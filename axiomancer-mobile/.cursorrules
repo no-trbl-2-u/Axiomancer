@@ -1,0 +1,141 @@
+# Axiomancer Mobile - Project Rules
+
+## Project Overview
+
+This is the **React Native / Expo client** for the Axiomancer TTRPG. The
+game rules, state shape, and randomness live in the
+[`axiomancer-mechanics`](https://www.npmjs.com/package/axiomancer-mechanics)
+engine — this repo is a presentation layer that consumes that package.
+
+Treat the engine as the source of truth. If the UI needs to know
+"how does combat work" or "what does an effect do", read the engine
+package, do not invent rules in this repo.
+
+## Core Concepts (delegated to the engine)
+
+- **Heart / Body / Mind** stat triangle (Heart > Body > Mind > Heart).
+- Combat is turn-based with stance + action + optional skill.
+- Effects (buffs / debuffs) tick around a round in a specific phase
+  order. The mobile UI **renders** effect state but does not **compute**
+  it.
+- Skills are themed around fallacies and paradoxes.
+
+If any of the above feels wrong, check the engine — the engine wins.
+
+## Code Conventions
+
+### File Structure
+
+- `app/<route>/<screen>.tsx` — Expo Router screen (UI shell only — props
+  in, JSX out, no game-rule math).
+- `app/<route>/<screen>.engine.ts` — pure presenter / selector logic
+  for the screen. Maps engine state → UI view-model. **No JSX, no React
+  hooks, no `Animated`.**
+- `app/<route>/e2e/<feature>.engine.test.ts` — hermetic e2e test for
+  the engine file above.
+- `components/<Component>.tsx` — reusable, presentational, prop-driven.
+- `components/<Component>.test.tsx` — render test (only when the
+  component has branching UI logic worth pinning).
+- `theme/axm.ts` — palette + font tokens; no logic.
+- `assets/images/` — real assets (PNG / SVG) once the SVG placeholders
+  are swapped per [`SVG_ASSET_SPEC.md`](./SVG_ASSET_SPEC.md).
+- `specs/` — planning specs; one per body of work.
+- `docs/` — design notes (testing standard, asset map, etc.).
+
+### Naming Conventions
+
+- camelCase for functions and variables.
+- PascalCase for React components, types, and interfaces.
+- SCREAMING_SNAKE_CASE for module-level constants and palette tokens
+  (e.g. `AXM.parchment`).
+- Selector functions prefixed with verbs: `selectCombatViewModel`,
+  `mapPlayerToHud`, `derive*`.
+
+### Type System
+
+- All exported functions must have explicit return types.
+- View-model types live next to the presenter: `<screen>.engine.ts`
+  exports `CombatViewModel`, etc.
+- Discriminated unions for action / phase types.
+- Prefer `Pick<T, K>` and `Partial<T>` over creating new interfaces
+  when slicing engine types.
+
+### Functional Patterns
+
+- Presenters are pure functions: `(engineState, ...args) => viewModel`.
+- Never mutate state directly — the engine's reducers are the only
+  place state changes.
+- Keep React state minimal: ephemeral UI state (selected stance preview,
+  open modal) lives in `useState`; **persistent** state lives in the
+  engine store.
+
+### Mobile Design Philosophy
+
+- Embrace the dark "Mörk Borg" tone — pitch black backgrounds, parchment
+  highlights, blood / sulfur / rust accents only.
+- Touch targets ≥ 44 × 44 dp.
+- Every screen must be readable at 320 dp wide (smallest reasonable
+  phone).
+- Animations are decorative — every screen must be navigable with
+  motion fully disabled (`reduceMotion`).
+- Fonts: Pirata One (gothic display), IM Fell English (serif body),
+  Bebas Neue (sans labels), JetBrains Mono (numerics).
+
+## Hermetic E2E Testing (REQUIRED for every implementation)
+
+Full standard: `docs/testing.md`. Reference: the first hermetic e2e
+under `app/<route>/e2e/` (delivered by Spec 01).
+
+Every implementation lands with at least one hermetic e2e test that
+drives the change through the highest-level public entry point of its
+module.
+
+**Hermetic** = all three:
+
+- **Self-contained:** no network, no real `AsyncStorage`, no real
+  filesystem, no real font loader, no real `Animated` driver, no real
+  timers (use `jest.useFakeTimers()` when timers matter).
+- **Deterministic:** `Math.random` stubbed (or seeded RNG via the
+  engine's `Rng` abstraction once Spec 11 in the engine ships). No
+  wall-clock, no env vars, no PIDs.
+- **Isolated:** `afterEach(() => jest.restoreAllMocks())`. No shared
+  mutable state across tests. Fixtures deep-cloned by the code under
+  test, not by the test.
+
+**E2E** = drives the change through the public entry point of the
+module — the screen's presenter (`select<Screen>ViewModel`) for UI
+work; the engine store's lifecycle (`createGameStore(asyncStorageAdapter,
+…)` driven through actions) for state work — *not* through a private
+helper.
+
+### Conventions
+
+- **Location:** `app/<route>/e2e/<feature>.engine.test.ts` for hermetic
+  full-flow tests. Companion engine code at
+  `app/<route>/e2e/<feature>.engine.ts`. Pure unit tests stay alongside
+  the source.
+- **Required suites:** happy path, every terminal / branch the change
+  can reach, invariants (view-model fields are total — no `undefined`
+  where the UI expects a string), and at least one
+  `createGameStore(memoryAdapter, …)` lifecycle assertion that
+  `jest.spyOn(memoryAdapter, 'save')` was *not* called when the change
+  doesn't write.
+- **Screen changes** must delegate to a presenter function with its own
+  hermetic e2e test. Inline math / inline data shaping in `*.tsx`
+  blocks this — extract it.
+
+Before declaring done: `npm test` green twice + `npx tsc --noEmit`
+clean.
+
+## Things to NOT do
+
+- Do not import `axiomancer-mechanics` Node-only adapters from a screen
+  (filesystem persistence is not bundleable on RN). Use the in-memory
+  adapter for tests; `AsyncStorage` adapter (Spec 09) for runtime.
+- Do not write game rules in this repo. If a rule is missing, add it to
+  the engine and re-version the dependency.
+- Do not add new `Math.random()` call sites in screens — go through the
+  engine's RNG.
+- Do not bypass the spec workflow for medium / large changes. Small
+  fixes are fine; anything touching multiple screens or the data model
+  warrants a spec.

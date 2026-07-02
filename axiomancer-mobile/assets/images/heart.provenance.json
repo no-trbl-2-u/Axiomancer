@@ -1,0 +1,9 @@
+{
+  "generated_by": "cursor-agent",
+  "date": "2026-05-09",
+  "tool": "hand-written-svg",
+  "prompt": "hand-written SVG — woodcut anatomical heart silhouette with knocked-out interior detail (fill-rule=evenodd), aorta + arteries on top, dripping blood drops at the bottom; all paths use currentColor so the icon tints via the SvgXml `color` prop",
+  "spec_section": "§1 Stance Glyphs (GlyphHeart)",
+  "target_dimensions": "64x64 viewBox, rendered 12-64 px",
+  "source_file": "components/StanceGlyph.tsx"
+}

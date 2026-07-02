@@ -1,0 +1,66 @@
+---
+description: Hermetic e2e testing requirement for every implementation
+alwaysApply: true
+---
+
+# Hermetic E2E Testing — REQUIRED for every implementation
+
+Full standard lives in [`docs/testing.md`](../../docs/testing.md). Read it
+before writing tests. Reference: the first hermetic e2e file under
+`app/<route>/e2e/` (delivered by Spec 01); until that lands, mirror the
+structure of the engine package's
+`src/Combat/e2e/combat.engine.test.ts`.
+
+## The rule
+
+Every implementation lands with at least one **hermetic e2e test** that
+exercises the change through the highest-level public entry point of
+its module. If you cannot write one, extract logic until you can — or
+note "hermetic-test debt" with a concrete reason in the PR description.
+
+**Hermetic** = all three of:
+
+1. **Self-contained** — no network, no real `AsyncStorage`, no real
+   filesystem, no real font loader, no real `Animated` driver, no real
+   timers (use `jest.useFakeTimers()` when timers matter), no real
+   image fetching.
+2. **Deterministic** — stub `Math.random` (or use the engine's seeded
+   `Rng` once available). No wall-clock time, env vars, or PIDs.
+3. **Isolated** — `afterEach(() => jest.restoreAllMocks())`; no shared
+   mutable state between tests.
+
+**E2E** = drives the change through the public entry point of the
+module — the screen's presenter (`select<Screen>ViewModel`) for UI
+work; the engine store's lifecycle for state changes — *not* through a
+private helper.
+
+## Conventions
+
+- **Location:** `app/<route>/e2e/<feature>.engine.test.ts`. Companion
+  engine code at `app/<route>/e2e/<feature>.engine.ts`. Pure unit tests
+  stay at `app/<route>/<file>.test.ts`. Component render tests at
+  `components/<Component>.test.tsx`.
+- **Imports for stubs:** keep `jest.spyOn(Math, 'random')` / fake-timer
+  setup in `app/test-utils/` so tests are one-liners. Do not duplicate
+  the same setup in every test file.
+- **Required suites:** happy path; every state branch the change can
+  reach (loading / error / empty / populated for screens, every
+  win-condition for combat presenters); invariants (view-model fields
+  total — no `undefined` strings, no negative bars); and at least one
+  store-lifecycle assertion driving `createGameStore(memoryAdapter, …)`
+  through the relevant action and asserting `memoryAdapter.save` was /
+  was not called as expected.
+- **Screen changes:** the screen `*.tsx` must delegate to a presenter
+  function in `*.engine.ts` that has its own hermetic e2e test. Inline
+  math / inline data shaping in screens blocks this and must be
+  extracted.
+
+## Self-check before declaring done
+
+- [ ] New / updated test under `app/<route>/e2e/` (or
+      `components/<Component>.test.tsx` for pure rendering branches).
+- [ ] `npm test` green twice in a row (no flakes).
+- [ ] All randomness stubbed; no raw `Math.random` in the test.
+- [ ] No network, no `AsyncStorage`, no real timers, no real fonts in
+      the test path.
+- [ ] `npx tsc --noEmit` clean.

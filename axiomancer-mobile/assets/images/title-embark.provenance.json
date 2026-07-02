@@ -1,0 +1,12 @@
+{
+  "generated_by": "user-supplied",
+  "date": "2026-06-18",
+  "tool": "external-illustration",
+  "prompt": "Axiomancer key art — a crowned king enthroned beside a horned, red-robed axiomancer in a gothic stained-glass hall, painted 'AxiomanceR' wordmark above",
+  "spec_section": "title-screen + app-icon",
+  "target_dimensions": "1024x1024",
+  "used_by": [
+    "components/TitleScreen.tsx (full-bleed Embark title art)",
+    "assets/images/icon.png and all iOS/Android/web launcher icon derivatives"
+  ]
+}

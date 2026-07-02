@@ -1,0 +1,250 @@
+You are designing four new modal/screen artboards for **Axiomancer Mobile**, a
+mobile-first dark-gothic narrative combat RPG in the lineage of FromSoftware
+× Inscryption × illuminated manuscript. The look has already been established
+by the 2026-05-16 handoff bundle. Match it exactly — palette, typography,
+hairlines, splatter, hatch fills, torn-edge clipping, wax-seal motifs,
+lowercase-roman numerals.
+
+──────────────────────────────────────────────────────────────────────────────
+DESIGN TOKENS (use only these — these mirror `theme/axm.ts` already in code)
+──────────────────────────────────────────────────────────────────────────────
+const AXM = {
+  bg: '#0a0a0a', deepBg: '#06050a', panelBg: '#100d0a',
+  parchment: '#e8dfc8', bone: '#8a8273', ash: '#3a3530',
+  blood: '#c0152a',  // HP, danger, death, bleed
+  sulfur: '#d4c026', // mana, selected, crit, reward shine
+  rust:   '#9e3a1a', // friendship, parley, warm accent
+  gothic: "'Pirata One', serif",
+  serif:  "'IM Fell English', Georgia, serif",
+  sans:   "'Bebas Neue', Impact, sans-serif",
+  mono:   "'JetBrains Mono', Menlo, monospace",
+};
+Type classes already in `tokens.css`: axm-display / h1 / h2 / body / bodyit /
+caption (sans tracked) / eyebrow (sans tracked, bone) / mono / mono-lg.
+Helpers already exported in `components.jsx`: NOISE_URI, Splatter, SectionLabel,
+IronRivet, LockSeal, StanceGlyph, tornEdge({width,height,jag,seed}).
+
+Phone frame is 390 × 844. Every artboard fills that interior.
+
+──────────────────────────────────────────────────────────────────────────────
+DELIVERABLE
+──────────────────────────────────────────────────────────────────────────────
+A single self-contained `screens/aftermath-modal.jsx` file in the same shape
+as the existing `screens/encounter-modal.jsx`, exposing on `window`:
+
+  window.CombatVictoryModal     // #1
+  window.CombatFriendshipModal  // #2
+  window.CombatDefeatModal      // #3
+  window.ErrorScreen            // #4
+
+Each component takes a plain props object (no hooks, no external state) and
+renders against the AXM tokens above. Include the same demo wrapper pattern
+the other screens use so they're previewable on the canvas (a `Demo` export
+that mounts all four side-by-side at 390×844 each). Use raw `<div>`/`<svg>`
+— this is design-only; the mobile port will translate to React Native.
+
+All four modals are **non-dismissible by tap-outside**. Each owns its own
+explicit dismiss control (continue button, retry button, etc).
+
+──────────────────────────────────────────────────────────────────────────────
+#1  CombatVictoryModal — "the foe falls"
+──────────────────────────────────────────────────────────────────────────────
+Props:
+{
+  enemyName, enemyEpithet,        // 'THE HIEROPHANT' · 'iron-tongued'
+  finalBlow: { skillName, damage, descriptor },  // 'AXE-FALL', 28, 'cleaves the binding rib'
+  finalBlowPhrase,                 // one full flavor line — see below
+  rewards: {
+    xp,                            // 24
+    currency: { vitae, sigils },   // { vitae: 6, sigils: 1 }
+    loot: [{ name, slot, rarity }],// up to 3 items, may be empty
+  },
+}
+
+Layout (top → bottom):
+1. **Eyebrow** in axm-caption, blood color: `✠ THE FOE FALLS`
+2. Large gothic title: enemy name. Below it, italic serif epithet in bone.
+3. **Final-blow panel** — torn-edge clipped box (reuse `tornEdge`), splatter
+   in blood at top-right + bottom-left, NOISE_URI overlay. Inside:
+     - tiny mono row: `FINAL BLOW · ${skillName} · ${damage}`
+     - one-line italic flavor (axm-bodyit, parchment) that reads like a
+       sentence from a chronicle. Example shape, not literal:
+         *"and the iron-tongued went down face-first into its own teeth."*
+     The phrase is passed in as `finalBlowPhrase`; design 3–4 placeholder
+     variants showing different death registers (brutal / quiet / ironic).
+4. **Reward strip** — three columns separated by `axm-rule-v`:
+     XP · VITAE / SIGILS · LOOT COUNT.
+   Numbers in mono-lg, sulfur for currency, parchment for XP. The shine
+   on the numerals should feel like rubbed gold leaf, not neon — a soft
+   sulfur drop-shadow at most.
+5. **Loot list** — up to three items, each row: small SVG glyph (use the
+   same primitive style as the existing ItemGlyph in `screens/inventory.jsx`),
+   item name in axm-caption, slot tag in axm-eyebrow, a rarity hairline
+   on the right (1px parchment, dotted for common, solid for rare, sulfur
+   for legendary). If `loot.length === 0`, replace this block with a single
+   italic line: *"no spoils. only quiet."*
+6. **Continue button** — full-width, gothic 16pt, parchment-on-black with a
+   2px parchment border. Label: `✠ CARRY ON`.
+
+Mood: triumphant but grim. Splatter is sparse. The page should feel
+*earned*, not celebratory.
+
+──────────────────────────────────────────────────────────────────────────────
+#2  CombatFriendshipModal — "the heart opens"
+──────────────────────────────────────────────────────────────────────────────
+Same overall vertical rhythm as #1, but the centerpiece is a deliberate
+aesthetic break: an **8-bit pixel-art emblem** rendered as a grid of
+`<rect>` cells inside an SVG. This is the only place in the entire app
+where pixel art appears — it's a diegetic motif from the "old friend
+codices" lore. The rest of the modal stays in the gothic/parchment
+register so the contrast lands.
+
+The emblem:
+- 16×16 cell grid, each cell ~12px on phone, so the whole sprite is ~192px.
+- A plump red heart (use AXM.blood for the heart fill, one row of darker
+  shadow pixels along the bottom-right in #7a0d1c, a single white
+  highlight pixel near the top-left).
+- Overlaid on the heart's center: two **white hand silhouettes**
+  (AXM.parchment) clasped in a handshake — thumbs interlocked, fingers
+  visible. Read clearly at 192px. Add a subtle 1-cell sulfur sparkle pixel
+  off the upper-right of the heart.
+- Frame the emblem with a parchment hairline square; below it write
+  `❦ AN ACCORD` in axm-caption rust.
+
+Props:
+{
+  formerFoeName, formerFoeEpithet,
+  pactPhrase,                  // one line describing the parley outcome
+  rewards: {
+    xp,
+    currency: { vitae, sigils },
+    loot: [...],               // often empty for friendship endings
+    journalEntry: {            // optional
+      bookName,                // 'THE CODEX OF KEPT WORDS'
+      entryTitle,              // 'On the Iron-Tongued'
+      preview,                 // first ~12 words of italic body
+    } | null,
+  },
+}
+
+Layout:
+1. Eyebrow in rust: `❦ THE HEART OPENS`
+2. Title: former-foe name in gothic, epithet italic bone underneath.
+3. The pixel-art emblem (as specified above), centered.
+4. One-line italic `pactPhrase` — chronicle voice — under the emblem.
+5. Reward strip identical to #1 but currency tint is rust instead of
+   sulfur to signal warm/peace gain.
+6. **Journal entry callout** (only if `journalEntry` is non-null):
+   a torn-edge panel in panelBg with a small SVG of a closed book, the
+   `bookName` in axm-eyebrow rust, the `entryTitle` in gothic 16, and the
+   `preview` italic body fading to a `…` at the end. Label the panel
+   `✎ A NEW ENTRY` at the top.
+7. Continue button — same shape as #1 but border is rust, label
+   `❦ PART AS FRIENDS`.
+
+──────────────────────────────────────────────────────────────────────────────
+#3  CombatDefeatModal — "the page closes"
+──────────────────────────────────────────────────────────────────────────────
+Most reductive of the four. The screen should feel **heavier** than the
+others — more black, more silence. No splatter explosion; just a long
+slow blood-bleed at the bottom edge of the viewport.
+
+Props:
+{
+  characterName,
+  cause: { killerName, killerEpithet, finalSkill, damage },
+  causePhrase,                 // chronicle line of how the character fell
+  run: { rounds, encountersSurvived, deepestNode },
+  onRetry,                     // button handler
+  onAbandon,                   // button handler
+}
+
+Layout:
+1. Top half of the screen is mostly empty black with a single centered
+   vertical hairline `axm-rule-v` extending ~80px down — a candle wick,
+   spent. Above the wick, axm-eyebrow blood: `✠ THE PAGE CLOSES`.
+2. Beneath the wick, characterName in axm-display gothic, parchment.
+3. Italic line: *fell to ${killerName}, ${killerEpithet}* in axm-bodyit
+   bone.
+4. `causePhrase` as a one-paragraph chronicle entry in axm-body, with the
+   `axm-dropcap` first-letter rule already in tokens.css. Aim for the
+   register of a marginal note in a medieval death-book.
+5. **Run summary** — three mono rows, right-aligned numbers, dotted
+   hairline between each: rounds endured, encounters survived, deepest
+   node reached. No exclamation; this is a ledger.
+6. Bottom: a slow blood seep — `linear-gradient(to top, ${blood} 0%,
+   transparent 60%)` clipped with a `tornEdge` from beneath, ~80px tall.
+7. Two buttons side by side just above the seep:
+     - `✠ BEGIN AGAIN` — primary, parchment border, gothic 16.
+     - `let the page close` — quiet ghost button in axm-bodyit bone,
+       no border, lowercase. (This is the abandon-run option; it should
+       feel like the heavier choice despite looking smaller.)
+
+No splatter. No icons in the buttons. Stillness.
+
+──────────────────────────────────────────────────────────────────────────────
+#4  ErrorScreen — "the binding tore"
+──────────────────────────────────────────────────────────────────────────────
+Most users will never see this; it's a dev-facing fallback. But it must
+stay in world. Treat it as a damaged page of the same chronicle.
+
+Props:
+{
+  errorCode,                   // 'E_BOUND_LOOSE' — short, in-world string
+  technical,                   // raw error string, mono, dimmable
+  hint,                        // optional one-line author note
+  onCopy,                      // copies technical to clipboard
+  onRetry,
+  onReturnHome,
+}
+
+Layout:
+1. The whole viewport is panelBg with a heavy hatched diagonal across it
+   (reuse `axm-hatch-strong`). Center-vertically, a large illuminated
+   gothic title `THE BINDING TORE` in parchment with a blood drop-shadow
+   like the combat outcome panel uses.
+2. Just under the title, in axm-eyebrow rust: `${errorCode}`. Treat it
+   like a chapter marker.
+3. A torn-edge inset panel containing `technical` in axm-mono, parchment-
+   dim, with a small **`✎ COPY`** ghost button in the top-right of the
+   panel that flashes sulfur when tapped (no need to wire — show the
+   pressed state in the demo).
+4. If `hint` is provided, render it as one italic axm-bodyit line below
+   the panel — like a scribe's apology written in the margin.
+5. Two buttons:
+     - `✠ TRY AGAIN` — primary, parchment border.
+     - `return to the hearth` — ghost, bone, axm-bodyit, lowercase.
+6. Tiny axm-eyebrow line at the very bottom: `the chronicle is incomplete
+   — but not lost.`
+
+Avoid the word "error". Avoid stack traces in the visible chrome (they
+go in the inset panel). The screen should make a developer smile and a
+player feel like the world bent rather than broke.
+
+──────────────────────────────────────────────────────────────────────────────
+CONSISTENCY CHECKLIST (please self-review before delivering)
+──────────────────────────────────────────────────────────────────────────────
+- [ ] Only AXM palette colors used — no stray hex.
+- [ ] All numerals that are not stat-deltas use lowercase-roman where the
+      rest of the app does (page numbers, chapter markers). Stat numbers
+      stay in mono.
+- [ ] No second-person archaic pronouns ("thou", "thee"). Chronicle voice
+      is third-person past.
+- [ ] Every modal has exactly one primary action with a parchment border
+      and (where present) one secondary ghost action.
+- [ ] Pixel art appears ONLY inside CombatFriendshipModal's emblem.
+- [ ] Splatter is sparing on victory, absent on defeat, absent on
+      friendship (replaced by the pixel emblem), absent on error.
+- [ ] Demo export mounts all four modals at 390×844 with realistic prop
+      values for each, including the empty-loot and null-journal branches.
+
+──────────────────────────────────────────────────────────────────────────────
+TONE REFERENCE (use sparingly to calibrate, don't quote in copy)
+──────────────────────────────────────────────────────────────────────────────
+The chronicle voice: terse, past-tense, weighted. Examples from elsewhere
+in the bundle: "It crawled out from under the cairn — patient as moss."
+"The throne is a trough." Short clauses. Concrete nouns. Nothing winks.
+
+When you're done: print a one-paragraph rationale for any place you broke
+from the bundle's defaults, especially around the pixel-art emblem (the
+deliberate aesthetic carve-out).

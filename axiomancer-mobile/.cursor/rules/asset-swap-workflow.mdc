@@ -1,0 +1,32 @@
+---
+description: Swap a placeholder SVG/image asset for a real one in this repo. Triggers when working under assets/images/, when editing placeholder SVG components (StanceGlyph, EffectGlyph, ActionIcon, NodeMark, Splatter, BodyDiagram, the inline SVG in combat.tsx / event.tsx, or TabIcon), or when the user mentions creating, generating, swapping, replacing, or wiring an icon, glyph, illustration, SVG, PNG, or visual asset.
+globs: assets/images/**,components/StanceGlyph.tsx,components/EffectGlyph.tsx,components/ActionIcon.tsx,components/NodeMark.tsx,components/Splatter.tsx,components/BodyDiagram.tsx,SVG_ASSET_SPEC.md
+alwaysApply: false
+---
+
+# Asset swap workflow
+
+Whenever you are about to create, swap, generate, or wire a visual
+asset (icon, glyph, illustration, SVG, PNG) in this repo, follow the
+[`swap-asset-placeholder`](../skills/swap-asset-placeholder/SKILL.md)
+skill. It encodes the canonical 7-step workflow:
+
+1. Pick the first unchecked item from `SVG_ASSET_SPEC.md`.
+2. Classify (vector vs raster).
+3. Guard against overwriting a hand-authored asset (provenance check).
+4. Generate (hand-write SVG XML, or call image-gen for rasters).
+5. Write `<name>.provenance.json` sidecar.
+6. Wire into the component (`SvgXml` for vectors).
+7. Hermetic test (`components/<Component>.test.tsx`) +
+   `npx tsc --noEmit` + `npm test` twice green.
+
+Reference implementation: `GlyphHeart` (§1) — see `assets/images/heart.svg`,
+`assets/images/heart.provenance.json`, `components/StanceGlyph.tsx`,
+`components/StanceGlyph.test.tsx`.
+
+**Hard rules:**
+
+- Never overwrite a hand-authored asset (no provenance sidecar = stop).
+- All vectors use `currentColor` only. No hardcoded hex outside `theme/axm.ts`.
+- Atomic commit: asset + provenance + wiring + test + checklist tick. One commit, nothing else.
+- Never commit without explicit user permission.

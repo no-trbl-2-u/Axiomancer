@@ -1,0 +1,64 @@
+name: preview-build
+
+on:
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: 'Target platform'
+        required: true
+        default: 'android'
+        type: choice
+        options:
+          - android
+          - ios
+          - all
+      profile:
+        description: 'EAS build profile'
+        required: true
+        default: 'preview'
+        type: string
+      run_visual_verify:
+        description: 'Run visual smoke screens (verify:visual) before building'
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+# One preview build at a time per branch; cloud builds already in flight
+# are not cancelled because EAS manages them independently of this runner.
+concurrency:
+  group: preview-build-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: EAS preview build (${{ inputs.platform }}, ${{ inputs.profile }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run verify gate
+        run: npm run verify
+
+      - name: Run visual smoke screens
+        if: inputs.run_visual_verify == true
+        run: npm run verify:visual
+
+      - name: EAS build
+        run: npx eas-cli@latest build --platform ${{ inputs.platform }} --profile ${{ inputs.profile }} --non-interactive
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}

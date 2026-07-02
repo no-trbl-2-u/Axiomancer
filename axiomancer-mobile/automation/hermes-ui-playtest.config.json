@@ -1,0 +1,149 @@
+{
+  "version": 1,
+  "name": "axiomancer-mobile-hermes-ui-playtest",
+  "description": "Hermes-native UI playthrough plan for Axiomancer Mobile, designed to produce evidence-rich reports for Tobin's systems judgment.",
+  "server": {
+    "command": "CI=1 EXPO_NO_TELEMETRY=1 npx expo start --web --port 18081 --host localhost",
+    "port": 18081,
+    "baseUrl": "http://127.0.0.1:18081/",
+    "readyPattern": "Waiting on http://localhost:18081",
+    "startupTimeoutSeconds": 90,
+    "killPolicy": "kill-only-if-started-by-harness",
+    "preferredTerminalMode": "background-pty"
+  },
+  "minigameSeeds": {
+    "hazard": {
+      "seed": 424242,
+      "hazardId": "cracked-cliff"
+    },
+    "gathering": {
+      "seed": 9090,
+      "siteId": "mire-mint"
+    },
+    "rest": {
+      "seed": 515151
+    },
+    "cache": {
+      "seed": 626262
+    },
+    "quest": {
+      "seed": 737373,
+      "boardId": "build-the-boat"
+    }
+  },
+  "browser": {
+    "viewport": {
+      "width": 414,
+      "height": 896,
+      "label": "mobile portrait"
+    },
+    "requiredTools": [
+      "browser_navigate",
+      "browser_snapshot",
+      "browser_click",
+      "browser_press",
+      "browser_scroll",
+      "browser_console",
+      "browser_vision"
+    ],
+    "consolePolicy": {
+      "errors": "always-file",
+      "warnings": "file-if-new-or-player-visible"
+    }
+  },
+  "paths": [
+    {
+      "id": "golden-encounter",
+      "name": "Golden encounter path",
+      "goal": "From first WILDS load, travel to an encounter, enter combat, resolve at least one full round, then start the next round.",
+      "minimumEvidence": [
+        "initial exploration snapshot",
+        "encounter modal snapshot",
+        "combat stance phase snapshot",
+        "round resolution snapshot",
+        "next-round snapshot",
+        "console check"
+      ]
+    },
+    {
+      "id": "failure-and-retreat",
+      "name": "Failure and retreat path",
+      "goal": "Probe FLEE, invalid choices, low-information states, and any visible defeat/retreat consequences without inventing outcomes not observed.",
+      "minimumEvidence": [
+        "FLEE affordance and cost text",
+        "post-flee or blocked-action state",
+        "player-facing consequence explanation"
+      ]
+    },
+    {
+      "id": "tab-literacy",
+      "name": "Tab literacy path",
+      "goal": "Visit WILDS, SELF, MEMOIR, and SATCHEL as a first-time player and judge whether each tab explains what can be done there.",
+      "minimumEvidence": [
+        "one snapshot per tab",
+        "one action or probe per tab when available",
+        "notes on terminology, affordance clarity, and dead surfaces"
+      ]
+    },
+    {
+      "id": "edge-probes",
+      "name": "Edge probes",
+      "goal": "Tap things that look tappable, use keyboard navigation where practical, scroll long surfaces, and look for dead ends, hidden state, or missing feedback.",
+      "minimumEvidence": [
+        "at least three affordance probes",
+        "any no-op tap called out explicitly",
+        "scroll or keyboard note"
+      ]
+    },
+    {
+      "id": "mechanics-fidelity",
+      "name": "Mechanics-to-UI fidelity path",
+      "goal": "Compare visible HP, stance, action, reward, friendship, inventory, and aftermath information against what the UI claims the mechanics are doing.",
+      "minimumEvidence": [
+        "before/after values for any changed stat",
+        "battle log text compared with visible panels",
+        "any mismatch between surfaces documented as fidelity risk"
+      ]
+    }
+  ],
+  "report": {
+    "outputPath": "plan/PLAYTEST_REPORT.md",
+    "requiredSections": [
+      "verdict-ready summary",
+      "session narrative",
+      "paths walked",
+      "findings",
+      "mechanic-to-UI fidelity notes",
+      "delight log",
+      "console and network",
+      "Tobin questions"
+    ],
+    "findingFields": [
+      "id",
+      "severity",
+      "type",
+      "location",
+      "path",
+      "playerFeeling",
+      "mechanicImplication",
+      "evidence",
+      "expected",
+      "actual",
+      "tobinPrompt"
+    ],
+    "severityScale": ["high", "medium", "low"],
+    "findingTypes": [
+      "confusion",
+      "friction",
+      "flow-gap",
+      "feedback-missing",
+      "bug",
+      "inconsistency",
+      "visual",
+      "pacing",
+      "delight"
+    ],
+    "maxFindings": 15,
+    "delightRequired": true
+  }
+}

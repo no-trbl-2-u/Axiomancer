@@ -1,0 +1,122 @@
+name: verify
+
+# Run the hermetic verify gate (lint + typecheck + jest) and the
+# bundler smoke test on every push to `main` and every PR against
+# `main`. This is the remote complement to local `npm run verify`:
+# the local gate runs on the maintainer's workstation and can miss
+# regressions that only surface on a different Node version, native
+# dep, or cache state. Two jobs run in parallel.
+#
+# The bundler smoke job uses `expo export --platform web` rather
+# than booting Metro because it terminates cleanly. See
+# `scripts/smoke-bundler.mjs` for the exit-code contract.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+# Opt the JavaScript-based actions (checkout, setup-node) onto Node
+# 24 ahead of GitHub's 2026-06-02 default flip and the 2026-09-16
+# Node-20-removal. Lets us flush any Node-24 incompat now while
+# there's time to react. Does not affect the Node version used by
+# `npm ci` / `npm run verify` — that's separately pinned per job
+# via `actions/setup-node.with.node-version`.
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
+
+concurrency:
+  group: verify-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: verify (lint + typecheck + jest)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run verify gate
+        run: npm run verify
+
+  smoke-bundler:
+    name: smoke-bundler (expo export web)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run bundler smoke
+        run: npm run smoke:bundler
+        env:
+          # See scripts/smoke-bundler.mjs DEFAULT_TIMEOUT_MS — 4 min
+          # is the per-export budget. Bumping to 8 min here gives the
+          # cold-cache CI runner a wider window than a warm laptop.
+          SMOKE_BUNDLER_TIMEOUT_MS: '480000'
+
+  e2e-minigames:
+    # Browser-driven playthroughs of both minigames against the exported
+    # web build (scripts/hazard-e2e.mjs + scripts/gathering-e2e.mjs).
+    # These were local-only until 2026-06-12; in CI they are the only
+    # gate that exercises real pointer gestures, the phase orchestration,
+    # and the reanimated overlays end-to-end. The hazard run exports
+    # .smoke-dist; the gathering run reuses it.
+    name: e2e-minigames (playwright playthroughs)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Hazard playthrough (both routes)
+        run: npm run e2e:hazard
+
+      - name: Gathering playthrough (both stances)
+        run: npm run e2e:gathering
+        env:
+          GATHER_E2E_REUSE_EXPORT: '1'
+
+      - name: Encounter routing (every minigame trigger → its screen)
+        run: npm run e2e:encounters
+        env:
+          ENCOUNTER_E2E_REUSE_EXPORT: '1'

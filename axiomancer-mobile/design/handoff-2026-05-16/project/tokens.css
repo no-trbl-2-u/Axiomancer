@@ -1,0 +1,105 @@
+/* Axiomancer design tokens — mirrors theme/axm.ts.
+   Loaded once by the canvas page. Used by every screen component.   */
+
+@import url('https://fonts.googleapis.com/css2?family=Pirata+One&family=IM+Fell+English:ital@0;1&family=Bebas+Neue&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+  /* ── palette ── */
+  --axm-bg:        #0a0a0a;   /* near-black background */
+  --axm-deepBg:    #06050a;   /* deeper void, used behind panels */
+  --axm-panelBg:   #100d0a;   /* panel fill */
+  --axm-parchment: #e8dfc8;   /* main text / inactive icon */
+  --axm-bone:      #8a8273;   /* secondary text, inactive tabs */
+  --axm-ash:       #3a3530;   /* borders, disabled */
+  --axm-blood:     #c0152a;   /* HP, danger, bleed */
+  --axm-sulfur:    #d4c026;   /* mana, selected, active */
+  --axm-rust:      #9e3a1a;   /* friendship, rust accents */
+  --axm-buff:      #2a1f00;   /* buff fill */
+  --axm-debuff:    #1a0a2e;   /* debuff fill */
+
+  /* derived */
+  --axm-parchment-dim: rgba(232, 223, 200, 0.55);
+  --axm-parchment-faint: rgba(232, 223, 200, 0.18);
+  --axm-rule: rgba(232, 223, 200, 0.12);
+  --axm-rule-strong: rgba(232, 223, 200, 0.22);
+
+  /* ── type ── */
+  --f-gothic: 'Pirata One', 'Times New Roman', serif;
+  --f-serif:  'IM Fell English', Georgia, serif;
+  --f-sans:   'Bebas Neue', 'Impact', sans-serif;
+  --f-mono:   'JetBrains Mono', 'Menlo', monospace;
+}
+
+/* ── reset within phone frame ── */
+.axm * { box-sizing: border-box; }
+.axm {
+  font-family: var(--f-serif);
+  color: var(--axm-parchment);
+  background: var(--axm-bg);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: geometricPrecision;
+}
+
+.axm-display  { font-family: var(--f-gothic); font-size: 30px; line-height: 1; letter-spacing: 0.02em; }
+.axm-h1       { font-family: var(--f-gothic); font-size: 22px; line-height: 1.05; letter-spacing: 0.02em; }
+.axm-h2       { font-family: var(--f-serif);  font-size: 18px; line-height: 1.2; }
+.axm-body     { font-family: var(--f-serif);  font-size: 14px; line-height: 1.45; }
+.axm-bodyit   { font-family: var(--f-serif);  font-size: 14px; line-height: 1.45; font-style: italic; }
+.axm-caption  { font-family: var(--f-sans);   font-size: 12px; line-height: 1.1; letter-spacing: 0.14em; }
+.axm-eyebrow  { font-family: var(--f-sans);   font-size: 10px; line-height: 1.1; letter-spacing: 0.22em; color: var(--axm-bone); }
+.axm-mono     { font-family: var(--f-mono);   font-size: 12px; line-height: 1.1; letter-spacing: 0; font-variant-numeric: tabular-nums; }
+.axm-mono-lg  { font-family: var(--f-mono);   font-size: 20px; line-height: 1; letter-spacing: 0; font-variant-numeric: tabular-nums; }
+
+/* hairline rule helpers */
+.axm-rule-h { height: 1px; background: var(--axm-rule); width: 100%; }
+.axm-rule-strong-h { height: 1px; background: var(--axm-rule-strong); width: 100%; }
+.axm-rule-v { width: 1px; background: var(--axm-rule); align-self: stretch; }
+.axm-rule-dot {
+  height: 1px;
+  background-image: linear-gradient(to right, var(--axm-rule-strong) 50%, transparent 50%);
+  background-size: 4px 1px;
+  width: 100%;
+}
+
+/* hatch fill (subtle woodcut texture) */
+.axm-hatch {
+  background-image: repeating-linear-gradient(
+    45deg,
+    transparent 0px,
+    transparent 3px,
+    rgba(232, 223, 200, 0.04) 3px,
+    rgba(232, 223, 200, 0.04) 4px
+  );
+}
+.axm-hatch-strong {
+  background-image: repeating-linear-gradient(
+    45deg,
+    transparent 0px,
+    transparent 2px,
+    rgba(232, 223, 200, 0.08) 2px,
+    rgba(232, 223, 200, 0.08) 3px
+  );
+}
+
+/* parchment-on-black drop-cap */
+.axm-dropcap::first-letter {
+  font-family: var(--f-gothic);
+  font-size: 2.6em;
+  float: left;
+  line-height: 0.85;
+  padding: 4px 6px 0 0;
+  color: var(--axm-sulfur);
+}
+
+/* selection */
+.axm ::selection { background: var(--axm-sulfur); color: var(--axm-bg); }
+
+/* button reset */
+.axm button {
+  font: inherit;
+  color: inherit;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}

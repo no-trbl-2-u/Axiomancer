@@ -1,0 +1,308 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`hazard view-model lock-in new surface copy is frozen (enchantments / vow / choose): expansion-copy 1`] = `
+{
+  "choose": {
+    "choose": true,
+    "chosenKey": "escape",
+    "powered": {
+      "escape": 15,
+      "force": 7,
+    },
+    "vowBonus": {
+      "escape": 7,
+      "force": 7,
+    },
+  },
+  "enchantments": [
+    {
+      "id": "auraForce",
+      "label": "+2 FORCE / card",
+    },
+    {
+      "id": "auraEscape",
+      "label": "+1 ESCAPE / card",
+    },
+    {
+      "id": "surge",
+      "label": "+2 to surge numbers",
+    },
+  ],
+  "goldVowNote": "VOW PRIMED — next gold die +7/+7",
+}
+`;
+
+exports[`hazard view-model lock-in round-play VM contract is frozen (with every new surface populated): round-play-shape 1`] = `
+{
+  "active": "boolean",
+  "boardHeadline": "string",
+  "boardNote": "string",
+  "bothRequired": "boolean",
+  "deckCount": "number",
+  "dice": [
+    {
+      "accessibilityLabel": "string",
+      "id": "string",
+      "isHex": "boolean",
+      "kind": "string",
+      "state": "string",
+      "temporary": "boolean",
+      "usable": "boolean",
+    },
+  ],
+  "diceReady": "number",
+  "discardCount": "number",
+  "enchantments": [
+    {
+      "id": "string",
+      "label": "string",
+    },
+  ],
+  "foretellPending": "null",
+  "goldVowNote": "string",
+  "hand": [
+    {
+      "applied": "boolean",
+      "cardId": "string",
+      "choose": "boolean",
+      "chosenKey": "null",
+      "dead": "boolean",
+      "dieAvailable": "boolean",
+      "flavor": "string",
+      "free": {
+        "escape": "number",
+        "force": "number",
+      },
+      "freeEffectLabel": "null",
+      "keywords": [
+        {
+          "desc": "string",
+          "id": "string",
+          "name": "string",
+        },
+      ],
+      "kind": "string",
+      "name": "string",
+      "powerColors": [
+        "string",
+      ],
+      "powered": {
+        "escape": "number",
+        "force": "number",
+      },
+      "poweredByDieId": "null",
+      "poweredEffectLabel": "null",
+      "rarity": "string",
+      "salvageLabel": "string",
+      "uid": "string",
+      "utility": "boolean",
+      "vowBonus": "null",
+    },
+  ],
+  "hazardId": "string",
+  "hexCount": "number",
+  "intro": "string",
+  "marks": [
+    "string",
+  ],
+  "meterDetail": "null",
+  "meters": [
+    {
+      "key": "string",
+      "label": "string",
+      "met": "boolean",
+      "need": "number",
+      "value": "number",
+    },
+  ],
+  "momentumNote": "null",
+  "outcome": "null",
+  "phase": "string",
+  "play": [
+    {
+      "applied": "boolean",
+      "cardId": "string",
+      "choose": "boolean",
+      "chosenKey": "string",
+      "dead": "boolean",
+      "dieAvailable": "boolean",
+      "flavor": "string",
+      "free": {
+        "escape": "number",
+        "force": "number",
+      },
+      "freeEffectLabel": "null",
+      "keywords": [
+        {
+          "desc": "string",
+          "id": "string",
+          "name": "string",
+        },
+      ],
+      "kind": "string",
+      "name": "string",
+      "powerColors": [
+        "string",
+      ],
+      "powered": {
+        "escape": "number",
+        "force": "number",
+      },
+      "poweredByDieId": "string",
+      "poweredEffectLabel": "null",
+      "rarity": "string",
+      "salvageLabel": "string",
+      "uid": "string",
+      "utility": "boolean",
+      "vowBonus": {
+        "escape": "number",
+        "force": "number",
+      },
+    },
+  ],
+  "resolveEnabled": "boolean",
+  "resolveFlash": "null",
+  "resolveLabel": "string",
+  "resolveSubLabel": "string",
+  "rewards": "null",
+  "roundLabel": "string",
+  "roundRoman": "string",
+  "routeChoices": [],
+  "routeKey": "string",
+  "routeLabel": "string",
+  "scenario": "string",
+  "sessionSeed": "number",
+  "subquests": [
+    {
+      "desc": "string",
+      "id": "string",
+      "name": "string",
+      "rewardLabel": "string",
+      "status": "string",
+    },
+  ],
+  "thresholdLadder": [
+    {
+      "key": "string",
+      "label": "string",
+      "values": [
+        "number",
+      ],
+    },
+  ],
+  "title": "string",
+  "totalRounds": "number",
+}
+`;
+
+exports[`hazard view-model lock-in route-select VM contract is frozen: route-select-shape 1`] = `
+{
+  "active": "boolean",
+  "boardHeadline": "string",
+  "boardNote": "string",
+  "bothRequired": "boolean",
+  "deckCount": "number",
+  "dice": [],
+  "diceReady": "number",
+  "discardCount": "number",
+  "enchantments": [],
+  "foretellPending": "null",
+  "goldVowNote": "null",
+  "hand": [
+    {
+      "applied": "boolean",
+      "cardId": "string",
+      "choose": "boolean",
+      "chosenKey": "null",
+      "dead": "boolean",
+      "dieAvailable": "boolean",
+      "flavor": "string",
+      "free": {
+        "escape": "number",
+        "force": "number",
+      },
+      "freeEffectLabel": "null",
+      "keywords": [
+        {
+          "desc": "string",
+          "id": "string",
+          "name": "string",
+        },
+      ],
+      "kind": "string",
+      "name": "string",
+      "powerColors": [
+        "string",
+      ],
+      "powered": {
+        "escape": "number",
+        "force": "number",
+      },
+      "poweredByDieId": "null",
+      "poweredEffectLabel": "null",
+      "rarity": "string",
+      "salvageLabel": "string",
+      "uid": "string",
+      "utility": "boolean",
+      "vowBonus": "null",
+    },
+  ],
+  "hazardId": "string",
+  "hexCount": "number",
+  "intro": "string",
+  "marks": [
+    "string",
+  ],
+  "meterDetail": "null",
+  "meters": [],
+  "momentumNote": "null",
+  "outcome": "null",
+  "phase": "string",
+  "play": [],
+  "resolveEnabled": "boolean",
+  "resolveFlash": "null",
+  "resolveLabel": "string",
+  "resolveSubLabel": "string",
+  "rewards": "null",
+  "roundLabel": "string",
+  "roundRoman": "string",
+  "routeChoices": [
+    {
+      "badge": "string",
+      "badgeTone": "string",
+      "ctaLabel": "string",
+      "description": "string",
+      "dual": "boolean",
+      "key": "string",
+      "ladder": [
+        {
+          "key": "string",
+          "label": "string",
+          "values": [
+            "number",
+          ],
+        },
+      ],
+      "name": "string",
+      "penaltyLabel": "string",
+      "rewardLabel": "string",
+    },
+  ],
+  "routeKey": "null",
+  "routeLabel": "string",
+  "scenario": "string",
+  "sessionSeed": "number",
+  "subquests": [
+    {
+      "desc": "string",
+      "id": "string",
+      "name": "string",
+      "rewardLabel": "string",
+      "status": "string",
+    },
+  ],
+  "thresholdLadder": [],
+  "title": "string",
+  "totalRounds": "number",
+}
+`;

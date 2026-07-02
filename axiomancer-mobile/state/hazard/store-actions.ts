@@ -1,0 +1,643 @@
+/**
+ * Hazard minigame — store action implementations.
+ *
+ * The pure engine lives in `axiomancer-mechanics` (World/Hazard —
+ * decoupled 2026-06-12 at 0.17.1; mobile owns UI only); these
+ * wrappers thread the session through the mobile store slice and, at
+ * claim time, apply the outcome to the real engine `GameState`
+ * (VITAE, max VITAE, currency, deck flags). See
+ * `docs/hazard-v2-vs-mechanics-divergence.md` for what applies live
+ * vs. what is recorded as flags pending engine systems.
+ */
+
+import type { GameState } from 'axiomancer-mechanics';
+
+import {
+    acknowledgeHazardOutcome as engineAcknowledgeOutcome,
+    applyHazardCard as engineApplyCard,
+    chooseHazardCardKey as engineChooseCardKey,
+    claimHazardRewards as engineClaimRewards,
+    continueHazardAfterResolve as engineContinueAfterResolve,
+    createHazardSession,
+    discardHazardCard as engineDiscardCard,
+    finishHazardRolling as engineFinishRolling,
+    isDefeated as engineIsDefeated,
+    powerHazardCard as enginePowerCard,
+    resolveHazardRound as engineResolveRound,
+    selectHazardRoute as engineSelectRoute,
+    stageHazardCard as engineStageCard,
+    unstageHazardCard as engineUnstageCard,
+    confirmHazardForetell as engineConfirmForetell,
+} from 'axiomancer-mechanics';
+import {
+    HAZARD_CACHE_SHILLINGS,
+    HAZARD_CRACK_CARD,
+    HAZARD_DECK,
+    HAZARD_LIBRARY,
+    HAZARD_MAXHP_SCAR,
+    HAZARD_MINHP_LOSS,
+    HAZARD_RELIC_SHILLINGS,
+    HAZARD_REWARD_CARDS,
+    HAZARD_VITAE_REWARD,
+} from 'axiomancer-mechanics';
+import { appendAcquiredCard, HAZARD_CARD_FLAG_PREFIX, hazardDeckBag } from 'axiomancer-mechanics';
+import type { HazardCardDef, HazardProgressKey, HazardRouteKey, HazardSessionState } from 'axiomancer-mechanics';
+import { resolveMinigameSeed, resolveMinigameString } from '../minigame-seeds';
+import type { AppStore } from '../store';
+
+export interface MobileHazardSlice {
+    session: HazardSessionState | null;
+}
+
+export const EMPTY_HAZARD_SLICE: MobileHazardSlice = Object.freeze({ session: null });
+
+/** Flag set by the `curse` consequence — future combat integration hook. */
+export const HAZARD_HEXED_FLAG = 'hazard-hexed';
+/** Flag prefix for banked paradox tokens granted by the `token` reward. */
+export const HAZARD_TOKEN_FLAG_PREFIX = 'hazard-token-banked:';
+/**
+ * Flag prefix recording an unhealed max-VITAE scar from the `maxhp`
+ * consequence. The suffix is the magnitude of max-VITAE lost. The scar
+ * is also baked into `player.maxHealth` at claim (the live effect); the
+ * flag is the durable record an inn rest reads to restore the loss
+ * toward baseline. Mobile-only adapter — `axiomancer-mechanics` owns no
+ * scar-recovery truth (see docs/hazard-v2-vs-mechanics-divergence.md).
+ */
+export const HAZARD_SCAR_FLAG_PREFIX = 'hazard-scar:';
+
+/**
+ * Flag prefix recording an out-of-combat death (Phase 130). One flag is
+ * stamped per fatal Hazard crossing — a crossing whose net VITAE swing
+ * would drop the player to `health <= 0` by the engine's `isDefeated`
+ * threshold. The suffix is a timestamp so repeated deaths accumulate
+ * distinct tombstones rather than collapsing to one. The durable record
+ * a future deaths-this-save surface reads; engine owns no death counter.
+ */
+export const HAZARD_DEATH_FLAG_PREFIX = 'hazard-death:';
+
+/** Sum the banked max-VITAE loss across all unhealed scar flags. */
+export function bankedScarMagnitude(flags: readonly string[]): number {
+    let total = 0;
+    for (const flag of flags) {
+        if (!flag.startsWith(HAZARD_SCAR_FLAG_PREFIX)) continue;
+        const magnitude = Number.parseInt(flag.slice(HAZARD_SCAR_FLAG_PREFIX.length), 10);
+        if (Number.isFinite(magnitude) && magnitude > 0) total += magnitude;
+    }
+    return total;
+}
+
+/** Count the out-of-combat deaths recorded across all tombstone flags. */
+export function hazardDeathCount(flags: readonly string[]): number {
+    let count = 0;
+    for (const flag of flags) {
+        if (flag.startsWith(HAZARD_DEATH_FLAG_PREFIX)) count += 1;
+    }
+    return count;
+}
+
+/**
+ * Dev/test seed override. The Playwright playthrough (and any dev
+ * tooling) sets `globalThis.__AXM_HAZARD_SEED__` /
+ * `globalThis.__AXM_HAZARD_ID__` before triggering a hazard to get a
+ * reproducible session. Ignored when unset.
+ */
+declare global {
+    // eslint-disable-next-line no-var
+    var __AXM_HAZARD_SEED__: number | undefined;
+    // eslint-disable-next-line no-var
+    var __AXM_HAZARD_ID__: string | undefined;
+}
+
+function currentBag(store: AppStore): string[] {
+    const flags = (store.getState() as unknown as GameState).flags ?? [];
+    return hazardDeckBag(flags);
+}
+
+function setSession(store: AppStore, session: HazardSessionState | null): void {
+    store.setState({ hazard: { session } });
+}
+
+export interface BeginHazardOptions {
+    hazardId?: string;
+    seed?: number;
+}
+
+export type HazardDeckPresetId =
+    | 'starter-baseline'
+    | 'early-straightforward'
+    | 'late-straightforward'
+    | 'early-enchantment'
+    | 'late-enchantment'
+    | 'early-utility'
+    | 'late-utility';
+
+export type HazardDeckPresetEra = 'baseline' | 'early' | 'late';
+export type HazardDeckPresetProfile = 'baseline' | 'straightforward' | 'enchantment' | 'utility';
+
+export interface HazardDeckPreset {
+    id: HazardDeckPresetId;
+    label: string;
+    era: HazardDeckPresetEra;
+    profile: HazardDeckPresetProfile;
+    description: string;
+    cardIds: readonly string[];
+}
+
+export interface HazardDeckPresetResult {
+    presetId: HazardDeckPresetId;
+    label: string;
+    era: HazardDeckPresetEra;
+    profile: HazardDeckPresetProfile;
+    cardIds: string[];
+}
+
+function allHazardCards(): HazardCardDef[] {
+    return [...HAZARD_DECK, ...HAZARD_REWARD_CARDS];
+}
+
+function isEnchantCard(card: HazardCardDef): boolean {
+    return card.effect === 'aura' || (card.keywords ?? []).includes('enchant');
+}
+
+function isUtilityCard(card: HazardCardDef): boolean {
+    return !isEnchantCard(card) && !!card.effect;
+}
+
+function isStraightforwardCard(card: HazardCardDef): boolean {
+    return !card.dead && !card.effect;
+}
+
+function pickCards(predicate: (card: HazardCardDef) => boolean, count: number, preferred: readonly string[]): string[] {
+    const selected: string[] = [];
+    const seen = new Set<string>();
+    const add = (id: string): void => {
+        if (seen.has(id)) return;
+        const card = allHazardCards().find((candidate) => candidate.id === id);
+        if (!card || !predicate(card)) return;
+        selected.push(id);
+        seen.add(id);
+    };
+
+    for (const id of preferred) add(id);
+    for (const card of allHazardCards()) {
+        if (selected.length >= count) break;
+        if (predicate(card)) add(card.id);
+    }
+    return selected.slice(0, count);
+}
+
+const earlyStraightforward = pickCards(isStraightforwardCard, 7, [
+    'r_grip',
+    'r_wind',
+    'r_pivot',
+    'r_drop',
+    'x_shoulder',
+    'x_eelstep',
+    'x_evenbreath',
+]);
+const lateStraightforward = pickCards(isStraightforwardCard, 13, [
+    ...earlyStraightforward,
+    'x_gatebreak',
+    'x_ghostgait',
+    'x_twinoath',
+    'x_stormpivot',
+    'x_tidalturn',
+    'x_pendulum',
+]);
+const earlyEnchantment = pickCards((card) => isEnchantCard(card) || isStraightforwardCard(card), 7, [
+    'r_aggr',
+    'r_swift',
+    'r_zeal',
+    'r_martyr',
+    'x_shoulder',
+    'x_eelstep',
+    'x_evenbreath',
+]);
+const lateEnchantment = pickCards((card) => isEnchantCard(card) || isStraightforwardCard(card), 13, [
+    ...earlyEnchantment,
+    'r_relic',
+    'x_warpaint',
+    'x_tailfeather',
+    'x_communion',
+    'x_chorus',
+    'x_whetstonechant',
+]);
+const earlyUtility = pickCards((card) => isUtilityCard(card) || isStraightforwardCard(card), 7, [
+    'r_even',
+    'r_conv',
+    'r_stone',
+    'r_tide',
+    'x_shoulder',
+    'x_eelstep',
+    'x_evenbreath',
+]);
+const lateUtility = pickCards((card) => isUtilityCard(card) || isStraightforwardCard(card), 13, [
+    ...earlyUtility,
+    'x_dawnpsalm',
+    'x_secondsun',
+    'x_lastrelic',
+    'x_greywarden',
+    'x_oldcapstan',
+    'x_goldoath',
+]);
+
+export const HAZARD_DECK_PRESETS: readonly HazardDeckPreset[] = Object.freeze([
+    {
+        id: 'starter-baseline',
+        label: 'Starter baseline',
+        era: 'baseline',
+        profile: 'baseline',
+        description: 'Only the implicit starter bag. Use this as the clean control deck.',
+        cardIds: [],
+    },
+    {
+        id: 'early-straightforward',
+        label: 'Early straightforward',
+        era: 'early',
+        profile: 'straightforward',
+        description: 'Low utility, low enchantment, direct force/escape cards for new-run clarity.',
+        cardIds: earlyStraightforward,
+    },
+    {
+        id: 'late-straightforward',
+        label: 'Late straightforward',
+        era: 'late',
+        profile: 'straightforward',
+        description: 'Large direct-progress deck for late-game straight-line pressure testing.',
+        cardIds: lateStraightforward,
+    },
+    {
+        id: 'early-enchantment',
+        label: 'Early enchantment',
+        era: 'early',
+        profile: 'enchantment',
+        description: 'Low utility, high enchantment, low direct-progress support.',
+        cardIds: earlyEnchantment,
+    },
+    {
+        id: 'late-enchantment',
+        label: 'Late enchantment',
+        era: 'late',
+        profile: 'enchantment',
+        description: 'Larger aura-heavy deck for testing long-term enchantment strategy.',
+        cardIds: lateEnchantment,
+    },
+    {
+        id: 'early-utility',
+        label: 'Early utility',
+        era: 'early',
+        profile: 'utility',
+        description: 'Low enchantment, high utility, low direct-progress deck for tool-use testing.',
+        cardIds: earlyUtility,
+    },
+    {
+        id: 'late-utility',
+        label: 'Late utility',
+        era: 'late',
+        profile: 'utility',
+        description: 'Large utility deck for testing draw, conversion, purge, ward, bounty, and anchor lines.',
+        cardIds: lateUtility,
+    },
+]);
+
+function hazardDeckPresetById(presetId: HazardDeckPresetId): HazardDeckPreset {
+    const preset = HAZARD_DECK_PRESETS.find((candidate) => candidate.id === presetId);
+    if (!preset) throw new Error(`Unknown hazard deck preset: ${presetId}`);
+    return preset;
+}
+
+export function beginHazardAction(store: AppStore, options: BeginHazardOptions = {}): boolean {
+    const state = store.getState();
+    if (state.hazard?.session) return false; // one crisis at a time
+    const seed = resolveMinigameSeed('hazard', options.seed, globalThis.__AXM_HAZARD_SEED__);
+    let hazardId = resolveMinigameString(
+        'hazard',
+        ['hazardId', 'id'],
+        options.hazardId,
+        globalThis.__AXM_HAZARD_ID__,
+    );
+    if (!hazardId) {
+        hazardId = HAZARD_LIBRARY[Math.abs(seed) % HAZARD_LIBRARY.length].id;
+    }
+    const session = createHazardSession(seed, currentBag(store), hazardId);
+    setSession(store, session);
+    return true;
+}
+
+export function selectHazardRouteAction(store: AppStore, route: HazardRouteKey): void {
+    const s = store.getState().hazard?.session;
+    if (!s) return;
+    setSession(store, engineSelectRoute(s, route, currentBag(store)));
+}
+
+export function finishHazardRollingAction(store: AppStore): void {
+    const s = store.getState().hazard?.session;
+    if (!s) return;
+    setSession(store, engineFinishRolling(s));
+}
+
+export function stageHazardCardAction(store: AppStore, uid: string): void {
+    const s = store.getState().hazard?.session;
+    if (!s) return;
+    setSession(store, engineStageCard(s, uid, currentBag(store)));
+}
+
+export function unstageHazardCardAction(store: AppStore, uid: string): void {
+    const s = store.getState().hazard?.session;
+    if (!s) return;
+    setSession(store, engineUnstageCard(s, uid));
+}
+
+export function discardHazardCardAction(store: AppStore, uid: string): void {
+    const s = store.getState().hazard?.session;
+    if (!s) return;
+    setSession(store, engineDiscardCard(s, uid));
+}
+
+export function powerHazardCardAction(store: AppStore, uid: string, dieId: string): void {
+    const s = store.getState().hazard?.session;
+    if (!s) return;
+    setSession(store, enginePowerCard(s, uid, dieId, currentBag(store)));
+}
+
+export function applyHazardCardAction(store: AppStore, uid: string): void {
+    const s = store.getState().hazard?.session;
+    if (!s) return;
+    setSession(store, engineApplyCard(s, uid, currentBag(store)));
+}
+
+export function chooseHazardCardKeyAction(store: AppStore, uid: string, key: HazardProgressKey): void {
+    const s = store.getState().hazard?.session;
+    if (!s) return;
+    setSession(store, engineChooseCardKey(s, uid, key));
+}
+
+export function resolveHazardRoundAction(store: AppStore): void {
+    const s = store.getState().hazard?.session;
+    if (!s) return;
+    setSession(store, engineResolveRound(s, currentBag(store)));
+}
+
+export function continueHazardAfterResolveAction(store: AppStore): void {
+    const s = store.getState().hazard?.session;
+    if (!s) return;
+    setSession(store, engineContinueAfterResolve(s, currentBag(store)));
+}
+
+export function acknowledgeHazardOutcomeAction(store: AppStore): void {
+    const s = store.getState().hazard?.session;
+    if (!s) return;
+    setSession(store, engineAcknowledgeOutcome(s));
+}
+
+export function confirmHazardForetellAction(store: AppStore, orderedIds: string[]): void {
+    const s = store.getState().hazard?.session;
+    if (!s) return;
+    setSession(store, engineConfirmForetell(s, orderedIds, currentBag(store)));
+}
+
+export interface ClaimHazardRewardsResult {
+    applied: boolean;
+    vitaeDelta: number;
+    maxVitaeDelta: number;
+    shillings: number;
+    cardAdded: string | null;
+    crackAdded: boolean;
+    tokensBanked: number;
+    tokensLost: boolean;
+    hexed: boolean;
+    /**
+     * Phase 130 — true when the crossing was fatal: the net VITAE swing
+     * would have dropped the player to `health <= 0` (engine `isDefeated`
+     * threshold), so the run was reset via `resetRun({ keepCharacter })`
+     * and the crossing's spoils were forfeit. On a fatal claim every
+     * delta reads 0 — death yields no reward.
+     */
+    died: boolean;
+}
+
+const NOOP_CLAIM: ClaimHazardRewardsResult = Object.freeze({
+    applied: false,
+    vitaeDelta: 0,
+    maxVitaeDelta: 0,
+    shillings: 0,
+    cardAdded: null,
+    crackAdded: false,
+    tokensBanked: 0,
+    tokensLost: false,
+    hexed: false,
+    died: false,
+});
+
+/**
+ * Confirms the rewards modal and applies the whole outcome to the
+ * engine `GameState`:
+ *
+ *  rewards     — `vitae` heals; `cache`/`relic` grant shillings;
+ *                `token` banks a paradox-token flag.
+ *  reserves    — +1 VITAE per unspent non-hex die (REC#3).
+ *  consequences— `minhp` damages; `maxhp` scars max VITAE;
+ *                `deadcard` shuffles a CRACK into the deck flags;
+ *                `tokens` clears banked token flags; `curse` sets the
+ *                hexed flag.
+ *  penalty     — route penaltyVitae × lost rounds.
+ *  card pick   — appended to the persistent deck flags.
+ *
+ * VITAE never drops below 1 here: hazards maim, they do not kill
+ * (documented divergence — the engine has no out-of-combat death).
+ */
+export function claimHazardRewardsAction(store: AppStore, cardId: string | null): ClaimHazardRewardsResult {
+    const s = store.getState().hazard?.session;
+    if (!s || !s.outcome) return NOOP_CLAIM;
+    const done = engineClaimRewards(s, cardId);
+    if (done.phase !== 'done') return NOOP_CLAIM;
+
+    const outcome = s.outcome;
+    const state = store.getState() as unknown as GameState;
+    let flags = (state.flags ?? []).slice();
+    let vitaeDelta = 0;
+    let maxVitaeDelta = 0;
+    let shillings = 0;
+    let tokensBanked = 0;
+    let tokensLost = false;
+    let hexed = false;
+    let crackAdded = false;
+
+    for (const reward of outcome.rewards) {
+        if (reward === 'vitae') vitaeDelta += HAZARD_VITAE_REWARD;
+        if (reward === 'cache') shillings += HAZARD_CACHE_SHILLINGS;
+        if (reward === 'relic') shillings += HAZARD_RELIC_SHILLINGS;
+        if (reward === 'token') {
+            tokensBanked += 1;
+            flags = [...flags, `${HAZARD_TOKEN_FLAG_PREFIX}${Date.now()}-${flags.length}`];
+        }
+    }
+    vitaeDelta += outcome.reserveBonus;
+
+    // Sub-quest bonuses (0 on a failure, see computeOutcome) ride on top of
+    // the main spoils.
+    shillings += outcome.questShillings;
+    vitaeDelta += outcome.questVitae;
+    for (let i = 0; i < outcome.questTokens; i++) {
+        tokensBanked += 1;
+        flags = [...flags, `${HAZARD_TOKEN_FLAG_PREFIX}${Date.now()}-q${flags.length}`];
+    }
+
+    for (const consequence of outcome.consequences) {
+        if (consequence === 'minhp') vitaeDelta -= HAZARD_MINHP_LOSS;
+        if (consequence === 'maxhp') maxVitaeDelta -= HAZARD_MAXHP_SCAR;
+        if (consequence === 'deadcard') {
+            flags = appendAcquiredCard(flags, HAZARD_CRACK_CARD.id);
+            crackAdded = true;
+        }
+        if (consequence === 'tokens') {
+            tokensLost = true;
+            flags = flags.filter((f) => !f.startsWith(HAZARD_TOKEN_FLAG_PREFIX));
+        }
+        if (consequence === 'curse') {
+            hexed = true;
+            if (!flags.includes(HAZARD_HEXED_FLAG)) flags = [...flags, HAZARD_HEXED_FLAG];
+        }
+    }
+    vitaeDelta -= outcome.penaltyVitae;
+    // SACRIFICE cards (BLOODPRICE) spent VITAE mid-run; settle it at claim.
+    vitaeDelta -= outcome.vitaeCost;
+    // Codex (0.18.0): MEND restores VITAE and BOUNTY banks shillings on a
+    // survived crossing — the engine zeroes both on a failure.
+    vitaeDelta += outcome.vitaeRestore;
+    shillings += outcome.bountyShillings;
+
+    if (done.pickedRewardCardId) {
+        flags = appendAcquiredCard(flags, done.pickedRewardCardId);
+    }
+
+    const player = state.player;
+
+    // Phase 130 — out-of-combat death. The nominal post-crossing VITAE
+    // (before the floor-1 clamp below) decides lethality by the engine's
+    // own `isDefeated` threshold (`health <= 0`) — the SAME predicate the
+    // combat death path uses. A crossing the player cannot afford routes
+    // through the engine death/respawn primitive (`resetRun`, mirroring
+    // combat's BEGIN AGAIN) instead of silently maiming to 1. Spoils are
+    // forfeit on the killing crossing: we never reach the spoils-apply
+    // `setState` below.
+    const nominalHealth = player.health + vitaeDelta;
+    if (engineIsDefeated({ ...player, health: nominalHealth })) {
+        const deathStore = store.getState() as unknown as {
+            resetRun?: (o: { keepCharacter: boolean }) => unknown;
+        };
+        // Stamp the tombstone onto the PRE-reset flags so it survives the
+        // run reset (resetRun keeps the character but may rebuild run
+        // flags); re-read post-reset flags and append.
+        deathStore.resetRun?.({ keepCharacter: true });
+        const afterReset = store.getState() as unknown as GameState;
+        const tombstoned = [...(afterReset.flags ?? []), `${HAZARD_DEATH_FLAG_PREFIX}${Date.now()}`];
+        store.setState({ flags: tombstoned, hazard: { session: null } } as never);
+        try {
+            store.getState().save();
+        } catch {
+            // Persistence failures must not strand the player on the modal.
+        }
+        return {
+            applied: true,
+            vitaeDelta: 0,
+            maxVitaeDelta: 0,
+            shillings: 0,
+            cardAdded: null,
+            crackAdded: false,
+            tokensBanked: 0,
+            tokensLost: false,
+            hexed: false,
+            died: true,
+        };
+    }
+
+    const newMax = Math.max(5, player.maxHealth + maxVitaeDelta);
+    const newHealth = Math.min(newMax, Math.max(1, player.health + vitaeDelta));
+    // Record the scar that was actually applied (the floor-5 clamp may
+    // soften the nominal HAZARD_MAXHP_SCAR) so an inn rest can restore
+    // exactly the max-VITAE lost — never more.
+    const appliedScar = player.maxHealth - newMax;
+    if (appliedScar > 0) {
+        flags = [...flags, `${HAZARD_SCAR_FLAG_PREFIX}${appliedScar}`];
+    }
+    store.setState({
+        player: {
+            ...player,
+            maxHealth: newMax,
+            health: newHealth,
+            currency: player.currency + shillings,
+        },
+        flags,
+        hazard: { session: null },
+    } as never);
+
+    // Persist immediately — the hazard's spoils and scars are exactly the
+    // kind of moment the explicit-save policy exists for.
+    try {
+        store.getState().save();
+    } catch {
+        // Persistence failures must not strand the player on the modal.
+    }
+
+    return {
+        applied: true,
+        vitaeDelta,
+        maxVitaeDelta,
+        shillings,
+        cardAdded: done.pickedRewardCardId,
+        crackAdded,
+        tokensBanked,
+        tokensLost,
+        hexed,
+        died: false,
+    };
+}
+
+/** Clears the session without rewards or penalties (dev / navigation escape). */
+export function abandonHazardAction(store: AppStore): void {
+    setSession(store, null);
+}
+
+/** Acquired cards granted by the dev deck-randomizer. */
+const RANDOMIZE_ACQUIRED_COUNT = 10;
+
+/** Apply a deterministic Kid playtest deck preset by replacing acquired hazard-card flags. */
+export function applyHazardDeckPresetAction(store: AppStore, presetId: HazardDeckPresetId): HazardDeckPresetResult {
+    const preset = hazardDeckPresetById(presetId);
+    const state = store.getState() as unknown as GameState;
+    let flags = (state.flags ?? []).filter((f) => !f.startsWith(HAZARD_CARD_FLAG_PREFIX));
+    const cardIds = [...preset.cardIds];
+    for (const cardId of cardIds) {
+        flags = appendAcquiredCard(flags, cardId);
+    }
+    store.setState({ flags } as never);
+    return {
+        presetId: preset.id,
+        label: preset.label,
+        era: preset.era,
+        profile: preset.profile,
+        cardIds,
+    };
+}
+
+/**
+ * Dev tool — rebuilds the player's acquired hazard cards as a random
+ * selection from EVERY defined card (starter deck + the reward pool),
+ * so dev sessions surface cards normal play rarely reaches. Existing
+ * `hazard-card:` flags are dropped first; the implicit starter bag is
+ * untouched. Returns the granted card ids (with duplicates).
+ */
+export function randomizeHazardDeckAction(store: AppStore): string[] {
+    const state = store.getState() as unknown as GameState;
+    const pool = [...HAZARD_DECK, ...HAZARD_REWARD_CARDS];
+    let flags = (state.flags ?? []).filter((f) => !f.startsWith(HAZARD_CARD_FLAG_PREFIX));
+    const granted: string[] = [];
+    for (let i = 0; i < RANDOMIZE_ACQUIRED_COUNT; i++) {
+        const card = pool[Math.floor(Math.random() * pool.length)];
+        flags = appendAcquiredCard(flags, card.id);
+        granted.push(card.id);
+    }
+    store.setState({ flags } as never);
+    return granted;
+}

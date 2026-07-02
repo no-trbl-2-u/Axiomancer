@@ -1,0 +1,72 @@
+# Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
+
+# dependencies
+node_modules/
+
+# Project canon is npm (package-lock.json). If a contributor runs
+# `pnpm install` it produces this stale parallel lockfile; keep it
+# out of the tree so it can't drift from package-lock.json or
+# mislead the loop's verify path.
+pnpm-lock.yaml
+
+# Expo
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+
+# Native
+.kotlin/
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# Metro
+.metro-health-check*
+
+# Playwright MCP scratch
+.playwright-mcp/
+
+# /playtest skill screenshots — written to repo root by the
+# Playwright-driven encounter walks; never committed.
+walk-*.png
+
+# /loop session-local scheduler lock; recreated on each session.
+.claude/scheduled_tasks.lock
+
+# Visual-smoke artefacts (baseline PNGs are committed; current + diff are not)
+.smoke-dist/
+screenshots/current/
+screenshots/diff/
+
+# debug
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# macOS
+.DS_Store
+*.pem
+
+# local env files
+.env
+.env.*.local
+.env*.local
+
+# typescript
+*.tsbuildinfo
+
+app-example
+
+# generated native folders
+/ios
+/android
+screenshots/hazard-e2e/
+bun.lock
+
+# visual-audit artifacts
+.audit-dist/
+.playwright-mcp/

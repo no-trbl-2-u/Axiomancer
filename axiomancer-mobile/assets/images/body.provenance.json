@@ -1,0 +1,9 @@
+{
+  "generated_by": "cursor-agent",
+  "date": "2026-05-14",
+  "tool": "hand-written-svg",
+  "prompt": "hand-written SVG",
+  "spec_section": "§1",
+  "target_dimensions": "64x64",
+  "source_file": "components/StanceGlyph.tsx"
+}

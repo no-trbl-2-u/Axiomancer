@@ -1,0 +1,163 @@
+name: march
+
+# Autonomous-beast loop: one tick of `/march`, which dispatches to
+# triage / critique / ship-a-phase / expand / iterate.
+#
+# Triggers:
+#   • Schedule — every 30 minutes. An idle-gate job checks for recent
+#     activity first; if nothing has happened (no bot commits, no human
+#     commits, no new/updated issues) the run exits early and burns
+#     only ~15 seconds of Actions time.
+#   • Manual — Actions tab → "march" → Run workflow. Always runs,
+#     bypassing the idle gate.
+#
+# Required secrets (Settings → Secrets and variables → Actions):
+#   CLAUDE_CODE_OAUTH_TOKEN — OAuth token from `claude setup-token`,
+#                             draws from your Claude Code subscription
+#                             instead of per-token API billing.
+#
+# The workflow uses the auto-provisioned GITHUB_TOKEN for `gh` and git
+# operations. No PAT needed unless you want cross-repo behaviour.
+
+on:
+  schedule:
+    - cron: '*/30 * * * *'
+  workflow_dispatch:
+    inputs:
+      args:
+        description: 'Optional argument passed to /march (e.g. "phase 10", "iterate")'
+        required: false
+        default: ''
+
+permissions:
+  contents: write        # git push commits the loop produces
+  issues: write          # /triage + phase-mirror issue ops
+  pull-requests: write   # /critique / /iterate may open PRs
+  actions: read          # idle gate reads workflow run history
+  id-token: write        # for Anthropic's auth proxy
+
+concurrency:
+  group: march-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  # ── Idle gate (scheduled runs only) ──────────────────────────────
+  # Skips the heavy march job when there's been no activity.
+  # Manual dispatches bypass this entirely.
+  idle-gate:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule'
+    timeout-minutes: 2
+    outputs:
+      skip: ${{ steps.check.outputs.skip }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check for recent activity
+        id: check
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          LOOKBACK="3 hours ago"
+
+          # 1. Bot commits in the lookback window → march is productive
+          BOT=$(git log --oneline --after="$LOOKBACK" \
+                --author="axiomancer-march" | wc -l)
+
+          # 2. Human commits → new work for march to pick up
+          HUMAN=$(git log --oneline --after="$LOOKBACK" \
+                  --invert-grep --author="axiomancer-march" | wc -l)
+
+          # 3. Issues created/updated recently → triage work
+          CUTOFF=$(date -u -d "$LOOKBACK" +%Y-%m-%dT%H:%M:%SZ 2>/dev/null \
+                || date -u -v-3H +%Y-%m-%dT%H:%M:%SZ)
+          ISSUES=$(gh issue list --state open --limit 5 \
+                   --search "updated:>=$CUTOFF" \
+                   --json number -q 'length' 2>/dev/null || echo "0")
+
+          echo "bot=$BOT  human=$HUMAN  issues=$ISSUES"
+
+          if [ "$BOT" -gt 0 ] || [ "$HUMAN" -gt 0 ] || [ "$ISSUES" -gt 0 ]; then
+            echo "Activity detected — proceeding."
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::No bot commits, human commits, or updated issues in the last 3 hours. March is idle — skipping."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          fi
+
+  # ── Main march job ───────────────────────────────────────────────
+  march:
+    needs: [idle-gate]
+    # Run when:
+    #   • idle-gate was skipped (manual dispatch) → always run
+    #   • idle-gate passed and said "don't skip" → run
+    # Don't run when:
+    #   • idle-gate said "skip" → idle, save minutes
+    #   • idle-gate failed or was cancelled → something is wrong
+    if: |
+      !cancelled() &&
+      (needs.idle-gate.result == 'skipped' ||
+       (needs.idle-gate.result == 'success' && needs.idle-gate.outputs.skip != 'true'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Configure git identity
+        run: |
+          git config user.name  "axiomancer-march[bot]"
+          git config user.email "41898282+axiomancer-march[bot]@users.noreply.github.com"
+
+      - name: Provision .env for nexus skills
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          EAS_PROJECT_ID: ${{ secrets.EAS_PROJECT_ID }}
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+          DEPLOY_PROVIDER: ${{ secrets.DEPLOY_PROVIDER }}
+          FULL_NAME: ${{ secrets.FULL_NAME }}
+        run: |
+          umask 077
+          cat > .env <<EOF
+          GH_TOKEN=${GH_TOKEN}
+          GH_REPO=${{ github.repository }}
+          EAS_PROJECT_ID=${EAS_PROJECT_ID}
+          EXPO_TOKEN=${EXPO_TOKEN}
+          DEPLOY_PROVIDER=${DEPLOY_PROVIDER}
+          FULL_NAME=${FULL_NAME}
+          EOF
+
+      - name: Run /march
+        uses: anthropics/claude-code-base-action@beta
+        with:
+          prompt: "/march ${{ github.event.inputs.args }}"
+          # Pin the current Sonnet latest family model. The action's built-in default
+          # (claude-sonnet-4-20250514) retired 2026-06-15 and now 404s.
+          # Use a deliberate active Sonnet pin rather than a retired action default.
+          model: claude-sonnet-5
+          # Reasoning effort for the autonomous loop (low|medium|high|...).
+          claude_env: |
+            CLAUDE_CODE_EFFORT_LEVEL: medium
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          allowed_tools: "Bash,Read,Edit,Write,Glob,Grep,Agent,TodoWrite,WebFetch,WebSearch"
+          settings: '{"permissions":{"defaultMode":"bypassPermissions","skipDangerousModePermissionPrompt":true}}'
+          timeout_minutes: '60'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
