@@ -19,7 +19,7 @@
  * this.
  */
 
-import { generateRarityDrop, type Equipment, type ItemRarity } from 'axiomancer-mechanics';
+import { generateRarityDrop, type Equipment, type ItemRarity } from '@mechanics';
 
 import type { AppStore } from '@/state/store';
 

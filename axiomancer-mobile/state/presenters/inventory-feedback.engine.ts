@@ -11,8 +11,8 @@
  * screen stays silent rather than emitting a misleading toast.
  */
 
-import type { GameEvent } from 'axiomancer-mechanics';
-import { isInventoryChangedEvent } from 'axiomancer-mechanics';
+import type { GameEvent } from '@mechanics';
+import { isInventoryChangedEvent } from '@mechanics';
 
 /**
  * Runtime-actual shape of an `inventory:changed` event's payload — a

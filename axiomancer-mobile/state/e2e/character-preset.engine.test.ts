@@ -11,7 +11,7 @@
  */
 
 import { afterEach, describe, expect, it, jest } from '@jest/globals';
-import { characterPresets } from 'axiomancer-mechanics';
+import { characterPresets } from '@mechanics';
 
 import { createMemoryAdapter } from '@/test-utils/memoryAdapter';
 import { createAppActions } from '@/state/actions';

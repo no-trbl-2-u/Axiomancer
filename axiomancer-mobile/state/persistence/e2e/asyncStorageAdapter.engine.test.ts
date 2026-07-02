@@ -9,7 +9,7 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 
 import { afterEach, describe, expect, it, jest } from '@jest/globals';
-import { createCharacter, createNewGameState, type GameState } from 'axiomancer-mechanics';
+import { createCharacter, createNewGameState, type GameState } from '@mechanics';
 
 jest.mock('@react-native-async-storage/async-storage', () =>
     require('@react-native-async-storage/async-storage/jest/async-storage-mock'),
@@ -251,7 +251,7 @@ describe('migrations — unwrap', () => {
         // defaultAlignment() applied. Pins the migration runs end-to-end
         // through createAsyncStorageAdapter, not just through unwrap().
         // eslint-disable-next-line @typescript-eslint/no-require-imports
-        const { defaultAlignment } = require('axiomancer-mechanics');
+        const { defaultAlignment } = require('@mechanics');
         const v2State = {
             player: {
                 name: 'V2 Pilgrim',

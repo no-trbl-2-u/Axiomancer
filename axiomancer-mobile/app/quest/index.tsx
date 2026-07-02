@@ -32,7 +32,7 @@ import {
 import { ScreenBg } from '@/components/ScreenBg';
 import { useGameActions, useGameState } from '@/state/GameStoreProvider';
 import { QUEST_TIER_LABELS, selectQuestBoardVM } from '@/state/presenters/quest.engine';
-import type { QuestSpaceKind } from 'axiomancer-mechanics';
+import type { QuestSpaceKind } from '@mechanics';
 import { FONTS } from '@/theme/axm';
 import { makeStyles, usePalette } from '@/theme/runtime';
 

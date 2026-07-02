@@ -20,7 +20,7 @@
  * the phase.
  */
 
-import type { CombatEncounterState } from 'axiomancer-mechanics';
+import type { CombatEncounterState } from '@mechanics';
 
 import type { CombatViewModel } from '@/state/presenters/combat-encounter.engine';
 

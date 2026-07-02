@@ -12,7 +12,7 @@ import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react-native';
 import { afterEach, describe, expect, it, jest } from '@jest/globals';
 
-import { initializeCombatEncounter, rollEncounterDice, draftStanceDie } from 'axiomancer-mechanics';
+import { initializeCombatEncounter, rollEncounterDice, draftStanceDie } from '@mechanics';
 import { CombatBoard, type DragController } from '@/components/combat/encounter/CombatBoard';
 import { buildCombatViewModel } from '@/state/presenters/combat-encounter.engine';
 import { createMockEncounterEnemy } from '@/state/mocks/combat.mock';

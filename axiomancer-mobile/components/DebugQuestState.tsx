@@ -29,7 +29,7 @@ import {
     completeQuest as engineCompleteQuest,
     type Quest,
     type QuestName,
-} from 'axiomancer-mechanics';
+} from '@mechanics';
 
 import { isDevToolsEnabled } from '@/lib/buildProfile';
 import { useGameStore } from '@/state/GameStoreProvider';

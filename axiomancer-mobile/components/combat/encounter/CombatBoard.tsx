@@ -46,7 +46,7 @@ import type {
 } from '@/state/presenters/combat-encounter.engine';
 import { armedReadValue, STANCE_COLORS } from '@/state/presenters/combat-encounter.engine';
 import { wheelNext, type WheelStance } from '@/state/combat/momentum';
-import type { CombatReadResult } from 'axiomancer-mechanics';
+import type { CombatReadResult } from '@mechanics';
 import { TrashGlyph, LedgerMark } from '@/components/hazard/glyphs';
 import { CombatCombatantPane, EffectChips, PlayerMedallion, COMBAT_HUD_HEIGHT, type CombatFx } from './CombatCombatantPane';
 import { CombatDie } from './CombatDie';

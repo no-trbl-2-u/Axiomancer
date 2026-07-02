@@ -8,7 +8,7 @@
  */
 
 import type { Palette } from '@/theme/palette';
-import type { GatherFamily } from 'axiomancer-mechanics';
+import type { GatherFamily } from '@mechanics';
 
 export const GL = {
     moss: '#5a8a3a',

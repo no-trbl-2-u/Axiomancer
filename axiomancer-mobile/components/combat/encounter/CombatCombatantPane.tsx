@@ -40,7 +40,7 @@ import { resolveEnemyArchetype, type EnemyArchetype } from '@/state/presenters/e
 import type {
     CombatEnemyPaneVM, CombatPlayerPaneVM, CombatEffectChipVM,
 } from '@/state/presenters/combat-encounter.engine';
-import type { CombatEvent } from 'axiomancer-mechanics';
+import type { CombatEvent } from '@mechanics';
 import { effectGlyph } from '@/components/combat/statusGlyphs';
 import { keywordForEffect } from '@/state/combat/keywords';
 import { IntentIcon } from './IntentIcon';

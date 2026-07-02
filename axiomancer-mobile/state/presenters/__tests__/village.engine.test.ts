@@ -20,7 +20,7 @@ import {
     equipmentTemplates,
     type NPC,
     type ShopWare,
-} from 'axiomancer-mechanics';
+} from '@mechanics';
 import {
     resolveWareItem,
     selectVillageVM,

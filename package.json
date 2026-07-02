@@ -1,0 +1,25 @@
+{
+  "name": "axiomancer",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Axiomancer monorepo — mechanics engine + mobile app + card editor.",
+  "workspaces": [
+    "axiomancer-mechanics",
+    "axiomancer-mobile",
+    "axiomancer-card-editor"
+  ],
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
+  },
+  "scripts": {
+    "mechanics": "npm --workspace axiomancer-mechanics run",
+    "mobile": "npm --workspace axiomancer-mobile run",
+    "editor": "npm --workspace axiomancer-card-editor run"
+  },
+  "overrides": {
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "react-test-renderer": "19.1.0"
+  }
+}

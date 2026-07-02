@@ -11,7 +11,7 @@ import {
     isCombatStartedEvent,
     isCombatEndedEvent,
     type TypedGameEvent,
-} from 'axiomancer-mechanics';
+} from '@mechanics';
 
 import { createAppActions } from '@/state/actions';
 import { createAppStore, RECENT_EVENTS_CAPACITY, getEmitterForStore } from '@/state/store';

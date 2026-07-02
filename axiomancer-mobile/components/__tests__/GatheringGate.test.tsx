@@ -10,7 +10,7 @@
 import { afterEach, describe, expect, it, jest } from '@jest/globals';
 import { act, render } from '@testing-library/react-native';
 import React from 'react';
-import type { GatheringSessionState } from 'axiomancer-mechanics';
+import type { GatheringSessionState } from '@mechanics';
 
 import { GatheringGate } from '@/components/GatheringGate';
 import { GameStoreProvider } from '@/state/GameStoreProvider';

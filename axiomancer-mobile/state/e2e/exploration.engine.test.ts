@@ -8,7 +8,7 @@
  */
 
 import { afterEach, describe, it, expect, jest } from '@jest/globals';
-import { createMapState, getMapDefinition } from 'axiomancer-mechanics';
+import { createMapState, getMapDefinition } from '@mechanics';
 
 import { createMemoryAdapter } from '@/test-utils/memoryAdapter';
 import { createAppActions } from '@/state/actions';

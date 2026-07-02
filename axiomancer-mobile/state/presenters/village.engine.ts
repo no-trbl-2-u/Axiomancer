@@ -10,8 +10,8 @@ import {
     equipmentTemplates,
     type Item,
     type ShopWare,
-} from 'axiomancer-mechanics';
-import { equipmentFromTemplate as templateToEquipment } from 'axiomancer-mechanics';
+} from '@mechanics';
+import { equipmentFromTemplate as templateToEquipment } from '@mechanics';
 import type { AppStoreState } from '@/state/store';
 
 export interface VillageMerchantVM {

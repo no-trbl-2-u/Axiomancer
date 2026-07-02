@@ -1,4 +1,4 @@
-import { createEnemy, type Enemy } from 'axiomancer-mechanics';
+import { createEnemy, type Enemy } from '@mechanics';
 
 /**
  * Placeholder encounter the combat screen bootstraps when no combat is

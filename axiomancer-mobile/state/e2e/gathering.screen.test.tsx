@@ -15,8 +15,8 @@ import { afterEach, describe, expect, it, jest } from '@jest/globals';
 import GatheringScreen from '@/app/gathering/index';
 import { createAppActions, type AppActions } from '@/state/actions';
 import type { AppStore } from '@/state/store';
-import { GATHER_WRATH_MAX } from 'axiomancer-mechanics';
-import type { GatherPlotEntry, GatheringSessionState } from 'axiomancer-mechanics';
+import { GATHER_WRATH_MAX } from '@mechanics';
+import type { GatherPlotEntry, GatheringSessionState } from '@mechanics';
 import { withAllProviders } from '@/test-utils/withAllProviders';
 
 jest.mock('expo-router', () => ({

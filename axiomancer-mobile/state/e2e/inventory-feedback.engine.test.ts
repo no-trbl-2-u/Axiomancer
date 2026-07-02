@@ -9,7 +9,7 @@
  * showing a misleading toast.
  */
 
-import type { GameEvent } from 'axiomancer-mechanics';
+import type { GameEvent } from '@mechanics';
 import { selectInventoryToast } from '@/state/presenters/inventory-feedback.engine';
 
 /** Cheap synthetic event factory — typed loosely on purpose. */

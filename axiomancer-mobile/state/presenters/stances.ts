@@ -12,6 +12,6 @@
  * checking the picker / phase-stack rendering.
  */
 
-import type { Stance } from 'axiomancer-mechanics';
+import type { Stance } from '@mechanics';
 
 export const STANCES: readonly Stance[] = ['heart', 'body', 'mind'] as const;

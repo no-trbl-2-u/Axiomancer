@@ -23,7 +23,7 @@
  * generate per-enemy lines.
  */
 
-import { isEquipment, type Item } from 'axiomancer-mechanics';
+import { isEquipment, type Item } from '@mechanics';
 
 import type { AftermathData } from '@/state/combat-mode';
 import { getMapLayout } from '@/state/exploration-maps';

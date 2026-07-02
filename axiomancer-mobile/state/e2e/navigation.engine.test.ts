@@ -5,7 +5,7 @@
  * against various game states.
  */
 
-import { createGameStore, createEnemy } from 'axiomancer-mechanics';
+import { createGameStore, createEnemy } from '@mechanics';
 import { createMemoryAdapter } from '@/test-utils/memoryAdapter';
 import {
     createAppStore,

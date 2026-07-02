@@ -11,7 +11,7 @@ import type {
     KeywordDeltaEntry,
     ModifierDeltaEntry,
     ResourceDeltaEntry,
-} from 'axiomancer-mechanics';
+} from '@mechanics';
 
 /**
  * Character-update delta surface (Phase 133; polarity reworked Phase 137).

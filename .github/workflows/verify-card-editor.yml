@@ -1,0 +1,46 @@
+name: verify-card-editor
+
+# Lightweight type-check for the card (Action) editor dev tool. It reads
+# mechanics source live via the @mechanics alias
+# (→ ../axiomancer-mechanics/src), so a mechanics rename can silently break
+# it — this guards that coupling. Runs on changes to either package.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'axiomancer-card-editor/**'
+      - 'axiomancer-mechanics/**'
+      - '.github/workflows/verify-card-editor.yml'
+      - 'package-lock.json'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'axiomancer-card-editor/**'
+      - 'axiomancer-mechanics/**'
+      - '.github/workflows/verify-card-editor.yml'
+      - 'package-lock.json'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: verify-card-editor-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  type-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+      - name: Install workspace dependencies
+        run: npm ci
+      - name: Type-check
+        run: npm run type-check --workspace axiomancer-card-editor

@@ -1,5 +1,5 @@
-import { clamp } from 'axiomancer-mechanics';
-import type { ActiveEffect, CombatResources } from 'axiomancer-mechanics';
+import { clamp } from '@mechanics';
+import type { ActiveEffect, CombatResources } from '@mechanics';
 
 import type { AppStoreState } from '@/state/store';
 

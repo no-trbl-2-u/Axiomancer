@@ -46,7 +46,7 @@ import {
     consumableLibrary,
     type Enemy,
     type Item,
-} from 'axiomancer-mechanics';
+} from '@mechanics';
 
 import { isDevToolsEnabled } from '@/lib/buildProfile';
 import { useGameActions, useGameStore } from '@/state/GameStoreProvider';

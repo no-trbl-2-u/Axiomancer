@@ -26,7 +26,7 @@ import {
     selectHasActiveEvent,
 } from '@/state/presenters/event.engine';
 import { EncounterModalOverlay } from '@/components/event/EncounterModalOverlay';
-import type { Enemy } from 'axiomancer-mechanics';
+import type { Enemy } from '@mechanics';
 
 export default function ExplorationScreen() {
     const styles = useStyles();

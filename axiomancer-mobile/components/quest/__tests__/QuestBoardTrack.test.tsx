@@ -21,7 +21,7 @@ import {
     QUEST_SPACE_GLYPHS,
     type QuestSpaceVM,
 } from '@/state/presenters/quest.engine';
-import type { QuestSpaceKind } from 'axiomancer-mechanics';
+import type { QuestSpaceKind } from '@mechanics';
 import { usePalette } from '@/theme/runtime';
 
 function space(index: number, kind: QuestSpaceKind, isPiece = false): QuestSpaceVM {

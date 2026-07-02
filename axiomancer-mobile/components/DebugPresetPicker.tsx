@@ -15,7 +15,7 @@
  * PHASE_CANDIDATES pass 5 [score 4.5].
  */
 
-import { characterPresets } from 'axiomancer-mechanics';
+import { characterPresets } from '@mechanics';
 import React, { useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 

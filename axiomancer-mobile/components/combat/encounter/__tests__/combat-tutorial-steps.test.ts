@@ -19,7 +19,7 @@ import {
     currentCombatTutorialStep,
 } from '@/components/combat/encounter/combat-tutorial-steps';
 import type { CombatViewModel } from '@/state/presenters/combat-encounter.engine';
-import type { CombatEncounterState } from 'axiomancer-mechanics';
+import type { CombatEncounterState } from '@mechanics';
 
 // ---------------------------------------------------------------------------
 // Fixtures

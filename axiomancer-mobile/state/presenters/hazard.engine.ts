@@ -12,13 +12,13 @@ import {
     HAZARD_KEYWORDS,
     HAZARD_REWARDS,
     type SeedInput,
-} from 'axiomancer-mechanics';
+} from '@mechanics';
 import {
     dieCanPowerCard,
     hazardCardPowerColors,
     hazardProjectedProgress,
     hazardSubquestResults,
-} from 'axiomancer-mechanics';
+} from '@mechanics';
 import type { AppStoreState } from '@/state/store';
 import {
     type HazardCardDef,
@@ -32,7 +32,7 @@ import {
     type HazardSessionState,
     type HazardSubquestReward,
     type HazardSubquestStatus,
-} from 'axiomancer-mechanics';
+} from '@mechanics';
 
 // ---------------------------------------------------------------------------
 // VM shapes

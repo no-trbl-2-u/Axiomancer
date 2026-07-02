@@ -4,13 +4,13 @@
  * Pure: no store writes, no rolls, no rule decisions.
  */
 
-import { REST_POSTURES, REST_TUNING, REST_WARMTH_MAX } from 'axiomancer-mechanics';
+import { REST_POSTURES, REST_TUNING, REST_WARMTH_MAX } from '@mechanics';
 import type {
     RestOutcomeTier,
     RestPosture,
     RestSession,
     RestWatchKind,
-} from 'axiomancer-mechanics';
+} from '@mechanics';
 import type { AppStoreState } from '@/state/store';
 
 // ---------------------------------------------------------------------------

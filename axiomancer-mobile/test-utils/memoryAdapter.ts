@@ -1,4 +1,4 @@
-import type { GameState, PersistenceAdapter } from 'axiomancer-mechanics';
+import type { GameState, PersistenceAdapter } from '@mechanics';
 
 export interface MemoryAdapter extends PersistenceAdapter {
     saveCount: number;

@@ -5,7 +5,7 @@
 // `Math.random` (item.factory, encounter pickers, loot tables) stay
 // pinned too.
 
-import { setRng, type Rng } from 'axiomancer-mechanics';
+import { setRng, type Rng } from '@mechanics';
 
 /** Build an `Rng` that yields `next()` for every `random()` call. */
 function rngFromSequence(next: () => number): Rng {

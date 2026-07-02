@@ -15,10 +15,10 @@ import {
     resolveHazardRound,
     selectHazardRoute,
     stageHazardCard,
-} from 'axiomancer-mechanics';
-import { getHazardDef, HAZARD_CRACK_CARD } from 'axiomancer-mechanics';
-import { hazardStarterBag } from 'axiomancer-mechanics';
-import type { HazardHandEntry, HazardSessionState } from 'axiomancer-mechanics';
+} from '@mechanics';
+import { getHazardDef, HAZARD_CRACK_CARD } from '@mechanics';
+import { hazardStarterBag } from '@mechanics';
+import type { HazardHandEntry, HazardSessionState } from '@mechanics';
 import { selectHazardViewModel, selectHasActiveHazard } from '@/state/presenters/hazard.engine';
 
 const BAG = hazardStarterBag();

@@ -13,7 +13,7 @@ import { afterEach, describe, expect, it, jest } from '@jest/globals';
 
 import HazardDeckScreen from '@/app/hazard-deck/index';
 import type { AppStore } from '@/state/store';
-import { appendAcquiredCard, HAZARD_CRACK_CARD } from 'axiomancer-mechanics';
+import { appendAcquiredCard, HAZARD_CRACK_CARD } from '@mechanics';
 import { withAllProviders } from '@/test-utils/withAllProviders';
 
 jest.mock('expo-router', () => ({

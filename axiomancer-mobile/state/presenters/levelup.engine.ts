@@ -5,8 +5,8 @@
  * Uses engine truth via deriveStats for accurate preview calculations.
  */
 
-import type { BaseStats, GameStore } from 'axiomancer-mechanics';
-import { previewStatAllocation } from 'axiomancer-mechanics';
+import type { BaseStats, GameStore } from '@mechanics';
+import { previewStatAllocation } from '@mechanics';
 import { freezeViewModel } from './freeze';
 
 export interface PreviewAllocation {

@@ -15,7 +15,7 @@
  */
 
 import { describe, expect, it } from '@jest/globals';
-import { applyEffect, effectsLibrary, type Enemy } from 'axiomancer-mechanics';
+import { applyEffect, effectsLibrary, type Enemy } from '@mechanics';
 
 import { createAppActions } from '@/state/actions';
 import { createAppStore } from '@/state/store';

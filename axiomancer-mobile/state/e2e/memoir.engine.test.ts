@@ -11,7 +11,7 @@
  */
 
 import { afterEach, describe, it, expect, jest } from '@jest/globals';
-import { createGameStore } from 'axiomancer-mechanics';
+import { createGameStore } from '@mechanics';
 
 import { createMemoryAdapter } from '@/test-utils/memoryAdapter';
 import {

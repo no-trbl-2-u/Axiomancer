@@ -18,8 +18,8 @@ import { afterEach, describe, expect, it, jest } from '@jest/globals';
 import HazardScreen from '@/app/hazard/index';
 import { createAppActions, type AppActions } from '@/state/actions';
 import type { AppStore } from '@/state/store';
-import { HAZARD_CRACK_CARD } from 'axiomancer-mechanics';
-import type { HazardHandEntry } from 'axiomancer-mechanics';
+import { HAZARD_CRACK_CARD } from '@mechanics';
+import type { HazardHandEntry } from '@mechanics';
 import { withAllProviders } from '@/test-utils/withAllProviders';
 
 jest.mock('expo-router', () => ({

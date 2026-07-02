@@ -23,13 +23,13 @@ import type {
     QuestLog,
     QuestObjective,
     TypedGameEvent,
-} from 'axiomancer-mechanics';
+} from '@mechanics';
 import {
     isCombatEndedEvent,
     isDialogueAppliedEvent,
     isLevelUpEvent,
     isWorldMovedEvent,
-} from 'axiomancer-mechanics';
+} from '@mechanics';
 
 /**
  * Honest signature for `selectMemoirViewModel`: takes engine

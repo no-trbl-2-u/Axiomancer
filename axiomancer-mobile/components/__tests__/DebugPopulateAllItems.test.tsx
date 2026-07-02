@@ -20,7 +20,7 @@ import {
     isConsumable,
     isEquipment,
     uniqueTemplates,
-} from 'axiomancer-mechanics';
+} from '@mechanics';
 import React from 'react';
 
 import { DebugPopulateAllItems } from '@/components/DebugPopulateAllItems';
@@ -78,7 +78,7 @@ describe('DebugPopulateAllItems: press routing', () => {
         // Unique-marker check: at least one equipment carries
         // `rarity: 'unique'` (the action overrides per-unique).
         const uniques = inventoryAfter.filter(
-            (item): item is import('axiomancer-mechanics').Equipment =>
+            (item): item is import('@mechanics').Equipment =>
                 isEquipment(item) && item.rarity === 'unique',
         );
         expect(uniques.length).toBeGreaterThan(0);

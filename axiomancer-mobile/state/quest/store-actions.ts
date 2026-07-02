@@ -9,7 +9,7 @@
  * vitae, items, or currency cross the table in either direction.
  */
 
-import type { GameState } from 'axiomancer-mechanics';
+import type { GameState } from '@mechanics';
 
 import {
     beginQuestBoard as engineBegin,
@@ -21,8 +21,8 @@ import {
     QUEST_BOARDS,
     rollQuestBone as engineRoll,
     useQuestCharm as engineUseCharm,
-} from 'axiomancer-mechanics';
-import type { QuestBoardSession, QuestCharmId, QuestOutcomeTier } from 'axiomancer-mechanics';
+} from '@mechanics';
+import type { QuestBoardSession, QuestCharmId, QuestOutcomeTier } from '@mechanics';
 import { resolveMinigameSeed, resolveMinigameString } from '../minigame-seeds';
 import { EMPTY_QUEST_SLICE, type AppStore } from '../store';
 

@@ -9,8 +9,9 @@ module.exports = {
         // (jest-expo's own preset includes this alternation for the
         // same reason). The remaining alternations are the historical
         // project-specific allowlist.
+        // axiomancer-mechanics is sibling source now (mapped below), not a
+        // node_modules dep; sibling source is transformed by default.
         'node_modules/(?!(\\.pnpm|' +
-            'axiomancer-mechanics|' +
             'expo|expo-.*|@expo/.*|' +
             'react-native|react-native-.*|@react-native/.*|' +
             'react-native-reanimated|' +
@@ -18,6 +19,8 @@ module.exports = {
             ')/)',
     ],
     moduleNameMapper: {
+        '^@mechanics$': '<rootDir>/../axiomancer-mechanics/src/index.ts',
+        '^@mechanics/(.*)$': '<rootDir>/../axiomancer-mechanics/src/$1',
         '^@/(.*)$': '<rootDir>/$1',
     },
     testPathIgnorePatterns: ['/node_modules/', '/android/', '/ios/'],

@@ -25,7 +25,7 @@ import {
 } from '@/state/GameStoreProvider';
 import { createAppStore, EMPTY_EVENT_SLICE, getEmitterForStore, type AppStore } from '@/state/store';
 import { createMemoryAdapter } from '@/test-utils/memoryAdapter';
-import type { ResolveMapEventResult } from 'axiomancer-mechanics';
+import type { ResolveMapEventResult } from '@mechanics';
 
 import DialogueScreen from '@/app/dialogue/index';
 import EventScreen from '@/app/event/index';

@@ -28,7 +28,7 @@ import { RewardsOverlay } from '@/components/hazard/RewardsOverlay';
 import { RouteSelect } from '@/components/hazard/RouteSelect';
 import { useGameActions, useGameState } from '@/state/GameStoreProvider';
 import { selectHazardViewModel, type HazardCardVM } from '@/state/presenters/hazard.engine';
-import type { SeedInput } from 'axiomancer-mechanics';
+import type { SeedInput } from '@mechanics';
 
 type DropResolver = (payload: DragPayload, x: number, y: number) => void | Promise<void>;
 

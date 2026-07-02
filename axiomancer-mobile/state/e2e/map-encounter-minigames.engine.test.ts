@@ -31,7 +31,7 @@ import {
     getNodePrimaryEventKind,
     type GameState,
     type MapEventKind,
-} from 'axiomancer-mechanics';
+} from '@mechanics';
 
 import { createAppActions } from '@/state/actions';
 import { createAppStore, type AppStore } from '@/state/store';

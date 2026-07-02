@@ -1,14 +1,14 @@
 /**
  * THE DATA ADAPTER — the single bridge between the editor UI and the REAL
- * Axiomancer mechanics package source (../src).
+ * Axiomancer mechanics package source (../axiomancer-mechanics/src).
  *
  * Everything the editor knows about cards (a.k.a. Actions — internally typed
  * `Card`), effects/keywords, and the combat enums is re-exported from here so
- * the rest of the app never reaches into ../src directly. These submodules are
- * browser-safe: `cards.library` only imports its own type module, and
- * `effects.library` imports two JSON files (Vite handles JSON natively). We
- * deliberately avoid the big `../src/index.ts` barrel (it can pull node-only
- * code via the "./node" export).
+ * the rest of the app never reaches into the mechanics src directly. These
+ * submodules are browser-safe: `cards.library` only imports its own type
+ * module, and `effects.library` imports two JSON files (Vite handles JSON
+ * natively). We deliberately avoid the big `@mechanics/index` barrel (it can
+ * pull node-only code via the "./node" export).
  */
 
 // ── Live REAL data imports (the heart of "incorporate everything") ───────────

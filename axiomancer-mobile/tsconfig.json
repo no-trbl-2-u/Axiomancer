@@ -5,6 +5,12 @@
     "paths": {
       "@/*": [
         "./*"
+      ],
+      "@mechanics": [
+        "../axiomancer-mechanics/src/index.ts"
+      ],
+      "@mechanics/*": [
+        "../axiomancer-mechanics/src/*"
       ]
     }
   },

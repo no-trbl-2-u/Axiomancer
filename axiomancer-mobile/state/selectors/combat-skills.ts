@@ -24,7 +24,7 @@ import {
     type Skill,
     type SkillCombatEffects,
     type SkillTarget,
-} from 'axiomancer-mechanics';
+} from '@mechanics';
 
 import { keywordForEffect } from '@/state/combat/keywords';
 

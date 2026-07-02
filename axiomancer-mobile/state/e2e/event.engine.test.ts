@@ -10,7 +10,7 @@
  */
 
 import { afterEach, describe, it, expect, jest } from '@jest/globals';
-import type { ResolveMapEventResult } from 'axiomancer-mechanics';
+import type { ResolveMapEventResult } from '@mechanics';
 
 import { createMemoryAdapter } from '@/test-utils/memoryAdapter';
 import { createAppActions } from '@/state/actions';

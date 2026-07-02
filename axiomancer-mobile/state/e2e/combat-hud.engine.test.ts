@@ -15,7 +15,7 @@ import {
     effectsLibrary,
     createGameStore,
     nullAdapter,
-} from 'axiomancer-mechanics';
+} from '@mechanics';
 
 import { mockAlternatingRng } from '@/test-utils/rng';
 import { createMemoryAdapter } from '@/test-utils/memoryAdapter';

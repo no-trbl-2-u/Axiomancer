@@ -1,5 +1,5 @@
 import { describe, expect, it } from '@jest/globals';
-import { COMBAT_REWARD_POOL, STARTING_SKILL_IDS } from 'axiomancer-mechanics';
+import { COMBAT_REWARD_POOL, STARTING_SKILL_IDS } from '@mechanics';
 
 import {
     applyCombatDeckPresetAction,

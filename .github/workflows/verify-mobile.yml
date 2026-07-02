@@ -1,0 +1,101 @@
+name: verify-mobile
+
+# Verify gate for the mobile app. Because mobile now consumes mechanics as
+# LOCAL SOURCE (via the @mechanics alias → ../axiomancer-mechanics/src),
+# changes to EITHER package must re-run this gate.
+#
+# Three jobs mirror the original mobile CI: the hermetic verify gate
+# (lint + typecheck + jest), the bundler smoke test (expo export web), and
+# the browser-driven minigame playthroughs.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'axiomancer-mobile/**'
+      - 'axiomancer-mechanics/**'
+      - '.github/workflows/verify-mobile.yml'
+      - 'package-lock.json'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'axiomancer-mobile/**'
+      - 'axiomancer-mechanics/**'
+      - '.github/workflows/verify-mobile.yml'
+      - 'package-lock.json'
+
+permissions:
+  contents: read
+
+# Opt JS-based actions onto Node 24 ahead of GitHub's default flip; does not
+# affect the Node used by npm ci / verify (pinned per job below).
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
+
+concurrency:
+  group: verify-mobile-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: verify (lint + typecheck + jest)
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - name: Install workspace dependencies
+        run: npm ci
+      - name: Run verify gate
+        run: npm run verify --workspace axiomancer-mobile
+
+  smoke-bundler:
+    name: smoke-bundler (expo export web)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - name: Install workspace dependencies
+        run: npm ci
+      - name: Run bundler smoke
+        run: npm run smoke:bundler --workspace axiomancer-mobile
+        env:
+          SMOKE_BUNDLER_TIMEOUT_MS: '480000'
+
+  e2e-minigames:
+    name: e2e-minigames (playwright playthroughs)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - name: Install workspace dependencies
+        run: npm ci
+      - name: Install Playwright chromium
+        run: npx playwright install --with-deps chromium
+      - name: Hazard playthrough (both routes)
+        run: npm run e2e:hazard --workspace axiomancer-mobile
+      - name: Gathering playthrough (both stances)
+        run: npm run e2e:gathering --workspace axiomancer-mobile
+        env:
+          GATHER_E2E_REUSE_EXPORT: '1'
+      - name: Encounter routing (every minigame trigger → its screen)
+        run: npm run e2e:encounters --workspace axiomancer-mobile
+        env:
+          ENCOUNTER_E2E_REUSE_EXPORT: '1'

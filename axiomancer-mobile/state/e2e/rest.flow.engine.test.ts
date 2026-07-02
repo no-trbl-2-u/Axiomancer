@@ -8,7 +8,7 @@
  */
 
 import { afterEach, describe, expect, it, jest } from '@jest/globals';
-import type { ActiveEffect, GameState, RestSession } from 'axiomancer-mechanics';
+import type { ActiveEffect, GameState, RestSession } from '@mechanics';
 
 import { createAppActions, type AppActions } from '@/state/actions';
 import { createAppStore, type AppStore } from '@/state/store';

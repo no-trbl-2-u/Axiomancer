@@ -6,7 +6,7 @@ import {
     lootUniqueItemAction,
 } from '../loot-rarity';
 import { createAppStore } from '@/state/store';
-import type { Equipment } from 'axiomancer-mechanics';
+import type { Equipment } from '@mechanics';
 
 describe('loot-rarity dev helper', () => {
     let store: ReturnType<typeof createAppStore>;

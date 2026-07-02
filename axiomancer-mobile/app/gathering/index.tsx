@@ -26,7 +26,7 @@ import {
     selectGatheringViewModel,
     type GatherPlotVM,
 } from '@/state/presenters/gathering.engine';
-import type { SeedInput } from 'axiomancer-mechanics';
+import type { SeedInput } from '@mechanics';
 
 export default function GatheringScreen() {
     const gathering = useGameState((s) => s.gathering);

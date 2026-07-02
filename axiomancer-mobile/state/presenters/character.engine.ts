@@ -18,10 +18,10 @@ import {
     type ActiveEffect,
     type Character,
     type GameStore,
-} from 'axiomancer-mechanics';
+} from '@mechanics';
 
 import { freezeViewModel } from './freeze';
-import { firstEquippedPerSlot } from 'axiomancer-mechanics';
+import { firstEquippedPerSlot } from '@mechanics';
 
 export type StanceKey = 'heart' | 'body' | 'mind';
 export type EffectKind = 'buff' | 'debuff' | 'poison' | 'bleed';

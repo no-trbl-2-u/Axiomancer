@@ -15,7 +15,7 @@
  */
 
 import { describe, it, expect } from '@jest/globals';
-import { getMapDefinition } from 'axiomancer-mechanics';
+import { getMapDefinition } from '@mechanics';
 import { getMapLayout } from '../index';
 
 // Each shipped map, with the engine registry keys the presenter resolves it by

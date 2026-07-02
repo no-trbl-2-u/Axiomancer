@@ -51,7 +51,7 @@ import {
     type EncounterSealMode,
 } from '@/state/presenters/encounter-seal.engine';
 import type { EventViewModel } from '@/state/presenters/event.engine';
-import type { CombatOutcome, Enemy } from 'axiomancer-mechanics';
+import type { CombatOutcome, Enemy } from '@mechanics';
 
 /**
  * Modal mode state machine (Phase 63b).

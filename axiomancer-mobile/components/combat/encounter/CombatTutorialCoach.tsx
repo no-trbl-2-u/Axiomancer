@@ -17,7 +17,7 @@ import React from 'react';
 import { Pressable, Text, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
-import type { CombatEncounterState } from 'axiomancer-mechanics';
+import type { CombatEncounterState } from '@mechanics';
 import type { CombatViewModel } from '@/state/presenters/combat-encounter.engine';
 import { FONTS } from '@/theme/axm';
 import { makeStyles } from '@/theme/runtime';

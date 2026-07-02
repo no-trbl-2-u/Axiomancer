@@ -30,8 +30,8 @@ import type {
     NPC,
     ResolveMapEventResult,
     ResolvedEvent,
-} from 'axiomancer-mechanics';
-import { getDialogueNode, visibleChoices } from 'axiomancer-mechanics';
+} from '@mechanics';
+import { getDialogueNode, visibleChoices } from '@mechanics';
 
 import type { AppStoreState } from '../store';
 import {

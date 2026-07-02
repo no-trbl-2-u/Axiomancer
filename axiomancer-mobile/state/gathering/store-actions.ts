@@ -10,7 +10,7 @@
  * tutorial trigger are host concerns.
  */
 
-import type { GameState, Material } from 'axiomancer-mechanics';
+import type { GameState, Material } from '@mechanics';
 
 import {
     acknowledgeGatheringOutcome as engineAcknowledgeOutcome,
@@ -24,19 +24,19 @@ import {
     selectGatheringApproach as engineSelectApproach,
     useGatheringTool as engineUseTool,
     withdrawFromGathering as engineWithdraw,
-} from 'axiomancer-mechanics';
+} from '@mechanics';
 import {
     GATHER_SET_REFINEMENTS,
     GATHERING_SITES,
     getGatherOfferingDef,
     getGatherPlotDef,
-} from 'axiomancer-mechanics';
+} from '@mechanics';
 import type {
     GatherApproachKey,
     GatherPiece,
     GatherToolId,
     GatheringSessionState,
-} from 'axiomancer-mechanics';
+} from '@mechanics';
 import type { AppStore } from '../store';
 import { resolveMinigameSeed, resolveMinigameString } from '../minigame-seeds';
 

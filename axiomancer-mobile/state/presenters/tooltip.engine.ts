@@ -20,7 +20,7 @@
  * Mirrors `event.engine.ts::preludeChrome` convention.
  */
 
-import { lookupEffect } from 'axiomancer-mechanics';
+import { lookupEffect } from '@mechanics';
 
 import { getCombatSkillById } from '@/state/selectors/combat-skills';
 import type { AppStoreState } from '@/state/store';

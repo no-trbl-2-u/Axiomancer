@@ -10,7 +10,7 @@
  */
 
 import { afterEach, describe, expect, it, jest } from '@jest/globals';
-import type { GameState } from 'axiomancer-mechanics';
+import type { GameState } from '@mechanics';
 
 import { createAppActions, type AppActions } from '@/state/actions';
 import { createAppStore, type AppStore } from '@/state/store';
@@ -19,13 +19,13 @@ import {
     GATHERING_TUTORIAL_SEED,
     GATHERING_TUTORIAL_SITE,
 } from '@/state/gathering/store-actions';
-import { getGatherPlotDef } from 'axiomancer-mechanics';
+import { getGatherPlotDef } from '@mechanics';
 import {
     GATHERING_TUTORIAL_STEPS,
     currentTutorialStep,
 } from '@/components/gathering/tutorial-steps';
 import { selectGatheringViewModel } from '@/state/presenters/gathering.engine';
-import type { GatheringSessionState } from 'axiomancer-mechanics';
+import type { GatheringSessionState } from '@mechanics';
 
 afterEach(() => {
     jest.restoreAllMocks();

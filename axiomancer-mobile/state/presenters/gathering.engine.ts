@@ -17,7 +17,7 @@ import {
     getGatherToolDef,
     type GatherKeywordId,
     type SeedInput,
-} from 'axiomancer-mechanics';
+} from '@mechanics';
 import {
     canPayGatheringOffering,
     gatherApproachDef,
@@ -26,12 +26,12 @@ import {
     gatheringFamilyTotals,
     gatheringHarvestWrath,
     gatheringHarvestYield,
-} from 'axiomancer-mechanics';
+} from '@mechanics';
 import {
     GATHER_WRATH_MAX,
     GATHER_WRATH_THRESHOLDS,
     GATHERING_TUNING,
-} from 'axiomancer-mechanics';
+} from '@mechanics';
 import type {
     GatherApproachKey,
     GatherBoonReward,
@@ -43,7 +43,7 @@ import type {
     GatherToolId,
     GatheringPhase,
     GatheringSessionState,
-} from 'axiomancer-mechanics';
+} from '@mechanics';
 import type { AppStoreState } from '@/state/store';
 
 // ---------------------------------------------------------------------------

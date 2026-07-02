@@ -15,7 +15,7 @@
 
 import React from 'react';
 import { Pressable, Text, View } from 'react-native';
-import { applyEffect, effectsLibrary } from 'axiomancer-mechanics';
+import { applyEffect, effectsLibrary } from '@mechanics';
 
 import { isDevToolsEnabled } from '@/lib/buildProfile';
 import { useGameStore } from '@/state/GameStoreProvider';

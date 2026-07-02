@@ -17,7 +17,7 @@ import {
     type Consumable,
     type Equipment,
     type Item,
-} from 'axiomancer-mechanics';
+} from '@mechanics';
 
 jest.mock('expo-router', () => ({
     useRouter: () => ({

@@ -1,11 +1,11 @@
-import type { GameState } from 'axiomancer-mechanics';
+import type { GameState } from '@mechanics';
 import {
     defaultAlignment,
     deriveStats,
     deriveNonCombatStats,
     migrate,
     GAME_STATE_VERSION,
-} from 'axiomancer-mechanics';
+} from '@mechanics';
 
 /**
  * Envelope-format version for the *mobile-only* legacy bridge.

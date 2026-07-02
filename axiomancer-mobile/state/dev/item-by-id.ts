@@ -17,10 +17,10 @@ import {
     getConsumableById,
     getEquipmentTemplate,
     getUniqueTemplate,
-} from 'axiomancer-mechanics';
+} from '@mechanics';
 
 import type { AppStore } from '@/state/store';
-import { equipmentFromTemplate as templateToEquipment } from 'axiomancer-mechanics';
+import { equipmentFromTemplate as templateToEquipment } from '@mechanics';
 
 export type AddItemByIdKind = 'equipment' | 'unique' | 'consumable';
 

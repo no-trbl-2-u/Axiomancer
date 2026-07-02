@@ -22,7 +22,7 @@ import {
     currentTutorialStep,
 } from '@/components/gathering/tutorial-steps';
 import type { GatheringViewModel } from '@/state/presenters/gathering.engine';
-import type { GatheringSessionState } from 'axiomancer-mechanics';
+import type { GatheringSessionState } from '@mechanics';
 
 // ---------------------------------------------------------------------------
 // Fixtures

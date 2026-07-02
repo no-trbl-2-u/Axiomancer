@@ -11,11 +11,11 @@ import {
     type ResolveMapEventResult,
     type StoreApi,
     type TypedGameEvent,
-} from 'axiomancer-mechanics';
+} from '@mechanics';
 
-import type { GatheringSessionState } from 'axiomancer-mechanics';
-import type { HazardSessionState } from 'axiomancer-mechanics';
-import type { Item, LootCacheSession, QuestBoardSession, RestSession } from 'axiomancer-mechanics';
+import type { GatheringSessionState } from '@mechanics';
+import type { HazardSessionState } from '@mechanics';
+import type { Item, LootCacheSession, QuestBoardSession, RestSession } from '@mechanics';
 
 /**
  * Mobile-only state slice for the event modal. The engine returns

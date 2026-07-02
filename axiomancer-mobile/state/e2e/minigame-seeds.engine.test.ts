@@ -11,7 +11,7 @@ import { afterEach, describe, expect, it, jest } from '@jest/globals';
 import { createAppActions, type AppActions } from '@/state/actions';
 import { createAppStore, type AppStore } from '@/state/store';
 import { createMemoryAdapter } from '@/test-utils/memoryAdapter';
-import type { Item } from 'axiomancer-mechanics';
+import type { Item } from '@mechanics';
 
 const LOOT: Item[] = [
     {

@@ -13,9 +13,9 @@
  */
 
 import { afterEach, describe, expect, it, jest } from '@jest/globals';
-import type { GameState } from 'axiomancer-mechanics';
-import { HAZARD_CRACK_CARD } from 'axiomancer-mechanics';
-import type { HazardHandEntry, HazardSessionState, RestSession } from 'axiomancer-mechanics';
+import type { GameState } from '@mechanics';
+import { HAZARD_CRACK_CARD } from '@mechanics';
+import type { HazardHandEntry, HazardSessionState, RestSession } from '@mechanics';
 
 import { createAppActions, type AppActions } from '@/state/actions';
 import { createAppStore, type AppStore } from '@/state/store';

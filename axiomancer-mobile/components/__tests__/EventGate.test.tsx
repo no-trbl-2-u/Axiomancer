@@ -12,7 +12,7 @@
 import { afterEach, describe, expect, it, jest } from '@jest/globals';
 import { act, render } from '@testing-library/react-native';
 import React from 'react';
-import type { ResolveMapEventResult } from 'axiomancer-mechanics';
+import type { ResolveMapEventResult } from '@mechanics';
 
 import { EventGate } from '@/components/EventGate';
 import { GameStoreProvider } from '@/state/GameStoreProvider';

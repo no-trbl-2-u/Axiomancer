@@ -32,7 +32,7 @@ import {
     rollLoot, addItem,
     type CombatEncounterState, type CombatOutcome, type Character, type Enemy, type CombatEvent,
     type CombatManaDie,
-} from 'axiomancer-mechanics';
+} from '@mechanics';
 
 import { advanceWheel, isMomentumDieId, isWheelStance, momentumDieId, type WheelStance } from '@/state/combat/momentum';
 

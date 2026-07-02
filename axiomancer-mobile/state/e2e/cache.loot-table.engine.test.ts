@@ -9,8 +9,8 @@
  */
 
 import { afterEach, describe, expect, it, jest } from '@jest/globals';
-import type { GameState, Item, LootCacheSession } from 'axiomancer-mechanics';
-import { createLootCacheSession } from 'axiomancer-mechanics';
+import type { GameState, Item, LootCacheSession } from '@mechanics';
+import { createLootCacheSession } from '@mechanics';
 
 import { createAppActions, type AppActions } from '@/state/actions';
 import { createAppStore, type AppStore } from '@/state/store';

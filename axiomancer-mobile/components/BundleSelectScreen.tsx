@@ -10,7 +10,7 @@
 import { View, Text, Pressable, ScrollView } from 'react-native';
 import { FONTS } from '@/theme/axm';
 import { makeStyles } from '@/theme/runtime';
-import { getCard } from 'axiomancer-mechanics';
+import { getCard } from '@mechanics';
 import { STARTER_BUNDLES, type StarterBundle } from '@/state/combat/store-actions';
 
 // Accent per path, aligned to the stance palette (Heart purple / Body red /

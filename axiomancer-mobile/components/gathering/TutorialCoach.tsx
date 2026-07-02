@@ -14,7 +14,7 @@ import { Pressable, Text, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
 import type { GatheringViewModel } from '@/state/presenters/gathering.engine';
-import type { GatheringSessionState } from 'axiomancer-mechanics';
+import type { GatheringSessionState } from '@mechanics';
 import { FONTS } from '@/theme/axm';
 import { makeStyles, usePalette } from '@/theme/runtime';
 

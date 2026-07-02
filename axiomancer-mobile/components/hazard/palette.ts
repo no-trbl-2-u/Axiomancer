@@ -8,7 +8,7 @@
  */
 
 import type { Palette } from '@/theme/palette';
-import type { HazardDieKind } from 'axiomancer-mechanics';
+import type { HazardDieKind } from '@mechanics';
 
 export const HZ = {
     acid: '#86a821',

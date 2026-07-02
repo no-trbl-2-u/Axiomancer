@@ -13,7 +13,7 @@ import {
     appendAcquiredCard,
     hazardStarterBag,
     HAZARD_CRACK_CARD,
-} from 'axiomancer-mechanics';
+} from '@mechanics';
 import { selectHazardDeckViewModel } from '@/state/presenters/hazard-deck.engine';
 
 function vmOf(flags: string[]) {

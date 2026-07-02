@@ -16,7 +16,7 @@ import { afterEach, describe, it, expect, jest } from '@jest/globals';
 import {
     createEnemy,
     createGameStore,
-} from 'axiomancer-mechanics';
+} from '@mechanics';
 
 import { mockFixedRng } from '@/test-utils/rng';
 import { createMemoryAdapter } from '@/test-utils/memoryAdapter';

@@ -6,7 +6,7 @@
  */
 
 import { describe, it, expect } from '@jest/globals';
-import type { ResolvedEvent } from 'axiomancer-mechanics';
+import type { ResolvedEvent } from '@mechanics';
 
 import {
     EVENT_ART_SLUGS,

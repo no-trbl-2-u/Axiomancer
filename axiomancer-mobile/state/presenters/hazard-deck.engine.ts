@@ -29,7 +29,7 @@ import {
     hazardStarterBag,
     type GameState,
     type HazardColor,
-} from 'axiomancer-mechanics';
+} from '@mechanics';
 
 import type { AppStoreState } from '@/state/store';
 import { cardVMFromId, type HazardCardVM } from '@/state/presenters/hazard.engine';

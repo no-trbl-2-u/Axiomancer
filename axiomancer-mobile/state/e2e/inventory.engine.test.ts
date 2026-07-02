@@ -16,7 +16,7 @@ import {
     type Item,
     type Material,
     type QuestItem,
-} from 'axiomancer-mechanics';
+} from '@mechanics';
 
 import { createMemoryAdapter } from '@/test-utils/memoryAdapter';
 import { createAppActions, parseHealAmount } from '@/state/actions';

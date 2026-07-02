@@ -9,7 +9,7 @@
 import { afterEach, describe, it, expect, jest } from '@jest/globals';
 import { render } from '@testing-library/react-native';
 import React, { useState } from 'react';
-import type { GameEvent } from 'axiomancer-mechanics';
+import type { GameEvent } from '@mechanics';
 
 import {
     GameStoreProvider,
@@ -18,7 +18,7 @@ import {
 } from '@/state/GameStoreProvider';
 import { createAppStore, type AppStore } from '@/state/store';
 import { createMemoryAdapter } from '@/test-utils/memoryAdapter';
-import { createEnemy } from 'axiomancer-mechanics';
+import { createEnemy } from '@mechanics';
 
 afterEach(() => {
     jest.restoreAllMocks();

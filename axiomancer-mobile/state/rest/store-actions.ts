@@ -9,7 +9,7 @@
  * the player — the engine guarantees heal ≥ 0.
  */
 
-import type { GameState } from 'axiomancer-mechanics';
+import type { GameState } from '@mechanics';
 
 import {
     chooseRestOption as engineChooseOption,
@@ -17,8 +17,8 @@ import {
     claimRestOutcome as engineClaim,
     continueRestWatch as engineContinue,
     createRestSession,
-} from 'axiomancer-mechanics';
-import type { RestOutcomeTier, RestPosture, RestSession } from 'axiomancer-mechanics';
+} from '@mechanics';
+import type { RestOutcomeTier, RestPosture, RestSession } from '@mechanics';
 import { bankedScarMagnitude, HAZARD_SCAR_FLAG_PREFIX } from '../hazard/store-actions';
 import { resolveMinigameSeed } from '../minigame-seeds';
 import { EMPTY_REST_SLICE, type AppStore } from '../store';

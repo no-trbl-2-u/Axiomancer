@@ -23,7 +23,7 @@ import {
     selectIsInCombat,
     selectPlayer,
     selectVersion,
-} from 'axiomancer-mechanics';
+} from '@mechanics';
 
 import { createAppStore } from '../store';
 import { createAppActions } from '../actions';

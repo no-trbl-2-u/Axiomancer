@@ -8,14 +8,14 @@
  */
 
 import { afterEach, describe, expect, it, jest } from '@jest/globals';
-import type { GameState } from 'axiomancer-mechanics';
+import type { GameState } from '@mechanics';
 
 import { createAppActions, type AppActions } from '@/state/actions';
 import { createAppStore, type AppStore } from '@/state/store';
-import { HAZARD_CRACK_CARD, getHazardDef } from 'axiomancer-mechanics';
-import { decodeAcquiredCards } from 'axiomancer-mechanics';
+import { HAZARD_CRACK_CARD, getHazardDef } from '@mechanics';
+import { decodeAcquiredCards } from '@mechanics';
 import { HAZARD_HEXED_FLAG } from '@/state/hazard/store-actions';
-import type { HazardHandEntry, HazardSessionState } from 'axiomancer-mechanics';
+import type { HazardHandEntry, HazardSessionState } from '@mechanics';
 import { createMemoryAdapter } from '@/test-utils/memoryAdapter';
 
 afterEach(() => {

@@ -19,7 +19,7 @@ import { fileURLToPath } from 'node:url';
 import { serialize, upsertCard, removeCard, identFromId } from '../skillCodegen.ts';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
-const REAL_LIB = path.resolve(here, '../../../../src/Cards/cards.library.ts');
+const REAL_LIB = path.resolve(here, '../../../../axiomancer-mechanics/src/Cards/cards.library.ts');
 
 let failures = 0;
 function check(label, cond) {

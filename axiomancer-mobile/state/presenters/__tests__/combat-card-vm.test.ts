@@ -15,7 +15,7 @@
  */
 
 import { describe, it, expect } from '@jest/globals';
-import { getCard, getSkillById } from 'axiomancer-mechanics';
+import { getCard, getSkillById } from '@mechanics';
 import {
     faceStats, detailStats, engineHonestKind, resolvePrimary, armedReadValue,
 } from '@/state/presenters/combat-encounter.engine';

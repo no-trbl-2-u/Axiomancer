@@ -12,7 +12,7 @@ import {
     questVowResults,
     QUEST_BOARD_TUNING,
     QUEST_PART_KINDS,
-} from 'axiomancer-mechanics';
+} from '@mechanics';
 import type {
     QuestBoardSession,
     QuestCharmId,
@@ -21,7 +21,7 @@ import type {
     QuestSpaceKind,
     QuestSpaceResult,
     QuestVowStatus,
-} from 'axiomancer-mechanics';
+} from '@mechanics';
 import type { AppStoreState } from '@/state/store';
 
 // ---------------------------------------------------------------------------

@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useMemo, useRef } from 'react';
 import { useStore } from 'zustand/react';
-import type { GameEventHandler, PersistenceAdapter } from 'axiomancer-mechanics';
+import type { GameEventHandler, PersistenceAdapter } from '@mechanics';
 import {
     createAppStore,
     getEmitterForStore,

@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "Local dev tool: web-based CARD (Action) editor for Axiomancer. Edits src/Cards/cards.library.ts in place. NOT published (excluded from the parent package 'files' field).",
+  "description": "Local dev tool: web-based CARD (Action) editor for Axiomancer. Edits axiomancer-mechanics/src/Cards/cards.library.ts in place via the @mechanics alias. Local-only; not published.",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
@@ -11,11 +11,11 @@
     "preview": "vite preview"
   },
   "devDependencies": {
-    "@types/react": "^18.3.12",
-    "@types/react-dom": "^18.3.1",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.0",
     "@vitejs/plugin-react": "^4.3.4",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
     "typescript": "^5.7.2",
     "vite": "^6.0.5"
   }

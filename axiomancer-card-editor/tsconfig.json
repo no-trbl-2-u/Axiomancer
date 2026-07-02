@@ -7,10 +7,10 @@
     "moduleResolution": "Bundler",
     "jsx": "react-jsx",
 
-    /* We import the REAL data submodules live from ../src. */
+    /* We import the REAL data submodules live from the mechanics package src. */
     "baseUrl": ".",
     "paths": {
-      "@mechanics/*": ["../src/*"]
+      "@mechanics/*": ["../axiomancer-mechanics/src/*"]
     },
 
     "resolveJsonModule": true,

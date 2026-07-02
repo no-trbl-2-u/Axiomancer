@@ -7,7 +7,7 @@
  */
 
 import { describe, expect, it } from '@jest/globals';
-import { skillLibrary } from 'axiomancer-mechanics';
+import { skillLibrary } from '@mechanics';
 
 import {
     COMBAT_SKILLS,

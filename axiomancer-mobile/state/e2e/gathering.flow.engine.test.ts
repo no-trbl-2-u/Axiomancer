@@ -9,7 +9,7 @@
  */
 
 import { afterEach, describe, expect, it, jest } from '@jest/globals';
-import type { GameState } from 'axiomancer-mechanics';
+import type { GameState } from '@mechanics';
 
 import { createAppActions, type AppActions } from '@/state/actions';
 import { createAppStore, type AppStore } from '@/state/store';
@@ -17,8 +17,8 @@ import {
     GATHERING_SCAR_FLAG,
     GATHERING_GRACE_FLAG,
 } from '@/state/gathering/store-actions';
-import { GATHER_WRATH_MAX, GATHERING_TUNING } from 'axiomancer-mechanics';
-import type { GatherPiece, GatherPlotEntry, GatheringSessionState } from 'axiomancer-mechanics';
+import { GATHER_WRATH_MAX, GATHERING_TUNING } from '@mechanics';
+import type { GatherPiece, GatherPlotEntry, GatheringSessionState } from '@mechanics';
 import { selectGatheringViewModel } from '@/state/presenters/gathering.engine';
 import { createMemoryAdapter, type MemoryAdapter } from '@/test-utils/memoryAdapter';
 

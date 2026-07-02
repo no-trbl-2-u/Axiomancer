@@ -63,7 +63,7 @@ import {
     type ResolveMapEventResult,
     type Skill,
     type WorldState,
-} from 'axiomancer-mechanics';
+} from '@mechanics';
 
 
 import {
@@ -71,7 +71,7 @@ import {
     getCombatSkillById,
     skillEffectText,
 } from '@/state/selectors/combat-skills';
-import { equipmentFromTemplate as templateToEquipment } from 'axiomancer-mechanics';
+import { equipmentFromTemplate as templateToEquipment } from '@mechanics';
 import { resolveWareItem } from '@/state/presenters/village.engine';
 import {
     applyCombatDeckPresetAction,
@@ -104,7 +104,7 @@ import {
     type HazardDeckPresetId,
     type HazardDeckPresetResult,
 } from './hazard/store-actions';
-import type { HazardProgressKey, HazardRouteKey } from 'axiomancer-mechanics';
+import type { HazardProgressKey, HazardRouteKey } from '@mechanics';
 import {
     abandonGatheringAction,
     acknowledgeGatheringOutcomeAction,
@@ -122,7 +122,7 @@ import {
     type BeginGatheringOptions,
     type ClaimGatheringSpoilsResult,
 } from './gathering/store-actions';
-import type { GatherApproachKey, GatherToolId } from 'axiomancer-mechanics';
+import type { GatherApproachKey, GatherToolId } from '@mechanics';
 import {
     abandonQuestBoardAction,
     acknowledgeQuestDuskAction,
@@ -136,7 +136,7 @@ import {
     type BeginQuestBoardOptions,
     type ClaimQuestBoardResult,
 } from './quest/store-actions';
-import type { QuestCharmId, RestPosture } from 'axiomancer-mechanics';
+import type { QuestCharmId, RestPosture } from '@mechanics';
 import {
     abandonRestAction,
     beginRestAction,
@@ -159,7 +159,7 @@ import {
     type BeginLootCacheOptions,
     type ClaimLootCacheResult,
 } from './cache/store-actions';
-import type { CacheLootTier } from 'axiomancer-mechanics';
+import type { CacheLootTier } from '@mechanics';
 import {
     applyPlayerTierPresetAction,
     type ApplyPlayerTierPresetResult,

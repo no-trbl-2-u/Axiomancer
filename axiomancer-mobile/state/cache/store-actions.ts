@@ -10,7 +10,7 @@
  * hazard and gathering minigames).
  */
 
-import type { GameState, Item } from 'axiomancer-mechanics';
+import type { GameState, Item } from '@mechanics';
 
 import {
     beginLootCache as engineBegin,
@@ -20,11 +20,11 @@ import {
     delveLootCache as engineDelve,
     probeLootCache as engineProbe,
     sealLootCache as engineSeal,
-} from 'axiomancer-mechanics';
-import type { CacheItemRef, LootCacheOutcomeTier, LootCacheSession } from 'axiomancer-mechanics';
+} from '@mechanics';
+import type { CacheItemRef, LootCacheOutcomeTier, LootCacheSession } from '@mechanics';
 import { resolveMinigameSeed } from '../minigame-seeds';
 import { EMPTY_CACHE_SLICE, type AppStore } from '../store';
-import { rollCacheLoot, type CacheLootTier } from 'axiomancer-mechanics';
+import { rollCacheLoot, type CacheLootTier } from '@mechanics';
 
 /** Flag prefix banking a keeper's keepsake. */
 export const CACHE_KEEPSAKE_FLAG_PREFIX = 'cache-keepsake:';

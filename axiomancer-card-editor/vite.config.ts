@@ -9,8 +9,9 @@ const dir = path.dirname(fileURLToPath(import.meta.url));
 // ─────────────────────────────────────────────────────────────────────────────
 // Axiomancer Card (Action) Editor — local dev tool.
 //
-// Imports the REAL card + effect data live from ../src (the published mechanics
-// package source) via the `@mechanics/*` alias, mirrored from tsconfig paths.
+// Imports the REAL card + effect data live from the sibling mechanics package
+// source (../axiomancer-mechanics/src) via the `@mechanics/*` alias, mirrored
+// from tsconfig paths.
 // server.host:true exposes the dev server on the LAN so the user can open the
 // editor from their PHONE (e.g. http://<your-machine-ip>:5174). Vite prints the
 // Network URL on `npm run dev`.
@@ -24,7 +25,8 @@ export default defineConfig({
     // ║                                                                       ║
     // ║  Runs in Node (fs access). Mounts the card (Action) JSON API on the   ║
     // ║  dev server — GET/POST /api/cards, DELETE /api/cards/:id — rewriting  ║
-    // ║  ../src/Cards/cards.library.ts: add/replace the card's               ║
+    // ║  ../axiomancer-mechanics/src/Cards/cards.library.ts: add/replace the   ║
+    // ║  card's                                                               ║
     // ║  `const <ident>: Card = {…}` block (located by id) and keep it a     ║
     // ║  member of the exported `cardLibrary` array, matching the file's     ║
     // ║  existing formatting/indentation. See src/server/cardEditorPlugin.ts. ║
@@ -34,7 +36,7 @@ export default defineConfig({
   resolve: {
     alias: {
       // Mirrors tsconfig `paths` so `@mechanics/...` resolves to the package src.
-      '@mechanics': path.resolve(dir, '../src'),
+      '@mechanics': path.resolve(dir, '../axiomancer-mechanics/src'),
     },
   },
   server: {

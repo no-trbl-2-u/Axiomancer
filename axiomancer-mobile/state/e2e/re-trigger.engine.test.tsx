@@ -16,7 +16,7 @@
  */
 
 import { afterEach, describe, expect, it, jest } from '@jest/globals';
-import { createEnemy } from 'axiomancer-mechanics';
+import { createEnemy } from '@mechanics';
 import React from 'react';
 
 import { withAllProviders } from '@/test-utils/withAllProviders';

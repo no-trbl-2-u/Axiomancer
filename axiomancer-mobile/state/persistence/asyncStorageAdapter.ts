@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import type { GameState, PersistenceAdapter } from 'axiomancer-mechanics';
+import type { GameState, PersistenceAdapter } from '@mechanics';
 
 import {
     DEFAULT_MIGRATIONS,

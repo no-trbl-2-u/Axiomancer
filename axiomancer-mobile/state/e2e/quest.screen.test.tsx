@@ -17,8 +17,8 @@ import RestScreen from '@/app/rest/index';
 import { QUEST_LANDING_TIMING } from '@/components/quest/useQuestLanding';
 import { createAppActions, type AppActions } from '@/state/actions';
 import type { AppStore } from '@/state/store';
-import { BUILD_THE_BOAT_BOARD, createLootCacheSession } from 'axiomancer-mechanics';
-import type { QuestBoardSession } from 'axiomancer-mechanics';
+import { BUILD_THE_BOAT_BOARD, createLootCacheSession } from '@mechanics';
+import type { QuestBoardSession } from '@mechanics';
 import { withAllProviders } from '@/test-utils/withAllProviders';
 
 jest.mock('expo-router', () => ({

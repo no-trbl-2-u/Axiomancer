@@ -9,8 +9,8 @@
  * (Q5=B) — the screen renders locked nodes desaturated to convey state.
  */
 
-import type { GameStore, MapEventKind } from 'axiomancer-mechanics';
-import { getMapDefinition, getNodePrimaryEventKind, getNodeEventPool } from 'axiomancer-mechanics';
+import type { GameStore, MapEventKind } from '@mechanics';
+import { getMapDefinition, getNodePrimaryEventKind, getNodeEventPool } from '@mechanics';
 
 import { readCurrentNodeId } from '../actions';
 import { getMapLayout } from '@/state/exploration-maps';

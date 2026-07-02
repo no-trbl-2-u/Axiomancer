@@ -52,7 +52,7 @@ import { CombatModeProvider } from '@/state/combat-mode';
 import { GameStoreProvider } from '@/state/GameStoreProvider';
 import { createAppStore, type AppStore, EMPTY_EVENT_SLICE } from '@/state/store';
 import { createMemoryAdapter } from '@/test-utils/memoryAdapter';
-import type { ResolveMapEventResult } from 'axiomancer-mechanics';
+import type { ResolveMapEventResult } from '@mechanics';
 
 import CharacterScreen from '@/app/(tabs)/character';
 import InventoryScreen from '@/app/(tabs)/inventory';

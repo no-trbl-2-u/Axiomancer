@@ -7,7 +7,7 @@
  * - Skill affordability follows engine truth, not local approximation
  */
 
-import { deriveStats, createCharacter } from 'axiomancer-mechanics';
+import { deriveStats, createCharacter } from '@mechanics';
 import { 
     selectLevelUpViewModel, 
     calculateDerivedPreview,

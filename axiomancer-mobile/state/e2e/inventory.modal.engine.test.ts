@@ -15,7 +15,7 @@ import {
     createGameStore,
     type Consumable,
     type Equipment,
-} from 'axiomancer-mechanics';
+} from '@mechanics';
 
 import { createMemoryAdapter } from '@/test-utils/memoryAdapter';
 import { selectItemModalViewModel } from '@/state/presenters/inventory.modal.engine';

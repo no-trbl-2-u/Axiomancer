@@ -9,8 +9,8 @@
  */
 
 import { afterEach, describe, expect, it, jest } from '@jest/globals';
-import type { GameState, QuestBoardSession } from 'axiomancer-mechanics';
-import { BUILD_THE_BOAT_BOARD } from 'axiomancer-mechanics';
+import type { GameState, QuestBoardSession } from '@mechanics';
+import { BUILD_THE_BOAT_BOARD } from '@mechanics';
 
 import { createAppActions, type AppActions } from '@/state/actions';
 import { createAppStore, type AppStore } from '@/state/store';

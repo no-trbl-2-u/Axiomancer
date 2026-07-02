@@ -13,7 +13,7 @@
  * carries an optional `description: string`).
  */
 
-import type { ResolvedEvent } from 'axiomancer-mechanics';
+import type { ResolvedEvent } from '@mechanics';
 
 // Phase 137 cleanup: rest / gathering / loot-cache / hazard slugs were
 // removed — those kinds never reach the event modal anymore (their

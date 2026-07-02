@@ -21,7 +21,7 @@ import {
     levelLadderPresets,
     type Character,
     type CharacterPreset,
-} from 'axiomancer-mechanics';
+} from '@mechanics';
 
 import type { AppStore } from '@/state/store';
 

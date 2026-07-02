@@ -20,7 +20,7 @@ import React from 'react';
 import { TutorialCoach } from '@/components/gathering/TutorialCoach';
 import { GATHERING_TUTORIAL_STEPS } from '@/components/gathering/tutorial-steps';
 import type { GatheringViewModel } from '@/state/presenters/gathering.engine';
-import type { GatheringSessionState } from 'axiomancer-mechanics';
+import type { GatheringSessionState } from '@mechanics';
 
 // ---------------------------------------------------------------------------
 // Fixtures

@@ -8,7 +8,7 @@
 
 import { afterEach, describe, expect, it, jest } from '@jest/globals';
 import { fireEvent, render } from '@testing-library/react-native';
-import { decodeAcquiredCards } from 'axiomancer-mechanics';
+import { decodeAcquiredCards } from '@mechanics';
 import React from 'react';
 
 import { DebugHazardDeckRandomize } from '@/components/DebugHazardDeckRandomize';

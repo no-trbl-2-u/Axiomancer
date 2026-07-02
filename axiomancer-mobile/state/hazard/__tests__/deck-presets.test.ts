@@ -1,5 +1,5 @@
 import { describe, expect, it } from '@jest/globals';
-import { decodeAcquiredCards } from 'axiomancer-mechanics';
+import { decodeAcquiredCards } from '@mechanics';
 
 import {
     applyHazardDeckPresetAction,

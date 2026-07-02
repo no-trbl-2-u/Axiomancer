@@ -11,7 +11,7 @@
 import type {
     LootCacheOutcomeTier,
     LootCacheSession,
-} from 'axiomancer-mechanics';
+} from '@mechanics';
 import type { AppStoreState } from '@/state/store';
 
 // ---------------------------------------------------------------------------

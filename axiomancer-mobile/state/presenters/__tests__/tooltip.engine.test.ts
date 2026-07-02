@@ -9,7 +9,7 @@
  */
 
 import { describe, expect, it } from '@jest/globals';
-import { skillLibrary } from 'axiomancer-mechanics';
+import { skillLibrary } from '@mechanics';
 
 import {
     accentForStat,
@@ -344,7 +344,7 @@ describe('selectTooltipContentFor', () => {
 
     describe('skill kind threads stance accent', () => {
         it('skill on body stance returns body accent', () => {
-            const { skillLibrary } = require('axiomancer-mechanics');
+            const { skillLibrary } = require('@mechanics');
             const bodySkill = skillLibrary.find((s: { philosophicalAspect: string }) => s.philosophicalAspect === 'body');
             if (!bodySkill) {
                 // No body-stance skill in library; skip without

@@ -17,7 +17,7 @@
  */
 
 import type { GatheringViewModel } from '@/state/presenters/gathering.engine';
-import type { GatheringSessionState } from 'axiomancer-mechanics';
+import type { GatheringSessionState } from '@mechanics';
 
 export interface GatheringTutorialStep {
     id: string;

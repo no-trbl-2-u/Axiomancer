@@ -6,7 +6,7 @@
  * `app/(tabs)/_layout.tsx`.
  */
 
-import { selectIsInCombat, type GameStore } from 'axiomancer-mechanics';
+import { selectIsInCombat, type GameStore } from '@mechanics';
 
 import type { AppStoreState } from '../store';
 import { selectHasActiveEvent } from './event.engine';

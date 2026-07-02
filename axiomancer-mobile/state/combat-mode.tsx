@@ -14,7 +14,7 @@
 
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
 
-import type { Item } from 'axiomancer-mechanics';
+import type { Item } from '@mechanics';
 
 export type CombatOutcome = 'victory' | 'defeat' | 'flee' | 'parley';
 

@@ -14,7 +14,7 @@
  * narrow via:
  *
  * ```ts
- * import { isCombatEndedEvent } from 'axiomancer-mechanics';
+ * import { isCombatEndedEvent } from '@mechanics';
  * const events = selectRecentEngineEvents(state);
  * for (const ev of events) {
  *     if (isCombatEndedEvent(ev)) {
@@ -24,7 +24,7 @@
  * ```
  */
 
-import type { TypedGameEvent } from 'axiomancer-mechanics';
+import type { TypedGameEvent } from '@mechanics';
 
 import type { AppStoreState } from '../store';
 

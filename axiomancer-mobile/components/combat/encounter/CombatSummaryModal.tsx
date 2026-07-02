@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { Pressable, Text, View } from 'react-native';
-import type { CombatSummary } from 'axiomancer-mechanics';
+import type { CombatSummary } from '@mechanics';
 import { FONTS } from '@/theme/axm';
 import { makeStyles, usePalette } from '@/theme/runtime';
 

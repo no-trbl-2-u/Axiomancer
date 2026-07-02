@@ -16,11 +16,11 @@
 
 import React, { useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
-import { getTemplatesBySlot } from 'axiomancer-mechanics';
+import { getTemplatesBySlot } from '@mechanics';
 
 import { isDevToolsEnabled } from '@/lib/buildProfile';
 import { useGameStore } from '@/state/GameStoreProvider';
-import { equipmentFromTemplate as templateToEquipment } from 'axiomancer-mechanics';
+import { equipmentFromTemplate as templateToEquipment } from '@mechanics';
 import { FONTS } from '@/theme/axm';
 import { makeStyles } from '@/theme/runtime';
 

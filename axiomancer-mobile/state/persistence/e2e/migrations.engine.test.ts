@@ -13,7 +13,7 @@ import {
     deriveNonCombatStats,
     createNewGameState,
     GAME_STATE_VERSION,
-} from 'axiomancer-mechanics';
+} from '@mechanics';
 import { unwrap, wrap, CURRENT_SCHEMA_VERSION, DEFAULT_MIGRATIONS, type StoredEnvelope } from '../migrations';
 
 describe('migrations.engine', () => {

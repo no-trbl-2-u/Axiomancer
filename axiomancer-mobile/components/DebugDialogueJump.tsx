@@ -21,7 +21,7 @@
 
 import React from 'react';
 import { Pressable, Text, View } from 'react-native';
-import type { DialogueTree } from 'axiomancer-mechanics';
+import type { DialogueTree } from '@mechanics';
 
 import { isDevToolsEnabled } from '@/lib/buildProfile';
 import { useGameStore } from '@/state/GameStoreProvider';

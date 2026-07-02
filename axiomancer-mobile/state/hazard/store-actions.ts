@@ -10,7 +10,7 @@
  * vs. what is recorded as flags pending engine systems.
  */
 
-import type { GameState } from 'axiomancer-mechanics';
+import type { GameState } from '@mechanics';
 
 import {
     acknowledgeHazardOutcome as engineAcknowledgeOutcome,
@@ -28,7 +28,7 @@ import {
     stageHazardCard as engineStageCard,
     unstageHazardCard as engineUnstageCard,
     confirmHazardForetell as engineConfirmForetell,
-} from 'axiomancer-mechanics';
+} from '@mechanics';
 import {
     HAZARD_CACHE_SHILLINGS,
     HAZARD_CRACK_CARD,
@@ -39,9 +39,9 @@ import {
     HAZARD_RELIC_SHILLINGS,
     HAZARD_REWARD_CARDS,
     HAZARD_VITAE_REWARD,
-} from 'axiomancer-mechanics';
-import { appendAcquiredCard, HAZARD_CARD_FLAG_PREFIX, hazardDeckBag } from 'axiomancer-mechanics';
-import type { HazardCardDef, HazardProgressKey, HazardRouteKey, HazardSessionState } from 'axiomancer-mechanics';
+} from '@mechanics';
+import { appendAcquiredCard, HAZARD_CARD_FLAG_PREFIX, hazardDeckBag } from '@mechanics';
+import type { HazardCardDef, HazardProgressKey, HazardRouteKey, HazardSessionState } from '@mechanics';
 import { resolveMinigameSeed, resolveMinigameString } from '../minigame-seeds';
 import type { AppStore } from '../store';
 

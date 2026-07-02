@@ -16,7 +16,7 @@ import {
     isGoldCard,
     type CombatCard,
     type GameState,
-} from 'axiomancer-mechanics';
+} from '@mechanics';
 
 import type { AppStore } from '../store';
 

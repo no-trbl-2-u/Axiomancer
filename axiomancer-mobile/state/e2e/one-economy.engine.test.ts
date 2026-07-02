@@ -19,7 +19,7 @@
  */
 
 import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals';
-import { createEnemy } from 'axiomancer-mechanics';
+import { createEnemy } from '@mechanics';
 
 import { createAppStore } from '../store';
 import { createAppActions, type AppActions } from '../actions';

@@ -27,9 +27,13 @@ import type { CardDraft } from '../types';
 const LIBRARY_MODULE = '@mechanics/Cards/cards.library';
 
 function resolveLibraryPath(server: ViteDevServer): string {
-    // server.config.root is the editor-web directory; the package src sits one
-    // level up (mirrors the `@mechanics` -> `../src` alias).
-    return path.resolve(server.config.root, '../src/Cards/cards.library.ts');
+    // server.config.root is the axiomancer-card-editor directory; the mechanics
+    // package src sits in the sibling axiomancer-mechanics package (mirrors the
+    // `@mechanics` -> `../axiomancer-mechanics/src` alias).
+    return path.resolve(
+        server.config.root,
+        '../axiomancer-mechanics/src/Cards/cards.library.ts',
+    );
 }
 
 function sendJson(res: ServerResponse, status: number, body: unknown): void {

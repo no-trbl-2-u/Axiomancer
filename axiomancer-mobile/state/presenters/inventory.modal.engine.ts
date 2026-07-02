@@ -17,16 +17,16 @@ import {
     type EquipmentProcTrigger,
     type GameStore,
     type Item,
-} from 'axiomancer-mechanics';
+} from '@mechanics';
 
 import { keywordForEffect } from '@/state/combat/keywords';
 import { freezeViewModel } from './freeze';
 import { parseHealAmount } from '../actions';
-import { computeEquipDelta, type EquipDeltaSide } from 'axiomancer-mechanics';
+import { computeEquipDelta, type EquipDeltaSide } from '@mechanics';
 import {
     findEquippedInSlot as selectFindEquippedInSlot,
     isEquippedFirstOfSlot as selectIsEquippedFirstOfSlot,
-} from 'axiomancer-mechanics';
+} from '@mechanics';
 
 /**
  * Modal mode discriminator. The screen branches on this to pick

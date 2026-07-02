@@ -23,7 +23,7 @@ import {
     type CombatThreatPhase, type CombatIntentType, type CombatReadResult,
     type CombatSummary, type SignatureSkill, type Stance,
     type Skill, type SkillCombatEffects,
-} from 'axiomancer-mechanics';
+} from '@mechanics';
 
 /** The barrel doesn't re-export the union, so derive it from Skill. */
 type SkillSpecialMechanic = NonNullable<Skill['specialMechanics']>[number];

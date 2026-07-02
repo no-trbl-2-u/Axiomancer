@@ -13,7 +13,7 @@ import {
     QUEST_SPACE_KIND_LABELS,
     type QuestSpaceVM,
 } from '@/state/presenters/quest.engine';
-import type { QuestSpaceKind } from 'axiomancer-mechanics';
+import type { QuestSpaceKind } from '@mechanics';
 
 function space(index: number, kind: QuestSpaceKind): QuestSpaceVM {
     return {

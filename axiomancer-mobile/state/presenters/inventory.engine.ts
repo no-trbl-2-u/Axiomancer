@@ -20,13 +20,13 @@ import {
     type Equipment,
     type GameStore,
     type Item,
-} from 'axiomancer-mechanics';
+} from '@mechanics';
 
 import { freezeViewModel } from './freeze';
-import { computeEquipDelta, type EquipDelta } from 'axiomancer-mechanics';
-import { firstEquippedPerSlot } from 'axiomancer-mechanics';
+import { computeEquipDelta, type EquipDelta } from '@mechanics';
+import { firstEquippedPerSlot } from '@mechanics';
 
-export type { EquipDelta } from 'axiomancer-mechanics';
+export type { EquipDelta } from '@mechanics';
 
 // ---------------------------------------------------------------------------
 // Public types
