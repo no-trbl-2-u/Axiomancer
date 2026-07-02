@@ -26,8 +26,8 @@ config.resolver.nodeModulesPaths = [
 ];
 
 // watchFolders reaches the whole monorepo, which includes the retired-nexus
-// `/archive` and staging `/carryforward` trees. They are docs-only and never
-// imported, but block them from the resolver so Metro never crawls them.
+// `/archive` tree. It is docs-only and never imported, but block it from the
+// resolver so Metro never crawls it.
 const existingBlock = Array.isArray(config.resolver.blockList)
   ? config.resolver.blockList
   : config.resolver.blockList
@@ -36,7 +36,6 @@ const existingBlock = Array.isArray(config.resolver.blockList)
 config.resolver.blockList = [
   ...existingBlock,
   /.*\/archive\/.*/,
-  /.*\/carryforward\/.*/,
 ];
 
 // `axiomancer-mechanics` ships a Node-only persistence adapter behind its

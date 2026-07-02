@@ -15,14 +15,28 @@ npm-workspaces monorepo. Three packages, flat at the root:
   memory + nexus CI), kept only as history and as a one-time seed for the nexus
   re-onboard. Its audit findings, phase plans, and pre-monorepo assumptions are
   stale and will actively mislead. See [`archive/README.md`](./archive/README.md).
-- `/carryforward` is **staging**, not live: domain tuning/playtest/design skills
-  awaiting trim + fold-in during the nexus re-onboard. Don't treat it as an active
-  `.claude/`. See [`carryforward/README.md`](./carryforward/README.md).
 - Mobile and card-editor consume mechanics via `@mechanics` — a mechanics
   rename/removal can break them. When changing mechanics' public surface, verify
   the dependent package.
 - Rules/state/RNG belong in `axiomancer-mechanics`, never duplicated in mobile
   presenters.
+
+## Root `.claude/`
+
+Live, at the repo root:
+- `.claude/commands/` — domain **slash commands** (tuning + playtest): mechanics
+  `combat-playtest`, `deck-tuning`, `gathering-tuning`, `hazard-tuning`,
+  `loot-cache-tuning`, `quest-board-tuning`, `rest-tuning`; mobile `bump-engine`,
+  `critic-loop`, `deep-playtest`, `resolve-playtest`, `combat-ux-tuning`,
+  `hermes-playtest`, `playtest`. Each is self-contained and carries a header
+  naming the package it runs against (paths are package-relative — `cd` there or
+  use `-w`). `combat-tuning` + `legacy-combat-tuning` were trimmed.
+- `.claude/skills/` — design skills: `brainstorm-mechanics`, `character-spec`,
+  `story-spec`, `world-spec`.
+- `.claude/agents/` — `balance-analyst`, `mechanics-expert`, `playtester`.
+
+The commands' `plan/…` / `/march`-style references still point at the retired
+harness in `/archive`; they are re-pointed when nexus is re-onboarded.
 
 ## Per-package guides
 
@@ -38,6 +52,8 @@ working in a package.
 
 ## Nexus
 
-The unified autonomous-build-loop harness has **not been re-onboarded yet** — that
-is a deliberate, user-run step done against this assembled structure. Until then
-there is no live `march`/`iterate` loop at the root.
+The domain skills/commands/agents are live in root `.claude/`, but the autonomous
+**loop** (`march`/`iterate`/`critique`/`oversight`/…) and its `plan/` memory are
+still in `/archive` — the unified harness has **not been re-onboarded yet**. That
+is a deliberate, user-run step against this assembled structure; until then there
+is no live `march`/`iterate` loop at the root.
