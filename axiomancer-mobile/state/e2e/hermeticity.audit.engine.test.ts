@@ -117,8 +117,9 @@ describe('hermeticity guard: isolation (no disk in tests)', () => {
         'state/e2e/route-registration.engine.test.ts',
         'state/e2e/hermeticity.audit.engine.test.ts',
         'scripts/__tests__/deploy-check.test.ts',
-        'scripts/__tests__/hermes-ui-playtest.test.ts',
-        'scripts/__tests__/playtest-skill.test.ts',
+        // hermes-ui-playtest.test.ts + playtest-skill.test.ts were skill-contract
+        // tests for the playtest skills; those skills were restructured into the
+        // monorepo root .claude/commands, and the tests moved to /archive.
         'scripts/__tests__/smoke-bundler.test.ts',
         'scripts/__tests__/smoke-screens.test.ts',
     ]);
