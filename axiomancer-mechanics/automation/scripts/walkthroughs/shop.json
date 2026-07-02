@@ -1,0 +1,13 @@
+[
+  { "presetId": "wanderer" },
+  { "tab": "map" },
+  { "target": "fv-2" },
+  { "tab": "map" },
+  { "target": "fv-3" },
+  { "action": "buy" },
+  { "wareId": "minor-healing-potion" },
+  { "action": "sell" },
+  { "sellChoice": "0:6" },
+  { "action": "leave" },
+  { "tab": "quit" }
+]

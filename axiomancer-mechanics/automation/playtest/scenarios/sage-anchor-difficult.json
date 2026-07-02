@@ -1,0 +1,10 @@
+{
+  "id": "sage-anchor-difficult",
+  "description": "Phase 121 Difficult anchor: Sage vs Balance Judge. Target: 25-50% actual wins across all policies.",
+  "preset": "sage",
+  "enemy": "balance-judge",
+  "runs": 25,
+  "maxRounds": 75,
+  "seed": "phase-121-difficult-v1",
+  "policies": ["aggressive", "defensive", "mixed", "strategist"]
+}

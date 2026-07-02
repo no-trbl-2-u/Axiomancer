@@ -1,0 +1,10 @@
+{
+  "id": "mid-game-northern-forest",
+  "description": "Mid-game level-6 Wanderer against northern-forest elite-tier enemies. Reference probe for midgame balance measurement.",
+  "preset": "wanderer-level-6",
+  "enemy": "hush-wraith",
+  "runs": 25,
+  "maxRounds": 50,
+  "seed": "mid-game-northern-forest-v0",
+  "policies": ["aggressive", "defensive", "mixed", "strategist"]
+}

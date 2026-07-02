@@ -1,0 +1,21 @@
+[
+  { "presetId": "apprentice" },
+  { "tab": "map" },
+  { "target": "fv-11" },
+  { "tab": "map" },
+  { "target": "fv-14" },
+  { "tab": "map" },
+  { "target": "fv-15" },
+  { "stance": "heart" },
+  { "action": "defend" },
+  { "stance": "heart" },
+  { "action": "defend" },
+  { "stance": "heart" },
+  { "action": "defend" },
+  { "stance": "heart" },
+  { "action": "defend" },
+  { "stance": "heart" },
+  { "action": "defend" },
+  { "tab": "codex" },
+  { "tab": "quit" }
+]

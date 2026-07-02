@@ -1,0 +1,10 @@
+{
+  "id": "late-game-coastal-tyrant",
+  "description": "Late-game Sage preset against The Coastal Tyrant. First vertical proving ground for balance, timeout, friendship visibility, and dominant-policy detection.",
+  "preset": "sage",
+  "enemy": "coastal-tyrant",
+  "runs": 25,
+  "maxRounds": 75,
+  "seed": "late-game-coastal-tyrant-v0",
+  "policies": ["aggressive", "defensive", "mixed", "strategist"]
+}

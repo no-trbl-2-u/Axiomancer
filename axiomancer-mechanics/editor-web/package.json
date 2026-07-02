@@ -1,0 +1,22 @@
+{
+  "name": "axiomancer-card-editor",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Local dev tool: web-based CARD (Action) editor for Axiomancer. Edits src/Cards/cards.library.ts in place. NOT published (excluded from the parent package 'files' field).",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "type-check": "tsc --noEmit",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "typescript": "^5.7.2",
+    "vite": "^6.0.5"
+  }
+}

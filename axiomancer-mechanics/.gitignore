@@ -1,0 +1,35 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+/automation/testing-logs/*.txt
+
+# Runtime state
+game-state.json
+.claude/scheduled_tasks.lock
+
+# Phase 26 CLI state-logs (--state-log <path>)
+logs/
+*.jsonl
+
+# Phase 39 agent verify reporter output
+/automation/last-verify-report.json
+
+# Environment
+.env
+.env.local

@@ -1,0 +1,99 @@
+name: deck-tuning
+
+# Manually fire one Hazard-Pattern Combat card-forge tick: runs /deck-tuning
+# against the combat card pool and deck economy, focuses the analysis on a
+# requested axis, and delivers the report, sandbox/prototype evidence, and any
+# applied card/deck winners together on one new branch with a PR opened for
+# review. Nothing is pushed to `main` automatically.
+#
+# Trigger: Actions tab → "deck-tuning" → Run workflow. Provide an optional
+# focus (e.g. "early", "dead cards in the tier-1 pool", "preset archetype
+# honesty", "late dot-weaver", "single-card-spam").
+#
+# Required secrets (Settings → Secrets and variables → Actions):
+#   CLAUDE_CODE_OAUTH_TOKEN — OAuth token from `claude setup-token`, draws from
+#                             your Claude Code subscription instead of per-token
+#                             API billing. (Mirrors `march`, `mechanics-tuning`,
+#                             `hazard-tuning`, and `combat-tuning`; no
+#                             ANTHROPIC_API_KEY is used.)
+#
+# Standing law: deck-tuning owns combat cards, deck presets, draft weights, and
+# sandbox card experiments. Engine constants belong to /combat-tuning; report-only
+# experiential evidence belongs to /combat-playtest.
+
+on:
+  workflow_dispatch:
+    inputs:
+      focus:
+        description: 'Deck tuning focus (e.g. "early", "dead cards", "preset archetype honesty", "single-card-spam")'
+        required: false
+        default: ''
+
+permissions:
+  contents: write        # push the report/suggestion/tuning PR branch
+  pull-requests: write   # open the suggestions PR
+  id-token: write        # for Anthropic's auth proxy
+
+concurrency:
+  group: deck-tuning
+  cancel-in-progress: false
+
+jobs:
+  tune:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Configure git identity
+        run: |
+          git config user.name  "axiomancer-deck-tuning[bot]"
+          git config user.email "41898282+axiomancer-deck-tuning[bot]@users.noreply.github.com"
+
+      - name: Provision .env for nexus skills
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # The nexus skills read GH_TOKEN / GH_REPO from a local .env via
+          # `awk -F=`. Provision a CI-scoped copy so delivery
+          # (git push + gh pr create) works out of the box.
+          umask 077
+          cat > .env <<EOF
+          GH_TOKEN=${GH_TOKEN}
+          GH_REPO=${{ github.repository }}
+          EOF
+
+      - name: Run /deck-tuning
+        uses: anthropics/claude-code-base-action@beta
+        with:
+          prompt: '/deck-tuning --focus="${{ github.event.inputs.focus }}"'
+          # Pin the current Sonnet latest family model and medium effort. The action default can
+          # drift or retire; deck tuning should not depend on it.
+          model: claude-sonnet-5
+          claude_env: |
+            CLAUDE_CODE_EFFORT_LEVEL: medium
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          # The skill needs to read card/deck docs/libraries, run npm/combat-playtest
+          # evidence matrices, edit sandbox/card/deck values only when warranted,
+          # and run git / gh for PR delivery. Keep this permissive in CI because
+          # the workflow itself is the trust boundary.
+          allowed_tools: "Bash,Read,Edit,Write,Glob,Grep,Agent,TodoWrite,WebFetch,WebSearch"
+          settings: '{"permissions":{"defaultMode":"bypassPermissions","skipDangerousModePermissionPrompt":true}}'
+          timeout_minutes: '110'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}

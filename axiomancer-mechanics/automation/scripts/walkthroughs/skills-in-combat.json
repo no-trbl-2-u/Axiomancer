@@ -1,0 +1,19 @@
+[
+  { "presetId": "wanderer" },
+  { "tab": "debug" },
+  { "slug": "wet-hound" },
+  { "stance": "body" },
+  { "action": "attack" },
+  { "stance": "body" },
+  { "action": "skill" },
+  { "skillId": "ad-hominem-strike" },
+  { "stance": "body" },
+  { "action": "attack" },
+  { "stance": "body" },
+  { "action": "attack" },
+  { "stance": "body" },
+  { "action": "attack" },
+  { "stance": "body" },
+  { "action": "attack" },
+  { "tab": "quit" }
+]

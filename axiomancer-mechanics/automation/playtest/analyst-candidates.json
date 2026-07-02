@@ -1,0 +1,5 @@
+[
+  { "paramId": "effect.resolutionDotDamageThreshold", "proposedValue": 3, "rationale": "26/48 cells fail to resolve; timeout-dominated mid/late cells sit at 80 avg rounds with 0-0.24 resolution despite huge player:enemy damage ratios. Lowering the DoT erosion threshold from 5 to 3 lets sustained status damage close out stalled fights via erosion, converting timeouts into in-band resolutions while raising status-effect reliance." },
+  { "paramId": "effect.resolutionDebuffIntensityThreshold", "proposedValue": 6, "rationale": "Strategist/mixed cells stack control but never force a yield (l15/l30-strategist-hard at 0.04 resolution, 96% timeout, engagementShare 0.87). Dropping the saturation-yield threshold from 8 to 6 lets debuff-heavy play resolve via saturation instead of timing out, rewarding status-effect engagement." },
+  { "paramId": "progression.statPointsPerLevel", "proposedValue": 4, "rationale": "Player time-to-kill collapses with level (L1 82% / L30 49% / L50 44% resolution). Raising stat points per level from 3 to 4 narrows the late-game power gap so high-level normal/hard cells resolve before the round cap." }
+]

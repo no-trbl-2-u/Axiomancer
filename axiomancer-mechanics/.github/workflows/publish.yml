@@ -1,0 +1,69 @@
+name: Publish npm package
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Run in dry-run mode (no actual publish)'
+        type: boolean
+        default: true
+      tag:
+        description: 'Optional dist-tag (e.g. next, beta)'
+        type: string
+        default: ''
+
+concurrency:
+  group: npm-publish
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          registry-url: 'https://registry.npmjs.org'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify
+        run: npm run verify
+
+      - name: Deploy check
+        run: npm run deploy:check
+
+      - name: Publish (dry run)
+        if: inputs.dry_run == true
+        env:
+          DIST_TAG: ${{ inputs.tag }}
+        run: |
+          tag_args=()
+          if [ -n "$DIST_TAG" ]; then
+            tag_args=(--tag "$DIST_TAG")
+          fi
+          npm publish --dry-run --provenance --access public "${tag_args[@]}"
+
+      - name: Publish
+        if: inputs.dry_run == false
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          DIST_TAG: ${{ inputs.tag }}
+        run: |
+          if [ -z "$NODE_AUTH_TOKEN" ]; then
+            echo "NPM_TOKEN secret is required for a live publish." >&2
+            exit 1
+          fi
+          tag_args=()
+          if [ -n "$DIST_TAG" ]; then
+            tag_args=(--tag "$DIST_TAG")
+          fi
+          npm publish --provenance --access public "${tag_args[@]}"

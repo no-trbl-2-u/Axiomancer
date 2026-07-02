@@ -1,0 +1,171 @@
+{
+  "triggers": [
+    {
+      "stance": "body",
+      "action": "attack",
+      "tier": 1,
+      "effectId": "debuff_post_hoc_tremor",
+      "target": "opponent",
+      "baseChance": 0.10,
+      "fumbleEffectId": "debuff_post_hoc_tremor"
+    },
+    {
+      "stance": "body",
+      "action": "attack",
+      "tier": 2,
+      "effectId": "debuff_bleed",
+      "target": "opponent",
+      "baseChance": 0.18,
+      "fumbleEffectId": "debuff_post_hoc_tremor"
+    },
+    {
+      "stance": "body",
+      "action": "attack",
+      "tier": 3,
+      "effectId": "debuff_petrify",
+      "target": "opponent",
+      "baseChance": 0.06,
+      "fumbleEffectId": "debuff_post_hoc_tremor"
+    },
+
+    {
+      "stance": "body",
+      "action": "defend",
+      "tier": 1,
+      "effectId": "buff_ad_hoc_patch",
+      "target": "self",
+      "baseChance": 0.10,
+      "fumbleEffectId": "debuff_post_hoc_tremor"
+    },
+    {
+      "stance": "body",
+      "action": "defend",
+      "tier": 2,
+      "effectId": "buff_resistance_body",
+      "target": "self",
+      "baseChance": 0.15,
+      "fumbleEffectId": "debuff_post_hoc_tremor"
+    },
+    {
+      "stance": "body",
+      "action": "defend",
+      "tier": 3,
+      "effectId": "buff_invincibility",
+      "target": "self",
+      "baseChance": 0.05,
+      "fumbleEffectId": "debuff_post_hoc_tremor"
+    },
+
+    {
+      "stance": "mind",
+      "action": "attack",
+      "tier": 1,
+      "effectId": "debuff_affirming_consequent",
+      "target": "opponent",
+      "baseChance": 0.10,
+      "fumbleEffectId": "debuff_affirming_consequent"
+    },
+    {
+      "stance": "mind",
+      "action": "attack",
+      "tier": 2,
+      "effectId": "debuff_daze",
+      "target": "opponent",
+      "baseChance": 0.18,
+      "fumbleEffectId": "debuff_affirming_consequent"
+    },
+    {
+      "stance": "mind",
+      "action": "attack",
+      "tier": 3,
+      "effectId": "debuff_petrify",
+      "target": "opponent",
+      "baseChance": 0.06,
+      "fumbleEffectId": "debuff_affirming_consequent"
+    },
+
+    {
+      "stance": "mind",
+      "action": "defend",
+      "tier": 1,
+      "effectId": "buff_gettiters_flicker",
+      "target": "self",
+      "baseChance": 0.10,
+      "fumbleEffectId": "debuff_affirming_consequent"
+    },
+    {
+      "stance": "mind",
+      "action": "defend",
+      "tier": 2,
+      "effectId": "buff_resistance_mind",
+      "target": "self",
+      "baseChance": 0.15,
+      "fumbleEffectId": "debuff_affirming_consequent"
+    },
+    {
+      "stance": "mind",
+      "action": "defend",
+      "tier": 3,
+      "effectId": "buff_haste",
+      "target": "self",
+      "baseChance": 0.05,
+      "fumbleEffectId": "debuff_affirming_consequent"
+    },
+
+    {
+      "stance": "heart",
+      "action": "attack",
+      "tier": 1,
+      "effectId": "debuff_straw_man_echo",
+      "target": "opponent",
+      "baseChance": 0.10,
+      "fumbleEffectId": "debuff_straw_man_echo"
+    },
+    {
+      "stance": "heart",
+      "action": "attack",
+      "tier": 2,
+      "effectId": "debuff_fear",
+      "target": "opponent",
+      "baseChance": 0.18,
+      "fumbleEffectId": "debuff_straw_man_echo"
+    },
+    {
+      "stance": "heart",
+      "action": "attack",
+      "tier": 3,
+      "effectId": "debuff_petrify",
+      "target": "opponent",
+      "baseChance": 0.06,
+      "fumbleEffectId": "debuff_straw_man_echo"
+    },
+
+    {
+      "stance": "heart",
+      "action": "defend",
+      "tier": 1,
+      "effectId": "buff_petitio_pulse",
+      "target": "self",
+      "baseChance": 0.10,
+      "fumbleEffectId": "debuff_straw_man_echo"
+    },
+    {
+      "stance": "heart",
+      "action": "defend",
+      "tier": 2,
+      "effectId": "buff_resistance_heart",
+      "target": "self",
+      "baseChance": 0.15,
+      "fumbleEffectId": "debuff_straw_man_echo"
+    },
+    {
+      "stance": "heart",
+      "action": "defend",
+      "tier": 3,
+      "effectId": "buff_invincibility",
+      "target": "self",
+      "baseChance": 0.05,
+      "fumbleEffectId": "debuff_straw_man_echo"
+    }
+  ]
+}

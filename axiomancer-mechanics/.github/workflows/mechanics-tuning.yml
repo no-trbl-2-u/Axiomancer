@@ -1,0 +1,102 @@
+name: mechanics-tuning
+
+# Manually fire one tuning tick: runs the character × playstyle × enemy balance
+# matrix, A/B-tests numeric candidates, and delivers everything — the data
+# report, the suggestions (with inline game-state evidence), and any auto-applied
+# winners — together on one new branch with a PR opened for review. Nothing is
+# pushed to `main` automatically.
+#
+# Trigger: Actions tab → "mechanics-tuning" → Run workflow. Provide an optional
+# focus (e.g. "new status effects since April", "early-game enemy balance").
+#
+# Required secrets (Settings → Secrets and variables → Actions):
+#   CLAUDE_CODE_OAUTH_TOKEN — OAuth token from `claude setup-token`, draws from
+#                             your Claude Code subscription instead of per-token
+#                             API billing. (Mirrors the `march` workflow; no
+#                             ANTHROPIC_API_KEY is used.)
+#
+# The auto-provisioned GITHUB_TOKEN is used to push the tuning branch and open
+# the PR (nothing is pushed to main). The hybrid analyst runs offline-first (no
+# programmatic API key), enriched by the balance-analyst subagent the skill
+# spawns in-session.
+
+on:
+  workflow_dispatch:
+    inputs:
+      focus:
+        description: 'Tuning focus (e.g. "early-game enemy balance", "effects since April")'
+        required: false
+        default: ''
+      max_iterations:
+        description: 'Max A/B experiments to attempt this tick'
+        required: false
+        default: '3'
+
+permissions:
+  contents: write        # push the data report to main; push the PR branch
+  pull-requests: write   # open the suggestions PR
+  id-token: write        # for Anthropic's auth proxy
+
+concurrency:
+  group: mechanics-tuning
+  cancel-in-progress: false
+
+jobs:
+  tune:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Configure git identity
+        run: |
+          git config user.name  "axiomancer-tuning[bot]"
+          git config user.email "41898282+axiomancer-tuning[bot]@users.noreply.github.com"
+
+      - name: Provision .env for nexus skills
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # The nexus skills read GH_TOKEN / GH_REPO from a local .env via
+          # `awk -F=`. Provision a CI-scoped copy so the two-track delivery
+          # (git push + gh pr create) works out of the box.
+          umask 077
+          cat > .env <<EOF
+          GH_TOKEN=${GH_TOKEN}
+          GH_REPO=${{ github.repository }}
+          EOF
+
+      - name: Run /mechanics-tuning
+        uses: anthropics/claude-code-base-action@beta
+        with:
+          prompt: '/mechanics-tuning --focus="${{ github.event.inputs.focus }}" --max-iterations=${{ github.event.inputs.max_iterations }}'
+          # Pin the current Sonnet latest family model and medium effort. The action default can
+          # drift or retire; tuning runs should not depend on it.
+          model: claude-sonnet-5
+          claude_env: |
+            CLAUDE_CODE_EFFORT_LEVEL: medium
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          # The skill needs to read everything, run npm (tune + verify), edit
+          # the winning numeric values, and run git / gh for the two-track
+          # delivery. The workflow itself is the trust boundary, so run with
+          # permissions bypassed (the equivalent of --dangerously-skip-permissions).
+          allowed_tools: "Bash,Read,Edit,Write,Glob,Grep,Agent,TodoWrite,WebFetch,WebSearch"
+          settings: '{"permissions":{"defaultMode":"bypassPermissions","skipDangerousModePermissionPrompt":true}}'
+          timeout_minutes: '110'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}

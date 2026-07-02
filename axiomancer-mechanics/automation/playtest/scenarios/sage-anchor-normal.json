@@ -1,0 +1,10 @@
+{
+  "id": "sage-anchor-normal",
+  "description": "Phase 121 Normal anchor: Sage vs Audit Sentinel. Target: 75-100% actual wins across all policies.",
+  "preset": "sage",
+  "enemy": "audit-sentinel",
+  "runs": 25,
+  "maxRounds": 55,
+  "seed": "phase-121-normal-v1",
+  "policies": ["aggressive", "defensive", "mixed", "strategist"]
+}

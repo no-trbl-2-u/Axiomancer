@@ -1,0 +1,98 @@
+name: combat-playtest
+
+# Manually fire one Hazard-Pattern Combat playtest tick: runs /combat-playtest
+# against the stage matrix and qualitative playtester loop, then delivers a
+# report-only branch/PR. This workflow must not tune numbers or ship balance
+# changes; findings route to /combat-tuning or /deck-tuning.
+#
+# Trigger: Actions tab → "combat-playtest" → Run workflow. Provide an optional
+# focus (e.g. "early", "mid", "late", "impossible", "control feel",
+# "single-card-spam").
+#
+# Required secrets (Settings → Secrets and variables → Actions):
+#   CLAUDE_CODE_OAUTH_TOKEN — OAuth token from `claude setup-token`, draws from
+#                             your Claude Code subscription instead of per-token
+#                             API billing. (Mirrors `march`, `mechanics-tuning`,
+#                             `hazard-tuning`, and `combat-tuning`; no
+#                             ANTHROPIC_API_KEY is used.)
+#
+# Standing law: combat-playtest is report-only. It answers whether status play
+# is the fun path across early/mid/late/impossible; it does not edit cards,
+# presets, engine constants, or thresholds.
+
+on:
+  workflow_dispatch:
+    inputs:
+      focus:
+        description: 'Combat playtest focus (e.g. "early", "mid", "late", "impossible", "control feel")'
+        required: false
+        default: ''
+
+permissions:
+  contents: write        # push the playtest report PR branch
+  pull-requests: write   # open the report PR
+  id-token: write        # for Anthropic's auth proxy
+
+concurrency:
+  group: combat-playtest
+  cancel-in-progress: false
+
+jobs:
+  playtest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Configure git identity
+        run: |
+          git config user.name  "axiomancer-combat-playtest[bot]"
+          git config user.email "41898282+axiomancer-combat-playtest[bot]@users.noreply.github.com"
+
+      - name: Provision .env for nexus skills
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # The nexus skills read GH_TOKEN / GH_REPO from a local .env via
+          # `awk -F=`. Provision a CI-scoped copy so delivery
+          # (git push + gh pr create) works out of the box.
+          umask 077
+          cat > .env <<EOF
+          GH_TOKEN=${GH_TOKEN}
+          GH_REPO=${{ github.repository }}
+          EOF
+
+      - name: Run /combat-playtest
+        uses: anthropics/claude-code-base-action@beta
+        with:
+          prompt: '/combat-playtest --focus="${{ github.event.inputs.focus }}"'
+          # Pin the current Sonnet latest family model and medium effort. The action default can
+          # drift or retire; combat playtest should not depend on it.
+          model: claude-sonnet-5
+          claude_env: |
+            CLAUDE_CODE_EFFORT_LEVEL: medium
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          # The skill needs to read combat docs/libraries, run npm/combat-playtest
+          # matrices, spawn playtester agents, write report-only artifacts, and
+          # run git / gh for PR delivery. Keep this permissive in CI because the
+          # workflow itself is the trust boundary.
+          allowed_tools: "Bash,Read,Edit,Write,Glob,Grep,Agent,TodoWrite,WebFetch,WebSearch"
+          settings: '{"permissions":{"defaultMode":"bypassPermissions","skipDangerousModePermissionPrompt":true}}'
+          timeout_minutes: '110'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}

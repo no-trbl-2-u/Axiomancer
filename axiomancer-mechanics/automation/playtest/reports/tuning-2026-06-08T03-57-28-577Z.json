@@ -1,0 +1,1756 @@
+{
+  "timestamp": "2026-06-08T03-57-28-577Z",
+  "focus": {
+    "raw": "Status effects and skill usage",
+    "categories": [
+      "effect",
+      "skill"
+    ]
+  },
+  "baselineHealth": {
+    "perCell": [
+      {
+        "cellId": "l1-aggressive-easy",
+        "level": 1,
+        "playstyle": "aggressive",
+        "difficulty": "easy",
+        "weight": 2,
+        "resolutionSuccessRate": 1,
+        "defeatRate": 0,
+        "band": {
+          "low": 0.75,
+          "high": 0.88
+        },
+        "bandDeviation": 0.0144,
+        "engagementShare": 0.11666666666666668,
+        "activityShare": 0.11666666666666668,
+        "engagementDeviation": 0.05444444444444442,
+        "deviation": 0.09606666666666663
+      },
+      {
+        "cellId": "l1-aggressive-normal",
+        "level": 1,
+        "playstyle": "aggressive",
+        "difficulty": "normal",
+        "weight": 2,
+        "resolutionSuccessRate": 0.96,
+        "defeatRate": 0.04,
+        "band": {
+          "low": 0.65,
+          "high": 0.75
+        },
+        "bandDeviation": 0.044099999999999986,
+        "engagementShare": 0.35566666666666663,
+        "activityShare": 0.36066666666666664,
+        "engagementDeviation": 0,
+        "deviation": 0.044099999999999986
+      },
+      {
+        "cellId": "l1-aggressive-hard",
+        "level": 1,
+        "playstyle": "aggressive",
+        "difficulty": "hard",
+        "weight": 2,
+        "resolutionSuccessRate": 0.78,
+        "defeatRate": 0.22,
+        "band": {
+          "low": 0.5,
+          "high": 0.65
+        },
+        "bandDeviation": 0.016900000000000002,
+        "engagementShare": 0.3261984126984126,
+        "activityShare": 0.3713412698412697,
+        "engagementDeviation": 0.0005665155580750856,
+        "deviation": 0.01774977333711263
+      },
+      {
+        "cellId": "l1-defensive-easy",
+        "level": 1,
+        "playstyle": "defensive",
+        "difficulty": "easy",
+        "weight": 2,
+        "resolutionSuccessRate": 0.86,
+        "defeatRate": 0.14,
+        "band": {
+          "low": 0.75,
+          "high": 0.88
+        },
+        "bandDeviation": 0,
+        "engagementShare": 0.13,
+        "activityShare": 0.13,
+        "engagementDeviation": 0.04839999999999999,
+        "deviation": 0.07259999999999998
+      },
+      {
+        "cellId": "l1-defensive-normal",
+        "level": 1,
+        "playstyle": "defensive",
+        "difficulty": "normal",
+        "weight": 2,
+        "resolutionSuccessRate": 0.94,
+        "defeatRate": 0.06,
+        "band": {
+          "low": 0.65,
+          "high": 0.75
+        },
+        "bandDeviation": 0.03609999999999998,
+        "engagementShare": 0.07666666666666667,
+        "activityShare": 0.07666666666666667,
+        "engagementDeviation": 0.0747111111111111,
+        "deviation": 0.1481666666666666
+      },
+      {
+        "cellId": "l1-defensive-hard",
+        "level": 1,
+        "playstyle": "defensive",
+        "difficulty": "hard",
+        "weight": 2,
+        "resolutionSuccessRate": 0.32,
+        "defeatRate": 0.68,
+        "band": {
+          "low": 0.5,
+          "high": 0.65
+        },
+        "bandDeviation": 0.0324,
+        "engagementShare": 0.04355555555555555,
+        "activityShare": 0.04355555555555555,
+        "engagementDeviation": 0.09390819753086417,
+        "deviation": 0.17326229629629625
+      },
+      {
+        "cellId": "l1-mixed-easy",
+        "level": 1,
+        "playstyle": "mixed",
+        "difficulty": "easy",
+        "weight": 2,
+        "resolutionSuccessRate": 1,
+        "defeatRate": 0,
+        "band": {
+          "low": 0.75,
+          "high": 0.88
+        },
+        "bandDeviation": 0.0144,
+        "engagementShare": 0.18,
+        "activityShare": 0.18,
+        "engagementDeviation": 0.028899999999999995,
+        "deviation": 0.057749999999999996
+      },
+      {
+        "cellId": "l1-mixed-normal",
+        "level": 1,
+        "playstyle": "mixed",
+        "difficulty": "normal",
+        "weight": 2,
+        "resolutionSuccessRate": 1,
+        "defeatRate": 0,
+        "band": {
+          "low": 0.65,
+          "high": 0.75
+        },
+        "bandDeviation": 0.0625,
+        "engagementShare": 0.10333333333333333,
+        "activityShare": 0.10333333333333333,
+        "engagementDeviation": 0.06084444444444444,
+        "deviation": 0.15376666666666666
+      },
+      {
+        "cellId": "l1-mixed-hard",
+        "level": 1,
+        "playstyle": "mixed",
+        "difficulty": "hard",
+        "weight": 2,
+        "resolutionSuccessRate": 0.44,
+        "defeatRate": 0.56,
+        "band": {
+          "low": 0.5,
+          "high": 0.65
+        },
+        "bandDeviation": 0.0036,
+        "engagementShare": 0.29494521852416594,
+        "activityShare": 0.4160103200892674,
+        "engagementDeviation": 0.0030310289633518387,
+        "deviation": 0.008146543445027757
+      },
+      {
+        "cellId": "l1-strategist-easy",
+        "level": 1,
+        "playstyle": "strategist",
+        "difficulty": "easy",
+        "weight": 2,
+        "resolutionSuccessRate": 0.98,
+        "defeatRate": 0.02,
+        "band": {
+          "low": 0.75,
+          "high": 0.88
+        },
+        "bandDeviation": 0.009999999999999995,
+        "engagementShare": 0.085,
+        "activityShare": 0.085,
+        "engagementDeviation": 0.07022499999999998,
+        "deviation": 0.11533749999999997
+      },
+      {
+        "cellId": "l1-strategist-normal",
+        "level": 1,
+        "playstyle": "strategist",
+        "difficulty": "normal",
+        "weight": 2,
+        "resolutionSuccessRate": 0.9,
+        "defeatRate": 0.1,
+        "band": {
+          "low": 0.65,
+          "high": 0.75
+        },
+        "bandDeviation": 0.022500000000000006,
+        "engagementShare": 0.08,
+        "activityShare": 0.08,
+        "engagementDeviation": 0.07289999999999998,
+        "deviation": 0.13184999999999997
+      },
+      {
+        "cellId": "l1-strategist-hard",
+        "level": 1,
+        "playstyle": "strategist",
+        "difficulty": "hard",
+        "weight": 2,
+        "resolutionSuccessRate": 0.6,
+        "defeatRate": 0.4,
+        "band": {
+          "low": 0.5,
+          "high": 0.65
+        },
+        "bandDeviation": 0,
+        "engagementShare": 0.3121531005114596,
+        "activityShare": 0.40228239149910977,
+        "engagementDeviation": 0.0014323878008956768,
+        "deviation": 0.0021485817013435155
+      },
+      {
+        "cellId": "l15-aggressive-easy",
+        "level": 15,
+        "playstyle": "aggressive",
+        "difficulty": "easy",
+        "weight": 2,
+        "resolutionSuccessRate": 1,
+        "defeatRate": 0,
+        "band": {
+          "low": 0.75,
+          "high": 0.88
+        },
+        "bandDeviation": 0.0144,
+        "engagementShare": 0.5120396825396828,
+        "activityShare": 0.5120396825396828,
+        "engagementDeviation": 0,
+        "deviation": 0.0144
+      },
+      {
+        "cellId": "l15-aggressive-normal",
+        "level": 15,
+        "playstyle": "aggressive",
+        "difficulty": "normal",
+        "weight": 2,
+        "resolutionSuccessRate": 1,
+        "defeatRate": 0,
+        "band": {
+          "low": 0.65,
+          "high": 0.75
+        },
+        "bandDeviation": 0.0625,
+        "engagementShare": 0.33504431346125374,
+        "activityShare": 0.33504431346125374,
+        "engagementDeviation": 0.00022367255984523542,
+        "deviation": 0.06283550883976785
+      },
+      {
+        "cellId": "l15-aggressive-hard",
+        "level": 15,
+        "playstyle": "aggressive",
+        "difficulty": "hard",
+        "weight": 2,
+        "resolutionSuccessRate": 1,
+        "defeatRate": 0,
+        "band": {
+          "low": 0.5,
+          "high": 0.65
+        },
+        "bandDeviation": 0.12249999999999998,
+        "engagementShare": 0.6613385917325355,
+        "activityShare": 0.6613385917325355,
+        "engagementDeviation": 0,
+        "deviation": 0.12249999999999998
+      },
+      {
+        "cellId": "l15-defensive-easy",
+        "level": 15,
+        "playstyle": "defensive",
+        "difficulty": "easy",
+        "weight": 2,
+        "resolutionSuccessRate": 0.94,
+        "defeatRate": 0,
+        "band": {
+          "low": 0.75,
+          "high": 0.88
+        },
+        "bandDeviation": 0.003599999999999993,
+        "engagementShare": 0.2228801358061247,
+        "activityShare": 0.23544263580612473,
+        "engagementDeviation": 0.016159459872669292,
+        "deviation": 0.02783918980900393
+      },
+      {
+        "cellId": "l15-defensive-normal",
+        "level": 15,
+        "playstyle": "defensive",
+        "difficulty": "normal",
+        "weight": 2,
+        "resolutionSuccessRate": 1,
+        "defeatRate": 0,
+        "band": {
+          "low": 0.65,
+          "high": 0.75
+        },
+        "bandDeviation": 0.0625,
+        "engagementShare": 0.5559000276882696,
+        "activityShare": 0.5559000276882696,
+        "engagementDeviation": 0,
+        "deviation": 0.0625
+      },
+      {
+        "cellId": "l15-defensive-hard",
+        "level": 15,
+        "playstyle": "defensive",
+        "difficulty": "hard",
+        "weight": 2,
+        "resolutionSuccessRate": 0.72,
+        "defeatRate": 0,
+        "band": {
+          "low": 0.5,
+          "high": 0.65
+        },
+        "bandDeviation": 0.004899999999999993,
+        "engagementShare": 0.4297609384411267,
+        "activityShare": 0.5349484384411268,
+        "engagementDeviation": 0,
+        "deviation": 0.004899999999999993
+      },
+      {
+        "cellId": "l15-mixed-easy",
+        "level": 15,
+        "playstyle": "mixed",
+        "difficulty": "easy",
+        "weight": 2,
+        "resolutionSuccessRate": 0,
+        "defeatRate": 0,
+        "band": {
+          "low": 0.75,
+          "high": 0.88
+        },
+        "bandDeviation": 0.5625,
+        "engagementShare": 0.05106249999999998,
+        "activityShare": 0.20424999999999993,
+        "engagementDeviation": 0.08936362890624998,
+        "deviation": 0.696545443359375
+      },
+      {
+        "cellId": "l15-mixed-normal",
+        "level": 15,
+        "playstyle": "mixed",
+        "difficulty": "normal",
+        "weight": 2,
+        "resolutionSuccessRate": 1,
+        "defeatRate": 0,
+        "band": {
+          "low": 0.65,
+          "high": 0.75
+        },
+        "bandDeviation": 0.0625,
+        "engagementShare": 0.7065734504578497,
+        "activityShare": 0.7065734504578497,
+        "engagementDeviation": 0,
+        "deviation": 0.0625
+      },
+      {
+        "cellId": "l15-mixed-hard",
+        "level": 15,
+        "playstyle": "mixed",
+        "difficulty": "hard",
+        "weight": 2,
+        "resolutionSuccessRate": 0,
+        "defeatRate": 0,
+        "band": {
+          "low": 0.5,
+          "high": 0.65
+        },
+        "bandDeviation": 0.25,
+        "engagementShare": 0.053687499999999985,
+        "activityShare": 0.21474999999999994,
+        "engagementDeviation": 0.08780109765625,
+        "deviation": 0.381701646484375
+      },
+      {
+        "cellId": "l15-strategist-easy",
+        "level": 15,
+        "playstyle": "strategist",
+        "difficulty": "easy",
+        "weight": 2,
+        "resolutionSuccessRate": 1,
+        "defeatRate": 0,
+        "band": {
+          "low": 0.75,
+          "high": 0.88
+        },
+        "bandDeviation": 0.0144,
+        "engagementShare": 0.9659479409479408,
+        "activityShare": 0.9659479409479408,
+        "engagementDeviation": 0,
+        "deviation": 0.0144
+      },
+      {
+        "cellId": "l15-strategist-normal",
+        "level": 15,
+        "playstyle": "strategist",
+        "difficulty": "normal",
+        "weight": 2,
+        "resolutionSuccessRate": 0,
+        "defeatRate": 0,
+        "band": {
+          "low": 0.65,
+          "high": 0.75
+        },
+        "bandDeviation": 0.42250000000000004,
+        "engagementShare": 0.029062500000000012,
+        "activityShare": 0.11625000000000005,
+        "engagementDeviation": 0.10300087890625,
+        "deviation": 0.5770013183593751
+      },
+      {
+        "cellId": "l15-strategist-hard",
+        "level": 15,
+        "playstyle": "strategist",
+        "difficulty": "hard",
+        "weight": 2,
+        "resolutionSuccessRate": 1,
+        "defeatRate": 0,
+        "band": {
+          "low": 0.5,
+          "high": 0.65
+        },
+        "bandDeviation": 0.12249999999999998,
+        "engagementShare": 0.9398474116808945,
+        "activityShare": 0.9398474116808945,
+        "engagementDeviation": 0,
+        "deviation": 0.12249999999999998
+      },
+      {
+        "cellId": "l30-aggressive-easy",
+        "level": 30,
+        "playstyle": "aggressive",
+        "difficulty": "easy",
+        "weight": 2,
+        "resolutionSuccessRate": 1,
+        "defeatRate": 0,
+        "band": {
+          "low": 0.75,
+          "high": 0.88
+        },
+        "bandDeviation": 0.0144,
+        "engagementShare": 0.5098353078889825,
+        "activityShare": 0.5098353078889825,
+        "engagementDeviation": 0,
+        "deviation": 0.0144
+      },
+      {
+        "cellId": "l30-aggressive-normal",
+        "level": 30,
+        "playstyle": "aggressive",
+        "difficulty": "normal",
+        "weight": 2,
+        "resolutionSuccessRate": 0.74,
+        "defeatRate": 0,
+        "band": {
+          "low": 0.65,
+          "high": 0.75
+        },
+        "bandDeviation": 0,
+        "engagementShare": 0.603325316681048,
+        "activityShare": 0.7437628166810484,
+        "engagementDeviation": 0,
+        "deviation": 0
+      },
+      {
+        "cellId": "l30-aggressive-hard",
+        "level": 30,
+        "playstyle": "aggressive",
+        "difficulty": "hard",
+        "weight": 2,
+        "resolutionSuccessRate": 0,
+        "defeatRate": 0,
+        "band": {
+          "low": 0.5,
+          "high": 0.65
+        },
+        "bandDeviation": 0.25,
+        "engagementShare": 0.17606249999999993,
+        "activityShare": 0.7042499999999997,
+        "engagementDeviation": 0.030254253906250018,
+        "deviation": 0.29538138085937504
+      },
+      {
+        "cellId": "l30-defensive-easy",
+        "level": 30,
+        "playstyle": "defensive",
+        "difficulty": "easy",
+        "weight": 2,
+        "resolutionSuccessRate": 0.98,
+        "defeatRate": 0,
+        "band": {
+          "low": 0.75,
+          "high": 0.88
+        },
+        "bandDeviation": 0.009999999999999995,
+        "engagementShare": 0.27190516315366325,
+        "activityShare": 0.2756551631536633,
+        "engagementDeviation": 0.006098803542055952,
+        "deviation": 0.01914820531308392
+      },
+      {
+        "cellId": "l30-defensive-normal",
+        "level": 30,
+        "playstyle": "defensive",
+        "difficulty": "normal",
+        "weight": 2,
+        "resolutionSuccessRate": 0.24,
+        "defeatRate": 0,
+        "band": {
+          "low": 0.65,
+          "high": 0.75
+        },
+        "bandDeviation": 0.16810000000000003,
+        "engagementShare": 0.25675518762544725,
+        "activityShare": 0.5957551876254474,
+        "engagementDeviation": 0.008694595034765542,
+        "deviation": 0.18114189255214835
+      },
+      {
+        "cellId": "l30-defensive-hard",
+        "level": 30,
+        "playstyle": "defensive",
+        "difficulty": "hard",
+        "weight": 2,
+        "resolutionSuccessRate": 0,
+        "defeatRate": 0,
+        "band": {
+          "low": 0.5,
+          "high": 0.65
+        },
+        "bandDeviation": 0.25,
+        "engagementShare": 0.08425,
+        "activityShare": 0.337,
+        "engagementDeviation": 0.07062306249999999,
+        "deviation": 0.35593459375
+      },
+      {
+        "cellId": "l30-mixed-easy",
+        "level": 30,
+        "playstyle": "mixed",
+        "difficulty": "easy",
+        "weight": 2,
+        "resolutionSuccessRate": 0.92,
+        "defeatRate": 0,
+        "band": {
+          "low": 0.75,
+          "high": 0.88
+        },
+        "bandDeviation": 0.001600000000000003,
+        "engagementShare": 0.5062632247090705,
+        "activityShare": 0.5345757247090704,
+        "engagementDeviation": 0,
+        "deviation": 0.001600000000000003
+      },
+      {
+        "cellId": "l30-mixed-normal",
+        "level": 30,
+        "playstyle": "mixed",
+        "difficulty": "normal",
+        "weight": 2,
+        "resolutionSuccessRate": 0,
+        "defeatRate": 0,
+        "band": {
+          "low": 0.65,
+          "high": 0.75
+        },
+        "bandDeviation": 0.42250000000000004,
+        "engagementShare": 0.13168749999999999,
+        "activityShare": 0.5267499999999999,
+        "engagementDeviation": 0.04766034765625,
+        "deviation": 0.49399052148437506
+      },
+      {
+        "cellId": "l30-mixed-hard",
+        "level": 30,
+        "playstyle": "mixed",
+        "difficulty": "hard",
+        "weight": 2,
+        "resolutionSuccessRate": 0,
+        "defeatRate": 0,
+        "band": {
+          "low": 0.5,
+          "high": 0.65
+        },
+        "bandDeviation": 0.25,
+        "engagementShare": 0.13649999999999998,
+        "activityShare": 0.5459999999999999,
+        "engagementDeviation": 0.04558225,
+        "deviation": 0.318373375
+      },
+      {
+        "cellId": "l30-strategist-easy",
+        "level": 30,
+        "playstyle": "strategist",
+        "difficulty": "easy",
+        "weight": 2,
+        "resolutionSuccessRate": 1,
+        "defeatRate": 0,
+        "band": {
+          "low": 0.75,
+          "high": 0.88
+        },
+        "bandDeviation": 0.0144,
+        "engagementShare": 0.7044583698792577,
+        "activityShare": 0.7044583698792577,
+        "engagementDeviation": 0,
+        "deviation": 0.0144
+      },
+      {
+        "cellId": "l30-strategist-normal",
+        "level": 30,
+        "playstyle": "strategist",
+        "difficulty": "normal",
+        "weight": 2,
+        "resolutionSuccessRate": 1,
+        "defeatRate": 0,
+        "band": {
+          "low": 0.65,
+          "high": 0.75
+        },
+        "bandDeviation": 0.0625,
+        "engagementShare": 0.7503064610454185,
+        "activityShare": 0.7503064610454185,
+        "engagementDeviation": 0,
+        "deviation": 0.0625
+      },
+      {
+        "cellId": "l30-strategist-hard",
+        "level": 30,
+        "playstyle": "strategist",
+        "difficulty": "hard",
+        "weight": 2,
+        "resolutionSuccessRate": 0.04,
+        "defeatRate": 0,
+        "band": {
+          "low": 0.5,
+          "high": 0.65
+        },
+        "bandDeviation": 0.2116,
+        "engagementShare": 0.17430497542997547,
+        "activityShare": 0.6209299754299755,
+        "engagementDeviation": 0.030868741658661516,
+        "deviation": 0.2579031124879923
+      }
+    ],
+    "aggregate": 0.14403724675218477,
+    "aggregateBand": 0.10046666666666665,
+    "aggregateEngagement": 0.04357058008551809,
+    "meanEngagement": 0.3298051283275407,
+    "meanActivity": 0.422142621374641,
+    "witness": {
+      "strategistResolution": 0.7244444444444444,
+      "aggressiveResolution": 0.8311111111111111,
+      "strategistEdge": -0.10666666666666669,
+      "cells": 18
+    },
+    "targetBand": {
+      "low": 0.65,
+      "high": 0.75
+    },
+    "engagementFloor": 0.35,
+    "maxDefeatRate": 0.68,
+    "summary": "3/36 cells in band; aggregate 0.1440 (band 0.1005 + engage 0.0436); mean leverage 33% / activity 42% (23/36 cells below floor); witness edge -11% (strat 72% vs aggr 83%); worst defeat 68%"
+  },
+  "cells": [
+    {
+      "cellId": "l1-aggressive-easy",
+      "level": 1,
+      "playstyle": "aggressive",
+      "difficulty": "easy",
+      "enemySlug": "apprentice-heretic",
+      "runs": 50,
+      "resolutionSuccessRate": 1,
+      "winRate": 1,
+      "defeatRate": 0,
+      "friendshipRate": 0,
+      "timeoutRate": 0,
+      "averageRounds": 1.74,
+      "damageRatio": {
+        "playerToEnemy": 52.1578947368421,
+        "playerEfficiency": 11.39080459770115,
+        "enemyEfficiency": 0.21839080459770116
+      },
+      "band": {
+        "low": 0.75,
+        "high": 0.88
+      },
+      "bandDeviation": 0.0144,
+      "engagementShare": 0.11666666666666668,
+      "activityShare": 0.11666666666666668,
+      "engagementDeviation": 0.05444444444444442
+    },
+    {
+      "cellId": "l1-aggressive-normal",
+      "level": 1,
+      "playstyle": "aggressive",
+      "difficulty": "normal",
+      "enemySlug": "petty-cutpurse",
+      "runs": 50,
+      "resolutionSuccessRate": 0.96,
+      "winRate": 0.96,
+      "defeatRate": 0.04,
+      "friendshipRate": 0,
+      "timeoutRate": 0,
+      "averageRounds": 2.02,
+      "damageRatio": {
+        "playerToEnemy": 13.29032258064516,
+        "playerEfficiency": 12.237623762376238,
+        "enemyEfficiency": 0.9207920792079208
+      },
+      "band": {
+        "low": 0.65,
+        "high": 0.75
+      },
+      "bandDeviation": 0.044099999999999986,
+      "engagementShare": 0.35566666666666663,
+      "activityShare": 0.36066666666666664,
+      "engagementDeviation": 0
+    },
+    {
+      "cellId": "l1-aggressive-hard",
+      "level": 1,
+      "playstyle": "aggressive",
+      "difficulty": "hard",
+      "enemySlug": "wandering-sophist",
+      "runs": 50,
+      "resolutionSuccessRate": 0.78,
+      "winRate": 0.78,
+      "defeatRate": 0.22,
+      "friendshipRate": 0,
+      "timeoutRate": 0,
+      "averageRounds": 6.54,
+      "damageRatio": {
+        "playerToEnemy": 12.452296819787986,
+        "playerEfficiency": 10.776758409785934,
+        "enemyEfficiency": 0.8654434250764527
+      },
+      "band": {
+        "low": 0.5,
+        "high": 0.65
+      },
+      "bandDeviation": 0.016900000000000002,
+      "engagementShare": 0.3261984126984126,
+      "activityShare": 0.3713412698412697,
+      "engagementDeviation": 0.0005665155580750856
+    },
+    {
+      "cellId": "l1-defensive-easy",
+      "level": 1,
+      "playstyle": "defensive",
+      "difficulty": "easy",
+      "enemySlug": "tolltaker-of-the-ford",
+      "runs": 50,
+      "resolutionSuccessRate": 0.86,
+      "winRate": 0.86,
+      "defeatRate": 0.14,
+      "friendshipRate": 0,
+      "timeoutRate": 0,
+      "averageRounds": 1.96,
+      "damageRatio": {
+        "playerToEnemy": 7.463235294117647,
+        "playerEfficiency": 10.357142857142858,
+        "enemyEfficiency": 1.3877551020408165
+      },
+      "band": {
+        "low": 0.75,
+        "high": 0.88
+      },
+      "bandDeviation": 0,
+      "engagementShare": 0.13,
+      "activityShare": 0.13,
+      "engagementDeviation": 0.04839999999999999
+    },
+    {
+      "cellId": "l1-defensive-normal",
+      "level": 1,
+      "playstyle": "defensive",
+      "difficulty": "normal",
+      "enemySlug": "thicket-ambusher",
+      "runs": 50,
+      "resolutionSuccessRate": 0.94,
+      "winRate": 0.94,
+      "defeatRate": 0.06,
+      "friendshipRate": 0,
+      "timeoutRate": 0,
+      "averageRounds": 2.22,
+      "damageRatio": {
+        "playerToEnemy": 17.506849315068493,
+        "playerEfficiency": 11.513513513513512,
+        "enemyEfficiency": 0.6576576576576576
+      },
+      "band": {
+        "low": 0.65,
+        "high": 0.75
+      },
+      "bandDeviation": 0.03609999999999998,
+      "engagementShare": 0.07666666666666667,
+      "activityShare": 0.07666666666666667,
+      "engagementDeviation": 0.0747111111111111
+    },
+    {
+      "cellId": "l1-defensive-hard",
+      "level": 1,
+      "playstyle": "defensive",
+      "difficulty": "hard",
+      "enemySlug": "reef-barnacle-colony",
+      "runs": 50,
+      "resolutionSuccessRate": 0.32,
+      "winRate": 0.32,
+      "defeatRate": 0.68,
+      "friendshipRate": 0,
+      "timeoutRate": 0,
+      "averageRounds": 8.24,
+      "damageRatio": {
+        "playerToEnemy": 19.90566037735849,
+        "playerEfficiency": 7.682038834951456,
+        "enemyEfficiency": 0.3859223300970874
+      },
+      "band": {
+        "low": 0.5,
+        "high": 0.65
+      },
+      "bandDeviation": 0.0324,
+      "engagementShare": 0.04355555555555555,
+      "activityShare": 0.04355555555555555,
+      "engagementDeviation": 0.09390819753086417
+    },
+    {
+      "cellId": "l1-mixed-easy",
+      "level": 1,
+      "playstyle": "mixed",
+      "difficulty": "easy",
+      "enemySlug": "driftwood-husk",
+      "runs": 50,
+      "resolutionSuccessRate": 1,
+      "winRate": 1,
+      "defeatRate": 0,
+      "friendshipRate": 0,
+      "timeoutRate": 0,
+      "averageRounds": 1.08,
+      "damageRatio": {
+        "playerToEnemy": 0,
+        "playerEfficiency": 18.703703703703702,
+        "enemyEfficiency": 0
+      },
+      "band": {
+        "low": 0.75,
+        "high": 0.88
+      },
+      "bandDeviation": 0.0144,
+      "engagementShare": 0.18,
+      "activityShare": 0.18,
+      "engagementDeviation": 0.028899999999999995
+    },
+    {
+      "cellId": "l1-mixed-normal",
+      "level": 1,
+      "playstyle": "mixed",
+      "difficulty": "normal",
+      "enemySlug": "reef-barnacle-colony",
+      "runs": 50,
+      "resolutionSuccessRate": 1,
+      "winRate": 1,
+      "defeatRate": 0,
+      "friendshipRate": 0,
+      "timeoutRate": 0,
+      "averageRounds": 1.94,
+      "damageRatio": {
+        "playerToEnemy": 0,
+        "playerEfficiency": 12.762886597938145,
+        "enemyEfficiency": 0
+      },
+      "band": {
+        "low": 0.65,
+        "high": 0.75
+      },
+      "bandDeviation": 0.0625,
+      "engagementShare": 0.10333333333333333,
+      "activityShare": 0.10333333333333333,
+      "engagementDeviation": 0.06084444444444444
+    },
+    {
+      "cellId": "l1-mixed-hard",
+      "level": 1,
+      "playstyle": "mixed",
+      "difficulty": "hard",
+      "enemySlug": "the-market-arbiter",
+      "runs": 50,
+      "resolutionSuccessRate": 0.44,
+      "winRate": 0.26,
+      "defeatRate": 0.56,
+      "friendshipRate": 0.18,
+      "timeoutRate": 0,
+      "averageRounds": 9.48,
+      "damageRatio": {
+        "playerToEnemy": 4.59016393442623,
+        "playerEfficiency": 5.9071729957805905,
+        "enemyEfficiency": 1.2869198312236285
+      },
+      "band": {
+        "low": 0.5,
+        "high": 0.65
+      },
+      "bandDeviation": 0.0036,
+      "engagementShare": 0.29494521852416594,
+      "activityShare": 0.4160103200892674,
+      "engagementDeviation": 0.0030310289633518387
+    },
+    {
+      "cellId": "l1-strategist-easy",
+      "level": 1,
+      "playstyle": "strategist",
+      "difficulty": "easy",
+      "enemySlug": "apprentice-heretic",
+      "runs": 50,
+      "resolutionSuccessRate": 0.98,
+      "winRate": 0.98,
+      "defeatRate": 0.02,
+      "friendshipRate": 0,
+      "timeoutRate": 0,
+      "averageRounds": 2.56,
+      "damageRatio": {
+        "playerToEnemy": 16.071428571428573,
+        "playerEfficiency": 8.7890625,
+        "enemyEfficiency": 0.546875
+      },
+      "band": {
+        "low": 0.75,
+        "high": 0.88
+      },
+      "bandDeviation": 0.009999999999999995,
+      "engagementShare": 0.085,
+      "activityShare": 0.085,
+      "engagementDeviation": 0.07022499999999998
+    },
+    {
+      "cellId": "l1-strategist-normal",
+      "level": 1,
+      "playstyle": "strategist",
+      "difficulty": "normal",
+      "enemySlug": "tolltaker-of-the-ford",
+      "runs": 50,
+      "resolutionSuccessRate": 0.9,
+      "winRate": 0.9,
+      "defeatRate": 0.1,
+      "friendshipRate": 0,
+      "timeoutRate": 0,
+      "averageRounds": 2.38,
+      "damageRatio": {
+        "playerToEnemy": 6.612903225806452,
+        "playerEfficiency": 10.336134453781513,
+        "enemyEfficiency": 1.5630252100840338
+      },
+      "band": {
+        "low": 0.65,
+        "high": 0.75
+      },
+      "bandDeviation": 0.022500000000000006,
+      "engagementShare": 0.08,
+      "activityShare": 0.08,
+      "engagementDeviation": 0.07289999999999998
+    },
+    {
+      "cellId": "l1-strategist-hard",
+      "level": 1,
+      "playstyle": "strategist",
+      "difficulty": "hard",
+      "enemySlug": "wandering-sophist",
+      "runs": 50,
+      "resolutionSuccessRate": 0.6,
+      "winRate": 0.6,
+      "defeatRate": 0.4,
+      "friendshipRate": 0,
+      "timeoutRate": 0,
+      "averageRounds": 8.16,
+      "damageRatio": {
+        "playerToEnemy": 8.080103359173126,
+        "playerEfficiency": 7.66421568627451,
+        "enemyEfficiency": 0.9485294117647058
+      },
+      "band": {
+        "low": 0.5,
+        "high": 0.65
+      },
+      "bandDeviation": 0,
+      "engagementShare": 0.3121531005114596,
+      "activityShare": 0.40228239149910977,
+      "engagementDeviation": 0.0014323878008956768
+    },
+    {
+      "cellId": "l15-aggressive-easy",
+      "level": 15,
+      "playstyle": "aggressive",
+      "difficulty": "easy",
+      "enemySlug": "bog-will-stripling",
+      "runs": 50,
+      "resolutionSuccessRate": 1,
+      "winRate": 1,
+      "defeatRate": 0,
+      "friendshipRate": 0,
+      "timeoutRate": 0,
+      "averageRounds": 6.72,
+      "damageRatio": {
+        "playerToEnemy": 0,
+        "playerEfficiency": 37.095238095238095,
+        "enemyEfficiency": 0
+      },
+      "band": {
+        "low": 0.75,
+        "high": 0.88
+      },
+      "bandDeviation": 0.0144,
+      "engagementShare": 0.5120396825396828,
+      "activityShare": 0.5120396825396828,
+      "engagementDeviation": 0
+    },
+    {
+      "cellId": "l15-aggressive-normal",
+      "level": 15,
+      "playstyle": "aggressive",
+      "difficulty": "normal",
+      "enemySlug": "tolltaker-of-the-ford",
+      "runs": 50,
+      "resolutionSuccessRate": 1,
+      "winRate": 1,
+      "defeatRate": 0,
+      "friendshipRate": 0,
+      "timeoutRate": 0,
+      "averageRounds": 43.72,
+      "damageRatio": {
+        "playerToEnemy": 0,
+        "playerEfficiency": 10.121683440073193,
+        "enemyEfficiency": 0
+      },
+      "band": {
+        "low": 0.65,
+        "high": 0.75
+      },
+      "bandDeviation": 0.0625,
+      "engagementShare": 0.33504431346125374,
+      "activityShare": 0.33504431346125374,
+      "engagementDeviation": 0.00022367255984523542
+    },
+    {
+      "cellId": "l15-aggressive-hard",
+      "level": 15,
+      "playstyle": "aggressive",
+      "difficulty": "hard",
+      "enemySlug": "the-market-arbiter",
+      "runs": 50,
+      "resolutionSuccessRate": 1,
+      "winRate": 1,
+      "defeatRate": 0,
+      "friendshipRate": 0,
+      "timeoutRate": 0,
+      "averageRounds": 37.6,
+      "damageRatio": {
+        "playerToEnemy": 667.625,
+        "playerEfficiency": 14.204787234042554,
+        "enemyEfficiency": 0.02127659574468085
+      },
+      "band": {
+        "low": 0.5,
+        "high": 0.65
+      },
+      "bandDeviation": 0.12249999999999998,
+      "engagementShare": 0.6613385917325355,
+      "activityShare": 0.6613385917325355,
+      "engagementDeviation": 0
+    },
+    {
+      "cellId": "l15-defensive-easy",
+      "level": 15,
+      "playstyle": "defensive",
+      "difficulty": "easy",
+      "enemySlug": "tolltaker-of-the-ford",
+      "runs": 50,
+      "resolutionSuccessRate": 0.94,
+      "winRate": 0.94,
+      "defeatRate": 0,
+      "friendshipRate": 0,
+      "timeoutRate": 0.06,
+      "averageRounds": 48.96,
+      "damageRatio": {
+        "playerToEnemy": 0,
+        "playerEfficiency": 7.642156862745098,
+        "enemyEfficiency": 0
+      },
+      "band": {
+        "low": 0.75,
+        "high": 0.88
+      },
+      "bandDeviation": 0.003599999999999993,
+      "engagementShare": 0.2228801358061247,
+      "activityShare": 0.23544263580612473,
+      "engagementDeviation": 0.016159459872669292
+    },
+    {
+      "cellId": "l15-defensive-normal",
+      "level": 15,
+      "playstyle": "defensive",
+      "difficulty": "normal",
+      "enemySlug": "wandering-sophist",
+      "runs": 50,
+      "resolutionSuccessRate": 1,
+      "winRate": 1,
+      "defeatRate": 0,
+      "friendshipRate": 0,
+      "timeoutRate": 0,
+      "averageRounds": 19.32,
+      "damageRatio": {
+        "playerToEnemy": 4342.75,
+        "playerEfficiency": 17.9824016563147,
+        "enemyEfficiency": 0.004140786749482402
+      },
+      "band": {
+        "low": 0.65,
+        "high": 0.75
+      },
+      "bandDeviation": 0.0625,
+      "engagementShare": 0.5559000276882696,
+      "activityShare": 0.5559000276882696,
+      "engagementDeviation": 0
+    },
+    {
+      "cellId": "l15-defensive-hard",
+      "level": 15,
+      "playstyle": "defensive",
+      "difficulty": "hard",
+      "enemySlug": "the-market-arbiter",
+      "runs": 50,
+      "resolutionSuccessRate": 0.72,
+      "winRate": 0.3,
+      "defeatRate": 0,
+      "friendshipRate": 0.42,
+      "timeoutRate": 0.28,
+      "averageRounds": 72.96,
+      "damageRatio": {
+        "playerToEnemy": 10.842816209578388,
+        "playerEfficiency": 7.261239035087719,
+        "enemyEfficiency": 0.6696820175438597
+      },
+      "band": {
+        "low": 0.5,
+        "high": 0.65
+      },
+      "bandDeviation": 0.004899999999999993,
+      "engagementShare": 0.4297609384411267,
+      "activityShare": 0.5349484384411268,
+      "engagementDeviation": 0
+    },
+    {
+      "cellId": "l15-mixed-easy",
+      "level": 15,
+      "playstyle": "mixed",
+      "difficulty": "easy",
+      "enemySlug": "apprentice-heretic",
+      "runs": 50,
+      "resolutionSuccessRate": 0,
+      "winRate": 0,
+      "defeatRate": 0,
+      "friendshipRate": 0,
+      "timeoutRate": 1,
+      "averageRounds": 80,
+      "damageRatio": {
+        "playerToEnemy": 1007.457627118644,
+        "playerEfficiency": 14.86,
+        "enemyEfficiency": 0.01475
+      },
+      "band": {
+        "low": 0.75,
+        "high": 0.88
+      },
+      "bandDeviation": 0.5625,
+      "engagementShare": 0.05106249999999998,
+      "activityShare": 0.20424999999999993,
+      "engagementDeviation": 0.08936362890624998
+    },
+    {
+      "cellId": "l15-mixed-normal",
+      "level": 15,
+      "playstyle": "mixed",
+      "difficulty": "normal",
+      "enemySlug": "thicket-ambusher",
+      "runs": 50,
+      "resolutionSuccessRate": 1,
+      "winRate": 1,
+      "defeatRate": 0,
+      "friendshipRate": 0,
+      "timeoutRate": 0,
+      "averageRounds": 17.08,
+      "damageRatio": {
+        "playerToEnemy": 8.015364916773368,
+        "playerEfficiency": 7.330210772833724,
+        "enemyEfficiency": 0.914519906323185
+      },
+      "band": {
+        "low": 0.65,
+        "high": 0.75
+      },
+      "bandDeviation": 0.0625,
+      "engagementShare": 0.7065734504578497,
+      "activityShare": 0.7065734504578497,
+      "engagementDeviation": 0
+    },
+    {
+      "cellId": "l15-mixed-hard",
+      "level": 15,
+      "playstyle": "mixed",
+      "difficulty": "hard",
+      "enemySlug": "reef-barnacle-colony",
+      "runs": 50,
+      "resolutionSuccessRate": 0,
+      "winRate": 0,
+      "defeatRate": 0,
+      "friendshipRate": 0,
+      "timeoutRate": 1,
+      "averageRounds": 80,
+      "damageRatio": {
+        "playerToEnemy": 22.518248175182478,
+        "playerEfficiency": 2.3137499999999998,
+        "enemyEfficiency": 0.10275000000000001
+      },
+      "band": {
+        "low": 0.5,
+        "high": 0.65
+      },
+      "bandDeviation": 0.25,
+      "engagementShare": 0.053687499999999985,
+      "activityShare": 0.21474999999999994,
+      "engagementDeviation": 0.08780109765625
+    },
+    {
+      "cellId": "l15-strategist-easy",
+      "level": 15,
+      "playstyle": "strategist",
+      "difficulty": "easy",
+      "enemySlug": "bog-will-stripling",
+      "runs": 50,
+      "resolutionSuccessRate": 1,
+      "winRate": 1,
+      "defeatRate": 0,
+      "friendshipRate": 0,
+      "timeoutRate": 0,
+      "averageRounds": 11.66,
+      "damageRatio": {
+        "playerToEnemy": 0,
+        "playerEfficiency": 19.214408233276156,
+        "enemyEfficiency": 0
+      },
+      "band": {
+        "low": 0.75,
+        "high": 0.88
+      },
+      "bandDeviation": 0.0144,
+      "engagementShare": 0.9659479409479408,
+      "activityShare": 0.9659479409479408,
+      "engagementDeviation": 0
+    },
+    {
+      "cellId": "l15-strategist-normal",
+      "level": 15,
+      "playstyle": "strategist",
+      "difficulty": "normal",
+      "enemySlug": "reef-barnacle-colony",
+      "runs": 50,
+      "resolutionSuccessRate": 0,
+      "winRate": 0,
+      "defeatRate": 0,
+      "friendshipRate": 0,
+      "timeoutRate": 1,
+      "averageRounds": 80,
+      "damageRatio": {
+        "playerToEnemy": 36.4270462633452,
+        "playerEfficiency": 2.559,
+        "enemyEfficiency": 0.07025
+      },
+      "band": {
+        "low": 0.65,
+        "high": 0.75
+      },
+      "bandDeviation": 0.42250000000000004,
+      "engagementShare": 0.029062500000000012,
+      "activityShare": 0.11625000000000005,
+      "engagementDeviation": 0.10300087890625
+    },
+    {
+      "cellId": "l15-strategist-hard",
+      "level": 15,
+      "playstyle": "strategist",
+      "difficulty": "hard",
+      "enemySlug": "the-market-arbiter",
+      "runs": 50,
+      "resolutionSuccessRate": 1,
+      "winRate": 1,
+      "defeatRate": 0,
+      "friendshipRate": 0,
+      "timeoutRate": 0,
+      "averageRounds": 42.34,
+      "damageRatio": {
+        "playerToEnemy": 58.72916666666667,
+        "playerEfficiency": 5.326405290505432,
+        "enemyEfficiency": 0.09069437883797826
+      },
+      "band": {
+        "low": 0.5,
+        "high": 0.65
+      },
+      "bandDeviation": 0.12249999999999998,
+      "engagementShare": 0.9398474116808945,
+      "activityShare": 0.9398474116808945,
+      "engagementDeviation": 0
+    },
+    {
+      "cellId": "l30-aggressive-easy",
+      "level": 30,
+      "playstyle": "aggressive",
+      "difficulty": "easy",
+      "enemySlug": "rimeclaw-prowler",
+      "runs": 50,
+      "resolutionSuccessRate": 1,
+      "winRate": 1,
+      "defeatRate": 0,
+      "friendshipRate": 0,
+      "timeoutRate": 0,
+      "averageRounds": 21.24,
+      "damageRatio": {
+        "playerToEnemy": 0,
+        "playerEfficiency": 30.031073446327685,
+        "enemyEfficiency": 0
+      },
+      "band": {
+        "low": 0.75,
+        "high": 0.88
+      },
+      "bandDeviation": 0.0144,
+      "engagementShare": 0.5098353078889825,
+      "activityShare": 0.5098353078889825,
+      "engagementDeviation": 0
+    },
+    {
+      "cellId": "l30-aggressive-normal",
+      "level": 30,
+      "playstyle": "aggressive",
+      "difficulty": "normal",
+      "enemySlug": "rimeclaw-prowler",
+      "runs": 50,
+      "resolutionSuccessRate": 0.74,
+      "winRate": 0.74,
+      "defeatRate": 0,
+      "friendshipRate": 0,
+      "timeoutRate": 0.26,
+      "averageRounds": 68.18,
+      "damageRatio": {
+        "playerToEnemy": 44.96185286103542,
+        "playerEfficiency": 9.680844822528599,
+        "enemyEfficiency": 0.2153124083308888
+      },
+      "band": {
+        "low": 0.65,
+        "high": 0.75
+      },
+      "bandDeviation": 0,
+      "engagementShare": 0.603325316681048,
+      "activityShare": 0.7437628166810484,
+      "engagementDeviation": 0
+    },
+    {
+      "cellId": "l30-aggressive-hard",
+      "level": 30,
+      "playstyle": "aggressive",
+      "difficulty": "hard",
+      "enemySlug": "apostate-abbot",
+      "runs": 50,
+      "resolutionSuccessRate": 0,
+      "winRate": 0,
+      "defeatRate": 0,
+      "friendshipRate": 0,
+      "timeoutRate": 1,
+      "averageRounds": 80,
+      "damageRatio": {
+        "playerToEnemy": 19.188326493388054,
+        "playerEfficiency": 21.04,
+        "enemyEfficiency": 1.0965
+      },
+      "band": {
+        "low": 0.5,
+        "high": 0.65
+      },
+      "bandDeviation": 0.25,
+      "engagementShare": 0.17606249999999993,
+      "activityShare": 0.7042499999999997,
+      "engagementDeviation": 0.030254253906250018
+    },
+    {
+      "cellId": "l30-defensive-easy",
+      "level": 30,
+      "playstyle": "defensive",
+      "difficulty": "easy",
+      "enemySlug": "rimeclaw-prowler",
+      "runs": 50,
+      "resolutionSuccessRate": 0.98,
+      "winRate": 0.98,
+      "defeatRate": 0,
+      "friendshipRate": 0,
+      "timeoutRate": 0.02,
+      "averageRounds": 46.2,
+      "damageRatio": {
+        "playerToEnemy": 0,
+        "playerEfficiency": 14.657575757575756,
+        "enemyEfficiency": 0
+      },
+      "band": {
+        "low": 0.75,
+        "high": 0.88
+      },
+      "bandDeviation": 0.009999999999999995,
+      "engagementShare": 0.27190516315366325,
+      "activityShare": 0.2756551631536633,
+      "engagementDeviation": 0.006098803542055952
+    },
+    {
+      "cellId": "l30-defensive-normal",
+      "level": 30,
+      "playstyle": "defensive",
+      "difficulty": "normal",
+      "enemySlug": "contrarian-revenant",
+      "runs": 50,
+      "resolutionSuccessRate": 0.24,
+      "winRate": 0.24,
+      "defeatRate": 0,
+      "friendshipRate": 0,
+      "timeoutRate": 0.76,
+      "averageRounds": 77.9,
+      "damageRatio": {
+        "playerToEnemy": 99.49236641221374,
+        "playerEfficiency": 13.384852374839538,
+        "enemyEfficiency": 0.13453145057766366
+      },
+      "band": {
+        "low": 0.65,
+        "high": 0.75
+      },
+      "bandDeviation": 0.16810000000000003,
+      "engagementShare": 0.25675518762544725,
+      "activityShare": 0.5957551876254474,
+      "engagementDeviation": 0.008694595034765542
+    },
+    {
+      "cellId": "l30-defensive-hard",
+      "level": 30,
+      "playstyle": "defensive",
+      "difficulty": "hard",
+      "enemySlug": "apostate-abbot",
+      "runs": 50,
+      "resolutionSuccessRate": 0,
+      "winRate": 0,
+      "defeatRate": 0,
+      "friendshipRate": 0,
+      "timeoutRate": 1,
+      "averageRounds": 80,
+      "damageRatio": {
+        "playerToEnemy": 5.809700155298053,
+        "playerEfficiency": 12.158249999999999,
+        "enemyEfficiency": 2.0927499999999997
+      },
+      "band": {
+        "low": 0.5,
+        "high": 0.65
+      },
+      "bandDeviation": 0.25,
+      "engagementShare": 0.08425,
+      "activityShare": 0.337,
+      "engagementDeviation": 0.07062306249999999
+    },
+    {
+      "cellId": "l30-mixed-easy",
+      "level": 30,
+      "playstyle": "mixed",
+      "difficulty": "easy",
+      "enemySlug": "rimeclaw-prowler",
+      "runs": 50,
+      "resolutionSuccessRate": 0.92,
+      "winRate": 0.92,
+      "defeatRate": 0,
+      "friendshipRate": 0,
+      "timeoutRate": 0.08,
+      "averageRounds": 56,
+      "damageRatio": {
+        "playerToEnemy": 26.484958979033728,
+        "playerEfficiency": 10.376428571428573,
+        "enemyEfficiency": 0.3917857142857143
+      },
+      "band": {
+        "low": 0.75,
+        "high": 0.88
+      },
+      "bandDeviation": 0.001600000000000003,
+      "engagementShare": 0.5062632247090705,
+      "activityShare": 0.5345757247090704,
+      "engagementDeviation": 0
+    },
+    {
+      "cellId": "l30-mixed-normal",
+      "level": 30,
+      "playstyle": "mixed",
+      "difficulty": "normal",
+      "enemySlug": "iron-covenanter",
+      "runs": 50,
+      "resolutionSuccessRate": 0,
+      "winRate": 0,
+      "defeatRate": 0,
+      "friendshipRate": 0,
+      "timeoutRate": 1,
+      "averageRounds": 80,
+      "damageRatio": {
+        "playerToEnemy": 23.65032679738562,
+        "playerEfficiency": 7.237,
+        "enemyEfficiency": 0.306
+      },
+      "band": {
+        "low": 0.65,
+        "high": 0.75
+      },
+      "bandDeviation": 0.42250000000000004,
+      "engagementShare": 0.13168749999999999,
+      "activityShare": 0.5267499999999999,
+      "engagementDeviation": 0.04766034765625
+    },
+    {
+      "cellId": "l30-mixed-hard",
+      "level": 30,
+      "playstyle": "mixed",
+      "difficulty": "hard",
+      "enemySlug": "the-tithewarden",
+      "runs": 50,
+      "resolutionSuccessRate": 0,
+      "winRate": 0,
+      "defeatRate": 0,
+      "friendshipRate": 0,
+      "timeoutRate": 1,
+      "averageRounds": 80,
+      "damageRatio": {
+        "playerToEnemy": 1.468621163536418,
+        "playerEfficiency": 3.2060000000000004,
+        "enemyEfficiency": 2.183
+      },
+      "band": {
+        "low": 0.5,
+        "high": 0.65
+      },
+      "bandDeviation": 0.25,
+      "engagementShare": 0.13649999999999998,
+      "activityShare": 0.5459999999999999,
+      "engagementDeviation": 0.04558225
+    },
+    {
+      "cellId": "l30-strategist-easy",
+      "level": 30,
+      "playstyle": "strategist",
+      "difficulty": "easy",
+      "enemySlug": "rimeclaw-prowler",
+      "runs": 50,
+      "resolutionSuccessRate": 1,
+      "winRate": 1,
+      "defeatRate": 0,
+      "friendshipRate": 0,
+      "timeoutRate": 0,
+      "averageRounds": 26.48,
+      "damageRatio": {
+        "playerToEnemy": 0,
+        "playerEfficiency": 25.830815709969787,
+        "enemyEfficiency": 0
+      },
+      "band": {
+        "low": 0.75,
+        "high": 0.88
+      },
+      "bandDeviation": 0.0144,
+      "engagementShare": 0.7044583698792577,
+      "activityShare": 0.7044583698792577,
+      "engagementDeviation": 0
+    },
+    {
+      "cellId": "l30-strategist-normal",
+      "level": 30,
+      "playstyle": "strategist",
+      "difficulty": "normal",
+      "enemySlug": "rimeclaw-prowler",
+      "runs": 50,
+      "resolutionSuccessRate": 1,
+      "winRate": 1,
+      "defeatRate": 0,
+      "friendshipRate": 0,
+      "timeoutRate": 0,
+      "averageRounds": 26.96,
+      "damageRatio": {
+        "playerToEnemy": 0,
+        "playerEfficiency": 35.14910979228487,
+        "enemyEfficiency": 0
+      },
+      "band": {
+        "low": 0.65,
+        "high": 0.75
+      },
+      "bandDeviation": 0.0625,
+      "engagementShare": 0.7503064610454185,
+      "activityShare": 0.7503064610454185,
+      "engagementDeviation": 0
+    },
+    {
+      "cellId": "l30-strategist-hard",
+      "level": 30,
+      "playstyle": "strategist",
+      "difficulty": "hard",
+      "enemySlug": "the-tithewarden",
+      "runs": 50,
+      "resolutionSuccessRate": 0.04,
+      "winRate": 0.04,
+      "defeatRate": 0,
+      "friendshipRate": 0,
+      "timeoutRate": 0.96,
+      "averageRounds": 79.6,
+      "damageRatio": {
+        "playerToEnemy": 157.5140186915888,
+        "playerEfficiency": 12.704020100502513,
+        "enemyEfficiency": 0.0806532663316583
+      },
+      "band": {
+        "low": 0.5,
+        "high": 0.65
+      },
+      "bandDeviation": 0.2116,
+      "engagementShare": 0.17430497542997547,
+      "activityShare": 0.6209299754299755,
+      "engagementDeviation": 0.030868741658661516
+    }
+  ],
+  "experiments": [
+    {
+      "paramId": "effect.maxIntensity",
+      "oldValue": 10,
+      "newValue": 11,
+      "winner": "A",
+      "deltaHealth": 0.000049942207198450106,
+      "significant": false,
+      "confidence": "low",
+      "regression": false,
+      "engagementRegression": false,
+      "witnessRegression": false,
+      "stats": {
+        "meanDelta": 0.00004994220719847092,
+        "stdErr": 0.00004326069944339373,
+        "n": 36,
+        "ciMargin": 0.0000847909709090517
+      },
+      "kept": false,
+      "verifyPassed": false
+    },
+    {
+      "paramId": "effect.maxDuration",
+      "oldValue": 10,
+      "newValue": 11,
+      "winner": "A",
+      "deltaHealth": 0.00006666666666665932,
+      "significant": false,
+      "confidence": "low",
+      "regression": false,
+      "engagementRegression": false,
+      "witnessRegression": false,
+      "stats": {
+        "meanDelta": 0.00006666666666666664,
+        "stdErr": 0.00006666666666666663,
+        "n": 36,
+        "ciMargin": 0.0001306666666666666
+      },
+      "kept": false,
+      "verifyPassed": false
+    },
+    {
+      "paramId": "effect.buff_regeneration.duration",
+      "oldValue": 6,
+      "newValue": 7,
+      "winner": "A",
+      "deltaHealth": 0,
+      "significant": false,
+      "confidence": "low",
+      "regression": false,
+      "engagementRegression": false,
+      "witnessRegression": false,
+      "stats": {
+        "meanDelta": 0,
+        "stdErr": 0,
+        "n": 36,
+        "ciMargin": 0
+      },
+      "kept": false,
+      "verifyPassed": false
+    },
+    {
+      "paramId": "effect.tier1_heart_defend.healthPerRound",
+      "oldValue": 2,
+      "newValue": 3,
+      "winner": "A",
+      "deltaHealth": -0.00584709972530692,
+      "significant": false,
+      "confidence": "low",
+      "regression": false,
+      "engagementRegression": false,
+      "witnessRegression": false,
+      "stats": {
+        "meanDelta": -0.005847099725306887,
+        "stdErr": 0.005226776905543953,
+        "n": 36,
+        "ciMargin": 0.010244482734866148
+      },
+      "kept": false,
+      "verifyPassed": false
+    },
+    {
+      "paramId": "effect.tier1_body_attack.duration",
+      "oldValue": 3,
+      "newValue": 4,
+      "winner": "A",
+      "deltaHealth": -0.0019496859222699614,
+      "significant": false,
+      "confidence": "low",
+      "regression": false,
+      "engagementRegression": false,
+      "witnessRegression": false,
+      "stats": {
+        "meanDelta": -0.001949685922269943,
+        "stdErr": 0.004142408782528331,
+        "n": 36,
+        "ciMargin": 0.008119121213755529
+      },
+      "kept": false,
+      "verifyPassed": false
+    }
+  ]
+}

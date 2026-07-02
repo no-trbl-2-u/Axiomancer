@@ -1,0 +1,22 @@
+[
+  { "presetId": "sage" },
+  { "tab": "debug" },
+  { "slug": "coastal-tyrant" },
+  { "stance": "heart" },
+  { "action": "defend" },
+  { "stance": "heart" },
+  { "action": "defend" },
+  { "stance": "heart" },
+  { "action": "defend" },
+  { "stance": "heart" },
+  { "action": "defend" },
+  { "stance": "heart" },
+  { "action": "defend" },
+  { "stance": "heart" },
+  { "action": "defend" },
+  { "stance": "heart" },
+  { "action": "defend" },
+  { "stance": "heart" },
+  { "action": "defend" },
+  { "tab": "quit" }
+]

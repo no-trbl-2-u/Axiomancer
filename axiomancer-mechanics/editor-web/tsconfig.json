@@ -1,0 +1,31 @@
+{
+  "compilerOptions": {
+    /* Standalone — does NOT extend the parent commonjs tsconfig. */
+    "target": "ES2020",
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "jsx": "react-jsx",
+
+    /* We import the REAL data submodules live from ../src. */
+    "baseUrl": ".",
+    "paths": {
+      "@mechanics/*": ["../src/*"]
+    },
+
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "isolatedModules": true,
+    "useDefineForClassFields": true,
+
+    "strict": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+
+    /* The parent tsconfig pins `types: ["node"]`; here we want a clean browser
+       graph with no node globals so the bundle stays browser-safe. */
+    "types": []
+  },
+  "include": ["src", "vite.config.ts"]
+}

@@ -1,0 +1,22 @@
+[
+  { "presetId": "wanderer" },
+  { "tab": "debug" },
+  { "slug": "sandbag" },
+  { "stance": "body" }, { "action": "attack" },
+  { "stance": "body" }, { "action": "attack" },
+  { "stance": "body" }, { "action": "attack" },
+  { "stance": "body" }, { "action": "attack" },
+  { "stance": "body" }, { "action": "attack" },
+  { "stance": "body" }, { "action": "item" }, { "itemId": "healing-potion" },
+  { "stance": "body" }, { "action": "attack" },
+  { "stance": "body" }, { "action": "attack" },
+  { "stance": "body" }, { "action": "attack" },
+  { "stance": "body" }, { "action": "attack" },
+  { "stance": "body" }, { "action": "attack" },
+  { "stance": "body" }, { "action": "attack" },
+  { "stance": "body" }, { "action": "attack" },
+  { "stance": "body" }, { "action": "attack" },
+  { "stance": "body" }, { "action": "attack" },
+  { "stance": "body" }, { "action": "attack" },
+  { "tab": "quit" }
+]

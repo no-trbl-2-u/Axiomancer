@@ -1,0 +1,766 @@
+{
+  "timestamp": "2026-06-08T00-01-57-425Z",
+  "focus": {},
+  "engagementFloor": 0.35,
+  "baselineSummary": "2/48 cells in band; aggregate 0.1350 (band 0.1157 + engage 0.0193); mean engagement 52% (15/48 cells below floor); worst defeat 98%",
+  "cooldown": [
+    "combat.skillStatMultiplier:up",
+    "combat.healthPerStat:up",
+    "combat.resourceGen.defend:up"
+  ],
+  "legalTunables": [
+    {
+      "id": "enemy.statPerLevel",
+      "current": 3,
+      "min": 2,
+      "max": 6,
+      "step": 0.5,
+      "effect": {
+        "difficulty": "raises"
+      },
+      "rationale": "Global enemy power scaling; the headline difficulty knob."
+    },
+    {
+      "id": "enemy.gearTierPerLevel",
+      "current": 0.02,
+      "min": 0,
+      "max": 0.05,
+      "step": 0.005,
+      "effect": {
+        "difficulty": "raises"
+      },
+      "rationale": "Off-budget gear tier counterweight to player power accumulation."
+    },
+    {
+      "id": "combat.skillStatMultiplier",
+      "current": 0.5,
+      "min": 0.25,
+      "max": 1,
+      "step": 0.05,
+      "effect": {
+        "difficulty": "lowers",
+        "engagement": "raises"
+      },
+      "rationale": "Scales skill damage off the scaling stat; a value, not a formula."
+    },
+    {
+      "id": "combat.healthPerStat",
+      "current": 5,
+      "min": 3,
+      "max": 8,
+      "step": 1,
+      "effect": {
+        "difficulty": "lowers",
+        "engagement": "raises"
+      },
+      "rationale": "HP per base-stat point; governs time-to-kill on both sides."
+    },
+    {
+      "id": "combat.defense.advantage",
+      "current": 2,
+      "min": 1.5,
+      "max": 3,
+      "step": 0.25,
+      "effect": {
+        "difficulty": "lowers",
+        "engagement": "lowers"
+      },
+      "rationale": "Reward for defending with the advantaged stance."
+    },
+    {
+      "id": "combat.defense.neutral",
+      "current": 1.5,
+      "min": 1,
+      "max": 2.5,
+      "step": 0.25,
+      "effect": {
+        "difficulty": "lowers",
+        "engagement": "lowers"
+      },
+      "rationale": "Defending with a neutral stance."
+    },
+    {
+      "id": "combat.resourceGen.attackHit",
+      "current": 3,
+      "min": 1,
+      "max": 6,
+      "step": 1,
+      "effect": {
+        "difficulty": "lowers",
+        "engagement": "raises"
+      },
+      "rationale": "Tokens generated on a landed attack; paces skill access."
+    },
+    {
+      "id": "combat.resourceGen.defend",
+      "current": 5,
+      "min": 2,
+      "max": 8,
+      "step": 1,
+      "effect": {
+        "difficulty": "lowers",
+        "engagement": "raises"
+      },
+      "rationale": "Tokens generated on defend; paces defensive playstyles."
+    },
+    {
+      "id": "combat.friendshipCounterMax",
+      "current": 3,
+      "min": 2,
+      "max": 6,
+      "step": 1,
+      "effect": {
+        "difficulty": "raises"
+      },
+      "rationale": "Both-defend rounds needed for a peaceful resolution."
+    },
+    {
+      "id": "effect.maxIntensity",
+      "current": 10,
+      "min": 5,
+      "max": 20,
+      "step": 1,
+      "effect": {
+        "engagement": "raises"
+      },
+      "rationale": "Ceiling on effect intensity stacking."
+    },
+    {
+      "id": "effect.maxDuration",
+      "current": 10,
+      "min": 5,
+      "max": 20,
+      "step": 1,
+      "effect": {
+        "engagement": "raises"
+      },
+      "rationale": "Ceiling on effect remaining-duration stacking."
+    },
+    {
+      "id": "progression.statPointsPerLevel",
+      "current": 3,
+      "min": 1,
+      "max": 6,
+      "step": 1,
+      "effect": {
+        "difficulty": "lowers"
+      },
+      "rationale": "Stat points granted per level; player power curve."
+    },
+    {
+      "id": "effect.buff_regeneration.duration",
+      "current": 6,
+      "min": 1,
+      "max": 8,
+      "step": 1,
+      "effect": {
+        "difficulty": "lowers",
+        "engagement": "raises"
+      },
+      "rationale": "Base duration of the regeneration buff."
+    },
+    {
+      "id": "effect.tier1_heart_defend.healthPerRound",
+      "current": 2,
+      "min": 1,
+      "max": 4,
+      "step": 1,
+      "effect": {
+        "difficulty": "lowers",
+        "engagement": "raises"
+      },
+      "rationale": "Base healing per round for tier 1 Heart self-buff - crucial for L1 survival."
+    },
+    {
+      "id": "effect.tier1_body_attack.duration",
+      "current": 3,
+      "min": 1,
+      "max": 5,
+      "step": 1,
+      "effect": {
+        "difficulty": "lowers",
+        "engagement": "raises"
+      },
+      "rationale": "Base duration for tier 1 Body self-buff - impacts early game viability."
+    },
+    {
+      "id": "effect.debuff_confusion.rollModifier",
+      "current": -5,
+      "min": -8,
+      "max": -2,
+      "step": 1,
+      "effect": {
+        "difficulty": "raises",
+        "engagement": "raises"
+      },
+      "rationale": "Roll penalty for confusion debuff - key strategist control effect."
+    },
+    {
+      "id": "effect.debuff_fear.rollModifier",
+      "current": -4,
+      "min": -6,
+      "max": -2,
+      "step": 1,
+      "effect": {
+        "difficulty": "raises",
+        "engagement": "raises"
+      },
+      "rationale": "Roll penalty for fear debuff - important for status-effect engagement."
+    },
+    {
+      "id": "effect.resolutionDebuffIntensityThreshold",
+      "current": 8,
+      "min": 4,
+      "max": 15,
+      "step": 1,
+      "effect": {
+        "difficulty": "lowers",
+        "engagement": "raises"
+      },
+      "rationale": "Combined debuff/control intensity needed to force saturation yield (friendship route)."
+    },
+    {
+      "id": "effect.resolutionDotDamageThreshold",
+      "current": 5,
+      "min": 2,
+      "max": 12,
+      "step": 1,
+      "effect": {
+        "difficulty": "lowers",
+        "engagement": "raises"
+      },
+      "rationale": "Minimum DoT damage per round to force erosion victory route."
+    }
+  ],
+  "cells": [
+    {
+      "cellId": "l1-aggressive-easy",
+      "difficulty": "easy",
+      "band": {
+        "low": 0.75,
+        "high": 0.88
+      },
+      "resolutionSuccessRate": 1,
+      "defeatRate": 0,
+      "engagementShare": 0.11666666666666668
+    },
+    {
+      "cellId": "l1-aggressive-normal",
+      "difficulty": "normal",
+      "band": {
+        "low": 0.65,
+        "high": 0.75
+      },
+      "resolutionSuccessRate": 0.96,
+      "defeatRate": 0.04,
+      "engagementShare": 0.36066666666666664
+    },
+    {
+      "cellId": "l1-aggressive-hard",
+      "difficulty": "hard",
+      "band": {
+        "low": 0.5,
+        "high": 0.65
+      },
+      "resolutionSuccessRate": 0.78,
+      "defeatRate": 0.22,
+      "engagementShare": 0.3713412698412697
+    },
+    {
+      "cellId": "l1-defensive-easy",
+      "difficulty": "easy",
+      "band": {
+        "low": 0.75,
+        "high": 0.88
+      },
+      "resolutionSuccessRate": 0.86,
+      "defeatRate": 0.14,
+      "engagementShare": 0.13
+    },
+    {
+      "cellId": "l1-defensive-normal",
+      "difficulty": "normal",
+      "band": {
+        "low": 0.65,
+        "high": 0.75
+      },
+      "resolutionSuccessRate": 0.94,
+      "defeatRate": 0.06,
+      "engagementShare": 0.07666666666666667
+    },
+    {
+      "cellId": "l1-defensive-hard",
+      "difficulty": "hard",
+      "band": {
+        "low": 0.5,
+        "high": 0.65
+      },
+      "resolutionSuccessRate": 0.32,
+      "defeatRate": 0.68,
+      "engagementShare": 0.04355555555555555
+    },
+    {
+      "cellId": "l1-mixed-easy",
+      "difficulty": "easy",
+      "band": {
+        "low": 0.75,
+        "high": 0.88
+      },
+      "resolutionSuccessRate": 1,
+      "defeatRate": 0,
+      "engagementShare": 0.18
+    },
+    {
+      "cellId": "l1-mixed-normal",
+      "difficulty": "normal",
+      "band": {
+        "low": 0.65,
+        "high": 0.75
+      },
+      "resolutionSuccessRate": 1,
+      "defeatRate": 0,
+      "engagementShare": 0.10333333333333333
+    },
+    {
+      "cellId": "l1-mixed-hard",
+      "difficulty": "hard",
+      "band": {
+        "low": 0.5,
+        "high": 0.65
+      },
+      "resolutionSuccessRate": 0.44,
+      "defeatRate": 0.56,
+      "engagementShare": 0.4160103200892674
+    },
+    {
+      "cellId": "l1-strategist-easy",
+      "difficulty": "easy",
+      "band": {
+        "low": 0.75,
+        "high": 0.88
+      },
+      "resolutionSuccessRate": 0.98,
+      "defeatRate": 0.02,
+      "engagementShare": 0.085
+    },
+    {
+      "cellId": "l1-strategist-normal",
+      "difficulty": "normal",
+      "band": {
+        "low": 0.65,
+        "high": 0.75
+      },
+      "resolutionSuccessRate": 0.9,
+      "defeatRate": 0.1,
+      "engagementShare": 0.08
+    },
+    {
+      "cellId": "l1-strategist-hard",
+      "difficulty": "hard",
+      "band": {
+        "low": 0.5,
+        "high": 0.65
+      },
+      "resolutionSuccessRate": 0.7,
+      "defeatRate": 0.3,
+      "engagementShare": 0.40852558552558554
+    },
+    {
+      "cellId": "l15-aggressive-easy",
+      "difficulty": "easy",
+      "band": {
+        "low": 0.75,
+        "high": 0.88
+      },
+      "resolutionSuccessRate": 1,
+      "defeatRate": 0,
+      "engagementShare": 0.5120396825396828
+    },
+    {
+      "cellId": "l15-aggressive-normal",
+      "difficulty": "normal",
+      "band": {
+        "low": 0.65,
+        "high": 0.75
+      },
+      "resolutionSuccessRate": 1,
+      "defeatRate": 0,
+      "engagementShare": 0.33504431346125374
+    },
+    {
+      "cellId": "l15-aggressive-hard",
+      "difficulty": "hard",
+      "band": {
+        "low": 0.5,
+        "high": 0.65
+      },
+      "resolutionSuccessRate": 1,
+      "defeatRate": 0,
+      "engagementShare": 0.6613385917325355
+    },
+    {
+      "cellId": "l15-defensive-easy",
+      "difficulty": "easy",
+      "band": {
+        "low": 0.75,
+        "high": 0.88
+      },
+      "resolutionSuccessRate": 0.94,
+      "defeatRate": 0,
+      "engagementShare": 0.23544263580612473
+    },
+    {
+      "cellId": "l15-defensive-normal",
+      "difficulty": "normal",
+      "band": {
+        "low": 0.65,
+        "high": 0.75
+      },
+      "resolutionSuccessRate": 1,
+      "defeatRate": 0,
+      "engagementShare": 0.5559000276882696
+    },
+    {
+      "cellId": "l15-defensive-hard",
+      "difficulty": "hard",
+      "band": {
+        "low": 0.5,
+        "high": 0.65
+      },
+      "resolutionSuccessRate": 0.72,
+      "defeatRate": 0,
+      "engagementShare": 0.5349484384411268
+    },
+    {
+      "cellId": "l15-mixed-easy",
+      "difficulty": "easy",
+      "band": {
+        "low": 0.75,
+        "high": 0.88
+      },
+      "resolutionSuccessRate": 0,
+      "defeatRate": 0,
+      "engagementShare": 0.20424999999999993
+    },
+    {
+      "cellId": "l15-mixed-normal",
+      "difficulty": "normal",
+      "band": {
+        "low": 0.65,
+        "high": 0.75
+      },
+      "resolutionSuccessRate": 1,
+      "defeatRate": 0,
+      "engagementShare": 0.7065734504578497
+    },
+    {
+      "cellId": "l15-mixed-hard",
+      "difficulty": "hard",
+      "band": {
+        "low": 0.5,
+        "high": 0.65
+      },
+      "resolutionSuccessRate": 0,
+      "defeatRate": 0,
+      "engagementShare": 0.21474999999999994
+    },
+    {
+      "cellId": "l15-strategist-easy",
+      "difficulty": "easy",
+      "band": {
+        "low": 0.75,
+        "high": 0.88
+      },
+      "resolutionSuccessRate": 1,
+      "defeatRate": 0,
+      "engagementShare": 0.9659479409479408
+    },
+    {
+      "cellId": "l15-strategist-normal",
+      "difficulty": "normal",
+      "band": {
+        "low": 0.65,
+        "high": 0.75
+      },
+      "resolutionSuccessRate": 0,
+      "defeatRate": 0,
+      "engagementShare": 0.11625000000000005
+    },
+    {
+      "cellId": "l15-strategist-hard",
+      "difficulty": "hard",
+      "band": {
+        "low": 0.5,
+        "high": 0.65
+      },
+      "resolutionSuccessRate": 0.04,
+      "defeatRate": 0,
+      "engagementShare": 0.8716666666666667
+    },
+    {
+      "cellId": "l30-aggressive-easy",
+      "difficulty": "easy",
+      "band": {
+        "low": 0.75,
+        "high": 0.88
+      },
+      "resolutionSuccessRate": 1,
+      "defeatRate": 0,
+      "engagementShare": 0.5098353078889825
+    },
+    {
+      "cellId": "l30-aggressive-normal",
+      "difficulty": "normal",
+      "band": {
+        "low": 0.65,
+        "high": 0.75
+      },
+      "resolutionSuccessRate": 0.74,
+      "defeatRate": 0,
+      "engagementShare": 0.7437628166810484
+    },
+    {
+      "cellId": "l30-aggressive-hard",
+      "difficulty": "hard",
+      "band": {
+        "low": 0.5,
+        "high": 0.65
+      },
+      "resolutionSuccessRate": 0,
+      "defeatRate": 0,
+      "engagementShare": 0.7042499999999997
+    },
+    {
+      "cellId": "l30-defensive-easy",
+      "difficulty": "easy",
+      "band": {
+        "low": 0.75,
+        "high": 0.88
+      },
+      "resolutionSuccessRate": 0.98,
+      "defeatRate": 0,
+      "engagementShare": 0.2756551631536633
+    },
+    {
+      "cellId": "l30-defensive-normal",
+      "difficulty": "normal",
+      "band": {
+        "low": 0.65,
+        "high": 0.75
+      },
+      "resolutionSuccessRate": 0.24,
+      "defeatRate": 0,
+      "engagementShare": 0.5957551876254474
+    },
+    {
+      "cellId": "l30-defensive-hard",
+      "difficulty": "hard",
+      "band": {
+        "low": 0.5,
+        "high": 0.65
+      },
+      "resolutionSuccessRate": 0,
+      "defeatRate": 0,
+      "engagementShare": 0.337
+    },
+    {
+      "cellId": "l30-mixed-easy",
+      "difficulty": "easy",
+      "band": {
+        "low": 0.75,
+        "high": 0.88
+      },
+      "resolutionSuccessRate": 0.92,
+      "defeatRate": 0,
+      "engagementShare": 0.5345757247090704
+    },
+    {
+      "cellId": "l30-mixed-normal",
+      "difficulty": "normal",
+      "band": {
+        "low": 0.65,
+        "high": 0.75
+      },
+      "resolutionSuccessRate": 0,
+      "defeatRate": 0,
+      "engagementShare": 0.5267499999999999
+    },
+    {
+      "cellId": "l30-mixed-hard",
+      "difficulty": "hard",
+      "band": {
+        "low": 0.5,
+        "high": 0.65
+      },
+      "resolutionSuccessRate": 0,
+      "defeatRate": 0,
+      "engagementShare": 0.5459999999999999
+    },
+    {
+      "cellId": "l30-strategist-easy",
+      "difficulty": "easy",
+      "band": {
+        "low": 0.75,
+        "high": 0.88
+      },
+      "resolutionSuccessRate": 1,
+      "defeatRate": 0,
+      "engagementShare": 0.7044583698792577
+    },
+    {
+      "cellId": "l30-strategist-normal",
+      "difficulty": "normal",
+      "band": {
+        "low": 0.65,
+        "high": 0.75
+      },
+      "resolutionSuccessRate": 1,
+      "defeatRate": 0,
+      "engagementShare": 0.7503064610454185
+    },
+    {
+      "cellId": "l30-strategist-hard",
+      "difficulty": "hard",
+      "band": {
+        "low": 0.5,
+        "high": 0.65
+      },
+      "resolutionSuccessRate": 0.04,
+      "defeatRate": 0,
+      "engagementShare": 0.6209299754299755
+    },
+    {
+      "cellId": "l50-aggressive-easy",
+      "difficulty": "easy",
+      "band": {
+        "low": 0.75,
+        "high": 0.88
+      },
+      "resolutionSuccessRate": 1,
+      "defeatRate": 0,
+      "engagementShare": 0.9277939101645607
+    },
+    {
+      "cellId": "l50-aggressive-normal",
+      "difficulty": "normal",
+      "band": {
+        "low": 0.65,
+        "high": 0.75
+      },
+      "resolutionSuccessRate": 1,
+      "defeatRate": 0,
+      "engagementShare": 0.8170242400631196
+    },
+    {
+      "cellId": "l50-aggressive-hard",
+      "difficulty": "hard",
+      "band": {
+        "low": 0.5,
+        "high": 0.65
+      },
+      "resolutionSuccessRate": 0,
+      "defeatRate": 0.98,
+      "engagementShare": 0.9604820760312254
+    },
+    {
+      "cellId": "l50-defensive-easy",
+      "difficulty": "easy",
+      "band": {
+        "low": 0.75,
+        "high": 0.88
+      },
+      "resolutionSuccessRate": 1,
+      "defeatRate": 0,
+      "engagementShare": 0.8179234093107881
+    },
+    {
+      "cellId": "l50-defensive-normal",
+      "difficulty": "normal",
+      "band": {
+        "low": 0.65,
+        "high": 0.75
+      },
+      "resolutionSuccessRate": 0.96,
+      "defeatRate": 0,
+      "engagementShare": 0.8250887749800324
+    },
+    {
+      "cellId": "l50-defensive-hard",
+      "difficulty": "hard",
+      "band": {
+        "low": 0.5,
+        "high": 0.65
+      },
+      "resolutionSuccessRate": 0.06,
+      "defeatRate": 0,
+      "engagementShare": 0.9225934065934066
+    },
+    {
+      "cellId": "l50-mixed-easy",
+      "difficulty": "easy",
+      "band": {
+        "low": 0.75,
+        "high": 0.88
+      },
+      "resolutionSuccessRate": 0.4,
+      "defeatRate": 0,
+      "engagementShare": 0.94583738182068
+    },
+    {
+      "cellId": "l50-mixed-normal",
+      "difficulty": "normal",
+      "band": {
+        "low": 0.65,
+        "high": 0.75
+      },
+      "resolutionSuccessRate": 0,
+      "defeatRate": 0,
+      "engagementShare": 0.5120000000000001
+    },
+    {
+      "cellId": "l50-mixed-hard",
+      "difficulty": "hard",
+      "band": {
+        "low": 0.5,
+        "high": 0.65
+      },
+      "resolutionSuccessRate": 0,
+      "defeatRate": 0,
+      "engagementShare": 0.6797500000000001
+    },
+    {
+      "cellId": "l50-strategist-easy",
+      "difficulty": "easy",
+      "band": {
+        "low": 0.75,
+        "high": 0.88
+      },
+      "resolutionSuccessRate": 0.7,
+      "defeatRate": 0,
+      "engagementShare": 0.7899003216034979
+    },
+    {
+      "cellId": "l50-strategist-normal",
+      "difficulty": "normal",
+      "band": {
+        "low": 0.65,
+        "high": 0.75
+      },
+      "resolutionSuccessRate": 0.18,
+      "defeatRate": 0,
+      "engagementShare": 0.7511697358197362
+    },
+    {
+      "cellId": "l50-strategist-hard",
+      "difficulty": "hard",
+      "band": {
+        "low": 0.5,
+        "high": 0.65
+      },
+      "resolutionSuccessRate": 0,
+      "defeatRate": 0.82,
+      "engagementShare": 0.6785124120346943
+    }
+  ],
+  "candidatesContract": "[{ \"paramId\": <legal id>, \"proposedValue\": <number>, \"rationale\": \"...\" }]"
+}

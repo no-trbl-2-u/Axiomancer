@@ -1,0 +1,10 @@
+{
+  "id": "sage-anchor-easy",
+  "description": "Phase 121 Easy anchor: Sage vs Coastal Tyrant. Target: 100% actual wins across all policies.",
+  "preset": "sage",
+  "enemy": "coastal-tyrant",
+  "runs": 25,
+  "maxRounds": 50,
+  "seed": "phase-121-easy-v1",
+  "policies": ["aggressive", "defensive", "mixed", "strategist"]
+}

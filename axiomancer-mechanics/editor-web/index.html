@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+<title>Axiomancer — Card Workshop</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Pirata+One&family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&family=Bebas+Neue&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    background:
+      radial-gradient(ellipse at 50% 0%, #161210 0%, #0a0908 55%, #060504 100%);
+    display: flex; align-items: stretch; justify-content: center;
+    min-height: 100vh;
+    font-family: "IM Fell English", Georgia, serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  #root { display: flex; justify-content: center; width: 100%; }
+  /* scrollbars — subtle, on-brand */
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #2a2620; border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: #3a3530; }
+  input::placeholder { color: #5a554c; }
+  button { -webkit-tap-highlight-color: transparent; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="module" src="/src/main.tsx"></script>
+</body>
+</html>
