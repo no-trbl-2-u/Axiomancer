@@ -199,7 +199,7 @@ async function checkButton(page, baseUrl, c) {
         .waitFor({ state: 'visible', timeout: 10000 })
         .catch(() => fail(`${c.button} routed to ${c.route} but '${c.landing}' never rendered`))
 
-    log(`${c.button}: opened ${c.name} at ${c.route} ✅`)
+    log(`${c.button}: opened ${c.name} at ${c.route}`)
 }
 
 // ---------------------------------------------------------------------------
@@ -227,7 +227,7 @@ async function main() {
             await checkButton(page, baseUrl, c)
             await context.close()
         }
-        log('ALL PASS — every minigame trigger routed to its screen ✅')
+        log('ALL PASS — every minigame trigger routed to its screen')
     } finally {
         await browser.close()
         server.close()

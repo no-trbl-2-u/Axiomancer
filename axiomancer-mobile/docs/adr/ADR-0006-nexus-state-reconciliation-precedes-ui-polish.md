@@ -1,6 +1,6 @@
 # ADR-0006 — Nexus state reconciliation precedes UI polish
 
-> Historical — describes the nexus harness retired to /archive at the monorepo merge.
+> Note — written for the pre-merge nexus harness; the nexus loop now runs live at the repo root (`skills/` + `plan/`). The decision itself still stands.
 
 Status: Accepted  
 Date: 2026-06-01  

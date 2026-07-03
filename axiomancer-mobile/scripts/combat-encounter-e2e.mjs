@@ -3,12 +3,12 @@
 //
 // Spec 25 Hazard-Pattern Combat — browser-driven end-to-end playthrough.
 //
-// Boots the exported web build, opens the dev entry, launches the
-// `/combat-encounter` screen, and PLAYS the card-and-dice combat with real
-// taps: asserts the two Pressure Tracks, the threat timeline, the stance-dice
-// board, and the hand render; powers status-effect cards and watches the DoT
-// pressure track advance; ends phases until the combat resolves; and asserts
-// the post-combat attribution summary appears.
+// Boots the exported web build, navigates straight to the `/combat-encounter`
+// screen, and PLAYS the card-and-dice combat with real taps: asserts the
+// reveal, then the full Spec 26/26b board surface (combatant pane with HP,
+// intent telegraph, stance-dice tray, hand, Conviction, signature bar, play
+// area); ends phases until the combat resolves (taking the mercy branch if it
+// appears); and asserts the post-combat attribution summary appears.
 //
 // Deterministic: the combat seed is pinned through `globalThis.__AXM_COMBAT_SEED__`
 // before the app boots. Hermetic: everything runs against localhost.
@@ -141,11 +141,12 @@ async function playCombat(page, baseUrl) {
     }
     await page.waitForTimeout(200)
     await shot(page, '02-board')
-    log('board renders battlefield + HP + intent + dice + signatures ✅')
+    log('board renders battlefield + HP + intent + dice + signatures')
 
     // 4) Drive to a terminal outcome by ending phases (card POWER needs a drag
     //    gesture not reliably simulable here; the jest suite covers the play path).
-    //    Without pressure the phases overwhelm → defeat → the attribution summary.
+    //    With no cards played the threat phases wear the player's HP down →
+    //    defeat (or the mercy branch) → the attribution summary.
     const terminal = async () => (await page.getByTestId('combat-summary').count()) > 0 || (await page.getByTestId('combat-mercy').count()) > 0
     for (let i = 0; i < 30; i++) {
         if (await terminal()) break
@@ -167,7 +168,7 @@ async function playCombat(page, baseUrl) {
     if (!/Erosion|Saturation|Defeat|Retreat|Mercy/i.test(summaryText)) {
         fail(`summary missing an outcome headline: ${summaryText.slice(0, 80)}`)
     }
-    log(`combat resolved → summary shown ✅ (${summaryText.split('\n')[0]})`)
+    log(`combat resolved → summary shown (${summaryText.split('\n')[0]})`)
 }
 
 async function main() {
@@ -184,7 +185,7 @@ async function main() {
         page.on('pageerror', (err) => console.error('combat-e2e: pageerror', err.message))
         await playCombat(page, baseUrl)
         await context.close()
-        log('ALL PASS — hazard-pattern combat played end-to-end ✅')
+        log('ALL PASS — hazard-pattern combat played end-to-end')
     } finally {
         await browser.close()
         server.close()

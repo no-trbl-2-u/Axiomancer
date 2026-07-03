@@ -337,7 +337,7 @@ async function playGlean(page, baseUrl) {
     await shot(page, 'glean-spoils')
     await page.getByTestId('gathering-spoils-confirm').click()
     await page.getByTestId('gathering-spoils').waitFor({ state: 'hidden', timeout: 5000 })
-    log('GLEAN: withdrew, weighed, and claimed clean ✅')
+    log('GLEAN: withdrew, weighed, and claimed clean')
 }
 
 // ---------------------------------------------------------------------------
@@ -407,7 +407,7 @@ async function playStrip(page, baseUrl) {
     await shot(page, 'strip-spoils')
     await page.getByTestId('gathering-spoils-confirm').click()
     await page.getByTestId('gathering-spoils').waitFor({ state: 'hidden', timeout: 5000 })
-    log('STRIP: erupted, routed, and settled the cost ✅')
+    log('STRIP: erupted, routed, and settled the cost')
 }
 
 // ---------------------------------------------------------------------------
@@ -441,7 +441,7 @@ async function playTutorial(page, baseUrl) {
     if (!(await page.getByTestId('gathering-board').isVisible())) {
         fail('skipping the tutorial must leave the session running')
     }
-    log('TUTORIAL: coached, advanced, and skipped clean ✅')
+    log('TUTORIAL: coached, advanced, and skipped clean')
 }
 
 // ---------------------------------------------------------------------------
@@ -467,7 +467,7 @@ async function main() {
             await play(page, baseUrl)
             await context.close()
         }
-        log('ALL PASS — both stances played end-to-end ✅')
+        log('ALL PASS — both stances played end-to-end')
     } finally {
         await browser.close()
         server.close()

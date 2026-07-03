@@ -415,7 +415,7 @@ async function playHazard(page, baseUrl, route, seed) {
     }
     await page.getByTestId('hazard-rewards-confirm').click()
     await page.getByTestId('hazard-rewards').waitFor({ state: 'hidden', timeout: 5000 })
-    log(`${route} route: claimed and closed clean ✅`)
+    log(`${route} route: claimed and closed clean`)
 }
 
 // ---------------------------------------------------------------------------
@@ -441,7 +441,7 @@ async function main() {
             await playHazard(page, baseUrl, route, SEED + (route === 'risk' ? 1 : 0))
             await context.close()
         }
-        log('ALL PASS — both routes played end-to-end ✅')
+        log('ALL PASS — both routes played end-to-end')
     } finally {
         await browser.close()
         server.close()

@@ -3,7 +3,7 @@
  *
  * Mounts the real `/combat-encounter` screen against a rigged store player and
  * walks the redesigned flow: the reveal → ENTER → the board (portraits, visible
- * HP, the two Pressure Tracks, the 2-die DRAFT, Conviction + Signature Skills,
+ * HP, the 2-die DRAFT, Conviction + Signature Skills,
  * the hidden-stance read) → END PHASE. Determinism comes from the engine seed
  * (`__AXM_COMBAT_SEED__`); seed 16 rolls a draftable first die (mind, heart).
  * The engine owns the rules; this asserts the presenter + screen wiring.

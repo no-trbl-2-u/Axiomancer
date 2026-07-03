@@ -5,7 +5,7 @@
  * `CombatEncounterState` into a single render-ready `CombatViewModel`. No store
  * writes, no rules — the engine owns truth, this shapes it for the board
  * (portraits, visible enemy HP, intent telegraph, the hidden-stance read, the
- * 2-die draft, Conviction + Signature Skills, and the two Pressure Tracks).
+ * 2-die draft, and Conviction + Signature Skills — the HP-only model).
  *
  * The redesign (Spec 26b): the enemy STANCE is hidden until revealed, so this
  * presenter only surfaces a stance colour/label once `isPhaseStanceRevealed`;

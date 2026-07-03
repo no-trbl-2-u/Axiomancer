@@ -35,7 +35,7 @@ The boundaries, stated plainly:
   Start at [`setup/01_repository.md`](setup/01_repository.md).
 - **[`docs/`](./docs/)** is **conceptual / reference** — durable
   technical guidance you read *while developing* (testing standards,
-  engine-upgrade guides, prompt templates). No machine-bootstrap steps.
+  architecture notes, prompt templates). No machine-bootstrap steps.
 - **[`docs/adr/`](./docs/adr/)** is **decisions** — Architecture Decision
   Records capturing the *why* behind durable architecture and product
   calls that sit above day-to-day build-plan execution.
@@ -179,13 +179,24 @@ commit and returns the real exit code.
 app/                       expo-router routes
   _layout.tsx              root stack + font loader
   index.tsx                redirects to /exploration
-  (tabs)/                  five-tab shell
+  (tabs)/                  four-tab shell
     _layout.tsx            tab bar config
-    combat.tsx             combat screen (fully implemented per spec 04)
-    character.tsx          character sheet (fully implemented per spec 05)
-    exploration.tsx        map / node graph (fully implemented per spec 07)
-    inventory.tsx          inventory screen (fully implemented per spec 06)
-    event.tsx              event / boss encounter (fully implemented per spec 08)
+    exploration/           map / node graph
+    character/             character sheet
+    memoir/                quests, chronicle, alignment
+    inventory/             inventory + equipment
+  combat-encounter/        Spec 25 Hazard-Pattern combat modal (card-and-dice)
+  hazard/                  hazard minigame
+  hazard-deck/             hazard deck builder
+  gathering/               gathering minigame (The Gleaning)
+  rest/                    rest encounter (The Night Watch)
+  cache/                   loot-cache encounter (The Reliquary)
+  quest/                   quest-board minigame (The Boy's Almanac)
+  dialogue/                NPC dialogue trees
+  event/                   paced narrative events
+  cutscene/                cutscenes
+  village/                 village hub
+  dev/ devart/ devaftermath/  dev-only tooling routes
 components/                reusable presentational components
   StanceGlyph.tsx          heart / body / mind glyphs (SVG placeholders)
   EffectGlyph.tsx          buff / debuff glyphs
@@ -209,7 +220,7 @@ This app follows a **"read upward, mutate downward"** pattern: data flows up fro
 
 ```
 ┌────────────────────────────┐
-│        UI screens          │  app/(tabs)/*.tsx
+│        UI screens          │  app/**/index.tsx
 │ (read view-models, render) │
 └──────────────┬─────────────┘
                │
@@ -255,28 +266,9 @@ assisted development. Pick up the loop here:
 - **Writing tests?** [`docs/testing.md`](./docs/testing.md) — hermetic
   e2e standard. Every implementation must land with at least one.
 - **Engine:** `axiomancer-mechanics` — sibling workspace, consumed as
-  local source via the `@mechanics` alias (no version pin; the
-  engine-upgrade guides below are historical records of npm-era bumps).
-- **Upgrading from mechanics `0.21.0`?**
-  [`docs/engine-upgrade-0.21.0-to-0.22.0.md`](./docs/engine-upgrade-0.21.0-to-0.22.0.md)
-  — package bump and the affix-release fallout (structured prefix/suffix item fields, `SeedInput` widening, refreshed loot-table fixtures, L50 dev-tier remap).
-- **Upgrading from mechanics `0.20.0`?**
-  [`docs/engine-upgrade-0.20.0-to-0.21.0.md`](./docs/engine-upgrade-0.20.0-to-0.21.0.md)
-  — package bump, Quest Board micro-games, Rest / Night Watch, Loot-cache / Reliquary, and encounter verification guidance.
-- **Upgrading from mechanics `0.15.1`?**
-  [`docs/engine-upgrade-0.15.1-to-0.16.0.md`](./docs/engine-upgrade-0.15.1-to-0.16.0.md)
-  — package bump, latest engine features, and migration guidance.
-- **Upgrading from mechanics `0.15.0`?**
-  [`docs/engine-upgrade-0.15.0-to-0.15.1.md`](./docs/engine-upgrade-0.15.0-to-0.15.1.md)
-  — package bump, stronger status effects, effect-driven victory/friendship resolution,
-  and manual-build evidence checklist.
-- **Upgrading from mechanics `0.14.0`?**
-  [`docs/engine-upgrade-0.14.0-to-0.15.0.md`](./docs/engine-upgrade-0.14.0-to-0.15.0.md)
-  — package bump, Stance and Vitae engine authority, northern-forest/story content,
-  and presenter/visual evidence checklist.
-- **Upgrading from older versions:**
-  [`docs/mechanics-upgrade-0.14.0.md`](./docs/mechanics-upgrade-0.14.0.md)
-  — removed imports, Befriend modal, region/faction aftermath, and presenter migration checklist.
+  local source via the `@mechanics` alias. There is no version pin and
+  no upgrade ceremony: engine changes land in the sibling workspace and
+  this app picks them up on the next build.
 
 ## Hermetic E2E testing
 

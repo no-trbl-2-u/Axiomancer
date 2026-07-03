@@ -52,11 +52,11 @@ Examples of e2e entry points by module:
 
 | Module                      | Hermetic e2e entry point                                                              |
 | --------------------------- | -------------------------------------------------------------------------------------- |
-| `app/(tabs)/combat.tsx`     | `selectCombatViewModel(state, localUi?)` in `state/presenters/combat.engine.ts` (composes `selectCombatHudViewModel`); component render via `@testing-library/react-native` for the JSX |
-| `app/(tabs)/character.tsx`  | `selectCharacterViewModel(state)` in `state/presenters/character.engine.ts`            |
-| `app/(tabs)/inventory.tsx`  | `selectInventoryViewModel(state, localUi?)` in `state/presenters/inventory.engine.ts`  |
-| `app/(tabs)/exploration.tsx`| `selectExplorationViewModel(state)` in `state/presenters/exploration.engine.ts`        |
-| `app/(tabs)/event.tsx`      | `selectEventViewModel(state)` in `state/presenters/event.engine.ts`                    |
+| `app/combat-encounter/`     | `buildCombatViewModel(state)` in `state/presenters/combat-encounter.engine.ts`; screen render via `state/e2e/combat-encounter.screen.test.tsx` (`@testing-library/react-native`) |
+| `app/(tabs)/character/`     | `selectCharacterViewModel(state)` in `state/presenters/character.engine.ts`            |
+| `app/(tabs)/inventory/`     | `selectInventoryViewModel(state, localUi?)` in `state/presenters/inventory.engine.ts`  |
+| `app/(tabs)/exploration/`   | `selectExplorationViewModel(state)` in `state/presenters/exploration.engine.ts`        |
+| `app/event/`                | `selectEventViewModel(state)` in `state/presenters/event.engine.ts`                    |
 | `app/(tabs)/_layout.tsx`    | `selectVisibleTabs(inCombat)` in `state/presenters/tabs.engine.ts`                     |
 | Engine store lifecycle      | `createGameStore(memoryAdapter, …)` driven through `startCombat` / `updateCombat` / `endCombat` from `axiomancer-mechanics` |
 | `components/<X>.tsx`        | `render(<X {...props} />)` → assert on `getByText` / `getByA11yLabel`. Only when the component has branching UI logic worth pinning. |
@@ -191,9 +191,9 @@ minimum:
 
 1. **Happy path** — the typical success scenario, end-to-end.
 2. **Boundary / branch conditions** — every terminal state the change
-   can reach (e.g. combat presenter covers all four phases:
-   `choosing_stance`, `choosing_action`, `choosing_skill`, `resolving`;
-   inventory presenter covers empty / partial / full).
+   can reach (e.g. the combat-encounter screen suite covers reveal,
+   board, and terminal outcomes; inventory presenter covers
+   empty / partial / full).
 3. **Invariants** — properties that must hold throughout (HP bar
    percentage in `[0, 1]`, view-model strings never `undefined`,
    round counter monotonic, fixtures unmutated, no negative durations).
@@ -207,11 +207,11 @@ minimum:
 The canonical reference tests are
 [`state/e2e/combat-hud.engine.test.ts`](../state/e2e/combat-hud.engine.test.ts)
 (Spec 01 — focused HUD slice) and
-[`state/e2e/combat.engine.test.ts`](../state/e2e/combat.engine.test.ts)
-(Spec 03 — full screen-level presenter that composes the HUD). Both
-demonstrate the top-of-file comment, the alternating-RNG helper, the
-suite split (happy path / invariants / store-lifecycle), and the
-deep-freeze invariant check the presenter contract requires.
+[`state/e2e/combat-encounter.screen.test.tsx`](../state/e2e/combat-encounter.screen.test.tsx)
+(Spec 26/26b — the full combat-encounter screen driven end-to-end).
+Together they demonstrate the top-of-file comment, deterministic
+seeding, the suite split (happy path / invariants / store-lifecycle),
+and asserting on observable state the presenter contract requires.
 
 ---
 
@@ -229,7 +229,7 @@ import { afterEach, describe, it, expect, jest } from '@jest/globals';
 
 import { mockAlternatingRng } from '@/app/test-utils/rng';
 // import the public entry point under test
-// e.g. import { selectCombatViewModel } from '../combat.engine';
+// e.g. import { buildCombatViewModel } from '../combat-encounter.engine';
 
 afterEach(() => {
     jest.restoreAllMocks();
@@ -253,15 +253,15 @@ describe('<feature>: invariants', () => {
 
 ```tsx
 import { render } from '@testing-library/react-native';
-import { CombatScreen } from '../combat';
-import { combatStateFixture } from '../combat.mock';
+import InventoryScreen from '@/app/(tabs)/inventory';
+import { inventoryStateFixture } from '../inventory.mock';
 
-describe('CombatScreen render', () => {
-    it('renders the stance picker in the choosing_stance phase', () => {
+describe('InventoryScreen render', () => {
+    it('renders the empty-satchel prompt when no items are held', () => {
         const { getByText } = render(
-            <CombatScreen state={combatStateFixture('choosing_stance')} />
+            <InventoryScreen state={inventoryStateFixture('empty')} />
         );
-        expect(getByText(/CHOOSE THY STANCE/)).toBeTruthy();
+        expect(getByText(/THY SATCHEL IS EMPTY/)).toBeTruthy();
     });
 });
 ```

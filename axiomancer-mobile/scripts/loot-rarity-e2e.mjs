@@ -198,7 +198,7 @@ function assertContract(rarity, expectedMods, text) {
     if (mods !== expectedMods) {
         fail(`${rarity}: expected ${expectedMods} mods, engine rolled ${mods} — "${text}"`)
     }
-    log(`${rarity}: ${text}  ✅`)
+    log(`${rarity}: ${text} `)
 }
 
 async function main() {
@@ -237,7 +237,7 @@ async function main() {
             if (!/no unique relic is available at level/i.test(lowUnique)) {
                 fail(`unique@L1: expected a graceful level gate, got "${lowUnique}"`)
             }
-            log(`unique@L1: graceful gate — "${lowUnique}"  ✅`)
+            log(`unique@L1: graceful gate — "${lowUnique}" `)
             // Level the player up via the L30 tier preset, then the unique
             // success path should open.
             await page.getByTestId('debug-player-tier-kid-l30').scrollIntoViewIfNeeded()
@@ -246,7 +246,7 @@ async function main() {
             assertContract('unique', 3, await pressLoot(page, 'unique'))
         }
 
-        log('ALL PASS — every rarity honoured the engine affix contract ✅')
+        log('ALL PASS — every rarity honoured the engine affix contract')
     } finally {
         await browser.close()
         server.close()

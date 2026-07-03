@@ -12,10 +12,7 @@
  * from the public type) onto a mobile-only `combatMana` slice on
  * `AppStoreState`. The slice is `null` outside combat and gets
  * seeded on `startCombat`, decremented on skill burn, and cleared on
- * `endCombat`. Phase 16 is `[skipped]` pending an
- * `axiomancer-mechanics` release that re-exports `skillLibrary` /
- * `getSkillById`; once that lands and Phase 16 ships, the stop-gap
- * pool gets replaced.
+ * `endCombat`.
  */
 
 import {

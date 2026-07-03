@@ -10,9 +10,9 @@
 > `/cutscene`. Read row-level claims against today's code.
 
 > Filed by `/iterate` ([4.0] AUDIT row, oversight 27th).
-> Sibling of `mechanics-ui-audit-2026-05-21-combat.md` —
-> same template, applied to the event/dialogue/encounter
-> shell. Scope: `state/presenters/event.engine.ts`,
+> Sibling of the 2026-05-21 combat audit (since removed —
+> its screen no longer exists) — same template, applied to
+> the event/dialogue/encounter shell. Scope: `state/presenters/event.engine.ts`,
 > `state/presenters/event-assets.ts`,
 > `components/EventGate.tsx`,
 > `components/event/EncounterModalOverlay.tsx`,

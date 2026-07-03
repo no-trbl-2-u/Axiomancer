@@ -24,10 +24,10 @@ const inCombat = useGameState((s) => s.combat !== null);
 
 The engine also re-exports memoizable selectors (`selectPlayer`,
 `selectCombat`, `selectInventory`, `selectVersion`, `selectIsInCombat`)
-from `axiomancer-mechanics` — pass them straight in:
+— import them via the `@mechanics` alias and pass them straight in:
 
 ```ts
-import { selectIsInCombat } from 'axiomancer-mechanics';
+import { selectIsInCombat } from '@mechanics';
 const inCombat = useGameState(selectIsInCombat);
 ```
 

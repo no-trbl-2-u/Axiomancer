@@ -20,30 +20,26 @@
 | [`testing-guide.md`](./testing-guide.md) | Extended testing guidance and patterns | **HELPFUL** |
 | [`E2E_INVENTORY.md`](./E2E_INVENTORY.md) | Complete E2E test suite catalog | **REFERENCE** |
 
-## Engine integration and upgrades
+## Engine integration
+
+The engine (`axiomancer-mechanics`) is a sibling workspace consumed as
+local source via the `@mechanics` alias — the historical npm-pin
+upgrade guides were removed (git history preserves them).
 
 | File | Coverage | Priority |
 |------|----------|----------|
-| [`engine-upgrade-0.15.1-to-0.16.0.md`](./engine-upgrade-0.15.1-to-0.16.0.md) | Latest upgrade to 0.16.0 | **HELPFUL** |
-| [`engine-team-handoff-2026-05-16.md`](./engine-team-handoff-2026-05-16.md) | Engine team transition documentation | **HELPFUL** |
+| [`engine-integration-architecture.md`](./engine-integration-architecture.md) | How the app consumes the engine | **HELPFUL** |
 | [`engine-map-reconciliation-2026-05-24.md`](./engine-map-reconciliation-2026-05-24.md) | Map system reconciliation notes | **HELPFUL** |
-| [`engine-upgrade-0.7.0-to-0.10.0.md`](./engine-upgrade-0.7.0-to-0.10.0.md) | Early major upgrade guide | **REFERENCE** |
-| [`engine-upgrade-0.10.0-to-0.10.2.md`](./engine-upgrade-0.10.0-to-0.10.2.md) | Patch upgrade documentation | **REFERENCE** |
-| [`engine-upgrade-0.14.0-to-0.15.0.md`](./engine-upgrade-0.14.0-to-0.15.0.md) | Major version upgrade guide | **REFERENCE** |
-| [`engine-upgrade-0.15.0-to-0.15.1.md`](./engine-upgrade-0.15.0-to-0.15.1.md) | Minor version upgrade guide | **REFERENCE** |
-| [`mechanics-upgrade-0.14.0.md`](./mechanics-upgrade-0.14.0.md) | Mechanics engine upgrade notes | **REFERENCE** |
 
 ## UI audit documentation
 
 | File | Screen Coverage | Priority |
 |------|-----------------|----------|
-| [`mechanics-ui-audit-2026-05-21-combat.md`](./mechanics-ui-audit-2026-05-21-combat.md) | Combat screen UI audit | **REFERENCE** |
 | [`mechanics-ui-audit-2026-05-22-character.md`](./mechanics-ui-audit-2026-05-22-character.md) | Character screen UI audit | **REFERENCE** |
 | [`mechanics-ui-audit-2026-05-22-event.md`](./mechanics-ui-audit-2026-05-22-event.md) | Event handling UI audit | **REFERENCE** |
 | [`mechanics-ui-audit-2026-05-22-exploration.md`](./mechanics-ui-audit-2026-05-22-exploration.md) | Exploration screen UI audit | **REFERENCE** |
 | [`mechanics-ui-audit-2026-05-22-inventory.md`](./mechanics-ui-audit-2026-05-22-inventory.md) | Inventory screen UI audit | **REFERENCE** |
 | [`mechanics-ui-audit-2026-05-22-memoir.md`](./mechanics-ui-audit-2026-05-22-memoir.md) | Memoir screen UI audit | **REFERENCE** |
-| [`mechanics-ui-audit-2026-05-25-combat-modal.md`](./mechanics-ui-audit-2026-05-25-combat-modal.md) | Combat modal UI audit | **REFERENCE** |
 
 ## Hazard minigame documentation
 
