@@ -103,8 +103,8 @@ MournfulGull `{ outlook: +3 }`; HollowEyedBeggar `{ scope: -3 }`. See
 enemies (Phase 60)" for the per-enemy authoring table.
 
 ```ts
-// Triggered automatically in END_COMBAT when determineCombatEnd() === 'friendship'
-// (Phase 36 cap by default; Enemy.befriendabilityConfig overrides per Phase 68).
+// Triggered automatically in END_COMBAT when the outcome is 'friendship'
+// (Befriend + spare authorization; Enemy.befriendabilityConfig gates per Phase 68).
 if (outcome === 'friendship') {
     return shiftMoralMeter(baseState, 1);
 }

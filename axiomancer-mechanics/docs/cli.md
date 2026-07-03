@@ -10,10 +10,9 @@ The CLI module provides a complete command-line interface for playing and testin
 
 ### `game.cli.ts` - Main Game Interface
 
-The primary CLI driver that provides a tabbed inquirer interface for playing the game. Includes five main tabs:
+The primary CLI driver that provides a tabbed inquirer interface for playing the game. Main tabs include:
 
-- **Map** - Navigate between nodes and trigger map events
-- **Legacy Combat** - Resolve combat rounds via the old `resolveCombatRound` stance/action loop (dev-only). The new Hazard-style combat is reached via `npm run combat`.
+- **Map** - Navigate between nodes and trigger map events. Hazard-Pattern Combat is reached via `npm run combat` (a subcommand of the game CLI).
 - **Journal** - View active/completed quests and philosophical alignment
 - **Skills** - View learned/unlocked skills; combat should show only currently affordable skills
 - **Inventory** - View carried items and equipment
@@ -29,24 +28,21 @@ npm run game
 - Save/load functionality
 - Development cheats and debugging
 
-### `combat.cli.ts` - New Hazard-style Combat CLI (Phase 165)
+### `combat.cli.ts` - Hazard-Pattern Combat CLI (Phase 165)
 
-A standalone driver for the **new Spec 25/26b Hazard-style combat engine**, reachable as a subcommand of the game CLI. Drives the card-and-dice HP-model combat (the primary system — status effects are the efficient path, raw strikes are the weak baseline). Supports interactive TTY play, `--auto` bot policies, and scripted/stdin agentic modes. The **old** `resolveCombatRound` loop is `legacy-combat`.
+A standalone driver for the **Spec 25/26b Hazard-Pattern Combat engine** (the only combat engine), reachable as a subcommand of the game CLI. Drives the card-and-dice HP-model combat (status effects are the efficient path, raw strikes are the weak baseline). Supports interactive TTY play, `--auto` bot policies, and scripted/stdin agentic modes.
 
 **Usage:**
 ```bash
 npm run game -- combat [flags]
 npm run combat -- [flags]             # convenience alias
-npm run game -- legacy-combat [flags]
-npm run legacy-combat -- [flags]      # old stance/action loop
 ```
 
 **Combat routing (Phase 165):**
 
 | Command | Engine |
 | --- | --- |
-| `npm run combat` | New Hazard-style card/dice engine (`combat.cli.ts`) |
-| `npm run legacy-combat` | Old `resolveCombatRound` stance/action loop |
+| `npm run combat` | Hazard-Pattern card/dice engine (`combat.cli.ts`) |
 | `npm run combat-sim` | Monte-Carlo balance witness (not player-facing) |
 
 **New-combat flags:**
@@ -72,9 +68,6 @@ npm run combat -- --auto --policy status --enemy mournful-gull --seed 42 \
 
 # Interactive TTY play
 npm run combat -- --enemy wet-hound --preset wanderer
-
-# Legacy engine (old stance/action loop)
-npm run legacy-combat -- --enemy mournful-gull --preset wanderer
 ```
 
 **State-log records** (for agentic consumers):
@@ -278,7 +271,7 @@ Development utilities for testing and debugging the game engine.
 **Key Functions:**
 - `devSetLevel()` - Set character level
 - `devSetStats()` - Modify character base stats
-- `devLearnSkills()` / legacy `devEquipSkills()` - Manage skill progression (Phase 99 removes separate skill equipment)
+- `devLearnSkills()` - Manage skill progression (Phase 99 removed separate skill equipment; `devEquipSkills` was removed in Phase 159)
 - `devGrantAllEquipment()` / `devGrantAllConsumables()` - Grant items
 - `devSpawnEnemy()` - Spawn specific enemies for testing
 - `devMaxOut()` - Max out character for endgame testing

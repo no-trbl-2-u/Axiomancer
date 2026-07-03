@@ -145,7 +145,7 @@ export { heal as healCharacter } from './health';
 export { INTERACTION_AMPLIFICATION } from './resolution.constants';
 
 // ─── Spec 25 — Hazard-Pattern Combat ──────────────────────────────────────────
-// The card-and-dice combat driver. Ships alongside `resolveCombatRound`; the
+// The card-and-dice combat driver; the
 // effects + skill engines are unchanged (Spec 25 §12 Q4 recommendation (b)).
 export type {
     CombatEncounterState, CombatEncounterPhase, CombatTransition,

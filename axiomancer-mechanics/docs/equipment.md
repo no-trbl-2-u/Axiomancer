@@ -684,8 +684,8 @@ payload onto a player snapshot:
    `applyEffect`.
 4. The `resourceGrant` field (if any) is normalised into a full
    `CombatResources` delta and returned on `ConsumableUseResult.resourceGrant`.
-   The combat resolver folds this into the live `combatResources` snapshot
-   when the consumable is used inside a fight via `action: 'item'`.
+   The combat engine folds this into the live `combatResources` snapshot
+   when the consumable is used inside a fight.
 
 Both inline and referenced effects may be present simultaneously. The caller
 is responsible for decrementing the inventory stack via the existing
@@ -737,24 +737,20 @@ The Zustand store (`Game/store.ts`) wraps these alongside `equipItem` /
 `unequipItem` / `useConsumable`, which additionally applies the
 consumable's effect via `useConsumableEffect`.
 
-## Combat resolver integration
+## Combat engine integration
 
 - `initializeCombat` calls `aggregateCombatStartTokens(player.equipment)`
   instead of zero-seeding `combatResources`.
 - `generateBasicActionResources(resources, stance, outcome, equipment?)`
   appends `applyEquipmentGenerationBonus(...)` onto the base-table token
-  whenever an `equipment` map is passed (the combat resolver passes
-  `player.equipment`).
-- `runActionProcs` in `combat.resolver.ts` calls `getEquipmentProcTriggers`
-  for the actor and forwards them as `equipmentTriggers` to
+  whenever an `equipment` map is passed.
+- `getEquipmentProcTriggers` supplies per-actor `equipmentTriggers` to
   `rollForCombatEffects`. Per Spec 05 Q6 these triggers participate in the
   same chance / crit / fumble math as the JSON-defined Stance × action
-  table.
-- A new `action: 'item'` branch in `resolveCombatRound` looks up
-  `playerAction.itemId` in `player.inventory`, applies the consumable via
-  `useConsumableEffect`, decrements the stack, and emits an
-  `ItemPhaseEvent` (`used` or `blocked`) on the combat event stream. The
-  enemy's basic action still resolves at passive defense.
+  table. (The legacy `runActionProcs` / `resolveCombatRound` wiring that
+  first shipped this was removed with the legacy turn-based resolver;
+  the shared proc machinery in `Combat/combat-effects.ts` is the live
+  surface.)
 
 ## Library
 

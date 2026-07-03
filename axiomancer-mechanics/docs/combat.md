@@ -2,27 +2,26 @@
 
 ## Overview
 
-**Hazard-Pattern Combat (Spec 25) is the primary player-facing combat system** — the one
-consumed by the mobile app and exercised by `/combat-tuning`. It is a card-and-dice system
+**Hazard-Pattern Combat (Spec 25) is the ONLY combat engine** — consumed by the mobile
+app, driven by the combat CLI (`npm run combat`), and exercised by the `/combat-playtest`
+and `/deck-tuning` loops. It is a card-and-dice system
 where the enemy's sole bar is HP; status effects are the efficient path to 0.
 See [§Hazard-Pattern Combat](#hazard-pattern-combat-spec-25) below for the full API surface.
 
-> **Legacy / dev-only:** `resolveCombatRound` (the turn-based resolver described in the
-> sections below) backs only the dev-only legacy combat tab. It is NOT the player-facing
-> system. Mobile consumers should use `initializeCombatEncounter` / `playCombatCard` /
-> `resolveCombatPhase` instead.
+> **Removed:** the legacy turn-based resolver (`resolveCombatRound` and its companions
+> `determineEnemyAction` / `isCombatOngoing` / `determineCombatEnd` /
+> `getEffectsResolutionOutcome`) has been deleted from the codebase. All consumers drive
+> fights via `initializeCombatEncounter` / `playCombatCard` / `resolveCombatPhase`.
 
-The legacy resolver lives in:
+The shared combat mechanics live in:
 
 - `Combat/index.ts` — module barrel + small mechanics helpers (advantage, stats, dice, damage, health, effect queries).
-- `Combat/combat.reducer.ts` — small `(state, …args) => newState` mutations on `CombatState`.
-- `Combat/combat.resolver.ts` — `resolveCombatRound`, the single round-resolution entry point. Returns `{ state, combatEvents }` so any UI client (CLI, future React Native UI, automated tester) can drive combat without re-implementing the math. The orchestrator delegates to per-phase helpers in `Combat/phases/`:
-  - `phases/round-start.ts` — regen / drain / start-phase DoT.
-  - `phases/action-restriction.ts` — `forcedStance` / `blockedStance` / `skipTurn`.
-  - `phases/advantage.ts` — type-advantage matchup + effect overrides.
-  - `phases/stance-effects.ts` — clear stale Tier 1 buffs; apply this round's Tier 1.
-  - `phases/scenario.ts` — skill / item / attack / defend resolution and stance-token generation (the largest phase).
-  - `phases/round-end.ts` — end-phase DoT and effect expiry.
+- `Combat/combat.reducer.ts` — `initializeCombat`, the `CombatState` constructor shared by the skill / effects / equipment engines, plus `incrementFriendship`.
+- `Combat/combat.engine.ts` — the Hazard-Pattern Combat driver (see §Hazard-Pattern Combat below).
+
+The sections that follow document the shared mechanics (stances, advantage,
+effects, procs, damage resistance, the friendship path) that both the skill /
+effects engines and the Hazard-Pattern driver consume.
 
 ## Type System
 
@@ -81,41 +80,6 @@ The multiplier depends on the defender's type-advantage over the attacker.
 | Disadvantage (wrong type) | 1.5× |
 | Not defending (took damage after losing attack contest) | 1× (passive) |
 
-## Round Flow (Current Implementation)
-
-A single call to `resolveCombatRound(state, playerAction, enemyAction, lookupSkill?)`
-runs every phase below and returns `{ state, combatEvents }`. The CLI prints the
-event stream via `renderRoundEvents` in `combat.display.ts`; the resolver
-itself never logs.
-
-```
-resolveCombatRound(state, playerAction, enemyAction, lookupSkill?)
-├── 1. round-start          → processRoundStartEffects  → regen / drain / start-phase DoT
-│                              (early exit if a combatant drops to 0 HP)
-├── 2. action-restriction   → canAct                    → forced-stance / blocked-stance / skipTurn
-├── 3. advantage            → resolveEffectiveAdvantage → matchup + per-side advantage label
-├── 4. stance-effects       → clearTier1EffectsForStance + applyTier1CombatEffect
-├── 5. scenario             → 'skill' routes through executeSkill (Spec 04);
-│                              otherwise attack-vs-attack / attack-vs-defend / etc.
-│                              Player basic actions also generate stance tokens
-│                              into `combatResources` (hit +3 / miss +1 / defend +5).
-│                              Phase 150: when the player lands a HOSTILE skill
-│                              and the enemy did not already pick one, a
-│                              legal-acting enemy may answer with a skill of its
-│                              own — gated by hostility (befriend/buff skills
-│                              draw no answer), `enemyCanAct`, and a 0.10
-│                              `ENEMY_SKILL_ANSWER_CHANCE` roll
-│                              (`selectEnemySkillResponse` → `enemy-skill-response`
-│                              marker + the enemy's `skill` event stream).
-└── 6. round-end            → end-phase DoT  → tickAllEffects  → log expired effects
-                              + round counter increments
-```
-
-Events are emitted in the order above, grouped by `phase`:
-`round-start` → `action-restriction` → `advantage` → `stance-effects` →
-`skill` → `scenario` → `resources` → `round-end`. UI consumers render each
-section from the typed `RoundEvent` union exported alongside the resolver.
-
 ## Tier 1 Auto-Effects
 
 Every `attack` or `defend` action automatically applies a Tier 1 effect — no resist roll.
@@ -132,7 +96,7 @@ Switching action types removes the previous type's self-buff immediately via `cl
 
 ## Effect-Based Combat Specials (Active)
 
-These are live in `combat.resolver.ts` (no CLI inline math — the CLI just renders the events the resolver emits):
+These are live engine helpers in `src/Combat/effects.ts` (no CLI inline math — the CLI just renders the events the engine emits):
 
 | Mechanic | When | What |
 |----------|------|------|
@@ -317,12 +281,12 @@ existential (at least one element).
 | `requiredSkillUse?: string[]` | Player must have cast at least one of the named skill IDs during combat (existential). Derived from `state.log[].playerAction` entries with `action === 'skill'`. Empty array = no requirement. |
 | `defaultFallback?: 'both-defend-cap'` | Explicit "fall through to Phase 36". When set, other fields are ignored for THIS enemy; eligibility uses the global counter cap exactly. |
 
-The engine helper that evaluates the predicate is
-`isFriendshipEligible(state: CombatState): boolean` in
-`src/Combat/index.ts`. It is **not** on the public barrel — engine
-consumers read combat-end state through `determineCombatEnd` /
-`isCombatOngoing`, both of which call it so the two predicates stay in
-lockstep.
+The engine helper that evaluates the predicate lives in
+`src/Combat/index.ts` (the private `befriendabilityPredicatesPass`,
+consumed by `isBefriendAttemptEligible`). The legacy combat-end
+predicates that also consumed it (`determineCombatEnd` /
+`isCombatOngoing` / `isFriendshipEligible`) were removed with the
+legacy turn-based driver.
 
 The counter still increments freely on both-defend rounds (Phase 36
 unchanged); friendship triggers only when ALL config predicates pass
@@ -367,42 +331,32 @@ themselves. This prevents silent bypassing of:
 - The explicit mercy choice moment
 - HP-gate and other authored eligibility requirements
 
-The `isFriendshipEligible(state)` predicate now checks
+Friendship resolution keys off
 `state.friendshipResolutionAuthorized === true` rather than counter/config
-predicates directly.
+predicates directly. In Hazard-Pattern Combat the mercy choice is opened via
+`selectEncounterMercyChoice`; the legacy `isFriendshipEligible` /
+`determineCombatEnd` predicates were removed with the legacy driver.
 
 ## Combat End Conditions
 
-`determineCombatEnd(state)` returns:
+In Hazard-Pattern Combat the enemy's sole bar is HP: `isDefeated(enemy)` is the
+win condition, player HP ≤ 0 is the loss, and the `friendship` outcome requires
+the explicit Befriend + `spare` authorization above. (The legacy
+`determineCombatEnd(state)` predicate was removed with the legacy driver.)
 
-| Return | Condition |
-|--------|-----------|
-| `'player'` | Enemy HP ≤ 0 OR effects-driven victory (Phase 125) |
-| `'ko'` | Player HP ≤ 0 |
-| `'friendship'` | `state.friendshipResolutionAuthorized === true` — set only when player casts Befriend + chooses `spare` (Phase 112) OR effects-driven friendship (Phase 125) |
-| `'ongoing'` | None of the above |
+### Effects-Driven Resolution (Phase 125 — removed)
 
-### Effects-Driven Resolution (Phase 125)
-
-Phase 125 allows status effects to force combat resolution instead of timeout, rewarding status-effect-heavy play styles. `getEffectsResolutionOutcome(state)` analyzes the enemy's active effects and can trigger two resolution paths:
-
-**Saturation Yield (→ friendship)**: When the enemy is overwhelmed by control and debuff effects, it yields. The combined intensity of control effects plus stat-debuffing effects must reach `EFFECTS_RESOLUTION_DEBUFF_INTENSITY_THRESHOLD` (tunable, default 8). This routes through the existing `'friendship'` outcome for stable rewards (half XP + full loot). Phase 155 — a control effect that is *actively restricting* the enemy (`forcedStance` / `blockedStances` / `skipTurn`) also credits its remaining lock duration (capped) toward this sum, so exploiting a decisive multi-round lock saturates the enemy even at base intensity.
-
-**DoT Erosion (→ victory)**: When damage-over-time effects can realistically finish the enemy, combat resolves to victory. Total DoT damage per round must exceed `EFFECTS_RESOLUTION_DOT_DAMAGE_THRESHOLD` (tunable, default 5) and be able to finish the enemy within ~10 rounds. Phase 155 — the route credits the **guaranteed pending DoT already locked in** (`Σ damagePerRound × intensity × remainingDuration`) against effective enemy HP, so a strategist who has stacked a lethal-in-flight DoT package resolves the fight they have already won instead of trading turns to the round cap. The per-round threshold gate is retained, so a trickle DoT still cannot force a premature win. This routes through the existing `'victory'` outcome for full XP and loot.
-
-Effects resolution integrates with existing combat-end logic:
-- Checked after HP conditions but before manual friendship authorization  
-- Uses existing `CombatEndReport.outcome` union values (no new outcome types)
-- Preserves round cap unchanged — effects provide resolution, not more time
-- Thresholds are registry tunables for balance iteration
-
-This closes the high-engagement timeout issue where players dominating via status effects couldn't complete fights within the round limit.
+Phase 125's `getEffectsResolutionOutcome(state)` (Saturation Yield → friendship,
+DoT Erosion → victory) was a legacy-resolver mechanic and was removed with the
+legacy driver. In Hazard-Pattern Combat the same doctrine is served directly by
+the HP model: DoT erodes the enemy's sole HP bar, control denies its telegraphed
+turns, and the escalation clock punishes stalling.
 
 ## Battle Log
 
 `CombatState.log: BattleLogEntry[]` is an opt-in coarse summary slot from
-the pre-Phase-9 combat design. `appendLog(state, entry)` is the reducer
-that pushes one row:
+the pre-Phase-9 combat design. The `BattleLogEntry` shape remains exported
+for consumers that want the summary shape:
 
 ```typescript
 {
@@ -415,47 +369,21 @@ that pushes one row:
 }
 ```
 
-The live per-round signal that consumers actually subscribe to is the
-`RoundEvent[]` stream returned by `resolveCombatRound` — it carries every
-phase / kind / sub-event (attack-roll, damage-applied, effect-application,
-heal, resist, friendship-counter ticks, ...). The CLI threads that
-stream onto the `combat:round` event payload and the agent-e2e state log
-via `store.updateCombat(next, combatEvents)`. `appendLog` remains on the
-public barrel for any consumer that wants the summary shape; the combat
-resolver itself never populates it.
-
-**Contract validation (Phase 96):** `resolveCombatRound` validates all
-required parameters at entry to prevent runtime contract divergence issues
-where BattleLogEntry fields might be undefined. If undefined `playerAction`
-or `enemyAction` are passed, the function throws early with descriptive errors.
+The live per-encounter signal that consumers actually subscribe to is the
+`CombatEvent[]` stream returned by the Hazard-Pattern engine transitions
+(`playCombatCard`, `resolveThreatPhase`, `processBetweenPhases`, ...).
 
 ## Combat Reducer API
 
 Defined in `src/Combat/combat.reducer.ts`. These are small, single-concept
-state-shape mutations. The current names are on the left; legacy aliases are
-listed where they exist for backwards compatibility.
+state-shape mutations. (The legacy per-round reducer verbs — `setPhase`,
+`setPlayerStance`, `setPlayerAction`, `appendLog`, `endCombat` — were removed
+with the legacy driver.)
 
 | Function | Alias(es) | Description |
 |----------|-----------|-------------|
-| `initializeCombat(player, enemy)` | — | Creates fresh CombatState with deep-cloned combatants |
-| `setPhase(state, phase)` | — | Transitions to a new combat phase |
-| `setPlayerStance(state, stance)` | — | Sets the player's stance choice |
-| `setPlayerAction(state, action)` | — | Sets the player's action choice |
-| `appendLog(state, entry)` | — | Appends a battle log entry |
+| `initializeCombat(player, enemy)` | — | Creates fresh CombatState with deep-cloned combatants — the `CombatState` constructor shared by the skill / effects / equipment engines |
 | `incrementFriendship(state)` | — | Increments the friendship counter |
-| `endCombat(state)` | — | Marks combat as ended; the reason is encoded in `determineCombatEnd(state)` |
-
-## Combat Resolver API
-
-Defined in `src/Combat/combat.resolver.ts`. The resolver is the single
-round-resolution entry point used by every UI client.
-
-| Function / Type | Description |
-|-----------------|-------------|
-| `resolveCombatRound(state, playerAction, enemyAction): RoundResolution` | Runs all six phases of one round and returns `{ state, combatEvents }`. Pure; only RNG source is `Math.random` inside dice rolls and effect selectors (stub via `src/test-utils/rng.ts`). |
-| `RoundResolution` | `{ state: CombatState; combatEvents: RoundEvent[] }` |
-| `RoundEvent` | Discriminated union, organised by `phase` (`round-start`, `action-restriction`, `advantage`, `stance-effects`, `scenario`, `round-end`). UIs render each phase as a section. |
-| `CombatActor` | `'player' \| 'enemy'` — used by every event to identify which side it belongs to. |
 
 ## Combat Mechanics API
 
@@ -464,9 +392,6 @@ round-resolution entry point used by every UI client.
 | `determineAdvantage(attacker, defender)` | Returns advantage relationship |
 | `getAdvantageModifier(advantage)` | Returns +2 / 0 / −2 |
 | `hasAdvantage(attacker, defender)` | Boolean shorthand |
-| `determineEnemyAction(logic)` | AI-driven enemy action selection |
-| `isCombatOngoing(state)` | True if combat should continue |
-| `determineCombatEnd(state)` | Returns outcome or 'ongoing' |
 | `getBaseStat(entity, stance)` | Raw base stat for a stance |
 | `getAttackStat(entity, stance)` | Attack derived stat for a stance |
 | `getDefenseStat(entity, stance)` | Defense derived stat for a stance |
@@ -486,7 +411,7 @@ round-resolution entry point used by every UI client.
 | `removeRandomBuff(target)` | Strips one random buff |
 | `extendRandomBuffDuration(target, amount)` | Extends one random buff |
 | `applyRegen(target)` | Sums and applies all regen effects |
-| `getActiveRollModifier(target)` | Sums all `rollModifier` + `rollModifierPerIntensity × intensity` across active effects — flat roll-mod total consumed by the combat resolver |
+| `getActiveRollModifier(target)` | Sums all `rollModifier` + `rollModifierPerIntensity × intensity` across active effects — flat roll-mod total consumed by the combat engine |
 | `canAct(effects, requestedStance?)` | Action-restriction gate — returns `{ canAct, resolvedStance, reason }` reflecting forced/blocked-stance and skipTurn constraints |
 | `isAlive(combatant)` | True if `health > 0` |
 | `isDefeated(combatant)` | True if `health <= 0` — the sole win condition for Hazard-Pattern Combat |
@@ -525,7 +450,7 @@ Cross-reference: `docs/skills.md` → Skills vs Cards.
 
 ## Hazard-Pattern Combat (Spec 25)
 
-**The primary player-facing combat system** (mobile map encounters, `/combat-tuning`).
+**The only combat engine** (mobile map encounters, the combat CLI, the `/combat-playtest` + `/deck-tuning` loops).
 A card-and-dice system structurally mirrored on the Hazard minigame: every verb is a
 combat card, and the enemy's **sole bar is HP** — dropping it to 0 (`isDefeated(enemy)`)
 is the only win condition. Status effects are the **efficient** path: DoT erodes HP far
@@ -701,7 +626,7 @@ escalation clock their consumer-facing surface.
 
 | Constant | Description |
 |----------|-------------|
-| `READ_STATUS_MULT` | `Record<CombatReadResult, number>` — stance-read scales the magnitude of a landed status effect (DoT damage, control intensity, debuff intensity). Values: `advantage` 1.34 / `neutral` 1.0 / `none` 1.0 / `disadvantage` 0.75. Gentler than `READ_DAMAGE_MULT` (1.5/0.5) so reading adds texture without swinging fights wildly. Tuned by `/combat-tuning`. |
+| `READ_STATUS_MULT` | `Record<CombatReadResult, number>` — stance-read scales the magnitude of a landed status effect (DoT damage, control intensity, debuff intensity). Values: `advantage` 1.34 / `neutral` 1.0 / `none` 1.0 / `disadvantage` 0.75. Gentler than `READ_DAMAGE_MULT` (1.5/0.5) so reading adds texture without swinging fights wildly. Tuned manually against `/combat-playtest` evidence. |
 | `THREAT_ESCALATION_PER_ROUND` | Per-round escalation step added to the incoming-threat damage multiplier for each round past the grace window (default 0.22). The escalation formula is `min(THREAT_ESCALATION_MAX, 1 + escalationRate × roundsPastGrace)` where `escalationRate = THREAT_ESCALATION_PER_ROUND × (isBoss ? THREAT_ESCALATION_BOSS_MULT : 1)`. |
 | `THREAT_ESCALATION_GRACE` | Rounds of grace before the clock starts — a fast clean kill is unpunished (default 1). |
 | `THREAT_ESCALATION_MAX` | Cap on the escalation multiplier so a long grind ramps but never runs away into a one-shot (default 2.0). The counters are on-vision: race the foe down (DoT) or deny its turns (control) to skip escalated hits. |
@@ -716,7 +641,7 @@ the boss-tier escalation warning).
 
 Phase 167 extends `CombatSimStats` (returned by `simulateHazardPatternCombat`)
 with five doctrine-critical fields that make "low status-engagement = balance
-failure" mechanically enforceable by `/combat-tuning`. Phase 168 adds the AMPLIFY
+failure" mechanically enforceable by the balance loops. Phase 168 adds the AMPLIFY
 burst mechanic (reads pending DoT × multiplier without consuming effects). The
 Conclusion sig-skill redesign adds `CONCLUDE_DMG_PER_STACK` for the BODY
 archetype's stack-based finisher.
@@ -755,19 +680,10 @@ consumes DoTs; AMPLIFY is the build-then-detonate path.
 ## Pending
 
 The Spec 02 / 03 / 04 / 05 work this section used to track has
-shipped. Combat is exercised end-to-end via `resolveCombatRound`
-through the six `Combat/phases/` files; skill and item actions live in
-`phases/scenario.ts`; Tier 2/3 procs are in `Combat/combat-effects.ts`.
+shipped, and the legacy turn-based resolver it produced has since been
+removed. Combat is exercised end-to-end via the Hazard-Pattern engine
+(`initializeCombatEncounter` → `playCombatCard` → `resolveThreatPhase` →
+`processBetweenPhases`); Tier 2/3 procs are in `Combat/combat-effects.ts`.
 The CLI log utilities were dropped when Phase 17 unified the CLI
 surface around `npm run game` — no log strings exist in the engine
-today; consumers render directly from the typed `RoundEvent` stream.
-
-### Landed in Spec 02
-
-- `resolveCombatRound` (in `combat.resolver.ts`) replaces the CLI's inline
-  attack / defend math; the CLI is now UI-only.
-- Typed `RoundEvent` stream emitted alongside the new state for UI rendering.
-- `canAct` / `getActiveEffectModifiers` are wired through the resolver.
-- Symmetric defense (Q3): both player and enemy defenders now route through
-  `getDefenseStat` instead of the asymmetric base-stat path the CLI used to
-  use for the player.
+today; consumers render directly from the typed `CombatEvent` stream.

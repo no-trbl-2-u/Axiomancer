@@ -1,7 +1,14 @@
 # Hazard-Pattern Combat — System Reconciliation Gaps
 
-> **Status:** Open design questions — handoff. 2026-06-21.
-> **Context:** Spec 25 shipped the Hazard-Pattern Combat engine (`resolveCombatPhase`)
+> **Status:** HISTORICAL — point-in-time handoff, 2026-06-21. The root
+> decision below has since been made: Hazard-Pattern Combat is a FULL
+> REPLACEMENT. The legacy turn-based `resolveCombatRound` (and the
+> `/combat-tuning` / `/legacy-combat-tuning` commands and `balance-analyst`
+> agent referenced below) have been removed; Pressure Tracks were replaced by
+> the HP-only win model (2026-06-22). Kept as a record of the reconciliation
+> analysis.
+>
+> **Context (as written):** Spec 25 shipped the Hazard-Pattern Combat engine (`resolveCombatPhase`)
 > as a card-and-dice driver where status effects fill two Pressure Tracks (DoT
 > Erosion + Control Saturation) that are the only practical win conditions. It
 > ships **alongside** the legacy turn-based `resolveCombatRound`, which still

@@ -1,12 +1,13 @@
 # Quickstart — Combat
 
-> Initialize combat, resolve rounds, and handle outcomes. For full
-> API reference see [`combat.md`](./combat.md).
+> Initialize a Hazard-Pattern Combat encounter, play cards, and handle
+> outcomes. Hazard-Pattern Combat is the only combat engine. For full
+> API reference see [`combat.md`](./combat.md) § Hazard-Pattern Combat.
 
-## Initialize combat
+## Initialize an encounter
 
 ```typescript
-import { createCharacter, createEnemy, initializeCombat } from 'axiomancer-mechanics';
+import { createCharacter, createEnemy, initializeCombatEncounter, rollEncounterDice } from 'axiomancer-mechanics';
 
 const player = createCharacter({ name: 'P', level: 1, baseStats: { body: 4, mind: 4, heart: 4 } });
 const enemy = createEnemy({
@@ -15,72 +16,78 @@ const enemy = createEnemy({
   mapName: 'test-map', logic: 'random',
 });
 
-const combat = initializeCombat(player, enemy);
-// combat.player, combat.enemy, combat.round === 1
-// combat.combatResources is the active player token pool:
-// { heart: 0, body: 0, mind: 0, fallacy: 0, paradox: 0 }
-// for an ungeared player; equipped item/set combat-start grants can seed it non-zero.
+let state = initializeCombatEncounter(player, enemy);
+// state.phase === 'reveal' — opening hand drawn, dice not yet rolled.
+// Optional args: a curated deck (string[] of card ids) and a seed for
+// deterministic runs: initializeCombatEncounter(player, enemy, deck, seed)
+
+({ state } = rollEncounterDice(state)); // opens phase-play and starts turn 1
 ```
 
-## Resolve a round
+## Play a turn
+
+Every engine verb returns a `CombatTransition` — `{ state, events }` — so any
+UI client (CLI, mobile, automated tester) can drive combat without
+re-implementing the math.
 
 ```typescript
-import { resolveCombatRound } from 'axiomancer-mechanics';
+import { draftStanceDie, playCombatCard, endTurn } from 'axiomancer-mechanics';
 
-const resolution = resolveCombatRound(combat, {
-  playerAction: { stance: 'body', action: 'attack' },
-});
-// resolution.state — updated CombatState
-// resolution.combatEvents — typed event stream (RoundEvent[])
+// 1. Draft one of the rolled dice as your stance (the unpicked die grants Conviction).
+({ state } = draftStanceDie(state, state.dice[0].id));
+
+// 2. Play cards from hand. `useBottom: true` powers the full effect (spends a die);
+//    `false` takes the free top action.
+const entry = state.hand[0];
+let t = playCombatCard(state, { uid: entry.uid }, true);
+state = t.state;
+// t.events — typed CombatEvent[] stream for rendering
+
+// 3. Close the turn.
+({ state } = endTurn(state));
 ```
 
-## Subscribe to events
+## Enemy threat phase and upkeep
 
 ```typescript
-for (const event of resolution.combatEvents) {
-  switch (event.phase) {
-    case 'scenario':
-      if (event.kind === 'damage-applied') {
-        console.log(`${event.target} took ${event.damage} damage`);
-      }
-      break;
-    case 'skill':
-      if (event.kind === 'effect-applied') {
-        console.log(`${event.effect.name} applied to ${event.appliedTo}`);
-      }
-      break;
-  }
+import { resolveThreatPhase, processBetweenPhases } from 'axiomancer-mechanics';
+
+({ state } = resolveThreatPhase(state));    // the enemy's telegraphed threat fires
+({ state } = processBetweenPhases(state));  // DoT ticks, effect durations, fresh hand
+```
+
+## Outcomes
+
+When `state.phase === 'complete'`, `state.outcome` is one of:
+
+| Outcome | Meaning |
+|---------|---------|
+| `victory` | Enemy HP reached 0 (DoT erosion + strikes) |
+| `mercy` | Spared a low-HP foe via Befriend + `spare` (the friendship path) |
+| `defeat` | Player HP reached 0 |
+| `retreat` | Player used the synthetic Retreat card |
+
+```typescript
+import { buildCombatSummary } from 'axiomancer-mechanics';
+
+if (state.phase === 'complete') {
+  const summary = buildCombatSummary(state);
+  // summary.outcome + per-card attribution rows (DoT damage, strikes, phases)
 }
 ```
 
-## Friendship outcome path
-
-Both combatants defending on the same round increments
-`friendshipCounter`. At `FRIENDSHIP_COUNTER_MAX` (3), combat ends
-with `outcome: 'friendship'`.
+## Simulate for balance evidence
 
 ```typescript
-import { determineCombatEnd } from 'axiomancer-mechanics';
+import { simulateHazardPatternCombat } from 'axiomancer-mechanics';
 
-const end = determineCombatEnd(resolution.state);
-if (end) {
-  // end.outcome: 'victory' | 'defeat' | 'friendship' | 'fled'
-  // end.report.xpGained, end.report.loot, end.report.friendshipReward
-}
+const stats = simulateHazardPatternCombat(player, enemy, 300);
+// stats.winRate, stats.dotHpFraction, stats.avgActiveEffectsPerPhase, ...
 ```
-
-## Combat action types
-
-| Action | Effect |
-|--------|--------|
-| `attack` | Roll contest against opponent; winner deals damage |
-| `defend` | Boost defense (3×/2×/1.5× by stance advantage); friendship +1 if both defend |
-| `skill` | Execute a learned/unlocked skill via `executeSkill`; UI should show only currently affordable skills |
-| `item` | Use a consumable from inventory |
-| `flee` | Attempt escape (not always successful) |
 
 ## Deep-dive
 
-- Event type reference: [`combat.md`](./combat.md) § Combat Reducer API
-- Per-phase resolver: `src/Combat/phases/` (round-start, advantage, scenario, round-end)
-- Friendship path: [`combat.md`](./combat.md) § Friendship Path
+- Full API surface: [`combat.md`](./combat.md) § Hazard-Pattern Combat API
+- Stance draft / the read / Conviction / Signature Skills: [`combat.md`](./combat.md) § Spec 26 / 26b
+- Deck building and presets: [`combat.md`](./combat.md) § Phase 169 — Curated Combat Loadout
+- Playtest loop: [`playtest.md`](./playtest.md)

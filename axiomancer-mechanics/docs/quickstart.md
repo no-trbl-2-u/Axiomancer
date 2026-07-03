@@ -18,7 +18,7 @@ canonical entry points. Cross-link to the per-module doc for depth.
 | Module | Marquee surface | Phases | Doc |
 |---|---|---|---|
 | **Character** | `createCharacter`, presets (`apprentice`/`wanderer`/`sage`), equipment + stat allocation, `Character.id` auto-gen | 18, 29, 35 | [character.md](./character.md) |
-| **Combat** | `resolveCombatRound`, per-phase split (`Combat/phases/*`), stat accessors, advantage / crit / friendship | 9, 15, 32, 36, 38 | [combat.md](./combat.md) |
+| **Combat** | Hazard-Pattern Combat (`initializeCombatEncounter` / `playCombatCard` / `resolveThreatPhase` / `simulateHazardPatternCombat`), stat accessors, advantage / crit / friendship | 9, 15, 32, 36, 38, 165+ | [combat.md](./combat.md) |
 | **Effects** | `applyEffect`, Tier 1-3 procs, `statModifiers` + intensity scaling, fallacy payloads | 1, 3, 38, 44, 48 | [effects.md](./effects.md) |
 | **Enemy** | `createEnemy`, AI strategies + outlook-bias (Phase 45), enemy-skill caster path (Phase 49), per-enemy alignment + `friendshipReward` (+ Phase 69 `alignmentDelta`) + Phase 68 `BefriendabilityConfig` | 7, 45, 49, 57, 60, 62, 68, 69 | [enemy.md](./enemy.md) |
 | **Game** | `createGameStore`, save/load + migrators (`GAME_STATE_VERSION` 7), event surface, autosave throttling, persistence adapters, run-loop semantics (`resetRun` + `runId`), Codex slice | 9, 11, 12, 21, 35, 38, 50, 51, 55, 72, 73 | [gameloop.md](./gameloop.md) |
@@ -54,7 +54,7 @@ tabs:
 |---|---|
 | **Self** | View items, allocate stat points (Phase 29), learn skills (Phase 30) |
 | **Map** | Walk available nodes, resolve MapEvents (`resolveMapEvent`), see discovered / consumed nodes |
-| **Combat** | When `state.combat !== null`, pick stance + action / skill / item per round (resolved through `resolveCombatRound`) |
+| **Combat** | Hazard-Pattern Combat via the `combat` subcommand (`npm run combat`): draft a stance die, play cards, resolve the threat phase |
 | **Save / Load** | Persistence via the configured `PersistenceAdapter` (default: file slot via `--save-file`) |
 | **Debug** | Spawn arbitrary enemies for testing (`debugSpawn`); useful for combat / loot validation |
 | **Quit** | Exit cleanly; the engine emits a final `cli:exit` event |
@@ -111,9 +111,9 @@ the full inventory + exit expectations.
 
 1. Enter combat: `store.startCombat(enemy)` (or `Encounter` for
    multi-enemy; length-1 today).
-2. Each round: pick `{ stance, action }` for the player; the resolver
-   computes the enemy's basic action (or skill if Phase 49 enemy-
-   skill rotation fires) and runs `resolveCombatRound`.
+2. Each turn (Hazard-Pattern Combat): draft a stance die, play cards
+   from hand (`playCombatCard`), then resolve the enemy's telegraphed
+   threat phase (`resolveThreatPhase`).
 3. **Victory path** — when `enemy.health <= 0`, `endCombat()` reports
    `outcome: 'victory'`, grants full XP + the weighted loot roll.
 4. **Friendship path** (Phase 36) — both combatants picking `defend`
@@ -131,10 +131,10 @@ the full inventory + exit expectations.
    carries `Enemy.befriendabilityConfig`, the Phase 36 cap is
    overridden by an AND-composed predicate set (`roundsThreshold`
    / `hpGate { belowPct }` / `requiredStances[]` / `requiredSkillUse[]`
-   / `defaultFallback`). The internal helper `isFriendshipEligible`
-   is the single decision point; `determineCombatEnd` and
-   `isCombatOngoing` both call it so the two predicates stay in
-   lockstep. Counter still increments freely; friendship triggers
+   / `defaultFallback`). The internal predicate helper backs
+   `isBefriendAttemptEligible` (the legacy `isFriendshipEligible` /
+   `determineCombatEnd` / `isCombatOngoing` consumers were removed
+   with the legacy driver). Counter still increments freely; friendship triggers
    only when all named predicates pass together — late-resolution
    semantics. First boss-tier authored config: `CoastalTyrant`
    (`hpGate { belowPct: 0.4 }`, `requiredStances: ['heart']`,
@@ -215,23 +215,20 @@ shift the cube on resolution (Phase 43).
 ## 5. Verify + deploy gates
 
 ```bash
-npm run verify       # type-check + lint + tests + build
-npm run deploy:check # 4 structural assertions + npm pack --dry-run
+npm run verify       # type-check + type-check:tests + lint + tests + build
 ```
 
 The `verify` gate enforces:
-- TypeScript strict (`tsc --noEmit`).
+- TypeScript strict (`tsc --noEmit`), plus the tests tsconfig (`type-check:tests`).
 - ESLint (flat config, `@typescript-eslint` plugin; warnings advisory).
 - Vitest hermetic suite (`src/**/e2e/*.engine.test.ts`).
 - Build (`tsc && tsc-alias` → `dist/`).
 
-The `deploy:check` gate adds:
-- `dist/` presence + types.d.ts count matches `src/` count.
-- Latest git tag matches the top tagged CHANGELOG heading (Phase 52).
-- Public-surface snapshot matches `scripts/public-surface.expected.json` (Phase 53).
+The deploy gate (`npm run deploy:check`) lives at the monorepo ROOT — run it
+from the repo root, not from this package.
 
-Both gates run on every PR + push to `main` via the Phase 56 CI workflow
-(`.github/workflows/verify.yml`).
+The verify gate runs on every PR + push to `main` via the root CI workflow
+(`.github/workflows/verify-mechanics.yml`).
 
 For the agent-friendly reporter variant (Phase 39/40) — emits JSON +
 markdown rollups including a prior-run diff:
@@ -249,7 +246,7 @@ Focused guides with runnable code samples for each major module:
 | Module | Quickstart | Covers |
 |--------|-----------|--------|
 | Character | [quickstart-character.md](./quickstart-character.md) | `createCharacter`, presets, stat allocation, skill learning |
-| Combat | [quickstart-combat.md](./quickstart-combat.md) | `initializeCombat`, `resolveCombatRound`, event stream, friendship path |
+| Combat | [quickstart-combat.md](./quickstart-combat.md) | `initializeCombatEncounter`, `playCombatCard`, threat phases, outcomes, sim |
 | Items | [quickstart-items.md](./quickstart-items.md) | `dropItem`, `previewTemplateAtRarity`, equip, shop, set bonuses |
 | Skills | [quickstart-skills.md](./quickstart-skills.md) | `executeSkill`, resource generation, synergy events, Tier 1/2/3 |
 | World | [quickstart-world.md](./quickstart-world.md) | `resolveMapEvent`, MapEventPool authoring, `alignmentDelta` |

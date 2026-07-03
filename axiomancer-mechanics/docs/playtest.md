@@ -7,9 +7,8 @@
 > that true at every stage of the campaign.
 >
 > Loops that consume this: `/combat-playtest` (evidence + verdict, report
-> only), `/deck-tuning` (cards/decks), `/combat-tuning` (engine constants).
-> The LEGACY turn-based playtest module is documented separately in
-> `docs/playtest-legacy.md`.
+> only) and `/deck-tuning` (cards/decks). Engine constants are tuned
+> manually against this harness's evidence.
 
 ## Stage profiles
 

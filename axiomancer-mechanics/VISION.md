@@ -17,10 +17,9 @@ the most engaging aspect of combat encounters. Every balance decision, tuning ru
 addition, and skill/effect design is judged first by "does this make applying
 and exploiting status effects more central and more satisfying?" If a change
 makes basic-attack trading more attractive than status-effect play, it works
-against the vision. Both balance loops must treat low status-effect engagement
-as a balance failure even when win/loss rates look healthy: the
-`legacy-combat-tuning` loop + the `balance-analyst` for the turn-based combat,
-and the `combat-tuning` loop for the Hazard-Pattern Combat.
+against the vision. The balance loops (`combat-playtest` and `deck-tuning` for
+Hazard-Pattern Combat — the only combat engine) must treat low status-effect
+engagement as a balance failure even when win/loss rates look healthy.
 
 **Hazard-Pattern Combat win model (updated 2026-06-22):** the enemy has ONE bar —
 HP — and dropping it to 0 is the only win condition. Status is the EFFICIENT path

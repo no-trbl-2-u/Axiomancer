@@ -562,7 +562,7 @@ function loadTab(store: GameStoreHandle, snapshotAdapter: PersistenceAdapter | n
     log('\nGame loaded.');
 }
 
-type DevAction = 'set-level' | 'set-stats' | 'learn-skills' | 'equip-skills'
+type DevAction = 'set-level' | 'set-stats' | 'learn-skills'
     | 'grant-equipment' | 'grant-consumables' | 'equip-item' | 'grant-currency'
     | 'set-moral' | 'set-alignment' | 'spawn-enemy' | 'max-out' | 'back';
 
@@ -574,7 +574,6 @@ async function devTab(store: GameStoreHandle): Promise<void> {
             { name: 'Set level',               value: 'set-level' },
             { name: 'Set base stats',           value: 'set-stats' },
             { name: 'Learn skills (pick/all)',   value: 'learn-skills' },
-            { name: 'Unlock skills (DEPRECATED)',   value: 'equip-skills' },
             { name: 'Grant all equipment',       value: 'grant-equipment' },
             { name: 'Grant all consumables',     value: 'grant-consumables' },
             { name: 'Equip specific item',       value: 'equip-item' },
@@ -628,12 +627,6 @@ async function devTab(store: GameStoreHandle): Promise<void> {
                 const r = devLearnSkills(store, skills);
                 log(`\n${r.detail}\n`);
             }
-            break;
-        }
-        case 'equip-skills': {
-            log('\n[DEPRECATED] Card equipment was removed in Phase 99.');
-            log('All known skills are automatically available for combat use.');
-            log('Use \'Learn skills\' to add skills to your known catalogue.');
             break;
         }
         case 'grant-equipment': {

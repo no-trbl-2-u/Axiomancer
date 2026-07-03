@@ -20,18 +20,16 @@ erodes HP far faster than the deliberately weak basic strike, and control hinder
 the enemy (it loses its telegraphed turn). **Updated 2026-06-22:** the old
 two-Pressure-Track win model (DoT Erosion + Control Saturation as the only win
 conditions) was REMOVED; HP is the sole win condition now (`isDefeated(enemy)`),
-basic-attack trading is the weak baseline rather than absent. Tuned by
-**`/combat-tuning`** (witness: `simulateHazardPatternCombat`). The new combat is LIVE in mobile map encounters;
-the legacy turn-based `resolveCombatRound` now backs only the dev-only legacy
-combat tab and is tuned by **`/legacy-combat-tuning`** (STRATEGIST witness).
-Alongside `/combat-tuning`: **`/deck-tuning`** forges the card pool
-(sandbox-first card/deck A/Bs, promotion into the library) and
+basic-attack trading is the weak baseline rather than absent. Hazard-Pattern
+Combat is the ONLY combat engine (witness: `simulateHazardPatternCombat`); the
+legacy turn-based resolver was removed. The combat is LIVE in mobile map
+encounters. Engine constants are tuned manually; **`/deck-tuning`** forges the
+card pool (sandbox-first card/deck A/Bs, promotion into the library) and
 **`/combat-playtest`** runs the stage matrix plus qualitative `playtester`
 agents (report only; see `docs/playtest.md`).
 
-Canonical: `VISION.md` → Combat vision. Echoed in `AGENTS.md`, the
-`combat-tuning` + `legacy-combat-tuning` skills, and the `balance-analyst`
-agent (legacy loop).
+Canonical: `VISION.md` → Combat vision. Echoed in `AGENTS.md` and the
+`combat-playtest` + `deck-tuning` skills.
 
 ## Pointers
 

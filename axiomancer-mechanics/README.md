@@ -40,11 +40,8 @@ npm run build --workspace axiomancer-mechanics   # compiles to ./dist
 ```ts
 import {
   createCharacter, createEnemy,
-  createGameStore, nullAdapter,
-  determineEnemyAction, determineAdvantage,
-  applyDamage, getAttackStat, getDefenseStat,
-  applyTier1CombatEffect, lookupEffect,
-  isCombatOngoing,
+  initializeCombatEncounter, rollEncounterDice,
+  playCombatCard, resolveThreatPhase, processBetweenPhases,
 } from 'axiomancer-mechanics';
 
 const player = createCharacter({
@@ -63,13 +60,18 @@ const enemy = createEnemy({
   logic: 'random',
 });
 
-const store = createGameStore(nullAdapter, { player });
-store.getState().startCombat(enemy);
+let state = initializeCombatEncounter(player, enemy);
+({ state } = rollEncounterDice(state));
 
-while (isCombatOngoing(store.getState().combat!)) {
-  // ...drive a round of combat using the helpers above...
+while (state.phase !== 'complete') {
+  // ...draft a stance die, play cards (playCombatCard), then
+  // resolveThreatPhase + processBetweenPhases per turn...
+  break;
 }
 ```
+
+See [`docs/quickstart-combat.md`](./docs/quickstart-combat.md) for the full
+turn loop.
 
 ## Public API
 
@@ -79,10 +81,9 @@ The barrel exports are organised by domain:
 | --------------- | ------------------------------------------------------------------------------------------------------------ |
 | Character       | `createCharacter` (auto-generates `Character.id` via `getRng()` when not supplied — Phase 35), `equipItem`/`unequipItem`, `getEquipmentModifiers`, `allocateStatPoint` + `STAT_POINTS_PER_LEVEL` + `availableStatPoints` field on `Character` (Phase 29), presets API (`characterPresets`, `getPresetById`, `buildCharacterFromPreset`), types (`Character`, `BaseStats`, `DerivedStats`, `NonCombatStats`, `CharacterPreset`) |
 | Enemy           | `createEnemy`, `decideEnemyAction`, AI presets (`aggressive`/`defensive`/`balanced`/`strategic`/`bossLogic`), `rollLoot`/`rollLootMany`, `EnemyLibrary`, `EnemiesByMap`, `ENEMY_REGISTRY`, `DEFAULT_XP_BY_DIFFICULTY`; `Enemy.philosophicalAlignment?: PhilosophicalAlignment` + outlook-driven basic-action bias since Phase 45; per-enemy `friendshipReward?: FriendshipReward` (`{ items?, xpBonus?, narrative?, flagSet?, alignmentDelta? }`) drives Phase 60 befriendable-enemy content (MournfulGull + HollowEyedBeggar authored today). Phase 62 added `flagSet?: string` — appends a world flag to `state.flags` on friendship outcome, consumed by `DialogueChoice.requires.flag`. Phase 68 added `BefriendabilityConfig` + `Enemy.befriendabilityConfig?: BefriendabilityConfig` — per-enemy override of the Phase 36 friendship-eligibility check (`roundsThreshold` / `hpGate` / `requiredStances` / `requiredSkillUse` AND-composed; `defaultFallback` escape hatch). First boss-tier authored config: CoastalTyrant (`hpGate { belowPct: 0.4 }`, `requiredStances: ['heart']`, `roundsThreshold: 5`). Phase 69 added `alignmentDelta?: Partial<PhilosophicalAlignment>` — applied to `state.philosophicalAlignment` via `applyAlignmentDelta` on friendship outcome; the post-clamp value surfaces on `CombatEndReport.friendshipReward.alignmentShift`. Closes Spec 14 Q4. First authored deltas: MournfulGull `{ outlook: +3 }`, HollowEyedBeggar `{ scope: -3 }`. Phase 71 added `FinalBlowLines` / `PactLines` / `CauseLines` types + per-foe `finalBlowLines?` / `pactLines?` / `causeLines?` — chronicle-voice prose on the Enemy type for the post-combat aftermath panel (3 variants per group; consumer picks based on outcome shape). Closes GH#65 ask 1. Initial author coverage: MournfulGull, HollowEyedBeggar, CoastalTyrant. Phase 73 added `CodexEntry { id, title, body }` type + per-foe `journalEntry?: CodexEntry` — auto-unlocks on `outcome === 'friendship'` (appends to `state.codex.unlockedEntries`; surfaces `{ id, title }` on `CombatEndReport.friendshipReward.codexEntryUnlocked`). Initial entries: `codex-mournful-gull`, `codex-hollow-eyed-beggar`, `codex-coastal-tyrant`. Closes GH#65 ask 3. |
-| Combat          | `determineAdvantage`, stat accessors (`getBaseStat`/`getAttackStat`/`getDefenseStat`/`getSaveStat`), `applyDamage`/`heal`/`healCharacter`, `tickAllEffects`/`applyRegen`, `getActiveRollModifier`/`getThornsReflect`, `resolveEffectApplication` (Phase 80 — Tier 2 debuff + Tier 3 **always land**; target-resist roll removed), `determineCombatEnd`, `isCombatOngoing`, `Stance`/`Action`/`CombatState`/`Combatant` |
-| Combat reducer  | `initializeCombat`, `setPhase`/`setPlayerStance`/`setPlayerAction`, `appendLog`, `incrementFriendship`, `endCombat`. **Deprecated** (`@deprecated` JSDoc — scheduled for removal at the next minor bump): `endCombatPlayerVictory` / `endCombatPlayerDefeat` / `endCombatWithFriendship` — all three dispatch to `endCombat`; the `outcome` is computed by `determineCombatEnd(state)`, not by the function name |
-| Combat resolver | `resolveCombatRound` plus its typed event stream: `RoundResolution`, `CombatActor`, `RoundEvent` (`RoundStartEvent`, `ActionRestrictionEvent`, `AdvantageEvent`, `StanceEffectEvent`, `ScenarioEvent`, `SkillPhaseEvent`, `ResourceEvent`, `ItemPhaseEvent`, `RoundEndEvent`). Per-phase implementation under `Combat/phases/` since Phase 15. |
-| Hazard-Pattern Combat (Spec 25) | Card-and-dice combat engine that ships **alongside** `resolveCombatRound` — every verb is a combat card (projected from a learned skill), and HP is the **sole win condition** (enemy HP drops to 0 via DoT erosion + strikes; basic-attack trading is the weak baseline). Drive a fight with `initializeCombatEncounter`, `rollEncounterDice`, `playCombatCard`, `resolveCombatPhase`/`resolveThreatPhase`/`processBetweenPhases`, `buildCombatSummary`; preview helpers `getCard`/`handCards`/`cardDieCostPreview`/`availableDice`; dice/deck/card/threat sub-modules (`rollCombatDice`, `buildCombatDeck`, `toCombatCard`, `getThreatSequence`); Monte-Carlo greedy bot `simulateHazardPatternCombat`. Types: `CombatEncounterState`, `CombatCard`, `CombatThreatPhase`, `CombatOutcome`, `CombatSummary`, `CombatSimStats`. See [`docs/combat.md`](./docs/combat.md) → Hazard-Pattern Combat. |
+| Combat          | `determineAdvantage`, stat accessors (`getBaseStat`/`getAttackStat`/`getDefenseStat`/`getSaveStat`), `applyDamage`/`heal`/`healCharacter`, `tickAllEffects`/`applyRegen`, `getActiveRollModifier`/`getThornsReflect`, `resolveEffectApplication` (Phase 80 — Tier 2 debuff + Tier 3 **always land**; target-resist roll removed), `Stance`/`Action`/`CombatState`/`Combatant` |
+| Combat reducer  | `initializeCombat` (the `CombatState` constructor shared by the skill / effects / equipment engines), `incrementFriendship`. The legacy per-round reducer verbs (`setPhase`/`setPlayerStance`/`setPlayerAction`/`appendLog`/`endCombat`) were removed with the legacy turn-based resolver |
+| Hazard-Pattern Combat (Spec 25) | Card-and-dice combat engine — **the only combat engine** (the legacy turn-based `resolveCombatRound` was removed) — every verb is a combat card (projected from a learned skill), and HP is the **sole win condition** (enemy HP drops to 0 via DoT erosion + strikes; basic-attack trading is the weak baseline). Drive a fight with `initializeCombatEncounter`, `rollEncounterDice`, `playCombatCard`, `resolveCombatPhase`/`resolveThreatPhase`/`processBetweenPhases`, `buildCombatSummary`; preview helpers `getCard`/`handCards`/`cardDieCostPreview`/`availableDice`; dice/deck/card/threat sub-modules (`rollCombatDice`, `buildCombatDeck`, `toCombatCard`, `getThreatSequence`); Monte-Carlo greedy bot `simulateHazardPatternCombat`. Types: `CombatEncounterState`, `CombatCard`, `CombatThreatPhase`, `CombatOutcome`, `CombatSummary`, `CombatSimStats`. See [`docs/combat.md`](./docs/combat.md) → Hazard-Pattern Combat. |
 | Effects         | `applyEffect`, `applyTier1CombatEffect`, `clearTier1EffectsForStance`/`ForType`, `lookupEffect`/`getEffectByName`/`getEffectsByType`, `effectsLibrary`, `processWorldEffectTick`/`getActiveHazards`, types (`Effect`, `ActiveEffect`, `EffectTier`, `StatModifier`, `DamageOverTime`, `RegenerationConfig`, `ActiveHazard`). Phase 80 always-land contract: Tier 2 debuffs + Tier 3 always land (no resist roll); only Tier 2 buff caster fumble/crit survives. See [`docs/effects.md`](./docs/effects.md). |
 | Items           | `addItem`/`removeItem`/`stackItem`, `useConsumable`/`useConsumableEffect`, equipment helpers (`aggregateCombatStartTokens`, `applyEquipmentGenerationBonus`, `getEquipmentProcTriggers`), `equipmentTemplates`/`uniqueTemplates`, `consumableLibrary`, type guards; shop economy (`buyItem`/`sellItem`/`defaultSellPrice`, types `ShopWare`/`ShopInventory` — Phase 37 + iterate `3ba5319`); set items (`getActiveSetBonuses` + 5 siblings: `getActiveSetBonusesForCharacter`/`aggregateSetStartTokens`/`applySetGenerationBonus`/`getActiveSetPassiveEffectIds`/`getEquippedItemSets`, library `itemSetLibrary`/`getItemSetById`, types `SetBonus`/`ItemSet` — Phase 54); base types (`Item`, `Equipment`, `Consumable`, `Material`, `QuestItem`, `EquipmentTemplate`, `UniqueItemTemplate`); Phase 75 added `previewTemplateAtRarity(templateId, rarity, playerLevel, rng?): Equipment \| undefined` — UI-tier wrapper around `dropItem` for mobile item-library mod-visibility (closes the user-jot at `b5c8165`). Phase 76 added `previewTemplateAtAllRarities(templateId, playerLevel, rng?): Record<ItemRarity, Equipment \| undefined>` — batch wrapper around the Phase 75 single-cell helper for UI tooltip / item-detail views rendering the full rarity strip in one call. Phase 152 added the affix-naming layer: `dropItemWithAffixes(templateId, playerLevel, rng?, opts?: DropWithAffixesOptions)` (drop + prefix/suffix roll), `composeItemName`, the `prefixes`/`suffixes`/`allAffixes` libraries with `getAffixById`/`affixesForSlot` lookups, `AFFIX_RARITY_WEIGHTS` draw scale, and types (`DropWithAffixesOptions`, `AffixControl`, `Affix`, `AffixRole`). |
 | Skills          | `executeSkill`, `canUseSkill`/`spendResources`/`calculateSkillDamage`, `generateBasicActionResources`/`generatePhilosophicalResource`, runtime learning (`learnSkill`, `getAvailableSkills`, `meetsLearningRequirement` — Phase 30; `learningRequirement` field on every Tier 2 / Tier 3 entry — Phase 33), top-level skill library (`skillLibrary`/`getSkillById` — Phase 50 unit 1 engine-handoff fix), types (`Skill`, `CombatResources`, `SkillTier`, `SkillResolution`, `SkillEvent`, `SkillLookup`); Tier 2 synergy primitive (`SkillSynergy` + `SynergyPredicate` types; 5 authored skills — `resonance-bleed`/`intensity-feedback`/`bat-swarm-thoughtform`/`resonance-burst`/`resonance-detonation` — Phase 66) |
@@ -181,7 +182,7 @@ automation/                # standalone walkthrough script + replay fixtures
 - [`Knowledge-Gaps.md`](./Knowledge-Gaps.md) — open design and intent questions
 - [`braindump/BRAINDUMP.md`](./braindump/BRAINDUMP.md) — unorganised idea backlog
 - [`docs/testing.md`](./docs/testing.md) — **hermetic e2e testing standard (required for every implementation)**
-- [`docs/playtest.md`](./docs/playtest.md) — Hazard-Pattern Combat playtest reference: stage profiles, sim-policy roster, deck-selection grammar, sandbox card workflow, CLI cookbook (legacy playtest module: [`docs/playtest-legacy.md`](./docs/playtest-legacy.md))
+- [`docs/playtest.md`](./docs/playtest.md) — Hazard-Pattern Combat playtest reference: stage profiles, sim-policy roster, deck-selection grammar, sandbox card workflow, CLI cookbook
 - [`docs/hazard-minigame.md`](./docs/hazard-minigame.md) — accepted v0 doctrine for the Mage Knight-like Hazard minigame: route choice, 4 dice, 5-card hand, card/enchantment lifecycle, `O - X` scoring, 30 action cards (Common/Uncommon/Rare), and 15 hazard cards
 - [`docs/hazard-minigame-api.md`](./docs/hazard-minigame-api.md) — Hazard minigame package-consumer guide: public exports, legal state-machine sequence, mobile presenter boundary, and v0 caveats
 - [`docs/hazard-minigame-prd.md`](./docs/hazard-minigame-prd.md) — Hazard minigame PRD: user stories, functional requirements, and success metrics
@@ -204,7 +205,7 @@ automation/                # standalone walkthrough script + replay fixtures
 | `npm run test:watch`    | Vitest in watch mode                                                                                  |
 | `npm run lint`          | Run ESLint                                                                                            |
 | `npm run check`         | Lint + type-check                                                                                     |
-| **`npm run verify`**    | **Hard gate** — `type-check && lint && test && build` chained; runs before every commit                |
-| **`npm run deploy:check`** | **Hard gate** — `npm pack --dry-run` + public-surface drift check (Phase 53); runs after every push |
+| **`npm run verify`**    | **Hard gate** — `type-check && type-check:tests && lint && test && build` chained; runs before every commit |
+| **`npm run deploy:check`** | **Hard gate** — lives at the monorepo ROOT (run `npm run deploy:check` from the repo root, not this package); runs after every push |
 | `npm run verify:agent`  | Agent-friendly verify report (Phase 39 + 40); writes `automation/last-verify-report.json` + markdown summary on stdout |
 | `npm run game`          | Interactive demo CLI (tabbed loop)                                                                    |

@@ -57,9 +57,12 @@ Multiplied by `level` for the final default.
 | `strategicLogic(enemy, state?)` | Attacks into `debuff_vulnerability_*` debuffs on the player; falls back to `aggressiveLogic` otherwise. |
 | `bossLogic(enemy, state?)` | Deterministic 4-round phase script: Body defend → counter-attack → Mind attack → Heart defend → loop. |
 
-Combat consumes the AI via `determineEnemyAction(enemy, state?)` in
-[`Combat/index.ts`](../src/Combat/index.ts). Strategies that need to react to
-the player (every non-random strategy) receive the live `CombatState`.
+Consumers reach the AI via `decideEnemyAction` in the Enemy module. (The
+legacy `determineEnemyAction` wrapper in `Combat/index.ts` was removed with
+the legacy turn-based resolver; Hazard-Pattern Combat drives enemies from
+authored threat sequences via `getThreatSequence` instead.) Strategies that
+need to react to the player (every non-random strategy) receive the live
+`CombatState`.
 
 **Stance helpers** (used by the built-in strategies; also exported for custom logic):
 

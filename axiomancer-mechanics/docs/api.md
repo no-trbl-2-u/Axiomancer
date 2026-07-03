@@ -42,14 +42,16 @@ unchanged, but the absolute semver guarantee starts at 1.0.
 
 ### Combat
 
-- `resolveCombatRound()` — Stable. The orchestrator delegates to per-phase
-  helpers under `src/Combat/phases/` (round-start / action-restriction /
-  advantage / stance-effects / scenario / round-end). Public contract
-  unchanged from Phase 02; internal split landed in Phase 15.
+- Hazard-Pattern Combat engine (`initializeCombatEncounter`,
+  `playCombatCard`, `resolveThreatPhase`, `processBetweenPhases`,
+  `simulateHazardPatternCombat`, etc.) — Stable. The ONLY combat engine;
+  the legacy turn-based `resolveCombatRound` (and its `RoundEvent` /
+  `RoundResolution` surface) was removed.
 - `determineAdvantage()`, advantage and damage / healing functions — Stable.
-- Combat state management (`initializeCombat`, `endCombat`, etc.) — Stable.
-- Combat types (`CombatState`, `Action`, `Stance`, `RoundEvent`,
-  `RoundResolution`, etc.) — Stable.
+- Combat state management (`initializeCombat` — the shared `CombatState`
+  constructor) — Stable.
+- Combat types (`CombatState`, `Action`, `Stance`,
+  `CombatEncounterState`, `CombatEvent`, etc.) — Stable.
 - **Phase 80 always-land contract:** `resolveEffectApplication` rewritten —
   Tier 2 debuffs + Tier 3 always land (no target-resist roll); only Tier 2
   buff caster fumble/crit survives. `EffectApplicationResult.rebounded`
@@ -157,7 +159,6 @@ interface EnginePayload {
     state: GameState;                    // the post-reducer state
     report?: CombatEndReport;            // only on combat:ended
     unlockedSkills?: string[];           // only on character:levelup (Phase 30)
-    combatEvents?: readonly RoundEvent[]; // only on combat:round (iterate 5ac6caa)
 }
 ```
 
@@ -166,12 +167,10 @@ learn after a level promotion crossed a tier-eligibility threshold. An
 empty array means the levelup didn't unlock anything new; the field is
 absent on every other topic.
 
-`combatEvents` (iterate `5ac6caa`) carries the full `RoundEvent[]` stream
-that `resolveCombatRound` produced (attack-roll, damage-applied,
-effect-application, skill phases, item-used, friendship-counter ticks,
-etc.). Populated only on `combat:round` when the CLI / driver threads
-the array through `store.updateCombat(combat, combatEvents)`; absent
-otherwise.
+(The legacy `combatEvents?: readonly RoundEvent[]` field was removed
+with the legacy turn-based resolver; Hazard-Pattern Combat consumers
+read the typed `CombatEvent[]` stream directly from the engine's
+`CombatTransition` returns instead.)
 
 `CombatEndReport.outcome` is `'victory' | 'defeat' | 'friendship' |
 'flee'`. Phase 36 added `'friendship'` for the friendship-counter exit
@@ -237,12 +236,11 @@ predicates AND-compose:
 
 Counter still increments freely on both-defend rounds (Phase 36
 unchanged); friendship triggers only when all predicates pass
-together — late-resolution semantics. The new internal helper
-`isFriendshipEligible(state)` is the single decision point;
-`determineCombatEnd` and `isCombatOngoing` both call it so the two
-predicates stay in lockstep. Helper is **not** on the public barrel
-per Phase 68 D11 — engine consumers read combat-end state through
-`determineCombatEnd`. First boss-tier authored config:
+together — late-resolution semantics. The internal predicate helper is
+**not** on the public barrel per Phase 68 D11; today it backs
+`isBefriendAttemptEligible` (the legacy `isFriendshipEligible` /
+`determineCombatEnd` / `isCombatOngoing` consumers were removed with
+the legacy turn-based driver). First boss-tier authored config:
 `CoastalTyrant` ships `{ hpGate: { belowPct: 0.4 }, requiredStances:
 ['heart'], roundsThreshold: 5 }`. See `docs/combat.md` § "Per-enemy
 predicate (Phase 68 — `BefriendabilityConfig`)" for the full schema
@@ -665,19 +663,12 @@ if (result.event.kind === 'encounter') {
 
 This package follows semver post-1.0; pre-1.0 minor bumps may carry
 breaking changes (typed event surface in 0.6.0, for example). The
-Stability Levels above indicate intent — and since Phase 53 the
-contract is **enforced** by a public-surface snapshot at
-[`scripts/public-surface.expected.json`](../scripts/public-surface.expected.json):
-
-- Every additive symbol on the top-level barrel must land with a
-  matching fixture refresh (`node scripts/snapshot-public-surface.mjs
-  --write`).
-- `npm run deploy:check` compares the live `dist/index.d.ts` against
-  the fixture and exits non-zero on drift; the deploy gate is wired
-  into CI (`.github/workflows/verify.yml`).
-- Per-tag deltas are emitted by `node scripts/diff-public-surface.mjs
-  <ref-A> <ref-B>` (markdown-shaped Added / Removed / Changed lists);
-  the CHANGELOG `[unreleased]` block carries the per-bump prose.
+Stability Levels above indicate intent. The former package-level
+public-surface snapshot layer (Phase 53) was retired at the monorepo
+merge — the package is consumed as local source via the `@mechanics`
+workspace alias, not published to npm. The deploy gate
+(`npm run deploy:check`) now lives at the monorepo ROOT and is run
+from the repo root, not from this package.
 
 Semver tier definitions:
 

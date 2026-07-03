@@ -190,10 +190,10 @@ Defined in `src/Skills/skill.engine.ts`.
 | `canUseSkill` | `(resources, skill) → boolean` | Returns `true` if every key in `resourceCost` is satisfied. Resonance check is implicit |
 | `spendResources` | `(resources, cost) → CombatResources` | Deducts cost; throws if insufficient (guard with `canUseSkill` first) |
 | `calculateSkillDamage` | `(character, skill, advantage) → number` | Applies the damage formula above |
-| `executeSkill` | `(state, skillId) → RoundResolution` | Full execution: validate → spend → resolve damage/effects → generate philosophical resource → emit events |
+| `executeSkill` | `(state, skillId, lookupSkill, casterSide?) → CardResolution` | Full execution: validate → spend → resolve damage/effects → generate philosophical resource → emit events |
 | `carryPhilosophicalResources` | `(resources, fraction?, cap?) → Partial<CombatResources>` | Cross-combat carry: returns the unspent fallacy / paradox to seed the next combat. `floor(fraction × unspent)` per resource, clamped to `cap`. Stance tokens never carry. Sparse result (positive keys only); pure |
 
-`executeSkill` emits `RoundEvent`s in the same stream as basic combat actions,
+`executeSkill` emits its skill events on the shared combat event stream,
 so the CLI renderer requires no special cases.
 
 ### Cross-combat resource carry
@@ -297,21 +297,18 @@ Minimum 12 skills covering all `philosophicalAspect × category` cells.
 
 ## Combat Integration
 
-Resources are generated inside `resolveCombatRound` immediately after the
-roll contest is resolved — before effects tick at round end. The resolver
-calls `generateBasicActionResources` with the player's stance and the
-contest outcome (`'hit'`, `'miss'`, or `'defend'`).
+In Hazard-Pattern Combat (the only combat engine), learned skills reach play
+as **projected cards**: `buildCombatDeck` assembles the deck from
+`knownSkills` (or the Phase 169 curated loadout) and `toCombatCard` projects
+each skill into a `CombatCard`. Playing a card's powered bottom action
+(`playCombatCard(state, cardRef, useBottom: true, dieId)`) spends a mana die
+and routes through `executeSkill` — the shared skill engine is unchanged.
 
-When `playerAction.action === 'skill'`, the resolver routes to `executeSkill`
-instead of the attack/defend path. The `CombatEvents` stream is unchanged —
-skill events use the same `phase` and `actor` shape as basic action events.
-
-The combat CLI should present a Skills sub-prompt after the player selects
-`action: skill`, listing learned/unlocked skills that are currently affordable
-under `canUseSkill(combatResources, skill)`. The chosen `skillId` is threaded
-into `resolveCombatRound` as `playerAction.skillId`. Selection is over the
-`knownSkills` catalogue (ADR-0002 / Phase 99); the legacy `equippedSkills` gate
-was removed in Phase 159.
+Selection is over the `knownSkills` catalogue (ADR-0002 / Phase 99); the
+legacy `equippedSkills` gate was removed in Phase 159, and the legacy
+turn-based resolver (`resolveCombatRound`) that consumed
+`playerAction.skillId` was removed outright. See `docs/combat.md` →
+Skills vs Cards for the terminology boundary.
 
 ---
 

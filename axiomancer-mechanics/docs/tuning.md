@@ -1,5 +1,13 @@
 # Tuning
 
+> **HISTORICAL:** this document describes the legacy `src/Tuning/` automated
+> A/B tuning module, which was removed along with the legacy turn-based combat
+> resolver (and with it the `/combat-tuning` / `/legacy-combat-tuning`
+> commands and the `balance-analyst` agent — none of these exist today).
+> Current balance loops: `/combat-playtest` (evidence + verdict, report only)
+> and `/deck-tuning` (cards/decks); engine constants are tuned manually. See
+> `docs/playtest.md`.
+
 ## Overview
 
 The Tuning module provides automated game balance testing and optimization. It runs statistical experiments on game mechanics, measures health across difficulty levels and playstyles, and automatically applies improvements that make the game more balanced and engaging.
@@ -27,7 +35,7 @@ The module is intentionally NOT re-exported from the package's public API (`src/
 - `analyst.bridge.ts` — Generates balance candidates from three sources:
   1. **Heuristic** — doctrine-aware nudges using parameter direction hints
   2. **API** — Claude Messages API with rich per-cell briefings (optional)
-  3. **File** — structured output from `balance-analyst` subagent (optional)
+  3. **File** — structured output from the (since-removed) `balance-analyst` subagent (optional)
 - `tunable.registry.ts` — Allow-listed numeric parameters safe for autonomous tuning
 - `tunable.applier.ts` — Applies changes to TypeScript/JSON source files via AST manipulation
 
@@ -207,7 +215,7 @@ The Tuning module builds on the existing Playtest module (`../Playtest/`) for co
 
 ### Balance Analyst Agent
 
-The `balance-analyst` subagent (`.claude/agents/balance-analyst.md`) provides AI-driven recommendations that the analyst bridge can validate and auto-apply. This bridges human expertise with automated execution.
+The `balance-analyst` subagent provided AI-driven recommendations that the analyst bridge could validate and auto-apply. It was removed with this module; no such agent exists today.
 
 ### Combat Doctrine
 

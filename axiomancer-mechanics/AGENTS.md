@@ -24,8 +24,8 @@ All commands are in `package.json`:
 | Lint | `npm run lint` |
 | Lint + type-check | `npm run check` |
 | Demo CLI | `npm run game` (tabbed map / combat / journal / skills / inventory / debug loop) |
-| Verify gate | `npm run verify` (type-check + lint + test + build) |
-| Deploy gate | `npm run deploy:check` (`npm pack --dry-run`) |
+| Verify gate | `npm run verify` (type-check + type-check:tests + lint + test + build) |
+| Deploy gate | `npm run deploy:check` — lives at the monorepo ROOT, not in this package; run `npm run deploy:check` from the repo root |
 
 For automated / agent-driven CLI runs, the Phase 20 flags expose
 scripted and JSON-event modes:
@@ -45,7 +45,7 @@ changes into a single commit at the end. A natural commit cadence is:
    `npm run type-check` are clean for that increment. Never commit a broken
    intermediate state.
 3. **Commit message format** — `<type>(<scope>): <short description>`, e.g.
-   `feat(combat): promote resolveCombatRound to first-class export` or
+   `feat(combat): promote simulateHazardPatternCombat to first-class export` or
    `refactor(cli): delegate runCombatTurn to resolver — no inline math`.
    Keep the body concise; reference the spec number when relevant.
 4. **Spec update commit** — the final commit for any spec implementation must
@@ -64,7 +64,8 @@ Never squash or amend after pushing unless explicitly asked.
   `--json-events`) over `pexpect` / tmux `send-keys`. The Python harness
   was removed in Phase 17 — hermetic e2e tests are the durable path.
 - **Test runner**: `npm test` runs vitest. Use alongside `npm run type-check`,
-  `npm run lint`, and `npm run build` (all four chained by `npm run verify`).
+  `npm run type-check:tests`, `npm run lint`, and `npm run build` (all five
+  chained by `npm run verify`).
 - **State file**: The Node persistence adapter writes `game-state.json` in
   the project root when used. This file is gitignored and ephemeral.
 - **Spec update**: If using a spec file to implement a change, update the
@@ -82,7 +83,7 @@ If you cannot, extract logic until you can — or document the
 (`vi.restoreAllMocks` in `afterEach`).
 
 - **Standard:** [`docs/testing.md`](./docs/testing.md) (canonical).
-- **Reference test:** [`src/Combat/e2e/combat.resolver.engine.test.ts`](./src/Combat/e2e/combat.resolver.engine.test.ts) (copy its structure).
+- **Reference test:** [`src/Combat/e2e/hazard-pattern-combat.engine.test.ts`](./src/Combat/e2e/hazard-pattern-combat.engine.test.ts) (copy its structure).
 - **Location:** `src/<Module>/e2e/<feature>.engine.test.ts` (the `.engine.test.ts`
   suffix is a fixed marker meaning "hermetic e2e suite"). The engine code
   itself lives next to the module as `<feature>.resolver.ts` (composite
