@@ -51,10 +51,63 @@ working in a package.
 - `npm run verify --workspace axiomancer-mobile` — lint + typecheck + jest
 - `npm run type-check --workspace axiomancer-card-editor`
 
-## Nexus
+## Nexus — the autonomous loop (live)
 
-The domain skills/commands/agents are live in root `.claude/`, but the autonomous
-**loop** (`march`/`iterate`/`critique`/`oversight`/…) and its `plan/` memory are
-still in `/archive` — the unified harness has **not been re-onboarded yet**. That
-is a deliberate, user-run step against this assembled structure; until then there
-is no live `march`/`iterate` loop at the root.
+The unified **nexus** harness was re-onboarded onto the monorepo on
+2026-07-03 (`chore: adopt nexus methodology`). It is now live at the repo root:
+
+- `skills/` — the loop verbs: `ship-a-phase`, `plan-a-phase`, `iterate`,
+  `critique`, `triage`, `expand`, `march`, `oversight`, `jot`, `digest`.
+  (Heavyweight source-of-truth files; the `.claude/commands/<verb>.md`
+  pointers are the doorways.)
+- `plan/` — the loop's durable memory: `bearings.md` (standing context —
+  **read this first**), `steps/01_build_plan.md` (the phase queue),
+  `AUDIT.md` + `CRITIQUE.md` (the drain queues), `PHASE_CANDIDATES.md`,
+  `CURRENT-STATE.md`, `reflexes.md`, `lessons.md`, `phases/`.
+- `scripts/` — `deploy-check.mjs` (CI-green deploy gate),
+  `notify.mjs` (pager), `loop-issue.mjs` (GitHub issue mirror).
+- `spec.md` — the product spec the loop builds against.
+
+Two gates wrap every shipping tick: the **verify gate**
+(`npm run verify`, per-workspace, pre-commit) and the **deploy gate**
+(`npm run deploy:check` = GitHub Actions CI-green, post-push). The loop
+pushes to **`main`** directly. Start at intervention level 0
+(`/ship-a-phase` by hand); ratchet up via `/march` then `/loop /march`.
+Full context lives in `plan/bearings.md` and the nexus kit
+(`../nexus/`).
+
+**Enforcement layer (opt-in).** `.claude/hooks/guard.mjs` (guard hook)
+ships dormant. To activate the mechanical hard-rule enforcement +
+permission allowlist for unattended runs, copy
+`.claude/settings.json.example` → `.claude/settings.json` (and delete
+its `__note` key). This widens the agent's own grants, so it is a
+deliberate, user-owned step needed only at level 3+; adoption did not
+enable it. Self-test the guard any time with
+`node .claude/hooks/guard.mjs self-test`.
+
+Distinct from the domain **design** skills in `.claude/skills/`
+(brainstorm/character/story/world-spec) and the domain tuning/playtest
+commands in `.claude/commands/` — the loop verbs are a separate layer.
+Do not merge the two.
+
+## Nexus standing rules (canonical)
+
+These apply to every loop skill and session. `plan/bearings.md` echoes
+them; update here first.
+
+1. **Commit and push as a single atomic act** to `main`. No unpushed
+   commits between ticks; no dirty tree left behind.
+2. **No `Co-Authored-By:` trailers, no emojis** — in commits, code, or
+   content.
+3. **The verify gate is non-negotiable.** No `--no-verify`, no
+   force-push, no destructive resets. Run the gate **foreground**,
+   never backgrounded.
+4. **Tests alongside code** — hermetic e2e at the highest public entry
+   point; never "add tests later".
+5. **The deploy gate runs after every push.** A red `verify-*` workflow
+   is a blocked tick: read the log, patch, push again (≤3
+   same-root-cause iterations, then stop cleanly).
+6. **`AskUserQuestion` only in `/oversight`.** Every other skill
+   decides, documents the call in the commit body, and ships. Genuine
+   user decisions get logged to `plan/AUDIT.md` as `[needs-user-call]`
+   and the loop continues with the most-defensible default.

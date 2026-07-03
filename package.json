@@ -15,7 +15,9 @@
   "scripts": {
     "mechanics": "npm --workspace axiomancer-mechanics run",
     "mobile": "npm --workspace axiomancer-mobile run",
-    "editor": "npm --workspace axiomancer-card-editor run"
+    "editor": "npm --workspace axiomancer-card-editor run",
+    "verify": "npm run verify --workspace axiomancer-mechanics && npm run verify --workspace axiomancer-mobile && npm run type-check --workspace axiomancer-card-editor",
+    "deploy:check": "node scripts/deploy-check.mjs"
   },
   "overrides": {
     "react": "19.1.0",
