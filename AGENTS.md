@@ -10,11 +10,12 @@ npm-workspaces monorepo. Three packages, flat at the root:
 
 ## Hard rules
 
-- ⛔ **Never read `/archive` unless the user explicitly tells you to.** It is the
-  retired per-package **nexus** harness (old loop verbs + accumulated `plan/`
-  memory + nexus CI), kept only as history and as a one-time seed for the nexus
-  re-onboard. Its audit findings, phase plans, and pre-monorepo assumptions are
-  stale and will actively mislead. See [`archive/README.md`](./archive/README.md).
+- The pre-monorepo per-package **nexus** harness (old loop verbs + accumulated
+  `plan/` memory + nexus CI) formerly lived in `/archive`. It was mined for its
+  durable findings and **removed at the 2026-07-03 re-onboard**; its live
+  successor is the unified root harness (see "Nexus — the autonomous loop"
+  below). Do not resurrect its stale pre-monorepo assumptions (npm-publish /
+  engine-pin model, Pressure Tracks) from git history.
 - Mobile and card-editor consume mechanics via `@mechanics` — a mechanics
   rename/removal can break them. When changing mechanics' public surface, verify
   the dependent package.

@@ -16,12 +16,13 @@ npm workspaces, flat top-level. Mechanics is consumed by mobile as **local sourc
 
 ```
 Axiomancer/
-  package.json            # workspaces root
+  package.json            # workspaces root + verify/deploy:check
   axiomancer-mechanics/
   axiomancer-mobile/
   axiomancer-card-editor/
   .github/workflows/      # path-scoped CI per package
-  archive/                # retired per-repo nexus harness (do not read unless told)
+  skills/  plan/  scripts/ # nexus autonomous-loop harness (root)
+  .claude/                # loop + domain commands, agents, design skills
 ```
 
 ## History

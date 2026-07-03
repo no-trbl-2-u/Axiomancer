@@ -153,8 +153,7 @@ Axiomancer/
 │   ├── commands/               # loop-verb pointers + domain tuning cmds
 │   ├── agents/                 # scout · reader · mechanics-expert · playtester
 │   ├── skills/                 # domain DESIGN skills (brainstorm/character/story/world-spec)
-│   ├── hooks/guard.mjs · settings.json
-└── archive/                    # ⛔ retired — removed at nexus re-onboard
+│   ├── hooks/guard.mjs · settings.json.example (opt-in enforcement)
 ```
 
 Note the deliberate split: **nexus loop verbs live in root
@@ -239,8 +238,9 @@ this echoes.)
    entry point; never "add tests later".
 6. **Rules/state/RNG live in mechanics, never in mobile
    presenters.**
-7. **⛔ Never read `/archive`** (it is being removed at adoption;
-   if any remnant remains, do not read it).
+7. **The `/archive` harness is gone** (consumed + removed at
+   re-onboard). Do not resurrect its retired pre-monorepo patterns
+   from git history.
 8. **Never commit secrets** (`.env` is gitignored).
 9. **Never reintroduce Pressure Tracks** or the npm-publish /
    engine-pin model (both deliberately retired).
