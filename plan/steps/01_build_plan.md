@@ -74,12 +74,12 @@ Tick in this file in the same commit that ships the phase.
 - [ ] Phase 12 — Doc-sync pass: reconcile `spec.md` / `docs/combat.md`
       with the shipped engine surface; frame Hazard-Pattern
       Combat as primary everywhere (mechanics; docs)
-
-> **Needs a T decision before it can be a phase** (parked in
-> `plan/AUDIT.md` as `[needs-user-call]`): the Hazard v2
-> ownership question (DIV-MECH-002) — should mechanics absorb
-> mobile's living hazard engine so mobile can delete its
-> duplicate? Until decided, do not touch either hazard engine.
+- [ ] Phase 13 — Hazard v2 engine port (DIV-MECH-002, promoted via
+      `/oversight` 2026-07-03): mechanics absorbs mobile's
+      `state/hazard/` engine into `World/Hazard/`; mobile migrates
+      to the mechanics engine and deletes its duplicate. Gap list:
+      `axiomancer-mechanics/docs/hazard-v2-vs-mechanics-divergence.md`.
+      (both; large — generate a brief before shipping)
 
 > **After the queue drains:** `/march` transitions to `/iterate`
 > — draining `plan/AUDIT.md` + `plan/CRITIQUE.md`, doc-drift,

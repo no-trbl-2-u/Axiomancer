@@ -14,18 +14,6 @@
 
 ## Pending
 
-### [needs-user-call] Hazard v2 engine ownership (DIV-MECH-002)
-- category: divergence
-- impact: 8
-- ease: 2
-- detail: mobile runs a *duplicate* hazard engine
-  (`state/hazard/`) that is rule-incompatible with mechanics'
-  `World/Hazard/` (phase order, card/dice ids, gold-as-wild,
-  staging/salvage/momentum). Needs a T decision on who owns the
-  v2 surface before either engine is touched. Authoritative gap
-  list: `axiomancer-mechanics/docs/hazard-v2-vs-mechanics-divergence.md`.
-- next: /oversight (do NOT auto-ship; parked for T)
-
 ### [3.2] `CardSpecialMechanic` deprecated-name not exported
 - category: contract
 - impact: 4
@@ -94,4 +82,7 @@
 
 ## Done
 
-(empty — populated as `/iterate` ships fixes)
+### Hazard v2 engine ownership (DIV-MECH-002)
+- resolved via `/oversight` 2026-07-03: mechanics absorbs
+  mobile's duplicate `state/hazard/` engine. Promoted to
+  `plan/PHASE_CANDIDATES.md` -> build plan Phase 13.

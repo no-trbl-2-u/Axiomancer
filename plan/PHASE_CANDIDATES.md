@@ -15,12 +15,6 @@
 > next-tier candidates awaiting `/oversight` promotion. Verify
 > "already shipped?" notes before promoting.
 
-### Hazard v2 port (mechanics absorbs mobile's living engine)
-- source: divergence DIV-MECH-002
-- so mobile can delete its duplicate hazard engine.
-- **Gated** on the T ownership decision (see
-  `plan/AUDIT.md` [needs-user-call]). Do not promote until decided.
-
 ### Hazard deck-thinning remove-card consumer
 - source: archive
 - mobile wiring is staged; blocked on a mechanics
@@ -45,8 +39,12 @@
 
 ## Promoted
 
-(empty — populated as `/oversight` promotes candidates to the
-build plan)
+### Hazard v2 port (mechanics absorbs mobile's living engine)
+- source: divergence DIV-MECH-002
+- decision (via `/oversight` 2026-07-03): mechanics absorbs
+  mobile's `state/hazard/` engine; mobile migrates to mechanics'
+  `World/Hazard/` and deletes its duplicate.
+- promoted to build plan as **Phase 13**.
 
 ## Rejected
 
