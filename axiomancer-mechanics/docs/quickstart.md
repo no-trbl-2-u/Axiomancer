@@ -7,7 +7,6 @@
 >
 > For the public API reference see [`docs/api.md`](./api.md).
 > For test layers see [`docs/testing.md`](./testing.md).
-> For release / publish flow see [`RELEASING.md`](../RELEASING.md).
 
 ---
 
@@ -264,8 +263,6 @@ Focused guides with runnable code samples for each major module:
 | Use a public API surface | [`docs/api.md`](./api.md) |
 | Understand a module's design | `docs/<module>.md` (per the table in §1) |
 | Add a hermetic test | [`docs/testing.md`](./testing.md) |
-| Cut a release | [`RELEASING.md`](../RELEASING.md) |
 | Re-ground stale consumer types after a bump | [`CHANGELOG.md`](../CHANGELOG.md) `[unreleased]` Migration notes (Phase 61 — the 9-row consumer-side re-grounding table covers `getCoastalMap` / `WorldMap` / `Encounter.enemy` / `DialogueChoice.id`/`.label` / `DialogueNode.speaker` / `Character.mana`/`.maxMana` / `ActiveEffect.id`/`.name` / `EffectStatTarget` / `GameState` index signature) |
-| Read about the autonomous-loop workflow | [`agents.md`](../agents.md), [`skills/march.md`](../skills/march.md), [`plan/bearings.md`](../plan/bearings.md) |
-| See the per-phase shipping history | [`plan/steps/01_build_plan.md`](../plan/steps/01_build_plan.md), `plan/phases/phase_<N>_*.md` |
-| File a finding / feature idea | [`plan/CRITIQUE.md`](../plan/CRITIQUE.md), [`plan/AUDIT.md`](../plan/AUDIT.md), or `braindump/BRAINDUMP.md` for half-formed ideas |
+| See the per-phase shipping history | [`CHANGELOG.md`](../CHANGELOG.md), [`RELEASES.md`](../RELEASES.md) |
+| File a finding / feature idea | `braindump/BRAINDUMP.md` for half-formed ideas |

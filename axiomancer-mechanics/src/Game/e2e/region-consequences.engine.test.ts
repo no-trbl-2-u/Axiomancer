@@ -5,11 +5,11 @@
  * region boss when combat starts (applied in the START_COMBAT path).
  */
 
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { createCharacter } from '../../Character';
 import { createGameStore } from '../store';
 import { nullAdapter } from '../persistence/null.adapter';
-import { mockSequentialRng } from '../../test-utils/rng';
+import { mockSequentialRng, restoreOriginalRng } from '../../test-utils/rng';
 import { Enemy } from '../../Enemy/types';
 import { ActiveEffect } from '../../Effects/types';
 
@@ -43,6 +43,13 @@ describe('Phase 109 — Region consequences for befriend choices', () => {
             level: 5,
             baseStats: { heart: 5, body: 3, mind: 3 },
         });
+    });
+
+    afterEach(() => {
+        // Hermeticity: drop the Math.random spy and reinstate the production
+        // RNG singleton so no mocked state leaks past this suite.
+        vi.restoreAllMocks();
+        restoreOriginalRng();
     });
 
     describe('Spare consequences', () => {

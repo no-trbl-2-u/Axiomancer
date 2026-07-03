@@ -2,7 +2,7 @@
 
 Turn-based RPG engine with a Heart / Body / Mind combat system. Status effects, skills, and enemies are themed around logical fallacies and philosophical paradoxes.
 
-This repository is the **non-UI engine** only. It is consumed as a library by clients (e.g. a React Native app). All logic is exposed through the package barrel at [`src/index.ts`](./src/index.ts).
+This package is the **non-UI engine** only — a workspace package in the Axiomancer monorepo, consumed as local source via the `@mechanics` alias by `axiomancer-mobile` and `card-editor`. All logic is exposed through the package barrel at [`src/index.ts`](./src/index.ts).
 
 **Looking for a tour?** See [`docs/quickstart.md`](./docs/quickstart.md) —
 a single-page entry point covering what's shipped, how to drive
@@ -10,31 +10,29 @@ the CLI through every major surface, the walkthrough catalog, key
 in-game flows (combat / friendship path / map exploration / save-load),
 verify gates, and pointers to deeper docs.
 
-See [`VISION.md`](./VISION.md) for T's current game vision and doctrine guardrail before major mechanics, combat, friendship, balance, or `/march` work.
+See [`VISION.md`](./VISION.md) for T's current game vision and doctrine guardrail before major mechanics, combat, friendship, or balance work.
 
 See [`RELEASES.md`](./RELEASES.md) for short-form per-version
 summaries (at-a-glance "what shipped in 0.X.Y?"),
 [`CHANGELOG.md`](./CHANGELOG.md) for the full per-phase detail per
-release, [`RELEASING.md`](./RELEASING.md) for the publish flow +
-deprecation lifecycle policy, [`docs/source-of-truth-hierarchy.md`](./docs/source-of-truth-hierarchy.md)
-for Nexus state reconciliation law, and [`docs/adr/`](./docs/adr/) for durable
+release (both historical logs from the pre-monorepo npm era),
+[`docs/source-of-truth-hierarchy.md`](./docs/source-of-truth-hierarchy.md)
+for the documentation hierarchy, and [`docs/adr/`](./docs/adr/) for durable
 architecture and product decisions that govern mechanics work.
 
 ---
 
 ## Install
 
-The package is published to npm:
+The package is **not published to npm** — it lives in the Axiomancer
+monorepo and is consumed as local source via the `@mechanics` alias by
+`axiomancer-mobile` and `card-editor`.
 
-```bash
-npm install axiomancer-mechanics
-```
-
-For local engine development:
+For local engine development (from the repo root):
 
 ```bash
 npm install
-npm run build       # compiles to ./dist
+npm run build --workspace axiomancer-mechanics   # compiles to ./dist
 ```
 
 ## Quick start

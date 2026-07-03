@@ -20,7 +20,7 @@ If a lower layer contradicts a higher layer, workers must:
 
 1. **Stop execution** — do not proceed with stale information.
 2. **Surface the drift** — report the specific contradiction and the files involved.
-3. **Request reconciliation** — route to `/oversight` or Glanton cleanup before resuming `/march`.
+3. **Request reconciliation** — surface to T and reconcile before resuming work.
 
 ## Examples
 
@@ -31,7 +31,5 @@ If a lower layer contradicts a higher layer, workers must:
 
 ## Implementation notes
 
-- `/march` state-sanity preflight checks for obvious drift before dispatch.
-- `/oversight` decision-sync checklist updates subordinate layers after T decisions.
 - Phase shipping must drain or annotate matching critique/audit/candidate rows.
 - CDRs/ADRs are not optional commentary; they sit above the central ledger in repo execution disputes.

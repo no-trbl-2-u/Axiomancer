@@ -1,6 +1,6 @@
 # Repository Setup Guide
 
-This guide provides comprehensive setup instructions for the Axiomancer Mobile repository, including environment configuration, development tools, and troubleshooting. For a quick start that covers the minimum steps to run the app, see the README.md quick start section first.
+This guide provides comprehensive setup instructions for the `axiomancer-mobile` package inside the Axiomancer monorepo, including environment configuration, development tools, and troubleshooting. For a quick start that covers the minimum steps to run the app, see the README.md quick start section first.
 
 Complete these comprehensive steps when you need full development environment setup, or if you encounter issues with the quick start process.
 
@@ -14,12 +14,15 @@ Complete these comprehensive steps when you need full development environment se
 
 ### 1. Clone and Install Dependencies
 
-```bash
-# Clone the repository
-git clone https://github.com/no-trbl-2-u/axiomancer-mobile.git
-cd axiomancer-mobile
+The mobile app lives at `axiomancer-mobile/` inside the Axiomancer
+monorepo (npm workspaces). Clone the monorepo and install from its root:
 
-# Install dependencies
+```bash
+# Clone the monorepo
+git clone https://github.com/no-trbl-2-u/Axiomancer.git
+cd Axiomancer
+
+# Install all workspace dependencies (root lockfile owns deps)
 npm install
 ```
 
@@ -36,7 +39,7 @@ Edit `.env` and configure these variables:
 | Variable | Purpose | Required | Where to get it |
 |----------|---------|----------|-----------------|
 | `GH_TOKEN` | GitHub API access for issue management | Development only | `gh auth token` (scopes: repo, read:org, gist, workflow) |
-| `GH_REPO` | GitHub repository identifier | Development only | Usually `no-trbl-2-u/axiomancer-mobile` |
+| `GH_REPO` | GitHub repository identifier | Development only | Usually `no-trbl-2-u/Axiomancer` |
 | `EXPO_TOKEN` | EAS Build API access | Deployment only | https://expo.dev/settings/access-tokens |
 | `EAS_PROJECT_ID` | Expo project identifier | Deployment only | Auto-detected from app.json |
 
@@ -67,11 +70,14 @@ gh auth login
 
 ### 4. Verify Setup
 
-Run the verification suite to ensure everything is configured correctly:
+Run the verification suite to ensure everything is configured correctly.
+From the monorepo root:
 
 ```bash
-npm run verify
+npm run verify --workspace axiomancer-mobile
 ```
+
+(Equivalently, run `npm run verify` from inside `axiomancer-mobile/`.)
 
 This runs:
 - `npm run lint` — ESLint with Expo's configuration
@@ -130,8 +136,6 @@ axiomancer-mobile/
 ├── test-utils/             # Testing helpers and utilities
 ├── docs/                   # Development documentation 
 ├── specs/                  # Product specification documents
-├── plan/                   # Build planning and autonomous loop state
-├── skills/                 # Autonomous agent skills and procedures
 └── setup/                  # This setup documentation
 ```
 
@@ -142,13 +146,12 @@ axiomancer-mobile/
 - **package.json** — Dependencies and npm scripts
 - **app.json** — Expo configuration
 - **eas.json** — EAS Build profiles
-- **plan/bearings.md** — Standing decisions and development context
 
 ## Development Guidelines
 
 ### Engine Integration
 
-- **Never reimplement game logic** — all rules live in the `axiomancer-mechanics` npm package
+- **Never reimplement game logic** — all rules live in the `axiomancer-mechanics` sibling workspace (local source via the `@mechanics` alias)
 - **Presenters are pure functions** — `(state) => ViewModel`, no side effects
 - **UI components consume view models** — never read engine state directly
 
@@ -237,6 +240,6 @@ Once repository setup is complete:
 
 - **Project documentation:** [`docs/`](../docs/) directory
 - **Architecture decisions:** [`docs/adr/`](../docs/adr/) directory  
-- **Game mechanics:** [axiomancer-mechanics package](https://www.npmjs.com/package/axiomancer-mechanics)
+- **Game mechanics:** [`axiomancer-mechanics`](../../axiomancer-mechanics/) sibling workspace
 - **Expo documentation:** https://docs.expo.dev
 - **React Native guides:** https://reactnative.dev/docs/getting-started

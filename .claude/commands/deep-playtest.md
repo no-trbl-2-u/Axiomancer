@@ -1,37 +1,31 @@
 ---
-description: Play through the game as a first-time player via the playtester agent, documenting UX friction, flow gaps, and delight moments to plan/PLAYTEST_REPORT.md
+description: Play through the game as a first-time player via the playtester agent, documenting UX friction, flow gaps, and delight moments to axiomancer-mobile/docs/reports/PLAYTEST_REPORT.md
 ---
 
 > **⚙️ Runs against the `axiomancer-mobile` package.** Repo-relative paths below
 > (`state/…`, `components/…`, `app/…`, `scripts/…`) are relative to that package — run from it (`cd axiomancer-mobile`) or via
-> `npm run <script> -w axiomancer-mobile`. Any `plan/…`, `skills/…`, or `/march`-style
-> references point at the retired nexus harness in `/archive` and are
-> placeholders until nexus is re-onboarded.
+> `npm run <script> -w axiomancer-mobile`.
 
 # Skill: deep-playtest
 
 > **Testing persona walkthrough.** Spawn the `playtester` agent
 > to play through the game as a first-time player, documenting
 > UX friction, flow gaps, and delight moments in
-> `plan/PLAYTEST_REPORT.md`. The complement to `/playtest`
-> (regression sentinel) — this is the experience audit.
+> `axiomancer-mobile/docs/reports/PLAYTEST_REPORT.md`. This is
+> the experience audit.
 >
 > **Opt-in by design.** Requires a user-started `pnpm web`
 > instance. Cannot autostart the dev server.
 
 ## 1. Purpose
 
-`/playtest` walks one canonical path and files regressions to
-AUDIT.md. `/deep-playtest` is different: the `playtester` agent
-explores broadly, plays multiple paths (golden, failure, tab
-exploration, edge cases), and produces a rich experience report
-that feeds the `/resolve-playtest` triage flow.
+`/deep-playtest` has the `playtester` agent explore broadly,
+play multiple paths (golden, failure, tab exploration, edge
+cases), and produce a rich experience report.
 
-The output (`plan/PLAYTEST_REPORT.md`) serves two purposes:
-1. Input for `/resolve-playtest` — interactive triage with the
-   user, routing findings to design specs or phase candidates.
-2. Context for `/oversight` — the next oversight call sees what
-   the playtester found and can adjust priorities.
+The output (`axiomancer-mobile/docs/reports/PLAYTEST_REPORT.md`)
+is the durable experience record: triage findings with the user,
+then route fixes into normal development work.
 
 ## 2. Invocation
 
@@ -106,11 +100,13 @@ Load Playwright tools via `ToolSearch` if not yet in context
 
 ### Step 2 — Read existing report
 
-If `plan/PLAYTEST_REPORT.md` exists, read its `## Done` section
-to pass to the playtester (avoid re-surfacing addressed
-findings).
+If `axiomancer-mobile/docs/reports/PLAYTEST_REPORT.md` exists,
+read its `## Done` section to pass to the playtester (avoid
+re-surfacing addressed findings).
 
-Read `plan/bearings.md` for voice cue.
+For a voice cue, skim recent reports in
+`axiomancer-mobile/docs/reports/` and the package's `AGENTS.md`
+for how the game talks about itself.
 
 ### Step 3 — Spawn playtester
 
@@ -118,7 +114,7 @@ Read `plan/bearings.md` for voice cue.
 Agent({
   subagent_type: "playtester",
   prompt: "Play through Axiomancer Mobile at <url>.
-           Voice cue from plan/bearings.md: <quote>.
+           Voice cue: <quote gathered in Step 2>.
            Already-addressed (skip): <Done section or 'none'>.
            Focus: <from arg or 'full walk — all paths'>.
            Current commit: <sha>.
@@ -136,7 +132,9 @@ Validate the playtester's output:
 - No invented observations (cross-check any specific UI text
   against codebase via grep if suspicious).
 
-Write to `plan/PLAYTEST_REPORT.md`. If a previous report exists,
+Write to `axiomancer-mobile/docs/reports/PLAYTEST_REPORT.md`
+(create the `docs/reports/` directory if it doesn't exist yet).
+If a previous report exists,
 move its `## Findings` and `## Delight Log` sections to
 `## Previous Sessions` at the bottom (preserve the `## Done`
 section intact at its current location).
@@ -163,25 +161,25 @@ curl -s -o /dev/null -w "HTTP %{http_code}\n" --max-time 3 \
 If the user's own server was already running
 (`SELF_STARTED_SERVER=false`), leave it alone.
 
-### Step 6 — Cross-reference CRITIQUE.md
+### Step 6 — Cross-reference critic-loop findings
 
-Scan `plan/CRITIQUE.md` Pending for findings that overlap with
-the new playtest findings. Add a cross-reference note to
-matching CRITIQUE rows: `- playtest: see PLAYTEST_REPORT.md [F##]`.
+If `axiomancer-mobile/docs/reports/CRITIQUE.md` exists (written
+by `/critic-loop`), scan its Pending section for findings that
+overlap with the new playtest findings. Add a cross-reference
+note to matching rows: `- playtest: see PLAYTEST_REPORT.md [F##]`.
 
 ### Step 7 — Commit + push
 
 If `dry-run`, print the report and exit.
 
 ```bash
-git add plan/PLAYTEST_REPORT.md plan/CRITIQUE.md
+git add axiomancer-mobile/docs/reports/PLAYTEST_REPORT.md \
+        axiomancer-mobile/docs/reports/CRITIQUE.md
 git commit -m "$(cat <<'EOF'
 deep-playtest: <date> — <N> findings (<H> high, <M> med, <L> low, <D> delight)
 
 Paths walked: <list>.
 Top findings: <1-2 line summary of highest-severity items>.
-
-Next step: /resolve-playtest to triage with user.
 EOF
 )"
 git push origin main
@@ -195,18 +193,17 @@ Print summary:
 deep-playtest <date> complete.
 <N> findings filed (<H> high, <M> med, <L> low).
 <D> delight moments logged.
-Run /resolve-playtest to triage findings and generate design spec.
+Report: axiomancer-mobile/docs/reports/PLAYTEST_REPORT.md —
+triage the findings with the user before routing fixes.
 ```
 
 ## 5. Relationship to other skills
 
 | Skill | How it relates |
 |---|---|
-| `/playtest` | Regression sentinel — walks one canonical path, files to AUDIT.md. Narrow and fast. `/deep-playtest` is broad and thorough. |
-| `/critique` | External observer of the site as text/HTML. `/deep-playtest` is an interactive player of the game as a game. |
-| `/resolve-playtest` | Reads PLAYTEST_REPORT.md and triages findings with the user. The downstream consumer. |
-| `/oversight` | Reads PLAYTEST_REPORT.md as context. Can re-prioritize findings. |
-| `/iterate` | Picks up code-routed findings from PHASE_CANDIDATES.md (after `/resolve-playtest` files them). |
+| `/critic-loop` | Screenshot-based visual/UX critic that fixes findings itself. `/deep-playtest` is an interactive player of the game as a game — report only. |
+| `/hermes-playtest` | Scripted Hermes-native UI playthrough. `/deep-playtest` is a free-form persona walk via Playwright. |
+| `/combat-ux-tuning` | Automated combat UX A/B tuner. Combat-UX findings from this report can seed its hypotheses. |
 
 ## 6. Hard rules
 
@@ -214,8 +211,8 @@ Run /resolve-playtest to triage findings and generate design spec.
    server, kill it when done. If the user's server was already
    running, leave it alone.
 2. **Never modify shipped code.** This skill is observation only.
-   Findings go to PLAYTEST_REPORT; fixes go through
-   `/resolve-playtest` → `/iterate` or Claude Design.
+   Findings go to PLAYTEST_REPORT; fixes are triaged with the
+   user and land through normal development work.
 3. **Always delegate to the playtester agent.** Don't play the
    game from the main agent context — the fresh-eyes persona
    requires a clean sub-agent context.

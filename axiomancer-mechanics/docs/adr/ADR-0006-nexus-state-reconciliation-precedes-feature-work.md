@@ -1,5 +1,7 @@
 # ADR-0006 — Nexus state reconciliation precedes feature work
 
+> Historical — describes the nexus harness retired to `/archive` at the monorepo merge.
+
 Status: Accepted  
 Date: 2026-06-01  
 Scope: axiomancer-mechanics

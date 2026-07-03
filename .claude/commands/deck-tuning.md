@@ -1,12 +1,10 @@
 ---
-description: Card Forge balance loop for Hazard-Pattern Combat — sandbox-first card and deck tuning; A/B experimental cards/overrides through the playtest matrix, tune presets/draft weights, promote proven cards into the library, deliver report + changes via PR. For engine constants use /combat-tuning.
+description: Card Forge balance loop for Hazard-Pattern Combat — sandbox-first card and deck tuning; A/B experimental cards/overrides through the playtest matrix, tune presets/draft weights, promote proven cards into the library, deliver report + changes via PR. Engine constants are tuned manually, not here.
 ---
 
 > **⚙️ Runs against the `axiomancer-mechanics` package.** Repo-relative paths below
 > (`src/…`, `automation/…`, `scripts/…`) are relative to that package — run from it (`cd axiomancer-mechanics`) or via
-> `npm run <script> -w axiomancer-mechanics`. Any `plan/…`, `skills/…`, or `/march`-style
-> references point at the retired nexus harness in `/archive` and are
-> placeholders until nexus is re-onboarded.
+> `npm run <script> -w axiomancer-mechanics`.
 
 # Skill: deck-tuning
 
@@ -15,8 +13,9 @@ description: Card Forge balance loop for Hazard-Pattern Combat — sandbox-first
 > experiments, and (with A/B evidence) library card numerics. The enemy's
 > SOLE bar is HP and status effects are the EFFICIENT way to drop it — every
 > card change is judged by whether it makes status play more central and more
-> satisfying. Engine constants (threat/Conviction economy) belong to
-> **`/combat-tuning`**; this skill owns the cards themselves.
+> satisfying. Engine constants (threat/Conviction economy) are tuned
+> manually — the combat-tuning loop was trimmed at the monorepo merge; this
+> skill owns the cards themselves.
 
 > **High autonomy within hard guardrails, sandbox-first.** New card ideas and
 > numeric nudges to existing cards are prototyped as SANDBOX cards/overrides
@@ -27,14 +26,15 @@ description: Card Forge balance loop for Hazard-Pattern Combat — sandbox-first
 
 ## Disambiguation — three combat loops, one doctrine
 
-| | `/deck-tuning` ← **this file** | `/combat-tuning` | `/combat-playtest` |
+| | `/deck-tuning` ← **this file** | engine-constant tuning (manual) | `/combat-playtest` |
 |---|---|---|---|
-| Surface | Card pool + deck economy: presets, draft weights, sandbox cards, library card numerics | Engine constants: threat damage, dice bag, Conviction/Signature economy | None — evidence + report only |
-| Files it edits | `src/Cards/cards.sandbox-sets.ts` (free), `src/Combat/combat.deck-presets.ts`, `src/Combat/combat.deck-draft.ts`, `src/Cards/cards.library.ts` (guarded) | `src/Combat/combat.{threat,threat-sequences,engine,cards,dice,signature,deck}.ts` constants | `plan/playtest-<ts>.md` only |
+| Surface | Card pool + deck economy: presets, draft weights, sandbox cards, library card numerics | Engine constants: threat damage, dice bag, Conviction/Signature economy (hand-tuned; the combat-tuning loop was trimmed at the monorepo merge) | None — evidence + report only |
+| Files it edits | `src/Cards/cards.sandbox-sets.ts` (free), `src/Combat/combat.deck-presets.ts`, `src/Combat/combat.deck-draft.ts`, `src/Cards/cards.library.ts` (guarded) | `src/Combat/combat.{threat,threat-sequences,engine,cards,dice,signature,deck}.ts` constants | `docs/reports/playtest-<ts>.md` only |
 | Witness | `npm run combat-playtest` matrix + per-card usage (`--cards`) | `simulateHazardPatternCombat` / `npm run combat-sim` | matrix + `playtester` agents |
 
 Do not cross-contaminate: if the fix for an off-band cell is a threat
-multiplier or a Conviction constant, hand it to `/combat-tuning` — do not
+multiplier or a Conviction constant, flag it as a manual engine-constant
+follow-up — do not
 compensate by inflating a card. If the finding is qualitative ("this stage
 feels flat"), it likely came FROM `/combat-playtest`; answer it here with
 cards, not prose.
@@ -165,7 +165,7 @@ Card-level targets on top of the bands:
 |---|---|
 | Single-card spam | no card id accounts for >70% of a typical win's impact (`buildCombatSummary`) |
 | Dead cards | every library card shows plays in the card-coverage e2e and non-trivial usage somewhere in the full `--cards` matrix |
-| Pool ratios (per `skills/combat-tuning.md` §4) | direct-damage <= 20% of pool; DoT >= 25%; control >= 15%; GUARD >= 1 per color; Befriend >= 1; state-interactive >= 2 |
+| Pool ratios (pool-ratio targets from the retired combat-tuning skill; re-derive from the current card library before relying on them) | direct-damage <= 20% of pool; DoT >= 25%; control >= 15%; GUARD >= 1 per color; Befriend >= 1; state-interactive >= 2 |
 | Per-stage pool health | each stage's eligible pool (`stageEligibleCardIds`) contains at least one live DoT, control, and defend line |
 | Archetype honesty | `dot`-focus drafts land more DoT than `damage`-focus drafts; `aggro-strike` preset stays the weak baseline |
 
@@ -187,8 +187,10 @@ Card-level targets on top of the bands:
 - `src/Cards/cards.sandbox-sets.ts` — existing experimental sets.
 - `src/Cards/cards.library.ts` — the literals you may eventually promote into
   or (guardedly) nudge.
-- Tally pool ratios per stage against the §4 targets (the combat-tuning §5
-  Step 1b table is the method).
+- Tally pool ratios per stage against the §4 targets (count each card class
+  in the stage's eligible pool and compute its share; the §4 targets came
+  from the retired combat-tuning skill — re-derive from the current card
+  library before relying on them).
 
 ### Step 2 — Baseline matrix
 ```
@@ -222,7 +224,8 @@ change per axis at a time; measure each before the next.
 
 ### Step 5 — Deliver on ONE PR
 - Branch off base: `git checkout -b balance/deck-<ts>`.
-- Write `plan/deck-tuning-<ts>.md`: pool audit, baseline matrix, every A/B
+- Write `docs/reports/deck-tuning-<ts>.md` (create `docs/reports/` if it
+  doesn't exist yet): pool audit, baseline matrix, every A/B
   with `old → new` + rationale + evidence, promotions, propose-only findings,
   open questions.
 - Commit: `balance(deck): <ts> report + forge changes (<n> applied)`.
@@ -267,8 +270,9 @@ headline status-engagement / band delta.
 3. **A sandbox card cannot be exercised** (never drawn/played in the
    harness). Treat as a design failure of the card, not a harness gap —
    redesign or drop it; flag if you suspect the harness.
-4. **The fix is an engine constant, not a card.** Hand it to
-   `/combat-tuning`; note the handoff in the report.
+4. **The fix is an engine constant, not a card.** Flag it as a manual
+   engine-constant follow-up (the combat-tuning loop was trimmed at the
+   monorepo merge); note the handoff in the report.
 5. **Focus matches nothing.** Run the full sweep; note the empty focus.
 
 ## 8. Quick reference
@@ -305,8 +309,9 @@ headline status-engagement / band delta.
 - Sim oracle (must never move): `src/Combat/e2e/hazard-pattern-combat.balance.sim.test.ts`
 
 **Doctrine:** `VISION.md` → Combat vision · `CLAUDE.md` (load-bearing
-doctrine) · pool ratio targets in `skills/combat-tuning.md` §4.
+doctrine) · pool-ratio targets in §4 above (from the retired combat-tuning
+skill; re-derive from the current card library before relying on them).
 
-**Related loops:** engine constants → `/combat-tuning`
-(`skills/combat-tuning.md`) · qualitative evidence → `/combat-playtest`
-(`skills/combat-playtest.md`).
+**Related loops:** engine constants → manual tuning (the combat-tuning loop
+was trimmed at the monorepo merge) · qualitative evidence →
+`/combat-playtest`.

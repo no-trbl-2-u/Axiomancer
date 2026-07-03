@@ -9,8 +9,8 @@
  * - Spare/exploit choice resolution
  */
 
-import { describe, it, expect, beforeEach } from 'vitest';
-import { mockSequentialRng } from '../../test-utils/rng';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { mockSequentialRng, restoreOriginalRng } from '../../test-utils/rng';
 import { createCharacter } from '../../Character';
 import { executeSkill } from '../skill.engine';
 import { getCardById } from '../cards.library';
@@ -34,6 +34,13 @@ const befriendableEnemy = createEnemy({
 describe('Befriend skill (Phase 108)', () => {
     beforeEach(() => {
         mockSequentialRng(0.5); // Fixed RNG for deterministic tests
+    });
+
+    afterEach(() => {
+        // Hermeticity: drop the Math.random spy and reinstate the production
+        // RNG singleton so no mocked state leaks past this suite.
+        vi.restoreAllMocks();
+        restoreOriginalRng();
     });
 
     describe('Starting skill acquisition', () => {

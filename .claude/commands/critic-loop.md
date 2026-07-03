@@ -4,9 +4,7 @@ description: Capture every screen, review them as a game critic, fix the visual/
 
 > **⚙️ Runs against the `axiomancer-mobile` package.** Repo-relative paths below
 > (`state/…`, `components/…`, `app/…`, `scripts/…`) are relative to that package — run from it (`cd axiomancer-mobile`) or via
-> `npm run <script> -w axiomancer-mobile`. Any `plan/…`, `skills/…`, or `/march`-style
-> references point at the retired nexus harness in `/archive` and are
-> placeholders until nexus is re-onboarded.
+> `npm run <script> -w axiomancer-mobile`.
 
 # Skill: critic-loop
 
@@ -18,8 +16,7 @@ description: Capture every screen, review them as a game critic, fix the visual/
 
 ## 1. Purpose
 
-`/iterate` audits the codebase; `critic-loop` audits the **rendered
-product**. It drives the exported web build, screenshots each screen at
+`critic-loop` audits the **rendered product**. It drives the exported web build, screenshots each screen at
 phone resolution, hands the images to a fresh game-critic eye, and ships
 the resulting fixes in tight rounds. It is how the game's *look and feel*
 gets tightened the way a player actually experiences it.
@@ -119,7 +116,9 @@ check that minigame/prelude captures reached the *real* screen (not the
 Run §5. Collect findings.
 
 If invoked as `/critic-loop audit`: write the findings to
-`plan/CRITIQUE.md` (the source `/iterate` drains) and **stop** — no fixes.
+`axiomancer-mobile/docs/reports/CRITIQUE.md` (create `docs/reports/`
+if it doesn't exist yet) and **stop** — no fixes. Later fix rounds
+(or `/deep-playtest` cross-referencing) drain that file.
 
 ### Step 3 — Triage
 Keep findings that are **in-scope** (§3) and **high/med** impact. Drop or

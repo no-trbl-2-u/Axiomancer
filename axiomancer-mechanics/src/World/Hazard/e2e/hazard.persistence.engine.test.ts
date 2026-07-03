@@ -16,8 +16,8 @@
  * retained.
  */
 
-import { describe, test, expect, beforeEach } from 'vitest';
-import { mockFixedRng } from '../../../test-utils/rng';
+import { describe, test, expect, beforeEach, afterEach, vi } from 'vitest';
+import { mockFixedRng, restoreOriginalRng } from '../../../test-utils/rng';
 import type { MapState, HazardNodeOutcome, WorldState } from '../../types';
 import { createMapState, getMapDefinition } from '../../map.registry';
 import {
@@ -43,6 +43,13 @@ describe('Hazard outcome → world-state route blocking', () => {
     mockFixedRng([0.5, 0.3, 0.7, 0.2]); // Deterministic RNG sequence
   });
 
+  afterEach(() => {
+    // Hermeticity: drop the Math.random spy and reinstate the production
+    // RNG singleton so no mocked state leaks across tests.
+    vi.restoreAllMocks();
+    restoreOriginalRng();
+  });
+
   test('a bridge-collapse outcome blocks the route and forces an alternate path', () => {
     const bridgeNode = 'fv-3';
     const connectedNode = 'fv-4';
@@ -55,7 +62,7 @@ describe('Hazard outcome → world-state route blocking', () => {
       nodeId: bridgeNode,
       hazardId: 'collapsed-bridge',
       outcome: 'blocked',
-      appliedDate: new Date().toISOString(),
+      appliedDate: '2026-01-01T00:00:00.000Z', // pinned: no wall-clock reads in hermetic tests
     };
 
     let blockedMap = recordHazardOutcome(mapWithPlayer, collapseOutcome);

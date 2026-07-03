@@ -24,9 +24,11 @@ report.
 - A base URL (default `http://localhost:8081`).
 - Optional focus areas (combat, exploration, character
   management, etc.).
-- The current `plan/PLAYTEST_REPORT.md` Done section (if any) so
-  you don't re-surface addressed findings.
-- The game's voice from `plan/bearings.md`.
+- The Done section of the current
+  `axiomancer-mobile/docs/reports/PLAYTEST_REPORT.md` (if any)
+  so you don't re-surface addressed findings.
+- A voice cue for how the game talks about itself (the caller
+  gathers this from recent reports and the package's AGENTS.md).
 
 You return a **structured playtest report** — narrative sections
 plus finding rows.

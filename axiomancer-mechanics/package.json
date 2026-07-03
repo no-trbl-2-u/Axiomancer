@@ -33,18 +33,13 @@
     "dev": "echo Please use check 'package.json' or README.md for available commands...\n ",
     "lint:fix": "eslint \"**/*.ts\" --fix",
     "lint": "eslint \"**/*.ts\"",
-    "prepublishOnly": "npm run clean && npm run build",
-    "publish:patch": "npm run type-check && npm test && npm version patch && npm publish",
-    "publish:minor": "npm run type-check && npm test && npm version minor && npm publish",
-    "publish:major": "npm run type-check && npm test && npm version major && npm publish",
     "start": "echo Please use check 'package.json' or README.md for available commands...\n ",
     "test:watch": "vitest",
     "test": "vitest run",
     "type-check": "tsc --noEmit",
     "type-check:tests": "tsc -p tsconfig.tests.json",
     "verify": "npm run type-check && npm run type-check:tests && npm run lint && npm test && npm run build",
-    "verify:agent": "npm run type-check && npm run type-check:tests && npm run lint && vitest run --reporter=default --reporter=./automation/agent-vitest-reporter.mjs && npm run build",
-    "deploy:check": "node scripts/deploy-check.mjs"
+    "verify:agent": "npm run type-check && npm run type-check:tests && npm run lint && vitest run --reporter=default --reporter=./automation/agent-vitest-reporter.mjs && npm run build"
   },
   "keywords": [
     "rpg",
@@ -55,15 +50,6 @@
   "author": "",
   "license": "ISC",
   "type": "commonjs",
-  "files": [
-    "dist",
-    "README.md",
-    "LICENSE",
-    "docs/hazard-minigame*.md",
-    "CHANGELOG.md",
-    "RELEASES.md",
-    "RELEASING.md"
-  ],
   "devDependencies": {
     "@eslint/js": "^9.39.1",
     "@types/node": "^25.9.3",

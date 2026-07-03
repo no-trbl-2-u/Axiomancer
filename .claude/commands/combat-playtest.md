@@ -1,12 +1,10 @@
 ---
-description: Supercharged Hazard-Pattern Combat playtest loop — run the stage-profile x policy matrix (npm run combat-playtest) AND spawn playtester sub-agents to play real seeded encounters, then synthesize a doctrine verdict (is status play the fun path at every stage?) into a report PR. Report only; numeric follow-ups go to /combat-tuning or /deck-tuning.
+description: Supercharged Hazard-Pattern Combat playtest loop — run the stage-profile x policy matrix (npm run combat-playtest) AND spawn playtester sub-agents to play real seeded encounters, then synthesize a doctrine verdict (is status play the fun path at every stage?) into a report PR. Report only; card/deck follow-ups go to /deck-tuning, engine-constant follow-ups are handled manually.
 ---
 
 > **⚙️ Runs against the `axiomancer-mechanics` package.** Repo-relative paths below
 > (`src/…`, `automation/…`, `scripts/…`) are relative to that package — run from it (`cd axiomancer-mechanics`) or via
-> `npm run <script> -w axiomancer-mechanics`. Any `plan/…`, `skills/…`, or `/march`-style
-> references point at the retired nexus harness in `/archive` and are
-> placeholders until nexus is re-onboarded.
+> `npm run <script> -w axiomancer-mechanics`.
 
 # Skill: combat-playtest
 
@@ -19,22 +17,22 @@ description: Supercharged Hazard-Pattern Combat playtest loop — run the stage-
 > what was frustrating, and whether status play carried the fight.
 
 > **Report only — this skill ships NO balance changes.** It synthesizes quant
-> + qual into `plan/playtest-<ts>.md` with a doctrine verdict (is status play
-> the fun path at every stage?) and hands every numeric follow-up to
-> `/combat-tuning` (engine constants) or `/deck-tuning` (cards/decks).
+> + qual into `docs/reports/playtest-<ts>.md` with a doctrine verdict (is
+> status play the fun path at every stage?) and hands every numeric follow-up
+> off: cards/decks to `/deck-tuning`; engine constants to manual tuning (the
+> combat-tuning loop was trimmed at the monorepo merge).
 > Deliver the report on ONE new branch + PR. Nothing auto-lands on `main`.
 
 ## Disambiguation — playtest vs the tuning loops
 
-| | `/combat-playtest` ← **this file** | `/combat-tuning` | `/deck-tuning` |
+| | `/combat-playtest` ← **this file** | engine-constant tuning (manual) | `/deck-tuning` |
 |---|---|---|---|
-| Ships changes? | NO — report + verdict only | Numeric engine constants | Cards, presets, draft weights, sandbox promotions |
+| Ships changes? | NO — report + verdict only | Numeric engine constants (currently hand-tuned; the combat-tuning loop was trimmed at the monorepo merge) | Cards, presets, draft weights, sandbox promotions |
 | Evidence | stage matrix + qualitative agent play | `simulateHazardPatternCombat` / `npm run combat-sim` | matrix A/Bs with `--sandbox` |
 | Question it answers | "Is status play the FUN path at every stage — and where does it break down?" | "Are the HP/threat/Conviction numbers in band?" | "Is the card pool healthy — no dead cards, no spam, honest archetypes?" |
 
-The legacy turn-based combat has its own loop (`/legacy-combat-tuning`) and
-its own legacy playtest framework (`docs/playtest-legacy.md`) — neither is
-this skill's surface.
+The legacy turn-based combat has its own legacy playtest framework
+(`docs/playtest-legacy.md`) — not this skill's surface.
 
 ## North star — feel is a balance axis
 
@@ -84,10 +82,10 @@ Without `--focus`, sweep all four stages.
 
 - **Report only.** This skill never edits engine code, card data, presets,
   draft weights, or test thresholds. Its sole write surface is the report
-  file (`plan/playtest-<ts>.md`) and, when warranted, `plan/CRITIQUE.md`
-  jottings. Numeric follow-ups are HANDED OFF: name the target skill
-  (`/combat-tuning` or `/deck-tuning`), the axis, and the evidence in the
-  report's "Handoffs" section.
+  file (`docs/reports/playtest-<ts>.md`; create `docs/reports/` if it
+  doesn't exist yet). Numeric follow-ups are HANDED OFF: name the target
+  (`/deck-tuning` for cards/decks, or "manual engine-constant tuning"), the
+  axis, and the evidence in the report's "Handoffs" section.
 - **Quant before qual.** Run the matrix first; brief the playtester agents
   with the cells that look suspicious so their hands land where the numbers
   are ambiguous.
@@ -173,7 +171,7 @@ protocol lives in `src/CLI/io.ts` (script/stdin modes); the agent file
 documents the exact commands.
 
 ### Step 3 — Synthesize
-Write `plan/playtest-<ts>.md`:
+Write `docs/reports/playtest-<ts>.md` (create the directory on first use):
 - the matrix tables (key cells, per-stage summaries, card coverage),
 - each agent's report verbatim (or tightly excerpted with runs tables
   intact),
@@ -181,13 +179,13 @@ Write `plan/playtest-<ts>.md`:
 - **the doctrine verdict:** is status play the fun path at EVERY stage —
   yes / no / degraded-at-<stage>, with the two or three load-bearing pieces
   of evidence,
-- `## Handoffs`: each numeric follow-up as one line — target skill, axis,
-  evidence pointer,
+- `## Handoffs`: each numeric follow-up as one line — target (skill or
+  manual), axis, evidence pointer,
 - `## Open questions`.
 
 ### Step 4 — Deliver on ONE PR
 - Branch off base: `git checkout -b playtest/combat-<ts>`.
-- Stage the report (and any `plan/CRITIQUE.md` jottings).
+- Stage the report.
 - Commit: `docs(playtest): combat playtest <ts> report`.
 - Push and open a PR (ready for review): title
   `playtest(combat): <ts> — <one-line verdict>`; body carries the doctrine
@@ -262,5 +260,5 @@ grammar, sandbox workflow, CLI cookbook).
 **Doctrine:** `VISION.md` → Combat vision · `CLAUDE.md` (load-bearing
 doctrine).
 
-**Handoff targets:** engine constants → `/combat-tuning` · cards/decks →
-`/deck-tuning`.
+**Handoff targets:** cards/decks → `/deck-tuning` · engine constants →
+manual tuning (the combat-tuning loop was trimmed at the monorepo merge).

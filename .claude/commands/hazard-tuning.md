@@ -4,9 +4,7 @@ description: Hazard minigame balance loop — use hazard CLI evidence to analyse
 
 > **⚙️ Runs against the `axiomancer-mechanics` package.** Repo-relative paths below
 > (`src/…`, `automation/…`, `scripts/…`) are relative to that package — run from it (`cd axiomancer-mechanics`) or via
-> `npm run <script> -w axiomancer-mechanics`. Any `plan/…`, `skills/…`, or `/march`-style
-> references point at the retired nexus harness in `/archive` and are
-> placeholders until nexus is re-onboarded.
+> `npm run <script> -w axiomancer-mechanics`.
 
 # Skill: hazard-tuning
 
@@ -41,16 +39,16 @@ mobile dev menu path in `axiomancer-mobile` as a live witness; CLI evidence alon
 does not answer phone-interaction questions.
 
 **Known documentation drift to check first:** Hazard implementation has moved
-from split library files to `hazard.content.ts` + engagement/deck modules. Treat
-old references to `hazard.cards.library.ts`, `hazard.hazards.library.ts`, H01/H02
-IDs, or top/bottom route labels as historical shorthand. Before editing, verify
+from split library files to `hazard.content.ts` + `hazard.tuning.ts` +
+engagement/deck-flag modules. Treat old doc references to
+`hazard.cards.library.ts`, `hazard.hazards.library.ts`, H01/H02 IDs, or
+top/bottom route labels as historical shorthand. Before editing, verify
 current exports and CLI flags from `src/World/Hazard/index.ts`,
 `src/World/Hazard/hazard.content.ts`, and `src/CLI/hazard.cli.ts`.
 
 **There is now a hazard testing CLI flow.** Use `npm run hazard -- [flags]`
-(convenience alias for `npm run game -- hazard`) as the empirical witness before
-applying tuning changes. `npm run tune` remains the combat engine; there is no
-separate `npm run hazard-tune` yet. The hazard CLI provides deterministic seeded
+(a `game.cli.ts hazard` alias) as the empirical witness before applying
+tuning changes. The hazard CLI provides deterministic seeded
 runs, route/hazard selection, greedy auto play, JSON events, and JSONL state logs:
 
 ```bash
@@ -68,7 +66,7 @@ Use this whenever the final report must judge touch complexity, learnability,
 deck feel, reward choice feel, or whether the minigame behaves correctly on a
 phone-sized surface.
 
-Repository: `/root/Workspace/axiomancer-both/axiomancer-mobile`.
+Package: `axiomancer-mobile` (run the commands below from that package).
 
 1. Export/serve a dev-enabled web build so the dev menu exists:
 
@@ -211,12 +209,17 @@ critical than before, since available dice are scarcer at baseline.
 
 Read these files in full before forming any hypothesis:
 
-- `src/World/Hazard/hazard.cards.library.ts` — all 30 action cards with their
-  effect values, bottom costs, rarity, and class.
-- `src/World/Hazard/hazard.hazards.library.ts` — all 15 hazard cards with
-  their top/bottom route thresholds, round counts, and penalty tables.
-- `src/World/Hazard/hazard.cards.ts` — card effect factories and constants.
-- `src/World/Hazard/hazard.dice.ts` — die face distribution and mana validation.
+- `src/World/Hazard/hazard.content.ts` — the authored content: action-card
+  deck (`HAZARD_DECK`), reward cards (`HAZARD_REWARD_CARDS`), the hazard
+  library (`HAZARD_LIBRARY`) with route thresholds and reward/consequence
+  tables, keywords, and sub-quests.
+- `src/World/Hazard/hazard.tuning.ts` — the numeric tuning registry
+  (`HAZARD_TUNING`): card stat bands, round/dice/hand constants, die face
+  distribution (`HAZARD_DIE_FACES`), and reward magnitudes.
+- `src/World/Hazard/hazard.engagement.ts` — deck focus/scars, reward offers,
+  sub-quest drafting (read for context; engagement logic is structural).
+- `src/World/Hazard/hazard.deck-flags.ts` — starter bag and acquired-card
+  deck encoding (read for context).
 
 Identify the current values for every axis in the design targets table.
 
@@ -331,15 +334,17 @@ doctrine and the shipped engine. Do not tune numbers around them — flag them.
 
 If a gap materially affects a tuning axis (e.g., the penalty gap means VITAE
 drain cannot be fully measured), record it in the report with the blocking axis
-noted. If no existing CLI or test surface can expose the axis, file a narrowly
-scoped harness-gap entry in `plan/PHASE_CANDIDATES.md`; otherwise prefer the
-existing hazard CLI evidence flow over new harness requests.
+noted. If no existing CLI or test surface can expose the axis, record a
+narrowly scoped harness-gap entry in the report's propose-only section;
+otherwise prefer the existing hazard CLI evidence flow over new harness
+requests.
 
 ### Step 6 — Deliver on ONE PR
 
 - Create a branch off base: `git checkout -b balance/hazard-<ts>`.
-- Stage the findings report, the suggestions writeup, and any changed library
-  files.
+- Write the findings report + suggestions to
+  `docs/reports/hazard-tuning-<ts>.md` (create `docs/reports/` if it doesn't
+  exist yet); stage it along with any changed content/tuning files.
 - Commit: `balance(hazard): <ts> report + suggestions (<n> changes applied)`.
 - Push and open a PR (ready for review):
   - Title: `balance(hazard): tuning <ts> (<n> applied)`
@@ -379,8 +384,8 @@ not present in CLI output, JSON events, state logs, or committed tests.
   gate is not applied.
 - **Never edit `src/World/Hazard/hazard.engine.ts` or `hazard.types.ts`
   for tuning purposes.** Engine logic and type contracts are structural — changes
-  require T sign-off. The tuning surface is the library files only:
-  `hazard.cards.library.ts`, `hazard.hazards.library.ts`.
+  require T sign-off. The tuning surface is the content/tuning files only:
+  `hazard.content.ts`, `hazard.tuning.ts`.
 - **Never add new progress types, die states, or card verb classes.** These are
   structural additions, not numeric tuning.
 - **Preserve canonical terms VITAE and STANCE** in all authored text.
@@ -412,9 +417,9 @@ not present in CLI output, JSON events, state logs, or committed tests.
 
 4. **An engine gap blocks measurement of a target axis.** First try the hazard
    CLI evidence flow (`--auto`, fixed seeds, `--json-events`, `--state-log`). If
-   the axis still cannot be measured, file a narrowly-scoped harness-gap entry in
-   `plan/PHASE_CANDIDATES.md`. Exclude that axis from applied changes and report
-   it clearly in the PR body.
+   the axis still cannot be measured, record a narrowly-scoped harness-gap entry
+   in the report's propose-only section. Exclude that axis from applied changes
+   and report it clearly in the PR body.
 
 5. **No axis deviates from target / no change is warranted.** Open a PR with
    the report only if the analysis surfaces anything new (a freshly-identified
@@ -426,17 +431,21 @@ not present in CLI output, JSON events, state logs, or committed tests.
 
 ## 8. Quick reference
 
-**Content libraries:**
-- Action cards: `src/World/Hazard/hazard.cards.library.ts`
-  (30 cards: A01–A30, IDs per file; `STARTER_DECK_CARD_IDS` exported)
-- Hazard cards: `src/World/Hazard/hazard.hazards.library.ts`
-  (15 hazards: H01–H15)
-- Card effect factories: `src/World/Hazard/hazard.cards.ts`
+**Content + tuning (the tunable surface):**
+- Authored content: `src/World/Hazard/hazard.content.ts`
+  (`HAZARD_DECK` action cards, `HAZARD_REWARD_CARDS`, `HAZARD_LIBRARY`
+  hazards with thresholds and reward/consequence tables, keywords,
+  sub-quests)
+- Numeric registry: `src/World/Hazard/hazard.tuning.ts`
+  (`HAZARD_TUNING` card stat bands, round/dice/hand constants,
+  `HAZARD_DIE_FACES`, reward magnitudes)
 
-**Engine:**
+**Engine (read-only for this skill):**
 - Core: `src/World/Hazard/hazard.engine.ts`
-- Dice: `src/World/Hazard/hazard.dice.ts`
-- Deck: `src/World/Hazard/hazard.deck.ts`
+- Sim: `src/World/Hazard/hazard.sim.ts`
+- RNG: `src/World/Hazard/hazard.rng.ts`
+- Engagement (deck focus, scars, reward offers): `src/World/Hazard/hazard.engagement.ts`
+- Deck flags (starter bag, acquired cards): `src/World/Hazard/hazard.deck-flags.ts`
 - Public barrel: `src/World/Hazard/index.ts`
 
 **Tests and CLI evidence:**
@@ -446,7 +455,7 @@ not present in CLI output, JSON events, state logs, or committed tests.
 - Engine e2e: `src/World/Hazard/e2e/hazard.engine.test.ts`
 - Run targeted CLI test: `npx vitest run src/CLI/e2e/hazard.cli.engine.test.ts`
 - Run full suite: `npm test` (vitest run — includes all e2e suites)
-- CI: `.github/workflows/hazard-tuning.yml` (manual `workflow_dispatch`, optional `focus` input)
+- Balance sim evidence: `src/World/Hazard/e2e/hazard.balance.sim.test.ts`
 
 **Design doctrine:**
 - CDR-0006 rules + card set: `docs/hazard-minigame.md`
@@ -458,17 +467,17 @@ not present in CLI output, JSON events, state logs, or committed tests.
 
 | Axis | Files | Target |
 |---|---|---|
-| Hazard card thresholds (per round, top + bottom) | `hazard.hazards.library.ts` | Top: 5–7/round; bottom: 8–11/round; final +2–+3 |
-| Hazard round counts | `hazard.hazards.library.ts` | 3 (default), 4–5 (select hazards) |
-| Action card top effect values | `hazard.cards.library.ts` | Top-action floor: 5–7 total progress per round |
-| Action card bottom effect values | `hazard.cards.library.ts` | 1 bottom action: +5–+8 additional progress |
-| Action card bottom mana costs | `hazard.cards.library.ts` | Validate 'any' vs specific color against die color distribution |
-| Focus buff values | `hazard.cards.library.ts` (A05, A07, A08) | Clear Mind top +2, bottom +5; adjust if top-route floor is wrong |
-| Deck class ratios (direct-progress share) | `hazard.cards.library.ts` | Direct progress ≤ 50% of pool (30 cards) |
-| X-interaction card count | `hazard.cards.library.ts` | ≥3 cards; draw ≥40% against 2+ X dice per 5-card hand |
-| Route reward magnitudes (VITAE, supply, items) | `hazard.hazards.library.ts` | Bottom reward must be genuinely better than top |
-| Per-round failure penalty magnitudes | `hazard.hazards.library.ts` | **Blocked — engine gap; penalty application not yet wired** |
-| Scoring bands / reward tables | `hazard.hazards.library.ts` | 3-round: 3O→strong, 2O→normal, 1O→minor, 0O→penalty |
+| Hazard card thresholds (per round, top + bottom) | `hazard.content.ts` (`HAZARD_LIBRARY`) + `hazard.tuning.ts` | Top: 5–7/round; bottom: 8–11/round; final +2–+3 |
+| Hazard round counts | `hazard.content.ts` (`HAZARD_LIBRARY`) | 3 (default), 4–5 (select hazards) |
+| Action card top effect values | `hazard.content.ts` (`HAZARD_DECK`) + `hazard.tuning.ts` card bands | Top-action floor: 5–7 total progress per round |
+| Action card bottom effect values | `hazard.content.ts` (`HAZARD_DECK`) + `hazard.tuning.ts` card bands | 1 bottom action: +5–+8 additional progress |
+| Action card bottom mana costs | `hazard.content.ts` (`HAZARD_DECK`) | Validate 'any' vs specific color against die face distribution (`HAZARD_DIE_FACES` in `hazard.tuning.ts`) |
+| Focus buff values | `hazard.content.ts` + `hazard.tuning.ts` card bands | Clear Mind top +2, bottom +5; adjust if top-route floor is wrong |
+| Deck class ratios (direct-progress share) | `hazard.content.ts` (`HAZARD_DECK` + `HAZARD_REWARD_CARDS`) | Direct progress ≤ 50% of pool |
+| X-interaction card count | `hazard.content.ts` | ≥3 cards; draw ≥40% against 2+ X dice per 5-card hand |
+| Route reward magnitudes (VITAE, supply, items) | `hazard.content.ts` reward tables + `hazard.tuning.ts` reward magnitudes | Bottom reward must be genuinely better than top |
+| Per-round failure penalty magnitudes | `hazard.content.ts` consequence tables | **Blocked — engine gap; penalty application not yet wired** |
+| Scoring bands / reward tables | `hazard.content.ts` + `hazard.tuning.ts` | 3-round: 3O→strong, 2O→normal, 1O→minor, 0O→penalty |
 
 **Known engine gaps (do not tune around; flag only):**
 
@@ -478,5 +487,5 @@ not present in CLI output, JSON events, state logs, or committed tests.
 | Dice refresh between rounds (resets all spent) | `hazard.engine.ts` `advanceToNextRound` | Contradicts CDR-0006 §Mana Dice: spent dice should not auto-reset |
 | Exhausted dice reset between rounds | `hazard.engine.ts` `processBetweenRounds` | CDR-0006: exhausted dice should reset to available; spent dice should not |
 | Dual-type (risk route) round resolution incomplete | `hazard.engine.ts` `resolveRound` | Single-type check only; risk route requires both types to be met |
-| Die color set in engine | `hazard.types.ts`, `hazard.dice.ts` | Engine may use old 6-color set; accepted colors are red/blue/purple/gold/x only |
+| Die color set in engine | `hazard.types.ts`, `hazard.tuning.ts` (`HAZARD_DIE_FACES`) | Engine may use old 6-color set; accepted colors are red/blue/purple/gold/x only |
 | Persistent map benefits not wired | `hazard.types.ts` | `⚑ future phase` comments |

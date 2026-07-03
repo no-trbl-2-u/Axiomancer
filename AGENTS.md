@@ -27,16 +27,17 @@ Live, at the repo root:
 - `.claude/commands/` — domain **slash commands** (tuning + playtest): mechanics
   `combat-playtest`, `deck-tuning`, `gathering-tuning`, `hazard-tuning`,
   `loot-cache-tuning`, `quest-board-tuning`, `rest-tuning`; mobile `bump-engine`,
-  `critic-loop`, `deep-playtest`, `resolve-playtest`, `combat-ux-tuning`,
-  `hermes-playtest`, `playtest`. Each is self-contained and carries a header
-  naming the package it runs against (paths are package-relative — `cd` there or
-  use `-w`). `combat-tuning` + `legacy-combat-tuning` were trimmed.
+  `critic-loop`, `deep-playtest`, `combat-ux-tuning`, `hermes-playtest`. Each is
+  self-contained and carries a header naming the package it runs against (paths
+  are package-relative — `cd` there or use `-w`). `combat-tuning`,
+  `legacy-combat-tuning`, `playtest`, and `resolve-playtest` were trimmed.
 - `.claude/skills/` — design skills: `brainstorm-mechanics`, `character-spec`,
   `story-spec`, `world-spec`.
-- `.claude/agents/` — `balance-analyst`, `mechanics-expert`, `playtester`.
+- `.claude/agents/` — `mechanics-expert`, `playtester`.
 
-The commands' `plan/…` / `/march`-style references still point at the retired
-harness in `/archive`; they are re-pointed when nexus is re-onboarded.
+Commands write their reports to `<package>/docs/reports/` (created on demand).
+All `plan/…` / `/march`-era references were scrubbed at the post-merge cleanup;
+the commands are fully self-contained.
 
 ## Per-package guides
 

@@ -2,18 +2,20 @@
 
 Expo / React Native client for the Axiomancer TTRPG — a philosophical
 tabletop RPG system exploring moral choice through tactical combat and
-character alignment. This repo is the **presentation layer** only. Game
-rules, state shape, and randomness live in the
-[`axiomancer-mechanics`](https://www.npmjs.com/package/axiomancer-mechanics)
-engine, which this app consumes as a library.
+character alignment. This package lives in the Axiomancer monorepo
+(npm workspaces) and is the **presentation layer** only. Game rules,
+state shape, and randomness live in the sibling
+[`axiomancer-mechanics`](../axiomancer-mechanics/) workspace, consumed
+as **local source** via the `@mechanics` / `@mechanics/*` path aliases
+(→ `../axiomancer-mechanics/src`) — not as an npm package.
 
 If you are looking for "how does combat work" or "what does an effect
 do", read the engine. If you are looking for "what does the combat
-screen show in the `choosing_stance` phase", read this repo.
+screen show in the `choosing_stance` phase", read this package.
 
-## Repository navigation
+## Package navigation
 
-This repository keeps its documentation in several directories. They do
+This package keeps its documentation in several directories. They do
 **not** overlap — each answers a different question. Pick the directory by
 the question you are trying to answer, not by topic:
 
@@ -22,8 +24,7 @@ the question you are trying to answer, not by topic:
 | Get the app running / build / deploy on a fresh machine   | [`setup/`](./setup/)     | `docs/`      |
 | Understand a runtime concept (testing standard, engine upgrade, AI-assist prompts) | [`docs/`](./docs/)       | `setup/`     |
 | Know **why** a durable architecture or product call was made | [`docs/adr/`](./docs/adr/)  | `docs/`      |
-| Plan or implement a new feature against its written contract | [`specs/`](./specs/)     | `plan/`      |
-| See what the autonomous loop is shipping (build plan, audit, critique, phase briefs) | [`plan/`](./plan/)       | `specs/`     |
+| Plan or implement a new feature against its written contract | [`specs/`](./specs/)     | `docs/`      |
 | Understand T's game vision / UX doctrine before major UX work | [`VISION.md`](./VISION.md) | `docs/adr/`  |
 
 The boundaries, stated plainly:
@@ -41,13 +42,9 @@ The boundaries, stated plainly:
 - **[`specs/`](./specs/)** is **contracts** — the written specification
   for a surface *before* it is built. Start at
   [`specs/README.md`](./specs/README.md) for workflow and status.
-- **[`plan/`](./plan/)** is **execution state** — the live build plan,
-  audit findings, critique log, and phase briefs the autonomous shipping
-  skills read and write. A spec says *what to build*; the plan tracks
-  *what has been built and what is next*.
 - **[`VISION.md`](./VISION.md)** is **doctrine** — T's game vision and UX
-  guardrails. Read before major mobile UX, combat, mercy/friendship,
-  alignment, or `/march` work.
+  guardrails. Read before major mobile UX, combat, mercy/friendship, or
+  alignment work.
 
 ---
 
@@ -77,7 +74,7 @@ This mobile app uses **React Native** (cross-platform mobile framework) with **E
 ### Development workflow
 
 ```bash
-# 1. Install dependencies
+# 1. Install dependencies (from the monorepo root — npm workspaces)
 npm install
 
 # 2. Start the development server
@@ -159,9 +156,9 @@ build before any cloud minutes are consumed. The `with-env.mjs` wrapper
 exists because npm does not auto-load `.env`, but `eas build` needs
 `EXPO_TOKEN` visible in its environment.
 
-After pushing to `main`, the shipping skills (`/ship-a-phase`,
-`/iterate`) call `npm run deploy:check` to confirm a build exists for the
-pushed commit. With `DEPLOY_PROVIDER=none` (the default), this is a stub
+After pushing to `main`, run `npm run deploy:check` to confirm a build
+exists for the pushed commit. With `DEPLOY_PROVIDER=none` (the default),
+this is a stub
 that prints HEAD and exits per the contract documented in
 `scripts/deploy-check.mjs`:
 
@@ -231,8 +228,8 @@ This app follows a **"read upward, mutate downward"** pattern: data flows up fro
                │
                ▼
 ┌────────────────────────────┐
-│   axiomancer-mechanics     │  npm package — engine
-│   (rules, RNG, reducers)   │
+│   axiomancer-mechanics     │  sibling workspace (local source
+│   (rules, RNG, reducers)   │  via @mechanics alias) — engine
 └────────────────────────────┘
 ```
 
@@ -257,7 +254,9 @@ assisted development. Pick up the loop here:
   — the operator's manual.
 - **Writing tests?** [`docs/testing.md`](./docs/testing.md) — hermetic
   e2e standard. Every implementation must land with at least one.
-- **Current engine version:** `axiomancer-mechanics ^0.22.0`
+- **Engine:** `axiomancer-mechanics` — sibling workspace, consumed as
+  local source via the `@mechanics` alias (no version pin; the
+  engine-upgrade guides below are historical records of npm-era bumps).
 - **Upgrading from mechanics `0.21.0`?**
   [`docs/engine-upgrade-0.21.0-to-0.22.0.md`](./docs/engine-upgrade-0.21.0-to-0.22.0.md)
   — package bump and the affix-release fallout (structured prefix/suffix item fields, `SeedInput` widening, refreshed loot-table fixtures, L50 dev-tier remap).

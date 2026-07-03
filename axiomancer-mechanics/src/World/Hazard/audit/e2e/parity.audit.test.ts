@@ -6,9 +6,9 @@
  * Tests key mobile behavior requirements to ensure parity.
  */
 
-import { beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { mockFixedRng } from '../../../../test-utils/rng';
+import { mockFixedRng, restoreOriginalRng } from '../../../../test-utils/rng';
 import { HAZARD_DIE_FACES } from '../../hazard.content';
 import { hazardStarterBag } from '../../hazard.deck-flags';
 import {
@@ -32,6 +32,13 @@ describe('Hazard Mobile Parity Audit', () => {
         // expected; an empty sequence makes any stray call fail loudly.
         mockFixedRng([]);
         session = createHazardSession(12345, hazardStarterBag(), 'cracked-cliff');
+    });
+
+    afterEach(() => {
+        // Hermeticity: drop the Math.random spy and reinstate the production
+        // RNG singleton so no mocked state leaks past this suite.
+        vi.restoreAllMocks();
+        restoreOriginalRng();
     });
 
     describe('Session Flow Parity', () => {

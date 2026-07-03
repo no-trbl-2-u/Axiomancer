@@ -4,9 +4,7 @@ description: Loot-cache encounter (The Reliquary) balance loop — seeded policy
 
 > **⚙️ Runs against the `axiomancer-mechanics` package.** Repo-relative paths below
 > (`src/…`, `automation/…`, `scripts/…`) are relative to that package — run from it (`cd axiomancer-mechanics`) or via
-> `npm run <script> -w axiomancer-mechanics`. Any `plan/…`, `skills/…`, or `/march`-style
-> references point at the retired nexus harness in `/archive` and are
-> placeholders until nexus is re-onboarded.
+> `npm run <script> -w axiomancer-mechanics`.
 
 # Skill: loot-cache-tuning
 
@@ -89,8 +87,8 @@ The empirical witnesses, in order of preference:
 - **Baseline before delta; evidence before edits; same seeds re-run
   after; `npm run verify` after any change; one PR carries everything;
   unknown is acceptable, false certainty is not.** (Identical contract
-  to the sibling tuning skills — see `skills/combat-tuning.md` for the
-  long form.)
+  to the sibling tuning skills — see `/hazard-tuning` for the long
+  form.)
 
 ## 4. Design targets (the objective function)
 

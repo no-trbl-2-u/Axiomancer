@@ -191,23 +191,21 @@ When you're done:
 
 Once this workflow is in place, Claude can:
 
-- **Verify Phase 65 fixes** by walking an encounter end-to-end
+- **Verify gameplay fixes** by walking an encounter end-to-end
   inside one Claude turn — no waiting for an EAS preview build.
-- **Catch regressions** before they ship. The `/march` loop can
-  add a "playtest tick" cadence that drives a fresh combat
-  every N ticks and flags any visible drift.
-- **Author the mechanics-vs-UI audit** ([3.7] in
-  `plan/AUDIT.md`) by driving each UI branch and comparing it
-  against the engine state.
-- **Ship UI fixes with confidence** — the loop now has an end-
-  to-end signal, not just hermetic Jest tests.
+- **Catch regressions** before they ship by driving a fresh
+  combat and flagging any visible drift.
+- **Audit mechanics-vs-UI parity** by driving each UI branch and
+  comparing it against the engine state.
+- **Ship UI fixes with confidence** — an end-to-end signal, not
+  just hermetic Jest tests.
 
 ---
 
 ## 7. Verification status
 
-> **Workflow verified by Claude on 2026-05-21** during the
-> iterate tick that filed this runbook (`[5.9]` AUDIT row).
+> **Workflow verified by Claude on 2026-05-21** when this
+> runbook was filed.
 > Smoke: navigate to http://localhost:8081 → land on
 > `/exploration` → snapshot reads stats (LVL 7, HP 22/38) + the
 > Fishing Village node graph + four tabs (WILDS / SELF / MEMOIR

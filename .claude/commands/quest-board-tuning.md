@@ -4,9 +4,7 @@ description: Quest Board minigame (The Boy's Almanac) balance loop — seeded po
 
 > **⚙️ Runs against the `axiomancer-mechanics` package.** Repo-relative paths below
 > (`src/…`, `automation/…`, `scripts/…`) are relative to that package — run from it (`cd axiomancer-mechanics`) or via
-> `npm run <script> -w axiomancer-mechanics`. Any `plan/…`, `skills/…`, or `/march`-style
-> references point at the retired nexus harness in `/archive` and are
-> placeholders until nexus is re-onboarded.
+> `npm run <script> -w axiomancer-mechanics`.
 
 # Skill: quest-board-tuning
 

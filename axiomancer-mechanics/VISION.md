@@ -1,6 +1,6 @@
 # Axiomancer Mechanics Vision
 
-This file preserves T's fundamental wants for Axiomancer as they affect the mechanics engine. Read it before major mechanics proposals, balance tuning, combat work, skill/status work, mercy/friendship work, alignment work, or `/march` phase execution.
+This file preserves T's fundamental wants for Axiomancer as they affect the mechanics engine. Read it before major mechanics proposals, balance tuning, combat work, skill/status work, mercy/friendship work, or alignment work.
 
 ## Game identity
 

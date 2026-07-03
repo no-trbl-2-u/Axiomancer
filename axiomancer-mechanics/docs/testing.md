@@ -112,40 +112,21 @@ coverage.
 
 ### Deploy gate — `npm run deploy:check`
 
-After `npm run verify` is green, `npm run deploy:check` runs four
-structural assertions before `npm pack --dry-run`: `dist/` exists,
-`dist/<Module>/types.d.ts` count matches `src/<Module>/types.ts`
-count, the latest git tag matches the top tagged CHANGELOG heading,
-and the public-surface snapshot matches the committed fixture. See
-[`scripts/README.md`](../scripts/README.md) for the full tools table
-+ the public-surface contract workflow.
+### Continuous integration — root `.github/workflows/verify-mechanics.yml`
 
-### Continuous integration — `.github/workflows/verify.yml` (Phase 56)
+The CI gate lives at the monorepo root
+(`.github/workflows/verify-mechanics.yml`) and fires on every
+`pull_request` against `main` and every `push` to `main` that touches
+this package. It runs `npm run verify --workspace axiomancer-mechanics`
+(`type-check` + `type-check:tests` + `lint` + tests + `build`).
 
-The CI gate at [`.github/workflows/verify.yml`](../.github/workflows/verify.yml)
-fires on every `pull_request` against `main` and every `push` to `main`.
-Pipeline steps:
+**No publish / deploy gate.** The monorepo consumes mechanics as local
+source via the `@mechanics` workspace alias; the package is not
+published to npm, so the old deploy-check structural assertions were
+retired at the monorepo merge.
 
-1. Checkout with `fetch-depth: 0` (full history; `deploy:check` runs
-   `git describe --tags --abbrev=0` for the tag/CHANGELOG assertion).
-2. Setup Node 22 + `npm ci` with the setup-node cache.
-3. `npm run verify` (`type-check` + tests + `build`).
-4. `npm run deploy:check` (the four structural assertions above).
-
-Concurrency group `verify-${{ github.ref }}` with
-`cancel-in-progress: true` — force-pushes on the same branch / PR
-don't pile up redundant runs.
-
-**No publish step by design.** Per `RELEASING.md`, `npm publish` is
-manual + attended (2FA prompt fires during the publish). The CI
-workflow validates publishability via `npm pack --dry-run`; the
-actual publish is a user-triggered ceremony, not a CI step.
-
-The autonomous-beast loop (`.github/workflows/march.yml`) runs verify
-before every commit it makes, so today's CI gate's primary audience is
-human-PR / one-off branch contributors who need a remote red/green
-signal before merge. Closes the PR-level gap critique-13 /
-expand-pass-13 flagged for the published npm package.
+Today's CI gate's primary audience is human-PR / one-off branch
+contributors who need a remote red/green signal before merge.
 
 ### Agent-friendly report — `npm run verify:agent` (Phase 39)
 

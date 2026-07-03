@@ -1,19 +1,16 @@
 # AGENTS.md — Project Orientation
 
-> **Note:** This file provides project-specific context and technical
-> details. For current autonomous loop instructions and workflow rules,
-> see [`agents.md`](./agents.md) (the nexus rule book).
-
 ## Project overview
 
 Axiomancer Mobile is the **React Native / Expo client** for the Axiomancer
 TTRPG. It is a thin presentation layer on top of the
-[`axiomancer-mechanics`](https://www.npmjs.com/package/axiomancer-mechanics)
-engine: all game rules, state shape, and randomness live there. This repo
+[`axiomancer-mechanics`](../axiomancer-mechanics/) sibling workspace
+(consumed as local source via the `@mechanics` alias): all game rules,
+state shape, and randomness live there. This package
 owns screens, navigation, theming, fonts, SVG/asset placeholders, and the
 glue (selectors / presenters) that maps engine state to UI props.
 
-See [`README.md`](./README.md) for architecture docs and [`plan/bearings.md`](./plan/bearings.md) for current project context.
+See [`README.md`](./README.md) for architecture docs.
 
 ## Load-bearing UI evidence doctrine
 

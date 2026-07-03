@@ -1,6 +1,6 @@
 # EAS Build Deploy Gate Setup
 
-This guide covers configuring the EAS Build deploy gate for `scripts/deploy-check.mjs`. After setup, the shipping loop can verify EAS builds automatically by polling build status for the current git commit.
+This guide covers configuring the EAS Build deploy gate for `scripts/deploy-check.mjs`. After setup, EAS builds can be verified automatically by polling build status for the current git commit.
 
 ## Prerequisites
 
@@ -118,17 +118,15 @@ EAS CLI handles rate limiting internally. If you see rate limit errors:
 2. Consider reducing polling frequency in automation
 3. For high-frequency use, evaluate webhook alternatives
 
-## Integration with Shipping Loop
+## Integration with the deploy workflow
 
-Once configured, the shipping skills (`/ship-a-phase`, `/iterate`) automatically call `deploy:check` as Step 12. No manual intervention needed.
+Once configured, run `npm run deploy:check` after pushing to `main` to confirm a build exists for the pushed commit:
 
-The loop will:
 1. Push commit to `main`
-2. Run `npm run deploy:check` 
+2. Run `npm run deploy:check`
 3. Wait for builds to complete or timeout
-4. Continue with next phase if builds pass
 
-For manual builds that don't auto-trigger on push, the gate will show "no builds found" (exit 2) and the loop continues.
+For manual builds that don't auto-trigger on push, the gate will show "no builds found" (exit 2).
 
 ## Alternative: Webhook-Based Notifications
 

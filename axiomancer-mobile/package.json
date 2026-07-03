@@ -9,7 +9,6 @@
   "_engineNotes": "Dev container (scripts/dev-server-container.sh) uses node:20-alpine for consistency. Local dev accepts any Node >=20.0.0.",
   "scripts": {
     "start": "expo start",
-    "reset-project": "node ./scripts/reset-project.js",
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",

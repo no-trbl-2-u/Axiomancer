@@ -69,9 +69,14 @@ describe('hermeticity guard: test conventions', () => {
     });
 
     it('spies are restored (no mock leaks across files)', () => {
+        // The test-utils/rng helpers install a Math.random spy internally,
+        // so files that call them install spies without ever writing
+        // `vi.spyOn(` themselves — treat them the same.
+        const INSTALLS_SPY =
+            /vi\.spyOn\(|mockFixedRng\s*\(|mockAlternatingRng\s*\(|mockSequentialRng\s*\(/;
         const offenders = TEST_FILES.filter((f) => {
             const code = stripComments(f.text);
-            if (!code.includes('vi.spyOn(')) return false;
+            if (!INSTALLS_SPY.test(code)) return false;
             return !/restoreAllMocks|mockRestore/.test(code);
         }).map((f) => f.rel);
         expect(offenders).toEqual([]);

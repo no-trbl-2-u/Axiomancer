@@ -4,9 +4,7 @@ description: Bump axiomancer-mechanics, install, and make the repo changes the m
 
 > **⚙️ Runs against the `axiomancer-mobile` package.** Repo-relative paths below
 > (`state/…`, `components/…`, `app/…`, `scripts/…`) are relative to that package — run from it (`cd axiomancer-mobile`) or via
-> `npm run <script> -w axiomancer-mobile`. Any `plan/…`, `skills/…`, or `/march`-style
-> references point at the retired nexus harness in `/archive` and are
-> placeholders until nexus is re-onboarded.
+> `npm run <script> -w axiomancer-mobile`.
 
 # Skill: bump-engine
 
@@ -174,8 +172,10 @@ say, under the §4 invariant:
 
 - **New `MapEventKind` / payload** → extend the discriminated-union
   handling in `state/actions.ts`, `state/presenters/event.engine.ts`,
-  `state/presenters/event-assets.ts`, and
-  `state/exploration-maps/event-pools.ts`. Fix exhaustive switches by
+  `state/presenters/event-assets.ts`, and the node-display mapping in
+  `state/presenters/exploration.engine.ts` (event pools are
+  engine-authored now — mobile reads them via `getNodeEventPool` from
+  `@mechanics`). Fix exhaustive switches by
   **rendering the new kind**, never by falling through to
   generic/unknown.
 - **New encounter procedure** → add the store slice + `store-actions.ts`
@@ -290,7 +290,7 @@ docs/engine-upgrade-<from>-to-<target>.md
 state/actions.ts                        # event-kind routing, outcome application
 state/presenters/event.engine.ts        # event-kind → view model
 state/presenters/event-assets.ts        # event-kind → art
-state/exploration-maps/event-pools.ts   # node → pool authoring
+state/presenters/exploration.engine.ts  # node display from engine-authored event pools (getNodeEventPool)
 state/<kind>/store-actions.ts           # per-encounter host glue (engine* imports)
 state/presenters/<kind>.engine.ts       # per-encounter presenter
 app/<kind>/                             # per-encounter screen

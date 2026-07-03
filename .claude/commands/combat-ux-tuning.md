@@ -4,9 +4,7 @@ description: Automated combat UX A/B tuner.
 
 > **⚙️ Runs against the `axiomancer-mobile` package.** Repo-relative paths below
 > (`state/…`, `components/…`, `app/…`, `scripts/…`) are relative to that package — run from it (`cd axiomancer-mobile`) or via
-> `npm run <script> -w axiomancer-mobile`. Any `plan/…`, `skills/…`, or `/march`-style
-> references point at the retired nexus harness in `/archive` and are
-> placeholders until nexus is re-onboarded.
+> `npm run <script> -w axiomancer-mobile`.
 
 # Skill: combat-ux-tuning
 
@@ -20,9 +18,10 @@ description: Automated combat UX A/B tuner.
 
 ## 1. Purpose
 
-`/combat-ux-tuning` is the Mobile-side companion to mechanics
-`/combat-tuning`. Mechanics tunes the card-and-dice combat numbers with
-Monte-Carlo simulation. This skill tunes the **player input surface** for
+`/combat-ux-tuning` is the Mobile-side companion to the mechanics-side
+numeric tuning (engine-constant tuning is currently manual — the
+combat-tuning loop was trimmed at the monorepo merge). Mechanics owns the
+card-and-dice combat numbers. This skill tunes the **player input surface** for
 that combat: how reliably and directly an automated player can enter combat,
 stage a card, assign/power with dice, APPLY, END PHASE, and progress the fight.
 
@@ -61,7 +60,7 @@ Focus values narrow the probe but do not loosen the evidence requirements.
   Keep the change only if friction improves and gates remain green.
 - **Automated witness is law:** screenshots/videos are supporting artifacts only.
   They are not the success metric.
-- **No questions.** When invoked manually, by `/march`, or by GitHub Actions,
+- **No questions.** However invoked,
   decide from evidence and proceed. Do not pause for clarification. Only stop
   for destructive, costly, secret-bearing, public-release, production, or
   major-product-direction actions.
@@ -114,7 +113,7 @@ Read the current combat UX surface before measuring:
 - `components/event/EncounterModalOverlay.tsx`
 - `app/(tabs)/exploration/index.tsx`
 - `package.json` scripts for current e2e/visual commands
-- `plan/bearings.md` and this repo's `AGENTS.md` for doctrine
+- this repo's `AGENTS.md` (root and package) for doctrine
 
 Existing automation to prefer:
 

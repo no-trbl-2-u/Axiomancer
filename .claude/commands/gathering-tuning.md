@@ -4,9 +4,7 @@ description: Gathering minigame (The Gleaning) balance loop — use the policy s
 
 > **⚙️ Runs against the `axiomancer-mechanics` package.** Repo-relative paths below
 > (`src/…`, `automation/…`, `scripts/…`) are relative to that package — run from it (`cd axiomancer-mechanics`) or via
-> `npm run <script> -w axiomancer-mechanics`. Any `plan/…`, `skills/…`, or `/march`-style
-> references point at the retired nexus harness in `/archive` and are
-> placeholders until nexus is re-onboarded.
+> `npm run <script> -w axiomancer-mechanics`.
 
 # Skill: gathering-tuning
 
@@ -244,8 +242,8 @@ deliberate, documented band update is reverted and recorded under
 2. **A change breaks a band accidentally.** Revert, record under
    "Considered but not applied" with the failing band.
 3. **An axis cannot be measured.** Prefer extending the CLI evidence flow;
-   if genuinely blocked, file a narrowly-scoped harness-gap entry in
-   `plan/PHASE_CANDIDATES.md` and exclude the axis from applied changes.
+   if genuinely blocked, record a narrowly-scoped harness-gap entry in the
+   report's propose-only section and exclude the axis from applied changes.
 4. **Focus matches nothing.** Run the full sweep and note the empty filter.
 
 ## 8. Quick reference

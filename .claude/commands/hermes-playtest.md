@@ -4,20 +4,18 @@ description: Hermes-native UI playthrough.
 
 > **⚙️ Runs against the `axiomancer-mobile` package.** Repo-relative paths below
 > (`state/…`, `components/…`, `app/…`, `scripts/…`) are relative to that package — run from it (`cd axiomancer-mobile`) or via
-> `npm run <script> -w axiomancer-mobile`. Any `plan/…`, `skills/…`, or `/march`-style
-> references point at the retired nexus harness in `/archive` and are
-> placeholders until nexus is re-onboarded.
+> `npm run <script> -w axiomancer-mobile`.
 
 # Skill: hermes-playtest
 
 > **Hermes-native UI playthrough.** Drive Axiomancer Mobile with Hermes'
 > native browser tools, not Claude Code's Playwright MCP, and produce a
 > thorough Tobin-facing playtest report. This is the Hermes counterpart to
-> `skills/playtest.md` and `skills/deep-playtest.md`.
+> `/deep-playtest`.
 
 ## 1. Purpose
 
-`/playtest` and `/deep-playtest` were written for Claude Code sessions with
+`/deep-playtest` was written for Claude Code sessions with
 Playwright MCP tools. Hermes does not need that bridge. Hermes can start Expo
 Web as a tracked process, drive the app with `browser_navigate`,
 `browser_snapshot`, `browser_click`, `browser_press`, `browser_scroll`,
@@ -164,7 +162,8 @@ the finding.
 
 ## Tobin-facing report contract
 
-Write or update `plan/PLAYTEST_REPORT.md` in this shape:
+Write or update `docs/reports/PLAYTEST_REPORT.md` (create the
+`docs/reports/` directory if it doesn't exist yet) in this shape:
 
 ```markdown
 # Playtest Report
@@ -242,7 +241,6 @@ the first section and know what judgment is being asked of him.
 For changes to this harness, run:
 
 ```bash
-npm test -- --runTestsByPath scripts/__tests__/hermes-ui-playtest.test.ts --runInBand
 npm run typecheck
 git diff --check
 ```
