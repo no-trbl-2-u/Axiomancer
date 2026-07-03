@@ -13,12 +13,11 @@ right-thing-to-do every tick:
 unlabeled issues exist          →  /triage
 ELSE critique due (rate-lim)    →  /critique
 ELSE pending phase              →  /ship-a-phase
-ELSE pending data               →  /ship-data
 ELSE expand due + bold posture  →  /expand
 ELSE                            →  /iterate
 ```
 
-Deliveries first: pending phases / data ship before `/expand`
+Deliveries first: pending phases ship before `/expand`
 ever fires. `/expand` only runs when there's no immediate
 delivery, OR when its rate-limit window opens (every ~20
 commits or ~48h) AND the bearings posture is **bold** or
@@ -124,19 +123,10 @@ tick):
 - Execute its procedure end-to-end.
 - Return.
 
-#### 3b. Pending data?
-
-Open `data/BACKLOG.md`. If any `[ ]` row exists (and project
-has a data layer):
-
-- Read `skills/ship-data.md`.
-- Execute its procedure end-to-end.
-- Return.
-
-#### 3c. Expand due (rate-limited, posture-gated)?
+#### 3b. Expand due (rate-limited, posture-gated)?
 
 Read `plan/bearings.md` "Plan expansion posture" section. If
-posture is **strict**, skip to 3d.
+posture is **strict**, skip to 3c.
 
 Read metadata header at top of `plan/PHASE_CANDIDATES.md`:
 
@@ -153,11 +143,11 @@ Dispatch to `/expand` if **all four** hold:
    is "never" and at least **3 phases have shipped**.
 3. There's at least one signal worth examining: `plan/AUDIT.md`
    has Pending rows, OR `plan/CRITIQUE.md` has Pending rows,
-   OR `git log -p --since="<last pass>" -- spec.md design/`
-   shows changes, OR `data/` has substantial growth since the
-   plan was authored.
-4. No phase or data work is pending (Steps 3a/3b would have
-   matched first if there were).
+   OR `git log -p --since="<last pass>" -- spec.md
+   axiomancer-mechanics/specs/ axiomancer-mechanics/braindump/`
+   shows changes.
+4. No phase work is pending (Step 3a would have matched first
+   if there were).
 
 If all four hold:
 
@@ -165,9 +155,9 @@ If all four hold:
 - Execute its procedure end-to-end.
 - Return.
 
-If any condition fails, fall through to 3d.
+If any condition fails, fall through to 3c.
 
-#### 3d. Else — iterate.
+#### 3c. Else — iterate.
 
 - Read `skills/iterate.md`.
 - Execute its procedure end-to-end.
@@ -196,7 +186,7 @@ A march tick succeeds iff the child tick succeeds.
 
 1. **`git pull` divergence.**
 2. **State files corrupted or missing** (build plan, AUDIT,
-   BACKLOG, CRITIQUE). Stop and report — don't reconstruct
+   CRITIQUE). Stop and report — don't reconstruct
    silently.
 
 Otherwise inherited from the dispatched skill.
@@ -206,7 +196,6 @@ Otherwise inherited from the dispatched skill.
 ```bash
 # State files
 plan/steps/01_build_plan.md          # pending phases
-data/BACKLOG.md                      # pending data work
 plan/CRITIQUE.md                     # critique queue + last-pass metadata
 
 # External signals
@@ -217,7 +206,6 @@ npm run deploy:check                    # green-deploy condition
 skills/triage.md                     # Step 1 (cheapest)
 skills/critique.md                   # Step 2 (rate-limited)
 skills/ship-a-phase.md               # Step 3a
-skills/ship-data.md                  # Step 3b
-skills/expand.md                     # Step 3c (posture-gated)
-skills/iterate.md                    # Step 3d
+skills/expand.md                     # Step 3b (posture-gated)
+skills/iterate.md                    # Step 3c
 ```

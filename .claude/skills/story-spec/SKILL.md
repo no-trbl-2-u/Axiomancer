@@ -17,6 +17,11 @@ the dev workflow can act on.
 4. Offer 2–3 structural alternatives with trade-offs, never just one.
 5. Create `specs/story/S-NN-<name-slug>.md` when the user is ready.
 
+**Paths.** All `specs/`, `braindump/`, `content/`, and `docs/` paths
+in this skill live under the `axiomancer-mechanics/` package — e.g.
+`axiomancer-mechanics/specs/story/`. Never create these directories
+at the monorepo root.
+
 ---
 
 ## Ground the conversation first
@@ -114,15 +119,15 @@ not narrow it.
 ## Phase 5 — Create spec in `specs/story/`
 
 When the user signals they're ready to commit the direction, **create a spec
-file** in `specs/story/`.
+file** in `axiomancer-mechanics/specs/story/` (not at the monorepo root).
 
 **Determine the next spec number:**
-1. List all files in `specs/story/` that match `S-NN-*.md`.
+1. List all files in `axiomancer-mechanics/specs/story/` that match `S-NN-*.md`.
 2. Take the highest NN found (treat `00-story-spec-template.md` as 00).
 3. New file uses NN+1, zero-padded to two digits.
-4. If `specs/story/` is empty (besides the template), start at `S-01`.
+4. If the directory is empty (besides the template), start at `S-01`.
 
-**Filename:** `specs/story/S-NN-<name-slug>.md`
+**Filename:** `axiomancer-mechanics/specs/story/S-NN-<name-slug>.md`
 
 - `<name-slug>` — 2–5 words kebab-cased describing the NPC or beat,
   e.g. `merchant-labyrinth`, `elder-council-reveal`, `fisherman-quest-arc`

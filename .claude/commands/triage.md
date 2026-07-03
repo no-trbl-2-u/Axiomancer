@@ -7,8 +7,8 @@ end to end before touching anything else.
 
 This skill reads issues from `no-trbl-2-u/Axiomancer` (or `$GH_REPO`),
 classifies, applies a `triage:*` label, posts a short comment,
-routes actionable issues into the right backlog (`plan/AUDIT.md`,
-`data/BACKLOG.md`, or build-plan row). Already-labeled issues
+routes actionable issues into the right backlog (`plan/AUDIT.md`
+or a build-plan row). Already-labeled issues
 skipped — labels are the state.
 
 Argument handling:

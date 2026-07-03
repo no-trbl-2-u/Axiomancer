@@ -70,8 +70,9 @@ engine, content library, tuning loop, and hermetic e2e tests:
 - **Loot-cache** — "The Reliquary" (three layers, one probe).
 - **Quest Board** — "The Boy's Almanac" (authored tabletop
   board).
-- A **legacy turn-based combat** (`resolveCombatRound`) is
-  retained for a dev-only tab.
+- The legacy turn-based combat (`resolveCombatRound`) and its
+  dev-only tab were fully removed; Hazard-Pattern Combat is the
+  only combat engine.
 
 Supporting engines: character / progression / equipment (rarity,
 affixes, set items), effects and interactions, enemy content +

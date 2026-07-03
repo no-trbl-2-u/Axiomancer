@@ -1,5 +1,5 @@
 ---
-description: The always-do-the-right-thing entry — triage → critique → phase → data → iterate. The loop's outer orchestrator.
+description: The always-do-the-right-thing entry — triage → critique → phase → iterate. The loop's outer orchestrator.
 ---
 
 You are invoked under the `march` skill — the unified outer
@@ -12,8 +12,7 @@ Procedure (§3 of the skill):
 2. Critique gate (rate-limited). If due + green deploy →
    `/critique`.
 3. Pending phase → `/ship-a-phase`.
-4. Pending data → `/ship-data`.
-5. Else → `/iterate`.
+4. Else → `/iterate`.
 
 You delegate by reading the relevant skill file and following
 its procedure end-to-end. The march skill itself is the

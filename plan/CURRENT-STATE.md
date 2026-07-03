@@ -17,8 +17,10 @@
 - **Consumption model:** mobile and card-editor consume mechanics
   as **local source** via the `@mechanics` alias
   (→ `../axiomancer-mechanics/src`). Not published to npm.
-- **Git history:** 33 commits (monorepo assembled via subtree
-  merge of formerly-separate `mechanics` and `mobile` repos).
+- **Git history:** monorepo assembled via subtree merge of the
+  formerly-separate `mechanics` and `mobile` repos (both full
+  histories preserved; ~11 first-parent monorepo commits at the
+  2026-07-03 re-onboard).
 - **CI:** GitHub Actions — `verify-mechanics.yml`,
   `verify-mobile.yml`, `verify-card-editor.yml` (push + PR to
   `main`, path-filtered), plus `preview-build.yml`
@@ -36,8 +38,8 @@
 - Per-package verify gates green in CI. Lint green in both TS
   packages.
 - Domain design + tuning harness carried forward into root
-  `.claude/` (tuning commands, design skills, `mechanics-expert`
-  + `playtester` agents).
+  `.claude/` (tuning commands, design skills, and the `scout`,
+  `reader`, `mechanics-expert`, `playtester` agents).
 
 ## Known broken / decayed (carried into plan/AUDIT.md)
 

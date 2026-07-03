@@ -13,8 +13,7 @@ triage, they pile up. With triage:
 - User files an issue.
 - Next `/march` tick reviews it, labels it, comments, routes
   it.
-- Subsequent `/iterate` or `/ship-data` ticks drain the
-  backlog.
+- Subsequent `/iterate` ticks drain the backlog.
 - Addressing commit closes the issue automatically.
 
 Cheap when idle (zero issues → exits in <1s). Non-blocking
@@ -68,8 +67,7 @@ default pass.
 
 Plus a category label paired with `triage:loop-queued`:
 
-- `bug`, `enhancement`, `content`, `data`, `docs`, `seo`,
-  `a11y`, `perf`
+- `bug`, `enhancement`, `content`, `docs`, `a11y`, `perf`
 
 Auto-create labels on first encounter via `gh label create`
 (idempotent).
@@ -112,16 +110,16 @@ label** — it is a signal, not a state.
 
 For each issue, decide:
 
-1. **Category**: `bug` | `enhancement` | `content` | `data` |
-   `docs` | `seo` | `a11y` | `perf`.
+1. **Category**: `bug` | `enhancement` | `content` |
+   `docs` | `a11y` | `perf`.
 2. **Routing**:
    - `triage:loop-queued` if the loop can address autonomously.
    - `triage:needs-user` if user judgment needed.
    - `triage:closed` if duplicate / spam / won't-fix.
    - `triage:reviewed` if waiting on something else.
 3. **Backlog target** (only `loop-queued`):
-   - bug / seo / a11y / perf / content / docs → `plan/AUDIT.md`
-   - data → `data/BACKLOG.md`
+   - bug / a11y / perf / content / docs (including data-ish
+     issues — game data, balance numbers) → `plan/AUDIT.md`
    - small enhancement → `plan/steps/01_build_plan.md`
      carry-overs section
    - large / off-strategy enhancement → re-route to
@@ -156,16 +154,10 @@ gh issue close "$NUM" --repo "$GH_REPO" --reason "not planned"
 - next: /iterate will pick up; reference #<N> in commit body.
 ```
 
-`data/BACKLOG.md` row:
-
-```markdown
-- [ ] <action> (issue #<N> — <one-line context>)
-```
-
 ### Step 5 — Commit + push (if any backlog changes)
 
 ```bash
-git add plan/AUDIT.md data/BACKLOG.md plan/steps/01_build_plan.md
+git add plan/AUDIT.md plan/steps/01_build_plan.md
 git commit -m "$(cat <<'EOF'
 triage: <K> issues processed (<L> queued, <M> user-call, <N> closed)
 
@@ -192,11 +184,11 @@ npm run deploy:check
 
 ```
 triage processed: <K>. queued: <L>. needs-user: <M>. closed: <N>.
-plan/AUDIT.md +<X> rows. data/BACKLOG.md +<Y> rows.
-loop next: <iterate | ship-data | ship-a-phase | march>.
+plan/AUDIT.md +<X> rows.
+loop next: <iterate | ship-a-phase | march>.
 ```
 
-## 6. Closing the loop (when iterate / ship-data ships a fix)
+## 6. Closing the loop (when iterate ships a fix)
 
 When a downstream skill addresses a triaged issue, it should
 update the issue:
@@ -214,8 +206,7 @@ gh issue comment <N> --repo "$GH_REPO" --body "Shipped in <commit>. Live after d
 gh issue close <N> --repo "$GH_REPO"   # if not already auto-closed by Closes #N trailer
 ```
 
-This is documented in `skills/iterate.md` §5 and
-`skills/ship-data.md` §6.
+This is documented in `skills/iterate.md` §5.
 
 ## 7. Hard rules
 

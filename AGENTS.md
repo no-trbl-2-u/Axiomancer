@@ -27,14 +27,15 @@ npm-workspaces monorepo. Three packages, flat at the root:
 Live, at the repo root:
 - `.claude/commands/` — domain **slash commands** (tuning + playtest): mechanics
   `combat-playtest`, `deck-tuning`, `gathering-tuning`, `hazard-tuning`,
-  `loot-cache-tuning`, `quest-board-tuning`, `rest-tuning`; mobile `bump-engine`,
+  `loot-cache-tuning`, `quest-board-tuning`, `rest-tuning`; mobile
   `critic-loop`, `deep-playtest`, `combat-ux-tuning`, `hermes-playtest`. Each is
   self-contained and carries a header naming the package it runs against (paths
   are package-relative — `cd` there or use `-w`). `combat-tuning`,
-  `legacy-combat-tuning`, `playtest`, and `resolve-playtest` were trimmed.
+  `legacy-combat-tuning`, `playtest`, `resolve-playtest`, and `bump-engine`
+  (npm-pin-era engine bumps, retired with the monorepo merge) were trimmed.
 - `.claude/skills/` — design skills: `brainstorm-mechanics`, `character-spec`,
   `story-spec`, `world-spec`.
-- `.claude/agents/` — `mechanics-expert`, `playtester`.
+- `.claude/agents/` — `scout`, `reader`, `mechanics-expert`, `playtester`.
 
 Commands write their reports to `<package>/docs/reports/` (created on demand).
 All `plan/…` / `/march`-era references were scrubbed at the post-merge cleanup;

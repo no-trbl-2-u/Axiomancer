@@ -7,8 +7,8 @@ review checkpoint. Read `skills/jot.md` end to end before
 touching anything else; that file is the single source of
 truth for this command.
 
-The user has spotted something on the live site (or in the
-build, or in the data) and wants to capture it before they
+The user has spotted something in the running expo-web build
+(or in the code, or in the game data) and wants to capture it before they
 forget. Your job: file one row to `plan/CRITIQUE.md`, commit,
 push, exit. Target end-to-end <10 seconds.
 

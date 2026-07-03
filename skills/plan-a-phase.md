@@ -30,15 +30,14 @@ Use when:
 1. `plan/bearings.md` — stack, contracts, standing decisions.
 2. `plan/steps/01_build_plan.md` — phase scope row.
 3. `plan/phases/<canonical-sibling>.md` — template.
-4. `design/INDEX.md` — file → family map (if design layer
-   exists).
-5. `design/decisions.<ext>` — design's own brief; **wins over
-   bearings on conflict**.
-6. `design/page-<family>.<ext>` — family-specific design (may
-   be 0 bytes / absent; not blocking).
-7. `<your-app-path>/<sibling-family>/` — closest already-shipped
+4. `axiomancer-mechanics/specs/` — formal design specs touching
+   the phase's surface (mechanics, characters, story, world);
+   **win over bearings on conflict**.
+5. `axiomancer-mechanics/braindump/` — raw design sessions (may
+   be absent for the surface; not blocking).
+6. `<your-app-path>/<sibling-family>/` — closest already-shipped
    sibling for code patterns.
-8. `spec.md` — only if brief touches a surface bearings doesn't
+7. `spec.md` — only if brief touches a surface bearings doesn't
    describe.
 
 ## 4. The brief format (`plan/phases/phase_<N>_<topic>.md`)
@@ -50,8 +49,8 @@ Mirrors `skills/ship-a-phase.md` §6. Fixed structure:
 - **Content / data reads** — table of helper → call → use.
 - **Components / handlers** — list of new + reused primitives.
 - **Cross-links** — In (verify) and Out (ship) and Retro-fit.
-- **SEO / metadata / output schema** — `generateMetadata`,
-  JSON-LD type, OpenAPI shape, etc.
+- **Output schema / contracts** — types, event shapes,
+  save-data shape, etc.
 - **Hero / body / sub-section composition.**
 - **Empty / loading / error states** — copy locked.
 - **Decisions made upfront — DO NOT ASK** — every judgment
@@ -102,11 +101,12 @@ upfront — DO NOT ASK".
 
 **Order of authority for Decisions:**
 
-1. `design/decisions.<ext>` SETTLED list (highest authority).
+1. `axiomancer-mechanics/specs/` settled decisions (highest
+   authority).
 2. `plan/bearings.md` standing decisions (project-wide).
 3. Phase-specific calls.
 
-If `decisions.<ext>` and `bearings.md` disagree, design wins.
+If a spec and `bearings.md` disagree, the spec wins.
 Update `bearings.md` in a separate prior commit
 (`bearings: align with design`).
 
@@ -128,7 +128,7 @@ phases: brief for phase <N> — <topic>
 
 - Routes locked: <list>.
 - N decisions resolved upfront (see brief).
-- Design export: <yes / pending>.
+- Design spec: <yes / pending>.
 EOF
 )"
 git push origin main
@@ -208,7 +208,8 @@ phase entirely:
 plan/steps/01_build_plan.md          # the phase row being refined
 spec.md                              # product truth
 plan/bearings.md                     # contracts, standing decisions
-design/                              # exports, if any landed
+axiomancer-mechanics/specs/          # design specs, if any landed
+axiomancer-mechanics/braindump/      # raw design sessions
 plan/AUDIT.md                        # open findings that touch the phase
 
 # Writes

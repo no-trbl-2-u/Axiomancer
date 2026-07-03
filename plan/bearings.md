@@ -74,7 +74,8 @@ one of these — then stop and surface it as `[needs-user-call]`.
 | mobile lint | `expo lint` | |
 | mobile e2e | Playwright (expo-web) + per-minigame scripts | `scripts/*-e2e.mjs` |
 | **card-editor** | Vite + React (local dev tool) | `type-check` only; not published |
-| Structured data | **none** — content is in-repo TS libraries | no gh-as-db; `/ship-data` not adopted |
+| Structured data | **none** — content is in-repo TS libraries | no gh-as-db; `/ship-data` not adopted; no `data/BACKLOG.md` |
+| Design layer | **none** — no `design/` export dir | design happens via the `.claude/skills/` design skills into `axiomancer-mechanics/specs/` |
 | Deploy (mobile) | EAS Build (manual, release-time) | not per-push |
 | CI / deploy gate | **GitHub Actions** — `verify-*` workflows | see deploy gate below |
 
@@ -190,8 +191,9 @@ ambiguity.)
   public surface, also verify mobile + card-editor.
 - **Which combat engine is canonical:** Hazard-Pattern Combat
   (`simulateHazardPatternCombat` / `initializeCombatEncounter`).
-  `resolveCombatRound` is dev-only legacy — never the default for
-  a combat gate or playtest.
+  The legacy `resolveCombatRound` driver was fully removed from
+  the engine (2026-06) — never resurrect it for a combat gate or
+  playtest.
 - **Win condition:** HP is the sole win condition. Never
   reintroduce Pressure Tracks / `CombatPressureTracks`.
 - **Copy canon:** VITAE, STANCE. Never HEALTH / GUARD.
@@ -226,8 +228,9 @@ here (extends the web-centric template set):
 
 ## Hard rules
 
-(Mirrors `AGENTS.md` § "Nexus standing rules". Update there first;
-this echoes.)
+(Rules 1-5 mirror `AGENTS.md` § "Nexus standing rules" — update
+there first; rules 6-9 are project-specific additions that live
+here.)
 
 1. **Commit and push as a single atomic act** to `main`.
 2. **No `Co-Authored-By:` trailers, no emojis** — anywhere.

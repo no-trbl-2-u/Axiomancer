@@ -19,6 +19,11 @@ files that the dev workflow can act on.
 4. Offer 2–3 structural alternatives with trade-offs, never just one.
 5. Create `specs/characters/C-NN-<name-slug>.md` when the user is ready.
 
+**Paths.** All `specs/`, `braindump/`, `content/`, and `docs/` paths
+in this skill live under the `axiomancer-mechanics/` package — e.g.
+`axiomancer-mechanics/specs/characters/`. Never create these
+directories at the monorepo root.
+
 This skill is for **a named entity's personhood** — bio, voice,
 motivation, posture. Use `story-spec` for the dialogue trees this
 character appears in. Use `world-spec` for the locations they inhabit.
@@ -113,15 +118,16 @@ Don't recommend one until asked.
 ## Phase 5 — Create spec in `specs/characters/`
 
 When the user signals they're ready to commit the direction, **create
-a spec file** in `specs/characters/`.
+a spec file** in `axiomancer-mechanics/specs/characters/` (not at the
+monorepo root).
 
 **Determine the next spec number:**
-1. List all files in `specs/characters/` that match `C-NN-*.md`.
+1. List all files in `axiomancer-mechanics/specs/characters/` that match `C-NN-*.md`.
 2. Take the highest NN found (treat `00-character-spec-template.md` as 00).
 3. New file uses NN+1, zero-padded to two digits.
-4. If `specs/characters/` is empty (besides the template), start at `C-01`.
+4. If the directory is empty (besides the template), start at `C-01`.
 
-**Filename:** `specs/characters/C-NN-<name-slug>.md`
+**Filename:** `axiomancer-mechanics/specs/characters/C-NN-<name-slug>.md`
 
 - `<name-slug>` — 2–4 words kebab-cased describing the character,
   e.g. `village-elder`, `argumentative-crow`, `fisherman-marian`.

@@ -87,7 +87,7 @@ mirroring the canonical sibling (typically phase 4 or 5):
 └── __tests__/
 
 <lib-or-utils>/<family>/
-├── queries.ts | seo.ts | etc.
+├── queries.ts | helpers.ts | etc.
 └── __tests__/
 
 <e2e>/<family>.spec.ts               # canonical render + cross-link checks
@@ -104,7 +104,7 @@ After phases 1–<substrate count>, these exist and are reused:
 - Layout primitives (Header, Footer, Container, …)
 - Editorial atoms / UI atoms (cards, chips, etc.)
 - Content / data loaders (in shared packages)
-- SEO helpers / metadata builders
+- Shared helpers / formatters
 - Design tokens
 
 If a primitive doesn't exist, build it inside the appropriate
@@ -187,16 +187,15 @@ If the open succeeded, capture `$PHASE_ISSUE` for use in Step 10
 ### Step 3 — Read the design + canonical sibling
 
 ```bash
-# Design (may not exist or be partial — that's OK)
-cat design/INDEX.md                      # if a design layer exists
-cat design/page-<family>.<ext>           # if family-specific design exists
-cat design/decisions.<ext>               # if a decisions doc exists
+# Design inputs (may not exist or be partial — that's OK)
+ls axiomancer-mechanics/specs/           # formal specs, if any touch this surface
+ls axiomancer-mechanics/braindump/       # raw design sessions
 
 # Canonical sibling — typically phase 4 or 5
 ls <repo-root>/<your-app-path>/<canonical-family>/
 ```
 
-If `design/` is empty or missing for this family, proceed using
+If no spec or braindump covers this family, proceed using
 the brief + canonical sibling + bearings. Note in commit-body
 Decisions.
 
@@ -214,13 +213,13 @@ appropriate shared package with colocated tests.
 
 Wire the new entries per the framework's convention (Next.js
 App Router auto-discovers; Express / Fastify need explicit
-mounting; CLI commands need registration). Update sitemap /
+mounting; CLI commands need registration). Update
 manifest / index files as needed.
 
-### Step 6 — SEO / metadata (where applicable)
+### Step 6 — Output schema / contracts (where applicable)
 
-Use shared SEO helpers. `generateMetadata`, JSON-LD per the
-brief's chosen type, OG image route handlers.
+Keep shared type contracts, event shapes, and save-data
+schemas in sync per the brief's output-schema section.
 
 ### Step 7 — Tests
 
@@ -420,7 +419,8 @@ For everything else: **decide, ship, document.**
 plan/steps/01_build_plan.md                  # status + scope
 plan/phases/phase_<N>_<topic>.md             # brief
 plan/bearings.md                             # stack + conventions
-design/                                      # design exports (optional)
+axiomancer-mechanics/specs/                  # design specs (optional)
+axiomancer-mechanics/braindump/              # raw design sessions (optional)
 spec.md                                      # product spec
 <your-app-path>/<canonical-family>/          # canonical sibling
 

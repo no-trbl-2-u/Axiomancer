@@ -111,22 +111,23 @@ spec has changed since the last expand pass:
 
 ### E. Design landings
 
-New / modified files in `design/`:
-- `design/page-<family>.<ext>` for a family that doesn't have a
-  phase → propose the phase.
-- `design/atoms.<ext>` adding new atoms → propose extracting
-  them as a primitives phase if substantial.
-- `design/decisions.<ext>` modifications → check against
-  `bearings.md`; propose alignment work.
+New / modified files in `axiomancer-mechanics/specs/` or
+`axiomancer-mechanics/braindump/`:
+- A spec for a mechanic / character / story beat / region that
+  doesn't have a phase → propose the phase.
+- Spec modifications → check against `bearings.md`; propose
+  alignment work.
+- Braindump sessions converging on a design without a spec →
+  propose speccing + shipping it.
 
-### F. Data growth
+### F. Content growth
 
-`/data/` (if Pattern A) — record counts vs. when the plan was
-written:
-- An entity went from 0 to 50+ records → may warrant its own
-  index page / detail surface that wasn't planned.
+Game content vs. when the plan was written:
+- A content family (encounters, dialogue, items) grew far past
+  what the planned surfaces assume → may warrant its own
+  surface that wasn't planned.
 - Cross-reference graphs that grew complex → may warrant a
-  taxonomy / browse phase.
+  browse / codex phase.
 
 ### G. Commit-pattern signals
 
@@ -313,7 +314,7 @@ Conditions in `/march` Step (between critique and dispatch):
    changes).
 
 If all three: dispatch to `/expand`. If any fails: fall through
-to normal phase / data / iterate dispatch.
+to normal phase / iterate dispatch.
 
 `/iterate` also dispatches to `/expand` when its own audit
 produces no findings scoring ≥ 3.0 — instead of stopping per
@@ -329,12 +330,11 @@ plan/AUDIT.md                                 # audit signals
 plan/CRITIQUE.md                              # critique signals
 plan/PHASE_CANDIDATES.md                      # current state
 plan/steps/01_build_plan.md                   # existing phases
-data/BACKLOG.md                               # data signals (Pattern A)
 spec.md                                       # spec drift
 
 # Git diffs (signals)
 git log -p --since="<last pass>" -- spec.md
-git log -p --since="<last pass>" -- design/
+git log -p --since="<last pass>" -- axiomancer-mechanics/specs/ axiomancer-mechanics/braindump/
 git log --since="<last pass>" --pretty=format:'%s'
 
 # Issues (signals — if gh available)

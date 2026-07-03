@@ -1,7 +1,7 @@
 # Skill: critique
 
-> **External observer.** Visit the live site as a first-time
-> reader, take notes, self-assess, append durable findings to
+> **External observer.** Play the local expo-web build as a
+> first-time player, take notes, self-assess, append durable findings to
 > `plan/CRITIQUE.md`. `/iterate` reads CRITIQUE.md as a finding
 > source — that's the **address loop** half.
 >
@@ -12,7 +12,7 @@
 
 The autonomous loop is good at shipping what it was told to
 ship. It's bad at noticing when the shipped result doesn't
-read well as a real reader would experience it.
+play well as a real first-time player would experience it.
 
 `/critique` is the corrective lens.
 
@@ -20,7 +20,7 @@ read well as a real reader would experience it.
 
 ```
 /critique                    # full pass — see auth handling below
-/critique <url>              # focused pass on one URL
+/critique <url>              # focused pass on one screen / route
 /critique mobile             # 375×800 only
 /critique desktop            # 1280×800 only
 /critique anonymous          # public/anonymous pass only (skip auth)
@@ -31,12 +31,11 @@ read well as a real reader would experience it.
 entry:
 
 - `Auth: none` → single anonymous pass (the default for
-  public sites).
+  this project — the game has no login).
 - `Auth: <other>` → default `/critique` runs **two** passes
-  in sequence: an anonymous pass against the marketing-side
-  URLs, then an authenticated pass against the app-side
-  URLs. Each pass spawns its own `reader` invocation so the
-  bot's session doesn't pollute the anonymous walk.
+  in sequence: an anonymous pass, then an authenticated
+  pass. Each pass spawns its own `playtester` invocation so
+  the bot's session doesn't pollute the anonymous walk.
 - Argument `anonymous` / `authenticated` runs only that
   pass.
 - `Auth:` field missing → exit with `[needs-user-call]`. Do
@@ -46,51 +45,36 @@ entry:
 
 When invoked from `/march`, conditions are pre-checked.
 
-## 3. The page set (default full pass)
+## 3. The screen set (default full pass)
 
-Pick **representative**, not exhaustive. The smoke walker
-already covers every URL; critique is for *quality*.
+Pick **representative**, not exhaustive. The e2e suite
+already covers every screen; critique is for *quality*.
 
-### Anonymous page set (always)
+### Screen set (always)
 
-| Page | Why critique it |
+| Screen | Why critique it |
 |---|---|
-| `/` (home) | First impression. The fold matters. |
-| `/<canonical-detail>/<latest>` | Canonical reading experience. |
-| `/<pillar-or-category>` | Pillar voice + card cascade. |
-| `/<signature-feature>` | Project's most distinctive surface (when public). |
-| `/<list-or-index>` | Faceted browse path. |
+| Title / landing screen | First impression. The fold matters. |
+| New-game / onboarding flow | Where a first-time player forms their model of the game. |
+| A canonical combat encounter | The game's core loop as actually played. |
+| Town / exploration hub | Navigation, voice, and orientation. |
+| An empty or early-progression state | Often where the experience breaks down. |
 
-### Authenticated page set (only when `Auth: != none`)
+Skip screens that don't exist yet. Note in pass log.
 
-| Page | Why critique it |
-|---|---|
-| `/<post-login-landing>` (typically `/dashboard`, `/app`, or `/home`) | What the user actually sees first. |
-| `/<canonical-detail-in-app>/<latest>` | The in-app version of the reading/working experience. |
-| `/<settings>` | Where users diagnose problems. Reflects voice + clarity. |
-| `/<signature-feature>` (logged-in version) | The product's most distinctive surface for real users. |
-| `/<empty-or-onboarding-state>` | Often where the experience breaks down. |
+## 4. Delegate to `playtester`
 
-The bot user's data shape matters here — see
-`nexus/customization/auth-aware-critique.md` "What does your
-bot user look like?". Curate it once so the authenticated
-pass walks through representative state, not an empty
-account.
+The `playtester` sub-agent at `.claude/agents/playtester.md` is
+the fresh-eyes observer. **Always delegate the playthrough.**
+Reasons:
 
-Skip pages that don't exist yet. Note in pass log.
-
-## 4. Delegate to `reader`
-
-The `reader` sub-agent at `.claude/agents/reader.md` is the
-fresh-eyes observer. **Always delegate the visit.** Reasons:
-
-- It has browser tools (`mcp__claude-in-chrome__*`) for richer
-  findings than WebFetch.
-- Fresh sub-agent context = genuine first-time-reader perspective.
+- It has Playwright tools (`mcp__playwright__*`) to actually
+  drive the local expo-web build.
+- Fresh sub-agent context = genuine first-time-player perspective.
 - Output is structured JSON; easy to filter and file.
 
 Pass it:
-- The URL list.
+- The screen list.
 - The **pass mode** (`anonymous` or `authenticated`).
 - Voice cue from `plan/bearings.md`.
 - Current `plan/CRITIQUE.md` Done section (so it doesn't
@@ -99,7 +83,7 @@ Pass it:
 
 It returns a JSON array of findings, each carrying
 `auth_state`. When the default invocation runs both passes,
-spawn `reader` **twice** (once per mode) and concatenate
+spawn `playtester` **twice** (once per mode) and concatenate
 results before §6 (self-assessment + filing).
 
 Findings tagged `auth_state: "auth-failed"` are filed as
@@ -121,17 +105,22 @@ If no green deploy: defer. Write a one-line entry to CRITIQUE.md
 "deferred at <date>: no green deploy" and exit 0. **Don't commit
 on no-ops.**
 
-### Step 1 — Build the page set
+Ensure the local expo-web build is running (serves at
+`http://localhost:8081`); start it if needed before spawning
+the playtester.
+
+### Step 1 — Build the screen set
 
 Default §3. Adjust based on argument, phase progress (skip
-non-existent pages), recent shipping focus.
+non-existent screens), recent shipping focus.
 
-### Step 2 — Spawn `reader`
+### Step 2 — Spawn `playtester`
 
 ```
 Agent({
-  subagent_type: "reader",
-  prompt: "Visit these URLs of http://localhost:8081: [list].
+  subagent_type: "playtester",
+  prompt: "Play the local expo-web build at http://localhost:8081
+           as a first-time player. Cover these screens: [list].
            Voice cue from plan/bearings.md: <quote>.
            Already-addressed (skip): <Done section>.
            Focus: <from arg or 'general'>.
@@ -143,7 +132,7 @@ Wait for return.
 
 ### Step 3 — Self-assess
 
-Reader returns observations; you decide which deserve to land.
+The playtester returns observations; you decide which deserve to land.
 For each:
 
 1. **Valid?** Can evidence be re-verified? Drop session-specific
@@ -171,11 +160,11 @@ After assessment, **3–6 findings**, not 8.
 ### [HIGH] /<url> — <one-line>
 - pass: <N> (commit <sha>)
 - viewport: desktop | mobile
-- category: <visual | comprehension | navigation | voice | mobile | performance | a11y | seo>
+- category: <visual | comprehension | navigation | voice | mobile | performance | a11y>
 - observation: <what was seen>
 - evidence: <screenshot region | quoted text | console msg>
 - suggested fix: <one-line concrete change>
-- source: browser | web-fetch
+- source: playtester
 
 ## Done
 
@@ -191,7 +180,7 @@ git add plan/CRITIQUE.md
 git commit -m "$(cat <<'EOF'
 critique: pass <N> — <K> findings (<H> high, <M> medium, <L> low)
 
-Visited: <list of URLs>.
+Played: <list of screens>.
 Findings filed to plan/CRITIQUE.md Pending.
 Address loop: /iterate will pick the highest-scoring finding.
 EOF
@@ -216,12 +205,12 @@ Return 3-line summary.
 ## 6. Hard rules
 
 1. **Never modify code, content, or data.** Findings only.
-2. **Always delegate the visit to `reader`.** Don't visit from
-   main agent context.
-3. **Self-assess after reader returns.** Don't file raw
+2. **Always delegate the playthrough to `playtester`.** Don't
+   play from main agent context.
+3. **Self-assess after the playtester returns.** Don't file raw
    observations.
-4. **Cap at 6 filed findings per pass.** 8 is reader's input
-   cap; 6 is your output cap.
+4. **Cap at 6 filed findings per pass.** 8 is the playtester's
+   input cap; 6 is your output cap.
 5. **Never duplicate Pending or Done entries.**
 6. **One commit per pass.**
 7. **No emojis. No `Co-Authored-By:`.**
@@ -229,10 +218,10 @@ Return 3-line summary.
 ## 7. Failure modes
 
 1. **No green deploy.** Defer.
-2. **`reader` returns malformed output.** Re-spawn once with
-   stricter format. If fails again, write single finding "reader
+2. **`playtester` returns malformed output.** Re-spawn once with
+   stricter format. If fails again, write single finding "playtester
    sub-agent malfunction at pass <N>", commit, exit 1.
-3. **No URLs in page set** (very early phases). Defer.
+3. **No screens in the set** (very early phases). Defer.
 4. **`git pull` divergence.**
 
 ## 8. Address loop contract (how `/iterate` consumes findings)
@@ -274,7 +263,7 @@ plan/CRITIQUE.md                     # findings queue + last-pass metadata
 plan/bearings.md                     # voice, URL contract, Auth: field
 
 # Sub-agent
-.claude/agents/reader.md             # the fresh-eyes observer persona
+.claude/agents/playtester.md         # the fresh-eyes observer persona
 
 # Commands
 git pull --ff-only                   # Step 0
@@ -282,8 +271,8 @@ npm run deploy:check                    # green-deploy precondition
 git commit && git push               # single critique: <summary> commit
 ```
 
-If the site sits behind a login wall, the reader needs an auth
-path — see nexus's
+If the app ever sits behind a login wall, the playtester needs
+an auth path — see nexus's
 [`customization/auth-aware-critique.md`](../../customization/auth-aware-critique.md)
 for the five patterns (test-user, session-cookie, bearer-token,
 preview-env, magic-link). Never fall back to critiquing the

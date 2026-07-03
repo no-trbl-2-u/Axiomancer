@@ -31,8 +31,9 @@ description: Supercharged Hazard-Pattern Combat playtest loop — run the stage-
 | Evidence | stage matrix + qualitative agent play | `simulateHazardPatternCombat` / `npm run combat-sim` | matrix A/Bs with `--sandbox` |
 | Question it answers | "Is status play the FUN path at every stage — and where does it break down?" | "Are the HP/threat/Conviction numbers in band?" | "Is the card pool healthy — no dead cards, no spam, honest archetypes?" |
 
-The legacy turn-based combat has its own legacy playtest framework
-(`docs/playtest-legacy.md`) — not this skill's surface.
+The legacy turn-based combat (and its playtest framework) was fully
+removed from the engine — Hazard-Pattern Combat is this skill's only
+surface.
 
 ## North star — feel is a balance axis
 

@@ -38,8 +38,7 @@ its own cadence.
 
    Plus queue states: build-plan `[ ]` / `[blocked:]` counts,
    `plan/AUDIT.md` pending, `plan/CRITIQUE.md` pending + last
-   pass age, `data/BACKLOG.md` pending (if a data layer
-   exists), `plan/PHASE_CANDIDATES.md` pending, open
+   pass age, `plan/PHASE_CANDIDATES.md` pending, open
    `triage:needs-user` / `loop:do` issues, deploy state
    (`npm run deploy:check`).
 3. **Breadth checks** (the night-only legs — adapt per

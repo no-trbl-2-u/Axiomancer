@@ -36,15 +36,18 @@
   build-plan Phase 7.)
 - next: /iterate
 
-### [2.0] fishing-village CLI + spec08 e2e drive legacy combat
-- category: tests
+### [1.2] Skipped enemy stat-budget test (content decision)
+- category: content
 - impact: 4
-- ease: 5
-- detail: DIV-MECH-005 — the fv-15 walkthrough + `spec08` e2e
-  still exercise legacy `resolveCombatRound` instead of the
-  shipped Hazard-Pattern Combat path (Phase 165). Risk: a
-  "combat" gate silently tests the wrong engine.
-- next: /iterate
+- ease: 3
+- detail: `src/Enemy/e2e/new-enemies.engine.test.ts` skips its
+  `enemyStatBudget` assertion — the 30 authored enemies match the
+  budget at levels 1-4 but drift up to 2x at level 50 (authored
+  under old constants with gear-tier scaling baked into raw
+  stats). Unskipping means re-authoring enemy stats or
+  reconstructing per-enemy gear-tier inputs. [needs-user-call]
+  on whether the budget curve or the authored stats are canon.
+- next: /oversight
 
 ### [2.0] Mobile `as any` clusters at the state boundary
 - category: debt
@@ -81,6 +84,12 @@
 - next: /iterate
 
 ## Done
+
+### fishing-village CLI + spec08 e2e drive legacy combat
+- drained 2026-07-03 (monorepo cleanup): stale — the legacy
+  `resolveCombatRound` no longer exists anywhere in
+  `axiomancer-mechanics/src`; no fv-15/spec08 script remains in
+  package.json. The finding predated the resolver removal.
 
 ### Hazard v2 engine ownership (DIV-MECH-002)
 - resolved via `/oversight` 2026-07-03: mechanics absorbs

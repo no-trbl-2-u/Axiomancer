@@ -16,7 +16,15 @@ fallacies and paradoxes, and a morality-driven difficulty meter.
 3. Show how 2–4 other games handled the same problem shape, including what
    real players actually liked and disliked.
 4. Offer 2–3 design alternatives with trade-offs, never just one.
-5. Capture the full session as a new file in `braindump/`.
+5. Capture the full session as a new file in
+   `axiomancer-mechanics/braindump/`.
+
+**Paths.** All `braindump/`, `specs/`, `docs/`, `src/`, and
+`BRAINDUMP.md` paths in this skill live under the
+`axiomancer-mechanics/` package — e.g.
+`axiomancer-mechanics/braindump/`,
+`axiomancer-mechanics/specs/`. Never create these directories
+at the monorepo root.
 
 ---
 
@@ -122,9 +130,10 @@ the design space**, not narrow it.
 
 When the user signals they're done, wants to lock a direction, or the
 session has run long enough to be worth saving, **create a new file**
-in the `braindump/` folder at the project root.
+in the `axiomancer-mechanics/braindump/` folder (not at the
+monorepo root).
 
-**Filename:** `braindump/YYYY-MM-DD-<topic-slug>.md`
+**Filename:** `axiomancer-mechanics/braindump/YYYY-MM-DD-<topic-slug>.md`
 
 - `YYYY-MM-DD` — current date from system info
 - `<topic-slug>` — 2–5 words kebab-cased that describe what was
@@ -177,7 +186,8 @@ half-ideas, tangents worth remembering. Omit section if empty.>
 ```
 
 **Rules:**
-- Create the `braindump/` directory if it doesn't exist yet.
+- Create the `axiomancer-mechanics/braindump/` directory if it doesn't
+  exist yet (under `axiomancer-mechanics/`, never at the monorepo root).
 - Never overwrite an existing file; use the `-2` suffix instead.
 - The file is the *full record* — write enough that a future reader has
   all context without needing the chat history.

@@ -11,12 +11,13 @@
 > **Decide-and-ship.** No questions back. No `AskUserQuestion`.
 > Hard rule #6 (only `/oversight` asks the user anything)
 > stands intact — `/jot` consumes user input via the
-> slash-command argument, same shape as `/ship-data add ...`.
+> slash-command argument alone.
 
 ## 1. Purpose
 
-You're looking at the live site. You see a spacing issue, a
-copy nit, a confusing CTA, an empty state that looks broken.
+You're playing the running expo-web build. You see a spacing
+issue, a copy nit, a confusing button, an empty state that
+looks broken.
 You don't want a full `/oversight` session for it; you also
 don't want to forget it.
 
@@ -38,11 +39,11 @@ way, so `/iterate`'s existing drainage logic just works.
 Examples:
 
 ```
-/jot footer padding too tight on /article pages
-/jot --url /dashboard the empty state looks broken
-/jot --severity high signup CTA disappears at 375px
-/jot --category content the trends pillar lede is buried
-/jot --authenticated --url /settings the save button has no loading state
+/jot combat log padding too tight on small screens
+/jot --url /town the empty shop state looks broken
+/jot --severity high end-turn button disappears at 375px
+/jot --category content the elder's intro dialogue is buried
+/jot --url /settings the save button has no loading state
 ```
 
 ## 3. Autonomy contract
@@ -89,16 +90,15 @@ reasonable):
 - Contains "mobile", "375", "phone" → `mobile`
 - Contains "load", "slow", "spin", "freeze" → `performance`
 - Contains "alt", "focus", "keyboard", "screen reader" → `a11y`
-- Contains "title", "meta", "OG", "preview" → `seo`
 - Contains "copy", "voice", "tone", "wording" → `voice`
-- Contains "article", "post", "missing", "stub" → `content`
+- Contains "dialogue", "encounter", "missing", "stub" → `content`
 - Otherwise → `observation`
 
 Don't overthink. The user can override with `--category`.
 
 ### Step 2 — Build the row
 
-Format identical to a `reader` finding so `/iterate`'s
+Format identical to a `playtester` finding so `/iterate`'s
 drainage logic doesn't need any new code:
 
 ```markdown
@@ -136,7 +136,7 @@ No `Co-Authored-By:`. No emojis.
 Print one short confirmation line:
 
 ```
-jot: filed [MED] /article — footer padding too tight (commit a3f1e2c).
+jot: filed [MED] /town — combat log padding too tight (commit a3f1e2c).
      Next /iterate or /march tick will score it against pending work.
 ```
 
@@ -155,7 +155,7 @@ Exit cleanly.
 ```
 
 **No `/oversight` needed.** The address loop drains user-source
-findings the same way it drains `reader`-source findings. The
+findings the same way it drains `playtester`-source findings. The
 score bump (see `iterate.md`) means user-source findings
 typically beat auto-detected findings at the same severity, so
 they get picked next time `/iterate` runs.
@@ -182,7 +182,7 @@ escapes:
 5. **No emojis. No `Co-Authored-By:`.**
 6. **Lowercase commit subject prefix `jot:`.**
 7. **Source field is always `user`.** Never spoof it for
-   automated entries — that's what `reader` is for.
+   automated entries — that's what `playtester` is for.
 
 ## 7. Failure modes
 
@@ -199,8 +199,9 @@ escapes:
 
 - **Not `/oversight`.** Doesn't audit, doesn't brief, doesn't
   ask questions, doesn't adjust the plan.
-- **Not `/critique`.** Doesn't visit the live site, doesn't
-  delegate to `reader`, doesn't run a structured pass.
+- **Not `/critique`.** Doesn't play the running expo-web build,
+  doesn't delegate to `playtester`, doesn't run a structured
+  pass.
 - **Not `/triage`.** Doesn't open or label GitHub issues. (If
   the spotted issue genuinely warrants a public issue, file
   one separately — `/jot` is for the private working notes.)

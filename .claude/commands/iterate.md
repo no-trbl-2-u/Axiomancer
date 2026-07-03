@@ -10,13 +10,13 @@ Argument handling:
   the top-scored one.
 - `audit` → audit-only, dry-run; emit findings to `plan/AUDIT.md`,
   no fixes.
-- `<focus>` → bias toward `content-gaps`, `data-gaps`, `seo`,
-  `links`, `a11y`, `tests`, `perf`, `external-critique`.
+- `<focus>` → bias toward `contract`, `divergence`, `debt`,
+  `gap`, `content`, `docs`, `tests`, `a11y`, `perf`,
+  `external-critique`.
 
 Be bold about delegating:
 - `scout` for web research.
-- Content / prose specialist for MDX articles or copy.
-- `data-steward` (or equivalent) for schema-heavy data work.
+- Content / prose specialist for game copy or dialogue.
 - Parallel sub-agents when work is independent.
 
 `plan/CRITIQUE.md` Pending is a finding source — drain it.

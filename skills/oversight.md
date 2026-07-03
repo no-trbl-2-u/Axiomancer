@@ -29,7 +29,8 @@ resume.
 /oversight                  # full audit + general questionnaire
 /oversight phase            # bias toward phase progress / scope
 /oversight content          # bias toward /iterate findings + content
-/oversight deploy           # bias toward Netlify / CI/CD signal
+/oversight deploy           # bias toward GitHub Actions CI signal
+                            # (npm run deploy:check, verify-* workflows)
 /oversight reset            # bias toward scope reduction
 /oversight audit            # READ-ONLY: print the §4 briefing, ask
                             # nothing, change nothing, commit nothing
@@ -52,10 +53,10 @@ In parallel where independent:
 4. `plan/steps/01_build_plan.md` "Status" block — pending
    phases.
 5. `plan/AUDIT.md` — open `/iterate` findings.
-6. `data/BACKLOG.md` — pending data work.
-7. `plan/CRITIQUE.md` — critique pending.
-8. Last 3 phase briefs — current vs. recent commits.
-9. `design/` — has a new export landed since the last sibling
+6. `plan/CRITIQUE.md` — critique pending.
+7. Last 3 phase briefs — current vs. recent commits.
+8. `axiomancer-mechanics/specs/` + `axiomancer-mechanics/braindump/`
+   — has a new design input landed since the last sibling
    commit?
 
 ## 4. The briefing (~25 lines max)
@@ -71,14 +72,13 @@ shipping
 state
 - pending phases: <count>; next is phase <N> (<topic>)
 - open audit findings: <count>; top score <X>: "<one-liner>"
-- pending data backlog: <count>
 - pending critique findings: <count>; pass count <N>; last pass <when>
 - working tree: <clean | N modified | N untracked>
 - last deploy: <state> (<sha>) — <admin URL or "ready">
 
 flags
 - <unusual patterns: stuck phase, repeated fix commits,
-  divergent local/Netlify state, design newer than sibling
+  divergent local/CI state, specs newer than sibling
   commit, etc.>
 ```
 
@@ -114,7 +114,7 @@ Generate 1–4 questions via `AskUserQuestion`. Rules:
 
 **Brief out of date**
 
-> `design/<family>/` was updated <K> commits ago, after phase
+> `axiomancer-mechanics/specs/<area>/` was updated <K> commits ago, after phase
 > <N> shipped. Refresh phase <N>'s brief and ship a follow-up?
 >
 > - (recommended) Yes — `/plan-a-phase phase <N>` then add
@@ -280,10 +280,10 @@ git log --oneline -20
 git status --short
 plan/steps/01_build_plan.md
 plan/AUDIT.md
-data/BACKLOG.md
 plan/CRITIQUE.md
 plan/phases/                       # last 3 modified
-design/                            # for newer-than-sibling check
+axiomancer-mechanics/specs/        # for newer-than-sibling check
+axiomancer-mechanics/braindump/
 
 # Tools
 AskUserQuestion                    # only place this is allowed
@@ -291,7 +291,6 @@ AskUserQuestion                    # only place this is allowed
 # Adjustment files
 plan/steps/01_build_plan.md
 plan/AUDIT.md
-data/BACKLOG.md
 plan/phases/phase_<N>_<topic>.md   # via /plan-a-phase
 
 # Commit

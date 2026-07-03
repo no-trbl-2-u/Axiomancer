@@ -19,6 +19,11 @@ that the dev workflow can act on.
 4. Offer 2–3 structural alternatives with trade-offs, never just one.
 5. Create `specs/world/W-NN-<name-slug>.md` when the user is ready.
 
+**Paths.** All `specs/`, `braindump/`, `content/`, and `docs/` paths
+in this skill live under the `axiomancer-mechanics/` package — e.g.
+`axiomancer-mechanics/specs/world/`. Never create these directories
+at the monorepo root.
+
 This skill is for **places, atmosphere, region-state, and environmental
 mechanics**. Use `story-spec` for NPC dialogue trees and authored
 beats. Use `character-spec` for a named entity's personhood. The three
@@ -111,15 +116,16 @@ space**, not narrow it.
 ## Phase 5 — Create spec in `specs/world/`
 
 When the user signals they're ready to commit the direction, **create
-a spec file** in `specs/world/`.
+a spec file** in `axiomancer-mechanics/specs/world/` (not at the
+monorepo root).
 
 **Determine the next spec number:**
-1. List all files in `specs/world/` that match `W-NN-*.md`.
+1. List all files in `axiomancer-mechanics/specs/world/` that match `W-NN-*.md`.
 2. Take the highest NN found (treat `00-world-spec-template.md` as 00).
 3. New file uses NN+1, zero-padded to two digits.
-4. If `specs/world/` is empty (besides the template), start at `W-01`.
+4. If the directory is empty (besides the template), start at `W-01`.
 
-**Filename:** `specs/world/W-NN-<name-slug>.md`
+**Filename:** `axiomancer-mechanics/specs/world/W-NN-<name-slug>.md`
 
 - `<name-slug>` — 2–5 words kebab-cased describing the location,
   e.g. `northern-cave`, `island-village-arrival`, `labyrinth-outer-ring`.

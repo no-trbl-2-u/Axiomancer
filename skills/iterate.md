@@ -18,7 +18,7 @@ on already-shipped surfaces.
 ```
 /iterate                    # full audit, ship the top finding
 /iterate audit              # audit-only; emit plan/AUDIT.md
-/iterate <focus>            # bias toward content / data / seo / a11y / tests / perf
+/iterate <focus>            # bias toward content / docs / debt / a11y / tests / perf
 /loop 1h /iterate           # autonomous improvement loop
 ```
 
@@ -28,7 +28,6 @@ on already-shipped surfaces.
   commits are unreviewable.
 - **Content gap → spawn `<content-curator>` (or equivalent).**
   Don't write prose from main agent.
-- **Data gap → call `/ship-data` flow inline.**
 - **Trivial fix → still ships through verify.**
 
 ## 4. The audit
@@ -80,21 +79,21 @@ in CRITIQUE.md with `[x]` + commit hash.
 - Tags / categories with low representation.
 - Pages with thin word counts.
 
-#### B. Data gaps
+#### B. Spec divergence / contract drift
 
-Run `skills/ship-data.md` §6 audit inline. Stale time-bound
-entries. Coverage gaps from cross-grep.
+- Implementation diverging from `axiomancer-mechanics/specs/`.
+- Cross-package contracts (types, event shapes) drifting.
 
-#### C. SEO / discoverability
+#### C. Docs / debt
 
-- Missing OG images, JSON-LD, sitemap entries.
-- Robots / canonical issues.
+- Stale or missing docs; README drift.
+- Known debt: TODO clusters, dead code, duplicated logic.
 
-#### D. Link integrity
+#### D. Navigation / flow gaps
 
-- Internal links to non-existent routes.
-- Tag/category refs not in taxonomy.
-- External links 404'ing.
+- Screens or routes unreachable or dead-ended in the
+  running expo-web build.
+- References to content or encounters that don't exist.
 
 #### E. Accessibility
 
@@ -111,7 +110,7 @@ entries. Coverage gaps from cross-grep.
 
 ### Scoring
 
-- Impact 0–10: how many readers / pages / queries affected?
+- Impact 0–10: how many players / screens / queries affected?
 - Ease 0–10: cheap fix = 9. New article = 4. Schema migration = 1.
 - Score = `impact × ease / 10`, clamped 0–10.
 
@@ -147,7 +146,7 @@ Audit block shape:
 ## Top 5 findings (scored)
 
 ### [8.1] <one-line description>
-- category: <content-gaps | data-gaps | seo | links | a11y | tests | perf | external-critique>
+- category: <contract | divergence | debt | gap | content | docs | tests | a11y | perf | external-critique>
 - impact: <0-10>
 - ease: <0-10>
 - next: <action — invocation, sub-agent, or follow-up>
@@ -178,7 +177,7 @@ Otherwise:
 # 1. Build the body file from the finding row.
 issue_body=$(mktemp)
 cat > "$issue_body" <<EOF
-**Source:** <pass description, e.g. "/critique pass 2 (reader sub-agent)" or "/jot <date>" or "/iterate audit <date>">
+**Source:** <pass description, e.g. "/critique pass 2 (playtester sub-agent)" or "/jot <date>" or "/iterate audit <date>">
 **Severity:** <HIGH|MED|LOW> · **Category:** <category from row> · **URL:** <url-or-"general">
 
 ## Observation
@@ -197,11 +196,11 @@ EOF
 # 2. Map row severity → helper flag.
 #    [HIGH] → high · [MED] → med · [LOW] → low
 # 3. Map row "source" field → helper flag.
-#    user → user · browser/reader → reader · audit/iterate → audit · external → external
+#    user → user · playtester → reader · audit/iterate → audit · external → external
 # 4. Map row category → helper category.
 #    visual / voice / navigation / mobile / external-critique → enhancement
-#    content (article/data/copy gap) → content
-#    a11y → a11y · seo → seo · perf → perf
+#    content (copy/content gap) → content
+#    a11y → a11y · docs → docs · perf → perf
 #    bug-shaped (broken link, regression) → bug
 #    Otherwise → enhancement.
 
@@ -240,8 +239,7 @@ separately — keep tick churn low.
 
 Default delegation:
 - Content gaps → `<content-curator>` sub-agent.
-- Data gaps → follow `skills/ship-data.md` §5 inline.
-- SEO / links / a11y / tests → main agent.
+- Contract / divergence / debt / docs / a11y / tests → main agent.
 - Performance → main agent; may delegate to `scout` for
   external benchmarking.
 
@@ -258,10 +256,9 @@ Iterate up to 3 times on same root cause.
 ### Step 5 — Commit
 
 Commit subject prefixes:
-- `content:` — articles, copy, MDX edits.
-- `data:` — anything under `/data`.
-- `seo:` — metadata, JSON-LD, sitemap, robots, RSS.
-- `fix:` — bug fixes, broken links, regressions.
+- `content:` — game content, copy, dialogue edits.
+- `docs:` — documentation.
+- `fix:` — bug fixes, broken flows, regressions.
 - `a11y:` — accessibility.
 - `test:` — test additions or fixes only.
 - `perf:` — performance work.
@@ -359,8 +356,8 @@ Return cleanly. Loop's next tick re-audits.
 4. **Don't write content yourself if a curator sub-agent
    exists** — delegate.
 5. **Don't audit blindly when work is queued.** If
-   `data/BACKLOG.md` has rows, prefer ship-data over fresh
-   audit.
+   `plan/CRITIQUE.md` has Pending rows, prefer draining those
+   over a fresh audit.
 6. **Never delete shipped content silently.** Archive +
    update routing.
 7. **Issue mirror is best-effort, not gating.** If
@@ -377,7 +374,6 @@ Return cleanly. Loop's next tick re-audits.
 plan/AUDIT.md                            # latest findings
 plan/CRITIQUE.md                         # external-critique queue
 plan/bearings.md                         # voice + standing decisions
-data/                                    # GitHub-as-DB
 
 # Sub-agents
 Agent({ subagent_type: "<content-curator>", prompt: "..." })
