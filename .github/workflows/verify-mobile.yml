@@ -11,8 +11,8 @@ name: verify-mobile
 # axiomancer-mechanics/src/Cards/cards.library.ts (i.e. the card editor
 # added/updated card DATA, touching no mobile or other-mechanics code) is
 # still fully validated by the mechanics gate (its ~10 card e2e suites +
-# type-check) and by this workflow's fast legs — but the slow ~25-min
-# Playwright `e2e-minigames` job is skipped. The `detect-scope` job below
+# type-check) and by this workflow's fast legs — but the slow Playwright
+# `e2e-minigames` job (the wall-clock hotspot) is skipped. The `detect-scope` job below
 # computes this; the gate defaults to running the heavy job whenever the
 # change scope can't be determined (never skip on uncertainty).
 

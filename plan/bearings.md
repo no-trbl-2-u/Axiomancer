@@ -309,7 +309,7 @@ gate.
 `axiomancer-mechanics/src/Cards/cards.library.ts` (card DATA edits
 from the card editor) still runs the full mechanics gate + mobile
 lint/typecheck/jest + bundler smoke, but `verify-mobile.yml` skips
-its slow ~25-min Playwright `e2e-minigames` job (the `detect-scope`
+its slow Playwright `e2e-minigames` job (the `detect-scope`
 job gates it; defaults to running on any uncertainty). Any mobile
 change or any *other* mechanics change runs the full e2e. The
 deploy gate is unaffected — a skipped job does not fail the run.
