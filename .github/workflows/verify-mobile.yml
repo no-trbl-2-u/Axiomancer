@@ -4,9 +4,17 @@ name: verify-mobile
 # LOCAL SOURCE (via the @mechanics alias → ../axiomancer-mechanics/src),
 # changes to EITHER package must re-run this gate.
 #
-# Three jobs mirror the original mobile CI: the hermetic verify gate
-# (lint + typecheck + jest), the bundler smoke test (expo export web), and
-# the browser-driven minigame playthroughs.
+# Jobs: the hermetic verify gate (lint + typecheck + jest), the bundler
+# smoke test (expo export web), and the browser-driven minigame playthroughs.
+#
+# Cards-only carve-out: a change confined to
+# axiomancer-mechanics/src/Cards/cards.library.ts (i.e. the card editor
+# added/updated card DATA, touching no mobile or other-mechanics code) is
+# still fully validated by the mechanics gate (its ~10 card e2e suites +
+# type-check) and by this workflow's fast legs — but the slow ~25-min
+# Playwright `e2e-minigames` job is skipped. The `detect-scope` job below
+# computes this; the gate defaults to running the heavy job whenever the
+# change scope can't be determined (never skip on uncertainty).
 
 on:
   push:
@@ -37,6 +45,63 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  detect-scope:
+    name: detect-scope (cards-only carve-out)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      run_heavy: ${{ steps.scope.outputs.run_heavy }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Determine change scope
+        id: scope
+        env:
+          EVENT: ${{ github.event_name }}
+          BEFORE: ${{ github.event.before }}
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          set -euo pipefail
+          CARD_FILE="axiomancer-mechanics/src/Cards/cards.library.ts"
+
+          # Resolve the base commit to diff HEAD against (PR vs push).
+          if [ "$EVENT" = "pull_request" ]; then
+            git fetch --no-tags --depth=200 origin "$BASE_REF" 2>/dev/null \
+              || git fetch --no-tags origin "$BASE_REF" 2>/dev/null || true
+            BASE="$(git merge-base "origin/$BASE_REF" HEAD 2>/dev/null || echo '')"
+          else
+            BASE="${BEFORE:-}"
+          fi
+
+          # Unknown / empty / all-zero / missing base -> run the heavy job
+          # (never skip on uncertainty).
+          if [ -z "$BASE" ] || ! git cat-file -e "${BASE}^{commit}" 2>/dev/null; then
+            echo "base unresolved ('$BASE'); defaulting run_heavy=true"
+            echo "run_heavy=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          CHANGED="$(git diff --name-only "$BASE" HEAD)"
+          echo "Changed files:"; echo "$CHANGED"
+
+          # Heavy (run e2e) unless every relevant change is the card file.
+          # Files outside both packages (docs/root) are irrelevant here.
+          RUN=false
+          while IFS= read -r f; do
+            [ -z "$f" ] && continue
+            case "$f" in
+              "$CARD_FILE") : ;;                  # card DATA only — light
+              axiomancer-mobile/*) RUN=true ;;    # any mobile change — heavy
+              axiomancer-mechanics/*) RUN=true ;; # other mechanics change — heavy
+              *) : ;;                             # docs/root/other — irrelevant
+            esac
+          done <<< "$CHANGED"
+
+          echo "run_heavy=$RUN"
+          echo "run_heavy=$RUN" >> "$GITHUB_OUTPUT"
+
   verify:
     name: verify (lint + typecheck + jest)
     runs-on: ubuntu-latest
@@ -75,6 +140,11 @@ jobs:
 
   e2e-minigames:
     name: e2e-minigames (playwright playthroughs)
+    # Cards-only carve-out: skipped when the change is confined to
+    # cards.library.ts (card DATA edits). The mechanics gate still
+    # fully validates the cards; see the header comment + detect-scope.
+    needs: detect-scope
+    if: needs.detect-scope.outputs.run_heavy == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
