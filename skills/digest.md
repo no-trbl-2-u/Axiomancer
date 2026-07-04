@@ -98,9 +98,12 @@ its own cadence.
     (before = blob at `<since>`, after = current, diff = a
     pixelmatch highlight). For each `<screen>` it prints
     (`SHOTS_JSON`), add a `**Shot:** <screen> — <caption>` line
-    to the matching `[ui]` card so the build embeds the trio. No
-    browser runs — the baselines are the source of truth,
-    already captured when the UI change landed.
+    to the matching `[ui]` card so the build embeds the trio.
+    Only *noticeably* changed screens are emitted (≥2% pixels,
+    `DEVLOG_SHOT_MIN_RATIO`), so trivial diffs stay out. No
+    browser and no AI run here — it reuses the committed
+    baselines (the verify gate's approved captures), already
+    made when the UI change landed.
 
    **Format contract** (the shared shell in
    `scripts/build-devlog.mjs` guarantees this; keep it honest if

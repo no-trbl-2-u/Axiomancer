@@ -52,6 +52,13 @@ ul, ol { padding-left: 22px; }
 li { margin: 4px 0; }
 .muted { color: var(--muted); }
 
+.st { font-weight: 600; white-space: nowrap; }
+.st::before { content: ""; display: inline-block; width: .5em; height: .5em; border-radius: 50%; margin-right: .38em; background: currentColor; vertical-align: middle; }
+.st-ok { color: #4bb96a; }
+.st-neutral { color: var(--muted); }
+.st-warn { color: #d0a92b; }
+.st-bad { color: #e0574b; }
+
 .headline { font-size: 19px; color: var(--fg-strong); margin: 0 0 12px; }
 .counts { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 22px; }
 
@@ -131,7 +138,7 @@ footer.foot { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--b
 <p class="field"><span class="flabel">Why</span> The old digest read like rendered markdown; it couldn't show <em>what</em> changed visually or <em>why</em> a mechanics change was made.</p>
 <p class="commits"><code class="commit">c20cc91</code></p></section>
 <section class="panel" id="while-you-were-out"><h2>While you were out</h2>
-<div class="tablewrap"><table><thead><tr><th>Tick</th><th>Verb</th><th>Outcome</th></tr></thead><tbody><tr><td>03:02</td><td>march</td><td>no-op (queues clean)</td></tr><tr><td>03:14</td><td>iterate</td><td>shipped: devlog pipeline</td></tr><tr><td>03:20</td><td>digest</td><td>this entry</td></tr></tbody></table></div></section>
+<div class="tablewrap"><table><thead><tr><th>Tick</th><th>Verb</th><th>Outcome</th></tr></thead><tbody><tr><td>03:02</td><td>march</td><td><span class="st st-neutral">no-op</span> (queues <span class="st st-ok">clean</span>)</td></tr><tr><td>03:14</td><td>iterate</td><td><span class="st st-ok">shipped</span>: devlog pipeline</td></tr><tr><td>03:20</td><td>digest</td><td>this entry</td></tr></tbody></table></div></section>
 <section class="panel" id="needs-you"><h2>Needs you</h2>
 <ul><li>Stand up Cloudflare Pages + Access so this renders on your phone (see <code>devlog/README.md</code>).</li></ul></section>
 <section class="panel" id="tuning-proposals"><h2>Tuning proposals</h2>

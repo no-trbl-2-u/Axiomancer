@@ -52,6 +52,13 @@ ul, ol { padding-left: 22px; }
 li { margin: 4px 0; }
 .muted { color: var(--muted); }
 
+.st { font-weight: 600; white-space: nowrap; }
+.st::before { content: ""; display: inline-block; width: .5em; height: .5em; border-radius: 50%; margin-right: .38em; background: currentColor; vertical-align: middle; }
+.st-ok { color: #4bb96a; }
+.st-neutral { color: var(--muted); }
+.st-warn { color: #d0a92b; }
+.st-bad { color: #e0574b; }
+
 .headline { font-size: 19px; color: var(--fg-strong); margin: 0 0 12px; }
 .counts { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 22px; }
 

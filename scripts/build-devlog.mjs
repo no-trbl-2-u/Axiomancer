@@ -66,6 +66,24 @@ function slug(s) {
     .replace(/^-+|-+$/g, "");
 }
 
+// Status is color + text, never color alone (format contract): tag known
+// outcome words with a colored dot while keeping the word. Applied to table
+// cells only, where the pulse/queue outcomes live.
+const STATUS = [
+  { re: /\b(shipped|landed|merged|done|pass(?:ed)?|green|clean)\b/gi, cls: "ok" },
+  { re: /\b(no-?op|quiet|skip(?:ped)?|idle|none)\b/gi, cls: "neutral" },
+  { re: /\b(blocked|needs[- ]user|waiting|pending)\b/gi, cls: "warn" },
+  { re: /\b(crashed|failed|failure|error|broke(?:n)?|red)\b/gi, cls: "bad" },
+];
+function statusize(html) {
+  // Skip cells that contain markup (links/code) to avoid matching inside tags.
+  if (/[<]/.test(html)) return html;
+  for (const { re, cls } of STATUS) {
+    html = html.replace(re, (m) => `<span class="st st-${cls}">${m}</span>`);
+  }
+  return html;
+}
+
 function inline(text) {
   // Protect code spans with a private-use sentinel (survives escapeHtml, can't
   // occur in real input) so their contents aren't reformatted and bare numbers
@@ -156,7 +174,7 @@ function mdToHtml(md) {
         i++;
       }
       const thead = `<thead><tr>${header.map((c) => `<th>${inline(c)}</th>`).join("")}</tr></thead>`;
-      const tbody = `<tbody>${rows.map((r) => `<tr>${r.map((c) => `<td>${inline(c)}</td>`).join("")}</tr>`).join("")}</tbody>`;
+      const tbody = `<tbody>${rows.map((r) => `<tr>${r.map((c) => `<td>${statusize(inline(c))}</td>`).join("")}</tr>`).join("")}</tbody>`;
       out.push(`<div class="tablewrap"><table>${thead}${tbody}</table></div>`);
       continue;
     }
@@ -387,6 +405,13 @@ tr:last-child td { border-bottom: none; }
 ul, ol { padding-left: 22px; }
 li { margin: 4px 0; }
 .muted { color: var(--muted); }
+
+.st { font-weight: 600; white-space: nowrap; }
+.st::before { content: ""; display: inline-block; width: .5em; height: .5em; border-radius: 50%; margin-right: .38em; background: currentColor; vertical-align: middle; }
+.st-ok { color: #4bb96a; }
+.st-neutral { color: var(--muted); }
+.st-warn { color: #d0a92b; }
+.st-bad { color: #e0574b; }
 
 .headline { font-size: 19px; color: var(--fg-strong); margin: 0 0 12px; }
 .counts { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 22px; }
