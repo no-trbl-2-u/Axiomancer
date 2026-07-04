@@ -40,7 +40,19 @@ be verified against it before a PR lands:
 - `src/World/QuestBoard/**`
 
 If a diff matches any of the above, run
-`npm run verify -w axiomancer-mobile` and block the PR on failure. The
+`npm run verify -w axiomancer-mobile` and block the PR on failure.
+
+`axiomancer-card-editor` couples to a subset of the same paths
+(`src/Cards/**`, `src/Effects/**`, `src/Combat/**`, `src/index.ts` — it
+imports the card/effect libraries, their type unions, and the combat card
+projections). A diff touching any of those must ALSO run
+`npm run type-check -w axiomancer-card-editor` and block on failure.
+Witness: the `grant_permanent_wild_die` variant added to `Cards/types.ts`
+(edba726) shipped with mechanics + mobile green but broke the editor's
+`SpecialMechanicKind` union, leaving `verify-card-editor` red on `main`
+for half a day until 3c9bbaf.
+
+The
 mechanics-only tuning skills (`combat-playtest`, `deck-tuning`,
 `hazard-tuning`, `gathering-tuning`, `rest-tuning`, `loot-cache-tuning`,
 `quest-board-tuning`, `world-tuning`) each carry a closing step that
