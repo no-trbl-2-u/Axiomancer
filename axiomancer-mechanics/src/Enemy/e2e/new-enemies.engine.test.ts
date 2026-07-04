@@ -53,6 +53,7 @@ describe('2026-06-07: budget-scaled enemy tiers', () => {
     });
 
     describe('stat-budget integrity', () => {
+        // SKIP-ISSUE: #1
         it.skip('matches enemyStatBudget total for budget-built samples', () => {
             // DISABLED FOR PHASE 123: These enemies were authored with different
             // constants than the current ENEMY_STAT_PER_LEVEL and lack gear-tier scaling.

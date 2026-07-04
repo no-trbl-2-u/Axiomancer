@@ -47,5 +47,9 @@ jobs:
       - name: Install workspace dependencies
         run: npm ci
 
+      - name: Skip-comment gate
+        run: node automation/check-skip-comments.mjs
+        working-directory: axiomancer-mechanics
+
       - name: Verify (type-check + tests + build)
         run: npm run verify --workspace axiomancer-mechanics
