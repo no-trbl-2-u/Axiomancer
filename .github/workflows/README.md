@@ -10,7 +10,10 @@ Two layers live here:
    All of them funnel through the reusable runner
    [`_claude-skill.yml`](./_claude-skill.yml), which owns checkout, `npm
    ci`, `.env` materialization, the nexus enforcement layer (guard hooks +
-   deny walls), and the `anthropics/claude-code-action` invocation.
+   deny walls), and the `anthropics/claude-code-action` invocation. Every
+   Claude workflow is pinned to **Sonnet 5** (`--model claude-sonnet-5`);
+   change it in one place there (plus `claude.yml` / `claude-pr-review.yml`,
+   which don't use the runner).
 
 ## Secrets
 
@@ -24,8 +27,8 @@ Two layers live here:
 
 | Workflow | Skill | Trigger | Notes |
 |---|---|---|---|
-| `march.yml` | `/march` | cron every 6h + manual | The autonomous-beast tick: triage → critique → ship-a-phase → iterate. Pushes to `main`. |
-| `night.yml` | `/digest` | daily 08:47 UTC + manual | Morning briefing to `plan/DIGEST.md` + nightly breadth checks. |
+| `march.yml` | `/march` | hourly cron + manual | The autonomous-beast tick: triage → critique → ship-a-phase → iterate. Pushes to `main`. |
+| `night.yml` | `/digest` | daily 08:47 UTC + manual | Morning briefing to `plan/DIGEST.html` (stylized, self-contained page) + nightly breadth checks. |
 | `triage.yml` | `/triage` | issue opened/reopened + manual | Immediate triage on arrival; march still sweeps as backstop. |
 | `ci-autofix.yml` | `/fix-ci` | `verify-*` failure on `main` + manual | Red-main first responder. Pushes the fix to `main`. |
 | `dep-upgrades.yml` | `/dep-upgrades` | Mon 06:13 UTC + manual | Patch/minor bumps, full verify, one PR. Locked stack untouched. |
