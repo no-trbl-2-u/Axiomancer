@@ -137,6 +137,7 @@ export const SPECIAL_MECHANIC_KINDS = [
     'riposte',
     'execute',
     'amplify',
+    'grant_permanent_wild_die',
 ] as const;
 export type SpecialMechanicKind = (typeof SPECIAL_MECHANIC_KINDS)[number];
 
