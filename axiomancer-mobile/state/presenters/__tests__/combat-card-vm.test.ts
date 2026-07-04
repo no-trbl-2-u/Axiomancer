@@ -57,6 +57,16 @@ describe('engineHonestKind — the honesty gate', () => {
         expect(engineHonestKind('buff_brazen_thorns')).toBe('thorns');      // 0.34.0: reflectDamage is now real
         expect(engineHonestKind(null)).toBeNull();
     });
+
+    it('classifies the 6 card-overhaul (2026-07-03) effects the whitelist previously missed', () => {
+        expect(engineHonestKind('debuff_exposure')).toBe('exposure');           // real -N DEF
+        expect(engineHonestKind('debuff_doubt')).toBe('doubt');                 // forces weak-tier next play
+        expect(engineHonestKind('debuff_sensory_null')).toBe('sensoryNull');    // blocks advantage / dulls control
+        expect(engineHonestKind('debuff_isolated')).toBe('isolated');           // denies ally-buff targeting
+        expect(engineHonestKind('debuff_overextended')).toBe('overextended');   // self-cost weak next play
+        expect(engineHonestKind('buff_clarity')).toBe('clarity');               // next die: Wild
+        expect(engineHonestKind('buff_resolute')).toBe('resolute');             // real -N% dmg taken (inverse of vulnerable)
+    });
 });
 
 describe('faceStats — honest real-unit faces', () => {
@@ -103,6 +113,58 @@ describe('faceStats — honest real-unit faces', () => {
         expect(f.heroText).toBe('');               // real-units-or-no-number
         expect(f.freeHeroText).toBe('small chip');
         expect(f.readDependent).toBe(true);
+    });
+
+    // ── card-overhaul (2026-07-03) — the 6 previously-blank effects ──
+    it("Achilles' Gambit (Exposure) → real -3 DEF, no longer blank", () => {
+        const { card, skill } = cardOf('achilles-gambit');
+        const f = faceStats(card, skill);
+        expect(f.kind).toBe('exposure');
+        expect(f.keyword).toBe('EXPOSE');
+        expect(f.heroText).toBe('-3 DEF');
+        expect(f.heroSub).toBe('2 turns');
+        expect(f.inert).toBe(false);
+    });
+    it("Ship of Theseus's Drift (Resolute self-buff) → real -15% dmg taken, no longer blank", () => {
+        const { card, skill } = cardOf('ship-of-theseus-drift');
+        const f = faceStats(card, skill);
+        expect(f.kind).toBe('resolute');
+        expect(f.keyword).toBe('RESOLUTE');
+        expect(f.heroText).toBe('-15%');
+        expect(f.heroSub).toBe('dmg taken · 2 turns');
+        expect(f.inert).toBe(false);
+    });
+    it('Continuum Fallacy (Clarity self-buff) → reads "next die: WILD", no longer blank', () => {
+        const { card, skill } = cardOf('continuum-fallacy');
+        const f = faceStats(card, skill);
+        expect(f.kind).toBe('clarity');
+        expect(f.keyword).toBe('CLARITY');
+        expect(f.heroText).toBe('WILD');
+        expect(f.heroSub).toBe('next die');
+        expect(f.inert).toBe(false);
+    });
+    it('Mob Appeal (Isolated) → qualitative "denies ally-buff targeting", no longer blank', () => {
+        const { card, skill } = cardOf('mob-appeal');
+        const f = faceStats(card, skill);
+        expect(f.kind).toBe('isolated');
+        expect(f.keyword).toBe('ISOLATE');
+        expect(f.heroText).toBe('');                // qualitative — no fabricated number
+        expect(f.heroSub).toBe('denies ally-buff targeting');
+        expect(f.inert).toBe(false);
+    });
+    it("False Dilemma's Fork (Sensory Null primary, Clarity rider) → primary honest, rider surfaced too", () => {
+        const { card, skill } = cardOf('false-dilemmas-fork');
+        const f = faceStats(card, skill);
+        expect(f.kind).toBe('sensoryNull');
+        expect(f.keyword).toBe('NUMB');
+        expect(f.heroSub).toBe('blocks advantage · dulls control');
+        expect(f.inert).toBe(false);
+        // The self-riding buff_clarity rider is now honest, so it surfaces as a
+        // full (non-minor) keyword in the detail modal rather than vanishing.
+        const d = detailStats(card, skill);
+        const names = d.keywords.map(k => k.name);
+        expect(names).toContain('CLARITY');
+        expect(d.keywords.find(k => k.name === 'CLARITY')?.minor).toBe(false);
     });
 });
 

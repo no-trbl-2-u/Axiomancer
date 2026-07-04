@@ -147,6 +147,14 @@ const EFFECT_KEYWORD: Record<string, string> = {
     buff_max_hp_up: 'Bolster',
     buff_cleanse: 'Cleanse',
     buff_open_minded: 'Open-Minded',
+
+    // ── card-overhaul (2026-07-03) — 6 new status effects ──
+    debuff_doubt: 'Undermine',
+    debuff_sensory_null: 'Numb',
+    debuff_isolated: 'Isolate',
+    debuff_overextended: 'Overextend',
+    buff_clarity: 'Clarity',
+    buff_resolute: 'Resolute',
 };
 
 /** Verb class → keyword for cards whose action is the keyword itself (no status effect). */
@@ -249,6 +257,13 @@ const KEYWORD_GLOSS: Record<string, string> = {
     Execute: 'A finisher: massive damage when the foe is low on HP or heavily DoT-stacked.',
     // Verb-class keyword
     Guard: "Absorbs the enemy's next attack, then fades. One-shot — does not stack.",
+    // ── card-overhaul (2026-07-03) — 6 new status effects ──
+    Undermine: 'Forces the next card played to resolve at weak tier, even with a die spent. Consumed on use.',
+    Numb: "Blocks the target's advantage reads and dulls its control accuracy.",
+    Isolate: 'Denies ally-buff targeting (alone, denies its own self-buff play instead).',
+    Overextend: 'Forces your own next play to weak tier. A self-cost, consumed on use.',
+    Clarity: 'The next die you draft counts as Wild. Consumed on use.',
+    Resolute: 'You take reduced damage.',
 };
 
 /**
