@@ -1,9 +1,10 @@
 name: night
 
-# The night shift: /digest writes the morning briefing to plan/DIGEST.html,
-# runs the breadth checks too slow for the per-commit path, and files
-# tuning proposals as candidates (see skills/digest.md — it names this
-# workflow). Daily, off the march cadence so the two never queue.
+# The night shift: /digest appends the day's briefing as a stylized HTML
+# entry under devlog/ (via `npm run devlog:build`), runs the breadth checks
+# too slow for the per-commit path, and files tuning proposals as candidates
+# (see skills/digest.md — it names this workflow). Daily, off the march
+# cadence so the two never queue.
 
 on:
   schedule:
