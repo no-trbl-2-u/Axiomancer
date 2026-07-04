@@ -148,7 +148,11 @@ rolls / ~10 deliberate).
    the same seeds after each, `npm run verify` after each. A change that
    breaks an e2e band without a deliberate documented band update is
    reverted and recorded under "Considered but not applied".
-6. **Deliver** — findings + suggestions + applied changes on one branch,
+6. **Cross-package verify** — before opening the PR, run
+   `git diff --name-only` against the changed paths; if any match the
+   cross-package impact checklist in `AGENTS.md`, run
+   `npm run verify -w axiomancer-mobile` and block the PR on failure.
+7. **Deliver** — findings + suggestions + applied changes on one branch,
    one PR. Standing propose-only suggestion until it lands: a real
    `quest-board.sim.ts` with codified policy bands, mirroring
    `gathering.sim.ts`.

@@ -208,6 +208,10 @@ deliberate, documented band update is reverted and recorded under
 
 ### Step 5 — Deliver on ONE PR
 
+- **Cross-package verify** — before opening the PR, run
+  `git diff --name-only` against the changed paths; if any match the
+  cross-package impact checklist in `AGENTS.md`, run
+  `npm run verify -w axiomancer-mobile` and block the PR on failure.
 - Branch: `balance/gathering-<ts>`.
 - Commit: `balance(gathering): <ts> report + suggestions (<n> changes applied)`.
 - PR (ready for review, never auto-merged): headline deviation; exact sim/CLI

@@ -185,6 +185,10 @@ Write `docs/reports/playtest-<ts>.md` (create the directory on first use):
 - `## Open questions`.
 
 ### Step 4 — Deliver on ONE PR
+- **Cross-package verify** — before opening the PR, run
+  `git diff --name-only` against the changed paths; if any match the
+  cross-package impact checklist in `AGENTS.md`, run
+  `npm run verify -w axiomancer-mobile` and block the PR on failure.
 - Branch off base: `git checkout -b playtest/combat-<ts>`.
 - Stage the report.
 - Commit: `docs(playtest): combat playtest <ts> report`.

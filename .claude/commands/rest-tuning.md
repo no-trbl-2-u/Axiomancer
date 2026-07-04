@@ -122,5 +122,9 @@ heal = posture base + 0.04/warmth + 0.05/comfort, scaled by the authored
 5. **Apply numeric changes** one axis at a time; re-probe the same
    seeds; `npm run verify` after each; band moves are deliberate and
    documented or reverted.
-6. **Deliver** — one branch, one PR. Standing propose-only suggestion:
+6. **Cross-package verify** — before opening the PR, run
+   `git diff --name-only` against the changed paths; if any match the
+   cross-package impact checklist in `AGENTS.md`, run
+   `npm run verify -w axiomancer-mobile` and block the PR on failure.
+7. **Deliver** — one branch, one PR. Standing propose-only suggestion:
    a `rest.sim.ts` with codified policy bands.

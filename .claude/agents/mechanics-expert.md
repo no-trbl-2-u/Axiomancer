@@ -68,6 +68,11 @@ You know the axiomancer-mechanics game design thoroughly:
 4. **No emojis. No `Co-Authored-By:`.**
 5. **Stay scoped.** Don't redesign systems beyond what was asked.
 6. **No code.** Return analysis; the main agent implements.
+7. **If the diff touches `src/index.ts` or the Combat/Cards/Effects/Skills
+   public surface**, explicitly state in the review output whether
+   `axiomancer-mobile` was re-verified (`npm run verify -w
+   axiomancer-mobile`); if unknown, flag it as an open question rather
+   than silent-passing.
 
 ## Failure modes
 

@@ -22,12 +22,37 @@ npm-workspaces monorepo. Three packages, flat at the root:
 - Rules/state/RNG belong in `axiomancer-mechanics`, never duplicated in mobile
   presenters.
 
+### Cross-package impact checklist
+
+Any diff touching one of these mechanics paths can break `axiomancer-mobile`
+(consumed via `@mechanics` as local source, not a published package) and must
+be verified against it before a PR lands:
+
+- `src/Combat/**`
+- `src/Cards/**`
+- `src/Effects/**`
+- `src/Skills/**`
+- `src/index.ts`
+- `src/World/LootCache/**`
+- `src/World/Gathering/**`
+- `src/World/Hazard/**`
+- `src/World/Rest/**`
+- `src/World/QuestBoard/**`
+
+If a diff matches any of the above, run
+`npm run verify -w axiomancer-mobile` and block the PR on failure. The
+mechanics-only tuning skills (`combat-playtest`, `deck-tuning`,
+`hazard-tuning`, `gathering-tuning`, `rest-tuning`, `loot-cache-tuning`,
+`quest-board-tuning`, `world-tuning`) each carry a closing step that
+references this checklist rather than re-deriving it — update it here
+first if the mechanics subsystem list changes.
+
 ## Root `.claude/`
 
 Live, at the repo root:
 - `.claude/commands/` — domain **slash commands** (tuning + playtest): mechanics
   `combat-playtest`, `deck-tuning`, `gathering-tuning`, `hazard-tuning`,
-  `loot-cache-tuning`, `quest-board-tuning`, `rest-tuning`; mobile
+  `loot-cache-tuning`, `quest-board-tuning`, `rest-tuning`, `world-tuning`; mobile
   `critic-loop`, `deep-playtest`, `combat-ux-tuning`, `hermes-playtest`. Each is
   self-contained and carries a header naming the package it runs against (paths
   are package-relative — `cd` there or use `-w`). `combat-tuning`,

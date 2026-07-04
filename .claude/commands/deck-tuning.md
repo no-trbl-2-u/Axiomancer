@@ -223,6 +223,10 @@ change per axis at a time; measure each before the next.
   under "Considered but not applied".
 
 ### Step 5 — Deliver on ONE PR
+- **Cross-package verify** — before opening the PR, run
+  `git diff --name-only` against the changed paths; if any match the
+  cross-package impact checklist in `AGENTS.md`, run
+  `npm run verify -w axiomancer-mobile` and block the PR on failure.
 - Branch off base: `git checkout -b balance/deck-<ts>`.
 - Write `docs/reports/deck-tuning-<ts>.md` (create `docs/reports/` if it
   doesn't exist yet): pool audit, baseline matrix, every A/B

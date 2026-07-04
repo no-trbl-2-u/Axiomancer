@@ -341,6 +341,10 @@ requests.
 
 ### Step 6 — Deliver on ONE PR
 
+- **Cross-package verify** — before opening the PR, run
+  `git diff --name-only` against the changed paths; if any match the
+  cross-package impact checklist in `AGENTS.md`, run
+  `npm run verify -w axiomancer-mobile` and block the PR on failure.
 - Create a branch off base: `git checkout -b balance/hazard-<ts>`.
 - Write the findings report + suggestions to
   `docs/reports/hazard-tuning-<ts>.md` (create `docs/reports/` if it doesn't
