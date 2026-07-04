@@ -9,14 +9,16 @@
 :root {
   color-scheme: light dark;
   --bg: #0e1116; --fg: #d7dde5; --fg-strong: #f0f3f7; --muted: #6b7480;
-  --accent: #8ab4f8; --panel: #161b22; --border: #222833; --row: #141a22;
-  --code-bg: #1b212b; --th: #aeb7c2; --list-head: #9aa4b0;
+  --accent: #8ab4f8; --panel: #161b22; --card: #12171f; --border: #222833;
+  --row: #141a22; --code-bg: #1b212b; --th: #aeb7c2; --list-head: #9aa4b0;
+  --add: rgba(80,200,120,.16); --del: rgba(230,90,90,.16);
 }
 @media (prefers-color-scheme: light) {
   :root {
     --bg: #f7f5ef; --fg: #33302a; --fg-strong: #1a160f; --muted: #6f6656;
-    --accent: #3a5db0; --panel: #efece3; --border: #ddd7c9; --row: #efece3;
-    --code-bg: #e9e5d9; --th: #5c5344; --list-head: #6f6656;
+    --accent: #3a5db0; --panel: #efece3; --card: #fbfaf5; --border: #ddd7c9;
+    --row: #efece3; --code-bg: #e9e5d9; --th: #5c5344; --list-head: #6f6656;
+    --add: rgba(35,140,75,.16); --del: rgba(190,55,55,.16);
   }
 }
 * { box-sizing: border-box; }
@@ -25,35 +27,87 @@ body {
   font: 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   -webkit-text-size-adjust: 100%;
 }
-.wrap { max-width: 42rem; margin: 0 auto; padding: 20px 18px 80px; }
+.wrap { max-width: 46rem; margin: 0 auto; padding: 20px 18px 80px; }
 header.top {
   position: sticky; top: 0; z-index: 5;
-  background: var(--bg); border-bottom: 1px solid var(--border); margin: 0 0 24px;
+  background: var(--bg); border-bottom: 1px solid var(--border); margin: 0 0 20px;
 }
 header.top .wrap { padding-top: 14px; padding-bottom: 14px; display: flex; align-items: baseline; gap: 14px; }
 header.top a.home, header.top .home { color: var(--accent); text-decoration: none; font-weight: 600; }
 header.top .crumb { color: var(--muted); font-size: 14px; font-variant-numeric: tabular-nums; }
 h1, h2, h3, h4 { line-height: 1.25; color: var(--fg-strong); }
-h1 { font-size: 26px; margin: 0 0 4px; }
-h2 { font-size: 20px; margin: 32px 0 10px; padding-bottom: 6px; border-bottom: 1px solid var(--border); scroll-margin-top: 72px; }
-h3 { font-size: 17px; margin: 22px 0 8px; scroll-margin-top: 72px; }
+h1 { font-size: 26px; margin: 0 0 6px; }
+h2 { font-size: 19px; margin: 0; }
 a { color: var(--accent); }
-code { background: var(--code-bg); padding: 1px 6px; border-radius: 5px; font-size: 0.88em; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+p { margin: 8px 0; }
+code { background: var(--code-bg); padding: 1px 6px; border-radius: 5px; font-size: 0.86em; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
 pre { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; overflow-x: auto; }
 pre code { background: none; padding: 0; }
-table { width: 100%; border-collapse: collapse; margin: 14px 0; display: block; overflow-x: auto; }
+.tablewrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; margin: 12px 0; }
 th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
 th { background: var(--panel); color: var(--th); font-weight: 600; white-space: nowrap; }
 tr:last-child td { border-bottom: none; }
 ul, ol { padding-left: 22px; }
 li { margin: 4px 0; }
+.muted { color: var(--muted); }
+
+.headline { font-size: 19px; color: var(--fg-strong); margin: 0 0 12px; }
+.counts { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 22px; }
+
+.chip {
+  display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: .04em;
+  text-transform: uppercase; padding: 2px 9px; border-radius: 999px;
+  color: #0b0d10; background: var(--cat, var(--accent)); white-space: nowrap;
+}
+.cat-mechanics { --cat: #d0a92b; }
+.cat-ui { --cat: #5aa9e6; }
+.cat-content { --cat: #7fc45a; }
+.cat-infra { --cat: #b08bf0; }
+.cat-balance { --cat: #e6864b; }
+
+.card {
+  background: var(--card); border: 1px solid var(--border);
+  border-left: 4px solid var(--cat, var(--accent));
+  border-radius: 10px; padding: 14px 18px; margin: 14px 0; scroll-margin-top: 72px;
+}
+.card-head { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.card-head h2 { font-size: 18px; }
+.field { margin: 6px 0; }
+.flabel {
+  display: inline-block; min-width: 3.2em; margin-right: 4px; color: var(--muted);
+  font-weight: 700; font-size: 12px; text-transform: uppercase; letter-spacing: .04em;
+}
+.commits { margin: 8px 0 2px; }
+.commit { font-size: 12px; }
+
+.panel { margin: 22px 0; scroll-margin-top: 72px; }
+.panel > h2 { padding-bottom: 6px; border-bottom: 1px solid var(--border); margin-bottom: 8px; }
+
+.diff {
+  border: 1px solid var(--border); border-radius: 8px; overflow-x: auto; margin: 12px 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; line-height: 1.5;
+  background: var(--bg);
+}
+.dl { padding: 0 12px; white-space: pre; }
+.dl.add { background: var(--add); }
+.dl.del { background: var(--del); }
+.dl.hunk { color: var(--accent); }
+.dl.meta { color: var(--muted); }
+
+figure.shotset { margin: 14px 0; }
+figure.shotset > figcaption { font-size: 14px; color: var(--fg); margin-bottom: 8px; }
+.shots { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+.shot { margin: 0; }
+.shot .role { font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); text-align: center; margin-bottom: 3px; }
+.shot img { width: 100%; height: auto; border: 1px solid var(--border); border-radius: 8px; display: block; }
+
 .entry-list { list-style: none; padding: 0; margin: 8px 0 0; }
 .entry-list li { margin: 0; border-bottom: 1px solid var(--border); }
-.entry-list a { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; padding: 14px 4px; text-decoration: none; color: var(--fg); }
+.entry-list a { display: block; padding: 14px 4px; text-decoration: none; color: var(--fg); }
 .entry-list a:hover { background: var(--row); }
 .entry-list .date { color: var(--accent); font-weight: 600; font-variant-numeric: tabular-nums; }
-.entry-list .head { color: var(--list-head); font-size: 14px; text-align: right; }
-.muted { color: var(--muted); }
+.entry-list .head { color: var(--list-head); font-size: 14px; margin: 2px 0 6px; }
 footer.foot { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--border); color: var(--muted); font-size: 13px; }
 </style>
 </head>
@@ -63,7 +117,7 @@ footer.foot { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--b
 <h1>Axiomancer DevLog</h1>
 <p class="muted">1 entry, newest first.</p>
 <ul class="entry-list">
-  <li><a href="./DIGEST_2026-07-04.html"><span class="date">2026-07-04</span><span class="head">Seed entry — delete me once the first real nightly digest lands. This exists so</span></a></li>
+  <li><a href="./DIGEST_2026-07-04.html"><span class="date">2026-07-04</span><div class="head">Seed entry — delete once the first real nightly digest lands. Shows every card type so you can preview the layout.</div><div class="counts"><span class="chip cat-mechanics">1 mechanics</span><span class="chip cat-ui">1 UI</span><span class="chip cat-infra">1 infra</span></div></a></li>
 </ul>
 <footer class="foot">Axiomancer DevLog &middot; generated by <code>scripts/build-devlog.mjs</code></footer>
 </main>

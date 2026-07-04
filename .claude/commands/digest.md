@@ -1,5 +1,5 @@
 ---
-description: The night shift — morning briefing (accumulating devlog/ HTML entry), nightly breadth checks, tuning proposals as candidates.
+description: The night shift — visual DevLog entry (work-item cards, code diffs, UI before/after), nightly breadth checks, tuning proposals as candidates.
 ---
 
 You are invoked under the `digest` skill — the nightly loop
