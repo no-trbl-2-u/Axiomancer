@@ -115,6 +115,12 @@ pushes to **`main`** directly. Start at intervention level 0
 Full context lives in `plan/bearings.md` and the nexus kit
 (`../nexus/`).
 
+**GitHub Actions layer.** Every zero-input skill/command also runs in CI
+via `.github/workflows/` (scheduled `/march` ticks, nightly `/digest`,
+weekly tuning loops, `/fix-ci` on red main, `@claude` mentions, auto PR
+review). See `.github/workflows/README.md` for the full map, cadences,
+and required secrets (`CLAUDE_CODE_OAUTH_TOKEN`, recommended `GH_PAT`).
+
 **Enforcement layer (opt-in).** `.claude/hooks/guard.mjs` (guard hook)
 ships dormant. To activate the mechanical hard-rule enforcement +
 permission allowlist for unattended runs, copy

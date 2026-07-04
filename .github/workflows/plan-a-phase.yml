@@ -1,0 +1,26 @@
+name: plan-a-phase
+
+# Refine the next phase brief without shipping code (see
+# skills/plan-a-phase.md). Dispatch-only.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+  actions: read
+  id-token: write
+
+concurrency:
+  group: nexus-loop
+  cancel-in-progress: false
+
+jobs:
+  plan:
+    uses: ./.github/workflows/_claude-skill.yml
+    secrets: inherit
+    with:
+      prompt: '/plan-a-phase'
+      timeout_minutes: 45

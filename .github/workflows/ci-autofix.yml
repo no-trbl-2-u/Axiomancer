@@ -1,0 +1,37 @@
+name: ci-autofix
+
+# Red-main first responder: when a verify-* workflow fails on main,
+# /fix-ci reads the failed run's logs, reproduces locally, fixes the root
+# cause, and pushes the fix to main (see .claude/commands/fix-ci.md).
+# Note: this only fires for pushes that triggered verify-* in the first
+# place — loop pushes made with the default GITHUB_TOKEN don't trigger
+# workflows, which is why the GH_PAT secret is recommended.
+
+on:
+  workflow_run:
+    workflows: [verify-mechanics, verify-mobile, verify-card-editor]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+  actions: read
+  id-token: write
+
+concurrency:
+  group: nexus-loop
+  cancel-in-progress: false
+
+jobs:
+  fix:
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'failure' &&
+       github.event.workflow_run.head_branch == 'main')
+    uses: ./.github/workflows/_claude-skill.yml
+    secrets: inherit
+    with:
+      prompt: '/fix-ci ${{ github.event.workflow_run.id }}'
+      timeout_minutes: 60

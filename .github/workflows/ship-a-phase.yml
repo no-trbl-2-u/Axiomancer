@@ -1,0 +1,27 @@
+name: ship-a-phase
+
+# Ship the next unchecked phase of the build plan end-to-end (see
+# skills/ship-a-phase.md). Dispatch-only — /march dispatches to it when a
+# pending phase exists; run this directly to force a delivery tick.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+  actions: read
+  id-token: write
+
+concurrency:
+  group: nexus-loop
+  cancel-in-progress: false
+
+jobs:
+  ship:
+    uses: ./.github/workflows/_claude-skill.yml
+    secrets: inherit
+    with:
+      prompt: '/ship-a-phase'
+      timeout_minutes: 120
