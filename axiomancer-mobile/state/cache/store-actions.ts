@@ -14,11 +14,13 @@ import type { GameState, Item } from '@mechanics';
 
 import {
     beginLootCache as engineBegin,
+    channelLootCacheInsight as engineChannelInsight,
     claimLootCacheOutcome as engineClaim,
     continueLootCacheCard as engineContinue,
     createLootCacheSession,
     delveLootCache as engineDelve,
-    probeLootCache as engineProbe,
+    pushLootCachePick as enginePushPick,
+    retreatLootCachePick as engineRetreatPick,
     sealLootCache as engineSeal,
 } from '@mechanics';
 import type { CacheItemRef, LootCacheOutcomeTier, LootCacheSession } from '@mechanics';
@@ -100,10 +102,25 @@ export function delveLootCacheAction(store: AppStore): void {
     setSession(store, engineDelve(s));
 }
 
-export function probeLootCacheAction(store: AppStore): void {
+/** Rolls the pick pool against the active layer's lock: resolves or continues picking. */
+export function pushLootCachePickAction(store: AppStore): void {
     const s = store.getState().cache?.session;
     if (!s) return;
-    setSession(store, engineProbe(s));
+    setSession(store, enginePushPick(s));
+}
+
+/** Spends the one per-session Insight charge for a bonus die on the next push. */
+export function channelLootCacheInsightAction(store: AppStore): void {
+    const s = store.getState().cache?.session;
+    if (!s) return;
+    setSession(store, engineChannelInsight(s));
+}
+
+/** Abandons the current layer's pick attempt cleanly — no loot, no bite. */
+export function retreatLootCachePickAction(store: AppStore): void {
+    const s = store.getState().cache?.session;
+    if (!s) return;
+    setSession(store, engineRetreatPick(s));
 }
 
 export function sealLootCacheAction(store: AppStore): void {

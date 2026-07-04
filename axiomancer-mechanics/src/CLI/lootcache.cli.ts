@@ -13,13 +13,13 @@
  * file, or an agent can all drive it through the same surface as game.cli.ts.
  *
  *   • `--policy greedy|prudent|prober`  the `--auto` policy (default prober,
- *                            the balanced/informed read; ignored when manual).
- *   • `--auto`               the balance-sim policy delves/probes/seals;
+ *                            the informed/balanced read; ignored when manual).
+ *   • `--auto`               the balance-sim policy delves/pushes/retreats;
  *                            otherwise the player drives by hand.
  *   • `--currency <n>`       the authored lid purse (default 10); deeper
  *                            layers scale off it.
  *   • `--seed <n|str>`       seeds the engine's embedded RNG so a run is fully
- *                            reproducible (trap fates are sealed at creation).
+ *                            reproducible (dice rolls flow from it).
  *   • `--runs <n>`           open N caches back-to-back (default 5).
  *
  * The engine is a pure, self-seeded state machine: every transition takes a
@@ -37,7 +37,9 @@ import {
     createLootCacheSession,
     beginLootCache,
     delveLootCache,
-    probeLootCache,
+    pushLootCachePick,
+    channelLootCacheInsight,
+    retreatLootCachePick,
     sealLootCache,
     continueLootCacheCard,
     claimLootCacheOutcome,
@@ -142,23 +144,34 @@ function seedToNumber(seed: string | undefined, runIndex: number): number {
     return minigameRunSeed(seedInput, runIndex);
 }
 
-// ─── Auto policy (mirrors lootcache.sim.ts decide()) ──────────────────────────
+// ─── Auto policy (mirrors lootcache.sim.ts decide*()) ─────────────────────────
 
-type AutoVerb = 'delve' | 'probe' | 'seal';
+type AutoVerb = 'delve' | 'seal' | 'push' | 'retreat' | 'insight';
 
-/** The next verb for a policy at the current depth (matches `lootcache.sim.ts`). */
+const PRUDENT_MAX_PUSHES = 1;
+
+/** The next verb for a policy at the current state (matches `lootcache.sim.ts`). */
 function autoVerb(s: LootCacheSession, policy: LootCachePolicyId): AutoVerb {
-    if (policy === 'greedy') return 'delve';
-    if (policy === 'prudent') return s.depth === 0 ? 'delve' : 'seal';
+    if (s.phase === 'delving') {
+        if (s.depth >= s.layers.length) return 'seal';
+        if (policy === 'prudent') return s.bittenVitae > 0 ? 'seal' : 'delve';
+        return 'delve';
+    }
 
-    // prober: lid is always safe; spend the one probe on the deepest layer.
-    const next = s.layers[s.depth];
-    if (!next) return 'seal';
-    if (s.depth === 0) return 'delve';
-    if (next.revealed) return next.trapped ? 'seal' : 'delve';
-    const isDeepest = s.depth === s.layers.length - 1;
-    if (isDeepest) return s.probeUsed ? 'seal' : 'probe';
-    return 'delve';
+    // phase === 'picking'
+    const pick = s.pick;
+    if (!pick) return 'retreat';
+
+    if (policy === 'prudent') {
+        return pick.pushes < PRUDENT_MAX_PUSHES ? 'push' : 'retreat';
+    }
+    if (policy === 'prober') {
+        const isDeepest = pick.layerIndex === s.layers.length - 1;
+        if (isDeepest && !s.insightUsed && pick.pushes === 0) return 'insight';
+        return 'push';
+    }
+    // greedy: always push, never retreats, never channels insight.
+    return 'push';
 }
 
 // ─── Step wrapper ─────────────────────────────────────────────────────────────
@@ -181,29 +194,51 @@ function step(
 
 function applyVerb(s: LootCacheSession, verb: AutoVerb): LootCacheSession {
     if (verb === 'delve') return step('delveLootCache', s, delveLootCache(s), { depth: s.depth });
-    if (verb === 'probe') return step('probeLootCache', s, probeLootCache(s), { depth: s.depth });
-    return step('sealLootCache', s, sealLootCache(s), { depth: s.depth });
+    if (verb === 'seal') return step('sealLootCache', s, sealLootCache(s), { depth: s.depth });
+    if (verb === 'push') return step('pushLootCachePick', s, pushLootCachePick(s), { depth: s.depth });
+    if (verb === 'insight') return step('channelLootCacheInsight', s, channelLootCacheInsight(s), { depth: s.depth });
+    return step('retreatLootCachePick', s, retreatLootCachePick(s), { depth: s.depth });
 }
 
 // ─── Manual driver (script / stdin / tty) ─────────────────────────────────────
 
 async function manualDelve(state: LootCacheSession): Promise<LootCacheSession> {
     const layer = state.layers[state.depth];
-    log(
-        `\n  Depth ${state.depth}/${state.layers.length} — bitten ${state.bittenVitae}` +
-        ` · probe ${state.probeUsed ? 'spent' : 'in hand'}`,
-    );
+    log(`\n  Depth ${state.depth}/${state.layers.length} — bitten ${state.bittenVitae}` +
+        ` · insight ${state.insightUsed ? 'spent' : 'in hand'}`);
     if (layer) {
-        log(`  Next: ${layer.name}${layer.revealed ? (layer.trapped ? ' (REVEALED: trapped!)' : ' (REVEALED: clean)') : ''}`);
+        log(`  Next: ${layer.name} (difficulty ${layer.difficulty})`);
         log(`  ${layer.flavor}`);
     }
 
     const choices: Array<{ name: string; value: string }> = [];
     if (state.depth < state.layers.length) {
         choices.push({ name: `delve ${layer?.name ?? 'the next layer'}`, value: 'delve' });
-        if (!state.probeUsed) choices.push({ name: 'probe the next layer (one only)', value: 'probe' });
     }
     choices.push({ name: 'seal and walk away with what you have', value: 'seal' });
+
+    const { pick } = await prompt<{ pick: string }>([{
+        type: 'rawlist', name: 'pick', message: 'Action?', choices,
+    }]);
+    return applyVerb(state, pick as AutoVerb);
+}
+
+async function manualPicking(state: LootCacheSession): Promise<LootCacheSession> {
+    const layer = state.layers[state.depth];
+    const p = state.pick;
+    log(`\n  Picking ${layer?.name ?? '???'} — progress ${p?.progress ?? 0}/${layer?.difficulty ?? '?'}` +
+        ` · push ${p?.pushes ?? 0} · bitten ${state.bittenVitae}`);
+    if (p?.lastRoll) {
+        log(`  Last roll: [${p.lastRoll.dice.join(', ')}] — ${p.lastRoll.slips} slip(s), +${p.lastRoll.gained}`);
+    }
+
+    const choices: Array<{ name: string; value: string }> = [
+        { name: 'push (roll the pick pool)', value: 'push' },
+        { name: 'retreat (bank nothing, walk away from this layer)', value: 'retreat' },
+    ];
+    if (!state.insightUsed && p?.pushes === 0) {
+        choices.splice(1, 0, { name: 'channel insight (bonus die on this push)', value: 'insight' });
+    }
 
     const { pick } = await prompt<{ pick: string }>([{
         type: 'rawlist', name: 'pick', message: 'Action?', choices,
@@ -233,7 +268,7 @@ async function playCache(flags: LootCacheCliFlags, runIndex: number): Promise<Ca
     state = step('beginLootCache', state, beginLootCache(state), {});
 
     let guard = 0;
-    while (state.phase !== 'done' && guard++ < 100) {
+    while (state.phase !== 'done' && guard++ < 200) {
         if (state.phase === 'card') {
             const card = state.card;
             if (card) {
@@ -244,9 +279,10 @@ async function playCache(flags: LootCacheCliFlags, runIndex: number): Promise<Ca
             continue;
         }
         if (state.phase === 'outcome') break;
-        // phase === 'delving'
         if (flags.auto) {
             state = applyVerb(state, autoVerb(state, flags.policy));
+        } else if (state.phase === 'picking') {
+            state = await manualPicking(state);
         } else {
             state = await manualDelve(state);
         }

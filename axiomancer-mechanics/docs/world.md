@@ -264,7 +264,11 @@ defeating the boss auto-completes the quest and grants the
 - fv-11 fishmonger row (village — Net-Mender Joss + small shop).
 - fv-12 ferry slip (cutscene — empty slip; absent ferrier).
 - fv-13 quayside chapel (rest, half-heal).
-- fv-14 tide pools (gathering — tide-shell).
+- fv-14 tide pools — **overridden 2026-07** by the fishing-village
+  new-player pool registration to a `narration` node: "What Do I Tell
+  Father?" (the boy's first ethical dilemma, a real branching
+  `DialogueTree` at dinner; see `src/World/MapEvents/content.ts`'s
+  `fvFatherWorryDialogue`). No longer a gathering node on that path.
 - fv-15 gull crag (encounter — Mournful Gull, Phase 60 befriendable;
   **dead-end** via fv-14).
 
@@ -450,16 +454,22 @@ heal-fraction / tier-rate / cleanse-rate / keepsake metrics. Bands verified in
 
 ### Loot-Cache ("The Reliquary") — `lootcache.sim.ts`
 
-Push-your-luck on hidden information: deeper layers are richer AND likelier
-trapped, and one probe buys perfect information. Three bots: **`greedy`**
-(always delve — richest raw take but most bitten, stung two caches in three),
-**`prudent`** (lid then seal — the unbitten floor), **`prober`** (saves its
-probe for the deadliest deepest layer). The sim surfaced a real balance note:
-with a single probe and the richest layer also the deadliest, the prober matches
-greedy on RAW currency but wins decisively on **risk-adjusted value** (same loot,
-roughly half the bites). The report exposes both a `currencyGradient` and a
-`riskAdjusted` gradient (`avgCurrency − LOOT_CACHE_BITE_PENALTY × avgBitten`) so
-the tuning skill can judge the probe's worth. Bands verified in
+Push-your-luck on LIVE dice-pool risk, not hidden information: every layer's
+difficulty is public, and the player rolls a d6 "Pick Pool" against it,
+choosing after every roll whether to push, retreat, or (once per session)
+channel Insight for a bonus die. Three bots: **`greedy`** (always delve,
+always push, never retreats or channels Insight — richest raw take but most
+jammed), **`prudent`** (retreats after one push, stops delving once bitten —
+the safer, poorer floor), **`prober`** (plays like greedy but spends its one
+Insight charge on the deepest layer it attempts). The sim surfaced a real
+balance note: naively adding a bonus die while holding the jam-slip threshold
+fixed *raises* jam odds (more dice, same trigger), making Insight a
+net-negative "buy" — fixed by letting a channeled push's jam threshold rise
+with its bonus die. With that fix, the prober matches or beats greedy on RAW
+currency and wins decisively on **risk-adjusted value** (same loot, fewer
+jams). The report exposes both a `currencyGradient` and a `riskAdjusted`
+gradient (`avgCurrency − LOOT_CACHE_BITE_PENALTY × avgBitten`) so the tuning
+skill can judge Insight's worth. Bands verified in
 `src/World/LootCache/e2e/lootcache.balance.sim.test.ts`.
 
 ## See Also

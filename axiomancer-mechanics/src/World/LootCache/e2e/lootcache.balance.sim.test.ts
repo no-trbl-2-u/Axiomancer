@@ -1,19 +1,17 @@
 /**
  * Loot-cache balance guard — Monte-Carlo over the real engine with
  * scripted push-your-luck bots (see `lootcache.sim.ts`). The Reliquary is
- * a hidden-information gamble: deeper layers are richer AND likelier
- * trapped, and one probe buys perfect information. The bands encode the
- * skill expression — INFORMED greed beats blind greed —
+ * now a LIVE dice-pool "Pick Pool" gamble: every layer's difficulty is
+ * public, and the player rolls to crack it, choosing after every roll
+ * whether to push, retreat, or (once per session) channel Insight for a
+ * bonus die. The bands encode the skill expression — INFORMED risk
+ * management beats blind greed, which beats early restraint —
  *
- *   prudent (lid only: never rich, never bitten)
- *     ~= greedy on risk-adjusted value (blind greed pays its winnings back in bites)
- *       < prober (same raw loot as greedy, a fraction of the pain)
- *
- *   greedy  — always delve: the richest raw take, but the most bitten and
- *             stung two times in three.
- *   prudent — lid then seal: the floor. Never bitten, never stung.
- *   prober  — saves the probe for the deadliest (deepest) layer: matches
- *             greedy's raw currency at half the bites and half the slams.
+ *   prudent (retreat after one push, stop once bitten: safest, poorest)
+ *     < greedy (always push: richest raw take, most bitten)
+ *       < prober (spends its one Insight charge on the deepest layer:
+ *                 matches or beats greedy's raw take at a real reduction
+ *                 in bites/stings)
  *
  * If content changes break a band, this suite fails and the numbers need
  * re-tuning (or the band needs a deliberate, documented update). 400 seeded
@@ -35,25 +33,24 @@ describe('loot-cache balance bands', () => {
     const prudent = runLootCacheSim({ runs: RUNS, policy: 'prudent' });
     const prober = runLootCacheSim({ runs: RUNS, policy: 'prober' });
 
-    it('blind greed wakes the traps: most bitten, stung the majority of caches', () => {
-        expect(greedy.avgBitten).toBeGreaterThanOrEqual(1);
-        expect(greedy.stungRate).toBeGreaterThanOrEqual(0.5);
-        // It does open the most layers, so its raw currency is high.
-        expect(greedy.avgLayersOpened).toBeGreaterThanOrEqual(2.3);
+    it('blind greed opens every layer and takes real jam risk', () => {
+        expect(greedy.avgLayersOpened).toBeCloseTo(3, 0);
+        expect(greedy.avgBitten).toBeGreaterThan(0);
+        expect(greedy.stungRate).toBeGreaterThan(0.15);
+        expect(greedy.stungRate).toBeLessThan(0.5);
     });
 
-    it('the prudent lid-only walk is the unbitten floor', () => {
-        expect(prudent.avgBitten).toBe(0);
-        expect(prudent.stungRate).toBe(0);
-        expect(prudent.prudentRate).toBe(1);
-        expect(prudent.avgLayersOpened).toBe(1);
+    it('the prudent retreat-early walk is the safer, poorer floor', () => {
+        expect(prudent.avgLayersOpened).toBeLessThan(greedy.avgLayersOpened);
+        expect(prudent.avgCurrency).toBeLessThan(greedy.avgCurrency);
+        expect(prudent.avgBitten).toBeLessThanOrEqual(greedy.avgBitten);
     });
 
-    it('informed probing matches greedy loot at a fraction of the pain', () => {
-        // Same raw take as blind greed (it still reaches the tithe)...
+    it('informed Insight play matches or beats greedy loot at fewer bites', () => {
+        // Same or better raw take as blind greed (it still reaches the tithe)...
         expect(prober.avgCurrency).toBeGreaterThanOrEqual(prudent.avgCurrency);
-        expect(prober.avgCurrency).toBeCloseTo(greedy.avgCurrency, 0);
-        // ...for far fewer bites and far fewer slams.
+        expect(prober.avgCurrency).toBeGreaterThanOrEqual(greedy.avgCurrency * 0.95);
+        // ...for fewer bites and fewer stings.
         expect(prober.avgBitten).toBeLessThan(greedy.avgBitten);
         expect(prober.stungRate).toBeLessThan(greedy.stungRate);
     });
@@ -62,8 +59,6 @@ describe('loot-cache balance bands', () => {
         const value = (s: typeof greedy) => s.avgCurrency - LOOT_CACHE_BITE_PENALTY * s.avgBitten;
         expect(value(prober)).toBeGreaterThan(value(greedy));
         expect(value(prober)).toBeGreaterThan(value(prudent));
-        // Blind greed gambles its winnings away: no better than walking early.
-        expect(value(greedy)).toBeLessThanOrEqual(value(prudent) + 1);
     });
 });
 

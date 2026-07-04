@@ -147,10 +147,12 @@ import {
 import {
     abandonLootCacheAction,
     beginLootCacheAction,
+    channelLootCacheInsightAction,
     claimLootCacheOutcomeAction,
     continueLootCacheCardAction,
     delveLootCacheAction,
-    probeLootCacheAction,
+    pushLootCachePickAction,
+    retreatLootCachePickAction,
     sealLootCacheAction,
     startLootCacheDelvingAction,
     type BeginLootCacheOptions,
@@ -579,17 +581,21 @@ export interface AppActions {
 
     // -----------------------------------------------------------------
     // Loot-cache encounter ("The Reliquary" — see state/cache/). Phase
-    // order: intro → delving ⇄ card → outcome → done.
+    // order: intro → delving ⇄ picking ⇄ card → outcome → done.
     // -----------------------------------------------------------------
 
     /** Start a cache from the authored payload. Returns false if one is open. */
     beginLootCache: (options?: BeginLootCacheOptions) => boolean;
     /** The find acknowledged: intro → delving. */
     startLootCacheDelving: () => void;
-    /** Open the next layer (a sealed trap fires unconditionally). */
+    /** Open the next layer: delving → picking (does not roll). */
     delveLootCache: () => void;
-    /** Spend the one probe to reveal the next layer's fate. */
-    probeLootCache: () => void;
+    /** Roll the pick pool against the active layer's lock: resolves or continues. */
+    pushLootCachePick: () => void;
+    /** Spend the one Insight charge for a bonus die (before the first push on a layer). */
+    channelLootCacheInsight: () => void;
+    /** Abandon the current layer's pick attempt cleanly — no loot, no bite. */
+    retreatLootCachePick: () => void;
     /** Walk away with everything lifted so far. */
     sealLootCache: () => void;
     /** Acknowledge the open card; delving, or the ledger, follows. */
@@ -910,7 +916,9 @@ export function createAppActions(store: AppStore): AppActions {
         beginLootCache: (options) => beginLootCacheAction(store, options),
         startLootCacheDelving: () => startLootCacheDelvingAction(store),
         delveLootCache: () => delveLootCacheAction(store),
-        probeLootCache: () => probeLootCacheAction(store),
+        pushLootCachePick: () => pushLootCachePickAction(store),
+        channelLootCacheInsight: () => channelLootCacheInsightAction(store),
+        retreatLootCachePick: () => retreatLootCachePickAction(store),
         sealLootCache: () => sealLootCacheAction(store),
         continueLootCacheCard: () => continueLootCacheCardAction(store),
         claimLootCacheOutcome: () => claimLootCacheOutcomeAction(store),

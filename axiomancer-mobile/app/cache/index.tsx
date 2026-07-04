@@ -1,38 +1,67 @@
 /**
  * /cache — the Loot-cache encounter screen ("The Reliquary").
  *
- * Three layers, sealed trap fates, one probe, push-your-luck. All
- * rules live in `axiomancer-mechanics` (World/LootCache); this screen
- * renders the presenter VM (which is also the hidden-information leak
- * boundary) and dispatches store actions only.
+ * Three layers, public difficulty, one Insight charge, push-your-luck
+ * on a live dice-pool pick. All rules live in `axiomancer-mechanics`
+ * (World/LootCache); this screen renders the presenter VM and
+ * dispatches store actions only. The picking phase's dice tray is the
+ * tactile centerpiece — every push shakes the pool, settles on the
+ * rolled faces, and fires haptics keyed to the outcome.
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'expo-router';
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import * as Haptics from 'expo-haptics';
 
+import { CacheDie } from '@/components/cache/CacheDie';
+import { CacheProgressMeter } from '@/components/cache/CacheProgressMeter';
 import { ScreenBg } from '@/components/ScreenBg';
 import { useGameActions, useGameState } from '@/state/GameStoreProvider';
-import { selectCacheVM, type CacheLayerVM } from '@/state/presenters/cache.engine';
+import {
+    selectCacheVM,
+    type CacheLayerVM,
+    type CachePickVM,
+} from '@/state/presenters/cache.engine';
 import { FONTS } from '@/theme/axm';
 import { makeStyles, usePalette } from '@/theme/runtime';
+import { LOOT_CACHE_TUNING } from '@mechanics';
+
+/** One slip shy of a jam — the engine's real jam threshold minus one. */
+const JAM_WARNING_SLIPS = LOOT_CACHE_TUNING.jamSlipThreshold - 1;
+
+function hapticImpact(style: Haptics.ImpactFeedbackStyle): void {
+    try {
+        Haptics.impactAsync(style).catch(() => undefined);
+    } catch {
+        // Haptics are pure polish — never let them break the screen.
+    }
+}
+
+function hapticNotification(type: Haptics.NotificationFeedbackType): void {
+    try {
+        Haptics.notificationAsync(type).catch(() => undefined);
+    } catch {
+        // Haptics are pure polish — never let them break the screen.
+    }
+}
 
 function LayerCard({ layer }: { layer: CacheLayerVM }) {
     const styles = useStyles();
     const AXM = usePalette();
     const READING_CHROME: Record<CacheLayerVM['reading'], { label: string; color: string }> = {
-        sealed: { label: 'SEALED',          color: AXM.bone },
-        live:   { label: 'TRAP — LIVE',     color: AXM.blood },
-        dud:    { label: 'TRAP — DEAD',     color: AXM.heal },
-        clean:  { label: 'LIFTED CLEAN',    color: AXM.heal },
-        sprung: { label: 'SPRUNG',          color: AXM.blood },
+        locked:    { label: 'LOCKED',        color: AXM.bone },
+        picking:   { label: 'PICKING',       color: AXM.sulfur },
+        cracked:   { label: 'LIFTED CLEAN',  color: AXM.heal },
+        sprung:    { label: 'SPRUNG',        color: AXM.blood },
+        retreated: { label: 'LEFT SHUT',     color: AXM.bone },
     };
     const chrome = READING_CHROME[layer.reading];
     return (
         <View
             style={[
                 styles.layer,
-                layer.isNext && { borderColor: AXM.sulfur },
+                layer.reading === 'picking' && { borderColor: AXM.sulfur },
                 layer.opened && { opacity: 0.75 },
             ]}
             testID={`cache-layer-${layer.index}`}
@@ -42,12 +71,93 @@ function LayerCard({ layer }: { layer: CacheLayerVM }) {
                 <Text style={[styles.layerReading, { color: chrome.color }]}>{chrome.label}</Text>
             </View>
             <Text style={styles.layerFlavor}>{layer.flavor}</Text>
+            <Text style={styles.layerDifficulty} testID={`cache-layer-${layer.index}-difficulty`}>
+                LOCK · {layer.difficulty}
+            </Text>
             {layer.lootSummary !== null && (
                 <Text style={styles.layerLoot} testID={`cache-layer-${layer.index}-loot`}>
                     {layer.lootSummary}
                 </Text>
             )}
         </View>
+    );
+}
+
+function DiceTray({ pick, onPush }: { pick: CachePickVM; onPush: () => void }) {
+    const styles = useStyles();
+    const AXM = usePalette();
+    const rollToken = useRef(0);
+    const [token, setToken] = useState(0);
+    const dice = pick.lastRoll?.dice ?? [];
+    const slips = pick.lastRoll?.slips ?? 0;
+    const onEdge = slips >= JAM_WARNING_SLIPS && !pick.lastRoll?.jammed && pick.canPush;
+
+    // Bump the shared roll token whenever a fresh roll lands so every die
+    // retriggers its tumble in lockstep (each die staggers off its index).
+    useEffect(() => {
+        if (pick.lastRoll === null) return;
+        rollToken.current += 1;
+        setToken(rollToken.current);
+    }, [pick.lastRoll]);
+
+    // Idle faces (before the first push) read as "ready", not "slipped" —
+    // show a neutral high face rather than 1s.
+    const faces = dice.length > 0 ? dice : Array.from({ length: pick.poolSize }, () => 6);
+
+    // The tray itself is a tap target that pushes the pool — players kept
+    // reaching for the dice directly (that's the natural read of a pile of
+    // rollable-looking dice) and finding nothing happened, since the only
+    // wired control used to be the separate PUSH button below. Tapping the
+    // tray now fires the exact same action, so the dice are never "just
+    // sitting there, unclickable."
+    return (
+        <TouchableOpacity
+            accessibilityRole="button"
+            accessibilityLabel="Push the pick by tapping the dice"
+            accessibilityState={{ disabled: !pick.canPush }}
+            disabled={!pick.canPush}
+            onPress={onPush}
+            activeOpacity={pick.canPush ? 0.7 : 1}
+            style={styles.diceTray}
+            testID="cache-dice-tray"
+        >
+            <View style={styles.diceRow}>
+                {faces.map((face, i) => (
+                    <CacheDie
+                        key={i}
+                        face={face}
+                        rollToken={token}
+                        index={i}
+                        bonus={i >= LOOT_CACHE_TUNING.pickPoolSize}
+                        testID={`cache-dice-${i}`}
+                    />
+                ))}
+            </View>
+            {pick.lastRoll === null && pick.canPush && (
+                <Text style={styles.diceHint} testID="cache-dice-hint">
+                    TAP THE DICE OR PUSH TO ROLL
+                </Text>
+            )}
+            {pick.lastRoll !== null && (
+                <View style={styles.rollReadout} testID="cache-roll-readout">
+                    <Text style={[styles.rollGain, { color: AXM.sulfur }]}>
+                        +{pick.lastRoll.gained} PROGRESS
+                    </Text>
+                    {pick.lastRoll.slips > 0 && (
+                        <Text
+                            style={[
+                                styles.rollSlips,
+                                { color: onEdge ? AXM.blood : AXM.bone },
+                            ]}
+                            testID="cache-roll-slips"
+                        >
+                            {pick.lastRoll.slips} SLIP{pick.lastRoll.slips > 1 ? 'S' : ''}
+                            {onEdge ? ' — ONE FROM A JAM' : ''}
+                        </Text>
+                    )}
+                </View>
+            )}
+        </TouchableOpacity>
     );
 }
 
@@ -63,6 +173,27 @@ export default function CacheScreen() {
         if (!vm.active && router.canGoBack()) router.back();
     }, [vm.active, router]);
 
+    const handlePush = () => {
+        hapticImpact(Haptics.ImpactFeedbackStyle.Light);
+        actions.pushLootCachePick();
+    };
+
+    // Fire resolution haptics once a roll lands (cracked / jammed / progressed).
+    const lastRollSeen = useRef<unknown>(null);
+    useEffect(() => {
+        const roll = vm.pick?.lastRoll ?? null;
+        if (roll === null || roll === lastRollSeen.current) return;
+        lastRollSeen.current = roll;
+        if (roll.jammed) {
+            hapticNotification(Haptics.NotificationFeedbackType.Error);
+            hapticImpact(Haptics.ImpactFeedbackStyle.Heavy);
+        } else if (vm.phase === 'card') {
+            hapticNotification(Haptics.NotificationFeedbackType.Success);
+        } else {
+            hapticImpact(Haptics.ImpactFeedbackStyle.Medium);
+        }
+    }, [vm.pick?.lastRoll, vm.phase]);
+
     if (!vm.active) return <ScreenBg><View /></ScreenBg>;
 
     return (
@@ -74,9 +205,9 @@ export default function CacheScreen() {
                 {vm.phase === 'intro' && (
                     <View testID="cache-intro">
                         <Text style={styles.body}>
-                            Half-buried and patient, the way hidden things are. Whoever
-                            packed it meant to come back; whoever trapped it meant the
-                            opposite. Three layers, one knife, and no one watching.
+                            Half-buried and patient, the way hidden things are. Three
+                            locks, honest about their difficulty, and no one watching.
+                            The pick either holds or it doesn&apos;t.
                         </Text>
                         <TouchableOpacity
                             accessibilityRole="button"
@@ -93,11 +224,22 @@ export default function CacheScreen() {
                 {/* Layer stack — always visible once delving */}
                 {vm.phase !== 'intro' && (
                     <View style={styles.layers} testID="cache-layers">
-                        {vm.layers.map(layer => <LayerCard key={layer.index} layer={layer} />)}
+                        {vm.layers.map(layer => (
+                            <View key={layer.index}>
+                                <LayerCard layer={layer} />
+                                {layer.reading === 'picking' && vm.pick !== null && (
+                                    <CacheProgressMeter
+                                        progress={vm.pick.progress}
+                                        difficulty={vm.pick.difficulty}
+                                        fraction={vm.pick.progressFraction}
+                                    />
+                                )}
+                            </View>
+                        ))}
                     </View>
                 )}
 
-                {/* Decisions */}
+                {/* Delving decisions */}
                 {vm.phase === 'delving' && (
                     <View style={styles.decisions} testID="cache-decisions">
                         <TouchableOpacity
@@ -113,25 +255,58 @@ export default function CacheScreen() {
                         </TouchableOpacity>
                         <TouchableOpacity
                             accessibilityRole="button"
-                            accessibilityLabel="Probe the next layer for traps"
-                            accessibilityState={{ disabled: !vm.canProbe }}
-                            disabled={!vm.canProbe}
-                            onPress={actions.probeLootCache}
-                            style={[styles.smallButton, !vm.canProbe && styles.disabled]}
-                            testID="cache-probe"
-                        >
-                            <Text style={styles.smallButtonText}>
-                                {vm.probeUsed ? 'THE KNIFE IS SPENT' : 'RUN THE KNIFE ALONG THE SEAM'}
-                            </Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            accessibilityRole="button"
                             accessibilityLabel="Seal the cache and walk away"
                             onPress={actions.sealLootCache}
                             style={styles.smallButton}
                             testID="cache-seal"
                         >
                             <Text style={styles.smallButtonText}>TAKE WHAT&apos;S LIFTED AND GO</Text>
+                        </TouchableOpacity>
+                    </View>
+                )}
+
+                {/* Picking — the dice tray, the tactile heart of the encounter */}
+                {vm.phase === 'picking' && vm.pick !== null && (
+                    <View style={styles.decisions} testID="cache-picking">
+                        <DiceTray pick={vm.pick} onPush={handlePush} />
+
+                        {vm.pick.canChannelInsight && (
+                            <TouchableOpacity
+                                accessibilityRole="button"
+                                accessibilityLabel="Steady the hand before the first push"
+                                onPress={actions.channelLootCacheInsight}
+                                style={[styles.smallButton, { borderColor: AXM.sulfur }]}
+                                testID="cache-insight"
+                            >
+                                <Text style={[styles.smallButtonText, { color: AXM.sulfur }]}>
+                                    STEADY THE HAND
+                                </Text>
+                            </TouchableOpacity>
+                        )}
+
+                        <TouchableOpacity
+                            accessibilityRole="button"
+                            accessibilityLabel="Push the pick"
+                            accessibilityState={{ disabled: !vm.pick.canPush }}
+                            disabled={!vm.pick.canPush}
+                            onPress={handlePush}
+                            style={[styles.bigButton, !vm.pick.canPush && styles.disabled]}
+                            testID="cache-push"
+                        >
+                            <Text style={styles.bigButtonText}>
+                                PUSH ({vm.pick.pushesRemaining} LEFT)
+                            </Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            accessibilityRole="button"
+                            accessibilityLabel="Retreat from this lock"
+                            accessibilityState={{ disabled: !vm.pick.canRetreat }}
+                            disabled={!vm.pick.canRetreat}
+                            onPress={actions.retreatLootCachePick}
+                            style={styles.smallButton}
+                            testID="cache-retreat"
+                        >
+                            <Text style={styles.smallButtonText}>PULL THE PICK BACK</Text>
                         </TouchableOpacity>
                     </View>
                 )}
@@ -254,8 +429,29 @@ const useStyles = makeStyles((AXM) => ({
     layerName: { fontFamily: FONTS.gothic, fontSize: 16, color: AXM.parchment, letterSpacing: 1.2 },
     layerReading: { fontFamily: FONTS.mono, fontSize: 12, letterSpacing: 1 },
     layerFlavor: { fontFamily: FONTS.serifItalic, fontSize: 13, color: AXM.bone, marginTop: 4 },
+    layerDifficulty: { fontFamily: FONTS.mono, fontSize: 11, letterSpacing: 1, color: AXM.bone, marginTop: 4 },
     layerLoot: { fontFamily: FONTS.mono, fontSize: 12, color: AXM.sulfur, marginTop: 4 },
     decisions: { gap: 8 },
+    diceTray: {
+        borderWidth: 1,
+        borderColor: AXM.ash,
+        backgroundColor: AXM.deepBg,
+        paddingVertical: 14,
+        paddingHorizontal: 10,
+        alignItems: 'center',
+    },
+    diceRow: { flexDirection: 'row', gap: 10, justifyContent: 'center' },
+    diceHint: {
+        fontFamily: FONTS.mono,
+        fontSize: 10,
+        letterSpacing: 1.5,
+        color: AXM.bone,
+        marginTop: 10,
+        opacity: 0.7,
+    },
+    rollReadout: { marginTop: 10, alignItems: 'center' },
+    rollGain: { fontFamily: FONTS.mono, fontSize: 13, letterSpacing: 1 },
+    rollSlips: { fontFamily: FONTS.mono, fontSize: 11, letterSpacing: 1, marginTop: 2 },
     card: {
         borderWidth: 2,
         borderColor: AXM.ash,

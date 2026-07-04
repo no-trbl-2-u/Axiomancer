@@ -3,35 +3,71 @@
  * (`axiomancer-mechanics` World/LootCache) onto a render-ready
  * view-model. Pure: no store writes, no rolls, no rule decisions.
  *
- * HIDDEN INFORMATION: a layer's `trapped` fate is surfaced ONLY once
- * the layer is `revealed` (probe) or `opened` — the presenter is the
- * leak boundary, so the screen can render the VM blindly.
+ * PUBLIC INFORMATION (Pick Pool redesign): a layer's `difficulty` is
+ * public from the start — there is no more hidden trap fate to leak.
+ * The presenter's job is now to translate the live dice-pool pick
+ * attempt (`LootCacheSession.pick`) into a render-ready `CachePickVM`
+ * for the active layer, and to give every layer a `reading` that
+ * reflects what has actually happened to it this session (never
+ * attempted, mid-attempt, cracked clean, jammed, or retreated from).
  */
 
 import type {
     LootCacheOutcomeTier,
     LootCacheSession,
 } from '@mechanics';
+import { LOOT_CACHE_TUNING } from '@mechanics';
 import type { AppStoreState } from '@/state/store';
 
 // ---------------------------------------------------------------------------
 // VM shapes
 // ---------------------------------------------------------------------------
 
-/** What the player may KNOW about a layer's fate. */
-export type CacheLayerReading = 'sealed' | 'live' | 'dud' | 'clean' | 'sprung';
+/** What has happened to a layer this session. */
+export type CacheLayerReading =
+    | 'locked'      // not yet attempted
+    | 'picking'     // the active lock, mid-attempt
+    | 'cracked'     // opened clean
+    | 'sprung'      // jammed / spoiled
+    | 'retreated';  // closed without opening, no bite
 
 export interface CacheLayerVM {
     index: number;
     name: string;
     flavor: string;
-    /** sealed = unknown; live/dud = probed; clean/sprung = opened. */
+    difficulty: number;
     reading: CacheLayerReading;
     opened: boolean;
-    /** This is the next layer the delve would open. */
+    /** This is the layer the pick attempt would open next. */
     isNext: boolean;
     /** Loot summary, shown only once opened. */
     lootSummary: string | null;
+}
+
+export interface CachePickRollVM {
+    dice: readonly number[];
+    slips: number;
+    gained: number;
+    jammed: boolean;
+}
+
+export interface CachePickVM {
+    layerIndex: number;
+    difficulty: number;
+    progress: number;
+    /** 0-1, for a fill-bar. */
+    progressFraction: number;
+    pushes: number;
+    maxPushes: number;
+    pushesRemaining: number;
+    poolSize: number;
+    canPush: boolean;
+    canRetreat: boolean;
+    canChannelInsight: boolean;
+    insightUsed: boolean;
+    /** True when the *next* push will roll the bonus die. */
+    insightPending: boolean;
+    lastRoll: CachePickRollVM | null;
 }
 
 export interface CacheCardVM {
@@ -57,10 +93,10 @@ export interface CacheVM {
     phase: LootCacheSession['phase'] | 'none';
     layers: readonly CacheLayerVM[];
     depth: number;
-    probeUsed: boolean;
+    insightUsed: boolean;
     canDelve: boolean;
-    canProbe: boolean;
     canSeal: boolean;
+    pick: CachePickVM | null;
     card: CacheCardVM | null;
     outcome: CacheOutcomeVM | null;
 }
@@ -80,10 +116,10 @@ const EMPTY_VM: CacheVM = Object.freeze({
     phase: 'none',
     layers: Object.freeze([]),
     depth: 0,
-    probeUsed: false,
+    insightUsed: false,
     canDelve: false,
-    canProbe: false,
     canSeal: false,
+    pick: null,
     card: null,
     outcome: null,
 });
@@ -96,11 +132,14 @@ export function selectCacheVM(state: Pick<AppStoreState, 'cache'>): CacheVM {
     const s = state.cache?.session;
     if (!s) return EMPTY_VM;
 
+    const activePickLayer = s.pick?.layerIndex ?? null;
+
     const layers: CacheLayerVM[] = s.layers.map(l => {
         let reading: CacheLayerReading;
-        if (l.opened) reading = l.spoiled ? 'sprung' : 'clean';
-        else if (l.revealed) reading = l.trapped ? 'live' : 'dud';
-        else reading = 'sealed';
+        if (l.opened) reading = l.spoiled ? 'sprung' : 'cracked';
+        else if (activePickLayer === l.index) reading = 'picking';
+        else if (l.index < s.depth) reading = 'retreated';
+        else reading = 'locked';
 
         let lootSummary: string | null = null;
         if (l.opened && !l.spoiled) {
@@ -110,19 +149,51 @@ export function selectCacheVM(state: Pick<AppStoreState, 'cache'>): CacheVM {
             if (l.loot.keepsake) pieces.push(l.loot.keepsake.toLowerCase());
             lootSummary = pieces.join(' · ');
         } else if (l.opened && l.spoiled) {
-            lootSummary = 'spoiled by the trap';
+            lootSummary = 'spoiled by the jam';
         }
 
         return {
             index: l.index,
             name: l.name,
             flavor: l.flavor,
+            difficulty: l.difficulty,
             reading,
             opened: l.opened,
             isNext: !l.opened && l.index === s.depth,
             lootSummary,
         };
     });
+
+    const pick: CachePickVM | null = s.pick === null ? null : (() => {
+        const p = s.pick!;
+        const maxPushes = LOOT_CACHE_TUNING.maxPushesPerLayer;
+        const layer = s.layers[p.layerIndex];
+        const insightPending = p.insightPending === true;
+        const poolSize = LOOT_CACHE_TUNING.pickPoolSize + (insightPending || p.lastRoll?.insightSpent ? 1 : 0);
+        return {
+            layerIndex: p.layerIndex,
+            difficulty: layer.difficulty,
+            progress: p.progress,
+            progressFraction: layer.difficulty > 0
+                ? Math.max(0, Math.min(1, p.progress / layer.difficulty))
+                : 0,
+            pushes: p.pushes,
+            maxPushes,
+            pushesRemaining: Math.max(0, maxPushes - p.pushes),
+            poolSize,
+            canPush: p.pushes < maxPushes,
+            canRetreat: true,
+            canChannelInsight: !s.insightUsed && !insightPending && p.pushes === 0,
+            insightUsed: s.insightUsed,
+            insightPending,
+            lastRoll: p.lastRoll === null ? null : {
+                dice: p.lastRoll.dice,
+                slips: p.lastRoll.slips,
+                gained: p.lastRoll.gained,
+                jammed: p.lastRoll.jammed,
+            },
+        };
+    })();
 
     const card: CacheCardVM | null = s.card === null ? null : {
         title: s.card.title,
@@ -147,10 +218,10 @@ export function selectCacheVM(state: Pick<AppStoreState, 'cache'>): CacheVM {
         phase: s.phase,
         layers,
         depth: s.depth,
-        probeUsed: s.probeUsed,
+        insightUsed: s.insightUsed,
         canDelve: delving && s.depth < s.layers.length,
-        canProbe: delving && !s.probeUsed && s.depth < s.layers.length,
         canSeal: delving,
+        pick,
         card,
         outcome,
     };

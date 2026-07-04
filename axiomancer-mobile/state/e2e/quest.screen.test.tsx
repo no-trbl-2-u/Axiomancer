@@ -17,7 +17,7 @@ import RestScreen from '@/app/rest/index';
 import { QUEST_LANDING_TIMING } from '@/components/quest/useQuestLanding';
 import { createAppActions, type AppActions } from '@/state/actions';
 import type { AppStore } from '@/state/store';
-import { BUILD_THE_BOAT_BOARD, createLootCacheSession } from '@mechanics';
+import { BUILD_THE_BOAT_BOARD } from '@mechanics';
 import type { QuestBoardSession } from '@mechanics';
 import { withAllProviders } from '@/test-utils/withAllProviders';
 
@@ -272,28 +272,32 @@ describe('rest screen', () => {
     });
 });
 
-describe('cache screen', () => {
-    function dudSeed(): number {
-        for (let seed = 1; seed < 3000; seed++) {
-            if (createLootCacheSession(seed, [], 10).layers.every(l => !l.trapped)) return seed;
-        }
-        throw new Error('no all-dud seed');
-    }
-
-    it('walks intro → layers → delve cards → ledger → claim', () => {
+describe('cache screen (pick pool)', () => {
+    it('walks intro → layers → delve → picking → push to resolution → ledger → claim', () => {
         const { store, actions } = mount(<CacheScreen />);
         act(() => {
-            actions.beginLootCache({ currency: 10, seed: dudSeed() });
+            actions.beginLootCache({ currency: 10, seed: 7 });
         });
         expect(screen.getByTestId('cache-intro')).toBeTruthy();
         fireEvent.press(screen.getByTestId('cache-begin'));
         expect(screen.getByTestId('cache-layers')).toBeTruthy();
         expect(screen.getByTestId('cache-decisions')).toBeTruthy();
 
-        for (let i = 0; i < 3; i++) {
+        let guard = 0;
+        while (store.getState().cache.session!.phase === 'delving'
+            && store.getState().cache.session!.depth < 3 && guard++ < 10) {
             fireEvent.press(screen.getByTestId('cache-delve'));
+            expect(screen.getByTestId('cache-dice-tray')).toBeTruthy();
+
+            let pushGuard = 0;
+            while (store.getState().cache.session!.phase === 'picking' && pushGuard++ < 50) {
+                fireEvent.press(screen.getByTestId('cache-push'));
+            }
             expect(screen.getByTestId('cache-card')).toBeTruthy();
             fireEvent.press(screen.getByTestId('cache-continue'));
+        }
+        if (store.getState().cache.session!.phase === 'delving') {
+            fireEvent.press(screen.getByTestId('cache-seal'));
         }
         expect(store.getState().cache.session!.phase).toBe('outcome');
         expect(screen.getByTestId('cache-outcome')).toBeTruthy();
@@ -301,19 +305,29 @@ describe('cache screen', () => {
         expect(store.getState().cache.session).toBeNull();
     });
 
-    it('hides sealed trap fates until probed', () => {
+    it('difficulty is public from the start — every unopened layer shows its target openly', () => {
         const { store, actions } = mount(<CacheScreen />);
         act(() => {
             actions.beginLootCache({ currency: 10, seed: 7 });
         });
         fireEvent.press(screen.getByTestId('cache-begin'));
-        // All unopened layers read SEALED — no fate leaks.
         const session = store.getState().cache.session!;
-        for (const layer of session.layers.slice(1)) {
-            if (layer.opened || layer.revealed) continue;
+        for (const layer of session.layers) {
             expect(screen.getByTestId(`cache-layer-${layer.index}`)).toBeTruthy();
+            expect(screen.getByTestId(`cache-layer-${layer.index}-difficulty`)).toBeTruthy();
         }
-        expect(screen.queryByText('TRAP — LIVE')).toBeNull();
-        expect(screen.queryByText('TRAP — DEAD')).toBeNull();
+    });
+
+    it('retreat exits the pick attempt without opening the layer or biting vitae', () => {
+        const { store, actions } = mount(<CacheScreen />);
+        act(() => {
+            actions.beginLootCache({ currency: 10, seed: 7 });
+        });
+        fireEvent.press(screen.getByTestId('cache-begin'));
+        fireEvent.press(screen.getByTestId('cache-delve'));
+        expect(store.getState().cache.session!.phase).toBe('picking');
+
+        fireEvent.press(screen.getByTestId('cache-retreat'));
+        expect(store.getState().cache.session!.phase).not.toBe('picking');
     });
 });

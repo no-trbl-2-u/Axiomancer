@@ -6,27 +6,35 @@
  * mirroring the hazard / gathering / quest-board sims). No I/O, no
  * Math.random — every run is reproducible from its seed.
  *
- * The Reliquary is PUSH-YOUR-LUCK on hidden information: three layers
- * (the lid is always safe; deeper layers are likelier trapped AND richer),
- * one PROBE that reveals the next layer's sealed fate before committing.
- * A sprung trap bites vitae, spoils that layer's loot, and slams the cache
- * shut. The skill expression is INFORMED greed — the policies witness it:
+ * The Reliquary is PUSH-YOUR-LUCK on a LIVE dice-pool "Pick Pool": three
+ * layers (the lid is easiest and richest-in-safety; deeper layers need
+ * more cumulative progress AND bite harder on a jam), a single Insight
+ * charge that grants a bonus die on a layer's opening roll. The skill
+ * expression is INFORMED risk management — the policies witness it:
  *
- *  - `greedy`  — always delve, never probe, never seal. Blind greed:
- *                takes everything when lucky, eats every trap when not.
- *  - `prudent` — delve the always-safe lid, then seal and walk. The
- *                restraint baseline: never bitten, never rich.
- *  - `prober`  — probe each layer, delve only on a clean reading, seal on
- *                teeth. Perfect information by design: the skilled take.
+ *  - `greedy`  — always delve, always push to crack or resist, never
+ *                retreats, never spends Insight. Blind greed: takes
+ *                everything when lucky, eats every jam when not.
+ *  - `prudent` — delves each layer but retreats after one push (banking
+ *                nothing extra), and stops delving new layers once bitten
+ *                once this session. The restraint baseline: rarely bitten,
+ *                rarely rich.
+ *  - `prober`  — delves and pushes like greedy, but spends the one
+ *                Insight charge on the deepest layer it attempts (The
+ *                Keeper's Tithe) before that layer's first roll. Informed
+ *                greed: the same raw pushes, a better-loaded pool where it
+ *                matters most.
  */
 
 import {
     beginLootCache,
+    channelLootCacheInsight,
     claimLootCacheOutcome,
     continueLootCacheCard,
     createLootCacheSession,
     delveLootCache,
-    probeLootCache,
+    pushLootCachePick,
+    retreatLootCachePick,
     sealLootCache,
 } from './lootcache.engine';
 import type {
@@ -58,8 +66,8 @@ export interface LootCacheSimRunResult {
 
 /**
  * Plays one whole cache to `done` and returns the outcome. The prober
- * spends its single probe on the next layer's fate, then delves a dud or
- * seals on teeth; the others never probe.
+ * spends its single Insight charge on the deepest layer it attempts; the
+ * others never channel it.
  */
 export function simulateLootCache(
     seed: number,
@@ -71,7 +79,7 @@ export function simulateLootCache(
     s = beginLootCache(s);
 
     let guard = 0;
-    while (s.phase !== 'done' && guard++ < 100) {
+    while (s.phase !== 'done' && guard++ < 200) {
         if (s.phase === 'card') {
             s = continueLootCacheCard(s);
             continue;
@@ -80,8 +88,12 @@ export function simulateLootCache(
             s = claimLootCacheOutcome(s);
             continue;
         }
+        if (s.phase === 'picking') {
+            s = decidePicking(s, policy);
+            continue;
+        }
         // phase === 'delving': decide.
-        s = decide(s, policy);
+        s = decideDelving(s, policy);
     }
 
     const outcome = s.outcome;
@@ -94,39 +106,40 @@ export function simulateLootCache(
     };
 }
 
-function decide(s: LootCacheSession, policy: LootCachePolicyId): LootCacheSession {
-    if (policy === 'greedy') return delveLootCache(s);
+/** Per-layer push count the prudent bot risks before retreating. */
+const PRUDENT_MAX_PUSHES = 1;
+
+function decideDelving(s: LootCacheSession, policy: LootCachePolicyId): LootCacheSession {
+    if (s.depth >= s.layers.length) return sealLootCache(s);
 
     if (policy === 'prudent') {
-        // Take the always-safe lid (depth 0), then seal and walk.
-        return s.depth === 0 ? delveLootCache(s) : sealLootCache(s);
+        // Stop opening new layers once bitten once this session.
+        return s.bittenVitae > 0 ? sealLootCache(s) : delveLootCache(s);
     }
 
-    // prober: the lid (depth 0) is always safe — take it free. Reaching
-    // the rich keeper's tithe (depth 2) means clearing the false bottom
-    // (depth 1, trap chance 1/3) first; the deepest layer carries the worst
-    // odds (1/2). The single probe is best spent on that deepest layer, so
-    // at depth 1 the prober accepts the smaller blind risk to keep the probe
-    // for where it matters; at depth 2 it probes and seals on teeth.
-    const next = s.layers[s.depth];
-    if (!next) return sealLootCache(s);
-    if (s.depth === 0) return delveLootCache(s);
-
-    // A fate this policy has already revealed is acted on directly.
-    if (next.revealed) {
-        return next.trapped ? sealLootCache(s) : delveLootCache(s);
-    }
-
-    const isDeepest = s.depth === s.layers.length - 1;
-    if (isDeepest) {
-        // The tithe: probe it if we still can; never blind-gamble the
-        // richest-but-deadliest layer.
-        return s.probeUsed ? sealLootCache(s) : probeLootCache(s);
-    }
-
-    // The false bottom, probe still in hand: accept the smaller blind risk
-    // to push toward the tithe and keep the probe for it.
+    // greedy and prober both delve every layer.
     return delveLootCache(s);
+}
+
+function decidePicking(s: LootCacheSession, policy: LootCachePolicyId): LootCacheSession {
+    if (s.pick === null) return s;
+
+    if (policy === 'prudent') {
+        return s.pick.pushes < PRUDENT_MAX_PUSHES ? pushLootCachePick(s) : retreatLootCachePick(s);
+    }
+
+    if (policy === 'prober') {
+        // Spend the single Insight charge on the deepest layer this bot
+        // attempts, before that layer's first roll.
+        const isDeepest = s.pick.layerIndex === s.layers.length - 1;
+        if (isDeepest && !s.insightUsed && s.pick.pushes === 0) {
+            return channelLootCacheInsight(s);
+        }
+        return pushLootCachePick(s);
+    }
+
+    // greedy: always push, never retreats, never channels Insight.
+    return pushLootCachePick(s);
 }
 
 export interface LootCacheSimSummary {
@@ -199,8 +212,8 @@ export interface LootCacheBalanceReport {
     currencyGradient: [number, number, number];
     /**
      * Risk-adjusted value per policy as [prober, greedy, prudent]:
-     * `avgCurrency - bitePenalty * avgBitten`. The probe's worth shows up
-     * here even when raw currency is flat — informed greed buys the same
+     * `avgCurrency - bitePenalty * avgBitten`. Insight's worth shows up
+     * here even when raw currency is flat — informed pushes buy the same
      * loot at a fraction of the vitae cost.
      */
     riskAdjusted: [number, number, number];
@@ -233,13 +246,13 @@ export function generateLootCacheBalanceReport(runs = 400): LootCacheBalanceRepo
 
     const recommendations: string[] = [];
     if (riskAdjusted[0] <= riskAdjusted[1]) {
-        recommendations.push('Informed probing no longer beats blind greed on risk-adjusted value — the probe is undervalued.');
+        recommendations.push('Insight no longer beats blind greed on risk-adjusted value — Insight is undervalued.');
     }
     if (policies.greedy.avgBitten <= policies.prober.avgBitten) {
-        recommendations.push('Blind greed is no longer punished more than skilled probing — trap economy too soft.');
+        recommendations.push('Blind greed is no longer punished more than informed pushing — jam economy too soft.');
     }
-    if (policies.prudent.avgBitten > 0) {
-        recommendations.push('Prudent (lid-only) policy is taking bites — the lid is no longer always safe.');
+    if (policies.prudent.avgBitten > policies.greedy.avgBitten) {
+        recommendations.push('Prudent (retreat-early) policy is taking more bites than blind greed — retreat threshold too loose.');
     }
 
     return {

@@ -1,9 +1,10 @@
 /**
  * Loot-cache encounter ("The Reliquary") — Public API.
  *
- * Three layers, sealed trap fates, one probe, push-your-luck. The
- * engine deals in item REFS; the host maps kept uids back to real
- * items and settles the bite at claim time.
+ * Three layers, a public per-layer difficulty, a live d6 "Pick Pool"
+ * skill check, one Insight charge, push-your-luck. The engine deals in
+ * item REFS; the host maps kept uids back to real items and settles the
+ * bite at claim time.
  *
  * Seeded-RNG helpers are aliased `lootCache*` because sibling modules
  * already export `seedRng`/`nextFloat`/… from the package root.
@@ -15,6 +16,8 @@ export type {
     LootCacheLayerIndex,
     LootCacheLayerLoot,
     LootCacheLayerState,
+    LootCachePickRoll,
+    LootCachePickState,
     LootCacheCard,
     LootCacheOutcomeTier,
     LootCacheOutcome,
@@ -41,7 +44,9 @@ export {
     createLootCacheSession,
     beginLootCache,
     delveLootCache,
-    probeLootCache,
+    pushLootCachePick,
+    channelLootCacheInsight,
+    retreatLootCachePick,
     sealLootCache,
     continueLootCacheCard,
     claimLootCacheOutcome,

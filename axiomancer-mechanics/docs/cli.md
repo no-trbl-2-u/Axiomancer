@@ -216,7 +216,9 @@ npm run rest -- [flags]              # convenience alias
 ### `lootcache.cli.ts` - Loot Cache Mini-Game Driver
 
 A standalone driver for the loot-cache push-your-luck mini-game ("The
-Reliquary"), reachable as a **subcommand** of the game CLI.
+Reliquary"), reachable as a **subcommand** of the game CLI. Each layer is a
+live d6 "Pick Pool" dice check against a public difficulty — push, retreat,
+or channel Insight — not a hidden pre-rolled trap.
 
 **Usage:**
 ```bash
@@ -228,8 +230,8 @@ npm run loot-cache -- [flags]        # convenience alias
 
 | Flag | Effect |
 | --- | --- |
-| `--policy greedy\|prudent\|prober` | The bot for `--auto` (default `prober`), reusing the `lootcache.sim.ts` push-your-luck `decide()` logic. |
-| `--auto` | The policy plays each cache. Otherwise the player decides whether to push or bank by hand. |
+| `--policy greedy\|prudent\|prober` | The bot for `--auto` (default `prober`), reusing `lootcache.sim.ts`'s push-your-luck decision logic. |
+| `--auto` | The policy plays each cache. Otherwise the player decides whether to push, retreat, channel Insight, or seal by hand. |
 | `--currency <n>` | The starting currency stake (default the engine's `DEFAULT_CACHE_CURRENCY`). |
 | `--seed <n\|str>` | Seed the engine's embedded RNG so a run is fully reproducible. |
 | `--runs <n>` | Play N caches back-to-back (default **5**). |

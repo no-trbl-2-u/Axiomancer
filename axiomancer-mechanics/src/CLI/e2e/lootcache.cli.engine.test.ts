@@ -1,6 +1,7 @@
 /**
  * Hermetic e2e — Loot-cache mini-game CLI (`src/CLI/lootcache.cli.ts`),
- * "The Reliquary".
+ * "The Reliquary". Now drives the live Pick Pool: delve → picking
+ * (push/retreat/insight) → card → delving/outcome.
  *
  * The driver is plain async functions over the deterministic, self-seeded
  * loot-cache engine, so we can drive it in-process:
@@ -84,8 +85,8 @@ describe('LootCache CLI — deterministic auto playthrough', () => {
             const logs = readLog(logPath);
             const claim = logs.find(r => r.action === 'claimLootCacheOutcome');
             expect(claim).toBeDefined();
-            const delves = logs.filter(r => r.action === 'delveLootCache').length;
-            return { delves, tier: claim!.event.tier as string, currency: claim!.event.currencyKept as number };
+            const pushes = logs.filter(r => r.action === 'pushLootCachePick').length;
+            return { pushes, tier: claim!.event.tier as string, currency: claim!.event.currencyKept as number };
         };
 
         const a = await runOnce();
@@ -93,12 +94,12 @@ describe('LootCache CLI — deterministic auto playthrough', () => {
 
         // Same seed → identical outcome.
         expect(a).toEqual(b);
-        // A real cache was opened to a claimed outcome (the always-safe lid).
-        expect(a.delves).toBeGreaterThan(0);
+        // A real cache was picked at least once en route to a claimed outcome.
+        expect(a.pushes).toBeGreaterThan(0);
         expect(['emptied', 'prudent', 'stung']).toContain(a.tier);
     });
 
-    it('the prudent policy takes only the safe lid and never gets bitten', async () => {
+    it('the prudent policy retreats early and rarely reaches every layer', async () => {
         const logPath = tmpPath('prudent');
         await runLootCacheCli([
             '--auto', '--policy', 'prudent', '--seed', '11', '--runs', '5',
@@ -106,9 +107,8 @@ describe('LootCache CLI — deterministic auto playthrough', () => {
         ]);
         const claims = readLog(logPath).filter(r => r.action === 'claimLootCacheOutcome');
         expect(claims).toHaveLength(5);
-        // The lid is always safe: prudent never carries a bite.
         for (const c of claims) {
-            expect(['prudent', 'emptied']).toContain(c.event.tier);
+            expect(['prudent', 'emptied', 'stung']).toContain(c.event.tier);
         }
     });
 
@@ -124,19 +124,39 @@ describe('LootCache CLI — deterministic auto playthrough', () => {
 });
 
 describe('LootCache CLI — illegal action handling', () => {
-    it('warns, skips, and logs a no-op probe-after-spent attempt with a state snapshot', async () => {
-        // Manual script: delve the lid, then probe layer 1, then try to probe
-        // AGAIN — the second probe is a deterministic no-op (probe already
-        // spent), regardless of the seed.
+    it('drives a manual delve → push → retreat → seal script to a claimed outcome', async () => {
+        // Manual script: delve the lid, push once, retreat from that layer
+        // attempt, then walk away with whatever was already cracked (nothing).
         const scriptPath = tmpPath('script', 'json');
         fs.writeFileSync(scriptPath, JSON.stringify([
-            { pick: 'delve' },  // open the always-safe lid
-            { pick: 'probe' },  // spend the one probe on layer 1
-            { pick: 'probe' },  // illegal — probe already spent
-            { pick: 'seal' },   // walk away cleanly
+            { pick: 'delve' },     // open a pick attempt on the lid
+            { pick: 'push' },      // roll the pick pool on the lid
+            { pick: 'retreat' },   // walk away from the lid mid-attempt (if still picking)
+            { pick: 'seal' },      // walk away cleanly
         ]));
 
-        const logPath = tmpPath('illegal');
+        const logPath = tmpPath('manual-flow');
+        await runLootCacheCli([
+            '--seed', '1', '--runs', '1',
+            '--script', scriptPath, '--json-events', '--state-log', logPath,
+        ]);
+
+        const claim = readLog(logPath).find(r => r.action === 'claimLootCacheOutcome');
+        expect(claim).toBeDefined();
+    });
+
+    it('warns, skips, and logs a no-op second insight attempt with a state snapshot', async () => {
+        const scriptPath = tmpPath('script', 'json');
+        fs.writeFileSync(scriptPath, JSON.stringify([
+            { pick: 'delve' },     // open a pick attempt on the lid
+            { pick: 'insight' },   // channel insight before the lid's first roll
+            { pick: 'insight' },   // illegal — insight already spent
+            { pick: 'push' },      // roll the (bonus-die) pool
+            { pick: 'retreat' },   // if still picking after the push
+            { pick: 'seal' },      // walk away with whatever's left to do
+        ]));
+
+        const logPath = tmpPath('illegal-insight');
         await runLootCacheCli([
             '--seed', '1', '--runs', '1',
             '--script', scriptPath, '--json-events', '--state-log', logPath,
@@ -145,9 +165,7 @@ describe('LootCache CLI — illegal action handling', () => {
         const illegal = readLog(logPath).filter(r => r.action === 'illegalLootCacheAction');
         expect(illegal.length).toBeGreaterThanOrEqual(1);
         const record = illegal[0]!;
-        // The attempted action is captured for tuning…
-        expect(record.event.attempted.action).toBe('probeLootCache');
-        // …along with a full loot-cache-state snapshot.
+        expect(record.event.attempted.action).toBe('channelLootCacheInsight');
         expect(typeof record.event.lootCacheState.phase).toBe('string');
         expect(Array.isArray(record.event.lootCacheState.layers)).toBe(true);
     });

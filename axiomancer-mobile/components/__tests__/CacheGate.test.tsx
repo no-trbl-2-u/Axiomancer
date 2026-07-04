@@ -49,7 +49,8 @@ function setActiveSession(store: AppStore) {
     const mockSession: LootCacheSession = {
         phase: 'delving',
         depth: 0,
-        probeUsed: false,
+        insightUsed: false,
+        pick: null,
         layers: [],
         card: null,
         outcome: null,

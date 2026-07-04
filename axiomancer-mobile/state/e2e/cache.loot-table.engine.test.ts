@@ -10,7 +10,6 @@
 
 import { afterEach, describe, expect, it, jest } from '@jest/globals';
 import type { GameState, Item, LootCacheSession } from '@mechanics';
-import { createLootCacheSession } from '@mechanics';
 
 import { createAppActions, type AppActions } from '@/state/actions';
 import { createAppStore, type AppStore } from '@/state/store';
@@ -38,13 +37,19 @@ function setLevel(store: AppStore, level: number): void {
     store.setState({ player: { ...player, level } } as never);
 }
 
-/** Finds a seed whose three layer fates are all clean (dud). */
-function allCleanSeed(): number {
-    for (let seed = 1; seed < 3000; seed++) {
-        const probe = createLootCacheSession(seed, [], 0);
-        if (probe.layers.every((l) => !l.trapped)) return seed;
+/** Drives every layer: delve → push the pick pool to resolution → continue. */
+function delveAllLayers(actions: AppActions, store: AppStore): void {
+    let guard = 0;
+    while (session(store).phase === 'delving' && session(store).depth < session(store).layers.length
+        && guard++ < 10) {
+        actions.delveLootCache();
+        let pushGuard = 0;
+        while (session(store).phase === 'picking' && pushGuard++ < 50) {
+            actions.pushLootCachePick();
+        }
+        if (session(store).phase === 'card') actions.continueLootCacheCard();
     }
-    throw new Error('no all-clean seed found');
+    if (session(store).phase === 'delving') actions.sealLootCache();
 }
 
 describe('cache loot-table reward depth', () => {
@@ -70,24 +75,23 @@ describe('cache loot-table reward depth', () => {
         const before = store.getState() as unknown as GameState;
         const beforeInv = before.player.inventory.length;
 
-        const seed = allCleanSeed();
-        actions.beginLootCache({ lootTable: { tier: 'rich' }, currency: 5, seed });
+        actions.beginLootCache({ lootTable: { tier: 'rich' }, currency: 5, seed: 99 });
         const rolledItemCount = session(store).layers.flatMap((l) => l.loot.items).length;
         expect(rolledItemCount).toBeGreaterThan(0);
 
         actions.startLootCacheDelving();
-        for (let i = 0; i < session(store).layers.length; i++) {
-            actions.delveLootCache();
-            if (session(store).phase === 'card') actions.continueLootCacheCard();
-        }
-        expect(selectCacheVM(store.getState()).outcome!.tier).toBe('emptied');
+        delveAllLayers(actions, store);
 
+        // Whatever survived cracking (a jam can spoil a layer's loot) is
+        // exactly what the claim adds — the accounting invariant, not a
+        // specific tier (the pick pool's dice are genuinely at risk).
+        const outcome = selectCacheVM(store.getState()).outcome!;
         const result = actions.claimLootCacheOutcome();
         expect(result.applied).toBe(true);
-        expect(result.itemsAdded).toBe(rolledItemCount);
+        expect(result.itemsAdded).toBe(outcome.itemNames.length);
 
         const after = store.getState() as unknown as GameState;
-        expect(after.player.inventory.length).toBe(beforeInv + rolledItemCount);
+        expect(after.player.inventory.length).toBe(beforeInv + result.itemsAdded);
         // The rolled items are real equipment with engine-resolved rarity.
         const added = after.player.inventory.slice(beforeInv);
         expect(added.every((i) => i.category === 'equipment')).toBe(true);
