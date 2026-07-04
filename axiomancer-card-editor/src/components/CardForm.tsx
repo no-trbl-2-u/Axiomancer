@@ -172,6 +172,8 @@ function defaultMechanic(kind: SpecialMechanicKind): CardSpecialMechanic {
             return { kind, hpPct: 30, dotStacks: 2 };
         case 'amplify':
             return { kind, multiplier: 1.5 };
+        case 'grant_permanent_wild_die':
+            return { kind, wildCount: 1, deadCount: 1 };
         default:
             return { kind: 'befriend_attempt' };
     }
@@ -575,6 +577,13 @@ function MechanicFields({ mechanic, patch }: { mechanic: CardSpecialMechanic; pa
             );
         case 'amplify':
             return numRow('MULTIPLIER', '× pending DoT', mechanic.multiplier, 'multiplier', 0, 20);
+        case 'grant_permanent_wild_die':
+            return (
+                <>
+                    {numRow('WILD DICE', 'engine caps pool at 3', mechanic.wildCount, 'wildCount', 0, 3)}
+                    {numRow('DEAD DICE', 'locked X per wild (§4.3)', mechanic.deadCount, 'deadCount', 0, 3)}
+                </>
+            );
         case 'befriend_attempt':
         case 'convert_enemy_buff_to_self':
         default:
