@@ -154,7 +154,7 @@ describe('playtest harness — honest failures', () => {
             stage: 'early', enemySlug: 'tidepool-crab', policyId: 'greedy',
             deck: { kind: 'preset', presetId: 'dot-erosion' }, runs: 2, seed: 1,
         });
-        expect(cell.deckCardIds).toContain('the-final-word');
+        expect(cell.deckCardIds).toContain('pyrrhic-victory');
         expect(cell.stats.runs).toBe(2);
     }, 30_000);
 });

@@ -133,9 +133,11 @@ describe('mob-appeal — Tier 2 body + secondary_heal_self', () => {
 
         const { state: next, events } = executeSkill(state, 'mob-appeal', getCardById);
 
-        // basePower 10 + body(6) x 0.5 = 13 damage, reduced by enemy body(3) resistance = 10 damage
-        expect(next.enemy.health).toBe(enemyHpBefore - 10);
-        // secondary_heal_self: heart(4) x 0.5 x 1 = 2
+        // Master Spec (2026-07-03): basePower 10 -> 0 (mob-appeal is now a status
+        // card, not a flat strike) + body(6) x 0.5 = 3 raw, reduced by enemy
+        // body(3) resistance to a 1-damage floor (calculateDamageResistance).
+        expect(next.enemy.health).toBe(enemyHpBefore - 1);
+        // secondary_heal_self: heart(4) x 0.5 x 1 = 2 (unaffected by the basePower change)
         expect(next.player.health).toBe(casterHpBefore + 2);
         expect(events.filter(e => e.kind === 'heal').length).toBeGreaterThanOrEqual(1);
     });

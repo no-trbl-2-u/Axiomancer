@@ -40,7 +40,7 @@ import {
 import {
     TURN_DICE_COUNT, rollTurnDice, dieHasStance,
     combatDieCanPower, availableDiceFor, spendDice, refreshOneDie, availableDieCount,
-    hasRerollableDice,
+    hasRerollableDice, rollPermanentBonusDice, MAX_PERMANENT_WILD_DICE,
 } from './combat.dice';
 import {
     COMBAT_HAND_SIZE, buildCombatDeck, drawCombatCards, shuffleCombatDeck,
@@ -52,6 +52,9 @@ import { recordAttribution } from './combat.attribution';
 import { canAct, getActiveEffectModifiers, getActiveDotTotal } from './effect-modifiers';
 import { getThreatSequence } from './combat.threat';
 import { getSignatureSkill, applySignatureSkill, playerArchetype, SIGNATURE_KITS } from './combat.signature';
+import {
+    lookupSkill as lookupSkillDefinition, canAffordSkill, triggerSkill,
+} from '../Skills';
 import type {
     CombatCard, CombatDieColor, CombatEncounterState, CombatEvent, CardPlay,
     CombatManaDie, CombatPhaseResult, CombatTransition, LandedEffect, CombatReadResult,
@@ -305,6 +308,10 @@ export function initializeCombatEncounter(
         directDamageDealt: 0,
         log: [],
         finalOutcome: null,
+        // Master Spec §4 — wild-die permanent-growth pool. Starts empty; grown
+        // for the rest of the encounter by `grant_permanent_wild_die` cards.
+        permanentWildDice: 0,
+        permanentDeadDice: 0,
         seed,
     };
 }
@@ -345,6 +352,12 @@ export function startTurn(
         dice = dice.slice();
         dice[0] = { id: `t${turn}-d0`, color: carriedDie, state: carriedDie === 'x' ? 'locked' : 'available', temporary: false };
         carriedDie = null;
+    }
+    // Master Spec §4 — permanent wild-die pool growth appends bonus dice to
+    // EVERY turn's draft pool from here on (not a one-turn trick). No-op while
+    // the pool is empty (the common case pre-growth).
+    if (state.permanentWildDice || state.permanentDeadDice) {
+        dice = [...dice, ...rollPermanentBonusDice(turn, state.permanentWildDice ?? 0, state.permanentDeadDice ?? 0)];
     }
     const next: CombatEncounterState = { ...state, dice, draftedDieId: null, turn, lastRead: 'none', carriedDie };
     const events: CombatEvent[] = [
@@ -742,6 +755,27 @@ function playBottomAction(
             events.push({ kind: 'damage-dealt', cardId: card.id, target: 'self', amount: -healAmt });
         }
     }
+    // GRANT_PERMANENT_WILD_DIE (Master Spec §4) — grows the wild-die pool for the
+    // REST of the encounter, clamped to MAX_PERMANENT_WILD_DICE; every granted
+    // Wild die pairs with one permanent dead (locked X) die (§4.3 balance guard).
+    // No-op (and no event) once the pool is already at cap.
+    let permanentWildDice = state.permanentWildDice ?? 0;
+    let permanentDeadDice = state.permanentDeadDice ?? 0;
+    const wildGrantMech = mechs.find(m => m.kind === 'grant_permanent_wild_die') as
+        { kind: 'grant_permanent_wild_die'; wildCount: number; deadCount: number } | undefined;
+    if (wildGrantMech) {
+        const addWild = Math.max(0, Math.min(wildGrantMech.wildCount, MAX_PERMANENT_WILD_DICE - permanentWildDice));
+        if (addWild > 0) {
+            permanentWildDice += addWild;
+            permanentDeadDice += wildGrantMech.deadCount;
+            events.push({
+                kind: 'permanent-wild-die-granted',
+                wildAdded: addWild,
+                deadAdded: wildGrantMech.deadCount,
+                totalWild: permanentWildDice,
+            });
+        }
+    }
     // Offensive status ids this card landed on the enemy — gates the combo loop on
     // VARIETY (a status new to this chain refreshes the die; a repeat spends it).
     const landedOffensiveIds: string[] = [];
@@ -825,6 +859,8 @@ function playBottomAction(
         barrier: (state.barrier ?? 0) + barrierGain,
         riposte: riposteArmed,
         directDamageDealt: directDamage,
+        permanentWildDice,
+        permanentDeadDice,
     };
     next = discardEntry(next, uid);
     if (mercyOpened) {
@@ -1251,6 +1287,111 @@ export function playSignatureSkill(
         ...applied.events,
     ];
     const next = withLog(applied.state, events);
+    return checkImmediateOutcome(next, events);
+}
+
+/**
+ * Master Spec §3 — Skills trigger hook. Skills are NOT cards (locked product
+ * doctrine): a separate, always-available ability system funded by
+ * `CombatResources` tokens, triggerable independent of the drawn hand / card
+ * plays and independent of the drafted-die turn structure (no `phase-play`
+ * gate, unlike `playCombatCard`) — only affordability + `SkillLimit` gate it.
+ *
+ * `apply_effect` / `cleanse_self` / `strip_enemy_buff` are fully resolved by
+ * `Skills/skill-trigger.engine.ts`'s `triggerSkill`; `consume_bank_burst` /
+ * `detonate_stacks` / `grant_barrier` come back as an `engineHandoff`
+ * descriptor and are finished HERE (mirrors the card `rupture`/`compound`/
+ * `barrier` handlers above — same pattern, Skills-owned trigger instead of a
+ * card play).
+ */
+export function triggerCombatSkill(
+    state: CombatEncounterState,
+    skillId: string,
+): CombatTransition {
+    const def = lookupSkillDefinition(skillId);
+    if (!def) return { state, events: [] };
+
+    const uses = state.skillUses ?? {};
+    const lastUsedRound = state.skillLastUsedRound ?? {};
+
+    if (def.limit?.kind === 'once_per_combat' && (uses[def.id] ?? 0) >= 1) {
+        const events: CombatEvent[] = [{ kind: 'skill-fizzled', skillId: def.id, message: `${def.name} already used this combat.` }];
+        return { state: withLog(state, events), events };
+    }
+    if (def.limit?.kind === 'cooldown') {
+        const last = lastUsedRound[def.id];
+        if (last !== undefined && state.round - last < def.limit.rounds) {
+            const events: CombatEvent[] = [{ kind: 'skill-fizzled', skillId: def.id, message: `${def.name} is on cooldown.` }];
+            return { state: withLog(state, events), events };
+        }
+    }
+    if (!canAffordSkill(state.combatResources, def.cost)) {
+        const events: CombatEvent[] = [{ kind: 'skill-fizzled', skillId: def.id, message: `not enough tokens for ${def.name}.` }];
+        return { state: withLog(state, events), events };
+    }
+
+    const result = triggerSkill(
+        { round: state.round, casterEffects: state.player.effects, enemyEffects: state.enemy.effects },
+        state.combatResources,
+        def,
+    );
+
+    const combatResources: CombatResources = { ...state.combatResources };
+    (Object.keys(result.resourceDelta) as (keyof CombatResources)[]).forEach(key => {
+        combatResources[key] = Math.max(0, combatResources[key] + (result.resourceDelta[key] ?? 0));
+    });
+
+    let player: Character = { ...state.player, effects: result.casterEffects };
+    let enemy: Enemy = { ...state.enemy, effects: result.enemyEffects };
+    let barrier = state.barrier ?? 0;
+    const events: CombatEvent[] = [
+        { kind: 'skill-triggered', skillId: def.id, name: def.name, cost: def.cost, landed: result.landed, message: result.message },
+    ];
+
+    if (result.engineHandoff) {
+        switch (result.engineHandoff.kind) {
+            case 'grant_barrier': {
+                barrier += result.engineHandoff.amount;
+                break;
+            }
+            case 'detonate_stacks': {
+                const distinct = getDistinctDebuffCount(enemy);
+                if (distinct >= result.engineHandoff.minDistinctDebuffs) {
+                    const consumedRes = consumeDotEffects(enemy);
+                    enemy = consumedRes.combatant;
+                    const burst = Math.round(enemy.maxHealth * (result.engineHandoff.perDebuffPct / 100) * distinct);
+                    if (burst > 0) {
+                        enemy = applyDamage(enemy, burst);
+                        events.push({ kind: 'rupture-detonated', amount: burst, consumed: consumedRes.consumed });
+                    }
+                } else {
+                    events.push({ kind: 'skill-fizzled', skillId: def.id, message: `${def.name}: not enough distinct debuffs to detonate.` });
+                }
+                break;
+            }
+            case 'consume_bank_burst': {
+                const burst = Math.round(
+                    enemy.maxHealth * (result.engineHandoff.tokensBurned * result.engineHandoff.pctPerToken / 100),
+                );
+                if (burst > 0) {
+                    enemy = applyDamage(enemy, burst);
+                    events.push({ kind: 'damage-dealt', cardId: def.id, target: 'enemy', amount: burst });
+                }
+                break;
+            }
+            default: break;
+        }
+    }
+
+    const skillUses = { ...uses };
+    const skillLastUsedRound = { ...lastUsedRound };
+    if (def.limit?.kind === 'once_per_combat') skillUses[def.id] = (skillUses[def.id] ?? 0) + 1;
+    if (def.limit?.kind === 'cooldown') skillLastUsedRound[def.id] = state.round;
+
+    let next: CombatEncounterState = {
+        ...state, player, enemy, combatResources, barrier, skillUses, skillLastUsedRound,
+    };
+    next = withLog(next, events);
     return checkImmediateOutcome(next, events);
 }
 

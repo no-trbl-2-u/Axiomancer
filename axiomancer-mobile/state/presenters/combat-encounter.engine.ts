@@ -347,14 +347,20 @@ export function resolvePrimary(card: CombatCard, skill: Skill | undefined): Prim
     }
     if (vc === 'befriend') return { kind: 'befriend', ce: null, guardAmount: null, riders: [], mech: null };
     if (vc === 'direct-damage') {
-        // 0.34.0: rupture / compound / siphon ride a direct hit; their headline value
-        // is the AUTHORED mechanic param (the actual swing is live → not headlined).
+        // 0.34.0: rupture / compound / siphon / execute ride a direct hit; their headline
+        // value is the AUTHORED mechanic param (the actual swing is live → not headlined).
         const rupture = findMech('rupture');
         if (rupture) return { kind: 'rupture', ce: null, guardAmount: null, riders: [], mech: rupture };
         const compound = findMech('compound');
         if (compound) return { kind: 'compound', ce: null, guardAmount: null, riders: [], mech: compound };
         const siphon = findMech('siphon');
         if (siphon) return { kind: 'siphon', ce: null, guardAmount: null, riders: [], mech: siphon };
+        // Status-doctrine overhaul: a bare execute/finisher with no classifiable
+        // enemy DoT/control effect lands here (mechanics' classifyVerbClass
+        // intentionally reads it as 'direct-damage' rather than 'buff-self') —
+        // without this branch it fell through to a misleading STRIKE badge.
+        const execute = findMech('execute');
+        if (execute) return { kind: 'execute', ce: null, guardAmount: null, riders: [], mech: execute };
         return { kind: 'strike', ce: null, guardAmount: null, riders: [], mech: null };
     }
     if (vc === 'buff-self') {

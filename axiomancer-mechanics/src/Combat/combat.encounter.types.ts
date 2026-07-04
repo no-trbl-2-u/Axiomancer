@@ -326,11 +326,20 @@ export type CombatEvent =
     | { kind: 'barrier-absorbed'; amount: number }
     | { kind: 'riposte-fired'; amount: number }
     | { kind: 'execute-fired'; amount: number; recoil: number }
+    // Master Spec §4 — wild-die permanent-growth mechanic. `grant_permanent_wild_die`
+    // cards fire this when powered by a die (weak plays never touch the pool).
+    | { kind: 'permanent-wild-die-granted'; wildAdded: number; deadAdded: number; totalWild: number }
     | { kind: 'conclude-hit'; amount: number; totalStacks: number }
     | { kind: 'phase-resolved'; phaseIndex: number; mark: 'clear' | 'overwhelmed' }
     | { kind: 'threat-fired'; phaseIndex: number; description: string; effects: CombatThreatEffect[] }
     | { kind: 'hand-drawn'; cards: string[] }
     | { kind: 'mercy-opened'; message: string }
+    // Master Spec §3 — Skills system. Skills are NOT cards: a separate,
+    // always-available ability system triggered via `triggerCombatSkill`,
+    // independent of card plays / the drawn hand.
+    | { kind: 'skill-triggered'; skillId: string; name: string; cost: Partial<CombatResources>;
+        landed: boolean; message: string }
+    | { kind: 'skill-fizzled'; skillId: string; message: string }
     | { kind: 'combat-ended'; outcome: CombatOutcome };
 
 // ---------------------------------------------------------------------------
@@ -401,6 +410,29 @@ export interface CombatEncounterState {
     /** Phase 112 — set when a successful Befriend / Control Saturation opens the
      *  spare/exploit mercy choice. */
     mercyChoiceActive?: boolean;
+    /**
+     * Master Spec §4 — permanent wild-die pool growth. Unlike `dice` (rolled
+     * fresh each turn) and `carriedDie` (one turn's carryover), these persist
+     * for the REST of the encounter once granted by a `grant_permanent_wild_die`
+     * card special mechanic: `startTurn` appends `permanentWildDice` extra Wild
+     * dice and `permanentDeadDice` extra locked X dice to every turn's draft
+     * pool from here on. Never reset by `startTurn`/`endTurn`. Optional for
+     * back-compat with state literals (treated as 0 when absent).
+     */
+    permanentWildDice?: number;
+    /** See `permanentWildDice`. Every permanent Wild die is paired with one
+     *  permanent dead (locked `x`) die — the visible "fate pushes back" cost. */
+    permanentDeadDice?: number;
+    /**
+     * Master Spec §3.3 — `SkillLimit` bookkeeping for `triggerCombatSkill`.
+     * `skillUses[skillId]` counts triggers so far this combat (gates
+     * `once_per_combat`); `skillLastUsedRound[skillId]` is the `round` a
+     * cooldown-limited skill last fired (gates `cooldown`). Optional for
+     * back-compat with state literals (treated as empty/never-used when absent).
+     */
+    skillUses?: Record<string, number>;
+    /** See `skillUses`. */
+    skillLastUsedRound?: Record<string, number>;
     seed?: number;                         // seed used to drive the encounter (sim/tests)
 }
 

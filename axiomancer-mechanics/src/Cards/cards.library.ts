@@ -35,8 +35,11 @@ const adHominemStrike: Card = {
         'had built. Their stance crumbles before their muscles do.',
     tier: 1,
     targetType: 'enemy',
-    basePower: 8,
+    basePower: 0,
     scalingStat: 'body',
+    combatEffects: [
+        { effectId: 'debuff_vulnerability_body', appliedTo: 'opponent', intensity: 2, duration: 2 },
+    ],
     specialMechanics: [{ kind: 'strip_random_buff', appliedTo: 'enemy' }],
 };
 
@@ -51,7 +54,7 @@ const falseDilemma: Card = {
         'walk straight through.',
     tier: 1,
     targetType: 'enemy',
-    basePower: 4,
+    basePower: 0,
     scalingStat: 'mind',
     combatEffects: [
         { effectId: 'debuff_confusion', appliedTo: 'opponent', duration: 2 },
@@ -86,8 +89,11 @@ const achillesGambit: Card = {
         'collapses into a single, unanswerable blow.',
     tier: 1,
     targetType: 'enemy',
-    basePower: 12,
+    basePower: 0,
     scalingStat: 'body',
+    combatEffects: [
+        { effectId: 'debuff_exposure', appliedTo: 'opponent', intensity: 2, duration: 2 },
+    ],
 };
 
 const liarsEcho: Card = {
@@ -101,7 +107,7 @@ const liarsEcho: Card = {
         'every tell twice.',
     tier: 1,
     targetType: 'enemy',
-    basePower: 3,
+    basePower: 0,
     scalingStat: 'mind',
     combatEffects: [
         { effectId: 'tier1_mind_mark', appliedTo: 'opponent', intensity: 2, duration: 2 },
@@ -137,8 +143,11 @@ const mobAppeal: Card = {
         'and both work.',
     tier: 2,
     targetType: 'enemy',
-    basePower: 10,
+    basePower: 0,
     scalingStat: 'body',
+    combatEffects: [
+        { effectId: 'debuff_isolated', appliedTo: 'opponent', duration: 1 },
+    ],
     specialMechanics: [{ kind: 'secondary_heal_self', stat: 'heart', multiplier: 1 }],
     learningRequirement: { level: 5 },
 };
@@ -154,7 +163,7 @@ const undistributedMiddle: Card = {
         'follow the syllogism into a corner they cannot leave.',
     tier: 2,
     targetType: 'enemy',
-    basePower: 8,
+    basePower: 0,
     scalingStat: 'mind',
     combatEffects: [
         { effectId: 'tier1_mind_mark', appliedTo: 'opponent', intensity: 3, duration: 3 },
@@ -173,7 +182,7 @@ const eternalRegress: Card = {
         'and lay two distinct binds on the wreckage.',
     tier: 2,
     targetType: 'enemy',
-    basePower: 6,
+    basePower: 0,
     scalingStat: 'heart',
     combatEffects: [
         { effectId: 'debuff_confusion', appliedTo: 'opponent' },
@@ -195,7 +204,7 @@ const soritesCascade: Card = {
         'their definition of "alive."',
     tier: 3,
     targetType: 'enemy',
-    basePower: 5,
+    basePower: 0,
     scalingStat: 'mind',
     combatEffects: [
         { effectId: 'debuff_bleed', appliedTo: 'opponent', intensity: 2, duration: 4 },
@@ -215,8 +224,11 @@ const strawGiant: Card = {
         'in sympathy with its hollow twin.',
     tier: 3,
     targetType: 'enemy',
-    basePower: 18,
+    basePower: 0,
     scalingStat: 'body',
+    combatEffects: [
+        { effectId: 'debuff_bleed', appliedTo: 'opponent', intensity: 3, duration: 4 },
+    ],
     learningRequirement: { level: 10 },
 };
 
@@ -256,7 +268,7 @@ const appealToConsequences: Card = {
         'made the force necessary.',
     tier: 3,
     targetType: 'enemy',
-    basePower: 16,
+    basePower: 0,
     scalingStat: 'body',
     combatEffects: [
         { effectId: 'tier1_body_attack', appliedTo: 'self', intensity: 2, duration: 3 },
@@ -276,7 +288,7 @@ const nirvanaFallacy: Card = {
         'fall through their own inadequacy.',
     tier: 3,
     targetType: 'enemy',
-    basePower: 14,
+    basePower: 0,
     scalingStat: 'mind',
     combatEffects: [
         { effectId: 'debuff_confusion', appliedTo: 'opponent' },
@@ -320,7 +332,7 @@ const appealToFear: Card = {
         'knew was inevitable.',
     tier: 3,
     targetType: 'enemy',
-    basePower: 12,
+    basePower: 0,
     scalingStat: 'heart',
     combatEffects: [
         { effectId: 'debuff_slow', appliedTo: 'opponent' },
@@ -352,8 +364,11 @@ const resonanceBleed: Card = {
         'agree that it has further to go.',
     tier: 2,
     targetType: 'enemy',
-    basePower: 4,
+    basePower: 0,
     scalingStat: 'heart',
+    combatEffects: [
+        { effectId: 'debuff_bleed', appliedTo: 'opponent', intensity: 1, duration: 2 },
+    ],
     learningRequirement: { level: 5 },
     synergy: {
         predicate: { effectId: 'debuff_bleed', on: 'target', durationMin: 2 },
@@ -372,8 +387,11 @@ const intensityFeedback: Card = {
         'into them. The louder it was for you, the louder it lands for them.',
     tier: 2,
     targetType: 'enemy',
-    basePower: 5,
+    basePower: 0,
     scalingStat: 'mind',
+    combatEffects: [
+        { effectId: 'debuff_doubt', appliedTo: 'opponent', duration: 1 },
+    ],
     learningRequirement: { level: 5 },
     synergy: {
         predicate: { effectId: 'buff_critical_rate_up', on: 'caster', intensityMin: 1 },
@@ -421,8 +439,15 @@ const resonanceBurst: Card = {
         'how long they have already been losing their footing.',
     tier: 2,
     targetType: 'enemy',
-    basePower: 3,
+    basePower: 0,
     scalingStat: 'mind',
+    // NOTE: applies debuff_doubt, not debuff_confusion — the synergy CONSUMES a
+    // matched debuff_confusion (see predicate below), and a card's own
+    // combatEffects apply AFTER synergy resolves, so seeding the same effectId
+    // here would immediately re-plant the thing it just consumed.
+    combatEffects: [
+        { effectId: 'debuff_doubt', appliedTo: 'opponent', duration: 1 },
+    ],
     learningRequirement: { level: 5 },
     synergy: {
         predicate: { effectId: 'debuff_confusion', on: 'target', durationMin: 1 },
@@ -534,8 +559,11 @@ const paradoxConvergence: Card = {
         'the argument down into the mathematical void.',
     tier: 3,
     targetType: 'enemy',
-    basePower: 15,
+    basePower: 0,
     scalingStat: 'mind',
+    combatEffects: [
+        { effectId: 'debuff_confusion', appliedTo: 'opponent', intensity: 2, duration: 3 },
+    ],
     learningRequirement: { level: 10 },
     synergy: {
         predicate: { effectId: 'buff_haste', on: 'target', intensityMin: 1 },
@@ -581,7 +609,7 @@ const logicalRecursion: Card = {
         'remains intact enough to remember which thoughts belonged to whom.',
     tier: 3,
     targetType: 'enemy',
-    basePower: 12,
+    basePower: 0,
     scalingStat: 'mind',
     learningRequirement: { level: 10 },
     synergy: {
@@ -610,8 +638,13 @@ const existentialCollapse: Card = {
         'your will finds purchase.',
     tier: 3,
     targetType: 'enemy',
-    basePower: 18,
+    basePower: 0,
     scalingStat: 'body',
+    // No own combatEffects — `clearAllEffectsBothSides` below wipes every
+    // ActiveEffect on both sides when the synergy fires, and a card's own
+    // combatEffects apply AFTER synergy resolves, so anything added here would
+    // survive the "everything cleared" invariant undoing the whole point of
+    // the clear. This is a pure synergy-payoff card (classifies direct-damage).
     learningRequirement: { level: 10 },
     synergy: {
         predicate: { effectId: 'debuff_petrify', on: 'target', durationMin: 1 },
@@ -675,11 +708,14 @@ const hastyGeneralization: Card = {
         'sample of one swelling to a verdict their whole body must answer for.',
     tier: 1,
     targetType: 'enemy',
-    basePower: 11,
+    basePower: 0,
     scalingStat: 'body',
+    combatEffects: [
+        { effectId: 'debuff_bleed', appliedTo: 'opponent', intensity: 2, duration: 2 },
+    ],
     learningRequirement: { level: 3 },
     addedIn: '2026-06-07',
-    tags: ['early-game', 'damage'],
+    tags: ['status-effect', 'dot', 'early-game'],
 };
 
 const redHerring: Card = {
@@ -693,7 +729,7 @@ const redHerring: Card = {
         'scent is gone and so is their footing.',
     tier: 1,
     targetType: 'enemy',
-    basePower: 4,
+    basePower: 0,
     scalingStat: 'mind',
     combatEffects: [
         { effectId: 'debuff_accuracy_down', appliedTo: 'opponent', duration: 3 },
@@ -733,11 +769,14 @@ const arrowParadox: Card = {
         'shot that logic insists never travelled.',
     tier: 1,
     targetType: 'enemy',
-    basePower: 13,
+    basePower: 0,
     scalingStat: 'body',
+    combatEffects: [
+        { effectId: 'debuff_root', appliedTo: 'opponent', duration: 2 },
+    ],
     learningRequirement: { level: 4 },
     addedIn: '2026-06-07',
-    tags: ['early-game', 'damage'],
+    tags: ['status-effect', 'control', 'early-game'],
 };
 
 const heapOfDoubt: Card = {
@@ -751,7 +790,7 @@ const heapOfDoubt: Card = {
         'You watch the heap of their conviction quietly stop being a heap.',
     tier: 1,
     targetType: 'enemy',
-    basePower: 5,
+    basePower: 0,
     scalingStat: 'mind',
     combatEffects: [
         { effectId: 'debuff_confusion', appliedTo: 'opponent', duration: 2 },
@@ -774,7 +813,7 @@ const slipperySlope: Card = {
         'the ground itself seems to tilt, and they slide the whole way down.',
     tier: 2,
     targetType: 'enemy',
-    basePower: 16,
+    basePower: 0,
     scalingStat: 'body',
     combatEffects: [
         { effectId: 'debuff_bleed', appliedTo: 'opponent', intensity: 2, duration: 3 },
@@ -795,7 +834,7 @@ const appealToAuthority: Card = {
         'borrowed certainty that was never yours to lend.',
     tier: 2,
     targetType: 'enemy',
-    basePower: 9,
+    basePower: 0,
     scalingStat: 'mind',
     combatEffects: [
         { effectId: 'debuff_vulnerability_mind', appliedTo: 'opponent', intensity: 2, duration: 3 },
@@ -817,8 +856,11 @@ const tuQuoque: Card = {
         'just enough of their own blow to mend the place it landed on you.',
     tier: 2,
     targetType: 'enemy',
-    basePower: 10,
+    basePower: 0,
     scalingStat: 'heart',
+    combatEffects: [
+        { effectId: 'debuff_despair', appliedTo: 'opponent', intensity: 1, duration: 1 },
+    ],
     specialMechanics: [{ kind: 'secondary_heal_self', stat: 'heart', multiplier: 2 }],
     learningRequirement: { level: 15 },
     addedIn: '2026-06-07',
@@ -836,7 +878,7 @@ const baradoxsBarber: Card = {
         'watch the recursion eat the floor out from under their attention.',
     tier: 2,
     targetType: 'enemy',
-    basePower: 11,
+    basePower: 0,
     scalingStat: 'mind',
     combatEffects: [
         { effectId: 'debuff_confusion', appliedTo: 'opponent', duration: 3 },
@@ -858,7 +900,7 @@ const ravenParadox: Card = {
         'each irrelevant proof sharpens the inevitability of the next strike.',
     tier: 2,
     targetType: 'enemy',
-    basePower: 18,
+    basePower: 0,
     scalingStat: 'body',
     combatEffects: [
         { effectId: 'buff_critical_rate_up', appliedTo: 'self', intensity: 2, duration: 3 },
@@ -901,8 +943,15 @@ const equivocationCascade: Card = {
         'whole argument has reorganised itself around your conclusion.',
     tier: 2,
     targetType: 'enemy',
-    basePower: 7,
+    basePower: 0,
     scalingStat: 'mind',
+    // debuff_doubt, not debuff_confusion — the synergy CONSUMES a matched
+    // debuff_confusion, and a card's own combatEffects apply AFTER synergy
+    // resolves, so seeding the same effectId here would immediately re-plant
+    // the thing it just consumed.
+    combatEffects: [
+        { effectId: 'debuff_doubt', appliedTo: 'opponent', duration: 2 },
+    ],
     learningRequirement: { level: 16 },
     synergy: {
         predicate: { effectId: 'debuff_confusion', on: 'target', durationMin: 1 },
@@ -912,7 +961,7 @@ const equivocationCascade: Card = {
         consumeMatched: true,
     },
     addedIn: '2026-06-07',
-    tags: ['mid-game', 'synergy', 'damage'],
+    tags: ['status-effect', 'synergy', 'control'],
 };
 
 const sunkCostMomentum: Card = {
@@ -926,8 +975,11 @@ const sunkCostMomentum: Card = {
         'demands that the next blow justify them all at once.',
     tier: 2,
     targetType: 'enemy',
-    basePower: 8,
+    basePower: 0,
     scalingStat: 'body',
+    combatEffects: [
+        { effectId: 'debuff_bleed', appliedTo: 'opponent', intensity: 2, duration: 2 },
+    ],
     learningRequirement: { level: 17 },
     synergy: {
         // Unconditional on cast — pure resource-dump strategist payoff.
@@ -936,7 +988,7 @@ const sunkCostMomentum: Card = {
         consumeAllResources: true,
     },
     addedIn: '2026-06-07',
-    tags: ['mid-game', 'synergy', 'damage'],
+    tags: ['status-effect', 'synergy', 'dot'],
 };
 
 // ── Tier 3 — late-game capstones (7 skills) ──────────────────────────────────
@@ -952,7 +1004,7 @@ const omnipotenceParadox: Card = {
         'them as a blow that no defence was designed to be able to answer.',
     tier: 3,
     targetType: 'enemy',
-    basePower: 30,
+    basePower: 0,
     scalingStat: 'body',
     scalingMultiplier: 1.5,
     combatEffects: [
@@ -974,7 +1026,7 @@ const gamblersRuin: Card = {
         'remains on a turn that the arithmetic has already lost.',
     tier: 3,
     targetType: 'enemy',
-    basePower: 22,
+    basePower: 0,
     scalingStat: 'mind',
     scalingMultiplier: 1.25,
     combatEffects: [
@@ -997,7 +1049,7 @@ const gamblersFallacy: Card = {
         'they overcommit to a turn that chance never promised.',
     tier: 3,
     targetType: 'enemy',
-    basePower: 17,
+    basePower: 0,
     scalingStat: 'mind',
     combatEffects: [
         { effectId: 'debuff_confusion', appliedTo: 'opponent', duration: 3 },
@@ -1018,7 +1070,7 @@ const buridansImpasse: Card = {
         'equal, and they freeze in the exact centre of their own indecision.',
     tier: 3,
     targetType: 'enemy',
-    basePower: 14,
+    basePower: 0,
     scalingStat: 'mind',
     combatEffects: [
         { effectId: 'debuff_stun', appliedTo: 'opponent', duration: 2 },
@@ -1063,8 +1115,13 @@ const grandfatherParadox: Card = {
         'the parry could have been born, and consumes the certainty they leaned on.',
     tier: 3,
     targetType: 'enemy',
-    basePower: 20,
+    basePower: 0,
     scalingStat: 'body',
+    // No own combatEffects — `clearAllEffectsBothSides` below wipes every
+    // ActiveEffect on both sides when the synergy fires, and a card's own
+    // combatEffects apply AFTER synergy resolves, so anything added here would
+    // survive the "everything cleared" invariant (see `existential-collapse`
+    // for the same reasoning). Pure synergy-payoff card.
     learningRequirement: { level: 44, statRequirementType: 'body', statRequirementValue: 34 },
     synergy: {
         predicate: { effectId: 'buff_all_stats_up', on: 'target', intensityMin: 1 },
@@ -1075,7 +1132,7 @@ const grandfatherParadox: Card = {
         clearAllEffectsBothSides: true,
     },
     addedIn: '2026-06-07',
-    tags: ['late-game', 'synergy', 'damage'],
+    tags: ['status-effect', 'synergy', 'late-game'],
 };
 
 const apophaticAegis: Card = {
@@ -1263,7 +1320,7 @@ const resonanceRupture: Card = {
         'rounds arrives in one.',
     tier: 2,
     targetType: 'enemy',
-    basePower: 4,
+    basePower: 0,
     scalingStat: 'heart',
     specialMechanics: [{ kind: 'rupture' }],
     learningRequirement: { level: 5 },
@@ -1282,7 +1339,7 @@ const mountingContradictions: Card = {
         'ways they are already coming apart, the harder the whole edifice falls.',
     tier: 2,
     targetType: 'enemy',
-    basePower: 3,
+    basePower: 0,
     scalingStat: 'mind',
     specialMechanics: [{ kind: 'compound', perDebuff: 6 }],
     learningRequirement: { level: 5 },
@@ -1391,12 +1448,19 @@ const leechingSyllogism: Card = {
         'yours.',
     tier: 2,
     targetType: 'enemy',
-    basePower: 12,
+    basePower: 0,
     scalingStat: 'heart',
-    specialMechanics: [{ kind: 'siphon', pct: 0.5 }],
+    // Siphon (HP-per-hit lifesteal) needed a nonzero flat strike to have anything
+    // to skim from, which is the exact "strike" mechanic the doctrine forbids.
+    // Reworked to the same lifesteal FEEL via a DoT + self-regen pairing instead:
+    // the enemy bleeds out, you recover in step with it.
+    combatEffects: [
+        { effectId: 'debuff_hemorrhage', appliedTo: 'opponent', duration: 3 },
+        { effectId: 'buff_regeneration', appliedTo: 'self', intensity: 2, duration: 3 },
+    ],
     learningRequirement: { level: 5 },
     addedIn: '2026-06-26',
-    tags: ['siphon', 'sustain', 'mid-game'],
+    tags: ['status-effect', 'dot', 'sustain', 'mid-game'],
 };
 
 // ─── Phase 168 — HP-model DoT amplifier cards ────────────────────────────────
@@ -1416,7 +1480,7 @@ const crescendoOfSuffering: Card = {
         'spreading. You simply turned the volume up.',
     tier: 2,
     targetType: 'enemy',
-    basePower: 3,
+    basePower: 0,
     scalingStat: 'heart',
     specialMechanics: [{ kind: 'amplify', multiplier: 1.5 }],
     learningRequirement: { level: 6 },
@@ -1437,12 +1501,561 @@ const theInevitable: Card = {
         'as a single moment of clarity.',
     tier: 2,
     targetType: 'enemy',
-    basePower: 2,
+    basePower: 0,
     scalingStat: 'mind',
     specialMechanics: [{ kind: 'amplify', multiplier: 2.0 }],
     learningRequirement: { level: 10 },
     addedIn: '2026-06-29',
     tags: ['status-effect', 'amplify', 'dot', 'mid-game'],
+};
+
+// ─── Master Spec (2026-07-03) — status-stacking content drop (23 cards) ─────
+//
+// Doctrine: no player card here deals a flat direct "strike" — every card
+// applies/compounds status effects (DoT or control), and `basePower: 0` keeps
+// the die-powered strike contribution at its existing stat-scaling floor
+// (matches the convention already set by `breach` / `gabrielsBulwark` /
+// `mountingContradictions`). The weak (free, no-die top action) vs. surge
+// (die-powered bottom action) split is entirely engine-owned (`combat.engine.ts`
+// `playTopAction`/`playBottomAction`) — this file supplies ONE `combatEffects`
+// list per card (the surge/full effect); the free top action already resolves
+// generically (a small HP chip, or the self-buff at intensity 1 when the card
+// classifies as `buff-self`). Three ids in the Master Spec collide with
+// pre-existing card ids/names in this library (`gamblers-fallacy`,
+// `grandfather-paradox`, `slippery-slope`, `ship-of-theseus`, `false-dilemma`,
+// `liars-echo`/`sorites-cascade` neighbors) — those existing cards are
+// untouched (explicitly out of scope per Master Spec §2.8) and the new cards
+// below use disambiguated ids/names so nothing collides.
+//
+// Bonus-aspect-token grants (Master Spec §2.6) and surge-only effect swaps
+// (e.g. bleed→hemorrhage on a matching die) are NOT implemented here — both
+// need a new `CardSpecialMechanic` variant / a weak-vs-surge effect split that
+// the mechanics layer did not add in this pass (types.ts changes are out of
+// scope unless flagged, and none was). Flagged as a follow-up for whoever owns
+// `Cards/types.ts` next. `grant_permanent_wild_die` already exists and is
+// naturally surge-only (only `playBottomAction` reads `specialMechanics`), so
+// the 3 wild-die cards below are fully faithful to the doctrine.
+
+// ── Tier 1 — Body (4) ────────────────────────────────────────────────────────
+
+const strawMansJab: Card = {
+    id: 'straw-mans-jab',
+    name: "Straw Man's Jab",
+    category: 'fallacy',
+    philosophicalAspect: 'body',
+    description:
+        'You do not answer their guard — you answer a flimsier one you built ' +
+        'in its place, and the real wound opens where the straw double fell.',
+    tier: 1,
+    targetType: 'enemy',
+    basePower: 0,
+    scalingStat: 'body',
+    combatEffects: [
+        { effectId: 'debuff_bleed', appliedTo: 'opponent', intensity: 2, duration: 3 },
+    ],
+    addedIn: '2026-07-03',
+    tags: ['status-effect', 'dot', 'early-game'],
+};
+
+const slipperySlopesGrip: Card = {
+    id: 'slippery-slopes-grip',
+    name: "Slippery Slope's Grip",
+    category: 'fallacy',
+    philosophicalAspect: 'body',
+    description:
+        'One small give becomes the next, and the next, until the ground ' +
+        'itself feels obligated to keep tilting. Their footing wears thin ' +
+        'grain by grain.',
+    tier: 1,
+    targetType: 'enemy',
+    basePower: 0,
+    scalingStat: 'body',
+    combatEffects: [
+        { effectId: 'debuff_fatigue', appliedTo: 'opponent', intensity: 2, duration: 3 },
+        { effectId: 'debuff_exposure', appliedTo: 'opponent', intensity: 1, duration: 1 },
+    ],
+    addedIn: '2026-07-03',
+    tags: ['status-effect', 'control', 'early-game'],
+};
+
+const zenosHalfStep: Card = {
+    id: 'zenos-half-step',
+    name: "Zeno's Half-Step",
+    category: 'paradox',
+    philosophicalAspect: 'body',
+    description:
+        'Close half the distance, then half again — you never quite arrive, ' +
+        'and neither does their next step. The infinite regress is theirs to ' +
+        'walk now.',
+    tier: 1,
+    targetType: 'enemy',
+    basePower: 0,
+    scalingStat: 'body',
+    combatEffects: [
+        { effectId: 'debuff_slow', appliedTo: 'opponent', duration: 2 },
+    ],
+    addedIn: '2026-07-03',
+    tags: ['status-effect', 'control', 'early-game'],
+};
+
+const compositionFallacy: Card = {
+    id: 'composition-fallacy',
+    name: 'Composition Fallacy',
+    category: 'fallacy',
+    philosophicalAspect: 'body',
+    description:
+        'What is true of the part, you insist, must be true of the whole — ' +
+        'so their one weak point becomes their every point, and your own ' +
+        'small resolve becomes a wall.',
+    tier: 1,
+    targetType: 'enemy',
+    basePower: 0,
+    scalingStat: 'body',
+    combatEffects: [
+        { effectId: 'debuff_bleed', appliedTo: 'opponent', intensity: 2, duration: 1 },
+        { effectId: 'buff_resolute', appliedTo: 'self', intensity: 2, duration: 2 },
+    ],
+    addedIn: '2026-07-03',
+    tags: ['status-effect', 'dot', 'buff', 'early-game'],
+};
+
+// ── Tier 1 — Mind (4) ────────────────────────────────────────────────────────
+
+const adHominemMurmur: Card = {
+    id: 'ad-hominem-murmur',
+    name: 'Ad Hominem Murmur',
+    category: 'fallacy',
+    philosophicalAspect: 'mind',
+    description:
+        'You do not raise your voice — you plant one small doubt about who ' +
+        'they are, and let it do the work an argument never could.',
+    tier: 1,
+    targetType: 'enemy',
+    basePower: 0,
+    scalingStat: 'mind',
+    combatEffects: [
+        { effectId: 'debuff_doubt', appliedTo: 'opponent', duration: 1 },
+    ],
+    addedIn: '2026-07-03',
+    tags: ['status-effect', 'control', 'early-game'],
+};
+
+const falseDilemmasFork: Card = {
+    id: 'false-dilemmas-fork',
+    name: "False Dilemma's Fork",
+    category: 'fallacy',
+    philosophicalAspect: 'mind',
+    description:
+        'Two doors, you tell them, and only two — and while they hunt for a ' +
+        'third, every sense they own goes quiet at the threshold.',
+    tier: 1,
+    targetType: 'enemy',
+    basePower: 0,
+    scalingStat: 'mind',
+    combatEffects: [
+        { effectId: 'debuff_sensory_null', appliedTo: 'opponent', duration: 2 },
+        { effectId: 'buff_clarity', appliedTo: 'self', intensity: 1 },
+    ],
+    addedIn: '2026-07-03',
+    tags: ['status-effect', 'control', 'early-game'],
+};
+
+const soritesWhisper: Card = {
+    id: 'sorites-whisper',
+    name: "Sorites' Whisper",
+    category: 'paradox',
+    philosophicalAspect: 'mind',
+    description:
+        'One grain of doubt is nothing. So is the next. You never name the ' +
+        'moment the heap of their certainty stopped being a heap — you just ' +
+        'let it keep unraveling.',
+    tier: 1,
+    targetType: 'enemy',
+    basePower: 0,
+    scalingStat: 'mind',
+    combatEffects: [
+        { effectId: 'debuff_unraveling', appliedTo: 'opponent' },
+        { effectId: 'debuff_sensory_null', appliedTo: 'opponent', duration: 1 },
+    ],
+    addedIn: '2026-07-03',
+    tags: ['status-effect', 'dot', 'control', 'early-game'],
+};
+
+const liarsParadox: Card = {
+    id: 'liars-paradox',
+    name: "Liar's Paradox",
+    category: 'paradox',
+    philosophicalAspect: 'mind',
+    description:
+        '"This sentence is false." They cannot resolve it and cannot ignore ' +
+        'it, and the loop leaves everything they think next a little less ' +
+        'certain.',
+    tier: 1,
+    targetType: 'enemy',
+    basePower: 0,
+    scalingStat: 'mind',
+    combatEffects: [
+        { effectId: 'debuff_doubt', appliedTo: 'opponent', intensity: 1 },
+        { effectId: 'buff_clarity', appliedTo: 'self', intensity: 1 },
+    ],
+    addedIn: '2026-07-03',
+    tags: ['status-effect', 'control', 'early-game'],
+};
+
+// ── Tier 1 — Heart (3) ───────────────────────────────────────────────────────
+
+const appealToPitysDespair: Card = {
+    id: 'appeal-to-pitys-despair',
+    name: "Appeal to Pity's Despair",
+    category: 'fallacy',
+    philosophicalAspect: 'heart',
+    description:
+        'You do not argue the point — you show them the wound, and let their ' +
+        'own compassion talk them down into believing the fight is already lost.',
+    tier: 1,
+    targetType: 'enemy',
+    basePower: 0,
+    scalingStat: 'heart',
+    combatEffects: [
+        { effectId: 'debuff_despair', appliedTo: 'opponent', intensity: 2 },
+        { effectId: 'buff_resolute', appliedTo: 'self', intensity: 1 },
+    ],
+    addedIn: '2026-07-03',
+    tags: ['status-effect', 'dot', 'early-game'],
+};
+
+const bandwagonsPull: Card = {
+    id: 'bandwagons-pull',
+    name: "Bandwagon's Pull",
+    category: 'fallacy',
+    philosophicalAspect: 'heart',
+    description:
+        'Everyone else has already decided, you tell them — so they must be ' +
+        'the only one left standing outside the crowd\'s conclusion, alone ' +
+        'with it.',
+    tier: 1,
+    targetType: 'enemy',
+    basePower: 0,
+    scalingStat: 'heart',
+    combatEffects: [
+        { effectId: 'debuff_isolated', appliedTo: 'opponent', duration: 1 },
+        { effectId: 'debuff_despair', appliedTo: 'opponent', intensity: 1 },
+    ],
+    addedIn: '2026-07-03',
+    tags: ['status-effect', 'control', 'early-game'],
+};
+
+const shipOfTheseusDrift: Card = {
+    id: 'ship-of-theseus-drift',
+    name: "Ship of Theseus's Drift",
+    category: 'paradox',
+    philosophicalAspect: 'heart',
+    description:
+        'Plank by plank you replace what wavered in you with something ' +
+        'steadier, until the vessel that answers the next blow is not, ' +
+        'quite, the one that took the last.',
+    tier: 1,
+    targetType: 'self',
+    basePower: 0,
+    scalingStat: 'heart',
+    combatEffects: [
+        { effectId: 'buff_resolute', appliedTo: 'self', intensity: 2, duration: 2 },
+    ],
+    addedIn: '2026-07-03',
+    tags: ['status-effect', 'buff', 'early-game'],
+};
+
+// ── Tier 2 — Body (3) ────────────────────────────────────────────────────────
+
+const poisonedWell: Card = {
+    id: 'poisoned-well',
+    name: 'Poisoned Well',
+    category: 'fallacy',
+    philosophicalAspect: 'body',
+    description:
+        'You discredit the source before they can drink from it — and the ' +
+        'poison you named becomes the poison that is actually there, ' +
+        'spreading through everything they try next.',
+    tier: 2,
+    targetType: 'enemy',
+    basePower: 0,
+    scalingStat: 'body',
+    combatEffects: [
+        { effectId: 'debuff_septic', appliedTo: 'opponent', intensity: 2, duration: 3 },
+    ],
+    learningRequirement: { level: 5 },
+    addedIn: '2026-07-03',
+    tags: ['status-effect', 'dot', 'mid-game'],
+};
+
+/** Wild-die card (Master Spec §4.4 #2) — surge grows the wild-die pool for the
+ *  rest of the encounter; the free weak play never touches it. Distinct id
+ *  from the pre-existing `gamblers-fallacy` (Tier 3, Mind) card. */
+const gamblersFolly: Card = {
+    id: 'gamblers-folly',
+    name: "Gambler's Folly",
+    category: 'fallacy',
+    philosophicalAspect: 'body',
+    description:
+        'The pattern owes you a correction — it must, surely, after so many ' +
+        'blows that did not land right. You lean into the wager the odds ' +
+        'never actually made, and the dice pool bends to your overconfidence.',
+    tier: 2,
+    targetType: 'self',
+    basePower: 0,
+    scalingStat: 'body',
+    combatEffects: [
+        { effectId: 'buff_resolute', appliedTo: 'self', intensity: 1, duration: 1 },
+        { effectId: 'debuff_vulnerable', appliedTo: 'self', intensity: 1, duration: 1 },
+    ],
+    specialMechanics: [{ kind: 'grant_permanent_wild_die', wildCount: 1, deadCount: 1 }],
+    learningRequirement: { level: 5 },
+    addedIn: '2026-07-03',
+    tags: ['status-effect', 'wild-die', 'mid-game'],
+};
+
+const naturalisticFallacy: Card = {
+    id: 'naturalistic-fallacy',
+    name: 'Naturalistic Fallacy',
+    category: 'fallacy',
+    philosophicalAspect: 'body',
+    description:
+        'Because it is natural, you insist, it is good — and the wound you ' +
+        'open is, in that sense, only doing what wounds naturally do: getting ' +
+        'worse.',
+    tier: 2,
+    targetType: 'enemy',
+    basePower: 0,
+    scalingStat: 'body',
+    combatEffects: [
+        { effectId: 'debuff_hemorrhage', appliedTo: 'opponent', duration: 3 },
+        { effectId: 'debuff_exposure', appliedTo: 'opponent', intensity: 1, duration: 1 },
+    ],
+    learningRequirement: { level: 5 },
+    addedIn: '2026-07-03',
+    tags: ['status-effect', 'dot', 'mid-game'],
+};
+
+// ── Tier 2 — Mind (3) ────────────────────────────────────────────────────────
+
+const movingTheGoalposts: Card = {
+    id: 'moving-the-goalposts',
+    name: 'Moving the Goalposts',
+    category: 'fallacy',
+    philosophicalAspect: 'mind',
+    description:
+        'Every certainty they reach, you quietly relocate the finish line ' +
+        'past it. Doubt and blindness both take root in the gap between ' +
+        'where they are and where they were promised to be.',
+    tier: 2,
+    targetType: 'enemy',
+    basePower: 0,
+    scalingStat: 'mind',
+    combatEffects: [
+        { effectId: 'debuff_doubt', appliedTo: 'opponent', duration: 1 },
+        { effectId: 'debuff_sensory_null', appliedTo: 'opponent', duration: 2 },
+    ],
+    learningRequirement: { level: 5 },
+    addedIn: '2026-07-03',
+    tags: ['status-effect', 'control', 'mid-game'],
+};
+
+const shipInABottle: Card = {
+    id: 'ship-in-a-bottle',
+    name: 'Ship-in-a-Bottle',
+    category: 'paradox',
+    philosophicalAspect: 'mind',
+    description:
+        'How did it get in there, fully built, through a neck too narrow to ' +
+        'admit it? They cannot stop turning the impossible object over, and ' +
+        'the turning wears them thin.',
+    tier: 2,
+    targetType: 'enemy',
+    basePower: 0,
+    scalingStat: 'mind',
+    combatEffects: [
+        { effectId: 'debuff_unraveling', appliedTo: 'opponent' },
+        { effectId: 'debuff_fatigue', appliedTo: 'opponent', intensity: 2, duration: 3 },
+    ],
+    learningRequirement: { level: 5 },
+    addedIn: '2026-07-03',
+    tags: ['status-effect', 'dot', 'control', 'mid-game'],
+};
+
+/** Wild-die card (Master Spec §4.4 #1). */
+const continuumFallacy: Card = {
+    id: 'continuum-fallacy',
+    name: 'Continuum Fallacy',
+    category: 'paradox',
+    philosophicalAspect: 'mind',
+    description:
+        'Somewhere between a heap and a single grain there must be a line — ' +
+        'you refuse to draw it, and the refusal itself accumulates into ' +
+        'something the dice pool cannot ignore.',
+    tier: 2,
+    targetType: 'self',
+    basePower: 0,
+    scalingStat: 'mind',
+    combatEffects: [
+        { effectId: 'buff_clarity', appliedTo: 'self', intensity: 1 },
+    ],
+    specialMechanics: [{ kind: 'grant_permanent_wild_die', wildCount: 1, deadCount: 1 }],
+    learningRequirement: { level: 5 },
+    addedIn: '2026-07-03',
+    tags: ['status-effect', 'wild-die', 'mid-game'],
+};
+
+// ── Tier 2 — Heart (2) ───────────────────────────────────────────────────────
+
+const sunkCostsToll: Card = {
+    id: 'sunk-costs-toll',
+    name: "Sunk Cost's Toll",
+    category: 'fallacy',
+    philosophicalAspect: 'heart',
+    description:
+        'You have already given so much to this exchange that stopping now ' +
+        'would waste it — so you give more, and let the giving itself become ' +
+        'the argument that breaks them.',
+    tier: 2,
+    targetType: 'enemy',
+    basePower: 0,
+    scalingStat: 'heart',
+    combatEffects: [
+        { effectId: 'debuff_despair', appliedTo: 'opponent', intensity: 3 },
+        { effectId: 'buff_resolute', appliedTo: 'self', intensity: 1, duration: 2 },
+    ],
+    learningRequirement: { level: 5 },
+    addedIn: '2026-07-03',
+    tags: ['status-effect', 'dot', 'mid-game'],
+};
+
+/** Distinct id from the pre-existing `grandfather-paradox` (Tier 3, Body). */
+const grandfatherParadoxsEcho: Card = {
+    id: 'grandfather-paradoxs-echo',
+    name: "Grandfather Paradox's Echo",
+    category: 'paradox',
+    philosophicalAspect: 'heart',
+    description:
+        'You unmake the condition that let their confidence exist at all — ' +
+        'the doubt lands before the certainty could have been born.',
+    tier: 2,
+    targetType: 'enemy',
+    basePower: 0,
+    scalingStat: 'heart',
+    combatEffects: [
+        { effectId: 'buff_resolute', appliedTo: 'self', intensity: 2, duration: 2 },
+        { effectId: 'debuff_despair', appliedTo: 'opponent', intensity: 1 },
+    ],
+    learningRequirement: { level: 5 },
+    addedIn: '2026-07-03',
+    tags: ['status-effect', 'buff', 'mid-game'],
+};
+
+// ── Tier 3 — new execute finisher (Master Spec §2.4 #4) ─────────────────────
+//
+// Pyrrhic Victory / The Final Word / Unmoved Mover already exist in this
+// library (gold cards, unchanged) and satisfy §2.4 #1-3 — the "consumes
+// existing stacks for a burst payoff" execute doctrine. Only Achilles'
+// Overtake is new. The engine's generic `execute` specialMechanic gates on
+// HP% OR distinct-DoT-count, not an arbitrary debuff-stack predicate, so the
+// literal "≥3 debuff_fatigue stacks" trigger isn't representable without an
+// engine change (out of scope here) — approximated with the closest existing
+// gate (low HP% OR 2+ distinct DoT) plus the fatigue/slow payoff effects.
+
+const achillesOvertake: Card = {
+    id: 'achilles-overtake',
+    name: "Achilles' Overtake",
+    category: 'paradox',
+    philosophicalAspect: 'body',
+    description:
+        'The tortoise never should have been catchable — yet every stride ' +
+        'you gained on them compounds, and the gap that logic insisted was ' +
+        'unclosable closes all at once.',
+    tier: 3,
+    targetType: 'enemy',
+    basePower: 0,
+    scalingStat: 'body',
+    combatEffects: [
+        { effectId: 'debuff_fatigue', appliedTo: 'opponent', intensity: 1 },
+        { effectId: 'debuff_slow', appliedTo: 'opponent', duration: 2 },
+    ],
+    specialMechanics: [{ kind: 'execute', hpPct: 0.3, dotStacks: 2 }],
+    learningRequirement: { level: 10 },
+    addedIn: '2026-07-03',
+    tags: ['status-effect', 'execute', 'late-game'],
+};
+
+// ── Tier 3 — non-execute payoff cards (Master Spec §2.5) ────────────────────
+
+const regressAdInfinitum: Card = {
+    id: 'regress-ad-infinitum',
+    name: 'Regress Ad Infinitum',
+    category: 'paradox',
+    philosophicalAspect: 'mind',
+    description:
+        'Every reason demands a prior reason, forever — you stop looking for ' +
+        'the foundation and simply let the regress keep pulling their ' +
+        'thoughts out from under them.',
+    tier: 3,
+    targetType: 'enemy',
+    basePower: 0,
+    scalingStat: 'mind',
+    combatEffects: [
+        { effectId: 'debuff_unraveling', appliedTo: 'opponent' },
+        { effectId: 'debuff_sensory_null', appliedTo: 'opponent', duration: 2 },
+    ],
+    learningRequirement: { level: 10 },
+    addedIn: '2026-07-03',
+    tags: ['status-effect', 'dot', 'control', 'late-game'],
+};
+
+const existentialDebt: Card = {
+    id: 'existential-debt',
+    name: 'Existential Debt',
+    category: 'fallacy',
+    philosophicalAspect: 'heart',
+    description:
+        'Every choice they did not make is a debt you collect on now — and ' +
+        'the collecting costs you something too, a small overextension you ' +
+        'accept as the price of the reckoning.',
+    tier: 3,
+    targetType: 'enemy',
+    basePower: 0,
+    scalingStat: 'heart',
+    combatEffects: [
+        { effectId: 'debuff_despair', appliedTo: 'opponent', intensity: 2 },
+        { effectId: 'buff_resolute', appliedTo: 'self', intensity: 1 },
+        { effectId: 'debuff_isolated', appliedTo: 'opponent', duration: 1 },
+        { effectId: 'debuff_overextended', appliedTo: 'self', duration: 1 },
+    ],
+    learningRequirement: { level: 10 },
+    addedIn: '2026-07-03',
+    tags: ['status-effect', 'dot', 'control', 'late-game'],
+};
+
+// ── Tier 3 — third wild-die card (Master Spec §4.4 #3) ──────────────────────
+
+const buridansWager: Card = {
+    id: 'buridans-wager',
+    name: "Buridan's Wager",
+    category: 'paradox',
+    philosophicalAspect: 'heart',
+    description:
+        'Equally hungry, equally placed between two identical meals, the ' +
+        'donkey starves on the symmetry — unless it wagers on one anyway. ' +
+        'You break the tie, and the dice pool remembers the choice. Distinct ' +
+        'id from the pre-existing `buridans-impasse` (Tier 3, Mind).',
+    tier: 3,
+    targetType: 'self',
+    basePower: 0,
+    scalingStat: 'heart',
+    combatEffects: [
+        { effectId: 'buff_resolute', appliedTo: 'self', intensity: 1, duration: 1 },
+    ],
+    specialMechanics: [{ kind: 'grant_permanent_wild_die', wildCount: 2, deadCount: 2 }],
+    learningRequirement: { level: 10 },
+    addedIn: '2026-07-03',
+    tags: ['status-effect', 'wild-die', 'late-game'],
 };
 
 // ─── Library Export ──────────────────────────────────────────────────────────
@@ -1533,6 +2146,33 @@ export const cardLibrary: Card[] = [
     // Phase 168 — HP-model DoT amplifier cards
     crescendoOfSuffering, // AMPLIFY (HEART) — pending DoT × 1.5, non-consuming
     theInevitable,        // AMPLIFY (MIND)  — pending DoT × 2.0, non-consuming
+    // Master Spec (2026-07-03) — status-stacking content drop (23 cards)
+    // Tier 1 (11)
+    strawMansJab,
+    slipperySlopesGrip,
+    zenosHalfStep,
+    compositionFallacy,
+    adHominemMurmur,
+    falseDilemmasFork,
+    soritesWhisper,
+    liarsParadox,
+    appealToPitysDespair,
+    bandwagonsPull,
+    shipOfTheseusDrift,
+    // Tier 2 (8)
+    poisonedWell,
+    gamblersFolly,      // wild-die — grows the permanent wild-die pool
+    naturalisticFallacy,
+    movingTheGoalposts,
+    shipInABottle,
+    continuumFallacy,   // wild-die — grows the permanent wild-die pool
+    sunkCostsToll,
+    grandfatherParadoxsEcho,
+    // Tier 3 (4)
+    achillesOvertake,   // EXECUTE finisher
+    regressAdInfinitum,
+    existentialDebt,
+    buridansWager,       // wild-die — grows the permanent wild-die pool
 ];
 
 const skillRegistry: ReadonlyMap<string, Card> = new Map(

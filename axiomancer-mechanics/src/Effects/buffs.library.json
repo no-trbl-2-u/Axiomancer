@@ -1268,6 +1268,39 @@
       "tier": 2,
       "addedIn": "2026-06-20",
       "tags": ["status-effect", "stat", "combo-enabler", "since-april"]
+    },
+    {
+      "id": "buff_resolute",
+      "name": "Unmoved Mover's Resolve",
+      "description": "Something must move without itself being moved. You anchor yourself there — whatever strikes you now finds a will that does not budge.",
+      "type": "buff",
+      "category": "defense",
+      "duration": 2,
+      "stacking": "intensity",
+      "resistedBy": "heart",
+      "resistDR": 12,
+      "payload": {
+        "damageTakenMult": 0.85
+      },
+      "tier": 2,
+      "addedIn": "2026-07-03",
+      "tags": ["status-effect", "defense", "hybrid-damage-model", "self-buff", "resolute"]
+    },
+    {
+      "id": "buff_clarity",
+      "name": "Liar's Clarity",
+      "description": "\"This next die is Wild\" — the sentence is either true or it isn't, and by naming it, you've made it so. One clean certainty, carved out of the paradox.",
+      "type": "buff",
+      "category": "advantage",
+      "duration": 1,
+      "stacking": "none",
+      "payload": {
+        "forceWildOnNextDie": true,
+        "consumedOnUse": true
+      },
+      "tier": 1,
+      "addedIn": "2026-07-03",
+      "tags": ["status-effect", "advantage", "hybrid-damage-model", "self-buff", "consumed-on-use"]
     }
   ]
 }

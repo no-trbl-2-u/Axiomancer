@@ -11,10 +11,12 @@
  *
  * Doctrine (CLAUDE.md): status effects are the main fun. The DoT and CONTROL
  * presets are the headline kits — they erode / hinder. UTILITY survives and
- * converts; DAMAGE is the deliberately-weak basic-attack baseline kept honest
- * with a status splash; BALANCED carries one of each lever. Every preset bundles
- * a defensive (GUARD) card so it can brace from turn one, mirroring
- * `STARTING_SKILL_IDS`.
+ * converts; RUSH-EXECUTE is the fastest DoT-stack-into-finisher clock;
+ * BALANCED carries one of each lever. RECURSION and ESCALATION (Master Spec
+ * §5.6-5.7) sample the newer Skills-token and wild-die-growth systems. Every
+ * preset bundles a defensive (GUARD) card so it can brace from turn one,
+ * mirroring `STARTING_SKILL_IDS` — ESCALATION keeps exactly one for the same
+ * reason but does not lean on it (variance, not turtling, is its identity).
  *
  * Pure data + pure helpers — card ids are validated against the skill library at
  * call time (an id that no longer resolves is dropped), so the lists stay safe to
@@ -24,8 +26,15 @@
 import { getCardById } from '../Cards/cards.library';
 import { SYNTHETIC_CARD_IDS } from './combat.cards';
 
-/** The design lever a preset leans on (mirrors the card effect-kinds). */
-export type CombatDeckFocus = 'dot' | 'control' | 'utility' | 'damage' | 'balanced';
+/**
+ * The design lever a preset leans on (mirrors the card effect-kinds).
+ * `'damage'` is kept (existing draft/sim-policy consumers key off it) and
+ * `'rush-execute'` is added alongside it (Master Spec §5.4) rather than
+ * replacing it in place, to avoid an engine-wide rename outside this pass's
+ * scope — `'damage'` still means "raw direct-damage lever" wherever else it's
+ * used (`combat.deck-draft.ts`, `combat.sim-policies.ts`, `combat.cli.ts`).
+ */
+export type CombatDeckFocus = 'dot' | 'control' | 'utility' | 'damage' | 'rush-execute' | 'balanced';
 
 /** A curated, ready-to-play combat deck with a single design focus. */
 export interface CombatDeckPreset {
@@ -40,6 +49,12 @@ export interface CombatDeckPreset {
     /** Curated skill-card ids. DUPLICATES are intentional (extra copies of a key
      *  card are part of the deck's identity — the deckbuilder point). */
     cardIds: readonly string[];
+    /** Dev-UI legibility only (Master Spec §5) — which aspect(s) the deck's
+     *  token generation leans on. Omitted where token lean isn't the point. */
+    tokenLean?: string;
+    /** Dev-UI legibility only — count of wild-die (`grant_permanent_wild_die`)
+     *  cards in `cardIds`. */
+    wildDieCards?: number;
 }
 
 /**
@@ -52,78 +67,110 @@ export const COMBAT_DECK_PRESETS: Record<string, CombatDeckPreset> = {
         id: 'dot-erosion',
         name: 'Erosion',
         focus: 'dot',
-        description: 'Stack damage-over-time and let the enemy bleed out — the fast, hands-off HP clock.',
+        description: 'Stack damage-over-time across two aspects and let the enemy bleed out — the fast, hands-off HP clock.',
         cardIds: [
-            'slippery-slope', 'slippery-slope',   // body DoT (bleed) — the backbone, doubled
-            'sorites-cascade', 'sorites-cascade',  // mind DoT — second stacking source
-            'pyrrhic-victory',                     // gold — a MAJOR DoT finisher
-            'the-final-word',                      // gold — guaranteed DoT at boosted intensity
-            'resonance-bleed', 'straw-giant',      // chip strikes to close a low-HP enemy
-            'brace-for-impact',                    // GUARD — brace from turn one
+            'straw-mans-jab',       // body DoT (bleed)
+            'naturalistic-fallacy', // body DoT (hemorrhage)
+            'poisoned-well',        // body DoT (septic, stacks)
+            'sorites-whisper',      // mind DoT (unraveling)
+            'ship-in-a-bottle',     // mind DoT (unraveling + fatigue)
+            'regress-ad-infinitum', // mind DoT (unraveling, tier-3 non-execute payoff)
+            'pyrrhic-victory',      // gold — execute gated on 2+ body-DoT stacks
+            'brace-for-impact',     // GUARD — brace from turn one
         ],
+        wildDieCards: 0,
     },
     'control-lock': {
         id: 'control-lock',
         name: 'Saturation',
         focus: 'control',
-        description: 'Deny the enemy its telegraphed turns — chain control + stat-debuffs so it never lands a threat.',
+        description: 'Deny the enemy its telegraphed turns — chain control + stat-debuffs across all three aspects so it never lands a threat.',
         cardIds: [
-            'false-dilemma', 'heap-of-doubt',      // mind tier-1 control — cheap, spammable openers
-            'eternal-regress',                     // heart control (confusion + slow)
-            'barbers-paradox', 'gamblers-ruin',    // mind control
-            'appeal-to-fear',                      // heart control (fear)
-            'buridans-impasse',                    // mind control
-            'unmoved-mover',                       // gold — a MAJOR control lock
-            'red-herring', 'appeal-to-authority',  // stat-debuffs — soft control to fill gaps
-            'suspend-judgment',                    // GUARD — brace while the locks land
+            'zenos-half-step',        // body control (slow)
+            'slippery-slopes-grip',   // body soft control (fatigue + exposure)
+            'ad-hominem-murmur',      // mind control (doubt)
+            'false-dilemmas-fork',    // mind control (sensory-null)
+            'moving-the-goalposts',   // mind control (doubt + sensory-null)
+            'eternal-regress',        // heart control (confusion + slow)
+            'suspend-judgment',       // GUARD — brace while the locks land
         ],
+        wildDieCards: 0,
     },
     'utility-bulwark': {
         id: 'utility-bulwark',
         name: 'Bulwark',
         focus: 'utility',
-        description: 'Outlast and convert — guards, self-buffs, and a Befriend line, with just enough offense to close.',
+        description: 'Outlast and convert — guards on every stance color, self-buffs, and a Befriend line, with just enough offense to still close.',
         cardIds: [
             'brace-for-impact', 'suspend-judgment', 'stoic-reserve',  // GUARD across all three colors
-            'stoic-bulwark', 'apophatic-aegis',    // heart defensive buffs
-            'bootstrap-paradox', 'soothing-words', // heart sustain / utility
+            'ship-of-theseus-drift', 'soothing-words', 'bootstrap-paradox', // self-buff / sustain
             'befriend',                            // the mercy line
-            'slippery-slope', 'eternal-regress',   // a DoT + a control win-condition so it can still close
+            'straw-mans-jab', 'moving-the-goalposts', // a DoT + a control win-condition
         ],
+        wildDieCards: 0, // variance is antithetical to a stall deck
     },
     'aggro-strike': {
         id: 'aggro-strike',
         name: 'Onslaught',
-        focus: 'damage',
-        description: 'Raw HP strikes — the fastest baseline clock, splashed with one DoT so it is not pure trading.',
+        focus: 'rush-execute',
+        description: 'The fastest DoT stack in the game — cheap, doubled tier-1 applicators feeding the earliest execute access.',
         cardIds: [
-            'ad-hominem-strike', 'ad-hominem-strike',  // body tier-1 strike, doubled
-            'achilles-gambit', 'hasty-generalization', // tier-1 strikes
-            'mob-appeal', 'sunk-cost-momentum',        // body tier-2 strikes
-            'straw-giant', 'grandfather-paradox',      // body tier-3 finishers
-            'slippery-slope',                          // a DoT splash — keeps a status payoff in the kit
-            'brace-for-impact',                        // GUARD
+            'straw-mans-jab', 'straw-mans-jab',                 // body tier-1 DoT, doubled — cheapest die-cost
+            'appeal-to-pitys-despair', 'appeal-to-pitys-despair', // heart tier-1 DoT, doubled
+            'achilles-overtake',                                 // lower-tier execute — smaller detonation, earlier access
+            'brace-for-impact',                                  // GUARD
         ],
+        wildDieCards: 0,
     },
     'balanced': {
         id: 'balanced',
         name: 'Generalist',
         focus: 'balanced',
-        description: 'One of every lever — DoT, control, a strike, a buff, a guard, and Befriend. A flexible default.',
+        description: 'One of every lever — DoT across all three aspects, control, a self-buff, a guard, Befriend, and a taste of the execute payoff.',
         cardIds: [
-            'slippery-slope', 'sorites-cascade',   // DoT
-            'eternal-regress', 'red-herring',      // control + soft control
-            'ad-hominem-strike', 'mob-appeal',     // strikes
-            'bootstrap-paradox',                   // self-buff
-            'brace-for-impact',                    // GUARD
-            'befriend',                            // mercy line
+            'straw-mans-jab', 'sorites-whisper', 'appeal-to-pitys-despair', // DoT — body / mind / heart
+            'zenos-half-step', 'ad-hominem-murmur',                        // control — body / mind
+            'ship-of-theseus-drift',                                       // self-buff
+            'brace-for-impact',                                            // GUARD
+            'befriend',                                                    // mercy line
+            'achilles-overtake',                                           // tier-3 execute payoff sample
         ],
+        wildDieCards: 0,
+    },
+    'token-recursion': {
+        id: 'token-recursion',
+        name: 'Recursion',
+        focus: 'balanced',
+        description: 'Cheap, reliable token generators spread across body/mind/heart — the payoff comes from Skills triggers, not card power.',
+        cardIds: [
+            'straw-mans-jab', 'zenos-half-step',    // body — cheap tier-1 token generators
+            'liars-paradox', 'ad-hominem-murmur',   // mind — cheap tier-1 token generators
+            'ship-of-theseus-drift', 'appeal-to-pitys-despair', // heart — cheap tier-1 token generators
+            'brace-for-impact',                     // GUARD
+        ],
+        tokenLean: 'body/mind/heart spread',
+        wildDieCards: 0,
+    },
+    'wild-escalation': {
+        id: 'wild-escalation',
+        name: 'Escalation',
+        focus: 'balanced',
+        description: 'Snowball the dice pool with all three wild-die cards, then cash in with the gold-rare executes that ignore die-cost on a Wild roll.',
+        cardIds: [
+            'gamblers-folly', 'continuum-fallacy', 'buridans-wager', // all 3 wild-die cards — body / mind / heart
+            'straw-mans-jab', 'sorites-whisper', 'bandwagons-pull',  // color-agnostic DoT/control backing
+            'pyrrhic-victory', 'the-final-word', 'unmoved-mover',    // gold executes — the wild-synergy payoff tier
+            'brace-for-impact',                                      // GUARD (present, not prioritized — this deck snowballs)
+        ],
+        tokenLean: 'n/a — dice-pool focused',
+        wildDieCards: 3,
     },
 };
 
 /** Stable display order for the deck-picker (headline status kits first). */
 export const COMBAT_DECK_PRESET_ORDER: readonly string[] = Object.freeze([
     'dot-erosion', 'control-lock', 'utility-bulwark', 'aggro-strike', 'balanced',
+    'token-recursion', 'wild-escalation',
 ]);
 
 /** All presets in display order. */

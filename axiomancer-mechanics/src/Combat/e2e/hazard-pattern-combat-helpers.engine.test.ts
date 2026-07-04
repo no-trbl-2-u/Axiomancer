@@ -25,6 +25,7 @@ import type { Enemy } from '../../Enemy/types';
 import { TidepoolCrab } from '../../Enemy/enemy.library';
 import { deepClone } from '../../Utils';
 import { getCardById } from '../../Cards/cards.library';
+import { registerSandboxCards } from '../../Cards/cards.sandbox';
 import { lookupEffect, applyEffect } from '../../Effects';
 
 import {
@@ -46,9 +47,24 @@ import { generateDefaultThreatSequence, AUTHORED_THREAT_ENEMY_IDS } from '../com
 import { ENEMY_REGISTRY } from '../../Enemy/enemy.library';
 import type { CombatManaDie, CombatEvent } from '../combat.encounter.types';
 
+// Master Spec (2026-07-03) doctrine pass converted every real library card off
+// flat `basePower` strikes — no real card can play "pure damage, no status"
+// anymore, so this suite's pure-strike fixture is a sandbox-only test card.
+registerSandboxCards([{
+    id: 'qa-pure-strike-body',
+    name: 'QA Pure Strike (test fixture)',
+    category: 'paradox',
+    philosophicalAspect: 'body',
+    description: 'Test-only fixture: a flat direct-damage card with no status payload.',
+    tier: 1,
+    targetType: 'enemy',
+    basePower: 12,
+    scalingStat: 'body',
+}]);
+
 const DOT_BODY = 'slippery-slope';       // body, tier 2, DoT
 const CONTROL_HEART = 'eternal-regress'; // heart, tier 2, control
-const DAMAGE_BODY = 'achilles-gambit';   // body, tier 1, no status effect
+const DAMAGE_BODY = 'qa-pure-strike-body'; // body, tier 1, no status effect (sandbox fixture)
 
 const SEED = 12345;
 

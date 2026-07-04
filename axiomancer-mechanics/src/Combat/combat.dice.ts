@@ -196,3 +196,40 @@ export function refreshOneDie(
 export function stanceToDieColor(stance: Stance): CombatDieColor {
     return stance;
 }
+
+// ---------------------------------------------------------------------------
+// Master Spec §4 — wild-die permanent-growth mechanic
+// ---------------------------------------------------------------------------
+
+/**
+ * Hard cap on `CombatEncounterState.permanentWildDice`. At cap a turn's draft
+ * is `TURN_DICE_COUNT` base dice + `MAX_PERMANENT_WILD_DICE` wild + `MAX_PERMANENT_WILD_DICE`
+ * dead — a visible, thematic "fate pushes back" cost rather than an invisible
+ * probability tilt (§4.3). Every permanent Wild die is granted alongside one
+ * permanent dead (`x`, locked) die by the `grant_permanent_wild_die` card
+ * special mechanic (combat-engine owned).
+ */
+export const MAX_PERMANENT_WILD_DICE = 3;
+
+/**
+ * Rolls the permanent bonus dice appended to a turn's draft pool once the
+ * player has grown the wild-die pool (Master Spec §4.1). `wildCount`/`deadCount`
+ * come from `CombatEncounterState.permanentWildDice`/`permanentDeadDice` and are
+ * NOT re-rolled — they're fixed grants, just re-materialized each turn as fresh
+ * turn-scoped die objects (mirrors how `rollTurnDice` ids are turn-scoped).
+ * Returns an empty array when both counts are 0 (the common case pre-growth).
+ */
+export function rollPermanentBonusDice(
+    turn: number,
+    wildCount: number,
+    deadCount: number,
+): CombatManaDie[] {
+    const dice: CombatManaDie[] = [];
+    for (let i = 0; i < wildCount; i++) {
+        dice.push({ id: `t${turn}-pw${i}`, color: 'wild', state: 'available', temporary: false });
+    }
+    for (let i = 0; i < deadCount; i++) {
+        dice.push({ id: `t${turn}-pd${i}`, color: 'x', state: 'locked', temporary: false });
+    }
+    return dice;
+}

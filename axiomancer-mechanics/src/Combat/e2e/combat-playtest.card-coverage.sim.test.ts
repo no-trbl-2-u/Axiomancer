@@ -81,9 +81,10 @@ function coveragePlays(cardId: string): { plays: number; seedsTried: number[] } 
 }
 
 describe('card coverage — every library card is exercisable', () => {
-    it('the coverage universe is the full 65-card library', () => {
-        expect(cardLibrary.length).toBe(65);
-        expect(new Set(cardLibrary.map(c => c.id)).size).toBe(65);
+    it('the coverage universe is the full 88-card library', () => {
+        // 65 + 23 (Master Spec 2026-07-03 status-stacking content drop).
+        expect(cardLibrary.length).toBe(88);
+        expect(new Set(cardLibrary.map(c => c.id)).size).toBe(88);
     });
 
     it.each(cardLibrary.map(c => [c.id] as const))(

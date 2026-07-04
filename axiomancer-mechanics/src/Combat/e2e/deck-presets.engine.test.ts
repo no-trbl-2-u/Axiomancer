@@ -27,6 +27,11 @@ const FOCUS_CLASSES: Record<string, CombatVerbClass[]> = {
     control: ['direct-control', 'stat-debuff'],
     utility: ['buff-self', 'defend', 'befriend'],
     damage: ['direct-damage'],
+    // Onslaught's Master Spec §5.4 identity is fast DoT stacking into an
+    // execute finisher — classifyVerbClass reads an enemy control debuff
+    // (e.g. Achilles' Overtake's slow) before its `execute` specialMechanic,
+    // so both verb classes count toward this lever.
+    'rush-execute': ['direct-dot', 'direct-control'],
 };
 
 function verbClassOf(cardId: string): CombatVerbClass | null {

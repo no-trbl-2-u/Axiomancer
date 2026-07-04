@@ -67,6 +67,8 @@ function focusWeight(focus: CombatDeckFocus, verbClass: CombatVerbClass): number
         case 'control':  return verbClass === 'direct-control' || verbClass === 'stat-debuff'
             ? FOCUS_WEIGHT : OFF_FOCUS_WEIGHT;
         case 'damage':   return verbClass === 'direct-damage' ? FOCUS_WEIGHT : OFF_FOCUS_WEIGHT;
+        case 'rush-execute': return verbClass === 'direct-dot' || verbClass === 'direct-control'
+            ? FOCUS_WEIGHT : OFF_FOCUS_WEIGHT;
         case 'utility':  return verbClass === 'defend' || verbClass === 'buff-self' || verbClass === 'befriend'
             ? FOCUS_WEIGHT : OFF_FOCUS_WEIGHT;
         case 'balanced': return OFF_FOCUS_WEIGHT;

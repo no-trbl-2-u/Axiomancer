@@ -92,10 +92,11 @@ export const SANDBOX_CARD_SETS: Record<string, SandboxCardSet> = {
             + 'the full sandbox grammar (new cards + a library override).',
         cards: [emberSyllogism, temperedDoubt],
         overrides: [
-            // Example numeric A/B: library value is 8 — does +1 on the weak
-            // baseline strike change anything? (It should not: status play must
-            // stay the efficient path.)
-            { cardId: 'ad-hominem-strike', patch: { basePower: 9 } },
+            // Example numeric A/B: library value is 0 (Master Spec 2026-07-03 —
+            // every player card is status-only bar a handful of tier-3 gated
+            // finishers) — does +1 on the doctrine's zero baseline strike change
+            // anything? (It should not: status play must stay the efficient path.)
+            { cardId: 'ad-hominem-strike', patch: { basePower: 1 } },
         ],
     },
 };

@@ -448,6 +448,55 @@ with the legacy driver.)
 
 Cross-reference: `docs/skills.md` → Skills vs Cards.
 
+> **Naming collision warning (2026-07):** the table above is the *legacy*
+> "Skill" — `Cards/skill.engine.ts`'s card-resolution engine (confusingly
+> named; a "skill" here is a card source, projected into play via
+> `toCombatCard`). A second, unrelated **Skills system** (`src/Skills/`,
+> `SKILLS_LIBRARY`, `triggerCombatSkill`) now also exists — see the next
+> section. The two are NOT the same concept; when reading "skill" in this
+> codebase, check which module it's coming from.
+
+## Status-Focused Card Doctrine, the Skills/Token System, and Wild-Die Growth
+
+Three locked product-owner decisions layered onto Hazard-Pattern Combat (full
+detail in the card/skill library files themselves, not duplicated here):
+
+- **Hybrid damage model.** Player cards apply status effects (stacking DoT
+  debuffs) rather than dealing flat direct "strike" damage; a small set of
+  rare Tier-3 **execute/finisher** cards (`pyrrhic-victory`, `the-final-word`,
+  `unmoved-mover`, `achilles-overtake`) are the only cards allowed to consume
+  already-stacked debuffs for a burst payoff — a payoff for setup, not a
+  strike. All cards added in the 2026-07 status-stacking pass
+  (`src/Cards/cards.library.ts`) ship with `basePower: 0` for exactly this
+  reason. **Known gap:** the pre-existing ~65-card library (everything before
+  that pass) still has non-zero `basePower` direct-damage cards that predate
+  this doctrine and were left untouched (out of scope for that pass) — a
+  follow-up pass should either retire or convert them.
+- **Skills are a separate, always-on ability system — NOT cards.** Cards are
+  drawn/played from the hand; **Skills** (`src/Skills/skills.library.ts`,
+  `SKILLS_LIBRARY`) are triggered any time the player can afford their
+  `CombatResources` token cost, independent of the current hand — see
+  `Combat/combat.engine.ts`'s `triggerCombatSkill`. `SkillDefinition` (the
+  catalogue) is deliberately separate from `getKnownSkills()` (what a given
+  player currently has access to) so race/class/equipment gating can be added
+  later without a rewrite; today `getKnownSkills()` returns everything with
+  `requiresUnlock: null` (i.e. all of them). See the naming-collision warning
+  just above — this is unrelated to the legacy `Cards/skill.engine.ts`.
+- **Wild-die cards are permanent pool growth, not a one-turn trick.**
+  Playing a `grant_permanent_wild_die` card (`CardSpecialMechanic`) adds a
+  Wild die to `CombatEncounterState.permanentWildDice` for the **rest of the
+  encounter** — every subsequent turn's dice pool includes it (see
+  `combat.engine.ts`'s `rollPermanentBonusDice` / `MAX_PERMANENT_WILD_DICE`).
+
+Full design intent for this pass lived in an external "Master Spec" handed to
+the implementing agents; no such spec file is checked into `specs/` today —
+a follow-up should write one up (e.g. `specs/29-status-stacking-and-skills.md`)
+so the `§2`/`§3`/`§4` references scattered through `src/Cards/`, `src/Skills/`,
+and `src/Combat/` code comments resolve to something readable. Until then,
+`specs/25-hazard-pattern-combat.md` remains the canonical mechanical-structure
+doc and `src/Skills/skills.types.ts` / `skill-trigger.engine.ts` carry the most
+complete design rationale in their doc comments.
+
 ## Hazard-Pattern Combat (Spec 25)
 
 **The only combat engine** (mobile map encounters, the combat CLI, the `/combat-playtest` + `/deck-tuning` loops).

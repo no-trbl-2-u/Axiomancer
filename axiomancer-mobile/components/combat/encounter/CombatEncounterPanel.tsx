@@ -29,14 +29,16 @@ import {
     initializeCombatEncounter, rollEncounterDice, playCombatCard, resolveThreatPhase,
     startTurn, draftStanceDie, discardCombatCard, playSignatureSkill,
     selectEncounterMercyChoice, buildCombatSummary, rollCombatCardRewards, addRewardCard,
-    rollLoot, addItem,
+    rollLoot, addItem, triggerCombatSkill,
     type CombatEncounterState, type CombatOutcome, type Character, type Enemy, type CombatEvent,
     type CombatManaDie,
 } from '@mechanics';
 
+import { isDevToolsEnabled } from '@/lib/buildProfile';
 import { advanceWheel, isMomentumDieId, isWheelStance, momentumDieId, type WheelStance } from '@/state/combat/momentum';
 
 import { CombatBoard, CombatCardFace, type DragController, type DragPayload } from '@/components/combat/encounter/CombatBoard';
+import { DebugTokensAndSkills } from '@/components/DebugTokensAndSkills';
 import { type CombatFx } from '@/components/combat/encounter/CombatCombatantPane';
 import { CombatDie } from '@/components/combat/encounter/CombatDie';
 import { CombatSummaryModal } from '@/components/combat/encounter/CombatSummaryModal';
@@ -311,6 +313,17 @@ export function CombatEncounterPanel({
 
     const unstageUid = useCallback((uid: string) => setStagedUids((prev) => prev.filter((u) => u !== uid)), []);
     const onEnter = useCallback(() => apply((s) => rollEncounterDice(s).state), [apply]);
+    // Dev-only — Skills are NOT cards (Master Spec §3): trigger a skill against
+    // the live encounter independent of hand/dice state, purely gated on the
+    // `CombatResources` token bank (+ the engine's own once-per-combat/cooldown
+    // limits). See `DebugTokensAndSkills`.
+    const onTriggerSkillDebug = useCallback((skillId: string) => {
+        apply((s) => {
+            const t = triggerCombatSkill(s, skillId);
+            fxRef.current = t.events;
+            return t.state;
+        });
+    }, [apply]);
     const onStage = useCallback((uid: string) => setStagedUids((prev) => (prev.includes(uid) ? prev : [...prev, uid])), []);
     const onUnstage = useCallback((uid: string) => unstageUid(uid), [unstageUid]);
     // APPLY one staged card (hazard model — the die is OPTIONAL). `power` true →
@@ -758,6 +771,11 @@ export function CombatEncounterPanel({
             )}
             {tutorialActive && primerDone && !showReveal && !summary && !mercy && (
                 <CombatTutorialCoach state={live} vm={vm} onSkip={() => finishTutorial(true)} />
+            )}
+
+            {/* dev-only — Skills/tokens/wild-die-pool readout + manual trigger */}
+            {isDevToolsEnabled() && !summary && (
+                <DebugTokensAndSkills state={live} onTriggerSkill={onTriggerSkillDebug} />
             )}
 
             {/* drag ghost */}

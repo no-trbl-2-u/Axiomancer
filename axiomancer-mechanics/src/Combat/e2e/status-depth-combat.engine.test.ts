@@ -17,6 +17,7 @@ import { TidepoolCrab } from '../../Enemy/enemy.library';
 import { deepClone } from '../../Utils';
 import { mockSequentialRng } from '../../test-utils/rng';
 import { getCardById } from '../../Cards/cards.library';
+import { registerSandboxCards } from '../../Cards/cards.sandbox';
 import { lookupEffect } from '../../Effects';
 import type { ActiveEffect } from '../../Effects/types';
 import {
@@ -32,6 +33,40 @@ import { COMBAT_REWARD_POOL } from '../combat.rewards';
 import type { CombatDieColor, CombatEncounterState, CombatEvent } from '../combat.encounter.types';
 
 afterEach(() => { vi.restoreAllMocks(); });
+
+// Master Spec (2026-07-03) doctrine pass converted every real library card off
+// flat `basePower` strikes (status-or-nothing now, bar a handful of tier-3
+// gated finishers) and reworked `leeching-syllogism` off the `siphon`
+// specialMechanic (siphon needs a nonzero direct strike to skim from, which is
+// exactly the "strike" the doctrine forbids). These two mechanics-isolation
+// tests below (VULNERABLE-on-a-pure-strike, SIPHON-on-a-strike) still need a
+// real pure-direct-damage / siphon-bearing card to exercise, so they're
+// sandbox-only test fixtures now.
+registerSandboxCards([
+    {
+        id: 'qa-pure-strike-body',
+        name: 'QA Pure Strike (test fixture)',
+        category: 'paradox',
+        philosophicalAspect: 'body',
+        description: 'Test-only fixture: a flat direct-damage card with no status payload.',
+        tier: 1,
+        targetType: 'enemy',
+        basePower: 12,
+        scalingStat: 'body',
+    },
+    {
+        id: 'qa-siphon-strike',
+        name: 'QA Siphon Strike (test fixture)',
+        category: 'fallacy',
+        philosophicalAspect: 'heart',
+        description: 'Test-only fixture: a direct-damage card carrying the `siphon` specialMechanic, isolated from the (now DoT-based) `leeching-syllogism` library card.',
+        tier: 2,
+        targetType: 'enemy',
+        basePower: 12,
+        scalingStat: 'heart',
+        specialMechanics: [{ kind: 'siphon', pct: 0.5 }],
+    },
+]);
 
 const ae = (effectId: string, intensity = 1, remainingDuration = 4, tier: 1 | 2 | 3 = 2): ActiveEffect =>
     ({ effectId, intensity, remainingDuration, appliedAt: 1, tier });
@@ -79,7 +114,7 @@ const enemyDotSum = (events: readonly CombatEvent[]): number =>
 
 describe('VULNERABLE — the foe takes more from every HP source', () => {
     it('the free TOP chip scales exactly ×1.5 with debuff_vulnerable present (×1 absent)', () => {
-        const DMG = 'achilles-gambit'; // pure direct-damage card
+        const DMG = 'qa-pure-strike-body'; // pure direct-damage card (sandbox fixture)
         const deck = [DMG, DMG, DMG, DMG, DMG];
 
         mockSequentialRng(0.05);
@@ -102,7 +137,7 @@ describe('VULNERABLE — the foe takes more from every HP source', () => {
     });
 
     it('the POWERED strike is strictly larger against a Vulnerable foe', () => {
-        const DMG = 'achilles-gambit';
+        const DMG = 'qa-pure-strike-body';
         const deck = [DMG, DMG, DMG];
 
         mockSequentialRng(0.05);
@@ -373,7 +408,7 @@ describe('EXECUTE — a finisher when the foe is low or heavily DoT-stacked', ()
 describe('SIPHON — heal for part of the HP eroded', () => {
     it('heals the player for a fraction of the strike (damage-dealt self event)', () => {
         mockSequentialRng(0.05);
-        const SIP = 'leeching-syllogism';
+        const SIP = 'qa-siphon-strike'; // sandbox fixture — `leeching-syllogism` was reworked off `siphon` (2026-07-03)
         const player = makePlayer([SIP]);
         player.health = 100; // leave headroom to observe the heal
         const state = openAndDraft(player, makeEnemy(300, 'mind'), [SIP, SIP, SIP], 'mind');
@@ -422,7 +457,9 @@ describe('card projection — the new payoff cards classify + advertise sensibly
         ['gabriels-bulwark', 'defend', 'none'],
         ['briar-riposte', 'defend', 'none'],
         ['brazen-rebuttal', 'buff-self', 'none'],
-        ['leeching-syllogism', 'direct-damage', 'none'],
+        // Reworked 2026-07-03: off `siphon` (needed a flat strike to skim from)
+        // onto a DoT (hemorrhage) + self-regen pairing — now classifies as DoT.
+        ['leeching-syllogism', 'direct-dot', 'dot'],
         ['pyrrhic-victory', 'direct-dot', 'dot'], // keeps its bleed class despite execute
     ];
 

@@ -782,6 +782,7 @@ function applySpecialMechanic(
         case 'riposte':
         case 'execute':
         case 'amplify':
+        case 'grant_permanent_wild_die':
             return { caster, target, events };
     }
 }

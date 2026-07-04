@@ -36,6 +36,7 @@ import { SIGNATURE_KITS, playerArchetype, CONCLUDE_DMG_PER_STACK } from '../comb
 import { rollCombatCardRewards, addRewardCard, unlockSkillViaDilemma, COMBAT_REWARD_POOL } from '../combat.rewards';
 import { buildCombatDeck, COMBAT_HAND_SIZE } from '../combat.deck';
 import { getCardById } from '../../Cards/cards.library';
+import { registerSandboxCards } from '../../Cards/cards.sandbox';
 import { simulateHazardPatternCombat } from '../combat.encounter.sim';
 import { getThreatSequence, deriveIntentType } from '../combat.threat';
 import type { CombatDieColor, CombatEncounterState } from '../combat.encounter.types';
@@ -48,9 +49,24 @@ afterEach(() => {
 
 // ── Fixtures ─────────────────────────────────────────────────────────────────
 
+// Master Spec (2026-07-03) doctrine pass converted every real library card off
+// flat `basePower` strikes — no real card can play "pure damage, no status"
+// anymore, so this suite's pure-strike fixture is a sandbox-only test card.
+registerSandboxCards([{
+    id: 'qa-pure-strike-body',
+    name: 'QA Pure Strike (test fixture)',
+    category: 'paradox',
+    philosophicalAspect: 'body',
+    description: 'Test-only fixture: a flat direct-damage card with no status payload.',
+    tier: 1,
+    targetType: 'enemy',
+    basePower: 12,
+    scalingStat: 'body',
+}]);
+
 const DOT_BODY = 'slippery-slope';       // body, tier 2, applies debuff_bleed (DoT)
 const CONTROL_HEART = 'eternal-regress'; // heart, tier 2, confusion + slow (control)
-const DAMAGE_BODY = 'achilles-gambit';   // body, tier 1, basePower 12, no status effect
+const DAMAGE_BODY = 'qa-pure-strike-body'; // body, tier 1, basePower 12, no status effect (sandbox fixture)
 const BEFRIEND = 'befriend';             // heart, tier 1
 
 function makePlayer(skills: string[]): Character {

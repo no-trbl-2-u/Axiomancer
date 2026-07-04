@@ -176,6 +176,8 @@ export {
     // 0.34.0 status-depth epic — honesty selectors
     getEnemyIncomingDamageMultiplier, getDisruptMeter,
     projectRupture, isExecuteReady, projectExecute, projectSiphonHeal,
+    // Master Spec §3 — Skills trigger hook (Skills are NOT cards)
+    triggerCombatSkill,
 } from './combat.engine';
 export type { CardDieCost } from './combat.engine';
 export {
@@ -183,6 +185,8 @@ export {
     rollCombatDieColor, dieHasStance,
     combatDieCanPower, refreshOneDie,
     dieIsRerollable, hasRerollableDice, rerollSpentDice,
+    // Master Spec §4 — wild-die permanent-growth mechanic
+    MAX_PERMANENT_WILD_DICE, rollPermanentBonusDice,
 } from './combat.dice';
 export { COMBAT_HAND_SIZE, buildCombatDeck, drawCombatCards, shuffleCombatDeck } from './combat.deck';
 export {

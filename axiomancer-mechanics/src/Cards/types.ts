@@ -155,7 +155,15 @@ export type CardSpecialMechanic =
      *  `multiplier` and fire as a one-time HP burst. DoT effects are NOT consumed —
      *  they keep ticking (distinct from RUPTURE which consumes them). Capped at
      *  AMPLIFY_BURST_CAP. Combat-engine owned; skill engine no-ops it. */
-    | { kind: 'amplify'; multiplier: number };
+    | { kind: 'amplify'; multiplier: number }
+    /** GRANT_PERMANENT_WILD_DIE — Master Spec §4. Adds `wildCount` Wild dice and
+     *  `deadCount` locked X dice to `CombatEncounterState.permanentWildDice` /
+     *  `permanentDeadDice` for the REST of the encounter (deck-building-style
+     *  escalation, not a one-turn trick), clamped to `MAX_PERMANENT_WILD_DICE`.
+     *  Only ever fired from a card's SURGE (die-powered) action — the doctrine is
+     *  weak plays never touch the pool. Combat-engine owned; skill engine no-ops
+     *  it, mirroring `guard`/`barrier`/`rupture`. */
+    | { kind: 'grant_permanent_wild_die'; wildCount: number; deadCount: number };
 
 /**
  * Phase 66 — synergy predicate. The matched ActiveEffect on `on`

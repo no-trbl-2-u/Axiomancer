@@ -218,6 +218,10 @@ export default function RootLayout() {
                 name="cutscene/index"
                 options={{ headerShown: false, presentation: 'fullScreenModal' }}
               />
+              <Stack.Screen
+                name="dev/index"
+                options={{ headerShown: false, presentation: 'fullScreenModal' }}
+              />
             </Stack>
           </TooltipProvider>
           </CombatModeProvider>

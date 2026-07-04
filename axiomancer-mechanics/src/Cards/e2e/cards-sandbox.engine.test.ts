@@ -119,7 +119,7 @@ describe('sandbox registry — register / lookup / clear', () => {
         clearSandboxCards();
         expect(hasSandboxContent()).toBe(false);
         expect(getCardById('sandbox-test-rot')).toBeUndefined();
-        expect(getCardById('ad-hominem-strike')?.basePower).toBe(8); // library literal
+        expect(getCardById('ad-hominem-strike')?.basePower).toBe(0); // library literal (Master Spec 2026-07-03)
     });
 });
 
@@ -155,7 +155,7 @@ describe('sandbox registry — collisions and validation', () => {
 describe('sandbox registry — library-card overrides', () => {
     it('a shallow patch is merged over the library card and visible via getCardById', () => {
         const base = getCardById('ad-hominem-strike');
-        expect(base?.basePower).toBe(8);
+        expect(base?.basePower).toBe(0); // library literal (Master Spec 2026-07-03)
 
         registerSandboxOverride('ad-hominem-strike', { basePower: 12 });
         const merged = getCardById('ad-hominem-strike');
@@ -191,7 +191,7 @@ describe('sandbox sets — the forge-example set', () => {
 
         expect(getCardById(EMBER)?.name).toBe('Ember Syllogism');
         expect(getCardById(DOUBT)?.name).toBe('Tempered Doubt');
-        expect(getCardById('ad-hominem-strike')?.basePower).toBe(9); // library literal is 8
+        expect(getCardById('ad-hominem-strike')?.basePower).toBe(1); // library literal is 0
 
         // Guard against typo'd effect ids — every referenced effect must be real.
         for (const card of set!.cards) {

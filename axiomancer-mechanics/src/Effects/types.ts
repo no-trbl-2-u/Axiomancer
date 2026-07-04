@@ -111,6 +111,72 @@ export interface EffectPayload {
      * byte-identical. See the VULNERABLE epic (mechanics 0.34.0).
      */
     damageTakenMult?: number;
+    /**
+     * Skills/Status Master Spec §1 — extensions for the 12 new status
+     * entries. Data-only for now: no resolver reads these fields yet (the
+     * DoT tick resolver, card-play resolution, and die-roll resolution paths
+     * that would consume them are a later implementation stage). Kept on
+     * `EffectPayload` rather than as bespoke top-level fields so the shape
+     * stays discoverable from one place.
+     */
+    /** DoT-specific behaviour beyond the plain `damageOverTime` tick. */
+    dotModifiers?: {
+        /** Halve remaining tick damage the instant the bearer receives any heal
+         *  (Hemorrhage). */
+        decayOnHeal?: boolean;
+        /** Tick damage ramps the longer the effect survives (Unraveling):
+         *  `tickDamage = baseTick * (1 + turnsSurvived * rampFactor)`. Reapplication
+         *  resets the ramp rather than stacking. */
+        escalatesPerTurn?: boolean;
+        /** Multiplier applied per turn survived when `escalatesPerTurn` is set. */
+        rampFactor?: number;
+    };
+    /** Outgoing-damage multiplier applied to damage the bearer DEALS (Septic's
+     *  necrotic seep is the first user) — additive across stacks, -X% each. */
+    outgoingDamageMulPct?: number;
+    /** Multiplier applied to a card's effective "power" for math purposes
+     *  (Fatigue-style chip debuffs feeding tier-3 execute setup). */
+    powerMulPct?: number;
+    /** Healing the bearer RECEIVES is multiplied by this (Despair-style). */
+    healingReceivedMulPct?: number;
+    /**
+     * Single-use "consumed on next matching event" lifecycle flag. Recommended
+     * by the Master Spec rather than four bespoke booleans: `debuff_exposure`,
+     * `debuff_doubt`, `buff_clarity`, and `debuff_overextended` all set this.
+     * Honored by whichever resolver path is nearest each consumption trigger
+     * (DoT application, card-play resolution, or die-roll resolution) — not
+     * yet wired to any of those paths.
+     */
+    consumedOnUse?: boolean;
+    /** Upgrades the tier of the bearer's next incoming DoT tick by this many
+     *  tiers, then the effect instance is removed (pairs with `consumedOnUse`). */
+    nextDotTierUpgrade?: number;
+    /** Forces the bearer's next card play to resolve at weak-tier even if a
+     *  matching/wild die is spent — an opponent-inflicted denial (pairs with
+     *  `consumedOnUse`). */
+    restrictsSurgeAccess?: boolean;
+    /** Forces the bearer's OWN next play to weak-tier as a self-inflicted status
+     *  cost (tier-3 cards that pay via status instead of a die spend). Distinct
+     *  from `restrictsSurgeAccess` to keep the self-cost vs. opponent-denial
+     *  sources unambiguous (pairs with `consumedOnUse`). */
+    forcesWeakTierNextPlay?: boolean;
+    /** Anti-control: the bearer cannot benefit from advantage/crit bonuses. */
+    blocksAdvantage?: boolean;
+    /** Anti-control: the bearer's own control-effect application accuracy is
+     *  reduced. */
+    reducesControlAccuracy?: boolean;
+    /** Denies the bearer from targeting allies with buff cards for the duration. */
+    deniesAllyBuffTargeting?: boolean;
+    /** Solo-fight fallback when there's no ally to deny a buff onto — flagged
+     *  for a combat-engine enemy-card-denial hook that doesn't exist yet. */
+    soloFightFallback?: 'deny_self_buff_card';
+    /** Forces the bearer's next die of `colorChoice` to count as Wild for
+     *  card-powering purposes (pairs with `consumedOnUse`). */
+    forceWildOnNextDie?: boolean;
+    /** Die color this buff's `forceWildOnNextDie` applies to. Inlined as a
+     *  literal union (rather than importing `CombatDieColor`) to avoid a
+     *  Combat → Effects → Combat import cycle. */
+    colorChoice?: 'heart' | 'body' | 'mind' | 'wild' | 'x';
 }
 
 /**

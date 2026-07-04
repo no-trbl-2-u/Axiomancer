@@ -8,17 +8,35 @@
  *   - brace-for-impact  Guard 12               → free Guard 6
  *   - eternal-recurrence Regen 3× dur4 (dpr 4) → 12/t·4t = 48, free 4/t·6t = 24
  *   - buridans-impasse  Stun dur2              → skip 2t
- *   - achilles-gambit   Strike                 → no fabricated number
+ *   - qa-mobile-pure-strike (sandbox fixture) Strike → no fabricated number
+ *     (no real card is a pure strike since the 2026-07-03 status-doctrine pass)
  *
  * Core invariant under test: real-units-or-no-number (never a fabricated value),
  * and face↔detail numbers agree.
  */
 
 import { describe, it, expect } from '@jest/globals';
-import { getCard, getSkillById } from '@mechanics';
+import { getCard, getSkillById, registerSandboxCards } from '@mechanics';
 import {
     faceStats, detailStats, engineHonestKind, resolvePrimary, armedReadValue,
 } from '@/state/presenters/combat-encounter.engine';
+
+// Master Spec (2026-07-03) doctrine pass converted every real library card off
+// flat `basePower` strikes — no real card can play "pure damage, no status"
+// anymore (see `achilles-gambit`, now a control-effect card), so this suite's
+// pure-strike fixture is a sandbox-only test card, mirroring the mechanics
+// package's identical fixture (`qa-pure-strike-body`).
+registerSandboxCards([{
+    id: 'qa-mobile-pure-strike',
+    name: 'QA Pure Strike (test fixture)',
+    category: 'paradox',
+    philosophicalAspect: 'body',
+    description: 'Test-only fixture: a flat direct-damage card with no status payload.',
+    tier: 1,
+    targetType: 'enemy',
+    basePower: 12,
+    scalingStat: 'body',
+}]);
 
 const cardOf = (id: string) => {
     const card = getCard(id);
@@ -78,8 +96,8 @@ describe('faceStats — honest real-unit faces', () => {
         expect(f.kind).toBe('stun');
         expect(f.heroText).toBe('skip 2 turns');
     });
-    it('Achilles Gambit (Strike) → no fabricated number', () => {
-        const { card, skill } = cardOf('achilles-gambit');
+    it('QA Pure Strike (Strike) → no fabricated number', () => {
+        const { card, skill } = cardOf('qa-mobile-pure-strike');
         const f = faceStats(card, skill);
         expect(f.kind).toBe('strike');
         expect(f.heroText).toBe('');               // real-units-or-no-number
@@ -121,7 +139,7 @@ describe('detailStats — same numbers as the face', () => {
 describe('resolvePrimary + armedReadValue', () => {
     it('resolvePrimary routes by verb-class + honesty', () => {
         expect(resolvePrimary(getCard('brace-for-impact')!, getSkillById('brace-for-impact')).kind).toBe('guard');
-        expect(resolvePrimary(getCard('achilles-gambit')!, getSkillById('achilles-gambit')).kind).toBe('strike');
+        expect(resolvePrimary(getCard('qa-mobile-pure-strike')!, getSkillById('qa-mobile-pure-strike')).kind).toBe('strike');
         expect(resolvePrimary(getCard('befriend')!, getSkillById('befriend')).kind).toBe('befriend');
         expect(resolvePrimary(getCard('slippery-slope')!, getSkillById('slippery-slope')).kind).toBe('dot');
     });

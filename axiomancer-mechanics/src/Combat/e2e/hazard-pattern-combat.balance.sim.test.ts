@@ -23,6 +23,7 @@ import type { Character } from '../../Character/types';
 import { MournfulGull, HollowEyedBeggar, CoastalTyrant } from '../../Enemy/enemy.library';
 import { deepClone } from '../../Utils';
 import { simulateHazardPatternCombat } from '../combat.encounter.sim';
+import { registerSandboxCards } from '../../Cards/cards.sandbox';
 
 const RUNS = 120;
 const SEED = 1;
@@ -36,8 +37,24 @@ function loadout(skills: string[]): Character {
     return p;
 }
 
+// Master Spec (2026-07-03) doctrine pass converted every real library card off
+// flat `basePower` strikes — no real card can play "the weak, no-status
+// baseline" anymore, so this suite's pure-strike witness is a sandbox fixture.
+const QA_PURE_STRIKE = 'qa-pure-strike-body';
+registerSandboxCards([{
+    id: QA_PURE_STRIKE,
+    name: 'QA Pure Strike (test fixture)',
+    category: 'paradox',
+    philosophicalAspect: 'body',
+    description: 'Test-only fixture: a flat direct-damage card with no status payload, used to witness the "status beats basic attacks" doctrine now that no real library card is a pure strike.',
+    tier: 1,
+    targetType: 'enemy',
+    basePower: 12,
+    scalingStat: 'body',
+}]);
+
 const DOT = ['slippery-slope'];                          // DoT — erodes enemy HP to 0
-const DAMAGE_ONLY = ['achilles-gambit'];                 // pure strike, no status (the weak baseline)
+const DAMAGE_ONLY = [QA_PURE_STRIKE];                    // pure strike, no status (the weak baseline)
 const MERCY = ['eternal-regress', 'befriend'];           // control + befriend → the spare path
 const CONTROL = ['false-dilemma', 'red-herring'];        // soft-control — roll-penalty debuffs (confusion −5, accuracy_down −3)
 const CONCLUDE = ['slippery-slope'];                     // BODY finisher: stack DoT intensity, then Conclusion Sig detonates

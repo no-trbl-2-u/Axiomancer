@@ -128,6 +128,10 @@ export {
     COMBAT_LOADOUT_FLAG_PREFIX, COMBAT_LOADOUT_MAX,
     decodeCombatLoadout, getCombatLoadout, addToLoadout, removeFromLoadout,
     isCombatSynergySatisfied,
+    // Master Spec §4 — wild-die permanent-growth mechanic
+    MAX_PERMANENT_WILD_DICE, rollPermanentBonusDice,
+    // Master Spec §3 — Skills trigger hook (Skills are NOT cards)
+    triggerCombatSkill,
 } from './Combat';
 export type {
     CombatEncounterState, CombatEncounterPhase, CombatTransition,
@@ -283,6 +287,20 @@ export type {
     CardEvent as SkillEvent,
     CardResolution as SkillResolution,
 } from './Cards';
+
+// ─── Skills system (Master Spec §3) — NOT the legacy "skill" card aliases
+// above. A separate, always-available ability system funded by
+// `CombatResources` tokens, triggerable mid-combat independent of the drawn
+// hand (see `Combat`'s `triggerCombatSkill`, exported above). ─────────────────
+export type {
+    SkillCost, SkillEffect, SkillLimit, SkillDefinition,
+    SkillTriggerContext, SkillTriggerResult, SkillEngineHandoff,
+} from './Skills';
+export {
+    SKILLS_LIBRARY, lookupSkill as lookupSkillDefinition, getAllSkillIds,
+    getKnownSkills,
+    canAffordSkill as canAffordSkillDefinition, spendSkillCost, triggerSkill as triggerSkillDefinition,
+} from './Skills';
 
 // ─── Game (state, store, persistence, constants) ──────────────────────────────
 export {
