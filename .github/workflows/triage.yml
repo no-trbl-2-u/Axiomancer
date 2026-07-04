@@ -1,0 +1,31 @@
+name: triage
+
+# Issue triage on arrival: when an issue is opened or reopened, /triage
+# classifies it, applies a triage:* label, comments, and routes it to the
+# right backlog (see skills/triage.md). /march also runs triage as its
+# first gate — this workflow just makes the response immediate instead of
+# next-tick. Cheap when idle: already-labeled issues are skipped.
+
+on:
+  issues:
+    types: [opened, reopened]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+  actions: read
+  id-token: write
+
+concurrency:
+  group: nexus-loop
+  cancel-in-progress: false
+
+jobs:
+  triage:
+    uses: ./.github/workflows/_claude-skill.yml
+    secrets: inherit
+    with:
+      prompt: '/triage ${{ github.event.issue.number }}'
+      timeout_minutes: 30

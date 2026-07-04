@@ -1,0 +1,28 @@
+name: iterate
+
+# One improvement tick: /iterate audits the project, picks the
+# highest-impact weakness, ships one fix end-to-end (see skills/iterate.md).
+# Dispatch-only — /march already dispatches to iterate on schedule; run
+# this directly when you want an extra quality pass without a full march.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+  actions: read
+  id-token: write
+
+concurrency:
+  group: nexus-loop
+  cancel-in-progress: false
+
+jobs:
+  iterate:
+    uses: ./.github/workflows/_claude-skill.yml
+    secrets: inherit
+    with:
+      prompt: '/iterate'
+      timeout_minutes: 90

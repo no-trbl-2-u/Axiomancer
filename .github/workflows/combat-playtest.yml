@@ -1,0 +1,32 @@
+name: combat-playtest
+
+# Supercharged combat playtest: quantitative stage matrix + playtester
+# agents on seeded encounters; doctrine-verdict report on a new branch + PR.
+# Report only, no balance changes. Monthly.
+# See .claude/commands/combat-playtest.md. Runs against axiomancer-mechanics.
+# Scheduled weekly-staggered so at most one tuning loop runs per day;
+# adjust or delete the cron to change cadence.
+
+on:
+  schedule:
+    - cron: "41 4 1 * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+  actions: read
+  id-token: write
+
+concurrency:
+  group: combat-playtest
+  cancel-in-progress: false
+
+jobs:
+  combat_playtest:
+    uses: ./.github/workflows/_claude-skill.yml
+    secrets: inherit
+    with:
+      prompt: "/combat-playtest"
+      timeout_minutes: 120

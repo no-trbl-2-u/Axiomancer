@@ -1,0 +1,29 @@
+name: critique
+
+# External-observer pass: /critique plays the local expo-web build as a
+# first-time player and appends durable findings to plan/CRITIQUE.md (see
+# skills/critique.md). Dispatch-only — /march runs it rate-limited
+# (≥12 commits + ≥24h, green deploy); use this for an on-demand pass.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+  actions: read
+  id-token: write
+
+concurrency:
+  group: nexus-loop
+  cancel-in-progress: false
+
+jobs:
+  critique:
+    uses: ./.github/workflows/_claude-skill.yml
+    secrets: inherit
+    with:
+      prompt: '/critique'
+      timeout_minutes: 90
+      install_playwright: true

@@ -1,0 +1,108 @@
+name: _claude-skill
+
+# Reusable runner for the Claude-powered automation workflows (the nexus
+# loop verbs, the tuning loops, and the playtest loops). Every thin
+# per-skill workflow calls this with a slash-command prompt; this file owns
+# the shared setup so the action config lives in exactly one place.
+#
+# What it does, in order:
+#   1. Checkout with full history (loop skills count commits / read
+#      `git log --since`), using GH_PAT when configured so pushes made by
+#      the skill trigger the verify-* workflows (the deploy gate).
+#   2. Node 22 + `npm ci` so verify gates and mechanics CLIs run without
+#      Claude spending turns on setup.
+#   3. Optionally install the Playwright Chromium browser (mobile
+#      expo-web playtest loops).
+#   4. Materialize `.env` (GH_TOKEN / GH_REPO) — the skills load gh auth
+#      from `.env` by design.
+#   5. Activate the dormant nexus enforcement layer
+#      (.claude/settings.json.example → .claude/settings.json): guard
+#      hooks + deny walls for force-push / --no-verify / destructive
+#      resets. CI runs are unattended (intervention level 3+), exactly
+#      the case the layer exists for.
+#   6. Run anthropics/claude-code-action with the given prompt.
+#
+# Secrets (via `secrets: inherit` from callers):
+#   CLAUDE_CODE_OAUTH_TOKEN  required — Claude subscription OAuth token.
+#   GH_PAT                   recommended — classic PAT (repo + workflow
+#                            scopes) or fine-grained token (contents,
+#                            issues, pull-requests RW; actions read).
+#                            Without it the default GITHUB_TOKEN is used
+#                            and pushes/PRs made by the skills will NOT
+#                            trigger the verify-* workflows, which
+#                            silently weakens the deploy gate.
+#   NOTIFY_NTFY_TOPIC        optional — scripts/notify.mjs pager channel.
+#   NOTIFY_WEBHOOK_URL       optional — scripts/notify.mjs webhook channel.
+
+on:
+  workflow_call:
+    inputs:
+      prompt:
+        description: 'Prompt passed to Claude (usually a repo slash command, e.g. "/march")'
+        required: true
+        type: string
+      timeout_minutes:
+        description: 'Job timeout'
+        type: number
+        default: 60
+      install_playwright:
+        description: 'Install Playwright Chromium (mobile expo-web loops)'
+        type: boolean
+        default: false
+      extra_claude_args:
+        description: 'Extra Claude Code CLI args appended to the defaults'
+        type: string
+        default: ''
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: ${{ inputs.timeout_minutes }}
+    env:
+      GH_TOKEN: ${{ secrets.GH_PAT || github.token }}
+      GH_REPO: ${{ github.repository }}
+      NOTIFY_NTFY_TOPIC: ${{ secrets.NOTIFY_NTFY_TOPIC }}
+      NOTIFY_WEBHOOK_URL: ${{ secrets.NOTIFY_WEBHOOK_URL }}
+    steps:
+      - name: Checkout (full history)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GH_PAT || github.token }}
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install workspace dependencies
+        run: npm ci
+
+      - name: Install Playwright Chromium
+        if: ${{ inputs.install_playwright }}
+        run: npx playwright install chromium --with-deps
+        working-directory: axiomancer-mobile
+
+      - name: Materialize .env for the skills
+        run: printf 'GH_TOKEN=%s\nGH_REPO=%s\n' "$GH_TOKEN" "$GH_REPO" > .env
+
+      - name: Activate nexus enforcement layer (guard hooks + deny walls)
+        run: |
+          node -e "
+            const fs = require('fs');
+            const s = JSON.parse(fs.readFileSync('.claude/settings.json.example', 'utf8'));
+            delete s.__note;
+            fs.writeFileSync('.claude/settings.json', JSON.stringify(s, null, 2));
+          "
+          node .claude/hooks/guard.mjs self-test
+
+      - name: Run Claude Code
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          github_token: ${{ secrets.GH_PAT || github.token }}
+          prompt: ${{ inputs.prompt }}
+          claude_args: |
+            --allowedTools "Bash,Edit,Write,Read,Glob,Grep,Task,TodoWrite,WebFetch,WebSearch"
+            ${{ inputs.extra_claude_args }}
