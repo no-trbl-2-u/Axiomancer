@@ -1,0 +1,45 @@
+name: pat-probe
+
+# Dispatchable diagnostic: verifies the GH_PAT secret can read/write both
+# Axiomancer and game-knowledge-base (the KB that scripts/kb-sync.mjs
+# pushes wishlist entries to from CI). Non-destructive: pushes a probe
+# ref to the KB repo and deletes it. Run it from the Actions tab whenever
+# the token is rotated or a workflow hits a 403.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      PAT: ${{ secrets.GH_PAT }}
+    steps:
+      - name: Token identity, kind, and per-repo permissions
+        run: |
+          if [ -z "$PAT" ]; then echo "FAIL: GH_PAT secret is empty/unset"; exit 1; fi
+          export GH_TOKEN="$PAT"
+          echo "== token belongs to =="
+          gh api user --jq '.login'
+          echo "== token kind (classic prints scopes; fine-grained prints none) =="
+          curl -sS -D - -o /dev/null -H "Authorization: token $PAT" https://api.github.com/user \
+            | grep -i '^x-oauth-scopes' || echo "(no x-oauth-scopes header -> fine-grained token)"
+          echo "== effective permissions on Axiomancer =="
+          gh api repos/no-trbl-2-u/Axiomancer --jq '.permissions'
+          echo "== effective permissions on game-knowledge-base =="
+          gh api repos/no-trbl-2-u/game-knowledge-base --jq '.permissions' \
+            || { echo "FAIL: token cannot see game-knowledge-base at all"; exit 1; }
+
+      - name: Probe write to game-knowledge-base (create + delete temp ref)
+        run: |
+          git init -q probe && cd probe
+          git -c user.name=pat-probe -c user.email=probe@invalid commit -q --allow-empty -m "pat probe"
+          git push -q "https://x-access-token:${PAT}@github.com/no-trbl-2-u/game-knowledge-base" HEAD:refs/heads/pat-probe-delete-me
+          echo "push OK"
+          git push -q "https://x-access-token:${PAT}@github.com/no-trbl-2-u/game-knowledge-base" :refs/heads/pat-probe-delete-me
+          echo "cleanup OK"
+          echo "PASS: GH_PAT can write to game-knowledge-base"
