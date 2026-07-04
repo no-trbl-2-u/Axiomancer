@@ -558,31 +558,54 @@ function fvInteractionPool(nodeId: string, npcName: string, description: string)
     };
 }
 
-// A narration node (the new dialogue-backed shell kind). Placeholder monologue
-// — leaf DialogueNodes with no choices — that the dialogue runtime plays
-// through. Content is a stub; this proves the wiring end to end.
-const fvNarrationPlaceholder: MapEventPool = {
+// A narration node (the dialogue-backed shell kind). "What Do I Tell Father?"
+// — the boy overhears Father counting coin for the boat, then faces a small
+// but real dilemma at dinner: tell the truth about the cost, spare him the
+// worry, or deflect with a joke. No choice is flagged "correct" by the
+// engine; each sets a flag a future Northern Forest node can react to.
+const fvFatherWorryDialogue: MapEventPool = {
     id: 'fv-14.narration',
     entries: [{
         kind: 'narration', weight: 1,
         payload: {
             kind: 'narration',
-            description: 'The salt-wind carries an old voice across the strand.',
+            description: 'Through the cottage wall, you hear Father counting coin under his breath.',
             dialogue: {
-                id: 'fv-strand-recollection',
-                rootId: 'line-1',
+                id: 'fv-father-worry',
+                rootId: 'overhear',
                 nodes: {
-                    'line-1': {
-                        id: 'line-1',
-                        text: 'The tide has gone out, and the strand lies bare to the grey morning.',
+                    overhear: {
+                        id: 'overhear',
+                        text: '"Pitch, cloth, nails, a plank—sound enough to trust the lake..." Father\'s voice trails off through the wall, tired in a way you don\'t like. At dinner he asks, too lightly, "So. This boat of yours. What will it take, exactly?"',
+                        choices: [
+                            {
+                                text: 'Tell him everything — the whole plan, cost and all.',
+                                nextNodeId: 'told-truth',
+                                effect: { setFlag: 'boy-told-father-truth' },
+                            },
+                            {
+                                text: '"Oh, not much. I\'ll manage most of it myself."',
+                                nextNodeId: 'spared-worry',
+                                effect: { setFlag: 'boy-spared-father-worry' },
+                            },
+                            {
+                                text: '"A boat fit for a king, obviously." (grin)',
+                                nextNodeId: 'deflected',
+                                effect: { setFlag: 'boy-deflected-father', alignmentDelta: { outlook: 1 } },
+                            },
+                        ],
                     },
-                    'line-2': {
-                        id: 'line-2',
-                        text: 'Somewhere a gull cries, and you remember why you came so far north.',
+                    'told-truth': {
+                        id: 'told-truth',
+                        text: 'Father listens all the way through, jaw tight, then nods slowly. "Then we\'ll find it. All of it." He doesn\'t smile, but he doesn\'t look away either.',
                     },
-                    'line-3': {
-                        id: 'line-3',
-                        text: 'The sea keeps its own counsel. You walk on.',
+                    'spared-worry': {
+                        id: 'spared-worry',
+                        text: 'His shoulders ease, just slightly — the lie has done its work. "Good lad," he says, and you hate a little how relieved he sounds.',
+                    },
+                    deflected: {
+                        id: 'deflected',
+                        text: 'He barks a laugh despite himself, shakes his head, and lets the question go. Whatever he was carrying, he carries it alone a while longer.',
                     },
                 },
             },
@@ -655,7 +678,7 @@ const FISHING_VILLAGE_NEW_PLAYER_POOLS: ReadonlyArray<{ nodeId: string; pool: Ma
             } else if (nodeId === 'fv-15') {
                 out.push({ nodeId, pool: fvBuildTheBoatQuest });
             } else if (nodeId === 'fv-14') {
-                out.push({ nodeId, pool: fvNarrationPlaceholder });
+                out.push({ nodeId, pool: fvFatherWorryDialogue });
             } else if (nodeId === 'fv-19') {
                 out.push({ nodeId, pool: fvShoreInteraction });
             } else if (FV_REST_NODES[nodeId]) {

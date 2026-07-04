@@ -86,7 +86,7 @@ describe('fishing-village content — new-player map', () => {
         }
     });
 
-    it('fv-14 is a narration node carrying a dialogue tree', () => {
+    it('fv-14 is a narration node carrying the "What Do I Tell Father?" branching dialogue', () => {
         mockSequentialRng(0.5);
         const state = freshWorldAt('fishing-village');
         const result = resolveMapEvent({
@@ -96,11 +96,15 @@ describe('fishing-village content — new-player map', () => {
         expect(result.event.kind).toBe('narration');
         if (result.event.kind === 'narration') {
             const tree = result.event.dialogue;
+            expect(tree.id).toBe('fv-father-worry');
             expect(tree.rootId).toBeTruthy();
-            expect(tree.nodes[tree.rootId]).toBeDefined();
-            // A narration is a monologue: the root leaf has no choices.
-            expect(tree.nodes[tree.rootId]!.choices).toBeUndefined();
-            expect(Object.keys(tree.nodes).length).toBeGreaterThanOrEqual(2);
+            const root = tree.nodes[tree.rootId];
+            expect(root).toBeDefined();
+            // Unlike the original monologue placeholder, this narration node
+            // is a real dilemma: the root offers three unflagged choices,
+            // each ending in its own leaf outcome.
+            expect(root!.choices).toHaveLength(3);
+            expect(Object.keys(tree.nodes).length).toBeGreaterThanOrEqual(4);
         }
     });
 
