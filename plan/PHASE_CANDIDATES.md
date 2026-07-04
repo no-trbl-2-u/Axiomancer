@@ -39,6 +39,11 @@
 
 ## Promoted
 
+### First-map route audit and survivorship semantics
+- source: Kid playthrough report `/root/Workspace/reports/axiomancer-playthrough/2026-07-04.md`
+- decision (T direct promotion 2026-07-04): fix the map/playthrough evidence issue before trusting first-continent coverage. The current route reaches 19/25 Fishing Village nodes, cannot prove all branch nodes in one legal run, counts `fv-1` only as a start position, and continues after boss combat `defeat`.
+- promoted to build plan as **Phase 14**.
+
 ### Hazard v2 port (mechanics absorbs mobile's living engine)
 - source: divergence DIV-MECH-002
 - decision (via `/oversight` 2026-07-03): mechanics absorbs
