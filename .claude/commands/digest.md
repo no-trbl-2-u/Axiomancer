@@ -1,5 +1,5 @@
 ---
-description: The night shift — morning briefing (plan/DIGEST.html, a stylized self-contained page), nightly breadth checks, tuning proposals as candidates.
+description: The night shift — morning briefing (accumulating devlog/ HTML entry), nightly breadth checks, tuning proposals as candidates.
 ---
 
 You are invoked under the `digest` skill — the nightly loop
