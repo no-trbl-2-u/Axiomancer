@@ -12,7 +12,7 @@
  * `--stdin`, plus `--json-events` and `--state-log`) so a person, a replay
  * file, or an agent can all drive it through the same surface as game.cli.ts.
  *
- *   • `--policy greedy|prudent|prober`  the `--auto` policy (default prober,
+ *   • `--policy greedy|prudent|informed`  the `--auto` policy (default informed,
  *                            the informed/balanced read; ignored when manual).
  *   • `--auto`               the balance-sim policy delves/pushes/retreats;
  *                            otherwise the player drives by hand.
@@ -69,7 +69,7 @@ export interface LootCacheCliFlags {
 
 const USAGE =
     'Usage: npm run game -- loot-cache ' +
-    '[--policy greedy|prudent|prober] [--auto] [--currency <n>] [--seed <n>] [--runs <n>] ' +
+    '[--policy greedy|prudent|informed] [--auto] [--currency <n>] [--seed <n>] [--runs <n>] ' +
     '[--script <path>] [--stdin] [--json-events] [--state-log <path>]';
 
 /** Pull `--flag value` or `--flag=value`; returns [value, nextIndex]. */
@@ -86,7 +86,7 @@ function takeValue(args: string[], i: number, flag: string): [string, number] {
 
 export function parseLootCacheArgv(args: string[]): LootCacheCliFlags {
     const flags: LootCacheCliFlags = {
-        policy: 'prober', auto: false, currency: DEFAULT_CACHE_CURRENCY,
+        policy: 'informed', auto: false, currency: DEFAULT_CACHE_CURRENCY,
         runs: 5, stdin: false, jsonEvents: false,
     };
     let i = 0;
@@ -103,8 +103,8 @@ export function parseLootCacheArgv(args: string[]): LootCacheCliFlags {
             case '--policy': {
                 let value: string;
                 [value, i] = takeValue(args, i, '--policy');
-                if (value !== 'greedy' && value !== 'prudent' && value !== 'prober') {
-                    throw new Error(`--policy must be 'greedy', 'prudent', or 'prober', got '${value}'.\n${USAGE}`);
+                if (value !== 'greedy' && value !== 'prudent' && value !== 'informed') {
+                    throw new Error(`--policy must be 'greedy', 'prudent', or 'informed', got '${value}'.\n${USAGE}`);
                 }
                 flags.policy = value;
                 break;
@@ -165,7 +165,7 @@ function autoVerb(s: LootCacheSession, policy: LootCachePolicyId): AutoVerb {
     if (policy === 'prudent') {
         return pick.pushes < PRUDENT_MAX_PUSHES ? 'push' : 'retreat';
     }
-    if (policy === 'prober') {
+    if (policy === 'informed') {
         const isDeepest = pick.layerIndex === s.layers.length - 1;
         if (isDeepest && !s.insightUsed && pick.pushes === 0) return 'insight';
         return 'push';

@@ -77,7 +77,7 @@ The empirical witnesses, in order of preference:
      delving new layers once bitten once this session.
    - **greedy** — always delve, always push to crack or resist, never
      retreats, never channels Insight.
-   - **prober** — plays like greedy, but spends the single Insight charge
+   - **informed** — plays like greedy, but spends the single Insight charge
      on the deepest layer it attempts, before that layer's first roll.
    Record per policy: avg currency kept, items kept rate, avg bitten vitae,
    avg layers opened, tier distribution, and both the `currencyGradient`
@@ -115,12 +115,12 @@ The empirical witnesses, in order of preference:
 
 | Axis | Target |
 |---|---|
-| Policy gradient | prober risk-adjusted value > greedy risk-adjusted value > prudent risk-adjusted value, by a margin a player can feel |
+| Policy gradient | informed risk-adjusted value > greedy risk-adjusted value > prudent risk-adjusted value, by a margin a player can feel |
 | The lid | cracked in ~1 push on average (difficulty 5 vs. ~10 expected `gained` per 3d6 roll); always worth a first push |
 | Jam odds | ~7.4% per push at base pool size (`Binomial(3, 1/6)`, `P(slips≥2)`); compounds across pushes on deeper layers |
 | Bite weight | avg bitten vitae under greedy play lands felt-but-not-crippling pre-floor (watch `avgBitten` in `runLootCacheSim`) |
-| Insight value | `prober.avgBitten < greedy.avgBitten` and `prober.stungRate < greedy.stungRate`, while `prober.avgCurrency` stays ≥ ~95% of `greedy.avgCurrency` — Insight trades a little raw greed for a real safety edge |
-| Tier distribution (prober) | 'emptied' dominates; 'stung' meaningfully less common than under greedy |
+| Insight value | `informed.avgBitten < greedy.avgBitten` and `informed.stungRate < greedy.stungRate`, while `informed.avgCurrency` stays ≥ ~95% of `greedy.avgCurrency` — Insight trades a little raw greed for a real safety edge |
+| Tier distribution (informed) | 'emptied' dominates; 'stung' meaningfully less common than under greedy |
 | Zero-purse caches | hidden-layer floors keep deeper layers non-trivial even when the authored purse is 0 |
 
 Doctrine constants (`LOOT_CACHE_TUNING`): difficulty 5 / 9 / 13 by layer;
@@ -140,7 +140,7 @@ keepsake.
 3. **Run the evidence matrix** — e2e + `runLootCacheSim` /
    `generateLootCacheBalanceReport` over ≥ 200 seeds per policy. Keep raw
    outputs in `/tmp`.
-4. **Map evidence against targets**, explaining mechanisms (e.g. "prober's
+4. **Map evidence against targets**, explaining mechanisms (e.g. "informed's
    risk-adjusted edge shrank because the tithe's difficulty rose without a
    matching bump to `insightBonusDice`'s jam-threshold offset — re-derive
    the per-roll `gained`/jam math rather than eyeballing it").

@@ -5,7 +5,8 @@
 > dice-pool lockpicking minigame (see
 > `braindump/2026-07-03-lockpicking-treasure-minigame.md` for the design
 > session; `docs/encounters/loot-cache-alt-hybrid-spec.md` documents the
-> lighter-weight fallback direction that was NOT built).
+> lighter-weight fallback direction that was NOT built). Decision record:
+> `docs/adr/ADR-0008-loot-cache-pick-pool.md`.
 
 ---
 
@@ -106,10 +107,10 @@ compounds the more a layer is pushed.
   slip threshold fixed *increases* the jam probability (more dice rolled,
   same 2-slip trigger — a 4-die roll jams ~13.2% of the time vs. 7.4% for
   3 dice), which made Insight a net-negative "buy" in early sim runs (see
-  `lootcache.sim.ts`'s `prober` bot underperforming `greedy` on
+  `lootcache.sim.ts`'s `informed` bot underperforming `greedy` on
   risk-adjusted value). Scaling the jam tolerance with the bonus die keeps
   Insight a genuine edge — in balance sim runs (2,000 seeds/policy), the
-  `prober` policy (spends Insight on the deepest layer it attempts) beats
+  `informed` policy (spends Insight on the deepest layer it attempts) beats
   `greedy` (never uses it) on both raw currency and risk-adjusted value.
 
 ---

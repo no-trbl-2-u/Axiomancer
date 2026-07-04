@@ -79,7 +79,7 @@ describe('LootCache CLI — deterministic auto playthrough', () => {
         const runOnce = async () => {
             const logPath = tmpPath('auto');
             await runLootCacheCli([
-                '--auto', '--policy', 'prober', '--seed', '42', '--runs', '1',
+                '--auto', '--policy', 'informed', '--seed', '42', '--runs', '1',
                 '--json-events', '--state-log', logPath,
             ]);
             const logs = readLog(logPath);

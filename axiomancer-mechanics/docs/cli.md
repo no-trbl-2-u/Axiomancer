@@ -230,7 +230,7 @@ npm run loot-cache -- [flags]        # convenience alias
 
 | Flag | Effect |
 | --- | --- |
-| `--policy greedy\|prudent\|prober` | The bot for `--auto` (default `prober`), reusing `lootcache.sim.ts`'s push-your-luck decision logic. |
+| `--policy greedy\|prudent\|informed` | The bot for `--auto` (default `informed`), reusing `lootcache.sim.ts`'s push-your-luck decision logic. |
 | `--auto` | The policy plays each cache. Otherwise the player decides whether to push, retreat, channel Insight, or seal by hand. |
 | `--currency <n>` | The starting currency stake (default the engine's `DEFAULT_CACHE_CURRENCY`). |
 | `--seed <n\|str>` | Seed the engine's embedded RNG so a run is fully reproducible. |

@@ -129,9 +129,9 @@ wasting the whole mechanic.
   "you can see the mechanism is rusted, this one looks bad") or only
   revealed by a probe? Full transparency leans more strategic/legible;
   hidden-until-probed keeps more of today's tension but reintroduces a
-  hidden-information leak boundary the presenter has to enforce (see
-  `ADR` note in `docs/encounters/loot-cache.md` — no dedicated ADR file
-  exists yet for this rule; one should be written if this ships).
+  hidden-information leak boundary the presenter has to enforce (the shipped
+  Pick Pool rule is recorded in `docs/adr/ADR-0008-loot-cache-pick-pool.md`;
+  if this hybrid ever ships instead, write a superseding ADR).
 - Does per-layer Probe (3 possible uses/session) outweigh the value of Pick
   Pool's single Insight charge enough to feel generous rather than
   interesting? May need a session-wide cap (e.g. max 2 probes total) even

@@ -9,7 +9,7 @@
  *
  *   prudent (retreat after one push, stop once bitten: safest, poorest)
  *     < greedy (always push: richest raw take, most bitten)
- *       < prober (spends its one Insight charge on the deepest layer:
+ *       < informed (spends its one Insight charge on the deepest layer:
  *                 matches or beats greedy's raw take at a real reduction
  *                 in bites/stings)
  *
@@ -31,7 +31,7 @@ const RUNS = 400;
 describe('loot-cache balance bands', () => {
     const greedy = runLootCacheSim({ runs: RUNS, policy: 'greedy' });
     const prudent = runLootCacheSim({ runs: RUNS, policy: 'prudent' });
-    const prober = runLootCacheSim({ runs: RUNS, policy: 'prober' });
+    const informed = runLootCacheSim({ runs: RUNS, policy: 'informed' });
 
     it('blind greed opens every layer and takes real jam risk', () => {
         expect(greedy.avgLayersOpened).toBeCloseTo(3, 0);
@@ -48,17 +48,17 @@ describe('loot-cache balance bands', () => {
 
     it('informed Insight play matches or beats greedy loot at fewer bites', () => {
         // Same or better raw take as blind greed (it still reaches the tithe)...
-        expect(prober.avgCurrency).toBeGreaterThanOrEqual(prudent.avgCurrency);
-        expect(prober.avgCurrency).toBeGreaterThanOrEqual(greedy.avgCurrency * 0.95);
+        expect(informed.avgCurrency).toBeGreaterThanOrEqual(prudent.avgCurrency);
+        expect(informed.avgCurrency).toBeGreaterThanOrEqual(greedy.avgCurrency * 0.95);
         // ...for fewer bites and fewer stings.
-        expect(prober.avgBitten).toBeLessThan(greedy.avgBitten);
-        expect(prober.stungRate).toBeLessThan(greedy.stungRate);
+        expect(informed.avgBitten).toBeLessThan(greedy.avgBitten);
+        expect(informed.stungRate).toBeLessThan(greedy.stungRate);
     });
 
-    it('the risk-adjusted gradient holds: prober beats both blind greed and pure restraint', () => {
+    it('the risk-adjusted gradient holds: informed beats both blind greed and pure restraint', () => {
         const value = (s: typeof greedy) => s.avgCurrency - LOOT_CACHE_BITE_PENALTY * s.avgBitten;
-        expect(value(prober)).toBeGreaterThan(value(greedy));
-        expect(value(prober)).toBeGreaterThan(value(prudent));
+        expect(value(informed)).toBeGreaterThan(value(greedy));
+        expect(value(informed)).toBeGreaterThan(value(prudent));
     });
 });
 
@@ -68,11 +68,11 @@ describe('loot-cache balance report', () => {
         expect(report.totalRuns).toBe(600);
         expect(report.policies.greedy).toBeDefined();
         expect(report.policies.prudent).toBeDefined();
-        expect(report.policies.prober).toBeDefined();
-        // riskAdjusted = [prober, greedy, prudent]; prober leads.
-        const [proberVal, greedyVal, prudentVal] = report.riskAdjusted;
-        expect(proberVal).toBeGreaterThan(greedyVal);
-        expect(proberVal).toBeGreaterThan(prudentVal);
+        expect(report.policies.informed).toBeDefined();
+        // riskAdjusted = [informed, greedy, prudent]; informed leads.
+        const [informedVal, greedyVal, prudentVal] = report.riskAdjusted;
+        expect(informedVal).toBeGreaterThan(greedyVal);
+        expect(informedVal).toBeGreaterThan(prudentVal);
         expect(report.recommendations).toHaveLength(0);
     });
 });

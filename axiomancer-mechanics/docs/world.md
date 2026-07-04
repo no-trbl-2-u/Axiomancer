@@ -460,12 +460,12 @@ choosing after every roll whether to push, retreat, or (once per session)
 channel Insight for a bonus die. Three bots: **`greedy`** (always delve,
 always push, never retreats or channels Insight — richest raw take but most
 jammed), **`prudent`** (retreats after one push, stops delving once bitten —
-the safer, poorer floor), **`prober`** (plays like greedy but spends its one
+the safer, poorer floor), **`informed`** (plays like greedy but spends its one
 Insight charge on the deepest layer it attempts). The sim surfaced a real
 balance note: naively adding a bonus die while holding the jam-slip threshold
 fixed *raises* jam odds (more dice, same trigger), making Insight a
 net-negative "buy" — fixed by letting a channeled push's jam threshold rise
-with its bonus die. With that fix, the prober matches or beats greedy on RAW
+with its bonus die. With that fix, the informed matches or beats greedy on RAW
 currency and wins decisively on **risk-adjusted value** (same loot, fewer
 jams). The report exposes both a `currencyGradient` and a `riskAdjusted`
 gradient (`avgCurrency − LOOT_CACHE_BITE_PENALTY × avgBitten`) so the tuning

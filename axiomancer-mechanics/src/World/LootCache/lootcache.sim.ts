@@ -19,7 +19,7 @@
  *                nothing extra), and stops delving new layers once bitten
  *                once this session. The restraint baseline: rarely bitten,
  *                rarely rich.
- *  - `prober`  — delves and pushes like greedy, but spends the one
+ *  - `informed`  — delves and pushes like greedy, but spends the one
  *                Insight charge on the deepest layer it attempts (The
  *                Keeper's Tithe) before that layer's first roll. Informed
  *                greed: the same raw pushes, a better-loaded pool where it
@@ -44,7 +44,7 @@ import type {
     LootCacheSession,
 } from './lootcache.types';
 
-export type LootCachePolicyId = 'greedy' | 'prudent' | 'prober';
+export type LootCachePolicyId = 'greedy' | 'prudent' | 'informed';
 
 /** The default authored payload the sim opens when none is pinned. */
 export const DEFAULT_CACHE_ITEMS: readonly CacheItemRef[] = Object.freeze([
@@ -65,7 +65,7 @@ export interface LootCacheSimRunResult {
 }
 
 /**
- * Plays one whole cache to `done` and returns the outcome. The prober
+ * Plays one whole cache to `done` and returns the outcome. The informed
  * spends its single Insight charge on the deepest layer it attempts; the
  * others never channel it.
  */
@@ -117,7 +117,7 @@ function decideDelving(s: LootCacheSession, policy: LootCachePolicyId): LootCach
         return s.bittenVitae > 0 ? sealLootCache(s) : delveLootCache(s);
     }
 
-    // greedy and prober both delve every layer.
+    // greedy and informed both delve every layer.
     return delveLootCache(s);
 }
 
@@ -128,7 +128,7 @@ function decidePicking(s: LootCacheSession, policy: LootCachePolicyId): LootCach
         return s.pick.pushes < PRUDENT_MAX_PUSHES ? pushLootCachePick(s) : retreatLootCachePick(s);
     }
 
-    if (policy === 'prober') {
+    if (policy === 'informed') {
         // Spend the single Insight charge on the deepest layer this bot
         // attempts, before that layer's first roll.
         const isDeepest = s.pick.layerIndex === s.layers.length - 1;
@@ -208,10 +208,10 @@ export interface LootCacheBalanceReport {
     timestamp: string;
     totalRuns: number;
     policies: Record<LootCachePolicyId, LootCacheSimSummary>;
-    /** Net currency per policy as [prober, greedy, prudent]. */
+    /** Net currency per policy as [informed, greedy, prudent]. */
     currencyGradient: [number, number, number];
     /**
-     * Risk-adjusted value per policy as [prober, greedy, prudent]:
+     * Risk-adjusted value per policy as [informed, greedy, prudent]:
      * `avgCurrency - bitePenalty * avgBitten`. Insight's worth shows up
      * here even when raw currency is flat — informed pushes buy the same
      * loot at a fraction of the vitae cost.
@@ -229,17 +229,17 @@ function riskAdjustedValue(sum: LootCacheSimSummary): number {
 
 export function generateLootCacheBalanceReport(runs = 400): LootCacheBalanceReport {
     const policies = {} as Record<LootCachePolicyId, LootCacheSimSummary>;
-    for (const policy of ['greedy', 'prudent', 'prober'] as const) {
+    for (const policy of ['greedy', 'prudent', 'informed'] as const) {
         policies[policy] = runLootCacheSim({ runs, policy });
     }
 
     const currencyGradient: [number, number, number] = [
-        policies.prober.avgCurrency,
+        policies.informed.avgCurrency,
         policies.greedy.avgCurrency,
         policies.prudent.avgCurrency,
     ];
     const riskAdjusted: [number, number, number] = [
-        riskAdjustedValue(policies.prober),
+        riskAdjustedValue(policies.informed),
         riskAdjustedValue(policies.greedy),
         riskAdjustedValue(policies.prudent),
     ];
@@ -248,7 +248,7 @@ export function generateLootCacheBalanceReport(runs = 400): LootCacheBalanceRepo
     if (riskAdjusted[0] <= riskAdjusted[1]) {
         recommendations.push('Insight no longer beats blind greed on risk-adjusted value — Insight is undervalued.');
     }
-    if (policies.greedy.avgBitten <= policies.prober.avgBitten) {
+    if (policies.greedy.avgBitten <= policies.informed.avgBitten) {
         recommendations.push('Blind greed is no longer punished more than informed pushing — jam economy too soft.');
     }
     if (policies.prudent.avgBitten > policies.greedy.avgBitten) {
