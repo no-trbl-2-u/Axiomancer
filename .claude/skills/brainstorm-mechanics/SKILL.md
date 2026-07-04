@@ -97,11 +97,26 @@ Stop asking when the user signals enough; don't grind.
 
 ## Phase 3 — Prior art
 
-Pull from the catalog in [references.md](references.md). Always cite
+**Consult the knowledge base first.** Run `node scripts/kb-sync.mjs`
+(clones/refreshes the OKF corpus into `kb/`, gitignored), then grep
+`kb/KnowledgeBase/BoardGames/` for the mechanic or problem shape under
+discussion. KB documents carry source-backed claims with per-claim
+confidence — when one is relevant, cite it as
+`kb:<game-slug>/<doc> (src-NNN)` and prefer its reception evidence over
+memory. The `reception/better-if.okf.md` docs (what real players wanted
+fixed) and `Design implications for SomberSoft` sections are the
+highest-value pulls.
+
+If the KB has nothing on a game or mechanic you wanted to cite, file it:
+`node scripts/kb-sync.mjs wish "<game or mechanic> — <why the session
+wanted it>"`. Best-effort; never block the session on it.
+
+Then pull from the catalog in [references.md](references.md). Always cite
 **game name + specific mechanic name**, not "MTG does something like
 this". One or two sentences per reference. Include what players actually
 liked or hated where you know it; if you don't, say so — never invent
-player reception.
+player reception. (KB claims count as a clean read; memory alone often
+doesn't.)
 
 Aim for 2–4 references that span **different solutions to the same
 problem**, not 4 variants of one solution.
@@ -226,3 +241,8 @@ half-ideas, tangents worth remembering. Omit section if empty.>
   organized by problem shape (RPS triangles, stance-switching, effect
   stacking, type conversion, morality difficulty, fallacy-as-flavor,
   decisive combat).
+- `kb/` — the OKF game knowledge base (synced via
+  `node scripts/kb-sync.mjs`; gitignored). Source-backed rules and
+  reception docs per game under `kb/KnowledgeBase/BoardGames/games/`;
+  cite as `kb:<game-slug>/<doc> (src-NNN)`. Misses go to the wishlist
+  via `node scripts/kb-sync.mjs wish "..."`.

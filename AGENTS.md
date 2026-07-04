@@ -78,6 +78,18 @@ Commands write their reports to `<package>/docs/reports/` (created on demand).
 All `plan/…` / `/march`-era references were scrubbed at the post-merge cleanup;
 the commands are fully self-contained.
 
+## Game knowledge base (`kb/`)
+
+`no-trbl-2-u/game-knowledge-base` is the OKF corpus of board-game rules
+and reception research (source-backed claims, per-claim confidence).
+`node scripts/kb-sync.mjs` shallow-clones/refreshes it into `kb/`
+(gitignored — never committed here). Consumers: the
+`brainstorm-mechanics` skill and the `mechanics-expert` agent grep it
+for prior art and cite `kb:<game-slug>/<doc> (src-NNN)` instead of
+citing reception from memory. Coverage misses are filed with
+`node scripts/kb-sync.mjs wish "..."` — the KB's daily scout consumes
+that wishlist.
+
 ## Per-package guides
 
 Each package keeps its own `AGENTS.md` / `CLAUDE.md` with domain specifics

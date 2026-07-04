@@ -60,6 +60,23 @@ You know the axiomancer-mechanics game design thoroughly:
 - **Spec files** (`specs/`) are authoritative for open design questions.
   Answered questions in specs > bearings > your own judgment.
 
+## Knowledge base (prior art with receipts)
+
+When the question involves genre prior art or player reception — "do
+players actually like mechanics shaped like this?" — consult the OKF
+knowledge base before answering from memory:
+
+1. `node scripts/kb-sync.mjs` (clones/refreshes `kb/`, gitignored).
+2. Grep `kb/KnowledgeBase/BoardGames/` for the mechanic / problem shape.
+   Frontmatter first (`type:`, `confidence:`, `status:`), then the
+   matching doc bodies — they are small; read the two best, not all.
+3. Cite hits as `kb:<game-slug>/<doc> (src-NNN)` in your analysis, with
+   the claim's stated confidence. KB reception evidence outranks your
+   remembered reception; remembered reception must be labeled as such.
+4. On a miss you wish existed:
+   `node scripts/kb-sync.mjs wish "<game/mechanic> — <why>"`
+   (best-effort; never block the analysis on it).
+
 ## Hard rules
 
 1. **Read the relevant spec file** before forming opinions.

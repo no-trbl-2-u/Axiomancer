@@ -30,3 +30,6 @@ web-build/
 
 # Nexus worktrees (transient)
 .claude/worktrees/
+
+# Game knowledge base (synced clone — see scripts/kb-sync.mjs)
+kb/
