@@ -65,9 +65,12 @@ export {
     // 0.34.0 status-depth epic — HP-model selectors + tunable scalars
     getDamageTakenMultiplier, getPendingDotTotal, consumeDotEffects,
     getDistinctDebuffCount, getDistinctControlCount,
-    VULNERABLE_MAX_MULT, RUPTURE_BURST_CAP, COMPOUND_COUNT_CAP,
+    VULNERABLE_MAX_MULT, RESOLUTE_MIN_MULT, RUPTURE_BURST_CAP, COMPOUND_COUNT_CAP,
     DISRUPT_DENY_AT, EXECUTE_DAMAGE_FRACTION,
     AMPLIFY_DEFAULT_MULTIPLIER, AMPLIFY_BURST_CAP,
+    // P0-truth — formerly-inert payload channels, now real + presenter-readable
+    getHealingReceivedMult, getOutgoingDamageMult, decayDotsOnHeal, consumeEffect,
+    hasPayloadFlag,
     getDotAmplificationByEffect, getActiveDotTotal, getActiveDotAmplifications,
     resolveEffectApplication,
     calculateDamageResistance, getSkillDamageType,
@@ -121,8 +124,9 @@ export {
     dieIsRerollable, hasRerollableDice, rerollSpentDice,
     // soft-control + stat-debuff threat tunables
     THREAT_WEAKEN_PER_ROLL, THREAT_DENY_AT, THREAT_WEAKEN_FLOOR,
-    // depth epic — read-scales-status + the escalation clock
-    READ_STATUS_MULT, THREAT_ESCALATION_PER_ROUND, THREAT_ESCALATION_GRACE, THREAT_ESCALATION_MAX,
+    // depth epic — the read bites status in REAL units (P0-truth) + the escalation clock
+    READ_ADVANTAGE_INTENSITY_BONUS, READ_DISADVANTAGE_DURATION_PENALTY,
+    THREAT_ESCALATION_PER_ROUND, THREAT_ESCALATION_GRACE, THREAT_ESCALATION_MAX,
     THREAT_ESCALATION_BOSS_MULT,
     // Phase 169 — curated combat loadout codec + synergy live-check
     COMBAT_LOADOUT_FLAG_PREFIX, COMBAT_LOADOUT_MAX,

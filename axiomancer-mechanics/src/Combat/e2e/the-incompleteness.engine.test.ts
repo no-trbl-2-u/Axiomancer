@@ -37,7 +37,10 @@ describe('The Incompleteness — registry wiring', () => {
         expect(fromRegistry).toBe(TheIncompleteness);
         expect(fromRegistry.id).toBe('enemy-the-incompleteness');
         expect(fromRegistry.name).toBe('The Incompleteness');
-        expect(fromRegistry.level).toBe(55);
+        // P0-truth pass (2026-07-05): L55/1375 HP became a scripted 200/200 win
+        // once the read rule + payload wiring got real — retuned to L110/2750 HP
+        // (greedy scrapes 0.095 @ 200 seeds, back near the 1-5% design target).
+        expect(fromRegistry.level).toBe(110);
         expect(fromRegistry.difficulty).toBe('unique');
         expect(fromRegistry.logic).toBe('boss');
     });
@@ -53,7 +56,7 @@ describe('The Incompleteness — registry wiring', () => {
     it('obeys the stat law: baseStats sum to 5 x level', () => {
         const { heart, body, mind } = TheIncompleteness.baseStats;
         expect(heart + body + mind).toBe(5 * TheIncompleteness.level);
-        expect(heart + body + mind).toBe(275);
+        expect(heart + body + mind).toBe(550);
     });
 
     it('mercy is not an out and it drops nothing — the fight is the lesson', () => {

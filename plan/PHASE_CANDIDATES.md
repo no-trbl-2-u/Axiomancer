@@ -15,6 +15,32 @@
 > next-tier candidates awaiting `/oversight` promotion. Verify
 > "already shipped?" notes before promoting.
 
+### Fate Engine P1 — dice get a second read (spec 31 §1, §5 #7-12)
+- source: spec-31 (owner request 2026-07-05; P0 "Truth" shipped same day)
+- Resonance tally + card thresholds, Reserve/ripening pips
+  (replaces invisible carriedDie), the Omen (undrafted die reveals
+  a beaten stance), Fate/X-die interaction, honor the dragged
+  dieId, new die-manipulation specialMechanics kinds, color-match
+  → +1 duration on status cards, sim policy update. Fixes owner
+  complaint #1 ("no interaction with the dice") structurally.
+
+### Fate Engine P2 — statuses rewrite the enemy's turn (spec 31 §3, §5 #13-18)
+- source: spec-31
+- Threat-Downgrade Ladder with struck-through telegraphs,
+  player-side control wiring (stagger = 1 fewer die; blocked
+  stances gate powering), combo-registry rebuild + REACT
+  detonations, status cap 5 + "The Inevitable" fast-forward
+  button. Finishes owner complaint #2 ("barely debuffs").
+
+### Fate Engine P3 — the 88-card library rewrite (spec 31 §4, §5 #20-23)
+- source: spec-31
+- Full card list re-authored with per-card dice text
+  (threshold/dieBonus/fate riders in real units), effect-library
+  canonicalization (7 distinct DoTs absorb 16 clones; deprecated
+  ids never renamed), preset re-cuts with identities, scripted
+  first fight, mobile UI for resonance/reserve/omen. L-sized
+  content pass; runs through /deck-tuning + /combat-playtest.
+
 ### Hazard deck-thinning remove-card consumer
 - source: archive
 - mobile wiring is staged; blocked on a mechanics

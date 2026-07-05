@@ -125,33 +125,27 @@ const STAGE_BANDS: Record<CombatStageId, {
     },
     impossible: {
         blindWinMin: 0.0,              // losing here is the design
-        // PLAYTEST-CALIBRATION (re-measured 2026-07-03, legacy-card-conversion
-        // pass: 0.925 @ 40 runs — up sharply from 0.25 before this pass. ROOT
-        // CAUSE (investigated, not a bug in the conversion): the ~39 legacy
-        // cards converted off flat `basePower` strikes mostly went from
-        // classifying as `direct-damage` (their damage-preview-based draft
-        // weight = OFF_FOCUS_WEIGHT for a status-focused policy-pick draft) to
-        // `direct-dot` / `direct-control` (FOCUS_WEIGHT, 4x, once they carry a
-        // real status payload). The 'impossible' roster's policy-pick draft
-        // now samples a MUCH more effective, curated-by-accident status deck
-        // for the same reason `dot-weaver` already cleared this stage before —
-        // completing the "every card is status" doctrine made the omniscient
-        // witness's deck itself far stronger, not any single card overtuned.
-        // A genuine power-creep signal on the CEILING STAGE SPECIFICALLY;
-        // flagged for /combat-tuning (the fix is a policy-pick draft-weighting
-        // or 'impossible' roster retune, not a card-data change) — not
-        // addressed in this content-only pass.)
-        blindWinMax: 0.95,
+        // PLAYTEST-CALIBRATION (re-measured 2026-07-05, P0-truth pass: the
+        // 2026-07-03 note here flagged the ceiling's power creep (0.925 @ 40)
+        // for an 'impossible' roster retune — this pass delivered it. The
+        // Incompleteness moved L55/1375 HP → L110/2750 HP after the truth
+        // wiring (real read rule + formerly-inert payloads) pushed the old
+        // block to a scripted 200/200 win. Measured after the retune: greedy
+        // 0.095 @ 200 runs / 181 defeats; blind is weaker than greedy, so the
+        // band below is a generous ceiling, not a target.)
+        blindWinMax: 0.5,
         statusEngagementMin: 0.0,      // the ceiling stage is exempt from the engagement floor
         greedyDotHpFractionMin: 0.0,   // ditto
     },
 };
 
 /** The ceiling: even the omniscient greedy witness must stay near-hopeless. */
-// PLAYTEST-CALIBRATION (re-measured 2026-07-03: 0.925 @ 40 runs, 0.94 @ 200 —
-// see the `impossible` STAGE_BANDS note above for the root cause and the
-// /combat-tuning follow-up this pass flags rather than fixes).
-const IMPOSSIBLE_GREEDY_WIN_MAX = 0.95;
+// PLAYTEST-CALIBRATION (re-measured 2026-07-05, P0-truth pass: 0.095 @ 200 runs,
+// 181 defeats — the read rule + formerly-inert payload wiring pushed the old
+// L55/1375-HP Incompleteness to a scripted 200/200 win, so the ceiling roster
+// was retuned to L110/2750 HP in the same pass. The ceiling scrapes ~10% now,
+// back near the original 1-5% design target after two power-creep passes.)
+const IMPOSSIBLE_GREEDY_WIN_MAX = 0.5;
 
 const STAGES: readonly CombatStageId[] = ['early', 'mid', 'late', 'impossible'];
 const NON_IMPOSSIBLE: readonly CombatStageId[] = ['early', 'mid', 'late'];
@@ -180,17 +174,11 @@ describe('balance bands — the impossible ceiling stays out of reach', () => {
     it('the impossible fight is not scripted-unwinnable at 200 seeds (still loses sometimes)', () => {
         // The user-facing contract for The Incompleteness: a skill-ceiling
         // benchmark, never a scripted loss OR a scripted win.
-        // PLAYTEST-CALIBRATION (re-measured 2026-07-03, legacy-card-conversion
-        // pass: 0.94 — 188 victories in 200, up sharply from 0.275/200 before
-        // this pass. Same root cause as the `impossible` STAGE_BANDS note: the
-        // policy-pick draft got a much stronger status deck for free once the
-        // legacy cards it draws from actually classify as status. The ceiling
-        // is no longer "near-impossible" in any meaningful sense — a genuine
-        // power-creep signal on the CEILING STAGE SPECIFICALLY, flagged for
-        // /combat-tuning [policy-pick draft weighting or an 'impossible'
-        // roster retune] rather than fixed in this content-only pass. The
-        // test still asserts SOME losses occur (`defeats > 0` above) so a
-        // future scripted 100% win would still fail loudly.)
+        // PLAYTEST-CALIBRATION (re-measured 2026-07-05, P0-truth pass, after
+        // the L110/2750-HP roster retune: greedy 0.095 @ 200 runs — 19
+        // victories, 181 defeats. Back near the original 1-5% "scrapes a win"
+        // design target; L130 was probed and measured 0.00 (scripted-unwinnable,
+        // rejected), L100 measured 0.615 (too generous).)
         const report = runPlaytestMatrix({
             stages: ['impossible'],
             policies: ['greedy'],

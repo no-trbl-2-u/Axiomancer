@@ -10,7 +10,7 @@ import { removeEffectsByType } from '../Effects';
 import { MAX_EFFECT_DURATION } from '../Game/game-mechanics.constants';
 import { Combatant } from './types';
 import { applyDamage, heal } from './health';
-import { getActiveEffectModifiers, getDotAmplificationByEffect } from './effect-modifiers';
+import { getActiveEffectModifiers, getDotAmplificationByEffect, rampedDamagePerRound } from './effect-modifiers';
 import { getRng } from '../Utils/rng';
 
 /** ID of the Mind studying mark. Used by Mind/Attack to add bonus damage. */
@@ -57,6 +57,10 @@ export function getThornsReflect(bearer: Combatant): number {
 /** VULNERABLE — hard ceiling on the outgoing-damage multiplier against a marked
  *  target. Conservative for burst (a marked foe takes at most ×2.0). Tunable. */
 export const VULNERABLE_MAX_MULT = 2.0;
+/** RESOLUTE — hard floor on the incoming-damage multiplier for a protected
+ *  bearer (a fully-stacked protective mult still lets half the hit through).
+ *  P0-truth: protective (`damageTakenMult < 1`) payloads are REAL now. Tunable. */
+export const RESOLUTE_MIN_MULT = 0.5;
 /** RUPTURE — hard cap on a single detonation's burst HP, so a long DoT stack
  *  can't one-shot a boss. Tunable. */
 export const RUPTURE_BURST_CAP = 80;
@@ -79,13 +83,14 @@ export const AMPLIFY_DEFAULT_MULTIPLIER = 1.5;
 export const AMPLIFY_BURST_CAP = 60;
 
 /**
- * VULNERABLE multiplier — the outgoing-damage multiplier the HP engine applies to
- * every HP source it lands on this bearer. Aggregated additively across the
+ * VULNERABLE / RESOLUTE multiplier — the damage multiplier the HP engine applies
+ * to every HP source landing on this bearer. Aggregated additively across the
  * bearer's OWN `damageTakenMult` payloads:
  *   mult = 1 + Σ ((damageTakenMult - 1) × intensity)
- * clamped to `[1, VULNERABLE_MAX_MULT]`. Returns EXACTLY `1` when the bearer
- * carries no marker, so every existing exact-HP assertion is byte-identical.
- * Pure.
+ * clamped to `[RESOLUTE_MIN_MULT, VULNERABLE_MAX_MULT]`. Returns EXACTLY `1`
+ * when the bearer carries no marker, so unmarked HP assertions are byte-identical.
+ * P0-truth: the old `Math.max(1, …)` clamp silently erased every protective
+ * (<1) payload — `buff_resolute` and self-`debuff_vulnerable` are real now. Pure.
  */
 export function getDamageTakenMultiplier(bearer: Combatant): number {
     let mult = 1;
@@ -95,7 +100,90 @@ export function getDamageTakenMultiplier(bearer: Combatant): number {
         if (dtm === undefined) continue;
         mult += (dtm - 1) * (ae.intensity ?? 1);
     }
-    return Math.min(VULNERABLE_MAX_MULT, Math.max(1, mult));
+    return Math.min(VULNERABLE_MAX_MULT, Math.max(RESOLUTE_MIN_MULT, mult));
+}
+
+/**
+ * Healing-received multiplier for the bearer (P0-truth wiring):
+ *   - `deniesAllyBuffTargeting` (ISOLATED) → 0: the bearer cannot be healed.
+ *   - `healingReceivedMulPct` (DESPAIR −15/stack) → 1 + Σ (pct/100 × intensity),
+ * clamped to [0, 2]. Exactly 1 for an unmarked bearer. Pure.
+ */
+export function getHealingReceivedMult(bearer: Combatant): number {
+    let mult = 1;
+    for (const ae of bearer.effects) {
+        const p = lookupEffect(ae.effectId)?.payload;
+        if (!p) continue;
+        if (p.deniesAllyBuffTargeting) return 0;
+        if (p.healingReceivedMulPct !== undefined) {
+            mult += (p.healingReceivedMulPct / 100) * (ae.intensity ?? 1);
+        }
+    }
+    return Math.min(2, Math.max(0, mult));
+}
+
+/**
+ * Outgoing-damage multiplier for the bearer (P0-truth wiring): folds
+ * `outgoingDamageMulPct` (SEPTIC −10/stack — dampens the bearer's hits) and
+ * `powerMulPct` (REGRESS FATIGUE — dampens card power) into one factor:
+ *   mult = 1 + Σ ((outgoingDamageMulPct + powerMulPct)/100 × intensity)
+ * clamped to [0.1, 2]. Exactly 1 for an unmarked bearer. Applied to the
+ * enemy's telegraphed threat damage and the player's powered strike. Pure.
+ */
+export function getOutgoingDamageMult(bearer: Combatant): number {
+    let mult = 1;
+    for (const ae of bearer.effects) {
+        const p = lookupEffect(ae.effectId)?.payload;
+        if (!p) continue;
+        const pct = (p.outgoingDamageMulPct ?? 0) + (p.powerMulPct ?? 0);
+        if (pct !== 0) mult += (pct / 100) * (ae.intensity ?? 1);
+    }
+    return Math.min(2, Math.max(0.1, mult));
+}
+
+/**
+ * HEMORRHAGE decay (P0-truth wiring of `dotModifiers.decayOnHeal`): when the
+ * bearer receives a heal, every decay-tagged DoT on them loses 1 intensity
+ * (removed at 0) — big but fragile. Returns the updated combatant and the
+ * effect ids that decayed. Pure.
+ */
+export function decayDotsOnHeal<T extends Combatant>(bearer: T): { combatant: T; decayed: string[] } {
+    const decayed: string[] = [];
+    const effects = bearer.effects.reduce<ActiveEffect[]>((acc, ae) => {
+        const def = lookupEffect(ae.effectId);
+        if (def?.payload.damageOverTime && def.payload.dotModifiers?.decayOnHeal) {
+            decayed.push(ae.effectId);
+            if (ae.intensity > 1) acc.push({ ...ae, intensity: ae.intensity - 1 });
+            // intensity 1 → the whole effect washes out
+        } else {
+            acc.push(ae);
+        }
+        return acc;
+    }, []);
+    return decayed.length ? { combatant: { ...bearer, effects }, decayed } : { combatant: bearer, decayed };
+}
+
+/**
+ * Removes ONE active effect by id — the `consumedOnUse` discharge (CLARITY,
+ * DOUBT, OVEREXTENDED, NOVIKOV fire once, then vanish). Pure; no-op when absent.
+ */
+export function consumeEffect<T extends Combatant>(bearer: T, effectId: string): T {
+    const idx = bearer.effects.findIndex(ae => ae.effectId === effectId);
+    if (idx === -1) return bearer;
+    return { ...bearer, effects: bearer.effects.filter((_, i) => i !== idx) };
+}
+
+/** True when the bearer carries a given payload flag (P0-truth gate reads). */
+export function hasPayloadFlag(
+    bearer: Combatant,
+    flag: 'blocksAdvantage' | 'restrictsSurgeAccess' | 'forcesWeakTierNextPlay' | 'forceWildOnNextDie' | 'nextDotTierUpgrade',
+): string | null {
+    for (const ae of bearer.effects) {
+        const p = lookupEffect(ae.effectId)?.payload;
+        if (!p) continue;
+        if (flag === 'nextDotTierUpgrade' ? (p.nextDotTierUpgrade ?? 0) > 0 : p[flag] === true) return ae.effectId;
+    }
+    return null;
 }
 
 /** One pending DoT effect's remaining lifetime total (amplification-aware). */
@@ -112,7 +200,7 @@ export interface PendingDotEntry {
  * combo multiplier the aggregator applies), floored per-tick then multiplied by
  * the remaining duration (permanent DoT counts one tick). Pure.
  */
-export function getPendingDotTotal(bearer: Combatant): { total: number; perEffect: PendingDotEntry[] } {
+export function getPendingDotTotal(bearer: Combatant, currentRound?: number): { total: number; perEffect: PendingDotEntry[] } {
     const dotAmp = getDotAmplificationByEffect(bearer.effects);
     const perEffect: PendingDotEntry[] = [];
     let total = 0;
@@ -122,9 +210,17 @@ export function getPendingDotTotal(bearer: Combatant): { total: number; perEffec
         if (!def || !dot) continue;
         const intensity = ae.intensity ?? 1;
         const multiplier = dotAmp.get(ae.effectId) ?? 1;
-        const perTick = Math.floor(dot.damagePerRound * intensity * multiplier);
         const ticks = Math.max(1, ae.remainingDuration);
-        const amount = perTick * ticks;
+        // P0-truth: escalating DoTs (`escalatesPerTurn`) sum their GROWING future
+        // ticks when a round is threaded; flat DoTs keep perTick × ticks.
+        let amount = 0;
+        for (let k = 0; k < ticks; k++) {
+            const dpr = rampedDamagePerRound(
+                ae, dot.damagePerRound, def.payload.dotModifiers,
+                currentRound === undefined ? undefined : currentRound + k,
+            );
+            amount += Math.floor(dpr * intensity * multiplier);
+        }
         perEffect.push({ effectId: ae.effectId, label: def.name, amount });
         total += amount;
     }
@@ -277,8 +373,9 @@ export function applyDrain<T extends Combatant>(target: T): { target: T; drained
 export function processDamageOverTime<T extends Combatant>(
     target: T,
     phase: 'start' | 'end',
+    currentRound?: number,
 ): { target: T; damage: number } {
-    const mods = getActiveEffectModifiers(target.effects);
+    const mods = getActiveEffectModifiers(target.effects, currentRound);
     const damage = phase === 'start' ? mods.dotStart : mods.dotEnd;
     if (damage <= 0) return { target, damage: 0 };
     return { target: applyDamage(target, damage), damage };
@@ -293,7 +390,7 @@ export function processDamageOverTime<T extends Combatant>(
  * Tick / expiry are intentionally *not* performed here; they belong to
  * `processRoundEndEffects` so duration counts down once per round.
  */
-export function processRoundStartEffects<T extends Combatant>(target: T): {
+export function processRoundStartEffects<T extends Combatant>(target: T, currentRound?: number): {
     target: T;
     healed: number;
     drained: number;
@@ -301,7 +398,7 @@ export function processRoundStartEffects<T extends Combatant>(target: T): {
 } {
     const regen = applyRegen(target);
     const drain = applyDrain(regen.target);
-    const dot   = processDamageOverTime(drain.target, 'start');
+    const dot   = processDamageOverTime(drain.target, 'start', currentRound);
     return {
         target:    dot.target,
         healed:    regen.healed,
@@ -315,12 +412,12 @@ export function processRoundStartEffects<T extends Combatant>(target: T): {
  *   1. End-phase DoT (e.g. bleed)
  *   2. Tick / expire all effects (single decrement per round)
  */
-export function processRoundEndEffects<T extends Combatant>(target: T): {
+export function processRoundEndEffects<T extends Combatant>(target: T, currentRound?: number): {
     target: T;
     dotDamage: number;
     expired: ActiveEffect[];
 } {
-    const dot   = processDamageOverTime(target, 'end');
+    const dot   = processDamageOverTime(target, 'end', currentRound);
     const ticked = tickAllEffects(dot.target);
     return {
         target:    ticked.target,

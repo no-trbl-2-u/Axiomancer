@@ -349,12 +349,14 @@ async function promptCardChoice(state: CombatEncounterState): Promise<{ uid: str
     if (cards.length === 0) return null;
     const enemyStance = revealedCurrentStance(state);
     const choices = cards.flatMap(({ uid, card }) => {
+        // P0-truth: every powered play costs exactly the drafted die — the old
+        // `cardDieCostPreview` free/2-die label described a pricing model the
+        // engine never charges. The read column is the real lever.
         const preview = cardDieCostPreview(state, card);
-        const costLabel = preview.cost === 0 ? 'free' : `${preview.cost} die`;
         const stanceLabel = enemyStance ? ` vs ${enemyStance}:${preview.advantage}` : '';
         return [
             { name: `[top] ${card.name}  (${card.stance}, ${card.effectKind})`, value: `top:${uid}` },
-            { name: `[bot] ${card.name}  cost ${costLabel}${stanceLabel}  ${card.bottomActionText}`, value: `bot:${uid}` },
+            { name: `[bot] ${card.name}  cost 1 die${stanceLabel}  ${card.bottomActionText}`, value: `bot:${uid}` },
         ];
     });
     choices.push({ name: 'resolve phase (stop playing cards)', value: '__resolve__' });

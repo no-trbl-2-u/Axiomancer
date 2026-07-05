@@ -12,6 +12,58 @@ deep imports are part of the supported surface.
 
 ## [Unreleased]
 
+P0 "TRUTH" of the Fate Engine revamp (spec 31; audit at
+`docs/combat-audit-2026-07-05.md`): every printed combat number is now a real
+engine unit, and the formerly-inert effect payloads bite.
+
+### Changed
+
+- **Deterministic read rule** — `READ_STATUS_MULT` (×1.34/×0.75 post-hoc
+  intensity rewrite, a no-op below intensity 3) is REMOVED. A won read lands
+  the played card's statuses at +1 intensity
+  (`READ_ADVANTAGE_INTENSITY_BONUS`); a lost read shortens them by 1 turn,
+  floor 1 (`READ_DISADVANTAGE_DURATION_PENALTY`); an even read lands the
+  printed numbers exactly.
+- **`bottomDamagePreview` is real units** — the DoT's ramp-aware lifetime HP on
+  an even read (was the removed pressure-track's credit units); control/buff
+  cards print no number (real-units-or-no-number). Card action text no longer
+  claims `impact ~N`, a color-gated die cost, or the never-charged 0/2-die
+  price (`cardDieCostPreview` label fixed in the CLI).
+- **`projectCardImpact` / `projectSiphonHeal`** now thread the same factors
+  execution applies (damage resistance via the target, VULNERABLE, outgoing /
+  healing multipliers) — preview == applied.
+- **Formerly-inert payload channels are live** (P0-truth wiring):
+  `damageTakenMult < 1` (buff_resolute; clamp `[RESOLUTE_MIN_MULT 0.5, 2.0]`)
+  and a player-side damage-taken call in `resolveThreatPhase`;
+  `dotModifiers.escalatesPerTurn/rampFactor` (unraveling ramps);
+  `dotModifiers.decayOnHeal` (hemorrhage); `healingReceivedMulPct` (despair);
+  `deniesAllyBuffTargeting` (isolated = cannot heal); `outgoingDamageMulPct` /
+  `powerMulPct` (septic / regress fatigue); `consumedOnUse`;
+  `nextDotTierUpgrade` (novikov); `restrictsSurgeAccess` (doubt cancels the
+  enemy's next fired threat riders); `forcesWeakTierNextPlay` (overextended
+  halves the enemy's next fired phase — interim until the P2 ladder);
+  `blocksAdvantage` (sensory null: enemy escalation frozen / player won-reads
+  clamp to neutral); `forceWildOnNextDie` (clarity). Charm's `forcedStance`
+  now replaces the enemy's hidden phase stance, so the read sees it.
+- **Synergy damage un-quartered** — synergy payoff damage is exempt from
+  `DIRECT_DAMAGE_WEIGHT` (combos stopped feeling like rounding errors).
+- **The Incompleteness retuned** L55/1375 HP → L110/2750 HP: the truth pass
+  made the omniscient greedy witness win 200/200 on the old block; measured
+  0.095 @ 200 seeds after the retune (near the original 1-5% ceiling target).
+
+### Added
+
+- `src/Combat/e2e/preview-truth.engine.test.ts` — pins preview==applied for
+  every DoT card, the exact read-rule deltas, and one behavioral assertion per
+  newly-wired payload channel.
+- Exports: `READ_ADVANTAGE_INTENSITY_BONUS`, `READ_DISADVANTAGE_DURATION_PENALTY`,
+  `RESOLUTE_MIN_MULT`, `getHealingReceivedMult`, `getOutgoingDamageMult`,
+  `decayDotsOnHeal`, `consumeEffect`, `hasPayloadFlag`.
+
+### Removed
+
+- `READ_STATUS_MULT` (breaking pre-1.0 export removal; see the read rule above).
+
 ## [0.37.0] — 2026-06-30
 
 Finishes the legacy turn-based combat removal that 0.36.0 began: decouples the

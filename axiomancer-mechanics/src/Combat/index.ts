@@ -38,9 +38,13 @@ export {
     // 0.34.0 status-depth epic — HP-model selectors + tunable scalars
     getDamageTakenMultiplier, getPendingDotTotal, consumeDotEffects,
     getDistinctDebuffCount, getDistinctControlCount,
-    VULNERABLE_MAX_MULT, RUPTURE_BURST_CAP, COMPOUND_COUNT_CAP,
+    VULNERABLE_MAX_MULT, RESOLUTE_MIN_MULT, RUPTURE_BURST_CAP, COMPOUND_COUNT_CAP,
     DISRUPT_DENY_AT, EXECUTE_DAMAGE_FRACTION,
     AMPLIFY_DEFAULT_MULTIPLIER, AMPLIFY_BURST_CAP,
+    // P0-truth — the formerly-inert payload channels are real; presenters read
+    // the live multipliers off these instead of hard-coding.
+    getHealingReceivedMult, getOutgoingDamageMult, decayDotsOnHeal, consumeEffect,
+    hasPayloadFlag,
 } from './effects';
 export type { PendingDotEntry } from './effects';
 export {
@@ -170,8 +174,9 @@ export {
     READ_DAMAGE_MULT, CONVICTION_PER_UNPICKED_DIE, CONVICTION_READ_WIN_BONUS,
     COLOR_MATCH_DAMAGE_BONUS,
     THREAT_WEAKEN_PER_ROLL, THREAT_DENY_AT, THREAT_WEAKEN_FLOOR,
-    // depth epic — the read now scales status; the clock escalates threat
-    READ_STATUS_MULT, THREAT_ESCALATION_PER_ROUND, THREAT_ESCALATION_GRACE, THREAT_ESCALATION_MAX,
+    // depth epic — the read bites status in REAL units (P0-truth); the clock escalates threat
+    READ_ADVANTAGE_INTENSITY_BONUS, READ_DISADVANTAGE_DURATION_PENALTY,
+    THREAT_ESCALATION_PER_ROUND, THREAT_ESCALATION_GRACE, THREAT_ESCALATION_MAX,
     THREAT_ESCALATION_BOSS_MULT,
     // 0.34.0 status-depth epic — honesty selectors
     getEnemyIncomingDamageMultiplier, getDisruptMeter,
