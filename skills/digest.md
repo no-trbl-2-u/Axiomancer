@@ -54,45 +54,72 @@ its own cadence.
    files them; the next dispatcher tick fixes them.
 4. **Write today's DevLog entry** — create
    `devlog/entries/DIGEST_<YYYY-MM-DD>.md`. Never overwrite a
-   past day; the DevLog is an accumulating ledger. Author it
-   as Markdown; sections, in order, each a `##` heading:
-   `Headline`, `While you were out` (pulse table: tick, verb,
-   outcome — no-ops included), `Shipped`, `Queues now`,
-   `Needs you` (blocked rows, needs-user issues,
-   `[needs-user-call]`s), `Today's intent` (next `[ ]` phase +
-   top finding), `Tuning proposals` (step 5, or "none"). Then
-   run `npm run devlog:build` to render the styled HTML page
-   and refresh `devlog/index.html` — commit the entry and the
-   built output together. Supported Markdown: `#`–`######`
-   headings, pipe tables, `-`/`1.` lists, fenced code,
-   `**bold**`, `_italic_`, `` `code` ``, `[links](url)`.
+   past day; the DevLog is an accumulating ledger. The entry is
+   a *visual, organized explanation of the day's work*, not a
+   flat status dump. Structure (the build parses it — see
+   `scripts/build-devlog.mjs`):
 
-   **Format contract** (each entry is a page, not a doc — the
-   shared shell in `scripts/build-devlog.mjs` guarantees this;
-   keep the shell honest if you touch it):
+   - `# <YYYY-MM-DD>` then a `>` blockquote **headline** (one
+     line; a quiet day says so here).
+   - **Work-item cards** — one per meaningful change, each a
+     `## [<category>] <title>` with `<category>` one of
+     `mechanics | ui | content | infra | balance`. Under it:
+     `**What:**` (one line — what changed) and `**Why:**` (one
+     line — the reason, mined from the commit body / PR / ADR /
+     `plan/` note; never invent). Optional: `**Commits:**` short
+     SHAs; a fenced ```diff block with a *representative* hunk
+     (≤~40 lines — the telling change, not the whole diff);
+     `**Shot:** <screen> — <caption>` for UI (step 4a).
+   - **Panels** — un-bracketed `##` sections rendered as-is:
+     `While you were out` (pulse table: tick, verb, outcome —
+     no-ops included), `Needs you` (blocked rows, needs-user
+     issues, `[needs-user-call]`s), `Tuning proposals` (step 5,
+     or "none"). Add `Queues now` / `Today's intent` as useful.
+
+   Then `npm run devlog:build` renders the cards/panels into the
+   styled HTML page and refreshes `devlog/index.html`. Commit
+   the entry, the built HTML, and any `devlog/assets/**`
+   together. Body Markdown: pipe tables, `-`/`1.` lists, fenced
+   code / ```diff, `**bold**`, `_italic_`, `` `code` ``,
+   `[links](url)`.
+
+4a. **UI shots (visual before/after)** — if the day's commits
+    changed any baseline screen
+    (`axiomancer-mobile/screenshots/baseline/*.png`), run:
+
+    ```bash
+    npm run devlog:shots -- <since-ref> <YYYY-MM-DD>
+    # <since-ref> = range start, e.g. the previous digest commit
+    # or `git rev-list -1 --before='26 hours ago' HEAD`
+    ```
+
+    It diffs the baselines across `<since>..HEAD` and writes
+    `devlog/assets/<date>/<screen>.{before,after,diff}.png`
+    (before = blob at `<since>`, after = current, diff = a
+    pixelmatch highlight). For each `<screen>` it prints
+    (`SHOTS_JSON`), add a `**Shot:** <screen> — <caption>` line
+    to the matching `[ui]` card so the build embeds the trio.
+    Only *noticeably* changed screens are emitted (≥2% pixels,
+    `DEVLOG_SHOT_MIN_RATIO`), so trivial diffs stay out. No
+    browser and no AI run here — it reuses the committed
+    baselines (the verify gate's approved captures), already
+    made when the UI change landed.
+
+   **Format contract** (the shared shell in
+   `scripts/build-devlog.mjs` guarantees this; keep it honest if
+   you touch the shell):
    - Fully self-contained HTML: inline `<style>`, no external
-     assets, no fetches, no JS required. It renders from a raw
-     file open on a phone.
-   - Phone-first: single column, centered ~`42rem` measure,
-     base font ≥16px, tables scroll horizontally in their own
-     container — the page itself never scrolls sideways.
-   - Respect the reader's theme: light via
-     `prefers-color-scheme` with a dark default befitting the
-     night shift — near-black ground, warm text, one accent
-     (Axiomancer's occult-scholar voice; restrained, no
-     emojis, no decorative images).
-   - Status is color + text, never color alone: the word is
-     always present (`shipped`, `no-op`, `crashed`,
-     `blocked`); `Needs you` reads loudest; a quiet day says
-     "quiet day" in the Headline.
+     fetches, no JS. Renders from a raw file open on a phone
+     (screenshots are local `devlog/assets/**` files).
+   - Phone-first: single column, centered ~`46rem` measure,
+     base font ≥16px; tables, diffs, and shot rows scroll in
+     their own container — the page never scrolls sideways.
+   - Light via `prefers-color-scheme` with a dark default; one
+     accent per category chip; restrained, no emojis.
    - `<title>Axiomancer digest — YYYY-MM-DD</title>`; the date
-     in a small header strip; every entry links back to the
-     index.
-   - Boring, diffable DOM: semantic tags, stable slugged
-     section ids (`#headline`, `#while-you-were-out`,
-     `#shipped`, `#queues-now`, `#needs-you`, `#todays-intent`,
-     `#tuning-proposals`), styles at the top, content in source
-     order. Git history is the archive; legible diffs matter.
+     in the header strip; every entry links back to the index.
+   - Boring, diffable DOM: semantic tags, slugged section/card
+     ids, styles at the top. Git history is the archive.
 5. **Meta-loop, within rails:** if the pulse shows a mistuned
    gate (critique never firing, the ceiling hibernating
    productive days, a starved queue), file the tuning as a
@@ -134,6 +161,7 @@ its own cadence.
 
 ```bash
 devlog/entries/DIGEST_<date>.md      # the deliverable (append, never overwrite)
+npm run devlog:shots -- <ref> <date> # collect UI before/after/diff (if screens changed)
 npm run devlog:build                 # render styled HTML + refresh index
 plan/AUDIT.md                        # breadth failures land here
 plan/PHASE_CANDIDATES.md             # tuning proposals land here
