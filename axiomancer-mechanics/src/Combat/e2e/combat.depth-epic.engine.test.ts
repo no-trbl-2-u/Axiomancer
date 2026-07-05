@@ -2,10 +2,11 @@
  * Hermetic E2E — combat depth epic (combat-depth-epic branch).
  *
  * Two new on-vision levers:
- *   H2 — the stance READ now scales a landed STATUS's magnitude (not just the
- *        weak strike), so "read the stance, draft the right color" matters for the
- *        status play that IS the game. Advantage makes a DoT bite harder; a
- *        neutral/none read leaves it byte-identical.
+ *   H2 — the stance READ bites a landed STATUS in REAL units (P0-truth): a won
+ *        read lands the card's statuses at +1 intensity, a lost read shortens
+ *        them by 1 turn (floor 1), a neutral/none read leaves the printed
+ *        numbers byte-identical. Deterministic and previewable — the old
+ *        ×1.34/×0.75 post-hoc intensity rewrite was a no-op below intensity 3.
  *   H3 — THE CLOCK: the enemy's telegraphed hit escalates each round past the
  *        grace window (capped), so a drawn-out fight turns lethal.
  */
@@ -20,7 +21,8 @@ import { deepClone } from '../../Utils';
 import {
     initializeCombatEncounter, rollEncounterDice, playCombatCard,
     resolveThreatPhase, draftStanceDie,
-    READ_STATUS_MULT, THREAT_ESCALATION_PER_ROUND, THREAT_ESCALATION_GRACE, THREAT_ESCALATION_MAX,
+    READ_ADVANTAGE_INTENSITY_BONUS, READ_DISADVANTAGE_DURATION_PENALTY,
+    THREAT_ESCALATION_PER_ROUND, THREAT_ESCALATION_GRACE, THREAT_ESCALATION_MAX,
     THREAT_ESCALATION_BOSS_MULT,
 } from '../combat.engine';
 import type { CombatDieColor, CombatEncounterState } from '../combat.encounter.types';
@@ -49,36 +51,40 @@ function setDice(state: CombatEncounterState, colors: CombatDieColor[]): CombatE
     }));
     return { ...state, dice, draftedDieId: null, turn };
 }
-const bleedIntensity = (s: CombatEncounterState) =>
-    s.enemy.effects.find(e => /bleed/.test(e.effectId))?.intensity ?? 0;
-
-/** Play a DoT card with a body die vs the given enemy stance (body-vs-mind = advantage,
- *  body-vs-body = neutral) and return the landed bleed intensity. */
-function playDotReadAgainst(stance: 'mind' | 'body'): number {
+/** Play a DoT card with a body die vs the given enemy stance (body-vs-mind =
+ *  advantage, body-vs-body = neutral, body-vs-heart = disadvantage) and return
+ *  the landed bleed. */
+function playDotReadAgainst(stance: 'mind' | 'body' | 'heart'): { intensity: number; duration: number } {
     let s = initializeCombatEncounter(makePlayer([DOT_BODY]), makeEnemy(300, stance), [DOT_BODY], 1);
     s = rollEncounterDice(s).state;
     s = setDice(s, ['body']);
     s = draftStanceDie(s, s.dice[0].id).state;
     const entry = s.hand.find(h => h.cardId === DOT_BODY);
     if (!entry) throw new Error('DOT card not in hand');
-    return bleedIntensity(playCombatCard(s, { uid: entry.uid }, true).state);
+    const after = playCombatCard(s, { uid: entry.uid }, true).state;
+    const bleed = after.enemy.effects.find(e => /bleed|poison/.test(e.effectId));
+    return { intensity: bleed?.intensity ?? 0, duration: bleed?.remainingDuration ?? 0 };
 }
 
-describe('combat depth epic — H2: the read scales STATUS', () => {
-    it('READ_STATUS_MULT is gentle and neutral/none are identity', () => {
-        expect(READ_STATUS_MULT.advantage).toBeGreaterThan(1);
-        expect(READ_STATUS_MULT.disadvantage).toBeLessThan(1);
-        expect(READ_STATUS_MULT.neutral).toBe(1);
-        expect(READ_STATUS_MULT.none).toBe(1);
-        // gentler than the strike's 1.5/0.5 read
-        expect(READ_STATUS_MULT.advantage).toBeLessThan(1.5);
+describe('combat depth epic — H2: the read bites STATUS in real units (P0-truth)', () => {
+    it('the read deltas are real, displayable units', () => {
+        expect(READ_ADVANTAGE_INTENSITY_BONUS).toBe(1);
+        expect(READ_DISADVANTAGE_DURATION_PENALTY).toBe(1);
     });
 
-    it('winning the read makes a landed DoT bite harder than a neutral read', () => {
-        const adv = playDotReadAgainst('mind');   // body beats mind → advantage
+    it('winning the read lands the status at +1 intensity over a neutral read', () => {
+        const adv = playDotReadAgainst('mind');     // body beats mind → advantage
         const neutral = playDotReadAgainst('body'); // body vs body → neutral
-        expect(neutral).toBeGreaterThan(0);
-        expect(adv).toBeGreaterThan(neutral);      // the read now matters for STATUS
+        expect(neutral.intensity).toBeGreaterThan(0);
+        expect(adv.intensity).toBe(neutral.intensity + READ_ADVANTAGE_INTENSITY_BONUS);
+        expect(adv.duration).toBe(neutral.duration); // advantage never shortens
+    });
+
+    it('losing the read shortens the status by 1 turn (floor 1) at printed intensity', () => {
+        const dis = playDotReadAgainst('heart');    // heart beats body → disadvantage
+        const neutral = playDotReadAgainst('body');
+        expect(dis.intensity).toBe(neutral.intensity); // printed intensity still lands
+        expect(dis.duration).toBe(Math.max(1, neutral.duration - READ_DISADVANTAGE_DURATION_PENALTY));
     });
 });
 

@@ -189,21 +189,35 @@ export function classifyVerbClass(
     return { verbClass: 'direct-damage', track: 'none' };
 }
 
-/** Total projected bottom-action impact for a combat card (preview; §7.3). */
+/**
+ * Total projected bottom-action impact for a combat card (preview; §7.3).
+ *
+ * P0-truth: REAL UNITS OR NO NUMBER (bearings "card faces" rule). The old
+ * version summed `effectImpact` — the REMOVED pressure-track model's credit
+ * units (intensity × CONTROL_HARD_MULT etc.), which matched nothing the enemy
+ * ever received (the owner-reported number-mismatch bug). Now:
+ *   - DoT cards → the LIFETIME HP the card's statuses deal on a neutral read:
+ *     Σ floor(damagePerRound × intensity) × duration, ramp-aware (UNRAVELING's
+ *     growing ticks are summed, not flattened). This equals the engine's
+ *     un-amplified pending-DoT total the moment the status lands.
+ *   - control / stat-debuff / buff cards → 0 (their action text states the real
+ *     behavior; there is no honest single number without live state).
+ *   - RUPTURE / COMPOUND / EXECUTE keep the basePower floor so the hand glow
+ *     isn't blank; live numbers come from projectRupture / projectExecute.
+ */
 export function bottomDamagePreview(skill: Card, lookupEffect: EffectLookup): number {
     let total = 0;
     for (const ce of enemyEffects(skill)) {
         const def = lookupEffect(ce.effectId);
-        if (!def) continue;
+        const dot = def?.payload.damageOverTime;
+        if (!def || !dot) continue;
         const intensity = Math.min(ce.intensity ?? 1, MAX_EFFECT_INTENSITY);
-        const duration = ce.duration ?? def.duration;
-        total += effectImpact(def, intensity, duration).amount;
+        const duration = Math.max(1, ce.duration ?? def.duration);
+        const ramp = def.payload.dotModifiers?.escalatesPerTurn ? (def.payload.dotModifiers.rampFactor ?? 0) : 0;
+        for (let k = 0; k < duration; k++) {
+            total += Math.floor((dot.damagePerRound + Math.floor(ramp * k)) * intensity);
+        }
     }
-    // 0.34.0 — RUPTURE / COMPOUND / EXECUTE cards have no static enemy effect to
-    // sum (their payoff is dynamic: detonate total / distinct-debuff count / a
-    // finisher). Surface the card's strike (basePower) as a non-zero floor so the
-    // hand glow isn't blank; the live numbers come from projectRupture /
-    // projectExecute / projectCardImpact.
     if (total === 0 && (skill.specialMechanics ?? []).some(
         m => m.kind === 'rupture' || m.kind === 'compound' || m.kind === 'execute',
     )) {
@@ -243,6 +257,22 @@ export function toCombatCard(cardId: string, lookupSkill: CardLookup, lookupEffe
     const isGold = isGoldCard(skill.id);
     const effectNoun = track === 'dot' ? 'damage-over-time' : track === 'control' ? 'control' : 'effect';
 
+    // P0-truth action text: every printed number is a real engine unit, and the
+    // die cost states the truth — ANY non-X die powers a card (the old
+    // "Costs 1 {color} die" was never enforced by the engine).
+    const enemyDefs = enemyEffects(skill)
+        .map(e => lookupEffect(e.effectId))
+        .filter((e): e is Effect => !!e);
+    const hardControl = enemyDefs.some(e => {
+        const r = e.payload.actionRestriction;
+        return !!r && (r.skipTurn === true || r.forcedStance !== undefined || (r.blockedStances?.length ?? 0) > 0);
+    });
+    const controlText = hardControl
+        ? 'can shut down the enemy\'s next action'
+        : 'weakens the enemy\'s coming attacks (and builds toward denying its turn)';
+    const dotText = preview > 0 ? `${preview} HP over its run` : 'damage each phase';
+    const effectLine = track === 'dot' ? dotText : track === 'control' ? controlText : 'its full effect';
+
     const topActionText = isGold
         ? 'GOLD — a free utility chip + a sliver of its effect, no die.'
         : verbClass === 'defend'
@@ -254,14 +284,14 @@ export function toCombatCard(cardId: string, lookupSkill: CardLookup, lookupEffe
                     : `Apply a weak version of the ${effectNoun}, no die.`;
 
     const bottomActionText = isGold
-        ? `GOLD — land a MAJOR ${effectNoun} + ~${preview} damage. Costs 1 die (a Wild die always lands advantage).`
+        ? `GOLD — land a MAJOR ${effectNoun}${preview > 0 ? ` — ${preview} HP over its run` : ''}. Costs 1 die (a Wild die always lands advantage).`
         : verbClass === 'defend'
             ? `Gain ${guardN} Guard — absorbs the enemy's next threat. Costs 1 die.`
             : verbClass === 'direct-damage'
                 ? `Full strike — HP damage only. Costs 1 die.`
                 : verbClass === 'buff-self'
                     ? 'Full buff to yourself. Costs 1 die.'
-                    : `Full ${effectNoun} — impact ~${preview}. Costs 1 ${cardStanceColor(skill)} die.`;
+                    : `Full ${effectNoun} — ${effectLine}. Costs 1 die (any color).`;
 
     return {
         id: skill.id,

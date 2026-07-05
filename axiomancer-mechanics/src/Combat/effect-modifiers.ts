@@ -42,6 +42,24 @@ export function getDotAmplificationByEffect(effects: ActiveEffect[]): Map<string
     return amp;
 }
 
+/**
+ * UNRAVELING ramp (P0-truth wiring of `dotModifiers.escalatesPerTurn`): the
+ * effective per-round damage grows the longer the effect has been active —
+ *   dprEff = dpr + floor(rampFactor × turnsActive)
+ * where turnsActive = currentRound − appliedAt (0 when `currentRound` is not
+ * threaded through, so untimed callers keep the flat base tick). Pure.
+ */
+export function rampedDamagePerRound(
+    ae: ActiveEffect,
+    dpr: number,
+    dotModifiers: { escalatesPerTurn?: boolean; rampFactor?: number } | undefined,
+    currentRound?: number,
+): number {
+    if (!dotModifiers?.escalatesPerTurn || !dotModifiers.rampFactor || currentRound === undefined) return dpr;
+    const turnsActive = Math.max(0, currentRound - ae.appliedAt);
+    return dpr + Math.floor(dotModifiers.rampFactor * turnsActive);
+}
+
 /** One DoT effect's per-tick contribution, with the live combo multiplier surfaced. */
 export interface ActiveDotEntry {
     effectId: string;
@@ -61,7 +79,7 @@ export interface ActiveDotEntry {
  * Pure; mirrors the floor-per-tick math `getActiveEffectModifiers` uses, so the
  * `amount`s sum to the HP the DoT actually erodes each round.
  */
-export function getActiveDotTotal(effects: ActiveEffect[]): { perEffect: ActiveDotEntry[]; total: number } {
+export function getActiveDotTotal(effects: ActiveEffect[], currentRound?: number): { perEffect: ActiveDotEntry[]; total: number } {
     const dotAmp = getDotAmplificationByEffect(effects);
     const perEffect: ActiveDotEntry[] = [];
     let total = 0;
@@ -71,8 +89,9 @@ export function getActiveDotTotal(effects: ActiveEffect[]): { perEffect: ActiveD
         if (!def || !dot) continue;
         const intensity = ae.intensity ?? 1;
         const multiplier = dotAmp.get(ae.effectId) ?? 1;
-        const baseAmount = Math.floor(dot.damagePerRound * intensity);
-        const amount = Math.floor(dot.damagePerRound * intensity * multiplier);
+        const dpr = rampedDamagePerRound(ae, dot.damagePerRound, def.payload.dotModifiers, currentRound);
+        const baseAmount = Math.floor(dpr * intensity);
+        const amount = Math.floor(dpr * intensity * multiplier);
         perEffect.push({ effectId: ae.effectId, label: def.name, baseAmount, amount, multiplier });
         total += amount;
     }
@@ -167,7 +186,7 @@ const addToMap = (map: Map<EffectStatTarget, number>, key: EffectStatTarget, val
  * Effects whose definition isn't in the library are skipped silently — they
  * may exist as data-only placeholders.
  */
-export function getActiveEffectModifiers(effects: ActiveEffect[]): AggregatedEffectModifiers {
+export function getActiveEffectModifiers(effects: ActiveEffect[], currentRound?: number): AggregatedEffectModifiers {
     const agg = emptyAgg();
     const dotAmp = getDotAmplificationByEffect(effects);
 
@@ -213,9 +232,11 @@ export function getActiveEffectModifiers(effects: ActiveEffect[]): AggregatedEff
         if (dot) {
             // Phase 156: apply live combo amplification to this effect's DoT.
             // Multiplier defaults to 1 (no combo) and floors to an integer to
-            // match the rest of the unresisted DoT math.
+            // match the rest of the unresisted DoT math. P0-truth: the ramp
+            // (`escalatesPerTurn`) grows the per-round base when a round is threaded.
             const multiplier = dotAmp.get(ae.effectId) ?? 1;
-            const total = Math.floor(dot.damagePerRound * intensity * multiplier);
+            const dpr = rampedDamagePerRound(ae, dot.damagePerRound, payload.dotModifiers, currentRound);
+            const total = Math.floor(dpr * intensity * multiplier);
             const phase: DotTickPhase = dot.tickPhase ?? 'start';
             if (phase === 'start') agg.dotStart += total;
             else                   agg.dotEnd   += total;

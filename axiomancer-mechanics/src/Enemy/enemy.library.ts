@@ -2388,8 +2388,13 @@ export const TheIncompleteness = createEnemy({
     name: 'The Incompleteness',
     stanceHint: 'It cannot be read from inside any system you carry; every tell is consistent, and none is complete.',
     description: 'A proof that cannot be finished, walking. It is true, it cannot be shown, and every axiom sent to contain it becomes the next sentence it is true about.',
-    level: 55,
-    baseStats: { heart: 92, body: 91, mind: 92 }, // 275 = 5 × 55 (stat law)
+    // PLAYTEST-CALIBRATION (P0-truth pass, 2026-07-05): the read rule now lands
+    // real +1-intensity statuses and the formerly-inert payload channels bite, so
+    // the omniscient greedy witness finished the old L55/1375-HP block 200/200
+    // (already power-crept to 0.94 by the 2026-07-03 legacy-card pass). The
+    // ceiling is restored the way its theme demands — it cannot be finished.
+    level: 110,
+    baseStats: { heart: 184, body: 183, mind: 183 }, // 550 = 5 × 110 (stat law)
     mapName: 'northern-forest',
     difficulty: 'unique',
     logic: 'boss',

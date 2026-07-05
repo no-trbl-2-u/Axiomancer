@@ -212,11 +212,12 @@ describe('resolvePrimary + armedReadValue', () => {
         expect(armedReadValue(guard, 'disadvantage', false)).toBe(6);   // 12 × 0.5
         expect(armedReadValue(guard, 'neutral', true)).toBe(15);        // + colour-match bonus
     });
-    it('armedReadValue scales DoT total by the gentler STATUS read (the read now bites status)', () => {
+    it('armedReadValue follows the P0-truth deterministic read rule for DoT (exact, no multipliers)', () => {
+        // Slippery Slope: bleed dpr 3 × intensity 2 × 3 turns = 18 on an even read.
         const dot = faceStats(getCard('slippery-slope')!, getSkillById('slippery-slope'));
-        expect(armedReadValue(dot, 'neutral', false)).toBe(18);         // 18 × 1.0
-        expect(armedReadValue(dot, 'advantage', false)).toBe(24);       // 18 × 1.34 → 24
-        expect(armedReadValue(dot, 'disadvantage', false)).toBe(14);    // 18 × 0.75 → 14 (rounded)
-        expect(armedReadValue(dot, 'advantage', true)).toBe(24);        // no colour-match bonus on status
+        expect(armedReadValue(dot, 'neutral', false)).toBe(18);         // printed exactly
+        expect(armedReadValue(dot, 'advantage', false)).toBe(27);       // +1 intensity: 3 × 3 × 3
+        expect(armedReadValue(dot, 'disadvantage', false)).toBe(12);    // −1 turn: 3 × 2 × 2
+        expect(armedReadValue(dot, 'advantage', true)).toBe(27);        // no colour-match bonus on status
     });
 });
