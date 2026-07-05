@@ -97,6 +97,27 @@ export function dieHasStance(color: CombatDieColor): boolean {
     return color === 'heart' || color === 'body' || color === 'mind';
 }
 
+// ---------------------------------------------------------------------------
+// Fate Engine P1 (spec 31 R2) — the RESERVE and its ripening pips
+// ---------------------------------------------------------------------------
+
+/** Max dice the Reserve holds. Banking past this burns for Conviction instead. */
+export const RESERVE_MAX = 2;
+/** Max pips a Reserve die ripens to (+1 per threat phase survived). */
+export const RESERVE_PIP_CAP = 2;
+
+/** Ripens every Reserve die +1 pip (cap `RESERVE_PIP_CAP`). Pure. */
+export function ripenReserve(reserve: readonly CombatManaDie[]): { reserve: CombatManaDie[]; ripenedIds: string[] } {
+    const ripenedIds: string[] = [];
+    const next = reserve.map(d => {
+        const pips = d.pips ?? 0;
+        if (pips >= RESERVE_PIP_CAP) return d;
+        ripenedIds.push(d.id);
+        return { ...d, pips: pips + 1 };
+    });
+    return { reserve: next, ripenedIds };
+}
+
 /**
  * A die Press Fate (the `reroll` signature) re-rolls: one you have USED this turn
  * (`spent`/`exhausted`) or a dead `x` face that can't power anything. A still-

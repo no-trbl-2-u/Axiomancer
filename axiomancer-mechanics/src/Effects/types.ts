@@ -112,6 +112,20 @@ export interface EffectPayload {
      */
     damageTakenMult?: number;
     /**
+     * Fate Engine P1 (spec 31 §3.1 #17) — STANCE-KEYED VULNERABLE: the bearer
+     * takes `mult` × damage, but ONLY from plays powered by a die of `stance`
+     * color (Wild counts as matching). A debuff that tells the player what to
+     * DRAFT. Read by the combat engine's powered-play paths; composes
+     * multiplicatively with the plain `damageTakenMult` aggregate.
+     */
+    damageTakenMultForStance?: { stance: 'heart' | 'body' | 'mind'; mult: number };
+    /**
+     * Fate Engine P1 — MARK: while the bearer carries this, their hidden phase
+     * stance is PUBLIC (Dune-style public-risk indicator). Read by the combat
+     * engine's stance-reveal selectors.
+     */
+    revealsStance?: boolean;
+    /**
      * Skills/Status Master Spec §1 — extensions for the 12 new status
      * entries. Data-only for now: no resolver reads these fields yet (the
      * DoT tick resolver, card-play resolution, and die-roll resolution paths

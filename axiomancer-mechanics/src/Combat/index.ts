@@ -178,6 +178,9 @@ export {
     READ_ADVANTAGE_INTENSITY_BONUS, READ_DISADVANTAGE_DURATION_PENALTY,
     THREAT_ESCALATION_PER_ROUND, THREAT_ESCALATION_GRACE, THREAT_ESCALATION_MAX,
     THREAT_ESCALATION_BOSS_MULT,
+    // Fate Engine P1 (spec 31) — the dice get a second read
+    tapFateDie, riderText,
+    PIP_INTENSITY_BONUS, PIP_GUARD_BONUS, COLOR_MATCH_STATUS_DURATION_BONUS, FATE_TAP_CONVICTION,
     // 0.34.0 status-depth epic — honesty selectors
     getEnemyIncomingDamageMultiplier, getDisruptMeter,
     projectRupture, isExecuteReady, projectExecute, projectSiphonHeal,
@@ -192,6 +195,7 @@ export {
     dieIsRerollable, hasRerollableDice, rerollSpentDice,
     // Master Spec §4 — wild-die permanent-growth mechanic
     MAX_PERMANENT_WILD_DICE, rollPermanentBonusDice,
+    RESERVE_MAX, RESERVE_PIP_CAP, ripenReserve,
 } from './combat.dice';
 export { COMBAT_HAND_SIZE, buildCombatDeck, drawCombatCards, shuffleCombatDeck } from './combat.deck';
 export {

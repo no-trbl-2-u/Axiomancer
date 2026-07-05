@@ -18,7 +18,7 @@
 
 import { MAX_EFFECT_INTENSITY } from '../Game/game-mechanics.constants';
 import type { Effect, ActiveEffect } from '../Effects/types';
-import type { Card, CardCombatEffects } from '../Cards/types';
+import type { Card, CardCombatEffects, CardRider } from '../Cards/types';
 import type {
     CombatCard, CombatDieColor, CombatVerbClass, CardEffectKind,
 } from './combat.encounter.types';
@@ -238,6 +238,26 @@ export function primaryEnemyEffectId(skill: Card, lookupEffect: EffectLookup): s
     return null;
 }
 
+/**
+ * Fate Engine P1 — human text for a `CardRider`. Every clause is a real engine
+ * unit (the P0-truth law: generated action text IS the applied number).
+ */
+export function riderText(r: CardRider): string {
+    const parts: string[] = [];
+    if (r.bonusIntensity) parts.push(`+${r.bonusIntensity} intensity`);
+    if (r.bonusDuration) parts.push(`+${r.bonusDuration} turn${r.bonusDuration === 1 ? '' : 's'}`);
+    if (r.chipHp) parts.push(`${r.chipHp} HP`);
+    if (r.guard) parts.push(`Guard ${r.guard}`);
+    if (r.conviction) parts.push(`+${r.conviction} Conviction`);
+    if (r.refreshDie) parts.push('refresh the die');
+    if (r.revealStance) parts.push('reveal the next stance');
+    if (r.tickAllDots) parts.push('tick every DoT now');
+    if (r.cleanse) parts.push(`cleanse ${r.cleanse}`);
+    if (r.healHp) parts.push(`heal ${r.healHp}`);
+    if (r.drawCards) parts.push(`draw ${r.drawCards}`);
+    return parts.join(' · ');
+}
+
 function tierLabel(tier: 1 | 2 | 3): string {
     return tier === 3 ? 'Tier 3' : tier === 2 ? 'Tier 2' : 'Tier 1';
 }
@@ -293,6 +313,34 @@ export function toCombatCard(cardId: string, lookupSkill: CardLookup, lookupEffe
                     ? 'Full buff to yourself. Costs 1 die.'
                     : `Full ${effectNoun} — ${effectLine}. Costs 1 die (any color).`;
 
+    // Fate Engine P1 — printed DIE LINES, generated from the riders in real
+    // units (printed == applied). One line per interaction the card carries.
+    const dieLines: string[] = [];
+    if (skill.threshold) {
+        dieLines.push(`⬡ ${skill.threshold.color.toUpperCase()} ×${skill.threshold.count} spent: ${riderText(skill.threshold.rider)}`);
+    }
+    if (skill.dieBonus) {
+        const on = skill.dieBonus.onColor === 'match'
+            ? `${cardStanceColor(skill).toUpperCase()}/WILD die`
+            : skill.dieBonus.onColor === 'off'
+                ? 'off-color die'
+                : `${skill.dieBonus.onColor.toUpperCase()} die`;
+        dieLines.push(`⬢ ${on}: ${riderText(skill.dieBonus.rider)}`);
+    }
+    if (skill.fate) {
+        const recoil = skill.fate.recoilHp ? ` (recoil ${skill.fate.recoilHp} HP)` : '';
+        dieLines.push(`✕ an X die may power this: +${riderText(skill.fate.rider)}${recoil}`);
+    }
+    for (const m of skill.specialMechanics ?? []) {
+        if (m.kind === 'convert_die_color') dieLines.push('◇ the spent die returns as WILD');
+        else if (m.kind === 'bank_spent_die') dieLines.push('◇ the spent die BANKS to the Reserve');
+        else if (m.kind === 'create_temporary_die') dieLines.push(`◇ forge a ${m.color.toUpperCase()} die into the Reserve`);
+        else if (m.kind === 'grant_pip') dieLines.push(`◇ every Reserve die ripens +${m.count} pip`);
+        else if (m.kind === 'reroll_spent') dieLines.push('◇ re-roll every spent/dead die');
+        else if (m.kind === 'refresh_die') dieLines.push('◇ refresh the spent die');
+        else if (m.kind === 'react') dieLines.push('⚗ REACT: consume both reagents on the foe → detonate');
+    }
+
     return {
         id: skill.id,
         skillId: skill.id,
@@ -304,9 +352,10 @@ export function toCombatCard(cardId: string, lookupSkill: CardLookup, lookupEffe
         rarity: isGold ? 'gold' : undefined,
         category: skill.category,
         topActionText: `${topActionText} (${isGold ? 'GOLD' : tierLabel(skill.tier)})`,
-        bottomActionText,
+        bottomActionText: dieLines.length ? `${bottomActionText} ${dieLines.join(' · ')}` : bottomActionText,
         bottomDamagePreview: preview,
         primaryEffectId: primaryEnemyEffectId(skill, lookupEffect),
+        ...(dieLines.length ? { dieLines } : {}),
     };
 }
 

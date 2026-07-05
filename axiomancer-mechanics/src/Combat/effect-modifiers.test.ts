@@ -50,23 +50,23 @@ describe('getActiveEffectModifiers', () => {
         // the phase-split aggregation from Phase 156 live combo amplification
         // (combo amplification is covered in status-combo-amplification.engine.test.ts).
         const mods = getActiveEffectModifiers([
-            ae('debuff_poison',        2),  // 4 × 2 = 8 at start
-            ae('debuff_tartarus_rot',  2),  // 4 × 2 = 8 at end
+            ae('debuff_poison',        2),  // canonical poison: 2 × 2 = 4 at start
+            ae('debuff_tartarus_rot',  2),  // 4 × 2 = 8 at end (deprecated payload, unchanged)
         ]);
-        expect(mods.dotStart).toBe(8);
+        expect(mods.dotStart).toBe(4);
         expect(mods.dotEnd).toBe(8);
     });
 
     it('amplifies DoT live when an amplify_damage combo is present (Phase 156)', () => {
         // poison (int 2) + bleed (int 1): combined intensity 3 ≥ 3 → Hemorrhage
-        // fires, ×1.5 on poison's start DoT: floor(4 × 2 × 1.5) = 12. Bleed
-        // (end phase, no combo target) stays at 3 × 1 = 3.
+        // fires, ×1.5 on poison's start DoT: floor(2 × 2 × 1.5) = 6. Bleed
+        // (end phase, no combo target) stays at 4 × 1 = 4.
         const mods = getActiveEffectModifiers([
             ae('debuff_poison', 2),
             ae('debuff_bleed',  1),
         ]);
-        expect(mods.dotStart).toBe(12);
-        expect(mods.dotEnd).toBe(3);
+        expect(mods.dotStart).toBe(6);
+        expect(mods.dotEnd).toBe(4);
     });
 
     it('separates regen from drain (Q6)', () => {
@@ -196,17 +196,17 @@ describe('DoT and drain HP changes', () => {
         const t = fixture([ae('debuff_poison', 2)]);
         const before = t.health;
         const r = processDamageOverTime(t, 'start');
-        expect(r.damage).toBe(8); // 4 × 2 = 8 (strengthened in Phase 126)
-        expect(r.target.health).toBe(before - 8);
+        expect(r.damage).toBe(4); // canonical poison: 2 × 2 = 4 (patient ramp identity)
+        expect(r.target.health).toBe(before - 4);
     });
 
     it('processDamageOverTime separates start from end phases', () => {
         const t = fixture([ae('debuff_poison'), ae('debuff_bleed')]);
-        // poison starts (4), bleed ends (3) - both strengthened in Phase 126
+        // canonical set: poison starts (2), bleed ends (4 — the burst window)
         const startTick = processDamageOverTime(t, 'start');
-        expect(startTick.damage).toBe(4);
+        expect(startTick.damage).toBe(2);
         const endTick = processDamageOverTime(startTick.target, 'end');
-        expect(endTick.damage).toBe(3);
+        expect(endTick.damage).toBe(4);
     });
 
     it('applyDrain damages bearer based on negative regen', () => {
@@ -229,13 +229,13 @@ describe('DoT and drain HP changes', () => {
 
 describe('processRoundStartEffects orchestrator', () => {
     it('applies regen, drain and start-DoT in one call', () => {
-        // poison (DoT 4 start, strengthened in Phase 126) + disease (DoT 2 start, drain 1)
+        // canonical poison (DoT 2 start) + disease (DoT 2 start, drain 1 — deprecated payload)
         const t = { ...fixture([ae('debuff_poison'), ae('debuff_disease')]), health: 30 };
         const r = processRoundStartEffects(t);
-        // start-DoT total: 4 + 2 = 6; drain: 1
-        expect(r.dotDamage).toBe(6);
+        // start-DoT total: 2 + 2 = 4; drain: 1
+        expect(r.dotDamage).toBe(4);
         expect(r.drained).toBe(1);
-        expect(r.target.health).toBe(30 - 6 - 1);
+        expect(r.target.health).toBe(30 - 4 - 1);
     });
 });
 
@@ -243,8 +243,8 @@ describe('processRoundEndEffects orchestrator', () => {
     it('applies end-DoT then ticks duration', () => {
         const t = { ...fixture([ae('debuff_bleed', 1, 2)]), health: 20 };
         const r = processRoundEndEffects(t);
-        expect(r.dotDamage).toBe(3); // strengthened from 2 to 3 in Phase 126
-        expect(r.target.health).toBe(17); // 20 - 3 = 17
+        expect(r.dotDamage).toBe(4); // canonical bleed: 4/turn over a short window
+        expect(r.target.health).toBe(16); // 20 - 4 = 16
         // Duration ticked from 2 → 1
         expect(r.target.effects[0].remainingDuration).toBe(1);
     });

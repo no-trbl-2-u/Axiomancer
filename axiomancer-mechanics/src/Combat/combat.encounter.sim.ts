@@ -23,7 +23,10 @@ import {
     initializeCombatEncounter, rollEncounterDice, playCombatCard,
     resolveThreatPhase, startTurn, draftStanceDie, endTurn, chooseDraft, revealedCurrentStance,
     playSignatureSkill, getDraftedDie, handCards, selectMercyChoice, getSignatureSkill,
+    tapFateDie,
 } from './combat.engine';
+import { RESERVE_MAX } from './combat.dice';
+import { getPendingDotTotal } from './effects';
 import { getRng } from '../Utils/rng';
 import type { CombatCard, CombatEncounterState, CombatOutcome } from './combat.encounter.types';
 import { COMBAT_SIM_POLICIES, type CombatSimPolicy, type CombatSimPolicyId } from './combat.sim-policies';
@@ -187,6 +190,25 @@ function policyPlayPhase(
         // Ensure a usable drafted die for this turn.
         let drafted = getDraftedDie(working);
         if (!drafted || drafted.state !== 'available' || drafted.color === 'x') {
+            // Fate Engine P1 — the RESERVE is a second power source: spend the
+            // oldest (ripest) banked die before rolling the next turn.
+            const banked = (working.reserve ?? [])[0];
+            if (banked) {
+                const wantR = selectCard(working, policy, rng, fizzledUids, focusIds);
+                if (wantR) {
+                    const resR = playCombatCard(working, { uid: wantR.uid }, true, banked.id);
+                    if (!resR.events.some(e => e.kind === 'effect-fizzled')) {
+                        working = resR.state;
+                        plays++;
+                        const landedR = resR.events.some(e => e.kind === 'effect-landed' && e.target === 'enemy');
+                        if (landedR) statusPlays++;
+                        bumpUsage(usage, wantR.card, 'bottom', landedR);
+                        if (working.finalOutcome || working.mercyChoiceActive) break;
+                        continue;
+                    }
+                    fizzledUids.add(wantR.uid);
+                }
+            }
             if (working.draftedDieId !== null) working = endTurn(working).state;
             if (working.dice.length === 0) {
                 working = startTurn(working).state;
@@ -199,7 +221,18 @@ function policyPlayPhase(
             const enemyStance = policy.blind ? revealedCurrentStance(working) : currentPhase(working).enemyStance;
             const pick = chooseDraft(working.dice, want?.card.stance ?? 'wild', enemyStance);
             if (!pick) break;
-            working = draftStanceDie(working, pick).state;
+            // Fate Engine P1 — BANK the unpicked die when the Reserve has room
+            // and Conviction isn't starved (pips beat a flat +1◆).
+            const bankUnpicked = (working.reserve ?? []).length < RESERVE_MAX && working.conviction >= 2;
+            working = draftStanceDie(working, pick, { bankUnpicked }).state;
+            // Fate Engine P1 — the universal FATE TAP: a dead X die in the tray
+            // advances the strongest enemy DoT (or banks +1 Conviction).
+            const xDie = working.dice.find(d => d.color === 'x' && d.state !== 'spent' && d.id !== working.draftedDieId);
+            if (xDie && working.fateTappedTurn !== working.turn) {
+                const choice = getPendingDotTotal(working.enemy, working.round).total > 0 ? 'dot-tick' as const : 'conviction' as const;
+                working = tapFateDie(working, xDie.id, choice).state;
+                if (working.finalOutcome) break;
+            }
             drafted = getDraftedDie(working);
             if (!drafted || drafted.state !== 'available' || drafted.color === 'x') {
                 // Forced X — chip with a free top, then end the turn.

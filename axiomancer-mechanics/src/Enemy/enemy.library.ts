@@ -417,7 +417,7 @@ export const TideflukeReaver = createEnemy({
     // Phase 45 — logic-pessimistic-relational (Ligotti / Rust Cohle archetype).
     philosophicalAlignment: { epistemology: 67, outlook: -67, scope: 0 },
     // Phase 57 — body-aspected tier-3 fallacy matches the reaver's "built threat → strike" trope.
-    skills: [skill('straw-giant')],
+    skills: [skill('mob-appeal')],
     // Phase 102 — befriendability config: elite tier, empathy required
     befriendabilityConfig: {
         hpGate: { belowPct: 0.3 },
@@ -887,7 +887,7 @@ export const FrostboundHunter = createEnemy({
     },
     loot: [none(40), drop('body-elixir', 30), drop('focus-vial', 20), drop('berserker-brew', 10)],
     philosophicalAlignment: { epistemology: 67, outlook: -67, scope: 0 }, // logic-pessimistic-relational
-    skills: [skill('straw-giant')],
+    skills: [skill('mob-appeal')],
     befriendabilityConfig: {
         hpGate: { belowPct: 0.35 },
         requiredStances: ['heart'],
@@ -1378,7 +1378,7 @@ export const BalanceJudge = createEnemy({
     ],
     philosophicalAlignment: { epistemology: 0, outlook: 67, scope: 67 }, // mid-optimistic-transcendent
     // Several skills including devastating ones
-    skills: [skill('sorites-cascade'), skill('straw-giant'), skill('bootstrap-paradox')],
+    skills: [skill('sorites-cascade'), skill('mob-appeal'), skill('bootstrap-paradox')],
     finalBlowLines: {
         brutal: 'The scales tip. The judgment is final.',
         quiet:  'A balanced verdict, weighed against your arguments.',
@@ -1680,7 +1680,7 @@ export const IronCovenanter = createEnemy({
     procUnlocks: { body: { attack: 2, defend: 2 } },
     loot: [none(30), drop('body-elixir', 35), drop('healing-potion', 20), drop('revive-crystal', 5)],
     philosophicalAlignment: { epistemology: -67, outlook: 0, scope: 0 },
-    skills: [skill('straw-giant')],
+    skills: [skill('mob-appeal')],
     addedIn: ADDED,
     tags: ['mid-game', 'enemy'],
 });
@@ -1737,7 +1737,7 @@ export const TheTithewarden = createEnemy({
     },
     loot: [drop('healing-potion', 45), drop('body-elixir', 30), drop('revive-crystal', 15), drop('void-essence', 10)],
     philosophicalAlignment: { epistemology: -67, outlook: -67, scope: 0 },
-    skills: [skill('ad-hominem-strike'), skill('straw-giant')],
+    skills: [skill('ad-hominem-strike'), skill('mob-appeal')],
     befriendabilityConfig: {
         hpGate: { belowPct: 0.3 },
         requiredStances: ['heart'],
@@ -1855,7 +1855,7 @@ export const FamineOfTheDeepWood = createEnemy({
     procUnlocks: { body: { attack: 3, defend: 2 } },
     loot: [none(25), drop('void-essence', 40), drop('berserker-brew', 20), drop('healing-potion', 15)],
     philosophicalAlignment: { epistemology: 0, outlook: -67, scope: 0 },
-    skills: [skill('straw-giant'), skill('achilles-gambit')],
+    skills: [skill('mob-appeal'), skill('achilles-gambit')],
     addedIn: ADDED,
     tags: ['late-game', 'enemy'],
 });
@@ -2008,7 +2008,7 @@ export const TheLastConsensus = createEnemy({
     },
     loot: [drop('void-essence', 45), drop('revive-crystal', 30), drop('philosopher-tea', 15), drop('resonance-crystal', 10)],
     philosophicalAlignment: { epistemology: -67, outlook: 67, scope: 67 },
-    skills: [skill('sorites-cascade'), skill('straw-giant'), skill('bootstrap-paradox')],
+    skills: [skill('sorites-cascade'), skill('mob-appeal'), skill('bootstrap-paradox')],
     befriendabilityConfig: {
         hpGate: { belowPct: 0.2 },
         requiredStances: ['mind', 'heart'],
@@ -2082,7 +2082,7 @@ export const PallbearerOfReason = createEnemy({
     procUnlocks: { body: { attack: 3, defend: 3 }, mind: { attack: 2, defend: 2 } },
     loot: [none(25), drop('body-elixir', 35), drop('void-essence', 25), drop('revive-crystal', 15)],
     philosophicalAlignment: { epistemology: 67, outlook: -67, scope: 0 },
-    skills: [skill('straw-giant'), skill('eternal-regress')],
+    skills: [skill('mob-appeal'), skill('eternal-regress')],
     addedIn: ADDED,
     tags: ['late-game', 'enemy'],
 });
@@ -2270,7 +2270,7 @@ export const ObsidianColossus = createEnemy({
     procUnlocks: { body: { attack: 2, defend: 2 }, heart: { attack: 2, defend: 2 } },
     loot: [none(25), drop('iron-skin-draught', 35), drop('body-elixir', 25), drop('revive-crystal', 15)],
     philosophicalAlignment: { epistemology: -34, outlook: -67, scope: 67 },
-    skills: [skill('straw-giant'), skill('achilles-gambit')],
+    skills: [skill('mob-appeal'), skill('achilles-gambit')],
     befriendabilityConfig: {
         hpGate: { belowPct: 0.3 },
         requiredStances: ['body', 'heart'],

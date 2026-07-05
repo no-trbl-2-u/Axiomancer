@@ -15,14 +15,18 @@
 > next-tier candidates awaiting `/oversight` promotion. Verify
 > "already shipped?" notes before promoting.
 
-### Fate Engine P1 — dice get a second read (spec 31 §1, §5 #7-12)
-- source: spec-31 (owner request 2026-07-05; P0 "Truth" shipped same day)
-- Resonance tally + card thresholds, Reserve/ripening pips
-  (replaces invisible carriedDie), the Omen (undrafted die reveals
-  a beaten stance), Fate/X-die interaction, honor the dragged
-  dieId, new die-manipulation specialMechanics kinds, color-match
-  → +1 duration on status cards, sim policy update. Fixes owner
-  complaint #1 ("no interaction with the dice") structurally.
+### Combat challenge-gradient retune (URGENT — post-trim)
+- source: spec-31 §9 (P1 + trim shipped 2026-07-05)
+- The curated 49-card pool + the Fate Engine dice layer made every
+  policy-pick deck strong: measured win ≈ 1.00 across stages
+  (doctrine metrics are on-vision: statusEngagement 0.45-0.64,
+  late dotHp 0.77). The balance bands are pinned KNOWN-BROKEN.
+  Needs a real /combat-tuning + /deck-tuning pass: enemy budgets,
+  the Incompleteness ceiling, mercy-gate pacing, policy-pick
+  draft weighting, and pricing the turn-cycling deny loop.
+
+### ~~Fate Engine P1 — dice get a second read~~ SHIPPED 2026-07-05
+- source: spec-31 §9 (shipped with the curated trim in the same PR)
 
 ### Fate Engine P2 — statuses rewrite the enemy's turn (spec 31 §3, §5 #13-18)
 - source: spec-31

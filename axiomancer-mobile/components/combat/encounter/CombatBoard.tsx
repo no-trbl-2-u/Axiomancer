@@ -156,38 +156,62 @@ function SignatureColumn({ conviction, signatures, onCast, onInfo }: {
 // ── Dice row (free-floating gems above the hand) ─────────────────────────────
 
 function DiceRow({
-    vm, dieGesture, draggingDieId, assignedDieIds,
+    vm, dieGesture, draggingDieId, assignedDieIds, onFateTap, bankSpare, onToggleBankSpare,
 }: {
     vm: CombatViewModel;
     dieGesture: (die: CombatDieVM) => ReturnType<typeof Gesture.Exclusive>;
     draggingDieId: string | null;
     assignedDieIds: Set<string>;
+    onFateTap?: (dieId: string) => void;
+    bankSpare?: boolean;
+    onToggleBankSpare?: () => void;
 }) {
     const AXM = usePalette();
     const styles = useStyles();
     return (
         <View style={styles.diceRow} testID="combat-dice-tray" pointerEvents="box-none">
             {vm.dice.map((die) => {
-                const draggable = !vm.hasDraft && !die.isX && !die.drafted && !die.spent;
+                // Fate Engine P1 — a Reserve die is a SECOND power source: draggable
+                // onto a card any time (the single-die law still holds per play).
+                const draggable = die.reserve
+                    ? draggingDieId !== die.id
+                    : !vm.hasDraft && !die.isX && !die.drafted && !die.spent;
                 const isAssigned = assignedDieIds.has(die.id);
-                // The drawn X/dud die is non-draggable — render it as a small greyed
-                // pip so it doesn't pad the row with an unusable full-size slot.
+                // R4 — a dead X face is never dead: tap it to advance the strongest
+                // enemy DoT (or bank +1 Conviction), once per turn.
                 if (die.isX) {
-                    return (
-                        <View key={die.id} style={styles.dieXPip} accessible accessibilityLabel="X die — unusable this turn">
+                    return die.fateTappable && onFateTap ? (
+                        <Pressable
+                            key={die.id}
+                            onPress={() => onFateTap(die.id)}
+                            style={[styles.dieXPip, { borderColor: AXM.sulfur }]}
+                            accessibilityRole="button"
+                            accessibilityLabel="Fate die — tap to advance the strongest enemy status (or bank Conviction)"
+                            testID={`combat-fate-tap-${die.id}`}
+                        >
+                            <Text style={[styles.dieXGlyph, { color: AXM.sulfur }]}>✕</Text>
+                            <Text style={styles.dieFateHint}>TAP</Text>
+                        </Pressable>
+                    ) : (
+                        <View key={die.id} style={styles.dieXPip} accessible accessibilityLabel="X die — spent this turn">
                             <Text style={styles.dieXGlyph}>✕</Text>
                         </View>
                     );
                 }
                 const node = (
                     <View style={isAssigned ? styles.dieAssigned : undefined}>
-                        <CombatDie die={die} size={54} dimmed={(vm.hasDraft && !die.drafted) || draggingDieId === die.id} />
-                        {draggable && die.readPip && die.readPip !== 'none' ? (
+                        <CombatDie die={die} size={54} dimmed={(!die.reserve && vm.hasDraft && !die.drafted) || draggingDieId === die.id} />
+                        {die.reserve ? (
+                            <Text style={[styles.dieConv, { color: AXM.sulfur }]} testID={`combat-reserve-${die.id}`}>
+                                ⏳{die.pips ? ` +${die.pips}✦` : ''} BANKED
+                            </Text>
+                        ) : null}
+                        {draggable && !die.reserve && die.readPip && die.readPip !== 'none' ? (
                             <Text style={[styles.diePip, { color: READ_ACCENT[die.readPip] }]}>
                                 {die.readPip === 'advantage' ? '▲ ADV' : die.readPip === 'disadvantage' ? '▼ DIS' : '— EVEN'}
                             </Text>
                         ) : null}
-                        {vm.hasDraft && !die.drafted && <Text style={styles.dieConv}>→ +1 ◆</Text>}
+                        {!die.reserve && vm.hasDraft && !die.drafted && <Text style={styles.dieConv}>→ +1 ◆</Text>}
                         {die.drafted && <Text style={[styles.dieConv, { color: AXM.sulfur }]}>{die.spent ? 'SPENT' : 'STANCE'}</Text>}
                     </View>
                 );
@@ -201,6 +225,20 @@ function DiceRow({
                     <View key={die.id}>{node}</View>
                 );
             })}
+            {/* R3 — BANK-OR-BURN made visible: the spare (undrafted) die's two lives. */}
+            {!vm.hasDraft && vm.diceRolled && vm.reserveRoom && onToggleBankSpare ? (
+                <Pressable
+                    onPress={onToggleBankSpare}
+                    style={[styles.bankChip, bankSpare && { borderColor: AXM.sulfur }]}
+                    accessibilityRole="button"
+                    accessibilityLabel={bankSpare ? 'Spare die will be banked to the Reserve' : 'Spare die will burn for one Conviction'}
+                    testID="combat-bank-toggle"
+                >
+                    <Text style={[styles.bankChipText, bankSpare && { color: AXM.sulfur }]}>
+                        {bankSpare ? 'spare → BANK ⏳' : 'spare → +1 ◆'}
+                    </Text>
+                </Pressable>
+            ) : null}
         </View>
     );
 }
@@ -433,10 +471,17 @@ export interface CombatBoardProps {
     onMomentumInfo?: () => void;
     /** Latest resolved engine events (drives enemy/player resolution feedback). */
     fx?: CombatFx;
+    // ── Fate Engine P1 ──
+    /** Tap a dead X die → the universal fate tap (once per turn). */
+    onFateTap?: (dieId: string) => void;
+    /** Bank-or-burn choice for the spare die at draft (panel-owned). */
+    bankSpare?: boolean;
+    onToggleBankSpare?: () => void;
 }
 
 export const CombatBoard = React.memo(function CombatBoard({
     vm, drag, stagedUids, onApply, onStage, onUnstage, onDiscard, onSignature, onEndPhase, onInspect, onChip, onSignatureInfo, onPlayerInspect, momentum, onMomentumInfo, fx,
+    onFateTap, bankSpare, onToggleBankSpare,
 }: CombatBoardProps) {
     const AXM = usePalette();
     const styles = useStyles();
@@ -758,7 +803,7 @@ export const CombatBoard = React.memo(function CombatBoard({
                     </View>
                 )}
 
-                <DiceRow vm={vm} dieGesture={dieGesture} draggingDieId={draggingDieId} assignedDieIds={assignedDieIds} />
+                <DiceRow vm={vm} dieGesture={dieGesture} draggingDieId={draggingDieId} assignedDieIds={assignedDieIds} onFateTap={onFateTap} bankSpare={bankSpare} onToggleBankSpare={onToggleBankSpare} />
 
                 {/* the hand dock — edge-to-edge fan, bottoms cropped off-screen */}
                 <View style={styles.dock}>
@@ -970,6 +1015,10 @@ export const CombatCardFace = React.memo(function CombatCardFace({
                                 base={styles.faceEffect}
                                 bold={styles.faceEffectBold}
                             />
+                            {/* Fate Engine P1 — the card's printed DIE LINES (real units). */}
+                            {card.dieLines?.map((line) => (
+                                <Text key={line} style={styles.faceDieLine} numberOfLines={2}>{line}</Text>
+                            ))}
                         </View>
                     ) : (
                         /* small face: ONE keyword line — "◆ KEYWORD value" */
@@ -1059,6 +1108,10 @@ const useStyles = makeStyles((AXM) => ({
     dieAssigned: { opacity: 0.4 },
     // Drawn X/dud die — a small greyed pip, not a full slot.
     dieXPip: { width: 24, height: 24, borderRadius: 6, borderWidth: 1, borderColor: '#3a3a3a', backgroundColor: 'rgba(0,0,0,0.4)', alignItems: 'center', justifyContent: 'center', opacity: 0.6, alignSelf: 'center' },
+    dieFateHint: { fontFamily: FONTS.mono, fontSize: 7, color: '#d4c026', marginTop: 1 },
+    faceDieLine: { fontFamily: FONTS.mono, fontSize: 9, color: '#d4c026', marginTop: 3, letterSpacing: 0.2 },
+    bankChip: { borderWidth: 1, borderColor: '#3a3a3a', borderRadius: 10, paddingHorizontal: 8, paddingVertical: 4, alignSelf: 'center', backgroundColor: 'rgba(0,0,0,0.35)' },
+    bankChipText: { fontFamily: FONTS.mono, fontSize: 9, color: '#8a8a7a', letterSpacing: 0.5 },
     dieXGlyph: { fontFamily: FONTS.sans, fontSize: 12, color: '#8a8273' },
     dieConv: { fontFamily: FONTS.mono, fontSize: 9, color: AXM.bone, textAlign: 'center', marginTop: 2, letterSpacing: 0.5, textShadowColor: 'rgba(0,0,0,0.9)', textShadowRadius: 3 },
     diePip: { fontFamily: FONTS.sans, fontSize: 10, textAlign: 'center', marginTop: 2, letterSpacing: 0.6, textShadowColor: 'rgba(0,0,0,0.9)', textShadowRadius: 3 },

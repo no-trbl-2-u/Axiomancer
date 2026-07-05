@@ -376,3 +376,72 @@ letter of §2/§5 are noted; nothing deviates from the law *preview == applied*)
   fields, and `resolveCardDieCost` itself are still present (each is inert);
   deleting them is P1 housekeeping (#19) once the schema work touches those
   files anyway.
+
+---
+
+## 9. P1 "FATE ENGINE" + the curated trim — as shipped (2026-07-05, same day)
+
+Owner call: *"trim it down by half and just lock in some really good ones
+first — then extend from there."* Shipped as one pass with the P1 dice layer
+so every keeper carries a real dice interaction from day one.
+
+**The trim.** `cards.library.ts` went 88 → **49 locked-in keepers** (criteria:
+engine-real post-P0, distinct in play, philosophy == mechanics, stance × tier ×
+verb coverage). Cut cards live in git history; unknown ids drop safely from
+deck projection. The effect libraries were canonicalized to **25 live debuffs +
+9 live buffs** — merged clones are tagged `deprecated` + `deprecatedFor` (ids
+never deleted; threat sequences/signatures re-pointed; Items/equipment still
+resolve deprecated ids and get re-pointed in their own later pass). The combo
+registry was rebuilt to 5 reachable `amplify_damage` pairs (the only consumed
+result type). `debuff_stagger` merges the four identical skipTurns;
+`debuff_mark` gains a REAL `revealsStance` payload (the marked foe's stance is
+public); the `vulnerability_*` trio became **stance-keyed** vulnerabilities
+(`damageTakenMultForStance` — +50% only from that color die: a debuff that
+tells you what to draft). Canonical DoT identities: bleed 4/2 (burst window),
+poison 2/4 ramping, burn 3/3 `fuel`, despair −50% healing, hemorrhage 5/3
+decay-on-heal, unraveling 2/5 ramping, septic 3/3 −10% outgoing.
+
+**The dice layer (spec §1), as shipped:**
+- **R1 RESONANCE + thresholds** — every spent/burned/banked colored die tallies;
+  `threshold: {color, count, rider}` fires free (spend counted first: one
+  spend, two payoffs).
+- **R2 RESERVE & RIPENING** — bank-or-burn at draft (`draftStanceDie(..., {
+  bankUnpicked })`); Reserve max 2; +1 pip per threat phase survived (cap 2);
+  pips cash +1 intensity/pip on status plays, +2 Guard/pip on defends; an
+  unspent drafted die banks at `endTurn` (the invisible `carriedDie` is retired).
+- **R4 FATE/X** — unpicked X dice stay on the table (locked, not consumed);
+  `fate` cards may be POWERED by an X die (printed rider + recoil, read =
+  none); the universal once-per-turn `tapFateDie` advances the strongest enemy
+  DoT or banks +1 Conviction.
+- **R5 OMEN (adapted)** — the reveal-current version was redundant (the draft
+  already reveals the current stance), so the Omen SCOUTS FORWARD: an unpicked
+  colored die that beats the current stance reveals the NEXT phase's stance.
+- **R6** shipped in P0. **R7** — color match = +1 turn on the landed status
+  (strike/defend keep the flat +3). **R8** — the dragged dieId is honored
+  (drafted / Reserve / fate-X; bogus id = explicit fizzle). **R9** — variety
+  chain unchanged; a fired REACT always refreshes the powering die.
+- **New specialMechanics**: `reroll_spent`, `refresh_die`, `convert_die_color`
+  (returns as WILD — deterministic, no color picker), `create_temporary_die`
+  (forged into the Reserve), `grant_pip`, `bank_spent_die`, and **REACT**
+  (`a`+`b` at minIntensity → consumed → burst on the mechanic path + product
+  status).
+- Card faces print generated **die lines** in real units (`CombatCard.dieLines`).
+
+**Sim/policies** — the driver banks (reserve room + conviction ≥ 2), powers
+from the Reserve when the drafted die is spent, and fate-taps dead X dice.
+
+**Mobile (functional-minimal)** — Reserve dice render in the tray
+(`⏳ +N✦ BANKED`, draggable onto cards any time), the spare die shows a
+bank-or-burn toggle chip, dead X dice are tappable (`✕ TAP`), pips/read pips
+label the dice, and the inspect face prints the die lines. The full resonance
+meter/reserve-tray polish is the P3 UI pass.
+
+**KNOWN-BROKEN, flagged loudly:** the trim + dice layer made every policy-pick
+deck strong — measured blind/greedy win ≈ 1.00 on early/late/impossible and
+0.96 mid, with statusEngagement 0.45–0.64 (was 0.12–0.18) and late
+dotHpFraction 0.77 (was 0.00 — late was UNWINNABLE pre-trim). Doctrine metrics
+are exactly on-vision; the CHALLENGE GRADIENT is gone. A coarse threat-constant
+probe barely moved it, so the fix is a real `/combat-tuning` + `/deck-tuning`
+loop pass (enemy budgets, mercy-gate pacing, policy-pick draft weighting) —
+tracked in `plan/PHASE_CANDIDATES.md`, pinned KNOWN-BROKEN in the balance-band
+suite, NOT smuggled into this content PR.

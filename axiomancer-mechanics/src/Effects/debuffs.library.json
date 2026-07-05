@@ -9,7 +9,11 @@
       "duration": 1,
       "stacking": "intensity",
       "payload": {},
-      "tier": 1
+      "tier": 1,
+      "tags": [
+        "deprecated"
+      ],
+      "deprecatedFor": "debuff_mark"
     },
     {
       "id": "debuff_all_stats_down",
@@ -56,7 +60,11 @@
         ],
         "rollModifier": -1
       },
-      "tier": 2
+      "tier": 2,
+      "tags": [
+        "deprecated"
+      ],
+      "deprecatedFor": "debuff_fear"
     },
     {
       "id": "debuff_poison",
@@ -70,8 +78,12 @@
       "resistDR": 13,
       "payload": {
         "damageOverTime": {
-          "damagePerRound": 4,
+          "damagePerRound": 2,
           "damageType": "body"
+        },
+        "dotModifiers": {
+          "escalatesPerTurn": true,
+          "rampFactor": 0.5
         }
       },
       "tier": 2
@@ -99,7 +111,11 @@
           }
         ]
       },
-      "tier": 2
+      "tier": 2,
+      "tags": [
+        "deprecated"
+      ],
+      "deprecatedFor": "debuff_poison"
     },
     {
       "id": "debuff_bleed",
@@ -107,13 +123,13 @@
       "description": "Plank by plank, your ship comes apart. Drop by drop, you become less yourself. When does the bleeding stop being you?",
       "type": "debuff",
       "category": "damage",
-      "duration": 4,
+      "duration": 2,
       "stacking": "intensity",
       "resistedBy": "mind",
       "resistDR": 12,
       "payload": {
         "damageOverTime": {
-          "damagePerRound": 3,
+          "damagePerRound": 4,
           "damageType": "body",
           "tickPhase": "end"
         }
@@ -132,18 +148,14 @@
       "resistDR": 13,
       "payload": {
         "damageOverTime": {
-          "damagePerRound": 4,
+          "damagePerRound": 3,
           "damageType": "heart"
-        },
-        "statModifiers": [
-          {
-            "stat": "heart",
-            "value": -1,
-            "isMultiplier": false
-          }
-        ]
+        }
       },
-      "tier": 2
+      "tier": 2,
+      "tags": [
+        "fuel"
+      ]
     },
     {
       "id": "debuff_frostbite",
@@ -162,7 +174,11 @@
         },
         "rollModifier": -2
       },
-      "tier": 2
+      "tier": 2,
+      "tags": [
+        "deprecated"
+      ],
+      "deprecatedFor": "debuff_bleed"
     },
     {
       "id": "debuff_shock",
@@ -181,7 +197,11 @@
         },
         "rollModifier": -1
       },
-      "tier": 2
+      "tier": 2,
+      "tags": [
+        "deprecated"
+      ],
+      "deprecatedFor": "debuff_bleed"
     },
     {
       "id": "debuff_curse",
@@ -213,7 +233,11 @@
         ],
         "rollModifier": -2
       },
-      "tier": 2
+      "tier": 2,
+      "tags": [
+        "deprecated"
+      ],
+      "deprecatedFor": "debuff_unraveling"
     },
     {
       "id": "debuff_disease",
@@ -234,7 +258,11 @@
           "healthPerRound": -1
         }
       },
-      "tier": 2
+      "tier": 2,
+      "tags": [
+        "deprecated"
+      ],
+      "deprecatedFor": "debuff_septic"
     },
     {
       "id": "debuff_wound",
@@ -256,7 +284,11 @@
         ],
         "defenseModifier": -2
       },
-      "tier": 2
+      "tier": 2,
+      "tags": [
+        "deprecated"
+      ],
+      "deprecatedFor": "debuff_bleed"
     },
     {
       "id": "debuff_stun",
@@ -273,7 +305,11 @@
           "skipTurn": true
         }
       },
-      "tier": 2
+      "tier": 2,
+      "tags": [
+        "deprecated"
+      ],
+      "deprecatedFor": "debuff_stagger"
     },
     {
       "id": "debuff_sleep",
@@ -291,7 +327,11 @@
         },
         "defenseModifier": -3
       },
-      "tier": 2
+      "tier": 2,
+      "tags": [
+        "deprecated"
+      ],
+      "deprecatedFor": "debuff_stagger"
     },
     {
       "id": "debuff_daze",
@@ -323,7 +363,11 @@
           }
         ]
       },
-      "tier": 2
+      "tier": 2,
+      "tags": [
+        "deprecated"
+      ],
+      "deprecatedFor": "debuff_confusion"
     },
     {
       "id": "debuff_petrify",
@@ -341,7 +385,11 @@
         },
         "defenseModifier": -4
       },
-      "tier": 3
+      "tier": 3,
+      "tags": [
+        "deprecated"
+      ],
+      "deprecatedFor": "debuff_stagger"
     },
     {
       "id": "debuff_fear",
@@ -445,7 +493,11 @@
           ]
         }
       },
-      "tier": 2
+      "tier": 2,
+      "tags": [
+        "deprecated"
+      ],
+      "deprecatedFor": "debuff_confusion"
     },
     {
       "id": "debuff_silence",
@@ -523,7 +575,11 @@
         ],
         "defenseModifier": -3
       },
-      "tier": 2
+      "tier": 2,
+      "tags": [
+        "deprecated"
+      ],
+      "deprecatedFor": "debuff_vulnerable"
     },
     {
       "id": "debuff_fatigue",
@@ -560,7 +616,11 @@
         ],
         "rollModifier": -1
       },
-      "tier": 2
+      "tier": 2,
+      "tags": [
+        "deprecated"
+      ],
+      "deprecatedFor": "debuff_slow"
     },
     {
       "id": "debuff_exhaustion",
@@ -607,7 +667,11 @@
         ],
         "rollModifier": -2
       },
-      "tier": 2
+      "tier": 2,
+      "tags": [
+        "deprecated"
+      ],
+      "deprecatedFor": "debuff_slow"
     },
     {
       "id": "debuff_slow",
@@ -666,7 +730,11 @@
         "defenseModifier": -4,
         "rollModifier": -3
       },
-      "tier": 2
+      "tier": 2,
+      "tags": [
+        "deprecated"
+      ],
+      "deprecatedFor": "debuff_root"
     },
     {
       "id": "debuff_vulnerability_body",
@@ -679,24 +747,10 @@
       "resistedBy": "mind",
       "resistDR": 13,
       "payload": {
-        "statModifiers": [
-          {
-            "stat": "body",
-            "value": -3,
-            "isMultiplier": false
-          },
-          {
-            "stat": "physicalDefense",
-            "value": -4,
-            "isMultiplier": false
-          },
-          {
-            "stat": "physicalSave",
-            "value": -3,
-            "isMultiplier": false
-          }
-        ],
-        "damageTakenMult": 1.5
+        "damageTakenMultForStance": {
+          "stance": "body",
+          "mult": 1.5
+        }
       },
       "tier": 2
     },
@@ -711,24 +765,10 @@
       "resistedBy": "heart",
       "resistDR": 13,
       "payload": {
-        "statModifiers": [
-          {
-            "stat": "mind",
-            "value": -3,
-            "isMultiplier": false
-          },
-          {
-            "stat": "mentalDefense",
-            "value": -4,
-            "isMultiplier": false
-          },
-          {
-            "stat": "mentalSave",
-            "value": -3,
-            "isMultiplier": false
-          }
-        ],
-        "damageTakenMult": 1.5
+        "damageTakenMultForStance": {
+          "stance": "mind",
+          "mult": 1.5
+        }
       },
       "tier": 2
     },
@@ -743,24 +783,10 @@
       "resistedBy": "body",
       "resistDR": 13,
       "payload": {
-        "statModifiers": [
-          {
-            "stat": "heart",
-            "value": -3,
-            "isMultiplier": false
-          },
-          {
-            "stat": "emotionalDefense",
-            "value": -4,
-            "isMultiplier": false
-          },
-          {
-            "stat": "emotionalSave",
-            "value": -3,
-            "isMultiplier": false
-          }
-        ],
-        "damageTakenMult": 1.5
+        "damageTakenMultForStance": {
+          "stance": "heart",
+          "mult": 1.5
+        }
       },
       "tier": 2
     },
@@ -779,12 +805,17 @@
       },
       "tier": 2,
       "addedIn": "2026-06-26",
-      "tags": ["status-effect", "vulnerable", "debuff", "amplify"]
+      "tags": [
+        "status-effect",
+        "vulnerable",
+        "debuff",
+        "amplify"
+      ]
     },
     {
       "id": "debuff_mark",
       "name": "Raven's Target",
-      "description": "Evidence confirms equivalent hypotheses. A green apple confirms all ravens are black—and confirms you are the target. Everything points to you.",
+      "description": "Marked and read. While it holds, the bearer’s stance is public — every draft against them is informed.",
       "type": "debuff",
       "category": "advantage",
       "duration": 3,
@@ -792,14 +823,7 @@
       "resistedBy": "heart",
       "resistDR": 13,
       "payload": {
-        "defenseModifier": -3,
-        "advantageModifier": {
-          "grantDisadvantage": [
-            "body",
-            "mind",
-            "heart"
-          ]
-        }
+        "revealsStance": true
       },
       "tier": 2
     },
@@ -828,7 +852,11 @@
         ],
         "rollModifier": -1
       },
-      "tier": 2
+      "tier": 2,
+      "tags": [
+        "deprecated"
+      ],
+      "deprecatedFor": "debuff_slow"
     },
     {
       "id": "debuff_mind_attack_down",
@@ -855,7 +883,11 @@
         ],
         "rollModifier": -1
       },
-      "tier": 2
+      "tier": 2,
+      "tags": [
+        "deprecated"
+      ],
+      "deprecatedFor": "debuff_slow"
     },
     {
       "id": "debuff_heart_attack_down",
@@ -882,7 +914,11 @@
         ],
         "rollModifier": -1
       },
-      "tier": 2
+      "tier": 2,
+      "tags": [
+        "deprecated"
+      ],
+      "deprecatedFor": "debuff_slow"
     },
     {
       "id": "debuff_evasion_down",
@@ -914,7 +950,11 @@
           }
         ]
       },
-      "tier": 2
+      "tier": 2,
+      "tags": [
+        "deprecated"
+      ],
+      "deprecatedFor": "debuff_vulnerable"
     },
     {
       "id": "debuff_accuracy_down",
@@ -946,7 +986,11 @@
           }
         ]
       },
-      "tier": 2
+      "tier": 2,
+      "tags": [
+        "deprecated"
+      ],
+      "deprecatedFor": "debuff_slow"
     },
     {
       "id": "debuff_defense_down",
@@ -973,7 +1017,11 @@
           }
         ]
       },
-      "tier": 2
+      "tier": 2,
+      "tags": [
+        "deprecated"
+      ],
+      "deprecatedFor": "debuff_vulnerable"
     },
     {
       "id": "debuff_dispel",
@@ -986,7 +1034,11 @@
       "resistedBy": "heart",
       "resistDR": 12,
       "payload": {},
-      "tier": 2
+      "tier": 2,
+      "tags": [
+        "deprecated"
+      ],
+      "deprecatedFor": "debuff_doubt"
     },
     {
       "id": "debuff_hex",
@@ -1004,7 +1056,11 @@
           "damageType": "heart"
         }
       },
-      "tier": 2
+      "tier": 2,
+      "tags": [
+        "deprecated"
+      ],
+      "deprecatedFor": "debuff_unraveling"
     },
     {
       "id": "debuff_hp_decay",
@@ -1025,7 +1081,11 @@
           "healthPerRound": -2
         }
       },
-      "tier": 2
+      "tier": 2,
+      "tags": [
+        "deprecated"
+      ],
+      "deprecatedFor": "debuff_poison"
     },
     {
       "id": "debuff_moral_learning",
@@ -1062,7 +1122,11 @@
         ],
         "rollModifier": -1
       },
-      "tier": 2
+      "tier": 2,
+      "tags": [
+        "deprecated"
+      ],
+      "deprecatedFor": "debuff_confusion"
     },
     {
       "id": "debuff_transformative",
@@ -1099,7 +1163,11 @@
           }
         ]
       },
-      "tier": 2
+      "tier": 2,
+      "tags": [
+        "deprecated"
+      ],
+      "deprecatedFor": "debuff_confusion"
     },
     {
       "id": "debuff_rational_disagreement",
@@ -1131,7 +1199,11 @@
         ],
         "rollModifier": -2
       },
-      "tier": 2
+      "tier": 2,
+      "tags": [
+        "deprecated"
+      ],
+      "deprecatedFor": "debuff_confusion"
     },
     {
       "id": "debuff_straw_man_echo",
@@ -1146,7 +1218,11 @@
       "payload": {
         "rollModifier": -1
       },
-      "tier": 1
+      "tier": 1,
+      "tags": [
+        "deprecated"
+      ],
+      "deprecatedFor": "debuff_slow"
     },
     {
       "id": "debuff_post_hoc_tremor",
@@ -1167,7 +1243,11 @@
           }
         ]
       },
-      "tier": 1
+      "tier": 1,
+      "tags": [
+        "deprecated"
+      ],
+      "deprecatedFor": "debuff_slow"
     },
     {
       "id": "debuff_affirming_consequent",
@@ -1188,7 +1268,11 @@
           }
         ]
       },
-      "tier": 1
+      "tier": 1,
+      "tags": [
+        "deprecated"
+      ],
+      "deprecatedFor": "debuff_slow"
     },
     {
       "id": "debuff_causal_emergence",
@@ -1225,7 +1309,11 @@
           ]
         }
       },
-      "tier": 2
+      "tier": 2,
+      "tags": [
+        "deprecated"
+      ],
+      "deprecatedFor": "debuff_confusion"
     },
     {
       "id": "debuff_no_true_scotsman",
@@ -1247,7 +1335,11 @@
       "tier": 2,
       "resistedBy": "mind",
       "resistDR": 12,
-      "sourcedFromCell": "logic-pessimistic-transcendent"
+      "sourcedFromCell": "logic-pessimistic-transcendent",
+      "tags": [
+        "deprecated"
+      ],
+      "deprecatedFor": "debuff_vulnerable"
     },
     {
       "id": "debuff_category_error",
@@ -1263,7 +1355,11 @@
       "tier": 2,
       "resistedBy": "heart",
       "resistDR": 11,
-      "sourcedFromCell": "mid-pessimistic-transcendent"
+      "sourcedFromCell": "mid-pessimistic-transcendent",
+      "tags": [
+        "deprecated"
+      ],
+      "deprecatedFor": "debuff_confusion"
     },
     {
       "id": "debuff_tartarus_rot",
@@ -1291,7 +1387,14 @@
       },
       "tier": 2,
       "addedIn": "2026-04-15",
-      "tags": ["status-effect", "damage", "dot", "since-april"]
+      "tags": [
+        "status-effect",
+        "damage",
+        "dot",
+        "since-april",
+        "deprecated"
+      ],
+      "deprecatedFor": "debuff_poison"
     },
     {
       "id": "debuff_lethe_fog",
@@ -1318,12 +1421,20 @@
           }
         ],
         "advantageModifier": {
-          "grantDisadvantage": ["mind"]
+          "grantDisadvantage": [
+            "mind"
+          ]
         }
       },
       "tier": 2,
       "addedIn": "2026-04-15",
-      "tags": ["status-effect", "control", "since-april"]
+      "tags": [
+        "status-effect",
+        "control",
+        "since-april",
+        "deprecated"
+      ],
+      "deprecatedFor": "debuff_confusion"
     },
     {
       "id": "debuff_gorgon_gaze",
@@ -1350,7 +1461,14 @@
       },
       "tier": 3,
       "addedIn": "2026-04-15",
-      "tags": ["status-effect", "control", "stun", "since-april"]
+      "tags": [
+        "status-effect",
+        "control",
+        "stun",
+        "since-april",
+        "deprecated"
+      ],
+      "deprecatedFor": "debuff_stagger"
     },
     {
       "id": "debuff_sisyphean_weight",
@@ -1384,7 +1502,13 @@
       },
       "tier": 2,
       "addedIn": "2026-04-15",
-      "tags": ["status-effect", "stat", "since-april"]
+      "tags": [
+        "status-effect",
+        "stat",
+        "since-april",
+        "deprecated"
+      ],
+      "deprecatedFor": "debuff_slow"
     },
     {
       "id": "debuff_harpy_torment",
@@ -1410,7 +1534,13 @@
       },
       "tier": 2,
       "addedIn": "2026-04-15",
-      "tags": ["status-effect", "regeneration", "since-april"]
+      "tags": [
+        "status-effect",
+        "regeneration",
+        "since-april",
+        "deprecated"
+      ],
+      "deprecatedFor": "debuff_despair"
     },
     {
       "id": "debuff_icarus_descent",
@@ -1425,7 +1555,10 @@
       "payload": {
         "rollModifier": -3,
         "advantageModifier": {
-          "grantDisadvantage": ["body", "heart"]
+          "grantDisadvantage": [
+            "body",
+            "heart"
+          ]
         },
         "statModifiers": [
           {
@@ -1437,7 +1570,13 @@
       },
       "tier": 2,
       "addedIn": "2026-05-20",
-      "tags": ["status-effect", "advantage", "since-april"]
+      "tags": [
+        "status-effect",
+        "advantage",
+        "since-april",
+        "deprecated"
+      ],
+      "deprecatedFor": "debuff_fear"
     },
     {
       "id": "debuff_basilisk_venom",
@@ -1464,7 +1603,14 @@
       },
       "tier": 2,
       "addedIn": "2026-05-20",
-      "tags": ["status-effect", "damage", "dot", "since-april"]
+      "tags": [
+        "status-effect",
+        "damage",
+        "dot",
+        "since-april",
+        "deprecated"
+      ],
+      "deprecatedFor": "debuff_unraveling"
     },
     {
       "id": "debuff_minotaur_maze",
@@ -1478,7 +1624,9 @@
       "resistDR": 14,
       "payload": {
         "actionRestriction": {
-          "blockedStances": ["body"]
+          "blockedStances": [
+            "body"
+          ]
         },
         "rollModifier": -2,
         "statModifiers": [
@@ -1491,7 +1639,13 @@
       },
       "tier": 2,
       "addedIn": "2026-05-20",
-      "tags": ["status-effect", "control", "since-april"]
+      "tags": [
+        "status-effect",
+        "control",
+        "since-april",
+        "deprecated"
+      ],
+      "deprecatedFor": "debuff_silence"
     },
     {
       "id": "debuff_hubris_brand",
@@ -1506,12 +1660,23 @@
       "payload": {
         "defenseModifier": -4,
         "advantageModifier": {
-          "grantDisadvantage": ["body", "mind", "heart"]
+          "grantDisadvantage": [
+            "body",
+            "mind",
+            "heart"
+          ]
         }
       },
       "tier": 2,
       "addedIn": "2026-06-07",
-      "tags": ["status-effect", "advantage", "mark", "since-april"]
+      "tags": [
+        "status-effect",
+        "advantage",
+        "mark",
+        "since-april",
+        "deprecated"
+      ],
+      "deprecatedFor": "debuff_mark"
     },
     {
       "id": "debuff_minor_unsteadiness",
@@ -1533,7 +1698,13 @@
       },
       "tier": 1,
       "addedIn": "2026-06-07",
-      "tags": ["status-effect", "stat", "since-april"]
+      "tags": [
+        "status-effect",
+        "stat",
+        "since-april",
+        "deprecated"
+      ],
+      "deprecatedFor": "debuff_slow"
     },
     {
       "id": "debuff_acid",
@@ -1560,7 +1731,15 @@
       },
       "tier": 2,
       "addedIn": "2026-06-20",
-      "tags": ["status-effect", "damage", "dot", "combo-enabler", "since-april"]
+      "tags": [
+        "status-effect",
+        "damage",
+        "dot",
+        "combo-enabler",
+        "since-april",
+        "deprecated"
+      ],
+      "deprecatedFor": "debuff_burn"
     },
     {
       "id": "debuff_exposure",
@@ -1589,7 +1768,14 @@
       },
       "tier": 2,
       "addedIn": "2026-06-20",
-      "tags": ["status-effect", "defense", "combo-enabler", "since-april"]
+      "tags": [
+        "status-effect",
+        "defense",
+        "combo-enabler",
+        "since-april",
+        "deprecated"
+      ],
+      "deprecatedFor": "debuff_vulnerable"
     },
     {
       "id": "debuff_hemorrhage",
@@ -1613,7 +1799,13 @@
       },
       "tier": 2,
       "addedIn": "2026-07-03",
-      "tags": ["status-effect", "damage", "dot", "hybrid-damage-model", "hemorrhage"]
+      "tags": [
+        "status-effect",
+        "damage",
+        "dot",
+        "hybrid-damage-model",
+        "hemorrhage"
+      ]
     },
     {
       "id": "debuff_septic",
@@ -1635,7 +1827,13 @@
       },
       "tier": 2,
       "addedIn": "2026-07-03",
-      "tags": ["status-effect", "damage", "dot", "hybrid-damage-model", "septic"]
+      "tags": [
+        "status-effect",
+        "damage",
+        "dot",
+        "hybrid-damage-model",
+        "septic"
+      ]
     },
     {
       "id": "debuff_regress_fatigue",
@@ -1652,7 +1850,13 @@
       },
       "tier": 2,
       "addedIn": "2026-07-03",
-      "tags": ["status-effect", "stat", "hybrid-damage-model", "execute-setup", "fatigue"]
+      "tags": [
+        "status-effect",
+        "stat",
+        "hybrid-damage-model",
+        "execute-setup",
+        "fatigue"
+      ]
     },
     {
       "id": "debuff_novikov_consistency",
@@ -1670,7 +1874,12 @@
       },
       "tier": 2,
       "addedIn": "2026-07-03",
-      "tags": ["status-effect", "advantage", "hybrid-damage-model", "consumed-on-use"]
+      "tags": [
+        "status-effect",
+        "advantage",
+        "hybrid-damage-model",
+        "consumed-on-use"
+      ]
     },
     {
       "id": "debuff_doubt",
@@ -1688,7 +1897,13 @@
       },
       "tier": 2,
       "addedIn": "2026-07-03",
-      "tags": ["status-effect", "control", "hybrid-damage-model", "consumed-on-use", "anti-surge"]
+      "tags": [
+        "status-effect",
+        "control",
+        "hybrid-damage-model",
+        "consumed-on-use",
+        "anti-surge"
+      ]
     },
     {
       "id": "debuff_sensory_null",
@@ -1706,7 +1921,12 @@
       },
       "tier": 2,
       "addedIn": "2026-07-03",
-      "tags": ["status-effect", "control", "hybrid-damage-model", "anti-control"]
+      "tags": [
+        "status-effect",
+        "control",
+        "hybrid-damage-model",
+        "anti-control"
+      ]
     },
     {
       "id": "debuff_unraveling",
@@ -1731,7 +1951,13 @@
       },
       "tier": 2,
       "addedIn": "2026-07-03",
-      "tags": ["status-effect", "damage", "dot", "hybrid-damage-model", "escalating"]
+      "tags": [
+        "status-effect",
+        "damage",
+        "dot",
+        "hybrid-damage-model",
+        "escalating"
+      ]
     },
     {
       "id": "debuff_despair",
@@ -1749,11 +1975,17 @@
           "damageType": "heart",
           "tickPhase": "end"
         },
-        "healingReceivedMulPct": -15
+        "healingReceivedMulPct": -50
       },
       "tier": 2,
       "addedIn": "2026-07-03",
-      "tags": ["status-effect", "damage", "dot", "hybrid-damage-model", "despair"]
+      "tags": [
+        "status-effect",
+        "damage",
+        "dot",
+        "hybrid-damage-model",
+        "despair"
+      ]
     },
     {
       "id": "debuff_isolated",
@@ -1771,7 +2003,12 @@
       },
       "tier": 2,
       "addedIn": "2026-07-03",
-      "tags": ["status-effect", "control", "hybrid-damage-model", "tier2-3-gate"]
+      "tags": [
+        "status-effect",
+        "control",
+        "hybrid-damage-model",
+        "tier2-3-gate"
+      ]
     },
     {
       "id": "debuff_overextended",
@@ -1787,7 +2024,33 @@
       },
       "tier": 1,
       "addedIn": "2026-07-03",
-      "tags": ["status-effect", "control", "hybrid-damage-model", "self-cost", "consumed-on-use"]
+      "tags": [
+        "status-effect",
+        "control",
+        "hybrid-damage-model",
+        "self-cost",
+        "consumed-on-use"
+      ]
+    },
+    {
+      "id": "debuff_stagger",
+      "name": "Staggered",
+      "description": "The argument lands where footing was. One whole turn simply does not happen for them.",
+      "type": "debuff",
+      "category": "control",
+      "duration": 1,
+      "stacking": "duration",
+      "tier": 3,
+      "payload": {
+        "actionRestriction": {
+          "skipTurn": true
+        }
+      },
+      "addedIn": "2026-07-05",
+      "tags": [
+        "fate-engine",
+        "hard-control"
+      ]
     }
   ]
 }

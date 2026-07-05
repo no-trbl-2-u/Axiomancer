@@ -28,7 +28,7 @@ import type { Character } from '../Character/types';
 import type { Enemy } from '../Enemy/types';
 import { getCardById } from '../Cards/cards.library';
 import { executeSkill, calculateSkillDamage } from '../Cards/skill.engine';
-import type { Card, CombatResources } from '../Cards/types';
+import type { Card, CardRider, CardSpecialMechanic, CombatResources } from '../Cards/types';
 import type { CombatState, Stance } from './types';
 import { applyDamage, heal, isDefeated } from './health';
 import {
@@ -36,20 +36,21 @@ import {
     getThornsReflect, getDamageTakenMultiplier, getPendingDotTotal, consumeDotEffects,
     getDistinctDebuffCount, getDistinctControlCount,
     getHealingReceivedMult, getOutgoingDamageMult, decayDotsOnHeal, consumeEffect,
-    hasPayloadFlag,
+    hasPayloadFlag, getStanceVulnMult,
     RUPTURE_BURST_CAP, COMPOUND_COUNT_CAP, DISRUPT_DENY_AT, EXECUTE_DAMAGE_FRACTION,
     AMPLIFY_BURST_CAP,
 } from './effects';
 import {
     TURN_DICE_COUNT, rollTurnDice, dieHasStance,
     combatDieCanPower, availableDiceFor, spendDice, refreshOneDie, availableDieCount,
-    hasRerollableDice, rollPermanentBonusDice, MAX_PERMANENT_WILD_DICE,
+    hasRerollableDice, rerollSpentDice, rollPermanentBonusDice, MAX_PERMANENT_WILD_DICE,
+    RESERVE_MAX, ripenReserve,
 } from './combat.dice';
 import {
     COMBAT_HAND_SIZE, buildCombatDeck, drawCombatCards, shuffleCombatDeck,
 } from './combat.deck';
 import {
-    toCombatCard, cardStanceColor, effectImpact,
+    toCombatCard, cardStanceColor, effectImpact, riderText,
 } from './combat.cards';
 import { recordAttribution } from './combat.attribution';
 import { canAct, getActiveEffectModifiers, getActiveDotTotal } from './effect-modifiers';
@@ -164,6 +165,19 @@ export const THREAT_ESCALATION_BOSS_MULT = 1.6;
  */
 export const READ_ADVANTAGE_INTENSITY_BONUS = 1;
 export const READ_DISADVANTAGE_DURATION_PENALTY = 1;
+
+// ── Fate Engine P1 (spec 31 §1) — the dice get a second read ─────────────────
+
+/** R2 — each pip on a spent Reserve die adds this much intensity to the status
+ *  the play lands (the ripened die hits harder). Tuned by /combat-tuning. */
+export const PIP_INTENSITY_BONUS = 1;
+/** R2 — each pip on a spent Reserve die adds this much Guard on a defend card. */
+export const PIP_GUARD_BONUS = 2;
+/** R7 — a color-matched (or Wild) die on a STATUS card extends the landed
+ *  status by this many turns. Strike/defend keep the flat +3 damage bonus. */
+export const COLOR_MATCH_STATUS_DURATION_BONUS = 1;
+/** R4 — the universal once-per-turn FATE TAP's Conviction payout. */
+export const FATE_TAP_CONVICTION = 1;
 
 const EMPTY_RESOURCES: CombatResources = { heart: 0, body: 0, mind: 0, fallacy: 0, paradox: 0 };
 const defaultRng = (): number => getRng().random();
@@ -365,8 +379,9 @@ export function startTurn(
         dice[0] = { ...dice[0], color: 'wild', state: 'available' };
         player = consumeEffect(player, clarityId);
     }
-    // Spec 26b tuning §3 — a carried (unspent) die from last turn isn't wasted:
-    // it takes one slot in the new pool so a good die persists.
+    // Fate Engine P1 — the invisible `carriedDie` slot-steal is gone; an
+    // unspent die now BANKS to the visible Reserve at `endTurn` (R2). A stale
+    // carriedDie from an old state literal still honors the legacy behavior.
     let carriedDie = state.carriedDie;
     if (carriedDie) {
         dice = dice.slice();
@@ -399,11 +414,19 @@ function clampPlayerRead(player: Character, read: CombatReadResult): CombatReadR
 }
 
 /**
- * Spec 26b §1 — drafts one of this turn's two dice as the STANCE. The unpicked
- * die converts to +1 Conviction; winning the hidden-stance read grants a bonus
- * Conviction and reveals the phase stance.
+ * Spec 26b §1 + Fate Engine P1 — drafts one of this turn's dice as the STANCE.
+ * The unpicked die is the OMEN (R5): if its color stance-beats the enemy's
+ * CURRENT hidden stance, it scouts forward — the NEXT phase's stance is
+ * revealed. Then it either BURNS for +1 Conviction (default) or BANKS to the
+ * Reserve at 0 pips (R2/R3, `opts.bankUnpicked`, when a slot is free) where it
+ * ripens +1 pip per threat phase survived. Winning the hidden-stance read
+ * grants a bonus Conviction and reveals the current phase stance.
  */
-export function draftStanceDie(state: CombatEncounterState, dieId: string): CombatTransition {
+export function draftStanceDie(
+    state: CombatEncounterState,
+    dieId: string,
+    opts: { bankUnpicked?: boolean } = {},
+): CombatTransition {
     if (state.phase !== 'phase-play') return { state, events: [] };
     if (state.draftedDieId !== null) return { state, events: [] };
     const drafted = state.dice.find(d => d.id === dieId);
@@ -413,45 +436,150 @@ export function draftStanceDie(state: CombatEncounterState, dieId: string): Comb
     const enemyStance = currentPhaseStance(state);
     const read = clampPlayerRead(state.player, resolveRead(drafted.color, enemyStance));
 
-    // The drafted die becomes the single available power source; an X draft stays
-    // locked (can't power). The unpicked die converts to Conviction.
-    const dice = state.dice.map(d => {
-        if (d.id === dieId) return { ...d, state: drafted.color === 'x' ? ('locked' as const) : ('available' as const) };
-        return { ...d, state: 'spent' as const }; // unpicked → consumed for Conviction
-    });
+    const unpicked = state.dice.filter(d => d.id !== dieId);
+    let reserve = (state.reserve ?? []).slice();
+    let resonance = { heart: 0, body: 0, mind: 0, ...(state.resonance ?? {}) };
+    let revealedStances = state.revealedStances;
 
-    let conviction = Math.min(CONVICTION_CAP, state.conviction + CONVICTION_PER_UNPICKED_DIE);
+    // R5 — THE OMEN: an unpicked colored die that beats the CURRENT stance
+    // scouts the NEXT phase. Fogged while the player is sensory-nulled.
+    const idx = Math.min(state.currentPhaseIndex, state.threatPhases.length - 1);
+    const nextIdx = Math.min(idx + 1, state.threatPhases.length - 1);
+    const omen = unpicked.find(d => dieHasStance(d.color) && stanceBeats(d.color as Stance, enemyStance));
+    if (omen && nextIdx !== idx && !revealedStances.includes(nextIdx)
+        && !hasPayloadFlag(state.player, 'blocksAdvantage')) {
+        revealedStances = [...revealedStances, nextIdx];
+        events.push({
+            kind: 'omen-revealed', dieColor: omen.color,
+            phaseIndex: nextIdx, stance: state.threatPhases[nextIdx].enemyStance,
+        });
+    }
+
+    // R2/R3 — BANK-OR-BURN the unpicked die. Banking takes the first colored/
+    // wild unpicked die into the Reserve (0 pips) INSTEAD of the +1 Conviction;
+    // burning (default) keeps the Spec 26b Conviction economy byte-identical.
+    // Either way, every colored unpicked die feeds the Resonance tally (R1).
+    let banked: CombatManaDie | null = null;
+    if (opts.bankUnpicked && reserve.length < RESERVE_MAX) {
+        const candidate = unpicked.find(d => d.color !== 'x');
+        if (candidate) {
+            banked = { ...candidate, state: 'available', pips: 0 };
+            reserve = [...reserve, banked];
+            events.push({ kind: 'die-banked', dieId: banked.id, color: banked.color, pips: 0 });
+        }
+    }
+    for (const d of unpicked) {
+        if (dieHasStance(d.color)) {
+            const color = d.color as 'heart' | 'body' | 'mind';
+            resonance = { ...resonance, [color]: resonance[color] + 1 };
+            events.push({ kind: 'resonance-gained', color, total: resonance[color] });
+        }
+    }
+
+    // The drafted die becomes the single tray power source; an X draft stays
+    // locked (can't power a card, but CAN be fate-tapped — R4). Banked die
+    // leaves the tray; unpicked COLORED dice are consumed; unpicked X dice stay
+    // LOCKED — dead faces remain on the table for fate cards + the universal tap.
+    const dice = state.dice
+        .filter(d => d.id !== banked?.id)
+        .map(d => {
+            if (d.id === dieId) return { ...d, state: drafted.color === 'x' ? ('locked' as const) : ('available' as const) };
+            if (d.color === 'x') return d;
+            return { ...d, state: 'spent' as const };
+        });
+
+    let conviction = state.conviction;
     events.push({ kind: 'die-drafted', dieId, color: drafted.color, read });
-    events.push({ kind: 'conviction-gained', amount: CONVICTION_PER_UNPICKED_DIE, total: conviction, reason: 'unpicked-die' });
+    if (!banked) {
+        conviction = Math.min(CONVICTION_CAP, conviction + CONVICTION_PER_UNPICKED_DIE);
+        events.push({ kind: 'conviction-gained', amount: CONVICTION_PER_UNPICKED_DIE, total: conviction, reason: 'unpicked-die' });
+    }
     if (read === 'advantage') {
         conviction = Math.min(CONVICTION_CAP, conviction + CONVICTION_READ_WIN_BONUS);
         events.push({ kind: 'conviction-gained', amount: CONVICTION_READ_WIN_BONUS, total: conviction, reason: 'read-win' });
     }
 
     // Reveal the phase's hidden stance on first contest.
-    const idx = Math.min(state.currentPhaseIndex, state.threatPhases.length - 1);
-    const revealedStances = state.revealedStances.includes(idx) ? state.revealedStances : [...state.revealedStances, idx];
-    if (!state.revealedStances.includes(idx)) {
+    if (!revealedStances.includes(idx)) {
+        revealedStances = [...revealedStances, idx];
         events.push({ kind: 'stance-revealed', phaseIndex: idx, stance: enemyStance });
     }
     events.push({ kind: 'read-result', stance: drafted.color, enemyStance, result: read });
 
     const next: CombatEncounterState = {
-        ...state, dice, draftedDieId: dieId, conviction, revealedStances, lastRead: read,
+        ...state, dice, reserve, resonance, draftedDieId: dieId, conviction, revealedStances, lastRead: read,
         // A fresh draft starts a fresh combo chain (Spec 26b tuning §3).
         chainEffectIds: [],
     };
     return { state: withLog(next, events), events };
 }
 
-/** Spec 26b §1 — ends the turn: clears the draft so the next turn can roll. An
- *  unspent (still-available, non-X) drafted die is carried into the next roll. */
+/** Spec 26b §1 + Fate Engine P1 — ends the turn: clears the draft so the next
+ *  turn can roll. An unspent (still-available, non-X) drafted die BANKS to the
+ *  Reserve when a slot is free (R2 — the visible successor of the invisible
+ *  `carriedDie`), else it burns for +1 Conviction. */
 export function endTurn(state: CombatEncounterState): CombatTransition {
     if (state.phase !== 'phase-play') return { state, events: [] };
+    const events: CombatEvent[] = [];
     const d = draftedDie(state);
-    const carriedDie = d && d.state === 'available' && d.color !== 'x' ? d.color : null;
-    const next: CombatEncounterState = { ...state, dice: [], draftedDieId: null, lastRead: 'none', carriedDie };
-    return { state: next, events: [] };
+    let reserve = state.reserve ?? [];
+    let conviction = state.conviction;
+    if (d && d.state === 'available' && d.color !== 'x') {
+        if (reserve.length < RESERVE_MAX) {
+            reserve = [...reserve, { ...d, pips: 0 }];
+            events.push({ kind: 'die-banked', dieId: d.id, color: d.color, pips: 0 });
+        } else {
+            conviction = Math.min(CONVICTION_CAP, conviction + CONVICTION_PER_UNPICKED_DIE);
+            events.push({ kind: 'conviction-gained', amount: CONVICTION_PER_UNPICKED_DIE, total: conviction, reason: 'unpicked-die' });
+        }
+    }
+    const next: CombatEncounterState = {
+        ...state, dice: [], reserve, conviction, draftedDieId: null, lastRead: 'none', carriedDie: null,
+    };
+    return { state: withLog(next, events), events };
+}
+
+/**
+ * Fate Engine P1 R4 — the universal FATE TAP: once per turn, tap a dead X die
+ * for "+1 tick on one enemy DoT" (the strongest — even dead fate erodes) or
+ * +1 Conviction. The tapped die is consumed. No-op outside phase-play, when
+ * already tapped this turn, or when the id is not a live X die.
+ */
+export function tapFateDie(
+    state: CombatEncounterState,
+    dieId: string,
+    choice: 'dot-tick' | 'conviction',
+): CombatTransition {
+    if (state.phase !== 'phase-play' || state.finalOutcome) return { state, events: [] };
+    if (state.fateTappedTurn === state.turn) return { state, events: [] };
+    const die = state.dice.find(d => d.id === dieId && d.color === 'x' && d.state !== 'spent');
+    if (!die) return { state, events: [] };
+
+    const events: CombatEvent[] = [];
+    let enemy = state.enemy;
+    let conviction = state.conviction;
+    if (choice === 'conviction') {
+        conviction = Math.min(CONVICTION_CAP, conviction + FATE_TAP_CONVICTION);
+        events.push({ kind: 'fate-tapped', dieId, choice, amount: FATE_TAP_CONVICTION });
+        events.push({ kind: 'conviction-gained', amount: FATE_TAP_CONVICTION, total: conviction, reason: 'effect' });
+    } else {
+        const ticks = getActiveDotTotal(enemy.effects, state.round).perEffect;
+        const strongest = ticks.reduce<typeof ticks[number] | null>(
+            (best, t) => (best === null || t.amount > best.amount ? t : best), null);
+        if (!strongest) {
+            const fizzle: CombatEvent[] = [{ kind: 'effect-fizzled', cardId: '', effectId: '', message: 'no DoT on the enemy to advance' }];
+            return { state: withLog(state, fizzle), events: fizzle };
+        }
+        enemy = applyDamage(enemy, strongest.amount);
+        events.push({ kind: 'fate-tapped', dieId, choice, amount: strongest.amount });
+        events.push({ kind: 'dot-tick', effectId: strongest.effectId, label: strongest.label, amount: strongest.amount, target: 'enemy' });
+    }
+    const next: CombatEncounterState = {
+        ...state, enemy, conviction,
+        dice: state.dice.map(d => (d.id === dieId ? { ...d, state: 'spent' as const } : d)),
+        fateTappedTurn: state.turn,
+    };
+    return checkImmediateOutcome(withLog(next, events), events);
 }
 
 /** The drafted stance die for this turn (or null). */
@@ -628,36 +756,60 @@ function playBottomAction(
     state: CombatEncounterState,
     uid: string,
     card: CombatCard,
-    _dieId: string | undefined,
+    dieId: string | undefined,
     _rng: () => number,
 ): CombatTransition {
     const skill = card.skillId ? lookupSkill(card.skillId) : undefined;
     if (!skill) return { state, events: [] };
 
-    // 1. A die must be drafted this turn, and it must be able to power a card.
+    // 1. Resolve the POWERING die — Fate Engine P1 R8: the dieId the player
+    //    dragged is HONORED. It may name the drafted die (default when absent),
+    //    a banked Reserve die (R2), or — for `fate` cards only — a locked X die
+    //    in the tray (R4). Anything else is an explicit fizzle.
     const drafted = draftedDie(state);
-    if (!drafted) {
-        const events: CombatEvent[] = [{ kind: 'effect-fizzled', cardId: card.id, effectId: '', message: 'draft a stance die first' }];
-        return { state: withLog(state, events), events };
-    }
-    if (drafted.state !== 'available' || drafted.color === 'x') {
-        const events: CombatEvent[] = [{ kind: 'effect-fizzled', cardId: card.id, effectId: '', message: 'the drafted die is spent or blocked — end the turn' }];
-        return { state: withLog(state, events), events };
+    const reserveIn = state.reserve ?? [];
+    let powering: CombatManaDie | null = null;
+    let poweringSource: 'drafted' | 'reserve' | 'fate-x' = 'drafted';
+    if (dieId === undefined || dieId === drafted?.id) {
+        if (!drafted) {
+            const events: CombatEvent[] = [{ kind: 'effect-fizzled', cardId: card.id, effectId: '', message: 'draft a stance die first' }];
+            return { state: withLog(state, events), events };
+        }
+        if (drafted.state !== 'available' || drafted.color === 'x') {
+            const events: CombatEvent[] = [{ kind: 'effect-fizzled', cardId: card.id, effectId: '', message: 'the drafted die is spent or blocked — end the turn' }];
+            return { state: withLog(state, events), events };
+        }
+        powering = drafted;
+    } else {
+        const banked = reserveIn.find(d => d.id === dieId);
+        const trayX = state.dice.find(d => d.id === dieId && d.color === 'x');
+        if (banked) {
+            powering = banked;
+            poweringSource = 'reserve';
+        } else if (trayX && skill.fate && trayX.state !== 'spent') {
+            powering = trayX;
+            poweringSource = 'fate-x';
+        } else {
+            const events: CombatEvent[] = [{ kind: 'effect-fizzled', cardId: card.id, effectId: '', message: 'that die cannot power this card' }];
+            return { state: withLog(state, events), events };
+        }
     }
 
-    // 2. The read (drafted die vs hidden enemy stance) + color-match bonus (§1, §3).
-    //    A WILD die has no stance of its own, so it ADOPTS the powered card's
-    //    stance for the read (contesting the enemy like a colored die); on a GOLD
-    //    (rare) card the wild die always reads advantage.
+    // 2. The read + color-match. The read belongs to the TURN's draft contest
+    //    (state.lastRead); a WILD powering die re-reads by adopting the card's
+    //    stance (gold: always advantage); a fate-X play has no stance → none.
     const enemyStance = currentPhaseStance(state);
-    const read: CombatReadResult = drafted.color === 'wild'
-        ? (card.rarity === 'gold' ? 'advantage' : clampPlayerRead(state.player, resolveRead(card.stance as CombatDieColor, enemyStance)))
-        : state.lastRead;
+    const read: CombatReadResult = poweringSource === 'fate-x'
+        ? 'none'
+        : powering.color === 'wild'
+            ? (card.rarity === 'gold' ? 'advantage' : clampPlayerRead(state.player, resolveRead(card.stance as CombatDieColor, enemyStance)))
+            : state.lastRead;
     const mult = READ_DAMAGE_MULT[read];
-    const colorMatch = drafted.color === 'wild' || drafted.color === card.stance;
+    const colorMatch = powering.color === 'wild' || powering.color === card.stance;
     const advantage = readToAdvantage(read);
+    const poweringPips = powering.pips ?? 0;
 
-    const events: CombatEvent[] = [{ kind: 'card-played', cardId: card.id, useBottom: true, dieId: drafted.id, advantage, colorMatch }];
+    const events: CombatEvent[] = [{ kind: 'card-played', cardId: card.id, useBottom: true, dieId: powering.id, advantage, colorMatch }];
 
     // 3. Execute the skill (unchanged engine) against a shim.
     const before = intensityMap(state.enemy.effects);
@@ -668,7 +820,11 @@ function playBottomAction(
     // VULNERABLE — the foe's outgoing-damage multiplier, read from state.enemy
     // BEFORE this card's own debuff lands (the set-up-then-swing beat). Exactly 1
     // when the foe carries no marker, so every pre-0.34.0 strike is byte-identical.
-    const vulnMult = getDamageTakenMultiplier(state.enemy);
+    // Composed with the STANCE-KEYED vulnerability (P1 #17): a foe marked
+    // `damageTakenMultForStance` takes extra only from plays powered by that
+    // color die — a debuff that tells the player what to DRAFT.
+    const vulnMult = getDamageTakenMultiplier(state.enemy)
+        * getStanceVulnMult(state.enemy, powering.color);
     // The skill's IMMEDIATE strike (basePower HP damage) — the WEAK basic baseline,
     // scaled by DIRECT_DAMAGE_WEIGHT, the read (advantage/disadvantage), VULNERABLE,
     // the player's own outgoing-damage statuses (SEPTIC / REGRESS FATIGUE — real
@@ -735,6 +891,73 @@ function playBottomAction(
     if (scaledStrike > 0) {
         attribution = recordAttribution(attribution, card.id, card.name, null, scaledStrike);
         events.push({ kind: 'damage-dealt', cardId: card.id, target: 'enemy', amount: scaledStrike });
+    }
+
+    // ── Fate Engine P1 — resonance, thresholds, die riders, pips (spec 31 §1) ──
+    // Spending the powering die feeds the RESONANCE tally (R1): its own color,
+    // or the card's stance for a Wild; a fate-X feeds nothing.
+    let resonance = { heart: 0, body: 0, mind: 0, ...(state.resonance ?? {}) };
+    let conviction = state.conviction;
+    const resonanceColor: 'heart' | 'body' | 'mind' | null =
+        dieHasStance(powering.color) ? (powering.color as 'heart' | 'body' | 'mind')
+            : powering.color === 'wild' && dieHasStance(card.stance) ? (card.stance as 'heart' | 'body' | 'mind')
+                : null;
+    if (resonanceColor) {
+        resonance = { ...resonance, [resonanceColor]: resonance[resonanceColor] + 1 };
+        events.push({ kind: 'resonance-gained', color: resonanceColor, total: resonance[resonanceColor] });
+    }
+    // Collect this play's fired riders: THRESHOLD (tally ≥ count — checked with
+    // this spend already counted: one spend, two payoffs), DIE BONUS (powering
+    // color matches the card's line), and FATE (powered by an X die).
+    const firedRiders: CardRider[] = [];
+    if (skill.threshold && resonance[skill.threshold.color] >= skill.threshold.count) {
+        firedRiders.push(skill.threshold.rider);
+        events.push({
+            kind: 'threshold-fired', cardId: card.id, color: skill.threshold.color,
+            count: skill.threshold.count, riderText: riderText(skill.threshold.rider),
+        });
+    }
+    if (skill.dieBonus) {
+        const on = skill.dieBonus.onColor;
+        const hit = on === 'match' ? colorMatch
+            : on === 'off' ? (dieHasStance(powering.color) && powering.color !== card.stance)
+                : powering.color === on;
+        if (hit) {
+            firedRiders.push(skill.dieBonus.rider);
+            events.push({ kind: 'die-bonus-fired', cardId: card.id, riderText: riderText(skill.dieBonus.rider) });
+        }
+    }
+    if (skill.fate && poweringSource === 'fate-x') {
+        firedRiders.push(skill.fate.rider);
+        const recoil = skill.fate.recoilHp ?? 0;
+        if (recoil > 0) player = applyDamage(player, recoil);
+        events.push({ kind: 'fate-powered', cardId: card.id, dieId: powering.id, recoil, riderText: riderText(skill.fate.rider) });
+    }
+    // Landed-status adjustments in one pass, all REAL units: rider intensity /
+    // duration bonuses, RIPENED pips (+1 intensity per pip on a non-defend play,
+    // R2), and the color-match +1 duration on status cards (R7).
+    const isDefendPlay = card.verbClass === 'defend';
+    const bonusIntensity = firedRiders.reduce((n, r) => n + (r.bonusIntensity ?? 0), 0)
+        + (isDefendPlay ? 0 : poweringPips * PIP_INTENSITY_BONUS);
+    const bonusDuration = firedRiders.reduce((n, r) => n + (r.bonusDuration ?? 0), 0)
+        + (colorMatch && card.effectKind !== 'none' ? COLOR_MATCH_STATUS_DURATION_BONUS : 0);
+    if (bonusIntensity > 0 || bonusDuration > 0) {
+        let touched = false;
+        enemy = {
+            ...enemy,
+            effects: enemy.effects.map(a => {
+                if ((before[a.effectId] ?? 0) >= a.intensity) return a;
+                touched = true;
+                return {
+                    ...a,
+                    intensity: Math.min(MAX_EFFECT_INTENSITY, a.intensity + bonusIntensity),
+                    remainingDuration: a.remainingDuration === -1 ? -1 : a.remainingDuration + bonusDuration,
+                };
+            }),
+        };
+        if (touched && poweringPips > 0 && !isDefendPlay) {
+            events.push({ kind: 'pips-cashed', cardId: card.id, pips: poweringPips, bonus: 'intensity', amount: poweringPips * PIP_INTENSITY_BONUS });
+        }
     }
 
     // ── 0.34.0 card mechanics — RUPTURE / COMPOUND / EXECUTE / SIPHON ─────────
@@ -836,6 +1059,75 @@ function playBottomAction(
             });
         }
     }
+    // REACT (Fate Engine P1, spec 31 §3.3) — if the foe carries BOTH reagents at
+    // minIntensity+, CONSUME them and detonate on the mechanic-damage path
+    // (never strike-weighted), optionally leaving a product status. A fired
+    // REACT always refreshes the powering die (the crescendo keeps the turn alive).
+    let reactFired = false;
+    const reactMech = mechs.find(m => m.kind === 'react') as
+        Extract<CardSpecialMechanic, { kind: 'react' }> | undefined;
+    if (reactMech) {
+        const a = state.enemy.effects.find(e => e.effectId === reactMech.a && e.intensity >= reactMech.minIntensity);
+        const b = state.enemy.effects.find(e => e.effectId === reactMech.b && e.intensity >= reactMech.minIntensity);
+        if (a && b) {
+            reactFired = true;
+            enemy = { ...enemy, effects: enemy.effects.filter(e => e.effectId !== reactMech.a && e.effectId !== reactMech.b) };
+            const burst = Math.round(reactMech.burstPerIntensity * (a.intensity + b.intensity) * mult * vulnMult);
+            if (burst > 0) {
+                enemy = applyDamage(enemy, burst);
+                mechanicDamage += burst;
+                directDamage += burst;
+                attribution = recordAttribution(attribution, card.id, card.name, null, burst);
+            }
+            if (reactMech.product) {
+                const def = lookupEffectDef(reactMech.product.effectId);
+                if (def) {
+                    const applied = applyEffect(enemy.effects, def, state.round, {
+                        intensityDelta: reactMech.product.intensity,
+                        durationMode: 'additive',
+                        durationDelta: reactMech.product.duration,
+                        sourceId: card.id,
+                    });
+                    enemy = { ...enemy, effects: applied.activeEffects };
+                }
+            }
+            events.push({ kind: 'react-detonated', cardId: card.id, amount: burst, consumed: [reactMech.a, reactMech.b] });
+        }
+    }
+    // Die-manipulation verbs that don't touch the powering die (P1 §4.1).
+    let reserve = reserveIn;
+    if (mechs.some(m => m.kind === 'reroll_spent') && hasRerollableDice(state.dice)) {
+        const rerolled = rerollSpentDice(state.dice, _rng);
+        state = { ...state, dice: rerolled.dice };
+        events.push({ kind: 'dice-rolled', dice: rerolled.dice });
+    }
+    const forgeMech = mechs.find(m => m.kind === 'create_temporary_die') as
+        Extract<CardSpecialMechanic, { kind: 'create_temporary_die' }> | undefined;
+    if (forgeMech) {
+        const forged: CombatManaDie = {
+            id: `forge-${state.turn}-${state.log.length}`, color: forgeMech.color,
+            state: 'available', temporary: true, pips: 0,
+        };
+        if (reserve.length < RESERVE_MAX) {
+            reserve = [...reserve, forged];
+            events.push({ kind: 'die-forged', dieId: forged.id, color: forged.color, destination: 'reserve' });
+        } else {
+            conviction = Math.min(CONVICTION_CAP, conviction + 1);
+            events.push({ kind: 'die-forged', dieId: forged.id, color: forged.color, destination: 'conviction' });
+        }
+    }
+    const pipGrant = mechs.find(m => m.kind === 'grant_pip') as
+        Extract<CardSpecialMechanic, { kind: 'grant_pip' }> | undefined;
+    if (pipGrant && reserve.length > 0) {
+        for (let i = 0; i < pipGrant.count; i++) {
+            const r = ripenReserve(reserve);
+            reserve = r.reserve;
+            for (const id of r.ripenedIds) {
+                events.push({ kind: 'die-ripened', dieId: id, pips: reserve.find(d => d.id === id)?.pips ?? 0 });
+            }
+        }
+    }
+
     // Offensive status ids this card landed on the enemy — gates the combo loop on
     // VARIETY (a status new to this chain refreshes the die; a repeat spends it).
     const landedOffensiveIds: string[] = [];
@@ -876,28 +1168,126 @@ function playBottomAction(
         }
     }
 
-    // 5. Status-combo loop: the drafted die REFRESHES (chain another card) ONLY
-    //    when this card landed a status NEW to the current chain — a long "big
-    //    turn" comes from playing DIFFERENT statuses. Re-applying one (or landing
-    //    nothing) spends the die and ends the turn.
+    // ── Fate Engine P1 — remaining rider payloads, all exact units ────────────
+    let revealedStances = state.revealedStances;
+    let hand = state.hand;
+    let drawPile = state.drawPile;
+    let discard = state.discard;
+    let riderGuard = 0;
+    let riderRefresh = false;
+    for (const r of firedRiders) {
+        if (r.chipHp) {
+            enemy = applyDamage(enemy, r.chipHp);
+            mechanicDamage += r.chipHp;
+            directDamage += r.chipHp;
+            attribution = recordAttribution(attribution, card.id, card.name, null, r.chipHp);
+            events.push({ kind: 'damage-dealt', cardId: card.id, target: 'enemy', amount: r.chipHp });
+        }
+        if (r.guard) riderGuard += r.guard;
+        if (r.conviction) conviction = Math.min(CONVICTION_CAP, conviction + r.conviction);
+        if (r.refreshDie) riderRefresh = true;
+        if (r.revealStance) {
+            const nIdx = Math.min(state.currentPhaseIndex + 1, state.threatPhases.length - 1);
+            if (!revealedStances.includes(nIdx)) {
+                revealedStances = [...revealedStances, nIdx];
+                events.push({ kind: 'stance-revealed', phaseIndex: nIdx, stance: state.threatPhases[nIdx].enemyStance });
+            }
+        }
+        if (r.tickAllDots) {
+            const ticks = getActiveDotTotal(enemy.effects, state.round);
+            if (ticks.total > 0) {
+                enemy = applyDamage(enemy, ticks.total);
+                directDamage += ticks.total;
+                attribution = recordAttribution(attribution, card.id, card.name, null, ticks.total);
+                for (const t of ticks.perEffect) {
+                    events.push({ kind: 'dot-tick', effectId: t.effectId, label: t.label, amount: t.amount, target: 'enemy' });
+                }
+            }
+        }
+        if (r.cleanse) {
+            let remaining = r.cleanse;
+            player = {
+                ...player,
+                effects: player.effects.filter(ae => {
+                    if (remaining > 0 && lookupEffectDef(ae.effectId)?.type === 'debuff') {
+                        remaining -= 1;
+                        return false;
+                    }
+                    return true;
+                }),
+            };
+        }
+        if (r.healHp) {
+            const healAmt = Math.round(r.healHp * getHealingReceivedMult(state.player));
+            if (healAmt > 0) {
+                player = heal(player, healAmt);
+                events.push({ kind: 'damage-dealt', cardId: card.id, target: 'self', amount: -healAmt });
+            }
+        }
+        if (r.drawCards) {
+            const room = Math.max(0, COMBAT_HAND_SIZE - hand.length);
+            const n = Math.min(r.drawCards, room);
+            if (n > 0) {
+                const draw = drawCombatCards(drawPile, discard, state.deck, n, _rng);
+                drawPile = draw.drawPile;
+                discard = draw.discard;
+                hand = [...hand, ...draw.drawn.map((cardId, i) => ({ uid: `cr${state.log.length + i}-${uid}`, cardId }))];
+                events.push({ kind: 'hand-drawn', cards: draw.drawn });
+            }
+        }
+    }
+
+    // 5. Die spend / refresh — the powering die's fate. The variety chain keeps
+    //    the turn alive on a NEW status (unchanged, R9); a fired REACT or a
+    //    refresh rider/mechanic always refreshes; CONVERT returns it as WILD;
+    //    BANK_SPENT_DIE parks it in the Reserve instead of spending.
     const chainBefore = state.chainEffectIds ?? [];
     const newChainIds = landedOffensiveIds.filter(id => !chainBefore.includes(id));
     const landedNewDistinct = newChainIds.length > 0;
+    const convertMech = mechs.some(m => m.kind === 'convert_die_color');
+    const bankSpentMech = mechs.some(m => m.kind === 'bank_spent_die');
+    const refreshed = (landedOnEnemy && landedNewDistinct) || reactFired || riderRefresh
+        || mechs.some(m => m.kind === 'refresh_die') || convertMech;
     let dice = state.dice;
-    if (landedOnEnemy && landedNewDistinct) {
-        events.push({ kind: 'die-refreshed', dieId: drafted.id, color: drafted.color });
+    if (poweringSource === 'reserve') {
+        if (refreshed) {
+            // Stays banked; its pips were cashed by this play.
+            reserve = reserve.map(d => (d.id === powering.id ? { ...d, pips: 0 } : d));
+            events.push({ kind: 'die-refreshed', dieId: powering.id, color: powering.color });
+        } else {
+            reserve = reserve.filter(d => d.id !== powering.id);
+            events.push({ kind: 'die-spent', dieId: powering.id, color: powering.color });
+        }
+    } else if (poweringSource === 'fate-x') {
+        dice = dice.map(d => (d.id === powering.id ? { ...d, state: 'spent' as const } : d));
+        events.push({ kind: 'die-spent', dieId: powering.id, color: powering.color });
+    } else if (convertMech) {
+        // "Still your die?" — the spent die returns refreshed as WILD.
+        dice = dice.map(d => (d.id === powering.id ? { ...d, color: 'wild' as const, state: 'available' as const } : d));
+        events.push({ kind: 'die-converted', dieId: powering.id, color: 'wild' });
+    } else if (bankSpentMech && reserve.length < RESERVE_MAX) {
+        dice = spendDice(dice, [powering.id]);
+        reserve = [...reserve, { ...powering, state: 'available', pips: 0 }];
+        events.push({ kind: 'die-banked', dieId: powering.id, color: powering.color, pips: 0 });
+    } else if (refreshed) {
+        events.push({ kind: 'die-refreshed', dieId: powering.id, color: powering.color });
     } else {
-        dice = spendDice(state.dice, [drafted.id]);
-        events.push({ kind: 'die-spent', dieId: drafted.id, color: drafted.color });
+        dice = spendDice(dice, [powering.id]);
+        events.push({ kind: 'die-spent', dieId: powering.id, color: powering.color });
     }
 
     // Defense card → GUARD: a shield vs the enemy's NEXT telegraphed threat,
     // read-scaled (advantage powers a bigger brace) + the color-match bonus, so it
-    // scales like the immediate strike. Absorbed in `resolveThreatPhase`.
+    // scales like the immediate strike. Ripened pips brace harder (+2 Guard per
+    // pip, R2). Absorbed in `resolveThreatPhase`.
     const guardMech = (skill.specialMechanics ?? []).find(m => m.kind === 'guard') as { amount: number } | undefined;
-    const guardGain = guardMech
+    const pipGuard = isDefendPlay ? poweringPips * PIP_GUARD_BONUS : 0;
+    if (pipGuard > 0) {
+        events.push({ kind: 'pips-cashed', cardId: card.id, pips: poweringPips, bonus: 'guard', amount: pipGuard });
+    }
+    const guardGain = (guardMech
         ? Math.max(1, Math.round(guardMech.amount * mult)) + (colorMatch ? COLOR_MATCH_DAMAGE_BONUS : 0)
-        : 0;
+        : 0) + riderGuard + pipGuard;
     // BARRIER — a STACKING, persistent soak (distinct from one-shot guard); read-scaled.
     const barrierMech = mechs.find(m => m.kind === 'barrier') as { kind: 'barrier'; amount: number } | undefined;
     const barrierGain = barrierMech
@@ -913,7 +1303,8 @@ function playBottomAction(
         : state.riposte;
 
     let next: CombatEncounterState = {
-        ...state, player, enemy, dice, combatResources, attribution,
+        ...state, player, enemy, dice, reserve, resonance, conviction,
+        revealedStances, hand, drawPile, discard, combatResources, attribution,
         chainEffectIds: [...chainBefore, ...newChainIds],
         guard: (state.guard ?? 0) + guardGain,
         barrier: (state.barrier ?? 0) + barrierGain,
@@ -1181,6 +1572,17 @@ export function processBetweenPhases(
     // 4. Advance the phase pointer — loop the final phase so the enemy keeps acting.
     const nextIndex = Math.min(state.currentPhaseIndex + 1, state.threatPhases.length - 1);
 
+    // Fate Engine P1 R2 — RESERVE dice RIPEN: +1 pip per threat phase survived
+    // (cap RESERVE_PIP_CAP). Holding a die through a telegraph is the gamble.
+    let reserve = state.reserve ?? [];
+    if (reserve.length > 0) {
+        const ripened = ripenReserve(reserve);
+        reserve = ripened.reserve;
+        for (const id of ripened.ripenedIds) {
+            events.push({ kind: 'die-ripened', dieId: id, pips: reserve.find(d => d.id === id)?.pips ?? 0 });
+        }
+    }
+
     // 5. Draw a fresh hand of 5 (discard the old hand — Hazard's "draw fresh").
     const discardedHand = state.hand.map(h => h.cardId);
     const draw = drawCombatCards(state.drawPile, [...state.discard, ...discardedHand], state.deck, COMBAT_HAND_SIZE, rng);
@@ -1192,6 +1594,7 @@ export function processBetweenPhases(
         ...state,
         player,
         enemy,
+        reserve,
         currentPhaseIndex: nextIndex,
         drawPile: draw.drawPile,
         discard: draw.discard,
@@ -1517,15 +1920,17 @@ export function getDraftedDie(state: CombatEncounterState): CombatManaDie | null
     return draftedDie(state);
 }
 
-/** True when the player has revealed a given phase's hidden enemy stance (§2). */
+/** True when the player has revealed a given phase's hidden enemy stance (§2).
+ *  A MARKED foe (`revealsStance` payload — Fate Engine P1) is public on EVERY
+ *  phase while the mark holds. */
 export function isPhaseStanceRevealed(state: CombatEncounterState, phaseIndex: number): boolean {
-    return state.revealedStances.includes(phaseIndex);
+    return state.revealedStances.includes(phaseIndex) || hasPayloadFlag(state.enemy, 'revealsStance') !== null;
 }
 
 /** The current phase's enemy stance IF revealed, else null (drives the "?" UI). */
 export function revealedCurrentStance(state: CombatEncounterState): Stance | null {
     const idx = Math.min(state.currentPhaseIndex, state.threatPhases.length - 1);
-    return state.revealedStances.includes(idx) ? currentPhaseStance(state) : null;
+    return isPhaseStanceRevealed(state, idx) ? currentPhaseStance(state) : null;
 }
 
 /**
@@ -1647,4 +2052,4 @@ export function projectSiphonHeal(state: CombatEncounterState, card: CombatCard)
 }
 
 /** Re-export for presenters that need to check die affordability directly. */
-export { combatDieCanPower, availableDiceFor, effectImpact, cardStanceColor };
+export { combatDieCanPower, availableDiceFor, effectImpact, cardStanceColor, riderText };

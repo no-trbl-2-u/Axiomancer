@@ -51,21 +51,21 @@ describe('Phase 88 — debuff_strong_poison', () => {
 
 // ─── debuff_burn: 4 dmg/round (start), heart -1 ──────────────────────────────
 
-describe('Phase 88 — debuff_burn', () => {
-    it('deals 4 damage per round at start-of-round', () => {
+describe('canonical debuff_burn (Fate Engine P1 trim — the FUEL DoT)', () => {
+    it('deals 3 damage per round at start-of-round', () => {
         const mods = getActiveEffectModifiers([ae('debuff_burn')]);
-        expect(mods.dotStart).toBe(4);
+        expect(mods.dotStart).toBe(3);
         expect(mods.dotEnd).toBe(0);
     });
 
-    it('also reduces heart by 1', () => {
+    it('carries no legacy stat rider — the identity is the tick + the fuel tag', () => {
         const mods = getActiveEffectModifiers([ae('debuff_burn')]);
-        expect(mods.statFlat.get('heart')).toBe(-1);
+        expect(mods.statFlat.get('heart')).toBeUndefined();
     });
 
     it('scales DoT with intensity', () => {
         const mods = getActiveEffectModifiers([ae('debuff_burn', 3)]);
-        expect(mods.dotStart).toBe(12);
+        expect(mods.dotStart).toBe(9);
     });
 });
 

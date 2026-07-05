@@ -44,7 +44,7 @@ export const SIGNATURE_SKILLS: Record<SignatureSkillId, SignatureSkill> = {
     },
     'sig-overwhelming-argument': {
         id: 'sig-overwhelming-argument', name: 'Overwhelming Argument', kind: 'control', cost: 8,
-        magnitude: 5, effectKind: 'control', effectId: 'debuff_petrify',
+        magnitude: 5, effectKind: 'control', effectId: 'debuff_stagger',
         description: 'Petrify the enemy — it turns to stone and loses its turns while the control holds.',
     },
     'sig-conviction-strike': {

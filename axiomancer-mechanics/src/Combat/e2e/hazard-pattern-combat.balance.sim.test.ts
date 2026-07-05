@@ -53,11 +53,11 @@ registerSandboxCards([{
     scalingStat: 'body',
 }]);
 
-const DOT = ['slippery-slope'];                          // DoT — erodes enemy HP to 0
+const DOT = ['slippery-slope', 'hasty-generalization'];  // DoT pair — ramp poison + burst bleed (Hemorrhage combo)
 const DAMAGE_ONLY = [QA_PURE_STRIKE];                    // pure strike, no status (the weak baseline)
 const MERCY = ['eternal-regress', 'befriend'];           // control + befriend → the spare path
-const CONTROL = ['false-dilemma', 'red-herring'];        // soft-control — roll-penalty debuffs (confusion −5, accuracy_down −3)
-const CONCLUDE = ['slippery-slope'];                     // BODY finisher: stack DoT intensity, then Conclusion Sig detonates
+const CONTROL = ['false-dilemma', 'undistributed-middle']; // soft-control — confusion roll penalties
+const CONCLUDE = ['slippery-slope', 'hasty-generalization']; // BODY finisher: stack DoT intensity, then Conclusion Sig detonates
 
 describe('HP combat — authored enemies are winnable with status play', () => {
     for (const [name, enemy] of [['MournfulGull', MournfulGull], ['HollowEyedBeggar', HollowEyedBeggar]] as const) {

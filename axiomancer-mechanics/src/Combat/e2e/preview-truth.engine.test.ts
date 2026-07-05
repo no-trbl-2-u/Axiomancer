@@ -143,10 +143,12 @@ describe('P0-truth — the card preview is the applied number', () => {
         }
     });
 
-    it('a neutral-read DoT play lands EXACTLY the authored intensity and duration', () => {
-        let s = initializeCombatEncounter(makePlayer(['slippery-slope']), makeEnemy(500, 'body'), ['slippery-slope'], 7);
+    it('a neutral-read, OFF-color DoT play lands EXACTLY the authored intensity and duration', () => {
+        // slippery-slope is a BODY card; a heart die vs a heart-stance enemy is a
+        // neutral read with NO color match → the printed numbers land untouched.
+        let s = initializeCombatEncounter(makePlayer(['slippery-slope']), makeEnemy(500, 'heart'), ['slippery-slope'], 7);
         s = rollEncounterDice(s).state;
-        s = setDice(s, ['body']); // body vs body → neutral read
+        s = setDice(s, ['heart']);
         s = draftStanceDie(s, s.dice[0].id).state;
         const entry = s.hand.find(h => h.cardId === 'slippery-slope')!;
         const after = playCombatCard(s, { uid: entry.uid }, true).state;
@@ -155,6 +157,22 @@ describe('P0-truth — the card preview is the applied number', () => {
         const landed = after.enemy.effects.find(e => e.effectId === authored.effectId)!;
         expect(landed.intensity).toBe(authored.intensity ?? 1);
         expect(landed.remainingDuration).toBe(authored.duration ?? lookupEffect(authored.effectId)!.duration);
+    });
+
+    it('a color-MATCHED status play lands +1 duration (Fate Engine R7 — printed on the card)', () => {
+        // body die vs body-stance enemy: neutral read, color match → +1 turn.
+        let s = initializeCombatEncounter(makePlayer(['slippery-slope']), makeEnemy(500, 'body'), ['slippery-slope'], 7);
+        s = rollEncounterDice(s).state;
+        s = setDice(s, ['body']);
+        s = draftStanceDie(s, s.dice[0].id).state;
+        const entry = s.hand.find(h => h.cardId === 'slippery-slope')!;
+        const after = playCombatCard(s, { uid: entry.uid }, true).state;
+        const authored = cardLibrary.find(c => c.id === 'slippery-slope')!.combatEffects!
+            .find(e => e.appliedTo === 'opponent')!;
+        const landed = after.enemy.effects.find(e => e.effectId === authored.effectId)!;
+        expect(landed.intensity).toBe(authored.intensity ?? 1);
+        expect(landed.remainingDuration).toBe(
+            (authored.duration ?? lookupEffect(authored.effectId)!.duration) + 1);
     });
 
     it('projectCardImpact matches the strike HP the enemy actually loses', () => {
@@ -229,12 +247,12 @@ describe('P0-truth — formerly-inert payloads now bite (threat side)', () => {
     });
 
     it('debuff_despair on the enemy shrinks its self-heal; debuff_isolated denies it outright', () => {
-        const despair = threatState([{ enemyHeal: 10 }], { enemyEffects: [activeEffect('debuff_despair', 2, 4)] });
+        const despair = threatState([{ enemyHeal: 10 }], { enemyEffects: [activeEffect('debuff_despair', 1, 4)] });
         const hurt = { ...despair, enemy: { ...despair.enemy, health: 300 } };
         const healed = resolveThreatPhase(hurt).state;
-        // despair i2 → ×0.7, minus this round's despair DoT ticks on the enemy
+        // canonical despair (-50%/stack) i1 → ×0.5, minus this round's despair DoT ticks
         const dotTick = getActiveDotTotal(hurt.enemy.effects).total;
-        expect(healed.enemy.health).toBe(300 + Math.round(10 * 0.7) - dotTick);
+        expect(healed.enemy.health).toBe(300 + Math.round(10 * 0.5) - dotTick);
 
         const isolated = threatState([{ enemyHeal: 10 }], { enemyEffects: [activeEffect('debuff_isolated', 1, 3)] });
         const hurtIso = { ...isolated, enemy: { ...isolated.enemy, health: 300 } };

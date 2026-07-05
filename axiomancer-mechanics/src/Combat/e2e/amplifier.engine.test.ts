@@ -30,7 +30,7 @@ import type { CombatDieColor, CombatEncounterState } from '../combat.encounter.t
 import type { ActiveEffect } from '../../Effects/types';
 
 const DOT_CARD = 'slippery-slope';          // body, applies bleed DoT
-const AMPLIFY_CARD = 'crescendo-of-suffering'; // heart, AMPLIFY × 1.5
+const AMPLIFY_CARD = 'the-inevitable'; // mind, AMPLIFY × 0.5 (curated keeper)
 
 function makePlayer(skills: string[]): Character {
     const p = deepClone(Player);

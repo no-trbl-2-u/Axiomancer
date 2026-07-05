@@ -173,10 +173,30 @@ export function consumeEffect<T extends Combatant>(bearer: T, effectId: string):
     return { ...bearer, effects: bearer.effects.filter((_, i) => i !== idx) };
 }
 
+/**
+ * Fate Engine P1 (spec 31 §3.1 #17) — STANCE-KEYED VULNERABLE: the extra
+ * multiplier the bearer takes from plays powered by a die of `dieColor` (Wild
+ * matches every stance; X matches none). Composes multiplicatively with the
+ * plain `damageTakenMult` aggregate; clamped to `[1, VULNERABLE_MAX_MULT]`.
+ * Exactly 1 for an unmarked bearer or an un-keyed die. Pure.
+ */
+export function getStanceVulnMult(bearer: Combatant, dieColor: string): number {
+    if (dieColor === 'x') return 1;
+    let mult = 1;
+    for (const ae of bearer.effects) {
+        const keyed = lookupEffect(ae.effectId)?.payload.damageTakenMultForStance;
+        if (!keyed) continue;
+        if (dieColor === 'wild' || dieColor === keyed.stance) {
+            mult += (keyed.mult - 1) * (ae.intensity ?? 1);
+        }
+    }
+    return Math.min(VULNERABLE_MAX_MULT, Math.max(1, mult));
+}
+
 /** True when the bearer carries a given payload flag (P0-truth gate reads). */
 export function hasPayloadFlag(
     bearer: Combatant,
-    flag: 'blocksAdvantage' | 'restrictsSurgeAccess' | 'forcesWeakTierNextPlay' | 'forceWildOnNextDie' | 'nextDotTierUpgrade',
+    flag: 'blocksAdvantage' | 'restrictsSurgeAccess' | 'forcesWeakTierNextPlay' | 'forceWildOnNextDie' | 'nextDotTierUpgrade' | 'revealsStance',
 ): string | null {
     for (const ae of bearer.effects) {
         const p = lookupEffect(ae.effectId)?.payload;

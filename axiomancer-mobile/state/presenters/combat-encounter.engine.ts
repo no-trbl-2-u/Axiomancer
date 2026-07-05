@@ -17,7 +17,7 @@ import {
     getDraftedDie, isPhaseStanceRevealed, cardReadPreview,
     revealedCurrentStance, resolveRead, getSignatureSkill,
     lookupEffect, READ_DAMAGE_MULT, COLOR_MATCH_DAMAGE_BONUS,
-    READ_ADVANTAGE_INTENSITY_BONUS, READ_DISADVANTAGE_DURATION_PENALTY,
+    READ_ADVANTAGE_INTENSITY_BONUS, READ_DISADVANTAGE_DURATION_PENALTY, RESERVE_MAX,
     EXECUTE_DAMAGE_FRACTION, COMPOUND_COUNT_CAP, RUPTURE_BURST_CAP,
     VULNERABLE_MAX_MULT, DISRUPT_DENY_AT,
     type CombatEncounterState, type CombatCard, type CombatManaDie,
@@ -95,6 +95,13 @@ export interface CombatDieVM {
     drafted: boolean; spent: boolean; isX: boolean;
     /** Read vs the (revealed) enemy stance: advantage/neutral/disadvantage/none/null(hidden). */
     readPip: CombatReadResult | null;
+    // ── Fate Engine P1 ──
+    /** A banked Reserve die — a second power source, ripening between phases. */
+    reserve?: boolean;
+    /** Ripening pips (+1 intensity per pip on a status play; +2 Guard on a defend). */
+    pips?: number;
+    /** A dead X face that can still be FATE-TAPPED this turn (R4). */
+    fateTappable?: boolean;
 }
 export type CombatCardKind =
     | 'dot' | 'stun' | 'regen' | 'guard' | 'strike' | 'weaken' | 'inert' | 'befriend'
@@ -174,6 +181,8 @@ export interface CombatCardVM {
     verbClass: string; effectKind: 'dot' | 'control' | 'none'; rarity?: 'gold'; tier: 1 | 2 | 3;
     category: 'fallacy' | 'paradox' | null;
     topActionText: string; bottomActionText: string; bottomDamagePreview: number;
+    /** Fate Engine P1 — the card's printed die lines (real units), if any. */
+    dieLines?: string[];
     /** Honest, render-ready 5-zone face — real units, zero abstraction. */
     face: CombatCardFaceVM;
     /** Honest, render-ready inspect detail (outcome + free/die + math + keywords). */
@@ -201,6 +210,11 @@ export interface CombatViewModel {
     conviction: number;
     signatures: CombatSignatureVM[];
     hand: CombatCardVM[];
+    // ── Fate Engine P1 ──
+    /** Room left in the Reserve (drives the bank-or-burn chip). */
+    reserveRoom: boolean;
+    /** The encounter's Resonance tally (thresholds key off this). */
+    resonance: { heart: number; body: number; mind: number };
     ledger: ('clear' | 'overwhelmed' | 'pending')[];
     phaseBadge: string;
     roundLabel: string;
@@ -282,12 +296,23 @@ function diceVM(state: CombatEncounterState): CombatDieVM[] {
     const drafted = getDraftedDie(state);
     // Per-die read pip — only once the phase stance is known (revealed/scouted).
     const stance = revealedCurrentStance(state) as Stance | null;
-    return state.dice.map((d: CombatManaDie) => ({
+    const tray: CombatDieVM[] = state.dice.map((d: CombatManaDie) => ({
         id: d.id, color: d.color, colorHex: STANCE_COLORS[d.color] ?? '#888',
         glyph: DIE_GLYPHS[d.color] ?? '?', stanceLabel: STANCE_LABELS[d.color] ?? '?',
         drafted: drafted?.id === d.id, spent: d.state === 'spent', isX: d.color === 'x',
         readPip: stance ? resolveRead(d.color, stance) : null,
+        // R4 — a dead X face is never dead: tappable once per turn.
+        fateTappable: d.color === 'x' && d.state !== 'spent' && state.fateTappedTurn !== state.turn,
     }));
+    // R2 — the Reserve renders in the same tray as a second power source.
+    const banked: CombatDieVM[] = (state.reserve ?? []).map((d: CombatManaDie) => ({
+        id: d.id, color: d.color, colorHex: STANCE_COLORS[d.color] ?? '#888',
+        glyph: DIE_GLYPHS[d.color] ?? '?', stanceLabel: STANCE_LABELS[d.color] ?? '?',
+        drafted: false, spent: false, isX: false,
+        readPip: null,
+        reserve: true, pips: d.pips ?? 0,
+    }));
+    return [...tray, ...banked];
 }
 
 // ── Honest card view-models (face + detail) ──────────────────────────────────
@@ -330,6 +355,8 @@ export function engineHonestKind(
     // 0.34.0: reflect + damage-amp are now read by the live HP engine, so they're honest.
     if ((p.reflectDamage ?? 0) > 0) return 'thorns';
     if ((p.damageTakenMult ?? 1) > 1) return 'vulnerable';
+    // Fate Engine P1: STANCE-KEYED vulnerability (+N% only from that color die).
+    if ((p as { damageTakenMultForStance?: { mult: number } }).damageTakenMultForStance) return 'vulnerable';
     // card-overhaul (2026-07-03): the 6 gaps in the whitelist — every one of these
     // is a real, engine-read payload, so each gets an honest kind rather than
     // falling through to 'inert'.
@@ -485,12 +512,22 @@ function cardCalc(card: CombatCard, skill: Skill | undefined): CardCalc {
             out.intensity = pr.ce?.intensity ?? 1;
             out.turns = pr.ce?.duration ?? eff?.duration ?? 0;
             out.dpr = p.damageOverTime?.damagePerRound ?? 0;
-            out.perTurn = out.dpr * out.intensity;
-            out.total = out.perTurn * out.turns;
+            out.perTurn = Math.floor(out.dpr * out.intensity);
+            // Fate Engine P1 — RAMP-AWARE lifetime totals (canonical poison /
+            // unraveling escalate): mirror the engine's exact tick math so the
+            // face equals `bottomDamagePreview` (printed == applied).
+            const rampMods = (p as { dotModifiers?: { escalatesPerTurn?: boolean; rampFactor?: number } }).dotModifiers;
+            const ramp = rampMods?.escalatesPerTurn ? (rampMods.rampFactor ?? 0) : 0;
+            const lifetime = (intensity: number, turns: number): number => {
+                let sum = 0;
+                for (let k = 0; k < turns; k++) sum += Math.floor((out.dpr + Math.floor(ramp * k)) * intensity);
+                return sum;
+            };
+            out.total = lifetime(out.intensity, out.turns);
             // P0-truth read triplet — the engine's deterministic rule, exactly:
             // ▲ +1 intensity for the full run; ▼ printed intensity, 1 turn shorter.
-            out.totalAdv = out.dpr * (out.intensity + READ_ADVANTAGE_INTENSITY_BONUS) * out.turns;
-            out.totalDis = out.perTurn * Math.max(1, out.turns - READ_DISADVANTAGE_DURATION_PENALTY);
+            out.totalAdv = lifetime(out.intensity + READ_ADVANTAGE_INTENSITY_BONUS, out.turns);
+            out.totalDis = lifetime(out.intensity, Math.max(1, out.turns - READ_DISADVANTAGE_DURATION_PENALTY));
             out.keyword = keywordForEffect(pr.ce?.effectId);
             out.glyph = pr.ce ? glyphFor(pr.ce.effectId) : '🔥';
             out.categoryColor = GLYPH_COLORS.dot;
@@ -531,7 +568,8 @@ function cardCalc(card: CombatCard, skill: Skill | undefined): CardCalc {
             out.turns = pr.ce?.duration ?? eff?.duration ?? 0;
             // P0-truth: the % shown is the engine's real intensity-scaled delta
             // (mult = 1 + (dtm−1) × intensity, capped) — not the per-stack figure.
-            const dtm = p.damageTakenMult ?? 1;
+            const keyed = (p as { damageTakenMultForStance?: { mult: number } }).damageTakenMultForStance;
+            const dtm = p.damageTakenMult ?? keyed?.mult ?? 1;
             const pct = (i: number): number =>
                 Math.round((Math.min(VULNERABLE_MAX_MULT, 1 + (dtm - 1) * i) - 1) * 100);
             out.vulnPct = pct(out.intensity);
@@ -823,6 +861,7 @@ function handVM(state: CombatEncounterState): CombatCardVM[] {
             verbClass: card.verbClass, effectKind: card.effectKind, rarity: card.rarity, tier: card.tier, category: card.category,
             topActionText: card.topActionText, bottomActionText: card.bottomActionText,
             bottomDamagePreview: card.bottomDamagePreview,
+            dieLines: card.dieLines,
             face: faceStats(card, skill),
             detail: detailStats(card, skill),
             read: preview?.read ?? null, colorMatch: preview?.colorMatch ?? false,
@@ -900,6 +939,8 @@ export function buildCombatViewModel(state: CombatEncounterState): CombatViewMod
         enemy: enemyPane(state),
         player: playerPane(state),
         dice: diceVM(state),
+        reserveRoom: (state.reserve ?? []).length < RESERVE_MAX,
+        resonance: { heart: 0, body: 0, mind: 0, ...(state.resonance ?? {}) },
         drafted: usableDraft,
         hasDraft: !!state.draftedDieId,
         needsDraft: state.dice.length > 0 && !state.draftedDieId,

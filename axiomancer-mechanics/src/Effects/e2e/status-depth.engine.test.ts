@@ -84,14 +84,14 @@ describe('Status Effect Depth Engine', () => {
             // Arrange: Mental debuff combination
             const activeEffects: ActiveEffect[] = [
                 {
-                    effectId: 'debuff_confusion',
+                    effectId: 'debuff_despair',
                     intensity: 1,
                     remainingDuration: 3,
                     appliedAt: 1,
                     tier: 2
                 },
                 {
-                    effectId: 'debuff_fear',
+                    effectId: 'debuff_confusion',
                     intensity: 1,
                     remainingDuration: 2,
                     appliedAt: 1,
@@ -102,11 +102,12 @@ describe('Status Effect Depth Engine', () => {
             // Act: Evaluate interactions
             const results = evaluateInteractions(EFFECT_INTERACTIONS, activeEffects);
             
-            // Assert: Panic interaction should trigger
-            const panic = results.find(r => r.message.includes('panic'));
-            expect(panic).toBeDefined();
-            expect(panic!.type).toBe('amplify_duration');
-            expect(panic!.amplificationValue).toBe(1.75);
+            // Assert: the rebuilt registry (Fate Engine P1) speaks only the
+            // consumed amplify_damage type — despair+confusion is the SPIRAL.
+            const spiral = results.find(r => r.message.includes('spiral'));
+            expect(spiral).toBeDefined();
+            expect(spiral!.type).toBe('amplify_damage');
+            expect(spiral!.amplificationValue).toBe(1.5);
         });
         
         it('should handle multiple simultaneous interactions', () => {
@@ -127,18 +128,11 @@ describe('Status Effect Depth Engine', () => {
                     appliedAt: 1,
                     tier: 2
                 },
-                // Regeneration + focus for enhanced healing  
+                // + vulnerable for OPENED VEINS on the bleed
                 {
-                    effectId: 'buff_regeneration',
-                    intensity: 2,
-                    remainingDuration: 5,
-                    appliedAt: 1,
-                    tier: 1
-                },
-                {
-                    effectId: 'buff_focus',
-                    intensity: 2,
-                    remainingDuration: 4,
+                    effectId: 'debuff_vulnerable',
+                    intensity: 1,
+                    remainingDuration: 2,
                     appliedAt: 1,
                     tier: 2
                 }
@@ -151,13 +145,13 @@ describe('Status Effect Depth Engine', () => {
             expect(results.length).toBeGreaterThanOrEqual(2);
             
             const hemorrhage = results.find(r => r.message.includes('hemorrhag'));
-            const enhancedHealing = results.find(r => r.message.includes('healing'));
+            const openedVeins = results.find(r => r.message.includes('veins'));
             
             expect(hemorrhage).toBeDefined();
-            expect(enhancedHealing).toBeDefined();
+            expect(openedVeins).toBeDefined();
             
             // Higher priority should come first
-            expect(results[0].message).toBe(hemorrhage!.message); // Priority 95 vs 85
+            expect(results[0].message).toBe(hemorrhage!.message); // Priority 100 vs 95
         });
     });
     
@@ -421,10 +415,9 @@ describe('Status Effect Depth Engine', () => {
             expect(totalDebuffIntensity).toBe(4);
             expect(totalDebuffIntensity).toBeGreaterThanOrEqual(3);
             
-            // Panic interaction should extend confusion duration
-            const panic = interactions.find(i => i.message.includes('panic'));
-            expect(panic).toBeDefined();
-            expect(panic!.type).toBe('amplify_duration');
+            // The rebuilt registry has no confusion+fear pair — the debuff
+            // saturation itself is the point here; no combo needs to fire.
+            expect(Array.isArray(interactions)).toBe(true);
         });
         
         it('should verify engagement maintenance with status effect focus', () => {
@@ -536,11 +529,13 @@ describe('Status Effect Depth Engine', () => {
             expect(damageCombos.length).toBeGreaterThanOrEqual(1);
         });
 
-        it('preserves status breadth — control/duration/advantage combos remain', () => {
+        it('speaks ONLY the consumed result type (Fate Engine P1 rebuild)', () => {
+            // The 2026-07-05 audit proved amplify_duration / grant_advantage /
+            // amplify_intensity results had NO consumer — the rebuilt registry
+            // uses amplify_damage exclusively so every combo is live.
             const types = new Set(EFFECT_INTERACTIONS.map(i => i.result.type));
-            expect(types.has('amplify_duration')).toBe(true);
-            expect(types.has('grant_advantage')).toBe(true);
-            expect(types.has('amplify_intensity')).toBe(true);
+            expect(types.size).toBe(1);
+            expect(types.has('amplify_damage')).toBe(true);
         });
     });
 });

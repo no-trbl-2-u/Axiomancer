@@ -56,9 +56,10 @@ describe('getDamageTakenMultiplier (VULNERABLE)', () => {
     });
 
     it('aggregates additively across markers and clamps at VULNERABLE_MAX_MULT', () => {
-        // vulnerable(1) + vulnerability_body(1) = 1 + 0.5 + 0.5 = 2.0 (== cap).
+        // vulnerable(2) = 1 + 0.5 + 0.5 = 2.0 (== cap). (vulnerability_body is
+        // STANCE-KEYED now — Fate Engine P1 — and no longer feeds this aggregate.)
         expect(getDamageTakenMultiplier(combatant([
-            ae('debuff_vulnerable', 1), ae('debuff_vulnerability_body', 1),
+            ae('debuff_vulnerable', 2),
         ]))).toBe(2.0);
         // intensity 3 → 1 + 0.5×3 = 2.5 → clamped to 2.0.
         expect(getDamageTakenMultiplier(combatant([ae('debuff_vulnerable', 3)]))).toBe(VULNERABLE_MAX_MULT);
@@ -68,21 +69,21 @@ describe('getDamageTakenMultiplier (VULNERABLE)', () => {
 
 describe('getPendingDotTotal / consumeDotEffects (RUPTURE)', () => {
     it('sums each DoT over its remaining lifetime (amplification-aware)', () => {
-        // poison i2, 4 ticks left → floor(4×2)×4 = 32. No combo (poison alone).
+        // canonical poison i2, 4 ticks left → floor(2×2)×4 = 16. No combo (poison alone).
         const only = getPendingDotTotal(combatant([ae('debuff_poison', 2, 4)]));
-        expect(only.total).toBe(32);
+        expect(only.total).toBe(16);
         expect(only.perEffect).toHaveLength(1);
 
         // poison i2 + bleed i1 → Hemorrhage ×1.5 on poison:
-        //   poison floor(4×2×1.5)=12 over 4 → 48; bleed floor(3×1)=3 over 4 → 12. total 60.
+        //   poison floor(2×2×1.5)=6 over 4 → 24; bleed floor(4×1)=4 over 4 → 16. total 40.
         const combo = getPendingDotTotal(combatant([ae('debuff_poison', 2, 4), ae('debuff_bleed', 1, 4)]));
-        expect(combo.total).toBe(60);
+        expect(combo.total).toBe(40);
     });
 
     it('ignores non-DoT effects and treats permanent DoT as one tick', () => {
         expect(getPendingDotTotal(combatant([ae('debuff_confusion', 1)])).total).toBe(0);
         // remainingDuration -1 (permanent) → max(1, -1) = 1 tick.
-        expect(getPendingDotTotal(combatant([ae('debuff_poison', 1, -1)])).total).toBe(4);
+        expect(getPendingDotTotal(combatant([ae('debuff_poison', 1, -1)])).total).toBe(2);
     });
 
     it('consumeDotEffects strips ONLY DoT effects and reports the ids', () => {
@@ -119,11 +120,11 @@ describe('getDistinctControlCount (DISRUPT)', () => {
 describe('getActiveDotTotal / getActiveDotAmplifications (amplification surface)', () => {
     it('per-tick amplified amounts SUM to the real per-round DoT', () => {
         const t = getActiveDotTotal([ae('debuff_poison', 2), ae('debuff_bleed', 1)]);
-        // poison floor(4×2×1.5)=12, bleed floor(3×1)=3 → 15 (matches the legacy oracle).
-        expect(t.total).toBe(15);
+        // poison floor(2×2×1.5)=6, bleed floor(4×1)=4 → 10 (matches the legacy oracle).
+        expect(t.total).toBe(10);
         const poison = t.perEffect.find(e => e.effectId === 'debuff_poison')!;
-        expect(poison.baseAmount).toBe(8);
-        expect(poison.amount).toBe(12);
+        expect(poison.baseAmount).toBe(4);
+        expect(poison.amount).toBe(6);
         expect(poison.multiplier).toBe(1.5);
     });
 

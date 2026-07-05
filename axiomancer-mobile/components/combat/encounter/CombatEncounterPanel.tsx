@@ -28,6 +28,7 @@ import Svg, { Circle, Defs, Line, Polygon, RadialGradient, Stop } from 'react-na
 import {
     initializeCombatEncounter, rollEncounterDice, playCombatCard, resolveThreatPhase,
     startTurn, draftStanceDie, discardCombatCard, playSignatureSkill,
+    tapFateDie, getPendingDotTotal,
     selectEncounterMercyChoice, buildCombatSummary, rollCombatCardRewards, addRewardCard,
     rollLoot, addItem,
     type CombatEncounterState, type CombatOutcome, type Character, type Enemy, type CombatEvent,
@@ -317,6 +318,24 @@ export function CombatEncounterPanel({
     // draft the dragged die (unless one is already drafted, the combo case) + power
     // the card (bottom action); `power` false → the FREE base action (top action,
     // no die). One commit; the card leaves staging.
+    // Fate Engine P1 R3 — the spare (undrafted) die's two lives: burn +1◆ (default)
+    // or BANK to the Reserve where it ripens. Panel-owned so the choice is set
+    // BEFORE the draft commits.
+    const [bankSpare, setBankSpare] = useState(false);
+    const bankSpareRef = useRef(bankSpare);
+    bankSpareRef.current = bankSpare;
+    const onToggleBankSpare = useCallback(() => setBankSpare(v => !v), []);
+    // R4 — the universal fate tap: advance the strongest enemy DoT when one is
+    // ticking, else bank +1 Conviction. Once per turn (engine-gated).
+    const onFateTap = useCallback((dieId: string) => {
+        apply((s) => {
+            const choice = getPendingDotTotal(s.enemy, s.round).total > 0 ? 'dot-tick' as const : 'conviction' as const;
+            const t = tapFateDie(s, dieId, choice);
+            fxRef.current = t.events;
+            return t.state;
+        });
+        setFxSeq((n) => n + 1);
+    }, [apply]);
     const onApply = useCallback((uid: string, dieId: string | null, power: boolean) => {
         // Momentum: advance the wheel with this card's stance (looked up BEFORE the
         // play removes it from the hand). A completed cycle forges a wild momentum
@@ -335,8 +354,15 @@ export function CombatEncounterPanel({
         }
         apply((s) => {
             let ns = s;
-            if (power && dieId && s.draftedDieId === null) ns = draftStanceDie(ns, dieId).state;
-            const t = playCombatCard(ns, { uid }, power);
+            // Fate Engine P1 R8 — the dragged die is HONORED: a banked Reserve die
+            // (or, for fate cards, a dead X die) powers the play directly; a fresh
+            // tray die drafts first (bank-or-burn applies to the spare die).
+            const isReserveDie = !!dieId && (s.reserve ?? []).some((d) => d.id === dieId);
+            const isFateX = !!dieId && s.dice.some((d) => d.id === dieId && d.color === 'x');
+            if (power && dieId && !isReserveDie && !isFateX && s.draftedDieId === null) {
+                ns = draftStanceDie(ns, dieId, { bankUnpicked: bankSpareRef.current }).state;
+            }
+            const t = playCombatCard(ns, { uid }, power, (isReserveDie || isFateX) ? dieId : undefined);
             fxRef.current = t.events;
             ns = t.state;
             // TODO(engine): momentum belongs in axiomancer-mechanics as a first-class
@@ -435,6 +461,9 @@ export function CombatEncounterPanel({
                     momentum={{ lit: wheelLit, charged: momentumCharged }}
                     onMomentumInfo={() => setMomentumInfoOpen(true)}
                     fx={fx}
+                    onFateTap={onFateTap}
+                    bankSpare={bankSpare}
+                    onToggleBankSpare={onToggleBankSpare}
                 />
             )}
 

@@ -774,7 +774,8 @@ function applySpecialMechanic(
         // Each mirrors `guard`: the SKILL engine no-ops it (so the shared engine,
         // legacy resolver, and effect math are untouched); the HP-model combat
         // engine reads the mechanic at its `playBottomAction` / `resolveThreatPhase`
-        // call sites. These cases exist for exhaustiveness over the union.
+        // call sites. Includes the Fate Engine P1 die-manipulation verbs + REACT.
+        // These cases exist for exhaustiveness over the union.
         case 'rupture':
         case 'compound':
         case 'siphon':
@@ -783,6 +784,13 @@ function applySpecialMechanic(
         case 'execute':
         case 'amplify':
         case 'grant_permanent_wild_die':
+        case 'reroll_spent':
+        case 'refresh_die':
+        case 'convert_die_color':
+        case 'create_temporary_die':
+        case 'grant_pip':
+        case 'bank_spent_die':
+        case 'react':
             return { caster, target, events };
     }
 }

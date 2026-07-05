@@ -30,7 +30,7 @@ import {
     resolveCombatPhase, resolveThreatPhase, processBetweenPhases,
     resolveCardDieCost, resolveRead, getCard, buildCombatSummary,
     draftStanceDie, getDraftedDie, isPhaseStanceRevealed,
-    playSignatureSkill, discardCombatCard, projectCardImpact, startTurn, endTurn,
+    playSignatureSkill, discardCombatCard, projectCardImpact, endTurn,
 } from '../combat.engine';
 import { SIGNATURE_KITS, playerArchetype, CONCLUDE_DMG_PER_STACK } from '../combat.signature';
 import { rollCombatCardRewards, addRewardCard, unlockSkillViaDilemma, COMBAT_REWARD_POOL } from '../combat.rewards';
@@ -64,8 +64,8 @@ registerSandboxCards([{
     scalingStat: 'body',
 }]);
 
-const DOT_BODY = 'slippery-slope';       // body, tier 2, applies debuff_bleed (DoT)
-const CONTROL_HEART = 'eternal-regress'; // heart, tier 2, confusion + slow (control)
+const DOT_BODY = 'slippery-slope';       // body starter, applies debuff_poison (ramping DoT)
+const CONTROL_HEART = 'false-dilemma';   // mind, tier 1, confusion (control)
 const DAMAGE_BODY = 'qa-pure-strike-body'; // body, tier 1, basePower 12, no status effect (sandbox fixture)
 const BEFRIEND = 'befriend';             // heart, tier 1
 
@@ -257,7 +257,7 @@ describe('Spec 26b §1 — status-combo loop', () => {
         const r = draftAndPlay(state, DOT_BODY);
         expect(r.played).toBe(true);
         // The DoT effect landed on the enemy (it will tick HP each phase).
-        expect(r.state.enemy.effects.some(e => e.effectId === 'debuff_bleed')).toBe(true);
+        expect(r.state.enemy.effects.some(e => e.effectId === 'debuff_poison')).toBe(true);
         const landed = r.events!.some(e => e.kind === 'effect-landed' && e.target === 'enemy');
         expect(landed).toBe(true);
         // The drafted die refreshed (still available) so the player can chain.
@@ -288,7 +288,7 @@ describe('Spec 25 §4.5 — between-phases processing', () => {
         state = rollEncounterDice(state).state;
         state = setDice(state, ['body', 'heart']);
         state = draftAndPlay(state, DOT_BODY).state;
-        const dotBefore = state.enemy.effects.find(e => e.effectId === 'debuff_bleed');
+        const dotBefore = state.enemy.effects.find(e => e.effectId === 'debuff_poison');
         expect(dotBefore).toBeDefined();
         const hpBefore = state.enemy.health;
         const durBefore = dotBefore!.remainingDuration;
@@ -297,7 +297,7 @@ describe('Spec 25 §4.5 — between-phases processing', () => {
         const after = bp.state;
         expect(after.enemy.health).toBeLessThan(hpBefore);
         expect(bp.events.some(e => e.kind === 'dot-tick' && e.target === 'enemy')).toBe(true);
-        const dotAfter = after.enemy.effects.find(e => e.effectId === 'debuff_bleed');
+        const dotAfter = after.enemy.effects.find(e => e.effectId === 'debuff_poison');
         if (dotAfter) expect(dotAfter.remainingDuration).toBeLessThan(durBefore);
         expect(after.hand.length).toBe(COMBAT_HAND_SIZE);
         // A new phase resets the draft so the next turn rolls fresh.
@@ -350,7 +350,7 @@ describe('Spec 26b §4 — Signature Skills (Conviction-funded)', () => {
         state = { ...state, conviction: 10 };
         const r = playSignatureSkill(state, 'sig-overwhelming-argument');
         expect(r.state.conviction).toBe(2); // cost 8
-        expect(r.state.enemy.effects.some(e => e.effectId === 'debuff_petrify')).toBe(true);
+        expect(r.state.enemy.effects.some(e => e.effectId === 'debuff_stagger')).toBe(true);
         expect(r.events.some(e => e.kind === 'signature-cast')).toBe(true);
     });
 
@@ -461,7 +461,7 @@ describe('Spec 26b tuning — variety-gated combo + projection + carry', () => {
         expect(adv.amount).toBeGreaterThan(dis.amount);
     });
 
-    it('an unspent drafted die carries into the next turn', () => {
+    it('an unspent drafted die BANKS to the visible Reserve at end of turn (Fate Engine R2)', () => {
         mockSequentialRng(0.5);
         let state = initializeCombatEncounter(makePlayer([DOT_BODY]), makeEnemy(60, 'mind'), [DOT_BODY], 1);
         state = rollEncounterDice(state).state;
@@ -469,11 +469,13 @@ describe('Spec 26b tuning — variety-gated combo + projection + carry', () => {
         state = draftStanceDie(state, state.dice[0].id).state; // draft heart, don't spend
         expect(getDraftedDie(state)?.color).toBe('heart');
         state = endTurn(state).state;
-        expect(state.carriedDie).toBe('heart');
-        state = startTurn(state).state;
-        // The carried heart die is present in the fresh pool.
-        expect(state.dice.some(d => d.color === 'heart')).toBe(true);
+        // The invisible carriedDie slot-steal is retired; the die is player-owned now.
         expect(state.carriedDie).toBeNull();
+        expect(state.reserve?.map(d => d.color)).toEqual(['heart']);
+        expect(state.reserve?.[0].pips).toBe(0);
+        // Surviving a threat phase RIPENS it (+1 pip, toward the cap).
+        state = resolveThreatPhase(state).state;
+        expect(state.reserve?.[0].pips).toBe(1);
     });
 
     it('every turn roll offers at least one stance-bearing die', () => {

@@ -49,6 +49,14 @@ export interface CombatManaDie {
     state: CombatDieState;
     /** Created by card effects; expires between phases (display + cleanup). */
     temporary: boolean;
+    /**
+     * Fate Engine P1 (spec 31 R2) — RIPENING pips. Deterministic, no new RNG:
+     * fresh-rolled dice have 0; a die BANKED to the Reserve gains +1 pip per
+     * threat phase survived (max `RESERVE_PIP_CAP`). Spending a pipped die adds
+     * +1 intensity per pip to the status it lands, or +2 Guard per pip on a
+     * defend card. Optional for back-compat with state literals (absent = 0).
+     */
+    pips?: number;
 }
 
 // ---------------------------------------------------------------------------
@@ -107,6 +115,12 @@ export interface CombatCard {
     /** The id of the primary enemy effect this card applies (for the projection
      *  preview's diminishing-returns lookup). Null for damage/buff/synthetic. */
     primaryEffectId: string | null;
+    /**
+     * Fate Engine P1 — the card's printed DIE LINES (threshold / dieBonus /
+     * fate / die-manipulation), generated from the skill's riders in REAL units
+     * (printed == applied). Absent for cards with no dice interaction.
+     */
+    dieLines?: string[];
 }
 
 /** A physical card instance in hand / play (uid-tracked, like Hazard). */
@@ -330,6 +344,19 @@ export type CombatEvent =
     // cards fire this when powered by a die (weak plays never touch the pool).
     | { kind: 'permanent-wild-die-granted'; wildAdded: number; deadAdded: number; totalWild: number }
     | { kind: 'conclude-hit'; amount: number; totalStacks: number }
+    // ── Fate Engine P1 (spec 31 §1) — dice-layer events ──────────────────────
+    | { kind: 'die-banked'; dieId: string; color: CombatDieColor; pips: number }
+    | { kind: 'die-ripened'; dieId: string; pips: number }
+    | { kind: 'omen-revealed'; dieColor: CombatDieColor; phaseIndex: number; stance: Stance }
+    | { kind: 'fate-tapped'; dieId: string; choice: 'dot-tick' | 'conviction'; amount: number }
+    | { kind: 'resonance-gained'; color: 'heart' | 'body' | 'mind'; total: number }
+    | { kind: 'threshold-fired'; cardId: string; color: 'heart' | 'body' | 'mind'; count: number; riderText: string }
+    | { kind: 'die-bonus-fired'; cardId: string; riderText: string }
+    | { kind: 'fate-powered'; cardId: string; dieId: string; recoil: number; riderText: string }
+    | { kind: 'pips-cashed'; cardId: string; pips: number; bonus: 'intensity' | 'guard'; amount: number }
+    | { kind: 'react-detonated'; cardId: string; amount: number; consumed: string[] }
+    | { kind: 'die-forged'; dieId: string; color: CombatDieColor; destination: 'reserve' | 'conviction' }
+    | { kind: 'die-converted'; dieId: string; color: CombatDieColor }
     | { kind: 'phase-resolved'; phaseIndex: number; mark: 'clear' | 'overwhelmed' }
     | { kind: 'threat-fired'; phaseIndex: number; description: string; effects: CombatThreatEffect[] }
     | { kind: 'hand-drawn'; cards: string[] }
@@ -385,8 +412,31 @@ export interface CombatEncounterState {
      *  draft. Optional for back-compat with state literals. */
     chainEffectIds?: string[];
     /** A carried unspent drafted die color, kept into the next turn so a good die
-     *  isn't wasted (Spec 26b tuning §3). Null when nothing carried. */
+     *  isn't wasted (Spec 26b tuning §3). Null when nothing carried.
+     *  @deprecated Fate Engine P1 — superseded by the visible `reserve` (R2).
+     *  Kept for state-literal back-compat; the engine no longer writes it. */
     carriedDie: CombatDieColor | null;
+    /**
+     * Fate Engine P1 (spec 31 R2) — the RESERVE: banked dice (max
+     * `RESERVE_MAX`), each ripening +1 pip per threat phase survived. A bottom
+     * action may be powered by the drafted die OR a Reserve die (still exactly
+     * one die — the single-die law is untouched). Optional for back-compat
+     * (absent = empty).
+     */
+    reserve?: CombatManaDie[];
+    /**
+     * Fate Engine P1 (spec 31 R1) — the RESONANCE tally: every die spent this
+     * encounter (powering, burning for Conviction, banking) adds 1 of its color;
+     * a Wild adds to the color of the card it powered. Cards with a `threshold`
+     * check this tally at play time. Optional for back-compat (absent = zeros).
+     */
+    resonance?: { heart: number; body: number; mind: number };
+    /**
+     * Fate Engine P1 (spec 31 R4) — the turn number of the last universal
+     * FATE TAP (tap an X die → +1 tick on one enemy DoT or +1 Conviction),
+     * gating it to once per turn. Optional for back-compat (absent = never).
+     */
+    fateTappedTurn?: number;
     /** The player's archetype (dominant base stat). */
     archetype: PlayerArchetype;
     /** The player's resolved Signature Skill kit for this combat (per-archetype). */

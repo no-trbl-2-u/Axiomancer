@@ -27,21 +27,26 @@ import type { PlayerArchetype } from './combat.encounter.types';
  * already run (that's the deckbuilder point).
  */
 export const COMBAT_REWARD_POOL: readonly string[] = Object.freeze([
+    // Fate Engine P1 trim (spec 31 §4.2): pool re-cut over the curated library.
     // body
-    'slippery-slope', 'ad-hominem-strike', 'mob-appeal', 'straw-giant',
+    'slippery-slope', 'ad-hominem-strike', 'hasty-generalization', 'mob-appeal',
+    'achilles-gambit',      // FATE — the impossible strike
     'brace-for-impact',     // defense (GUARD)
-    'brazen-rebuttal',      // THORNS — reflect the telegraphed hit
     'briar-riposte',        // RIPOSTE — parry + counter
+    'appeal-to-consequences', // fear + Body-threshold chip
     // mind
     'false-dilemma', 'liars-echo', 'undistributed-middle', 'sorites-cascade',
-    'suspend-judgment',     // defense (GUARD)
+    'suspend-judgment',     // defense (GUARD) + bank the die
     'breach',               // VULNERABLE — mark the foe Breached (set-up-then-swing)
     'mounting-contradictions', // COMPOUND — HP per distinct debuff
+    'eternal-regress',      // unraveling — the long game
     // heart
-    'eternal-regress', 'appeal-to-pity', 'ship-of-theseus', 'bootstrap-paradox',
-    'stoic-reserve',        // defense (GUARD)
-    'resonance-rupture',    // RUPTURE — detonate the foe's DoT
-    'gabriels-bulwark',     // BARRIER — stacking, persistent soak
+    'appeal-to-pity', 'soothing-words', 'bat-swarm-thoughtform', 'existential-debt',
+    'tu-quoque',            // THORNS — reflect the telegraphed hit
+    'ship-of-theseus',      // convert the spent die to WILD
+    'stoic-reserve',        // defense (GUARD) + ripen the Reserve
+    'resonance-detonation', // RUPTURE — detonate the foe's DoT
+    'apophatic-aegis',      // BARRIER — stacking, persistent soak
     'leeching-syllogism',   // SIPHON — offense-scaled sustain
     // gold (rare) — the strongest tier; weighted RARE in the roll below
     'pyrrhic-victory', 'the-final-word', 'unmoved-mover',

@@ -18,7 +18,10 @@
         ],
         "rollModifierPerIntensity": 1
       },
-      "tier": 1
+      "tier": 1,
+      "tags": [
+        "deprecated"
+      ]
     },
     {
       "id": "tier1_body_defend",
@@ -59,7 +62,10 @@
       "payload": {
         "rollModifier": -5
       },
-      "tier": 1
+      "tier": 1,
+      "tags": [
+        "deprecated"
+      ]
     },
     {
       "id": "buff_body_attack_up",
@@ -86,7 +92,10 @@
         ],
         "rollModifier": 2
       },
-      "tier": 2
+      "tier": 2,
+      "tags": [
+        "deprecated"
+      ]
     },
     {
       "id": "buff_mind_attack_up",
@@ -113,7 +122,10 @@
         ],
         "rollModifier": 2
       },
-      "tier": 2
+      "tier": 2,
+      "tags": [
+        "deprecated"
+      ]
     },
     {
       "id": "buff_heart_attack_up",
@@ -140,7 +152,10 @@
         ],
         "rollModifier": 2
       },
-      "tier": 2
+      "tier": 2,
+      "tags": [
+        "deprecated"
+      ]
     },
     {
       "id": "buff_body_defense_up",
@@ -167,7 +182,10 @@
         ],
         "defenseModifier": 2
       },
-      "tier": 2
+      "tier": 2,
+      "tags": [
+        "deprecated"
+      ]
     },
     {
       "id": "buff_mind_defense_up",
@@ -194,7 +212,10 @@
         ],
         "defenseModifier": 2
       },
-      "tier": 2
+      "tier": 2,
+      "tags": [
+        "deprecated"
+      ]
     },
     {
       "id": "buff_heart_defense_up",
@@ -221,7 +242,10 @@
         ],
         "defenseModifier": 2
       },
-      "tier": 2
+      "tier": 2,
+      "tags": [
+        "deprecated"
+      ]
     },
     {
       "id": "buff_defend_up",
@@ -268,7 +292,10 @@
           }
         ]
       },
-      "tier": 2
+      "tier": 2,
+      "tags": [
+        "deprecated"
+      ]
     },
     {
       "id": "buff_accuracy_up",
@@ -300,7 +327,10 @@
           }
         ]
       },
-      "tier": 2
+      "tier": 2,
+      "tags": [
+        "deprecated"
+      ]
     },
     {
       "id": "buff_evasion_up",
@@ -339,7 +369,10 @@
           ]
         }
       },
-      "tier": 2
+      "tier": 2,
+      "tags": [
+        "deprecated"
+      ]
     },
     {
       "id": "buff_critical_rate_up",
@@ -361,7 +394,10 @@
           }
         ]
       },
-      "tier": 2
+      "tier": 2,
+      "tags": [
+        "deprecated"
+      ]
     },
     {
       "id": "buff_critical_damage_up",
@@ -392,7 +428,10 @@
           }
         ]
       },
-      "tier": 2
+      "tier": 2,
+      "tags": [
+        "deprecated"
+      ]
     },
     {
       "id": "buff_haste",
@@ -414,7 +453,10 @@
           ]
         }
       },
-      "tier": 3
+      "tier": 3,
+      "tags": [
+        "deprecated"
+      ]
     },
     {
       "id": "buff_regeneration",
@@ -452,7 +494,10 @@
           }
         ]
       },
-      "tier": 2
+      "tier": 2,
+      "tags": [
+        "deprecated"
+      ]
     },
     {
       "id": "buff_barrier",
@@ -467,7 +512,10 @@
       "payload": {
         "defenseModifier": 5
       },
-      "tier": 2
+      "tier": 2,
+      "tags": [
+        "deprecated"
+      ]
     },
     {
       "id": "buff_damage_reduction",
@@ -482,7 +530,10 @@
       "payload": {
         "defenseModifier": 5
       },
-      "tier": 2
+      "tier": 2,
+      "tags": [
+        "deprecated"
+      ]
     },
     {
       "id": "buff_invincibility",
@@ -497,7 +548,10 @@
       "payload": {
         "defenseModifier": 99
       },
-      "tier": 3
+      "tier": 3,
+      "tags": [
+        "deprecated"
+      ]
     },
     {
       "id": "buff_taunt",
@@ -519,7 +573,10 @@
           }
         ]
       },
-      "tier": 2
+      "tier": 2,
+      "tags": [
+        "deprecated"
+      ]
     },
     {
       "id": "buff_stealth",
@@ -541,7 +598,10 @@
           ]
         }
       },
-      "tier": 2
+      "tier": 2,
+      "tags": [
+        "deprecated"
+      ]
     },
     {
       "id": "buff_all_stats_up",
@@ -593,7 +653,10 @@
         ],
         "rollModifier": 1
       },
-      "tier": 2
+      "tier": 2,
+      "tags": [
+        "deprecated"
+      ]
     },
     {
       "id": "buff_reflect",
@@ -608,7 +671,11 @@
       "payload": {
         "defenseModifier": 2
       },
-      "tier": 2
+      "tier": 2,
+      "tags": [
+        "deprecated"
+      ],
+      "deprecatedFor": "buff_brazen_thorns"
     },
     {
       "id": "buff_counter",
@@ -628,7 +695,10 @@
           ]
         }
       },
-      "tier": 2
+      "tier": 2,
+      "tags": [
+        "deprecated"
+      ]
     },
     {
       "id": "buff_resistance_body",
@@ -659,7 +729,10 @@
           }
         ]
       },
-      "tier": 2
+      "tier": 2,
+      "tags": [
+        "deprecated"
+      ]
     },
     {
       "id": "buff_resistance_mind",
@@ -690,7 +763,10 @@
           }
         ]
       },
-      "tier": 2
+      "tier": 2,
+      "tags": [
+        "deprecated"
+      ]
     },
     {
       "id": "buff_resistance_heart",
@@ -721,7 +797,10 @@
           }
         ]
       },
-      "tier": 2
+      "tier": 2,
+      "tags": [
+        "deprecated"
+      ]
     },
     {
       "id": "buff_cleanse",
@@ -734,7 +813,10 @@
       "resistedBy": "heart",
       "resistDR": 12,
       "payload": {},
-      "tier": 2
+      "tier": 2,
+      "tags": [
+        "deprecated"
+      ]
     },
     {
       "id": "buff_buff_duration_up",
@@ -749,7 +831,10 @@
       "payload": {
         "rollModifier": 1
       },
-      "tier": 2
+      "tier": 2,
+      "tags": [
+        "deprecated"
+      ]
     },
     {
       "id": "buff_status_chance_up",
@@ -764,7 +849,10 @@
       "payload": {
         "rollModifier": 3
       },
-      "tier": 2
+      "tier": 2,
+      "tags": [
+        "deprecated"
+      ]
     },
     {
       "id": "buff_life_steal",
@@ -813,7 +901,10 @@
           }
         ]
       },
-      "tier": 2
+      "tier": 2,
+      "tags": [
+        "deprecated"
+      ]
     },
     {
       "id": "buff_advantage_mind",
@@ -844,7 +935,10 @@
           }
         ]
       },
-      "tier": 2
+      "tier": 2,
+      "tags": [
+        "deprecated"
+      ]
     },
     {
       "id": "buff_petitio_pulse",
@@ -865,7 +959,10 @@
           }
         ]
       },
-      "tier": 1
+      "tier": 1,
+      "tags": [
+        "deprecated"
+      ]
     },
     {
       "id": "buff_gettiters_flicker",
@@ -886,7 +983,10 @@
           }
         ]
       },
-      "tier": 1
+      "tier": 1,
+      "tags": [
+        "deprecated"
+      ]
     },
     {
       "id": "buff_ad_hoc_patch",
@@ -907,7 +1007,10 @@
           }
         ]
       },
-      "tier": 1
+      "tier": 1,
+      "tags": [
+        "deprecated"
+      ]
     },
     {
       "id": "buff_advantage_heart",
@@ -938,7 +1041,10 @@
           }
         ]
       },
-      "tier": 2
+      "tier": 2,
+      "tags": [
+        "deprecated"
+      ]
     },
     {
       "id": "buff_special_pleading",
@@ -952,7 +1058,10 @@
         "defenseModifier": 2
       },
       "tier": 1,
-      "sourcedFromCell": "faith-optimistic-individual"
+      "sourcedFromCell": "faith-optimistic-individual",
+      "tags": [
+        "deprecated"
+      ]
     },
     {
       "id": "buff_open_minded",
@@ -963,7 +1072,10 @@
       "duration": -1,
       "stacking": "none",
       "payload": {},
-      "tier": 0
+      "tier": 0,
+      "tags": [
+        "deprecated"
+      ]
     },
     {
       "id": "buff_quine_resolve",
@@ -990,7 +1102,12 @@
       },
       "tier": 1,
       "addedIn": "2026-04-15",
-      "tags": ["status-effect", "stat", "since-april"]
+      "tags": [
+        "status-effect",
+        "stat",
+        "since-april",
+        "deprecated"
+      ]
     },
     {
       "id": "buff_apollonian_clarity",
@@ -1024,7 +1141,12 @@
       },
       "tier": 2,
       "addedIn": "2026-04-15",
-      "tags": ["status-effect", "stat", "since-april"]
+      "tags": [
+        "status-effect",
+        "stat",
+        "since-april",
+        "deprecated"
+      ]
     },
     {
       "id": "buff_promethean_ember",
@@ -1050,7 +1172,11 @@
       },
       "tier": 2,
       "addedIn": "2026-04-15",
-      "tags": ["status-effect", "regeneration", "since-april"]
+      "tags": [
+        "status-effect",
+        "regeneration",
+        "since-april"
+      ]
     },
     {
       "id": "buff_aegis_recursion",
@@ -1079,7 +1205,12 @@
       },
       "tier": 2,
       "addedIn": "2026-04-15",
-      "tags": ["status-effect", "defense", "since-april"]
+      "tags": [
+        "status-effect",
+        "defense",
+        "since-april",
+        "deprecated"
+      ]
     },
     {
       "id": "buff_dionysian_surge",
@@ -1094,7 +1225,10 @@
       "payload": {
         "rollModifier": 2,
         "advantageModifier": {
-          "grantAdvantage": ["heart", "body"]
+          "grantAdvantage": [
+            "heart",
+            "body"
+          ]
         },
         "statModifiers": [
           {
@@ -1106,7 +1240,12 @@
       },
       "tier": 2,
       "addedIn": "2026-04-15",
-      "tags": ["status-effect", "advantage", "since-april"]
+      "tags": [
+        "status-effect",
+        "advantage",
+        "since-april",
+        "deprecated"
+      ]
     },
     {
       "id": "buff_brazen_thorns",
@@ -1124,7 +1263,12 @@
       },
       "tier": 2,
       "addedIn": "2026-05-20",
-      "tags": ["status-effect", "defense", "reflect", "since-april"]
+      "tags": [
+        "status-effect",
+        "defense",
+        "reflect",
+        "since-april"
+      ]
     },
     {
       "id": "buff_oracle_foresight",
@@ -1139,7 +1283,11 @@
       "payload": {
         "rollModifier": 2,
         "advantageModifier": {
-          "grantAdvantage": ["mind", "heart", "body"]
+          "grantAdvantage": [
+            "mind",
+            "heart",
+            "body"
+          ]
         },
         "statModifiers": [
           {
@@ -1151,7 +1299,12 @@
       },
       "tier": 2,
       "addedIn": "2026-05-20",
-      "tags": ["status-effect", "advantage", "since-april"]
+      "tags": [
+        "status-effect",
+        "advantage",
+        "since-april",
+        "deprecated"
+      ]
     },
     {
       "id": "buff_stoic_bulwark",
@@ -1185,7 +1338,12 @@
       },
       "tier": 2,
       "addedIn": "2026-05-20",
-      "tags": ["status-effect", "defense", "since-april"]
+      "tags": [
+        "status-effect",
+        "defense",
+        "since-april",
+        "deprecated"
+      ]
     },
     {
       "id": "buff_minor_fortitude",
@@ -1211,7 +1369,12 @@
       },
       "tier": 1,
       "addedIn": "2026-06-07",
-      "tags": ["status-effect", "stat", "since-april"]
+      "tags": [
+        "status-effect",
+        "stat",
+        "since-april",
+        "deprecated"
+      ]
     },
     {
       "id": "buff_phoenix_vigor",
@@ -1238,7 +1401,11 @@
       },
       "tier": 2,
       "addedIn": "2026-06-07",
-      "tags": ["status-effect", "regeneration", "since-april"]
+      "tags": [
+        "status-effect",
+        "regeneration",
+        "since-april"
+      ]
     },
     {
       "id": "buff_focus",
@@ -1267,7 +1434,13 @@
       },
       "tier": 2,
       "addedIn": "2026-06-20",
-      "tags": ["status-effect", "stat", "combo-enabler", "since-april"]
+      "tags": [
+        "status-effect",
+        "stat",
+        "combo-enabler",
+        "since-april",
+        "deprecated"
+      ]
     },
     {
       "id": "buff_resolute",
@@ -1284,7 +1457,13 @@
       },
       "tier": 2,
       "addedIn": "2026-07-03",
-      "tags": ["status-effect", "defense", "hybrid-damage-model", "self-buff", "resolute"]
+      "tags": [
+        "status-effect",
+        "defense",
+        "hybrid-damage-model",
+        "self-buff",
+        "resolute"
+      ]
     },
     {
       "id": "buff_clarity",
@@ -1300,7 +1479,13 @@
       },
       "tier": 1,
       "addedIn": "2026-07-03",
-      "tags": ["status-effect", "advantage", "hybrid-damage-model", "self-buff", "consumed-on-use"]
+      "tags": [
+        "status-effect",
+        "advantage",
+        "hybrid-damage-model",
+        "self-buff",
+        "consumed-on-use"
+      ]
     }
   ]
 }
