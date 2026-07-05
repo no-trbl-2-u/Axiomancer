@@ -131,12 +131,12 @@ describe('Phase 46 — alignment-gated content (live authored gates)', () => {
         expect(meetsLearningRequirement(ch, skill)).toBe(false); // no alignment → gate fails
     });
 
-    it('appeal-to-fear is learnable only when scope ≥ 34', async () => {
+    it('appeal-to-consequences is learnable only when scope ≥ 34 (gate inherited from the cut appeal-to-fear)', async () => {
         const { getCardById } = await import('../../Cards/cards.library');
         const { meetsLearningRequirement } = await import('../../Cards/skill.engine');
         const { createCharacter } = await import('../../Character');
 
-        const skill = getCardById('appeal-to-fear')!;
+        const skill = getCardById('appeal-to-consequences')!;
         const ch = createCharacter({
             name: 'Tester', level: 10,
             baseStats: { heart: 6, body: 6, mind: 6 },

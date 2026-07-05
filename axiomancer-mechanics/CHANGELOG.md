@@ -12,6 +12,54 @@ deep imports are part of the supported surface.
 
 ## [Unreleased]
 
+Fate Engine P1 + the curated trim (spec 31 §§1,3,4 — owner call 2026-07-05:
+"trim it down by half and lock in some really good ones first").
+
+### Changed
+
+- **Card library trimmed 88 → 49 locked-in keepers** (`cards.library.ts`) —
+  every keeper is engine-real post-P0-truth, distinct in play, and most Tier-2+
+  keepers carry ONE die-interaction line (threshold / dieBonus / fate /
+  die-manipulation / react). Presets re-cut (EROSION/SATURATION/BULWARK/
+  ONSLAUGHT/FATE FORGE/GENERALIST — Recursion + Escalation retired), reward
+  pool re-cut, `straw-giant` enemy rotations → `mob-appeal`.
+- **Effect libraries canonicalized** — 25 live debuffs + 9 live buffs; merged
+  clones tagged `deprecated` + `deprecatedFor` (ids never deleted; combat
+  surfaces re-pointed). New `debuff_stagger` (merges stun/sleep/petrify/
+  gorgon); `debuff_mark` gains a real `revealsStance` payload; the
+  `vulnerability_*` trio is STANCE-KEYED (`damageTakenMultForStance`); combo
+  registry rebuilt to 5 reachable `amplify_damage` pairs.
+- **The Fate Engine dice layer** — dice get a second read:
+  RESONANCE tally + card thresholds; the RESERVE (bank-or-burn at draft,
+  `RESERVE_MAX` 2) whose dice RIPEN +1 pip per threat phase (pips cash +1
+  intensity / +2 Guard per pip); FATE/X plays (`fate` cards powered by dead X
+  dice) + the universal once-per-turn `tapFateDie`; the OMEN (an unpicked die
+  that beats the current stance scouts the NEXT phase); color match = +1 turn
+  on landed statuses; the dragged `dieId` is HONORED (drafted/Reserve/fate-X);
+  new specialMechanics `reroll_spent`/`refresh_die`/`convert_die_color`/
+  `create_temporary_die`/`grant_pip`/`bank_spent_die`/`react`.
+- **Card schema** — `Card` gains `threshold`/`dieBonus`/`fate` (+`CardRider`);
+  projected `CombatCard` gains generated `dieLines` in real units.
+- **KNOWN-BROKEN (flagged, deferred to /combat-tuning + /deck-tuning):** the
+  curated pool + dice layer collapsed the challenge gradient (win ≈ 1.0 across
+  stages at on-vision doctrine metrics). Balance bands re-pinned to measured
+  reality with KNOWN-BROKEN markers; the retune is the next loop pass.
+
+### Added
+
+- `src/Combat/e2e/fate-engine.engine.test.ts` (16 pins) +
+  `src/Cards/e2e/curated-library.engine.test.ts` (shape contract) +
+  `src/Effects/e2e/deprecated-effects.engine.test.ts` (deprecation contract).
+- Exports: `tapFateDie`, `riderText`, `RESERVE_MAX`, `RESERVE_PIP_CAP`,
+  `ripenReserve`, `PIP_INTENSITY_BONUS`, `PIP_GUARD_BONUS`,
+  `COLOR_MATCH_STATUS_DURATION_BONUS`, `FATE_TAP_CONVICTION`,
+  `getStanceVulnMult`.
+
+### Removed
+
+- 39 cut cards (git history keeps them; unknown ids drop safely from decks) and
+  the tests that existed only to pin cut content.
+
 P0 "TRUTH" of the Fate Engine revamp (spec 31; audit at
 `docs/combat-audit-2026-07-05.md`): every printed combat number is now a real
 engine unit, and the formerly-inert effect payloads bite.

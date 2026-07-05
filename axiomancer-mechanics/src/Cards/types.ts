@@ -163,7 +163,67 @@ export type CardSpecialMechanic =
      *  Only ever fired from a card's SURGE (die-powered) action — the doctrine is
      *  weak plays never touch the pool. Combat-engine owned; skill engine no-ops
      *  it, mirroring `guard`/`barrier`/`rupture`. */
-    | { kind: 'grant_permanent_wild_die'; wildCount: number; deadCount: number };
+    | { kind: 'grant_permanent_wild_die'; wildCount: number; deadCount: number }
+    // ── Fate Engine P1 (spec 31 §4.1) — die-manipulation verbs, all combat-engine
+    //    owned (the skill engine no-ops them, mirroring guard/rupture). ──────────
+    /** REROLL_SPENT — re-roll every spent/blocked die in the tray (the library
+     *  sibling of the Press Fate signature). */
+    | { kind: 'reroll_spent' }
+    /** REFRESH_DIE — the powering die returns to `available` after this play
+     *  (independent of the variety-chain rule). */
+    | { kind: 'refresh_die' }
+    /** CONVERT_DIE_COLOR — the powering die returns REFRESHED as a WILD die
+     *  ("still your die?" — maximally flexible, deterministic, no color picker). */
+    | { kind: 'convert_die_color' }
+    /** CREATE_TEMPORARY_DIE — forge a fresh die of `color` (temporary: true).
+     *  It joins the RESERVE at 0 pips when a slot is free; otherwise it burns
+     *  for +1 Conviction. */
+    | { kind: 'create_temporary_die'; color: 'heart' | 'body' | 'mind' | 'wild' }
+    /** GRANT_PIP — every die currently in the Reserve ripens +`count` pips
+     *  (clamped to the pip cap). */
+    | { kind: 'grant_pip'; count: number }
+    /** BANK_SPENT_DIE — instead of being spent, the powering die goes to the
+     *  Reserve at 0 pips (if a slot is free; otherwise it is spent normally). */
+    | { kind: 'bank_spent_die' }
+    /** REACT — if the foe carries BOTH status `a` and status `b` at
+     *  `minIntensity`+, CONSUME them and detonate: burst = `burstPerIntensity` ×
+     *  (consumed intensities), on the mechanic-damage path (never strike-weighted),
+     *  plus an optional `product` status. A fired REACT refreshes the drafted die
+     *  (the crescendo keeps the turn alive). */
+    | { kind: 'react'; a: string; b: string; minIntensity: number;
+        burstPerIntensity: number;
+        product?: { effectId: string; intensity: number; duration: number } };
+
+/**
+ * Fate Engine P1 — a card RIDER: a bundle of real-unit bonuses fired by a
+ * die-interaction line (`threshold` / `dieBonus` / `fate`). Every field is an
+ * exact engine unit so generated action text is the applied number (P0-truth
+ * law). All fields optional; absent = 0/false.
+ */
+export interface CardRider {
+    /** +N intensity on the statuses THIS play lands on the enemy. */
+    bonusIntensity?: number;
+    /** +N turns on the statuses THIS play lands on the enemy. */
+    bonusDuration?: number;
+    /** Immediate flat HP chip to the enemy (mechanic-damage path, unweighted). */
+    chipHp?: number;
+    /** +N Guard. */
+    guard?: number;
+    /** +N Conviction (clamped to the cap). */
+    conviction?: number;
+    /** Refresh the powering die back to available. */
+    refreshDie?: boolean;
+    /** Reveal the NEXT threat phase's hidden stance. */
+    revealStance?: boolean;
+    /** Immediately tick every enemy DoT once (extra tick — durations untouched). */
+    tickAllDots?: boolean;
+    /** Cleanse up to N of the player's own debuffs (tier-3 scope). */
+    cleanse?: number;
+    /** Heal the player N HP. */
+    healHp?: number;
+    /** Draw N cards. */
+    drawCards?: number;
+}
 
 /**
  * Phase 66 — synergy predicate. The matched ActiveEffect on `on`
@@ -291,4 +351,27 @@ export interface Card {
      */
     addedIn?: string;
     tags?: string[];
+    // ── Fate Engine P1 (spec 31 §4.1) — per-card die-interaction lines. Design
+    //    law: every Tier-2+ card carries exactly ONE of threshold / dieBonus /
+    //    fate / die-manipulation / react; Tier-1 at most one. All combat-engine
+    //    owned; the skill engine ignores them. ───────────────────────────────────
+    /**
+     * RESONANCE THRESHOLD (Spirit Island element thresholds): when the
+     * encounter's spent-die tally of `color` is ≥ `count` at play time, the
+     * rider fires automatically, free. One spend, two payoffs.
+     */
+    threshold?: { color: StatType; count: number; rider: CardRider };
+    /**
+     * DIE BONUS: the rider fires when the POWERING die's color matches —
+     * `'match'` = this card's own stance (or Wild), a named color = exactly
+     * that color, `'off'` = any color that is NOT this card's stance (the
+     * straw-man line: the wrong target, hit harder).
+     */
+    dieBonus?: { onColor: StatType | 'match' | 'off'; rider: CardRider };
+    /**
+     * FATE (Mage Knight no-dead-faces): this card may be POWERED BY AN X DIE.
+     * A colored/wild die plays the card normally; the X die fires the printed
+     * `rider` on top and costs `recoilHp` (the impossible made load-bearing).
+     */
+    fate?: { rider: CardRider; recoilHp?: number };
 }

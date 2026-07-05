@@ -138,6 +138,14 @@ export const SPECIAL_MECHANIC_KINDS = [
     'execute',
     'amplify',
     'grant_permanent_wild_die',
+    // Fate Engine P1 (spec 31 §4.1) — die-manipulation verbs + REACT
+    'reroll_spent',
+    'refresh_die',
+    'convert_die_color',
+    'create_temporary_die',
+    'grant_pip',
+    'bank_spent_die',
+    'react',
 ] as const;
 export type SpecialMechanicKind = (typeof SPECIAL_MECHANIC_KINDS)[number];
 

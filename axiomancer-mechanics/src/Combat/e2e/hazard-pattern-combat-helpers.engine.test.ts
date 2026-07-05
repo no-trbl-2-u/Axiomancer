@@ -62,8 +62,8 @@ registerSandboxCards([{
     scalingStat: 'body',
 }]);
 
-const DOT_BODY = 'slippery-slope';       // body, tier 2, DoT
-const CONTROL_HEART = 'eternal-regress'; // heart, tier 2, control
+const DOT_BODY = 'slippery-slope';       // body starter, DoT (canonical poison)
+const CONTROL_HEART = 'false-dilemma';   // mind, tier 1, control
 const DAMAGE_BODY = 'qa-pure-strike-body'; // body, tier 1, no status effect (sandbox fixture)
 
 const SEED = 12345;

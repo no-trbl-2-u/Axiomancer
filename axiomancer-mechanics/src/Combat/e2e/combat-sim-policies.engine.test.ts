@@ -159,10 +159,11 @@ describe('greedy object reproduces the pinned legacy decision sequences', () => 
     // refactor changed greedy's behavior — fix the refactor, never the pin.
     it('seed 11 vs MournfulGull: befriend-spare in one round', () => {
         const r = runOneEncounter(loadout(MIX), MournfulGull, 11, 'greedy');
-        // Recalibrated 2026-07-03 alongside the CoastalTyrant pin above — same
-        // `slippery-slope` basePower→0 conversion, same reason (fresh measurement).
+        // Recalibrated 2026-07-05 (Fate Engine P1 trim): slippery-slope is the
+        // ramping poison and eternal-regress the unraveling DoT now; the
+        // measured mercy line is one play shorter. Freshly measured, not guessed.
         expect({ outcome: r.outcome, rounds: r.rounds, plays: r.plays, statusPlays: r.statusPlays })
-            .toEqual({ outcome: 'mercy', rounds: 1, plays: 4, statusPlays: 3 });
+            .toEqual({ outcome: 'mercy', rounds: 1, plays: 3, statusPlays: 2 });
         expect(r.cardUsage['slippery-slope']).toEqual({
             cardId: 'slippery-slope', plays: 1, bottomPlays: 1, topPlays: 0, statusLands: 1, discards: 0,
         });
@@ -173,17 +174,19 @@ describe('greedy object reproduces the pinned legacy decision sequences', () => 
 
     it('seed 11 vs CoastalTyrant: a four-round status grind to victory', () => {
         const r = runOneEncounter(loadout(MIX), CoastalTyrant, 11, 'greedy');
-        // Recalibrated 2026-07-03: converting `slippery-slope` off its legacy
-        // basePower (16 → 0, pure status now) shifted the greedy decision
-        // sequence — the strike component no longer front-loads chip damage,
-        // so the grind resolves a round earlier. Freshly measured, not guessed.
+        // Recalibrated 2026-07-05 (Fate Engine P1 trim): the MIX fixture's DoTs
+        // are all PATIENT lines now (ramping poison / unraveling), and this
+        // 150-HP 5-card starter loadout loses the race against the tyrant's
+        // boss escalation clock at seed 11 — a real texture note for
+        // /deck-tuning (stage decks win these fights; see the balance bands).
+        // The pin records the measured sequence, as ever.
         expect({ outcome: r.outcome, rounds: r.rounds, plays: r.plays, statusPlays: r.statusPlays })
-            .toEqual({ outcome: 'victory', rounds: 4, plays: 18, statusPlays: 9 });
+            .toEqual({ outcome: 'defeat', rounds: 4, plays: 24, statusPlays: 12 });
         expect(r.cardUsage['slippery-slope']).toEqual({
-            cardId: 'slippery-slope', plays: 3, bottomPlays: 3, topPlays: 0, statusLands: 3, discards: 0,
+            cardId: 'slippery-slope', plays: 4, bottomPlays: 4, topPlays: 0, statusLands: 4, discards: 0,
         });
         expect(r.cardUsage['card-retreat']).toEqual({
-            cardId: 'card-retreat', plays: 3, bottomPlays: 0, topPlays: 3, statusLands: 0, discards: 0,
+            cardId: 'card-retreat', plays: 4, bottomPlays: 0, topPlays: 4, statusLands: 0, discards: 0,
         });
     }, 30_000);
 });

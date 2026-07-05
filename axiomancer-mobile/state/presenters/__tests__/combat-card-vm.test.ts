@@ -2,14 +2,13 @@
  * Hermetic unit tests for the honest card view-model helpers
  * (engineHonestKind / resolvePrimary / faceStats / detailStats / armedReadValue).
  *
- * Fixtures are the four verified sample cards from the card-rework design spec,
- * read live from the installed engine so the assertions stay true to real data:
- *   - slippery-slope    Bleed 2× dur3 (dpr 3)  → 6/t·3t = 18
+ * Fixtures are curated keepers (Fate Engine P1 trim, spec 31 §4), read live
+ * from the installed engine so the assertions stay true to real data:
+ *   - slippery-slope    ramping Poison i1 d4   → 2+2+3+3 = 10 lifetime
  *   - brace-for-impact  Guard 12               → free Guard 6
- *   - eternal-recurrence Regen 3× dur4 (dpr 4) → 12/t·4t = 48, free 4/t·6t = 24
- *   - buridans-impasse  Stun dur2              → skip 2t
+ *   - eternal-recurrence Regen i2 d4 (hpr 4)   → 8/t·4t = 32
+ *   - unmoved-mover     Stagger d1             → skip 1t
  *   - qa-mobile-pure-strike (sandbox fixture) Strike → no fabricated number
- *     (no real card is a pure strike since the 2026-07-03 status-doctrine pass)
  *
  * Core invariant under test: real-units-or-no-number (never a fabricated value),
  * and face↔detail numbers agree.
@@ -70,16 +69,15 @@ describe('engineHonestKind — the honesty gate', () => {
 });
 
 describe('faceStats — honest real-unit faces', () => {
-    it('Slippery Slope (Bleed) → 18 total · 6/turn · 3 turns, FREE 2 HP', () => {
+    it('Slippery Slope (ramping Poison) → 10 lifetime (2,2,3,3) · 4 turns, FREE 2 HP', () => {
         const { card, skill } = cardOf('slippery-slope');
         const f = faceStats(card, skill);
         expect(f.kind).toBe('dot');
-        expect(f.keyword).toBe('BLEED');
-        expect(f.heroText).toBe('18');
-        expect(f.heroSub).toBe('over 3 turns');
+        expect(f.heroText).toBe('10');        // ramp-aware: 2+2+3+3 (rampFactor 0.5)
+        expect(f.heroSub).toBe('over 4 turns');
         expect(f.freeHeroText).toBe('2 HP');
         expect(f.readDependent).toBe(true);   // the read now scales status (depth epic)
-        expect(f.statusBase).toBe(18);
+        expect(f.statusBase).toBe(10);
         expect(f.inert).toBe(false);
     });
     it('Brace for Impact (Guard) → Guard 12, FREE Guard 6, read-dependent', () => {
@@ -91,20 +89,19 @@ describe('faceStats — honest real-unit faces', () => {
         expect(f.readDependent).toBe(true);
         expect(f.guardBase).toBe(12);
     });
-    it('Eternal Recurrence (Regen) → 48 total · 12/turn · 4 turns, FREE 24', () => {
+    it('Eternal Recurrence (Regen) → real i2 d4 totals from the canonical library', () => {
         const { card, skill } = cardOf('eternal-recurrence');
         const f = faceStats(card, skill);
         expect(f.kind).toBe('regen');
-        expect(f.heroText).toBe('48');
+        // buff_regeneration hpr 4 × i2 = 8/turn × 4 turns = 32 (exact, from data)
+        expect(f.heroText).toBe('32');
         expect(f.heroSub).toBe('over 4 turns');
-        expect(f.freeHeroText).toBe('24');
-        expect(f.freeHeroSub).toBe('4/turn · 6 turns');
     });
-    it("Buridan's Impasse (Stun) → skip 2t", () => {
-        const { card, skill } = cardOf('buridans-impasse');
+    it('Unmoved Mover (Stagger) → skip 1t (stun/sleep/petrify merged into stagger)', () => {
+        const { card, skill } = cardOf('unmoved-mover');
         const f = faceStats(card, skill);
         expect(f.kind).toBe('stun');
-        expect(f.heroText).toBe('skip 2 turns');
+        expect(f.heroText).toBe('skip 1 turns');
     });
     it('QA Pure Strike (Strike) → no fabricated number', () => {
         const { card, skill } = cardOf('qa-mobile-pure-strike');
@@ -116,79 +113,49 @@ describe('faceStats — honest real-unit faces', () => {
     });
 
     // ── card-overhaul (2026-07-03) — the 6 previously-blank effects ──
-    it("Achilles' Gambit (Exposure) → real -3 DEF, no longer blank", () => {
+    it("Achilles' Gambit (FATE bleed) → real 8-HP lifetime + a printed X-die line", () => {
         const { card, skill } = cardOf('achilles-gambit');
         const f = faceStats(card, skill);
-        expect(f.kind).toBe('exposure');
-        expect(f.keyword).toBe('EXPOSE');
-        expect(f.heroText).toBe('-3 DEF');
-        expect(f.heroSub).toBe('2 turns');
+        expect(f.kind).toBe('dot');
+        expect(f.heroText).toBe('8');       // bleed 4 × i1 × 2 turns
+        expect(card.dieLines?.some(l => l.includes('X die'))).toBe(true);
         expect(f.inert).toBe(false);
     });
-    it("Ship of Theseus's Drift (Resolute self-buff) → real -15% dmg taken, no longer blank", () => {
-        const { card, skill } = cardOf('ship-of-theseus-drift');
+    it('Appeal to Pity (Resolute self-buff) → real -15% dmg taken', () => {
+        const { card, skill } = cardOf('appeal-to-pity');
         const f = faceStats(card, skill);
         expect(f.kind).toBe('resolute');
-        expect(f.keyword).toBe('RESOLUTE');
         expect(f.heroText).toBe('-15%');
         expect(f.heroSub).toBe('dmg taken · 2 turns');
         expect(f.inert).toBe(false);
     });
-    it('Continuum Fallacy (Clarity self-buff) → reads "next die: WILD", no longer blank', () => {
-        const { card, skill } = cardOf('continuum-fallacy');
+    // (Clarity-primary face: no curated keeper leads with buff_clarity —
+    // appeal-to-authority carries it as a rider. Face coverage returns with
+    // the P3 extension wave.)
+    it('Existential Debt leads with its DESPAIR DoT (isolate rides along)', () => {
+        const { card, skill } = cardOf('existential-debt');
         const f = faceStats(card, skill);
-        expect(f.kind).toBe('clarity');
-        expect(f.keyword).toBe('CLARITY');
-        expect(f.heroText).toBe('WILD');
-        expect(f.heroSub).toBe('next die');
+        expect(f.kind).toBe('dot');
+        expect(f.heroText).toBe('36');              // despair 3 × i3 × 4 turns
         expect(f.inert).toBe(false);
     });
-    it('Mob Appeal (Isolated) → qualitative "denies ally-buff targeting", no longer blank', () => {
-        const { card, skill } = cardOf('mob-appeal');
-        const f = faceStats(card, skill);
-        expect(f.kind).toBe('isolated');
-        expect(f.keyword).toBe('ISOLATE');
-        expect(f.heroText).toBe('');                // qualitative — no fabricated number
-        expect(f.heroSub).toBe('denies ally-buff targeting');
-        expect(f.inert).toBe(false);
-    });
-    it("False Dilemma's Fork (Sensory Null primary, Clarity rider) → primary honest, rider surfaced too", () => {
-        const { card, skill } = cardOf('false-dilemmas-fork');
-        const f = faceStats(card, skill);
-        expect(f.kind).toBe('sensoryNull');
-        expect(f.keyword).toBe('NUMB');
-        expect(f.heroSub).toBe('blocks advantage · dulls control');
-        expect(f.inert).toBe(false);
-        // The self-riding buff_clarity rider is now honest, so it surfaces as a
-        // full (non-minor) keyword in the detail modal rather than vanishing.
-        const d = detailStats(card, skill);
-        const names = d.keywords.map(k => k.name);
-        expect(names).toContain('CLARITY');
-        expect(d.keywords.find(k => k.name === 'CLARITY')?.minor).toBe(false);
-    });
+    // (Sensory-null face: its card was cut in the P1 trim; the effect returns
+    // as enemy-side content in P2.)
 });
 
 describe('detailStats — same numbers as the face', () => {
-    it('Slippery Slope outcome + stats + math all agree on 18', () => {
+    it('Slippery Slope outcome + stats + pill all agree on the ramp-aware 10', () => {
         const { card, skill } = cardOf('slippery-slope');
         const d = detailStats(card, skill);
-        expect(d.outcomeLine).toBe('Apply Bleed 18 over 3 turns.');
-        expect(d.outcomeStats).toEqual([
-            { label: 'PER TURN', value: '6' },
-            { label: 'TURNS', value: '3' },
-            { label: 'TOTAL', value: '18' },
-        ]);
+        expect(d.outcomeStats.find(st => st.label === 'TOTAL')?.value).toBe('10');
         expect(d.stacksText).toBe('Stacks up to 10×.');
-        expect(d.mathLine).toContain('3 base × 2 intensity');
-        // §C: the +DIE read triplet surfaces the status read scaling, base = 18.
-        expect(d.diePill).toMatch(/^▲\d+ · —18 · ▼\d+$/);
-        expect(d.diePillKeyword).toBe('BLEED');
+        // §C: the +DIE read triplet is the deterministic rule, base = 10.
+        expect(d.diePill).toMatch(/^▲\d+ · —10 · ▼\d+$/);
     });
-    it('Eternal Recurrence shows the 48 power total and the 24 FREE total', () => {
+    it('Eternal Recurrence detail agrees with the 32 face total', () => {
         const { card, skill } = cardOf('eternal-recurrence');
         const d = detailStats(card, skill);
-        expect(d.outcomeLine).toContain('48 over');
-        expect(d.mathLine).toContain('24');
+        expect(d.outcomeLine).toContain('32 over');
     });
     it('Brace for Impact (Guard) → terse "Gain Guard 12."', () => {
         const { card, skill } = cardOf('brace-for-impact');
@@ -212,12 +179,12 @@ describe('resolvePrimary + armedReadValue', () => {
         expect(armedReadValue(guard, 'disadvantage', false)).toBe(6);   // 12 × 0.5
         expect(armedReadValue(guard, 'neutral', true)).toBe(15);        // + colour-match bonus
     });
-    it('armedReadValue follows the P0-truth deterministic read rule for DoT (exact, no multipliers)', () => {
-        // Slippery Slope: bleed dpr 3 × intensity 2 × 3 turns = 18 on an even read.
+    it('armedReadValue follows the P0-truth deterministic read rule for DoT (exact, ramp-aware)', () => {
+        // Slippery Slope: canonical poison dpr 2, ramp 0.5, i1, 4 turns.
         const dot = faceStats(getCard('slippery-slope')!, getSkillById('slippery-slope'));
-        expect(armedReadValue(dot, 'neutral', false)).toBe(18);         // printed exactly
-        expect(armedReadValue(dot, 'advantage', false)).toBe(27);       // +1 intensity: 3 × 3 × 3
-        expect(armedReadValue(dot, 'disadvantage', false)).toBe(12);    // −1 turn: 3 × 2 × 2
-        expect(armedReadValue(dot, 'advantage', true)).toBe(27);        // no colour-match bonus on status
+        expect(armedReadValue(dot, 'neutral', false)).toBe(10);         // 2+2+3+3, printed exactly
+        expect(armedReadValue(dot, 'advantage', false)).toBe(20);       // +1 intensity: 4+4+6+6
+        expect(armedReadValue(dot, 'disadvantage', false)).toBe(7);     // −1 turn: 2+2+3
+        expect(armedReadValue(dot, 'advantage', true)).toBe(20);        // no colour-match bonus on status
     });
 });

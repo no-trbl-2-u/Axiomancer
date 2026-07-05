@@ -19,6 +19,7 @@ import {
 import { buildCombatDeck } from '../combat.deck';
 import { isCombatSynergySatisfied, toCombatCard } from '../combat.cards';
 import { getCardById } from '../../Cards/cards.library';
+import { registerSandboxCards } from '../../Cards/cards.sandbox';
 import { lookupEffect } from '../../Effects';
 import { createCharacter } from '../../Character';
 import type { ActiveEffect } from '../../Effects/types';
@@ -159,11 +160,25 @@ describe('isCombatSynergySatisfied', () => {
     });
 
     it('returns false for a caster-side predicate (on: caster)', () => {
-        const card = buildCard('intensity-feedback');
+        // No curated keeper carries a caster-side predicate (Fate Engine P1
+        // trim), so the fixture is a sandbox-only card.
+        registerSandboxCards([{
+            id: 'qa-caster-synergy',
+            name: 'QA Caster Synergy (test fixture)',
+            category: 'paradox',
+            philosophicalAspect: 'mind',
+            description: 'Test-only: caster-side synergy predicate.',
+            tier: 2,
+            targetType: 'enemy',
+            basePower: 4,
+            scalingStat: 'mind',
+            synergy: { predicate: { effectId: 'buff_regeneration', on: 'caster', intensityMin: 1 }, bonusDamage: 5 },
+        }]);
+        const card = buildCard('qa-caster-synergy');
         expect(card).not.toBeNull();
         const enemyEffects: ActiveEffect[] = [
             {
-                effectId: 'buff_critical_rate_up',
+                effectId: 'buff_regeneration',
                 intensity: 1,
                 remainingDuration: 2,
                 sourceId: 'test',

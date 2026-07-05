@@ -156,18 +156,18 @@ describe('VULNERABLE — the foe takes more from every HP source', () => {
 
     it('DoT erosion takes a labeled VULNERABLE surcharge that reconciles to the HP lost', () => {
         const base = initializeCombatEncounter(makePlayer([]), makeEnemy(300, 'mind'), undefined, 7);
-        // poison i2 → 8/round (start). Without vulnerable: lose 8.
+        // canonical poison i2 → 4/round (start). Without vulnerable: lose 4.
         const plain = processBetweenPhases({ ...base, enemy: { ...base.enemy, effects: [ae('debuff_poison', 2)] } });
-        expect(300 - plain.state.enemy.health).toBe(8);
+        expect(300 - plain.state.enemy.health).toBe(4);
         expect(plain.events.some(e => e.kind === 'dot-tick' && e.effectId === 'vulnerable-surcharge')).toBe(false);
 
-        // With vulnerable 1.5: 8 + round(8×0.5)=4 → 12; surcharge is a labeled tick.
+        // With vulnerable 1.5: 4 + round(4×0.5)=2 → 6; surcharge is a labeled tick.
         const vuln = processBetweenPhases({ ...base, enemy: { ...base.enemy, effects: [ae('debuff_poison', 2), ae('debuff_vulnerable', 1)] } });
         const lost = 300 - vuln.state.enemy.health;
-        expect(lost).toBe(12);
+        expect(lost).toBe(6);
         const surcharge = vuln.events.find(e => e.kind === 'dot-tick' && e.effectId === 'vulnerable-surcharge');
         expect(surcharge).toBeDefined();
-        expect((surcharge as { amount: number }).amount).toBe(4);
+        expect((surcharge as { amount: number }).amount).toBe(2);
         // Honesty: the emitted enemy dot-ticks SUM to the real HP lost.
         expect(enemyDotSum(vuln.events)).toBe(lost);
     });
@@ -181,10 +181,10 @@ describe('AMPLIFICATION — the combo registry is surfaced honestly', () => {
         const enemyEffects = [ae('debuff_poison', 2), ae('debuff_bleed', 1)];
         const res = processBetweenPhases({ ...base, enemy: { ...base.enemy, effects: enemyEffects } });
         const lost = 300 - res.state.enemy.health;
-        expect(lost).toBe(15);                       // poison floor(4×2×1.5)=12 + bleed 3
+        expect(lost).toBe(10);                       // poison floor(4×2×1.5)=12 + bleed 3
         expect(enemyDotSum(res.events)).toBe(lost);  // honesty: emitted == landed
 
-        expect(getActiveDotTotal(enemyEffects).total).toBe(15);
+        expect(getActiveDotTotal(enemyEffects).total).toBe(10);
         const amps = getActiveDotAmplifications(enemyEffects);
         expect(amps).toHaveLength(1);
         expect(amps[0].comboName).toBe('Hemorrhage');
@@ -195,14 +195,15 @@ describe('AMPLIFICATION — the combo registry is surfaced honestly', () => {
 // ── RUPTURE — consume DoT, deal the remaining total ──────────────────────────
 
 describe('RUPTURE — detonate the foe DoT for the remaining total', () => {
-    const RUP = 'resonance-rupture';
+    const RUP = 'resonance-detonation';
 
     it('strips the DoT and bursts for projectRupture (read + vulnerable scaled)', () => {
         mockSequentialRng(0.05);
         const enemyEffects = [ae('debuff_poison', 2, 4), ae('debuff_bleed', 1, 4)];
         const state = openAndDraft(makePlayer([RUP]), makeEnemy(300, 'heart', enemyEffects), [RUP, RUP, RUP], 'heart');
         const projected = projectRupture(state); // neutral read (heart die vs heart) → ×1
-        expect(projected).toBe(60);              // poison 12×4 + bleed 3×4
+        // canonical poison RAMPS (rampFactor 0.5): ticks 6,6,9,9 amplified = 30, bleed 4×4 = 16.
+        expect(projected).toBe(46);
 
         const hpBefore = state.enemy.health;
         const res = playCombatCard(state, { uid: state.hand.find(h => h.cardId === RUP)!.uid }, true);
@@ -217,7 +218,7 @@ describe('RUPTURE — detonate the foe DoT for the remaining total', () => {
 
     it('respects RUPTURE_BURST_CAP on a huge DoT stack', () => {
         mockSequentialRng(0.05);
-        const enemyEffects = [ae('debuff_poison', 10, 10)]; // pending 40×10 = 400
+        const enemyEffects = [ae('debuff_poison', 10, 10)]; // pending floor(2×10)×10 = 200
         const state = openAndDraft(makePlayer([RUP]), makeEnemy(900, 'heart', enemyEffects), [RUP, RUP, RUP], 'heart');
         const res = playCombatCard(state, { uid: state.hand.find(h => h.cardId === RUP)!.uid }, true);
         const det = res.events.find(e => e.kind === 'rupture-detonated') as { amount: number } | undefined;
@@ -312,9 +313,9 @@ describe('THORNS — the foe telegraphed hit rebounds onto it', () => {
 describe('BARRIER — a persistent, stacking soak', () => {
     it('a powered Gabriel\'s Bulwark STACKS onto any existing barrier', () => {
         mockSequentialRng(0.05);
-        const state = openAndDraft(makePlayer(['gabriels-bulwark']), makeEnemy(300, 'mind'), ['gabriels-bulwark', 'gabriels-bulwark', 'gabriels-bulwark'], 'mind');
+        const state = openAndDraft(makePlayer(['apophatic-aegis']), makeEnemy(300, 'mind'), ['apophatic-aegis', 'apophatic-aegis', 'apophatic-aegis'], 'mind');
         const seeded = { ...state, barrier: 10 };
-        const res = playCombatCard(seeded, { uid: seeded.hand.find(h => h.cardId === 'gabriels-bulwark')!.uid }, true);
+        const res = playCombatCard(seeded, { uid: seeded.hand.find(h => h.cardId === 'apophatic-aegis')!.uid }, true);
         expect(res.state.barrier ?? 0).toBeGreaterThan(10); // stacked, not replaced
     });
 
@@ -439,9 +440,9 @@ describe('INVARIANT — no new behavior fires without its marker', () => {
 
         for (const ev of res.events) expect(NEW_KINDS.has(ev.kind)).toBe(false);
         expect(res.events.some(e => e.kind === 'dot-tick' && e.effectId === 'vulnerable-surcharge')).toBe(false);
-        // poison i2, no combo → floor(4×2×1)=8 exactly (byte-identical to pre-0.34.0).
+        // canonical poison i2, no combo → floor(2×2×1)=4 exactly.
         const tick = res.events.find(e => e.kind === 'dot-tick' && e.effectId === 'debuff_poison') as { amount: number } | undefined;
-        expect(tick!.amount).toBe(8);
+        expect(tick!.amount).toBe(4);
         expect(res.events.some(e => e.kind === 'threat-fired')).toBe(true); // enemy still acts
     });
 });
@@ -451,12 +452,12 @@ describe('INVARIANT — no new behavior fires without its marker', () => {
 describe('card projection — the new payoff cards classify + advertise sensibly', () => {
     const cases: Array<[string, string, string]> = [
         // [cardId, expected verbClass, expected effectKind/track]
-        ['resonance-rupture', 'direct-damage', 'none'],
+        ['resonance-detonation', 'direct-damage', 'none'],
         ['mounting-contradictions', 'direct-damage', 'none'],
         ['breach', 'stat-debuff', 'control'],
-        ['gabriels-bulwark', 'defend', 'none'],
+        ['apophatic-aegis', 'defend', 'none'],
         ['briar-riposte', 'defend', 'none'],
-        ['brazen-rebuttal', 'buff-self', 'none'],
+        ['tu-quoque', 'buff-self', 'none'],
         // Reworked 2026-07-03: off `siphon` (needed a flat strike to skim from)
         // onto a DoT (hemorrhage) + self-regen pairing — now classifies as DoT.
         ['leeching-syllogism', 'direct-dot', 'dot'],
@@ -477,7 +478,7 @@ describe('card projection — the new payoff cards classify + advertise sensibly
     }
 
     it('rupture/compound cards advertise a non-zero preview floor', () => {
-        for (const id of ['resonance-rupture', 'mounting-contradictions']) {
+        for (const id of ['resonance-detonation', 'mounting-contradictions']) {
             expect(toCombatCard(id, getCardById, lookupEffect)!.bottomDamagePreview).toBeGreaterThan(0);
         }
     });

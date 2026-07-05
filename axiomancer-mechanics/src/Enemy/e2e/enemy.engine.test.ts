@@ -52,8 +52,8 @@ describe('Phase 49 + Phase 57 enemy rotations', () => {
         expect(skillIds).toContain('achilles-gambit');
     });
 
-    it('Tidefluke Reaver carries the straw-giant rotation (Phase 57)', () => {
-        expect(TideflukeReaver.skills?.[0].id).toBe('straw-giant');
+    it('Tidefluke Reaver carries the mob-appeal rotation (straw-giant retired in the P1 trim)', () => {
+        expect(TideflukeReaver.skills?.[0].id).toBe('mob-appeal');
     });
 
     it('Hush-Wraith carries the sorites-cascade rotation (Phase 57)', () => {

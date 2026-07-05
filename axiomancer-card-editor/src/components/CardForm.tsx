@@ -174,6 +174,18 @@ function defaultMechanic(kind: SpecialMechanicKind): CardSpecialMechanic {
             return { kind, multiplier: 1.5 };
         case 'grant_permanent_wild_die':
             return { kind, wildCount: 1, deadCount: 1 };
+        // Fate Engine P1 — die-manipulation verbs + REACT
+        case 'reroll_spent':
+        case 'refresh_die':
+        case 'convert_die_color':
+        case 'bank_spent_die':
+            return { kind };
+        case 'create_temporary_die':
+            return { kind, color: 'wild' };
+        case 'grant_pip':
+            return { kind, count: 1 };
+        case 'react':
+            return { kind, a: 'debuff_fear', b: 'debuff_confusion', minIntensity: 1, burstPerIntensity: 4 };
         default:
             return { kind: 'befriend_attempt' };
     }

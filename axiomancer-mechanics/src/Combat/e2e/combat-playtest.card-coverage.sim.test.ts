@@ -81,10 +81,10 @@ function coveragePlays(cardId: string): { plays: number; seedsTried: number[] } 
 }
 
 describe('card coverage — every library card is exercisable', () => {
-    it('the coverage universe is the full 88-card library', () => {
-        // 65 + 23 (Master Spec 2026-07-03 status-stacking content drop).
-        expect(cardLibrary.length).toBe(88);
-        expect(new Set(cardLibrary.map(c => c.id)).size).toBe(88);
+    it('the coverage universe is the curated 49-card library (Fate Engine P1 trim)', () => {
+        // Trimmed 2026-07-05 (spec 31 §4): 49 locked-in keepers.
+        expect(cardLibrary.length).toBe(49);
+        expect(new Set(cardLibrary.map(c => c.id)).size).toBe(49);
     });
 
     it.each(cardLibrary.map(c => [c.id] as const))(
