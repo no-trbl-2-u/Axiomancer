@@ -45,12 +45,18 @@ export interface CreatureSceneProps {
     /** SVG preserveAspectRatio. The combat battlefield passes 'xMidYMid slice' so
      *  the scene fills a band whose aspect differs from the 374×320 canvas. */
     preserveAspectRatio?: string;
+    /** Suppress the procedural moonlit backdrop (moon, treeline, framing trees,
+     *  mist, embers) and draw ONLY the creature + ground shadow. The combat
+     *  battlefield sets this so the raster arena backdrop behind the scene isn't
+     *  overpainted by the SVG atmosphere. The shared `Defs` (eye/moon glow the
+     *  figures reference) are always kept. Default false = full event scene. */
+    hideBackdrop?: boolean;
     /** The creature figure, drawn around the ground origin. */
     children: React.ReactNode;
 }
 
 export function CreatureScene({
-    label, shadowWidth = 64, figureScale = 1, preserveAspectRatio, children,
+    label, shadowWidth = 64, figureScale = 1, preserveAspectRatio, hideBackdrop = false, children,
 }: CreatureSceneProps) {
     const AXM = usePalette();
     return (
@@ -75,44 +81,48 @@ export function CreatureScene({
                 </RadialGradient>
             </Defs>
 
-            {/* Moon + halo */}
-            <Circle cx={290} cy={66} r={64} fill="url(#enemySceneMoon)" />
-            <Circle cx={290} cy={66} r={26} fill={AXM.parchment} opacity={0.16} />
-            <Circle cx={290} cy={66} r={26} fill="none" stroke={AXM.parchment} strokeWidth={1.2} opacity={0.5} />
+            {!hideBackdrop && (
+                <>
+                    {/* Moon + halo */}
+                    <Circle cx={290} cy={66} r={64} fill="url(#enemySceneMoon)" />
+                    <Circle cx={290} cy={66} r={26} fill={AXM.parchment} opacity={0.16} />
+                    <Circle cx={290} cy={66} r={26} fill="none" stroke={AXM.parchment} strokeWidth={1.2} opacity={0.5} />
 
-            {/* Ground horizon */}
-            <Line x1={0} y1={200} x2={374} y2={200} stroke={AXM.bone} strokeWidth={0.75} opacity={0.45} />
+                    {/* Ground horizon */}
+                    <Line x1={0} y1={200} x2={374} y2={200} stroke={AXM.bone} strokeWidth={0.75} opacity={0.45} />
 
-            {/* Receding treeline */}
-            {BACK_TREES.map(({ x, top, depth }, i) => (
-                <G key={`bt-${i}`} opacity={0.25 + depth * 0.4}>
-                    <Path d={`M${x} ${top} L ${x} 220`} stroke={AXM.bone} strokeWidth={1 + depth * 1.5} />
-                    <Path
-                        d={`M${x} ${top + 18} l ${-12 - depth * 8} ${-8} M${x} ${top + 34} l ${14 + depth * 8} ${-6}`}
-                        stroke={AXM.bone}
-                        strokeWidth={1}
-                        fill="none"
-                    />
-                </G>
-            ))}
+                    {/* Receding treeline */}
+                    {BACK_TREES.map(({ x, top, depth }, i) => (
+                        <G key={`bt-${i}`} opacity={0.25 + depth * 0.4}>
+                            <Path d={`M${x} ${top} L ${x} 220`} stroke={AXM.bone} strokeWidth={1 + depth * 1.5} />
+                            <Path
+                                d={`M${x} ${top + 18} l ${-12 - depth * 8} ${-8} M${x} ${top + 34} l ${14 + depth * 8} ${-6}`}
+                                stroke={AXM.bone}
+                                strokeWidth={1}
+                                fill="none"
+                            />
+                        </G>
+                    ))}
 
-            {/* Framing trees */}
-            {[12, 362].map((x, i) => {
-                const dir = x < 187 ? 1 : -1;
-                return (
-                    <G key={`ft-${i}`}>
-                        <Path d={`M${x} 40 C ${x + dir * 10} 110, ${x - dir * 8} 170, ${x} 224`} stroke={AXM.parchment} strokeWidth={3} fill="none" />
-                        <Path d={`M${x} 80 l ${dir * 34} -14 M${x} 120 l ${dir * 40} -6 M${x} 150 l ${dir * 30} 6`} stroke={AXM.parchment} strokeWidth={1.5} fill="none" />
+                    {/* Framing trees */}
+                    {[12, 362].map((x, i) => {
+                        const dir = x < 187 ? 1 : -1;
+                        return (
+                            <G key={`ft-${i}`}>
+                                <Path d={`M${x} 40 C ${x + dir * 10} 110, ${x - dir * 8} 170, ${x} 224`} stroke={AXM.parchment} strokeWidth={3} fill="none" />
+                                <Path d={`M${x} 80 l ${dir * 34} -14 M${x} 120 l ${dir * 40} -6 M${x} 150 l ${dir * 30} 6`} stroke={AXM.parchment} strokeWidth={1.5} fill="none" />
+                            </G>
+                        );
+                    })}
+
+                    {/* Ground mist */}
+                    <G stroke={AXM.bone} strokeWidth={0.5} opacity={0.28}>
+                        {Array.from({ length: 40 }).map((_, i) => (
+                            <Line key={`m-${i}`} x1={i * 10} y1={206 + (i % 4) * 4} x2={i * 10 + 14} y2={206 + (i % 4) * 4} />
+                        ))}
                     </G>
-                );
-            })}
-
-            {/* Ground mist */}
-            <G stroke={AXM.bone} strokeWidth={0.5} opacity={0.28}>
-                {Array.from({ length: 40 }).map((_, i) => (
-                    <Line key={`m-${i}`} x1={i * 10} y1={206 + (i % 4) * 4} x2={i * 10 + 14} y2={206 + (i % 4) * 4} />
-                ))}
-            </G>
+                </>
+            )}
 
             {/* Creature */}
             <G transform={`translate(187 200) scale(${figureScale})`}>
@@ -121,7 +131,7 @@ export function CreatureScene({
             </G>
 
             {/* Embers */}
-            {EMBERS.map((e, i) => (
+            {!hideBackdrop && EMBERS.map((e, i) => (
                 <Circle key={`e-${i}`} cx={e.cx} cy={e.cy} r={e.r} fill={e.warm ? AXM.sulfur : AXM.blood} opacity={0.5} />
             ))}
         </Svg>
