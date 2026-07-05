@@ -22,6 +22,7 @@
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { AccessibilityInfo, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image } from 'expo-image';
 import * as Haptics from 'expo-haptics';
 import Animated, {
     runOnJS, useAnimatedStyle, useSharedValue, withDelay, withSequence, withTiming,
@@ -44,6 +45,11 @@ import type { CombatEvent } from '@mechanics';
 import { effectGlyph } from '@/components/combat/statusGlyphs';
 import { keywordForEffect } from '@/state/combat/keywords';
 import { IntentIcon } from './IntentIcon';
+
+/** Full-bleed battlefield backdrop — a storm-lit ruined city over a cracked
+ *  stone floor. Sits behind the enemy figure; the SVG `CreatureScene` draws
+ *  `hideBackdrop` so its procedural moon/treeline doesn't overpaint the art. */
+const ARENA_BG = require('@/assets/images/combat/arena-ruined-city.jpg');
 
 /** A bump of resolved engine events the pane animates. `seq` rises on each new
  *  resolution so the effect fires exactly once per APPLY / END PHASE. */
@@ -443,12 +449,21 @@ export const CombatCombatantPane = React.memo(function CombatCombatantPane({
         <Animated.View style={[StyleSheet.absoluteFillObject, shakeStyle]} pointerEvents="box-none" testID="combat-combatant-pane">
             {/* ── layer 0: the battlefield scene, enemy figure LARGE ── */}
             <View style={styles.sceneBand} pointerEvents="none">
+                {/* raster arena backdrop — full-bleed behind the foe */}
+                <Image
+                    source={ARENA_BG}
+                    style={StyleSheet.absoluteFill}
+                    contentFit="cover"
+                    contentPosition="bottom center"
+                    accessibilityLabel="A storm-lit ruined city skyline over a cracked stone floor"
+                />
                 <Animated.View style={[StyleSheet.absoluteFillObject, enemyAnim]}>
                     <CreatureScene
                         label={`${enemy.name} bars the way`}
                         figureScale={1.15}
                         preserveAspectRatio="xMidYMid slice"
                         shadowWidth={50}
+                        hideBackdrop
                     >
                         <Figure />
                     </CreatureScene>
