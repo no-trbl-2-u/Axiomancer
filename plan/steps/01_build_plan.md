@@ -32,11 +32,12 @@ Tick in this file in the same commit that ships the phase.
       — `feat(cli): classify first-map route coverage and survivorship`
 
 **Calibration (small, low-risk — prove the loop works in this repo):**
-- [ ] Phase 1 — Combat test-coverage backfill: add the missing
+- [x] Phase 1 — Combat test-coverage backfill: add the missing
       funded-path (success) e2e coverage for
       `sig-overwhelming-argument` and any HP kill-path with zero
       population-level witness (mechanics; test-only, low risk;
       exercises the mechanics verify gate + CI-green deploy gate)
+      — `test(mechanics): backfill funded-path combat kill-path coverage — phase 1` (0af106ff)
 
 **Engine depth (status-effect doctrine):**
 - [ ] Phase 2 — Projected-lethality readout API
@@ -129,3 +130,4 @@ phases with linked notes here.)
 ## Phase log (commit hashes)
 
 - phase 0 — (adoption commit) — nexus methodology adopted
+- phase 1 — 0af106ff — combat test-coverage backfill (sig-overwhelming-argument funded-path victory witness)
