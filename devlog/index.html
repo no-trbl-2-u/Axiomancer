@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
-<title>Axiomancer DevLog</title>
+<title>Axiomancer</title>
 <style>
 :root {
   color-scheme: light dark;
@@ -116,17 +116,91 @@ figure.shotset > figcaption { font-size: 14px; color: var(--fg); margin-bottom: 
 .entry-list .date { color: var(--accent); font-weight: 600; font-variant-numeric: tabular-nums; }
 .entry-list .head { color: var(--list-head); font-size: 14px; margin: 2px 0 6px; }
 footer.foot { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--border); color: var(--muted); font-size: 13px; }
+
+/* ── Hub (landing page) ──────────────────────────────────────────────── */
+.hub { display: grid; grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr)); gap: 14px; margin: 22px 0 0; }
+.hub a {
+  display: block; text-decoration: none; color: var(--fg);
+  background: var(--card); border: 1px solid var(--border);
+  border-left: 4px solid var(--hue, var(--accent));
+  border-radius: 12px; padding: 18px 20px; transition: background .12s, transform .12s;
+}
+.hub a:hover { background: var(--row); transform: translateY(-1px); }
+.hub .h-title { font-size: 19px; font-weight: 700; color: var(--fg-strong); margin: 0 0 4px; }
+.hub .h-sub { font-size: 14px; color: var(--muted); }
+.hub .h-glyph { font-size: 22px; line-height: 1; margin-bottom: 8px; display: block; }
+.hue-cards { --hue: #5aa9e6; }
+.hue-enemies { --hue: #e0574b; }
+.hue-effects { --hue: #b08bf0; }
+.hue-log { --hue: #d0a92b; }
+
+/* ── Catalog: cards grid ─────────────────────────────────────────────── */
+.searchbar { margin: 14px 0 4px; }
+.searchbar input {
+  width: 100%; padding: 10px 14px; border-radius: 10px; font-size: 15px;
+  background: var(--card); color: var(--fg); border: 1px solid var(--border);
+}
+.count-note { color: var(--muted); font-size: 13px; margin: 6px 0 16px; }
+.grid-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr)); gap: 16px; }
+.gcard {
+  background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+  overflow: hidden; display: flex; flex-direction: column;
+}
+.gcard .art { aspect-ratio: 4 / 3; background: var(--panel); overflow: hidden; }
+.gcard .art img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.gcard .art.none { display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 26px; }
+.gcard .body { padding: 12px 14px 14px; }
+.gcard .name { font-weight: 700; color: var(--fg-strong); margin: 0 0 6px; }
+.gcard .text { font-size: 14px; color: var(--fg); }
+
+/* ── Catalog: enemies ────────────────────────────────────────────────── */
+.grid-enemies { display: grid; grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr)); gap: 16px; }
+.ecard { background: var(--card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+.ecard .portrait { aspect-ratio: 1 / 1; background: var(--panel); overflow: hidden; }
+.ecard .portrait img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.ecard .portrait.none { display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 34px; }
+.ecard .body { padding: 12px 15px 15px; }
+.ecard .name { font-size: 18px; font-weight: 700; color: var(--fg-strong); margin: 0; }
+.ecard .sub { color: var(--muted); font-size: 13px; margin: 2px 0 10px; text-transform: capitalize; }
+.statrow { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 10px; }
+.stat { font-size: 12px; font-weight: 700; padding: 2px 9px; border-radius: 999px; background: var(--panel); border: 1px solid var(--border); color: var(--fg); white-space: nowrap; }
+.stat .k { color: var(--muted); font-weight: 600; margin-right: 3px; }
+.stat.hp { --sc: #e0574b; } .stat.body { --sc: #e6864b; } .stat.mind { --sc: #5aa9e6; } .stat.heart { --sc: #7fc45a; }
+.stat.hp, .stat.body, .stat.mind, .stat.heart { border-color: color-mix(in srgb, var(--sc) 55%, var(--border)); }
+.sec-label { font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 700; margin: 10px 0 5px; }
+.fights { font-size: 14px; margin: 0 0 4px; }
+.hint { font-size: 13px; color: var(--muted); font-style: italic; margin: 4px 0 0; }
+.skill { border-top: 1px solid var(--border); padding: 8px 0 0; margin: 8px 0 0; }
+.skill .sk-name { font-weight: 700; color: var(--fg-strong); font-size: 14px; }
+.skill .sk-text { font-size: 13px; color: var(--fg); margin: 2px 0 0; }
+.no-skills { font-size: 13px; color: var(--muted); }
+
+/* ── Catalog: effects ────────────────────────────────────────────────── */
+.eff-list { display: grid; gap: 10px; margin: 8px 0 0; }
+.eff {
+  display: grid; grid-template-columns: 3rem 1fr; gap: 14px; align-items: start;
+  background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px;
+}
+.eff .glyph {
+  width: 3rem; height: 3rem; border-radius: 10px; display: flex; align-items: center; justify-content: center;
+  font-size: 26px; line-height: 1; color: #0b0d10; font-weight: 700;
+  background: var(--gc, var(--accent)); box-shadow: inset 0 0 0 1px rgba(0,0,0,.15);
+}
+.eff .name { font-weight: 700; color: var(--fg-strong); }
+.eff .text { font-size: 14px; color: var(--fg); margin: 2px 0 0; }
 </style>
 </head>
 <body>
-<header class="top"><div class="wrap"><span class="home">Axiomancer DevLog</span></div></header>
+<header class="top"><div class="wrap"><span class="home">Axiomancer</span></div></header>
 <main class="wrap">
-<h1>Axiomancer DevLog</h1>
-<p class="muted">2 entries, newest first.</p>
-<ul class="entry-list">
-  <li><a href="./DIGEST_2026-07-06.html"><span class="date">2026-07-06</span><div class="head">Quiet on the loop's own dial, loud everywhere else: the autonomous march tick has been silently no-oping on almost every run for the past day and a half — a stale OAuth token masked as green — while four merged PRs shipped the Fate Engine dice layer, a 52-enemy art-driven roster rewrite, a first arena backdrop, and an art + drag-perf pass.</div><div class="counts"><span class="chip cat-mechanics">1 mechanics</span><span class="chip cat-ui">2 UI</span><span class="chip cat-content">2 content</span><span class="chip cat-infra">3 infra</span></div></a></li>
-  <li><a href="./DIGEST_2026-07-04.html"><span class="date">2026-07-04</span><div class="head">Seed entry — delete once the first real nightly digest lands. Shows every card type so you can preview the layout.</div><div class="counts"><span class="chip cat-mechanics">1 mechanics</span><span class="chip cat-ui">1 UI</span><span class="chip cat-infra">1 infra</span></div></a></li>
-</ul>
+<h1>Axiomancer</h1>
+<p class="muted">A private index of the game's content and the nightly development log.</p>
+<div class="hub">
+  <a class="hue-cards" href="./cards.html"><span class="h-glyph">🂠</span><div class="h-title">Cards</div><div class="h-sub">49 cards</div></a>
+  <a class="hue-enemies" href="./enemies.html"><span class="h-glyph">☠</span><div class="h-title">Enemies</div><div class="h-sub">53 foes</div></a>
+  <a class="hue-effects" href="./effects.html"><span class="h-glyph">✷</span><div class="h-title">Effects</div><div class="h-sub">34 statuses</div></a>
+  <a class="hue-log" href="./log.html"><span class="h-glyph">❯</span><div class="h-title">DevLog</div><div class="h-sub">2 entries</div></a>
+</div>
 <footer class="foot">Axiomancer DevLog &middot; generated by <code>scripts/build-devlog.mjs</code></footer>
 </main>
 </body>
