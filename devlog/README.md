@@ -1,12 +1,42 @@
 # DevLog
 
-An accumulating, private development log — one **visual** entry per day: a
-headline, categorized work-item cards (each with *what* changed and *why*),
-rendered code diffs for engine/mechanics work, and before/after screenshots for
-UI work. The nightly `/digest` skill authors a structured markdown entry;
+A private, self-contained site served from this one directory. `index.html` is a
+**hub** with four links:
+
+- **Cards** (`cards.html`) — every combat card: name, painting, card text.
+- **Enemies** (`enemies.html`) — every foe: portrait, name, stats, and attacks
+  (signature skills + how its AI fights).
+- **Effects** (`effects.html`) — every live status effect: name, board glyph,
+  and what it does.
+- **DevLog** (`log.html`) — the accumulating, one-visual-entry-per-day
+  development log.
+
+The **catalog** pages (Cards/Enemies/Effects) are generated from the game's
+canonical libraries; the **DevLog** is one **visual** entry per day: a headline,
+categorized work-item cards (each with *what* changed and *why*), rendered code
+diffs for engine/mechanics work, and before/after screenshots for UI work. The
+nightly `/digest` skill authors a structured markdown entry;
 `scripts/build-devlog.mjs` renders it into a self-contained styled HTML page.
-Both the markdown source and the built HTML are committed — no build runs on the
-host.
+Everything served here — markdown source, built HTML, copied art — is committed;
+no build runs on the host.
+
+## Catalog pages (Cards / Enemies / Effects)
+
+These are **generated from the mechanics engine**, so they never drift from what
+the game actually ships:
+
+- `scripts/export-catalog.ts` (run via `npm run catalog:export`, ts-node) reads
+  `axiomancer-mechanics` (`cards.library`, `enemy.library`, the effect libraries)
+  plus the mobile art registries, writes flat records to `data/{cards,enemies,`
+  `effects}.json`, and copies the referenced paintings into
+  `assets/catalog/{cards,enemies}/`. This is the one place the art-free mechanics
+  package meets the mobile art files.
+- `scripts/build-catalog.mjs` (`npm run catalog:build`, zero-dep) renders those
+  JSON files into `cards.html` / `enemies.html` / `effects.html` using the shared
+  theme in `scripts/devlog-shell.mjs`.
+
+Effect **glyphs** reuse the mobile combat board's presentation mapping
+(`statusGlyphs.ts`); deprecated-tagged effects are omitted.
 
 ## Entry format
 
@@ -56,8 +86,8 @@ UI change landed.
 1. **Zero setup — GitHub mobile.** Open `entries/DIGEST_{date}.md` in the GitHub
    app on a private repo. Renders in GitHub's markdown style (not the custom
    theme, and no rendered diffs/shots), but needs nothing extra.
-2. **Full experience — Cloudflare Pages + Access (free).** Serves the built HTML
-   (cards, diffs, screenshots) as a real webpage, gated to just your email:
+2. **Full experience — Cloudflare Pages + Access (free).** Serves the whole site
+   (hub + catalog + DevLog) as a real webpage, gated to just your email:
    - Cloudflare dashboard → **Workers & Pages** → **Create** → **Pages** →
      **Connect to Git** → pick this repo.
    - Build settings: **Framework preset = None**, **Build command = (empty)**,
@@ -73,6 +103,11 @@ The site sends `noindex` and, behind Access, is not publicly reachable.
 ## Regenerating locally
 
 ```bash
-npm run devlog:build                       # re-render all entries + index
+npm run site:build                         # everything: catalog export + build + devlog
+npm run catalog                            # just the catalog: export JSON + build HTML
+npm run devlog:build                       # just the hub + DevLog entries
 npm run devlog:shots -- <since-ref> <date> # collect UI before/after/diff
 ```
+
+`npm run catalog:export` needs the `axiomancer-mechanics` dev deps installed
+(ts-node); `catalog:build` and `devlog:build` are dependency-free.

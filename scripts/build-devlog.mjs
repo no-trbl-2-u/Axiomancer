@@ -1,7 +1,12 @@
 #!/usr/bin/env node
-// Build the DevLog: turn each structured markdown entry in devlog/entries/ into
-// a self-contained, visually organized HTML page under devlog/, and regenerate
-// devlog/index.html.
+// Build the DevLog site:
+//   - devlog/index.html         the HUB — four links: Cards, Enemies, Effects, DevLog
+//   - devlog/log.html           the DevLog entry list (newest first)
+//   - devlog/DIGEST_<date>.html one page per structured markdown entry
+//
+// The Cards / Enemies / Effects pages are built by scripts/build-catalog.mjs
+// from devlog/data/*.json (produced by `npm run catalog:export`). This script
+// only reads those JSON files (if present) to show live counts on the hub.
 //
 // Zero dependencies (matches the dep-free root). Entries are Markdown with a
 // light structure the /digest skill authors (see skills/digest.md §3.4):
@@ -33,11 +38,13 @@
 import { readdirSync, readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
+import { escapeHtml, slug, inline, page } from "./devlog-shell.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const DEVLOG = join(ROOT, "devlog");
 const ENTRIES = join(DEVLOG, "entries");
 const ASSETS = join(DEVLOG, "assets");
+const DATA = join(DEVLOG, "data");
 
 const ENTRY_RE = /^DIGEST_(\d{4}-\d{2}-\d{2})\.md$/;
 
@@ -51,24 +58,10 @@ const CAT_LABEL = {
 };
 
 // ---------------------------------------------------------------------------
-// Inline markdown → HTML
-// ---------------------------------------------------------------------------
-function escapeHtml(s) {
-  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-}
-
-// Stable, diffable heading ids ("Today's intent" -> "todays-intent").
-function slug(s) {
-  return s
-    .toLowerCase()
-    .replace(/['’]/g, "")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-}
-
 // Status is color + text, never color alone (format contract): tag known
 // outcome words with a colored dot while keeping the word. Applied to table
 // cells only, where the pulse/queue outcomes live.
+// ---------------------------------------------------------------------------
 const STATUS = [
   { re: /\b(shipped|landed|merged|done|pass(?:ed)?|green|clean)\b/gi, cls: "ok" },
   { re: /\b(no-?op|quiet|skip(?:ped)?|idle|none)\b/gi, cls: "neutral" },
@@ -82,27 +75,6 @@ function statusize(html) {
     html = html.replace(re, (m) => `<span class="st st-${cls}">${m}</span>`);
   }
   return html;
-}
-
-function inline(text) {
-  // Protect code spans with a private-use sentinel (survives escapeHtml, can't
-  // occur in real input) so their contents aren't reformatted and bare numbers
-  // in the text can't collide with placeholders.
-  const codes = [];
-  let s = text.replace(/`([^`]+)`/g, (_, code) => {
-    codes.push(`<code>${escapeHtml(code)}</code>`);
-    return `\x00${codes.length - 1}\x00`;
-  });
-  s = escapeHtml(s);
-  s = s.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, (_, label, href) => {
-    const safe = href.replace(/"/g, "&quot;");
-    return `<a href="${safe}">${label}</a>`;
-  });
-  s = s.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
-  s = s.replace(/(^|[^*])\*([^*]+)\*(?!\*)/g, "$1<em>$2</em>");
-  s = s.replace(/(^|[^A-Za-z0-9])_([^_]+)_/g, "$1<em>$2</em>");
-  s = s.replace(/\x00(\d+)\x00/g, (_, i) => codes[Number(i)]);
-  return s;
 }
 
 // ---------------------------------------------------------------------------
@@ -357,143 +329,49 @@ function countsBar(counts) {
 }
 
 // ---------------------------------------------------------------------------
-// Shared page shell — the single source of DevLog styling
+// The hub (devlog/index.html) — four links into the site
 // ---------------------------------------------------------------------------
-const STYLE = `
-:root {
-  color-scheme: light dark;
-  --bg: #0e1116; --fg: #d7dde5; --fg-strong: #f0f3f7; --muted: #6b7480;
-  --accent: #8ab4f8; --panel: #161b22; --card: #12171f; --border: #222833;
-  --row: #141a22; --code-bg: #1b212b; --th: #aeb7c2; --list-head: #9aa4b0;
-  --add: rgba(80,200,120,.16); --del: rgba(230,90,90,.16);
-}
-@media (prefers-color-scheme: light) {
-  :root {
-    --bg: #f7f5ef; --fg: #33302a; --fg-strong: #1a160f; --muted: #6f6656;
-    --accent: #3a5db0; --panel: #efece3; --card: #fbfaf5; --border: #ddd7c9;
-    --row: #efece3; --code-bg: #e9e5d9; --th: #5c5344; --list-head: #6f6656;
-    --add: rgba(35,140,75,.16); --del: rgba(190,55,55,.16);
+function dataCount(name) {
+  try {
+    const arr = JSON.parse(readFileSync(join(DATA, `${name}.json`), "utf8"));
+    return Array.isArray(arr) ? arr.length : null;
+  } catch {
+    return null;
   }
 }
-* { box-sizing: border-box; }
-body {
-  margin: 0; background: var(--bg); color: var(--fg);
-  font: 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  -webkit-text-size-adjust: 100%;
-}
-.wrap { max-width: 46rem; margin: 0 auto; padding: 20px 18px 80px; }
-header.top {
-  position: sticky; top: 0; z-index: 5;
-  background: var(--bg); border-bottom: 1px solid var(--border); margin: 0 0 20px;
-}
-header.top .wrap { padding-top: 14px; padding-bottom: 14px; display: flex; align-items: baseline; gap: 14px; }
-header.top a.home, header.top .home { color: var(--accent); text-decoration: none; font-weight: 600; }
-header.top .crumb { color: var(--muted); font-size: 14px; font-variant-numeric: tabular-nums; }
-h1, h2, h3, h4 { line-height: 1.25; color: var(--fg-strong); }
-h1 { font-size: 26px; margin: 0 0 6px; }
-h2 { font-size: 19px; margin: 0; }
-a { color: var(--accent); }
-p { margin: 8px 0; }
-code { background: var(--code-bg); padding: 1px 6px; border-radius: 5px; font-size: 0.86em; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
-pre { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; overflow-x: auto; }
-pre code { background: none; padding: 0; }
-.tablewrap { overflow-x: auto; }
-table { width: 100%; border-collapse: collapse; margin: 12px 0; }
-th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
-th { background: var(--panel); color: var(--th); font-weight: 600; white-space: nowrap; }
-tr:last-child td { border-bottom: none; }
-ul, ol { padding-left: 22px; }
-li { margin: 4px 0; }
-.muted { color: var(--muted); }
 
-.st { font-weight: 600; white-space: nowrap; }
-.st::before { content: ""; display: inline-block; width: .5em; height: .5em; border-radius: 50%; margin-right: .38em; background: currentColor; vertical-align: middle; }
-.st-ok { color: #4bb96a; }
-.st-neutral { color: var(--muted); }
-.st-warn { color: #d0a92b; }
-.st-bad { color: #e0574b; }
+function buildHub(entryCount) {
+  const cards = dataCount("cards");
+  const enemies = dataCount("enemies");
+  const effects = dataCount("effects");
+  const sub = (n, noun) => (n == null ? "browse the catalog" : `${n} ${noun}`);
 
-.headline { font-size: 19px; color: var(--fg-strong); margin: 0 0 12px; }
-.counts { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 22px; }
+  const tiles = [
+    { href: "./cards.html", hue: "cards", glyph: "🂠", title: "Cards", sub: sub(cards, "cards") },
+    { href: "./enemies.html", hue: "enemies", glyph: "☠", title: "Enemies", sub: sub(enemies, "foes") },
+    { href: "./effects.html", hue: "effects", glyph: "✷", title: "Effects", sub: sub(effects, "statuses") },
+    {
+      href: "./log.html",
+      hue: "log",
+      glyph: "❯",
+      title: "DevLog",
+      sub: entryCount === 0 ? "no entries yet" : `${entryCount} ${entryCount === 1 ? "entry" : "entries"}`,
+    },
+  ];
 
-.chip {
-  display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: .04em;
-  text-transform: uppercase; padding: 2px 9px; border-radius: 999px;
-  color: #0b0d10; background: var(--cat, var(--accent)); white-space: nowrap;
-}
-.cat-mechanics { --cat: #d0a92b; }
-.cat-ui { --cat: #5aa9e6; }
-.cat-content { --cat: #7fc45a; }
-.cat-infra { --cat: #b08bf0; }
-.cat-balance { --cat: #e6864b; }
+  const grid = tiles
+    .map(
+      (t) =>
+        `  <a class="hue-${t.hue}" href="${t.href}"><span class="h-glyph">${t.glyph}</span>` +
+        `<div class="h-title">${escapeHtml(t.title)}</div><div class="h-sub">${escapeHtml(t.sub)}</div></a>`
+    )
+    .join("\n");
 
-.card {
-  background: var(--card); border: 1px solid var(--border);
-  border-left: 4px solid var(--cat, var(--accent));
-  border-radius: 10px; padding: 14px 18px; margin: 14px 0; scroll-margin-top: 72px;
-}
-.card-head { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
-.card-head h2 { font-size: 18px; }
-.field { margin: 6px 0; }
-.flabel {
-  display: inline-block; min-width: 3.2em; margin-right: 4px; color: var(--muted);
-  font-weight: 700; font-size: 12px; text-transform: uppercase; letter-spacing: .04em;
-}
-.commits { margin: 8px 0 2px; }
-.commit { font-size: 12px; }
-
-.panel { margin: 22px 0; scroll-margin-top: 72px; }
-.panel > h2 { padding-bottom: 6px; border-bottom: 1px solid var(--border); margin-bottom: 8px; }
-
-.diff {
-  border: 1px solid var(--border); border-radius: 8px; overflow-x: auto; margin: 12px 0;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; line-height: 1.5;
-  background: var(--bg);
-}
-.dl { padding: 0 12px; white-space: pre; }
-.dl.add { background: var(--add); }
-.dl.del { background: var(--del); }
-.dl.hunk { color: var(--accent); }
-.dl.meta { color: var(--muted); }
-
-figure.shotset { margin: 14px 0; }
-figure.shotset > figcaption { font-size: 14px; color: var(--fg); margin-bottom: 8px; }
-.shots { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
-.shot { margin: 0; }
-.shot .role { font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); text-align: center; margin-bottom: 3px; }
-.shot img { width: 100%; height: auto; border: 1px solid var(--border); border-radius: 8px; display: block; }
-
-.entry-list { list-style: none; padding: 0; margin: 8px 0 0; }
-.entry-list li { margin: 0; border-bottom: 1px solid var(--border); }
-.entry-list a { display: block; padding: 14px 4px; text-decoration: none; color: var(--fg); }
-.entry-list a:hover { background: var(--row); }
-.entry-list .date { color: var(--accent); font-weight: 600; font-variant-numeric: tabular-nums; }
-.entry-list .head { color: var(--list-head); font-size: 14px; margin: 2px 0 6px; }
-footer.foot { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--border); color: var(--muted); font-size: 13px; }
-`;
-
-function page({ title, crumb, body, isIndex }) {
-  const home = isIndex
-    ? `<span class="home">Axiomancer DevLog</span>`
-    : `<a class="home" href="./index.html">&larr; DevLog</a>`;
-  return `<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="robots" content="noindex">
-<title>${escapeHtml(title)}</title>
-<style>${STYLE}</style>
-</head>
-<body>
-<header class="top"><div class="wrap">${home}${crumb ? `<span class="crumb">${escapeHtml(crumb)}</span>` : ""}</div></header>
-<main class="wrap">
-${body}
-<footer class="foot">Axiomancer DevLog &middot; generated by <code>scripts/build-devlog.mjs</code></footer>
-</main>
-</body>
-</html>
-`;
+  return (
+    `<h1>Axiomancer</h1>\n` +
+    `<p class="muted">A private index of the game's content and the nightly development log.</p>\n` +
+    `<div class="hub">\n${grid}\n</div>`
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -517,15 +395,21 @@ function build() {
 
     writeFileSync(
       join(DEVLOG, `DIGEST_${date}.html`),
-      page({ title: `Axiomancer digest — ${date}`, crumb: date, body, isIndex: false })
+      page({
+        title: `Axiomancer digest — ${date}`,
+        home: { href: "./log.html", label: "← DevLog" },
+        crumb: date,
+        body,
+      })
     );
     meta.push({ date, headline, counts });
   }
 
+  // DevLog entry list → log.html
   const listBody =
     meta.length === 0
-      ? `<h1>Axiomancer DevLog</h1>\n<p class="muted">No entries yet — the next nightly digest will land the first one.</p>`
-      : `<h1>Axiomancer DevLog</h1>\n<p class="muted">${meta.length} ${
+      ? `<h1>DevLog</h1>\n<p class="muted">No entries yet — the next nightly digest will land the first one.</p>`
+      : `<h1>DevLog</h1>\n<p class="muted">${meta.length} ${
           meta.length === 1 ? "entry" : "entries"
         }, newest first.</p>\n<ul class="entry-list">\n${meta
           .map(
@@ -536,11 +420,22 @@ function build() {
           .join("\n")}\n</ul>`;
 
   writeFileSync(
-    join(DEVLOG, "index.html"),
-    page({ title: "Axiomancer DevLog", crumb: "", body: listBody, isIndex: true })
+    join(DEVLOG, "log.html"),
+    page({
+      title: "Axiomancer DevLog",
+      home: { href: "./index.html", label: "← Axiomancer" },
+      crumb: "DevLog",
+      body: listBody,
+    })
   );
 
-  console.log(`devlog: built ${meta.length} entr${meta.length === 1 ? "y" : "ies"} + index.html`);
+  // Hub → index.html
+  writeFileSync(
+    join(DEVLOG, "index.html"),
+    page({ title: "Axiomancer", home: null, crumb: "", body: buildHub(meta.length) })
+  );
+
+  console.log(`devlog: built hub + log + ${meta.length} entr${meta.length === 1 ? "y" : "ies"}`);
 }
 
 build();

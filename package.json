@@ -19,7 +19,11 @@
     "verify": "npm run verify --workspace axiomancer-mechanics && npm run verify --workspace axiomancer-mobile && npm run type-check --workspace axiomancer-card-editor",
     "deploy:check": "node scripts/deploy-check.mjs",
     "devlog:build": "node scripts/build-devlog.mjs",
-    "devlog:shots": "node axiomancer-mobile/scripts/devlog-shots.mjs"
+    "devlog:shots": "node axiomancer-mobile/scripts/devlog-shots.mjs",
+    "catalog:export": "npm --workspace axiomancer-mechanics run catalog:export",
+    "catalog:build": "node scripts/build-catalog.mjs",
+    "catalog": "npm run catalog:export && npm run catalog:build",
+    "site:build": "npm run catalog && npm run devlog:build"
   },
   "overrides": {
     "react": "19.1.0",

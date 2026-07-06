@@ -1,0 +1,1283 @@
+[
+ {
+  "id": "enemy-float-eye",
+  "name": "Float-Eye",
+  "image": "./assets/catalog/enemies/float-eye.webp",
+  "level": 1,
+  "difficulty": "normal",
+  "maxHealth": 15,
+  "stats": {
+   "body": 1,
+   "mind": 1,
+   "heart": 1
+  },
+  "logic": "balanced",
+  "logicBlurb": "Balanced — presses while healthy, defends once below half HP.",
+  "stanceHint": "It only watches — whatever it does next, it has watched you do first.",
+  "skills": []
+ },
+ {
+  "id": "enemy-grave-larva",
+  "name": "Grave Larva",
+  "image": "./assets/catalog/enemies/larva.webp",
+  "level": 1,
+  "difficulty": "simple",
+  "maxHealth": 25,
+  "stats": {
+   "body": 3,
+   "mind": 1,
+   "heart": 1
+  },
+  "logic": "aggressive",
+  "logicBlurb": "Aggressive — attacks most turns, countering your last stance.",
+  "stanceHint": "It is all appetite and no argument — it simply chews toward you.",
+  "skills": []
+ },
+ {
+  "id": "enemy-chattering-skull",
+  "name": "Chattering Skull",
+  "image": "./assets/catalog/enemies/skull.webp",
+  "level": 2,
+  "difficulty": "simple",
+  "maxHealth": 30,
+  "stats": {
+   "body": 2,
+   "mind": 3,
+   "heart": 1
+  },
+  "logic": "random",
+  "logicBlurb": "Unpredictable — any stance, any action, no pattern to read.",
+  "stanceHint": "It repeats its last argument on a loop — cold, toothy, and rehearsed.",
+  "skills": []
+ },
+ {
+  "id": "enemy-little-belle",
+  "name": "Little Belle",
+  "image": "./assets/catalog/enemies/little-belle.webp",
+  "level": 2,
+  "difficulty": "normal",
+  "maxHealth": 40,
+  "stats": {
+   "body": 2,
+   "mind": 2,
+   "heart": 4
+  },
+  "logic": "balanced",
+  "logicBlurb": "Balanced — presses while healthy, defends once below half HP.",
+  "stanceHint": "A creature of pure mourning; it acts on raw feeling, not calculation.",
+  "skills": [
+   {
+    "name": "Appeal to Pity",
+    "text": "You let the wound show. The argument was never the point — your pain is. Even your own body listens, and softens, and bends a little of itself back together."
+   }
+  ]
+ },
+ {
+  "id": "enemy-foot-stealer",
+  "name": "Foot-Stealer",
+  "image": "./assets/catalog/enemies/foot-stealer.webp",
+  "level": 3,
+  "difficulty": "normal",
+  "maxHealth": 45,
+  "stats": {
+   "body": 5,
+   "mind": 2,
+   "heart": 2
+  },
+  "logic": "aggressive",
+  "logicBlurb": "Aggressive — attacks most turns, countering your last stance.",
+  "stanceHint": "It goes for your footing first — everything it does is leverage.",
+  "skills": []
+ },
+ {
+  "id": "enemy-water-holger",
+  "name": "Water-Holger",
+  "image": "./assets/catalog/enemies/water-holger.webp",
+  "level": 3,
+  "difficulty": "normal",
+  "maxHealth": 40,
+  "stats": {
+   "body": 2,
+   "mind": 2,
+   "heart": 4
+  },
+  "logic": "strategic",
+  "logicBlurb": "Strategic — reads your active effects and exploits your vulnerabilities.",
+  "stanceHint": "Grief moves it more than hunger — the sea returned the feeling parts.",
+  "skills": [
+   {
+    "name": "Pascal's Wager",
+    "text": "You commit to the belief that costs nothing if you are wrong, and saves you if you are right. The certainty is its own balm; the wound closes around the wager."
+   }
+  ]
+ },
+ {
+  "id": "enemy-cursed-head",
+  "name": "Cursed Head",
+  "image": "./assets/catalog/enemies/cursed-head.webp",
+  "level": 4,
+  "difficulty": "normal",
+  "maxHealth": 65,
+  "stats": {
+   "body": 3,
+   "mind": 2,
+   "heart": 8
+  },
+  "logic": "random",
+  "logicBlurb": "Unpredictable — any stance, any action, no pattern to read.",
+  "stanceHint": "It leads with feeling — the grudge does the talking.",
+  "skills": []
+ },
+ {
+  "id": "enemy-ghast",
+  "name": "Ghast",
+  "image": "./assets/catalog/enemies/ghast.webp",
+  "level": 5,
+  "difficulty": "normal",
+  "maxHealth": 80,
+  "stats": {
+   "body": 3,
+   "mind": 10,
+   "heart": 3
+  },
+  "logic": "strategic",
+  "logicBlurb": "Strategic — reads your active effects and exploits your vulnerabilities.",
+  "stanceHint": "It calculates its hunger — every request is a trap already sprung.",
+  "skills": [
+   {
+    "name": "False Dilemma",
+    "text": "Two doors. Only two. Either-or, your fault, no third option — except every option is a door. The enemy hesitates between phantoms while you walk straight through."
+   }
+  ]
+ },
+ {
+  "id": "enemy-doom-egg",
+  "name": "Doom-Egg",
+  "image": "./assets/catalog/enemies/doom-egg.webp",
+  "level": 6,
+  "difficulty": "normal",
+  "maxHealth": 100,
+  "stats": {
+   "body": 8,
+   "mind": 4,
+   "heart": 8
+  },
+  "logic": "defensive",
+  "logicBlurb": "Defensive — turtles until wounded, then strikes your weakest stat.",
+  "stanceHint": "It does not attack so much as incubate — the danger is the countdown.",
+  "skills": []
+ },
+ {
+  "id": "enemy-the-butcher",
+  "name": "The Butcher",
+  "image": "./assets/catalog/enemies/butcher.webp",
+  "level": 6,
+  "difficulty": "elite",
+  "maxHealth": 95,
+  "stats": {
+   "body": 13,
+   "mind": 3,
+   "heart": 3
+  },
+  "logic": "aggressive",
+  "logicBlurb": "Aggressive — attacks most turns, countering your last stance.",
+  "stanceHint": "He answers everything with the cleaver — force is his entire rhetoric.",
+  "skills": [
+   {
+    "name": "Mob Appeal",
+    "text": "The crowd already believes you. So does the part of you that needed convincing. A simultaneous blow and a small, dishonest reassurance — and both work."
+   }
+  ]
+ },
+ {
+  "id": "enemy-king-of-revenge",
+  "name": "The King of Revenge",
+  "image": "./assets/catalog/enemies/king-revenge.webp",
+  "level": 6,
+  "difficulty": "boss",
+  "maxHealth": 150,
+  "stats": {
+   "body": 8,
+   "mind": 12,
+   "heart": 10
+  },
+  "logic": "boss",
+  "logicBlurb": "Boss script — a telegraphed, round-keyed signature pattern.",
+  "stanceHint": "A grievance with a crown — he answers everything with feeling first, and the feeling is old.",
+  "skills": [
+   {
+    "name": "Achilles' Gambit",
+    "text": "You commit to the strike that should never land — the runner who can never catch the tortoise, the heel that must be exposed. Paradox collapses into a single, unanswerable blow."
+   },
+   {
+    "name": "Ad Hominem Strike",
+    "text": "You don't refute the argument — you refute the arguer. The blow lands where their composure was, scattering whatever fragile certainty they had built. Their stance crumbles before their muscles do."
+   },
+   {
+    "name": "False Dilemma",
+    "text": "Two doors. Only two. Either-or, your fault, no third option — except every option is a door. The enemy hesitates between phantoms while you walk straight through."
+   }
+  ]
+ },
+ {
+  "id": "enemy-brine-hag",
+  "name": "Brine Hag",
+  "image": "./assets/catalog/enemies/hag.webp",
+  "level": 7,
+  "difficulty": "elite",
+  "maxHealth": 120,
+  "stats": {
+   "body": 3,
+   "mind": 7,
+   "heart": 14
+  },
+  "logic": "strategic",
+  "logicBlurb": "Strategic — reads your active effects and exploits your vulnerabilities.",
+  "stanceHint": "She works on the feelings first — the bargain is already half-made in your chest.",
+  "skills": [
+   {
+    "name": "Appeal to Pity",
+    "text": "You let the wound show. The argument was never the point — your pain is. Even your own body listens, and softens, and bends a little of itself back together."
+   }
+  ]
+ },
+ {
+  "id": "enemy-the-ferryman",
+  "name": "The Ferryman",
+  "image": "./assets/catalog/enemies/sendou-figure-a.webp",
+  "level": 8,
+  "difficulty": "elite",
+  "maxHealth": 140,
+  "stats": {
+   "body": 8,
+   "mind": 15,
+   "heart": 5
+  },
+  "logic": "strategic",
+  "logicBlurb": "Strategic — reads your active effects and exploits your vulnerabilities.",
+  "stanceHint": "A cold calculator of crossings; only at the end does the pole swing on feeling.",
+  "skills": [
+   {
+    "name": "Sorites' Cascade",
+    "text": "A grain. Another grain. At what point did the heap of small wounds become a mortal one? They cannot say. The bleeding stacks faster than their definition of \"alive.\""
+   }
+  ]
+ },
+ {
+  "id": "enemy-wichtlein",
+  "name": "Wichtlein",
+  "image": "./assets/catalog/enemies/wichtlein.webp",
+  "level": 9,
+  "difficulty": "normal",
+  "maxHealth": 160,
+  "stats": {
+   "body": 7,
+   "mind": 19,
+   "heart": 6
+  },
+  "logic": "defensive",
+  "logicBlurb": "Defensive — turtles until wounded, then strikes your weakest stat.",
+  "stanceHint": "It measures and portends — every knock is a calculation about your ending.",
+  "skills": [
+   {
+    "name": "False Dilemma",
+    "text": "Two doors. Only two. Either-or, your fault, no third option — except every option is a door. The enemy hesitates between phantoms while you walk straight through."
+   }
+  ]
+ },
+ {
+  "id": "enemy-kudan",
+  "name": "Kudan",
+  "image": "./assets/catalog/enemies/kudan.webp",
+  "level": 10,
+  "difficulty": "unique",
+  "maxHealth": 100,
+  "stats": {
+   "body": 6,
+   "mind": 7,
+   "heart": 7
+  },
+  "logic": "strategic",
+  "logicBlurb": "Strategic — reads your active effects and exploits your vulnerabilities.",
+  "stanceHint": "It grieves what it knows — the prophecy hurts it more than you can.",
+  "skills": [
+   {
+    "name": "Eternal Regress",
+    "text": "Every answer they reach demands a previous answer; every previous answer demands one more. You watch their certainty unspool itself — and lay two distinct binds on the wreckage."
+   }
+  ]
+ },
+ {
+  "id": "enemy-bull-begger",
+  "name": "Bull-Begger",
+  "image": "./assets/catalog/enemies/bull-begger-re-a.webp",
+  "level": 11,
+  "difficulty": "normal",
+  "maxHealth": 205,
+  "stats": {
+   "body": 23,
+   "mind": 9,
+   "heart": 9
+  },
+  "logic": "aggressive",
+  "logicBlurb": "Aggressive — attacks most turns, countering your last stance.",
+  "stanceHint": "It begs with a raised fist — the asking and the taking are one motion.",
+  "skills": []
+ },
+ {
+  "id": "enemy-goblin-shaman",
+  "name": "Goblin Shaman",
+  "image": "./assets/catalog/enemies/goblin-shaman-c.webp",
+  "level": 12,
+  "difficulty": "normal",
+  "maxHealth": 225,
+  "stats": {
+   "body": 10,
+   "mind": 26,
+   "heart": 9
+  },
+  "logic": "strategic",
+  "logicBlurb": "Strategic — reads your active effects and exploits your vulnerabilities.",
+  "stanceHint": "It consults before it strikes — three small gods, all of them owed.",
+  "skills": [
+   {
+    "name": "Liar's Echo",
+    "text": "\"This sentence is false.\" Their next thought catches on the loop, doubles back, and arrives more exposed than when it left. You read every tell twice."
+   }
+  ]
+ },
+ {
+  "id": "enemy-weeping-head",
+  "name": "Weeping Head",
+  "image": "./assets/catalog/enemies/cursed-head2.webp",
+  "level": 12,
+  "difficulty": "normal",
+  "maxHealth": 225,
+  "stats": {
+   "body": 10,
+   "mind": 9,
+   "heart": 26
+  },
+  "logic": "defensive",
+  "logicBlurb": "Defensive — turtles until wounded, then strikes your weakest stat.",
+  "stanceHint": "It fights the way it cries: continuously, and at you.",
+  "skills": [
+   {
+    "name": "Appeal to Pity",
+    "text": "You let the wound show. The argument was never the point — your pain is. Even your own body listens, and softens, and bends a little of itself back together."
+   }
+  ]
+ },
+ {
+  "id": "enemy-sugata",
+  "name": "Sugata, the Half-Erased",
+  "image": "./assets/catalog/enemies/sugata.webp",
+  "level": 13,
+  "difficulty": "normal",
+  "maxHealth": 245,
+  "stats": {
+   "body": 16,
+   "mind": 9,
+   "heart": 24
+  },
+  "logic": "random",
+  "logicBlurb": "Unpredictable — any stance, any action, no pattern to read.",
+  "stanceHint": "It moves on pure feeling — stopping, it fears, would finish the erasing.",
+  "skills": []
+ },
+ {
+  "id": "enemy-mabadi",
+  "name": "Mabadi",
+  "image": "./assets/catalog/enemies/mabadi.webp",
+  "level": 14,
+  "difficulty": "elite",
+  "maxHealth": 270,
+  "stats": {
+   "body": 31,
+   "mind": 15,
+   "heart": 8
+  },
+  "logic": "strategic",
+  "logicBlurb": "Strategic — reads your active effects and exploits your vulnerabilities.",
+  "stanceHint": "The cane is a metronome — he strikes on beats you have not learned yet.",
+  "skills": [
+   {
+    "name": "Achilles' Gambit",
+    "text": "You commit to the strike that should never land — the runner who can never catch the tortoise, the heel that must be exposed. Paradox collapses into a single, unanswerable blow."
+   }
+  ]
+ },
+ {
+  "id": "enemy-pale-brood",
+  "name": "Pale Brood",
+  "image": "./assets/catalog/enemies/larva2.webp",
+  "level": 14,
+  "difficulty": "normal",
+  "maxHealth": 270,
+  "stats": {
+   "body": 32,
+   "mind": 12,
+   "heart": 10
+  },
+  "logic": "aggressive",
+  "logicBlurb": "Aggressive — attacks most turns, countering your last stance.",
+  "stanceHint": "It remembers being winged — the fury is all forward.",
+  "skills": []
+ },
+ {
+  "id": "enemy-tri-eyes",
+  "name": "Tri-Eyes",
+  "image": "./assets/catalog/enemies/tri-eyes-a.webp",
+  "level": 15,
+  "difficulty": "normal",
+  "maxHealth": 375,
+  "stats": {
+   "body": 5,
+   "mind": 36,
+   "heart": 34
+  },
+  "logic": "balanced",
+  "logicBlurb": "Balanced — presses while healthy, defends once below half HP.",
+  "stanceHint": "It counts your errors through whichever eye you fail to watch.",
+  "skills": [
+   {
+    "name": "False Dilemma",
+    "text": "Two doors. Only two. Either-or, your fault, no third option — except every option is a door. The enemy hesitates between phantoms while you walk straight through."
+   },
+   {
+    "name": "Ad Hominem Strike",
+    "text": "You don't refute the argument — you refute the arguer. The blow lands where their composure was, scattering whatever fragile certainty they had built. Their stance crumbles before their muscles do."
+   }
+  ]
+ },
+ {
+  "id": "enemy-bone-totem",
+  "name": "Bone Totem",
+  "image": "./assets/catalog/enemies/bone-totem-a.webp",
+  "level": 16,
+  "difficulty": "elite",
+  "maxHealth": 315,
+  "stats": {
+   "body": 18,
+   "mind": 28,
+   "heart": 17
+  },
+  "logic": "defensive",
+  "logicBlurb": "Defensive — turtles until wounded, then strikes your weakest stat.",
+  "stanceHint": "It stands its ground because it IS its ground — the curse assembles one word per skull.",
+  "skills": [
+   {
+    "name": "Mob Appeal",
+    "text": "The crowd already believes you. So does the part of you that needed convincing. A simultaneous blow and a small, dishonest reassurance — and both work."
+   }
+  ]
+ },
+ {
+  "id": "enemy-frayed-one",
+  "name": "The Frayed One",
+  "image": "./assets/catalog/enemies/frayed-one.webp",
+  "level": 16,
+  "difficulty": "elite",
+  "maxHealth": 315,
+  "stats": {
+   "body": 9,
+   "mind": 36,
+   "heart": 18
+  },
+  "logic": "strategic",
+  "logicBlurb": "Strategic — reads your active effects and exploits your vulnerabilities.",
+  "stanceHint": "It thinks in loose threads — and every thread it loses, it takes from something else.",
+  "skills": [
+   {
+    "name": "Sorites' Cascade",
+    "text": "A grain. Another grain. At what point did the heap of small wounds become a mortal one? They cannot say. The bleeding stacks faster than their definition of \"alive.\""
+   }
+  ]
+ },
+ {
+  "id": "enemy-bone-wizard",
+  "name": "Bone Wizard",
+  "image": "./assets/catalog/enemies/bone-wizard-b.webp",
+  "level": 17,
+  "difficulty": "elite",
+  "maxHealth": 340,
+  "stats": {
+   "body": 12,
+   "mind": 44,
+   "heart": 12
+  },
+  "logic": "strategic",
+  "logicBlurb": "Strategic — reads your active effects and exploits your vulnerabilities.",
+  "stanceHint": "Pure study moves it — the flesh was a distraction it graded and discarded.",
+  "skills": [
+   {
+    "name": "Eternal Regress",
+    "text": "Every answer they reach demands a previous answer; every previous answer demands one more. You watch their certainty unspool itself — and lay two distinct binds on the wreckage."
+   }
+  ]
+ },
+ {
+  "id": "enemy-mirac",
+  "name": "Mirac",
+  "image": "./assets/catalog/enemies/mirac.webp",
+  "level": 18,
+  "difficulty": "boss",
+  "maxHealth": 450,
+  "stats": {
+   "body": 5,
+   "mind": 20,
+   "heart": 65
+  },
+  "logic": "boss",
+  "logicBlurb": "Boss script — a telegraphed, round-keyed signature pattern.",
+  "stanceHint": "The verdict is felt before it is reasoned — the red court rules from the chest.",
+  "skills": [
+   {
+    "name": "Sorites' Cascade",
+    "text": "A grain. Another grain. At what point did the heap of small wounds become a mortal one? They cannot say. The bleeding stacks faster than their definition of \"alive.\""
+   },
+   {
+    "name": "Mob Appeal",
+    "text": "The crowd already believes you. So does the part of you that needed convincing. A simultaneous blow and a small, dishonest reassurance — and both work."
+   },
+   {
+    "name": "Bootstrap Paradox",
+    "text": "The healing comes from the version of you that survived. The version of you that survived came from this healing. The loop is whole; the wound, less so."
+   }
+  ]
+ },
+ {
+  "id": "enemy-cursed-paladin",
+  "name": "Cursed Paladin",
+  "image": "./assets/catalog/enemies/paladin-cursed-a.webp",
+  "level": 19,
+  "difficulty": "elite",
+  "maxHealth": 390,
+  "stats": {
+   "body": 44,
+   "mind": 11,
+   "heart": 23
+  },
+  "logic": "balanced",
+  "logicBlurb": "Balanced — presses while healthy, defends once below half HP.",
+  "stanceHint": "The armor swings on muscle memory — the oath does the aiming.",
+  "skills": [
+   {
+    "name": "Achilles' Gambit",
+    "text": "You commit to the strike that should never land — the runner who can never catch the tortoise, the heel that must be exposed. Paradox collapses into a single, unanswerable blow."
+   },
+   {
+    "name": "Pascal's Wager",
+    "text": "You commit to the belief that costs nothing if you are wrong, and saves you if you are right. The certainty is its own balm; the wound closes around the wager."
+   }
+  ]
+ },
+ {
+  "id": "enemy-vampire-thrall",
+  "name": "Vampire Thrall",
+  "image": "./assets/catalog/enemies/slave-vampire-servant.webp",
+  "level": 20,
+  "difficulty": "normal",
+  "maxHealth": 420,
+  "stats": {
+   "body": 42,
+   "mind": 14,
+   "heart": 28
+  },
+  "logic": "aggressive",
+  "logicBlurb": "Aggressive — attacks most turns, countering your last stance.",
+  "stanceHint": "It throws itself forward — its will is elsewhere, holding the leash.",
+  "skills": [
+   {
+    "name": "Mob Appeal",
+    "text": "The crowd already believes you. So does the part of you that needed convincing. A simultaneous blow and a small, dishonest reassurance — and both work."
+   }
+  ]
+ },
+ {
+  "id": "enemy-hasshaku-sama",
+  "name": "Hasshaku-sama",
+  "image": "./assets/catalog/enemies/hasshaku-sama.webp",
+  "level": 21,
+  "difficulty": "elite",
+  "maxHealth": 450,
+  "stats": {
+   "body": 23,
+   "mind": 23,
+   "heart": 44
+  },
+  "logic": "strategic",
+  "logicBlurb": "Strategic — reads your active effects and exploits your vulnerabilities.",
+  "stanceHint": "Everything she does is affection, scaled wrong — the choosing came from the heart.",
+  "skills": [
+   {
+    "name": "Appeal to Pity",
+    "text": "You let the wound show. The argument was never the point — your pain is. Even your own body listens, and softens, and bends a little of itself back together."
+   },
+   {
+    "name": "Pascal's Wager",
+    "text": "You commit to the belief that costs nothing if you are wrong, and saves you if you are right. The certainty is its own balm; the wound closes around the wager."
+   }
+  ]
+ },
+ {
+  "id": "enemy-jeweled-tree",
+  "name": "The Jeweled Tree",
+  "image": "./assets/catalog/enemies/jeweled-tree-b.webp",
+  "level": 22,
+  "difficulty": "elite",
+  "maxHealth": 470,
+  "stats": {
+   "body": 14,
+   "mind": 27,
+   "heart": 53
+  },
+  "logic": "defensive",
+  "logicBlurb": "Defensive — turtles until wounded, then strikes your weakest stat.",
+  "stanceHint": "It feeds on wanting — the whole fight is an appeal to your appetite.",
+  "skills": [
+   {
+    "name": "Appeal to Pity",
+    "text": "You let the wound show. The argument was never the point — your pain is. Even your own body listens, and softens, and bends a little of itself back together."
+   }
+  ]
+ },
+ {
+  "id": "enemy-ogre-naga",
+  "name": "Ogre Naga",
+  "image": "./assets/catalog/enemies/ogre-naga-e.webp",
+  "level": 23,
+  "difficulty": "elite",
+  "maxHealth": 505,
+  "stats": {
+   "body": 57,
+   "mind": 29,
+   "heart": 15
+  },
+  "logic": "aggressive",
+  "logicBlurb": "Aggressive — attacks most turns, countering your last stance.",
+  "stanceHint": "Coils first, questions never — it swallows counterarguments whole.",
+  "skills": [
+   {
+    "name": "Mob Appeal",
+    "text": "The crowd already believes you. So does the part of you that needed convincing. A simultaneous blow and a small, dishonest reassurance — and both work."
+   }
+  ]
+ },
+ {
+  "id": "enemy-sidelle",
+  "name": "Sidelle",
+  "image": "./assets/catalog/enemies/sidelle.webp",
+  "level": 24,
+  "difficulty": "elite",
+  "maxHealth": 535,
+  "stats": {
+   "body": 61,
+   "mind": 31,
+   "heart": 15
+  },
+  "logic": "strategic",
+  "logicBlurb": "Strategic — reads your active effects and exploits your vulnerabilities.",
+  "stanceHint": "It could fly and chooses to crawl — everything it does is a pointed refusal.",
+  "skills": [
+   {
+    "name": "Achilles' Gambit",
+    "text": "You commit to the strike that should never land — the runner who can never catch the tortoise, the heel that must be exposed. Paradox collapses into a single, unanswerable blow."
+   }
+  ]
+ },
+ {
+  "id": "enemy-rawhead-rex",
+  "name": "Rawhead Rex",
+  "image": "./assets/catalog/enemies/raw-head-rex.webp",
+  "level": 25,
+  "difficulty": "boss",
+  "maxHealth": 570,
+  "stats": {
+   "body": 65,
+   "mind": 17,
+   "heart": 32
+  },
+  "logic": "boss",
+  "logicBlurb": "Boss script — a telegraphed, round-keyed signature pattern.",
+  "stanceHint": "A cellar-thing of pure muscle — the courtesy is over.",
+  "skills": [
+   {
+    "name": "Mob Appeal",
+    "text": "The crowd already believes you. So does the part of you that needed convincing. A simultaneous blow and a small, dishonest reassurance — and both work."
+   },
+   {
+    "name": "Achilles' Gambit",
+    "text": "You commit to the strike that should never land — the runner who can never catch the tortoise, the heel that must be exposed. Paradox collapses into a single, unanswerable blow."
+   },
+   {
+    "name": "Ad Hominem Strike",
+    "text": "You don't refute the argument — you refute the arguer. The blow lands where their composure was, scattering whatever fragile certainty they had built. Their stance crumbles before their muscles do."
+   }
+  ]
+ },
+ {
+  "id": "enemy-fate-spinner",
+  "name": "The Fate-Spinner",
+  "image": "./assets/catalog/enemies/fate-spinner.webp",
+  "level": 26,
+  "difficulty": "boss",
+  "maxHealth": 595,
+  "stats": {
+   "body": 17,
+   "mind": 67,
+   "heart": 35
+  },
+  "logic": "boss",
+  "logicBlurb": "Boss script — a telegraphed, round-keyed signature pattern.",
+  "stanceHint": "Every move a reasoned counter — the web was drafted before you arrived.",
+  "skills": [
+   {
+    "name": "Liar's Echo",
+    "text": "\"This sentence is false.\" Their next thought catches on the loop, doubles back, and arrives more exposed than when it left. You read every tell twice."
+   },
+   {
+    "name": "False Dilemma",
+    "text": "Two doors. Only two. Either-or, your fault, no third option — except every option is a door. The enemy hesitates between phantoms while you walk straight through."
+   },
+   {
+    "name": "Eternal Regress",
+    "text": "Every answer they reach demands a previous answer; every previous answer demands one more. You watch their certainty unspool itself — and lay two distinct binds on the wreckage."
+   }
+  ]
+ },
+ {
+  "id": "enemy-ashen-bone-drake",
+  "name": "Ashen Bone Drake",
+  "image": "./assets/catalog/enemies/ashen-bone-drake.webp",
+  "level": 27,
+  "difficulty": "elite",
+  "maxHealth": 620,
+  "stats": {
+   "body": 71,
+   "mind": 35,
+   "heart": 18
+  },
+  "logic": "balanced",
+  "logicBlurb": "Balanced — presses while healthy, defends once below half HP.",
+  "stanceHint": "What remains of it is the part that says no — force, distilled.",
+  "skills": [
+   {
+    "name": "Achilles' Gambit",
+    "text": "You commit to the strike that should never land — the runner who can never catch the tortoise, the heel that must be exposed. Paradox collapses into a single, unanswerable blow."
+   },
+   {
+    "name": "Liar's Echo",
+    "text": "\"This sentence is false.\" Their next thought catches on the loop, doubles back, and arrives more exposed than when it left. You read every tell twice."
+   }
+  ]
+ },
+ {
+  "id": "enemy-ra-amin-ka",
+  "name": "Ra-Amin-Ka",
+  "image": "./assets/catalog/enemies/ra-amin-ka-b.webp",
+  "level": 28,
+  "difficulty": "boss",
+  "maxHealth": 660,
+  "stats": {
+   "body": 33,
+   "mind": 66,
+   "heart": 33
+  },
+  "logic": "boss",
+  "logicBlurb": "Boss script — a telegraphed, round-keyed signature pattern.",
+  "stanceHint": "Cold administration — every strike is a decree, countersigned.",
+  "skills": [
+   {
+    "name": "Bootstrap Paradox",
+    "text": "The healing comes from the version of you that survived. The version of you that survived came from this healing. The loop is whole; the wound, less so."
+   },
+   {
+    "name": "Eternal Regress",
+    "text": "Every answer they reach demands a previous answer; every previous answer demands one more. You watch their certainty unspool itself — and lay two distinct binds on the wreckage."
+   },
+   {
+    "name": "Undistributed Middle",
+    "text": "All philosophers are mortal. You are mortal. Therefore you are a philosopher — and your enemy is illegible. You watch them try to follow the syllogism into a corner they cannot leave."
+   }
+  ]
+ },
+ {
+  "id": "enemy-lady-gabriella",
+  "name": "Lady Gabriella",
+  "image": "./assets/catalog/enemies/vampire-lady-gabriella.webp",
+  "level": 29,
+  "difficulty": "elite",
+  "maxHealth": 690,
+  "stats": {
+   "body": 35,
+   "mind": 35,
+   "heart": 68
+  },
+  "logic": "strategic",
+  "logicBlurb": "Strategic — reads your active effects and exploits your vulnerabilities.",
+  "stanceHint": "Courtesy is the weapon — the feelings are real, which is the trap.",
+  "skills": [
+   {
+    "name": "Pascal's Wager",
+    "text": "You commit to the belief that costs nothing if you are wrong, and saves you if you are right. The certainty is its own balm; the wound closes around the wager."
+   },
+   {
+    "name": "Appeal to Pity",
+    "text": "You let the wound show. The argument was never the point — your pain is. Even your own body listens, and softens, and bends a little of itself back together."
+   }
+  ]
+ },
+ {
+  "id": "enemy-zoma",
+  "name": "Zoma, Twin-Voiced",
+  "image": "./assets/catalog/enemies/zoma-a.webp",
+  "level": 30,
+  "difficulty": "elite",
+  "maxHealth": 725,
+  "stats": {
+   "body": 21,
+   "mind": 82,
+   "heart": 42
+  },
+  "logic": "strategic",
+  "logicBlurb": "Strategic — reads your active effects and exploits your vulnerabilities.",
+  "stanceHint": "Two minds, one patient argument — they disagree only about which of them loves you less.",
+  "skills": [
+   {
+    "name": "False Dilemma",
+    "text": "Two doors. Only two. Either-or, your fault, no third option — except every option is a door. The enemy hesitates between phantoms while you walk straight through."
+   },
+   {
+    "name": "Liar's Echo",
+    "text": "\"This sentence is false.\" Their next thought catches on the loop, doubles back, and arrives more exposed than when it left. You read every tell twice."
+   }
+  ]
+ },
+ {
+  "id": "enemy-mabadi-undrowned",
+  "name": "Mabadi, Undrowned",
+  "image": "./assets/catalog/enemies/mabadi2.webp",
+  "level": 31,
+  "difficulty": "elite",
+  "maxHealth": 755,
+  "stats": {
+   "body": 86,
+   "mind": 44,
+   "heart": 21
+  },
+  "logic": "strategic",
+  "logicBlurb": "Strategic — reads your active effects and exploits your vulnerabilities.",
+  "stanceHint": "The same metronome, colder — the river taught him new beats.",
+  "skills": [
+   {
+    "name": "Achilles' Gambit",
+    "text": "You commit to the strike that should never land — the runner who can never catch the tortoise, the heel that must be exposed. Paradox collapses into a single, unanswerable blow."
+   },
+   {
+    "name": "Eternal Regress",
+    "text": "Every answer they reach demands a previous answer; every previous answer demands one more. You watch their certainty unspool itself — and lay two distinct binds on the wreckage."
+   }
+  ]
+ },
+ {
+  "id": "enemy-tri-eyes-hollowed",
+  "name": "Tri-Eyes, Hollowed",
+  "image": "./assets/catalog/enemies/tri-eyes-b.webp",
+  "level": 34,
+  "difficulty": "elite",
+  "maxHealth": 855,
+  "stats": {
+   "body": 49,
+   "mind": 97,
+   "heart": 25
+  },
+  "logic": "strategic",
+  "logicBlurb": "Strategic — reads your active effects and exploits your vulnerabilities.",
+  "stanceHint": "The tally continues without a reason — cold arithmetic, self-sustaining.",
+  "skills": [
+   {
+    "name": "Ad Hominem Strike",
+    "text": "You don't refute the argument — you refute the arguer. The blow lands where their composure was, scattering whatever fragile certainty they had built. Their stance crumbles before their muscles do."
+   },
+   {
+    "name": "Sorites' Cascade",
+    "text": "A grain. Another grain. At what point did the heap of small wounds become a mortal one? They cannot say. The bleeding stacks faster than their definition of \"alive.\""
+   }
+  ]
+ },
+ {
+  "id": "enemy-black-death",
+  "name": "The Black Death",
+  "image": "./assets/catalog/enemies/black-death.webp",
+  "level": 36,
+  "difficulty": "elite",
+  "maxHealth": 930,
+  "stats": {
+   "body": 105,
+   "mind": 28,
+   "heart": 53
+  },
+  "logic": "aggressive",
+  "logicBlurb": "Aggressive — attacks most turns, countering your last stance.",
+  "stanceHint": "A plague with posture — it spreads by main force now.",
+  "skills": [
+   {
+    "name": "Mob Appeal",
+    "text": "The crowd already believes you. So does the part of you that needed convincing. A simultaneous blow and a small, dishonest reassurance — and both work."
+   },
+   {
+    "name": "Achilles' Gambit",
+    "text": "You commit to the strike that should never land — the runner who can never catch the tortoise, the heel that must be exposed. Paradox collapses into a single, unanswerable blow."
+   }
+  ]
+ },
+ {
+  "id": "enemy-the-unnameable",
+  "name": "The Unnameable",
+  "image": "./assets/catalog/enemies/lovecraft-c.webp",
+  "level": 38,
+  "difficulty": "elite",
+  "maxHealth": 1000,
+  "stats": {
+   "body": 28,
+   "mind": 114,
+   "heart": 58
+  },
+  "logic": "strategic",
+  "logicBlurb": "Strategic — reads your active effects and exploits your vulnerabilities.",
+  "stanceHint": "It thinks in shapes language was built to avoid.",
+  "skills": [
+   {
+    "name": "Eternal Regress",
+    "text": "Every answer they reach demands a previous answer; every previous answer demands one more. You watch their certainty unspool itself — and lay two distinct binds on the wreckage."
+   },
+   {
+    "name": "Liar's Echo",
+    "text": "\"This sentence is false.\" Their next thought catches on the loop, doubles back, and arrives more exposed than when it left. You read every tell twice."
+   }
+  ]
+ },
+ {
+  "id": "enemy-fire-giant",
+  "name": "Fire Giant",
+  "image": "./assets/catalog/enemies/fire-giant-a.webp",
+  "level": 40,
+  "difficulty": "elite",
+  "maxHealth": 1080,
+  "stats": {
+   "body": 144,
+   "mind": 36,
+   "heart": 36
+  },
+  "logic": "aggressive",
+  "logicBlurb": "Aggressive — attacks most turns, countering your last stance.",
+  "stanceHint": "A furnace with a genealogy — everything he does is a hammer blow.",
+  "skills": [
+   {
+    "name": "Mob Appeal",
+    "text": "The crowd already believes you. So does the part of you that needed convincing. A simultaneous blow and a small, dishonest reassurance — and both work."
+   },
+   {
+    "name": "Achilles' Gambit",
+    "text": "You commit to the strike that should never land — the runner who can never catch the tortoise, the heel that must be exposed. Paradox collapses into a single, unanswerable blow."
+   }
+  ]
+ },
+ {
+  "id": "enemy-greater-devil",
+  "name": "Greater Devil",
+  "image": "./assets/catalog/enemies/greater-devil-a.webp",
+  "level": 42,
+  "difficulty": "elite",
+  "maxHealth": 1155,
+  "stats": {
+   "body": 88,
+   "mind": 86,
+   "heart": 57
+  },
+  "logic": "strategic",
+  "logicBlurb": "Strategic — reads your active effects and exploits your vulnerabilities.",
+  "stanceHint": "It administers rather than rages — the contract is the cage.",
+  "skills": [
+   {
+    "name": "False Dilemma",
+    "text": "Two doors. Only two. Either-or, your fault, no third option — except every option is a door. The enemy hesitates between phantoms while you walk straight through."
+   },
+   {
+    "name": "Bootstrap Paradox",
+    "text": "The healing comes from the version of you that survived. The version of you that survived came from this healing. The loop is whole; the wound, less so."
+   }
+  ]
+ },
+ {
+  "id": "enemy-rangda",
+  "name": "Rangda",
+  "image": "./assets/catalog/enemies/rangda.webp",
+  "level": 44,
+  "difficulty": "boss",
+  "maxHealth": 1240,
+  "stats": {
+   "body": 62,
+   "mind": 62,
+   "heart": 124
+  },
+  "logic": "boss",
+  "logicBlurb": "Boss script — a telegraphed, round-keyed signature pattern.",
+  "stanceHint": "Grief that learned sorcery — every curse arrives still weeping.",
+  "skills": [
+   {
+    "name": "Appeal to Pity",
+    "text": "You let the wound show. The argument was never the point — your pain is. Even your own body listens, and softens, and bends a little of itself back together."
+   },
+   {
+    "name": "Sorites' Cascade",
+    "text": "A grain. Another grain. At what point did the heap of small wounds become a mortal one? They cannot say. The bleeding stacks faster than their definition of \"alive.\""
+   },
+   {
+    "name": "Liar's Echo",
+    "text": "\"This sentence is false.\" Their next thought catches on the loop, doubles back, and arrives more exposed than when it left. You read every tell twice."
+   }
+  ]
+ },
+ {
+  "id": "enemy-zoma-ascendant",
+  "name": "Zoma Ascendant",
+  "image": "./assets/catalog/enemies/zoma-d.webp",
+  "level": 45,
+  "difficulty": "boss",
+  "maxHealth": 1280,
+  "stats": {
+   "body": 36,
+   "mind": 146,
+   "heart": 74
+  },
+  "logic": "boss",
+  "logicBlurb": "Boss script — a telegraphed, round-keyed signature pattern.",
+  "stanceHint": "The two voices agree now — consensus, it turns out, was the threat.",
+  "skills": [
+   {
+    "name": "Liar's Echo",
+    "text": "\"This sentence is false.\" Their next thought catches on the loop, doubles back, and arrives more exposed than when it left. You read every tell twice."
+   },
+   {
+    "name": "Bootstrap Paradox",
+    "text": "The healing comes from the version of you that survived. The version of you that survived came from this healing. The loop is whole; the wound, less so."
+   },
+   {
+    "name": "False Dilemma",
+    "text": "Two doors. Only two. Either-or, your fault, no third option — except every option is a door. The enemy hesitates between phantoms while you walk straight through."
+   }
+  ]
+ },
+ {
+  "id": "enemy-elder-fire-giant",
+  "name": "Elder Fire Giant",
+  "image": "./assets/catalog/enemies/fire-giant-2-d.webp",
+  "level": 46,
+  "difficulty": "boss",
+  "maxHealth": 1325,
+  "stats": {
+   "body": 152,
+   "mind": 75,
+   "heart": 38
+  },
+  "logic": "boss",
+  "logicBlurb": "Boss script — a telegraphed, round-keyed signature pattern.",
+  "stanceHint": "A fire gone white with age — it burns the way glaciers move: entirely.",
+  "skills": [
+   {
+    "name": "Mob Appeal",
+    "text": "The crowd already believes you. So does the part of you that needed convincing. A simultaneous blow and a small, dishonest reassurance — and both work."
+   },
+   {
+    "name": "Achilles' Gambit",
+    "text": "You commit to the strike that should never land — the runner who can never catch the tortoise, the heel that must be exposed. Paradox collapses into a single, unanswerable blow."
+   },
+   {
+    "name": "Ad Hominem Strike",
+    "text": "You don't refute the argument — you refute the arguer. The blow lands where their composure was, scattering whatever fragile certainty they had built. Their stance crumbles before their muscles do."
+   }
+  ]
+ },
+ {
+  "id": "enemy-tezcatlipoca",
+  "name": "Tezcatlipoca",
+  "image": "./assets/catalog/enemies/tezcatlipoca2.webp",
+  "level": 47,
+  "difficulty": "boss",
+  "maxHealth": 1370,
+  "stats": {
+   "body": 68,
+   "mind": 138,
+   "heart": 68
+  },
+  "logic": "boss",
+  "logicBlurb": "Boss script — a telegraphed, round-keyed signature pattern.",
+  "stanceHint": "The smoking mirror calculates — it shows you the you that already lost.",
+  "skills": [
+   {
+    "name": "Liar's Echo",
+    "text": "\"This sentence is false.\" Their next thought catches on the loop, doubles back, and arrives more exposed than when it left. You read every tell twice."
+   },
+   {
+    "name": "Bootstrap Paradox",
+    "text": "The healing comes from the version of you that survived. The version of you that survived came from this healing. The loop is whole; the wound, less so."
+   },
+   {
+    "name": "Sorites' Cascade",
+    "text": "A grain. Another grain. At what point did the heap of small wounds become a mortal one? They cannot say. The bleeding stacks faster than their definition of \"alive.\""
+   }
+  ]
+ },
+ {
+  "id": "enemy-arch-demon",
+  "name": "Arch-Demon",
+  "image": "./assets/catalog/enemies/arch-demon3.webp",
+  "level": 48,
+  "difficulty": "boss",
+  "maxHealth": 1410,
+  "stats": {
+   "body": 161,
+   "mind": 80,
+   "heart": 41
+  },
+  "logic": "boss",
+  "logicBlurb": "Boss script — a telegraphed, round-keyed signature pattern.",
+  "stanceHint": "Appetite promoted past restraint — the violence is administrative.",
+  "skills": [
+   {
+    "name": "Mob Appeal",
+    "text": "The crowd already believes you. So does the part of you that needed convincing. A simultaneous blow and a small, dishonest reassurance — and both work."
+   },
+   {
+    "name": "Achilles' Gambit",
+    "text": "You commit to the strike that should never land — the runner who can never catch the tortoise, the heel that must be exposed. Paradox collapses into a single, unanswerable blow."
+   },
+   {
+    "name": "Bootstrap Paradox",
+    "text": "The healing comes from the version of you that survived. The version of you that survived came from this healing. The loop is whole; the wound, less so."
+   }
+  ]
+ },
+ {
+  "id": "enemy-death",
+  "name": "Death",
+  "image": "./assets/catalog/enemies/death-f.webp",
+  "level": 49,
+  "difficulty": "unique",
+  "maxHealth": 1455,
+  "stats": {
+   "body": 73,
+   "mind": 109,
+   "heart": 109
+  },
+  "logic": "strategic",
+  "logicBlurb": "Strategic — reads your active effects and exploits your vulnerabilities.",
+  "stanceHint": "It is not cruel. It is punctual, and it has already read your schedule.",
+  "skills": [
+   {
+    "name": "Eternal Regress",
+    "text": "Every answer they reach demands a previous answer; every previous answer demands one more. You watch their certainty unspool itself — and lay two distinct binds on the wreckage."
+   },
+   {
+    "name": "Sorites' Cascade",
+    "text": "A grain. Another grain. At what point did the heap of small wounds become a mortal one? They cannot say. The bleeding stacks faster than their definition of \"alive.\""
+   },
+   {
+    "name": "Bootstrap Paradox",
+    "text": "The healing comes from the version of you that survived. The version of you that survived came from this healing. The loop is whole; the wound, less so."
+   }
+  ]
+ },
+ {
+  "id": "enemy-beelzebub",
+  "name": "Beelzebub",
+  "image": "./assets/catalog/enemies/beelzebub.webp",
+  "level": 50,
+  "difficulty": "boss",
+  "maxHealth": 1500,
+  "stats": {
+   "body": 76,
+   "mind": 150,
+   "heart": 74
+  },
+  "logic": "boss",
+  "logicBlurb": "Boss script — a telegraphed, round-keyed signature pattern.",
+  "stanceHint": "Each fly is a small opinion; together they are policy.",
+  "skills": [
+   {
+    "name": "Mob Appeal",
+    "text": "The crowd already believes you. So does the part of you that needed convincing. A simultaneous blow and a small, dishonest reassurance — and both work."
+   },
+   {
+    "name": "Liar's Echo",
+    "text": "\"This sentence is false.\" Their next thought catches on the loop, doubles back, and arrives more exposed than when it left. You read every tell twice."
+   },
+   {
+    "name": "Bootstrap Paradox",
+    "text": "The healing comes from the version of you that survived. The version of you that survived came from this healing. The loop is whole; the wound, less so."
+   }
+  ]
+ },
+ {
+  "id": "enemy-the-abortive",
+  "name": "The Abortive",
+  "image": "./assets/catalog/enemies/abortive.webp",
+  "level": 50,
+  "difficulty": "unique",
+  "maxHealth": 1500,
+  "stats": {
+   "body": 76,
+   "mind": 74,
+   "heart": 150
+  },
+  "logic": "boss",
+  "logicBlurb": "Boss script — a telegraphed, round-keyed signature pattern.",
+  "stanceHint": "It feels everything it never got to be — the grief predates the griever.",
+  "skills": [
+   {
+    "name": "Bootstrap Paradox",
+    "text": "The healing comes from the version of you that survived. The version of you that survived came from this healing. The loop is whole; the wound, less so."
+   },
+   {
+    "name": "Eternal Regress",
+    "text": "Every answer they reach demands a previous answer; every previous answer demands one more. You watch their certainty unspool itself — and lay two distinct binds on the wreckage."
+   },
+   {
+    "name": "Liar's Echo",
+    "text": "\"This sentence is false.\" Their next thought catches on the loop, doubles back, and arrives more exposed than when it left. You read every tell twice."
+   }
+  ]
+ },
+ {
+  "id": "enemy-the-incompleteness",
+  "name": "The Incompleteness",
+  "image": null,
+  "level": 110,
+  "difficulty": "unique",
+  "maxHealth": 2750,
+  "stats": {
+   "body": 183,
+   "mind": 183,
+   "heart": 184
+  },
+  "logic": "boss",
+  "logicBlurb": "Boss script — a telegraphed, round-keyed signature pattern.",
+  "stanceHint": "It cannot be read from inside any system you carry; every tell is consistent, and none is complete.",
+  "skills": [
+   {
+    "name": "Bootstrap Paradox",
+    "text": "The healing comes from the version of you that survived. The version of you that survived came from this healing. The loop is whole; the wound, less so."
+   },
+   {
+    "name": "Eternal Regress",
+    "text": "Every answer they reach demands a previous answer; every previous answer demands one more. You watch their certainty unspool itself — and lay two distinct binds on the wreckage."
+   },
+   {
+    "name": "Liar's Echo",
+    "text": "\"This sentence is false.\" Their next thought catches on the loop, doubles back, and arrives more exposed than when it left. You read every tell twice."
+   }
+  ]
+ }
+]

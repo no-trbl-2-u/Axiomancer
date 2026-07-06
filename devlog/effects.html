@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Axiomancer — Effects</title>
+<style>
+:root {
+  color-scheme: light dark;
+  --bg: #0e1116; --fg: #d7dde5; --fg-strong: #f0f3f7; --muted: #6b7480;
+  --accent: #8ab4f8; --panel: #161b22; --card: #12171f; --border: #222833;
+  --row: #141a22; --code-bg: #1b212b; --th: #aeb7c2; --list-head: #9aa4b0;
+  --add: rgba(80,200,120,.16); --del: rgba(230,90,90,.16);
+}
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg: #f7f5ef; --fg: #33302a; --fg-strong: #1a160f; --muted: #6f6656;
+    --accent: #3a5db0; --panel: #efece3; --card: #fbfaf5; --border: #ddd7c9;
+    --row: #efece3; --code-bg: #e9e5d9; --th: #5c5344; --list-head: #6f6656;
+    --add: rgba(35,140,75,.16); --del: rgba(190,55,55,.16);
+  }
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--bg); color: var(--fg);
+  font: 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  -webkit-text-size-adjust: 100%;
+}
+.wrap { max-width: 46rem; margin: 0 auto; padding: 20px 18px 80px; }
+header.top {
+  position: sticky; top: 0; z-index: 5;
+  background: var(--bg); border-bottom: 1px solid var(--border); margin: 0 0 20px;
+}
+header.top .wrap { padding-top: 14px; padding-bottom: 14px; display: flex; align-items: baseline; gap: 14px; }
+header.top a.home, header.top .home { color: var(--accent); text-decoration: none; font-weight: 600; }
+header.top .crumb { color: var(--muted); font-size: 14px; font-variant-numeric: tabular-nums; }
+h1, h2, h3, h4 { line-height: 1.25; color: var(--fg-strong); }
+h1 { font-size: 26px; margin: 0 0 6px; }
+h2 { font-size: 19px; margin: 0; }
+a { color: var(--accent); }
+p { margin: 8px 0; }
+code { background: var(--code-bg); padding: 1px 6px; border-radius: 5px; font-size: 0.86em; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+pre { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; overflow-x: auto; }
+pre code { background: none; padding: 0; }
+.tablewrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+th { background: var(--panel); color: var(--th); font-weight: 600; white-space: nowrap; }
+tr:last-child td { border-bottom: none; }
+ul, ol { padding-left: 22px; }
+li { margin: 4px 0; }
+.muted { color: var(--muted); }
+
+.st { font-weight: 600; white-space: nowrap; }
+.st::before { content: ""; display: inline-block; width: .5em; height: .5em; border-radius: 50%; margin-right: .38em; background: currentColor; vertical-align: middle; }
+.st-ok { color: #4bb96a; }
+.st-neutral { color: var(--muted); }
+.st-warn { color: #d0a92b; }
+.st-bad { color: #e0574b; }
+
+.headline { font-size: 19px; color: var(--fg-strong); margin: 0 0 12px; }
+.counts { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 22px; }
+
+.chip {
+  display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: .04em;
+  text-transform: uppercase; padding: 2px 9px; border-radius: 999px;
+  color: #0b0d10; background: var(--cat, var(--accent)); white-space: nowrap;
+}
+.cat-mechanics { --cat: #d0a92b; }
+.cat-ui { --cat: #5aa9e6; }
+.cat-content { --cat: #7fc45a; }
+.cat-infra { --cat: #b08bf0; }
+.cat-balance { --cat: #e6864b; }
+
+.card {
+  background: var(--card); border: 1px solid var(--border);
+  border-left: 4px solid var(--cat, var(--accent));
+  border-radius: 10px; padding: 14px 18px; margin: 14px 0; scroll-margin-top: 72px;
+}
+.card-head { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.card-head h2 { font-size: 18px; }
+.field { margin: 6px 0; }
+.flabel {
+  display: inline-block; min-width: 3.2em; margin-right: 4px; color: var(--muted);
+  font-weight: 700; font-size: 12px; text-transform: uppercase; letter-spacing: .04em;
+}
+.commits { margin: 8px 0 2px; }
+.commit { font-size: 12px; }
+
+.panel { margin: 22px 0; scroll-margin-top: 72px; }
+.panel > h2 { padding-bottom: 6px; border-bottom: 1px solid var(--border); margin-bottom: 8px; }
+
+.diff {
+  border: 1px solid var(--border); border-radius: 8px; overflow-x: auto; margin: 12px 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; line-height: 1.5;
+  background: var(--bg);
+}
+.dl { padding: 0 12px; white-space: pre; }
+.dl.add { background: var(--add); }
+.dl.del { background: var(--del); }
+.dl.hunk { color: var(--accent); }
+.dl.meta { color: var(--muted); }
+
+figure.shotset { margin: 14px 0; }
+figure.shotset > figcaption { font-size: 14px; color: var(--fg); margin-bottom: 8px; }
+.shots { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+.shot { margin: 0; }
+.shot .role { font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); text-align: center; margin-bottom: 3px; }
+.shot img { width: 100%; height: auto; border: 1px solid var(--border); border-radius: 8px; display: block; }
+
+.entry-list { list-style: none; padding: 0; margin: 8px 0 0; }
+.entry-list li { margin: 0; border-bottom: 1px solid var(--border); }
+.entry-list a { display: block; padding: 14px 4px; text-decoration: none; color: var(--fg); }
+.entry-list a:hover { background: var(--row); }
+.entry-list .date { color: var(--accent); font-weight: 600; font-variant-numeric: tabular-nums; }
+.entry-list .head { color: var(--list-head); font-size: 14px; margin: 2px 0 6px; }
+footer.foot { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--border); color: var(--muted); font-size: 13px; }
+
+/* ── Hub (landing page) ──────────────────────────────────────────────── */
+.hub { display: grid; grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr)); gap: 14px; margin: 22px 0 0; }
+.hub a {
+  display: block; text-decoration: none; color: var(--fg);
+  background: var(--card); border: 1px solid var(--border);
+  border-left: 4px solid var(--hue, var(--accent));
+  border-radius: 12px; padding: 18px 20px; transition: background .12s, transform .12s;
+}
+.hub a:hover { background: var(--row); transform: translateY(-1px); }
+.hub .h-title { font-size: 19px; font-weight: 700; color: var(--fg-strong); margin: 0 0 4px; }
+.hub .h-sub { font-size: 14px; color: var(--muted); }
+.hub .h-glyph { font-size: 22px; line-height: 1; margin-bottom: 8px; display: block; }
+.hue-cards { --hue: #5aa9e6; }
+.hue-enemies { --hue: #e0574b; }
+.hue-effects { --hue: #b08bf0; }
+.hue-log { --hue: #d0a92b; }
+
+/* ── Catalog: cards grid ─────────────────────────────────────────────── */
+.searchbar { margin: 14px 0 4px; }
+.searchbar input {
+  width: 100%; padding: 10px 14px; border-radius: 10px; font-size: 15px;
+  background: var(--card); color: var(--fg); border: 1px solid var(--border);
+}
+.count-note { color: var(--muted); font-size: 13px; margin: 6px 0 16px; }
+.grid-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr)); gap: 16px; }
+.gcard {
+  background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+  overflow: hidden; display: flex; flex-direction: column;
+}
+.gcard .art { aspect-ratio: 4 / 3; background: var(--panel); overflow: hidden; }
+.gcard .art img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.gcard .art.none { display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 26px; }
+.gcard .body { padding: 12px 14px 14px; }
+.gcard .name { font-weight: 700; color: var(--fg-strong); margin: 0 0 6px; }
+.gcard .text { font-size: 14px; color: var(--fg); }
+
+/* ── Catalog: enemies ────────────────────────────────────────────────── */
+.grid-enemies { display: grid; grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr)); gap: 16px; }
+.ecard { background: var(--card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+.ecard .portrait { aspect-ratio: 1 / 1; background: var(--panel); overflow: hidden; }
+.ecard .portrait img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.ecard .portrait.none { display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 34px; }
+.ecard .body { padding: 12px 15px 15px; }
+.ecard .name { font-size: 18px; font-weight: 700; color: var(--fg-strong); margin: 0; }
+.ecard .sub { color: var(--muted); font-size: 13px; margin: 2px 0 10px; text-transform: capitalize; }
+.statrow { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 10px; }
+.stat { font-size: 12px; font-weight: 700; padding: 2px 9px; border-radius: 999px; background: var(--panel); border: 1px solid var(--border); color: var(--fg); white-space: nowrap; }
+.stat .k { color: var(--muted); font-weight: 600; margin-right: 3px; }
+.stat.hp { --sc: #e0574b; } .stat.body { --sc: #e6864b; } .stat.mind { --sc: #5aa9e6; } .stat.heart { --sc: #7fc45a; }
+.stat.hp, .stat.body, .stat.mind, .stat.heart { border-color: color-mix(in srgb, var(--sc) 55%, var(--border)); }
+.sec-label { font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 700; margin: 10px 0 5px; }
+.fights { font-size: 14px; margin: 0 0 4px; }
+.hint { font-size: 13px; color: var(--muted); font-style: italic; margin: 4px 0 0; }
+.skill { border-top: 1px solid var(--border); padding: 8px 0 0; margin: 8px 0 0; }
+.skill .sk-name { font-weight: 700; color: var(--fg-strong); font-size: 14px; }
+.skill .sk-text { font-size: 13px; color: var(--fg); margin: 2px 0 0; }
+.no-skills { font-size: 13px; color: var(--muted); }
+
+/* ── Catalog: effects ────────────────────────────────────────────────── */
+.eff-list { display: grid; gap: 10px; margin: 8px 0 0; }
+.eff {
+  display: grid; grid-template-columns: 3rem 1fr; gap: 14px; align-items: start;
+  background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px;
+}
+.eff .glyph {
+  width: 3rem; height: 3rem; border-radius: 10px; display: flex; align-items: center; justify-content: center;
+  font-size: 26px; line-height: 1; color: #0b0d10; font-weight: 700;
+  background: var(--gc, var(--accent)); box-shadow: inset 0 0 0 1px rgba(0,0,0,.15);
+}
+.eff .name { font-weight: 700; color: var(--fg-strong); }
+.eff .text { font-size: 14px; color: var(--fg); margin: 2px 0 0; }
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap"><a class="home" href="./index.html">← Axiomancer</a><span class="crumb">Effects</span></div></header>
+<main class="wrap">
+<h1>Effects</h1>
+<p class="count-note">34 status effects — the glyph is how each one reads on the combat board.</p>
+<div class="sec-label">Buffs · 9</div>
+<div class="eff-list">
+  <div class="eff"><div class="glyph" style="--gc:#9aa0a6" role="img" aria-label="Brazen Thorns glyph">✸</div><div><div class="name">Brazen Thorns</div><div class="text">Your skin answers in kind. To press an argument against you is to be cut by it — the harder the push, the deeper the rebuttal bites back.</div></div></div>
+  <div class="eff"><div class="glyph" style="--gc:#9aa0a6" role="img" aria-label="Briar Stance glyph">✸</div><div><div class="name">Briar Stance</div><div class="text">You root yourself like a thorn bush — still, patient, dangerous. Striking you is a choice they'll regret. Every blow lands, but something sharp comes back.</div></div></div>
+  <div class="eff"><div class="glyph" style="--gc:#5bbf6a" role="img" aria-label="Liar's Clarity glyph">▲</div><div><div class="name">Liar's Clarity</div><div class="text">"This next die is Wild" — the sentence is either true or it isn't, and by naming it, you've made it so. One clean certainty, carved out of the paradox.</div></div></div>
+  <div class="eff"><div class="glyph" style="--gc:#49b98a" role="img" aria-label="Maxwell's Siphon glyph">✚</div><div><div class="name">Maxwell's Siphon</div><div class="text">Like the demon sorting molecules, you separate your enemy's vitality from their form—fast energy to you, slow energy left behind.</div></div></div>
+  <div class="eff"><div class="glyph" style="--gc:#49b98a" role="img" aria-label="Phoenix Vigor glyph">✚</div><div><div class="name">Phoenix Vigor</div><div class="text">Ash remembers the bird. The closer you come to ending, the more fiercely you mend — vitality returning in waves, defenses tightening as the pyre cools.</div></div></div>
+  <div class="eff"><div class="glyph" style="--gc:#49b98a" role="img" aria-label="Promethean Ember glyph">✚</div><div><div class="name">Promethean Ember</div><div class="text">Stolen fire kept burning under the ribs. It mends what the fight tears open, knitting flesh faster than the wound can widen — a gift that keeps costing the giver.</div></div></div>
+  <div class="eff"><div class="glyph" style="--gc:#49b98a" role="img" aria-label="Tristram's Recovery glyph">✚</div><div><div class="name">Tristram's Recovery</div><div class="text">Like the writer who takes a year to document a day, your healing works faster than wounds accumulate. Eventually, you'll catch up.</div></div></div>
+  <div class="eff"><div class="glyph" style="--gc:#5bbf6a" role="img" aria-label="Unmoved Mover's Resolve glyph">▲</div><div><div class="name">Unmoved Mover's Resolve</div><div class="text">Something must move without itself being moved. You anchor yourself there — whatever strikes you now finds a will that does not budge.</div></div></div>
+  <div class="eff"><div class="glyph" style="--gc:#49b98a" role="img" aria-label="Vital Empathy glyph">✚</div><div><div class="name">Vital Empathy</div><div class="text">You stop fighting for a moment and simply exist. The stillness heals. The compassion you pour outward turns inward just enough — a quiet restoration, round by round.</div></div></div>
+</div>
+<div class="sec-label">Debuffs · 25</div>
+<div class="eff-list">
+  <div class="eff"><div class="glyph" style="--gc:#a86bdc" role="img" aria-label="Achilles' Burden glyph">🐌</div><div><div class="name">Achilles' Burden</div><div class="text">You are Achilles—faster than any tortoise. Yet the tortoise is always ahead. No matter how swiftly you act, you're always one step behind.</div></div></div>
+  <div class="eff"><div class="glyph" style="--gc:#a86bdc" role="img" aria-label="Bandwagon's Absence glyph">⛓</div><div><div class="name">Bandwagon's Absence</div><div class="text">The crowd that carried you has moved on to the next argument. Whatever support you were counting on isn't coming — not this turn.</div></div></div>
+  <div class="eff"><div class="glyph" style="--gc:#a86bdc" role="img" aria-label="Braess Binding glyph">⚓</div><div><div class="name">Braess Binding</div><div class="text">Adding options makes things worse. You could move, but seeing the paths available creates congestion in your muscles. Paralysis through possibility.</div></div></div>
+  <div class="eff"><div class="glyph" style="--gc:#e08a3c" role="img" aria-label="Breach glyph">▼</div><div><div class="name">Breach</div><div class="text">A seam pried open in their guard, stance-agnostic and bleeding-obvious. Every blow you land now finds the gap and digs deeper.</div></div></div>
+  <div class="eff"><div class="glyph" style="--gc:#e08a3c" role="img" aria-label="Burali-Forti Wound glyph">❣</div><div><div class="name">Burali-Forti Wound</div><div class="text">Your emotional ordinals exceed their own bounds. The set of all your feelings contains a feeling greater than all feelings. Your Heart tears itself apart.</div></div></div>
+  <div class="eff"><div class="glyph" style="--gc:#e08a3c" role="img" aria-label="Cantor's Gap glyph">🧠</div><div><div class="name">Cantor's Gap</div><div class="text">Your mental defenses are countably infinite—impressive, until you face uncountable assault. There's always a larger infinity of thoughts to break you.</div></div></div>
+  <div class="eff"><div class="glyph" style="--gc:#a86bdc" role="img" aria-label="Cartesian Doubt glyph">⛓</div><div><div class="name">Cartesian Doubt</div><div class="text">You can no longer trust that your next move is the one you intend. The certainty a strong play requires has been methodically dissolved.</div></div></div>
+  <div class="eff"><div class="glyph" style="--gc:#e2543b" role="img" aria-label="Curry's Corruption glyph">☠</div><div><div class="name">Curry's Corruption</div><div class="text">If this poison harms you, then it spreads. The conditional is vacuously true. The conclusion is inevitably, recursively toxic.</div></div></div>
+  <div class="eff"><div class="glyph" style="--gc:#e2543b" role="img" aria-label="Curry's Sepsis glyph">🔥</div><div><div class="name">Curry's Sepsis</div><div class="text">If this wound festers, then it worsens. The conditional is vacuously true — and so is the next one, and the next, each infection weakening the strength of your own next blow.</div></div></div>
+  <div class="eff"><div class="glyph" style="--gc:#a86bdc" role="img" aria-label="Grandfather's Terror glyph">👁</div><div><div class="name">Grandfather's Terror</div><div class="text">You see the paradox of your own destruction—if you fight, you ensure your doom; if you flee, you ensure your doom. Either path leads backward to oblivion.</div></div></div>
+  <div class="eff"><div class="glyph" style="--gc:#a86bdc" role="img" aria-label="Moore's Muteness glyph">🤐</div><div><div class="name">Moore's Muteness</div><div class="text">You believe you can speak, yet you don't believe you're speaking. The absurdity freezes your voice. Assertion becomes impossible.</div></div></div>
+  <div class="eff"><div class="glyph" style="--gc:#e08a3c" role="img" aria-label="Novikov's Consistency glyph">▼</div><div><div class="name">Novikov's Consistency</div><div class="text">The timeline resists paradox: whatever wound is coming was always going to land, and land hard. The universe simply patches around any attempt to prevent it.</div></div></div>
+  <div class="eff"><div class="glyph" style="--gc:#e2543b" role="img" aria-label="Olbers' Fire glyph">🔥</div><div><div class="name">Olbers' Fire</div><div class="text">If infinite stars fill the sky, why is it dark? Because their light is delayed. When it arrives all at once—you burn in accumulated radiance.</div></div></div>
+  <div class="eff"><div class="glyph" style="--gc:#a86bdc" role="img" aria-label="Overextended Commitment glyph">⛓</div><div><div class="name">Overextended Commitment</div><div class="text">You reached past what the moment could support. The next thing you do will be smaller for it — the cost of a payoff already spent.</div></div></div>
+  <div class="eff"><div class="glyph" style="--gc:#d9c66a" role="img" aria-label="Raven's Target glyph">◎</div><div><div class="name">Raven's Target</div><div class="text">Marked and read. While it holds, the bearer’s stance is public — every draft against them is informed.</div></div></div>
+  <div class="eff"><div class="glyph" style="--gc:#e08a3c" role="img" aria-label="Regress Ad Infinitum glyph">▼</div><div><div class="name">Regress Ad Infinitum</div><div class="text">Every reason needs a reason, and that reason needs one too. The chain never grounds out — and neither do you, each unanswered link sapping a little more of what you had left.</div></div></div>
+  <div class="eff"><div class="glyph" style="--gc:#e08a3c" role="img" aria-label="Richard's Exposure glyph">🛡</div><div><div class="name">Richard's Exposure</div><div class="text">Your physical defenses are defined in terms of themselves—a diagonal contradiction. The enumeration reveals your weakness; Body attacks pierce deeply.</div></div></div>
+  <div class="eff"><div class="glyph" style="--gc:#e2543b" role="img" aria-label="Schopenhauer's Despair glyph">🔥</div><div><div class="name">Schopenhauer's Despair</div><div class="text">Every desire you satisfy only reveals the next lack. The will grinds on, wanting, and even the comfort you reach for arrives diminished by the wanting itself.</div></div></div>
+  <div class="eff"><div class="glyph" style="--gc:#e2543b" role="img" aria-label="Sorites' Unraveling glyph">🔥</div><div><div class="name">Sorites' Unraveling</div><div class="text">One grain removed is nothing. The next is nothing too. But the heap has been shedding grains since the moment you were struck, and it has not stopped counting.</div></div></div>
+  <div class="eff"><div class="glyph" style="--gc:#a86bdc" role="img" aria-label="Staggered glyph">⛓</div><div><div class="name">Staggered</div><div class="text">The argument lands where footing was. One whole turn simply does not happen for them.</div></div></div>
+  <div class="eff"><div class="glyph" style="--gc:#e2543b" role="img" aria-label="Theseus' Dissolution glyph">🩸</div><div><div class="name">Theseus' Dissolution</div><div class="text">Plank by plank, your ship comes apart. Drop by drop, you become less yourself. When does the bleeding stop being you?</div></div></div>
+  <div class="eff"><div class="glyph" style="--gc:#e2543b" role="img" aria-label="Theseus' Rupture glyph">🔥</div><div><div class="name">Theseus' Rupture</div><div class="text">The bleeding you named Theseus' Dissolution was gradual — a plank at a time. This is the hull giving way all at once. Only mercy, not time, slows it now.</div></div></div>
+  <div class="eff"><div class="glyph" style="--gc:#a86bdc" role="img" aria-label="Two Envelope Delirium glyph">🌀</div><div><div class="name">Two Envelope Delirium</div><div class="text">Should you switch? The other choice always seems better. You switch targets, switch tactics, switch again—always certain switching helps, always wrong.</div></div></div>
+  <div class="eff"><div class="glyph" style="--gc:#a86bdc" role="img" aria-label="Wigner's Friendship glyph">💗</div><div><div class="name">Wigner's Friendship</div><div class="text">From your perspective, your reality has collapsed into serving them. From outside, you remain in superposition. Neither view is wrong. You obey.</div></div></div>
+  <div class="eff"><div class="glyph" style="--gc:#a86bdc" role="img" aria-label="Zombie Argument glyph">⛓</div><div><div class="name">Zombie Argument</div><div class="text">Something is happening to you, functionally identical to being hurt in every respect — except, the philosophers insist, there is no felt advantage in it. None of your openings mean anything anymore.</div></div></div>
+</div>
+<footer class="foot">Axiomancer DevLog &middot; generated by <code>scripts/build-catalog.mjs</code></footer>
+</main>
+</body>
+</html>
