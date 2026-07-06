@@ -76,12 +76,15 @@ its own cadence.
      issues, `[needs-user-call]`s), `Tuning proposals` (step 5,
      or "none"). Add `Queues now` / `Today's intent` as useful.
 
-   Then `npm run devlog:build` renders the cards/panels into the
-   styled HTML page and refreshes `devlog/index.html`. Commit
-   the entry, the built HTML, and any `devlog/assets/**`
-   together. Body Markdown: pipe tables, `-`/`1.` lists, fenced
-   code / ```diff, `**bold**`, `_italic_`, `` `code` ``,
-   `[links](url)`.
+   Then `npm run site:build` renders the entry into styled HTML,
+   refreshes the hub (`devlog/index.html`), AND regenerates the
+   Cards / Enemies / Effects catalog from the current engine
+   libraries (`npm run catalog` — ts-node export + zero-dep
+   render) so the catalog never drifts from what ships. Commit
+   the entry, the built HTML, `devlog/data/**`, and any
+   `devlog/assets/**` together. Body Markdown: pipe tables,
+   `-`/`1.` lists, fenced code / ```diff, `**bold**`, `_italic_`,
+   `` `code` ``, `[links](url)`.
 
 4a. **UI shots (visual before/after)** — if the day's commits
     changed any baseline screen
@@ -145,8 +148,9 @@ its own cadence.
 
 1. Append a new `devlog/entries/DIGEST_<date>.md` each run;
    never overwrite a past day — the DevLog is a ledger. Run
-   `npm run devlog:build` so the committed HTML + index stay
-   in sync with the entries.
+   `npm run site:build` so the committed HTML, hub, and the
+   Cards / Enemies / Effects catalog stay in sync with the
+   entries and the engine libraries.
 2. Ship nothing else — breadth failures become findings, not
    fixes. The night shift briefs; the dispatcher ships.
 3. Proposals, never actions (the meta-loop rail).
@@ -178,7 +182,7 @@ its own cadence.
 ```bash
 devlog/entries/DIGEST_<date>.md      # the deliverable (append, never overwrite)
 npm run devlog:shots -- <ref> <date> # collect UI before/after/diff (if screens changed)
-npm run devlog:build                 # render styled HTML + refresh index
+npm run site:build                   # catalog (export+render) + entry HTML + hub
 plan/AUDIT.md                        # breadth failures land here
 plan/PHASE_CANDIDATES.md             # tuning proposals land here
 gh run list --workflow march -L 20   # the invisible no-ops

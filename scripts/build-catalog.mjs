@@ -69,6 +69,28 @@ function artOrPlaceholder(image, cls, glyph, alt) {
   return `<div class="${cls} none" role="img" aria-label="${escapeHtml(alt)} (no art)">${glyph}</div>`;
 }
 
+// Raw-stat rendering — compact key/value badges + spelled-out mechanic lines.
+function chipsHtml(chips) {
+  if (!chips || !chips.length) return "";
+  return (
+    `<div class="statrow">` +
+    chips
+      .map((c) => `<span class="stat"><span class="k">${escapeHtml(c.k)}</span>${escapeHtml(c.v)}</span>`)
+      .join("") +
+    `</div>`
+  );
+}
+function linesHtml(lines) {
+  if (!lines || !lines.length) return "";
+  return `<ul class="mods">` + lines.map((l) => `<li>${escapeHtml(l)}</li>`).join("") + `</ul>`;
+}
+function searchText(name, chips, lines) {
+  const parts = [name]
+    .concat((chips || []).map((c) => `${c.k} ${c.v}`))
+    .concat(lines || []);
+  return escapeHtml(parts.join(" ").toLowerCase());
+}
+
 // ---------------------------------------------------------------------------
 // Cards — name · image · card text
 // ---------------------------------------------------------------------------
@@ -76,12 +98,14 @@ function buildCards() {
   const cards = load("cards");
   const grid = cards
     .map((c) => {
-      const search = escapeHtml((c.name + " " + (c.text || "")).toLowerCase());
+      const search = searchText(c.name, c.chips, c.lines);
       const art = artOrPlaceholder(c.image, "art", "🂠", c.name);
       return (
         `  <article class="gcard" data-search="${search}">${art}` +
         `<div class="body"><div class="name">${inline(c.name)}</div>` +
-        `<div class="text">${inline(c.text || "")}</div></div></article>`
+        chipsHtml(c.chips) +
+        linesHtml(c.lines) +
+        `</div></article>`
       );
     })
     .join("\n");
@@ -164,7 +188,9 @@ function buildEffects() {
     `  <div class="eff"><div class="glyph" style="--gc:${escapeHtml(e.color)}" role="img" ` +
     `aria-label="${escapeHtml(e.name)} glyph">${escapeHtml(e.glyph)}</div>` +
     `<div><div class="name">${inline(e.name)}</div>` +
-    `<div class="text">${inline(e.text || "")}</div></div></div>`;
+    chipsHtml(e.chips) +
+    linesHtml(e.lines) +
+    `</div></div>`;
 
   const section = (label, list) =>
     list.length

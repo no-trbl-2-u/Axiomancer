@@ -6,7 +6,32 @@
   "glyph": "✸",
   "color": "#9aa0a6",
   "kind": "thorns",
-  "text": "Your skin answers in kind. To press an argument against you is to be cut by it — the harder the push, the deeper the rebuttal bites back."
+  "chips": [
+   {
+    "k": "Type",
+    "v": "buff"
+   },
+   {
+    "k": "Category",
+    "v": "defense"
+   },
+   {
+    "k": "Tier",
+    "v": "2"
+   },
+   {
+    "k": "Duration",
+    "v": "3 rounds"
+   },
+   {
+    "k": "Stacking",
+    "v": "intensity"
+   }
+  ],
+  "lines": [
+   "Defense +1",
+   "Thorns 2/intensity"
+  ]
  },
  {
   "id": "tier1_body_defend",
@@ -15,7 +40,31 @@
   "glyph": "✸",
   "color": "#9aa0a6",
   "kind": "thorns",
-  "text": "You root yourself like a thorn bush — still, patient, dangerous. Striking you is a choice they'll regret. Every blow lands, but something sharp comes back."
+  "chips": [
+   {
+    "k": "Type",
+    "v": "buff"
+   },
+   {
+    "k": "Category",
+    "v": "defense"
+   },
+   {
+    "k": "Tier",
+    "v": "1"
+   },
+   {
+    "k": "Duration",
+    "v": "3 rounds"
+   },
+   {
+    "k": "Stacking",
+    "v": "intensity"
+   }
+  ],
+  "lines": [
+   "Thorns 1/intensity"
+  ]
  },
  {
   "id": "buff_clarity",
@@ -24,7 +73,31 @@
   "glyph": "▲",
   "color": "#5bbf6a",
   "kind": "statup",
-  "text": "\"This next die is Wild\" — the sentence is either true or it isn't, and by naming it, you've made it so. One clean certainty, carved out of the paradox."
+  "chips": [
+   {
+    "k": "Type",
+    "v": "buff"
+   },
+   {
+    "k": "Category",
+    "v": "advantage"
+   },
+   {
+    "k": "Tier",
+    "v": "1"
+   },
+   {
+    "k": "Duration",
+    "v": "1 rounds"
+   },
+   {
+    "k": "Stacking",
+    "v": "none"
+   }
+  ],
+  "lines": [
+   "Next die counts as Wild"
+  ]
  },
  {
   "id": "buff_life_steal",
@@ -33,7 +106,32 @@
   "glyph": "✚",
   "color": "#49b98a",
   "kind": "regen",
-  "text": "Like the demon sorting molecules, you separate your enemy's vitality from their form—fast energy to you, slow energy left behind."
+  "chips": [
+   {
+    "k": "Type",
+    "v": "buff"
+   },
+   {
+    "k": "Category",
+    "v": "regeneration"
+   },
+   {
+    "k": "Tier",
+    "v": "2"
+   },
+   {
+    "k": "Duration",
+    "v": "4 rounds"
+   },
+   {
+    "k": "Stacking",
+    "v": "intensity"
+   }
+  ],
+  "lines": [
+   "Regen +2 HP/round",
+   "Roll +1"
+  ]
  },
  {
   "id": "buff_phoenix_vigor",
@@ -42,7 +140,33 @@
   "glyph": "✚",
   "color": "#49b98a",
   "kind": "regen",
-  "text": "Ash remembers the bird. The closer you come to ending, the more fiercely you mend — vitality returning in waves, defenses tightening as the pyre cools."
+  "chips": [
+   {
+    "k": "Type",
+    "v": "buff"
+   },
+   {
+    "k": "Category",
+    "v": "regeneration"
+   },
+   {
+    "k": "Tier",
+    "v": "2"
+   },
+   {
+    "k": "Duration",
+    "v": "5 rounds"
+   },
+   {
+    "k": "Stacking",
+    "v": "intensity"
+   }
+  ],
+  "lines": [
+   "heart +1",
+   "Regen +4 HP/round",
+   "Defense +1"
+  ]
  },
  {
   "id": "buff_promethean_ember",
@@ -51,7 +175,32 @@
   "glyph": "✚",
   "color": "#49b98a",
   "kind": "regen",
-  "text": "Stolen fire kept burning under the ribs. It mends what the fight tears open, knitting flesh faster than the wound can widen — a gift that keeps costing the giver."
+  "chips": [
+   {
+    "k": "Type",
+    "v": "buff"
+   },
+   {
+    "k": "Category",
+    "v": "regeneration"
+   },
+   {
+    "k": "Tier",
+    "v": "2"
+   },
+   {
+    "k": "Duration",
+    "v": "4 rounds"
+   },
+   {
+    "k": "Stacking",
+    "v": "intensity"
+   }
+  ],
+  "lines": [
+   "heart +1",
+   "Regen +3 HP/round"
+  ]
  },
  {
   "id": "buff_regeneration",
@@ -60,7 +209,31 @@
   "glyph": "✚",
   "color": "#49b98a",
   "kind": "regen",
-  "text": "Like the writer who takes a year to document a day, your healing works faster than wounds accumulate. Eventually, you'll catch up."
+  "chips": [
+   {
+    "k": "Type",
+    "v": "buff"
+   },
+   {
+    "k": "Category",
+    "v": "regeneration"
+   },
+   {
+    "k": "Tier",
+    "v": "2"
+   },
+   {
+    "k": "Duration",
+    "v": "6 rounds"
+   },
+   {
+    "k": "Stacking",
+    "v": "intensity"
+   }
+  ],
+  "lines": [
+   "Regen +4 HP/round"
+  ]
  },
  {
   "id": "buff_resolute",
@@ -69,7 +242,31 @@
   "glyph": "▲",
   "color": "#5bbf6a",
   "kind": "statup",
-  "text": "Something must move without itself being moved. You anchor yourself there — whatever strikes you now finds a will that does not budge."
+  "chips": [
+   {
+    "k": "Type",
+    "v": "buff"
+   },
+   {
+    "k": "Category",
+    "v": "defense"
+   },
+   {
+    "k": "Tier",
+    "v": "2"
+   },
+   {
+    "k": "Duration",
+    "v": "2 rounds"
+   },
+   {
+    "k": "Stacking",
+    "v": "intensity"
+   }
+  ],
+  "lines": [
+   "Damage taken +-15%"
+  ]
  },
  {
   "id": "tier1_heart_defend",
@@ -78,7 +275,31 @@
   "glyph": "✚",
   "color": "#49b98a",
   "kind": "regen",
-  "text": "You stop fighting for a moment and simply exist. The stillness heals. The compassion you pour outward turns inward just enough — a quiet restoration, round by round."
+  "chips": [
+   {
+    "k": "Type",
+    "v": "buff"
+   },
+   {
+    "k": "Category",
+    "v": "regeneration"
+   },
+   {
+    "k": "Tier",
+    "v": "1"
+   },
+   {
+    "k": "Duration",
+    "v": "4 rounds"
+   },
+   {
+    "k": "Stacking",
+    "v": "intensity"
+   }
+  ],
+  "lines": [
+   "Regen +2 HP/round"
+  ]
  },
  {
   "id": "debuff_slow",
@@ -87,7 +308,33 @@
   "glyph": "🐌",
   "color": "#a86bdc",
   "kind": "control",
-  "text": "You are Achilles—faster than any tortoise. Yet the tortoise is always ahead. No matter how swiftly you act, you're always one step behind."
+  "chips": [
+   {
+    "k": "Type",
+    "v": "debuff"
+   },
+   {
+    "k": "Category",
+    "v": "control"
+   },
+   {
+    "k": "Tier",
+    "v": "2"
+   },
+   {
+    "k": "Duration",
+    "v": "3 rounds"
+   },
+   {
+    "k": "Stacking",
+    "v": "duration"
+   }
+  ],
+  "lines": [
+   "physicalSkill -2",
+   "Roll -2",
+   "Disadvantage: body"
+  ]
  },
  {
   "id": "debuff_isolated",
@@ -96,7 +343,29 @@
   "glyph": "⛓",
   "color": "#a86bdc",
   "kind": "control",
-  "text": "The crowd that carried you has moved on to the next argument. Whatever support you were counting on isn't coming — not this turn."
+  "chips": [
+   {
+    "k": "Type",
+    "v": "debuff"
+   },
+   {
+    "k": "Category",
+    "v": "control"
+   },
+   {
+    "k": "Tier",
+    "v": "2"
+   },
+   {
+    "k": "Duration",
+    "v": "1 rounds"
+   },
+   {
+    "k": "Stacking",
+    "v": "none"
+   }
+  ],
+  "lines": []
  },
  {
   "id": "debuff_root",
@@ -105,7 +374,32 @@
   "glyph": "⚓",
   "color": "#a86bdc",
   "kind": "control",
-  "text": "Adding options makes things worse. You could move, but seeing the paths available creates congestion in your muscles. Paralysis through possibility."
+  "chips": [
+   {
+    "k": "Type",
+    "v": "debuff"
+   },
+   {
+    "k": "Category",
+    "v": "control"
+   },
+   {
+    "k": "Tier",
+    "v": "2"
+   },
+   {
+    "k": "Duration",
+    "v": "2 rounds"
+   },
+   {
+    "k": "Stacking",
+    "v": "duration"
+   }
+  ],
+  "lines": [
+   "Roll -2",
+   "Defense -2"
+  ]
  },
  {
   "id": "debuff_vulnerable",
@@ -114,7 +408,31 @@
   "glyph": "▼",
   "color": "#e08a3c",
   "kind": "statdown",
-  "text": "A seam pried open in their guard, stance-agnostic and bleeding-obvious. Every blow you land now finds the gap and digs deeper."
+  "chips": [
+   {
+    "k": "Type",
+    "v": "debuff"
+   },
+   {
+    "k": "Category",
+    "v": "defense"
+   },
+   {
+    "k": "Tier",
+    "v": "2"
+   },
+   {
+    "k": "Duration",
+    "v": "3 rounds"
+   },
+   {
+    "k": "Stacking",
+    "v": "duration"
+   }
+  ],
+  "lines": [
+   "Damage taken +50%"
+  ]
  },
  {
   "id": "debuff_vulnerability_heart",
@@ -123,7 +441,31 @@
   "glyph": "❣",
   "color": "#e08a3c",
   "kind": "statdown",
-  "text": "Your emotional ordinals exceed their own bounds. The set of all your feelings contains a feeling greater than all feelings. Your Heart tears itself apart."
+  "chips": [
+   {
+    "k": "Type",
+    "v": "debuff"
+   },
+   {
+    "k": "Category",
+    "v": "defense"
+   },
+   {
+    "k": "Tier",
+    "v": "2"
+   },
+   {
+    "k": "Duration",
+    "v": "3 rounds"
+   },
+   {
+    "k": "Stacking",
+    "v": "duration"
+   }
+  ],
+  "lines": [
+   "Damage taken +50% from heart plays"
+  ]
  },
  {
   "id": "debuff_vulnerability_mind",
@@ -132,7 +474,31 @@
   "glyph": "🧠",
   "color": "#e08a3c",
   "kind": "statdown",
-  "text": "Your mental defenses are countably infinite—impressive, until you face uncountable assault. There's always a larger infinity of thoughts to break you."
+  "chips": [
+   {
+    "k": "Type",
+    "v": "debuff"
+   },
+   {
+    "k": "Category",
+    "v": "defense"
+   },
+   {
+    "k": "Tier",
+    "v": "2"
+   },
+   {
+    "k": "Duration",
+    "v": "3 rounds"
+   },
+   {
+    "k": "Stacking",
+    "v": "duration"
+   }
+  ],
+  "lines": [
+   "Damage taken +50% from mind plays"
+  ]
  },
  {
   "id": "debuff_doubt",
@@ -141,7 +507,31 @@
   "glyph": "⛓",
   "color": "#a86bdc",
   "kind": "control",
-  "text": "You can no longer trust that your next move is the one you intend. The certainty a strong play requires has been methodically dissolved."
+  "chips": [
+   {
+    "k": "Type",
+    "v": "debuff"
+   },
+   {
+    "k": "Category",
+    "v": "control"
+   },
+   {
+    "k": "Tier",
+    "v": "2"
+   },
+   {
+    "k": "Duration",
+    "v": "2 rounds"
+   },
+   {
+    "k": "Stacking",
+    "v": "none"
+   }
+  ],
+  "lines": [
+   "Denies enemy surge (next play weak-tier)"
+  ]
  },
  {
   "id": "debuff_poison",
@@ -150,7 +540,31 @@
   "glyph": "☠",
   "color": "#e2543b",
   "kind": "dot",
-  "text": "If this poison harms you, then it spreads. The conditional is vacuously true. The conclusion is inevitably, recursively toxic."
+  "chips": [
+   {
+    "k": "Type",
+    "v": "debuff"
+   },
+   {
+    "k": "Category",
+    "v": "damage"
+   },
+   {
+    "k": "Tier",
+    "v": "2"
+   },
+   {
+    "k": "Duration",
+    "v": "4 rounds"
+   },
+   {
+    "k": "Stacking",
+    "v": "intensity"
+   }
+  ],
+  "lines": [
+   "DoT 2/round × intensity (body, ticks start)"
+  ]
  },
  {
   "id": "debuff_septic",
@@ -159,7 +573,32 @@
   "glyph": "🔥",
   "color": "#e2543b",
   "kind": "dot",
-  "text": "If this wound festers, then it worsens. The conditional is vacuously true — and so is the next one, and the next, each infection weakening the strength of your own next blow."
+  "chips": [
+   {
+    "k": "Type",
+    "v": "debuff"
+   },
+   {
+    "k": "Category",
+    "v": "damage"
+   },
+   {
+    "k": "Tier",
+    "v": "2"
+   },
+   {
+    "k": "Duration",
+    "v": "3 rounds"
+   },
+   {
+    "k": "Stacking",
+    "v": "intensity"
+   }
+  ],
+  "lines": [
+   "DoT 3/round × intensity (body, ticks end)",
+   "Outgoing damage -10%"
+  ]
  },
  {
   "id": "debuff_fear",
@@ -168,7 +607,34 @@
   "glyph": "👁",
   "color": "#a86bdc",
   "kind": "control",
-  "text": "You see the paradox of your own destruction—if you fight, you ensure your doom; if you flee, you ensure your doom. Either path leads backward to oblivion."
+  "chips": [
+   {
+    "k": "Type",
+    "v": "debuff"
+   },
+   {
+    "k": "Category",
+    "v": "control"
+   },
+   {
+    "k": "Tier",
+    "v": "2"
+   },
+   {
+    "k": "Duration",
+    "v": "3 rounds"
+   },
+   {
+    "k": "Stacking",
+    "v": "duration"
+   }
+  ],
+  "lines": [
+   "heart -4",
+   "emotionalSkill -3",
+   "emotionalDefense -3",
+   "Roll -4"
+  ]
  },
  {
   "id": "debuff_silence",
@@ -177,7 +643,33 @@
   "glyph": "🤐",
   "color": "#a86bdc",
   "kind": "control",
-  "text": "You believe you can speak, yet you don't believe you're speaking. The absurdity freezes your voice. Assertion becomes impossible."
+  "chips": [
+   {
+    "k": "Type",
+    "v": "debuff"
+   },
+   {
+    "k": "Category",
+    "v": "control"
+   },
+   {
+    "k": "Tier",
+    "v": "2"
+   },
+   {
+    "k": "Duration",
+    "v": "3 rounds"
+   },
+   {
+    "k": "Stacking",
+    "v": "none"
+   }
+  ],
+  "lines": [
+   "heart -2",
+   "emotionalSkill -3",
+   "Blocks stance: heart"
+  ]
  },
  {
   "id": "debuff_novikov_consistency",
@@ -186,7 +678,31 @@
   "glyph": "▼",
   "color": "#e08a3c",
   "kind": "statdown",
-  "text": "The timeline resists paradox: whatever wound is coming was always going to land, and land hard. The universe simply patches around any attempt to prevent it."
+  "chips": [
+   {
+    "k": "Type",
+    "v": "debuff"
+   },
+   {
+    "k": "Category",
+    "v": "advantage"
+   },
+   {
+    "k": "Tier",
+    "v": "2"
+   },
+   {
+    "k": "Duration",
+    "v": "1 rounds"
+   },
+   {
+    "k": "Stacking",
+    "v": "none"
+   }
+  ],
+  "lines": [
+   "Next DoT tick +1 tier"
+  ]
  },
  {
   "id": "debuff_burn",
@@ -195,7 +711,31 @@
   "glyph": "🔥",
   "color": "#e2543b",
   "kind": "dot",
-  "text": "If infinite stars fill the sky, why is it dark? Because their light is delayed. When it arrives all at once—you burn in accumulated radiance."
+  "chips": [
+   {
+    "k": "Type",
+    "v": "debuff"
+   },
+   {
+    "k": "Category",
+    "v": "damage"
+   },
+   {
+    "k": "Tier",
+    "v": "2"
+   },
+   {
+    "k": "Duration",
+    "v": "3 rounds"
+   },
+   {
+    "k": "Stacking",
+    "v": "intensity"
+   }
+  ],
+  "lines": [
+   "DoT 3/round × intensity (heart, ticks start)"
+  ]
  },
  {
   "id": "debuff_overextended",
@@ -204,7 +744,31 @@
   "glyph": "⛓",
   "color": "#a86bdc",
   "kind": "control",
-  "text": "You reached past what the moment could support. The next thing you do will be smaller for it — the cost of a payoff already spent."
+  "chips": [
+   {
+    "k": "Type",
+    "v": "debuff"
+   },
+   {
+    "k": "Category",
+    "v": "control"
+   },
+   {
+    "k": "Tier",
+    "v": "1"
+   },
+   {
+    "k": "Duration",
+    "v": "1 rounds"
+   },
+   {
+    "k": "Stacking",
+    "v": "none"
+   }
+  ],
+  "lines": [
+   "Single-use trigger"
+  ]
  },
  {
   "id": "debuff_mark",
@@ -213,7 +777,31 @@
   "glyph": "◎",
   "color": "#d9c66a",
   "kind": "mark",
-  "text": "Marked and read. While it holds, the bearer’s stance is public — every draft against them is informed."
+  "chips": [
+   {
+    "k": "Type",
+    "v": "debuff"
+   },
+   {
+    "k": "Category",
+    "v": "advantage"
+   },
+   {
+    "k": "Tier",
+    "v": "2"
+   },
+   {
+    "k": "Duration",
+    "v": "3 rounds"
+   },
+   {
+    "k": "Stacking",
+    "v": "none"
+   }
+  ],
+  "lines": [
+   "Reveals hidden stance"
+  ]
  },
  {
   "id": "debuff_regress_fatigue",
@@ -222,7 +810,31 @@
   "glyph": "▼",
   "color": "#e08a3c",
   "kind": "statdown",
-  "text": "Every reason needs a reason, and that reason needs one too. The chain never grounds out — and neither do you, each unanswered link sapping a little more of what you had left."
+  "chips": [
+   {
+    "k": "Type",
+    "v": "debuff"
+   },
+   {
+    "k": "Category",
+    "v": "stat"
+   },
+   {
+    "k": "Tier",
+    "v": "2"
+   },
+   {
+    "k": "Duration",
+    "v": "5 rounds"
+   },
+   {
+    "k": "Stacking",
+    "v": "intensity"
+   }
+  ],
+  "lines": [
+   "Card power -4%"
+  ]
  },
  {
   "id": "debuff_vulnerability_body",
@@ -231,7 +843,31 @@
   "glyph": "🛡",
   "color": "#e08a3c",
   "kind": "statdown",
-  "text": "Your physical defenses are defined in terms of themselves—a diagonal contradiction. The enumeration reveals your weakness; Body attacks pierce deeply."
+  "chips": [
+   {
+    "k": "Type",
+    "v": "debuff"
+   },
+   {
+    "k": "Category",
+    "v": "defense"
+   },
+   {
+    "k": "Tier",
+    "v": "2"
+   },
+   {
+    "k": "Duration",
+    "v": "3 rounds"
+   },
+   {
+    "k": "Stacking",
+    "v": "duration"
+   }
+  ],
+  "lines": [
+   "Damage taken +50% from body plays"
+  ]
  },
  {
   "id": "debuff_despair",
@@ -240,7 +876,32 @@
   "glyph": "🔥",
   "color": "#e2543b",
   "kind": "dot",
-  "text": "Every desire you satisfy only reveals the next lack. The will grinds on, wanting, and even the comfort you reach for arrives diminished by the wanting itself."
+  "chips": [
+   {
+    "k": "Type",
+    "v": "debuff"
+   },
+   {
+    "k": "Category",
+    "v": "damage"
+   },
+   {
+    "k": "Tier",
+    "v": "2"
+   },
+   {
+    "k": "Duration",
+    "v": "4 rounds"
+   },
+   {
+    "k": "Stacking",
+    "v": "intensity"
+   }
+  ],
+  "lines": [
+   "DoT 3/round × intensity (heart, ticks end)",
+   "Healing received -50%"
+  ]
  },
  {
   "id": "debuff_unraveling",
@@ -249,7 +910,31 @@
   "glyph": "🔥",
   "color": "#e2543b",
   "kind": "dot",
-  "text": "One grain removed is nothing. The next is nothing too. But the heap has been shedding grains since the moment you were struck, and it has not stopped counting."
+  "chips": [
+   {
+    "k": "Type",
+    "v": "debuff"
+   },
+   {
+    "k": "Category",
+    "v": "damage"
+   },
+   {
+    "k": "Tier",
+    "v": "2"
+   },
+   {
+    "k": "Duration",
+    "v": "5 rounds"
+   },
+   {
+    "k": "Stacking",
+    "v": "none"
+   }
+  ],
+  "lines": [
+   "DoT 2/round × intensity (mind, ticks end)"
+  ]
  },
  {
   "id": "debuff_stagger",
@@ -258,7 +943,31 @@
   "glyph": "⛓",
   "color": "#a86bdc",
   "kind": "control",
-  "text": "The argument lands where footing was. One whole turn simply does not happen for them."
+  "chips": [
+   {
+    "k": "Type",
+    "v": "debuff"
+   },
+   {
+    "k": "Category",
+    "v": "control"
+   },
+   {
+    "k": "Tier",
+    "v": "3"
+   },
+   {
+    "k": "Duration",
+    "v": "1 rounds"
+   },
+   {
+    "k": "Stacking",
+    "v": "duration"
+   }
+  ],
+  "lines": [
+   "Skips turn"
+  ]
  },
  {
   "id": "debuff_bleed",
@@ -267,7 +976,31 @@
   "glyph": "🩸",
   "color": "#e2543b",
   "kind": "dot",
-  "text": "Plank by plank, your ship comes apart. Drop by drop, you become less yourself. When does the bleeding stop being you?"
+  "chips": [
+   {
+    "k": "Type",
+    "v": "debuff"
+   },
+   {
+    "k": "Category",
+    "v": "damage"
+   },
+   {
+    "k": "Tier",
+    "v": "2"
+   },
+   {
+    "k": "Duration",
+    "v": "2 rounds"
+   },
+   {
+    "k": "Stacking",
+    "v": "intensity"
+   }
+  ],
+  "lines": [
+   "DoT 4/round × intensity (body, ticks end)"
+  ]
  },
  {
   "id": "debuff_hemorrhage",
@@ -276,7 +1009,31 @@
   "glyph": "🔥",
   "color": "#e2543b",
   "kind": "dot",
-  "text": "The bleeding you named Theseus' Dissolution was gradual — a plank at a time. This is the hull giving way all at once. Only mercy, not time, slows it now."
+  "chips": [
+   {
+    "k": "Type",
+    "v": "debuff"
+   },
+   {
+    "k": "Category",
+    "v": "damage"
+   },
+   {
+    "k": "Tier",
+    "v": "2"
+   },
+   {
+    "k": "Duration",
+    "v": "3 rounds"
+   },
+   {
+    "k": "Stacking",
+    "v": "none"
+   }
+  ],
+  "lines": [
+   "DoT 5/round × intensity (body, ticks end)"
+  ]
  },
  {
   "id": "debuff_confusion",
@@ -285,7 +1042,32 @@
   "glyph": "🌀",
   "color": "#a86bdc",
   "kind": "control",
-  "text": "Should you switch? The other choice always seems better. You switch targets, switch tactics, switch again—always certain switching helps, always wrong."
+  "chips": [
+   {
+    "k": "Type",
+    "v": "debuff"
+   },
+   {
+    "k": "Category",
+    "v": "control"
+   },
+   {
+    "k": "Tier",
+    "v": "2"
+   },
+   {
+    "k": "Duration",
+    "v": "4 rounds"
+   },
+   {
+    "k": "Stacking",
+    "v": "duration"
+   }
+  ],
+  "lines": [
+   "Roll -5",
+   "Disadvantage: body, mind, heart"
+  ]
  },
  {
   "id": "debuff_charm",
@@ -294,7 +1076,33 @@
   "glyph": "💗",
   "color": "#a86bdc",
   "kind": "control",
-  "text": "From your perspective, your reality has collapsed into serving them. From outside, you remain in superposition. Neither view is wrong. You obey."
+  "chips": [
+   {
+    "k": "Type",
+    "v": "debuff"
+   },
+   {
+    "k": "Category",
+    "v": "control"
+   },
+   {
+    "k": "Tier",
+    "v": "2"
+   },
+   {
+    "k": "Duration",
+    "v": "2 rounds"
+   },
+   {
+    "k": "Stacking",
+    "v": "none"
+   }
+  ],
+  "lines": [
+   "heart -2",
+   "emotionalDefense -2",
+   "Forced stance: heart"
+  ]
  },
  {
   "id": "debuff_sensory_null",
@@ -303,6 +1111,31 @@
   "glyph": "⛓",
   "color": "#a86bdc",
   "kind": "control",
-  "text": "Something is happening to you, functionally identical to being hurt in every respect — except, the philosophers insist, there is no felt advantage in it. None of your openings mean anything anymore."
+  "chips": [
+   {
+    "k": "Type",
+    "v": "debuff"
+   },
+   {
+    "k": "Category",
+    "v": "control"
+   },
+   {
+    "k": "Tier",
+    "v": "2"
+   },
+   {
+    "k": "Duration",
+    "v": "2 rounds"
+   },
+   {
+    "k": "Stacking",
+    "v": "duration"
+   }
+  ],
+  "lines": [
+   "Blocks advantage/crit",
+   "Reduces control accuracy"
+  ]
  }
 ]
