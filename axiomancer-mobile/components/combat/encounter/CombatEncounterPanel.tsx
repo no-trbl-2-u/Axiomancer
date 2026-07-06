@@ -45,9 +45,10 @@ import { CombatRewardsOverlay } from '@/components/combat/encounter/CombatReward
 import { CombatTutorialPrimer } from '@/components/combat/encounter/CombatTutorialPrimer';
 import { CombatTutorialCoach } from '@/components/combat/encounter/CombatTutorialCoach';
 import { currentCombatTutorialStep } from '@/components/combat/encounter/combat-tutorial-steps';
-import { EnemyPortrait } from '@/components/event/enemy-art/EnemyPortrait';
+import { Image } from 'expo-image';
+import { getEncounterEnemyArt } from '@/assets/images/enemies';
 import { INTENT_ICONS, buildCombatViewModel, rewardOfferVMs, STANCE_COLORS, type CombatCardVM, type CombatEffectChipVM, type CombatSignatureVM } from '@/state/presenters/combat-encounter.engine';
-import { PlayerPortrait } from '@/components/art/PlayerPortrait';
+import { PlayerPortraitImage } from '@/components/art/PlayerPortraitImage';
 import { useGameState, useGameStore } from '@/state/GameStoreProvider';
 import { COMBAT_TUTORIAL_FLAG, completeCombatTutorialAction, runArchetype, skewRewardsByArchetype } from '@/state/combat/store-actions';
 import { FONTS } from '@/theme/axm';
@@ -260,8 +261,14 @@ export function CombatEncounterPanel({
 
     // Bootstrap the encounter ONCE — combat must not restart when the store
     // player mutates (e.g. our own write-back) or props re-identify.
+    // Real encounters run unseeded (`seed` only arrives from sims/tests); stamp
+    // a random one so seed-keyed presentation (the enemy-art pick) reshuffles
+    // per encounter. Nothing engine-side reads `state.seed` after init.
     const initial = useMemo(
-        () => initializeCombatEncounter(bootstrapPlayer, enemy, deck, seed),
+        () => {
+            const s = initializeCombatEncounter(bootstrapPlayer, enemy, deck, seed);
+            return s.seed === undefined ? { ...s, seed: Math.floor(Math.random() * 0xffffffff) } : s;
+        },
         // eslint-disable-next-line react-hooks/exhaustive-deps
         [],
     );
@@ -433,6 +440,21 @@ export function CombatEncounterPanel({
         setRewardsClaimed(true);
     }, [store]);
 
+    // Identity-stable board props: inline arrows / fresh objects here defeat
+    // CombatBoard's React.memo and re-render the whole 1200-line board on every
+    // unrelated panel state change (tooltips, fx bumps) — felt as drag jank.
+    const onInspect = useCallback((c: CombatCardVM) => { detailOpenedAt.current = Date.now(); setDetailCard(c); }, []);
+    const onPlayerInspect = useCallback(() => setPilgrimOpen(true), []);
+    const onMomentumInfo = useCallback(() => setMomentumInfoOpen(true), []);
+    const momentum = useMemo(() => ({ lit: wheelLit, charged: momentumCharged }), [wheelLit, momentumCharged]);
+
+    // Ghost stays MOUNTED once the first drag begins (opacity-gated by dragShown):
+    // remounting the face + image on every drag begin cost a mount + decode while
+    // the finger was already moving — the start-of-drag stutter.
+    const lastDragRef = useRef<DragPayload | null>(null);
+    if (dragActive) lastDragRef.current = dragActive;
+    const ghostPayload = dragActive ?? lastDragRef.current;
+
     if (!vm) {
         return <View style={styles.root} testID="combat-encounter-empty" />;
     }
@@ -454,12 +476,12 @@ export function CombatEncounterPanel({
                     onDiscard={onDiscard}
                     onSignature={onSignature}
                     onEndPhase={onEndPhase}
-                    onInspect={(c) => { detailOpenedAt.current = Date.now(); setDetailCard(c); }}
+                    onInspect={onInspect}
                     onChip={setTipEffect}
                     onSignatureInfo={setSigInfo}
-                    onPlayerInspect={() => setPilgrimOpen(true)}
-                    momentum={{ lit: wheelLit, charged: momentumCharged }}
-                    onMomentumInfo={() => setMomentumInfoOpen(true)}
+                    onPlayerInspect={onPlayerInspect}
+                    momentum={momentum}
+                    onMomentumInfo={onMomentumInfo}
                     fx={fx}
                     onFateTap={onFateTap}
                     bankSpare={bankSpare}
@@ -473,7 +495,13 @@ export function CombatEncounterPanel({
                     <ScrollView contentContainerStyle={styles.revealScroll}>
                         <Text style={styles.revealEyebrow}>⚔ A FOE BARS THE WAY</Text>
                         <View style={[styles.revealPortrait, { borderColor: AXM.blood }]}>
-                            <EnemyPortrait enemyArtKey={vm.enemy.artKey} isBoss={vm.enemy.isBoss} width={120} height={140} label={vm.enemy.name} />
+                            <Image
+                                source={getEncounterEnemyArt(vm.enemy.artKey, vm.enemy.artNonce)}
+                                style={{ width: 120, height: 140 }}
+                                contentFit="contain"
+                                transition={0}
+                                accessibilityLabel={vm.enemy.name}
+                            />
                         </View>
                         <Text style={styles.revealName}>{vm.enemy.name}</Text>
                         <Text style={styles.revealHp}>♥ {vm.enemy.hp} / {vm.enemy.maxHp}</Text>
@@ -709,7 +737,7 @@ export function CombatEncounterPanel({
                         <View style={styles.pilgrimWrap} onStartShouldSetResponder={() => true}>
                             <ScrollView contentContainerStyle={styles.pilgrimStack} showsVerticalScrollIndicator={false}>
                                 <View style={styles.pilgrimHead}>
-                                    <View style={styles.pilgrimPortrait}><PlayerPortrait width={56} height={68} /></View>
+                                    <View style={styles.pilgrimPortrait}><PlayerPortraitImage width={56} height={68} fit="cover" /></View>
                                     <View style={{ flex: 1 }}>
                                         <Text style={styles.pilgrimName}>{vm.player.name}</Text>
                                         <Text style={styles.pilgrimVitae}>LVL {p.level ?? 1}   ♥ {vm.player.hp} / {vm.player.maxHp} VITAE{vm.player.guard > 0 ? `   🛡 ${vm.player.guard}` : ''}</Text>
@@ -789,15 +817,16 @@ export function CombatEncounterPanel({
                 <CombatTutorialCoach state={live} vm={vm} onSkip={() => finishTutorial(true)} />
             )}
 
-            {/* drag ghost */}
-            {dragActive && (
+            {/* drag ghost — persistently mounted after the first drag; dragShown
+                gates visibility so a finished drag leaves it hidden, not unmounted */}
+            {ghostPayload && (
                 <Animated.View pointerEvents="none" style={[styles.ghost, ghostStyle]}>
-                    {dragActive.type === 'card' ? (
+                    {ghostPayload.type === 'card' ? (
                         // The dragged card keeps its real face (was a stripped name-only box
                         // that looked like a different, "old" card mid-drag).
-                        <CombatCardFace card={dragActive.card} width={108} height={158} />
+                        <CombatCardFace card={ghostPayload.card} width={108} height={158} />
                     ) : (
-                        <CombatDie die={dragActive.die} size={56} />
+                        <CombatDie die={ghostPayload.die} size={56} />
                     )}
                 </Animated.View>
             )}

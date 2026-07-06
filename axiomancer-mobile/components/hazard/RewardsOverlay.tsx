@@ -7,8 +7,10 @@
 
 import React, { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image } from 'expo-image';
 import Animated, { FadeIn, FadeInDown, FadeInUp, ZoomIn } from 'react-native-reanimated';
 
+import { TREASURE_CHEST_PALE } from '@/assets/images/treasure';
 import type { HazardRewardsVM } from '@/state/presenters/hazard.engine';
 import { FONTS } from '@/theme/axm';
 import { makeStyles, usePalette } from '@/theme/runtime';
@@ -78,6 +80,14 @@ export function RewardsOverlay({
     return (
         <Animated.View entering={FadeInUp.duration(280)} style={styles.root} testID="hazard-rewards">
             <View style={{ alignItems: 'center', paddingTop: 16, paddingBottom: 8 }}>
+                <Image
+                    source={TREASURE_CHEST_PALE}
+                    style={{ width: 96, height: 78, marginBottom: 4 }}
+                    contentFit="contain"
+                    transition={0}
+                    accessibilityElementsHidden
+                    importantForAccessibility="no-hide-descendants"
+                />
                 <Text style={styles.eyebrow}>THE RECKONING</Text>
                 <Text style={[styles.title, { color: tierColor }]}>SPOILS &amp; SCARS</Text>
             </View>
