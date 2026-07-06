@@ -98,8 +98,9 @@ the *efficient* path and becomes the *only* path.
 | **disenchant** | play → persistent zone for the rest of the combat, **attached to the enemy** — a standing curse/aura working against the foe | PAID-only |
 
 - Enchantments are the owner's "passive bonus that strengthens poison"
-  card; disenchants are their enemy-facing mirror (working assumption
-  §9 A1: *enchant = passive on you, disenchant = passive on the enemy*).
+  card; disenchants are their negative mirror (owner-ratified:
+  *enchant = positive persistent passive, disenchant = negative
+  persistent passive — a standing effect working against the enemy*).
 - The persistent zone already exists in the Hazard shape
   (`persistentZone`, spec 25 §"Enchantment zone"); this wires it for
   real.
@@ -433,15 +434,12 @@ model, cap 3, bigger-turns intent (yes) · ladder names (yes) ·
 status-payoffs-only HP line (yes) · 75 cards, 4 themes × all ranks,
 fewer keywords (yes) · no retired-card rescues (yes) · card types:
 enchantment / disenchant / spell, more to come (yes) · reshuffle law
-(yes).
+(yes) · **disenchant scope: enchant = positive persistent passive,
+disenchant = negative persistent passive, all combat (yes — ratified
+2026-07-06 follow-up; §7's D-cards stand as designed)**.
 
 **Assumption-confirms (non-blocking; flag if wrong):**
 
-- **A1 — disenchant scope.** Interpreted as *persistent effect attached
-  to the ENEMY* (a standing curse: suppurating-curse, entropy-tax,
-  mirror-of-guilt, captive-audience) vs enchant = persistent benefit on
-  YOU. If disenchant instead means e.g. "removes enchantments" or
-  self-side negative passives, §7's D-cards re-home easily.
 - **A2 — enchant/disenchant cost.** PAID-only (a die is the commitment;
   no FREE line). They leave the deck cycle once played (not reshuffled).
 - **A3 — floating dice feed Resonance** when spent, like any die, and
