@@ -12,8 +12,8 @@ Two layers live here:
    ci`, `.env` materialization, the nexus enforcement layer (guard hooks +
    deny walls), and the `anthropics/claude-code-action` invocation. Every
    Claude workflow is pinned to **Sonnet 5** (`--model claude-sonnet-5`);
-   change it in one place there (plus `claude.yml` / `claude-pr-review.yml`,
-   which don't use the runner).
+   change it in one place there (plus `claude.yml`, which doesn't use the
+   runner).
 
 ## Secrets
 
@@ -37,7 +37,6 @@ Two layers live here:
 | `combat-playtest.yml` | `/combat-playtest` | monthly (1st) + manual | Report-only doctrine verdict, branch + PR. |
 | `critic-loop.yml`, `deep-playtest.yml`, `combat-ux-tuning.yml`, `hermes-playtest.yml` | same-named | manual only | Mobile expo-web loops; install Playwright, long-running. |
 | `claude.yml` | — | `@claude` mention in issues/PRs | Interactive responder. |
-| `claude-pr-review.yml` | — | PR opened / ready-for-review | First-pass review; comments only, never pushes. Reviews the tuning loops' PRs. |
 
 Skills that need a human in the loop (`/oversight`, `/jot`, the
 `.claude/skills/` design partners) deliberately have no workflow.
