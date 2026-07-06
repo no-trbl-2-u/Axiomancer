@@ -23,8 +23,10 @@
 
 import React from 'react';
 import { Pressable, Text, View } from 'react-native';
+import { Image } from 'expo-image';
 import Svg, { Circle, Path as SvgPath } from 'react-native-svg';
 
+import { TREASURE_FALLING_COINS } from '@/assets/images/treasure';
 import { Splatter } from '@/components/Splatter';
 import { VictoryWreath } from '@/components/art/VictoryWreath';
 import { FONTS } from '@/theme/axm';
@@ -170,12 +172,20 @@ export function CombatVictoryPanel({ vm, onContinue }: CombatVictoryPanelProps) 
                     )}
                 </View>
 
-                {/* Ceremonial laurel watermark — fills the void above the
-                    CTA so a win always reads as an earned, framed beat. */}
+                {/* Spoils tableau — coins spill over the ceremonial laurel in the
+                    void above the CTA so a win always reads as an earned beat. */}
                 <View style={styles.spacer}>
                     <View style={styles.wreathWatermark} pointerEvents="none">
                         <VictoryWreath size={132} />
                     </View>
+                    <Image
+                        source={TREASURE_FALLING_COINS}
+                        style={styles.coinSpill}
+                        contentFit="contain"
+                        transition={0}
+                        accessibilityElementsHidden
+                        importantForAccessibility="no-hide-descendants"
+                    />
                 </View>
 
                 <Pressable
@@ -475,7 +485,8 @@ const useStyles = makeStyles((AXM) => ({
     rarityRailCommon: { opacity: 0.6 },
     rarityRailUnique: { height: 4 },
     spacer: { flex: 1, minHeight: 8, alignItems: 'center', justifyContent: 'center' },
-    wreathWatermark: { opacity: 0.16 },
+    wreathWatermark: { opacity: 0.16, position: 'absolute' },
+    coinSpill: { width: 132, height: 110 },
     carryOn: {
         paddingVertical: 12,
         backgroundColor: AXM.silhouette,

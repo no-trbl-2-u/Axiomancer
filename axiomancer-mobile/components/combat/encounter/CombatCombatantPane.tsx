@@ -3,8 +3,9 @@
  *
  * Redesigned from the boxed two-column pane into a reference-style full-bleed
  * composition (see design/combat-screen-polish-2026-07.md):
- *   · layer 0 — the moonlit CreatureScene with a LARGE archetype figure fills
- *     the upper band of the screen (the enemy IS the screen);
+ *   · layer 0 — the arena backdrop with a LARGE alpha-matted enemy painting
+ *     (random per encounter — see assets/images/enemies) filling the upper
+ *     band of the screen (the enemy IS the screen);
  *   · layer 1 — scrim gradients keep the HUD legible + shelf the hand;
  *   · layer 2 — floating chrome: enemy name, a full-width HP bar anchored by a
  *     central crest carrying the big HP number, the intent badge, glowing
@@ -27,17 +28,12 @@ import * as Haptics from 'expo-haptics';
 import Animated, {
     runOnJS, useAnimatedStyle, useSharedValue, withDelay, withSequence, withTiming,
 } from 'react-native-reanimated';
-import Svg, { Circle, Defs, LinearGradient, Path, RadialGradient, Rect, Stop } from 'react-native-svg';
+import Svg, { Circle, Defs, Ellipse, LinearGradient, Path, RadialGradient, Rect, Stop } from 'react-native-svg';
 
-import { PlayerPortrait } from '@/components/art/PlayerPortrait';
-import { CreatureScene } from '@/components/event/enemy-art/CreatureScene';
-import {
-    AvianFigure, BeastFigure, CrustaceanFigure, EldritchFigure, FloraFigure,
-    GenericFigure, SpiritFigure, TyrantFigure, VerminFigure, ZealotFigure,
-} from '@/components/event/enemy-art/figures';
+import { PlayerPortraitImage } from '@/components/art/PlayerPortraitImage';
+import { getEncounterEnemyArt } from '@/assets/images/enemies';
 import { FONTS } from '@/theme/axm';
 import { makeStyles, usePalette } from '@/theme/runtime';
-import { resolveEnemyArchetype, type EnemyArchetype } from '@/state/presenters/enemy-art';
 import type {
     CombatEnemyPaneVM, CombatPlayerPaneVM, CombatEffectChipVM,
 } from '@/state/presenters/combat-encounter.engine';
@@ -60,19 +56,6 @@ export interface CombatFx { seq: number; events: CombatEvent[]; }
 export const COMBAT_HUD_HEIGHT = 148;
 
 type Float = { id: number; text: string; color: string; dx: number };
-
-const FIGURES: Record<EnemyArchetype, React.ComponentType> = {
-    vermin: VerminFigure,
-    crustacean: CrustaceanFigure,
-    spirit: SpiritFigure,
-    beast: BeastFigure,
-    avian: AvianFigure,
-    flora: FloraFigure,
-    zealot: ZealotFigure,
-    eldritch: EldritchFigure,
-    tyrant: TyrantFigure,
-    generic: GenericFigure,
-};
 
 // ── Enemy HP bar + crest ─────────────────────────────────────────────────────
 
@@ -292,7 +275,7 @@ export const PlayerMedallion = React.memo(function PlayerMedallion({
                     hitSlop={6}
                 >
                     <View style={styles.medallionClip}>
-                        <PlayerPortrait width={72} height={86} />
+                        <PlayerPortraitImage width={72} height={86} fit="cover" />
                         <Animated.View style={[styles.medallionFlash, flashAnim]} pointerEvents="none" />
                     </View>
                     <Svg width={92} height={92} viewBox="0 0 92 92" style={StyleSheet.absoluteFill} pointerEvents="none">
@@ -442,8 +425,9 @@ export const CombatCombatantPane = React.memo(function CombatCombatantPane({
     const shakeStyle = useAnimatedStyle(() => ({ transform: [{ translateX: shake.value }] }));
     const vignetteStyle = useAnimatedStyle(() => ({ opacity: vignette.value }));
 
-    const archetype = resolveEnemyArchetype(enemy.artKey, enemy.isBoss);
-    const Figure = FIGURES[archetype];
+    // Random painting per encounter (artNonce = encounter seed), stable for the
+    // fight's duration — see assets/images/enemies.
+    const enemyArt = getEncounterEnemyArt(enemy.artKey, enemy.artNonce);
 
     return (
         <Animated.View style={[StyleSheet.absoluteFillObject, shakeStyle]} pointerEvents="box-none" testID="combat-combatant-pane">
@@ -458,15 +442,26 @@ export const CombatCombatantPane = React.memo(function CombatCombatantPane({
                     accessibilityLabel="A storm-lit ruined city skyline over a cracked stone floor"
                 />
                 <Animated.View style={[StyleSheet.absoluteFillObject, enemyAnim]}>
-                    <CreatureScene
-                        label={`${enemy.name} bars the way`}
-                        figureScale={1.15}
-                        preserveAspectRatio="xMidYMid slice"
-                        shadowWidth={50}
-                        hideBackdrop
-                    >
-                        <Figure />
-                    </CreatureScene>
+                    <View style={styles.enemyFigureWrap}>
+                        {/* grounding shadow so the alpha-matted figure sits ON the floor */}
+                        <Svg width={240} height={40} style={styles.enemyShadow}>
+                            <Defs>
+                                <RadialGradient id="axmEnemyGroundShadow" cx="50%" cy="50%" rx="50%" ry="50%">
+                                    <Stop offset="0" stopColor="#000" stopOpacity={0.55} />
+                                    <Stop offset="1" stopColor="#000" stopOpacity={0} />
+                                </RadialGradient>
+                            </Defs>
+                            <Ellipse cx={120} cy={20} rx={112} ry={17} fill="url(#axmEnemyGroundShadow)" />
+                        </Svg>
+                        <Image
+                            source={enemyArt}
+                            style={[styles.enemyFigureImg, enemy.isBoss && styles.enemyFigureImgBoss]}
+                            contentFit="contain"
+                            contentPosition="bottom center"
+                            transition={0}
+                            accessibilityLabel={`${enemy.name} bars the way`}
+                        />
+                    </View>
                 </Animated.View>
                 {/* top scrim — HUD legibility over the scene */}
                 <Svg style={StyleSheet.absoluteFill} pointerEvents="none">
@@ -542,6 +537,12 @@ export const CombatCombatantPane = React.memo(function CombatCombatantPane({
 const useStyles = makeStyles((AXM) => ({
     // Battlefield band — the scene fills the top ~62% and fades into the floor.
     sceneBand: { position: 'absolute', top: 0, left: 0, right: 0, height: '62%', backgroundColor: AXM.bg },
+    // Enemy painting — anchored to the band's lower half, clear of the HUD; the
+    // grounding shadow hugs its feet.
+    enemyFigureWrap: { position: 'absolute', left: 0, right: 0, top: COMBAT_HUD_HEIGHT - 14, bottom: '9%', alignItems: 'center', justifyContent: 'flex-end' },
+    enemyShadow: { position: 'absolute', bottom: -12 },
+    enemyFigureImg: { width: '78%', height: '96%', maxWidth: 380 },
+    enemyFigureImgBoss: { width: '92%', maxWidth: 460 },
     floorGlow: { position: 'absolute', left: 0, right: 0, top: '46%', bottom: 0 },
     bottomScrim: { position: 'absolute', left: 0, right: 0, bottom: 0, height: 250 },
     vignette: { ...StyleSheet.absoluteFillObject, backgroundColor: '#7a1410', zIndex: 30 },

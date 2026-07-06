@@ -12,8 +12,10 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'expo-router';
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { Image } from 'expo-image';
 import * as Haptics from 'expo-haptics';
 
+import { TREASURE_CHEST_CLOSED, TREASURE_GOLD_HOARD } from '@/assets/images/treasure';
 import { CacheDie } from '@/components/cache/CacheDie';
 import { CacheProgressMeter } from '@/components/cache/CacheProgressMeter';
 import { ScreenBg } from '@/components/ScreenBg';
@@ -204,6 +206,13 @@ export default function CacheScreen() {
 
                 {vm.phase === 'intro' && (
                     <View testID="cache-intro">
+                        <Image
+                            source={TREASURE_CHEST_CLOSED}
+                            style={styles.heroArt}
+                            contentFit="contain"
+                            transition={0}
+                            accessibilityLabel="A banded chest, shut and half-buried"
+                        />
                         <Text style={styles.body}>
                             Half-buried and patient, the way hidden things are. Three
                             locks, honest about their difficulty, and no one watching.
@@ -345,6 +354,13 @@ export default function CacheScreen() {
                 {/* Ledger */}
                 {vm.phase === 'outcome' && vm.outcome !== null && (
                     <View style={styles.card} testID="cache-outcome">
+                        <Image
+                            source={TREASURE_GOLD_HOARD}
+                            style={styles.tallyArt}
+                            contentFit="contain"
+                            transition={0}
+                            accessibilityLabel="Spilled gold and an ewer — the take"
+                        />
                         <Text style={styles.eyebrow}>THE TALLY</Text>
                         <Text style={[styles.cardTitle, { color: AXM.sulfur }]}>{vm.outcome.tierLabel}</Text>
                         <View style={styles.chipRow}>
@@ -397,6 +413,9 @@ const useStyles = makeStyles((AXM) => ({
     // don't sit atop a sea of empty black (critic round: cache was the one
     // encounter screen that never got dialogue's centring treatment).
     scroll: { padding: 14, paddingBottom: 24, flexGrow: 1, justifyContent: 'center' },
+    // Encounter art — the shut chest greets the kneel; the hoard crowns the tally.
+    heroArt: { width: '100%', height: 180, marginBottom: 10 },
+    tallyArt: { width: '100%', height: 140, marginBottom: 8 },
     eyebrow: {
         fontFamily: FONTS.sans,
         fontSize: 12,

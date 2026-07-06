@@ -78,6 +78,9 @@ export interface CombatIntentVM {
 }
 export interface CombatEnemyPaneVM {
     name: string; artKey: string; isBoss: boolean;
+    /** Encounter-varying nonce (the encounter seed) — salts the random art pick
+     *  so the same foe wears a different painting from fight to fight. */
+    artNonce: number;
     hp: number; maxHp: number; hpPct: number;
     effects: CombatEffectChipVM[];
     intent: CombatIntentVM;
@@ -270,6 +273,7 @@ function enemyPane(state: CombatEncounterState): CombatEnemyPaneVM {
     return {
         name: e.name,
         artKey: e.id,
+        artNonce: state.seed ?? 0,
         isBoss,
         hp: Math.max(0, e.health), maxHp: e.maxHealth,
         hpPct: e.maxHealth > 0 ? Math.max(0, e.health) / e.maxHealth : 0,

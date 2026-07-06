@@ -1,0 +1,9 @@
+{
+  "generated_by": "user-supplied",
+  "date": "2026-07-06",
+  "tool": "external-illustration",
+  "prompt": "Temp art drop (repo-root tmp_image, 2026-07-06) — painted figures/objects on black; batch-processed: resized to <=512-640px, converted to WebP, and (except card art) black backgrounds alpha-matted (border-connected keying with graded glow edges)",
+  "spec_section": "temp-art-pass",
+  "covers": "every .webp in this directory",
+  "used_by": ["assets/images/treasure/index.ts (registry — see its header for surfaces)"]
+}

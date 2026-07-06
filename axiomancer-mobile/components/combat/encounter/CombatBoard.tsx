@@ -51,10 +51,9 @@ import { TrashGlyph, LedgerMark } from '@/components/hazard/glyphs';
 import { CombatCombatantPane, EffectChips, PlayerMedallion, COMBAT_HUD_HEIGHT, type CombatFx } from './CombatCombatantPane';
 import { CombatDie } from './CombatDie';
 
-// The single bundled card art (one photo across every card for now — see TODO at
-// CombatCardFace). Per-card differentiation is preserved via the stance tint +
-// the keyword/category glyph until per-card art exists.
-const CARD_ART = require('@/assets/images/cards/circe-placeholder.jpg');
+// Per-card art registry (temp art pass) — keyed by cardId, falls back to the
+// circe placeholder for unmapped ids. Stance tint + glyph still ride on top.
+import { getCardArt } from '@/assets/images/cards';
 
 // ── Drag plumbing (cards AND dice) ───────────────────────────────────────────
 
@@ -548,12 +547,17 @@ export const CombatBoard = React.memo(function CombatBoard({
         if (x < 0 && y < 0) return;
         if (payload.type === 'die') {
             // Per-card targeting: drop a die onto a SPECIFIC staged card to power it.
+            // All staged rects are measured in ONE parallel round-trip — awaiting
+            // them sequentially cost O(N) async hops per drop with N staged cards.
             let target: string | null = null;
-            for (const uid of stagedUids) {
+            const measured = await Promise.all(stagedUids.map(async (uid) => {
                 const node = stagedRefs.current.get(uid);
-                if (!node) continue;
+                if (!node) return null;
                 const rect = await measureRect({ current: node });
-                if (rectContains(rect, x, y, 16)) { target = uid; break; }
+                return { uid, rect };
+            }));
+            for (const m of measured) {
+                if (m && rectContains(m.rect, x, y, 16)) { target = m.uid; break; }
             }
             // Forgiveness: a die dropped loosely in the play area lands on the one
             // eligible card (the single staged card, else the first still without a die).
@@ -920,8 +924,8 @@ function paidValueText(f: CombatCardFaceVM, hero?: string): string {
     return base;
 }
 
-// Deterministic per-card art variation (one bundled photo backs every card until
-// per-card art ships): mirror the image for ~half the cards, keyed off the card id.
+// Deterministic per-card art variation (the temp art pool is smaller than the
+// card pool, so paintings are shared): mirror for ~half the cards, keyed off id.
 function artMirrored(cardId: string): boolean {
     let h = 0;
     for (let i = 0; i < cardId.length; i++) h = (h * 31 + cardId.charCodeAt(i)) | 0;
@@ -931,17 +935,13 @@ function artMirrored(cardId: string): boolean {
 /**
  * The shared card FACE — art-forward reference shape — instanced small in the
  * hand and LARGE in the inspect modal so the two can never drift.
- *   · real ART (Circe placeholder) fills the top ~64% behind a stance-tint
- *     gradient wash;
+ *   · per-card ART (temp pool, keyword-matched) fills the top ~64% behind a
+ *     stance-tint gradient wash;
  *   · a glossy stance ORB (category glyph, stance colour) top-left;
  *   · the card NAME on a stance-coloured bevelled band;
  *   · small face: ONE keyword line ("◆ KEYWORD value") — the FREE/POWER fork
  *     lives on the APPLY ribbon + the detail modal;
  *   · large face: the effect SENTENCE with bolded keywords + the type tab.
- *
- * TODO(art): one bundled photo (circe-placeholder.jpg) backs every card today —
- * per-card differentiation is carried by the stance tint + mirror + the glyph
- * until per-card art ships; swap CARD_ART for a per-card source then.
  */
 export const CombatCardFace = React.memo(function CombatCardFace({
     card, width, height, large = false, accent = null, readPip = null, heroOverride, children,
@@ -977,7 +977,7 @@ export const CombatCardFace = React.memo(function CombatCardFace({
                 {/* ART window — top ~64% behind a bottom-up stance gradient */}
                 <View style={[styles.faceArt, large && { height: '52%' }]} pointerEvents="none">
                     <Image
-                        source={CARD_ART}
+                        source={getCardArt(card.cardId)}
                         style={[StyleSheet.absoluteFill, artMirrored(card.cardId) && { transform: [{ scaleX: -1 }] }]}
                         contentFit="cover"
                         transition={0}
