@@ -12,7 +12,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { Player } from '../../Character/characters.mock';
 import type { Character } from '../../Character/types';
 import type { Enemy } from '../../Enemy/types';
-import { TidepoolCrab } from '../../Enemy/enemy.library';
+import { GraveLarva } from '../../Enemy/enemy.library';
 import { deepClone } from '../../Utils';
 import { setSeed } from '../../Utils/rng';
 import type { CombatResources } from '../../Cards/types';
@@ -39,7 +39,7 @@ function makePlayer(): Character {
 }
 
 function makeEnemy(hp = 1000): Enemy {
-    const e = deepClone(TidepoolCrab);
+    const e = deepClone(GraveLarva);
     e.id = 'enemy-skills-test';
     e.health = hp;
     e.maxHealth = hp;

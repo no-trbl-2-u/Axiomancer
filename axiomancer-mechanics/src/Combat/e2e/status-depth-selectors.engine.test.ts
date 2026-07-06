@@ -20,7 +20,7 @@ import type { Combatant } from '../types';
 import type { Character } from '../../Character/types';
 import type { Enemy } from '../../Enemy/types';
 import { Player } from '../../Character/characters.mock';
-import { TidepoolCrab } from '../../Enemy/enemy.library';
+import { GraveLarva } from '../../Enemy/enemy.library';
 import { deepClone } from '../../Utils';
 import { getCardById } from '../../Cards/cards.library';
 import { executeSkill } from '../../Cards/skill.engine';
@@ -169,7 +169,7 @@ describe('skill engine — every new mechanic kind is a NO-OP through executeSki
             // Zero stats so the skill's own basePower/stat-scaling deals 0 — then
             // any HP/effect change could ONLY come from the mechanic (which no-ops).
             player.baseStats = { body: 0, mind: 0, heart: 0 };
-            const enemy = deepClone(TidepoolCrab) as Enemy;
+            const enemy = deepClone(GraveLarva) as Enemy;
             enemy.health = 100; enemy.maxHealth = 100; enemy.effects = [ae('debuff_poison', 3)];
 
             const state: CombatState = {

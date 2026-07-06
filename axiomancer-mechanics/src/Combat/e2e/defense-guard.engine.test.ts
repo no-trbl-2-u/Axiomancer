@@ -23,7 +23,7 @@ import { describe, it, expect, afterEach, vi } from 'vitest';
 import { Player } from '../../Character/characters.mock';
 import type { Character } from '../../Character/types';
 import type { Enemy } from '../../Enemy/types';
-import { TidepoolCrab } from '../../Enemy/enemy.library';
+import { GraveLarva } from '../../Enemy/enemy.library';
 import { deepClone } from '../../Utils';
 import { mockSequentialRng } from '../../test-utils/rng';
 import { getCardById } from '../../Cards/cards.library';
@@ -56,7 +56,7 @@ function makePlayer(skills: string[]): Character {
 }
 
 function makeEnemy(hp: number, stance: 'heart' | 'body' | 'mind' = 'mind'): Enemy {
-    const e = deepClone(TidepoolCrab);
+    const e = deepClone(GraveLarva);
     e.id = 'enemy-test-dummy';
     e.health = hp;
     e.maxHealth = hp;

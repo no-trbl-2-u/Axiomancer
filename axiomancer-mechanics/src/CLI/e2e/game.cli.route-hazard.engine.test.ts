@@ -50,7 +50,7 @@ describe('Game CLI route walkthrough → Hazard-Pattern combat', () => {
             .filter(r => r.action === 'resolveMapEvent')
             .map(r => r.event as { kind?: string; encounter?: { enemies?: Array<{ name?: string }> } })
             .find(event => event.kind === 'encounter');
-        expect(encounterEvent?.encounter?.enemies?.[0]?.name).toBe('Driftwood Husk');
+        expect(encounterEvent?.encounter?.enemies?.[0]?.name).toBe('Little Belle');
 
         const end = logs.find(r => r.action === 'hazardCombat:end');
         expect((end?.event as { outcome?: string })?.outcome).toMatch(/victory|defeat|mercy|retreat/);

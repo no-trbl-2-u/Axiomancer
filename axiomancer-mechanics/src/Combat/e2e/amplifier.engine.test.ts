@@ -18,7 +18,7 @@ import { describe, it, expect } from 'vitest';
 import { Player } from '../../Character/characters.mock';
 import type { Character } from '../../Character/types';
 import type { Enemy } from '../../Enemy/types';
-import { TidepoolCrab } from '../../Enemy/enemy.library';
+import { GraveLarva } from '../../Enemy/enemy.library';
 import { deepClone } from '../../Utils';
 import {
     initializeCombatEncounter, rollEncounterDice, playCombatCard,
@@ -41,7 +41,7 @@ function makePlayer(skills: string[]): Character {
 }
 
 function makeEnemy(hp: number): Enemy {
-    const e = deepClone(TidepoolCrab);
+    const e = deepClone(GraveLarva);
     e.id = 'amplify-test-enemy';
     e.health = hp; e.maxHealth = hp; e.effects = [];
     e.baseStats = { heart: 2, body: 2, mind: 2 };

@@ -1,415 +1,386 @@
 /**
  * Hazard-Pattern Combat — AUTHORED THREAT SEQUENCES (the learnable enemy patterns).
  *
- * GENERATED CONTENT. One entry per enemy: a deterministic, fully-revealed-up-front
- * sequence of phases the player learns and out-plays. Each phase declares its
- * hidden STANCE (the RPS read), a thematic `stanceHint` that implies but never
- * names that stance, RELATIVE dot/control factors (which track the enemy is weak
- * to — both win paths stay live across the roster), a telegraphed threat action
- * (`actionText` + optional debuff), and a `damageWeight`. The resolver in
- * `combat.threat.ts` computes the concrete thresholds + threat damage from level +
- * difficulty, so the whole roster retunes from a few constants.
+ * GENERATED CONTENT. One entry per enemy in the 2026-07-06 art-driven roster: a
+ * deterministic, fully-revealed-up-front sequence of phases the player learns and
+ * out-plays. Each phase declares its hidden STANCE (the RPS read), a thematic
+ * `stanceHint` that implies but never names that stance, a telegraphed threat
+ * action (`actionText` + optional debuff), and a `damageWeight`.
  *
- * Authoring convention & catalog: see the `/combat-tuning` workflow. Edits here
- * are pure content (cards/mechanics scope).
+ * ESCALATION DOCTRINE (the Aeon's-End pressure): every sequence RAMPS — later
+ * phases carry heavier `damageWeight` and harder debuffs, and the final phase is
+ * a spike. On top of this per-phase ramp the engine's escalation clock
+ * (`THREAT_ESCALATION_PER_ROUND`, bosses ×`THREAT_ESCALATION_BOSS_MULT`)
+ * multiplies threat damage every round past the grace window, so a fight that
+ * drags compounds BOTH curves. Solve it fast (DoT) or deny turns (control).
+ *
+ * The resolver in `combat.threat.ts` computes the concrete threat damage from
+ * level + difficulty, so the whole roster retunes from a few constants.
  */
 
 import type { AuthoredThreatPhase } from './combat.threat';
 
 export const AUTHORED_THREAT_SEQUENCES: Record<string, AuthoredThreatPhase[]> = {
-    // Befriendable fallen-faith — heart-dominant grief over discarded faith.
-    'enemy-apostate-abbot': [
-        { enemyStance: 'heart', actionText: "The Abbot recites a prayer he no longer believes and the empty words still wound", stanceHint: "He performs the old devotion with hollow eyes, grieving what he threw away." },
-        { enemyStance: 'mind', damageWeight: 0.85, threatEffectId: 'debuff_confusion', threatIntensity: 2, actionText: "The Abbot poses a doubt so heavy your own faith staggers under it", stanceHint: "He weighs each heresy precisely, having learned the robes outweigh the god." },
-        { enemyStance: 'heart', damageWeight: 1.1, threatEffectId: 'debuff_vulnerability_heart', threatIntensity: 2, actionText: "The Abbot turns his abandoned devotion outward as raw, accusing sorrow", stanceHint: "All the love he can no longer give upward, he hurls at you instead." },
-        { enemyStance: 'heart', damageWeight: 1.35, threatEffectId: 'debuff_fear', threatIntensity: 3, actionText: "The Abbot lets the weight of the robes settle fully and despair pours off him onto you", stanceHint: "He stops pretending — there is no god, only the crushing garment of what he was — and the horror of it is contagious." },
+    // ══ FISHING VILLAGE — early (L1-8) ══════════════════════════════════════════
+
+    // Mindless burial-grub — pure forward appetite; the ramp is it committing.
+    'enemy-grave-larva': [
+        { enemyStance: 'body', actionText: "The larva lunges and gums a mouthful of your shin", stanceHint: "It does not aim — it simply chews toward the nearest warm certainty." },
+        { enemyStance: 'body', damageWeight: 1.3, threatEffectId: 'debuff_bleed', actionText: "It clamps on with its whole becoming and tears", stanceHint: "Whatever it is deciding to be, it has decided to be it at you, all at once." },
     ],
-    // Zealous doubter — mind-resistant and dot-tough; control cracks his recited certainty.
-    'enemy-apprentice-heretic': [
-        { enemyStance: 'heart', damageWeight: 0.9, actionText: "The Heretic flings a scripture back in your teeth like a curse", stanceHint: "He weeps as he condemns you; the excommunication still burns in his chest." },
-        { enemyStance: 'mind', threatEffectId: 'debuff_silence', actionText: "The Heretic names your sins in cold order", stanceHint: "He has rehearsed every rebuttal; he answers before you finish speaking." },
-        { enemyStance: 'heart', damageWeight: 1.3, threatEffectId: 'debuff_fear', threatIntensity: 2, actionText: "The Heretic makes his final, fevered profession of faith", stanceHint: "Twice as certain because he is twice as afraid; the fervor pours out of him." },
+    // The watcher — patient, then suddenly all leverage; watching IS the wind-up.
+    'enemy-float-eye': [
+        { enemyStance: 'body', actionText: "The orb barrels into you like a thrown boulder", stanceHint: "All that watching stores momentum; it arrives with the weight of a held breath." },
+        { enemyStance: 'mind', damageWeight: 0.85, threatEffectId: 'debuff_root', actionText: "Its gaze pins your feet to the ground mid-step", stanceHint: "It studies your stride and files an objection precisely where you planted it." },
+        { enemyStance: 'body', damageWeight: 1.3, actionText: "The whole eye rolls over you, iris first", stanceHint: "Out of patience, it stops watching and simply throws its entire opinion at the matter." },
     ],
-    // A pedant who debates you to death — mind-resistant sophist, weak to slow erosion that won't argue back.
-    'enemy-argumentative-crow': [
-        { enemyStance: 'mind', damageWeight: 0.85, actionText: "The Crow caws a syllogism that closes like a snare around your throat", stanceHint: "It tilts its head, weighing your every word for the flaw it already knows is there." },
-        { enemyStance: 'heart', threatEffectId: 'debuff_confusion', actionText: "The Crow shrieks a contradiction that splits your reasoning in two", stanceHint: "Losing the thread, it screeches with the wounded pride of one who has never been wrong." },
-        { enemyStance: 'mind', damageWeight: 1.3, actionText: "The Crow delivers its final premise: that you were always going to lose", stanceHint: "Calm again, it lands its conclusion with the cold finality of a proof completed." },
+    // A skull on a loop — its last argument, escalating in volume.
+    'enemy-chattering-skull': [
+        { enemyStance: 'mind', damageWeight: 0.8, actionText: "The skull recites its last word at you until your ears ring", stanceHint: "It repeats the argument it died holding, colder each time." },
+        { enemyStance: 'mind', damageWeight: 1.25, threatEffectId: 'debuff_confusion', actionText: "The chattering doubles and redoubles until it is inside your own thinking", stanceHint: "Cornered, the loop tightens — the same word, faster, until it is the only word." },
     ],
-    // Methodical scrutiny — befriendable, so Control-weak; resists erosion as it tallies.
-    'enemy-audit-sentinel': [
-        { enemyStance: 'mind', damageWeight: 0.85, actionText: "The Sentinel marks a fresh tally against your name", stanceHint: "It never raises its voice; it simply notes the discrepancy and waits." },
-        { enemyStance: 'heart', threatEffectId: 'debuff_slow', actionText: "The Sentinel recites your every misstep until your hand falters", stanceHint: "There is something almost pleading in how badly it wants the columns to balance." },
-        { enemyStance: 'mind', damageWeight: 1.25, threatEffectId: 'debuff_unraveling', threatIntensity: 2, actionText: "The Sentinel renders its final verdict on the ledger of you", stanceHint: "Every error reconciled, it closes the book with the patience of arithmetic." },
+    // Befriendable grief-bell — Control/mercy reaches it; raw sorrow resists erosion.
+    'enemy-little-belle': [
+        { enemyStance: 'heart', damageWeight: 0.85, threatEffectId: 'debuff_fear', actionText: "The bell tolls your name into the empty chapel of the air", stanceHint: "Every peal is a mourning for someone who never came; it grieves at you, openly." },
+        { enemyStance: 'mind', damageWeight: 0.85, threatEffectId: 'debuff_slow', actionText: "It rings a measured, patient interval that drags your hands behind the beat", stanceHint: "Between tolls it counts the congregation, wheeling through a liturgy it knows by rote." },
+        { enemyStance: 'heart', damageWeight: 1.3, actionText: "Belle swings the bell itself in one final, grief-mad peal straight through you", stanceHint: "Past liturgy now, it throws its whole small orange body into the toll." },
     ],
-    // Befriendable unmaker of first principles (unique, mind-dom) — Control-weak (it can be given a new axiom to hold); erosion-resistant, flips DoT-soft only at the climax.
-    'enemy-axiom-breaker': [
-        { enemyStance: 'mind', damageWeight: 0.9, threatEffectId: 'debuff_vulnerability_mind', threatIntensity: 2, actionText: "The Axiom-Breaker quietly revokes the rule that kept you standing", stanceHint: "It does not dispute your ground; it simply notes, almost kindly, that it is gone." },
-        { enemyStance: 'body', actionText: "The Axiom-Breaker lets gravity that no longer agrees to spare you take hold", stanceHint: "Having unmade the rule, it leans the raw consequence onto you with bare force." },
-        { enemyStance: 'heart', damageWeight: 0.95, threatEffectId: 'debuff_confusion', threatIntensity: 2, actionText: "The Axiom-Breaker makes the thing you most believe stop being true", stanceHint: "For a moment it looks almost sorry to take the one belief you could not live without." },
-        { enemyStance: 'mind', damageWeight: 1.4, threatEffectId: 'debuff_unraveling', threatIntensity: 3, actionText: "The Axiom-Breaker unwrites the premise that you exist at all", stanceHint: "It reaches the last axiom and, cold and exact, simply declares it false." },
+    // A collector of footing — trips first, then presses the advantage it made.
+    'enemy-foot-stealer': [
+        { enemyStance: 'body', threatEffectId: 'debuff_stagger', actionText: "A hand you did not count grabs your ankle and pulls", stanceHint: "It works low and honest: every limb is for leverage, nothing is for show." },
+        { enemyStance: 'mind', damageWeight: 0.9, threatEffectId: 'debuff_slow', actionText: "It rearranges the ground under your next three steps", stanceHint: "It has inventoried your stride and is deciding which piece to repossess." },
+        { enemyStance: 'body', damageWeight: 1.35, actionText: "It takes the footing entire, and you with it", stanceHint: "The collection closes on its favorite item with every scuttling hand at once." },
     ],
-    // Heart-dominant arbiter, NOT befriendable — dot-weak instead; control-resistant scales.
-    'enemy-balance-judge': [
-        { enemyStance: 'body', actionText: "The Judge brings the heavier scale crashing down", stanceHint: "It hears no argument; it only lets the weight fall where weight must fall." },
-        { enemyStance: 'mind', damageWeight: 0.85, threatEffectId: 'debuff_vulnerability_heart', threatIntensity: 2, actionText: "The Judge measures your conviction and finds it wanting", stanceHint: "Cold and exact, it weighs reason against unreason on a fulcrum of pure indifference." },
-        { enemyStance: 'heart', damageWeight: 1.2, threatEffectId: 'debuff_stagger', threatIntensity: 2, actionText: "The Judge pronounces sentence, and the verdict settles into your bones", stanceHint: "At the last its impartiality burns like wrath — final, absolute, and personally aggrieved." },
+    // Befriendable drowned deckhand — mercy reaches the man; the wreck resists erosion.
+    'enemy-water-holger': [
+        { enemyStance: 'heart', damageWeight: 0.85, actionText: "Holger reaches for you with hands that remember hauling shipmates from the water", stanceHint: "It is not attacking so much as rescuing you, badly, toward the deep." },
+        { enemyStance: 'body', threatEffectId: 'debuff_fear', actionText: "It surges with the sudden strength of the drowning", stanceHint: "The wreck lends it a brute, saltwater momentum it never asked for." },
+        { enemyStance: 'heart', damageWeight: 1.3, actionText: "It embraces you like a shipmate going down, and means to finish the drill", stanceHint: "Grief and duty collapse into one motion; it weeps brine through the hold." },
     ],
-    // A young marsh-light still learning to lure — mind-resistant, dot-weak, with an innocent flicker that resists control.
-    'enemy-bog-will-stripling': [
-        { enemyStance: 'mind', damageWeight: 0.85, actionText: "The Stripling bobs a false promise of dry ground just ahead", stanceHint: "It studies which way you lean, learning the shape of a trap it half-understands." },
-        { enemyStance: 'heart', threatEffectId: 'debuff_slow', actionText: "The Stripling brightens, delighted, as the mud closes over your boots", stanceHint: "It glows with a child's guileless joy at a game it doesn't know is cruel." },
-        { enemyStance: 'mind', damageWeight: 1.3, threatEffectId: 'debuff_confusion', threatIntensity: 2, actionText: "The Stripling leads you, at last, to the deep water it was always pointing at", stanceHint: "Something colder wakes behind its light, and it begins, finally, to mean it." },
+    // A grudge on a spike — it remembers everything except being wrong.
+    'enemy-cursed-head': [
+        { enemyStance: 'heart', damageWeight: 0.85, threatEffectId: 'debuff_fear', actionText: "The head recites the wrong done to it until the air curdles", stanceHint: "The grudge does the talking; the talking does the wounding." },
+        { enemyStance: 'mind', damageWeight: 0.9, actionText: "It corrects your version of events, tooth by tooth", stanceHint: "It has rehearsed the account for years; yours is an editing problem." },
+        { enemyStance: 'heart', damageWeight: 1.3, threatEffectId: 'debuff_unraveling', actionText: "The curse pronounces you part of the grievance, permanently", stanceHint: "At the last it stops recounting and simply files you under the wrong." },
     ],
-    // Befriendable forgotten guardian — Control-weak (it can be relieved of duty); body-dominant brute, dot-resistant ossified mass.
-    'enemy-boneward-sentinel': [
-        { enemyStance: 'body', actionText: "The Sentinel raises its ossified halberd to bar a passage it can no longer name", stanceHint: "It moves on rote — vast, certain, and asking nothing, because asking stopped centuries ago." },
-        { enemyStance: 'mind', damageWeight: 0.9, threatEffectId: 'debuff_stagger', actionText: "The Sentinel measures your trespass against an oath it has half-forgotten", stanceHint: "Something old and procedural turns behind its sockets, checking you against a vanished list." },
-        { enemyStance: 'heart', damageWeight: 1.25, actionText: "The Sentinel strikes with the grief of a guard who has outlived its purpose", stanceHint: "For one moment it remembers there was something it loved enough to guard, and mourns it." },
+    // Hunger with manners — the courtesy escalates into the taking.
+    'enemy-ghast': [
+        { enemyStance: 'mind', damageWeight: 0.85, threatEffectId: 'debuff_charm', actionText: "The ghast asks, beautifully, for something you will miss", stanceHint: "The request is a trap already sprung; it is merely observing the forms." },
+        { enemyStance: 'body', damageWeight: 0.9, threatEffectId: 'debuff_bleed', actionText: "It takes without waiting for the answer", stanceHint: "The manners end where the reach begins." },
+        { enemyStance: 'mind', damageWeight: 1.3, actionText: "It thanks you, sincerely, while taking the rest", stanceHint: "Cold and gracious to the end — the etiquette was always the appetite." },
     ],
-    // Vast cerebral structure — control-resistant + dot-weak (it cannot bleed); flips dot-open only when forced to answer itself; pure mind.
-    'enemy-cathedral-of-doubt': [
-        { enemyStance: 'mind', threatEffectId: 'debuff_confusion', threatIntensity: 2, actionText: "The Cathedral poses a question with no floor and you fall through it", stanceHint: "Every arch is an unanswered query; it reasons in vaults too high to see the top of." },
-        { enemyStance: 'mind', damageWeight: 0.85, threatEffectId: 'debuff_silence', threatIntensity: 2, actionText: "The Cathedral leads you down a nave that only deepens the asking", stanceHint: "Its cold geometry is built to keep you wandering among its doubts forever." },
-        { enemyStance: 'heart', damageWeight: 1.1, threatEffectId: 'debuff_fear', threatIntensity: 2, actionText: "The Cathedral lets its silence answer, and the vast indifference of it presses down", stanceHint: "Beneath all the questions there is a grief so wide it has gone quiet." },
-        { enemyStance: 'mind', damageWeight: 1.4, threatEffectId: 'debuff_fear', threatIntensity: 3, actionText: "The Cathedral turns its ultimate question upon itself and the collapse of certainty buries you with it", stanceHint: "For one ruinous instant it must answer its own asking — and the whole structure trembles toward an answer it cannot survive." },
+    // The countdown fight — the egg does little, then very much; kill it before it hatches.
+    'enemy-doom-egg': [
+        { enemyStance: 'heart', damageWeight: 0.5, threatEffectId: 'debuff_poison', actionText: "The egg weeps a thin caustic promise down its own shell", stanceHint: "Nothing in it hurries. Everything in it counts." },
+        { enemyStance: 'body', damageWeight: 0.8, threatEffectId: 'debuff_root', enemyHeal: 4, actionText: "Feelers lash out to hold you exactly where the hatching wants you", stanceHint: "The shell flexes with something rehearsing its limbs." },
+        { enemyStance: 'body', damageWeight: 1.5, threatEffectId: 'debuff_septic', threatIntensity: 2, actionText: "The shell splits and the countdown presents its total", stanceHint: "Every round it waited is in the blow; the kindness is billed in full." },
     ],
-    // Befriendable grieving flame — Control-weak (grief reachable); burns with erosion resistance.
-    'enemy-cindergeist-revenant': [
-        { enemyStance: 'heart', threatEffectId: 'debuff_burn', threatIntensity: 2, actionText: "The Revenant flares, reaching for you as fuel", stanceHint: "It clings to you the way a dying fire clings to the last dry log — desperate, grieving." },
-        { enemyStance: 'mind', damageWeight: 0.85, actionText: "The Revenant banks low, feeding on the air you breathe", stanceHint: "For a moment the grief cools into something calculating, hoarding its last embers." },
-        { enemyStance: 'heart', damageWeight: 1.35, threatEffectId: 'debuff_poison', threatIntensity: 2, actionText: "The Revenant pours out everything it has left in one consuming blaze", stanceHint: "It would rather burn you and itself to ash than be left cold and alone again." },
+    // Elite dock brute — the cleaver is the argument, restated louder.
+    'enemy-the-butcher': [
+        { enemyStance: 'body', threatEffectId: 'debuff_bleed', actionText: "The Butcher opens the debate along your forearm", stanceHint: "He answers everything with the cleaver; the block is wherever you happen to stand." },
+        { enemyStance: 'mind', damageWeight: 0.85, actionText: "He sizes you up by the joints, unhurried", stanceHint: "A tradesman's cold appraisal — which cuts are worth keeping." },
+        { enemyStance: 'body', damageWeight: 1.15, threatEffectId: 'debuff_stagger', threatIntensity: 2, actionText: "The flat of the cleaver arrives like a dropped door", stanceHint: "The appraisal is done; the work begins in earnest." },
+        { enemyStance: 'body', damageWeight: 1.4, threatEffectId: 'debuff_bleed', threatIntensity: 2, actionText: "He dresses the argument properly, by the joints", stanceHint: "No anger in it at all — just the trade, practiced past thought, brought to bear entire." },
     ],
-    // Befriendable fallen magistrate — Control-weak (his old reason can be reached); dot-resistant, and most cunning when cornered.
-    'enemy-coastal-tyrant': [
-        { enemyStance: 'mind', threatEffectId: 'debuff_root', actionText: "The Tyrant pronounces sentence and the tide answers", stanceHint: "He still speaks in the cadence of a court, weighing your crimes by old statute." },
-        { enemyStance: 'heart', damageWeight: 0.85, threatEffectId: 'debuff_fear', actionText: "The Tyrant rages over a charter no one honors", stanceHint: "Beneath the crown of gull-feathers he is only a forgotten man, grieving his bay." },
-        { enemyStance: 'body', damageWeight: 1.2, actionText: "The Tyrant brings down the blade older than the village", stanceHint: "Words spent, the magistrate becomes the storm, all weight and breaking surf." },
-        { enemyStance: 'mind', damageWeight: 1.4, threatEffectId: 'debuff_unraveling', threatIntensity: 3, actionText: "The Tyrant makes one last cold, kingly verdict upon you", stanceHint: "Cornered, the old judge turns sly again, plotting the cruelest lawful ruin." },
+    // Befriendable face-broker — Control/mercy reaches her; the bargains resist erosion.
+    'enemy-brine-hag': [
+        { enemyStance: 'body', actionText: "The Hag rakes brine-cracked nails toward your face", stanceHint: "She reaches for the surface of you first — the rest, she reckons, follows the face." },
+        { enemyStance: 'heart', damageWeight: 0.9, threatEffectId: 'debuff_fear', threatIntensity: 2, actionText: "She shows you your own reflection wearing an expression you have never allowed", stanceHint: "Beneath the bargaining is a mourning for a face she cannot wear." },
+        { enemyStance: 'mind', threatEffectId: 'debuff_root', threatIntensity: 2, actionText: "She prices your escape at exactly more than you have", stanceHint: "The tide taught her arithmetic; every sum comes out in her favor." },
+        { enemyStance: 'body', damageWeight: 1.4, actionText: "She closes the bargain with both hands", stanceHint: "All the courtesy of the market drops away and the exchange completes by force." },
     ],
-    // Cerebral arguer — control-resistant + dot-weak early, flips to dot-vulnerable when its certainty finally cracks.
-    'enemy-contrarian-revenant': [
-        { enemyStance: 'mind', actionText: "The Revenant rebuts your position before you finish forming it", stanceHint: "Whatever you assert, it has already prepared the opposite, coolly, in advance." },
-        { enemyStance: 'mind', damageWeight: 0.21, threatEffectId: 'debuff_silence', threatIntensity: 2, actionText: "The Revenant talks over you until your own argument dissolves", stanceHint: "It will not let a single one of your words stand uncontested." },
-        { enemyStance: 'heart', damageWeight: 1.35, threatEffectId: 'debuff_unraveling', threatIntensity: 3, actionText: "The Revenant, finally cornered, refuses to die out of sheer spite and curses your certainty", stanceHint: "It would rather rot in place forever than grant you the last word." },
+    // Befriendable psychopomp — answer the toll (control) or be ferried; cerebral, dot-resistant.
+    'enemy-the-ferryman': [
+        { enemyStance: 'mind', damageWeight: 0.21, threatEffectId: 'debuff_silence', actionText: "The Ferryman names the toll, and your objection is not legal tender", stanceHint: "He waits with the patience of a schedule that has never once been missed." },
+        { enemyStance: 'mind', threatEffectId: 'debuff_confusion', threatIntensity: 2, actionText: "He describes the far bank until you cannot remember the near one", stanceHint: "He listens past your words, appraising what you could not afford to lose." },
+        { enemyStance: 'heart', damageWeight: 1.25, actionText: "The pole swings with the grief of ten thousand one-way crossings", stanceHint: "Cornered, the boatman finally lets the cost of the job show through." },
     ],
-    // A wordless arguing tree — you cannot reason with timber.
-    'enemy-disatree': [
-        { enemyStance: 'body', actionText: "The Disatree swats you flat with a contradicting branch", stanceHint: "It does not debate so much as shove — every point it makes lands as a slab of trunk." },
-        { enemyStance: 'mind', damageWeight: 0.85, threatEffectId: 'debuff_root', actionText: "Roots erupt to pin you in place mid-sentence", stanceHint: "It chooses its angle of attack with the slow, patient geometry of a thing that has stood here for a century." },
-        { enemyStance: 'body', damageWeight: 1.3, actionText: "The whole tree heaves over to bring its argument crashing down", stanceHint: "Out of patience, it stops gesturing and simply throws its entire weight at the matter." },
+    // Befriendable fallen sovereign — Control-weak (the grievance can be heard);
+    // dot-resistant, and most kingly when cornered. (The village climax boss.)
+    'enemy-king-of-revenge': [
+        { enemyStance: 'mind', threatEffectId: 'debuff_root', actionText: "The King pronounces sentence and the shore itself holds you for it", stanceHint: "He still speaks in the cadence of a court, weighing your crimes by a statute only he remembers." },
+        { enemyStance: 'heart', damageWeight: 0.85, threatEffectId: 'debuff_fear', actionText: "The King rages over the wrong no one living recalls", stanceHint: "Beneath the crown there is no head — only the grievance, holding the shape of one." },
+        { enemyStance: 'body', damageWeight: 1.2, actionText: "The King brings down the whole weight of his century of court", stanceHint: "Words spent, the grievance becomes the storm, all verdict and breaking surf." },
+        { enemyStance: 'mind', damageWeight: 1.4, threatEffectId: 'debuff_unraveling', threatIntensity: 3, actionText: "The King makes one last cold, kingly ruling upon you", stanceHint: "Cornered, the old grievance turns sly again, plotting the cruelest lawful ruin." },
     ],
-    // A mindless tide-carved shape — there is no one home to reason with.
-    'enemy-driftwood-husk': [
-        { enemyStance: 'body', actionText: "The husk lurches forward and clubs you with a barnacled limb", stanceHint: "It moves only when your gaze is on it, swinging with the dumb force of driftwood in a swell." },
-        { enemyStance: 'mind', damageWeight: 0.8, threatEffectId: 'debuff_confusion', actionText: "It freezes mid-motion, and the stillness rattles loose your senses", stanceHint: "It seems to wait and weigh, choosing the exact instant you blink to be somewhere new." },
-        { enemyStance: 'body', damageWeight: 1.35, actionText: "The whole waterlogged frame topples onto you like a falling mast", stanceHint: "All pretense of stillness gone, it gives up everything to one final, crushing collapse." },
+
+    // ══ NORTHERN FOREST — early-mid (L9-18) ═════════════════════════════════════
+
+    // Omen-miner — it knocks, it warns, and the third knock lands.
+    'enemy-wichtlein': [
+        { enemyStance: 'mind', damageWeight: 0.8, actionText: "The Wichtlein knocks once on the thin place under your feet", stanceHint: "It measures the ground the way a clerk measures a coffin — for someone specific." },
+        { enemyStance: 'mind', damageWeight: 0.95, threatEffectId: 'debuff_fear', actionText: "The second knock, and the world under you sounds suddenly hollow", stanceHint: "It portends with the cold satisfaction of arithmetic coming out even." },
+        { enemyStance: 'body', damageWeight: 1.35, threatEffectId: 'debuff_stagger', threatIntensity: 2, actionText: "The third knock — and what it was knocking on gives way", stanceHint: "The omen stops predicting the collapse and becomes it." },
     ],
-    // Recurring doubt-voice — Control-resistant + dot-weak (cut the loop with erosion); cold and mental, flips to heart at the end.
-    'enemy-echo-of-pyrrhonia': [
-        { enemyStance: 'mind', damageWeight: 0.9, threatEffectId: 'debuff_silence', actionText: "The Echo repeats your own first doubt back at you until it cannot be unheard", stanceHint: "It reasons in flawless circles, and the circle has no door because it built none." },
-        { enemyStance: 'mind', damageWeight: 0.95, actionText: "The Echo asks the question beneath the question, and the floor of your certainty thins", stanceHint: "Every answer you offer it has already answered, colder and first." },
-        { enemyStance: 'heart', damageWeight: 1.3, threatEffectId: 'debuff_fear', threatIntensity: 2, actionText: "The Echo finally speaks in YOUR voice, and means it", stanceHint: "At the last it stops arguing and simply despairs — the doubt was always a wound, not a proof." },
+    // Unique prophecy-calf — cerebral and grieving; the calamity is the final phase.
+    'enemy-kudan': [
+        { enemyStance: 'mind', damageWeight: 0.9, threatEffectId: 'debuff_silence', actionText: "The Kudan opens its human mouth, and your reply refuses to form", stanceHint: "It knows one true thing, and the knowing crowds every other sentence out of the room." },
+        { enemyStance: 'heart', damageWeight: 0.95, threatEffectId: 'debuff_fear', threatIntensity: 2, actionText: "It weeps for you, specifically, with terrible accuracy", stanceHint: "The grief is not for itself — it has read the ending, and the ending has your gait." },
+        { enemyStance: 'mind', damageWeight: 1.3, threatEffectId: 'debuff_unraveling', threatIntensity: 2, actionText: "The Kudan begins to speak the calamity, and the first word is your name", stanceHint: "Cold and exact now — the prophecy was always going to be delivered; it only needed a listener." },
     ],
-    // Unique frozen-season-will — Control-resistant + dot-weak; mind-led, eerie recurrence.
-    'enemy-eternal-autumn': [
-        { enemyStance: 'mind', damageWeight: 0.9, threatEffectId: 'debuff_bleed', actionText: "Eternal Autumn lets the leaves fall upward around you, and the cold begins its slow accounting", stanceHint: "It schemes in cycles, arranging your ending the way it arranges every leaf — deliberately, again." },
-        { enemyStance: 'heart', actionText: "Eternal Autumn presses the ache of every unfinished goodbye into your chest", stanceHint: "It is a season that could not bear to end — all its hunger is really longing." },
-        { enemyStance: 'mind', damageWeight: 1.15, threatEffectId: 'debuff_slow', threatIntensity: 2, actionText: "Eternal Autumn begins the ending again, and again, and refuses to let it complete", stanceHint: "Coldly it resets the same dying moment, certain that this time it can hold the door shut." },
-        { enemyStance: 'body', damageWeight: 1.35, actionText: "Eternal Autumn collapses a whole frozen season onto you at once", stanceHint: "All the patience drops away and it simply falls, heavy as a year of dead leaves." },
+    // Lane bogey — the begging and the taking are one escalating motion.
+    'enemy-bull-begger': [
+        { enemyStance: 'body', actionText: "The Bull-Begger begs with a raised fist, and the fist lands first", stanceHint: "The asking is a formality; the arm was always going to follow." },
+        { enemyStance: 'heart', damageWeight: 0.9, threatEffectId: 'debuff_fear', actionText: "It howls at the insult of being answered at all", stanceHint: "Refusal and charity anger it equally; what it loves is the asking." },
+        { enemyStance: 'body', damageWeight: 1.35, actionText: "It takes the alms it decided you owed", stanceHint: "All pretense of petition gone — the collection is by main strength." },
     ],
-    // Starving brute mass — pure body.
-    'enemy-famine-of-the-deep-wood': [
-        { enemyStance: 'body', actionText: "The Famine drags you into bramble that will not green again", stanceHint: "It moves on nothing but appetite, all gaunt momentum and no thought at all." },
-        { enemyStance: 'body', damageWeight: 0.85, threatEffectId: 'debuff_slow', threatIntensity: 2, actionText: "The Famine drinks the warmth from your limbs and the wood forgets how to grow", stanceHint: "Where it leans, the very strength of things drains away into its hollow." },
-        { enemyStance: 'mind', damageWeight: 1.1, actionText: "The Famine spreads thin and patient, a starving silence closing every path", stanceHint: "Hunger this old has a cold cunning to it, herding you toward the barren center." },
-        { enemyStance: 'body', damageWeight: 1.4, threatEffectId: 'debuff_septic', threatIntensity: 3, actionText: "The Famine consumes everything that could grow back and the rot of barrenness sets into you", stanceHint: "It opens its whole starving weight upon you, taking the future along with the flesh." },
+    // A river of grief — pity is the current; it pulls.
+    'enemy-weeping-head': [
+        { enemyStance: 'heart', threatEffectId: 'debuff_slow', actionText: "The weeping rises past your knees and drags at every step", stanceHint: "It cries continuously, and at you; the river is the argument." },
+        { enemyStance: 'heart', damageWeight: 0.9, threatEffectId: 'debuff_fear', threatIntensity: 2, actionText: "The sobbing finds the frequency of your own worst night", stanceHint: "Its grief reaches for yours the way water finds water." },
+        { enemyStance: 'body', damageWeight: 1.3, actionText: "The current takes you off your feet all at once", stanceHint: "The mourning stops asking for company and simply pulls." },
     ],
-    // A flickering arguer that blinks out of reach — control-resistant, weak to erosion that catches it mid-fade.
-    'enemy-forest-sprite': [
-        { enemyStance: 'mind', damageWeight: 0.8, threatEffectId: 'debuff_confusion', actionText: "The Sprite scatters into motes that needle at your eyes", stanceHint: "It debates with itself whether to be seen, and each answer changes where it stands." },
-        { enemyStance: 'heart', actionText: "The Sprite flares with a spiteful little brightness", stanceHint: "Cornered, its tiny opinions curdle into a flare of pure pique." },
-        { enemyStance: 'mind', damageWeight: 1.25, actionText: "The Sprite resolves its argument and lunges through the gap in your guard", stanceHint: "It has talked itself, at last, into being real enough to wound." },
+    // Borrowed-gods shaman — three debts, called in ascending order.
+    'enemy-goblin-shaman': [
+        { enemyStance: 'mind', damageWeight: 0.85, threatEffectId: 'debuff_confusion', actionText: "The Shaman rattles the first god awake and points it at your reasoning", stanceHint: "It consults before it strikes; the consultation is billed to you." },
+        { enemyStance: 'mind', damageWeight: 1.0, threatEffectId: 'debuff_poison', actionText: "The second god is older, and arrives through your blood", stanceHint: "Its bargains are all overdue; the interest compounds in your veins." },
+        { enemyStance: 'heart', damageWeight: 1.35, threatEffectId: 'debuff_fear', threatIntensity: 2, actionText: "The third god it does not point — it merely lets go of the leash", stanceHint: "For one moment even the shaman looks apologetic about what it borrowed." },
     ],
-    // A patient tracker who can be turned aside — Control/mercy reaches the person under the ice; body-strong, resists erosion early.
-    'enemy-frostbound-hunter': [
-        { enemyStance: 'body', threatEffectId: 'debuff_bleed', actionText: "The Hunter closes the distance your warmth betrayed, blade rimed white", stanceHint: "Years of the hunt have made him pure muscle and silence, all forward pressure." },
-        { enemyStance: 'mind', damageWeight: 0.85, threatEffectId: 'debuff_slow', threatIntensity: 2, actionText: "The Hunter cuts off your retreat before you've thought to take it", stanceHint: "He reads your breath in the cold and plots its end with patient, ledger-cold care." },
-        { enemyStance: 'heart', damageWeight: 1.2, actionText: "The Hunter strikes, and for a breath you see the man who would rather not", stanceHint: "Under the frost there is grief older than the cold; the patience was never really cruelty." },
-        { enemyStance: 'body', damageWeight: 1.35, threatEffectId: 'debuff_bleed', threatIntensity: 2, actionText: "The Hunter ends the chase the only way the cold has left him knowing", stanceHint: "Whatever he feels, the body remembers the hunt and finishes it without him." },
+    // The half-erased dancer — do not make it stop; it fights to keep moving.
+    'enemy-sugata': [
+        { enemyStance: 'heart', damageWeight: 0.85, actionText: "Sugata whirls through you mid-figure, desperate not to lose the step", stanceHint: "It moves on pure feeling; stopping, it fears, would finish the erasing." },
+        { enemyStance: 'body', damageWeight: 0.95, threatEffectId: 'debuff_stagger', actionText: "The tambourine cracks across you on the downbeat", stanceHint: "The dance has a violence to it now — every beat defended like territory." },
+        { enemyStance: 'heart', damageWeight: 1.3, threatEffectId: 'debuff_unraveling', actionText: "It pulls you into the figure, and the erasure is a partner dance", stanceHint: "If it must fade mid-step, it has decided the step will be a duet." },
     ],
-    // Cerebral oracle, NOT befriendable — control-resistant + dot-weak; the one timeline it can win.
-    'enemy-glassmind-oracle': [
-        { enemyStance: 'mind', damageWeight: 0.85, threatEffectId: 'debuff_confusion', threatIntensity: 2, actionText: "The Oracle answers a move you have not yet made", stanceHint: "It looks past you to the ninety-nine deaths it already discarded, and chooses around them." },
-        { enemyStance: 'heart', actionText: "The Oracle mourns your defeat before it happens", stanceHint: "A flicker of foreseen grief crosses it — it has already wept for you and moved on." },
-        { enemyStance: 'mind', damageWeight: 1.3, threatEffectId: 'debuff_confusion', threatIntensity: 3, actionText: "The Oracle steers you gently into the hundredth ending", stanceHint: "Every choice you think is yours, it laid down for you a hundred turns ago." },
+    // The wrong-hatched brood — remembers wings; the fury is all forward.
+    'enemy-pale-brood': [
+        { enemyStance: 'body', threatEffectId: 'debuff_bleed', actionText: "The brood drives its half-formed bulk into you, tearing", stanceHint: "It fights the way the wrongly-born do: as if owed, and collecting." },
+        { enemyStance: 'heart', damageWeight: 0.9, threatEffectId: 'debuff_fear', actionText: "It keens at the sky it was promised, and the sound scrapes something loose in you", stanceHint: "Dimly, furiously, it remembers being meant for wings." },
+        { enemyStance: 'body', damageWeight: 1.35, actionText: "It throws everything it became at you, all at once", stanceHint: "No flight, so it makes the leap the hard way — through you." },
     ],
-    // Mourning custodian of dead arguments (elite, heart-dom) — DoT-weak (its grief takes erosion fast); Control-resistant.
-    'enemy-graveward-keeper': [
-        { enemyStance: 'heart', threatEffectId: 'debuff_fear', threatIntensity: 2, actionText: "The Keeper invites you to lie down among the unwon and rest", stanceHint: "Every word is soft with mourning for the cases that never got to finish." },
-        { enemyStance: 'body', threatEffectId: 'debuff_root', threatIntensity: 2, actionText: "The Keeper heaps grave-soil over your feet to keep you in the rows", stanceHint: "It hauls the dirt with a sexton's tireless, grieving arms." },
-        { enemyStance: 'heart', damageWeight: 1.3, threatEffectId: 'debuff_septic', threatIntensity: 3, actionText: "The Keeper closes your plot and pulls the quiet over you like a sheet", stanceHint: "It weeps as it finishes, because it truly would have preferred your company kept." },
+    // Befriendable triple watcher — methodical scrutiny; Control-weak, erosion-resistant tallying.
+    'enemy-tri-eyes': [
+        { enemyStance: 'mind', damageWeight: 0.85, actionText: "Tri-Eyes marks a fresh error against your name", stanceHint: "It never raises its voice; it simply notes the discrepancy and waits." },
+        { enemyStance: 'heart', threatEffectId: 'debuff_slow', actionText: "It recounts your every misstep until your hand falters", stanceHint: "There is something almost pleading in how badly it wants the tally to balance." },
+        { enemyStance: 'mind', damageWeight: 1.25, threatEffectId: 'debuff_unraveling', threatIntensity: 2, actionText: "The third eye renders its final count on the ledger of you", stanceHint: "Every error reconciled, it closes the book with the patience of arithmetic." },
     ],
-    // Cerebral reaper of identity — control-resistant + dot-weak early; flips dot-vulnerable in the final cut when it overreaches.
-    'enemy-harvest-of-names': [
-        { enemyStance: 'mind', threatEffectId: 'debuff_confusion', threatIntensity: 2, actionText: "The Harvest takes the name you answer to and you turn, uncertain, toward nothing", stanceHint: "It collects each title with the patient precision of a clerk filing the dead." },
-        { enemyStance: 'mind', damageWeight: 0.85, threatEffectId: 'debuff_unraveling', threatIntensity: 2, actionText: "The Harvest reaps your titles one by one until you forget why you are fighting", stanceHint: "It weighs who you were against who you are, cold and unhurried, and finds the seam between." },
-        { enemyStance: 'heart', damageWeight: 1.1, actionText: "The Harvest holds up a name you loved and lets you watch it wither", stanceHint: "For the first time it lingers, savoring the grief of a name well-stolen." },
-        { enemyStance: 'mind', damageWeight: 1.4, threatEffectId: 'debuff_confusion', threatIntensity: 3, actionText: "The Harvest reaches for your last name, your own, and the world dims as it almost takes too much", stanceHint: "Greedy now, it overreaches — and in grasping everything, it leaves itself open." },
+    // Patient green duelist — the cane keeps time you have not learned yet.
+    'enemy-mabadi': [
+        { enemyStance: 'mind', damageWeight: 0.8, actionText: "Mabadi taps the cane twice and you flinch on the wrong beat", stanceHint: "He is counting something in your footwork, and the count is not flattering." },
+        { enemyStance: 'body', damageWeight: 1.1, threatEffectId: 'debuff_stagger', actionText: "The cane arrives between your third and fourth thoughts", stanceHint: "All that patience converts, in one metronome tick, to reach." },
+        { enemyStance: 'body', damageWeight: 1.35, threatEffectId: 'debuff_bleed', threatIntensity: 2, actionText: "He plays the phrase through to its cadence, on you", stanceHint: "The duel was scored long before you arrived; this is merely the performance." },
     ],
-    // A grieving soul who can be reached — Control/mercy is the win path; resists erosion behind their need.
-    'enemy-hollow-eyed-beggar': [
-        { enemyStance: 'heart', damageWeight: 0.85, actionText: "The Beggar clutches at your pack with trembling, desperate hands", stanceHint: "Their eyes are wells gone dry; they reach not to harm but because they have nothing left." },
-        { enemyStance: 'body', threatEffectId: 'debuff_fear', actionText: "The Beggar surges with the sudden strength of the truly cornered", stanceHint: "Hunger lends them a brute, animal momentum they did not ask for." },
-        { enemyStance: 'heart', damageWeight: 1.3, actionText: "The Beggar lashes out, mourning even as they strike you", stanceHint: "Grief and want collapse into one motion; they weep through the blow." },
+    // The unravelling thief — it replaces every lost thread with one of yours.
+    'enemy-frayed-one': [
+        { enemyStance: 'mind', damageWeight: 0.85, threatEffectId: 'debuff_unraveling', actionText: "The Frayed One pulls a thread from the edge of your resolve", stanceHint: "It thinks in loose ends, and it has inventoried yours." },
+        { enemyStance: 'heart', damageWeight: 0.95, threatEffectId: 'debuff_fear', threatIntensity: 2, actionText: "It shows you the gap where the thread used to be", stanceHint: "Under the fury is panic — every hem it loses, it feels." },
+        { enemyStance: 'mind', damageWeight: 1.35, threatEffectId: 'debuff_unraveling', threatIntensity: 2, actionText: "It reweaves itself from you, seam by seam", stanceHint: "Cold now, and tidy: your unraveling is its mending." },
     ],
-    // Befriendable martyr seeking a cause — Control-weak throughout; talk it down before its final martyrdom.
-    'enemy-hollow-saint': [
-        { enemyStance: 'heart', damageWeight: 0.85, threatEffectId: 'debuff_charm', actionText: "The Saint offers you its wound to hold", stanceHint: "It reaches for you with open, sorrowing hands, longing to be needed." },
-        { enemyStance: 'heart', actionText: "The Saint mirrors your own grief back at you", stanceHint: "Whatever pain you carry, it carries it too, and grieves louder." },
-        { enemyStance: 'heart', damageWeight: 1.35, threatEffectId: 'debuff_unraveling', threatIntensity: 2, actionText: "The Saint embraces martyrdom and drags you toward it", stanceHint: "Finding no cause, it makes one of its own ending, and would take you along." },
+    // Stacked-curse totem — immovable; the sentence assembles a word per phase.
+    'enemy-bone-totem': [
+        { enemyStance: 'mind', damageWeight: 0.8, threatEffectId: 'debuff_silence', actionText: "The lowest skull speaks its one word, and yours goes missing", stanceHint: "It stands its ground because it IS its ground; the curse is a sentence under construction." },
+        { enemyStance: 'mind', damageWeight: 1.0, threatEffectId: 'debuff_fear', threatIntensity: 2, actionText: "The middle skulls speak in order, and the air goes wrong between clauses", stanceHint: "Each mouth holds one word; the grammar is older than mercy." },
+        { enemyStance: 'heart', damageWeight: 1.35, threatEffectId: 'debuff_septic', threatIntensity: 2, actionText: "The topmost skull completes the sentence, with you in it", stanceHint: "The assembly finishes; the curse, at last, is grammatical." },
     ],
-    // Befriendable silence — control-weak (answer it), but cerebral and dot-resistant; mind-stance trap.
-    'enemy-hush-wraith': [
-        { enemyStance: 'mind', damageWeight: 0.21, threatEffectId: 'debuff_silence', actionText: "The Wraith lets the quiet press against your throat", stanceHint: "It waits with the patience of a held breath, weighing whether you will speak." },
-        { enemyStance: 'mind', threatEffectId: 'debuff_confusion', threatIntensity: 2, actionText: "The Wraith returns your own unanswered question", stanceHint: "It listens past your words, cataloguing each thing you cannot prove." },
-        { enemyStance: 'heart', damageWeight: 1.25, actionText: "The Wraith fills the silence with everything you feared was there", stanceHint: "Cornered, the cold listener finally lets its own old grief show through." },
+    // Post-flesh scholar — the peer review is adversarial.
+    'enemy-bone-wizard': [
+        { enemyStance: 'mind', damageWeight: 0.85, threatEffectId: 'debuff_confusion', actionText: "The Bone Wizard cites a source your reasoning cannot survive", stanceHint: "Pure study moves it; the flesh was a distraction it graded and discarded." },
+        { enemyStance: 'mind', threatEffectId: 'debuff_vulnerability_mind', threatIntensity: 2, actionText: "It identifies the flaw in your methodology, out loud", stanceHint: "Each question is laid like a trap that has already sprung." },
+        { enemyStance: 'body', damageWeight: 1.35, actionText: "It concludes the review with the staff, per tradition", stanceHint: "The findings are final; the defense, it notes, was inadequate." },
     ],
-    // Body-sworn zealot, NOT befriendable — dot-weak (flesh long forsaken); control-resistant oath.
-    'enemy-iron-covenanter': [
-        { enemyStance: 'body', actionText: "The Covenanter advances a step its dead cause demands", stanceHint: "It moves on rote and sinew alone; whatever it once felt was buried with the oath's last witness." },
-        { enemyStance: 'mind', damageWeight: 0.85, threatEffectId: 'debuff_root', threatIntensity: 2, actionText: "The Covenanter binds you to the same ground it cannot leave", stanceHint: "There is a grim arithmetic to its guard, every angle held by a creed memorized past meaning." },
-        { enemyStance: 'body', damageWeight: 1.35, threatEffectId: 'debuff_slow', threatIntensity: 3, actionText: "The Covenanter spends the last of a body kept upright by vow alone", stanceHint: "The cause is dust and it knows it; still the muscle answers the oath, again, and again." },
+    // Heart-dominant verdict, NOT befriendable — dot-weak; control-resistant scales.
+    'enemy-mirac': [
+        { enemyStance: 'body', actionText: "The court brings the red orb crashing down", stanceHint: "It hears no argument; it only lets the weight fall where weight must fall." },
+        { enemyStance: 'mind', damageWeight: 0.85, threatEffectId: 'debuff_vulnerability_heart', threatIntensity: 2, actionText: "Mirac measures your conviction and finds it wanting", stanceHint: "Cold and exact, it weighs feeling against feeling on a fulcrum of pure indifference." },
+        { enemyStance: 'heart', damageWeight: 1.2, threatEffectId: 'debuff_stagger', threatIntensity: 2, actionText: "Mirac pronounces sentence, and the verdict settles into your bones", stanceHint: "At the last its impartiality burns like wrath — final, absolute, and personally aggrieved." },
+        { enemyStance: 'heart', damageWeight: 1.4, threatEffectId: 'debuff_fear', threatIntensity: 3, actionText: "The hooded court rises as one, and the red verdict is executed", stanceHint: "Sentence first, crime later — and the sentence has waited long enough." },
     ],
-    // A grief-song made flesh — wordless lull; control effects wear it out on the heart phase.
-    'enemy-lullaby-moth': [
-        { enemyStance: 'heart', damageWeight: 0.8, threatEffectId: 'debuff_stagger', actionText: "The moth's hum drags your eyelids toward a soft, fatal dark", stanceHint: "Its song is all longing — a lullaby for someone it lost long before you arrived." },
-        { enemyStance: 'body', damageWeight: 1.25, actionText: "Wings the size of sails buffet you awake with a thunderclap", stanceHint: "When the song fails it simply beats at you, frantic and graceless as a thing twice its size." },
+
+    // ══ NORTHERN FOREST — mid (L19-31) ══════════════════════════════════════════
+
+    // Oath without faith — rote muscle; the conviction arrives late and hits hardest.
+    'enemy-cursed-paladin': [
+        { enemyStance: 'body', actionText: "The Paladin advances a step the oath demands", stanceHint: "The armor swings on muscle memory; whatever believed is long gone from the visor." },
+        { enemyStance: 'heart', damageWeight: 0.9, threatEffectId: 'debuff_fear', threatIntensity: 2, actionText: "It kneels mid-fight, and the prayer that answers is not from anywhere good", stanceHint: "For one broken moment the emptiness inside the armor is the loudest thing in the wood." },
+        { enemyStance: 'body', damageWeight: 1.2, threatEffectId: 'debuff_stagger', threatIntensity: 2, actionText: "The blessed blade remembers its work without being asked", stanceHint: "The oath does the aiming; the man was optional all along." },
+        { enemyStance: 'body', damageWeight: 1.4, threatEffectId: 'debuff_bleed', threatIntensity: 2, actionText: "The Paladin spends the last of what the curse keeps upright", stanceHint: "The faith is dust and it knows it; still the armor answers the vow, again, and again." },
     ],
-    // Drowning majority — dot-weak (rotting mass) yet control-resistant (no single mind to seize); body brute.
-    'enemy-mire-of-consensus': [
-        { enemyStance: 'body', actionText: "The Mire heaves upward, a wave of agreed-upon muck closing over your knees", stanceHint: "It does not argue; it simply leans its whole sodden weight against you." },
-        { enemyStance: 'mind', damageWeight: 0.8, threatEffectId: 'debuff_slow', threatIntensity: 2, actionText: "The Mire votes you down, every voice in the slime saying the same dull yes", stanceHint: "A thousand half-thoughts pool into one sluggish, unanimous calculation." },
-        { enemyStance: 'body', damageWeight: 1.3, threatEffectId: 'debuff_slow', threatIntensity: 2, actionText: "The Mire pulls down by sheer carried-along mass, the consensus of the drowned", stanceHint: "To sink is the only motion it knows, and it shares that motion freely." },
+    // Leashed devotion — it throws itself; the will holding the leash is elsewhere.
+    'enemy-vampire-thrall': [
+        { enemyStance: 'body', threatEffectId: 'debuff_bleed', actionText: "The thrall throws itself at your throat, artlessly", stanceHint: "It moves like a tool being swung from far away — all force, no author." },
+        { enemyStance: 'heart', damageWeight: 0.9, actionText: "It clutches at you, begging you to hold still for its master's sake", stanceHint: "Under the frenzy is devotion, spent on someone who is not here and never will be." },
+        { enemyStance: 'body', damageWeight: 1.3, threatEffectId: 'debuff_bleed', threatIntensity: 2, actionText: "The leash jerks taut and the thrall spends itself entirely", stanceHint: "The final installment of its will comes due, and it pays with your blood." },
     ],
-    // Befriendable fog — cerebral: dot-weak, control-resistant; flips to control-weak when pinned.
-    'enemy-mistwalker-shade': [
-        { enemyStance: 'mind', damageWeight: 0.9, threatEffectId: 'debuff_confusion', actionText: "The Shade drifts where your eyes are not", stanceHint: "It is never quite where you last fixed it, sliding between your certainties." },
-        { enemyStance: 'mind', threatEffectId: 'debuff_confusion', threatIntensity: 2, actionText: "The Shade blurs the ground between you and itself", stanceHint: "It thinks three moves ahead through the mist, untouched and unhurried." },
-        { enemyStance: 'heart', damageWeight: 1.3, actionText: "The Shade condenses into one grieving, solid shape", stanceHint: "Pinned at last, the fog remembers a face it loved and wavers." },
+    // Befriendable tall mother — Control/mercy reaches her; the choosing resists erosion.
+    'enemy-hasshaku-sama': [
+        { enemyStance: 'heart', damageWeight: 0.85, threatEffectId: 'debuff_charm', actionText: "She says your name in the voice of someone who loves you", stanceHint: "She reaches for you with open, sorrowing hands, longing to be chosen back." },
+        { enemyStance: 'heart', actionText: "She stoops through the canopy to look at you more closely", stanceHint: "Everything she does is affection, scaled wrong." },
+        { enemyStance: 'heart', damageWeight: 1.35, threatEffectId: 'debuff_unraveling', threatIntensity: 2, actionText: "She gathers you up the way mothers gather what is theirs", stanceHint: "The choosing completes; her choosing has never once been refused." },
     ],
-    // Befriendable grief made loud — the Control/mercy path reaches it ; its raw sorrow resists erosion (.
-    'enemy-mournful-gull': [
-        { enemyStance: 'heart', damageWeight: 0.85, threatEffectId: 'debuff_fear', actionText: "The gull shrieks its whole ledger of wrongs into your skull", stanceHint: "Every cry is the name of someone who hurt it, screamed until the air itself aches." },
-        { enemyStance: 'mind', damageWeight: 0.85, threatEffectId: 'debuff_slow', actionText: "It dives in a tight, calculated arc to rake at your eyes", stanceHint: "Between sobs it picks its moment, wheeling with the practiced timing of a creature that has done this a thousand times." },
-        { enemyStance: 'heart', damageWeight: 1.3, actionText: "The gull stoops in a final, grief-mad plunge straight at you", stanceHint: "Past reason, it throws itself at you the way the bereaved throw themselves at the sea." },
+    // Temptation with a trunk — it feeds on wanting; the mouth is for afterward.
+    'enemy-jeweled-tree': [
+        { enemyStance: 'heart', damageWeight: 0.8, threatEffectId: 'debuff_charm', threatIntensity: 2, actionText: "A gemstone eye catches the light exactly the way you hoped it would", stanceHint: "It feeds on wanting; the whole fight is an appeal to your appetite." },
+        { enemyStance: 'body', threatEffectId: 'debuff_root', threatIntensity: 2, actionText: "Roots close over your boots while you are still admiring", stanceHint: "Beneath the glitter it is timber and patience, and it holds what lingers." },
+        { enemyStance: 'heart', damageWeight: 1.35, actionText: "The mouth in the bark opens, and the transaction completes", stanceHint: "The wanting was the meal; what follows is only digestion." },
     ],
-    // Befriendable dream — cerebral: dot-weak, control-resistant early; wake it and it grows control-weak and afraid.
-    'enemy-nightmare-stag': [
-        { enemyStance: 'mind', damageWeight: 0.9, threatEffectId: 'debuff_fear', actionText: "The Stag lowers crystalline antlers and your thoughts go cold", stanceHint: "It circles just out of waking, reading the shape of what you dread." },
-        { enemyStance: 'body', damageWeight: 1.1, threatEffectId: 'debuff_bleed', threatIntensity: 2, actionText: "The Stag charges, antlers cutting waking thought from sleep", stanceHint: "It runs with the unstoppable momentum of a dream you cannot leave." },
-        { enemyStance: 'heart', actionText: "The Stag falters, the dream remembering it was only ever frightened", stanceHint: "Driven toward waking, the great beast trembles like the child who first dreamed it." },
-        { enemyStance: 'mind', damageWeight: 1.4, threatEffectId: 'debuff_confusion', threatIntensity: 3, actionText: "The Stag makes one last desperate flight through your sleeping mind", stanceHint: "Terrified of ending, it schemes a final maze to keep itself dreamt." },
+    // Crowned coils — it has never lost a debate it could reach.
+    'enemy-ogre-naga': [
+        { enemyStance: 'body', actionText: "The naga's coils close the distance your argument was standing on", stanceHint: "Coils first, questions never; the reach is the rebuttal." },
+        { enemyStance: 'body', damageWeight: 1.1, threatEffectId: 'debuff_root', threatIntensity: 2, actionText: "It constricts, patiently, an inch per point conceded", stanceHint: "It does not need you wrong — only within reach, which you now are." },
+        { enemyStance: 'mind', damageWeight: 1.35, threatEffectId: 'debuff_stagger', threatIntensity: 2, actionText: "The crown of teeth descends to deliver the closing statement", stanceHint: "Having swallowed the counterargument, it proceeds to the conclusion." },
     ],
-    // Befriendable grieving construct — split weakness: Control-reachable grief, body brutality dot-weak.
-    'enemy-obsidian-colossus': [
-        { enemyStance: 'body', damageWeight: 1.1, actionText: "The Colossus sweeps an arm and the air itself is cut open", stanceHint: "Each motion is ponderous, unstoppable, the momentum of a mountain deciding to move." },
-        { enemyStance: 'heart', damageWeight: 0.85, threatEffectId: 'debuff_fear', threatIntensity: 2, actionText: "The Colossus keens, a grief that shakes the cavern", stanceHint: "Within the volcanic glass an old sorrow stirs; for a moment it forgets to be a weapon." },
-        { enemyStance: 'body', damageWeight: 1.35, threatEffectId: 'debuff_root', threatIntensity: 2, actionText: "The Colossus brings its full ancient weight down upon you", stanceHint: "Grief hardens back into stone, and the stone falls with the whole of its sorrow behind it." },
+    // The spiteful crawler — it could fly; the refusal is the weapon.
+    'enemy-sidelle': [
+        { enemyStance: 'body', threatEffectId: 'debuff_bleed', actionText: "Sidelle drags itself over you, talon by talon, when it could simply have flown", stanceHint: "Everything it does is a pointed refusal; the crawling is a message." },
+        { enemyStance: 'mind', damageWeight: 0.9, actionText: "It folds its wings with theatrical precision and picks its next handhold on you", stanceHint: "The spite is structural — every choice made the harder way, at you." },
+        { enemyStance: 'body', damageWeight: 1.35, threatEffectId: 'debuff_bleed', threatIntensity: 2, actionText: "It finally uses the wings — one beat, downward, through you", stanceHint: "It saved the flight for the one moment it would insult you most." },
     ],
-    // A grief-mad predator leading dead packmates — mindless erosion-weak, resists control behind its howling ghosts.
-    'enemy-packleader-wolf': [
-        { enemyStance: 'body', actionText: "The Wolf drives at you with the weight of a charge that has no doubt in it", stanceHint: "It moves as muscle and instinct, all forward, never once weighing the risk." },
-        { enemyStance: 'heart', damageWeight: 0.9, threatEffectId: 'debuff_fear', actionText: "The Wolf throws back its head and howls for a pack that answers only in echoes", stanceHint: "Its grief is louder than its hunger; it calls names the dead can no longer wear." },
-        { enemyStance: 'body', damageWeight: 1.35, actionText: "The Wolf hurls itself into a final lunge, ghosts running at its flanks", stanceHint: "Pure momentum now, it spends its whole body in one last unthinking leap." },
+    // Cellar boss — the courtesy is over; pure escalating muscle.
+    'enemy-rawhead-rex': [
+        { enemyStance: 'body', threatEffectId: 'debuff_bleed', actionText: "Rawhead comes up the stairs it was never supposed to leave", stanceHint: "A cellar-thing of pure muscle; the dark it lived in comes along politely." },
+        { enemyStance: 'heart', damageWeight: 0.9, threatEffectId: 'debuff_fear', threatIntensity: 2, actionText: "It grins the grin from every story you were told too young", stanceHint: "It knows exactly which bedtime warning you are remembering, because it is the warning." },
+        { enemyStance: 'body', damageWeight: 1.2, threatEffectId: 'debuff_stagger', threatIntensity: 2, actionText: "The bloody bones swing with the weight of every child's held breath", stanceHint: "The stories underdescribed it. Stories have editors; cellars do not." },
+        { enemyStance: 'body', damageWeight: 1.4, threatEffectId: 'debuff_bleed', threatIntensity: 3, actionText: "Rawhead ends the courtesy it extended for a hundred years", stanceHint: "The stairs are behind it now; nothing about it is under anything anymore." },
     ],
-    // Slow funeral-bearer of dead theories (elite, body-dom) — DoT-weak (the weight rots fast); heavily Control-resistant, never sets the box down.
-    'enemy-pallbearer-of-reason': [
-        { enemyStance: 'body', threatEffectId: 'debuff_slow', threatIntensity: 2, actionText: "The Pallbearer steps forward and the coffin's shadow buries your tempo", stanceHint: "It moves at one pace only, and the floor groans beneath the box it will not lower." },
-        { enemyStance: 'body', damageWeight: 1.1, threatEffectId: 'debuff_slow', threatIntensity: 2, actionText: "The Pallbearer shifts the casket onto your shoulders to share the load", stanceHint: "Its arms are dead-locked around the dead, and nothing you say loosens that grip." },
-        { enemyStance: 'mind', damageWeight: 1.35, threatEffectId: 'debuff_slow', threatIntensity: 3, actionText: "The Pallbearer lays the overreaching coffin to rest, and means it for you", stanceHint: "At the graveside it measures the plot with a slow, deliberate, final care." },
+    // Befriendable weaver — Control-weak (hand it a thread it didn't spin); erosion-resistant web.
+    'enemy-fate-spinner': [
+        { enemyStance: 'mind', damageWeight: 0.85, actionText: "The Spinner tightens a thread you did not know you were standing on", stanceHint: "Every move a reasoned counter; the web was drafted before you arrived." },
+        { enemyStance: 'heart', damageWeight: 0.85, threatEffectId: 'debuff_confusion', actionText: "He shows you the tapestry with your next three mistakes already woven", stanceHint: "There is an old sorrow in the showing — he has never once been surprised." },
+        { enemyStance: 'mind', damageWeight: 1.2, threatEffectId: 'debuff_slow', threatIntensity: 2, actionText: "He spins your hesitation into the loom mid-thought", stanceHint: "Cold and certain: your pauses are his raw material." },
+        { enemyStance: 'mind', damageWeight: 1.4, threatEffectId: 'debuff_unraveling', threatIntensity: 3, actionText: "The Spinner pulls the pattern taut, and your part in it concludes", stanceHint: "The final motif was always going to be a struggle, rendered beautifully." },
     ],
-    // Heart-zealot, NOT befriendable — dot-weak (it welcomes wounds); control-resistant fervor.
-    'enemy-penitent-flagellant': [
-        { enemyStance: 'heart', threatEffectId: 'debuff_bleed', threatIntensity: 2, actionText: "The Flagellant scourges itself and turns the lash on you", stanceHint: "Each cut it takes lights its face with terrible joy; it counts your blood as a gift shared." },
-        { enemyStance: 'body', damageWeight: 0.85, actionText: "The Flagellant drags you closer to share its penance", stanceHint: "It throws its whole flagellated body forward, heedless, ecstatic with pain." },
-        { enemyStance: 'heart', damageWeight: 1.35, threatEffectId: 'debuff_unraveling', threatIntensity: 3, actionText: "The Flagellant anoints you in its bounty of suffering", stanceHint: "In its eyes your agony is grace; it offers it to you with the fervor of a saint." },
+    // Burned-down drake — what survived the fire is the part that says no.
+    'enemy-ashen-bone-drake': [
+        { enemyStance: 'body', threatEffectId: 'debuff_burn', actionText: "The drake exhales the memory of fire, which burns regardless", stanceHint: "What remains of it is refusal, distilled; the heat is rhetorical and real." },
+        { enemyStance: 'mind', damageWeight: 0.9, threatEffectId: 'debuff_vulnerability_body', threatIntensity: 2, actionText: "It circles once, reading where your guard was burned before", stanceHint: "Ash remembers shapes; it is comparing you to previous refusals." },
+        { enemyStance: 'body', damageWeight: 1.2, actionText: "The bone frame slams down with the weight the fire never took", stanceHint: "The argument of itself, restated skeletally, lands entire." },
+        { enemyStance: 'body', damageWeight: 1.4, threatEffectId: 'debuff_burn', threatIntensity: 2, actionText: "The drake spends its last ember on principle", stanceHint: "It refuses, one final time, everything — including the ending." },
     ],
-    // A glib thief who out-talks consequence — mind-resistant, weak to control that pins him and erosion that outlasts his patter.
-    'enemy-petty-cutpurse': [
-        { enemyStance: 'mind', damageWeight: 0.85, actionText: "The Cutpurse feints a deal and slips a blade where your coin-hand was", stanceHint: "He's already three steps into a plan, counting your purse before he's touched it." },
-        { enemyStance: 'body', threatEffectId: 'debuff_bleed', actionText: "The Cutpurse opens a quick, shallow line and dances back grinning", stanceHint: "Talk done, he lets a fast wrist do the arguing for him." },
-        { enemyStance: 'mind', damageWeight: 1.3, actionText: "The Cutpurse explains, mid-stab, exactly why this was inevitable", stanceHint: "He closes the deal with cold arithmetic: your loss was only ever a matter of when." },
+    // Administrative mummy-king — decrees, countersigned, escalating.
+    'enemy-ra-amin-ka': [
+        { enemyStance: 'mind', threatEffectId: 'debuff_slow', threatIntensity: 2, actionText: "Ra-Amin-Ka issues a decree, and your tempo is annexed", stanceHint: "Cold administration; every strike is a signature, witnessed." },
+        { enemyStance: 'mind', damageWeight: 0.9, threatEffectId: 'debuff_silence', threatIntensity: 2, actionText: "He strikes your objection from the record of the living", stanceHint: "The court of dust has procedures older than your language." },
+        { enemyStance: 'body', damageWeight: 1.2, threatEffectId: 'debuff_root', threatIntensity: 2, actionText: "The bandaged hand closes, and the kingdom presumes your loyalty", stanceHint: "When paper fails, the king remembers that hands predate paper." },
+        { enemyStance: 'mind', damageWeight: 1.4, threatEffectId: 'debuff_unraveling', threatIntensity: 3, actionText: "The final decree is read, and it concerns your continued existence", stanceHint: "The bandages are signed; the last signature required is yours, posthumously." },
     ],
-    // Cold litigator of unreality (elite, mind-dom) — Control-resistant + DoT-weak; ruled by evidence, undone by erosion.
-    'enemy-prosecutor-of-the-real': [
-        { enemyStance: 'mind', damageWeight: 0.21, threatEffectId: 'debuff_silence', threatIntensity: 2, actionText: "The Prosecutor strikes your testimony from the record mid-breath", stanceHint: "It needs no anger; the exhibits are damning enough on their own." },
-        { enemyStance: 'mind', threatEffectId: 'debuff_vulnerability_mind', threatIntensity: 2, actionText: "The Prosecutor admits the proof that you were never real to begin with", stanceHint: "Each question is laid like a trap that has already sprung." },
-        { enemyStance: 'body', damageWeight: 1.35, threatEffectId: 'debuff_unraveling', threatIntensity: 3, actionText: "The Prosecutor rests its case, and the verdict erases your defense", stanceHint: "The argument finished, it closes the folder and lets the conclusion fall like a gavel-blow." },
+    // Befriendable courteous appetite — mercy reaches the hostess; the hunger resists erosion.
+    'enemy-lady-gabriella': [
+        { enemyStance: 'heart', damageWeight: 0.85, threatEffectId: 'debuff_charm', threatIntensity: 2, actionText: "The Lady offers you a seat you did not see her place", stanceHint: "Courtesy is the weapon; the feelings are real, which is the trap." },
+        { enemyStance: 'mind', damageWeight: 0.9, actionText: "She inquires after your health with clinical accuracy", stanceHint: "Between courses she appraises, cold as cellar stone, what is worth keeping." },
+        { enemyStance: 'heart', damageWeight: 1.2, threatEffectId: 'debuff_bleed', threatIntensity: 2, actionText: "Dinner is served the moment you stop being a guest", stanceHint: "The mouth she uses for meaning it has other uses." },
+        { enemyStance: 'heart', damageWeight: 1.4, actionText: "Four centuries of appetite arrive at the table at once", stanceHint: "The last human habit gives way, with sincere regret, to the older ones." },
     ],
-    // Mindless agreeing swarm — dot-weak (erode the mass), high control-resistance; one stubborn will.
-    'enemy-reef-barnacle-colony': [
-        { enemyStance: 'heart', damageWeight: 0.9, threatEffectId: 'debuff_root', actionText: "The Colony reaches as one to hold you in place", stanceHint: "A thousand small wills lean toward you with the slow yearning of the tide." },
-        { enemyStance: 'body', threatEffectId: 'debuff_poison', threatIntensity: 2, actionText: "The Colony grinds shut around your limbs", stanceHint: "It closes by sheer accreting mass, mindless and crushing as stone." },
-        { enemyStance: 'heart', damageWeight: 1.3, actionText: "The Colony agrees, finally, that you should never leave", stanceHint: "Every small mind settles on one shared longing: keep you, keep you, keep you." },
+    // Twin-voiced arguer — the disagreement is the mercy; beware the agreement.
+    'enemy-zoma': [
+        { enemyStance: 'mind', damageWeight: 0.85, threatEffectId: 'debuff_confusion', actionText: "The left head rebuts a thing you had not said yet", stanceHint: "Two minds, one patient argument — you are the current topic." },
+        { enemyStance: 'mind', damageWeight: 0.95, threatEffectId: 'debuff_silence', actionText: "The right head answers the left, and your part of the conversation is deemed redundant", stanceHint: "They disagree only about which of them loves you less." },
+        { enemyStance: 'heart', damageWeight: 1.3, threatEffectId: 'debuff_fear', threatIntensity: 2, actionText: "Both heads turn to you at once, in perfect, terrible accord", stanceHint: "The arguing was the safety mechanism. It has been switched off." },
     ],
-    // Befriendable starving hunter — Control-weak from need, body-driven; circles before it commits.
-    'enemy-rimeclaw-prowler': [
-        { enemyStance: 'mind', damageWeight: 0.8, actionText: "The Prowler circles wide, cutting off your retreat", stanceHint: "It does not lunge; it studies the angles of your stance with cold, hungry patience." },
-        { enemyStance: 'body', damageWeight: 1.1, threatEffectId: 'debuff_bleed', threatIntensity: 2, actionText: "The Prowler commits, rime-sheathed claws raking deep", stanceHint: "All the waiting collapses into one explosion of starving muscle." },
-        { enemyStance: 'heart', damageWeight: 1.25, threatEffectId: 'debuff_bleed', threatIntensity: 2, actionText: "The Prowler drives in with the desperation of a long winter", stanceHint: "Cornered between hunger and you, something almost mournful enters its eyes." },
+    // The undrowned duelist — the river taught him new beats.
+    'enemy-mabadi-undrowned': [
+        { enemyStance: 'mind', damageWeight: 0.85, threatEffectId: 'debuff_slow', actionText: "Undrowned Mabadi counts a rhythm with river-water patience", stanceHint: "The same metronome, colder; the beats have silt in them now." },
+        { enemyStance: 'body', damageWeight: 1.1, threatEffectId: 'debuff_stagger', threatIntensity: 2, actionText: "The cane arrives with current behind it", stanceHint: "He collected interest the whole way downstream." },
+        { enemyStance: 'body', damageWeight: 1.35, threatEffectId: 'debuff_bleed', threatIntensity: 2, actionText: "He plays the drowned cadence through to its end, on you", stanceHint: "The river gave him back for exactly this performance." },
+        { enemyStance: 'mind', damageWeight: 1.4, actionText: "He closes with the principal — the beat you never hear", stanceHint: "Cold and final: the collection completes, to the note." },
     ],
-    // Mindless gnawing vermin — it cannot be talked to.
-    'enemy-salt-gnaw-rat': [
-        { enemyStance: 'body', threatEffectId: 'debuff_bleed', actionText: "The rat sinks brine-yellow teeth into your calf and tears", stanceHint: "It does not hesitate or aim — it simply bites whatever certainty is nearest, the way it bites everything." },
-        { enemyStance: 'body', damageWeight: 1.2, actionText: "It swarms up your leg in a frenzy of gnashing", stanceHint: "Cornered, it becomes pure hunger and momentum, throwing its scrabbling body at you again and again." },
+
+    // ══ NORTHERN FOREST — late (L34-50) ═════════════════════════════════════════
+
+    // The hollowed tally — arithmetic that no longer wants anything, which makes it faster.
+    'enemy-tri-eyes-hollowed': [
+        { enemyStance: 'mind', damageWeight: 0.9, actionText: "The hollowed watcher marks an error you have not made yet", stanceHint: "The tally continues without a reason; cold arithmetic, self-sustaining." },
+        { enemyStance: 'mind', threatEffectId: 'debuff_vulnerability_mind', threatIntensity: 2, actionText: "It reconciles your account against nothing, and the nothing carries", stanceHint: "There is no wanting left to slow the count." },
+        { enemyStance: 'mind', damageWeight: 1.35, threatEffectId: 'debuff_unraveling', threatIntensity: 3, actionText: "The count completes, and you are the remainder", stanceHint: "The ledger closes with the satisfaction of zero." },
     ],
-    // A confused drifting thought — it wants to speak, so the mercy/Control path reaches it ; its cunning fog resists erosion (.
-    'enemy-sea-mist-wisp': [
-        { enemyStance: 'mind', damageWeight: 0.85, threatEffectId: 'debuff_confusion', actionText: "The wisp scatters your thoughts like droplets on glass", stanceHint: "It circles your reasoning, testing each premise for the seam it can slip through." },
-        { enemyStance: 'mind', damageWeight: 1.1, threatEffectId: 'debuff_confusion', actionText: "It thickens into a blank white veil over your eyes", stanceHint: "Denied its exit, it grows clever and cold, folding the fog into shapes meant to mislead." },
+    // The walking plague — septic mass; it spreads by main force now.
+    'enemy-black-death': [
+        { enemyStance: 'body', threatEffectId: 'debuff_septic', threatIntensity: 2, actionText: "The Black Death lays a hand on you like a census", stanceHint: "A plague with posture; every touch is enrollment." },
+        { enemyStance: 'body', damageWeight: 1.1, threatEffectId: 'debuff_poison', threatIntensity: 2, actionText: "It breathes a town's worth of endings across you", stanceHint: "It remembers every parish by taste, and is tasting." },
+        { enemyStance: 'heart', damageWeight: 0.95, threatEffectId: 'debuff_fear', threatIntensity: 2, actionText: "It shows you the arithmetic of what it has already survived being", stanceHint: "Under the spine it is still a multitude, and multitudes grieve strangely." },
+        { enemyStance: 'body', damageWeight: 1.4, threatEffectId: 'debuff_septic', threatIntensity: 3, actionText: "The pestilence embraces you with the patience of history", stanceHint: "Walking, it decided, beats waiting — and it has walked straight to you." },
     ],
-    // Unique pre-thought wildness — dot-weak (raw flesh-memory bleeds); control-resistant, wordless body-brute, no philosophy to grip.
-    'enemy-shadow-of-the-first': [
-        { enemyStance: 'body', actionText: "The Shadow lunges with the forest's first, unthinking hunger", stanceHint: "There is nothing to reason with — only appetite, older than the first spoken word." },
-        { enemyStance: 'body', damageWeight: 1.1, threatEffectId: 'debuff_fear', threatIntensity: 2, actionText: "The Shadow shows you the wood as it was before names, and the wrongness of it stops your breath", stanceHint: "It does not threaten; it simply IS the dark, and the dark never learned to bargain." },
-        { enemyStance: 'heart', damageWeight: 1.35, threatEffectId: 'debuff_bleed', threatIntensity: 2, actionText: "The Shadow falls on you with the pure, uncomplicated fury of something never tamed", stanceHint: "At the end it is all raw feeling — rage with no thought in it, and no mercy either." },
+    // The eaten names — it thinks in shapes language avoids.
+    'enemy-the-unnameable': [
+        { enemyStance: 'mind', damageWeight: 0.9, threatEffectId: 'debuff_silence', threatIntensity: 2, actionText: "It eats the word you were about to use for it", stanceHint: "It thinks in shapes language was built to avoid." },
+        { enemyStance: 'mind', threatEffectId: 'debuff_confusion', threatIntensity: 2, actionText: "It rearranges the part of you that files things under names", stanceHint: "Every taxonomy sent against it has been digested, namer included." },
+        { enemyStance: 'heart', damageWeight: 1.1, threatEffectId: 'debuff_fear', threatIntensity: 2, actionText: "You perceive, briefly, what it is instead of what it is called", stanceHint: "Beneath the eating is a loneliness no noun has survived long enough to describe." },
+        { enemyStance: 'mind', damageWeight: 1.4, threatEffectId: 'debuff_unraveling', threatIntensity: 3, actionText: "It reaches for your name, having finished all of its own", stanceHint: "The collection is nearly complete; yours would round out the set." },
     ],
-    // Befriendable argument-made-flesh — Control-weak (it WANTS to be resolved); resists erosion, opens cold and mental.
-    'enemy-the-disagreement': [
-        { enemyStance: 'mind', damageWeight: 0.85, actionText: "The Disagreement raises a thorned counterpoint, pinning the flaw in your reasoning", stanceHint: "It has anticipated this; every barb is placed where you were already weakest." },
-        { enemyStance: 'heart', damageWeight: 0.85, threatEffectId: 'debuff_confusion', actionText: "The Disagreement contradicts itself on purpose, and the contradiction wounds you", stanceHint: "There is real hurt under the bramble — it argues the way the grieving argue, to keep from stopping." },
-        { enemyStance: 'mind', damageWeight: 1.3, actionText: "The Disagreement delivers its rehearsed final clause, the one it knew would land", stanceHint: "It speaks the conclusion it prepared before you ever arrived, certain and cold." },
+    // Furnace with a genealogy — hammer blows, escalating to the mountain's spine.
+    'enemy-fire-giant': [
+        { enemyStance: 'body', threatEffectId: 'debuff_burn', actionText: "The giant's blade sweeps a horizon of heat across you", stanceHint: "A furnace with a genealogy; everything he does is a hammer blow." },
+        { enemyStance: 'body', damageWeight: 1.1, threatEffectId: 'debuff_stagger', threatIntensity: 2, actionText: "He plants a foot and the ground concedes the point", stanceHint: "His footwork is geological; you are fighting terrain that moves." },
+        { enemyStance: 'mind', damageWeight: 0.95, actionText: "He appraises you down the length of the mountain's spine", stanceHint: "Old fire thinks slowly and exactly, like cooling stone." },
+        { enemyStance: 'body', damageWeight: 1.45, threatEffectId: 'debuff_burn', threatIntensity: 3, actionText: "The sword remembers being a mountain, and falls like one", stanceHint: "The genealogy arrives all at once, ancestor by burning ancestor." },
     ],
-    // Befriendable thousand-year arboreal intellect — Control-weak (it can be spoken with); patient, mind-led, dot-resistant.
-    'enemy-the-forest-mind': [
-        { enemyStance: 'mind', damageWeight: 0.9, actionText: "The Forest Mind tightens a slow lattice of roots around your footing", stanceHint: "It answers in growth rings — no hurry, having thought this through across a hundred winters." },
-        { enemyStance: 'body', threatEffectId: 'debuff_root', threatIntensity: 2, actionText: "The Forest Mind heaves the living wood upward to seize you", stanceHint: "For one season it forgets thought entirely and simply pushes, vast and unstoppable as a thaw." },
-        { enemyStance: 'heart', damageWeight: 1.2, threatEffectId: 'debuff_stagger', threatIntensity: 2, actionText: "The Forest Mind sings the long green lullaby of every autumn it has outlived", stanceHint: "Beneath the calculus is grief — a thousand years of letting things fall, and the ache of it shows." },
+    // The office-holder — the contract is the cage; the flaw is you.
+    'enemy-greater-devil': [
+        { enemyStance: 'mind', damageWeight: 0.85, threatEffectId: 'debuff_charm', threatIntensity: 2, actionText: "The Devil tables an offer with your signature already drying on it", stanceHint: "It administers rather than rages; the contract is the cage." },
+        { enemyStance: 'mind', threatEffectId: 'debuff_silence', threatIntensity: 2, actionText: "It invokes the clause that governs objections", stanceHint: "The paperwork is flawless. It has had a very long time to proofread." },
+        { enemyStance: 'body', damageWeight: 1.2, threatEffectId: 'debuff_root', threatIntensity: 2, actionText: "Enforcement arrives, as specified, in person", stanceHint: "When the ink fails, the office remembers it has claws on retainer." },
+        { enemyStance: 'mind', damageWeight: 1.4, threatEffectId: 'debuff_unraveling', threatIntensity: 3, actionText: "The Devil executes the agreement, and the agreement executes you", stanceHint: "The flaw in the paperwork was always going to be the counterparty." },
     ],
-    // The impossible playtest ceiling (unique, level 55) — the skill-ceiling
-    // benchmark: calibrated so the BEST policy line scrapes a 1-5% win rate
-    // (near-impossible, not scripted-unwinnable). Erosion-stubborn AND
-    // control-shrugging: almost nothing you bring is complete enough to hold it.
+    // Befriendable widow-queen — mercy reaches the mourner; the sorcery resists erosion.
+    'enemy-rangda': [
+        { enemyStance: 'heart', threatEffectId: 'debuff_fear', threatIntensity: 2, actionText: "Rangda keens, and the curse arrives still weeping", stanceHint: "Grief that learned sorcery; every hex is a lesson she passed alone." },
+        { enemyStance: 'mind', damageWeight: 0.9, threatEffectId: 'debuff_poison', threatIntensity: 2, actionText: "She recites the syllabus of four hundred years of accusation", stanceHint: "Each charge they invented, she studied; the coursework is in your blood now." },
+        { enemyStance: 'heart', damageWeight: 1.2, threatEffectId: 'debuff_unraveling', threatIntensity: 2, actionText: "She shows you the widow under the mask, and the showing burns", stanceHint: "The monster was assigned; the mourning was hers." },
+        { enemyStance: 'heart', damageWeight: 1.4, threatEffectId: 'debuff_fear', threatIntensity: 3, actionText: "Rangda lets the whole studied grief off its leash at once", stanceHint: "Love with nowhere to go, four centuries compounded, finds somewhere." },
+    ],
+    // The agreed twins — consensus was the threat the arguing held back.
+    'enemy-zoma-ascendant': [
+        { enemyStance: 'mind', damageWeight: 0.9, threatEffectId: 'debuff_confusion', threatIntensity: 2, actionText: "Both voices state the same premise, and it doubles in the air", stanceHint: "The two voices agree now; the argument was the safety mechanism." },
+        { enemyStance: 'heart', damageWeight: 0.95, threatEffectId: 'debuff_charm', threatIntensity: 2, actionText: "They invite you, warmly, in unison, to concur", stanceHint: "Agreement at this register is gravitational; dissent takes effort they no longer spend." },
+        { enemyStance: 'mind', damageWeight: 1.2, threatEffectId: 'debuff_silence', threatIntensity: 2, actionText: "The consensus rules your objection out of order, permanently", stanceHint: "There is no gap between the voices left to argue through." },
+        { enemyStance: 'mind', damageWeight: 1.45, threatEffectId: 'debuff_unraveling', threatIntensity: 3, actionText: "The twin verdict lands as one sentence with no seam in it", stanceHint: "What the arguing held back, the agreement delivers entire." },
+    ],
+    // The white fire — it burns the way glaciers move: entirely.
+    'enemy-elder-fire-giant': [
+        { enemyStance: 'body', threatEffectId: 'debuff_slow', threatIntensity: 2, actionText: "The white heat settles over you like a season changing", stanceHint: "A fire gone pale with age; it burns the way glaciers move." },
+        { enemyStance: 'mind', damageWeight: 0.9, actionText: "The elder considers you with the patience of a thing that outlived its own eruption", stanceHint: "Old flame plans in centuries; you are a brief agenda item." },
+        { enemyStance: 'body', damageWeight: 1.2, threatEffectId: 'debuff_burn', threatIntensity: 2, actionText: "The pale blade falls with the weight of everything it has already burned", stanceHint: "The cloak of ash is a ledger; it adds you neatly." },
+        { enemyStance: 'body', damageWeight: 1.45, threatEffectId: 'debuff_burn', threatIntensity: 3, actionText: "The oldest fire in the world burns, once, entirely", stanceHint: "Whiteness is what flame becomes when it stops needing to prove anything." },
+    ],
+    // The smoking mirror — it shows you the you that already lost.
+    'enemy-tezcatlipoca': [
+        { enemyStance: 'mind', damageWeight: 0.85, threatEffectId: 'debuff_confusion', threatIntensity: 2, actionText: "The mirror shows you mid-mistake, slightly before you make it", stanceHint: "It calculates in reflections; the smoke is where the discarded versions go." },
+        { enemyStance: 'heart', damageWeight: 0.95, threatEffectId: 'debuff_fear', threatIntensity: 2, actionText: "It shows you the version of you that already lost, at leisure", stanceHint: "There is grief in the glass — every reflection it keeps was somebody's best attempt." },
+        { enemyStance: 'mind', damageWeight: 1.2, threatEffectId: 'debuff_vulnerability_mind', threatIntensity: 2, actionText: "The mirror angles, and your certainty falls out of frame", stanceHint: "It edits with the courtesy of a god who has already seen the final cut." },
+        { enemyStance: 'mind', damageWeight: 1.45, threatEffectId: 'debuff_unraveling', threatIntensity: 3, actionText: "The smoking mirror waits, courteously, for you to agree with it", stanceHint: "The reflection reaches the glass from the inside. The glass does not object." },
+    ],
+    // The promoted appetite — administrative violence at scale.
+    'enemy-arch-demon': [
+        { enemyStance: 'body', threatEffectId: 'debuff_burn', threatIntensity: 2, actionText: "The Arch-Demon backhands a portion of the battlefield out of the ledger", stanceHint: "Appetite promoted past restraint; the violence is administrative." },
+        { enemyStance: 'mind', damageWeight: 0.9, threatEffectId: 'debuff_fear', threatIntensity: 2, actionText: "It reviews your file, aloud, with commentary", stanceHint: "Somewhere below, lesser devils are already processing the outcome." },
+        { enemyStance: 'body', damageWeight: 1.2, threatEffectId: 'debuff_stagger', threatIntensity: 2, actionText: "It signs the intent to consume, in triplicate, on your guard", stanceHint: "Each blow is countersigned; the bureaucracy is load-bearing." },
+        { enemyStance: 'body', damageWeight: 1.45, threatEffectId: 'debuff_septic', threatIntensity: 3, actionText: "The appetite executes its mandate in full", stanceHint: "The promotion came with discretionary powers, and this is the discretion." },
+    ],
+    // Lord of swarms — each fly a small opinion; together, policy.
+    'enemy-beelzebub': [
+        { enemyStance: 'mind', damageWeight: 0.85, threatEffectId: 'debuff_confusion', threatIntensity: 2, actionText: "The swarm opens debate on the subject of your surfaces", stanceHint: "Each fly is a small opinion; the buzzing is deliberation." },
+        { enemyStance: 'heart', damageWeight: 0.95, threatEffectId: 'debuff_fear', threatIntensity: 2, actionText: "The swarm votes, and the air itself abstains from you", stanceHint: "Beneath the lord's stillness, ten million constituents reach alignment." },
+        { enemyStance: 'body', damageWeight: 1.2, threatEffectId: 'debuff_poison', threatIntensity: 2, actionText: "Policy is enacted across every inch of you at once", stanceHint: "The swarm does nothing singly; enforcement is unanimous." },
+        { enemyStance: 'mind', damageWeight: 1.45, threatEffectId: 'debuff_septic', threatIntensity: 3, actionText: "Beelzebub ratifies the final motion, and the swarm descends as one", stanceHint: "The lord of everything that swarms calls the question, and the question is you." },
+    ],
+    // Unique: the punctual end — courteous, scheduled, and compounding.
+    'enemy-death': [
+        { enemyStance: 'mind', damageWeight: 0.9, threatEffectId: 'debuff_slow', threatIntensity: 2, actionText: "Death consults the ledger, and your minutes begin reporting to it", stanceHint: "It is not cruel. It is punctual, and it has already read your schedule." },
+        { enemyStance: 'heart', damageWeight: 0.95, threatEffectId: 'debuff_fear', threatIntensity: 2, actionText: "It offers its hand, the way one does to the late", stanceHint: "The courtesy is so old it reads as coldness; the appointment is genuine." },
+        { enemyStance: 'mind', damageWeight: 1.2, threatEffectId: 'debuff_unraveling', threatIntensity: 2, actionText: "It amortizes you, gently, against the remaining term", stanceHint: "The arithmetic of endings is its whole vocation, and it does not round in your favor." },
+        { enemyStance: 'mind', damageWeight: 1.45, threatEffectId: 'debuff_unraveling', threatIntensity: 3, actionText: "Death keeps the appointment", stanceHint: "It has never once been early. That was the whole of its mercy, and it is spent." },
+    ],
+    // Unique: the never-begun god — patience predating existence; the world it was owed.
+    'enemy-the-abortive': [
+        { enemyStance: 'heart', damageWeight: 0.9, threatEffectId: 'debuff_fear', threatIntensity: 2, actionText: "The Abortive shows you the world it was meant to begin", stanceHint: "It feels everything it never got to be; the grief predates the griever." },
+        { enemyStance: 'mind', damageWeight: 0.95, threatEffectId: 'debuff_silence', threatIntensity: 2, actionText: "It unsays the part of the world that took its place", stanceHint: "Displacement is the only theology it was taught, and it studied." },
+        { enemyStance: 'heart', damageWeight: 1.2, threatEffectId: 'debuff_unraveling', threatIntensity: 2, actionText: "It reaches for you with a strength never spent on living", stanceHint: "Everything it would have poured into a cosmos, it pours into the reaching." },
+        { enemyStance: 'heart', damageWeight: 1.45, threatEffectId: 'debuff_unraveling', threatIntensity: 3, actionText: "The unbegun god tries, one more time, to begin — through you", stanceHint: "Its patience predates its existence, and both predate your defenses." },
+    ],
+
+    // ══ THE INCOMPLETENESS — the impossible playtest ceiling ═══════════════════
+    // (unique, level 110) — the skill-ceiling benchmark: calibrated so the BEST
+    // policy line scrapes a 1-5% win rate (near-impossible, not scripted-unwinnable).
+    // Erosion-stubborn AND control-shrugging: almost nothing you bring is complete
+    // enough to hold it.
     // PLAYTEST-CALIBRATION — weights 0.21 / 0.232 / 0.271 / 0.326, phase-3 self-knit (8).
-    // The L55 unique threat budget is enormous, so these look tiny: at x1.7 fire
+    // The L110 unique threat budget is enormous, so these look tiny: at x1.45 fire
     // scale and the boss escalation clock they still land ~60-180 HP per phase.
-    // Empirically (200 seeds, seed 1): greedy/blind 1.5%, every other scripted
-    // policy 0%. The Incompleteness does not hit hard — it simply cannot be
-    // finished (1375 HP; most losses are the round cap, which is the theme).
+    // The Incompleteness does not hit hard — it simply cannot be finished
+    // (most losses are the round cap, which is the theme).
     'enemy-the-incompleteness': [
         { enemyStance: 'mind', damageWeight: 0.21, threatEffectId: 'debuff_silence', threatIntensity: 2, actionText: "The Incompleteness states a truth your system cannot express, and your reply dies unprovable", stanceHint: "It begins from outside every axiom you brought; you cannot see the floor it stands on." },
         { enemyStance: 'heart', damageWeight: 0.232, threatEffectId: 'debuff_fear', threatIntensity: 2, actionText: "The Incompleteness shows you the true sentence about yourself that you will never be able to prove", stanceHint: "For a moment it grieves for you, the way one grieves for a house that believes it is finished." },
         { enemyStance: 'mind', damageWeight: 0.271, threatEffectId: 'debuff_confusion', threatIntensity: 3, enemyHeal: 8, actionText: "The Incompleteness incorporates your strongest argument as a new axiom and grows truer", stanceHint: "Whatever you add to it, it contains; whatever wounds it becomes another thing it survives." },
         { enemyStance: 'mind', damageWeight: 0.326, threatEffectId: 'debuff_fear', threatIntensity: 3, isFinalPhase: true, actionText: "The Incompleteness proves, within you, the statement that you cannot go on — and you cannot refute it", stanceHint: "There is no triumph in it; the proof was never finishable, it only needed you to stop." },
-    ],
-    // Befriendable peace-by-force (boss, even stats) — Control-weak (it can still be talked out of agreement); erosion-stubborn.
-    'enemy-the-last-consensus': [
-        { enemyStance: 'body', actionText: "The Consensus moves to make you agree, and reaches for your hands", stanceHint: "It does not raise its voice; it raises its whole settled weight against you." },
-        { enemyStance: 'mind', damageWeight: 0.85, threatEffectId: 'debuff_charm', threatIntensity: 2, actionText: "The Consensus shows you how much simpler it is to concede", stanceHint: "It has resolved a million quarrels and remembers the precise wording that ends each one." },
-        { enemyStance: 'heart', damageWeight: 0.9, threatEffectId: 'debuff_fear', threatIntensity: 2, actionText: "The Consensus mourns, gently, the last voice that ever said no", stanceHint: "There is real sorrow in it for everyone it had to convince by force." },
-        { enemyStance: 'body', damageWeight: 1.4, threatEffectId: 'debuff_stagger', threatIntensity: 3, actionText: "The Consensus settles the question of you, permanently and as one", stanceHint: "All argument spent, it bears down with the unanimous force of everything already decided." },
-    ],
-    // Befriendable philosopher-king — cold logic that can be talked level.
-    'enemy-the-market-arbiter': [
-        { enemyStance: 'mind', damageWeight: 0.85, actionText: "The Arbiter quotes you a price you cannot pay", stanceHint: "He weighs your worth against the room and finds an exact, bloodless figure." },
-        { enemyStance: 'body', actionText: "The Arbiter calls in every debt at once, and the village leans on you", stanceHint: "When ledgers fail he simply leans his whole considerable weight upon the scale." },
-        { enemyStance: 'heart', damageWeight: 0.85, threatEffectId: 'debuff_charm', actionText: "The Arbiter offers terms so reasonable you nearly thank him", stanceHint: "He genuinely believes a fair bargain can end any quarrel, and it wounds him when it can't." },
-        { enemyStance: 'mind', damageWeight: 1.3, threatEffectId: 'debuff_slow', threatIntensity: 2, actionText: "The Arbiter collects on the whole quarrel in a single, ruinous sum", stanceHint: "The figures are tallied; now he is only the cold remainder doing the math." },
-    ],
-    // Befriendable sovereign of schism — Control-weak (reconcile it); mind-resistant and erosion-stubborn mid-fight.
-    'enemy-the-schismarch': [
-        { enemyStance: 'mind', damageWeight: 0.9, threatEffectId: 'debuff_confusion', threatIntensity: 2, actionText: "The Schismarch splits your conviction into two that despise each other", stanceHint: "It watches which half of you flinches, then speaks only to that one." },
-        { enemyStance: 'body', actionText: "The Schismarch drives a wedge of pure division through your stance", stanceHint: "When persuasion stalls it simply shoves the two pieces apart by main strength." },
-        { enemyStance: 'heart', damageWeight: 0.85, threatEffectId: 'debuff_charm', threatIntensity: 2, actionText: "The Schismarch offers to take your side, and means it, and lies", stanceHint: "It still mourns the first faith it ever broke, and breaks you the same tender way." },
-        { enemyStance: 'mind', damageWeight: 1.35, threatEffectId: 'debuff_fear', threatIntensity: 3, actionText: "The Schismarch divides you from yourself and rules the remainder", stanceHint: "Cold now, it tallies the fractures it has opened and chooses the cleanest line to cut." },
-    ],
-    // Conversation-ending demonstration (unique, mind-dom) — Control-resistant + DoT-weak; the proof is rigid, erosion dissolves it.
-    'enemy-the-terminal-proof': [
-        { enemyStance: 'mind', damageWeight: 0.9, threatEffectId: 'debuff_silence', threatIntensity: 2, actionText: "The Terminal Proof states its first lemma and your reply will not form", stanceHint: "It begins without preamble, certain of every step before it is taken." },
-        { enemyStance: 'mind', threatEffectId: 'debuff_stagger', threatIntensity: 2, actionText: "The Terminal Proof advances a step you cannot deny, and you stiffen around it", stanceHint: "Each line follows the last with the cold inevitability of a thing already settled." },
-        { enemyStance: 'body', damageWeight: 1.1, threatEffectId: 'debuff_root', threatIntensity: 2, actionText: "The Terminal Proof drives its central inference clean through your footing", stanceHint: "The argument stops persuading and simply forces the conclusion into place." },
-        { enemyStance: 'mind', damageWeight: 1.4, threatEffectId: 'debuff_poison', threatIntensity: 3, actionText: "The Terminal Proof writes Q.E.D. and ends the things that were having the conversation", stanceHint: "It reaches the final line with no triumph at all — only the closing of a thing that cannot be reopened." },
-    ],
-    // Befriendable collector — body-led ledger that flips to heart.
-    'enemy-the-tithewarden': [
-        { enemyStance: 'body', actionText: "The Tithewarden seizes its tenth of your strength with a collector's heavy hand", stanceHint: "It takes what is owed the way a millstone takes grain — without malice, without mercy." },
-        { enemyStance: 'body', damageWeight: 0.85, threatEffectId: 'debuff_bleed', threatIntensity: 2, actionText: "The Tithewarden carves a tenth of your blood into its endless ledger", stanceHint: "Every wound is a line item; it weighs your bleeding against the column and finds it short." },
-        { enemyStance: 'mind', damageWeight: 1.1, actionText: "The Tithewarden recalculates the debt and demands the difference at once", stanceHint: "It pauses to tally, cold and exact, certain the books can still be balanced." },
-        { enemyStance: 'heart', damageWeight: 1.35, threatEffectId: 'debuff_slow', threatIntensity: 3, actionText: "The Tithewarden claims its tenth of your conviction and the ledger never balances", stanceHint: "At the last it weeps over the column that will not close, and lays its impossible debt on you." },
-    ],
-    // Cerebral deletion — control-resistant + dot-weak (no body to bleed); a void of logic that only buckles when it must delete itself.
-    'enemy-the-unwriting': [
-        { enemyStance: 'mind', threatEffectId: 'debuff_silence', threatIntensity: 2, actionText: "The Unwriting removes the word you were about to say", stanceHint: "It studies your sentence for the one joint that holds it, and deletes precisely that." },
-        { enemyStance: 'mind', damageWeight: 0.85, threatEffectId: 'debuff_confusion', threatIntensity: 2, actionText: "The Unwriting erases the premise your stance was standing on", stanceHint: "Coldly it unmakes the reason you came, leaving only the blank where it was." },
-        { enemyStance: 'heart', damageWeight: 1.1, actionText: "The Unwriting deletes the part of you that was certain you could win", stanceHint: "There is something almost like contempt in how surgically it removes your hope." },
-        { enemyStance: 'mind', damageWeight: 1.4, threatEffectId: 'debuff_fear', threatIntensity: 3, actionText: "The Unwriting begins erasing the very rules that let it exist, and the unraveling spreads to you", stanceHint: "To finish you it must delete the last axiom holding itself together — and it does, without hesitation." },
-    ],
-    // Brute bramble-bandit — dot-weak (let it bleed), control-resistant; brawn first, sly bargain only after blood.
-    'enemy-thicket-ambusher': [
-        { enemyStance: 'body', damageWeight: 1.3, threatEffectId: 'debuff_bleed', threatIntensity: 2, actionText: "The Ambusher bursts from the green with a thorned cudgel", stanceHint: "It opens with raw muscle, all ambush and breaking weight, no word offered." },
-        { enemyStance: 'mind', damageWeight: 0.85, actionText: "The Ambusher names a price now that you've bloodied it", stanceHint: "First blood spent, the brute turns merchant, calculating what your life is worth." },
-        { enemyStance: 'body', damageWeight: 1.35, threatEffectId: 'debuff_root', threatIntensity: 2, actionText: "The Ambusher drags you down into the brambles", stanceHint: "Bargain refused, it falls back on the only honest thing it has: sheer force." },
-    ],
-    // A patient territorial bramble — no mind to parley with.
-    'enemy-thorned-sentinel': [
-        { enemyStance: 'body', threatEffectId: 'debuff_bleed', actionText: "The sentinel lashes a thorned vine across your forearm", stanceHint: "It guards its ground with the flat, immovable certainty of a wall that has stood through many sieges." },
-        { enemyStance: 'mind', damageWeight: 0.8, threatEffectId: 'debuff_root', threatIntensity: 2, actionText: "Bramble erupts underfoot to cage your legs in thorns", stanceHint: "It does not rush; it waits with the cold arithmetic of a thing that measures patience in seasons." },
-        { enemyStance: 'body', damageWeight: 1.35, actionText: "A wall of thorns rakes over you all at once", stanceHint: "When the trespass will not stop, it answers with every spine it has, all at once and without mercy." },
-    ],
-    // A shore-cursed brawler whose rage can be soothed — Control/mercy is the way in; immense body, resists erosion behind the curse.
-    'enemy-tidefluke-reaver': [
-        { enemyStance: 'body', actionText: "The Reaver hammers down with fists faster than the surf retreats", stanceHint: "It is all muscle and salt-weight, a wave given arms and a single intent." },
-        { enemyStance: 'heart', damageWeight: 0.9, threatEffectId: 'debuff_fear', threatIntensity: 2, actionText: "The Reaver roars the name of a shore that drowned, and the sound staggers you", stanceHint: "Beneath the curse is a mourning so vast it breaks over you like tide." },
-        { enemyStance: 'mind', threatEffectId: 'debuff_root', threatIntensity: 2, actionText: "The Reaver herds you against the rocks the way the sea herds the drowning", stanceHint: "The curse lends it a tidal cunning, reading the pull of the ground beneath you." },
-        { enemyStance: 'body', damageWeight: 1.4, actionText: "The Reaver brings down a blow with the whole weight of a vengeful sea", stanceHint: "All grief spends itself as force now; the shore-curse closes its fist and does not let go." },
-    ],
-    // A territorial brute — wordless and stubborn.
-    'enemy-tidepool-crab': [
-        { enemyStance: 'body', actionText: "The crab clamps a claw shut on your fingers", stanceHint: "It plants its feet on its scrap of dock and answers every approach with the same blunt pinch." },
-        { enemyStance: 'body', damageWeight: 1.3, threatEffectId: 'debuff_bleed', actionText: "It drives a serrated claw clean through your guard", stanceHint: "Defending its claim to the last, it puts its whole armored bulk behind one crushing snap." },
-    ],
-    // Brutal body-bully — dot-weak (hews under bleed); control-resistant, immovable.
-    'enemy-tolltaker-of-the-ford': [
-        { enemyStance: 'body', actionText: "The Tolltaker plants himself midstream and demands his due with a raised cudgel", stanceHint: "He stands like the river's own stone — the current breaks on him and he does not notice." },
-        { enemyStance: 'mind', damageWeight: 0.85, threatEffectId: 'debuff_bleed', actionText: "The Tolltaker eyes the coin you are NOT carrying and decides what else you'll pay", stanceHint: "He tallies your pockets with a merchant's cold arithmetic before the first blow." },
-        { enemyStance: 'body', damageWeight: 1.35, actionText: "The Tolltaker collects in full, swinging to take the only thing you brought", stanceHint: "No more talk — just the brute weight of a man who has drowned the unpaying before." },
-    ],
-    // Befriendable shepherd — control-weak (reason with it); dot-tough green wood. Defends until it must judge you.
-    'enemy-verdant-protector': [
-        { enemyStance: 'body', threatEffectId: 'debuff_root', actionText: "The Protector lashes a living branch across your path", stanceHint: "It plants itself between you and the grove, immovable as old timber." },
-        { enemyStance: 'heart', damageWeight: 0.9, actionText: "The Protector mourns the trampled growth at your feet", stanceHint: "It tends a broken seedling even as it fights, grieving every snapped stem." },
-        { enemyStance: 'body', damageWeight: 1.3, threatEffectId: 'debuff_bleed', threatIntensity: 2, actionText: "The Protector swings its green blade in final judgment", stanceHint: "Convinced now you are blight, it brings its full weight down without mercy." },
-    ],
-    // Befriendable absence-forged automaton — Control-weak (the lonely thing answers a voice), dot-resistant crystallized nothing; mind-dominant, body-heavy.
-    'enemy-voidwrought-construct': [
-        { enemyStance: 'mind', damageWeight: 0.9, threatEffectId: 'debuff_silence', threatIntensity: 2, actionText: "The Construct calculates the precise shape of what you lack and presses into the gap", stanceHint: "It reasons with the awful patience of math, weighing you against everything it is not." },
-        { enemyStance: 'body', damageWeight: 1.1, actionText: "The Construct brings the full mass of its crystallized absence down upon you", stanceHint: "It moves as though dragging the weight of every thing that was taken to forge it." },
-        { enemyStance: 'mind', damageWeight: 1.2, threatEffectId: 'debuff_fear', threatIntensity: 2, actionText: "The Construct subtracts you, piece by piece, from the equation it is solving", stanceHint: "In its final reckoning there is something almost like loneliness — it solves toward company it cannot name." },
-    ],
-    // Sophist elite — dot-weak (the patter unravels under steady erosion); control-resistant, mind-dominant, dagger is an afterthought.
-    'enemy-wandering-sophist': [
-        { enemyStance: 'mind', damageWeight: 0.85, threatEffectId: 'debuff_confusion', threatIntensity: 2, actionText: "The Sophist sells you a certainty that turns to smoke as you grasp it", stanceHint: "The patter never stops; he wins the point before you notice it was a knife." },
-        { enemyStance: 'mind', damageWeight: 0.95, actionText: "The Sophist reframes the entire dispute so your strength becomes your error", stanceHint: "He moves the ground beneath the argument with a cold, practiced ease." },
-        { enemyStance: 'body', damageWeight: 1.3, threatEffectId: 'debuff_bleed', actionText: "Mid-sentence, the Sophist lets the incidental dagger finish the thought", stanceHint: "The words were always cover — the wrist flicks while the mouth keeps talking." },
-    ],
-    // Befriendable bailiff of oblivion — Control-weak (it can be served its own papers); erosion-resistant.
-    'enemy-warrant-of-the-void': [
-        { enemyStance: 'body', actionText: "The Warrant presses its writ against your chest until the ink burns", stanceHint: "It does not argue; it simply advances, and the floor it stood on is already yours no longer." },
-        { enemyStance: 'mind', damageWeight: 0.8, threatEffectId: 'debuff_silence', threatIntensity: 2, actionText: "The Warrant reads the charge aloud and the word for your name goes missing", stanceHint: "Each clause is filed in order, cross-referenced, leaving no clean place to object." },
-        { enemyStance: 'heart', damageWeight: 0.9, threatEffectId: 'debuff_fear', threatIntensity: 2, actionText: "The Warrant shows you the date of execution, and it is today", stanceHint: "Behind the seal something grieves the duty it cannot refuse." },
-        { enemyStance: 'body', damageWeight: 1.35, threatEffectId: 'debuff_unraveling', threatIntensity: 3, actionText: "The Warrant carries out the sentence that was passed before you were born", stanceHint: "All deliberation done, it lowers the stamp with the weight of a closing door." },
-    ],
-    // Half-feral, half-pitiful — its trembling, beggable side opens the Control/mercy path ; its feral fury resists erosion (.
-    'enemy-wet-hound': [
-        { enemyStance: 'body', threatEffectId: 'debuff_bleed', actionText: "The hound lunges and clamps its jaws on your wrist", stanceHint: "Hunger wins out and it strikes on raw instinct, all snapping muscle and no thought at all." },
-        { enemyStance: 'heart', damageWeight: 0.8, actionText: "It cowers, then flinches forward in a confused half-bite", stanceHint: "It trembles between bite and beg, whining at you with eyes that remember being someone's." },
-        { enemyStance: 'body', damageWeight: 1.3, actionText: "Driven past fear, it leaps for your throat", stanceHint: "The beggar drowns in the beast, and it throws its whole shivering weight into one desperate maul." },
-    ],
-    // An ancient mind whispering forgotten secrets — control-resistant and luring, weak to patient erosion against old wood.
-    'enemy-whispering-oak': [
-        { enemyStance: 'mind', damageWeight: 0.85, threatEffectId: 'debuff_confusion', actionText: "The Oak murmurs a secret meant to unmoor you from where you stand", stanceHint: "Its leaves trade whispers in a slow, deliberate calculus older than the path." },
-        { enemyStance: 'heart', actionText: "The Oak's murmur turns to a sorrowing keen that bows its branches toward you", stanceHint: "Some of its secrets are griefs, and it shares one now like an open wound." },
-        { enemyStance: 'mind', damageWeight: 1.3, threatEffectId: 'debuff_unraveling', threatIntensity: 2, actionText: "The Oak offers its last invitation, and the forest leans in to enforce it", stanceHint: "Coldly patient, it speaks the warning it always meant as a trap." },
     ],
 };

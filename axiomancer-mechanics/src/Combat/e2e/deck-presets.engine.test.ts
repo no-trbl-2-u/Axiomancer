@@ -17,7 +17,7 @@ import { getCardById } from '../../Cards/cards.library';
 import { lookupEffect } from '../../Effects';
 import { initializeCombatEncounter, rollEncounterDice } from '../combat.engine';
 import { Player } from '../../Character/characters.mock';
-import { TidepoolCrab } from '../../Enemy/enemy.library';
+import { GraveLarva } from '../../Enemy/enemy.library';
 import { deepClone } from '../../Utils';
 import type { CombatVerbClass } from '../combat.encounter.types';
 
@@ -93,7 +93,7 @@ describe('preset combat decks', () => {
 
     it('a preset deck drives a real encounter (opening hand drawn from it)', () => {
         const player = deepClone(Player);
-        const enemy = deepClone(TidepoolCrab);
+        const enemy = deepClone(GraveLarva);
         const deck = buildPresetDeck('dot-erosion');
         let state = initializeCombatEncounter(player, enemy, deck, 7);
         expect(state.deck).toEqual(deck);

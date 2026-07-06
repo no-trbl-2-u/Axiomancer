@@ -183,9 +183,10 @@ export interface EventViewModel {
     variant: EventVariant;
     artSlug: EventArtSlug;
     /**
-     * Enemy id (e.g. `"enemy-coastal-tyrant"`) for bespoke combat-prelude
-     * art routing. Present only on combat-prelude variants; the art layer
-     * maps it to an archetype illustration (see `enemy-art`).
+     * Enemy art key — the engine's `portraitAsset` (e.g. `"king-of-revenge"`),
+     * falling back to the enemy id. Present only on combat-prelude variants;
+     * the art layer resolves it 1:1 against the painting registry, with the
+     * archetype illustration (see `enemy-art`) as the silhouette fallback.
      */
     enemyArtKey?: string | null;
     badge: string;
@@ -512,7 +513,7 @@ function composeCombatPrelude(encounter: Encounter, isBoss: boolean): Omit<Event
         kind: 'combat-prelude',
         variant: isBoss ? 'boss' : 'encounter',
         artSlug: isBoss ? 'boss' : 'encounter',
-        enemyArtKey: enemy.id,
+        enemyArtKey: enemy.portraitAsset ?? enemy.id,
         badge,
         badgeAccentKey: 'blood',
         title: enemy.name.toUpperCase(),

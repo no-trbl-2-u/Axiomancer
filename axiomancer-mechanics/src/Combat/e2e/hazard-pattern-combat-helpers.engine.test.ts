@@ -22,7 +22,7 @@ import { describe, it, expect } from 'vitest';
 import { Player } from '../../Character/characters.mock';
 import type { Character } from '../../Character/types';
 import type { Enemy } from '../../Enemy/types';
-import { TidepoolCrab } from '../../Enemy/enemy.library';
+import { GraveLarva } from '../../Enemy/enemy.library';
 import { deepClone } from '../../Utils';
 import { getCardById } from '../../Cards/cards.library';
 import { registerSandboxCards } from '../../Cards/cards.sandbox';
@@ -78,7 +78,7 @@ function makePlayer(skills: string[]): Character {
 }
 
 function makeEnemy(hp: number, stance: 'heart' | 'body' | 'mind' = 'heart'): Enemy {
-    const e = deepClone(TidepoolCrab);
+    const e = deepClone(GraveLarva);
     e.id = 'enemy-helper-dummy';
     e.health = hp;
     e.maxHealth = hp;
@@ -400,8 +400,8 @@ describe('Spec 25 — constants', () => {
 // ── AUTHORED_THREAT_ENEMY_IDS ─────────────────────────────────────────────────
 
 describe('Spec 25 — AUTHORED_THREAT_ENEMY_IDS', () => {
-    it('contains exactly 62 authored-threat enemy slugs', () => {
-        expect(AUTHORED_THREAT_ENEMY_IDS.length).toBe(62);
+    it('contains exactly 53 authored-threat enemy slugs (52 roster + the ceiling)', () => {
+        expect(AUTHORED_THREAT_ENEMY_IDS.length).toBe(53);
     });
 
     it('every entry follows the "enemy-<slug>" naming convention', () => {

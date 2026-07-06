@@ -15,7 +15,7 @@ import {
     DIFFICULTY_LEVEL_BANDS,
 } from './encounter';
 import { Enemy } from '../Enemy/types';
-import { TidepoolCrab, EchoOfPyrrhonia, ENEMY_REGISTRY } from '../Enemy/enemy.library';
+import { GraveLarva, Kudan, ENEMY_REGISTRY } from '../Enemy/enemy.library';
 import { MapNode } from './types';
 
 const fishingNode: MapNode = { id: 'fv-2', location: [0, 0], connectedNodes: [] };
@@ -34,7 +34,7 @@ describe('DIFFICULTY_LEVEL_BANDS', () => {
 
 describe('scaledEncounterLevel', () => {
     it('clamps the floor to 1 when scaling simple enemies for a low-level player', () => {
-        const simple: Enemy = { ...TidepoolCrab };
+        const simple: Enemy = { ...GraveLarva };
         // Player level 1, simple band = [-1, 0] → either 0 (clamped to 1) or 1.
         for (let i = 0; i < 20; i++) {
             const level = scaledEncounterLevel(simple, 1);
@@ -44,12 +44,12 @@ describe('scaledEncounterLevel', () => {
     });
 
     it('unique enemies ignore player level — they stay at authored level', () => {
-        const level = scaledEncounterLevel(EchoOfPyrrhonia, 50);
-        expect(level).toBe(EchoOfPyrrhonia.level);
+        const level = scaledEncounterLevel(Kudan, 50);
+        expect(level).toBe(Kudan.level);
     });
 
     it('boss band stays in [+2, +3] relative to the player', () => {
-        const boss = ENEMY_REGISTRY['coastal-tyrant'];
+        const boss = ENEMY_REGISTRY['king-of-revenge'];
         for (let i = 0; i < 50; i++) {
             const level = scaledEncounterLevel(boss, 5);
             expect(level).toBeGreaterThanOrEqual(7);
@@ -60,26 +60,26 @@ describe('scaledEncounterLevel', () => {
 
 describe('scaleEnemyToLevel', () => {
     it('returns a clone — does not mutate the source', () => {
-        const before = JSON.stringify(TidepoolCrab);
-        scaleEnemyToLevel(TidepoolCrab, 5);
-        expect(JSON.stringify(TidepoolCrab)).toBe(before);
+        const before = JSON.stringify(GraveLarva);
+        scaleEnemyToLevel(GraveLarva, 5);
+        expect(JSON.stringify(GraveLarva)).toBe(before);
     });
 
     it('recomputes maxHealth and resets HP to full', () => {
-        const scaled = scaleEnemyToLevel(TidepoolCrab, 5);
+        const scaled = scaleEnemyToLevel(GraveLarva, 5);
         expect(scaled.level).toBe(5);
         expect(scaled.health).toBe(scaled.maxHealth);
-        expect(scaled.maxHealth).toBeGreaterThan(TidepoolCrab.maxHealth);
+        expect(scaled.maxHealth).toBeGreaterThan(GraveLarva.maxHealth);
     });
 
     it('clamps the target level to a floor of 1', () => {
-        const scaled = scaleEnemyToLevel(TidepoolCrab, -5);
+        const scaled = scaleEnemyToLevel(GraveLarva, -5);
         expect(scaled.level).toBe(1);
     });
 
     it('rescales xpReward when the source used the default multiplier', () => {
-        const scaled = scaleEnemyToLevel(TidepoolCrab, 4);
-        // TidepoolCrab is simple; default = 4 × 10 = 40.
+        const scaled = scaleEnemyToLevel(GraveLarva, 4);
+        // GraveLarva is simple; default = 4 × 10 = 40.
         expect(scaled.xpReward).toBe(40);
     });
 });

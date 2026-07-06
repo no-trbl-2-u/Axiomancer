@@ -177,7 +177,7 @@ describe('devSetAlignment', () => {
 describe('devSpawnEnemy', () => {
     it('spawns an enemy into combat', () => {
         const store = freshStore();
-        const r = devSpawnEnemy(store, 'wet-hound');
+        const r = devSpawnEnemy(store, 'foot-stealer');
         expect(r.ok).toBe(true);
         expect(store.getState().combat).not.toBeNull();
     });

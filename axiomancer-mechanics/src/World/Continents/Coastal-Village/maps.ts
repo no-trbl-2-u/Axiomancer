@@ -248,14 +248,14 @@ const beggarTree: DialogueTree = {
                 },
                 {
                     // Phase 62 — flag-gated branch surfacing only after the
-                    // player has befriended the Mournful Gull (which sets
-                    // the `befriended-mournful-gull` flag via its
+                    // player has befriended Little Belle (which sets the
+                    // `befriended-little-belle` flag via its
                     // friendshipReward.flagSet). The beggar's voice softens
                     // when they recognise a fellow listener. Placed LAST per
                     // the same index-stability convention.
-                    text: "\"I've been hearing the gulls quieter, lately.\" (Mention the Mournful Gull.)",
+                    text: "\"The little bell by the docks has gone quiet, lately.\" (Mention Little Belle.)",
                     nextNodeId: 'gull_recognition',
-                    requires: { flag: 'befriended-mournful-gull' },
+                    requires: { flag: 'befriended-little-belle' },
                     effect: {
                         moralDelta: 2,
                         alignmentDelta: { outlook: 1, scope: 1 },
@@ -288,7 +288,7 @@ const beggarTree: DialogueTree = {
             // Phase 62 — terminal node for the post-befriend-gull dialogue
             // branch. Establishes the village as a small network of listeners
             // who notice when a known bitter creature stops circling.
-            text: "The beggar's head tilts. \"Aye. She used to scream the same names every dawn. I'd thought she was warning us. Maybe she was just keeping count.\" Their gaze settles on the harbor. \"It's good to hear a quieter morning.\"",
+            text: "The beggar's head tilts. \"Aye. It rang the same hour every dawn. I'd thought it was tolling for us. Maybe it was just keeping the service.\" Their gaze settles on the harbor. \"It's good to hear a quieter morning.\"",
         },
     },
 };
@@ -303,15 +303,15 @@ const coastalBeggar: NPC = {
 
 const startingQuest: Quest = {
     name: 'starting-quest',
-    description: "Slay the Coastal Tyrant nesting at the breakwater. Old Marrow will reward you.",
+    description: "Slay the King of Revenge holding court at the breakwater. Old Marrow will reward you.",
     mapName: 'fishing-village',
     status: 'available',
     objectives: [
         {
             id: 'kill-tyrant',
             type: 'kill',
-            target: 'The Coastal Tyrant',
-            description: "Defeat the Coastal Tyrant.",
+            target: 'The King of Revenge',
+            description: "Defeat the King of Revenge.",
             requiredCount: 1,
             currentCount: 0,
         },

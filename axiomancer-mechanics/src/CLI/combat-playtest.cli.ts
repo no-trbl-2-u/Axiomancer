@@ -15,7 +15,7 @@
  *   npm run combat-playtest -- --stage=early --policy=all
  *   npm run combat-playtest -- --policy=dot-weaver --deck=draft:dot
  *   npm run combat-playtest -- --deck=preset:dot-erosion --runs=100 --seed=7
- *   npm run combat-playtest -- --enemy=coastal-tyrant --cards
+ *   npm run combat-playtest -- --enemy=king-of-revenge --cards
  *   npm run combat-playtest -- --sandbox=forge-example --json
  *
  * Flags (house style: `--k=v` for values, bare `--k` for switches):

@@ -118,11 +118,11 @@ describe('emit', () => {
             return true;
         });
 
-        emit({ type: 'combat:started', payload: { enemy: 'disatree' } });
+        emit({ type: 'combat:started', payload: { enemy: 'float-eye' } });
         emit({ type: 'world:moved' });
 
         expect(spy).toHaveBeenCalledTimes(2);
-        expect(writes[0]).toBe('{"type":"combat:started","payload":{"enemy":"disatree"}}\n');
+        expect(writes[0]).toBe('{"type":"combat:started","payload":{"enemy":"float-eye"}}\n');
         expect(writes[1]).toBe('{"type":"world:moved"}\n');
     });
 

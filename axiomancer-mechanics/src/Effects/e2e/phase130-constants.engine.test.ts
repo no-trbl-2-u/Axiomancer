@@ -1,12 +1,14 @@
 /**
  * Phase 130 — Constants verification tests
- * 
- * Verifies that Phase 130 constants changes are correctly applied.
+ *
+ * Verifies that Phase 130 constants changes are correctly applied, plus the
+ * befriendability tuning carried forward onto the 2026-07-06 roster's
+ * mid-tier befriendables.
  */
 
 import { describe, it, expect } from 'vitest';
 import { EFFECTS_RESOLUTION_DEBUFF_INTENSITY_THRESHOLD, EFFECTS_RESOLUTION_DOT_DAMAGE_THRESHOLD, EFFECT_BASE_PROC_INTENSITY } from '../../Game/game-mechanics.constants';
-import { AuditSentinel, RimeclawProwler, TheMarketArbiter } from '../../Enemy/enemy.library';
+import { TriEyes, LadyGabriella, HasshakuSama } from '../../Enemy/enemy.library';
 
 describe('Phase 130 — Constants and config verification', () => {
     describe('Resolution thresholds lowered from Phase 126', () => {
@@ -25,30 +27,30 @@ describe('Phase 130 — Constants and config verification', () => {
         });
     });
 
-    describe('L15-tier enemy befriendability improvements', () => {
-        it('AuditSentinel should now be befriendable', () => {
-            expect(AuditSentinel.befriendabilityConfig).toBeDefined();
-            expect(AuditSentinel.befriendabilityConfig?.hpGate?.belowPct).toBe(0.7); // Phase 138 tuning
-            expect(AuditSentinel.befriendabilityConfig?.requiredStances).toContain('mind');
-            expect(AuditSentinel.befriendabilityConfig?.roundsThreshold).toBe(1); // Phase 138 tuning
-            expect(AuditSentinel.friendshipReward).toBeDefined();
-            expect(AuditSentinel.friendshipReward?.flagSet).toBe('befriended-audit-sentinel');
+    describe('L15-tier enemy befriendability (carried onto the art roster)', () => {
+        it('Tri-Eyes (Normal anchor) keeps the Phase 138 befriend tuning', () => {
+            expect(TriEyes.befriendabilityConfig).toBeDefined();
+            expect(TriEyes.befriendabilityConfig?.hpGate?.belowPct).toBe(0.7); // Phase 138 tuning
+            expect(TriEyes.befriendabilityConfig?.requiredStances).toContain('mind');
+            expect(TriEyes.befriendabilityConfig?.roundsThreshold).toBe(1); // Phase 138 tuning
+            expect(TriEyes.friendshipReward).toBeDefined();
+            expect(TriEyes.friendshipReward?.flagSet).toBe('befriended-tri-eyes');
         });
 
-        it('RimeclawProwler should now be befriendable', () => {
-            expect(RimeclawProwler.befriendabilityConfig).toBeDefined();
-            expect(RimeclawProwler.befriendabilityConfig?.hpGate?.belowPct).toBe(0.35);
-            expect(RimeclawProwler.befriendabilityConfig?.requiredStances).toContain('body');
-            expect(RimeclawProwler.befriendabilityConfig?.roundsThreshold).toBe(3);
-            expect(RimeclawProwler.friendshipReward).toBeDefined();
-            expect(RimeclawProwler.friendshipReward?.flagSet).toBe('befriended-rimeclaw-prowler');
+        it('Lady Gabriella is befriendable on the mercy path', () => {
+            expect(LadyGabriella.befriendabilityConfig).toBeDefined();
+            expect(LadyGabriella.befriendabilityConfig?.hpGate?.belowPct).toBe(0.35);
+            expect(LadyGabriella.befriendabilityConfig?.requiredStances).toContain('heart');
+            expect(LadyGabriella.befriendabilityConfig?.roundsThreshold).toBe(5);
+            expect(LadyGabriella.friendshipReward).toBeDefined();
+            expect(LadyGabriella.friendshipReward?.flagSet).toBe('befriended-lady-gabriella');
         });
 
-        it('TheMarketArbiter should have strengthened befriendability thresholds', () => {
-            expect(TheMarketArbiter.befriendabilityConfig).toBeDefined();
-            expect(TheMarketArbiter.befriendabilityConfig?.hpGate?.belowPct).toBe(0.3); // lowered from 0.35
-            expect(TheMarketArbiter.befriendabilityConfig?.requiredStances).toContain('mind');
-            expect(TheMarketArbiter.befriendabilityConfig?.roundsThreshold).toBe(3); // reduced from 4
+        it('Hasshaku-sama carries mid-band befriendability thresholds', () => {
+            expect(HasshakuSama.befriendabilityConfig).toBeDefined();
+            expect(HasshakuSama.befriendabilityConfig?.hpGate?.belowPct).toBe(0.4);
+            expect(HasshakuSama.befriendabilityConfig?.requiredStances).toContain('heart');
+            expect(HasshakuSama.befriendabilityConfig?.roundsThreshold).toBe(3);
         });
     });
 });

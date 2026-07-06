@@ -20,7 +20,7 @@ import { describe, it, expect } from 'vitest';
 
 import { Player } from '../../Character/characters.mock';
 import type { Character } from '../../Character/types';
-import { MournfulGull, HollowEyedBeggar, CoastalTyrant } from '../../Enemy/enemy.library';
+import { LittleBelle, WaterHolger, KingOfRevenge } from '../../Enemy/enemy.library';
 import { deepClone } from '../../Utils';
 import { simulateHazardPatternCombat } from '../combat.encounter.sim';
 import { registerSandboxCards } from '../../Cards/cards.sandbox';
@@ -60,7 +60,7 @@ const CONTROL = ['false-dilemma', 'undistributed-middle']; // soft-control — c
 const CONCLUDE = ['slippery-slope', 'hasty-generalization']; // BODY finisher: stack DoT intensity, then Conclusion Sig detonates
 
 describe('HP combat — authored enemies are winnable with status play', () => {
-    for (const [name, enemy] of [['MournfulGull', MournfulGull], ['HollowEyedBeggar', HollowEyedBeggar]] as const) {
+    for (const [name, enemy] of [['LittleBelle', LittleBelle], ['WaterHolger', WaterHolger]] as const) {
         it(`${name}: a DoT loadout wins the large majority of seeded combats`, () => {
             const s = simulateHazardPatternCombat(loadout(DOT), enemy, RUNS, SEED);
             expect(s.runs).toBe(RUNS);
@@ -78,8 +78,8 @@ describe('HP combat doctrine — status beats basic attacks', () => {
         // un-doctrinal baseline that lands NO status at all. (The optimal witness
         // can grind this boss either way via shared Signatures, so the faithful
         // signal is status engagement + efficiency, not a saturated win-rate gap.)
-        const dot = simulateHazardPatternCombat(loadout(DOT), CoastalTyrant, RUNS, SEED);
-        const damage = simulateHazardPatternCombat(loadout(DAMAGE_ONLY), CoastalTyrant, RUNS, SEED);
+        const dot = simulateHazardPatternCombat(loadout(DOT), KingOfRevenge, RUNS, SEED);
+        const damage = simulateHazardPatternCombat(loadout(DAMAGE_ONLY), KingOfRevenge, RUNS, SEED);
         // The DoT line wins reliably and its work comes from status play…
         expect(dot.winRate).toBeGreaterThanOrEqual(0.8);
         expect(dot.statusEngagement).toBeGreaterThan(0.3);
@@ -92,7 +92,7 @@ describe('HP combat doctrine — status beats basic attacks', () => {
 
 describe('HP combat — the befriend mercy path is live', () => {
     it('a control+befriend loadout spares a low-HP foe (mercy, not a DoT kill)', () => {
-        const m = simulateHazardPatternCombat(loadout(MERCY), MournfulGull, RUNS, SEED);
+        const m = simulateHazardPatternCombat(loadout(MERCY), LittleBelle, RUNS, SEED);
         expect(m.winRate).toBeGreaterThan(0);
         // Wins resolve as MERCY (the spare), not VICTORY (an HP kill).
         expect(m.mercies).toBeGreaterThan(0);
@@ -100,8 +100,8 @@ describe('HP combat — the befriend mercy path is live', () => {
     });
 
     it('a DoT loadout kills (victory) where the befriend loadout spares (mercy)', () => {
-        const dot = simulateHazardPatternCombat(loadout(DOT), MournfulGull, RUNS, SEED);
-        const mercy = simulateHazardPatternCombat(loadout(MERCY), MournfulGull, RUNS, SEED);
+        const dot = simulateHazardPatternCombat(loadout(DOT), LittleBelle, RUNS, SEED);
+        const mercy = simulateHazardPatternCombat(loadout(MERCY), LittleBelle, RUNS, SEED);
         expect(dot.victories).toBeGreaterThan(mercy.victories);
         expect(mercy.mercies).toBeGreaterThan(dot.mercies);
     });
@@ -114,7 +114,7 @@ describe('HP combat — soft-control is a viable status modality (0.33.0 de-iner
         // hitting the THREAT_DENY_AT (8) threshold that fully denies the enemy's turn.
         // This confirms the 0.33.0 soft-control de-inert actually delivers a playable,
         // winning strategy — not just code that compiles.
-        const ctrl = simulateHazardPatternCombat(loadout(CONTROL), MournfulGull, RUNS, SEED);
+        const ctrl = simulateHazardPatternCombat(loadout(CONTROL), LittleBelle, RUNS, SEED);
         expect(ctrl.winRate).toBeGreaterThanOrEqual(0.5);
         expect(ctrl.statusEngagement).toBeGreaterThan(0);
     });
@@ -123,8 +123,8 @@ describe('HP combat — soft-control is a viable status modality (0.33.0 de-iner
         // Doctrine: status is the efficient path; basic-attack trading is the weak baseline.
         // Against the boss, a pure-strike loadout is the documented weak path (no status).
         // A soft-control loadout must beat it by denying the enemy's threat turns.
-        const ctrl = simulateHazardPatternCombat(loadout(CONTROL), CoastalTyrant, RUNS, SEED);
-        const damage = simulateHazardPatternCombat(loadout(DAMAGE_ONLY), CoastalTyrant, RUNS, SEED);
+        const ctrl = simulateHazardPatternCombat(loadout(CONTROL), KingOfRevenge, RUNS, SEED);
+        const damage = simulateHazardPatternCombat(loadout(DAMAGE_ONLY), KingOfRevenge, RUNS, SEED);
         expect(ctrl.winRate).toBeGreaterThanOrEqual(damage.winRate);
         expect(ctrl.statusEngagement).toBeGreaterThan(damage.statusEngagement);
     });
@@ -134,46 +134,46 @@ describe('HP combat — Phase 167 status-engagement metrics are valid and doctri
     it('dotHpFraction > 0 with a DoT loadout — DoT contributes meaningfully to HP erosion', () => {
         // Doctrine witness: DoT should be the primary HP-damage source in status builds.
         // A non-zero dotHpFraction confirms the engine is eroding enemy HP via status, not just strikes.
-        const s = simulateHazardPatternCombat(loadout(DOT), MournfulGull, RUNS, SEED);
+        const s = simulateHazardPatternCombat(loadout(DOT), LittleBelle, RUNS, SEED);
         expect(s.dotHpFraction).toBeGreaterThan(0);
         expect(s.dotHpFraction).toBeLessThanOrEqual(1);
     });
 
     it('dotHpFraction > strikeFraction with a DoT loadout — status damage exceeds pure strike damage', () => {
         // Doctrine: status > basic attacks. DoT must deliver more HP damage than pure strikes.
-        const s = simulateHazardPatternCombat(loadout(DOT), MournfulGull, RUNS, SEED);
+        const s = simulateHazardPatternCombat(loadout(DOT), LittleBelle, RUNS, SEED);
         expect(s.dotHpFraction).toBeGreaterThan(s.strikeFraction);
     });
 
     it('strikeFraction is 0 or near-0 for a pure-strike loadout (no status)', () => {
         // Pure-strike loadout: all enemy HP damage comes from strikes; dotHpFraction must be 0.
-        const s = simulateHazardPatternCombat(loadout(DAMAGE_ONLY), MournfulGull, RUNS, SEED);
+        const s = simulateHazardPatternCombat(loadout(DAMAGE_ONLY), LittleBelle, RUNS, SEED);
         expect(s.dotHpFraction).toBe(0);
         expect(s.strikeFraction).toBeGreaterThan(0);
     });
 
     it('avgActiveEffectsPerPhase > 0 with a DoT loadout — board is loaded with status effects', () => {
         // Doctrine witness: a loaded enemy board = status-centric play is working.
-        const s = simulateHazardPatternCombat(loadout(DOT), MournfulGull, RUNS, SEED);
+        const s = simulateHazardPatternCombat(loadout(DOT), LittleBelle, RUNS, SEED);
         expect(s.avgActiveEffectsPerPhase).toBeGreaterThan(0);
     });
 
     it('avgActiveEffectsPerPhase is 0 for a pure-strike loadout — no status on board', () => {
         // Pure-strike loadout never lands status; the board should remain empty every phase.
-        const s = simulateHazardPatternCombat(loadout(DAMAGE_ONLY), MournfulGull, RUNS, SEED);
+        const s = simulateHazardPatternCombat(loadout(DAMAGE_ONLY), LittleBelle, RUNS, SEED);
         expect(s.avgActiveEffectsPerPhase).toBe(0);
     });
 
     it('guardMitigatedFraction is a valid fraction (0–1)', () => {
         // GUARD is generated by defense cards; the metric must be a valid ratio.
-        const s = simulateHazardPatternCombat(loadout(DOT), MournfulGull, RUNS, SEED);
+        const s = simulateHazardPatternCombat(loadout(DOT), LittleBelle, RUNS, SEED);
         expect(s.guardMitigatedFraction).toBeGreaterThanOrEqual(0);
         expect(s.guardMitigatedFraction).toBeLessThanOrEqual(1);
     });
 
     it('fractions sum to ≤ 1 (remaining HP loss from thorns/riposte/barrier)', () => {
         // The three-way HP split must not exceed 100% — the remainder is other sources.
-        const s = simulateHazardPatternCombat(loadout(DOT), MournfulGull, RUNS, SEED);
+        const s = simulateHazardPatternCombat(loadout(DOT), LittleBelle, RUNS, SEED);
         expect(s.dotHpFraction + s.strikeFraction + s.mechanicBurstFraction).toBeLessThanOrEqual(1.01);
     });
 });
@@ -184,7 +184,7 @@ describe('HP combat — BODY/Conclusion archetype is a viable status-board finis
         // building a loaded status board — damage = CONCLUDE_DMG_PER_STACK × sum(effect.intensity).
         // A DoT-stacking loadout with the BODY sig kit (all-10 stats → body tiebreak) must produce
         // a winning run rate: stacks build via slippery-slope DoT, Conviction banks, Conclusion fires.
-        const s = simulateHazardPatternCombat(loadout(CONCLUDE), MournfulGull, RUNS, SEED);
+        const s = simulateHazardPatternCombat(loadout(CONCLUDE), LittleBelle, RUNS, SEED);
         expect(s.winRate).toBeGreaterThanOrEqual(0.5);
         expect(s.statusEngagement).toBeGreaterThan(0);
     });
@@ -192,15 +192,15 @@ describe('HP combat — BODY/Conclusion archetype is a viable status-board finis
     it('a CONCLUDE loadout lands status on the board — avgActiveEffectsPerPhase > 0', () => {
         // Doctrine: status is central to the CONCLUDE kill-path; Conclusion damage scales with
         // board depth. The sim must confirm effects are actually loaded on the enemy board.
-        const s = simulateHazardPatternCombat(loadout(CONCLUDE), MournfulGull, RUNS, SEED);
+        const s = simulateHazardPatternCombat(loadout(CONCLUDE), LittleBelle, RUNS, SEED);
         expect(s.avgActiveEffectsPerPhase).toBeGreaterThan(0);
     });
 
     it('a CONCLUDE loadout fires mechanic burst damage on the boss — Conclusion Sig detonates', () => {
         // Conclusion fires as a mechanic burst (conclude-hit credited to mechanicBurstFraction).
-        // Against the boss (CoastalTyrant) the Conclusion Sig must fire in at least some runs,
+        // Against the boss (KingOfRevenge) the Conclusion Sig must fire in at least some runs,
         // confirming the BODY kill-path is active (not just DoT ticks) at the hardest target.
-        const s = simulateHazardPatternCombat(loadout(CONCLUDE), CoastalTyrant, RUNS, SEED);
+        const s = simulateHazardPatternCombat(loadout(CONCLUDE), KingOfRevenge, RUNS, SEED);
         expect(s.mechanicBurstFraction).toBeGreaterThan(0);
     });
 });

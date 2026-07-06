@@ -17,7 +17,7 @@ import { describe, it, expect } from 'vitest';
 
 import { Player } from '../../Character/characters.mock';
 import type { Character } from '../../Character/types';
-import { MournfulGull } from '../../Enemy/enemy.library';
+import { LittleBelle } from '../../Enemy/enemy.library';
 import { deepClone } from '../../Utils';
 import { simulateHazardPatternCombat } from '../combat.encounter.sim';
 
@@ -39,7 +39,7 @@ const FULL_KIT = ['slippery-slope', 'breach', 'resonance-rupture', 'mounting-con
 
 describe('0.34.0 — the new content does not regress the DoT baseline', () => {
     it('the pure DoT loadout still wins the large majority WITH high status engagement', () => {
-        const s = simulateHazardPatternCombat(loadout(DOT), MournfulGull, RUNS, SEED);
+        const s = simulateHazardPatternCombat(loadout(DOT), LittleBelle, RUNS, SEED);
         expect(s.winRate).toBeGreaterThanOrEqual(0.8);
         // Doctrine witness: status play stays central (must NOT drop).
         expect(s.statusEngagement).toBeGreaterThan(0.3);
@@ -48,19 +48,19 @@ describe('0.34.0 — the new content does not regress the DoT baseline', () => {
 
 describe('0.34.0 — building around the new payoff cards is winnable + status-central', () => {
     it('DoT + RUPTURE wins and still lands status', () => {
-        const s = simulateHazardPatternCombat(loadout(DOT_RUPTURE), MournfulGull, RUNS, SEED);
+        const s = simulateHazardPatternCombat(loadout(DOT_RUPTURE), LittleBelle, RUNS, SEED);
         expect(s.winRate).toBeGreaterThanOrEqual(0.75);
         expect(s.statusEngagement).toBeGreaterThan(0.2);
     });
 
     it('DoT + VULNERABLE (Breach) wins and still lands status', () => {
-        const s = simulateHazardPatternCombat(loadout(DOT_VULNERABLE), MournfulGull, RUNS, SEED);
+        const s = simulateHazardPatternCombat(loadout(DOT_VULNERABLE), LittleBelle, RUNS, SEED);
         expect(s.winRate).toBeGreaterThanOrEqual(0.75);
         expect(s.statusEngagement).toBeGreaterThan(0.2);
     });
 
     it('the full payoff kit wins and keeps status central (DoT feeds the payoffs)', () => {
-        const s = simulateHazardPatternCombat(loadout(FULL_KIT), MournfulGull, RUNS, SEED);
+        const s = simulateHazardPatternCombat(loadout(FULL_KIT), LittleBelle, RUNS, SEED);
         expect(s.winRate).toBeGreaterThanOrEqual(0.75);
         expect(s.statusEngagement).toBeGreaterThan(0.2);
     });

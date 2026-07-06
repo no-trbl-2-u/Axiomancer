@@ -12,7 +12,7 @@ import { describe, it, expect, afterEach, vi } from 'vitest';
 import { createGameStore } from './store';
 import { nullAdapter } from './persistence/null.adapter';
 import { Player } from '../Character/characters.mock';
-import { TidepoolCrab, CoastalTyrant } from '../Enemy/enemy.library';
+import { GraveLarva, KingOfRevenge } from '../Enemy/enemy.library';
 import { Encounter } from '../World/types';
 import { Item } from '../Items/types';
 import { mockSequentialRng } from '../test-utils/rng';
@@ -22,16 +22,16 @@ afterEach(() => vi.restoreAllMocks());
 describe('store.startCombat — accepts Enemy or Encounter', () => {
     it('back-compat: bare Enemy stages an encounter', () => {
         const store = createGameStore(nullAdapter, { player: Player });
-        store.getState().startCombat(TidepoolCrab);
+        store.getState().startCombat(GraveLarva);
         const encounter = store.getState().currentEncounter!;
-        expect(encounter.enemies[0]!.id).toBe(TidepoolCrab.id);
+        expect(encounter.enemies[0]!.id).toBe(GraveLarva.id);
     });
 
     it('Encounter: stages the first enemy of the list', () => {
-        const enc: Encounter = { enemies: [CoastalTyrant], origin: 'test:fv-1' };
+        const enc: Encounter = { enemies: [KingOfRevenge], origin: 'test:fv-1' };
         const store = createGameStore(nullAdapter, { player: Player });
         store.getState().startCombat(enc);
-        expect(store.getState().currentEncounter!.enemies[0]!.id).toBe(CoastalTyrant.id);
+        expect(store.getState().currentEncounter!.enemies[0]!.id).toBe(KingOfRevenge.id);
     });
 
     it('throws for an empty encounter', () => {
@@ -43,29 +43,29 @@ describe('store.startCombat — accepts Enemy or Encounter', () => {
 describe('store.endCombat — grants XP + loot on victory', () => {
     it('victory grants xpReward and adds rolled loot to inventory', () => {
         // Fix the RNG so the loot table always lands on a non-null bucket.
-        // TidepoolCrab's table: [none(80), drop(minor-healing-potion, 20)].
+        // GraveLarva's table: [none(80), drop(minor-healing-potion, 20)].
         // A roll of 0.99 lands at the right edge → second (item) bucket.
         mockSequentialRng(0.99);
 
         const store = createGameStore(nullAdapter, { player: Player });
-        store.getState().startCombat(TidepoolCrab);
+        store.getState().startCombat(GraveLarva);
 
         // Combat resolution lives outside the store; report the victory outcome.
         const report = store.getState().endCombat('victory');
         expect(report.outcome).toBe('victory');
-        expect(report.xpGained).toBe(TidepoolCrab.xpReward);
+        expect(report.xpGained).toBe(GraveLarva.xpReward);
         expect(report.loot.length).toBeGreaterThan(0);
 
         // Player got the XP and the item.
         const player = store.getState().player;
-        expect(player.experience).toBe(Player.experience + TidepoolCrab.xpReward!);
+        expect(player.experience).toBe(Player.experience + GraveLarva.xpReward!);
         const got = player.inventory.find(i => i.id === 'minor-healing-potion');
         expect(got).toBeDefined();
     });
 
     it('defeat grants nothing', () => {
         const store = createGameStore(nullAdapter, { player: Player });
-        store.getState().startCombat(TidepoolCrab);
+        store.getState().startCombat(GraveLarva);
 
         const report = store.getState().endCombat('defeat');
         expect(report.outcome).toBe('defeat');
@@ -75,7 +75,7 @@ describe('store.endCombat — grants XP + loot on victory', () => {
 
     it('flee (combat ended without KO) grants nothing', () => {
         const store = createGameStore(nullAdapter, { player: Player });
-        store.getState().startCombat(TidepoolCrab);
+        store.getState().startCombat(GraveLarva);
 
         // Walking away from a live encounter resolves as flee.
         const report = store.getState().endCombat('flee');
@@ -95,7 +95,7 @@ describe('store.endCombat — grants XP + loot on victory', () => {
             player: { ...Player, inventory: seededInventory },
         });
 
-        store.getState().startCombat(TidepoolCrab);
+        store.getState().startCombat(GraveLarva);
         store.getState().endCombat('victory');
 
         const stack = store.getState().player.inventory.find(i => i.id === 'minor-healing-potion');

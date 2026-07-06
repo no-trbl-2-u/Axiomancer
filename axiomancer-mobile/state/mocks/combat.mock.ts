@@ -7,9 +7,9 @@ import { createEnemy, type Enemy } from '@mechanics';
  */
 export function createMockEncounterEnemy(): Enemy {
     return createEnemy({
-        id: 'carrion-hierophant',
-        name: 'Carrion Hierophant',
-        description: 'A robed figure that sings to the worms below.',
+        id: 'enemy-brine-hag',
+        name: 'Brine Hag',
+        description: 'She traded her reflection to the tide for the right to keep yours.',
         level: 3,
         baseStats: { heart: 5, body: 6, mind: 7 },
         mapName: 'fishing-village' as never,

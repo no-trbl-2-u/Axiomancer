@@ -8,21 +8,24 @@ import { resolveEnemyArchetype } from '@/state/presenters/enemy-art';
 
 describe('resolveEnemyArchetype', () => {
     it('honours explicit overrides (with or without the enemy- prefix)', () => {
-        expect(resolveEnemyArchetype('salt-gnaw-rat')).toBe('vermin');
-        expect(resolveEnemyArchetype('enemy-salt-gnaw-rat')).toBe('vermin');
-        expect(resolveEnemyArchetype('enemy-coastal-tyrant', true)).toBe('tyrant');
-        expect(resolveEnemyArchetype('the-disagreement', true)).toBe('eldritch');
+        expect(resolveEnemyArchetype('kudan')).toBe('beast');
+        expect(resolveEnemyArchetype('enemy-kudan')).toBe('beast');
+        expect(resolveEnemyArchetype('enemy-king-of-revenge', true)).toBe('tyrant');
+        expect(resolveEnemyArchetype('the-abortive', true)).toBe('eldritch');
+        expect(resolveEnemyArchetype('doom-egg')).toBe('eldritch');
+        expect(resolveEnemyArchetype('mirac')).toBe('zealot');
     });
 
     it('matches by keyword for un-overridden ids', () => {
-        expect(resolveEnemyArchetype('enemy-tidepool-crab')).toBe('crustacean');
-        expect(resolveEnemyArchetype('enemy-reef-barnacle-colony')).toBe('crustacean');
-        expect(resolveEnemyArchetype('enemy-argumentative-crow')).toBe('avian');
-        expect(resolveEnemyArchetype('enemy-packleader-wolf')).toBe('beast');
-        expect(resolveEnemyArchetype('enemy-whispering-oak')).toBe('flora');
-        expect(resolveEnemyArchetype('enemy-hush-wraith')).toBe('spirit');
-        expect(resolveEnemyArchetype('enemy-apostate-abbot')).toBe('zealot');
-        expect(resolveEnemyArchetype('enemy-cathedral-of-doubt')).toBe('eldritch');
+        expect(resolveEnemyArchetype('enemy-grave-larva')).toBe('vermin');
+        expect(resolveEnemyArchetype('enemy-pale-brood')).toBe('vermin');
+        expect(resolveEnemyArchetype('enemy-rawhead-rex')).toBe('beast');
+        expect(resolveEnemyArchetype('enemy-jeweled-tree')).toBe('flora');
+        expect(resolveEnemyArchetype('enemy-water-holger')).toBe('spirit');
+        expect(resolveEnemyArchetype('enemy-hasshaku-sama')).toBe('spirit');
+        expect(resolveEnemyArchetype('enemy-brine-hag')).toBe('zealot');
+        expect(resolveEnemyArchetype('enemy-fate-spinner')).toBe('eldritch');
+        expect(resolveEnemyArchetype('enemy-elder-fire-giant')).toBe('tyrant');
     });
 
     it('falls back to generic for foes and tyrant for unknown bosses', () => {

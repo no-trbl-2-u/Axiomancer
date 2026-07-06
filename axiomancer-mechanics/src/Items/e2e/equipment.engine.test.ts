@@ -24,7 +24,7 @@ import { afterEach, describe, it, expect, vi } from 'vitest';
 
 import { createCharacter } from '../../Character/index';
 import { equipItem, unequipItem, getEquipmentModifiers } from '../../Character/equipment.reducer';
-import { Disatree_01 } from '../../Enemy/enemy.library';
+import { FloatEye } from '../../Enemy/enemy.library';
 import { createGameStore } from '../../Game/store';
 import { nullAdapter } from '../../Game/persistence/null.adapter';
 import {
@@ -204,7 +204,7 @@ describe('initializeCombat: combat-start token seeding', () => {
             baseStats: { heart: 4, body: 3, mind: 2 },
             equipment: { accessory: berserkerBand },
         });
-        const state = initializeCombat(player, Disatree_01);
+        const state = initializeCombat(player, FloatEye);
         expect(state.combatResources).toEqual({
             heart: 0, body: 3, mind: 0, fallacy: 0, paradox: 0,
         });
@@ -217,7 +217,7 @@ describe('initializeCombat: combat-start token seeding', () => {
             baseStats: { heart: 4, body: 3, mind: 2 },
             equipment: { weapon: ironWeapon },
         });
-        const state = initializeCombat(player, Disatree_01);
+        const state = initializeCombat(player, FloatEye);
         expect(state.combatResources).toEqual({
             heart: 0, body: 0, mind: 0, fallacy: 0, paradox: 0,
         });
@@ -381,7 +381,7 @@ describe('Game store lifecycle: equipment & consumables with nullAdapter', () =>
         });
         // Combat is decoupled from the store now; build the CombatState
         // directly to inspect the combat-start token seeding.
-        const combat = initializeCombat(player, Disatree_01);
+        const combat = initializeCombat(player, FloatEye);
         expect(combat.combatResources.body).toBe(3);
     });
 });

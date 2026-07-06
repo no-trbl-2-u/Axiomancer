@@ -32,14 +32,14 @@ const BOSS_LABEL =
 
 /** A representative enemy id per bespoke (non-generic, non-tyrant) archetype. */
 const BESPOKE_SAMPLES: ReadonlyArray<readonly [string, EnemyArchetype]> = [
-    ['salt-gnaw-rat', 'vermin'],
+    ['grave-larva', 'vermin'],
     ['tidepool-crab', 'crustacean'],
-    ['hush-wraith', 'spirit'],
-    ['wet-hound', 'beast'],
+    ['water-holger', 'spirit'],
+    ['rawhead-rex', 'beast'],
     ['mournful-gull', 'avian'],
-    ['the-forest-mind', 'flora'],
-    ['hollow-saint', 'zealot'],
-    ['the-unwriting', 'eldritch'],
+    ['jeweled-tree', 'flora'],
+    ['brine-hag', 'zealot'],
+    ['the-abortive', 'eldritch'],
 ];
 
 describe('EnemyIllustration', () => {
@@ -85,7 +85,7 @@ describe('EnemyIllustration', () => {
     });
 
     it('routes a tyrant boss to the crowned CreatureScene (not the throne scene)', () => {
-        const key = 'coastal-tyrant';
+        const key = 'king-of-revenge';
         expect(resolveEnemyArchetype(key, true)).toBe('tyrant');
         const tree = render(<EnemyIllustration enemyArtKey={key} isBoss />);
         const scene = tree.getByLabelText(/Combat encounter illustration showing /);
@@ -96,7 +96,7 @@ describe('EnemyIllustration', () => {
     });
 
     it('routes a tyrant non-boss to the throne BossIllustration', () => {
-        const key = 'coastal-tyrant';
+        const key = 'king-of-revenge';
         expect(resolveEnemyArchetype(key, false)).toBe('tyrant');
         const tree = render(<EnemyIllustration enemyArtKey={key} isBoss={false} />);
         expect(tree.getByLabelText(BOSS_LABEL)).toBeTruthy();

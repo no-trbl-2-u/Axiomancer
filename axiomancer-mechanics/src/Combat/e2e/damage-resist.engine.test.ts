@@ -9,14 +9,14 @@
 import { describe, it, expect } from 'vitest';
 import { calculateDamageResistance, getSkillDamageType } from '../damage-resist';
 import { Player } from '../../Character/characters.mock';
-import { Disatree_01 } from '../../Enemy/enemy.library';
+import { FloatEye } from '../../Enemy/enemy.library';
 import { getCardById } from '../../Cards/cards.library';
 import { calculateSkillDamage } from '../../Cards/skill.engine';
 
 describe('Phase 93 — Damage-resist primitive', () => {
     it('reduces damage by target resistance stats', () => {
         // Use mock character with known stats
-        const target = { ...Disatree_01 };
+        const target = { ...FloatEye };
         target.baseStats = { body: 10, mind: 8, heart: 6 };
 
         // Test physical damage reduction
@@ -34,7 +34,7 @@ describe('Phase 93 — Damage-resist primitive', () => {
 
     it('enforces minimum 1 damage', () => {
         // Target with very high resistance
-        const target = { ...Disatree_01 };
+        const target = { ...FloatEye };
         target.baseStats = { body: 20, mind: 20, heart: 20 };
 
         // High resistance should not completely negate damage
@@ -50,7 +50,7 @@ describe('Phase 93 — Damage-resist primitive', () => {
 
     it('integrates with skill execution via calculateSkillDamage', () => {
         const attacker = Player;
-        const defender = { ...Disatree_01 };
+        const defender = { ...FloatEye };
         defender.baseStats.body = 5; // Some resistance
 
         // Get a body-scaling skill
@@ -82,7 +82,7 @@ describe('Phase 93 — Damage-resist primitive', () => {
     });
 
     it('handles zero or negative base damage gracefully', () => {
-        const target = Disatree_01;
+        const target = FloatEye;
         
         // Zero damage stays zero
         expect(calculateDamageResistance(target, 0, 'physical')).toBe(0);
@@ -92,7 +92,7 @@ describe('Phase 93 — Damage-resist primitive', () => {
     });
 
     it('handles different damage types with corresponding resistance stats', () => {
-        const target = { ...Disatree_01 };
+        const target = { ...FloatEye };
         target.baseStats = { body: 3, mind: 7, heart: 5 };
 
         // Same base damage, different resistances based on type

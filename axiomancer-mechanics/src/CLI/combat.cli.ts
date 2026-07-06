@@ -13,7 +13,7 @@
  *   `npm run combat-sim`    → Monte-Carlo balance witness (not player-facing)
  *
  * Combat flags:
- *   --enemy <slug>       enemy from the registry (default mournful-gull)
+ *   --enemy <slug>       enemy from the registry (default little-belle)
  *   --preset <id>        character preset id (default apprentice)
  *   --seed <n>           deterministic RNG seed
  *   --auto               run a bot policy (no TTY required)
@@ -161,7 +161,7 @@ function takeValue(args: string[], i: number, flag: string): [string, number] {
 
 export function parseCombatArgv(args: string[]): CombatCliFlags {
     const flags: CombatCliFlags = {
-        enemySlug: 'mournful-gull',
+        enemySlug: 'little-belle',
         presetId: 'apprentice',
         presetExplicit: false,
         auto: false,
