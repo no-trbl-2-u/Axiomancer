@@ -98,6 +98,7 @@ jobs:
           node .claude/hooks/guard.mjs self-test
 
       - name: Run Claude Code
+        id: claude
         uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
@@ -108,3 +109,26 @@ jobs:
             --model claude-sonnet-5
             --allowedTools "Bash,Edit,Write,Read,Glob,Grep,Task,TodoWrite,WebFetch,WebSearch"
             ${{ inputs.extra_claude_args }}
+
+      - name: Fail if Claude reported an execution error
+        if: ${{ always() && steps.claude.outputs.execution_file != '' }}
+        shell: bash
+        env:
+          CLAUDE_EXECUTION_FILE: ${{ steps.claude.outputs.execution_file }}
+        run: |
+          node - <<'NODE'
+          const fs = require('fs');
+          const path = process.env.CLAUDE_EXECUTION_FILE;
+          const raw = fs.readFileSync(path, 'utf8');
+          const data = JSON.parse(raw);
+          const events = Array.isArray(data) ? data : [data];
+          const failing = events.find((event) => event && event.is_error === true);
+          if (failing) {
+            const status = failing.api_error_status || failing.error_status || 'unknown';
+            const error = failing.error || 'unknown_error';
+            const result = typeof failing.result === 'string' ? failing.result : JSON.stringify(failing.result || {});
+            console.error(`Claude execution failed: status=${status} error=${error}`);
+            console.error(result);
+            process.exit(1);
+          }
+          NODE
