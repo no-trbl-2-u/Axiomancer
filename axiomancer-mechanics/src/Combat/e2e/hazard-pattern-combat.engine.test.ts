@@ -364,6 +364,43 @@ describe('Spec 26b §4 — Signature Skills (Conviction-funded)', () => {
         expect(r.events.some(e => e.kind === 'effect-fizzled')).toBe(true);
     });
 
+    // Funded-path (success) kill-path witness (build-plan Phase 1): the unit
+    // tests above only check the isolated cast; this runs the capstone all the
+    // way to an HP-kill victory so the control path has a population-level
+    // outcome witness, mirroring §11's DoT-only victory below.
+    it('a funded Overwhelming Argument denies the enemy telegraph outright, en route to an HP-kill victory', () => {
+        mockSequentialRng(0.05);
+        const player = makePlayer([DOT_BODY]);
+        const enemy = makeEnemy(30, 'heart');
+        let state = initializeCombatEncounter(player, enemy, [DOT_BODY, DOT_BODY, DOT_BODY], 21);
+
+        // Turn 1 — cast the funded capstone; Petrify should deny the enemy's
+        // telegraphed hit outright this phase (no player HP loss).
+        state = rollEncounterDice(state).state;
+        state = { ...state, conviction: 10 };
+        const healthBeforeCast = state.player.health;
+        const cast = playSignatureSkill(state, 'sig-overwhelming-argument');
+        expect(cast.state.enemy.effects.some(e => e.effectId === 'debuff_stagger')).toBe(true);
+        expect(cast.events.some(e => e.kind === 'signature-cast')).toBe(true);
+        state = resolveThreatPhase(cast.state).state;
+        expect(state.player.health).toBe(healthBeforeCast);
+
+        // Grind the rest out with stacked DoT to a real HP-kill outcome.
+        let guard = 0;
+        while (state.phase !== 'complete' && state.phase !== 'mercy-choice' && guard < 40) {
+            guard++;
+            const res = resolveCombatPhase(state, [
+                { cardId: DOT_BODY, useBottom: true },
+                { cardId: DOT_BODY, useBottom: true },
+            ]);
+            state = res.state;
+            if (state.finalOutcome) break;
+        }
+        expect(state.finalOutcome).toBe('victory');
+        const summary = buildCombatSummary(state);
+        expect(summary.outcome).toBe('victory');
+    });
+
     it('Press Fate re-rolls ONLY spent dice and keeps a still-usable die', () => {
         mockSequentialRng(0.5); // re-rolled face → floor(0.5*6)=3 → wild
         let state = initializeCombatEncounter(makePlayer([DOT_BODY]), makeEnemy(60, 'mind'), [DOT_BODY], 2);
