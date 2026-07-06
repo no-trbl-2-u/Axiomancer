@@ -1,0 +1,296 @@
+[
+ {
+  "id": "achilles-gambit",
+  "name": "Achilles' Gambit",
+  "text": "You commit to the strike that should never land — the runner who can never catch the tortoise, the heel that must be exposed. Paradox collapses into a single, unanswerable blow.",
+  "image": "./assets/catalog/cards/bleed.webp"
+ },
+ {
+  "id": "achilles-overtake",
+  "name": "Achilles' Overtake",
+  "text": "The tortoise never should have been catchable — yet every stride you gained on them compounds, and the gap that logic insisted was unclosable closes all at once.",
+  "image": "./assets/catalog/cards/ice-sword.webp"
+ },
+ {
+  "id": "ad-hominem-strike",
+  "name": "Ad Hominem Strike",
+  "text": "You don't refute the argument — you refute the arguer. The blow lands where their composure was, scattering whatever fragile certainty they had built. Their stance crumbles before their muscles do.",
+  "image": "./assets/catalog/cards/burn.webp"
+ },
+ {
+  "id": "apophatic-aegis",
+  "name": "Apophatic Aegis",
+  "text": "You define your defence only by what it is not — not a wall, not a guard, not a refusal — until the via negativa leaves nothing for the blow to find. What cannot be named cannot be struck.",
+  "image": "./assets/catalog/cards/guard-3.webp"
+ },
+ {
+  "id": "appeal-to-authority",
+  "name": "Appeal to Authority",
+  "text": "You do not argue — you cite. A name they dare not contradict settles over the exchange, and their own thoughts begin to defer to a borrowed certainty that was never yours to lend.",
+  "image": "./assets/catalog/cards/devil-book.webp"
+ },
+ {
+  "id": "appeal-to-consequences",
+  "name": "Appeal to Consequences",
+  "text": "The outcome justifies the method, so the method becomes righteous. Your strike carries the weight of inevitable consequence — what must happen, happening. They fall not to your force, but to the logic that made the force necessary.",
+  "image": "./assets/catalog/cards/devil-book.webp"
+ },
+ {
+  "id": "appeal-to-pity",
+  "name": "Appeal to Pity",
+  "text": "You let the wound show. The argument was never the point — your pain is. Even your own body listens, and softens, and bends a little of itself back together.",
+  "image": "./assets/catalog/cards/light-ring.webp"
+ },
+ {
+  "id": "barbers-paradox",
+  "name": "Barber's Paradox",
+  "text": "The barber who shaves all who do not shave themselves — does he shave himself? You hand them the question that has no consistent answer and watch the recursion eat the floor out from under their attention.",
+  "image": "./assets/catalog/cards/confuse.webp"
+ },
+ {
+  "id": "bat-swarm-thoughtform",
+  "name": "Bat-Swarm Thoughtform",
+  "text": "Your defensive thorns lift off your skin in a heart-shape and become a swarm of small attentive things. They feed on the distance they remember as your edge.",
+  "image": "./assets/catalog/cards/blue-light.webp"
+ },
+ {
+  "id": "befriend",
+  "name": "Befriend",
+  "text": "You extend genuine compassion toward your adversary, seeking understanding over victory. When successful, you must choose between mercy and exploitation of the vulnerable moment you have created.",
+  "image": "./assets/catalog/cards/meat-pecker.webp"
+ },
+ {
+  "id": "bootstrap-paradox",
+  "name": "Bootstrap Paradox",
+  "text": "The healing comes from the version of you that survived. The version of you that survived came from this healing. The loop is whole; the wound, less so.",
+  "image": "./assets/catalog/cards/light-ring.webp"
+ },
+ {
+  "id": "brace-for-impact",
+  "name": "Brace for Impact",
+  "text": "You set your stance and meet the blow on your own terms — what is braced for cannot break you. The strike still comes; it simply finds a body that has already decided not to fall.",
+  "image": "./assets/catalog/cards/guard-2.webp"
+ },
+ {
+  "id": "breach",
+  "name": "Breach",
+  "text": "You find the load-bearing premise and pull it. The whole defense does not fall — it simply opens, and stays open, and everything after lands where it hurts.",
+  "image": "./assets/catalog/cards/burn.webp"
+ },
+ {
+  "id": "briar-riposte",
+  "name": "Briar Riposte",
+  "text": "You root yourself like a thorn bush and wait for the swing. When it comes you turn it aside and let the briar answer — measured, exact, and theirs to regret.",
+  "image": "./assets/catalog/cards/yggdrasil.webp"
+ },
+ {
+  "id": "empathetic-understanding",
+  "name": "Empathetic Understanding",
+  "text": "Deep understanding that transcends conflict, building stronger bonds.",
+  "image": "./assets/catalog/cards/god-eye-silver.webp"
+ },
+ {
+  "id": "equivocation-cascade",
+  "name": "Equivocation Cascade",
+  "text": "The same word, two meanings, slid against each other until the seam gives. By the time they notice the term has changed under them, the whole argument has reorganised itself around your conclusion.",
+  "image": "./assets/catalog/cards/blue-light.webp"
+ },
+ {
+  "id": "eternal-recurrence",
+  "name": "Eternal Recurrence",
+  "text": "Live this moment so that you could will it again, and again, forever. You take the wound as something you have already chosen a thousand times, and the choosing knits it shut with the weight of all those lives.",
+  "image": "./assets/catalog/cards/yggdrasil.webp"
+ },
+ {
+  "id": "eternal-regress",
+  "name": "Eternal Regress",
+  "text": "Every answer they reach demands a previous answer; every previous answer demands one more. You watch their certainty unspool itself — and lay two distinct binds on the wreckage.",
+  "image": "./assets/catalog/cards/spark.webp"
+ },
+ {
+  "id": "existential-collapse",
+  "name": "Existential Collapse",
+  "text": "Why debate the nature of truth when truth itself is questionable? You dissolve the foundation beneath every position, every stance, every reason to resist. In the resulting void where meaning used to be, only your will finds purchase.",
+  "image": "./assets/catalog/cards/freeze.webp"
+ },
+ {
+  "id": "existential-debt",
+  "name": "Existential Debt",
+  "text": "Every choice they did not make is a debt you collect on now — and the collecting costs you something too, a small overextension you accept as the price of the reckoning.",
+  "image": "./assets/catalog/cards/devil-book.webp"
+ },
+ {
+  "id": "false-dilemma",
+  "name": "False Dilemma",
+  "text": "Two doors. Only two. Either-or, your fault, no third option — except every option is a door. The enemy hesitates between phantoms while you walk straight through.",
+  "image": "./assets/catalog/cards/confuse.webp"
+ },
+ {
+  "id": "gamblers-folly",
+  "name": "Gambler's Folly",
+  "text": "The pattern owes you a correction — it must, surely, after so many blows that did not land right. You lean into the wager the odds never actually made, and the dice pool bends to your overconfidence.",
+  "image": "./assets/catalog/cards/will-o-wisp.webp"
+ },
+ {
+  "id": "hasty-generalization",
+  "name": "Hasty Generalization",
+  "text": "One blow becomes the whole truth of them. You strike once and treat the flinch as proof of everything — and so it becomes proof, the sample of one swelling to a verdict their whole body must answer for.",
+  "image": "./assets/catalog/cards/meat-pecker.webp"
+ },
+ {
+  "id": "leeching-syllogism",
+  "name": "Leeching Syllogism",
+  "text": "Every step of the argument takes something from them and gives it to you. By the time the conclusion lands, their strength is already yours.",
+  "image": "./assets/catalog/cards/bleed.webp"
+ },
+ {
+  "id": "liars-echo",
+  "name": "Liar's Echo",
+  "text": "\"This sentence is false.\" Their next thought catches on the loop, doubles back, and arrives more exposed than when it left. You read every tell twice.",
+  "image": "./assets/catalog/cards/will-o-wisp.webp"
+ },
+ {
+  "id": "mob-appeal",
+  "name": "Mob Appeal",
+  "text": "The crowd already believes you. So does the part of you that needed convincing. A simultaneous blow and a small, dishonest reassurance — and both work.",
+  "image": "./assets/catalog/cards/bright-sphere-yellow.webp"
+ },
+ {
+  "id": "mounting-contradictions",
+  "name": "Mounting Contradictions",
+  "text": "You name every inconsistency at once and let them collide. The more ways they are already coming apart, the harder the whole edifice falls.",
+  "image": "./assets/catalog/cards/bright-sphere-yellow.webp"
+ },
+ {
+  "id": "moving-the-goalposts",
+  "name": "Moving the Goalposts",
+  "text": "Every certainty they reach, you quietly relocate the finish line past it. Doubt and blindness both take root in the gap between where they are and where they were promised to be.",
+  "image": "./assets/catalog/cards/confuse.webp"
+ },
+ {
+  "id": "nirvana-fallacy",
+  "name": "Nirvana Fallacy",
+  "text": "Why settle for good when perfection exists somewhere? You show them the ideal they cannot reach, and suddenly their reality becomes failure. The gap between what is and what could be opens like a wound, and they fall through their own inadequacy.",
+  "image": "./assets/catalog/cards/will-o-wisp.webp"
+ },
+ {
+  "id": "pascals-wager",
+  "name": "Pascal's Wager",
+  "text": "You commit to the belief that costs nothing if you are wrong, and saves you if you are right. The certainty is its own balm; the wound closes around the wager.",
+  "image": "./assets/catalog/cards/god-eye-silver.webp"
+ },
+ {
+  "id": "peaceful-gesture",
+  "name": "Peaceful Gesture",
+  "text": "A calming physical gesture that builds trust through non-threatening movement.",
+  "image": "./assets/catalog/cards/meat-pecker.webp"
+ },
+ {
+  "id": "poisoned-well",
+  "name": "Poisoned Well",
+  "text": "You discredit the source before they can drink from it — and the poison you named becomes the poison that is actually there, spreading through everything they try next.",
+  "image": "./assets/catalog/cards/dream-flutter.webp"
+ },
+ {
+  "id": "pyrrhic-victory",
+  "name": "Pyrrhic Victory",
+  "text": "Another such victory and you are undone — yet you take it anyway, and make them pay the same ruinous price. The wound you open in them will go on bleeding long after the field is yours.",
+  "image": "./assets/catalog/cards/burn.webp"
+ },
+ {
+  "id": "resonance-bleed",
+  "name": "Resonance Bleed",
+  "text": "A heart-pitched lyric over the body's open wound. The bleeding finds the lyric and the lyric finds your enemy, and the two agree that it has further to go.",
+  "image": "./assets/catalog/cards/bleed.webp"
+ },
+ {
+  "id": "resonance-detonation",
+  "name": "Resonance Detonation",
+  "text": "You spend the whole shape you brought into the fight — every token, every binding, every breath you were saving for after. The release is the answer; what was on the field is no longer on the field. Resetting the fight back to its first round in exchange for one apex truth.",
+  "image": "./assets/catalog/cards/spark.webp"
+ },
+ {
+  "id": "ship-of-theseus",
+  "name": "Ship of Theseus",
+  "text": "A plank of their resolve replaces a plank of yours. They are still themselves, technically; you are still yourself, technically. The borrowed buff settles around your shoulders.",
+  "image": "./assets/catalog/cards/blue-light.webp"
+ },
+ {
+  "id": "ship-in-a-bottle",
+  "name": "Ship-in-a-Bottle",
+  "text": "How did it get in there, fully built, through a neck too narrow to admit it? They cannot stop turning the impossible object over, and the turning wears them thin.",
+  "image": "./assets/catalog/cards/freeze.webp"
+ },
+ {
+  "id": "slippery-slope",
+  "name": "Slippery Slope",
+  "text": "One concession, then the next, then the avalanche you promised was inevitable. You name the catastrophe at the bottom of the hill until the ground itself seems to tilt, and they slide the whole way down.",
+  "image": "./assets/catalog/cards/dream-flutter.webp"
+ },
+ {
+  "id": "soothing-words",
+  "name": "Soothing Words",
+  "text": "Gentle words that calm tensions without requiring defensive posture.",
+  "image": "./assets/catalog/cards/light-ring.webp"
+ },
+ {
+  "id": "sorites-cascade",
+  "name": "Sorites' Cascade",
+  "text": "A grain. Another grain. At what point did the heap of small wounds become a mortal one? They cannot say. The bleeding stacks faster than their definition of \"alive.\"",
+  "image": "./assets/catalog/cards/spark.webp"
+ },
+ {
+  "id": "stoic-reserve",
+  "name": "Stoic Reserve",
+  "text": "What is not in your power to prevent, you decline to be wounded by. You hold a reserve of stillness against the blow — it spends its force on a self that has agreed, in advance, to remain unmoved.",
+  "image": "./assets/catalog/cards/guard-1.webp"
+ },
+ {
+  "id": "sunk-cost-momentum",
+  "name": "Sunk Cost Momentum",
+  "text": "You have already given so much to this exchange — so you give more, and the giving becomes its own argument. Every token you have spent demands that the next blow justify them all at once.",
+  "image": "./assets/catalog/cards/bleed.webp"
+ },
+ {
+  "id": "suspend-judgment",
+  "name": "Suspend Judgment",
+  "text": "You withhold assent from the attack's premise — refuse to grant that it must land, and the conclusion loses its grip. The skeptic's shield is built from everything left unconceded.",
+  "image": "./assets/catalog/cards/guard-3.webp"
+ },
+ {
+  "id": "the-final-word",
+  "name": "The Final Word",
+  "text": "You speak the sentence that ends the argument — and seeps into the one who heard it. Doubt is a slow poison; once the premise is conceded, the conclusion finishes them on its own schedule.",
+  "image": "./assets/catalog/cards/devil-book.webp"
+ },
+ {
+  "id": "the-inevitable",
+  "name": "The Inevitable",
+  "text": "Conclusion is not inflicted — it is observed. You have read every effect to its endpoint, added them together, and delivered the sum as a single moment of clarity.",
+  "image": "./assets/catalog/cards/spark.webp"
+ },
+ {
+  "id": "unmoved-mover",
+  "name": "The Unmoved Mover",
+  "text": "The first cause that is itself uncaused — you move them without being moved. They lose the thread of their own intent, turning in confusion around a center that will not turn.",
+  "image": "./assets/catalog/cards/guard-1.webp"
+ },
+ {
+  "id": "transcendent-synthesis",
+  "name": "Transcendent Synthesis",
+  "text": "You weave every thread of certainty on the field into a new pattern that transcends its components. The synthesis heals what the analysis wounded; the whole exceeds its parts.",
+  "image": "./assets/catalog/cards/bright-sphere-yellow.webp"
+ },
+ {
+  "id": "tu-quoque",
+  "name": "Tu Quoque",
+  "text": "\"And you?\" You turn the accusation back on the accuser, and in the turning their guard turns with it. The mirror you raise reflects just enough of their own blow to mend the place it landed on you.",
+  "image": "./assets/catalog/cards/yggdrasil.webp"
+ },
+ {
+  "id": "undistributed-middle",
+  "name": "Undistributed Middle",
+  "text": "All philosophers are mortal. You are mortal. Therefore you are a philosopher — and your enemy is illegible. You watch them try to follow the syllogism into a corner they cannot leave.",
+  "image": "./assets/catalog/cards/confuse.webp"
+ }
+]

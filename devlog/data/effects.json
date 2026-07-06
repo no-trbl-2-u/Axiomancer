@@ -1,0 +1,308 @@
+[
+ {
+  "id": "buff_brazen_thorns",
+  "name": "Brazen Thorns",
+  "type": "buff",
+  "glyph": "✸",
+  "color": "#9aa0a6",
+  "kind": "thorns",
+  "text": "Your skin answers in kind. To press an argument against you is to be cut by it — the harder the push, the deeper the rebuttal bites back."
+ },
+ {
+  "id": "tier1_body_defend",
+  "name": "Briar Stance",
+  "type": "buff",
+  "glyph": "✸",
+  "color": "#9aa0a6",
+  "kind": "thorns",
+  "text": "You root yourself like a thorn bush — still, patient, dangerous. Striking you is a choice they'll regret. Every blow lands, but something sharp comes back."
+ },
+ {
+  "id": "buff_clarity",
+  "name": "Liar's Clarity",
+  "type": "buff",
+  "glyph": "▲",
+  "color": "#5bbf6a",
+  "kind": "statup",
+  "text": "\"This next die is Wild\" — the sentence is either true or it isn't, and by naming it, you've made it so. One clean certainty, carved out of the paradox."
+ },
+ {
+  "id": "buff_life_steal",
+  "name": "Maxwell's Siphon",
+  "type": "buff",
+  "glyph": "✚",
+  "color": "#49b98a",
+  "kind": "regen",
+  "text": "Like the demon sorting molecules, you separate your enemy's vitality from their form—fast energy to you, slow energy left behind."
+ },
+ {
+  "id": "buff_phoenix_vigor",
+  "name": "Phoenix Vigor",
+  "type": "buff",
+  "glyph": "✚",
+  "color": "#49b98a",
+  "kind": "regen",
+  "text": "Ash remembers the bird. The closer you come to ending, the more fiercely you mend — vitality returning in waves, defenses tightening as the pyre cools."
+ },
+ {
+  "id": "buff_promethean_ember",
+  "name": "Promethean Ember",
+  "type": "buff",
+  "glyph": "✚",
+  "color": "#49b98a",
+  "kind": "regen",
+  "text": "Stolen fire kept burning under the ribs. It mends what the fight tears open, knitting flesh faster than the wound can widen — a gift that keeps costing the giver."
+ },
+ {
+  "id": "buff_regeneration",
+  "name": "Tristram's Recovery",
+  "type": "buff",
+  "glyph": "✚",
+  "color": "#49b98a",
+  "kind": "regen",
+  "text": "Like the writer who takes a year to document a day, your healing works faster than wounds accumulate. Eventually, you'll catch up."
+ },
+ {
+  "id": "buff_resolute",
+  "name": "Unmoved Mover's Resolve",
+  "type": "buff",
+  "glyph": "▲",
+  "color": "#5bbf6a",
+  "kind": "statup",
+  "text": "Something must move without itself being moved. You anchor yourself there — whatever strikes you now finds a will that does not budge."
+ },
+ {
+  "id": "tier1_heart_defend",
+  "name": "Vital Empathy",
+  "type": "buff",
+  "glyph": "✚",
+  "color": "#49b98a",
+  "kind": "regen",
+  "text": "You stop fighting for a moment and simply exist. The stillness heals. The compassion you pour outward turns inward just enough — a quiet restoration, round by round."
+ },
+ {
+  "id": "debuff_slow",
+  "name": "Achilles' Burden",
+  "type": "debuff",
+  "glyph": "🐌",
+  "color": "#a86bdc",
+  "kind": "control",
+  "text": "You are Achilles—faster than any tortoise. Yet the tortoise is always ahead. No matter how swiftly you act, you're always one step behind."
+ },
+ {
+  "id": "debuff_isolated",
+  "name": "Bandwagon's Absence",
+  "type": "debuff",
+  "glyph": "⛓",
+  "color": "#a86bdc",
+  "kind": "control",
+  "text": "The crowd that carried you has moved on to the next argument. Whatever support you were counting on isn't coming — not this turn."
+ },
+ {
+  "id": "debuff_root",
+  "name": "Braess Binding",
+  "type": "debuff",
+  "glyph": "⚓",
+  "color": "#a86bdc",
+  "kind": "control",
+  "text": "Adding options makes things worse. You could move, but seeing the paths available creates congestion in your muscles. Paralysis through possibility."
+ },
+ {
+  "id": "debuff_vulnerable",
+  "name": "Breach",
+  "type": "debuff",
+  "glyph": "▼",
+  "color": "#e08a3c",
+  "kind": "statdown",
+  "text": "A seam pried open in their guard, stance-agnostic and bleeding-obvious. Every blow you land now finds the gap and digs deeper."
+ },
+ {
+  "id": "debuff_vulnerability_heart",
+  "name": "Burali-Forti Wound",
+  "type": "debuff",
+  "glyph": "❣",
+  "color": "#e08a3c",
+  "kind": "statdown",
+  "text": "Your emotional ordinals exceed their own bounds. The set of all your feelings contains a feeling greater than all feelings. Your Heart tears itself apart."
+ },
+ {
+  "id": "debuff_vulnerability_mind",
+  "name": "Cantor's Gap",
+  "type": "debuff",
+  "glyph": "🧠",
+  "color": "#e08a3c",
+  "kind": "statdown",
+  "text": "Your mental defenses are countably infinite—impressive, until you face uncountable assault. There's always a larger infinity of thoughts to break you."
+ },
+ {
+  "id": "debuff_doubt",
+  "name": "Cartesian Doubt",
+  "type": "debuff",
+  "glyph": "⛓",
+  "color": "#a86bdc",
+  "kind": "control",
+  "text": "You can no longer trust that your next move is the one you intend. The certainty a strong play requires has been methodically dissolved."
+ },
+ {
+  "id": "debuff_poison",
+  "name": "Curry's Corruption",
+  "type": "debuff",
+  "glyph": "☠",
+  "color": "#e2543b",
+  "kind": "dot",
+  "text": "If this poison harms you, then it spreads. The conditional is vacuously true. The conclusion is inevitably, recursively toxic."
+ },
+ {
+  "id": "debuff_septic",
+  "name": "Curry's Sepsis",
+  "type": "debuff",
+  "glyph": "🔥",
+  "color": "#e2543b",
+  "kind": "dot",
+  "text": "If this wound festers, then it worsens. The conditional is vacuously true — and so is the next one, and the next, each infection weakening the strength of your own next blow."
+ },
+ {
+  "id": "debuff_fear",
+  "name": "Grandfather's Terror",
+  "type": "debuff",
+  "glyph": "👁",
+  "color": "#a86bdc",
+  "kind": "control",
+  "text": "You see the paradox of your own destruction—if you fight, you ensure your doom; if you flee, you ensure your doom. Either path leads backward to oblivion."
+ },
+ {
+  "id": "debuff_silence",
+  "name": "Moore's Muteness",
+  "type": "debuff",
+  "glyph": "🤐",
+  "color": "#a86bdc",
+  "kind": "control",
+  "text": "You believe you can speak, yet you don't believe you're speaking. The absurdity freezes your voice. Assertion becomes impossible."
+ },
+ {
+  "id": "debuff_novikov_consistency",
+  "name": "Novikov's Consistency",
+  "type": "debuff",
+  "glyph": "▼",
+  "color": "#e08a3c",
+  "kind": "statdown",
+  "text": "The timeline resists paradox: whatever wound is coming was always going to land, and land hard. The universe simply patches around any attempt to prevent it."
+ },
+ {
+  "id": "debuff_burn",
+  "name": "Olbers' Fire",
+  "type": "debuff",
+  "glyph": "🔥",
+  "color": "#e2543b",
+  "kind": "dot",
+  "text": "If infinite stars fill the sky, why is it dark? Because their light is delayed. When it arrives all at once—you burn in accumulated radiance."
+ },
+ {
+  "id": "debuff_overextended",
+  "name": "Overextended Commitment",
+  "type": "debuff",
+  "glyph": "⛓",
+  "color": "#a86bdc",
+  "kind": "control",
+  "text": "You reached past what the moment could support. The next thing you do will be smaller for it — the cost of a payoff already spent."
+ },
+ {
+  "id": "debuff_mark",
+  "name": "Raven's Target",
+  "type": "debuff",
+  "glyph": "◎",
+  "color": "#d9c66a",
+  "kind": "mark",
+  "text": "Marked and read. While it holds, the bearer’s stance is public — every draft against them is informed."
+ },
+ {
+  "id": "debuff_regress_fatigue",
+  "name": "Regress Ad Infinitum",
+  "type": "debuff",
+  "glyph": "▼",
+  "color": "#e08a3c",
+  "kind": "statdown",
+  "text": "Every reason needs a reason, and that reason needs one too. The chain never grounds out — and neither do you, each unanswered link sapping a little more of what you had left."
+ },
+ {
+  "id": "debuff_vulnerability_body",
+  "name": "Richard's Exposure",
+  "type": "debuff",
+  "glyph": "🛡",
+  "color": "#e08a3c",
+  "kind": "statdown",
+  "text": "Your physical defenses are defined in terms of themselves—a diagonal contradiction. The enumeration reveals your weakness; Body attacks pierce deeply."
+ },
+ {
+  "id": "debuff_despair",
+  "name": "Schopenhauer's Despair",
+  "type": "debuff",
+  "glyph": "🔥",
+  "color": "#e2543b",
+  "kind": "dot",
+  "text": "Every desire you satisfy only reveals the next lack. The will grinds on, wanting, and even the comfort you reach for arrives diminished by the wanting itself."
+ },
+ {
+  "id": "debuff_unraveling",
+  "name": "Sorites' Unraveling",
+  "type": "debuff",
+  "glyph": "🔥",
+  "color": "#e2543b",
+  "kind": "dot",
+  "text": "One grain removed is nothing. The next is nothing too. But the heap has been shedding grains since the moment you were struck, and it has not stopped counting."
+ },
+ {
+  "id": "debuff_stagger",
+  "name": "Staggered",
+  "type": "debuff",
+  "glyph": "⛓",
+  "color": "#a86bdc",
+  "kind": "control",
+  "text": "The argument lands where footing was. One whole turn simply does not happen for them."
+ },
+ {
+  "id": "debuff_bleed",
+  "name": "Theseus' Dissolution",
+  "type": "debuff",
+  "glyph": "🩸",
+  "color": "#e2543b",
+  "kind": "dot",
+  "text": "Plank by plank, your ship comes apart. Drop by drop, you become less yourself. When does the bleeding stop being you?"
+ },
+ {
+  "id": "debuff_hemorrhage",
+  "name": "Theseus' Rupture",
+  "type": "debuff",
+  "glyph": "🔥",
+  "color": "#e2543b",
+  "kind": "dot",
+  "text": "The bleeding you named Theseus' Dissolution was gradual — a plank at a time. This is the hull giving way all at once. Only mercy, not time, slows it now."
+ },
+ {
+  "id": "debuff_confusion",
+  "name": "Two Envelope Delirium",
+  "type": "debuff",
+  "glyph": "🌀",
+  "color": "#a86bdc",
+  "kind": "control",
+  "text": "Should you switch? The other choice always seems better. You switch targets, switch tactics, switch again—always certain switching helps, always wrong."
+ },
+ {
+  "id": "debuff_charm",
+  "name": "Wigner's Friendship",
+  "type": "debuff",
+  "glyph": "💗",
+  "color": "#a86bdc",
+  "kind": "control",
+  "text": "From your perspective, your reality has collapsed into serving them. From outside, you remain in superposition. Neither view is wrong. You obey."
+ },
+ {
+  "id": "debuff_sensory_null",
+  "name": "Zombie Argument",
+  "type": "debuff",
+  "glyph": "⛓",
+  "color": "#a86bdc",
+  "kind": "control",
+  "text": "Something is happening to you, functionally identical to being hurt in every respect — except, the philosophers insist, there is no felt advantage in it. None of your openings mean anything anymore."
+ }
+]

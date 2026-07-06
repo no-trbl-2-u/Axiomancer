@@ -30,6 +30,7 @@
     "combat-sim": "ts-node src/CLI/combat-sim.cli.ts",
     "combat-playtest": "ts-node src/CLI/combat-playtest.cli.ts",
     "agent-e2e": "node automation/agent-e2e.mjs",
+    "catalog:export": "ts-node --transpile-only scripts/export-catalog.ts",
     "dev": "echo Please use check 'package.json' or README.md for available commands...\n ",
     "lint:fix": "eslint \"**/*.ts\" --fix",
     "lint": "eslint \"**/*.ts\"",

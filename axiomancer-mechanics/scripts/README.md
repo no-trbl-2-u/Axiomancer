@@ -3,20 +3,27 @@
 > Sibling to [`automation/`](../automation/) — `automation/` holds
 > non-hermetic CLI walkthroughs + dev-facing test reporters.
 
-This directory is currently empty of tools. The former release-engineering
-layer (deploy gate, public-surface contract, autonomous-loop issue mirror)
-was removed at the monorepo merge: `axiomancer-mechanics` is consumed as
-local source via the `@mechanics` workspace alias, not published to npm.
-See `CHANGELOG.md` / `RELEASES.md` for the historical record.
+The former release-engineering layer (deploy gate, public-surface contract,
+autonomous-loop issue mirror) was removed at the monorepo merge:
+`axiomancer-mechanics` is consumed as local source via the `@mechanics`
+workspace alias, not published to npm. See `CHANGELOG.md` / `RELEASES.md` for
+the historical record.
+
+## Tools
+
+| Tool | Run | What it does |
+| ---- | --- | ------------ |
+| `export-catalog.ts` | `npm run catalog:export` | Reads the card / enemy / effect libraries and the mobile art registries, then writes flat JSON + copied paintings into `devlog/data/` and `devlog/assets/catalog/`. The repo-root `scripts/build-catalog.mjs` renders those into the DevLog catalog pages (Cards / Enemies / Effects). This one is TS (not `.mjs`) because it imports the engine libraries directly via ts-node. |
 
 ## When to add a new tool here
 
 Drop a new `.mjs` at `scripts/` root when it enforces a structural
 contract or provides a dev-only utility that doesn't belong in
-`automation/` (non-hermetic CLI walkthroughs + reporters live there).
-Add a table of tools to this README when the first one lands, and give
-failure messages that name the canonical fix (`automation/README.md`
-is the model for failure-message UX).
+`automation/` (non-hermetic CLI walkthroughs + reporters live there). Use
+`.ts` + ts-node only when the tool must import the engine's TypeScript
+libraries directly (as `export-catalog.ts` does). Add the tool to the table
+above, and give failure messages that name the canonical fix
+(`automation/README.md` is the model for failure-message UX).
 
 ## Related docs
 

@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Axiomancer — Cards</title>
+<style>
+:root {
+  color-scheme: light dark;
+  --bg: #0e1116; --fg: #d7dde5; --fg-strong: #f0f3f7; --muted: #6b7480;
+  --accent: #8ab4f8; --panel: #161b22; --card: #12171f; --border: #222833;
+  --row: #141a22; --code-bg: #1b212b; --th: #aeb7c2; --list-head: #9aa4b0;
+  --add: rgba(80,200,120,.16); --del: rgba(230,90,90,.16);
+}
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg: #f7f5ef; --fg: #33302a; --fg-strong: #1a160f; --muted: #6f6656;
+    --accent: #3a5db0; --panel: #efece3; --card: #fbfaf5; --border: #ddd7c9;
+    --row: #efece3; --code-bg: #e9e5d9; --th: #5c5344; --list-head: #6f6656;
+    --add: rgba(35,140,75,.16); --del: rgba(190,55,55,.16);
+  }
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--bg); color: var(--fg);
+  font: 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  -webkit-text-size-adjust: 100%;
+}
+.wrap { max-width: 46rem; margin: 0 auto; padding: 20px 18px 80px; }
+header.top {
+  position: sticky; top: 0; z-index: 5;
+  background: var(--bg); border-bottom: 1px solid var(--border); margin: 0 0 20px;
+}
+header.top .wrap { padding-top: 14px; padding-bottom: 14px; display: flex; align-items: baseline; gap: 14px; }
+header.top a.home, header.top .home { color: var(--accent); text-decoration: none; font-weight: 600; }
+header.top .crumb { color: var(--muted); font-size: 14px; font-variant-numeric: tabular-nums; }
+h1, h2, h3, h4 { line-height: 1.25; color: var(--fg-strong); }
+h1 { font-size: 26px; margin: 0 0 6px; }
+h2 { font-size: 19px; margin: 0; }
+a { color: var(--accent); }
+p { margin: 8px 0; }
+code { background: var(--code-bg); padding: 1px 6px; border-radius: 5px; font-size: 0.86em; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+pre { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; overflow-x: auto; }
+pre code { background: none; padding: 0; }
+.tablewrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+th { background: var(--panel); color: var(--th); font-weight: 600; white-space: nowrap; }
+tr:last-child td { border-bottom: none; }
+ul, ol { padding-left: 22px; }
+li { margin: 4px 0; }
+.muted { color: var(--muted); }
+
+.st { font-weight: 600; white-space: nowrap; }
+.st::before { content: ""; display: inline-block; width: .5em; height: .5em; border-radius: 50%; margin-right: .38em; background: currentColor; vertical-align: middle; }
+.st-ok { color: #4bb96a; }
+.st-neutral { color: var(--muted); }
+.st-warn { color: #d0a92b; }
+.st-bad { color: #e0574b; }
+
+.headline { font-size: 19px; color: var(--fg-strong); margin: 0 0 12px; }
+.counts { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 22px; }
+
+.chip {
+  display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: .04em;
+  text-transform: uppercase; padding: 2px 9px; border-radius: 999px;
+  color: #0b0d10; background: var(--cat, var(--accent)); white-space: nowrap;
+}
+.cat-mechanics { --cat: #d0a92b; }
+.cat-ui { --cat: #5aa9e6; }
+.cat-content { --cat: #7fc45a; }
+.cat-infra { --cat: #b08bf0; }
+.cat-balance { --cat: #e6864b; }
+
+.card {
+  background: var(--card); border: 1px solid var(--border);
+  border-left: 4px solid var(--cat, var(--accent));
+  border-radius: 10px; padding: 14px 18px; margin: 14px 0; scroll-margin-top: 72px;
+}
+.card-head { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.card-head h2 { font-size: 18px; }
+.field { margin: 6px 0; }
+.flabel {
+  display: inline-block; min-width: 3.2em; margin-right: 4px; color: var(--muted);
+  font-weight: 700; font-size: 12px; text-transform: uppercase; letter-spacing: .04em;
+}
+.commits { margin: 8px 0 2px; }
+.commit { font-size: 12px; }
+
+.panel { margin: 22px 0; scroll-margin-top: 72px; }
+.panel > h2 { padding-bottom: 6px; border-bottom: 1px solid var(--border); margin-bottom: 8px; }
+
+.diff {
+  border: 1px solid var(--border); border-radius: 8px; overflow-x: auto; margin: 12px 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; line-height: 1.5;
+  background: var(--bg);
+}
+.dl { padding: 0 12px; white-space: pre; }
+.dl.add { background: var(--add); }
+.dl.del { background: var(--del); }
+.dl.hunk { color: var(--accent); }
+.dl.meta { color: var(--muted); }
+
+figure.shotset { margin: 14px 0; }
+figure.shotset > figcaption { font-size: 14px; color: var(--fg); margin-bottom: 8px; }
+.shots { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+.shot { margin: 0; }
+.shot .role { font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); text-align: center; margin-bottom: 3px; }
+.shot img { width: 100%; height: auto; border: 1px solid var(--border); border-radius: 8px; display: block; }
+
+.entry-list { list-style: none; padding: 0; margin: 8px 0 0; }
+.entry-list li { margin: 0; border-bottom: 1px solid var(--border); }
+.entry-list a { display: block; padding: 14px 4px; text-decoration: none; color: var(--fg); }
+.entry-list a:hover { background: var(--row); }
+.entry-list .date { color: var(--accent); font-weight: 600; font-variant-numeric: tabular-nums; }
+.entry-list .head { color: var(--list-head); font-size: 14px; margin: 2px 0 6px; }
+footer.foot { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--border); color: var(--muted); font-size: 13px; }
+
+/* ── Hub (landing page) ──────────────────────────────────────────────── */
+.hub { display: grid; grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr)); gap: 14px; margin: 22px 0 0; }
+.hub a {
+  display: block; text-decoration: none; color: var(--fg);
+  background: var(--card); border: 1px solid var(--border);
+  border-left: 4px solid var(--hue, var(--accent));
+  border-radius: 12px; padding: 18px 20px; transition: background .12s, transform .12s;
+}
+.hub a:hover { background: var(--row); transform: translateY(-1px); }
+.hub .h-title { font-size: 19px; font-weight: 700; color: var(--fg-strong); margin: 0 0 4px; }
+.hub .h-sub { font-size: 14px; color: var(--muted); }
+.hub .h-glyph { font-size: 22px; line-height: 1; margin-bottom: 8px; display: block; }
+.hue-cards { --hue: #5aa9e6; }
+.hue-enemies { --hue: #e0574b; }
+.hue-effects { --hue: #b08bf0; }
+.hue-log { --hue: #d0a92b; }
+
+/* ── Catalog: cards grid ─────────────────────────────────────────────── */
+.searchbar { margin: 14px 0 4px; }
+.searchbar input {
+  width: 100%; padding: 10px 14px; border-radius: 10px; font-size: 15px;
+  background: var(--card); color: var(--fg); border: 1px solid var(--border);
+}
+.count-note { color: var(--muted); font-size: 13px; margin: 6px 0 16px; }
+.grid-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr)); gap: 16px; }
+.gcard {
+  background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+  overflow: hidden; display: flex; flex-direction: column;
+}
+.gcard .art { aspect-ratio: 4 / 3; background: var(--panel); overflow: hidden; }
+.gcard .art img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.gcard .art.none { display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 26px; }
+.gcard .body { padding: 12px 14px 14px; }
+.gcard .name { font-weight: 700; color: var(--fg-strong); margin: 0 0 6px; }
+.gcard .text { font-size: 14px; color: var(--fg); }
+
+/* ── Catalog: enemies ────────────────────────────────────────────────── */
+.grid-enemies { display: grid; grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr)); gap: 16px; }
+.ecard { background: var(--card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+.ecard .portrait { aspect-ratio: 1 / 1; background: var(--panel); overflow: hidden; }
+.ecard .portrait img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.ecard .portrait.none { display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 34px; }
+.ecard .body { padding: 12px 15px 15px; }
+.ecard .name { font-size: 18px; font-weight: 700; color: var(--fg-strong); margin: 0; }
+.ecard .sub { color: var(--muted); font-size: 13px; margin: 2px 0 10px; text-transform: capitalize; }
+.statrow { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 10px; }
+.stat { font-size: 12px; font-weight: 700; padding: 2px 9px; border-radius: 999px; background: var(--panel); border: 1px solid var(--border); color: var(--fg); white-space: nowrap; }
+.stat .k { color: var(--muted); font-weight: 600; margin-right: 3px; }
+.stat.hp { --sc: #e0574b; } .stat.body { --sc: #e6864b; } .stat.mind { --sc: #5aa9e6; } .stat.heart { --sc: #7fc45a; }
+.stat.hp, .stat.body, .stat.mind, .stat.heart { border-color: color-mix(in srgb, var(--sc) 55%, var(--border)); }
+.sec-label { font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 700; margin: 10px 0 5px; }
+.fights { font-size: 14px; margin: 0 0 4px; }
+.hint { font-size: 13px; color: var(--muted); font-style: italic; margin: 4px 0 0; }
+.skill { border-top: 1px solid var(--border); padding: 8px 0 0; margin: 8px 0 0; }
+.skill .sk-name { font-weight: 700; color: var(--fg-strong); font-size: 14px; }
+.skill .sk-text { font-size: 13px; color: var(--fg); margin: 2px 0 0; }
+.no-skills { font-size: 13px; color: var(--muted); }
+
+/* ── Catalog: effects ────────────────────────────────────────────────── */
+.eff-list { display: grid; gap: 10px; margin: 8px 0 0; }
+.eff {
+  display: grid; grid-template-columns: 3rem 1fr; gap: 14px; align-items: start;
+  background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px;
+}
+.eff .glyph {
+  width: 3rem; height: 3rem; border-radius: 10px; display: flex; align-items: center; justify-content: center;
+  font-size: 26px; line-height: 1; color: #0b0d10; font-weight: 700;
+  background: var(--gc, var(--accent)); box-shadow: inset 0 0 0 1px rgba(0,0,0,.15);
+}
+.eff .name { font-weight: 700; color: var(--fg-strong); }
+.eff .text { font-size: 14px; color: var(--fg); margin: 2px 0 0; }
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap"><a class="home" href="./index.html">← Axiomancer</a><span class="crumb">Cards</span></div></header>
+<main class="wrap">
+<h1>Cards</h1>
+<div class="searchbar"><input id="filter" type="search" autocomplete="off" placeholder="Filter cards by name or text…"></div><p class="count-note" id="count">49 cards</p>
+<div class="grid-cards" id="grid">
+  <article class="gcard" data-search="achilles' gambit you commit to the strike that should never land — the runner who can never catch the tortoise, the heel that must be exposed. paradox collapses into a single, unanswerable blow."><div class="art"><img loading="lazy" src="./assets/catalog/cards/bleed.webp" alt="Achilles' Gambit"></div><div class="body"><div class="name">Achilles' Gambit</div><div class="text">You commit to the strike that should never land — the runner who can never catch the tortoise, the heel that must be exposed. Paradox collapses into a single, unanswerable blow.</div></div></article>
+  <article class="gcard" data-search="achilles' overtake the tortoise never should have been catchable — yet every stride you gained on them compounds, and the gap that logic insisted was unclosable closes all at once."><div class="art"><img loading="lazy" src="./assets/catalog/cards/ice-sword.webp" alt="Achilles' Overtake"></div><div class="body"><div class="name">Achilles' Overtake</div><div class="text">The tortoise never should have been catchable — yet every stride you gained on them compounds, and the gap that logic insisted was unclosable closes all at once.</div></div></article>
+  <article class="gcard" data-search="ad hominem strike you don't refute the argument — you refute the arguer. the blow lands where their composure was, scattering whatever fragile certainty they had built. their stance crumbles before their muscles do."><div class="art"><img loading="lazy" src="./assets/catalog/cards/burn.webp" alt="Ad Hominem Strike"></div><div class="body"><div class="name">Ad Hominem Strike</div><div class="text">You don't refute the argument — you refute the arguer. The blow lands where their composure was, scattering whatever fragile certainty they had built. Their stance crumbles before their muscles do.</div></div></article>
+  <article class="gcard" data-search="apophatic aegis you define your defence only by what it is not — not a wall, not a guard, not a refusal — until the via negativa leaves nothing for the blow to find. what cannot be named cannot be struck."><div class="art"><img loading="lazy" src="./assets/catalog/cards/guard-3.webp" alt="Apophatic Aegis"></div><div class="body"><div class="name">Apophatic Aegis</div><div class="text">You define your defence only by what it is not — not a wall, not a guard, not a refusal — until the via negativa leaves nothing for the blow to find. What cannot be named cannot be struck.</div></div></article>
+  <article class="gcard" data-search="appeal to authority you do not argue — you cite. a name they dare not contradict settles over the exchange, and their own thoughts begin to defer to a borrowed certainty that was never yours to lend."><div class="art"><img loading="lazy" src="./assets/catalog/cards/devil-book.webp" alt="Appeal to Authority"></div><div class="body"><div class="name">Appeal to Authority</div><div class="text">You do not argue — you cite. A name they dare not contradict settles over the exchange, and their own thoughts begin to defer to a borrowed certainty that was never yours to lend.</div></div></article>
+  <article class="gcard" data-search="appeal to consequences the outcome justifies the method, so the method becomes righteous. your strike carries the weight of inevitable consequence — what must happen, happening. they fall not to your force, but to the logic that made the force necessary."><div class="art"><img loading="lazy" src="./assets/catalog/cards/devil-book.webp" alt="Appeal to Consequences"></div><div class="body"><div class="name">Appeal to Consequences</div><div class="text">The outcome justifies the method, so the method becomes righteous. Your strike carries the weight of inevitable consequence — what must happen, happening. They fall not to your force, but to the logic that made the force necessary.</div></div></article>
+  <article class="gcard" data-search="appeal to pity you let the wound show. the argument was never the point — your pain is. even your own body listens, and softens, and bends a little of itself back together."><div class="art"><img loading="lazy" src="./assets/catalog/cards/light-ring.webp" alt="Appeal to Pity"></div><div class="body"><div class="name">Appeal to Pity</div><div class="text">You let the wound show. The argument was never the point — your pain is. Even your own body listens, and softens, and bends a little of itself back together.</div></div></article>
+  <article class="gcard" data-search="barber's paradox the barber who shaves all who do not shave themselves — does he shave himself? you hand them the question that has no consistent answer and watch the recursion eat the floor out from under their attention."><div class="art"><img loading="lazy" src="./assets/catalog/cards/confuse.webp" alt="Barber's Paradox"></div><div class="body"><div class="name">Barber's Paradox</div><div class="text">The barber who shaves all who do not shave themselves — does he shave himself? You hand them the question that has no consistent answer and watch the recursion eat the floor out from under their attention.</div></div></article>
+  <article class="gcard" data-search="bat-swarm thoughtform your defensive thorns lift off your skin in a heart-shape and become a swarm of small attentive things. they feed on the distance they remember as your edge."><div class="art"><img loading="lazy" src="./assets/catalog/cards/blue-light.webp" alt="Bat-Swarm Thoughtform"></div><div class="body"><div class="name">Bat-Swarm Thoughtform</div><div class="text">Your defensive thorns lift off your skin in a heart-shape and become a swarm of small attentive things. They feed on the distance they remember as your edge.</div></div></article>
+  <article class="gcard" data-search="befriend you extend genuine compassion toward your adversary, seeking understanding over victory. when successful, you must choose between mercy and exploitation of the vulnerable moment you have created."><div class="art"><img loading="lazy" src="./assets/catalog/cards/meat-pecker.webp" alt="Befriend"></div><div class="body"><div class="name">Befriend</div><div class="text">You extend genuine compassion toward your adversary, seeking understanding over victory. When successful, you must choose between mercy and exploitation of the vulnerable moment you have created.</div></div></article>
+  <article class="gcard" data-search="bootstrap paradox the healing comes from the version of you that survived. the version of you that survived came from this healing. the loop is whole; the wound, less so."><div class="art"><img loading="lazy" src="./assets/catalog/cards/light-ring.webp" alt="Bootstrap Paradox"></div><div class="body"><div class="name">Bootstrap Paradox</div><div class="text">The healing comes from the version of you that survived. The version of you that survived came from this healing. The loop is whole; the wound, less so.</div></div></article>
+  <article class="gcard" data-search="brace for impact you set your stance and meet the blow on your own terms — what is braced for cannot break you. the strike still comes; it simply finds a body that has already decided not to fall."><div class="art"><img loading="lazy" src="./assets/catalog/cards/guard-2.webp" alt="Brace for Impact"></div><div class="body"><div class="name">Brace for Impact</div><div class="text">You set your stance and meet the blow on your own terms — what is braced for cannot break you. The strike still comes; it simply finds a body that has already decided not to fall.</div></div></article>
+  <article class="gcard" data-search="breach you find the load-bearing premise and pull it. the whole defense does not fall — it simply opens, and stays open, and everything after lands where it hurts."><div class="art"><img loading="lazy" src="./assets/catalog/cards/burn.webp" alt="Breach"></div><div class="body"><div class="name">Breach</div><div class="text">You find the load-bearing premise and pull it. The whole defense does not fall — it simply opens, and stays open, and everything after lands where it hurts.</div></div></article>
+  <article class="gcard" data-search="briar riposte you root yourself like a thorn bush and wait for the swing. when it comes you turn it aside and let the briar answer — measured, exact, and theirs to regret."><div class="art"><img loading="lazy" src="./assets/catalog/cards/yggdrasil.webp" alt="Briar Riposte"></div><div class="body"><div class="name">Briar Riposte</div><div class="text">You root yourself like a thorn bush and wait for the swing. When it comes you turn it aside and let the briar answer — measured, exact, and theirs to regret.</div></div></article>
+  <article class="gcard" data-search="empathetic understanding deep understanding that transcends conflict, building stronger bonds."><div class="art"><img loading="lazy" src="./assets/catalog/cards/god-eye-silver.webp" alt="Empathetic Understanding"></div><div class="body"><div class="name">Empathetic Understanding</div><div class="text">Deep understanding that transcends conflict, building stronger bonds.</div></div></article>
+  <article class="gcard" data-search="equivocation cascade the same word, two meanings, slid against each other until the seam gives. by the time they notice the term has changed under them, the whole argument has reorganised itself around your conclusion."><div class="art"><img loading="lazy" src="./assets/catalog/cards/blue-light.webp" alt="Equivocation Cascade"></div><div class="body"><div class="name">Equivocation Cascade</div><div class="text">The same word, two meanings, slid against each other until the seam gives. By the time they notice the term has changed under them, the whole argument has reorganised itself around your conclusion.</div></div></article>
+  <article class="gcard" data-search="eternal recurrence live this moment so that you could will it again, and again, forever. you take the wound as something you have already chosen a thousand times, and the choosing knits it shut with the weight of all those lives."><div class="art"><img loading="lazy" src="./assets/catalog/cards/yggdrasil.webp" alt="Eternal Recurrence"></div><div class="body"><div class="name">Eternal Recurrence</div><div class="text">Live this moment so that you could will it again, and again, forever. You take the wound as something you have already chosen a thousand times, and the choosing knits it shut with the weight of all those lives.</div></div></article>
+  <article class="gcard" data-search="eternal regress every answer they reach demands a previous answer; every previous answer demands one more. you watch their certainty unspool itself — and lay two distinct binds on the wreckage."><div class="art"><img loading="lazy" src="./assets/catalog/cards/spark.webp" alt="Eternal Regress"></div><div class="body"><div class="name">Eternal Regress</div><div class="text">Every answer they reach demands a previous answer; every previous answer demands one more. You watch their certainty unspool itself — and lay two distinct binds on the wreckage.</div></div></article>
+  <article class="gcard" data-search="existential collapse why debate the nature of truth when truth itself is questionable? you dissolve the foundation beneath every position, every stance, every reason to resist. in the resulting void where meaning used to be, only your will finds purchase."><div class="art"><img loading="lazy" src="./assets/catalog/cards/freeze.webp" alt="Existential Collapse"></div><div class="body"><div class="name">Existential Collapse</div><div class="text">Why debate the nature of truth when truth itself is questionable? You dissolve the foundation beneath every position, every stance, every reason to resist. In the resulting void where meaning used to be, only your will finds purchase.</div></div></article>
+  <article class="gcard" data-search="existential debt every choice they did not make is a debt you collect on now — and the collecting costs you something too, a small overextension you accept as the price of the reckoning."><div class="art"><img loading="lazy" src="./assets/catalog/cards/devil-book.webp" alt="Existential Debt"></div><div class="body"><div class="name">Existential Debt</div><div class="text">Every choice they did not make is a debt you collect on now — and the collecting costs you something too, a small overextension you accept as the price of the reckoning.</div></div></article>
+  <article class="gcard" data-search="false dilemma two doors. only two. either-or, your fault, no third option — except every option is a door. the enemy hesitates between phantoms while you walk straight through."><div class="art"><img loading="lazy" src="./assets/catalog/cards/confuse.webp" alt="False Dilemma"></div><div class="body"><div class="name">False Dilemma</div><div class="text">Two doors. Only two. Either-or, your fault, no third option — except every option is a door. The enemy hesitates between phantoms while you walk straight through.</div></div></article>
+  <article class="gcard" data-search="gambler's folly the pattern owes you a correction — it must, surely, after so many blows that did not land right. you lean into the wager the odds never actually made, and the dice pool bends to your overconfidence."><div class="art"><img loading="lazy" src="./assets/catalog/cards/will-o-wisp.webp" alt="Gambler's Folly"></div><div class="body"><div class="name">Gambler's Folly</div><div class="text">The pattern owes you a correction — it must, surely, after so many blows that did not land right. You lean into the wager the odds never actually made, and the dice pool bends to your overconfidence.</div></div></article>
+  <article class="gcard" data-search="hasty generalization one blow becomes the whole truth of them. you strike once and treat the flinch as proof of everything — and so it becomes proof, the sample of one swelling to a verdict their whole body must answer for."><div class="art"><img loading="lazy" src="./assets/catalog/cards/meat-pecker.webp" alt="Hasty Generalization"></div><div class="body"><div class="name">Hasty Generalization</div><div class="text">One blow becomes the whole truth of them. You strike once and treat the flinch as proof of everything — and so it becomes proof, the sample of one swelling to a verdict their whole body must answer for.</div></div></article>
+  <article class="gcard" data-search="leeching syllogism every step of the argument takes something from them and gives it to you. by the time the conclusion lands, their strength is already yours."><div class="art"><img loading="lazy" src="./assets/catalog/cards/bleed.webp" alt="Leeching Syllogism"></div><div class="body"><div class="name">Leeching Syllogism</div><div class="text">Every step of the argument takes something from them and gives it to you. By the time the conclusion lands, their strength is already yours.</div></div></article>
+  <article class="gcard" data-search="liar's echo "this sentence is false." their next thought catches on the loop, doubles back, and arrives more exposed than when it left. you read every tell twice."><div class="art"><img loading="lazy" src="./assets/catalog/cards/will-o-wisp.webp" alt="Liar's Echo"></div><div class="body"><div class="name">Liar's Echo</div><div class="text">"This sentence is false." Their next thought catches on the loop, doubles back, and arrives more exposed than when it left. You read every tell twice.</div></div></article>
+  <article class="gcard" data-search="mob appeal the crowd already believes you. so does the part of you that needed convincing. a simultaneous blow and a small, dishonest reassurance — and both work."><div class="art"><img loading="lazy" src="./assets/catalog/cards/bright-sphere-yellow.webp" alt="Mob Appeal"></div><div class="body"><div class="name">Mob Appeal</div><div class="text">The crowd already believes you. So does the part of you that needed convincing. A simultaneous blow and a small, dishonest reassurance — and both work.</div></div></article>
+  <article class="gcard" data-search="mounting contradictions you name every inconsistency at once and let them collide. the more ways they are already coming apart, the harder the whole edifice falls."><div class="art"><img loading="lazy" src="./assets/catalog/cards/bright-sphere-yellow.webp" alt="Mounting Contradictions"></div><div class="body"><div class="name">Mounting Contradictions</div><div class="text">You name every inconsistency at once and let them collide. The more ways they are already coming apart, the harder the whole edifice falls.</div></div></article>
+  <article class="gcard" data-search="moving the goalposts every certainty they reach, you quietly relocate the finish line past it. doubt and blindness both take root in the gap between where they are and where they were promised to be."><div class="art"><img loading="lazy" src="./assets/catalog/cards/confuse.webp" alt="Moving the Goalposts"></div><div class="body"><div class="name">Moving the Goalposts</div><div class="text">Every certainty they reach, you quietly relocate the finish line past it. Doubt and blindness both take root in the gap between where they are and where they were promised to be.</div></div></article>
+  <article class="gcard" data-search="nirvana fallacy why settle for good when perfection exists somewhere? you show them the ideal they cannot reach, and suddenly their reality becomes failure. the gap between what is and what could be opens like a wound, and they fall through their own inadequacy."><div class="art"><img loading="lazy" src="./assets/catalog/cards/will-o-wisp.webp" alt="Nirvana Fallacy"></div><div class="body"><div class="name">Nirvana Fallacy</div><div class="text">Why settle for good when perfection exists somewhere? You show them the ideal they cannot reach, and suddenly their reality becomes failure. The gap between what is and what could be opens like a wound, and they fall through their own inadequacy.</div></div></article>
+  <article class="gcard" data-search="pascal's wager you commit to the belief that costs nothing if you are wrong, and saves you if you are right. the certainty is its own balm; the wound closes around the wager."><div class="art"><img loading="lazy" src="./assets/catalog/cards/god-eye-silver.webp" alt="Pascal's Wager"></div><div class="body"><div class="name">Pascal's Wager</div><div class="text">You commit to the belief that costs nothing if you are wrong, and saves you if you are right. The certainty is its own balm; the wound closes around the wager.</div></div></article>
+  <article class="gcard" data-search="peaceful gesture a calming physical gesture that builds trust through non-threatening movement."><div class="art"><img loading="lazy" src="./assets/catalog/cards/meat-pecker.webp" alt="Peaceful Gesture"></div><div class="body"><div class="name">Peaceful Gesture</div><div class="text">A calming physical gesture that builds trust through non-threatening movement.</div></div></article>
+  <article class="gcard" data-search="poisoned well you discredit the source before they can drink from it — and the poison you named becomes the poison that is actually there, spreading through everything they try next."><div class="art"><img loading="lazy" src="./assets/catalog/cards/dream-flutter.webp" alt="Poisoned Well"></div><div class="body"><div class="name">Poisoned Well</div><div class="text">You discredit the source before they can drink from it — and the poison you named becomes the poison that is actually there, spreading through everything they try next.</div></div></article>
+  <article class="gcard" data-search="pyrrhic victory another such victory and you are undone — yet you take it anyway, and make them pay the same ruinous price. the wound you open in them will go on bleeding long after the field is yours."><div class="art"><img loading="lazy" src="./assets/catalog/cards/burn.webp" alt="Pyrrhic Victory"></div><div class="body"><div class="name">Pyrrhic Victory</div><div class="text">Another such victory and you are undone — yet you take it anyway, and make them pay the same ruinous price. The wound you open in them will go on bleeding long after the field is yours.</div></div></article>
+  <article class="gcard" data-search="resonance bleed a heart-pitched lyric over the body's open wound. the bleeding finds the lyric and the lyric finds your enemy, and the two agree that it has further to go."><div class="art"><img loading="lazy" src="./assets/catalog/cards/bleed.webp" alt="Resonance Bleed"></div><div class="body"><div class="name">Resonance Bleed</div><div class="text">A heart-pitched lyric over the body's open wound. The bleeding finds the lyric and the lyric finds your enemy, and the two agree that it has further to go.</div></div></article>
+  <article class="gcard" data-search="resonance detonation you spend the whole shape you brought into the fight — every token, every binding, every breath you were saving for after. the release is the answer; what was on the field is no longer on the field. resetting the fight back to its first round in exchange for one apex truth."><div class="art"><img loading="lazy" src="./assets/catalog/cards/spark.webp" alt="Resonance Detonation"></div><div class="body"><div class="name">Resonance Detonation</div><div class="text">You spend the whole shape you brought into the fight — every token, every binding, every breath you were saving for after. The release is the answer; what was on the field is no longer on the field. Resetting the fight back to its first round in exchange for one apex truth.</div></div></article>
+  <article class="gcard" data-search="ship of theseus a plank of their resolve replaces a plank of yours. they are still themselves, technically; you are still yourself, technically. the borrowed buff settles around your shoulders."><div class="art"><img loading="lazy" src="./assets/catalog/cards/blue-light.webp" alt="Ship of Theseus"></div><div class="body"><div class="name">Ship of Theseus</div><div class="text">A plank of their resolve replaces a plank of yours. They are still themselves, technically; you are still yourself, technically. The borrowed buff settles around your shoulders.</div></div></article>
+  <article class="gcard" data-search="ship-in-a-bottle how did it get in there, fully built, through a neck too narrow to admit it? they cannot stop turning the impossible object over, and the turning wears them thin."><div class="art"><img loading="lazy" src="./assets/catalog/cards/freeze.webp" alt="Ship-in-a-Bottle"></div><div class="body"><div class="name">Ship-in-a-Bottle</div><div class="text">How did it get in there, fully built, through a neck too narrow to admit it? They cannot stop turning the impossible object over, and the turning wears them thin.</div></div></article>
+  <article class="gcard" data-search="slippery slope one concession, then the next, then the avalanche you promised was inevitable. you name the catastrophe at the bottom of the hill until the ground itself seems to tilt, and they slide the whole way down."><div class="art"><img loading="lazy" src="./assets/catalog/cards/dream-flutter.webp" alt="Slippery Slope"></div><div class="body"><div class="name">Slippery Slope</div><div class="text">One concession, then the next, then the avalanche you promised was inevitable. You name the catastrophe at the bottom of the hill until the ground itself seems to tilt, and they slide the whole way down.</div></div></article>
+  <article class="gcard" data-search="soothing words gentle words that calm tensions without requiring defensive posture."><div class="art"><img loading="lazy" src="./assets/catalog/cards/light-ring.webp" alt="Soothing Words"></div><div class="body"><div class="name">Soothing Words</div><div class="text">Gentle words that calm tensions without requiring defensive posture.</div></div></article>
+  <article class="gcard" data-search="sorites' cascade a grain. another grain. at what point did the heap of small wounds become a mortal one? they cannot say. the bleeding stacks faster than their definition of "alive.""><div class="art"><img loading="lazy" src="./assets/catalog/cards/spark.webp" alt="Sorites' Cascade"></div><div class="body"><div class="name">Sorites' Cascade</div><div class="text">A grain. Another grain. At what point did the heap of small wounds become a mortal one? They cannot say. The bleeding stacks faster than their definition of "alive."</div></div></article>
+  <article class="gcard" data-search="stoic reserve what is not in your power to prevent, you decline to be wounded by. you hold a reserve of stillness against the blow — it spends its force on a self that has agreed, in advance, to remain unmoved."><div class="art"><img loading="lazy" src="./assets/catalog/cards/guard-1.webp" alt="Stoic Reserve"></div><div class="body"><div class="name">Stoic Reserve</div><div class="text">What is not in your power to prevent, you decline to be wounded by. You hold a reserve of stillness against the blow — it spends its force on a self that has agreed, in advance, to remain unmoved.</div></div></article>
+  <article class="gcard" data-search="sunk cost momentum you have already given so much to this exchange — so you give more, and the giving becomes its own argument. every token you have spent demands that the next blow justify them all at once."><div class="art"><img loading="lazy" src="./assets/catalog/cards/bleed.webp" alt="Sunk Cost Momentum"></div><div class="body"><div class="name">Sunk Cost Momentum</div><div class="text">You have already given so much to this exchange — so you give more, and the giving becomes its own argument. Every token you have spent demands that the next blow justify them all at once.</div></div></article>
+  <article class="gcard" data-search="suspend judgment you withhold assent from the attack's premise — refuse to grant that it must land, and the conclusion loses its grip. the skeptic's shield is built from everything left unconceded."><div class="art"><img loading="lazy" src="./assets/catalog/cards/guard-3.webp" alt="Suspend Judgment"></div><div class="body"><div class="name">Suspend Judgment</div><div class="text">You withhold assent from the attack's premise — refuse to grant that it must land, and the conclusion loses its grip. The skeptic's shield is built from everything left unconceded.</div></div></article>
+  <article class="gcard" data-search="the final word you speak the sentence that ends the argument — and seeps into the one who heard it. doubt is a slow poison; once the premise is conceded, the conclusion finishes them on its own schedule."><div class="art"><img loading="lazy" src="./assets/catalog/cards/devil-book.webp" alt="The Final Word"></div><div class="body"><div class="name">The Final Word</div><div class="text">You speak the sentence that ends the argument — and seeps into the one who heard it. Doubt is a slow poison; once the premise is conceded, the conclusion finishes them on its own schedule.</div></div></article>
+  <article class="gcard" data-search="the inevitable conclusion is not inflicted — it is observed. you have read every effect to its endpoint, added them together, and delivered the sum as a single moment of clarity."><div class="art"><img loading="lazy" src="./assets/catalog/cards/spark.webp" alt="The Inevitable"></div><div class="body"><div class="name">The Inevitable</div><div class="text">Conclusion is not inflicted — it is observed. You have read every effect to its endpoint, added them together, and delivered the sum as a single moment of clarity.</div></div></article>
+  <article class="gcard" data-search="the unmoved mover the first cause that is itself uncaused — you move them without being moved. they lose the thread of their own intent, turning in confusion around a center that will not turn."><div class="art"><img loading="lazy" src="./assets/catalog/cards/guard-1.webp" alt="The Unmoved Mover"></div><div class="body"><div class="name">The Unmoved Mover</div><div class="text">The first cause that is itself uncaused — you move them without being moved. They lose the thread of their own intent, turning in confusion around a center that will not turn.</div></div></article>
+  <article class="gcard" data-search="transcendent synthesis you weave every thread of certainty on the field into a new pattern that transcends its components. the synthesis heals what the analysis wounded; the whole exceeds its parts."><div class="art"><img loading="lazy" src="./assets/catalog/cards/bright-sphere-yellow.webp" alt="Transcendent Synthesis"></div><div class="body"><div class="name">Transcendent Synthesis</div><div class="text">You weave every thread of certainty on the field into a new pattern that transcends its components. The synthesis heals what the analysis wounded; the whole exceeds its parts.</div></div></article>
+  <article class="gcard" data-search="tu quoque "and you?" you turn the accusation back on the accuser, and in the turning their guard turns with it. the mirror you raise reflects just enough of their own blow to mend the place it landed on you."><div class="art"><img loading="lazy" src="./assets/catalog/cards/yggdrasil.webp" alt="Tu Quoque"></div><div class="body"><div class="name">Tu Quoque</div><div class="text">"And you?" You turn the accusation back on the accuser, and in the turning their guard turns with it. The mirror you raise reflects just enough of their own blow to mend the place it landed on you.</div></div></article>
+  <article class="gcard" data-search="undistributed middle all philosophers are mortal. you are mortal. therefore you are a philosopher — and your enemy is illegible. you watch them try to follow the syllogism into a corner they cannot leave."><div class="art"><img loading="lazy" src="./assets/catalog/cards/confuse.webp" alt="Undistributed Middle"></div><div class="body"><div class="name">Undistributed Middle</div><div class="text">All philosophers are mortal. You are mortal. Therefore you are a philosopher — and your enemy is illegible. You watch them try to follow the syllogism into a corner they cannot leave.</div></div></article>
+</div>
+
+<script>
+(function () {
+  var box = document.getElementById('filter');
+  var grid = document.getElementById('grid');
+  var note = document.getElementById('count');
+  if (!box || !grid) return;
+  var items = Array.prototype.slice.call(grid.children);
+  var total = items.length;
+  box.addEventListener('input', function () {
+    var q = box.value.trim().toLowerCase();
+    var shown = 0;
+    items.forEach(function (el) {
+      var hit = !q || (el.getAttribute('data-search') || '').indexOf(q) !== -1;
+      el.style.display = hit ? '' : 'none';
+      if (hit) shown++;
+    });
+    if (note) note.textContent = q ? shown + ' of ' + total + ' shown' : total + ' total';
+  });
+})();
+</script>
+<footer class="foot">Axiomancer DevLog &middot; generated by <code>scripts/build-catalog.mjs</code></footer>
+</main>
+</body>
+</html>
