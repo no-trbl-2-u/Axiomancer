@@ -5,6 +5,11 @@ name: preview-build
 # package directory (where eas.json + app config live).
 
 on:
+  schedule:
+    # GitHub Actions cron uses UTC. These are fixed EST times:
+    # 09:15 EST -> 14:15 UTC; 17:00 EST -> 22:00 UTC.
+    - cron: '15 14 * * *'
+    - cron: '0 22 * * *'
   workflow_dispatch:
     inputs:
       platform:
@@ -36,9 +41,12 @@ concurrency:
 
 jobs:
   build:
-    name: EAS preview build (${{ inputs.platform }}, ${{ inputs.profile }})
+    name: EAS preview build (${{ inputs.platform || 'android' }}, ${{ inputs.profile || 'preview' }})
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    env:
+      PREVIEW_PLATFORM: ${{ inputs.platform || 'android' }}
+      PREVIEW_PROFILE: ${{ inputs.profile || 'preview' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -61,6 +69,6 @@ jobs:
 
       - name: EAS build
         working-directory: axiomancer-mobile
-        run: npx eas-cli@latest build --platform ${{ inputs.platform }} --profile ${{ inputs.profile }} --non-interactive
+        run: npx eas-cli@latest build --platform "$PREVIEW_PLATFORM" --profile "$PREVIEW_PROFILE" --non-interactive
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
