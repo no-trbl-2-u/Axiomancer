@@ -24,11 +24,12 @@ Tick in this file in the same commit that ships the phase.
 **Next up (autonomous loop's queue):**
 
 **Field evidence blockers (direct T promotion):**
-- [ ] Phase 14 — First-map route audit and survivorship semantics:
+- [x] Phase 14 — First-map route audit and survivorship semantics:
       fix `game.cli --route` map evidence so Fishing Village coverage
       is honest, full-map coverage is available through an explicit
       audit lane, and post-defeat traversal is not reported as clean
       survivorship (mechanics; promoted 2026-07-04 from Kid report)
+      — `feat(cli): classify first-map route coverage and survivorship`
 
 **Calibration (small, low-risk — prove the loop works in this repo):**
 - [ ] Phase 1 — Combat test-coverage backfill: add the missing
