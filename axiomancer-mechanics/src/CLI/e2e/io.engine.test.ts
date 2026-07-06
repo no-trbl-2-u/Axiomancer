@@ -46,26 +46,26 @@ afterEach(() => {
 describe('parseArgv', () => {
     it('returns sensible defaults for an empty arg list', () => {
         const flags: CliFlags = parseArgv([]);
-        expect(flags).toEqual({ stdin: false, jsonEvents: false, autoCombat: false });
+        expect(flags).toEqual({ stdin: false, jsonEvents: false, autoCombat: false, resolveStart: false });
     });
 
     it('parses --stdin and --json-events independently', () => {
-        expect(parseArgv(['--stdin'])).toEqual({ stdin: true, jsonEvents: false, autoCombat: false });
-        expect(parseArgv(['--json-events'])).toEqual({ stdin: false, jsonEvents: true, autoCombat: false });
+        expect(parseArgv(['--stdin'])).toEqual({ stdin: true, jsonEvents: false, autoCombat: false, resolveStart: false });
+        expect(parseArgv(['--json-events'])).toEqual({ stdin: false, jsonEvents: true, autoCombat: false, resolveStart: false });
     });
 
     it('parses --script with separate value and = form', () => {
         expect(parseArgv(['--script', 'plan.json'])).toEqual({
-            stdin: false, jsonEvents: false, autoCombat: false, scriptPath: 'plan.json',
+            stdin: false, jsonEvents: false, autoCombat: false, resolveStart: false, scriptPath: 'plan.json',
         });
         expect(parseArgv(['--script=plan.json'])).toEqual({
-            stdin: false, jsonEvents: false, autoCombat: false, scriptPath: 'plan.json',
+            stdin: false, jsonEvents: false, autoCombat: false, resolveStart: false, scriptPath: 'plan.json',
         });
     });
 
     it('parses all flags combined in any order', () => {
         expect(parseArgv(['--json-events', '--stdin', '--script=replay.json'])).toEqual({
-            stdin: true, jsonEvents: true, autoCombat: false, scriptPath: 'replay.json',
+            stdin: true, jsonEvents: true, autoCombat: false, resolveStart: false, scriptPath: 'replay.json',
         });
     });
 
@@ -80,10 +80,10 @@ describe('parseArgv', () => {
 
     it('parses --save-file with separate value and = form', () => {
         expect(parseArgv(['--save-file', 'save.json'])).toEqual({
-            stdin: false, jsonEvents: false, autoCombat: false, saveFile: 'save.json',
+            stdin: false, jsonEvents: false, autoCombat: false, resolveStart: false, saveFile: 'save.json',
         });
         expect(parseArgv(['--save-file=save.json'])).toEqual({
-            stdin: false, jsonEvents: false, autoCombat: false, saveFile: 'save.json',
+            stdin: false, jsonEvents: false, autoCombat: false, resolveStart: false, saveFile: 'save.json',
         });
     });
 

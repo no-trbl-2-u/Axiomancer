@@ -31,6 +31,20 @@ export interface CliFlags {
     saveFile?: string;
     /** Comma-separated explicit node ids to walk without prompts. */
     route?: string[];
+    /**
+     * Phase 14 — resolve the current (start) node's own event before
+     * walking `route`. Without this, the start node is visited but its
+     * event never resolves (see `game.cli.ts`'s `route:end` summary).
+     */
+    resolveStart: boolean;
+    /**
+     * Phase 14 — non-mutating full-map coverage witness. Names a
+     * registered map (e.g. `fishing-village`); reports every authored
+     * node's primary event kind via read-only introspection instead of
+     * walking a single legal route. Mutually exclusive in practice with
+     * `route` (route wins if both are somehow passed).
+     */
+    routeAudit?: string;
     /** Auto-run Hazard-Pattern combat when a route encounter fires. */
     autoCombat: boolean;
     combatPolicy?: string;
@@ -39,7 +53,7 @@ export interface CliFlags {
 }
 
 export function parseArgv(args: string[]): CliFlags {
-    const flags: CliFlags = { stdin: false, jsonEvents: false, autoCombat: false };
+    const flags: CliFlags = { stdin: false, jsonEvents: false, autoCombat: false, resolveStart: false };
     let i = 0;
     while (i < args.length) {
         const arg = args[i]!;
@@ -89,6 +103,19 @@ export function parseArgv(args: string[]): CliFlags {
             }
             flags.route = next.split(',').map(s => s.trim()).filter(Boolean);
             i += 2;
+        } else if (arg.startsWith('--route-audit=')) {
+            flags.routeAudit = arg.slice('--route-audit='.length).trim();
+            i++;
+        } else if (arg === '--route-audit') {
+            const next = args[i + 1];
+            if (!next || next.startsWith('--')) {
+                throw new Error('--route-audit requires a registered map name.');
+            }
+            flags.routeAudit = next.trim();
+            i += 2;
+        } else if (arg === '--resolve-start') {
+            flags.resolveStart = true;
+            i++;
         } else if (arg === '--auto-combat') {
             flags.autoCombat = true;
             i++;
@@ -119,7 +146,7 @@ export function parseArgv(args: string[]): CliFlags {
         } else {
             throw new Error(
                 `Unknown CLI flag: '${arg}'.\n` +
-                `Usage: npm run game -- [--script <path>] [--stdin] [--json-events] [--state-log <path>] [--save-file <path>] [--route <nodes>] [--auto-combat] [--combat-policy <policy>] [--combat-max-turns <n>] [--combat-seed <n>]`,
+                `Usage: npm run game -- [--script <path>] [--stdin] [--json-events] [--state-log <path>] [--save-file <path>] [--route <nodes>] [--resolve-start] [--route-audit <mapName>] [--auto-combat] [--combat-policy <policy>] [--combat-max-turns <n>] [--combat-seed <n>]`,
             );
         }
     }

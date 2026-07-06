@@ -44,8 +44,8 @@ import { createNodeAdapter } from '../Game/persistence/node.adapter';
 import type { PersistenceAdapter } from '../Game/persistence/types';
 import type { TypedLevelUpEvent } from '../Game/events.types';
 import { getMapDefinition } from '../World/map.registry';
-import { resolveMapEvent } from '../World';
-import type { ResolvedEvent } from '../World';
+import { resolveMapEvent, MAP_REGISTRY, getNodePrimaryEventKind } from '../World';
+import type { ResolvedEvent, ContinentName, MapName } from '../World';
 import { getCardById } from '../Cards/cards.library';
 import { getAvailableSkills } from '../Cards/skill.engine';
 import { isConsumable } from '../Items/types';
@@ -53,6 +53,7 @@ import { buyItem, sellItem, defaultSellPrice } from '../Items/shop.reducer';
 import { getConsumableById } from '../Items/consumable.library';
 import { bucketAxis, getAlignmentCell } from '../Philosophy';
 import { runHazardCombatCliEncounter, type CombatAutoPolicyId } from './combat.cli';
+import type { CombatOutcome } from '../Combat/combat.encounter.types';
 
 type Tab = 'map' | 'journal' | 'skills' | 'codex' | 'inventory' | 'character' | 'dev' | 'reset' | 'save' | 'load' | 'quit';
 
@@ -125,7 +126,60 @@ function asCombatPolicy(value: string | undefined): CombatAutoPolicyId {
     return 'status';
 }
 
-async function moveAndResolveMapNode(store: GameStoreHandle, target: string, flags: CliFlags): Promise<void> {
+/** What resolving one node's authored event actually produced — the
+ *  contract `route:end` classification is built from (Phase 14). */
+interface NodeResolutionResult {
+    event: ResolvedEvent;
+    /** Set only when the event was an encounter; null covers "no
+     *  encounter" and "combat still running" (shouldn't happen — auto
+     *  mode plays to a terminal outcome or the turn cap). */
+    combatOutcome: CombatOutcome | null;
+}
+
+/** Resolves the event authored at the CURRENT node — assumes any move
+ *  already happened. Split out from `moveAndResolveMapNode` so the
+ *  route runner can also resolve the start node in place (Phase 14
+ *  unit 4), which `moveToNode` can never target since a node is never
+ *  in its own `connectedNodes`. */
+async function resolveCurrentNodeEvent(
+    store: GameStoreHandle,
+    flags: CliFlags,
+    nodeLabel: string,
+): Promise<NodeResolutionResult> {
+    const before = store.getState();
+    const result = resolveMapEvent(before);
+    store.setState({
+        player: result.state.player,
+        world:  result.state.world,
+        quests: result.state.quests,
+        flags:  result.state.flags,
+    });
+    logState('resolveMapEvent', before, store.getState(), result.event);
+    log(describeResolvedEvent(result.event));
+
+    let combatOutcome: CombatOutcome | null = null;
+    if (result.event.kind === 'encounter') {
+        const enemy = result.event.encounter.enemies[0];
+        if (!enemy) throw new Error(`Encounter at '${nodeLabel}' had no enemy.`);
+        const combatResult = await runHazardCombatCliEncounter({
+            enemy,
+            presetId: 'apprentice',
+            seed: flags.combatSeed,
+            auto: flags.autoCombat || flags.route !== undefined || flags.routeAudit !== undefined || flags.scriptPath !== undefined || flags.stdin,
+            policy: asCombatPolicy(flags.combatPolicy),
+            maxTurns: flags.combatMaxTurns ?? 20,
+        });
+        combatOutcome = combatResult.outcome;
+    }
+
+    if (result.event.kind === 'village' && result.event.shop && result.event.shop.wares.length > 0) {
+        await shopLoop(store, result.event.shop);
+    }
+
+    return { event: result.event, combatOutcome };
+}
+
+async function moveAndResolveMapNode(store: GameStoreHandle, target: string, flags: CliFlags): Promise<NodeResolutionResult> {
     const state = store.getState();
     const current = state.world.currentMap.currentNode;
     const def = getMapDefinition(state.world.currentMap.continent, state.world.currentMap.name);
@@ -140,33 +194,140 @@ async function moveAndResolveMapNode(store: GameStoreHandle, target: string, fla
     log(`Moved to ${target}.`);
     logState('moveToNode', beforeMove, store.getState(), { target });
 
-    const before = store.getState();
-    const result = resolveMapEvent(before);
-    store.setState({
-        player: result.state.player,
-        world:  result.state.world,
-        quests: result.state.quests,
-        flags:  result.state.flags,
+    return resolveCurrentNodeEvent(store, flags, target);
+}
+
+/**
+ * Phase 14 — the honest evidence contract for `--route` / `--route-audit`.
+ * Three lanes, never conflated:
+ *   - `survivorship`   — a legal, no-backtravel walk; stops dead on defeat.
+ *   - `blocked`        — a survivorship walk that hit a combat defeat.
+ *   - `coverage-audit` — read-only introspection of every authored node,
+ *                        making no claim about a single life surviving.
+ */
+interface RouteEndSummary {
+    classification: 'survivorship' | 'blocked' | 'coverage-audit';
+    visitedNodeIds: string[];
+    resolvedNodeIds: string[];
+    unvisitedNodeIds: string[];
+    blockedAtNodeId?: string;
+    blockerReason?: string;
+    combatOutcomes: Record<string, string>;
+    survived: boolean;
+    startNode?: { nodeId: string; resolved: boolean; reason?: string };
+    eventKinds?: Record<string, string>;
+}
+
+function emitRouteEnd(store: GameStoreHandle, summary: RouteEndSummary): void {
+    logState('route:end', null, store.getState(), summary);
+    emit({ type: 'cli:exit', payload: { reason: 'route-complete', ...summary } });
+}
+
+/** `--route` walker (Phase 14 rewrite). Player-ish/legal moves only —
+ *  never claims survivorship past a combat defeat. */
+async function runScriptedRoute(store: GameStoreHandle, flags: CliFlags): Promise<void> {
+    const startState = store.getState();
+    const startNodeId = startState.world.currentMap.currentNode;
+    const def = getMapDefinition(startState.world.currentMap.continent, startState.world.currentMap.name);
+    const allNodeIds = def.nodes.map(n => n.id);
+
+    const visitedNodeIds: string[] = [startNodeId];
+    const resolvedNodeIds: string[] = [];
+    const combatOutcomes: Record<string, string> = {};
+    let startNode: RouteEndSummary['startNode'];
+
+    if (flags.resolveStart) {
+        const { event, combatOutcome } = await resolveCurrentNodeEvent(store, flags, startNodeId);
+        if (event.kind !== 'none') resolvedNodeIds.push(startNodeId);
+        if (combatOutcome) combatOutcomes[startNodeId] = combatOutcome;
+        startNode = { nodeId: startNodeId, resolved: true };
+        if (combatOutcome === 'defeat') {
+            emitRouteEnd(store, {
+                classification: 'blocked',
+                visitedNodeIds, resolvedNodeIds,
+                unvisitedNodeIds: allNodeIds.filter(id => !visitedNodeIds.includes(id)),
+                blockedAtNodeId: startNodeId,
+                blockerReason: 'combat defeat at start node',
+                combatOutcomes,
+                survived: false,
+                startNode,
+            });
+            return;
+        }
+    } else {
+        startNode = {
+            nodeId: startNodeId,
+            resolved: false,
+            reason: 'start node not resolved by the route runner; pass --resolve-start to resolve it',
+        };
+    }
+
+    let blockedAtNodeId: string | undefined;
+    let blockerReason: string | undefined;
+
+    for (const target of flags.route ?? []) {
+        const { event, combatOutcome } = await moveAndResolveMapNode(store, target, flags);
+        visitedNodeIds.push(target);
+        if (event.kind !== 'none') resolvedNodeIds.push(target);
+        if (combatOutcome) combatOutcomes[target] = combatOutcome;
+        if (combatOutcome === 'defeat') {
+            blockedAtNodeId = target;
+            blockerReason = 'combat defeat';
+            break;
+        }
+    }
+
+    emitRouteEnd(store, {
+        classification: blockedAtNodeId ? 'blocked' : 'survivorship',
+        visitedNodeIds,
+        resolvedNodeIds,
+        unvisitedNodeIds: allNodeIds.filter(id => !visitedNodeIds.includes(id)),
+        blockedAtNodeId,
+        blockerReason,
+        combatOutcomes,
+        survived: blockedAtNodeId === undefined,
+        startNode,
     });
-    logState('resolveMapEvent', before, store.getState(), result.event);
-    log(describeResolvedEvent(result.event));
+}
 
-    if (result.event.kind === 'encounter') {
-        const enemy = result.event.encounter.enemies[0];
-        if (!enemy) throw new Error(`Encounter at '${target}' had no enemy.`);
-        await runHazardCombatCliEncounter({
-            enemy,
-            presetId: 'apprentice',
-            seed: flags.combatSeed,
-            auto: flags.autoCombat || flags.route !== undefined || flags.scriptPath !== undefined || flags.stdin,
-            policy: asCombatPolicy(flags.combatPolicy),
-            maxTurns: flags.combatMaxTurns ?? 20,
-        });
+function findMapContinent(mapName: string): ContinentName | undefined {
+    for (const continent of Object.keys(MAP_REGISTRY) as ContinentName[]) {
+        if (MAP_REGISTRY[continent]?.[mapName as MapName]) return continent;
+    }
+    return undefined;
+}
+
+/** `--route-audit <mapName>` — non-mutating full-map coverage witness
+ *  (Phase 14 unit 3, "Preferred option"). Reads every authored node's
+ *  primary event kind via `getNodePrimaryEventKind` — no RNG roll, no
+ *  movement, no combat — so it can honestly claim 100% node coverage
+ *  without pretending a single legal route visited them all in one life. */
+async function runRouteAudit(store: GameStoreHandle, mapName: string): Promise<void> {
+    const continent = findMapContinent(mapName);
+    if (!continent) {
+        const known = (Object.keys(MAP_REGISTRY) as ContinentName[])
+            .flatMap(c => Object.keys(MAP_REGISTRY[c] ?? {}));
+        throw new Error(`--route-audit: unknown map '${mapName}'. Registered maps: ${known.join(', ') || '(none)'}`);
+    }
+    const def = getMapDefinition(continent, mapName as MapName);
+    const allNodeIds = def.nodes.map(n => n.id);
+    const eventKinds: Record<string, string> = {};
+    for (const id of allNodeIds) {
+        eventKinds[id] = getNodePrimaryEventKind(continent, mapName as MapName, id) ?? 'none';
     }
 
-    if (result.event.kind === 'village' && result.event.shop && result.event.shop.wares.length > 0) {
-        await shopLoop(store, result.event.shop);
-    }
+    log(`\n— Route audit: ${def.name} — ${allNodeIds.length} authored nodes —`);
+    for (const id of allNodeIds) log(`  ${id}: ${eventKinds[id]}`);
+
+    emitRouteEnd(store, {
+        classification: 'coverage-audit',
+        visitedNodeIds: allNodeIds,
+        resolvedNodeIds: allNodeIds,
+        unvisitedNodeIds: [],
+        combatOutcomes: {},
+        survived: true,
+        eventKinds,
+    });
 }
 
 async function mapTab(store: GameStoreHandle, flags: CliFlags): Promise<void> {
@@ -782,10 +943,12 @@ export async function runGameCli(rawArgs = process.argv.slice(2)): Promise<void>
     const store = await bootstrapStore(nullAdapter);
 
     if (flags.route && flags.route.length > 0) {
-        for (const target of flags.route) {
-            await moveAndResolveMapNode(store, target, flags);
-        }
-        emit({ type: 'cli:exit', payload: { reason: 'route-complete', route: flags.route } });
+        await runScriptedRoute(store, flags);
+        return;
+    }
+
+    if (flags.routeAudit) {
+        await runRouteAudit(store, flags.routeAudit);
         return;
     }
 
