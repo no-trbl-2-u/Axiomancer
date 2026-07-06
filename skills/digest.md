@@ -130,7 +130,16 @@ its own cadence.
 6. **Gate + commit + push:** `npm run verify`, then one commit
    `digest: <YYYY-MM-DD>` and push. Cloud ticks confirm the
    deploy per the standing rules if the digest commit
-   triggers one.
+   triggers one. Run `npm run verify` **synchronously, in the
+   same turn** — do not background it and do not call
+   `ScheduleWakeup`/`send_later` to resume and commit later.
+   The night workflow is one `claude-code-action` invocation:
+   when the turn ends, the runner tears down and anything
+   uncommitted is gone, no matter what got scheduled. If
+   verify is still running when you'd otherwise end the turn,
+   keep waiting on it in-turn (a blocking `Bash` call, or a
+   poll loop) until it resolves, then commit and push before
+   finishing.
 
 ## 4. Hard rules
 
@@ -145,6 +154,9 @@ its own cadence.
 5. One commit; cloud ticks carry the `Cloud-Run:` trailer.
 6. No `Co-Authored-By`, no emojis, no `--no-verify` — the
    standing rules apply at 3am too.
+7. Never end the turn with the commit/push still pending on
+   a backgrounded command or a scheduled wakeup — this run has
+   no later turn to resume into (§3.6).
 
 ## 5. Failure modes
 
@@ -156,6 +168,10 @@ its own cadence.
    what the digest broke; ≤3 iterations, then stop loud per
    the standing rules.
 4. **`git pull` divergence** — stop.
+5. **`npm run verify` is slow** — wait on it in-turn; do not
+   background it past the turn boundary. If it risks the
+   job's `timeout_minutes`, that's a finding for tomorrow's
+   digest, not a reason to defer this one.
 
 ## 6. Quick reference
 
