@@ -36,7 +36,7 @@ import {
     getThornsReflect, getDamageTakenMultiplier, getPendingDotTotal, consumeDotEffects,
     getDistinctDebuffCount, getDistinctControlCount,
     getHealingReceivedMult, getOutgoingDamageMult, decayDotsOnHeal, consumeEffect,
-    hasPayloadFlag, getStanceVulnMult,
+    hasPayloadFlag, getStanceVulnMult, computeRoundsToKill,
     RUPTURE_BURST_CAP, COMPOUND_COUNT_CAP, DISRUPT_DENY_AT, EXECUTE_DAMAGE_FRACTION,
     AMPLIFY_BURST_CAP,
 } from './effects';
@@ -2049,6 +2049,70 @@ export function projectSiphonHeal(state: CombatEncounterState, card: CombatCard)
         { kind: 'siphon'; pct: number } | undefined;
     if (!mech) return 0;
     return Math.round(projectCardImpact(state, card).amount * mech.pct * getHealingReceivedMult(state.player));
+}
+
+/** AMPLIFY projection — the live amplified detonate total an amplify card would
+ *  deal RIGHT NOW (pending DoT x its multiplier x read x vulnerable, capped).
+ *  Mirrors `projectRupture`; extracted from the inline amplify-detonate formula
+ *  in `playBottomAction` for the finisher readout (`projectCombatOutcome`). */
+export function projectAmplify(state: CombatEncounterState, card: CombatCard): { ready: boolean; amount: number } {
+    const skill = card.skillId ? lookupSkill(card.skillId) : undefined;
+    const mech = (skill?.specialMechanics ?? []).find(m => m.kind === 'amplify') as
+        { kind: 'amplify'; multiplier: number } | undefined;
+    if (!mech) return { ready: false, amount: 0 };
+    const d = draftedDie(state);
+    const read: CombatReadResult = d ? state.lastRead : 'neutral';
+    const pending = getPendingDotTotal(state.enemy, state.round).total;
+    const amount = Math.min(
+        AMPLIFY_BURST_CAP,
+        Math.round(pending * mech.multiplier * READ_DAMAGE_MULT[read] * getDamageTakenMultiplier(state.enemy)),
+    );
+    return { ready: amount > 0, amount };
+}
+
+/** One hand card's finisher (rupture / amplify / execute) readiness, for
+ *  `projectCombatOutcome`. */
+export interface FinisherProjection {
+    uid: string;
+    cardId: string;
+    mechanic: 'rupture' | 'amplify' | 'execute';
+    ready: boolean;
+    amount: number;
+}
+
+/** The consolidated status kill-path readout (spec 30, build-plan phase 2):
+ *  pending DoT, whether it alone kills the foe and in how many rounds, and
+ *  which hand cards are ready to detonate the stack right now. Pure selector
+ *  no `CombatEvent`, no state mutation; call it on demand from a presenter. */
+export interface CombatOutcomeProjection {
+    pendingDot: number;
+    roundsToKill: number | null;
+    isLethalInFlight: boolean;
+    finishers: FinisherProjection[];
+}
+
+export function projectCombatOutcome(state: CombatEncounterState): CombatOutcomeProjection {
+    const pendingDot = getPendingDotTotal(state.enemy, state.round).total;
+    const roundsToKill = computeRoundsToKill(state.enemy, state.round);
+    const finishers: FinisherProjection[] = [];
+    for (const { uid, card } of handCards(state)) {
+        const skill = card.skillId ? lookupSkill(card.skillId) : undefined;
+        const mech = (skill?.specialMechanics ?? []).find(
+            m => m.kind === 'rupture' || m.kind === 'amplify' || m.kind === 'execute',
+        );
+        if (!mech) continue;
+        if (mech.kind === 'rupture') {
+            const amount = projectRupture(state);
+            finishers.push({ uid, cardId: card.id, mechanic: 'rupture', ready: amount > 0, amount });
+        } else if (mech.kind === 'amplify') {
+            const { ready, amount } = projectAmplify(state, card);
+            finishers.push({ uid, cardId: card.id, mechanic: 'amplify', ready, amount });
+        } else {
+            const { ready, amount } = projectExecute(state, card);
+            finishers.push({ uid, cardId: card.id, mechanic: 'execute', ready, amount });
+        }
+    }
+    return { pendingDot, roundsToKill, isLethalInFlight: roundsToKill !== null, finishers };
 }
 
 /** Re-export for presenters that need to check die affordability directly. */

@@ -248,6 +248,48 @@ export function getPendingDotTotal(bearer: Combatant, currentRound?: number): { 
 }
 
 /**
+ * Rounds until the bearer's currently-stacked DoT effects alone would drop it
+ * to 0 HP, walking round-by-round with the same per-tick formula
+ * `getPendingDotTotal` sums in lump form (ramp- and combo-amplification-aware).
+ * Each effect's tick count is capped at `Math.max(1, remainingDuration)` — the
+ * same "permanent DoT counts one tick" convention `getPendingDotTotal` uses —
+ * so the two figures never diverge. Returns `null` when the DoT alone won't
+ * finish the bearer over its remaining duration. Pure.
+ */
+export function computeRoundsToKill(bearer: Combatant, currentRound?: number): number | null {
+    const dotAmp = getDotAmplificationByEffect(bearer.effects);
+    const dotEffects = bearer.effects
+        .map(ae => {
+            const def = lookupEffect(ae.effectId);
+            const dot = def?.payload.damageOverTime;
+            if (!def || !dot) return null;
+            return {
+                ae, dot, dotModifiers: def.payload.dotModifiers,
+                intensity: ae.intensity ?? 1,
+                multiplier: dotAmp.get(ae.effectId) ?? 1,
+                ticks: Math.max(1, ae.remainingDuration),
+            };
+        })
+        .filter((e): e is NonNullable<typeof e> => e !== null);
+    if (dotEffects.length === 0) return null;
+
+    const maxTicks = Math.max(...dotEffects.map(e => e.ticks));
+    let cumulative = 0;
+    for (let k = 0; k < maxTicks; k++) {
+        for (const e of dotEffects) {
+            if (k >= e.ticks) continue;
+            const dpr = rampedDamagePerRound(
+                e.ae, e.dot.damagePerRound, e.dotModifiers,
+                currentRound === undefined ? undefined : currentRound + k,
+            );
+            cumulative += Math.floor(dpr * e.intensity * e.multiplier);
+        }
+        if (cumulative >= bearer.health) return k + 1;
+    }
+    return null;
+}
+
+/**
  * Strips every DoT effect from the bearer (RUPTURE consumes them on detonation).
  * Returns the updated combatant and the consumed effect ids. Pure.
  */

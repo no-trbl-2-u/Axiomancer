@@ -36,7 +36,7 @@ export {
     processDamageOverTime, processRoundStartEffects, processRoundEndEffects,
     applyCleanse, applyDispel,
     // 0.34.0 status-depth epic — HP-model selectors + tunable scalars
-    getDamageTakenMultiplier, getPendingDotTotal, consumeDotEffects,
+    getDamageTakenMultiplier, getPendingDotTotal, consumeDotEffects, computeRoundsToKill,
     getDistinctDebuffCount, getDistinctControlCount,
     VULNERABLE_MAX_MULT, RESOLUTE_MIN_MULT, RUPTURE_BURST_CAP, COMPOUND_COUNT_CAP,
     DISRUPT_DENY_AT, EXECUTE_DAMAGE_FRACTION,
@@ -184,10 +184,12 @@ export {
     // 0.34.0 status-depth epic — honesty selectors
     getEnemyIncomingDamageMultiplier, getDisruptMeter,
     projectRupture, isExecuteReady, projectExecute, projectSiphonHeal,
+    // Phase 2 — projected-lethality readout (spec 30)
+    projectAmplify, projectCombatOutcome,
     // Master Spec §3 — Skills trigger hook (Skills are NOT cards)
     triggerCombatSkill,
 } from './combat.engine';
-export type { CardDieCost } from './combat.engine';
+export type { CardDieCost, FinisherProjection, CombatOutcomeProjection } from './combat.engine';
 export {
     COMBAT_DICE_COUNT, TURN_DICE_COUNT, COMBAT_DIE_FACES, rollCombatDice, rollTurnDice,
     rollCombatDieColor, dieHasStance,
