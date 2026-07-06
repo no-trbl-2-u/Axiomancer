@@ -40,10 +40,11 @@ Tick in this file in the same commit that ships the phase.
       — `test(mechanics): backfill funded-path combat kill-path coverage — phase 1` (0af106ff)
 
 **Engine depth (status-effect doctrine):**
-- [ ] Phase 2 — Projected-lethality readout API
+- [x] Phase 2 — Projected-lethality readout API
       (`projectCombatOutcome` -> "DoT kills in N phases",
       amplify/execute ready) to make the status kill-path legible
       (mechanics; spec 30 draft)
+      — `feat(mechanics): projected-lethality readout API — phase 2` (128659e0)
 - [ ] Phase 3 — Enemy combat-phase progression / "rage mode"
       (`unlockAfterRound` threat phases) so long fights get
       qualitatively harder and fast status finishes are rewarded
