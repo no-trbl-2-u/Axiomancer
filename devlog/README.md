@@ -3,11 +3,13 @@
 A private, self-contained site served from this one directory. `index.html` is a
 **hub** with four links:
 
-- **Cards** (`cards.html`) — every combat card: name, painting, card text.
+- **Cards** (`cards.html`) — every combat card: name, painting, and raw stats
+  (stance, type, tier, target, power, and the mechanical effects it applies).
 - **Enemies** (`enemies.html`) — every foe: portrait, name, stats, and attacks
   (signature skills + how its AI fights).
 - **Effects** (`effects.html`) — every live status effect: name, board glyph,
-  and what it does.
+  and raw stats (type, category, tier, duration, stacking, and payload
+  modifiers).
 - **DevLog** (`log.html`) — the accumulating, one-visual-entry-per-day
   development log.
 
@@ -37,6 +39,10 @@ the game actually ships:
 
 Effect **glyphs** reuse the mobile combat board's presentation mapping
 (`statusGlyphs.ts`); deprecated-tagged effects are omitted.
+
+The nightly `/digest` runs `npm run site:build`, which regenerates the catalog
+from the current libraries — so as cards, enemies, and effects change, these
+pages refresh automatically on the next digest commit (no manual step).
 
 ## Entry format
 
