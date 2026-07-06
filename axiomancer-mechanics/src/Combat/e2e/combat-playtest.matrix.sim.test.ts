@@ -49,7 +49,7 @@ describe('playtest matrix — determinism', () => {
     it('runPlaytestCell is deterministic for an identical spec', () => {
         const spec = {
             stage: 'early' as const,
-            enemySlug: 'tidepool-crab',
+            enemySlug: 'grave-larva',
             policyId: 'dot-weaver' as const,
             deck: { kind: 'policy-pick' as const },
             runs: 6,
@@ -151,7 +151,7 @@ describe('playtest harness — honest failures', () => {
         // not learned; the harness grants deck knowledge so the cell still runs
         // (the maturity gate lives in DRAFTING, not the engine knownSkills check).
         const cell = runPlaytestCell({
-            stage: 'early', enemySlug: 'tidepool-crab', policyId: 'greedy',
+            stage: 'early', enemySlug: 'grave-larva', policyId: 'greedy',
             deck: { kind: 'preset', presetId: 'dot-erosion' }, runs: 2, seed: 1,
         });
         expect(cell.deckCardIds).toContain('pyrrhic-victory');

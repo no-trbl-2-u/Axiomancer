@@ -125,7 +125,7 @@ export const FRIENDSHIP_COUNTER_MAX = 3;
 // REACTIVE answer to the player's offensive skill, not the enemy's own opening.
 // Set at 0.10 — a felt but not overwhelming reactive threat. A guaranteed
 // (1.0) answer crushes both the STRATEGIST friendship route and the difficult
-// lethal anchor (`balance-judge`); an answer-chance sweep on the Phase 121
+// lethal anchor (`mirac`); an answer-chance sweep on the Phase 121
 // difficult anchor found win rate 0.04 at 0.20–0.35, 0.12 at 0.15, and 0.16 at
 // 0.10 against an authored band of 0.10–0.40, while the normal anchor (0.80)
 // and difficult-anchor friendship rate (0.20) stay flat across the range. 0.10

@@ -15,7 +15,7 @@ import { describe, it, expect, afterEach, vi } from 'vitest';
 
 import { Player } from '../../Character/characters.mock';
 import type { Character } from '../../Character/types';
-import { MournfulGull, CoastalTyrant, TidepoolCrab } from '../../Enemy/enemy.library';
+import { LittleBelle, KingOfRevenge, GraveLarva } from '../../Enemy/enemy.library';
 import { getCardById } from '../../Cards/cards.library';
 import { registerSandboxCards } from '../../Cards/cards.sandbox';
 import { lookupEffect } from '../../Effects';
@@ -76,7 +76,7 @@ const forbiddenRng = (): number => {
 };
 
 function freshState(seed = 5): CombatEncounterState {
-    return initializeCombatEncounter(loadout(MIX), deepClone(TidepoolCrab), undefined, seed);
+    return initializeCombatEncounter(loadout(MIX), deepClone(GraveLarva), undefined, seed);
 }
 
 describe('policy roster — every id resolves', () => {
@@ -157,8 +157,8 @@ describe('greedy object reproduces the pinned legacy decision sequences', () => 
     // These literals were produced by the PRE-refactor sim (verified via a
     // side-by-side run of the HEAD implementation). If they drift, the policy
     // refactor changed greedy's behavior — fix the refactor, never the pin.
-    it('seed 11 vs MournfulGull: befriend-spare in one round', () => {
-        const r = runOneEncounter(loadout(MIX), MournfulGull, 11, 'greedy');
+    it('seed 11 vs LittleBelle: befriend-spare in one round', () => {
+        const r = runOneEncounter(loadout(MIX), LittleBelle, 11, 'greedy');
         // Recalibrated 2026-07-05 (Fate Engine P1 trim): slippery-slope is the
         // ramping poison and eternal-regress the unraveling DoT now; the
         // measured mercy line is one play shorter. Freshly measured, not guessed.
@@ -172,8 +172,8 @@ describe('greedy object reproduces the pinned legacy decision sequences', () => 
         });
     });
 
-    it('seed 11 vs CoastalTyrant: a four-round status grind to victory', () => {
-        const r = runOneEncounter(loadout(MIX), CoastalTyrant, 11, 'greedy');
+    it('seed 11 vs KingOfRevenge: a four-round status grind to victory', () => {
+        const r = runOneEncounter(loadout(MIX), KingOfRevenge, 11, 'greedy');
         // Recalibrated 2026-07-05 (Fate Engine P1 trim): the MIX fixture's DoTs
         // are all PATIENT lines now (ramping poison / unraveling), and this
         // 150-HP 5-card starter loadout loses the race against the tyrant's
@@ -204,21 +204,21 @@ describe('chaos — randomness flows only through the injected seeded rng', () =
 
     it('a full chaos encounter never touches Math.random (hermeticity)', () => {
         const spy = vi.spyOn(Math, 'random');
-        const r = runOneEncounter(loadout(MIX), MournfulGull, 9, 'chaos');
+        const r = runOneEncounter(loadout(MIX), LittleBelle, 9, 'chaos');
         expect(spy).not.toHaveBeenCalled();
         expect(['victory', 'mercy', 'defeat', 'retreat']).toContain(r.outcome);
     }, 30_000);
 
     it('chaos runs are seed-deterministic', () => {
-        const a = runOneEncounter(loadout(MIX), MournfulGull, 9, 'chaos');
-        const b = runOneEncounter(loadout(MIX), MournfulGull, 9, 'chaos');
+        const a = runOneEncounter(loadout(MIX), LittleBelle, 9, 'chaos');
+        const b = runOneEncounter(loadout(MIX), LittleBelle, 9, 'chaos');
         expect(b).toEqual(a);
     }, 30_000);
 });
 
 describe('per-card telemetry — cardUsage is consistent with the aggregate counters', () => {
     it('usage sums match plays / bottom+top / statusPlays', () => {
-        const r = runOneEncounter(loadout(MIX), MournfulGull, 3, 'greedy');
+        const r = runOneEncounter(loadout(MIX), LittleBelle, 3, 'greedy');
         const rows = Object.values(r.cardUsage);
         const totalPlays = rows.reduce((n, row) => n + row.plays, 0);
         const totalBottom = rows.reduce((n, row) => n + row.bottomPlays, 0);
@@ -233,7 +233,7 @@ describe('per-card telemetry — cardUsage is consistent with the aggregate coun
     it('respects an explicit deck: only its ids (plus Retreat) appear in usage', () => {
         const deck = ['slippery-slope', 'slippery-slope', 'brace-for-impact'];
         const allowed = new Set([...deck, 'card-retreat']);
-        const r = runOneEncounter(loadout(MIX), MournfulGull, 4, 'greedy', { deck });
+        const r = runOneEncounter(loadout(MIX), LittleBelle, 4, 'greedy', { deck });
         expect(Object.keys(r.cardUsage).length).toBeGreaterThan(0);
         for (const key of Object.keys(r.cardUsage)) {
             expect(allowed.has(key), `unexpected card '${key}' in usage`).toBe(true);
@@ -244,7 +244,7 @@ describe('per-card telemetry — cardUsage is consistent with the aggregate coun
         // Greedy would normally power the DoT before the pure strike; the focus
         // boost must force the strike into play (the card-coverage lever).
         const deck = ['slippery-slope', 'achilles-gambit', 'achilles-gambit', 'brace-for-impact'];
-        const r = runOneEncounter(loadout(deck), MournfulGull, 6, 'greedy', {
+        const r = runOneEncounter(loadout(deck), LittleBelle, 6, 'greedy', {
             deck, focusCardIds: ['achilles-gambit'],
         });
         expect(r.cardUsage['achilles-gambit']?.plays ?? 0).toBeGreaterThanOrEqual(1);
@@ -252,7 +252,7 @@ describe('per-card telemetry — cardUsage is consistent with the aggregate coun
     });
 
     it('throws on an unknown policy id (honest failure, no silent fallback)', () => {
-        expect(() => runOneEncounter(loadout(MIX), MournfulGull, 1, 'nope' as CombatSimPolicyId))
+        expect(() => runOneEncounter(loadout(MIX), LittleBelle, 1, 'nope' as CombatSimPolicyId))
             .toThrow(/Unknown combat sim policy/);
     });
 });

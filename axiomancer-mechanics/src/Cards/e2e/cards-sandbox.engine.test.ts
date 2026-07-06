@@ -21,7 +21,7 @@ import { describe, it, expect, afterEach, vi } from 'vitest';
 import { Player } from '../../Character/characters.mock';
 import type { Character } from '../../Character/types';
 import type { Enemy } from '../../Enemy/types';
-import { TidepoolCrab } from '../../Enemy/enemy.library';
+import { GraveLarva } from '../../Enemy/enemy.library';
 import { deepClone } from '../../Utils';
 import { lookupEffect } from '../../Effects';
 import type { Card } from '../types';
@@ -73,7 +73,7 @@ function makePlayer(skills: string[]): Character {
 }
 
 function makeWeakEnemy(): Enemy {
-    const e = deepClone(TidepoolCrab);
+    const e = deepClone(GraveLarva);
     e.health = 60;
     e.maxHealth = 60;
     e.effects = [];

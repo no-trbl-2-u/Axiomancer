@@ -30,15 +30,15 @@ const DEFAULT_LABEL = 'Enemy portrait';
 
 /** A representative enemy id per bespoke (non-generic) archetype. */
 const BESPOKE_SAMPLES: ReadonlyArray<readonly [string, EnemyArchetype]> = [
-    ['salt-gnaw-rat', 'vermin'],
+    ['grave-larva', 'vermin'],
     ['tidepool-crab', 'crustacean'],
-    ['hush-wraith', 'spirit'],
-    ['wet-hound', 'beast'],
+    ['water-holger', 'spirit'],
+    ['rawhead-rex', 'beast'],
     ['mournful-gull', 'avian'],
-    ['the-forest-mind', 'flora'],
-    ['hollow-saint', 'zealot'],
-    ['the-unwriting', 'eldritch'],
-    ['coastal-tyrant', 'tyrant'],
+    ['jeweled-tree', 'flora'],
+    ['brine-hag', 'zealot'],
+    ['the-abortive', 'eldritch'],
+    ['king-of-revenge', 'tyrant'],
 ];
 
 describe('EnemyPortrait', () => {
@@ -82,14 +82,14 @@ describe('EnemyPortrait', () => {
     });
 
     it('uses the default accessibility label when none is supplied', () => {
-        const tree = render(<EnemyPortrait enemyArtKey="salt-gnaw-rat" />);
+        const tree = render(<EnemyPortrait enemyArtKey="grave-larva" />);
         expect(tree.getByLabelText(DEFAULT_LABEL)).toBeTruthy();
     });
 
     it('overrides the accessibility label when one is supplied', () => {
         const label = 'Salt-gnaw rat, hunched and bristling';
         const tree = render(
-            <EnemyPortrait enemyArtKey="salt-gnaw-rat" label={label} />,
+            <EnemyPortrait enemyArtKey="grave-larva" label={label} />,
         );
         expect(tree.getByLabelText(label)).toBeTruthy();
         expect(tree.queryByLabelText(DEFAULT_LABEL)).toBeNull();
@@ -97,7 +97,7 @@ describe('EnemyPortrait', () => {
 
     it('propagates custom width and height to the portrait SVG', () => {
         const tree = render(
-            <EnemyPortrait enemyArtKey="wet-hound" width={120} height={140} />,
+            <EnemyPortrait enemyArtKey="rawhead-rex" width={120} height={140} />,
         );
         const svg = tree.getByLabelText(DEFAULT_LABEL);
         expect(svg.props.width).toBe(120);

@@ -46,7 +46,7 @@ const SEED_OFFSETS = [0, 1000, 2000] as const;
 const SUPPORT_KIT = ['brace-for-impact', 'slippery-slope', 'befriend'] as const;
 
 const WEAK_ENEMY: Enemy = deepClone(
-    (ENEMY_REGISTRY as Record<string, Enemy>)['tidepool-crab'],
+    (ENEMY_REGISTRY as Record<string, Enemy>)['grave-larva'],
 );
 
 /** Late-stage player who additionally knows EVERY library card — the engine's

@@ -49,7 +49,7 @@ describe('World/Continents Engine Tests', () => {
       expect(startingQuest.mapName).toBe('fishing-village');
       expect(startingQuest.objectives).toHaveLength(1);
       expect(startingQuest.objectives[0].type).toBe('kill');
-      expect(startingQuest.objectives[0].target).toBe('The Coastal Tyrant');
+      expect(startingQuest.objectives[0].target).toBe('The King of Revenge');
     });
   });
 
@@ -341,15 +341,15 @@ describe('World/Continents Engine Tests', () => {
 
   describe('Cross-NPC Flag Integration', () => {
     it('has flag-gated content referencing other NPCs', () => {
-      // Test beggar's gull recognition (requires befriended-mournful-gull flag)
+      // Test beggar's bell recognition (requires befriended-little-belle flag)
       const beggarTree = fishingVillage.npcs!.find(npc => npc.name === 'Coastal Beggar')?.dialogueTree;
       if (beggarTree) {
         const greetNode = beggarTree.nodes['greet'];
         const gullChoice = greetNode.choices!.find(c => 
-          c.requires?.flag === 'befriended-mournful-gull'
+          c.requires?.flag === 'befriended-little-belle'
         );
         expect(gullChoice).toBeDefined();
-        expect(gullChoice?.text).toContain('gulls quieter');
+        expect(gullChoice?.text).toContain('gone quiet');
       }
     });
 

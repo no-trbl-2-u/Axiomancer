@@ -119,11 +119,11 @@ describe('fishing-village content — new-player map', () => {
         });
         if (result.event.kind === 'encounter') {
             expect(result.event.isBoss).toBe(true);
-            // coastal-tyrant is endgame-tier (L6); the encounter `level`
+            // king-of-revenge is mid-tier (L6); the encounter `level`
             // override scales it down so a fresh player can win the climax.
             const boss = result.event.encounter.enemies[0];
             expect(boss.level).toBe(3);
-            expect(boss.name).toBe('The Coastal Tyrant');
+            expect(boss.name).toBe('The King of Revenge');
         }
     });
 });

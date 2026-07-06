@@ -29,7 +29,7 @@ import {
     getEquippedItemSets,
 } from '../set.engine';
 import { itemSetLibrary, getItemSetById } from '../set.library';
-import { Disatree_01 } from '../../Enemy/enemy.library';
+import { FloatEye } from '../../Enemy/enemy.library';
 import { tickAllEffects } from '../../Combat/effects';
 import type { Equipment, EquipmentSlot } from '../types';
 import type { CombatResources } from '../../Cards/types';
@@ -205,7 +205,7 @@ describe('Phase 54 — initializeCombat seeds set tokens additively', () => {
             equipment: { feet: sandals, head: leatherCap, accessory: heartAccessory },
         };
 
-        const state = initializeCombat(player, Disatree_01);
+        const state = initializeCombat(player, FloatEye);
         // 2 (set) + 1 (item) = 3.
         expect(state.combatResources.heart).toBe(3);
         // Other resources stay at the equipment/set baseline (all zero here).
@@ -215,7 +215,7 @@ describe('Phase 54 — initializeCombat seeds set tokens additively', () => {
 
     it('zero-set baseline still works (no equipment, no set bonuses)', () => {
         const player = buildPlayer();
-        const state = initializeCombat(player, Disatree_01);
+        const state = initializeCombat(player, FloatEye);
         expect(state.combatResources).toEqual(ZERO_RESOURCES);
     });
 });
@@ -232,7 +232,7 @@ describe('Phase 54 — set passiveEffects are combat-scoped (Spec Q4)', () => {
             ...buildPlayer(),
             equipment: { head: leatherCap, accessory: copperRing },
         };
-        const state = initializeCombat(player, Disatree_01);
+        const state = initializeCombat(player, FloatEye);
 
         // The effect lands on combatState.player.effects, not character.effects.
         const setEffect = state.player.effects?.find(
@@ -261,7 +261,7 @@ describe('Phase 54 — set passiveEffects are combat-scoped (Spec Q4)', () => {
             ...buildPlayer(),
             equipment: { head: leatherCap, accessory: copperRing },
         };
-        let state = initializeCombat(player, Disatree_01);
+        let state = initializeCombat(player, FloatEye);
 
         // Tick the player's effects 20 times — well past any plausible combat
         // length. The set passive must still be present at the end.
@@ -359,7 +359,7 @@ describe('Phase 158 — every set anchors on a status-effect passive', () => {
             ...buildPlayer(),
             equipment: equipAll(getItemSetById('iron-discipline')!.memberTemplateIds),
         };
-        const state = initializeCombat(player, Disatree_01);
+        const state = initializeCombat(player, FloatEye);
         const statusEffect = state.player.effects?.find(
             e => e.effectId === STATUS_OFFENSE && e.sourceId === 'set-bonus',
         );

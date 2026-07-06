@@ -20,7 +20,7 @@ import { classifyVerbClass } from '../combat.cards';
 import { getCardById } from '../../Cards/cards.library';
 import { lookupEffect } from '../../Effects';
 import { initializeCombatEncounter } from '../combat.engine';
-import { TidepoolCrab } from '../../Enemy/enemy.library';
+import { GraveLarva } from '../../Enemy/enemy.library';
 import { deepClone } from '../../Utils';
 import type { Card } from '../../Cards/types';
 import type { CombatVerbClass } from '../combat.encounter.types';
@@ -206,7 +206,7 @@ describe('drafted decks drive the engine', () => {
     it('a stage draft initializes a real encounter (deck = drafted ids)', () => {
         const early = COMBAT_STAGE_PROFILES.early;
         const deck = draftCombatDeck({ focus: 'dot', stage: early, rng: lcg(8) });
-        const state = initializeCombatEncounter(buildStagePlayer(early), deepClone(TidepoolCrab), deck, 8);
+        const state = initializeCombatEncounter(buildStagePlayer(early), deepClone(GraveLarva), deck, 8);
         expect(state.deck).toEqual(deck);
         expect(state.hand.length).toBeGreaterThan(0);
         expect(state.finalOutcome).toBeNull();

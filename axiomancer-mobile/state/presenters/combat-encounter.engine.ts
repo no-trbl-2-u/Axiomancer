@@ -30,7 +30,6 @@ import {
 type SkillSpecialMechanic = NonNullable<Skill['specialMechanics']>[number];
 import { effectGlyph, GLYPH_COLORS, type StatusGlyph } from '@/components/combat/statusGlyphs';
 import { keywordForEffect, keywordForVerb, keywordGloss } from '@/state/combat/keywords';
-import { resolveEnemyArchetype } from '@/state/presenters/enemy-art';
 
 // ── Stance palette (Heart/Body/Mind/Wild/X) ──────────────────────────────────
 
@@ -269,10 +268,11 @@ function enemyPane(state: CombatEncounterState): CombatEnemyPaneVM {
     const cur = currentPhase(state);
     const revealed = isPhaseStanceRevealed(state, Math.min(state.currentPhaseIndex, state.threatPhases.length - 1));
     const stance = revealed ? cur?.enemyStance ?? null : null;
-    const isBoss = (e.tags ?? []).includes('boss') || /tyrant|boss|sovereign/.test(e.id);
+    const isBoss = e.difficulty === 'boss' || e.difficulty === 'unique'
+        || (e.tags ?? []).includes('boss') || (e.tags ?? []).includes('unique');
     return {
         name: e.name,
-        artKey: e.id,
+        artKey: e.portraitAsset ?? e.id,
         artNonce: state.seed ?? 0,
         isBoss,
         hp: Math.max(0, e.health), maxHp: e.maxHealth,

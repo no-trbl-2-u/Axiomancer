@@ -5,7 +5,7 @@
  * `gameReducer` dispatch spine:
  *
  *   1. createGameStore + createEventEmitter
- *   2. START_COMBAT against TidepoolCrab (low-HP enemy → cheap victory)
+ *   2. START_COMBAT against GraveLarva (low-HP enemy → cheap victory)
  *   3. updateCombat drops the enemy to 0 HP (emits combat:round)
  *   4. END_COMBAT — outcome is 'victory', loot + XP applied
  *   5. LEVEL_UP — confirms the placeholder level-up reducer (Phase 09 brief)
@@ -21,7 +21,7 @@
 import { describe, it, expect, afterEach, vi } from 'vitest';
 
 import { Player } from '../../Character/characters.mock';
-import { TidepoolCrab } from '../../Enemy/enemy.library';
+import { GraveLarva } from '../../Enemy/enemy.library';
 import { createGameStore } from '../store';
 import { createEventEmitter, GameEvent, GameEventType } from '../events';
 import { createNewGameState, gameReducer } from '../game.reducer';
@@ -62,16 +62,16 @@ describe('Game loop — full transcript through gameReducer', () => {
         // 1. START_COMBAT — stages the encounter in the store.
         store.getState().dispatch({
             type: 'START_COMBAT',
-            payload: { target: TidepoolCrab },
+            payload: { target: GraveLarva },
         });
         expect(store.getState().currentEncounter).toBeDefined();
-        expect(store.getState().currentEncounter!.enemies[0]!.id).toBe(TidepoolCrab.id);
+        expect(store.getState().currentEncounter!.enemies[0]!.id).toBe(GraveLarva.id);
 
         // 2. END_COMBAT — combat resolution lives outside the store, so we
         //    report the victory outcome; it grants enemy XP and rolls loot.
         const report = store.getState().endCombat('victory');
         expect(report.outcome).toBe('victory');
-        expect(report.xpGained).toBe(TidepoolCrab.xpReward);
+        expect(report.xpGained).toBe(GraveLarva.xpReward);
         expect(store.getState().currentEncounter).toBeUndefined();
 
         // 4. LEVEL_UP — the seeded XP + enemy reward should clear the threshold.

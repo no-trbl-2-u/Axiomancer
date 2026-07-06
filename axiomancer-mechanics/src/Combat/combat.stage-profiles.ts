@@ -65,8 +65,8 @@ export const COMBAT_STAGE_PROFILES: Record<CombatStageId, CombatStageProfile> = 
         playerMaxHealth: 90,
         maxCardTier: 1,
         enemySlugs: [
-            'tidepool-crab', 'salt-gnaw-rat', 'mournful-gull',
-            'hollow-eyed-beggar', 'hush-wraith', 'coastal-tyrant',
+            'grave-larva', 'foot-stealer', 'little-belle',
+            'water-holger', 'the-butcher', 'king-of-revenge',
         ],
     },
     mid: {
@@ -80,8 +80,8 @@ export const COMBAT_STAGE_PROFILES: Record<CombatStageId, CombatStageProfile> = 
         playerMaxHealth: 255,
         maxCardTier: 2,
         enemySlugs: [
-            'audit-sentinel', 'rimeclaw-prowler', 'glassmind-oracle',
-            'mire-of-consensus', 'the-lich-of-missing-steps',
+            'tri-eyes', 'mirac', 'hasshaku-sama',
+            'jeweled-tree', 'rawhead-rex',
         ],
     },
     late: {
@@ -95,8 +95,8 @@ export const COMBAT_STAGE_PROFILES: Record<CombatStageId, CombatStageProfile> = 
         playerMaxHealth: 570,
         maxCardTier: 3,
         enemySlugs: [
-            'famine-of-the-deep-wood', 'warrant-of-the-void', 'graveward-keeper',
-            'the-last-consensus', 'axiom-breaker', 'the-terminal-proof',
+            'fire-giant', 'rangda', 'tezcatlipoca',
+            'arch-demon', 'death', 'the-abortive',
         ],
     },
     impossible: {

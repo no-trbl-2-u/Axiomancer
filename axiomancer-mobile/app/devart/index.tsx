@@ -16,15 +16,15 @@ import { isDevToolsEnabled } from '@/lib/buildProfile';
 import { EnemyIllustration } from '@/components/event/enemy-art/EnemyIllustration';
 
 const SAMPLES: ReadonlyArray<{ label: string; key: string; boss?: boolean }> = [
-    { label: 'vermin', key: 'salt-gnaw-rat' },
+    { label: 'vermin', key: 'grave-larva' },
     { label: 'crustacean', key: 'tidepool-crab' },
-    { label: 'spirit', key: 'hush-wraith' },
-    { label: 'beast', key: 'wet-hound' },
+    { label: 'spirit', key: 'water-holger' },
+    { label: 'beast', key: 'rawhead-rex' },
     { label: 'avian', key: 'mournful-gull' },
-    { label: 'flora', key: 'forest-sprite' },
-    { label: 'zealot', key: 'hollow-saint' },
-    { label: 'eldritch', key: 'the-disagreement' },
-    { label: 'tyrant (boss)', key: 'coastal-tyrant', boss: true },
+    { label: 'flora', key: 'jeweled-tree' },
+    { label: 'zealot', key: 'brine-hag' },
+    { label: 'eldritch', key: 'the-abortive' },
+    { label: 'tyrant (boss)', key: 'king-of-revenge', boss: true },
     { label: 'generic', key: 'mystery-foe' },
 ];
 

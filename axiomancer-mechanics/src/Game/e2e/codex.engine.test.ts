@@ -13,8 +13,8 @@ import { nullAdapter } from '../persistence/null.adapter';
 import { createNewGameState, GAME_STATE_VERSION } from '../game.reducer';
 import { migrate } from '../game.migrate';
 import {
-    MournfulGull,
-    TidepoolCrab,
+    LittleBelle,
+    GraveLarva,
 } from '../../Enemy/enemy.library';
 
 describe('Phase 73 — codex / journal-entry surface', () => {
@@ -23,17 +23,17 @@ describe('Phase 73 — codex / journal-entry surface', () => {
         expect(state.codex).toEqual({ unlockedEntries: [] });
     });
 
-    it('befriending MournfulGull unlocks codex entry + surfaces { id, title } on report', () => {
+    it('befriending LittleBelle unlocks codex entry + surfaces { id, title } on report', () => {
         const store = createGameStore(nullAdapter);
         // Drive a friendship outcome directly — combat resolution lives outside
         // the store now, so endCombat takes the resolved outcome.
-        store.getState().startCombat(MournfulGull);
+        store.getState().startCombat(LittleBelle);
         const report = store.getState().endCombat('friendship');
         expect(report.outcome).toBe('friendship');
-        expect(store.getState().codex.unlockedEntries).toContain('codex-mournful-gull');
+        expect(store.getState().codex.unlockedEntries).toContain('codex-little-belle');
         expect(report.friendshipReward?.codexEntryUnlocked).toEqual({
-            id: 'codex-mournful-gull',
-            title: 'The Catalogue of Slights',
+            id: 'codex-little-belle',
+            title: 'The Service Held By One',
         });
     });
 
@@ -44,18 +44,18 @@ describe('Phase 73 — codex / journal-entry surface', () => {
         expect(store.getState().codex.unlockedEntries).toEqual(['codex-test']);
     });
 
-    it('TidepoolCrab (no journalEntry) friendship leaves codex empty + no report field', () => {
+    it('GraveLarva (no journalEntry) friendship leaves codex empty + no report field', () => {
         const store = createGameStore(nullAdapter);
-        store.getState().startCombat(TidepoolCrab);
+        store.getState().startCombat(GraveLarva);
         const report = store.getState().endCombat('friendship');
         expect(report.outcome).toBe('friendship');
         expect(store.getState().codex.unlockedEntries).toEqual([]);
         expect(report.friendshipReward?.codexEntryUnlocked).toBeUndefined();
     });
 
-    it('victory outcome against MournfulGull does NOT unlock the codex entry', () => {
+    it('victory outcome against LittleBelle does NOT unlock the codex entry', () => {
         const store = createGameStore(nullAdapter);
-        store.getState().startCombat(MournfulGull);
+        store.getState().startCombat(LittleBelle);
         const report = store.getState().endCombat('victory');
         expect(report.outcome).toBe('victory');
         expect(store.getState().codex.unlockedEntries).toEqual([]);

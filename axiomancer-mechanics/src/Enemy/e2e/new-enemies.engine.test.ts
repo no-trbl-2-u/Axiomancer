@@ -1,111 +1,108 @@
 /**
- * 2026-06-07 content drop — hermetic coverage for the budget-scaled
- * early / mid / late game enemy tiers.
+ * 2026-07-06 art-driven roster — hermetic coverage for the base enemy library.
  *
  * Asserts:
- *   - every new slug resolves in ENEMY_REGISTRY,
- *   - a budget-built sample's baseStats sum equals enemyStatBudget(level) total,
- *   - >=10 enemies tagged 'early-game', >=10 'mid-game', >=10 'late-game',
- *   - derivedStats and maxHealth are positive across the new roster.
+ *   - every roster slug resolves in ENEMY_REGISTRY and EnemyLibrary,
+ *   - every roster enemy carries a UNIQUE portraitAsset (the 1:1 art law),
+ *   - every roster enemy has an AUTHORED threat sequence (no generator
+ *     fallbacks in the shipped roster) whose damage weights ESCALATE
+ *     (max weight in the back half >= max weight of the opening phase),
+ *   - tier tags cover early/mid/late with >=12 enemies each,
+ *   - derivedStats and maxHealth are positive across the roster.
  */
 
 import { describe, it, expect } from 'vitest';
-import { enemyStatBudget } from '../index';
-import { ENEMY_REGISTRY, EnemyLibrary } from '../enemy.library';
-import type { BaseStats } from '../../Character/types';
+import { ENEMY_REGISTRY, EnemyLibrary, TheIncompleteness, Sandbag_01 } from '../enemy.library';
+import { AUTHORED_THREAT_SEQUENCES } from '../../Combat/combat.threat-sequences';
 import type { Enemy } from '../types';
 
-// Slugs introduced in the 2026-06-07 drop.
-const NEW_SLUGS = [
-    // early-game
-    'salt-gnaw-rat', 'driftwood-husk', 'petty-cutpurse', 'bog-will-stripling',
-    'apprentice-heretic', 'thicket-ambusher', 'reef-barnacle-colony',
-    'wandering-sophist', 'tolltaker-of-the-ford', 'the-market-arbiter',
-    // mid-game
-    'rimeclaw-prowler', 'glassmind-oracle', 'penitent-flagellant', 'iron-covenanter',
-    'mire-of-consensus', 'contrarian-revenant', 'the-tithewarden', 'apostate-abbot',
-    'the-unwriting', 'harvest-of-names',
-    // late-game
-    'famine-of-the-deep-wood', 'cathedral-of-doubt', 'warrant-of-the-void',
-    'the-schismarch', 'graveward-keeper', 'prosecutor-of-the-real',
-    'the-last-consensus', 'axiom-breaker', 'pallbearer-of-reason', 'the-terminal-proof',
-] as const;
+/** The 52 art-roster slugs (excludes the sandbag + incompleteness fixtures). */
+const ROSTER_SLUGS = (Object.keys(ENEMY_REGISTRY) as Array<keyof typeof ENEMY_REGISTRY>)
+    .filter(slug => slug !== 'sandbag' && slug !== 'the-incompleteness');
 
-function statSum(s: BaseStats): number {
-    return s.heart + s.body + s.mind;
-}
-
-describe('2026-06-07: budget-scaled enemy tiers', () => {
-    describe('registry resolution', () => {
-        it('resolves every new slug in ENEMY_REGISTRY', () => {
-            for (const slug of NEW_SLUGS) {
-                const enemy = (ENEMY_REGISTRY as Record<string, unknown>)[slug];
-                expect(enemy, `slug ${slug} missing from ENEMY_REGISTRY`).toBeDefined();
-            }
-        });
-
-        it('registers every new enemy in EnemyLibrary', () => {
-            for (const slug of NEW_SLUGS) {
-                const enemy = (ENEMY_REGISTRY as Record<string, { id: string }>)[slug]!;
-                expect(EnemyLibrary).toContain(enemy);
-            }
-        });
+describe('2026-07-06: the art-driven base roster', () => {
+    it('carries exactly 52 roster enemies (one per painting)', () => {
+        expect(ROSTER_SLUGS.length).toBe(52);
     });
 
-    describe('stat-budget integrity', () => {
-        // SKIP-ISSUE: #1
-        it.skip('matches enemyStatBudget total for budget-built samples', () => {
-            // DISABLED FOR PHASE 123: These enemies were authored with different
-            // constants than the current ENEMY_STAT_PER_LEVEL and lack gear-tier scaling.
-            // The budget integrity check is incompatible with the Phase 123 changes.
-            // Re-enable when these enemies are migrated to the new system.
-            for (const slug of NEW_SLUGS) {
-                const enemy = (ENEMY_REGISTRY as Record<string, {
-                    level: number; baseStats: BaseStats;
-                }>)[slug]!;
-                const expected = statSum(enemyStatBudget(enemy.level, undefined, undefined, 0));
-                const actual = statSum(enemy.baseStats);
-                expect(Math.abs(actual - expected), `slug ${slug} budget mismatch: expected ${expected}, got ${actual}`).toBeLessThanOrEqual(5);
-            }
-        });
+    it('registers every roster enemy in EnemyLibrary', () => {
+        for (const slug of ROSTER_SLUGS) {
+            expect(EnemyLibrary).toContain(ENEMY_REGISTRY[slug]);
+        }
+    });
+
+    it('gives every roster enemy a unique portraitAsset (the 1:1 art law)', () => {
+        const seen = new Set<string>();
+        for (const slug of ROSTER_SLUGS) {
+            const enemy = ENEMY_REGISTRY[slug] as Enemy;
+            expect(enemy.portraitAsset, `slug ${slug} missing portraitAsset`).toBeTruthy();
+            expect(seen.has(enemy.portraitAsset!), `duplicate portraitAsset ${enemy.portraitAsset}`).toBe(false);
+            seen.add(enemy.portraitAsset!);
+        }
+    });
+
+    it('authors a threat sequence for every roster enemy (no generator fallbacks)', () => {
+        for (const slug of ROSTER_SLUGS) {
+            const enemy = ENEMY_REGISTRY[slug] as Enemy;
+            const seq = AUTHORED_THREAT_SEQUENCES[enemy.id];
+            expect(seq, `enemy ${enemy.id} has no authored threat sequence`).toBeDefined();
+            expect(seq!.length).toBeGreaterThanOrEqual(2);
+        }
+    });
+
+    it('escalates every authored sequence (Aeon\'s-End pressure: the back half outweighs the opener)', () => {
+        for (const slug of ROSTER_SLUGS) {
+            const enemy = ENEMY_REGISTRY[slug] as Enemy;
+            const seq = AUTHORED_THREAT_SEQUENCES[enemy.id]!;
+            const opener = seq[0].damageWeight ?? 1;
+            const peak = Math.max(...seq.map(p => p.damageWeight ?? 1));
+            expect(peak, `enemy ${enemy.id} never escalates past its opener`).toBeGreaterThan(opener);
+        }
     });
 
     describe('tier tag distribution', () => {
         const tagged = (tag: string) =>
-            NEW_SLUGS
-                .map(slug => (ENEMY_REGISTRY as Record<string, { tags?: string[] }>)[slug]!)
+            ROSTER_SLUGS
+                .map(slug => ENEMY_REGISTRY[slug] as Enemy)
                 .filter(e => e.tags?.includes(tag));
 
-        it('has >=10 early-game enemies', () => {
-            expect(tagged('early-game').length).toBeGreaterThanOrEqual(10);
+        it('has >=12 early-game enemies', () => {
+            expect(tagged('early-game').length).toBeGreaterThanOrEqual(12);
         });
 
-        it('has >=10 mid-game enemies', () => {
-            expect(tagged('mid-game').length).toBeGreaterThanOrEqual(10);
+        it('has >=12 mid-game enemies', () => {
+            expect(tagged('mid-game').length).toBeGreaterThanOrEqual(12);
         });
 
-        it('has >=10 late-game enemies', () => {
-            expect(tagged('late-game').length).toBeGreaterThanOrEqual(10);
+        it('has >=12 late-game enemies', () => {
+            expect(tagged('late-game').length).toBeGreaterThanOrEqual(12);
         });
 
-        it('stamps every new enemy with addedIn provenance', () => {
-            for (const slug of NEW_SLUGS) {
-                const enemy = (ENEMY_REGISTRY as Record<string, { addedIn?: string }>)[slug]!;
-                expect(enemy.addedIn).toBe('2026-06-07');
+        it('stamps every roster enemy with addedIn provenance', () => {
+            for (const slug of ROSTER_SLUGS) {
+                const enemy = ENEMY_REGISTRY[slug] as Enemy;
+                expect(enemy.addedIn).toBe('2026-07-06');
             }
         });
     });
 
     describe('derived resources are positive', () => {
-        it('has positive maxHealth and derivedStats for every new enemy', () => {
-            for (const slug of NEW_SLUGS) {
-                const enemy = (ENEMY_REGISTRY as Record<string, Enemy>)[slug]!;
+        it('has positive maxHealth and derivedStats for every roster enemy', () => {
+            for (const slug of ROSTER_SLUGS) {
+                const enemy = ENEMY_REGISTRY[slug] as Enemy;
                 expect(enemy.maxHealth, `slug ${slug} maxHealth`).toBeGreaterThan(0);
                 expect(enemy.health, `slug ${slug} health`).toBeGreaterThan(0);
                 for (const [key, value] of Object.entries(enemy.derivedStats)) {
                     expect(value, `slug ${slug} derivedStats.${key}`).toBeGreaterThan(0);
                 }
             }
+        });
+    });
+
+    describe('fixtures stay out of the roster', () => {
+        it('keeps the Sandbag and The Incompleteness registered but excluded from the count', () => {
+            expect(ENEMY_REGISTRY['sandbag']).toBe(Sandbag_01);
+            expect(ENEMY_REGISTRY['the-incompleteness']).toBe(TheIncompleteness);
         });
     });
 });

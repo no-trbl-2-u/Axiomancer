@@ -8,7 +8,7 @@
  * Usage:
  *   npm run combat-sim                              # omniscient ('greedy') witness
  *   npm run combat-sim -- --blind                  # realistic-player witness (no hidden-stance peek)
- *   npm run combat-sim -- --enemy=CoastalTyrant    # one enemy only
+ *   npm run combat-sim -- --enemy=KingOfRevenge    # one enemy only
  *   npm run combat-sim -- --loadout=slippery-slope,eternal-regress,befriend
  *   npm run combat-sim -- --runs=300 --seed=1 --blind
  *
@@ -22,11 +22,11 @@
 import { Player } from '../Character/characters.mock';
 import type { Character } from '../Character/types';
 import type { Enemy } from '../Enemy/types';
-import { MournfulGull, HushWraith, CoastalTyrant, TheDisagreement } from '../Enemy/enemy.library';
+import { LittleBelle, TheFerryman, KingOfRevenge, FateSpinner } from '../Enemy/enemy.library';
 import { deepClone } from '../Utils';
 import { simulateHazardPatternCombat, type CombatSimPolicyId } from '../Combat/combat.encounter.sim';
 
-const ENEMIES: Record<string, Enemy> = { MournfulGull, HushWraith, CoastalTyrant, TheDisagreement };
+const ENEMIES: Record<string, Enemy> = { LittleBelle, TheFerryman, KingOfRevenge, FateSpinner };
 
 const flag = (k: string): string | undefined => {
     const a = process.argv.find(x => x.startsWith(`--${k}=`));

@@ -18,7 +18,7 @@ import { describe, it, expect, afterEach, vi } from 'vitest';
 import { Player } from '../../Character/characters.mock';
 import type { Character } from '../../Character/types';
 import type { Enemy } from '../../Enemy/types';
-import { TidepoolCrab } from '../../Enemy/enemy.library';
+import { GraveLarva } from '../../Enemy/enemy.library';
 import { deepClone } from '../../Utils';
 import { registerSandboxCards } from '../../Cards/cards.sandbox';
 import {
@@ -77,7 +77,7 @@ function makePlayer(skills: string[]): Character {
 }
 
 function makeEnemy(hp: number, stance: 'heart' | 'body' | 'mind', effects: ActiveEffect[] = []): Enemy {
-    const e = deepClone(TidepoolCrab);
+    const e = deepClone(GraveLarva);
     e.id = 'enemy-fate-dummy';
     e.health = hp; e.maxHealth = hp; e.effects = effects;
     e.baseStats = { heart: stance === 'heart' ? 6 : 2, body: stance === 'body' ? 6 : 2, mind: stance === 'mind' ? 6 : 2 };

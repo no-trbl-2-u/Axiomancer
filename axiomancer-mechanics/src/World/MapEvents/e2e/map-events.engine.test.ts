@@ -51,7 +51,7 @@ describe('resolveMapEvent — per-kind', () => {
             entries: [{
                 kind: 'encounter',
                 weight: 1,
-                payload: { kind: 'encounter', enemySlug: 'tidepool-crab' },
+                payload: { kind: 'encounter', enemySlug: 'grave-larva' },
             }],
         });
         const result = resolveMapEvent(state);

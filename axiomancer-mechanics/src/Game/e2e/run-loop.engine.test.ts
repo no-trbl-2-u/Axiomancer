@@ -13,7 +13,7 @@ import { createNewGameState, GAME_STATE_VERSION } from '../game.reducer';
 import { migrate } from '../game.migrate';
 import { STARTING_REGION } from '../run-loop';
 import { getMapDefinition } from '../../World';
-import { TidepoolCrab } from '../../Enemy/enemy.library';
+import { GraveLarva } from '../../Enemy/enemy.library';
 
 describe('Phase 72 — run-loop semantics', () => {
     it('createNewGameState assigns a fresh 16-char hex runId', () => {
@@ -58,7 +58,7 @@ describe('Phase 72 — run-loop semantics', () => {
             flags: ['pre-reset-flag'],
             lastSeenAlignmentCells: { 'old-marrow': 'mid-mid-mid' },
         });
-        store.getState().startCombat(TidepoolCrab);
+        store.getState().startCombat(GraveLarva);
         expect(store.getState().currentEncounter).toBeDefined();
         const next = store.getState().resetRun({ keepCharacter: true });
         expect(next.currentEncounter).toBeUndefined();

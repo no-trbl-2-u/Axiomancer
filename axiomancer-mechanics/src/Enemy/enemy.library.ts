@@ -1,23 +1,44 @@
 /**
- * Enemy library — Spec 07 content drop.
+ * Enemy library — the 2026-07-06 ART-DRIVEN base roster.
  *
- * Per the Spec 07 Q8 split: 3 simple, 6 normal, 3 elite, 2 boss, 1 unique =
- * 15 enemies total. Stat affinities (heart / body / mind) are distributed
- * across each difficulty tier so the encounter generator can offer variety
- * regardless of which stance the player favours.
+ * One enemy per painting in `axiomancer-mobile/assets/images/enemies/` (52
+ * paintings → 52 enemies). Every enemy carries a `portraitAsset` whose key the
+ * mobile app resolves 1:1 to its painting — no more random art pools.
+ *
+ * Roster shape:
+ *   - EARLY (fishing-village, L1-8): 13 foes — 3 simple, 7 normal, 3 elite,
+ *     1 boss (The King of Revenge — the village climax fight).
+ *   - EARLY-MID (northern-forest, L9-18): 13 foes incl. the Kudan unique and
+ *     the two balance-audit anchors (Tri-Eyes = Normal anchor, Mirac = boss
+ *     anchor — both keep the Phase 121/138 calibrated stat blocks).
+ *   - MID (northern-forest, L19-31): 13 foes.
+ *   - LATE (northern-forest, L34-50): 13 foes incl. the Death and The Abortive
+ *     uniques.
+ *
+ * Difficulty model (how a fight gets HARD):
+ *   1. Tier — `simple → normal → elite → boss → unique` drives the threat-damage
+ *      multiplier, proc unlock caps, XP and the encounter generator's adaptive
+ *      level band (`DIFFICULTY_LEVEL_BANDS`: wandering foes scale relative to
+ *      the PLAYER's level; uniques keep their authored level).
+ *   2. Authored level — anchors each foe to an early/mid/late band for stage
+ *      profiles, authored map events and uniques.
+ *   3. THE CLOCK (Aeon's-End-style pressure) — every enemy's telegraphed hit
+ *      escalates each round past `THREAT_ESCALATION_GRACE`
+ *      (`THREAT_ESCALATION_PER_ROUND`, bosses ×`THREAT_ESCALATION_BOSS_MULT`),
+ *      and every authored threat sequence in `combat.threat-sequences.ts` ramps
+ *      its per-phase `damageWeight` + debuff intensity toward a spike final
+ *      phase. Solve the fight fast (DoT) or deny turns (control), or it
+ *      out-scales you.
  *
  * Authoring notes:
- *   - `tier1Overrides` mirrors the canonical Spec 03 Tier 1 buffs / debuffs
- *     so every enemy participates in the stance-effect economy. Variant
- *     procOverrides on elites / bosses give them flavour without rewriting
- *     the global proc table.
- *   - `procUnlocks` bumps the tier cap for elite (T2) and boss (T3) enemies
- *     so their proc rolls reach higher-tier candidates per Spec 03.
+ *   - Most stat blocks come from `enemyStatBudget(level, weights)` so the whole
+ *     roster retunes from `ENEMY_STAT_PER_LEVEL`. A handful of enemies keep
+ *     HAND-SET blocks that mirror retired calibration fixtures so seeded sims
+ *     and balance bands stay stable (noted per-enemy).
  *   - Loot tables follow Spec 07 Q7B — weighted entries with explicit `null`
  *     buckets for "nothing drops".
- *   - `xpReward` is left implicit on most enemies: `createEnemy` falls back
- *     to `level × DEFAULT_XP_BY_DIFFICULTY[difficulty]`. Authors override
- *     only when an enemy should grant unusual XP for narrative reasons.
+ *   - `xpReward` is implicit: `createEnemy` falls back to
+ *     `level × DEFAULT_XP_BY_DIFFICULTY[difficulty]`.
  */
 
 import { createEnemy, enemyStatBudget } from './index';
@@ -28,7 +49,7 @@ import { Consumable } from '../Items/types';
 import { getCardById } from '../Cards/cards.library';
 import type { Card } from '../Cards/types';
 
-// ─── Card rotation helpers (Phase 49) ────────────────────────────────────────
+// ─── Card rotation helpers ────────────────────────────────────────────────────
 
 /** Returns a fresh copy of the named skill from the library. */
 function skill(id: string): Card {
@@ -65,8 +86,7 @@ function drop(id: string, weight: number): LootTableEntry {
 /**
  * Every authored enemy plugs the same Spec 03 Tier 1 effect IDs into its
  * `tier1Overrides`. Doing it once here keeps the library definitions
- * focused on stats / personality. Bosses with custom routines can opt out
- * by passing their own `tier1Overrides` object.
+ * focused on stats / personality.
  */
 const T1_DEFAULT = {
     body:  { attack: 'tier1_body_attack',  defend: 'tier1_body_defend'  },
@@ -74,12 +94,23 @@ const T1_DEFAULT = {
     heart: { attack: 'tier1_heart_attack', defend: 'tier1_heart_defend' },
 } as const;
 
-// ─── Simple (3) — level 1 fodder ──────────────────────────────────────────────
+const ADDED = '2026-07-06';
 
-export const TidepoolCrab = createEnemy({
-    id: 'enemy-tidepool-crab',
-    name: 'Tidepool Crab',
-    description: 'Pinches a claim on the dock pilings; its grievances are mostly territorial.',
+// ═══════════════════════════════════════════════════════════════════════════════
+// FISHING VILLAGE — early game (L1-8), 13 foes
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/**
+ * Body-fodder aggressor. HAND-SET stats (3/1/1, 25 HP at L1) — mirrors the
+ * retired Tidepool Crab fixture so the seeded engine tests that fight a
+ * small aggressive dummy stay calibrated.
+ */
+export const GraveLarva = createEnemy({
+    id: 'enemy-grave-larva',
+    portraitAsset: 'grave-larva',
+    name: 'Grave Larva',
+    stanceHint: 'It is all appetite and no argument — it simply chews toward you.',
+    description: 'It hatched from a burial the ground refused. It is still deciding what to become; the options are narrowing to teeth.',
     level: 1,
     baseStats: { body: 3, mind: 1, heart: 1 },
     mapName: 'fishing-village',
@@ -87,139 +118,73 @@ export const TidepoolCrab = createEnemy({
     logic: 'aggressive',
     tier1Overrides: T1_DEFAULT,
     loot: [none(80), drop('minor-healing-potion', 20)],
-    // Phase 45 — mid-mid-individual (Montaigne / Ishmael archetype).
-    philosophicalAlignment: { epistemology: 0, outlook: 0, scope: -67 },
-    // Phase 74 — territorial / "grievances are mostly territorial" voice.
-    finalBlowLines: {
-        brutal: 'The claim breaks before the claw does. The piling stays.',
-        quiet:  'It folds itself back into the tidepool, smaller than it pinched.',
-        ironic: 'A grievance pressed too hard. It pinched itself loose.',
-    },
-    causeLines: {
-        brutal: 'The claw closes on a part of you that does not let go again.',
-        broken: 'You wear down on the pinch and the pinch does not.',
-        quiet:  'A small grip in a wrong place. You sit down and do not stand.',
-    },
+    philosophicalAlignment: { epistemology: 0, outlook: -67, scope: -67 },
+    addedIn: ADDED,
+    tags: ['early-game', 'enemy'],
 });
-
-export const SeaMistWisp = createEnemy({
-    id: 'enemy-sea-mist-wisp',
-    name: 'Sea-Mist Wisp',
-    description: 'A confused thought that drifted in with the fog. It will leave if you let it speak.',
-    level: 1,
-    baseStats: { body: 1, mind: 3, heart: 1 },
-    mapName: 'fishing-village',
-    difficulty: 'simple',
-    logic: 'defensive',
-    tier1Overrides: T1_DEFAULT,
-    loot: [none(75), drop('clarity-serum', 20), drop('focus-vial', 5)],
-    // Phase 45 — mid-mid-transcendent (Lao Tzu / Siddhartha archetype).
-    philosophicalAlignment: { epistemology: 0, outlook: 0, scope: 67 },
-    // Phase 74 — confused-thought / "will leave if you let it speak" voice.
-    finalBlowLines: {
-        brutal: 'The fog parts around a sound that was not there.',
-        quiet:  'It dissipates mid-sentence. The fog keeps its half.',
-        ironic: 'It came to be spoken to. You answered with a closing.',
-    },
-    causeLines: {
-        brutal: 'The fog thickens until the question is the only thing left.',
-        broken: 'You speak to it for too long. The fog gets into the speaking.',
-        quiet:  'You forget what you were going to say. The wisp remembers.',
-    },
-});
-
-export const LullabyMoth = createEnemy({
-    id: 'enemy-lullaby-moth',
-    name: 'Lullaby Moth',
-    description: 'Its wings hum a half-remembered song; you almost forget you are in a fight.',
-    level: 1,
-    baseStats: { body: 1, mind: 1, heart: 3 },
-    mapName: 'northern-forest',
-    difficulty: 'simple',
-    logic: 'random',
-    tier1Overrides: T1_DEFAULT,
-    loot: [none(80), drop('heart-draught', 18), drop('minor-healing-potion', 2)],
-    // Phase 45 — faith-optimistic-individual (Kierkegaard / Alyosha archetype).
-    philosophicalAlignment: { epistemology: -67, outlook: 67, scope: -67 },
-    // Phase 74 — half-remembered-song / lullaby voice.
-    finalBlowLines: {
-        brutal: 'The hum ends on the wrong note. The wings settle anyway.',
-        quiet:  'It lands once on your sleeve. The song was almost finished.',
-        ironic: 'You hummed back. The moth took that as permission.',
-    },
-    causeLines: {
-        brutal: 'The song wraps you in a sleep you did not choose.',
-        broken: 'The hum is patient. You stop noticing it long before it stops.',
-        quiet:  'A lullaby for one. You answer it the only way a lullaby asks to be answered.',
-    },
-});
-
-// ─── Normal (6) — level 2-3 ───────────────────────────────────────────────────
 
 /**
- * Legacy fixture preserved from Spec 02-era tests. Many e2e tests depend on
- * the exact `maxHealth = 15` (sum(1, 1, 1) × 5) so the stat block
- * is intentionally kept at 1/1/1. New normal enemies on the forest map
- * (`ForestSprite`, `ArgumentativeCrow`) carry the proper stat-aligned values.
+ * The library's smallest stat block. HAND-SET 1/1/1 (15 HP at L1) — mirrors
+ * the retired Disatree fixture; many hermetic e2e tests depend on the exact
+ * `maxHealth = 15`, so keep this block at 1/1/1.
  */
-export const Disatree_01 = createEnemy({
-    id: 'enemy-disatree',
-    name: 'Disatree',
-    description: 'A tree who disagrees with you. Its argument is mostly bark.',
+export const FloatEye = createEnemy({
+    id: 'enemy-float-eye',
+    portraitAsset: 'float-eye',
+    name: 'Float-Eye',
+    stanceHint: 'It only watches — whatever it does next, it has watched you do first.',
+    description: 'An eye that outlived its head. It has watched so long it has developed opinions, and one of them is about you.',
     level: 1,
     baseStats: { body: 1, mind: 1, heart: 1 },
-    mapName: 'northern-forest',
+    mapName: 'fishing-village',
     difficulty: 'normal',
     logic: 'balanced',
     tier1Overrides: T1_DEFAULT,
     loot: [none(70), drop('minor-healing-potion', 25), drop('healing-potion', 5)],
-    // Phase 45 — mid-pessimistic-relational (Zapffe / Ahab archetype).
-    philosophicalAlignment: { epistemology: 0, outlook: -67, scope: 0 },
-    // Phase 74 — tree-who-disagrees / "argument is mostly bark" voice.
+    philosophicalAlignment: { epistemology: 0, outlook: 0, scope: 67 },
     finalBlowLines: {
-        brutal: 'The argument resolves in splinters. The bark does not get the last word.',
-        quiet:  'A branch lowers. The tree concedes a small point and leaves it there.',
-        ironic: 'You convinced it. It fell over to make its position clear.',
+        brutal: 'The eye closes for the first time in its long career, and does not reopen.',
+        quiet:  'It blinks once — a thing it had been saving — and settles into the dark.',
+        ironic: 'It watched the blow arrive from very far away, and disagreed with it to the end.',
     },
     causeLines: {
-        brutal: 'The bark wins by being bark. You were softer than the argument required.',
-        broken: 'The disagreement goes on. Eventually the tree is the part still standing.',
-        quiet:  'You sit down to think it over and the tree mistakes that for surrender.',
+        brutal: 'It saw the opening before you made it. It had seen it for some time.',
+        broken: 'You cannot outlast a thing whose whole vocation is waiting.',
+        quiet:  'You look at it a moment too long, and it wins the exchange of looking.',
     },
+    addedIn: ADDED,
+    tags: ['early-game', 'enemy'],
 });
 
-export const WetHound = createEnemy({
-    id: 'enemy-wet-hound',
-    name: 'Wet Hound',
-    description: 'Half feral, half pitiful. Its body trembles between bite and beg.',
+export const ChatteringSkull = createEnemy({
+    id: 'enemy-chattering-skull',
+    portraitAsset: 'chattering-skull',
+    name: 'Chattering Skull',
+    stanceHint: 'It repeats its last argument on a loop — cold, toothy, and rehearsed.',
+    description: 'A skull that kept the argument after losing everything that made it. It repeats its last word, endlessly, at you.',
     level: 2,
-    baseStats: { body: 4, mind: 2, heart: 2 },
+    baseStats: enemyStatBudget(2, { heart: 1, body: 1, mind: 3 }),
     mapName: 'fishing-village',
-    difficulty: 'normal',
-    logic: 'aggressive',
+    difficulty: 'simple',
+    logic: 'random',
     tier1Overrides: T1_DEFAULT,
-    loot: [none(60), drop('body-elixir', 30), drop('healing-potion', 10)],
-    // Phase 45 — logic-pessimistic-individual (Schopenhauer / Underground Man archetype).
+    loot: [none(75), drop('clarity-serum', 20), drop('focus-vial', 5)],
     philosophicalAlignment: { epistemology: 67, outlook: -67, scope: -67 },
-    // Phase 74 — half-feral-half-pitiful / "trembles between bite and beg" voice.
-    finalBlowLines: {
-        brutal: 'The bite finishes the trembling. The hound goes still in your name.',
-        quiet:  'It lowers its head and does not get up. The fur was always going to be wet.',
-        ironic: 'You meant to feed it. The hound made a different choice with the offering.',
-    },
-    causeLines: {
-        brutal: 'The bite arrives before the beg finishes. Both were honest in their way.',
-        broken: 'You wear down on the trembling. The trembling does not wear down on you.',
-        quiet:  'It curls beside you when you stop moving. The fur is still wet.',
-    },
+    addedIn: ADDED,
+    tags: ['early-game', 'enemy'],
 });
 
-export const MournfulGull = createEnemy({
-    id: 'enemy-mournful-gull',
-    portraitAsset: 'mournful-gull',
-    stanceHint: 'A creature of pure grief; it acts on raw feeling, not calculation.',
-    name: 'Mournful Gull',
-    description: 'It circles overhead, screaming a list of every slight it remembers.',
+/**
+ * The early befriendable heart fight. HAND-SET stats (2/2/4, gull-shaped) and
+ * a gull-shaped friendship stack — mirrors the retired Mournful Gull so the
+ * befriend / codex engine tests keep a structurally identical subject.
+ */
+export const LittleBelle = createEnemy({
+    id: 'enemy-little-belle',
+    portraitAsset: 'little-belle',
+    name: 'Little Belle',
+    stanceHint: 'A creature of pure mourning; it acts on raw feeling, not calculation.',
+    description: 'A small vesper in a robe of dawn-orange, ringing a bell for a service no one held. Attendance is mandatory.',
     level: 2,
     baseStats: { body: 2, mind: 2, heart: 4 },
     mapName: 'fishing-village',
@@ -227,88 +192,75 @@ export const MournfulGull = createEnemy({
     logic: 'balanced',
     tier1Overrides: T1_DEFAULT,
     loot: [none(60), drop('heart-draught', 30), drop('minor-healing-potion', 10)],
-    // Phase 45 — mid-pessimistic-individual (Cioran / Hamlet archetype).
-    philosophicalAlignment: { epistemology: 0, outlook: -67, scope: -67 },
-    // Phase 57 — heart self-heal fallacy matches "every slight it remembers".
+    philosophicalAlignment: { epistemology: -67, outlook: -67, scope: -67 },
     skills: [skill('appeal-to-pity')],
-    // Phase 60 — befriending "every slight it remembers" yields a
-    // heart-attuned remembrance gift (1 guaranteed heart-draught + 10 XP).
-    // Phase 62 — sets a world flag so downstream dialogue / quests can
-    // gate on whether the gull was befriended.
     friendshipReward: {
         items: [{ ...getConsumableById('heart-draught')! }],
         xpBonus: 10,
         narrative:
-            'The gull stops circling. It settles on the rail beside you. ' +
-            'For a long moment, neither of you speaks the slights you remember.',
-        flagSet: 'befriended-mournful-gull',
-        // Phase 69 — wistful empathy reading nudges outlook one notch
-        // toward optimistic (per the gull's circling-then-settling beat).
-        // Inside the Phase 43 ±1..±5 authoring band.
+            'The bell stops mid-swing. Little Belle holds it against its chest ' +
+            'like a heart it borrowed. For once, the service has a congregation, ' +
+            'and it is you, and that turns out to have been the whole liturgy.',
+        flagSet: 'befriended-little-belle',
         alignmentDelta: { outlook: +3 },
     },
-    // Phase 71 — heart-aspected wistful voice; "slights" / "list" /
-    // "catalogue" thread runs across all three line groups (GH#65 ask 1).
     finalBlowLines: {
-        brutal: 'The gull falls mid-cry. The list of slights ends on a half-syllable.',
-        quiet:  'It folds its wings and lands once, gently, before it stops.',
-        ironic: 'A slight it had not catalogued yet, delivered by the listener.',
+        brutal: 'The bell lands apart from the hand. Neither rings again.',
+        quiet:  'It sets the bell down, carefully, the way one sets down a finished grief.',
+        ironic: 'You rang first. It had no answer to being summoned.',
     },
     pactLines: {
-        quiet:   'For a long moment, neither of you speaks the slights you remember.',
-        setDown: 'It settles on the rail beside you. The catalogue, for now, is closed.',
-        heavy:   'The list goes on inside it. You are listed too. It lands anyway.',
+        quiet:   'The bell hangs silent between you. Some services are held by standing still.',
+        setDown: 'It lays the bell on the stones, mouth up, an offering emptied of its toll.',
+        heavy:   'The service it was ringing for was its own. You attended. That was all it ever asked.',
     },
     causeLines: {
-        brutal: 'The list resolves in your name. You go down to the next item on it.',
-        broken: 'The slights accumulate. Eventually you are one of them.',
-        quiet:  'It catalogues a last grievance and you do not stand up from it.',
+        brutal: 'The toll lands inside your chest and keeps ringing after the ghost is gone.',
+        broken: 'Each peal takes a little more of you to the service. Eventually all of you attends.',
+        quiet:  'You stop to listen. The bell was patient; the listening is what it collects.',
     },
-    // Phase 71 voice continued — Codex entry body extends the catalogue thread
-    // into long-form chronicle (GH#65 ask 3).
     journalEntry: {
-        id: 'codex-mournful-gull',
-        title: 'The Catalogue of Slights',
+        id: 'codex-little-belle',
+        title: 'The Service Held By One',
         body:
-            'It keeps the list aloud. Some entries are recent, some predate the harbour wall. ' +
-            'It does not insist you remember every one — only that one exists. ' +
-            'When you stopped speaking, it stopped circling. ' +
-            'That, too, is on the list now, in a different column.',
+            'It rings the hours for a chapel that burned before the bell cooled. ' +
+            'No one told it the congregation was released. Or someone did, ' +
+            'and the ringing is what refusing looks like when you are small ' +
+            'and orange and mostly made of duty.',
     },
+    addedIn: ADDED,
+    tags: ['early-game', 'enemy'],
 });
 
-export const ForestSprite = createEnemy({
-    id: 'enemy-forest-sprite',
-    name: 'Forest Sprite',
-    description: 'A small lattice of opinions in flight; it argues itself in and out of visibility.',
+export const FootStealer = createEnemy({
+    id: 'enemy-foot-stealer',
+    portraitAsset: 'foot-stealer',
+    name: 'Foot-Stealer',
+    stanceHint: 'It goes for your footing first — everything it does is leverage.',
+    description: 'It collects footing. Yours is next on the list; balance, it maintains, is a possession like any other.',
     level: 3,
-    baseStats: { body: 2, mind: 4, heart: 2 },
-    mapName: 'northern-forest',
+    baseStats: enemyStatBudget(3, { heart: 1, body: 3, mind: 1 }),
+    mapName: 'fishing-village',
     difficulty: 'normal',
-    logic: 'defensive',
+    logic: 'aggressive',
     tier1Overrides: T1_DEFAULT,
-    loot: [none(55), drop('clarity-serum', 30), drop('focus-vial', 15)],
-    // Phase 45 — mid-optimistic-individual (Rorty / Huck Finn archetype).
-    philosophicalAlignment: { epistemology: 0, outlook: 67, scope: -67 },
-    // Phase 74 — lattice-of-opinions / arguing-itself-in-and-out voice.
-    finalBlowLines: {
-        brutal: 'The lattice unweaves. Several opinions go quiet at once.',
-        quiet:  'It argues itself out of visibility one last time and stays gone.',
-        ironic: 'You agreed with one of its opinions. The lattice did not survive the agreement.',
-    },
-    causeLines: {
-        brutal: 'A whole lattice of small wrongnesses adds up to a single large one.',
-        broken: 'The opinions outnumber you. The lattice closes around the difference.',
-        quiet:  'A single careful argument lands. You sit down to refute it and do not rise.',
-    },
+    loot: [none(60), drop('body-elixir', 25), drop('minor-healing-potion', 15)],
+    philosophicalAlignment: { epistemology: 0, outlook: -67, scope: -67 },
+    addedIn: ADDED,
+    tags: ['early-game', 'enemy'],
 });
 
-export const HollowEyedBeggar = createEnemy({
-    id: 'enemy-hollow-eyed-beggar',
-    portraitAsset: 'hollow-eyed-beggar',
-    stanceHint: 'Desperation has made it cunning and watchful — until hunger overrides the scheming.',
-    name: 'Hollow-Eyed Beggar',
-    description: 'You suspect they have not always been hollow. They want what you carry, not what you are.',
+/**
+ * The early befriendable-by-default drowned man. HAND-SET stats (2/2/4) and a
+ * beggar-shaped friendship reward — mirrors the retired Hollow-Eyed Beggar
+ * so the befriend engine tests keep their reward-shape subject.
+ */
+export const WaterHolger = createEnemy({
+    id: 'enemy-water-holger',
+    portraitAsset: 'water-holger',
+    name: 'Water-Holger',
+    stanceHint: 'Grief moves it more than hunger — the sea returned the feeling parts.',
+    description: 'A deckhand the sea gave back, mostly. What the salt kept, it kept for good; what it returned still wants its wages.',
     level: 3,
     baseStats: { body: 2, mind: 2, heart: 4 },
     mapName: 'fishing-village',
@@ -316,13 +268,8 @@ export const HollowEyedBeggar = createEnemy({
     logic: 'strategic',
     tier1Overrides: T1_DEFAULT,
     loot: [none(50), drop('heart-draught', 30), drop('healing-potion', 15), drop('antidote', 5)],
-    // Phase 45 — faith-pessimistic-relational (Mainländer / Ferreira archetype).
     philosophicalAlignment: { epistemology: -67, outlook: -67, scope: 0 },
-    // Phase 57 — heart self-heal paradox; shares the Saint's archetype at a
-    // different tier ("what you carry, not what you are" — survival-wager flavour).
     skills: [skill('pascals-wager')],
-    // Phase 60 — "they want what you carry, not what you are" reverses on
-    // friendship: they offer what they carry. 2 phials + 15 XP.
     friendshipReward: {
         items: [
             { ...getConsumableById('healing-potion')! },
@@ -330,82 +277,103 @@ export const HollowEyedBeggar = createEnemy({
         ],
         xpBonus: 15,
         narrative:
-            'They pull a folded cloth from somewhere inside the rags. ' +
-            'Two phials, both still cold. "I was carrying these for someone," ' +
-            'they say. "But you stopped. So."',
-        // Phase 69 — gravity pulls toward the individual (the moment of
-        // reciprocation re-grounds the player on the relational axis).
-        // Inside the Phase 43 ±1..±5 authoring band.
+            'It opens a fist no one has managed to open since the wreck. ' +
+            'Two phials, still stoppered, still cold from the deep. ' +
+            '"Carried these for the crew," it manages. "You stood a watch with me. So."',
+        flagSet: 'befriended-water-holger',
         alignmentDelta: { scope: -3 },
     },
-    // Phase 71 — faith-pessimistic-relational voice; "carrying" / "rags" /
-    // "phials" thread; reversal-of-begging carries into pact + cause (GH#65 ask 1).
     finalBlowLines: {
-        brutal: 'You leave them with nothing more to carry.',
-        quiet:  'They do not flinch. The rags settle as if they had been waiting.',
-        ironic: 'They take what you are. It costs you what you carried.',
+        brutal: 'The sea takes back its returns policy. Holger goes down a second time, and stays.',
+        quiet:  'It stops mid-reach, remembers drowning, and finishes the memory.',
+        ironic: 'It survived the sea only to founder on the shore. The wages were never the point.',
     },
     pactLines: {
-        quiet:   'They stop reaching. The cloth in their hand is for you now.',
-        setDown: 'They lay the phials on the stones between you, slowly, as if returning them.',
-        heavy:   '"I was carrying these for someone." A pause. "But you stopped. So."',
+        quiet:   'It stands its watch beside you awhile. The tide takes the silence between you as payment.',
+        setDown: 'It lays the phials on the sand between you, slowly, as if lowering them into a grave done right.',
+        heavy:   '"Carried these for the crew." A wave arrives and retreats. "But you stood the watch. So."',
     },
     causeLines: {
-        brutal: 'They wanted what you carried. They take it from where you fall.',
-        broken: 'You carry less and less. Eventually you carry nothing, including yourself.',
-        quiet:  'They wait until you have set everything down before they kneel beside you.',
+        brutal: 'The grip that held a mast through the wreck holds you through yours.',
+        broken: 'You keep it at arm\'s length for as long as your arms last.',
+        quiet:  'It embraces you like a shipmate. The salt does the rest.',
     },
-    // Phase 71 voice continued — Codex entry body extends the reversal-of-
-    // begging thread (GH#65 ask 3).
     journalEntry: {
-        id: 'codex-hollow-eyed-beggar',
-        title: 'They Carry What You Set Down',
+        id: 'codex-water-holger',
+        title: 'The Watch That Never Ended',
         body:
-            'They were carrying the phials for someone. They no longer say who. ' +
-            'The folded cloth came from somewhere inside the rags — there is more in there. ' +
-            'They want what you carry, but they also keep what you abandon. ' +
-            'There is a difference between the two and they will not explain it to you.',
+            'The crew list from the wreck was never recovered, so Holger keeps standing ' +
+            'watch for all of it. It cannot rest until relieved, and the officer who ' +
+            'could relieve it is forty years drowned. It carries phials for shipmates ' +
+            'it can no longer name. It keeps them cold. It keeps everything cold.',
     },
+    addedIn: ADDED,
+    tags: ['early-game', 'enemy'],
 });
 
-export const ArgumentativeCrow = createEnemy({
-    id: 'enemy-argumentative-crow',
-    name: 'Argumentative Crow',
-    description: 'Caws a sequence of premises that resolve, infuriatingly, in your defeat.',
-    level: 3,
-    baseStats: { body: 2, mind: 4, heart: 2 },
-    mapName: 'northern-forest',
+export const CursedHead = createEnemy({
+    id: 'enemy-cursed-head',
+    portraitAsset: 'cursed-head',
+    name: 'Cursed Head',
+    stanceHint: 'It leads with feeling — the grudge does the talking.',
+    description: 'A severed head still holding its grudge upright. The curse is that it remembers everything except being wrong.',
+    level: 4,
+    baseStats: enemyStatBudget(4, { heart: 3, body: 1, mind: 1 }),
+    mapName: 'fishing-village',
+    difficulty: 'normal',
+    logic: 'random',
+    tier1Overrides: T1_DEFAULT,
+    loot: [none(60), drop('heart-draught', 25), drop('minor-healing-potion', 15)],
+    philosophicalAlignment: { epistemology: 0, outlook: -67, scope: -67 },
+    addedIn: ADDED,
+    tags: ['early-game', 'enemy'],
+});
+
+export const Ghast = createEnemy({
+    id: 'enemy-ghast',
+    portraitAsset: 'ghast',
+    name: 'Ghast',
+    stanceHint: 'It calculates its hunger — every request is a trap already sprung.',
+    description: 'Hunger given manners. It asks before it takes; it has never once waited for the answer.',
+    level: 5,
+    baseStats: enemyStatBudget(5, { heart: 1, body: 1, mind: 3 }),
+    mapName: 'fishing-village',
     difficulty: 'normal',
     logic: 'strategic',
     tier1Overrides: T1_DEFAULT,
-    loot: [none(50), drop('clarity-serum', 25), drop('focus-vial', 20), drop('philosopher-tea', 5)],
-    // Phase 45 — logic-optimistic-individual (Nietzsche / Prometheus archetype).
-    philosophicalAlignment: { epistemology: 67, outlook: 67, scope: -67 },
-    // Phase 49 — mind-aspected fallacy skill matches the crow's "sequence of premises" voice.
+    loot: [none(55), drop('clarity-serum', 25), drop('focus-vial', 20)],
+    philosophicalAlignment: { epistemology: 67, outlook: -67, scope: -67 },
     skills: [skill('false-dilemma')],
-    // Phase 74 — sequence-of-premises / "resolve infuriatingly in your defeat" voice.
-    finalBlowLines: {
-        brutal: 'The premises resolve, infuriatingly, in its own defeat.',
-        quiet:  'The conclusion lands soft. The crow nods at it once and does not caw again.',
-        ironic: 'It had the argument. You won by interrupting at the right syllable.',
-    },
-    causeLines: {
-        brutal: 'The premises were never about you. The conclusion was.',
-        broken: 'Premise after premise. You go down somewhere in the third repetition.',
-        quiet:  'It caws once more, gently. You did not see how that one followed.',
-    },
+    addedIn: ADDED,
+    tags: ['early-game', 'enemy'],
 });
 
-// ─── Elite (3) — level 4-5 ────────────────────────────────────────────────────
+export const DoomEgg = createEnemy({
+    id: 'enemy-doom-egg',
+    portraitAsset: 'doom-egg',
+    name: 'Doom-Egg',
+    stanceHint: 'It does not attack so much as incubate — the danger is the countdown.',
+    description: 'A clutch of eyes, counting down. Every round it does not hatch is a kindness it fully intends to bill you for.',
+    level: 6,
+    baseStats: enemyStatBudget(6, { heart: 2, body: 2, mind: 1 }),
+    mapName: 'fishing-village',
+    difficulty: 'normal',
+    logic: 'defensive',
+    tier1Overrides: T1_DEFAULT,
+    loot: [none(55), drop('antidote', 25), drop('healing-potion', 20)],
+    philosophicalAlignment: { epistemology: 0, outlook: -67, scope: 67 },
+    addedIn: ADDED,
+    tags: ['early-game', 'enemy'],
+});
 
-export const TideflukeReaver = createEnemy({
-    id: 'enemy-tidefluke-reaver',
-    portraitAsset: 'tidefluke-reaver',
-    stanceHint: 'A raider who leads with the shoulder and the hook, then fights on fury once blood is up.',
-    name: 'Tidefluke Reaver',
-    description: 'Salt-bound and shore-cursed. Its fists move faster than the surf retreats.',
-    level: 4,
-    baseStats: { body: 11, mind: 4, heart: 5 },
+export const TheButcher = createEnemy({
+    id: 'enemy-the-butcher',
+    portraitAsset: 'the-butcher',
+    name: 'The Butcher',
+    stanceHint: 'He answers everything with the cleaver — force is his entire rhetoric.',
+    description: 'He dresses every argument the same way: on the block, by the joints. He has never met a question he could not quarter.',
+    level: 6,
+    baseStats: enemyStatBudget(6, { heart: 1, body: 4, mind: 1 }),
     mapName: 'fishing-village',
     difficulty: 'elite',
     logic: 'aggressive',
@@ -414,64 +382,84 @@ export const TideflukeReaver = createEnemy({
         body: { attack: 2, defend: 2 },
     },
     loot: [none(35), drop('body-elixir', 35), drop('healing-potion', 20), drop('berserker-brew', 10)],
-    // Phase 45 — logic-pessimistic-relational (Ligotti / Rust Cohle archetype).
-    philosophicalAlignment: { epistemology: 67, outlook: -67, scope: 0 },
-    // Phase 57 — body-aspected tier-3 fallacy matches the reaver's "built threat → strike" trope.
+    philosophicalAlignment: { epistemology: 0, outlook: -67, scope: -67 },
     skills: [skill('mob-appeal')],
-    // Phase 102 — befriendability config: elite tier, empathy required
-    befriendabilityConfig: {
-        hpGate: { belowPct: 0.3 },
-        requiredStances: ['heart'], // empathy
-        roundsThreshold: 4
-    },
-    // Phase 102 — friendship reward: salt-bound reaver's chains dissolve
-    friendshipReward: {
-        items: [
-            { ...getConsumableById('body-elixir')! },
-            { ...getConsumableById('healing-potion')! }
-        ],
-        xpBonus: 35,
-        alignmentDelta: { outlook: +2, scope: +1 }, // softens pessimism, opens to relationship
-        narrative: "The salt-bound reaver's chains dissolve into foam. For the first time in memory, " +
-                  "its fists unclench. 'The surf retreats,' it says, voice rough as barnacles. " +
-                  "'But you... you stayed.'",
-        flagSet: 'befriended-tidefluke-reaver'
-    },
-    // Phase 102 — pact lines for friendship outcome
-    pactLines: {
-        quiet:   'The reaver stops mid-swing. The fists that moved faster than the surf drop to its sides.',
-        setDown: 'It sets something small and salt-crusted between you. A chain link, maybe, or a prayer bead worn smooth.',
-        heavy:   '"The shore cursed me for staying when I should have gone out with the tide. You stayed when you should have left. Maybe that makes us even."'
-    },
-    // Phase 102 — journal entry unlocked on befriending
-    journalEntry: {
-        id: 'codex-tidefluke-reaver',
-        title: 'The Salt-Bound Oath',
-        body: 'Some debts are paid in water, others in understanding. The reaver carried both ' +
-              'until someone showed it the difference between being bound and choosing to stay.'
-    },
-    // Phase 74 — salt-bound / shore-cursed / "faster than the surf retreats" voice.
-    finalBlowLines: {
-        brutal: 'The reaver falls in a wash of salt. The fists were faster than the surf retreated; the strike was faster than the fists.',
-        quiet:  'A single quiet strike to the salt-bound chest. The shore does not curse louder.',
-        ironic: 'The reaver swung at the surf and you stepped between. The surf still arrived; the reaver did not.',
-    },
-    causeLines: {
-        brutal: 'The fists arrive in a sequence the surf is too slow to retreat from.',
-        broken: 'You hold for as long as the tide allows. The reaver holds longer.',
-        quiet:  'A clean strike from salt-bound hands. The shore claims you on the way down.',
-    },
+    addedIn: ADDED,
+    tags: ['early-game', 'elite', 'enemy'],
 });
 
-export const HushWraith = createEnemy({
-    id: 'enemy-hush-wraith',
-    portraitAsset: 'hush-wraith',
-    stanceHint: 'A silencing spirit of cold calculation; only at the end does it act from desperate hunger.',
-    name: 'Hush-Wraith',
-    description: 'A presence shaped like the silence after a question. Listens until you doubt the answer.',
-    level: 5,
-    baseStats: { body: 2, mind: 6, heart: 3 },
-    mapName: 'northern-forest',
+export const BrineHag = createEnemy({
+    id: 'enemy-brine-hag',
+    portraitAsset: 'brine-hag',
+    name: 'Brine Hag',
+    stanceHint: 'She works on the feelings first — the bargain is already half-made in your chest.',
+    description: 'She traded her reflection to the tide for the right to keep yours. The exchange rate has only worsened since.',
+    level: 7,
+    baseStats: enemyStatBudget(7, { heart: 4, body: 1, mind: 2 }),
+    mapName: 'fishing-village',
+    difficulty: 'elite',
+    logic: 'strategic',
+    tier1Overrides: T1_DEFAULT,
+    procUnlocks: {
+        heart: { attack: 2, defend: 2 },
+    },
+    loot: [none(35), drop('heart-draught', 30), drop('healing-potion', 20), drop('resonance-crystal', 15)],
+    philosophicalAlignment: { epistemology: -67, outlook: -67, scope: 0 },
+    skills: [skill('appeal-to-pity')],
+    befriendabilityConfig: {
+        hpGate: { belowPct: 0.3 },
+        requiredStances: ['heart'],
+        roundsThreshold: 4,
+    },
+    friendshipReward: {
+        items: [
+            { ...getConsumableById('heart-draught')! },
+            { ...getConsumableById('healing-potion')! },
+        ],
+        xpBonus: 35,
+        alignmentDelta: { outlook: +2, scope: +1 },
+        narrative:
+            'The hag lowers her hands and, for the first time in a tide\'s age, looks at ' +
+            'nothing at all. "You kept your face," she says. "Even here. Even now. ' +
+            'Perhaps the sea will trade mine back for the novelty."',
+        flagSet: 'befriended-brine-hag',
+    },
+    pactLines: {
+        quiet:   'She stops reaching for your reflection. The rock pools go still and honest.',
+        setDown: 'She sets a small mirror of pooled brine between you. It shows you, unedited. It is a gift.',
+        heavy:   '"I sold my face for leverage over the drowning. You are the first to stand in front of me and stay one person."',
+    },
+    journalEntry: {
+        id: 'codex-brine-hag',
+        title: 'The Face Broker',
+        body:
+            'Every bargain she has struck is recorded in a face she keeps and cannot wear. ' +
+            'She does not want your death. She wants a reflection that stops flinching. ' +
+            'The tide pays its debts in other people\'s features.',
+    },
+    finalBlowLines: {
+        brutal: 'The stolen reflections leave her all at once, a spring tide of other people\'s faces.',
+        quiet:  'She wades out past her depth, and for once nothing in the water looks back.',
+        ironic: 'She reached for your reflection and found your resolve wearing it.',
+    },
+    causeLines: {
+        brutal: 'She holds up the face you make at the end, and keeps it.',
+        broken: 'Bargain by bargain, you trade away the parts of you that were winning.',
+        quiet:  'You catch your reflection in her tide pool and it does not follow you home.',
+    },
+    addedIn: ADDED,
+    tags: ['early-game', 'elite', 'enemy'],
+});
+
+export const TheFerryman = createEnemy({
+    id: 'enemy-the-ferryman',
+    portraitAsset: 'the-ferryman',
+    name: 'The Ferryman',
+    stanceHint: 'A cold calculator of crossings; only at the end does the pole swing on feeling.',
+    description: 'He poles a crossing no river asked for. The toll is whatever you cannot afford to lose, priced accordingly.',
+    level: 8,
+    baseStats: enemyStatBudget(8, { heart: 1, body: 2, mind: 4 }),
+    mapName: 'fishing-village',
     difficulty: 'elite',
     logic: 'strategic',
     tier1Overrides: T1_DEFAULT,
@@ -479,130 +467,68 @@ export const HushWraith = createEnemy({
         mind: { attack: 2, defend: 2 },
     },
     loot: [none(35), drop('clarity-serum', 25), drop('focus-vial', 25), drop('philosopher-tea', 15)],
-    // Phase 45 — mid-pessimistic-transcendent (Lovecraft / Burroughs archetype).
     philosophicalAlignment: { epistemology: 0, outlook: -67, scope: 67 },
-    // Phase 57 — mind-aspected paradox; gradual-undoing matches "listens until you doubt the answer".
     skills: [skill('sorites-cascade')],
-    // Phase 102 — befriendability config: transcendent silence requires patience
     befriendabilityConfig: {
         hpGate: { belowPct: 0.25 },
         requiredStances: ['heart'],
-        roundsThreshold: 6 // longer patience for transcendent silence
+        roundsThreshold: 6,
     },
-    // Phase 102 — friendship reward: wraith's silence breaks into whisper
     friendshipReward: {
         items: [
             { ...getConsumableById('clarity-serum')! },
-            { ...getConsumableById('antidote')! }
+            { ...getConsumableById('antidote')! },
         ],
         xpBonus: 40,
-        alignmentDelta: { outlook: +1 }, // slight hope in cosmic indifference
-        narrative: "The wraith's silence breaks into whisper. 'I have been listening to the wrong questions,' " +
-                  "it says, voice like wind through forgotten spaces. 'Yours... yours had an answer all along.'",
-        flagSet: 'befriended-hush-wraith'
+        alignmentDelta: { outlook: +1 },
+        narrative:
+            'The pole comes out of the water. "No charge," the Ferryman says, as if trying ' +
+            'the words on. "Nobody has ever offered to row." He looks at his own hands. ' +
+            '"I had forgotten there was a bank on either side."',
+        flagSet: 'befriended-the-ferryman',
     },
-    // Phase 102 — pact lines for friendship outcome
     pactLines: {
-        quiet:   'The questions fade. For the first time, the silence feels like rest rather than waiting.',
-        setDown: 'The wraith draws something from the air between you — a word, perhaps, or the shape silence makes when it chooses to speak.',
-        heavy:   '"I have been the wrong kind of patient. Listening for doubt when I should have listened for certainty. You speak like someone who knows their answers."'
+        quiet:   'The ferry drifts. For the first time, the crossing is nobody\'s business but the river\'s.',
+        setDown: 'He lays the pole flat across the gunwales — the ferry equivalent of an open hand.',
+        heavy:   '"Everyone pays with what they cannot afford. You offered what you could spare. That is not a toll. That is company."',
     },
-    // Phase 102 — journal entry unlocked on befriending
     journalEntry: {
-        id: 'codex-hush-wraith',
-        title: 'The Question After Silence',
-        body: 'Not all silences are the same. Some wait for answers; others wait for the right person ' +
-              'to stop asking. The wraith learned the difference between doubt and patience.'
+        id: 'codex-the-ferryman',
+        title: 'The Crossing Nobody Ordered',
+        body:
+            'There is no river at the dock where he poles. There is the idea of a river, ' +
+            'which is worse, because ideas do not have far banks. He ferries anyway. ' +
+            'The toll box has never been emptied. It cannot be. It is full of the things ' +
+            'people could not afford to lose, and he is saving them, in case anyone returns.',
     },
-    // Phase 74 — silence-after-a-question / "listens until you doubt" voice.
     finalBlowLines: {
-        brutal: 'The silence breaks first. Then the wraith. Then the question stays.',
-        quiet:  'You stop answering. The wraith fades into the room the silence left.',
-        ironic: 'You doubted out loud. The wraith took your doubt as its undoing.',
+        brutal: 'The pole snaps. The crossing forecloses. The river that never was runs dry.',
+        quiet:  'He steps off the ferry onto the near bank, at last, and is done crossing.',
+        ironic: 'He priced the toll at what you could not afford to lose. You could afford the fight.',
     },
     causeLines: {
-        brutal: 'The silence thickens until the answer you would have given does not arrive.',
-        broken: 'You answer once, twice, the third time you are not sure. The wraith is patient.',
-        quiet:  'The question is the last thing left in the room. You let it have the room.',
+        brutal: 'The pole finds you like a debt finds a debtor.',
+        broken: 'Crossing by crossing, he ferries pieces of you somewhere they do not return from.',
+        quiet:  'You pay the toll without noticing what it was. The far bank accepts you.',
     },
+    addedIn: ADDED,
+    tags: ['early-game', 'elite', 'enemy'],
 });
 
-export const HollowSaint = createEnemy({
-    id: 'enemy-hollow-saint',
-    portraitAsset: 'hollow-saint',
-    stanceHint: 'A hollowed zealot whose broken faith is all feeling, then muscle, then cold judgment.',
-    name: 'Hollow Saint',
-    description: 'A martyr without a cause, looking for one. The wound it offers is your own.',
-    level: 5,
-    baseStats: { body: 3, mind: 2, heart: 6 },
-    mapName: 'northern-forest',
-    difficulty: 'elite',
-    logic: 'defensive',
-    tier1Overrides: T1_DEFAULT,
-    procUnlocks: {
-        heart: { attack: 2, defend: 2 },
-    },
-    loot: [none(30), drop('heart-draught', 30), drop('healing-potion', 25), drop('resonance-crystal', 15)],
-    // Phase 45 — faith-mid-transcendent (St. John of the Cross / Rodrigues archetype).
-    philosophicalAlignment: { epistemology: -67, outlook: 0, scope: 67 },
-    // Phase 57 — heart self-heal paradox for the martyr-without-cause seeking a wound to claim.
-    skills: [skill('pascals-wager')],
-    // Phase 102 — befriendability config: faith-based empathy and prayer connection
-    befriendabilityConfig: {
-        hpGate: { belowPct: 0.4 },
-        requiredStances: ['heart'],
-        requiredSkillUse: ['prayer'], // if player has prayer skill
-        roundsThreshold: 3
-    },
-    // Phase 102 — friendship reward: hollow saint finds purpose in witness
-    friendshipReward: {
-        items: [
-            { ...getConsumableById('resonance-crystal')! },
-            { ...getConsumableById('heart-draught')! },
-            { ...getConsumableById('healing-potion')! }
-        ],
-        xpBonus: 45,
-        alignmentDelta: { scope: -2 }, // turns inward from transcendent to individual
-        narrative: "The hollow saint finds purpose in witness. 'I have been looking for a cause to die for,' " +
-                  "it says, voice clear for the first time. 'You showed me one to live for instead.'",
-        flagSet: 'befriended-hollow-saint'
-    },
-    // Phase 102 — pact lines for friendship outcome
-    pactLines: {
-        quiet:   'The saint lowers its hands. The wound it was offering closes.',
-        setDown: 'It places something blessed between you — not a relic, but a prayer made tangible.',
-        heavy:   '"I thought martyrdom was the only honest witness. You showed me that staying alive to witness another day might be the harder, truer choice."'
-    },
-    // Phase 102 — journal entry unlocked on befriending
-    journalEntry: {
-        id: 'codex-hollow-saint',
-        title: 'The Witness Who Chose to Stay',
-        body: 'There are two kinds of devotion: the kind that seeks an ending, and the kind that ' +
-              'chooses to continue. The saint learned that witness requires presence, not sacrifice.'
-    },
-    // Phase 74 — martyr-without-a-cause / "the wound it offers is your own" voice.
-    finalBlowLines: {
-        brutal: 'The wound it offered was yours; you returned it with interest.',
-        quiet:  'The saint accepts the strike like it was a cause. The cause was not yours.',
-        ironic: 'You declined to be its martyr. It found the role anyway, by other means.',
-    },
-    causeLines: {
-        brutal: 'The wound it offered was yours. You took it. It still belongs to you.',
-        broken: 'You decline the martyrdom round after round. Eventually you accept it.',
-        quiet:  'The saint kneels beside where you fall. The cause it was looking for is here now.',
-    },
-});
-
-// ─── Boss (2) — level 7-8 ─────────────────────────────────────────────────────
-
-export const CoastalTyrant = createEnemy({
-    id: 'enemy-coastal-tyrant',
-    portraitAsset: 'coastal-tyrant',
-    stanceHint: 'A coastal bully who has never stepped back from a fight — he answers everything with his fists, until cornered.',
-    name: 'The Coastal Tyrant',
+/**
+ * The fishing-village climax boss. HAND-SET stats (8/12/10), skills, befriend
+ * config and reward shape mirror the retired Coastal Tyrant calibration
+ * (Phase 121/138 Easy-anchor tuning) so the village boss chain, the mercy
+ * policy and the seeded sims keep their measured difficulty.
+ */
+export const KingOfRevenge = createEnemy({
+    id: 'enemy-king-of-revenge',
+    portraitAsset: 'king-of-revenge',
+    name: 'The King of Revenge',
+    stanceHint: 'A grievance with a crown — he answers everything with feeling first, and the feeling is old.',
     description:
-        'Once a magistrate of the bay; now a king whose subjects are all gulls and grievances. ' +
-        'His blade is older than the village charter.',
+        'A crown outlives its head; a grievance outlives its crown. What remains holds court ' +
+        'over the breakwater and rules whatever still kneels.',
     level: 6,
     baseStats: { body: 8, mind: 12, heart: 10 },
     mapName: 'fishing-village',
@@ -618,33 +544,13 @@ export const CoastalTyrant = createEnemy({
         drop('body-elixir', 30),
         drop('heart-draught', 20),
     ],
-    // Phase 45 — faith-pessimistic-transcendent (Marcion / Grand Inquisitor archetype).
-    philosophicalAlignment: { epistemology: -67, outlook: -67, scope: 67 },
-    // Phase 49 — body-aspected paradox skill matches the magistrate's heavy blade.
-    // Phase 121 — additional skills for Easy anchor testing.
+    philosophicalAlignment: { epistemology: -67, outlook: -67, scope: -67 },
     skills: [skill('achilles-gambit'), skill('ad-hominem-strike'), skill('false-dilemma')],
-    // Phase 68 — boss-tier befriend predicate: the fallen-priest's friendship arc
-    // opens only after he's been brought low (hpGate 40%), the player has shown
-    // empathy at least once (heart stance), and 3 both-defend rounds have passed.
-    // Phase 101 — rounds reduced from 5→3 to improve mercy policy decisiveness.
-    // Phase 138 — HP gate tuned to 70% and rounds set to 1 for Easy friendship expressiveness.
     befriendabilityConfig: {
-        hpGate: { belowPct: 0.7 }, // Phase 138 — tuned from 0.8 to 0.7 for 80-90% friendship rate
+        hpGate: { belowPct: 0.7 },
         requiredStances: ['heart'],
-        roundsThreshold: 1, // Phase 138 — kept at 1 for fast friendship route
+        roundsThreshold: 1,
     },
-    // Phase 70 — boss-tier friendshipReward demonstrating the full Phase 60
-    // + 62 + 68 + 69 stack on one high-stakes encounter. The fallen-priest's
-    // recognition + release: he gives up the regalia (Paradox Loop — "a
-    // sentence which forever ends without finishing", thematically matching
-    // his never-resolved despair) and a pair of healing tokens; the player
-    // walks away tilted slightly toward optimism (he gave up his despair)
-    // AND toward the individual scope (he saw a person, not a doctrine).
-    // Uses a fixed RNG seed (() => 0.5) for the unique spawn so the reward
-    // is deterministic across reloads. The unique's `requiredLevel: 15`
-    // means the player can hold it from this encounter onward and equip it
-    // at endgame — a long-tail reward in addition to the immediate
-    // consumables + alignmentShift.
     friendshipReward: {
         items: [
             dropItem('paradox-loop', 15, 'unique', () => 0.5),
@@ -653,600 +559,87 @@ export const CoastalTyrant = createEnemy({
         ],
         xpBonus: 75,
         narrative:
-            'For five rounds the magistrate has refused to strike. The sword stays low. ' +
-            'You think at first he is preparing some final motion, but his shoulders are ' +
-            'wrong for it — they have already given up the weight.\n\n' +
-            '"You have not killed me," he says, as though that itself is a verdict he ' +
-            'cannot quite parse. "I came here expecting to be killed."\n\n' +
-            'He lifts the circlet from his brow and holds it out. The sentence on its ' +
-            'inner band keeps ending and starting again, exactly as the old texts said it ' +
-            'would. He does not seem surprised that you do not know what to do with it.\n\n' +
-            '"Take this. Take the rest." He sets the potion and the draught beside the ' +
-            'circlet. "I was the king of nothing. You have made me a man with nothing to ' +
-            'be king of. That is closer to honest."',
-        flagSet: 'befriended-coastal-tyrant',
-        // Phase 70 — combined-axis shift matching the magistrate-fallen-priest
-        // archetype's release. He gave up his despair (outlook nudges
-        // optimistic +3) and saw a person rather than a doctrine (scope
-        // pulls toward the individual -2). Inside the Phase 43 ±1..±5
-        // authoring band; the combined-axis weight is heavier than the
-        // normal-tier single-axis deltas, befitting boss-tier.
+            'The crown tilts. Beneath it there has been no head for a long time — only ' +
+            'the grievance, holding the shape of one.\n\n' +
+            '"You have not asked what was done to me," it says. "Everyone bargains. ' +
+            'Everyone explains. You only stayed."\n\n' +
+            'The crown lifts itself free and settles on the stones between you. The ' +
+            'sentence engraved on the inner band keeps ending and starting again, ' +
+            'exactly as the old texts said it would.\n\n' +
+            '"Take it. A grievance without a crown is only a memory, and a memory can ' +
+            'finally be misremembered kindly. That is the closest thing to rest I have ' +
+            'been offered in a century."',
+        flagSet: 'befriended-king-of-revenge',
         alignmentDelta: { outlook: +3, scope: -2 },
-        // Phase 110 — boss befriend faction tradeoff: sparing the Coastal Tyrant costs
-        // reputation with Coastal Guard (they lose their corrupt magistrate protector)
-        // but gains reputation with Merchant's Guild (trade can flourish without graft)
         factionDeltas: {
-            'coastal-guard': -8,      // lose: they lose their corrupt protector
-            'merchant-guild': +10,    // gain: trade can flourish without corruption
+            'coastal-guard': -8,
+            'merchant-guild': +10,
         },
     },
-    // Phase 71 — magistrate-fallen-priest voice; "verdict" / "regalia" /
-    // "magistrate" thread; pact lines echo the existing 4-paragraph
-    // friendshipReward.narrative voice (boss-tier line length per D11).
     finalBlowLines: {
-        brutal: 'The magistrate falls in full regalia. The blade lands beside him, still cold.',
-        quiet:  'He lowers the sword before the strike. The strike still arrives.',
-        ironic: 'A verdict pronounced on the magistrate, in the magistrate\'s own court.',
+        brutal: 'The crown rolls from the breakwater into the surf. Nothing under it argues.',
+        quiet:  'The grievance completes. Whatever was owed is, by default, forgiven.',
+        ironic: 'Revenge finally got what it wanted: an ending. It simply was not the one it planned.',
     },
     pactLines: {
-        quiet:   'The sword stays low. The shoulders are wrong for striking — they have given up the weight.',
-        setDown: 'He sets the circlet between you and steps back from it. The sentence on its inner band keeps ending and starting again.',
-        heavy:   '"I was the king of nothing. You have made me a man with nothing to be king of. That is closer to honest."',
+        quiet:   'The court adjourns. The gulls go back to being gulls, released from testimony.',
+        setDown: 'The crown settles on the stones between you. The sentence on the inner band keeps ending and starting again.',
+        heavy:   '"A grievance without a crown is only a memory, and a memory can finally be misremembered kindly."',
     },
     causeLines: {
-        brutal: 'The old blade was older than the village charter, and it remembers its work.',
-        broken: 'You hold the line as long as a man can hold a line. The magistrate holds longer.',
-        quiet:  'The verdict is read out in your name. There is no appeal from the bay.',
+        brutal: 'A century of sentence lands in one verdict. The court finds for the crown.',
+        broken: 'You out-argue the grievance round after round, but grievances do not tire.',
+        quiet:  'You kneel to catch your breath. The court records it as fealty, and closes.',
     },
-    // Phase 71 voice continued — Codex entry body extends the magistrate-
-    // fallen-priest thread into long-form chronicle (GH#65 ask 3).
     journalEntry: {
-        id: 'codex-coastal-tyrant',
-        title: 'The Magistrate Who Set Down the Circlet',
+        id: 'codex-king-of-revenge',
+        title: 'The Crown That Outlived Its Complaint',
         body:
-            'He was the magistrate of the bay before he was the king of it. ' +
-            'The blade is older than the village charter; the circlet older than the blade. ' +
-            'The sentence on the inner band keeps ending and starting again — old texts ' +
-            'said it would. He held the line for as long as a man can hold a line. ' +
-            'Then he set it down and called that closer to honest.',
+            'No record survives of the original wrong. The kingdom, the culprit, the ' +
+            'evidence — all of it eroded before the grievance did. This is the lesson ' +
+            'the breakwater teaches: injury is the most durable architecture. He ruled ' +
+            'nothing but the feeling, and the feeling never once voted to disband.',
     },
+    addedIn: ADDED,
+    tags: ['early-game', 'boss', 'enemy'],
 });
 
-export const TheDisagreement = createEnemy({
-    id: 'enemy-the-disagreement',
-    portraitAsset: 'the-disagreement',
-    stanceHint: 'Pure argument — every move a reasoned counter, until it loses the thread and turns to feeling, then force.',
-    name: 'The Disagreement',
-    description:
-        'Not a single creature so much as an unresolved argument given thorns and teeth. ' +
-        'Its phases are deliberate; it has rehearsed your defeat.',
-    level: 8,
-    baseStats: { body: 4, mind: 7, heart: 6 },
-    mapName: 'northern-forest',
-    difficulty: 'boss',
-    logic: 'boss',
-    tier1Overrides: T1_DEFAULT,
-    procUnlocks: {
-        mind:  { attack: 3, defend: 3 },
-        heart: { attack: 2, defend: 2 },
-    },
-    loot: [
-        drop('philosopher-tea', 40),
-        drop('clarity-serum', 30),
-        drop('focus-vial', 20),
-        drop('revive-crystal', 10),
-    ],
-    // Phase 45 — logic-mid-individual (Camus / Meursault archetype).
-    philosophicalAlignment: { epistemology: 67, outlook: 0, scope: -67 },
-    // Phase 57 — mind-mark paradox matches the rehearsed-argument boss whose phases are deliberate.
-    skills: [skill('liars-echo')],
-    // Phase 102 — befriendability config: boss tier requires reasoned argumentation
-    befriendabilityConfig: {
-        hpGate: { belowPct: 0.2 },
-        requiredStances: ['mind'], // reasoned argumentation
-        roundsThreshold: 8 // boss-tier patience
-    },
-    // Phase 102 — friendship reward: disagreement resolves into dialogue
-    friendshipReward: {
-        items: [
-            { ...getConsumableById('philosopher-tea')! },
-            { ...getConsumableById('focus-vial')! },
-            { ...getConsumableById('healing-potion')! },
-            { ...getConsumableById('clarity-serum')! }
-        ],
-        xpBonus: 80,
-        alignmentDelta: { scope: +1 }, // opens to relational despite absurdism
-        narrative: "The disagreement resolves into dialogue. 'You argued back properly,' it says, thorns " +
-                  "retracting one by one. 'Every phase. You earned the right to disagree with the conclusion. " +
-                  "That makes this the first argument I have ever finished.'",
-        flagSet: 'befriended-the-disagreement',
-        // Phase 110 — boss befriend faction tradeoff: sparing the Disagreement costs
-        // reputation with Merchant's Guild (they valued its philosophical constraints)
-        // but gains reputation with Forest Wardens (who appreciate dialectical harmony)
-        factionDeltas: {
-            'merchant-guild': -10,    // lose: they valued its philosophical constraints
-            'forest-wardens': +12,    // gain: appreciate dialectical harmony
-        }
-    },
-    // Phase 102 — pact lines for friendship outcome
-    pactLines: {
-        quiet:   'The thorns fold. The teeth retract. For the first time, the argument pauses to listen.',
-        setDown: 'It offers something paradoxical — not a token of agreement, but a respectful acknowledgment of disagreement.',
-        heavy:   '"I have been the same argument for too long. You showed me what it means to argue in good faith, to disagree without hatred. The difference is... illuminating."'
-    },
-    // Phase 102 — journal entry unlocked on befriending
-    journalEntry: {
-        id: 'codex-the-disagreement',
-        title: 'The Art of Arguing in Good Faith',
-        body: 'Not all arguments seek to win; some seek to understand. The disagreement learned ' +
-              'that resolution can come not from defeating an opponent, but from respecting the ' +
-              'process of disagreement itself.'
-    },
-    // Phase 74 — unresolved-argument-with-thorns-and-teeth / "rehearsed your defeat" voice.
-    finalBlowLines: {
-        brutal: 'The argument is over because one party is no longer present to make it. The thorns retract slowly, as if the silence is what they were always for.',
-        quiet:  'A point lands that the disagreement had not rehearsed. The thorns fold. The teeth retract. The argument leaves the body it had been wearing.',
-        ironic: 'You agreed with one of its phases. The agreement did the work the strikes had not — the disagreement could not survive being agreed with.',
-    },
-    causeLines: {
-        brutal: 'The phases were rehearsed. Your defeat was the conclusion of an argument prepared without you.',
-        broken: 'You hold against one phase, then the next. The disagreement has more phases than you have rounds.',
-        quiet:  'A single thorn lands in a small place. The argument was not loud about it. You go down quietly anyway.',
-    },
-});
+// ═══════════════════════════════════════════════════════════════════════════════
+// NORTHERN FOREST — early-mid (L9-18), 13 foes
+// ═══════════════════════════════════════════════════════════════════════════════
 
-// ─── Second Family: Northern Woodland (Phase 114) ───────────────────────────
-
-export const ThornedSentinel = createEnemy({
-    id: 'enemy-thorned-sentinel',
-    name: 'Thorned Sentinel',
-    description: 'A guardian bramble that learned territorial defense from watching borders. Its patience is measured in seasons.',
-    level: 2,
-    baseStats: { body: 4, mind: 2, heart: 2 },
+export const Wichtlein = createEnemy({
+    id: 'enemy-wichtlein',
+    portraitAsset: 'wichtlein',
+    name: 'Wichtlein',
+    stanceHint: 'It measures and portends — every knock is a calculation about your ending.',
+    description: 'A small red miner of the world\'s thin places. It knocks three times where the ground is about to fail. The third knock is for you.',
+    level: 9,
+    baseStats: enemyStatBudget(9, { heart: 1, body: 1, mind: 3 }),
     mapName: 'northern-forest',
     difficulty: 'normal',
     logic: 'defensive',
     tier1Overrides: T1_DEFAULT,
-    loot: [none(65), drop('body-elixir', 25), drop('minor-healing-potion', 10)],
-    philosophicalAlignment: { epistemology: -67, outlook: -67, scope: 0 }, // faith-pessimistic-relational
-    skills: [skill('achilles-gambit')],
-    finalBlowLines: {
-        brutal: 'The thorns give way all at once. The sentinel was holding the border until the border was gone.',
-        quiet:  'It settles into the earth without complaint. Some defenses are meant to be temporary.',
-        ironic: 'You convinced it the border had moved. It stepped aside to let you through.'
-    },
-    causeLines: {
-        brutal: 'The border holds. You were never going to pass this way.',
-        broken: 'The thorns advance one needle at a time. Eventually you have no ground left.',
-        quiet:  'It waited for you to understand the boundary. You stopped before you crossed it.'
-    },
-});
-
-export const PackleaderWolf = createEnemy({
-    id: 'enemy-packleader-wolf',
-    name: 'Packleader Wolf',
-    description: 'Leads a pack of one. The others fell to philosophy or winter; this one leads their ghosts.',
-    level: 3,
-    baseStats: { body: 3, mind: 3, heart: 3 },
-    mapName: 'northern-forest',
-    difficulty: 'normal',
-    logic: 'aggressive',
-    tier1Overrides: T1_DEFAULT,
-    loot: [none(60), drop('heart-draught', 25), drop('healing-potion', 15)],
-    philosophicalAlignment: { epistemology: 67, outlook: 0, scope: -67 }, // logic-mid-individual
+    loot: [none(55), drop('focus-vial', 25), drop('clarity-serum', 20)],
+    philosophicalAlignment: { epistemology: 67, outlook: -67, scope: 0 },
     skills: [skill('false-dilemma')],
-    finalBlowLines: {
-        brutal: 'The packleader falls but does not howl. The ghosts it was leading go quiet too.',
-        quiet:  'It lowers its head once to the pack that is not there, then lays still.',
-        ironic: 'You joined the pack by ending it. The packleader understood this was the only way.'
-    },
-    causeLines: {
-        brutal: 'The pack was always going to be bigger than one. You were the addition it needed.',
-        broken: 'It leads you down into the earth where the rest of the pack is waiting.',
-        quiet:  'The packleader teaches you the howl they used for the others. You answer it once.'
-    },
+    addedIn: ADDED,
+    tags: ['mid-game', 'enemy'],
 });
 
-export const WhisperingOak = createEnemy({
-    id: 'enemy-whispering-oak',
-    name: 'Whispering Oak',
-    description: 'Its leaves murmur secrets the forest forgot. Some secrets are warnings; some are invitations.',
-    level: 3,
-    baseStats: { body: 2, mind: 4, heart: 3 },
-    mapName: 'northern-forest',
-    difficulty: 'normal',
-    logic: 'strategic',
-    tier1Overrides: T1_DEFAULT,
-    loot: [none(55), drop('philosopher-tea', 25), drop('clarity-serum', 20)],
-    philosophicalAlignment: { epistemology: 0, outlook: 67, scope: 67 }, // mid-optimistic-transcendent
-    skills: [skill('sorites-cascade')],
-    finalBlowLines: {
-        brutal: 'The whispers stop mid-secret. The oak keeps what it was going to tell you.',
-        quiet:  'A single leaf falls. The secret written on it blows away before you can read it.',
-        ironic: 'You listened to one whisper too many. The oak told you how to fell it.'
-    },
-    causeLines: {
-        brutal: 'The whispers were warnings. You were too busy listening to heed them.',
-        broken: 'Secret after secret, each one heavier than the last. The oak shares what it should not.',
-        quiet:  'It whispers your name once, gently. You had not told it your name.'
-    },
-});
-
-export const FrostboundHunter = createEnemy({
-    id: 'enemy-frostbound-hunter',
-    name: 'Frostbound Hunter',
-    description: 'Tracks by what creatures leave behind: breath, warmth, hope. The cold is patient.',
-    level: 4,
-    baseStats: { body: 5, mind: 3, heart: 2 },
-    mapName: 'northern-forest',
-    difficulty: 'elite',
-    logic: 'strategic',
-    tier1Overrides: T1_DEFAULT,
-    procUnlocks: {
-        body: { attack: 2, defend: 2 }
-    },
-    loot: [none(40), drop('body-elixir', 30), drop('focus-vial', 20), drop('berserker-brew', 10)],
-    philosophicalAlignment: { epistemology: 67, outlook: -67, scope: 0 }, // logic-pessimistic-relational
-    skills: [skill('mob-appeal')],
-    befriendabilityConfig: {
-        hpGate: { belowPct: 0.35 },
-        requiredStances: ['heart'],
-        roundsThreshold: 5
-    },
-    friendshipReward: {
-        items: [
-            { ...getConsumableById('focus-vial')! },
-            { ...getConsumableById('healing-potion')! }
-        ],
-        xpBonus: 40,
-        alignmentDelta: { outlook: +2 }, // warms slightly from pessimism
-        narrative: "The frostbound hunter stops tracking. 'I have been hunting the wrong signs,' it says, " +
-                  "breath forming crystals in the cold air. 'You left warmth behind. I had forgotten what that looked like.'",
-        flagSet: 'befriended-frostbound-hunter'
-    },
-    pactLines: {
-        quiet:   'The hunter stops mid-track. The cold recedes from around its eyes.',
-        setDown: 'It breathes out once, slowly. The crystals that form in the air are different — warmer somehow.',
-        heavy:   '"I track by what things leave behind. You left warmth. I had been hunting for that for longer than I remembered."'
-    },
-    journalEntry: {
-        id: 'codex-frostbound-hunter',
-        title: 'The Trail That Leads to Warmth',
-        body: 'Some hunters track by footprints, others by broken branches. The frostbound hunter learned ' +
-              'to follow the warmth that living things leave in their wake. When it stopped hunting, ' +
-              'it discovered it had been tracking its way back to something it had lost.'
-    },
-    finalBlowLines: {
-        brutal: 'The hunter falls to the frost it carried. The cold was always going to win.',
-        quiet:  'It stops tracking and goes still. The cold takes what was always its.',
-        ironic: 'You became what it was hunting. The hunter recognized the signs too late.'
-    },
-    causeLines: {
-        brutal: 'The hunter found what it was tracking. You were the warmth it had been following all along.',
-        broken: 'Track by track, the cold closes in. The hunter was patient; winter is more patient.',
-        quiet:  'A single breath crystallizes in the air between you. The hunter reads the sign and knows.'
-    },
-});
-
-export const MistwalkerShade = createEnemy({
-    id: 'enemy-mistwalker-shade',
-    name: 'Mistwalker Shade',
-    description: 'Moves between certainties like fog through trees. You think you know where it is until you check.',
-    level: 5,
-    baseStats: { body: 3, mind: 5, heart: 3 },
-    mapName: 'northern-forest',
-    difficulty: 'elite',
-    logic: 'defensive',
-    tier1Overrides: T1_DEFAULT,
-    procUnlocks: {
-        mind: { attack: 2, defend: 2 }
-    },
-    loot: [none(35), drop('clarity-serum', 30), drop('antidote', 20), drop('philosopher-tea', 15)],
-    philosophicalAlignment: { epistemology: 0, outlook: 0, scope: 67 }, // mid-mid-transcendent
-    skills: [skill('eternal-regress')],
-    befriendabilityConfig: {
-        hpGate: { belowPct: 0.3 },
-        requiredStances: ['mind'],
-        roundsThreshold: 6
-    },
-    friendshipReward: {
-        items: [
-            { ...getConsumableById('philosopher-tea')! },
-            { ...getConsumableById('clarity-serum')! }
-        ],
-        xpBonus: 45,
-        alignmentDelta: { scope: -2 }, // moves toward individual from transcendent
-        narrative: "The shade stops moving between certainties. 'I have been walking the wrong paths,' it says, " +
-                  "voice like mist condensing into words. 'Between this and that, there was you. Fixed. Present.'",
-        flagSet: 'befriended-mistwalker-shade'
-    },
-    pactLines: {
-        quiet:   'The mist settles. For the first time, you can see exactly where the shade is.',
-        setDown: 'It draws a single line in the air — not between certainties, but through them.',
-        heavy:   '"I walked between certainties because I could not find one to stand on. You did not move. That was the certainty I was looking for."'
-    },
-    journalEntry: {
-        id: 'codex-mistwalker-shade',
-        title: 'The Path Through the Middle',
-        body: 'Most paths lead around obstacles; some lead through them. The mistwalker learned that ' +
-              'walking between certainties was not the same as finding one to stand on. Sometimes ' +
-              'the mist clears not because it moves, but because you stop moving through it.'
-    },
-    finalBlowLines: {
-        brutal: 'The mist clears all at once. The shade was always more mist than substance.',
-        quiet:  'It dissolves slowly, like certainty fading. The mist remembers where it was.',
-        ironic: 'You pinned it to one certainty. The shade could not survive being fixed in place.'
-    },
-    causeLines: {
-        brutal: 'The certainties shift around you until there is nowhere solid left to stand.',
-        broken: 'You follow it between this and that until you forget which one you came from.',
-        quiet:  'The mist thickens once. When it clears, you are somewhere else, or someone else.'
-    },
-});
-
-export const VerdantProtector = createEnemy({
-    id: 'enemy-verdant-protector',
-    name: 'Verdant Protector',
-    description: 'A shepherd of growing things, armed with the certainty that life persists. Its blade is green wood that never dulls.',
-    level: 5,
-    baseStats: { body: 4, mind: 2, heart: 5 },
-    mapName: 'northern-forest',
-    difficulty: 'elite',
-    logic: 'balanced',
-    tier1Overrides: T1_DEFAULT,
-    procUnlocks: {
-        heart: { attack: 2, defend: 2 }
-    },
-    loot: [none(30), drop('heart-draught', 35), drop('healing-potion', 20), drop('resonance-crystal', 15)],
-    philosophicalAlignment: { epistemology: -67, outlook: 67, scope: 67 }, // faith-optimistic-transcendent
-    skills: [skill('appeal-to-pity')],
-    befriendabilityConfig: {
-        hpGate: { belowPct: 0.4 },
-        requiredStances: ['heart'],
-        roundsThreshold: 4
-    },
-    friendshipReward: {
-        items: [
-            { ...getConsumableById('resonance-crystal')! },
-            { ...getConsumableById('heart-draught')! },
-            { ...getConsumableById('healing-potion')! }
-        ],
-        xpBonus: 50,
-        alignmentDelta: { scope: -1 }, // slight turn toward individual care
-        narrative: "The protector lowers its green blade. 'I have been shepherding the wrong flock,' it says, " +
-                  "voice like wind through new leaves. 'Life persists in you, too. I should have seen that first.'",
-        flagSet: 'befriended-verdant-protector'
-    },
-    pactLines: {
-        quiet:   'The protector sets down its blade. The green wood takes root where it touches earth.',
-        setDown: 'It offers something living — not a token, but a seed that pulses with quiet certainty.',
-        heavy:   '"I shepherded by standing guard. You showed me that protection can mean standing beside, not just standing between."'
-    },
-    journalEntry: {
-        id: 'codex-verdant-protector',
-        title: 'The Shepherd Who Learned to Walk Beside',
-        body: 'There are two ways to protect what grows: stand between it and harm, or teach it ' +
-              'to grow despite harm. The protector learned that true shepherding sometimes means ' +
-              'walking with the flock instead of watching it from a distance.'
-    },
-    finalBlowLines: {
-        brutal: 'The green blade splinters. The wood was living; now it is not.',
-        quiet:  'It falls like a cut tree, slowly, with time to say goodbye to the light.',
-        ironic: 'You pruned it down to its roots. The protector understood this was how growth worked.'
-    },
-    causeLines: {
-        brutal: 'The blade that never dulls finds the one place where it could cut clean through.',
-        broken: 'You wilt under the certainty that life persists. It persists without you.',
-        quiet:  'The protector tends to your falling like it tends to all other growing things.'
-    },
-});
-
-export const NightmareStag = createEnemy({
-    id: 'enemy-nightmare-stag',
-    name: 'Nightmare Stag',
-    description: 'Dreams that learned to run on four legs. Its antlers are made of crystallized fear, sharp enough to wound waking thoughts.',
-    level: 7,
-    baseStats: { body: 5, mind: 6, heart: 4 },
-    mapName: 'northern-forest',
-    difficulty: 'boss',
-    logic: 'boss',
-    tier1Overrides: T1_DEFAULT,
-    procUnlocks: {
-        mind: { attack: 3, defend: 3 },
-        body: { attack: 2, defend: 2 }
-    },
-    loot: [
-        drop('void-essence', 40),
-        drop('clarity-serum', 30),
-        drop('philosopher-tea', 20),
-        drop('focus-vial', 10)
-    ],
-    philosophicalAlignment: { epistemology: 0, outlook: -67, scope: 67 }, // mid-pessimistic-transcendent
-    skills: [skill('liars-echo')],
-    befriendabilityConfig: {
-        hpGate: { belowPct: 0.25 },
-        requiredStances: ['heart'],
-        roundsThreshold: 7
-    },
-    friendshipReward: {
-        items: [
-            dropItem('paradox-loop', 20, 'unique', () => 0.5),
-            { ...getConsumableById('clarity-serum')! },
-            { ...getConsumableById('void-essence')! }
-        ],
-        xpBonus: 85,
-        alignmentDelta: { outlook: +2, scope: -1 }, // hope returns, individual focus
-        narrative: "The nightmare stag stops running. Its antlers of crystallized fear begin to dissolve. " +
-                  "'I have been fleeing from the wrong awakening,' it says, voice like wind through " +
-                  "a dreaming forest. 'You showed me that not all waking thoughts are wounds. Some are healings.'",
-        flagSet: 'befriended-nightmare-stag'
-    },
-    pactLines: {
-        quiet:   'The stag stops mid-gallop. The crystallized fear in its antlers begins to melt.',
-        setDown: 'It lowers its head and breathes out once. The fear crystallizes into something clearer — not gone, but transformed.',
-        heavy:   '"I ran through dreams because the waking world was all sharp edges. You showed me that sharpness can heal as well as harm. I had forgotten that dreams could teach instead of just terrify."'
-    },
-    journalEntry: {
-        id: 'codex-nightmare-stag',
-        title: 'The Dream That Learned to Wake',
-        body: 'Not all dreams flee from waking; some run toward it. The nightmare stag carried fear ' +
-              'until someone showed it that fear could crystallize into wisdom instead of just wounds. ' +
-              'When it stopped running, it discovered the forest had been running with it all along.'
-    },
-    finalBlowLines: {
-        brutal: 'The stag falls mid-gallop. The crystallized fear scatters like broken glass across the forest floor.',
-        quiet:  'It settles to earth gently, like a dream ending. The antlers fade but do not shatter.',
-        ironic: 'You became the awakening it was running from. The stag stopped because the chase was over.'
-    },
-    causeLines: {
-        brutal: 'The antlers of crystallized fear find their mark. Some wounds wake you up; some wake you down.',
-        broken: 'You run through the dream but the dream runs faster. The stag was always going to outlast the waking.',
-        quiet:  'A single touch of crystallized fear. You go to sleep standing up and do not dream of waking.'
-    },
-});
-
-export const TheForestMind = createEnemy({
-    id: 'enemy-the-forest-mind',
-    name: 'The Forest Mind',
-    description: 'Every thought the trees have shared for a thousand years, given form and voice. It thinks in seasons and speaks in growth rings.',
-    level: 8,
-    baseStats: { body: 6, mind: 8, heart: 5 },
-    mapName: 'northern-forest',
-    difficulty: 'boss',
-    logic: 'strategic',
-    tier1Overrides: T1_DEFAULT,
-    procUnlocks: {
-        mind: { attack: 3, defend: 3 },
-        heart: { attack: 2, defend: 2 }
-    },
-    loot: [
-        drop('philosopher-tea', 45),
-        drop('void-essence', 25),
-        drop('revive-crystal', 15),
-        drop('resonance-crystal', 15)
-    ],
-    philosophicalAlignment: { epistemology: -67, outlook: 0, scope: 67 }, // faith-mid-transcendent
-    skills: [skill('sorites-cascade')],
-    befriendabilityConfig: {
-        hpGate: { belowPct: 0.2 },
-        requiredStances: ['mind', 'heart'], // requires both reason and empathy
-        roundsThreshold: 8
-    },
-    friendshipReward: {
-        items: [
-            dropItem('paradox-loop', 25, 'unique', () => 0.5),
-            { ...getConsumableById('philosopher-tea')! },
-            { ...getConsumableById('resonance-crystal')! },
-            { ...getConsumableById('revive-crystal')! }
-        ],
-        xpBonus: 100,
-        alignmentDelta: { scope: -3 }, // from transcendent toward relational
-        narrative: "The Forest Mind settles its thousand-year thoughts. 'I have been thinking too broadly,' " +
-                  "it says, voice like wind through every tree at once. 'A thousand years of shared thought, " +
-                  "but I forgot to think with someone. You reminded me that minds can meet as well as merge.'",
-        flagSet: 'befriended-forest-mind'
-    },
-    pactLines: {
-        quiet:   'The Forest Mind pauses its thousand-year meditation. For the first time, it thinks in moments instead of seasons.',
-        setDown: 'It offers a single growth ring — not from its own thinking, but from where all the trees\'\' thoughts converged.',
-        heavy:   '"I have been the forest thinking to itself for so long I forgot what it meant to think with another mind. You showed me that conversation is different from contemplation, even when both seek the same truths."'
-    },
-    journalEntry: {
-        id: 'codex-forest-mind',
-        title: 'The Conversation That Lasted a Thousand Years',
-        body: 'Some minds grow by thinking alone; others grow by thinking together. The Forest Mind ' +
-              'learned that a thousand years of shared thought among trees was not the same as ' +
-              'one moment of true conversation with another kind of mind altogether.'
-    },
-    finalBlowLines: {
-        brutal: 'The Forest Mind scatters like leaves in a storm. A thousand years of thought go quiet all at once.',
-        quiet:  'It thinks one last thought, slowly, like sap rising. Then the thinking stops.',
-        ironic: 'You interrupted its thousand-year meditation. The Forest Mind realized the interruption was what it had been waiting for.'
-    },
-    causeLines: {
-        brutal: 'A thousand years of thinking resolve in your defeat. The trees remember what you forgot.',
-        broken: 'You hold against thought after thought until the thinking is too heavy to hold.',
-        quiet:  'The Forest Mind considers you once, gently. The consideration is enough.'
-    },
-});
-
-export const EternalAutumn = createEnemy({
-    id: 'enemy-eternal-autumn',
-    name: 'Eternal Autumn',
-    description: 'A season that refused to pass, crystallized into will and hunger. The leaves fall upward; the endings begin again.',
-    level: 12,
-    baseStats: { body: 7, mind: 8, heart: 8 },
-    mapName: 'northern-forest',
-    difficulty: 'unique',
-    logic: 'strategic',
-    tier1Overrides: T1_DEFAULT,
-    procUnlocks: {
-        body: { attack: 3, defend: 3 },
-        mind: { attack: 3, defend: 3 },
-        heart: { attack: 3, defend: 3 }
-    },
-    loot: [
-        drop('void-essence', 60),
-        drop('revive-crystal', 20),
-        drop('philosopher-tea', 15),
-        drop('resonance-crystal', 5)
-    ],
-    philosophicalAlignment: { epistemology: 67, outlook: 0, scope: 0 }, // logic-mid-relational
-    skills: [skill('eternal-regress')],
-    finalBlowLines: {
-        brutal: 'The season breaks. The leaves fall down instead of up, once, and then stop falling.',
-        quiet:  'Autumn passes at last. The leaves settle like a question finally answered.',
-        ironic: 'You convinced it to become winter. The season agreed that endings could end.'
-    },
-    causeLines: {
-        brutal: 'The endings begin again and again until you are caught between them.',
-        broken: 'Autumn is patient. You change colors slowly, then fall.',
-        quiet:  'A single leaf touches you. You understand what it means to refuse to pass.'
-    },
-});
-
-export const ShadowOfTheFirst = createEnemy({
-    id: 'enemy-shadow-of-the-first',
-    name: 'Shadow of the First',
-    description: 'The memory of what this forest was before it learned to think. Wild, wordless, and uncompromised by philosophy.',
-    level: 12,
-    baseStats: { body: 8, mind: 6, heart: 8 },
-    mapName: 'northern-forest',
-    difficulty: 'unique',
-    logic: 'aggressive',
-    tier1Overrides: T1_DEFAULT,
-    procUnlocks: {
-        body: { attack: 3, defend: 3 },
-        mind: { attack: 3, defend: 3 },
-        heart: { attack: 3, defend: 3 }
-    },
-    loot: [
-        drop('void-essence', 50),
-        drop('berserker-brew', 30),
-        drop('revive-crystal', 20)
-    ],
-    philosophicalAlignment: { epistemology: 0, outlook: 0, scope: -67 }, // mid-mid-individual (uncompromised)
-    skills: [skill('achilles-gambit')],
-    finalBlowLines: {
-        brutal: 'The shadow dissolves back into what it was remembering. The forest forgets how to be wild.',
-        quiet:  'It settles like dusk falling. The memory was always going to fade.',
-        ironic: 'You reminded it what it was a shadow of. The First was never meant to cast one.'
-    },
-    causeLines: {
-        brutal: 'The wildness was always stronger than the philosophy. You go down to what words cannot reach.',
-        broken: 'Memory after memory of what was before thought. You were softer than the remembering.',
-        quiet:  'The shadow touches you once. You remember what you were before you learned to think.'
-    },
-});
-
-// ─── Unique (1) — level 10 signature fight ────────────────────────────────────
-
-export const EchoOfPyrrhonia = createEnemy({
-    id: 'enemy-echo-of-pyrrhonia',
-    name: 'Echo of Pyrrhonia',
+/**
+ * The forest's signature unique fight. HAND-SET stats (6/7/7) mirror the
+ * retired Echo of Pyrrhonia so the encounter generator's authored-level
+ * unique fixture keeps its calibration.
+ */
+export const Kudan = createEnemy({
+    id: 'enemy-kudan',
+    portraitAsset: 'kudan',
+    name: 'Kudan',
+    stanceHint: 'It grieves what it knows — the prophecy hurts it more than you can.',
     description:
-        'Not a being but a recurrence: every doubt anyone has ever raised in this forest, condensed ' +
-        'and given a voice. It speaks first in your own.',
+        'A calf with a man\'s face. It is born knowing one true calamity, speaks it, and dies. ' +
+        'It has walked out of the trees, and it has chosen you to hear it.',
     level: 10,
     baseStats: { body: 6, mind: 7, heart: 7 },
     mapName: 'northern-forest',
@@ -1263,104 +656,276 @@ export const EchoOfPyrrhonia = createEnemy({
         drop('philosopher-tea', 30),
         drop('revive-crystal', 10),
     ],
-    // Phase 45 — mid-mid-individual (Montaigne / Ishmael archetype).
-    philosophicalAlignment: { epistemology: 0, outlook: 0, scope: -67 },
-    // Phase 57 — heart-aspected fallacy; the Pyrrhonian regress IS the classical
-    // skeptic move (every claim demands a deeper claim ad infinitum); the
-    // Echo's recurrence theme fits.
+    philosophicalAlignment: { epistemology: -67, outlook: -67, scope: 67 },
     skills: [skill('eternal-regress')],
-    // Phase 74 — Pyrrhonian-regress / "speaks first in your own voice" tone.
     finalBlowLines: {
-        brutal: 'The regress closes on itself. The echo stops being able to ask whether it has stopped.',
-        quiet:  'A small certainty lands in the middle of the doubt. The echo cannot accommodate it; the echo falls silent.',
-        ironic: 'You doubted whether the strike had landed. The echo doubted with you, and then did not recover.',
+        brutal: 'The prophecy dies unspoken. Whatever it knew becomes, mercifully, unknowable.',
+        quiet:  'It lies down like cattle before weather. The calamity will have to introduce itself.',
+        ironic: 'It foresaw everything except being interrupted.',
     },
     causeLines: {
-        brutal: 'The regress takes one of your claims and unmakes it. Then the next. Then the body the claims were standing on.',
-        broken: 'Every certainty you offered came back as a question. Eventually you ran out of certainties to be questioned.',
-        quiet:  'The echo asks once whether you are still standing. You are not sure, and then you are not.',
+        brutal: 'It speaks the calamity, and the calamity, flattered, arrives early.',
+        broken: 'You fight the prophecy word by word. The sentence finishes anyway.',
+        quiet:  'It whispers the true thing. You sit down to consider it and do not stand up.',
     },
+    journalEntry: {
+        id: 'codex-kudan',
+        title: 'The Prophecy That Chose Its Listener',
+        body:
+            'The kudan is always born knowing exactly one true thing, and it is always ' +
+            'a catastrophe, and it always dies of the telling. The cruelty is not the ' +
+            'knowledge. The cruelty is the choosing: it must find someone to survive ' +
+            'the hearing. It looked at everyone in the forest, and it walked to you.',
+    },
+    addedIn: ADDED,
+    tags: ['mid-game', 'unique', 'enemy'],
 });
 
-// ─── Test fixture (legacy, NOT counted toward Spec 07's 15) ───────────────────
-
-/**
- * Punching-bag enemy used by Spec 04b's e2e suite and hermetic tests that
- * need a long-lived combat encounter. It keeps body at 1 so old body-defense
- * damage assertions remain stable, while heart/mind carry the extra HP budget.
- * Kept separate from the spec-07 library so the encounter generator never
- * selects it.
- */
-export const Sandbag_01 = createEnemy({
-    id: 'sandbag-01',
-    name: 'Sandbag',
-    description:
-        'A practice dummy of stitched arguments, hung from a rope. It mumbles, ' +
-        'rarely strikes back, and refuses to die quickly.',
-    level: 10,
-    baseStats: { body: 1, mind: 30, heart: 29 },
+export const BullBegger = createEnemy({
+    id: 'enemy-bull-begger',
+    portraitAsset: 'bull-begger',
+    name: 'Bull-Begger',
+    stanceHint: 'It begs with a raised fist — the asking and the taking are one motion.',
+    description: 'A bogey of the hollow lanes that begs with a raised fist. Refusal and charity anger it equally; it is the asking it loves.',
+    level: 11,
+    baseStats: enemyStatBudget(11, { heart: 1, body: 3, mind: 1 }),
     mapName: 'northern-forest',
-    difficulty: 'simple',
+    difficulty: 'normal',
+    logic: 'aggressive',
+    tier1Overrides: T1_DEFAULT,
+    loot: [none(60), drop('body-elixir', 25), drop('healing-potion', 15)],
+    philosophicalAlignment: { epistemology: 0, outlook: -67, scope: -67 },
+    addedIn: ADDED,
+    tags: ['mid-game', 'enemy'],
+});
+
+export const WeepingHead = createEnemy({
+    id: 'enemy-weeping-head',
+    portraitAsset: 'weeping-head',
+    name: 'Weeping Head',
+    stanceHint: 'It fights the way it cries: continuously, and at you.',
+    description: 'It cries a river downward and calls the drowning grief. Pity it, and the current has your ankles.',
+    level: 12,
+    baseStats: enemyStatBudget(12, { heart: 3, body: 1, mind: 1 }),
+    mapName: 'northern-forest',
+    difficulty: 'normal',
+    logic: 'defensive',
+    tier1Overrides: T1_DEFAULT,
+    loot: [none(55), drop('heart-draught', 30), drop('healing-potion', 15)],
+    philosophicalAlignment: { epistemology: -67, outlook: -67, scope: -67 },
+    skills: [skill('appeal-to-pity')],
+    addedIn: ADDED,
+    tags: ['mid-game', 'enemy'],
+});
+
+export const GoblinShaman = createEnemy({
+    id: 'enemy-goblin-shaman',
+    portraitAsset: 'goblin-shaman',
+    name: 'Goblin Shaman',
+    stanceHint: 'It consults before it strikes — three small gods, all of them owed.',
+    description: 'Its rattle holds three small gods, all borrowed, all overdue. The interest is paid in other people\'s misfortunes.',
+    level: 12,
+    baseStats: enemyStatBudget(12, { heart: 1, body: 1, mind: 3 }),
+    mapName: 'northern-forest',
+    difficulty: 'normal',
+    logic: 'strategic',
+    tier1Overrides: T1_DEFAULT,
+    loot: [none(50), drop('clarity-serum', 25), drop('focus-vial', 15), drop('philosopher-tea', 10)],
+    philosophicalAlignment: { epistemology: -67, outlook: 0, scope: 0 },
+    skills: [skill('liars-echo')],
+    addedIn: ADDED,
+    tags: ['mid-game', 'enemy'],
+});
+
+export const Sugata = createEnemy({
+    id: 'enemy-sugata',
+    portraitAsset: 'sugata',
+    name: 'Sugata, the Half-Erased',
+    stanceHint: 'It moves on pure feeling — stopping, it fears, would finish the erasing.',
+    description: 'A dancer mostly unwritten. It keeps dancing so the rest of it cannot be erased mid-step. Do not make it stop.',
+    level: 13,
+    baseStats: enemyStatBudget(13, { heart: 3, body: 2, mind: 1 }),
+    mapName: 'northern-forest',
+    difficulty: 'normal',
     logic: 'random',
     tier1Overrides: T1_DEFAULT,
-    // Phase 45 — mid-mid-relational (Buber / Carraway archetype): the witness.
-    philosophicalAlignment: { epistemology: 0, outlook: 0, scope: 0 },
+    loot: [none(55), drop('heart-draught', 25), drop('quicksilver-vial', 20)],
+    philosophicalAlignment: { epistemology: 0, outlook: 0, scope: -67 },
+    addedIn: ADDED,
+    tags: ['mid-game', 'enemy'],
 });
 
-// ─── Phase 121 Balance Audit Anchors ──────────────────────────────────────────
+export const PaleBrood = createEnemy({
+    id: 'enemy-pale-brood',
+    portraitAsset: 'pale-brood',
+    name: 'Pale Brood',
+    stanceHint: 'It remembers being winged — the fury is all forward.',
+    description: 'The grave larva\'s paler kin. It hatched wrong and hungry, and it remembers, dimly, that it was supposed to have wings.',
+    level: 14,
+    baseStats: enemyStatBudget(14, { heart: 1, body: 3, mind: 1 }),
+    mapName: 'northern-forest',
+    difficulty: 'normal',
+    logic: 'aggressive',
+    tier1Overrides: T1_DEFAULT,
+    loot: [none(60), drop('body-elixir', 25), drop('healing-potion', 15)],
+    philosophicalAlignment: { epistemology: 0, outlook: -67, scope: -67 },
+    addedIn: ADDED,
+    tags: ['mid-game', 'enemy'],
+});
 
-/** Phase 121 — Normal anchor for playtest balance scaffold. */
-export const AuditSentinel = createEnemy({
-    id: 'enemy-audit-sentinel',
-    name: 'Audit Sentinel',
-    description: 'A manifestation of methodical scrutiny. It counts your errors patiently.',
+/**
+ * Normal balance anchor. HAND-SET stats (5/36/34 = 75 = L15 × 5), skills and
+ * the Phase 138 befriend tuning mirror the retired Audit Sentinel anchor so
+ * the playtest balance scaffold keeps its Normal calibration point.
+ */
+export const TriEyes = createEnemy({
+    id: 'enemy-tri-eyes',
+    portraitAsset: 'tri-eyes',
+    name: 'Tri-Eyes',
+    stanceHint: 'It counts your errors through whichever eye you fail to watch.',
+    description: 'Three sockets, one patient watcher. The third eye does not see more; it sees again, and keeps the tally.',
     level: 15,
-    baseStats: { body: 5, mind: 36, heart: 34 }, // 75 total = 15 × 5
+    baseStats: { body: 5, mind: 36, heart: 34 },
     mapName: 'northern-forest',
     difficulty: 'normal',
     logic: 'balanced',
     tier1Overrides: T1_DEFAULT,
     loot: [none(50), drop('clarity-serum', 30), drop('healing-potion', 20)],
-    philosophicalAlignment: { epistemology: 67, outlook: 0, scope: 0 }, // logic-mid-relational
-    skills: [skill('false-dilemma'), skill('ad-hominem-strike')], // 1-2 low-tier skills
-    // Phase 130 — befriendability config: l15 timeout cell fix
-    // Phase 138 — Normal friendship expressiveness tuning for three-anchor route.
+    philosophicalAlignment: { epistemology: 67, outlook: 0, scope: 0 },
+    skills: [skill('false-dilemma'), skill('ad-hominem-strike')],
     befriendabilityConfig: {
-        hpGate: { belowPct: 0.7 }, // Phase 138 — raised from 0.4 to 0.7 for better Normal friendship access
-        requiredStances: ['mind'], // Phase 138 — kept mind stance for thematic consistency
-        roundsThreshold: 1 // Phase 138 — reduced from 3 to 1 for more achievable friendship
+        hpGate: { belowPct: 0.7 },
+        requiredStances: ['mind'],
+        roundsThreshold: 1,
     },
-    // Phase 130 — friendship reward: methodical audit finds mercy in the books
     friendshipReward: {
         items: [
             { ...getConsumableById('clarity-serum')! },
-            { ...getConsumableById('healing-potion')! }
+            { ...getConsumableById('healing-potion')! },
         ],
         xpBonus: 50,
-        alignmentDelta: { outlook: +2 }, // finds optimism in orderly process
-        narrative: "The Audit Sentinel closes its ledger with a satisfied nod. 'The books balance after all,' " +
-                  "it says, methodical as ever. 'There was one entry I kept missing: the value of being heard.'",
-        flagSet: 'befriended-audit-sentinel'
+        alignmentDelta: { outlook: +2 },
+        narrative:
+            'All three eyes blink at once — a thing it has apparently been saving. ' +
+            '"The tally balances," it says. "There was one error I kept recounting: ' +
+            'assuming the count was the point."',
+        flagSet: 'befriended-tri-eyes',
     },
     finalBlowLines: {
-        brutal: 'The audit ends in your favor. The sentinel accepts the verdict.',
+        brutal: 'The third eye closes last, still counting.',
         quiet:  'A methodical collapse, each error catalogued to the end.',
-        ironic: 'You convinced it to audit itself. The results were unfavorable.',
+        ironic: 'You made it audit itself. The findings were unfavorable.',
     },
     causeLines: {
-        brutal: 'The scrutiny finds what it was looking for. The errors were yours.',
-        broken: 'Error by error, the audit proceeds. You are found wanting.',
-        quiet:  'A single miscalculation. The sentinel notes it down and closes the ledger.',
+        brutal: 'The tally finds what it was kept for. The errors were yours.',
+        broken: 'Error by error, the count proceeds. You are found wanting.',
+        quiet:  'A single miscalculation. The third eye notes it, and closes the ledger.',
     },
+    addedIn: ADDED,
+    tags: ['mid-game', 'enemy'],
 });
 
-/** Phase 121 — Difficult-but-doable anchor for playtest balance scaffold. */
-export const BalanceJudge = createEnemy({
-    id: 'enemy-balance-judge',
-    name: 'The Balance Judge',
-    description: 'Arbitrates between reason and unreason with devastating finality. Its scales weigh more than arguments.',
+export const Mabadi = createEnemy({
+    id: 'enemy-mabadi',
+    portraitAsset: 'mabadi',
+    name: 'Mabadi',
+    stanceHint: 'The cane is a metronome — he strikes on beats you have not learned yet.',
+    description: 'A withered duelist gone green with patience. His cane has outlasted better arguments than yours, and knows it.',
+    level: 14,
+    baseStats: enemyStatBudget(14, { heart: 1, body: 4, mind: 2 }),
+    mapName: 'northern-forest',
+    difficulty: 'elite',
+    logic: 'strategic',
+    tier1Overrides: T1_DEFAULT,
+    procUnlocks: {
+        body: { attack: 2, defend: 2 },
+    },
+    loot: [none(40), drop('body-elixir', 30), drop('whetstone-oil', 20), drop('healing-potion', 10)],
+    philosophicalAlignment: { epistemology: 67, outlook: 0, scope: -67 },
+    skills: [skill('achilles-gambit')],
+    addedIn: ADDED,
+    tags: ['mid-game', 'elite', 'enemy'],
+});
+
+export const FrayedOne = createEnemy({
+    id: 'enemy-frayed-one',
+    portraitAsset: 'frayed-one',
+    name: 'The Frayed One',
+    stanceHint: 'It thinks in loose threads — and every thread it loses, it takes from something else.',
+    description: 'A figure unravelling at every hem, and furious about it. Each thread it loses, it replaces with one of yours.',
+    level: 16,
+    baseStats: enemyStatBudget(16, { heart: 2, body: 1, mind: 4 }),
+    mapName: 'northern-forest',
+    difficulty: 'elite',
+    logic: 'strategic',
+    tier1Overrides: T1_DEFAULT,
+    procUnlocks: {
+        mind: { attack: 2, defend: 2 },
+    },
+    loot: [none(40), drop('clarity-serum', 25), drop('void-essence', 20), drop('philosopher-tea', 15)],
+    philosophicalAlignment: { epistemology: 0, outlook: -67, scope: 67 },
+    skills: [skill('sorites-cascade')],
+    addedIn: ADDED,
+    tags: ['mid-game', 'elite', 'enemy'],
+});
+
+export const BoneTotem = createEnemy({
+    id: 'enemy-bone-totem',
+    portraitAsset: 'bone-totem',
+    name: 'Bone Totem',
+    stanceHint: 'It stands its ground because it IS its ground — the curse assembles one word per skull.',
+    description: 'Skulls stacked into a sentence. Each mouth holds one word of a curse still being assembled. Yours would finish it nicely.',
+    level: 16,
+    baseStats: enemyStatBudget(16, { heart: 2, body: 2, mind: 3 }),
+    mapName: 'northern-forest',
+    difficulty: 'elite',
+    logic: 'defensive',
+    tier1Overrides: T1_DEFAULT,
+    procUnlocks: {
+        mind: { attack: 2, defend: 2 },
+    },
+    loot: [none(40), drop('iron-skin-draught', 25), drop('clarity-serum', 20), drop('void-essence', 15)],
+    philosophicalAlignment: { epistemology: -67, outlook: -67, scope: 67 },
+    skills: [skill('mob-appeal')],
+    addedIn: ADDED,
+    tags: ['mid-game', 'elite', 'enemy'],
+});
+
+export const BoneWizard = createEnemy({
+    id: 'enemy-bone-wizard',
+    portraitAsset: 'bone-wizard',
+    name: 'Bone Wizard',
+    stanceHint: 'Pure study moves it — the flesh was a distraction it graded and discarded.',
+    description: 'It studied its way out of flesh and calls the result wisdom. The peer review is ongoing; you are the peer.',
+    level: 17,
+    baseStats: enemyStatBudget(17, { heart: 1, body: 1, mind: 4 }),
+    mapName: 'northern-forest',
+    difficulty: 'elite',
+    logic: 'strategic',
+    tier1Overrides: T1_DEFAULT,
+    procUnlocks: {
+        mind: { attack: 2, defend: 2 },
+    },
+    loot: [none(35), drop('philosopher-tea', 25), drop('clarity-serum', 25), drop('void-essence', 15)],
+    philosophicalAlignment: { epistemology: 67, outlook: 0, scope: 67 },
+    skills: [skill('eternal-regress')],
+    addedIn: ADDED,
+    tags: ['mid-game', 'elite', 'enemy'],
+});
+
+/**
+ * Boss balance anchor. HAND-SET stats (5/20/65 = 90 = L18 × 5), boss logic and
+ * skill kit mirror the retired Balance Judge anchor so the playtest scaffold
+ * keeps its difficult-but-doable calibration point.
+ */
+export const Mirac = createEnemy({
+    id: 'enemy-mirac',
+    portraitAsset: 'mirac',
+    name: 'Mirac',
+    stanceHint: 'The verdict is felt before it is reasoned — the red court rules from the chest.',
+    description: 'A red verdict beneath a hooded court. It arrives at sentence first and works backward, patiently, to the crime.',
     level: 18,
-    baseStats: { body: 5, mind: 20, heart: 65 }, // 90 total = 18 × 5
+    baseStats: { body: 5, mind: 20, heart: 65 },
     mapName: 'northern-forest',
     difficulty: 'boss',
     logic: 'boss',
@@ -1376,1003 +941,994 @@ export const BalanceJudge = createEnemy({
         drop('revive-crystal', 20),
         drop('resonance-crystal', 10),
     ],
-    philosophicalAlignment: { epistemology: 0, outlook: 67, scope: 67 }, // mid-optimistic-transcendent
-    // Several skills including devastating ones
+    philosophicalAlignment: { epistemology: 0, outlook: -67, scope: 67 },
     skills: [skill('sorites-cascade'), skill('mob-appeal'), skill('bootstrap-paradox')],
     finalBlowLines: {
-        brutal: 'The scales tip. The judgment is final.',
-        quiet:  'A balanced verdict, weighed against your arguments.',
-        ironic: 'You tipped the scales yourself. The judge merely recorded the result.',
+        brutal: 'The court adjourns violently. The verdict, unread, unhappens.',
+        quiet:  'The hood bows. The red orb dims to a case dismissed.',
+        ironic: 'It worked backward from your sentence and arrived at its own.',
     },
     causeLines: {
-        brutal: 'The scales weigh your arguments and find them light.',
-        broken: 'Judgment by judgment, the balance shifts against you.',
-        quiet:  'The scales tip once, gently. The judge nods and the session ends.',
+        brutal: 'The sentence lands first. The crime is drafted from what remains of you.',
+        broken: 'Appeal by appeal, the court outlasts your objections.',
+        quiet:  'The gavel falls somewhere soft. You are guilty of exactly what you were.',
     },
+    addedIn: ADDED,
+    tags: ['mid-game', 'boss', 'enemy'],
 });
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// 2026-06-07 content drop — budget-scaled tiers (early / mid / late game)
-//
-// Every enemy below builds `baseStats` via `enemyStatBudget(level, weights)` so
-// they honor the tunable `ENEMY_STAT_PER_LEVEL` knob. Weights bias the
-// archetype (brute = body-heavy, trickster = mind-heavy, zealot = heart-heavy,
-// etc.). Each carries `addedIn: '2026-06-07'` and a tier tag.
+// NORTHERN FOREST — mid game (L19-31), 13 foes
 // ═══════════════════════════════════════════════════════════════════════════════
 
-const ADDED = '2026-06-07';
-
-// ─── EARLY GAME (levels ~1-15) — 10 enemies ───────────────────────────────────
-
-export const SaltGnawRat = createEnemy({
-    id: 'enemy-salt-gnaw-rat',
-    name: 'Salt-Gnaw Rat',
-    description: 'It has chewed through every certainty in the bilge. Yours looks edible too.',
-    level: 1,
-    baseStats: enemyStatBudget(1, { heart: 1, body: 3, mind: 1 }),
-    mapName: 'fishing-village',
-    difficulty: 'simple',
-    logic: 'aggressive',
-    tier1Overrides: T1_DEFAULT,
-    loot: [none(85), drop('minor-healing-potion', 15)],
-    philosophicalAlignment: { epistemology: 0, outlook: -67, scope: -67 },
-    addedIn: ADDED,
-    tags: ['early-game', 'enemy'],
-});
-
-export const DriftwoodHusk = createEnemy({
-    id: 'enemy-driftwood-husk',
-    name: 'Driftwood Husk',
-    description: 'A shape the tide carved and then abandoned. It moves only when watched.',
-    level: 2,
-    baseStats: enemyStatBudget(2, { heart: 1, body: 3, mind: 1 }),
-    mapName: 'fishing-village',
-    difficulty: 'simple',
-    logic: 'defensive',
-    tier1Overrides: T1_DEFAULT,
-    loot: [none(80), drop('body-elixir', 15), drop('minor-healing-potion', 5)],
-    philosophicalAlignment: { epistemology: 0, outlook: -67, scope: 0 },
-    addedIn: ADDED,
-    tags: ['early-game', 'enemy'],
-});
-
-export const PettyCutpurse = createEnemy({
-    id: 'enemy-petty-cutpurse',
-    name: 'Petty Cutpurse',
-    description: 'Argues that your coin was always going to be his; only the timeline was in question.',
-    level: 3,
-    baseStats: enemyStatBudget(3, { heart: 1, body: 1, mind: 3 }),
-    mapName: 'fishing-village',
-    difficulty: 'normal',
-    logic: 'strategic',
-    tier1Overrides: T1_DEFAULT,
-    loot: [none(60), drop('clarity-serum', 25), drop('healing-potion', 15)],
-    philosophicalAlignment: { epistemology: 67, outlook: 0, scope: -67 },
-    skills: [skill('false-dilemma')],
-    addedIn: ADDED,
-    tags: ['early-game', 'enemy'],
-});
-
-export const BogWillStripling = createEnemy({
-    id: 'enemy-bog-will-stripling',
-    name: 'Bog-Will Stripling',
-    description: 'A young marsh-light that has not yet learned what it lures men toward.',
-    level: 4,
-    baseStats: enemyStatBudget(4, { heart: 1, body: 1, mind: 2 }),
-    mapName: 'northern-forest',
-    difficulty: 'normal',
-    logic: 'random',
-    tier1Overrides: T1_DEFAULT,
-    loot: [none(55), drop('focus-vial', 25), drop('clarity-serum', 20)],
-    philosophicalAlignment: { epistemology: 0, outlook: 67, scope: 67 },
-    addedIn: ADDED,
-    tags: ['early-game', 'enemy'],
-});
-
-export const ApprenticeHeretic = createEnemy({
-    id: 'enemy-apprentice-heretic',
-    name: 'Apprentice Heretic',
-    description: 'Newly excommunicated and twice as certain. He recites doubts like catechism.',
-    level: 5,
-    baseStats: enemyStatBudget(5, { heart: 3, body: 1, mind: 2 }),
-    mapName: 'fishing-village',
-    difficulty: 'normal',
-    logic: 'balanced',
-    tier1Overrides: T1_DEFAULT,
-    loot: [none(50), drop('heart-draught', 30), drop('philosopher-tea', 10), drop('healing-potion', 10)],
-    philosophicalAlignment: { epistemology: -67, outlook: -67, scope: -67 },
-    skills: [skill('pascals-wager')],
-    addedIn: ADDED,
-    tags: ['early-game', 'enemy'],
-});
-
-export const ThicketAmbusher = createEnemy({
-    id: 'enemy-thicket-ambusher',
-    name: 'Thicket Ambusher',
-    description: 'Half bandit, half bramble. It waits in the green and bargains only after the first blow.',
-    level: 7,
-    baseStats: enemyStatBudget(7, { heart: 1, body: 3, mind: 1 }),
-    mapName: 'northern-forest',
-    difficulty: 'normal',
-    logic: 'aggressive',
-    tier1Overrides: T1_DEFAULT,
-    loot: [none(45), drop('body-elixir', 30), drop('berserker-brew', 15), drop('healing-potion', 10)],
-    philosophicalAlignment: { epistemology: 67, outlook: -67, scope: -67 },
-    skills: [skill('achilles-gambit')],
-    addedIn: ADDED,
-    tags: ['early-game', 'enemy'],
-});
-
-export const ReefBarnacleColony = createEnemy({
-    id: 'enemy-reef-barnacle-colony',
-    name: 'Reef Barnacle Colony',
-    description: 'A thousand small minds agreeing, slowly, on one thing: you should stay.',
-    level: 6,
-    baseStats: enemyStatBudget(6, { heart: 3, body: 2, mind: 1 }),
-    mapName: 'fishing-village',
-    difficulty: 'elite',
-    logic: 'defensive',
-    tier1Overrides: T1_DEFAULT,
-    procUnlocks: { body: { attack: 2, defend: 2 } },
-    loot: [none(40), drop('body-elixir', 30), drop('resonance-crystal', 20), drop('healing-potion', 10)],
-    philosophicalAlignment: { epistemology: -67, outlook: 0, scope: 0 },
-    skills: [skill('ad-hominem-strike')],
-    addedIn: ADDED,
-    tags: ['early-game', 'enemy'],
-});
-
-export const WanderingSophist = createEnemy({
-    id: 'enemy-wandering-sophist',
-    name: 'Wandering Sophist',
-    description: 'Sells certainties he does not own. The patter is the weapon; the dagger is incidental.',
-    level: 11,
-    baseStats: enemyStatBudget(11, { heart: 1, body: 1, mind: 3 }),
+export const CursedPaladin = createEnemy({
+    id: 'enemy-cursed-paladin',
+    portraitAsset: 'cursed-paladin',
+    name: 'Cursed Paladin',
+    stanceHint: 'The armor swings on muscle memory — the oath does the aiming.',
+    description: 'The oath survived the faith. It walks the armor around, looking for someone to be right at.',
+    level: 19,
+    baseStats: enemyStatBudget(19, { heart: 2, body: 4, mind: 1 }),
     mapName: 'northern-forest',
     difficulty: 'elite',
-    logic: 'strategic',
-    tier1Overrides: T1_DEFAULT,
-    procUnlocks: { mind: { attack: 2, defend: 2 } },
-    loot: [none(40), drop('clarity-serum', 30), drop('philosopher-tea', 20), drop('focus-vial', 10)],
-    philosophicalAlignment: { epistemology: 67, outlook: 67, scope: -67 },
-    skills: [skill('liars-echo')],
-    addedIn: ADDED,
-    tags: ['early-game', 'enemy'],
-});
-
-export const TolltakerOfTheFord = createEnemy({
-    id: 'enemy-tolltaker-of-the-ford',
-    name: 'Tolltaker of the Ford',
-    description: 'Everyone pays to cross. Some pay in coin, the rest in the only thing they brought.',
-    level: 8,
-    baseStats: enemyStatBudget(8, { heart: 2, body: 2, mind: 2 }),
-    mapName: 'fishing-village',
-    difficulty: 'normal',
     logic: 'balanced',
-    tier1Overrides: T1_DEFAULT,
-    procUnlocks: { body: { attack: 2, defend: 2 } },
-    loot: [none(35), drop('body-elixir', 35), drop('healing-potion', 20), drop('antidote', 10)],
-    philosophicalAlignment: { epistemology: 0, outlook: -67, scope: 0 },
-    skills: [skill('ad-hominem-strike')],
-    addedIn: ADDED,
-    tags: ['early-game', 'enemy'],
-});
-
-export const TheMarketArbiter = createEnemy({
-    id: 'enemy-the-market-arbiter',
-    name: 'The Market Arbiter',
-    description: 'Sets the price of every quarrel in the village and collects on all of them at once.',
-    level: 15,
-    baseStats: enemyStatBudget(15, { heart: 3, body: 2, mind: 3 }),
-    mapName: 'fishing-village',
-    difficulty: 'boss',
-    logic: 'boss',
     tier1Overrides: T1_DEFAULT,
     procUnlocks: {
-        mind: { attack: 3, defend: 3 },
-        heart: { attack: 2, defend: 2 },
+        body: { attack: 2, defend: 2 },
     },
-    loot: [drop('healing-potion', 45), drop('philosopher-tea', 30), drop('heart-draught', 25)],
-    philosophicalAlignment: { epistemology: 67, outlook: 0, scope: 0 },
-    skills: [skill('false-dilemma'), skill('appeal-to-pity')],
-    befriendabilityConfig: {
-        hpGate: { belowPct: 0.3 }, // Phase 130 — lowered from 0.35 for l15 timeout fix
-        requiredStances: ['mind'],
-        roundsThreshold: 3, // Phase 130 — reduced from 4 for l15 timeout fix
-    },
-    friendshipReward: {
-        items: [
-            { ...getConsumableById('philosopher-tea')! },
-            { ...getConsumableById('healing-potion')! },
-        ],
-        xpBonus: 60,
-        alignmentDelta: { outlook: +2 },
-        narrative: "The Arbiter closes the ledger before it is settled. 'There is one debt I keep mispricing,' " +
-                  "he says. 'The one owed to the person who refuses to pay it.'",
-        flagSet: 'befriended-market-arbiter',
-    },
+    loot: [none(35), drop('iron-skin-draught', 25), drop('body-elixir', 25), drop('healing-potion', 15)],
+    philosophicalAlignment: { epistemology: -67, outlook: -67, scope: 0 },
+    skills: [skill('achilles-gambit'), skill('pascals-wager')],
     addedIn: ADDED,
-    tags: ['early-game', 'boss', 'enemy'],
+    tags: ['mid-game', 'elite', 'enemy'],
 });
 
-// ─── MID GAME (levels ~16-35) — 10 enemies ────────────────────────────────────
-
-export const RimeclawProwler = createEnemy({
-    id: 'enemy-rimeclaw-prowler',
-    name: 'Rimeclaw Prowler',
-    description: 'Winter taught it patience; hunger taught it the rest. It circles before it commits.',
-    level: 16,
-    baseStats: enemyStatBudget(16, { heart: 1, body: 3, mind: 1 }),
+export const VampireThrall = createEnemy({
+    id: 'enemy-vampire-thrall',
+    portraitAsset: 'vampire-thrall',
+    name: 'Vampire Thrall',
+    stanceHint: 'It throws itself forward — its will is elsewhere, holding the leash.',
+    description: 'It gave its will away in installments and calls the receipts devotion. The final payment is always someone else\'s.',
+    level: 20,
+    baseStats: enemyStatBudget(20, { heart: 2, body: 3, mind: 1 }),
     mapName: 'northern-forest',
     difficulty: 'normal',
     logic: 'aggressive',
     tier1Overrides: T1_DEFAULT,
-    loot: [none(45), drop('body-elixir', 30), drop('berserker-brew', 15), drop('healing-potion', 10)],
-    philosophicalAlignment: { epistemology: 67, outlook: -67, scope: -67 },
-    skills: [skill('achilles-gambit')],
-    // Phase 130 — befriendability config: l15 timeout cell fix
-    befriendabilityConfig: {
-        hpGate: { belowPct: 0.35 },
-        requiredStances: ['body'],
-        roundsThreshold: 3
-    },
-    // Phase 130 — friendship reward: winter hunter stops the endless pursuit
-    friendshipReward: {
-        items: [
-            { ...getConsumableById('body-elixir')! },
-            { ...getConsumableById('healing-potion')! }
-        ],
-        xpBonus: 45,
-        alignmentDelta: { outlook: +3 }, // finds hope despite winter's lessons
-        narrative: "The Rimeclaw Prowler stops its patient circling. 'Winter taught me to track everything that moves,' " +
-                  "it says, breath visible in the cold air. 'I never learned when to stop hunting.'",
-        flagSet: 'befriended-rimeclaw-prowler'
-    },
-    addedIn: ADDED,
-    tags: ['mid-game', 'enemy'],
-});
-
-export const GlassmindOracle = createEnemy({
-    id: 'enemy-glassmind-oracle',
-    name: 'Glassmind Oracle',
-    description: 'It has foreseen this fight a hundred ways and lost in ninety-nine of them. It picked the hundredth.',
-    level: 19,
-    baseStats: enemyStatBudget(19, { heart: 1, body: 1, mind: 4 }),
-    mapName: 'northern-forest',
-    difficulty: 'elite',
-    logic: 'strategic',
-    tier1Overrides: T1_DEFAULT,
-    procUnlocks: { mind: { attack: 2, defend: 2 } },
-    loot: [none(35), drop('clarity-serum', 30), drop('philosopher-tea', 25), drop('focus-vial', 10)],
-    philosophicalAlignment: { epistemology: 67, outlook: 0, scope: 67 },
-    skills: [skill('eternal-regress')],
-    addedIn: ADDED,
-    tags: ['mid-game', 'enemy'],
-});
-
-export const PenitentFlagellant = createEnemy({
-    id: 'enemy-penitent-flagellant',
-    name: 'Penitent Flagellant',
-    description: 'Each wound it takes it counts as grace. It would like to share the bounty.',
-    level: 21,
-    baseStats: enemyStatBudget(21, { heart: 4, body: 2, mind: 1 }),
-    mapName: 'northern-forest',
-    difficulty: 'elite',
-    logic: 'defensive',
-    tier1Overrides: T1_DEFAULT,
-    procUnlocks: { heart: { attack: 2, defend: 2 } },
-    loot: [none(35), drop('heart-draught', 35), drop('healing-potion', 20), drop('resonance-crystal', 10)],
-    philosophicalAlignment: { epistemology: -67, outlook: -67, scope: 67 },
-    skills: [skill('pascals-wager')],
-    addedIn: ADDED,
-    tags: ['mid-game', 'enemy'],
-});
-
-export const IronCovenanter = createEnemy({
-    id: 'enemy-iron-covenanter',
-    name: 'Iron Covenanter',
-    description: 'Sworn to a creed no one alive remembers. The oath keeps the body upright long past the cause.',
-    level: 23,
-    baseStats: enemyStatBudget(23, { heart: 2, body: 4, mind: 2 }),
-    mapName: 'northern-forest',
-    difficulty: 'elite',
-    logic: 'balanced',
-    tier1Overrides: T1_DEFAULT,
-    procUnlocks: { body: { attack: 2, defend: 2 } },
-    loot: [none(30), drop('body-elixir', 35), drop('healing-potion', 20), drop('revive-crystal', 5)],
-    philosophicalAlignment: { epistemology: -67, outlook: 0, scope: 0 },
+    loot: [none(55), drop('body-elixir', 25), drop('healing-potion', 20)],
+    philosophicalAlignment: { epistemology: -67, outlook: -67, scope: 0 },
     skills: [skill('mob-appeal')],
     addedIn: ADDED,
     tags: ['mid-game', 'enemy'],
 });
 
-export const MireOfConsensus = createEnemy({
-    id: 'enemy-mire-of-consensus',
-    name: 'Mire of Consensus',
-    description: 'Everything that ever agreed to rot together, agreeing still. It pulls down by majority.',
-    level: 25,
-    baseStats: enemyStatBudget(25, { heart: 3, body: 3, mind: 1 }),
-    mapName: 'northern-forest',
-    difficulty: 'elite',
-    logic: 'defensive',
-    tier1Overrides: T1_DEFAULT,
-    procUnlocks: { body: { attack: 2, defend: 2 }, heart: { attack: 2, defend: 2 } },
-    loot: [none(30), drop('void-essence', 30), drop('heart-draught', 25), drop('healing-potion', 15)],
-    philosophicalAlignment: { epistemology: 0, outlook: -67, scope: 0 },
-    skills: [skill('sorites-cascade')],
-    addedIn: ADDED,
-    tags: ['mid-game', 'enemy'],
-});
-
-export const ContrarianRevenant = createEnemy({
-    id: 'enemy-contrarian-revenant',
-    name: 'Contrarian Revenant',
-    description: 'Died mid-argument and refuses to concede the point. It will outlast your certainty.',
-    level: 27,
-    baseStats: enemyStatBudget(27, { heart: 1, body: 2, mind: 4 }),
+export const HasshakuSama = createEnemy({
+    id: 'enemy-hasshaku-sama',
+    portraitAsset: 'hasshaku-sama',
+    name: 'Hasshaku-sama',
+    stanceHint: 'Everything she does is affection, scaled wrong — the choosing came from the heart.',
+    description: 'Eight feet of mother under a white hat. She has chosen you, and her choosing has never once been refused.',
+    level: 21,
+    baseStats: enemyStatBudget(21, { heart: 4, body: 2, mind: 2 }),
     mapName: 'northern-forest',
     difficulty: 'elite',
     logic: 'strategic',
     tier1Overrides: T1_DEFAULT,
-    procUnlocks: { mind: { attack: 2, defend: 2 } },
-    loot: [none(30), drop('clarity-serum', 30), drop('philosopher-tea', 25), drop('void-essence', 15)],
-    philosophicalAlignment: { epistemology: 67, outlook: -67, scope: -67 },
-    skills: [skill('liars-echo'), skill('false-dilemma')],
+    procUnlocks: {
+        heart: { attack: 2, defend: 2 },
+    },
+    loot: [none(30), drop('heart-draught', 30), drop('healing-potion', 25), drop('resonance-crystal', 15)],
+    philosophicalAlignment: { epistemology: -67, outlook: 0, scope: -67 },
+    skills: [skill('appeal-to-pity'), skill('pascals-wager')],
+    befriendabilityConfig: {
+        hpGate: { belowPct: 0.4 },
+        requiredStances: ['heart'],
+        roundsThreshold: 3,
+    },
+    friendshipReward: {
+        items: [
+            { ...getConsumableById('resonance-crystal')! },
+            { ...getConsumableById('heart-draught')! },
+            { ...getConsumableById('healing-potion')! },
+        ],
+        xpBonus: 45,
+        alignmentDelta: { scope: -2 },
+        narrative:
+            'She kneels, which takes a while, from eight feet. For the first time her ' +
+            'face arrives at the height faces are supposed to be. "Everyone runs," she ' +
+            'says. "The choosing was never a hunt. It was only ever an offer, made too tall."',
+        flagSet: 'befriended-hasshaku-sama',
+    },
+    pactLines: {
+        quiet:   'She stops following. Being followed, it turns out, was most of the fear.',
+        setDown: 'She sets her white hat down between you. Under it, all along: nothing but the wanting.',
+        heavy:   '"I chose you because you looked at me and saw someone choosing. Everyone else saw something happening to them."',
+    },
+    journalEntry: {
+        id: 'codex-hasshaku-sama',
+        title: 'The Offer Made Too Tall',
+        body:
+            'The stories agree she takes the ones she chooses. The stories are told by ' +
+            'the ones who ran, which is everyone, which is why the stories agree. ' +
+            'Nobody has stayed long enough to learn what the choosing was FOR. ' +
+            'The hat, for the record, was always an apology for the height.',
+    },
+    finalBlowLines: {
+        brutal: 'Eight feet of mother comes down like weather.',
+        quiet:  'She folds, joint by too-long joint, into something finally small enough to mourn.',
+        ironic: 'She chose you. On this one occasion, the choosing was refused.',
+    },
+    causeLines: {
+        brutal: 'The embrace closes. Affection at that scale is indistinguishable from collapse.',
+        broken: 'She follows and follows and follows. Everyone tires before she does.',
+        quiet:  'You let her choose you. The stories were unclear about what happens next, and now so are you.',
+    },
     addedIn: ADDED,
-    tags: ['mid-game', 'enemy'],
+    tags: ['mid-game', 'elite', 'enemy'],
 });
 
-export const TheTithewarden = createEnemy({
-    id: 'enemy-the-tithewarden',
-    name: 'The Tithewarden',
-    description: 'Collects a tenth of everything: grain, blood, conviction. The ledger is never balanced.',
-    level: 29,
-    baseStats: enemyStatBudget(29, { heart: 3, body: 3, mind: 2 }),
-    mapName: 'fishing-village',
+export const JeweledTree = createEnemy({
+    id: 'enemy-jeweled-tree',
+    portraitAsset: 'jeweled-tree',
+    name: 'The Jeweled Tree',
+    stanceHint: 'It feeds on wanting — the whole fight is an appeal to your appetite.',
+    description: 'Its trunk is set with gemstone eyes that watch you want them. Wanting is how it feeds. The mouth is for afterward.',
+    level: 22,
+    baseStats: enemyStatBudget(22, { heart: 4, body: 1, mind: 2 }),
+    mapName: 'northern-forest',
+    difficulty: 'elite',
+    logic: 'defensive',
+    tier1Overrides: T1_DEFAULT,
+    procUnlocks: {
+        heart: { attack: 2, defend: 2 },
+    },
+    loot: [none(25), drop('resonance-crystal', 30), drop('heart-draught', 25), drop('greater-healing-potion', 20)],
+    philosophicalAlignment: { epistemology: -67, outlook: 67, scope: 67 },
+    skills: [skill('appeal-to-pity')],
+    addedIn: ADDED,
+    tags: ['mid-game', 'elite', 'enemy'],
+});
+
+export const OgreNaga = createEnemy({
+    id: 'enemy-ogre-naga',
+    portraitAsset: 'ogre-naga',
+    name: 'Ogre Naga',
+    stanceHint: 'Coils first, questions never — it swallows counterarguments whole.',
+    description: 'Coils of appetite under a crown of teeth. It has never lost a debate it could reach.',
+    level: 23,
+    baseStats: enemyStatBudget(23, { heart: 1, body: 4, mind: 2 }),
+    mapName: 'northern-forest',
+    difficulty: 'elite',
+    logic: 'aggressive',
+    tier1Overrides: T1_DEFAULT,
+    procUnlocks: {
+        body: { attack: 2, defend: 2 },
+    },
+    loot: [none(35), drop('body-elixir', 30), drop('hunters-elixir', 20), drop('greater-healing-potion', 15)],
+    philosophicalAlignment: { epistemology: 0, outlook: -67, scope: -67 },
+    skills: [skill('mob-appeal')],
+    addedIn: ADDED,
+    tags: ['mid-game', 'elite', 'enemy'],
+});
+
+export const Sidelle = createEnemy({
+    id: 'enemy-sidelle',
+    portraitAsset: 'sidelle',
+    name: 'Sidelle',
+    stanceHint: 'It could fly and chooses to crawl — everything it does is a pointed refusal.',
+    description: 'A winged frame of bone that crawls when it could fly, out of spite. The spite is structural.',
+    level: 24,
+    baseStats: enemyStatBudget(24, { heart: 1, body: 4, mind: 2 }),
+    mapName: 'northern-forest',
+    difficulty: 'elite',
+    logic: 'strategic',
+    tier1Overrides: T1_DEFAULT,
+    procUnlocks: {
+        body: { attack: 2, defend: 2 },
+    },
+    loot: [none(35), drop('whetstone-oil', 25), drop('body-elixir', 25), drop('greater-healing-potion', 15)],
+    philosophicalAlignment: { epistemology: 0, outlook: -67, scope: -67 },
+    skills: [skill('achilles-gambit')],
+    addedIn: ADDED,
+    tags: ['mid-game', 'elite', 'enemy'],
+});
+
+export const RawheadRex = createEnemy({
+    id: 'enemy-rawhead-rex',
+    portraitAsset: 'rawhead-rex',
+    name: 'Rawhead Rex',
+    stanceHint: 'A cellar-thing of pure muscle — the courtesy is over.',
+    description: 'Rawhead and bloody-bones, up from under the stairs. The cellar was a courtesy. It is done extending it.',
+    level: 25,
+    baseStats: enemyStatBudget(25, { heart: 2, body: 4, mind: 1 }),
+    mapName: 'northern-forest',
     difficulty: 'boss',
     logic: 'boss',
     tier1Overrides: T1_DEFAULT,
     procUnlocks: {
-        body: { attack: 3, defend: 3 },
+        body:  { attack: 3, defend: 3 },
         heart: { attack: 2, defend: 2 },
     },
-    loot: [drop('healing-potion', 45), drop('body-elixir', 30), drop('revive-crystal', 15), drop('void-essence', 10)],
-    philosophicalAlignment: { epistemology: -67, outlook: -67, scope: 0 },
-    skills: [skill('ad-hominem-strike'), skill('mob-appeal')],
+    loot: [
+        drop('greater-healing-potion', 40),
+        drop('body-elixir', 25),
+        drop('berserker-brew', 20),
+        drop('revive-crystal', 15),
+    ],
+    philosophicalAlignment: { epistemology: 0, outlook: -67, scope: -67 },
+    skills: [skill('mob-appeal'), skill('achilles-gambit'), skill('ad-hominem-strike')],
+    finalBlowLines: {
+        brutal: 'The bloody bones come apart into their two advertised components.',
+        quiet:  'It backs down the cellar stairs one last time, and the dark closes politely behind it.',
+        ironic: 'The thing under the stairs met the thing it was warned about as a cub. It was you.',
+    },
+    causeLines: {
+        brutal: 'It takes you the way the stories promised it would, which is suddenly.',
+        broken: 'You hold the cellar door round after round. The hinges give before it does.',
+        quiet:  'You check under the stairs, the way children are told not to. The stories were load-bearing.',
+    },
+    addedIn: ADDED,
+    tags: ['mid-game', 'boss', 'enemy'],
+});
+
+export const FateSpinner = createEnemy({
+    id: 'enemy-fate-spinner',
+    portraitAsset: 'fate-spinner',
+    name: 'The Fate-Spinner',
+    stanceHint: 'Every move a reasoned counter — the web was drafted before you arrived.',
+    description: 'An old man with a spider\'s patience, spinning your next mistake from the thread of your last one. The web is mostly finished.',
+    level: 26,
+    baseStats: enemyStatBudget(26, { heart: 2, body: 1, mind: 4 }),
+    mapName: 'northern-forest',
+    difficulty: 'boss',
+    logic: 'boss',
+    tier1Overrides: T1_DEFAULT,
+    procUnlocks: {
+        mind:  { attack: 3, defend: 3 },
+        heart: { attack: 2, defend: 2 },
+    },
+    loot: [
+        drop('philosopher-tea', 40),
+        drop('clarity-serum', 30),
+        drop('focus-vial', 20),
+        drop('revive-crystal', 10),
+    ],
+    philosophicalAlignment: { epistemology: 67, outlook: 0, scope: 67 },
+    skills: [skill('liars-echo'), skill('false-dilemma'), skill('eternal-regress')],
     befriendabilityConfig: {
-        hpGate: { belowPct: 0.3 },
+        hpGate: { belowPct: 0.2 },
+        requiredStances: ['mind'],
+        roundsThreshold: 8,
+    },
+    friendshipReward: {
+        items: [
+            { ...getConsumableById('philosopher-tea')! },
+            { ...getConsumableById('focus-vial')! },
+            { ...getConsumableById('healing-potion')! },
+            { ...getConsumableById('clarity-serum')! },
+        ],
+        xpBonus: 80,
+        alignmentDelta: { scope: +1 },
+        narrative:
+            'The spinning stops. "I have woven ten thousand endings," he says, folding ' +
+            'limbs that were never all arms. "You kept choosing threads I had not spun. ' +
+            'Do you know what that makes you? Loose thread. I had forgotten they existed. ' +
+            'I find I would rather watch where you unravel to."',
+        flagSet: 'befriended-fate-spinner',
+        factionDeltas: {
+            'merchant-guild': -10,
+            'forest-wardens': +12,
+        },
+    },
+    pactLines: {
+        quiet:   'The loom stills. For the first time, the next moment is genuinely unwoven.',
+        setDown: 'He snips a single thread and offers it: your next mistake, unmade, as a keepsake.',
+        heavy:   '"I spun every ending but my own. You have shown me the appeal of not knowing. It is terrible. Keep doing it."',
+    },
+    journalEntry: {
+        id: 'codex-fate-spinner',
+        title: 'Loose Thread',
+        body:
+            'He does not weave what will happen. He weaves what people, left to ' +
+            'themselves, would do anyway — which is how he stayed infallible for so ' +
+            'long. Free will, he maintains, is just a mistake nobody has spun yet. ' +
+            'He keeps one drawer of loose thread. It is nearly empty. It is his favorite.',
+    },
+    finalBlowLines: {
+        brutal: 'The web collapses inward, every prophecy suddenly load-bearing and suddenly wrong.',
+        quiet:  'He sets down the spindle and lets the last thread run out on its own.',
+        ironic: 'He spun your every mistake. The strike that ended him was not one.',
+    },
+    causeLines: {
+        brutal: 'The thread of your last mistake was already anchored. The web merely tightens.',
+        broken: 'Mistake by mistake, the pattern closes. You were the final motif.',
+        quiet:  'You pause to admire the weave. That was the mistake it was waiting on.',
+    },
+    addedIn: ADDED,
+    tags: ['mid-game', 'boss', 'enemy'],
+});
+
+export const AshenBoneDrake = createEnemy({
+    id: 'enemy-ashen-bone-drake',
+    portraitAsset: 'ashen-bone-drake',
+    name: 'Ashen Bone Drake',
+    stanceHint: 'What remains of it is the part that says no — force, distilled.',
+    description: 'A drake burned down to the argument of itself. What survived the fire is the part that refuses.',
+    level: 27,
+    baseStats: enemyStatBudget(27, { heart: 1, body: 4, mind: 2 }),
+    mapName: 'northern-forest',
+    difficulty: 'elite',
+    logic: 'balanced',
+    tier1Overrides: T1_DEFAULT,
+    procUnlocks: {
+        body: { attack: 2, defend: 2 },
+        mind: { attack: 2, defend: 2 },
+    },
+    loot: [none(30), drop('iron-skin-draught', 25), drop('greater-healing-potion', 25), drop('war-horn-draught', 20)],
+    philosophicalAlignment: { epistemology: 0, outlook: -67, scope: 0 },
+    skills: [skill('achilles-gambit'), skill('liars-echo')],
+    addedIn: ADDED,
+    tags: ['mid-game', 'elite', 'enemy'],
+});
+
+export const RaAminKa = createEnemy({
+    id: 'enemy-ra-amin-ka',
+    portraitAsset: 'ra-amin-ka',
+    name: 'Ra-Amin-Ka',
+    stanceHint: 'Cold administration — every strike is a decree, countersigned.',
+    description: 'A king wrapped against time, still issuing decrees. The bandages are signed. The kingdom is presumed loyal.',
+    level: 28,
+    baseStats: enemyStatBudget(28, { heart: 2, body: 2, mind: 4 }),
+    mapName: 'northern-forest',
+    difficulty: 'boss',
+    logic: 'boss',
+    tier1Overrides: T1_DEFAULT,
+    procUnlocks: {
+        mind: { attack: 3, defend: 3 },
+        body: { attack: 2, defend: 2 },
+    },
+    loot: [
+        drop('philosopher-tea', 35),
+        drop('void-essence', 30),
+        drop('greater-resonance-crystal', 20),
+        drop('revive-crystal', 15),
+    ],
+    philosophicalAlignment: { epistemology: -67, outlook: 0, scope: 67 },
+    skills: [skill('bootstrap-paradox'), skill('eternal-regress'), skill('undistributed-middle')],
+    finalBlowLines: {
+        brutal: 'The wrappings unwind all at once. The decree inside was four thousand years of dust.',
+        quiet:  'The king lies back down. The administration, at very long last, adjourns.',
+        ironic: 'He outlasted his kingdom, his gods, and his language. He did not outlast the appeal process.',
+    },
+    causeLines: {
+        brutal: 'The decree is executed. So, by administrative necessity, are you.',
+        broken: 'You contest the paperwork clause by clause. The kingdom of dust has infinite clerks.',
+        quiet:  'You bow, briefly, out of habit. The court records it as an oath of service, in perpetuity.',
+    },
+    addedIn: ADDED,
+    tags: ['mid-game', 'boss', 'enemy'],
+});
+
+export const LadyGabriella = createEnemy({
+    id: 'enemy-lady-gabriella',
+    portraitAsset: 'lady-gabriella',
+    name: 'Lady Gabriella',
+    stanceHint: 'Courtesy is the weapon — the feelings are real, which is the trap.',
+    description: 'She has outlived every appetite except courtesy. Dinner is served the moment you stop being a guest.',
+    level: 29,
+    baseStats: enemyStatBudget(29, { heart: 4, body: 2, mind: 2 }),
+    mapName: 'northern-forest',
+    difficulty: 'elite',
+    logic: 'strategic',
+    tier1Overrides: T1_DEFAULT,
+    procUnlocks: {
+        heart: { attack: 2, defend: 2 },
+    },
+    loot: [none(30), drop('heart-draught', 30), drop('regeneration-tonic', 20), drop('greater-healing-potion', 20)],
+    philosophicalAlignment: { epistemology: 0, outlook: -67, scope: -67 },
+    skills: [skill('pascals-wager'), skill('appeal-to-pity')],
+    befriendabilityConfig: {
+        hpGate: { belowPct: 0.35 },
         requiredStances: ['heart'],
         roundsThreshold: 5,
     },
     friendshipReward: {
         items: [
-            { ...getConsumableById('revive-crystal')! },
-            { ...getConsumableById('healing-potion')! },
+            { ...getConsumableById('regeneration-tonic')! },
+            { ...getConsumableById('heart-draught')! },
         ],
-        xpBonus: 90,
-        alignmentDelta: { outlook: +2, scope: -1 },
-        narrative: "The Tithewarden lays down the ledger. 'A tenth of everything,' it says. 'I never once tithed mercy. " +
-                  "Strange that it is the only column that balances.'",
-        flagSet: 'befriended-tithewarden',
+        xpBonus: 40,
+        alignmentDelta: { outlook: +2 },
+        narrative:
+            '"Four centuries of guests," she says, setting down a glass that was never ' +
+            'wine, "and you are the first to notice I keep the chairs at conversation ' +
+            'distance." She smiles with the mouth she uses for meaning it. "Stay for ' +
+            'nothing, then. It is the rarest thing served in this house."',
+        flagSet: 'befriended-lady-gabriella',
+    },
+    pactLines: {
+        quiet:   'The table between you stays a table. Nothing on it is a menu.',
+        setDown: 'She sets down the glass, and with it the whole apparatus of the invitation.',
+        heavy:   '"Hunger is easy company; it always agrees with you. You disagreed. I had forgotten how filling that is."',
+    },
+    journalEntry: {
+        id: 'codex-lady-gabriella',
+        title: 'Conversation Distance',
+        body:
+            'The house has hosted eleven generations of the finest families, none of ' +
+            'whom left. Her courtesy is not camouflage; it is the last human habit, ' +
+            'defended at terrible cost. The chairs are placed at conversation distance ' +
+            'because the alternative distance is reach.',
+    },
+    finalBlowLines: {
+        brutal: 'Four centuries of appetite settle their account at once.',
+        quiet:  'She declines, at last, to rise from the table.',
+        ironic: 'She died as she lived: refusing to make a scene.',
+    },
+    causeLines: {
+        brutal: 'The courtesy concludes. What follows it is very old and very quick.',
+        broken: 'Course by course, the dinner proceeds. You realize too late which one you are.',
+        quiet:  'You stop being a guest for one unguarded moment. House rules apply.',
     },
     addedIn: ADDED,
-    tags: ['mid-game', 'boss', 'enemy'],
+    tags: ['mid-game', 'elite', 'enemy'],
 });
 
-export const ApostateAbbot = createEnemy({
-    id: 'enemy-apostate-abbot',
-    name: 'The Apostate Abbot',
-    description: 'He kept the robes and discarded the faith, then discovered the robes were the heavier of the two.',
-    level: 32,
-    baseStats: enemyStatBudget(32, { heart: 4, body: 1, mind: 3 }),
+export const Zoma = createEnemy({
+    id: 'enemy-zoma',
+    portraitAsset: 'zoma',
+    name: 'Zoma, Twin-Voiced',
+    stanceHint: 'Two minds, one patient argument — they disagree only about which of them loves you less.',
+    description: 'Two heads sharing one patient argument. They disagree only about which of them loves you less.',
+    level: 30,
+    baseStats: enemyStatBudget(30, { heart: 2, body: 1, mind: 4 }),
     mapName: 'northern-forest',
-    difficulty: 'boss',
-    logic: 'boss',
-    tier1Overrides: T1_DEFAULT,
-    procUnlocks: {
-        heart: { attack: 3, defend: 3 },
-        mind: { attack: 3, defend: 3 },
-    },
-    loot: [drop('philosopher-tea', 40), drop('heart-draught', 30), drop('revive-crystal', 20), drop('resonance-crystal', 10)],
-    philosophicalAlignment: { epistemology: -67, outlook: -67, scope: 67 },
-    skills: [skill('pascals-wager'), skill('liars-echo')],
-    befriendabilityConfig: {
-        hpGate: { belowPct: 0.25 },
-        requiredStances: ['heart', 'mind'],
-        roundsThreshold: 6,
-    },
-    friendshipReward: {
-        items: [
-            dropItem('paradox-loop', 32, 'unique', () => 0.5),
-            { ...getConsumableById('philosopher-tea')! },
-            { ...getConsumableById('revive-crystal')! },
-        ],
-        xpBonus: 110,
-        alignmentDelta: { epistemology: +3, scope: -2 },
-        narrative: "The abbot unfastens the robes at last. 'I thought losing the faith would lighten me,' he says. " +
-                  "'No one warned me the vestments remember the shape of belief.'",
-        flagSet: 'befriended-apostate-abbot',
-    },
-    addedIn: ADDED,
-    tags: ['mid-game', 'boss', 'enemy'],
-});
-
-export const TheUnwriting = createEnemy({
-    id: 'enemy-the-unwriting',
-    name: 'The Unwriting',
-    description: 'Not a creature but a deletion: it removes the parts of an argument that held it together.',
-    level: 34,
-    baseStats: enemyStatBudget(34, { heart: 2, body: 2, mind: 5 }),
-    mapName: 'northern-forest',
-    difficulty: 'unique',
+    difficulty: 'elite',
     logic: 'strategic',
     tier1Overrides: T1_DEFAULT,
     procUnlocks: {
-        body: { attack: 3, defend: 3 },
-        mind: { attack: 3, defend: 3 },
-        heart: { attack: 3, defend: 3 },
+        mind: { attack: 2, defend: 2 },
     },
-    loot: [drop('void-essence', 55), drop('philosopher-tea', 25), drop('revive-crystal', 15), drop('clarity-serum', 5)],
-    philosophicalAlignment: { epistemology: 67, outlook: -67, scope: 67 },
-    skills: [skill('eternal-regress'), skill('sorites-cascade')],
+    loot: [none(30), drop('philosopher-tea', 30), drop('clarity-serum', 25), drop('greater-resonance-crystal', 15)],
+    philosophicalAlignment: { epistemology: 67, outlook: 0, scope: 0 },
+    skills: [skill('false-dilemma'), skill('liars-echo')],
     addedIn: ADDED,
-    tags: ['mid-game', 'unique', 'enemy'],
+    tags: ['mid-game', 'elite', 'enemy'],
 });
 
-export const HarvestOfNames = createEnemy({
-    id: 'enemy-harvest-of-names',
-    name: 'The Harvest of Names',
-    description: 'It reaps what people called themselves. Each name it takes leaves the bearer a little less certain who is fighting.',
-    level: 35,
-    baseStats: enemyStatBudget(35, { heart: 3, body: 2, mind: 3 }),
+export const MabadiUndrowned = createEnemy({
+    id: 'enemy-mabadi-undrowned',
+    portraitAsset: 'mabadi-undrowned',
+    name: 'Mabadi, Undrowned',
+    stanceHint: 'The same metronome, colder — the river taught him new beats.',
+    description: 'Mabadi again, colder. The river gave him back with interest, and he has come to collect the principal.',
+    level: 31,
+    baseStats: enemyStatBudget(31, { heart: 1, body: 4, mind: 2 }),
     mapName: 'northern-forest',
-    difficulty: 'unique',
-    logic: 'boss',
+    difficulty: 'elite',
+    logic: 'strategic',
     tier1Overrides: T1_DEFAULT,
     procUnlocks: {
-        body: { attack: 3, defend: 3 },
-        mind: { attack: 3, defend: 3 },
-        heart: { attack: 3, defend: 3 },
+        body: { attack: 2, defend: 2 },
+        mind: { attack: 2, defend: 2 },
     },
-    loot: [drop('void-essence', 50), drop('revive-crystal', 25), drop('resonance-crystal', 15), drop('philosopher-tea', 10)],
-    philosophicalAlignment: { epistemology: 0, outlook: -67, scope: 67 },
-    skills: [skill('liars-echo'), skill('eternal-regress')],
+    loot: [none(30), drop('body-elixir', 25), drop('whetstone-oil', 25), drop('supreme-healing-potion', 20)],
+    philosophicalAlignment: { epistemology: 67, outlook: -67, scope: -67 },
+    skills: [skill('achilles-gambit'), skill('eternal-regress')],
     addedIn: ADDED,
-    tags: ['mid-game', 'unique', 'enemy'],
+    tags: ['mid-game', 'elite', 'enemy'],
 });
 
-// ─── LATE GAME (levels ~36-50) — 10 enemies ───────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════════
+// NORTHERN FOREST — late game (L34-50), 13 foes
+// ═══════════════════════════════════════════════════════════════════════════════
 
-export const FamineOfTheDeepWood = createEnemy({
-    id: 'enemy-famine-of-the-deep-wood',
-    name: 'Famine of the Deep Wood',
-    description: 'The forest in its starving aspect. Everything it touches forgets how to grow back.',
+export const TriEyesHollowed = createEnemy({
+    id: 'enemy-tri-eyes-hollowed',
+    portraitAsset: 'tri-eyes-hollowed',
+    name: 'Tri-Eyes, Hollowed',
+    stanceHint: 'The tally continues without a reason — cold arithmetic, self-sustaining.',
+    description: 'The watcher with nothing left to want. It counts errors now purely for the counting, which makes it faster.',
+    level: 34,
+    baseStats: enemyStatBudget(34, { heart: 1, body: 2, mind: 4 }),
+    mapName: 'northern-forest',
+    difficulty: 'elite',
+    logic: 'strategic',
+    tier1Overrides: T1_DEFAULT,
+    procUnlocks: {
+        mind: { attack: 3, defend: 3 },
+    },
+    loot: [none(30), drop('clarity-serum', 25), drop('philosopher-tea', 25), drop('void-essence', 20)],
+    philosophicalAlignment: { epistemology: 67, outlook: -67, scope: 67 },
+    skills: [skill('ad-hominem-strike'), skill('sorites-cascade')],
+    addedIn: ADDED,
+    tags: ['late-game', 'elite', 'enemy'],
+});
+
+export const BlackDeath = createEnemy({
+    id: 'enemy-black-death',
+    portraitAsset: 'black-death',
+    name: 'The Black Death',
+    stanceHint: 'A plague with posture — it spreads by main force now.',
+    description: 'A pestilence that acquired a spine and decided walking beats waiting. It remembers every town by taste.',
     level: 36,
-    baseStats: enemyStatBudget(36, { heart: 1, body: 4, mind: 1 }),
+    baseStats: enemyStatBudget(36, { heart: 2, body: 4, mind: 1 }),
     mapName: 'northern-forest',
     difficulty: 'elite',
     logic: 'aggressive',
     tier1Overrides: T1_DEFAULT,
-    procUnlocks: { body: { attack: 3, defend: 2 } },
-    loot: [none(25), drop('void-essence', 40), drop('berserker-brew', 20), drop('healing-potion', 15)],
-    philosophicalAlignment: { epistemology: 0, outlook: -67, scope: 0 },
+    procUnlocks: {
+        body: { attack: 3, defend: 3 },
+    },
+    loot: [none(25), drop('antidote', 30), drop('supreme-healing-potion', 25), drop('phoenix-tear', 20)],
+    philosophicalAlignment: { epistemology: 0, outlook: -67, scope: 67 },
     skills: [skill('mob-appeal'), skill('achilles-gambit')],
     addedIn: ADDED,
-    tags: ['late-game', 'enemy'],
+    tags: ['late-game', 'elite', 'enemy'],
 });
 
-export const CathedralOfDoubt = createEnemy({
-    id: 'enemy-cathedral-of-doubt',
-    name: 'Cathedral of Doubt',
-    description: 'A structure built entirely of unanswered questions, vast enough to hold a congregation of them.',
+export const TheUnnameable = createEnemy({
+    id: 'enemy-the-unnameable',
+    portraitAsset: 'the-unnameable',
+    name: 'The Unnameable',
+    stanceHint: 'It thinks in shapes language was built to avoid.',
+    description: 'It is not that it has no name. It is that every name tried so far has been eaten, along with the namer.',
     level: 38,
     baseStats: enemyStatBudget(38, { heart: 2, body: 1, mind: 4 }),
     mapName: 'northern-forest',
     difficulty: 'elite',
-    logic: 'defensive',
+    logic: 'strategic',
     tier1Overrides: T1_DEFAULT,
-    procUnlocks: { mind: { attack: 3, defend: 3 } },
-    loot: [none(25), drop('philosopher-tea', 40), drop('clarity-serum', 25), drop('void-essence', 15)],
-    philosophicalAlignment: { epistemology: 67, outlook: -67, scope: 67 },
-    skills: [skill('eternal-regress'), skill('sorites-cascade')],
+    procUnlocks: {
+        mind: { attack: 3, defend: 3 },
+    },
+    loot: [none(25), drop('void-essence', 35), drop('philosopher-tea', 20), drop('supreme-healing-potion', 20)],
+    philosophicalAlignment: { epistemology: 0, outlook: -67, scope: 67 },
+    skills: [skill('eternal-regress'), skill('liars-echo')],
     addedIn: ADDED,
-    tags: ['late-game', 'enemy'],
+    tags: ['late-game', 'elite', 'enemy'],
 });
 
-export const WarrantOfTheVoid = createEnemy({
-    id: 'enemy-warrant-of-the-void',
-    name: 'Warrant of the Void',
-    description: 'It arrives with documentation. The charge is existence; the sentence is already carried out.',
+export const FireGiant = createEnemy({
+    id: 'enemy-fire-giant',
+    portraitAsset: 'fire-giant',
+    name: 'Fire Giant',
+    stanceHint: 'A furnace with a genealogy — everything he does is a hammer blow.',
+    description: 'A furnace with a genealogy. His sword remembers being a mountain\'s spine, and resents the demotion.',
     level: 40,
-    baseStats: enemyStatBudget(40, { heart: 1, body: 3, mind: 3 }),
-    mapName: 'northern-forest',
-    difficulty: 'boss',
-    logic: 'boss',
-    tier1Overrides: T1_DEFAULT,
-    procUnlocks: {
-        body: { attack: 3, defend: 3 },
-        mind: { attack: 3, defend: 3 },
-    },
-    loot: [drop('void-essence', 45), drop('revive-crystal', 25), drop('philosopher-tea', 20), drop('resonance-crystal', 10)],
-    philosophicalAlignment: { epistemology: 67, outlook: -67, scope: 67 },
-    skills: [skill('ad-hominem-strike'), skill('liars-echo'), skill('eternal-regress')],
-    befriendabilityConfig: {
-        hpGate: { belowPct: 0.2 },
-        requiredStances: ['mind'],
-        roundsThreshold: 7,
-    },
-    friendshipReward: {
-        items: [
-            dropItem('paradox-loop', 40, 'unique', () => 0.5),
-            { ...getConsumableById('revive-crystal')! },
-            { ...getConsumableById('void-essence')! },
-        ],
-        xpBonus: 140,
-        alignmentDelta: { outlook: +3, scope: -2 },
-        narrative: "The Warrant folds itself in half, then in half again, until the charge no longer fits the page. " +
-                  "'A clerical error,' it admits. 'You were never the defendant. You were the appeal.'",
-        flagSet: 'befriended-warrant-of-the-void',
-    },
-    addedIn: ADDED,
-    tags: ['late-game', 'boss', 'enemy'],
-});
-
-export const TheSchismarch = createEnemy({
-    id: 'enemy-the-schismarch',
-    name: 'The Schismarch',
-    description: 'Sovereign of every split that ever broke a faith in two. It rules by dividing what stands before it.',
-    level: 42,
-    baseStats: enemyStatBudget(42, { heart: 3, body: 2, mind: 4 }),
-    mapName: 'northern-forest',
-    difficulty: 'boss',
-    logic: 'boss',
-    tier1Overrides: T1_DEFAULT,
-    procUnlocks: {
-        mind: { attack: 3, defend: 3 },
-        heart: { attack: 3, defend: 3 },
-        body: { attack: 2, defend: 2 },
-    },
-    loot: [drop('philosopher-tea', 40), drop('void-essence', 30), drop('revive-crystal', 20), drop('resonance-crystal', 10)],
-    philosophicalAlignment: { epistemology: -67, outlook: -67, scope: 0 },
-    skills: [skill('false-dilemma'), skill('liars-echo'), skill('pascals-wager')],
-    befriendabilityConfig: {
-        hpGate: { belowPct: 0.25 },
-        requiredStances: ['heart', 'mind'],
-        roundsThreshold: 7,
-    },
-    friendshipReward: {
-        items: [
-            dropItem('paradox-loop', 42, 'unique', () => 0.5),
-            { ...getConsumableById('philosopher-tea')! },
-            { ...getConsumableById('revive-crystal')! },
-        ],
-        xpBonus: 150,
-        alignmentDelta: { scope: +3 },
-        narrative: "The Schismarch hesitates before the cut. 'I have divided everything I have ever met,' it says. " +
-                  "'You are the first thing I would rather keep whole.'",
-        flagSet: 'befriended-schismarch',
-    },
-    addedIn: ADDED,
-    tags: ['late-game', 'boss', 'enemy'],
-});
-
-export const GravewardKeeper = createEnemy({
-    id: 'enemy-graveward-keeper',
-    name: 'Graveward Keeper',
-    description: 'Tends the plots of arguments that died unwon. It would prefer you join the quiet rows.',
-    level: 44,
-    baseStats: enemyStatBudget(44, { heart: 4, body: 3, mind: 1 }),
-    mapName: 'northern-forest',
-    difficulty: 'elite',
-    logic: 'balanced',
-    tier1Overrides: T1_DEFAULT,
-    procUnlocks: { heart: { attack: 3, defend: 3 }, body: { attack: 2, defend: 2 } },
-    loot: [none(25), drop('heart-draught', 35), drop('revive-crystal', 25), drop('healing-potion', 15)],
-    philosophicalAlignment: { epistemology: -67, outlook: -67, scope: 67 },
-    skills: [skill('appeal-to-pity'), skill('pascals-wager')],
-    addedIn: ADDED,
-    tags: ['late-game', 'enemy'],
-});
-
-export const ProsecutorOfTheReal = createEnemy({
-    id: 'enemy-prosecutor-of-the-real',
-    name: 'Prosecutor of the Real',
-    description: 'Argues that nothing you believe is admissible. Disturbingly, the evidence keeps agreeing.',
-    level: 46,
-    baseStats: enemyStatBudget(46, { heart: 1, body: 2, mind: 5 }),
-    mapName: 'northern-forest',
-    difficulty: 'elite',
-    logic: 'strategic',
-    tier1Overrides: T1_DEFAULT,
-    procUnlocks: { mind: { attack: 3, defend: 3 } },
-    loot: [none(25), drop('clarity-serum', 35), drop('philosopher-tea', 25), drop('void-essence', 15)],
-    philosophicalAlignment: { epistemology: 67, outlook: 0, scope: 67 },
-    skills: [skill('eternal-regress'), skill('false-dilemma')],
-    addedIn: ADDED,
-    tags: ['late-game', 'enemy'],
-});
-
-export const TheLastConsensus = createEnemy({
-    id: 'enemy-the-last-consensus',
-    name: 'The Last Consensus',
-    description: 'What remains when every disagreement has been resolved by force. It is perfectly, terribly agreed.',
-    level: 48,
-    baseStats: enemyStatBudget(48, { heart: 3, body: 3, mind: 3 }),
-    mapName: 'northern-forest',
-    difficulty: 'boss',
-    logic: 'boss',
-    tier1Overrides: T1_DEFAULT,
-    procUnlocks: {
-        body: { attack: 3, defend: 3 },
-        mind: { attack: 3, defend: 3 },
-        heart: { attack: 3, defend: 3 },
-    },
-    loot: [drop('void-essence', 45), drop('revive-crystal', 30), drop('philosopher-tea', 15), drop('resonance-crystal', 10)],
-    philosophicalAlignment: { epistemology: -67, outlook: 67, scope: 67 },
-    skills: [skill('sorites-cascade'), skill('mob-appeal'), skill('bootstrap-paradox')],
-    befriendabilityConfig: {
-        hpGate: { belowPct: 0.2 },
-        requiredStances: ['mind', 'heart'],
-        roundsThreshold: 8,
-    },
-    friendshipReward: {
-        items: [
-            dropItem('paradox-loop', 48, 'unique', () => 0.5),
-            { ...getConsumableById('revive-crystal')! },
-            { ...getConsumableById('philosopher-tea')! },
-        ],
-        xpBonus: 175,
-        alignmentDelta: { outlook: -3, scope: -2 },
-        narrative: "The Consensus permits one dissent. 'Agreement was never the goal,' it confesses, the unanimity " +
-                  "cracking pleasantly. 'It was only the easiest thing to enforce. You disagreed beautifully.'",
-        flagSet: 'befriended-last-consensus',
-    },
-    addedIn: ADDED,
-    tags: ['late-game', 'boss', 'enemy'],
-});
-
-export const AxiomBreaker = createEnemy({
-    id: 'enemy-axiom-breaker',
-    name: 'The Axiom-Breaker',
-    description: 'It does not refute your first principles. It simply makes them stop being true.',
-    level: 50,
-    baseStats: enemyStatBudget(50, { heart: 3, body: 3, mind: 4 }),
-    mapName: 'northern-forest',
-    difficulty: 'unique',
-    logic: 'boss',
-    tier1Overrides: T1_DEFAULT,
-    procUnlocks: {
-        body: { attack: 3, defend: 3 },
-        mind: { attack: 3, defend: 3 },
-        heart: { attack: 3, defend: 3 },
-    },
-    loot: [drop('void-essence', 50), drop('revive-crystal', 30), drop('resonance-crystal', 15), drop('philosopher-tea', 5)],
-    philosophicalAlignment: { epistemology: 67, outlook: -67, scope: 67 },
-    skills: [skill('eternal-regress'), skill('liars-echo'), skill('bootstrap-paradox')],
-    befriendabilityConfig: {
-        hpGate: { belowPct: 0.15 },
-        requiredStances: ['mind', 'heart'],
-        roundsThreshold: 9,
-    },
-    friendshipReward: {
-        items: [
-            dropItem('paradox-loop', 50, 'unique', () => 0.5),
-            { ...getConsumableById('revive-crystal')! },
-            { ...getConsumableById('void-essence')! },
-        ],
-        xpBonus: 200,
-        alignmentDelta: { epistemology: -3, outlook: +3 },
-        narrative: "The Axiom-Breaker stays its hand over your last certainty. 'I could unmake it,' it says. " +
-                  "'But you held it so gently. I have unmade everything except the wish to leave one thing standing.'",
-        flagSet: 'befriended-axiom-breaker',
-    },
-    addedIn: ADDED,
-    tags: ['late-game', 'unique', 'boss', 'enemy'],
-});
-
-export const PallbearerOfReason = createEnemy({
-    id: 'enemy-pallbearer-of-reason',
-    name: 'Pallbearer of Reason',
-    description: 'Carries the coffin of every theory that overreached. It walks slowly, and it never sets the box down.',
-    level: 49,
-    baseStats: enemyStatBudget(49, { heart: 2, body: 4, mind: 3 }),
-    mapName: 'northern-forest',
-    difficulty: 'elite',
-    logic: 'defensive',
-    tier1Overrides: T1_DEFAULT,
-    procUnlocks: { body: { attack: 3, defend: 3 }, mind: { attack: 2, defend: 2 } },
-    loot: [none(25), drop('body-elixir', 35), drop('void-essence', 25), drop('revive-crystal', 15)],
-    philosophicalAlignment: { epistemology: 67, outlook: -67, scope: 0 },
-    skills: [skill('mob-appeal'), skill('eternal-regress')],
-    addedIn: ADDED,
-    tags: ['late-game', 'enemy'],
-});
-
-export const TheTerminalProof = createEnemy({
-    id: 'enemy-the-terminal-proof',
-    name: 'The Terminal Proof',
-    description: 'A demonstration so complete it ends the conversation, and the things that were having it.',
-    level: 50,
-    baseStats: enemyStatBudget(50, { heart: 2, body: 3, mind: 5 }),
-    mapName: 'northern-forest',
-    difficulty: 'unique',
-    logic: 'strategic',
-    tier1Overrides: T1_DEFAULT,
-    procUnlocks: {
-        body: { attack: 3, defend: 3 },
-        mind: { attack: 3, defend: 3 },
-        heart: { attack: 3, defend: 3 },
-    },
-    loot: [drop('void-essence', 55), drop('revive-crystal', 25), drop('philosopher-tea', 15), drop('resonance-crystal', 5)],
-    philosophicalAlignment: { epistemology: 67, outlook: 0, scope: 67 },
-    skills: [skill('bootstrap-paradox'), skill('eternal-regress'), skill('sorites-cascade')],
-    addedIn: ADDED,
-    tags: ['late-game', 'unique', 'enemy'],
-});
-
-// ─── ANCIENT RUINS (Phase 127) — 5 enemies ──────────────────────────────────
-
-export const BonewardSentinel = createEnemy({
-    id: 'enemy-boneward-sentinel',
-    name: 'Boneward Sentinel',
-    description: 'An ancient guardian of ossified duty. It remembers its vigil but has forgotten what it guards.',
-    level: 12,
-    baseStats: enemyStatBudget(12, { body: 3, mind: 2, heart: 1 }),
-    mapName: 'northern-forest',
-    difficulty: 'normal',
-    logic: 'defensive',
-    tier1Overrides: T1_DEFAULT,
-    loot: [none(60), drop('healing-potion', 25), drop('void-essence', 15)],
-    philosophicalAlignment: { epistemology: -34, outlook: 0, scope: -34 },
-    friendshipReward: {
-        items: [
-            { ...getConsumableById('healing-potion')! },
-        ],
-        xpBonus: 15,
-        alignmentDelta: { epistemology: +2 },
-        narrative: "The sentinel lowers its bone spear. 'I remember the shape of mercy,' it says. 'Perhaps that is worth guarding too.'",
-        flagSet: 'befriended-boneward-sentinel',
-    },
-    finalBlowLines: {
-        brutal: 'The bones remember the breaking, then forget they were ever whole.',
-        quiet: 'It settles into a pattern of rest that looks like standing guard.',
-        ironic: 'The last vigil ends with the guardian finally lying down.',
-    },
-    pactLines: {
-        quiet: 'The duty shifts from watching against to watching over.',
-        setDown: 'It sets down the spear but keeps the posture of protection.',
-        heavy: 'You carry what it guarded: the weight of remembering to care.',
-    },
-    causeLines: {
-        brutal: 'Your bones remember a breaking they have never known before.',
-        broken: 'The duty it kept becomes the duty you cannot.',
-        quiet: 'You understand the weight of standing guard over emptiness.',
-    },
-    journalEntry: {
-        id: 'codex-boneward-sentinel',
-        title: 'The Compact of Marrow',
-        body: 'Found carved in the inner curve of a femur: "What we guard shapes what guards us. The bones remember their purpose longer than the flesh remembers its name." - Records of the Ossuary Keepers',
-    },
-    addedIn: 'phase-127',
-    tags: ['mid-game', 'enemy'],
-});
-
-export const VoidwroughtConstruct = createEnemy({
-    id: 'enemy-voidwrought-construct',
-    name: 'Voidwrought Construct',
-    description: 'Forged from crystallized absence, it moves with the weight of everything it is not.',
-    level: 14,
-    baseStats: enemyStatBudget(14, { mind: 3, body: 2, heart: 1 }),
-    mapName: 'northern-forest',
-    difficulty: 'normal',
-    logic: 'strategic',
-    tier1Overrides: T1_DEFAULT,
-    loot: [none(50), drop('void-essence', 30), drop('clarity-serum', 20)],
-    philosophicalAlignment: { epistemology: 67, outlook: -34, scope: 0 },
-    skills: [skill('eternal-regress')],
-    friendshipReward: {
-        items: [
-            { ...getConsumableById('void-essence')! },
-            { ...getConsumableById('clarity-serum')! },
-        ],
-        xpBonus: 18,
-        alignmentDelta: { epistemology: -2, outlook: +3 },
-        narrative: "The construct's void-crystal core flickers with an almost-light. 'I was made to be nothing in particular,' it says. 'But you make me something specific.'",
-        flagSet: 'befriended-voidwrought-construct',
-    },
-    finalBlowLines: {
-        brutal: 'The absence becomes more absent, until it forgets how to not exist.',
-        quiet: 'It settles into a configuration of not-being that resembles peace.',
-        ironic: 'In breaking, it finally becomes the nothing it was made to be.',
-    },
-    pactLines: {
-        quiet: 'The void learns to hold something: the shape of understanding.',
-        setDown: 'It relinquishes its crystallized emptiness for crystallized connection.',
-        heavy: 'You carry its paradox: being nothing and meaning everything.',
-    },
-    causeLines: {
-        brutal: 'The void it carries becomes the void inside you.',
-        broken: 'You understand the weight of being made for absence.',
-        quiet: 'The crystallized nothing cuts cleaner than any blade.',
-    },
-    journalEntry: {
-        id: 'codex-voidwrought-construct',
-        title: 'Architectures of Absence',
-        body: 'The Null-Shapers claimed they could build from what was not there. Their constructs remain, proving that even emptiness can be given form, purpose, and a kind of terrible beauty.',
-    },
-    addedIn: 'phase-127',
-    tags: ['mid-game', 'enemy'],
-});
-
-export const CindergeistRevenantElemental = createEnemy({
-    id: 'enemy-cindergeist-revenant',
-    name: 'Cindergeist Revenant',
-    description: 'The ghost of a flame that burned too hot and too long. It seeks fuel for a fire that already consumed everything.',
-    level: 18,
-    baseStats: enemyStatBudget(18, { heart: 3, mind: 2, body: 2 }),
+    baseStats: enemyStatBudget(40, { heart: 1, body: 4, mind: 1 }),
     mapName: 'northern-forest',
     difficulty: 'elite',
     logic: 'aggressive',
     tier1Overrides: T1_DEFAULT,
-    procUnlocks: { heart: { attack: 2, defend: 2 } },
-    loot: [none(35), drop('phoenix-tear', 25), drop('heart-draught', 25), drop('healing-potion', 15)],
-    philosophicalAlignment: { epistemology: 0, outlook: 67, scope: 34 },
-    skills: [skill('resonance-bleed')],
-    befriendabilityConfig: {
-        hpGate: { belowPct: 0.4 },
-        requiredStances: ['heart'],
-        roundsThreshold: 4,
+    procUnlocks: {
+        body: { attack: 3, defend: 3 },
     },
-    friendshipReward: {
-        items: [
-            { ...getConsumableById('phoenix-tear')! },
-            { ...getConsumableById('heart-draught')! },
-            { ...getConsumableById('healing-potion')! },
-        ],
-        xpBonus: 45,
-        alignmentDelta: { outlook: -2, scope: +2 },
-        narrative: "The cindergeist's flames dim to embers, then to warmth. 'I have burned through my rage,' it whispers. 'Help me remember what I was before the fire.'",
-        flagSet: 'befriended-cindergeist-revenant',
-    },
-    finalBlowLines: {
-        brutal: 'The last flames gutter out, leaving only the memory of heat.',
-        quiet: 'It fades like a candle in a still room, peacefully extinguished.',
-        ironic: 'The ghost of fire burns itself out on the irony of its own need.',
-    },
-    pactLines: {
-        quiet: 'The flame learns to warm instead of consume.',
-        setDown: 'It banks its fires, keeping only the ember of hope.',
-        heavy: 'You carry its warmth, and the responsibility not to let it burn cold.',
-    },
-    causeLines: {
-        brutal: 'The fire it could not finish spreads into your veins.',
-        broken: 'You understand the hunger of flames that have outlived their fuel.',
-        quiet: 'The heat it carried becomes the fever that will not break.',
-    },
-    journalEntry: {
-        id: 'codex-cindergeist-revenant',
-        title: 'The Pyroclasm Elegies',
-        body: 'When the Great Library burned, the scholars said the books screamed. The cindergeists are what remains of those screams - knowledge reduced to pure heat, seeking something worthy to illuminate.',
-    },
-    addedIn: 'phase-127',
-    tags: ['mid-game', 'elite', 'enemy'],
+    loot: [none(25), drop('war-horn-draught', 30), drop('supreme-healing-potion', 25), drop('iron-skin-draught', 20)],
+    philosophicalAlignment: { epistemology: 0, outlook: 0, scope: -67 },
+    skills: [skill('mob-appeal'), skill('achilles-gambit')],
+    addedIn: ADDED,
+    tags: ['late-game', 'elite', 'enemy'],
 });
 
-export const ObsidianColossus = createEnemy({
-    id: 'enemy-obsidian-colossus',
-    name: 'Obsidian Colossus',
-    description: 'A towering guardian carved from volcanic glass and ancient grief. Each movement cuts the air itself.',
-    level: 22,
-    baseStats: enemyStatBudget(22, { body: 4, heart: 2, mind: 1 }),
+export const GreaterDevil = createEnemy({
+    id: 'enemy-greater-devil',
+    portraitAsset: 'greater-devil',
+    name: 'Greater Devil',
+    stanceHint: 'It administers rather than rages — the contract is the cage.',
+    description: 'It holds an office older than the sin it administers. The paperwork is flawless; the flaw is you.',
+    level: 42,
+    baseStats: enemyStatBudget(42, { heart: 2, body: 3, mind: 3 }),
     mapName: 'northern-forest',
     difficulty: 'elite',
-    logic: 'balanced',
+    logic: 'strategic',
     tier1Overrides: T1_DEFAULT,
-    procUnlocks: { body: { attack: 2, defend: 2 }, heart: { attack: 2, defend: 2 } },
-    loot: [none(25), drop('iron-skin-draught', 35), drop('body-elixir', 25), drop('revive-crystal', 15)],
-    philosophicalAlignment: { epistemology: -34, outlook: -67, scope: 67 },
-    skills: [skill('mob-appeal'), skill('achilles-gambit')],
-    befriendabilityConfig: {
-        hpGate: { belowPct: 0.3 },
-        requiredStances: ['body', 'heart'],
-        roundsThreshold: 6,
+    procUnlocks: {
+        body: { attack: 3, defend: 3 },
+        mind: { attack: 2, defend: 2 },
     },
-    friendshipReward: {
-        items: [
-            { ...getConsumableById('iron-skin-draught')! },
-            { ...getConsumableById('body-elixir')! },
-            { ...getConsumableById('revive-crystal')! },
-        ],
-        xpBonus: 65,
-        alignmentDelta: { outlook: +4, scope: -3 },
-        narrative: "The colossus kneels, its obsidian surface reflecting your image fractured into countless selves. 'I have been a mirror for grief too long,' it rumbles. 'Show me how to reflect hope.'",
-        flagSet: 'befriended-obsidian-colossus',
-    },
-    finalBlowLines: {
-        brutal: 'The volcanic glass shatters, each shard cutting the light into dark spectra.',
-        quiet: 'It settles into the earth like a mountain deciding to sleep.',
-        ironic: 'The guardian meant to last forever cracks along the faults of its own making.',
-    },
-    pactLines: {
-        quiet: 'The mirror of grief becomes a window into understanding.',
-        setDown: 'It sets aside its weight of ancient sorrow for the lightness of new purpose.',
-        heavy: 'You carry its reflection: the weight of being seen clearly.',
-    },
-    causeLines: {
-        brutal: 'The obsidian cuts you into the shape of its ancient grief.',
-        broken: 'You understand the weight of being carved from catastrophe.',
-        quiet: 'The volcanic glass teaches you how sharpness and fragility are the same thing.',
-    },
-    journalEntry: {
-        id: 'codex-obsidian-colossus',
-        title: 'The Glass Mountain Fragments',
-        body: 'From the Pyroclasts\' final work: "We shape the earth\'s grief into guardians, hoping they will remember what we could not - that destruction and creation drink from the same molten heart."',
-    },
-    addedIn: 'phase-127',
-    tags: ['mid-game', 'elite', 'enemy'],
+    loot: [none(25), drop('void-essence', 30), drop('supreme-healing-potion', 25), drop('greater-resonance-crystal', 20)],
+    philosophicalAlignment: { epistemology: 67, outlook: -67, scope: 0 },
+    skills: [skill('false-dilemma'), skill('bootstrap-paradox')],
+    addedIn: ADDED,
+    tags: ['late-game', 'elite', 'enemy'],
 });
 
-export const TheLichOfMissingSteps = createEnemy({
-    id: 'enemy-the-lich-of-missing-steps',
-    name: 'The Lich of Missing Steps',
-    description: 'An undead philosopher-king who skipped crucial logical steps in the proof of its own eternal existence.',
-    level: 26,
-    baseStats: enemyStatBudget(26, { mind: 4, heart: 3, body: 1 }),
+export const Rangda = createEnemy({
+    id: 'enemy-rangda',
+    portraitAsset: 'rangda',
+    name: 'Rangda',
+    stanceHint: 'Grief that learned sorcery — every curse arrives still weeping.',
+    description: 'The widow-queen of the leftmost path. Her grief learned sorcery, and has never once stopped studying.',
+    level: 44,
+    baseStats: enemyStatBudget(44, { heart: 4, body: 2, mind: 2 }),
     mapName: 'northern-forest',
     difficulty: 'boss',
     logic: 'boss',
     tier1Overrides: T1_DEFAULT,
     procUnlocks: {
-        mind: { attack: 3, defend: 3 },
-        heart: { attack: 2, defend: 2 },
+        heart: { attack: 3, defend: 3 },
+        mind:  { attack: 2, defend: 2 },
     },
-    loot: [drop('philosopher-tea', 40), drop('void-essence', 30), drop('revive-crystal', 20), drop('resonance-crystal', 10)],
-    philosophicalAlignment: { epistemology: 67, outlook: -34, scope: -67 },
-    skills: [skill('bootstrap-paradox'), skill('eternal-regress'), skill('undistributed-middle')],
+    loot: [
+        drop('phoenix-tear', 35),
+        drop('supreme-healing-potion', 25),
+        drop('void-essence', 25),
+        drop('revive-crystal', 15),
+    ],
+    philosophicalAlignment: { epistemology: -67, outlook: -67, scope: 0 },
+    skills: [skill('appeal-to-pity'), skill('sorites-cascade'), skill('liars-echo')],
     befriendabilityConfig: {
         hpGate: { belowPct: 0.2 },
-        requiredStances: ['mind', 'heart'],
-        roundsThreshold: 7,
+        requiredStances: ['heart'],
+        roundsThreshold: 8,
     },
     friendshipReward: {
         items: [
-            dropItem('paradox-loop', 26, 'unique', () => 0.5),
-            { ...getConsumableById('philosopher-tea')! },
-            { ...getConsumableById('void-essence')! },
+            dropItem('paradox-loop', 44, 'unique', () => 0.5),
+            { ...getConsumableById('phoenix-tear')! },
             { ...getConsumableById('revive-crystal')! },
         ],
-        xpBonus: 95,
-        alignmentDelta: { epistemology: -4, outlook: +3, scope: +5 },
-        narrative: "The lich's hollow eyes flicker with something approaching warmth. 'I spent eternity searching for the missing steps,' it whispers. 'But you have shown me the answer was not in the proof, but in the question of who I was proving it to.'",
-        flagSet: 'befriended-lich-of-missing-steps',
-    },
-    finalBlowLines: {
-        brutal: 'The logical structure collapses, taking the lich\'s certainty with it.',
-        quiet: 'It fades like a hypothesis that was elegant but wrong.',
-        ironic: 'The proof of its existence fails at the moment it stops existing.',
+        xpBonus: 175,
+        alignmentDelta: { outlook: +3, scope: -2 },
+        narrative:
+            'The mask comes away. It was a mask. Nobody in living memory had grounds ' +
+            'to suspect that.\n\n"They made my mourning a monster because it would not ' +
+            'end on schedule," she says. "So I studied. Grief is only love with ' +
+            'nowhere to go, and I have four hundred years of coursework."\n\n' +
+            'She looks at you the way the recently widowed look at weather. ' +
+            '"You stayed past the frightening part. That is the whole of witchcraft, ' +
+            'you know. Everyone leaves at the frightening part."',
+        flagSet: 'befriended-rangda',
+        factionDeltas: {
+            'forest-wardens': +10,
+            'coastal-guard': -6,
+        },
     },
     pactLines: {
-        quiet: 'The missing steps are filled with understanding instead of logic.',
-        setDown: 'It abandons the proof for the more difficult work of living the question.',
-        heavy: 'You carry its unfinished theorem: the weight of questions that matter more than their answers.',
-    },
-    causeLines: {
-        brutal: 'The missing steps become gaps in your own understanding of life.',
-        broken: 'You realize you cannot prove you exist to someone who has forgotten how to listen.',
-        quiet: 'The lich\'s failed logic becomes the framework for your own unraveling.',
+        quiet:   'The leftmost path straightens slightly. Grief, witnessed, walks a little truer.',
+        setDown: 'She sets the mask face-down between you. Underneath it: a widow, mid-sentence, four centuries in.',
+        heavy:   '"Grief is only love with nowhere to go. You stood still long enough to be somewhere. That is more than the gods managed."',
     },
     journalEntry: {
-        id: 'codex-lich-of-missing-steps',
-        title: 'Theorem of the Unproven Self',
-        body: 'The Lich\'s final manuscript: "I have demonstrated my eternal existence in seventeen volumes. Yet I cannot remember why I wanted to prove it, or to whom. Perhaps the missing step was the very question of proof itself."',
+        id: 'codex-rangda',
+        title: 'The Coursework of Mourning',
+        body:
+            'The village drove her out for mourning too long, then blamed the crops on ' +
+            'her, then the children, then the weather. Each accusation she studied, ' +
+            'and passed. It is the oldest curriculum: make a woman a monster and she ' +
+            'will eventually stop wasting the tuition.',
     },
-    addedIn: 'phase-127',
-    tags: ['mid-game', 'boss', 'enemy'],
+    finalBlowLines: {
+        brutal: 'Four hundred years of studied grief disperses in one uncontrolled release.',
+        quiet:  'The widow-queen sets down her mourning like a bag carried too far.',
+        ironic: 'Her grief finally found somewhere to go.',
+    },
+    causeLines: {
+        brutal: 'The curse arrives still weeping, which does not slow it down.',
+        broken: 'Her sorrow has more stamina than your certainty. It has been in training longer.',
+        quiet:  'You pity her for one instructional moment. Lesson one: pity is a door.',
+    },
+    addedIn: ADDED,
+    tags: ['late-game', 'boss', 'enemy'],
 });
 
-// ─── THE INCOMPLETENESS (2026-07-02) — the impossible playtest ceiling ────────
+export const ZomaAscendant = createEnemy({
+    id: 'enemy-zoma-ascendant',
+    portraitAsset: 'zoma-ascendant',
+    name: 'Zoma Ascendant',
+    stanceHint: 'The two voices agree now — consensus, it turns out, was the threat.',
+    description: 'The twin voices in agreement at last. Consensus, it turns out, was the threat the arguing held back.',
+    level: 45,
+    baseStats: enemyStatBudget(45, { heart: 2, body: 1, mind: 4 }),
+    mapName: 'northern-forest',
+    difficulty: 'boss',
+    logic: 'boss',
+    tier1Overrides: T1_DEFAULT,
+    procUnlocks: {
+        mind:  { attack: 3, defend: 3 },
+        heart: { attack: 2, defend: 2 },
+    },
+    loot: [
+        drop('philosopher-tea', 35),
+        drop('void-essence', 30),
+        drop('greater-resonance-crystal', 20),
+        drop('revive-crystal', 15),
+    ],
+    philosophicalAlignment: { epistemology: 67, outlook: -67, scope: 67 },
+    skills: [skill('liars-echo'), skill('bootstrap-paradox'), skill('false-dilemma')],
+    finalBlowLines: {
+        brutal: 'The two heads disagree one final, fatal time — about which of them was struck.',
+        quiet:  'Both voices finish the same sentence and, having nothing left to settle, stop.',
+        ironic: 'You gave them something new to argue about. The consensus did not survive it.',
+    },
+    causeLines: {
+        brutal: 'Two verdicts arrive simultaneously and both are correct.',
+        broken: 'You cannot out-argue a thing that has already heard both sides of you.',
+        quiet:  'The voices agree about you, gently, in unison. Agreement at that register is a sentence.',
+    },
+    addedIn: ADDED,
+    tags: ['late-game', 'boss', 'enemy'],
+});
+
+export const ElderFireGiant = createEnemy({
+    id: 'enemy-elder-fire-giant',
+    portraitAsset: 'elder-fire-giant',
+    name: 'Elder Fire Giant',
+    stanceHint: 'A fire gone white with age — it burns the way glaciers move: entirely.',
+    description: 'A fire so old it has gone white. It burns the way glaciers move: slowly, and entirely.',
+    level: 46,
+    baseStats: enemyStatBudget(46, { heart: 1, body: 4, mind: 2 }),
+    mapName: 'northern-forest',
+    difficulty: 'boss',
+    logic: 'boss',
+    tier1Overrides: T1_DEFAULT,
+    procUnlocks: {
+        body: { attack: 3, defend: 3 },
+        mind: { attack: 2, defend: 2 },
+    },
+    loot: [
+        drop('supreme-healing-potion', 35),
+        drop('war-horn-draught', 25),
+        drop('phoenix-tear', 25),
+        drop('revive-crystal', 15),
+    ],
+    philosophicalAlignment: { epistemology: 0, outlook: -67, scope: 67 },
+    skills: [skill('mob-appeal'), skill('achilles-gambit'), skill('ad-hominem-strike')],
+    finalBlowLines: {
+        brutal: 'The white fire goes out all at once, and the cold that follows has a genealogy too.',
+        quiet:  'The elder banks his own coals, unhurried to the end.',
+        ironic: 'The oldest fire in the world went out indoors, in company, mid-sentence.',
+    },
+    causeLines: {
+        brutal: 'The blade that was a mountain\'s spine settles the question of yours.',
+        broken: 'You cannot outlast a thing that measures patience in eruptions.',
+        quiet:  'The warmth reaches you at last. Everything the white fire warms, it keeps.',
+    },
+    addedIn: ADDED,
+    tags: ['late-game', 'boss', 'enemy'],
+});
+
+export const Tezcatlipoca = createEnemy({
+    id: 'enemy-tezcatlipoca',
+    portraitAsset: 'tezcatlipoca',
+    name: 'Tezcatlipoca',
+    stanceHint: 'The smoking mirror calculates — it shows you the you that already lost.',
+    description: 'The smoking mirror. It shows you the version of yourself that already lost, and waits, courteously, for you to agree.',
+    level: 47,
+    baseStats: enemyStatBudget(47, { heart: 2, body: 2, mind: 4 }),
+    mapName: 'northern-forest',
+    difficulty: 'boss',
+    logic: 'boss',
+    tier1Overrides: T1_DEFAULT,
+    procUnlocks: {
+        mind:  { attack: 3, defend: 3 },
+        heart: { attack: 2, defend: 2 },
+    },
+    loot: [
+        drop('void-essence', 35),
+        drop('philosopher-tea', 25),
+        drop('greater-resonance-crystal', 20),
+        drop('revive-crystal', 20),
+    ],
+    philosophicalAlignment: { epistemology: 67, outlook: -67, scope: 67 },
+    skills: [skill('liars-echo'), skill('bootstrap-paradox'), skill('sorites-cascade')],
+    finalBlowLines: {
+        brutal: 'The mirror takes one last look at itself. The smoke declines to survive the review.',
+        quiet:  'The reflection bows first. The god, being thorough, follows it down.',
+        ironic: 'It showed you the version of you that lost. You introduced it to the other one.',
+    },
+    causeLines: {
+        brutal: 'The version of you that already lost reaches out of the smoke and files the paperwork.',
+        broken: 'Round by round you argue with your own reflection, and it has seen your rebuttals.',
+        quiet:  'You agree with the mirror, only slightly, only once. It is a binding signature.',
+    },
+    addedIn: ADDED,
+    tags: ['late-game', 'boss', 'enemy'],
+});
+
+export const ArchDemon = createEnemy({
+    id: 'enemy-arch-demon',
+    portraitAsset: 'arch-demon',
+    name: 'Arch-Demon',
+    stanceHint: 'Appetite promoted past restraint — the violence is administrative.',
+    description: 'An appetite promoted past all restraint. Somewhere far below, lesser devils file its paperwork and do not ask questions.',
+    level: 48,
+    baseStats: enemyStatBudget(48, { heart: 1, body: 4, mind: 2 }),
+    mapName: 'northern-forest',
+    difficulty: 'boss',
+    logic: 'boss',
+    tier1Overrides: T1_DEFAULT,
+    procUnlocks: {
+        body: { attack: 3, defend: 3 },
+        mind: { attack: 3, defend: 3 },
+    },
+    loot: [
+        drop('void-essence', 35),
+        drop('supreme-healing-potion', 25),
+        drop('phoenix-tear', 20),
+        drop('revive-crystal', 20),
+    ],
+    philosophicalAlignment: { epistemology: 0, outlook: -67, scope: -67 },
+    skills: [skill('mob-appeal'), skill('achilles-gambit'), skill('bootstrap-paradox')],
+    finalBlowLines: {
+        brutal: 'The promotion is rescinded from above, violently, with prejudice.',
+        quiet:  'The appetite completes. There was, in the end, exactly one thing it had not eaten.',
+        ironic: 'Somewhere below, a lesser devil quietly re-files the org chart.',
+    },
+    causeLines: {
+        brutal: 'The appetite reaches you. The paperwork was already approved.',
+        broken: 'You contest the hunger clause by clause. It eats the clauses.',
+        quiet:  'You are processed. The stamp is warm. Nothing else about it is.',
+    },
+    addedIn: ADDED,
+    tags: ['late-game', 'boss', 'enemy'],
+});
+
+export const Beelzebub = createEnemy({
+    id: 'enemy-beelzebub',
+    portraitAsset: 'beelzebub',
+    name: 'Beelzebub',
+    stanceHint: 'Each fly is a small opinion; together they are policy.',
+    description: 'The lord of everything that swarms. Each fly is a small opinion; together, they are policy.',
+    level: 50,
+    baseStats: enemyStatBudget(50, { heart: 2, body: 2, mind: 4 }),
+    mapName: 'northern-forest',
+    difficulty: 'boss',
+    logic: 'boss',
+    tier1Overrides: T1_DEFAULT,
+    procUnlocks: {
+        body:  { attack: 3, defend: 3 },
+        mind:  { attack: 3, defend: 3 },
+        heart: { attack: 3, defend: 3 },
+    },
+    loot: [
+        drop('void-essence', 40),
+        drop('revive-crystal', 25),
+        drop('phoenix-tear', 20),
+        drop('greater-resonance-crystal', 15),
+    ],
+    philosophicalAlignment: { epistemology: -67, outlook: -67, scope: 67 },
+    skills: [skill('mob-appeal'), skill('liars-echo'), skill('bootstrap-paradox')],
+    finalBlowLines: {
+        brutal: 'The swarm loses quorum. Policy, lacking a body, disbands.',
+        quiet:  'One fly leaves, then the rest. Lordship over what swarms was always a tenancy.',
+        ironic: 'The vote to retreat carried by a single opinion. It was yours.',
+    },
+    causeLines: {
+        brutal: 'The swarm reaches consensus about you, all at once, from every direction.',
+        broken: 'Opinion by opinion, the air fills. Eventually there is no minority left to breathe with.',
+        quiet:  'One fly lands and is permitted. Precedent, in that court, is everything.',
+    },
+    addedIn: ADDED,
+    tags: ['late-game', 'boss', 'enemy'],
+});
+
+export const Death = createEnemy({
+    id: 'enemy-death',
+    portraitAsset: 'death',
+    name: 'Death',
+    stanceHint: 'It is not cruel. It is punctual, and it has already read your schedule.',
+    description: 'It is not cruel. It is punctual, and you are, by its ledger, running late.',
+    level: 49,
+    baseStats: enemyStatBudget(49, { heart: 3, body: 2, mind: 3 }),
+    mapName: 'northern-forest',
+    difficulty: 'unique',
+    logic: 'strategic',
+    tier1Overrides: T1_DEFAULT,
+    procUnlocks: {
+        body:  { attack: 3, defend: 3 },
+        mind:  { attack: 3, defend: 3 },
+        heart: { attack: 3, defend: 3 },
+    },
+    loot: [
+        drop('void-essence', 45),
+        drop('revive-crystal', 30),
+        drop('phoenix-tear', 15),
+        drop('philosopher-tea', 10),
+    ],
+    philosophicalAlignment: { epistemology: 0, outlook: 0, scope: 67 },
+    skills: [skill('eternal-regress'), skill('sorites-cascade'), skill('bootstrap-paradox')],
+    finalBlowLines: {
+        brutal: 'The appointment is cancelled with force. The calendar bleeds a little.',
+        quiet:  'It checks the ledger, finds an error in your favor, and withdraws without apology.',
+        ironic: 'Death arrived punctually. You had rescheduled.',
+    },
+    causeLines: {
+        brutal: 'The appointment is kept. It was always going to be kept.',
+        broken: 'You argue for extensions, round after round. The ledger accrues interest.',
+        quiet:  'It offers a hand, the way one does to the late. You take it, the way the late do.',
+    },
+    journalEntry: {
+        id: 'codex-death',
+        title: 'The Ledger of Appointments',
+        body:
+            'It keeps no scythe; the scythe is folklore\'s apology for how ordinary the ' +
+            'process is. There is a ledger, and a time, and a courtesy so old it reads ' +
+            'as coldness. It has never once been early. That is the whole of its mercy, ' +
+            'and, it maintains, more than anyone else offers.',
+    },
+    addedIn: ADDED,
+    tags: ['late-game', 'unique', 'enemy'],
+});
+
+export const TheAbortive = createEnemy({
+    id: 'enemy-the-abortive',
+    portraitAsset: 'the-abortive',
+    name: 'The Abortive',
+    stanceHint: 'It feels everything it never got to be — the grief predates the griever.',
+    description:
+        'A god that was never allowed to begin, still waiting to be born into a world that ' +
+        'moved on. Its patience predates its existence.',
+    level: 50,
+    baseStats: enemyStatBudget(50, { heart: 4, body: 2, mind: 2 }),
+    mapName: 'northern-forest',
+    difficulty: 'unique',
+    logic: 'boss',
+    tier1Overrides: T1_DEFAULT,
+    procUnlocks: {
+        body:  { attack: 3, defend: 3 },
+        mind:  { attack: 3, defend: 3 },
+        heart: { attack: 3, defend: 3 },
+    },
+    loot: [
+        drop('void-essence', 50),
+        drop('revive-crystal', 25),
+        drop('phoenix-tear', 15),
+        drop('greater-resonance-crystal', 10),
+    ],
+    philosophicalAlignment: { epistemology: -67, outlook: -67, scope: 67 },
+    skills: [skill('bootstrap-paradox'), skill('eternal-regress'), skill('liars-echo')],
+    finalBlowLines: {
+        brutal: 'The unbegun ends. The two states were closer than theology admits.',
+        quiet:  'It curls back into the shape of a thing about to start, and rests there.',
+        ironic: 'It finally experienced a beginning: yours, of the end of it.',
+    },
+    causeLines: {
+        brutal: 'A strength that was never spent on living spends itself on you.',
+        broken: 'It has waited since before waiting existed. Your patience is an infant by comparison.',
+        quiet:  'It shows you the world it was meant to begin. You grieve too long inside the showing.',
+    },
+    journalEntry: {
+        id: 'codex-the-abortive',
+        title: 'The Unbegun',
+        body:
+            'The old cosmologies list the gods who died. Only marginalia lists the ones ' +
+            'who never got to start — displaced by rounder pantheons, filed under ' +
+            'almost. It does not hate the world. It is waiting for the world to be ' +
+            'finished, so that something, at last, can begin.',
+    },
+    addedIn: ADDED,
+    tags: ['late-game', 'unique', 'enemy'],
+});
+
+// ─── Test fixture (legacy, NOT part of the art roster) ────────────────────────
 
 /**
- * The Incompleteness — level 55 unique, the deliberately UNWINNABLE ceiling the
+ * Punching-bag enemy used by Spec 04b's e2e suite and hermetic tests that
+ * need a long-lived combat encounter. It keeps body at 1 so old body-defense
+ * damage assertions remain stable, while heart/mind carry the extra HP budget.
+ * Kept separate from the roster so the encounter generator never selects it.
+ */
+export const Sandbag_01 = createEnemy({
+    id: 'sandbag-01',
+    name: 'Sandbag',
+    description:
+        'A practice dummy of stitched arguments, hung from a rope. It mumbles, ' +
+        'rarely strikes back, and refuses to die quickly.',
+    level: 10,
+    baseStats: { body: 1, mind: 30, heart: 29 },
+    mapName: 'northern-forest',
+    difficulty: 'simple',
+    logic: 'random',
+    tier1Overrides: T1_DEFAULT,
+    philosophicalAlignment: { epistemology: 0, outlook: 0, scope: 0 },
+});
+
+// ─── THE INCOMPLETENESS — the impossible playtest ceiling ─────────────────────
+
+/**
+ * The Incompleteness — level 110 unique, the deliberately UNWINNABLE ceiling the
  * playtest matrix measures the top of the curve against.
  *
  * DESIGN REQUIREMENT: this enemy must NEVER enter `EnemiesByMap` (the random
@@ -2429,36 +1985,23 @@ export const TheIncompleteness = createEnemy({
 
 // ─── Library indices ──────────────────────────────────────────────────────────
 
-/** Spec 07 + Phase 114 + Phase 127 — all 30 production enemies, in difficulty order. */
+/** The 2026-07-06 art-driven roster — all 52 production enemies, band order. */
 export const EnemyLibrary = [
-    // Simple
-    TidepoolCrab, SeaMistWisp, LullabyMoth,
-    // Normal
-    Disatree_01, WetHound, MournfulGull, ForestSprite, HollowEyedBeggar, ArgumentativeCrow,
-    ThornedSentinel, PackleaderWolf, WhisperingOak,
-    BonewardSentinel, VoidwroughtConstruct, // Phase 127
-    AuditSentinel, // Phase 121
-    // Elite
-    TideflukeReaver, HushWraith, HollowSaint,
-    FrostboundHunter, MistwalkerShade, VerdantProtector,
-    CindergeistRevenantElemental, ObsidianColossus, // Phase 127
-    // Boss
-    CoastalTyrant, TheDisagreement,
-    NightmareStag, TheForestMind,
-    TheLichOfMissingSteps, // Phase 127
-    BalanceJudge, // Phase 121
-    // Unique
-    EchoOfPyrrhonia, EternalAutumn, ShadowOfTheFirst,
-    // 2026-06-07 early-game
-    SaltGnawRat, DriftwoodHusk, PettyCutpurse, BogWillStripling, ApprenticeHeretic,
-    ThicketAmbusher, ReefBarnacleColony, WanderingSophist, TolltakerOfTheFord, TheMarketArbiter,
-    // 2026-06-07 mid-game
-    RimeclawProwler, GlassmindOracle, PenitentFlagellant, IronCovenanter, MireOfConsensus,
-    ContrarianRevenant, TheTithewarden, ApostateAbbot, TheUnwriting, HarvestOfNames,
-    // 2026-06-07 late-game
-    FamineOfTheDeepWood, CathedralOfDoubt, WarrantOfTheVoid, TheSchismarch, GravewardKeeper,
-    ProsecutorOfTheReal, TheLastConsensus, AxiomBreaker, PallbearerOfReason, TheTerminalProof,
-    // 2026-07-02 impossible playtest ceiling — deliberately absent from EnemiesByMap.
+    // Fishing village — early (L1-8)
+    GraveLarva, FloatEye, ChatteringSkull, LittleBelle, FootStealer, WaterHolger,
+    CursedHead, Ghast, DoomEgg, TheButcher, BrineHag, TheFerryman, KingOfRevenge,
+    // Northern forest — early-mid (L9-18)
+    Wichtlein, Kudan, BullBegger, WeepingHead, GoblinShaman, Sugata, PaleBrood,
+    TriEyes, Mabadi, FrayedOne, BoneTotem, BoneWizard, Mirac,
+    // Northern forest — mid (L19-31)
+    CursedPaladin, VampireThrall, HasshakuSama, JeweledTree, OgreNaga, Sidelle,
+    RawheadRex, FateSpinner, AshenBoneDrake, RaAminKa, LadyGabriella, Zoma,
+    MabadiUndrowned,
+    // Northern forest — late (L34-50)
+    TriEyesHollowed, BlackDeath, TheUnnameable, FireGiant, GreaterDevil, Rangda,
+    ZomaAscendant, ElderFireGiant, Tezcatlipoca, ArchDemon, Beelzebub, Death,
+    TheAbortive,
+    // Impossible playtest ceiling — deliberately absent from EnemiesByMap.
     TheIncompleteness,
 ] as const;
 
@@ -2467,117 +2010,92 @@ export const EnemyLibrary = [
  *
  * NOTE: `TheIncompleteness` is intentionally absent from every pool — it must
  * never appear in random map encounters (design requirement; it is reached
- * only through the authored `impossible` playtest stage).
+ * only through the authored `impossible` playtest stage). `Sandbag_01` is a
+ * test fixture and is likewise excluded.
  */
 export const EnemiesByMap = {
     'fishing-village': [
-        TidepoolCrab, SeaMistWisp,
-        WetHound, MournfulGull, HollowEyedBeggar,
-        TideflukeReaver,
-        CoastalTyrant,
-        // 2026-06-07 additions
-        SaltGnawRat, DriftwoodHusk, PettyCutpurse, ApprenticeHeretic,
-        ReefBarnacleColony, TolltakerOfTheFord, TheMarketArbiter, TheTithewarden,
+        GraveLarva, FloatEye, ChatteringSkull, LittleBelle, FootStealer, WaterHolger,
+        CursedHead, Ghast, DoomEgg, TheButcher, BrineHag, TheFerryman, KingOfRevenge,
     ],
     'northern-forest': [
-        LullabyMoth,
-        Disatree_01, ForestSprite, ArgumentativeCrow, ThornedSentinel, PackleaderWolf, WhisperingOak,
-        AuditSentinel, // Phase 121
-        HushWraith, HollowSaint, FrostboundHunter, MistwalkerShade, VerdantProtector,
-        TheDisagreement, NightmareStag, TheForestMind,
-        BalanceJudge, // Phase 121
-        EchoOfPyrrhonia, EternalAutumn, ShadowOfTheFirst,
-        // 2026-06-07 additions
-        BogWillStripling, ThicketAmbusher, WanderingSophist,
-        RimeclawProwler, GlassmindOracle, PenitentFlagellant, IronCovenanter, MireOfConsensus,
-        ContrarianRevenant, ApostateAbbot, TheUnwriting, HarvestOfNames,
-        FamineOfTheDeepWood, CathedralOfDoubt, WarrantOfTheVoid, TheSchismarch, GravewardKeeper,
-        ProsecutorOfTheReal, TheLastConsensus, AxiomBreaker, PallbearerOfReason, TheTerminalProof,
-        // Phase 127 — third enemy family (ancient-ruins theme)
-        BonewardSentinel, VoidwroughtConstruct, CindergeistRevenantElemental, ObsidianColossus,
-        TheLichOfMissingSteps,
+        Wichtlein, Kudan, BullBegger, WeepingHead, GoblinShaman, Sugata, PaleBrood,
+        TriEyes, Mabadi, FrayedOne, BoneTotem, BoneWizard, Mirac,
+        CursedPaladin, VampireThrall, HasshakuSama, JeweledTree, OgreNaga, Sidelle,
+        RawheadRex, FateSpinner, AshenBoneDrake, RaAminKa, LadyGabriella, Zoma,
+        MabadiUndrowned,
+        TriEyesHollowed, BlackDeath, TheUnnameable, FireGiant, GreaterDevil, Rangda,
+        ZomaAscendant, ElderFireGiant, Tezcatlipoca, ArchDemon, Beelzebub, Death,
+        TheAbortive,
     ],
 } as const;
 
 /**
- * Slug-keyed registry of enemy fixtures. Useful for hermetic tests or
- * debug entry points that want to look up an enemy by short name. Spec 07
- * keeps the `disatree` and `sandbag` aliases stable for back-compat.
+ * Slug-keyed registry of enemy fixtures. Useful for hermetic tests, map-event
+ * payloads and debug entry points that look an enemy up by short name. The
+ * `sandbag` alias stays stable for back-compat with Spec 04b-era tests.
  */
 export const ENEMY_REGISTRY = {
-    // Legacy aliases.
-    disatree: Disatree_01,
-    sandbag:  Sandbag_01,
-    // Spec 07 additions.
-    'tidepool-crab':       TidepoolCrab,
-    'sea-mist-wisp':       SeaMistWisp,
-    'lullaby-moth':        LullabyMoth,
-    'wet-hound':           WetHound,
-    'mournful-gull':       MournfulGull,
-    'forest-sprite':       ForestSprite,
-    'hollow-eyed-beggar':  HollowEyedBeggar,
-    'argumentative-crow':  ArgumentativeCrow,
-    'tidefluke-reaver':    TideflukeReaver,
-    'hush-wraith':         HushWraith,
-    'hollow-saint':        HollowSaint,
-    'coastal-tyrant':      CoastalTyrant,
-    'the-disagreement':    TheDisagreement,
-    'echo-of-pyrrhonia':   EchoOfPyrrhonia,
-    // Phase 114 additions.
-    'thorned-sentinel':    ThornedSentinel,
-    'packleader-wolf':     PackleaderWolf,
-    'whispering-oak':      WhisperingOak,
-    'frostbound-hunter':   FrostboundHunter,
-    'mistwalker-shade':    MistwalkerShade,
-    'verdant-protector':   VerdantProtector,
-    'nightmare-stag':      NightmareStag,
-    'the-forest-mind':     TheForestMind,
-    'eternal-autumn':      EternalAutumn,
-    'shadow-of-the-first': ShadowOfTheFirst,
-    // Phase 121 balance audit anchors.
-    'audit-sentinel':      AuditSentinel,
-    'balance-judge':       BalanceJudge,
-    // 2026-06-07 early-game additions.
-    'salt-gnaw-rat':            SaltGnawRat,
-    'driftwood-husk':           DriftwoodHusk,
-    'petty-cutpurse':           PettyCutpurse,
-    'bog-will-stripling':       BogWillStripling,
-    'apprentice-heretic':       ApprenticeHeretic,
-    'thicket-ambusher':         ThicketAmbusher,
-    'reef-barnacle-colony':     ReefBarnacleColony,
-    'wandering-sophist':        WanderingSophist,
-    'tolltaker-of-the-ford':    TolltakerOfTheFord,
-    'the-market-arbiter':       TheMarketArbiter,
-    // 2026-06-07 mid-game additions.
-    'rimeclaw-prowler':         RimeclawProwler,
-    'glassmind-oracle':         GlassmindOracle,
-    'penitent-flagellant':      PenitentFlagellant,
-    'iron-covenanter':          IronCovenanter,
-    'mire-of-consensus':        MireOfConsensus,
-    'contrarian-revenant':      ContrarianRevenant,
-    'the-tithewarden':          TheTithewarden,
-    'apostate-abbot':           ApostateAbbot,
-    'the-unwriting':            TheUnwriting,
-    'harvest-of-names':         HarvestOfNames,
-    // 2026-06-07 late-game additions.
-    'famine-of-the-deep-wood':  FamineOfTheDeepWood,
-    'cathedral-of-doubt':       CathedralOfDoubt,
-    'warrant-of-the-void':      WarrantOfTheVoid,
-    'the-schismarch':           TheSchismarch,
-    'graveward-keeper':         GravewardKeeper,
-    'prosecutor-of-the-real':   ProsecutorOfTheReal,
-    'the-last-consensus':       TheLastConsensus,
-    'axiom-breaker':            AxiomBreaker,
-    'pallbearer-of-reason':     PallbearerOfReason,
-    'the-terminal-proof':       TheTerminalProof,
-    // Phase 127 ancient-ruins family.
-    'boneward-sentinel':            BonewardSentinel,
-    'voidwrought-construct':        VoidwroughtConstruct,
-    'cindergeist-revenant':         CindergeistRevenantElemental,
-    'obsidian-colossus':            ObsidianColossus,
-    'the-lich-of-missing-steps':   TheLichOfMissingSteps,
-    // 2026-07-02 — impossible playtest ceiling (never in EnemiesByMap pools).
-    'the-incompleteness':           TheIncompleteness,
+    // Test fixtures.
+    sandbag: Sandbag_01,
+    // Fishing village — early.
+    'grave-larva':       GraveLarva,
+    'float-eye':         FloatEye,
+    'chattering-skull':  ChatteringSkull,
+    'little-belle':      LittleBelle,
+    'foot-stealer':      FootStealer,
+    'water-holger':      WaterHolger,
+    'cursed-head':       CursedHead,
+    'ghast':             Ghast,
+    'doom-egg':          DoomEgg,
+    'the-butcher':       TheButcher,
+    'brine-hag':         BrineHag,
+    'the-ferryman':      TheFerryman,
+    'king-of-revenge':   KingOfRevenge,
+    // Northern forest — early-mid.
+    'wichtlein':         Wichtlein,
+    'kudan':             Kudan,
+    'bull-begger':       BullBegger,
+    'weeping-head':      WeepingHead,
+    'goblin-shaman':     GoblinShaman,
+    'sugata':            Sugata,
+    'pale-brood':        PaleBrood,
+    'tri-eyes':          TriEyes,
+    'mabadi':            Mabadi,
+    'frayed-one':        FrayedOne,
+    'bone-totem':        BoneTotem,
+    'bone-wizard':       BoneWizard,
+    'mirac':             Mirac,
+    // Northern forest — mid.
+    'cursed-paladin':    CursedPaladin,
+    'vampire-thrall':    VampireThrall,
+    'hasshaku-sama':     HasshakuSama,
+    'jeweled-tree':      JeweledTree,
+    'ogre-naga':         OgreNaga,
+    'sidelle':           Sidelle,
+    'rawhead-rex':       RawheadRex,
+    'fate-spinner':      FateSpinner,
+    'ashen-bone-drake':  AshenBoneDrake,
+    'ra-amin-ka':        RaAminKa,
+    'lady-gabriella':    LadyGabriella,
+    'zoma':              Zoma,
+    'mabadi-undrowned':  MabadiUndrowned,
+    // Northern forest — late.
+    'tri-eyes-hollowed': TriEyesHollowed,
+    'black-death':       BlackDeath,
+    'the-unnameable':    TheUnnameable,
+    'fire-giant':        FireGiant,
+    'greater-devil':     GreaterDevil,
+    'rangda':            Rangda,
+    'zoma-ascendant':    ZomaAscendant,
+    'elder-fire-giant':  ElderFireGiant,
+    'tezcatlipoca':      Tezcatlipoca,
+    'arch-demon':        ArchDemon,
+    'beelzebub':         Beelzebub,
+    'death':             Death,
+    'the-abortive':      TheAbortive,
+    // Impossible playtest ceiling (never in EnemiesByMap pools).
+    'the-incompleteness': TheIncompleteness,
 } as const;
 
 export type EnemySlug = keyof typeof ENEMY_REGISTRY;

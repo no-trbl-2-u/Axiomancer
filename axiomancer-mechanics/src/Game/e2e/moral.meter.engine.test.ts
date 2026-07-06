@@ -11,7 +11,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { TidepoolCrab } from '../../Enemy/enemy.library';
+import { GraveLarva } from '../../Enemy/enemy.library';
 import { createGameStore, selectMoralMeter } from '../store';
 import { createNewGameState } from '../game.reducer';
 import { nullAdapter } from '../persistence/null.adapter';
@@ -70,7 +70,7 @@ describe('Moral meter system — complete pipeline', () => {
     it('friendship victory grants +1 moral meter bonus', () => {
         const store = createGameStore(nullAdapter);
 
-        store.getState().startCombat(TidepoolCrab);
+        store.getState().startCombat(GraveLarva);
         expect(store.getState().currentEncounter).toBeTruthy();
 
         const initialMeter = selectMoralMeter(store.getState());

@@ -12,7 +12,7 @@
 import { describe, it, expect, afterEach, vi } from 'vitest';
 
 import { Player } from '../../Character/characters.mock';
-import { TidepoolCrab } from '../../Enemy/enemy.library';
+import { GraveLarva } from '../../Enemy/enemy.library';
 import { createGameStore } from '../store';
 import { GameState } from '../types';
 import { PersistenceAdapter } from '../persistence/types';
@@ -39,7 +39,7 @@ describe('Phase 51 — autosave throttling restricts adapter.save to DURABLE_ACT
         // START_COMBAT — not in durable set.
         store.getState().dispatch({
             type: 'START_COMBAT',
-            payload: { target: TidepoolCrab },
+            payload: { target: GraveLarva },
         });
 
         expect(adapter.saves).toBe(0);
@@ -72,7 +72,7 @@ describe('Phase 51 — autosave throttling restricts adapter.save to DURABLE_ACT
         // Enter combat (not a durable action — saves stays 0).
         store.getState().dispatch({
             type: 'START_COMBAT',
-            payload: { target: TidepoolCrab },
+            payload: { target: GraveLarva },
         });
         expect(adapter.saves).toBe(0);
     });

@@ -36,7 +36,7 @@ const DEFEAT_VM: AftermathDefeatViewModel = {
     kind: 'defeat',
     characterName: 'WORM-EATEN PILGRIM',
     killer: {
-        name: 'Salt-Gnaw Rat',
+        name: 'Grave Larva',
         epithet: 'the bilge’s long patience',
         finalSkill: 'STRIKE',
         damage: 6,

@@ -43,7 +43,7 @@ afterEach(() => {
 describe('Combat CLI — flag parsing', () => {
     it('parses new-combat flags', () => {
         const flags = parseCombatArgv([
-            '--enemy', 'mournful-gull',
+            '--enemy', 'little-belle',
             '--preset', 'apprentice',
             '--seed', '42',
             '--auto',
@@ -53,7 +53,7 @@ describe('Combat CLI — flag parsing', () => {
             '--state-log', 'trace.jsonl',
         ]);
         expect(flags).toMatchObject({
-            enemySlug: 'mournful-gull',
+            enemySlug: 'little-belle',
             presetId: 'apprentice',
             seed: 42,
             auto: true,
@@ -65,8 +65,8 @@ describe('Combat CLI — flag parsing', () => {
     });
 
     it('supports --flag=value form', () => {
-        const flags = parseCombatArgv(['--enemy=wet-hound', '--auto']);
-        expect(flags.enemySlug).toBe('wet-hound');
+        const flags = parseCombatArgv(['--enemy=foot-stealer', '--auto']);
+        expect(flags.enemySlug).toBe('foot-stealer');
         expect(flags.auto).toBe(true);
         expect(flags.policy).toBe('status');
         expect(flags.maxTurns).toBe(8);
@@ -95,7 +95,7 @@ describe('Combat CLI — deterministic auto playthrough', () => {
             const logPath = tmpPath('auto');
             await runCombatCli([
                 '--auto', '--policy', 'status',
-                '--enemy', 'mournful-gull',
+                '--enemy', 'little-belle',
                 '--preset', 'apprentice',
                 '--seed', '42',
                 '--max-turns', '12',
@@ -120,7 +120,7 @@ describe('Combat CLI — deterministic auto playthrough', () => {
         const logPath = tmpPath('phases');
         await runCombatCli([
             '--auto', '--policy', 'status',
-            '--enemy', 'mournful-gull',
+            '--enemy', 'little-belle',
             '--preset', 'apprentice',
             '--seed', '7',
             '--max-turns', '6',
@@ -136,7 +136,7 @@ describe('Combat CLI — deterministic auto playthrough', () => {
             const logPath = tmpPath(`policy-${policy}`);
             await expect(runCombatCli([
                 '--auto', '--policy', policy,
-                '--enemy', 'wet-hound',
+                '--enemy', 'foot-stealer',
                 '--preset', 'apprentice',
                 '--seed', '1',
                 '--max-turns', '8',

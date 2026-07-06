@@ -97,9 +97,9 @@ const nfSprite: MapEventPool = {
         kind: 'encounter', weight: 1,
         payload: {
             kind: 'encounter',
-            enemySlug: 'forest-sprite',
+            enemySlug: 'wichtlein',
             isBoss: false,
-            description: 'A forest sprite flickers between the boughs.',
+            description: 'A small red-hooded figure knocks three times on the roots.',
         },
     }],
 };
@@ -133,19 +133,6 @@ const nfForestMarket: MapEventPool = {
                 ],
             },
             description: 'A small forest market keeps trade alive on the path.',
-        },
-    }],
-};
-
-const _nfCrow: MapEventPool = {
-    id: 'nf-9.encounter',
-    entries: [{
-        kind: 'encounter', weight: 1,
-        payload: {
-            kind: 'encounter',
-            enemySlug: 'argumentative-crow',
-            isBoss: false,
-            description: 'An argumentative crow drops from a low branch.',
         },
     }],
 };
@@ -229,9 +216,9 @@ const nfDenseThicket: MapEventPool = {
         kind: 'encounter', weight: 1,
         payload: {
             kind: 'encounter',
-            enemySlug: 'thorned-sentinel',
+            enemySlug: 'jeweled-tree',
             isBoss: false,
-            description: 'Dense thickets block the way; something large and thorned moves within.',
+            description: 'Dense thickets block the way; deep within, gemstone eyes catch the light.',
         },
     }],
 };
@@ -332,9 +319,9 @@ const nfShadowWolfTerritory: MapEventPool = {
         kind: 'encounter', weight: 1,
         payload: {
             kind: 'encounter',
-            enemySlug: 'mistwalker-shade',
+            enemySlug: 'hasshaku-sama',
             isBoss: false,
-            description: 'A shadowy form drifts between the mist-wreathed trees.',
+            description: 'Something far too tall moves between the mist-wreathed trees, and it has noticed you.',
         },
     }],
 };
@@ -486,12 +473,12 @@ const NORTHERN_FOREST_POOLS: ReadonlyArray<{ nodeId: string; pool: MapEventPool 
 // coastal-tyrant is endgame-tier elsewhere, so we override the level here).
 
 const FV_NEW_PLAYER_FOES: ReadonlyArray<{ slug: EnemySlug; description: string }> = [
-    { slug: 'tidepool-crab',  description: 'A tidepool crab pincers up from the dock pilings.' },
-    { slug: 'sea-mist-wisp',  description: 'A sea-mist wisp coils out of the fog.' },
-    { slug: 'salt-gnaw-rat',  description: 'A salt-gnaw rat bares its teeth among the crates.' },
-    { slug: 'driftwood-husk', description: 'A driftwood husk shudders upright on the strand.' },
-    { slug: 'wet-hound',      description: 'A wet-hound bristles between the shacks.' },
-    { slug: 'mournful-gull',  description: 'A mournful gull wheels down, shrieking.' },
+    { slug: 'grave-larva',      description: 'A grave larva gums its way up from under the dock pilings.' },
+    { slug: 'float-eye',        description: 'A float-eye drifts out of the fog, already watching.' },
+    { slug: 'chattering-skull', description: 'A chattering skull rattles its last word among the crates.' },
+    { slug: 'little-belle',     description: 'A small orange vesper rings a bell for a service no one held.' },
+    { slug: 'foot-stealer',     description: 'A foot-stealer scuttles between the shacks, low and grasping.' },
+    { slug: 'water-holger',     description: 'A drowned deckhand wades up the strand, still standing his watch.' },
 ];
 
 function fvEncounterPool(nodeId: string, foe: { slug: EnemySlug; description: string }): MapEventPool {
@@ -625,8 +612,8 @@ const fvBuildTheBoatQuest: MapEventPool = {
     }],
 };
 
-// The region boss — coastal-tyrant, but pinned to a low absolute level so a
-// fresh player can win the climax (the shared enemy is endgame-tier elsewhere).
+// The region boss — king-of-revenge, but pinned to a low absolute level so a
+// fresh player can win the climax (the shared enemy is mid-tier elsewhere).
 const FV_BOSS_LEVEL = 3;
 const fvGauntletBoss: MapEventPool = {
     id: 'fv-6.encounter-boss',
@@ -634,10 +621,10 @@ const fvGauntletBoss: MapEventPool = {
         kind: 'encounter', weight: 1,
         payload: {
             kind: 'encounter',
-            enemySlug: 'coastal-tyrant',
+            enemySlug: 'king-of-revenge',
             isBoss: true,
             level: FV_BOSS_LEVEL,
-            description: 'The Coastal Tyrant rises from the breakwater.',
+            description: 'The King of Revenge rises from the breakwater.',
         },
     }],
 };

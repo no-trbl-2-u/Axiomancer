@@ -22,7 +22,7 @@ import {
 } from './combat-effects';
 import { lookupEffect } from '../Effects/effects.library';
 import { Player } from '../Character/characters.mock';
-import { Disatree_01 } from '../Enemy/enemy.library';
+import { FloatEye } from '../Enemy/enemy.library';
 
 const STANCES: Stance[] = ['body', 'mind', 'heart'];
 const ACTIONS: Array<'attack' | 'defend'> = ['attack', 'defend'];
@@ -165,7 +165,7 @@ describe('rollForCombatEffects', () => {
             { stance: 'body', action: 'attack', tier: 1, effectId: 'debuff_curse', target: 'opponent', baseChance: 1 },
         ];
         const { procs } = rollForCombatEffects({
-            actor: Disatree_01,
+            actor: FloatEye,
             stance: 'body',
             action: 'attack',
             rawAttackRoll: 10,
