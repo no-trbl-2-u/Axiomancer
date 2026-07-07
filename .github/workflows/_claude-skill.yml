@@ -46,7 +46,7 @@ on:
         type: number
         default: 60
       install_playwright:
-        description: 'Install Playwright Chromium (mobile expo-web loops)'
+        description: 'Install Playwright Chromium (mobile expo-web loops) and grant the mcp__playwright__browser_* tools that the playtester/critic sub-agents need to drive it'
         type: boolean
         default: false
       extra_claude_args:
@@ -107,7 +107,7 @@ jobs:
           show_full_output: true
           claude_args: |
             --model claude-sonnet-5
-            --allowedTools "Bash,Edit,Write,Read,Glob,Grep,Task,TodoWrite,WebFetch,WebSearch"
+            --allowedTools "Bash,Edit,Write,Read,Glob,Grep,Task,TodoWrite,WebFetch,WebSearch${{ inputs.install_playwright && ',mcp__playwright__browser_navigate,mcp__playwright__browser_click,mcp__playwright__browser_snapshot,mcp__playwright__browser_take_screenshot,mcp__playwright__browser_console_messages,mcp__playwright__browser_close,mcp__playwright__browser_resize,mcp__playwright__browser_press_key,mcp__playwright__browser_hover,mcp__playwright__browser_evaluate,mcp__playwright__browser_wait_for,mcp__playwright__browser_tabs,mcp__playwright__browser_network_requests,mcp__playwright__browser_navigate_back' || '' }}"
             ${{ inputs.extra_claude_args }}
 
       - name: Fail if Claude reported an execution error

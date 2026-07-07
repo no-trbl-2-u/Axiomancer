@@ -1,5 +1,5 @@
 {
-  "__note": "Nexus enforcement layer (OPT-IN). Copy to .claude/settings.json to activate: a permission allowlist so unattended /loop ticks never stall on a prompt, deny walls for force-push / --no-verify / destructive resets, and guard hooks (.claude/hooks/guard.mjs) that block the forbidden commands at the harness + warn on unclean turn-ends. Only needed at intervention level 3+ (unattended). At level 0-2 (manual /ship-a-phase, attended /march) it is unnecessary. Activating it widens the agent's own grants, so it is a deliberate, user-owned step — the adoption did not enable it for you. Delete this __note key after copying.",
+  "__note": "Nexus enforcement layer (OPT-IN). Copy to .claude/settings.json to activate: a permission allowlist so unattended /loop ticks never stall on a prompt (including the mcp__playwright__browser_* tools the playtester/critic sub-agents need when a workflow sets install_playwright: true), deny walls for force-push / --no-verify / destructive resets, and guard hooks (.claude/hooks/guard.mjs) that block the forbidden commands at the harness + warn on unclean turn-ends. Only needed at intervention level 3+ (unattended). At level 0-2 (manual /ship-a-phase, attended /march) it is unnecessary. Activating it widens the agent's own grants, so it is a deliberate, user-owned step — the adoption did not enable it for you. Delete this __note key after copying.",
   "permissions": {
     "allow": [
       "Bash(git status:*)",
@@ -52,7 +52,21 @@
       "Bash(sed:*)",
       "Bash(grep:*)",
       "Bash(head:*)",
-      "Bash(tail:*)"
+      "Bash(tail:*)",
+      "mcp__playwright__browser_navigate",
+      "mcp__playwright__browser_click",
+      "mcp__playwright__browser_snapshot",
+      "mcp__playwright__browser_take_screenshot",
+      "mcp__playwright__browser_console_messages",
+      "mcp__playwright__browser_close",
+      "mcp__playwright__browser_resize",
+      "mcp__playwright__browser_press_key",
+      "mcp__playwright__browser_hover",
+      "mcp__playwright__browser_evaluate",
+      "mcp__playwright__browser_wait_for",
+      "mcp__playwright__browser_tabs",
+      "mcp__playwright__browser_network_requests",
+      "mcp__playwright__browser_navigate_back"
     ],
     "deny": [
       "Bash(git push --force:*)",
