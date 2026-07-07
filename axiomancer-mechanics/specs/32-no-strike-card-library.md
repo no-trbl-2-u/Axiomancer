@@ -366,10 +366,10 @@ strengthened separately); rank honesty and deck distinctness ARE.
 - **CAPITULATE** (ratified) — SWAY ≥ enemy current HP at end of your
   turn: the enemy yields. Counts as a merciful resolution for morality
   systems. Charm's identity: it can win without ever touching HP.
-- **CONCEDE** (assumption-confirm A1) — optional second alt-win: a
-  completed 8-Premise Aporia-grade Peroration wins the argument
-  outright. Hold until owner confirms; ships as a Peroration upgrade
-  path, not a new card slot.
+- **CONCEDE** (ratified 2026-07-07) — second alt-win: a completed
+  8-Premise Aporia-grade Peroration wins the argument outright. Ships
+  as a Peroration upgrade path on `the-closing-word`, not a new card
+  slot.
 
 ## 10. Enemies
 
@@ -427,9 +427,9 @@ contract).
 8. **Delivery**: spec v3 → owner ratification → implement in ordered
    phases. (yes)
 
-**Assumption-confirms (non-blocking; flag if wrong):**
+**Assumption-confirms — ALL RATIFIED 2026-07-07 ("keep them all"):**
 
-- **A1** — CONCEDE alt-win (§9): include or hold at two alt-wins?
+- **A1** — CONCEDE alt-win included (§9).
 - **A2** — SWAY decays 1/turn (the tension knob; `irresistible-grace`
   removes it). Tune via `/deck-tuning`.
 - **A3** — MARK as the universal glue affliction (+1 per tick per
