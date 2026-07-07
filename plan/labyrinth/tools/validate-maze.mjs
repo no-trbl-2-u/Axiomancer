@@ -41,7 +41,17 @@ const ACTS = {
     honestFragments: 4,
     counterfeits: 5,
   },
-  act3: null, // filled in when acts/act3.md lands
+  act3: {
+    start: '49',
+    boss: '63',
+    expectedShortestMoves: 7,
+    expectedUniqueShortest: true,
+    secretEdges: [['57', '61']],
+    gateEdges: [['61', '62']],
+    realms: { Path: 9, Loop: 4, Trap: 3 },
+    honestFragments: 5,
+    counterfeits: 4,
+  },
 };
 
 function parseRoster(md, file) {
@@ -60,10 +70,10 @@ function parseRoster(md, file) {
     const tokens = doorsRaw.match(/(?:[^,(]|\([^)]*\))+/g) ?? [];
     for (const tok of tokens.map((t) => t.trim())) {
       if (!tok || tok === '—') continue;
-      const m = tok.match(/^(\d+|descent)\s*(<->|->)?\s*(?:\((.*)\))?$/);
+      const m = tok.match(/^(\d+|descent|exit)\s*(<->|->)?\s*(?:\((.*)\))?$/);
       if (!m) throw new Error(`${file}: unparsable door token "${tok}" in room ${display}`);
       const [, dest, arrow = '<->', note = ''] = m;
-      if (dest === 'descent') continue; // act-exit marker, not a graph edge
+      if (dest === 'descent' || dest === 'exit') continue; // act-exit marker, not a graph edge
       doors.push({
         dest,
         twoWay: arrow === '<->',
@@ -162,9 +172,10 @@ for (const act of requested) {
   }
   pass(`realm split ${Object.entries(realmCounts).map(([k, v]) => `${k}:${v}`).join(' ')}`);
 
-  // counterfeits are marked "painted" (Act I) or "false mark"
-  // (Act II onward: the forger learned to carve)
-  const isForged = (f) => /painted|false/.test(f);
+  // counterfeits are marked "painted" (Act I), "false mark"
+  // (Act II: the forger learned to carve), or "furniture"
+  // (Act III: honest words bear weight — "structural")
+  const isForged = (f) => /painted|false|furniture/.test(f);
   const isHonest = (f) => /carved/.test(f) && !isForged(f);
   const honest = rooms.filter((r) => isHonest(r.fragment)).length;
   const forged = rooms.filter((r) => isForged(r.fragment)).length;
