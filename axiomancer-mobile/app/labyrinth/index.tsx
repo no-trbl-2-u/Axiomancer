@@ -192,9 +192,14 @@ export default function LabyrinthScreen() {
                     </Pressable>
                 </View>
 
-                <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
+                {/* ── The scene fills everything under the header; every
+                       strip (remark, confirm, gate, finale, accordion)
+                       floats OVER it — no dead space. ── */}
+                <View style={styles.sceneArea}>
                     {showMap ? (
-                        <FogMap map={map} />
+                        <View style={styles.mapWrap}>
+                            <FogMap map={map} />
+                        </View>
                     ) : (
                         <RoomScene
                             nodeId={room.nodeId}
@@ -210,96 +215,104 @@ export default function LabyrinthScreen() {
                         />
                     )}
 
-                    {/* ── Waystone / ejection toast ── */}
-                    {arrivalToast !== null && (
-                        <View style={styles.toast} testID="labyrinth-arrival-toast">
-                            <Text style={styles.toastText}>{arrivalToast}</Text>
-                        </View>
-                    )}
-
-                    {/* ── The Sophist's remark on the last inspected POI ── */}
-                    {room.lastRemark !== null && (
-                        <View style={styles.remarkStrip} testID="labyrinth-remark">
-                            <Text style={styles.remarkText}>“{room.lastRemark.remark}”</Text>
-                            {room.lastRemark.pickupLine !== null && (
-                                <Text style={styles.pickupText}>{room.lastRemark.pickupLine}</Text>
-                            )}
-                            {room.lastRemark.trapLine !== null && (
-                                <Text style={styles.trapText}>{room.lastRemark.trapLine}</Text>
-                            )}
-                        </View>
-                    )}
-
-                    {/* ── Door confirm strip ── */}
-                    {selectedDoor !== null && (
-                        <View style={styles.confirmStrip} testID="labyrinth-door-confirm">
-                            <Text style={styles.confirmText}>
-                                {selectedDoor.gated
-                                    ? LABYRINTH_COPY.gatedDoorLine
-                                    : `${LABYRINTH_COPY.doorConfirmTitle} — ${selectedDoor.display}`}
-                            </Text>
-                            <View style={styles.confirmButtons}>
-                                {!selectedDoor.gated && (
-                                    <Pressable
-                                        onPress={confirmMove}
-                                        style={styles.confirmGo}
-                                        testID="labyrinth-door-walk"
-                                    >
-                                        <Text style={styles.confirmGoText}>{LABYRINTH_COPY.doorGo}</Text>
-                                    </Pressable>
-                                )}
-                                <Pressable
-                                    onPress={() => setSelectedDoor(null)}
-                                    style={styles.confirmStay}
-                                    testID="labyrinth-door-stay"
-                                >
-                                    <Text style={styles.confirmStayText}>{LABYRINTH_COPY.doorStay}</Text>
-                                </Pressable>
+                    <View style={styles.overlayStack} pointerEvents="box-none">
+                        {/* ── Waystone / ejection toast ── */}
+                        {arrivalToast !== null && (
+                            <View style={styles.toast} testID="labyrinth-arrival-toast">
+                                <Text style={styles.toastText}>{arrivalToast}</Text>
                             </View>
-                        </View>
-                    )}
+                        )}
 
-                    {/* ── Gate of Assent sockets ── */}
-                    {room.gate !== null && (
-                        <GateSockets
-                            gate={room.gate}
-                            pocket={room.pocket}
-                            resultLine={gateLine}
-                            onSubmit={(words) => {
-                                const result = actions.labyrinthSubmitGate(words);
-                                if (!result) return;
-                                setGateLine(
-                                    result.ok
-                                        ? result.line
-                                        : `${result.line} ${LABYRINTH_COPY.gateLedgerNote}`,
-                                );
+                        {/* ── The Sophist's remark on the last inspected POI ── */}
+                        {room.lastRemark !== null && (
+                            <View style={styles.remarkStrip} testID="labyrinth-remark">
+                                <Text style={styles.remarkText}>“{room.lastRemark.remark}”</Text>
+                                {room.lastRemark.pickupLine !== null && (
+                                    <Text style={styles.pickupText}>{room.lastRemark.pickupLine}</Text>
+                                )}
+                                {room.lastRemark.trapLine !== null && (
+                                    <Text style={styles.trapText}>{room.lastRemark.trapLine}</Text>
+                                )}
+                            </View>
+                        )}
+
+                        {/* ── Door confirm strip ── */}
+                        {selectedDoor !== null && (
+                            <View style={styles.confirmStrip} testID="labyrinth-door-confirm">
+                                <Text style={styles.confirmText}>
+                                    {selectedDoor.gated
+                                        ? LABYRINTH_COPY.gatedDoorLine
+                                        : `${LABYRINTH_COPY.doorConfirmTitle} — ${selectedDoor.display}`}
+                                </Text>
+                                <View style={styles.confirmButtons}>
+                                    {!selectedDoor.gated && (
+                                        <Pressable
+                                            onPress={confirmMove}
+                                            style={styles.confirmGo}
+                                            testID="labyrinth-door-walk"
+                                        >
+                                            <Text style={styles.confirmGoText}>{LABYRINTH_COPY.doorGo}</Text>
+                                        </Pressable>
+                                    )}
+                                    <Pressable
+                                        onPress={() => setSelectedDoor(null)}
+                                        style={styles.confirmStay}
+                                        testID="labyrinth-door-stay"
+                                    >
+                                        <Text style={styles.confirmStayText}>{LABYRINTH_COPY.doorStay}</Text>
+                                    </Pressable>
+                                </View>
+                            </View>
+                        )}
+
+                        {/* ── Gate of Assent sockets ── */}
+                        {room.gate !== null && (
+                            <ScrollView style={styles.sheet}>
+                                <GateSockets
+                                    gate={room.gate}
+                                    pocket={room.pocket}
+                                    resultLine={gateLine}
+                                    onSubmit={(words) => {
+                                        const result = actions.labyrinthSubmitGate(words);
+                                        if (!result) return;
+                                        setGateLine(
+                                            result.ok
+                                                ? result.line
+                                                : `${result.line} ${LABYRINTH_COPY.gateLedgerNote}`,
+                                        );
+                                    }}
+                                />
+                            </ScrollView>
+                        )}
+
+                        {/* ── Boss room: the reckoning precedes the fight ── */}
+                        {finaleVm !== null && (
+                            <ScrollView style={styles.sheet}>
+                                <FinalePanel
+                                    vm={finaleVm}
+                                    onFight={() => actions.labyrinthBeginBossEvent()}
+                                    onSpeakName={(spoken) => actions.labyrinthSpeakName(spoken)}
+                                />
+                            </ScrollView>
+                        )}
+                    </View>
+
+                    <View style={styles.accordionWrap}>
+                        <LabyrinthAccordion
+                            room={room}
+                            hintLine={hintLine}
+                            onBuyHint={(tier) => {
+                                const bought = actions.labyrinthBuyHint(tier);
+                                setHintLine(bought ? bought.line : LABYRINTH_COPY.hintBroke);
                             }}
+                            onSettleDebt={
+                                room.settle && room.settle.canAfford
+                                    ? () => actions.labyrinthSettleDebt(1)
+                                    : null
+                            }
                         />
-                    )}
-
-                    {/* ── Boss room: the reckoning precedes the fight ── */}
-                    {finaleVm !== null && (
-                        <FinalePanel
-                            vm={finaleVm}
-                            onFight={() => actions.labyrinthBeginBossEvent()}
-                            onSpeakName={(spoken) => actions.labyrinthSpeakName(spoken)}
-                        />
-                    )}
-                </ScrollView>
-
-                <LabyrinthAccordion
-                    room={room}
-                    hintLine={hintLine}
-                    onBuyHint={(tier) => {
-                        const bought = actions.labyrinthBuyHint(tier);
-                        setHintLine(bought ? bought.line : LABYRINTH_COPY.hintBroke);
-                    }}
-                    onSettleDebt={
-                        room.settle && room.settle.canAfford
-                            ? () => actions.labyrinthSettleDebt(1)
-                            : null
-                    }
-                />
+                    </View>
+                </View>
 
                 {showEncounterModal && (
                     <EncounterModalOverlay
@@ -401,15 +414,42 @@ const useStyles = makeStyles((AXM) => ({
         letterSpacing: 2,
         color: AXM.sulfur,
     },
-    scroll: { flex: 1 },
-    scrollContent: {
-        paddingHorizontal: 14,
-        paddingBottom: 20,
-        gap: 10,
+    sceneArea: {
+        flex: 1,
+        marginHorizontal: 10,
+        marginBottom: 10,
+    },
+    mapWrap: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderWidth: 2,
+        borderColor: AXM.ash,
+    },
+    // Strips float over the canvas foot, clear of the accordion strip.
+    overlayStack: {
+        position: 'absolute',
+        left: 8,
+        right: 8,
+        bottom: 54,
+        gap: 8,
+    },
+    accordionWrap: {
+        position: 'absolute',
+        left: 0,
+        right: 0,
+        bottom: 0,
+    },
+    sheet: {
+        maxHeight: 420,
+        backgroundColor: AXM.panelBg,
+        borderWidth: 1,
+        borderColor: AXM.ash,
     },
     toast: {
         borderWidth: 1,
         borderColor: AXM.sulfur,
+        backgroundColor: AXM.panelBg,
         padding: 10,
     },
     toastText: {
@@ -421,8 +461,10 @@ const useStyles = makeStyles((AXM) => ({
     remarkStrip: {
         borderLeftWidth: 3,
         borderLeftColor: AXM.rust,
+        backgroundColor: AXM.panelBg,
         paddingLeft: 10,
-        paddingVertical: 4,
+        paddingRight: 8,
+        paddingVertical: 6,
         gap: 3,
     },
     remarkText: {
@@ -446,6 +488,7 @@ const useStyles = makeStyles((AXM) => ({
     confirmStrip: {
         borderWidth: 1,
         borderColor: AXM.ash,
+        backgroundColor: AXM.panelBg,
         padding: 10,
         gap: 8,
     },

@@ -118,16 +118,26 @@ export function RoomScene({
     // Doors spread along the back wall; positions in scene percent.
     const doorSlots = doors.map((door, i) => ({
         door,
-        left: doors.length === 1 ? 50 : 14 + (i * 72) / (doors.length - 1),
+        left: doors.length === 1 ? 50 : 15 + (i * 70) / (doors.length - 1),
     }));
 
-    // Object POIs stand in the floor band: evenly spread with alternating
-    // rows and a little deterministic jitter, so labels never pile up.
-    const poiSlots = pois.map((poi, i) => ({
-        poi,
-        left: pois.length === 1 ? 50 : 12 + (i * 76) / (pois.length - 1),
-        top: 58 + (i % 2) * 17 + Math.floor(rnd(i + 11, seed) * 7),
-    }));
+    // Object POIs stand in the floor band (the scene is full-height now):
+    // one generous row up to three, two staggered rows beyond, with a
+    // little deterministic jitter so no two rooms feel stamped.
+    const rows = pois.length > 3 ? 2 : 1;
+    const perRow = Math.ceil(pois.length / rows) || 1;
+    const poiSlots = pois.map((poi, i) => {
+        const row = Math.floor(i / perRow);
+        const inRow = row === rows - 1 ? pois.length - perRow * (rows - 1) : perRow;
+        const col = i % perRow;
+        const left = inRow === 1 ? 50 : 14 + (col * 72) / (inRow - 1);
+        const base = rows === 1 ? 56 : row === 0 ? 46 : 68;
+        return {
+            poi,
+            left,
+            top: base + Math.floor(rnd(i + 11, seed) * 8),
+        };
+    });
 
     return (
         <View style={styles.canvas} testID="labyrinth-room-scene">
@@ -136,18 +146,18 @@ export function RoomScene({
                 <Image source={backdrop} style={styles.backdrop} contentFit="cover" />
             ) : (
                 <Svg
-                    viewBox="0 0 360 240"
+                    viewBox="0 0 360 640"
                     style={styles.backdrop}
                     preserveAspectRatio="xMidYMid slice"
                     pointerEvents="none"
                 >
                     {/* Parchment field */}
-                    <Rect x={0} y={0} width={360} height={240} fill={AXM.parchment} />
+                    <Rect x={0} y={0} width={360} height={640} fill={AXM.parchment} />
                     {/* Ink vignette frame */}
-                    <Rect x={4} y={4} width={352} height={232} fill="none" stroke={AXM.bg} strokeWidth={3} />
+                    <Rect x={4} y={4} width={352} height={632} fill="none" stroke={AXM.bg} strokeWidth={3} />
                     {/* Back wall + floor line */}
-                    <Line x1={0} y1={132} x2={360} y2={132} stroke={AXM.bg} strokeWidth={1.5} />
-                    <Path d="M0 240 L48 132 M360 240 L312 132" stroke={AXM.bg} strokeWidth={1} opacity={0.6} />
+                    <Line x1={0} y1={300} x2={360} y2={300} stroke={AXM.bg} strokeWidth={1.5} />
+                    <Path d="M0 640 L60 300 M360 640 L300 300" stroke={AXM.bg} strokeWidth={1} opacity={0.6} />
                     {/* Cross-hatch ceiling shade */}
                     {Array.from({ length: 14 }, (_, i) => (
                         <Line
@@ -155,20 +165,20 @@ export function RoomScene({
                             x1={i * 28 - 20}
                             y1={0}
                             x2={i * 28 + 20}
-                            y2={30 + rnd(i, seed) * 14}
+                            y2={40 + rnd(i, seed) * 26}
                             stroke={AXM.bg}
                             strokeWidth={0.7}
                             opacity={0.35}
                         />
                     ))}
                     {/* Floorboard strokes */}
-                    {Array.from({ length: 6 }, (_, i) => (
+                    {Array.from({ length: 7 }, (_, i) => (
                         <Line
                             key={`f${i}`}
-                            x1={20 + rnd(i + 40, seed) * 40}
-                            y1={150 + i * 15}
-                            x2={340 - rnd(i + 50, seed) * 40}
-                            y2={150 + i * 15}
+                            x1={24 + rnd(i + 40, seed) * 50}
+                            y1={340 + i * 44}
+                            x2={336 - rnd(i + 50, seed) * 50}
+                            y2={340 + i * 44}
                             stroke={AXM.bg}
                             strokeWidth={0.6}
                             opacity={0.3}
@@ -177,8 +187,8 @@ export function RoomScene({
                     {/* A little deterministic room dressing */}
                     <Circle
                         cx={40 + rnd(7, seed) * 280}
-                        cy={200 + rnd(8, seed) * 24}
-                        r={3 + rnd(9, seed) * 5}
+                        cy={460 + rnd(8, seed) * 120}
+                        r={4 + rnd(9, seed) * 7}
                         fill="none"
                         stroke={AXM.bg}
                         strokeWidth={1}
@@ -227,8 +237,8 @@ export function RoomScene({
 
 const useStyles = makeStyles((AXM) => ({
     canvas: {
+        flex: 1,
         width: '100%',
-        aspectRatio: 3 / 2,
         backgroundColor: AXM.parchment,
         borderWidth: 2,
         borderColor: AXM.ash,
@@ -243,45 +253,46 @@ const useStyles = makeStyles((AXM) => ({
     },
     displayBadge: {
         position: 'absolute',
-        right: 8,
-        bottom: 8,
+        right: 10,
+        // Clear of the accordion strip that floats over the canvas foot.
+        bottom: 58,
         borderWidth: 1.5,
         borderColor: AXM.bg,
         backgroundColor: AXM.parchment,
-        paddingHorizontal: 8,
-        paddingVertical: 2,
+        paddingHorizontal: 10,
+        paddingVertical: 3,
     },
     displayText: {
         fontFamily: FONTS.gothic,
-        fontSize: 18,
+        fontSize: 22,
         color: AXM.bg,
     },
     doorWrap: {
         position: 'absolute',
-        top: '12%',
-        width: 52,
-        marginLeft: -26,
+        top: '9%',
+        width: 66,
+        marginLeft: -33,
         alignItems: 'center',
     },
     plaque: {
         backgroundColor: AXM.bg,
-        paddingHorizontal: 6,
-        paddingVertical: 1,
-        marginBottom: 3,
+        paddingHorizontal: 8,
+        paddingVertical: 2,
+        marginBottom: 4,
     },
     plaqueText: {
         fontFamily: FONTS.sans,
-        fontSize: 12,
+        fontSize: 14,
         letterSpacing: 1,
         color: AXM.parchment,
     },
     doorArch: {
-        width: 44,
-        height: 62,
+        width: 56,
+        height: 84,
         borderWidth: 2,
         borderColor: AXM.bg,
-        borderTopLeftRadius: 22,
-        borderTopRightRadius: 22,
+        borderTopLeftRadius: 28,
+        borderTopRightRadius: 28,
         alignItems: 'center',
         justifyContent: 'flex-end',
         backgroundColor: AXM.parchment,
@@ -290,20 +301,20 @@ const useStyles = makeStyles((AXM) => ({
         opacity: 0.75,
     },
     doorPanel: {
-        width: 30,
-        height: 46,
+        width: 40,
+        height: 64,
         borderWidth: 1,
         borderColor: AXM.bg,
-        borderTopLeftRadius: 15,
-        borderTopRightRadius: 15,
+        borderTopLeftRadius: 20,
+        borderTopRightRadius: 20,
         backgroundColor: AXM.shadow,
         opacity: 0.85,
     },
     sealedText: {
         position: 'absolute',
-        bottom: 20,
+        bottom: 26,
         fontFamily: FONTS.sans,
-        fontSize: 8,
+        fontSize: 9,
         letterSpacing: 1,
         color: AXM.blood,
         backgroundColor: AXM.parchment,
@@ -311,14 +322,14 @@ const useStyles = makeStyles((AXM) => ({
     },
     poiWrap: {
         position: 'absolute',
-        width: 64,
-        marginLeft: -32,
+        width: 82,
+        marginLeft: -41,
         alignItems: 'center',
     },
     poiDot: {
-        width: 26,
-        height: 26,
-        borderRadius: 13,
+        width: 32,
+        height: 32,
+        borderRadius: 16,
         borderWidth: 2,
         borderColor: AXM.rust,
         alignItems: 'center',
@@ -326,19 +337,19 @@ const useStyles = makeStyles((AXM) => ({
         backgroundColor: AXM.parchment,
     },
     poiCore: {
-        width: 10,
-        height: 10,
-        borderRadius: 5,
+        width: 12,
+        height: 12,
+        borderRadius: 6,
         backgroundColor: AXM.rust,
     },
     poiLabel: {
-        marginTop: 2,
+        marginTop: 3,
         fontFamily: FONTS.serif,
-        fontSize: 9,
-        lineHeight: 11,
+        fontSize: 11,
+        lineHeight: 13,
         textAlign: 'center',
         color: AXM.bg,
         backgroundColor: AXM.parchment,
-        paddingHorizontal: 2,
+        paddingHorizontal: 3,
     },
 }));

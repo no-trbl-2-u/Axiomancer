@@ -152,7 +152,9 @@ const useStyles = makeStyles((AXM) => ({
         color: AXM.bone,
     },
     body: {
-        maxHeight: 300,
+        // The accordion floats over the scene — it may cover most of it
+        // when expanded (T's call: "the accordion can go over the screen").
+        maxHeight: 460,
     },
     bodyContent: {
         paddingHorizontal: 14,
