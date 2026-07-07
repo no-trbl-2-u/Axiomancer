@@ -30,6 +30,9 @@ import {
     isLevelUpEvent,
     isWorldMovedEvent,
 } from '@mechanics';
+import { hazardDeathCount } from '../hazard/store-actions';
+import { REST_KEEPSAKE_FLAG_PREFIX } from '../rest/store-actions';
+import { CACHE_KEEPSAKE_FLAG_PREFIX } from '../cache/store-actions';
 
 /**
  * Honest signature for `selectMemoirViewModel`: takes engine
@@ -126,6 +129,25 @@ export interface PhilosophicalAlignment {
     provisional: boolean;
 }
 
+/**
+ * REMAINS section (Phase 6) — read-back of two previously-orphaned
+ * durable records: out-of-combat death tombstones (`hazardDeathCount`,
+ * unconsumed since Phase 130) and Rest/LootCache keepsake labels
+ * (banked as flags, never read back outside their own outcome
+ * screens). See `extractKeepsakes` / `buildDeathLine` below.
+ */
+export interface MemoirRemainsViewModel {
+    /** Raw tally from `hazardDeathCount(state.flags)`. */
+    deathCount: number;
+    /** Narrative line — singular/plural/zero handled here so the
+     *  screen carries no literal (Hard Rule #8). */
+    deathLine: string;
+    /** Distinct keepsake labels (Rest `night-keepsake:` + LootCache
+     *  `cache-keepsake:`), reverse-chronological — most recently
+     *  banked first, matching the chronicle section's ordering. */
+    keepsakes: readonly string[];
+}
+
 export interface MemoirViewModel {
     /** Header eyebrow + sub-line. */
     headerEyebrow: string;
@@ -137,6 +159,9 @@ export interface MemoirViewModel {
     questsCompletedEyebrow: string;
     questsForgottenEyebrow: string;
     measureEyebrow: string;
+    /** REMAINS section eyebrows (Phase 6). */
+    remainsEyebrow: string;
+    remainsKeepsakesEyebrow: string;
     /** Chronicle section — Tick D populates from `_recentEvents`. */
     chronicle: ReadonlyArray<ChronicleEntry>;
     /** Quest sections — Tick B populates from `state.quests`. */
@@ -155,11 +180,15 @@ export interface MemoirViewModel {
      * `null` here.
      */
     philosopherQuote: string | null;
+    /** REMAINS section (Phase 6) — death tally + keepsake read-back. */
+    remains: MemoirRemainsViewModel;
     /** Empty-state copy lines, pinned per Phase 33 brief. */
     emptyChronicle: string;
     emptyQuests: string;
     emptyMoral: string;
     emptyPhilosophical: string;
+    /** Phase 6 — shown when `remains.keepsakes` is empty. */
+    emptyKeepsakes: string;
 }
 
 const DEFAULT_MORAL: MoralAlignment = Object.freeze({
@@ -417,6 +446,12 @@ function buildPhilosophicalAlignment(stats: BaseStats | undefined): Philosophica
     }) as PhilosophicalAlignment;
 }
 
+const DEFAULT_REMAINS: MemoirRemainsViewModel = Object.freeze({
+    deathCount: 0,
+    deathLine: 'you have not yet fallen.',
+    keepsakes: Object.freeze([]) as readonly string[],
+}) as MemoirRemainsViewModel;
+
 const FALLBACK_VM: MemoirViewModel = Object.freeze({
     headerEyebrow: '✠ THE BOOK OF DEEDS',
     headerSubline: 'gathering pages…',
@@ -426,6 +461,8 @@ const FALLBACK_VM: MemoirViewModel = Object.freeze({
     questsCompletedEyebrow: '✠ COMPLETED',
     questsForgottenEyebrow: '✠ FORGOTTEN',
     measureEyebrow: '✠ MEASURE',
+    remainsEyebrow: '✠ REMAINS',
+    remainsKeepsakesEyebrow: '✠ KEEPSAKES',
     chronicle: Object.freeze([]) as ReadonlyArray<ChronicleEntry>,
     quests: Object.freeze({
         active: Object.freeze([]) as ReadonlyArray<MemoirQuestRow>,
@@ -435,10 +472,12 @@ const FALLBACK_VM: MemoirViewModel = Object.freeze({
     moralAlignment: DEFAULT_MORAL,
     philosophicalAlignment: DEFAULT_PHILOSOPHICAL,
     philosopherQuote: null,
+    remains: DEFAULT_REMAINS,
     emptyChronicle: 'the page is bare.',
     emptyQuests: 'no errands written here.',
     emptyMoral: 'the scales are level.',
     emptyPhilosophical: 'untested.',
+    emptyKeepsakes: 'nothing kept.',
 }) as MemoirViewModel;
 
 /**
@@ -555,6 +594,61 @@ function buildCompletedRows(
 }
 
 /**
+ * Narrative death-tally line (Phase 6). Singular/plural handled here
+ * so the screen carries no numeric-copy literal (Hard Rule #8).
+ */
+function buildDeathLine(count: number): string {
+    if (count === 0) return DEFAULT_REMAINS.deathLine;
+    if (count === 1) return 'you have fallen once.';
+    return `you have fallen ${count} times.`;
+}
+
+/**
+ * Merge Rest (`night-keepsake:`) and LootCache (`cache-keepsake:`)
+ * flags into one reverse-chronological, de-duplicated label list
+ * (Phase 6). `state.flags` is append-order (oldest first); reversing
+ * before de-dup keeps the most-recent occurrence of a repeated label,
+ * matching the chronicle section's "most recent first" convention.
+ * The writers already guard against literal duplicate flags
+ * (`state/rest/store-actions.ts` / `state/cache/store-actions.ts`),
+ * but this de-dupes defensively rather than trusting that invariant —
+ * consistent with this presenter's existing defensive-parsing style.
+ */
+function extractKeepsakes(flags: unknown): ReadonlyArray<string> {
+    if (!Array.isArray(flags)) return Object.freeze([]) as readonly string[];
+    const labels: string[] = [];
+    for (const flag of flags as readonly unknown[]) {
+        if (typeof flag !== 'string') continue;
+        if (flag.startsWith(REST_KEEPSAKE_FLAG_PREFIX)) {
+            labels.push(flag.slice(REST_KEEPSAKE_FLAG_PREFIX.length));
+        } else if (flag.startsWith(CACHE_KEEPSAKE_FLAG_PREFIX)) {
+            labels.push(flag.slice(CACHE_KEEPSAKE_FLAG_PREFIX.length));
+        }
+    }
+    const seen = new Set<string>();
+    const deduped: string[] = [];
+    for (const label of labels.reverse()) {
+        if (seen.has(label)) continue;
+        seen.add(label);
+        deduped.push(label);
+    }
+    return Object.freeze(deduped) as readonly string[];
+}
+
+/** Composes the REMAINS section VM (Phase 6) from raw `state.flags`. */
+function buildRemains(flags: unknown): MemoirRemainsViewModel {
+    const safeFlags: readonly string[] = Array.isArray(flags)
+        ? (flags.filter((f): f is string => typeof f === 'string') as readonly string[])
+        : [];
+    const deathCount = hazardDeathCount(safeFlags);
+    return Object.freeze({
+        deathCount,
+        deathLine: buildDeathLine(deathCount),
+        keepsakes: extractKeepsakes(flags),
+    }) as MemoirRemainsViewModel;
+}
+
+/**
  * Pure mapper from game state → `MemoirViewModel`. Builds the full
  * journal surface — header, chronicle, quests, alignment readouts —
  * off the engine state in one pass.
@@ -592,6 +686,11 @@ function buildCompletedRows(
  * - **Philosopher quote** — currently always `null`. A follow-up
  *   phase wires the lookup once exact alignments + a quote inventory
  *   are defined.
+ * - **Remains** (Phase 6) — reads `state.flags` (engine
+ *   `GameState.flags`). Death tally via the previously-unconsumed
+ *   `hazardDeathCount`; keepsakes merge Rest's `night-keepsake:` and
+ *   LootCache's `cache-keepsake:` flags into one reverse-chronological,
+ *   de-duplicated list via `extractKeepsakes`.
  *
  * The view-model shape is pinned by `state/e2e/memoir.engine.test.ts`;
  * extensions to any section must keep the contract stable.
@@ -627,6 +726,7 @@ export function selectMemoirViewModel(state: MemoirStateInput): MemoirViewModel 
     const moralAlignment = buildMoralAlignment(state.moralMeter);
     const philosophicalAlignment = buildPhilosophicalAlignment(player?.baseStats);
     const chronicle = buildChronicle(state._recentEvents);
+    const remains = buildRemains(state.flags);
     return freezeViewModel({
         ...FALLBACK_VM,
         headerSubline: subline,
@@ -638,5 +738,6 @@ export function selectMemoirViewModel(state: MemoirStateInput): MemoirViewModel 
         },
         moralAlignment,
         philosophicalAlignment,
+        remains,
     });
 }

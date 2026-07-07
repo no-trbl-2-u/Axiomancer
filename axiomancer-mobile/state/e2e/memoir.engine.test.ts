@@ -558,3 +558,83 @@ describe('selectMemoirViewModel: chronicle (Tick D)', () => {
         expect(vm.chronicle[11]?.label).toBe('ROSE TO 4');
     });
 });
+
+// ---------------------------------------------------------------------------
+// Tick E — remains section (Phase 6): death tally + keepsake read-back
+// ---------------------------------------------------------------------------
+
+function setFlags(store: ReturnType<typeof createGameStore>, flags: string[]): void {
+    store.setState({ flags } as Partial<AppStoreState>);
+}
+
+describe('selectMemoirViewModel: remains (Phase 6)', () => {
+    it('defaults to zero deaths and no keepsakes for a fresh game', () => {
+        const store = createGameStore(createMemoryAdapter());
+        const vm = selectMemoirViewModel(store.getState());
+        expect(vm.remainsEyebrow).toBe('✠ REMAINS');
+        expect(vm.remainsKeepsakesEyebrow).toBe('✠ KEEPSAKES');
+        expect(vm.remains.deathCount).toBe(0);
+        expect(vm.remains.deathLine).toBe('you have not yet fallen.');
+        expect(vm.remains.keepsakes).toEqual([]);
+        expect(vm.emptyKeepsakes).toBe('nothing kept.');
+    });
+
+    it('counts hazard-death: flags via hazardDeathCount and pluralizes the line', () => {
+        const store = createGameStore(createMemoryAdapter());
+        setFlags(store, ['hazard-death:1000']);
+        expect(selectMemoirViewModel(store.getState()).remains.deathLine).toBe(
+            'you have fallen once.',
+        );
+
+        setFlags(store, ['hazard-death:1000', 'hazard-death:2000', 'hazard-death:3000']);
+        const vm = selectMemoirViewModel(store.getState());
+        expect(vm.remains.deathCount).toBe(3);
+        expect(vm.remains.deathLine).toBe('you have fallen 3 times.');
+    });
+
+    it('merges night-keepsake and cache-keepsake flags with the prefix stripped', () => {
+        const store = createGameStore(createMemoryAdapter());
+        setFlags(store, [
+            'night-keepsake:An oar\'s rhythm, remembered wrong',
+            'cache-keepsake:A dead stranger\'s luck, inherited',
+        ]);
+        const vm = selectMemoirViewModel(store.getState());
+        expect(vm.remains.keepsakes).toContain("An oar's rhythm, remembered wrong");
+        expect(vm.remains.keepsakes).toContain("A dead stranger's luck, inherited");
+        expect(vm.remains.keepsakes).toHaveLength(2);
+    });
+
+    it('returns keepsakes reverse-chronological (most recently banked first)', () => {
+        const store = createGameStore(createMemoryAdapter());
+        setFlags(store, [
+            'night-keepsake:first kept',
+            'cache-keepsake:second kept',
+            'night-keepsake:third kept',
+        ]);
+        const vm = selectMemoirViewModel(store.getState());
+        expect(vm.remains.keepsakes).toEqual(['third kept', 'second kept', 'first kept']);
+    });
+
+    it('de-dupes a repeated keepsake label defensively', () => {
+        const store = createGameStore(createMemoryAdapter());
+        setFlags(store, ['night-keepsake:same label', 'night-keepsake:same label']);
+        const vm = selectMemoirViewModel(store.getState());
+        expect(vm.remains.keepsakes).toEqual(['same label']);
+    });
+
+    it('ignores unrelated flags (hazard-scar:, gleaning-token-banked:)', () => {
+        const store = createGameStore(createMemoryAdapter());
+        setFlags(store, ['hazard-scar:5', 'gleaning-token-banked:some-token']);
+        const vm = selectMemoirViewModel(store.getState());
+        expect(vm.remains.deathCount).toBe(0);
+        expect(vm.remains.keepsakes).toEqual([]);
+    });
+
+    it('includes remains in the frozen view model', () => {
+        const store = createGameStore(createMemoryAdapter());
+        setFlags(store, ['hazard-death:1000', 'night-keepsake:kept']);
+        const vm = selectMemoirViewModel(store.getState());
+        expect(Object.isFrozen(vm.remains)).toBe(true);
+        expect(Object.isFrozen(vm.remains.keepsakes)).toBe(true);
+    });
+});

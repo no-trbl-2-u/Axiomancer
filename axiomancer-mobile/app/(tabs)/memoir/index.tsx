@@ -86,6 +86,9 @@ export default function MemoirScreen() {
     // subscription now means the screen rebuilds the chronicle
     // automatically when the ring buffer ticks.
     const recentEvents = useGameState((s) => s._recentEvents);
+    // Phase 6 — REMAINS section reads death tombstones + keepsake
+    // labels off the durable flags array.
+    const flags = useGameState((s) => s.flags);
     const vm = useMemo<MemoirViewModel>(
         () =>
             selectMemoirViewModel({
@@ -93,8 +96,9 @@ export default function MemoirScreen() {
                 quests,
                 moralMeter,
                 _recentEvents: recentEvents,
+                flags,
             } as never),
-        [player, quests, moralMeter, recentEvents],
+        [player, quests, moralMeter, recentEvents, flags],
     );
 
     return (
@@ -249,6 +253,34 @@ export default function MemoirScreen() {
                         <Text style={styles.quote}>{vm.philosopherQuote}</Text>
                     )}
                 </View>
+
+                {/* Remains (Phase 6) */}
+                <View style={styles.section} testID="memoir-remains">
+                    <SectionLabel size={10}>{vm.remainsEyebrow}</SectionLabel>
+                    <Text style={styles.remainsLine} testID="memoir-death-line">
+                        {vm.remains.deathLine}
+                    </Text>
+                    <View style={styles.questGroup}>
+                        <SectionLabel size={9} color={AXM.bone}>
+                            {vm.remainsKeepsakesEyebrow}
+                        </SectionLabel>
+                        {vm.remains.keepsakes.length === 0 ? (
+                            <Text style={styles.emptyLine} testID="memoir-keepsakes-empty">
+                                {vm.emptyKeepsakes}
+                            </Text>
+                        ) : (
+                            vm.remains.keepsakes.map((label, index) => (
+                                <Text
+                                    key={`${index}-${label}`}
+                                    style={styles.keepsakeLine}
+                                    testID={`memoir-keepsake-${index}`}
+                                >
+                                    {label}
+                                </Text>
+                            ))
+                        )}
+                    </View>
+                </View>
             </ScrollView>
         </ScreenBg>
     );
@@ -357,5 +389,19 @@ const useStyles = makeStyles((AXM) => ({
         color: AXM.sulfur,
         marginTop: 8,
         lineHeight: 14,
+    },
+    remainsLine: {
+        fontFamily: FONTS.serifItalic,
+        fontSize: 12,
+        color: AXM.bone,
+        marginTop: 6,
+        lineHeight: 15,
+    },
+    keepsakeLine: {
+        fontFamily: FONTS.serif,
+        fontSize: 13,
+        color: AXM.parchment,
+        marginTop: 4,
+        lineHeight: 17,
     },
 }));
