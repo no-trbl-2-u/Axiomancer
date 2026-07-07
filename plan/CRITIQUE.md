@@ -11,43 +11,6 @@
 
 ## Pending
 
-### [needs-user-call] Playwright MCP tools unavailable to sub-agents
-- pass: 1, 2, 3, 4 (commits 6e23724a, 22bc8ab2, f472e1a1, 6ac89721) —
-  recurring, unresolved, four consecutive passes with zero coverage
-- viewport: n/a
-- category: infra
-- observation: The local expo-web build started fine on
-  `http://localhost:8081` (host-run `npx expo start --web --port 8081`,
-  bundled clean — the containerised `web:container` path is separately
-  broken, see below). But every `mcp__playwright__browser_*` call
-  from the `playtester` sub-agent was rejected with "Claude requested
-  permissions to use mcp__playwright__browser_navigate, but you
-  haven't granted it yet." Pass 4 confirms this is still unresolved:
-  `.claude/settings.json` exists untracked in the working tree
-  (unchanged in shape since pass 2) and its `permissions.allow` list
-  still has no `mcp__playwright__*` entries. `/march` (fully
-  autonomous this tick) again deliberately did not self-grant the
-  permission rather than unblock its own critique pass, per the
-  config file's own header note that widening its grants is "a
-  deliberate, user-owned step." Four anonymous-pass attempts across
-  four passes have now produced zero actual playtest coverage.
-- evidence: playtester sub-agent report (pass 1, main-agent direct
-  call); playtester sub-agent report (pass 2, identical rejection
-  message, verbatim retry-then-fail behavior); playtester sub-agent
-  report (pass 3, same rejection message, single retry per updated
-  instructions, no coverage); playtester sub-agent report (pass 4,
-  same rejection message verbatim, immediate stop per updated
-  instructions, no coverage).
-- suggested fix: add the needed `mcp__playwright__*` tool names to
-  `.claude/settings.json`'s `permissions.allow` list (a user/config
-  decision, not a code fix `/iterate` or `/march` can make
-  unilaterally — see `update-config` skill). Until granted, every
-  `/critique` tick will keep producing zero playtest coverage. Four
-  unresolved passes is well past the "worth a nudge" threshold from
-  pass 3 — this now warrants a direct `/oversight` escalation rather
-  than a fifth silent retry.
-- source: critique pass 1, pass 2, pass 3, pass 4
-
 ### [LOW] `web:container` dev-server script is broken
 - pass: 1 (commit 6e23724a)
 - viewport: n/a
@@ -96,4 +59,21 @@
 
 ## Done
 
-(empty)
+### [x] [needs-user-call] Playwright MCP tools unavailable to sub-agents (pass 1-4; addressed at 525cd25 follow-up)
+- Root cause: two allowlist gaps, not a Playwright bug. (1)
+  `.github/workflows/_claude-skill.yml`'s `--allowedTools` CLI flag
+  was a fixed list that never included any `mcp__playwright__*` tool,
+  even when `install_playwright: true` installed the browser. (2)
+  `.claude/settings.json.example` (activated as `.claude/settings.json`
+  for every unattended CI run) had no `mcp__playwright__*` entries in
+  `permissions.allow` either. Unattended runs auto-reject tools outside
+  both allowlists instead of prompting, so every `playtester`
+  `browser_*` call failed instantly.
+- Fix: `--allowedTools` in `_claude-skill.yml` now appends the 14
+  `mcp__playwright__browser_*` tools whenever `install_playwright` is
+  true; `.claude/settings.json.example` grants the same 14 tools in
+  `permissions.allow`. Also unblocks `deep-playtest`, `combat-ux-tuning`,
+  `critic-loop`, and `hermes-playtest`, which share the same runner and
+  had the identical gap.
+- User-owned decision, applied on explicit user request (not a
+  self-grant by `/critique` or `/march`).
