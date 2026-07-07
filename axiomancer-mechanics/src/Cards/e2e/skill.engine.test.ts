@@ -192,6 +192,16 @@ describe('executeSkill — guards', () => {
         expect(() => executeSkill({ ...state, player }, 'sk_unknown', () => undefined))
             .toThrow(/not found/);
     });
+
+    it('accepts a card owned via combatRewardCards but not knownSkills', () => {
+        // Reward-pool pickups enter the deck without joining knownSkills (they
+        // bypass the learning gate). The player-caster guard must treat them as
+        // owned — otherwise playing a dealt reward card crashes combat.
+        const state = fixtureState({ body: 3 });
+        const player = { ...state.player, knownSkills: [], combatRewardCards: [damagingSkill.id] };
+        expect(() => executeSkill({ ...state, player }, damagingSkill.id, lookup))
+            .not.toThrow();
+    });
 });
 
 describe('executeSkill — Phase 49 casterSide=enemy', () => {

@@ -334,7 +334,16 @@ export function executeSkill(
     const target: Combatant = isPlayerCaster ? state.enemy : state.player;
 
     if (isPlayerCaster) {
-        if (!(caster as Character).knownSkills.includes(skillId)) {
+        // A player OWNS a combat card when it is a learned skill OR a card-reward
+        // pickup — the exact two sources `buildCombatDeck` deals from. Reward
+        // cards (`combatRewardCards`) enter the deck WITHOUT joining `knownSkills`
+        // (they bypass the learning gate — the won combat is the gate), so a
+        // knownSkills-only check wrongly rejected legitimately-dealt reward cards
+        // and crashed combat when one was played.
+        const playerCaster = caster as Character;
+        const owned = playerCaster.knownSkills.includes(skillId)
+            || (playerCaster.combatRewardCards ?? []).includes(skillId);
+        if (!owned) {
             throw new Error(`Card '${skillId}' is not known.`);
         }
     } else {
