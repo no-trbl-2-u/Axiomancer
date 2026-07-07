@@ -45,6 +45,14 @@
   first fight, mobile UI for resonance/reserve/omen. L-sized
   content pass; runs through /deck-tuning + /combat-playtest.
 
+### Enemy themed decks (mechanics — post spec-32 v3)
+- source: T direct decision 2026-07-07 (themed-deck-library session)
+- spec 32 v3 gives enemies persistent passives only (an enchantment
+  plus an attachable disenchant). The stated long-term goal: enemies
+  draw and play from their own themed decks built from the same
+  10-theme library. Follow-up phase after the 10 player presets prove
+  out through /combat-playtest.
+
 ### Hazard deck-thinning remove-card consumer
 - source: archive
 - mobile wiring is staged; blocked on a mechanics
