@@ -246,6 +246,14 @@ export interface CombatThreatPhase {
     /** Spec 26b §2 — thematic tell that *implies* (never states) this phase's
      *  hidden stance. Falls back to the enemy-level `stanceHint`. */
     stanceHint?: string;
+
+    /** Phase 3 — "rage mode": this phase cannot be entered until the
+     *  ABOUT-TO-RESOLVE round (state.round + 1 at phase-advance time) is
+     *  >= this value. While locked, `processBetweenPhases` holds the phase
+     *  pointer at the last reachable phase (repeating it) instead of
+     *  advancing into this one. Undefined = never locked (every phase
+     *  authored before this epic behaves exactly as before). */
+    unlockAfterRound?: number;
 }
 
 export type CombatThreatMark = 'clear' | 'overwhelmed' | 'pending';

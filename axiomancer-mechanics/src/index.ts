@@ -104,6 +104,7 @@ export {
     COMBAT_DECK_PRESETS, COMBAT_DECK_PRESET_ORDER, listDeckPresets, getDeckPreset, buildPresetDeck,
     getThreatSequence, generateDefaultThreatSequence,
     AUTHORED_THREAT_ENEMY_IDS,
+    RAGE_UNLOCK_ROUND, RAGE_DAMAGE_WEIGHT, RAGE_HEAL_FRACTION,
     simulateHazardPatternCombat, runHazardCombatAutoEncounter,
     SYNTHETIC_CARD_IDS, isSyntheticCard, GOLD_CARD_IDS, isGoldCard,
     // Spec 26 / 26b — stance draft, hidden read, Conviction, Signature Skills

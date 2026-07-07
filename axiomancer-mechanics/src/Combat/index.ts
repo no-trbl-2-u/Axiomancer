@@ -214,6 +214,7 @@ export {
 export {
     getThreatSequence, generateDefaultThreatSequence,
     deriveIntentType, AUTHORED_THREAT_ENEMY_IDS,
+    RAGE_UNLOCK_ROUND, RAGE_DAMAGE_WEIGHT, RAGE_HEAL_FRACTION,
 } from './combat.threat';
 export {
     simulateHazardPatternCombat, simulateHazardPatternCombatDetailed, runOneEncounter,

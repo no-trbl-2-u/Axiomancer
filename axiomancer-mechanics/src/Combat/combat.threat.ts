@@ -42,6 +42,10 @@ export interface AuthoredThreatPhase {
     isFinalPhase?: boolean;
     /** Spec 26b §2 — thematic tell implying this phase's hidden stance. */
     stanceHint?: string;
+    /** Phase 3 — "rage mode": locks this phase until the resolving round
+     *  reaches it (see `CombatThreatPhase.unlockAfterRound`). Undefined on
+     *  every authored sequence today — none is gated yet. */
+    unlockAfterRound?: number;
 }
 
 /**
@@ -174,24 +178,53 @@ function resolveAuthored(enemy: Enemy, authored: AuthoredThreatPhase[]): CombatT
             threatAction: buildThreatAction(p.actionText, damage, p.threatEffectId, p.threatIntensity, p.enemyHeal),
             isFinalPhase: p.isFinalPhase ?? i === authored.length - 1,
             stanceHint: p.stanceHint ?? enemyStanceHint(enemy) ?? DEFAULT_STANCE_HINTS[p.enemyStance],
+            unlockAfterRound: p.unlockAfterRound,
         });
     });
 }
 
-/** Generates a default 3-phase escalating sequence for an unauthored enemy (§10). */
+/**
+ * Phase 3 — "rage mode": the generated (unauthored) sequence's appended
+ * escalation phase. Locked until `RAGE_UNLOCK_ROUND` — a discrete,
+ * qualitative step layered on top of THE CLOCK's continuous numeric
+ * escalation (`THREAT_ESCALATION_*`, `combat.engine.ts`), which already
+ * saturates a few rounds past its grace window. Harder-hitting AND
+ * self-healing (reusing the existing `enemyHeal` rider) so it specifically
+ * punishes slow, non-status attrition — locked-in DoT keeps ticking
+ * regardless, but a fight won by trading basic strikes gets partially
+ * healed back.
+ */
+export const RAGE_UNLOCK_ROUND = 6;
+export const RAGE_DAMAGE_WEIGHT = 1.6;
+export const RAGE_HEAL_FRACTION = 0.5;
+
+/** Generates a default escalating sequence for an unauthored enemy (§10),
+ *  topped with a locked rage phase (Phase 3). */
 export function generateDefaultThreatSequence(enemy: Enemy): CombatThreatPhase[] {
     const base = dominantStance(enemy);
     const PHASES = 3;
-    return Array.from({ length: PHASES }, (_unused, i) => {
+    const phases = Array.from({ length: PHASES }, (_unused, i) => {
         const enemyStance = rotateStance(base, i);
         return withIntent({
             index: i + 1,
             enemyStance,
             threatAction: defaultThreatAction(enemy, i),
-            isFinalPhase: i === PHASES - 1,
+            isFinalPhase: false, // the rage phase below is the true final phase
             stanceHint: enemyStanceHint(enemy) ?? DEFAULT_STANCE_HINTS[enemyStance],
         });
     });
+    const rageStance = rotateStance(base, PHASES);
+    const rageDamage = threatDamageBudget(enemy.level, difficultyMult(enemy), PHASES, RAGE_DAMAGE_WEIGHT);
+    const rageHeal = Math.round(rageDamage * RAGE_HEAL_FRACTION);
+    phases.push(withIntent({
+        index: PHASES + 1,
+        enemyStance: rageStance,
+        threatAction: buildThreatAction(`${enemy.name} loses patience and turns savage`, rageDamage, undefined, undefined, rageHeal),
+        isFinalPhase: true,
+        unlockAfterRound: RAGE_UNLOCK_ROUND,
+        stanceHint: enemyStanceHint(enemy) ?? DEFAULT_STANCE_HINTS[rageStance],
+    }));
+    return phases;
 }
 
 /**

@@ -1570,7 +1570,16 @@ export function processBetweenPhases(
     for (const t of playerDotTicks) events.push({ kind: 'dot-tick', effectId: t.effectId, label: t.label, amount: t.amount, target: 'self' });
 
     // 4. Advance the phase pointer — loop the final phase so the enemy keeps acting.
-    const nextIndex = Math.min(state.currentPhaseIndex + 1, state.threatPhases.length - 1);
+    //    Phase 3 (rage mode): a candidate phase gated by `unlockAfterRound`
+    //    isn't entered until the resolving round reaches it — the pointer
+    //    holds at the current (last reachable) phase instead of advancing
+    //    past it. Undefined `unlockAfterRound` (every phase before this
+    //    epic) is always reachable — byte-identical to the old one-liner.
+    const resolvedRound = state.round + 1;
+    const candidateIndex = Math.min(state.currentPhaseIndex + 1, state.threatPhases.length - 1);
+    const candidatePhase = state.threatPhases[candidateIndex];
+    const rageGated = candidatePhase.unlockAfterRound !== undefined && resolvedRound < candidatePhase.unlockAfterRound;
+    const nextIndex = rageGated ? state.currentPhaseIndex : candidateIndex;
 
     // Fate Engine P1 R2 — RESERVE dice RIPEN: +1 pip per threat phase survived
     // (cap RESERVE_PIP_CAP). Holding a die through a telegraph is the gamble.
