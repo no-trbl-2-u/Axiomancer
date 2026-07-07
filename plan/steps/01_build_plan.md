@@ -45,10 +45,11 @@ Tick in this file in the same commit that ships the phase.
       amplify/execute ready) to make the status kill-path legible
       (mechanics; spec 30 draft)
       — `feat(mechanics): projected-lethality readout API — phase 2` (128659e0)
-- [ ] Phase 3 — Enemy combat-phase progression / "rage mode"
+- [x] Phase 3 — Enemy combat-phase progression / "rage mode"
       (`unlockAfterRound` threat phases) so long fights get
       qualitatively harder and fast status finishes are rewarded
       (mechanics; doctrine-central)
+      — `feat(mechanics): enemy rage-mode threat phase — phase 3` (e87559d0)
 - [ ] Phase 4 — Balance-sim population witnesses for the HP
       kill-paths still lacking pop-level coverage
       (Conclusion/BODY-sig, Execute finish, escalation clock)
