@@ -1,7 +1,7 @@
 # Critique log
 
-> Last pass: 2026-07-07 at commit 6ac89721
-> Pass count: 4
+> Last pass: 2026-07-07 at commit b0707e0a
+> Pass count: 5
 
 > External-observer feedback for Axiomancer. Populated by
 > `/critique` (which drives the local expo-web build with the
@@ -10,6 +10,40 @@
 > `plan/bearings.md` § Surface for the local-build adaptation.
 
 ## Pending
+
+### [needs-user-call] Playwright MCP tools unavailable to sub-agents — reopened (pass 5)
+- pass: 5 (commit b0707e0a)
+- viewport: n/a
+- category: infra
+- observation: the pass 1-4 occurrence of this issue was marked
+  fixed (see Done section) via `.claude/settings.json` /
+  `.claude/settings.json.example` and `_claude-skill.yml`
+  `--allowedTools` grants for the 14 `mcp__playwright__browser_*`
+  tools. This pass, `.claude/settings.json` on disk already lists
+  all 14 tools under `permissions.allow`, yet a live
+  `mcp__playwright__browser_navigate` call — both from the
+  `playtester` sub-agent and from the main agent directly — was
+  rejected with "Claude requested permissions to use
+  mcp__playwright__browser_navigate, but you haven't granted it
+  yet." The settings-file fix does not appear sufficient for this
+  session/runtime; something in the live permission-mode
+  enforcement (interactive session vs. the CI `--allowedTools`
+  path the prior fix targeted) still gates MCP tool calls behind
+  a grant that never arrives in an unattended run. Local expo-web
+  build was started and reachable at http://localhost:8081; the
+  blocker is purely the tool grant, not the app.
+- evidence: verbatim tool error, reproduced 2x independently:
+  `Claude requested permissions to use
+  mcp__playwright__browser_navigate, but you haven't granted it
+  yet.`
+- suggested fix: needs a user-side permission-mode decision —
+  either grant `mcp__playwright__*` at a scope this session
+  actually reads (vs. project `.claude/settings.json`), or
+  confirm whether unattended `/march` ticks run under a
+  permission mode that structurally cannot auto-approve MCP
+  tools (in which case `/critique` needs a different playtest
+  transport, not another allowlist edit).
+- source: critique pass 5 (playtester + direct main-agent probe)
 
 ### [LOW] `web:container` dev-server script is broken
 - pass: 1 (commit 6e23724a)
