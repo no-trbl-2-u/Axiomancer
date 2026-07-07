@@ -50,10 +50,11 @@ Tick in this file in the same commit that ships the phase.
       qualitatively harder and fast status finishes are rewarded
       (mechanics; doctrine-central)
       — `feat(mechanics): enemy rage-mode threat phase — phase 3` (e87559d0)
-- [ ] Phase 4 — Balance-sim population witnesses for the HP
+- [x] Phase 4 — Balance-sim population witnesses for the HP
       kill-paths still lacking pop-level coverage
       (Conclusion/BODY-sig, Execute finish, escalation clock)
       (mechanics; test-only)
+      — `test(mechanics): population witnesses for execute + escalation clock — phase 4` (d9763659)
 
 **Mobile surfaces (presenter-only, low engine risk):**
 - [ ] Phase 5 — Village SELL tab: surface the engine's
@@ -133,3 +134,4 @@ phases with linked notes here.)
 
 - phase 0 — (adoption commit) — nexus methodology adopted
 - phase 1 — 0af106ff — combat test-coverage backfill (sig-overwhelming-argument funded-path victory witness)
+- phase 4 — d9763659 — balance-sim population witnesses (execute finisher + escalation clock; Conclusion/BODY-sig already had coverage)
