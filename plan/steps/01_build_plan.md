@@ -61,9 +61,10 @@ Tick in this file in the same commit that ships the phase.
       `sellItem` / `defaultSellPrice` (Phase 37) that has no
       mobile consumer (mobile)
       — `feat(mobile): village SELL tab — phase 5` (98e7b2bc)
-- [ ] Phase 6 — Memoir run-history surface: read-back of deaths
+- [x] Phase 6 — Memoir run-history surface: read-back of deaths
       (`hazardDeathCount` helper, currently unconsumed) +
       keepsakes (mobile; presenter-only)
+      — `feat(mobile): memoir REMAINS section — phase 6` (48d2c802)
 - [ ] Phase 7 — `combatMana` -> engine `combatResources`
       migration: retire the slice deprecated since Phase 105 but
       still load-bearing in StatusCard / HUD / actions (mobile;
@@ -136,4 +137,5 @@ phases with linked notes here.)
 - phase 0 — (adoption commit) — nexus methodology adopted
 - phase 1 — 0af106ff — combat test-coverage backfill (sig-overwhelming-argument funded-path victory witness)
 - phase 5 — 98e7b2bc — village SELL tab (sellVillageItem action + presenter sellables/hasShop)
+- phase 6 — 48d2c802 — memoir REMAINS section (death tally via hazardDeathCount + merged Rest/LootCache keepsake read-back)
 - phase 4 — d9763659 — balance-sim population witnesses (execute finisher + escalation clock; Conclusion/BODY-sig already had coverage)
