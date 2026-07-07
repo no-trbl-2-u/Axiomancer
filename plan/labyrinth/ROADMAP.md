@@ -228,6 +228,68 @@ falls back to the recommended default marked (D).
   OK, or keep solution appendices in a separate clearly-marked file?
   (D: separate `SOLUTIONS.md` per act, clearly marked, same branch.)
 
+## T's answers (recorded 2026-07-07) — BINDING
+
+T answered the question list (chat, 2026-07-07). These override the
+defaults wherever they differ. Unanswered questions fall back to
+their recorded defaults, per the agreed protocol.
+
+- **Access (new requirement):** the labyrinth is reachable in the UI
+  ONLY via the dev menu in the character tab for now (no story
+  wiring yet), and the labyrinth gets its OWN CLI subcommand
+  (`npm run game -- labyrinth` + named shortcut) so the whole
+  puzzle/playthrough is testable headlessly without the UI.
+- **Q5 (order strictness):** T deferred ("idk") -> default stands:
+  MAZE-faithful free wandering; the directed graph + act gates
+  enforce the true order.
+- **Q6 (traps):** default accepted, PLUS Act III gets checkpoints so
+  its signature ejection-trap is not so unforgiving (eject to last
+  checkpoint, not act entrance).
+- **Q7 (act shape):** default accepted — 3 separate maps on one
+  continent, ~15-16 rooms each, ~45-48 total.
+- **Q8 (return journey):** REJECTED — no return journey. The
+  labyrinth is a one-way descent; its center/exit leads onward to
+  the LAST continent of the game. (Story fact: the labyrinth is the
+  gateway to the endgame continent — this is what makes it pivotal.)
+  Consequence: the MAZE-style "answer hidden along the path" payload
+  is redistributed across the three acts' true paths instead of an
+  inbound/outbound split.
+- **Q9 (hints):** approved — the Guide sells three hint tiers
+  (nudge -> clue decode -> door reveal) at mechanically tempting,
+  philosophically costly prices.
+- **Q13 (re-traversal):** REVERSED from default — "a solved space is
+  just solved." A room fires its random encounter on FIRST arrival
+  only; re-entering or backtracking through cleared rooms is free.
+  Wandering cost = every NEW wrong room costs one encounter. (This
+  conveniently matches the existing `consumedNodes` one-shot engine
+  semantics — smaller engine delta than feared.)
+- **Q16 (presentation):** book-style — each room is presented like
+  the book's illustrations: a scene with points of interest, nothing
+  inherently linear. "Here's some POIs, click one, trigger an
+  encounter, brings you to the next place, repeat." The collapsible
+  accordion at the bottom carries the Guide's description + riddle.
+  (Final art direction goes to claude-design via handoff prompt —
+  see scope.)
+- **Q17 (auto-map):** default accepted — stingy fog-of-war map as a
+  secondary view: visited rooms only, one-way doors drawn only in
+  the walked direction, an earnable item upgrades it.
+- **Q2/Q3 (center + Guide):** approved — the Guide is a new named
+  character (unreliable narrator, implicated in the finale); the
+  center holds the passage to the last continent + the revelation.
+  Specifics proposed in DESIGN.md.
+- **Q1 (trap semantics Act III):** see Q6 — checkpoints adopted.
+- **Q19 (scope):** design first; once design lands, implement the
+  MECHANICS + CLI on this effort and merge that. THEN write a
+  handoff prompt T can give to claude-design for the UI (accordion,
+  room scenes, dev-menu entry). Mobile UI implementation is out of
+  scope here beyond the dev-menu hook spec.
+- **Screenshots:** uploaded to `plan/labyrinth/reference/maze-book/`
+  (compressed, descriptively named, with README index) so other
+  agents can see the source material.
+- All other questions (Q4 alignment, Q10 time budget, Q11 defeat,
+  Q12 pool weights, Q14 bosses, Q15 quest boards, Q18 room numbers,
+  Q20 naming, Q21 spoiler files): defaults stand.
+
 ## Steps (the full plan)
 
 Numbered to match the session task list. Each step names its
@@ -261,9 +323,10 @@ deliverable and completion gate.
    cross-act clue callbacks, first meta-layer (clues that only make
    sense assembled across rooms). Gate: same.
 7. **Act III puzzle** — hardest: the center room (45-analog), the
-   hidden riddle whose answer is scattered along the true path, the
-   inverted return journey, the signature trap, finale boss (the
-   Guide) + pre-boss quest. Gate: same.
+   hidden riddle whose answer was scattered across all three acts'
+   true paths, the signature ejection-trap, CHECKPOINTS (per T),
+   finale boss (the Guide) + pre-boss quest, and the exit passage to
+   the last continent. No return journey (per T). Gate: same.
 8. **Validation** — `plan/labyrinth/tools/validate-maze.mjs`
    (plain node, no deps): parses the act room tables, verifies
    intended shortest path is actually shortest and unique-enough,
@@ -272,17 +335,37 @@ deliverable and completion gate.
    encounter time is within the 6h +/- 25% budget. Then spawn
    `mechanics-expert` for a fairness/difficulty review and fix
    findings. Gate: script green + expert findings addressed.
-9. **Finalize** — promote durable specs into
+9. **Finalize design** — promote durable specs into
    `axiomancer-mechanics/specs/world/` (one continent spec + three
    act specs) and `specs/characters/` (the Guide) using the repo
-   templates; update this status tracker; write the implementation
-   phase list into the PR body (engine: labyrinth traversal doctrine,
-   map defs, event pools, enemies, quest boards; mobile: accordion,
-   scene strip, fog-of-war changes; content: copy pass); push; PR
-   ready for review. Gate: PR ready-for-review with all files.
+   templates; update this status tracker; push; PR ready for review.
+   Gate: PR ready-for-review with all design files.
+10. **Mechanics + CLI implementation** (per T's Q19 answer; after
+    design lands/merges): in `axiomancer-mechanics` — labyrinth
+    traversal doctrine (per-map `labyrinth` mode: back-travel
+    allowed through cleared rooms, first-arrival-only encounter
+    rolls reusing `consumedNodes`, act gates/proof-tokens,
+    checkpoints), the three `MapDefinition`s + event pools + node
+    prefix wiring, enemies (`EnemiesByMap`), per-act quest boards,
+    hint economy engine, and a `labyrinth` CLI subcommand
+    (`npm run game -- labyrinth` + named shortcut) that plays the
+    whole labyrinth headlessly: prints the Guide prose + riddle +
+    door list per room, accepts door choices, rolls encounters
+    (auto-resolve or sub-minigame stubs per existing CLI patterns),
+    enforces gates/traps/checkpoints. Hermetic e2e tests (seeded
+    RNG): true path completes each act, traps behave, gates hold,
+    solved-space-solved invariant. Verify gates per bearings; merge.
+11. **claude-design handoff prompt** — write a complete prompt T can
+    hand to claude-design for the mobile UI: book-style room scenes
+    with clickable POIs/doors, the collapsible bottom accordion
+    (description + riddle), stingy fog-of-war map view, dev-menu
+    entry point in the character tab, engine surface it consumes
+    (exports added in step 10), copy canon + AXM token rules.
+    Deliverable: `plan/labyrinth/CLAUDE-DESIGN-PROMPT.md`.
 
-Implementation itself (engine + mobile code) is intentionally NOT a
-step here unless Q19 says otherwise.
+UI implementation itself stays out of scope (goes to claude-design
+via step 11's prompt); the only UI wiring specced here is the
+dev-menu entry.
 
 ## Resume protocol (if a session dies)
 
@@ -301,10 +384,13 @@ step here unless Q19 says otherwise.
 - [x] 1. Research: explorer (codebase) — DONE 2026-07-07
 - [x] 1b. Research: scout (MAZE book) — DONE 2026-07-07, see RESEARCH-maze-book.md
 - [x] 2. Roadmap committed + PR opened
-- [ ] 3. T's answers recorded (or defaults invoked)
+- [x] 3. T's answers recorded — 2026-07-07, see "T's answers" above
+- [x] 3b. Book screenshots committed to reference/maze-book/
 - [ ] 4. DESIGN.md authored
 - [ ] 5. Act I authored + validated
 - [ ] 6. Act II authored + validated
 - [ ] 7. Act III authored + validated
 - [ ] 8. Validation script green + mechanics-expert review addressed
-- [ ] 9. Specs promoted, PR ready for review
+- [ ] 9. Design specs promoted, PR ready for review
+- [ ] 10. Mechanics + CLI implementation merged (post-design)
+- [ ] 11. CLAUDE-DESIGN-PROMPT.md written for T
