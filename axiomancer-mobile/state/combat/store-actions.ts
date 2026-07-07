@@ -235,8 +235,17 @@ export interface StarterBundle {
     id: string;
     name: string;
     description: string;
-    /** Hidden archetype tag — never surfaced in the UI. */
-    archetype: StarterArchetype;
+    /**
+     * Hidden archetype tag — never surfaced in the UI. Biases later card
+     * rewards (see `skewRewardsByArchetype`). `null` for the pure theme-test
+     * bundles that don't map onto one of the three reward archetypes (stance /
+     * aggression / gold showcases): they seed their themed deck but apply no
+     * reward skew.
+     */
+    archetype: StarterArchetype | null;
+    /** Tile accent colour. Decoupled from `archetype` so every theme reads
+     *  distinct on the picker. */
+    accent: string;
     /** Keyword pills shown on the selection tile. */
     pills: readonly string[];
     /** The seeded knownSkills deck (valid engine card ids). */
@@ -248,43 +257,97 @@ export const BUNDLE_CHOSEN_FLAG = 'starter-bundle-chosen';
 const BUNDLE_FLAG_PREFIX = 'bundle:';
 const ARCHETYPE_FLAG_PREFIX = 'archetype:';
 
-// Build a playable level-1 deck: a themed core (≤ tier 2) plus an attack and a
-// guard staple so every path can both threaten and survive, padded from the
-// proven baseline starters so a thin category never yields a stub deck.
-function bundleDeck(themed: (c: CombatCard) => boolean): string[] {
+// Build a THEME test deck: EVERY card matching the theme (so all of a theme's
+// cards are reachable for testing), plus an attack and a guard staple so the
+// path can always threaten and brace from turn one, padded from the proven
+// baseline starters so a thin theme never yields a stub deck.
+function themeDeck(themed: (c: CombatCard) => boolean): string[] {
     const ids: string[] = [];
     const add = (id: string | undefined): void => { if (id && !ids.includes(id)) ids.push(id); };
-    poolMatching((c) => themed(c) && c.tier <= 2).slice(0, 3).forEach(add);
+    poolMatching(themed).forEach(add);
     add(poolMatching((c) => c.verbClass === 'direct-damage' && c.tier === 1)[0]);
     add(poolMatching((c) => c.verbClass === 'defend' && c.tier === 1)[0]);
     for (const id of STARTER_DECK_IDS) { if (ids.length >= 5) break; add(id); }
     return ids;
 }
 
+// Every deck THEME the picker exposes. The first three carry a hidden reward
+// archetype (they double as the shipped "choose your path" identities); the
+// rest are pure test benches (`archetype: null`) added so a fresh run can pick
+// ANY theme — stance mono-decks, raw aggression, the gold/rare tier — and
+// exercise its cards. See the branch intent: deck-theme testing setup.
 export const STARTER_BUNDLES: readonly StarterBundle[] = Object.freeze([
     {
         id: 'bleeding-edge',
         name: 'The Bleeding Edge',
         description: 'Aggressive. Stack damage-over-time and erode the foe turn by turn.',
         archetype: 'bleeder',
+        accent: '#9a5fd0',
         pills: ['BLEED', 'POISON', 'DoT'],
-        cardIds: bundleDeck((c) => c.effectKind === 'dot'),
+        cardIds: themeDeck((c) => c.effectKind === 'dot'),
     },
     {
         id: 'patient-defender',
         name: 'The Patient Defender',
         description: 'Reactive. Absorb attacks, mend, and outlast the enemy.',
         archetype: 'guardian',
+        accent: '#d6543f',
         pills: ['GUARD', 'REGENERATE', 'FORTIFY'],
-        cardIds: bundleDeck((c) => c.verbClass === 'defend' || c.verbClass === 'buff-self'),
+        cardIds: themeDeck((c) => c.verbClass === 'defend' || c.verbClass === 'buff-self'),
     },
     {
         id: 'minds-unraveling',
         name: "Mind's Unraveling",
         description: 'Control. Confuse, slow, and dominate the enemy mind.',
         archetype: 'controller',
+        accent: '#4f7fd6',
         pills: ['CONFUSE', 'STUN', 'SLOW'],
-        cardIds: bundleDeck((c) => c.effectKind === 'control'),
+        cardIds: themeDeck((c) => c.effectKind === 'control'),
+    },
+    {
+        id: 'body-force',
+        name: 'The Body / Force',
+        description: 'Test bench. Every Body-stance card — direct force, bleed, and a brace.',
+        archetype: null,
+        accent: '#d6543f',
+        pills: ['BODY', 'FORCE', 'STANCE'],
+        cardIds: themeDeck((c) => c.stance === 'body'),
+    },
+    {
+        id: 'mind-logic',
+        name: 'The Mind / Logic',
+        description: 'Test bench. Every Mind-stance card — strikes, confusion, and erosion.',
+        archetype: null,
+        accent: '#4f7fd6',
+        pills: ['MIND', 'LOGIC', 'STANCE'],
+        cardIds: themeDeck((c) => c.stance === 'mind'),
+    },
+    {
+        id: 'heart-will',
+        name: 'The Heart / Will',
+        description: 'Test bench. Every Heart-stance card — self-buffs, control, and a guard.',
+        archetype: null,
+        accent: '#9a5fd0',
+        pills: ['HEART', 'WILL', 'STANCE'],
+        cardIds: themeDeck((c) => c.stance === 'heart'),
+    },
+    {
+        id: 'raw-aggression',
+        name: 'Raw Aggression',
+        description: 'Test bench. All direct-damage cards across stances for raw burst play.',
+        archetype: null,
+        accent: '#d4a017',
+        pills: ['BURST', 'DAMAGE', 'TEMPO'],
+        cardIds: themeDeck((c) => c.verbClass === 'direct-damage'),
+    },
+    {
+        id: 'gold-showcase',
+        name: 'The Gold Showcase',
+        description: 'Test bench. The Gold rares plus the tier-3 support — exercise the rare tier.',
+        archetype: null,
+        accent: '#d4c026',
+        pills: ['GOLD', 'RARE', 'TIER 3'],
+        cardIds: themeDeck((c) => isGoldCard(c.id) || c.tier === 3),
     },
 ]);
 
@@ -320,7 +383,8 @@ export function seedStarterBundleAction(store: AppStore, bundleId: string): void
     const flags = new Set(state.flags ?? []);
     flags.add(BUNDLE_CHOSEN_FLAG);
     flags.add(`${BUNDLE_FLAG_PREFIX}${bundle.id}`);
-    flags.add(`${ARCHETYPE_FLAG_PREFIX}${bundle.archetype}`);
+    // Pure theme-test bundles carry no archetype → no reward skew tag.
+    if (bundle.archetype) flags.add(`${ARCHETYPE_FLAG_PREFIX}${bundle.archetype}`);
     const player = state.player;
     const patch: Record<string, unknown> = { flags: [...flags] };
     if (player && (player.knownSkills?.length ?? 0) === 0) {
