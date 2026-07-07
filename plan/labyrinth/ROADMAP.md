@@ -90,21 +90,25 @@ report below):
   encounters/dialogue already exist; `narration` events render any
   `DialogueTree` with zero new UI.
 
-### MAZE book (scout report — IN FLIGHT)
+### MAZE book (scout report — COMPLETE)
 
-Scout is researching: exact 16-step solution path and graph topology,
-clue taxonomy (visual/textual/cross-room/red herrings), the room-45
-riddle and how its answer is hidden along the true path, the
-unreliable-narrator Guide voice, the trap-loop topology, fan analysis
-("Into the Abyss"), and lessons from digital adaptations. When it
-lands, fold the findings into `plan/labyrinth/DESIGN.md` (step 4) and
-summarize the design-relevant rules here. From T's screenshots we
-already know the grammar: 45 numbered rooms, full-scene illustrations
-with numbered doors, unreliable narrator prose under each scene,
-clues in both picture and text (reversed signs, symbols, object
-rebuses), one-way doors, an inescapable trap section, goal = reach
-room 45 and return to room 1 in 16 steps, plus a hidden riddle at the
-center whose answer is concealed along the shortest path.
+Full condensed report: `plan/labyrinth/RESEARCH-maze-book.md`.
+Headlines: official 16-step solution (1-26-30-42-4-29-17-45 in,
+45-23-8-12-39-4-15-37-20-1 out); doors are a directed graph with
+one-way (unnumbered) edges; the only entrance to the center is a
+secret door reachable via a redundantly-clued perspective trick;
+realm topology Path (19) / Loop (19, churn, one safe exit) / Trap
+(7, terminal room 24 with no exits); riddle "What house will all
+live in?" answered "Like Atlas, you bear it upon your shoulders",
+hidden word-by-word inbound and letter-by-letter outbound along the
+true path only; the Guide is the Minotaur, unreliable-narrator voice
+as the clue channel; nobody solved the riddle layers in the original
+contest. Seven transferable design rules extracted (see research
+file, "Transferable design rules") — most important: every mandatory
+trick must be forward-solvable and redundantly clued (the book's
+documented fairness failure is hindsight-only clues), and since an
+app auto-maps, difficulty must live in puzzle content + the
+encounter-cost economy of wandering, not mapping labor.
 
 ## Clarifying questions for T (with recommended defaults)
 
@@ -295,7 +299,7 @@ step here unless Q19 says otherwise.
 ## Status tracker
 
 - [x] 1. Research: explorer (codebase) — DONE 2026-07-07
-- [ ] 1b. Research: scout (MAZE book) — in flight, fold report in
+- [x] 1b. Research: scout (MAZE book) — DONE 2026-07-07, see RESEARCH-maze-book.md
 - [x] 2. Roadmap committed + PR opened
 - [ ] 3. T's answers recorded (or defaults invoked)
 - [ ] 4. DESIGN.md authored
