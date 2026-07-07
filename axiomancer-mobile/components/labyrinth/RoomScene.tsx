@@ -27,7 +27,11 @@ import Animated, {
 import Svg, { Circle, Line, Path, Rect } from 'react-native-svg';
 import { Image } from 'expo-image';
 
-import { LABYRINTH_SCENE_BACKDROPS } from '@/assets/images/labyrinth';
+import {
+    LABYRINTH_DOOR_IMAGES,
+    LABYRINTH_SCENE_BACKDROPS,
+    LABYRINTH_SEALED_DOOR,
+} from '@/assets/images/labyrinth';
 import type { LabyrinthDoorVM, LabyrinthPoiVM } from '@/state/presenters/labyrinth.engine';
 import { FONTS, rnd } from '@/theme/axm';
 import { makeStyles, usePalette } from '@/theme/runtime';
@@ -114,6 +118,7 @@ export function RoomScene({
     const styles = useStyles();
     const seed = sceneSeed(nodeId);
     const backdrop = LABYRINTH_SCENE_BACKDROPS[nodeId] ?? null;
+    const doorImage = LABYRINTH_DOOR_IMAGES[nodeId] ?? null;
 
     // Doors spread along the back wall; positions in scene percent.
     const doorSlots = doors.map((door, i) => ({
@@ -214,10 +219,22 @@ export function RoomScene({
                     <View style={styles.plaque}>
                         <Text style={styles.plaqueText}>{door.display}</Text>
                     </View>
-                    <View style={[styles.doorArch, door.gated && styles.doorArchGated]}>
-                        <View style={styles.doorPanel} />
-                        {door.gated && <Text style={styles.sealedText}>{sealedLabel}</Text>}
-                    </View>
+                    {doorImage ? (
+                        <View style={styles.doorImageBox}>
+                            <Image
+                                source={door.gated ? LABYRINTH_SEALED_DOOR : doorImage}
+                                style={styles.doorImage}
+                                contentFit="contain"
+                                contentPosition="bottom center"
+                            />
+                            {door.gated && <Text style={styles.sealedText}>{sealedLabel}</Text>}
+                        </View>
+                    ) : (
+                        <View style={[styles.doorArch, door.gated && styles.doorArchGated]}>
+                            <View style={styles.doorPanel} />
+                            {door.gated && <Text style={styles.sealedText}>{sealedLabel}</Text>}
+                        </View>
+                    )}
                 </Pressable>
             ))}
 
@@ -285,6 +302,16 @@ const useStyles = makeStyles((AXM) => ({
         fontSize: 14,
         letterSpacing: 1,
         color: AXM.parchment,
+    },
+    doorImageBox: {
+        width: 62,
+        height: 92,
+        alignItems: 'center',
+        justifyContent: 'flex-end',
+    },
+    doorImage: {
+        width: 62,
+        height: 92,
     },
     doorArch: {
         width: 56,
