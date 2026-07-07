@@ -111,6 +111,11 @@ const EXPECTED_ROUTE_FILES: ReadonlySet<string> = new Set([
     // Dev-only enemy-art gallery (visual-audit 2026-06); gated by
     // isDevToolsEnabled() so production renders an empty view.
     './devart/index.tsx',
+    // Dev-only Aporia room gallery (room-art pass 2026-07); same
+    // isDevToolsEnabled() gate — renders every authored room's
+    // RoomScene so wall/door pairings can be audited without walking
+    // the maze past its gates and encounters.
+    './devart/rooms.tsx',
     // Dev-only aftermath-panel gallery (visual-audit 2026-06); same
     // isDevToolsEnabled() gate — renders the defeat / parley panels
     // that have no organic combat-capture path.
