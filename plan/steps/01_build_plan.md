@@ -57,9 +57,10 @@ Tick in this file in the same commit that ships the phase.
       — `test(mechanics): population witnesses for execute + escalation clock — phase 4` (d9763659)
 
 **Mobile surfaces (presenter-only, low engine risk):**
-- [ ] Phase 5 — Village SELL tab: surface the engine's
+- [x] Phase 5 — Village SELL tab: surface the engine's
       `sellItem` / `defaultSellPrice` (Phase 37) that has no
       mobile consumer (mobile)
+      — `feat(mobile): village SELL tab — phase 5` (98e7b2bc)
 - [ ] Phase 6 — Memoir run-history surface: read-back of deaths
       (`hazardDeathCount` helper, currently unconsumed) +
       keepsakes (mobile; presenter-only)
@@ -134,4 +135,5 @@ phases with linked notes here.)
 
 - phase 0 — (adoption commit) — nexus methodology adopted
 - phase 1 — 0af106ff — combat test-coverage backfill (sig-overwhelming-argument funded-path victory witness)
+- phase 5 — 98e7b2bc — village SELL tab (sellVillageItem action + presenter sellables/hasShop)
 - phase 4 — d9763659 — balance-sim population witnesses (execute finisher + escalation clock; Conclusion/BODY-sig already had coverage)
