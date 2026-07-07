@@ -242,6 +242,36 @@
   ]
  },
  {
+  "id": "enemy-the-doorwarden",
+  "name": "The Doorwarden",
+  "image": null,
+  "level": 8,
+  "difficulty": "boss",
+  "maxHealth": 140,
+  "stats": {
+   "body": 14,
+   "mind": 9,
+   "heart": 5
+  },
+  "logic": "boss",
+  "logicBlurb": "Boss script — a telegraphed, round-keyed signature pattern.",
+  "stanceHint": "He answers every motion with a jamb — where you would step, a threshold has already been installed.",
+  "skills": [
+   {
+    "name": "False Dilemma",
+    "text": "Two doors. Only two. Either-or, your fault, no third option — except every option is a door. The enemy hesitates between phantoms while you walk straight through."
+   },
+   {
+    "name": "Undistributed Middle",
+    "text": "All philosophers are mortal. You are mortal. Therefore you are a philosopher — and your enemy is illegible. You watch them try to follow the syllogism into a corner they cannot leave."
+   },
+   {
+    "name": "Achilles' Gambit",
+    "text": "You commit to the strike that should never land — the runner who can never catch the tortoise, the heel that must be exposed. Paradox collapses into a single, unanswerable blow."
+   }
+  ]
+ },
+ {
   "id": "enemy-the-ferryman",
   "name": "The Ferryman",
   "image": "./assets/catalog/enemies/sendou-figure-a.webp",
@@ -343,6 +373,36 @@
    {
     "name": "Liar's Echo",
     "text": "\"This sentence is false.\" Their next thought catches on the loop, doubles back, and arrives more exposed than when it left. You read every tell twice."
+   }
+  ]
+ },
+ {
+  "id": "enemy-the-index",
+  "name": "The Index",
+  "image": null,
+  "level": 12,
+  "difficulty": "boss",
+  "maxHealth": 225,
+  "stats": {
+   "body": 14,
+   "mind": 25,
+   "heart": 6
+  },
+  "logic": "boss",
+  "logicBlurb": "Boss script — a telegraphed, round-keyed signature pattern.",
+  "stanceHint": "It files before it strikes — by the time the blow lands, your counter is already catalogued under errata.",
+  "skills": [
+   {
+    "name": "Sorites' Cascade",
+    "text": "A grain. Another grain. At what point did the heap of small wounds become a mortal one? They cannot say. The bleeding stacks faster than their definition of \"alive.\""
+   },
+   {
+    "name": "Liar's Echo",
+    "text": "\"This sentence is false.\" Their next thought catches on the loop, doubles back, and arrives more exposed than when it left. You read every tell twice."
+   },
+   {
+    "name": "False Dilemma",
+    "text": "Two doors. Only two. Either-or, your fault, no third option — except every option is a door. The enemy hesitates between phantoms while you walk straight through."
    }
   ]
  },
@@ -491,6 +551,36 @@
    {
     "name": "Sorites' Cascade",
     "text": "A grain. Another grain. At what point did the heap of small wounds become a mortal one? They cannot say. The bleeding stacks faster than their definition of \"alive.\""
+   }
+  ]
+ },
+ {
+  "id": "enemy-the-sophist",
+  "name": "The Sophist",
+  "image": null,
+  "level": 16,
+  "difficulty": "boss",
+  "maxHealth": 315,
+  "stats": {
+   "body": 9,
+   "mind": 36,
+   "heart": 18
+  },
+  "logic": "boss",
+  "logicBlurb": "Boss script — a telegraphed, round-keyed signature pattern.",
+  "stanceHint": "He argues in your grammar — every stance you take, he has already taken it better, and returned it used.",
+  "skills": [
+   {
+    "name": "Bootstrap Paradox",
+    "text": "The healing comes from the version of you that survived. The version of you that survived came from this healing. The loop is whole; the wound, less so."
+   },
+   {
+    "name": "Liar's Echo",
+    "text": "\"This sentence is false.\" Their next thought catches on the loop, doubles back, and arrives more exposed than when it left. You read every tell twice."
+   },
+   {
+    "name": "False Dilemma",
+    "text": "Two doors. Only two. Either-or, your fault, no third option — except every option is a door. The enemy hesitates between phantoms while you walk straight through."
    }
   ]
  },
