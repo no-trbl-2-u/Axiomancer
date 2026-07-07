@@ -5,7 +5,7 @@
 
 ## True path (7 moves)
 
-49 -> 51 -> 53 -> 55 -> 57 -> (secret) 61 -> 62 -> 63
+49 -> 51 -> 53 -> 55 -> 57 -> (secret) 61 -> 65 -> 63
 
 By engine id: ap3-1 -> ap3-2 -> ap3-3 -> ap3-4 -> ap3-5 -> ap3-7 ->
 ap3-8 -> ap3-9, with a required detour 57 -> 59 -> 57 (the Third
@@ -37,18 +37,26 @@ All five honest fragments sit ON the spine or one move off it.
 - **61 (The Foundation):** fragment WON on the threshold stone
   (the thirteenth word, in the room where it is needed — findable
   before or during the socket work). The center riddle: "What
-  argument has no first premise?" Lay thirteen honest fragments in
-  walking order: THE ONE YOU WALK IT RESTS ON NOTHING IT IS WALKED
-  NOT WON. Counterfeit filters, act by act: painted (I), unlisted
+  argument has no first premise?" The eight words proven at the two
+  act gates arrive pre-confirmed ("the house remembers your
+  assents"); the live puzzle is Act III's five words plus
+  counterfeit filtering. Filters, act by act: painted (I), unlisted
   shelf-marks (II), furniture (III). A spared Index grants one free
-  authenticity check. On success: the revelation, and 61->62 opens.
-- **62 (The Sophist's Study):** quest (the Third Ledger). The three
+  authenticity check; every refused submission joins the Ledger of
+  Assertions. On success: the revelation, and 61->65 opens.
+- **65 (The Sophist's Study):** quest (the Third Ledger). The three
   ledger signatures P. / Pro- / -tas assemble the finale mercy key:
-  PROTAS.
-- **63 (Threshold of the Unfounded):** the Sophist, finale boss;
-  his power scales with the player's total hint debt. Mercy fork:
-  name him (PROTAS) — HP-gated per ADR-0007. Then the Unfounded
-  Door: the exit to the last continent.
+  PROTAS. The blank Fourth Ledger is the debt-settlement
+  instrument: pay resources + an Epistemology concession to reduce
+  the finale's Borrowed Premise stacks.
+- **63 (Threshold of the Unfounded):** the Sophist, finale boss.
+  His power is Borrowed Premise status stacks — capped at three,
+  visible pre-fight — built from hint debt + refused assertions,
+  reducible at the Study. Mercy fork through the standard Befriend
+  heart-skill (heart tokens + HP gate): knowing PROTAS unlocks the
+  naming option inside the mercy choice; exploiting both prior act
+  bosses closes it. Then the Unfounded Door: the exit to the last
+  continent.
 
 ## Fragment placement
 
@@ -85,9 +93,9 @@ encounters and a walk — plus the lesson.
 ## Graph invariants (for tools/validate-maze.mjs)
 
 - Node count 16; realm split 9 Path / 4 Loop / 3 Trap.
-- One-way edges: 56->58, 58->64, 64->60, 62->63, 63->exit; eject
+- One-way edges: 56->58, 58->64, 64->60, 65->63, 63->exit; eject
   edge 60->49 (worst-case model of return-to-last-Waystone); gate
-  edge 61->62 blocked until the passphrase is laid.
+  edge 61->65 blocked until the passphrase is laid.
 - Secret edge 57<->61 is a mandatory cut for reaching 63.
 - Shortest path 49 -> 63 (secret open, gate open) = 7 moves,
   UNIQUE (every Loop deviation adds at least one move; the Loop
@@ -124,6 +132,9 @@ bands, Loop sizes.
   deliberate cruelty, and it is quadruple-clued before commitment;
   it exists so that the real Waystones' kindness is never taken as
   furniture.
-- The finale's hint-debt scaling makes the Guide's economy pay off
+- The finale's debt scaling makes the Guide's economy pay off
   dramatically rather than punitively: the player fights exactly
-  the amount of borrowed certainty they purchased.
+  the borrowed certainty they purchased or asserted — capped at
+  three Borrowed Premise stacks, reducible at the Fourth Ledger,
+  and floored by the Third Waystone's generous one-shot rest, so
+  the wall is always climbable in a grindless one-way descent.

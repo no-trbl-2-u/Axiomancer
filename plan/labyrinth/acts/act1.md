@@ -104,7 +104,9 @@ POI remarks:
 - Strapped column: "Someone bound it so it could not wander. It is
   a column. Where would it go." (Fragment THE, carved beneath the
   strap.)
-- Plaques: "Small words hold up large stones."
+- Plaques: "Small words hold up large stones. Carved, every one —
+  the maze carves; it does not paint. Should you meet paint,
+  remember whose habit that is."
 - Low side door (6): "The long way is popular. Popularity is not an
   argument."
 
@@ -153,7 +155,9 @@ POI remarks:
   not waste oil."
 - Relief of a stair: "Decorative, surely. The mason carved a stair
   going up on a wall with nothing behind it. Masons are such
-  dreamers." (Interacting here reveals the SECRET DOOR to 17.)
+  dreamers." (The FIRST interaction with this POI both delivers the
+  remark and reveals the SECRET DOOR to 17 in the same beat — one
+  click, never a second hidden step; no pixel-hunt.)
 - Drain: "Even the rain leaves this room eventually. Follow
   something that leaves."
 - Doors 8 / 9 / 6: "Eight is twice four. Nine is thrice three. Six
@@ -217,10 +221,17 @@ It will know a forgery — it always knows. So do I, but I charge."
 
 Gate logic: the player arranges collected fragments into the four
 sockets. Correct: THE ONE YOU WALK -> the door swings without
-sound; edge 19->29 unblocks permanently. Incorrect (any counterfeit
-or wrong order): the door stays; the Sophist responds per attempt
-("Painted words. You brought me paint."; "Right words, wrong feet.
-Order is an argument too."). No other penalty; unlimited attempts.
+sound; edge 19->29 unblocks permanently. Fragments are proven, not
+consumed — the pocket keeps them (the center will need them).
+Incorrect (any counterfeit or wrong order): the door stays; the
+Sophist responds per attempt ("Painted words. You brought me
+paint."; "Right words, wrong feet. Order is an argument too.") —
+and writes the refused submission into his ledger. Unlimited
+attempts, no immediate cost; every refusal is an entry in the
+Ledger of Assertions and returns at the finale (DESIGN.md
+sections 2 and 6). The Sophist says so the first time it happens:
+"Guess freely. I keep the guesses. They keep, better than you
+would think."
 
 POI remarks:
 - Sockets: "Four beds for four words. The house sleeps poorly
@@ -261,11 +272,13 @@ the house, which has a sense of humor, obliged. He is every door
 you did not choose. He holds it against you."
 
 Boss: **The Doorwarden** — encounter override, isBoss, pinned level
-band per implementation. Mercy fork per ADR-0007: sparing him is
-possible and consequential (he remembers doors; a spared Doorwarden
-names one forgery in Act II — a single free counterfeit detection —
-exploit instead for a material reward; design note for
-specs/story).
+band per implementation. Mercy fork per ADR-0007 (through the
+standard Befriend heart-skill): sparing him is possible and
+consequential — he remembers doors; a spared Doorwarden names one
+forgery in Act II (a single free counterfeit detection). Exploiting
+him instead yields a material reward AND is remembered: exploiting
+BOTH act bosses hardens the finale's naming fork (DESIGN.md
+section 6). Design note for specs/story.
 
 Post-victory: the descent hatch (one-way) is the only exit. The
 Sophist: "Down, then. The house saves its best manners for the

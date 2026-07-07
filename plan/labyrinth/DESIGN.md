@@ -53,13 +53,25 @@ species of monster: an arguer with no axioms of his own.
      phrased unhelpfully.
   2. **A Reading** — dear. Decodes one clue in the current room
      (names the mechanism, not the door).
-  3. **A Conclusion** — ruinous. Names the correct door outright.
+  3. **A Conclusion** — ruinous. Names the correct door outright;
+     at a Gate of Assent or the center, one purchase names ONE
+     correct word in its correct socket (so the ruinous tier stays
+     meaningful where the obstacle is an ordering, not a door).
   Prices rise per act and per tier reuse. Every purchase shifts
-  alignment toward accepted-authority (exact axis mapping decided at
-  implementation against the live alignment model) and the Sophist
-  remembers the total; the finale reads it (section 7). Buying
-  conclusions without proofs is the game's thesis inverted — legal,
-  tempting, and philosophically costly.
+  alignment (an Epistemology-axis delta via the existing
+  `alignmentDelta` authoring surface; exact magnitude decided at
+  implementation) and the Sophist remembers the total; the finale
+  reads it (section 6). Buying conclusions without proofs is the
+  game's thesis inverted — legal, tempting, and philosophically
+  costly.
+- **The Ledger of Assertions (anti-lawnmower rule):** gate and
+  center attempts are unlimited and free of immediate penalty —
+  but every REFUSED submission is entered in the Sophist's ledger
+  and feeds the finale exactly like hint debt ("You asserted this
+  for me"). Guessing is always allowed; unfounded assertion is
+  never free. This keeps the detectors (paint, shelf-marks,
+  bears-weight) the cheap path and shuffle-till-green the expensive
+  one, without ever locking a stuck player out.
 - **Secret (for specs/characters/ spec):** the Sophist entered the
   Aporia as its first challenger. He could not bear to revise a
   single axiom, so the maze digested him into its narrator. He is
@@ -137,12 +149,18 @@ cleared rooms.
 
 - **Time budget (~6h target, validated at step 8):** ~47 rooms;
   assume a decent player first-visits ~40 of them (wrong turns
-  included). ~40 encounters x ~4 min = ~160 min. 3 quest events
-  x ~10 min + 3 bosses x ~12 min = ~66 min. Inspection, riddle
-  thinking, backtracking, hint dialogues = ~90-130 min. Total
-  ~5.3-6.0h, roughly a third of a ~18h game. Levers if validation
-  disagrees: room count per act, pool weights, encounter length
-  bands.
+  included). ~40 first-arrival EVENTS (only ~30-40% of them combat,
+  per the pool tables; narration/rest run shorter, act III combat
+  longer) x ~4 min average = ~160 min. 3 quest events x ~10 min +
+  3 bosses x ~12 min = ~66 min. Inspection, riddle thinking,
+  backtracking, hint dialogues = ~90-130 min. Total ~5.0-6.4h,
+  roughly a third of a ~18h game. Levers if validation disagrees:
+  room count per act, pool weights, encounter length bands.
+- **Waystone rest is one-shot** (Act III checkpoints): the rest
+  override fires on first arrival only, per standard
+  `consumedNodes` semantics — ejection from the Oubliette does NOT
+  re-arm it. No repeatable-heal loop exists; the
+  meagre-but-never-lethal rest doctrine holds.
 - **Defeat** in any labyrinth encounter uses the normal game-over
   flow (no maze-special rule).
 
@@ -187,8 +205,20 @@ beyond its encounter cost.
 the pre-boss chamber: a door that opens only when the player answers
 that act's riddle (choice among assembled candidates — the honest
 fragments spell the answer; counterfeits spell traps). Wrong answers
-are allowed: the gate stays shut, the Sophist mocks, nothing is
-lost but pride and a re-think. No pixel-hunt lockouts.
+are allowed and unlimited: the gate stays shut, the Sophist mocks —
+and the refused submission is entered in the Ledger of Assertions
+(section 2), armed against the player at the finale. No pixel-hunt
+lockouts; no free lawnmowering either.
+
+**Fragments are never consumed.** Laying words at a gate proves
+them; the pocket keeps them. At the center, the house
+"remembers your assents": the eight words already proven at the two
+act gates arrive pre-confirmed in their sockets, leaving Act III's
+five words (and the counterfeit filtering) as the live puzzle — the
+climax is judgment, not re-assembly tedium. The Pocket records each
+fragment's provenance (where found, what mark or make it carries)
+and, once the Catalogue ledger has been read, its verdict — the
+note-taking is the game's job, not homework.
 
 **Fairness rules (binding on acts authoring, from the research):**
 - Every mandatory deduction has at least one forward-solvable
@@ -228,10 +258,32 @@ book's "foundation" room). It holds:
    no number. It appears on no map. It was never locked.
 
 Sequence at the center: Passphrase -> revelation -> Act III quest
-event -> finale with the Sophist (fight, or the mercy fork: name
-his real name — learnable from fragments of his story scattered in
-narration events — and he may stand aside; hint-debt and alignment
-gate the fork per ADR-0007 doctrine) -> the Unfounded Door.
+event -> finale with the Sophist -> the Unfounded Door.
+
+**Finale doctrine (softlock-proofed):**
+- The Sophist's debt scaling is authored as **Borrowed Premise**
+  status stacks — capped at THREE, visible pre-fight, built from
+  hint debt + the Ledger of Assertions. Status-effect content, per
+  combat doctrine; never an unbounded stat wall.
+- Debt is **settleable** at the Sophist's Study: the blank Fourth
+  Ledger is the repayment instrument — the Act III quest offers the
+  option to settle some or all debt at a real price (resources +
+  an Epistemology alignment concession), reducing Borrowed Premise
+  stacks before the fight.
+- The Third Waystone guarantees a **resource floor** (its one-shot
+  rest is authored generously within the meagre band) so a
+  hint-heavy, guess-heavy player still arrives fightable — the
+  descent is one-way and grindless, so the wall must be climbable
+  by everyone who reaches it.
+- The mercy fork routes **through the standard Befriend
+  heart-skill** (heart tokens + HP gate + mercy-choice state, per
+  ADR-0007) — knowing the name PROTAS unlocks the naming option
+  INSIDE the mercy choice; it is never a parallel bypass.
+- **Exploit consequence** (ADR-0007's anti-exploit pattern): a
+  player who exploited BOTH the Doorwarden and the Index finds the
+  naming fork hardened — the Sophist will not take his name from
+  that mouth (fork closed; standard spare remains available at the
+  normal gate).
 
 ## 7. UI design (spec for claude-design; implemented later)
 
@@ -317,10 +369,9 @@ testable without the UI — that is the acceptance test for step 10.
 ## 10. Open items carried into act authoring
 
 - Final passphrase wording sized to true-path room count (step 7).
-- The Sophist's real name (mercy-fork key) and where its three
-  tellings hide.
-- Alignment-axis mapping for hint purchases (needs the live
-  alignment model at implementation).
+- Alignment magnitude for hint purchases (axis settled:
+  Epistemology, via `alignmentDelta`; magnitude needs the live
+  model at implementation).
 - Room display-number scheme per act (honest in I; forgery pairs in
   II-III must each have an honest detector).
 - Exact pool weights (tuned at implementation via world-tuning).

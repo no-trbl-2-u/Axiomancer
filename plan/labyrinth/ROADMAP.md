@@ -354,7 +354,11 @@ deliverable and completion gate.
     (auto-resolve or sub-minigame stubs per existing CLI patterns),
     enforces gates/traps/checkpoints. Hermetic e2e tests (seeded
     RNG): true path completes each act, traps behave, gates hold,
-    solved-space-solved invariant. Verify gates per bearings; merge.
+    solved-space-solved invariant. Verify gates per bearings — and
+    because this touches mechanics' public surface, the step 10
+    gate INCLUDES `npm run verify -w axiomancer-mobile` and
+    `npm run type-check -w axiomancer-card-editor` (the @mechanics
+    alias couples them). Merge.
 11. **claude-design handoff prompt** — write a complete prompt T can
     hand to claude-design for the mobile UI: book-style room scenes
     with clickable POIs/doors, the collapsible bottom accordion
@@ -390,8 +394,21 @@ dev-menu entry.
 - [x] 5. Act I authored + validated — The Colonnade, validator green
 - [x] 6. Act II authored + validated — The Archive, validator green
 - [x] 7. Act III authored + validated — The Proof, validator green
-- [ ] 8. Validation script green + mechanics-expert review addressed
-      (script green for all three acts; expert review in flight)
+- [x] 8. Validation script green + mechanics-expert review addressed
+      — 2026-07-07. Expert verdict "needs-adjustment"; all five
+      ranked risks fixed in-place: (1) gate lawnmowering killed via
+      the Ledger of Assertions (refused submissions feed finale
+      scaling) + socket-diverse Act II counterfeits (STANDS/UPON
+      replace LAW/GOLD); (2) finale softlock prevented (Borrowed
+      Premise stacks capped at 3, settleable at the Fourth Ledger,
+      Third Waystone resource floor); (3) Waystone rest specified
+      one-shot, ejection does not re-arm; (4) copy drift fixed
+      (carve/paint detector now taught on the Act I Path at ap1-2;
+      Study renumbered 62->65 restoring the parity easter egg,
+      validator now asserts it; fragment non-consumption + center
+      pre-confirmation stated); (5) mercy forks routed through the
+      standard Befriend heart-skill per ADR-0007, exploiting both
+      act bosses closes the finale naming fork.
 - [ ] 9. Design specs promoted, PR ready for review
 - [ ] 10. Mechanics + CLI implementation merged (post-design)
 - [ ] 11. CLAUDE-DESIGN-PROMPT.md written for T

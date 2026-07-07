@@ -11,9 +11,13 @@ Same as Acts I-II, plus the Act III escalations:
 
 - **Checkpoints (per T).** Three Waystones; the first is the act
   entrance. Arrival activates one automatically and freely.
-  Waystones are authored rest rooms (meagre, per rest doctrine).
-  The act's signature trap EJECTS to the last activated Waystone —
-  never a full reset.
+  Waystones are authored rest rooms — ONE-SHOT (first arrival
+  only, standard consumed-node semantics; Oubliette ejection does
+  NOT re-arm them), meagre per rest doctrine, except the Third
+  Waystone whose single rest is authored at the generous end of
+  the meagre band (the finale resource floor, DESIGN.md section
+  6). The act's signature trap EJECTS to the last activated
+  Waystone — never a full reset.
 - **Detectors themselves get forged.** The Catalogue is two floors
   up; iron can be counterfeited down here. The act's taught
   detector: **"In the deep house, trust only what bears weight. The
@@ -50,8 +54,8 @@ Same as Acts I-II, plus the Act III escalations:
 | ap3-4 | 55 | The Second Waystone | Path | 53 <->, 57 <->, 54 <-> | WALKED (carved, structural) | rest + checkpoint |
 | ap3-5 | 57 | The Gallery of Premises | Path | 55 <->, 59 <->, 61 <-> (SECRET) | — | — |
 | ap3-6 | 59 | The Third Waystone | Path | 57 <->, 56 <-> | NOT (carved, structural) | rest + checkpoint |
-| ap3-7 | 61 | The Foundation | Path | 57 <-> (secret side), 62 (GATE; opens on passphrase) | WON (carved, structural) | narration (revelation) + gate logic |
-| ap3-8 | 62 | The Sophist's Study | Path | 61 <->, 63 -> | — | quest (act quest board) |
+| ap3-7 | 61 | The Foundation | Path | 57 <-> (secret side), 65 (GATE; opens on passphrase) | WON (carved, structural) | narration (revelation) + gate logic |
+| ap3-8 | 65 | The Sophist's Study | Path | 61 <->, 63 -> | — | quest (act quest board) |
 | ap3-9 | 63 | The Threshold of the Unfounded | Path | exit -> (the Unfounded Door; appears after the finale) | — | encounter, isBoss: the Sophist |
 | ap3-10 | 50 | The Anteroom of Almost | Loop | 49 <->, 51 <->, 52 <-> | GIVEN (carved, furniture) | — |
 | ap3-11 | 52 | The Corridor of Therefore | Loop | 50 <->, 53 <->, 54 <-> | BUILT (carved, furniture) | — |
@@ -63,11 +67,13 @@ Same as Acts I-II, plus the Act III escalations:
 
 Graph sanity notes for the validator: intended true path is 7
 moves; secret edge `57 <-> 61` (the Unnumbered Door) is the only
-route into {61,62,63}; one-way edges `56->58`, `58->64`, `64->60`,
-`62->63`; the eject edge `60->49` models the worst-case checkpoint
+route into {61,65,63}; one-way edges `56->58`, `58->64`, `64->60`,
+`65->63`; the eject edge `60->49` models the worst-case checkpoint
 return (the engine actually sends the player to the LAST activated
-Waystone — 49, 55, or 59). Gate edge `61->62` blocked until the
-thirteen-word passphrase is laid.
+Waystone — 49, 55, or 59). Gate edge `61->65` blocked until the
+thirteen-word passphrase is laid. There is no room 62 in the deep
+house — the display run skips it (the house numbers its bones
+once, and one bone is missing; unexplained, MAZE-style).
 
 ## Rooms
 
@@ -259,11 +265,18 @@ POI remarks:
 
 Gate logic: the player lays fragments into the thirteen sockets in
 walking order: THE ONE YOU WALK IT RESTS ON NOTHING IT IS WALKED
-NOT WON. Any counterfeit (KEY, NAME, CROWN, REST, STONE, LAW,
-FAITH, GOLD, PROOF, GIVEN, BUILT, EARNED, FOUND) or misorder is
-refused with act-appropriate lines ("Furniture."; "Right words,
-wrong walking."). A spared Index (Act II fork) grants ONE free
-authenticity check on a socketed word. Unlimited attempts.
+NOT WON. The house remembers your assents: the eight words already
+proven at the two act gates arrive PRE-CONFIRMED in their sockets
+("The house remembers your assents. Eight beds are made."), so the
+live puzzle is Act III's five words plus counterfeit filtering.
+Fragments were never consumed at the act gates — the pocket holds
+everything. Any counterfeit (KEY, NAME, CROWN, REST, STONE,
+STANDS, FAITH, UPON, PROOF, GIVEN, BUILT, EARNED, FOUND) or
+misorder is refused with act-appropriate lines ("Furniture.";
+"Right words, wrong walking.") — and every refusal is entered in
+the Ledger of Assertions, armed at the finale one room away.
+A spared Index (Act II fork) grants ONE free authenticity check on
+a socketed word. Unlimited attempts.
 
 On success — the REVELATION (narration): "So. The argument with no
 first premise is the one that needs none: the walked one. The
@@ -271,10 +284,10 @@ house was never a wall around the last continent. It is the
 proving. What lives past that door does not forbid visitors — it
 merely cannot be survived by a mind that will not turn back,
 revise, retract, resume. The house teaches the turning. I should
-know. I am its oldest pupil, and its only failure." Edge 61->62
+know. I am its oldest pupil, and its only failure." Edge 61->65
 unblocks permanently.
 
-### ap3-8 — display 62 — The Sophist's Study (quest override)
+### ap3-8 — display 65 — The Sophist's Study (quest override)
 
 Scene: a small, warm, terribly ordinary room: a desk, a good chair,
 a bad chair, and three ledgers laid out with the care of relics —
@@ -291,11 +304,22 @@ only witness."
 Override: `quest` — the Sophist's Third Ledger (act quest board,
 boardId at implementation). Fires once, pre-boss (T's rule).
 
+**Debt settlement (the Fourth Ledger):** within the quest, the
+blank fourth ledger is the repayment instrument — the player may
+settle some or all of their accumulated debt (hint purchases +
+refused assertions) at a real price: resources plus an Epistemology
+alignment concession. Each settlement reduces the finale's
+Borrowed Premise stacks (see ap3-9). The Sophist, on settling:
+"Paid in full is a sentence I have never once written. Paid in
+part, the house accepts. It knows how arguments end."
+
 POI remarks:
 - Three signed ledgers: "P. Pro. Tas. Assemble it if you like. I
   was called it when asking was still my trade." (The name PROTAS —
   the finale mercy key — is confirmable here for players who
   gathered the thirds.)
+- The blank fourth ledger: "Yours. Blank is the most expensive
+  state a page can be in."
 - The good chair: "Mine."
 - The bad chair: "Everyone else's. The house's one honest joke."
 
@@ -319,13 +343,23 @@ way, if you kept your receipts."
 
 Boss: **the Sophist** — encounter override, isBoss, finale-tier.
 Design-level fight doctrine (finalize at implementation): his power
-scales with the player's HINT DEBT — every Nudge, Reading, and
-Conclusion purchased returns as a weapon ("You argued this for me").
-Mercy fork per ADR-0007, HP-gated: NAME him — Protas, assembled
-from the three ledger signatures — and he stands aside (spare:
-he gives his last true sentence about the far country; exploit:
-material reward — finalize in specs/story alongside the
-character spec).
+comes from **Borrowed Premise** status stacks — CAPPED AT THREE,
+visible pre-fight — built from the player's hint debt AND the
+Ledger of Assertions ("You argued this for me. You asserted this
+for me."). Unsettled debt arms him; the Fourth Ledger (ap3-8) can
+have disarmed him partly or fully. Status-effect content per
+combat doctrine, never an unbounded stat wall; combined with the
+Third Waystone's resource floor, the fight is climbable by every
+player who reaches it. Mercy fork per ADR-0007, routed THROUGH the
+standard Befriend heart-skill (heart tokens + HP gate +
+mercy-choice state): knowing the name PROTAS unlocks the naming
+option INSIDE the mercy choice — never a parallel bypass. A player
+who EXPLOITED both the Doorwarden and the Index finds the naming
+fork closed ("I do not take my name from that mouth"); the
+standard spare remains available at the normal gate. Spare: he
+gives his last true sentence about the far country. Exploit:
+material reward. Finalize in specs/story alongside the character
+spec.
 
 Post-victory/post-mercy: the Unfounded Door is simply walked
 through. Exit marker -> the last continent. The Sophist, final
@@ -490,7 +524,7 @@ chair fit. Remember that it fit."
 ## Act III quest + boss summary (for implementation)
 
 - Quest: the Sophist's Third Ledger — act quest board at ap3-8
-  (display 62), fires once, pre-boss only (T's rule).
+  (display 65), fires once, pre-boss only (T's rule).
 - Boss: the Sophist at ap3-9 (display 63), isBoss, finale tier;
   power scales with total hint debt; mercy fork = naming him
   (PROTAS, assembled from the three ledger signatures), HP-gated

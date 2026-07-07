@@ -47,10 +47,13 @@ const ACTS = {
     expectedShortestMoves: 7,
     expectedUniqueShortest: true,
     secretEdges: [['57', '61']],
-    gateEdges: [['61', '62']],
+    gateEdges: [['61', '65']],
     realms: { Path: 9, Loop: 4, Trap: 3 },
     honestFragments: 5,
     counterfeits: 4,
+    // act3 easter egg (act3.solution.md): Path rooms wear odd
+    // displays; Loop and Trap wear even ones
+    parity: { Path: 1, Loop: 0, Trap: 0 },
   },
 };
 
@@ -182,6 +185,13 @@ for (const act of requested) {
   if (honest !== cfg.honestFragments) fail(`honest fragments: ${honest}, expected ${cfg.honestFragments}`);
   if (forged !== cfg.counterfeits) fail(`counterfeits: ${forged}, expected ${cfg.counterfeits}`);
   pass(`fragments: ${honest} carved / ${forged} painted`);
+
+  if (cfg.parity) {
+    const bad = rooms.filter((r) => cfg.parity[r.realm] !== undefined
+      && Number(r.display) % 2 !== cfg.parity[r.realm]);
+    if (bad.length) fail(`parity easter egg broken: ${bad.map((r) => `${r.display}(${r.realm})`).join(', ')}`);
+    else pass('display parity easter egg holds (Path odd, Loop/Trap even)');
+  }
 
   // -- path checks ------------------------------------------------
   const open = buildEdges(rooms, { openGates: true });

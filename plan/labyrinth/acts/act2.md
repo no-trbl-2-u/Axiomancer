@@ -28,8 +28,12 @@ Same as Act I (`act1.md` "Conventions"), plus the Act II escalations:
 - Act riddle, stated in ap2-1 and answered at the Gate of Assent
   (display 45): **"What does the true argument stand on?"**
 - Honest fragments: IT, RESTS, ON, NOTHING (shelf-marked, in the
-  ledger). Counterfeits: STONE, LAW, FAITH, GOLD, PROOF
-  (shelf-marked, NOT in the ledger).
+  ledger). Counterfeits: STONE, STANDS, FAITH, UPON, PROOF
+  (shelf-marked, NOT in the ledger). Deliberately socket-diverse:
+  STANDS forges the verb (competes with RESTS), UPON forges the
+  preposition (competes with ON), STONE/FAITH/PROOF forge the
+  ground — so the answer frame cannot be inferred from the forgery
+  pile and lawnmowering the final socket alone cannot win.
 - A spared Doorwarden (Act I mercy fork) names one forgery here for
   free (FAITH, in the Stair of Returns).
 
@@ -47,9 +51,9 @@ Same as Act I (`act1.md` "Conventions"), plus the Act II escalations:
 | ap2-8 | 46 | The Index's Antechamber | Path | 45 <->, 47 -> | — | quest (act quest board) |
 | ap2-9 | 47 | The Spine | Path | descent -> (Act III; appears after victory) | — | encounter, isBoss: The Index |
 | ap2-10 | 34 | The Periodicals Rotunda | Loop | 33 <->, 35 <->, 36 <->, 40 <-> | STONE (carved, false mark) | — |
-| ap2-11 | 36 | The Scriptorium | Loop | 33 <->, 34 <->, 42 <-> | LAW (carved, false mark) | — |
+| ap2-11 | 36 | The Scriptorium | Loop | 33 <->, 34 <->, 42 <-> | STANDS (carved, false mark) | — |
 | ap2-12 | 40 | The Stair of Returns | Loop | 34 <->, 39 <->, 42 <-> | FAITH (carved, false mark) | — |
-| ap2-13 | 42 | The Bindery | Loop | 36 <->, 40 <->, 48 <-> | GOLD (carved, false mark) | — |
+| ap2-13 | 42 | The Bindery | Loop | 36 <->, 40 <->, 48 <-> | UPON (carved, false mark) | — |
 | ap2-14 | 48 | The Unshelved Corridor | Loop | 42 <->, 38 -> | PROOF (carved, false mark) | — |
 | ap2-15 | 38 | The Weight of Volumes | Trap | 44 <-> | — | — |
 | ap2-16 | 44 | The Return Slot | Trap | 38 <->, 34 -> | — | — |
@@ -220,9 +224,13 @@ what it will not shelve. Lay the words in walking order. Forgeries
 will be checked against the catalogue. Everything is, eventually."
 
 Gate logic: correct = IT RESTS ON NOTHING -> the slate door pivots;
-edge 45->46 unblocks permanently. Incorrect: refusal lines ("The
-catalogue has no such holding."; "Right words, wrong shelving.").
-Unlimited attempts, no penalty.
+edge 45->46 unblocks permanently. Fragments are proven, not
+consumed. Incorrect: refusal lines ("The catalogue has no such
+holding."; "Right words, wrong shelving.") — and the refused
+submission goes into the Ledger of Assertions, armed at the finale
+(DESIGN.md sections 2 and 6). Unlimited attempts, no immediate
+penalty; the Sophist reminds returners: "Still keeping your
+guesses. The pile grows characterful."
 
 ### ap2-8 — display 46 — The Index's Antechamber (quest override)
 
@@ -257,10 +265,13 @@ everything is, which is not the same as knowing anything. Do not
 let it cite you."
 
 Boss: **The Index** — encounter override, isBoss, level band at
-implementation. Mercy fork per ADR-0007: spare -> the Index files
-ONE fragment of the player's choosing as "verified" in Act III (a
-single free authenticity check at the Foundation); exploit ->
-material reward (design note for specs/story).
+implementation. Mercy fork per ADR-0007 (through the standard
+Befriend heart-skill): spare -> the Index files ONE fragment of the
+player's choosing as "verified" in Act III (a single free
+authenticity check at the Foundation); exploit -> material reward,
+and it is remembered — exploiting BOTH act bosses hardens the
+finale's naming fork (DESIGN.md section 6). Design note for
+specs/story.
 
 Post-victory: a gallery floor unclasps — the one-way descent to
 Act III. The Sophist: "Deeper, then. Past the shelving, under the
@@ -295,8 +306,9 @@ is complicated. The desk they all face carved its opinion loudly.
 Loud is not shelved."
 
 POI remarks:
-- Carved slope: "LAW, mark V.v. The catalogue has never heard of
-  either." (Counterfeit LAW, carved, false mark V.v.)
+- Carved slope: "STANDS, mark V.v. A verb, pretending to be
+  load-bearing. The catalogue has never heard of it." (Counterfeit
+  STANDS, carved, false mark V.v.)
 - Dried ink wells: "Every argument here ran dry mid-sentence.
   There is a lesson in that I decline to copy out."
 
@@ -337,10 +349,11 @@ persuasive. The display copy is the forger's masterwork — gold on
 the spine and nothing sewn behind it."
 
 POI remarks:
-- Display binding: "GOLD, mark VIII.viii, gilded deep enough to
-  pass for carving. Open it. Blank. Bindings are promises;
-  contents are arguments." (Counterfeit GOLD, carved/gilt, false
-  mark VIII.viii.)
+- Display binding: "UPON, mark VIII.viii, tooled in gold deep
+  enough to pass for carving. A preposition with delusions of
+  grandeur. Open it. Blank. Bindings are promises; contents are
+  arguments." (Counterfeit UPON, carved/gilt, false mark
+  VIII.viii.)
 - Guillotine: "For trimming overhang. The Archive dislikes margins
   wider than their meaning."
 
@@ -424,7 +437,12 @@ POI remarks:
 - Counterfeit detector: taught at the entrance, usable at the
   ledger from the second room of the act; PROOF also self-detects
   (unmarked). Legacy carve/paint detector explicitly retired via
-  the "forger has learned his letters" line. PASS.
+  the entrance line "my colleague the forger works these halls
+  now. He carves nicely." PASS.
+- Anti-lawnmower: counterfeits attack three different sockets
+  (verb, preposition, ground), so the forgery pile does not reveal
+  the answer frame; refused gate submissions feed the Ledger of
+  Assertions. PASS.
 - Trap: escapable by walking (44 -> 34 service stair); mouth
   telegraphed twice. PASS.
 - Stuck player: hint tiers available everywhere. PASS.

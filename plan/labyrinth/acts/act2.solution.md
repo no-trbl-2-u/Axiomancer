@@ -40,9 +40,14 @@ as Act I) and the Map Room is one move from the Misfiled Wing.
   press under ATLASES OF NOWHERE — the very holding the ledger
   called "returned").
 - **45 (Gate):** answer IT RESTS ON NOTHING, in walking order.
-  Counterfeits all fail the ledger check: STONE (III.ix), LAW
-  (V.v), FAITH (XIII.iii), GOLD (VIII.viii) cite marks the ledger
-  lacks; PROOF carries no mark at all.
+  Counterfeits all fail the ledger check: STONE (III.ix), STANDS
+  (V.v), FAITH (XIII.iii), UPON (VIII.viii) cite marks the ledger
+  lacks; PROOF carries no mark at all. The forgery pile is
+  socket-diverse (verb STANDS, preposition UPON, grounds
+  STONE/FAITH/PROOF), so the IT-RESTS-ON-X frame cannot be read
+  off the counterfeits, and refused submissions accrue in the
+  Ledger of Assertions (finale scaling) — guessing is legal,
+  never free.
 - **46 (Antechamber):** quest (the Sophist's Second Ledger), then
   the one-way boss door.
 - **47 (The Spine):** the Index (isBoss). Mercy fork: spare -> one
@@ -58,9 +63,9 @@ as Act I) and the Map Room is one move from the Misfiled Wing.
 | ON | honest (carved) | 37 | IX.i | yes |
 | NOTHING | honest (carved) | 43 | XVII.i | yes |
 | STONE | counterfeit | 34 | III.ix | no |
-| LAW | counterfeit | 36 | V.v | no |
+| STANDS | counterfeit | 36 | V.v | no |
 | FAITH | counterfeit | 40 | XIII.iii | no (free-detected if Doorwarden spared) |
-| GOLD | counterfeit | 42 | VIII.viii | no |
+| UPON | counterfeit | 42 | VIII.viii | no |
 | PROOF | counterfeit | 48 | none | self-detecting |
 
 Act II contributes "IT RESTS ON NOTHING" to the center Passphrase
