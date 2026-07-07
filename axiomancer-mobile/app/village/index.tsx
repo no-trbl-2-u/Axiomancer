@@ -5,9 +5,14 @@
  * merchants (their stall-calls), and a transactional shop when the
  * authored payload carries one. Buying goes through the action
  * layer's `buyVillageWare` (engine `buyItem` owns the rules).
+ *
+ * Phase 5 adds a SELL tab alongside BUY: the shop head gains a tab
+ * toggle, and SELL lists the player's inventory (quest items
+ * excluded) priced via the presenter's `sellables` — dispatching
+ * `sellVillageItem` (engine `sellItem` owns the rules).
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'expo-router';
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 
@@ -27,6 +32,7 @@ export default function VillageScreen() {
     );
     const actions = useGameActions();
     const router = useRouter();
+    const [shopTab, setShopTab] = useState<'buy' | 'sell'>('buy');
 
     useEffect(() => {
         if (!vm.active && router.canGoBack()) router.back();
@@ -55,7 +61,7 @@ export default function VillageScreen() {
                     </>
                 )}
 
-                {vm.wares.length > 0 && (
+                {vm.hasShop && (
                     <>
                         <View style={styles.shopHead}>
                             <Text style={styles.sectionLabel}>THE STALLS</Text>
@@ -63,26 +69,76 @@ export default function VillageScreen() {
                                 {vm.currency} SHILLINGS
                             </Text>
                         </View>
-                        {vm.wares.map(ware => (
+                        <View style={styles.tabRow}>
                             <TouchableOpacity
-                                key={ware.itemId}
                                 accessibilityRole="button"
-                                accessibilityLabel={`Buy ${ware.name} for ${ware.price} shillings`}
-                                accessibilityState={{ disabled: !ware.affordable }}
-                                disabled={!ware.affordable}
-                                onPress={() => actions.buyVillageWare(ware.itemId)}
-                                style={[styles.wareRow, { opacity: ware.affordable ? 1 : 0.4 }]}
-                                testID={`village-ware-${ware.itemId}`}
+                                accessibilityLabel="Buy from the stalls"
+                                accessibilityState={{ selected: shopTab === 'buy' }}
+                                onPress={() => setShopTab('buy')}
+                                style={[styles.tabButton, shopTab === 'buy' && styles.tabButtonActive]}
+                                testID="village-tab-buy"
                             >
-                                <View style={styles.flexOne}>
-                                    <Text style={styles.wareName}>{ware.name}</Text>
-                                    {ware.description.length > 0 && (
-                                        <Text style={styles.wareDesc}>{ware.description}</Text>
-                                    )}
-                                </View>
-                                <Text style={[styles.warePrice, !ware.affordable && styles.warePriceUnaffordable]}>{ware.price}s</Text>
+                                <Text style={[styles.tabButtonText, shopTab === 'buy' && styles.tabButtonTextActive]}>BUY</Text>
                             </TouchableOpacity>
-                        ))}
+                            <TouchableOpacity
+                                accessibilityRole="button"
+                                accessibilityLabel="Sell to the stalls"
+                                accessibilityState={{ selected: shopTab === 'sell' }}
+                                onPress={() => setShopTab('sell')}
+                                style={[styles.tabButton, shopTab === 'sell' && styles.tabButtonActive]}
+                                testID="village-tab-sell"
+                            >
+                                <Text style={[styles.tabButtonText, shopTab === 'sell' && styles.tabButtonTextActive]}>SELL</Text>
+                            </TouchableOpacity>
+                        </View>
+
+                        {shopTab === 'buy' && (
+                            vm.wares.length > 0 ? vm.wares.map(ware => (
+                                <TouchableOpacity
+                                    key={ware.itemId}
+                                    accessibilityRole="button"
+                                    accessibilityLabel={`Buy ${ware.name} for ${ware.price} shillings`}
+                                    accessibilityState={{ disabled: !ware.affordable }}
+                                    disabled={!ware.affordable}
+                                    onPress={() => actions.buyVillageWare(ware.itemId)}
+                                    style={[styles.wareRow, { opacity: ware.affordable ? 1 : 0.4 }]}
+                                    testID={`village-ware-${ware.itemId}`}
+                                >
+                                    <View style={styles.flexOne}>
+                                        <Text style={styles.wareName}>{ware.name}</Text>
+                                        {ware.description.length > 0 && (
+                                            <Text style={styles.wareDesc}>{ware.description}</Text>
+                                        )}
+                                    </View>
+                                    <Text style={[styles.warePrice, !ware.affordable && styles.warePriceUnaffordable]}>{ware.price}s</Text>
+                                </TouchableOpacity>
+                            )) : (
+                                <Text style={styles.emptyNote} testID="village-buy-empty">Nothing for sale.</Text>
+                            )
+                        )}
+
+                        {shopTab === 'sell' && (
+                            vm.sellables.length > 0 ? vm.sellables.map(sellable => (
+                                <TouchableOpacity
+                                    key={`${sellable.itemId}-${sellable.index}`}
+                                    accessibilityRole="button"
+                                    accessibilityLabel={`Sell ${sellable.name} for ${sellable.sellPrice} shillings`}
+                                    onPress={() => actions.sellVillageItem(sellable.index)}
+                                    style={styles.wareRow}
+                                    testID={`village-sell-${sellable.index}`}
+                                >
+                                    <View style={styles.flexOne}>
+                                        <Text style={styles.wareName}>{sellable.name}</Text>
+                                        {sellable.description.length > 0 && (
+                                            <Text style={styles.wareDesc}>{sellable.description}</Text>
+                                        )}
+                                    </View>
+                                    <Text style={styles.warePrice}>{sellable.sellPrice}s</Text>
+                                </TouchableOpacity>
+                            )) : (
+                                <Text style={styles.emptyNote} testID="village-sell-empty">Nothing to sell.</Text>
+                            )
+                        )}
                     </>
                 )}
 
@@ -142,6 +198,19 @@ const useStyles = makeStyles((AXM) => ({
     merchantLine: { fontFamily: FONTS.serifItalic, fontSize: 12, color: AXM.parchment, marginTop: 4 },
     shopHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline' },
     purse: { fontFamily: FONTS.mono, fontSize: 10, color: AXM.sulfur, letterSpacing: 1 },
+    tabRow: { flexDirection: 'row', gap: 8, marginTop: 8, marginBottom: 8 },
+    tabButton: {
+        flex: 1,
+        borderWidth: 2,
+        borderColor: AXM.ash,
+        backgroundColor: AXM.panelBg,
+        paddingVertical: 6,
+        alignItems: 'center',
+    },
+    tabButtonActive: { borderColor: AXM.parchment, backgroundColor: AXM.bg },
+    tabButtonText: { fontFamily: FONTS.gothic, fontSize: 13, letterSpacing: 1.5, color: AXM.bone },
+    tabButtonTextActive: { color: AXM.parchment },
+    emptyNote: { fontFamily: FONTS.serifItalic, fontSize: 12, color: AXM.bone, marginBottom: 6 },
     wareRow: {
         flexDirection: 'row',
         alignItems: 'center',

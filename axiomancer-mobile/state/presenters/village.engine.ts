@@ -3,10 +3,19 @@
  * screen's VM from the pending `village` event (Phase 137). Pure: no
  * store writes. Wares resolve against the engine item libraries; the
  * BUY action lives in the action layer (`buyVillageWare`).
+ *
+ * Phase 5 adds the SELL side: `sellables` mirrors the player's
+ * inventory (quest items excluded — they are never sellable, same
+ * guard as `dropItem`) with a price derived by engine
+ * `defaultSellPrice` when the item matches a ware this village's shop
+ * lists, else the CLI's long-standing fallback of `1`
+ * (`src/CLI/game.cli.ts` `shopLoop`) — this presenter is the second
+ * consumer of that policy, so mobile and the CLI price sells alike.
  */
 
 import {
     consumableLibrary,
+    defaultSellPrice,
     equipmentTemplates,
     type Item,
     type ShopWare,
@@ -30,12 +39,24 @@ export interface VillageWareVM {
     affordable: boolean;
 }
 
+export interface VillageSellableVM {
+    /** Index into `player.inventory` — the identity `sellVillageItem` acts on. */
+    index: number;
+    itemId: string;
+    name: string;
+    description: string;
+    sellPrice: number;
+}
+
 export interface VillageVM {
     active: boolean;
     villageName: string;
     body: string;
     merchants: readonly VillageMerchantVM[];
+    /** A shop object is present on the event — gates the BUY/SELL tabs. */
+    hasShop: boolean;
     wares: readonly VillageWareVM[];
+    sellables: readonly VillageSellableVM[];
     currency: number;
 }
 
@@ -44,7 +65,9 @@ const EMPTY_VM: VillageVM = Object.freeze({
     villageName: '',
     body: '',
     merchants: Object.freeze([]),
+    hasShop: false,
     wares: Object.freeze([]),
+    sellables: Object.freeze([]),
     currency: 0,
 });
 
@@ -79,7 +102,9 @@ export function selectVillageVM(
         };
     });
 
-    const wares: VillageWareVM[] = (event.shop?.wares ?? [])
+    const shopWares = event.shop?.wares ?? [];
+
+    const wares: VillageWareVM[] = shopWares
         .map(ware => {
             const item = resolveWareItem(ware);
             if (!item) return null;
@@ -93,6 +118,22 @@ export function selectVillageVM(
         })
         .filter((w): w is VillageWareVM => w !== null);
 
+    const inventory = state.player?.inventory ?? [];
+    const sellables: VillageSellableVM[] = inventory
+        .map((item, index) => {
+            if (item.category === 'quest-item') return null;
+            const matching = shopWares.find(w => w.itemId === item.id);
+            const sellPrice = matching ? defaultSellPrice(matching) : 1;
+            return {
+                index,
+                itemId: item.id,
+                name: item.name,
+                description: item.description ?? '',
+                sellPrice,
+            };
+        })
+        .filter((s): s is VillageSellableVM => s !== null);
+
     return {
         active: true,
         villageName: event.villageName,
@@ -101,7 +142,9 @@ export function selectVillageVM(
             'each other. Coin is welcome. Strangers are tolerated, provided ' +
             'they become customers promptly.',
         merchants,
+        hasShop: event.shop !== undefined,
         wares,
+        sellables,
         currency,
     };
 }

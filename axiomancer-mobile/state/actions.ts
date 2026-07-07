@@ -18,6 +18,8 @@
 import {
     applyDialogueChoice,
     buyItem as engineBuyItem,
+    sellItem as engineSellItem,
+    defaultSellPrice as engineDefaultSellPrice,
     buildCharacterFromPreset,
     calculateSkillDamage,
     defaultAlignment,
@@ -662,6 +664,17 @@ export interface AppActions {
      */
     buyVillageWare: (itemId: string) => boolean;
 
+    /**
+     * Sell an inventory item back to the pending village event's
+     * shop (Phase 5). `index` identifies the inventory slot (mirrors
+     * the CLI `shopLoop` sell path, which disambiguates the same
+     * way). Price is engine `defaultSellPrice` against the shop's
+     * ware list when the item matches a listed ware, else the CLI's
+     * long-standing fallback of `1`. Quest items are never sellable.
+     * Returns success.
+     */
+    sellVillageItem: (index: number) => boolean;
+
     // -----------------------------------------------------------------
     // Skill-learning pass.
     // -----------------------------------------------------------------
@@ -1037,6 +1050,7 @@ export function createAppActions(store: AppStore): AppActions {
         claimLootCacheOutcome: () => claimLootCacheOutcomeAction(store),
         abandonLootCache: () => abandonLootCacheAction(store),
         buyVillageWare: (itemId) => buyVillageWareAction(store, itemId),
+        sellVillageItem: (index) => sellVillageItemAction(store, index),
         getLearnableSkillOffers: (count) => getLearnableSkillOffersAction(store, count),
         learnSkill: (skillId) => learnSkillAction(store, skillId),
     };
@@ -1837,6 +1851,37 @@ function buyVillageWareAction(store: AppStore, itemId: string): boolean {
         return true;
     } catch (error) {
         console.error('Failed to buy village ware:', error);
+        return false;
+    }
+}
+
+/**
+ * Sells an inventory item back to the pending village event's shop
+ * (Phase 5). Quest items are never sellable — mirrors the `dropItem`
+ * defend-in-depth guard (`canDiscard` on the inventory VM keeps the
+ * screen from ever offering the action, but the action layer checks
+ * again for direct dispatch). Price matches the CLI's `shopLoop` sell
+ * path: `defaultSellPrice` against the shop's ware list when the item
+ * matches a listed ware, else a flat fallback of `1`.
+ */
+function sellVillageItemAction(store: AppStore, index: number): boolean {
+    try {
+        const state = store.getState();
+        const pending = state.event?.pending;
+        if (!pending || pending.event.kind !== 'village') return false;
+        const player = (state as unknown as GameState).player;
+        const item = player.inventory[index];
+        if (!item) return false;
+        if (item.category === 'quest-item') return false;
+        const wares = pending.event.shop?.wares ?? [];
+        const matching = wares.find(w => w.itemId === item.id);
+        const price = matching ? engineDefaultSellPrice(matching) : 1;
+        const next = engineSellItem(player, item.id, price);
+        if (next === player) return false;
+        store.setState({ player: next } as never);
+        return true;
+    } catch (error) {
+        console.error('Failed to sell village item:', error);
         return false;
     }
 }

@@ -18,6 +18,7 @@
 import {
     consumableLibrary,
     equipmentTemplates,
+    type Item,
     type NPC,
     type ShopWare,
 } from '@mechanics';
@@ -52,6 +53,8 @@ function makeState(opts: {
     villageName?: string;
     kind?: string;
     noPending?: boolean;
+    noShop?: boolean;
+    inventory?: readonly Item[];
 }): VillageState {
     const {
         merchants = [],
@@ -60,6 +63,8 @@ function makeState(opts: {
         villageName = 'Saltmarsh',
         kind = 'village',
         noPending = false,
+        noShop = false,
+        inventory = [],
     } = opts;
 
     const event = noPending
@@ -70,14 +75,24 @@ function makeState(opts: {
                       kind,
                       villageName,
                       merchants,
-                      shop: { wares },
+                      shop: noShop ? undefined : { wares },
                   },
               },
           } as unknown as AppStoreState['event']);
 
     return {
         event,
-        player: { currency } as unknown as AppStoreState['player'],
+        player: { currency, inventory } as unknown as AppStoreState['player'],
+    };
+}
+
+function questItem(id = 'hierophants-tooth'): Item {
+    return {
+        id,
+        name: "Hierophant's Tooth",
+        description: 'Reek of incense.',
+        category: 'quest-item',
+        questId: 'quest-priest',
     };
 }
 
@@ -217,5 +232,60 @@ describe('selectVillageVM', () => {
     it('returns an empty ware list when the village has no shop', () => {
         const vm = selectVillageVM(makeState({}));
         expect(vm.wares).toEqual([]);
+    });
+
+    it('hasShop is true when the event carries a shop object, even with zero wares', () => {
+        const vm = selectVillageVM(makeState({ wares: [] }));
+        expect(vm.hasShop).toBe(true);
+    });
+
+    it('hasShop is false when the event has no shop object at all', () => {
+        const vm = selectVillageVM(makeState({ noShop: true }));
+        expect(vm.hasShop).toBe(false);
+        expect(vm.wares).toEqual([]);
+        expect(vm.sellables).toEqual([]);
+    });
+
+    it('derives a sellable per non-quest inventory item, priced off the matching ware', () => {
+        const vm = selectVillageVM(
+            makeState({
+                wares: [{ itemId: REAL_CONSUMABLE_ID!, price: 12 }],
+                inventory: [
+                    { id: REAL_CONSUMABLE_ID!, name: 'Phial', description: '', category: 'consumable', quantity: 1 },
+                ],
+            }),
+        );
+        expect(vm.sellables).toHaveLength(1);
+        expect(vm.sellables[0]).toEqual({
+            index: 0,
+            itemId: REAL_CONSUMABLE_ID,
+            name: 'Phial',
+            description: '',
+            sellPrice: 6,
+        });
+    });
+
+    it('falls back to a sell price of 1 when the item matches no ware on this shop', () => {
+        const vm = selectVillageVM(
+            makeState({
+                wares: [],
+                inventory: [
+                    { id: 'unlisted-trinket', name: 'Trinket', description: '', category: 'material', quantity: 1 },
+                ],
+            }),
+        );
+        expect(vm.sellables[0]?.sellPrice).toBe(1);
+    });
+
+    it('excludes quest items from sellables', () => {
+        const vm = selectVillageVM(
+            makeState({ inventory: [questItem()] }),
+        );
+        expect(vm.sellables).toEqual([]);
+    });
+
+    it('treats missing inventory as an empty sellable list', () => {
+        const vm = selectVillageVM(makeState({}));
+        expect(vm.sellables).toEqual([]);
     });
 });
