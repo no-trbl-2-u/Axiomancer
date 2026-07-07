@@ -1,7 +1,7 @@
 # Critique log
 
-> Last pass: 2026-07-07 at commit f472e1a1
-> Pass count: 3
+> Last pass: 2026-07-07 at commit 6ac89721
+> Pass count: 4
 
 > External-observer feedback for Axiomancer. Populated by
 > `/critique` (which drives the local expo-web build with the
@@ -12,8 +12,8 @@
 ## Pending
 
 ### [needs-user-call] Playwright MCP tools unavailable to sub-agents
-- pass: 1, 2, 3 (commits 6e23724a, 22bc8ab2, f472e1a1) — recurring,
-  unresolved
+- pass: 1, 2, 3, 4 (commits 6e23724a, 22bc8ab2, f472e1a1, 6ac89721) —
+  recurring, unresolved, four consecutive passes with zero coverage
 - viewport: n/a
 - category: infra
 - observation: The local expo-web build started fine on
@@ -22,30 +22,31 @@
   broken, see below). But every `mcp__playwright__browser_*` call
   from the `playtester` sub-agent was rejected with "Claude requested
   permissions to use mcp__playwright__browser_navigate, but you
-  haven't granted it yet." Pass 3 confirms this is chronic, not
-  transient: `.claude/settings.json` still exists untracked in the
-  working tree (confirmed present, unchanged in shape since pass 2)
-  and its `permissions.allow` list still has no `mcp__playwright__*`
-  entries. `.claude/settings.json.example`'s own header note frames
-  activating/widening this file's grants as "a deliberate, user-owned
-  step — the adoption did not enable it for you," which is why
-  `/march` (fully autonomous this tick) deliberately did not
-  self-grant the permission rather than unblock its own critique
-  pass. Three anonymous-pass attempts across three passes have now
-  produced zero actual playtest coverage.
+  haven't granted it yet." Pass 4 confirms this is still unresolved:
+  `.claude/settings.json` exists untracked in the working tree
+  (unchanged in shape since pass 2) and its `permissions.allow` list
+  still has no `mcp__playwright__*` entries. `/march` (fully
+  autonomous this tick) again deliberately did not self-grant the
+  permission rather than unblock its own critique pass, per the
+  config file's own header note that widening its grants is "a
+  deliberate, user-owned step." Four anonymous-pass attempts across
+  four passes have now produced zero actual playtest coverage.
 - evidence: playtester sub-agent report (pass 1, main-agent direct
   call); playtester sub-agent report (pass 2, identical rejection
   message, verbatim retry-then-fail behavior); playtester sub-agent
   report (pass 3, same rejection message, single retry per updated
+  instructions, no coverage); playtester sub-agent report (pass 4,
+  same rejection message verbatim, immediate stop per updated
   instructions, no coverage).
 - suggested fix: add the needed `mcp__playwright__*` tool names to
   `.claude/settings.json`'s `permissions.allow` list (a user/config
   decision, not a code fix `/iterate` or `/march` can make
   unilaterally — see `update-config` skill). Until granted, every
-  `/critique` tick will keep producing zero playtest coverage. Given
-  three unresolved passes, worth a direct user nudge (e.g. via
-  `/oversight`) rather than waiting for a fourth.
-- source: critique pass 1, pass 2, pass 3
+  `/critique` tick will keep producing zero playtest coverage. Four
+  unresolved passes is well past the "worth a nudge" threshold from
+  pass 3 — this now warrants a direct `/oversight` escalation rather
+  than a fifth silent retry.
+- source: critique pass 1, pass 2, pass 3, pass 4
 
 ### [LOW] `web:container` dev-server script is broken
 - pass: 1 (commit 6e23724a)
