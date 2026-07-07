@@ -400,8 +400,8 @@ describe('Spec 25 — constants', () => {
 // ── AUTHORED_THREAT_ENEMY_IDS ─────────────────────────────────────────────────
 
 describe('Spec 25 — AUTHORED_THREAT_ENEMY_IDS', () => {
-    it('contains exactly 53 authored-threat enemy slugs (52 roster + the ceiling)', () => {
-        expect(AUTHORED_THREAT_ENEMY_IDS.length).toBe(53);
+    it('contains exactly 56 authored-threat enemy slugs (52 roster + the ceiling + 3 Aporia bosses)', () => {
+        expect(AUTHORED_THREAT_ENEMY_IDS.length).toBe(56);
     });
 
     it('every entry follows the "enemy-<slug>" naming convention', () => {

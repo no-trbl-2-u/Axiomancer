@@ -1,4 +1,5 @@
 import { WorldState, QuestLog, Encounter } from '../World/types';
+import { LabyrinthProgress } from '../World/Labyrinth/types';
 import { Character } from '../Character/types';
 import { PhilosophicalAlignment } from '../Philosophy/types';
 import { FactionReputations } from '../Faction/types';
@@ -146,4 +147,12 @@ export interface GameState {
      * (empty, all factions neutral) on new games.
      */
     factionReputations: FactionReputations;
+    /**
+     * W-01 — cross-act labyrinth (The Aporia) progress: pocket of
+     * fragments, opened gates, revealed secrets, the debt ledger, and
+     * waystones. Optional lazy slice like `lastSeenAlignmentCells`:
+     * absent until the player first enters the continent, so older
+     * saves need no migration.
+     */
+    labyrinth?: LabyrinthProgress;
 }

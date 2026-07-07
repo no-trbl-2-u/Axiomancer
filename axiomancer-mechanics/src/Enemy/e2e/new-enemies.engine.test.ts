@@ -16,9 +16,18 @@ import { ENEMY_REGISTRY, EnemyLibrary, TheIncompleteness, Sandbag_01 } from '../
 import { AUTHORED_THREAT_SEQUENCES } from '../../Combat/combat.threat-sequences';
 import type { Enemy } from '../types';
 
-/** The 52 art-roster slugs (excludes the sandbag + incompleteness fixtures). */
+/** The Aporia act bosses (W-01) — authored labyrinth content, not paintings. */
+const APORIA_BOSS_SLUGS = ['the-doorwarden', 'the-index', 'the-sophist'] as const;
+
+/**
+ * The 52 art-roster slugs (excludes the sandbag + incompleteness fixtures and
+ * the W-01 labyrinth act bosses, which are not part of the painting roster).
+ */
 const ROSTER_SLUGS = (Object.keys(ENEMY_REGISTRY) as Array<keyof typeof ENEMY_REGISTRY>)
-    .filter(slug => slug !== 'sandbag' && slug !== 'the-incompleteness');
+    .filter(slug =>
+        slug !== 'sandbag' &&
+        slug !== 'the-incompleteness' &&
+        !(APORIA_BOSS_SLUGS as readonly string[]).includes(slug));
 
 describe('2026-07-06: the art-driven base roster', () => {
     it('carries exactly 52 roster enemies (one per painting)', () => {
@@ -103,6 +112,45 @@ describe('2026-07-06: the art-driven base roster', () => {
         it('keeps the Sandbag and The Incompleteness registered but excluded from the count', () => {
             expect(ENEMY_REGISTRY['sandbag']).toBe(Sandbag_01);
             expect(ENEMY_REGISTRY['the-incompleteness']).toBe(TheIncompleteness);
+        });
+    });
+
+    describe('the Aporia act bosses (W-01)', () => {
+        it('registers all three labyrinth bosses at boss difficulty on their act maps', () => {
+            const expected: Record<(typeof APORIA_BOSS_SLUGS)[number], string> = {
+                'the-doorwarden': 'aporia-colonnade',
+                'the-index':      'aporia-archive',
+                'the-sophist':    'aporia-proof',
+            };
+            for (const slug of APORIA_BOSS_SLUGS) {
+                const enemy = ENEMY_REGISTRY[slug] as Enemy;
+                expect(enemy, `slug ${slug} missing from ENEMY_REGISTRY`).toBeDefined();
+                expect(enemy.difficulty).toBe('boss');
+                expect(enemy.mapName).toBe(expected[slug]);
+                expect(EnemyLibrary).toContain(enemy);
+            }
+        });
+
+        it('authors an escalating threat sequence for every labyrinth boss', () => {
+            for (const slug of APORIA_BOSS_SLUGS) {
+                const enemy = ENEMY_REGISTRY[slug] as Enemy;
+                const seq = AUTHORED_THREAT_SEQUENCES[enemy.id];
+                expect(seq, `enemy ${enemy.id} has no authored threat sequence`).toBeDefined();
+                expect(seq!.length).toBeGreaterThanOrEqual(2);
+                const opener = seq![0].damageWeight ?? 1;
+                const peak = Math.max(...seq!.map(p => p.damageWeight ?? 1));
+                expect(peak, `enemy ${enemy.id} never escalates past its opener`).toBeGreaterThan(opener);
+            }
+        });
+
+        it('derives positive resources for every labyrinth boss', () => {
+            for (const slug of APORIA_BOSS_SLUGS) {
+                const enemy = ENEMY_REGISTRY[slug] as Enemy;
+                expect(enemy.maxHealth, `slug ${slug} maxHealth`).toBeGreaterThan(0);
+                for (const [key, value] of Object.entries(enemy.derivedStats)) {
+                    expect(value, `slug ${slug} derivedStats.${key}`).toBeGreaterThan(0);
+                }
+            }
         });
     });
 });

@@ -5,21 +5,37 @@ import { CoastalContinentMapNames } from "./Continents/Coastal-Village/maps";
  * ContinentName represents the names of all continents in the game world
  * - 'coastal-continent': Starting Continent
  * - 'northern-continent': Contains Caverns, first major city, and connecting river
+ * - 'labyrinth-continent': THE APORIA — the MAZE-style puzzle labyrinth
+ *   gating the last continent (specs/world/W-01). Dev-menu + CLI access
+ *   only until the last continent exists.
  * @todo: Add more continents
  * @todo: Come up with better names
  */
 export type ContinentName =
     'coastal-continent' |
-    'northern-continent';
+    'northern-continent' |
+    'labyrinth-continent';
+
+/**
+ * LabyrinthContinentMapNames are the three acts of The Aporia (W-01):
+ * - 'aporia-colonnade': Act I — The Colonnade
+ * - 'aporia-archive':   Act II — The Archive
+ * - 'aporia-proof':     Act III — The Proof
+ */
+export type LabyrinthContinentMapNames =
+    'aporia-colonnade' |
+    'aporia-archive' |
+    'aporia-proof';
 
 /**
  * MapName is the union of all map names in the game
  * @todo: There is no type enforcement to ensure a specific map name is part
- *        of a specific continent.  
+ *        of a specific continent.
  */
 export type MapName =
     CoastalContinentMapNames |
-    NorthernContinentMapNames;
+    NorthernContinentMapNames |
+    LabyrinthContinentMapNames;
 
 /**
  * NorthernContinentMaps are all the maps in the Northern Continent

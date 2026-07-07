@@ -416,5 +416,16 @@ dev-menu entry.
       avoid duplicating 1,700 lines of room content into specs) +
       `specs/characters/C-01-the-sophist.md`. Both cross-referenced
       mutually.
-- [ ] 10. Mechanics + CLI implementation merged (post-design)
-- [ ] 11. CLAUDE-DESIGN-PROMPT.md written for T
+- [x] 10. Mechanics + CLI implementation — 2026-07-07. Labyrinth
+      traversal mode + engine (src/World/Labyrinth/), three act
+      content modules, maps/pools/registry/prefix wiring, three
+      bosses + threat sequences, three quest boards,
+      GameState.labyrinth slice, `npm run labyrinth` CLI. 35 new
+      hermetic tests; all three verify gates green; full scripted
+      three-act CLI playthrough completes (gate answers, passphrase
+      with pre-confirmation, PROTAS naming fork). Known tuning item:
+      act random-encounter difficulty vs combat preset (kid-l15 can
+      wall in act3 on hot seeds) — a world-tuning loop follow-up.
+- [x] 11. CLAUDE-DESIGN-PROMPT.md written for T — hand it to
+      claude-design for the mobile UI (dev-menu entry, room scenes,
+      accordion, sockets, fog-of-war map).

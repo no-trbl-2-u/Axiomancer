@@ -58,10 +58,15 @@ export function moveToNode(state: WorldState, nodeId: NodeId): WorldState {
     if (!currentNode.connectedNodes.includes(nodeId)) {
         throw new IllegalMoveError(`moveToNode: '${nodeId}' is not adjacent to '${map.currentNode}'.`);
     }
-    if (map.completedNodes.includes(nodeId)) {
+    // W-01 — labyrinth maps allow free travel along the current room's
+    // doors, including back into completed/consumed rooms ("solved space
+    // is solved" — re-entry is free, the one-shot event just won't fire).
+    // Gauntlet maps keep the classic forward-only doctrine below.
+    const labyrinth = getMapDefinition(map.continent, map.name).traversal === 'labyrinth';
+    if (!labyrinth && map.completedNodes.includes(nodeId)) {
         throw new IllegalMoveError(`moveToNode: '${nodeId}' is already completed — back-travel is not permitted.`);
     }
-    if (map.lockedNodes.includes(nodeId)) {
+    if (!labyrinth && map.lockedNodes.includes(nodeId)) {
         throw new IllegalMoveError(`moveToNode: '${nodeId}' is locked.`);
     }
     const blockedRoute = map.blockedRoutes.find(
@@ -300,7 +305,40 @@ export function blockMapRoute(state: MapState, from: NodeId, to: NodeId, reason:
 }
 
 /**
- * Query all hazard outcomes affecting a specific node. Used by the 
+ * Removes any block on the route between two nodes (either direction).
+ * W-01 — opens a labyrinth secret door or an answered act gate. No-op
+ * when the route isn't blocked.
+ */
+export function unblockMapRoute(state: MapState, from: NodeId, to: NodeId): MapState {
+    const remaining = state.blockedRoutes.filter(
+        route => !((route.from === from && route.to === to) ||
+                   (route.from === to && route.to === from))
+    );
+    if (remaining.length === state.blockedRoutes.length) return state;
+    return { ...state, blockedRoutes: remaining };
+}
+
+/**
+ * Places the player directly on `nodeId`, bypassing adjacency. W-01 —
+ * labyrinth-only movements that are not walks: the Oubliette's ejection
+ * to the last activated Waystone. Throws off labyrinth maps so gauntlet
+ * traversal can never be teleport-skipped, and on unknown nodes.
+ */
+export function teleportToNode(state: WorldState, nodeId: NodeId): WorldState {
+    const map = state.currentMap;
+    const def = getMapDefinition(map.continent, map.name);
+    if (def.traversal !== 'labyrinth') {
+        throw new IllegalMoveError(`teleportToNode: '${map.name}' is not a labyrinth map.`);
+    }
+    if (!def.nodes.some(n => n.id === nodeId)) {
+        throw new IllegalMoveError(`teleportToNode: '${nodeId}' is unknown on map '${map.name}'.`);
+    }
+    if (map.currentNode === nodeId) return state;
+    return { ...state, currentMap: { ...map, currentNode: nodeId } };
+}
+
+/**
+ * Query all hazard outcomes affecting a specific node. Used by the
  * HazardModifierTable system to compute threshold adjustments.
  */
 export function getHazardOutcomesForNode(state: MapState, nodeId: NodeId): HazardNodeOutcome[] {

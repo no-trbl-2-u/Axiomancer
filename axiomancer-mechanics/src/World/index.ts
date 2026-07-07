@@ -97,6 +97,31 @@ export * from './LootCache';
 // Gathering Minigame (Phase 142)
 export * from './Gathering';
 
+// The Labyrinth — THE APORIA (W-01). The pools module self-registers the
+// three acts' MapEvent pools on import, mirroring the content import above.
+import './Labyrinth/labyrinth.pools';
+
+export {
+    createLabyrinthProgress, visibleDoors, canTraverse, inspectPoi,
+    submitGateAnswer, preConfirmedWords, buyHint, hintPrice, nextHopToward,
+    debtPoints, borrowedPremiseStacks, settleDebt, activateWaystone,
+    lastWaystone, namingForkOpen, recordBossOutcome, getRoom, edgeKey,
+    LabyrinthContentError,
+    HINT_TIER_POINTS, ASSERTION_POINTS,
+    BORROWED_PREMISE_THRESHOLDS, BORROWED_PREMISE_CAP,
+} from './Labyrinth/labyrinth.engine';
+export {
+    APORIA_ACTS, getAporiaAct, getAporiaActByMap,
+    buildLabyrinthMapDefinition,
+    aporiaColonnade, aporiaArchive, aporiaProof,
+} from './Labyrinth/maps';
+export type {
+    LabyrinthActDef, LabyrinthActId, LabyrinthRoomDef, LabyrinthPoiDef,
+    LabyrinthDoorDef, LabyrinthGateDef, LabyrinthRealm, LabyrinthFragment,
+    LabyrinthProgress, LabyrinthHintPurchase, LabyrinthBossOutcome,
+    LabyrinthVisibleDoor, LabyrinthInspectResult, LabyrinthGateResult,
+} from './Labyrinth/types';
+
 // Minigame Harness (Phase 148) — composable cross-minigame testing
 export {
     runMinigameHarness, summarizeHarnessReport,

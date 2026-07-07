@@ -1902,6 +1902,200 @@ export const TheAbortive = createEnemy({
     tags: ['late-game', 'unique', 'enemy'],
 });
 
+// ═══════════════════════════════════════════════════════════════════════════════
+// THE APORIA — labyrinth continent (W-01), act bosses (L8 / L12 / L16)
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/** Provenance stamp for the W-01 labyrinth-boss batch (not the art roster). */
+const APORIA_ADDED = '2026-07-07';
+
+/**
+ * Act I boss — The Colonnade. Control / stance-denial kit: roots, staggers
+ * and silences so the status line is the way through, per doctrine. Level 8
+ * pins the act band (see `labyrinth.pools.ts` BOSS_LEVEL).
+ */
+export const TheDoorwarden = createEnemy({
+    id: 'enemy-the-doorwarden',
+    name: 'The Doorwarden',
+    stanceHint: 'He answers every motion with a jamb — where you would step, a threshold has already been installed.',
+    description:
+        'A hinge-priest of jointed bronze, kneeling in a chapel whose walls are doors. ' +
+        'Every door that ever shut is remembered in him, and he holds them all shut at once. ' +
+        'He does not hate you. He simply does not recognize your right of way.',
+    level: 8,
+    baseStats: enemyStatBudget(8, { heart: 1, body: 3, mind: 2 }),
+    mapName: 'aporia-colonnade',
+    difficulty: 'boss',
+    logic: 'boss',
+    tier1Overrides: T1_DEFAULT,
+    procUnlocks: {
+        body: { attack: 3, defend: 3 },
+        mind: { attack: 2, defend: 2 },
+    },
+    loot: [
+        drop('healing-potion', 40),
+        drop('iron-skin-draught', 25),
+        drop('clarity-serum', 20),
+        drop('resonance-crystal', 15),
+    ],
+    philosophicalAlignment: { epistemology: 67, outlook: 0, scope: -67 },
+    skills: [skill('false-dilemma'), skill('undistributed-middle'), skill('achilles-gambit')],
+    finalBlowLines: {
+        brutal: 'The hinge-priest comes apart at every joint at once. Ten thousand doors, unheld, swing open somewhere.',
+        quiet:  'He folds shut along his own seams, the way a door closes on an empty room, and stays closed.',
+        ironic: 'He remembered every door that ever shut. He had no doctrine for one that simply walked through him.',
+    },
+    causeLines: {
+        brutal: 'The threshold arrives at you, all bronze and precedent, and closes.',
+        broken: 'Room by room he narrows the argument until the only door left open is the one behind you.',
+        quiet:  'You pause to knock. In his chapel, knocking is consent to the terms of the house.',
+    },
+    journalEntry: {
+        id: 'codex-the-doorwarden',
+        title: 'The Hinge-Priest',
+        body:
+            'The house needed something to believe in its doors, so it built a believer. ' +
+            'He was assembled from the hinges of every argument that ever closed — each ' +
+            'joint a refusal, oiled and kept. His liturgy is short: what shuts, stays ' +
+            'shut. He kneels because a kneeling thing is a door at rest, and he has ' +
+            'been at rest, facing the entrance, for a very long time.',
+    },
+    addedIn: APORIA_ADDED,
+    tags: ['mid-game', 'boss', 'enemy', 'labyrinth'],
+});
+
+/**
+ * Act II boss — The Archive. DoT / misfile kit: bleed and burn stacked deep,
+ * so erosion is the efficient line, per doctrine. Level 12 pins the act band.
+ */
+export const TheIndex = createEnemy({
+    id: 'enemy-the-index',
+    name: 'The Index',
+    stanceHint: 'It files before it strikes — by the time the blow lands, your counter is already catalogued under errata.',
+    description:
+        'A librarian-golem made of misfiled truths, card drawers for ribs, a spine of ' +
+        'retired catalogues. Everything it ever shelved wrongly is still in there, ' +
+        'filed under you now. It bleeds ink, and so, presently, will you.',
+    level: 12,
+    baseStats: enemyStatBudget(12, { heart: 1, body: 2, mind: 4 }),
+    mapName: 'aporia-archive',
+    difficulty: 'boss',
+    logic: 'boss',
+    tier1Overrides: T1_DEFAULT,
+    procUnlocks: {
+        mind: { attack: 3, defend: 3 },
+        body: { attack: 2, defend: 2 },
+    },
+    loot: [
+        drop('philosopher-tea', 35),
+        drop('clarity-serum', 25),
+        drop('focus-vial', 25),
+        drop('revive-crystal', 15),
+    ],
+    philosophicalAlignment: { epistemology: 67, outlook: -67, scope: 67 },
+    skills: [skill('sorites-cascade'), skill('liars-echo'), skill('false-dilemma')],
+    finalBlowLines: {
+        brutal: 'The drawers burst in order, A through the end of knowing. The misfiled truths get one moment of daylight each.',
+        quiet:  'It shelves itself, finally, in the one place it never checked: under its own name.',
+        ironic: 'It catalogued every way you could lose. The winning move was, of course, misfiled.',
+    },
+    causeLines: {
+        brutal: 'A drawer opens at your name. The paper cuts are individually filed, and there are so very many files.',
+        broken: 'Errata accumulate faster than you can issue corrections. Eventually you are all margin.',
+        quiet:  'You stop to read one card too long. The Archive quietly assigns you a call number.',
+    },
+    journalEntry: {
+        id: 'codex-the-index',
+        title: 'The Misfiled',
+        body:
+            'The Archive keeps everything, which is not the same as keeping it well. ' +
+            'Every truth shelved under the wrong heading had to go somewhere, and the ' +
+            'somewhere accreted: ribs of card drawers, a heart of cross-references that ' +
+            'resolve to nothing. It does not guard the collection. It IS the errata, ' +
+            'walking, and it wants the record to show that none of this was its filing.',
+    },
+    addedIn: APORIA_ADDED,
+    tags: ['mid-game', 'boss', 'enemy', 'labyrinth'],
+});
+
+/**
+ * Act III finale boss — The Proof. The labyrinth's narrator made manifest
+ * (C-01). Befriendable: the mercy fork at the Foundation is a named beat in
+ * W-01, so the pact path carries the reward. Level 16 pins the act band.
+ */
+export const TheSophist = createEnemy({
+    id: 'enemy-the-sophist',
+    name: 'The Sophist',
+    stanceHint: 'He argues in your grammar — every stance you take, he has already taken it better, and returned it used.',
+    description:
+        'The labyrinth\'s narrator, stepped down from the margin at last. He fights ' +
+        'with borrowed premises — yours, mostly, held at a more flattering angle — ' +
+        'and he has been rehearsing this conversation for centuries. The house ' +
+        'requires its paperwork. He is the paperwork.',
+    level: 16,
+    baseStats: enemyStatBudget(16, { heart: 2, body: 1, mind: 4 }),
+    mapName: 'aporia-proof',
+    difficulty: 'boss',
+    logic: 'boss',
+    tier1Overrides: T1_DEFAULT,
+    procUnlocks: {
+        mind:  { attack: 3, defend: 3 },
+        heart: { attack: 3, defend: 3 },
+        body:  { attack: 2, defend: 2 },
+    },
+    loot: [
+        drop('philosopher-tea', 35),
+        drop('clarity-serum', 25),
+        drop('greater-healing-potion', 20),
+        drop('revive-crystal', 20),
+    ],
+    philosophicalAlignment: { epistemology: 67, outlook: -67, scope: 67 },
+    skills: [skill('bootstrap-paradox'), skill('liars-echo'), skill('false-dilemma')],
+    befriendabilityConfig: {
+        hpGate: { belowPct: 0.25 },
+        requiredStances: ['mind'],
+        roundsThreshold: 6,
+    },
+    friendshipReward: {
+        items: [
+            { ...getConsumableById('philosopher-tea')! },
+            { ...getConsumableById('clarity-serum')! },
+            { ...getConsumableById('revive-crystal')! },
+        ],
+        xpBonus: 120,
+        alignmentDelta: { outlook: +2, scope: +1 },
+        narrative:
+            'He sets down the argument mid-clause. It was yours anyway.\n\n' +
+            '"You noticed," he says. "That I borrow. Everyone notices late or never. ' +
+            'The ones who notice late I bury in their own premises. You I cannot, ' +
+            'because you kept revising yours while I held them."\n\n' +
+            'He signs the air the way he signs the ledgers: a third of a name.\n\n' +
+            '"The house wanted a witness. I wanted a better one than me. ' +
+            'Go down. Finish the sentence I could not start. I will keep the record."',
+        flagSet: 'befriended-the-sophist',
+        factionDeltas: {
+            'forest-wardens': +8,
+        },
+    },
+    pactLines: {
+        quiet:   'The narration stops. For the first time in centuries, the house has no one to explain it.',
+        setDown: 'He closes the third ledger and lays the pen across it, nib toward you. The fourth ledger stays blank. That is the concession.',
+        heavy:   '"I sold certainty at the door because I could not afford it myself. You walked in without buying. Note it in the record: one walked in without buying."',
+    },
+    journalEntry: {
+        id: 'codex-the-sophist',
+        title: 'The Ledger Signed in Thirds',
+        body:
+            'He was the first to walk down, and the first the house kept. He carried ' +
+            'his premises like furniture and would not set one down, so the maze made ' +
+            'him its clerk: warden, footnote, oldest pupil, only failure. He signs the ' +
+            'act ledgers in thirds because a whole name would admit a whole man. He is ' +
+            'not guarding the center. He is standing where he cannot see it.',
+    },
+    addedIn: APORIA_ADDED,
+    tags: ['mid-game', 'boss', 'enemy', 'labyrinth'],
+});
+
 // ─── Test fixture (legacy, NOT part of the art roster) ────────────────────────
 
 /**
@@ -2001,6 +2195,8 @@ export const EnemyLibrary = [
     TriEyesHollowed, BlackDeath, TheUnnameable, FireGiant, GreaterDevil, Rangda,
     ZomaAscendant, ElderFireGiant, Tezcatlipoca, ArchDemon, Beelzebub, Death,
     TheAbortive,
+    // The Aporia — labyrinth act bosses (W-01; not part of the 52-painting roster).
+    TheDoorwarden, TheIndex, TheSophist,
     // Impossible playtest ceiling — deliberately absent from EnemiesByMap.
     TheIncompleteness,
 ] as const;
@@ -2027,6 +2223,22 @@ export const EnemiesByMap = {
         TriEyesHollowed, BlackDeath, TheUnnameable, FireGiant, GreaterDevil, Rangda,
         ZomaAscendant, ElderFireGiant, Tezcatlipoca, ArchDemon, Beelzebub, Death,
         TheAbortive,
+    ],
+    // The Aporia (W-01) — three acts of rising difficulty. Pools reuse the
+    // shared roster (wandering foes scale to the player via the adaptive
+    // level bands); each act adds its authored boss.
+    'aporia-colonnade': [
+        Wichtlein, BullBegger, WeepingHead, GoblinShaman, Sugata, PaleBrood,
+        TriEyes, TheDoorwarden,
+    ],
+    'aporia-archive': [
+        Mabadi, FrayedOne, BoneTotem, BoneWizard, CursedPaladin, VampireThrall,
+        HasshakuSama, TheIndex,
+    ],
+    'aporia-proof': [
+        TriEyesHollowed, BlackDeath, TheUnnameable, FireGiant, GreaterDevil,
+        ZomaAscendant, ElderFireGiant, Tezcatlipoca, ArchDemon, Beelzebub,
+        TheSophist,
     ],
 } as const;
 
@@ -2094,6 +2306,10 @@ export const ENEMY_REGISTRY = {
     'beelzebub':         Beelzebub,
     'death':             Death,
     'the-abortive':      TheAbortive,
+    // The Aporia — labyrinth act bosses (W-01).
+    'the-doorwarden':    TheDoorwarden,
+    'the-index':         TheIndex,
+    'the-sophist':       TheSophist,
     // Impossible playtest ceiling (never in EnemiesByMap pools).
     'the-incompleteness': TheIncompleteness,
 } as const;

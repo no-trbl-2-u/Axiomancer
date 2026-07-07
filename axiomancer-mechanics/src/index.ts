@@ -397,6 +397,22 @@ export type {
     VillagePayload, CutscenePayload, HazardPayload, LootCachePayload,
     QuestEventPayload, NarrationPayload, ResolvedEvent, ResolveMapEventResult,
 } from './World';
+// W-01 — The Labyrinth (THE APORIA). Additive surface for the mobile
+// dev-menu entry + labyrinth presenters.
+export {
+    createLabyrinthProgress, visibleDoors, canTraverse, inspectPoi,
+    submitGateAnswer, preConfirmedWords, buyHint, hintPrice,
+    debtPoints, borrowedPremiseStacks, settleDebt, activateWaystone,
+    lastWaystone, namingForkOpen, recordBossOutcome, getRoom, edgeKey,
+    APORIA_ACTS, getAporiaAct, getAporiaActByMap,
+    aporiaColonnade, aporiaArchive, aporiaProof,
+} from './World';
+export type {
+    LabyrinthActDef, LabyrinthActId, LabyrinthRoomDef, LabyrinthPoiDef,
+    LabyrinthDoorDef, LabyrinthGateDef, LabyrinthRealm, LabyrinthFragment,
+    LabyrinthProgress, LabyrinthVisibleDoor, LabyrinthInspectResult,
+    LabyrinthGateResult,
+} from './World';
 export {
     generateEncounter, scaleEnemyToLevel, scaledEncounterLevel,
     DIFFICULTY_LEVEL_BANDS,

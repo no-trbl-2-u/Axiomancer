@@ -10,6 +10,7 @@
 import { MapDefinition, MapState, NodeId, UniqueEvent } from './types';
 import { ContinentName, MapName } from './map.library';
 import { fishingVillage, northernForest } from './Continents/Coastal-Village/maps';
+import { aporiaColonnade, aporiaArchive, aporiaProof } from './Labyrinth/maps';
 
 /** Thrown when navigating to a map that isn't registered. */
 export class MapNotFoundError extends Error {
@@ -29,6 +30,13 @@ export const MAP_REGISTRY: Record<ContinentName, Partial<Record<MapName, MapDefi
         'northern-forest': northernForest,
     },
     'northern-continent': {},
+    // W-01 — The Aporia (dev-menu + CLI access only until the last
+    // continent exists; see specs/world/W-01).
+    'labyrinth-continent': {
+        'aporia-colonnade': aporiaColonnade,
+        'aporia-archive': aporiaArchive,
+        'aporia-proof': aporiaProof,
+    },
 };
 
 /**
@@ -72,7 +80,9 @@ export function createMapState(def: MapDefinition): MapState {
         consumedNodes: [],
         // Phase 135 — hazard persistence extensions, initialized as empty.
         hazardOutcomes: [],
-        blockedRoutes: [],
+        // W-01 — secret doors / act gates arrive pre-blocked on labyrinth
+        // maps; empty everywhere else.
+        blockedRoutes: (def.initialBlockedRoutes ?? []).map(r => ({ ...r })),
     };
 }
 
