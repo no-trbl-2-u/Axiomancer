@@ -409,6 +409,12 @@ dev-menu entry.
       pre-confirmation stated); (5) mercy forks routed through the
       standard Befriend heart-skill per ADR-0007, exploiting both
       act bosses closes the finale naming fork.
-- [ ] 9. Design specs promoted, PR ready for review
+- [x] 9. Design specs promoted, PR ready for review — 2026-07-07.
+      `specs/world/W-01-aporia-labyrinth-continent.md` (continent
+      contract; the act files in plan/labyrinth/acts/ are its
+      normative room-level appendices — one spec instead of four to
+      avoid duplicating 1,700 lines of room content into specs) +
+      `specs/characters/C-01-the-sophist.md`. Both cross-referenced
+      mutually.
 - [ ] 10. Mechanics + CLI implementation merged (post-design)
 - [ ] 11. CLAUDE-DESIGN-PROMPT.md written for T
