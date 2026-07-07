@@ -22,7 +22,7 @@ import { Player } from '../../Character/characters.mock';
 import type { Character } from '../../Character/types';
 import { LittleBelle, WaterHolger, KingOfRevenge } from '../../Enemy/enemy.library';
 import { deepClone } from '../../Utils';
-import { simulateHazardPatternCombat } from '../combat.encounter.sim';
+import { simulateHazardPatternCombat, runOneEncounter } from '../combat.encounter.sim';
 import { registerSandboxCards } from '../../Cards/cards.sandbox';
 
 const RUNS = 120;
@@ -58,6 +58,8 @@ const DAMAGE_ONLY = [QA_PURE_STRIKE];                    // pure strike, no stat
 const MERCY = ['eternal-regress', 'befriend'];           // control + befriend → the spare path
 const CONTROL = ['false-dilemma', 'undistributed-middle']; // soft-control — confusion roll penalties
 const CONCLUDE = ['slippery-slope', 'hasty-generalization']; // BODY finisher: stack DoT intensity, then Conclusion Sig detonates
+const EXECUTE = ['pyrrhic-victory', 'slippery-slope', 'hasty-generalization']; // Execute finisher: DoT-erode to the 30% HP gate, then Pyrrhic Victory detonates
+const TURTLE = ['brace-for-impact', 'slippery-slope', 'hasty-generalization']; // outlast: guard wall + DoT — used to bucket real fights by how long they drag
 
 describe('HP combat — authored enemies are winnable with status play', () => {
     for (const [name, enemy] of [['LittleBelle', LittleBelle], ['WaterHolger', WaterHolger]] as const) {
@@ -202,5 +204,57 @@ describe('HP combat — BODY/Conclusion archetype is a viable status-board finis
         // confirming the BODY kill-path is active (not just DoT ticks) at the hardest target.
         const s = simulateHazardPatternCombat(loadout(CONCLUDE), KingOfRevenge, RUNS, SEED);
         expect(s.mechanicBurstFraction).toBeGreaterThan(0);
+    });
+});
+
+describe('HP combat — Execute finisher is a population-level kill accelerant (doctrine witness)', () => {
+    it('an EXECUTE loadout wins reliably on a normal enemy — DoT-to-execute is a viable line', () => {
+        const s = simulateHazardPatternCombat(loadout(EXECUTE), LittleBelle, RUNS, SEED);
+        expect(s.winRate).toBeGreaterThanOrEqual(0.5);
+        expect(s.statusEngagement).toBeGreaterThan(0);
+    });
+
+    it('an EXECUTE loadout detonates on the boss — mechanic burst > 0 across many seeded runs', () => {
+        // Pyrrhic Victory (kind: 'execute') is ready once the foe drops to <=30% HP or
+        // carries >=3 distinct DoT effects; the DoT pair here reliably erodes the boss
+        // to the HP gate. `execute-fired` is credited to mechanicBurstFraction (same
+        // bucket as conclude/rupture/compound) — a nonzero population reading confirms
+        // the finisher actually detonates across many seeded runs, not just the single
+        // crafted state the existing unit coverage (combat.depth-epic) exercises.
+        const s = simulateHazardPatternCombat(loadout(EXECUTE), KingOfRevenge, RUNS, SEED);
+        expect(s.mechanicBurstFraction).toBeGreaterThan(0);
+    });
+});
+
+describe('HP combat — THE CLOCK bites harder the longer a real fight drags (doctrine witness)', () => {
+    it('runs that drag past the grace window take measurably more damage per round than fast-finishing runs', () => {
+        // Population-level witness for THE CLOCK (combat.engine.ts THREAT_ESCALATION_*).
+        // Same loadout, same policy, same boss — the only variable is how long a given
+        // seed's real, fully-played-out fight actually runs. Bucketing by round count
+        // isolates the clock's bite from any policy/deck confound: a turtle-vs-dot-weaver
+        // comparison instead conflates the clock with turtle's guard mitigation, which
+        // dominates that signal (measured: turtle can out-survive dot-weaver despite
+        // dragging fights out longer). Bucketing within ONE policy's own seed spread
+        // avoids that confound entirely.
+        const CLOCK_RUNS = 300;
+        const p = loadout(TURTLE);
+        const byRounds = new Map<number, { n: number; hp: number }>();
+        for (let i = 0; i < CLOCK_RUNS; i++) {
+            const r = runOneEncounter(p, KingOfRevenge, SEED + i, 'turtle');
+            const b = byRounds.get(r.rounds) ?? { n: 0, hp: 0 };
+            b.n += 1;
+            b.hp += r.playerHpTaken;
+            byRounds.set(r.rounds, b);
+        }
+        const short = byRounds.get(2);
+        const long = byRounds.get(4);
+        expect(short?.n ?? 0).toBeGreaterThan(0);
+        expect(long?.n ?? 0).toBeGreaterThan(0);
+        const shortAvgPerRound = short!.hp / short!.n / 2;
+        const longAvgPerRound = long!.hp / long!.n / 4;
+        // Grace is 1 round; escalation ramps per round past it, steepened by the
+        // boss multiplier — a round-4 fight should be taking meaningfully more
+        // damage per round than a round-2 fight (measured ~4x at this seed range).
+        expect(longAvgPerRound).toBeGreaterThan(shortAvgPerRound * 2);
     });
 });
