@@ -134,6 +134,21 @@ export interface MapDefinition {
     readonly uniqueEvents?: readonly UniqueEvent[];
     readonly quests?: readonly Quest[];
     readonly images?: { mapImage: Image; combatImage: Image };
+    /**
+     * Traversal doctrine (W-01). `'gauntlet'` (default when absent) is the
+     * classic forward-only walk: completed nodes lock, progress is a
+     * spreading unlock frontier. `'labyrinth'` is the Aporia mode: free
+     * travel along the current node's edges INCLUDING back into completed
+     * or consumed rooms; `lockedNodes` is not consulted. One-shot events
+     * (`consumedNodes`) apply in both modes.
+     */
+    readonly traversal?: 'gauntlet' | 'labyrinth';
+    /**
+     * Routes blocked at map creation (secret doors, act gates). Seeded
+     * into `MapState.blockedRoutes` by `createMapState`; opened at runtime
+     * via `unblockMapRoute`.
+     */
+    readonly initialBlockedRoutes?: readonly BlockedRoute[];
 }
 
 // ─── Hazard Persistence (Phase 135) ────────────────────────────────────────

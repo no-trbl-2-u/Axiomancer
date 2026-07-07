@@ -913,6 +913,14 @@ export async function runGameCli(rawArgs = process.argv.slice(2)): Promise<void>
         return;
     }
 
+    // Subcommand: `npm run game -- labyrinth [flags]` hands off to THE
+    // APORIA driver (W-01) — the full labyrinth continent, headless.
+    if (rawArgs[0] === 'labyrinth') {
+        const { runLabyrinthCli } = await import('./labyrinth.cli');
+        await runLabyrinthCli(rawArgs.slice(1));
+        return;
+    }
+
     const flags = parseArgv(rawArgs);
     if (flags.jsonEvents) setOutputMode('json');
     if (flags.scriptPath) {

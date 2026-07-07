@@ -367,6 +367,30 @@ export const AUTHORED_THREAT_SEQUENCES: Record<string, AuthoredThreatPhase[]> = 
         { enemyStance: 'heart', damageWeight: 1.45, threatEffectId: 'debuff_unraveling', threatIntensity: 3, actionText: "The unbegun god tries, one more time, to begin — through you", stanceHint: "Its patience predates its existence, and both predate your defenses." },
     ],
 
+    // ══ THE APORIA — labyrinth act bosses (W-01; L8 / L12 / L16) ═══════════════
+
+    // Act I boss: the hinge-priest — control and stance-denial; the doors do the fighting.
+    'enemy-the-doorwarden': [
+        { enemyStance: 'body', threatEffectId: 'debuff_root', threatIntensity: 2, actionText: "A threshold assembles itself under your feet and declines to be crossed", stanceHint: "He worships thresholds; where you would step, a doctrine has already been installed." },
+        { enemyStance: 'mind', damageWeight: 0.9, threatEffectId: 'debuff_silence', threatIntensity: 2, actionText: "He closes a door you were keeping open in your head", stanceHint: "Every door that ever shut is remembered in him, and he consults the memory alphabetically." },
+        { enemyStance: 'body', damageWeight: 1.2, threatEffectId: 'debuff_stagger', threatIntensity: 2, actionText: "The bronze frame swings through you like a door through a draught", stanceHint: "Sermon concluded, the hinge-priest recalls that he is mostly hinge." },
+        { enemyStance: 'body', damageWeight: 1.4, threatEffectId: 'debuff_root', threatIntensity: 3, actionText: "Every door he remembers shuts at once, and you are the room", stanceHint: "The liturgy reaches its one commandment: what shuts, stays shut." },
+    ],
+    // Act II boss: the librarian-golem — misfiled truths as DoT; the paper does the cutting.
+    'enemy-the-index': [
+        { enemyStance: 'mind', threatEffectId: 'debuff_bleed', threatIntensity: 2, actionText: "A drawer opens at your name and issues the first thousand paper cuts", stanceHint: "It files before it strikes; the cuts arrive pre-catalogued." },
+        { enemyStance: 'mind', damageWeight: 0.9, threatEffectId: 'debuff_burn', threatIntensity: 2, actionText: "It misfiles you under KINDLING and shelves you beside the lamp oil", stanceHint: "The Archive's errata smoulder; a truth in the wrong place is an accelerant." },
+        { enemyStance: 'body', damageWeight: 1.2, threatEffectId: 'debuff_bleed', threatIntensity: 3, actionText: "The card-drawer ribs slam open and closed on whatever of you is nearest", stanceHint: "Out of patience with citation, the golem remembers its shelving is oak and iron." },
+        { enemyStance: 'mind', damageWeight: 1.4, threatEffectId: 'debuff_burn', threatIntensity: 3, actionText: "It reads out every wrong entry ever filed about you, and the reading scalds", stanceHint: "The whole errata at once: a bonfire of corrections, and you are the margin they burn in." },
+    ],
+    // Act III finale: the narrator manifest — borrowed premises, returned with interest.
+    'enemy-the-sophist': [
+        { enemyStance: 'mind', threatEffectId: 'debuff_confusion', threatIntensity: 2, actionText: "The Sophist restates your position, improved, and aims it back at you", stanceHint: "He fights with borrowed premises — yours, mostly, held at a more flattering angle." },
+        { enemyStance: 'heart', damageWeight: 0.9, threatEffectId: 'debuff_charm', threatIntensity: 2, actionText: "He concedes a point you had not made yet, courteously, like a trap", stanceHint: "The etiquette is the blade; the house eats the courteous last." },
+        { enemyStance: 'mind', damageWeight: 1.2, threatEffectId: 'debuff_silence', threatIntensity: 2, actionText: "He strikes your best premise from the record and signs the deletion in thirds", stanceHint: "Centuries of clerkship: what he cannot win he redacts." },
+        { enemyStance: 'mind', damageWeight: 1.45, threatEffectId: 'debuff_unraveling', threatIntensity: 3, actionText: "The Sophist closes the argument with your own opening move, perfected", stanceHint: "The narration stops being about you and starts happening to you." },
+    ],
+
     // ══ THE INCOMPLETENESS — the impossible playtest ceiling ═══════════════════
     // (unique, level 110) — the skill-ceiling benchmark: calibrated so the BEST
     // policy line scrapes a 1-5% win rate (near-impossible, not scripted-unwinnable).
