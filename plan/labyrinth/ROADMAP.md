@@ -386,11 +386,12 @@ dev-menu entry.
 - [x] 2. Roadmap committed + PR opened
 - [x] 3. T's answers recorded — 2026-07-07, see "T's answers" above
 - [x] 3b. Book screenshots committed to reference/maze-book/
-- [ ] 4. DESIGN.md authored
-- [ ] 5. Act I authored + validated
-- [ ] 6. Act II authored + validated
-- [ ] 7. Act III authored + validated
+- [x] 4. DESIGN.md authored — 2026-07-07 (The Aporia; the Sophist)
+- [x] 5. Act I authored + validated — The Colonnade, validator green
+- [x] 6. Act II authored + validated — The Archive, validator green
+- [x] 7. Act III authored + validated — The Proof, validator green
 - [ ] 8. Validation script green + mechanics-expert review addressed
+      (script green for all three acts; expert review in flight)
 - [ ] 9. Design specs promoted, PR ready for review
 - [ ] 10. Mechanics + CLI implementation merged (post-design)
 - [ ] 11. CLAUDE-DESIGN-PROMPT.md written for T

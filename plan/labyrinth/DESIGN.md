@@ -75,9 +75,12 @@ each act ends DOWNWARD.
 
 | Act | Working name | Rooms | Realm split (Path/Loop/Trap) | Navigation gimmick taught |
 |---|---|---|---|---|
-| I | The Colonnade | 15 | 8 / 5 / 2 | Doors lie; prose hints; the absent thing is the answer (negative space); numbers matter |
-| II | The Archive | 16 | 8 / 6 / 2 | One-way doors dominate; clues chain ACROSS rooms; signage can be forged |
+| I | The Colonnade | 15 | 9 / 4 / 2 | Doors lie; prose hints; the absent thing is the answer (negative space); numbers matter |
+| II | The Archive | 16 | 9 / 5 / 2 | One-way doors dominate; clues chain ACROSS rooms; signage can be forged |
 | III | The Proof | 16 | 9 / 4 / 3 | Everything at once, plus checkpoints, the ejection trap, and the center riddle |
+
+(Realm splits are the as-authored numbers from `acts/act*.md`,
+enforced by `tools/validate-maze.mjs`.)
 
 - **Act seams:** each act's final chamber contains, in order: the
   act's **quest event** (T's rule: the only place `quest` fires,
