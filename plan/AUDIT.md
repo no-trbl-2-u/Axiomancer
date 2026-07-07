@@ -14,6 +14,26 @@
 
 ## Pending
 
+### [3.2] Night workflow never installs Playwright's browser — breadth check silently would fail on every run
+- category: gap
+- impact: 4
+- ease: 8
+- detail: `.github/workflows/night.yml` calls `_claude-skill.yml`
+  without `install_playwright: true` (unlike `critique.yml`,
+  `deep-playtest.yml`, `hermes-playtest.yml`,
+  `combat-ux-tuning.yml`, `critic-loop.yml`, which all set it).
+  `/digest`'s breadth check (`npm run e2e:minigames` in
+  `axiomancer-mobile`) needs Playwright's Chromium
+  headless-shell binary; on a fresh Actions runner it isn't
+  cached, so `hazard-e2e.mjs` aborts immediately with
+  "Executable doesn't exist at
+  .../chromium_headless_shell-1228/...". Worked around this run
+  by installing it by hand (`npx playwright install
+  chromium-headless-shell`) before the suite; without that step
+  every future night run repeats the same failure and the
+  nightly breadth signal is dead.
+- next: /iterate
+
 ### [3.2] `CardSpecialMechanic` deprecated-name not exported
 - category: contract
 - impact: 4
