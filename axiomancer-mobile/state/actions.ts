@@ -819,6 +819,33 @@ function learnSkillAction(store: AppStore, skillId: string): boolean {
 }
 
 // ---------------------------------------------------------------------------
+// Testing knob — live-encounter enemy HP scale
+// ---------------------------------------------------------------------------
+
+/**
+ * Testing multiplier applied to every LIVE-encounter foe's HP so fights last
+ * longer and there's more time to exercise a deck's status-effect play. Applied
+ * only at the mobile `beginHazardEncounter` chokepoint (below), NOT in the
+ * engine's `createEnemy` — the hermetic engine tests assert exact authored
+ * `maxHealth` values (e.g. Grave Larva 25, Disatree 15) and must stay untouched.
+ * Set to 1 to restore stock HP.
+ */
+export const ENCOUNTER_ENEMY_HP_MULTIPLIER = 2;
+
+/**
+ * Returns a copy of `enemy` with `health` and `maxHealth` scaled by `mult`
+ * (rounded, floored at 1). Both scale together so HP-ratio mechanics
+ * (befriend `hpGate`, execute thresholds) keep their proportions. A `mult` of 1
+ * returns an equivalent (un-scaled) enemy.
+ */
+export function withScaledEnemyHp(enemy: Enemy, mult: number): Enemy {
+    if (mult === 1) return enemy;
+    const maxHealth = Math.max(1, Math.round(enemy.maxHealth * mult));
+    const health = Math.max(1, Math.round(enemy.health * mult));
+    return { ...enemy, health, maxHealth };
+}
+
+// ---------------------------------------------------------------------------
 // Action creators
 // ---------------------------------------------------------------------------
 
@@ -847,7 +874,9 @@ export function createAppActions(store: AppStore): AppActions {
             if (!enemy) return null;
             ensureStarterSkills(store);
             clearEventSlice(store);
-            return enemy;
+            // Testing: fatten every live foe so encounters run longer (more
+            // turns to exercise status-effect play). See ENCOUNTER_ENEMY_HP_MULTIPLIER.
+            return withScaledEnemyHp(enemy, ENCOUNTER_ENEMY_HP_MULTIPLIER);
         },
         endCombat: (outcome) => {
             // Cross-combat resource carry is engine-owned now (the reducer's

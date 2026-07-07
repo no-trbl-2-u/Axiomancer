@@ -13,14 +13,6 @@ import { makeStyles } from '@/theme/runtime';
 import { getCard } from '@mechanics';
 import { STARTER_BUNDLES, type StarterBundle } from '@/state/combat/store-actions';
 
-// Accent per path, aligned to the stance palette (Heart purple / Body red /
-// Mind blue) so the colour language is consistent with combat.
-const ARCHETYPE_ACCENT: Record<string, string> = {
-    bleeder: '#9a5fd0',
-    guardian: '#d6543f',
-    controller: '#4f7fd6',
-};
-
 interface BundleSelectScreenProps {
     onPick: (bundleId: string) => void;
 }
@@ -35,7 +27,7 @@ export function BundleSelectScreen({ onPick }: BundleSelectScreenProps) {
                     Your starter cards set the shape of your run. You can find more as you go.
                 </Text>
                 {STARTER_BUNDLES.map((b: StarterBundle) => {
-                    const accent = ARCHETYPE_ACCENT[b.archetype] ?? '#d4c026';
+                    const accent = b.accent;
                     return (
                         <Pressable
                             key={b.id}
