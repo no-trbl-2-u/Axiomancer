@@ -17,8 +17,8 @@ import { COMBAT_DECK_PRESETS, buildPresetDeck } from '../../Combat/combat.deck-p
 import { GOLD_CARD_IDS } from '../../Combat/combat.cards';
 
 describe('curated library — shape contract', () => {
-    it('is the locked-in keeper set (49 cards)', () => {
-        expect(cardLibrary.length).toBe(49);
+    it('is the locked-in keeper set (50 cards)', () => {
+        expect(cardLibrary.length).toBe(50);
         const ids = cardLibrary.map(c => c.id);
         expect(new Set(ids).size).toBe(ids.length); // no duplicate ids
     });

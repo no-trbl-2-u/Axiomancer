@@ -81,10 +81,11 @@ function coveragePlays(cardId: string): { plays: number; seedsTried: number[] } 
 }
 
 describe('card coverage — every library card is exercisable', () => {
-    it('the coverage universe is the curated 49-card library (Fate Engine P1 trim)', () => {
-        // Trimmed 2026-07-05 (spec 31 §4): 49 locked-in keepers.
-        expect(cardLibrary.length).toBe(49);
-        expect(new Set(cardLibrary.map(c => c.id)).size).toBe(49);
+    it('the coverage universe is the curated 50-card library (Fate Engine P1 trim + corrosive-regress)', () => {
+        // Trimmed 2026-07-05 (spec 31 §4) to 49 keepers; +1 (corrosive-regress,
+        // a tier-1 mind poison promoted by deck-tuning 2026-07-07) → 50.
+        expect(cardLibrary.length).toBe(50);
+        expect(new Set(cardLibrary.map(c => c.id)).size).toBe(50);
     });
 
     it.each(cardLibrary.map(c => [c.id] as const))(

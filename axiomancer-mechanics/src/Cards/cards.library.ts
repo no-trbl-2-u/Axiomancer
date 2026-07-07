@@ -199,6 +199,39 @@ const hastyGeneralization: Card = {
     threshold: { color: 'body', count: 2, rider: { bonusIntensity: 1 } },
 };
 
+// Promoted 2026-07-07 (deck-tuning): before this card the tier-1 (early-stage)
+// DoT line was `achilles-gambit` + `hasty-generalization` — both BODY stance,
+// both `debuff_bleed`. A player rolling mind/heart dice early had no DoT to
+// power, collapsing the doctrinal status path to a body-die gate. This adds a
+// MIND-powered tier-1 poison so the early DoT line spans two colors and two
+// effects. Calibrated to `achilles-gambit` (intensity 1 / duration 2, one
+// threshold rider) — the gentler of the two prior tier-1 DoTs, so it
+// diversifies the early DoT COLOR without out-racing the befriend/mercy path.
+// A/B evidence: docs/reports/deck-tuning-2026-07-07.md.
+const corrosiveRegress: Card = {
+    id: 'corrosive-regress',
+    name: 'Corrosive Regress',
+    category: 'paradox',
+    philosophicalAspect: 'mind',
+    description:
+        'Each answer demands a prior one, and that one another, back and back — ' +
+        'until the ground of their certainty dissolves and keeps dissolving ' +
+        'long after you have stopped asking.',
+    tier: 1,
+    targetType: 'enemy',
+    basePower: 0,
+    scalingStat: 'mind',
+    learningRequirement: { level: 1 },
+    addedIn: '2026-07-07',
+    tags: ['status-effect', 'dot', 'early-game'],
+    combatEffects: [
+        { effectId: 'debuff_poison', appliedTo: 'opponent', intensity: 1, duration: 2 },
+    ],
+    // One tier-1 die line (mirrors hasty-generalization's body threshold): a
+    // mind-tally threshold that ripens the poison to 2 when mind dice flow.
+    threshold: { color: 'mind', count: 2, rider: { bonusIntensity: 1 } },
+};
+
 const suspendJudgment: Card = {
     id: 'suspend-judgment',
     name: 'Suspend Judgment',
@@ -1077,7 +1110,7 @@ const peacefulGesture: Card = {
 };
 
 export const cardLibrary: Card[] = [
-    slipperySlope, braceForImpact, adHominemStrike, falseDilemma, appealToPity, achillesGambit, liarsEcho, shipOfTheseus, hastyGeneralization, suspendJudgment, soothingWords, befriend, mobAppeal, undistributedMiddle, eternalRegress, resonanceBleed, batSwarmThoughtform, empatheticUnderstanding, stoicReserve, appealToAuthority, tuQuoque, baradoxsBarber, equivocationCascade, sunkCostMomentum, breach, briarRiposte, leechingSyllogism, theInevitable, mountingContradictions, poisonedWell, gamblersFolly, movingTheGoalposts, shipInABottle, resonanceDetonation, soritesCascade, bootstrapParadox, appealToConsequences, nirvanaFallacy, pascalsWager, existentialCollapse, achillesOvertake, eternalRecurrence, apophaticAegis, transcendentSynthesis, existentialDebt, pyrrhicVictory, theFinalWord, unmovedMover, peacefulGesture,
+    slipperySlope, braceForImpact, adHominemStrike, falseDilemma, appealToPity, achillesGambit, liarsEcho, shipOfTheseus, hastyGeneralization, corrosiveRegress, suspendJudgment, soothingWords, befriend, mobAppeal, undistributedMiddle, eternalRegress, resonanceBleed, batSwarmThoughtform, empatheticUnderstanding, stoicReserve, appealToAuthority, tuQuoque, baradoxsBarber, equivocationCascade, sunkCostMomentum, breach, briarRiposte, leechingSyllogism, theInevitable, mountingContradictions, poisonedWell, gamblersFolly, movingTheGoalposts, shipInABottle, resonanceDetonation, soritesCascade, bootstrapParadox, appealToConsequences, nirvanaFallacy, pascalsWager, existentialCollapse, achillesOvertake, eternalRecurrence, apophaticAegis, transcendentSynthesis, existentialDebt, pyrrhicVictory, theFinalWord, unmovedMover, peacefulGesture,
 ];
 
 const skillRegistry: ReadonlyMap<string, Card> = new Map(
