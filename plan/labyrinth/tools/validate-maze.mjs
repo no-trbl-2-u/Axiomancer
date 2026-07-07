@@ -30,7 +30,17 @@ const ACTS = {
     honestFragments: 4,
     counterfeits: 4,
   },
-  act2: null, // filled in when acts/act2.md lands
+  act2: {
+    start: '33',
+    boss: '47',
+    expectedShortestMoves: 7,
+    expectedUniqueShortest: true,
+    secretEdges: [['41', '43']],
+    gateEdges: [['45', '46']],
+    realms: { Path: 9, Loop: 5, Trap: 2 },
+    honestFragments: 4,
+    counterfeits: 5,
+  },
   act3: null, // filled in when acts/act3.md lands
 };
 
@@ -152,8 +162,12 @@ for (const act of requested) {
   }
   pass(`realm split ${Object.entries(realmCounts).map(([k, v]) => `${k}:${v}`).join(' ')}`);
 
-  const honest = rooms.filter((r) => /carved/.test(r.fragment)).length;
-  const forged = rooms.filter((r) => /painted/.test(r.fragment)).length;
+  // counterfeits are marked "painted" (Act I) or "false mark"
+  // (Act II onward: the forger learned to carve)
+  const isForged = (f) => /painted|false/.test(f);
+  const isHonest = (f) => /carved/.test(f) && !isForged(f);
+  const honest = rooms.filter((r) => isHonest(r.fragment)).length;
+  const forged = rooms.filter((r) => isForged(r.fragment)).length;
   if (honest !== cfg.honestFragments) fail(`honest fragments: ${honest}, expected ${cfg.honestFragments}`);
   if (forged !== cfg.counterfeits) fail(`counterfeits: ${forged}, expected ${cfg.counterfeits}`);
   pass(`fragments: ${honest} carved / ${forged} painted`);
@@ -197,7 +211,7 @@ for (const act of requested) {
   const pathRooms = new Set(rooms.filter((r) => r.realm === 'Path').map((r) => r.display));
   const pathOnly = new Map([...open].map(([k, v]) => [k, new Set([...v].filter((d) => pathRooms.has(d)))]));
   const pathDist = bfs(pathOnly, cfg.start);
-  const missing = rooms.filter((r) => /carved/.test(r.fragment) && !pathDist.has(r.display));
+  const missing = rooms.filter((r) => isHonest(r.fragment) && !pathDist.has(r.display));
   if (missing.length) fail(`honest fragments off the Path realm walk: ${missing.map((r) => r.display).join(', ')}`);
   else pass('all honest fragments reachable via Path realm alone');
 }
