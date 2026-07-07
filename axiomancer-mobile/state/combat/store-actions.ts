@@ -81,15 +81,121 @@ const STARTER_DECK_IDS: readonly string[] = Object.freeze([
     'ship-of-theseus', //   heart · attack
 ]);
 
-export type CombatDeckPresetId =
-    | 'starter-baseline'
-    | 'body-force'
-    | 'mind-logic'
-    | 'heart-will'
-    | 'aggression'
-    | 'attrition'
-    | 'control-guard'
-    | 'gold-showcase';
+/** Pool card ids whose engine metadata satisfies `predicate`, in pool order. */
+function poolMatching(predicate: (card: CombatCard) => boolean): string[] {
+    const out: string[] = [];
+    for (const id of COMBAT_CARD_POOL) {
+        const card = getCard(id);
+        if (card && predicate(card)) out.push(id);
+    }
+    return out;
+}
+
+// ---------------------------------------------------------------------------
+// Keyword deck TYPES — the shared taxonomy behind BOTH the dev deck presets and
+// the pre-run "choose your path" picker. Instead of grouping cards by STANCE
+// COLOUR (Body / Mind / Heart), each deck here is a KEYWORD archetype: a family
+// of cards that share a status keyword or combat role (Bleed, Poison,
+// Confusion, Dread, Guard, Sustain). This lets a tester exercise a real *deck
+// type* — "does a bleed stack actually close a fight?" — rather than just a
+// colour. Every matcher reads the engine's own projected card metadata
+// (`primaryEffectId` / `verbClass`); mobile invents no keywords, costs, or cards.
+// ---------------------------------------------------------------------------
+
+export type KeywordDeckId =
+    | 'bleed'
+    | 'poison'
+    | 'confusion'
+    | 'dread'
+    | 'guard'
+    | 'sustain';
+
+interface KeywordDeckDef {
+    id: KeywordDeckId;
+    /** Keyword archetype name — no stance colour in it. */
+    name: string;
+    /** One-line description of the deck TYPE and how it wins. */
+    blurb: string;
+    /** Keyword pills surfaced on the picker tile. */
+    pills: readonly string[];
+    /** Tile accent — a per-keyword hue, deliberately unrelated to stance colour. */
+    accent: string;
+    /** Reward-skew archetype for the pre-run picker (null → no skew). */
+    archetype: StarterArchetype | null;
+    /** True when a projected card carries this deck's keyword. */
+    match: (card: CombatCard) => boolean;
+}
+
+/** Does the card apply an enemy effect whose id contains any of `needles`? */
+function effectMatches(card: CombatCard, ...needles: string[]): boolean {
+    const effectId = card.primaryEffectId ?? '';
+    return needles.some((needle) => effectId.includes(needle));
+}
+
+/**
+ * The canonical keyword deck types. Order is the display order on both
+ * surfaces. Two DoT keywords (bleed / poison), two control keywords (confusion /
+ * dread), and two defensive/support keywords (guard / sustain) — each a distinct
+ * *deck type* a tester can pick to pressure one mechanic.
+ */
+const KEYWORD_DECKS: readonly KeywordDeckDef[] = Object.freeze([
+    {
+        id: 'bleed',
+        name: 'Bleed',
+        blurb: 'Stack bleed and hemorrhage, then let the wounds do the killing.',
+        pills: ['BLEED', 'HEMORRHAGE', 'DoT'],
+        accent: '#c0392b',
+        archetype: 'bleeder',
+        match: (c) => effectMatches(c, 'bleed', 'hemorrhage'),
+    },
+    {
+        id: 'poison',
+        name: 'Poison',
+        blurb: 'Seep poison and rot — damage that erodes HP no matter their guard.',
+        pills: ['POISON', 'SEPTIC', 'DoT'],
+        accent: '#5aa02c',
+        archetype: 'bleeder',
+        match: (c) => effectMatches(c, 'poison', 'septic'),
+    },
+    {
+        id: 'confusion',
+        name: 'Confusion',
+        blurb: 'Confuse the foe so it fumbles its own telegraphed turn.',
+        pills: ['CONFUSE', 'DAZE', 'CONTROL'],
+        accent: '#4f7fd6',
+        archetype: 'controller',
+        match: (c) => effectMatches(c, 'confusion'),
+    },
+    {
+        id: 'dread',
+        name: 'Dread',
+        blurb: 'Break the enemy mind with fear and despair until it folds.',
+        pills: ['FEAR', 'DESPAIR', 'CONTROL'],
+        accent: '#6c5ce7',
+        archetype: 'controller',
+        match: (c) => effectMatches(c, 'fear', 'despair'),
+    },
+    {
+        id: 'guard',
+        name: 'Guard',
+        blurb: 'Brace, parry, and barrier — absorb everything and grind them down.',
+        pills: ['GUARD', 'BARRIER', 'PARRY'],
+        accent: '#7f8c9b',
+        archetype: 'guardian',
+        match: (c) => c.verbClass === 'defend',
+    },
+    {
+        id: 'sustain',
+        name: 'Sustain',
+        blurb: 'Regenerate and steel your resolve; outlast every exchange.',
+        pills: ['REGEN', 'HEAL', 'RESOLVE'],
+        accent: '#d4a017',
+        archetype: 'guardian',
+        match: (c) => c.verbClass === 'buff-self',
+    },
+]);
+
+export type CombatDeckPresetId = 'starter-baseline' | KeywordDeckId | 'gold-showcase';
 
 export interface CombatDeckPreset {
     id: CombatDeckPresetId;
@@ -104,16 +210,9 @@ export interface CombatDeckPresetResult {
     cardIds: string[];
 }
 
-/** Pool card ids whose engine metadata satisfies `predicate`, in pool order. */
-function poolMatching(predicate: (card: CombatCard) => boolean): string[] {
-    const out: string[] = [];
-    for (const id of COMBAT_CARD_POOL) {
-        const card = getCard(id);
-        if (card && predicate(card)) out.push(id);
-    }
-    return out;
-}
-
+// Dev presets are the PURE keyword selection (every pool card carrying the
+// keyword, no padding) so the tester sees exactly that keyword's cards. The
+// picker bundles below pad the same selection into a playable deck.
 export const COMBAT_DECK_PRESETS: readonly CombatDeckPreset[] = Object.freeze([
     {
         id: 'starter-baseline',
@@ -121,42 +220,12 @@ export const COMBAT_DECK_PRESETS: readonly CombatDeckPreset[] = Object.freeze([
         description: 'The default level-1 deck a new player is seeded with. Clean control.',
         cardIds: STARTER_DECK_IDS,
     },
-    {
-        id: 'body-force',
-        label: 'Body / Force',
-        description: 'Every body-stance card — direct force, bleed, and a brace.',
-        cardIds: poolMatching((c) => c.stance === 'body'),
-    },
-    {
-        id: 'mind-logic',
-        label: 'Mind / Logic',
-        description: 'Every mind-stance card — strikes, confusion control, and erosion.',
-        cardIds: poolMatching((c) => c.stance === 'mind'),
-    },
-    {
-        id: 'heart-will',
-        label: 'Heart / Will',
-        description: 'Every heart-stance card — self-buffs, control, and a guard.',
-        cardIds: poolMatching((c) => c.stance === 'heart'),
-    },
-    {
-        id: 'aggression',
-        label: 'Aggression',
-        description: 'All direct-damage cards across stances for raw burst testing.',
-        cardIds: poolMatching((c) => c.verbClass === 'direct-damage'),
-    },
-    {
-        id: 'attrition',
-        label: 'Attrition (DoT)',
-        description: 'Damage-over-time engines plus self-buff sustain for long-game testing.',
-        cardIds: poolMatching((c) => c.effectKind === 'dot' || c.verbClass === 'buff-self'),
-    },
-    {
-        id: 'control-guard',
-        label: 'Control & Guard',
-        description: 'Confusion/control plus every defensive GUARD card for stall testing.',
-        cardIds: poolMatching((c) => c.effectKind === 'control' || c.verbClass === 'defend'),
-    },
+    ...KEYWORD_DECKS.map((deck): CombatDeckPreset => ({
+        id: deck.id,
+        label: deck.name,
+        description: deck.blurb,
+        cardIds: poolMatching(deck.match),
+    })),
     {
         id: 'gold-showcase',
         label: 'Gold showcase',
@@ -237,14 +306,13 @@ export interface StarterBundle {
     description: string;
     /**
      * Hidden archetype tag — never surfaced in the UI. Biases later card
-     * rewards (see `skewRewardsByArchetype`). `null` for the pure theme-test
-     * bundles that don't map onto one of the three reward archetypes (stance /
-     * aggression / gold showcases): they seed their themed deck but apply no
-     * reward skew.
+     * rewards (see `skewRewardsByArchetype`). `null` for keyword decks that
+     * don't map onto one of the three reward archetypes (e.g. the gold/rare
+     * showcase): they seed their deck but apply no reward skew.
      */
     archetype: StarterArchetype | null;
-    /** Tile accent colour. Decoupled from `archetype` so every theme reads
-     *  distinct on the picker. */
+    /** Tile accent colour. A per-keyword hue, decoupled from stance colour so
+     *  every deck type reads distinct on the picker. */
     accent: string;
     /** Keyword pills shown on the selection tile. */
     pills: readonly string[];
@@ -257,10 +325,10 @@ export const BUNDLE_CHOSEN_FLAG = 'starter-bundle-chosen';
 const BUNDLE_FLAG_PREFIX = 'bundle:';
 const ARCHETYPE_FLAG_PREFIX = 'archetype:';
 
-// Build a THEME test deck: EVERY card matching the theme (so all of a theme's
-// cards are reachable for testing), plus an attack and a guard staple so the
-// path can always threaten and brace from turn one, padded from the proven
-// baseline starters so a thin theme never yields a stub deck.
+// Build a playable KEYWORD test deck: EVERY pool card carrying the keyword (so
+// all of the deck type's cards are reachable for testing), plus an attack and a
+// guard staple so the deck can always threaten and brace from turn one, padded
+// from the proven baseline starters so a thin keyword never yields a stub deck.
 function themeDeck(themed: (c: CombatCard) => boolean): string[] {
     const ids: string[] = [];
     const add = (id: string | undefined): void => { if (id && !ids.includes(id)) ids.push(id); };
@@ -271,78 +339,24 @@ function themeDeck(themed: (c: CombatCard) => boolean): string[] {
     return ids;
 }
 
-// Every deck THEME the picker exposes. The first three carry a hidden reward
-// archetype (they double as the shipped "choose your path" identities); the
-// rest are pure test benches (`archetype: null`) added so a fresh run can pick
-// ANY theme — stance mono-decks, raw aggression, the gold/rare tier — and
-// exercise its cards. See the branch intent: deck-theme testing setup.
+// Every deck TYPE the picker exposes — one per shared-keyword archetype
+// (`KEYWORD_DECKS`), not one per stance colour. Each carries the keyword's
+// reward-skew archetype so wins bias rewards toward the same keyword. A final
+// gold/rare test bench (`archetype: null`, no skew) rounds out the list so a
+// fresh run can also exercise the rare tier.
 export const STARTER_BUNDLES: readonly StarterBundle[] = Object.freeze([
-    {
-        id: 'bleeding-edge',
-        name: 'The Bleeding Edge',
-        description: 'Aggressive. Stack damage-over-time and erode the foe turn by turn.',
-        archetype: 'bleeder',
-        accent: '#9a5fd0',
-        pills: ['BLEED', 'POISON', 'DoT'],
-        cardIds: themeDeck((c) => c.effectKind === 'dot'),
-    },
-    {
-        id: 'patient-defender',
-        name: 'The Patient Defender',
-        description: 'Reactive. Absorb attacks, mend, and outlast the enemy.',
-        archetype: 'guardian',
-        accent: '#d6543f',
-        pills: ['GUARD', 'REGENERATE', 'FORTIFY'],
-        cardIds: themeDeck((c) => c.verbClass === 'defend' || c.verbClass === 'buff-self'),
-    },
-    {
-        id: 'minds-unraveling',
-        name: "Mind's Unraveling",
-        description: 'Control. Confuse, slow, and dominate the enemy mind.',
-        archetype: 'controller',
-        accent: '#4f7fd6',
-        pills: ['CONFUSE', 'STUN', 'SLOW'],
-        cardIds: themeDeck((c) => c.effectKind === 'control'),
-    },
-    {
-        id: 'body-force',
-        name: 'The Body / Force',
-        description: 'Test bench. Every Body-stance card — direct force, bleed, and a brace.',
-        archetype: null,
-        accent: '#d6543f',
-        pills: ['BODY', 'FORCE', 'STANCE'],
-        cardIds: themeDeck((c) => c.stance === 'body'),
-    },
-    {
-        id: 'mind-logic',
-        name: 'The Mind / Logic',
-        description: 'Test bench. Every Mind-stance card — strikes, confusion, and erosion.',
-        archetype: null,
-        accent: '#4f7fd6',
-        pills: ['MIND', 'LOGIC', 'STANCE'],
-        cardIds: themeDeck((c) => c.stance === 'mind'),
-    },
-    {
-        id: 'heart-will',
-        name: 'The Heart / Will',
-        description: 'Test bench. Every Heart-stance card — self-buffs, control, and a guard.',
-        archetype: null,
-        accent: '#9a5fd0',
-        pills: ['HEART', 'WILL', 'STANCE'],
-        cardIds: themeDeck((c) => c.stance === 'heart'),
-    },
-    {
-        id: 'raw-aggression',
-        name: 'Raw Aggression',
-        description: 'Test bench. All direct-damage cards across stances for raw burst play.',
-        archetype: null,
-        accent: '#d4a017',
-        pills: ['BURST', 'DAMAGE', 'TEMPO'],
-        cardIds: themeDeck((c) => c.verbClass === 'direct-damage'),
-    },
+    ...KEYWORD_DECKS.map((deck): StarterBundle => ({
+        id: deck.id,
+        name: deck.name,
+        description: deck.blurb,
+        archetype: deck.archetype,
+        accent: deck.accent,
+        pills: deck.pills,
+        cardIds: themeDeck(deck.match),
+    })),
     {
         id: 'gold-showcase',
-        name: 'The Gold Showcase',
+        name: 'Gold Showcase',
         description: 'Test bench. The Gold rares plus the tier-3 support — exercise the rare tier.',
         archetype: null,
         accent: '#d4c026',
