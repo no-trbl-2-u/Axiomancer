@@ -119,6 +119,9 @@ const EXPECTED_ROUTE_FILES: ReadonlySet<string> = new Set([
     // dropdown was extracted here; gated by isDevToolsEnabled() so
     // production renders an inert placeholder.
     './dev/index.tsx',
+    // THE APORIA (W-01) — labyrinth continent, dev-menu entry only
+    // (DebugAporiaButton). Act select → room scenes → accordion.
+    './labyrinth/index.tsx',
     './(tabs)/_layout.tsx',
     './(tabs)/character/index.tsx',
     './(tabs)/exploration/index.tsx',

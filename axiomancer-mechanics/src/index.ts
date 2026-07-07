@@ -338,6 +338,7 @@ export {
     createStartingWorld, MapNotFoundError,
     MAP_REGISTRY, getMapDefinition, createMapState,
     moveToNode, completeCurrentNode, IllegalMoveError,
+    teleportToNode, unblockMapRoute,
     applyDialogueChoice,
     emptyQuestLog, isQuestComplete, findActiveQuest, findQuest,
     startQuest, progressQuest, completeQuest, discoverQuest,
@@ -404,6 +405,8 @@ export {
     submitGateAnswer, preConfirmedWords, buyHint, hintPrice,
     debtPoints, borrowedPremiseStacks, settleDebt, activateWaystone,
     lastWaystone, namingForkOpen, recordBossOutcome, getRoom, edgeKey,
+    recordWalk, walkedEdgesOf, isSophistTrueName, resolvePoiTrap,
+    HINT_TIER_POINTS, SETTLE_PRICE_PER_POINT,
     APORIA_ACTS, getAporiaAct, getAporiaActByMap,
     aporiaColonnade, aporiaArchive, aporiaProof,
 } from './World';
@@ -411,7 +414,7 @@ export type {
     LabyrinthActDef, LabyrinthActId, LabyrinthRoomDef, LabyrinthPoiDef,
     LabyrinthDoorDef, LabyrinthGateDef, LabyrinthRealm, LabyrinthFragment,
     LabyrinthProgress, LabyrinthVisibleDoor, LabyrinthInspectResult,
-    LabyrinthGateResult,
+    LabyrinthGateResult, LabyrinthHintPurchase, LabyrinthBossOutcome,
 } from './World';
 export {
     generateEncounter, scaleEnemyToLevel, scaledEncounterLevel,

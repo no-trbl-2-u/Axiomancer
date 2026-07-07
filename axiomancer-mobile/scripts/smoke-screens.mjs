@@ -39,6 +39,8 @@ export const ROUTES = [
     { name: 'exploration', path: '/exploration' },
     { name: 'combat-encounter', path: '/combat-encounter' },
     { name: 'memoir', path: '/memoir' },
+    // THE APORIA act select (no session on a fresh boot).
+    { name: 'labyrinth', path: '/labyrinth' },
     // `/event` is gated by `selectHasActiveEvent`; smoke skips it until
     // a state-seed hook lands. Add it back here once the seed exists.
 ]

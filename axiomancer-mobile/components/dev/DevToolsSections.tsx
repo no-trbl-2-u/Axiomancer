@@ -41,6 +41,7 @@ const DebugQuestState = lazy(() => import('@/components/DebugQuestState').then(m
 const DebugTriggerEncounter = lazy(() => import('@/components/DebugTriggerEncounter').then(m => ({ default: m.DebugTriggerEncounter })));
 const DebugHudOverrides = lazy(() => import('@/components/DebugHudOverrides').then(m => ({ default: m.DebugHudOverrides })));
 const DebugMapResetButton = lazy(() => import('@/components/DebugMapResetButton').then(m => ({ default: m.DebugMapResetButton })));
+const DebugAporiaButton = lazy(() => import('@/components/DebugAporiaButton').then(m => ({ default: m.DebugAporiaButton })));
 const DebugPlaythroughPresets = lazy(() => import('@/components/DebugPlaythroughPresets').then(m => ({ default: m.DebugPlaythroughPresets })));
 const DebugPresetPicker = lazy(() => import('@/components/DebugPresetPicker').then(m => ({ default: m.DebugPresetPicker })));
 const DebugPopulateAllItems = lazy(() => import('@/components/DebugPopulateAllItems').then(m => ({ default: m.DebugPopulateAllItems })));
@@ -131,6 +132,7 @@ export function DevToolsSections() {
 
                 <DevSection label="WORLD & STORY TOOLS" testID="dev-section-world">
                     <DebugMapResetButton />
+                    <DebugAporiaButton />
                     <DebugAlignmentShift />
                     <DebugDialogueJump />
                     <DebugQuestState />

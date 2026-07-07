@@ -174,6 +174,25 @@ import {
     lootUniqueItemAction,
     type LootRarityResult,
 } from './dev/loot-rarity';
+import {
+    clearLabyrinthArrivalNoteAction,
+    enterLabyrinthAction,
+    exitLabyrinthAction,
+    labyrinthBuyHintAction,
+    labyrinthInspectAction,
+    labyrinthMoveAction,
+    labyrinthPostArriveAction,
+    labyrinthPreArriveAction,
+    labyrinthRecordBossOutcomeAction,
+    labyrinthSettleDebtAction,
+    labyrinthSpeakNameAction,
+    labyrinthSubmitGateAction,
+    type LabyrinthGateOutcome,
+    type LabyrinthHintOutcome,
+    type LabyrinthInspectOutcome,
+} from './labyrinth/store-actions';
+import { getAporiaAct } from '@mechanics';
+import type { LabyrinthActId, LabyrinthBossOutcome } from '@mechanics';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -605,6 +624,37 @@ export interface AppActions {
     /** Clear the cache without loot or bites (dev / escape hatch). */
     abandonLootCache: () => void;
 
+    // -----------------------------------------------------------------
+    // The Labyrinth — THE APORIA (W-01; see state/labyrinth/). Dev-menu
+    // entry only. Durable progress lives on GameState.labyrinth; the
+    // transient visit on the labyrinthUi slice. Arrival events resolve
+    // through resolveCurrentMapEvent with labyrinth bracketing (waystone
+    // before the roll, Oubliette ejection after).
+    // -----------------------------------------------------------------
+
+    /** Enter an act: snapshot the overworld, swap maps, resolve arrival. */
+    enterLabyrinth: (actId: LabyrinthActId) => void;
+    /** Leave: restore the overworld snapshot, clear the visit. */
+    exitLabyrinth: () => void;
+    /** Walk a door; resolves the arrival event (boss rooms defer). */
+    labyrinthMove: (to: string) => boolean;
+    /** Fire the boss room's deferred arrival (after the naming rite). */
+    labyrinthBeginBossEvent: () => boolean;
+    /** Inspect a POI: remark + fragment / secret door / baited clue. */
+    labyrinthInspect: (poiId: string) => LabyrinthInspectOutcome | null;
+    /** Lay words at the room's gate. */
+    labyrinthSubmitGate: (words: readonly string[]) => LabyrinthGateOutcome | null;
+    /** Ask the Sophist (tiers 1-3, priced by the engine). Null = broke. */
+    labyrinthBuyHint: (tier: 1 | 2 | 3) => LabyrinthHintOutcome | null;
+    /** Settle debt points at the Fourth Ledger. Returns points settled. */
+    labyrinthSettleDebt: (points: number) => number;
+    /** Speak a name at the finale; true → spared, act complete. */
+    labyrinthSpeakName: (spoken: string) => boolean;
+    /** Record the act boss outcome (descends or completes the maze). */
+    labyrinthRecordBossOutcome: (outcome: LabyrinthBossOutcome) => void;
+    /** Clear the one-shot waystone/ejection toast signal. */
+    clearLabyrinthArrivalNote: () => void;
+
     /**
      * Buy a ware from the pending village event's shop (Phase 137
      * dedicated village screen). Engine `buyItem` owns the rules
@@ -907,6 +957,40 @@ export function createAppActions(store: AppStore): AppActions {
         acknowledgeQuestDusk: () => acknowledgeQuestDuskAction(store),
         claimQuestBoardCompletion: () => claimQuestBoardCompletionAction(store),
         abandonQuestBoard: () => abandonQuestBoardAction(store),
+        // ── The Labyrinth (THE APORIA) ──
+        enterLabyrinth: (actId) => {
+            enterLabyrinthAction(store, actId);
+            labyrinthPreArriveAction(store);
+            resolveCurrentMapEventAction(store, 'labyrinth');
+            labyrinthPostArriveAction(store);
+        },
+        exitLabyrinth: () => exitLabyrinthAction(store),
+        labyrinthMove: (to) => {
+            const session = store.getState().labyrinthUi?.session ?? null;
+            if (!session) return false;
+            if (!labyrinthMoveAction(store, to)) return false;
+            // The boss room's arrival is deferred: the finale panel (naming
+            // rite, Borrowed Premise reckoning) must precede the fight —
+            // `labyrinthBeginBossEvent` fires it (CLI `bossRoomSequence`
+            // parity).
+            const act = getAporiaAct(session.actId);
+            if (store.getState().world.currentMap.currentNode === act.bossRoom) {
+                return true;
+            }
+            labyrinthPreArriveAction(store);
+            resolveCurrentMapEventAction(store, 'labyrinth');
+            labyrinthPostArriveAction(store);
+            return true;
+        },
+        labyrinthBeginBossEvent: () => resolveCurrentMapEventAction(store, 'labyrinth'),
+        labyrinthInspect: (poiId) => labyrinthInspectAction(store, poiId),
+        labyrinthSubmitGate: (words) => labyrinthSubmitGateAction(store, words),
+        labyrinthBuyHint: (tier) => labyrinthBuyHintAction(store, tier),
+        labyrinthSettleDebt: (points) => labyrinthSettleDebtAction(store, points),
+        labyrinthSpeakName: (spoken) => labyrinthSpeakNameAction(store, spoken),
+        labyrinthRecordBossOutcome: (outcome) => labyrinthRecordBossOutcomeAction(store, outcome),
+        clearLabyrinthArrivalNote: () => clearLabyrinthArrivalNoteAction(store),
+
         beginRest: (options) => beginRestAction(store, options),
         chooseRestPosture: (posture) => chooseRestPostureAction(store, posture),
         chooseRestOption: (optionId) => chooseRestOptionAction(store, optionId),

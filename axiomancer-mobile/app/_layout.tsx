@@ -222,6 +222,10 @@ export default function RootLayout() {
                 name="dev/index"
                 options={{ headerShown: false, presentation: 'fullScreenModal' }}
               />
+              <Stack.Screen
+                name="labyrinth/index"
+                options={{ headerShown: false, presentation: 'fullScreenModal', gestureEnabled: false }}
+              />
             </Stack>
           </TooltipProvider>
           </CombatModeProvider>

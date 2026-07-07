@@ -39,8 +39,10 @@ import {
     createLabyrinthProgress, visibleDoors, inspectPoi, submitGateAnswer,
     preConfirmedWords, buyHint, hintPrice, debtPoints, borrowedPremiseStacks,
     settleDebt, activateWaystone, lastWaystone, namingForkOpen,
-    recordBossOutcome, getRoom, edgeKey,
+    recordBossOutcome, getRoom, edgeKey, recordWalk, isSophistTrueName,
+    SETTLE_PRICE_PER_POINT,
 } from '../World/Labyrinth/labyrinth.engine';
+import { resolvePoiTrap } from '../World/Labyrinth/labyrinth.pools';
 import type { LabyrinthActDef, LabyrinthActId, LabyrinthProgress } from '../World/Labyrinth/types';
 import { runHazardCombatCliEncounter, type CombatAutoPolicyId } from './combat.cli';
 import type { CombatOutcome } from '../Combat/combat.encounter.types';
@@ -240,7 +242,7 @@ async function bossRoomSequence(
                 message: 'There is a third way, if you kept your receipts. Speak a name, or press enter to fight:',
             }]);
             const spoken = (naming ?? '').trim().toUpperCase();
-            if (spoken === THE_NAME) {
+            if (isSophistTrueName(spoken)) {
                 setProgress(store, recordBossOutcome(getProgress(store), act.id, 'spared'));
                 log(`\nThe Sophist: "...So. The asker, again. Very well — ${THE_NAME} stands aside."`);
                 log('He gives you his last true sentence about the far country, and it is kind.');
@@ -398,7 +400,10 @@ export async function runLabyrinthCli(rawArgs = process.argv.slice(2)): Promise<
                     break;
                 }
                 const before = store.getState();
-                store.setState({ world: moveToNode(before.world, action.to) });
+                store.setState({
+                    world: moveToNode(before.world, action.to),
+                    labyrinth: recordWalk(getProgress(store), nodeId, action.to),
+                });
                 logState('labyrinth:move', before, store.getState(), { to: action.to });
                 // The boss room's arrival is owned by bossRoomSequence at the
                 // top of the loop (the finale's naming rite must come first).
@@ -428,6 +433,38 @@ export async function runLabyrinthCli(rawArgs = process.argv.slice(2)): Promise<
                     });
                     logState('labyrinth:secretRevealed', before, store.getState(), { from: nodeId, to: result.revealedDoorTo });
                     log(`A door that was not there is there. It leads to ${getRoom(act, result.revealedDoorTo).display}.`);
+                }
+                // Baited clues (one-shot, first inspection only): resolve
+                // through the standard MapEvents dispatch; combat runs the
+                // same encounter driver as arrivals.
+                if (result.trap) {
+                    const before = store.getState();
+                    const sprung = resolvePoiTrap(before, act, result.trap);
+                    store.setState({
+                        player: sprung.state.player,
+                        world: sprung.state.world,
+                        quests: sprung.state.quests,
+                        flags: sprung.state.flags,
+                    });
+                    logState('labyrinth:poiTrap', before, store.getState(), { nodeId, poiId: action.poiId, event: sprung.event });
+                    log(describeEvent(sprung.event));
+                    if (sprung.event.kind === 'encounter') {
+                        const enemy = sprung.event.encounter.enemies[0];
+                        if (!enemy) throw new Error(`POI trap at '${nodeId}' had no enemy.`);
+                        const combat = await runHazardCombatCliEncounter({
+                            enemy,
+                            presetId,
+                            seed: flags.combatSeed,
+                            auto: true,
+                            policy: asCombatPolicy(flags.combatPolicy),
+                            maxTurns: flags.combatMaxTurns ?? 30,
+                        });
+                        if (combat.outcome === 'defeat') {
+                            log('\nYou are defeated. (Normal game-over flow.)');
+                            emit({ type: 'cli:exit', payload: { reason: 'defeat', act: act.id } });
+                            return;
+                        }
+                    }
                 }
                 break;
             }
@@ -473,7 +510,7 @@ export async function runLabyrinthCli(rawArgs = process.argv.slice(2)): Promise<
                 const p = getProgress(store);
                 const outstanding = debtPoints(p);
                 if (outstanding === 0) { log('The Sophist: "Nothing owed. How unlike a visitor."'); break; }
-                const pricePerPoint = 30;
+                const pricePerPoint = SETTLE_PRICE_PER_POINT;
                 const currency = store.getState().player.currency;
                 const affordable = Math.min(outstanding, Math.floor(currency / pricePerPoint));
                 if (affordable === 0) { log(`Settling costs ${pricePerPoint} coin a point. You cannot afford one.`); break; }

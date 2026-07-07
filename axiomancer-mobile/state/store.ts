@@ -16,6 +16,7 @@ import {
 import type { GatheringSessionState } from '@mechanics';
 import type { HazardSessionState } from '@mechanics';
 import type { Item, LootCacheSession, QuestBoardSession, RestSession } from '@mechanics';
+import type { LabyrinthActId, WorldState } from '@mechanics';
 
 /**
  * Mobile-only state slice for the event modal. The engine returns
@@ -140,6 +141,32 @@ export interface MobileCacheSlice {
     stash: Readonly<Record<string, Item>>;
 }
 
+/**
+ * Mobile-only Labyrinth (THE APORIA) session slice. Durable progress
+ * lives on the ENGINE state (`GameState.labyrinth`, persisted with the
+ * save); this slice holds only the transient visit: which act is open,
+ * the overworld snapshot restored on exit (the dev-menu entry must
+ * leave the exploration tab untouched), and the Sophist's last remark
+ * (a one-shot UI signal). `null` outside the labyrinth.
+ */
+export interface MobileLabyrinthSlice {
+    session: {
+        actId: LabyrinthActId;
+        /** Overworld `world` snapshot, restored by `exitLabyrinth`. */
+        savedWorld: WorldState | null;
+        /** Latest POI inspection echo (remark strip + pickup line). */
+        lastRemark: {
+            poiId: string;
+            remark: string;
+            fragmentWord: string | null;
+            revealedDisplay: string | null;
+            trap: 'encounter' | 'hazard' | null;
+        } | null;
+        /** One-shot arrival signals for toasts (waystone / ejection). */
+        arrivalNote: 'waystone' | 'ejected' | null;
+    } | null;
+}
+
 export type AppStoreState = GameStore & {
     event: MobileEventSlice;
     hazard: MobileHazardSlice;
@@ -147,6 +174,7 @@ export type AppStoreState = GameStore & {
     quest: MobileQuestSlice;
     rest: MobileRestSlice;
     cache: MobileCacheSlice;
+    labyrinthUi: MobileLabyrinthSlice;
     notifications: MobileNotificationsSlice;
     /** Phase 87 — dev-only overrides for testing empty-state branches. */
     devOverrides: DevOverridesSlice;
@@ -188,6 +216,8 @@ export const EMPTY_CACHE_SLICE: MobileCacheSlice = Object.freeze({
     session: null,
     stash: Object.freeze({}),
 });
+
+export const EMPTY_LABYRINTH_SLICE: MobileLabyrinthSlice = Object.freeze({ session: null });
 
 /**
  * Default notifications slice. `levelUpAcknowledged: true` because a
@@ -274,6 +304,7 @@ export function createAppStore(options: CreateAppStoreOptions = {}): AppStore {
         quest: EMPTY_QUEST_SLICE,
         rest: EMPTY_REST_SLICE,
         cache: EMPTY_CACHE_SLICE,
+        labyrinthUi: EMPTY_LABYRINTH_SLICE,
         notifications: DEFAULT_NOTIFICATIONS_SLICE,
         devOverrides: DEFAULT_DEV_OVERRIDES_SLICE,
         _recentEvents: [],

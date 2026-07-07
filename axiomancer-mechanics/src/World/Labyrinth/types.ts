@@ -41,6 +41,13 @@ export interface LabyrinthPoiDef {
      * reveal land in the same beat; never a second hidden step).
      */
     revealsSecretDoorTo?: NodeId;
+    /**
+     * The clue is bait: FIRST inspection springs a combat encounter or a
+     * hazard (one-shot, like fragments). Never authored on a POI that
+     * carries a fragment or reveals a secret door — a trap is a cost,
+     * not a toll on progress.
+     */
+    trap?: 'encounter' | 'hazard';
 }
 
 /** An outgoing door. One-way doors simply have no mirror on the far side. */
@@ -135,6 +142,13 @@ export interface LabyrinthProgress {
     pocket: LabyrinthFragment[];
     /** `${nodeId}:${poiId}` keys already inspected (fragments are one-shot). */
     inspectedPois: string[];
+    /**
+     * Directed edges actually walked, `${from}->${to}` keys in first-walk
+     * order. Drives the fog-of-war map: an edge renders only in the
+     * direction walked. Optional — absent on saves written before the
+     * mobile UI landed (read through `walkedEdgesOf`).
+     */
+    walkedEdges?: string[];
     /** Edge keys `${from}->${to}` whose secret door is revealed. */
     revealedSecrets: string[];
     /** Edge keys `${from}->${to}` whose gate is answered. */
@@ -168,6 +182,11 @@ export interface LabyrinthInspectResult {
     fragment?: LabyrinthFragment;
     /** Secret door revealed by THIS inspection. */
     revealedDoorTo?: NodeId;
+    /**
+     * Trap sprung by THIS inspection (undefined on re-inspect). The caller
+     * resolves it — `resolvePoiTrap` builds and applies the event.
+     */
+    trap?: 'encounter' | 'hazard';
 }
 
 export interface LabyrinthGateResult {
