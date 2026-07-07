@@ -85,7 +85,7 @@ jest.mock('@/components/BundleSelectScreen', () => ({
         const mockReact = require('react');
         return mockReact.createElement('view', {
             testID: 'bundle-select',
-            onPress: () => onPick('bleeding-edge'),
+            onPress: () => onPick('bleed'),
         }, 'Bundle Select');
     },
 }));

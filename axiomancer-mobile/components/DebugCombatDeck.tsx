@@ -1,8 +1,8 @@
 /**
  * Dev-only combat deck controls. The named presets swap the player's combat
- * deck for a curated selection (starter baseline, the three stance decks, and
- * aggression / attrition / control / gold-showcase strategy decks); the
- * randomizer deals a chaos hand from the full card pool. Each preset replaces
+ * deck for a curated selection (starter baseline, the keyword deck types —
+ * bleed / poison / confusion / dread / guard / sustain — and a gold-showcase);
+ * the randomizer deals a chaos hand from the full card pool. Each preset replaces
  * `player.knownSkills` and clears earned reward cards, so the next encounter
  * deals exactly that deck. Renders null outside dev builds.
  */
