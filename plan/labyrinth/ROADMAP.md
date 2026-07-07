@@ -429,3 +429,16 @@ dev-menu entry.
 - [x] 11. CLAUDE-DESIGN-PROMPT.md written for T — hand it to
       claude-design for the mobile UI (dev-menu entry, room scenes,
       accordion, sockets, fog-of-war map).
+- [x] 12. Mobile UI implementation — 2026-07-07. Dev-menu entry
+      (DebugAporiaButton) → `/labyrinth` route: act select, room
+      scene (procedural ink-on-parchment SVG, pulsating uninspected
+      clue POIs, per-room backdrop override slot in
+      `assets/images/labyrinth/`), the Accordion, gate sockets with
+      pre-confirmed words, walk-history fog-of-war map, waystone /
+      Oubliette toasts, boss reckoning + naming input. NEW at T's
+      request: baited clues — 12 authored POI traps (9 combat /
+      3 hazard, loop/trap-realm biased, never on fragment/secret
+      POIs) via `LabyrinthPoiDef.trap` + `resolvePoiTrap`, wired in
+      mobile AND the CLI. MAZE book scans stay reference-only (their
+      in-picture numbers contradict our rooms; rights); art contract
+      documented in the backdrop registry.

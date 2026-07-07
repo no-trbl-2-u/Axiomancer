@@ -270,3 +270,6 @@ the `color` prop without needing separate colored variants.
 - [ ] Event: Boss illustration (full-width × 360)
 - [ ] Character body diagram (88×220)
 - [ ] Tab bar icon set (5 icons)
+- [ ] Labyrinth room-scene backdrops (47 rooms, 3:2, ink-on-parchment —
+      contract in `assets/images/labyrinth/index.ts`; procedural SVG
+      placeholder in `components/labyrinth/RoomScene.tsx` until then)

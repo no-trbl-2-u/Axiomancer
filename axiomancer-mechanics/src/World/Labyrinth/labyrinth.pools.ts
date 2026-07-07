@@ -17,7 +17,10 @@ import {
     setDefaultMapEventPool,
     setNodeEventPoolOverride,
 } from '../MapEvents/resolve-map-event';
-import type { MapEventPool } from '../MapEvents/types';
+import { applyPayload } from '../MapEvents/handlers';
+import type { MapEventPool, ResolveMapEventResult } from '../MapEvents/types';
+import type { GameState } from '../../Game/types';
+import { getRng } from '../../Utils/rng';
 import type { DialogueTree } from '../../NPCs/types';
 import { ENEMY_REGISTRY } from '../../Enemy/enemy.library';
 import type { EnemySlug } from '../../Enemy/enemy.library';
@@ -177,6 +180,33 @@ function overridePool(act: LabyrinthActDef, room: LabyrinthRoomDef): MapEventPoo
     }
 
     return undefined;
+}
+
+/**
+ * Resolve a POI trap (`LabyrinthInspectResult.trap`) into a real event.
+ * Baited clues bypass the first-arrival pool (the room is already
+ * consumed by the time a POI is inspected): the payload is built from
+ * the act's tuning and applied through the standard MapEvents dispatch,
+ * so a trap encounter scales exactly like an arrival encounter and a
+ * trap hazard bites with the act's hazard damage.
+ */
+export function resolvePoiTrap(
+    state: GameState,
+    act: LabyrinthActDef,
+    kind: 'encounter' | 'hazard',
+    rng: () => number = () => getRng().random(),
+): ResolveMapEventResult {
+    const t = ACT_POOL_TUNING[act.id];
+    const payload = kind === 'hazard'
+        ? {
+            kind: 'hazard' as const, damage: t.hazardDamage,
+            description: 'The clue was bait. The building fights you.',
+        }
+        : {
+            kind: 'encounter' as const,
+            description: 'The clue was bait. Something kept it.',
+        };
+    return applyPayload(state, payload, rng);
 }
 
 /** Registers every Aporia pool. Idempotence guard for hermetic tests. */

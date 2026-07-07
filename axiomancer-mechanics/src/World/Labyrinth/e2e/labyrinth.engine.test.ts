@@ -29,7 +29,9 @@ import {
     debtPoints, borrowedPremiseStacks, settleDebt,
     activateWaystone, lastWaystone, namingForkOpen, recordBossOutcome,
     edgeKey, BORROWED_PREMISE_CAP,
+    recordWalk, walkedEdgesOf, isSophistTrueName,
 } from '../labyrinth.engine';
+import { resolvePoiTrap } from '../labyrinth.pools';
 import { createMapState, getMapDefinition } from '../../map.registry';
 import { moveToNode, teleportToNode, unblockMapRoute, IllegalMoveError } from '../../world.reducer';
 import { resolveMapEvent } from '../../MapEvents/resolve-map-event';
@@ -412,5 +414,86 @@ describe('one-shot events on labyrinth maps (solved space is solved)', () => {
             expect(result.event.isBoss).toBe(true);
             expect(result.event.encounter.enemies[0]?.name).toBe('The Doorwarden');
         }
+    });
+});
+
+describe('baited clues (POI traps)', () => {
+    it('never share a POI with a fragment or secret, avoid set-piece rooms, and skew to combat', () => {
+        let encounters = 0;
+        let hazards = 0;
+        for (const act of APORIA_ACTS) {
+            let actTraps = 0;
+            for (const room of act.rooms) {
+                for (const poi of room.pois) {
+                    if (!poi.trap) continue;
+                    actTraps += 1;
+                    // A trap is a cost, never a toll on progress.
+                    expect(poi.fragment, `${room.nodeId}:${poi.id}`).toBeUndefined();
+                    expect(poi.revealsSecretDoorTo, `${room.nodeId}:${poi.id}`).toBeUndefined();
+                    // Set-piece rooms (entry, gate, quest, boss) keep their
+                    // authored drama; their clues are safe to read.
+                    expect([act.entry, act.questRoom, act.bossRoom]).not.toContain(room.nodeId);
+                    expect(act.gates.some(g => g.roomId === room.nodeId)).toBe(false);
+                    if (poi.trap === 'encounter') encounters += 1;
+                    else hazards += 1;
+                }
+            }
+            expect(actTraps).toBeGreaterThan(0);
+        }
+        expect(encounters).toBeGreaterThan(hazards);
+    });
+
+    it('spring once: first inspection carries the trap kind, re-inspection does not', () => {
+        const first = inspectPoi(ACT1, createLabyrinthProgress(), 'ap1-9', 'fountain');
+        expect(first.trap).toBe('encounter');
+        const again = inspectPoi(ACT1, first.progress, 'ap1-9', 'fountain');
+        expect(again.trap).toBeUndefined();
+        expect(again.remark).toBe(first.remark);
+    });
+
+    it('resolvePoiTrap: an encounter trap yields a live enemy; a hazard trap bites with act damage', () => {
+        const base = createNewGameState();
+        const state: GameState = { ...base, world: aporiaWorld() };
+
+        const fight = resolvePoiTrap(state, ACT1, 'encounter', () => 0.0);
+        expect(fight.event.kind).toBe('encounter');
+        if (fight.event.kind === 'encounter') {
+            expect(fight.event.encounter.enemies.length).toBeGreaterThan(0);
+            expect(fight.event.isBoss).toBe(false);
+        }
+
+        const bite = resolvePoiTrap(state, ACT1, 'hazard', () => 0.0);
+        expect(bite.event.kind).toBe('hazard');
+        if (bite.event.kind === 'hazard') {
+            // Act I hazard tuning (labyrinth.pools.ts ACT_POOL_TUNING).
+            expect(bite.event.damage).toBe(6);
+            expect(bite.state.player.health).toBe(state.player.health - 6);
+        }
+    });
+});
+
+describe('walk history (fog-of-war source)', () => {
+    it('records each directed edge once, in order, tolerant of legacy saves', () => {
+        let p = createLabyrinthProgress();
+        p = recordWalk(p, 'ap1-1', 'ap1-2');
+        p = recordWalk(p, 'ap1-2', 'ap1-1');
+        p = recordWalk(p, 'ap1-1', 'ap1-2');
+        expect(p.walkedEdges).toEqual(['ap1-1->ap1-2', 'ap1-2->ap1-1']);
+
+        // Saves written before the field existed read as empty and heal on
+        // the first recorded walk.
+        const legacy = createLabyrinthProgress();
+        delete (legacy as { walkedEdges?: string[] }).walkedEdges;
+        expect(walkedEdgesOf(legacy)).toEqual([]);
+        expect(recordWalk(legacy, 'ap1-1', 'ap1-3').walkedEdges).toEqual(['ap1-1->ap1-3']);
+    });
+});
+
+describe('the naming rite', () => {
+    it('accepts the true name loosely typed and rejects furniture', () => {
+        expect(isSophistTrueName(' protas ')).toBe(true);
+        expect(isSophistTrueName('PROTAS')).toBe(true);
+        expect(isSophistTrueName('SOPHIST')).toBe(false);
+        expect(isSophistTrueName('')).toBe(false);
     });
 });

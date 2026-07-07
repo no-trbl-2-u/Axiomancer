@@ -321,6 +321,7 @@ export const ACT1: LabyrinthActDef = {
                     id: 'fountain',
                     label: 'Fountain',
                     remark: 'Dry. Circulation is not nourishment.',
+                    trap: 'encounter',
                 },
             ],
             doors: [
@@ -398,6 +399,7 @@ export const ACT1: LabyrinthActDef = {
                     id: 'black-water',
                     label: 'Black water',
                     remark: 'Deep enough. For what, it declines to say.',
+                    trap: 'hazard',
                 },
             ],
             doors: [
@@ -418,6 +420,7 @@ export const ACT1: LabyrinthActDef = {
                     id: 'ceiling-mouth',
                     label: 'Ceiling mouth',
                     remark: 'You may address complaints to it. It has heard them all.',
+                    trap: 'encounter',
                 },
                 {
                     id: 'tallow-stubs',

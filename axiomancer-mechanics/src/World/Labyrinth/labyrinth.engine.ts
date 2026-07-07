@@ -28,6 +28,17 @@ export const ASSERTION_POINTS = 1;
 export const BORROWED_PREMISE_THRESHOLDS = [1, 6, 12] as const;
 /** Hard cap (softlock-proofing; see W-01 finale doctrine). */
 export const BORROWED_PREMISE_CAP = 3;
+/** Coin per debt point at the Fourth Ledger (the Sophist's Study). */
+export const SETTLE_PRICE_PER_POINT = 30;
+
+/** The Sophist's real name — the finale mercy key (C-01). Never rendered
+ *  by clients; the player must type it. */
+const TRUE_NAME = 'PROTAS';
+
+/** Whether a spoken name is the Sophist's own (the naming rite). */
+export function isSophistTrueName(spoken: string): boolean {
+    return spoken.trim().toUpperCase() === TRUE_NAME;
+}
 
 export function edgeKey(from: NodeId, to: NodeId): string {
     return `${from}->${to}`;
@@ -38,6 +49,7 @@ export function createLabyrinthProgress(): LabyrinthProgress {
         currentAct: 'act1',
         pocket: [],
         inspectedPois: [],
+        walkedEdges: [],
         revealedSecrets: [],
         openGates: [],
         assertionDebt: 0,
@@ -152,7 +164,26 @@ export function inspectPoi(
         };
     }
 
-    return { progress: next, remark: poi.remark, fragment, revealedDoorTo };
+    return { progress: next, remark: poi.remark, fragment, revealedDoorTo, trap: poi.trap };
+}
+
+// ─── Walk history (fog-of-war map source) ────────────────────────────────────
+
+/** Walked edges, tolerant of saves that predate the field. */
+export function walkedEdgesOf(progress: LabyrinthProgress): readonly string[] {
+    return progress.walkedEdges ?? [];
+}
+
+/** Record a walked directed edge (first walk only; order preserved). */
+export function recordWalk(
+    progress: LabyrinthProgress,
+    from: NodeId,
+    to: NodeId,
+): LabyrinthProgress {
+    const key = edgeKey(from, to);
+    const walked = walkedEdgesOf(progress);
+    if (walked.includes(key)) return progress;
+    return { ...progress, walkedEdges: [...walked, key] };
 }
 
 // ─── Gates ────────────────────────────────────────────────────────────────────

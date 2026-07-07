@@ -53,6 +53,7 @@ export {
     completeNode, unlockNode, changeContinent, completeUniqueEvent,
     revealAdjacent, markNodeConsumed, unlockAdjacent,
     recordHazardOutcome, blockMapRoute, getHazardOutcomesForNode, isRouteBlocked,
+    teleportToNode, unblockMapRoute,
 } from './world.reducer';
 
 export {
@@ -106,10 +107,13 @@ export {
     submitGateAnswer, preConfirmedWords, buyHint, hintPrice, nextHopToward,
     debtPoints, borrowedPremiseStacks, settleDebt, activateWaystone,
     lastWaystone, namingForkOpen, recordBossOutcome, getRoom, edgeKey,
+    recordWalk, walkedEdgesOf, isSophistTrueName,
     LabyrinthContentError,
     HINT_TIER_POINTS, ASSERTION_POINTS,
     BORROWED_PREMISE_THRESHOLDS, BORROWED_PREMISE_CAP,
+    SETTLE_PRICE_PER_POINT,
 } from './Labyrinth/labyrinth.engine';
+export { resolvePoiTrap } from './Labyrinth/labyrinth.pools';
 export {
     APORIA_ACTS, getAporiaAct, getAporiaActByMap,
     buildLabyrinthMapDefinition,

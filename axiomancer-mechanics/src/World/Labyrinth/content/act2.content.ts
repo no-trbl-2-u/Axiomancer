@@ -277,6 +277,7 @@ export const ACT2: LabyrinthActDef = {
                     id: 'same-dated-broadsheets',
                     label: 'Same-dated broadsheets',
                     remark: 'Circulation. The word does all its own work here.',
+                    trap: 'encounter',
                 },
             ],
             doors: [
@@ -361,6 +362,7 @@ export const ACT2: LabyrinthActDef = {
                     id: 'guillotine',
                     label: 'Guillotine',
                     remark: 'For trimming overhang. The Archive dislikes margins wider than their meaning.',
+                    trap: 'hazard',
                 },
             ],
             doors: [
@@ -411,6 +413,7 @@ export const ACT2: LabyrinthActDef = {
                     id: 'ceiling-hatch',
                     label: 'Ceiling hatch',
                     remark: 'File your objection with the crates.',
+                    trap: 'encounter',
                 },
             ],
             doors: [
@@ -429,6 +432,7 @@ export const ACT2: LabyrinthActDef = {
                     id: 'canvas-hopper',
                     label: 'Canvas hopper',
                     remark: 'Everything the Wing rejected arrives here soft. Consider the courtesy.',
+                    trap: 'encounter',
                 },
                 {
                     id: 'sorting-table',

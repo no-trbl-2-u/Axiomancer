@@ -314,6 +314,7 @@ export const ACT3: LabyrinthActDef = {
                     id: 'lit-brazier',
                     label: 'Lit brazier',
                     remark: 'Fire at last, and it warms a waiting room. The house spends comfort where it costs the most.',
+                    trap: 'encounter',
                 },
                 {
                     id: 'unworn-bench',
@@ -365,6 +366,7 @@ export const ACT3: LabyrinthActDef = {
                     id: 'brass-plates',
                     label: 'Brass plates',
                     remark: 'First names only. The settled travel light, eventually.',
+                    trap: 'encounter',
                 },
                 {
                     id: 'the-fresh-mortared-58',
@@ -393,6 +395,7 @@ export const ACT3: LabyrinthActDef = {
                     id: 'glass-cased-proofs',
                     label: 'Glass-cased proofs',
                     remark: 'Signed and settled. The house keeps them the way the Archive keeps the news: at the moment they stopped.',
+                    trap: 'encounter',
                 },
                 {
                     id: 'the-pulling-door-58',
@@ -420,6 +423,7 @@ export const ACT3: LabyrinthActDef = {
                     id: 'donation-bowl',
                     label: 'Donation bowl',
                     remark: 'Empty. Even the forger\'s patrons had second thoughts, at the end.',
+                    trap: 'encounter',
                 },
                 {
                     id: 'the-welcoming-inner-door-64',
@@ -447,6 +451,7 @@ export const ACT3: LabyrinthActDef = {
                     id: 'the-perfect-chair',
                     label: 'The perfect chair',
                     remark: 'It fits. That is a property of traps, not of truths.',
+                    trap: 'hazard',
                 },
                 {
                     id: 'the-oculus-60',

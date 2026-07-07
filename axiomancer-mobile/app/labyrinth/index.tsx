@@ -1,0 +1,487 @@
+/**
+ * THE APORIA — labyrinth screen (dev-menu entry only, W-01 / DESIGN.md
+ * section 7). Act select → room scene → accordion; gates, fog map,
+ * finale.
+ *
+ * Event plumbing mirrors the exploration screen: arrival (and baited-
+ * clue) encounters rise as the in-place `<EncounterModalOverlay>`
+ * combat-prelude; hazard / rest / loot / gathering / quest / narration
+ * events route to their existing full-screen minigames via the
+ * globally-mounted gates. Boss rooms defer their arrival until the
+ * finale panel's FIGHT (the naming rite precedes the fight — CLI
+ * `bossRoomSequence` parity).
+ */
+
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { Pressable, ScrollView, Text, View } from 'react-native';
+import { useRouter } from 'expo-router';
+
+import { ScreenBg } from '@/components/ScreenBg';
+import { EncounterModalOverlay } from '@/components/event/EncounterModalOverlay';
+import { FinalePanel } from '@/components/labyrinth/FinalePanel';
+import { FogMap } from '@/components/labyrinth/FogMap';
+import { GateSockets } from '@/components/labyrinth/GateSockets';
+import { LabyrinthAccordion } from '@/components/labyrinth/LabyrinthAccordion';
+import { RoomScene } from '@/components/labyrinth/RoomScene';
+import { useCombatMode } from '@/state/combat-mode';
+import { useGameActions, useGameState } from '@/state/GameStoreProvider';
+import { selectEventViewModel, selectHasActiveEvent } from '@/state/presenters/event.engine';
+import {
+    LABYRINTH_COPY,
+    selectLabyrinthFinaleViewModel,
+    selectLabyrinthViewModel,
+} from '@/state/presenters/labyrinth.engine';
+import { FONTS } from '@/theme/axm';
+import { makeStyles } from '@/theme/runtime';
+import type { Enemy } from '@mechanics';
+
+export default function LabyrinthScreen() {
+    const styles = useStyles();
+    const router = useRouter();
+    const actions = useGameActions();
+
+    const vm = useGameState(selectLabyrinthViewModel);
+    const finaleVm = useGameState(selectLabyrinthFinaleViewModel);
+    const eventVm = useGameState(selectEventViewModel);
+    const hasEvent = useGameState(selectHasActiveEvent);
+
+    const [selectedDoor, setSelectedDoor] = useState<{ to: string; display: string; gated: boolean } | null>(null);
+    const [showMap, setShowMap] = useState(false);
+    const [hintLine, setHintLine] = useState<string | null>(null);
+    const [gateLine, setGateLine] = useState<string | null>(null);
+    const [activeEnemy, setActiveEnemy] = useState<Enemy | null>(null);
+
+    // ── Encounter modal lifecycle (exploration-screen parity) ──
+    const {
+        inEncounterModal,
+        openEncounterModal,
+        closeEncounterModal,
+        inCombat,
+        enterCombat,
+        lastOutcome,
+    } = useCombatMode();
+
+    const preludeReady = hasEvent && eventVm.kind === 'combat-prelude';
+    const showEncounterModal = inEncounterModal || preludeReady;
+
+    useEffect(() => {
+        if (preludeReady && !inEncounterModal) openEncounterModal();
+    }, [preludeReady, inEncounterModal, openEncounterModal]);
+    useEffect(() => {
+        if (inEncounterModal && !preludeReady && lastOutcome === null && !inCombat) {
+            closeEncounterModal();
+        }
+    }, [inEncounterModal, preludeReady, lastOutcome, inCombat, closeEncounterModal]);
+    useEffect(() => {
+        if (!inEncounterModal) setActiveEnemy(null);
+    }, [inEncounterModal]);
+
+    // ── Boss outcome recording (one per modal session) ──
+    const bossOutcomeRecorded = useRef(false);
+    const inBossRoom = vm.kind === 'room' && vm.room.isBossRoom;
+    useEffect(() => {
+        if (!inBossRoom) {
+            bossOutcomeRecorded.current = false;
+            return;
+        }
+        if (bossOutcomeRecorded.current) return;
+        if (lastOutcome === 'victory') {
+            bossOutcomeRecorded.current = true;
+            actions.labyrinthRecordBossOutcome('slain');
+        } else if (lastOutcome === 'parley') {
+            bossOutcomeRecorded.current = true;
+            actions.labyrinthRecordBossOutcome('spared');
+        }
+    }, [inBossRoom, lastOutcome, actions]);
+
+    // ── One-shot arrival toast (waystone / ejection) ──
+    const arrivalToast = vm.kind === 'room' ? vm.room.arrivalToast : null;
+    useEffect(() => {
+        if (arrivalToast === null) return;
+        const t = setTimeout(() => actions.clearLabyrinthArrivalNote(), 3500);
+        return () => clearTimeout(t);
+    }, [arrivalToast, actions]);
+
+    const leave = useCallback(() => {
+        actions.exitLabyrinth();
+        if (router.canGoBack()) router.back();
+    }, [actions, router]);
+
+    const onEncounterFight = () => {
+        const enemy = actions.beginHazardEncounter();
+        if (!enemy) return;
+        setActiveEnemy(enemy);
+        enterCombat();
+    };
+    const onEncounterFlee = () => {
+        actions.pickEventChoice('flee');
+    };
+
+    // ── Act select ──
+    if (vm.kind === 'act-select') {
+        return (
+            <ScreenBg scrollable={false}>
+                <View style={styles.selectRoot} testID="labyrinth-act-select">
+                    <Text style={styles.title}>{vm.title}</Text>
+                    <Text style={styles.sub}>{vm.sub}</Text>
+                    <Text style={styles.warning}>{vm.warning}</Text>
+                    {vm.acts.map((act) => (
+                        <Pressable
+                            key={act.id}
+                            onPress={() => actions.enterLabyrinth(act.id)}
+                            style={styles.actCard}
+                            testID={`labyrinth-act-${act.id}`}
+                        >
+                            <Text style={styles.actTitle}>{act.title}</Text>
+                            <Text style={styles.actRiddle}>{act.riddle}</Text>
+                            <Text style={styles.actEnter}>
+                                {act.completed ? LABYRINTH_COPY.actDone : LABYRINTH_COPY.enterAct}
+                            </Text>
+                        </Pressable>
+                    ))}
+                    <Pressable onPress={leave} style={styles.leaveButton} testID="labyrinth-leave">
+                        <Text style={styles.leaveText}>{LABYRINTH_COPY.leave}</Text>
+                    </Pressable>
+                </View>
+            </ScreenBg>
+        );
+    }
+
+    // ── The Unfounded Door walked ──
+    if (vm.kind === 'complete') {
+        return (
+            <ScreenBg scrollable={false}>
+                <View style={styles.selectRoot} testID="labyrinth-complete">
+                    <Text style={styles.title}>{vm.title}</Text>
+                    <Text style={styles.sub}>{vm.body}</Text>
+                    <Text style={styles.warning}>{vm.lastLine}</Text>
+                    <Pressable onPress={leave} style={styles.leaveButton} testID="labyrinth-leave">
+                        <Text style={styles.leaveText}>{LABYRINTH_COPY.leave}</Text>
+                    </Pressable>
+                </View>
+            </ScreenBg>
+        );
+    }
+
+    const { room, map } = vm;
+
+    const onDoorPress = (to: string) => {
+        const door = room.doors.find((d) => d.to === to);
+        if (!door) return;
+        setSelectedDoor((prev) => (prev?.to === to ? null : { ...door }));
+    };
+    const confirmMove = () => {
+        if (!selectedDoor || selectedDoor.gated) return;
+        setSelectedDoor(null);
+        setHintLine(null);
+        setGateLine(null);
+        actions.labyrinthMove(selectedDoor.to);
+    };
+
+    return (
+        <ScreenBg scrollable={false}>
+            <View style={styles.root} testID="labyrinth-room">
+                {/* ── Header strip ── */}
+                <View style={styles.header}>
+                    <Pressable onPress={leave} testID="labyrinth-leave">
+                        <Text style={styles.headerAction}>{LABYRINTH_COPY.leave}</Text>
+                    </Pressable>
+                    <Text style={styles.headerTitle} numberOfLines={1}>{room.actTitle}</Text>
+                    <Pressable onPress={() => setShowMap((m) => !m)} testID="labyrinth-map-toggle">
+                        <Text style={styles.headerAction}>{LABYRINTH_COPY.mapLabel}</Text>
+                    </Pressable>
+                </View>
+
+                <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
+                    {showMap ? (
+                        <FogMap map={map} />
+                    ) : (
+                        <RoomScene
+                            nodeId={room.nodeId}
+                            display={room.display}
+                            doors={room.doors}
+                            pois={room.pois}
+                            sealedLabel={LABYRINTH_COPY.doorSealed}
+                            onDoorPress={onDoorPress}
+                            onPoiPress={(poiId) => {
+                                setSelectedDoor(null);
+                                actions.labyrinthInspect(poiId);
+                            }}
+                        />
+                    )}
+
+                    {/* ── Waystone / ejection toast ── */}
+                    {arrivalToast !== null && (
+                        <View style={styles.toast} testID="labyrinth-arrival-toast">
+                            <Text style={styles.toastText}>{arrivalToast}</Text>
+                        </View>
+                    )}
+
+                    {/* ── The Sophist's remark on the last inspected POI ── */}
+                    {room.lastRemark !== null && (
+                        <View style={styles.remarkStrip} testID="labyrinth-remark">
+                            <Text style={styles.remarkText}>“{room.lastRemark.remark}”</Text>
+                            {room.lastRemark.pickupLine !== null && (
+                                <Text style={styles.pickupText}>{room.lastRemark.pickupLine}</Text>
+                            )}
+                            {room.lastRemark.trapLine !== null && (
+                                <Text style={styles.trapText}>{room.lastRemark.trapLine}</Text>
+                            )}
+                        </View>
+                    )}
+
+                    {/* ── Door confirm strip ── */}
+                    {selectedDoor !== null && (
+                        <View style={styles.confirmStrip} testID="labyrinth-door-confirm">
+                            <Text style={styles.confirmText}>
+                                {selectedDoor.gated
+                                    ? LABYRINTH_COPY.gatedDoorLine
+                                    : `${LABYRINTH_COPY.doorConfirmTitle} — ${selectedDoor.display}`}
+                            </Text>
+                            <View style={styles.confirmButtons}>
+                                {!selectedDoor.gated && (
+                                    <Pressable
+                                        onPress={confirmMove}
+                                        style={styles.confirmGo}
+                                        testID="labyrinth-door-walk"
+                                    >
+                                        <Text style={styles.confirmGoText}>{LABYRINTH_COPY.doorGo}</Text>
+                                    </Pressable>
+                                )}
+                                <Pressable
+                                    onPress={() => setSelectedDoor(null)}
+                                    style={styles.confirmStay}
+                                    testID="labyrinth-door-stay"
+                                >
+                                    <Text style={styles.confirmStayText}>{LABYRINTH_COPY.doorStay}</Text>
+                                </Pressable>
+                            </View>
+                        </View>
+                    )}
+
+                    {/* ── Gate of Assent sockets ── */}
+                    {room.gate !== null && (
+                        <GateSockets
+                            gate={room.gate}
+                            pocket={room.pocket}
+                            resultLine={gateLine}
+                            onSubmit={(words) => {
+                                const result = actions.labyrinthSubmitGate(words);
+                                if (!result) return;
+                                setGateLine(
+                                    result.ok
+                                        ? result.line
+                                        : `${result.line} ${LABYRINTH_COPY.gateLedgerNote}`,
+                                );
+                            }}
+                        />
+                    )}
+
+                    {/* ── Boss room: the reckoning precedes the fight ── */}
+                    {finaleVm !== null && (
+                        <FinalePanel
+                            vm={finaleVm}
+                            onFight={() => actions.labyrinthBeginBossEvent()}
+                            onSpeakName={(spoken) => actions.labyrinthSpeakName(spoken)}
+                        />
+                    )}
+                </ScrollView>
+
+                <LabyrinthAccordion
+                    room={room}
+                    hintLine={hintLine}
+                    onBuyHint={(tier) => {
+                        const bought = actions.labyrinthBuyHint(tier);
+                        setHintLine(bought ? bought.line : LABYRINTH_COPY.hintBroke);
+                    }}
+                    onSettleDebt={
+                        room.settle && room.settle.canAfford
+                            ? () => actions.labyrinthSettleDebt(1)
+                            : null
+                    }
+                />
+
+                {showEncounterModal && (
+                    <EncounterModalOverlay
+                        vm={eventVm}
+                        encounterEnemy={activeEnemy}
+                        onFight={onEncounterFight}
+                        onFlee={onEncounterFlee}
+                    />
+                )}
+            </View>
+        </ScreenBg>
+    );
+}
+
+const useStyles = makeStyles((AXM) => ({
+    root: { flex: 1 },
+    selectRoot: {
+        flex: 1,
+        padding: 20,
+        gap: 12,
+        justifyContent: 'center',
+    },
+    title: {
+        fontFamily: FONTS.gothic,
+        fontSize: 34,
+        color: AXM.parchment,
+        textAlign: 'center',
+    },
+    sub: {
+        fontFamily: FONTS.serif,
+        fontSize: 14,
+        lineHeight: 20,
+        color: AXM.bone,
+        textAlign: 'center',
+    },
+    warning: {
+        fontFamily: FONTS.serif,
+        fontSize: 13,
+        fontStyle: 'italic',
+        color: AXM.sulfur,
+        textAlign: 'center',
+        marginBottom: 8,
+    },
+    actCard: {
+        borderWidth: 1,
+        borderColor: AXM.ash,
+        padding: 14,
+        gap: 4,
+    },
+    actTitle: {
+        fontFamily: FONTS.gothic,
+        fontSize: 20,
+        color: AXM.parchment,
+    },
+    actRiddle: {
+        fontFamily: FONTS.serif,
+        fontSize: 12,
+        fontStyle: 'italic',
+        color: AXM.bone,
+    },
+    actEnter: {
+        fontFamily: FONTS.sans,
+        fontSize: 12,
+        letterSpacing: 2,
+        color: AXM.sulfur,
+        marginTop: 4,
+    },
+    leaveButton: {
+        alignSelf: 'center',
+        paddingVertical: 8,
+        paddingHorizontal: 24,
+        borderWidth: 1,
+        borderColor: AXM.ash,
+        marginTop: 8,
+    },
+    leaveText: {
+        fontFamily: FONTS.sans,
+        fontSize: 12,
+        letterSpacing: 2,
+        color: AXM.bone,
+    },
+    header: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingHorizontal: 14,
+        paddingVertical: 10,
+    },
+    headerTitle: {
+        flex: 1,
+        fontFamily: FONTS.gothic,
+        fontSize: 18,
+        color: AXM.parchment,
+        textAlign: 'center',
+    },
+    headerAction: {
+        fontFamily: FONTS.sans,
+        fontSize: 12,
+        letterSpacing: 2,
+        color: AXM.sulfur,
+    },
+    scroll: { flex: 1 },
+    scrollContent: {
+        paddingHorizontal: 14,
+        paddingBottom: 20,
+        gap: 10,
+    },
+    toast: {
+        borderWidth: 1,
+        borderColor: AXM.sulfur,
+        padding: 10,
+    },
+    toastText: {
+        fontFamily: FONTS.serif,
+        fontSize: 13,
+        fontStyle: 'italic',
+        color: AXM.sulfur,
+    },
+    remarkStrip: {
+        borderLeftWidth: 3,
+        borderLeftColor: AXM.rust,
+        paddingLeft: 10,
+        paddingVertical: 4,
+        gap: 3,
+    },
+    remarkText: {
+        fontFamily: FONTS.serif,
+        fontSize: 14,
+        lineHeight: 20,
+        color: AXM.parchment,
+    },
+    pickupText: {
+        fontFamily: FONTS.sans,
+        fontSize: 12,
+        letterSpacing: 1,
+        color: AXM.sulfur,
+    },
+    trapText: {
+        fontFamily: FONTS.sans,
+        fontSize: 12,
+        letterSpacing: 1,
+        color: AXM.blood,
+    },
+    confirmStrip: {
+        borderWidth: 1,
+        borderColor: AXM.ash,
+        padding: 10,
+        gap: 8,
+    },
+    confirmText: {
+        fontFamily: FONTS.serif,
+        fontSize: 14,
+        color: AXM.parchment,
+    },
+    confirmButtons: {
+        flexDirection: 'row',
+        gap: 10,
+    },
+    confirmGo: {
+        flex: 1,
+        borderWidth: 1,
+        borderColor: AXM.sulfur,
+        paddingVertical: 8,
+        alignItems: 'center',
+    },
+    confirmGoText: {
+        fontFamily: FONTS.sans,
+        fontSize: 12,
+        letterSpacing: 2,
+        color: AXM.sulfur,
+    },
+    confirmStay: {
+        flex: 1,
+        borderWidth: 1,
+        borderColor: AXM.ash,
+        paddingVertical: 8,
+        alignItems: 'center',
+    },
+    confirmStayText: {
+        fontFamily: FONTS.sans,
+        fontSize: 12,
+        letterSpacing: 2,
+        color: AXM.bone,
+    },
+}));
