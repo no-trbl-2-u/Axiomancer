@@ -21,7 +21,6 @@ const WALLS = {
     'cave-wall': require('./walls/cave-wall.webp'),
     'wall04-a1': require('./walls/wall04-a1.webp'),
     'wall04-a2': require('./walls/wall04-a2.webp'),
-    'wall12-b': require('./walls/wall12-b.webp'),
     'wall19': require('./walls/wall19.webp'),
     'wall19-b': require('./walls/wall19-b.webp'),
     'wall20': require('./walls/wall20.webp'),
@@ -92,7 +91,7 @@ const ROOM_ART: Readonly<Record<string, readonly [WallKey, DoorKey]>> = {
     'ap2-9': ['wall44', 'door08-b'], // The Spine
     'ap2-10': ['wall44', 'door04-c'], // The Periodicals Rotunda
     'ap2-11': ['wall20', 'egypt-door-open'], // The Scriptorium: walls of writing
-    'ap2-12': ['wall12-b', 'door04-c'], // The Stair of Returns: high windows
+    'ap2-12': ['wall31-b', 'door04-c'], // The Stair of Returns: plank stairwell
     'ap2-13': ['wall31-b', 'door08-a'], // The Bindery
     'ap2-14': ['wall44', 'door08-b'], // The Unshelved Corridor
     'ap2-15': ['wall44', 'door09-b'], // The Weight of Volumes: rusted hatch out
