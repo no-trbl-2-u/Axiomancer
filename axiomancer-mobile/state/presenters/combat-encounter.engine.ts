@@ -18,7 +18,7 @@ import {
     revealedCurrentStance, resolveRead, getSignatureSkill,
     lookupEffect, READ_DAMAGE_MULT, COLOR_MATCH_DAMAGE_BONUS,
     READ_ADVANTAGE_INTENSITY_BONUS, READ_DISADVANTAGE_DURATION_PENALTY, RESERVE_MAX,
-    EXECUTE_DAMAGE_FRACTION, COMPOUND_COUNT_CAP, RUPTURE_BURST_CAP,
+    RUPTURE_BURST_CAP, riderText,
     VULNERABLE_MAX_MULT, DISRUPT_DENY_AT,
     type CombatEncounterState, type CombatCard, type CombatManaDie,
     type CombatThreatPhase, type CombatIntentType, type CombatReadResult,
