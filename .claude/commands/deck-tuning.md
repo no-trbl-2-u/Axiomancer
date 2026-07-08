@@ -12,6 +12,12 @@ description: Card Forge balance loop for Hazard-Pattern Combat — sandbox-first
 > (`kb:dawncaster` receipts), the keyword wiring checklist, and this
 > skill's autonomy tiers. The caller keeps orchestration: scoping the
 > `--focus`, reviewing the evidence tables, and delivering the branch + PR.
+>
+> **Fact ownership:** doctrine facts (keyword budget, file map, wiring
+> checklist, pricing table) are owned by the agent file and the specs it
+> cites; this skill owns PROCEDURE, TARGETS, and DELIVERY. When a fact
+> here disagrees with the agent/spec, the agent/spec wins — fix the drift
+> here in the same PR.
 
 # Skill: deck-tuning
 
@@ -60,11 +66,12 @@ status the efficient route there. So the forge's questions are:
    proves every library card can be played; the anti-spam target says no
    single card carries >70% of a win's impact (`buildCombatSummary`
    attribution). Dead cards and dominant cards are both forge failures.
-3. **Do the presets and draft weights produce honest archetypes?** A
-   `dot`-focus draft must actually out-DoT a `damage`-focus draft; the
-   `aggro-strike` preset must remain the weak baseline (its underperformance
-   IS the design), and `dot-erosion`/`control-lock` must beat it where it
-   counts.
+3. **Do the presets and draft weights produce honest archetypes?** Each
+   of the 10 theme presets must win through its own signature keywords
+   (spec 32 §8-9), a `dot`-focus draft must actually out-DoT a `balanced`
+   draft, and the `aggro-brute` sim policy must remain the weak baseline
+   (its underperformance IS the design — status play must beat
+   basic-attack trading everywhere it matters).
 4. **Do experiments earn their place?** A sandbox card is promoted only after
    it proves out across at least 2 stages and 2 policies without breaking the
    balance-band e2e.
@@ -116,11 +123,15 @@ The tunable surface is TIERED. Work from the freest tier inward:
   `src/Combat/combat.deck-presets.ts` and the draft weights/defaults in
   `src/Combat/combat.deck-draft.ts` (focus weight 4x, size 10, max copies 2)
   are directly editable with before/after matrix evidence.
-- **Guarded — library card numerics.** `basePower`, `scalingMultiplier`,
-  `combatEffects` intensity/duration, and `specialMechanics` amounts in
+- **Guarded — library card numerics.** `combatEffects` intensity/duration,
+  `specialMechanics` amounts, and rider numerics in
   `src/Cards/cards.library.ts` may be changed ONLY after a sandbox-override
   A/B of the exact same patch shows the intended effect (same seeds, with vs
-  without `--sandbox=<set>`). No cold edits to library literals.
+  without `--sandbox=<set>`). No cold edits to library literals. Every
+  numeric change updates the card's `// pts:` arithmetic comment — the
+  pricing lint (`src/Cards/e2e/pricing.engine.test.ts`) checks the sum
+  against the printed rank's band. (`basePower`/`scalingMultiplier` were
+  deleted with spec 32 v3 — raw damage fields no longer exist.)
 - **Propose-only — structure.** New `specialMechanics` kinds, new verb
   classes, changes to `toCombatCard` classification, `effectImpact`, or any
   engine path are propose-only. You MAY prototype a structural idea as a
@@ -172,9 +183,36 @@ Card-level targets on top of the bands:
 |---|---|
 | Single-card spam | no card id accounts for >70% of a typical win's impact (`buildCombatSummary`) |
 | Dead cards | every library card shows plays in the card-coverage e2e and non-trivial usage somewhere in the full `--cards` matrix |
-| Pool ratios (pool-ratio targets from the retired combat-tuning skill; re-derive from the current card library before relying on them) | direct-damage <= 20% of pool; DoT >= 25%; control >= 15%; GUARD >= 1 per color; Befriend >= 1; state-interactive >= 2 |
+| Pool ratios (v3 — re-derive from the live library before relying on them) | direct damage = 0 by LAW (spec 32: THE STRIKE IS DEAD — a card printing raw HP damage is a spec violation, not a tuning finding); DoT >= 25%; control >= 15%; GUARD/BARRIER >= 1 per theme; Befriend >= 1; state-interactive >= 2 |
 | Per-stage pool health | each stage's eligible pool (`stageEligibleCardIds`) contains at least one live DoT, control, and defend line |
-| Archetype honesty | `dot`-focus drafts land more DoT than `damage`-focus drafts; `aggro-strike` preset stays the weak baseline |
+| Archetype honesty | each of the 10 theme presets (`erosion` … `refrain`) wins through its own SIGNATURE keywords, not just the shared utility 10 (spec 32 §8-9); `dot`-focus drafts land more DoT than `balanced` drafts; the `aggro-brute` POLICY stays the weak baseline (a sim policy — the v2 `aggro-strike` preset is retired) |
+
+### 4b. The keyword proving gate (the exit criteria for the 30-cap)
+
+Spec 32 §3 caps the registry at exactly 30 keywords as a PROVING GATE:
+the owner intends to grow past 30 once the current 30 are proven
+correct. "Proven correct" is measurable — every run of this skill
+updates the scoreboard in
+`axiomancer-mechanics/docs/keyword-atlas.md` (owned by `card-expert`)
+against these criteria, per keyword:
+
+| Criterion | Evidence |
+|---|---|
+| Exercised | the keyword's cards show non-trivial plays in the full `--cards` matrix (not just the coverage e2e minimum) |
+| Not dominant | no keyword's cards jointly account for >70% of a typical win's impact on any stage (`buildCombatSummary` attribution) |
+| Priced honestly | every card carrying it passes the pricing lint, and its A/B history shows no standing "known-cheap/known-dear" note |
+| Theme-honest (signatures only) | the keyword's home preset wins through it (§4 archetype honesty), not around it |
+
+A keyword failing a criterion is a forge target, not a retirement
+candidate by default — fix the cards first, the keyword second. When
+ALL 30 rows are green across a full sweep, report "proving gate:
+satisfied" prominently — that is the owner's signal to consider
+opening the registry (`[needs-user-call]`; spec 32 §3 change).
+
+Attribution today is per-CARD (`buildCombatSummary`); per-KEYWORD
+engagement is derived by summing a keyword's cards. If that proxy
+proves too coarse, propose a per-keyword attribution extension as an
+engine follow-up (propose-only — do not build it inside this loop).
 
 ## 5. The procedure
 
@@ -186,7 +224,10 @@ Card-level targets on top of the bands:
 - If anything fails before you touch a file, stop and report.
 
 ### Step 1 — Read the forge surface
-- `src/Combat/combat.deck-presets.ts` — the five presets and their card lists.
+- `src/Combat/combat.deck-presets.ts` — the ten theme presets
+  (`erosion`, `oratory`, `foundry`, `penitent`, `standstill`, `augury`,
+  `tithe`, `grace`, `bastion`, `refrain` — 1:1 with the spec 32 themes)
+  and their card lists.
 - `src/Combat/combat.deck-draft.ts` — focus weights, size/copy defaults,
   guarantees (>= 1 defend, >= 1 status card).
 - `src/Combat/combat.stage-profiles.ts` — tier/level gates that shape each
@@ -202,13 +243,22 @@ Card-level targets on top of the bands:
 ### Step 2 — Baseline matrix
 ```
 npm run combat-playtest -- --stage=all --policy=all --runs=60 --seed=1 --cards
-npm run combat-playtest -- --stage=early --policy=blind --deck=preset:dot-erosion --seed=1
+npm run combat-playtest -- --stage=early --policy=blind --deck=preset:erosion --seed=1
 npm run combat-playtest -- --stage=late --policy=dot-weaver --deck=policy-pick --seed=1 --cards
 ```
 Record per stage/policy: win rate, V/M/D/R, `statusEngagement`,
 `dotHpFraction`, and the per-card usage table (plays, status lands,
 discards). Flag dead cards (zero or near-zero plays where eligible) and
 dominant cards.
+
+**Diff against the checked-in baseline.** If
+`docs/reports/baselines/deck-matrix-baseline.json` exists (the `--json`
+output of the first command above, seed-pinned, stamped with the commit
+it was generated at), diff the fresh run against it BEFORE forming
+hypotheses — drift with no forge change in between means some other
+merge moved the balance, and that finding leads the report. If the
+baseline is missing or its seeds/flags no longer match, regenerate it
+from the fresh run and note that this run has no drift signal.
 
 ### Step 3 — Forge and A/B in the sandbox
 For each hypothesis, write or edit a set in `cards.sandbox-sets.ts` (new
@@ -228,6 +278,12 @@ change per axis at a time; measure each before the next.
   provenance record or prune it — your call, say which.
 - `npm run verify` after each applied change. Broken test → revert, record
   under "Considered but not applied".
+- Any applied change (promotion, preset/draft edit, library nudge)
+  regenerates `docs/reports/baselines/deck-matrix-baseline.json` from the
+  post-change full matrix (same seeds/flags as Step 2) and ships it in the
+  same PR — the next run diffs against the world this one leaves behind.
+- Update the affected rows of `docs/keyword-atlas.md` (proving-gate
+  scoreboard, §4b) in the same PR.
 
 ### Step 5 — Deliver on ONE PR
 - **Cross-package verify** — before opening the PR, run
@@ -293,13 +349,15 @@ headline status-engagement / band delta.
 | Tier | File | What |
 |---|---|---|
 | Free (sandbox) | `src/Cards/cards.sandbox-sets.ts` | named sets: new `Card` literals + `{ cardId, patch }` overrides; example set `forge-example` |
-| Free (composition) | `src/Combat/combat.deck-presets.ts` | preset card lists (`dot-erosion`, `control-lock`, `utility-bulwark`, `aggro-strike`, `balanced`) |
+| Free (composition) | `src/Combat/combat.deck-presets.ts` | the 10 theme preset card lists (`erosion`, `oratory`, `foundry`, `penitent`, `standstill`, `augury`, `tithe`, `grace`, `bastion`, `refrain`) |
 | Free (composition) | `src/Combat/combat.deck-draft.ts` | focus weights (4x), draft size (10), max copies (2), guarantees |
-| Guarded (A/B first) | `src/Cards/cards.library.ts` | `basePower`, `scalingMultiplier`, effect intensity/duration, mechanic amounts |
+| Guarded (A/B first) | `src/Cards/cards.library.ts` | effect intensity/duration, mechanic amounts, rider numerics + the `// pts:` comment (no damage fields exist — spec 32) |
 | Propose-only | — | new mechanics kinds, verb classes, `toCombatCard` / `effectImpact`, engine paths |
 
 **Deck-selection grammar (shared by `npm run combat-playtest` and
-`npm run combat`):** `preset:<id>` | `draft:<focus>` (`dot|control|utility|damage|balanced`)
+`npm run combat`):** `preset:<id>` | `draft:<focus>`
+(`dot|control|utility|damage|rush-execute|balanced` — the
+`CombatDeckFocus` union in `combat.deck-presets.ts` is authoritative)
 | `cards:a,b,c` | `policy-pick` (drafts from the policy's preferred focus).
 
 **Evidence CLI:** `npm run combat-playtest` — flags `--stage=`, `--policy=`,
