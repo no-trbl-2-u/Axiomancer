@@ -9,6 +9,7 @@ import { lookupEffect } from '../Effects/effects.library';
 import { removeEffectsByType } from '../Effects';
 import { MAX_EFFECT_DURATION } from '../Game/game-mechanics.constants';
 import { Combatant } from './types';
+import type { Enemy } from '../Enemy/types';
 import { applyDamage, heal } from './health';
 import { getActiveEffectModifiers, getDotAmplificationByEffect, rampedDamagePerRound } from './effect-modifiers';
 import { getRng } from '../Utils/rng';
@@ -84,6 +85,37 @@ export function ruptureBurstCap(enemyMaxHealth: number): number {
 export function reapAllBurstCap(enemyMaxHealth: number): number {
     return Math.max(REAP_ALL_BURST_CAP, Math.round(BURST_CAP_FRACTION * enemyMaxHealth));
 }
+/** CONCEDE Premises required (plan/tuning/2026-07-08-win-path-scaling.md item
+ *  1a): `the-closing-word`'s flat 8-Premise `concedeAt` let Oratory land its
+ *  alt-win identically against a 100 HP early wolf and a 1,500+ HP late boss
+ *  — Battle Lab round 2 clocked it at 100% win rate on EVERY stage. The
+ *  Premise cost now derives from the enemy's own `difficulty` classification
+ *  (a real bestiary field, preferred over stage-id string-matching per the
+ *  plan): normal/simple enemies keep the card-authored 8; elite enemies need
+ *  10; boss/unique enemies (which dominate the late/impossible rosters) need
+ *  12. Tunable. */
+export const CONCEDE_PREMISES_BASE = 8;
+export const CONCEDE_PREMISES_ELITE = 10;
+export const CONCEDE_PREMISES_BOSS = 12;
+/** CAPITULATE resolve threshold (Dawncaster Charmed-style rework, plan/
+ *  tuning/2026-07-08-win-path-scaling.md item 1a): the old check (SWAY ≥
+ *  enemy CURRENT HP) made Grace's alt-win match a boss's ENTIRE HP bar —
+ *  unreachable against a 1,000+ HP late pool (0% in Battle Lab round 2).
+ *  `resolve` is a per-enemy stat well below max HP:
+ *  CAPITULATE_RESOLVE_FRACTION of maxHealth, floored at CAPITULATE_MIN (a
+ *  tiny enemy still asks for a token SWAY commitment) and — via
+ *  `capitulateThreshold` — never allowed to exceed the enemy's CURRENT
+ *  health, so a nearly-dead enemy still yields at the old low bar. Against a
+ *  small early enemy 0.35×maxHealth usually sits above current HP anyway,
+ *  so early behavior barely moves; against a boss it turns "match the whole
+ *  bar" into "commit a real but reachable SWAY investment". Tunable. */
+export const CAPITULATE_RESOLVE_FRACTION = 0.35;
+export const CAPITULATE_MIN = 10;
+/** CAPITULATE resolve threshold for a given enemy — see CAPITULATE_RESOLVE_FRACTION. */
+export function capitulateThreshold(enemy: Pick<Enemy, 'health' | 'maxHealth'>): number {
+    const resolve = Math.max(CAPITULATE_MIN, Math.round(CAPITULATE_RESOLVE_FRACTION * enemy.maxHealth));
+    return Math.min(resolve, enemy.health);
+}
 /** RUPTURE — flat burst per NON-DoT affliction stack consumed (marks, backfire,
  *  rapport). Spec 32 v3 §3. Tunable. */
 export const RUPTURE_PER_AFFLICTION_STACK = 3;
@@ -94,6 +126,23 @@ export const DISRUPT_DENY_AT = 3;
  *  all of them denies the turn. Bosses/uniques carry one more. Tunable. */
 export const THREAT_RUNGS = 2;
 export const THREAT_RUNGS_BOSS = 3;
+/** Boss/unique rung REGROWTH (anti-permalock, plan/tuning/2026-07-08-
+ *  win-path-scaling.md item 1c): a denial deck (Standstill) that reliably
+ *  meets THREAT_RUNGS_BOSS every single round previously locked a boss out
+ *  of acting for the whole fight, at every stage, regardless of how tough
+ *  the boss nominally was — Battle Lab round 2's 100%-every-stage finding.
+ *  Every enemy turn a boss/unique's telegraph was denied or weakened
+ *  (rungs removed), it regrows BOSS_RUNG_REGROWTH rungs of resilience on
+ *  top of its natural THREAT_RUNGS_BOSS count, capped at doubling that
+ *  natural count (`bossRungGrowthCap`) — so a fight-long denial strategy
+ *  eventually needs more rungs of STAGGER per round than it can reliably
+ *  produce. Normal/elite enemies never accrue this. Tunable. */
+export const BOSS_RUNG_REGROWTH = 1;
+/** Ceiling on accrued `bossRungGrowth` — never lets a boss's effective rung
+ *  total exceed double its natural (`THREAT_RUNGS_BOSS`) count. */
+export function bossRungGrowthCap(naturalRungs: number): number {
+    return naturalRungs;
+}
 
 /**
  * VULNERABLE / RESOLUTE multiplier — the damage multiplier the HP engine applies

@@ -237,7 +237,14 @@ lands.
 - [x] Item 2 — scaling burst caps, fraction 0.25 (8d853dcb):
       penitent late 0.02->0.40 (regression erased), erosion late 0.08;
       foundry/tithe/augury/bastion late still 0 -> items 3/5 territory
-- [ ] Item 1 — win-path scaling (in progress)
+- [x] Item 1 — win-path scaling: CONCEDE 8/10/12 by enemy difficulty,
+      CAPITULATE resolve threshold max(10, 0.35x maxHP) clamped to current
+      HP, boss rung-regrowth 1/turn capped at 2x natural. Grace late
+      0.00->0.75. Finding: oratory/standstill stay 1.00 late — oratory
+      falls through to ordinary damage wins when CONCEDE is delayed;
+      standstill dominance is BACKFIRE per-rung drip, not permanent
+      denial. Their ceiling breach is now a BACKFIRE/damage tuning item
+      (deck-tuning forge), not a threshold item.
 - [ ] Item 3 — persistence-by-stack DoTs (re-scope after item 2: erosion
       late only 0.08, so the DoT-decay wall is still real)
 - [ ] Item 5 — theme pressure valve (foundry/bastion walls unchanged)

@@ -398,6 +398,7 @@ export type CombatEvent =
     | { kind: 'premises-spent'; spent: number; marks: number; drawn: number }
     | { kind: 'staggered'; rungs: number; total: number }
     | { kind: 'backfired'; amount: number; rungs: number }
+    | { kind: 'rung-regrown'; rungs: number; total: number }
     | { kind: 'stance-locked'; phaseIndex: number; stance: Stance }
     | { kind: 'foretold'; count: number; topCardId: string | null }
     | { kind: 'omen-declared'; cardId: string; stance: CombatDieColor; phaseIndex: number }
@@ -524,6 +525,14 @@ export interface CombatEncounterState {
     /** Spec 32 v3 T5 — STAGGER rungs accumulated against the enemy's NEXT
      *  telegraphed action (consumed at threat resolution). Optional. */
     staggerRungs?: number;
+    /** plan/tuning/2026-07-08-win-path-scaling.md item 1c — boss/unique
+     *  anti-permalock: rungs a boss/unique has REGROWN back after a phase
+     *  where its telegraph was denied/weakened by STAGGER. Raises the
+     *  effective rung total (`THREAT_RUNGS_BOSS` + this, capped at double)
+     *  so a denial deck that reliably meets the flat threshold every round
+     *  cannot lock a boss out of acting for the whole fight. Normal enemies
+     *  never accrue this. Optional (absent = 0, byte-identical to before). */
+    bossRungGrowth?: number;
     /** Spec 32 v3 T5 — arrow-paradox: the NEXT phase keeps the current stance. */
     stanceLockedNext?: boolean;
     /** Spec 32 v3 T6 — pending OMENS awaiting the next phase boundary. */

@@ -40,7 +40,9 @@ import {
     consumeAfflictions, consumeOneAffliction, getBackfirePerRung, consumeMarks, getMarkStacks,
     RUPTURE_PER_AFFLICTION_STACK, DISRUPT_DENY_AT,
     ruptureBurstCap, reapAllBurstCap,
-    THREAT_RUNGS, THREAT_RUNGS_BOSS,
+    THREAT_RUNGS, THREAT_RUNGS_BOSS, BOSS_RUNG_REGROWTH, bossRungGrowthCap,
+    CONCEDE_PREMISES_BASE, CONCEDE_PREMISES_ELITE, CONCEDE_PREMISES_BOSS,
+    capitulateThreshold,
 } from './effects';
 import {
     TURN_DICE_COUNT, rollTurnDice, dieHasStance,
@@ -170,17 +172,6 @@ export const THREAT_EFFECT_ESCALATION_STEP = 0.34;
  * Tuned by /combat-tuning.
  */
 export const THREAT_ENCHANT_CURSE_EVERY_ROUNDS = 5;
-/**
- * CONCEDE (the `peroration` mechanic's `concedeAt` — Oratory's alt-win) does
- * not otherwise scale with enemy tier at all, which let it clear the
- * Impossible ceiling probe at the same flat Premise count as anywhere else.
- * Above CONCEDE_HIGH_TIER_LEVEL, +1 Premise is required per
- * CONCEDE_HIGH_TIER_STEP levels of enemy level past that line — a no-op for
- * every stage except the Impossible-tier ceiling probe (~level 110), which
- * sits far above it. Tuned by /combat-tuning.
- */
-export const CONCEDE_HIGH_TIER_LEVEL = 60;
-export const CONCEDE_HIGH_TIER_STEP = 10;
 /**
  * P0-truth READ RULE (replaces the old `READ_STATUS_MULT` ×1.34/×0.75 post-hoc
  * intensity rewrite, which was a provable no-op below intensity 3 and made the
@@ -747,8 +738,11 @@ function gainSouls(
     return { ...state, souls, enemy, directDamageDealt: directDamage };
 }
 
-/** SWAY gain + the CAPITULATE check (spec 32 v3 §9): SWAY ≥ enemy current HP
- *  → the enemy yields. Checked eagerly on every gain and at turn boundaries. */
+/** SWAY gain + the CAPITULATE check (spec 32 v3 §9, reworked by plan/tuning/
+ *  2026-07-08-win-path-scaling.md item 1a to a Dawncaster Charmed-style
+ *  `resolve` threshold — see `capitulateThreshold`): SWAY ≥ the enemy's
+ *  resolve → the enemy yields. Checked eagerly on every gain and at turn
+ *  boundaries. */
 function gainSway(
     state: CombatEncounterState,
     amount: number,
@@ -777,7 +771,7 @@ function swayCapitulates(state: CombatEncounterState): boolean {
     // (otherwise any 1 SWAY would relabel every DoT kill 'capitulate').
     return (state.sway ?? 0) > 0
         && !isDefeated(state.enemy)
-        && (state.sway ?? 0) >= state.enemy.health;
+        && (state.sway ?? 0) >= capitulateThreshold(state.enemy);
 }
 
 /** PREMISE gain + the PERORATION trigger (spec 32 v3 T2). When the declared
@@ -795,19 +789,22 @@ function gainPremises(
     const decl = next.peroration;
     if (!decl) return { state: next, concede: false };
     const total = next.premises ?? 0;
-    // Oratory impossible-stage rebalance (2026-07-08): CONCEDE was the lab's
-    // only above-ceiling result at Impossible (a flat concedeAt fires
-    // identically against a 150 HP Early boss and the 2750 HP/L110 ceiling
-    // probe). The Closing Word's own concedeAt stays untouched — Late's
-    // roster (level ~40-50) never crosses CONCEDE_HIGH_TIER_LEVEL, so Late
-    // is unaffected — but a genuinely high-tier enemy now needs more banked
-    // Premises to argue past, matching how every other win condition scales
-    // with enemy HP while CONCEDE alone previously didn't scale with anything.
-    const enemyLevel = next.enemy.level;
-    const concedeHighTierBonus = enemyLevel > CONCEDE_HIGH_TIER_LEVEL
-        ? Math.floor((enemyLevel - CONCEDE_HIGH_TIER_LEVEL) / CONCEDE_HIGH_TIER_STEP)
-        : 0;
-    const effectiveConcedeAt = decl.concedeAt !== undefined ? decl.concedeAt + concedeHighTierBonus : undefined;
+    // Win-path scaling (plan/tuning/2026-07-08-win-path-scaling.md item 1a):
+    // the-closing-word's flat concedeAt (8) let Oratory land CONCEDE
+    // identically against a 100 HP early wolf and a 1,500+ HP late boss —
+    // Battle Lab round 2 clocked it at 100% win rate on EVERY stage. The
+    // required Premise count now floors at the enemy's own `difficulty`
+    // classification (a real bestiary field, not stage-id string-matching):
+    // simple/normal enemies keep the card-authored concedeAt; elite/boss/
+    // unique enemies raise the bar to CONCEDE_PREMISES_ELITE/_BOSS. Replaces
+    // the narrower per-level bump that only ever fired against the
+    // Impossible-tier ceiling probe.
+    const concedeTierFloor = next.enemy.difficulty === 'boss' || next.enemy.difficulty === 'unique'
+        ? CONCEDE_PREMISES_BOSS
+        : next.enemy.difficulty === 'elite'
+            ? CONCEDE_PREMISES_ELITE
+            : CONCEDE_PREMISES_BASE;
+    const effectiveConcedeAt = decl.concedeAt !== undefined ? Math.max(decl.concedeAt, concedeTierFloor) : undefined;
     if (effectiveConcedeAt !== undefined && total >= effectiveConcedeAt) {
         events.push({ kind: 'peroration-fired', cardId: decl.cardId, premisesSpent: total });
         return { state: { ...next, premises: 0, peroration: null }, concede: true };
@@ -2119,13 +2116,21 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
     // even before the cumulative penalty reaches THREAT_DENY_AT.
     const controlPips = getDistinctControlCount(state.enemy);
     const disruptDenied = controlPips >= DISRUPT_DENY_AT;
+    const isBossTier = state.enemy.difficulty === 'boss' || state.enemy.difficulty === 'unique';
     // STAGGER RUNGS (spec 32 v3 T5) — the telegraphed action carries
     // THREAT_RUNGS rungs (bosses one more); accumulated STAGGER plus the
     // `quagmire-of-doubt` disenchant (-1 standing) remove rungs. At 0 the turn
     // is DENIED; partial removal weakens the hit proportionally, and each rung
     // lost feeds BACKFIRE.
-    const rungsTotal = (state.enemy.difficulty === 'boss' || state.enemy.difficulty === 'unique')
-        ? THREAT_RUNGS_BOSS : THREAT_RUNGS;
+    const naturalRungsTotal = isBossTier ? THREAT_RUNGS_BOSS : THREAT_RUNGS;
+    // Boss/unique rung REGROWTH (plan/tuning/2026-07-08-win-path-scaling.md
+    // item 1c, anti-permalock): accrued resilience from prior rounds where
+    // this boss's telegraph was denied/weakened — see the `bossRungGrowth`
+    // write-back below. Normal/elite enemies never accrue it (isBossTier
+    // gates the write-back too), so their rungsTotal is byte-identical to
+    // before.
+    const rungGrowth = isBossTier ? Math.min(state.bossRungGrowth ?? 0, bossRungGrowthCap(naturalRungsTotal)) : 0;
+    const rungsTotal = naturalRungsTotal + rungGrowth;
     const quagmire = zoneHas(state, 'quagmire-of-doubt') ? 1 : 0;
     const rungsLost = Math.min(rungsTotal, (state.staggerRungs ?? 0) + quagmire);
     const rungDenied = rungsLost >= rungsTotal;
@@ -2140,7 +2145,6 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
     // THREAT_ESCALATION_BOSS_MULT so a dragging boss fight becomes more lethal than a
     // dragging normal fight — makes finishing bosses quickly (DoT/control) the clear
     // efficient path.
-    const isBossTier = state.enemy.difficulty === 'boss' || state.enemy.difficulty === 'unique';
     const escalationRate = THREAT_ESCALATION_PER_ROUND * (isBossTier ? THREAT_ESCALATION_BOSS_MULT : 1);
     // SENSORY NULL on the enemy (P0-truth `blocksAdvantage` wiring): its
     // escalation clock is FROZEN — the null blinds it to the fight's momentum.
@@ -2328,6 +2332,18 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
     // `achilles-and-the-tortoise` (E): a denied turn feeds your next draw.
     const bonusDraw = zoneHas(state, 'achilles-and-the-tortoise') && hindered ? 1 : 0;
 
+    // Boss/unique rung REGROWTH write-back (item 1c): this turn's telegraph
+    // lost at least one rung (partial weaken or full denial) → the boss
+    // regrows BOSS_RUNG_REGROWTH rungs of resilience for future phases,
+    // capped so it can never more than double its natural rung count.
+    // Normal/elite enemies (isBossTier false) never accrue this.
+    const nextBossRungGrowth = isBossTier && rungsLost > 0
+        ? Math.min(bossRungGrowthCap(naturalRungsTotal), rungGrowth + BOSS_RUNG_REGROWTH)
+        : rungGrowth;
+    if (nextBossRungGrowth > rungGrowth) {
+        events.push({ kind: 'rung-regrown', rungs: BOSS_RUNG_REGROWTH, total: nextBossRungGrowth });
+    }
+
     let next: CombatEncounterState = {
         ...state,
         player,
@@ -2338,6 +2354,7 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
         barrier,                        // persistent soak — carries the unspent remainder across phases
         riposte: undefined,             // cleared each phase (like guard)
         staggerRungs: crumbleRungs,     // consumed this phase; crumbling-resolve seeds the next
+        bossRungGrowth: nextBossRungGrowth,
         phase: 'phase-resolve',
         threatMarks,
         phaseResults: [...state.phaseResults, result],
