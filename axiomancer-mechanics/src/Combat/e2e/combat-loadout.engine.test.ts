@@ -84,7 +84,8 @@ describe('buildCombatDeck with curated loadout', () => {
         level: 1,
         baseStats: { heart: 5, body: 5, mind: 5 },
     });
-    const playerWithSkills = { ...player, knownSkills: [SKILL_A, SKILL_B, 'slippery-slope-ii'] };
+    const EXTRA = 'straw-mans-jab'; // a third real card only knownSkills carries
+    const playerWithSkills = { ...player, knownSkills: [SKILL_A, SKILL_B, EXTRA] };
 
     it('uses the curated loadout when loadout flags are present', () => {
         let flags: string[] = [];
@@ -93,7 +94,7 @@ describe('buildCombatDeck with curated loadout', () => {
         const deck = buildCombatDeck(playerWithSkills, flags);
         expect(deck).toContain(SKILL_A);
         expect(deck).toContain(SKILL_B);
-        expect(deck).not.toContain('slippery-slope-ii');
+        expect(deck).not.toContain(EXTRA);
         expect(deck).toContain('card-retreat');
     });
 
@@ -101,26 +102,42 @@ describe('buildCombatDeck with curated loadout', () => {
         const deck = buildCombatDeck(playerWithSkills, []);
         expect(deck).toContain(SKILL_A);
         expect(deck).toContain(SKILL_B);
-        expect(deck).toContain('slippery-slope-ii');
+        expect(deck).toContain(EXTRA);
         expect(deck).toContain('card-retreat');
     });
 
     it('falls back to knownSkills when flags has no loadout prefix', () => {
         const deck = buildCombatDeck(playerWithSkills, ['other-flag:1']);
-        expect(deck).toContain('slippery-slope-ii');
+        expect(deck).toContain(EXTRA);
     });
 
     it('falls back to knownSkills when flags parameter is omitted', () => {
         const deck = buildCombatDeck(playerWithSkills);
-        expect(deck).toContain('slippery-slope-ii');
+        expect(deck).toContain(EXTRA);
     });
 });
 
 describe('isCombatSynergySatisfied', () => {
     const buildCard = (skillId: string) => toCombatCard(skillId, getCardById, lookupEffect);
 
+    // spec 32 v3: no library card carries a synergy clause any more — the
+    // machinery survives for sandbox/tuning experiments, so the fixtures are
+    // sandbox-only cards (no basePower; the strike is dead at the schema level).
+    registerSandboxCards([{
+        id: 'qa-target-synergy',
+        name: 'QA Target Synergy (test fixture)',
+        category: 'fallacy',
+        philosophicalAspect: 'body',
+        description: 'Test-only: target-side synergy predicate on bleed.',
+        tier: 2,
+        rank: 2,
+        cardType: 'spell',
+        targetType: 'enemy',
+        synergy: { predicate: { effectId: 'debuff_bleed', on: 'target', intensityMin: 1, durationMin: 2 }, bonusDamage: 0 },
+    }]);
+
     it('returns true when target-side predicate is satisfied', () => {
-        const card = buildCard('resonance-bleed');
+        const card = buildCard('qa-target-synergy');
         expect(card).not.toBeNull();
         const enemyEffects: ActiveEffect[] = [
             {
@@ -138,12 +155,12 @@ describe('isCombatSynergySatisfied', () => {
     });
 
     it('returns false when the required effect is absent', () => {
-        const card = buildCard('resonance-bleed');
+        const card = buildCard('qa-target-synergy');
         expect(isCombatSynergySatisfied(card!, [])).toBe(false);
     });
 
     it('returns false when durationMin is not met', () => {
-        const card = buildCard('resonance-bleed');
+        const card = buildCard('qa-target-synergy');
         const enemyEffects: ActiveEffect[] = [
             {
                 effectId: 'debuff_bleed',
@@ -160,8 +177,6 @@ describe('isCombatSynergySatisfied', () => {
     });
 
     it('returns false for a caster-side predicate (on: caster)', () => {
-        // No curated keeper carries a caster-side predicate (Fate Engine P1
-        // trim), so the fixture is a sandbox-only card.
         registerSandboxCards([{
             id: 'qa-caster-synergy',
             name: 'QA Caster Synergy (test fixture)',
@@ -169,9 +184,9 @@ describe('isCombatSynergySatisfied', () => {
             philosophicalAspect: 'mind',
             description: 'Test-only: caster-side synergy predicate.',
             tier: 2,
+            rank: 3,
+            cardType: 'spell',
             targetType: 'enemy',
-            basePower: 4,
-            scalingStat: 'mind',
             synergy: { predicate: { effectId: 'buff_regeneration', on: 'caster', intensityMin: 1 }, bonusDamage: 5 },
         }]);
         const card = buildCard('qa-caster-synergy');

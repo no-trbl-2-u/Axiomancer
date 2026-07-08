@@ -67,7 +67,10 @@ function focusWeight(focus: CombatDeckFocus, verbClass: CombatVerbClass): number
         case 'control':  return verbClass === 'direct-control' || verbClass === 'stat-debuff'
             ? FOCUS_WEIGHT : OFF_FOCUS_WEIGHT;
         case 'damage':   return verbClass === 'direct-damage' ? FOCUS_WEIGHT : OFF_FOCUS_WEIGHT;
-        case 'rush-execute': return verbClass === 'direct-dot' || verbClass === 'direct-control'
+        // spec 32 v3: execute is dead — the rush texture is fast afflictions
+        // (DoT / exposure) feeding a payoff burst (REAP / RUPTURE).
+        case 'rush-execute': return verbClass === 'direct-dot' || verbClass === 'stat-debuff'
+            || verbClass === 'direct-damage'
             ? FOCUS_WEIGHT : OFF_FOCUS_WEIGHT;
         case 'utility':  return verbClass === 'defend' || verbClass === 'buff-self' || verbClass === 'befriend'
             ? FOCUS_WEIGHT : OFF_FOCUS_WEIGHT;
