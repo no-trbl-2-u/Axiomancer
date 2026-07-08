@@ -118,7 +118,7 @@ describe('isAttackSuccessful', () => {
   });
 });
 
-const BUFF_ID = 'tier1_body_attack';
+const BUFF_ID = 'buff_accuracy_up'; // spec 32 v3 re-pin: tier1_* card effects retired; support-tagged buff
 const DEBUFF_ID = 'debuff_burn';
 const makeActiveBuff = (overrides: Partial<ActiveEffect> = {}): ActiveEffect => ({
   effectId: BUFF_ID, remainingDuration: 3, intensity: 1, appliedAt: 0, tier: 1, ...overrides,
@@ -262,8 +262,8 @@ describe('getThornsReflect', () => {
     expect(getThornsReflect(makePlayer())).toBe(0);
   });
 
-  it('returns reflectDamage × intensity for tier1_body_defend (reflectDamage: 1)', () => {
-    const thorns: ActiveEffect = { effectId: 'tier1_body_defend', remainingDuration: 3, intensity: 2, appliedAt: 0, tier: 1 };
+  it('returns reflectDamage × intensity for buff_thorns (reflectDamage: 1)', () => {
+    const thorns: ActiveEffect = { effectId: 'buff_thorns', remainingDuration: 3, intensity: 2, appliedAt: 0, tier: 1 };
     const p = { ...makePlayer(), effects: [thorns] };
     expect(getThornsReflect(p)).toBe(2);
   });
@@ -292,10 +292,12 @@ describe('getActiveRollModifier', () => {
     expect(getActiveRollModifier(p)).toBe(-5);
   });
 
-  it('returns rollModifierPerIntensity × intensity for an effect with per-intensity modifier (tier1_body_attack: 1/intensity, intensity=3)', () => {
-    const bodyAttack: ActiveEffect = { effectId: 'tier1_body_attack', remainingDuration: 2, intensity: 3, appliedAt: 0, tier: 1 };
-    const p = { ...makePlayer(), effects: [bodyAttack] };
-    expect(getActiveRollModifier(p)).toBe(3);
+  it('a flat rollModifier is intensity-independent (debuff_frostbite: -2 at intensity 3)', () => {
+    // spec 32 v3 re-pin: no library effect carries rollModifierPerIntensity any
+    // more — flat modifiers must NOT scale with intensity.
+    const frostbite: ActiveEffect = { effectId: 'debuff_frostbite', remainingDuration: 2, intensity: 3, appliedAt: 0, tier: 2 };
+    const p = { ...makePlayer(), effects: [frostbite] };
+    expect(getActiveRollModifier(p)).toBe(-2);
   });
 
   it('sums flat and per-intensity contributions across multiple effects', () => {
