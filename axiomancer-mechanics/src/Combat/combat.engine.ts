@@ -21,7 +21,7 @@
 
 import { deepClone } from '../Utils';
 import { getRng, setSeed } from '../Utils/rng';
-import { MAX_EFFECT_INTENSITY } from '../Game/game-mechanics.constants';
+import { MAX_EFFECT_INTENSITY, FREE_ENCHANT_ROUNDS } from '../Game/game-mechanics.constants';
 import { lookupEffect, applyEffect } from '../Effects';
 import type { Effect, ActiveEffect } from '../Effects/types';
 import type { Character } from '../Character/types';
@@ -346,6 +346,9 @@ export function initializeCombatEncounter(
         hand,
         persistentZone: [],
         enemyAttachments: [],
+        // Spec 32 v4 §2.1 — timed zones fed by the FREE (dieless) enchant line.
+        tempZone: [],
+        enemyTempAttachments: [],
         // Spec 32 v3 §10 — enemy persistent passives, authored on the bestiary
         // record (optional field; absent = none).
         enemyEnchantments: ((clonedEnemy as Enemy & { enchantments?: string[] }).enchantments ?? []).slice(),
@@ -708,13 +711,18 @@ function discardEntry(state: CombatEncounterState, uid: string): CombatEncounter
 
 // ── Spec 32 v3 — shared rider/state helpers ──────────────────────────────────
 
-/** True when the persistent zones carry a given card id (player enchantment or
- *  enemy-attached disenchant). The zone IS the hook registry — each persistent
- *  card's passive is implemented at its trigger site, gated by this check. */
+/** True when any zone — permanent or temporary — carries a given card id (player
+ *  enchantment or enemy-attached disenchant). The zone IS the hook registry: each
+ *  persistent card's passive is implemented at its trigger site, gated by this
+ *  check. Spec 32 v4 — a FREE-line TIMED instance (`tempZone` / `enemyTempAttachments`)
+ *  lights up the exact same hook while its `roundsLeft` holds, so the weak and the
+ *  permanent versions differ only in duration, never in effect. */
 function zoneHas(state: CombatEncounterState, cardId: string): boolean {
     return state.persistentZone.includes(cardId)
         || (state.enemyAttachments ?? []).includes(cardId)
-        || (state.enemyEnchantments ?? []).includes(cardId);
+        || (state.enemyEnchantments ?? []).includes(cardId)
+        || (state.tempZone ?? []).some(t => t.cardId === cardId)
+        || (state.enemyTempAttachments ?? []).some(t => t.cardId === cardId);
 }
 
 /** SOUL gain (Harvest): bumps the bank; `bone-orchard` (E) drips 1 HP per Soul
@@ -982,10 +990,58 @@ function applyRiderToState(
 }
 
 /**
+ * Spec 32 v4 §2.1 — the FREE (dieless) enchant/disenchant line. Drops a TIMED
+ * instance of the card's passive into its temp zone: `tempZone` for an enchantment
+ * (player-side), `enemyTempAttachments` for a disenchant (enemy-side). The hook
+ * fires identically to the permanent version for {@link FREE_ENCHANT_ROUNDS} rounds,
+ * then ticks out in `processBetweenPhases`. The card is discarded (it recycles into
+ * the deck), so the FREE line is replayable and a later PAID play promotes it to
+ * permanent. Fizzles only when the PERMANENT version is already standing.
+ */
+function playFreeEnchant(
+    state: CombatEncounterState,
+    uid: string,
+    card: CombatCard,
+    skill: Card,
+): CombatTransition {
+    const isEnchant = skill.cardType === 'enchantment';
+    const permanentZone = isEnchant ? state.persistentZone : (state.enemyAttachments ?? []);
+    if (permanentZone.includes(skill.id)) {
+        const fizzle: CombatEvent[] = [{
+            kind: 'effect-fizzled', cardId: card.id, effectId: '',
+            message: `${card.name} is already in play (permanent)`,
+        }];
+        return { state: withLog(state, fizzle), events: fizzle };
+    }
+
+    const events: CombatEvent[] = [
+        { kind: 'card-played', cardId: card.id, useBottom: false, dieId: null, advantage: 'neutral' },
+    ];
+    // Refresh-or-add the timed entry (a re-cast resets the countdown to full).
+    const bumpTimed = (zone: { cardId: string; roundsLeft: number }[]) =>
+        [...zone.filter(t => t.cardId !== skill.id), { cardId: skill.id, roundsLeft: FREE_ENCHANT_ROUNDS }];
+    let next: CombatEncounterState = isEnchant
+        ? { ...state, tempZone: bumpTimed(state.tempZone ?? []) }
+        : { ...state, enemyTempAttachments: bumpTimed(state.enemyTempAttachments ?? []) };
+    next = discardEntry(next, uid);
+    events.push(isEnchant
+        ? { kind: 'enchant-played', cardId: card.id, name: card.name, temporary: true, roundsLeft: FREE_ENCHANT_ROUNDS }
+        : { kind: 'disenchant-attached', cardId: card.id, name: card.name, temporary: true, roundsLeft: FREE_ENCHANT_ROUNDS });
+    next = withLog(next, events);
+    return checkImmediateOutcome(next, events);
+}
+
+/**
  * Spec 32 v3 §2.2 — the FREE (top) action executes the card's AUTHORED free
  * rider: dieless, small, always available. There is no chip, no auto-derived
- * weak effect — what is printed is what fires. Persistent cards (enchant /
- * disenchant) have no FREE line and fizzle.
+ * weak effect — what is printed is what fires.
+ *
+ * Spec 32 v4 §2.1 — persistent cards (enchant / disenchant) DO carry a FREE line:
+ * it grants a WEAK, TIMED instance of the same passive (the card's hook, active
+ * for {@link FREE_ENCHANT_ROUNDS} rounds) then ticks out. The die-costed PAID line
+ * is the identical effect made permanent (rest of combat). The card is discarded
+ * and recycles, so the FREE line can be replayed — or upgraded by a later PAID play.
+ * A FREE play fizzles only when the PERMANENT version is already in play.
  */
 function playTopAction(
     state: CombatEncounterState,
@@ -995,11 +1051,7 @@ function playTopAction(
 ): CombatTransition {
     const skill = card.skillId ? lookupSkill(card.skillId) : undefined;
     if (skill && skill.cardType !== 'spell') {
-        const events: CombatEvent[] = [{
-            kind: 'effect-fizzled', cardId: card.id, effectId: '',
-            message: 'a persistent card is PAID-only — the die is the commitment',
-        }];
-        return { state: withLog(state, events), events };
+        return playFreeEnchant(state, uid, card, skill);
     }
     const events: CombatEvent[] = [
         { kind: 'card-played', cardId: card.id, useBottom: false, dieId: null, advantage: 'neutral' },
@@ -1118,12 +1170,17 @@ function playBottomAction(
         events.push(skill.cardType === 'enchantment'
             ? { kind: 'enchant-played', cardId: card.id, name: card.name }
             : { kind: 'disenchant-attached', cardId: card.id, name: card.name });
+        // Spec 32 v4 — a PAID play makes the passive PERMANENT; if a FREE-line timed
+        // instance of this card is still ticking, it is promoted (dropped from the
+        // temp zone so the same id is not counted twice).
         let next: CombatEncounterState = {
             ...state, dice, reserve, floatingDice,
             persistentZone: skill.cardType === 'enchantment'
                 ? [...state.persistentZone, skill.id] : state.persistentZone,
             enemyAttachments: skill.cardType === 'disenchant'
                 ? [...(state.enemyAttachments ?? []), skill.id] : state.enemyAttachments,
+            tempZone: (state.tempZone ?? []).filter(t => t.cardId !== skill.id),
+            enemyTempAttachments: (state.enemyTempAttachments ?? []).filter(t => t.cardId !== skill.id),
         };
         // The card leaves the deck cycle: pulled from hand WITHOUT entering the
         // discard (it will not reshuffle back).
@@ -2661,6 +2718,29 @@ export function processBetweenPhases(
     const hand = draw.drawn.map(cardId => ({ uid: `c${++uid}`, cardId }));
     events.push({ kind: 'hand-drawn', cards: draw.drawn });
 
+    // Spec 32 v4 §2.1 — tick the FREE-line TIMED enchant/disenchant zones. Each
+    // round the passive was active this round (its hooks fired above via `state`),
+    // now `roundsLeft` decrements; an entry that hits 0 ticks out of play. A PAID
+    // promotion has already removed the id, so only genuinely temporary instances
+    // expire here.
+    const tickTimed = (
+        zone: { cardId: string; roundsLeft: number }[] | undefined,
+        side: 'player' | 'enemy',
+    ): { cardId: string; roundsLeft: number }[] => {
+        const kept: { cardId: string; roundsLeft: number }[] = [];
+        for (const t of zone ?? []) {
+            const roundsLeft = t.roundsLeft - 1;
+            if (roundsLeft > 0) {
+                kept.push({ cardId: t.cardId, roundsLeft });
+            } else {
+                events.push({ kind: 'enchant-expired', cardId: t.cardId, name: getCardById(t.cardId)?.name ?? t.cardId, side });
+            }
+        }
+        return kept;
+    };
+    const tickedTempZone = tickTimed(omenState.tempZone, 'player');
+    const tickedEnemyTemp = tickTimed(omenState.enemyTempAttachments, 'enemy');
+
     let next: CombatEncounterState = {
         ...omenState,
         reserve,
@@ -2672,6 +2752,8 @@ export function processBetweenPhases(
         hand,
         phase: 'phase-play',
         round: state.round + 1,
+        tempZone: tickedTempZone,
+        enemyTempAttachments: tickedEnemyTemp,
         // New phase → fresh turn; clear the draft so the next startTurn rolls.
         dice: [],
         draftedDieId: null,

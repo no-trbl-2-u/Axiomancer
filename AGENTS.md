@@ -21,6 +21,7 @@ npm-workspaces monorepo. Three packages, flat at the root:
   the dependent package.
 - Rules/state/RNG belong in `axiomancer-mechanics`, never duplicated in mobile
   presenters.
+- All questions should be asked using the `AskUserQuestion` tool and come with your recommended option.
 
 ### Cross-package impact checklist
 

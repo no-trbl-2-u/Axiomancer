@@ -390,8 +390,13 @@ export type CombatEvent =
     // ── Spec 32 v3 — themed-deck events ──────────────────────────────────────
     | { kind: 'die-floated'; dieId: string; color: CombatDieColor; poolSize: number }
     | { kind: 'floating-die-spent'; dieId: string; color: CombatDieColor; poolSize: number }
-    | { kind: 'enchant-played'; cardId: string; name: string }
-    | { kind: 'disenchant-attached'; cardId: string; name: string }
+    // Spec 32 v4 — `temporary`/`roundsLeft` are set when the card entered play via
+    // the FREE (dieless) line (a timed instance); absent/false = the PAID permanent
+    // play (rest of combat).
+    | { kind: 'enchant-played'; cardId: string; name: string; temporary?: boolean; roundsLeft?: number }
+    | { kind: 'disenchant-attached'; cardId: string; name: string; temporary?: boolean; roundsLeft?: number }
+    // Spec 32 v4 — a FREE-line temporary enchant/disenchant ticked out of its zone.
+    | { kind: 'enchant-expired'; cardId: string; name: string; side: 'player' | 'enemy' }
     | { kind: 'premise-gained'; amount: number; total: number }
     | { kind: 'peroration-declared'; cardId: string; at: number }
     | { kind: 'peroration-fired'; cardId: string; premisesSpent: number }
@@ -511,6 +516,16 @@ export interface CombatEncounterState {
     /** Spec 32 v3 §2.1 — DISENCHANTS the player attached to the ENEMY (standing
      *  curses, rest of combat). Optional for back-compat (absent = none). */
     enemyAttachments?: string[];
+    /** Spec 32 v4 §2.1 — TEMPORARY player-side enchantments from the FREE (dieless)
+     *  line: the same themed passive as the PAID version, but timed. `roundsLeft`
+     *  ticks down each round in `processBetweenPhases`; the entry drops at 0. A
+     *  PAID play of the same card promotes it to the permanent `persistentZone`.
+     *  Optional for back-compat (absent = none). */
+    tempZone?: { cardId: string; roundsLeft: number }[];
+    /** Spec 32 v4 §2.1 — TEMPORARY enemy-attached disenchants from the FREE line;
+     *  the timed mirror of `enemyAttachments`. Same tick/promote rules as
+     *  {@link tempZone}. Optional (absent = none). */
+    enemyTempAttachments?: { cardId: string; roundsLeft: number }[];
     /** Spec 32 v3 §10 — the enemy's own persistent passives (seeded from the
      *  bestiary) + disenchants IT attached to the player live here. Optional. */
     enemyEnchantments?: string[];

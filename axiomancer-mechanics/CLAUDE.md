@@ -34,6 +34,19 @@ agents (report only; see `docs/playtest.md`).
 Canonical: `VISION.md` → Combat vision. Echoed in `AGENTS.md` and the
 `combat-playtest` + `deck-tuning` skills.
 
+## Load-bearing doctrine (set 2026-07-08)
+
+**Starter preset decks must adhere to this win-rate curve** (blind
+policy-pick): early ~80%, mid ~50%, late ~25-35%, impossible 0%. The 10 theme
+presets are early/mid-game decks by design — the player trades into a new
+mid-game deck after the labyrinth (see the preset-deck-tutorial rethink in
+`plan/CRITIQUE.md`), so a starter preset overperforming this curve late is a
+dominance finding, not a success. This is the objective function for
+`/deck-tuning`'s balance-band work on the starter library.
+
+Canonical: `VISION.md` → Combat vision. Correction history:
+`plan/tuning/2026-07-08-win-path-scaling.md`.
+
 ## Pointers
 
 - Package guide: `AGENTS.md`

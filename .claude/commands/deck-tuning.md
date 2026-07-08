@@ -162,17 +162,28 @@ The tunable surface is TIERED. Work from the freest tier inward:
 
 ## 4. Design targets (the objective function)
 
+**Doctrine (load-bearing, set 2026-07-08 — see `VISION.md` → Combat vision):
+starter preset decks must adhere to this win-rate curve**, blind
+policy-pick: early ~80%, mid ~50%, late ~25-35%, impossible 0%. Starter
+presets are early/mid-game decks by design — the player trades into a new
+mid-game deck after the labyrinth — so a preset overperforming this curve
+at late/impossible is a dominance finding, not a success. Correction
+history: `plan/tuning/2026-07-08-win-path-scaling.md`.
+
 The **contract** is the balance-band e2e:
 `src/Combat/e2e/combat-playtest.balance-bands.sim.test.ts`. Its thresholds
 (marked `// PLAYTEST-CALIBRATION`) are the live bands — read them at run time
-rather than trusting this table to stay current. Current placeholders:
+rather than trusting this table to stay current. **The bands below predate
+the 2026-07-08 curve correction and need re-tuning toward it** (in
+particular the late/impossible ceilings, which were set for a "starter
+decks stay competitive forever" assumption this doctrine retires):
 
 | Axis | Band |
 |---|---|
-| Win rate — early (blind, policy-pick) | 0.55–1.0 |
-| Win rate — mid (blind) | 0.35–1.0 |
-| Win rate — late (blind) | 0.15–1.0 |
-| Impossible stage (greedy) | winRate <= 0.15 and defeats > 0 — losing is the design |
+| Win rate — early (blind, policy-pick) | 0.55–1.0 (target ~0.80) |
+| Win rate — mid (blind) | 0.35–1.0 (target ~0.50) |
+| Win rate — late (blind) | informational telemetry — NO floor (a raw starter preset is graded on early+mid only; by late the player has matured or replaced the deck). Dominance ceiling still applies: target <= 0.98 |
+| Impossible stage (greedy) | winRate <= 0.15 and defeats > 0 — losing is the design (target: winRate == 0 for starter presets) |
 | Status engagement | > 0.2 on every non-impossible stage |
 | Doctrine assertion | `dot-weaver` beats `aggro-brute` win rate on the late stage |
 | DoT HP share | `dotHpFraction` > 0.25 on greedy stage summaries |
@@ -186,7 +197,7 @@ Card-level targets on top of the bands:
 | Pool ratios (v3 — re-derive from the live library before relying on them) | direct damage = 0 by LAW (spec 32: THE STRIKE IS DEAD — a card printing raw HP damage is a spec violation, not a tuning finding); DoT >= 25%; control >= 15%; GUARD/BARRIER >= 1 per theme; Befriend >= 1; state-interactive >= 2 |
 | Per-stage pool health | each stage's eligible pool (`stageEligibleCardIds`) contains at least one live DoT, control, and defend line |
 | Archetype honesty | each of the 10 theme presets (`erosion` … `refrain`) wins through its own SIGNATURE keywords, not just the shared utility 10 (spec 32 §8-9); `dot`-focus drafts land more DoT than `balanced` drafts; the `aggro-brute` POLICY stays the weak baseline (a sim policy — the v2 `aggro-strike` preset is retired) |
-| Per-deck floors & ceiling (balance the VARIANCE, not the mean) | every theme preset >= 40% early, >= 25% mid, >= 10% late; NO preset at >98% on any stage — a 100% cell is a DOMINANCE finding, not a success. Live enforcement values are the `PRESET_FLOORS` / `PRESET_CEILING` constants in the balance-band e2e (`// PLAYTEST-CALIBRATION`, pinned loose today) — ratchet them toward these targets as forge items land; stage averages that hit band while presets sit at 0% or 100% are a FAIL |
+| Per-deck floors & ceiling (balance the VARIANCE, not the mean) | FLOORS are graded on the starter deck's design window only — every theme preset >= 40% early, >= 25% mid (target ratchets). **Late is informational telemetry, NOT a graded floor** (deck-progression model, owner-confirmed 2026-07-08: starter presets are early-game decks; the player matures the deck by drafting through the labyrinth and by late has kept a built-up deck or swapped to a not-yet-built late-game preset — so an un-matured starter losing late is correct, not a dead-on-arrival bug). The DOMINANCE ceiling still applies on EVERY stage incl. late: NO preset at >98% on any stage — a 100% cell is a dominance finding regardless of stage (Oratory/Standstill). Impossible should target a hard 0% ceiling for starter presets. Live enforcement values are the `PRESET_FLOORS` (early+mid) / `PRESET_CEILING` (all stages) constants in the balance-band e2e (`// PLAYTEST-CALIBRATION`, pinned loose today) — ratchet floors toward these targets as forge items land; stage averages that hit band while presets sit at 0% on a graded stage or 100% anywhere are a FAIL |
 
 Every run's report includes the per-preset spread table (min/median/max
 win rate per stage, one row per preset) — stage averages alone are not
@@ -384,8 +395,9 @@ headline status-engagement / band delta.
 - Sim oracle (must never move): `src/Combat/e2e/hazard-pattern-combat.balance.sim.test.ts`
 
 **Doctrine:** `VISION.md` → Combat vision · `CLAUDE.md` (load-bearing
-doctrine) · pool-ratio targets in §4 above (from the retired combat-tuning
-skill; re-derive from the current card library before relying on them).
+doctrine, incl. the 2026-07-08 starter-preset win-rate curve) · pool-ratio
+targets in §4 above (from the retired combat-tuning skill; re-derive from
+the current card library before relying on them).
 
 **Related loops:** engine constants → manual tuning (the combat-tuning loop
 was trimmed at the monorepo merge) · qualitative evidence →

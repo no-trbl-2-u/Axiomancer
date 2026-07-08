@@ -12,8 +12,9 @@
  *
  * Coverage counts fizzle-drains honestly: the sim drains a token-gated or
  * resource-starved bottom via the card's free top action (a real play).
- * Enchant/disenchant cards are PAID-only but unique-in-play — three copies
- * still register the first play, and the later copies drain as fizzles.
+ * Spec 32 v4 — enchant/disenchant carry a FREE line too (a timed 3-round
+ * instance of the passive), so their top action is a real play; the PAID line
+ * is permanent + unique-in-play, so a second PAID copy drains as a fizzle.
  *
  * There is no synthetic retreat card any more (no in-combat retreat exists —
  * `SYNTHETIC_CARD_IDS` is now empty), so the coverage universe is exactly the

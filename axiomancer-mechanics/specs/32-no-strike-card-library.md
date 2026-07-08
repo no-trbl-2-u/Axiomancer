@@ -1,6 +1,10 @@
 # Spec 32 — The Themed Deck Library: 10 themes, 70 cards, 30 keywords
 
-> **Status:** DESIGN v3 — supersedes v2 (owner-directed 2026-07-07).
+> **Status:** DESIGN v4 — v4 revises the enchant/disenchant model
+> (owner-directed 2026-07-08): these cards gain a FREE (dieless) line that
+> grants a TIMED 3-round instance of their passive, with the PAID line
+> making the same passive permanent. Everything else is unchanged from v3
+> (below), which supersedes v2 (owner-directed 2026-07-07).
 > v2's catalogue (75 cards / 4 themes / 6-rank recipe / 5 presets) is
 > replaced wholesale; v2's ENGINE machinery (floating-dice live tray,
 > persistent enchant/disenchant zone, Premises/Peroration, power-budget
@@ -23,11 +27,12 @@
 > 4. **3 rarities mapped onto the rank ladder** (§4): Common =
 >    Doxa/Lemma, Uncommon = Thesis/Theorem, Rare = Axiom/Aporia. Faces
 >    keep the rank names; recipes and drop weights use rarity.
-> 5. **Card types:** spell (play → discard), enchantment (persistent
->    positive passive, player-side, rest of combat), disenchant
->    (persistent negative passive **attached to the enemy** — a standing
->    curse). Enemies get enchantments too and may attach disenchants to
->    the player (§10).
+> 5. **Card types:** spell (play → discard), enchantment (positive
+>    passive, player-side), disenchant (negative passive **attached to the
+>    enemy** — a standing curse). v4: enchant/disenchant have a FREE line
+>    (a TIMED 3-round instance) and a PAID line (the same passive made
+>    permanent, rest of combat). Enemies get enchantments too and may
+>    attach disenchants to the player (§10).
 > 6. No raw HP damage — no strikes, no chips (unchanged from v2; §1).
 >    Same FREE/PAID die economy, same art pool (§11 #15).
 > 7. Cards must interact with combat itself: floating dice, card draw,
@@ -79,15 +84,20 @@ sim gate.
 | type | lifecycle | anatomy |
 |---|---|---|
 | **spell** | play → discard; recycled by the reshuffle law | FREE line + PAID line |
-| **enchantment** | play → persistent zone (player side), rest of combat; leaves the deck cycle | PAID-only |
-| **disenchant** | play → persistent zone **attached to the enemy**, rest of combat | PAID-only |
+| **enchantment** | FREE → timed zone (player side, 3 rounds), recycles · PAID → persistent zone, rest of combat, leaves the deck cycle | FREE line + PAID line |
+| **disenchant** | FREE → timed zone **on the enemy** (3 rounds), recycles · PAID → persistent zone **on the enemy**, rest of combat, leaves the deck cycle | FREE line + PAID line |
 
 - FREE line: dieless, small, always available. PAID line: one die, the
   real payload. Budget law: FREE ≈ 25–35% of total points.
 - Conditionality is the third pricing lever; every Tier-2+ card carries
   at most ONE condition line (threshold / dieBonus / fate / theme-state).
 - Deck exhaustion → reshuffle discard (law; no fatigue mechanic ever).
-- Enchant/disenchant are PAID-only and unique-in-play per name.
+- **Spec 32 v4** — enchant/disenchant carry BOTH lines. Their FREE line
+  grants a WEAK, TIMED instance of the same hooked passive (3 rounds,
+  then ticks out; the card recycles); the PAID line is the identical
+  passive made **permanent** (rest of combat), unique-in-play per name,
+  and leaves the deck cycle. Same effect and magnitude on both lines —
+  only the duration differs. A PAID play promotes a live FREE instance.
 - More types to come; `cardType` stays an open enum.
 
 ## 3. The keyword registry — exactly 30
@@ -201,7 +211,8 @@ keywords, its own in-theme defense/sustain, and a distinct win texture.
 
 Format: **card (stance+tier, type)** · rank · FREE | PAID | ⬡ condition
 · pts (est.; lint-audited arithmetic ships in the TS). S=spell,
-E=enchantment, D=disenchant. E/D are PAID-only.
+E=enchantment, D=disenchant. v4: E/D have a FREE (timed, 3-round) line
+and a PAID (permanent) line — same passive, only the duration differs.
 
 ### T1 — Affliction
 

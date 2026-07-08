@@ -80,30 +80,49 @@ describe('balance bands (loose) — doctrine witnesses', () => {
     }, 120_000);
 });
 
-// Per-deck floors/ceiling (plan/tuning/2026-07-08-win-path-scaling.md item 4):
-// stage AVERAGES hide a bimodal distribution (presets at ~100% next to
+// Per-deck floors/ceiling (plan/tuning/2026-07-08-win-path-scaling.md item 4),
+// retargeted to the confirmed deck-progression model (CLAUDE.md doctrine +
+// plan header): the ten themed presets are EARLY-game starter decks. The
+// player MATURES the deck by drafting through the labyrinth (mid), and by late
+// has either kept a built-up deck or swapped to a late-game preset. So a raw
+// starter preset is only GRADED on the stages it is designed to carry —
+// stage AVERAGES also hide a bimodal distribution (presets at ~100% next to
 // presets at ~0%), so the objective function is per-preset, not per-stage.
+//
+//   FLOORS graded on:  early · mid        (the starter's design window)
+//   telemetry only:    late              ([preset-spread] still prints it; an
+//                      un-matured starter losing a late boss is CORRECT under
+//                      the progression model, not a dead-on-arrival bug)
+//   CEILING on EVERY stage incl. late — a starter preset that is UNBEATABLE on
+//     any stage has escaped the curve (a DOMINANCE finding regardless of
+//     stage; see Oratory/Standstill in Battle Lab round 2). Floor and ceiling
+//     are separate concerns: only the floor goes informational on late.
+//
 // PLAYTEST-CALIBRATION — current values are the loosest that pass on main;
-// /deck-tuning ratchets them toward the targets as forge items land:
-//   floors  — early 0.40 · mid 0.25 · late 0.10
-//   ceiling — 0.98 on every stage (a 100% preset is a DOMINANCE finding,
-//             not a success; see Oratory/Standstill in Battle Lab round 2)
-const PRESET_FLOORS: Readonly<Record<'early' | 'mid' | 'late', number>> = {
+// /deck-tuning ratchets them toward the targets as forge items land.
+const GRADED_STAGES = ['early', 'mid'] as const; // floors enforced here
+const SPREAD_STAGES = ['early', 'mid', 'late'] as const; // late = telemetry
+const PRESET_FLOORS: Readonly<Record<(typeof GRADED_STAGES)[number], number>> = {
     early: 0.2, // ratchet target 0.40
     mid: 0,     // ratchet target 0.25 — Foundry/Augury/Bastion/Tithe near 0 today
-    late: 0,    // ratchet target 0.10 — only 3 of 10 presets win late at all
 };
 const PRESET_CEILING = 1.0; // ratchet target 0.98 — Oratory/Standstill sit at 1.0 today
 
+function isGraded(stage: (typeof SPREAD_STAGES)[number]): stage is (typeof GRADED_STAGES)[number] {
+    return (GRADED_STAGES as readonly string[]).includes(stage);
+}
+
 describe('balance bands (loose) — per-preset floors and dominance ceiling', () => {
-    // The deck axis (spec 32 v3 §8): stage × policy × PRESET. A preset that
-    // cannot clear its stage floor is dead on arrival; a preset pinned at
-    // 100% has escaped the stage curve (alt-win scaling, plan item 1).
+    // The deck axis (spec 32 v3 §8): stage × policy × PRESET. On its graded
+    // stages a preset that cannot clear the floor is dead on arrival; a preset
+    // pinned at 100% on ANY stage has escaped the stage curve (alt-win
+    // scaling, plan item 1). Late win rate is reported, not graded — see the
+    // progression-model note above.
     it.each(COMBAT_DECK_PRESET_ORDER.map(id => [id] as const))(
         "preset '%s' respects the per-stage floors and ceiling",
         (presetId) => {
             const spread: string[] = [];
-            for (const stage of ['early', 'mid', 'late'] as const) {
+            for (const stage of SPREAD_STAGES) {
                 const report = runPlaytestMatrix({
                     stages: [stage],
                     policies: ['greedy'],
@@ -117,14 +136,19 @@ describe('balance bands (loose) — per-preset floors and dominance ceiling', ()
                 expect(runs).toBeGreaterThan(0);
                 const rate = wins / runs;
                 spread.push(`${stage}=${rate.toFixed(2)}`);
-                expect(
-                    rate,
-                    `preset '${presetId}' below the ${stage} floor (${PRESET_FLOORS[stage]})`,
-                ).toBeGreaterThanOrEqual(PRESET_FLOORS[stage]);
+                // Dominance ceiling applies on every stage (incl. late).
                 expect(
                     rate,
                     `preset '${presetId}' above the ${stage} ceiling (${PRESET_CEILING}) — dominance finding`,
                 ).toBeLessThanOrEqual(PRESET_CEILING);
+                // Floors apply only on the stages the starter deck is graded on;
+                // late is informational telemetry under the progression model.
+                if (isGraded(stage)) {
+                    expect(
+                        rate,
+                        `preset '${presetId}' below the ${stage} floor (${PRESET_FLOORS[stage]})`,
+                    ).toBeGreaterThanOrEqual(PRESET_FLOORS[stage]);
+                }
             }
             console.info(`[preset-spread] ${presetId}: ${spread.join(' ')}`);
         },

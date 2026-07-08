@@ -2,10 +2,32 @@
 
 > Source evidence: `axiomancer-battle-lab-round2.html` (200 runs/cell,
 > main vs `feature/preset-deck-tuning`, merged as PR #41) + the spec 32
-> library. Stage averages r2: early 96.8% (target ~85), mid 53.7%
-> (target 75-80), late 23.8% (target 65-75), impossible 0% (target ~1).
+> library. Stage averages r2: early 96.8%, mid 53.7%, late 23.8%,
+> impossible 0%.
 > Owner: card-expert / `/deck-tuning` execute; items marked
 > **[owner-call]** need ratification before implementation.
+>
+> **Target curve — corrected via `/oversight` 2026-07-08.** The prior
+> targets (early ~85, mid 75-80, late 65-75, impossible ~1) assumed the
+> tested decks would carry the whole game. They don't: Battle Lab round
+> 2 tested the starter/preset decks specifically, and per the early-game
+> tutorial rethink (`plan/CRITIQUE.md` — preset-deck tutorial jot),
+> those are the decks a player starts the labyrinth with, not what they
+> fight late/impossible content with. Corrected targets:
+> - **early: ~80%** (was ~85 — close, no major change)
+> - **mid: ~50%** (was 75-80 — starter decks should start losing their
+>   edge here, not still dominate)
+> - **late: ~25-35%** (was 65-75 — starter decks are expected to
+>   struggle; this is a genuine challenge stage for a deck the player
+>   hasn't upgraded)
+> - **impossible: 0%** (was ~1 — a hard wall by design, not a rare fluke
+>   win)
+>
+> This changes how to read every stage-average number in this doc:
+> late 23.8% and mid 53.7% are now much closer to the corrected targets
+> than the original headline framing suggested — re-triage items 1-3
+> against the NEW bands before spending further owner-call cycles
+> narrowing a gap that was measured against the wrong target.
 
 **The headline finding:** the round-2 audit made the cards honest, and
 honesty barely moved the needle. The remaining gaps are structural —
@@ -130,9 +152,19 @@ this item.
 
 ## 4. Balance the variance, not the mean — per-deck floors
 
-**Problem.** Mid averages 53.7% vs target 75-80%, but the distribution
-is bimodal: four decks ~100%, four near 0%. A stage average can hit
-target while half the themes are unplayable.
+**Problem.** Mid averages 53.7% vs the corrected ~50% target, but the
+distribution is bimodal: four decks ~100%, four near 0%. A stage
+average can hit target while half the themes are unplayable — that's
+still true under the corrected curve, it's just a coincidence that the
+mid average now sits close to target for the wrong reason.
+
+**[owner-call], recorded 2026-07-08:** the floor/ceiling numbers below
+predate the corrected target curve (see header) and need re-tuning to
+it before they're load-bearing again — in particular the late floor
+(">= 10%") and the "no preset at 100%" ceiling rule should be revisited
+against a ~25-35% late average rather than 65-75%, and impossible
+should target a hard 0% floor AND ceiling (no deck should ever land an
+impossible win with a starter deck), not just "~1% average."
 
 **Fix.** Add per-deck floor/ceiling targets to `/deck-tuning` §4 and the
 balance-band e2e: every theme preset >= 40% early, >= 25% mid, >= 10%

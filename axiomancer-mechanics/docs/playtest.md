@@ -142,3 +142,13 @@ doctrine fails the gate — that is the point. Companion witnesses:
 `combat-playtest.matrix.sim.test.ts` (determinism + invariants) and
 `combat-playtest.card-coverage.sim.test.ts` (every library card must be
 playable — dead cards fail the build).
+
+**Starter-preset win-rate curve (load-bearing doctrine, set 2026-07-08 — see
+`VISION.md` → Combat vision):** early ~80%, mid ~50%, late ~25-35%,
+impossible 0%. The current placeholder bands above (esp. the late win-rate
+ceiling and the `winRate <= 0.15` impossible ceiling) predate this doctrine
+and should tighten toward it as calibration runs land — a starter preset
+clearing late/impossible well above this curve is a dominance finding, not a
+success, since starter presets are early/mid-game decks by design (the
+player trades into a new mid-game deck after the labyrinth). Correction
+history: `plan/tuning/2026-07-08-win-path-scaling.md`.

@@ -8,8 +8,9 @@
  *   declare/hit/miss, SOULS (expiry + REAP fizzle/spend + REAP-all cap),
  *   SWAY (gain / decay / capitulate / irresistible-grace), ECHO (doubles
  *   statuses + stuck-in-their-head drip + echo-next-spell charge), REPRISE
- *   (highest rank back + fireFree), ENCHANT/DISENCHANT zone play (PAID-only,
- *   unique-in-play, leaves the deck cycle) + persistent hooks (venom-and-vein,
+ *   (highest rank back + fireFree), ENCHANT/DISENCHANT zone play (FREE timed
+ *   instance / PAID permanent, unique-in-play, leaves the deck cycle) +
+ *   persistent hooks (venom-and-vein,
  *   mirror-of-guilt, crumbling-resolve), BLEED per-tick decay, MARK tick
  *   amplification — plus a per-preset theme-engine ignition smoke.
  *
@@ -488,32 +489,89 @@ describe('REPRISE — returns the highest-rank discard; fireFree fires its FREE 
     });
 });
 
-// ── ENCHANT / DISENCHANT — the persistent zone (spec 32 v3 §2) ───────────────
+// ── ENCHANT / DISENCHANT — FREE timed instance vs PAID permanent (spec 32 v4 §2) ─
 
-describe('ENCHANT / DISENCHANT — PAID-only, unique-in-play, leaves the deck cycle', () => {
+describe('ENCHANT / DISENCHANT — FREE timed line, PAID permanent, unique-in-play', () => {
     const ENCH = 'venom-and-vein';       // T1 enchantment
     const CURSE = 'suppurating-curse';   // T1 disenchant
 
-    it('a persistent card FIZZLES on the FREE line — the die is the commitment', () => {
+    it('FREE (dieless): drops a TIMED enchant into tempZone for 3 rounds and RECYCLES the card', () => {
         mockSequentialRng(0.05);
         const state = openAndDraft(makePlayer([ENCH]), makeEnemy(300, 'body'), [ENCH, ENCH, ENCH], 'body');
         const res = playFromHand(state, ENCH, false);
-        expect(res.events.some(e => e.kind === 'effect-fizzled')).toBe(true);
-        expect(res.state.persistentZone).toEqual([]);
+        expect(res.events.some(e => e.kind === 'enchant-played'
+            && (e as { temporary?: boolean }).temporary === true)).toBe(true);
+        expect(res.state.tempZone).toEqual([{ cardId: ENCH, roundsLeft: 3 }]);
+        expect(res.state.persistentZone).toEqual([]);              // NOT permanent
+        expect(getDraftedDie(res.state)?.state).toBe('available'); // dieless — the die is untouched
+        expect(res.state.deck).toContain(ENCH);                    // stays in the deck cycle
     });
 
-    it('PAID: enters the zone, consumes the die, and leaves the deck cycle (no reshuffle back)', () => {
+    it('FREE disenchant: drops a TIMED curse into enemyTempAttachments for 3 rounds', () => {
+        mockSequentialRng(0.05);
+        const state = openAndDraft(makePlayer([CURSE]), makeEnemy(300, 'mind'), [CURSE, CURSE, CURSE], 'mind');
+        const res = playFromHand(state, CURSE, false);
+        expect(res.events.some(e => e.kind === 'disenchant-attached'
+            && (e as { temporary?: boolean }).temporary === true)).toBe(true);
+        expect(res.state.enemyTempAttachments).toEqual([{ cardId: CURSE, roundsLeft: 3 }]);
+        expect(res.state.enemyAttachments).toEqual([]);            // NOT permanent
+    });
+
+    it('a TEMP enchant fires the exact same hook as the permanent one (venom blesses a DoT)', () => {
+        mockSequentialRng(0.05);
+        const DOT = 'slippery-slope';
+        let state = openAndDraft(makePlayer([DOT]), makeEnemy(300, 'heart'), [DOT, DOT, DOT], 'heart');
+        state = { ...state, tempZone: [{ cardId: 'venom-and-vein', roundsLeft: 3 }] };
+        const res = playFromHand(state, DOT);
+        const poison = res.state.enemy.effects.find(e => e.effectId === 'debuff_poison');
+        expect(poison?.intensity).toBe(2); // authored i1 + venom blessing, from the TIMED instance
+    });
+
+    it('a TEMP enchant ticks out after 3 rounds (enchant-expired), no longer in the zone', () => {
+        let state = initializeCombatEncounter(makePlayer([]), makeEnemy(300, 'mind'), undefined, 7);
+        state = { ...state, tempZone: [{ cardId: ENCH, roundsLeft: 3 }] };
+        // Round 1 → 2 → 3 processing decrements 3 → 2 → 1 → 0.
+        state = processBetweenPhases(state).state;   // 3 → 2
+        expect(state.tempZone).toEqual([{ cardId: ENCH, roundsLeft: 2 }]);
+        state = processBetweenPhases(state).state;   // 2 → 1
+        expect(state.tempZone).toEqual([{ cardId: ENCH, roundsLeft: 1 }]);
+        const final = processBetweenPhases(state);   // 1 → 0 → expire
+        expect(final.state.tempZone).toEqual([]);
+        expect(final.events.some(e => e.kind === 'enchant-expired'
+            && (e as { cardId: string }).cardId === ENCH)).toBe(true);
+    });
+
+    it('PAID: enters the PERMANENT zone, consumes the die, and leaves the deck cycle (no reshuffle back)', () => {
         mockSequentialRng(0.05);
         const state = openAndDraft(makePlayer([ENCH]), makeEnemy(300, 'body'), [ENCH, ENCH, ENCH], 'body');
         const res = playFromHand(state, ENCH);
-        expect(res.events.some(e => e.kind === 'enchant-played')).toBe(true);
+        expect(res.events.some(e => e.kind === 'enchant-played'
+            && !(e as { temporary?: boolean }).temporary)).toBe(true);
         expect(res.state.persistentZone).toEqual([ENCH]);
         expect(res.state.discard).not.toContain(ENCH);              // NOT discarded
         expect(res.state.deck).not.toContain(ENCH);                 // out of the cycle
         expect(getDraftedDie(res.state)?.state).toBe('spent');      // the die is gone
     });
 
-    it('unique-in-play: a second copy fizzles', () => {
+    it('PAID promotes a live FREE instance: drops it from tempZone into the permanent zone', () => {
+        mockSequentialRng(0.05);
+        let state = openAndDraft(makePlayer([ENCH]), makeEnemy(300, 'body'), [ENCH, ENCH, ENCH], 'body');
+        state = { ...state, tempZone: [{ cardId: ENCH, roundsLeft: 2 }] };
+        const res = playFromHand(state, ENCH);
+        expect(res.state.persistentZone).toEqual([ENCH]);
+        expect(res.state.tempZone).toEqual([]);                     // promoted, not double-counted
+    });
+
+    it('FREE fizzles when the PERMANENT version is already standing', () => {
+        mockSequentialRng(0.05);
+        let state = openAndDraft(makePlayer([ENCH]), makeEnemy(300, 'body'), [ENCH, ENCH, ENCH], 'body');
+        state = { ...state, persistentZone: [ENCH] };
+        const res = playFromHand(state, ENCH, false);
+        expect(res.events.some(e => e.kind === 'effect-fizzled')).toBe(true);
+        expect(res.state.tempZone ?? []).toEqual([]);
+    });
+
+    it('unique-in-play: a second PAID copy fizzles', () => {
         mockSequentialRng(0.05);
         let state = openAndDraft(makePlayer([ENCH]), makeEnemy(300, 'body'), [ENCH, ENCH, ENCH], 'body');
         state = { ...state, persistentZone: [ENCH] };
@@ -522,7 +580,7 @@ describe('ENCHANT / DISENCHANT — PAID-only, unique-in-play, leaves the deck cy
         expect(res.state.persistentZone).toEqual([ENCH]);
     });
 
-    it('a disenchant attaches to the ENEMY as a standing curse', () => {
+    it('a PAID disenchant attaches to the ENEMY as a standing curse', () => {
         mockSequentialRng(0.05);
         const state = openAndDraft(makePlayer([CURSE]), makeEnemy(300, 'mind'), [CURSE, CURSE, CURSE], 'mind');
         const res = playFromHand(state, CURSE);

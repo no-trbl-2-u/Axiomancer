@@ -44,6 +44,30 @@ The player may sometimes win by attacking over and over. The player may sometime
 
 Balance should prove AGGRESSIVE, DEFENSIVE, MIXED, and STRATEGIST play styles. STRATEGIST — skill/status/resource planning — is the witness for the intended mastery path.
 
+**Doctrine (load-bearing, set 2026-07-08): starter preset decks must adhere to
+this win-rate curve.** The 10 theme presets a player starts with (and commits
+to at the labyrinth, per the preset-deck-tutorial rethink in
+`plan/CRITIQUE.md`) are early/mid-game decks by design — they are not meant to
+remain competitive forever, since the player is expected to trade into a new
+mid-game deck after the labyrinth. Their target win-rate curve, blind
+policy-pick, is:
+
+| Stage | Target win rate |
+|---|---|
+| Early | ~80% |
+| Mid | ~50% |
+| Late | ~25-35% |
+| Impossible | 0% (a hard wall, not a rare fluke win) |
+
+A starter preset winning well above this curve at late/impossible is a
+dominance finding, not a success — it means the deck never needed to be
+traded out. A starter preset winning well below it at early/mid is a
+weakness finding. This curve is the objective function for `/deck-tuning`'s
+balance-band work on the starter preset library; see `plan/tuning/2026-07-08-win-path-scaling.md`
+for the correction history and re-derive the live numeric bands
+(`combat-playtest.balance-bands.sim.test.ts`) against it before trusting any
+older target table.
+
 ## Defend vision
 
 The player should use defend only when:

@@ -263,7 +263,9 @@ grammar, sandbox workflow, CLI cookbook).
 **Sub-agent:** `.claude/agents/playtester.md`.
 
 **Doctrine:** `VISION.md` → Combat vision · `CLAUDE.md` (load-bearing
-doctrine).
+doctrine, incl. the 2026-07-08 starter-preset win-rate curve: early ~80%,
+mid ~50%, late ~25-35%, impossible 0% — a starter preset overperforming
+this late/impossible is a dominance finding, not a success).
 
 **Handoff targets:** cards/decks → `/deck-tuning` · engine constants →
 manual tuning (the combat-tuning loop was trimmed at the monorepo merge).

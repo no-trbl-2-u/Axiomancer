@@ -10,7 +10,7 @@
  * (the P0-truth law survives the overhaul).
  */
 
-import { MAX_EFFECT_INTENSITY } from '../Game/game-mechanics.constants';
+import { MAX_EFFECT_INTENSITY, FREE_ENCHANT_ROUNDS } from '../Game/game-mechanics.constants';
 import type { Effect, ActiveEffect } from '../Effects/types';
 import type { Card, CardCombatEffects, CardRider, CardSpecialMechanic } from '../Cards/types';
 import { rankToRarity, CARD_RANK_NAMES } from '../Cards/types';
@@ -288,17 +288,19 @@ export function toCombatCard(cardId: string, lookupSkill: CardLookup, lookupEffe
     const preview = bottomDamagePreview(skill, lookupEffect);
     const persistent = skill.cardType === 'enchantment' || skill.cardType === 'disenchant';
 
-    // FREE line — the authored dieless rider (spells only). Persistent cards
-    // are PAID-only: the die is the commitment.
+    const paid = paidText(skill, lookupEffect);
+
+    // FREE line — the authored dieless rider (spells only). Spec 32 v4: persistent
+    // cards get a dieless FREE line that grants a TIMED (FREE_ENCHANT_ROUNDS-round)
+    // instance of the same passive; the PAID line makes it permanent.
     const topActionText = persistent
-        ? `${skill.cardType === 'enchantment' ? 'ENCHANTMENT' : 'DISENCHANT'} — PAID only (no free line). (${rankLabel(skill)})`
+        ? `FREE — ${paid} for ${FREE_ENCHANT_ROUNDS} rounds (timed). (${rankLabel(skill)})`
         : skill.free
             ? `FREE — ${riderText(skill.free)}. (${rankLabel(skill)})`
             : `FREE — no effect. (${rankLabel(skill)})`;
 
-    const paid = paidText(skill, lookupEffect);
     const bottomActionText = persistent
-        ? `(rest of combat) ${paid}. Costs 1 die. ${skill.cardType === 'disenchant' ? 'Attaches to the enemy.' : ''}`.trim()
+        ? `PAID — ${paid} for the rest of combat. Costs 1 die.${skill.cardType === 'disenchant' ? ' Attaches to the enemy.' : ''}`
         : `PAID — ${paid}${preview > 0 ? ` (${preview} HP over its run)` : ''}. Costs 1 die.`;
 
     // Printed DIE LINES, generated from the riders in real units.

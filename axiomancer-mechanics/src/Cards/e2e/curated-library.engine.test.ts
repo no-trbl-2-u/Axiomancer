@@ -99,9 +99,9 @@ describe('themed library — FREE/PAID anatomy (spec §2)', () => {
         }
     });
 
-    it('enchantments and disenchants are PAID-only (no FREE line — the die is the commitment)', () => {
+    it('enchantments and disenchants carry no AUTHORED free rider — spec 32 v4 FREE line is engine-derived (a timed instance of the passive)', () => {
         for (const card of cardLibrary.filter(c => c.cardType !== 'spell')) {
-            expect(card.free, `${card.id} (${card.cardType}) must not carry a FREE line`).toBeUndefined();
+            expect(card.free, `${card.id} (${card.cardType}) must not carry an authored FREE rider — the timed FREE line is derived by the engine`).toBeUndefined();
         }
     });
 

@@ -15,15 +15,21 @@
 > next-tier candidates awaiting `/oversight` promotion. Verify
 > "already shipped?" notes before promoting.
 
-### Combat challenge-gradient retune (URGENT — post-trim)
+### Combat challenge-gradient retune (superseded 2026-07-08 — tracked live, not a phase)
 - source: spec-31 §9 (P1 + trim shipped 2026-07-05)
-- The curated 49-card pool + the Fate Engine dice layer made every
-  policy-pick deck strong: measured win ≈ 1.00 across stages
-  (doctrine metrics are on-vision: statusEngagement 0.45-0.64,
-  late dotHp 0.77). The balance bands are pinned KNOWN-BROKEN.
-  Needs a real /combat-tuning + /deck-tuning pass: enemy budgets,
-  the Incompleteness ceiling, mercy-gate pacing, policy-pick
-  draft weighting, and pricing the turn-cycling deny loop.
+- Status per `/oversight` 2026-07-08 review: this candidate predates
+  Battle Lab round 2 and is now substantially superseded by
+  `plan/tuning/2026-07-08-win-path-scaling.md`, which is actively
+  executing against the same win≈1.00 symptom (4 of 7 items landed
+  same day: per-preset floors, effectiveness lint, atlas gate marks,
+  scaled burst caps). Remaining open: oratory/standstill still hit
+  1.00 late — reclassified as a BACKFIRE/damage-tuning item for
+  `/deck-tuning` forge, not an engine-threshold item; items 3
+  (persistence-by-stack DoTs) and 5 (theme pressure valve) unshipped.
+  Decision: do NOT promote this row to a build-plan phase — the work
+  is already tracked and progressing through the tuning doc's own
+  sequencing. Leave this row as a pointer; drop it once the tuning
+  doc's remaining items land or get re-scoped.
 
 ### ~~Fate Engine P1 — dice get a second read~~ SHIPPED 2026-07-05
 - source: spec-31 §9 (shipped with the curated trim in the same PR)
@@ -74,6 +80,18 @@
 - source: archive
 - only one board is authored; completion currently writes a flag
   nothing reads. Content + a consumer for the completion flag.
+
+### Enemy stat rewrite to budget-curve compliance (content)
+- source: `plan/AUDIT.md` [1.2], decision via `/oversight` 2026-07-08
+- decision: the `enemyStatBudget` curve is canon, not the currently
+  authored stats. The 30 authored enemies drift up to 2x the budget
+  by level 50 (authored under old constants with gear-tier scaling
+  baked into raw stats). Scope: reconstruct per-enemy gear-tier
+  inputs so raw stats comply with the budget formula through level
+  50, then unskip the assertion in
+  `src/Enemy/e2e/new-enemies.engine.test.ts`. Real content-sized
+  work (30 enemies) — promote to a build-plan phase when queue has
+  room.
 
 ## Promoted
 

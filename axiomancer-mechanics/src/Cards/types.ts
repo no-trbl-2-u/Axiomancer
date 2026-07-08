@@ -54,8 +54,11 @@ export function rankToRarity(rank: CardRank): CardRarity {
 /**
  * Spec 32 v3 — card type. Open enum (more types to come).
  * - `spell`       — play → discard; recycled by the reshuffle law.
- * - `enchantment` — persistent POSITIVE passive, player-side, rest of combat.
- * - `disenchant`  — persistent NEGATIVE passive attached to the ENEMY.
+ * - `enchantment` — POSITIVE passive, player-side. Spec 32 v4: FREE line = a TIMED
+ *                   instance (3 rounds, dieless); PAID line = the same passive made
+ *                   permanent (rest of combat, unique, leaves the deck cycle).
+ * - `disenchant`  — NEGATIVE passive attached to the ENEMY. Same FREE-timed / PAID-
+ *                   permanent split as `enchantment`.
  */
 export type CardType = 'spell' | 'enchantment' | 'disenchant';
 
@@ -413,16 +416,20 @@ export interface Card {
      */
     rank: CardRank;
     /**
-     * Spec 32 v3 — card type. `spell` plays → discard (FREE + PAID lines);
-     * `enchantment` / `disenchant` are PAID-only persistent passives — the
-     * enchantment sits player-side, the disenchant attaches to the ENEMY as a
-     * standing curse. Both leave the deck cycle once played.
+     * Spec 32 v3 — card type. `spell` plays → discard (FREE + PAID lines).
+     * Spec 32 v4 — `enchantment` / `disenchant` now carry BOTH lines: the FREE
+     * (dieless) line grants a TIMED instance of the passive (3 rounds); the PAID
+     * line makes the same passive permanent (rest of combat), unique-in-play, and
+     * leaves the deck cycle. The enchantment sits player-side; the disenchant
+     * attaches to the ENEMY as a standing curse.
      */
     cardType: CardType;
     /**
-     * Spec 32 v3 — the authored FREE (dieless) line. Spells only; enchant/
-     * disenchant have no FREE line (the die is the commitment). Budget law:
+     * Spec 32 v3 — the authored FREE (dieless) line for SPELLS. Budget law:
      * FREE ≈ 25-35% of the card's total points.
+     * Spec 32 v4 — enchant/disenchant carry NO authored `free` rider: their FREE
+     * line is engine-derived (a timed instance of the same hooked passive), so this
+     * field stays undefined for them.
      */
     free?: CardRider;
     combatEffects?: CardCombatEffects[];

@@ -45,7 +45,7 @@
   import. (Verify still live before fixing.)
 - next: /iterate
 
-### [1.2] Skipped enemy stat-budget test (content decision)
+### [1.2] Skipped enemy stat-budget test (content decision — RESOLVED via oversight 2026-07-08)
 - category: content
 - impact: 4
 - ease: 3
@@ -53,10 +53,14 @@
   `enemyStatBudget` assertion — the 30 authored enemies match the
   budget at levels 1-4 but drift up to 2x at level 50 (authored
   under old constants with gear-tier scaling baked into raw
-  stats). Unskipping means re-authoring enemy stats or
-  reconstructing per-enemy gear-tier inputs. [needs-user-call]
-  on whether the budget curve or the authored stats are canon.
-- next: /oversight
+  stats). Decision (via `/oversight` 2026-07-08): the budget curve
+  is canon; the 30 authored enemies need re-authoring to comply
+  (reconstruct per-enemy gear-tier inputs so raw stats match the
+  budget formula through level 50), then unskip the assertion.
+  Promoted to `plan/PHASE_CANDIDATES.md` as a real content phase —
+  see "Enemy stat rewrite to budget-curve compliance".
+- next: /oversight (promote candidate to a build-plan phase when
+  queue has room)
 
 ### [2.0] Mobile `as any` clusters at the state boundary
 - category: debt
