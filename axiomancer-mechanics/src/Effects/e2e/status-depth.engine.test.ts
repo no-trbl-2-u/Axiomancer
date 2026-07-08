@@ -80,34 +80,34 @@ describe('Status Effect Depth Engine', () => {
             expect(hemorrhage).toBeUndefined();
         });
         
-        it('should trigger confusion+fear panic interaction', () => {
-            // Arrange: Mental debuff combination
+        it('should trigger bleed+mark opened-veins interaction (v3 card vocabulary)', () => {
+            // Arrange: the exposure pair — the wound follows the named flaw.
             const activeEffects: ActiveEffect[] = [
                 {
-                    effectId: 'debuff_despair',
+                    effectId: 'debuff_bleed',
                     intensity: 1,
                     remainingDuration: 3,
                     appliedAt: 1,
                     tier: 2
                 },
                 {
-                    effectId: 'debuff_confusion',
+                    effectId: 'debuff_mark',
                     intensity: 1,
                     remainingDuration: 2,
                     appliedAt: 1,
-                    tier: 2
+                    tier: 1
                 }
             ];
-            
+
             // Act: Evaluate interactions
             const results = evaluateInteractions(EFFECT_INTERACTIONS, activeEffects);
-            
-            // Assert: the rebuilt registry (Fate Engine P1) speaks only the
-            // consumed amplify_damage type — despair+confusion is the SPIRAL.
-            const spiral = results.find(r => r.message.includes('spiral'));
-            expect(spiral).toBeDefined();
-            expect(spiral!.type).toBe('amplify_damage');
-            expect(spiral!.amplificationValue).toBe(1.5);
+
+            // Assert: the v3-re-pinned registry speaks only the consumed
+            // amplify_damage type — bleed+mark is OPENED VEINS.
+            const openedVeins = results.find(r => r.message.includes('veins'));
+            expect(openedVeins).toBeDefined();
+            expect(openedVeins!.type).toBe('amplify_damage');
+            expect(openedVeins!.amplificationValue).toBe(1.5);
         });
         
         it('should handle multiple simultaneous interactions', () => {
@@ -128,13 +128,13 @@ describe('Status Effect Depth Engine', () => {
                     appliedAt: 1,
                     tier: 2
                 },
-                // + vulnerable for OPENED VEINS on the bleed
+                // + mark for OPENED VEINS on the bleed
                 {
-                    effectId: 'debuff_vulnerable',
+                    effectId: 'debuff_mark',
                     intensity: 1,
                     remainingDuration: 2,
                     appliedAt: 1,
-                    tier: 2
+                    tier: 1
                 }
             ];
             
