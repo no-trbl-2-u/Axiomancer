@@ -80,9 +80,14 @@ Tick in this file in the same commit that ships the phase.
       quests (`get-to-forest`, `gather-wood`, `get-to-cave`) and
       added the missing `collect`-objective engine wiring —
       `feat(mechanics): author get-to-forest/gather-wood/get-to-cave quests — phase 8` (3bb6eeaa)
-- [ ] Phase 9 — Author the first real character/story/world specs
-      via the design skills, replacing the template-only
-      `specs/*` folders (both)
+- [x] Phase 9 — Author the first real character/story/world specs:
+      verified `specs/characters/C-01-the-sophist.md` and
+      `specs/world/W-01-aporia-labyrinth-continent.md` (7ea06a6e)
+      plus `specs/story/S-01-fishing-village-northern-forest-dilemmas.md`
+      (6fa7f090) already satisfy this row; each folder's template
+      defines "the first real spec is \*-01-\*.md" and all three
+      exist as full records — recorded via
+      `plan: phase 9 shipped — character/story/world specs already authored`
 
 **Cross-cutting / debt:**
 - [ ] Phase 10 — Multi-screen integration test harness (Jest
@@ -145,3 +150,4 @@ phases with linked notes here.)
 - phase 5 — 98e7b2bc — village SELL tab (sellVillageItem action + presenter sellables/hasShop)
 - phase 6 — 48d2c802 — memoir REMAINS section (death tally via hazardDeathCount + merged Rest/LootCache keepsake read-back)
 - phase 4 — d9763659 — balance-sim population witnesses (execute finisher + escalation clock; Conclusion/BODY-sig already had coverage)
+- phase 9 — 7ea06a6e / 6fa7f090 — character/story/world specs (C-01 the Sophist, W-01 the Aporia, S-01 fishing-village dilemmas; already shipped pre-tracking, recorded this tick)
