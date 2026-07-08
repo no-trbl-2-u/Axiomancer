@@ -74,9 +74,12 @@ Tick in this file in the same commit that ships the phase.
       `chore(mobile): retire dead combatMana slice + fix stale HUD comments — phase 7` (bdca1068)
 
 **Content pipeline:**
-- [ ] Phase 8 — Northern Forest region content extension (apply
-      the fishing-village 10->25-node expansion pattern to the
-      mid-game gate) (mechanics)
+- [x] Phase 8 — Northern Forest region content extension: verified
+      the 10->25-node expansion already shipped pre-nexus; rescoped
+      to the real gap — authored the three declared-but-unauthored
+      quests (`get-to-forest`, `gather-wood`, `get-to-cave`) and
+      added the missing `collect`-objective engine wiring —
+      `feat(mechanics): author get-to-forest/gather-wood/get-to-cave quests — phase 8` (3bb6eeaa)
 - [ ] Phase 9 — Author the first real character/story/world specs
       via the design skills, replacing the template-only
       `specs/*` folders (both)
