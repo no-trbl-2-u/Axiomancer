@@ -599,9 +599,32 @@ function cardCalc(card: CombatCard, skill: Skill | undefined): CardCalc {
             break;
         }
         case 'weaken': {
+            out.turns = pr.ce?.duration ?? eff?.duration ?? 0;
             out.keyword = keywordForEffect(pr.ce?.effectId);
             out.glyph = pr.ce ? glyphFor(pr.ce.effectId) : '⛓';
             out.categoryColor = GLYPH_COLORS.control;
+            break;
+        }
+        case 'mark': {
+            const p = (eff?.payload ?? {}) as EffectPayloadLike;
+            out.intensity = pr.ce?.intensity ?? 1;
+            out.turns = pr.ce?.duration ?? eff?.duration ?? 0;
+            out.markAmp = (p.tickAmplifyFlat ?? 0) * out.intensity;
+            out.keyword = keywordForEffect(pr.ce?.effectId) ?? 'Mark';
+            out.glyph = pr.ce ? glyphFor(pr.ce.effectId) : '◎';
+            out.categoryColor = GLYPH_COLORS.mark;
+            out.stacks = eff?.stacking === 'intensity';
+            break;
+        }
+        case 'backfire': {
+            const p = (eff?.payload ?? {}) as EffectPayloadLike;
+            out.intensity = pr.ce?.intensity ?? 1;
+            out.turns = pr.ce?.duration ?? eff?.duration ?? 0;
+            out.backfireN = (p.backfirePerRung ?? 0) * out.intensity;
+            out.keyword = keywordForEffect(pr.ce?.effectId) ?? 'Backfire';
+            out.glyph = pr.ce ? glyphFor(pr.ce.effectId) : '↩';
+            out.categoryColor = GLYPH_COLORS.control;
+            out.stacks = eff?.stacking === 'intensity';
             break;
         }
         case 'vulnerable': {
@@ -769,7 +792,9 @@ export function faceStats(card: CombatCard, skill?: Skill): CombatCardFaceVM {
     switch (c.kind) {
         case 'dot': return { ...base, kind: 'dot', keyword: kw, heroText: `${c.total}`, heroSub: `over ${c.turns} turns`, freeHeroText: free, freeHeroSub: null, verbLine: 'foe loses HP each turn', powerRail: c.keyword ?? 'DoT', readDependent: true, inert: false, guardBase: null, statusBase: c.total, statusAdv: c.totalAdv, statusDis: c.totalDis };
         case 'stun': return { ...base, kind: 'stun', keyword: kw, heroText: `skip ${c.skips} turns`, heroSub: null, freeHeroText: free, freeHeroSub: null, verbLine: "the foe can't act", powerRail: c.keyword ?? 'Stun', readDependent: false, inert: false, guardBase: null };
-        case 'weaken': return { ...base, kind: 'weaken', keyword: kw, heroText: '', heroSub: 'weakens its next hit', freeHeroText: free, freeHeroSub: null, verbLine: "weakens the foe's hit", powerRail: c.keyword ?? 'Weaken', readDependent: false, inert: false, guardBase: null };
+        case 'weaken': return { ...base, kind: 'weaken', keyword: kw, heroText: '', heroSub: c.turns > 0 ? `hits softer · ${c.turns} turns` : 'weakens its hits', freeHeroText: free, freeHeroSub: null, verbLine: "weakens the foe's hits", powerRail: c.keyword ?? 'Weaken', readDependent: false, inert: false, guardBase: null };
+        case 'mark': return { ...base, kind: 'mark', keyword: kw, heroText: `+${c.markAmp}/tick`, heroSub: `${c.turns} turns`, freeHeroText: free, freeHeroSub: null, verbLine: 'every DoT tick on the foe bites harder', powerRail: c.keyword ?? 'Mark', readDependent: false, inert: false, guardBase: null };
+        case 'backfire': return { ...base, kind: 'backfire', keyword: kw, heroText: `${c.backfireN}/rung`, heroSub: `${c.turns} turns`, freeHeroText: free, freeHeroSub: null, verbLine: 'the foe takes damage per rung its actions lose', powerRail: c.keyword ?? 'Backfire', readDependent: false, inert: false, guardBase: null };
         case 'regen': return { ...base, kind: 'regen', keyword: kw, heroText: `${c.total}`, heroSub: `over ${c.turns} turns`, freeHeroText: free, freeHeroSub: null, verbLine: 'heal yourself each turn', powerRail: c.keyword ?? 'Regen', readDependent: false, inert: false, guardBase: null };
         case 'guard': { const b = c.guardAmount ?? 0; return { ...base, kind: 'guard', keyword: 'GUARD', heroText: `Guard ${b}`, heroSub: null, freeHeroText: free, freeHeroSub: null, verbLine: 'block the next hit', powerRail: `${b} ↑read`, readDependent: true, inert: false, guardBase: b }; }
         case 'befriend': return { ...base, kind: 'befriend', keyword: 'SPARE', heroText: '', heroSub: 'spare a near-dead foe', freeHeroText: 'mercy', freeHeroSub: null, verbLine: 'spare a near-dead foe', powerRail: 'mercy', readDependent: false, inert: false, guardBase: null };
