@@ -21,14 +21,10 @@ import { lookupEffect, applyEffect } from '../Effects';
 import { applyDamage, heal } from '../Combat/health';
 import { removeRandomBuff } from '../Combat/effects';
 import { resolveEffectApplication } from '../Combat/resist';
-import { calculateDamageResistance, getSkillDamageType } from '../Combat/damage-resist';
 import { incrementFriendship } from '../Combat/combat.reducer';
 import { isBefriendAttemptEligible } from '../Combat/index';
 import { Combatant, CombatState, Stance } from '../Combat/types';
-import {
-    RESOURCE_GENERATION,
-    SKILL_STAT_MULTIPLIER,
-} from '../Game/game-mechanics.constants';
+import { RESOURCE_GENERATION } from '../Game/game-mechanics.constants';
 import { Equipment, EquipmentSlot } from '../Items/types';
 import { applyEquipmentGenerationBonus } from '../Items/equipment.engine';
 import { applySetGenerationBonus } from '../Items/set.engine';

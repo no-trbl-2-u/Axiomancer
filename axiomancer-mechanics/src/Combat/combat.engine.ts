@@ -44,7 +44,7 @@ import {
 import {
     TURN_DICE_COUNT, rollTurnDice, dieHasStance,
     combatDieCanPower, availableDiceFor, spendDice, refreshOneDie, availableDieCount,
-    hasRerollableDice, rerollSpentDice, rollPermanentBonusDice, MAX_PERMANENT_WILD_DICE,
+    hasRerollableDice, rerollSpentDice, rollPermanentBonusDice,
     RESERVE_MAX, ripenReserve, FLOATING_DICE_CAP, materializeFloatingDice,
 } from './combat.dice';
 import {
@@ -976,11 +976,12 @@ function playTopAction(
     const events: CombatEvent[] = [
         { kind: 'card-played', cardId: card.id, useBottom: false, dieId: null, advantage: 'neutral' },
     ];
-    let next = state;
+    // Discard the played card BEFORE the free rider fires so a printed
+    // "draw N" is never blocked by the card's own hand slot (P0-truth).
+    let next = discardEntry(state, uid);
     if (skill?.free) {
         next = applyRiderToState(next, card.id, skill.free, events, rng);
     }
-    next = discardEntry(next, uid);
     if (next.finalOutcome === 'concede') {
         return endCombat({ ...withLog(next, events), phase: 'phase-play', finalOutcome: null }, 'concede', events);
     }
@@ -1106,7 +1107,6 @@ function playBottomAction(
     const echoCharge = state.echoNextSpell === true;
     const chamberEcho = zoneHas(state, 'resonant-chamber') && (state.spellsPlayedThisTurn ?? 0) === 0;
     const echoed = mechsAll.some(m => m.kind === 'echo') || echoCharge || chamberEcho;
-    const echoPasses = echoed ? 2 : 1;
 
     const before = intensityMap(state.enemy.effects);
     let shimState: CombatState = skillShim(state);
@@ -1267,6 +1267,9 @@ function playBottomAction(
     let pipsSpentThisPlay = 0;
     let pipGuardExtra = 0;
     const reprisedFreeRiders: CardRider[] = [];
+    // FORGE (spec 32 v3 §5): a freshly forged floating die joins the TRAY NOW —
+    // collected here and merged into `dice` after the powering-die spend.
+    const forgedFloating: CombatManaDie[] = [];
 
     // Local SOUL gain (bone-orchard drips 1 HP per Soul gained — soul-gated).
     const gainSoulsLocal = (n: number, reason: 'expiry' | 'consumed' | 'granted'): void => {
@@ -1557,6 +1560,7 @@ function playBottomAction(
                         pips: zoneHas(state, 'anvil-of-form') ? 1 : 0,
                     };
                     floatingDice = [...floatingDice, die];
+                    forgedFloating.push(die);
                     events.push({ kind: 'die-floated', dieId: die.id, color, poolSize: floatingDice.length });
                 }
                 break;
@@ -1770,7 +1774,10 @@ function playBottomAction(
             }
         }
         if (r.drawCards) {
-            const room = Math.max(0, COMBAT_HAND_SIZE - hand.length);
+            // The PLAYED card leaves the hand right after this play resolves —
+            // it must not occupy draw room, or a printed "draw N" under-delivers
+            // whenever the hand is full (P0-truth: printed == applied).
+            const room = Math.max(0, COMBAT_HAND_SIZE - (hand.length - 1));
             const n = Math.min(r.drawCards, room);
             if (n > 0) {
                 const draw = drawCombatCards(drawPile, discard, state.deck, n, _rng);
@@ -1843,6 +1850,9 @@ function playBottomAction(
         dice = spendDice(dice, [powering.id]);
         events.push({ kind: 'die-spent', dieId: powering.id, color: powering.color });
     }
+    // FORGE (spec 32 v3 §5) — the forged floating die joins the tray NOW, so it
+    // can power a play THIS turn (the "bigger turns" intent).
+    if (forgedFloating.length > 0) dice = [...dice, ...forgedFloating];
     // `entropy-tax` (D): spending a KINDLED (temporary) or FLOATING die marks
     // the enemy — the manufactured resource has a price (spec 32 v3 T3).
     if (zoneHas(state, 'entropy-tax')
@@ -2331,6 +2341,9 @@ export function processBetweenPhases(
     let omenState: CombatEncounterState = {
         ...state, player, enemy, threatPhases, revealedStances,
     };
+    // Cards an omen rider draws must survive the fresh-hand redraw below —
+    // fold them into the draw count instead of drawing into the doomed hand.
+    let omenBonusDraw = 0;
     const pendingOmens = state.pendingOmens ?? [];
     if (pendingOmens.length > 0) {
         const incomingStance = threatPhases[nextIndex]?.enemyStance;
@@ -2362,7 +2375,12 @@ export function processBetweenPhases(
                         premises: amp(omenMech.rider.premises),
                     };
                     events.push({ kind: 'omen-hit', cardId: omen.cardId, phaseIndex: nextIndex, riderText: riderText(rider) });
-                    omenState = applyRiderToState(omenState, omen.cardId, rider, events, rng);
+                    // drawCards rides the fresh hand (drawn below) — drawing
+                    // into the current hand would be wiped by the redraw.
+                    omenBonusDraw += rider.drawCards ?? 0;
+                    omenState = applyRiderToState(
+                        omenState, omen.cardId, { ...rider, drawCards: undefined }, events, rng,
+                    );
                 }
                 if (zoneHas(state, 'fated-course')) {
                     const markDef = lookupEffectDef('debuff_mark');
@@ -2420,7 +2438,7 @@ export function processBetweenPhases(
     const discardedHand = omenState.hand.map(h => h.cardId);
     const draw = drawCombatCards(
         omenState.drawPile, [...omenState.discard, ...discardedHand], omenState.deck,
-        COMBAT_HAND_SIZE + bonusDraw, rng,
+        COMBAT_HAND_SIZE + bonusDraw + omenBonusDraw, rng,
     );
     let uid = state.round * 100;
     const hand = draw.drawn.map(cardId => ({ uid: `c${++uid}`, cardId }));

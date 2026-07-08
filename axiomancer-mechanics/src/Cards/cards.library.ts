@@ -507,7 +507,12 @@ const pactOfAkrasia: Card = {
     free: { guard: 2 },
     combatEffects: [{ effectId: 'debuff_bleed', appliedTo: 'self', intensity: 1, duration: 2 }],
     specialMechanics: [{ kind: 'forge_floating_die', color: 'wild' }, { kind: 'recoil', hp: 6 }],
-    learningRequirement: { level: 10 },
+    // Phase 46 alignment gate — only a pessimist signs in blood (inherits the
+    // cut nirvana-fallacy's outlook gate).
+    learningRequirement: {
+        level: 10,
+        requiresAlignment: { axis: 'outlook', op: 'lte', value: -34 },
+    },
     addedIn: '2026-07-08',
     tags: ['akrasia', 'floating'],
 };
@@ -1020,7 +1025,12 @@ const heartOfTheMatter: Card = {
     free: { sway: 1 },
     specialMechanics: [{ kind: 'sway', amount: 5 }, { kind: 'rider', rider: { healHp: 4 } }],
     threshold: { color: 'heart', count: 5, rider: { sway: 3 } },
-    learningRequirement: { level: 10 },
+    // Phase 46 alignment gate — seeing another truly needs relational scope
+    // (inherits the cut appeal-to-consequences' scope gate).
+    learningRequirement: {
+        level: 10,
+        requiresAlignment: { axis: 'scope', op: 'gte', value: 34 },
+    },
     addedIn: '2026-07-08',
     tags: ['charm', 'alt-win'],
 };

@@ -1,18 +1,18 @@
 /**
  * EditTab — browse / search / filter the REAL card library (typed `Card[]`),
  * tap a card to load it into the shared CardForm, then UPDATE / DUPLICATE /
- * DELETE. Rarity is GOLD-vs-COMMON, keyed off `GOLD_CARD_IDS` membership (there
- * is no `rarity` field on a real card).
+ * DELETE. Rarity is the spec 32 v3 band (common / uncommon / rare), derived
+ * from the card's `rank` ladder.
  */
 import { useMemo, useState } from 'react';
 import { toDraft, type CardDraft } from '../../types';
-import { isGold, type Card } from '../../data/mechanics';
+import { rarityOf, type Card } from '../../data/mechanics';
 import { WX, RARITY, type RarityKey } from '../../theme/wx';
 import { CardFace } from '../CardFace';
 import { CardForm } from '../CardForm';
 import { Btn } from '../form';
 
-type RarFilter = 'all' | 'common' | 'gold';
+type RarFilter = 'all' | RarityKey;
 
 function FilterChip({
     label,
@@ -52,8 +52,7 @@ function FilterChip({
 }
 
 function LibThumb({ skill, selected, onClick }: { skill: Card; selected: boolean; onClick: () => void }) {
-    const gold = isGold(skill.id);
-    const rar: RarityKey = gold ? 'gold' : 'common';
+    const rar: RarityKey = rarityOf(skill);
     return (
         <button
             onClick={onClick}
@@ -107,15 +106,13 @@ export function EditTab({
     const [rarFilter, setRarFilter] = useState<RarFilter>('all');
 
     const counts = useMemo(() => {
-        let gold = 0;
-        for (const s of library) if (isGold(s.id)) gold += 1;
-        return { all: library.length, gold, common: library.length - gold };
+        const c = { all: library.length, common: 0, uncommon: 0, rare: 0 };
+        for (const s of library) c[rarityOf(s)] += 1;
+        return c;
     }, [library]);
 
     const filtered = library.filter((s) => {
-        const gold = isGold(s.id);
-        if (rarFilter === 'gold' && !gold) return false;
-        if (rarFilter === 'common' && gold) return false;
+        if (rarFilter !== 'all' && rarityOf(s) !== rarFilter) return false;
         if (q.trim() && !s.name.toLowerCase().includes(q.trim().toLowerCase())) return false;
         return true;
     });
@@ -139,7 +136,8 @@ export function EditTab({
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                 <FilterChip label="ALL" active={rarFilter === 'all'} count={counts.all} onClick={() => setRarFilter('all')} />
                 <FilterChip label="COMMON" active={rarFilter === 'common'} color={RARITY.common.color} count={counts.common} onClick={() => setRarFilter('common')} />
-                <FilterChip label="GOLD" active={rarFilter === 'gold'} color={RARITY.gold.color} count={counts.gold} onClick={() => setRarFilter('gold')} />
+                <FilterChip label="UNCOMMON" active={rarFilter === 'uncommon'} color={RARITY.uncommon.color} count={counts.uncommon} onClick={() => setRarFilter('uncommon')} />
+                <FilterChip label="RARE" active={rarFilter === 'rare'} color={RARITY.rare.color} count={counts.rare} onClick={() => setRarFilter('rare')} />
             </div>
 
             {/* library grid */}

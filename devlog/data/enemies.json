@@ -67,8 +67,8 @@
   "stanceHint": "A creature of pure mourning; it acts on raw feeling, not calculation.",
   "skills": [
    {
-    "name": "Appeal to Pity",
-    "text": "You let the wound show. The argument was never the point — your pain is. Even your own body listens, and softens, and bends a little of itself back together."
+    "name": "Soft Word",
+    "text": "It turns away wrath — not by winning, but by making wrath feel over-dressed for the occasion."
    }
   ]
  },
@@ -106,8 +106,8 @@
   "stanceHint": "Grief moves it more than hunger — the sea returned the feeling parts.",
   "skills": [
    {
-    "name": "Pascal's Wager",
-    "text": "You commit to the belief that costs nothing if you are wrong, and saves you if you are right. The certainty is its own balm; the wound closes around the wager."
+    "name": "Soft Word",
+    "text": "It turns away wrath — not by winning, but by making wrath feel over-dressed for the occasion."
    }
   ]
  },
@@ -145,8 +145,8 @@
   "stanceHint": "It calculates its hunger — every request is a trap already sprung.",
   "skills": [
    {
-    "name": "False Dilemma",
-    "text": "Two doors. Only two. Either-or, your fault, no third option — except every option is a door. The enemy hesitates between phantoms while you walk straight through."
+    "name": "Red Herring",
+    "text": "Something glints in the corner of the argument. They lunge for it, and the lunge is the wound."
    }
   ]
  },
@@ -184,8 +184,8 @@
   "stanceHint": "He answers everything with the cleaver — force is his entire rhetoric.",
   "skills": [
    {
-    "name": "Mob Appeal",
-    "text": "The crowd already believes you. So does the part of you that needed convincing. A simultaneous blow and a small, dishonest reassurance — and both work."
+    "name": "Sweet Poison",
+    "text": "You taste it first, to prove the vintage. The enemy drinks deeper — but you did drink."
    }
   ]
  },
@@ -206,16 +206,16 @@
   "stanceHint": "A grievance with a crown — he answers everything with feeling first, and the feeling is old.",
   "skills": [
    {
-    "name": "Achilles' Gambit",
-    "text": "You commit to the strike that should never land — the runner who can never catch the tortoise, the heel that must be exposed. Paradox collapses into a single, unanswerable blow."
+    "name": "Straw Man's Jab",
+    "text": "You hit the version of them that is easiest to hit. It bleeds all the same — wounds do not check citations."
    },
    {
-    "name": "Ad Hominem Strike",
-    "text": "You don't refute the argument — you refute the arguer. The blow lands where their composure was, scattering whatever fragile certainty they had built. Their stance crumbles before their muscles do."
+    "name": "Brief Candle",
+    "text": "Out, out. It burns bright, it burns fast, and what it leaves behind is yours to gather."
    },
    {
-    "name": "False Dilemma",
-    "text": "Two doors. Only two. Either-or, your fault, no third option — except every option is a door. The enemy hesitates between phantoms while you walk straight through."
+    "name": "Red Herring",
+    "text": "Something glints in the corner of the argument. They lunge for it, and the lunge is the wound."
    }
   ]
  },
@@ -236,8 +236,8 @@
   "stanceHint": "She works on the feelings first — the bargain is already half-made in your chest.",
   "skills": [
    {
-    "name": "Appeal to Pity",
-    "text": "You let the wound show. The argument was never the point — your pain is. Even your own body listens, and softens, and bends a little of itself back together."
+    "name": "Soft Word",
+    "text": "It turns away wrath — not by winning, but by making wrath feel over-dressed for the occasion."
    }
   ]
  },
@@ -258,16 +258,16 @@
   "stanceHint": "He answers every motion with a jamb — where you would step, a threshold has already been installed.",
   "skills": [
    {
-    "name": "False Dilemma",
-    "text": "Two doors. Only two. Either-or, your fault, no third option — except every option is a door. The enemy hesitates between phantoms while you walk straight through."
+    "name": "Red Herring",
+    "text": "Something glints in the corner of the argument. They lunge for it, and the lunge is the wound."
    },
    {
     "name": "Undistributed Middle",
-    "text": "All philosophers are mortal. You are mortal. Therefore you are a philosopher — and your enemy is illegible. You watch them try to follow the syllogism into a corner they cannot leave."
+    "text": "The middle term never quite connects, and neither does their swing. Somewhere between premise and blow, the force goes missing."
    },
    {
-    "name": "Achilles' Gambit",
-    "text": "You commit to the strike that should never land — the runner who can never catch the tortoise, the heel that must be exposed. Paradox collapses into a single, unanswerable blow."
+    "name": "Straw Man's Jab",
+    "text": "You hit the version of them that is easiest to hit. It bleeds all the same — wounds do not check citations."
    }
   ]
  },
@@ -288,8 +288,8 @@
   "stanceHint": "A cold calculator of crossings; only at the end does the pole swing on feeling.",
   "skills": [
    {
-    "name": "Sorites' Cascade",
-    "text": "A grain. Another grain. At what point did the heap of small wounds become a mortal one? They cannot say. The bleeding stacks faster than their definition of \"alive.\""
+    "name": "Festering Argument",
+    "text": "Left unanswered, a wound of reasoning does not close. You decline to answer it. Everything they carry runs a little longer."
    }
   ]
  },
@@ -310,8 +310,8 @@
   "stanceHint": "It measures and portends — every knock is a calculation about your ending.",
   "skills": [
    {
-    "name": "False Dilemma",
-    "text": "Two doors. Only two. Either-or, your fault, no third option — except every option is a door. The enemy hesitates between phantoms while you walk straight through."
+    "name": "Red Herring",
+    "text": "Something glints in the corner of the argument. They lunge for it, and the lunge is the wound."
    }
   ]
  },
@@ -332,8 +332,8 @@
   "stanceHint": "It grieves what it knows — the prophecy hurts it more than you can.",
   "skills": [
    {
-    "name": "Eternal Regress",
-    "text": "Every answer they reach demands a previous answer; every previous answer demands one more. You watch their certainty unspool itself — and lay two distinct binds on the wreckage."
+    "name": "Slippery Slope",
+    "text": "One concession, then the next, then the avalanche you promised was inevitable. The ground tilts, and they slide the whole way down."
    }
   ]
  },
@@ -371,8 +371,8 @@
   "stanceHint": "It consults before it strikes — three small gods, all of them owed.",
   "skills": [
    {
-    "name": "Liar's Echo",
-    "text": "\"This sentence is false.\" Their next thought catches on the loop, doubles back, and arrives more exposed than when it left. You read every tell twice."
+    "name": "Glimpse",
+    "text": "A crack in the next moment, wide enough for one eye. You look, and mark what looks back."
    }
   ]
  },
@@ -393,16 +393,16 @@
   "stanceHint": "It files before it strikes — by the time the blow lands, your counter is already catalogued under errata.",
   "skills": [
    {
-    "name": "Sorites' Cascade",
-    "text": "A grain. Another grain. At what point did the heap of small wounds become a mortal one? They cannot say. The bleeding stacks faster than their definition of \"alive.\""
+    "name": "Festering Argument",
+    "text": "Left unanswered, a wound of reasoning does not close. You decline to answer it. Everything they carry runs a little longer."
    },
    {
-    "name": "Liar's Echo",
-    "text": "\"This sentence is false.\" Their next thought catches on the loop, doubles back, and arrives more exposed than when it left. You read every tell twice."
+    "name": "Glimpse",
+    "text": "A crack in the next moment, wide enough for one eye. You look, and mark what looks back."
    },
    {
-    "name": "False Dilemma",
-    "text": "Two doors. Only two. Either-or, your fault, no third option — except every option is a door. The enemy hesitates between phantoms while you walk straight through."
+    "name": "Red Herring",
+    "text": "Something glints in the corner of the argument. They lunge for it, and the lunge is the wound."
    }
   ]
  },
@@ -423,8 +423,8 @@
   "stanceHint": "It fights the way it cries: continuously, and at you.",
   "skills": [
    {
-    "name": "Appeal to Pity",
-    "text": "You let the wound show. The argument was never the point — your pain is. Even your own body listens, and softens, and bends a little of itself back together."
+    "name": "Soft Word",
+    "text": "It turns away wrath — not by winning, but by making wrath feel over-dressed for the occasion."
    }
   ]
  },
@@ -462,8 +462,8 @@
   "stanceHint": "The cane is a metronome — he strikes on beats you have not learned yet.",
   "skills": [
    {
-    "name": "Achilles' Gambit",
-    "text": "You commit to the strike that should never land — the runner who can never catch the tortoise, the heel that must be exposed. Paradox collapses into a single, unanswerable blow."
+    "name": "Straw Man's Jab",
+    "text": "You hit the version of them that is easiest to hit. It bleeds all the same — wounds do not check citations."
    }
   ]
  },
@@ -501,12 +501,12 @@
   "stanceHint": "It counts your errors through whichever eye you fail to watch.",
   "skills": [
    {
-    "name": "False Dilemma",
-    "text": "Two doors. Only two. Either-or, your fault, no third option — except every option is a door. The enemy hesitates between phantoms while you walk straight through."
+    "name": "Red Herring",
+    "text": "Something glints in the corner of the argument. They lunge for it, and the lunge is the wound."
    },
    {
-    "name": "Ad Hominem Strike",
-    "text": "You don't refute the argument — you refute the arguer. The blow lands where their composure was, scattering whatever fragile certainty they had built. Their stance crumbles before their muscles do."
+    "name": "Brief Candle",
+    "text": "Out, out. It burns bright, it burns fast, and what it leaves behind is yours to gather."
    }
   ]
  },
@@ -527,8 +527,8 @@
   "stanceHint": "It stands its ground because it IS its ground — the curse assembles one word per skull.",
   "skills": [
    {
-    "name": "Mob Appeal",
-    "text": "The crowd already believes you. So does the part of you that needed convincing. A simultaneous blow and a small, dishonest reassurance — and both work."
+    "name": "Sweet Poison",
+    "text": "You taste it first, to prove the vintage. The enemy drinks deeper — but you did drink."
    }
   ]
  },
@@ -549,8 +549,8 @@
   "stanceHint": "It thinks in loose threads — and every thread it loses, it takes from something else.",
   "skills": [
    {
-    "name": "Sorites' Cascade",
-    "text": "A grain. Another grain. At what point did the heap of small wounds become a mortal one? They cannot say. The bleeding stacks faster than their definition of \"alive.\""
+    "name": "Festering Argument",
+    "text": "Left unanswered, a wound of reasoning does not close. You decline to answer it. Everything they carry runs a little longer."
    }
   ]
  },
@@ -571,16 +571,16 @@
   "stanceHint": "He argues in your grammar — every stance you take, he has already taken it better, and returned it used.",
   "skills": [
    {
-    "name": "Bootstrap Paradox",
-    "text": "The healing comes from the version of you that survived. The version of you that survived came from this healing. The loop is whole; the wound, less so."
+    "name": "Bootstrap Loop",
+    "text": "The proof assumes itself and, scandalously, works. The effect funds its own cause."
    },
    {
-    "name": "Liar's Echo",
-    "text": "\"This sentence is false.\" Their next thought catches on the loop, doubles back, and arrives more exposed than when it left. You read every tell twice."
+    "name": "Glimpse",
+    "text": "A crack in the next moment, wide enough for one eye. You look, and mark what looks back."
    },
    {
-    "name": "False Dilemma",
-    "text": "Two doors. Only two. Either-or, your fault, no third option — except every option is a door. The enemy hesitates between phantoms while you walk straight through."
+    "name": "Red Herring",
+    "text": "Something glints in the corner of the argument. They lunge for it, and the lunge is the wound."
    }
   ]
  },
@@ -601,8 +601,8 @@
   "stanceHint": "Pure study moves it — the flesh was a distraction it graded and discarded.",
   "skills": [
    {
-    "name": "Eternal Regress",
-    "text": "Every answer they reach demands a previous answer; every previous answer demands one more. You watch their certainty unspool itself — and lay two distinct binds on the wreckage."
+    "name": "Slippery Slope",
+    "text": "One concession, then the next, then the avalanche you promised was inevitable. The ground tilts, and they slide the whole way down."
    }
   ]
  },
@@ -623,16 +623,16 @@
   "stanceHint": "The verdict is felt before it is reasoned — the red court rules from the chest.",
   "skills": [
    {
-    "name": "Sorites' Cascade",
-    "text": "A grain. Another grain. At what point did the heap of small wounds become a mortal one? They cannot say. The bleeding stacks faster than their definition of \"alive.\""
+    "name": "Festering Argument",
+    "text": "Left unanswered, a wound of reasoning does not close. You decline to answer it. Everything they carry runs a little longer."
    },
    {
-    "name": "Mob Appeal",
-    "text": "The crowd already believes you. So does the part of you that needed convincing. A simultaneous blow and a small, dishonest reassurance — and both work."
+    "name": "Sweet Poison",
+    "text": "You taste it first, to prove the vintage. The enemy drinks deeper — but you did drink."
    },
    {
-    "name": "Bootstrap Paradox",
-    "text": "The healing comes from the version of you that survived. The version of you that survived came from this healing. The loop is whole; the wound, less so."
+    "name": "Bootstrap Loop",
+    "text": "The proof assumes itself and, scandalously, works. The effect funds its own cause."
    }
   ]
  },
@@ -653,12 +653,12 @@
   "stanceHint": "The armor swings on muscle memory — the oath does the aiming.",
   "skills": [
    {
-    "name": "Achilles' Gambit",
-    "text": "You commit to the strike that should never land — the runner who can never catch the tortoise, the heel that must be exposed. Paradox collapses into a single, unanswerable blow."
+    "name": "Straw Man's Jab",
+    "text": "You hit the version of them that is easiest to hit. It bleeds all the same — wounds do not check citations."
    },
    {
-    "name": "Pascal's Wager",
-    "text": "You commit to the belief that costs nothing if you are wrong, and saves you if you are right. The certainty is its own balm; the wound closes around the wager."
+    "name": "Soft Word",
+    "text": "It turns away wrath — not by winning, but by making wrath feel over-dressed for the occasion."
    }
   ]
  },
@@ -679,8 +679,8 @@
   "stanceHint": "It throws itself forward — its will is elsewhere, holding the leash.",
   "skills": [
    {
-    "name": "Mob Appeal",
-    "text": "The crowd already believes you. So does the part of you that needed convincing. A simultaneous blow and a small, dishonest reassurance — and both work."
+    "name": "Sweet Poison",
+    "text": "You taste it first, to prove the vintage. The enemy drinks deeper — but you did drink."
    }
   ]
  },
@@ -701,12 +701,12 @@
   "stanceHint": "Everything she does is affection, scaled wrong — the choosing came from the heart.",
   "skills": [
    {
-    "name": "Appeal to Pity",
-    "text": "You let the wound show. The argument was never the point — your pain is. Even your own body listens, and softens, and bends a little of itself back together."
+    "name": "Soft Word",
+    "text": "It turns away wrath — not by winning, but by making wrath feel over-dressed for the occasion."
    },
    {
-    "name": "Pascal's Wager",
-    "text": "You commit to the belief that costs nothing if you are wrong, and saves you if you are right. The certainty is its own balm; the wound closes around the wager."
+    "name": "Soft Word",
+    "text": "It turns away wrath — not by winning, but by making wrath feel over-dressed for the occasion."
    }
   ]
  },
@@ -727,8 +727,8 @@
   "stanceHint": "It feeds on wanting — the whole fight is an appeal to your appetite.",
   "skills": [
    {
-    "name": "Appeal to Pity",
-    "text": "You let the wound show. The argument was never the point — your pain is. Even your own body listens, and softens, and bends a little of itself back together."
+    "name": "Soft Word",
+    "text": "It turns away wrath — not by winning, but by making wrath feel over-dressed for the occasion."
    }
   ]
  },
@@ -749,8 +749,8 @@
   "stanceHint": "Coils first, questions never — it swallows counterarguments whole.",
   "skills": [
    {
-    "name": "Mob Appeal",
-    "text": "The crowd already believes you. So does the part of you that needed convincing. A simultaneous blow and a small, dishonest reassurance — and both work."
+    "name": "Sweet Poison",
+    "text": "You taste it first, to prove the vintage. The enemy drinks deeper — but you did drink."
    }
   ]
  },
@@ -771,8 +771,8 @@
   "stanceHint": "It could fly and chooses to crawl — everything it does is a pointed refusal.",
   "skills": [
    {
-    "name": "Achilles' Gambit",
-    "text": "You commit to the strike that should never land — the runner who can never catch the tortoise, the heel that must be exposed. Paradox collapses into a single, unanswerable blow."
+    "name": "Straw Man's Jab",
+    "text": "You hit the version of them that is easiest to hit. It bleeds all the same — wounds do not check citations."
    }
   ]
  },
@@ -793,16 +793,16 @@
   "stanceHint": "A cellar-thing of pure muscle — the courtesy is over.",
   "skills": [
    {
-    "name": "Mob Appeal",
-    "text": "The crowd already believes you. So does the part of you that needed convincing. A simultaneous blow and a small, dishonest reassurance — and both work."
+    "name": "Sweet Poison",
+    "text": "You taste it first, to prove the vintage. The enemy drinks deeper — but you did drink."
    },
    {
-    "name": "Achilles' Gambit",
-    "text": "You commit to the strike that should never land — the runner who can never catch the tortoise, the heel that must be exposed. Paradox collapses into a single, unanswerable blow."
+    "name": "Straw Man's Jab",
+    "text": "You hit the version of them that is easiest to hit. It bleeds all the same — wounds do not check citations."
    },
    {
-    "name": "Ad Hominem Strike",
-    "text": "You don't refute the argument — you refute the arguer. The blow lands where their composure was, scattering whatever fragile certainty they had built. Their stance crumbles before their muscles do."
+    "name": "Brief Candle",
+    "text": "Out, out. It burns bright, it burns fast, and what it leaves behind is yours to gather."
    }
   ]
  },
@@ -823,16 +823,16 @@
   "stanceHint": "Every move a reasoned counter — the web was drafted before you arrived.",
   "skills": [
    {
-    "name": "Liar's Echo",
-    "text": "\"This sentence is false.\" Their next thought catches on the loop, doubles back, and arrives more exposed than when it left. You read every tell twice."
+    "name": "Glimpse",
+    "text": "A crack in the next moment, wide enough for one eye. You look, and mark what looks back."
    },
    {
-    "name": "False Dilemma",
-    "text": "Two doors. Only two. Either-or, your fault, no third option — except every option is a door. The enemy hesitates between phantoms while you walk straight through."
+    "name": "Red Herring",
+    "text": "Something glints in the corner of the argument. They lunge for it, and the lunge is the wound."
    },
    {
-    "name": "Eternal Regress",
-    "text": "Every answer they reach demands a previous answer; every previous answer demands one more. You watch their certainty unspool itself — and lay two distinct binds on the wreckage."
+    "name": "Slippery Slope",
+    "text": "One concession, then the next, then the avalanche you promised was inevitable. The ground tilts, and they slide the whole way down."
    }
   ]
  },
@@ -853,12 +853,12 @@
   "stanceHint": "What remains of it is the part that says no — force, distilled.",
   "skills": [
    {
-    "name": "Achilles' Gambit",
-    "text": "You commit to the strike that should never land — the runner who can never catch the tortoise, the heel that must be exposed. Paradox collapses into a single, unanswerable blow."
+    "name": "Straw Man's Jab",
+    "text": "You hit the version of them that is easiest to hit. It bleeds all the same — wounds do not check citations."
    },
    {
-    "name": "Liar's Echo",
-    "text": "\"This sentence is false.\" Their next thought catches on the loop, doubles back, and arrives more exposed than when it left. You read every tell twice."
+    "name": "Glimpse",
+    "text": "A crack in the next moment, wide enough for one eye. You look, and mark what looks back."
    }
   ]
  },
@@ -879,16 +879,16 @@
   "stanceHint": "Cold administration — every strike is a decree, countersigned.",
   "skills": [
    {
-    "name": "Bootstrap Paradox",
-    "text": "The healing comes from the version of you that survived. The version of you that survived came from this healing. The loop is whole; the wound, less so."
+    "name": "Bootstrap Loop",
+    "text": "The proof assumes itself and, scandalously, works. The effect funds its own cause."
    },
    {
-    "name": "Eternal Regress",
-    "text": "Every answer they reach demands a previous answer; every previous answer demands one more. You watch their certainty unspool itself — and lay two distinct binds on the wreckage."
+    "name": "Slippery Slope",
+    "text": "One concession, then the next, then the avalanche you promised was inevitable. The ground tilts, and they slide the whole way down."
    },
    {
     "name": "Undistributed Middle",
-    "text": "All philosophers are mortal. You are mortal. Therefore you are a philosopher — and your enemy is illegible. You watch them try to follow the syllogism into a corner they cannot leave."
+    "text": "The middle term never quite connects, and neither does their swing. Somewhere between premise and blow, the force goes missing."
    }
   ]
  },
@@ -909,12 +909,12 @@
   "stanceHint": "Courtesy is the weapon — the feelings are real, which is the trap.",
   "skills": [
    {
-    "name": "Pascal's Wager",
-    "text": "You commit to the belief that costs nothing if you are wrong, and saves you if you are right. The certainty is its own balm; the wound closes around the wager."
+    "name": "Soft Word",
+    "text": "It turns away wrath — not by winning, but by making wrath feel over-dressed for the occasion."
    },
    {
-    "name": "Appeal to Pity",
-    "text": "You let the wound show. The argument was never the point — your pain is. Even your own body listens, and softens, and bends a little of itself back together."
+    "name": "Soft Word",
+    "text": "It turns away wrath — not by winning, but by making wrath feel over-dressed for the occasion."
    }
   ]
  },
@@ -935,12 +935,12 @@
   "stanceHint": "Two minds, one patient argument — they disagree only about which of them loves you less.",
   "skills": [
    {
-    "name": "False Dilemma",
-    "text": "Two doors. Only two. Either-or, your fault, no third option — except every option is a door. The enemy hesitates between phantoms while you walk straight through."
+    "name": "Red Herring",
+    "text": "Something glints in the corner of the argument. They lunge for it, and the lunge is the wound."
    },
    {
-    "name": "Liar's Echo",
-    "text": "\"This sentence is false.\" Their next thought catches on the loop, doubles back, and arrives more exposed than when it left. You read every tell twice."
+    "name": "Glimpse",
+    "text": "A crack in the next moment, wide enough for one eye. You look, and mark what looks back."
    }
   ]
  },
@@ -961,12 +961,12 @@
   "stanceHint": "The same metronome, colder — the river taught him new beats.",
   "skills": [
    {
-    "name": "Achilles' Gambit",
-    "text": "You commit to the strike that should never land — the runner who can never catch the tortoise, the heel that must be exposed. Paradox collapses into a single, unanswerable blow."
+    "name": "Straw Man's Jab",
+    "text": "You hit the version of them that is easiest to hit. It bleeds all the same — wounds do not check citations."
    },
    {
-    "name": "Eternal Regress",
-    "text": "Every answer they reach demands a previous answer; every previous answer demands one more. You watch their certainty unspool itself — and lay two distinct binds on the wreckage."
+    "name": "Slippery Slope",
+    "text": "One concession, then the next, then the avalanche you promised was inevitable. The ground tilts, and they slide the whole way down."
    }
   ]
  },
@@ -987,12 +987,12 @@
   "stanceHint": "The tally continues without a reason — cold arithmetic, self-sustaining.",
   "skills": [
    {
-    "name": "Ad Hominem Strike",
-    "text": "You don't refute the argument — you refute the arguer. The blow lands where their composure was, scattering whatever fragile certainty they had built. Their stance crumbles before their muscles do."
+    "name": "Brief Candle",
+    "text": "Out, out. It burns bright, it burns fast, and what it leaves behind is yours to gather."
    },
    {
-    "name": "Sorites' Cascade",
-    "text": "A grain. Another grain. At what point did the heap of small wounds become a mortal one? They cannot say. The bleeding stacks faster than their definition of \"alive.\""
+    "name": "Festering Argument",
+    "text": "Left unanswered, a wound of reasoning does not close. You decline to answer it. Everything they carry runs a little longer."
    }
   ]
  },
@@ -1013,12 +1013,12 @@
   "stanceHint": "A plague with posture — it spreads by main force now.",
   "skills": [
    {
-    "name": "Mob Appeal",
-    "text": "The crowd already believes you. So does the part of you that needed convincing. A simultaneous blow and a small, dishonest reassurance — and both work."
+    "name": "Sweet Poison",
+    "text": "You taste it first, to prove the vintage. The enemy drinks deeper — but you did drink."
    },
    {
-    "name": "Achilles' Gambit",
-    "text": "You commit to the strike that should never land — the runner who can never catch the tortoise, the heel that must be exposed. Paradox collapses into a single, unanswerable blow."
+    "name": "Straw Man's Jab",
+    "text": "You hit the version of them that is easiest to hit. It bleeds all the same — wounds do not check citations."
    }
   ]
  },
@@ -1039,12 +1039,12 @@
   "stanceHint": "It thinks in shapes language was built to avoid.",
   "skills": [
    {
-    "name": "Eternal Regress",
-    "text": "Every answer they reach demands a previous answer; every previous answer demands one more. You watch their certainty unspool itself — and lay two distinct binds on the wreckage."
+    "name": "Slippery Slope",
+    "text": "One concession, then the next, then the avalanche you promised was inevitable. The ground tilts, and they slide the whole way down."
    },
    {
-    "name": "Liar's Echo",
-    "text": "\"This sentence is false.\" Their next thought catches on the loop, doubles back, and arrives more exposed than when it left. You read every tell twice."
+    "name": "Glimpse",
+    "text": "A crack in the next moment, wide enough for one eye. You look, and mark what looks back."
    }
   ]
  },
@@ -1065,12 +1065,12 @@
   "stanceHint": "A furnace with a genealogy — everything he does is a hammer blow.",
   "skills": [
    {
-    "name": "Mob Appeal",
-    "text": "The crowd already believes you. So does the part of you that needed convincing. A simultaneous blow and a small, dishonest reassurance — and both work."
+    "name": "Sweet Poison",
+    "text": "You taste it first, to prove the vintage. The enemy drinks deeper — but you did drink."
    },
    {
-    "name": "Achilles' Gambit",
-    "text": "You commit to the strike that should never land — the runner who can never catch the tortoise, the heel that must be exposed. Paradox collapses into a single, unanswerable blow."
+    "name": "Straw Man's Jab",
+    "text": "You hit the version of them that is easiest to hit. It bleeds all the same — wounds do not check citations."
    }
   ]
  },
@@ -1091,12 +1091,12 @@
   "stanceHint": "It administers rather than rages — the contract is the cage.",
   "skills": [
    {
-    "name": "False Dilemma",
-    "text": "Two doors. Only two. Either-or, your fault, no third option — except every option is a door. The enemy hesitates between phantoms while you walk straight through."
+    "name": "Red Herring",
+    "text": "Something glints in the corner of the argument. They lunge for it, and the lunge is the wound."
    },
    {
-    "name": "Bootstrap Paradox",
-    "text": "The healing comes from the version of you that survived. The version of you that survived came from this healing. The loop is whole; the wound, less so."
+    "name": "Bootstrap Loop",
+    "text": "The proof assumes itself and, scandalously, works. The effect funds its own cause."
    }
   ]
  },
@@ -1117,16 +1117,16 @@
   "stanceHint": "Grief that learned sorcery — every curse arrives still weeping.",
   "skills": [
    {
-    "name": "Appeal to Pity",
-    "text": "You let the wound show. The argument was never the point — your pain is. Even your own body listens, and softens, and bends a little of itself back together."
+    "name": "Soft Word",
+    "text": "It turns away wrath — not by winning, but by making wrath feel over-dressed for the occasion."
    },
    {
-    "name": "Sorites' Cascade",
-    "text": "A grain. Another grain. At what point did the heap of small wounds become a mortal one? They cannot say. The bleeding stacks faster than their definition of \"alive.\""
+    "name": "Festering Argument",
+    "text": "Left unanswered, a wound of reasoning does not close. You decline to answer it. Everything they carry runs a little longer."
    },
    {
-    "name": "Liar's Echo",
-    "text": "\"This sentence is false.\" Their next thought catches on the loop, doubles back, and arrives more exposed than when it left. You read every tell twice."
+    "name": "Glimpse",
+    "text": "A crack in the next moment, wide enough for one eye. You look, and mark what looks back."
    }
   ]
  },
@@ -1147,16 +1147,16 @@
   "stanceHint": "The two voices agree now — consensus, it turns out, was the threat.",
   "skills": [
    {
-    "name": "Liar's Echo",
-    "text": "\"This sentence is false.\" Their next thought catches on the loop, doubles back, and arrives more exposed than when it left. You read every tell twice."
+    "name": "Glimpse",
+    "text": "A crack in the next moment, wide enough for one eye. You look, and mark what looks back."
    },
    {
-    "name": "Bootstrap Paradox",
-    "text": "The healing comes from the version of you that survived. The version of you that survived came from this healing. The loop is whole; the wound, less so."
+    "name": "Bootstrap Loop",
+    "text": "The proof assumes itself and, scandalously, works. The effect funds its own cause."
    },
    {
-    "name": "False Dilemma",
-    "text": "Two doors. Only two. Either-or, your fault, no third option — except every option is a door. The enemy hesitates between phantoms while you walk straight through."
+    "name": "Red Herring",
+    "text": "Something glints in the corner of the argument. They lunge for it, and the lunge is the wound."
    }
   ]
  },
@@ -1177,16 +1177,16 @@
   "stanceHint": "A fire gone white with age — it burns the way glaciers move: entirely.",
   "skills": [
    {
-    "name": "Mob Appeal",
-    "text": "The crowd already believes you. So does the part of you that needed convincing. A simultaneous blow and a small, dishonest reassurance — and both work."
+    "name": "Sweet Poison",
+    "text": "You taste it first, to prove the vintage. The enemy drinks deeper — but you did drink."
    },
    {
-    "name": "Achilles' Gambit",
-    "text": "You commit to the strike that should never land — the runner who can never catch the tortoise, the heel that must be exposed. Paradox collapses into a single, unanswerable blow."
+    "name": "Straw Man's Jab",
+    "text": "You hit the version of them that is easiest to hit. It bleeds all the same — wounds do not check citations."
    },
    {
-    "name": "Ad Hominem Strike",
-    "text": "You don't refute the argument — you refute the arguer. The blow lands where their composure was, scattering whatever fragile certainty they had built. Their stance crumbles before their muscles do."
+    "name": "Brief Candle",
+    "text": "Out, out. It burns bright, it burns fast, and what it leaves behind is yours to gather."
    }
   ]
  },
@@ -1207,16 +1207,16 @@
   "stanceHint": "The smoking mirror calculates — it shows you the you that already lost.",
   "skills": [
    {
-    "name": "Liar's Echo",
-    "text": "\"This sentence is false.\" Their next thought catches on the loop, doubles back, and arrives more exposed than when it left. You read every tell twice."
+    "name": "Glimpse",
+    "text": "A crack in the next moment, wide enough for one eye. You look, and mark what looks back."
    },
    {
-    "name": "Bootstrap Paradox",
-    "text": "The healing comes from the version of you that survived. The version of you that survived came from this healing. The loop is whole; the wound, less so."
+    "name": "Bootstrap Loop",
+    "text": "The proof assumes itself and, scandalously, works. The effect funds its own cause."
    },
    {
-    "name": "Sorites' Cascade",
-    "text": "A grain. Another grain. At what point did the heap of small wounds become a mortal one? They cannot say. The bleeding stacks faster than their definition of \"alive.\""
+    "name": "Festering Argument",
+    "text": "Left unanswered, a wound of reasoning does not close. You decline to answer it. Everything they carry runs a little longer."
    }
   ]
  },
@@ -1237,16 +1237,16 @@
   "stanceHint": "Appetite promoted past restraint — the violence is administrative.",
   "skills": [
    {
-    "name": "Mob Appeal",
-    "text": "The crowd already believes you. So does the part of you that needed convincing. A simultaneous blow and a small, dishonest reassurance — and both work."
+    "name": "Sweet Poison",
+    "text": "You taste it first, to prove the vintage. The enemy drinks deeper — but you did drink."
    },
    {
-    "name": "Achilles' Gambit",
-    "text": "You commit to the strike that should never land — the runner who can never catch the tortoise, the heel that must be exposed. Paradox collapses into a single, unanswerable blow."
+    "name": "Straw Man's Jab",
+    "text": "You hit the version of them that is easiest to hit. It bleeds all the same — wounds do not check citations."
    },
    {
-    "name": "Bootstrap Paradox",
-    "text": "The healing comes from the version of you that survived. The version of you that survived came from this healing. The loop is whole; the wound, less so."
+    "name": "Bootstrap Loop",
+    "text": "The proof assumes itself and, scandalously, works. The effect funds its own cause."
    }
   ]
  },
@@ -1267,16 +1267,16 @@
   "stanceHint": "It is not cruel. It is punctual, and it has already read your schedule.",
   "skills": [
    {
-    "name": "Eternal Regress",
-    "text": "Every answer they reach demands a previous answer; every previous answer demands one more. You watch their certainty unspool itself — and lay two distinct binds on the wreckage."
+    "name": "Slippery Slope",
+    "text": "One concession, then the next, then the avalanche you promised was inevitable. The ground tilts, and they slide the whole way down."
    },
    {
-    "name": "Sorites' Cascade",
-    "text": "A grain. Another grain. At what point did the heap of small wounds become a mortal one? They cannot say. The bleeding stacks faster than their definition of \"alive.\""
+    "name": "Festering Argument",
+    "text": "Left unanswered, a wound of reasoning does not close. You decline to answer it. Everything they carry runs a little longer."
    },
    {
-    "name": "Bootstrap Paradox",
-    "text": "The healing comes from the version of you that survived. The version of you that survived came from this healing. The loop is whole; the wound, less so."
+    "name": "Bootstrap Loop",
+    "text": "The proof assumes itself and, scandalously, works. The effect funds its own cause."
    }
   ]
  },
@@ -1297,16 +1297,16 @@
   "stanceHint": "Each fly is a small opinion; together they are policy.",
   "skills": [
    {
-    "name": "Mob Appeal",
-    "text": "The crowd already believes you. So does the part of you that needed convincing. A simultaneous blow and a small, dishonest reassurance — and both work."
+    "name": "Sweet Poison",
+    "text": "You taste it first, to prove the vintage. The enemy drinks deeper — but you did drink."
    },
    {
-    "name": "Liar's Echo",
-    "text": "\"This sentence is false.\" Their next thought catches on the loop, doubles back, and arrives more exposed than when it left. You read every tell twice."
+    "name": "Glimpse",
+    "text": "A crack in the next moment, wide enough for one eye. You look, and mark what looks back."
    },
    {
-    "name": "Bootstrap Paradox",
-    "text": "The healing comes from the version of you that survived. The version of you that survived came from this healing. The loop is whole; the wound, less so."
+    "name": "Bootstrap Loop",
+    "text": "The proof assumes itself and, scandalously, works. The effect funds its own cause."
    }
   ]
  },
@@ -1327,16 +1327,16 @@
   "stanceHint": "It feels everything it never got to be — the grief predates the griever.",
   "skills": [
    {
-    "name": "Bootstrap Paradox",
-    "text": "The healing comes from the version of you that survived. The version of you that survived came from this healing. The loop is whole; the wound, less so."
+    "name": "Bootstrap Loop",
+    "text": "The proof assumes itself and, scandalously, works. The effect funds its own cause."
    },
    {
-    "name": "Eternal Regress",
-    "text": "Every answer they reach demands a previous answer; every previous answer demands one more. You watch their certainty unspool itself — and lay two distinct binds on the wreckage."
+    "name": "Slippery Slope",
+    "text": "One concession, then the next, then the avalanche you promised was inevitable. The ground tilts, and they slide the whole way down."
    },
    {
-    "name": "Liar's Echo",
-    "text": "\"This sentence is false.\" Their next thought catches on the loop, doubles back, and arrives more exposed than when it left. You read every tell twice."
+    "name": "Glimpse",
+    "text": "A crack in the next moment, wide enough for one eye. You look, and mark what looks back."
    }
   ]
  },
@@ -1357,16 +1357,16 @@
   "stanceHint": "It cannot be read from inside any system you carry; every tell is consistent, and none is complete.",
   "skills": [
    {
-    "name": "Bootstrap Paradox",
-    "text": "The healing comes from the version of you that survived. The version of you that survived came from this healing. The loop is whole; the wound, less so."
+    "name": "Bootstrap Loop",
+    "text": "The proof assumes itself and, scandalously, works. The effect funds its own cause."
    },
    {
-    "name": "Eternal Regress",
-    "text": "Every answer they reach demands a previous answer; every previous answer demands one more. You watch their certainty unspool itself — and lay two distinct binds on the wreckage."
+    "name": "Slippery Slope",
+    "text": "One concession, then the next, then the avalanche you promised was inevitable. The ground tilts, and they slide the whole way down."
    },
    {
-    "name": "Liar's Echo",
-    "text": "\"This sentence is false.\" Their next thought catches on the loop, doubles back, and arrives more exposed than when it left. You read every tell twice."
+    "name": "Glimpse",
+    "text": "A crack in the next moment, wide enough for one eye. You look, and mark what looks back."
    }
   ]
  }

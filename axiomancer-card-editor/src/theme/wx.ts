@@ -49,8 +49,8 @@ export const DIE: Record<DieKey, DieMeta> = {
 };
 export const DIE_ORDER: DieKey[] = ['body', 'mind', 'heart', 'wild'];
 
-// ── Rarity frame (common grey · rare purple · gold yellow-orange) ────────────
-export type RarityKey = 'common' | 'rare' | 'gold';
+// ── Rarity frame (spec 32 v3 §4: common · uncommon · rare, derived from rank) ─
+export type RarityKey = 'common' | 'uncommon' | 'rare';
 
 export interface RarityMeta {
     label: string;
@@ -62,13 +62,11 @@ export interface RarityMeta {
 
 export const RARITY: Record<RarityKey, RarityMeta> = {
     common: { label: 'COMMON', color: '#8a8273', glow: 0, border: 1.5 },
+    uncommon: { label: 'UNCOMMON', color: '#6b8eb0', glow: 0, border: 1.5 },
+    // RARE (Axiom/Aporia) keys the special frame — the gold tier is gone.
     rare: { label: 'RARE', color: '#9a6ad6', glow: 13, border: 2 },
-    // GOLD no longer gets a special frame: it renders with the NORMAL (common)
-    // grey border, no glow, no ★. The rarity DATA/plumbing (isGold, 'gold' key,
-    // label) is kept intact — only the gold-border visual treatment is removed.
-    gold: { label: 'GOLD', color: '#8a8273', glow: 0, border: 1.5 },
 };
-export const RARITY_ORDER: RarityKey[] = ['common', 'rare', 'gold'];
+export const RARITY_ORDER: RarityKey[] = ['common', 'uncommon', 'rare'];
 
 // ── Keyword glossary — terse mechanical definitions (PRD vocabulary) ─────────
 export type KeywordFamily =
@@ -107,6 +105,21 @@ export const KEYWORDS = {
     silence: { label: 'SILENCE', family: 'control', unit: 't', blurb: 'Prevent the enemy from using special abilities for N turns.' },
     strip_buff: { label: 'STRIP BUFF', family: 'special', unit: '', blurb: 'Remove one random buff from the enemy.' },
     heal_self: { label: 'HEAL SELF', family: 'recovery', unit: '', blurb: 'Heal yourself for a flat amount after damage resolves.' },
+    // ── Spec 32 v3 — the themed-deck vocabulary ──
+    mark: { label: 'MARK', family: 'dot', unit: '×', blurb: 'Universal exposure: every DoT tick on the bearer deals +1 per stack.' },
+    stagger: { label: 'STAGGER', family: 'control', unit: '', blurb: "Remove rungs from the enemy's next telegraphed action; at 0 it is denied." },
+    backfire: { label: 'BACKFIRE', family: 'control', unit: '×', blurb: 'While active the enemy takes N per rung its actions lose.' },
+    sway: { label: 'SWAY', family: 'special', unit: '', blurb: 'Stacks on the enemy, decays 1/turn; SWAY >= its VITAE = CAPITULATE.' },
+    reap: { label: 'REAP', family: 'special', unit: '', blurb: 'Spend Souls to fire the printed payoff.' },
+    soul: { label: 'SOUL', family: 'special', unit: '', blurb: 'Gained when an enemy affliction expires or is consumed; spent by REAP.' },
+    foretell: { label: 'FORETELL', family: 'special', unit: '', blurb: "Peek + reorder your deck top and glimpse the enemy's next telegraph." },
+    premise: { label: 'PREMISE', family: 'special', unit: '', blurb: 'The running tally of your argument; a Peroration spends it.' },
+    echo: { label: 'ECHO', family: 'special', unit: '', blurb: 'The printed line fires twice.' },
+    forge: { label: 'FORGE', family: 'special', unit: '', blurb: 'Create a floating die that persists across combats until spent.' },
+    tick: { label: 'TICK', family: 'dot', unit: '', blurb: 'One enemy DoT deals its per-turn damage now; duration untouched.' },
+    draw: { label: 'DRAW', family: 'special', unit: '', blurb: 'Draw cards from your deck.' },
+    enchant: { label: 'ENCHANT', family: 'special', unit: '', blurb: 'A persistent player-side passive, rest of combat. Paid only.' },
+    disenchant: { label: 'DISENCHANT', family: 'special', unit: '', blurb: 'A standing curse attached to the enemy, rest of combat. Paid only.' },
 } satisfies Record<string, KeywordMeta>;
 
 export type KeywordId = keyof typeof KEYWORDS;

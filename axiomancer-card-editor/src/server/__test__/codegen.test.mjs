@@ -45,13 +45,13 @@ const newDraft = {
         'hand-authored entries in the library are formatted for readability.',
     tier: 2,
     targetType: 'enemy',
-    basePower: 7,
-    scalingStat: 'mind',
-    scalingMultiplier: 1.5,
-    combatEffects: [{ effectId: 'debuff_confusion', appliedTo: 'opponent', duration: 2 }],
+    rank: 3,
+    cardType: 'spell',
+    free: { tickOne: true },
+    combatEffects: [{ effectId: 'debuff_mark', appliedTo: 'opponent', duration: 2 }],
     specialMechanics: [{ kind: 'guard', amount: 3 }],
     learningRequirement: { level: 5, requiresAlignment: { axis: 'outlook', op: 'lte', value: -10 } },
-    tags: ['test', 'damage'],
+    tags: ['test', 'control'],
 };
 
 function countOccurrences(haystack, needle) {
@@ -82,6 +82,8 @@ async function main() {
     check('smart-quotes the apostrophe name', block.includes(`name: "Tester's Gambit",`));
     check('wraps the long description with ` +` joins', block.includes(' +\n'));
     check('inlines single-element specialMechanics', block.includes('specialMechanics: [{ kind: \'guard\', amount: 3 }],'));
+    check('emits rank + cardType on the tier line', block.includes("tier: 2, rank: 3, cardType: 'spell',"));
+    check('emits the authored FREE line', block.includes('free: { tickOne: true },'));
     check('multi-line combatEffects array', block.includes('combatEffects: [\n'));
     check('nested learningRequirement w/ alignment', block.includes('requiresAlignment: { axis: \'outlook\', op: \'lte\', value: -10 }'));
     check('block terminates with `};`', block.trimEnd().endsWith('};'));
@@ -97,30 +99,31 @@ async function main() {
     check('exactly one new block', countOccurrences(t1, `const ${NEW_IDENT}: Card = {`) === 1);
     check('registered in cardLibrary array', new RegExp(`^[ \\t]*${NEW_IDENT},`, 'm').test(t1));
     check('array membership appears once', countOccurrences(t1, `\n    ${NEW_IDENT},`) === 1);
-    check('existing cards untouched (ad-hominem-strike survives)', t1.includes("id: 'ad-hominem-strike',"));
+    check('existing cards untouched (slippery-slope survives)', t1.includes("id: 'slippery-slope',"));
 
-    console.log('upsert(edit existing — false-dilemma basePower -> 99):');
+    console.log('upsert(edit existing — red-herring rank -> 4):');
     const editDraft = {
         ...newDraft,
-        id: 'false-dilemma',
-        name: 'False Dilemma',
+        id: 'red-herring',
+        name: 'Red Herring',
         philosophicalAspect: 'mind',
-        scalingStat: 'mind',
-        basePower: 99,
-        scalingMultiplier: undefined,
+        rank: 4,
+        free: { drawCards: 1 },
         specialMechanics: [],
         learningRequirement: undefined,
         tags: [],
-        combatEffects: [{ effectId: 'debuff_confusion', appliedTo: 'opponent', duration: 2 }],
+        combatEffects: [{ effectId: 'debuff_backfire', appliedTo: 'opponent', intensity: 2, duration: 2 }],
     };
     const t2 = await (async () => {
         const out = upsertCard(t1, editDraft);
         await fs.writeFile(tmpLib, out, 'utf-8');
         return out;
     })();
-    check('falseDilemma still single const block', countOccurrences(t2, 'const falseDilemma: Card = {') === 1);
-    check('edited basePower present', /id: 'false-dilemma',[\s\S]*?basePower: 99,/.test(t2));
-    check('falseDilemma array membership still single', countOccurrences(t2, '\n    falseDilemma,') === 1);
+    check('redHerring still single const block', countOccurrences(t2, 'const redHerring: Card = {') === 1);
+    check('edited rank present', /id: 'red-herring',[\s\S]*?rank: 4, cardType: 'spell',/.test(t2));
+    // The v3 library registers several idents per line, so match the bare
+    // `redHerring,` token (the const decl carries no trailing comma).
+    check('redHerring array membership still single', countOccurrences(t2, 'redHerring,') === 1);
     check('new card still present after edit', t2.includes(`const ${NEW_IDENT}: Card = {`));
 
     console.log('remove(test-roundtrip-card):');
@@ -131,8 +134,8 @@ async function main() {
     })();
     check('block removed', !t3.includes(`const ${NEW_IDENT}: Card = {`));
     check('array membership removed', !new RegExp(`^[ \\t]*${NEW_IDENT},`, 'm').test(t3));
-    check('false-dilemma edit survived removal', /id: 'false-dilemma',[\s\S]*?basePower: 99,/.test(t3));
-    check('ad-hominem-strike survived removal', t3.includes("id: 'ad-hominem-strike',"));
+    check('red-herring edit survived removal', /id: 'red-herring',[\s\S]*?rank: 4, cardType: 'spell',/.test(t3));
+    check('slippery-slope survived removal', t3.includes("id: 'slippery-slope',"));
     check('removing a missing id is a no-op', removeCard(t3, 'no-such-card-xyz') === t3);
 
     // SAFETY: the real source file must be byte-identical to before.

@@ -262,12 +262,16 @@ export type {
     CardLearningRequirement, CardCombatEffects, CardSpecialMechanic,
     CardEvent, CardResolution, CardLookup,
     CardSynergy, SynergyPredicate,
+    // Spec 32 v3 — the rank ladder / rarity / card-type axes
+    CardRank, CardRarity, CardType, CardRider,
     // Phase 142 — Extended synergy predicates
     ExtendedSynergyPredicate,
 } from './Cards';
 export {
     generateBasicActionResources, generatePhilosophicalResource,
     calculateSkillDamage, executeSkill,
+    // Spec 32 v3 — rank/rarity helpers (mobile renders rank names off these)
+    CARD_RANK_NAMES, rankToRarity,
     meetsLearningRequirement, getAvailableSkills, learnSkill,
     cardLibrary, getCardById,
     // Phase 142 — Extended synergy predicate functionality

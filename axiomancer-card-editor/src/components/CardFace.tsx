@@ -14,7 +14,7 @@
  */
 import type { CSSProperties } from 'react';
 import type { CardDraft } from '../types';
-import { isGold, lookupEffect } from '../data/mechanics';
+import { rankToRarity, lookupEffect } from '../data/mechanics';
 import {
     WX,
     DIE,
@@ -64,6 +64,9 @@ function controlKeyword(effectId: string, skipTurn: boolean): KeywordId {
 
 /** Best-effort: the card's signature keyword + its representative value. */
 function primaryKeyword(card: CardDraft): { kw: KeywordId; val: number } {
+    // Persistent cards read as their card type.
+    if (card.cardType === 'enchantment') return { kw: 'enchant', val: 0 };
+    if (card.cardType === 'disenchant') return { kw: 'disenchant', val: 0 };
     const sm = card.specialMechanics[0];
     if (sm) {
         switch (sm.kind) {
@@ -75,17 +78,44 @@ function primaryKeyword(card: CardDraft): { kw: KeywordId; val: number } {
                 return { kw: 'riposte', val: sm.damage };
             case 'rupture':
                 return { kw: 'rupture', val: sm.bonusPct ?? 0 };
-            case 'compound':
-                return { kw: 'compound', val: sm.perDebuff };
             case 'siphon':
-                return { kw: 'siphon', val: sm.pct };
-            case 'execute':
-                return { kw: 'execute', val: 0 };
+                return { kw: 'siphon', val: Math.round(sm.pct * 100) };
+            case 'reap':
+                return { kw: 'reap', val: sm.cost };
+            case 'reap_all':
+                return { kw: 'reap', val: 0 };
+            case 'soul_gain':
+            case 'consume_affliction':
+                return { kw: 'soul', val: 0 };
+            case 'sway':
+                return { kw: 'sway', val: sm.amount };
+            case 'stagger':
+                return { kw: 'stagger', val: sm.rungs };
+            case 'lock_stance':
+                return { kw: 'stagger', val: 0 };
+            case 'foretell':
+                return { kw: 'foretell', val: sm.count };
+            case 'omen':
+                return { kw: 'foretell', val: 0 };
+            case 'premise':
+                return { kw: 'premise', val: sm.count };
+            case 'peroration':
+            case 'spend_premises':
+                return { kw: 'premise', val: 0 };
+            case 'echo':
+            case 'echo_next_spell':
+            case 'reprise':
+            case 'replay_last':
+                return { kw: 'echo', val: 0 };
+            case 'forge_floating_die':
+            case 'create_temporary_die':
+                return { kw: 'forge', val: 0 };
+            case 'extend_dots':
+            case 'convert_dots':
+            case 'boost_all_dots':
+                return { kw: 'dot', val: 0 };
             case 'strip_random_buff':
-            case 'convert_enemy_buff_to_self':
                 return { kw: 'strip_buff', val: 0 };
-            case 'secondary_heal_self':
-                return { kw: 'heal_self', val: 0 };
             default:
                 break;
         }
@@ -97,6 +127,12 @@ function primaryKeyword(card: CardDraft): { kw: KeywordId; val: number } {
         const payload = eff?.payload;
         if (payload?.damageOverTime) {
             return { kw: dotKeyword(ce.effectId), val: ce.intensity ?? 1 };
+        }
+        if (ce.effectId.includes('mark')) {
+            return { kw: 'mark', val: ce.intensity ?? 1 };
+        }
+        if (ce.effectId.includes('backfire')) {
+            return { kw: 'backfire', val: ce.intensity ?? 1 };
         }
         if (eff?.category === 'control') {
             const skip = !!payload?.actionRestriction?.skipTurn;
@@ -115,19 +151,45 @@ function primaryKeyword(card: CardDraft): { kw: KeywordId; val: number } {
         return { kw: 'control', val: ce.duration ?? eff?.duration ?? 1 };
     }
 
-    if (card.targetType === 'self') return { kw: 'heal_self', val: card.basePower };
-    return { kw: 'damage', val: card.basePower };
+    // Spec 32 v3 — the strike is dead: with no mechanic and no effect payload
+    // there is no damage number to show.
+    if (card.targetType === 'self') return { kw: 'heal_self', val: 0 };
+    return { kw: 'control', val: 0 };
+}
+
+/** Face keyword + value for the authored FREE (dieless) rider. */
+function freeKeyword(card: CardDraft): { kw: KeywordId; val: number } {
+    if (card.cardType === 'enchantment' || card.cardType === 'disenchant') {
+        // PAID only — no free line exists on persistent cards.
+        return { kw: card.cardType === 'enchantment' ? 'enchant' : 'disenchant', val: 0 };
+    }
+    const f = card.free;
+    if (!f) return { kw: 'control', val: 0 };
+    if (f.guard) return { kw: 'guard', val: f.guard };
+    if (f.healHp) return { kw: 'heal_self', val: f.healHp };
+    if (f.drawCards) return { kw: 'draw', val: f.drawCards };
+    if (f.tickOne || f.tickAllDots) return { kw: 'tick', val: 0 };
+    if (f.premises) return { kw: 'premise', val: f.premises };
+    if (f.sway) return { kw: 'sway', val: f.sway };
+    if (f.souls) return { kw: 'soul', val: f.souls };
+    if (f.foretell) return { kw: 'foretell', val: f.foretell };
+    if (f.conviction) return { kw: 'control', val: 0 };
+    if (f.applyEffect) {
+        const id = f.applyEffect.effectId;
+        if (id.includes('mark')) return { kw: 'mark', val: f.applyEffect.intensity ?? 1 };
+        if (id.includes('bleed') || id.includes('poison')) return { kw: dotKeyword(id), val: f.applyEffect.intensity ?? 1 };
+        return { kw: 'control', val: 0 };
+    }
+    return { kw: 'control', val: 0 };
 }
 
 /** Derive face-ready fields from any editable card draft. */
 export function projectFace(card: CardDraft): FaceCard {
     const die = card.philosophicalAspect as DieKey; // body | mind | heart
-    const rarity: RarityKey = isGold(card.id) ? 'gold' : 'common';
+    // Spec 32 v3 §4 — rarity derives from the rank ladder (gold is gone).
+    const rarity: RarityKey = rankToRarity(card.rank);
     const primary = primaryKeyword(card);
-    const free: { kw: KeywordId; val: number } =
-        card.targetType === 'self'
-            ? { kw: 'heal_self', val: card.basePower }
-            : { kw: 'damage', val: card.basePower };
+    const free = freeKeyword(card);
     return {
         name: card.name,
         die,

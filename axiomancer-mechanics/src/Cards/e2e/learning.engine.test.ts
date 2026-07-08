@@ -76,8 +76,12 @@ describe('meetsLearningRequirement — the v3 rank ladder gates (spec 32 §4)', 
 
     it('a level-15 character qualifies for the whole library', () => {
         const ch = buildPlayer(15);
+        // Two cards carry Phase 46 alignment gates (pact-of-akrasia: outlook
+        // <= -34; heart-of-the-matter: scope >= 34) — thread an alignment that
+        // satisfies both so the sweep stays a pure level-gate check.
+        const alignment = { epistemology: 0, outlook: -50, scope: 50 };
         for (const s of cardLibrary) {
-            expect(meetsLearningRequirement(ch, s), s.id).toBe(true);
+            expect(meetsLearningRequirement(ch, s, alignment), s.id).toBe(true);
         }
     });
 

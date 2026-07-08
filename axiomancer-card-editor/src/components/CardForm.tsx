@@ -20,8 +20,9 @@ import type { CardDraft } from '../types';
 import {
     CATEGORIES,
     STANCES,
-    SCALING_STATS,
     TIERS,
+    RANKS,
+    CARD_TYPES,
     TARGET_TYPES,
     APPLIED_TO,
     SPECIAL_MECHANIC_KINDS,
@@ -150,31 +151,19 @@ function defaultMechanic(kind: SpecialMechanicKind): CardSpecialMechanic {
     switch (kind) {
         case 'strip_random_buff':
             return { kind, appliedTo: 'enemy' };
-        case 'convert_enemy_buff_to_self':
-            return { kind };
-        case 'secondary_heal_self':
-            return { kind, stat: 'heart', multiplier: 1 };
         case 'befriend_attempt':
             return { kind };
         case 'guard':
             return { kind, amount: 5 };
         case 'rupture':
             return { kind, bonusPct: 0 };
-        case 'compound':
-            return { kind, perDebuff: 3 };
         case 'siphon':
-            return { kind, pct: 50 };
+            return { kind, pct: 0.5 };
         case 'barrier':
             return { kind, amount: 5 };
         case 'riposte':
             return { kind, damage: 5, reduce: 2 };
-        case 'execute':
-            return { kind, hpPct: 30, dotStacks: 2 };
-        case 'amplify':
-            return { kind, multiplier: 1.5 };
-        case 'grant_permanent_wild_die':
-            return { kind, wildCount: 1, deadCount: 1 };
-        // Fate Engine P1 — die-manipulation verbs + REACT
+        // Fate Engine P1 — die-manipulation verbs
         case 'reroll_spent':
         case 'refresh_die':
         case 'convert_die_color':
@@ -184,8 +173,54 @@ function defaultMechanic(kind: SpecialMechanicKind): CardSpecialMechanic {
             return { kind, color: 'wild' };
         case 'grant_pip':
             return { kind, count: 1 };
-        case 'react':
-            return { kind, a: 'debuff_fear', b: 'debuff_confusion', minIntensity: 1, burstPerIntensity: 4 };
+        // Spec 32 v3 — the themed-deck verb set
+        case 'forge_floating_die':
+            return { kind, color: 'powering' };
+        case 'stagger':
+            return { kind, rungs: 1 };
+        case 'lock_stance':
+            return { kind };
+        case 'foretell':
+            return { kind, count: 1 };
+        case 'omen':
+            return { kind, rider: {} };
+        case 'premise':
+            return { kind, count: 1 };
+        case 'peroration':
+            return { kind, at: 6, rider: {} };
+        case 'spend_premises':
+            return { kind, markPer: 2, drawPer: 3 };
+        case 'spend_all_pips':
+            return { kind };
+        case 'recoil':
+            return { kind, hp: 4 };
+        case 'extend_dots':
+            return { kind, turns: 1 };
+        case 'convert_dots':
+            return { kind, bonusIntensity: 1 };
+        case 'boost_all_dots':
+            return { kind, intensity: 1 };
+        case 'soul_gain':
+            return { kind, count: 1 };
+        case 'consume_affliction':
+            return { kind, souls: 1 };
+        case 'reap':
+            return { kind, cost: 3 };
+        case 'reap_all':
+            return { kind, burstPerSoul: 2 };
+        case 'sway':
+            return { kind, amount: 3 };
+        case 'echo':
+        case 'echo_next_spell':
+            return { kind };
+        case 'reprise':
+            return { kind, count: 1 };
+        case 'replay_last':
+            return { kind, times: 1 };
+        case 'conjure_card':
+            return { kind, cardId: '' };
+        case 'rider':
+            return { kind, rider: {} };
         default:
             return { kind: 'befriend_attempt' };
     }
@@ -357,22 +392,21 @@ export function CardForm({ card, setCard }: { card: CardDraft; setCard: (c: Card
                 </div>
             </Section>
 
-            {/* ════ POWER & SCALING ════ */}
-            <Section title="POWER & SCALING" defaultOpen>
-                <div style={{ display: 'flex', gap: 12 }}>
-                    <div style={{ flex: 1 }}>
-                        <FieldLabel hint="flat magnitude">BASE POWER</FieldLabel>
-                        <Stepper value={card.basePower} onChange={(v) => set({ basePower: v })} min={0} max={99} />
-                    </div>
-                    <div style={{ flex: 1.3 }}>
-                        <FieldLabel hint="scales off">SCALING STAT</FieldLabel>
-                        <Segmented options={SCALING_STATS} value={card.scalingStat} onChange={(v) => set({ scalingStat: v })} colorFor={dieColor} />
-                    </div>
+            {/* ════ RANK & TYPE (spec 32 v3 — replaces the dead POWER & SCALING) ════ */}
+            <Section title="RANK & TYPE" defaultOpen>
+                <div>
+                    <FieldLabel hint="Doxa 1 … Aporia 6 · rarity derives from it">RANK</FieldLabel>
+                    <Segmented options={RANKS} value={card.rank} onChange={(v) => set({ rank: v })} />
                 </div>
                 <div>
-                    <FieldLabel hint="optional · ×stat term (default 1)">SCALING MULTIPLIER</FieldLabel>
-                    <NumField value={card.scalingMultiplier} onChange={(v) => set({ scalingMultiplier: v })} placeholder="1" />
+                    <FieldLabel hint="spell · persistent enchantment · enemy curse">CARD TYPE</FieldLabel>
+                    <Segmented options={CARD_TYPES} value={card.cardType} onChange={(v) => set({ cardType: v })} />
                 </div>
+                {card.free != null && (
+                    <div style={{ fontFamily: WX.serif, fontStyle: 'italic', fontSize: 12.5, color: WX.bone }}>
+                        Authored FREE line present — preserved verbatim on save (edit it in source).
+                    </div>
+                )}
             </Section>
 
             {/* ════ COMBAT EFFECTS ════ */}
@@ -540,6 +574,12 @@ function MechanicFields({ mechanic, patch }: { mechanic: CardSpecialMechanic; pa
         </div>
     );
 
+    const riderNote = (
+        <div style={{ fontFamily: WX.serif, fontStyle: 'italic', fontSize: 12.5, color: WX.ash }}>
+            carries a RIDER payload — preserved verbatim on save (edit it in source)
+        </div>
+    );
+
     switch (mechanic.kind) {
         case 'strip_random_buff':
             return (
@@ -552,52 +592,121 @@ function MechanicFields({ mechanic, patch }: { mechanic: CardSpecialMechanic; pa
                     />
                 </div>
             );
-        case 'secondary_heal_self':
-            return (
-                <>
-                    <div>
-                        <FieldLabel>HEAL STAT</FieldLabel>
-                        <Segmented options={STANCES} value={mechanic.stat} onChange={(v) => patch({ stat: v })} colorFor={dieColor} />
-                    </div>
-                    {numRow('MULTIPLIER', 'default 1', mechanic.multiplier ?? 1, 'multiplier', 0, 20)}
-                </>
-            );
         case 'guard':
             return numRow('GUARD AMOUNT', 'shield', mechanic.amount, 'amount');
         case 'barrier':
             return numRow('BARRIER AMOUNT', 'stacking soak', mechanic.amount, 'amount');
         case 'rupture':
-            return numRow('BONUS %', 'extra detonation', mechanic.bonusPct ?? 0, 'bonusPct');
-        case 'compound':
-            return numRow('PER DEBUFF', 'HP per distinct debuff', mechanic.perDebuff, 'perDebuff');
+            return (
+                <>
+                    {numRow('BONUS %', 'extra detonation', mechanic.bonusPct ?? 0, 'bonusPct')}
+                    {numRow('FUEL / PIP', 'with spend_all_pips', mechanic.fuelPerPip ?? 0, 'fuelPerPip')}
+                    {numRow('FUEL / OMEN HIT', 'Oracle capstone', mechanic.fuelPerOmenHit ?? 0, 'fuelPerOmenHit')}
+                </>
+            );
         case 'siphon':
-            return numRow('SIPHON %', '% of HP dealt', mechanic.pct, 'pct');
+            return (
+                <div>
+                    <FieldLabel hint="% of the burst healed">SIPHON %</FieldLabel>
+                    <Stepper value={Math.round((mechanic.pct ?? 0) * 100)} onChange={(v) => patch({ pct: v / 100 })} min={0} max={100} />
+                </div>
+            );
         case 'riposte':
             return (
                 <>
-                    {numRow('COUNTER DAMAGE', 'on parry', mechanic.damage, 'damage')}
+                    {numRow('COUNTER DAMAGE', 'on full block', mechanic.damage, 'damage')}
                     {numRow('REDUCE', 'incoming hit –', mechanic.reduce, 'reduce')}
                 </>
             );
-        case 'execute':
+        case 'create_temporary_die':
+            return (
+                <div>
+                    <FieldLabel hint="KINDLE colour">DIE COLOUR</FieldLabel>
+                    <Segmented
+                        options={[...STANCES, { value: 'wild', label: 'WILD' }] as { value: string; label: string }[]}
+                        value={mechanic.color}
+                        onChange={(v) => patch({ color: v })}
+                    />
+                </div>
+            );
+        case 'grant_pip':
+            return numRow('PIPS', '+N to every Reserve die', mechanic.count, 'count', 0, 10);
+        case 'forge_floating_die':
+            return (
+                <div>
+                    <FieldLabel hint="FORGE — persists across combats">DIE COLOUR</FieldLabel>
+                    <Segmented
+                        options={[{ value: 'powering', label: 'POWERING' }, { value: 'wild', label: 'WILD' }] as { value: string; label: string }[]}
+                        value={mechanic.color}
+                        onChange={(v) => patch({ color: v })}
+                    />
+                </div>
+            );
+        case 'stagger':
+            return numRow('RUNGS', "removed from the enemy's next action", mechanic.rungs, 'rungs', 1, 5);
+        case 'foretell':
+            return numRow('COUNT', 'top cards seen + reordered', mechanic.count, 'count', 1, 5);
+        case 'omen':
+            return riderNote;
+        case 'premise':
+            return numRow('PREMISES', 'added to the tally', mechanic.count, 'count', 1, 5);
+        case 'peroration':
             return (
                 <>
-                    {numRow('HP % THRESHOLD', 'fires at/below', mechanic.hpPct, 'hpPct')}
-                    {numRow('DOT STACKS', 'or ≥ distinct DoTs', mechanic.dotStacks, 'dotStacks')}
-                    {numRow('RECOIL %', 'self-damage, optional', mechanic.recoilPct ?? 0, 'recoilPct')}
+                    {numRow('FIRES AT', 'Premise count', mechanic.at, 'at', 1, 12)}
+                    <div>
+                        <FieldLabel hint="0 = no concede clause">CONCEDE AT</FieldLabel>
+                        <Stepper value={mechanic.concedeAt ?? 0} onChange={(v) => patch({ concedeAt: v === 0 ? undefined : v })} min={0} max={12} />
+                    </div>
+                    {riderNote}
                 </>
             );
-        case 'amplify':
-            return numRow('MULTIPLIER', '× pending DoT', mechanic.multiplier, 'multiplier', 0, 20);
-        case 'grant_permanent_wild_die':
+        case 'spend_premises':
             return (
                 <>
-                    {numRow('WILD DICE', 'engine caps pool at 3', mechanic.wildCount, 'wildCount', 0, 3)}
-                    {numRow('DEAD DICE', 'locked X per wild (§4.3)', mechanic.deadCount, 'deadCount', 0, 3)}
+                    {numRow('MARK PER', '+1 mark stack per N spent', mechanic.markPer, 'markPer', 1, 10)}
+                    {numRow('DRAW PER', 'draw 1 per N spent', mechanic.drawPer, 'drawPer', 1, 10)}
                 </>
             );
+        case 'spend_all_pips':
+            return numRow('GUARD / PIP', 'optional', mechanic.guardPerPip ?? 0, 'guardPerPip', 0, 10);
+        case 'recoil':
+            return numRow('RECOIL', 'VITAE paid (unpreventable)', mechanic.hp, 'hp', 1, 20);
+        case 'extend_dots':
+            return numRow('TURNS', '+N duration to ALL your DoTs', mechanic.turns, 'turns', 1, 5);
+        case 'convert_dots':
+            return numRow('BONUS INTENSITY', 'on the converted DoT', mechanic.bonusIntensity, 'bonusIntensity', 0, 5);
+        case 'boost_all_dots':
+            return numRow('INTENSITY', '+N to every enemy DoT', mechanic.intensity, 'intensity', 1, 5);
+        case 'soul_gain':
+            return numRow('SOULS', 'gained', mechanic.count, 'count', 1, 5);
+        case 'consume_affliction':
+            return numRow('SOULS', 'yielded by the consumed affliction', mechanic.souls, 'souls', 0, 5);
+        case 'reap':
+            return (
+                <>
+                    {numRow('COST', 'Souls spent (fizzles underfunded)', mechanic.cost, 'cost', 1, 12)}
+                    {mechanic.rider != null && riderNote}
+                </>
+            );
+        case 'reap_all':
+            return numRow('BURST / SOUL', 'HP per Soul spent (cap kept)', mechanic.burstPerSoul, 'burstPerSoul', 1, 10);
+        case 'sway':
+            return numRow('SWAY', 'decays 1/turn · ≥ enemy VITAE = capitulate', mechanic.amount, 'amount', 1, 12);
+        case 'reprise':
+            return numRow('COUNT', 'cards returned from the discard', mechanic.count, 'count', 1, 5);
+        case 'replay_last':
+            return numRow('TIMES', 'replays of the last spell', mechanic.times, 'times', 1, 3);
+        case 'conjure_card':
+            return (
+                <div>
+                    <FieldLabel hint="Thoughtform card id">CARD ID</FieldLabel>
+                    <TextField value={mechanic.cardId} onChange={(v) => patch({ cardId: v })} placeholder="e.g. thoughtform-…" />
+                </div>
+            );
+        case 'rider':
+            return riderNote;
         case 'befriend_attempt':
-        case 'convert_enemy_buff_to_self':
         default:
             return <div style={{ fontFamily: WX.serif, fontStyle: 'italic', fontSize: 12.5, color: WX.ash }}>no parameters — marker mechanic</div>;
     }

@@ -1,140 +1,8 @@
 [
  {
-  "id": "achilles-gambit",
-  "name": "Achilles' Gambit",
-  "image": "./assets/catalog/cards/bleed.webp",
-  "chips": [
-   {
-    "k": "Stance",
-    "v": "body"
-   },
-   {
-    "k": "Type",
-    "v": "paradox"
-   },
-   {
-    "k": "Tier",
-    "v": "1"
-   },
-   {
-    "k": "Target",
-    "v": "enemy"
-   },
-   {
-    "k": "Power",
-    "v": "0 + body"
-   }
-  ],
-  "lines": [
-   "Applies Theseus' Dissolution ×1, 2t → enemy",
-   "Fate: playable by an X die (recoil 2 HP)"
-  ]
- },
- {
-  "id": "achilles-overtake",
-  "name": "Achilles' Overtake",
-  "image": "./assets/catalog/cards/ice-sword.webp",
-  "chips": [
-   {
-    "k": "Stance",
-    "v": "body"
-   },
-   {
-    "k": "Type",
-    "v": "paradox"
-   },
-   {
-    "k": "Tier",
-    "v": "3"
-   },
-   {
-    "k": "Target",
-    "v": "enemy"
-   },
-   {
-    "k": "Power",
-    "v": "0 + body"
-   },
-   {
-    "k": "Learn",
-    "v": "Lv 10"
-   }
-  ],
-  "lines": [
-   "Applies Achilles' Burden ×1, 2t → enemy",
-   "Execute < 30% HP (needs 2 DoT)"
-  ]
- },
- {
-  "id": "ad-hominem-strike",
-  "name": "Ad Hominem Strike",
-  "image": "./assets/catalog/cards/burn.webp",
-  "chips": [
-   {
-    "k": "Stance",
-    "v": "body"
-   },
-   {
-    "k": "Type",
-    "v": "fallacy"
-   },
-   {
-    "k": "Tier",
-    "v": "1"
-   },
-   {
-    "k": "Target",
-    "v": "enemy"
-   },
-   {
-    "k": "Power",
-    "v": "0 + body"
-   }
-  ],
-  "lines": [
-   "Applies Richard's Exposure ×1, 2t → enemy",
-   "strip_random_buff"
-  ]
- },
- {
-  "id": "apophatic-aegis",
-  "name": "Apophatic Aegis",
-  "image": "./assets/catalog/cards/guard-3.webp",
-  "chips": [
-   {
-    "k": "Stance",
-    "v": "heart"
-   },
-   {
-    "k": "Type",
-    "v": "paradox"
-   },
-   {
-    "k": "Tier",
-    "v": "3"
-   },
-   {
-    "k": "Target",
-    "v": "self"
-   },
-   {
-    "k": "Power",
-    "v": "0 + heart×4"
-   },
-   {
-    "k": "Learn",
-    "v": "Lv 40"
-   }
-  ],
-  "lines": [
-   "Applies Unmoved Mover's Resolve ×1, 2t → self",
-   "Barrier 6"
-  ]
- },
- {
-  "id": "appeal-to-authority",
-  "name": "Appeal to Authority",
-  "image": "./assets/catalog/cards/devil-book.webp",
+  "id": "achilles-and-the-tortoise",
+  "name": "Achilles and the Tortoise",
+  "image": "./assets/catalog/cards/freeze.webp",
   "chips": [
    {
     "k": "Stance",
@@ -142,7 +10,7 @@
    },
    {
     "k": "Type",
-    "v": "fallacy"
+    "v": "paradox"
    },
    {
     "k": "Tier",
@@ -150,90 +18,26 @@
    },
    {
     "k": "Target",
-    "v": "enemy"
+    "v": "self"
    },
    {
-    "k": "Power",
-    "v": "0 + mind"
+    "k": "Rank",
+    "v": "Axiom (rare)"
    },
    {
-    "k": "Learn",
-    "v": "Lv 15"
-   }
-  ],
-  "lines": [
-   "Applies Raven's Target ×1, 2t → enemy",
-   "Applies Liar's Clarity ×1 → self"
-  ]
- },
- {
-  "id": "appeal-to-consequences",
-  "name": "Appeal to Consequences",
-  "image": "./assets/catalog/cards/devil-book.webp",
-  "chips": [
-   {
-    "k": "Stance",
-    "v": "body"
-   },
-   {
-    "k": "Type",
-    "v": "fallacy"
-   },
-   {
-    "k": "Tier",
-    "v": "3"
-   },
-   {
-    "k": "Target",
-    "v": "enemy"
-   },
-   {
-    "k": "Power",
-    "v": "0 + body"
+    "k": "Kind",
+    "v": "enchantment"
    },
    {
     "k": "Learn",
     "v": "Lv 10"
    }
   ],
-  "lines": [
-   "Applies Grandfather's Terror ×2, 2t → enemy",
-   "Threshold: 4× body die fires a rider"
-  ]
+  "lines": []
  },
  {
-  "id": "appeal-to-pity",
-  "name": "Appeal to Pity",
-  "image": "./assets/catalog/cards/light-ring.webp",
-  "chips": [
-   {
-    "k": "Stance",
-    "v": "heart"
-   },
-   {
-    "k": "Type",
-    "v": "fallacy"
-   },
-   {
-    "k": "Tier",
-    "v": "1"
-   },
-   {
-    "k": "Target",
-    "v": "self"
-   },
-   {
-    "k": "Power",
-    "v": "0 + heart×4"
-   }
-  ],
-  "lines": [
-   "Applies Unmoved Mover's Resolve ×1, 2t → self"
-  ]
- },
- {
-  "id": "barbers-paradox",
-  "name": "Barber's Paradox",
+  "id": "ad-nauseam",
+  "name": "Ad Nauseam",
   "image": "./assets/catalog/cards/confuse.webp",
   "chips": [
    {
@@ -242,42 +46,7 @@
    },
    {
     "k": "Type",
-    "v": "paradox"
-   },
-   {
-    "k": "Tier",
-    "v": "2"
-   },
-   {
-    "k": "Target",
-    "v": "enemy"
-   },
-   {
-    "k": "Power",
-    "v": "0 + mind"
-   },
-   {
-    "k": "Learn",
-    "v": "Lv 16"
-   }
-  ],
-  "lines": [
-   "Applies Two Envelope Delirium ×1, 2t → enemy",
-   "Fate: playable by an X die"
-  ]
- },
- {
-  "id": "bat-swarm-thoughtform",
-  "name": "Bat-Swarm Thoughtform",
-  "image": "./assets/catalog/cards/blue-light.webp",
-  "chips": [
-   {
-    "k": "Stance",
-    "v": "heart"
-   },
-   {
-    "k": "Type",
-    "v": "paradox"
+    "v": "fallacy"
    },
    {
     "k": "Tier",
@@ -288,23 +57,28 @@
     "v": "self"
    },
    {
-    "k": "Power",
-    "v": "0 + heart"
+    "k": "Rank",
+    "v": "Thesis (uncommon)"
+   },
+   {
+    "k": "Kind",
+    "v": "spell"
    },
    {
     "k": "Learn",
-    "v": "Lv 5"
+    "v": "Lv 4"
    }
   ],
   "lines": [
-   "create_temporary_die",
-   "Die bonus: powering die match fires a rider"
+   "FREE — mark i1 d1",
+   "your next spell gains ECHO",
+   "Die bonus: powering die mind fires a rider"
   ]
  },
  {
-  "id": "befriend",
-  "name": "Befriend",
-  "image": "./assets/catalog/cards/meat-pecker.webp",
+  "id": "against-my-judgment",
+  "name": "Against My Judgment",
+  "image": "./assets/catalog/cards/devil-book.webp",
   "chips": [
    {
     "k": "Stance",
@@ -320,25 +94,35 @@
    },
    {
     "k": "Target",
-    "v": "enemy"
+    "v": "self"
    },
    {
-    "k": "Power",
-    "v": "0 + heart"
+    "k": "Rank",
+    "v": "Doxa (common)"
+   },
+   {
+    "k": "Kind",
+    "v": "spell"
+   },
+   {
+    "k": "Learn",
+    "v": "Lv 1"
    }
   ],
   "lines": [
-   "befriend_attempt"
+   "FREE — +1 Conviction",
+   "Applies Mark ×1, 2t → self",
+   "rider"
   ]
  },
  {
-  "id": "bootstrap-paradox",
-  "name": "Bootstrap Paradox",
-  "image": "./assets/catalog/cards/light-ring.webp",
+  "id": "anvil-of-form",
+  "name": "Anvil of Form",
+  "image": "./assets/catalog/cards/guard-1.webp",
   "chips": [
    {
     "k": "Stance",
-    "v": "heart"
+    "v": "mind"
    },
    {
     "k": "Type",
@@ -346,24 +130,141 @@
    },
    {
     "k": "Tier",
-    "v": "3"
+    "v": "2"
    },
    {
     "k": "Target",
     "v": "self"
    },
    {
-    "k": "Power",
-    "v": "0 + heart×4"
+    "k": "Rank",
+    "v": "Axiom (rare)"
+   },
+   {
+    "k": "Kind",
+    "v": "enchantment"
    },
    {
     "k": "Learn",
     "v": "Lv 10"
    }
   ],
+  "lines": []
+ },
+ {
+  "id": "arrow-paradox",
+  "name": "Arrow Paradox",
+  "image": "./assets/catalog/cards/freeze.webp",
+  "chips": [
+   {
+    "k": "Stance",
+    "v": "body"
+   },
+   {
+    "k": "Type",
+    "v": "paradox"
+   },
+   {
+    "k": "Tier",
+    "v": "2"
+   },
+   {
+    "k": "Target",
+    "v": "enemy"
+   },
+   {
+    "k": "Rank",
+    "v": "Theorem (uncommon)"
+   },
+   {
+    "k": "Kind",
+    "v": "spell"
+   },
+   {
+    "k": "Learn",
+    "v": "Lv 6"
+   }
+  ],
   "lines": [
-   "Applies Novikov's Consistency ×1 → enemy",
-   "refresh_die"
+   "FREE — Guard 2",
+   "lock the enemy stance",
+   "STAGGER 1"
+  ]
+ },
+ {
+  "id": "bone-orchard",
+  "name": "Bone Orchard",
+  "image": "./assets/catalog/cards/yggdrasil.webp",
+  "chips": [
+   {
+    "k": "Stance",
+    "v": "mind"
+   },
+   {
+    "k": "Type",
+    "v": "fallacy"
+   },
+   {
+    "k": "Tier",
+    "v": "2"
+   },
+   {
+    "k": "Target",
+    "v": "self"
+   },
+   {
+    "k": "Rank",
+    "v": "Axiom (rare)"
+   },
+   {
+    "k": "Kind",
+    "v": "enchantment"
+   },
+   {
+    "k": "Learn",
+    "v": "Lv 10"
+   }
+  ],
+  "lines": []
+ },
+ {
+  "id": "bootstrap-loop",
+  "name": "Bootstrap Loop",
+  "image": "./assets/catalog/cards/spark.webp",
+  "chips": [
+   {
+    "k": "Stance",
+    "v": "mind"
+   },
+   {
+    "k": "Type",
+    "v": "paradox"
+   },
+   {
+    "k": "Tier",
+    "v": "2"
+   },
+   {
+    "k": "Target",
+    "v": "self"
+   },
+   {
+    "k": "Rank",
+    "v": "Thesis (uncommon)"
+   },
+   {
+    "k": "Kind",
+    "v": "spell"
+   },
+   {
+    "k": "Learn",
+    "v": "Lv 4"
+   }
+  ],
+  "lines": [
+   "FREE — +1 Conviction",
+   "KINDLE (wild)",
+   "Threshold: 2× mind die fires a rider"
   ]
  },
  {
@@ -388,8 +289,12 @@
     "v": "self"
    },
    {
-    "k": "Power",
-    "v": "0 + body"
+    "k": "Rank",
+    "v": "Doxa (common)"
+   },
+   {
+    "k": "Kind",
+    "v": "spell"
    },
    {
     "k": "Learn",
@@ -397,13 +302,592 @@
    }
   ],
   "lines": [
-   "Guard 12"
+   "FREE — Guard 2",
+   "Guard 8"
   ]
  },
  {
-  "id": "breach",
-  "name": "Breach",
+  "id": "brief-candle",
+  "name": "Brief Candle",
   "image": "./assets/catalog/cards/burn.webp",
+  "chips": [
+   {
+    "k": "Stance",
+    "v": "body"
+   },
+   {
+    "k": "Type",
+    "v": "fallacy"
+   },
+   {
+    "k": "Tier",
+    "v": "1"
+   },
+   {
+    "k": "Target",
+    "v": "enemy"
+   },
+   {
+    "k": "Rank",
+    "v": "Doxa (common)"
+   },
+   {
+    "k": "Kind",
+    "v": "spell"
+   },
+   {
+    "k": "Learn",
+    "v": "Lv 1"
+   }
+  ],
+  "lines": [
+   "FREE — tick",
+   "Applies Bleed ×2, 1t → enemy"
+  ]
+ },
+ {
+  "id": "captive-audience",
+  "name": "Captive Audience",
+  "image": "./assets/catalog/cards/will-o-wisp.webp",
+  "chips": [
+   {
+    "k": "Stance",
+    "v": "heart"
+   },
+   {
+    "k": "Type",
+    "v": "fallacy"
+   },
+   {
+    "k": "Tier",
+    "v": "2"
+   },
+   {
+    "k": "Target",
+    "v": "enemy"
+   },
+   {
+    "k": "Rank",
+    "v": "Aporia (rare)"
+   },
+   {
+    "k": "Kind",
+    "v": "disenchant"
+   },
+   {
+    "k": "Learn",
+    "v": "Lv 12"
+   }
+  ],
+  "lines": []
+ },
+ {
+  "id": "cassandras-burden",
+  "name": "Cassandra's Burden",
+  "image": "./assets/catalog/cards/god-eye-silver.webp",
+  "chips": [
+   {
+    "k": "Stance",
+    "v": "heart"
+   },
+   {
+    "k": "Type",
+    "v": "paradox"
+   },
+   {
+    "k": "Tier",
+    "v": "2"
+   },
+   {
+    "k": "Target",
+    "v": "enemy"
+   },
+   {
+    "k": "Rank",
+    "v": "Thesis (uncommon)"
+   },
+   {
+    "k": "Kind",
+    "v": "spell"
+   },
+   {
+    "k": "Learn",
+    "v": "Lv 4"
+   }
+  ],
+  "lines": [
+   "FREE — draw 1",
+   "OMEN — on hit: Guard 4 · mark i2 d2"
+  ]
+ },
+ {
+  "id": "circular-reasoning",
+  "name": "Circular Reasoning",
+  "image": "./assets/catalog/cards/light-ring.webp",
+  "chips": [
+   {
+    "k": "Stance",
+    "v": "mind"
+   },
+   {
+    "k": "Type",
+    "v": "fallacy"
+   },
+   {
+    "k": "Tier",
+    "v": "2"
+   },
+   {
+    "k": "Target",
+    "v": "self"
+   },
+   {
+    "k": "Rank",
+    "v": "Theorem (uncommon)"
+   },
+   {
+    "k": "Kind",
+    "v": "spell"
+   },
+   {
+    "k": "Learn",
+    "v": "Lv 6"
+   }
+  ],
+  "lines": [
+   "FREE — draw 1",
+   "REPRISE 1 — its FREE line fires now"
+  ]
+ },
+ {
+  "id": "common-ground",
+  "name": "Common Ground",
+  "image": "./assets/catalog/cards/bright-sphere-yellow.webp",
+  "chips": [
+   {
+    "k": "Stance",
+    "v": "heart"
+   },
+   {
+    "k": "Type",
+    "v": "fallacy"
+   },
+   {
+    "k": "Tier",
+    "v": "2"
+   },
+   {
+    "k": "Target",
+    "v": "enemy"
+   },
+   {
+    "k": "Rank",
+    "v": "Thesis (uncommon)"
+   },
+   {
+    "k": "Kind",
+    "v": "spell"
+   },
+   {
+    "k": "Learn",
+    "v": "Lv 4"
+   }
+  ],
+  "lines": [
+   "FREE — draw 1",
+   "Applies Rapport ×1, 2t → enemy",
+   "SWAY 2",
+   "Threshold: 3× heart die fires a rider"
+  ]
+ },
+ {
+  "id": "crown-of-thorns",
+  "name": "Crown of Thorns",
+  "image": "./assets/catalog/cards/yggdrasil.webp",
+  "chips": [
+   {
+    "k": "Stance",
+    "v": "heart"
+   },
+   {
+    "k": "Type",
+    "v": "paradox"
+   },
+   {
+    "k": "Tier",
+    "v": "2"
+   },
+   {
+    "k": "Target",
+    "v": "self"
+   },
+   {
+    "k": "Rank",
+    "v": "Axiom (rare)"
+   },
+   {
+    "k": "Kind",
+    "v": "enchantment"
+   },
+   {
+    "k": "Learn",
+    "v": "Lv 10"
+   }
+  ],
+  "lines": []
+ },
+ {
+  "id": "crumbling-resolve",
+  "name": "Crumbling Resolve",
+  "image": "./assets/catalog/cards/guard-2.webp",
+  "chips": [
+   {
+    "k": "Stance",
+    "v": "body"
+   },
+   {
+    "k": "Type",
+    "v": "fallacy"
+   },
+   {
+    "k": "Tier",
+    "v": "2"
+   },
+   {
+    "k": "Target",
+    "v": "enemy"
+   },
+   {
+    "k": "Rank",
+    "v": "Aporia (rare)"
+   },
+   {
+    "k": "Kind",
+    "v": "disenchant"
+   },
+   {
+    "k": "Learn",
+    "v": "Lv 12"
+   }
+  ],
+  "lines": []
+ },
+ {
+  "id": "currys-conversion",
+  "name": "Curry's Conversion",
+  "image": "./assets/catalog/cards/bleed.webp",
+  "chips": [
+   {
+    "k": "Stance",
+    "v": "mind"
+   },
+   {
+    "k": "Type",
+    "v": "paradox"
+   },
+   {
+    "k": "Tier",
+    "v": "2"
+   },
+   {
+    "k": "Target",
+    "v": "enemy"
+   },
+   {
+    "k": "Rank",
+    "v": "Theorem (uncommon)"
+   },
+   {
+    "k": "Kind",
+    "v": "spell"
+   },
+   {
+    "k": "Learn",
+    "v": "Lv 6"
+   }
+  ],
+  "lines": [
+   "FREE — draw 1",
+   "convert bleed↔poison, +1 intensity"
+  ]
+ },
+ {
+  "id": "delphic-ambiguity",
+  "name": "Delphic Ambiguity",
+  "image": "./assets/catalog/cards/confuse.webp",
+  "chips": [
+   {
+    "k": "Stance",
+    "v": "mind"
+   },
+   {
+    "k": "Type",
+    "v": "paradox"
+   },
+   {
+    "k": "Tier",
+    "v": "2"
+   },
+   {
+    "k": "Target",
+    "v": "self"
+   },
+   {
+    "k": "Rank",
+    "v": "Theorem (uncommon)"
+   },
+   {
+    "k": "Kind",
+    "v": "spell"
+   },
+   {
+    "k": "Learn",
+    "v": "Lv 6"
+   }
+  ],
+  "lines": [
+   "FREE — FORETELL 1",
+   "FORETELL 3",
+   "rider",
+   "Die bonus: powering die mind fires a rider"
+  ]
+ },
+ {
+  "id": "disarming-smile",
+  "name": "Disarming Smile",
+  "image": "./assets/catalog/cards/light-ring.webp",
+  "chips": [
+   {
+    "k": "Stance",
+    "v": "heart"
+   },
+   {
+    "k": "Type",
+    "v": "fallacy"
+   },
+   {
+    "k": "Tier",
+    "v": "1"
+   },
+   {
+    "k": "Target",
+    "v": "enemy"
+   },
+   {
+    "k": "Rank",
+    "v": "Lemma (common)"
+   },
+   {
+    "k": "Kind",
+    "v": "spell"
+   },
+   {
+    "k": "Learn",
+    "v": "Lv 2"
+   }
+  ],
+  "lines": [
+   "FREE — SWAY 1",
+   "Applies Rapport ×2, 2t → enemy",
+   "rider"
+  ]
+ },
+ {
+  "id": "entropy-tax",
+  "name": "Entropy Tax",
+  "image": "./assets/catalog/cards/devil-book.webp",
+  "chips": [
+   {
+    "k": "Stance",
+    "v": "mind"
+   },
+   {
+    "k": "Type",
+    "v": "paradox"
+   },
+   {
+    "k": "Tier",
+    "v": "2"
+   },
+   {
+    "k": "Target",
+    "v": "enemy"
+   },
+   {
+    "k": "Rank",
+    "v": "Aporia (rare)"
+   },
+   {
+    "k": "Kind",
+    "v": "disenchant"
+   },
+   {
+    "k": "Learn",
+    "v": "Lv 12"
+   }
+  ],
+  "lines": []
+ },
+ {
+  "id": "ex-nihilo",
+  "name": "Ex Nihilo",
+  "image": "./assets/catalog/cards/bright-sphere-yellow.webp",
+  "chips": [
+   {
+    "k": "Stance",
+    "v": "mind"
+   },
+   {
+    "k": "Type",
+    "v": "paradox"
+   },
+   {
+    "k": "Tier",
+    "v": "2"
+   },
+   {
+    "k": "Target",
+    "v": "self"
+   },
+   {
+    "k": "Rank",
+    "v": "Theorem (uncommon)"
+   },
+   {
+    "k": "Kind",
+    "v": "spell"
+   },
+   {
+    "k": "Learn",
+    "v": "Lv 6"
+   }
+  ],
+  "lines": [
+   "FREE — draw 1",
+   "FORGE a the powering die's color floating die",
+   "Threshold: 4× mind die fires a rider"
+  ]
+ },
+ {
+  "id": "exordium",
+  "name": "Exordium",
+  "image": "./assets/catalog/cards/light-ring.webp",
+  "chips": [
+   {
+    "k": "Stance",
+    "v": "heart"
+   },
+   {
+    "k": "Type",
+    "v": "fallacy"
+   },
+   {
+    "k": "Tier",
+    "v": "1"
+   },
+   {
+    "k": "Target",
+    "v": "self"
+   },
+   {
+    "k": "Rank",
+    "v": "Doxa (common)"
+   },
+   {
+    "k": "Kind",
+    "v": "spell"
+   },
+   {
+    "k": "Learn",
+    "v": "Lv 1"
+   }
+  ],
+  "lines": [
+   "FREE — +1 Premise",
+   "+1 Premise",
+   "rider"
+  ]
+ },
+ {
+  "id": "fallen-grace",
+  "name": "Fallen Grace",
+  "image": "./assets/catalog/cards/light-ring.webp",
+  "chips": [
+   {
+    "k": "Stance",
+    "v": "heart"
+   },
+   {
+    "k": "Type",
+    "v": "paradox"
+   },
+   {
+    "k": "Tier",
+    "v": "2"
+   },
+   {
+    "k": "Target",
+    "v": "enemy"
+   },
+   {
+    "k": "Rank",
+    "v": "Theorem (uncommon)"
+   },
+   {
+    "k": "Kind",
+    "v": "spell"
+   },
+   {
+    "k": "Learn",
+    "v": "Lv 6"
+   }
+  ],
+  "lines": [
+   "FREE — draw 1",
+   "Applies Bleed ×2, 3t → enemy",
+   "Fallen: heal 4"
+  ]
+ },
+ {
+  "id": "fated-course",
+  "name": "Fated Course",
+  "image": "./assets/catalog/cards/freeze.webp",
+  "chips": [
+   {
+    "k": "Stance",
+    "v": "mind"
+   },
+   {
+    "k": "Type",
+    "v": "paradox"
+   },
+   {
+    "k": "Tier",
+    "v": "2"
+   },
+   {
+    "k": "Target",
+    "v": "enemy"
+   },
+   {
+    "k": "Rank",
+    "v": "Aporia (rare)"
+   },
+   {
+    "k": "Kind",
+    "v": "disenchant"
+   },
+   {
+    "k": "Learn",
+    "v": "Lv 12"
+   }
+  ],
+  "lines": []
+ },
+ {
+  "id": "festering-argument",
+  "name": "Festering Argument",
+  "image": "./assets/catalog/cards/dream-flutter.webp",
   "chips": [
    {
     "k": "Stance",
@@ -422,23 +906,148 @@
     "v": "enemy"
    },
    {
-    "k": "Power",
-    "v": "0 + mind"
+    "k": "Rank",
+    "v": "Thesis (uncommon)"
+   },
+   {
+    "k": "Kind",
+    "v": "spell"
    },
    {
     "k": "Learn",
-    "v": "Lv 5"
+    "v": "Lv 4"
    }
   ],
   "lines": [
-   "Applies Breach ×1, 2t → enemy",
-   "Threshold: 3× mind die fires a rider"
+   "FREE — tick",
+   "+1 duration to ALL your DoTs"
   ]
  },
  {
-  "id": "briar-riposte",
-  "name": "Briar Riposte",
-  "image": "./assets/catalog/cards/yggdrasil.webp",
+  "id": "glimpse",
+  "name": "Glimpse",
+  "image": "./assets/catalog/cards/god-eye-silver.webp",
+  "chips": [
+   {
+    "k": "Stance",
+    "v": "mind"
+   },
+   {
+    "k": "Type",
+    "v": "paradox"
+   },
+   {
+    "k": "Tier",
+    "v": "1"
+   },
+   {
+    "k": "Target",
+    "v": "enemy"
+   },
+   {
+    "k": "Rank",
+    "v": "Doxa (common)"
+   },
+   {
+    "k": "Kind",
+    "v": "spell"
+   },
+   {
+    "k": "Learn",
+    "v": "Lv 1"
+   }
+  ],
+  "lines": [
+   "FREE — FORETELL 1",
+   "Applies Mark ×1, 2t → enemy",
+   "FORETELL 2"
+  ]
+ },
+ {
+  "id": "half-step",
+  "name": "Half-Step",
+  "image": "./assets/catalog/cards/blue-light.webp",
+  "chips": [
+   {
+    "k": "Stance",
+    "v": "body"
+   },
+   {
+    "k": "Type",
+    "v": "paradox"
+   },
+   {
+    "k": "Tier",
+    "v": "1"
+   },
+   {
+    "k": "Target",
+    "v": "self"
+   },
+   {
+    "k": "Rank",
+    "v": "Lemma (common)"
+   },
+   {
+    "k": "Kind",
+    "v": "spell"
+   },
+   {
+    "k": "Learn",
+    "v": "Lv 2"
+   }
+  ],
+  "lines": [
+   "FREE — Guard 2",
+   "Guard 5",
+   "+1 pip to every Reserve die"
+  ]
+ },
+ {
+  "id": "heart-of-the-matter",
+  "name": "Heart of the Matter",
+  "image": "./assets/catalog/cards/bright-sphere-yellow.webp",
+  "chips": [
+   {
+    "k": "Stance",
+    "v": "heart"
+   },
+   {
+    "k": "Type",
+    "v": "fallacy"
+   },
+   {
+    "k": "Tier",
+    "v": "3"
+   },
+   {
+    "k": "Target",
+    "v": "enemy"
+   },
+   {
+    "k": "Rank",
+    "v": "Axiom (rare)"
+   },
+   {
+    "k": "Kind",
+    "v": "spell"
+   },
+   {
+    "k": "Learn",
+    "v": "Lv 10"
+   }
+  ],
+  "lines": [
+   "FREE — SWAY 1",
+   "SWAY 5",
+   "rider",
+   "Threshold: 5× heart die fires a rider"
+  ]
+ },
+ {
+  "id": "hedgehogs-dilemma",
+  "name": "Hedgehog's Dilemma",
+  "image": "./assets/catalog/cards/guard-3.webp",
   "chips": [
    {
     "k": "Stance",
@@ -457,23 +1066,138 @@
     "v": "self"
    },
    {
-    "k": "Power",
-    "v": "0 + body"
+    "k": "Rank",
+    "v": "Axiom (rare)"
+   },
+   {
+    "k": "Kind",
+    "v": "enchantment"
    },
    {
     "k": "Learn",
-    "v": "Lv 5"
+    "v": "Lv 10"
+   }
+  ],
+  "lines": []
+ },
+ {
+  "id": "irresistible-grace",
+  "name": "Irresistible Grace",
+  "image": "./assets/catalog/cards/light-ring.webp",
+  "chips": [
+   {
+    "k": "Stance",
+    "v": "heart"
+   },
+   {
+    "k": "Type",
+    "v": "paradox"
+   },
+   {
+    "k": "Tier",
+    "v": "2"
+   },
+   {
+    "k": "Target",
+    "v": "self"
+   },
+   {
+    "k": "Rank",
+    "v": "Axiom (rare)"
+   },
+   {
+    "k": "Kind",
+    "v": "enchantment"
+   },
+   {
+    "k": "Learn",
+    "v": "Lv 10"
+   }
+  ],
+  "lines": []
+ },
+ {
+  "id": "measured-answer",
+  "name": "Measured Answer",
+  "image": "./assets/catalog/cards/guard-3.webp",
+  "chips": [
+   {
+    "k": "Stance",
+    "v": "body"
+   },
+   {
+    "k": "Type",
+    "v": "paradox"
+   },
+   {
+    "k": "Tier",
+    "v": "2"
+   },
+   {
+    "k": "Target",
+    "v": "self"
+   },
+   {
+    "k": "Rank",
+    "v": "Theorem (uncommon)"
+   },
+   {
+    "k": "Kind",
+    "v": "spell"
+   },
+   {
+    "k": "Learn",
+    "v": "Lv 6"
    }
   ],
   "lines": [
+   "FREE — Guard 3",
    "Guard 6",
-   "riposte",
-   "Die bonus: powering die body fires a rider"
+   "RIPOSTE 3 (parry 2)"
   ]
  },
  {
-  "id": "empathetic-understanding",
-  "name": "Empathetic Understanding",
+  "id": "memento-mori",
+  "name": "Memento Mori",
+  "image": "./assets/catalog/cards/meat-pecker.webp",
+  "chips": [
+   {
+    "k": "Stance",
+    "v": "mind"
+   },
+   {
+    "k": "Type",
+    "v": "paradox"
+   },
+   {
+    "k": "Tier",
+    "v": "1"
+   },
+   {
+    "k": "Target",
+    "v": "enemy"
+   },
+   {
+    "k": "Rank",
+    "v": "Lemma (common)"
+   },
+   {
+    "k": "Kind",
+    "v": "spell"
+   },
+   {
+    "k": "Learn",
+    "v": "Lv 2"
+   }
+  ],
+  "lines": [
+   "FREE — +1 Soul",
+   "Applies Mark ×2, 1t → enemy"
+  ]
+ },
+ {
+  "id": "mirror-of-guilt",
+  "name": "Mirror of Guilt",
   "image": "./assets/catalog/cards/god-eye-silver.webp",
   "chips": [
    {
@@ -490,21 +1214,182 @@
    },
    {
     "k": "Target",
-    "v": "self"
+    "v": "enemy"
    },
    {
-    "k": "Power",
-    "v": "0 + mind"
+    "k": "Rank",
+    "v": "Aporia (rare)"
+   },
+   {
+    "k": "Kind",
+    "v": "disenchant"
+   },
+   {
+    "k": "Learn",
+    "v": "Lv 12"
+   }
+  ],
+  "lines": []
+ },
+ {
+  "id": "mirror-of-longing",
+  "name": "Mirror of Longing",
+  "image": "./assets/catalog/cards/god-eye-silver.webp",
+  "chips": [
+   {
+    "k": "Stance",
+    "v": "heart"
+   },
+   {
+    "k": "Type",
+    "v": "paradox"
+   },
+   {
+    "k": "Tier",
+    "v": "2"
+   },
+   {
+    "k": "Target",
+    "v": "enemy"
+   },
+   {
+    "k": "Rank",
+    "v": "Aporia (rare)"
+   },
+   {
+    "k": "Kind",
+    "v": "disenchant"
+   },
+   {
+    "k": "Learn",
+    "v": "Lv 12"
+   }
+  ],
+  "lines": []
+ },
+ {
+  "id": "mounting-case",
+  "name": "Mounting Case",
+  "image": "./assets/catalog/cards/bright-sphere-yellow.webp",
+  "chips": [
+   {
+    "k": "Stance",
+    "v": "mind"
+   },
+   {
+    "k": "Type",
+    "v": "fallacy"
+   },
+   {
+    "k": "Tier",
+    "v": "2"
+   },
+   {
+    "k": "Target",
+    "v": "enemy"
+   },
+   {
+    "k": "Rank",
+    "v": "Thesis (uncommon)"
+   },
+   {
+    "k": "Kind",
+    "v": "spell"
+   },
+   {
+    "k": "Learn",
+    "v": "Lv 4"
    }
   ],
   "lines": [
-   "Applies Raven's Target ×1, 2t → enemy",
-   "Die bonus: powering die heart fires a rider"
+   "FREE — +1 Premise",
+   "Applies Mark ×1, 3t → enemy",
+   "+2 Premises",
+   "Threshold: 2× heart die fires a rider"
   ]
  },
  {
-  "id": "equivocation-cascade",
-  "name": "Equivocation Cascade",
+  "id": "nettle-cloak",
+  "name": "Nettle Cloak",
+  "image": "./assets/catalog/cards/yggdrasil.webp",
+  "chips": [
+   {
+    "k": "Stance",
+    "v": "body"
+   },
+   {
+    "k": "Type",
+    "v": "fallacy"
+   },
+   {
+    "k": "Tier",
+    "v": "1"
+   },
+   {
+    "k": "Target",
+    "v": "self"
+   },
+   {
+    "k": "Rank",
+    "v": "Lemma (common)"
+   },
+   {
+    "k": "Kind",
+    "v": "spell"
+   },
+   {
+    "k": "Learn",
+    "v": "Lv 2"
+   }
+  ],
+  "lines": [
+   "FREE — Guard 2",
+   "Applies Thorns ×2, 2t → self"
+  ]
+ },
+ {
+  "id": "opening-statement",
+  "name": "Opening Statement",
+  "image": "./assets/catalog/cards/light-ring.webp",
+  "chips": [
+   {
+    "k": "Stance",
+    "v": "heart"
+   },
+   {
+    "k": "Type",
+    "v": "fallacy"
+   },
+   {
+    "k": "Tier",
+    "v": "1"
+   },
+   {
+    "k": "Target",
+    "v": "enemy"
+   },
+   {
+    "k": "Rank",
+    "v": "Lemma (common)"
+   },
+   {
+    "k": "Kind",
+    "v": "spell"
+   },
+   {
+    "k": "Learn",
+    "v": "Lv 2"
+   }
+  ],
+  "lines": [
+   "FREE — +1 Premise",
+   "Applies Mark ×1, 2t → enemy",
+   "+2 Premises"
+  ]
+ },
+ {
+  "id": "ouroboros",
+  "name": "Ouroboros",
   "image": "./assets/catalog/cards/blue-light.webp",
   "chips": [
    {
@@ -513,42 +1398,6 @@
    },
    {
     "k": "Type",
-    "v": "fallacy"
-   },
-   {
-    "k": "Tier",
-    "v": "2"
-   },
-   {
-    "k": "Target",
-    "v": "enemy"
-   },
-   {
-    "k": "Power",
-    "v": "0 + mind"
-   },
-   {
-    "k": "Learn",
-    "v": "Lv 16"
-   }
-  ],
-  "lines": [
-   "Applies Two Envelope Delirium ×1, 2t → enemy",
-   "convert_die_color",
-   "Synergy clause (stance-switch payoff)"
-  ]
- },
- {
-  "id": "eternal-recurrence",
-  "name": "Eternal Recurrence",
-  "image": "./assets/catalog/cards/yggdrasil.webp",
-  "chips": [
-   {
-    "k": "Stance",
-    "v": "heart"
-   },
-   {
-    "k": "Type",
     "v": "paradox"
    },
    {
@@ -557,81 +1406,15 @@
    },
    {
     "k": "Target",
-    "v": "self"
-   },
-   {
-    "k": "Power",
-    "v": "0 + heart×6"
-   },
-   {
-    "k": "Learn",
-    "v": "Lv 42"
-   }
-  ],
-  "lines": [
-   "Applies Tristram's Recovery ×2, 4t → self",
-   "Die bonus: powering die heart fires a rider"
-  ]
- },
- {
-  "id": "eternal-regress",
-  "name": "Eternal Regress",
-  "image": "./assets/catalog/cards/spark.webp",
-  "chips": [
-   {
-    "k": "Stance",
-    "v": "heart"
-   },
-   {
-    "k": "Type",
-    "v": "fallacy"
-   },
-   {
-    "k": "Tier",
-    "v": "2"
-   },
-   {
-    "k": "Target",
     "v": "enemy"
    },
    {
-    "k": "Power",
-    "v": "0 + heart"
+    "k": "Rank",
+    "v": "Axiom (rare)"
    },
    {
-    "k": "Learn",
-    "v": "Lv 5"
-   }
-  ],
-  "lines": [
-   "Applies Sorites' Unraveling ×2, 5t → enemy",
-   "Die bonus: powering die mind fires a rider"
-  ]
- },
- {
-  "id": "existential-collapse",
-  "name": "Existential Collapse",
-  "image": "./assets/catalog/cards/freeze.webp",
-  "chips": [
-   {
-    "k": "Stance",
-    "v": "body"
-   },
-   {
-    "k": "Type",
-    "v": "fallacy"
-   },
-   {
-    "k": "Tier",
-    "v": "3"
-   },
-   {
-    "k": "Target",
-    "v": "enemy"
-   },
-   {
-    "k": "Power",
-    "v": "0 + body"
+    "k": "Kind",
+    "v": "spell"
    },
    {
     "k": "Learn",
@@ -639,357 +1422,18 @@
    }
   ],
   "lines": [
-   "Applies Theseus' Dissolution ×2, 2t → enemy",
-   "react"
+   "FREE — draw 1",
+   "replay your last spell ×2"
   ]
  },
  {
-  "id": "existential-debt",
-  "name": "Existential Debt",
+  "id": "pact-of-akrasia",
+  "name": "Pact of Akrasia",
   "image": "./assets/catalog/cards/devil-book.webp",
   "chips": [
    {
     "k": "Stance",
-    "v": "heart"
-   },
-   {
-    "k": "Type",
-    "v": "fallacy"
-   },
-   {
-    "k": "Tier",
-    "v": "3"
-   },
-   {
-    "k": "Target",
-    "v": "enemy"
-   },
-   {
-    "k": "Power",
-    "v": "0 + heart"
-   },
-   {
-    "k": "Learn",
-    "v": "Lv 10"
-   }
-  ],
-  "lines": [
-   "Applies Schopenhauer's Despair ×3, 4t → enemy",
-   "Applies Bandwagon's Absence ×1, 3t → enemy"
-  ]
- },
- {
-  "id": "false-dilemma",
-  "name": "False Dilemma",
-  "image": "./assets/catalog/cards/confuse.webp",
-  "chips": [
-   {
-    "k": "Stance",
-    "v": "mind"
-   },
-   {
-    "k": "Type",
-    "v": "fallacy"
-   },
-   {
-    "k": "Tier",
-    "v": "1"
-   },
-   {
-    "k": "Target",
-    "v": "enemy"
-   },
-   {
-    "k": "Power",
-    "v": "0 + mind"
-   }
-  ],
-  "lines": [
-   "Applies Two Envelope Delirium ×1, 2t → enemy",
-   "Die bonus: powering die off fires a rider"
-  ]
- },
- {
-  "id": "gamblers-folly",
-  "name": "Gambler's Folly",
-  "image": "./assets/catalog/cards/will-o-wisp.webp",
-  "chips": [
-   {
-    "k": "Stance",
     "v": "body"
-   },
-   {
-    "k": "Type",
-    "v": "fallacy"
-   },
-   {
-    "k": "Tier",
-    "v": "2"
-   },
-   {
-    "k": "Target",
-    "v": "self"
-   },
-   {
-    "k": "Power",
-    "v": "0 + body"
-   },
-   {
-    "k": "Learn",
-    "v": "Lv 5"
-   }
-  ],
-  "lines": [
-   "Applies Breach ×1, 2t → self",
-   "grant_permanent_wild_die"
-  ]
- },
- {
-  "id": "hasty-generalization",
-  "name": "Hasty Generalization",
-  "image": "./assets/catalog/cards/meat-pecker.webp",
-  "chips": [
-   {
-    "k": "Stance",
-    "v": "body"
-   },
-   {
-    "k": "Type",
-    "v": "fallacy"
-   },
-   {
-    "k": "Tier",
-    "v": "1"
-   },
-   {
-    "k": "Target",
-    "v": "enemy"
-   },
-   {
-    "k": "Power",
-    "v": "0 + body"
-   },
-   {
-    "k": "Learn",
-    "v": "Lv 3"
-   }
-  ],
-  "lines": [
-   "Applies Theseus' Dissolution ×2, 2t → enemy",
-   "Threshold: 2× body die fires a rider"
-  ]
- },
- {
-  "id": "leeching-syllogism",
-  "name": "Leeching Syllogism",
-  "image": "./assets/catalog/cards/bleed.webp",
-  "chips": [
-   {
-    "k": "Stance",
-    "v": "heart"
-   },
-   {
-    "k": "Type",
-    "v": "fallacy"
-   },
-   {
-    "k": "Tier",
-    "v": "2"
-   },
-   {
-    "k": "Target",
-    "v": "enemy"
-   },
-   {
-    "k": "Power",
-    "v": "0 + heart"
-   },
-   {
-    "k": "Learn",
-    "v": "Lv 5"
-   }
-  ],
-  "lines": [
-   "Applies Theseus' Rupture ×2, 3t → enemy"
-  ]
- },
- {
-  "id": "liars-echo",
-  "name": "Liar's Echo",
-  "image": "./assets/catalog/cards/will-o-wisp.webp",
-  "chips": [
-   {
-    "k": "Stance",
-    "v": "mind"
-   },
-   {
-    "k": "Type",
-    "v": "paradox"
-   },
-   {
-    "k": "Tier",
-    "v": "1"
-   },
-   {
-    "k": "Target",
-    "v": "enemy"
-   },
-   {
-    "k": "Power",
-    "v": "0 + mind"
-   }
-  ],
-  "lines": [
-   "Applies Raven's Target ×1, 2t → enemy"
-  ]
- },
- {
-  "id": "mob-appeal",
-  "name": "Mob Appeal",
-  "image": "./assets/catalog/cards/bright-sphere-yellow.webp",
-  "chips": [
-   {
-    "k": "Stance",
-    "v": "body"
-   },
-   {
-    "k": "Type",
-    "v": "fallacy"
-   },
-   {
-    "k": "Tier",
-    "v": "2"
-   },
-   {
-    "k": "Target",
-    "v": "enemy"
-   },
-   {
-    "k": "Power",
-    "v": "0 + body"
-   },
-   {
-    "k": "Learn",
-    "v": "Lv 5"
-   }
-  ],
-  "lines": [
-   "secondary_heal_self 1",
-   "Threshold: 3× body die fires a rider"
-  ]
- },
- {
-  "id": "mounting-contradictions",
-  "name": "Mounting Contradictions",
-  "image": "./assets/catalog/cards/bright-sphere-yellow.webp",
-  "chips": [
-   {
-    "k": "Stance",
-    "v": "mind"
-   },
-   {
-    "k": "Type",
-    "v": "fallacy"
-   },
-   {
-    "k": "Tier",
-    "v": "2"
-   },
-   {
-    "k": "Target",
-    "v": "enemy"
-   },
-   {
-    "k": "Power",
-    "v": "0 + mind"
-   },
-   {
-    "k": "Learn",
-    "v": "Lv 5"
-   }
-  ],
-  "lines": [
-   "compound"
-  ]
- },
- {
-  "id": "moving-the-goalposts",
-  "name": "Moving the Goalposts",
-  "image": "./assets/catalog/cards/confuse.webp",
-  "chips": [
-   {
-    "k": "Stance",
-    "v": "mind"
-   },
-   {
-    "k": "Type",
-    "v": "fallacy"
-   },
-   {
-    "k": "Tier",
-    "v": "2"
-   },
-   {
-    "k": "Target",
-    "v": "enemy"
-   },
-   {
-    "k": "Power",
-    "v": "0 + mind"
-   },
-   {
-    "k": "Learn",
-    "v": "Lv 5"
-   }
-  ],
-  "lines": [
-   "Applies Cartesian Doubt ×1 → enemy",
-   "Applies Overextended Commitment ×1 → enemy"
-  ]
- },
- {
-  "id": "nirvana-fallacy",
-  "name": "Nirvana Fallacy",
-  "image": "./assets/catalog/cards/will-o-wisp.webp",
-  "chips": [
-   {
-    "k": "Stance",
-    "v": "mind"
-   },
-   {
-    "k": "Type",
-    "v": "fallacy"
-   },
-   {
-    "k": "Tier",
-    "v": "3"
-   },
-   {
-    "k": "Target",
-    "v": "enemy"
-   },
-   {
-    "k": "Power",
-    "v": "0 + mind"
-   },
-   {
-    "k": "Learn",
-    "v": "Lv 10"
-   }
-  ],
-  "lines": [
-   "Applies Cartesian Doubt ×1 → enemy",
-   "Threshold: 4× mind die fires a rider"
-  ]
- },
- {
-  "id": "pascals-wager",
-  "name": "Pascal's Wager",
-  "image": "./assets/catalog/cards/god-eye-silver.webp",
-  "chips": [
-   {
-    "k": "Stance",
-    "v": "heart"
    },
    {
     "k": "Type",
@@ -1004,8 +1448,12 @@
     "v": "self"
    },
    {
-    "k": "Power",
-    "v": "0 + heart×3"
+    "k": "Rank",
+    "v": "Axiom (rare)"
+   },
+   {
+    "k": "Kind",
+    "v": "spell"
    },
    {
     "k": "Learn",
@@ -1013,17 +1461,20 @@
    }
   ],
   "lines": [
-   "Fate: playable by an X die"
+   "FREE — Guard 2",
+   "Applies Bleed ×1, 2t → self",
+   "FORGE a WILD floating die",
+   "RECOIL 6"
   ]
  },
  {
-  "id": "peaceful-gesture",
-  "name": "Peaceful Gesture",
-  "image": "./assets/catalog/cards/meat-pecker.webp",
+  "id": "paralysis-of-analysis",
+  "name": "Paralysis of Analysis",
+  "image": "./assets/catalog/cards/confuse.webp",
   "chips": [
    {
     "k": "Stance",
-    "v": "body"
+    "v": "mind"
    },
    {
     "k": "Type",
@@ -1031,61 +1482,114 @@
    },
    {
     "k": "Tier",
-    "v": "1"
+    "v": "3"
+   },
+   {
+    "k": "Target",
+    "v": "enemy"
+   },
+   {
+    "k": "Rank",
+    "v": "Axiom (rare)"
+   },
+   {
+    "k": "Kind",
+    "v": "spell"
+   },
+   {
+    "k": "Learn",
+    "v": "Lv 10"
+   }
+  ],
+  "lines": [
+   "FREE — draw 1",
+   "Applies Backfire ×2, 2t → enemy",
+   "STAGGER 2"
+  ]
+ },
+ {
+  "id": "peroratio-interrupta",
+  "name": "Peroratio Interrupta",
+  "image": "./assets/catalog/cards/light-ring.webp",
+  "chips": [
+   {
+    "k": "Stance",
+    "v": "mind"
+   },
+   {
+    "k": "Type",
+    "v": "paradox"
+   },
+   {
+    "k": "Tier",
+    "v": "2"
+   },
+   {
+    "k": "Target",
+    "v": "enemy"
+   },
+   {
+    "k": "Rank",
+    "v": "Theorem (uncommon)"
+   },
+   {
+    "k": "Kind",
+    "v": "spell"
+   },
+   {
+    "k": "Learn",
+    "v": "Lv 6"
+   }
+  ],
+  "lines": [
+   "FREE — draw 1",
+   "spend ALL Premises — +1 mark per 2, draw 1 per 3"
+  ]
+ },
+ {
+  "id": "practiced-cadence",
+  "name": "Practiced Cadence",
+  "image": "./assets/catalog/cards/light-ring.webp",
+  "chips": [
+   {
+    "k": "Stance",
+    "v": "heart"
+   },
+   {
+    "k": "Type",
+    "v": "fallacy"
+   },
+   {
+    "k": "Tier",
+    "v": "2"
    },
    {
     "k": "Target",
     "v": "self"
    },
    {
-    "k": "Power",
-    "v": "0 + body"
+    "k": "Rank",
+    "v": "Axiom (rare)"
+   },
+   {
+    "k": "Kind",
+    "v": "enchantment"
+   },
+   {
+    "k": "Learn",
+    "v": "Lv 10"
    }
   ],
   "lines": []
  },
  {
-  "id": "poisoned-well",
-  "name": "Poisoned Well",
-  "image": "./assets/catalog/cards/dream-flutter.webp",
+  "id": "prophecy-fulfilled",
+  "name": "Prophecy Fulfilled",
+  "image": "./assets/catalog/cards/god-eye-silver.webp",
   "chips": [
    {
     "k": "Stance",
-    "v": "body"
-   },
-   {
-    "k": "Type",
-    "v": "fallacy"
-   },
-   {
-    "k": "Tier",
-    "v": "2"
-   },
-   {
-    "k": "Target",
-    "v": "enemy"
-   },
-   {
-    "k": "Power",
-    "v": "0 + body"
-   },
-   {
-    "k": "Learn",
-    "v": "Lv 5"
-   }
-  ],
-  "lines": [
-   "Applies Curry's Sepsis ×2, 3t → enemy"
-  ]
- },
- {
-  "id": "pyrrhic-victory",
-  "name": "Pyrrhic Victory",
-  "image": "./assets/catalog/cards/burn.webp",
-  "chips": [
-   {
-    "k": "Stance",
-    "v": "body"
+    "v": "mind"
    },
    {
     "k": "Type",
@@ -1100,27 +1604,107 @@
     "v": "enemy"
    },
    {
-    "k": "Power",
-    "v": "16 + body"
+    "k": "Rank",
+    "v": "Axiom (rare)"
+   },
+   {
+    "k": "Kind",
+    "v": "spell"
+   },
+   {
+    "k": "Learn",
+    "v": "Lv 10"
+   }
+  ],
+  "lines": [
+   "FREE — FORETELL 1",
+   "RUPTURE (+3 fuel per omen hit)"
+  ]
+ },
+ {
+  "id": "quagmire-of-doubt",
+  "name": "Quagmire of Doubt",
+  "image": "./assets/catalog/cards/confuse.webp",
+  "chips": [
+   {
+    "k": "Stance",
+    "v": "mind"
+   },
+   {
+    "k": "Type",
+    "v": "fallacy"
+   },
+   {
+    "k": "Tier",
+    "v": "2"
+   },
+   {
+    "k": "Target",
+    "v": "enemy"
+   },
+   {
+    "k": "Rank",
+    "v": "Aporia (rare)"
+   },
+   {
+    "k": "Kind",
+    "v": "disenchant"
    },
    {
     "k": "Learn",
     "v": "Lv 12"
    }
   ],
-  "lines": [
-   "Applies Theseus' Dissolution ×3, 5t → enemy",
-   "Execute < 30% HP (needs 3 DoT, recoil 10%)"
-  ]
+  "lines": []
  },
  {
-  "id": "resonance-bleed",
-  "name": "Resonance Bleed",
-  "image": "./assets/catalog/cards/bleed.webp",
+  "id": "red-herring",
+  "name": "Red Herring",
+  "image": "./assets/catalog/cards/will-o-wisp.webp",
   "chips": [
    {
     "k": "Stance",
-    "v": "heart"
+    "v": "mind"
+   },
+   {
+    "k": "Type",
+    "v": "fallacy"
+   },
+   {
+    "k": "Tier",
+    "v": "1"
+   },
+   {
+    "k": "Target",
+    "v": "enemy"
+   },
+   {
+    "k": "Rank",
+    "v": "Lemma (common)"
+   },
+   {
+    "k": "Kind",
+    "v": "spell"
+   },
+   {
+    "k": "Learn",
+    "v": "Lv 2"
+   }
+  ],
+  "lines": [
+   "FREE — draw 1",
+   "Applies Backfire ×2, 2t → enemy",
+   "Die bonus: powering die mind fires a rider"
+  ]
+ },
+ {
+  "id": "refrain",
+  "name": "Refrain",
+  "image": "./assets/catalog/cards/will-o-wisp.webp",
+  "chips": [
+   {
+    "k": "Stance",
+    "v": "mind"
    },
    {
     "k": "Type",
@@ -1128,24 +1712,29 @@
    },
    {
     "k": "Tier",
-    "v": "2"
+    "v": "1"
    },
    {
     "k": "Target",
     "v": "enemy"
    },
    {
-    "k": "Power",
-    "v": "0 + heart"
+    "k": "Rank",
+    "v": "Doxa (common)"
+   },
+   {
+    "k": "Kind",
+    "v": "spell"
    },
    {
     "k": "Learn",
-    "v": "Lv 5"
+    "v": "Lv 1"
    }
   ],
   "lines": [
-   "Applies Theseus' Dissolution ×1, 2t → enemy",
-   "Synergy clause (stance-switch payoff)"
+   "FREE — draw 1",
+   "Applies Mark ×1, 2t → enemy",
+   "ECHO"
   ]
  },
  {
@@ -1163,59 +1752,34 @@
    },
    {
     "k": "Tier",
-    "v": "2"
+    "v": "3"
    },
    {
     "k": "Target",
     "v": "enemy"
    },
    {
-    "k": "Power",
-    "v": "0 + heart"
+    "k": "Rank",
+    "v": "Axiom (rare)"
+   },
+   {
+    "k": "Kind",
+    "v": "spell"
    },
    {
     "k": "Learn",
-    "v": "Lv 5"
+    "v": "Lv 10"
    }
   ],
   "lines": [
-   "Rupture (consume DoT)"
+   "FREE — tick",
+   "RUPTURE"
   ]
  },
  {
-  "id": "ship-of-theseus",
-  "name": "Ship of Theseus",
-  "image": "./assets/catalog/cards/blue-light.webp",
-  "chips": [
-   {
-    "k": "Stance",
-    "v": "heart"
-   },
-   {
-    "k": "Type",
-    "v": "paradox"
-   },
-   {
-    "k": "Tier",
-    "v": "1"
-   },
-   {
-    "k": "Target",
-    "v": "enemy"
-   },
-   {
-    "k": "Power",
-    "v": "4 + heart"
-   }
-  ],
-  "lines": [
-   "convert_die_color"
-  ]
- },
- {
-  "id": "ship-in-a-bottle",
-  "name": "Ship-in-a-Bottle",
-  "image": "./assets/catalog/cards/freeze.webp",
+  "id": "resonant-chamber",
+  "name": "Resonant Chamber",
+  "image": "./assets/catalog/cards/spark.webp",
   "chips": [
    {
     "k": "Stance",
@@ -1231,20 +1795,178 @@
    },
    {
     "k": "Target",
-    "v": "enemy"
+    "v": "self"
    },
    {
-    "k": "Power",
-    "v": "0 + mind"
+    "k": "Rank",
+    "v": "Axiom (rare)"
+   },
+   {
+    "k": "Kind",
+    "v": "enchantment"
    },
    {
     "k": "Learn",
-    "v": "Lv 5"
+    "v": "Lv 10"
+   }
+  ],
+  "lines": []
+ },
+ {
+  "id": "second-thoughts",
+  "name": "Second Thoughts",
+  "image": "./assets/catalog/cards/blue-light.webp",
+  "chips": [
+   {
+    "k": "Stance",
+    "v": "mind"
+   },
+   {
+    "k": "Type",
+    "v": "paradox"
+   },
+   {
+    "k": "Tier",
+    "v": "1"
+   },
+   {
+    "k": "Target",
+    "v": "self"
+   },
+   {
+    "k": "Rank",
+    "v": "Lemma (common)"
+   },
+   {
+    "k": "Kind",
+    "v": "spell"
+   },
+   {
+    "k": "Learn",
+    "v": "Lv 2"
    }
   ],
   "lines": [
-   "Applies Curry's Corruption ×2 → enemy",
-   "bank_spent_die"
+   "FREE — draw 1",
+   "REPRISE 1"
+  ]
+ },
+ {
+  "id": "self-flagellant",
+  "name": "Self-Flagellant",
+  "image": "./assets/catalog/cards/burn.webp",
+  "chips": [
+   {
+    "k": "Stance",
+    "v": "body"
+   },
+   {
+    "k": "Type",
+    "v": "fallacy"
+   },
+   {
+    "k": "Tier",
+    "v": "2"
+   },
+   {
+    "k": "Target",
+    "v": "enemy"
+   },
+   {
+    "k": "Rank",
+    "v": "Thesis (uncommon)"
+   },
+   {
+    "k": "Kind",
+    "v": "spell"
+   },
+   {
+    "k": "Learn",
+    "v": "Lv 4"
+   }
+  ],
+  "lines": [
+   "FREE — tick",
+   "RECOIL 4",
+   "+1 intensity to ALL enemy DoTs"
+  ]
+ },
+ {
+  "id": "signs-and-portents",
+  "name": "Signs and Portents",
+  "image": "./assets/catalog/cards/will-o-wisp.webp",
+  "chips": [
+   {
+    "k": "Stance",
+    "v": "heart"
+   },
+   {
+    "k": "Type",
+    "v": "paradox"
+   },
+   {
+    "k": "Tier",
+    "v": "1"
+   },
+   {
+    "k": "Target",
+    "v": "self"
+   },
+   {
+    "k": "Rank",
+    "v": "Lemma (common)"
+   },
+   {
+    "k": "Kind",
+    "v": "spell"
+   },
+   {
+    "k": "Learn",
+    "v": "Lv 2"
+   }
+  ],
+  "lines": [
+   "FREE — FORETELL 1",
+   "OMEN — on hit: draw 2"
+  ]
+ },
+ {
+  "id": "sketch-of-a-thought",
+  "name": "Sketch of a Thought",
+  "image": "./assets/catalog/cards/blue-light.webp",
+  "chips": [
+   {
+    "k": "Stance",
+    "v": "mind"
+   },
+   {
+    "k": "Type",
+    "v": "paradox"
+   },
+   {
+    "k": "Tier",
+    "v": "1"
+   },
+   {
+    "k": "Target",
+    "v": "self"
+   },
+   {
+    "k": "Rank",
+    "v": "Doxa (common)"
+   },
+   {
+    "k": "Kind",
+    "v": "spell"
+   },
+   {
+    "k": "Learn",
+    "v": "Lv 1"
+   }
+  ],
+  "lines": [
+   "FREE — draw 1",
+   "KINDLE (mind)"
   ]
  },
  {
@@ -1269,22 +1991,27 @@
     "v": "enemy"
    },
    {
-    "k": "Power",
-    "v": "0 + body"
+    "k": "Rank",
+    "v": "Doxa (common)"
+   },
+   {
+    "k": "Kind",
+    "v": "spell"
    },
    {
     "k": "Learn",
-    "v": "Lv 14"
+    "v": "Lv 1"
    }
   ],
   "lines": [
-   "Applies Curry's Corruption ×1 → enemy"
+   "FREE — tick",
+   "Applies Poison ×1 → enemy"
   ]
  },
  {
-  "id": "soothing-words",
-  "name": "Soothing Words",
-  "image": "./assets/catalog/cards/light-ring.webp",
+  "id": "soft-word",
+  "name": "Soft Word",
+  "image": "./assets/catalog/cards/meat-pecker.webp",
   "chips": [
    {
     "k": "Stance",
@@ -1300,57 +2027,71 @@
    },
    {
     "k": "Target",
-    "v": "self"
+    "v": "enemy"
    },
    {
-    "k": "Power",
-    "v": "0 + heart"
+    "k": "Rank",
+    "v": "Doxa (common)"
+   },
+   {
+    "k": "Kind",
+    "v": "spell"
+   },
+   {
+    "k": "Learn",
+    "v": "Lv 1"
    }
   ],
   "lines": [
+   "FREE — heal 2",
+   "SWAY 3",
    "Die bonus: powering die heart fires a rider"
   ]
  },
  {
-  "id": "sorites-cascade",
-  "name": "Sorites' Cascade",
-  "image": "./assets/catalog/cards/spark.webp",
+  "id": "straw-mans-jab",
+  "name": "Straw Man's Jab",
+  "image": "./assets/catalog/cards/bleed.webp",
   "chips": [
    {
     "k": "Stance",
-    "v": "mind"
+    "v": "body"
    },
    {
     "k": "Type",
-    "v": "paradox"
+    "v": "fallacy"
    },
    {
     "k": "Tier",
-    "v": "3"
+    "v": "1"
    },
    {
     "k": "Target",
     "v": "enemy"
    },
    {
-    "k": "Power",
-    "v": "0 + mind"
+    "k": "Rank",
+    "v": "Lemma (common)"
+   },
+   {
+    "k": "Kind",
+    "v": "spell"
    },
    {
     "k": "Learn",
-    "v": "Lv 10"
+    "v": "Lv 2"
    }
   ],
   "lines": [
-   "Applies Theseus' Dissolution ×1, 2t → enemy",
-   "Applies Curry's Corruption ×1 → enemy",
-   "Applies Cartesian Doubt ×1 → enemy"
+   "FREE — tick",
+   "Applies Bleed ×2, 2t → enemy",
+   "Die bonus: powering die body fires a rider"
   ]
  },
  {
-  "id": "stoic-reserve",
-  "name": "Stoic Reserve",
-  "image": "./assets/catalog/cards/guard-1.webp",
+  "id": "stuck-in-their-head",
+  "name": "Stuck in Their Head",
+  "image": "./assets/catalog/cards/will-o-wisp.webp",
   "chips": [
    {
     "k": "Stance",
@@ -1358,7 +2099,7 @@
    },
    {
     "k": "Type",
-    "v": "paradox"
+    "v": "fallacy"
    },
    {
     "k": "Tier",
@@ -1366,26 +2107,63 @@
    },
    {
     "k": "Target",
-    "v": "self"
+    "v": "enemy"
    },
    {
-    "k": "Power",
-    "v": "0 + heart"
+    "k": "Rank",
+    "v": "Aporia (rare)"
+   },
+   {
+    "k": "Kind",
+    "v": "disenchant"
    },
    {
     "k": "Learn",
-    "v": "Lv 6"
+    "v": "Lv 12"
    }
   ],
-  "lines": [
-   "Guard 18",
-   "grant_pip 1"
-  ]
+  "lines": []
  },
  {
-  "id": "sunk-cost-momentum",
-  "name": "Sunk Cost Momentum",
-  "image": "./assets/catalog/cards/bleed.webp",
+  "id": "suppurating-curse",
+  "name": "Suppurating Curse",
+  "image": "./assets/catalog/cards/devil-book.webp",
+  "chips": [
+   {
+    "k": "Stance",
+    "v": "mind"
+   },
+   {
+    "k": "Type",
+    "v": "fallacy"
+   },
+   {
+    "k": "Tier",
+    "v": "2"
+   },
+   {
+    "k": "Target",
+    "v": "enemy"
+   },
+   {
+    "k": "Rank",
+    "v": "Aporia (rare)"
+   },
+   {
+    "k": "Kind",
+    "v": "disenchant"
+   },
+   {
+    "k": "Learn",
+    "v": "Lv 12"
+   }
+  ],
+  "lines": []
+ },
+ {
+  "id": "sweet-poison",
+  "name": "Sweet Poison",
+  "image": "./assets/catalog/cards/dream-flutter.webp",
   "chips": [
    {
     "k": "Stance",
@@ -1404,62 +2182,32 @@
     "v": "enemy"
    },
    {
-    "k": "Power",
-    "v": "0 + body"
+    "k": "Rank",
+    "v": "Lemma (common)"
+   },
+   {
+    "k": "Kind",
+    "v": "spell"
    },
    {
     "k": "Learn",
-    "v": "Lv 17"
+    "v": "Lv 2"
    }
   ],
   "lines": [
-   "Applies Theseus' Dissolution ×2, 2t → enemy",
-   "Synergy clause (stance-switch payoff)"
+   "FREE — tick",
+   "Applies Poison ×2 → enemy",
+   "Applies Bleed ×1, 2t → self"
   ]
  },
  {
-  "id": "suspend-judgment",
-  "name": "Suspend Judgment",
-  "image": "./assets/catalog/cards/guard-3.webp",
+  "id": "the-adamant-wall",
+  "name": "The Adamant Wall",
+  "image": "./assets/catalog/cards/guard-1.webp",
   "chips": [
    {
     "k": "Stance",
-    "v": "mind"
-   },
-   {
-    "k": "Type",
-    "v": "paradox"
-   },
-   {
-    "k": "Tier",
-    "v": "1"
-   },
-   {
-    "k": "Target",
-    "v": "self"
-   },
-   {
-    "k": "Power",
-    "v": "0 + mind"
-   },
-   {
-    "k": "Learn",
-    "v": "Lv 1"
-   }
-  ],
-  "lines": [
-   "Guard 12",
-   "bank_spent_die"
-  ]
- },
- {
-  "id": "the-final-word",
-  "name": "The Final Word",
-  "image": "./assets/catalog/cards/devil-book.webp",
-  "chips": [
-   {
-    "k": "Stance",
-    "v": "mind"
+    "v": "body"
    },
    {
     "k": "Type",
@@ -1471,30 +2219,113 @@
    },
    {
     "k": "Target",
-    "v": "enemy"
+    "v": "self"
    },
    {
-    "k": "Power",
-    "v": "14 + mind"
+    "k": "Rank",
+    "v": "Axiom (rare)"
+   },
+   {
+    "k": "Kind",
+    "v": "spell"
    },
    {
     "k": "Learn",
-    "v": "Lv 12"
+    "v": "Lv 10"
    }
   ],
   "lines": [
-   "Applies Curry's Corruption ×3, 5t → enemy",
-   "Threshold: 5× mind die fires a rider"
+   "FREE — Guard 3",
+   "Barrier 10",
+   "RIPOSTE 4 (parry 2)"
   ]
  },
  {
-  "id": "the-inevitable",
-  "name": "The Inevitable",
-  "image": "./assets/catalog/cards/spark.webp",
+  "id": "the-closing-word",
+  "name": "The Closing Word",
+  "image": "./assets/catalog/cards/bright-sphere-yellow.webp",
+  "chips": [
+   {
+    "k": "Stance",
+    "v": "heart"
+   },
+   {
+    "k": "Type",
+    "v": "fallacy"
+   },
+   {
+    "k": "Tier",
+    "v": "3"
+   },
+   {
+    "k": "Target",
+    "v": "enemy"
+   },
+   {
+    "k": "Rank",
+    "v": "Axiom (rare)"
+   },
+   {
+    "k": "Kind",
+    "v": "spell"
+   },
+   {
+    "k": "Learn",
+    "v": "Lv 10"
+   }
+  ],
+  "lines": [
+   "FREE — +1 Premise",
+   "PERORATION at 6 (CONCEDE at 8)"
+  ]
+ },
+ {
+  "id": "the-gleaners-due",
+  "name": "The Gleaner's Due",
+  "image": "./assets/catalog/cards/meat-pecker.webp",
   "chips": [
    {
     "k": "Stance",
     "v": "mind"
+   },
+   {
+    "k": "Type",
+    "v": "fallacy"
+   },
+   {
+    "k": "Tier",
+    "v": "2"
+   },
+   {
+    "k": "Target",
+    "v": "self"
+   },
+   {
+    "k": "Rank",
+    "v": "Theorem (uncommon)"
+   },
+   {
+    "k": "Kind",
+    "v": "spell"
+   },
+   {
+    "k": "Learn",
+    "v": "Lv 6"
+   }
+  ],
+  "lines": [
+   "FREE — draw 1",
+   "REAP 3 — KINDLE (mind) — draw 2"
+  ]
+ },
+ {
+  "id": "the-olive-branch",
+  "name": "The Olive Branch",
+  "image": "./assets/catalog/cards/yggdrasil.webp",
+  "chips": [
+   {
+    "k": "Stance",
+    "v": "body"
    },
    {
     "k": "Type",
@@ -1509,23 +2340,28 @@
     "v": "enemy"
    },
    {
-    "k": "Power",
-    "v": "0 + mind"
+    "k": "Rank",
+    "v": "Theorem (uncommon)"
+   },
+   {
+    "k": "Kind",
+    "v": "spell"
    },
    {
     "k": "Learn",
-    "v": "Lv 10"
+    "v": "Lv 6"
    }
   ],
   "lines": [
-   "Amplify pending DoT ×2",
-   "Threshold: 5× mind die fires a rider"
+   "FREE — Guard 2",
+   "SWAY 3",
+   "rider"
   ]
  },
  {
-  "id": "unmoved-mover",
-  "name": "The Unmoved Mover",
-  "image": "./assets/catalog/cards/guard-1.webp",
+  "id": "the-oracles-eye",
+  "name": "The Oracle's Eye",
+  "image": "./assets/catalog/cards/god-eye-silver.webp",
   "chips": [
    {
     "k": "Stance",
@@ -1534,6 +2370,82 @@
    {
     "k": "Type",
     "v": "paradox"
+   },
+   {
+    "k": "Tier",
+    "v": "2"
+   },
+   {
+    "k": "Target",
+    "v": "self"
+   },
+   {
+    "k": "Rank",
+    "v": "Axiom (rare)"
+   },
+   {
+    "k": "Kind",
+    "v": "enchantment"
+   },
+   {
+    "k": "Learn",
+    "v": "Lv 10"
+   }
+  ],
+  "lines": []
+ },
+ {
+  "id": "the-overtake",
+  "name": "The Overtake",
+  "image": "./assets/catalog/cards/ice-sword.webp",
+  "chips": [
+   {
+    "k": "Stance",
+    "v": "body"
+   },
+   {
+    "k": "Type",
+    "v": "paradox"
+   },
+   {
+    "k": "Tier",
+    "v": "2"
+   },
+   {
+    "k": "Target",
+    "v": "enemy"
+   },
+   {
+    "k": "Rank",
+    "v": "Axiom (rare)"
+   },
+   {
+    "k": "Kind",
+    "v": "spell"
+   },
+   {
+    "k": "Learn",
+    "v": "Lv 10"
+   }
+  ],
+  "lines": [
+   "FREE — Guard 2",
+   "spend ALL pips (+2 Guard per pip)",
+   "RUPTURE (+2 fuel per pip)"
+  ]
+ },
+ {
+  "id": "the-reaping",
+  "name": "The Reaping",
+  "image": "./assets/catalog/cards/ice-sword.webp",
+  "chips": [
+   {
+    "k": "Stance",
+    "v": "body"
+   },
+   {
+    "k": "Type",
+    "v": "fallacy"
    },
    {
     "k": "Tier",
@@ -1544,43 +2456,12 @@
     "v": "enemy"
    },
    {
-    "k": "Power",
-    "v": "12 + heart"
+    "k": "Rank",
+    "v": "Axiom (rare)"
    },
    {
-    "k": "Learn",
-    "v": "Lv 12"
-   }
-  ],
-  "lines": [
-   "Applies Staggered ×1, 1t → enemy",
-   "grant_pip 1"
-  ]
- },
- {
-  "id": "transcendent-synthesis",
-  "name": "Transcendent Synthesis",
-  "image": "./assets/catalog/cards/bright-sphere-yellow.webp",
-  "chips": [
-   {
-    "k": "Stance",
-    "v": "heart"
-   },
-   {
-    "k": "Type",
-    "v": "paradox"
-   },
-   {
-    "k": "Tier",
-    "v": "3"
-   },
-   {
-    "k": "Target",
-    "v": "self"
-   },
-   {
-    "k": "Power",
-    "v": "0 + heart×4"
+    "k": "Kind",
+    "v": "spell"
    },
    {
     "k": "Learn",
@@ -1588,9 +2469,45 @@
    }
   ],
   "lines": [
-   "Fate: playable by an X die",
-   "Synergy clause (stance-switch payoff)"
+   "FREE — tick",
+   "REAP all — 2 per Soul"
   ]
+ },
+ {
+  "id": "the-tithe",
+  "name": "The Tithe",
+  "image": "./assets/catalog/cards/devil-book.webp",
+  "chips": [
+   {
+    "k": "Stance",
+    "v": "mind"
+   },
+   {
+    "k": "Type",
+    "v": "fallacy"
+   },
+   {
+    "k": "Tier",
+    "v": "2"
+   },
+   {
+    "k": "Target",
+    "v": "enemy"
+   },
+   {
+    "k": "Rank",
+    "v": "Aporia (rare)"
+   },
+   {
+    "k": "Kind",
+    "v": "disenchant"
+   },
+   {
+    "k": "Learn",
+    "v": "Lv 12"
+   }
+  ],
+  "lines": []
  },
  {
   "id": "tu-quoque",
@@ -1611,20 +2528,25 @@
    },
    {
     "k": "Target",
-    "v": "enemy"
+    "v": "self"
    },
    {
-    "k": "Power",
-    "v": "0 + heart"
+    "k": "Rank",
+    "v": "Thesis (uncommon)"
+   },
+   {
+    "k": "Kind",
+    "v": "spell"
    },
    {
     "k": "Learn",
-    "v": "Lv 15"
+    "v": "Lv 4"
    }
   ],
   "lines": [
-   "Applies Brazen Thorns ×2, 2t → self",
-   "secondary_heal_self 2"
+   "FREE — Guard 2",
+   "Applies Thorns ×3, 2t → self",
+   "Die bonus: powering die body fires a rider"
   ]
  },
  {
@@ -1638,7 +2560,7 @@
    },
    {
     "k": "Type",
-    "v": "paradox"
+    "v": "fallacy"
    },
    {
     "k": "Tier",
@@ -1649,17 +2571,137 @@
     "v": "enemy"
    },
    {
-    "k": "Power",
-    "v": "0 + mind"
+    "k": "Rank",
+    "v": "Thesis (uncommon)"
+   },
+   {
+    "k": "Kind",
+    "v": "spell"
    },
    {
     "k": "Learn",
-    "v": "Lv 5"
+    "v": "Lv 4"
    }
   ],
   "lines": [
-   "Applies Two Envelope Delirium ×1, 2t → enemy",
+   "FREE — mark i1 d1",
+   "Applies Backfire ×1, 2t → enemy",
+   "STAGGER 1",
    "Threshold: 3× mind die fires a rider"
+  ]
+ },
+ {
+  "id": "venom-and-vein",
+  "name": "Venom and Vein",
+  "image": "./assets/catalog/cards/dream-flutter.webp",
+  "chips": [
+   {
+    "k": "Stance",
+    "v": "body"
+   },
+   {
+    "k": "Type",
+    "v": "fallacy"
+   },
+   {
+    "k": "Tier",
+    "v": "2"
+   },
+   {
+    "k": "Target",
+    "v": "self"
+   },
+   {
+    "k": "Rank",
+    "v": "Axiom (rare)"
+   },
+   {
+    "k": "Kind",
+    "v": "enchantment"
+   },
+   {
+    "k": "Learn",
+    "v": "Lv 10"
+   }
+  ],
+  "lines": []
+ },
+ {
+  "id": "winnowing",
+  "name": "Winnowing",
+  "image": "./assets/catalog/cards/ice-sword.webp",
+  "chips": [
+   {
+    "k": "Stance",
+    "v": "body"
+   },
+   {
+    "k": "Type",
+    "v": "fallacy"
+   },
+   {
+    "k": "Tier",
+    "v": "2"
+   },
+   {
+    "k": "Target",
+    "v": "enemy"
+   },
+   {
+    "k": "Rank",
+    "v": "Thesis (uncommon)"
+   },
+   {
+    "k": "Kind",
+    "v": "spell"
+   },
+   {
+    "k": "Learn",
+    "v": "Lv 4"
+   }
+  ],
+  "lines": [
+   "FREE — tick",
+   "consume 1 affliction — its fuel ticks now, +1 Soul"
+  ]
+ },
+ {
+  "id": "zenos-half-step",
+  "name": "Zeno's Half-Step",
+  "image": "./assets/catalog/cards/confuse.webp",
+  "chips": [
+   {
+    "k": "Stance",
+    "v": "body"
+   },
+   {
+    "k": "Type",
+    "v": "paradox"
+   },
+   {
+    "k": "Tier",
+    "v": "1"
+   },
+   {
+    "k": "Target",
+    "v": "enemy"
+   },
+   {
+    "k": "Rank",
+    "v": "Doxa (common)"
+   },
+   {
+    "k": "Kind",
+    "v": "spell"
+   },
+   {
+    "k": "Learn",
+    "v": "Lv 1"
+   }
+  ],
+  "lines": [
+   "FREE — Guard 2",
+   "STAGGER 1"
   ]
  }
 ]
