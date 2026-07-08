@@ -957,8 +957,7 @@
       "tier": 1,
       "addedIn": "2026-07-08",
       "tags": [
-        "support",
-        "non-card",
+        "v3",
         "peroration"
       ]
     },
@@ -982,6 +981,7 @@
       "tier": 1,
       "addedIn": "2026-07-08",
       "tags": [
+        "v3",
         "forge",
         "dot",
         "ember"
@@ -1003,7 +1003,7 @@
       "tier": 3,
       "addedIn": "2026-07-08",
       "tags": [
-        "v3-tuning",
+        "v3",
         "control",
         "affliction"
       ]
@@ -1029,6 +1029,7 @@
       "tier": 1,
       "addedIn": "2026-07-08",
       "tags": [
+        "v3",
         "oracle",
         "exposure",
         "affliction"
@@ -1057,6 +1058,7 @@
       "tier": 1,
       "addedIn": "2026-07-08",
       "tags": [
+        "v3",
         "dot",
         "affliction",
         "bulwark"
@@ -1086,8 +1088,7 @@
       "tier": 1,
       "addedIn": "2026-07-08",
       "tags": [
-        "support",
-        "non-card",
+        "v3",
         "echo"
       ]
     }

@@ -61,10 +61,14 @@ export const VULNERABLE_MAX_MULT = 2.0;
  *  bearer (a fully-stacked protective mult still lets half the hit through).
  *  P0-truth: protective (`damageTakenMult < 1`) payloads are REAL now. Tunable. */
 export const RESOLUTE_MIN_MULT = 0.5;
-/** RUPTURE — hard cap on a single detonation's burst HP (all payoff bursts —
- *  RUPTURE, REAP-all, mark conclusions — share it), so a long stack can't
- *  one-shot a boss. Tunable. */
+/** RUPTURE — hard cap on a single detonation's burst HP (RUPTURE + mark
+ *  conclusions share it), so a long stack can't one-shot a boss. Tunable. */
 export const RUPTURE_BURST_CAP = 80;
+/** REAP-ALL — the Harvest capstone (`the-reaping`) empties the WHOLE Soul bank
+ *  in one swing, so its ceiling is deliberately higher than the shared RUPTURE
+ *  cap: "every soul you gathered, swung at once" must actually pay off a big
+ *  bank instead of silently wasting Souls past the 80 line. Tunable. */
+export const REAP_ALL_BURST_CAP = 200;
 /** RUPTURE — flat burst per NON-DoT affliction stack consumed (marks, backfire,
  *  rapport). Spec 32 v3 §3. Tunable. */
 export const RUPTURE_PER_AFFLICTION_STACK = 3;

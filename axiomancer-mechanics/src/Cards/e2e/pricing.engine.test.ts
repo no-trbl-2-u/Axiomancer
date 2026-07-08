@@ -25,18 +25,21 @@ import {
  * demanded it):
  *   - Doxa/Lemma (1-2):    1.5 – 7.5
  *   - Thesis/Theorem (3-4): 4.5 – 13
- *   - Axiom (5):            7 – 18. Spec's sketch said 8, but two shipped
- *     rank-5 spells price honestly just below it under the table —
+ *   - Axiom (5):            7 – 19. Spec's sketch said 8, but shipped rank-5
+ *     spells price honestly outside it under the table: at the FLOOR,
  *     `pact-of-akrasia` (7.25: the forge is cheap BECAUSE the blood credits
  *     bite) and `heart-of-the-matter` (7.33: SWAY at 0.8/stack undervalues
- *     CAPITULATE proximity). Band adjusted, not the cards (task rule); a
- *     rank-5 scoring 2 still fails loudly.
+ *     CAPITULATE proximity); at the CEILING, two DELIBERATE big finishers —
+ *     `resonance-detonation` (18.13) and `the-overtake` (18.35) — are authored
+ *     over the sketch on purpose (owner directive: a payoff worth cashing your
+ *     own board for). Band adjusted, not the cards (task rule); a rank-5
+ *     scoring 2 still fails loudly.
  * Rank 6 (Aporia) never appears: every Aporia card is a disenchant.
  */
 const RANK_BANDS: Record<'common' | 'uncommon' | 'rare', [number, number]> = {
     common: [1.5, 7.5],
     uncommon: [4.5, 13],
-    rare: [7, 18],
+    rare: [7, 19],
 };
 
 const spells = cardLibrary.filter(c => c.cardType === 'spell');

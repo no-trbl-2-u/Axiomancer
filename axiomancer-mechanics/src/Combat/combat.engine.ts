@@ -38,7 +38,7 @@ import {
     getHealingReceivedMult, getOutgoingDamageMult, decayDotsOnHeal, consumeEffect,
     hasPayloadFlag, getStanceVulnMult, computeRoundsToKill,
     consumeAfflictions, consumeOneAffliction, getBackfirePerRung, consumeMarks, getMarkStacks,
-    RUPTURE_BURST_CAP, RUPTURE_PER_AFFLICTION_STACK, DISRUPT_DENY_AT,
+    RUPTURE_BURST_CAP, REAP_ALL_BURST_CAP, RUPTURE_PER_AFFLICTION_STACK, DISRUPT_DENY_AT,
     THREAT_RUNGS, THREAT_RUNGS_BOSS,
 } from './effects';
 import {
@@ -1492,9 +1492,11 @@ function playBottomAction(
                 break;
             }
             case 'reap_all': {
-                // THE REAPING — spend every Soul: a payoff burst per Soul.
+                // THE REAPING — spend every Soul: a payoff burst per Soul. Uses
+                // the higher REAP_ALL_BURST_CAP (not the shared RUPTURE cap) so a
+                // full Soul bank actually pays off ("every soul, swung at once").
                 const spent = souls;
-                const burst = Math.min(RUPTURE_BURST_CAP, Math.round(mech.burstPerSoul * spent * mult * vulnMult));
+                const burst = Math.min(REAP_ALL_BURST_CAP, Math.round(mech.burstPerSoul * spent * mult * vulnMult));
                 souls = 0;
                 if (burst > 0) {
                     enemy = applyDamage(enemy, burst);
@@ -1922,10 +1924,15 @@ function playBottomAction(
         events.push({ kind: 'floating-die-spent', dieId: powering.id, color: powering.color, poolSize: floatingDice.length });
         events.push({ kind: 'die-spent', dieId: powering.id, color: powering.color });
     } else if (poweringSource === 'reserve') {
-        if (refreshed) {
-            // Stays banked; its pips were cashed by this play.
+        if (refreshed || bankSpentMech) {
+            // Refreshed (rider/mechanic) OR BANK_SPENT_DIE: the die stays in the
+            // Reserve, its pips cashed by this play. `bank_spent_die` on a
+            // Reserve-powered play ("the hand that struck it goes back in the
+            // tray, unspent") was previously ignored here — the die was spent.
             reserve = reserve.map(d => (d.id === powering.id ? { ...d, pips: 0 } : d));
-            events.push({ kind: 'die-refreshed', dieId: powering.id, color: powering.color });
+            events.push(refreshed
+                ? { kind: 'die-refreshed', dieId: powering.id, color: powering.color }
+                : { kind: 'die-banked', dieId: powering.id, color: powering.color, pips: 0 });
         } else {
             reserve = reserve.filter(d => d.id !== powering.id);
             events.push({ kind: 'die-spent', dieId: powering.id, color: powering.color });
@@ -2501,7 +2508,20 @@ export function processBetweenPhases(
     let omenBonusDraw = 0;
     const pendingOmens = state.pendingOmens ?? [];
     if (pendingOmens.length > 0) {
-        const incomingStance = threatPhases[nextIndex]?.enemyStance;
+        // `fated-course` (D): a "curse of inevitability" — while it is attached,
+        // the enemy's next telegraph is FORCED to the stance a pending omen named
+        // for that phase, so the prophecy cannot miss (its mark is guaranteed and
+        // the named future is the only one left to them).
+        let phasesForOmen = threatPhases;
+        if (zoneHas(state, 'fated-course')) {
+            const forcing = pendingOmens.find(o => o.phaseIndex === nextIndex);
+            if (forcing && phasesForOmen[nextIndex]) {
+                phasesForOmen = phasesForOmen.map((p, i) =>
+                    i === nextIndex ? { ...p, enemyStance: forcing.stance } : p);
+                omenState = { ...omenState, threatPhases: phasesForOmen };
+            }
+        }
+        const incomingStance = phasesForOmen[nextIndex]?.enemyStance;
         const remaining: typeof pendingOmens = [];
         for (const omen of pendingOmens) {
             if (omen.phaseIndex !== nextIndex) {
@@ -2528,6 +2548,9 @@ export function processBetweenPhases(
                         sway: amp(omenMech.rider.sway),
                         souls: amp(omenMech.rider.souls),
                         premises: amp(omenMech.rider.premises),
+                        applyEffect: omenMech.rider.applyEffect
+                            ? { ...omenMech.rider.applyEffect, intensity: amp(omenMech.rider.applyEffect.intensity) }
+                            : undefined,
                     };
                     events.push({ kind: 'omen-hit', cardId: omen.cardId, phaseIndex: nextIndex, riderText: riderText(rider) });
                     // drawCards rides the fresh hand (drawn below) — drawing
@@ -3064,7 +3087,7 @@ export function projectReapAll(state: CombatEncounterState, card: CombatCard): {
     const d = draftedDie(state);
     const read: CombatReadResult = d ? state.lastRead : 'neutral';
     const amount = Math.min(
-        RUPTURE_BURST_CAP,
+        REAP_ALL_BURST_CAP,
         Math.round(mech.burstPerSoul * (state.souls ?? 0) * READ_DAMAGE_MULT[read] * getDamageTakenMultiplier(state.enemy)),
     );
     return { ready: amount > 0, amount };

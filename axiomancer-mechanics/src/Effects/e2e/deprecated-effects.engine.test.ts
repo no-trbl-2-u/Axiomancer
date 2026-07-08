@@ -27,6 +27,14 @@ import { AUTHORED_THREAT_SEQUENCES } from '../../Combat/combat.threat-sequences'
 
 // ─── The canonical card vocabulary (spec 32 v3 §3) ───────────────────────────
 
+// The v3 card vocabulary. The reset (spec 32 v3 §3) rebuilt it as six effects;
+// the 2026-07-08 themed-deck rebalance added six THEMED afflictions on top (five
+// DoT variants that carry a distinct resist axis / tick behaviour the canonical
+// two don't, plus an acute BACKFIRE), all card-referenced by cardType:'spell'
+// cards. They are blessed here so the library is honest about what it ships.
+// NOTE: these six are slated to be RE-HOMED into the persistent disenchant/curse
+// layer (owner direction — Doom/Charmed-style, no tick-down); when that lands,
+// they leave the card channel and this set returns to the canonical six.
 const CARD_EFFECT_SET = new Set([
     'debuff_poison',
     'debuff_bleed',
@@ -34,6 +42,13 @@ const CARD_EFFECT_SET = new Set([
     'debuff_backfire',
     'debuff_rapport',
     'buff_thorns',
+    // themed afflictions (pending curse re-home):
+    'debuff_argument_wound',
+    'debuff_kindling_ember',
+    'debuff_foretold_wound',
+    'debuff_echo_sting',
+    'debuff_nettle_sting',
+    'debuff_backfire_acute',
 ]);
 
 /**
