@@ -103,7 +103,7 @@ describe('card coverage — synthetic retreat card (direct engine assertion)', (
     it("the retreat bottom action ends the encounter with outcome 'retreat'", () => {
         // A 5-card deck is drawn whole into the opening hand, so the retreat
         // card is guaranteed to be present without any draw luck.
-        const deck = ['card-retreat', ...SUPPORT_KIT, 'ad-hominem-strike'];
+        const deck = ['card-retreat', ...SUPPORT_KIT, 'red-herring'];
         let state = initializeCombatEncounter(PLAYER, WEAK_ENEMY, deck, BASE_SEED);
         state = rollEncounterDice(state).state;
         expect(state.phase).toBe('phase-play');
