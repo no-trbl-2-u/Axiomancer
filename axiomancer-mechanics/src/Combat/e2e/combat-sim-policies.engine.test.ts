@@ -29,23 +29,37 @@ import { initializeCombatEncounter } from '../combat.engine';
 import { toCombatCard } from '../combat.cards';
 import type { CombatCard, CombatEncounterState } from '../combat.encounter.types';
 
-// Master Spec (2026-07-03) doctrine pass converted every real library card off
-// flat `basePower` strikes (status-or-nothing now, bar a handful of tier-3
-// gated finishers). This suite needs a genuine pure-direct-damage card with NO
-// status payload to witness "status ranks above a pure strike" — a real card
-// can no longer play that role, so it's a sandbox-only test fixture.
-const QA_PURE_STRIKE = 'qa-pure-strike-body';
-registerSandboxCards([{
-    id: QA_PURE_STRIKE,
-    name: 'QA Pure Strike (test fixture)',
-    category: 'paradox',
-    philosophicalAspect: 'body',
-    description: 'Test-only fixture: a flat direct-damage card with no status payload, used to isolate pure-strike behavior now that no real library card plays that role.',
-    tier: 1,
-    targetType: 'enemy',
-    basePower: 12,
-    scalingStat: 'body',
-}]);
+// Spec 32 v3: basePower is deleted at the schema level — the "no status game"
+// card is a statusless utility fixture, and the Befriend lever (no library
+// card carries `befriend_attempt` any more; the mercy path lives on the heart
+// signature) is a sandbox fixture too.
+const QA_STATUSLESS = 'qa-statusless-utility';
+const QA_BEFRIEND = 'qa-befriend';
+registerSandboxCards([
+    {
+        id: QA_STATUSLESS,
+        name: 'QA Statusless Utility (test fixture)',
+        category: 'paradox',
+        philosophicalAspect: 'body',
+        description: 'Test-only fixture: a card with no status payload, used to witness status-first ranking.',
+        tier: 1,
+        rank: 1,
+        cardType: 'spell',
+        targetType: 'enemy',
+    },
+    {
+        id: QA_BEFRIEND,
+        name: 'QA Befriend (test fixture)',
+        category: 'fallacy',
+        philosophicalAspect: 'heart',
+        description: 'Test-only fixture: the Befriend verb for the mercy-turn ranking law.',
+        tier: 1,
+        rank: 1,
+        cardType: 'spell',
+        targetType: 'enemy',
+        specialMechanics: [{ kind: 'befriend_attempt' }],
+    },
+]);
 
 afterEach(() => vi.restoreAllMocks());
 
@@ -62,7 +76,8 @@ function loadout(skills: string[]): Character {
     return p;
 }
 
-const MIX = ['slippery-slope', 'eternal-regress', 'ad-hominem-strike', 'brace-for-impact', 'befriend'];
+// A cross-theme starter mix: ramping poison, decaying bleed, control, guard.
+const MIX = ['slippery-slope', 'straw-mans-jab', 'red-herring', 'brace-for-impact'];
 
 function card(id: string): CombatCard {
     const projected = toCombatCard(id, getCardById, lookupEffect);
@@ -114,18 +129,18 @@ describe('policy roster — every id resolves', () => {
         const s = freshState();
         const brute = COMBAT_SIM_POLICIES['aggro-brute'];
         const dot = card('slippery-slope');
-        const strike = card(QA_PURE_STRIKE);
+        const plain = card(QA_STATUSLESS);
         // The brute ranks strictly by preview — it does NOT put status first.
         expect(brute.rankCard(s, dot, forbiddenRng)).toBe(dot.bottomDamagePreview);
-        expect(brute.rankCard(s, strike, forbiddenRng)).toBe(strike.bottomDamagePreview);
+        expect(brute.rankCard(s, plain, forbiddenRng)).toBe(plain.bottomDamagePreview);
     });
 });
 
-describe('greedy rankCard — the legacy ordering as scores (doctrine: status > strikes)', () => {
-    it('ranks a status card above a pure strike', () => {
+describe('greedy rankCard — the legacy ordering as scores (doctrine: status > everything)', () => {
+    it('ranks a status card above a statusless card', () => {
         const s = freshState();
         expect(COMBAT_SIM_POLICIES.greedy.rankCard(s, card('slippery-slope'), forbiddenRng))
-            .toBeGreaterThan(COMBAT_SIM_POLICIES.greedy.rankCard(s, card(QA_PURE_STRIKE), forbiddenRng));
+            .toBeGreaterThan(COMBAT_SIM_POLICIES.greedy.rankCard(s, card(QA_STATUSLESS), forbiddenRng));
     });
 
     it('ranks a status NEW to the board above the same status already applied', () => {
@@ -145,10 +160,10 @@ describe('greedy rankCard — the legacy ordering as scores (doctrine: status > 
         const low = deepClone(s);
         low.enemy.health = 1;
         const greedy = COMBAT_SIM_POLICIES.greedy;
-        expect(greedy.rankCard(low, card('befriend'), forbiddenRng))
+        expect(greedy.rankCard(low, card(QA_BEFRIEND), forbiddenRng))
             .toBeGreaterThan(greedy.rankCard(low, card('slippery-slope'), forbiddenRng));
         // ...but NOT before that (status play stays the default game).
-        expect(greedy.rankCard(s, card('befriend'), forbiddenRng))
+        expect(greedy.rankCard(s, card(QA_BEFRIEND), forbiddenRng))
             .toBeLessThan(greedy.rankCard(s, card('slippery-slope'), forbiddenRng));
     });
 });
