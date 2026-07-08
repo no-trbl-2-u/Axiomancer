@@ -28,8 +28,9 @@ primary pattern (a few mix two — noted in the row).
 | **P3** | **renderHook / context** | A hook or context provider (e.g. `useCombatMode`, `useGameEvents`) emits the expected sequence on subscribe / dispatch / unmount | Provider only (no screens) | Real engine |
 | **P4** | **Screen render** | Mounting an `app/(tabs)/<screen>.tsx` does not throw and renders the right strings | Full screen + jest-expo's RN host | Real engine |
 | **P5** | **Source-grep contract** | Layout / routing invariants the type system can't catch (`<GestureHandlerRootView>` wraps root; folder routes named `<dir>/index`; no stray `_layout.*` files in `app/`) | No | None — reads source files as text |
+| **P6** | **Cross-screen integration** | Mounting two real, related screens together (e.g. a tab screen + its tab layout) under one store and driving a real state transition between them; asserts the two screens' derived UI state (mount conditions, nav lock) stays consistent across the transition, not just each screen in isolation | Two+ full screens + jest-expo's RN host | Real engine |
 
-All five run under `pnpm test` (Jest + `jest-expo` preset). Reanimated
+All six run under `pnpm test` (Jest + `jest-expo` preset). Reanimated
 is mocked via `react-native-reanimated/mock` in `jest.setup.ts`.
 RNG is replaced by `test-utils/rng.ts` (`mockFixedRng`, `mockSequentialRng`,
 `mockAlternatingRng`) which calls the engine's `setRng()`.
@@ -73,6 +74,7 @@ assertions.
 | `exploration.codex.engine.test.ts` | P1 (pure) | `selectExplorationCodexHeader`: REGION/<region-slug> + NODE/<currentNodeId-slug>, uppercase/hyphen/underscore/whitespace normalization, UNKNOWN/NONE fallbacks (Phase 50 tick D) | 1 | 5 |
 | `debug-seed.engine.test.ts` | P2 | `actions.debugSeed()` end-to-end: inventory gains items across categories (consumable + 3 equipment slots), knownSkills gains both paradox + fallacy fixture categories, current map resets to startingNode with fresh discovered/consumed sets, skills are set-idempotent on re-seed (Phase 54) | 1 | 5 |
 | `event-pools.engine.test.ts` | P2 | Per-node-type pool overrides + isBoss + unregistered-node fallback + idempotent re-registration. **Phase 55:** multi-entry encounter pools. **Phase 56:** per-quest-node NPC pools. **Phase 57:** per-map treasure + gather payloads with locale-themed items, distinct fv vs nf rosters, currency thread, material-category check. **Phase 58:** chaos-mode toggle | 5 | 28 |
+| `cross-screen-integration.engine.test.tsx` | **P6** | `ExplorationScreen` + `(tabs)/_layout` mounted together (real props captured off a mocked `<Tabs>`/`<Tabs.Screen>`); `inEncounterModal` drives the encounter-modal mount AND the tab-bar lock in lockstep across the FIGHT event-slice-clear boundary and the FLEE round-trip — pins commit `a18ee12b`'s regression class at the two-screen level (Phase 10) | 1 | 4 |
 | `state/presenters/__tests__/aftermath.engine.test.ts` | P1 (pure) | Aftermath VM presenter (Phase 70): victory branch (uppercased enemy name, epithet derivation + truncation, finalBlow passthrough + fallbacks, per-tier flavor phrase selection, reward field threading); parley branch (per-level pact phrase, journal-entry passthrough); defeat branch (killer block + cause-phrase by damage tier + run-summary trio passthrough) | 3 | 29 |
 | `state/presenters/__tests__/encounter-seal.engine.test.ts` | P1 (pure) | `selectEncounterSealChrome(mode, round?)` (Phase 71): prelude / combat / aftermath chain-bar labels + accent colors, lowercase-roman round labels (i / ii / iii), round-independence of non-combat modes, defensive `·` sentinel for round 0 | 1 | 9 |
 | **Totals (`state/e2e/` + `state/presenters/__tests__/`)** | | | **136** | **508** |
@@ -190,3 +192,20 @@ If any of these need coverage, the most likely vehicle is the
 `smoke-render.engine.test.tsx` harness — extending it with deeper
 mount probes — rather than reaching for a Detox / Playwright layer
 that would re-introduce network and timer non-determinism.
+
+**Phase 10 update:** the specific gap this section used to point at
+("if cross-screen regressions need coverage, extend smoke-render")
+is now closed for the one seam with a proven regression history —
+`cross-screen-integration.engine.test.tsx` (P6, above) mounts
+`ExplorationScreen` + `(tabs)/_layout` together in exactly that
+extended-mount-probe style. Its browser-level companion,
+`scripts/exploration-combat-roundtrip-e2e.mjs` (`npm run
+e2e:exploration-roundtrip`), is a narrowly-scoped Playwright script in
+the existing `scripts/*-e2e.mjs` family (not a new Detox/Playwright-
+for-Jest layer) — it proved necessary in practice: a hermetic Jest
+mount can pin the *props* `TabLayout` computes, but only a real
+browser proves those props actually repaint the tab bar (react-navigation's
+web tab bar can leave stale/duplicate DOM nodes with the same
+accessibility label mid-transition, which a real `:visible` check
+catches and a prop assertion cannot). Cross-screen coverage
+elsewhere in the app (beyond this one seam) remains an open gap.

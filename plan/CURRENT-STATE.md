@@ -61,8 +61,9 @@ See `plan/AUDIT.md` for the scored, categorized queue.
 - Authored character/story/world content (only templates exist).
 - Northern-forest region content.
 - Tutorial / onboarding flow.
-- Multi-screen integration test coverage (the biggest verify-gate
-  blind spot — see below).
+- Multi-screen integration test coverage (was the biggest verify-gate
+  blind spot; Phase 10 pinned the one seam with a proven regression
+  history — see below — broader cross-screen coverage still open).
 
 ## Conventions worth keeping
 
@@ -79,8 +80,12 @@ See `plan/AUDIT.md` for the scored, categorized queue.
 
 - Doc-drift: new engine surfaces chronically lag `spec.md` /
   `docs/combat.md`. Keep a doc-sync check in the loop.
-- Hermetic tests are blind to cross-screen integration
-  regressions (the FIGHT-modal-unmount class). Real gap.
+- Hermetic tests were blind to cross-screen integration
+  regressions (the FIGHT-modal-unmount class) — Phase 10 pinned this
+  one seam (`ExplorationScreen` + `(tabs)/_layout`,
+  `state/e2e/cross-screen-integration.engine.test.tsx` +
+  `scripts/exploration-combat-roundtrip-e2e.mjs`). Cross-screen
+  coverage elsewhere in the app remains a real, open gap.
 - Pre-monorepo npm-package model (engine pins, lockfile
   co-commit runbook, `bump-engine` semver) is **retired** — do
   not resurrect it from muscle memory.
