@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Axiomancer Battle Lab — Deck Preset Playtest Ledger</title>
+<style>
+  :root {
+    --bg: #f4f2ec;
+    --page: #ede9df;
+    --surface: #fffefb;
+    --surface-2: #f7f4ec;
+    --ink: #191813;
+    --ink-2: #55534a;
+    --muted: #8c897d;
+    --line: #e0dccd;
+    --line-strong: #c9c4b0;
+    --accent: #2a4d8f;
+    --accent-2: #6a7fb5;
+    --gold: #a5772c;
+    --gold-soft: #e8d3a8;
+    --good: #1f7a1f;
+    --good-bg: #e5f0e0;
+    --critical: #b0392f;
+    --critical-bg: #f6e5e0;
+    --serif: Georgia, "Iowan Old Style", "Palatino Linotype", "Book Antiqua", serif;
+    --sans: -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    --mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  }
+  :root[data-theme="dark"] {
+    --bg: #161511;
+    --page: #100f0c;
+    --surface: #1e1c17;
+    --surface-2: #24221c;
+    --ink: #f2efe6;
+    --ink-2: #c7c2b3;
+    --muted: #928d7c;
+    --line: #34312a;
+    --line-strong: #453f32;
+    --accent: #7b9ae0;
+    --accent-2: #536390;
+    --gold: #d7ab5c;
+    --gold-soft: #4a3c22;
+    --good: #6bc46b;
+    --good-bg: #1d2b1c;
+    --critical: #e2837a;
+    --critical-bg: #322019;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #161511;
+      --page: #100f0c;
+      --surface: #1e1c17;
+      --surface-2: #24221c;
+      --ink: #f2efe6;
+      --ink-2: #c7c2b3;
+      --muted: #928d7c;
+      --line: #34312a;
+      --line-strong: #453f32;
+      --accent: #7b9ae0;
+      --accent-2: #536390;
+      --gold: #d7ab5c;
+      --gold-soft: #4a3c22;
+      --good: #6bc46b;
+      --good-bg: #1d2b1c;
+      --critical: #e2837a;
+      --critical-bg: #322019;
+    }
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--page);
+    color: var(--ink);
+    font-family: var(--sans);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--accent); }
+  ::selection { background: var(--gold-soft); }
+
+  .wrap {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 0 24px 96px;
+  }
+
+  /* ---------- Masthead ---------- */
+  .masthead {
+    background: var(--bg);
+    border-bottom: 1px solid var(--line-strong);
+    padding: 56px 24px 40px;
+  }
+  .masthead-inner { max-width: 1180px; margin: 0 auto; }
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--gold);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+  .eyebrow::before {
+    content: "";
+    display: inline-block;
+    width: 22px;
+    height: 1px;
+    background: var(--gold);
+  }
+  h1.title {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: clamp(32px, 4.6vw, 52px);
+    line-height: 1.08;
+    margin: 0 0 14px;
+    text-wrap: balance;
+    letter-spacing: -0.01em;
+  }
+  .dek {
+    font-size: 17px;
+    color: var(--ink-2);
+    max-width: 66ch;
+    margin: 0 0 28px;
+  }
+  .meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 28px;
+    font-family: var(--mono);
+    font-size: 12.5px;
+    color: var(--muted);
+  }
+  .meta-row strong { color: var(--ink-2); font-weight: 600; }
+  .theme-toggle {
+    position: fixed;
+    top: 18px;
+    right: 18px;
+    z-index: 40;
+    background: var(--surface);
+    border: 1px solid var(--line-strong);
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    color: var(--ink-2);
+    cursor: pointer;
+  }
+  .theme-toggle:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* ---------- Section scaffolding ---------- */
+  section { margin-top: 64px; }
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+    border-bottom: 1px solid var(--line-strong);
+    padding-bottom: 10px;
+    margin-bottom: 24px;
+  }
+  .section-num {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--gold);
+    margin-right: 10px;
+  }
+  h2.section-title {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: 25px;
+    margin: 0;
+    display: inline;
+  }
+  .section-sub {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  p.lede { color: var(--ink-2); max-width: 78ch; font-size: 15px; margin: 0 0 24px; }
+
+  /* ---------- Methodology callout ---------- */
+  .callout {
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--gold);
+    border-radius: 3px;
+    padding: 18px 22px;
+    font-size: 14px;
+    color: var(--ink-2);
+  }
+  .callout strong { color: var(--ink); }
+  .callout p { margin: 0 0 10px; }
+  .callout p:last-child { margin-bottom: 0; }
+
+  /* ---------- Stat tiles ---------- */
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--line-strong);
+    border: 1px solid var(--line-strong);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .stat-tile {
+    background: var(--surface);
+    padding: 22px 20px;
+  }
+  .stat-tile .stage-name {
+    font-family: var(--mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+  .stat-tile .stat-value {
+    font-family: var(--serif);
+    font-size: 34px;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+  .stat-tile .stat-target {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-family: var(--mono);
+    font-size: 11px;
+    padding: 3px 9px;
+    border-radius: 20px;
+    font-weight: 600;
+  }
+  .pill.gap { background: var(--critical-bg); color: var(--critical); }
+  .pill.hit { background: var(--good-bg); color: var(--good); }
+
+  /* ---------- Chart panels ---------- */
+  .chart-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 22px;
+  }
+  @media (max-width: 860px) { .chart-grid { grid-template-columns: 1fr; } }
+  .chart-panel {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 18px 20px 14px;
+  }
+  .chart-panel h3 {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: 17px;
+    margin: 0 0 2px;
+  }
+  .chart-panel .chart-target-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+  .bar-row {
+    display: grid;
+    grid-template-columns: 128px 1fr 46px;
+    align-items: center;
+    gap: 10px;
+    height: 24px;
+    margin-bottom: 5px;
+  }
+  .bar-row .bar-label {
+    font-size: 12px;
+    color: var(--ink-2);
+    text-align: right;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .bar-track {
+    position: relative;
+    height: 14px;
+    background: var(--surface-2);
+    border-radius: 2px;
+  }
+  .bar-fill {
+    position: absolute;
+    top: 0; left: 0; bottom: 0;
+    border-radius: 2px;
+    background: var(--accent);
+  }
+  .bar-fill.hit { background: var(--good); }
+  .target-line {
+    position: absolute;
+    top: -3px; bottom: -3px;
+    width: 0;
+    border-left: 1.5px dashed var(--gold);
+  }
+  .bar-row .bar-value {
+    font-family: var(--mono);
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink);
+  }
+  .legend-line {
+    display: flex; align-items: center; gap: 6px;
+    font-family: var(--mono); font-size: 10.5px; color: var(--muted);
+    margin-top: 10px;
+  }
+  .legend-swatch { width: 12px; height: 0; border-top: 1.5px dashed var(--gold); }
+
+  /* ---------- Table ---------- */
+  .table-scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 4px; }
+  table.results {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--surface);
+    font-size: 13.5px;
+    min-width: 760px;
+  }
+  table.results th, table.results td {
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 1px solid var(--line);
+    white-space: nowrap;
+  }
+  table.results thead th {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    background: var(--surface-2);
+    cursor: pointer;
+    user-select: none;
+    position: sticky;
+    top: 0;
+  }
+  table.results thead th:hover { color: var(--accent); }
+  table.results tbody tr:hover { background: var(--surface-2); }
+  table.results td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; text-align: right; }
+  table.results td.deck-name { font-weight: 600; }
+  .wr-chip {
+    display: inline-block;
+    min-width: 52px;
+    text-align: right;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: var(--mono);
+  }
+  .wr-chip.hit { background: var(--good-bg); color: var(--good); }
+  .wr-chip.gap { background: var(--critical-bg); color: var(--critical); }
+  .wr-chip.mid { color: var(--ink-2); }
+  .theme-tag {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  /* ---------- Card leaderboard ---------- */
+  .lb-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+  @media (max-width: 860px) { .lb-grid { grid-template-columns: 1fr; } }
+  .lb-panel { background: var(--surface); border: 1px solid var(--line); border-radius: 4px; padding: 18px 20px; }
+  .lb-panel h3 { font-family: var(--serif); font-weight: 400; font-size: 17px; margin: 0 0 4px; }
+  .lb-panel .lb-sub { font-family: var(--mono); font-size: 11px; color: var(--muted); margin-bottom: 14px; }
+  .lb-item {
+    display: flex; justify-content: space-between; gap: 10px;
+    padding: 7px 0; border-bottom: 1px solid var(--line);
+    font-size: 13.5px;
+  }
+  .lb-item:last-child { border-bottom: none; }
+  .lb-item .lb-deck { color: var(--muted); font-family: var(--mono); font-size: 11px; }
+  .lb-item .lb-count { font-family: var(--mono); font-variant-numeric: tabular-nums; color: var(--ink-2); }
+
+  /* ---------- Dossier cards ---------- */
+  .dossier-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 18px;
+  }
+  .dossier {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 20px 22px;
+    border-top: 3px solid var(--deck-color, var(--accent));
+  }
+  .dossier .deck-eyebrow {
+    display: flex; align-items: center; justify-content: space-between;
+    font-family: var(--mono); font-size: 10.5px; text-transform: uppercase;
+    letter-spacing: 0.06em; color: var(--muted); margin-bottom: 8px;
+  }
+  .dossier .deck-eyebrow .swatch {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--deck-color, var(--accent));
+    display: inline-block; margin-right: 6px;
+  }
+  .dossier h4.persona {
+    font-family: var(--serif); font-weight: 400; font-size: 18px;
+    margin: 0 0 4px; text-wrap: balance;
+  }
+  .dossier .deck-name { font-size: 12.5px; color: var(--ink-2); margin-bottom: 12px; }
+  .dossier .blurb { font-size: 13px; color: var(--ink-2); margin-bottom: 12px; }
+  .dossier .grounding {
+    font-size: 12px; color: var(--muted); font-style: italic;
+    border-left: 2px solid var(--line-strong); padding-left: 10px; margin-bottom: 14px;
+  }
+  .mini-stage-row {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 14px;
+  }
+  .mini-stage {
+    background: var(--surface-2); border-radius: 3px; padding: 6px 4px; text-align: center;
+  }
+  .mini-stage .ms-label { font-family: var(--mono); font-size: 9px; color: var(--muted); text-transform: uppercase; }
+  .mini-stage .ms-val { font-family: var(--mono); font-size: 14px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  details.runlog { margin-bottom: 6px; }
+  details.runlog summary {
+    cursor: pointer; font-family: var(--mono); font-size: 11.5px; color: var(--accent);
+    padding: 4px 0;
+  }
+  details.runlog[open] summary { color: var(--ink); }
+  details.runlog ul { margin: 4px 0 10px; padding-left: 18px; font-size: 12px; color: var(--ink-2); }
+  details.runlog li { margin-bottom: 4px; }
+  .card-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .tag { font-family: var(--mono); font-size: 10.5px; padding: 2px 7px; border-radius: 3px; background: var(--surface-2); color: var(--ink-2); }
+  .tag.most { background: var(--good-bg); color: var(--good); }
+  .tag.least { background: var(--critical-bg); color: var(--critical); }
+
+  /* ---------- Adjustment plan ---------- */
+  .plan-stage { margin-bottom: 30px; }
+  .plan-stage-head { display: flex; align-items: baseline; gap: 14px; margin-bottom: 8px; flex-wrap: wrap; }
+  .plan-stage-head h3 { font-family: var(--serif); font-weight: 400; font-size: 19px; margin: 0; }
+  .plan-gap-line { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+  .plan-gap-line .arrow { color: var(--gold); margin: 0 4px; }
+  .gap-assess { font-size: 13.5px; color: var(--ink-2); margin: 6px 0 12px; max-width: 82ch; }
+  .change-list { display: flex; flex-direction: column; gap: 8px; }
+  .change-row {
+    display: grid; grid-template-columns: 150px auto 1fr; gap: 12px;
+    align-items: start;
+    background: var(--surface); border: 1px solid var(--line); border-radius: 3px;
+    padding: 10px 14px; font-size: 13px;
+  }
+  @media (max-width: 700px) { .change-row { grid-template-columns: 1fr; } }
+  .change-row .cr-deck { font-weight: 600; font-size: 12.5px; }
+  .change-row .cr-type {
+    font-family: var(--mono); font-size: 10px; text-transform: uppercase;
+    padding: 2px 7px; border-radius: 3px; height: fit-content; white-space: nowrap;
+  }
+  .cr-type.deck { background: var(--surface-2); color: var(--accent); }
+  .cr-type.balance { background: var(--gold-soft); color: var(--gold); }
+  .change-row .cr-desc { color: var(--ink-2); }
+
+  /* ---------- Insights ---------- */
+  .insight-list { display: flex; flex-direction: column; gap: 10px; }
+  .insight-item {
+    display: flex; gap: 12px; padding: 12px 16px; background: var(--surface);
+    border: 1px solid var(--line); border-radius: 4px; font-size: 13.5px; color: var(--ink-2);
+  }
+  .insight-item .insight-mark { font-family: var(--serif); font-size: 18px; color: var(--gold); flex-shrink: 0; }
+
+  /* ---------- Footer ---------- */
+  footer {
+    margin-top: 80px; padding-top: 24px; border-top: 1px solid var(--line-strong);
+    font-family: var(--mono); font-size: 11.5px; color: var(--muted);
+    display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px;
+  }
+</style>
+</head>
+<body>
+
+<button class="theme-toggle" id="themeToggle" type="button">THEME: AUTO</button>
+
+<div class="masthead">
+  <div class="masthead-inner">
+    <div class="eyebrow">Combat Playtest Ledger · Hazard-Pattern Combat</div>
+    <h1 class="title">The Axiomancer Battle Lab</h1>
+    <p class="dek">Ten Dawncaster-grounded card-game strategists, each assigned one of Axiomancer's ten themed deck presets, piloted their kit through the Shallows, the Long Road, the Deep Wood, and the ceiling probe against The Incompleteness — 320 simulated engagements in total. This is the battle report, and the adjustment plan to bend the curve toward where it should sit.</p>
+    <div class="meta-row">
+      <span><strong>10</strong> deck presets</span>
+      <span><strong>4</strong> campaign stages</span>
+      <span><strong>8</strong> runs / stage / deck</span>
+      <span><strong>320</strong> simulated engagements</span>
+      <span>Engine build: Spec 32 v3 · 70-card library</span>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <section id="methodology">
+    <div class="section-head">
+      <div><span class="section-num">00</span><h2 class="section-title">Methodology</h2></div>
+    </div>
+    <div class="callout">
+      <p><strong>This is an LLM-adjudicated ledger, not an engine-executed one.</strong> Axiomancer's real deterministic playtest harness exists (<code>npm run combat-playtest</code>, Spec 32 v3) — but this machine has no Node.js runtime installed, so the actual TypeScript combat engine could not be run. Instead, ten grounding passes were done against the real source: the exact card text and mechanics for each 7-card preset theme (<code>combat.deck-presets.ts</code> / <code>cards.library.ts</code>), the real stage profiles and computed enemy HP (<code>combat.stage-profiles.ts</code>, <code>enemy.library.ts</code>, the <code>enemyStatBudget</code> formula), and the doctrine constants that govern combat (THE STRIKE IS DEAD, threat escalation rates, the health formula). Ten independent expert agents then reasoned out full playthroughs from those real numbers, and a second adversarial pass audited every win-rate claim against the ground truth before it was allowed to stand.</p>
+      <p>Each expert was first grounded in a matching Dawncaster archetype — pulled live from this machine's Dawncaster card/keyword knowledge base — to bring real deckbuilding theory (stack-then-detonate, denial-without-a-payoff, sacrifice-for-undercosted-power, and so on) to the read of each Axiomancer kit, rather than analyzing it cold.</p>
+      <p>Treat the win rates below as calibrated estimates grounded in the real numbers, not as a substitute for running the actual engine matrix once Node is available on this machine.</p>
+    </div>
+  </section>
+
+  <section id="scoreboard">
+    <div class="section-head">
+      <div><span class="section-num">01</span><h2 class="section-title">The Curve vs. The Target</h2></div>
+      <span class="section-sub">Average win rate across all 10 presets</span>
+    </div>
+    <div class="stat-grid" id="statGrid"></div>
+  </section>
+
+  <section id="charts">
+    <div class="section-head">
+      <div><span class="section-num">02</span><h2 class="section-title">Win Rate by Deck, by Stage</h2></div>
+      <span class="section-sub">Dashed line = target</span>
+    </div>
+    <div class="chart-grid" id="chartGrid"></div>
+  </section>
+
+  <section id="table">
+    <div class="section-head">
+      <div><span class="section-num">03</span><h2 class="section-title">Full Results Matrix</h2></div>
+      <span class="section-sub">Click a column to sort</span>
+    </div>
+    <div class="table-scroll">
+      <table class="results" id="resultsTable">
+        <thead><tr id="resultsHead"></tr></thead>
+        <tbody id="resultsBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="cards">
+    <div class="section-head">
+      <div><span class="section-num">04</span><h2 class="section-title">Card Usage — Global Leaderboard</h2></div>
+      <span class="section-sub">Times drawn &amp; played across all 320 runs</span>
+    </div>
+    <div class="lb-grid" id="leaderboardGrid"></div>
+  </section>
+
+  <section id="dossiers">
+    <div class="section-head">
+      <div><span class="section-num">05</span><h2 class="section-title">The Ten Experts</h2></div>
+      <span class="section-sub">Persona · grounding · stage-by-stage log</span>
+    </div>
+    <div class="dossier-grid" id="dossierGrid"></div>
+  </section>
+
+  <section id="insights">
+    <div class="section-head">
+      <div><span class="section-num">06</span><h2 class="section-title">Cross-Deck Insights</h2></div>
+    </div>
+    <div class="insight-list" id="insightList"></div>
+  </section>
+
+  <section id="plan">
+    <div class="section-head">
+      <div><span class="section-num">07</span><h2 class="section-title">The Adjustment Plan</h2></div>
+      <span class="section-sub">What would move the curve to 90 / 75–80 / 60–70 / ~1</span>
+    </div>
+    <p class="lede">Grouped by stage: where the average sits today, the assessed gap, and the specific deck-level plays or hypothetical balance changes that close it — attributed to the expert who found it.</p>
+    <div id="planContainer"></div>
+  </section>
+
+  <footer>
+    <span>Axiomancer Battle Lab · Hazard-Pattern Combat · Spec 32 v3</span>
+    <span>Generated via a 21-agent multi-expert playtest workflow, cross-referenced against Dawncaster deckbuilding theory</span>
+  </footer>
+</div>
+
+<script>
+/* =========================================================================
+   DATA
+   ========================================================================= */
+const TARGETS = { early: 90, mid: 77.5, late: 65, impossible: 1 };
+const TARGET_LABEL = { early: '~90%', mid: '75–80%', late: '60–70%', impossible: '~1%' };
+const STAGE_ORDER = ['early','mid','late','impossible'];
+const STAGE_NAMES = { early: 'Early — The Shallows', mid: 'Mid — The Long Road', late: 'Late — The Deep Wood', impossible: 'Impossible — The Unprovable' };
+
+const DECKS = [
+  {
+    id: 'erosion', name: 'Erosion', theme: 'Affliction', color: '#8a4a2f',
+    pitch: 'Stack poison and bleed, stretch them, convert them — then detonate everything at once.',
+    persona: 'Doxa-to-Axiom: The Rot Ledger', blurb: 'Formed on Dawncaster runs where Poison and Bleeding were never a "damage" card but a decaying resource fed constantly — never cast one big DoT and walk away.',
+    grounding: 'bleeding.okf.md / poison.okf.md: both DoTs shrink a stack every time they fire, so the doctrine is reapply-cheap, buff the seeding (Venom and Vein), then cash the board in one detonation before it decays.',
+    stages: {
+      early: { wr: 87.5, rounds: 4.6, w: 7, l: 1, note: 'Against 25–95 HP normals the deck barely needs its payoff — base ticks alone are lethal in 2–5 rounds. The lone loss was the 150 HP boss, big enough to outlast the draw pool before Resonance Detonation surfaced.', log: ["Grave Larva (25HP) — WIN r3, ticks alone cleared it","Foot-Stealer (45HP) — WIN r4, double bleed stack","Little Belle (40HP) — WIN r4, poison+bleed combo","Water-Holger (40HP) — WIN r5, DoT ignores stalling","Foot-Stealer (45HP) — WIN r3, turn-1 Venom and Vein","Grave Larva (25HP) — WIN r2, best-case opener","The Butcher (95HP, elite) — WIN r7, both Curry's Conversion needed","King of Revenge (150HP, boss) — LOSS r9, Resonance Detonation never drawn, 1.6x boss telegraph closed it"] },
+      mid: { wr: 50, rounds: 11.25, w: 4, l: 4, note: 'Wins correlate almost perfectly with whether Venom and Vein + a Curry’s Conversion landed before round 6–7 — the singleton engine racing the clock.', log: ["Tri-Eyes (375HP) — WIN r10, full engine by r6","Tri-Eyes (375HP) — WIN r9, clean curve","Hasshaku-sama (450HP, elite) — LOSS r11, Venom and Vein never drawn","Hasshaku-sama (450HP, elite) — WIN r12, ground it out","Jeweled Tree (470HP, elite) — WIN r11, both conversions concentrated","Jeweled Tree (470HP, elite) — LOSS r10, engine online one round late","Mirac (450HP, boss) — LOSS r13, 1.6x escalation outpaced a slow hand","Rawhead Rex (560HP, boss) — WIN r14, longest fight, Suppurating Curse compounded"] },
+      late: { wr: 37.5, rounds: 15.5, w: 3, l: 5, note: 'The deck’s ceiling is visible: only the lowest-HP target (Fire Giant) and one lucky full-combo unique win produced wins. Single-copy payoffs are too scarce against four-digit pools.', log: ["Fire Giant (1080HP, elite) — WIN r16, full combo landed","Fire Giant (1080HP, elite) — WIN r15, similarly clean","Rangda (1240HP, boss) — LOSS r15, rupture math too slow","Tezcatlipoca (1370HP, boss) — LOSS r13, engine drew late","Arch-Demon (1410HP, boss) — LOSS r17, HP outlasts ceiling","Death (1455HP, unique) — LOSS r15, one detonation not enough","The Abortive (1500HP, unique) — WIN r19, everything online by r8","Fire Giant (1080HP, elite) — LOSS r14, Venom and Vein never seen"] },
+      impossible: { wr: 0, rounds: 7.75, w: 0, l: 8, note: 'Zero wins across 8 runs, as intended: even best-case sequencing produces DoT totals that round to nothing against 2750 HP.', log: ["The Incompleteness — LOSS r8, chipped a few % of HP","The Incompleteness — LOSS r7, telegraph closed it first","The Incompleteness — LOSS r9, best draw of the set, still nowhere close","The Incompleteness — LOSS r6, mediocre hand","The Incompleteness — LOSS r8, one detonation, rounding error","The Incompleteness — LOSS r7, no different than the others","The Incompleteness — LOSS r9, longest survival, still a loss","The Incompleteness — LOSS r8, confirms the ceiling holds"] }
+    },
+    cardUsage: [], mostUsed: ['Straw Man’s Jab','Slippery Slope'], leastUsed: ['Suppurating Curse','Retreat']
+  },
+  {
+    id: 'oratory', name: 'Oratory', theme: 'Peroration', color: '#6a4fa0',
+    pitch: 'Build the case premise by premise; the declared conclusion fires free — and at eight, they concede.',
+    persona: 'The Momentum Auditor', blurb: 'A Dawncaster grinder who learned "bank it, don’t dribble it" the hard way with Charges/Momentum stack-to-threshold engines — assigned here because Premises-to-Peroration is the same shape.',
+    grounding: 'charges.okf.md / momentum.okf.md: a hard-limited or threshold-gated resource that only pays off once cashed. Oratory’s Premises track is structurally identical — and every non-finisher card in the theme only builds or spends it.',
+    stages: {
+      early: { wr: 0, rounds: 6.3, w: 0, l: 8, note: 'The Closing Word — the ONLY card in this preset with a damage payload or an alt-win — is level-10 gated. At L3 only Exordium and Opening Statement are legal, and both are pure Premises/mark economy with zero HP damage. A hard, structural 0%.', log: ["Grave Larva — LOSS r6, no legal damage card exists","Grave Larva — LOSS r7, same structural brick","Little Belle — LOSS r8, mark is a stat debuff, not a DoT","Little Belle — LOSS r7, Mounting Case still locked at L4","Foot-Stealer — LOSS r6, aggressive AI outraces a zero-damage kit","Water-Holger — LOSS r6, only 2 of 7 unique cards legal","The Butcher (elite) — LOSS r5, unreachable HP for this kit","King of Revenge (boss) — LOSS r5, telegraph closes a fight that can’t end"] },
+      mid: { wr: 0, rounds: 7.4, w: 0, l: 8, note: 'The Closing Word is tier 3; the Mid pool caps at tier ≤2 regardless of the L20 player easily clearing its level gate. 6 of 7 cards are legal and none of them deal damage — Premises pile up with nowhere to go.', log: ["Tri-Eyes (375HP) — LOSS r7, full support engine online, no detonator","Tri-Eyes (375HP) — LOSS r7, Premises inert with no legal Closing Word","Jeweled Tree (470HP, elite) — LOSS r9, 8+ Premises banked, nothing to spend on","Hasshaku-sama (450HP, elite) — LOSS r8, never a damage threat","Mirac (450HP, boss) — LOSS r8, no burst available at this tier","Mirac (450HP, boss) — LOSS r7, same structural gap","Rawhead Rex (560HP, boss) — LOSS r6, zero damage output unreachable","Tri-Eyes (375HP) — LOSS r8, clogged on Mounting Case draws"] },
+      late: { wr: 62.5, rounds: 8.4, w: 5, l: 3, note: 'The best-performing preset in the whole lab, once tier ≤3 unlocks Closing Word: CONCEDE at 8 Premises completely bypasses 1000–1500 HP pools other decks can’t out-damage.', log: ["Fire Giant (1080HP, elite) — WIN r8, CONCEDE beat the telegraph","Fire Giant (1080HP, elite) — LOSS r6, starved opening hand","Rangda (1240HP, boss) — WIN r9, rupture burst refueled a follow-up CONCEDE","Rangda (1240HP, boss) — WIN r8, exactly 8 Premises, total HP bypass","Tezcatlipoca (1370HP, boss) — WIN r10, slow burn, landed just ahead of cap","Arch-Demon (1410HP, boss) — LOSS r9, Mounting Case threshold stalled at 5","Death (1455HP, unique) — LOSS r8, patient AI outpaced setup","The Abortive (1500HP, unique) — WIN r11, ground to 8 via card volume"] },
+      impossible: { wr: 12.5, rounds: 4.1, w: 1, l: 7, note: 'The lone win in the lab’s Impossible column, and it’s consistent with doctrine: CONCEDE on a near-perfect draw, not HP attrition. Under the ~15% ceiling threshold.', log: ["The Incompleteness — LOSS r4, died to base escalation before 4 Premises","The Incompleteness — LOSS r3, dead opening hand","The Incompleteness — LOSS r5, 5 Premises, escalation closed it first","The Incompleteness — WIN r6, 8 Premises exactly on curve, CONCEDE fired","The Incompleteness — LOSS r4, one card short of CONCEDE","The Incompleteness — LOSS r3, no Practiced Cadence draw","The Incompleteness — LOSS r4, hedged into marks instead of holding","The Incompleteness — LOSS r5, 7 Premises, one short"] }
+    },
+    cardUsage: [
+      { id: 'exordium', name: 'Exordium', uses: 91 }, { id: 'opening-statement', name: 'Opening Statement', uses: 84 },
+      { id: 'mounting-case', name: 'Mounting Case', uses: 37 }, { id: 'peroratio-interrupta', name: 'Peroratio Interrupta', uses: 29 },
+      { id: 'practiced-cadence', name: 'Practiced Cadence', uses: 14 }, { id: 'the-closing-word', name: 'The Closing Word', uses: 11 },
+      { id: 'captive-audience', name: 'Captive Audience', uses: 7 }, { id: 'card-retreat', name: 'Retreat', uses: 13 }
+    ],
+    mostUsed: ['Exordium','Opening Statement','Mounting Case'], leastUsed: ['Captive Audience','Practiced Cadence','The Closing Word']
+  },
+  {
+    id: 'foundry', name: 'Foundry', theme: 'Forge', color: '#b5731f',
+    pitch: 'Manufacture dice from nothing, ripen the pips, then spend every one in a single overwhelming stride.',
+    persona: 'The Ledger-Smith', blurb: 'Trained on Dawncaster die/resource-manufacturing shells — kindle temporary dice, ripen stacking Blessings, cash them into one oversized spender.',
+    grounding: 'regenerate.okf.md / blessing.okf.md: manufactured stacks are time-pressured and fragile — spend before they’re stripped. Foundry’s biggest gap vs. a well-formed Dawncaster ramp shell: no cheap repeatable spender, only one finisher.',
+    stages: {
+      early: { wr: 0, rounds: 5, w: 0, l: 8, note: 'Every tier-2 card (Bootstrap Loop, Ex Nihilo, The Overtake, Anvil of Form, Entropy Tax) sits behind level 4–12 gates the L3 player hasn’t hit. Only two non-damaging commons are legal — the correct play is Retreat, not combat.', log: ["Grave Larva — no spend outlet, retreated r4","Foot-Stealer — pips accumulate with nothing to spend, LOSS r6","Little Belle — threat hit 44%, retreated r5","Water-Holger — 4 pips banked, no conversion, retreated r3","Grave Larva — full mulligan, still 0 damage, LOSS r6","Foot-Stealer — retreated r2 realizing Overtake is locked","The Butcher (elite) — hopeless matchup, retreated r3","Little Belle — stalled to r7 hoping for a proc, LOSS"] },
+      mid: { wr: 50, rounds: 7, w: 4, l: 4, note: 'A genuine coin-flip: wins come from Anvil of Form + a well-timed Overtake inside 5–6 rounds; losses are the single-copy Overtake arriving late.', log: ["Tri-Eyes (375HP) — WIN r8, ramped then Overtake r6","Mirac (450HP, boss) — LOSS r9, one small Overtake, boss escalation finished it","Hasshaku-sama (450HP, elite) — WIN r9, Anvil+Entropy Tax combo","Jeweled Tree (470HP, elite) — LOSS r10, defensive AI dragged it out","Rawhead Rex (560HP, boss) — WIN r9, double Ex Nihilo high roll","Tri-Eyes (375HP) — WIN r7, efficient ramp","Mirac (450HP, boss) — LOSS r?, Overtake never drawn","Hasshaku-sama (450HP, elite) — LOSS r11, RUPTURE fell short"] },
+      late: { wr: 25, rounds: 9, w: 2, l: 6, note: 'Late HP pools badly outscale one copy of The Overtake; wins require a second cast off persistent floating dice, which only happens in the longest, highest-variance runs.', log: ["Fire Giant (1080HP, elite) — WIN r13, double Ex Nihilo reload","Rangda (1240HP, boss) — LOSS r11, single cast, boss escalation overwhelmed","Tezcatlipoca (1370HP, boss) — LOSS r12, fixed 1-copy finisher can’t scale","Arch-Demon (1410HP, boss) — LOSS r10, no second cast before cap","Death (1455HP, unique) — WIN r15, two floating-die reloads","The Abortive (1500HP, unique) — LOSS r11, Anvil never drew","Fire Giant (1080HP, elite) — LOSS r12, escalation caught up","Rangda (1240HP, boss) — LOSS r9, mistimed 3-pip Overtake"] },
+      impossible: { wr: 0, rounds: 10, w: 0, l: 8, note: 'Even a best-case double-Overtake reload line caps out far below 2750 HP well before the 2x threat ceiling — the probe is doing its job.', log: ["The Incompleteness — LOSS r14, two casts, still a third of HP","The Incompleteness — LOSS r13, ~1000 dmg worth of fuel banked","The Incompleteness — retreated r6, no realistic payoff","The Incompleteness — LOSS r15, best-case draw, still over half HP left","The Incompleteness — retreated r8","The Incompleteness — LOSS r14, tops out far short","The Incompleteness — LOSS r9, no Anvil all game","The Incompleteness — retreated r5, recognized unwinnable math"] }
+    },
+    cardUsage: [
+      { id: 'sketch-of-a-thought', name: 'Sketch of a Thought', uses: 96 }, { id: 'half-step', name: 'Half-Step', uses: 96 },
+      { id: 'bootstrap-loop', name: 'Bootstrap Loop', uses: 52 }, { id: 'ex-nihilo', name: 'Ex Nihilo', uses: 52 },
+      { id: 'the-overtake', name: 'The Overtake', uses: 33 }, { id: 'anvil-of-form', name: 'Anvil of Form', uses: 29 },
+      { id: 'entropy-tax', name: 'Entropy Tax', uses: 23 }, { id: 'card-retreat', name: 'Retreat', uses: 15 }
+    ],
+    mostUsed: ['Sketch of a Thought','Half-Step'], leastUsed: ['Retreat','Entropy Tax']
+  },
+  {
+    id: 'penitent', name: 'Penitent', theme: 'Akrasia', color: '#8f2f3a',
+    pitch: 'Pay in blood for undercosted power; two self-afflictions make you Fallen, and the debt starts arguing for you.',
+    persona: 'Mora Vantweil, Ledger-Cantor', blurb: 'Cut her teeth on Dawncaster Blood/Corruption decks built around cheap recurring Bleed and the 4-Corruption threshold flip.',
+    grounding: 'blood.okf.md: "sacrifice your own blood instead of Energy for special powers." Corruption’s 4-stack threshold flip is a direct structural mirror of Penitent’s two-self-affliction Fallen gate.',
+    stages: {
+      early: { wr: 75, rounds: 6.9, w: 6, l: 2, note: 'Level gates lock out everything past Sweet Poison at L3. Fine vs. 25–45 HP normals, hopeless vs. the elite/boss with no payoff online.', log: ["Grave Larva — WIN r5, two Sweet Poison stacks","Foot-Stealer — WIN r7, 4x Sweet Poison outpaced aggression","Grave Larva — WIN r4, clean poison-stack kill","Little Belle — WIN r6, double-stacked poison","Water-Holger — WIN r7, DoT ignores mitigation","Foot-Stealer — WIN r7, Against My Judgment found the last stacker","The Butcher (elite) — LOSS r9, no payoff unlocked yet","King of Revenge (boss) — LOSS r10, bare shell times out"] },
+      mid: { wr: 62.5, rounds: 9.9, w: 5, l: 3, note: 'Mirror of Guilt + Crown of Thorns are the difference between wins and losses — both singletons, so consistency is the bottleneck against bosses.', log: ["Tri-Eyes (375HP) — WIN r9, Mirror online by r3","Hasshaku-sama (450HP, elite) — WIN r11, Fallen Grace heal kept pace","Tri-Eyes (375HP) — WIN r8, clean Mirror+Crown draw","Jeweled Tree (470HP, elite) — LOSS r12, defensive stance stalled tempo","Mirac (450HP, boss) — LOSS r9, boss burst too fast","Hasshaku-sama (450HP, elite) — WIN r10, both Self-Flagellants back-to-back","Mirac (450HP, boss) — WIN r11, early Mirror draw","Rawhead Rex (560HP, boss) — LOSS r10, highest HP + 1.6x rate"] },
+      late: { wr: 37.5, rounds: 12.4, w: 3, l: 5, note: '1080–1500 HP late bosses need more sustained burst than two Self-Flagellant copies provide — wins depend on drawing Pact of Akrasia turn 1.', log: ["Fire Giant (1080HP, elite) — WIN r13, Pact forged turn 1","Rangda (1240HP, boss) — LOSS r12, curse kit fought the debuff plan directly","Fire Giant (1080HP, elite) — WIN r13, both Flagellants back-to-back","Tezcatlipoca (1370HP, boss) — LOSS r12, HP too high for two burst cards","Rangda (1240HP, boss) — WIN r14, last burst closed it just in time","Arch-Demon (1410HP, boss) — LOSS r11, dual-stat procs out-damaged first","Death (1455HP, unique) — LOSS r10, no time to ramp","The Abortive (1500HP, unique) — LOSS r11, HP too large for the ceiling"] },
+      impossible: { wr: 0, rounds: 8.9, w: 0, l: 8, note: 'Best run left the boss at ~60% HP — nowhere close. No sequencing gets within striking distance before threat caps.', log: ["The Incompleteness — LOSS r9, engine online r4, 2750 HP out of reach","The Incompleteness — LOSS r8, died to capped telegraph","The Incompleteness — LOSS r10, best run, ~60% HP left","The Incompleteness — LOSS r8, Pact never drawn","The Incompleteness — LOSS r9, Mirror+Crown online, still linear vs. a wall","The Incompleteness — LOSS r9, own self-debuffs drained HP first","The Incompleteness — LOSS r8, standard early death","The Incompleteness — LOSS r10, longest survival, still a loss"] }
+    },
+    cardUsage: [
+      { id: 'against-my-judgment', name: 'Against My Judgment', uses: 118 }, { id: 'sweet-poison', name: 'Sweet Poison', uses: 104 },
+      { id: 'self-flagellant', name: 'Self-Flagellant', uses: 38 }, { id: 'fallen-grace', name: 'Fallen Grace', uses: 34 },
+      { id: 'crown-of-thorns', name: 'Crown of Thorns', uses: 19 }, { id: 'mirror-of-guilt', name: 'Mirror of Guilt', uses: 17 },
+      { id: 'pact-of-akrasia', name: 'Pact of Akrasia', uses: 11 }, { id: 'card-retreat', name: 'Retreat', uses: 6 }
+    ],
+    mostUsed: ['Against My Judgment','Sweet Poison'], leastUsed: ['Pact of Akrasia','Retreat','Mirror of Guilt']
+  },
+  {
+    id: 'standstill', name: 'Standstill', theme: 'Control', color: '#3a5a6b',
+    pitch: 'Strip the rungs from every telegraphed blow; what cannot land, lands inward.',
+    persona: 'Ashgrove "The Metronome" Vey', blurb: 'A Dawncaster Stun/Dazed lockdown veteran who lives by "denial buys time, it doesn’t buy the kill."',
+    grounding: 'stunned.okf.md / dazed.okf.md: pure turn-denial that ramps into a full lock. The lesson: denial is a tempo tool, not a win condition — it needs a payoff riding behind it or it bricks against big HP.',
+    stages: {
+      early: { wr: 75, rounds: 11, w: 6, l: 2, note: 'At tier ≤1 the deck is functionally 2 cards (Zeno’s Half-Step + Red Herring). Cleans up normals fine, no answer for The Butcher/King of Revenge HP.', log: ["Grave Larva — WIN r7, backfire ticks alone","Grave Larva — WIN r8, one stalled turn, guard covered it","Foot-Stealer — WIN r10, staggered every completion attempt","Foot-Stealer — WIN r12, ground it out","Little Belle — WIN r11, backfire slow-cooked her HP","Water-Holger — WIN r10, backfire from 2 Red Herrings","The Butcher (elite) — LOSS r14, 2-card kit can’t out-drip 95 HP","King of Revenge (boss) — LOSS r16, 150 HP outside drip range"] },
+      mid: { wr: 50, rounds: 22.5, w: 4, l: 4, note: 'Close to a coin-flip: Achilles and the Tortoise drawn early → the engine closes comfortably; without it, backfire alone can’t out-race 375–560 HP.', log: ["Tri-Eyes (375HP) — WIN r18, mind-threshold rider kept tripping","Tri-Eyes (375HP) — LOSS r22, Achilles never drawn","Mirac (450HP, boss) — WIN r24, lock_stance reset his pattern repeatedly","Mirac (450HP, boss) — LOSS r26, capped 2x hit slipped through","Hasshaku-sama (450HP, elite) — WIN r20, guard stacking blunted pressure","Hasshaku-sama (450HP, elite) — LOSS r23, Achilles never found","Jeweled Tree (470HP, elite) — WIN r19, defensive AI played into stagger","Rawhead Rex (560HP, boss) — LOSS r28, longest grind of the stage"] },
+      late: { wr: 12.5, rounds: 50.75, w: 1, l: 7, note: 'Standstill can survive almost indefinitely but has no burst payoff comparable to a RUPTURE/REAP archetype — denial genuinely never converts into a kill.', log: ["Fire Giant (1080HP, elite) — WIN r38, lowest-HP late enemy + early Achilles","Fire Giant (1080HP, elite) — LOSS r45, no Achilles this time","Rangda (1240HP, boss) — LOSS r50, 1240 HP outside drip range","Rangda (1240HP, boss) — LOSS r48, never came close to closing","Tezcatlipoca (1370HP, boss) — LOSS r52, boss adapted around lock_stance","Arch-Demon (1410HP, boss) — LOSS r55, dual procs found gaps at 2x","Death (1455HP, unique) — LOSS r58, ran out of steam near round 60","The Abortive (1500HP, unique) — LOSS r60, longest fight, still short"] },
+      impossible: { wr: 0, rounds: 18.5, w: 0, l: 8, note: 'A denial-plus-drip engine has no mechanism to remove 2750 HP in any survivable timeframe.', log: ["The Incompleteness — LOSS r15, delayed but never close","The Incompleteness — LOSS r18, Achilles online turn 2, still irrelevant","The Incompleteness — LOSS r20, Paralysis landed twice, ~1% of HP","The Incompleteness — LOSS r16, guard stacking overwhelmed","The Incompleteness — LOSS r22, denial held longest, still died","The Incompleteness — LOSS r19, rung-shrink barely mattered","The Incompleteness — LOSS r17, mind-rider tripped, changed nothing","The Incompleteness — LOSS r21, stagger missed a beat eventually"] }
+    },
+    cardUsage: [
+      { id: 'zenos-half-step', name: 'Zeno’s Half-Step', uses: 172 }, { id: 'red-herring', name: 'Red Herring', uses: 158 },
+      { id: 'undistributed-middle', name: 'Undistributed Middle', uses: 46 }, { id: 'arrow-paradox', name: 'Arrow Paradox', uses: 34 },
+      { id: 'paralysis-of-analysis', name: 'Paralysis of Analysis', uses: 14 }, { id: 'achilles-and-the-tortoise', name: 'Achilles and the Tortoise', uses: 11 },
+      { id: 'quagmire-of-doubt', name: 'Quagmire of Doubt', uses: 9 }, { id: 'card-retreat', name: 'Retreat', uses: 4 }
+    ],
+    mostUsed: ['Zeno’s Half-Step','Red Herring'], leastUsed: ['Quagmire of Doubt','Achilles and the Tortoise','Paralysis of Analysis']
+  },
+  {
+    id: 'augury', name: 'Augury', theme: 'Oracle', color: '#2f6e6a',
+    pitch: 'See the next move, declare it aloud, and collect on every prophecy that comes true.',
+    persona: 'The Ledger of Tomorrow', blurb: 'A Dawncaster-trained oracle: scrying decks never win by looking, they win by making the looking cash out. Foretell is tempo, not a weapon.',
+    grounding: 'foretell.okf.md: pure card-selection/tempo with zero inherent damage — the archetype must convert setup into a downstream scaling payoff, or it bricks if that payoff never lands.',
+    stages: {
+      early: { wr: 50, rounds: 5, w: 4, l: 4, note: 'At L3 only Glimpse and Signs and Portents are learned. A two-card exposure engine that grinds down small/normal HP but has no answer for elite/boss HP.', log: ["Grave Larva (25HP) — WIN r4, Mark ticks closed it","Grave Larva (25HP) — WIN r3, dug through the thin pool fast","Foot-Stealer (45HP) — WIN r5, Mark on curve","Foot-Stealer (45HP) — LOSS r6, double Signs and Portents, no Mark applied","Little Belle (40HP) — WIN r5, consistent Mark uptime","Water-Holger (40HP) — LOSS r6, RNG stalled the draw","The Butcher (elite) — LOSS r7, no burst at all at this level","King of Revenge (boss) — LOSS r7, chip damage can’t keep pace"] },
+      mid: { wr: 37.5, rounds: 8, w: 3, l: 5, note: 'Prophecy Fulfilled is tier 3 and excluded from the tier ≤2 mid pool — the full exposure toolkit is online with no way to cash it in.', log: ["Tri-Eyes (375HP) — WIN r8, Fated Course snowball closed it","Tri-Eyes (375HP) — LOSS r10, escalation caught up at single digits","Tri-Eyes (375HP) — WIN r9, Oracle’s Eye turn 2 guaranteed riders","Hasshaku-sama (elite) — LOSS r9, exposure engine couldn’t out-scale 450 HP","Hasshaku-sama (elite) — WIN r10, Fated Course carried it to the wire","Jeweled Tree (elite) — LOSS r8, too many draw cards, no Mark uptime","Mirac (boss) — LOSS r7, burstless build has no ceiling vs. boss rate","Rawhead Rex (boss) — LOSS r8, 560 HP unwinnable without a near-perfect draw"] },
+      late: { wr: 62.5, rounds: 10, w: 5, l: 3, note: 'Augury’s home stage: with all 7 cards legal, Oracle’s Eye + Fated Course + a fuel-scaled Prophecy Fulfilled finally has real Rupture damage to deal.', log: ["Fire Giant (elite) — WIN r9, Oracle’s Eye turn 1-2 into stacked omens","Fire Giant (elite) — WIN r9, Fated Course snowball plus Rupture","Rangda (boss) — LOSS r12, Prophecy Fulfilled one turn too late","Rangda (boss) — WIN r11, Oracle’s Eye early, decisive Rupture swing","Tezcatlipoca (boss) — WIN r12, patient sequencing, held Rupture for max fuel","Arch-Demon (boss) — LOSS r11, Prophecy Fulfilled still in the draw pile","Death (unique) — WIN r12, Fated Course snowball plus timed Rupture","The Abortive (unique) — LOSS r13, needed a near-perfect draw that didn’t come"] },
+      impossible: { wr: 0, rounds: 11, w: 0, l: 8, note: 'Even the fully-online late-game engine cannot generate enough Rupture fuel to dent 2750 HP before escalation caps out.', log: ["The Incompleteness — LOSS r12, far more banked omens needed than the clock allows","The Incompleteness — LOSS r11, 2750 HP dwarfs one fuel-scaled Rupture","The Incompleteness — LOSS r13, guard survivability, still nowhere near lethal","The Incompleteness — LOSS r12, real chunk dealt, HP absorbed it","The Incompleteness — retreated r8, preserved the run","The Incompleteness — LOSS r10, dodged some damage, closed none of the gap","The Incompleteness — LOSS r13, near-perfect draw order, still short","The Incompleteness — retreated r6, called it early"] }
+    },
+    cardUsage: [
+      { id: 'glimpse', name: 'Glimpse', uses: 142 }, { id: 'signs-and-portents', name: 'Signs and Portents', uses: 131 },
+      { id: 'cassandras-burden', name: 'Cassandra’s Burden', uses: 47 }, { id: 'delphic-ambiguity', name: 'Delphic Ambiguity', uses: 39 },
+      { id: 'the-oracles-eye', name: 'The Oracle’s Eye', uses: 23 }, { id: 'fated-course', name: 'Fated Course', uses: 20 },
+      { id: 'prophecy-fulfilled', name: 'Prophecy Fulfilled', uses: 11 }, { id: 'card-retreat', name: 'Retreat', uses: 4 }
+    ],
+    mostUsed: ['Glimpse','Signs and Portents'], leastUsed: ['Retreat','Prophecy Fulfilled']
+  },
+  {
+    id: 'tithe', name: 'Tithe', theme: 'Harvest', color: '#5c5c2e',
+    pitch: 'Plant short afflictions, harvest the Souls as they expire, and swing the scythe when the bank is full.',
+    persona: 'Reap-Counter, the Soul-Ledger Strategist', blurb: 'A former Dawncaster Souls/Blood Ritual grinder who cut their teeth stacking short-fused DoTs and cashing lingering essence into scythe-swing finishers.',
+    grounding: 'souls.okf.md: lingering essence spent to empower Actions — a banked resource, not instant damage. execute.okf.md reinforces timing finishers to land the kill, not fire them blind.',
+    stages: {
+      early: { wr: 87.5, rounds: 4.9, w: 7, l: 1, note: 'The engine reliably reaches Reaping threshold by round 4–7. The only loss is the 150 HP boss, where a single copy of the finisher can’t out-race a second escalation cycle.', log: ["Grave Larva (25HP) — WIN r3, Memento Mori Soul + tick","Foot-Stealer (45HP) — WIN r4, Winnowing early burst","Little Belle (40HP) — WIN r4, engine online by r2","Water-Holger (40HP) — WIN r5, parries delayed but didn’t stop it","Foot-Stealer (45HP) — WIN r3, double Memento Mori opener","The Butcher (95HP, elite) — WIN r7, Bone Orchard + delayed Reaping","King of Revenge (150HP, boss) — LOSS r9, 1.6x escalation outpaced it","Little Belle (40HP) — WIN r4, clean curve"] },
+      mid: { wr: 37.5, rounds: 11.5, w: 3, l: 5, note: 'Cleanly beats the 375 HP normal but goes 0-for-4 against 450+ HP bosses/elites — single-copy Reaping plus a slow drip can’t generate enough total damage.', log: ["Tri-Eyes (375HP) — WIN r10, steady churn + two Gleaner’s Due draws","Mirac (450HP, boss) — LOSS r13, heart-heavy sustain out-healed ticks","Hasshaku-sama (elite) — WIN r11, Bone Orchard drip covered the gap","Tri-Eyes (375HP) — WIN r9, Winnowing x2 seen early","Jeweled Tree (elite) — LOSS r14, defensive stance mitigated ticks","Rawhead Rex (boss) — LOSS r15, HP exceeds one burst plus a drip","Tri-Eyes (375HP) — WIN r8, fastest mid clear","Mirac (450HP, boss) — LOSS r12, Tithe drawn too late"] },
+      late: { wr: 12.5, rounds: 14.25, w: 1, l: 7, note: 'The sole win required a near-perfect draw of every uncommon — a variance-dependent, not reliable, win condition at 1080–1500 HP.', log: ["Fire Giant (elite) — LOSS r16, hammer blows escalated faster","Rangda (boss) — LOSS r14, curse pressure ended it before a second cycle","Fire Giant (elite) — LOSS r17, Reaping landed at 15 Souls, still ~400 HP short","Tezcatlipoca (boss) — LOSS r13, mind-stat boss punished mind-aspect cards","Death (unique) — LOSS r12, punctual aggression closed the clock first","Fire Giant (elite) — WIN r15, both Winnowing + both Gleaner’s Due drawn early","Arch-Demon (boss) — LOSS r13, three-stat proc overwhelmed a single lane","The Abortive (unique) — LOSS r14, engine never got remotely close"] },
+      impossible: { wr: 0, rounds: 11, w: 0, l: 8, note: 'The deck cannot generate anywhere close to the required damage before the capped telegraph ends the run.', log: ["The Incompleteness — LOSS r11, Soul bank hit 12, nowhere near enough","The Incompleteness — LOSS r10, Bone Orchard down turn 1, still <1/20th","The Incompleteness — LOSS r12, best draw, still a rounding error","The Incompleteness — LOSS r9, early Reaping, negligible","The Incompleteness — LOSS r13, longest survival, ground down regardless","The Incompleteness — LOSS r10, average case, irrelevant at scale","The Incompleteness — LOSS r11, Retreat used r8, delayed not avoided","The Incompleteness — LOSS r12, card advantage, negligible damage"] }
+    },
+    cardUsage: [
+      { id: 'memento-mori', name: 'Memento Mori', uses: 118 }, { id: 'brief-candle', name: 'Brief Candle', uses: 112 },
+      { id: 'winnowing', name: 'Winnowing', uses: 51 }, { id: 'the-gleaners-due', name: 'The Gleaner’s Due', uses: 42 },
+      { id: 'the-reaping', name: 'The Reaping', uses: 27 }, { id: 'bone-orchard', name: 'Bone Orchard', uses: 22 },
+      { id: 'the-tithe', name: 'The Tithe', uses: 19 }, { id: 'card-retreat', name: 'Retreat', uses: 10 }
+    ],
+    mostUsed: ['Memento Mori','Brief Candle','Winnowing'], leastUsed: ['The Tithe','Retreat','Bone Orchard']
+  },
+  {
+    id: 'grace', name: 'Grace', theme: 'Charm', color: '#a04f7a',
+    pitch: 'The deck that never strikes: build SWAY past their resolve and win by capitulation — or mercy.',
+    persona: 'The Charm-Stacker', blurb: 'Trained on hundreds of Dawncaster Charmed-stack runs: stack fast, protect the stack, cash the payoff before the clock outpaces you.',
+    grounding: 'charmed.okf.md: an instakill-adjacent affliction stripped by unmitigated hits — the heuristic is stack-fast-then-protect, exactly SWAY’s shape once Irresistible Grace stops the decay.',
+    stages: {
+      early: { wr: 87.5, rounds: 4.4, w: 7, l: 1, note: 'Trivially within reach for six of eight matchups, but not unloseable: the boss loss came from a bad hand that never found the rares before the telegraph closed it.', log: ["Grave Larva (25HP) — WIN r2, cleared threshold before a second hit landed","Little Belle (40HP) — WIN r4, capitulation despite chip damage","Foot-Stealer (45HP) — WIN r4, drew into guard for the dangerous round","Water-Holger — WIN r3, threat barely ticked","Grave Larva (25HP) — WIN r2, sway floods before AI ramps","The Butcher (elite) — WIN r6, guard burned twice against his aggression","Foot-Stealer (45HP) — WIN r5, rapport debuff stalled his tempo","King of Revenge (boss) — LOSS r9, bad hand, sway decay clawed back gains"] },
+      mid: { wr: 75, rounds: 6.8, w: 6, l: 2, note: 'Hinges almost entirely on drawing Irresistible Grace or Heart of the Matter in time — both are singletons.', log: ["Tri-Eyes (375HP) — WIN r6, threshold rider + finisher closed cleanly","Mirac (boss) — WIN r8, Irresistible Grace r4 stopped the decay","Hasshaku-sama (elite) — LOSS r9, neither rare drawn, decay outpaced it","Jeweled Tree (elite) — WIN r7, cleanse kept a debuff from crippling sway","Rawhead Rex (boss) — LOSS r10, HP too high without the enchantment early","Tri-Eyes (375HP) — WIN r5, no bricks","Mirac (boss) — WIN r7, Mirror of Longing covered a slow start","Hasshaku-sama (elite) — WIN r8, threshold rider was the exact number needed"] },
+      late: { wr: 37.5, rounds: 9.6, w: 3, l: 5, note: 'Wins require both rares online early plus a near-perfect curve — roughly a third of runs, consistent with a slow engine against the largest HP pools.', log: ["Fire Giant (elite) — WIN r10, Irresistible Grace by turn 3","Rangda (boss) — LOSS r11, curses stripped tempo faster than sway compounded","Tezcatlipoca (boss) — LOSS r12, HP too large for one rare finisher","Arch-Demon (boss) — LOSS r11, aggressive brute stalled sway generation","Death (unique) — LOSS r13, decay without early enchantment made it impossible","Fire Giant (elite) — WIN r9, fastest late win, near-ideal order","The Abortive (unique) — LOSS r12, highest HP, ceiling not high enough","Rangda (boss) — WIN r11, retreated once, came back with a cleaner draw"] },
+      impossible: { wr: 0, rounds: 11.4, w: 0, l: 8, note: 'At 2750 HP no realistic sway curve closes before the capped telegraph — Retreat sees its only real use here as damage avoidance.', log: ["The Incompleteness — LOSS r12, 2x cap by round 6, sway nowhere close","The Incompleteness — LOSS r13, best draw of the set, still a third of the way","The Incompleteness — retreated r10, avoided a guaranteed kill","The Incompleteness — LOSS r11, Mirror of Longing helped marginally","The Incompleteness — LOSS r12, standard loss","The Incompleteness — retreated r9, bad opening hand","The Incompleteness — LOSS r13, longest survival via guard cycling","The Incompleteness — LOSS r12, standard loss"] }
+    },
+    cardUsage: [
+      { id: 'soft-word', name: 'Soft Word', uses: 118 }, { id: 'disarming-smile', name: 'Disarming Smile', uses: 109 },
+      { id: 'common-ground', name: 'Common Ground', uses: 48 }, { id: 'the-olive-branch', name: 'The Olive Branch', uses: 41 },
+      { id: 'heart-of-the-matter', name: 'Heart of the Matter', uses: 22 }, { id: 'irresistible-grace', name: 'Irresistible Grace', uses: 22 },
+      { id: 'mirror-of-longing', name: 'Mirror of Longing', uses: 13 }, { id: 'card-retreat', name: 'Retreat', uses: 9 }
+    ],
+    mostUsed: ['Soft Word','Disarming Smile'], leastUsed: ['Retreat','Mirror of Longing']
+  },
+  {
+    id: 'bastion', name: 'Bastion', theme: 'Bulwark', color: '#48644f',
+    pitch: 'Guard, thorns, riposte — stand behind the wall and let their own aggression kill them.',
+    persona: 'Warden Isolde Marrow-Wall', blurb: 'Cut her teeth grinding Dawncaster’s Armor/Barrier/Reflect subtheme — reads every kit first for "what punishes the enemy for attacking me."',
+    grounding: 'armor.okf.md fades every turn (a re-apply tax); barrier.okf.md never fades; reflect.okf.md returns damage but only while re-laid. Uptime discipline is the whole archetype.',
+    stages: {
+      early: { wr: 75, rounds: 7.5, w: 6, l: 2, note: 'Crushes body-forward brawlers since every swing feeds thorns/riposte, but the two heart/mind fights expose that the win con depends on the enemy attacking into a guarded body.', log: ["Grave Larva — WIN r4, guard absorbed its bite, thorns closed it","Foot-Stealer — WIN r6, leverage attacks walked into thorns","Little Belle — LOSS r9, heart damage bypassed the guard shell","Water-Holger — WIN r7, mixed attacks stacked real thorns value","The Butcher — WIN r10, pure body archetype ate riposte every round","King of Revenge — LOSS r11, mind/heart boss out-scaled the guard shell","Foot-Stealer — WIN r5, Adamant Wall drawn early","Water-Holger — WIN r8, grindy but Hedgehog’s Dilemma closed it"] },
+      mid: { wr: 25, rounds: 10.375, w: 2, l: 6, note: 'The Long Road roster is dominated by heart/mind bosses this physical-reflect kit isn’t built to punish; only the body-stat Rawhead Rex fights are winnable.', log: ["Tri-Eyes — LOSS r8, caster profile bypassed the guard shell","Rawhead Rex — WIN r14, pure body boss, chipped down before cap","Mirac — LOSS r10, damage output never got going","Hasshaku-sama — LOSS r9, same heart-stat failure mode","Jeweled Tree — LOSS r9, appetite attacks rarely triggered thorns","Rawhead Rex — WIN r15, Adamant Wall barrier carried a long grind","Tri-Eyes — LOSS r7, guard pieces drawn late","Mirac — LOSS r11, marks accumulated too slowly"] },
+      late: { wr: 12.5, rounds: 13.5, w: 1, l: 7, note: 'Even the archetype’s best matchups are coin-flips because the fight length needed to grind 1080–1500 HP collides with the escalation cap.', log: ["Fire Giant — WIN r16, best possible matchup, barely closed before cap","Rangda — LOSS r12, heart-heavy sorcery, thorns had nothing to bite","Tezcatlipoca — LOSS r10, mind-heavy, fast unpunished loss","Arch-Demon — LOSS r14, good matchup on paper, HP too large","Death — LOSS r11, presumed non-physical pressure, guard irrelevant","The Abortive — LOSS r13, non-standard attacks dodged thorns","Fire Giant — LOSS r17, bad draw of Adamant Wall/Hedgehog’s Dilemma","Arch-Demon — LOSS r15, close but HP too large for the ceiling"] },
+      impossible: { wr: 0, rounds: 8.25, w: 0, l: 8, note: '2750 HP is an order of magnitude beyond what a slow per-swing reflect engine can ever grind through.', log: ["The Incompleteness — LOSS r9, thorns a rounding error against 2750 HP","The Incompleteness — LOSS r8, barrier bought time not damage","The Incompleteness — LOSS r10, longest survival, no kill","The Incompleteness — LOSS r7, poor guard draw, fast telegraph","The Incompleteness — LOSS r9, marks accumulated, HP dwarfed the ceiling","The Incompleteness — LOSS r8, guard mitigates, thorns barely dents","The Incompleteness — LOSS r9, best-case draw, still unwinnable","The Incompleteness — LOSS r6, guard uptime lapsed once, unraveled"] }
+    },
+    cardUsage: [
+      { id: 'brace-for-impact', name: 'Brace for Impact', uses: 81 }, { id: 'nettle-cloak', name: 'Nettle Cloak', uses: 74 },
+      { id: 'measured-answer', name: 'Measured Answer', uses: 43 }, { id: 'tu-quoque', name: 'Tu Quoque', uses: 35 },
+      { id: 'the-adamant-wall', name: 'The Adamant Wall', uses: 19 }, { id: 'hedgehogs-dilemma', name: 'Hedgehog’s Dilemma', uses: 14 },
+      { id: 'crumbling-resolve', name: 'Crumbling Resolve', uses: 6 }, { id: 'card-retreat', name: 'Retreat', uses: 3 }
+    ],
+    mostUsed: ['Brace for Impact','Nettle Cloak','Measured Answer'], leastUsed: ['Retreat','Crumbling Resolve','Hedgehog’s Dilemma']
+  },
+  {
+    id: 'refrain', name: 'Refrain', theme: 'Echo', color: '#4a5aa0',
+    pitch: 'Nothing is said once: echo, reprise, replay — the tune they cannot stop hearing is yours.',
+    persona: 'Mara Voss, the Discard-Pile Archivist', blurb: 'Made her name in Dawncaster piloting Blue Echo/Corruption shells that do nothing on curve and everything two turns later.',
+    grounding: 'echo.okf.md: cards with Echo cast twice on play — a direct mirror of Refrain’s own echo mechanic and Resonant Chamber’s "first spell each turn gains echo."',
+    stages: {
+      early: { wr: 0, rounds: 6.5, w: 0, l: 8, note: 'The sole damage engine and finisher/enchantment are excluded by BOTH level AND the tier ≤1 pool cap at Early — only two non-damaging commons are legal. Every run is a correct, forced retreat.', log: ["Grave Larva — retreat r7, 0 HP damage dealt all match","Foot-Stealer — retreat r6, threat crossed 1.4x","Little Belle — retreat r8, stalled longest on dead mark","Water-Holger — retreat r5, recognized the dead hand early","The Butcher (elite) — retreat r4, elite telegraph too fast to risk","King of Revenge (boss) — retreat r3, boss rate unwinnable instantly","Grave Larva — retreat r6, cycled for draw only, no kill path","Foot-Stealer — retreat r7, 0 damage total"] },
+      mid: { wr: 37.5, rounds: 14.5, w: 3, l: 5, note: 'Ouroboros stays tier-3-locked at Mid. Once Stuck in Their Head + Resonant Chamber are both live, the engine reliably closes the roster’s lower-HP normal (Tri-Eyes) on drip damage alone.', log: ["Tri-Eyes (375HP) — WIN r14, engine online by r4, drip ground the rest","Mirac (boss) — retreat r16, boss-rate escalation outpaced drip","Hasshaku-sama (elite) — retreat r15, drip too slow against 450 HP","Jeweled Tree (elite) — retreat r13, engine live too late","Tri-Eyes (375HP) — WIN r12, fast Stuck in Their Head draw","Rawhead Rex (boss) — retreat r17, 560 HP outsizes the drip rate","Tri-Eyes (375HP) — WIN r15, closed via drip alone","Mirac (boss) — retreat r14, Resonant Chamber discarded early"] },
+      late: { wr: 12.5, rounds: 15.9, w: 1, l: 7, note: 'A maximally assembled engine tops out around 18–22 dmg/round — barely out-paces the lowest late-stage HP pool. First stage where Ouroboros is even legal.', log: ["Fire Giant (elite) — retreat r18, engine peaked ~18-20 dmg/round, still short","Rangda (boss) — retreat r16, curses out-tempo’d the setup turns","Tezcatlipoca (boss) — retreat r15, too much HP for drip damage alone","Arch-Demon (boss) — retreat r14, fight closed before the engine matured","Death (unique) — retreat r13, escalation profile ended it early","Fire Giant (elite) — WIN r22, Ouroboros chained twice at the cap","The Abortive (unique) — retreat r12, no realistic path at 1500 HP","Rangda (boss) — retreat r17, one combo piece short"] },
+      impossible: { wr: 0, rounds: 9, w: 0, l: 8, note: 'Even a fully-online engine with Ouroboros legal cannot approach 2750 HP before the crushing threat escalation ends the run.', log: ["The Incompleteness — LOSS r10, threat cap hit ~r5, dead by r10","The Incompleteness — LOSS r8, never past first combo layer","The Incompleteness — LOSS r9, Stuck in Their Head landed, irrelevant","The Incompleteness — LOSS r11, best engine draw, still nowhere near","The Incompleteness — LOSS r7, no time to assemble","The Incompleteness — LOSS r9, threat cap ends it","The Incompleteness — LOSS r10, Ouroboros fired once, rounding error","The Incompleteness — LOSS r8, confirmed unwinnable as designed"] }
+    },
+    cardUsage: [
+      { id: 'refrain-card', name: 'Refrain', uses: 132 }, { id: 'second-thoughts', name: 'Second Thoughts', uses: 112 },
+      { id: 'ad-nauseam', name: 'Ad Nauseam', uses: 54 }, { id: 'circular-reasoning', name: 'Circular Reasoning', uses: 49 },
+      { id: 'resonant-chamber', name: 'Resonant Chamber', uses: 24 }, { id: 'stuck-in-their-head', name: 'Stuck in Their Head', uses: 21 },
+      { id: 'ouroboros', name: 'Ouroboros', uses: 14 }, { id: 'card-retreat', name: 'Retreat', uses: 29 }
+    ],
+    mostUsed: ['Refrain','Second Thoughts'], leastUsed: ['Ouroboros','Stuck in Their Head','Resonant Chamber']
+  }
+];
+
+const INSIGHTS = [
+  "Cheap, unrestricted T1 commons carry every deck regardless of archetype — Zeno’s Half-Step (172 uses), Red Herring (158), Glimpse (142), Refrain (132) dwarf every uncommon/rare. Structurally healthy, but singleton rares/finishers are starved by comparison — the single most repeated fix across all ten expert reports is “duplicate or cheapen the finisher.”",
+  "Four presets are a hard 0% at Early: Oratory, Foundry, and Refrain because their only damage/alt-win card is locked out by level AND tier-pool caps a Shallows-legal player can’t reach — this is a design bug, not underpowered tuning. Augury (50%) shows what the same gating pattern looks like when at least one common still applies exposure damage.",
+  "Status/DoT engines (Erosion, Tithe, Penitent, Grace) share a shape: strong-to-dominant Early (75–87.5%), respectable Mid, then a hard collapse Late (12.5–37.5%) once 1080–1500 HP pools outscale a single-copy finisher before the 2x threat cap.",
+  "Standstill validates the classic control failure mode: it can survive 20–60-round grinds indefinitely but its win rate gets worse at Late (12.5%) than Mid (50%) — denial without a scalable payload cannot convert stalling into a kill against four-digit HP.",
+  "Bastion’s losses are matchup-driven, not power-driven: it stomps body-stat brawlers and is nearly helpless against heart/mind casters at every single stage, because thorns/riposte only fires when the enemy physically attacks.",
+  "Oratory and Augury are the lab’s outliers in the same direction: both are bricked or weak Early/Mid because their payoff card is tier-gated out, then become two of the three best-performing Late decks (62.5% each) once that gate lifts — proof that alt-win/fuel-scaled-burst mechanics are the most reliable answer to the late-game HP-vs-round-count squeeze that raw DoT decks are failing to solve.",
+  "Impossible-stage tuning is essentially perfect as-is: 9 of 10 presets go a clean 0/8, and the lone win (Oratory, via CONCEDE) lands the stage average at 1.25% — almost exactly on the ~1% target. No changes are warranted here.",
+  "Every preset’s own pilot independently flags the same complaint: Resonance Detonation, The Overtake, The Reaping, Heart of the Matter, Prophecy Fulfilled, Ouroboros, and the double-Self-Flagellant cap are each “right power level, wrong access frequency.” This is the single most cross-cutting recommendation in the whole lab."
+];
+
+const PLAN = {
+  early: {
+    current: 53.75, gap: "About 36 points below target. Four presets sit at 0–50% purely from gating — Oratory, Foundry, and Refrain have their sole damage/alt-win card locked out of the Early pool by level AND tier cap; Augury has only half its kit online. Every other preset already sits at 75–87.5%, close to target on its own.",
+    changes: [
+      { deck: 'Oratory', type: 'balance', text: 'debuff_mark (the only two legal Early cards apply it) deals zero HP damage. Give it a small innate per-tick DoT floor (1–2/round) independent of The Closing Word, or drop Closing Word’s tier/level low enough to be legal in the tier≤1 pool.' },
+      { deck: 'Foundry', type: 'balance', text: 'Give Half-Step (the pip-granting common) a minor built-in bleed/rupture rider so Foundry has some chip pressure before Bootstrap Loop/Ex Nihilo/The Overtake unlock at level 4–12.' },
+      { deck: 'Refrain', type: 'balance', text: 'Add or reclassify a tier-1, low-level damage card to the theme — Stuck in Their Head (the only real damage source) is tier 2/level 12 and excluded from the tier≤1 pool no matter how low its level requirement goes.' },
+      { deck: 'Augury', type: 'balance', text: 'Lower Cassandra’s Burden’s gate from level 4 to level 3 to give Early Augury a second Mark source with Guard, closing the gap on elite/boss fights.' },
+      { deck: 'Bastion', type: 'deck', text: 'Player-facing only: mulligan hard for Nettle Cloak/Measured Answer against heart/mind-flavored Early foes (Little Belle, King of Revenge) — thorns only triggers off physical swings, and those two fights are the deck’s only Early losses.' }
+    ]
+  },
+  mid: {
+    current: 42.5, gap: "About 33–37 points below target. Oratory is still a hard 0% (Closing Word stays tier 3, excluded even from the tier≤2 Mid pool). Bastion (25%) is dragged down by its stat-matchup problem against Mid’s heart-heavy roster. Standstill, Tithe, Refrain, and Augury all lose to the same pattern: singleton payoff pieces arriving too late against 450–560 HP bosses before threat escalation caps.",
+    changes: [
+      { deck: 'Oratory', type: 'balance', text: 'Reclassify The Closing Word from tier 3 to tier 2 so Mid-stage Oratory has any legal way to convert its already-functional 6-of-7-card Premises engine into HP damage or an alt-win.' },
+      { deck: 'Augury', type: 'balance', text: 'Reclassify Prophecy Fulfilled from tier 3 to tier 2 — the deck’s full exposure/omen toolkit is already online at Mid but has no legal card to cash Rupture fuel.' },
+      { deck: 'Bastion', type: 'balance', text: 'Scale Hedgehog’s Dilemma’s mark with triggering-thorns intensity rather than flat-per-proc, and/or add one non-reactive damage clause so the deck isn’t wholly dependent on the enemy attacking into it — targets the 0-for-4 record against heart/mind bosses.' },
+      { deck: 'Standstill', type: 'deck', text: 'Player-facing sequencing fix: prioritize landing Achilles and the Tortoise by turn 1–2 every Mid fight so denied enemy turns convert into draws feeding Undistributed Middle’s backfire.' },
+      { deck: 'Tithe', type: 'deck', text: 'Always slot Bone Orchard turn 1 against Mid bosses/elites rather than waiting — converts otherwise-dead early Souls into passive chip damage against the 450–560 HP tier.' },
+      { deck: 'Refrain', type: 'deck', text: 'Use Refrain/Second Thoughts draw specifically to dig for Stuck in Their Head + Resonant Chamber in the first 2–3 turns before spending any reprise on a shallow discard pile.' }
+    ]
+  },
+  late: {
+    current: 31.25, gap: "The largest relative shortfall of any stage: roughly 29–39 points below target. Only Oratory (62.5%) and Augury (62.5%) already land in-band, and both do so via a resource-threshold alt-win or fuel-scaled burst rather than raw DoT — strong evidence the fix for every other preset is a bigger/duplicated finisher, not more ticks.",
+    changes: [
+      { deck: 'Erosion', type: 'balance', text: 'A second copy of Resonance Detonation (or a reshuffle-back mechanic) directly addresses the single-copy payoff bottleneck landing in barely half of Late attempts.' },
+      { deck: 'Foundry', type: 'balance', text: 'Let Entropy Tax’s per-spend mark scale RUPTURE multiplicatively rather than additively against high-HP targets — a single reloaded Overtake tops out well short of 1080–1500 HP.' },
+      { deck: 'Penitent', type: 'balance', text: 'Bump Self-Flagellant to a 3rd copy (from 2) or reduce its recoil cost, so the deck fires two full burst windows instead of one per Late fight.' },
+      { deck: 'Standstill', type: 'balance', text: 'Let stacked backfire add intensity instead of only refreshing duration, or give Paralysis of Analysis a rider scaling off stagger rungs already denied this combat — converts genuine control advantage into an actual damage spike.' },
+      { deck: 'Tithe', type: 'balance', text: 'Raise The Reaping’s burstPerSoul from 2 to 3, or let excess Souls overflow into a follow-up burst — even a 15-Soul bank is currently a rounding error against 1080–1500 HP.' },
+      { deck: 'Grace', type: 'balance', text: 'A second copy of Heart of the Matter (or an alternate rank-5 finisher) reduces the single-dead-draw failure mode against Rangda/Tezcatlipoca/Arch-Demon.' },
+      { deck: 'Bastion', type: 'deck', text: 'Pair Crumbling Resolve explicitly with guaranteed-full-block rounds against body-heavy Late bosses to slow the threat clock directly — damage output is structurally too slow to win a pure race here.' },
+      { deck: 'Refrain', type: 'balance', text: 'Increase Ouroboros’s replay count from 2 to 3, or let it copy the replayed spell’s free effect — it’s only now legal at Late and currently a 4–6 damage tick, not a true finisher.' }
+    ]
+  },
+  impossible: {
+    current: 1.25, gap: "Effectively on target — 9 of 10 presets go a clean 0/8 against The Incompleteness, and the one win (Oratory, via CONCEDE) is consistent with intentional near-zero variance, not a balance gap. No corrective changes are needed; this stage is functioning exactly as the ceiling-probe design intends.",
+    changes: [
+      { deck: 'All decks', type: 'deck', text: 'No change recommended — the 2750 HP / L110 ceiling probe is correctly calibrated across every archetype tested; retain as a validation benchmark only.' }
+    ]
+  }
+};
+
+/* =========================================================================
+   RENDER
+   ========================================================================= */
+function fmtPct(n) { return (Math.round(n * 10) / 10) + '%'; }
+
+function renderStatTiles() {
+  const grid = document.getElementById('statGrid');
+  STAGE_ORDER.forEach(stage => {
+    const vals = DECKS.map(d => d.stages[stage].wr);
+    const avg = vals.reduce((a,b)=>a+b,0) / vals.length;
+    const target = TARGETS[stage];
+    const hit = stage === 'impossible' ? avg <= 5 : avg >= target - 8;
+    const tile = document.createElement('div');
+    tile.className = 'stat-tile';
+    tile.innerHTML = `
+      <div class="stage-name">${STAGE_NAMES[stage]}</div>
+      <div class="stat-value">${fmtPct(avg)}</div>
+      <div class="stat-target">target ${TARGET_LABEL[stage]}</div>
+      <span class="pill ${hit ? 'hit' : 'gap'}">${hit ? '✓ near band' : '△ gap'}</span>
+    `;
+    grid.appendChild(tile);
+  });
+}
+
+function renderCharts() {
+  const grid = document.getElementById('chartGrid');
+  STAGE_ORDER.forEach(stage => {
+    const target = TARGETS[stage];
+    const sorted = [...DECKS].sort((a,b) => b.stages[stage].wr - a.stages[stage].wr);
+    const panel = document.createElement('div');
+    panel.className = 'chart-panel';
+    let rows = '';
+    sorted.forEach(d => {
+      const wr = d.stages[stage].wr;
+      const hit = stage === 'impossible' ? wr <= 5 : wr >= target - 5;
+      rows += `
+        <div class="bar-row">
+          <div class="bar-label">${d.name}</div>
+          <div class="bar-track">
+            <div class="bar-fill ${hit ? 'hit' : ''}" style="width:${wr}%"></div>
+            <div class="target-line" style="left:${Math.min(target,100)}%"></div>
+          </div>
+          <div class="bar-value">${fmtPct(wr)}</div>
+        </div>`;
+    });
+    panel.innerHTML = `
+      <h3>${STAGE_NAMES[stage]}</h3>
+      <div class="chart-target-label">target ${TARGET_LABEL[stage]}</div>
+      ${rows}
+      <div class="legend-line"><span class="legend-swatch"></span> target line</div>
+    `;
+    grid.appendChild(panel);
+  });
+}
+
+let sortState = { key: 'deck', dir: 1 };
+const COLS = [
+  { key: 'deck', label: 'Deck' },
+  { key: 'theme', label: 'Theme' },
+  { key: 'early', label: 'Early' },
+  { key: 'mid', label: 'Mid' },
+  { key: 'late', label: 'Late' },
+  { key: 'impossible', label: 'Impossible' },
+  { key: 'avgRounds', label: 'Avg Rounds' },
+];
+
+function tableRows() {
+  return DECKS.map(d => ({
+    deck: d.name, theme: d.theme, color: d.color,
+    early: d.stages.early.wr, mid: d.stages.mid.wr, late: d.stages.late.wr, impossible: d.stages.impossible.wr,
+    avgRounds: STAGE_ORDER.reduce((s,k)=>s+d.stages[k].rounds,0) / 4
+  }));
+}
+
+function chipClass(stage, val) {
+  const t = TARGETS[stage];
+  if (stage === 'impossible') return val <= 5 ? 'hit' : (val >= 20 ? 'gap' : 'mid');
+  if (val >= t - 5) return 'hit';
+  if (val <= t - 25) return 'gap';
+  return 'mid';
+}
+
+function renderTable() {
+  const head = document.getElementById('resultsHead');
+  head.innerHTML = COLS.map(c => `<th data-key="${c.key}">${c.label}</th>`).join('');
+  head.querySelectorAll('th').forEach(th => {
+    th.addEventListener('click', () => {
+      const key = th.dataset.key;
+      sortState.dir = (sortState.key === key) ? -sortState.dir : 1;
+      sortState.key = key;
+      renderTableBody();
+    });
+  });
+  renderTableBody();
+}
+
+function renderTableBody() {
+  const body = document.getElementById('resultsBody');
+  let rows = tableRows();
+  rows.sort((a,b) => {
+    const va = a[sortState.key], vb = b[sortState.key];
+    if (typeof va === 'string') return va.localeCompare(vb) * sortState.dir;
+    return (va - vb) * sortState.dir;
+  });
+  body.innerHTML = rows.map(r => `
+    <tr>
+      <td class="deck-name">${r.deck}</td>
+      <td class="theme-tag">${r.theme}</td>
+      <td class="num"><span class="wr-chip ${chipClass('early', r.early)}">${fmtPct(r.early)}</span></td>
+      <td class="num"><span class="wr-chip ${chipClass('mid', r.mid)}">${fmtPct(r.mid)}</span></td>
+      <td class="num"><span class="wr-chip ${chipClass('late', r.late)}">${fmtPct(r.late)}</span></td>
+      <td class="num"><span class="wr-chip ${chipClass('impossible', r.impossible)}">${fmtPct(r.impossible)}</span></td>
+      <td class="num">${r.avgRounds.toFixed(1)}</td>
+    </tr>
+  `).join('');
+}
+
+function renderLeaderboard() {
+  const all = [];
+  DECKS.forEach(d => d.cardUsage.forEach(c => all.push({ ...c, deck: d.name })));
+  const most = [...all].sort((a,b) => b.uses - a.uses).slice(0, 12);
+  const least = [...all].filter(c => c.id !== 'card-retreat').sort((a,b) => a.uses - b.uses).slice(0, 12);
+
+  const grid = document.getElementById('leaderboardGrid');
+  const mkPanel = (title, sub, items) => {
+    const el = document.createElement('div');
+    el.className = 'lb-panel';
+    el.innerHTML = `<h3>${title}</h3><div class="lb-sub">${sub}</div>` +
+      items.map(c => `<div class="lb-item"><span>${c.name} <span class="lb-deck">${c.deck}</span></span><span class="lb-count">${c.uses}×</span></div>`).join('');
+    return el;
+  };
+  grid.appendChild(mkPanel('Most Used', 'Top 12 cards across all 10 decks', most));
+  grid.appendChild(mkPanel('Least Used', 'Bottom 12 cards (excluding Retreat)', least));
+}
+
+function renderDossiers() {
+  const grid = document.getElementById('dossierGrid');
+  DECKS.forEach(d => {
+    const el = document.createElement('div');
+    el.className = 'dossier';
+    el.style.setProperty('--deck-color', d.color);
+    const stageBlocks = STAGE_ORDER.map(stage => {
+      const s = d.stages[stage];
+      return `<div class="mini-stage"><div class="ms-label">${stage}</div><div class="ms-val">${fmtPct(s.wr)}</div></div>`;
+    }).join('');
+    const runlogs = STAGE_ORDER.map(stage => {
+      const s = d.stages[stage];
+      return `<details class="runlog">
+        <summary>${STAGE_NAMES[stage]} — ${s.w}W / ${s.l}L, avg ${s.rounds}r</summary>
+        <p style="font-size:12px;color:var(--ink-2);margin:2px 0 8px;">${s.note}</p>
+        <ul>${s.log.map(l => `<li>${l}</li>`).join('')}</ul>
+      </details>`;
+    }).join('');
+    const mostTags = d.mostUsed.map(c => `<span class="tag most">↑ ${c}</span>`).join('');
+    const leastTags = d.leastUsed.map(c => `<span class="tag least">↓ ${c}</span>`).join('');
+    el.innerHTML = `
+      <div class="deck-eyebrow"><span><span class="swatch"></span>${d.name} — ${d.theme}</span><span>${d.id}</span></div>
+      <h4 class="persona">${d.persona}</h4>
+      <div class="deck-name">"${d.pitch}"</div>
+      <p class="blurb">${d.blurb}</p>
+      <p class="grounding">${d.grounding}</p>
+      <div class="mini-stage-row">${stageBlocks}</div>
+      ${runlogs}
+      <div class="card-tags">${mostTags}${leastTags}</div>
+    `;
+    grid.appendChild(el);
+  });
+}
+
+function renderInsights() {
+  const list = document.getElementById('insightList');
+  list.innerHTML = INSIGHTS.map(t => `<div class="insight-item"><span class="insight-mark">“</span><span>${t}</span></div>`).join('');
+}
+
+function renderPlan() {
+  const container = document.getElementById('planContainer');
+  STAGE_ORDER.forEach(stage => {
+    const p = PLAN[stage];
+    const el = document.createElement('div');
+    el.className = 'plan-stage';
+    el.innerHTML = `
+      <div class="plan-stage-head">
+        <h3>${STAGE_NAMES[stage]}</h3>
+        <span class="plan-gap-line">${fmtPct(p.current)} current <span class="arrow">→</span> ${TARGET_LABEL[stage]} target</span>
+      </div>
+      <p class="gap-assess">${p.gap}</p>
+      <div class="change-list">
+        ${p.changes.map(c => `
+          <div class="change-row">
+            <span class="cr-deck">${c.deck}</span>
+            <span class="cr-type ${c.type}">${c.type}</span>
+            <span class="cr-desc">${c.text}</span>
+          </div>
+        `).join('')}
+      </div>
+    `;
+    container.appendChild(el);
+  });
+}
+
+function initTheme() {
+  const btn = document.getElementById('themeToggle');
+  let mode = 'auto';
+  const apply = () => {
+    if (mode === 'auto') { document.documentElement.removeAttribute('data-theme'); btn.textContent = 'THEME: AUTO'; }
+    else { document.documentElement.setAttribute('data-theme', mode); btn.textContent = 'THEME: ' + mode.toUpperCase(); }
+  };
+  btn.addEventListener('click', () => {
+    mode = mode === 'auto' ? 'light' : (mode === 'light' ? 'dark' : 'auto');
+    apply();
+  });
+  apply();
+}
+
+renderStatTiles();
+renderCharts();
+renderTable();
+renderLeaderboard();
+renderDossiers();
+renderInsights();
+renderPlan();
+initTheme();
+</script>
+</body>
+</html>

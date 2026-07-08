@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Card-Expert Tuning Lab — Plan Execution Report</title>
+<style>
+  :root{
+    --bg:#0d1117; --panel:#161b22; --panel2:#1c2230; --ink:#e6edf3; --dim:#8b949e;
+    --line:#2d333b; --green:#3fb950; --amber:#d29922; --red:#f85149; --blue:#58a6ff;
+    --violet:#bc8cff; --teal:#39c5cf; --pink:#db61a2;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font:15px/1.55 "Segoe UI",system-ui,sans-serif;padding:0 0 80px}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+  header{padding:44px 0 28px;border-bottom:1px solid var(--line);margin-bottom:36px;
+    background:linear-gradient(180deg,#131a26 0%,var(--bg) 100%)}
+  h1{font-size:30px;letter-spacing:.5px}
+  h1 .accent{color:var(--teal)}
+  .sub{color:var(--dim);margin-top:6px;font-size:14px}
+  .chips{margin-top:14px;display:flex;gap:8px;flex-wrap:wrap}
+  .chip{font-size:12px;padding:3px 10px;border:1px solid var(--line);border-radius:999px;color:var(--dim)}
+  .chip b{color:var(--ink)}
+  section{margin:44px 0}
+  .snum{color:var(--teal);font-family:Consolas,monospace;font-size:13px;letter-spacing:2px}
+  h2{font-size:22px;margin:4px 0 18px}
+  h3{font-size:16px;margin:0 0 8px}
+  p{margin:8px 0;color:#c7d0d9}
+  .overflow{overflow-x:auto}
+  table{border-collapse:collapse;width:100%;font-size:13.5px}
+  th,td{border:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top}
+  th{background:var(--panel2);color:var(--ink);white-space:nowrap}
+  td{background:var(--panel)}
+  code,.mono{font-family:Consolas,"Cascadia Mono",monospace;font-size:12.5px;color:var(--blue)}
+  .good{color:var(--green);font-weight:600}
+  .bad{color:var(--red);font-weight:600}
+  .warn{color:var(--amber);font-weight:600}
+  /* pipeline */
+  .pipe{position:relative;margin-left:10px;padding-left:34px}
+  .pipe::before{content:"";position:absolute;left:9px;top:6px;bottom:6px;width:2px;
+    background:linear-gradient(180deg,var(--teal),var(--violet))}
+  .node{position:relative;margin:0 0 18px;background:var(--panel);border:1px solid var(--line);
+    border-radius:10px;padding:14px 16px}
+  .node::before{content:"";position:absolute;left:-31px;top:18px;width:14px;height:14px;border-radius:50%;
+    background:var(--bg);border:3px solid var(--teal)}
+  .node.done::before{background:var(--green);border-color:var(--green)}
+  .node.open::before{background:var(--bg);border-color:var(--amber)}
+  .node .meta{display:flex;gap:10px;flex-wrap:wrap;align-items:baseline;margin-bottom:4px}
+  .badge{font-size:11px;font-weight:700;letter-spacing:.5px;padding:2px 8px;border-radius:5px}
+  .badge.done{background:#12351f;color:var(--green)}
+  .badge.open{background:#3a2c10;color:var(--amber)}
+  .sha{font-family:Consolas,monospace;font-size:12px;color:var(--dim)}
+  .delta{font-family:Consolas,monospace;font-size:12.5px;color:var(--teal)}
+  .node p{font-size:13.5px;margin:4px 0 0}
+  /* cards */
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+  .card{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--blue);
+    border-radius:8px;padding:14px 16px}
+  .card.finding{border-left-color:var(--violet)}
+  .card.misc{border-left-color:var(--dim)}
+  .card.rec{border-left-color:var(--green)}
+  .card h3 .tag{font-size:11px;color:var(--dim);font-weight:400;margin-left:6px}
+  .card p, .card li{font-size:13.5px}
+  ul{padding-left:20px;margin:6px 0}
+  li{margin:4px 0;color:#c7d0d9}
+  .callout{background:linear-gradient(90deg,#20172a,#161b22);border:1px solid #4a3a6a;border-left:5px solid var(--violet);
+    border-radius:10px;padding:18px 20px;margin:20px 0}
+  .callout h3{color:var(--violet)}
+  .stage{border-top:4px solid var(--line)}
+  .stage.early{border-top-color:var(--green)}
+  .stage.mid{border-top-color:var(--amber)}
+  .stage.late{border-top-color:var(--red)}
+  .kbd{font-size:11.5px;color:var(--dim)}
+  footer{margin-top:60px;padding-top:16px;border-top:1px solid var(--line);color:var(--dim);
+    font-size:12.5px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+  .bar{height:10px;border-radius:5px;background:#22282f;position:relative;overflow:hidden;min-width:120px}
+  .bar i{position:absolute;left:0;top:0;bottom:0;border-radius:5px;background:var(--teal)}
+  .rowflex{display:flex;align-items:center;gap:10px}
+  .pct{font-family:Consolas,monospace;font-size:12px;width:110px;white-space:nowrap}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <h1>Card-Expert <span class="accent">Tuning Lab</span></h1>
+  <div class="sub">Plan execution report — <span class="mono">plan/tuning/2026-07-08-win-path-scaling.md</span> · run of 2026-07-08 · evidence: Battle Lab round 2 (200 runs/cell) + preset-spread telemetry (greedy · seed 1 · 30 runs/cell)</div>
+  <div class="chips">
+    <span class="chip"><b>5 / 7</b> plan items landed on main</span>
+    <span class="chip">Penitent late <b class="mono">2% → 40%</b></span>
+    <span class="chip">Grace late <b class="mono">0% → 75%</b></span>
+    <span class="chip"><b>70/70</b> cards effectiveness-linted</span>
+    <span class="chip">all gates green (mechanics · mobile 2400 · card-editor)</span>
+  </div>
+</div></header>
+
+<div class="wrap">
+
+<!-- 01 WORK DIAGRAM -->
+<section>
+  <span class="snum">01</span><h2>The Work — seven plan items, five landed</h2>
+  <div class="pipe">
+    <div class="node done">
+      <div class="meta"><span class="badge done">LANDED</span><h3>Item 4 — Per-preset floors &amp; dominance ceiling</h3><span class="sha">60b1e26b</span></div>
+      <p>The objective function moved from stage <em>averages</em> to per-preset floors (targets 40/25/10 by stage) and a ≤98% ceiling. New <code>[preset-spread]</code> telemetry prints every preset's early/mid/late rate on every run — the 53.7% mid average was hiding four presets near 100% next to four near 0%.</p>
+    </div>
+    <div class="node done">
+      <div class="meta"><span class="badge done">LANDED</span><h3>Item 7 — Keyword atlas scored from round 2</h3><span class="sha">8f646629</span></div>
+      <p>All 21 signature rows gate-marked: PREMISE/PERORATION and STAGGER/BACKFIRE flagged <b>dominant</b>; RUPTURE/REAP/KINDLE/PIP flagged <b>cap-blocked</b>; SWAY/OMEN/SOUL/THORNS flagged <b>late-unreachable</b>; ECHO/REPRISE <b>proven</b> by the Ouroboros fix.</p>
+    </div>
+    <div class="node done">
+      <div class="meta"><span class="badge done">LANDED</span><h3>Item 2 — Burst caps scale with enemy max HP</h3><span class="sha">8d853dcb</span><span class="delta">cap = max(floor, 0.25 × maxHP)</span></div>
+      <p>The flat 80-HP RUPTURE cap (bottleneck named by four decks) became a scaling formula; the Tithe 200-cap exception was retired into the same formula as a floor. Early/mid behavior bit-identical; against a 1,500 HP boss the cap is now 375. Swept at f = 0.20 / 0.25 through the matrix.</p>
+      <p class="delta">Penitent: mid 0.80→0.92, late 0.02→0.40 (the round-2 regression, erased) · Erosion late 0.00→0.08</p>
+    </div>
+    <div class="node done">
+      <div class="meta"><span class="badge done">LANDED</span><h3>Item 6 — Card effectiveness lint</h3><span class="sha">679ba168</span><span class="delta">70/70 strict · 37 mechanic kinds mapped</span></div>
+      <p>Every card's PAID face is played into one rich fixture (DoT fuel, MARK stacks, FALLEN, Souls, Premises, dice, discard) and must produce the observable delta its data declares — magnitudes checked, so a payoff bursting for 0 fails. Unmapped future mechanic kinds throw. The Ouroboros class of bug ("card plays but does nothing") is now caught at commit time.</p>
+    </div>
+    <div class="node done">
+      <div class="meta"><span class="badge done">LANDED</span><h3>Item 1 — Win-path scaling</h3><span class="sha">63cfb3ba</span><span class="delta">CONCEDE 8/10/12 · CAPITULATE resolve threshold · boss rung-regrowth</span></div>
+      <p>CONCEDE premises scale by enemy class (8 normal / 10 elite / 12 boss). CAPITULATE became a Dawncaster-Charmed-style threshold — SWAY ≥ max(10, 0.35 × maxHP), clamped to current HP — instead of matching the entire health bar. Bosses regrow 1 telegraph rung/turn (capped 2× natural). 15 new hermetic e2e incl. pins proving small-enemy behavior is byte-identical.</p>
+      <p class="delta">Grace late 0.00→0.75 — Charm's no-strike win is finally reachable against bosses. Every other preset exactly unchanged.</p>
+    </div>
+    <div class="node open">
+      <div class="meta"><span class="badge open">OPEN</span><h3>Item 3 — Persistence-by-stack DoTs</h3><span class="delta">re-scoped: still needed</span></div>
+      <p>Erosion late reached only 0.08 under scaled caps — durationed DoTs still decay before eroding an 11-round boss. The fix (afflictions persist by stacks, never round timers — the Dawncaster model) reprices ~a third of the library, so it stayed owner-gated.</p>
+    </div>
+    <div class="node open">
+      <div class="meta"><span class="badge open">OPEN</span><h3>Item 5 — Theme pressure valve (boss-tech rares)</h3></div>
+      <p>Foundry (no tier-3 line) and Bastion (no kill-path vs non-attackers) still hit hard walls that no constant fixes. Each theme's rare redesigned as its own boss answer — see Recommendations below.</p>
+    </div>
+  </div>
+
+  <h3 style="margin-top:26px">Late-stage win rate — before the run → after (greedy, seed 1)</h3>
+  <div class="overflow"><table>
+    <tr><th>Preset</th><th>Late before</th><th>Late after</th><th style="min-width:220px">Movement</th><th>What moved it / what still blocks it</th></tr>
+    <tr><td>Penitent</td><td>0.02</td><td class="good">0.40</td><td><div class="rowflex"><div class="bar" style="flex:1"><i style="width:40%"></i></div><span class="pct">+38 pts</span></div></td><td>Scaling caps (item 2) — the round-2 regression is gone</td></tr>
+    <tr><td>Grace</td><td>0.00</td><td class="good">0.75</td><td><div class="rowflex"><div class="bar" style="flex:1"><i style="width:75%"></i></div><span class="pct">+75 pts</span></div></td><td>CAPITULATE resolve threshold (item 1)</td></tr>
+    <tr><td>Erosion</td><td>0.00</td><td class="warn">0.08</td><td><div class="rowflex"><div class="bar" style="flex:1"><i style="width:8%"></i></div><span class="pct">+8 pts</span></div></td><td>Caps helped; DoT decay wall remains (item 3)</td></tr>
+    <tr><td>Refrain</td><td>0.65</td><td>0.65</td><td><div class="rowflex"><div class="bar" style="flex:1"><i style="width:65%"></i></div><span class="pct">held</span></div></td><td>Already fixed by the round-2 Ouroboros repair</td></tr>
+    <tr><td>Oratory / Standstill</td><td>1.00</td><td class="warn">1.00</td><td><div class="rowflex"><div class="bar" style="flex:1"><i style="width:100%;background:var(--amber)"></i></div><span class="pct">ceiling breach</span></div></td><td>See Finding F2 — the dominance isn't where we thought</td></tr>
+    <tr><td>Foundry / Tithe / Augury / Bastion</td><td>0.00</td><td class="bad">0.00</td><td><div class="rowflex"><div class="bar" style="flex:1"><i style="width:0%"></i></div><span class="pct">unmoved</span></div></td><td>Structural theme gaps — items 3 &amp; 5 + Recommendations</td></tr>
+  </table></div>
+</section>
+
+<!-- 02 FINDINGS -->
+<section>
+  <span class="snum">02</span><h2>Findings &amp; what to do about them</h2>
+  <div class="grid">
+    <div class="card finding">
+      <h3>F1 — Honesty barely moves win rates; scaling does</h3>
+      <p>Round 2's correctness pass (fixing every lying card) moved stage averages ~4-6 pts. Two <em>scaling</em> changes (items 1+2) moved individual decks +38 and +75 pts. <b>Suggestion:</b> spend future tuning effort on scaling shape (how a number grows across stages), not magnitude nudges — the pricing lint already polices magnitudes.</p>
+    </div>
+    <div class="card finding">
+      <h3>F2 — Oratory/Standstill dominance is NOT the thresholds</h3>
+      <p>With scaled CONCEDE, Oratory concedes less (81/120 vs ~100%) but still wins 119/120 — it falls through to ordinary damage wins. Standstill's late lock is BACKFIRE's flat per-rung drip, not permanent denial (rung regrowth verified working). <b>Suggestion:</b> this is now a forge-side numbers item — tune BACKFIRE intensity and Oratory's premise-fueled damage down via sandbox A/B; no engine work needed. The 0.98 ceiling in the balance-band e2e is the ratchet to enforce it.</p>
+    </div>
+    <div class="card finding">
+      <h3>F3 — The DoT decay wall survives the cap fix</h3>
+      <p>Even with a 375-HP detonation ceiling, Erosion late = 0.08: durationed DoTs expire before eroding an 11-round boss pool. <b>Suggestion:</b> item 3 (persist-by-stack, the Dawncaster affliction model) is confirmed necessary, not speculative. Bound payoff windows, not the afflictions.</p>
+    </div>
+    <div class="card finding">
+      <h3>F4 — Four dead-at-mid decks share one shape</h3>
+      <p>Foundry, Augury, Tithe, Bastion all: fine early, ~0 from mid boss fights on. Their engines (pips, omens, souls, walls) <em>build</em> resources but their <em>spenders</em> don't scale. <b>Suggestion:</b> every engine theme needs exactly one spender whose output scales with something that grows during the fight (bank size, fight length, enemy maxHP) — see Recommendations.</p>
+    </div>
+    <div class="card finding">
+      <h3>F5 — The lint has one blind spot, and it's static</h3>
+      <p>The effectiveness lint catches a declared PAID mechanic that silently no-ops. It <em>cannot</em> see a payoff authored only on the FREE face (absent from PAID data entirely — the original Ouroboros shape). <b>Suggestion:</b> a small static authoring rule ("damage-bearing riders on rank ≥ 5 spells must appear on the PAID face") closes it; runtime testing can't.</p>
+    </div>
+    <div class="card finding">
+      <h3>F6 — Impossible stage is still 0% for everything</h3>
+      <p>Target is ~1% (losing is the design), currently 0% flat. Low priority, but once late is healthy, verify a lucky run CAN thread it — a hard-0 "impossible" reads as scripted, not brutal.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 03 MISC -->
+<section>
+  <span class="snum">03</span><h2>Misc. — what the subagents turned up along the way</h2>
+  <div class="grid">
+    <div class="card misc">
+      <h3>Dead API surface <span class="tag">effectiveness-lint agent</span></h3>
+      <p>Four mechanic kinds exist in the <code>CardSpecialMechanic</code> union that <em>no library card uses</em>: <code>strip_random_buff</code>, <code>befriend_attempt</code>, <code>convert_die_color</code>, <code>reroll_spent</code>. A meta-test now pins this so a card adopting one gets a strict assertion written for it. Candidates for pruning or for future card designs.</p>
+    </div>
+    <div class="card misc">
+      <h3>Repo hygiene <span class="tag">card-system explorer</span></h3>
+      <ul>
+        <li><code>src/CLI/_audit-preset-sim.ts</code> is marked TEMP / delete-after-use and still present.</li>
+        <li><code>src/Cards/types.ts</code> comments reference <code>src/Tuning/focus.parser.ts</code> — that file doesn't exist (aspirational/stale).</li>
+        <li><code>agent-vitest-reporter.engine.test.ts</code> fails on Windows only (path-separator expectations); green on Linux CI.</li>
+      </ul>
+    </div>
+    <div class="card misc">
+      <h3>Knowledge-base facts <span class="tag">KB explorer</span></h3>
+      <ul>
+        <li>Dawncaster corpus: <b>1,692</b> card records + <b>141</b> keywords, all community-sourced (<code>draft</code> / <code>medium</code> confidence) — leads, not canon.</li>
+        <li>Keyword function census: Deck Management 65 · Offense 28 · Defense 15 · Various 13 · Buff 12 · Energy Mgmt 11 · Blood Ritual 7 · Healing 7.</li>
+        <li>Board-game reception corpus covers 8 games; the Slay the Spire board game's better-if docs are the closest tuning prior art.</li>
+      </ul>
+    </div>
+    <div class="card misc">
+      <h3>Engine notes <span class="tag">win-path agent</span></h3>
+      <ul>
+        <li>The old CONCEDE gate was a level-threshold hack (<code>CONCEDE_HIGH_TIER_LEVEL/_STEP</code>) — replaced by <code>enemy.difficulty</code>-derived floors.</li>
+        <li>New state field <code>bossRungGrowth</code> + <code>rung-regrown</code> event are UI-visible if the mobile app wants to telegraph "the boss recovers."</li>
+        <li>No existing test pinned the old capitulate/concede contracts on big enemies — the new suite adds explicit regression pins both ways.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 04 THE STATIC DECK PROBLEM -->
+<section>
+  <span class="snum">04</span><h2>The elephant: static decklists vs a growing player</h2>
+  <div class="callout">
+    <h3>You're right — and it reframes every "late = 0%" number above</h3>
+    <p>The matrix pits the <em>same 15-card preset</em> against early wolves and 1,500-HP late bosses. Real play doesn't work that way: the player drafts, learns higher-rank cards, and upgrades as they go. So "Foundry late = 0%" conflates two different questions — <em>"is the theme broken late?"</em> and <em>"is a starter deck supposed to beat a boss?"</em> (it isn't). Some of the late wall is real (the DoT decay math), but some is measurement artifact.</p>
+    <p><b>Fix the harness, not just the cards — add a deck-maturity axis:</b></p>
+    <ul>
+      <li><b>Three snapshots per theme</b>: <code>base</code> (current 15-card recipe), <code>developed</code> (mid: swap 2 commons for the theme's uncommons at full copies), <code>apex</code> (late: + both rares guaranteed, commons upgraded to their higher-rank versions when item "upgrade paths" exist).</li>
+      <li><b>Pair maturity to stage in the matrix</b>: early×base, mid×developed, late×apex become the banded cells; off-diagonal cells (late×base) stay as informational "underdog" telemetry, not targets.</li>
+      <li><b>Re-baseline after</b>: the per-preset floors (item 4) then mean "an appropriately-grown deck wins reasonably," which is the promise the game actually makes.</li>
+      <li><b>Long-term</b>: this motivates an in-run growth keyword family (see UPGRADE/ASCEND below) so deck growth is a mechanic the player feels, not just a sim configuration — prior art: Dawncaster's <code>Upgrade</code>/<code>Upgradeable</code>/<code>Ascend</code> keywords and StS's card-upgrade economy.</li>
+    </ul>
+    <p class="kbd">Implementation is cheap: presets already have card-id lists; snapshots are two more lists per theme in <code>combat.deck-presets.ts</code> + a matrix flag. No engine changes.</p>
+  </div>
+</section>
+
+<!-- 05 RECOMMENDATIONS -->
+<section>
+  <span class="snum">05</span><h2>Recommendations — keywords &amp; cards per stage</h2>
+  <p>Grounded in the spread data and Dawncaster prior art (all analogues are community-sourced leads — <span class="mono">kb:dawncaster</span>, confidence medium). The 30-keyword proving gate still holds: anything marked <b>NEW KW</b> is a candidate for when you open the registry (or a swap for a failing keyword); everything else composes existing keywords.</p>
+
+  <div class="grid">
+    <div class="card rec stage early">
+      <h3>EARLY <span class="tag">avg 96.8% — above target: add teaching, not power</span></h3>
+      <ul>
+        <li><b>No new power.</b> Early is already trivialized-adjacent; the risk is boredom, not difficulty.</li>
+        <li><b>Teaching cards</b>: cheap Doxa/Lemma spells that demonstrate the theme's engine loop in one play — e.g. a Tithe common that applies a 1-stack affliction AND grants a SOUL immediately, so the harvest loop is legible in turn one.</li>
+        <li><b>Consistency verbs, not damage</b>: attach small DRAW/FORETELL riders to weak commons (Dawncaster lead: <i>Reliable</i> — guaranteed-effect cards) so bad hands are rarer without raising ceiling.</li>
+        <li><b>Watch dominance</b>: the ceiling ratchet (0.98) matters here first — early is where 1.00 rows already live.</li>
+      </ul>
+    </div>
+
+    <div class="card rec stage mid">
+      <h3>MID <span class="tag">avg 53.7%, bimodal — give every engine ONE scaling spender</span></h3>
+      <ul>
+        <li><b>Foundry</b>: an uncapped-by-count pip spender — Thesis/Theorem spell: "spend ALL pips: RUPTURE with fuel per pip spent." Scales with bank size, honors strike-dead. (Dawncaster leads: <i>Charges</i>, <i>Empower</i>.)</li>
+        <li><b>Tithe</b>: SOUL on affliction <em>application</em> (not just expiry) on one uncommon — halves the rebuild cycle that makes late harvests impossible. (Lead: <i>Souls</i> economy cards.)</li>
+        <li><b>Augury</b>: an omen-chain payoff — "if this Omen lands, your next Omen's rider fires twice" (composes ECHO). Prophecy should snowball. (Lead: <i>Foretell</i> + <i>Momentum</i>-shaped escalation.)</li>
+        <li><b>Bastion</b>: RIPOSTE fires on <em>denied</em> turns too, not only full blocks — gives the wall a kill-path against non-attackers within its own vocabulary.</li>
+        <li><b>Uncommon rank band is the home</b> for all of these (Thesis/Theorem): they arrive exactly when the mid wall bites — and with maturity snapshots, mid decks will actually contain them.</li>
+      </ul>
+    </div>
+
+    <div class="card rec stage late">
+      <h3>LATE <span class="tag">avg 23.8% vs target 70 — persistence &amp; proportional payoffs</span></h3>
+      <ul>
+        <li><b>Ship item 3 first</b> (persist-by-stack DoTs) — no card design out-tunes decaying DoTs vs 11-round fights.</li>
+        <li><b>NEW KW — DOOM</b> <span class="kbd">(Dawncaster: Affliction, delayed detonation)</span>: stacks accumulate silently, detonate as one burst when the count is reached. The late-game affliction: long fights become its natural habitat. First candidate when the registry opens.</li>
+        <li><b>NEW KW — MOMENTUM</b> <span class="kbd">(Dawncaster: Blessing, grows per turn)</span>: a player-side escalator ("+1 intensity to your next payoff per turn held") that makes fight LENGTH an ally — the exact inversion of the current late-game math.</li>
+        <li><b>NEW KW — LIFEDRAIN</b> <span class="kbd">(Dawncaster: sustain function)</span>: DoT ticks heal you for a fraction. Long grinds currently lose on attrition even when damage suffices; Bastion/Erosion need sustain that scales with their own engine.</li>
+        <li><b>Proportional payoffs on Axiom/Aporia rares</b>: affliction-gated finishers priced as % of enemy max HP — e.g. "if the enemy carries ≥ 6 affliction stacks: RUPTURE ignores the cap fraction floor and adds 10% of max HP as fuel." Execute-shaped without violating strike-dead (it's still status-fueled).</li>
+        <li><b>NEW KW family — UPGRADE / ASCEND</b> <span class="kbd">(Dawncaster: Upgrade, Upgradeable, Ascend)</span>: in-run card growth ("this card permanently gains +1 intensity each time it's played this run") — the mechanical face of the deck-maturity fix in §04.</li>
+      </ul>
+    </div>
+  </div>
+
+  <p style="margin-top:16px" class="kbd">Sequencing suggestion: maturity snapshots (§04) → re-baseline floors → item 3 → the four mid spenders as sandbox A/Bs via /deck-tuning → late rares → then judge whether DOOM/MOMENTUM/LIFEDRAIN earn registry slots with the proving-gate scoreboard as the evidence.</p>
+</section>
+
+<footer>
+  <span>Card-Expert Tuning Lab · plan/tuning/2026-07-08-win-path-scaling.md · commits 60b1e26b · 8f646629 · 8d853dcb · 679ba168 · 9eaaf8d7 · 63cfb3ba</span>
+  <span>telemetry: [preset-spread] greedy · seed 1 · 30 runs/cell — full-matrix numbers cited from Battle Lab round 2 (200 runs/cell)</span>
+</footer>
+
+</div>
+</body>
+</html>

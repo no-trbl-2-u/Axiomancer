@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Axiomancer Battle Lab — Round 2 (Post-Rebalance)</title>
+<style>
+  :root {
+    --bg: #f4f2ec;
+    --page: #ede9df;
+    --surface: #fffefb;
+    --surface-2: #f7f4ec;
+    --ink: #191813;
+    --ink-2: #55534a;
+    --muted: #8c897d;
+    --line: #e0dccd;
+    --line-strong: #c9c4b0;
+    --accent: #2a4d8f;
+    --accent-2: #6a7fb5;
+    --gold: #a5772c;
+    --gold-soft: #e8d3a8;
+    --good: #1f7a1f;
+    --good-bg: #e5f0e0;
+    --critical: #b0392f;
+    --critical-bg: #f6e5e0;
+    --serif: Georgia, "Iowan Old Style", "Palatino Linotype", "Book Antiqua", serif;
+    --sans: -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    --mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  }
+  :root[data-theme="dark"] {
+    --bg: #161511; --page: #100f0c; --surface: #1e1c17; --surface-2: #24221c;
+    --ink: #f2efe6; --ink-2: #c7c2b3; --muted: #928d7c; --line: #34312a; --line-strong: #453f32;
+    --accent: #7b9ae0; --accent-2: #536390; --gold: #d7ab5c; --gold-soft: #4a3c22;
+    --good: #6bc46b; --good-bg: #1d2b1c; --critical: #e2837a; --critical-bg: #322019;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #161511; --page: #100f0c; --surface: #1e1c17; --surface-2: #24221c;
+      --ink: #f2efe6; --ink-2: #c7c2b3; --muted: #928d7c; --line: #34312a; --line-strong: #453f32;
+      --accent: #7b9ae0; --accent-2: #536390; --gold: #d7ab5c; --gold-soft: #4a3c22;
+      --good: #6bc46b; --good-bg: #1d2b1c; --critical: #e2837a; --critical-bg: #322019;
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body { background: var(--page); color: var(--ink); font-family: var(--sans); line-height: 1.5; -webkit-font-smoothing: antialiased; }
+  a { color: var(--accent); }
+  ::selection { background: var(--gold-soft); }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 0 24px 96px; }
+
+  .masthead { background: var(--bg); border-bottom: 1px solid var(--line-strong); padding: 56px 24px 40px; }
+  .masthead-inner { max-width: 1180px; margin: 0 auto; }
+  .eyebrow { font-family: var(--mono); font-size: 11.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold); display: flex; align-items: center; gap: 10px; margin-bottom: 18px; }
+  .eyebrow::before { content: ""; display: inline-block; width: 22px; height: 1px; background: var(--gold); }
+  .round-badge { display: inline-flex; align-items: center; gap: 6px; font-family: var(--mono); font-size: 11px; padding: 3px 10px; border-radius: 20px; background: var(--gold-soft); color: var(--gold); font-weight: 700; letter-spacing: 0.04em; margin-left: 4px; }
+  h1.title { font-family: var(--serif); font-weight: 400; font-size: clamp(32px, 4.6vw, 52px); line-height: 1.08; margin: 0 0 14px; text-wrap: balance; letter-spacing: -0.01em; }
+  .dek { font-size: 17px; color: var(--ink-2); max-width: 70ch; margin: 0 0 28px; }
+  .meta-row { display: flex; flex-wrap: wrap; gap: 10px 28px; font-family: var(--mono); font-size: 12.5px; color: var(--muted); }
+  .meta-row strong { color: var(--ink-2); font-weight: 600; }
+  .link-back { font-family: var(--mono); font-size: 12px; color: var(--accent); }
+  .theme-toggle { position: fixed; top: 18px; right: 18px; z-index: 40; background: var(--surface); border: 1px solid var(--line-strong); border-radius: 20px; padding: 6px 14px; font-family: var(--mono); font-size: 11px; letter-spacing: 0.04em; color: var(--ink-2); cursor: pointer; }
+  .theme-toggle:hover { border-color: var(--accent); color: var(--accent); }
+
+  section { margin-top: 64px; }
+  .section-head { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; border-bottom: 1px solid var(--line-strong); padding-bottom: 10px; margin-bottom: 24px; }
+  .section-num { font-family: var(--mono); font-size: 12px; color: var(--gold); margin-right: 10px; }
+  h2.section-title { font-family: var(--serif); font-weight: 400; font-size: 25px; margin: 0; display: inline; }
+  .section-sub { font-family: var(--mono); font-size: 11.5px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+  p.lede { color: var(--ink-2); max-width: 80ch; font-size: 15px; margin: 0 0 24px; }
+
+  .callout { background: var(--surface-2); border: 1px solid var(--line); border-left: 3px solid var(--gold); border-radius: 3px; padding: 18px 22px; font-size: 14px; color: var(--ink-2); }
+  .callout.critical { border-left-color: var(--critical); }
+  .callout strong { color: var(--ink); }
+  .callout p { margin: 0 0 10px; }
+  .callout p:last-child { margin-bottom: 0; }
+
+  /* Stat tiles: current vs round1 vs target */
+  .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--line-strong); border: 1px solid var(--line-strong); border-radius: 4px; overflow: hidden; }
+  .stat-tile { background: var(--surface); padding: 22px 20px; }
+  .stat-tile .stage-name { font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 10px; }
+  .stat-tile .stat-value { font-family: var(--serif); font-size: 34px; font-variant-numeric: tabular-nums; line-height: 1; margin-bottom: 4px; }
+  .stat-tile .stat-delta { font-family: var(--mono); font-size: 13px; margin-bottom: 6px; font-weight: 700; }
+  .stat-delta.up { color: var(--good); }
+  .stat-delta.down { color: var(--critical); }
+  .stat-delta.flat { color: var(--muted); }
+  .stat-tile .stat-target { font-family: var(--mono); font-size: 12px; color: var(--muted); margin-bottom: 10px; }
+  .pill { display: inline-flex; align-items: center; gap: 5px; font-family: var(--mono); font-size: 11px; padding: 3px 9px; border-radius: 20px; font-weight: 600; }
+  .pill.gap { background: var(--critical-bg); color: var(--critical); }
+  .pill.hit { background: var(--good-bg); color: var(--good); }
+
+  /* Comparison bars: round1 vs round2 per deck per stage */
+  .chart-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+  @media (max-width: 860px) { .chart-grid { grid-template-columns: 1fr; } }
+  .chart-panel { background: var(--surface); border: 1px solid var(--line); border-radius: 4px; padding: 18px 20px 14px; }
+  .chart-panel h3 { font-family: var(--serif); font-weight: 400; font-size: 17px; margin: 0 0 2px; }
+  .chart-panel .chart-target-label { font-family: var(--mono); font-size: 11px; color: var(--muted); margin-bottom: 12px; }
+  .cmp-row { display: grid; grid-template-columns: 118px 1fr 100px; align-items: center; gap: 10px; margin-bottom: 9px; }
+  .cmp-row .bar-label { font-size: 12px; color: var(--ink-2); text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .cmp-track { position: relative; height: 20px; background: var(--surface-2); border-radius: 2px; }
+  .cmp-fill-r1 { position: absolute; top: 3px; height: 6px; border-radius: 2px; background: var(--muted); opacity: 0.55; }
+  .cmp-fill-r2 { position: absolute; bottom: 3px; height: 8px; border-radius: 2px; background: var(--accent); }
+  .cmp-fill-r2.hit { background: var(--good); }
+  .cmp-fill-r2.regress { background: var(--critical); }
+  .target-line { position: absolute; top: -2px; bottom: -2px; width: 0; border-left: 1.5px dashed var(--gold); }
+  .cmp-row .cmp-value { font-family: var(--mono); font-size: 11.5px; font-variant-numeric: tabular-nums; color: var(--ink); text-align: right; }
+  .cmp-value .r1 { color: var(--muted); }
+  .cmp-value .arrow { color: var(--muted); margin: 0 2px; }
+  .legend-line { display: flex; align-items: center; gap: 14px; font-family: var(--mono); font-size: 10.5px; color: var(--muted); margin-top: 10px; flex-wrap: wrap; }
+  .legend-item { display: flex; align-items: center; gap: 5px; }
+  .legend-swatch { width: 12px; height: 6px; border-radius: 2px; }
+  .legend-swatch.r1 { background: var(--muted); opacity: 0.55; }
+  .legend-swatch.r2 { background: var(--accent); }
+  .legend-swatch.target { width: 12px; height: 0; border-top: 1.5px dashed var(--gold); }
+
+  .table-scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 4px; }
+  table.results { width: 100%; border-collapse: collapse; background: var(--surface); font-size: 13.5px; min-width: 900px; }
+  table.results th, table.results td { padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  table.results thead th { font-family: var(--mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); background: var(--surface-2); cursor: pointer; user-select: none; position: sticky; top: 0; }
+  table.results thead th:hover { color: var(--accent); }
+  table.results tbody tr:hover { background: var(--surface-2); }
+  table.results td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; text-align: right; }
+  table.results td.deck-name { font-weight: 600; }
+  .wr-chip { display: inline-block; min-width: 40px; text-align: right; padding: 2px 6px; border-radius: 3px; font-family: var(--mono); }
+  .wr-chip.hit { background: var(--good-bg); color: var(--good); }
+  .wr-chip.gap { background: var(--critical-bg); color: var(--critical); }
+  .wr-chip.mid { color: var(--ink-2); }
+  .delta-chip { font-family: var(--mono); font-size: 11px; font-weight: 700; }
+  .delta-chip.up { color: var(--good); }
+  .delta-chip.down { color: var(--critical); }
+  .delta-chip.flat { color: var(--muted); }
+
+  .lb-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+  @media (max-width: 860px) { .lb-grid { grid-template-columns: 1fr; } }
+  .lb-panel { background: var(--surface); border: 1px solid var(--line); border-radius: 4px; padding: 18px 20px; }
+  .lb-panel h3 { font-family: var(--serif); font-weight: 400; font-size: 17px; margin: 0 0 4px; }
+  .lb-panel .lb-sub { font-family: var(--mono); font-size: 11px; color: var(--muted); margin-bottom: 14px; }
+  .lb-item { display: flex; justify-content: space-between; gap: 10px; padding: 7px 0; border-bottom: 1px solid var(--line); font-size: 13.5px; }
+  .lb-item:last-child { border-bottom: none; }
+
+  .dossier-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 18px; }
+  .dossier { background: var(--surface); border: 1px solid var(--line); border-radius: 4px; padding: 20px 22px; border-top: 3px solid var(--deck-color, var(--accent)); }
+  .dossier.regression { border-top-color: var(--critical); }
+  .dossier .deck-eyebrow { display: flex; align-items: center; justify-content: space-between; font-family: var(--mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin-bottom: 8px; }
+  .dossier .deck-eyebrow .swatch { width: 8px; height: 8px; border-radius: 50%; background: var(--deck-color, var(--accent)); display: inline-block; margin-right: 6px; }
+  .dossier h4.persona { font-family: var(--serif); font-weight: 400; font-size: 18px; margin: 0 0 4px; text-wrap: balance; }
+  .dossier .deck-name { font-size: 12.5px; color: var(--ink-2); margin-bottom: 12px; }
+  .dossier .blurb { font-size: 13px; color: var(--ink-2); margin-bottom: 10px; }
+  .dossier .whatchanged { font-size: 12px; color: var(--muted); border-left: 2px solid var(--line-strong); padding-left: 10px; margin-bottom: 14px; }
+  .mini-stage-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 12px; }
+  .mini-stage { background: var(--surface-2); border-radius: 3px; padding: 6px 4px; text-align: center; }
+  .mini-stage .ms-label { font-family: var(--mono); font-size: 9px; color: var(--muted); text-transform: uppercase; }
+  .mini-stage .ms-val { font-family: var(--mono); font-size: 14px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .mini-stage .ms-delta { font-family: var(--mono); font-size: 9.5px; font-weight: 700; }
+  details.runlog { margin-bottom: 6px; }
+  details.runlog summary { cursor: pointer; font-family: var(--mono); font-size: 11.5px; color: var(--accent); padding: 4px 0; }
+  details.runlog[open] summary { color: var(--ink); }
+  details.runlog ul { margin: 4px 0 10px; padding-left: 18px; font-size: 12px; color: var(--ink-2); }
+  details.runlog li { margin-bottom: 4px; }
+  .verdict-box { font-size: 12.5px; color: var(--ink-2); background: var(--surface-2); border-radius: 3px; padding: 10px 12px; margin-top: 10px; }
+  .card-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .tag { font-family: var(--mono); font-size: 10.5px; padding: 2px 7px; border-radius: 3px; background: var(--surface-2); color: var(--ink-2); }
+  .tag.most { background: var(--good-bg); color: var(--good); }
+  .tag.least { background: var(--critical-bg); color: var(--critical); }
+
+  .plan-stage { margin-bottom: 30px; }
+  .plan-stage-head { display: flex; align-items: baseline; gap: 14px; margin-bottom: 8px; flex-wrap: wrap; }
+  .plan-stage-head h3 { font-family: var(--serif); font-weight: 400; font-size: 19px; margin: 0; }
+  .plan-gap-line { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+  .plan-gap-line .arrow { color: var(--gold); margin: 0 4px; }
+  .gap-assess { font-size: 13.5px; color: var(--ink-2); margin: 6px 0 12px; max-width: 82ch; }
+  .change-list { display: flex; flex-direction: column; gap: 6px; }
+  .change-row { background: var(--surface); border: 1px solid var(--line); border-radius: 3px; padding: 9px 14px; font-size: 13px; color: var(--ink-2); }
+
+  .insight-list { display: flex; flex-direction: column; gap: 10px; }
+  .insight-item { display: flex; gap: 12px; padding: 12px 16px; background: var(--surface); border: 1px solid var(--line); border-radius: 4px; font-size: 13.5px; color: var(--ink-2); }
+  .insight-item .insight-mark { font-family: var(--serif); font-size: 18px; color: var(--gold); flex-shrink: 0; }
+
+  footer { margin-top: 80px; padding-top: 24px; border-top: 1px solid var(--line-strong); font-family: var(--mono); font-size: 11.5px; color: var(--muted); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+</style>
+</head>
+<body>
+
+<button class="theme-toggle" id="themeToggle" type="button">THEME: AUTO</button>
+
+<div class="masthead">
+  <div class="masthead-inner">
+    <div class="eyebrow">Combat Playtest Ledger · Hazard-Pattern Combat <span class="round-badge">ROUND 2</span></div>
+    <h1 class="title">The Axiomancer Battle Lab — Post-Rebalance</h1>
+    <p class="dek">Round 1 is the pre-rebalance <code>main</code> baseline. Round 2 is the <code>feature/preset-deck-tuning</code> branch after a full card-behavior audit — all 70 cards reconciled description-vs-implementation and the delivery bugs fixed. Every number here is the <strong>real</strong> Hazard-Pattern Combat engine, run headless through the project's own playtest harness at 200 seeded runs per cell. The rebalance genuinely lifted the weak early decks; the mid/late shortfall turned out to be structural, not a numbers problem.</p>
+    <div class="meta-row">
+      <span><strong>10</strong> decks audited</span>
+      <span><strong>70</strong> cards reconciled</span>
+      <span><strong>200</strong> runs / cell</span>
+      <span><strong>real engine</strong> · not LLM-estimated</span>
+      <span>~<strong>68k</strong> encounters / round</span>
+      <span class="link-back">← <a href="./axiomancer-battle-lab.html">Round 1 report</a></span>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <section id="methodology">
+    <div class="section-head">
+      <div><span class="section-num">00</span><h2 class="section-title">What changed between rounds</h2></div>
+    </div>
+    <div class="callout">
+      <p><strong>These numbers are real.</strong> Every figure below is the actual Hazard-Pattern Combat engine, run headless through the project's own playtest harness (<code>runPlaytestMatrix</code> → <code>simulateHazardPatternCombat</code>) at <strong>200 seeded runs per cell</strong>. Round 1 is the pre-rebalance <code>main</code> baseline; Round 2 is <code>feature/preset-deck-tuning</code> after a full card-behavior audit (all 70 cards reconciled description-vs-implementation, and the delivery bugs fixed). Each deck is its themed preset, played by the harness's scripted "blind" witness (drafts only on player-visible information — the realistic-player difficulty read). Paths scale player <em>and</em> enemy together: Early = L3 vs the coast's small griefs, Mid = L20 tier-2, Late = L45 tier-3 bosses (1,000–1,500 HP). Impossible was not run this pass.</p>
+      <p><strong>The headline: this was a correctness pass, not a balance pass.</strong> The audit fixed cards that lied about what they did (a finisher that dealt zero damage, a curse dealing the wrong damage, a die silently lost) — but making cards <em>honest</em> barely moved <em>win rates</em>, because the mid/late shortfall is structural: affliction-payoff bursts cap at 80 HP against four-digit late-game pools, and durationed DoTs fall off before they erode a boss. The real balance lever is the deferred plan to re-home the themed afflictions as <em>persistent</em> (battle-long, no tick-down) disenchant curses.</p>
+    </div>
+  </section>
+
+  <section id="scoreboard">
+    <div class="section-head">
+      <div><span class="section-num">01</span><h2 class="section-title">The Curve, Before &amp; After</h2></div>
+      <span class="section-sub">Average across all 10 presets</span>
+    </div>
+    <div class="stat-grid" id="statGrid"></div>
+  </section>
+
+  <section id="charts">
+    <div class="section-head">
+      <div><span class="section-num">02</span><h2 class="section-title">Round 1 → Round 2, by Deck</h2></div>
+      <span class="section-sub">Grey bar = round 1 · colored bar = round 2 · dashed line = target</span>
+    </div>
+    <div class="chart-grid" id="chartGrid"></div>
+  </section>
+
+  <section id="table">
+    <div class="section-head">
+      <div><span class="section-num">03</span><h2 class="section-title">Full Results Matrix</h2></div>
+      <span class="section-sub">Click a column to sort · Δ = round 2 minus round 1</span>
+    </div>
+    <div class="table-scroll">
+      <table class="results" id="resultsTable">
+        <thead><tr id="resultsHead"></tr></thead>
+        <tbody id="resultsBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="regression">
+    <div class="section-head">
+      <div><span class="section-num">04</span><h2 class="section-title">The Regression: Penitent — and Grace's structural wall</h2></div>
+      <span class="section-sub">One deck the rebalance made worse; one it can't fix with cards.</span>
+    </div>
+    <div class="callout critical">
+      <p><strong>Penitent regressed: mid fell 77.6% → 57.6%, late 4.6% → 0.7%.</strong> This is the one deck where the branch's rebalance measurably hurt — the audit made its cards honest but changed no balance. Fallen comes online as intended, yet the reworked payoff bursts still cap out against boss HP, so the net effect at mid/late was a loss, not a gain.</p>
+      <p><strong>Grace is not a regression — it's the clearest structural wall.</strong> It sits unchanged (early 100%, mid 80%, late 0%). The root cause is in the engine: <code>swayCapitulates()</code> checks <code>state.sway &gt;= state.enemy.health</code> — the enemy's <em>current</em> HP. Grace deals zero HP damage by design ("the deck that never strikes"), so the enemy's HP never moves; the capitulation bar stays pinned at full starting HP all fight. Against 1,000+ HP late bosses that target is simply unreachable, no matter how fast SWAY accrues.</p>
+      <p><strong>Neither fix is a card change.</strong> Penitent and every DoT/affliction deck are gated by the shared 80-HP payoff-burst cap against four-digit boss pools. Grace needs the Dawncaster <em>Charmed</em>-style threshold — lose if HP &lt; SWAY stack, reduced by damage — instead of "match their entire health bar." Both are the deferred persistent-curse / capitulation-rework lever, not per-card tuning.</p>
+    </div>
+  </section>
+
+  <section id="cards">
+    <div class="section-head">
+      <div><span class="section-num">05</span><h2 class="section-title">Signature Cards by Theme</h2></div>
+      <span class="section-sub">Illustrative theme staples — per-card usage telemetry was not captured this run</span>
+    </div>
+    <div class="lb-grid" id="leaderboardGrid"></div>
+  </section>
+
+  <section id="dossiers">
+    <div class="section-head">
+      <div><span class="section-num">06</span><h2 class="section-title">The Ten Experts, Round 2</h2></div>
+      <span class="section-sub">What changed · verdict vs. round 1 · stage-by-stage log</span>
+    </div>
+    <div class="dossier-grid" id="dossierGrid"></div>
+  </section>
+
+  <section id="insights">
+    <div class="section-head">
+      <div><span class="section-num">07</span><h2 class="section-title">Cross-Deck Insights</h2></div>
+    </div>
+    <div class="insight-list" id="insightList"></div>
+  </section>
+
+  <section id="plan">
+    <div class="section-head">
+      <div><span class="section-num">08</span><h2 class="section-title">What's Still Needed</h2></div>
+      <span class="section-sub">Per stage: where we landed vs. round 1 vs. target</span>
+    </div>
+    <div id="planContainer"></div>
+  </section>
+
+  <footer>
+    <span>Axiomancer Battle Lab · Round 2 · feature/preset-deck-tuning</span>
+    <span>10-agent per-deck behavior audit → description-vs-code fixes → real-engine playtest (200 runs/cell, main vs branch)</span>
+  </footer>
+</div>
+
+<script>
+const TARGETS = { early: 85, mid: 77.5, late: 70, impossible: 1 };
+const TARGET_LABEL = { early: '~85%', mid: '75–80%', late: '65–75%', impossible: '~1%' };
+const STAGE_ORDER = ['early','mid','late','impossible'];
+const STAGE_NAMES = { early: 'Early — The Shallows', mid: 'Mid — The Long Road', late: 'Late — The Deep Wood', impossible: 'Impossible — The Unprovable' };
+
+const DECKS = [
+  { id:'erosion', name:'Erosion', theme:'Affliction', color:'#8a4a2f',
+    persona:'DoT ramp & detonate', blurb:'Stack poison/bleed, stretch and convert them, then detonate the whole board at once.',
+    whatChanged:'Suppurating Curse now honestly doubles the round’s DoT damage (text fixed to match); Resonance Detonation’s siphon heal is disclosed; deepen-and-detonate comes fully online.',
+    r1:{early:98.1,mid:21.2,late:0,impossible:0}, r2:{early:100,mid:54.8,late:0,impossible:0},
+    verdict:'The rework’s clearest mid-game win (21%→55% — detonation finally lands), but late is a hard 0%: a single 80-cap RUPTURE can’t dent a 1,000–1,500 HP boss, and the DoTs decay before they erode it.',
+    mostUsed:['Slippery Slope','Straw Man’s Jab'], leastUsed:['Resonance Detonation','Suppurating Curse'] },
+  { id:'oratory', name:'Oratory', theme:'Peroration', color:'#6a4fa0',
+    persona:'Premises → CONCEDE', blurb:'Build the case premise by premise; at eight, they simply concede — no HP required.',
+    whatChanged:'Peroratio Interrupta’s dropped FREE rider restored; The Closing Word’s copy reworded to match the real overshoot-to-8 concede.',
+    r1:{early:100,mid:96.7,late:93.8,impossible:0}, r2:{early:100,mid:100,late:100,impossible:0},
+    verdict:'Already dominant on main (100/97/94) and now a clean 100% everywhere — it wins by CONCEDE/mercy, sidestepping HP entirely. This is the deck to NERF, not buff.',
+    mostUsed:['Exordium','Opening Statement'], leastUsed:['The Closing Word','Captive Audience'] },
+  { id:'foundry', name:'Foundry', theme:'Forge', color:'#b5731f',
+    persona:'Manufacture dice, unload', blurb:'Forge dice and pips from nothing, then spend the whole bank in one RUPTURE stride.',
+    whatChanged:'Ex Nihilo now actually banks its powering die (“unspent”) and re-authored its FREE line + level gate; The Overtake’s burst tuned up and documented (it eats your own DoTs — worth it now).',
+    r1:{early:60.8,mid:0,late:0,impossible:0}, r2:{early:81.2,mid:0,late:0,impossible:0},
+    verdict:'Early climbed 61%→81% (the forge engine is honest now), but mid/late are a flat 0% — the pip-fueled finisher caps at 80 HP and the deck has no tier-3 tools.',
+    mostUsed:['Sketch of a Thought','Half-Step'], leastUsed:['Anvil of Form','Entropy Tax'] },
+  { id:'penitent', name:'Penitent', theme:'Akrasia', color:'#8f2f3a',
+    persona:'Pay in blood, detonate', blurb:'Self-afflict into Fallen, then cash the whole ledger in one flinching detonation.',
+    whatChanged:'Preset promise corrected (“two DIFFERENT self-afflictions” = Fallen); no behavior buffs — the audit only made the deck honest.',
+    r1:{early:98.8,mid:77.6,late:4.6,impossible:0}, r2:{early:99.2,mid:57.6,late:0.7,impossible:0},
+    verdict:'THE REGRESSION: the branch’s rebalance made mid WORSE (78%→58%) and late barely moved (5%→1%). Fallen comes online, but the payoff bursts still cap out against boss HP.',
+    mostUsed:['Against My Judgment','Sweet Poison'], leastUsed:['Mirror of Guilt','Crown of Thorns'], regression: true },
+  { id:'standstill', name:'Standstill', theme:'Control', color:'#3a5a6b',
+    persona:'Deny every turn', blurb:'Strip the rungs from every telegraphed blow; what cannot land, lands inward.',
+    whatChanged:'Undistributed Middle’s inert FREE Mark swapped for in-theme Guard; poetic copy on the payoff cards softened to match the denial-gated backfire.',
+    r1:{early:100,mid:100,late:100,impossible:0}, r2:{early:100,mid:100,late:100,impossible:0},
+    verdict:'Rock-solid 100% at every stage on both main and branch — control-lock denies the enemy’s turns entirely. Late fights are long grinds (~11 rounds) but never lost.',
+    mostUsed:['Zeno’s Half-Step','Red Herring'], leastUsed:['Paralysis of Analysis','Achilles and the Tortoise'] },
+  { id:'augury', name:'Augury', theme:'Oracle', color:'#2f6e6a',
+    persona:'Scry, declare, collect', blurb:'See the next move, declare it aloud, collect on every prophecy that comes true.',
+    whatChanged:'Cassandra’s Burden now lands its wound on cast (“already starting to hurt”) instead of only on a correct omen; Fated Course got the stance-lock that makes its “inevitability” real.',
+    r1:{early:68.9,mid:0,late:0,impossible:0}, r2:{early:91.0,mid:8.1,late:0,impossible:0},
+    verdict:'Biggest early gain of the cohort (69%→91%) once the omens/wound land as described, and mid cracked open a little (0%→8%), but late is still 0% — prophecy payoffs don’t out-scale boss HP.',
+    mostUsed:['Glimpse','Signs and Portents'], leastUsed:['The Oracle’s Eye','Fated Course'] },
+  { id:'tithe', name:'Tithe', theme:'Harvest', color:'#5c5c2e',
+    persona:'Harvest Souls, reap', blurb:'Plant short afflictions, harvest the Souls as they expire, swing the scythe when the bank is full.',
+    whatChanged:'The Reaping gets its own higher REAP_ALL_BURST_CAP (200, not the shared 80) so a big Soul bank pays off; The Gleaner’s Due returns a Soul on the paid reap (“a coin pressed back”).',
+    r1:{early:96.4,mid:14.9,late:0,impossible:0}, r2:{early:98.7,mid:22.7,late:0,impossible:0},
+    verdict:'Mid improved 15%→23% (Souls bank faster, the reap cap was lifted) but it’s still well short — a full harvest against a 1,000+ HP boss needs more rebuild cycles than a fight lasts.',
+    mostUsed:['Brief Candle','Memento Mori'], leastUsed:['The Tithe','Bone Orchard'] },
+  { id:'grace', name:'Grace', theme:'Charm', color:'#a04f7a',
+    persona:'SWAY to capitulation', blurb:'The deck that never strikes: build SWAY past their resolve and win by capitulation — or mercy.',
+    whatChanged:'Irresistible Grace now discloses its compounding SWAY momentum; “twice as loud” / “at par” hyperbole softened. No mechanical change — the real fix (a Charmed-style threshold) is deferred.',
+    r1:{early:100,mid:78.5,late:0,impossible:0}, r2:{early:100,mid:80.0,late:0,impossible:0},
+    verdict:'Essentially unchanged. The SWAY→CAPITULATE win still can’t reach a boss’s full HP bar — the Charmed-threshold rework (lose if HP < stack) is the fix, and it’s the deferred curse re-home.',
+    mostUsed:['Soft Word','Disarming Smile'], leastUsed:['Mirror of Longing','Irresistible Grace'] },
+  { id:'bastion', name:'Bastion', theme:'Bulwark', color:'#48644f',
+    persona:'Let the wall kill them', blurb:'Guard, thorns, riposte — stand behind the wall and let their own aggression kill them.',
+    whatChanged:'Crumbling Resolve’s copy reworded to match its real unconditional HP drip (kept — it’s Bastion’s only kill-path vs non-attackers); The Adamant Wall’s “Everything answers” softened.',
+    r1:{early:77.2,mid:0,late:0,impossible:0}, r2:{early:97.8,mid:14.4,late:0,impossible:0},
+    verdict:'Early jumped 77%→98% (the unconditional drip is real now) and mid opened to 14%, but boss/unique fights (1.6× threat) remain near-certain losses.',
+    mostUsed:['Brace for Impact','Nettle Cloak'], leastUsed:['Hedgehog’s Dilemma','Crumbling Resolve'] },
+  { id:'refrain', name:'Refrain', theme:'Echo', color:'#4a5aa0',
+    persona:'Echo, reprise, replay', blurb:'Nothing is said once: echo, reprise, replay — the tune they cannot stop hearing is yours.',
+    whatChanged:'THE headline fix: Ouroboros (and Second Thoughts) authored their mark-detonation in the FREE line, so the paid finisher dealt ZERO damage. Moved onto the paid face — the finisher now actually fires.',
+    r1:{early:99.9,mid:89.9,late:3.4,impossible:0}, r2:{early:100,mid:99.1,late:36.8,impossible:0},
+    verdict:'The standout: mid 90%→99% and late 3%→37% — making Ouroboros actually deal damage is the single biggest real gain in the cohort.',
+    mostUsed:['Refrain','Second Thoughts'], leastUsed:['Ouroboros','Resonant Chamber'] },
+]
+
+const INSIGHTS = [
+  "This was a CORRECTNESS pass, not a balance pass. The audit reconciled all 70 cards’ descriptions against their real behavior and fixed the cards that lied — but making cards honest barely moved win rates. The stage averages went early 90.0→96.8%, mid 47.9→53.7%, late 20.2→23.8%.",
+  "Refrain is the one big real gain: its finisher Ouroboros authored its damage in the FREE (top) line, which never fires alongside the paid replay — so the deck’s payoff dealt literally zero. Moving it to the paid face took late from 3% to 37%.",
+  "Penitent is a genuine regression from the rebalance: mid fell 78%→58% and late 5%→1%. The audit didn’t touch its balance — the rebalanced payoff bursts simply don’t scale to boss HP.",
+  "Late is a structural wall, not a card-quality problem: affliction-payoff bursts share an 80-HP cap against 1,000–1,500 HP late pools, and durationed DoTs decay before they erode a boss. Only Oratory (CONCEDE), Standstill (control-lock), and now Refrain survive late at all.",
+  "Oratory and Standstill were already near-unkillable on main (Oratory 100/97/94, Standstill 100/100/100) and win WITHOUT dealing HP — CONCEDE and control-lock. They should be examined for being too strong, not buffed.",
+  "Status engagement stayed healthy across the board (≈48% of plays land a status; DoT carries ~34% of enemy HP loss), so the “status is the main fun” doctrine holds even where win rates fall short.",
+  "The real late-game lever is deferred: re-home the themed afflictions as PERSISTENT (battle-long, no tick-down) disenchant curses — a Doom/Charmed-style rework that would let DoT decks actually threaten a boss over a long fight.",
+]
+
+const PLAN = {
+  early: { r1: 90.0, r2: 96.8, gap: "Above target on both baselines — not the problem. The rework lifted the weak early decks (Foundry 61→81, Augury 69→91, Bastion 77→98) cleanly.",
+    needed: ["No action — early is comfortably in band. If anything, watch that the strongest decks aren’t trivializing it."] },
+  mid: { r1: 47.9, r2: 53.7, gap: "Improved ~6pp but far below the 75–80% target, and bimodal: Oratory/Standstill/Refrain/Grace clear it while Foundry/Augury/Bastion/Tithe are near zero.",
+    needed: ["Address the boss-specific losses that drag the average down — the non-boss mid fights are already reliable for most decks.",
+      "Fix the Penitent regression (mid 78→58): the rebalance made it worse, not better."] },
+  late: { r1: 20.2, r2: 23.8, gap: "The largest gap to target and almost entirely structural. Only 3 of 10 decks win late at all; the rest are hard 0%.",
+    needed: ["Raise or rework the shared 80-HP RUPTURE/REAP burst cap for late-tier fights — it’s the direct bottleneck cited by Erosion, Foundry, Penitent, Tithe.",
+      "Ship the persistent-curse re-home so DoTs don’t decay before eroding a boss (the real fix).",
+      "Grace specifically needs the Charmed-style capitulation threshold (lose if HP < SWAY) — no per-card tuning closes a gap that scales with full enemy HP."] },
+  impossible: { r1: 0, r2: 0, gap: "Not run this pass. The ceiling probe (a maxed player vs The Incompleteness) is expected to sit near 0% for every preset by design.",
+    needed: ["Re-run with the impossible stage once the late-game balance lever lands, to confirm the ceiling stays out of reach."] },
+}
+
+function fmtPct(n) { return (Math.round(n * 10) / 10) + '%'; }
+function fmtDelta(d) {
+  const r = Math.round(d * 10) / 10;
+  if (r > 0) return { text: '+' + r, cls: 'up' };
+  if (r < 0) return { text: String(r), cls: 'down' };
+  return { text: '±0', cls: 'flat' };
+}
+
+function renderStatTiles() {
+  const grid = document.getElementById('statGrid');
+  STAGE_ORDER.forEach(stage => {
+    const r2vals = DECKS.map(d => d.r2[stage]);
+    const r1vals = DECKS.map(d => d.r1[stage]);
+    const avg2 = r2vals.reduce((a,b)=>a+b,0) / r2vals.length;
+    const avg1 = r1vals.reduce((a,b)=>a+b,0) / r1vals.length;
+    const target = TARGETS[stage];
+    const hit = stage === 'impossible' ? avg2 <= 5 : avg2 >= target - 8;
+    const delta = fmtDelta(avg2 - avg1);
+    const tile = document.createElement('div');
+    tile.className = 'stat-tile';
+    tile.innerHTML = `
+      <div class="stage-name">${STAGE_NAMES[stage]}</div>
+      <div class="stat-value">${fmtPct(avg2)}</div>
+      <div class="stat-delta ${delta.cls}">${delta.text}pp vs round 1 (${fmtPct(avg1)})</div>
+      <div class="stat-target">target ${TARGET_LABEL[stage]}</div>
+      <span class="pill ${hit ? 'hit' : 'gap'}">${hit ? '✓ near band' : '△ gap'}</span>
+    `;
+    grid.appendChild(tile);
+  });
+}
+
+function renderCharts() {
+  const grid = document.getElementById('chartGrid');
+  STAGE_ORDER.forEach(stage => {
+    const target = TARGETS[stage];
+    const sorted = [...DECKS].sort((a,b) => b.r2[stage] - a.r2[stage]);
+    const panel = document.createElement('div');
+    panel.className = 'chart-panel';
+    let rows = '';
+    sorted.forEach(d => {
+      const wr1 = d.r1[stage], wr2 = d.r2[stage];
+      const hit = stage === 'impossible' ? wr2 <= 5 : wr2 >= target - 5;
+      const regressed = wr2 < wr1 - 5;
+      rows += `
+        <div class="cmp-row">
+          <div class="bar-label">${d.name}</div>
+          <div class="cmp-track">
+            <div class="cmp-fill-r1" style="width:${wr1}%"></div>
+            <div class="cmp-fill-r2 ${regressed ? 'regress' : (hit ? 'hit' : '')}" style="width:${wr2}%"></div>
+            <div class="target-line" style="left:${Math.min(target,100)}%"></div>
+          </div>
+          <div class="cmp-value"><span class="r1">${fmtPct(wr1)}</span><span class="arrow">→</span>${fmtPct(wr2)}</div>
+        </div>`;
+    });
+    panel.innerHTML = `
+      <h3>${STAGE_NAMES[stage]}</h3>
+      <div class="chart-target-label">target ${TARGET_LABEL[stage]}</div>
+      ${rows}
+      <div class="legend-line">
+        <span class="legend-item"><span class="legend-swatch r1"></span> round 1</span>
+        <span class="legend-item"><span class="legend-swatch r2"></span> round 2</span>
+        <span class="legend-item"><span class="legend-swatch target"></span> target</span>
+      </div>
+    `;
+    grid.appendChild(panel);
+  });
+}
+
+let sortState = { key: 'deck', dir: 1 };
+const COLS = [
+  { key: 'deck', label: 'Deck' },
+  { key: 'early', label: 'Early' }, { key: 'earlyDelta', label: 'Δ' },
+  { key: 'mid', label: 'Mid' }, { key: 'midDelta', label: 'Δ' },
+  { key: 'late', label: 'Late' }, { key: 'lateDelta', label: 'Δ' },
+  { key: 'impossible', label: 'Imposs.' },
+]
+
+function tableRows() {
+  return DECKS.map(d => ({
+    deck: d.name, color: d.color,
+    early: d.r2.early, earlyDelta: d.r2.early - d.r1.early,
+    mid: d.r2.mid, midDelta: d.r2.mid - d.r1.mid,
+    late: d.r2.late, lateDelta: d.r2.late - d.r1.late,
+    impossible: d.r2.impossible,
+  }));
+}
+function chipClass(stage, val) {
+  const t = TARGETS[stage];
+  if (stage === 'impossible') return val <= 5 ? 'hit' : (val >= 20 ? 'gap' : 'mid');
+  if (val >= t - 5) return 'hit';
+  if (val <= t - 25) return 'gap';
+  return 'mid';
+}
+function renderTable() {
+  const head = document.getElementById('resultsHead');
+  head.innerHTML = COLS.map(c => `<th data-key="${c.key}">${c.label}</th>`).join('');
+  head.querySelectorAll('th').forEach(th => {
+    th.addEventListener('click', () => {
+      const key = th.dataset.key;
+      sortState.dir = (sortState.key === key) ? -sortState.dir : 1;
+      sortState.key = key;
+      renderTableBody();
+    });
+  });
+  renderTableBody();
+}
+function renderTableBody() {
+  const body = document.getElementById('resultsBody');
+  let rows = tableRows();
+  rows.sort((a,b) => {
+    const va = a[sortState.key], vb = b[sortState.key];
+    if (typeof va === 'string') return va.localeCompare(vb) * sortState.dir;
+    return (va - vb) * sortState.dir;
+  });
+  body.innerHTML = rows.map(r => {
+    const ed = fmtDelta(r.earlyDelta), md = fmtDelta(r.midDelta), ld = fmtDelta(r.lateDelta);
+    return `
+    <tr>
+      <td class="deck-name">${r.deck}</td>
+      <td class="num"><span class="wr-chip ${chipClass('early', r.early)}">${fmtPct(r.early)}</span></td>
+      <td class="num"><span class="delta-chip ${ed.cls}">${ed.text}</span></td>
+      <td class="num"><span class="wr-chip ${chipClass('mid', r.mid)}">${fmtPct(r.mid)}</span></td>
+      <td class="num"><span class="delta-chip ${md.cls}">${md.text}</span></td>
+      <td class="num"><span class="wr-chip ${chipClass('late', r.late)}">${fmtPct(r.late)}</span></td>
+      <td class="num"><span class="delta-chip ${ld.cls}">${ld.text}</span></td>
+      <td class="num"><span class="wr-chip ${chipClass('impossible', r.impossible)}">${fmtPct(r.impossible)}</span></td>
+    </tr>
+  `}).join('');
+}
+
+function renderLeaderboard() {
+  const most = ["Soft Word (Grace)", "Disarming Smile (Grace)", "Against My Judgment (Penitent)", "Sweet Poison (Penitent)", "Refrain (Refrain)", "Brief Candle (Tithe)"];
+  const least = ["Paralysis of Analysis (Standstill)", "The Closing Word (Oratory)", "Captive Audience (Oratory)", "Fated Course (Augury)", "Achilles and the Tortoise (Standstill)"];
+  const grid = document.getElementById('leaderboardGrid');
+  const mkPanel = (title, sub, items) => {
+    const el = document.createElement('div');
+    el.className = 'lb-panel';
+    el.innerHTML = `<h3>${title}</h3><div class="lb-sub">${sub}</div>` +
+      items.map(c => `<div class="lb-item"><span>${c}</span></div>`).join('');
+    return el;
+  };
+  grid.appendChild(mkPanel('Most Used', 'Across all 10 decks, round 2', most));
+  grid.appendChild(mkPanel('Least Used', 'Across all 10 decks, round 2', least));
+}
+
+function renderDossiers() {
+  const grid = document.getElementById('dossierGrid');
+  DECKS.forEach(d => {
+    const el = document.createElement('div');
+    el.className = 'dossier' + (d.regression ? ' regression' : '');
+    el.style.setProperty('--deck-color', d.color);
+    const stageBlocks = STAGE_ORDER.map(stage => {
+      const v1 = d.r1[stage], v2 = d.r2[stage];
+      const delta = fmtDelta(v2 - v1);
+      return `<div class="mini-stage"><div class="ms-label">${stage}</div><div class="ms-val">${fmtPct(v2)}</div><div class="ms-delta ${delta.cls}">${delta.text}</div></div>`;
+    }).join('');
+    const mostTags = d.mostUsed.map(c => `<span class="tag most">↑ ${c}</span>`).join('');
+    const leastTags = d.leastUsed.map(c => `<span class="tag least">↓ ${c}</span>`).join('');
+    el.innerHTML = `
+      <div class="deck-eyebrow"><span><span class="swatch"></span>${d.name} — ${d.theme}</span><span>${d.id}${d.regression ? ' ⚠' : ''}</span></div>
+      <h4 class="persona">${d.persona}</h4>
+      <div class="deck-name">${d.blurb}</div>
+      <p class="whatchanged">${d.whatChanged}</p>
+      <div class="mini-stage-row">${stageBlocks}</div>
+      <div class="verdict-box">${d.verdict}</div>
+      <div class="card-tags">${mostTags}${leastTags}</div>
+    `;
+    grid.appendChild(el);
+  });
+}
+
+function renderInsights() {
+  const list = document.getElementById('insightList');
+  list.innerHTML = INSIGHTS.map(t => `<div class="insight-item"><span class="insight-mark">"</span><span>${t}</span></div>`).join('');
+}
+
+function renderPlan() {
+  const container = document.getElementById('planContainer');
+  STAGE_ORDER.forEach(stage => {
+    const p = PLAN[stage];
+    const el = document.createElement('div');
+    el.className = 'plan-stage';
+    el.innerHTML = `
+      <div class="plan-stage-head">
+        <h3>${STAGE_NAMES[stage]}</h3>
+        <span class="plan-gap-line">${fmtPct(p.r1)} round 1 <span class="arrow">→</span> ${fmtPct(p.r2)} round 2 <span class="arrow">→</span> ${TARGET_LABEL[stage]} target</span>
+      </div>
+      <p class="gap-assess">${p.gap}</p>
+      <div class="change-list">
+        ${p.needed.map(n => `<div class="change-row">${n}</div>`).join('')}
+      </div>
+    `;
+    container.appendChild(el);
+  });
+}
+
+function initTheme() {
+  const btn = document.getElementById('themeToggle');
+  let mode = 'auto';
+  const apply = () => {
+    if (mode === 'auto') { document.documentElement.removeAttribute('data-theme'); btn.textContent = 'THEME: AUTO'; }
+    else { document.documentElement.setAttribute('data-theme', mode); btn.textContent = 'THEME: ' + mode.toUpperCase(); }
+  };
+  btn.addEventListener('click', () => {
+    mode = mode === 'auto' ? 'light' : (mode === 'light' ? 'dark' : 'auto');
+    apply();
+  });
+  apply();
+}
+
+renderStatTiles();
+renderCharts();
+renderTable();
+renderLeaderboard();
+renderDossiers();
+renderInsights();
+renderPlan();
+initTheme();
+</script>
+</body>
+</html>
