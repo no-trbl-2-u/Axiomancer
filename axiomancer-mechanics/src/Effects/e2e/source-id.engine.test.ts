@@ -34,9 +34,9 @@ const debuffSkill: Card = {
     philosophicalAspect: 'mind',
     description: 'Plants a seed of doubt.',
     tier: 1,
+    rank: 1,
+    cardType: 'spell',
     targetType: 'enemy',
-    basePower: 0,
-    scalingStat: 'mind',
     combatEffects: [{ effectId: 'debuff_poison', appliedTo: 'opponent' }],
 };
 
@@ -47,10 +47,10 @@ const buffSkill: Card = {
     philosophicalAspect: 'heart',
     description: 'A heartening certainty.',
     tier: 1,
+    rank: 1,
+    cardType: 'spell',
     targetType: 'self',
-    basePower: 0,
-    scalingStat: 'heart',
-    combatEffects: [{ effectId: 'tier1_heart_attack', appliedTo: 'self' }],
+    combatEffects: [{ effectId: 'buff_thorns', appliedTo: 'self' }],
 };
 
 function fixturePlayer() {
@@ -101,7 +101,7 @@ describe('Phase 38 — player skill applies buff onto self', () => {
 
         const { state: next } = executeSkill(state, buffSkill.id, lookup(buffSkill));
 
-        const applied = next.player.effects.find(e => e.effectId === 'tier1_heart_attack');
+        const applied = next.player.effects.find(e => e.effectId === 'buff_thorns');
         expect(applied).toBeDefined();
         expect(applied!.sourceId).toBe('char-player-shopper');
     });
@@ -193,11 +193,11 @@ describe('Phase 38 — regression: equipment passives keep sourceId === item.id'
             tier: 1,
             rarity: 'common' as const,
             requiredLevel: 1,
-            passiveEffects: ['tier1_heart_defend'],
+            passiveEffects: ['buff_regeneration'],
         };
 
         const equipped = equipItem(player, passiveEquipment);
-        const passive = equipped.effects.find(e => e.effectId === 'tier1_heart_defend');
+        const passive = equipped.effects.find(e => e.effectId === 'buff_regeneration');
         expect(passive).toBeDefined();
         expect(passive!.sourceId).toBe('eq_regen_band');
     });
