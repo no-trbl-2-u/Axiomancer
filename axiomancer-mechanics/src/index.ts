@@ -350,7 +350,7 @@ export {
     applyDialogueChoice,
     emptyQuestLog, isQuestComplete, findActiveQuest, findQuest,
     startQuest, progressQuest, completeQuest, discoverQuest,
-    reachableObjectives, killObjectives,
+    reachableObjectives, killObjectives, collectObjectives,
     seedInputToUint32, minigameRunSeed, branchMinigameSeed,
 } from './World';
 

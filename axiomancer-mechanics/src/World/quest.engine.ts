@@ -100,6 +100,26 @@ export function progressQuest(
 }
 
 /**
+ * Returns active-quest objectives that fire on `collect`-type completion for
+ * `itemId`. Used by `resolveMapEvent` to auto-advance "gather N of X"
+ * objectives when a gathering event grants a matching item.
+ */
+export function collectObjectives(log: QuestLog, itemId: string): Array<{
+    questName: QuestName;
+    objectiveId: string;
+}> {
+    const out: Array<{ questName: QuestName; objectiveId: string }> = [];
+    for (const q of log.active) {
+        for (const o of q.objectives) {
+            if (o.type === 'collect' && o.target === itemId && o.currentCount < o.requiredCount) {
+                out.push({ questName: q.name, objectiveId: o.id });
+            }
+        }
+    }
+    return out;
+}
+
+/**
  * Mark a quest completed explicitly (no objective bookkeeping). Used by event
  * nodes that want to short-circuit objective tracking.
  */

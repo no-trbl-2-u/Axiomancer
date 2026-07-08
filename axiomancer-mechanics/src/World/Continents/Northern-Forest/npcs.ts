@@ -413,7 +413,18 @@ const forestRangerTree: DialogueTree = {
                     text: "Nod respectfully and continue deeper into the forest.",
                     nextNodeId: undefined,
                 },
+                {
+                    // Phase 8 — appended last; grants get-to-cave.
+                    text: "What's past the tree line?",
+                    nextNodeId: 'ranger_cave_directions',
+                    effect: { startQuest: 'get-to-cave' },
+                },
             ],
+        },
+        ranger_cave_directions: {
+            id: 'ranger_cave_directions',
+            // Phase 8 — terminal node for the get-to-cave quest grant.
+            text: "\"A cave mouth cuts into the cliff at the forest's far edge. Cold air spills from it even in summer. Follow the deer trail east and don't linger past dusk — I mark the safe path, not what's waiting in it.\"",
         },
         talk_duties: {
             id: 'talk_duties',
@@ -496,7 +507,18 @@ const hermitSageTree: DialogueTree = {
                     text: "Withdraw quietly to respect their meditation.",
                     nextNodeId: undefined,
                 },
+                {
+                    // Phase 8 — appended last; grants gather-wood.
+                    text: "Is there anything you need, out here alone?",
+                    nextNodeId: 'hermit_firewood',
+                    effect: { startQuest: 'gather-wood' },
+                },
             ],
+        },
+        hermit_firewood: {
+            id: 'hermit_firewood',
+            // Phase 8 — terminal node for the gather-wood quest grant.
+            text: "The Sage's eyes crinkle. \"The hearth runs cold faster than these old bones warm it. Three bundles of oak, if you'd spare the walk — I ask little else of the world.\"",
         },
         talk_solitude_choice: {
             id: 'talk_solitude_choice',

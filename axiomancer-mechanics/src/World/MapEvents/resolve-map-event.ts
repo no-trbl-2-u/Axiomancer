@@ -21,7 +21,7 @@ import type { GameState } from '../../Game/types';
 import { revealAdjacent, markNodeConsumed, unlockAdjacent } from '../world.reducer';
 import { getRng } from '../../Utils/rng';
 import { applyPayload } from './handlers';
-import { reachableObjectives, progressQuest } from '../quest.engine';
+import { reachableObjectives, collectObjectives, progressQuest } from '../quest.engine';
 import { applyAlignmentDelta } from '../../Philosophy';
 import type { QuestLog, NodeId } from '../types';
 import type {
@@ -40,6 +40,21 @@ function advanceReachObjectives(quests: QuestLog, nodeId: NodeId): QuestLog {
     let log = quests;
     for (const r of reaches) {
         log = progressQuest(log, r.questName, r.objectiveId).log;
+    }
+    return log;
+}
+
+/**
+ * Advances any active `collect`-type quest objectives whose target matches
+ * one of `itemIds`. Mirrors `advanceReachObjectives` for the gathering path —
+ * called after a `gathering` payload resolves, with the granted items' ids.
+ */
+function advanceCollectObjectives(quests: QuestLog, itemIds: string[]): QuestLog {
+    let log = quests;
+    for (const itemId of itemIds) {
+        for (const c of collectObjectives(log, itemId)) {
+            log = progressQuest(log, c.questName, c.objectiveId).log;
+        }
     }
     return log;
 }
@@ -243,18 +258,28 @@ export function resolveMapEvent(
     // 4. Apply the matching handler.
     const result = applyPayload(stateAfterReach, entry.payload, rng);
 
+    // 4a. Advance any active `collect`-type quest objectives the granted
+    // items satisfy. Mirrors the reach-objective auto-advance above, but
+    // fires on the resolved event's items rather than the arrived-at node.
+    const stateAfterCollect: GameState = result.event.kind === 'gathering'
+        ? {
+            ...result.state,
+            quests: advanceCollectObjectives(result.state.quests, result.event.items.map(i => i.id)),
+        }
+        : result.state;
+
     // 4b. Apply the pool entry's authored alignment delta, if any (Phase 43).
     // Mirrors the dialogue-runtime moralDelta path — the handler computes its
     // event delta on the pre-shift state; the alignment shift applies on top.
     const stateWithAlignment: GameState = entry.alignmentDelta
         ? {
-            ...result.state,
+            ...stateAfterCollect,
             philosophicalAlignment: applyAlignmentDelta(
-                result.state.philosophicalAlignment,
+                stateAfterCollect.philosophicalAlignment,
                 entry.alignmentDelta,
             ),
         }
-        : result.state;
+        : stateAfterCollect;
 
     // 5. Reveal + unlock adjacents + mark consumed. Phase 31 — unlock is what
     // moves the adjacents out of `lockedNodes` into `availableNodes` so the

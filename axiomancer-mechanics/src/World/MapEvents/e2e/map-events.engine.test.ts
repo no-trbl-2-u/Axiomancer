@@ -26,6 +26,9 @@ import type { QuestName } from '../../quest.library';
 // and reuse.
 const REACH_FV2 = 'reach-fv2' as QuestName;
 
+// Fabricated quest name for the collect-objective tests below (Phase 8).
+const COLLECT_DRIFTWOOD = 'collect-driftwood' as QuestName;
+
 function freshState(): GameState {
     return { ...createNewGameState(), world: createStartingWorld() };
 }
@@ -409,5 +412,96 @@ describe('resolveMapEvent — reach-objective auto-advance', () => {
         // Quest stays active — fv-5 wasn't reached.
         expect(result.state.quests.active.some(q => q.name === REACH_FV2)).toBe(true);
         expect(result.state.quests.completed).not.toContain('reach-fv2');
+    });
+});
+
+// ── Phase 8 — `collect`-objective auto-advance via resolveMapEvent ─────────
+//
+// Mirrors the reach-objective block above: the `collect` objective type has
+// existed on `QuestObjectiveType` since Spec 08 but had no engine wiring
+// until this phase — `resolveGathering` granted items but nothing advanced
+// a matching quest objective.
+
+describe('resolveMapEvent — collect-objective auto-advance', () => {
+    function seedCollectQuest(state: GameState, targetItemId: string, requiredCount = 1): GameState {
+        const collectQuest: Quest = {
+            name: COLLECT_DRIFTWOOD,
+            description: 'Collect driftwood.',
+            mapName: state.world.currentMap.name,
+            objectives: [{
+                id: 'collect',
+                type: 'collect' as const,
+                description: 'Collect the target item.',
+                target: targetItemId,
+                requiredCount,
+                currentCount: 0,
+            }],
+            reward: { kind: 'currency' as const, amount: 0 },
+            status: 'active' as const,
+        };
+        return {
+            ...state,
+            quests: { ...state.quests, active: [...state.quests.active, collectQuest] },
+        };
+    }
+
+    function withGatheringPool(state: GameState, itemIds: string[]): GameState {
+        return withPool(state, {
+            id: 'pool.collect-test',
+            entries: [{
+                kind: 'gathering',
+                weight: 1,
+                payload: {
+                    kind: 'gathering',
+                    items: itemIds.map(id => ({
+                        id, name: id, description: '', category: 'material' as const, quantity: 1,
+                    })),
+                },
+            }],
+        });
+    }
+
+    it('completes a collect quest when the resolved gathering event grants the target item', () => {
+        mockSequentialRng(0.5);
+        const state = seedCollectQuest(withGatheringPool(freshState(), ['driftwood']), 'driftwood');
+
+        const result = resolveMapEvent(state);
+        expect(result.event.kind).toBe('gathering');
+        expect(result.state.quests.active.some(q => q.name === COLLECT_DRIFTWOOD)).toBe(false);
+        expect(result.state.quests.completed).toContain('collect-driftwood');
+    });
+
+    it('is a silent no-op when the resolved gathering event grants a different item', () => {
+        mockSequentialRng(0.5);
+        const state = seedCollectQuest(withGatheringPool(freshState(), ['oak-branch']), 'driftwood');
+
+        const result = resolveMapEvent(state);
+        expect(result.event.kind).toBe('gathering');
+        expect(result.state.quests.active.some(q => q.name === COLLECT_DRIFTWOOD)).toBe(true);
+        expect(result.state.quests.completed).not.toContain('collect-driftwood');
+    });
+
+    it('advances currentCount by every matching item granted in one resolution', () => {
+        mockSequentialRng(0.5);
+        const state = seedCollectQuest(withGatheringPool(freshState(), ['driftwood', 'driftwood']), 'driftwood', 3);
+
+        const result = resolveMapEvent(state);
+        const quest = result.state.quests.active.find(q => q.name === COLLECT_DRIFTWOOD);
+        expect(quest?.objectives[0]?.currentCount).toBe(2);
+        expect(result.state.quests.completed).not.toContain('collect-driftwood');
+    });
+
+    it('is a no-op for non-gathering events even when a collect objective is active', () => {
+        mockSequentialRng(0.5);
+        const base = withPool(freshState(), {
+            id: 'pool.collect-noop-test',
+            entries: [{ kind: 'rest', weight: 1, payload: { kind: 'rest', healFraction: 0.5 } }],
+        });
+        const state = seedCollectQuest(base, 'driftwood');
+
+        const result = resolveMapEvent(state);
+        expect(result.event.kind).toBe('rest');
+        expect(result.state.quests.active.some(q => q.name === COLLECT_DRIFTWOOD)).toBe(true);
+        expect(result.state.quests.completed).not.toContain('collect-driftwood');
     });
 });

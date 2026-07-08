@@ -98,4 +98,21 @@ describe('Old Marrow — moral dialogue tree (Phase 14)', () => {
         const secondStep = applyDialogueChoice(withQuest, tree, half);
         expect(secondStep.gameState.moralMeter).toBe(7);
     });
+
+    it('asking "where should I head" grants get-to-forest once starting-quest is complete (Phase 8)', () => {
+        const tree = findOldMarrowTree();
+        const store = createGameStore(nullAdapter);
+
+        const baseState = store.getState();
+        const primed = { ...baseState, quests: completeQuest(baseState.quests, 'starting-quest') };
+
+        const thanks = tree.nodes['thanks']!;
+        const nextSteps = thanks.choices!.find(c => c.text.startsWith('Where should I head'))!;
+        expect(nextSteps.effect?.startQuest).toBe('get-to-forest');
+        expect(nextSteps.requires?.questCompleted).toBe('starting-quest');
+
+        const result = applyDialogueChoice(primed, tree, nextSteps);
+        expect(result.gameState.quests.active.some(q => q.name === 'get-to-forest')).toBe(true);
+        expect(result.effects.startedQuest).toBe('get-to-forest');
+    });
 });

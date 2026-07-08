@@ -44,7 +44,7 @@ export type { GenerateEncounterOptions } from './encounter';
 export {
     emptyQuestLog, isQuestComplete, findActiveQuest, findQuest,
     startQuest, progressQuest, completeQuest, discoverQuest,
-    reachableObjectives, killObjectives,
+    reachableObjectives, killObjectives, collectObjectives,
 } from './quest.engine';
 
 export {

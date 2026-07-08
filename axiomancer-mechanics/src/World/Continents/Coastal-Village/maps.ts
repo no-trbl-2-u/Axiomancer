@@ -141,7 +141,21 @@ const oldDockmasterTree: DialogueTree = {
                         alignmentDelta: { epistemology: 3, outlook: -3, scope: -3 },
                     },
                 },
+                {
+                    // Phase 8 — placed LAST per this file's index-stability
+                    // convention (Phase 46/62/63). Old Marrow points the
+                    // player toward the mid-game gate once the boss is dead.
+                    text: "Where should I head, now that's done?",
+                    nextNodeId: 'next_steps',
+                    requires: { questCompleted: 'starting-quest' },
+                    effect: { startQuest: 'get-to-forest' },
+                },
             ],
+        },
+        next_steps: {
+            id: 'next_steps',
+            // Phase 8 — terminal node for the get-to-forest quest grant.
+            text: "\"North, past the last shacks. The road turns to forest before the wind picks up. Mind the treeline — the family that keeps the village fed doesn't walk past it lightly.\"",
         },
     },
 };
@@ -319,6 +333,63 @@ const startingQuest: Quest = {
     reward: { kind: 'currency', amount: 25 },
 };
 
+// Phase 8 — the mid-game gate. `quest.library.ts` has declared these three
+// QuestName union members since before the nexus loop; none had an authored
+// Quest object until now.
+const getToForestQuest: Quest = {
+    name: 'get-to-forest',
+    description: "Leave the village and walk the coast road north into the forest.",
+    mapName: 'fishing-village',
+    status: 'available',
+    objectives: [
+        {
+            id: 'reach-forest',
+            type: 'reach',
+            target: 'nf-1',
+            description: "Reach the northern forest.",
+            requiredCount: 1,
+            currentCount: 0,
+        },
+    ],
+    reward: { kind: 'experience', amount: 30 },
+};
+
+const gatherWoodQuest: Quest = {
+    name: 'gather-wood',
+    description: "Gather three bundles of oak branches for the Hermit Sage's hearth.",
+    mapName: 'northern-forest',
+    status: 'available',
+    objectives: [
+        {
+            id: 'collect-oak-branch',
+            type: 'collect',
+            target: 'oak-branch',
+            description: "Collect 3 oak branches.",
+            requiredCount: 3,
+            currentCount: 0,
+        },
+    ],
+    reward: { kind: 'currency', amount: 20 },
+};
+
+const getToCaveQuest: Quest = {
+    name: 'get-to-cave',
+    description: "Follow the Forest Ranger's directions to the cave at the forest's edge.",
+    mapName: 'northern-forest',
+    status: 'available',
+    objectives: [
+        {
+            id: 'reach-cave',
+            type: 'reach',
+            target: 'nf-10',
+            description: "Reach the cave mouth.",
+            requiredCount: 1,
+            currentCount: 0,
+        },
+    ],
+    reward: { kind: 'experience', amount: 40 },
+};
+
 // ─── Map definitions ──────────────────────────────────────────────────────────
 //
 // Per Spec 23 / Phase 24, node events are no longer authored on the
@@ -375,7 +446,7 @@ const fishingVillage: MapDefinition = {
     npcs: [oldMarrow, tideShopkeeper, coastalBeggar, captainBlackwater, fishermansDaughter, villageHealer, unionLeader, merchantWidow],
     enemies: [],
     uniqueEvents: [],
-    quests: [startingQuest],
+    quests: [startingQuest, getToForestQuest],
     images: {
         mapImage: { alt: '', src: '' },
         combatImage: { alt: '', src: '' },
@@ -434,7 +505,7 @@ const northernForest: MapDefinition = {
     npcs: [shrineKeeper, chronicler, wanderingPhilosopher, forestRanger, hermitSage, lostTrader],
     enemies: [],
     uniqueEvents: [],
-    quests: [],
+    quests: [gatherWoodQuest, getToCaveQuest],
     images: {
         mapImage: { alt: '', src: '' },
         combatImage: { alt: '', src: '' },

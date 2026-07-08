@@ -23,7 +23,7 @@ describe('World/Continents Engine Tests', () => {
       expect(fishingVillage.startingNode.id).toBe('fv-1');
       expect(fishingVillage.nodes).toHaveLength(25); // Phase 65 expanded grid
       expect(fishingVillage.npcs).toHaveLength(8); // All coastal NPCs
-      expect(fishingVillage.quests).toHaveLength(1); // Starting quest
+      expect(fishingVillage.quests).toHaveLength(2); // starting-quest + get-to-forest (Phase 8)
     });
 
     it('has properly connected node network', () => {
@@ -51,6 +51,15 @@ describe('World/Continents Engine Tests', () => {
       expect(startingQuest.objectives[0].type).toBe('kill');
       expect(startingQuest.objectives[0].target).toBe('The King of Revenge');
     });
+
+    it('has a get-to-forest quest gating on the mid-game gate (Phase 8)', () => {
+      const getToForest = fishingVillage.quests!.find(q => q.name === 'get-to-forest');
+      expect(getToForest).toBeDefined();
+      expect(getToForest!.mapName).toBe('fishing-village');
+      expect(getToForest!.objectives).toHaveLength(1);
+      expect(getToForest!.objectives[0].type).toBe('reach');
+      expect(getToForest!.objectives[0].target).toBe('nf-1');
+    });
   });
 
   describe('Northern Forest Map Definition', () => {
@@ -61,6 +70,26 @@ describe('World/Continents Engine Tests', () => {
       expect(northernForest.startingNode.id).toBe('nf-1');
       expect(northernForest.nodes.length).toBeGreaterThan(10);
       expect(northernForest.npcs).toHaveLength(6); // All northern NPCs
+      expect(northernForest.quests).toHaveLength(2); // gather-wood + get-to-cave (Phase 8)
+    });
+
+    it('has a gather-wood quest targeting the nf-2 gathering node\'s item (Phase 8)', () => {
+      const gatherWood = northernForest.quests!.find(q => q.name === 'gather-wood');
+      expect(gatherWood).toBeDefined();
+      expect(gatherWood!.mapName).toBe('northern-forest');
+      expect(gatherWood!.objectives).toHaveLength(1);
+      expect(gatherWood!.objectives[0].type).toBe('collect');
+      expect(gatherWood!.objectives[0].target).toBe('oak-branch');
+      expect(gatherWood!.objectives[0].requiredCount).toBe(3);
+    });
+
+    it('has a get-to-cave quest targeting the cave-mouth node (Phase 8)', () => {
+      const getToCave = northernForest.quests!.find(q => q.name === 'get-to-cave');
+      expect(getToCave).toBeDefined();
+      expect(getToCave!.mapName).toBe('northern-forest');
+      expect(getToCave!.objectives).toHaveLength(1);
+      expect(getToCave!.objectives[0].type).toBe('reach');
+      expect(getToCave!.objectives[0].target).toBe('nf-10');
     });
 
     it('has proper sub-area connectivity', () => {
@@ -213,10 +242,18 @@ describe('World/Continents Engine Tests', () => {
       expect(dutiesNode.text).toContain('heartwood of the eldest trees');
       
       // Test sustainable alternatives choice
-      const sustainableChoice = dutiesNode.choices!.find(c => 
+      const sustainableChoice = dutiesNode.choices!.find(c =>
         c.text.includes('sustainable forest trades')
       );
       expect(sustainableChoice?.effect?.setFlag).toBe('forest_conservation_supporter');
+
+      // Phase 8 — get-to-cave quest grant, appended to greet.
+      const caveChoice = forestRanger.dialogueTree!.nodes['greet'].choices!.find(c =>
+        c.effect?.startQuest === 'get-to-cave'
+      );
+      expect(caveChoice).toBeDefined();
+      expect(caveChoice!.nextNodeId).toBe('ranger_cave_directions');
+      expect(forestRanger.dialogueTree!.nodes['ranger_cave_directions']).toBeDefined();
     });
 
     it('Hermit Sage has isolation vs community obligation themes', () => {
@@ -228,10 +265,18 @@ describe('World/Continents Engine Tests', () => {
       expect(solitudeNode.text).toContain('enlightenment selfish');
       
       // Test balanced sharing choice with bridge flag
-      const balancedChoice = solitudeNode.choices!.find(c => 
+      const balancedChoice = solitudeNode.choices!.find(c =>
         c.text.includes('share your wisdom while preserving')
       );
       expect(balancedChoice?.effect?.setFlag).toBe('hermit_wisdom_bridge');
+
+      // Phase 8 — gather-wood quest grant, appended to greet.
+      const firewoodChoice = hermitSage.dialogueTree!.nodes['greet'].choices!.find(c =>
+        c.effect?.startQuest === 'gather-wood'
+      );
+      expect(firewoodChoice).toBeDefined();
+      expect(firewoodChoice!.nextNodeId).toBe('hermit_firewood');
+      expect(hermitSage.dialogueTree!.nodes['hermit_firewood']).toBeDefined();
     });
 
     it('Lost Trader has trust and deception themes in crisis situations', () => {
