@@ -6,6 +6,13 @@ description: Card Forge balance loop for Hazard-Pattern Combat — sandbox-first
 > (`src/…`, `automation/…`, `scripts/…`) are relative to that package — run from it (`cd axiomancer-mechanics`) or via
 > `npm run <script> -w axiomancer-mechanics`.
 
+> **Working agent:** delegate the design + implementation work of this
+> skill to the `card-expert` subagent (`.claude/agents/card-expert.md`).
+> It carries the spec 32 doctrine, the Dawncaster KB lookup discipline
+> (`kb:dawncaster` receipts), the keyword wiring checklist, and this
+> skill's autonomy tiers. The caller keeps orchestration: scoping the
+> `--focus`, reviewing the evidence tables, and delivering the branch + PR.
+
 # Skill: deck-tuning
 
 > **The Card Forge — tunes the combat CARD POOL and DECK economy for the

@@ -73,8 +73,9 @@ Live, at the repo root:
 - `.claude/skills/` — design skills: `brainstorm-mechanics`, `character-spec`,
   `story-spec`, `world-spec`.
 - `.claude/agents/` — `scout`, `reader`, `mechanics-expert`, `playtester`,
-  `card-expert` (card/keyword design consults grounded in the Dawncaster
-  corpus — see "Game knowledge base" below).
+  `card-expert` (card/keyword design AND implementation — the working
+  agent behind `/deck-tuning`; grounded in the Dawncaster corpus — see
+  "Game knowledge base" below).
 
 Commands write their reports to `<package>/docs/reports/` (created on demand).
 All `plan/…` / `/march`-era references were scrubbed at the post-merge cleanup;
