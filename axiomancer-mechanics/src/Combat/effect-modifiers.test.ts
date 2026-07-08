@@ -201,11 +201,11 @@ describe('DoT and drain HP changes', () => {
 
     it('processDamageOverTime separates start from end phases', () => {
         const t = fixture([ae('debuff_poison'), ae('debuff_bleed')]);
-        // canonical set: poison starts (2), bleed ends (4 — the burst window)
+        // v3 canonical set: poison starts (2), bleed ends (3 — the burst window)
         const startTick = processDamageOverTime(t, 'start');
         expect(startTick.damage).toBe(2);
         const endTick = processDamageOverTime(startTick.target, 'end');
-        expect(endTick.damage).toBe(4);
+        expect(endTick.damage).toBe(3);
     });
 
     it('applyDrain damages bearer based on negative regen', () => {
@@ -239,12 +239,13 @@ describe('processRoundStartEffects orchestrator', () => {
 });
 
 describe('processRoundEndEffects orchestrator', () => {
-    it('applies end-DoT then ticks duration', () => {
-        const t = { ...fixture([ae('debuff_bleed', 1, 2)]), health: 20 };
+    it('applies end-DoT then ticks duration (v3 bleed decays 1 intensity per tick)', () => {
+        const t = { ...fixture([ae('debuff_bleed', 2, 2)]), health: 20 };
         const r = processRoundEndEffects(t);
-        expect(r.dotDamage).toBe(4); // canonical bleed: 4/turn over a short window
-        expect(r.target.health).toBe(16); // 20 - 4 = 16
-        // Duration ticked from 2 → 1
+        expect(r.dotDamage).toBe(6); // v3 bleed: floor(3 × 2) = 6 front-loaded
+        expect(r.target.health).toBe(14); // 20 - 6
+        // Intensity decayed 2 → 1 (spec 32 v3 BLEED), duration ticked 2 → 1
+        expect(r.target.effects[0].intensity).toBe(1);
         expect(r.target.effects[0].remainingDuration).toBe(1);
     });
 });
@@ -282,8 +283,8 @@ describe('applyCleanse / applyDispel (Q10)', () => {
 
 describe('resolveEffectiveAdvantage (Q8)', () => {
     it('granted advantage on attacker stance overrides matchup', () => {
-        // matchup is disadvantage but buff_advantage_body grants advantage on body
-        const adv = resolveEffectiveAdvantage('disadvantage', [ae('buff_advantage_body')], 'body');
+        // matchup is disadvantage but buff_counter grants advantage on body
+        const adv = resolveEffectiveAdvantage('disadvantage', [ae('buff_counter')], 'body');
         expect(adv).toBe('advantage');
     });
 
@@ -299,7 +300,7 @@ describe('resolveEffectiveAdvantage (Q8)', () => {
     });
 
     it('grant on a different stance does not affect this stance', () => {
-        const adv = resolveEffectiveAdvantage('neutral', [ae('buff_advantage_body')], 'heart');
+        const adv = resolveEffectiveAdvantage('neutral', [ae('buff_counter')], 'heart');
         expect(adv).toBe('neutral');
     });
 });
