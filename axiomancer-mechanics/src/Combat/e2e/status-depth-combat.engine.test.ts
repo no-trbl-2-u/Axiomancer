@@ -30,7 +30,7 @@ import {
 } from '../combat.engine';
 import { classifyVerbClass, toCombatCard } from '../combat.cards';
 import { getActiveDotTotal, getActiveDotAmplifications } from '../effect-modifiers';
-import { RUPTURE_BURST_CAP } from '../effects';
+import { RUPTURE_BURST_CAP, ruptureBurstCap } from '../effects';
 import { COMBAT_REWARD_POOL } from '../combat.rewards';
 import type { CombatDieColor, CombatEncounterState, CombatEvent } from '../combat.encounter.types';
 
@@ -163,12 +163,25 @@ describe('RUPTURE — detonate the foe afflictions for the pending total', () =>
         expect(det!.amount).toBe(9);
     });
 
-    it('respects RUPTURE_BURST_CAP on a huge DoT stack', () => {
+    it('respects the SCALING burst cap on a huge DoT stack (big enemy → cap grows)', () => {
+        // Plan item 2: the cap scales with enemy max HP so a full detonation
+        // stays relevant against boss pools — max(flat floor, fraction × maxHP).
         mockSequentialRng(0.05);
         const enemyEffects = [ae('debuff_poison', 10, 10)];
         const state = openAndDraft(makePlayer([RUP]), makeEnemy(900, 'heart', enemyEffects), [RUP, RUP, RUP], 'heart');
         const res = playCombatCard(state, { uid: state.hand.find(h => h.cardId === RUP)!.uid }, true);
         const det = res.events.find(e => e.kind === 'rupture-detonated') as { amount: number } | undefined;
+        expect(ruptureBurstCap(900)).toBeGreaterThan(RUPTURE_BURST_CAP); // 900 HP: the fraction term wins
+        expect(det!.amount).toBe(ruptureBurstCap(900));
+    });
+
+    it('keeps the flat floor on a small enemy (early/mid behavior unchanged)', () => {
+        mockSequentialRng(0.05);
+        const enemyEffects = [ae('debuff_poison', 10, 10)];
+        const state = openAndDraft(makePlayer([RUP]), makeEnemy(300, 'heart', enemyEffects), [RUP, RUP, RUP], 'heart');
+        const res = playCombatCard(state, { uid: state.hand.find(h => h.cardId === RUP)!.uid }, true);
+        const det = res.events.find(e => e.kind === 'rupture-detonated') as { amount: number } | undefined;
+        expect(ruptureBurstCap(300)).toBe(RUPTURE_BURST_CAP); // fraction term below the floor
         expect(det!.amount).toBe(RUPTURE_BURST_CAP);
     });
 });

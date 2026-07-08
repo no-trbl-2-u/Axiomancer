@@ -69,6 +69,21 @@ export const RUPTURE_BURST_CAP = 80;
  *  cap: "every soul you gathered, swung at once" must actually pay off a big
  *  bank instead of silently wasting Souls past the 80 line. Tunable. */
 export const REAP_ALL_BURST_CAP = 200;
+/** Burst caps scale with enemy MAX HP (plan/tuning/2026-07-08-win-path-scaling.md
+ *  item 2): the flat 80/200 caps were the direct late-game bottleneck named by
+ *  four decks in Battle Lab round 2 (a full detonation cannot dent a
+ *  1,000-1,500 HP boss). The flat constants above become FLOORS, so early/mid
+ *  behavior is unchanged; against big pools the cap grows with the enemy.
+ *  Sweep-tuned via the playtest matrix. Tunable. */
+export const BURST_CAP_FRACTION = 0.25;
+/** RUPTURE cap for a given enemy: max(flat floor, fraction of enemy max HP). */
+export function ruptureBurstCap(enemyMaxHealth: number): number {
+    return Math.max(RUPTURE_BURST_CAP, Math.round(BURST_CAP_FRACTION * enemyMaxHealth));
+}
+/** REAP-ALL cap for a given enemy: keeps its deliberately higher floor. */
+export function reapAllBurstCap(enemyMaxHealth: number): number {
+    return Math.max(REAP_ALL_BURST_CAP, Math.round(BURST_CAP_FRACTION * enemyMaxHealth));
+}
 /** RUPTURE — flat burst per NON-DoT affliction stack consumed (marks, backfire,
  *  rapport). Spec 32 v3 §3. Tunable. */
 export const RUPTURE_PER_AFFLICTION_STACK = 3;

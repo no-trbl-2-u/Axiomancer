@@ -38,7 +38,8 @@ import {
     getHealingReceivedMult, getOutgoingDamageMult, decayDotsOnHeal, consumeEffect,
     hasPayloadFlag, getStanceVulnMult, computeRoundsToKill,
     consumeAfflictions, consumeOneAffliction, getBackfirePerRung, consumeMarks, getMarkStacks,
-    RUPTURE_BURST_CAP, REAP_ALL_BURST_CAP, RUPTURE_PER_AFFLICTION_STACK, DISRUPT_DENY_AT,
+    RUPTURE_PER_AFFLICTION_STACK, DISRUPT_DENY_AT,
+    ruptureBurstCap, reapAllBurstCap,
     THREAT_RUNGS, THREAT_RUNGS_BOSS,
 } from './effects';
 import {
@@ -919,7 +920,7 @@ function applyRiderToState(
         const consumed = consumeMarks(enemy);
         if (consumed.stacks > 0) {
             enemy = consumed.combatant;
-            const burst = Math.min(RUPTURE_BURST_CAP, r.ruptureMarks * consumed.stacks);
+            const burst = Math.min(ruptureBurstCap(enemy.maxHealth), r.ruptureMarks * consumed.stacks);
             enemy = applyDamage(enemy, burst);
             directDamage += burst;
             events.push({ kind: 'damage-dealt', cardId, target: 'enemy', amount: burst });
@@ -1434,7 +1435,7 @@ function playBottomAction(
                     + (mech.fuelPerPip ?? 0) * pipsSpentThisPlay
                     + (mech.fuelPerOmenHit ?? 0) * (state.omenHits ?? 0);
                 const burst = Math.min(
-                    RUPTURE_BURST_CAP,
+                    ruptureBurstCap(enemy.maxHealth),
                     Math.round(fuel * mult * (1 + (mech.bonusPct ?? 0)) * vulnMult),
                 );
                 if (burst > 0) {
@@ -1496,7 +1497,7 @@ function playBottomAction(
                 // the higher REAP_ALL_BURST_CAP (not the shared RUPTURE cap) so a
                 // full Soul bank actually pays off ("every soul, swung at once").
                 const spent = souls;
-                const burst = Math.min(REAP_ALL_BURST_CAP, Math.round(mech.burstPerSoul * spent * mult * vulnMult));
+                const burst = Math.min(reapAllBurstCap(enemy.maxHealth), Math.round(mech.burstPerSoul * spent * mult * vulnMult));
                 souls = 0;
                 if (burst > 0) {
                     enemy = applyDamage(enemy, burst);
@@ -1815,7 +1816,7 @@ function playBottomAction(
             const consumed = consumeMarks(enemy);
             if (consumed.stacks > 0) {
                 enemy = consumed.combatant;
-                const burst = Math.min(RUPTURE_BURST_CAP, Math.round(r.ruptureMarks * consumed.stacks * vulnMult));
+                const burst = Math.min(ruptureBurstCap(enemy.maxHealth), Math.round(r.ruptureMarks * consumed.stacks * vulnMult));
                 enemy = applyDamage(enemy, burst);
                 mechanicDamage += burst;
                 directDamage += burst;
@@ -3063,7 +3064,7 @@ export function projectRupture(state: CombatEncounterState): number {
     const read: CombatReadResult = d ? state.lastRead : 'neutral';
     const pending = getPendingDotTotal(state.enemy, state.round).total;
     return Math.min(
-        RUPTURE_BURST_CAP,
+        ruptureBurstCap(state.enemy.maxHealth),
         Math.round(pending * READ_DAMAGE_MULT[read] * getDamageTakenMultiplier(state.enemy)),
     );
 }
@@ -3087,7 +3088,7 @@ export function projectReapAll(state: CombatEncounterState, card: CombatCard): {
     const d = draftedDie(state);
     const read: CombatReadResult = d ? state.lastRead : 'neutral';
     const amount = Math.min(
-        REAP_ALL_BURST_CAP,
+        reapAllBurstCap(state.enemy.maxHealth),
         Math.round(mech.burstPerSoul * (state.souls ?? 0) * READ_DAMAGE_MULT[read] * getDamageTakenMultiplier(state.enemy)),
     );
     return { ready: amount > 0, amount };
