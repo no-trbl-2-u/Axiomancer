@@ -27,10 +27,10 @@ const ae = (effectId: string, intensity = 1, remainingDuration = 3): ActiveEffec
 
 describe('getActiveEffectModifiers', () => {
     it('aggregates flat statModifiers scaled by intensity (Q2)', () => {
-        // buff_body_attack_up: +2 body, +3 physicalSkill, rollModifier +2
-        const mods = getActiveEffectModifiers([ae('buff_body_attack_up', 2)]);
-        expect(mods.statFlat.get('body')).toBe(4);
-        expect(mods.statFlat.get('physicalSkill')).toBe(6);
+        // spec 32 v3 re-pin: buff_resistance_body — +3 body, +4 physicalDefense
+        const mods = getActiveEffectModifiers([ae('buff_resistance_body', 2)]);
+        expect(mods.statFlat.get('body')).toBe(6);
+        expect(mods.statFlat.get('physicalDefense')).toBe(8);
     });
 
     it('composes multipliers additively (Q3)', () => {
@@ -45,28 +45,27 @@ describe('getActiveEffectModifiers', () => {
     });
 
     it('aggregates DoT damage by tick phase (Q4)', () => {
-        // poison ticks at start (default), tartarus_rot ticks at end (data-driven).
-        // Neither forms an amplify_damage combo with the other, so this isolates
-        // the phase-split aggregation from Phase 156 live combo amplification
-        // (combo amplification is covered in status-combo-amplification.engine.test.ts).
+        // spec 32 v3: poison ticks at start, bleed ticks at end. Intensity 1 each
+        // keeps combined intensity (2) below the Hemorrhage combo's gate (3), so
+        // this isolates the phase-split aggregation from live combo amplification.
         const mods = getActiveEffectModifiers([
-            ae('debuff_poison',        2),  // canonical poison: 2 × 2 = 4 at start
-            ae('debuff_tartarus_rot',  2),  // 4 × 2 = 8 at end (deprecated payload, unchanged)
+            ae('debuff_poison', 1),  // v3 poison: 2 × 1 = 2 at start
+            ae('debuff_bleed',  1),  // v3 bleed: 3 × 1 = 3 at end
         ]);
-        expect(mods.dotStart).toBe(4);
-        expect(mods.dotEnd).toBe(8);
+        expect(mods.dotStart).toBe(2);
+        expect(mods.dotEnd).toBe(3);
     });
 
     it('amplifies DoT live when an amplify_damage combo is present (Phase 156)', () => {
         // poison (int 2) + bleed (int 1): combined intensity 3 ≥ 3 → Hemorrhage
         // fires, ×1.5 on poison's start DoT: floor(2 × 2 × 1.5) = 6. Bleed
-        // (end phase, no combo target) stays at 4 × 1 = 4.
+        // (end phase, no combo target) stays at v3's 3 × 1 = 3.
         const mods = getActiveEffectModifiers([
             ae('debuff_poison', 2),
             ae('debuff_bleed',  1),
         ]);
         expect(mods.dotStart).toBe(6);
-        expect(mods.dotEnd).toBe(4);
+        expect(mods.dotEnd).toBe(3);
     });
 
     it('separates regen from drain (Q6)', () => {
@@ -83,7 +82,7 @@ describe('getActiveEffectModifiers', () => {
         const mods = getActiveEffectModifiers([
             ae('buff_haste'),          // grantAdvantage [body, mind, heart]
             ae('debuff_confusion'),    // grantDisadvantage [body, mind, heart]
-            ae('buff_advantage_body'), // grantAdvantage [body]
+            ae('buff_counter'),        // grantAdvantage [body]
         ]);
         expect(mods.advantageGrants.has('body')).toBe(true);
         expect(mods.advantageGrants.has('mind')).toBe(true);
@@ -137,14 +136,14 @@ describe('canAct (Q7 precedence)', () => {
 
 describe('getEffectiveStats', () => {
     it('flat stat modifier on a base stat re-derives derived stats', () => {
-        // buff_body_attack_up: +2 body, +3 physicalSkill
-        const t = fixture([ae('buff_body_attack_up')]);
+        // spec 32 v3 re-pin: buff_resistance_body — +3 body, +4 physicalDefense
+        const t = fixture([ae('buff_resistance_body')]);
         const eff = getEffectiveStats(t);
-        // body 5 + 2 = 7; physicalAttack derives from body × 1
-        expect(eff.baseStats.body).toBe(7);
-        expect(eff.derivedStats.physicalAttack).toBe(7);
-        // physicalSkill = body(7)*1 + 3 direct = 10
-        expect(eff.derivedStats.physicalSkill).toBe(10);
+        // body 5 + 3 = 8; physicalAttack derives from body × 1
+        expect(eff.baseStats.body).toBe(8);
+        expect(eff.derivedStats.physicalAttack).toBe(8);
+        // physicalDefense = body(8) × 3 + 4 direct = 28
+        expect(eff.derivedStats.physicalDefense).toBe(28);
     });
 
     it('multiplier on body scales every body-derived stat', () => {
@@ -164,11 +163,11 @@ describe('getEffectiveStats', () => {
     });
 
     it('intensity scales flat modifiers', () => {
-        const t = fixture([ae('buff_body_attack_up', 3)]);
+        const t = fixture([ae('buff_resistance_body', 3)]);
         const eff = getEffectiveStats(t);
-        // +2 body × 3 intensity = +6 body, +3 phys skill × 3 = +9
-        expect(eff.baseStats.body).toBe(11);
-        expect(eff.derivedStats.physicalSkill).toBe(11 + 9);
+        // +3 body × 3 intensity = +9 body; physicalDefense +4 × 3 = +12 direct
+        expect(eff.baseStats.body).toBe(14);
+        expect(eff.derivedStats.physicalDefense).toBe(14 * 3 + 12);
     });
 });
 
@@ -180,14 +179,14 @@ describe('stat lookup helpers honor effective stats and defenseDelta', () => {
     });
 
     it('getAttackStat reflects re-derived stat after base-stat mod', () => {
-        const t = fixture([ae('buff_body_attack_up')]); // +2 body, +3 physicalSkill
-        // physicalAttack = body(7) × 1 = 7
-        expect(getAttackStat(t, 'body')).toBe(7);
+        const t = fixture([ae('buff_resistance_body')]); // +3 body
+        // physicalAttack = body(8) × 1 = 8
+        expect(getAttackStat(t, 'body')).toBe(8);
     });
 
     it('getResistStat returns effective base stat', () => {
-        const t = fixture([ae('buff_body_attack_up')]); // +2 body
-        expect(getEffectiveStats(t).baseStats.body).toBe(7);
+        const t = fixture([ae('buff_resistance_body')]); // +3 body
+        expect(getEffectiveStats(t).baseStats.body).toBe(8);
     });
 });
 
