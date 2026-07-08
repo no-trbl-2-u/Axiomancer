@@ -186,6 +186,12 @@ Card-level targets on top of the bands:
 | Pool ratios (v3 — re-derive from the live library before relying on them) | direct damage = 0 by LAW (spec 32: THE STRIKE IS DEAD — a card printing raw HP damage is a spec violation, not a tuning finding); DoT >= 25%; control >= 15%; GUARD/BARRIER >= 1 per theme; Befriend >= 1; state-interactive >= 2 |
 | Per-stage pool health | each stage's eligible pool (`stageEligibleCardIds`) contains at least one live DoT, control, and defend line |
 | Archetype honesty | each of the 10 theme presets (`erosion` … `refrain`) wins through its own SIGNATURE keywords, not just the shared utility 10 (spec 32 §8-9); `dot`-focus drafts land more DoT than `balanced` drafts; the `aggro-brute` POLICY stays the weak baseline (a sim policy — the v2 `aggro-strike` preset is retired) |
+| Per-deck floors & ceiling (balance the VARIANCE, not the mean) | every theme preset >= 40% early, >= 25% mid, >= 10% late; NO preset at >98% on any stage — a 100% cell is a DOMINANCE finding, not a success. Live enforcement values are the `PRESET_FLOORS` / `PRESET_CEILING` constants in the balance-band e2e (`// PLAYTEST-CALIBRATION`, pinned loose today) — ratchet them toward these targets as forge items land; stage averages that hit band while presets sit at 0% or 100% are a FAIL |
+
+Every run's report includes the per-preset spread table (min/median/max
+win rate per stage, one row per preset) — stage averages alone are not
+evidence; the round-2 battle lab showed a 53.7% mid average hiding four
+presets near 100% and four near 0%.
 
 ### 4b. The keyword proving gate (the exit criteria for the 30-cap)
 

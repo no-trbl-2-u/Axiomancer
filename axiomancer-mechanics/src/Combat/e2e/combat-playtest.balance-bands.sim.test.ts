@@ -80,27 +80,55 @@ describe('balance bands (loose) — doctrine witnesses', () => {
     }, 120_000);
 });
 
-describe('balance bands (loose) — every themed preset can win on the easy profile', () => {
-    // The deck axis (spec 32 v3 §8): stage × policy × PRESET. One easy-stage
-    // cell per preset; the loose gate is "wins at least once" — a preset that
-    // cannot beat the easiest roster at all is dead on arrival.
+// Per-deck floors/ceiling (plan/tuning/2026-07-08-win-path-scaling.md item 4):
+// stage AVERAGES hide a bimodal distribution (presets at ~100% next to
+// presets at ~0%), so the objective function is per-preset, not per-stage.
+// PLAYTEST-CALIBRATION — current values are the loosest that pass on main;
+// /deck-tuning ratchets them toward the targets as forge items land:
+//   floors  — early 0.40 · mid 0.25 · late 0.10
+//   ceiling — 0.98 on every stage (a 100% preset is a DOMINANCE finding,
+//             not a success; see Oratory/Standstill in Battle Lab round 2)
+const PRESET_FLOORS: Readonly<Record<'early' | 'mid' | 'late', number>> = {
+    early: 0.2, // ratchet target 0.40
+    mid: 0,     // ratchet target 0.25 — Foundry/Augury/Bastion/Tithe near 0 today
+    late: 0,    // ratchet target 0.10 — only 3 of 10 presets win late at all
+};
+const PRESET_CEILING = 1.0; // ratchet target 0.98 — Oratory/Standstill sit at 1.0 today
+
+describe('balance bands (loose) — per-preset floors and dominance ceiling', () => {
+    // The deck axis (spec 32 v3 §8): stage × policy × PRESET. A preset that
+    // cannot clear its stage floor is dead on arrival; a preset pinned at
+    // 100% has escaped the stage curve (alt-win scaling, plan item 1).
     it.each(COMBAT_DECK_PRESET_ORDER.map(id => [id] as const))(
-        "preset '%s' wins at least sometimes on the early stage",
+        "preset '%s' respects the per-stage floors and ceiling",
         (presetId) => {
-            const report = runPlaytestMatrix({
-                stages: ['early'],
-                policies: ['greedy'],
-                decks: [{ kind: 'preset', presetId }],
-                enemiesPerStage: 2,
-                runsPerCell: RUNS_PER_CELL,
-                seed: SEED,
-            });
-            const wins = report.cells.reduce((n, c) => n + c.stats.victories + c.stats.mercies, 0);
-            const runs = report.cells.reduce((n, c) => n + c.stats.runs, 0);
-            expect(runs).toBeGreaterThan(0);
-            expect(wins, `preset '${presetId}' never won a single early-stage run`).toBeGreaterThan(0);
+            const spread: string[] = [];
+            for (const stage of ['early', 'mid', 'late'] as const) {
+                const report = runPlaytestMatrix({
+                    stages: [stage],
+                    policies: ['greedy'],
+                    decks: [{ kind: 'preset', presetId }],
+                    enemiesPerStage: 2,
+                    runsPerCell: RUNS_PER_CELL,
+                    seed: SEED,
+                });
+                const wins = report.cells.reduce((n, c) => n + c.stats.victories + c.stats.mercies, 0);
+                const runs = report.cells.reduce((n, c) => n + c.stats.runs, 0);
+                expect(runs).toBeGreaterThan(0);
+                const rate = wins / runs;
+                spread.push(`${stage}=${rate.toFixed(2)}`);
+                expect(
+                    rate,
+                    `preset '${presetId}' below the ${stage} floor (${PRESET_FLOORS[stage]})`,
+                ).toBeGreaterThanOrEqual(PRESET_FLOORS[stage]);
+                expect(
+                    rate,
+                    `preset '${presetId}' above the ${stage} ceiling (${PRESET_CEILING}) — dominance finding`,
+                ).toBeLessThanOrEqual(PRESET_CEILING);
+            }
+            console.info(`[preset-spread] ${presetId}: ${spread.join(' ')}`);
         },
-        120_000,
+        360_000,
     );
 });
 
