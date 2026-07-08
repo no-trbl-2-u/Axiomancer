@@ -9,7 +9,7 @@
  *   npm run combat-sim                              # omniscient ('greedy') witness
  *   npm run combat-sim -- --blind                  # realistic-player witness (no hidden-stance peek)
  *   npm run combat-sim -- --enemy=KingOfRevenge    # one enemy only
- *   npm run combat-sim -- --loadout=slippery-slope,eternal-regress,befriend
+ *   npm run combat-sim -- --loadout=slippery-slope,straw-mans-jab,soft-word
  *   npm run combat-sim -- --runs=300 --seed=1 --blind
  *
  * `--blind`: the bot drafts using ONLY information a real player can currently see
@@ -37,7 +37,9 @@ const has = (k: string): boolean => process.argv.includes(`--${k}`);
 const policy: CombatSimPolicyId = has('blind') ? 'blind' : 'greedy';
 const runs = Number(flag('runs') ?? '200');
 const seed = Number(flag('seed') ?? '1');
-const loadout = (flag('loadout') ?? 'slippery-slope').split(',').map(s => s.trim()).filter(Boolean);
+// Default loadout: the spec 32 v3 starting deck (slippery-slope teaches DoT,
+// brace-for-impact teaches GUARD).
+const loadout = (flag('loadout') ?? 'slippery-slope,brace-for-impact').split(',').map(s => s.trim()).filter(Boolean);
 const only = flag('enemy');
 
 function player(skills: string[]): Character {
@@ -52,7 +54,8 @@ function player(skills: string[]): Character {
 const names = only ? [only] : Object.keys(ENEMIES);
 process.stdout.write(
     `\nHazard combat sim — policy=${policy} runs=${runs} seed=${seed} loadout=[${loadout.join(', ')}]\n`
-    + `(win = enemy HP→0 or befriend-spare; V/M/D/R = victory/mercy/defeat/retreat)\n\n`,
+    + `(win = enemy HP→0 or a merciful resolution (befriend/capitulate/concede); `
+    + `V/M/D/R = victory/merciful/defeat/retreat)\n\n`,
 );
 for (const name of names) {
     const enemy = ENEMIES[name];

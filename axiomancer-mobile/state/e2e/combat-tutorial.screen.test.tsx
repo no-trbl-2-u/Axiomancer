@@ -25,7 +25,7 @@ jest.mock('expo-router', () => ({
     useLocalSearchParams: () => mockParams,
 }));
 
-const SKILLS = ['slippery-slope', 'eternal-regress', 'achilles-gambit', 'befriend'];
+const SKILLS = ['slippery-slope', 'straw-mans-jab', 'brace-for-impact', 'soft-word'];
 
 beforeEach(() => {
     (globalThis as { __AXM_COMBAT_SEED__?: number }).__AXM_COMBAT_SEED__ = 16;
