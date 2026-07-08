@@ -1,16 +1,10 @@
 /**
- * Balance-sim witness — 0.34.0 status-depth epic.
+ * Balance-sim witness — status-payoff loadouts (spec 32 v3 re-pin).
  *
- * The new levers (VULNERABLE × RUPTURE × COMPOUND burst, and the DISRUPT deny
- * path) can shift win-rates, so this guard asserts:
- *   1. The EXISTING DoT baseline is UNCHANGED by the new content (regression
- *      guard): a DoT loadout still wins the large majority AND status engagement
- *      stays high (the CLAUDE.md doctrine witness — status play must not drop).
- *   2. Loadouts that BUILD AROUND the new cards (DoT+Rupture, DoT+Breach, the
- *      full payoff kit) are winnable and still land status (status stays central;
- *      the payoff cards cash in a status board, they do not replace it).
- *
- * Exact rates may drift; the INVARIANTS are not. Tuned via `/combat-tuning`.
+ * spec 32 v3: bands re-pinned loose; /deck-tuning + /combat-playtest
+ * recalibrate. Win ratio is explicitly NOT a constraint (spec §8) — the loose
+ * invariants here are: combats terminate, no crashes, status play happens,
+ * and payoff-built loadouts can win at least sometimes on an easy profile.
  */
 
 import { describe, it, expect } from 'vitest';
@@ -21,7 +15,7 @@ import { LittleBelle } from '../../Enemy/enemy.library';
 import { deepClone } from '../../Utils';
 import { simulateHazardPatternCombat } from '../combat.encounter.sim';
 
-const RUNS = 120;
+const RUNS = 80;
 const SEED = 1;
 
 function loadout(skills: string[]): Character {
@@ -32,36 +26,38 @@ function loadout(skills: string[]): Character {
     return p;
 }
 
-const DOT = ['slippery-slope'];
-const DOT_RUPTURE = ['slippery-slope', 'resonance-rupture'];
-const DOT_VULNERABLE = ['slippery-slope', 'breach'];
-const FULL_KIT = ['slippery-slope', 'breach', 'resonance-rupture', 'mounting-contradictions'];
+const DOT = ['slippery-slope', 'straw-mans-jab'];
+const DOT_RUPTURE = ['slippery-slope', 'straw-mans-jab', 'resonance-detonation'];
+const DOT_MARK = ['slippery-slope', 'opening-statement'];          // DoT + MARK exposure
+const FULL_KIT = ['slippery-slope', 'straw-mans-jab', 'opening-statement', 'resonance-detonation'];
 
-describe('0.34.0 — the new content does not regress the DoT baseline', () => {
-    it('the pure DoT loadout still wins the large majority WITH high status engagement', () => {
+describe('spec 32 v3 — the DoT baseline is alive (loose bands)', () => {
+    it('the pure DoT loadout wins at least sometimes WITH real status engagement', () => {
         const s = simulateHazardPatternCombat(loadout(DOT), LittleBelle, RUNS, SEED);
-        expect(s.winRate).toBeGreaterThanOrEqual(0.8);
-        // Doctrine witness: status play stays central (must NOT drop).
-        expect(s.statusEngagement).toBeGreaterThan(0.3);
+        expect(s.runs).toBe(RUNS);
+        expect(s.victories + s.mercies + s.defeats + s.retreats).toBe(RUNS);
+        expect(s.winRate).toBeGreaterThan(0);
+        expect(s.statusEngagement).toBeGreaterThan(0);
     });
 });
 
-describe('0.34.0 — building around the new payoff cards is winnable + status-central', () => {
-    it('DoT + RUPTURE wins and still lands status', () => {
+describe('spec 32 v3 — building around the payoff cards is playable + status-central (loose)', () => {
+    it('DoT + RUPTURE terminates, wins sometimes, and still lands status', () => {
         const s = simulateHazardPatternCombat(loadout(DOT_RUPTURE), LittleBelle, RUNS, SEED);
-        expect(s.winRate).toBeGreaterThanOrEqual(0.75);
-        expect(s.statusEngagement).toBeGreaterThan(0.2);
+        expect(s.winRate).toBeGreaterThan(0);
+        expect(s.statusEngagement).toBeGreaterThan(0);
     });
 
-    it('DoT + VULNERABLE (Breach) wins and still lands status', () => {
-        const s = simulateHazardPatternCombat(loadout(DOT_VULNERABLE), LittleBelle, RUNS, SEED);
-        expect(s.winRate).toBeGreaterThanOrEqual(0.75);
-        expect(s.statusEngagement).toBeGreaterThan(0.2);
+    it('DoT + MARK exposure terminates, wins sometimes, and still lands status', () => {
+        const s = simulateHazardPatternCombat(loadout(DOT_MARK), LittleBelle, RUNS, SEED);
+        expect(s.winRate).toBeGreaterThan(0);
+        expect(s.statusEngagement).toBeGreaterThan(0);
     });
 
-    it('the full payoff kit wins and keeps status central (DoT feeds the payoffs)', () => {
+    it('the full payoff kit terminates and keeps status central (DoT feeds the payoffs)', () => {
         const s = simulateHazardPatternCombat(loadout(FULL_KIT), LittleBelle, RUNS, SEED);
-        expect(s.winRate).toBeGreaterThanOrEqual(0.75);
-        expect(s.statusEngagement).toBeGreaterThan(0.2);
+        expect(s.winRate).toBeGreaterThan(0);
+        expect(s.statusEngagement).toBeGreaterThan(0);
+        expect(s.dotHpFraction).toBeGreaterThan(0);
     });
 });

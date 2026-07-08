@@ -33,13 +33,16 @@ describe('DebugCombatDeck: deck controls', () => {
 
         for (const id of [
             'starter-baseline',
-            'bleed',
-            'poison',
-            'confusion',
-            'dread',
-            'guard',
-            'sustain',
-            'gold-showcase',
+            'erosion',
+            'oratory',
+            'foundry',
+            'penitent',
+            'standstill',
+            'augury',
+            'tithe',
+            'grace',
+            'bastion',
+            'refrain',
         ]) {
             expect(tree.queryByTestId(`debug-combat-deck-preset-${id}`)).not.toBeNull();
         }
@@ -50,11 +53,11 @@ describe('DebugCombatDeck: deck controls', () => {
         const store = makeStore();
         const tree = render(withProviders(store, <DebugCombatDeck />));
 
-        fireEvent.press(tree.getByTestId('debug-combat-deck-preset-bleed'));
+        fireEvent.press(tree.getByTestId('debug-combat-deck-preset-erosion'));
 
         expect(store.getState().player.knownSkills.length).toBeGreaterThan(0);
         expect(store.getState().player.combatRewardCards).toEqual([]);
-        expect(tree.getByText(/Bleed: \d+-card deck/i)).toBeTruthy();
+        expect(tree.getByText(/Erosion: \d+-card deck/i)).toBeTruthy();
     });
 
     it('pressing random deck deals a random hand into knownSkills', () => {
