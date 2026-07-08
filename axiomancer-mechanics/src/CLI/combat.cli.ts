@@ -579,6 +579,8 @@ export async function runHazardCombatCliEncounter(
     const outcomeLabel: Record<CombatOutcome, string> = {
         victory: 'Victory',
         mercy: 'Mercy / Befriended',
+        capitulate: 'Capitulation — the enemy yields (SWAY)',
+        concede: 'Concession — the argument is won (Peroration)',
         defeat: 'Defeat',
         retreat: 'Retreated',
     };
