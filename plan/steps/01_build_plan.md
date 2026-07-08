@@ -94,8 +94,11 @@ Tick in this file in the same commit that ships the phase.
       full-provider mounts + Playwright web flows) to close the
       cross-screen regression blind spot (mobile; see AUDIT
       gotcha) — `test(mobile): cross-screen integration harness — phase 10` (7692758e)
-- [ ] Phase 11 — Tutorial / onboarding flow (GAMEPLAY_GAPS
-      GAP-001: no guided intro) (mobile)
+- [x] Phase 11 — Tutorial / onboarding flow (GAMEPLAY_GAPS
+      GAP-001: no guided intro) (mobile) — scoped to the Rest
+      encounter (the smallest of four ungoached minigames; see
+      `plan/phases/phase_11_rest_tutorial.md` § 0 and the Follow-ups
+      below) — `feat(mobile): guided first-night rest tutorial — phase 11` (1fb1d7f8)
 - [ ] Phase 12 — Doc-sync pass: reconcile `spec.md` / `docs/combat.md`
       with the shipped engine surface; frame Hazard-Pattern
       Combat as primary everywhere (mechanics; docs)
@@ -105,6 +108,17 @@ Tick in this file in the same commit that ships the phase.
       to the mechanics engine and deletes its duplicate. Gap list:
       `axiomancer-mechanics/docs/hazard-v2-vs-mechanics-divergence.md`.
       (both; large — generate a brief before shipping)
+- [ ] Phase 15 — Hazard first-crossing tutorial (GAP-001 follow-up):
+      guided first-run coach for the Hazard minigame, mirroring the
+      Rest/Gathering/Combat tutorials. Largest remaining gap — route
+      selection, staging/powering cards, foretell — generate a brief
+      before shipping (mobile)
+- [ ] Phase 16 — Loot-Cache ("The Reliquary") first-delve tutorial
+      (GAP-001 follow-up), mirroring the Rest/Gathering/Combat
+      tutorials (mobile)
+- [ ] Phase 17 — Quest Board ("The Boy's Almanac") first-session
+      tutorial (GAP-001 follow-up), mirroring the Rest/Gathering/Combat
+      tutorials (mobile)
 
 > **After the queue drains:** `/march` transitions to `/iterate`
 > — draining `plan/AUDIT.md` + `plan/CRITIQUE.md`, doc-drift,
