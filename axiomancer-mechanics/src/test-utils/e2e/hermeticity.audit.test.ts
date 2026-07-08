@@ -103,7 +103,9 @@ describe('hermeticity guard: isolation (no disk / network / subprocess)', () => 
      *    the build; its tests exercise the IO boundary on purpose);
      *  - the node persistence adapter IS a disk feature;
      *  - the vitest-reporter test exercises the reporter's file output;
-     *  - this guard reads committed sources.
+     *  - this guard reads committed sources;
+     *  - the curated-library strike gate reads cards.library.ts to assert
+     *    the banned strings basePower/chipHp never reappear (spec 32 v3 §1).
      * Add to this list only when the FEATURE under test is the
      * disk/process seam itself.
      */
@@ -122,6 +124,7 @@ describe('hermeticity guard: isolation (no disk / network / subprocess)', () => 
         'test-utils/e2e/agent-vitest-reporter.engine.test.ts',
         'test-utils/e2e/hermeticity.audit.test.ts',
         'Combat/e2e/terminology-boundary.engine.test.ts',
+        'Cards/e2e/curated-library.engine.test.ts',
     ]);
 
     const IO_PATTERN =

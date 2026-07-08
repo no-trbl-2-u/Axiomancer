@@ -2,40 +2,26 @@
  * Hermetic unit tests for the honest card view-model helpers
  * (engineHonestKind / resolvePrimary / faceStats / detailStats / armedReadValue).
  *
- * Fixtures are curated keepers (Fate Engine P1 trim, spec 31 §4), read live
- * from the installed engine so the assertions stay true to real data:
- *   - slippery-slope    ramping Poison i1 d4   → 2+2+3+3 = 10 lifetime
- *   - brace-for-impact  Guard 12               → free Guard 6
- *   - eternal-recurrence Regen i2 d4 (hpr 4)   → 8/t·4t = 32
- *   - unmoved-mover     Stagger d1             → skip 1t
- *   - qa-mobile-pure-strike (sandbox fixture) Strike → no fabricated number
+ * Fixtures are spec 32 v3 library cards, read live from the sibling engine so
+ * the assertions stay true to real data:
+ *   - slippery-slope        ramping Poison i1 d4  → 2+2+3+3 = 10 lifetime · FREE tick
+ *   - brace-for-impact      Guard 8               → FREE Guard 2
+ *   - resonance-detonation  RUPTURE               → a word, never a number
+ *   - the-reaping           REAP all (2/Soul)     → live burst, never headlined
+ *   - venom-and-vein        enchantment           → persistent, PAID only
+ *   - suppurating-curse     disenchant            → standing curse, PAID only
+ *   - memento-mori          MARK i2 d1            → +2 per DoT tick
+ *   - red-herring           BACKFIRE i2 d2        → 2 per denied rung
  *
- * Core invariant under test: real-units-or-no-number (never a fabricated value),
- * and face↔detail numbers agree.
+ * Core invariant under test: real-units-or-no-number (never a fabricated
+ * value — THE STRIKE IS DEAD), and face↔detail numbers agree.
  */
 
 import { describe, it, expect } from '@jest/globals';
-import { getCard, getSkillById, registerSandboxCards } from '@mechanics';
+import { getCard, getSkillById, READ_DAMAGE_MULT, COLOR_MATCH_DAMAGE_BONUS } from '@mechanics';
 import {
     faceStats, detailStats, engineHonestKind, resolvePrimary, armedReadValue,
 } from '@/state/presenters/combat-encounter.engine';
-
-// Master Spec (2026-07-03) doctrine pass converted every real library card off
-// flat `basePower` strikes — no real card can play "pure damage, no status"
-// anymore (see `achilles-gambit`, now a control-effect card), so this suite's
-// pure-strike fixture is a sandbox-only test card, mirroring the mechanics
-// package's identical fixture (`qa-pure-strike-body`).
-registerSandboxCards([{
-    id: 'qa-mobile-pure-strike',
-    name: 'QA Pure Strike (test fixture)',
-    category: 'paradox',
-    philosophicalAspect: 'body',
-    description: 'Test-only fixture: a flat direct-damage card with no status payload.',
-    tier: 1,
-    targetType: 'enemy',
-    basePower: 12,
-    scalingStat: 'body',
-}]);
 
 const cardOf = (id: string) => {
     const card = getCard(id);
@@ -45,102 +31,92 @@ const cardOf = (id: string) => {
 };
 
 describe('engineHonestKind — the honesty gate', () => {
-    it('classifies DoT / stun / regen / weaken / vulnerable / thorns', () => {
+    it('classifies the spec 32 v3 keyword effects', () => {
+        expect(engineHonestKind('debuff_poison')).toBe('dot');
         expect(engineHonestKind('debuff_bleed')).toBe('dot');
-        expect(engineHonestKind('debuff_stun')).toBe('stun');
-        expect(engineHonestKind('buff_regeneration')).toBe('regen');
-        expect(engineHonestKind('debuff_slow')).toBe('weaken');             // negative roll mod (0.33.0 de-inert)
-        expect(engineHonestKind('debuff_confusion')).toBe('weaken');
-        expect(engineHonestKind('debuff_vulnerable')).toBe('vulnerable');   // 0.34.0: damageTakenMult is now real
-        expect(engineHonestKind('debuff_vulnerability_body')).toBe('vulnerable'); // now carries damageTakenMult
-        expect(engineHonestKind('buff_brazen_thorns')).toBe('thorns');      // 0.34.0: reflectDamage is now real
+        expect(engineHonestKind('debuff_mark')).toBe('mark');           // tickAmplifyFlat
+        expect(engineHonestKind('debuff_backfire')).toBe('backfire');   // backfirePerRung
+        expect(engineHonestKind('debuff_rapport')).toBe('weaken');      // outgoingDamageMulPct < 0
+        expect(engineHonestKind('buff_thorns')).toBe('thorns');         // reflectDamage
         expect(engineHonestKind(null)).toBeNull();
-    });
-
-    it('classifies the 6 card-overhaul (2026-07-03) effects the whitelist previously missed', () => {
-        expect(engineHonestKind('debuff_exposure')).toBe('exposure');           // real -N DEF
-        expect(engineHonestKind('debuff_doubt')).toBe('doubt');                 // forces weak-tier next play
-        expect(engineHonestKind('debuff_sensory_null')).toBe('sensoryNull');    // blocks advantage / dulls control
-        expect(engineHonestKind('debuff_isolated')).toBe('isolated');           // denies ally-buff targeting
-        expect(engineHonestKind('debuff_overextended')).toBe('overextended');   // self-cost weak next play
-        expect(engineHonestKind('buff_clarity')).toBe('clarity');               // next die: Wild
-        expect(engineHonestKind('buff_resolute')).toBe('resolute');             // real -N% dmg taken (inverse of vulnerable)
     });
 });
 
 describe('faceStats — honest real-unit faces', () => {
-    it('Slippery Slope (ramping Poison) → 10 lifetime (2,2,3,3) · 4 turns, FREE 2 HP', () => {
+    it('Slippery Slope (ramping Poison) → 10 lifetime (2,2,3,3) · 4 turns · FREE tick', () => {
         const { card, skill } = cardOf('slippery-slope');
         const f = faceStats(card, skill);
         expect(f.kind).toBe('dot');
         expect(f.heroText).toBe('10');        // ramp-aware: 2+2+3+3 (rampFactor 0.5)
         expect(f.heroSub).toBe('over 4 turns');
-        expect(f.freeHeroText).toBe('2 HP');
-        expect(f.readDependent).toBe(true);   // the read now scales status (depth epic)
+        expect(f.freeHeroText).toBe('tick');  // the AUTHORED free rider, verbatim
+        expect(f.readDependent).toBe(true);
         expect(f.statusBase).toBe(10);
         expect(f.inert).toBe(false);
     });
-    it('Brace for Impact (Guard) → Guard 12, FREE Guard 6, read-dependent', () => {
+    it('Brace for Impact (Guard) → Guard 8 · the authored FREE Guard 2', () => {
         const { card, skill } = cardOf('brace-for-impact');
         const f = faceStats(card, skill);
         expect(f.kind).toBe('guard');
-        expect(f.heroText).toBe('Guard 12');
-        expect(f.freeHeroText).toBe('Guard 6');
+        expect(f.heroText).toBe('Guard 8');
+        expect(f.freeHeroText).toBe('Guard 2');   // skill.free.guard — never a halved fabrication
         expect(f.readDependent).toBe(true);
-        expect(f.guardBase).toBe(12);
+        expect(f.guardBase).toBe(8);
     });
-    it('Eternal Recurrence (Regen) → real i2 d4 totals from the canonical library', () => {
-        const { card, skill } = cardOf('eternal-recurrence');
+    it('Resonance Detonation (RUPTURE) → a word, never a number', () => {
+        const { card, skill } = cardOf('resonance-detonation');
         const f = faceStats(card, skill);
-        expect(f.kind).toBe('regen');
-        // buff_regeneration hpr 4 × i2 = 8/turn × 4 turns = 32 (exact, from data)
-        expect(f.heroText).toBe('32');
-        expect(f.heroSub).toBe('over 4 turns');
+        expect(f.kind).toBe('rupture');
+        expect(f.heroText).toBe('detonate');  // live burst → qualitative word only
+        expect(f.freeHeroText).toBe('tick');
     });
-    it('Unmoved Mover (Stagger) → skip 1t (stun/sleep/petrify merged into stagger)', () => {
-        const { card, skill } = cardOf('unmoved-mover');
+    it('The Reaping (REAP all) → spends the Soul bank, burst stays live', () => {
+        const { card, skill } = cardOf('the-reaping');
         const f = faceStats(card, skill);
-        expect(f.kind).toBe('stun');
-        expect(f.heroText).toBe('skip 1 turns');
+        expect(f.kind).toBe('reap');
+        expect(f.heroText).toBe('all Souls');
+        expect(f.heroSub).toBe('2 per Soul'); // burstPerSoul — a real authored unit
     });
-    it('QA Pure Strike (Strike) → no fabricated number', () => {
-        const { card, skill } = cardOf('qa-mobile-pure-strike');
+    it('Venom and Vein (enchantment) → persistent, PAID only', () => {
+        const { card, skill } = cardOf('venom-and-vein');
         const f = faceStats(card, skill);
-        expect(f.kind).toBe('strike');
-        expect(f.heroText).toBe('');               // real-units-or-no-number
-        expect(f.freeHeroText).toBe('small chip');
-        expect(f.readDependent).toBe(true);
+        expect(f.kind).toBe('enchant');
+        expect(f.heroSub).toBe('rest of combat');
+        expect(f.freeHeroText).toBe('PAID only');
+        expect(card.cardType).toBe('enchantment');
     });
+    it('Suppurating Curse (disenchant) → a standing curse on the enemy', () => {
+        const { card, skill } = cardOf('suppurating-curse');
+        const f = faceStats(card, skill);
+        expect(f.kind).toBe('disenchant');
+        expect(f.freeHeroText).toBe('PAID only');
+        expect(card.cardType).toBe('disenchant');
+    });
+    it('Memento Mori (MARK i2 d1) → +2 per DoT tick, real units', () => {
+        const { card, skill } = cardOf('memento-mori');
+        const f = faceStats(card, skill);
+        expect(f.kind).toBe('mark');
+        expect(f.heroText).toBe('+2/tick');   // tickAmplifyFlat 1 × intensity 2
+        expect(f.inert).toBe(false);
+    });
+    it('Red Herring (BACKFIRE i2 d2) → 2 per denied rung, real units', () => {
+        const { card, skill } = cardOf('red-herring');
+        const f = faceStats(card, skill);
+        expect(f.kind).toBe('backfire');
+        expect(f.heroText).toBe('2/rung');    // backfirePerRung 1 × intensity 2
+        expect(f.inert).toBe(false);
+    });
+});
 
-    // ── card-overhaul (2026-07-03) — the 6 previously-blank effects ──
-    it("Achilles' Gambit (FATE bleed) → real 8-HP lifetime + a printed X-die line", () => {
-        const { card, skill } = cardOf('achilles-gambit');
-        const f = faceStats(card, skill);
-        expect(f.kind).toBe('dot');
-        expect(f.heroText).toBe('8');       // bleed 4 × i1 × 2 turns
-        expect(card.dieLines?.some(l => l.includes('X die'))).toBe(true);
-        expect(f.inert).toBe(false);
+describe('rank / rarity projection (spec 32 v3 §4)', () => {
+    it('rank rides the card; rarity derives from it (rare frame keys off rarity)', () => {
+        expect(getCard('slippery-slope')!.rank).toBe(1);
+        expect(getCard('slippery-slope')!.rarity).toBe('common');
+        expect(getCard('resonance-detonation')!.rank).toBe(5);
+        expect(getCard('resonance-detonation')!.rarity).toBe('rare');
+        expect(getCard('suppurating-curse')!.rank).toBe(6);
+        expect(getCard('suppurating-curse')!.rarity).toBe('rare');
     });
-    it('Appeal to Pity (Resolute self-buff) → real -15% dmg taken', () => {
-        const { card, skill } = cardOf('appeal-to-pity');
-        const f = faceStats(card, skill);
-        expect(f.kind).toBe('resolute');
-        expect(f.heroText).toBe('-15%');
-        expect(f.heroSub).toBe('dmg taken · 2 turns');
-        expect(f.inert).toBe(false);
-    });
-    // (Clarity-primary face: no curated keeper leads with buff_clarity —
-    // appeal-to-authority carries it as a rider. Face coverage returns with
-    // the P3 extension wave.)
-    it('Existential Debt leads with its DESPAIR DoT (isolate rides along)', () => {
-        const { card, skill } = cardOf('existential-debt');
-        const f = faceStats(card, skill);
-        expect(f.kind).toBe('dot');
-        expect(f.heroText).toBe('36');              // despair 3 × i3 × 4 turns
-        expect(f.inert).toBe(false);
-    });
-    // (Sensory-null face: its card was cut in the P1 trim; the effect returns
-    // as enemy-side content in P2.)
 });
 
 describe('detailStats — same numbers as the face', () => {
@@ -151,33 +127,43 @@ describe('detailStats — same numbers as the face', () => {
         expect(d.stacksText).toBe('Stacks up to 10×.');
         // §C: the +DIE read triplet is the deterministic rule, base = 10.
         expect(d.diePill).toMatch(/^▲\d+ · —10 · ▼\d+$/);
+        // The FREE pill is the authored free line.
+        expect(d.freePill).toBe('tick');
+        // The meta chip surfaces the rank name + card type (where gold used to sit).
+        expect(d.metaChip).toContain('DOXA');
+        expect(d.metaChip).toContain('SPELL');
     });
-    it('Eternal Recurrence detail agrees with the 32 face total', () => {
-        const { card, skill } = cardOf('eternal-recurrence');
-        const d = detailStats(card, skill);
-        expect(d.outcomeLine).toContain('32 over');
-    });
-    it('Brace for Impact (Guard) → terse "Gain Guard 12."', () => {
+    it('Brace for Impact (Guard) → terse "Gain Guard 8."', () => {
         const { card, skill } = cardOf('brace-for-impact');
         const d = detailStats(card, skill);
-        expect(d.outcomeLine).toBe('Gain Guard 12.');
+        expect(d.outcomeLine).toBe('Gain Guard 8.');
         expect(d.stacksText).toBeNull();
+    });
+    it('Enchantment detail leans on the engine-generated PAID text', () => {
+        const { card, skill } = cardOf('venom-and-vein');
+        const d = detailStats(card, skill);
+        expect(d.powerLine).toContain(card.bottomActionText);
+        expect(d.metaChip).toContain('ENCHANTMENT');
     });
 });
 
 describe('resolvePrimary + armedReadValue', () => {
-    it('resolvePrimary routes by verb-class + honesty', () => {
+    it('resolvePrimary routes by verb-class + honesty (the v3 shapes)', () => {
         expect(resolvePrimary(getCard('brace-for-impact')!, getSkillById('brace-for-impact')).kind).toBe('guard');
-        expect(resolvePrimary(getCard('qa-mobile-pure-strike')!, getSkillById('qa-mobile-pure-strike')).kind).toBe('strike');
-        expect(resolvePrimary(getCard('befriend')!, getSkillById('befriend')).kind).toBe('befriend');
         expect(resolvePrimary(getCard('slippery-slope')!, getSkillById('slippery-slope')).kind).toBe('dot');
+        expect(resolvePrimary(getCard('resonance-detonation')!, getSkillById('resonance-detonation')).kind).toBe('rupture');
+        expect(resolvePrimary(getCard('the-reaping')!, getSkillById('the-reaping')).kind).toBe('reap');
+        expect(resolvePrimary(getCard('venom-and-vein')!, getSkillById('venom-and-vein')).kind).toBe('enchant');
+        expect(resolvePrimary(getCard('suppurating-curse')!, getSkillById('suppurating-curse')).kind).toBe('disenchant');
     });
     it('armedReadValue scales Guard by the DAMAGE read (+colour match)', () => {
         const guard = faceStats(getCard('brace-for-impact')!, getSkillById('brace-for-impact'));
-        expect(armedReadValue(guard, 'neutral', false)).toBe(12);       // 12 × 1.0
-        expect(armedReadValue(guard, 'advantage', false)).toBe(18);     // 12 × 1.5
-        expect(armedReadValue(guard, 'disadvantage', false)).toBe(6);   // 12 × 0.5
-        expect(armedReadValue(guard, 'neutral', true)).toBe(15);        // + colour-match bonus
+        const adv = Math.max(1, Math.round(8 * READ_DAMAGE_MULT.advantage));
+        const dis = Math.max(1, Math.round(8 * READ_DAMAGE_MULT.disadvantage));
+        expect(armedReadValue(guard, 'neutral', false)).toBe(8);
+        expect(armedReadValue(guard, 'advantage', false)).toBe(adv);
+        expect(armedReadValue(guard, 'disadvantage', false)).toBe(dis);
+        expect(armedReadValue(guard, 'neutral', true)).toBe(8 + COLOR_MATCH_DAMAGE_BONUS);
     });
     it('armedReadValue follows the P0-truth deterministic read rule for DoT (exact, ramp-aware)', () => {
         // Slippery Slope: canonical poison dpr 2, ramp 0.5, i1, 4 turns.

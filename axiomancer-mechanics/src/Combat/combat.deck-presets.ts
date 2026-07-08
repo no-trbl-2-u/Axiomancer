@@ -149,7 +149,10 @@ export const COMBAT_DECK_PRESETS: Record<string, CombatDeckPreset> = {
         id: 'grace',
         name: 'Grace',
         theme: 'charm',
-        focus: 'utility',
+        // SWAY/RAPPORT cards classify as the control lever (they hinder and
+        // soften the enemy); 'control' keeps the draft/sim-policy consumers
+        // pointed at the deck's real texture.
+        focus: 'control',
         description: 'The deck that never strikes: build SWAY past their resolve and win by capitulation — or mercy.',
         cardIds: recipe(
             'soft-word', 'disarming-smile',
