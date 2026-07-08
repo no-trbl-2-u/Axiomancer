@@ -118,19 +118,19 @@ describe('triggerSkill', () => {
             { effectId: 'debuff_bleed', remainingDuration: 2, intensity: 1, appliedAt: 1, tier: 2 as const },
             { effectId: 'debuff_poison', remainingDuration: 2, intensity: 1, appliedAt: 1, tier: 2 as const },
             { effectId: 'debuff_stun', remainingDuration: 1, intensity: 1, appliedAt: 1, tier: 2 as const },
-            { effectId: 'buff_resolute', remainingDuration: 2, intensity: 1, appliedAt: 1, tier: 2 as const },
+            { effectId: 'buff_haste', remainingDuration: 2, intensity: 1, appliedAt: 1, tier: 2 as const },
         ];
         const result = triggerSkill({ round: 1, casterEffects, enemyEffects: [] }, FULL_RESOURCES, def);
         expect(result.landed).toBe(true);
         expect(result.casterEffects).toHaveLength(2);
-        expect(result.casterEffects.some(ae => ae.effectId === 'buff_resolute')).toBe(true);
+        expect(result.casterEffects.some(ae => ae.effectId === 'buff_haste')).toBe(true);
         expect(result.casterEffects.some(ae => ae.effectId === 'debuff_stun')).toBe(true);
     });
 
     it('strip_enemy_buff: Petitio Principii removes an enemy buff only', () => {
         const def = lookupSkill('petitio-principii')!;
         const enemyEffects = [
-            { effectId: 'buff_resolute', remainingDuration: 2, intensity: 1, appliedAt: 1, tier: 2 as const },
+            { effectId: 'buff_haste', remainingDuration: 2, intensity: 1, appliedAt: 1, tier: 2 as const },
             { effectId: 'debuff_bleed', remainingDuration: 2, intensity: 1, appliedAt: 1, tier: 2 as const },
         ];
         const result = triggerSkill({ round: 1, casterEffects: [], enemyEffects }, FULL_RESOURCES, def);

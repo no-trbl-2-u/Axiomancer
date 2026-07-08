@@ -281,16 +281,24 @@ describe('Spec 26b §1 — status-combo loop', () => {
         expect(getDraftedDie(r.state)?.state).toBe('available');
     });
 
-    it('a color-matched advantaged strike deals more HP damage than a disadvantaged off-color one', () => {
+    it('an advantaged color-matched land beats a disadvantaged off-color one in REAL status units', () => {
         mockSequentialRng(0.05);
         const base = () => {
             const s = initializeCombatEncounter(makePlayer([DOT_BODY]), makeEnemy(120, 'mind'), [DOT_BODY], 21);
             return rollEncounterDice(s).state;
         };
+        // THE STRIKE IS DEAD: the read bites the landed STATUS instead —
+        // advantage = +1 intensity; disadvantage = -1 duration (floor 1);
+        // a color match adds +1 duration (R7).
         const adv = draftAndPlay(setDice(base(), ['body', 'heart']), DOT_BODY); // match + advantage
-        const dis = draftAndPlay(setDice(base(), ['mind', 'wild']), DOT_BODY); // off-color + disadvantage
-        // The read + color-match scale the immediate STRIKE damage.
-        expect(adv.state.directDamageDealt).toBeGreaterThan(dis.state.directDamageDealt);
+        const dis = draftAndPlay(setDice(base(), ['mind', 'wild']), DOT_BODY);  // off-color + disadvantage
+        const advPoison = adv.state.enemy.effects.find(e => e.effectId === 'debuff_poison')!;
+        const disPoison = dis.state.enemy.effects.find(e => e.effectId === 'debuff_poison')!;
+        expect(advPoison.intensity).toBeGreaterThan(disPoison.intensity);
+        expect(advPoison.remainingDuration).toBeGreaterThan(disPoison.remainingDuration);
+        // And nobody struck: no direct HP moved on either play.
+        expect(adv.state.directDamageDealt).toBe(0);
+        expect(dis.state.directDamageDealt).toBe(0);
     });
 });
 
@@ -358,14 +366,14 @@ describe('Spec 26b §4 — Signature Skills (Conviction-funded)', () => {
         expect(r.state.hand.find(h => h.uid === uid)).toBeUndefined();
     });
 
-    it('Overwhelming Argument (heart capstone) applies Petrify to the enemy', () => {
+    it('Overwhelming Argument (control capstone) applies BACKFIRE to the enemy (v3 control vocabulary)', () => {
         mockSequentialRng(0.5);
         let state = initializeCombatEncounter(makePlayer([DOT_BODY]), makeEnemy(90, 'heart'), [DOT_BODY], 4);
         state = rollEncounterDice(state).state;
         state = { ...state, conviction: 10 };
         const r = playSignatureSkill(state, 'sig-overwhelming-argument');
         expect(r.state.conviction).toBe(2); // cost 8
-        expect(r.state.enemy.effects.some(e => e.effectId === 'debuff_stagger')).toBe(true);
+        expect(r.state.enemy.effects.some(e => e.effectId === 'debuff_backfire')).toBe(true);
         expect(r.events.some(e => e.kind === 'signature-cast')).toBe(true);
     });
 

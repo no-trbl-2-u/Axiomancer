@@ -96,7 +96,7 @@ const armorWithPassive = (): Equipment => ({
     slot: 'armor',
     rarity: 'rare',
     requiredLevel: 1,
-    passiveEffects: ['tier1_body_defend'],
+    passiveEffects: ['buff_regeneration'],
 });
 
 // ─── createCharacter — derivation + defaults ─────────────────────────────────
@@ -199,7 +199,7 @@ describe('createCharacter — Spec 05 Q3 starting equipment fold-in', () => {
         const ch = buildPlayer({ equipment: { armor: armorWithPassive() } });
         const passive = ch.effects.find(e => e.sourceId === 'test-armor-with-passive');
         expect(passive).toBeDefined();
-        expect(passive?.effectId).toBe('tier1_body_defend');
+        expect(passive?.effectId).toBe('buff_regeneration');
         expect(passive?.remainingDuration).toBe(-1);
         expect(passive?.intensity).toBe(1);
     });
@@ -235,7 +235,7 @@ describe('equipItem — slot replacement', () => {
             effects: [
                 ...start.effects,
                 {
-                    effectId: 'tier1_mind_mark',
+                    effectId: 'debuff_mark',
                     remainingDuration: 5,
                     intensity: 1,
                     appliedAt: 0,

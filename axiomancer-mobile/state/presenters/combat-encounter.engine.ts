@@ -378,7 +378,7 @@ type EffectPayloadLike = {
  *  variety denies) the enemy's turn, so it counts as 'weaken'. */
 export function engineHonestKind(
     effectId: string | null | undefined,
-): 'dot' | 'stun' | 'regen' | 'weaken' | 'vulnerable' | 'thorns'
+): 'dot' | 'stun' | 'regen' | 'weaken' | 'vulnerable' | 'thorns' | 'mark' | 'backfire'
     | 'exposure' | 'doubt' | 'sensoryNull' | 'isolated' | 'overextended' | 'clarity' | 'resolute'
     | null {
     if (!effectId) return null;
@@ -388,6 +388,12 @@ export function engineHonestKind(
     if (p.damageOverTime) return 'dot';
     if (p.actionRestriction?.skipTurn) return 'stun';
     if ((p.regeneration?.healthPerRound ?? 0) > 0) return 'regen';
+    // Spec 32 v3 — the themed-deck payloads, all engine-read (honest):
+    // MARK amplifies every DoT tick; BACKFIRE bites per denied rung; RAPPORT
+    // (negative outgoing-damage %) weakens the enemy's hits.
+    if ((p.tickAmplifyFlat ?? 0) > 0) return 'mark';
+    if ((p.backfirePerRung ?? 0) > 0) return 'backfire';
+    if ((p.outgoingDamageMulPct ?? 0) < 0) return 'weaken';
     // 0.34.0: reflect + damage-amp are now read by the live HP engine, so they're honest.
     if ((p.reflectDamage ?? 0) > 0) return 'thorns';
     if ((p.damageTakenMult ?? 1) > 1) return 'vulnerable';
@@ -488,11 +494,13 @@ export function resolvePrimary(card: CombatCard, skill: Skill | undefined): Prim
             : k === 'stun' ? 'stun'
                 : k === 'weaken' ? 'weaken'
                     : k === 'vulnerable' ? 'vulnerable'
-                        : k === 'exposure' ? 'exposure'
-                            : k === 'doubt' ? 'doubt'
-                                : k === 'sensoryNull' ? 'sensoryNull'
-                                    : k === 'isolated' ? 'isolated'
-                                        : 'inert';
+                        : k === 'mark' ? 'mark'
+                            : k === 'backfire' ? 'backfire'
+                                : k === 'exposure' ? 'exposure'
+                                    : k === 'doubt' ? 'doubt'
+                                        : k === 'sensoryNull' ? 'sensoryNull'
+                                            : k === 'isolated' ? 'isolated'
+                                                : 'inert';
     return { kind, ce: primary, guardAmount: null, riders: [...opp.filter(o => o !== primary), ...selfFx], mech: null };
 }
 
@@ -513,6 +521,8 @@ interface CardCalc extends PrimaryResolution {
     riposteReduce: number; // incoming reduction (riposte.reduce, base read)
     reapCost: number;      // Souls a REAP spends (0 = spends ALL, reap_all)
     reapPerSoul: number;   // burst per Soul (reap_all.burstPerSoul)
+    markAmp: number;       // MARK: +N per DoT tick per application (tickAmplifyFlat × intensity)
+    backfireN: number;     // BACKFIRE: N per denied rung (backfirePerRung × intensity)
     // ── card-overhaul (2026-07-03) ──
     exposureDelta: number; // real -N DEF (defenseModifier, negative)
     resolutePct: number;   // real -N% dmg taken (the inverse of vulnPct, negative)
@@ -533,6 +543,7 @@ function cardCalc(card: CombatCard, skill: Skill | undefined): CardCalc {
         skips: 0, dpr: 0, intensity: 1, stacks: false,
         vulnPct: 0, reflectN: 0, barrierAmt: 0, siphonPct: 0,
         riposteDmg: 0, riposteReduce: 0, reapCost: 0, reapPerSoul: 0,
+        markAmp: 0, backfireN: 0,
         exposureDelta: 0, resolutePct: 0,
         totalAdv: 0, totalDis: 0, vulnPctAdv: 0,
     };

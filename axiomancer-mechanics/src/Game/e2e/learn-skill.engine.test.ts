@@ -30,7 +30,7 @@ function buildStore(level: number, knownSkills: string[] = []) {
 
 describe('LEARN_SKILL action — Phase 30 unit 3', () => {
     it('appends an eligible skill id to knownSkills', () => {
-        const t1 = cardLibrary.find(s => s.tier === 1)!;
+        const t1 = cardLibrary.find(s => s.rank === 1)!; // Doxa cards gate at level 1
         const store = buildStore(1, []);
         const before = store.getState().player.knownSkills.length;
         store.getState().learnSkill(t1.id);
@@ -40,7 +40,7 @@ describe('LEARN_SKILL action — Phase 30 unit 3', () => {
     });
 
     it('is a no-op when the skill is already known', () => {
-        const t1 = cardLibrary.find(s => s.tier === 1)!;
+        const t1 = cardLibrary.find(s => s.rank === 1)!;
         const store = buildStore(1, [t1.id]);
         const before = store.getState().player.knownSkills.slice();
         store.getState().learnSkill(t1.id);
@@ -49,8 +49,8 @@ describe('LEARN_SKILL action — Phase 30 unit 3', () => {
     });
 
     it('is a no-op when the learning requirement is not met', () => {
-        // T3 default level minimum is 10; level-5 character is below the gate.
-        const t3 = cardLibrary.find(s => s.tier === 3)!;
+        // Axiom (rank 5) cards gate at level 10; level-5 character is below it.
+        const t3 = cardLibrary.find(s => s.rank === 5)!;
         const store = buildStore(5, []);
         const before = store.getState().player.knownSkills.slice();
         store.getState().learnSkill(t3.id);
