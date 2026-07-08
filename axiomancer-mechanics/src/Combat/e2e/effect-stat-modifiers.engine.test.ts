@@ -10,11 +10,11 @@
  * accessor path so a future stats.ts refactor can't silently regress.
  *
  * Math baseline (`STAT_MULTIPLIERS`): ATTACK=1, SKILL=1, DEFENSE=3.
- * Reference effects (live library):
- *   - buff_body_attack_up: statModifiers [body +2, physicalSkill +3], flat
+ * Reference effects (spec 32 v3 — support-tagged non-card entries):
+ *   - buff_resistance_body: statModifiers [body +3, physicalDefense +4, physicalSave +3], flat
  *   - buff_max_hp_up: statModifiers [body ×1.25], multiplier
  *   - buff_barrier: defenseModifier 5
- *   - debuff_all_stats_down: statModifiers [body -2, ...], flat
+ *   - debuff_exhaustion: statModifiers [body -2, mind -2, heart -2, ...], flat
  */
 
 import { describe, it, expect } from 'vitest';

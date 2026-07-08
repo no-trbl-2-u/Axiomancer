@@ -48,37 +48,15 @@ describe('Phase 93 — Damage-resist primitive', () => {
         expect(getSkillDamageType('heart')).toBe('emotional');
     });
 
-    it('integrates with skill execution via calculateSkillDamage', () => {
+    it('calculateSkillDamage is 0 for EVERY library card — the strike is dead (spec 32 v3 §1)', () => {
+        // basePower was deleted at the schema level; the skill engine's damage
+        // step is a permanent 0. The resist primitive survives for the threat
+        // side and future non-card consumers.
         const attacker = Player;
         const defender = { ...FloatEye };
-        defender.baseStats.body = 5; // Some resistance
-
-        // Get a body-scaling skill
-        const bodySkill = getCardById('ad-hominem-strike')!;
-        expect(bodySkill.scalingStat).toBe('body');
-
-        // Calculate damage with resistance applied
-        const damageWithResistance = calculateSkillDamage(attacker, bodySkill, defender);
-        
-        // Calculate damage without resistance for comparison
-        const damageWithoutResistance = calculateSkillDamage(attacker, bodySkill);
-
-        // With resistance should be lower (unless already at minimum 1)
-        expect(damageWithResistance).toBeLessThanOrEqual(damageWithoutResistance);
-        expect(damageWithResistance).toBeGreaterThanOrEqual(1); // Min 1 damage
-    });
-
-    it('maintains backward compatibility when target not provided', () => {
-        const attacker = Player;
-        const skill = getCardById('ad-hominem-strike')!;
-
-        // Without target should work as before (no resistance applied)
-        const damageWithoutTarget = calculateSkillDamage(attacker, skill);
-        expect(damageWithoutTarget).toBeGreaterThan(0);
-        
-        // With undefined target should be same as without
-        const damageWithUndefinedTarget = calculateSkillDamage(attacker, skill, undefined);
-        expect(damageWithUndefinedTarget).toBe(damageWithoutTarget);
+        const skill = getCardById('slippery-slope')!;
+        expect(calculateSkillDamage(attacker, skill, defender)).toBe(0);
+        expect(calculateSkillDamage(attacker, skill)).toBe(0);
     });
 
     it('handles zero or negative base damage gracefully', () => {

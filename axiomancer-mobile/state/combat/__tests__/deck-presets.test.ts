@@ -1,5 +1,5 @@
 import { describe, expect, it } from '@jest/globals';
-import { COMBAT_REWARD_POOL, STARTING_SKILL_IDS, getCard } from '@mechanics';
+import { COMBAT_REWARD_POOL, STARTING_SKILL_IDS, getCard, listDeckPresets } from '@mechanics';
 
 import {
     applyCombatDeckPresetAction,
@@ -9,15 +9,19 @@ import {
 import { createAppStore } from '@/state/store';
 import { createMemoryAdapter } from '@/test-utils/memoryAdapter';
 
+// Spec 32 v3 §8 — the starter baseline plus the ten themed preset decks.
 const expectedPresetIds = [
     'starter-baseline',
-    'bleed',
-    'poison',
-    'confusion',
-    'dread',
-    'guard',
-    'sustain',
-    'gold-showcase',
+    'erosion',
+    'oratory',
+    'foundry',
+    'penitent',
+    'standstill',
+    'augury',
+    'tithe',
+    'grace',
+    'bastion',
+    'refrain',
 ];
 
 const FULL_POOL = new Set([...STARTING_SKILL_IDS, ...COMBAT_REWARD_POOL]);
@@ -27,7 +31,7 @@ function makeStore() {
 }
 
 describe('Combat deck presets', () => {
-    it('exposes the eight strategy presets in stable order', () => {
+    it('exposes the starter baseline + the ten themed presets in stable order', () => {
         expect(COMBAT_DECK_PRESETS.map((preset) => preset.id)).toEqual(expectedPresetIds);
     });
 
@@ -37,6 +41,20 @@ describe('Combat deck presets', () => {
             for (const id of preset.cardIds) {
                 expect(FULL_POOL.has(id)).toBe(true);
             }
+        }
+    });
+
+    it('themed presets mirror the engine recipe verbatim (4/4/2/2/1/1/1 — 15 cards)', () => {
+        const engine = Object.fromEntries(listDeckPresets().map((p) => [p.id, p]));
+        for (const preset of COMBAT_DECK_PRESETS) {
+            if (preset.id === 'starter-baseline') continue;
+            expect(preset.cardIds).toEqual([...engine[preset.id]!.cardIds]);
+            expect(preset.cardIds.length).toBe(15);
+            // 7 uniques per theme: 2 commons ×4, 2 uncommons ×2, 3 rares ×1.
+            const counts = new Map<string, number>();
+            for (const id of preset.cardIds) counts.set(id, (counts.get(id) ?? 0) + 1);
+            expect(counts.size).toBe(7);
+            expect([...counts.values()].sort((a, b) => b - a)).toEqual([4, 4, 2, 2, 1, 1, 1]);
         }
     });
 
@@ -50,54 +68,50 @@ describe('Combat deck presets', () => {
             },
         } as never);
 
-        const result = applyCombatDeckPresetAction(store, 'bleed');
+        const result = applyCombatDeckPresetAction(store, 'erosion');
 
-        expect(result.presetId).toBe('bleed');
+        expect(result.presetId).toBe('erosion');
         expect(result.cardIds.length).toBeGreaterThan(0);
         expect(store.getState().player.knownSkills).toEqual(result.cardIds);
         expect(store.getState().player.combatRewardCards).toEqual([]);
     });
 
     it('is deterministic — the same preset yields the same deck every time', () => {
-        const first = applyCombatDeckPresetAction(makeStore(), 'gold-showcase');
-        const second = applyCombatDeckPresetAction(makeStore(), 'gold-showcase');
+        const first = applyCombatDeckPresetAction(makeStore(), 'grace');
+        const second = applyCombatDeckPresetAction(makeStore(), 'grace');
         expect(first.cardIds).toEqual(second.cardIds);
     });
 
-    it('starter-baseline restores the default five-card starter deck', () => {
+    it('starter-baseline restores the engine starting deck (spec 32 v3 §7)', () => {
         const result = applyCombatDeckPresetAction(makeStore(), 'starter-baseline');
-        expect(result.cardIds).toEqual([
-            'ad-hominem-strike',
-            'brace-for-impact',
-            'false-dilemma',
-            'suspend-judgment',
-            'ship-of-theseus',
-        ]);
+        expect(result.cardIds).toEqual([...STARTING_SKILL_IDS]);
+        expect(result.cardIds).toContain('slippery-slope');
+        expect(result.cardIds).toContain('brace-for-impact');
     });
 
-    it('groups by shared keyword, not by stance colour', () => {
-        const byId = Object.fromEntries(COMBAT_DECK_PRESETS.map((p) => [p.id, p]));
-        const every = (id: string, pred: (effectId: string, verbClass: string) => boolean) =>
-            byId[id]!.cardIds.every((c) => {
-                const card = getCard(c);
-                return !!card && pred(card.primaryEffectId ?? '', card.verbClass);
-            });
+    it('themed decks are strictly self-contained — zero cross-deck card overlap', () => {
+        const seen = new Map<string, string>();
+        for (const preset of COMBAT_DECK_PRESETS) {
+            if (preset.id === 'starter-baseline') continue;
+            for (const id of new Set(preset.cardIds)) {
+                // The starters (slippery-slope / brace-for-impact) live inside
+                // their home themes (Erosion / Bastion) — still one deck each.
+                const owner = seen.get(id);
+                expect(owner === undefined || owner === preset.id).toBe(true);
+                seen.set(id, preset.id);
+            }
+        }
+    });
 
-        // Effect-keyword decks: every card literally applies the keyword.
-        expect(every('bleed', (e) => e.includes('bleed') || e.includes('hemorrhage'))).toBe(true);
-        expect(every('poison', (e) => e.includes('poison') || e.includes('septic'))).toBe(true);
-        expect(every('confusion', (e) => e.includes('confusion'))).toBe(true);
-        expect(every('dread', (e) => e.includes('fear') || e.includes('despair'))).toBe(true);
-        // Role-keyword decks: every card shares the combat role.
-        expect(every('guard', (_e, v) => v === 'defend')).toBe(true);
-        expect(every('sustain', (_e, v) => v === 'buff-self')).toBe(true);
-
-        // No preset is a single-stance ("colour") deck — every keyword deck
-        // spans more than one stance OR is defined purely by keyword, never by
-        // a `stance ===` filter. Guard against a colour regression: the bleed
-        // deck must draw from multiple stances (body + mind + heart bleeders).
-        const bleedStances = new Set(byId['bleed']!.cardIds.map((c) => getCard(c)?.stance));
-        expect(bleedStances.size).toBeGreaterThan(1);
+    it('every preset card resolves through the engine card projection', () => {
+        for (const preset of COMBAT_DECK_PRESETS) {
+            for (const id of new Set(preset.cardIds)) {
+                const card = getCard(id);
+                expect(card).toBeTruthy();
+                expect(card!.rarity).toMatch(/^(common|uncommon|rare)$/);
+                expect(card!.cardType).toMatch(/^(spell|enchantment|disenchant)$/);
+            }
+        }
     });
 
     it('randomizer deals unique cards from the full pool into knownSkills', () => {
