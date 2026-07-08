@@ -1,7 +1,7 @@
 # Critique log
 
-> Last pass: 2026-07-07 at commit b0707e0a
-> Pass count: 5
+> Last pass: 2026-07-08 at commit e50e819a
+> Pass count: 6
 
 > External-observer feedback for Axiomancer. Populated by
 > `/critique` (which drives the local expo-web build with the
@@ -11,39 +11,46 @@
 
 ## Pending
 
-### [needs-user-call] Playwright MCP tools unavailable to sub-agents — reopened (pass 5)
-- pass: 5 (commit b0707e0a)
+### [needs-user-call] Playwright MCP tools unavailable to sub-agents — recurred again (pass 6)
+- pass: 6 (commit e50e819a); prior: pass 5 (commit b0707e0a), pass
+  1-4 (marked fixed, see Done section)
 - viewport: n/a
 - category: infra
-- observation: the pass 1-4 occurrence of this issue was marked
-  fixed (see Done section) via `.claude/settings.json` /
-  `.claude/settings.json.example` and `_claude-skill.yml`
-  `--allowedTools` grants for the 14 `mcp__playwright__browser_*`
-  tools. This pass, `.claude/settings.json` on disk already lists
-  all 14 tools under `permissions.allow`, yet a live
-  `mcp__playwright__browser_navigate` call — both from the
-  `playtester` sub-agent and from the main agent directly — was
-  rejected with "Claude requested permissions to use
-  mcp__playwright__browser_navigate, but you haven't granted it
-  yet." The settings-file fix does not appear sufficient for this
-  session/runtime; something in the live permission-mode
-  enforcement (interactive session vs. the CI `--allowedTools`
-  path the prior fix targeted) still gates MCP tool calls behind
-  a grant that never arrives in an unattended run. Local expo-web
-  build was started and reachable at http://localhost:8081; the
-  blocker is purely the tool grant, not the app.
-- evidence: verbatim tool error, reproduced 2x independently:
-  `Claude requested permissions to use
-  mcp__playwright__browser_navigate, but you haven't granted it
-  yet.`
-- suggested fix: needs a user-side permission-mode decision —
-  either grant `mcp__playwright__*` at a scope this session
-  actually reads (vs. project `.claude/settings.json`), or
-  confirm whether unattended `/march` ticks run under a
-  permission mode that structurally cannot auto-approve MCP
-  tools (in which case `/critique` needs a different playtest
-  transport, not another allowlist edit).
-- source: critique pass 5 (playtester + direct main-agent probe)
+- observation: third occurrence of this exact blocker. `.claude/
+  settings.json` on disk still lists all 14
+  `mcp__playwright__browser_*` tools under `permissions.allow`
+  (verified again this pass — `mcp__playwright__browser_navigate`,
+  `_click`, `_snapshot`, `_take_screenshot`, `_console_messages`,
+  `_close`, etc. all present). Local expo-web build was started
+  and confirmed reachable (`curl -> 200`) at
+  http://localhost:8081 before spawning `playtester`. The
+  `playtester` sub-agent still had every
+  `mcp__playwright__browser_navigate` call rejected, retried 5x
+  independently, never granted. This confirms pass 5's read: the
+  settings.json allowlist content is not the gap — something in
+  how this runtime/session grants MCP tool permissions to
+  sub-agents structurally never resolves the grant in an
+  unattended run, regardless of what the file says. Two
+  consecutive passes (5, 6) reproduce identically with a verified
+  correct settings file, which rules out "the file needs another
+  edit" as the fix.
+- evidence: verbatim tool error, reproduced across passes 5 and
+  6 (5x retries pass 6 alone): `Claude requested permissions to
+  use mcp__playwright__browser_navigate, but you haven't granted
+  it yet.`
+- suggested fix: stop re-attempting settings.json edits — two
+  passes have now verified the file is already correct. This
+  needs a `[needs-user-call]` decision on the permission-mode
+  mechanism itself: either (a) confirm whether this harness's
+  unattended/`/march`-invoked sessions structurally cannot
+  auto-approve MCP tool grants for sub-agents (in which case
+  `/critique` needs a non-Playwright transport for unattended
+  ticks — e.g. a headless script driving the expo-web build
+  directly), or (b) identify the correct scope/mechanism (session
+  flag, env var, harness config outside `.claude/settings.json`)
+  that actually grants MCP tools to sub-agent contexts.
+- source: critique pass 6 (playtester, dev server pre-verified up
+  before spawn)
 
 ### [LOW] `web:container` dev-server script is broken
 - pass: 1 (commit 6e23724a)
