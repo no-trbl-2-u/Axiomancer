@@ -72,7 +72,9 @@ Live, at the repo root:
   (npm-pin-era engine bumps, retired with the monorepo merge) were trimmed.
 - `.claude/skills/` — design skills: `brainstorm-mechanics`, `character-spec`,
   `story-spec`, `world-spec`.
-- `.claude/agents/` — `scout`, `reader`, `mechanics-expert`, `playtester`.
+- `.claude/agents/` — `scout`, `reader`, `mechanics-expert`, `playtester`,
+  `card-expert` (card/keyword design consults grounded in the Dawncaster
+  corpus — see "Game knowledge base" below).
 
 Commands write their reports to `<package>/docs/reports/` (created on demand).
 All `plan/…` / `/march`-era references were scrubbed at the post-merge cleanup;
@@ -84,9 +86,11 @@ the commands are fully self-contained.
 and reception research (source-backed claims, per-claim confidence).
 `node scripts/kb-sync.mjs` shallow-clones/refreshes it into `kb/`
 (gitignored — never committed here). Consumers: the
-`brainstorm-mechanics` skill and the `mechanics-expert` agent grep it
-for prior art and cite `kb:<game-slug>/<doc> (src-NNN)` instead of
-citing reception from memory. Coverage misses are filed with
+`brainstorm-mechanics` skill and the `mechanics-expert` and
+`card-expert` agents grep it for prior art and cite
+`kb:<game-slug>/<doc> (src-NNN)` instead of citing reception from
+memory (`card-expert` leans on the `DigitalCardGames/dawncaster`
+corpus — 1,692 card records, 141 keywords). Coverage misses are filed with
 `node scripts/kb-sync.mjs wish "..."` — the KB's daily scout consumes
 that wishlist.
 
