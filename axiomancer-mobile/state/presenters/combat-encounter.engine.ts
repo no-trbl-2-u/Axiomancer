@@ -197,7 +197,16 @@ type DetailCore = Omit<CombatCardDetailVM, 'freePill' | 'diePillKeyword' | 'dieP
 
 export interface CombatCardVM {
     uid: string; cardId: string; name: string; stance: string; stanceColor: string;
-    verbClass: string; effectKind: 'dot' | 'control' | 'none'; rarity?: 'gold'; tier: 1 | 2 | 3;
+    verbClass: string; effectKind: 'dot' | 'control' | 'none';
+    /** Spec 32 v3 — rarity band derived from the rank ladder. The RARE frame
+     *  keys off `rarity === 'rare'` (the gold tier is gone). */
+    rarity?: 'common' | 'uncommon' | 'rare';
+    /** Spec 32 v3 — rank 1-6 (Doxa → Aporia) + its printed name. */
+    rank?: 1 | 2 | 3 | 4 | 5 | 6;
+    rankName: string | null;
+    /** Spec 32 v3 — spell / enchantment / disenchant. */
+    cardType?: 'spell' | 'enchantment' | 'disenchant';
+    tier: 1 | 2 | 3;
     category: 'fallacy' | 'paradox' | null;
     topActionText: string; bottomActionText: string; bottomDamagePreview: number;
     /** Fate Engine P1 — the card's printed die lines (real units), if any. */
@@ -402,8 +411,8 @@ interface PrimaryResolution {
     ce: SkillCombatEffects | null;
     guardAmount: number | null;
     riders: SkillCombatEffects[];
-    /** The driving special mechanic for the 0.34.0 kinds (barrier/riposte/siphon/
-     *  rupture/compound/execute); null for effect- or verb-driven kinds. */
+    /** The driving special mechanic for the mechanic-led kinds (barrier/riposte/
+     *  siphon/rupture/reap); null for effect- or verb-driven kinds. */
     mech: SkillSpecialMechanic | null;
 }
 
@@ -427,22 +436,21 @@ export function resolvePrimary(card: CombatCard, skill: Skill | undefined): Prim
         return { kind: 'guard', ce: null, guardAmount: g?.amount ?? 0, riders: [], mech: null };
     }
     if (vc === 'befriend') return { kind: 'befriend', ce: null, guardAmount: null, riders: [], mech: null };
+    // Spec 32 v3 — persistent cards (player enchantment / enemy-attached curse).
+    // Their honest text is the engine-generated PAID line; no headline number.
+    if (vc === 'enchant') return { kind: 'enchant', ce: null, guardAmount: null, riders: [], mech: null };
+    if (vc === 'disenchant') return { kind: 'disenchant', ce: null, guardAmount: null, riders: [], mech: null };
     if (vc === 'direct-damage') {
-        // 0.34.0: rupture / compound / siphon / execute ride a direct hit; their headline
-        // value is the AUTHORED mechanic param (the actual swing is live → not headlined).
+        // Spec 32 v3 — 'direct-damage' is the status-payoff class ONLY (the strike
+        // is dead): RUPTURE detonates afflictions, REAP spends Souls. Their live
+        // swing is never headlined as a number.
         const rupture = findMech('rupture');
         if (rupture) return { kind: 'rupture', ce: null, guardAmount: null, riders: [], mech: rupture };
-        const compound = findMech('compound');
-        if (compound) return { kind: 'compound', ce: null, guardAmount: null, riders: [], mech: compound };
+        const reap = findMech('reap_all') ?? findMech('reap');
+        if (reap) return { kind: 'reap', ce: null, guardAmount: null, riders: [], mech: reap };
         const siphon = findMech('siphon');
         if (siphon) return { kind: 'siphon', ce: null, guardAmount: null, riders: [], mech: siphon };
-        // Status-doctrine overhaul: a bare execute/finisher with no classifiable
-        // enemy DoT/control effect lands here (mechanics' classifyVerbClass
-        // intentionally reads it as 'direct-damage' rather than 'buff-self') —
-        // without this branch it fell through to a misleading STRIKE badge.
-        const execute = findMech('execute');
-        if (execute) return { kind: 'execute', ce: null, guardAmount: null, riders: [], mech: execute };
-        return { kind: 'strike', ce: null, guardAmount: null, riders: [], mech: null };
+        return { kind: 'inert', ce: null, guardAmount: null, riders: [], mech: null };
     }
     if (vc === 'buff-self') {
         const self = (skill?.combatEffects ?? []).filter(e => e.appliedTo === 'self');

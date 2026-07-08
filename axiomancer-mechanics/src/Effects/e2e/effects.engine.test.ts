@@ -110,12 +110,16 @@ describe('clearTier1EffectsForStance', () => {
         expect(cleared).toHaveLength(1);
     });
 
-    it('keeps debuffs (opponent-applied)', () => {
+    // The tier1_* library entries were retired by the spec 32 v3 keyword
+    // reset; the id-prefix machinery survives for save back-compat, so the
+    // clear only ever touches ids with the `tier1_` prefix.
+    it('keeps non-tier1 effects (card-vocabulary statuses are never stance-cleared)', () => {
         const effects: ActiveEffect[] = [
-            { effectId: 'tier1_mind_mark', remainingDuration: 3, intensity: 2, appliedAt: 1, tier: 1 },
+            { effectId: 'debuff_mark', remainingDuration: 3, intensity: 2, appliedAt: 1, tier: 1 },
+            { effectId: 'buff_thorns', remainingDuration: 2, intensity: 1, appliedAt: 1, tier: 1 },
         ];
         const { activeEffects, cleared } = clearTier1EffectsForStance(effects, 'body');
-        expect(activeEffects).toHaveLength(1);
+        expect(activeEffects).toHaveLength(2);
         expect(cleared).toHaveLength(0);
     });
 });
@@ -144,26 +148,26 @@ describe('removeEffect', () => {
 
 describe('removeEffectsByType', () => {
     const effects: ActiveEffect[] = [
-        // a Tier 2 buff
+        // a Tier 2 buff (support / non-card)
         { effectId: 'buff_regeneration',  remainingDuration: 4, intensity: 1, appliedAt: 1, tier: 2 },
-        // a Tier 2 debuff
+        // a Tier 2 debuff (v3 card vocabulary)
         { effectId: 'debuff_poison',      remainingDuration: 3, intensity: 1, appliedAt: 1, tier: 2 },
-        // a Tier 1 self-buff (Ad Baculum)
-        { effectId: 'tier1_body_attack',  remainingDuration: 2, intensity: 1, appliedAt: 1, tier: 1 },
+        // a Tier 1 buff (v3 card vocabulary — Thorns)
+        { effectId: 'buff_thorns',        remainingDuration: 2, intensity: 1, appliedAt: 1, tier: 1 },
         // a Tier 3 buff (haste)
         { effectId: 'buff_haste',         remainingDuration: 2, intensity: 1, appliedAt: 1, tier: 3 },
     ];
 
     it('strips all buffs when no tier cap', () => {
         const { activeEffects, removed } = removeEffectsByType(effects, 'buff');
-        expect(removed.map(r => r.effectId).sort()).toEqual(['buff_haste', 'buff_regeneration', 'tier1_body_attack']);
+        expect(removed.map(r => r.effectId).sort()).toEqual(['buff_haste', 'buff_regeneration', 'buff_thorns']);
         expect(activeEffects).toHaveLength(1);
         expect(activeEffects[0].effectId).toBe('debuff_poison');
     });
 
     it('respects maxTier — Tier 2 dispel does not touch Tier 3', () => {
         const { activeEffects, removed } = removeEffectsByType(effects, 'buff', 2);
-        expect(removed.map(r => r.effectId).sort()).toEqual(['buff_regeneration', 'tier1_body_attack']);
+        expect(removed.map(r => r.effectId).sort()).toEqual(['buff_regeneration', 'buff_thorns']);
         expect(activeEffects.find(e => e.effectId === 'buff_haste')).toBeDefined();
     });
 
