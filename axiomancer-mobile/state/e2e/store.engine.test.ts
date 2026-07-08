@@ -123,8 +123,10 @@ describe('createAppActions: dispatch', () => {
         );
         expect(deck.length).toBeGreaterThanOrEqual(3);
         expect(visible.length).toBeGreaterThanOrEqual(2);
+        // A 2-skill deck draws a padded hand — both starters must be present
+        // (duplicates are the reshuffle law at work, not a bug).
         const distinct = new Set(visible.map(({ card }) => card.id));
-        expect(distinct.size).toBe(visible.length);
+        expect(distinct).toEqual(new Set(['slippery-slope', 'brace-for-impact']));
         // One card erodes (DoT) and one defends — the strike is dead, so the
         // opening hand teaches poison + Guard rather than a raw hit.
         const verbs = visible.map(({ card }) => card.verbClass);
