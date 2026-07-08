@@ -69,9 +69,10 @@ const TIER_3_SKILLS = [
     'bootstrap-loop',
 ];
 
+// The synergy-payoff line. straw-mans-jab and sketch-of-a-thought (its
+// setup pieces) already ride in TIER_1_SKILLS — knownSkills is a set-like
+// catalogue, so the lists stay disjoint to avoid duplicate ids.
 const TIER_2_SYNERGY_SKILLS = [
-    'straw-mans-jab',
-    'sketch-of-a-thought',
     'resonance-detonation',
 ];
 
