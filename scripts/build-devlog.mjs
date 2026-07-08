@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 // Build the DevLog site:
-//   - devlog/index.html         the HUB — links: Catalog, DevLog
-//   - devlog/log.html           the DevLog entry list (newest first)
-//   - devlog/DIGEST_<date>.html one page per structured markdown entry
+//   - devlog/index.html                 the HUB — links: Catalog, DevLog, Tuning Lab
+//   - devlog/log.html                   the DevLog entry list (newest first)
+//   - devlog/entries/DIGEST_<date>.html one page per structured markdown entry
+//   - devlog/tuning-lab/index.html      the Tuning Lab report list
 //
 // The single Catalog page is built by scripts/build-catalog.mjs from
 // devlog/data/*.json (produced by `npm run catalog:export`). This script only
@@ -45,6 +46,7 @@ const DEVLOG = join(ROOT, "devlog");
 const ENTRIES = join(DEVLOG, "entries");
 const ASSETS = join(DEVLOG, "assets");
 const DATA = join(DEVLOG, "data");
+const TUNING_LAB = join(DEVLOG, "tuning-lab");
 
 const ENTRY_RE = /^DIGEST_(\d{4}-\d{2}-\d{2})\.md$/;
 
@@ -273,7 +275,7 @@ function renderShots(shots, date) {
       .map(
         ([r, label]) =>
           `<figure class="shot"><div class="role">${label}</div>` +
-          `<img loading="lazy" src="./assets/${date}/${screen}.${r}.png" alt="${escapeHtml(screen)} ${label}"></figure>`
+          `<img loading="lazy" src="../assets/${date}/${screen}.${r}.png" alt="${escapeHtml(screen)} ${label}"></figure>`
       );
     if (figs.length === 0) continue;
     out.push(
@@ -340,7 +342,7 @@ function dataCount(name) {
   }
 }
 
-function buildHub(entryCount) {
+function buildHub(entryCount, tuningCount) {
   const cards = dataCount("cards");
   const enemies = dataCount("enemies");
   const effects = dataCount("effects");
@@ -361,6 +363,13 @@ function buildHub(entryCount) {
       title: "DevLog",
       sub: entryCount === 0 ? "no entries yet" : `${entryCount} ${entryCount === 1 ? "entry" : "entries"}`,
     },
+    {
+      href: "./tuning-lab/index.html",
+      hue: "tuning",
+      glyph: "⚖",
+      title: "Tuning Lab",
+      sub: tuningCount === 0 ? "no reports yet" : `${tuningCount} ${tuningCount === 1 ? "report" : "reports"}`,
+    },
   ];
 
   const grid = tiles
@@ -376,6 +385,48 @@ function buildHub(entryCount) {
     `<p class="muted">A private index of the game's content and the nightly development log.</p>\n` +
     `<div class="hub">\n${grid}\n</div>`
   );
+}
+
+// ---------------------------------------------------------------------------
+// Tuning Lab (devlog/tuning-lab/index.html) — a list of hand-authored,
+// self-contained tuning reports (each file supplies its own <title>; the
+// index just links to them, it doesn't parse or restyle their contents).
+// ---------------------------------------------------------------------------
+const TUNING_RE = /^(?!index\.html$).+\.html$/;
+
+function tuningLabTitle(file) {
+  const html = readFileSync(join(TUNING_LAB, file), "utf8");
+  const m = html.match(/<title>([^<]*)<\/title>/i);
+  return (m && m[1].trim()) || file;
+}
+
+function buildTuningLab() {
+  if (!existsSync(TUNING_LAB)) mkdirSync(TUNING_LAB, { recursive: true });
+
+  const files = readdirSync(TUNING_LAB)
+    .filter((f) => TUNING_RE.test(f))
+    .sort();
+
+  const listBody =
+    files.length === 0
+      ? `<h1>Tuning Lab</h1>\n<p class="muted">No reports yet — the next tuning pass will land the first one.</p>`
+      : `<h1>Tuning Lab</h1>\n<p class="muted">${files.length} ${
+          files.length === 1 ? "report" : "reports"
+        }.</p>\n<ul class="entry-list">\n${files
+          .map((f) => `  <li><a href="./${f}"><div class="head">${escapeHtml(tuningLabTitle(f))}</div></a></li>`)
+          .join("\n")}\n</ul>`;
+
+  writeFileSync(
+    join(TUNING_LAB, "index.html"),
+    page({
+      title: "Axiomancer Tuning Lab",
+      home: { href: "../index.html", label: "← Axiomancer" },
+      crumb: "Tuning Lab",
+      body: listBody,
+    })
+  );
+
+  return files.length;
 }
 
 // ---------------------------------------------------------------------------
@@ -398,10 +449,10 @@ function build() {
     }\n${countsBar(counts)}\n${html}`;
 
     writeFileSync(
-      join(DEVLOG, `DIGEST_${date}.html`),
+      join(ENTRIES, `DIGEST_${date}.html`),
       page({
         title: `Axiomancer digest — ${date}`,
-        home: { href: "./log.html", label: "← DevLog" },
+        home: { href: "../log.html", label: "← DevLog" },
         crumb: date,
         body,
       })
@@ -418,7 +469,7 @@ function build() {
         }, newest first.</p>\n<ul class="entry-list">\n${meta
           .map(
             (m) =>
-              `  <li><a href="./DIGEST_${m.date}.html"><span class="date">${m.date}</span>` +
+              `  <li><a href="./entries/DIGEST_${m.date}.html"><span class="date">${m.date}</span>` +
               `<div class="head">${escapeHtml(m.headline)}</div>${countsBar(m.counts)}</a></li>`
           )
           .join("\n")}\n</ul>`;
@@ -433,10 +484,13 @@ function build() {
     })
   );
 
+  // Tuning Lab → tuning-lab/index.html
+  const tuningCount = buildTuningLab();
+
   // Hub → index.html
   writeFileSync(
     join(DEVLOG, "index.html"),
-    page({ title: "Axiomancer", home: null, crumb: "", body: buildHub(meta.length) })
+    page({ title: "Axiomancer", home: null, crumb: "", body: buildHub(meta.length, tuningCount) })
   );
 
   console.log(`devlog: built hub + log + ${meta.length} entr${meta.length === 1 ? "y" : "ies"}`);

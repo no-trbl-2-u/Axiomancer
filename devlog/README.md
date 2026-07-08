@@ -1,20 +1,24 @@
 # DevLog
 
 A private, self-contained site served from this one directory. `index.html` is a
-**hub** with two links:
+**hub** with three links:
 
 - **Catalog** (`catalog.html`) — one HTML file containing every combat card,
   enemy, and live status effect, with inline CSS and inline JavaScript. It has no
   separate catalog page, script file, or stylesheet.
 - **DevLog** (`log.html`) — the accumulating, one-visual-entry-per-day
   development log.
+- **Tuning Lab** (`tuning-lab/index.html`) — a list of the hand-authored tuning
+  reports living in `tuning-lab/`.
 
 The **catalog** (`catalog.html`) is generated from the game's canonical
 libraries; the **DevLog** is one **visual** entry per day: a headline,
 categorized work-item cards (each with *what* changed and *why*), rendered code
 diffs for engine/mechanics work, and before/after screenshots for UI work. The
-nightly `/digest` skill authors a structured markdown entry;
-`scripts/build-devlog.mjs` renders it into a self-contained styled HTML page.
+nightly `/digest` skill authors a structured markdown entry into
+`entries/DIGEST_<date>.md`; `scripts/build-devlog.mjs` renders it into a
+self-contained styled HTML page at `entries/DIGEST_<date>.html` — markdown
+source and built HTML live side by side in `entries/`.
 Everything served here — markdown source, built HTML, copied art — is committed;
 no build runs on the host.
 
@@ -72,6 +76,16 @@ pages refresh automatically on the next digest commit (no manual step).
 - `## [<category>] <title>` → a **card** (`mechanics | ui | content | infra |
   balance`, each color-coded).
 - `## <title>` (no bracket) → a **panel**, rendered as-is (tables/lists/prose).
+
+## Tuning Lab (`tuning-lab/`)
+
+Each file in `tuning-lab/` (other than `index.html`) is a hand-authored,
+self-contained tuning report — e.g. a Battle Lab playtest ledger from
+`/deck-tuning` or a similar balance pass. `scripts/build-devlog.mjs` doesn't
+parse or restyle them; it just lists every `*.html` file in the folder (using
+each file's own `<title>`) on `tuning-lab/index.html`, linked from the hub.
+Drop a new report file in `tuning-lab/` and the next `npm run devlog:build`
+picks it up automatically.
 
 ## UI before/after screenshots
 

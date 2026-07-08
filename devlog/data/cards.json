@@ -418,7 +418,8 @@
   ],
   "lines": [
    "FREE — draw 1",
-   "OMEN — on hit: Guard 4 · foretold_wound i2 d2"
+   "Applies Foretold Wound ×2, 2t → enemy",
+   "OMEN — on hit: Guard 4"
   ]
  },
  {
@@ -760,10 +761,11 @@
    },
    {
     "k": "Learn",
-    "v": "Lv 8"
+    "v": "Lv 6"
    }
   ],
   "lines": [
+   "FREE — +1 Conviction",
    "FORGE a WILD floating die",
    "the spent die BANKS to the Reserve",
    "Threshold: 3× mind die fires a rider"
@@ -1428,8 +1430,9 @@
    }
   ],
   "lines": [
-   "FREE — draw 1 · consume all marks — 3 per stack",
-   "replay your last spell ×2"
+   "FREE — draw 1",
+   "replay your last spell ×2",
+   "rider"
   ]
  },
  {
@@ -1549,6 +1552,7 @@
    }
   ],
   "lines": [
+   "FREE — tick",
    "RUPTURE"
   ]
  },
@@ -1856,8 +1860,9 @@
    }
   ],
   "lines": [
-   "FREE — draw 1 · consume all marks — 1 per stack",
-   "REPRISE 1"
+   "FREE — draw 1",
+   "REPRISE 1",
+   "rider"
   ]
  },
  {
@@ -2326,7 +2331,7 @@
   ],
   "lines": [
    "FREE — draw 1 · +1 Soul",
-   "REAP 2 — KINDLE (mind) — draw 2"
+   "REAP 2 — KINDLE (mind) — draw 2 · +1 Soul"
   ]
  },
  {
@@ -2442,7 +2447,7 @@
   "lines": [
    "FREE — Guard 2",
    "spend ALL pips (+1 Guard per pip)",
-   "RUPTURE (+2.5 fuel per pip)",
+   "RUPTURE (+3.5 fuel per pip)",
    "refresh the spent die"
   ]
  },
@@ -2597,7 +2602,7 @@
    }
   ],
   "lines": [
-   "FREE — mark i1 d1",
+   "FREE — Guard 2",
    "Applies Backfire ×2, 3t → enemy",
    "STAGGER 1",
    "Threshold: 3× mind die fires a rider"
