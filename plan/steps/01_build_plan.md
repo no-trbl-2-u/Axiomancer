@@ -99,9 +99,13 @@ Tick in this file in the same commit that ships the phase.
       encounter (the smallest of four ungoached minigames; see
       `plan/phases/phase_11_rest_tutorial.md` § 0 and the Follow-ups
       below) — `feat(mobile): guided first-night rest tutorial — phase 11` (1fb1d7f8)
-- [ ] Phase 12 — Doc-sync pass: reconcile `spec.md` / `docs/combat.md`
+- [x] Phase 12 — Doc-sync pass: reconcile `spec.md` / `docs/combat.md`
       with the shipped engine surface; frame Hazard-Pattern
-      Combat as primary everywhere (mechanics; docs)
+      Combat as primary everywhere (mechanics; docs) — collapsed the
+      orphaned `axiomancer-mechanics/spec.md` duplicate to a pointer;
+      fixed spec-32-v3 dead-API references in `docs/combat.md`
+      (basePower/chipHp/DIRECT_DAMAGE_WEIGHT/GOLD_CARD_IDS) —
+      `docs(mechanics): reconcile spec.md / docs/combat.md with spec 32 v3 — phase 12` (cb5c6467)
 - [ ] Phase 13 — Hazard v2 engine port (DIV-MECH-002, promoted via
       `/oversight` 2026-07-03): mechanics absorbs mobile's
       `state/hazard/` engine into `World/Hazard/`; mobile migrates
