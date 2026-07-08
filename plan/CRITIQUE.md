@@ -1,7 +1,7 @@
 # Critique log
 
-> Last pass: 2026-07-08 at commit 43088f6f
-> Pass count: 8
+> Last pass: 2026-07-08 at commit 31817335
+> Pass count: 9
 
 > External-observer feedback for Axiomancer. Populated by
 > `/critique` (which drives the local expo-web build with the
@@ -21,10 +21,10 @@
 - suggested fix: [user has not specified — iterate to determine]
 - source: user
 
-### [needs-user-call] Playwright MCP tools unavailable to sub-agents — recurred again (pass 8)
-- pass: 8 (commit 43088f6f); prior: pass 7 (commit aff7fece),
-  pass 6 (commit e50e819a), pass 5 (commit b0707e0a), pass 1-4
-  (marked fixed, see Done section)
+### [needs-user-call] Playwright MCP tools unavailable to sub-agents — recurred again (pass 9)
+- pass: 9 (commit 31817335); prior: pass 8 (commit 43088f6f),
+  pass 7 (commit aff7fece), pass 6 (commit e50e819a), pass 5
+  (commit b0707e0a), pass 1-4 (marked fixed, see Done section)
 - viewport: n/a
 - category: infra
 - observation: fifth occurrence of this exact blocker, fourth
@@ -53,10 +53,25 @@
   fresh clone/environment unless committed (or unless that's
   intentional per the `__note` in `settings.json.example`, which
   frames activation as "a deliberate, user-owned step").
-- evidence: verbatim tool error, reproduced again this pass:
-  `Playwright MCP tools are unavailable to me (permission to use
-  mcp__playwright__browser_navigate was not granted), so I cannot
-  play the game or produce findings.`
+  New this pass: the *calling* session (this one) was itself
+  offered direct `mcp__playwright__browser_*` tool access mid-run
+  (surfaced via a deferred-tool listing, and callable without a
+  permission prompt) — yet the `playtester` sub-agent it spawned
+  moments later, using the identical repo-level
+  `.claude/settings.json` allowlist, still had every
+  `browser_navigate`/`browser_snapshot` call rejected as
+  ungranted. This is the clearest signal yet that the grant is
+  session-scoped and does not inherit into Agent-tool sub-agent
+  contexts even when the top-level session holds it — reinforcing
+  (not just repeating) the pass 5-8 diagnosis that this is a
+  structural sub-agent propagation gap, not a stale-config or
+  missing-file problem.
+- evidence: sixth occurrence, fifth consecutive. Verbatim
+  sub-agent tool errors this pass: "Claude requested permissions
+  to use mcp__playwright__browser_navigate, but you haven't
+  granted it yet." and "...mcp__playwright__browser_snapshot,
+  but you haven't granted it yet." — raised on every attempt
+  before any page load.
 - suggested fix: unchanged from pass 6/7 — this needs a
   `[needs-user-call]` decision on the permission-mode mechanism
   itself: either (a) confirm whether this harness's
@@ -75,8 +90,9 @@
   should be committed to the repo so the fix travels with it, or
   left as a per-environment opt-in as `settings.json.example`'s
   note implies.
-- source: critique pass 8 (playtester, dev server pre-verified up
-  before spawn)
+- source: critique pass 9 (playtester, dev server pre-verified up
+  before spawn; expo web bound at http://localhost:8081 via
+  `npx expo start --web --port 8081` from `axiomancer-mobile/`)
 
 ### [LOW] `web:container` dev-server script is broken
 - pass: 1 (commit 6e23724a)
