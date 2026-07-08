@@ -1,10 +1,11 @@
 /**
- * Per-card art registry — temp art pass (2026-07-06 drop).
+ * Per-card art registry — spec 32 v3 themed-deck pass (2026-07-08).
  *
- * 18 paintings back the 50-card combat pool, assigned by keyword/theme match
- * (e.g. bleed → the dark blade, CONFUSION → the twin rings) and reused where
- * the pool outnumbers the paintings. Unmapped ids (sandbox / future cards)
- * fall back to the original circe placeholder.
+ * The same 18 paintings back the 70-card themed library, reassigned by THEME
+ * so each deck reads as a visual family (Affliction → the toxic moth,
+ * Bulwark → the armor set, Oracle → the divine stag, …) with the rare cards
+ * taking the strongest painting in the family. Unmapped ids (sandbox /
+ * conjured Thoughtforms) fall back to the circe placeholder.
  *
  * Metro needs static require literals, so this map is the one place a card id
  * meets a file path; the mechanics package stays art-free.
@@ -32,71 +33,88 @@ const guardShield = require('./guard-3.webp');
 export const FALLBACK_CARD_ART = require('./circe-placeholder.jpg');
 
 const CARD_ART_BY_ID: Record<string, number> = {
-    // poison / septic — the toxic luna moth
+    // ── T1 Affliction — the toxic moth + the dark blade ──
     'slippery-slope': dreamFlutter,
-    'poisoned-well': dreamFlutter,
-    'the-final-word': devilBook,
-    // guard family — armor, shield, stone torso
-    'brace-for-impact': guardArmor,
-    'suspend-judgment': guardShield,
-    'stoic-reserve': guardTorso,
-    'apophatic-aegis': guardShield,
-    'unmoved-mover': guardTorso,
-    // bleed family — the dark blade
-    'achilles-gambit': bleedBlade,
-    'resonance-bleed': bleedBlade,
-    'sunk-cost-momentum': bleedBlade,
-    'leeching-syllogism': bleedBlade,
-    // aggression / vulnerable — the burning blade
-    'ad-hominem-strike': burnBlade,
-    'breach': burnBlade,
-    'pyrrhic-victory': burnBlade,
-    // confusion — the twin rings
-    'false-dilemma': confuseRings,
-    'undistributed-middle': confuseRings,
-    'barbers-paradox': confuseRings,
-    'moving-the-goalposts': confuseRings,
-    // cold / preserved / executioner steel
-    'ship-in-a-bottle': freezeCrystal,
-    'existential-collapse': freezeCrystal,
-    'achilles-overtake': iceSword,
-    // lightning / cascade / rupture
-    'eternal-regress': spark,
-    'the-inevitable': spark,
+    'straw-mans-jab': bleedBlade,
+    'festering-argument': dreamFlutter,
+    'currys-conversion': bleedBlade,
     'resonance-detonation': spark,
-    'sorites-cascade': spark,
-    // radiant ring — halos, loops, renewal
-    'appeal-to-pity': lightRing,
-    'soothing-words': lightRing,
-    'bootstrap-paradox': lightRing,
-    // the misleading light
-    'liars-echo': willOWisp,
-    'gamblers-folly': willOWisp,
-    'nirvana-fallacy': willOWisp,
-    'card-retreat': willOWisp,
-    // shifting orbs — swarms, conversions
-    'ship-of-theseus': blueLight,
-    'equivocation-cascade': blueLight,
-    'bat-swarm-thoughtform': blueLight,
-    // flaring sphere — rallies, transcendence
-    'mob-appeal': brightSphere,
-    'mounting-contradictions': brightSphere,
-    'transcendent-synthesis': brightSphere,
-    // the divine stag — seeing truly, wagers with god
-    'empathetic-understanding': godEye,
-    'pascals-wager': godEye,
-    // the sinister tome — authority, fear, debt
-    'appeal-to-authority': devilBook,
-    'appeal-to-consequences': devilBook,
-    'existential-debt': devilBook,
-    // the hummingbird — quick jabs and peace offerings
-    'hasty-generalization': meatPecker,
-    'befriend': meatPecker,
-    'peaceful-gesture': meatPecker,
-    // the world tree — thorns and recurrence
+    'venom-and-vein': dreamFlutter,
+    'suppurating-curse': devilBook,
+    // ── T2 Peroration — the radiant ring (the case, built in circles) ──
+    'exordium': lightRing,
+    'opening-statement': lightRing,
+    'mounting-case': brightSphere,
+    'peroratio-interrupta': lightRing,
+    'the-closing-word': brightSphere,
+    'practiced-cadence': lightRing,
+    'captive-audience': willOWisp,
+    // ── T3 Forge — sparks and shifting orbs (dice from nothing) ──
+    'sketch-of-a-thought': blueLight,
+    'half-step': blueLight,
+    'bootstrap-loop': spark,
+    'ex-nihilo': brightSphere,
+    'the-overtake': iceSword,
+    'anvil-of-form': guardTorso,
+    'entropy-tax': devilBook,
+    // ── T4 Akrasia — the sinister tome + the burning blade (the debt) ──
+    'against-my-judgment': devilBook,
+    'sweet-poison': dreamFlutter,
+    'self-flagellant': burnBlade,
+    'fallen-grace': lightRing,
+    'pact-of-akrasia': devilBook,
+    'crown-of-thorns': yggdrasil,
+    'mirror-of-guilt': godEye,
+    // ── T5 Control — the twin rings (the fettered mind) ──
+    'zenos-half-step': confuseRings,
+    'red-herring': willOWisp,
+    'undistributed-middle': confuseRings,
+    'arrow-paradox': freezeCrystal,
+    'paralysis-of-analysis': confuseRings,
+    'achilles-and-the-tortoise': freezeCrystal,
+    'quagmire-of-doubt': confuseRings,
+    // ── T6 Oracle — the divine stag (seeing truly) ──
+    'glimpse': godEye,
+    'signs-and-portents': willOWisp,
+    'cassandras-burden': godEye,
+    'delphic-ambiguity': confuseRings,
+    'prophecy-fulfilled': godEye,
+    'the-oracles-eye': godEye,
+    'fated-course': freezeCrystal,
+    // ── T7 Harvest — the hummingbird + blades (the gleaning) ──
+    'brief-candle': burnBlade,
+    'memento-mori': meatPecker,
+    'winnowing': iceSword,
+    'the-gleaners-due': meatPecker,
+    'the-reaping': iceSword,
+    'bone-orchard': yggdrasil,
+    'the-tithe': devilBook,
+    // ── T8 Charm — the radiant ring + the hummingbird (mercy) ──
+    'soft-word': meatPecker,
+    'disarming-smile': lightRing,
+    'common-ground': brightSphere,
+    'the-olive-branch': yggdrasil,
+    'heart-of-the-matter': brightSphere,
+    'irresistible-grace': lightRing,
+    'mirror-of-longing': godEye,
+    // ── T9 Bulwark — the armor set (the wall) ──
+    'brace-for-impact': guardArmor,
+    'nettle-cloak': yggdrasil,
     'tu-quoque': yggdrasil,
-    'briar-riposte': yggdrasil,
-    'eternal-recurrence': yggdrasil,
+    'measured-answer': guardShield,
+    'the-adamant-wall': guardTorso,
+    'hedgehogs-dilemma': guardShield,
+    'crumbling-resolve': guardArmor,
+    // ── T10 Echo — the misleading light + shifting orbs (the refrain) ──
+    'refrain': willOWisp,
+    'second-thoughts': blueLight,
+    'ad-nauseam': confuseRings,
+    'circular-reasoning': lightRing,
+    'ouroboros': blueLight,
+    'resonant-chamber': spark,
+    'stuck-in-their-head': willOWisp,
+    // ── Synthetic ──
+    'card-retreat': willOWisp,
 };
 
 export function getCardArt(cardId: string): number {

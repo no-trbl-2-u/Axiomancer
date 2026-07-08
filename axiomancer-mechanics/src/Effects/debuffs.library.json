@@ -23,7 +23,11 @@
       },
       "tier": 2,
       "addedIn": "2026-07-08",
-      "tags": ["v3", "dot", "affliction"]
+      "tags": [
+        "v3",
+        "dot",
+        "affliction"
+      ]
     },
     {
       "id": "debuff_bleed",
@@ -47,7 +51,11 @@
       },
       "tier": 2,
       "addedIn": "2026-07-08",
-      "tags": ["v3", "dot", "affliction"]
+      "tags": [
+        "v3",
+        "dot",
+        "affliction"
+      ]
     },
     {
       "id": "debuff_mark",
@@ -62,7 +70,11 @@
       },
       "tier": 1,
       "addedIn": "2026-07-08",
-      "tags": ["v3", "exposure", "affliction"]
+      "tags": [
+        "v3",
+        "exposure",
+        "affliction"
+      ]
     },
     {
       "id": "debuff_backfire",
@@ -79,7 +91,11 @@
       },
       "tier": 2,
       "addedIn": "2026-07-08",
-      "tags": ["v3", "control", "affliction"]
+      "tags": [
+        "v3",
+        "control",
+        "affliction"
+      ]
     },
     {
       "id": "debuff_rapport",
@@ -96,7 +112,826 @@
       },
       "tier": 2,
       "addedIn": "2026-07-08",
-      "tags": ["v3", "charm", "affliction"]
+      "tags": [
+        "v3",
+        "charm",
+        "affliction"
+      ]
+    },
+    {
+      "id": "debuff_strong_poison",
+      "name": "Yablo's Venom",
+      "description": "Each moment of pain refers to the next: 'All pain after this will be worse.' No self-reference, yet infinitely escalating agony.",
+      "type": "debuff",
+      "category": "damage",
+      "duration": 3,
+      "stacking": "intensity",
+      "resistedBy": "mind",
+      "resistDR": 14,
+      "payload": {
+        "damageOverTime": {
+          "damagePerRound": 5,
+          "damageType": "body"
+        },
+        "statModifiers": [
+          {
+            "stat": "body",
+            "value": -1,
+            "isMultiplier": false
+          }
+        ]
+      },
+      "tier": 2,
+      "tags": [
+        "support",
+        "non-card"
+      ]
+    },
+    {
+      "id": "debuff_burn",
+      "name": "Olbers' Fire",
+      "description": "If infinite stars fill the sky, why is it dark? Because their light is delayed. When it arrives all at once\u2014you burn in accumulated radiance.",
+      "type": "debuff",
+      "category": "damage",
+      "duration": 3,
+      "stacking": "intensity",
+      "resistedBy": "body",
+      "resistDR": 13,
+      "payload": {
+        "damageOverTime": {
+          "damagePerRound": 3,
+          "damageType": "heart"
+        }
+      },
+      "tier": 2,
+      "tags": [
+        "support",
+        "non-card"
+      ]
+    },
+    {
+      "id": "debuff_frostbite",
+      "name": "Boltzmann's Chill",
+      "description": "Random fluctuations conspire against you\u2014entropy arranges itself into impossible cold. Your movements slow toward heat death.",
+      "type": "debuff",
+      "category": "damage",
+      "duration": 3,
+      "stacking": "duration",
+      "resistedBy": "mind",
+      "resistDR": 12,
+      "payload": {
+        "damageOverTime": {
+          "damagePerRound": 3,
+          "damageType": "body"
+        },
+        "rollModifier": -2
+      },
+      "tier": 2,
+      "tags": [
+        "support",
+        "non-card"
+      ]
+    },
+    {
+      "id": "debuff_shock",
+      "name": "Hardy's Discharge",
+      "description": "Two particles that should never meet\u2014do. The impossible measurement occurs. Reality contradicts itself through your nervous system.",
+      "type": "debuff",
+      "category": "damage",
+      "duration": 2,
+      "stacking": "intensity",
+      "resistedBy": "heart",
+      "resistDR": 13,
+      "payload": {
+        "damageOverTime": {
+          "damagePerRound": 3,
+          "damageType": "mind"
+        },
+        "rollModifier": -1
+      },
+      "tier": 2,
+      "tags": [
+        "support",
+        "non-card"
+      ]
+    },
+    {
+      "id": "debuff_curse",
+      "name": "Grelling's Malediction",
+      "description": "This curse is heterological\u2014it does not describe itself. But then it does describe itself. The contradiction festers in your soul.",
+      "type": "debuff",
+      "category": "stat",
+      "duration": 5,
+      "stacking": "none",
+      "resistedBy": "body",
+      "resistDR": 14,
+      "payload": {
+        "statModifiers": [
+          {
+            "stat": "body",
+            "value": -1,
+            "isMultiplier": false
+          },
+          {
+            "stat": "mind",
+            "value": -1,
+            "isMultiplier": false
+          },
+          {
+            "stat": "heart",
+            "value": -2,
+            "isMultiplier": false
+          }
+        ],
+        "rollModifier": -2
+      },
+      "tier": 2,
+      "tags": [
+        "support",
+        "non-card"
+      ]
+    },
+    {
+      "id": "debuff_disease",
+      "name": "Inspection Sickness",
+      "description": "You randomly sampled this moment\u2014but longer illnesses are more likely to be sampled. Your disease will last longer than average, paradoxically.",
+      "type": "debuff",
+      "category": "damage",
+      "duration": 4,
+      "stacking": "duration",
+      "resistedBy": "mind",
+      "resistDR": 12,
+      "payload": {
+        "damageOverTime": {
+          "damagePerRound": 2,
+          "damageType": "body"
+        },
+        "regeneration": {
+          "healthPerRound": -1
+        }
+      },
+      "tier": 2,
+      "tags": [
+        "support",
+        "non-card"
+      ]
+    },
+    {
+      "id": "debuff_wound",
+      "name": "Berry's Injury",
+      "description": "The smallest wound not describable in fewer than eleven words. By describing it, we've created it. Definability becomes damage.",
+      "type": "debuff",
+      "category": "stat",
+      "duration": 4,
+      "stacking": "intensity",
+      "resistedBy": "mind",
+      "resistDR": 13,
+      "payload": {
+        "statModifiers": [
+          {
+            "stat": "body",
+            "value": -2,
+            "isMultiplier": false
+          }
+        ],
+        "defenseModifier": -2
+      },
+      "tier": 2,
+      "tags": [
+        "support",
+        "non-card"
+      ]
+    },
+    {
+      "id": "debuff_stun",
+      "name": "Buridan's Paralysis",
+      "description": "Like the ass between two hay bales, you cannot choose. Perfect rationality demands sufficient reason\u2014and you have none. You stand frozen.",
+      "type": "debuff",
+      "category": "control",
+      "duration": 1,
+      "stacking": "duration",
+      "resistedBy": "heart",
+      "resistDR": 14,
+      "payload": {
+        "actionRestriction": {
+          "skipTurn": true
+        }
+      },
+      "tier": 2,
+      "tags": [
+        "support",
+        "non-card"
+      ]
+    },
+    {
+      "id": "debuff_sleep",
+      "name": "Sleeping Beauty's Rest",
+      "description": "You wake, uncertain if this is Monday or Tuesday\u2014or if the coin landed heads. Unable to resolve your credence, you drift back to unconsciousness.",
+      "type": "debuff",
+      "category": "control",
+      "duration": 2,
+      "stacking": "none",
+      "resistedBy": "heart",
+      "resistDR": 13,
+      "payload": {
+        "actionRestriction": {
+          "skipTurn": true
+        },
+        "defenseModifier": -3
+      },
+      "tier": 2,
+      "tags": [
+        "support",
+        "non-card"
+      ]
+    },
+    {
+      "id": "debuff_daze",
+      "name": "Simpson's Confusion",
+      "description": "Each part of your thinking is superior, yet combined they're inferior. Your mind's aggregation betrays its components.",
+      "type": "debuff",
+      "category": "control",
+      "duration": 2,
+      "stacking": "duration",
+      "resistedBy": "heart",
+      "resistDR": 12,
+      "payload": {
+        "rollModifier": -3,
+        "statModifiers": [
+          {
+            "stat": "mind",
+            "value": -2,
+            "isMultiplier": false
+          },
+          {
+            "stat": "mentalSkill",
+            "value": -2,
+            "isMultiplier": false
+          },
+          {
+            "stat": "mentalDefense",
+            "value": -1,
+            "isMultiplier": false
+          }
+        ]
+      },
+      "tier": 2,
+      "tags": [
+        "support",
+        "non-card"
+      ]
+    },
+    {
+      "id": "debuff_petrify",
+      "name": "Zeno's Stillness",
+      "description": "To move, you must first move half the distance. Then half again. Infinite steps in finite time\u2014but your muscles refuse the mathematics.",
+      "type": "debuff",
+      "category": "control",
+      "duration": 2,
+      "stacking": "none",
+      "resistedBy": "heart",
+      "resistDR": 17,
+      "payload": {
+        "actionRestriction": {
+          "skipTurn": true
+        },
+        "defenseModifier": -4
+      },
+      "tier": 3,
+      "tags": [
+        "support",
+        "non-card"
+      ]
+    },
+    {
+      "id": "debuff_fear",
+      "name": "Grandfather's Terror",
+      "description": "You see the paradox of your own destruction\u2014if you fight, you ensure your doom; if you flee, you ensure your doom. Either path leads backward to oblivion.",
+      "type": "debuff",
+      "category": "control",
+      "duration": 3,
+      "stacking": "duration",
+      "resistedBy": "body",
+      "resistDR": 13,
+      "payload": {
+        "rollModifier": -4,
+        "statModifiers": [
+          {
+            "stat": "heart",
+            "value": -4,
+            "isMultiplier": false
+          },
+          {
+            "stat": "emotionalSkill",
+            "value": -3,
+            "isMultiplier": false
+          },
+          {
+            "stat": "emotionalDefense",
+            "value": -3,
+            "isMultiplier": false
+          }
+        ]
+      },
+      "tier": 2,
+      "tags": [
+        "support",
+        "non-card"
+      ]
+    },
+    {
+      "id": "debuff_charm",
+      "name": "Wigner's Friendship",
+      "description": "From your perspective, your reality has collapsed into serving them. From outside, you remain in superposition. Neither view is wrong. You obey.",
+      "type": "debuff",
+      "category": "control",
+      "duration": 2,
+      "stacking": "none",
+      "resistedBy": "body",
+      "resistDR": 14,
+      "payload": {
+        "actionRestriction": {
+          "forcedStance": "heart"
+        },
+        "statModifiers": [
+          {
+            "stat": "heart",
+            "value": -2,
+            "isMultiplier": false
+          },
+          {
+            "stat": "emotionalDefense",
+            "value": -2,
+            "isMultiplier": false
+          }
+        ]
+      },
+      "tier": 2,
+      "tags": [
+        "support",
+        "non-card"
+      ]
+    },
+    {
+      "id": "debuff_confusion",
+      "name": "Two Envelope Delirium",
+      "description": "Should you switch? The other choice always seems better. You switch targets, switch tactics, switch again\u2014always certain switching helps, always wrong.",
+      "type": "debuff",
+      "category": "control",
+      "duration": 4,
+      "stacking": "duration",
+      "resistedBy": "heart",
+      "resistDR": 13,
+      "payload": {
+        "rollModifier": -5,
+        "advantageModifier": {
+          "grantDisadvantage": [
+            "body",
+            "mind",
+            "heart"
+          ]
+        }
+      },
+      "tier": 2,
+      "tags": [
+        "support",
+        "non-card"
+      ]
+    },
+    {
+      "id": "debuff_blind",
+      "name": "Quantum Erasure",
+      "description": "Information about your target has been erased from reality itself. You know they exist; you cannot know where. Observation fails.",
+      "type": "debuff",
+      "category": "control",
+      "duration": 2,
+      "stacking": "duration",
+      "resistedBy": "heart",
+      "resistDR": 13,
+      "payload": {
+        "rollModifier": -5,
+        "advantageModifier": {
+          "grantDisadvantage": [
+            "body",
+            "mind"
+          ]
+        }
+      },
+      "tier": 2,
+      "tags": [
+        "support",
+        "non-card"
+      ]
+    },
+    {
+      "id": "debuff_silence",
+      "name": "Moore's Muteness",
+      "description": "You believe you can speak, yet you don't believe you're speaking. The absurdity freezes your voice. Assertion becomes impossible.",
+      "type": "debuff",
+      "category": "control",
+      "duration": 3,
+      "stacking": "none",
+      "resistedBy": "body",
+      "resistDR": 13,
+      "payload": {
+        "actionRestriction": {
+          "blockedStances": [
+            "heart"
+          ]
+        },
+        "statModifiers": [
+          {
+            "stat": "heart",
+            "value": -2,
+            "isMultiplier": false
+          },
+          {
+            "stat": "emotionalSkill",
+            "value": -3,
+            "isMultiplier": false
+          }
+        ]
+      },
+      "tier": 2,
+      "tags": [
+        "support",
+        "non-card"
+      ]
+    },
+    {
+      "id": "debuff_fatigue",
+      "name": "Preface Exhaustion",
+      "description": "You believe each action you take is correct. You also believe some of your actions must be mistakes. The inconsistency drains you.",
+      "type": "debuff",
+      "category": "stat",
+      "duration": 4,
+      "stacking": "intensity",
+      "resistedBy": "heart",
+      "resistDR": 12,
+      "payload": {
+        "statModifiers": [
+          {
+            "stat": "body",
+            "value": -1,
+            "isMultiplier": false
+          },
+          {
+            "stat": "mind",
+            "value": -1,
+            "isMultiplier": false
+          },
+          {
+            "stat": "physicalSkill",
+            "value": -1,
+            "isMultiplier": false
+          },
+          {
+            "stat": "mentalSkill",
+            "value": -1,
+            "isMultiplier": false
+          }
+        ],
+        "rollModifier": -1
+      },
+      "tier": 2,
+      "tags": [
+        "support",
+        "non-card"
+      ]
+    },
+    {
+      "id": "debuff_exhaustion",
+      "name": "Lottery Despair",
+      "description": "For each effort, you rationally believe it will fail. Combined, you believe nothing will succeed. Yet something must. The contradiction exhausts you.",
+      "type": "debuff",
+      "category": "stat",
+      "duration": 3,
+      "stacking": "intensity",
+      "resistedBy": "heart",
+      "resistDR": 13,
+      "payload": {
+        "statModifiers": [
+          {
+            "stat": "body",
+            "value": -2,
+            "isMultiplier": false
+          },
+          {
+            "stat": "mind",
+            "value": -2,
+            "isMultiplier": false
+          },
+          {
+            "stat": "heart",
+            "value": -2,
+            "isMultiplier": false
+          },
+          {
+            "stat": "physicalSkill",
+            "value": -1,
+            "isMultiplier": false
+          },
+          {
+            "stat": "mentalSkill",
+            "value": -1,
+            "isMultiplier": false
+          },
+          {
+            "stat": "emotionalSkill",
+            "value": -1,
+            "isMultiplier": false
+          }
+        ],
+        "rollModifier": -2
+      },
+      "tier": 2,
+      "tags": [
+        "support",
+        "non-card"
+      ]
+    },
+    {
+      "id": "debuff_slow",
+      "name": "Achilles' Burden",
+      "description": "You are Achilles\u2014faster than any tortoise. Yet the tortoise is always ahead. No matter how swiftly you act, you're always one step behind.",
+      "type": "debuff",
+      "category": "control",
+      "duration": 3,
+      "stacking": "duration",
+      "resistedBy": "mind",
+      "resistDR": 12,
+      "payload": {
+        "rollModifier": -2,
+        "statModifiers": [
+          {
+            "stat": "physicalSkill",
+            "value": -2,
+            "isMultiplier": false
+          }
+        ],
+        "advantageModifier": {
+          "grantDisadvantage": [
+            "body"
+          ]
+        }
+      },
+      "tier": 2,
+      "tags": [
+        "support",
+        "non-card"
+      ]
+    },
+    {
+      "id": "debuff_root",
+      "name": "Braess Binding",
+      "description": "Adding options makes things worse. You could move, but seeing the paths available creates congestion in your muscles. Paralysis through possibility.",
+      "type": "debuff",
+      "category": "control",
+      "duration": 2,
+      "stacking": "duration",
+      "resistedBy": "mind",
+      "resistDR": 13,
+      "payload": {
+        "defenseModifier": -2,
+        "rollModifier": -2
+      },
+      "tier": 2,
+      "tags": [
+        "support",
+        "non-card"
+      ]
+    },
+    {
+      "id": "debuff_knockdown",
+      "name": "Ross-Littlewood Fall",
+      "description": "At noon, how many balls remain? Your stance is like the paradox\u2014adding and removing faster and faster until at the limit, nothing coherent remains.",
+      "type": "debuff",
+      "category": "control",
+      "duration": 1,
+      "stacking": "none",
+      "resistedBy": "mind",
+      "resistDR": 12,
+      "payload": {
+        "defenseModifier": -4,
+        "rollModifier": -3
+      },
+      "tier": 2,
+      "tags": [
+        "support",
+        "non-card"
+      ]
+    },
+    {
+      "id": "debuff_vulnerability_body",
+      "name": "Richard's Exposure",
+      "description": "Your physical defenses are defined in terms of themselves\u2014a diagonal contradiction. The enumeration reveals your weakness; Body attacks pierce deeply.",
+      "type": "debuff",
+      "category": "defense",
+      "duration": 3,
+      "stacking": "duration",
+      "resistedBy": "mind",
+      "resistDR": 13,
+      "payload": {
+        "damageTakenMultForStance": {
+          "stance": "body",
+          "mult": 1.5
+        }
+      },
+      "tier": 2,
+      "tags": [
+        "support",
+        "non-card"
+      ]
+    },
+    {
+      "id": "debuff_vulnerability_mind",
+      "name": "Cantor's Gap",
+      "description": "Your mental defenses are countably infinite\u2014impressive, until you face uncountable assault. There's always a larger infinity of thoughts to break you.",
+      "type": "debuff",
+      "category": "defense",
+      "duration": 3,
+      "stacking": "duration",
+      "resistedBy": "heart",
+      "resistDR": 13,
+      "payload": {
+        "damageTakenMultForStance": {
+          "stance": "mind",
+          "mult": 1.5
+        }
+      },
+      "tier": 2,
+      "tags": [
+        "support",
+        "non-card"
+      ]
+    },
+    {
+      "id": "debuff_vulnerability_heart",
+      "name": "Burali-Forti Wound",
+      "description": "Your emotional ordinals exceed their own bounds. The set of all your feelings contains a feeling greater than all feelings. Your Heart tears itself apart.",
+      "type": "debuff",
+      "category": "defense",
+      "duration": 3,
+      "stacking": "duration",
+      "resistedBy": "body",
+      "resistDR": 13,
+      "payload": {
+        "damageTakenMultForStance": {
+          "stance": "heart",
+          "mult": 1.5
+        }
+      },
+      "tier": 2,
+      "tags": [
+        "support",
+        "non-card"
+      ]
+    },
+    {
+      "id": "debuff_hex",
+      "name": "Allais' Curse",
+      "description": "Your allies' pain becomes yours\u2014you violate expected utility by feeling their losses more than logic allows. Independence fails; harm transfers.",
+      "type": "debuff",
+      "category": "damage",
+      "duration": 3,
+      "stacking": "none",
+      "resistedBy": "body",
+      "resistDR": 13,
+      "payload": {
+        "damageOverTime": {
+          "damagePerRound": 2,
+          "damageType": "heart"
+        }
+      },
+      "tier": 2,
+      "tags": [
+        "support",
+        "non-card"
+      ]
+    },
+    {
+      "id": "debuff_hp_decay",
+      "name": "Centipede's End",
+      "description": "Backward induction reveals the truth: at every step, you should have given up earlier. Your vitality unravels from the conclusion backward.",
+      "type": "debuff",
+      "category": "damage",
+      "duration": 4,
+      "stacking": "none",
+      "resistedBy": "mind",
+      "resistDR": 13,
+      "payload": {
+        "damageOverTime": {
+          "damagePerRound": 3,
+          "damageType": "body"
+        },
+        "regeneration": {
+          "healthPerRound": -2
+        }
+      },
+      "tier": 2,
+      "tags": [
+        "support",
+        "non-card"
+      ]
+    },
+    {
+      "id": "debuff_straw_man_echo",
+      "name": "Straw Man's Echo",
+      "description": "A weakened version of your intent was easily dismissed. You never argued for that\u2014but the damage is done. Your confidence wavers, just slightly.",
+      "type": "debuff",
+      "category": "advantage",
+      "duration": 2,
+      "stacking": "none",
+      "resistedBy": "body",
+      "resistDR": 10,
+      "payload": {
+        "rollModifier": -1
+      },
+      "tier": 1,
+      "tags": [
+        "support",
+        "non-card"
+      ]
+    },
+    {
+      "id": "debuff_post_hoc_tremor",
+      "name": "Post Hoc Tremor",
+      "description": "After the stumble came the strike\u2014correlation mistaken for causation. Your muscles remember the sequence and flinch preemptively, just a little.",
+      "type": "debuff",
+      "category": "stat",
+      "duration": 2,
+      "stacking": "none",
+      "resistedBy": "mind",
+      "resistDR": 10,
+      "payload": {
+        "statModifiers": [
+          {
+            "stat": "body",
+            "value": -1,
+            "isMultiplier": false
+          }
+        ]
+      },
+      "tier": 1,
+      "tags": [
+        "support",
+        "non-card"
+      ]
+    },
+    {
+      "id": "debuff_affirming_consequent",
+      "name": "Affirming the Consequent",
+      "description": "If you were skilled, you'd succeed. You succeeded\u2014therefore you were skilled. But the reasoning was flawed, and your next attempt knows it.",
+      "type": "debuff",
+      "category": "stat",
+      "duration": 2,
+      "stacking": "none",
+      "resistedBy": "mind",
+      "resistDR": 10,
+      "payload": {
+        "statModifiers": [
+          {
+            "stat": "physicalSkill",
+            "value": -1,
+            "isMultiplier": false
+          }
+        ]
+      },
+      "tier": 1,
+      "tags": [
+        "support",
+        "non-card"
+      ]
+    },
+    {
+      "id": "debuff_gorgon_gaze",
+      "name": "Gorgon's Gaze",
+      "description": "Meet the eyes and the body forgets it was ever fluid. Stone climbs the limbs from the ankles up. For a held breath, you are a statue of yourself.",
+      "type": "debuff",
+      "category": "control",
+      "duration": 1,
+      "stacking": "none",
+      "resistedBy": "heart",
+      "resistDR": 16,
+      "payload": {
+        "actionRestriction": {
+          "skipTurn": true
+        },
+        "defenseModifier": -3,
+        "statModifiers": [
+          {
+            "stat": "physicalDefense",
+            "value": -2,
+            "isMultiplier": false
+          }
+        ]
+      },
+      "tier": 3,
+      "addedIn": "2026-04-15",
+      "tags": [
+        "support",
+        "non-card"
+      ]
     }
   ]
 }

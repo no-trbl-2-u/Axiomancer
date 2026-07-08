@@ -193,7 +193,7 @@ export const LittleBelle = createEnemy({
     tier1Overrides: T1_DEFAULT,
     loot: [none(60), drop('heart-draught', 30), drop('minor-healing-potion', 10)],
     philosophicalAlignment: { epistemology: -67, outlook: -67, scope: -67 },
-    skills: [skill('appeal-to-pity')],
+    skills: [skill('soft-word')],
     friendshipReward: {
         items: [{ ...getConsumableById('heart-draught')! }],
         xpBonus: 10,
@@ -269,7 +269,7 @@ export const WaterHolger = createEnemy({
     tier1Overrides: T1_DEFAULT,
     loot: [none(50), drop('heart-draught', 30), drop('healing-potion', 15), drop('antidote', 5)],
     philosophicalAlignment: { epistemology: -67, outlook: -67, scope: 0 },
-    skills: [skill('pascals-wager')],
+    skills: [skill('soft-word')],
     friendshipReward: {
         items: [
             { ...getConsumableById('healing-potion')! },
@@ -343,7 +343,7 @@ export const Ghast = createEnemy({
     tier1Overrides: T1_DEFAULT,
     loot: [none(55), drop('clarity-serum', 25), drop('focus-vial', 20)],
     philosophicalAlignment: { epistemology: 67, outlook: -67, scope: -67 },
-    skills: [skill('false-dilemma')],
+    skills: [skill('red-herring')],
     addedIn: ADDED,
     tags: ['early-game', 'enemy'],
 });
@@ -383,7 +383,7 @@ export const TheButcher = createEnemy({
     },
     loot: [none(35), drop('body-elixir', 35), drop('healing-potion', 20), drop('berserker-brew', 10)],
     philosophicalAlignment: { epistemology: 0, outlook: -67, scope: -67 },
-    skills: [skill('mob-appeal')],
+    skills: [skill('sweet-poison')],
     addedIn: ADDED,
     tags: ['early-game', 'elite', 'enemy'],
 });
@@ -405,7 +405,7 @@ export const BrineHag = createEnemy({
     },
     loot: [none(35), drop('heart-draught', 30), drop('healing-potion', 20), drop('resonance-crystal', 15)],
     philosophicalAlignment: { epistemology: -67, outlook: -67, scope: 0 },
-    skills: [skill('appeal-to-pity')],
+    skills: [skill('soft-word')],
     befriendabilityConfig: {
         hpGate: { belowPct: 0.3 },
         requiredStances: ['heart'],
@@ -468,7 +468,7 @@ export const TheFerryman = createEnemy({
     },
     loot: [none(35), drop('clarity-serum', 25), drop('focus-vial', 25), drop('philosopher-tea', 15)],
     philosophicalAlignment: { epistemology: 0, outlook: -67, scope: 67 },
-    skills: [skill('sorites-cascade')],
+    skills: [skill('festering-argument')],
     befriendabilityConfig: {
         hpGate: { belowPct: 0.25 },
         requiredStances: ['heart'],
@@ -545,7 +545,7 @@ export const KingOfRevenge = createEnemy({
         drop('heart-draught', 20),
     ],
     philosophicalAlignment: { epistemology: -67, outlook: -67, scope: -67 },
-    skills: [skill('achilles-gambit'), skill('ad-hominem-strike'), skill('false-dilemma')],
+    skills: [skill('straw-mans-jab'), skill('brief-candle'), skill('red-herring')],
     befriendabilityConfig: {
         hpGate: { belowPct: 0.7 },
         requiredStances: ['heart'],
@@ -622,7 +622,7 @@ export const Wichtlein = createEnemy({
     tier1Overrides: T1_DEFAULT,
     loot: [none(55), drop('focus-vial', 25), drop('clarity-serum', 20)],
     philosophicalAlignment: { epistemology: 67, outlook: -67, scope: 0 },
-    skills: [skill('false-dilemma')],
+    skills: [skill('red-herring')],
     addedIn: ADDED,
     tags: ['mid-game', 'enemy'],
 });
@@ -657,7 +657,7 @@ export const Kudan = createEnemy({
         drop('revive-crystal', 10),
     ],
     philosophicalAlignment: { epistemology: -67, outlook: -67, scope: 67 },
-    skills: [skill('eternal-regress')],
+    skills: [skill('slippery-slope')],
     finalBlowLines: {
         brutal: 'The prophecy dies unspoken. Whatever it knew becomes, mercifully, unknowable.',
         quiet:  'It lies down like cattle before weather. The calamity will have to introduce itself.',
@@ -713,7 +713,7 @@ export const WeepingHead = createEnemy({
     tier1Overrides: T1_DEFAULT,
     loot: [none(55), drop('heart-draught', 30), drop('healing-potion', 15)],
     philosophicalAlignment: { epistemology: -67, outlook: -67, scope: -67 },
-    skills: [skill('appeal-to-pity')],
+    skills: [skill('soft-word')],
     addedIn: ADDED,
     tags: ['mid-game', 'enemy'],
 });
@@ -732,7 +732,7 @@ export const GoblinShaman = createEnemy({
     tier1Overrides: T1_DEFAULT,
     loot: [none(50), drop('clarity-serum', 25), drop('focus-vial', 15), drop('philosopher-tea', 10)],
     philosophicalAlignment: { epistemology: -67, outlook: 0, scope: 0 },
-    skills: [skill('liars-echo')],
+    skills: [skill('glimpse')],
     addedIn: ADDED,
     tags: ['mid-game', 'enemy'],
 });
@@ -792,7 +792,7 @@ export const TriEyes = createEnemy({
     tier1Overrides: T1_DEFAULT,
     loot: [none(50), drop('clarity-serum', 30), drop('healing-potion', 20)],
     philosophicalAlignment: { epistemology: 67, outlook: 0, scope: 0 },
-    skills: [skill('false-dilemma'), skill('ad-hominem-strike')],
+    skills: [skill('red-herring'), skill('brief-candle')],
     befriendabilityConfig: {
         hpGate: { belowPct: 0.7 },
         requiredStances: ['mind'],
@@ -842,7 +842,7 @@ export const Mabadi = createEnemy({
     },
     loot: [none(40), drop('body-elixir', 30), drop('whetstone-oil', 20), drop('healing-potion', 10)],
     philosophicalAlignment: { epistemology: 67, outlook: 0, scope: -67 },
-    skills: [skill('achilles-gambit')],
+    skills: [skill('straw-mans-jab')],
     addedIn: ADDED,
     tags: ['mid-game', 'elite', 'enemy'],
 });
@@ -864,7 +864,7 @@ export const FrayedOne = createEnemy({
     },
     loot: [none(40), drop('clarity-serum', 25), drop('void-essence', 20), drop('philosopher-tea', 15)],
     philosophicalAlignment: { epistemology: 0, outlook: -67, scope: 67 },
-    skills: [skill('sorites-cascade')],
+    skills: [skill('festering-argument')],
     addedIn: ADDED,
     tags: ['mid-game', 'elite', 'enemy'],
 });
@@ -886,7 +886,7 @@ export const BoneTotem = createEnemy({
     },
     loot: [none(40), drop('iron-skin-draught', 25), drop('clarity-serum', 20), drop('void-essence', 15)],
     philosophicalAlignment: { epistemology: -67, outlook: -67, scope: 67 },
-    skills: [skill('mob-appeal')],
+    skills: [skill('sweet-poison')],
     addedIn: ADDED,
     tags: ['mid-game', 'elite', 'enemy'],
 });
@@ -908,7 +908,7 @@ export const BoneWizard = createEnemy({
     },
     loot: [none(35), drop('philosopher-tea', 25), drop('clarity-serum', 25), drop('void-essence', 15)],
     philosophicalAlignment: { epistemology: 67, outlook: 0, scope: 67 },
-    skills: [skill('eternal-regress')],
+    skills: [skill('slippery-slope')],
     addedIn: ADDED,
     tags: ['mid-game', 'elite', 'enemy'],
 });
@@ -942,7 +942,7 @@ export const Mirac = createEnemy({
         drop('resonance-crystal', 10),
     ],
     philosophicalAlignment: { epistemology: 0, outlook: -67, scope: 67 },
-    skills: [skill('sorites-cascade'), skill('mob-appeal'), skill('bootstrap-paradox')],
+    skills: [skill('festering-argument'), skill('sweet-poison'), skill('bootstrap-loop')],
     finalBlowLines: {
         brutal: 'The court adjourns violently. The verdict, unread, unhappens.',
         quiet:  'The hood bows. The red orb dims to a case dismissed.',
@@ -978,7 +978,7 @@ export const CursedPaladin = createEnemy({
     },
     loot: [none(35), drop('iron-skin-draught', 25), drop('body-elixir', 25), drop('healing-potion', 15)],
     philosophicalAlignment: { epistemology: -67, outlook: -67, scope: 0 },
-    skills: [skill('achilles-gambit'), skill('pascals-wager')],
+    skills: [skill('straw-mans-jab'), skill('soft-word')],
     addedIn: ADDED,
     tags: ['mid-game', 'elite', 'enemy'],
 });
@@ -997,7 +997,7 @@ export const VampireThrall = createEnemy({
     tier1Overrides: T1_DEFAULT,
     loot: [none(55), drop('body-elixir', 25), drop('healing-potion', 20)],
     philosophicalAlignment: { epistemology: -67, outlook: -67, scope: 0 },
-    skills: [skill('mob-appeal')],
+    skills: [skill('sweet-poison')],
     addedIn: ADDED,
     tags: ['mid-game', 'enemy'],
 });
@@ -1019,7 +1019,7 @@ export const HasshakuSama = createEnemy({
     },
     loot: [none(30), drop('heart-draught', 30), drop('healing-potion', 25), drop('resonance-crystal', 15)],
     philosophicalAlignment: { epistemology: -67, outlook: 0, scope: -67 },
-    skills: [skill('appeal-to-pity'), skill('pascals-wager')],
+    skills: [skill('soft-word'), skill('soft-word')],
     befriendabilityConfig: {
         hpGate: { belowPct: 0.4 },
         requiredStances: ['heart'],
@@ -1084,7 +1084,7 @@ export const JeweledTree = createEnemy({
     },
     loot: [none(25), drop('resonance-crystal', 30), drop('heart-draught', 25), drop('greater-healing-potion', 20)],
     philosophicalAlignment: { epistemology: -67, outlook: 67, scope: 67 },
-    skills: [skill('appeal-to-pity')],
+    skills: [skill('soft-word')],
     addedIn: ADDED,
     tags: ['mid-game', 'elite', 'enemy'],
 });
@@ -1106,7 +1106,7 @@ export const OgreNaga = createEnemy({
     },
     loot: [none(35), drop('body-elixir', 30), drop('hunters-elixir', 20), drop('greater-healing-potion', 15)],
     philosophicalAlignment: { epistemology: 0, outlook: -67, scope: -67 },
-    skills: [skill('mob-appeal')],
+    skills: [skill('sweet-poison')],
     addedIn: ADDED,
     tags: ['mid-game', 'elite', 'enemy'],
 });
@@ -1128,7 +1128,7 @@ export const Sidelle = createEnemy({
     },
     loot: [none(35), drop('whetstone-oil', 25), drop('body-elixir', 25), drop('greater-healing-potion', 15)],
     philosophicalAlignment: { epistemology: 0, outlook: -67, scope: -67 },
-    skills: [skill('achilles-gambit')],
+    skills: [skill('straw-mans-jab')],
     addedIn: ADDED,
     tags: ['mid-game', 'elite', 'enemy'],
 });
@@ -1156,7 +1156,7 @@ export const RawheadRex = createEnemy({
         drop('revive-crystal', 15),
     ],
     philosophicalAlignment: { epistemology: 0, outlook: -67, scope: -67 },
-    skills: [skill('mob-appeal'), skill('achilles-gambit'), skill('ad-hominem-strike')],
+    skills: [skill('sweet-poison'), skill('straw-mans-jab'), skill('brief-candle')],
     finalBlowLines: {
         brutal: 'The bloody bones come apart into their two advertised components.',
         quiet:  'It backs down the cellar stairs one last time, and the dark closes politely behind it.',
@@ -1194,7 +1194,7 @@ export const FateSpinner = createEnemy({
         drop('revive-crystal', 10),
     ],
     philosophicalAlignment: { epistemology: 67, outlook: 0, scope: 67 },
-    skills: [skill('liars-echo'), skill('false-dilemma'), skill('eternal-regress')],
+    skills: [skill('glimpse'), skill('red-herring'), skill('slippery-slope')],
     befriendabilityConfig: {
         hpGate: { belowPct: 0.2 },
         requiredStances: ['mind'],
@@ -1266,7 +1266,7 @@ export const AshenBoneDrake = createEnemy({
     },
     loot: [none(30), drop('iron-skin-draught', 25), drop('greater-healing-potion', 25), drop('war-horn-draught', 20)],
     philosophicalAlignment: { epistemology: 0, outlook: -67, scope: 0 },
-    skills: [skill('achilles-gambit'), skill('liars-echo')],
+    skills: [skill('straw-mans-jab'), skill('glimpse')],
     addedIn: ADDED,
     tags: ['mid-game', 'elite', 'enemy'],
 });
@@ -1294,7 +1294,7 @@ export const RaAminKa = createEnemy({
         drop('revive-crystal', 15),
     ],
     philosophicalAlignment: { epistemology: -67, outlook: 0, scope: 67 },
-    skills: [skill('bootstrap-paradox'), skill('eternal-regress'), skill('undistributed-middle')],
+    skills: [skill('bootstrap-loop'), skill('slippery-slope'), skill('undistributed-middle')],
     finalBlowLines: {
         brutal: 'The wrappings unwind all at once. The decree inside was four thousand years of dust.',
         quiet:  'The king lies back down. The administration, at very long last, adjourns.',
@@ -1326,7 +1326,7 @@ export const LadyGabriella = createEnemy({
     },
     loot: [none(30), drop('heart-draught', 30), drop('regeneration-tonic', 20), drop('greater-healing-potion', 20)],
     philosophicalAlignment: { epistemology: 0, outlook: -67, scope: -67 },
-    skills: [skill('pascals-wager'), skill('appeal-to-pity')],
+    skills: [skill('soft-word'), skill('soft-word')],
     befriendabilityConfig: {
         hpGate: { belowPct: 0.35 },
         requiredStances: ['heart'],
@@ -1391,7 +1391,7 @@ export const Zoma = createEnemy({
     },
     loot: [none(30), drop('philosopher-tea', 30), drop('clarity-serum', 25), drop('greater-resonance-crystal', 15)],
     philosophicalAlignment: { epistemology: 67, outlook: 0, scope: 0 },
-    skills: [skill('false-dilemma'), skill('liars-echo')],
+    skills: [skill('red-herring'), skill('glimpse')],
     addedIn: ADDED,
     tags: ['mid-game', 'elite', 'enemy'],
 });
@@ -1414,7 +1414,7 @@ export const MabadiUndrowned = createEnemy({
     },
     loot: [none(30), drop('body-elixir', 25), drop('whetstone-oil', 25), drop('supreme-healing-potion', 20)],
     philosophicalAlignment: { epistemology: 67, outlook: -67, scope: -67 },
-    skills: [skill('achilles-gambit'), skill('eternal-regress')],
+    skills: [skill('straw-mans-jab'), skill('slippery-slope')],
     addedIn: ADDED,
     tags: ['mid-game', 'elite', 'enemy'],
 });
@@ -1440,7 +1440,7 @@ export const TriEyesHollowed = createEnemy({
     },
     loot: [none(30), drop('clarity-serum', 25), drop('philosopher-tea', 25), drop('void-essence', 20)],
     philosophicalAlignment: { epistemology: 67, outlook: -67, scope: 67 },
-    skills: [skill('ad-hominem-strike'), skill('sorites-cascade')],
+    skills: [skill('brief-candle'), skill('festering-argument')],
     addedIn: ADDED,
     tags: ['late-game', 'elite', 'enemy'],
 });
@@ -1462,7 +1462,7 @@ export const BlackDeath = createEnemy({
     },
     loot: [none(25), drop('antidote', 30), drop('supreme-healing-potion', 25), drop('phoenix-tear', 20)],
     philosophicalAlignment: { epistemology: 0, outlook: -67, scope: 67 },
-    skills: [skill('mob-appeal'), skill('achilles-gambit')],
+    skills: [skill('sweet-poison'), skill('straw-mans-jab')],
     addedIn: ADDED,
     tags: ['late-game', 'elite', 'enemy'],
 });
@@ -1484,7 +1484,7 @@ export const TheUnnameable = createEnemy({
     },
     loot: [none(25), drop('void-essence', 35), drop('philosopher-tea', 20), drop('supreme-healing-potion', 20)],
     philosophicalAlignment: { epistemology: 0, outlook: -67, scope: 67 },
-    skills: [skill('eternal-regress'), skill('liars-echo')],
+    skills: [skill('slippery-slope'), skill('glimpse')],
     addedIn: ADDED,
     tags: ['late-game', 'elite', 'enemy'],
 });
@@ -1506,7 +1506,7 @@ export const FireGiant = createEnemy({
     },
     loot: [none(25), drop('war-horn-draught', 30), drop('supreme-healing-potion', 25), drop('iron-skin-draught', 20)],
     philosophicalAlignment: { epistemology: 0, outlook: 0, scope: -67 },
-    skills: [skill('mob-appeal'), skill('achilles-gambit')],
+    skills: [skill('sweet-poison'), skill('straw-mans-jab')],
     addedIn: ADDED,
     tags: ['late-game', 'elite', 'enemy'],
 });
@@ -1529,7 +1529,7 @@ export const GreaterDevil = createEnemy({
     },
     loot: [none(25), drop('void-essence', 30), drop('supreme-healing-potion', 25), drop('greater-resonance-crystal', 20)],
     philosophicalAlignment: { epistemology: 67, outlook: -67, scope: 0 },
-    skills: [skill('false-dilemma'), skill('bootstrap-paradox')],
+    skills: [skill('red-herring'), skill('bootstrap-loop')],
     addedIn: ADDED,
     tags: ['late-game', 'elite', 'enemy'],
 });
@@ -1557,7 +1557,7 @@ export const Rangda = createEnemy({
         drop('revive-crystal', 15),
     ],
     philosophicalAlignment: { epistemology: -67, outlook: -67, scope: 0 },
-    skills: [skill('appeal-to-pity'), skill('sorites-cascade'), skill('liars-echo')],
+    skills: [skill('soft-word'), skill('festering-argument'), skill('glimpse')],
     befriendabilityConfig: {
         hpGate: { belowPct: 0.2 },
         requiredStances: ['heart'],
@@ -1636,7 +1636,7 @@ export const ZomaAscendant = createEnemy({
         drop('revive-crystal', 15),
     ],
     philosophicalAlignment: { epistemology: 67, outlook: -67, scope: 67 },
-    skills: [skill('liars-echo'), skill('bootstrap-paradox'), skill('false-dilemma')],
+    skills: [skill('glimpse'), skill('bootstrap-loop'), skill('red-herring')],
     finalBlowLines: {
         brutal: 'The two heads disagree one final, fatal time — about which of them was struck.',
         quiet:  'Both voices finish the same sentence and, having nothing left to settle, stop.',
@@ -1674,7 +1674,7 @@ export const ElderFireGiant = createEnemy({
         drop('revive-crystal', 15),
     ],
     philosophicalAlignment: { epistemology: 0, outlook: -67, scope: 67 },
-    skills: [skill('mob-appeal'), skill('achilles-gambit'), skill('ad-hominem-strike')],
+    skills: [skill('sweet-poison'), skill('straw-mans-jab'), skill('brief-candle')],
     finalBlowLines: {
         brutal: 'The white fire goes out all at once, and the cold that follows has a genealogy too.',
         quiet:  'The elder banks his own coals, unhurried to the end.',
@@ -1712,7 +1712,7 @@ export const Tezcatlipoca = createEnemy({
         drop('revive-crystal', 20),
     ],
     philosophicalAlignment: { epistemology: 67, outlook: -67, scope: 67 },
-    skills: [skill('liars-echo'), skill('bootstrap-paradox'), skill('sorites-cascade')],
+    skills: [skill('glimpse'), skill('bootstrap-loop'), skill('festering-argument')],
     finalBlowLines: {
         brutal: 'The mirror takes one last look at itself. The smoke declines to survive the review.',
         quiet:  'The reflection bows first. The god, being thorough, follows it down.',
@@ -1750,7 +1750,7 @@ export const ArchDemon = createEnemy({
         drop('revive-crystal', 20),
     ],
     philosophicalAlignment: { epistemology: 0, outlook: -67, scope: -67 },
-    skills: [skill('mob-appeal'), skill('achilles-gambit'), skill('bootstrap-paradox')],
+    skills: [skill('sweet-poison'), skill('straw-mans-jab'), skill('bootstrap-loop')],
     finalBlowLines: {
         brutal: 'The promotion is rescinded from above, violently, with prejudice.',
         quiet:  'The appetite completes. There was, in the end, exactly one thing it had not eaten.',
@@ -1789,7 +1789,7 @@ export const Beelzebub = createEnemy({
         drop('greater-resonance-crystal', 15),
     ],
     philosophicalAlignment: { epistemology: -67, outlook: -67, scope: 67 },
-    skills: [skill('mob-appeal'), skill('liars-echo'), skill('bootstrap-paradox')],
+    skills: [skill('sweet-poison'), skill('glimpse'), skill('bootstrap-loop')],
     finalBlowLines: {
         brutal: 'The swarm loses quorum. Policy, lacking a body, disbands.',
         quiet:  'One fly leaves, then the rest. Lordship over what swarms was always a tenancy.',
@@ -1828,7 +1828,7 @@ export const Death = createEnemy({
         drop('philosopher-tea', 10),
     ],
     philosophicalAlignment: { epistemology: 0, outlook: 0, scope: 67 },
-    skills: [skill('eternal-regress'), skill('sorites-cascade'), skill('bootstrap-paradox')],
+    skills: [skill('slippery-slope'), skill('festering-argument'), skill('bootstrap-loop')],
     finalBlowLines: {
         brutal: 'The appointment is cancelled with force. The calendar bleeds a little.',
         quiet:  'It checks the ledger, finds an error in your favor, and withdraws without apology.',
@@ -1878,7 +1878,7 @@ export const TheAbortive = createEnemy({
         drop('greater-resonance-crystal', 10),
     ],
     philosophicalAlignment: { epistemology: -67, outlook: -67, scope: 67 },
-    skills: [skill('bootstrap-paradox'), skill('eternal-regress'), skill('liars-echo')],
+    skills: [skill('bootstrap-loop'), skill('slippery-slope'), skill('glimpse')],
     finalBlowLines: {
         brutal: 'The unbegun ends. The two states were closer than theology admits.',
         quiet:  'It curls back into the shape of a thing about to start, and rests there.',
@@ -1939,7 +1939,7 @@ export const TheDoorwarden = createEnemy({
         drop('resonance-crystal', 15),
     ],
     philosophicalAlignment: { epistemology: 67, outlook: 0, scope: -67 },
-    skills: [skill('false-dilemma'), skill('undistributed-middle'), skill('achilles-gambit')],
+    skills: [skill('red-herring'), skill('undistributed-middle'), skill('straw-mans-jab')],
     finalBlowLines: {
         brutal: 'The hinge-priest comes apart at every joint at once. Ten thousand doors, unheld, swing open somewhere.',
         quiet:  'He folds shut along his own seams, the way a door closes on an empty room, and stays closed.',
@@ -1993,7 +1993,7 @@ export const TheIndex = createEnemy({
         drop('revive-crystal', 15),
     ],
     philosophicalAlignment: { epistemology: 67, outlook: -67, scope: 67 },
-    skills: [skill('sorites-cascade'), skill('liars-echo'), skill('false-dilemma')],
+    skills: [skill('festering-argument'), skill('glimpse'), skill('red-herring')],
     finalBlowLines: {
         brutal: 'The drawers burst in order, A through the end of knowing. The misfiled truths get one moment of daylight each.',
         quiet:  'It shelves itself, finally, in the one place it never checked: under its own name.',
@@ -2050,7 +2050,7 @@ export const TheSophist = createEnemy({
         drop('revive-crystal', 20),
     ],
     philosophicalAlignment: { epistemology: 67, outlook: -67, scope: 67 },
-    skills: [skill('bootstrap-paradox'), skill('liars-echo'), skill('false-dilemma')],
+    skills: [skill('bootstrap-loop'), skill('glimpse'), skill('red-herring')],
     befriendabilityConfig: {
         hpGate: { belowPct: 0.25 },
         requiredStances: ['mind'],
@@ -2157,7 +2157,7 @@ export const TheIncompleteness = createEnemy({
     // It drops nothing; the fight is the lesson.
     loot: [none(100)],
     philosophicalAlignment: { epistemology: 67, outlook: 0, scope: 67 },
-    skills: [skill('bootstrap-paradox'), skill('eternal-regress'), skill('liars-echo')],
+    skills: [skill('bootstrap-loop'), skill('slippery-slope'), skill('glimpse')],
     finalBlowLines: {
         brutal: 'You do not finish the proof. You break the page it was written on, and the page stops holding sentences.',
         quiet: 'It remains true. It simply stops insisting, and the wood is quiet where the argument stood.',

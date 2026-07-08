@@ -13,7 +13,968 @@
       },
       "tier": 1,
       "addedIn": "2026-07-08",
-      "tags": ["v3", "bulwark"]
+      "tags": [
+        "v3",
+        "bulwark"
+      ]
+    },
+    {
+      "id": "buff_defend_up",
+      "name": "Hilbert's Shelter",
+      "description": "Your defense is an infinite hotel\u2014no matter how many attacks arrive, there's always room to accommodate them without harm.",
+      "type": "buff",
+      "category": "defense",
+      "duration": 3,
+      "stacking": "none",
+      "resistedBy": "heart",
+      "resistDR": 14,
+      "payload": {
+        "defenseModifier": 4,
+        "statModifiers": [
+          {
+            "stat": "body",
+            "value": 1,
+            "isMultiplier": false
+          },
+          {
+            "stat": "mind",
+            "value": 1,
+            "isMultiplier": false
+          },
+          {
+            "stat": "heart",
+            "value": 1,
+            "isMultiplier": false
+          },
+          {
+            "stat": "physicalDefense",
+            "value": 2,
+            "isMultiplier": false
+          },
+          {
+            "stat": "mentalDefense",
+            "value": 2,
+            "isMultiplier": false
+          },
+          {
+            "stat": "emotionalDefense",
+            "value": 2,
+            "isMultiplier": false
+          }
+        ]
+      },
+      "tier": 2,
+      "tags": [
+        "support",
+        "non-card"
+      ]
+    },
+    {
+      "id": "buff_accuracy_up",
+      "name": "Bertrand's Precision",
+      "description": "In any given moment, you choose the interpretation of 'random' that most benefits your aim. Probability bends to your will.",
+      "type": "buff",
+      "category": "advantage",
+      "duration": 3,
+      "stacking": "intensity",
+      "resistedBy": "heart",
+      "resistDR": 13,
+      "payload": {
+        "rollModifier": 3,
+        "statModifiers": [
+          {
+            "stat": "physicalSkill",
+            "value": 2,
+            "isMultiplier": false
+          },
+          {
+            "stat": "mentalSkill",
+            "value": 2,
+            "isMultiplier": false
+          },
+          {
+            "stat": "emotionalSkill",
+            "value": 2,
+            "isMultiplier": false
+          }
+        ]
+      },
+      "tier": 2,
+      "tags": [
+        "support",
+        "non-card"
+      ]
+    },
+    {
+      "id": "buff_evasion_up",
+      "name": "Arrow's Impossibility",
+      "description": "Like Zeno's arrow frozen in each instant, attacks that should strike you simply... don't. Motion toward harm becomes impossible.",
+      "type": "buff",
+      "category": "defense",
+      "duration": 3,
+      "stacking": "duration",
+      "resistedBy": "mind",
+      "resistDR": 13,
+      "payload": {
+        "defenseModifier": 3,
+        "statModifiers": [
+          {
+            "stat": "physicalDefense",
+            "value": 2,
+            "isMultiplier": false
+          },
+          {
+            "stat": "mentalDefense",
+            "value": 2,
+            "isMultiplier": false
+          },
+          {
+            "stat": "emotionalDefense",
+            "value": 2,
+            "isMultiplier": false
+          }
+        ],
+        "advantageModifier": {
+          "grantDisadvantage": [
+            "body",
+            "mind",
+            "heart"
+          ]
+        }
+      },
+      "tier": 2,
+      "tags": [
+        "support",
+        "non-card"
+      ]
+    },
+    {
+      "id": "buff_critical_rate_up",
+      "name": "Observer's Collapse",
+      "description": "Your attacks exist in superposition until observed by your enemy. When they look, the wavefunction collapses\u2014always into the deadliest outcome.",
+      "type": "buff",
+      "category": "advantage",
+      "duration": 4,
+      "stacking": "intensity",
+      "resistedBy": "heart",
+      "resistDR": 12,
+      "payload": {
+        "rollModifier": 2,
+        "statModifiers": [
+          {
+            "stat": "luck",
+            "value": 2,
+            "isMultiplier": false
+          }
+        ]
+      },
+      "tier": 2,
+      "tags": [
+        "support",
+        "non-card"
+      ]
+    },
+    {
+      "id": "buff_critical_damage_up",
+      "name": "Banach-Tarski Strike",
+      "description": "Your critical hits decompose and reassemble\u2014one devastating blow becomes two, each as powerful as the original. Mathematics defies conservation.",
+      "type": "buff",
+      "category": "damage",
+      "duration": 3,
+      "stacking": "none",
+      "resistedBy": "mind",
+      "resistDR": 14,
+      "payload": {
+        "statModifiers": [
+          {
+            "stat": "body",
+            "value": 1.5,
+            "isMultiplier": true
+          },
+          {
+            "stat": "mind",
+            "value": 1.5,
+            "isMultiplier": true
+          },
+          {
+            "stat": "heart",
+            "value": 1.5,
+            "isMultiplier": true
+          }
+        ]
+      },
+      "tier": 2,
+      "tags": [
+        "support",
+        "non-card"
+      ]
+    },
+    {
+      "id": "buff_haste",
+      "name": "Twin's Dilation",
+      "description": "While you move at relativistic speeds, time slows for your enemies. You act twice in what feels like a single moment.",
+      "type": "buff",
+      "category": "advantage",
+      "duration": 2,
+      "stacking": "none",
+      "resistedBy": "mind",
+      "resistDR": 17,
+      "payload": {
+        "rollModifier": 4,
+        "advantageModifier": {
+          "grantAdvantage": [
+            "body",
+            "mind",
+            "heart"
+          ]
+        }
+      },
+      "tier": 3,
+      "tags": [
+        "support",
+        "non-card"
+      ]
+    },
+    {
+      "id": "buff_regeneration",
+      "name": "Tristram's Recovery",
+      "description": "Like the writer who takes a year to document a day, your healing works faster than wounds accumulate. Eventually, you'll catch up.",
+      "type": "buff",
+      "category": "regeneration",
+      "duration": 6,
+      "stacking": "intensity",
+      "resistedBy": "mind",
+      "resistDR": 12,
+      "payload": {
+        "regeneration": {
+          "healthPerRound": 4
+        }
+      },
+      "tier": 2,
+      "tags": [
+        "support",
+        "non-card"
+      ]
+    },
+    {
+      "id": "buff_max_hp_up",
+      "name": "Galileo's Infinity",
+      "description": "Your vitality is like perfect squares in natural numbers\u2014somehow equal to the whole despite being only a part. Your maximum health expands impossibly.",
+      "type": "buff",
+      "category": "stat",
+      "duration": 5,
+      "stacking": "none",
+      "resistedBy": "mind",
+      "resistDR": 13,
+      "payload": {
+        "statModifiers": [
+          {
+            "stat": "body",
+            "value": 1.25,
+            "isMultiplier": true
+          }
+        ]
+      },
+      "tier": 2,
+      "tags": [
+        "support",
+        "non-card"
+      ]
+    },
+    {
+      "id": "buff_barrier",
+      "name": "Gabriel's Horn",
+      "description": "A shield of infinite surface but finite volume wraps around you\u2014attacks spread across its endless expanse, their force diluted to nothing.",
+      "type": "buff",
+      "category": "defense",
+      "duration": 3,
+      "stacking": "none",
+      "resistedBy": "heart",
+      "resistDR": 13,
+      "payload": {
+        "defenseModifier": 5
+      },
+      "tier": 2,
+      "tags": [
+        "support",
+        "non-card"
+      ]
+    },
+    {
+      "id": "buff_damage_reduction",
+      "name": "Dichotomy Shield",
+      "description": "Every attack must first travel half the distance. Then half again. Then half again. By the time it reaches you, its power approaches zero.",
+      "type": "buff",
+      "category": "defense",
+      "duration": 3,
+      "stacking": "none",
+      "resistedBy": "heart",
+      "resistDR": 13,
+      "payload": {
+        "defenseModifier": 5
+      },
+      "tier": 2,
+      "tags": [
+        "support",
+        "non-card"
+      ]
+    },
+    {
+      "id": "buff_invincibility",
+      "name": "EPR Entanglement",
+      "description": "You become quantum-entangled with a safe version of yourself in another reality. All harm befalls that other you; you remain untouched.",
+      "type": "buff",
+      "category": "defense",
+      "duration": 1,
+      "stacking": "none",
+      "resistedBy": "heart",
+      "resistDR": 18,
+      "payload": {
+        "defenseModifier": 99
+      },
+      "tier": 3,
+      "tags": [
+        "support",
+        "non-card"
+      ]
+    },
+    {
+      "id": "buff_taunt",
+      "name": "Crocodile's Promise",
+      "description": "You present enemies with an impossible choice\u2014attack you or face worse consequences. Like the child-stealing crocodile, your logic traps them.",
+      "type": "buff",
+      "category": "control",
+      "duration": 3,
+      "stacking": "none",
+      "resistedBy": "body",
+      "resistDR": 12,
+      "payload": {
+        "defenseModifier": 2,
+        "statModifiers": [
+          {
+            "stat": "body",
+            "value": 1,
+            "isMultiplier": false
+          }
+        ]
+      },
+      "tier": 2,
+      "tags": [
+        "support",
+        "non-card"
+      ]
+    },
+    {
+      "id": "buff_stealth",
+      "name": "Fermi's Absence",
+      "description": "Where are you? The paradox of your existence\u2014you should be detectable, yet no evidence of you can be found. You are the universe's silent contradiction.",
+      "type": "buff",
+      "category": "advantage",
+      "duration": 2,
+      "stacking": "none",
+      "resistedBy": "mind",
+      "resistDR": 14,
+      "payload": {
+        "defenseModifier": 6,
+        "advantageModifier": {
+          "grantAdvantage": [
+            "body",
+            "mind",
+            "heart"
+          ]
+        }
+      },
+      "tier": 2,
+      "tags": [
+        "support",
+        "non-card"
+      ]
+    },
+    {
+      "id": "buff_all_stats_up",
+      "name": "Sorites Ascension",
+      "description": "One grain of power is nothing. Two grains still nothing. Yet somehow, grain by grain, you've become a heap of overwhelming force.",
+      "type": "buff",
+      "category": "stat",
+      "duration": 3,
+      "stacking": "none",
+      "resistedBy": "heart",
+      "resistDR": 14,
+      "payload": {
+        "statModifiers": [
+          {
+            "stat": "body",
+            "value": 2,
+            "isMultiplier": false
+          },
+          {
+            "stat": "mind",
+            "value": 2,
+            "isMultiplier": false
+          },
+          {
+            "stat": "heart",
+            "value": 2,
+            "isMultiplier": false
+          },
+          {
+            "stat": "physicalSkill",
+            "value": 1,
+            "isMultiplier": false
+          },
+          {
+            "stat": "mentalSkill",
+            "value": 1,
+            "isMultiplier": false
+          },
+          {
+            "stat": "emotionalSkill",
+            "value": 1,
+            "isMultiplier": false
+          },
+          {
+            "stat": "luck",
+            "value": 1,
+            "isMultiplier": false
+          }
+        ],
+        "rollModifier": 1
+      },
+      "tier": 2,
+      "tags": [
+        "support",
+        "non-card"
+      ]
+    },
+    {
+      "id": "buff_reflect",
+      "name": "Russell's Mirror",
+      "description": "You become the set of all things that reflect themselves. Attacks contain themselves, creating an impossible recursion that rebounds to sender.",
+      "type": "buff",
+      "category": "defense",
+      "duration": 2,
+      "stacking": "none",
+      "resistedBy": "heart",
+      "resistDR": 13,
+      "payload": {
+        "defenseModifier": 2
+      },
+      "tier": 2,
+      "tags": [
+        "support",
+        "non-card"
+      ]
+    },
+    {
+      "id": "buff_counter",
+      "name": "Newcomb's Retribution",
+      "description": "Like the perfect predictor, you've already seen their attack coming. Your counterattack was prepared before they even decided to strike.",
+      "type": "buff",
+      "category": "advantage",
+      "duration": 3,
+      "stacking": "none",
+      "resistedBy": "mind",
+      "resistDR": 13,
+      "payload": {
+        "rollModifier": 2,
+        "advantageModifier": {
+          "grantAdvantage": [
+            "body"
+          ]
+        }
+      },
+      "tier": 2,
+      "tags": [
+        "support",
+        "non-card"
+      ]
+    },
+    {
+      "id": "buff_resistance_body",
+      "name": "Pole in Barn",
+      "description": "From your reference frame, physical attacks contract to fit within your defenses. Length becomes relative; harm becomes negotiable.",
+      "type": "buff",
+      "category": "defense",
+      "duration": 4,
+      "stacking": "duration",
+      "resistedBy": "mind",
+      "resistDR": 13,
+      "payload": {
+        "statModifiers": [
+          {
+            "stat": "body",
+            "value": 3,
+            "isMultiplier": false
+          },
+          {
+            "stat": "physicalDefense",
+            "value": 4,
+            "isMultiplier": false
+          },
+          {
+            "stat": "physicalSave",
+            "value": 3,
+            "isMultiplier": false
+          }
+        ]
+      },
+      "tier": 2,
+      "tags": [
+        "support",
+        "non-card"
+      ]
+    },
+    {
+      "id": "buff_resistance_mind",
+      "name": "Liar's Shield",
+      "description": "'This thought will not harm me.' If true, you're protected. If false, the thought didn't harm you. Either way, mental attacks fail.",
+      "type": "buff",
+      "category": "defense",
+      "duration": 4,
+      "stacking": "duration",
+      "resistedBy": "heart",
+      "resistDR": 13,
+      "payload": {
+        "statModifiers": [
+          {
+            "stat": "mind",
+            "value": 3,
+            "isMultiplier": false
+          },
+          {
+            "stat": "mentalDefense",
+            "value": 4,
+            "isMultiplier": false
+          },
+          {
+            "stat": "mentalSave",
+            "value": 3,
+            "isMultiplier": false
+          }
+        ]
+      },
+      "tier": 2,
+      "tags": [
+        "support",
+        "non-card"
+      ]
+    },
+    {
+      "id": "buff_resistance_heart",
+      "name": "Fiction's Wall",
+      "description": "You know emotional attacks aren't real\u2014merely fictions. Yet somehow, knowing this provides genuine protection. The paradox shields you.",
+      "type": "buff",
+      "category": "defense",
+      "duration": 4,
+      "stacking": "duration",
+      "resistedBy": "body",
+      "resistDR": 13,
+      "payload": {
+        "statModifiers": [
+          {
+            "stat": "heart",
+            "value": 3,
+            "isMultiplier": false
+          },
+          {
+            "stat": "emotionalDefense",
+            "value": 4,
+            "isMultiplier": false
+          },
+          {
+            "stat": "emotionalSave",
+            "value": 3,
+            "isMultiplier": false
+          }
+        ]
+      },
+      "tier": 2,
+      "tags": [
+        "support",
+        "non-card"
+      ]
+    },
+    {
+      "id": "buff_cleanse",
+      "name": "Barber's Paradox",
+      "description": "You shave away only those effects that don't remove themselves. The logical impossibility resolves\u2014all negative conditions vanish.",
+      "type": "buff",
+      "category": "stat",
+      "duration": 0,
+      "stacking": "none",
+      "resistedBy": "heart",
+      "resistDR": 12,
+      "payload": {},
+      "tier": 2,
+      "tags": [
+        "support",
+        "non-card"
+      ]
+    },
+    {
+      "id": "buff_buff_duration_up",
+      "name": "Unexpected Extension",
+      "description": "Your buffs will end on a day you don't expect. But by knowing this, you can never truly expect it... so they never end when expected.",
+      "type": "buff",
+      "category": "advantage",
+      "duration": 3,
+      "stacking": "none",
+      "resistedBy": "heart",
+      "resistDR": 12,
+      "payload": {
+        "rollModifier": 1
+      },
+      "tier": 2,
+      "tags": [
+        "support",
+        "non-card"
+      ]
+    },
+    {
+      "id": "buff_status_chance_up",
+      "name": "Monty's Advantage",
+      "description": "Like switching doors, you've learned that counterintuitive choices yield better odds. Your effects land more often than probability suggests.",
+      "type": "buff",
+      "category": "advantage",
+      "duration": 4,
+      "stacking": "none",
+      "resistedBy": "heart",
+      "resistDR": 13,
+      "payload": {
+        "rollModifier": 3
+      },
+      "tier": 2,
+      "tags": [
+        "support",
+        "non-card"
+      ]
+    },
+    {
+      "id": "buff_life_steal",
+      "name": "Maxwell's Siphon",
+      "description": "Like the demon sorting molecules, you separate your enemy's vitality from their form\u2014fast energy to you, slow energy left behind.",
+      "type": "buff",
+      "category": "regeneration",
+      "duration": 4,
+      "stacking": "intensity",
+      "resistedBy": "mind",
+      "resistDR": 12,
+      "payload": {
+        "regeneration": {
+          "healthPerRound": 2
+        },
+        "rollModifier": 1
+      },
+      "tier": 2,
+      "tags": [
+        "support",
+        "non-card"
+      ]
+    },
+    {
+      "id": "buff_advantage_mind",
+      "name": "Knowability Insight",
+      "description": "If a truth is knowable, it must already be known. You know this truth: your Mind attacks will succeed. Therefore, they must.",
+      "type": "buff",
+      "category": "advantage",
+      "duration": 3,
+      "stacking": "none",
+      "resistedBy": "heart",
+      "resistDR": 13,
+      "payload": {
+        "advantageModifier": {
+          "grantAdvantage": [
+            "mind"
+          ]
+        },
+        "statModifiers": [
+          {
+            "stat": "mind",
+            "value": 1,
+            "isMultiplier": false
+          },
+          {
+            "stat": "mentalSkill",
+            "value": 2,
+            "isMultiplier": false
+          }
+        ]
+      },
+      "tier": 2,
+      "tags": [
+        "support",
+        "non-card"
+      ]
+    },
+    {
+      "id": "buff_petitio_pulse",
+      "name": "Petitio Principii Pulse",
+      "description": "Your courage assumes itself justified. The argument is circular, the logic bankrupt\u2014yet somehow the conviction holds just long enough to matter.",
+      "type": "buff",
+      "category": "stat",
+      "duration": 2,
+      "stacking": "none",
+      "resistedBy": "body",
+      "resistDR": 10,
+      "payload": {
+        "statModifiers": [
+          {
+            "stat": "heart",
+            "value": 1,
+            "isMultiplier": false
+          }
+        ]
+      },
+      "tier": 1,
+      "tags": [
+        "support",
+        "non-card"
+      ]
+    },
+    {
+      "id": "buff_gettiters_flicker",
+      "name": "Gettier's Flicker",
+      "description": "You don't truly know where to strike\u2014your belief is justified and true, but only by coincidence. The attack lands anyway. Epistemology shrugs.",
+      "type": "buff",
+      "category": "advantage",
+      "duration": 2,
+      "stacking": "none",
+      "resistedBy": "heart",
+      "resistDR": 10,
+      "payload": {
+        "statModifiers": [
+          {
+            "stat": "luck",
+            "value": 1,
+            "isMultiplier": false
+          }
+        ]
+      },
+      "tier": 1,
+      "tags": [
+        "support",
+        "non-card"
+      ]
+    },
+    {
+      "id": "buff_ad_hoc_patch",
+      "name": "Ad Hoc Patch",
+      "description": "A tiny gap in your technique is hastily filled with an explanation invented after the fact. It shouldn't work. It barely does.",
+      "type": "buff",
+      "category": "stat",
+      "duration": 2,
+      "stacking": "none",
+      "resistedBy": "mind",
+      "resistDR": 10,
+      "payload": {
+        "statModifiers": [
+          {
+            "stat": "physicalSkill",
+            "value": 1,
+            "isMultiplier": false
+          }
+        ]
+      },
+      "tier": 1,
+      "tags": [
+        "support",
+        "non-card"
+      ]
+    },
+    {
+      "id": "buff_open_minded",
+      "name": "Open-Minded",
+      "description": "A mind prepared to consider mercy, softened by witnessing compassion to lesser foes. This status has no mechanical effect beyond qualifying the bearer for befriend paths.",
+      "type": "buff",
+      "category": "special",
+      "duration": -1,
+      "stacking": "none",
+      "payload": {},
+      "tier": 0,
+      "tags": [
+        "support",
+        "non-card"
+      ]
+    },
+    {
+      "id": "buff_promethean_ember",
+      "name": "Promethean Ember",
+      "description": "Stolen fire kept burning under the ribs. It mends what the fight tears open, knitting flesh faster than the wound can widen \u2014 a gift that keeps costing the giver.",
+      "type": "buff",
+      "category": "regeneration",
+      "duration": 4,
+      "stacking": "intensity",
+      "resistedBy": "mind",
+      "resistDR": 12,
+      "payload": {
+        "regeneration": {
+          "healthPerRound": 3
+        },
+        "statModifiers": [
+          {
+            "stat": "heart",
+            "value": 1,
+            "isMultiplier": false
+          }
+        ]
+      },
+      "tier": 2,
+      "addedIn": "2026-04-15",
+      "tags": [
+        "support",
+        "non-card"
+      ]
+    },
+    {
+      "id": "buff_brazen_thorns",
+      "name": "Brazen Thorns",
+      "description": "Your skin answers in kind. To press an argument against you is to be cut by it \u2014 the harder the push, the deeper the rebuttal bites back.",
+      "type": "buff",
+      "category": "defense",
+      "duration": 3,
+      "stacking": "intensity",
+      "resistedBy": "mind",
+      "resistDR": 12,
+      "payload": {
+        "reflectDamage": 2,
+        "defenseModifier": 1
+      },
+      "tier": 2,
+      "addedIn": "2026-05-20",
+      "tags": [
+        "support",
+        "non-card"
+      ]
+    },
+    {
+      "id": "buff_oracle_foresight",
+      "name": "Oracle's Foresight",
+      "description": "The vapors rise and the next moment unspools before it arrives. You do not react \u2014 you arrive early. Every line of approach is already known to you.",
+      "type": "buff",
+      "category": "advantage",
+      "duration": 3,
+      "stacking": "none",
+      "resistedBy": "heart",
+      "resistDR": 13,
+      "payload": {
+        "rollModifier": 2,
+        "advantageModifier": {
+          "grantAdvantage": [
+            "mind",
+            "heart",
+            "body"
+          ]
+        },
+        "statModifiers": [
+          {
+            "stat": "luck",
+            "value": 2,
+            "isMultiplier": false
+          }
+        ]
+      },
+      "tier": 2,
+      "addedIn": "2026-05-20",
+      "tags": [
+        "support",
+        "non-card"
+      ]
+    },
+    {
+      "id": "buff_stoic_bulwark",
+      "name": "Stoic Bulwark",
+      "description": "What is not in your control cannot wound what matters. You set the citadel of the mind against the siege, and the assault finds nothing to grip.",
+      "type": "buff",
+      "category": "defense",
+      "duration": 4,
+      "stacking": "duration",
+      "resistedBy": "body",
+      "resistDR": 13,
+      "payload": {
+        "statModifiers": [
+          {
+            "stat": "mind",
+            "value": 2,
+            "isMultiplier": false
+          },
+          {
+            "stat": "mentalDefense",
+            "value": 4,
+            "isMultiplier": false
+          },
+          {
+            "stat": "mentalSave",
+            "value": 3,
+            "isMultiplier": false
+          }
+        ],
+        "defenseModifier": 2
+      },
+      "tier": 2,
+      "addedIn": "2026-05-20",
+      "tags": [
+        "support",
+        "non-card"
+      ]
+    },
+    {
+      "id": "buff_minor_fortitude",
+      "name": "Minor Fortitude",
+      "description": "A small, stubborn steadiness. Not glory, just the refusal to fold first. It is enough, today, to keep your feet under you.",
+      "type": "buff",
+      "category": "stat",
+      "duration": 2,
+      "stacking": "intensity",
+      "payload": {
+        "statModifiers": [
+          {
+            "stat": "body",
+            "value": 1,
+            "isMultiplier": false
+          },
+          {
+            "stat": "physicalDefense",
+            "value": 1,
+            "isMultiplier": false
+          }
+        ]
+      },
+      "tier": 1,
+      "addedIn": "2026-06-07",
+      "tags": [
+        "support",
+        "non-card"
+      ]
+    },
+    {
+      "id": "buff_phoenix_vigor",
+      "name": "Phoenix Vigor",
+      "description": "Ash remembers the bird. The closer you come to ending, the more fiercely you mend \u2014 vitality returning in waves, defenses tightening as the pyre cools.",
+      "type": "buff",
+      "category": "regeneration",
+      "duration": 5,
+      "stacking": "intensity",
+      "resistedBy": "mind",
+      "resistDR": 13,
+      "payload": {
+        "regeneration": {
+          "healthPerRound": 4
+        },
+        "defenseModifier": 1,
+        "statModifiers": [
+          {
+            "stat": "heart",
+            "value": 1,
+            "isMultiplier": false
+          }
+        ]
+      },
+      "tier": 2,
+      "addedIn": "2026-06-07",
+      "tags": [
+        "support",
+        "non-card"
+      ]
     }
   ]
 }
