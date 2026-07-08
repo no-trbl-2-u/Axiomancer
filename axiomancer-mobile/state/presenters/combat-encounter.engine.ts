@@ -40,14 +40,30 @@ export const STANCE_COLORS: Record<string, string> = {
 const DIE_GLYPHS: Record<string, string> = { heart: '♥', body: '⚡', mind: '★', wild: '✦', x: '✕' };
 const STANCE_LABELS: Record<string, string> = { heart: 'HEART', body: 'BODY', mind: 'MIND', wild: 'WILD', x: 'X' };
 
-// Mirror of the engine's TOP_ACTION_CHIP — the HP a FREE (no-die) action chips.
-// Not on the public barrel, so duplicated here (kept in sync by hand).
-const FREE_CHIP_HP = 2;
+// Spec 32 v3 — THE STRIKE IS DEAD: a FREE (no-die) play executes the card's
+// AUTHORED free rider (no flat chip exists). The free text below always comes
+// from the engine's riderText so printed == applied (P0-truth).
+//
+// Rank ladder display names (spec 32 v3 §4). CARD_RANK_NAMES lives in
+// mechanics src/Cards/types.ts but is NOT re-exported through the barrel,
+// so mirrored here (kept in sync by hand).
+const RANK_NAMES: Record<number, string> = Object.freeze({
+    1: 'Doxa', 2: 'Lemma', 3: 'Thesis', 4: 'Theorem', 5: 'Axiom', 6: 'Aporia',
+});
 // Verb-class card colours (these map to verbs, not Effects, so they aren't in GLYPH_COLORS).
 const GUARD_COLOR = '#9aa0a6';
-const STRIKE_COLOR = '#c2a14e';
+const PAYOFF_COLOR = '#c2a14e';
 const BEFRIEND_COLOR = '#5bbf6a';
 const INERT_COLOR = '#6b6257';
+const ENCHANT_COLOR = '#7fb3a6';
+
+/** The authored FREE (no-die) line in real engine units — riderText over the
+ *  skill's `free` rider; persistent (enchant/disenchant) cards are PAID-only.
+ *  Never a fabricated number. */
+function freeLineText(card: CombatCard, skill?: Skill): string {
+    if (card.cardType === 'enchantment' || card.cardType === 'disenchant') return 'PAID only';
+    return skill?.free ? riderText(skill.free) : 'no effect';
+}
 
 // ── Intent vocabulary (Spec 26 §2.4) ─────────────────────────────────────────
 
@@ -106,16 +122,17 @@ export interface CombatDieVM {
     fateTappable?: boolean;
 }
 export type CombatCardKind =
-    | 'dot' | 'stun' | 'regen' | 'guard' | 'strike' | 'weaken' | 'inert' | 'befriend'
+    | 'dot' | 'stun' | 'regen' | 'guard' | 'weaken' | 'inert' | 'befriend'
     // ── mechanics 0.34.0 — newly REAL in the HP engine ──
     | 'vulnerable'   // debuff_vulnerable / debuff_vulnerability_* — foe takes +N% damage
-    | 'rupture'      // detonate stored DoT (live total → a word, no fabricated number)
-    | 'compound'     // bonus damage per distinct debuff on the foe
+    | 'rupture'      // detonate stored afflictions (live total → a word, no fabricated number)
+    | 'reap'         // spec 32 v3 — spend Souls for a burst (live total → a word)
+    | 'enchant'      // spec 32 v3 — persistent player-side passive (rest of combat)
+    | 'disenchant'   // spec 32 v3 — standing curse attached to the enemy
     | 'barrier'      // stacking soak shield on YOU
     | 'thorns'       // reflect attacker damage back
     | 'siphon'       // heal for a % of the damage dealt
     | 'riposte'      // counter the next hit + reduce it
-    | 'execute'      // finisher when the foe is low / heavily stacked
     // ── card-overhaul (2026-07-03) — 6 new status effects the honesty gate missed ──
     | 'exposure'      // debuff_exposure → real -N DEF number
     | 'doubt'         // debuff_doubt → forces the foe's next play to weak-tier (qualitative)
