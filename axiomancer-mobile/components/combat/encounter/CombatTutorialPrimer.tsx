@@ -37,9 +37,9 @@ const PANELS: PrimerPanel[] = [
         eyebrow: 'BLEED & BIND',
         title: 'POISON, THEN STEAL THEIR TURN',
         body:
-            'A DoT (poison, bleed) drains their VITAE every turn — your main damage. ' +
-            'Control (stun, fear) STEALS their attack: a hindered enemy skips its telegraphed ' +
-            'turn. Lead with status; strikes alone won’t close it. Befriend a low-VITAE foe to spare it.',
+            'A DoT (POISON, BLEED) drains their VITAE every turn — your damage. ' +
+            'STAGGER strips rungs from their telegraphed action: at zero it is denied outright. ' +
+            'There is no strike — status is the only blade. Befriend a low-VITAE foe to spare it.',
     },
     {
         eyebrow: 'DICE & CARDS',
