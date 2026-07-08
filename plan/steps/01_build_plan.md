@@ -90,10 +90,10 @@ Tick in this file in the same commit that ships the phase.
       `plan: phase 9 shipped — character/story/world specs already authored`
 
 **Cross-cutting / debt:**
-- [ ] Phase 10 — Multi-screen integration test harness (Jest
+- [x] Phase 10 — Multi-screen integration test harness (Jest
       full-provider mounts + Playwright web flows) to close the
       cross-screen regression blind spot (mobile; see AUDIT
-      gotcha)
+      gotcha) — `test(mobile): cross-screen integration harness — phase 10` (7692758e)
 - [ ] Phase 11 — Tutorial / onboarding flow (GAMEPLAY_GAPS
       GAP-001: no guided intro) (mobile)
 - [ ] Phase 12 — Doc-sync pass: reconcile `spec.md` / `docs/combat.md`
