@@ -15,9 +15,9 @@
  * Enchant/disenchant cards are PAID-only but unique-in-play — three copies
  * still register the first play, and the later copies drain as fizzles.
  *
- * The synthetic 'card-retreat' is policy-invisible (every policy filters the
- * retreat verb), so it is covered by a direct engine assertion instead: its
- * bottom action must end the encounter with outcome 'retreat'.
+ * There is no synthetic retreat card any more (no in-combat retreat exists —
+ * `SYNTHETIC_CARD_IDS` is now empty), so the coverage universe is exactly the
+ * 70-card library with no separate synthetic-card assertion.
  */
 
 import { describe, it, expect, afterEach, vi } from 'vitest';
@@ -29,9 +29,6 @@ import type { Character } from '../../Character/types';
 import { deepClone } from '../../Utils';
 import { COMBAT_STAGE_PROFILES, buildStagePlayer } from '../combat.stage-profiles';
 import { runOneEncounter } from '../combat.encounter.sim';
-import {
-    initializeCombatEncounter, rollEncounterDice, playCombatCard, handCards,
-} from '../combat.engine';
 
 afterEach(() => vi.restoreAllMocks());
 
@@ -97,23 +94,4 @@ describe('card coverage — every library card is exercisable', () => {
         },
         30_000,
     );
-});
-
-describe('card coverage — synthetic retreat card (direct engine assertion)', () => {
-    it("the retreat bottom action ends the encounter with outcome 'retreat'", () => {
-        // A 5-card deck is drawn whole into the opening hand, so the retreat
-        // card is guaranteed to be present without any draw luck.
-        const deck = ['card-retreat', ...SUPPORT_KIT, 'red-herring'];
-        let state = initializeCombatEncounter(PLAYER, WEAK_ENEMY, deck, BASE_SEED);
-        state = rollEncounterDice(state).state;
-        expect(state.phase).toBe('phase-play');
-
-        const retreat = handCards(state).find(c => c.card.verbClass === 'retreat');
-        expect(retreat, 'card-retreat missing from the opening hand').toBeDefined();
-
-        const res = playCombatCard(state, { uid: retreat!.uid }, true);
-        expect(res.state.finalOutcome).toBe('retreat');
-        expect(res.state.phase).toBe('complete');
-        expect(res.events.some(e => e.kind === 'combat-ended' && e.outcome === 'retreat')).toBe(true);
-    }, 30_000);
 });

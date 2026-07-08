@@ -4,8 +4,9 @@
  * Every preset follows the owner's recipe exactly: 4 copies × 2 unique
  * commons, 2 copies × 2 unique uncommons, 1 copy × 3 unique rares (the rare
  * spell finisher + the theme's enchantment + its disenchant) = 15 cards, all
- * in-theme. Themes are strictly self-contained — zero card overlap; only the
- * synthetic Retreat is shared (appended by `buildPresetDeck`).
+ * in-theme. Themes are strictly self-contained — zero card overlap, and no
+ * in-combat escape card is appended to any of them (no retreat exists once
+ * combat is joined).
  *
  * Each deck plays fundamentally differently (the deck-distinctness law):
  * Erosion ramps DoTs and detonates; Oratory builds Premises toward a declared
@@ -22,7 +23,6 @@
  */
 
 import { getCardById } from '../Cards/cards.library';
-import { SYNTHETIC_CARD_IDS } from './combat.cards';
 
 /**
  * The design lever a preset leans on. Kept coarse for the draft/sim-policy
@@ -211,16 +211,12 @@ function isValidPresetCard(id: string): boolean {
 
 /**
  * Builds a ready-to-play deck from a preset: the curated cards (invalid ids
- * dropped) PLUS the synthetic baseline (Retreat) so a player can always leave a
- * fight — exactly the contract `buildCombatDeck` guarantees. Returns an empty
- * array for an unknown preset id (callers can fall back to `buildCombatDeck`).
+ * dropped). There is no escape-hatch card appended — once combat is joined it
+ * resolves only by winning or losing (no in-combat retreat exists). Returns an
+ * empty array for an unknown preset id (callers can fall back to `buildCombatDeck`).
  */
 export function buildPresetDeck(presetId: string): string[] {
     const preset = getDeckPreset(presetId);
     if (!preset) return [];
-    const deck = preset.cardIds.filter(isValidPresetCard);
-    for (const id of SYNTHETIC_CARD_IDS) {
-        if (!deck.includes(id)) deck.push(id);
-    }
-    return deck;
+    return preset.cardIds.filter(isValidPresetCard);
 }

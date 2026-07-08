@@ -134,7 +134,7 @@ export {
     // depth epic — the read bites status in REAL units (P0-truth) + the escalation clock
     READ_ADVANTAGE_INTENSITY_BONUS, READ_DISADVANTAGE_DURATION_PENALTY,
     THREAT_ESCALATION_PER_ROUND, THREAT_ESCALATION_GRACE, THREAT_ESCALATION_MAX,
-    THREAT_ESCALATION_BOSS_MULT,
+    THREAT_ESCALATION_BOSS_MULT, THREAT_EFFECT_ESCALATION_STEP, THREAT_ENCHANT_CURSE_EVERY_ROUNDS,
     // Phase 169 — curated combat loadout codec + synergy live-check
     COMBAT_LOADOUT_FLAG_PREFIX, COMBAT_LOADOUT_MAX,
     decodeCombatLoadout, getCombatLoadout, addToLoadout, removeFromLoadout,

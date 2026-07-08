@@ -22,7 +22,7 @@ import { getCardById, cardLibrary } from '../Cards/cards.library';
 import { lookupEffect } from '../Effects';
 import { getRng } from '../Utils/rng';
 import type { CombatVerbClass } from './combat.encounter.types';
-import { toCombatCard, isSyntheticCard, SYNTHETIC_CARD_IDS } from './combat.cards';
+import { toCombatCard, isSyntheticCard } from './combat.cards';
 import type { CombatDeckFocus } from './combat.deck-presets';
 import { buildPresetDeck } from './combat.deck-presets';
 import type { CombatStageProfile } from './combat.stage-profiles';
@@ -100,7 +100,7 @@ function buildCandidates(options: DeckDraftOptions): DraftCandidate[] {
 
     const candidates: DraftCandidate[] = [];
     for (const id of poolIds) {
-        if (isSyntheticCard(id)) continue; // Retreat is appended, never drafted.
+        if (isSyntheticCard(id)) continue; // synthetic cards (if any) are never drafted.
         const card = toCombatCard(id, lookupSkill, lookupEffect);
         if (!card) continue;
         candidates.push({
@@ -130,8 +130,9 @@ function weightedPick(candidates: DraftCandidate[], rng: () => number): DraftCan
  * Drafts a focused combat deck: a weighted seeded sample of the eligible pool
  * (focus-fitting verb classes at 4x weight), capped at `maxCopies` per card,
  * guaranteed to contain at least one defend and one status-applying card when
- * the pool allows, with 'card-retreat' appended. Deterministic for a given rng
- * state. Pass the result straight into `initializeCombatEncounter`.
+ * the pool allows. No escape card is appended — no in-combat retreat exists.
+ * Deterministic for a given rng state. Pass the result straight into
+ * `initializeCombatEncounter`.
  */
 export function draftCombatDeck(options: DeckDraftOptions): string[] {
     const rng = options.rng ?? ((): number => getRng().random());
@@ -150,11 +151,7 @@ export function draftCombatDeck(options: DeckDraftOptions): string[] {
     ensureClassPresent(deck, candidates, rng, c => c.verbClass === 'defend');
     ensureClassPresent(deck, candidates, rng, c => STATUS_VERB_CLASSES.includes(c.verbClass));
 
-    const ids = deck.map(c => c.id);
-    for (const syntheticId of SYNTHETIC_CARD_IDS) {
-        if (!ids.includes(syntheticId)) ids.push(syntheticId);
-    }
-    return ids;
+    return deck.map(c => c.id);
 }
 
 /**
@@ -198,7 +195,7 @@ export type CombatDeckSelection =
  * - 'draft'  → `draftCombatDeck` with the selection's focus/size, scoped to
  *   `stage` when given.
  * - 'cards'  → the trusted list with invalid ids dropped (exactly like
- *   `buildPresetDeck` does) and Retreat appended if absent.
+ *   `buildPresetDeck` does). No escape card is appended.
  * - 'policy-pick' → THROWS at this layer. A policy-picked deck is resolved by
  *   the playtest harness, which drafts with the policy's `preferredFocus`
  *   before ever reaching this function.
@@ -213,14 +210,8 @@ export function resolveDeckSelection(
             return buildPresetDeck(selection.presetId);
         case 'draft':
             return draftCombatDeck({ focus: selection.focus, size: selection.size, stage, rng });
-        case 'cards': {
-            const deck = selection.cardIds.filter(id => isSyntheticCard(id) || !!getCardById(id));
-            const resolved = [...deck];
-            for (const syntheticId of SYNTHETIC_CARD_IDS) {
-                if (!resolved.includes(syntheticId)) resolved.push(syntheticId);
-            }
-            return resolved;
-        }
+        case 'cards':
+            return selection.cardIds.filter(id => isSyntheticCard(id) || !!getCardById(id));
         case 'policy-pick':
             throw new Error(
                 'resolveDeckSelection: \'policy-pick\' must be resolved by the playtest '

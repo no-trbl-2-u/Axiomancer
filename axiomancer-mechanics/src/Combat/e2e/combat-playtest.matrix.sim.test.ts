@@ -79,7 +79,7 @@ describe('playtest matrix — cell invariants', () => {
         const report = smallReport();
         for (const cell of report.cells) {
             expect(cell.deckCardIds.length).toBeGreaterThan(0);
-            expect(cell.deckCardIds).toContain('card-retreat');
+            expect(cell.deckCardIds).not.toContain('card-retreat'); // no in-combat retreat exists
             const allowed = new Set(cell.deckCardIds);
             for (const key of Object.keys(cell.cardUsage)) {
                 expect(allowed.has(key), `cell played '${key}' outside its deck`).toBe(true);

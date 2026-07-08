@@ -65,7 +65,10 @@ When `state.phase === 'complete'`, `state.outcome` is one of:
 | `victory` | Enemy HP reached 0 (DoT erosion + strikes) |
 | `mercy` | Spared a low-HP foe via Befriend + `spare` (the friendship path) |
 | `defeat` | Player HP reached 0 |
-| `retreat` | Player used the synthetic Retreat card |
+
+There is no in-combat retreat — once a fight is joined it resolves only by
+winning or losing (`retreat` still exists as a dead `CombatOutcome` union
+member for now; no code path can ever produce it).
 
 ```typescript
 import { buildCombatSummary } from 'axiomancer-mechanics';

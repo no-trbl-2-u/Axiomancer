@@ -84,7 +84,13 @@ export type CombatVerbClass =
     | 'defend'            // Guard/defense card → shields against the enemy's next threat
     | 'enchant'           // spec 32 v3 — persistent player-side passive
     | 'disenchant'        // spec 32 v3 — persistent curse attached to the enemy
-    | 'retreat';          // Retreat card → leaves combat (§3, §12 Q2)
+    | 'retreat';          // dead — no card ever produces this verb class any more.
+                           // No in-combat retreat exists; combat resolves only
+                           // by winning or losing. Kept in the union rather than
+                           // deleted so every exhaustive Record/switch keyed on
+                           // CombatVerbClass elsewhere doesn't need a blind,
+                           // unverified edit (this repo has no local TS
+                           // toolchain to confirm a full deletion is safe).
 
 /** The effect-kind a card's bottom action applies. `none` = utility / damage only. */
 export type CardEffectKind = 'dot' | 'control' | 'none';
@@ -316,7 +322,9 @@ export type CombatOutcome =
     | 'capitulate' // spec 32 v3 §9 — SWAY ≥ enemy HP: the enemy yields (merciful)
     | 'concede'    // spec 32 v3 §9 — an 8-Premise Peroration wins the argument
     | 'defeat'     // player HP → 0
-    | 'retreat';   // player used the Retreat card
+    | 'retreat';   // dead — no in-combat retreat exists; combat resolves only
+                   // by winning or losing. Kept in the union (see
+                   // CombatVerbClass's matching note) rather than deleted.
 
 export type CombatEncounterPhase =
     | 'reveal'         // enemy + opening hand visible before dice are rolled
@@ -416,6 +424,10 @@ export type CombatEvent =
     | { kind: 'skill-triggered'; skillId: string; name: string; cost: Partial<CombatResources>;
         landed: boolean; message: string }
     | { kind: 'skill-fizzled'; skillId: string; message: string }
+    // THE CLOCK, discrete tier (combat-depth-epic): every
+    // THREAT_ENCHANT_CURSE_EVERY_ROUNDS the enemy grows a new passive
+    // strength or lays a fresh curse on the player.
+    | { kind: 'threat-clock-enchant'; target: 'enemy' | 'player'; effectId: string; round: number }
     | { kind: 'combat-ended'; outcome: CombatOutcome };
 
 // ---------------------------------------------------------------------------

@@ -131,8 +131,8 @@ describe('projectCombatOutcome — the consolidated status kill-path readout', (
 
     it('a hand with no finisher-mechanic cards reports no finishers', () => {
         const enemy = makeEnemy(300, [ae('debuff_bleed', 1, 2)]);
-        const deck = ['card-retreat'];
-        const state = initializeCombatEncounter(makePlayer([]), enemy, deck, 7);
+        const deck = ['brace-for-impact']; // a real, playable, non-finisher card
+        const state = initializeCombatEncounter(makePlayer(['brace-for-impact']), enemy, deck, 7);
         const projection = projectCombatOutcome(state);
         expect(projection.finishers).toEqual([]);
     });

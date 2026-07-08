@@ -113,8 +113,6 @@ const CARD_ART_BY_ID: Record<string, number> = {
     'ouroboros': blueLight,
     'resonant-chamber': spark,
     'stuck-in-their-head': willOWisp,
-    // ── Synthetic ──
-    'card-retreat': willOWisp,
 };
 
 export function getCardArt(cardId: string): number {

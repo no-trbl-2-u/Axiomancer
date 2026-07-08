@@ -4,8 +4,9 @@
  * Verifies drafting is deterministic for a given rng state, respects size /
  * maxCopies / stage maturity gates, weights the requested focus (a dot draft
  * carries strictly more DoT cards than a damage draft — status play stays the
- * headline), guarantees the defend + status floor, appends Retreat exactly
- * once, and that `resolveDeckSelection` handles all four selection kinds.
+ * headline), guarantees the defend + status floor, appends no escape card (no
+ * in-combat retreat exists), and that `resolveDeckSelection` handles all four
+ * selection kinds.
  */
 
 import { describe, it, expect, afterEach, vi } from 'vitest';
@@ -67,13 +68,12 @@ describe('draftCombatDeck determinism', () => {
 });
 
 describe('draftCombatDeck size / copies / retreat', () => {
-    it('drafts exactly `size` cards (default 10) plus one Retreat, max 2 copies each', () => {
+    it('drafts exactly `size` cards (default 10), no escape card, max 2 copies each', () => {
         for (const seed of [1, 7, 13]) {
             const deck = draftCombatDeck({ focus: 'balanced', rng: lcg(seed) });
             const cards = withoutRetreat(deck);
             expect(cards.length).toBe(10);
-            expect(deck.filter(id => id === 'card-retreat').length).toBe(1);
-            expect(deck[deck.length - 1]).toBe('card-retreat');
+            expect(deck).not.toContain('card-retreat');
             const counts = new Map<string, number>();
             for (const id of cards) counts.set(id, (counts.get(id) ?? 0) + 1);
             for (const [id, n] of counts) expect(n, `${id} over maxCopies`).toBeLessThanOrEqual(2);
@@ -185,15 +185,16 @@ describe('resolveDeckSelection', () => {
         for (const id of withoutRetreat(a)) expect(getCardById(id)!.tier).toBe(1);
     });
 
-    it("kind 'cards' drops invalid ids and appends Retreat exactly once", () => {
+    it("kind 'cards' drops invalid ids, with no escape card appended", () => {
         const deck = resolveDeckSelection(
             { kind: 'cards', cardIds: ['slippery-slope', 'not-a-card', 'brace-for-impact'] },
             undefined);
-        expect(deck).toEqual(['slippery-slope', 'brace-for-impact', 'card-retreat']);
+        expect(deck).toEqual(['slippery-slope', 'brace-for-impact']);
 
-        const withRetreat = resolveDeckSelection(
+        // The removed Retreat id is now just another invalid id — dropped like any other.
+        const trusted = resolveDeckSelection(
             { kind: 'cards', cardIds: ['card-retreat', 'befriend'] }, undefined);
-        expect(withRetreat.filter(id => id === 'card-retreat').length).toBe(1);
+        expect(trusted).toEqual(['befriend']);
     });
 
     it("kind 'policy-pick' throws at this layer (the harness resolves it)", () => {

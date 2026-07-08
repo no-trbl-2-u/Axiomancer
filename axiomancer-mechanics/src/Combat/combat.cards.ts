@@ -22,25 +22,17 @@ import { getCardById } from '../Cards/cards.library';
 export type EffectLookup = (effectId: string) => Effect | undefined;
 export type CardLookup = (skillId: string) => Card | undefined;
 
-/** Synthetic (non-skill) card ids always present in a combat deck. */
-export const SYNTHETIC_CARD_IDS: readonly string[] = Object.freeze(['card-retreat']);
+/**
+ * Synthetic (non-skill) card ids always present in a combat deck. Empty by
+ * design: no in-combat retreat exists — once a fight is joined it resolves
+ * only by winning or losing. Kept as a (now-empty) registry rather than
+ * deleted outright so `isSyntheticCard` / `toCombatCard`'s synthetic-card
+ * branch, and every deck-builder that iterates `SYNTHETIC_CARD_IDS`, stay
+ * valid no-ops if a different synthetic card is ever introduced.
+ */
+export const SYNTHETIC_CARD_IDS: readonly string[] = Object.freeze([]);
 
-const SYNTHETIC_CARDS: Record<string, CombatCard> = {
-    'card-retreat': {
-        id: 'card-retreat',
-        skillId: null,
-        name: 'Retreat',
-        stance: 'wild',
-        verbClass: 'retreat',
-        effectKind: 'none',
-        tier: 1,
-        category: null,
-        topActionText: 'Brace — refresh 1 spent die.',
-        bottomActionText: 'Flee combat. Costs all remaining available dice (§12 Q2).',
-        bottomDamagePreview: 0,
-        primaryEffectId: null,
-    },
-};
+const SYNTHETIC_CARDS: Record<string, CombatCard> = {};
 
 /** True when the id names a synthetic (non-skill) card. */
 export function isSyntheticCard(cardId: string): boolean {

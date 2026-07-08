@@ -163,11 +163,11 @@ describe('Spec 25 §4.7 — refreshOneDie (status-loop reclaim)', () => {
 // ── Deck building (§4.3) ─────────────────────────────────────────────────────
 
 describe('Spec 25 §4.3 — buildCombatDeck', () => {
-    it('builds the deck from known skills + the synthetic Retreat baseline', () => {
+    it('builds the deck from known skills, with no escape card appended', () => {
         const deck = buildCombatDeck(makePlayer([DOT_BODY, CONTROL_HEART]));
         expect(deck).toContain(DOT_BODY);
         expect(deck).toContain(CONTROL_HEART);
-        expect(deck).toContain('card-retreat'); // always-present escape baseline
+        expect(deck).not.toContain('card-retreat'); // no in-combat retreat exists
     });
 
     it('de-dups known skills and preserves learn order', () => {
@@ -176,8 +176,8 @@ describe('Spec 25 §4.3 — buildCombatDeck', () => {
         expect(deck.indexOf(DOT_BODY)).toBeLessThan(deck.indexOf(CONTROL_HEART));
     });
 
-    it('still yields a playable deck (Retreat) for a player with no skills', () => {
-        expect(buildCombatDeck(makePlayer([]))).toEqual(['card-retreat']);
+    it('yields an empty deck for a player with no skills (unreachable via any real preset)', () => {
+        expect(buildCombatDeck(makePlayer([]))).toEqual([]);
     });
 });
 
@@ -202,10 +202,8 @@ describe('Spec 25 §6 — card adapters', () => {
         expect(track).toBe('none');
     });
 
-    it('toCombatCard projects a synthetic Retreat card without a skill lookup', () => {
-        const card = toCombatCard('card-retreat', getCardById, lookupEffect);
-        expect(card).not.toBeNull();
-        expect(card!.id).toBe('card-retreat');
+    it('toCombatCard returns null for the removed Retreat id (no in-combat retreat exists)', () => {
+        expect(toCombatCard('card-retreat', getCardById, lookupEffect)).toBeNull();
     });
 
     it('toCombatCard returns null for an unknown card id', () => {
@@ -246,7 +244,7 @@ describe('Spec 25 §7 — presenter previews', () => {
     it('cardDieCostPreview matches resolveCardDieCost against the current phase stance', () => {
         let state = initializeCombatEncounter(makePlayer([DOT_BODY]), makeEnemy(80, 'body'), undefined, SEED);
         state = rollEncounterDice(state).state;
-        const cardId = state.hand[0]?.cardId ?? 'card-retreat';
+        const cardId = state.hand[0]?.cardId ?? DOT_BODY;
         const card = getCard(cardId)!;
         const phaseStance = state.threatPhases[state.currentPhaseIndex].enemyStance;
         expect(cardDieCostPreview(state, card)).toEqual(resolveCardDieCost(card.stance, phaseStance));

@@ -8,14 +8,17 @@
  * dice, deck, and skill procs share one reproducible stream (hermetic via
  * `mockFixedRng` / `setSeed`).
  *
- * The player's combat deck is built from their learned skills (§4.3). A small
- * baseline of synthetic cards (Retreat) is always present so a player can leave
- * a fight even with no offensive skills learned.
+ * The player's combat deck is built from their learned skills (§4.3). There is
+ * no in-combat escape card — once a fight is joined it resolves only by
+ * winning or losing. Every character preset grants a starting kit of skills
+ * (`TIER_1_SKILLS`), so a real player never reaches combat with an empty
+ * deck; the always-available `Signature Skills` kit (`combat.signature.ts`,
+ * funded by Conviction, independent of the drawn hand) is the real fallback
+ * action space regardless of deck contents.
  */
 
 import { getRng } from '../Utils/rng';
 import type { Character } from '../Character/types';
-import { SYNTHETIC_CARD_IDS } from './combat.cards';
 import { getCombatLoadout } from './combat.loadout';
 
 /** Cards drawn at the start of every threat phase. Spec 26b hazard-combat tuning:
@@ -41,8 +44,8 @@ export function shuffleCombatDeck<T>(items: readonly T[], rng: () => number = de
  * `flags` contains loadout entries, or falls back to the full `knownSkills`
  * list for backwards compatibility with saves that pre-date Phase 169.
  *
- * Card ids are skill ids (kebab-case). Reward cards and the synthetic baseline
- * (Retreat) are always appended after the skill base.
+ * Card ids are skill ids (kebab-case). Reward cards stack on top of the skill
+ * base. No escape card is appended — see the file header.
  *
  * @param player - Character whose `knownSkills` / `combatRewardCards` supply the base.
  * @param flags  - `GameState.flags` — when non-empty loadout flags are present
@@ -60,9 +63,6 @@ export function buildCombatDeck(player: Character, flags?: readonly string[]): s
     // Spec 26b deckbuilder — reward cards stack on top (DUPLICATES kept: extra
     // copies are the whole point of a deckbuilder pickup).
     for (const id of player.combatRewardCards ?? []) deck.push(id);
-    for (const id of SYNTHETIC_CARD_IDS) {
-        if (!seen.has(id)) { seen.add(id); deck.push(id); }
-    }
     return deck;
 }
 

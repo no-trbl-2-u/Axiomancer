@@ -43,7 +43,7 @@ import {
 } from './effects';
 import {
     TURN_DICE_COUNT, rollTurnDice, dieHasStance,
-    combatDieCanPower, availableDiceFor, spendDice, refreshOneDie, availableDieCount,
+    combatDieCanPower, availableDiceFor, spendDice, availableDieCount,
     hasRerollableDice, rerollSpentDice, rollPermanentBonusDice,
     RESERVE_MAX, ripenReserve, FLOATING_DICE_CAP, materializeFloatingDice,
 } from './combat.dice';
@@ -149,6 +149,26 @@ export const THREAT_ESCALATION_MAX = 2.0;
  * are simply more urgent facing a boss. Tuned by /combat-tuning.
  */
 export const THREAT_ESCALATION_BOSS_MULT = 1.6;
+/**
+ * THE CLOCK also intensifies enemy-inflicted STATUS effects, not just raw
+ * damage: every THREAT_EFFECT_ESCALATION_STEP of escalation growth
+ * (`escalation - 1`, the SAME clock as THREAT_ESCALATION_*, already boss-
+ * scaled and already capped at THREAT_ESCALATION_MAX) adds +1 intensity to
+ * whatever status the enemy's telegraphed hit applies this phase. Reuses the
+ * damage clock's numbers instead of a second independent tuning knob, so it
+ * ramps and caps on exactly the same schedule. Tuned by /combat-tuning.
+ */
+export const THREAT_EFFECT_ESCALATION_STEP = 0.34;
+/**
+ * Every THREAT_ENCHANT_CURSE_EVERY_ROUNDS rounds a fight runs, the enemy
+ * either grows a new passive strength (the non-card buff `buff_all_stats_up`
+ * — "Sorites Ascension") or lays a fresh curse on the player (the non-card
+ * debuff `debuff_curse` — "Grelling's Malediction"), chosen 50/50 by the
+ * seeded rng. A long grind doesn't just get more dangerous on the continuous
+ * clock — every five rounds it also gets a genuinely NEW threat on the board.
+ * Tuned by /combat-tuning.
+ */
+export const THREAT_ENCHANT_CURSE_EVERY_ROUNDS = 5;
 /**
  * P0-truth READ RULE (replaces the old `READ_STATUS_MULT` ×1.34/×0.75 post-hoc
  * intensity rewrite, which was a provable no-op below intensity 3 and made the
@@ -648,11 +668,6 @@ export function playCombatCard(
     const card = getCard(entry.cardId);
     if (!card) return { state, events: [] };
 
-    // Retreat is synthetic — handled before the skill path.
-    if (card.verbClass === 'retreat') {
-        return playRetreat(state, entry.uid, useBottom);
-    }
-
     return useBottom
         ? playBottomAction(state, entry.uid, card, dieId, rng)
         : playTopAction(state, entry.uid, card, rng);
@@ -686,27 +701,6 @@ function discardEntry(state: CombatEncounterState, uid: string): CombatEncounter
         hand: state.hand.filter(h => h.uid !== uid),
         discard: [...state.discard, entry.cardId],
     };
-}
-
-function playRetreat(state: CombatEncounterState, uid: string, useBottom: boolean): CombatTransition {
-    if (useBottom) {
-        // Flee: spend all available dice, end combat as retreat (§12 Q2).
-        const dice = state.dice.map(d => (d.state === 'available' ? { ...d, state: 'spent' as const } : d));
-        const ended: CombatEncounterState = {
-            ...discardEntry({ ...state, dice }, uid),
-            phase: 'complete',
-            finalOutcome: 'retreat',
-        };
-        const events: CombatEvent[] = [{ kind: 'combat-ended', outcome: 'retreat' }];
-        return { state: withLog(ended, events), events };
-    }
-    // Brace (top): refresh one spent die.
-    const { dice, refreshedId } = refreshOneDie(state.dice, 'wild');
-    const next = discardEntry({ ...state, dice }, uid);
-    const events: CombatEvent[] = refreshedId
-        ? [{ kind: 'die-refreshed', dieId: refreshedId, color: 'wild' }]
-        : [];
-    return { state: withLog(next, events), events };
 }
 
 // ── Spec 32 v3 — shared rider/state helpers ──────────────────────────────────
@@ -2045,6 +2039,11 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
             THREAT_ESCALATION_MAX,
             1 + escalationRate * Math.max(0, state.round - THREAT_ESCALATION_GRACE),
         );
+    // Same clock, applied to STATUS intensity instead of raw damage: the
+    // longer the fight drags, the harder the enemy's telegraphed status lands
+    // too. Derived from `escalation` so it shares its boss-speedup and its
+    // cap — no separate ramp to keep in sync.
+    const effectIntensityBonus = Math.floor((escalation - 1) / THREAT_EFFECT_ESCALATION_STEP);
     // Enemy-borne outgoing-damage statuses (SEPTIC / REGRESS FATIGUE) dampen its
     // telegraphed hit; OVEREXTENDED halves its next fired phase outright, then is
     // consumed (interim rung of the P2 threat-downgrade ladder).
@@ -2121,7 +2120,7 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
                 const def = lookupEffectDef(eff.effectId);
                 if (def) {
                     const res = applyEffect(player.effects, def, state.round, {
-                        intensityDelta: eff.intensity ?? 1,
+                        intensityDelta: (eff.intensity ?? 1) + effectIntensityBonus,
                         durationMode: eff.duration ? 'additive' : 'reset',
                         durationDelta: eff.duration,
                         sourceId: enemy.id,
@@ -2305,7 +2304,7 @@ export function processBetweenPhases(
     // 3. Process a full round of effects on the player (DoT / regen / drain).
     const playerStart = processRoundStartEffects(state.player, state.round);
     const playerEnd = processRoundEndEffects(playerStart.target, state.round);
-    const player = playerEnd.target as Character;
+    let player = playerEnd.target as Character;
 
     for (const t of enemyDotTicks) events.push({ kind: 'dot-tick', effectId: t.effectId, label: t.label, amount: t.amount, target: 'enemy' });
     if (vulnSurcharge > 0) events.push({ kind: 'dot-tick', effectId: 'vulnerable-surcharge', label: 'Vulnerable', amount: vulnSurcharge, target: 'enemy' });
@@ -2318,6 +2317,38 @@ export function processBetweenPhases(
     //    past it. Undefined `unlockAfterRound` (every phase before this
     //    epic) is always reachable — byte-identical to the old one-liner.
     const resolvedRound = state.round + 1;
+
+    // THE CLOCK, discrete tier — every THREAT_ENCHANT_CURSE_EVERY_ROUNDS the
+    // fight runs, the enemy gains a new passive strength or lays a fresh
+    // curse on the player (50/50, seeded). Skipped once the encounter is
+    // already over (defeat/victory this round) so a finished fight can't
+    // still grant one on its way out.
+    if (
+        resolvedRound > 0
+        && resolvedRound % THREAT_ENCHANT_CURSE_EVERY_ROUNDS === 0
+        && !isDefeated(enemy) && !isDefeated(player)
+    ) {
+        if (rng() < 0.5) {
+            const empower = lookupEffectDef('buff_all_stats_up');
+            if (empower) {
+                const applied = applyEffect(enemy.effects, empower, resolvedRound, {
+                    intensityDelta: 1, sourceId: 'threat-clock-empower',
+                });
+                enemy = { ...enemy, effects: applied.activeEffects };
+                events.push({ kind: 'threat-clock-enchant', target: 'enemy', effectId: 'buff_all_stats_up', round: resolvedRound });
+            }
+        } else {
+            const curse = lookupEffectDef('debuff_curse');
+            if (curse) {
+                const applied = applyEffect(player.effects, curse, resolvedRound, {
+                    intensityDelta: 1, sourceId: 'threat-clock-curse',
+                });
+                player = { ...player, effects: applied.activeEffects };
+                events.push({ kind: 'threat-clock-enchant', target: 'player', effectId: 'debuff_curse', round: resolvedRound });
+            }
+        }
+    }
+
     const candidateIndex = Math.min(state.currentPhaseIndex + 1, state.threatPhases.length - 1);
     const candidatePhase = state.threatPhases[candidateIndex];
     const rageGated = candidatePhase.unlockAfterRound !== undefined && resolvedRound < candidatePhase.unlockAfterRound;

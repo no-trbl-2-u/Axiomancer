@@ -23,7 +23,7 @@ import {
     resolveThreatPhase, draftStanceDie,
     READ_ADVANTAGE_INTENSITY_BONUS, READ_DISADVANTAGE_DURATION_PENALTY,
     THREAT_ESCALATION_PER_ROUND, THREAT_ESCALATION_GRACE, THREAT_ESCALATION_MAX,
-    THREAT_ESCALATION_BOSS_MULT,
+    THREAT_ESCALATION_BOSS_MULT, THREAT_EFFECT_ESCALATION_STEP, THREAT_ENCHANT_CURSE_EVERY_ROUNDS,
 } from '../combat.engine';
 import type { CombatDieColor, CombatEncounterState } from '../combat.encounter.types';
 
@@ -160,5 +160,65 @@ describe('combat depth epic — H4: bosses escalate faster', () => {
         const r20 = threatDamageAtRoundFor(boss, 20); // far past cap
         expect(r4).toBeGreaterThan(r1);
         expect(r20).toBeLessThanOrEqual(Math.ceil(r1 * THREAT_ESCALATION_MAX) + 1);
+    });
+});
+
+describe('combat depth epic — H5: the clock also intensifies enemy-inflicted STATUS', () => {
+    /** Injects a status-applying effect onto phase 0's threat action (the
+     *  default generated sequence is damage-only) so landed intensity can be
+     *  observed directly. Same neutral-read fixture as H3/H4 (body vs body). */
+    function statusIntensityAtRound(round: number): number {
+        let s = initializeCombatEncounter(makePlayer([DOT_BODY]), makeEnemy(300, 'body'), [DOT_BODY], 1);
+        s = rollEncounterDice(s).state;
+        const threatPhases = s.threatPhases.map((p, i) => (i === 0
+            ? { ...p, threatAction: { ...p.threatAction, effects: [...p.threatAction.effects, { effectId: 'debuff_poison', intensity: 1 }] } }
+            : p));
+        s = { ...s, threatPhases, round };
+        const after = resolveThreatPhase(s).state;
+        const poison = after.player.effects.find(e => e.effectId === 'debuff_poison');
+        return poison?.intensity ?? 0;
+    }
+
+    it('within the grace window the printed intensity lands unboosted', () => {
+        expect(statusIntensityAtRound(THREAT_ESCALATION_GRACE)).toBe(1);
+    });
+
+    it('a drawn-out fight lands the status at higher intensity, capped with the damage clock', () => {
+        const early = statusIntensityAtRound(1);
+        const late = statusIntensityAtRound(20); // far past the escalation cap
+        expect(late).toBeGreaterThan(early);
+        const maxBonus = Math.floor((THREAT_ESCALATION_MAX - 1) / THREAT_EFFECT_ESCALATION_STEP);
+        expect(late).toBe(early + maxBonus);
+    });
+});
+
+describe('combat depth epic — H6: every N rounds, a new enchant or curse', () => {
+    function stateAtRound(round: number): CombatEncounterState {
+        let s = initializeCombatEncounter(makePlayer([DOT_BODY]), makeEnemy(300, 'body'), [DOT_BODY], 1);
+        s = rollEncounterDice(s).state;
+        return { ...s, round };
+    }
+
+    it('THREAT_ENCHANT_CURSE_EVERY_ROUNDS defaults to 5', () => {
+        expect(THREAT_ENCHANT_CURSE_EVERY_ROUNDS).toBe(5);
+    });
+
+    it('on the cadence round, empowers the enemy when the roll favors it', () => {
+        const s = stateAtRound(THREAT_ENCHANT_CURSE_EVERY_ROUNDS - 1); // resolvedRound hits the cadence
+        const after = resolveThreatPhase(s, () => 0.1).state; // < 0.5 → empower
+        expect(after.enemy.effects.some(e => e.effectId === 'buff_all_stats_up')).toBe(true);
+    });
+
+    it('on the cadence round, curses the player when the roll favors it', () => {
+        const s = stateAtRound(THREAT_ENCHANT_CURSE_EVERY_ROUNDS - 1);
+        const after = resolveThreatPhase(s, () => 0.9).state; // >= 0.5 → curse
+        expect(after.player.effects.some(e => e.effectId === 'debuff_curse')).toBe(true);
+    });
+
+    it('does not fire off the cadence', () => {
+        const s = stateAtRound(THREAT_ENCHANT_CURSE_EVERY_ROUNDS - 2); // resolvedRound one short
+        const after = resolveThreatPhase(s, () => 0.1).state;
+        expect(after.enemy.effects.some(e => e.effectId === 'buff_all_stats_up')).toBe(false);
+        expect(after.player.effects.some(e => e.effectId === 'debuff_curse')).toBe(false);
     });
 });

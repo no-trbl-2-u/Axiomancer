@@ -47,6 +47,9 @@ const HEADLINES: Record<CombatOutcome, string> = {
     capitulate: 'Capitulation — the enemy yields, swayed',
     concede: 'Concession — the argument is won outright',
     defeat: 'Defeat',
+    // No in-combat retreat exists (the Retreat card was removed) — this entry
+    // stays only because `CombatOutcome` is a Record key and must stay
+    // exhaustive; no live code path can ever produce this outcome.
     retreat: 'Retreat',
 };
 

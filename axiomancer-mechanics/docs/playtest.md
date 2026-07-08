@@ -63,7 +63,8 @@ One grammar shared by `npm run combat-playtest --deck=...`,
 | `cards:a,b,c` | An explicit card-id list (invalid ids dropped) |
 | `policy-pick` | The harness drafts from the running policy's `preferredFocus` — the default |
 
-Every resolved deck gets `card-retreat` appended. Drafts are deterministic
+No escape card is appended — there is no in-combat retreat; a fight resolves
+only by winning or losing. Drafts are deterministic
 for a given seed.
 
 ## Sandbox card workflow (register → A/B → promote)

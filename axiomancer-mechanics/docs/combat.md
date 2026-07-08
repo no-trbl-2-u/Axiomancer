@@ -533,7 +533,7 @@ The engine lives in `src/Combat/`:
 | `rollCombatDice(count?, rng?)` / `combatDieCanPower(die, cardColor)` / `refreshOneDie(dice, color)` | Dice helpers: roll the opening pool; check whether a die can power a card of a given color (wild powers any; x powers nothing unless flipped); refresh one spent die of a matching color back to available (self-reinforcing status loop, §4.7). |
 | `toCombatCard(cardId, lookupSkill, lookupEffect)` / `projectDeck(cardIds, lookupSkill, lookupEffect)` | Card-view converters: project a single skill (or synthetic card) into a `CombatCard` view, or an entire deck of ids into a `CombatCard[]` (unknown ids dropped). |
 | `classifyVerbClass(skill, lookupEffect)` | Classifies a skill into a `CombatVerbClass` + `CardEffectKind` pair. Priority: DoT > control > stat-debuff > buff > direct-damage. Used by `toCombatCard` to generate top/bottom action text. |
-| `buildCombatDeck(player)` | Assembles the player's combat deck from `knownSkills` + `combatRewardCards` (de-duped for the baseline, duplicates kept for reward cards) + the synthetic `card-retreat` baseline. Ready to feed `initializeCombatEncounter`. |
+| `buildCombatDeck(player)` | Assembles the player's combat deck from `knownSkills` + `combatRewardCards` (de-duped for the baseline, duplicates kept for reward cards). No escape card is appended — there is no in-combat retreat. Ready to feed `initializeCombatEncounter`. |
 | `playCombatCard(state, cardId, dice)` | Plays one combat card, spending dice; lands its effects and deals HP damage via status/strike. |
 | `resolveCombatPhase(state, cardsPlayed)` | Resolves a full player phase (card-play driven; replaces the per-round attack/defend resolution). |
 | `resolveThreatPhase(state)` | Resolves the enemy threat phase (Clear / Overwhelmed ledger). |
@@ -542,9 +542,9 @@ The engine lives in `src/Combat/`:
 | `getCard` / `handCards` / `cardDieCostPreview` / `availableDice` | Read-only previews for a UI to render the hand and affordances. |
 | `buildCombatSummary(state)` | End-of-fight `CombatSummary` with per-effect attribution rows. |
 | `simulateHazardPatternCombat(...)` | Monte-Carlo greedy bot returning `CombatSimStats` for balance runs. |
-| `SYNTHETIC_CARD_IDS` / `isSyntheticCard` | `SYNTHETIC_CARD_IDS` is a `readonly string[]` of built-in non-deck cards (currently `['card-retreat']`). The deck builder injects them into every hand; `isSyntheticCard(id)` is the boolean predicate. Filtered out of deckbuilder reward drafts. |
+| `SYNTHETIC_CARD_IDS` / `isSyntheticCard` | `SYNTHETIC_CARD_IDS` is a `readonly string[]` of built-in non-deck cards — currently empty (the synthetic Retreat card was removed; no in-combat retreat exists). Kept as a registry, not deleted, so a future synthetic card has somewhere to register. `isSyntheticCard(id)` is the boolean predicate; always `false` today. |
 | `GOLD_CARD_IDS` / `isGoldCard` / `CardEffectKind` | Gold (rare) card support. `GOLD_CARD_IDS` is a `ReadonlySet<string>` of the three rare card ids (`'pyrrhic-victory'`, `'the-final-word'`, `'unmoved-mover'`); unpowered they provide utility, powered they land a MAJOR status + damage. `isGoldCard(id)` is the boolean predicate — the engine grants automatic advantage when a WILD die powers a gold card. `CardEffectKind` (`'dot' \| 'control' \| 'none'`) is the status-payload classification tag on every `CombatCard` (set by `classifyVerbClass`); it drives the mobile card frame and deck-preset focus logic. The baseline GUARD defense card (`'brace-for-impact'`) is included in `STARTING_SKILL_IDS`. |
-| `CombatEncounterState`, `CombatCard`, `CombatThreatPhase`, `CombatOutcome`, `CombatSummary` | The core encounter type family. (`CombatPressureTracks` was REMOVED 2026-06-22 — HP is the sole win condition.) `CombatCard.skillId` is the canonical field for the backing learned-skill id (`string \| null`; `null` for synthetic cards like Retreat). Use it to trace a projected card back to its source skill. |
+| `CombatEncounterState`, `CombatCard`, `CombatThreatPhase`, `CombatOutcome`, `CombatSummary` | The core encounter type family. (`CombatPressureTracks` was REMOVED 2026-06-22 — HP is the sole win condition.) `CombatCard.skillId` is the canonical field for the backing learned-skill id (`string \| null`; `null` for synthetic cards, if any are ever added again). `CombatOutcome`/`CombatVerbClass` still list `'retreat'` as a union member for now (no live code path can produce it — no escape card exists) rather than risk an unverified type-cascade removal. Use `skillId` to trace a projected card back to its source skill. |
 | `CombatAttributionRow`, `LandedEffect` | Attribution sub-types for `buildCombatSummary`. `CombatAttributionRow` is a per-card row (`cardId`, `name`, `dotDamage`, `damageDealt`, `phases`); `LandedEffect` is a snapshot of one live effect used internally during attribution (`effectId`, `effect`, `active`, `target`). |
 
 ### Spec 26 / 26b — stance draft, the read, Conviction, Signature Skills, deckbuilding
@@ -599,14 +599,14 @@ progression levers, keeping status effects the win path.
 | `generateDefaultThreatSequence(enemy)` | Generates a 3-phase fallback threat sequence from the enemy's dominant stance, rotating through Heart / Body / Mind. Used automatically by `getThreatSequence` when no authored sequence exists. |
 | `rerollSpentDice(state, rng?)` / `hasRerollableDice(state)` / `dieIsRerollable(die)` | PR #190 — partial Press Fate re-roll: re-rolls only spent/exhausted + dead `x`-face dice, leaving usable dice in play. A no-op (refunds Conviction) when nothing is rerollable. |
 | `THREAT_WEAKEN_PER_ROLL` / `THREAT_DENY_AT` / `THREAT_WEAKEN_FLOOR` | Soft-control and stat-debuff threat tunables (0.33.0). Each point of enemy roll penalty (from confusion, fear, blind, slow, accuracy/attack-down etc.) reduces the incoming hit by `THREAT_WEAKEN_PER_ROLL` (default 0.06). When the cumulative roll penalty reaches `THREAT_DENY_AT` (default 8), the turn is fully denied (same as hard control). `THREAT_WEAKEN_FLOOR` (default 0.4) clamps the minimum damage multiplier for a weakened-but-not-denied enemy. Read these to display soft-control thresholds in the UI. |
-| `COMBAT_DECK_PRESETS` / `COMBAT_DECK_PRESET_ORDER` / `listDeckPresets()` / `getDeckPreset(id)` / `buildPresetDeck(id)` | PR #190 — five named preset decks (Erosion, Saturation, Bulwark, Onslaught, Generalist), each with a single design focus. `buildPresetDeck` appends the synthetic Retreat baseline and is ready to feed `initializeCombatEncounter`. |
+| `COMBAT_DECK_PRESETS` / `COMBAT_DECK_PRESET_ORDER` / `listDeckPresets()` / `getDeckPreset(id)` / `buildPresetDeck(id)` | PR #190 — five named preset decks (Erosion, Saturation, Bulwark, Onslaught, Generalist), each with a single design focus. (Superseded by the ten spec 32 v3 themed presets — see §8 above; this row is stale beyond the naming.) `buildPresetDeck` appends no escape card — there is no in-combat retreat — and is ready to feed `initializeCombatEncounter`. |
 | `CombatDeckPreset`, `CombatDeckFocus` | PR #190 type exports — `CombatDeckPreset` describes a single named preset deck entry (id, label, focus, cardIds); `CombatDeckFocus` is the discriminated string union of the five design-focus tags (`erosion` / `saturation` / `bulwark` / `onslaught` / `generalist`). Both are importable as `import type { CombatDeckPreset, CombatDeckFocus } from 'axiomancer-mechanics'`. |
 | `CardDieCost` | Die-cost helper type — `{ cost: number; advantage: boolean }` returned by `resolveCardDieCost` and `cardDieCostPreview`. Importable as `import type { CardDieCost } from 'axiomancer-mechanics'`. |
 | `CombatIntentType`, `CombatReadResult`, `SignatureSkill`, `SignatureSkillId`, `SignatureSkillKind`, `PlayerArchetype` | The depth-layer type family. |
 
 ### Phase 169 — Curated Combat Loadout
 
-Replaces `buildCombatDeck = knownSkills + Retreat` with a **player-shaped curated loadout**
+Replaces `buildCombatDeck = knownSkills` with a **player-shaped curated loadout**
 persisted on `GameState.flags` via a `combat-loadout-card:` prefix codec (mirroring the
 Hazard deck-flags pattern). When no loadout flags are present the engine falls back to
 `knownSkills` for full backwards compatibility with pre-169 saves.
@@ -680,11 +680,14 @@ escalation clock their consumer-facing surface.
 | `THREAT_ESCALATION_GRACE` | Rounds of grace before the clock starts — a fast clean kill is unpunished (default 1). |
 | `THREAT_ESCALATION_MAX` | Cap on the escalation multiplier so a long grind ramps but never runs away into a one-shot (default 2.0). The counters are on-vision: race the foe down (DoT) or deny its turns (control) to skip escalated hits. |
 | `THREAT_ESCALATION_BOSS_MULT` | Boss/unique enemies escalate at `THREAT_ESCALATION_PER_ROUND × THREAT_ESCALATION_BOSS_MULT` per round (default 1.6). Makes long boss fights qualitatively more lethal than equivalently long normal fights — incentivises finishing bosses quickly via DoT or denying their turns via control. Normal/elite enemies use the base rate (multiplier 1.0). |
+| `THREAT_EFFECT_ESCALATION_STEP` | The SAME clock (`escalation`, above — already boss-scaled, already capped at `THREAT_ESCALATION_MAX`) also intensifies the enemy's telegraphed STATUS application, not just its raw damage: `effectIntensityBonus = floor((escalation - 1) / THREAT_EFFECT_ESCALATION_STEP)` is added to the intensity of whatever status the enemy's hit applies this phase (default step 0.34, capping the bonus around +2 at max escalation). Reuses the damage clock's numbers rather than a second independent ramp. |
+| `THREAT_ENCHANT_CURSE_EVERY_ROUNDS` | Every N rounds a fight runs (default 5), the enemy gains a new passive strength (`buff_all_stats_up`, "Sorites Ascension") or lays a fresh curse on the player (`debuff_curse`, "Grelling's Malediction") — chosen 50/50 by the phase's seeded rng, skipped if the fight is already over. Both are pre-existing non-card effects (`tags: ["support", "non-card"]` in the buff/debuff libraries); no new keyword was introduced. Emits a `threat-clock-enchant` event. |
 
-All five are exported from `src/Combat/combat.engine.ts` and re-exported via
-the root barrel. Used by `resolveCombatPhase`; consumers read them to render
-the escalation clock UI (e.g. showing current multiplier vs. cap, and surfacing
-the boss-tier escalation warning).
+All seven are exported from `src/Combat/combat.engine.ts` and re-exported via
+the root barrel. Used by `resolveCombatPhase` / `processBetweenPhases`;
+consumers read them to render the escalation clock UI (e.g. showing current
+multiplier vs. cap, surfacing the boss-tier escalation warning, and flagging
+the next enchant/curse round).
 
 ### Phase 167/168 — Sim status-engagement metrics + AMPLIFY mechanic + Conclusion sig
 

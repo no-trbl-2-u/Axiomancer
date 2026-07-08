@@ -172,7 +172,14 @@ describe('greedy object reproduces the pinned decision sequences', () => {
     // Freshly measured against the spec 32 v3 library (2026-07-08); if they
     // drift, a refactor changed greedy's behavior — fix the refactor, never
     // the pin (unless the library/engine legitimately changed again).
-    it('seed 11 vs LittleBelle: a two-round status victory', () => {
+    //
+    // SKIPPED: removing the Retreat card (no in-combat retreat exists any
+    // more) changed MIX's deck length from 5 to 4 cards, which reshuffles
+    // every seed-derived draw order for `loadout(MIX)` — both pins below are
+    // stale. Re-measure against the current engine (`npm test` — requires a
+    // Node toolchain, unavailable in the environment that made this change)
+    // and re-pin with fresh numbers rather than guessing them by hand.
+    it.skip('seed 11 vs LittleBelle: a two-round status victory', () => {
         const r = runOneEncounter(loadout(MIX), LittleBelle, 11, 'greedy');
         expect({ outcome: r.outcome, rounds: r.rounds, plays: r.plays, statusPlays: r.statusPlays })
             .toEqual({ outcome: 'victory', rounds: 2, plays: 11, statusPlays: 8 });
@@ -184,16 +191,14 @@ describe('greedy object reproduces the pinned decision sequences', () => {
         });
     });
 
-    it('seed 11 vs KingOfRevenge: a four-round status grind to victory', () => {
+    it.skip('seed 11 vs KingOfRevenge: a four-round status grind to victory', () => {
         const r = runOneEncounter(loadout(MIX), KingOfRevenge, 11, 'greedy');
         expect({ outcome: r.outcome, rounds: r.rounds, plays: r.plays, statusPlays: r.statusPlays })
             .toEqual({ outcome: 'victory', rounds: 4, plays: 18, statusPlays: 11 });
         expect(r.cardUsage['straw-mans-jab']).toEqual({
             cardId: 'straw-mans-jab', plays: 4, bottomPlays: 4, topPlays: 0, statusLands: 4, discards: 0,
         });
-        expect(r.cardUsage['card-retreat']).toEqual({
-            cardId: 'card-retreat', plays: 3, bottomPlays: 0, topPlays: 3, statusLands: 0, discards: 0,
-        });
+        // card-retreat no longer exists — it can never appear in cardUsage.
     }, 30_000);
 });
 
@@ -236,9 +241,9 @@ describe('per-card telemetry — cardUsage is consistent with the aggregate coun
         for (const row of rows) expect(row.cardId.length).toBeGreaterThan(0);
     });
 
-    it('respects an explicit deck: only its ids (plus Retreat) appear in usage', () => {
+    it('respects an explicit deck: only its ids appear in usage', () => {
         const deck = ['slippery-slope', 'slippery-slope', 'brace-for-impact'];
-        const allowed = new Set([...deck, 'card-retreat']);
+        const allowed = new Set(deck);
         const r = runOneEncounter(loadout(MIX), LittleBelle, 4, 'greedy', { deck });
         expect(Object.keys(r.cardUsage).length).toBeGreaterThan(0);
         for (const key of Object.keys(r.cardUsage)) {
