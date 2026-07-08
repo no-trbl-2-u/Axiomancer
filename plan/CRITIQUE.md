@@ -11,6 +11,16 @@
 
 ## Pending
 
+### [MED] general — rethink early-game as canned preset-deck tutorial, defer deckbuilding to labyrinth choice
+- pass: user-jot (commit 63cfb3ba)
+- viewport: unspecified
+- auth_state: anonymous
+- category: design
+- observation: for the early game / "child" levels, potentially remove the deck-building aspect entirely. Instead each battle is a canned tutorial introducing a new preset deck, teaching each mechanic in a controlled vacuum. Pre-maze gameplay is really just the tutorial: "build a boat" -> "sail to friend" -> "go to labyrinth". The labyrinth is when the player commits to which deck they want to start the game with, which dictates their reward offering for the labyrinth. When the player completes the labyrinth and lands in the new city, they gain the ability to switch base decks post-labyrinth and trade their current deck for a new mid-game deck (since during the labyrinth they earn card rewards focused on their current deck's theme).
+- evidence: user-spotted at 2026-07-08T18:36:36Z
+- suggested fix: [user has not specified — iterate to determine]
+- source: user
+
 ### [needs-user-call] Playwright MCP tools unavailable to sub-agents — recurred again (pass 8)
 - pass: 8 (commit 43088f6f); prior: pass 7 (commit aff7fece),
   pass 6 (commit e50e819a), pass 5 (commit b0707e0a), pass 1-4
