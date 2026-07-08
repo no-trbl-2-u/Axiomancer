@@ -111,15 +111,39 @@ const resonanceDetonation: Card = {
     philosophicalAspect: 'heart',
     description:
         'Every argument you have seeded rings at once, one frequency, one ' +
-        'conclusion. The structure was never going to hold.',
+        'conclusion. The structure was never going to hold — and the ruin ' +
+        'remembers its own shape well enough to happen again.',
     tier: 3, rank: 5, cardType: 'spell',
     targetType: 'enemy',
-    // pts: RUPTURE 4 + expected fuel value ~8 + tick 0.6 ≈ 12.6 → Axiom
+    // pts (DRASTIC late-stage rework, 2026-07-08 — deliberately overrides the
+    // normal pricing curve per directive): RUPTURE alone caps at
+    // RUPTURE_BURST_CAP (80 HP) per cast, a hard global engine constant this
+    // card cannot raise. Even fully fueled, one 80-cap burst cannot close a
+    // 1080-1500 HP late pool — the deck's real problem was never a single
+    // cast's magnitude, it was ACCESS (only one copy) + TIMING (rupture wipes
+    // your own DoT board, so rebuilding fuel for cast #2 was pure redraw luck
+    // while round-scaling threat escalation punishes the wait).
+    // SIPHON 35% buys the survival window a detonate-then-rebuild loop needs.
+    // REPRISE 2 (fireFree) pulls your two best already-discarded DoT/glue
+    // cards (Curry's Conversion, Festering Argument, Straw Man's Jab — the
+    // engine returns highest-rank-first) straight back to hand the instant
+    // you detonate, so replanting for the NEXT cast starts immediately
+    // instead of waiting on a natural redraw — this is the deck's real
+    // second access route to its own payoff, without a second printed copy.
+    // bonusPct 0.5 makes the FIRST detonation of a long fight (thinnest
+    // fuel) land closer to the 80 cap instead of undershooting it.
+    // This card is tier 3, and combat.stage-profiles.ts caps MID at
+    // maxCardTier:2, so this rework is structurally late-stage-only — it
+    // cannot leak into the mid-stage roster.
     free: { tickOne: true },
-    specialMechanics: [{ kind: 'rupture' }],
+    specialMechanics: [
+        { kind: 'rupture', bonusPct: 0.5 },
+        { kind: 'siphon', pct: 0.35 },
+        { kind: 'reprise', count: 2, fireFree: true },
+    ],
     learningRequirement: { level: 10 },
     addedIn: '2026-07-08',
-    tags: ['affliction', 'payoff'],
+    tags: ['affliction', 'payoff', 'recursion'],
 };
 
 const venomAndVein: Card = {
@@ -163,15 +187,17 @@ const exordium: Card = {
     philosophicalAspect: 'heart',
     description:
         'Every case begins somewhere quiet. You clear your throat, and the ' +
-        'room — without knowing why — leans in.',
+        'room — without knowing why — leans in. Somewhere in that first ' +
+        'breath, the wound is already open.',
     tier: 1, rank: 1, cardType: 'spell',
-    targetType: 'self',
-    // pts: PAID draw 1 (2) + 1 Premise (0.8) + FREE premise (0.8) = 3.6 → Doxa
+    targetType: 'enemy',
+    // pts: argument-wound i1 d2 (1.33) + 1 Premise (0.8) + draw rider (2) + FREE premise (0.8) = 4.93 → Doxa
     free: { premises: 1 },
+    combatEffects: [{ effectId: 'debuff_argument_wound', appliedTo: 'opponent', duration: 2 }],
     specialMechanics: [{ kind: 'premise', count: 1 }, { kind: 'rider', rider: { drawCards: 1 } }],
     learningRequirement: { level: 1 },
     addedIn: '2026-07-08',
-    tags: ['peroration'],
+    tags: ['peroration', 'exposure'],
 };
 
 const openingStatement: Card = {
@@ -181,12 +207,16 @@ const openingStatement: Card = {
     philosophicalAspect: 'heart',
     description:
         'You name what you intend to prove while pointing at the place it ' +
-        'will break them. A promise is also a threat.',
+        'will break them. A promise is also a threat — and threats, once ' +
+        'named, start to bleed.',
     tier: 1, rank: 2, cardType: 'spell',
     targetType: 'enemy',
-    // pts: mark d2 (1.5) + 2 Premises (1.6) + FREE premise (0.8) = 3.9 → Lemma
+    // pts: mark d2 (1.5) + argument-wound i1 d3 (2.33) + 2 Premises (1.6) + FREE premise (0.8) = 6.23 → Lemma
     free: { premises: 1 },
-    combatEffects: [{ effectId: 'debuff_mark', appliedTo: 'opponent', duration: 2 }],
+    combatEffects: [
+        { effectId: 'debuff_mark', appliedTo: 'opponent', duration: 2 },
+        { effectId: 'debuff_argument_wound', appliedTo: 'opponent', duration: 3 },
+    ],
     specialMechanics: [{ kind: 'premise', count: 2 }],
     learningRequirement: { level: 2 },
     addedIn: '2026-07-08',
@@ -200,13 +230,16 @@ const mountingCase: Card = {
     philosophicalAspect: 'mind',
     description:
         'Premise stacked on premise, each one small, none deniable. The ' +
-        'weight is the argument.',
+        'weight is the argument — and the weight is starting to cut.',
     tier: 2, rank: 3, cardType: 'spell',
     targetType: 'enemy',
-    // pts: mark d3 (2.2) + 2 Premises (1.6) + FREE premise (0.8) + threshold(+1 premise ×0.5 = 0.4)
-    //      + tempo ≈ 6.8 → Thesis
+    // pts: mark d3 (2.25) + argument-wound i2 d4 (6.67) + 2 Premises (1.6) + FREE premise (0.8)
+    //      + threshold(+1 premise x 0.5 = 0.4) = 11.72 -> Thesis
     free: { premises: 1 },
-    combatEffects: [{ effectId: 'debuff_mark', appliedTo: 'opponent', duration: 3 }],
+    combatEffects: [
+        { effectId: 'debuff_mark', appliedTo: 'opponent', duration: 3 },
+        { effectId: 'debuff_argument_wound', appliedTo: 'opponent', duration: 4, intensity: 2 },
+    ],
     specialMechanics: [{ kind: 'premise', count: 2 }],
     threshold: { color: 'heart', count: 2, rider: { premises: 1 } },
     learningRequirement: { level: 4 },
@@ -220,13 +253,14 @@ const peroratioInterrupta: Card = {
     category: 'paradox',
     philosophicalAspect: 'mind',
     description:
-        'You cash the argument early — ugly, effective. The conclusion you ' +
+        'You cash the argument early — ugly, effective. Every mark and ' +
+        'wound already on them detonates at once; the conclusion you ' +
         'spend today cannot be refuted tomorrow.',
     tier: 2, rank: 4, cardType: 'spell',
     targetType: 'enemy',
-    // pts: spend-all engine (~mark per 2 + draw per 3, scales with tally) ≈ 7-9 + FREE draw 2 ≈ 9 → Theorem
-    free: { drawCards: 1 },
-    specialMechanics: [{ kind: 'spend_premises', markPer: 2, drawPer: 3 }],
+    // pts: RUPTURE -- consumes all afflictions (mark + argument-wound stacks) --
+    //      verb (4) + expected fuel (8) = 12 -> Theorem
+    specialMechanics: [{ kind: 'rupture' }],
     learningRequirement: { level: 6 },
     addedIn: '2026-07-08',
     tags: ['peroration', 'payoff'],
@@ -293,16 +327,20 @@ const sketchOfAThought: Card = {
     category: 'paradox',
     philosophicalAspect: 'mind',
     description:
-        'Not yet an idea — the shape where an idea will be. You rough it in ' +
-        'and it starts paying rent immediately.',
+        'Not yet an idea — the shape where an idea will be. You rough it in, ' +
+        'and a spark leaps off the sketch and catches on them before they notice.',
     tier: 1, rank: 1, cardType: 'spell',
-    targetType: 'self',
-    // pts: KINDLE mind (2.5) + FREE draw 1 (2 × 0.35 free-share ≈ 0.7) ≈ 3.2 → Doxa
+    targetType: 'enemy',
+    // pts: KINDLE mind (2.5) + FREE draw 1 (2) + ember i1 d3 lifetime 3/3=1 +
+    // dieBonus(bonusIntensity 1 × 1.5 × 0.6 = 0.9) = 6.4 -- verified against
+    // scoreCard(), fits the 1.5-7.5 Doxa/Lemma band for rank 1.
     free: { drawCards: 1 },
+    combatEffects: [{ effectId: 'debuff_kindling_ember', appliedTo: 'opponent', intensity: 1, duration: 3 }],
+    dieBonus: { onColor: 'mind', rider: { bonusIntensity: 1 } },
     specialMechanics: [{ kind: 'create_temporary_die', color: 'mind' }],
     learningRequirement: { level: 1 },
     addedIn: '2026-07-08',
-    tags: ['forge', 'dice'],
+    tags: ['forge', 'dice', 'dot'],
 };
 
 const halfStep: Card = {
@@ -312,12 +350,13 @@ const halfStep: Card = {
     philosophicalAspect: 'body',
     description:
         'Zeno was half right: you can always take half a step back. What ' +
-        'waits behind the guard, ripens.',
+        'waits behind the guard ripens twice as fast when you learn to be patient about it.',
     tier: 1, rank: 2, cardType: 'spell',
     targetType: 'self',
-    // pts: Guard 5 (1.25) + pip (1.5) + FREE guard 2 (0.5) + tempo ≈ 4.3 → Lemma
+    // pts: Guard 5 (1.25) + 2 pips (3.0) + FREE guard 2 (0.5) = 4.75 -- verified
+    // against scoreCard(), fits the 1.5-7.5 Doxa/Lemma band for rank 2.
     free: { guard: 2 },
-    specialMechanics: [{ kind: 'guard', amount: 5 }, { kind: 'grant_pip', count: 1 }],
+    specialMechanics: [{ kind: 'guard', amount: 5 }, { kind: 'grant_pip', count: 2 }],
     learningRequirement: { level: 2 },
     addedIn: '2026-07-08',
     tags: ['forge', 'defense'],
@@ -348,15 +387,21 @@ const exNihilo: Card = {
     category: 'paradox',
     philosophicalAspect: 'mind',
     description:
-        'Something from nothing — the oldest scandal in philosophy, sitting ' +
-        'in your tray, glinting, permanent until spent.',
+        'Something from nothing — and this time it comes out already flexible, ' +
+        'the shape of whatever you need it to be. Even the hand that struck it ' +
+        'goes back in the tray, unspent.',
     tier: 2, rank: 4, cardType: 'spell',
     targetType: 'self',
-    // pts: FORGE floating (5) + FREE draw (0.7) + threshold(pips ×0.5 = 0.75) + persistence value ≈ 9.8 → Theorem
-    free: { drawCards: 1 },
-    specialMechanics: [{ kind: 'forge_floating_die', color: 'powering' }],
-    threshold: { color: 'mind', count: 4, rider: { pips: 1 } },
-    learningRequirement: { level: 6 },
+    // pts: FORGE floating WILD (5 + 3 persistence + 1 wild bonus = 9) + BANK own
+    // powering die (2) + threshold(mind×3, rider pips:2 -> 2×1.5×0.5 = 1.5) = 12.5
+    // -- verified against scoreCard(), fits the 4.5-13 Thesis/Theorem band for
+    // rank 4.
+    specialMechanics: [
+        { kind: 'forge_floating_die', color: 'wild' },
+        { kind: 'bank_spent_die' },
+    ],
+    threshold: { color: 'mind', count: 3, rider: { pips: 2 } },
+    learningRequirement: { level: 8 },
     addedIn: '2026-07-08',
     tags: ['forge', 'dice', 'floating'],
 };
@@ -368,14 +413,22 @@ const theOvertake: Card = {
     philosophicalAspect: 'body',
     description:
         'Achilles does pass the tortoise — all at once, every saved step ' +
-        'spent in a single stride. Sudden, and total.',
+        'spent in a single stride. Sudden, and total. And the leg that carried ' +
+        'him is already reset, ready to take the next one.',
     tier: 2, rank: 5, cardType: 'spell',
     targetType: 'enemy',
-    // pts: spend ALL pips (+2 Guard per) + RUPTURE +2 fuel per pip ≈ 4 + ~9 scaled ≈ 13 → Axiom
+    // pts: spend ALL pips (+1 Guard per: 1 + 0.5 = 1.5) + RUPTURE (+2.5 fuel per
+    // pip, +20% burst: 4 + 8 + 1.667 + 0.008 = 13.675) + REFRESH own powering
+    // die (2) + FREE guard 2 (0.5) = 17.675 -- fits the 7-18 Axiom band for rank 5.
+    //
+    // CAVEAT (verified in combat.engine.ts): a FLOATING die is spent-and-gone-
+    // forever by design -- refresh_die only returns the powering die to the
+    // pool when Overtake is powered by a RESERVE die.
     free: { guard: 2 },
     specialMechanics: [
-        { kind: 'spend_all_pips', guardPerPip: 2 },
-        { kind: 'rupture', fuelPerPip: 2 },
+        { kind: 'spend_all_pips', guardPerPip: 1 },
+        { kind: 'rupture', fuelPerPip: 2.5, bonusPct: 0.2 },
+        { kind: 'refresh_die' },
     ],
     learningRequirement: { level: 10 },
     addedIn: '2026-07-08',
@@ -463,12 +516,21 @@ const selfFlagellant: Card = {
     philosophicalAspect: 'body',
     description:
         'The lash falls on your own back, and every wound you have argued ' +
-        'into them deepens in sympathy.',
+        'into them — poison, bleed, the guilt mirrored back a dozen times ' +
+        'over — comes due at once.',
     tier: 2, rank: 3, cardType: 'spell',
     targetType: 'enemy',
-    // pts: +1 int to ALL enemy DoTs (~1.5 × ~3 = 4.5) + tick 0.6 − recoil 4 credit (−1) + tempo ≈ 7 → Thesis
+    // pts: RUPTURE (4 + fuel 8, bonusPct 0.10 ≈ +0.004) − recoil 5 credit
+    // (−1.25) + tick 0.6 ≈ 11.35 → fits Thesis/Theorem band. DRASTIC REWORK:
+    // was a flat, always-the-same +1-intensity sustained amplifier (~7pts);
+    // is now a repeatable detonator. RUPTURE consumes every affliction on the
+    // enemy and converts their full remaining lifetime into ONE burst now,
+    // capped at 80.
     free: { tickOne: true },
-    specialMechanics: [{ kind: 'recoil', hp: 4 }, { kind: 'boost_all_dots', intensity: 1 }],
+    specialMechanics: [
+        { kind: 'recoil', hp: 5 },
+        { kind: 'rupture', bonusPct: 0.1 },
+    ],
     learningRequirement: { level: 4 },
     addedIn: '2026-07-08',
     tags: ['akrasia', 'dot'],
@@ -598,11 +660,14 @@ const undistributedMiddle: Card = {
         'Somewhere between premise and blow, the force goes missing.',
     tier: 2, rank: 3, cardType: 'spell',
     targetType: 'enemy',
-    // pts: STAGGER 1 (2) + backfire i1 d2 (1.5) + FREE mark (0.5) + threshold(STAGGER 2 more ×0.5 = 2) ≈ 6-7.5 → Thesis
+    // pts (retuned 2026-07-08, mid/late engagement pass): STAGGER 1 (2) + backfire
+    // i2 d3 (0.75x2x3=4.5, up from i1/d2=1.5) + FREE mark (0.75) + threshold(mind
+    // x3 -> stagger+1 AND bonusIntensity+1, rider=2+1.5=3.5 x0.5 discount = 1.75)
+    // total = 9.0, in-band for uncommon [4.5,13].
     free: { applyEffect: { effectId: 'debuff_mark', duration: 1 } },
-    combatEffects: [{ effectId: 'debuff_backfire', appliedTo: 'opponent', intensity: 1, duration: 2 }],
+    combatEffects: [{ effectId: 'debuff_backfire', appliedTo: 'opponent', intensity: 2, duration: 3 }],
     specialMechanics: [{ kind: 'stagger', rungs: 1 }],
-    threshold: { color: 'mind', count: 3, rider: { stagger: 1 } },
+    threshold: { color: 'mind', count: 3, rider: { stagger: 1, bonusIntensity: 1 } },
     learningRequirement: { level: 4 },
     addedIn: '2026-07-08',
     tags: ['control'],
@@ -615,12 +680,16 @@ const arrowParadox: Card = {
     philosophicalAspect: 'body',
     description:
         'At every instant the arrow is at rest. You choose the instant, and ' +
-        'hold them in it — motion frozen mid-flight.',
+        'hold them in it -- motion frozen mid-flight, the stillness itself ' +
+        'a wound.',
     tier: 2, rank: 4, cardType: 'spell',
     targetType: 'enemy',
-    // pts: lock stance (2.5) + STAGGER 1 (2) + reveal value + FREE guard (0.5) + tempo ≈ 9.5 → Theorem
+    // pts (reworked 2026-07-08): lock_stance (2.5) + STAGGER 1 (2) + backfire
+    // i1 d2 on the shared 'debuff_backfire' stack (1.5, NEW) + FREE guard 2 (0.5)
+    // = 6.5, in-band for Theorem [4.5,13].
     free: { guard: 2 },
     specialMechanics: [{ kind: 'lock_stance' }, { kind: 'stagger', rungs: 1 }],
+    combatEffects: [{ effectId: 'debuff_backfire', appliedTo: 'opponent', intensity: 1, duration: 2 }],
     learningRequirement: { level: 6 },
     addedIn: '2026-07-08',
     tags: ['control'],
@@ -633,13 +702,20 @@ const paralysisOfAnalysis: Card = {
     philosophicalAspect: 'mind',
     description:
         'You hand them every option at once. They stand in the doorway of ' +
-        'the decision forever, bleeding from the hinges.',
+        'the decision forever, bleeding from the hinges -- and the longer ' +
+        'they stand there, the more of them spills out.',
     tier: 3, rank: 5, cardType: 'spell',
     targetType: 'enemy',
-    // pts: STAGGER 2 (4 — a full deny) + backfire i2 d2 (3) + FREE draw (0.7) + tier-3 land rate ≈ 13 → Axiom
+    // pts (reworked 2026-07-08, THE payoff card): STAGGER 2 (4, full deny alone) +
+    // NEW debuff_backfire_acute i3 d3 (6.75) on its OWN effectId -- stacks
+    // independently ON TOP of the shared 'debuff_backfire' track, doubling the
+    // deck's intensity ceiling (10+10) -- + FREE draw (2) + dieBonus(mind:
+    // bonusIntensity 2 + bonusDuration 1, rider=4 x0.6 = 2.4) total = 15.15,
+    // in-band for rare [7,18].
     free: { drawCards: 1 },
-    combatEffects: [{ effectId: 'debuff_backfire', appliedTo: 'opponent', intensity: 2, duration: 2 }],
+    combatEffects: [{ effectId: 'debuff_backfire_acute', appliedTo: 'opponent', intensity: 3, duration: 3 }],
     specialMechanics: [{ kind: 'stagger', rungs: 2 }],
+    dieBonus: { onColor: 'mind', rider: { bonusIntensity: 2, bonusDuration: 1 } },
     learningRequirement: { level: 10 },
     addedIn: '2026-07-08',
     tags: ['control', 'payoff'],
@@ -686,12 +762,14 @@ const glimpse: Card = {
     philosophicalAspect: 'mind',
     description:
         'A crack in the next moment, wide enough for one eye. You look, and ' +
-        'mark what looks back.',
+        'mark what looks back — the wound starts arriving a beat before the ' +
+        'blow that causes it.',
     tier: 1, rank: 1, cardType: 'spell',
     targetType: 'enemy',
-    // pts: FORETELL 2 (2) + mark d2 (1.5) + FREE foretell (0.35) ≈ 3.9 → Doxa
+    // pts: FORETELL 2 (2) + Foretold Wound d2 (now real DoT, ~2.0) + FREE
+    // foretell (0.35) ≈ 4.35 → Doxa
     free: { foretell: 1 },
-    combatEffects: [{ effectId: 'debuff_mark', appliedTo: 'opponent', duration: 2 }],
+    combatEffects: [{ effectId: 'debuff_foretold_wound', appliedTo: 'opponent', duration: 2 }],
     specialMechanics: [{ kind: 'foretell', count: 2 }],
     learningRequirement: { level: 1 },
     addedIn: '2026-07-08',
@@ -723,14 +801,15 @@ const cassandrasBurden: Card = {
     philosophicalAspect: 'heart',
     description:
         'You saw it coming. No one believed you — so you braced alone, and ' +
-        'named the exact place it would land.',
+        'named the exact place it would land. It is already starting to hurt.',
     tier: 2, rank: 3, cardType: 'spell',
     targetType: 'enemy',
-    // pts: OMEN(mark i2 d2 (2.5) + Guard 4 (1)) ×0.6 = 2.1 + FREE draw (0.7) + info ≈ 6.8 → Thesis
+    // pts: OMEN(Foretold Wound i2 d2 (~3.2) + Guard 4 (1)) ×0.6 = 2.5 + FREE
+    // draw (0.7) + info ≈ 7.2 → Thesis
     free: { drawCards: 1 },
     specialMechanics: [{
         kind: 'omen',
-        rider: { applyEffect: { effectId: 'debuff_mark', intensity: 2, duration: 2 }, guard: 4 },
+        rider: { applyEffect: { effectId: 'debuff_foretold_wound', intensity: 2, duration: 2 }, guard: 4 },
     }],
     learningRequirement: { level: 4 },
     addedIn: '2026-07-08',
@@ -743,17 +822,23 @@ const delphicAmbiguity: Card = {
     category: 'paradox',
     philosophicalAspect: 'mind',
     description:
-        'The oracle answers truly, and you arrange what the truth will be. A ' +
-        'great empire will indeed fall.',
+        'The oracle never lies, only arrives early. You read the sentence ' +
+        'before it is finished — the first half of the prophecy has already ' +
+        'landed on them.',
     tier: 2, rank: 4, cardType: 'spell',
-    targetType: 'self',
-    // pts: FORETELL 3 (3) + reveal next stance (1.5) + dieBonus(pips ×0.6 = 0.9) + FREE foretell + tempo ≈ 9 → Theorem
-    free: { foretell: 1 },
-    specialMechanics: [{ kind: 'foretell', count: 3 }, { kind: 'rider', rider: { revealStance: true } }],
+    targetType: 'enemy',
+    // pts: consume_affliction (Foretold Wound fuel, ~4-5) + 1 Soul (0.75) +
+    // foretell 1 (1.5) + dieBonus mind pips (0.9) + FREE tickOne (0.6) ≈ 8.75 →
+    // Theorem
+    free: { tickOne: true },
+    specialMechanics: [
+        { kind: 'consume_affliction', souls: 1 },
+        { kind: 'foretell', count: 1 },
+    ],
     dieBonus: { onColor: 'mind', rider: { pips: 1 } },
     learningRequirement: { level: 6 },
     addedIn: '2026-07-08',
-    tags: ['oracle'],
+    tags: ['oracle', 'payoff'],
 };
 
 const prophecyFulfilled: Card = {
@@ -815,11 +900,12 @@ const briefCandle: Card = {
     philosophicalAspect: 'body',
     description:
         'Out, out. It burns bright, it burns fast, and what it leaves ' +
-        'behind is yours to gather.',
+        'behind is yours to gather — some of it before it even finishes burning.',
     tier: 1, rank: 1, cardType: 'spell',
     targetType: 'enemy',
-    // pts: bleed i2 d1 (~2) + fast expiry→Soul (0.75) + FREE tick 0.6 ≈ 3.4 → Doxa
-    free: { tickOne: true },
+    // pts: bleed i2 d1 (~2) + fast expiry→Soul (0.75) + FREE souls 1 (0.75) ≈ 3.5 →
+    // Doxa, in-budget.
+    free: { souls: 1 },
     combatEffects: [{ effectId: 'debuff_bleed', appliedTo: 'opponent', intensity: 2, duration: 1 }],
     learningRequirement: { level: 1 },
     addedIn: '2026-07-08',
@@ -833,11 +919,12 @@ const mementoMori: Card = {
     philosophicalAspect: 'mind',
     description:
         'Remember that they die. You remember it AT them, and the ' +
-        'remembering leaves a residue you can spend.',
+        'remembering leaves more of a residue than it used to.',
     tier: 1, rank: 2, cardType: 'spell',
     targetType: 'enemy',
-    // pts: mark i2 d1 (2) + its expiry Soul (0.75) + FREE soul (0.75×0.35) ≈ 4.2 with churn value → Lemma
-    free: { souls: 1 },
+    // pts: mark i2 d1 (2, unresisted) + its expiry Soul (0.75) + FREE souls 2
+    // (1.5) ≈ 4.25 — matches Lemma-tier budget.
+    free: { souls: 2 },
     combatEffects: [{ effectId: 'debuff_mark', appliedTo: 'opponent', intensity: 2, duration: 1 }],
     learningRequirement: { level: 2 },
     addedIn: '2026-07-08',
@@ -851,12 +938,13 @@ const winnowing: Card = {
     philosophicalAspect: 'body',
     description:
         'The scythe does not wait for the season. One standing affliction, ' +
-        'cut and threshed and pocketed now.',
+        'cut and threshed and pocketed now — and the thresher keeps more of the grain than it used to.',
     tier: 2, rank: 3, cardType: 'spell',
     targetType: 'enemy',
-    // pts: consume 1 affliction → fuel ticks NOW (~4-5) + 1 Soul (0.75) + FREE tick 0.6 ≈ 7 → Thesis
+    // pts: consume 1 affliction → fuel ticks NOW (~4-5) + 2 Souls (1.5) + FREE
+    // tick 0.6 ≈ 7.5-8.5 → Thesis-tier.
     free: { tickOne: true },
-    specialMechanics: [{ kind: 'consume_affliction', souls: 1 }],
+    specialMechanics: [{ kind: 'consume_affliction', souls: 2 }],
     learningRequirement: { level: 4 },
     addedIn: '2026-07-08',
     tags: ['harvest', 'payoff'],
@@ -869,12 +957,13 @@ const theGleanersDue: Card = {
     philosophicalAspect: 'mind',
     description:
         'What the field owes the one who walks behind the reapers: a die ' +
-        'from the leavings, and something to read by.',
+        'from the leavings, something to read by, and a coin pressed back into your palm on the way out.',
     tier: 2, rank: 4, cardType: 'spell',
     targetType: 'self',
-    // pts: REAP 3 → KINDLE (2.5) + draw 2 (4) − soul cost (~2.25) + FREE draw 0.7 + engine value ≈ 9 → Theorem
-    free: { drawCards: 1 },
-    specialMechanics: [{ kind: 'reap', cost: 3, rider: { drawCards: 2 }, kindle: 'mind' }],
+    // pts: REAP 2 → KINDLE (2.5) + draw 2 (4) − soul cost (~1.5) + FREE draw 0.7
+    // + FREE soul 0.75 ≈ 6.45 → Theorem-tier, net Soul drain now only 1.
+    free: { drawCards: 1, souls: 1 },
+    specialMechanics: [{ kind: 'reap', cost: 2, rider: { drawCards: 2 }, kindle: 'mind' }],
     learningRequirement: { level: 6 },
     addedIn: '2026-07-08',
     tags: ['harvest'],
@@ -886,13 +975,14 @@ const theReaping: Card = {
     category: 'fallacy',
     philosophicalAspect: 'body',
     description:
-        'Every soul you gathered, swung at once. The harvest was never for ' +
-        'keeping — it was for this.',
+        'Every soul you gathered, swung at once — and some of what it costs them ' +
+        'comes back to you. The harvest was never for keeping. It was for this, and for what comes after.',
     tier: 3, rank: 5, cardType: 'spell',
     targetType: 'enemy',
-    // pts: REAP all — 2 per Soul (cap kept), read+vuln scaled ≈ 13 with a running engine → Axiom
+    // pts: REAP ALL — 4 per Soul (burstPerSoul 2→4; caps at 80 dmg off a ~20-Soul
+    // bank) + SIPHON 40% of the burst back as healing + FREE tick 0.6 ≈ 17-19.
     free: { tickOne: true },
-    specialMechanics: [{ kind: 'reap_all', burstPerSoul: 2 }],
+    specialMechanics: [{ kind: 'reap_all', burstPerSoul: 4 }, { kind: 'siphon', pct: 0.4 }],
     learningRequirement: { level: 10 },
     addedIn: '2026-07-08',
     tags: ['harvest', 'payoff'],
@@ -1017,20 +1107,23 @@ const heartOfTheMatter: Card = {
     category: 'fallacy',
     philosophicalAspect: 'heart',
     description:
-        'You say the thing they have been not-saying their whole life. The ' +
-        'fight goes out of a person who feels seen.',
+        'You say the thing they have been not-saying their whole life. Said ' +
+        'once, it is heard; said again, in the same breath, it is believed. ' +
+        'The fight goes out of a person who feels seen, seen twice over.',
     tier: 3, rank: 5, cardType: 'spell',
     targetType: 'enemy',
-    // pts: SWAY 5 (4) + heal 4 (1.3) + FREE sway 1 (0.3) + threshold(SWAY +3 ×0.5 = 1.2) + capstone ≈ 13 → Axiom
+    // pts: SWAY 6 x ECHO (engine echoFactor) + heal-4 rider (NOT echoed) + FREE
+    // sway 1 + threshold(SWAY +4) -- this IS the Late-stage finisher burst
+    // (rebalance 2026-07-08, Late SWAY ceiling pass). Self-ECHO only doubles the
+    // specialMechanics 'sway' entry; free/threshold sway riders add flat.
     free: { sway: 1 },
-    specialMechanics: [{ kind: 'sway', amount: 5 }, { kind: 'rider', rider: { healHp: 4 } }],
-    threshold: { color: 'heart', count: 5, rider: { sway: 3 } },
-    // Phase 46 alignment gate — seeing another truly needs relational scope
-    // (inherits the cut appeal-to-consequences' scope gate).
-    learningRequirement: {
-        level: 10,
-        requiresAlignment: { axis: 'scope', op: 'gte', value: 34 },
-    },
+    specialMechanics: [
+        { kind: 'sway', amount: 6 },
+        { kind: 'echo' },
+        { kind: 'rider', rider: { healHp: 4 } },
+    ],
+    threshold: { color: 'heart', count: 5, rider: { sway: 4 } },
+    learningRequirement: { level: 10 },
     addedIn: '2026-07-08',
     tags: ['charm', 'alt-win'],
 };
@@ -1093,13 +1186,19 @@ const nettleCloak: Card = {
     category: 'fallacy',
     philosophicalAspect: 'body',
     description:
-        'Wear the argument that stings on contact. Let them figure out the ' +
-        'lesson with their knuckles.',
+        'Wear the argument that stings on contact — and stings just as well ' +
+        'standing still. Let them figure out the lesson with their knuckles, ' +
+        'or simply, eventually, with their skin.',
     tier: 1, rank: 2, cardType: 'spell',
     targetType: 'self',
-    // pts: thorns i2 d2 (~3) + FREE guard 2 (0.5) + reflect synergy ≈ 4.3 → Lemma
+    // pts: thorns i2 d2 (~3, reactive, unchanged) + NEW non-reactive Nettle
+    // Sting i1 d2 applied directly to the enemy on cast (~1.5, fires even if
+    // they never swing) + FREE guard 2 (0.5) + reflect synergy ≈ 5.8 → Lemma
     free: { guard: 2 },
-    combatEffects: [{ effectId: 'buff_thorns', appliedTo: 'self', intensity: 2, duration: 2 }],
+    combatEffects: [
+        { effectId: 'buff_thorns', appliedTo: 'self', intensity: 2, duration: 2 },
+        { effectId: 'debuff_nettle_sting', appliedTo: 'opponent', intensity: 1, duration: 2 },
+    ],
     learningRequirement: { level: 2 },
     addedIn: '2026-07-08',
     tags: ['bulwark', 'reflect'],
@@ -1182,11 +1281,17 @@ const crumblingResolve: Card = {
     category: 'fallacy',
     philosophicalAspect: 'body',
     description:
-        'A curse for the persistent: every swing your wall swallows whole ' +
-        'takes a rung out of their next one.',
+        'A curse for the patient too: the wall does not need to be struck to ' +
+        'collect. Every round it stands whole is a rung taken from them ' +
+        'regardless — and every swing it swallows is a rung more.',
     tier: 2, rank: 6, cardType: 'disenchant',
     targetType: 'enemy',
-    // pts: engine text — a fully blocked attack staggers the next telegraph (Aporia)
+    // pts: engine text (Aporia). RETAINS the old clause (a fully-blocked attack
+    // still costs the enemy 1 rung on its next telegraph). ADDS the deck's
+    // genuine non-reactive lever: at the end of EVERY threat phase, if
+    // (leftover guard + persistent barrier) > 0, the enemy takes direct damage
+    // = max(4, round(0.2 x (guard+barrier))) -- fires whether or not the enemy
+    // attacked that round. See combat.engine.ts hook (2026-07-08 engine pass).
     learningRequirement: { level: 12 },
     addedIn: '2026-07-08',
     tags: ['bulwark', 'disenchant'],
@@ -1201,12 +1306,17 @@ const refrain: Card = {
     philosophicalAspect: 'mind',
     description:
         'Said once, it is a remark. Said twice, in the same breath, it ' +
-        'starts to sound like the truth.',
+        'starts to sound like the truth — and the truth leaves a mark.',
     tier: 1, rank: 1, cardType: 'spell',
     targetType: 'enemy',
-    // pts: mark d2 ×ECHO (1.5×1.8 = 2.7) + FREE draw (0.7) ≈ 3.4 → Doxa
+    // pts: [mark d2 (1.5) + echo_sting d2 (1.5)] × ECHO(x2 applications) ≈ 6 +
+    // FREE draw (0.7) ≈ 6.7 → Thesis-adjacent (deliberately above stock T1
+    // budget -- Early's legal pool is ONLY this + second-thoughts).
     free: { drawCards: 1 },
-    combatEffects: [{ effectId: 'debuff_mark', appliedTo: 'opponent', duration: 2 }],
+    combatEffects: [
+        { effectId: 'debuff_mark', appliedTo: 'opponent', duration: 2 },
+        { effectId: 'debuff_echo_sting', appliedTo: 'opponent', duration: 2 },
+    ],
     specialMechanics: [{ kind: 'echo' }],
     learningRequirement: { level: 1 },
     addedIn: '2026-07-08',
@@ -1220,11 +1330,13 @@ const secondThoughts: Card = {
     philosophicalAspect: 'mind',
     description:
         'The discarded idea was not wrong — it was early. You reach back ' +
-        'into the pile and take it again.',
+        'into the pile, take it again, and cash in what it already cost them.',
     tier: 1, rank: 2, cardType: 'spell',
     targetType: 'self',
-    // pts: REPRISE 1 (2) + FREE draw (0.7) + selection value (best-of-discard) ≈ 4.2 → Lemma
-    free: { drawCards: 1 },
+    // pts: REPRISE 1 (2) + FREE draw (0.7) + FREE ruptureMarks:1 (~1.5) +
+    // selection value ≈ 5.2 → Lemma. ruptureMarks is an existing generically-
+    // resolved CardRider field (same path the-closing-word uses).
+    free: { drawCards: 1, ruptureMarks: 1 },
     specialMechanics: [{ kind: 'reprise', count: 1 }],
     learningRequirement: { level: 2 },
     addedIn: '2026-07-08',
@@ -1275,11 +1387,14 @@ const ouroboros: Card = {
     philosophicalAspect: 'mind',
     description:
         'The argument eats its own tail and grows fat on it. Whatever you ' +
-        'said last, the serpent says again. Twice.',
+        'said last, the serpent says again — and everything it has already said, it says for damage, all at once.',
     tier: 3, rank: 5, cardType: 'spell',
     targetType: 'enemy',
-    // pts: replay last spell ×2 (≈ 2 × avg spell payload ~5 = 10) + FREE draw (0.7) + setup cost ≈ 13.5 → Axiom
-    free: { drawCards: 1 },
+    // pts: replay last spell PAID x2 (~10) + FREE draw (0.7) + FREE
+    // ruptureMarks:3 (consumes ALL current Mark stacks, 3 dmg/stack) ≈ 22-33 →
+    // Axiom+ (deliberately pushed above the old budget: this is now the
+    // deck's actual finisher).
+    free: { drawCards: 1, ruptureMarks: 3 },
     specialMechanics: [{ kind: 'replay_last', times: 2 }],
     learningRequirement: { level: 10 },
     addedIn: '2026-07-08',

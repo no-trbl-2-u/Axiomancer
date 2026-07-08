@@ -932,6 +932,164 @@
         "support",
         "non-card"
       ]
+    },
+    {
+      "id": "debuff_argument_wound",
+      "name": "Argument Wound",
+      "description": "Each premise it cannot answer opens the cut a little wider — the case itself is bleeding them now.",
+      "type": "debuff",
+      "category": "damage",
+      "duration": 3,
+      "stacking": "intensity",
+      "resistedBy": "mind",
+      "resistDR": 12,
+      "payload": {
+        "damageOverTime": {
+          "damagePerRound": 2,
+          "damageType": "heart",
+          "tickPhase": "end"
+        },
+        "dotModifiers": {
+          "escalatesPerTurn": true,
+          "rampFactor": 0.5
+        }
+      },
+      "tier": 1,
+      "addedIn": "2026-07-08",
+      "tags": [
+        "support",
+        "non-card",
+        "peroration"
+      ]
+    },
+    {
+      "id": "debuff_kindling_ember",
+      "name": "Kindling Ember",
+      "description": "A spark thrown loose from the forge, caught in cloth that hasn't noticed yet. It will.",
+      "type": "debuff",
+      "category": "damage",
+      "duration": 3,
+      "stacking": "intensity",
+      "resistedBy": "mind",
+      "resistDR": 10,
+      "payload": {
+        "damageOverTime": {
+          "damagePerRound": 1,
+          "damageType": "mentalAttack",
+          "tickPhase": "start"
+        }
+      },
+      "tier": 1,
+      "addedIn": "2026-07-08",
+      "tags": [
+        "forge",
+        "dot",
+        "ember"
+      ]
+    },
+    {
+      "id": "debuff_backfire_acute",
+      "name": "Acute Backfire",
+      "description": "The denial doesn't just cost them the turn — it costs them the argument entirely. What cannot happen collapses the mind that tried to make it happen.",
+      "type": "debuff",
+      "category": "control",
+      "duration": 3,
+      "stacking": "intensity",
+      "resistedBy": "mind",
+      "resistDR": 14,
+      "payload": {
+        "backfirePerRung": 3
+      },
+      "tier": 3,
+      "addedIn": "2026-07-08",
+      "tags": [
+        "v3-tuning",
+        "control",
+        "affliction"
+      ]
+    },
+    {
+      "id": "debuff_foretold_wound",
+      "name": "Foretold Wound",
+      "description": "The wound is already written; the body just hasn't caught up to the sentence yet.",
+      "type": "debuff",
+      "category": "damage",
+      "duration": 2,
+      "stacking": "intensity",
+      "resistedBy": "mind",
+      "resistDR": 12,
+      "payload": {
+        "damageOverTime": {
+          "damagePerRound": 1,
+          "damageType": "mind",
+          "tickPhase": "start"
+        },
+        "tickAmplifyFlat": 1
+      },
+      "tier": 1,
+      "addedIn": "2026-07-08",
+      "tags": [
+        "oracle",
+        "exposure",
+        "affliction"
+      ]
+    },
+    {
+      "id": "debuff_nettle_sting",
+      "name": "Nettle Sting",
+      "description": "You did not need to be struck to be answered. Proximity alone was argument enough, and it is still working under their skin.",
+      "type": "debuff",
+      "category": "damage",
+      "duration": 2,
+      "stacking": "intensity",
+      "resistedBy": "body",
+      "resistDR": 10,
+      "payload": {
+        "damageOverTime": {
+          "damagePerRound": 2,
+          "damageType": "physicalAttack",
+          "tickPhase": "end"
+        },
+        "dotModifiers": {
+          "decaysPerTick": false
+        }
+      },
+      "tier": 1,
+      "addedIn": "2026-07-08",
+      "tags": [
+        "dot",
+        "affliction",
+        "bulwark"
+      ]
+    },
+    {
+      "id": "debuff_echo_sting",
+      "name": "Echo Sting",
+      "description": "The words repeat until they cut. Every echo leaves the same phrase ringing a little deeper.",
+      "type": "debuff",
+      "category": "damage",
+      "duration": 2,
+      "stacking": "intensity",
+      "resistedBy": "mind",
+      "resistDR": 10,
+      "payload": {
+        "damageOverTime": {
+          "damagePerRound": 1,
+          "damageType": "mind",
+          "tickPhase": "end"
+        },
+        "dotModifiers": {
+          "escalatesPerTurn": true,
+          "rampFactor": 0.5
+        }
+      },
+      "tier": 1,
+      "addedIn": "2026-07-08",
+      "tags": [
+        "support",
+        "non-card",
+        "echo"
+      ]
     }
   ]
 }

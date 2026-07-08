@@ -37,7 +37,7 @@ import {
     getDistinctDebuffCount, getDistinctControlCount,
     getHealingReceivedMult, getOutgoingDamageMult, decayDotsOnHeal, consumeEffect,
     hasPayloadFlag, getStanceVulnMult, computeRoundsToKill,
-    consumeAfflictions, consumeOneAffliction, getBackfirePerRung, consumeMarks,
+    consumeAfflictions, consumeOneAffliction, getBackfirePerRung, consumeMarks, getMarkStacks,
     RUPTURE_BURST_CAP, RUPTURE_PER_AFFLICTION_STACK, DISRUPT_DENY_AT,
     THREAT_RUNGS, THREAT_RUNGS_BOSS,
 } from './effects';
@@ -169,6 +169,17 @@ export const THREAT_EFFECT_ESCALATION_STEP = 0.34;
  * Tuned by /combat-tuning.
  */
 export const THREAT_ENCHANT_CURSE_EVERY_ROUNDS = 5;
+/**
+ * CONCEDE (the `peroration` mechanic's `concedeAt` — Oratory's alt-win) does
+ * not otherwise scale with enemy tier at all, which let it clear the
+ * Impossible ceiling probe at the same flat Premise count as anywhere else.
+ * Above CONCEDE_HIGH_TIER_LEVEL, +1 Premise is required per
+ * CONCEDE_HIGH_TIER_STEP levels of enemy level past that line — a no-op for
+ * every stage except the Impossible-tier ceiling probe (~level 110), which
+ * sits far above it. Tuned by /combat-tuning.
+ */
+export const CONCEDE_HIGH_TIER_LEVEL = 60;
+export const CONCEDE_HIGH_TIER_STEP = 10;
 /**
  * P0-truth READ RULE (replaces the old `READ_STATUS_MULT` ×1.34/×0.75 post-hoc
  * intensity rewrite, which was a provable no-op below intensity 3 and made the
@@ -743,8 +754,20 @@ function gainSway(
     events: CombatEvent[],
 ): CombatEncounterState {
     if (amount <= 0) return state;
-    const sway = (state.sway ?? 0) + amount;
-    events.push({ kind: 'sway-gained', amount, total: sway });
+    // Grace late-stage rebalance (2026-07-08): buff_grace_momentum (stacked
+    // at the turn boundary while irresistible-grace holds SWAY from decaying
+    // — see processBetweenPhases) multiplies every SWAY gain by its payload's
+    // outgoingSwayGainMulPct per stack. "Protect the stack" becomes a
+    // genuinely compounding payoff instead of just a decay-proof floor.
+    const momentum = state.player.effects.find(e => e.effectId === 'buff_grace_momentum');
+    let scaledAmount = amount;
+    if (momentum) {
+        const momentumDef = lookupEffectDef('buff_grace_momentum');
+        const pct = (momentumDef?.payload as { outgoingSwayGainMulPct?: number } | undefined)?.outgoingSwayGainMulPct ?? 0;
+        scaledAmount = Math.round(amount * (1 + (pct / 100) * momentum.intensity));
+    }
+    const sway = (state.sway ?? 0) + scaledAmount;
+    events.push({ kind: 'sway-gained', amount: scaledAmount, total: sway });
     return { ...state, sway };
 }
 
@@ -771,7 +794,20 @@ function gainPremises(
     const decl = next.peroration;
     if (!decl) return { state: next, concede: false };
     const total = next.premises ?? 0;
-    if (decl.concedeAt !== undefined && total >= decl.concedeAt) {
+    // Oratory impossible-stage rebalance (2026-07-08): CONCEDE was the lab's
+    // only above-ceiling result at Impossible (a flat concedeAt fires
+    // identically against a 150 HP Early boss and the 2750 HP/L110 ceiling
+    // probe). The Closing Word's own concedeAt stays untouched — Late's
+    // roster (level ~40-50) never crosses CONCEDE_HIGH_TIER_LEVEL, so Late
+    // is unaffected — but a genuinely high-tier enemy now needs more banked
+    // Premises to argue past, matching how every other win condition scales
+    // with enemy HP while CONCEDE alone previously didn't scale with anything.
+    const enemyLevel = next.enemy.level;
+    const concedeHighTierBonus = enemyLevel > CONCEDE_HIGH_TIER_LEVEL
+        ? Math.floor((enemyLevel - CONCEDE_HIGH_TIER_LEVEL) / CONCEDE_HIGH_TIER_STEP)
+        : 0;
+    const effectiveConcedeAt = decl.concedeAt !== undefined ? decl.concedeAt + concedeHighTierBonus : undefined;
+    if (effectiveConcedeAt !== undefined && total >= effectiveConcedeAt) {
         events.push({ kind: 'peroration-fired', cardId: decl.cardId, premisesSpent: total });
         return { state: { ...next, premises: 0, peroration: null }, concede: true };
     }
@@ -1051,6 +1087,11 @@ function playBottomAction(
     const colorMatch = powering.color === 'wild' || powering.color === card.stance;
     const advantage = readToAdvantage(read);
     const poweringPips = powering.pips ?? 0;
+    // Penitent rebalance (2026-07-08): tracks blood-price HP taken THIS play
+    // (recoil mechanic + fate.recoilHp) so `mirror-of-guilt` can convert raw
+    // recoil, not just landed self-debuff applications, into reflection —
+    // see the mirror-of-guilt block below.
+    let recoilTaken = 0;
 
     const events: CombatEvent[] = [{ kind: 'card-played', cardId: card.id, useBottom: true, dieId: powering.id, advantage, colorMatch }];
 
@@ -1190,7 +1231,7 @@ function playBottomAction(
     if (skill.fate && poweringSource === 'fate-x') {
         firedRiders.push(skill.fate.rider);
         const recoil = skill.fate.recoilHp ?? 0;
-        if (recoil > 0) player = applyDamage(player, recoil);
+        if (recoil > 0) { player = applyDamage(player, recoil); recoilTaken += recoil; }
         events.push({ kind: 'fate-powered', cardId: card.id, dieId: powering.id, recoil, riderText: riderText(skill.fate.rider) });
     }
     // FALLEN (spec 32 v3 T4) — the theme-state condition line: fires free while
@@ -1208,13 +1249,31 @@ function playBottomAction(
     const isDefendPlay = card.verbClass === 'defend';
     const landsDot = (skill.combatEffects ?? []).some(ce =>
         ce.appliedTo === 'opponent' && lookupEffectDef(ce.effectId)?.payload.damageOverTime);
+    // Penitent rebalance (2026-07-08): crown-of-thorns used to grant a flat
+    // +1 regardless of how deep into Fallen the player had gone. It now
+    // scales with debt DEPTH — +1 at the 2-debuff Fallen minimum (unchanged
+    // from before), +1 more per self-debuff carried beyond that, capped at
+    // +4 — the "bigger, scarier Fallen state that compounds faster once
+    // triggered" the theme promises, instead of capping out the same
+    // whether the player carries 2 self-afflictions or 5.
+    const debtDepth = getDistinctDebuffCount(state.player);
+    const crownBonus = zoneHas(state, 'crown-of-thorns') && wasFallen
+        ? Math.min(4, Math.max(1, debtDepth - 1))
+        : 0;
     const zoneIntensity =
         (zoneHas(state, 'venom-and-vein') && landsDot ? 1 : 0)
-        + (zoneHas(state, 'crown-of-thorns') && wasFallen ? 1 : 0);
+        + crownBonus;
+    // Erosion late-stage rebalance (2026-07-08): venom-and-vein now also
+    // stretches every bleed/poison it deepens by 1 turn (not just +1
+    // intensity), so its "deeper roots" payoff compounds specifically across
+    // the long fights it was printed for, rather than adding a flat power
+    // token that hits every fight equally hard regardless of length.
+    const zoneDuration = zoneHas(state, 'venom-and-vein') && landsDot ? 1 : 0;
     const bonusIntensity = firedRiders.reduce((n, r) => n + (r.bonusIntensity ?? 0), 0)
         + zoneIntensity
         + (isDefendPlay ? 0 : poweringPips * PIP_INTENSITY_BONUS);
     const bonusDuration = firedRiders.reduce((n, r) => n + (r.bonusDuration ?? 0), 0)
+        + zoneDuration
         + (colorMatch && card.effectKind !== 'none' ? COLOR_MATCH_STATUS_DURATION_BONUS : 0);
     if (bonusIntensity > 0 || bonusDuration > 0) {
         let touched = false;
@@ -1278,13 +1337,19 @@ function playBottomAction(
         }
     };
 
-    // `stuck-in-their-head` (D): every ECHO / REPRISE drips 2 (engine-gated).
+    // `stuck-in-their-head` (D): every ECHO / REPRISE drips damage, engine-
+    // gated. Refrain rebalance (2026-07-08): the flat 2 HP was a rounding
+    // error against late-stage HP pools no matter how many times the deck
+    // echoed Mark onto the enemy — it now scales with getMarkStacks(enemy),
+    // floor 2 (unchanged worst case) / cap 16 (~8 stacks), so "the tune gets
+    // louder each time" is a real mechanical fact, not just flavor text.
     const stuckDrip = (): void => {
         if (!zoneHas(state, 'stuck-in-their-head')) return;
-        enemy = applyDamage(enemy, 2);
-        mechanicDamage += 2;
-        directDamage += 2;
-        events.push({ kind: 'damage-dealt', cardId: 'stuck-in-their-head', target: 'enemy', amount: 2 });
+        const drip = Math.max(2, Math.min(16, getMarkStacks(enemy)));
+        enemy = applyDamage(enemy, drip);
+        mechanicDamage += drip;
+        directDamage += drip;
+        events.push({ kind: 'damage-dealt', cardId: 'stuck-in-their-head', target: 'enemy', amount: drip });
     };
     if (echoed) stuckDrip();
 
@@ -1298,6 +1363,7 @@ function playBottomAction(
             case 'recoil': {
                 // AKRASIA — the printed blood price (unpreventable).
                 player = applyDamage(player, mech.hp);
+                recoilTaken += mech.hp;
                 events.push({ kind: 'recoil-paid', cardId: card.id, amount: mech.hp });
                 break;
             }
@@ -1330,10 +1396,22 @@ function playBottomAction(
             }
             case 'spend_premises': spendPremisesMech = mech; break;
             case 'spend_all_pips': {
-                // Zero every pip (powering die + Reserve); each grants Guard and
-                // feeds a paired RUPTURE via `fuelPerPip`.
+                // Zero every pip (powering die + Reserve + floating bank); each
+                // grants Guard and feeds a paired RUPTURE via `fuelPerPip`.
                 let pips = poweringPips;
                 reserve = reserve.map(d => {
+                    pips += d.pips ?? 0;
+                    return (d.pips ?? 0) > 0 ? { ...d, pips: 0 } : d;
+                });
+                // Foundry engagement fix (2026-07-08): a persistent FLOATING die
+                // (forged by Ex Nihilo) sitting in the tray previously never
+                // counted toward this spend — only Reserve pips did, decoupling
+                // the deck's two signature mechanics from each other. Floating
+                // dice that are NOT this cast's own powering die (already
+                // folded into poweringPips above) now also contribute their
+                // pips, zeroed the same way Reserve pips are.
+                floatingDice = floatingDice.map(d => {
+                    if (d.id === powering.id) return d;
                     pips += d.pips ?? 0;
                     return (d.pips ?? 0) > 0 ? { ...d, pips: 0 } : d;
                 });
@@ -1666,6 +1744,31 @@ function playBottomAction(
                 effectKind: def.payload.damageOverTime ? 'dot' : 'control',
                 intensity: applied.result.activeEffect?.intensity ?? 1, effect: def,
             });
+        }
+        // Penitent rebalance (2026-07-08): raw recoil (Self-Flagellant, Pact
+        // of Akrasia's fate cost) previously earned NO reflection at all —
+        // only a self-debuff APPLICATION did. Every MIRROR_RECOIL_HP_PER_STACK
+        // HP of recoil taken this play now also lands stacks of the player's
+        // most recently self-inflicted debuff (or a standing debuff_mark if
+        // this play took recoil with no self-debuff application of its own)
+        // onto the enemy — the debt argues for you even when it's paid in
+        // pure HP, not just in applied afflictions.
+        const MIRROR_RECOIL_HP_PER_STACK = 3;
+        const recoilStacks = Math.floor(recoilTaken / MIRROR_RECOIL_HP_PER_STACK);
+        if (recoilStacks > 0) {
+            const mirrorEffectId = selfDebuffsLanded.length > 0
+                ? selfDebuffsLanded[selfDebuffsLanded.length - 1].effectId
+                : 'debuff_mark';
+            const def = lookupEffectDef(mirrorEffectId);
+            if (def) {
+                const applied = applyEffect(enemy.effects, def, state.round, { intensityDelta: recoilStacks, sourceId: 'mirror-of-guilt-recoil' });
+                enemy = { ...enemy, effects: applied.activeEffects };
+                events.push({
+                    kind: 'effect-landed', cardId: 'mirror-of-guilt', effectId: def.id, target: 'enemy',
+                    effectKind: def.payload.damageOverTime ? 'dot' : 'control',
+                    intensity: applied.result.activeEffect?.intensity ?? recoilStacks, effect: def,
+                });
+            }
         }
     }
 
@@ -2192,12 +2295,28 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
     // SWAY — their aggression argues your case (spec 32 v3 T8).
     let sway = state.sway ?? 0;
     if (zoneHas(state, 'mirror-of-longing') && damagePrevented > 0) {
-        sway += damagePrevented;
-        events.push({ kind: 'sway-gained', amount: damagePrevented, total: sway });
+        // Routed through gainSway (not a bare `sway += amount`) so
+        // buff_grace_momentum's per-stack multiplier applies here too, not
+        // just to card-driven SWAY gains (2026-07-08 Grace rebalance).
+        sway = gainSway({ ...state, player, sway }, damagePrevented, events).sway ?? sway;
     }
     // `crumbling-resolve` (D): an attack that failed to break your Guard costs
     // the enemy a rung on its NEXT telegraph.
     const crumbleRungs = zoneHas(state, 'crumbling-resolve') && attacksFullyBlocked > 0 ? 1 : 0;
+    // Bastion engagement fix (2026-07-08): the deck's whole kit (guard/thorns/
+    // riposte) previously did NOTHING if the enemy never physically attacked
+    // — "guard held, thorns had nothing to punish" against heart/mind casters
+    // was a dead hand. crumbling-resolve now ALSO drips direct damage every
+    // phase, unconditionally, off whatever guard+barrier is standing — the
+    // wall doesn't need to be struck to collect. Reads `guard`/`barrier`
+    // BEFORE the `guard: 0` reset below, so this fires the same phase the
+    // soak pool was built, whether or not the enemy ever swung into it.
+    if (zoneHas(state, 'crumbling-resolve') && guard + barrier > 0 && !isDefeated(enemy)) {
+        const upkeepDrip = Math.max(4, Math.round(0.2 * (guard + barrier)));
+        enemy = applyDamage(enemy, upkeepDrip);
+        directDamage += upkeepDrip;
+        events.push({ kind: 'dot-tick', effectId: 'crumbling-resolve', label: 'Wall Upkeep', amount: upkeepDrip, target: 'enemy' });
+    }
     // `achilles-and-the-tortoise` (E): a denied turn feeds your next draw.
     const bonusDraw = zoneHas(state, 'achilles-and-the-tortoise') && hindered ? 1 : 0;
 
@@ -2280,10 +2399,15 @@ export function processBetweenPhases(
     const expiredAfflictions = [...enemyEnd.expired, ...tithedExpired]
         .filter(ae => lookupEffectDef(ae.effectId)?.type === 'debuff').length;
 
-    // `suppurating-curse` (D): the enemy takes +1 HP per DoT tick it suffered
-    // this round (spec 32 v3 T1; engine-gated drip on the tick count).
+    // `suppurating-curse` (D): the enemy takes bonus HP loss equal to the
+    // REAL DAMAGE its DoTs ticked for this round (Erosion late-stage
+    // rebalance, 2026-07-08 — was a flat +1 HP per distinct tick regardless
+    // of that tick's size, which undersold the printed text "every tick...
+    // costs one more" against four-digit late-stage HP pools; now it
+    // genuinely doubles the deck's total DoT throughput for the rest of
+    // combat, matching a tick-DAMAGE reading instead of a tick-COUNT one).
     if (zoneHas(state, 'suppurating-curse') && enemyDotTicks.length > 0 && !isDefeated(enemy)) {
-        const drip = enemyDotTicks.length;
+        const drip = enemyDotTicks.reduce((sum, t) => sum + t.amount, 0);
         enemy = applyDamage(enemy, drip);
         events.push({ kind: 'dot-tick', effectId: 'suppurating-curse', label: 'Suppuration', amount: drip, target: 'enemy' });
     }
@@ -2443,6 +2567,27 @@ export function processBetweenPhases(
     if (sway > 0 && !zoneHas(state, 'irresistible-grace')) {
         sway = Math.max(0, sway - SWAY_DECAY_PER_TURN);
         events.push({ kind: 'sway-decayed', total: sway });
+    } else if (sway > 0 && zoneHas(state, 'irresistible-grace')) {
+        // Grace late-stage rebalance (2026-07-08): every turn boundary the
+        // player holds SWAY continuously under Irresistible Grace's decay
+        // immunity, buff_grace_momentum stacks one further (capped at
+        // GRACE_MOMENTUM_MAX_STACKS) — "protect the stack" becomes a real,
+        // compounding payoff (read by gainSway) instead of just a floor.
+        const momentumDef = lookupEffectDef('buff_grace_momentum');
+        if (momentumDef) {
+            const current = omenState.player.effects.find(e => e.effectId === 'buff_grace_momentum');
+            const GRACE_MOMENTUM_MAX_STACKS = 9;
+            if (!current || current.intensity < GRACE_MOMENTUM_MAX_STACKS) {
+                const applied = applyEffect(omenState.player.effects, momentumDef, state.round, {
+                    intensityDelta: 1, sourceId: 'grace-momentum',
+                });
+                omenState = { ...omenState, player: { ...omenState.player, effects: applied.activeEffects } };
+                events.push({
+                    kind: 'effect-landed', cardId: 'irresistible-grace', effectId: 'buff_grace_momentum', target: 'self',
+                    effectKind: 'none', intensity: applied.result.activeEffect?.intensity ?? 1, effect: momentumDef,
+                });
+            }
+        }
     }
     omenState = { ...omenState, sway };
     if (zoneHas(state, 'captive-audience') && (omenState.premises ?? 0) >= 4) {
