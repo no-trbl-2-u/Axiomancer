@@ -31,6 +31,7 @@ const DebugCombatTutorialButton = lazy(() => import('@/components/DebugCombatTut
 const DebugHazardButton = lazy(() => import('@/components/DebugHazardButton').then(m => ({ default: m.DebugHazardButton })));
 const DebugHazardDeckRandomize = lazy(() => import('@/components/DebugHazardDeckRandomize').then(m => ({ default: m.DebugHazardDeckRandomize })));
 const DebugGatheringButton = lazy(() => import('@/components/DebugGatheringButton').then(m => ({ default: m.DebugGatheringButton })));
+const DebugRestButton = lazy(() => import('@/components/DebugRestButton').then(m => ({ default: m.DebugRestButton })));
 const DebugEncounterButtons = lazy(() => import('@/components/DebugEncounterButtons').then(m => ({ default: m.DebugEncounterButtons })));
 const DebugAlignmentShift = lazy(() => import('@/components/DebugAlignmentShift').then(m => ({ default: m.DebugAlignmentShift })));
 const DebugCurrencyControl = lazy(() => import('@/components/DebugCurrencyControl').then(m => ({ default: m.DebugCurrencyControl })));
@@ -115,6 +116,10 @@ export function DevToolsSections() {
 
                 <DevSection label="GATHERING SETUP" testID="dev-section-gathering">
                     <DebugGatheringButton />
+                </DevSection>
+
+                <DevSection label="REST SETUP" testID="dev-section-rest">
+                    <DebugRestButton />
                 </DevSection>
 
                 <DevSection label="COMBAT SETUP" testID="dev-section-combat">

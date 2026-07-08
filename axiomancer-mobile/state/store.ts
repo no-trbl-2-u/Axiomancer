@@ -113,6 +113,13 @@ export interface MobileQuestSlice {
  */
 export interface MobileRestSlice {
     session: RestSession | null;
+    /**
+     * True while this session is the guided first night. The coach
+     * overlay (`components/rest/TutorialCoach.tsx`) renders on top of
+     * the normal screen; completion/skip sets `REST_TUTORIAL_FLAG`,
+     * which gates both the trigger and the coach's visibility.
+     */
+    tutorial: boolean;
 }
 
 /**
@@ -195,7 +202,10 @@ export const EMPTY_GATHERING_SLICE: MobileGatheringSlice = Object.freeze({
 
 export const EMPTY_QUEST_SLICE: MobileQuestSlice = Object.freeze({ session: null });
 
-export const EMPTY_REST_SLICE: MobileRestSlice = Object.freeze({ session: null });
+export const EMPTY_REST_SLICE: MobileRestSlice = Object.freeze({
+    session: null,
+    tutorial: false,
+});
 
 export const EMPTY_CACHE_SLICE: MobileCacheSlice = Object.freeze({
     session: null,

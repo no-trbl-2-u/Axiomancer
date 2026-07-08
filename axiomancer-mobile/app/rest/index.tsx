@@ -12,6 +12,9 @@ import { useRouter } from 'expo-router';
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 
 import { ScreenBg } from '@/components/ScreenBg';
+import { TutorialCoach } from '@/components/rest/TutorialCoach';
+import { currentTutorialStep } from '@/components/rest/tutorial-steps';
+import { REST_TUTORIAL_FLAG } from '@/state/rest/store-actions';
 import { useGameActions, useGameState } from '@/state/GameStoreProvider';
 import {
     REST_WATCH_GLYPHS,
@@ -45,9 +48,22 @@ export default function RestScreen() {
     const styles = useStyles();
     const AXM = usePalette();
     const slice = useGameState((s) => s.rest);
+    const tutorialDone = useGameState((s) =>
+        ((s as unknown as { flags?: string[] }).flags ?? []).includes(REST_TUTORIAL_FLAG),
+    );
     const vm = useMemo(() => selectRestVM({ rest: slice }), [slice]);
     const actions = useGameActions();
     const router = useRouter();
+
+    // The coach rides the guided first night until its script is done
+    // or skipped; the persistent flag gates it (and the map trigger).
+    const session = slice?.session ?? null;
+    const coachActive = slice?.tutorial === true && session !== null && !tutorialDone;
+    useEffect(() => {
+        if (coachActive && currentTutorialStep(session!, vm) === -1) {
+            actions.completeRestTutorial(false);
+        }
+    }, [coachActive, session, vm, actions]);
 
     useEffect(() => {
         if (!vm.active && router.canGoBack()) router.back();
@@ -200,6 +216,14 @@ export default function RestScreen() {
                     </TouchableOpacity>
                 )}
             </ScrollView>
+
+            {coachActive && (
+                <TutorialCoach
+                    session={session!}
+                    vm={vm}
+                    onSkip={() => actions.completeRestTutorial(true)}
+                />
+            )}
         </ScreenBg>
     );
 }

@@ -26,6 +26,17 @@ import { EMPTY_REST_SLICE, type AppStore } from '../store';
 /** Flag prefix banking a held dream / watchful find. */
 export const REST_KEEPSAKE_FLAG_PREFIX = 'night-keepsake:';
 
+/** Flag set once the guided first night is completed or skipped. */
+export const REST_TUTORIAL_FLAG = 'night-watch-tutorial-done';
+
+/**
+ * The tutorial session is pinned so the coach script always matches the
+ * night: seed 41 deals `watchPlan = ['embers', 'dream', 'stir']` (a fire
+ * to tend, a dream to hold or let fade, then a stir the chosen posture
+ * decides), with `dreamQueue[1] = 'dream-gates'` surfacing on watch 2.
+ */
+export const REST_TUTORIAL_SEED = 41;
+
 /**
  * A rest is "inn-grade" (a full-recovery shelter) when its authored
  * heal fraction restores the whole bar; wilderness field-camp watches
@@ -48,20 +59,30 @@ declare global {
 }
 
 function setSession(store: AppStore, session: RestSession | null): void {
-    store.setState({ rest: { session } });
+    const prev = store.getState().rest ?? EMPTY_REST_SLICE;
+    store.setState({ rest: { ...prev, session } });
 }
 
 export interface BeginRestOptions {
     seed?: number;
     /** Authored baseline from the map-event payload (default 1.0). */
     healFraction?: number;
+    /** Start the guided first night (pinned seed unless overridden). */
+    tutorial?: boolean;
 }
 
 export function beginRestAction(store: AppStore, options: BeginRestOptions = {}): boolean {
     const state = store.getState();
     if (state.rest?.session) return false; // one night at a time
-    const seed = resolveMinigameSeed('rest', options.seed, globalThis.__AXM_REST_SEED__);
-    setSession(store, createRestSession(seed, options.healFraction ?? 1.0));
+    const seed = resolveMinigameSeed(
+        'rest',
+        options.seed,
+        globalThis.__AXM_REST_SEED__,
+        options.tutorial ? REST_TUTORIAL_SEED : undefined,
+    );
+    store.setState({
+        rest: { session: createRestSession(seed, options.healFraction ?? 1.0), tutorial: options.tutorial === true },
+    });
     return true;
 }
 
@@ -175,4 +196,22 @@ export function claimRestOutcomeAction(store: AppStore): ClaimRestOutcomeResult 
 /** Clears the night without a heal (dev / navigation escape). */
 export function abandonRestAction(store: AppStore): void {
     setSession(store, null);
+}
+
+/**
+ * Marks the guided first night as done (completed or skipped): sets the
+ * persistent flag so the map trigger never re-runs it, and persists.
+ * The session (if any) keeps running as normal play. Idempotent.
+ */
+export function completeRestTutorialAction(store: AppStore, skipped: boolean): void {
+    const state = store.getState() as unknown as GameState;
+    if (!(state.flags ?? []).includes(REST_TUTORIAL_FLAG)) {
+        store.setState({ flags: [...(state.flags ?? []), REST_TUTORIAL_FLAG] } as never);
+        try {
+            store.getState().save();
+        } catch {
+            // Persistence failures must not strand the coach.
+        }
+    }
+    void skipped;
 }

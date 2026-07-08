@@ -139,7 +139,9 @@ import {
     chooseRestOptionAction,
     chooseRestPostureAction,
     claimRestOutcomeAction,
+    completeRestTutorialAction,
     continueRestWatchAction,
+    REST_TUTORIAL_FLAG,
     type BeginRestOptions,
     type ClaimRestOutcomeResult,
 } from './rest/store-actions';
@@ -596,6 +598,8 @@ export interface AppActions {
     claimRestOutcome: () => ClaimRestOutcomeResult;
     /** Clear the night without a heal (dev / escape hatch). */
     abandonRest: () => void;
+    /** Mark the guided first night done (completed or skipped) and persist. */
+    completeRestTutorial: (skipped: boolean) => void;
 
     // -----------------------------------------------------------------
     // Loot-cache encounter ("The Reliquary" — see state/cache/). Phase
@@ -1016,6 +1020,7 @@ export function createAppActions(store: AppStore): AppActions {
         continueRestWatch: () => continueRestWatchAction(store),
         claimRestOutcome: () => claimRestOutcomeAction(store),
         abandonRest: () => abandonRestAction(store),
+        completeRestTutorial: (skipped) => completeRestTutorialAction(store, skipped),
         beginLootCache: (options) => beginLootCacheAction(store, options),
         startLootCacheDelving: () => startLootCacheDelvingAction(store),
         delveLootCache: () => delveLootCacheAction(store),
@@ -1606,7 +1611,14 @@ function resolveCurrentMapEventAction(store: AppStore, sourceNodeType?: string):
                 player: gameState.player,
                 event: EMPTY_EVENT_SLICE,
             });
-            beginRestAction(store, { healFraction: result.event.healFraction });
+            // The first-ever night runs as the guided tutorial (pinned
+            // seed, coach overlay); the persistent flag set on
+            // completion/skip keeps every later rest organic.
+            const tutorialDone = (gameState.flags ?? []).includes(REST_TUTORIAL_FLAG);
+            beginRestAction(store, {
+                healFraction: result.event.healFraction,
+                tutorial: !tutorialDone,
+            });
             return true;
         }
 
