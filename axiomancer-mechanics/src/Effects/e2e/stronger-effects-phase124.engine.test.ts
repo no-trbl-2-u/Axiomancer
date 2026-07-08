@@ -7,24 +7,10 @@ import { describe, it, expect } from 'vitest';
 import { lookupEffect } from '../effects.library';
 
 describe('Phase 124 - Stronger skills/effects', () => {
-    it('tier1_heart_defend provides stronger healing and longer duration', async () => {
-        const healing = lookupEffect('tier1_heart_defend');
-        expect(healing).toBeDefined();
-        
-        // Phase 124: increased from healthPerRound: 1 → 2, duration: 3 → 4
-        expect(healing!.duration).toBe(4);
-        expect(healing!.payload.regeneration?.healthPerRound).toBe(2);
-    });
-
-    it('tier1_body_attack has stronger stat bonus and longer duration', async () => {
-        const bodyBuff = lookupEffect('tier1_body_attack');
-        expect(bodyBuff).toBeDefined();
-        
-        // Phase 124: increased physicalAttack value: 1 → 2, duration: 2 → 3
-        expect(bodyBuff!.duration).toBe(3);
-        expect(bodyBuff!.payload.statModifiers?.[0].value).toBe(2);
-        expect(bodyBuff!.payload.statModifiers?.[0].stat).toBe('physicalAttack');
-    });
+    // The tier1_heart_defend / tier1_body_attack cases retired with the
+    // spec 32 v3 keyword reset (the tier1_* stance layer is gone from the
+    // library). The surviving Phase 124 tuning below lives on support-tagged
+    // non-card effects.
 
     it('debuff_confusion has stronger penalty and longer duration', async () => {
         const confusion = lookupEffect('debuff_confusion');

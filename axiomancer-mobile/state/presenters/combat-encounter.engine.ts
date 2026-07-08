@@ -690,28 +690,26 @@ function cardCalc(card: CombatCard, skill: Skill | undefined): CardCalc {
             out.keyword = 'Siphon'; out.glyph = glyphFor('buff_life_steal'); out.categoryColor = GLYPH_COLORS.drain;
             break;
         }
-        case 'compound': {
-            const m = pr.mech?.kind === 'compound' ? pr.mech : undefined;
-            out.compoundPer = m?.perDebuff ?? 0;
-            out.keyword = 'Compound'; out.glyph = '⊕'; out.categoryColor = STRIKE_COLOR;
-            break;
-        }
-        case 'execute': {
-            const m = pr.mech?.kind === 'execute' ? pr.mech : undefined;
-            out.executeHpPct = Math.round((m?.hpPct ?? 0) * 100);
-            out.executeStacks = m?.dotStacks ?? 0;
-            out.keyword = 'Execute'; out.glyph = '☠'; out.categoryColor = GLYPH_COLORS.dot;
-            break;
-        }
         case 'rupture': {
-            // Live-only value (detonates the foe's pending DoT) → a word, never a number.
+            // Live-only value (detonates the foe's afflictions) → a word, never a number.
             out.keyword = 'Rupture'; out.glyph = '✸'; out.categoryColor = GLYPH_COLORS.dot;
             break;
         }
+        case 'reap': {
+            // Spec 32 v3 T7 — spend Souls; the burst is live (never headlined).
+            const m = pr.mech?.kind === 'reap' ? pr.mech : undefined;
+            const all = pr.mech?.kind === 'reap_all' ? pr.mech : undefined;
+            out.reapCost = m?.cost ?? 0;
+            out.reapPerSoul = all?.burstPerSoul ?? 0;
+            out.keyword = 'Reap'; out.glyph = '☠'; out.categoryColor = GLYPH_COLORS.dot;
+            break;
+        }
+        case 'enchant':
+            out.keyword = 'Enchantment'; out.glyph = '◈'; out.categoryColor = ENCHANT_COLOR; break;
+        case 'disenchant':
+            out.keyword = 'Disenchant'; out.glyph = '⛓'; out.categoryColor = GLYPH_COLORS.control; break;
         case 'guard':
             out.keyword = 'Guard'; out.glyph = '🛡'; out.categoryColor = GUARD_COLOR; break;
-        case 'strike':
-            out.keyword = null; out.glyph = '◆'; out.categoryColor = STRIKE_COLOR; break;
         case 'befriend':
             out.keyword = null; out.glyph = '🕊'; out.categoryColor = BEFRIEND_COLOR; break;
         case 'inert':
