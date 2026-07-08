@@ -229,6 +229,19 @@ lands.
 
 ---
 
+## Status (2026-07-08, post-plan execution pass)
+
+- [x] Item 4 — per-preset floors + dominance ceiling (60b1e26b)
+- [x] Item 6 — card effectiveness lint, 70/70 strict (679ba168)
+- [x] Item 7 — atlas gate marks from round 2 (8f646629)
+- [x] Item 2 — scaling burst caps, fraction 0.25 (8d853dcb):
+      penitent late 0.02->0.40 (regression erased), erosion late 0.08;
+      foundry/tithe/augury/bastion late still 0 -> items 3/5 territory
+- [ ] Item 1 — win-path scaling (in progress)
+- [ ] Item 3 — persistence-by-stack DoTs (re-scope after item 2: erosion
+      late only 0.08, so the DoT-decay wall is still real)
+- [ ] Item 5 — theme pressure valve (foundry/bastion walls unchanged)
+
 ## Sequencing
 
 1. **#4 floors** (S, free) — fix the objective function first.
