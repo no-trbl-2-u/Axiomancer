@@ -149,6 +149,7 @@ const resonanceDetonation: Card = {
 
 const venomAndVein: Card = {
     id: 'venom-and-vein',
+    persistentEffect: 'Every bleed or poison you apply lands at +1 intensity.',
     name: 'Venom and Vein',
     category: 'fallacy',
     philosophicalAspect: 'body',
@@ -165,6 +166,7 @@ const venomAndVein: Card = {
 
 const suppuratingCurse: Card = {
     id: 'suppurating-curse',
+    persistentEffect: 'Doubles the total enemy damage-over-time each round.',
     name: 'Suppurating Curse',
     category: 'fallacy',
     philosophicalAspect: 'mind',
@@ -298,6 +300,7 @@ const theClosingWord: Card = {
 
 const practicedCadence: Card = {
     id: 'practiced-cadence',
+    persistentEffect: '+1 Premise on the first card you play each turn.',
     name: 'Practiced Cadence',
     category: 'fallacy',
     philosophicalAspect: 'heart',
@@ -314,6 +317,7 @@ const practicedCadence: Card = {
 
 const captiveAudience: Card = {
     id: 'captive-audience',
+    persistentEffect: 'While you hold 4+ Premises, the enemy stays marked.',
     name: 'Captive Audience',
     category: 'fallacy',
     philosophicalAspect: 'heart',
@@ -452,6 +456,7 @@ const theOvertake: Card = {
 
 const anvilOfForm: Card = {
     id: 'anvil-of-form',
+    persistentEffect: 'Every kindled or floating die arrives with +1 pip.',
     name: 'Anvil of Form',
     category: 'paradox',
     philosophicalAspect: 'mind',
@@ -468,6 +473,7 @@ const anvilOfForm: Card = {
 
 const entropyTax: Card = {
     id: 'entropy-tax',
+    persistentEffect: 'Every kindled or floating die you spend marks the enemy.',
     name: 'Entropy Tax',
     category: 'paradox',
     philosophicalAspect: 'mind',
@@ -596,6 +602,7 @@ const pactOfAkrasia: Card = {
 
 const crownOfThorns: Card = {
     id: 'crown-of-thorns',
+    persistentEffect: 'While Fallen, your status applications land at +1 intensity.',
     name: 'Crown of Thorns',
     category: 'paradox',
     philosophicalAspect: 'heart',
@@ -612,6 +619,7 @@ const crownOfThorns: Card = {
 
 const mirrorOfGuilt: Card = {
     id: 'mirror-of-guilt',
+    persistentEffect: 'Every self-debuff you take also lands one stack on the enemy.',
     name: 'Mirror of Guilt',
     category: 'paradox',
     philosophicalAspect: 'mind',
@@ -740,6 +748,7 @@ const paralysisOfAnalysis: Card = {
 
 const achillesAndTheTortoise: Card = {
     id: 'achilles-and-the-tortoise',
+    persistentEffect: 'Draw 1 card each time you deny an enemy turn.',
     name: 'Achilles and the Tortoise',
     category: 'paradox',
     philosophicalAspect: 'mind',
@@ -756,6 +765,7 @@ const achillesAndTheTortoise: Card = {
 
 const quagmireOfDoubt: Card = {
     id: 'quagmire-of-doubt',
+    persistentEffect: 'Enemy telegraphs enter play one rung lower.',
     name: 'Quagmire of Doubt',
     category: 'fallacy',
     philosophicalAspect: 'mind',
@@ -881,6 +891,7 @@ const prophecyFulfilled: Card = {
 
 const theOraclesEye: Card = {
     id: 'the-oracles-eye',
+    persistentEffect: 'The next enemy stance is always revealed, and your omens hit harder.',
     name: "The Oracle's Eye",
     category: 'paradox',
     philosophicalAspect: 'heart',

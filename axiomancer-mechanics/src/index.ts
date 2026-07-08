@@ -172,14 +172,16 @@ export {
     draftCombatDeck, resolveDeckSelection,
     COMBAT_SIM_POLICIES, COMBAT_SIM_POLICY_ORDER, getSimPolicy, listSimPolicies,
     runPlaytestCell, runPlaytestMatrix, formatPlaytestReport,
+    evaluateWinRateCurve, CURVE_SHAPE_TOLERANCES,
 } from './Combat';
 export type {
-    CombatSimRunOptions, CombatSimDetailedOptions, CombatCardUsage,
+    CombatSimRunOptions, CombatSimDetailedOptions, CombatCardUsage, WinPathCounts,
     CombatStageId, CombatStageProfile,
     DeckDraftOptions, CombatDeckSelection,
     CombatSimPolicy,
     PlaytestCellSpec, PlaytestCellResult, PlaytestMatrixOptions,
     PlaytestStageSummary, PlaytestReport,
+    WinRateCurveClass, WinRateCurvePoint, WinRateCurveResult, CurveShapeTolerances,
 } from './Combat';
 
 // ─── Sandbox cards — the deck-forge experimentation surface ───────────────────

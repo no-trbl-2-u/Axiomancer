@@ -18,6 +18,7 @@ import { describe, it, expect, afterEach, vi } from 'vitest';
 
 import { runPlaytestMatrix, type PlaytestReport } from '../combat.playtest';
 import { COMBAT_DECK_PRESET_ORDER } from '../combat.deck-presets';
+import { evaluateWinRateCurve, type WinRateCurvePoint } from '../combat.curve-shape';
 import type { CombatStageId } from '../combat.stage-profiles';
 
 afterEach(() => vi.restoreAllMocks());
@@ -154,6 +155,68 @@ describe('balance bands (loose) — per-preset floors and dominance ceiling', ()
         },
         360_000,
     );
+});
+
+// ── Win-rate CURVE SHAPE (deck-tuning free-metrics tier, 2026-07-08) ──────────
+// The per-stage floors above grade each stage INDEPENDENTLY, so a flat/inverted
+// dominance curve (early≈mid≈late) clears every band while being exactly the
+// anti-pattern the deck-progression doctrine forbids: a STARTER preset that
+// never falls off. `evaluateWinRateCurve('starter')` grades the SHAPE across
+// early→mid→late on identical seeds: monotone non-increasing + a real total
+// decay (≥ CURVE_SHAPE_TOLERANCES.starter.minTotalMove).
+//
+// This is a CHARACTERIZATION witness, not a green-gate on the shape itself: the
+// three listed presets FAIL the curve on `main` today and that is a documented
+// FINDING (see docs/reports/deck-tuning-2026-07-08*.md), not something this pass
+// fixes. The test pins the EXACT failing set so the suite stays green now and
+// goes RED the moment a NEW preset breaks the curve, or someone flattens/steepens
+// a passing one, or a listed offender is fixed without updating this list. Do NOT
+// widen the tolerances to shrink this set — re-derive the offenders and update
+// the constant when a forge item legitimately reshapes a curve.
+const CURVE_STAGES: readonly CombatStageId[] = ['early', 'mid', 'late'];
+// seed 1, greedy, 2 enemies/stage, 30 runs/cell (matches this file's matrix).
+const KNOWN_CURVE_VIOLATORS: readonly string[] = ['grace', 'oratory', 'standstill'];
+
+let cachedCurve: PlaytestReport | null = null;
+function curveReport(): PlaytestReport {
+    cachedCurve = cachedCurve ?? runPlaytestMatrix({
+        stages: CURVE_STAGES,
+        policies: ['greedy'],
+        decks: COMBAT_DECK_PRESET_ORDER.map(id => ({ kind: 'preset' as const, presetId: id })),
+        enemiesPerStage: 2,
+        runsPerCell: RUNS_PER_CELL,
+        seed: SEED,
+    });
+    return cachedCurve;
+}
+
+function presetWinRate(report: PlaytestReport, presetId: string, stage: CombatStageId): number {
+    const cells = report.cells.filter(
+        c => c.spec.stage === stage
+            && c.spec.deck.kind === 'preset'
+            && (c.spec.deck as { presetId: string }).presetId === presetId,
+    );
+    const wins = cells.reduce((n, c) => n + c.stats.victories + c.stats.mercies, 0);
+    const runs = cells.reduce((n, c) => n + c.stats.runs, 0);
+    return runs > 0 ? wins / runs : 0;
+}
+
+describe('win-rate curve shape — starter presets must decay, not sit flat', () => {
+    it('the set of presets FAILING the starter curve is exactly the known offenders', () => {
+        const report = curveReport();
+        const failing: string[] = [];
+        for (const presetId of COMBAT_DECK_PRESET_ORDER) {
+            const points: WinRateCurvePoint[] = CURVE_STAGES.map(stage => ({
+                stage, winRate: presetWinRate(report, presetId, stage),
+            }));
+            const result = evaluateWinRateCurve(points, 'starter');
+            const shape = points.map(p => p.winRate.toFixed(2)).join('/');
+            console.info(`[curve] ${presetId}: ${shape} move=${result.totalMove.toFixed(2)} `
+                + `${result.pass ? 'OK' : `FAIL(${result.violations.join('; ')})`}`);
+            if (!result.pass) failing.push(presetId);
+        }
+        expect(failing.slice().sort()).toEqual([...KNOWN_CURVE_VIOLATORS].slice().sort());
+    }, 240_000);
 });
 
 // spec 32 v3: bands re-pinned loose; /deck-tuning + /combat-playtest recalibrate.

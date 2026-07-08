@@ -46,7 +46,7 @@ import { isSyntheticCard } from './combat.cards';
 import { COMBAT_SIM_POLICIES, type CombatSimPolicy, type CombatSimPolicyId } from './combat.sim-policies';
 import {
     simulateHazardPatternCombatDetailed,
-    type CombatCardUsage, type CombatSimStats,
+    type CombatCardUsage, type CombatSimStats, type WinPathCounts,
 } from './combat.encounter.sim';
 
 /** One frozen measurement: stage × enemy × policy × deck × runs × seed. */
@@ -99,6 +99,16 @@ export interface PlaytestStageSummary {
     statusEngagement: number;
     dotHpFraction: number;
     avgRounds: number;
+    /** Summed win-path counts across the stage's cells (un-collapsed). */
+    winPathCounts: WinPathCounts;
+    /** Runs-weighted deck utilization (distinct-played / distinct-deck). */
+    deckUtilization: number;
+    /** Runs-weighted normalized play entropy (decision spread). */
+    usageEntropy: number;
+    /** The single card with the largest attributed enemy-HP share across the
+     *  stage's cells, and that share (the dominant-card witness). '' when none. */
+    dominantCardId: string;
+    dominantCardShare: number;
 }
 
 export interface PlaytestReport {
@@ -106,8 +116,10 @@ export interface PlaytestReport {
     /** Aggregated over cells, weighted by runs. */
     stageSummaries: PlaytestStageSummary[];
     /** Coverage vs the union of eligible pools (library + sandbox) of the
-     *  stages run: which cards were ever played vs never touched. */
-    cardCoverage: { exercised: string[]; neverPlayed: string[] };
+     *  stages run: which cards were ever played vs never touched. `deadCardRate`
+     *  is `neverPlayed / (exercised + neverPlayed)` — the dead-card witness as a
+     *  first-class number (0 = every eligible card saw a play). */
+    cardCoverage: { exercised: string[]; neverPlayed: string[]; deadCardRate: number };
 }
 
 /**
@@ -189,7 +201,14 @@ export function runPlaytestCell(spec: PlaytestCellSpec): PlaytestCellResult {
 
 function summarizeStage(stage: CombatStageId, cells: readonly PlaytestCellResult[]): PlaytestStageSummary {
     const mine = cells.filter(c => c.spec.stage === stage);
-    let runs = 0, win = 0, engagement = 0, dot = 0, rounds = 0;
+    let runs = 0, win = 0, engagement = 0, dot = 0, rounds = 0, util = 0, entropy = 0;
+    const winPathCounts: WinPathCounts = {
+        victory: 0, mercy: 0, capitulate: 0, concede: 0, defeat: 0, retreat: 0,
+    };
+    // Dominant card at the stage level: the biggest per-card share seen in any
+    // of the stage's cells (the worst-case single-card concentration).
+    let dominantCardId = '';
+    let dominantCardShare = 0;
     for (const cell of mine) {
         const weight = cell.stats.runs;
         runs += weight;
@@ -197,6 +216,15 @@ function summarizeStage(stage: CombatStageId, cells: readonly PlaytestCellResult
         engagement += cell.stats.statusEngagement * weight;
         dot += cell.stats.dotHpFraction * weight;
         rounds += cell.stats.avgRounds * weight;
+        util += cell.stats.deckUtilization * weight;
+        entropy += cell.stats.usageEntropy * weight;
+        for (const key of Object.keys(winPathCounts) as (keyof WinPathCounts)[]) {
+            winPathCounts[key] += cell.stats.winPathCounts[key];
+        }
+        if (cell.stats.dominantCardShare > dominantCardShare) {
+            dominantCardShare = cell.stats.dominantCardShare;
+            dominantCardId = cell.stats.dominantCardId;
+        }
     }
     const denom = Math.max(1, runs);
     return {
@@ -206,6 +234,11 @@ function summarizeStage(stage: CombatStageId, cells: readonly PlaytestCellResult
         statusEngagement: engagement / denom,
         dotHpFraction: dot / denom,
         avgRounds: rounds / denom,
+        winPathCounts,
+        deckUtilization: util / denom,
+        usageEntropy: entropy / denom,
+        dominantCardId,
+        dominantCardShare,
     };
 }
 
@@ -256,8 +289,10 @@ export function runPlaytestMatrix(options: PlaytestMatrixOptions = {}): Playtest
     }
     const exercised = [...pool].filter(id => played.has(id)).sort();
     const neverPlayed = [...pool].filter(id => !played.has(id)).sort();
+    const poolSize = exercised.length + neverPlayed.length;
+    const deadCardRate = poolSize > 0 ? neverPlayed.length / poolSize : 0;
 
-    return { cells, stageSummaries, cardCoverage: { exercised, neverPlayed } };
+    return { cells, stageSummaries, cardCoverage: { exercised, neverPlayed, deadCardRate } };
 }
 
 function deckLabel(selection: CombatDeckSelection): string {
@@ -280,12 +315,14 @@ export function formatPlaytestReport(report: PlaytestReport, opts?: { perCard?: 
     const lines: string[] = [];
     lines.push('Hazard combat playtest matrix');
     lines.push('(win = enemy HP→0 or befriend-spare; V/M/D/R = victory/mercy/defeat/retreat;');
-    lines.push(' statusEng + dotFrac are the doctrine witnesses: status play is the efficient path)');
+    lines.push(' statusEng + dotFrac are the doctrine witnesses: status play is the efficient path;');
+    lines.push(' util=deck utilization, H=play entropy, dom=dominant-card HP share (>70% = spam))');
     lines.push('');
 
     const header = `  ${'stage'.padEnd(11)}${'enemy'.padEnd(26)}${'policy'.padEnd(13)}${'deck'.padEnd(22)}`
         + `${'win'.padStart(5)}  ${'V/M/D/R'.padEnd(12)}${'rounds'.padStart(6)}`
-        + `${'statusEng'.padStart(10)}${'dotFrac'.padStart(8)}${'strike'.padStart(7)}`;
+        + `${'statusEng'.padStart(10)}${'dotFrac'.padStart(8)}${'strike'.padStart(7)}`
+        + `${'util'.padStart(6)}${'H'.padStart(5)}${'dom'.padStart(6)}`;
     lines.push(header);
     for (const cell of report.cells) {
         const s = cell.stats;
@@ -294,23 +331,49 @@ export function formatPlaytestReport(report: PlaytestReport, opts?: { perCard?: 
             + `${deckLabel(cell.spec.deck).padEnd(22)}`
             + `${pct(s.winRate)}  ${`${s.victories}/${s.mercies}/${s.defeats}/${s.retreats}`.padEnd(12)}`
             + `${s.avgRounds.toFixed(1).padStart(6)}`
-            + `${pct(s.statusEngagement).padStart(10)}${pct(s.dotHpFraction).padStart(8)}${pct(s.strikeFraction).padStart(7)}`,
+            + `${pct(s.statusEngagement).padStart(10)}${pct(s.dotHpFraction).padStart(8)}${pct(s.strikeFraction).padStart(7)}`
+            + `${pct(s.deckUtilization).padStart(6)}${s.usageEntropy.toFixed(2).padStart(5)}${pct(s.dominantCardShare).padStart(6)}`,
+        );
+    }
+
+    // Un-collapsed win-path mix per cell (V/M/D/R folds the three merciful
+    // resolutions — this exposes the theme's OWN win path: capitulate / concede).
+    lines.push('');
+    lines.push('Win-path mix (per cell — victory/mercy/capitulate/concede/defeat):');
+    for (const cell of report.cells) {
+        const w = cell.stats.winPathCounts;
+        lines.push(
+            `  ${cell.spec.stage.padEnd(11)}${cell.spec.enemySlug.padEnd(26)}${cell.spec.policyId.padEnd(13)}`
+            + `${deckLabel(cell.spec.deck).padEnd(22)}`
+            + `vic=${String(w.victory).padStart(3)} mer=${String(w.mercy).padStart(3)} `
+            + `cap=${String(w.capitulate).padStart(3)} con=${String(w.concede).padStart(3)} `
+            + `def=${String(w.defeat).padStart(3)}`,
         );
     }
 
     lines.push('');
     lines.push('Stage summaries (runs-weighted):');
     for (const summary of report.stageSummaries) {
+        const w = summary.winPathCounts;
         lines.push(
             `  ${summary.stage.padEnd(11)}cells=${String(summary.cells).padEnd(4)}`
             + `win=${pct(summary.winRate)}  statusEng=${pct(summary.statusEngagement)}`
-            + `  dotFrac=${pct(summary.dotHpFraction)}  rounds=${summary.avgRounds.toFixed(1)}`,
+            + `  dotFrac=${pct(summary.dotHpFraction)}  rounds=${summary.avgRounds.toFixed(1)}`
+            + `  util=${pct(summary.deckUtilization)}  H=${summary.usageEntropy.toFixed(2)}`
+            + `  dom=${pct(summary.dominantCardShare)}${summary.dominantCardId ? `(${summary.dominantCardId})` : ''}`,
+        );
+        lines.push(
+            `             win-path: vic=${w.victory} mer=${w.mercy} cap=${w.capitulate}`
+            + ` con=${w.concede} def=${w.defeat}`,
         );
     }
 
     const totalPool = report.cardCoverage.exercised.length + report.cardCoverage.neverPlayed.length;
     lines.push('');
-    lines.push(`Card coverage: ${report.cardCoverage.exercised.length}/${totalPool} eligible cards exercised`);
+    lines.push(
+        `Card coverage: ${report.cardCoverage.exercised.length}/${totalPool} eligible cards exercised`
+        + ` (dead-card rate ${pct(report.cardCoverage.deadCardRate)})`,
+    );
     if (report.cardCoverage.neverPlayed.length > 0) {
         lines.push(`  never played: ${report.cardCoverage.neverPlayed.join(', ')}`);
     }

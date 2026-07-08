@@ -26,9 +26,12 @@ import {
     tapFateDie,
 } from './combat.engine';
 import { RESERVE_MAX } from './combat.dice';
+import { isSyntheticCard } from './combat.cards';
 import { getPendingDotTotal } from './effects';
 import { getRng } from '../Utils/rng';
-import type { CombatCard, CombatEncounterState, CombatOutcome } from './combat.encounter.types';
+import type {
+    CombatAttributionRow, CombatCard, CombatEncounterState, CombatOutcome,
+} from './combat.encounter.types';
 import { COMBAT_SIM_POLICIES, type CombatSimPolicy, type CombatSimPolicyId } from './combat.sim-policies';
 
 /**
@@ -43,6 +46,16 @@ import { COMBAT_SIM_POLICIES, type CombatSimPolicy, type CombatSimPolicyId } fro
  */
 export type { CombatSimPolicyId } from './combat.sim-policies';
 
+/**
+ * The UN-COLLAPSED win-path distribution: a raw count per `CombatOutcome`
+ * across the sim's runs. The legacy `victories`/`mercies` counters fold the
+ * three merciful resolutions (mercy + capitulate + concede) into one bucket
+ * (`mercies = mercy + capitulate + concede`); this record keeps them apart so a
+ * theme's OWN win path is visible — Charm wins via `capitulate`, Peroration via
+ * `concede`, Befriend via `mercy`. deck-tuning free-metrics tier (2026-07-08).
+ */
+export type WinPathCounts = Record<CombatOutcome, number>;
+
 export interface CombatSimStats {
     runs: number;
     victories: number;       // enemy HP → 0
@@ -51,6 +64,10 @@ export interface CombatSimStats {
     retreats: number;
     /** Win rate = (victories + mercies) / runs. */
     winRate: number;
+    /** Un-collapsed win-path mix (victory / mercy / capitulate / concede /
+     *  defeat / retreat) — `mercies` folds mercy+capitulate+concede; this keeps
+     *  each path visible. Sums to `runs`. */
+    winPathCounts: WinPathCounts;
     avgRounds: number;
     /** Average share of plays that landed a status effect on the enemy (engagement witness). */
     statusEngagement: number;
@@ -69,6 +86,22 @@ export interface CombatSimStats {
     /** Mean count of active effects on the enemy at the start of each threat phase.
      *  Doctrine witness: a loaded status board = the engine working as intended. */
     avgActiveEffectsPerPhase: number;
+    /** Deck utilization: distinct cards actually PLAYED / distinct cards in the
+     *  deck (0–1). 1.0 = every card earned a play; a low value on a big deck is
+     *  the bloat witness (a 2x late preset that only ever plays 6 of its 15+
+     *  uniques). Denominator falls back to distinct cards played when no explicit
+     *  deck was threaded (the known-skills path), so it reads 1.0 there. */
+    deckUtilization: number;
+    /** Normalized Shannon entropy (0–1) over the per-card PLAYS vector — the
+     *  decision-spread witness. 0 = one card carried every play (one-note spam);
+     *  1 = plays spread evenly across the deck's distinct cards. */
+    usageEntropy: number;
+    /** The single card that dealt the enemy the most HP (dotDamage + damageDealt,
+     *  aggregated across runs), by id. '' when nothing dealt damage. */
+    dominantCardId: string;
+    /** `dominantCardId`'s share of total attributed enemy-HP damage (0–1). The
+     *  single-card-spam witness: deck-tuning §4 flags any card > 0.70. */
+    dominantCardShare: number;
 }
 
 /** Per-card telemetry for one run (or aggregated over many), keyed by the
@@ -297,6 +330,10 @@ export function runOneEncounter(
     guardOnAttack: number; playerHpTaken: number;
     activeEffectSamples: number[];
     cardUsage: Record<string, CombatCardUsage>;
+    /** The final per-card HP-damage ledger (already accumulated by the engine —
+     *  surfaced, not recomputed) so the detailed sim can aggregate the
+     *  dominant-card share across runs. */
+    attribution: Record<string, CombatAttributionRow>;
 } {
     const policyObj = COMBAT_SIM_POLICIES[policy];
     if (!policyObj) throw new Error(`Unknown combat sim policy '${String(policy)}'`);
@@ -387,6 +424,7 @@ export function runOneEncounter(
         playerHpTaken,
         activeEffectSamples,
         cardUsage,
+        attribution: state.attribution,
     };
 }
 
@@ -406,6 +444,42 @@ export interface CombatSimDetailedOptions {
     focusCardIds?: readonly string[];
 }
 
+/** A zeroed win-path tally with every `CombatOutcome` key present. */
+function emptyWinPathCounts(): WinPathCounts {
+    return { victory: 0, mercy: 0, capitulate: 0, concede: 0, defeat: 0, retreat: 0 };
+}
+
+/** The card with the largest share of total attributed enemy-HP damage. */
+function dominantCard(damageByCard: Record<string, number>): { dominantCardId: string; dominantCardShare: number } {
+    const entries = Object.entries(damageByCard);
+    const total = entries.reduce((s, [, d]) => s + d, 0);
+    if (total <= 0 || entries.length === 0) return { dominantCardId: '', dominantCardShare: 0 };
+    let bestId = '';
+    let bestDmg = -Infinity;
+    for (const [id, dmg] of entries) {
+        if (dmg > bestDmg) { bestDmg = dmg; bestId = id; }
+    }
+    return { dominantCardId: bestId, dominantCardShare: bestDmg / total };
+}
+
+/**
+ * Normalized Shannon entropy (0–1) of the per-card PLAYS distribution. 0 when
+ * one card carried every play (one-note spam); 1 when plays are spread evenly
+ * across the distinct cards that saw play. A single played card (or none)
+ * yields 0 — there is no spread to measure.
+ */
+function normalizedPlayEntropy(usage: readonly CombatCardUsage[]): number {
+    const plays = usage.map(u => u.plays).filter(p => p > 0);
+    const total = plays.reduce((s, p) => s + p, 0);
+    if (total <= 0 || plays.length <= 1) return 0;
+    let h = 0;
+    for (const p of plays) {
+        const prob = p / total;
+        h -= prob * Math.log(prob);
+    }
+    return h / Math.log(plays.length);
+}
+
 /**
  * Monte-Carlo simulation with per-card telemetry: runs `runs` seeded
  * encounters and reports the win/mercy/defeat distribution + engagement
@@ -423,6 +497,9 @@ export function simulateHazardPatternCombatDetailed(
     let totalDotHp = 0, totalMechanicBurst = 0, totalDirectHp = 0;
     let totalGuardOnAttack = 0, totalPlayerHpTaken = 0;
     let totalActiveEffectSamples = 0, totalPhaseSamples = 0;
+    const winPathCounts = emptyWinPathCounts();
+    // Per-card enemy-HP damage across all runs (dominant-card witness).
+    const damageByCard: Record<string, number> = {};
     const cardUsage: Record<string, CombatCardUsage> = {};
 
     for (let i = 0; i < count; i++) {
@@ -430,12 +507,16 @@ export function simulateHazardPatternCombatDetailed(
             deck: options.deck,
             focusCardIds: options.focusCardIds,
         });
+        winPathCounts[r.outcome]++;
         if (r.outcome === 'victory') victories++;
         // Spec 32 v3 §9 — CAPITULATE (SWAY) and CONCEDE (Peroration) are
         // merciful resolutions: they count with the mercy wins.
         else if (r.outcome === 'mercy' || r.outcome === 'capitulate' || r.outcome === 'concede') mercies++;
         else if (r.outcome === 'retreat') retreats++;
         else defeats++;
+        for (const row of Object.values(r.attribution)) {
+            damageByCard[row.cardId] = (damageByCard[row.cardId] ?? 0) + row.dotDamage + row.damageDealt;
+        }
         totalRounds += r.rounds;
         totalPlays += r.plays;
         totalStatusPlays += r.statusPlays;
@@ -462,6 +543,18 @@ export function simulateHazardPatternCombatDetailed(
     const totalEnemyHpLost = Math.max(1, totalDotHp + totalMechanicBurst + totalDirectHp);
     const guardDenom = Math.max(1, totalGuardOnAttack + totalPlayerHpTaken);
 
+    // Distinct cards that earned at least one play across the runs.
+    const playedIds = Object.values(cardUsage).filter(u => u.plays > 0).map(u => u.cardId);
+    // Denominator: distinct non-synthetic cards in the threaded deck; when no
+    // explicit deck was given (known-skills path) fall back to the played set so
+    // utilization reads 1.0 rather than dividing by an unknown pool.
+    const deckDistinct = options.deck
+        ? new Set(options.deck.filter(id => !isSyntheticCard(id))).size
+        : playedIds.length;
+    const deckUtilization = deckDistinct > 0 ? Math.min(1, playedIds.length / deckDistinct) : 0;
+
+    const { dominantCardId, dominantCardShare } = dominantCard(damageByCard);
+
     const stats: CombatSimStats = {
         runs: count,
         victories,
@@ -469,6 +562,7 @@ export function simulateHazardPatternCombatDetailed(
         defeats,
         retreats,
         winRate: (victories + mercies) / count,
+        winPathCounts,
         avgRounds: totalRounds / count,
         statusEngagement: totalPlays > 0 ? totalStatusPlays / totalPlays : 0,
         avgConvictionSpent: totalConviction / count,
@@ -477,6 +571,10 @@ export function simulateHazardPatternCombatDetailed(
         mechanicBurstFraction: totalMechanicBurst / totalEnemyHpLost,
         guardMitigatedFraction: totalGuardOnAttack / guardDenom,
         avgActiveEffectsPerPhase: totalPhaseSamples > 0 ? totalActiveEffectSamples / totalPhaseSamples : 0,
+        deckUtilization,
+        usageEntropy: normalizedPlayEntropy(Object.values(cardUsage)),
+        dominantCardId,
+        dominantCardShare,
     };
     return { stats, cardUsage };
 }

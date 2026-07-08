@@ -225,8 +225,13 @@ export {
 } from './combat.encounter.sim';
 export type {
     CombatSimStats, CombatSimPolicyId,
-    CombatSimRunOptions, CombatSimDetailedOptions, CombatCardUsage,
+    CombatSimRunOptions, CombatSimDetailedOptions, CombatCardUsage, WinPathCounts,
 } from './combat.encounter.sim';
+// deck-tuning free-metrics tier — deck-class-aware win-rate curve-shape witness.
+export { evaluateWinRateCurve, CURVE_SHAPE_TOLERANCES } from './combat.curve-shape';
+export type {
+    WinRateCurveClass, WinRateCurvePoint, WinRateCurveResult, CurveShapeTolerances,
+} from './combat.curve-shape';
 // ─── Playtest supercharge — stage profiles, deck drafting, policy roster, matrix ──
 export {
     COMBAT_STAGE_ORDER, COMBAT_STAGE_PROFILES,

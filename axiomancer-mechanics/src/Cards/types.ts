@@ -432,6 +432,15 @@ export interface Card {
      * field stays undefined for them.
      */
     free?: CardRider;
+    /**
+     * Spec 32 v4 — a one-line mechanical summary of an enchant/disenchant's
+     * HOOKED passive (the effect lives in the engine, not in `combatEffects`, so
+     * it is otherwise invisible to the catalog and the card UI). Rendered on both
+     * lines: FREE grants it for a few rounds (timed), PAID makes it permanent —
+     * same effect, only the duration differs. Required for enchant/disenchant;
+     * ignored for spells.
+     */
+    persistentEffect?: string;
     combatEffects?: CardCombatEffects[];
     specialMechanics?: CardSpecialMechanic[];
     learningRequirement?: CardLearningRequirement;
