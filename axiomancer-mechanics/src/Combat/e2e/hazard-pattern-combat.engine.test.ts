@@ -167,7 +167,7 @@ describe('Spec 25 §6 — card classification', () => {
         expect(card.effectKind).toBe('control');
         expect(['direct-control', 'stat-debuff']).toContain(card.verbClass);
     });
-    it('a pure-damage skill is direct-damage with 0 pressure preview', () => {
+    it('a payoff-burst skill is direct-damage with 0 preview (no strike number exists)', () => {
         const card = getCard(DAMAGE_BODY)!;
         expect(card.verbClass).toBe('direct-damage');
         expect(card.effectKind).toBe('none');
@@ -227,14 +227,19 @@ describe('Spec 26b §1 — initialization + draft', () => {
     });
 });
 
-// ── Direct damage is the weak baseline (HP model) ────────────────────────────
+// ── Payoff bursts are affliction-gated (HP model, spec 32 v3) ────────────────
 
-describe('HP model — a direct-damage card chips HP and spends the die', () => {
-    it('a pure-damage bottom damages enemy HP (no status) and spends the die (no chain)', () => {
+describe('HP model — a payoff card bursts only off afflictions and spends the die', () => {
+    it('a RUPTURE bottom on an afflicted foe bursts HP (no status landed → die spent, no chain)', () => {
         mockSequentialRng(0.05);
         let state = initializeCombatEncounter(makePlayer([DAMAGE_BODY]), makeEnemy(80, 'mind'), [DAMAGE_BODY], 7);
         state = rollEncounterDice(state).state;
         state = setDice(state, ['body', 'heart']);
+        // Seed the fuel: the burst exists ONLY because the affliction does.
+        state = {
+            ...state,
+            enemy: { ...state.enemy, effects: [{ effectId: 'debuff_poison', intensity: 2, remainingDuration: 3, appliedAt: 1, tier: 2 }] },
+        };
         const hpBefore = state.enemy.health;
         const r = draftAndPlay(state, DAMAGE_BODY);
         expect(r.played).toBe(true);
@@ -242,6 +247,17 @@ describe('HP model — a direct-damage card chips HP and spends the die', () => 
         expect(r.state.directDamageDealt).toBeGreaterThan(0);
         // No status landed → the drafted die is spent (no chain).
         expect(getDraftedDie(r.state)?.state).toBe('spent');
+    });
+
+    it('the same RUPTURE on a clean foe bursts 0 — no fuel, no damage (never a raw strike)', () => {
+        mockSequentialRng(0.05);
+        let state = initializeCombatEncounter(makePlayer([DAMAGE_BODY]), makeEnemy(80, 'mind'), [DAMAGE_BODY], 7);
+        state = rollEncounterDice(state).state;
+        state = setDice(state, ['body', 'heart']);
+        const hpBefore = state.enemy.health;
+        const r = draftAndPlay(state, DAMAGE_BODY);
+        expect(r.played).toBe(true);
+        expect(r.state.enemy.health).toBe(hpBefore);
     });
 });
 

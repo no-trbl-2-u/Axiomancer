@@ -125,6 +125,8 @@ export type CombatCardKind =
     | 'dot' | 'stun' | 'regen' | 'guard' | 'weaken' | 'inert' | 'befriend'
     // ── mechanics 0.34.0 — newly REAL in the HP engine ──
     | 'vulnerable'   // debuff_vulnerable / debuff_vulnerability_* — foe takes +N% damage
+    | 'mark'         // spec 32 v3 — universal exposure: +N per DoT tick per stack
+    | 'backfire'     // spec 32 v3 — the enemy takes N per action rung it loses
     | 'rupture'      // detonate stored afflictions (live total → a word, no fabricated number)
     | 'reap'         // spec 32 v3 — spend Souls for a burst (live total → a word)
     | 'enchant'      // spec 32 v3 — persistent player-side passive (rest of combat)
@@ -354,8 +356,12 @@ type EffectPayloadLike = {
     rollModifier?: number;
     rollModifierPerIntensity?: number;
     // ── mechanics 0.34.0 ──
-    reflectDamage?: number;     // buff_brazen_thorns / tier1_body_defend → Thorns
+    reflectDamage?: number;     // buff_thorns / tier1_body_defend → Thorns
     damageTakenMult?: number;   // debuff_vulnerable / debuff_vulnerability_* → Vulnerable (>1) / buff_resolute → Resolute (<1)
+    // ── spec 32 v3 — the themed-deck payload keys ──
+    tickAmplifyFlat?: number;      // debuff_mark → +N per DoT tick per stack
+    backfirePerRung?: number;      // debuff_backfire → N per rung the enemy's action loses
+    outgoingDamageMulPct?: number; // debuff_rapport → the enemy deals N% less damage (<0)
     // ── card-overhaul (2026-07-03) ──
     defenseModifier?: number;          // debuff_exposure → real -N DEF number
     restrictsSurgeAccess?: boolean;    // debuff_doubt → forces the foe's next play to weak-tier

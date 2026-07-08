@@ -29,9 +29,12 @@ describe('Card library structural invariants', () => {
             expect(skill.id).toMatch(/^[a-z][a-z0-9-]*$/);  // kebab-case
             expect([1, 2, 3]).toContain(skill.tier);
             expect(['self', 'enemy']).toContain(skill.targetType);
-            expect(['body', 'mind', 'heart']).toContain(skill.scalingStat);
+            expect(['body', 'mind', 'heart']).toContain(skill.philosophicalAspect);
             expect(['fallacy', 'paradox']).toContain(skill.category);
-            expect(typeof skill.basePower).toBe('number');
+            // Spec 32 v3 — the quality axis + card type replace the deleted
+            // basePower/scalingStat damage fields (THE STRIKE IS DEAD).
+            expect([1, 2, 3, 4, 5, 6]).toContain(skill.rank);
+            expect(['spell', 'enchantment', 'disenchant']).toContain(skill.cardType);
         }
     });
 
