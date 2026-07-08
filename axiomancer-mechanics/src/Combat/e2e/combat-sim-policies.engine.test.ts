@@ -173,30 +173,28 @@ describe('greedy object reproduces the pinned decision sequences', () => {
     // drift, a refactor changed greedy's behavior — fix the refactor, never
     // the pin (unless the library/engine legitimately changed again).
     //
-    // SKIPPED: removing the Retreat card (no in-combat retreat exists any
-    // more) changed MIX's deck length from 5 to 4 cards, which reshuffles
-    // every seed-derived draw order for `loadout(MIX)` — both pins below are
-    // stale. Re-measure against the current engine (`npm test` — requires a
-    // Node toolchain, unavailable in the environment that made this change)
-    // and re-pin with fresh numbers rather than guessing them by hand.
-    it.skip('seed 11 vs LittleBelle: a two-round status victory', () => {
+    // Re-pinned 2026-07-08: removing the Retreat card (no in-combat retreat
+    // exists any more) changed MIX's deck length from 5 to 4 cards, which
+    // reshuffles every seed-derived draw order for `loadout(MIX)` — both
+    // pins below were re-measured against the current engine.
+    it('seed 11 vs LittleBelle: a two-round status victory', () => {
         const r = runOneEncounter(loadout(MIX), LittleBelle, 11, 'greedy');
         expect({ outcome: r.outcome, rounds: r.rounds, plays: r.plays, statusPlays: r.statusPlays })
-            .toEqual({ outcome: 'victory', rounds: 2, plays: 11, statusPlays: 8 });
+            .toEqual({ outcome: 'victory', rounds: 2, plays: 6, statusPlays: 5 });
         expect(r.cardUsage['slippery-slope']).toEqual({
-            cardId: 'slippery-slope', plays: 3, bottomPlays: 3, topPlays: 0, statusLands: 3, discards: 0,
+            cardId: 'slippery-slope', plays: 2, bottomPlays: 2, topPlays: 0, statusLands: 2, discards: 0,
         });
         expect(r.cardUsage['straw-mans-jab']).toEqual({
-            cardId: 'straw-mans-jab', plays: 3, bottomPlays: 3, topPlays: 0, statusLands: 3, discards: 0,
+            cardId: 'straw-mans-jab', plays: 1, bottomPlays: 1, topPlays: 0, statusLands: 1, discards: 0,
         });
     });
 
-    it.skip('seed 11 vs KingOfRevenge: a four-round status grind to victory', () => {
+    it('seed 11 vs KingOfRevenge: a two-round status victory', () => {
         const r = runOneEncounter(loadout(MIX), KingOfRevenge, 11, 'greedy');
         expect({ outcome: r.outcome, rounds: r.rounds, plays: r.plays, statusPlays: r.statusPlays })
-            .toEqual({ outcome: 'victory', rounds: 4, plays: 18, statusPlays: 11 });
+            .toEqual({ outcome: 'victory', rounds: 2, plays: 12, statusPlays: 9 });
         expect(r.cardUsage['straw-mans-jab']).toEqual({
-            cardId: 'straw-mans-jab', plays: 4, bottomPlays: 4, topPlays: 0, statusLands: 4, discards: 0,
+            cardId: 'straw-mans-jab', plays: 3, bottomPlays: 3, topPlays: 0, statusLands: 3, discards: 0,
         });
         // card-retreat no longer exists — it can never appear in cardUsage.
     }, 30_000);

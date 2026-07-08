@@ -5,8 +5,9 @@
  * unique commons, 2 copies × 2 unique uncommons, 1 copy × 3 unique rares —
  * rare spell + enchantment + disenchant = 15 cards), themes are strictly
  * self-contained (zero cross-preset card overlap), each deck leans on the
- * lever it advertises, the builder appends the synthetic baseline, and a
- * preset deck drives a real encounter end to end.
+ * lever it advertises, the builder appends no escape-hatch card (no
+ * in-combat retreat exists), and a preset deck drives a real encounter end
+ * to end.
  */
 
 import { describe, it, expect } from 'vitest';
@@ -112,14 +113,12 @@ describe('preset combat decks (spec 32 v3 §8)', () => {
         }
     });
 
-    it('buildPresetDeck appends the synthetic baseline (Retreat) exactly once', () => {
+    it('buildPresetDeck appends no escape-hatch card (no in-combat retreat exists)', () => {
+        expect(SYNTHETIC_CARD_IDS.length).toBe(0);
         for (const id of COMBAT_DECK_PRESET_ORDER) {
             const deck = buildPresetDeck(id);
-            for (const synth of SYNTHETIC_CARD_IDS) {
-                expect(deck.filter(c => c === synth).length, `${id} → ${synth}`).toBe(1);
-            }
-            // 15 recipe cards + Retreat.
-            expect(deck.length).toBe(16);
+            // 15 recipe cards, no synthetic baseline.
+            expect(deck.length).toBe(15);
         }
     });
 

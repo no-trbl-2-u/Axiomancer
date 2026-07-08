@@ -193,8 +193,8 @@ describe('resolveDeckSelection', () => {
 
         // The removed Retreat id is now just another invalid id — dropped like any other.
         const trusted = resolveDeckSelection(
-            { kind: 'cards', cardIds: ['card-retreat', 'befriend'] }, undefined);
-        expect(trusted).toEqual(['befriend']);
+            { kind: 'cards', cardIds: ['card-retreat', 'red-herring'] }, undefined);
+        expect(trusted).toEqual(['red-herring']);
     });
 
     it("kind 'policy-pick' throws at this layer (the harness resolves it)", () => {
