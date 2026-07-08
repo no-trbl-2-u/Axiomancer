@@ -27,42 +27,64 @@ const buildPlayer = (level: number, overrides: Partial<{
     knownSkills: overrides.knownSkills ?? [],
 });
 
-describe('meetsLearningRequirement — tier-derived defaults', () => {
-    it('admits a level-1 character to every default-gated Tier 1 skill', () => {
-        const ch = buildPlayer(1);
-        // Scope to skills relying on tier-derived defaults; content-expansion
-        // skills may carry explicit higher requirements (level / stat gates).
-        for (const s of cardLibrary.filter(x => x.tier === 1 && !x.learningRequirement)) {
-            expect(meetsLearningRequirement(ch, s)).toBe(true);
+// Spec 32 v3: every library card carries an explicit `learningRequirement`
+// on the rank ladder (rank 1..6 -> level 1/2/4/6/10/12). The tier-derived
+// DEFAULTS (T1 -> 1, T2 -> 5, T3 -> 10) still govern cards authored without a
+// requirement, covered via fabricated fixtures below.
+
+const bareCard = (tier: 1 | 2 | 3): typeof cardLibrary[number] => ({
+    id: `fab-default-t${tier}`,
+    name: `Fabricated T${tier}`,
+    category: 'fallacy',
+    philosophicalAspect: 'mind',
+    description: 'Fabricated default-gated fixture.',
+    tier,
+    rank: 1,
+    cardType: 'spell',
+    targetType: 'enemy',
+});
+
+describe('meetsLearningRequirement — tier-derived defaults (fabricated fixtures)', () => {
+    it('admits a level-1 character to a default-gated Tier 1 skill', () => {
+        expect(meetsLearningRequirement(buildPlayer(1), bareCard(1))).toBe(true);
+    });
+
+    it('rejects a default-gated Tier 2 skill below level 5, admits at 5', () => {
+        expect(meetsLearningRequirement(buildPlayer(4), bareCard(2))).toBe(false);
+        expect(meetsLearningRequirement(buildPlayer(5), bareCard(2))).toBe(true);
+    });
+
+    it('rejects a default-gated Tier 3 skill below level 10, admits at 10', () => {
+        expect(meetsLearningRequirement(buildPlayer(9), bareCard(3))).toBe(false);
+        expect(meetsLearningRequirement(buildPlayer(10), bareCard(3))).toBe(true);
+    });
+});
+
+describe('meetsLearningRequirement — the v3 rank ladder gates (spec 32 §4)', () => {
+    // The authored level gates follow the rank ladder exactly:
+    // Doxa 1 / Lemma 2 / Thesis 4 / Theorem 6 / Axiom 10 / Aporia 12.
+    const RANK_LEVEL_GATE: Record<number, number> = { 1: 1, 2: 2, 3: 4, 4: 6, 5: 10, 6: 12 };
+
+    it('every library card authors its rank-ladder level gate', () => {
+        for (const s of cardLibrary) {
+            expect(
+                s.learningRequirement?.level,
+                `${s.id} (rank ${s.rank}) must gate at level ${RANK_LEVEL_GATE[s.rank]}`,
+            ).toBe(RANK_LEVEL_GATE[s.rank]);
         }
     });
 
-    it('rejects Tier 2 skills below level 5', () => {
-        const ch = buildPlayer(4);
-        for (const s of cardLibrary.filter(x => x.tier === 2)) {
-            expect(meetsLearningRequirement(ch, s)).toBe(false);
-        }
-    });
-
-    it('rejects Tier 3 skills below level 10', () => {
-        const ch = buildPlayer(9);
-        for (const s of cardLibrary.filter(x => x.tier === 3)) {
-            expect(meetsLearningRequirement(ch, s)).toBe(false);
-        }
-    });
-
-    it('admits a level-15 character to every Tier 3 skill (with all-passing alignment)', () => {
+    it('a level-15 character qualifies for the whole library', () => {
         const ch = buildPlayer(15);
-        // Phase 46 authored two alignment gates on Tier 3 skills:
-        //   nirvana-fallacy → outlook ≤ -34
-        //   appeal-to-fear  → scope   ≥ 34
-        // The two gates are orthogonal axes, so an alignment that satisfies
-        // both exists: pessimistic AND transcendent.
-        const passAllGates = { epistemology: 0, outlook: -50, scope: 50 };
-        // Scope to default-gated tier-3 skills (tier-derived level 10/15).
-        // Content-expansion tier-3 skills may require higher levels / stats.
-        for (const s of cardLibrary.filter(x => x.tier === 3 && !x.learningRequirement)) {
-            expect(meetsLearningRequirement(ch, s, passAllGates)).toBe(true);
+        for (const s of cardLibrary) {
+            expect(meetsLearningRequirement(ch, s), s.id).toBe(true);
+        }
+    });
+
+    it('a level-1 character qualifies only for rank-1 cards', () => {
+        const ch = buildPlayer(1);
+        for (const s of cardLibrary) {
+            expect(meetsLearningRequirement(ch, s), s.id).toBe(s.rank === 1);
         }
     });
 });
@@ -82,10 +104,11 @@ describe('getAvailableSkills', () => {
     });
 
     it('omits already-known skills from the result', () => {
-        const known = cardLibrary.filter(s => s.tier === 1).map(s => s.id);
+        // Know every card a level-1 character can qualify for (the rank-1 set);
+        // everything else is level-gated away, so nothing remains available.
+        const known = cardLibrary.filter(s => s.rank === 1).map(s => s.id);
         const ch = buildPlayer(1, { knownSkills: known });
         const available = getAvailableSkills(ch);
-        // Only T2+T3 should be candidate, but level 1 disqualifies them.
         expect(available).toEqual([]);
     });
 
@@ -106,16 +129,16 @@ describe('getAvailableSkills', () => {
 describe('learnSkill', () => {
     it('appends the id to knownSkills when eligible', () => {
         const ch = buildPlayer(1);
-        const t1 = cardLibrary.find(s => s.tier === 1)!;
-        const after = learnSkill(ch, t1.id);
-        expect(after.knownSkills).toContain(t1.id);
+        const starter = cardLibrary.find(s => s.rank === 1)!; // level-1 gate
+        const after = learnSkill(ch, starter.id);
+        expect(after.knownSkills).toContain(starter.id);
         expect(after.knownSkills.length).toBe(ch.knownSkills.length + 1);
     });
 
     it('is a no-op (same reference) when the skill is already known', () => {
-        const t1 = cardLibrary.find(s => s.tier === 1)!;
-        const ch = buildPlayer(1, { knownSkills: [t1.id] });
-        const after = learnSkill(ch, t1.id);
+        const starter = cardLibrary.find(s => s.rank === 1)!;
+        const ch = buildPlayer(1, { knownSkills: [starter.id] });
+        const after = learnSkill(ch, starter.id);
         expect(after).toBe(ch);
     });
 
@@ -126,9 +149,9 @@ describe('learnSkill', () => {
     });
 
     it('is a no-op when the learning requirement is not met', () => {
-        const t3 = cardLibrary.find(s => s.tier === 3)!;
-        const ch = buildPlayer(5); // T3 needs level 10
-        const after = learnSkill(ch, t3.id);
+        const axiom = cardLibrary.find(s => s.rank === 5)!;
+        const ch = buildPlayer(5); // Axiom cards gate at level 10
+        const after = learnSkill(ch, axiom.id);
         expect(after).toBe(ch);
     });
 });
@@ -144,9 +167,9 @@ describe('meetsLearningRequirement — requiresAlignment (Phase 46)', () => {
         philosophicalAspect: 'mind',
         description: 'Gated by outlook <= -34.',
         tier: 3,
+        rank: 5,
+        cardType: 'spell',
         targetType: 'enemy',
-        basePower: 1,
-        scalingStat: 'mind',
         learningRequirement: {
             level: 10,
             requiresAlignment: { axis: 'outlook', op: 'lte', value: -34 },
@@ -212,9 +235,9 @@ describe('learnSkill — requiresAlignment gate (Phase 46)', () => {
         philosophicalAspect: 'heart',
         description: 'Gated by scope >= 34.',
         tier: 1,
+        rank: 1,
+        cardType: 'spell',
         targetType: 'self',
-        basePower: 0,
-        scalingStat: 'heart',
         learningRequirement: {
             level: 1,
             requiresAlignment: { axis: 'scope', op: 'gte', value: 34 },

@@ -49,25 +49,24 @@ afterEach(() => {
 
 // ── Fixtures ─────────────────────────────────────────────────────────────────
 
-// Master Spec (2026-07-03) doctrine pass converted every real library card off
-// flat `basePower` strikes — no real card can play "pure damage, no status"
-// anymore, so this suite's pure-strike fixture is a sandbox-only test card.
+// Spec 32 v3: basePower is deleted at the schema level — no card can strike.
+// The "damage class" fixture is a bare RUPTURE payoff (affliction-gated burst).
 registerSandboxCards([{
-    id: 'qa-pure-strike-body',
-    name: 'QA Pure Strike (test fixture)',
+    id: 'qa-payoff-burst',
+    name: 'QA Payoff Burst (test fixture)',
     category: 'paradox',
     philosophicalAspect: 'body',
-    description: 'Test-only fixture: a flat direct-damage card with no status payload.',
+    description: 'Test-only fixture: a bare RUPTURE payoff with no status payload.',
     tier: 1,
+    rank: 1,
+    cardType: 'spell',
     targetType: 'enemy',
-    basePower: 12,
-    scalingStat: 'body',
+    specialMechanics: [{ kind: 'rupture' }],
 }]);
 
 const DOT_BODY = 'slippery-slope';       // body starter, applies debuff_poison (ramping DoT)
-const CONTROL_HEART = 'false-dilemma';   // mind, tier 1, confusion (control)
-const DAMAGE_BODY = 'qa-pure-strike-body'; // body, tier 1, basePower 12, no status effect (sandbox fixture)
-const BEFRIEND = 'befriend';             // heart, tier 1
+const CONTROL_CARD = 'red-herring';      // mind, tier 1, BACKFIRE (control)
+const DAMAGE_BODY = 'qa-payoff-burst';   // body, tier 1, RUPTURE payoff (sandbox fixture)
 
 function makePlayer(skills: string[]): Character {
     const p = deepClone(Player);
@@ -164,7 +163,7 @@ describe('Spec 25 §6 — card classification', () => {
         expect(card.bottomDamagePreview).toBeGreaterThan(0);
     });
     it('a control skill is a direct-control card on the control track', () => {
-        const card = getCard(CONTROL_HEART)!;
+        const card = getCard(CONTROL_CARD)!;
         expect(card.effectKind).toBe('control');
         expect(['direct-control', 'stat-debuff']).toContain(card.verbClass);
     });
@@ -181,7 +180,7 @@ describe('Spec 25 §6 — card classification', () => {
 describe('Spec 26b §1 — initialization + draft', () => {
     it('opens in reveal, draws 5, then rolls a 2-die turn pool', () => {
         mockSequentialRng(0.5);
-        let state = initializeCombatEncounter(makePlayer([DOT_BODY, CONTROL_HEART, DAMAGE_BODY]), makeEnemy(30), undefined, 42);
+        let state = initializeCombatEncounter(makePlayer([DOT_BODY, CONTROL_CARD, DAMAGE_BODY]), makeEnemy(30), undefined, 42);
         expect(state.phase).toBe('reveal');
         expect(state.hand.length).toBe(COMBAT_HAND_SIZE);
         state = rollEncounterDice(state).state;
@@ -334,7 +333,7 @@ describe('Spec 26b §4 — Signature Skills (Conviction-funded)', () => {
 
     it('scrapping a hand card grants +1 Conviction and discards it', () => {
         mockSequentialRng(0.5);
-        let state = initializeCombatEncounter(makePlayer([DOT_BODY, CONTROL_HEART]), makeEnemy(60), [DOT_BODY, CONTROL_HEART], 6);
+        let state = initializeCombatEncounter(makePlayer([DOT_BODY, CONTROL_CARD]), makeEnemy(60), [DOT_BODY, CONTROL_CARD], 6);
         state = rollEncounterDice(state).state;
         const uid = state.hand[0].uid;
         const before = state.conviction;
@@ -468,12 +467,12 @@ describe('Spec 26b tuning — variety-gated combo + projection + carry', () => {
 
         // Variety: a DoT then a DISTINCT control status — the new status refreshes
         // the die for a genuine combo chain (the Mage-Knight "big turn").
-        let varied = initializeCombatEncounter(makePlayer([DOT_BODY, CONTROL_HEART]), makeEnemy(160, 'mind'), [DOT_BODY, CONTROL_HEART], 7);
+        let varied = initializeCombatEncounter(makePlayer([DOT_BODY, CONTROL_CARD]), makeEnemy(160, 'mind'), [DOT_BODY, CONTROL_CARD], 7);
         varied = rollEncounterDice(varied).state;
         varied = setDice(varied, ['body', 'heart']);
         const dot = draftAndPlay(varied, DOT_BODY);
         expect(dot.events!.some(e => e.kind === 'die-refreshed')).toBe(true);
-        const ctrlEntry = dot.state.hand.find(h => h.cardId === CONTROL_HEART)!;
+        const ctrlEntry = dot.state.hand.find(h => h.cardId === CONTROL_CARD)!;
         const ctrl = playCombatCard(dot.state, { uid: ctrlEntry.uid }, true);
         expect(ctrl.events.some(e => e.kind === 'die-refreshed')).toBe(true);
     });
@@ -569,7 +568,7 @@ describe('Spec 26b §B/§C/§D — archetype kit, rewards, unlock, difficulty fl
 
     it('Disarming Plea (heart mercy) charms the enemy and strikes its HP', () => {
         mockSequentialRng(0.5);
-        let state = initializeCombatEncounter(makePlayer([CONTROL_HEART]), makeEnemy(120, 'body'), [CONTROL_HEART], 1);
+        let state = initializeCombatEncounter(makePlayer([CONTROL_CARD]), makeEnemy(120, 'body'), [CONTROL_CARD], 1);
         state = rollEncounterDice(state).state;
         state = { ...state, conviction: 8 };
         const hpBefore = state.enemy.health;
@@ -700,7 +699,7 @@ describe('0.33.0 — soft control weakens & denies the enemy threat', () => {
 
 describe('Hazard combat — Monte-Carlo sim', () => {
     it('runs 300 seeded combats and reports a coherent outcome distribution', () => {
-        const player = makePlayer([DOT_BODY, CONTROL_HEART, DAMAGE_BODY, BEFRIEND]);
+        const player = makePlayer([DOT_BODY, CONTROL_CARD, DAMAGE_BODY]);
         const enemy = makeEnemy(40);
         const stats = simulateHazardPatternCombat(player, enemy, 300, 1);
         expect(stats.runs).toBe(300);
