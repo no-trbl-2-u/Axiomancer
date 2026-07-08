@@ -65,10 +65,13 @@ Tick in this file in the same commit that ships the phase.
       (`hazardDeathCount` helper, currently unconsumed) +
       keepsakes (mobile; presenter-only)
       — `feat(mobile): memoir REMAINS section — phase 6` (48d2c802)
-- [ ] Phase 7 — `combatMana` -> engine `combatResources`
+- [x] Phase 7 — `combatMana` -> engine `combatResources`
       migration: retire the slice deprecated since Phase 105 but
       still load-bearing in StatusCard / HUD / actions (mobile;
-      verify Phase 156 didn't already ship it first)
+      verify Phase 156 didn't already ship it first) — verified the
+      migration already shipped (commit 6ef5f989, 2026-06-20);
+      shipped the remaining dead-code + doc cleanup —
+      `chore(mobile): retire dead combatMana slice + fix stale HUD comments — phase 7` (bdca1068)
 
 **Content pipeline:**
 - [ ] Phase 8 — Northern Forest region content extension (apply
