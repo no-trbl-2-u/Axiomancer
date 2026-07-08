@@ -46,10 +46,10 @@ function calculateResourcePercent(resources: CombatResources): number {
  *
  * - `hpPercent` reads from the in-combat player snapshot when a
  *   battle is active, otherwise from the out-of-combat player.
- * - `manaPercent` reads from engine `CombatState.combatResources` 
- *   (Phase 105 — uses engine truth). Shows total combined resources
- *   from all pools (heart/body/mind/fallacy/paradox). When combat
- *   is inactive, the bar shows as full (1.0).
+ * - `manaPercent` is always `1.0` (full). This persistent top-bar HUD
+ *   always reflects the overworld player (see note below) and has no
+ *   wired source for in-combat resources — the Hazard-Pattern combat
+ *   panel shows live resources itself, via its own dice tray.
  * - Dev overrides (Phase 87) can force empty states for testing
  *   branches that would otherwise require specific game state.
  */
@@ -64,19 +64,19 @@ export function selectCombatHudViewModel(state: AppStoreState): CombatHudViewMod
         ? clamp(player.health / player.maxHealth, 0, 1)
         : 0;
 
-    // Engine combat resources (Phase 105 — replaced local combatMana slice).
-    // When combat is inactive, show full bar (1.0). During combat, 
-    // calculate percentage from total current vs approximate max resources.
     // Phase 87 — dev override can force mana hidden (null) for testing.
     const hudOverrides = state.devOverrides?.hud ?? {
         hideMana: false,
         hideEffects: false,
         hideStance: false,
     };
-    
-    // No legacy combat slice → no engine combat resources to read; the
-    // mana bar shows full (1.0) out of combat. `hideMana` still forces null.
-    const combatResources = hudOverrides.hideMana ? null : null;
+
+    // No source wires in-combat resources to this persistent top-bar HUD
+    // (legacy combat's `state.combat` was removed in mechanics 0.37.0; the
+    // Hazard-Pattern panel shows live resources itself). The bar always
+    // reads as full regardless of `hideMana` — kept as a no-op override
+    // rather than removed, so existing dev-menu wiring stays intact.
+    const combatResources: CombatResources | null = null;
     const manaPercent: number = combatResources === null
         ? 1
         : calculateResourcePercent(combatResources);

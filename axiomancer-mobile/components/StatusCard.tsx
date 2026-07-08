@@ -29,8 +29,8 @@ export function StatusCard(props: StatusCardProps = {}) {
   // game state. Test fixtures may still inject props directly —
   // the prop wins when defined, otherwise we fall through to the
   // store. Phase-62 bug-sweep 2026-05-21 dropped the mana bar
-  // (mana is combat-only via Phase 60d's combatMana slice); the
-  // status card surfaces only the HP that exists out-of-combat.
+  // (mana is combat-only, owned by the Hazard-Pattern combat panel);
+  // the status card surfaces only the HP that exists out-of-combat.
   const playerName = useGameState((s) => s.player?.name ?? 'WORM-EATEN PILGRIM');
   const playerLevel = useGameState((s) => s.player?.level ?? 1);
   const playerHp = useGameState((s) => s.player?.health ?? 0);

@@ -48,7 +48,6 @@
 - Cross-package hazard divergence (DIV-MECH-002): mobile runs a
   *duplicate* hazard engine incompatible with mechanics'
   `World/Hazard`. Needs a T ownership decision.
-- `combatMana` slice deprecated but still load-bearing in mobile.
 - Village shop has no SELL surface (engine ships `sellItem`).
 - Assorted debt: unbounded keepsake/death flag growth on long
   saves, `as any` clusters at the mobile state boundary, a few

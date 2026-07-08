@@ -61,21 +61,6 @@ export interface MobileNotificationsSlice {
 }
 
 /**
- * Mobile-only combat mana scaffolding (Phase 60d). Engine 0.10.1+
- * removed `mana` / `maxMana` from public `Character`; mobile lifted
- * the presentation-stop-gap onto this parallel slice so the Character
- * shape stays clean. Phase 21 (engine-driven skill resolution) will
- * replace it with engine per-resource pools once that lands.
- *
- * `null` outside combat. Seeded on `startCombat`; decremented on
- * skill burn in `resolveRound`; cleared on `endCombat`.
- */
-export interface CombatManaState {
-    current: number;
-    max: number;
-}
-
-/**
  * Dev-only overrides slice (Phase 87). Stores forced states for testing
  * empty-state branches and edge cases. Not persisted — resets on app restart.
  */

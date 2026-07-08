@@ -3,7 +3,9 @@
  *
  * Four buttons in a 2x2 grid inside the DevMenu:
  *
- *   - `HIDE MANA` forces `combatMana: null` on HUD presenter reads.
+ *   - `HIDE MANA` toggles `devOverrides.hud.hideMana`; currently a
+ *     no-op on the HUD presenter's output (`manaPercent` is always
+ *     1.0 — no in-combat resource source is wired to this HUD).
  *   - `HIDE EFFECTS` forces `effects: []` on HUD presenter reads.
  *   - `HIDE STANCE` forces `stance: 'none'` on HUD presenter reads.
  *   - `RESET ALL` clears all active overrides.

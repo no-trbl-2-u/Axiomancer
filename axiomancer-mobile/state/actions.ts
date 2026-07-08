@@ -3,16 +3,13 @@
  *
  * Per Spec 04 the combat screen never dispatches engine reducers
  * directly — it calls these actions. Each one wraps a small bit of
- * engine state and writes the result back through `updateCombat`.
+ * engine state and writes the result back through the store.
  *
- * Resource (mana) accounting on the in-combat player is a
- * presentation placeholder until Phase 21 (engine-driven skill
- * resolution) wires the engine's per-resource pools. **Phase 60d**
- * lifted mana off `Character` (engine 0.10.1+ removed those fields
- * from the public type) onto a mobile-only `combatMana` slice on
- * `AppStoreState`. The slice is `null` outside combat and gets
- * seeded on `startCombat`, decremented on skill burn, and cleared on
- * `endCombat`.
+ * In-combat resource accounting is fully engine-owned by the
+ * Hazard-Pattern combat driver (`CombatEncounterState.combatResources`,
+ * `dice`/`reserve`) — mobile keeps no parallel mana bookkeeping. The
+ * legacy mobile-only `combatMana` slice (Phase 60d) was retired when
+ * legacy turn-based combat was removed (mechanics 0.37.0).
  */
 
 import {

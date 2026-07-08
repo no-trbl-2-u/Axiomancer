@@ -45,17 +45,6 @@
   import. (Verify still live before fixing.)
 - next: /iterate
 
-### [2.0] `combatMana` slice deprecated but still load-bearing
-- category: debt
-- impact: 5
-- ease: 4
-- detail: deprecated since Phase 105, still used by StatusCard,
-  debug controls, HUD presenters, `state/actions.ts`. Migration
-  to engine `combatResources` was promoted as Phase 156 — verify
-  whether it shipped before re-filing / re-scoping. (Overlaps
-  build-plan Phase 7.)
-- next: /iterate
-
 ### [1.2] Skipped enemy stat-budget test (content decision)
 - category: content
 - impact: 4
@@ -115,3 +104,16 @@
 - resolved via `/oversight` 2026-07-03: mechanics absorbs
   mobile's duplicate `state/hazard/` engine. Promoted to
   `plan/PHASE_CANDIDATES.md` -> build plan Phase 13.
+
+### [2.0] `combatMana` slice deprecated but still load-bearing
+- drained 2026-07-08 (build-plan Phase 7): stale — the slice was
+  actually retired by mobile commit `6ef5f989` (2026-06-20,
+  "remove the vestigial client mana model") and its container
+  (`state.combat`) fully removed by `160ae907`/mechanics `4cb504a5`
+  (2026-06-30/07-01). "Phase 156" was never the migration (that
+  number is the unrelated status-effect interaction engine); the
+  audit row was carried into the monorepo re-onboard without being
+  re-validated against code that had already changed nine days
+  earlier. No live `combatMana` reference remained; Phase 7 deleted
+  the one dead type (`CombatManaState`) and fixed four stale
+  comments still narrating the retired slice.
