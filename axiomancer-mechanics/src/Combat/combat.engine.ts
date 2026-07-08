@@ -755,7 +755,11 @@ function gainSway(
 }
 
 function swayCapitulates(state: CombatEncounterState): boolean {
-    return (state.sway ?? 0) > 0 && (state.sway ?? 0) >= state.enemy.health;
+    // A DEFEATED enemy cannot capitulate — HP 0 is a victory, not a yield
+    // (otherwise any 1 SWAY would relabel every DoT kill 'capitulate').
+    return (state.sway ?? 0) > 0
+        && !isDefeated(state.enemy)
+        && (state.sway ?? 0) >= state.enemy.health;
 }
 
 /** PREMISE gain + the PERORATION trigger (spec 32 v3 T2). When the declared
