@@ -62,8 +62,11 @@ encounter drivers, each with its own CLI subcommand, seeded
 engine, content library, tuning loop, and hermetic e2e tests:
 
 - **Hazard-Pattern Combat** — the primary combat system (Spec
-  25/26). Card-and-dice; the enemy has ONE bar = HP; status is
-  the efficient path to 0 HP. HP is the **sole** win condition.
+  25/26, Spec 32 v3). Card-and-dice; the enemy has ONE bar = HP;
+  status is the **only** path to 0 HP — Spec 32 v3 ("THE STRIKE
+  IS DEAD", 2026-07-08) deleted raw strike damage from the card
+  schema entirely, so no card can chip HP directly any more. HP
+  is the **sole** win condition.
 - **Hazard minigame** ("v2") — environmental hazard card game.
 - **Gathering** — "The Gleaning."
 - **Rest** — "The Night Watch" (three watches at camp).
@@ -92,7 +95,9 @@ theme; four period display fonts; SVG placeholder art system.
 - Combat-depth follow-up specs 26–30 (draft): Catalyst
   multiplicative scaling, card-salvage sideways play, curated
   combat deck + synergy, reactive/telegraphing enemies,
-  projected-lethality readout.
+  projected-lethality readout. (Specs 31/32 shipped since this
+  section was last reviewed — Spec 31 fate-engine card/effect
+  revamp and Spec 32 v3 no-strike card library, see above.)
 - Authored content: `specs/characters`, `specs/story`,
   `specs/world` currently hold only templates — character/story/
   world authoring is the open content pipeline (driven by the

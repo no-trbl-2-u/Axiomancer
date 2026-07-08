@@ -461,17 +461,36 @@ Cross-reference: `docs/skills.md` → Skills vs Cards.
 Three locked product-owner decisions layered onto Hazard-Pattern Combat (full
 detail in the card/skill library files themselves, not duplicated here):
 
-- **Hybrid damage model.** Player cards apply status effects (stacking DoT
-  debuffs) rather than dealing flat direct "strike" damage; a small set of
-  rare Tier-3 **execute/finisher** cards (`pyrrhic-victory`, `the-final-word`,
-  `unmoved-mover`, `achilles-overtake`) are the only cards allowed to consume
-  already-stacked debuffs for a burst payoff — a payoff for setup, not a
-  strike. All cards added in the 2026-07 status-stacking pass
-  (`src/Cards/cards.library.ts`) ship with `basePower: 0` for exactly this
-  reason. **Known gap:** the pre-existing ~65-card library (everything before
-  that pass) still has non-zero `basePower` direct-damage cards that predate
-  this doctrine and were left untouched (out of scope for that pass) — a
-  follow-up pass should either retire or convert them.
+- **No card deals direct damage — THE STRIKE IS DEAD (Spec 32 v3,
+  2026-07-08).** `basePower` / `chipHp` were deleted from the `Card` schema
+  entirely, not merely zeroed — a card carrying either field is now a
+  compile error. `calculateSkillDamage` is kept only for call-site
+  compatibility (sim policies / projections still call it) and
+  unconditionally returns `0`. Every point of enemy HP now falls to DoT
+  ticks, affliction-payoff bursts (RUPTURE / AMPLIFY / Conclusion), engine-
+  gated drips (BACKFIRE and persistent-card hooks), or reflect (THORNS /
+  RIPOSTE) — see [`specs/32-no-strike-card-library.md`](../specs/32-no-strike-card-library.md)
+  for the full accounting and the pricing model. The card library was
+  rewritten wholesale alongside the purge: **70 cards across 10
+  self-contained themes** (`erosion` / `oratory` / `foundry` / `penitent` /
+  `standstill` / `augury` / `tithe` / `grace` / `bastion` / `refrain` — see
+  `combat.deck-presets.ts`), **exactly 30 keywords**, each card pricing
+  itself against a printed rank band (`cards.pricing.ts` + a hermetic
+  pricing-lint test). The pre-v3 library (49 cards, 126 effect ids, ~80
+  keywords — including the old execute/finisher set `pyrrhic-victory` /
+  `the-final-word` / `unmoved-mover` / `achilles-overtake`, all now retired)
+  was deleted with no rescues (owner rule); unknown ids drop gracefully from
+  any deck that still references them.
+- **Rank / rarity / card-type axes (Spec 32 v3).** Every card carries a
+  `rank: CardRank` (1 Doxa · 2 Lemma · 3 Thesis · 4 Theorem · 5 Axiom ·
+  6 Aporia — quality axis, orthogonal to `tier` which stays the resist
+  axis) and a `cardType: CardType` (`'spell' | 'enchantment' |
+  'disenchant'` — `spell` plays straight to discard; `enchantment` /
+  `disenchant` carry both a FREE and a PAID line). `rankToRarity(rank)`
+  derives the display rarity band (`common` = 1-2, `uncommon` = 3-4,
+  `rare` = 5-6) consumed by mobile via `CARD_RANK_NAMES`. This axis family
+  replaced the old ad hoc "gold card" list (`GOLD_CARD_IDS` / `isGoldCard`
+  — deleted; see the API table below).
 - **Skills are a separate, always-on ability system — NOT cards.** Cards are
   drawn/played from the hand; **Skills** (`src/Skills/skills.library.ts`,
   `SKILLS_LIBRARY`) are triggered any time the player can afford their
@@ -487,28 +506,32 @@ detail in the card/skill library files themselves, not duplicated here):
   Wild die to `CombatEncounterState.permanentWildDice` for the **rest of the
   encounter** — every subsequent turn's dice pool includes it (see
   `combat.engine.ts`'s `rollPermanentBonusDice` / `MAX_PERMANENT_WILD_DICE`).
+  The engine hook is still live; no card in the current 70-card library
+  authors it (the ten spec 32 v3 themes each carry their own build-around
+  instead) — a future card can pick it back up without engine work.
 
-Full design intent for this pass lived in an external "Master Spec" handed to
-the implementing agents; no such spec file is checked into `specs/` today —
-a follow-up should write one up (e.g. `specs/29-status-stacking-and-skills.md`)
-so the `§2`/`§3`/`§4` references scattered through `src/Cards/`, `src/Skills/`,
-and `src/Combat/` code comments resolve to something readable. Until then,
-`specs/25-hazard-pattern-combat.md` remains the canonical mechanical-structure
-doc and `src/Skills/skills.types.ts` / `skill-trigger.engine.ts` carry the most
-complete design rationale in their doc comments.
+Full design intent for the 2026-07 status-stacking pass lived in an
+external "Master Spec" handed to the implementing agents and was never
+checked into `specs/`; `specs/32-no-strike-card-library.md` supersedes it
+as the canonical mechanical-structure doc for the current (spec 32 v3)
+library, alongside `specs/25-hazard-pattern-combat.md` for the underlying
+engine loop. `src/Skills/skills.types.ts` / `skill-trigger.engine.ts` carry
+the most complete design rationale for the separate Skills system.
 
 ## Hazard-Pattern Combat (Spec 25)
 
 **The only combat engine** (mobile map encounters, the combat CLI, the `/combat-playtest` + `/deck-tuning` loops).
 A card-and-dice system structurally mirrored on the Hazard minigame: every verb is a
 combat card, and the enemy's **sole bar is HP** — dropping it to 0 (`isDefeated(enemy)`)
-is the only win condition. Status effects are the **efficient** path: DoT erodes HP far
-faster than the deliberately weak basic strike (`DIRECT_DAMAGE_WEIGHT`), and control
-hinders the enemy's telegraphed threat turn. Basic-attack trading is the weak baseline,
-not a parallel win track. Full design:
-[`specs/25-hazard-pattern-combat.md`](../specs/25-hazard-pattern-combat.md)
-(note: that spec's two-pressure-track narrative is superseded by the HP-only
-model shipped 2026-06-22 — `VISION.md` → Combat vision is canonical).
+is the only win condition. Status effects are the **only** path (Spec 32 v3, 2026-07-08 —
+THE STRIKE IS DEAD, see § above): DoT ticks, affliction-payoff bursts, engine-gated
+drips, and reflect are the sole HP sources; control denies the enemy's telegraphed
+threat turn outright rather than merely discouraging a parallel damage track. Full
+design: [`specs/25-hazard-pattern-combat.md`](../specs/25-hazard-pattern-combat.md)
+for the engine loop, [`specs/32-no-strike-card-library.md`](../specs/32-no-strike-card-library.md)
+for the current card library (note: spec 25's two-pressure-track narrative was
+superseded by the HP-only model 2026-06-22, then the strike itself was removed
+2026-07-08 — `VISION.md` → Combat vision is canonical).
 
 The engine lives in `src/Combat/`:
 
@@ -543,7 +566,7 @@ The engine lives in `src/Combat/`:
 | `buildCombatSummary(state)` | End-of-fight `CombatSummary` with per-effect attribution rows. |
 | `simulateHazardPatternCombat(...)` | Monte-Carlo greedy bot returning `CombatSimStats` for balance runs. |
 | `SYNTHETIC_CARD_IDS` / `isSyntheticCard` | `SYNTHETIC_CARD_IDS` is a `readonly string[]` of built-in non-deck cards — currently empty (the synthetic Retreat card was removed; no in-combat retreat exists). Kept as a registry, not deleted, so a future synthetic card has somewhere to register. `isSyntheticCard(id)` is the boolean predicate; always `false` today. |
-| `GOLD_CARD_IDS` / `isGoldCard` / `CardEffectKind` | Gold (rare) card support. `GOLD_CARD_IDS` is a `ReadonlySet<string>` of the three rare card ids (`'pyrrhic-victory'`, `'the-final-word'`, `'unmoved-mover'`); unpowered they provide utility, powered they land a MAJOR status + damage. `isGoldCard(id)` is the boolean predicate — the engine grants automatic advantage when a WILD die powers a gold card. `CardEffectKind` (`'dot' \| 'control' \| 'none'`) is the status-payload classification tag on every `CombatCard` (set by `classifyVerbClass`); it drives the mobile card frame and deck-preset focus logic. The baseline GUARD defense card (`'brace-for-impact'`) is included in `STARTING_SKILL_IDS`. |
+| `CardEffectKind` | `'dot' \| 'control' \| 'none'` — the status-payload classification tag on every `CombatCard` (set by `classifyVerbClass`); drives the mobile card frame and deck-preset focus logic. The baseline GUARD defense card (`'brace-for-impact'`) is included in `STARTING_SKILL_IDS`. **`GOLD_CARD_IDS` / `isGoldCard` were deleted in Spec 32 v3** (2026-07-08) along with the three rare card ids they named — rarity is now derived from `rank` via `rankToRarity` (`rare` = rank 5-6), and the wild-die-auto-advantage-on-gold behavior was removed with them (a wild/x die is always neutral advantage now — see `resolveCardDieCost`). |
 | `CombatEncounterState`, `CombatCard`, `CombatThreatPhase`, `CombatOutcome`, `CombatSummary` | The core encounter type family. (`CombatPressureTracks` was REMOVED 2026-06-22 — HP is the sole win condition.) `CombatCard.skillId` is the canonical field for the backing learned-skill id (`string \| null`; `null` for synthetic cards, if any are ever added again). `CombatOutcome`/`CombatVerbClass` still list `'retreat'` as a union member for now (no live code path can produce it — no escape card exists) rather than risk an unverified type-cascade removal. Use `skillId` to trace a projected card back to its source skill. |
 | `CombatAttributionRow`, `LandedEffect` | Attribution sub-types for `buildCombatSummary`. `CombatAttributionRow` is a per-card row (`cardId`, `name`, `dotDamage`, `damageDealt`, `phases`); `LandedEffect` is a snapshot of one live effect used internally during attribution (`effectId`, `effect`, `active`, `target`). |
 
@@ -599,8 +622,8 @@ progression levers, keeping status effects the win path.
 | `generateDefaultThreatSequence(enemy)` | Generates a 3-phase fallback threat sequence from the enemy's dominant stance, rotating through Heart / Body / Mind. Used automatically by `getThreatSequence` when no authored sequence exists. |
 | `rerollSpentDice(state, rng?)` / `hasRerollableDice(state)` / `dieIsRerollable(die)` | PR #190 — partial Press Fate re-roll: re-rolls only spent/exhausted + dead `x`-face dice, leaving usable dice in play. A no-op (refunds Conviction) when nothing is rerollable. |
 | `THREAT_WEAKEN_PER_ROLL` / `THREAT_DENY_AT` / `THREAT_WEAKEN_FLOOR` | Soft-control and stat-debuff threat tunables (0.33.0). Each point of enemy roll penalty (from confusion, fear, blind, slow, accuracy/attack-down etc.) reduces the incoming hit by `THREAT_WEAKEN_PER_ROLL` (default 0.06). When the cumulative roll penalty reaches `THREAT_DENY_AT` (default 8), the turn is fully denied (same as hard control). `THREAT_WEAKEN_FLOOR` (default 0.4) clamps the minimum damage multiplier for a weakened-but-not-denied enemy. Read these to display soft-control thresholds in the UI. |
-| `COMBAT_DECK_PRESETS` / `COMBAT_DECK_PRESET_ORDER` / `listDeckPresets()` / `getDeckPreset(id)` / `buildPresetDeck(id)` | PR #190 — five named preset decks (Erosion, Saturation, Bulwark, Onslaught, Generalist), each with a single design focus. (Superseded by the ten spec 32 v3 themed presets — see §8 above; this row is stale beyond the naming.) `buildPresetDeck` appends no escape card — there is no in-combat retreat — and is ready to feed `initializeCombatEncounter`. |
-| `CombatDeckPreset`, `CombatDeckFocus` | PR #190 type exports — `CombatDeckPreset` describes a single named preset deck entry (id, label, focus, cardIds); `CombatDeckFocus` is the discriminated string union of the five design-focus tags (`erosion` / `saturation` / `bulwark` / `onslaught` / `generalist`). Both are importable as `import type { CombatDeckPreset, CombatDeckFocus } from 'axiomancer-mechanics'`. |
+| `COMBAT_DECK_PRESETS` / `COMBAT_DECK_PRESET_ORDER` / `listDeckPresets()` / `getDeckPreset(id)` / `buildPresetDeck(id)` | The ten spec 32 v3 themed preset decks (`src/Combat/combat.deck-presets.ts`): Erosion, Oratory, Foundry, Penitent, Standstill, Augury, Tithe, Grace, Bastion, Refrain — each a fixed 15-card recipe (4/4/2/2/1/1/1: two commons ×4, two uncommons ×2, the theme's rare spell + enchantment + disenchant ×1), strictly self-contained with zero cross-theme card overlap. Originally a PR #190 five-preset lineup (Erosion, Saturation, Bulwark, Onslaught, Generalist); the names/functions were kept but the content and count were fully replaced. `buildPresetDeck` appends no escape card — there is no in-combat retreat — and is ready to feed `initializeCombatEncounter`. |
+| `CombatDeckPreset`, `CombatDeckFocus` | `CombatDeckPreset` describes a single named preset deck entry (id, name, theme, focus, description, cardIds). `CombatDeckFocus` is the discriminated string union of the (now six) coarse design-lever tags used by draft/sim-policy consumers — `'dot' \| 'control' \| 'utility' \| 'damage' \| 'rush-execute' \| 'balanced'` (not the old per-preset name union). Both are importable as `import type { CombatDeckPreset, CombatDeckFocus } from 'axiomancer-mechanics'`. |
 | `CardDieCost` | Die-cost helper type — `{ cost: number; advantage: boolean }` returned by `resolveCardDieCost` and `cardDieCostPreview`. Importable as `import type { CardDieCost } from 'axiomancer-mechanics'`. |
 | `CombatIntentType`, `CombatReadResult`, `SignatureSkill`, `SignatureSkillId`, `SignatureSkillKind`, `PlayerArchetype` | The depth-layer type family. |
 
