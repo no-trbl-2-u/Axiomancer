@@ -1,7 +1,7 @@
 # Critique log
 
-> Last pass: 2026-07-08 at commit e50e819a
-> Pass count: 6
+> Last pass: 2026-07-08 at commit aff7fece
+> Pass count: 7
 
 > External-observer feedback for Axiomancer. Populated by
 > `/critique` (which drives the local expo-web build with the
@@ -11,45 +11,41 @@
 
 ## Pending
 
-### [needs-user-call] Playwright MCP tools unavailable to sub-agents — recurred again (pass 6)
-- pass: 6 (commit e50e819a); prior: pass 5 (commit b0707e0a), pass
-  1-4 (marked fixed, see Done section)
+### [needs-user-call] Playwright MCP tools unavailable to sub-agents — recurred again (pass 7)
+- pass: 7 (commit aff7fece); prior: pass 6 (commit e50e819a),
+  pass 5 (commit b0707e0a), pass 1-4 (marked fixed, see Done
+  section)
 - viewport: n/a
 - category: infra
-- observation: third occurrence of this exact blocker. `.claude/
-  settings.json` on disk still lists all 14
-  `mcp__playwright__browser_*` tools under `permissions.allow`
-  (verified again this pass — `mcp__playwright__browser_navigate`,
-  `_click`, `_snapshot`, `_take_screenshot`, `_console_messages`,
-  `_close`, etc. all present). Local expo-web build was started
-  and confirmed reachable (`curl -> 200`) at
+- observation: fourth occurrence of this exact blocker, third
+  consecutive. Local expo-web build was started fresh this pass
+  (`npx expo start --web --port 8081` from `axiomancer-mobile/`,
+  since `web:container` is still broken per the separate LOW
+  finding below) and confirmed reachable (`curl -> 200`) at
   http://localhost:8081 before spawning `playtester`. The
-  `playtester` sub-agent still had every
-  `mcp__playwright__browser_navigate` call rejected, retried 5x
-  independently, never granted. This confirms pass 5's read: the
-  settings.json allowlist content is not the gap — something in
-  how this runtime/session grants MCP tool permissions to
-  sub-agents structurally never resolves the grant in an
-  unattended run, regardless of what the file says. Two
-  consecutive passes (5, 6) reproduce identically with a verified
-  correct settings file, which rules out "the file needs another
-  edit" as the fix.
-- evidence: verbatim tool error, reproduced across passes 5 and
-  6 (5x retries pass 6 alone): `Claude requested permissions to
-  use mcp__playwright__browser_navigate, but you haven't granted
-  it yet.`
-- suggested fix: stop re-attempting settings.json edits — two
-  passes have now verified the file is already correct. This
-  needs a `[needs-user-call]` decision on the permission-mode
-  mechanism itself: either (a) confirm whether this harness's
+  `playtester` sub-agent had every `browser_navigate`,
+  `browser_snapshot`, and `browser_resize` call rejected at the
+  permission layer before executing — identical to passes 5 and
+  6. This is now three consecutive passes reproducing identically
+  with a verified-correct settings file, which further rules out
+  "the file needs another edit" as the fix.
+- evidence: verbatim tool error, reproduced again this pass:
+  `Claude requested permissions to use
+  mcp__playwright__browser_navigate, but you haven't granted it
+  yet.` (same pattern for `browser_snapshot`, `browser_resize`).
+- suggested fix: unchanged from pass 6 — this needs a
+  `[needs-user-call]` decision on the permission-mode mechanism
+  itself: either (a) confirm whether this harness's
   unattended/`/march`-invoked sessions structurally cannot
   auto-approve MCP tool grants for sub-agents (in which case
   `/critique` needs a non-Playwright transport for unattended
   ticks — e.g. a headless script driving the expo-web build
   directly), or (b) identify the correct scope/mechanism (session
   flag, env var, harness config outside `.claude/settings.json`)
-  that actually grants MCP tools to sub-agent contexts.
-- source: critique pass 6 (playtester, dev server pre-verified up
+  that actually grants MCP tools to sub-agent contexts. Do not
+  re-attempt settings.json edits — three passes have now verified
+  the file is already correct.
+- source: critique pass 7 (playtester, dev server pre-verified up
   before spawn)
 
 ### [LOW] `web:container` dev-server script is broken
