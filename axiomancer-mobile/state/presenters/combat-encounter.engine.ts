@@ -522,7 +522,7 @@ interface CardCalc extends PrimaryResolution {
 function cardCalc(card: CombatCard, skill: Skill | undefined): CardCalc {
     const pr = resolvePrimary(card, skill);
     const out: CardCalc = {
-        ...pr, keyword: null, glyph: '◆', categoryColor: STRIKE_COLOR,
+        ...pr, keyword: null, glyph: '◆', categoryColor: PAYOFF_COLOR,
         perTurn: 0, turns: 0, total: 0, freePerTurn: 0, freeTurns: 0, freeTotal: 0,
         skips: 0, dpr: 0, intensity: 1, stacks: false,
         vulnPct: 0, reflectN: 0, barrierAmt: 0, siphonPct: 0,

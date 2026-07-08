@@ -906,7 +906,6 @@ export const CombatBoard = React.memo(function CombatBoard({
 function heroFace(f: CombatCardFaceVM): string {
     if (f.heroText) return f.heroText;
     switch (f.kind) {
-        case 'strike': return 'HIT';
         case 'befriend': return 'SPARE';
         case 'weaken': return 'softens';
         default: return 'minor';   // inert
