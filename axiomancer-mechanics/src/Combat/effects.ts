@@ -227,13 +227,19 @@ export function getPendingDotTotal(bearer: Combatant, currentRound?: number): { 
         const ticks = Math.max(1, ae.remainingDuration);
         // P0-truth: escalating DoTs (`escalatesPerTurn`) sum their GROWING future
         // ticks when a round is threaded; flat DoTs keep perTick × ticks.
+        // BLEED (spec 32 v3 `decaysPerTick`): intensity falls 1 per future tick
+        // and the instance washes out at 0 — the pending fuel must model that
+        // decay or RUPTURE previews overstate the burst (projection-truth law).
+        const decays = def.payload.dotModifiers?.decaysPerTick === true;
         let amount = 0;
         for (let k = 0; k < ticks; k++) {
+            const tickIntensity = decays ? intensity - k : intensity;
+            if (tickIntensity <= 0) break;
             const dpr = rampedDamagePerRound(
                 ae, dot.damagePerRound, def.payload.dotModifiers,
                 currentRound === undefined ? undefined : currentRound + k,
             );
-            amount += Math.floor(dpr * intensity * multiplier);
+            amount += Math.floor(dpr * tickIntensity * multiplier);
         }
         perEffect.push({ effectId: ae.effectId, label: def.name, amount });
         total += amount;
@@ -262,6 +268,7 @@ export function computeRoundsToKill(bearer: Combatant, currentRound?: number): n
                 intensity: ae.intensity ?? 1,
                 multiplier: dotAmp.get(ae.effectId) ?? 1,
                 ticks: Math.max(1, ae.remainingDuration),
+                decays: def.payload.dotModifiers?.decaysPerTick === true,
             };
         })
         .filter((e): e is NonNullable<typeof e> => e !== null);
@@ -272,11 +279,14 @@ export function computeRoundsToKill(bearer: Combatant, currentRound?: number): n
     for (let k = 0; k < maxTicks; k++) {
         for (const e of dotEffects) {
             if (k >= e.ticks) continue;
+            // BLEED decay — same convention as `getPendingDotTotal`.
+            const tickIntensity = e.decays ? e.intensity - k : e.intensity;
+            if (tickIntensity <= 0) continue;
             const dpr = rampedDamagePerRound(
                 e.ae, e.dot.damagePerRound, e.dotModifiers,
                 currentRound === undefined ? undefined : currentRound + k,
             );
-            cumulative += Math.floor(dpr * e.intensity * e.multiplier);
+            cumulative += Math.floor(dpr * tickIntensity * e.multiplier);
         }
         if (cumulative >= bearer.health) return k + 1;
     }
