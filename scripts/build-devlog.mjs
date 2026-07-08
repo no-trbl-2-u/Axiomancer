@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 // Build the DevLog site:
-//   - devlog/index.html         the HUB — four links: Cards, Enemies, Effects, DevLog
+//   - devlog/index.html         the HUB — links: Catalog, DevLog
 //   - devlog/log.html           the DevLog entry list (newest first)
 //   - devlog/DIGEST_<date>.html one page per structured markdown entry
 //
-// The Cards / Enemies / Effects pages are built by scripts/build-catalog.mjs
-// from devlog/data/*.json (produced by `npm run catalog:export`). This script
-// only reads those JSON files (if present) to show live counts on the hub.
+// The single Catalog page is built by scripts/build-catalog.mjs from
+// devlog/data/*.json (produced by `npm run catalog:export`). This script only
+// reads those JSON files (if present) to show live counts on the hub.
 //
 // Zero dependencies (matches the dep-free root). Entries are Markdown with a
 // light structure the /digest skill authors (see skills/digest.md §3.4):
@@ -347,9 +347,13 @@ function buildHub(entryCount) {
   const sub = (n, noun) => (n == null ? "browse the catalog" : `${n} ${noun}`);
 
   const tiles = [
-    { href: "./cards.html", hue: "cards", glyph: "🂠", title: "Cards", sub: sub(cards, "cards") },
-    { href: "./enemies.html", hue: "enemies", glyph: "☠", title: "Enemies", sub: sub(enemies, "foes") },
-    { href: "./effects.html", hue: "effects", glyph: "✷", title: "Effects", sub: sub(effects, "statuses") },
+    {
+      href: "./catalog.html",
+      hue: "cards",
+      glyph: "🂠",
+      title: "Catalog",
+      sub: [sub(cards, "cards"), sub(enemies, "foes"), sub(effects, "statuses")].join(" · "),
+    },
     {
       href: "./log.html",
       hue: "log",
