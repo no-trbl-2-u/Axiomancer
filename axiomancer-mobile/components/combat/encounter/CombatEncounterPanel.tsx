@@ -79,12 +79,21 @@ export interface CombatEncounterPanelProps {
 
 type StoreLike = ReturnType<typeof useGameStore>;
 
+/** Spec 32 v3 §9 — the merciful resolutions. Befriend (mercy), CAPITULATE
+ *  (SWAY ≥ enemy VITAE) and CONCEDE (the 8-Premise Peroration) all reward like
+ *  mercy: XP flows, no corpse loot. */
+function isMercifulWin(outcome: CombatOutcome): boolean {
+    return outcome === 'mercy' || outcome === 'capitulate' || outcome === 'concede';
+}
+
 /**
  * Economy write-back for a finished hazard encounter — the bridge the new
- * engine omits. Victory/mercy grant XP (+ cascade level-ups); victory also
- * rolls item loot. Final HP persists for every outcome except defeat (the
- * host's run-reset full-heals there). The deckbuilder card is handled
- * separately (it's claimed mid-flow via `addRewardCard`).
+ * engine omits. Victory and the merciful wins (mercy / capitulate / concede)
+ * grant XP (+ cascade level-ups); victory also rolls item loot. Final HP
+ * persists for every outcome except defeat (the host's run-reset full-heals
+ * there). The FLOATING-die pool (spec 32 v3 §5) writes back to the character
+ * on every outcome — forged dice persist across combats until spent. The
+ * deckbuilder card is handled separately (claimed mid-flow via `addRewardCard`).
  */
 function applyHazardOutcome(
     store: StoreLike,
@@ -93,13 +102,16 @@ function applyHazardOutcome(
     enemy: Enemy,
 ): void {
     const finalHp = finalState.player.health;
+    // Spec 32 v3 §5 — the surviving floating dice, in engine truth (spent dice
+    // are gone forever; unspent ones arrive in the next battle's opening tray).
+    const floatingDice = getFloatingDiceColors(finalState);
     store.setState((s) => {
         if (!s.player) return {};
-        let player: Character = { ...s.player };
+        let player: Character = { ...s.player, floatingDice };
         if (outcome !== 'defeat') {
             player = { ...player, health: Math.max(0, Math.min(finalHp, player.maxHealth)) };
         }
-        if (outcome === 'victory' || outcome === 'mercy') {
+        if (outcome === 'victory' || isMercifulWin(outcome)) {
             player = { ...player, experience: player.experience + (enemy.xpReward ?? 0) };
         }
         if (outcome === 'victory') {
@@ -113,7 +125,7 @@ function applyHazardOutcome(
     // Cascade level-ups through the engine store (applyLevelUps isn't exported,
     // so the LEVEL_UP reducer is the only public path). applyLevelUps already
     // loops internally; the guarded while-loop is belt-and-braces.
-    if (outcome === 'victory' || outcome === 'mercy') {
+    if (outcome === 'victory' || isMercifulWin(outcome)) {
         const levelUp = (store.getState() as { levelUp?: () => void }).levelUp;
         let guard = 0;
         while (

@@ -42,7 +42,7 @@ import {
     dieIsRerollable, hasRerollableDice, rerollSpentDice,
 } from '../combat.dice';
 import { buildCombatDeck, COMBAT_HAND_SIZE } from '../combat.deck';
-import { classifyVerbClass, toCombatCard, projectDeck, isGoldCard, GOLD_CARD_IDS } from '../combat.cards';
+import { classifyVerbClass, toCombatCard, projectDeck } from '../combat.cards';
 import { generateDefaultThreatSequence, AUTHORED_THREAT_ENEMY_IDS } from '../combat.threat';
 import { ENEMY_REGISTRY } from '../../Enemy/enemy.library';
 import type { CombatManaDie, CombatEvent } from '../combat.encounter.types';
