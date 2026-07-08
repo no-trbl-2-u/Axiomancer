@@ -171,7 +171,8 @@ describe('sandbox cards — v3 vocabulary and combat projection', () => {
         registerSandboxCards([testDotCard()]);
         const projected = toCombatCard('sandbox-test-rot', getCardById, lookupEffect);
         expect(projected).not.toBeNull();
-        expect(projected!.cardId).toBe('sandbox-test-rot');
+        expect(projected!.id).toBe('sandbox-test-rot');
         expect(projected!.primaryEffectId).toBe('debuff_bleed');
+        expect(projected!.effectKind).toBe('dot');
     });
 });

@@ -150,8 +150,9 @@ function keywordTypeTag(kind: string, index: number): string {
         case 'weaken': return 'CONTROL';
         case 'guard': return 'GUARD';
         case 'regen': return 'REGEN';
-        case 'strike': return 'STRIKE';
         case 'befriend': return 'MERCY';
+        case 'enchant': return 'ENCHANT';
+        case 'disenchant': return 'CURSE';
         default: return 'EFFECT';
     }
 }
@@ -159,7 +160,7 @@ function keywordTypeTag(kind: string, index: number): string {
 // Reference-style coloured type tags (right-aligned on the keyword panels).
 const TAG_COLORS: Record<string, string> = {
     DOT: '#e2543b', CONTROL: '#a86bdc', GUARD: '#9aa0a6', REGEN: '#5bbf6a',
-    STRIKE: '#c2a14e', MERCY: '#5bbf6a', EFFECT: '#8a8273',
+    MERCY: '#5bbf6a', ENCHANT: '#7fb3a6', CURSE: '#a86bdc', EFFECT: '#8a8273',
 };
 
 // Category plaque for the status tooltip — glyph kind → badge label + colour.
