@@ -28,7 +28,7 @@ import Svg, { Circle, Defs, Line, Polygon, RadialGradient, Stop } from 'react-na
 import {
     initializeCombatEncounter, rollEncounterDice, playCombatCard, resolveThreatPhase,
     startTurn, draftStanceDie, discardCombatCard, playSignatureSkill,
-    tapFateDie, getPendingDotTotal,
+    tapFateDie, getPendingDotTotal, getFloatingDiceColors,
     selectEncounterMercyChoice, buildCombatSummary, rollCombatCardRewards, addRewardCard,
     rollLoot, addItem,
     type CombatEncounterState, type CombatOutcome, type Character, type Enemy, type CombatEvent,

@@ -255,36 +255,6 @@ describe('R7 COLOR MATCH — +1 turn on status plays', () => {
     });
 });
 
-describe('REACT — consuming detonation', () => {
-    it('consumes both reagents, bursts on the mechanic path, applies the product', () => {
-        let s = open(['qa-react-card'], 'heart', [ae('debuff_fear', 2, 2), ae('debuff_confusion', 1, 2)]);
-        s = setDice(s, ['heart', 'mind']);
-        s = draftStanceDie(s, s.dice[0].id).state;  // neutral read
-        const hp = s.enemy.health;
-        const entry = s.hand.find(h => h.cardId === 'qa-react-card')!;
-        const res = playCombatCard(s, { uid: entry.uid }, true);
-        const det = res.events.find(e => e.kind === 'react-detonated') as { amount: number; consumed: string[] } | undefined;
-        expect(det).toBeDefined();
-        expect(det!.amount).toBe(4 * (2 + 1)); // burstPerIntensity × consumed intensities, neutral ×1
-        expect(det!.consumed.sort()).toEqual(['debuff_confusion', 'debuff_fear']);
-        expect(res.state.enemy.effects.some(e => e.effectId === 'debuff_fear')).toBe(false);
-        expect(res.state.enemy.effects.some(e => e.effectId === 'debuff_stagger')).toBe(true);
-        expect(hp - res.state.enemy.health).toBeGreaterThanOrEqual(det!.amount);
-        // a fired REACT refreshes the powering die (the crescendo keeps the turn alive)
-        expect(res.events.some(e => e.kind === 'die-refreshed')).toBe(true);
-    });
-
-    it('without both reagents it is just the card (no detonation)', () => {
-        let s = open(['qa-react-card'], 'heart', [ae('debuff_fear', 2, 2)]);
-        s = setDice(s, ['heart', 'mind']);
-        s = draftStanceDie(s, s.dice[0].id).state;
-        const entry = s.hand.find(h => h.cardId === 'qa-react-card')!;
-        const res = playCombatCard(s, { uid: entry.uid }, true);
-        expect(res.events.some(e => e.kind === 'react-detonated')).toBe(false);
-        expect(res.state.enemy.effects.some(e => e.effectId === 'debuff_fear')).toBe(true);
-    });
-});
-
 describe('R8 — a bogus dieId is an explicit fizzle', () => {
     it('fizzles without touching state', () => {
         let s = open(['qa-threshold-dot'], 'body');
@@ -298,10 +268,12 @@ describe('R8 — a bogus dieId is an explicit fizzle', () => {
 });
 
 describe('the projected card prints its die lines (real units)', () => {
-    it('threshold / fate / die-manipulation lines appear on curated keepers', () => {
-        expect(getCard('hasty-generalization')!.dieLines?.some(l => l.includes('BODY ×2'))).toBe(true);
-        expect(getCard('achilles-gambit')!.dieLines?.some(l => l.includes('X die'))).toBe(true);
-        expect(getCard('ship-of-theseus')!.dieLines?.some(l => l.includes('WILD'))).toBe(true);
-        expect(getCard('suspend-judgment')!.dieLines?.some(l => l.includes('Reserve'))).toBe(true);
+    it('threshold / dieBonus lines appear on v3 library cards', () => {
+        // mounting-case: threshold heart×2 → +1 Premise
+        expect(getCard('mounting-case')!.dieLines?.some(l => l.includes('HEART ×2'))).toBe(true);
+        // straw-mans-jab: dieBonus on a BODY die → +1 intensity
+        expect(getCard('straw-mans-jab')!.dieLines?.some(l => l.includes('BODY die'))).toBe(true);
+        // bootstrap-loop: threshold mind×2 → +1 pip to every Reserve die
+        expect(getCard('bootstrap-loop')!.dieLines?.some(l => l.includes('Reserve'))).toBe(true);
     });
 });

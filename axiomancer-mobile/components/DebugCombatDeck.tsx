@@ -1,10 +1,11 @@
 /**
  * Dev-only combat deck controls. The named presets swap the player's combat
- * deck for a curated selection (starter baseline, the keyword deck types —
- * bleed / poison / confusion / dread / guard / sustain — and a gold-showcase);
- * the randomizer deals a chaos hand from the full card pool. Each preset replaces
- * `player.knownSkills` and clears earned reward cards, so the next encounter
- * deals exactly that deck. Renders null outside dev builds.
+ * deck for a curated selection (starter baseline plus the ten themed preset
+ * decks — Erosion, Oratory, Foundry, Penitent, Standstill, Augury, Tithe,
+ * Grace, Bastion, Refrain); the randomizer deals a chaos hand from the full
+ * card pool. Each preset replaces `player.knownSkills` and clears earned
+ * reward cards, so the next encounter deals exactly that deck. Renders null
+ * outside dev builds.
  */
 
 import React, { useState } from 'react';
