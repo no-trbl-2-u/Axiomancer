@@ -181,15 +181,15 @@ describe('removeEffectsByType', () => {
 
 describe('effectsLibrary', () => {
     it('lookupEffect finds buffs', () => {
-        const effect = lookupEffect('tier1_body_attack');
+        const effect = lookupEffect('buff_thorns');
         expect(effect).toBeDefined();
-        expect(effect?.name).toBe('Ad Baculum');
+        expect(effect?.name).toBe('Thorns');
     });
 
     it('lookupEffect finds debuffs', () => {
-        const effect = lookupEffect('tier1_mind_mark');
+        const effect = lookupEffect('debuff_mark');
         expect(effect).toBeDefined();
-        expect(effect?.name).toBe('Exposed Reasoning');
+        expect(effect?.name).toBe('Mark');
     });
 
     it('returns undefined for unknown ID', () => {

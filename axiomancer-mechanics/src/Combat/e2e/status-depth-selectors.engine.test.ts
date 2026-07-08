@@ -172,8 +172,10 @@ describe('getActiveDotTotal / getActiveDotAmplifications (amplification surface)
     it('MARK adds +1 per stack to EVERY DoT tick on the bearer (ratified A3)', () => {
         expect(getTickAmplifyFlat([ae('debuff_mark', 2)])).toBe(2);
         const t = getActiveDotTotal([ae('debuff_poison', 1), ae('debuff_bleed', 1), ae('debuff_mark', 2)]);
-        // poison 2+2=4, bleed 3+2=5 → 9 (no Hemorrhage at combined intensity 2).
-        expect(t.total).toBe(9);
+        // poison 2+2=4; bleed+mark trigger Opened Veins (×1.5 on bleed):
+        // floor(3×1×1.5)=4, +2 mark = 6 → total 10. (No Hemorrhage at combined
+        // poison+bleed intensity 2.)
+        expect(t.total).toBe(10);
     });
 
     it('reports the live triggered combos with their registry names', () => {

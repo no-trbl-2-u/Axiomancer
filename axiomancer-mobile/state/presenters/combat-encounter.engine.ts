@@ -475,9 +475,6 @@ export function resolvePrimary(card: CombatCard, skill: Skill | undefined): Prim
     // it wasn't even a rider. Surface it as a rider too, so the (now honest)
     // keyword shows in the inspect modal rather than vanishing.
     const selfFx = (skill?.combatEffects ?? []).filter(e => e.appliedTo === 'self');
-    // 0.34.0: execute is a finisher that rides whatever the card also applies (e.g. a DoT).
-    const execute = findMech('execute');
-    if (execute) return { kind: 'execute', ce: null, guardAmount: null, riders: [...opp, ...selfFx], mech: execute };
     const primary = opp.find(o => engineHonestKind(o.effectId)) ?? opp[0] ?? null;
     const k = engineHonestKind(primary?.effectId);
     const kind: CombatCardKind =
@@ -508,9 +505,8 @@ interface CardCalc extends PrimaryResolution {
     siphonPct: number;     // % of damage healed (siphon.pct)
     riposteDmg: number;    // counter damage (riposte.damage, base read)
     riposteReduce: number; // incoming reduction (riposte.reduce, base read)
-    executeHpPct: number;  // foe-HP threshold for the finisher (execute.hpPct)
-    executeStacks: number; // OR ≥N DoT stacks (execute.dotStacks)
-    compoundPer: number;   // bonus damage per distinct debuff (compound.perDebuff)
+    reapCost: number;      // Souls a REAP spends (0 = spends ALL, reap_all)
+    reapPerSoul: number;   // burst per Soul (reap_all.burstPerSoul)
     // ── card-overhaul (2026-07-03) ──
     exposureDelta: number; // real -N DEF (defenseModifier, negative)
     resolutePct: number;   // real -N% dmg taken (the inverse of vulnPct, negative)
@@ -530,7 +526,7 @@ function cardCalc(card: CombatCard, skill: Skill | undefined): CardCalc {
         perTurn: 0, turns: 0, total: 0, freePerTurn: 0, freeTurns: 0, freeTotal: 0,
         skips: 0, dpr: 0, intensity: 1, stacks: false,
         vulnPct: 0, reflectN: 0, barrierAmt: 0, siphonPct: 0,
-        riposteDmg: 0, riposteReduce: 0, executeHpPct: 0, executeStacks: 0, compoundPer: 0,
+        riposteDmg: 0, riposteReduce: 0, reapCost: 0, reapPerSoul: 0,
         exposureDelta: 0, resolutePct: 0,
         totalAdv: 0, totalDis: 0, vulnPctAdv: 0,
     };
