@@ -1,22 +1,18 @@
 /**
  * Hermetic E2E — P0-truth: THE PRINTED NUMBER IS THE APPLIED NUMBER.
  *
- * The owner-reported bug (2026-07-05): "the number on the card doesn't appear
- * to be the same number of effect points the enemy gets". Root causes, all
- * fixed in the P0-truth pass and pinned here so they cannot regress:
- *   1. `bottomDamagePreview` was denominated in the REMOVED pressure-track
- *      model's units (intensity × CONTROL_HARD_MULT…) — now it is the DoT's
- *      real lifetime HP on a neutral read, and 0 (no number) otherwise.
- *   2. `READ_STATUS_MULT` rescaled a landed intensity AFTER application
- *      (round(2×1.34)=3 but round(1×1.34)=1 — a silent no-op at low intensity)
- *      — replaced by the deterministic ±1 read rule (see combat.depth-epic).
- *   3. `projectCardImpact` omitted the damage resistance and VULNERABLE
- *      multiplier execution applies — now it threads the same factors.
- *   4. A dozen shipped payload fields (`buff_resolute`, DESPAIR's anti-heal,
- *      SEPTIC's damp, UNRAVELING's ramp, HEMORRHAGE's decay, DOUBT, CLARITY,
- *      OVEREXTENDED, ISOLATED, NOVIKOV, SENSORY NULL, CHARM's forced stance)
- *      had ZERO engine readers — cards printed effects the enemy never
- *      received. Each is pinned to a real behavioral delta below.
+ * Re-pinned to spec 32 v3: the strike is dead (`basePower`/`chipHp` deleted at
+ * the schema level), the retired effect vocabulary (resolute / vulnerable /
+ * septic / doubt / overextended / despair / isolated / hemorrhage / clarity /
+ * sensory-null / unraveling) is gone from the library, and the surviving truth
+ * laws are pinned against the v3 cards and effects:
+ *   1. `bottomDamagePreview` is the DoT's real lifetime HP on a neutral read,
+ *      and 0 (no number) otherwise.
+ *   2. The deterministic read rule lands the printed numbers EXACTLY on a
+ *      neutral read; a color match adds exactly +1 duration (Fate Engine R7).
+ *   3. `projectCardImpact` never advertises a strike number — there is none.
+ *   4. RAPPORT (the v3 charm-vocabulary debuff) really dampens the enemy's
+ *      outgoing threat damage; CHARM's forced stance is visible to the read.
  */
 
 import { describe, it, expect } from 'vitest';
@@ -31,12 +27,11 @@ import { lookupEffect } from '../../Effects/effects.library';
 import type { ActiveEffect } from '../../Effects/types';
 import {
     initializeCombatEncounter, rollEncounterDice, playCombatCard, resolveThreatPhase,
-    draftStanceDie, startTurn, getCard, projectCardImpact,
+    draftStanceDie, getCard, projectCardImpact,
     THREAT_DAMAGE_SCALE,
 } from '../combat.engine';
 import {
     getDamageTakenMultiplier, getHealingReceivedMult, getOutgoingDamageMult,
-    RESOLUTE_MIN_MULT,
 } from '../effects';
 import { getActiveDotTotal } from '../effect-modifiers';
 import type { CombatDieColor, CombatEncounterState, CombatThreatPhase } from '../combat.encounter.types';
@@ -106,7 +101,9 @@ describe('P0-truth — the card preview is the applied number', () => {
             const card = getCard(c.id);
             return card?.verbClass === 'direct-dot';
         });
-        expect(dotCards.length).toBeGreaterThan(10);
+        // v3 library: slippery-slope, straw-mans-jab, sweet-poison,
+        // fallen-grace, brief-candle at minimum.
+        expect(dotCards.length).toBeGreaterThanOrEqual(5);
         for (const skill of dotCards) {
             const card = getCard(skill.id)!;
             // Expected: Σ over enemy-targeted DoT payloads of floor(dpr×int)×dur
@@ -129,17 +126,13 @@ describe('P0-truth — the card preview is the applied number', () => {
         }
     });
 
-    it('non-DoT status cards print NO number (real-units-or-no-number)', () => {
+    it('non-DoT cards print NO number (real-units-or-no-number; the strike is dead)', () => {
         for (const skill of cardLibrary) {
             const card = getCard(skill.id)!;
-            if (card.verbClass === 'direct-control' || card.verbClass === 'stat-debuff' || card.verbClass === 'buff-self') {
-                const hasMechanicFloor = (skill.specialMechanics ?? []).some(
-                    m => m.kind === 'rupture' || m.kind === 'compound' || m.kind === 'execute');
-                if (!hasMechanicFloor) {
-                    expect(card.bottomDamagePreview, `${skill.id} has no honest single number`).toBe(0);
-                }
-                expect(card.bottomActionText).not.toContain('impact ~');
+            if (card.verbClass !== 'direct-dot') {
+                expect(card.bottomDamagePreview, `${skill.id} has no honest single number`).toBe(0);
             }
+            expect(card.bottomActionText).not.toContain('impact ~');
         }
     });
 
@@ -175,95 +168,28 @@ describe('P0-truth — the card preview is the applied number', () => {
             (authored.duration ?? lookupEffect(authored.effectId)!.duration) + 1);
     });
 
-    it('projectCardImpact matches the strike HP the enemy actually loses', () => {
-        // A pure basePower strike card with no synergy / no mechanics.
-        const strikeSkill = cardLibrary.find(c =>
-            c.basePower > 0 && c.targetType === 'enemy'
-            && !(c.combatEffects ?? []).length && !(c.specialMechanics ?? []).length && !c.synergy
-            && getCard(c.id)?.verbClass === 'direct-damage');
-        if (!strikeSkill) return; // library carries no pure strike — nothing to pin
-        let s = initializeCombatEncounter(makePlayer([strikeSkill.id]), makeEnemy(500, 'body'), [strikeSkill.id], 7);
-        s = rollEncounterDice(s).state;
-        s = setDice(s, ['body']);
-        s = draftStanceDie(s, s.dice[0].id).state;
-        const card = getCard(strikeSkill.id)!;
-        const projected = projectCardImpact(s, card).amount;
-        const entry = s.hand.find(h => h.cardId === strikeSkill.id)!;
-        const after = playCombatCard(s, { uid: entry.uid }, true).state;
-        expect(500 - after.enemy.health).toBe(projected);
+    it('projectCardImpact never advertises a strike number — the strike is dead (spec 32 v3 §1)', () => {
+        const s = initializeCombatEncounter(makePlayer(['slippery-slope']), makeEnemy(500, 'body'), ['slippery-slope'], 7);
+        for (const skill of cardLibrary) {
+            const card = getCard(skill.id)!;
+            const impact = projectCardImpact(s, card);
+            expect(impact.amount, `${skill.id} must not advertise an immediate-strike number`).toBe(0);
+            expect(impact.track).toBe(card.effectKind);
+        }
     });
 });
 
-describe('P0-truth — formerly-inert payloads now bite (threat side)', () => {
+describe('P0-truth — threat-side payloads bite for real', () => {
     it('baseline: a 10-damage threat lands round(10 × THREAT_DAMAGE_SCALE)', () => {
         const s = threatState([{ damage: 10 }]);
         const after = resolveThreatPhase(s).state;
         expect(s.player.health - after.player.health).toBe(BASE_HIT);
     });
 
-    it('buff_resolute on the player REDUCES incoming threat damage (was double-dead)', () => {
-        const s = threatState([{ damage: 10 }], { playerEffects: [activeEffect('buff_resolute', 1, 2)] });
-        const after = resolveThreatPhase(s).state;
-        expect(s.player.health - after.player.health).toBe(Math.round(10 * THREAT_DAMAGE_SCALE * 0.85));
-    });
-
-    it('self debuff_vulnerable on the player INCREASES incoming threat damage (gambles have stakes)', () => {
-        const s = threatState([{ damage: 10 }], { playerEffects: [activeEffect('debuff_vulnerable', 1, 2)] });
-        const after = resolveThreatPhase(s).state;
-        expect(s.player.health - after.player.health).toBe(Math.round(10 * THREAT_DAMAGE_SCALE * 1.5));
-    });
-
-    it('protective stacking clamps at RESOLUTE_MIN_MULT (never full immunity)', () => {
-        const p = makePlayer([]);
-        p.effects = [activeEffect('buff_resolute', 5, 2)];
-        expect(getDamageTakenMultiplier(p)).toBe(RESOLUTE_MIN_MULT);
-    });
-
-    it('debuff_septic on the enemy dampens ITS outgoing hit (-10%/stack)', () => {
-        const s = threatState([{ damage: 10 }], { enemyEffects: [activeEffect('debuff_septic', 2, 3)] });
+    it('RAPPORT on the enemy dampens ITS outgoing hit (-10%/stack, spec 32 v3 T8)', () => {
+        const s = threatState([{ damage: 10 }], { enemyEffects: [activeEffect('debuff_rapport', 2, 2)] });
         const after = resolveThreatPhase(s).state;
         expect(s.player.health - after.player.health).toBe(Math.round(10 * THREAT_DAMAGE_SCALE * 0.8));
-    });
-
-    it('debuff_overextended halves the enemy\'s next fired phase, then is consumed', () => {
-        const s = threatState([{ damage: 10 }], { enemyEffects: [activeEffect('debuff_overextended', 1, 3)] });
-        const after = resolveThreatPhase(s).state;
-        expect(s.player.health - after.player.health).toBe(Math.round(10 * THREAT_DAMAGE_SCALE * 0.5));
-        expect(after.enemy.effects.find(e => e.effectId === 'debuff_overextended')).toBeUndefined();
-    });
-
-    it('debuff_doubt cancels the threat\'s RIDERS (status + self-heal), then is consumed', () => {
-        const s = threatState(
-            [{ damage: 10, effectId: 'debuff_fear', intensity: 2, enemyHeal: 10 }],
-            { enemyEffects: [activeEffect('debuff_doubt', 1, 3)] },
-        );
-        const enemyHpBefore = s.enemy.health;
-        const after = resolveThreatPhase(s).state;
-        expect(after.player.effects.find(e => e.effectId === 'debuff_fear'), 'rider cancelled').toBeUndefined();
-        expect(after.enemy.health, 'self-heal cancelled').toBeLessThanOrEqual(enemyHpBefore);
-        expect(after.enemy.effects.find(e => e.effectId === 'debuff_doubt'), 'doubt consumed').toBeUndefined();
-        // the damage itself still lands — doubt cancels riders, not the hit
-        expect(s.player.health - after.player.health).toBe(BASE_HIT);
-    });
-
-    it('debuff_despair on the enemy shrinks its self-heal; debuff_isolated denies it outright', () => {
-        const despair = threatState([{ enemyHeal: 10 }], { enemyEffects: [activeEffect('debuff_despair', 1, 4)] });
-        const hurt = { ...despair, enemy: { ...despair.enemy, health: 300 } };
-        const healed = resolveThreatPhase(hurt).state;
-        // canonical despair (-50%/stack) i1 → ×0.5, minus this round's despair DoT ticks
-        const dotTick = getActiveDotTotal(hurt.enemy.effects).total;
-        expect(healed.enemy.health).toBe(300 + Math.round(10 * 0.5) - dotTick);
-
-        const isolated = threatState([{ enemyHeal: 10 }], { enemyEffects: [activeEffect('debuff_isolated', 1, 3)] });
-        const hurtIso = { ...isolated, enemy: { ...isolated.enemy, health: 300 } };
-        const after = resolveThreatPhase(hurtIso).state;
-        expect(after.enemy.health).toBe(300); // no heal, and isolated has no DoT
-    });
-
-    it('debuff_hemorrhage decays 1 intensity when the bearer heals (big but fragile)', () => {
-        const s = threatState([{ enemyHeal: 5 }], { enemyEffects: [activeEffect('debuff_hemorrhage', 2, 3)] });
-        const after = resolveThreatPhase(s).state;
-        expect(after.enemy.effects.find(e => e.effectId === 'debuff_hemorrhage')?.intensity).toBe(1);
     });
 
     it('charm (forcedStance) makes the enemy fight from the forced stance — the read sees it', () => {
@@ -279,29 +205,13 @@ describe('P0-truth — formerly-inert payloads now bite (threat side)', () => {
     });
 });
 
-describe('P0-truth — formerly-inert payloads now bite (player/dice side)', () => {
-    it('buff_clarity guarantees one WILD die next roll, then is consumed', () => {
-        let s = initializeCombatEncounter(makePlayer(['slippery-slope']), makeEnemy(500, 'body'), ['slippery-slope'], 7);
-        s = { ...s, phase: 'phase-play' as const, player: { ...s.player, effects: [activeEffect('buff_clarity', 1, 2)] } };
-        const rolled = startTurn(s).state;
-        expect(rolled.dice[0].color).toBe('wild');
-        expect(rolled.player.effects.find(e => e.effectId === 'buff_clarity')).toBeUndefined();
-    });
-
-    it('debuff_sensory_null on the player clamps a won read to neutral', () => {
-        let s = initializeCombatEncounter(makePlayer(['slippery-slope']), makeEnemy(500, 'mind'), ['slippery-slope'], 7);
-        s = rollEncounterDice(s).state;
-        s = { ...s, player: { ...s.player, effects: [activeEffect('debuff_sensory_null', 1, 2)] } };
-        s = setDice(s, ['body']); // body beats mind → would be advantage
-        s = draftStanceDie(s, s.dice[0].id).state;
-        expect(s.lastRead).toBe('neutral');
-    });
-
-    it('debuff_unraveling RAMPS: later rounds tick harder than the first', () => {
-        const effects = [activeEffect('debuff_unraveling', 2, 5, 1)];
-        const early = getActiveDotTotal(effects, 1).total;   // turnsActive 0
-        const late = getActiveDotTotal(effects, 6).total;    // turnsActive 5 → +floor(0.25×5)=+1 dpr
-        expect(late).toBeGreaterThan(early);
+describe('P0-truth — dice/DoT-side laws', () => {
+    it('POISON RAMPS: later rounds tick harder than the first (v3 honest printed curve)', () => {
+        const effects = [activeEffect('debuff_poison', 2, 5, 1)];
+        const early = getActiveDotTotal(effects, 1).total;   // turnsActive 0 → dpr 2
+        const late = getActiveDotTotal(effects, 6).total;    // turnsActive 5 → dpr 2+floor(0.5×5)=4
+        expect(early).toBe(4);
+        expect(late).toBe(8);
     });
 
     it('multiplier helpers are exactly 1 for unmarked bearers (byte-compat)', () => {

@@ -766,14 +766,10 @@ export interface LearnableSkillOffer {
 }
 
 function toLearnableOffer(store: AppStore, skill: Skill): LearnableSkillOffer {
-    const player = store.getState().player;
     const combatSkill = getCombatSkillById(skill.id);
-    let damage = Math.max(0, skill.basePower);
-    try {
-        damage = calculateSkillDamage(player, skill);
-    } catch {
-        // incomplete caster shape — keep the base-power estimate
-    }
+    // Spec 32 v3 — THE STRIKE IS DEAD: cards deal no immediate damage, so the
+    // offer row carries only the status/effect line (never a fabricated number).
+    const damage = 0;
     return {
         id: skill.id,
         name: skill.name.toUpperCase(),
