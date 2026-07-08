@@ -38,9 +38,11 @@ export {
     // 0.34.0 status-depth epic — HP-model selectors + tunable scalars
     getDamageTakenMultiplier, getPendingDotTotal, consumeDotEffects, computeRoundsToKill,
     getDistinctDebuffCount, getDistinctControlCount,
-    VULNERABLE_MAX_MULT, RESOLUTE_MIN_MULT, RUPTURE_BURST_CAP, COMPOUND_COUNT_CAP,
-    DISRUPT_DENY_AT, EXECUTE_DAMAGE_FRACTION,
-    AMPLIFY_DEFAULT_MULTIPLIER, AMPLIFY_BURST_CAP,
+    VULNERABLE_MAX_MULT, RESOLUTE_MIN_MULT, RUPTURE_BURST_CAP,
+    RUPTURE_PER_AFFLICTION_STACK, DISRUPT_DENY_AT, THREAT_RUNGS, THREAT_RUNGS_BOSS,
+    // Spec 32 v3 — themed-deck selectors
+    consumeAfflictions, consumeOneAffliction, getBackfirePerRung,
+    getMarkStacks, consumeMarks,
     // P0-truth — the formerly-inert payload channels are real; presenters read
     // the live multipliers off these instead of hard-coding.
     getHealingReceivedMult, getOutgoingDamageMult, decayDotsOnHeal, consumeEffect,
@@ -183,9 +185,11 @@ export {
     PIP_INTENSITY_BONUS, PIP_GUARD_BONUS, COLOR_MATCH_STATUS_DURATION_BONUS, FATE_TAP_CONVICTION,
     // 0.34.0 status-depth epic — honesty selectors
     getEnemyIncomingDamageMultiplier, getDisruptMeter,
-    projectRupture, isExecuteReady, projectExecute, projectSiphonHeal,
+    projectRupture, projectSiphonHeal, projectReapAll,
     // Phase 2 — projected-lethality readout (spec 30)
-    projectAmplify, projectCombatOutcome,
+    projectCombatOutcome,
+    // Spec 32 v3 — floating dice save-back + sway decay knob
+    getFloatingDiceColors, SWAY_DECAY_PER_TURN,
     // Master Spec §3 — Skills trigger hook (Skills are NOT cards)
     triggerCombatSkill,
 } from './combat.engine';
@@ -208,7 +212,7 @@ export type { CombatDeckPreset, CombatDeckFocus } from './combat.deck-presets';
 export {
     toCombatCard, projectDeck, classifyVerbClass,
     isSyntheticCard, SYNTHETIC_CARD_IDS,
-    GOLD_CARD_IDS, isGoldCard,
+    mechanicText,
     isCombatSynergySatisfied,
 } from './combat.cards';
 export {

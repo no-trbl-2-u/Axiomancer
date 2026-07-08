@@ -7,21 +7,22 @@
  * (`cards.sandbox.ts`), which `getCardById` consults first — so the set is
  * live across deck building, projection, and execution for that process.
  *
- * Doctrine check for every card added here: does it make applying and
- * exploiting status effects more central and more satisfying? Effect ids MUST
- * be real ids from the Effects library (`src/Effects/*.library.json`) — a
- * made-up id silently lands nothing.
+ * SPEC 32 v3 RESET (2026-07-08): the pre-v3 experiment sets referenced retired
+ * cards, retired effect ids, and the deleted `basePower` field — all cleared
+ * with the library overhaul. `/deck-tuning` authors fresh v3 sets here (cards
+ * must use the 30-keyword effect set and the v3 `Card` schema: `rank`,
+ * `cardType`, `free` — no raw HP damage; the schema enforces the doctrine).
  *
  * Promotion path: a sandbox card that proves out across stages/policies moves
  * its literal into `cards.library.ts` in the same PR as the evidence table.
  */
 
-import type { Card } from './types';
 import {
     registerSandboxCards,
     registerSandboxOverride,
     type SandboxCardPatch,
 } from './cards.sandbox';
+import type { Card } from './types';
 
 export interface SandboxCardSet {
     id: string;
@@ -31,75 +32,9 @@ export interface SandboxCardSet {
     overrides?: ReadonlyArray<{ cardId: string; patch: SandboxCardPatch }>;
 }
 
-// ─── forge-example — the reference experiment ────────────────────────────────
-
-/** Direct-dot experiment: Burn (a real DoT — `debuff_burn` ticks 4 HP/round
- *  and saps heart) on a mid-tier mind card. Status is the efficient path;
- *  this card exists to test whether a second mid-tier Burn source deepens
- *  DoT-weaving without outshining `slippery-slope`. */
-const emberSyllogism: Card = {
-    id: 'sandbox-ember-syllogism',
-    name: 'Ember Syllogism',
-    category: 'fallacy',
-    philosophicalAspect: 'mind',
-    description:
-        'A conclusion reached too fast generates heat. You hand them the '
-        + 'shortcut and let it smoulder — the argument keeps burning long '
-        + 'after you have stopped speaking.',
-    tier: 2,
-    targetType: 'enemy',
-    basePower: 10,
-    scalingStat: 'mind',
-    combatEffects: [
-        { effectId: 'debuff_burn', appliedTo: 'opponent', intensity: 2, duration: 3 },
-    ],
-    learningRequirement: { level: 10 },
-    addedIn: '2026-07-02',
-    tags: ['sandbox', 'experimental', 'dot', 'mid-game'],
-};
-
-/** Defend/guard hybrid experiment: a solid Guard plus a small lingering
- *  self-buff (`buff_minor_fortitude`), probing whether defence that ALSO
- *  advances a status board state beats flat guard (`brace-for-impact`). */
-const temperedDoubt: Card = {
-    id: 'sandbox-tempered-doubt',
-    name: 'Tempered Doubt',
-    category: 'paradox',
-    philosophicalAspect: 'body',
-    description:
-        'You do not deny the blow — you doubt its premises until it lands '
-        + 'softer. What survives the doubting is harder than certainty ever was.',
-    tier: 2,
-    targetType: 'self',
-    basePower: 0,
-    scalingStat: 'body',
-    specialMechanics: [{ kind: 'guard', amount: 14 }],
-    combatEffects: [
-        { effectId: 'buff_minor_fortitude', appliedTo: 'self', intensity: 1, duration: 2 },
-    ],
-    learningRequirement: { level: 10 },
-    addedIn: '2026-07-02',
-    tags: ['sandbox', 'experimental', 'defense', 'guard', 'mid-game'],
-};
-
-export const SANDBOX_CARD_SETS: Record<string, SandboxCardSet> = {
-    'forge-example': {
-        id: 'forge-example',
-        name: 'The Forge — Example Set',
-        description:
-            'Reference experiment: a second mid-tier Burn DoT source, a guard/'
-            + 'buff hybrid, and a +1 basePower nudge to Ad Hominem Strike. Shows '
-            + 'the full sandbox grammar (new cards + a library override).',
-        cards: [emberSyllogism, temperedDoubt],
-        overrides: [
-            // Example numeric A/B: library value is 0 (Master Spec 2026-07-03 —
-            // every player card is status-only bar a handful of tier-3 gated
-            // finishers) — does +1 on the doctrine's zero baseline strike change
-            // anything? (It should not: status play must stay the efficient path.)
-            { cardId: 'ad-hominem-strike', patch: { basePower: 1 } },
-        ],
-    },
-};
+/** The registry of named experiment sets (empty post-v3-reset; `/deck-tuning`
+ *  repopulates it as A/B candidates are authored). */
+export const SANDBOX_CARD_SETS: Record<string, SandboxCardSet> = {};
 
 /** All registered sandbox sets, in declaration order. */
 export function listSandboxSets(): SandboxCardSet[] {

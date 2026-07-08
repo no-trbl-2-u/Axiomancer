@@ -1,23 +1,26 @@
 /**
- * The curated combat card library — Fate Engine P1 (spec 31 §4).
+ * The Themed Deck Library — spec 32 v3 (2026-07-08).
  *
- * TRIMMED 2026-07-05 from 88 cards to the 48 keepers below (owner call: lock in
- * a smaller set of genuinely distinct cards first, extend from there). Keeper
- * criteria: (1) every mechanic is engine-REAL post-P0-truth, (2) no two keepers
- * feel the same in play, (3) the card's philosophy matches what it does,
- * (4) stance x tier x verb coverage keeps presets/draft/rewards functional.
+ * 70 unique cards: 10 self-contained themes × 7 (2 common spells ×4 copies,
+ * 2 uncommon spells ×2 copies, 1 rare spell + 1 enchantment + 1 disenchant ×1
+ * in the preset recipe — see `combat.deck-presets.ts`). Exactly 30 keywords
+ * (spec §3); THE STRIKE IS DEAD — no card touches HP outside DoT ticks,
+ * affliction payoffs, engine-gated drips, and reflect.
  *
- * Most Tier-2+ cards carry ONE die-interaction line (Fate Engine P1):
- *   threshold — Resonance tally >= N of a color fires a free rider
- *   dieBonus  — the powering die's color fires a rider
- *   fate      — the card may be POWERED BY AN X DIE for a printed twist
- *   die-manipulation mechanics — convert / bank / forge / ripen / refresh
- * Rider text is generated in real units (P0-truth law: printed == applied).
+ * Rank ladder (quality axis): 1 Doxa · 2 Lemma · 3 Thesis · 4 Theorem ·
+ * 5 Axiom · 6 Aporia. Rarity derives from it: common 1-2 / uncommon 3-4 /
+ * rare 5-6. `tier` stays the resist axis.
  *
- * Cut cards live in git history; their ids simply stop resolving (deck
- * projection drops unknown ids, so old saves degrade gracefully). Effect ids
- * the cut cards used are tagged `deprecated` in the effect libraries and are
- * BANNED here by `src/Effects/e2e/deprecated-effects.engine.test.ts`.
+ * Every card ships its pricing arithmetic in a comment (spec §4 point table;
+ * conditional discounts threshold ×0.5 · dieBonus ×0.6 · fate ×0.7 ·
+ * theme-state ×0.5; self-cost credits −0.75×). The pricing lint
+ * (`cards.pricing.ts` + `src/Cards/e2e/pricing.engine.test.ts`) asserts each
+ * sum lands in the printed rank's band.
+ *
+ * The pre-v3 library (49 cards, 126 effect ids, ~80 keywords) is retired to
+ * git history — no rescues (owner rule). Unknown ids drop gracefully from
+ * decks; the deprecated-ids ban list is regenerated in
+ * `src/Effects/e2e/deprecated-effects.engine.test.ts`.
  *
  * This file is data-only. All runtime behaviour lives in
  * `src/Cards/skill.engine.ts` and `src/Combat/combat.engine.ts`.
@@ -26,6 +29,8 @@
 import { Card } from './types';
 import { bindSandboxLibraryGuard, getSandboxCard } from './cards.sandbox';
 
+// ─── T1 — AFFLICTION (bleed + poison: stack, extend, convert, detonate) ──────
+
 const slipperySlope: Card = {
     id: 'slippery-slope',
     name: 'Slippery Slope',
@@ -33,676 +38,70 @@ const slipperySlope: Card = {
     philosophicalAspect: 'body',
     description:
         'One concession, then the next, then the avalanche you promised was ' +
-        'inevitable. You name the catastrophe at the bottom of the hill until ' +
-        'the ground itself seems to tilt, and they slide the whole way down.',
-    tier: 2,
+        'inevitable. The ground tilts, and they slide the whole way down.',
+    tier: 2, rank: 1, cardType: 'spell',
     targetType: 'enemy',
-    basePower: 0,
-    scalingStat: 'body',
-    learningRequirement: { level: 14 },
-    addedIn: '2026-06-07',
-    tags: ['mid-game', 'damage', 'control'],
-    combatEffects: [
-        { effectId: 'debuff_poison', appliedTo: 'opponent', intensity: 1 },
-    ],
-};
-
-const braceForImpact: Card = {
-    id: 'brace-for-impact',
-    name: 'Brace for Impact',
-    category: 'paradox',
-    philosophicalAspect: 'body',
-    description:
-        'You set your stance and meet the blow on your own terms — what is ' +
-        'braced for cannot break you. The strike still comes; it simply finds ' +
-        'a body that has already decided not to fall.',
-    tier: 1,
-    targetType: 'self',
-    basePower: 0,
-    scalingStat: 'body',
-    specialMechanics: [{ kind: 'guard', amount: 12 }],
+    // pts: poison i1 d4 ramp lifetime 10/3 ≈ 3.3 + FREE tick 0.6 = 3.9 → Doxa (starter)
+    free: { tickOne: true },
+    combatEffects: [{ effectId: 'debuff_poison', appliedTo: 'opponent', intensity: 1 }],
     learningRequirement: { level: 1 },
-    addedIn: '2026-06-22',
-    tags: ['defense', 'guard', 'early-game'],
+    addedIn: '2026-07-08',
+    tags: ['affliction', 'dot', 'starter'],
 };
 
-const adHominemStrike: Card = {
-    id: 'ad-hominem-strike',
-    name: 'Ad Hominem Strike',
+const strawMansJab: Card = {
+    id: 'straw-mans-jab',
+    name: "Straw Man's Jab",
     category: 'fallacy',
     philosophicalAspect: 'body',
     description:
-        'You don\'t refute the argument — you refute the arguer. The blow lands ' +
-        'where their composure was, scattering whatever fragile certainty they ' +
-        'had built. Their stance crumbles before their muscles do.',
-    tier: 1,
+        'You hit the version of them that is easiest to hit. It bleeds all ' +
+        'the same — wounds do not check citations.',
+    tier: 1, rank: 2, cardType: 'spell',
     targetType: 'enemy',
-    basePower: 0,
-    scalingStat: 'body',
-    specialMechanics: [{ kind: 'strip_random_buff', appliedTo: 'enemy' }],
-    combatEffects: [
-        { effectId: 'debuff_vulnerability_body', appliedTo: 'opponent', intensity: 1, duration: 2 },
-    ],
+    // pts: bleed i2 d2 lifetime ~10/3 ≈ 3.3 + tick 0.6 + dieBonus(+1 int ~1.5 ×0.6 = 0.9) ≈ 4.8 → Lemma
+    free: { tickOne: true },
+    combatEffects: [{ effectId: 'debuff_bleed', appliedTo: 'opponent', intensity: 2, duration: 2 }],
+    dieBonus: { onColor: 'body', rider: { bonusIntensity: 1 } },
+    learningRequirement: { level: 2 },
+    addedIn: '2026-07-08',
+    tags: ['affliction', 'dot'],
 };
 
-const falseDilemma: Card = {
-    id: 'false-dilemma',
-    name: 'False Dilemma',
+const festeringArgument: Card = {
+    id: 'festering-argument',
+    name: 'Festering Argument',
     category: 'fallacy',
     philosophicalAspect: 'mind',
     description:
-        'Two doors. Only two. Either-or, your fault, no third option — except ' +
-        'every option is a door. The enemy hesitates between phantoms while you ' +
-        'walk straight through.',
-    tier: 1,
+        'Left unanswered, a wound of reasoning does not close. You decline ' +
+        'to answer it. Everything they carry runs a little longer.',
+    tier: 2, rank: 3, cardType: 'spell',
     targetType: 'enemy',
-    basePower: 0,
-    scalingStat: 'mind',
-    combatEffects: [
-        { effectId: 'debuff_confusion', appliedTo: 'opponent', duration: 2 },
-    ],
-    dieBonus: { onColor: 'off', rider: { bonusDuration: 1 } }, // the wrong door, closed harder
+    // pts: +1 duration to ALL DoTs ≈ 1/dot × expected 2-3 live dots ≈ 5.5 + tick 0.6 ≈ 6.1 → Thesis
+    free: { tickOne: true },
+    specialMechanics: [{ kind: 'extend_dots', turns: 1 }],
+    learningRequirement: { level: 4 },
+    addedIn: '2026-07-08',
+    tags: ['affliction', 'glue'],
 };
 
-const appealToPity: Card = {
-    id: 'appeal-to-pity',
-    name: 'Appeal to Pity',
-    category: 'fallacy',
-    philosophicalAspect: 'heart',
-    description:
-        'You let the wound show. The argument was never the point — your pain ' +
-        'is. Even your own body listens, and softens, and bends a little of ' +
-        'itself back together.',
-    tier: 1,
-    targetType: 'self',
-    basePower: 0,
-    scalingStat: 'heart',
-    // heal = 0 + heart × 0.5 × 4  →  heart × 2 (per Spec 04b Q2-companion).
-    scalingMultiplier: 4,
-    combatEffects: [
-        { effectId: 'buff_resolute', appliedTo: 'self', intensity: 1, duration: 2 },
-    ],
-};
-
-const achillesGambit: Card = {
-    id: 'achilles-gambit',
-    name: 'Achilles\' Gambit',
-    category: 'paradox',
-    philosophicalAspect: 'body',
-    description:
-        'You commit to the strike that should never land — the runner who can ' +
-        'never catch the tortoise, the heel that must be exposed. Paradox ' +
-        'collapses into a single, unanswerable blow.',
-    tier: 1,
-    targetType: 'enemy',
-    basePower: 0,
-    scalingStat: 'body',
-    combatEffects: [
-        { effectId: 'debuff_bleed', appliedTo: 'opponent', intensity: 1, duration: 2 },
-    ],
-    fate: { rider: { chipHp: 4, bonusIntensity: 1 }, recoilHp: 2 }, // the impossible strike lands
-};
-
-const liarsEcho: Card = {
-    id: 'liars-echo',
-    name: 'Liar\'s Echo',
+const currysConversion: Card = {
+    id: 'currys-conversion',
+    name: "Curry's Conversion",
     category: 'paradox',
     philosophicalAspect: 'mind',
     description:
-        '"This sentence is false." Their next thought catches on the loop, ' +
-        'doubles back, and arrives more exposed than when it left. You read ' +
-        'every tell twice.',
-    tier: 1,
+        'If this wound harms you, then it spreads. The conditional is ' +
+        'vacuously true. The wound becomes the argument.',
+    tier: 2, rank: 4, cardType: 'spell',
     targetType: 'enemy',
-    basePower: 0,
-    scalingStat: 'mind',
-    combatEffects: [
-        { effectId: 'debuff_mark', appliedTo: 'opponent', intensity: 1, duration: 2 },
-    ],
-};
-
-const shipOfTheseus: Card = {
-    id: 'ship-of-theseus',
-    name: 'Ship of Theseus',
-    category: 'paradox',
-    philosophicalAspect: 'heart',
-    description:
-        'A plank of their resolve replaces a plank of yours. They are still ' +
-        'themselves, technically; you are still yourself, technically. The ' +
-        'borrowed buff settles around your shoulders.',
-    tier: 1,
-    targetType: 'enemy',
-    basePower: 4,
-    scalingStat: 'heart',
-    specialMechanics: [{ kind: 'convert_die_color' }],
-};
-
-const hastyGeneralization: Card = {
-    id: 'hasty-generalization',
-    name: 'Hasty Generalization',
-    category: 'fallacy',
-    philosophicalAspect: 'body',
-    description:
-        'One blow becomes the whole truth of them. You strike once and treat ' +
-        'the flinch as proof of everything — and so it becomes proof, the ' +
-        'sample of one swelling to a verdict their whole body must answer for.',
-    tier: 1,
-    targetType: 'enemy',
-    basePower: 0,
-    scalingStat: 'body',
-    learningRequirement: { level: 3 },
-    addedIn: '2026-06-07',
-    tags: ['status-effect', 'dot', 'early-game'],
-    combatEffects: [
-        { effectId: 'debuff_bleed', appliedTo: 'opponent', intensity: 2, duration: 2 },
-    ],
-    threshold: { color: 'body', count: 2, rider: { bonusIntensity: 1 } },
-};
-
-const suspendJudgment: Card = {
-    id: 'suspend-judgment',
-    name: 'Suspend Judgment',
-    category: 'paradox',
-    philosophicalAspect: 'mind',
-    description:
-        'You withhold assent from the attack\'s premise — refuse to grant that ' +
-        'it must land, and the conclusion loses its grip. The skeptic\'s shield ' +
-        'is built from everything left unconceded.',
-    tier: 1,
-    targetType: 'self',
-    basePower: 0,
-    scalingStat: 'mind',
-    specialMechanics: [{ kind: 'guard', amount: 12 }, { kind: 'bank_spent_die' }],
-    learningRequirement: { level: 1 },
-    addedIn: '2026-06-22',
-    tags: ['defense', 'guard', 'early-game'],
-};
-
-const soothingWords: Card = {
-    id: 'soothing-words',
-    name: 'Soothing Words',
-    category: 'fallacy',
-    philosophicalAspect: 'heart',
-    description: 'Gentle words that calm tensions without requiring defensive posture.',
-    tier: 1,
-    targetType: 'self',
-    basePower: 0,
-    scalingStat: 'heart',
-    incrementsFriendship: 1,
-    dieBonus: { onColor: 'heart', rider: { cleanse: 2 } },
-};
-
-const befriend: Card = {
-    id: 'befriend',
-    name: 'Befriend',
-    category: 'paradox',
-    philosophicalAspect: 'heart',
-    description:
-        'You extend genuine compassion toward your adversary, seeking understanding ' +
-        'over victory. When successful, you must choose between mercy and exploitation ' +
-        'of the vulnerable moment you have created.',
-    tier: 1,
-    targetType: 'enemy',
-    basePower: 0,
-    scalingStat: 'heart',
-    specialMechanics: [{ kind: 'befriend_attempt' }],
-};
-
-const mobAppeal: Card = {
-    id: 'mob-appeal',
-    name: 'Mob Appeal',
-    category: 'fallacy',
-    philosophicalAspect: 'body',
-    description:
-        'The crowd already believes you. So does the part of you that needed ' +
-        'convincing. A simultaneous blow and a small, dishonest reassurance — ' +
-        'and both work.',
-    tier: 2,
-    targetType: 'enemy',
-    basePower: 0,
-    scalingStat: 'body',
-    specialMechanics: [{ kind: 'secondary_heal_self', stat: 'heart', multiplier: 1 }],
-    learningRequirement: { level: 5 },
-    threshold: { color: 'body', count: 3, rider: { chipHp: 6 } }, // the mob is the bodies you already spent
-};
-
-const undistributedMiddle: Card = {
-    id: 'undistributed-middle',
-    name: 'Undistributed Middle',
-    category: 'paradox',
-    philosophicalAspect: 'mind',
-    description:
-        'All philosophers are mortal. You are mortal. Therefore you are a ' +
-        'philosopher — and your enemy is illegible. You watch them try to ' +
-        'follow the syllogism into a corner they cannot leave.',
-    tier: 2,
-    targetType: 'enemy',
-    basePower: 0,
-    scalingStat: 'mind',
-    learningRequirement: { level: 5 },
-    combatEffects: [
-        { effectId: 'debuff_confusion', appliedTo: 'opponent', duration: 2 },
-    ],
-    threshold: { color: 'mind', count: 3, rider: { bonusDuration: 1, drawCards: 1 } },
-};
-
-const eternalRegress: Card = {
-    id: 'eternal-regress',
-    name: 'Eternal Regress',
-    category: 'fallacy',
-    philosophicalAspect: 'heart',
-    description:
-        'Every answer they reach demands a previous answer; every previous ' +
-        'answer demands one more. You watch their certainty unspool itself — ' +
-        'and lay two distinct binds on the wreckage.',
-    tier: 2,
-    targetType: 'enemy',
-    basePower: 0,
-    scalingStat: 'heart',
-    learningRequirement: { level: 5 },
-    combatEffects: [
-        { effectId: 'debuff_unraveling', appliedTo: 'opponent', intensity: 2, duration: 5 },
-    ],
-    dieBonus: { onColor: 'mind', rider: { bonusIntensity: 1 } },
-};
-
-const resonanceBleed: Card = {
-    id: 'resonance-bleed',
-    name: 'Resonance Bleed',
-    category: 'paradox',
-    philosophicalAspect: 'heart',
-    description:
-        'A heart-pitched lyric over the body\'s open wound. The bleeding ' +
-        'finds the lyric and the lyric finds your enemy, and the two ' +
-        'agree that it has further to go.',
-    tier: 2,
-    targetType: 'enemy',
-    basePower: 0,
-    scalingStat: 'heart',
-    learningRequirement: { level: 5 },
-    synergy: {
-        predicate: { effectId: 'debuff_bleed', on: 'target', durationMin: 2 },
-        bonusDamage: 5,
-        durationDamageMul: 3,
-    },
-    combatEffects: [
-        { effectId: 'debuff_bleed', appliedTo: 'opponent', intensity: 1, duration: 2 },
-    ],
-};
-
-const batSwarmThoughtform: Card = {
-    id: 'bat-swarm-thoughtform',
-    name: 'Bat-Swarm Thoughtform',
-    category: 'paradox',
-    philosophicalAspect: 'heart',
-    description:
-        'Your defensive thorns lift off your skin in a heart-shape and ' +
-        'become a swarm of small attentive things. They feed on the ' +
-        'distance they remember as your edge.',
-    tier: 2,
-    targetType: 'self',
-    basePower: 0,
-    scalingStat: 'heart',
-    learningRequirement: { level: 5 },
-    specialMechanics: [{ kind: 'create_temporary_die', color: 'heart' }],
-    dieBonus: { onColor: 'match', rider: { conviction: 1 } },
-};
-
-const empatheticUnderstanding: Card = {
-    id: 'empathetic-understanding',
-    name: 'Empathetic Understanding',
-    category: 'paradox',
-    philosophicalAspect: 'mind',
-    description: 'Deep understanding that transcends conflict, building stronger bonds.',
-    tier: 2,
-    targetType: 'self', 
-    basePower: 0,
-    scalingStat: 'mind',
-    incrementsFriendship: 2,
-    combatEffects: [
-        { effectId: 'debuff_mark', appliedTo: 'opponent', intensity: 1, duration: 2 },
-    ],
-    dieBonus: { onColor: 'heart', rider: { revealStance: true } },
-};
-
-const stoicReserve: Card = {
-    id: 'stoic-reserve',
-    name: 'Stoic Reserve',
-    category: 'paradox',
-    philosophicalAspect: 'heart',
-    description:
-        'What is not in your power to prevent, you decline to be wounded by. ' +
-        'You hold a reserve of stillness against the blow — it spends its force ' +
-        'on a self that has agreed, in advance, to remain unmoved.',
-    tier: 2,
-    targetType: 'self',
-    basePower: 0,
-    scalingStat: 'heart',
-    specialMechanics: [{ kind: 'guard', amount: 18 }, { kind: 'grant_pip', count: 1 }],
+    // pts: convert bleed↔poison +1 int ≈ 1.5/instance × ~2 + tempo value ≈ 6.5 + draw 2 ≈ 8.5 → Theorem
+    free: { drawCards: 1 },
+    specialMechanics: [{ kind: 'convert_dots', bonusIntensity: 1 }],
     learningRequirement: { level: 6 },
-    addedIn: '2026-06-22',
-    tags: ['defense', 'guard', 'mid-game'],
-};
-
-const appealToAuthority: Card = {
-    id: 'appeal-to-authority',
-    name: 'Appeal to Authority',
-    category: 'fallacy',
-    philosophicalAspect: 'mind',
-    description:
-        'You do not argue — you cite. A name they dare not contradict settles ' +
-        'over the exchange, and their own thoughts begin to defer to a ' +
-        'borrowed certainty that was never yours to lend.',
-    tier: 2,
-    targetType: 'enemy',
-    basePower: 0,
-    scalingStat: 'mind',
-    learningRequirement: { level: 15 },
-    addedIn: '2026-06-07',
-    tags: ['mid-game', 'control', 'buff'],
-    combatEffects: [
-        { effectId: 'debuff_mark', appliedTo: 'opponent', intensity: 1, duration: 2 },
-        { effectId: 'buff_clarity', appliedTo: 'self' },
-    ],
-};
-
-const tuQuoque: Card = {
-    id: 'tu-quoque',
-    name: 'Tu Quoque',
-    category: 'fallacy',
-    philosophicalAspect: 'heart',
-    description:
-        '"And you?" You turn the accusation back on the accuser, and in the ' +
-        'turning their guard turns with it. The mirror you raise reflects ' +
-        'just enough of their own blow to mend the place it landed on you.',
-    tier: 2,
-    targetType: 'enemy',
-    basePower: 0,
-    scalingStat: 'heart',
-    specialMechanics: [{ kind: 'secondary_heal_self', stat: 'heart', multiplier: 2 }],
-    learningRequirement: { level: 15 },
-    addedIn: '2026-06-07',
-    tags: ['mid-game', 'damage', 'heal'],
-    combatEffects: [
-        { effectId: 'buff_brazen_thorns', appliedTo: 'self', intensity: 2, duration: 2 },
-    ],
-};
-
-const baradoxsBarber: Card = {
-    id: 'barbers-paradox',
-    name: "Barber's Paradox",
-    category: 'paradox',
-    philosophicalAspect: 'mind',
-    description:
-        'The barber who shaves all who do not shave themselves — does he shave ' +
-        'himself? You hand them the question that has no consistent answer and ' +
-        'watch the recursion eat the floor out from under their attention.',
-    tier: 2,
-    targetType: 'enemy',
-    basePower: 0,
-    scalingStat: 'mind',
-    learningRequirement: { level: 16 },
-    addedIn: '2026-06-07',
-    tags: ['mid-game', 'control'],
-    combatEffects: [
-        { effectId: 'debuff_confusion', appliedTo: 'opponent', duration: 2 },
-    ],
-    fate: { rider: { bonusIntensity: 1, bonusDuration: 1 } }, // the unresolvable question
-};
-
-const equivocationCascade: Card = {
-    id: 'equivocation-cascade',
-    name: 'Equivocation Cascade',
-    category: 'fallacy',
-    philosophicalAspect: 'mind',
-    description:
-        'The same word, two meanings, slid against each other until the seam ' +
-        'gives. By the time they notice the term has changed under them, the ' +
-        'whole argument has reorganised itself around your conclusion.',
-    tier: 2,
-    targetType: 'enemy',
-    basePower: 0,
-    scalingStat: 'mind',
-    // debuff_doubt, not debuff_confusion — the synergy CONSUMES a matched
-    // debuff_confusion, and a card's own combatEffects apply AFTER synergy
-    // resolves, so seeding the same effectId here would immediately re-plant
-    // the thing it just consumed.
-    learningRequirement: { level: 16 },
-    synergy: {
-        predicate: { effectId: 'debuff_confusion', on: 'target', durationMin: 1 },
-        bonusDamage: 6,
-        durationDamageMul: 4,
-        intensityDamageMul: 3,
-        consumeMatched: true,
-    },
-    addedIn: '2026-06-07',
-    tags: ['status-effect', 'synergy', 'control'],
-    combatEffects: [
-        { effectId: 'debuff_confusion', appliedTo: 'opponent', duration: 2 },
-    ],
-    specialMechanics: [{ kind: 'convert_die_color' }],
-};
-
-const sunkCostMomentum: Card = {
-    id: 'sunk-cost-momentum',
-    name: 'Sunk Cost Momentum',
-    category: 'fallacy',
-    philosophicalAspect: 'body',
-    description:
-        'You have already given so much to this exchange — so you give more, ' +
-        'and the giving becomes its own argument. Every token you have spent ' +
-        'demands that the next blow justify them all at once.',
-    tier: 2,
-    targetType: 'enemy',
-    basePower: 0,
-    scalingStat: 'body',
-    combatEffects: [
-        { effectId: 'debuff_bleed', appliedTo: 'opponent', intensity: 2, duration: 2 },
-    ],
-    learningRequirement: { level: 17 },
-    synergy: {
-        // Unconditional on cast — pure resource-dump strategist payoff.
-        bonusDamage: 10,
-        resourceTokenDamageMul: 4,
-        consumeAllResources: true,
-    },
-    addedIn: '2026-06-07',
-    tags: ['status-effect', 'synergy', 'dot'],
-};
-
-const breach: Card = {
-    id: 'breach',
-    name: 'Breach',
-    category: 'fallacy',
-    philosophicalAspect: 'mind',
-    description:
-        'You find the load-bearing premise and pull it. The whole defense does ' +
-        'not fall — it simply opens, and stays open, and everything after lands ' +
-        'where it hurts.',
-    tier: 2,
-    targetType: 'enemy',
-    basePower: 0,
-    scalingStat: 'mind',
-    learningRequirement: { level: 5 },
-    addedIn: '2026-06-26',
-    tags: ['status-effect', 'vulnerable', 'mid-game'],
-    combatEffects: [
-        { effectId: 'debuff_vulnerable', appliedTo: 'opponent', intensity: 1, duration: 2 },
-    ],
-    threshold: { color: 'mind', count: 3, rider: { bonusIntensity: 1 } },
-};
-
-const briarRiposte: Card = {
-    id: 'briar-riposte',
-    name: 'Briar Riposte',
-    category: 'paradox',
-    philosophicalAspect: 'body',
-    description:
-        'You root yourself like a thorn bush and wait for the swing. When it ' +
-        'comes you turn it aside and let the briar answer — measured, exact, ' +
-        'and theirs to regret.',
-    tier: 2,
-    targetType: 'self',
-    basePower: 0,
-    scalingStat: 'body',
-    specialMechanics: [
-        { kind: 'guard', amount: 6 },
-        { kind: 'riposte', damage: 8, reduce: 6 },
-    ],
-    learningRequirement: { level: 5 },
-    addedIn: '2026-06-26',
-    tags: ['status-effect', 'riposte', 'defense', 'mid-game'],
-    dieBonus: { onColor: 'body', rider: { guard: 3 } },
-};
-
-const leechingSyllogism: Card = {
-    id: 'leeching-syllogism',
-    name: 'Leeching Syllogism',
-    category: 'fallacy',
-    philosophicalAspect: 'heart',
-    description:
-        'Every step of the argument takes something from them and gives it to ' +
-        'you. By the time the conclusion lands, their strength is already ' +
-        'yours.',
-    tier: 2,
-    targetType: 'enemy',
-    basePower: 0,
-    scalingStat: 'heart',
-    // Siphon (HP-per-hit lifesteal) needed a nonzero flat strike to have anything
-    // to skim from, which is the exact "strike" mechanic the doctrine forbids.
-    // Reworked to the same lifesteal FEEL via a DoT + self-regen pairing instead:
-    // the enemy bleeds out, you recover in step with it.
-    learningRequirement: { level: 5 },
-    addedIn: '2026-06-26',
-    tags: ['status-effect', 'dot', 'sustain', 'mid-game'],
-    combatEffects: [
-        { effectId: 'debuff_hemorrhage', appliedTo: 'opponent', intensity: 2, duration: 3 },
-    ],
-};
-
-const theInevitable: Card = {
-    id: 'the-inevitable',
-    name: 'The Inevitable',
-    category: 'paradox',
-    philosophicalAspect: 'mind',
-    description:
-        'Conclusion is not inflicted — it is observed. You have read every ' +
-        'effect to its endpoint, added them together, and delivered the sum ' +
-        'as a single moment of clarity.',
-    tier: 2,
-    targetType: 'enemy',
-    basePower: 0,
-    scalingStat: 'mind',
-    specialMechanics: [{ kind: 'amplify', multiplier: 2.0 }],
-    learningRequirement: { level: 10 },
-    addedIn: '2026-06-29',
-    tags: ['status-effect', 'amplify', 'dot', 'mid-game'],
-    threshold: { color: 'mind', count: 5, rider: { tickAllDots: true } },
-};
-
-const mountingContradictions: Card = {
-    id: 'mounting-contradictions',
-    name: 'Mounting Contradictions',
-    category: 'fallacy',
-    philosophicalAspect: 'mind',
-    description:
-        'You name every inconsistency at once and let them collide. The more ' +
-        'ways they are already coming apart, the harder the whole edifice falls.',
-    tier: 2,
-    targetType: 'enemy',
-    basePower: 0,
-    scalingStat: 'mind',
-    specialMechanics: [{ kind: 'compound', perDebuff: 6 }],
-    learningRequirement: { level: 5 },
-    addedIn: '2026-06-26',
-    tags: ['status-effect', 'compound', 'mid-game'],
-};
-
-const poisonedWell: Card = {
-    id: 'poisoned-well',
-    name: 'Poisoned Well',
-    category: 'fallacy',
-    philosophicalAspect: 'body',
-    description:
-        'You discredit the source before they can drink from it — and the ' +
-        'poison you named becomes the poison that is actually there, ' +
-        'spreading through everything they try next.',
-    tier: 2,
-    targetType: 'enemy',
-    basePower: 0,
-    scalingStat: 'body',
-    learningRequirement: { level: 5 },
-    addedIn: '2026-07-03',
-    tags: ['status-effect', 'dot', 'mid-game'],
-    combatEffects: [
-        { effectId: 'debuff_septic', appliedTo: 'opponent', intensity: 2, duration: 3 },
-    ],
-};
-
-const gamblersFolly: Card = {
-    id: 'gamblers-folly',
-    name: "Gambler's Folly",
-    category: 'fallacy',
-    philosophicalAspect: 'body',
-    description:
-        'The pattern owes you a correction — it must, surely, after so many ' +
-        'blows that did not land right. You lean into the wager the odds ' +
-        'never actually made, and the dice pool bends to your overconfidence.',
-    tier: 2,
-    targetType: 'self',
-    basePower: 0,
-    scalingStat: 'body',
-    specialMechanics: [{ kind: 'grant_permanent_wild_die', wildCount: 1, deadCount: 1 }],
-    learningRequirement: { level: 5 },
-    addedIn: '2026-07-03',
-    tags: ['status-effect', 'wild-die', 'mid-game'],
-    combatEffects: [
-        { effectId: 'debuff_vulnerable', appliedTo: 'self', intensity: 1, duration: 2 },
-    ],
-};
-
-const movingTheGoalposts: Card = {
-    id: 'moving-the-goalposts',
-    name: 'Moving the Goalposts',
-    category: 'fallacy',
-    philosophicalAspect: 'mind',
-    description:
-        'Every certainty they reach, you quietly relocate the finish line ' +
-        'past it. Doubt and blindness both take root in the gap between ' +
-        'where they are and where they were promised to be.',
-    tier: 2,
-    targetType: 'enemy',
-    basePower: 0,
-    scalingStat: 'mind',
-    learningRequirement: { level: 5 },
-    addedIn: '2026-07-03',
-    tags: ['status-effect', 'control', 'mid-game'],
-    combatEffects: [
-        { effectId: 'debuff_doubt', appliedTo: 'opponent' },
-        { effectId: 'debuff_overextended', appliedTo: 'opponent' },
-    ],
-};
-
-const shipInABottle: Card = {
-    id: 'ship-in-a-bottle',
-    name: 'Ship-in-a-Bottle',
-    category: 'paradox',
-    philosophicalAspect: 'mind',
-    description:
-        'How did it get in there, fully built, through a neck too narrow to ' +
-        'admit it? They cannot stop turning the impossible object over, and ' +
-        'the turning wears them thin.',
-    tier: 2,
-    targetType: 'enemy',
-    basePower: 0,
-    scalingStat: 'mind',
-    learningRequirement: { level: 5 },
-    addedIn: '2026-07-03',
-    tags: ['status-effect', 'dot', 'control', 'mid-game'],
-    combatEffects: [
-        { effectId: 'debuff_poison', appliedTo: 'opponent', intensity: 2 },
-    ],
-    specialMechanics: [{ kind: 'bank_spent_die' }],
+    addedIn: '2026-07-08',
+    tags: ['affliction', 'glue'],
 };
 
 const resonanceDetonation: Card = {
@@ -711,392 +110,1246 @@ const resonanceDetonation: Card = {
     category: 'paradox',
     philosophicalAspect: 'heart',
     description:
-        'You spend the whole shape you brought into the fight — every ' +
-        'token, every binding, every breath you were saving for after. ' +
-        'The release is the answer; what was on the field is no longer ' +
-        'on the field. Resetting the fight back to its first round in ' +
-        'exchange for one apex truth.',
-    tier: 2,
+        'Every argument you have seeded rings at once, one frequency, one ' +
+        'conclusion. The structure was never going to hold.',
+    tier: 3, rank: 5, cardType: 'spell',
     targetType: 'enemy',
-    basePower: 0,
-    scalingStat: 'heart',
-    learningRequirement: { level: 5 },
+    // pts: RUPTURE 4 + expected fuel value ~8 + tick 0.6 ≈ 12.6 → Axiom
+    free: { tickOne: true },
     specialMechanics: [{ kind: 'rupture' }],
-};
-
-const soritesCascade: Card = {
-    id: 'sorites-cascade',
-    name: 'Sorites\' Cascade',
-    category: 'paradox',
-    philosophicalAspect: 'mind',
-    description:
-        'A grain. Another grain. At what point did the heap of small wounds ' +
-        'become a mortal one? They cannot say. The bleeding stacks faster than ' +
-        'their definition of "alive."',
-    tier: 3,
-    targetType: 'enemy',
-    basePower: 0,
-    scalingStat: 'mind',
     learningRequirement: { level: 10 },
-    combatEffects: [
-        { effectId: 'debuff_bleed', appliedTo: 'opponent', intensity: 1, duration: 2 },
-        { effectId: 'debuff_poison', appliedTo: 'opponent', intensity: 1 },
-        { effectId: 'debuff_doubt', appliedTo: 'opponent' },
-    ],
+    addedIn: '2026-07-08',
+    tags: ['affliction', 'payoff'],
 };
 
-const bootstrapParadox: Card = {
-    id: 'bootstrap-paradox',
-    name: 'Bootstrap Paradox',
-    category: 'paradox',
-    philosophicalAspect: 'heart',
-    description:
-        'The healing comes from the version of you that survived. The version ' +
-        'of you that survived came from this healing. The loop is whole; the ' +
-        'wound, less so.',
-    tier: 3,
-    targetType: 'self',
-    basePower: 0,
-    scalingStat: 'heart',
-    // Fallback per spec out-of-scope note: until `RoundEvent` exposes a
-    // round-damage total, the heal is a flat heart × 0.5 × 4 → heart × 2.
-    scalingMultiplier: 4,
-    learningRequirement: { level: 10 },
-    combatEffects: [
-        { effectId: 'debuff_novikov_consistency', appliedTo: 'opponent' },
-    ],
-    specialMechanics: [{ kind: 'refresh_die' }],
-};
-
-const appealToConsequences: Card = {
-    id: 'appeal-to-consequences',
-    name: 'Appeal to Consequences',
+const venomAndVein: Card = {
+    id: 'venom-and-vein',
+    name: 'Venom and Vein',
     category: 'fallacy',
     philosophicalAspect: 'body',
     description:
-        'The outcome justifies the method, so the method becomes righteous. ' +
-        'Your strike carries the weight of inevitable consequence — what must ' +
-        'happen, happening. They fall not to your force, but to the logic that ' +
-        'made the force necessary.',
-    tier: 3,
-    targetType: 'enemy',
-    basePower: 0,
-    scalingStat: 'body',
-    learningRequirement: {
-        level: 10,
-        // Fate Engine P1 trim: inherits the cut appeal-to-fear's scope gate so
-        // alignment-gated learning keeps a live positive-axis witness.
-        requiresAlignment: { axis: 'scope', op: 'gte', value: 34 },
-    },
-    combatEffects: [
-        { effectId: 'debuff_fear', appliedTo: 'opponent', intensity: 2, duration: 2 },
-    ],
-    threshold: { color: 'body', count: 4, rider: { chipHp: 8 } }, // believe, or else
+        'The argument in the blood and the blood in the argument. From here ' +
+        'on, everything you plant grows deeper roots.',
+    tier: 2, rank: 5, cardType: 'enchantment',
+    targetType: 'self',
+    // pts: persistent +1 intensity on every bleed/poison application ≈ 1.5 × ~8 triggers × min-4 law ≈ 12 → Axiom
+    learningRequirement: { level: 10 },
+    addedIn: '2026-07-08',
+    tags: ['affliction', 'enchantment'],
 };
 
-const nirvanaFallacy: Card = {
-    id: 'nirvana-fallacy',
-    name: 'Nirvana Fallacy',
+const suppuratingCurse: Card = {
+    id: 'suppurating-curse',
+    name: 'Suppurating Curse',
     category: 'fallacy',
     philosophicalAspect: 'mind',
     description:
-        'Why settle for good when perfection exists somewhere? You show them ' +
-        'the ideal they cannot reach, and suddenly their reality becomes failure. ' +
-        'The gap between what is and what could be opens like a wound, and they ' +
-        'fall through their own inadequacy.',
-    tier: 3,
+        'A standing verdict: nothing on them is allowed to close. Every tick ' +
+        'of every wound costs one more.',
+    tier: 2, rank: 6, cardType: 'disenchant',
     targetType: 'enemy',
-    basePower: 0,
-    scalingStat: 'mind',
-    // Phase 46 — only learnable by a sufficiently pessimistic character.
-    // The skill expresses Schopenhauer / Underground Man metaphysics; a
-    // hopeful caster wouldn't reach the contempt the wager requires.
-    learningRequirement: {
-        level: 10,
-        requiresAlignment: { axis: 'outlook', op: 'lte', value: -34 },
-    },
-    combatEffects: [
-        { effectId: 'debuff_doubt', appliedTo: 'opponent' },
-    ],
-    threshold: { color: 'mind', count: 4, rider: { drawCards: 2 } },
+    // pts: engine text — +1 HP per DoT tick, rest of combat (Aporia: rule-rewriter)
+    learningRequirement: { level: 12 },
+    addedIn: '2026-07-08',
+    tags: ['affliction', 'disenchant'],
 };
 
-const pascalsWager: Card = {
-    id: 'pascals-wager',
-    name: "Pascal's Wager",
-    category: 'paradox',
+// ─── T2 — PERORATION (the PERFORM spin-off: Premises → the conclusion) ───────
+
+const exordium: Card = {
+    id: 'exordium',
+    name: 'Exordium',
+    category: 'fallacy',
     philosophicalAspect: 'heart',
     description:
-        'You commit to the belief that costs nothing if you are wrong, and saves ' +
-        'you if you are right. The certainty is its own balm; the wound closes ' +
-        'around the wager.',
-    tier: 3,
+        'Every case begins somewhere quiet. You clear your throat, and the ' +
+        'room — without knowing why — leans in.',
+    tier: 1, rank: 1, cardType: 'spell',
     targetType: 'self',
-    basePower: 0,
-    scalingStat: 'heart',
-    // Mirrors `bootstrap-paradox`: heart × 0.5 × 3 → heart × 1.5 healed.
-    scalingMultiplier: 3,
-    learningRequirement: { level: 10 },
-    fate: { rider: { guard: 8, healHp: 4 } }, // infinite payoff, funded by nothing
+    // pts: PAID draw 1 (2) + 1 Premise (0.8) + FREE premise (0.8) = 3.6 → Doxa
+    free: { premises: 1 },
+    specialMechanics: [{ kind: 'premise', count: 1 }, { kind: 'rider', rider: { drawCards: 1 } }],
+    learningRequirement: { level: 1 },
+    addedIn: '2026-07-08',
+    tags: ['peroration'],
 };
 
-const existentialCollapse: Card = {
-    id: 'existential-collapse',
-    name: 'Existential Collapse',
+const openingStatement: Card = {
+    id: 'opening-statement',
+    name: 'Opening Statement',
     category: 'fallacy',
-    philosophicalAspect: 'body',
+    philosophicalAspect: 'heart',
     description:
-        'Why debate the nature of truth when truth itself is questionable? ' +
-        'You dissolve the foundation beneath every position, every stance, every ' +
-        'reason to resist. In the resulting void where meaning used to be, only ' +
-        'your will finds purchase.',
-    tier: 3,
+        'You name what you intend to prove while pointing at the place it ' +
+        'will break them. A promise is also a threat.',
+    tier: 1, rank: 2, cardType: 'spell',
     targetType: 'enemy',
-    basePower: 0,
-    scalingStat: 'body',
-    // No own combatEffects — `clearAllEffectsBothSides` below wipes every
-    // ActiveEffect on both sides when the synergy fires, and a card's own
-    // combatEffects apply AFTER synergy resolves, so anything added here would
-    // survive the "everything cleared" invariant undoing the whole point of
-    // the clear. This is a pure synergy-payoff card (classifies direct-damage).
-    learningRequirement: { level: 10 },
-    combatEffects: [
-        { effectId: 'debuff_bleed', appliedTo: 'opponent', intensity: 2, duration: 2 },
-    ],
+    // pts: mark d2 (1.5) + 2 Premises (1.6) + FREE premise (0.8) = 3.9 → Lemma
+    free: { premises: 1 },
+    combatEffects: [{ effectId: 'debuff_mark', appliedTo: 'opponent', duration: 2 }],
+    specialMechanics: [{ kind: 'premise', count: 2 }],
+    learningRequirement: { level: 2 },
+    addedIn: '2026-07-08',
+    tags: ['peroration', 'exposure'],
+};
+
+const mountingCase: Card = {
+    id: 'mounting-case',
+    name: 'Mounting Case',
+    category: 'fallacy',
+    philosophicalAspect: 'mind',
+    description:
+        'Premise stacked on premise, each one small, none deniable. The ' +
+        'weight is the argument.',
+    tier: 2, rank: 3, cardType: 'spell',
+    targetType: 'enemy',
+    // pts: mark d3 (2.2) + 2 Premises (1.6) + FREE premise (0.8) + threshold(+1 premise ×0.5 = 0.4)
+    //      + tempo ≈ 6.8 → Thesis
+    free: { premises: 1 },
+    combatEffects: [{ effectId: 'debuff_mark', appliedTo: 'opponent', duration: 3 }],
+    specialMechanics: [{ kind: 'premise', count: 2 }],
+    threshold: { color: 'heart', count: 2, rider: { premises: 1 } },
+    learningRequirement: { level: 4 },
+    addedIn: '2026-07-08',
+    tags: ['peroration', 'exposure'],
+};
+
+const peroratioInterrupta: Card = {
+    id: 'peroratio-interrupta',
+    name: 'Peroratio Interrupta',
+    category: 'paradox',
+    philosophicalAspect: 'mind',
+    description:
+        'You cash the argument early — ugly, effective. The conclusion you ' +
+        'spend today cannot be refuted tomorrow.',
+    tier: 2, rank: 4, cardType: 'spell',
+    targetType: 'enemy',
+    // pts: spend-all engine (~mark per 2 + draw per 3, scales with tally) ≈ 7-9 + FREE draw 2 ≈ 9 → Theorem
+    free: { drawCards: 1 },
+    specialMechanics: [{ kind: 'spend_premises', markPer: 2, drawPer: 3 }],
+    learningRequirement: { level: 6 },
+    addedIn: '2026-07-08',
+    tags: ['peroration', 'payoff'],
+};
+
+const theClosingWord: Card = {
+    id: 'the-closing-word',
+    name: 'The Closing Word',
+    category: 'fallacy',
+    philosophicalAspect: 'heart',
+    description:
+        'The conclusion, declared before it is finished being true. At six ' +
+        'premises it lands. At eight, they simply concede.',
+    tier: 3, rank: 5, cardType: 'spell',
+    targetType: 'enemy',
+    // pts: PERORATION at 6 → consume marks 3/stack + draw 2 + 2 Conviction ≈ 13 (CONCEDE at 8 — alt-win, §9) → Axiom
+    free: { premises: 1 },
     specialMechanics: [{
-        kind: 'react', a: 'debuff_fear', b: 'debuff_confusion', minIntensity: 1,
-        burstPerIntensity: 4,
-        product: { effectId: 'debuff_stagger', intensity: 1, duration: 1 },
+        kind: 'peroration', at: 6, concedeAt: 8,
+        rider: { ruptureMarks: 3, drawCards: 2, conviction: 2 },
     }],
-};
-
-const achillesOvertake: Card = {
-    id: 'achilles-overtake',
-    name: "Achilles' Overtake",
-    category: 'paradox',
-    philosophicalAspect: 'body',
-    description:
-        'The tortoise never should have been catchable — yet every stride ' +
-        'you gained on them compounds, and the gap that logic insisted was ' +
-        'unclosable closes all at once.',
-    tier: 3,
-    targetType: 'enemy',
-    basePower: 0,
-    scalingStat: 'body',
-    combatEffects: [
-        { effectId: 'debuff_slow', appliedTo: 'opponent', duration: 2 },
-    ],
-    specialMechanics: [{ kind: 'execute', hpPct: 0.3, dotStacks: 2 }],
     learningRequirement: { level: 10 },
-    addedIn: '2026-07-03',
-    tags: ['status-effect', 'execute', 'late-game'],
+    addedIn: '2026-07-08',
+    tags: ['peroration', 'payoff', 'alt-win'],
 };
 
-const eternalRecurrence: Card = {
-    id: 'eternal-recurrence',
-    name: 'Eternal Recurrence',
-    category: 'paradox',
-    philosophicalAspect: 'heart',
-    description:
-        'Live this moment so that you could will it again, and again, forever. ' +
-        'You take the wound as something you have already chosen a thousand ' +
-        'times, and the choosing knits it shut with the weight of all those lives.',
-    tier: 3,
-    targetType: 'self',
-    basePower: 0,
-    scalingStat: 'heart',
-    scalingMultiplier: 6,
-    learningRequirement: { level: 42, statRequirementType: 'heart', statRequirementValue: 32 },
-    addedIn: '2026-06-07',
-    tags: ['late-game', 'defensive', 'heal', 'buff'],
-    combatEffects: [
-        { effectId: 'buff_regeneration', appliedTo: 'self', intensity: 2, duration: 4 },
-    ],
-    dieBonus: { onColor: 'heart', rider: { drawCards: 1 } }, // it recurs
-};
-
-const apophaticAegis: Card = {
-    id: 'apophatic-aegis',
-    name: 'Apophatic Aegis',
-    category: 'paradox',
-    philosophicalAspect: 'heart',
-    description:
-        'You define your defence only by what it is not — not a wall, not a ' +
-        'guard, not a refusal — until the via negativa leaves nothing for the ' +
-        'blow to find. What cannot be named cannot be struck.',
-    tier: 3,
-    targetType: 'self',
-    basePower: 0,
-    scalingStat: 'heart',
-    scalingMultiplier: 4,
-    learningRequirement: { level: 40, statRequirementType: 'heart', statRequirementValue: 30 },
-    addedIn: '2026-06-07',
-    tags: ['late-game', 'defensive', 'buff', 'heal'],
-    combatEffects: [
-        { effectId: 'buff_resolute', appliedTo: 'self', intensity: 1, duration: 2 },
-    ],
-    specialMechanics: [{ kind: 'barrier', amount: 6 }],
-};
-
-const transcendentSynthesis: Card = {
-    id: 'transcendent-synthesis',
-    name: 'Transcendent Synthesis',
-    category: 'paradox',
-    philosophicalAspect: 'heart',
-    description:
-        'You weave every thread of certainty on the field into a new ' +
-        'pattern that transcends its components. The synthesis heals what ' +
-        'the analysis wounded; the whole exceeds its parts.',
-    tier: 3,
-    targetType: 'self',
-    basePower: 0,
-    scalingStat: 'heart',
-    scalingMultiplier: 4,
-    learningRequirement: { level: 10 },
-    synergy: {
-        // No predicate — unconditional synthesis on cast
-        bonusDamage: 15,
-        resourceTokenDamageMul: 6,
-        consumeAllResources: true,
-        applyEffectOnFire: {
-            effectId: 'buff_regeneration',
-            appliedTo: 'self',
-            intensity: 3,
-            duration: 4,
-        },
-    },
-    fate: { rider: { conviction: 2, healHp: 2 } }, // synthesis of the dead faces
-};
-
-const existentialDebt: Card = {
-    id: 'existential-debt',
-    name: 'Existential Debt',
+const practicedCadence: Card = {
+    id: 'practiced-cadence',
+    name: 'Practiced Cadence',
     category: 'fallacy',
     philosophicalAspect: 'heart',
     description:
-        'Every choice they did not make is a debt you collect on now — and ' +
-        'the collecting costs you something too, a small overextension you ' +
-        'accept as the price of the reckoning.',
-    tier: 3,
-    targetType: 'enemy',
-    basePower: 0,
-    scalingStat: 'heart',
+        'The rhythm carries the argument when the content flags. From here ' +
+        'on, every opening remark counts toward the close.',
+    tier: 2, rank: 5, cardType: 'enchantment',
+    targetType: 'self',
+    // pts: persistent +1 Premise on the first card each turn ≈ 0.8 × ~10 turns, min-4 law ≈ 12 → Axiom
     learningRequirement: { level: 10 },
-    addedIn: '2026-07-03',
-    tags: ['status-effect', 'dot', 'control', 'late-game'],
-    combatEffects: [
-        { effectId: 'debuff_despair', appliedTo: 'opponent', intensity: 3, duration: 4 },
-        { effectId: 'debuff_isolated', appliedTo: 'opponent', duration: 3 },
-    ],
+    addedIn: '2026-07-08',
+    tags: ['peroration', 'enchantment'],
 };
 
-const pyrrhicVictory: Card = {
-    id: 'pyrrhic-victory',
-    name: 'Pyrrhic Victory',
-    category: 'paradox',
-    philosophicalAspect: 'body',
+const captiveAudience: Card = {
+    id: 'captive-audience',
+    name: 'Captive Audience',
+    category: 'fallacy',
+    philosophicalAspect: 'heart',
     description:
-        'Another such victory and you are undone — yet you take it anyway, and ' +
-        'make them pay the same ruinous price. The wound you open in them will ' +
-        'go on bleeding long after the field is yours.',
-    tier: 3,
+        'While the case is building they cannot look away — and what cannot ' +
+        'look away stands exposed.',
+    tier: 2, rank: 6, cardType: 'disenchant',
     targetType: 'enemy',
-    basePower: 16,
-    scalingStat: 'body',
-    combatEffects: [
-        { effectId: 'debuff_bleed', appliedTo: 'opponent', intensity: 3, duration: 5 },
-    ],
-    // EXECUTE — a finisher (HP behavior in combat.engine): when the foe is at/below
-    // 30% HP OR carries >= 3 distinct DoT effects, deal a large (typically lethal)
-    // hit with 10% self-recoil (the Pyrrhic price); otherwise the normal strike +
-    // bleed. Synergizes with the low-HP Befriend/mercy window. Keeps its bleed, so
-    // the card still reads as a DoT card.
-    specialMechanics: [
-        { kind: 'execute', hpPct: 0.3, dotStacks: 3, recoilPct: 0.1 },
-    ],
+    // pts: engine text — while you hold 4+ Premises the enemy stays marked (Aporia)
     learningRequirement: { level: 12 },
-    addedIn: '2026-06-22',
-    tags: ['gold', 'rare'],
+    addedIn: '2026-07-08',
+    tags: ['peroration', 'disenchant'],
 };
 
-const theFinalWord: Card = {
-    id: 'the-final-word',
-    name: 'The Final Word',
+// ─── T3 — FORGE (dice from nothing: kindle, ripen, float, overtake) ──────────
+
+const sketchOfAThought: Card = {
+    id: 'sketch-of-a-thought',
+    name: 'Sketch of a Thought',
     category: 'paradox',
     philosophicalAspect: 'mind',
     description:
-        'You speak the sentence that ends the argument — and seeps into the one ' +
-        'who heard it. Doubt is a slow poison; once the premise is conceded, the ' +
-        'conclusion finishes them on its own schedule.',
-    tier: 3,
-    targetType: 'enemy',
-    basePower: 14,
-    scalingStat: 'mind',
-    learningRequirement: { level: 12 },
-    addedIn: '2026-06-22',
-    tags: ['gold', 'rare'],
-    combatEffects: [
-        { effectId: 'debuff_poison', appliedTo: 'opponent', intensity: 3, duration: 5 },
-    ],
-    threshold: { color: 'mind', count: 5, rider: { bonusIntensity: 2 } }, // the final word must be final
+        'Not yet an idea — the shape where an idea will be. You rough it in ' +
+        'and it starts paying rent immediately.',
+    tier: 1, rank: 1, cardType: 'spell',
+    targetType: 'self',
+    // pts: KINDLE mind (2.5) + FREE draw 1 (2 × 0.35 free-share ≈ 0.7) ≈ 3.2 → Doxa
+    free: { drawCards: 1 },
+    specialMechanics: [{ kind: 'create_temporary_die', color: 'mind' }],
+    learningRequirement: { level: 1 },
+    addedIn: '2026-07-08',
+    tags: ['forge', 'dice'],
 };
 
-const unmovedMover: Card = {
-    id: 'unmoved-mover',
-    name: 'The Unmoved Mover',
+const halfStep: Card = {
+    id: 'half-step',
+    name: 'Half-Step',
+    category: 'paradox',
+    philosophicalAspect: 'body',
+    description:
+        'Zeno was half right: you can always take half a step back. What ' +
+        'waits behind the guard, ripens.',
+    tier: 1, rank: 2, cardType: 'spell',
+    targetType: 'self',
+    // pts: Guard 5 (1.25) + pip (1.5) + FREE guard 2 (0.5) + tempo ≈ 4.3 → Lemma
+    free: { guard: 2 },
+    specialMechanics: [{ kind: 'guard', amount: 5 }, { kind: 'grant_pip', count: 1 }],
+    learningRequirement: { level: 2 },
+    addedIn: '2026-07-08',
+    tags: ['forge', 'defense'],
+};
+
+const bootstrapLoop: Card = {
+    id: 'bootstrap-loop',
+    name: 'Bootstrap Loop',
+    category: 'paradox',
+    philosophicalAspect: 'mind',
+    description:
+        'The proof assumes itself and, scandalously, works. The effect funds ' +
+        'its own cause.',
+    tier: 2, rank: 3, cardType: 'spell',
+    targetType: 'self',
+    // pts: KINDLE wild (3) + FREE conviction (1×0.35) + threshold(pip 1.5 ×0.5 = 0.75) + tempo ≈ 6.5 → Thesis
+    free: { conviction: 1 },
+    specialMechanics: [{ kind: 'create_temporary_die', color: 'wild' }],
+    threshold: { color: 'mind', count: 2, rider: { pips: 1 } },
+    learningRequirement: { level: 4 },
+    addedIn: '2026-07-08',
+    tags: ['forge', 'dice'],
+};
+
+const exNihilo: Card = {
+    id: 'ex-nihilo',
+    name: 'Ex Nihilo',
+    category: 'paradox',
+    philosophicalAspect: 'mind',
+    description:
+        'Something from nothing — the oldest scandal in philosophy, sitting ' +
+        'in your tray, glinting, permanent until spent.',
+    tier: 2, rank: 4, cardType: 'spell',
+    targetType: 'self',
+    // pts: FORGE floating (5) + FREE draw (0.7) + threshold(pips ×0.5 = 0.75) + persistence value ≈ 9.8 → Theorem
+    free: { drawCards: 1 },
+    specialMechanics: [{ kind: 'forge_floating_die', color: 'powering' }],
+    threshold: { color: 'mind', count: 4, rider: { pips: 1 } },
+    learningRequirement: { level: 6 },
+    addedIn: '2026-07-08',
+    tags: ['forge', 'dice', 'floating'],
+};
+
+const theOvertake: Card = {
+    id: 'the-overtake',
+    name: 'The Overtake',
+    category: 'paradox',
+    philosophicalAspect: 'body',
+    description:
+        'Achilles does pass the tortoise — all at once, every saved step ' +
+        'spent in a single stride. Sudden, and total.',
+    tier: 2, rank: 5, cardType: 'spell',
+    targetType: 'enemy',
+    // pts: spend ALL pips (+2 Guard per) + RUPTURE +2 fuel per pip ≈ 4 + ~9 scaled ≈ 13 → Axiom
+    free: { guard: 2 },
+    specialMechanics: [
+        { kind: 'spend_all_pips', guardPerPip: 2 },
+        { kind: 'rupture', fuelPerPip: 2 },
+    ],
+    learningRequirement: { level: 10 },
+    addedIn: '2026-07-08',
+    tags: ['forge', 'payoff'],
+};
+
+const anvilOfForm: Card = {
+    id: 'anvil-of-form',
+    name: 'Anvil of Form',
+    category: 'paradox',
+    philosophicalAspect: 'mind',
+    description:
+        'Matter remembers the shape it was struck into. Everything you forge ' +
+        'from here arrives already tempered.',
+    tier: 2, rank: 5, cardType: 'enchantment',
+    targetType: 'self',
+    // pts: persistent +1 pip on every kindled/floating die ≈ 1.5 × ~6 forges, min-4 ≈ 12 → Axiom
+    learningRequirement: { level: 10 },
+    addedIn: '2026-07-08',
+    tags: ['forge', 'enchantment'],
+};
+
+const entropyTax: Card = {
+    id: 'entropy-tax',
+    name: 'Entropy Tax',
+    category: 'paradox',
+    philosophicalAspect: 'mind',
+    description:
+        'Nothing is created free. Every manufactured die you spend, the ' +
+        'universe bills to them.',
+    tier: 2, rank: 6, cardType: 'disenchant',
+    targetType: 'enemy',
+    // pts: engine text — every kindled/floating spend marks the enemy (Aporia)
+    learningRequirement: { level: 12 },
+    addedIn: '2026-07-08',
+    tags: ['forge', 'disenchant'],
+};
+
+// ─── T4 — AKRASIA (acting against your own judgment; the debt pays) ──────────
+
+const againstMyJudgment: Card = {
+    id: 'against-my-judgment',
+    name: 'Against My Judgment',
     category: 'paradox',
     philosophicalAspect: 'heart',
     description:
-        'The first cause that is itself uncaused — you move them without being ' +
-        'moved. They lose the thread of their own intent, turning in confusion ' +
-        'around a center that will not turn.',
-    tier: 3,
-    targetType: 'enemy',
-    basePower: 12,
-    scalingStat: 'heart',
-    learningRequirement: { level: 12 },
-    addedIn: '2026-06-22',
-    tags: ['gold', 'rare'],
-    combatEffects: [
-        { effectId: 'debuff_stagger', appliedTo: 'opponent', duration: 1 },
-    ],
-    specialMechanics: [{ kind: 'grant_pip', count: 1 }],
+        'You know better. You do it anyway — and the knowing-better arrives ' +
+        'two cards too late to stop you.',
+    tier: 1, rank: 1, cardType: 'spell',
+    targetType: 'self',
+    // pts: draw 2 (4) − self-mark d2 credit (−0.75×1.5 ≈ −1.1) + FREE conviction 0.35 ≈ 3.3 → Doxa
+    free: { conviction: 1 },
+    combatEffects: [{ effectId: 'debuff_mark', appliedTo: 'self', duration: 2 }],
+    specialMechanics: [{ kind: 'rider', rider: { drawCards: 2 } }],
+    learningRequirement: { level: 1 },
+    addedIn: '2026-07-08',
+    tags: ['akrasia'],
 };
 
-const peacefulGesture: Card = {
-    id: 'peaceful-gesture',
-    name: 'Peaceful Gesture',
-    category: 'fallacy', 
+const sweetPoison: Card = {
+    id: 'sweet-poison',
+    name: 'Sweet Poison',
+    category: 'fallacy',
     philosophicalAspect: 'body',
-    description: 'A calming physical gesture that builds trust through non-threatening movement.',
-    tier: 1,
-    targetType: 'self',
-    basePower: 0,
-    scalingStat: 'body',
-    incrementsFriendship: 1,
+    description:
+        'You taste it first, to prove the vintage. The enemy drinks deeper — ' +
+        'but you did drink.',
+    tier: 2, rank: 2, cardType: 'spell',
+    targetType: 'enemy',
+    // pts: poison i2 d4 (~6.7) − self-bleed i1 d2 credit (−0.75×1.7 ≈ −1.3) + tick 0.6 ≈ 6.0 → Lemma (deliberately rich — the akratic bargain)
+    free: { tickOne: true },
+    combatEffects: [
+        { effectId: 'debuff_poison', appliedTo: 'opponent', intensity: 2 },
+        { effectId: 'debuff_bleed', appliedTo: 'self', intensity: 1, duration: 2 },
+    ],
+    learningRequirement: { level: 2 },
+    addedIn: '2026-07-08',
+    tags: ['akrasia', 'dot'],
 };
+
+const selfFlagellant: Card = {
+    id: 'self-flagellant',
+    name: 'Self-Flagellant',
+    category: 'fallacy',
+    philosophicalAspect: 'body',
+    description:
+        'The lash falls on your own back, and every wound you have argued ' +
+        'into them deepens in sympathy.',
+    tier: 2, rank: 3, cardType: 'spell',
+    targetType: 'enemy',
+    // pts: +1 int to ALL enemy DoTs (~1.5 × ~3 = 4.5) + tick 0.6 − recoil 4 credit (−1) + tempo ≈ 7 → Thesis
+    free: { tickOne: true },
+    specialMechanics: [{ kind: 'recoil', hp: 4 }, { kind: 'boost_all_dots', intensity: 1 }],
+    learningRequirement: { level: 4 },
+    addedIn: '2026-07-08',
+    tags: ['akrasia', 'dot'],
+};
+
+const fallenGrace: Card = {
+    id: 'fallen-grace',
+    name: 'Fallen Grace',
+    category: 'paradox',
+    philosophicalAspect: 'heart',
+    description:
+        'Grace was never for the upright. It finds you face-down, and it ' +
+        'pays better there.',
+    tier: 2, rank: 4, cardType: 'spell',
+    targetType: 'enemy',
+    // pts: bleed i2 d3 (~5) + draw 0.7 + FALLEN(heal 4 ≈ 1.3 ×0.5 = 0.7) + tempo ≈ 9 → Theorem
+    free: { drawCards: 1 },
+    combatEffects: [{ effectId: 'debuff_bleed', appliedTo: 'opponent', intensity: 2, duration: 3 }],
+    fallen: { rider: { healHp: 4 } },
+    learningRequirement: { level: 6 },
+    addedIn: '2026-07-08',
+    tags: ['akrasia', 'dot'],
+};
+
+const pactOfAkrasia: Card = {
+    id: 'pact-of-akrasia',
+    name: 'Pact of Akrasia',
+    category: 'paradox',
+    philosophicalAspect: 'body',
+    description:
+        'The cheapest forge in the world. The bill is written in your own ' +
+        'blood, and you sign it smiling.',
+    tier: 3, rank: 5, cardType: 'spell',
+    targetType: 'self',
+    // pts: FORGE wild floating (6) + persistence − recoil 6 (−1.5) − self-bleed credit (−1.3) + wild premium ≈ 12.6 → Axiom
+    free: { guard: 2 },
+    combatEffects: [{ effectId: 'debuff_bleed', appliedTo: 'self', intensity: 1, duration: 2 }],
+    specialMechanics: [{ kind: 'forge_floating_die', color: 'wild' }, { kind: 'recoil', hp: 6 }],
+    learningRequirement: { level: 10 },
+    addedIn: '2026-07-08',
+    tags: ['akrasia', 'floating'],
+};
+
+const crownOfThorns: Card = {
+    id: 'crown-of-thorns',
+    name: 'Crown of Thorns',
+    category: 'paradox',
+    philosophicalAspect: 'heart',
+    description:
+        'Wear the damage as regalia. While you are Fallen, everything you ' +
+        'inflict inherits the weight.',
+    tier: 2, rank: 5, cardType: 'enchantment',
+    targetType: 'self',
+    // pts: persistent +1 intensity on applications while FALLEN ≈ 1.5 × ~7 gated ×0.5 ≈ 11 → Axiom
+    learningRequirement: { level: 10 },
+    addedIn: '2026-07-08',
+    tags: ['akrasia', 'enchantment'],
+};
+
+const mirrorOfGuilt: Card = {
+    id: 'mirror-of-guilt',
+    name: 'Mirror of Guilt',
+    category: 'paradox',
+    philosophicalAspect: 'mind',
+    description:
+        'A curse of perfect symmetry: whatever you suffer, they now suffer ' +
+        'the reflection of. The debt argues for you.',
+    tier: 2, rank: 6, cardType: 'disenchant',
+    targetType: 'enemy',
+    // pts: engine text — every self-debuff you gain lands 1 stack on the enemy (Aporia)
+    learningRequirement: { level: 12 },
+    addedIn: '2026-07-08',
+    tags: ['akrasia', 'disenchant'],
+};
+
+// ─── T5 — CONTROL (strip the rungs; the denied blow lands inward) ────────────
+
+const zenosHalfStep: Card = {
+    id: 'zenos-half-step',
+    name: "Zeno's Half-Step",
+    category: 'paradox',
+    philosophicalAspect: 'body',
+    description:
+        'To reach you, the blow must first cross half the distance. You keep ' +
+        'the halves coming.',
+    tier: 1, rank: 1, cardType: 'spell',
+    targetType: 'enemy',
+    // pts: STAGGER 1 (~half a phase-deny, 2) + FREE guard 2 (0.5) + tempo ≈ 3.5 → Doxa
+    free: { guard: 2 },
+    specialMechanics: [{ kind: 'stagger', rungs: 1 }],
+    learningRequirement: { level: 1 },
+    addedIn: '2026-07-08',
+    tags: ['control'],
+};
+
+const redHerring: Card = {
+    id: 'red-herring',
+    name: 'Red Herring',
+    category: 'fallacy',
+    philosophicalAspect: 'mind',
+    description:
+        'Something glints in the corner of the argument. They lunge for it, ' +
+        'and the lunge is the wound.',
+    tier: 1, rank: 2, cardType: 'spell',
+    targetType: 'enemy',
+    // pts: backfire i2 d2 (3) + FREE draw (0.7) + dieBonus(+1 dur ×0.6 = 0.6) ≈ 4.3 → Lemma
+    free: { drawCards: 1 },
+    combatEffects: [{ effectId: 'debuff_backfire', appliedTo: 'opponent', intensity: 2, duration: 2 }],
+    dieBonus: { onColor: 'mind', rider: { bonusDuration: 1 } },
+    learningRequirement: { level: 2 },
+    addedIn: '2026-07-08',
+    tags: ['control'],
+};
+
+const undistributedMiddle: Card = {
+    id: 'undistributed-middle',
+    name: 'Undistributed Middle',
+    category: 'fallacy',
+    philosophicalAspect: 'mind',
+    description:
+        'The middle term never quite connects, and neither does their swing. ' +
+        'Somewhere between premise and blow, the force goes missing.',
+    tier: 2, rank: 3, cardType: 'spell',
+    targetType: 'enemy',
+    // pts: STAGGER 1 (2) + backfire i1 d2 (1.5) + FREE mark (0.5) + threshold(STAGGER 2 more ×0.5 = 2) ≈ 6-7.5 → Thesis
+    free: { applyEffect: { effectId: 'debuff_mark', duration: 1 } },
+    combatEffects: [{ effectId: 'debuff_backfire', appliedTo: 'opponent', intensity: 1, duration: 2 }],
+    specialMechanics: [{ kind: 'stagger', rungs: 1 }],
+    threshold: { color: 'mind', count: 3, rider: { stagger: 1 } },
+    learningRequirement: { level: 4 },
+    addedIn: '2026-07-08',
+    tags: ['control'],
+};
+
+const arrowParadox: Card = {
+    id: 'arrow-paradox',
+    name: 'Arrow Paradox',
+    category: 'paradox',
+    philosophicalAspect: 'body',
+    description:
+        'At every instant the arrow is at rest. You choose the instant, and ' +
+        'hold them in it — motion frozen mid-flight.',
+    tier: 2, rank: 4, cardType: 'spell',
+    targetType: 'enemy',
+    // pts: lock stance (2.5) + STAGGER 1 (2) + reveal value + FREE guard (0.5) + tempo ≈ 9.5 → Theorem
+    free: { guard: 2 },
+    specialMechanics: [{ kind: 'lock_stance' }, { kind: 'stagger', rungs: 1 }],
+    learningRequirement: { level: 6 },
+    addedIn: '2026-07-08',
+    tags: ['control'],
+};
+
+const paralysisOfAnalysis: Card = {
+    id: 'paralysis-of-analysis',
+    name: 'Paralysis of Analysis',
+    category: 'fallacy',
+    philosophicalAspect: 'mind',
+    description:
+        'You hand them every option at once. They stand in the doorway of ' +
+        'the decision forever, bleeding from the hinges.',
+    tier: 3, rank: 5, cardType: 'spell',
+    targetType: 'enemy',
+    // pts: STAGGER 2 (4 — a full deny) + backfire i2 d2 (3) + FREE draw (0.7) + tier-3 land rate ≈ 13 → Axiom
+    free: { drawCards: 1 },
+    combatEffects: [{ effectId: 'debuff_backfire', appliedTo: 'opponent', intensity: 2, duration: 2 }],
+    specialMechanics: [{ kind: 'stagger', rungs: 2 }],
+    learningRequirement: { level: 10 },
+    addedIn: '2026-07-08',
+    tags: ['control', 'payoff'],
+};
+
+const achillesAndTheTortoise: Card = {
+    id: 'achilles-and-the-tortoise',
+    name: 'Achilles and the Tortoise',
+    category: 'paradox',
+    philosophicalAspect: 'mind',
+    description:
+        'While they chase the conclusion they can never reach, you read. ' +
+        'Every denied turn is a page.',
+    tier: 2, rank: 5, cardType: 'enchantment',
+    targetType: 'self',
+    // pts: persistent draw 1 per denied enemy turn ≈ 2 × ~5 denies gated, min-4 ≈ 12 → Axiom
+    learningRequirement: { level: 10 },
+    addedIn: '2026-07-08',
+    tags: ['control', 'enchantment'],
+};
+
+const quagmireOfDoubt: Card = {
+    id: 'quagmire-of-doubt',
+    name: 'Quagmire of Doubt',
+    category: 'fallacy',
+    philosophicalAspect: 'mind',
+    description:
+        'The ground under their certainty goes soft. Every action starts one ' +
+        'rung lower than they remember planning it.',
+    tier: 2, rank: 6, cardType: 'disenchant',
+    targetType: 'enemy',
+    // pts: engine text — telegraphs enter play 1 rung lower, rest of combat (Aporia)
+    learningRequirement: { level: 12 },
+    addedIn: '2026-07-08',
+    tags: ['control', 'disenchant'],
+};
+
+// ─── T6 — ORACLE (foretell, declare, collect on the future) ──────────────────
+
+const glimpse: Card = {
+    id: 'glimpse',
+    name: 'Glimpse',
+    category: 'paradox',
+    philosophicalAspect: 'mind',
+    description:
+        'A crack in the next moment, wide enough for one eye. You look, and ' +
+        'mark what looks back.',
+    tier: 1, rank: 1, cardType: 'spell',
+    targetType: 'enemy',
+    // pts: FORETELL 2 (2) + mark d2 (1.5) + FREE foretell (0.35) ≈ 3.9 → Doxa
+    free: { foretell: 1 },
+    combatEffects: [{ effectId: 'debuff_mark', appliedTo: 'opponent', duration: 2 }],
+    specialMechanics: [{ kind: 'foretell', count: 2 }],
+    learningRequirement: { level: 1 },
+    addedIn: '2026-07-08',
+    tags: ['oracle', 'exposure'],
+};
+
+const signsAndPortents: Card = {
+    id: 'signs-and-portents',
+    name: 'Signs and Portents',
+    category: 'paradox',
+    philosophicalAspect: 'heart',
+    description:
+        'You cast the die as augury and dare tomorrow to disagree. When it ' +
+        'does not, the future owes you.',
+    tier: 1, rank: 2, cardType: 'spell',
+    targetType: 'self',
+    // pts: OMEN(draw 2 = 4 ×0.6 omen-odds = 2.4) + FREE foretell (0.35) + info value ≈ 4.4 → Lemma
+    free: { foretell: 1 },
+    specialMechanics: [{ kind: 'omen', rider: { drawCards: 2 } }],
+    learningRequirement: { level: 2 },
+    addedIn: '2026-07-08',
+    tags: ['oracle'],
+};
+
+const cassandrasBurden: Card = {
+    id: 'cassandras-burden',
+    name: "Cassandra's Burden",
+    category: 'paradox',
+    philosophicalAspect: 'heart',
+    description:
+        'You saw it coming. No one believed you — so you braced alone, and ' +
+        'named the exact place it would land.',
+    tier: 2, rank: 3, cardType: 'spell',
+    targetType: 'enemy',
+    // pts: OMEN(mark i2 d2 (2.5) + Guard 4 (1)) ×0.6 = 2.1 + FREE draw (0.7) + info ≈ 6.8 → Thesis
+    free: { drawCards: 1 },
+    specialMechanics: [{
+        kind: 'omen',
+        rider: { applyEffect: { effectId: 'debuff_mark', intensity: 2, duration: 2 }, guard: 4 },
+    }],
+    learningRequirement: { level: 4 },
+    addedIn: '2026-07-08',
+    tags: ['oracle', 'exposure'],
+};
+
+const delphicAmbiguity: Card = {
+    id: 'delphic-ambiguity',
+    name: 'Delphic Ambiguity',
+    category: 'paradox',
+    philosophicalAspect: 'mind',
+    description:
+        'The oracle answers truly, and you arrange what the truth will be. A ' +
+        'great empire will indeed fall.',
+    tier: 2, rank: 4, cardType: 'spell',
+    targetType: 'self',
+    // pts: FORETELL 3 (3) + reveal next stance (1.5) + dieBonus(pips ×0.6 = 0.9) + FREE foretell + tempo ≈ 9 → Theorem
+    free: { foretell: 1 },
+    specialMechanics: [{ kind: 'foretell', count: 3 }, { kind: 'rider', rider: { revealStance: true } }],
+    dieBonus: { onColor: 'mind', rider: { pips: 1 } },
+    learningRequirement: { level: 6 },
+    addedIn: '2026-07-08',
+    tags: ['oracle'],
+};
+
+const prophecyFulfilled: Card = {
+    id: 'prophecy-fulfilled',
+    name: 'Prophecy Fulfilled',
+    category: 'paradox',
+    philosophicalAspect: 'mind',
+    description:
+        'Every omen that came true is a nail already driven. This is just ' +
+        'the hammer falling on all of them at once.',
+    tier: 3, rank: 5, cardType: 'spell',
+    targetType: 'enemy',
+    // pts: RUPTURE (4 + fuel) + 3 fuel per omen hit ≈ 13 with a played oracle engine → Axiom
+    free: { foretell: 1 },
+    specialMechanics: [{ kind: 'rupture', fuelPerOmenHit: 3 }],
+    learningRequirement: { level: 10 },
+    addedIn: '2026-07-08',
+    tags: ['oracle', 'payoff'],
+};
+
+const theOraclesEye: Card = {
+    id: 'the-oracles-eye',
+    name: "The Oracle's Eye",
+    category: 'paradox',
+    philosophicalAspect: 'heart',
+    description:
+        'The lid never closes again. The enemy stops having a next move you ' +
+        'have not already seen.',
+    tier: 2, rank: 5, cardType: 'enchantment',
+    targetType: 'self',
+    // pts: persistent always-revealed next stance + omen riders ×1.5 ≈ 12 (min-4 law) → Axiom
+    learningRequirement: { level: 10 },
+    addedIn: '2026-07-08',
+    tags: ['oracle', 'enchantment'],
+};
+
+const fatedCourse: Card = {
+    id: 'fated-course',
+    name: 'Fated Course',
+    category: 'paradox',
+    philosophicalAspect: 'mind',
+    description:
+        'A curse of inevitability: the future you named is the only one left ' +
+        'to them, and walking into it leaves a mark.',
+    tier: 2, rank: 6, cardType: 'disenchant',
+    targetType: 'enemy',
+    // pts: engine text — every hit omen marks the foe, rest of combat (Aporia)
+    learningRequirement: { level: 12 },
+    addedIn: '2026-07-08',
+    tags: ['oracle', 'disenchant'],
+};
+
+// ─── T7 — HARVEST (short afflictions churn into Souls; Souls into the scythe) ─
+
+const briefCandle: Card = {
+    id: 'brief-candle',
+    name: 'Brief Candle',
+    category: 'fallacy',
+    philosophicalAspect: 'body',
+    description:
+        'Out, out. It burns bright, it burns fast, and what it leaves ' +
+        'behind is yours to gather.',
+    tier: 1, rank: 1, cardType: 'spell',
+    targetType: 'enemy',
+    // pts: bleed i2 d1 (~2) + fast expiry→Soul (0.75) + FREE tick 0.6 ≈ 3.4 → Doxa
+    free: { tickOne: true },
+    combatEffects: [{ effectId: 'debuff_bleed', appliedTo: 'opponent', intensity: 2, duration: 1 }],
+    learningRequirement: { level: 1 },
+    addedIn: '2026-07-08',
+    tags: ['harvest', 'dot'],
+};
+
+const mementoMori: Card = {
+    id: 'memento-mori',
+    name: 'Memento Mori',
+    category: 'paradox',
+    philosophicalAspect: 'mind',
+    description:
+        'Remember that they die. You remember it AT them, and the ' +
+        'remembering leaves a residue you can spend.',
+    tier: 1, rank: 2, cardType: 'spell',
+    targetType: 'enemy',
+    // pts: mark i2 d1 (2) + its expiry Soul (0.75) + FREE soul (0.75×0.35) ≈ 4.2 with churn value → Lemma
+    free: { souls: 1 },
+    combatEffects: [{ effectId: 'debuff_mark', appliedTo: 'opponent', intensity: 2, duration: 1 }],
+    learningRequirement: { level: 2 },
+    addedIn: '2026-07-08',
+    tags: ['harvest', 'exposure'],
+};
+
+const winnowing: Card = {
+    id: 'winnowing',
+    name: 'Winnowing',
+    category: 'fallacy',
+    philosophicalAspect: 'body',
+    description:
+        'The scythe does not wait for the season. One standing affliction, ' +
+        'cut and threshed and pocketed now.',
+    tier: 2, rank: 3, cardType: 'spell',
+    targetType: 'enemy',
+    // pts: consume 1 affliction → fuel ticks NOW (~4-5) + 1 Soul (0.75) + FREE tick 0.6 ≈ 7 → Thesis
+    free: { tickOne: true },
+    specialMechanics: [{ kind: 'consume_affliction', souls: 1 }],
+    learningRequirement: { level: 4 },
+    addedIn: '2026-07-08',
+    tags: ['harvest', 'payoff'],
+};
+
+const theGleanersDue: Card = {
+    id: 'the-gleaners-due',
+    name: "The Gleaner's Due",
+    category: 'fallacy',
+    philosophicalAspect: 'mind',
+    description:
+        'What the field owes the one who walks behind the reapers: a die ' +
+        'from the leavings, and something to read by.',
+    tier: 2, rank: 4, cardType: 'spell',
+    targetType: 'self',
+    // pts: REAP 3 → KINDLE (2.5) + draw 2 (4) − soul cost (~2.25) + FREE draw 0.7 + engine value ≈ 9 → Theorem
+    free: { drawCards: 1 },
+    specialMechanics: [{ kind: 'reap', cost: 3, rider: { drawCards: 2 }, kindle: 'mind' }],
+    learningRequirement: { level: 6 },
+    addedIn: '2026-07-08',
+    tags: ['harvest'],
+};
+
+const theReaping: Card = {
+    id: 'the-reaping',
+    name: 'The Reaping',
+    category: 'fallacy',
+    philosophicalAspect: 'body',
+    description:
+        'Every soul you gathered, swung at once. The harvest was never for ' +
+        'keeping — it was for this.',
+    tier: 3, rank: 5, cardType: 'spell',
+    targetType: 'enemy',
+    // pts: REAP all — 2 per Soul (cap kept), read+vuln scaled ≈ 13 with a running engine → Axiom
+    free: { tickOne: true },
+    specialMechanics: [{ kind: 'reap_all', burstPerSoul: 2 }],
+    learningRequirement: { level: 10 },
+    addedIn: '2026-07-08',
+    tags: ['harvest', 'payoff'],
+};
+
+const boneOrchard: Card = {
+    id: 'bone-orchard',
+    name: 'Bone Orchard',
+    category: 'fallacy',
+    philosophicalAspect: 'mind',
+    description:
+        'Plant what expires; the orchard does the rest. Every soul that ' +
+        'falls to you takes a bite of them on the way.',
+    tier: 2, rank: 5, cardType: 'enchantment',
+    targetType: 'self',
+    // pts: persistent 1 HP per Soul gained (soul-gated drip) ≈ 1 × ~12 souls, min-4 ≈ 12 → Axiom
+    learningRequirement: { level: 10 },
+    addedIn: '2026-07-08',
+    tags: ['harvest', 'enchantment'],
+};
+
+const theTithe: Card = {
+    id: 'the-tithe',
+    name: 'The Tithe',
+    category: 'fallacy',
+    philosophicalAspect: 'mind',
+    description:
+        'A tenth of everything, taken early. Their afflictions ripen a turn ' +
+        'sooner, and the collection plate is yours.',
+    tier: 2, rank: 6, cardType: 'disenchant',
+    targetType: 'enemy',
+    // pts: engine text — enemy afflictions expire 1 turn sooner (faster Soul churn) (Aporia)
+    learningRequirement: { level: 12 },
+    addedIn: '2026-07-08',
+    tags: ['harvest', 'disenchant'],
+};
+
+// ─── T8 — CHARM (SWAY toward CAPITULATION — the deck that never strikes) ─────
+
+const softWord: Card = {
+    id: 'soft-word',
+    name: 'Soft Word',
+    category: 'fallacy',
+    philosophicalAspect: 'heart',
+    description:
+        'It turns away wrath — not by winning, but by making wrath feel ' +
+        'over-dressed for the occasion.',
+    tier: 1, rank: 1, cardType: 'spell',
+    targetType: 'enemy',
+    // pts: SWAY 3 (2.4) + FREE heal 2 (0.65) + dieBonus(SWAY 1 ×0.6 = 0.5) ≈ 3.6 → Doxa
+    free: { healHp: 2 },
+    specialMechanics: [{ kind: 'sway', amount: 3 }],
+    dieBonus: { onColor: 'heart', rider: { sway: 1 } },
+    learningRequirement: { level: 1 },
+    addedIn: '2026-07-08',
+    tags: ['charm', 'alt-win'],
+};
+
+const disarmingSmile: Card = {
+    id: 'disarming-smile',
+    name: 'Disarming Smile',
+    category: 'fallacy',
+    philosophicalAspect: 'heart',
+    description:
+        'Hard to swing at someone who seems glad to see you. Their blows ' +
+        'arrive apologizing.',
+    tier: 1, rank: 2, cardType: 'spell',
+    targetType: 'enemy',
+    // pts: rapport i2 d2 (3) + heal 2 (0.65) + FREE sway 1 (0.3) ≈ 4.5 → Lemma
+    free: { sway: 1 },
+    combatEffects: [{ effectId: 'debuff_rapport', appliedTo: 'opponent', intensity: 2, duration: 2 }],
+    specialMechanics: [{ kind: 'rider', rider: { healHp: 2 } }],
+    learningRequirement: { level: 2 },
+    addedIn: '2026-07-08',
+    tags: ['charm'],
+};
+
+const commonGround: Card = {
+    id: 'common-ground',
+    name: 'Common Ground',
+    category: 'fallacy',
+    philosophicalAspect: 'heart',
+    description:
+        'You find the one thing you both believe and stand on it together. ' +
+        'It is very hard to duel on shared ground.',
+    tier: 2, rank: 3, cardType: 'spell',
+    targetType: 'enemy',
+    // pts: SWAY 2 (1.6) + rapport i1 d2 (1.5) + FREE draw (0.7) + threshold(SWAY 2 ×0.5 = 0.8) + tempo ≈ 7 → Thesis
+    free: { drawCards: 1 },
+    combatEffects: [{ effectId: 'debuff_rapport', appliedTo: 'opponent', intensity: 1, duration: 2 }],
+    specialMechanics: [{ kind: 'sway', amount: 2 }],
+    threshold: { color: 'heart', count: 3, rider: { sway: 2 } },
+    learningRequirement: { level: 4 },
+    addedIn: '2026-07-08',
+    tags: ['charm'],
+};
+
+const theOliveBranch: Card = {
+    id: 'the-olive-branch',
+    name: 'The Olive Branch',
+    category: 'paradox',
+    philosophicalAspect: 'body',
+    description:
+        'Extended with a steady hand, from inside their reach. Mercy offered ' +
+        'from a guard position is twice as loud.',
+    tier: 2, rank: 4, cardType: 'spell',
+    targetType: 'enemy',
+    // pts: SWAY 3 (2.4) + cleanse (1.5) + heal 3 (1) + FREE guard (0.5) + tempo ≈ 9 → Theorem
+    free: { guard: 2 },
+    specialMechanics: [
+        { kind: 'sway', amount: 3 },
+        { kind: 'rider', rider: { cleanse: 1, healHp: 3 } },
+    ],
+    learningRequirement: { level: 6 },
+    addedIn: '2026-07-08',
+    tags: ['charm', 'defense'],
+};
+
+const heartOfTheMatter: Card = {
+    id: 'heart-of-the-matter',
+    name: 'Heart of the Matter',
+    category: 'fallacy',
+    philosophicalAspect: 'heart',
+    description:
+        'You say the thing they have been not-saying their whole life. The ' +
+        'fight goes out of a person who feels seen.',
+    tier: 3, rank: 5, cardType: 'spell',
+    targetType: 'enemy',
+    // pts: SWAY 5 (4) + heal 4 (1.3) + FREE sway 1 (0.3) + threshold(SWAY +3 ×0.5 = 1.2) + capstone ≈ 13 → Axiom
+    free: { sway: 1 },
+    specialMechanics: [{ kind: 'sway', amount: 5 }, { kind: 'rider', rider: { healHp: 4 } }],
+    threshold: { color: 'heart', count: 5, rider: { sway: 3 } },
+    learningRequirement: { level: 10 },
+    addedIn: '2026-07-08',
+    tags: ['charm', 'alt-win'],
+};
+
+const irresistibleGrace: Card = {
+    id: 'irresistible-grace',
+    name: 'Irresistible Grace',
+    category: 'paradox',
+    philosophicalAspect: 'heart',
+    description:
+        'What has truly been offered cannot be taken back, and cannot wear ' +
+        'off. Your sway stops decaying.',
+    tier: 2, rank: 5, cardType: 'enchantment',
+    targetType: 'self',
+    // pts: persistent — SWAY no longer decays (≈ +1/turn saved × rest of combat), min-4 ≈ 12 → Axiom
+    learningRequirement: { level: 10 },
+    addedIn: '2026-07-08',
+    tags: ['charm', 'enchantment'],
+};
+
+const mirrorOfLonging: Card = {
+    id: 'mirror-of-longing',
+    name: 'Mirror of Longing',
+    category: 'paradox',
+    philosophicalAspect: 'heart',
+    description:
+        'Every blow you turn aside shows them what they actually wanted. ' +
+        'Prevented violence converts, at par, to persuasion.',
+    tier: 2, rank: 6, cardType: 'disenchant',
+    targetType: 'enemy',
+    // pts: engine text — damage your defenses prevent becomes SWAY (Aporia)
+    learningRequirement: { level: 12 },
+    addedIn: '2026-07-08',
+    tags: ['charm', 'disenchant', 'alt-win'],
+};
+
+// ─── T9 — BULWARK (guard, thorns, riposte — their aggression kills them) ─────
+
+const braceForImpact: Card = {
+    id: 'brace-for-impact',
+    name: 'Brace for Impact',
+    category: 'paradox',
+    philosophicalAspect: 'body',
+    description:
+        'You set your stance and meet the blow on your own terms — what is ' +
+        'braced for cannot break you.',
+    tier: 1, rank: 1, cardType: 'spell',
+    targetType: 'self',
+    // pts: Guard 8 (2) + FREE guard 2 (0.5) + pip line (+2/pip, situational ≈ 0.8) ≈ 3.3 → Doxa (starter)
+    free: { guard: 2 },
+    specialMechanics: [{ kind: 'guard', amount: 8 }],
+    learningRequirement: { level: 1 },
+    addedIn: '2026-07-08',
+    tags: ['bulwark', 'defense', 'starter'],
+};
+
+const nettleCloak: Card = {
+    id: 'nettle-cloak',
+    name: 'Nettle Cloak',
+    category: 'fallacy',
+    philosophicalAspect: 'body',
+    description:
+        'Wear the argument that stings on contact. Let them figure out the ' +
+        'lesson with their knuckles.',
+    tier: 1, rank: 2, cardType: 'spell',
+    targetType: 'self',
+    // pts: thorns i2 d2 (~3) + FREE guard 2 (0.5) + reflect synergy ≈ 4.3 → Lemma
+    free: { guard: 2 },
+    combatEffects: [{ effectId: 'buff_thorns', appliedTo: 'self', intensity: 2, duration: 2 }],
+    learningRequirement: { level: 2 },
+    addedIn: '2026-07-08',
+    tags: ['bulwark', 'reflect'],
+};
+
+const tuQuoque: Card = {
+    id: 'tu-quoque',
+    name: 'Tu Quoque',
+    category: 'fallacy',
+    philosophicalAspect: 'heart',
+    description:
+        '"You also." The oldest counter in the book — whatever they do to ' +
+        'you becomes, instantly, about them.',
+    tier: 2, rank: 3, cardType: 'spell',
+    targetType: 'self',
+    // pts: thorns i3 d2 (~4.5) + FREE guard 2 (0.5) + dieBonus(guard 2 ×0.6 = 0.3) + tempo ≈ 6.5 → Thesis
+    free: { guard: 2 },
+    combatEffects: [{ effectId: 'buff_thorns', appliedTo: 'self', intensity: 3, duration: 2 }],
+    dieBonus: { onColor: 'body', rider: { guard: 2 } },
+    learningRequirement: { level: 4 },
+    addedIn: '2026-07-08',
+    tags: ['bulwark', 'reflect'],
+};
+
+const measuredAnswer: Card = {
+    id: 'measured-answer',
+    name: 'Measured Answer',
+    category: 'paradox',
+    philosophicalAspect: 'body',
+    description:
+        'You do not interrupt. You let the whole blow arrive, catch it ' +
+        'entire, and reply in kind — once, precisely.',
+    tier: 2, rank: 4, cardType: 'spell',
+    targetType: 'self',
+    // pts: Guard 6 (1.5) + RIPOSTE 3/parry 2 (~4) + FREE guard 3 (0.75) + full-block gate + tempo ≈ 9 → Theorem
+    free: { guard: 3 },
+    specialMechanics: [{ kind: 'guard', amount: 6 }, { kind: 'riposte', damage: 3, reduce: 2 }],
+    learningRequirement: { level: 6 },
+    addedIn: '2026-07-08',
+    tags: ['bulwark', 'reflect'],
+};
+
+const theAdamantWall: Card = {
+    id: 'the-adamant-wall',
+    name: 'The Adamant Wall',
+    category: 'paradox',
+    philosophicalAspect: 'body',
+    description:
+        'Not a defense — a verdict about where the fight ends. Everything ' +
+        'that breaks against it answers for the attempt.',
+    tier: 3, rank: 5, cardType: 'spell',
+    targetType: 'self',
+    // pts: BARRIER 10 (3.3) + RIPOSTE 4/parry 2 (~5) + FREE guard 3 (0.75) + persistence ≈ 13 → Axiom
+    free: { guard: 3 },
+    specialMechanics: [{ kind: 'barrier', amount: 10 }, { kind: 'riposte', damage: 4, reduce: 2 }],
+    learningRequirement: { level: 10 },
+    addedIn: '2026-07-08',
+    tags: ['bulwark', 'reflect', 'payoff'],
+};
+
+const hedgehogsDilemma: Card = {
+    id: 'hedgehogs-dilemma',
+    name: "Hedgehog's Dilemma",
+    category: 'paradox',
+    philosophicalAspect: 'body',
+    description:
+        'To reach you they must come close; to come close is to be pierced. ' +
+        'Every prick leaves the flaw named.',
+    tier: 2, rank: 5, cardType: 'enchantment',
+    targetType: 'self',
+    // pts: persistent — every THORNS trigger also marks the enemy ≈ 1 × ~8 triggers, min-4 ≈ 12 → Axiom
+    learningRequirement: { level: 10 },
+    addedIn: '2026-07-08',
+    tags: ['bulwark', 'enchantment'],
+};
+
+const crumblingResolve: Card = {
+    id: 'crumbling-resolve',
+    name: 'Crumbling Resolve',
+    category: 'fallacy',
+    philosophicalAspect: 'body',
+    description:
+        'A curse for the persistent: every swing your wall swallows whole ' +
+        'takes a rung out of their next one.',
+    tier: 2, rank: 6, cardType: 'disenchant',
+    targetType: 'enemy',
+    // pts: engine text — a fully blocked attack staggers the next telegraph (Aporia)
+    learningRequirement: { level: 12 },
+    addedIn: '2026-07-08',
+    tags: ['bulwark', 'disenchant'],
+};
+
+// ─── T10 — ECHO (the discard is a songbook; the refrain never ends) ──────────
+
+const refrain: Card = {
+    id: 'refrain',
+    name: 'Refrain',
+    category: 'paradox',
+    philosophicalAspect: 'mind',
+    description:
+        'Said once, it is a remark. Said twice, in the same breath, it ' +
+        'starts to sound like the truth.',
+    tier: 1, rank: 1, cardType: 'spell',
+    targetType: 'enemy',
+    // pts: mark d2 ×ECHO (1.5×1.8 = 2.7) + FREE draw (0.7) ≈ 3.4 → Doxa
+    free: { drawCards: 1 },
+    combatEffects: [{ effectId: 'debuff_mark', appliedTo: 'opponent', duration: 2 }],
+    specialMechanics: [{ kind: 'echo' }],
+    learningRequirement: { level: 1 },
+    addedIn: '2026-07-08',
+    tags: ['echo', 'exposure'],
+};
+
+const secondThoughts: Card = {
+    id: 'second-thoughts',
+    name: 'Second Thoughts',
+    category: 'paradox',
+    philosophicalAspect: 'mind',
+    description:
+        'The discarded idea was not wrong — it was early. You reach back ' +
+        'into the pile and take it again.',
+    tier: 1, rank: 2, cardType: 'spell',
+    targetType: 'self',
+    // pts: REPRISE 1 (2) + FREE draw (0.7) + selection value (best-of-discard) ≈ 4.2 → Lemma
+    free: { drawCards: 1 },
+    specialMechanics: [{ kind: 'reprise', count: 1 }],
+    learningRequirement: { level: 2 },
+    addedIn: '2026-07-08',
+    tags: ['echo', 'recursion'],
+};
+
+const adNauseam: Card = {
+    id: 'ad-nauseam',
+    name: 'Ad Nauseam',
+    category: 'fallacy',
+    philosophicalAspect: 'mind',
+    description:
+        'Repetition is not proof — but somewhere around the tenth hearing, ' +
+        'the difference stops mattering. Whatever you say next, says itself twice.',
+    tier: 2, rank: 3, cardType: 'spell',
+    targetType: 'self',
+    // pts: next spell gains ECHO (≈ ×0.8 of an avg spell ≈ 5) + FREE mark (0.5) + dieBonus(draw ×0.6 = 1.2) ≈ 6.7 → Thesis
+    free: { applyEffect: { effectId: 'debuff_mark', duration: 1 } },
+    specialMechanics: [{ kind: 'echo_next_spell' }],
+    dieBonus: { onColor: 'mind', rider: { drawCards: 1 } },
+    learningRequirement: { level: 4 },
+    addedIn: '2026-07-08',
+    tags: ['echo', 'recursion'],
+};
+
+const circularReasoning: Card = {
+    id: 'circular-reasoning',
+    name: 'Circular Reasoning',
+    category: 'fallacy',
+    philosophicalAspect: 'mind',
+    description:
+        'The conclusion proves the premise proves the conclusion. Nothing ' +
+        'ever leaves the loop — including your best card.',
+    tier: 2, rank: 4, cardType: 'spell',
+    targetType: 'self',
+    // pts: REPRISE 1 + its FREE line fires now (2 + ~1.5) + FREE draw (0.7) + selection ≈ 9 → Theorem
+    free: { drawCards: 1 },
+    specialMechanics: [{ kind: 'reprise', count: 1, fireFree: true }],
+    learningRequirement: { level: 6 },
+    addedIn: '2026-07-08',
+    tags: ['echo', 'recursion'],
+};
+
+const ouroboros: Card = {
+    id: 'ouroboros',
+    name: 'Ouroboros',
+    category: 'paradox',
+    philosophicalAspect: 'mind',
+    description:
+        'The argument eats its own tail and grows fat on it. Whatever you ' +
+        'said last, the serpent says again. Twice.',
+    tier: 3, rank: 5, cardType: 'spell',
+    targetType: 'enemy',
+    // pts: replay last spell ×2 (≈ 2 × avg spell payload ~5 = 10) + FREE draw (0.7) + setup cost ≈ 13.5 → Axiom
+    free: { drawCards: 1 },
+    specialMechanics: [{ kind: 'replay_last', times: 2 }],
+    learningRequirement: { level: 10 },
+    addedIn: '2026-07-08',
+    tags: ['echo', 'recursion', 'payoff'],
+};
+
+const resonantChamber: Card = {
+    id: 'resonant-chamber',
+    name: 'Resonant Chamber',
+    category: 'paradox',
+    philosophicalAspect: 'mind',
+    description:
+        'The room learns your voice. The first thing you say each turn ' +
+        'comes back saying itself.',
+    tier: 2, rank: 5, cardType: 'enchantment',
+    targetType: 'self',
+    // pts: persistent — the first spell each turn gains ECHO ≈ ×0.8 spell/turn × rest, min-4 ≈ 12 → Axiom
+    learningRequirement: { level: 10 },
+    addedIn: '2026-07-08',
+    tags: ['echo', 'enchantment'],
+};
+
+const stuckInTheirHead: Card = {
+    id: 'stuck-in-their-head',
+    name: 'Stuck in Their Head',
+    category: 'fallacy',
+    philosophicalAspect: 'heart',
+    description:
+        'The tune they cannot stop hearing is yours. Every repetition ' +
+        'costs them a little more of themselves.',
+    tier: 2, rank: 6, cardType: 'disenchant',
+    targetType: 'enemy',
+    // pts: engine text — every ECHO / REPRISE drips 2 (echo-gated, §1 source 3) (Aporia)
+    learningRequirement: { level: 12 },
+    addedIn: '2026-07-08',
+    tags: ['echo', 'disenchant'],
+};
+
+// ─── Library assembly ────────────────────────────────────────────────────────
 
 export const cardLibrary: Card[] = [
-    slipperySlope, braceForImpact, adHominemStrike, falseDilemma, appealToPity, achillesGambit, liarsEcho, shipOfTheseus, hastyGeneralization, suspendJudgment, soothingWords, befriend, mobAppeal, undistributedMiddle, eternalRegress, resonanceBleed, batSwarmThoughtform, empatheticUnderstanding, stoicReserve, appealToAuthority, tuQuoque, baradoxsBarber, equivocationCascade, sunkCostMomentum, breach, briarRiposte, leechingSyllogism, theInevitable, mountingContradictions, poisonedWell, gamblersFolly, movingTheGoalposts, shipInABottle, resonanceDetonation, soritesCascade, bootstrapParadox, appealToConsequences, nirvanaFallacy, pascalsWager, existentialCollapse, achillesOvertake, eternalRecurrence, apophaticAegis, transcendentSynthesis, existentialDebt, pyrrhicVictory, theFinalWord, unmovedMover, peacefulGesture,
+    // T1 Affliction
+    slipperySlope, strawMansJab, festeringArgument, currysConversion,
+    resonanceDetonation, venomAndVein, suppuratingCurse,
+    // T2 Peroration
+    exordium, openingStatement, mountingCase, peroratioInterrupta,
+    theClosingWord, practicedCadence, captiveAudience,
+    // T3 Forge
+    sketchOfAThought, halfStep, bootstrapLoop, exNihilo,
+    theOvertake, anvilOfForm, entropyTax,
+    // T4 Akrasia
+    againstMyJudgment, sweetPoison, selfFlagellant, fallenGrace,
+    pactOfAkrasia, crownOfThorns, mirrorOfGuilt,
+    // T5 Control
+    zenosHalfStep, redHerring, undistributedMiddle, arrowParadox,
+    paralysisOfAnalysis, achillesAndTheTortoise, quagmireOfDoubt,
+    // T6 Oracle
+    glimpse, signsAndPortents, cassandrasBurden, delphicAmbiguity,
+    prophecyFulfilled, theOraclesEye, fatedCourse,
+    // T7 Harvest
+    briefCandle, mementoMori, winnowing, theGleanersDue,
+    theReaping, boneOrchard, theTithe,
+    // T8 Charm
+    softWord, disarmingSmile, commonGround, theOliveBranch,
+    heartOfTheMatter, irresistibleGrace, mirrorOfLonging,
+    // T9 Bulwark
+    braceForImpact, nettleCloak, tuQuoque, measuredAnswer,
+    theAdamantWall, hedgehogsDilemma, crumblingResolve,
+    // T10 Echo
+    refrain, secondThoughts, adNauseam, circularReasoning,
+    ouroboros, resonantChamber, stuckInTheirHead,
 ];
 
-const skillRegistry: ReadonlyMap<string, Card> = new Map(
-    cardLibrary.map(skill => [skill.id, skill]),
-);
+const registry = new Map<string, Card>(cardLibrary.map(card => [card.id, card]));
 
-// Sandbox wiring — gives the (import-cycle-free) sandbox registry a base-card
-// lookup for collision checks and override merging.
-bindSandboxLibraryGuard(id => skillRegistry.get(id));
+// Sandbox integration: experimental cards / overrides (loaded via --sandbox)
+// take precedence over the curated library at lookup time.
+bindSandboxLibraryGuard(id => registry.get(id));
 
-/**
- * O(1) lookup by skill ID. Returns `undefined` if no skill matches — callers
- * must handle that (the combat resolver emits a `skill-blocked` event with
- * `reason: 'unknown-skill'` rather than throwing).
- *
- * Sandbox-aware: experimental cards / overrides registered via
- * `cards.sandbox.ts` take precedence (a no-op O(1) check when the sandbox is
- * empty, i.e. in all normal play).
- */
+/** O(1) lookup by card id; sandbox-aware. */
 export function getCardById(id: string): Card | undefined {
-    return getSandboxCard(id) ?? skillRegistry.get(id);
+    return getSandboxCard(id) ?? registry.get(id);
 }

@@ -31,6 +31,35 @@ export type CardCategory = 'fallacy' | 'paradox';
 export type CardTier = 1 | 2 | 3;
 
 /**
+ * Spec 32 v3 — the rank ladder (quality axis, distinct from `tier`):
+ * 1 Doxa · 2 Lemma · 3 Thesis · 4 Theorem · 5 Axiom · 6 Aporia.
+ */
+export type CardRank = 1 | 2 | 3 | 4 | 5 | 6;
+
+/** Display names for the rank ladder (printed on card faces). */
+export const CARD_RANK_NAMES: Readonly<Record<CardRank, string>> = Object.freeze({
+    1: 'Doxa', 2: 'Lemma', 3: 'Thesis', 4: 'Theorem', 5: 'Axiom', 6: 'Aporia',
+});
+
+/** Spec 32 v3 — rarity band, derived from rank (§4). Drives the deck recipe
+ *  and reward drop weights. */
+export type CardRarity = 'common' | 'uncommon' | 'rare';
+
+/** Maps a rank to its rarity band: common = Doxa/Lemma, uncommon =
+ *  Thesis/Theorem, rare = Axiom/Aporia. */
+export function rankToRarity(rank: CardRank): CardRarity {
+    return rank <= 2 ? 'common' : rank <= 4 ? 'uncommon' : 'rare';
+}
+
+/**
+ * Spec 32 v3 — card type. Open enum (more types to come).
+ * - `spell`       — play → discard; recycled by the reshuffle law.
+ * - `enchantment` — persistent POSITIVE passive, player-side, rest of combat.
+ * - `disenchant`  — persistent NEGATIVE passive attached to the ENEMY.
+ */
+export type CardType = 'spell' | 'enchantment' | 'disenchant';
+
+/**
  * Targeting scope for a skill effect.
  * - `'self'`  — the caster.
  * - `'enemy'` — the current opponent.
@@ -103,96 +132,133 @@ export interface CardCombatEffects {
 
 /**
  * Bespoke skill mechanics that don't map cleanly onto an ActiveEffect
- * payload. Each is processed by `executeSkill` after damage and after
- * `combatEffects`. Kept as a discriminated union so the resolver / UI can
- * branch on `kind` without runtime tag parsing.
+ * payload. Each is processed by `executeSkill` after `combatEffects`
+ * (spec 32 v3: there is no damage step — the strike is dead). Kept as a
+ * discriminated union so the resolver / UI can branch on `kind` without
+ * runtime tag parsing.
  *
- * - `strip_random_buff`: remove one random buff from the target. Used by
- *   Ad Hominem Strike (enemy) and similar harassment effects.
- * - `convert_enemy_buff_to_self`: strip a random buff from the enemy and
- *   apply the same effect to the player. Ship of Theseus.
- * - `secondary_heal_self`: heal the player for
- *   `baseStats[stat] × SKILL_STAT_MULTIPLIER × (multiplier ?? 1)` after the
- *   primary damage resolves. Used by Mob Appeal to bolt a small self-heal
- *   onto an enemy-targeted strike.
+ * - `strip_random_buff`: remove one random buff from the target.
  * - `befriend_attempt`: Phase 108 - attempt to befriend the enemy, opening
  *   a mercy choice state if successful (requires HP gate eligibility).
  */
 export type CardSpecialMechanic =
     | { kind: 'strip_random_buff'; appliedTo: 'self' | 'enemy' }
-    | { kind: 'convert_enemy_buff_to_self' }
-    | { kind: 'secondary_heal_self'; stat: StatType; multiplier?: number }
     | { kind: 'befriend_attempt' }
     /** Hazard-Pattern Combat — grants the player GUARD (a shield that absorbs the
      *  enemy's next telegraphed threat). Handled by the combat engine, not the
      *  skill engine. `amount` is the base Guard before read/free scaling. */
     | { kind: 'guard'; amount: number }
-    /** RUPTURE — consume ALL DoT on the foe and deal their remaining total as a
-     *  burst (read + vulnerable scaled, capped at `RUPTURE_BURST_CAP`). `bonusPct`
-     *  is an extra flat fraction on the detonation. HP behavior owned by the
-     *  combat engine (mirrors `guard`); the skill engine no-ops it. */
-    | { kind: 'rupture'; bonusPct?: number }
-    /** COMPOUND — deal `perDebuff` HP per DISTINCT debuff on the foe (counted
-     *  before this card's own debuff lands, capped at `COMPOUND_COUNT_CAP`,
-     *  read + vulnerable scaled). HP behavior owned by the combat engine. */
-    | { kind: 'compound'; perDebuff: number }
+    /** RUPTURE — consume ALL afflictions on the foe and detonate: 1.5× the
+     *  remaining DoT fuel + a flat amount per non-DoT affliction stack (read +
+     *  vulnerable scaled, capped at `RUPTURE_BURST_CAP`). `bonusPct` is an extra
+     *  flat fraction; `fuelPerPip` adds fuel per pip spent by a paired
+     *  `spend_all_pips`; `fuelPerOmenHit` adds fuel per omen hit this combat
+     *  (Oracle capstone). HP behavior owned by the combat engine (mirrors
+     *  `guard`); the skill engine no-ops it. */
+    | { kind: 'rupture'; bonusPct?: number; fuelPerPip?: number; fuelPerOmenHit?: number }
     /** SIPHON — heal the player for `pct` of the HP this card erodes from the
-     *  foe (strike + any rupture/compound/execute burst). Combat-engine owned. */
+     *  foe (rupture/reap bursts). Combat-engine owned. */
     | { kind: 'siphon'; pct: number }
     /** BARRIER — add `amount` (read-scaled) to the player's STACKING, persistent
      *  damage soak (`CombatEncounterState.barrier`), distinct from one-shot GUARD.
      *  Combat-engine owned. */
     | { kind: 'barrier'; amount: number }
-    /** RIPOSTE — a one-shot parry: reduce the foe's next telegraphed hit by
-     *  `reduce` and counter for `damage` (read-scaled). Combat-engine owned. */
+    /** RIPOSTE — arm the counter-stance: while armed this phase, an attack your
+     *  Guard/Barrier FULLY blocks is answered for `damage` HP (reflect-class,
+     *  spec 32 v3 §1 source 4). `reduce` shaves the incoming hit first (the
+     *  parry half). Combat-engine owned. */
     | { kind: 'riposte'; damage: number; reduce: number }
-    /** EXECUTE — a finisher: when the foe is at/below `hpPct` of max HP OR carries
-     *  at least `dotStacks` distinct DoT effects, deal a large (typically lethal)
-     *  hit with optional `recoilPct` self-damage; otherwise fall back to the
-     *  normal small strike. Combat-engine owned. */
-    | { kind: 'execute'; hpPct: number; dotStacks: number; recoilPct?: number }
-    /** AMPLIFY — read the foe's pending DoT total (getPendingDotTotal) ×
-     *  `multiplier` and fire as a one-time HP burst. DoT effects are NOT consumed —
-     *  they keep ticking (distinct from RUPTURE which consumes them). Capped at
-     *  AMPLIFY_BURST_CAP. Combat-engine owned; skill engine no-ops it. */
-    | { kind: 'amplify'; multiplier: number }
-    /** GRANT_PERMANENT_WILD_DIE — Master Spec §4. Adds `wildCount` Wild dice and
-     *  `deadCount` locked X dice to `CombatEncounterState.permanentWildDice` /
-     *  `permanentDeadDice` for the REST of the encounter (deck-building-style
-     *  escalation, not a one-turn trick), clamped to `MAX_PERMANENT_WILD_DICE`.
-     *  Only ever fired from a card's SURGE (die-powered) action — the doctrine is
-     *  weak plays never touch the pool. Combat-engine owned; skill engine no-ops
-     *  it, mirroring `guard`/`barrier`/`rupture`. */
-    | { kind: 'grant_permanent_wild_die'; wildCount: number; deadCount: number }
     // ── Fate Engine P1 (spec 31 §4.1) — die-manipulation verbs, all combat-engine
     //    owned (the skill engine no-ops them, mirroring guard/rupture). ──────────
     /** REROLL_SPENT — re-roll every spent/blocked die in the tray (the library
-     *  sibling of the Press Fate signature). */
+     *  sibling of the Press Fate signature). Floating dice are exempt. */
     | { kind: 'reroll_spent' }
     /** REFRESH_DIE — the powering die returns to `available` after this play
      *  (independent of the variety-chain rule). */
     | { kind: 'refresh_die' }
-    /** CONVERT_DIE_COLOR — the powering die returns REFRESHED as a WILD die
-     *  ("still your die?" — maximally flexible, deterministic, no color picker). */
+    /** CONVERT_DIE_COLOR — the powering die returns REFRESHED as a WILD die. */
     | { kind: 'convert_die_color' }
-    /** CREATE_TEMPORARY_DIE — forge a fresh die of `color` (temporary: true).
-     *  It joins the RESERVE at 0 pips when a slot is free; otherwise it burns
-     *  for +1 Conviction. */
+    /** KINDLE (spec 32 v3) — forge a fresh TEMPORARY die of `color` (this combat
+     *  only). It joins the RESERVE at 0 pips when a slot is free; otherwise it
+     *  burns for +1 Conviction. */
     | { kind: 'create_temporary_die'; color: 'heart' | 'body' | 'mind' | 'wild' }
-    /** GRANT_PIP — every die currently in the Reserve ripens +`count` pips
-     *  (clamped to the pip cap). */
+    /** PIP — every die currently in the Reserve ripens +`count` pips. */
     | { kind: 'grant_pip'; count: number }
     /** BANK_SPENT_DIE — instead of being spent, the powering die goes to the
      *  Reserve at 0 pips (if a slot is free; otherwise it is spent normally). */
     | { kind: 'bank_spent_die' }
-    /** REACT — if the foe carries BOTH status `a` and status `b` at
-     *  `minIntensity`+, CONSUME them and detonate: burst = `burstPerIntensity` ×
-     *  (consumed intensities), on the mechanic-damage path (never strike-weighted),
-     *  plus an optional `product` status. A fired REACT refreshes the drafted die
-     *  (the crescendo keeps the turn alive). */
-    | { kind: 'react'; a: string; b: string; minIntensity: number;
-        burstPerIntensity: number;
-        product?: { effectId: string; intensity: number; duration: number } };
+    // ── Spec 32 v3 — the themed-deck verb set (all combat-engine owned) ────────
+    /** FORGE — create a FLOATING die: joins the tray now, never rerolls, persists
+     *  across rounds AND combats, gone forever when spent. Cap 3; forging at cap
+     *  converts to +1 Conviction (printed). `color: 'powering'` = the powering
+     *  die's color; `'wild'` on premium cards. */
+    | { kind: 'forge_floating_die'; color: 'powering' | 'wild' }
+    /** STAGGER — remove `rungs` rungs from the enemy's next telegraphed action;
+     *  at 0 rungs the action is denied outright. */
+    | { kind: 'stagger'; rungs: number }
+    /** LOCK STANCE — the enemy's NEXT phase keeps its current stance (revealed). */
+    | { kind: 'lock_stance' }
+    /** FORETELL — look at the top `count` cards of your deck (the engine
+     *  deterministically floats the highest-rank card to the top) and glimpse
+     *  the enemy's next telegraph. */
+    | { kind: 'foretell'; count: number }
+    /** OMEN — cast the powering die as the prognostication: if the enemy's NEXT
+     *  phase stance matches the powering die's stance (wild = this card's
+     *  stance), the omen HITS at the next phase boundary and `rider` fires free. */
+    | { kind: 'omen'; rider: CardRider }
+    /** PREMISE — add `count` Premises to the running tally (Peroration theme). */
+    | { kind: 'premise'; count: number }
+    /** PERORATION — declare the conclusion (one in play at a time): when the
+     *  Premise tally reaches `at`, `rider` fires FREE and the tally resets.
+     *  If the tally reaches `concedeAt` first, the enemy CONCEDES the argument
+     *  outright (alt-win, spec 32 v3 §9). */
+    | { kind: 'peroration'; at: number; rider: CardRider; concedeAt?: number }
+    /** SPEND PREMISES — cash the whole tally early: +1 MARK stack per
+     *  `markPer` spent and draw 1 per `drawPer` spent. */
+    | { kind: 'spend_premises'; markPer: number; drawPer: number }
+    /** SPEND ALL PIPS — zero every pip on the powering die + Reserve; a paired
+     *  `rupture` gains `fuelPerPip` per pip, and each pip grants `guardPerPip`. */
+    | { kind: 'spend_all_pips'; guardPerPip?: number }
+    /** RECOIL — pay `hp` VITAE (unpreventable, printed cost). */
+    | { kind: 'recoil'; hp: number }
+    /** EXTEND DOTS — +`turns` duration to ALL your DoTs on the enemy. */
+    | { kind: 'extend_dots'; turns: number }
+    /** CONVERT DOTS — convert enemy bleed↔poison at equal intensity,
+     *  +`bonusIntensity` (the wound becomes the argument). */
+    | { kind: 'convert_dots'; bonusIntensity: number }
+    /** BOOST ALL DOTS — +`intensity` to every DoT already on the enemy. */
+    | { kind: 'boost_all_dots'; intensity: number }
+    /** SOUL — gain `count` Souls (Harvest theme currency). */
+    | { kind: 'soul_gain'; count: number }
+    /** CONSUME AFFLICTION — consume 1 enemy affliction early: its remaining DoT
+     *  fuel ticks NOW, and the harvest yields `souls` Souls. */
+    | { kind: 'consume_affliction'; souls: number }
+    /** REAP — spend `cost` Souls (fizzles when underfunded): fire `rider`,
+     *  and/or KINDLE a die of `kindle` color. */
+    | { kind: 'reap'; cost: number; rider?: CardRider; kindle?: 'heart' | 'body' | 'mind' | 'wild' }
+    /** REAP ALL — spend every Soul: burst `burstPerSoul` HP per Soul spent
+     *  (mechanic-damage path, capped at `RUPTURE_BURST_CAP`). */
+    | { kind: 'reap_all'; burstPerSoul: number }
+    /** SWAY — add `amount` SWAY to the enemy. SWAY decays 1/turn; if SWAY ≥ the
+     *  enemy's current HP at a turn boundary, it CAPITULATES (alt-win). */
+    | { kind: 'sway'; amount: number }
+    /** ECHO — this card's PAID payload fires twice. */
+    | { kind: 'echo' }
+    /** ECHO NEXT — your next spell this turn gains ECHO. */
+    | { kind: 'echo_next_spell' }
+    /** REPRISE — return `count` cards from the discard pile to hand (the engine
+     *  picks the highest-rank). `fireFree` also fires the reprised card's FREE
+     *  line immediately. */
+    | { kind: 'reprise'; count: number; fireFree?: boolean }
+    /** REPLAY LAST — replay the PAID payload of the last spell you played this
+     *  combat, `times` times (never chains into another replay). */
+    | { kind: 'replay_last'; times: number }
+    /** CONJURE — create a one-use Thoughtform card into hand (removed from the
+     *  combat after it is played or the combat ends). */
+    | { kind: 'conjure_card'; cardId: string }
+    /** RIDER — an UNCONDITIONAL rider fired by the PAID line (the generic
+     *  draw/heal/cleanse/guard verb carrier; same executor as condition riders). */
+    | { kind: 'rider'; rider: CardRider };
 
 /**
  * Fate Engine P1 — a card RIDER: a bundle of real-unit bonuses fired by a
@@ -205,8 +271,6 @@ export interface CardRider {
     bonusIntensity?: number;
     /** +N turns on the statuses THIS play lands on the enemy. */
     bonusDuration?: number;
-    /** Immediate flat HP chip to the enemy (mechanic-damage path, unweighted). */
-    chipHp?: number;
     /** +N Guard. */
     guard?: number;
     /** +N Conviction (clamped to the cap). */
@@ -217,12 +281,36 @@ export interface CardRider {
     revealStance?: boolean;
     /** Immediately tick every enemy DoT once (extra tick — durations untouched). */
     tickAllDots?: boolean;
+    /** TICK (spec 32 v3) — the strongest enemy DoT deals its per-turn damage
+     *  NOW, duration untouched. The canonical small erosion line. */
+    tickOne?: boolean;
     /** Cleanse up to N of the player's own debuffs (tier-3 scope). */
     cleanse?: number;
     /** Heal the player N HP. */
     healHp?: number;
     /** Draw N cards. */
     drawCards?: number;
+    // ── Spec 32 v3 — themed-deck rider verbs ─────────────────────────────────
+    /** +N Premises (Peroration tally). */
+    premises?: number;
+    /** +N SWAY on the enemy. */
+    sway?: number;
+    /** +N Souls (Harvest currency). */
+    souls?: number;
+    /** FORETELL N — reorder the top N of your deck + glimpse the next telegraph. */
+    foretell?: number;
+    /** Apply an effect from the library (the generic small-status line, e.g.
+     *  a FREE "mark d2"). `to` defaults to 'opponent'. */
+    applyEffect?: { effectId: string; intensity?: number; duration?: number; to?: 'self' | 'opponent' };
+    /** Consume ALL enemy MARK stacks and burst N HP per stack (the-closing-word's
+     *  conclusion — an affliction-payoff, mechanic-damage path). */
+    ruptureMarks?: number;
+    /** +1 intensity to ONE enemy DoT per pip spent (paired with spend verbs). */
+    intensityPerPip?: number;
+    /** +N pips to every Reserve die (the ripening rider). */
+    pips?: number;
+    /** STAGGER N — remove N rungs from the enemy's next telegraphed action. */
+    stagger?: number;
 }
 
 /**
@@ -303,18 +391,11 @@ export interface CardSynergy {
  * @property philosophicalAspect - Stat alignment of the skill (heart/body/mind).
  * @property tier            - 1 / 2 / 3, mirrors the effect tier system.
  * @property targetType      - 'self' or 'enemy'.
- * @property basePower       - Flat damage / heal magnitude before stat scaling.
- * @property scalingStat     - Base stat the skill scales off of (typically
- *                             matches `philosophicalAspect`, but may deviate).
- * @property scalingMultiplier - Optional multiplier on the scaling-stat term
- *                               (default 1). Card damage / heal becomes
- *                               `basePower + stat × SKILL_STAT_MULTIPLIER × scalingMultiplier`.
- *                               Used by self-heals like Appeal to Pity that want
- *                               a more substantial restorative effect.
  * @property combatEffects   - Optional list of effect payloads to apply.
- * @property specialMechanics - Optional bespoke behaviours (buff-strip,
- *                              buff-conversion, secondary heal, etc.). Resolved
- *                              after damage and after `combatEffects`.
+ * @property specialMechanics - Optional bespoke behaviours. Resolved after
+ *                              `combatEffects`. (Spec 32 v3: there is NO
+ *                              damage step — `basePower` was deleted from the
+ *                              schema; raw HP damage is a compile error.)
  * @property learningRequirement - Optional prerequisites needed to learn.
  */
 export interface Card {
@@ -325,9 +406,25 @@ export interface Card {
     description: string;
     tier: CardTier;
     targetType: CardTarget;
-    basePower: number;
-    scalingStat: StatType;
-    scalingMultiplier?: number;
+    /**
+     * Spec 32 v3 — the RANK ladder (quality axis): 1 Doxa · 2 Lemma · 3 Thesis
+     * · 4 Theorem · 5 Axiom · 6 Aporia. Rarity derives from it (§4):
+     * common = 1-2, uncommon = 3-4, rare = 5-6. Orthogonal to `tier` (resist).
+     */
+    rank: CardRank;
+    /**
+     * Spec 32 v3 — card type. `spell` plays → discard (FREE + PAID lines);
+     * `enchantment` / `disenchant` are PAID-only persistent passives — the
+     * enchantment sits player-side, the disenchant attaches to the ENEMY as a
+     * standing curse. Both leave the deck cycle once played.
+     */
+    cardType: CardType;
+    /**
+     * Spec 32 v3 — the authored FREE (dieless) line. Spells only; enchant/
+     * disenchant have no FREE line (the die is the commitment). Budget law:
+     * FREE ≈ 25-35% of the card's total points.
+     */
+    free?: CardRider;
     combatEffects?: CardCombatEffects[];
     specialMechanics?: CardSpecialMechanic[];
     learningRequirement?: CardLearningRequirement;
@@ -374,4 +471,9 @@ export interface Card {
      * `rider` on top and costs `recoilHp` (the impossible made load-bearing).
      */
     fate?: { rider: CardRider; recoilHp?: number };
+    /**
+     * Spec 32 v3 T4 — FALLEN theme-state condition line: the rider fires free
+     * when the player is Fallen (carries ≥2 distinct self-debuffs) at play time.
+     */
+    fallen?: { rider: CardRider };
 }

@@ -89,38 +89,20 @@ export function generatePhilosophicalResource(
 // ─── Damage Calculation ──────────────────────────────────────────────────────
 
 /**
- * Card damage formula:
- *
- *   damage = basePower
- *          + character.baseStats[scalingStat] × SKILL_STAT_MULTIPLIER × (scalingMultiplier ?? 1)
- *
- * The actor's baseStats are read directly (not effective stats) — skill
- * scaling is intentionally simpler than the basic-attack rolls so balancing
- * stays predictable. Stat-modifier effects influence the basic-attack path,
- * not the skill scaling path. `scalingMultiplier` lets individual skills like
- * Appeal to Pity amplify the stat term without warping `basePower`.
+ * Spec 32 v3 §1 — THE STRIKE IS DEAD. `basePower` was deleted from the Card
+ * schema, so no card carries a damage/heal magnitude any more: every point of
+ * enemy HP falls to DoT ticks, status-payoff bursts, engine-gated drips, or
+ * reflect (all combat-engine owned). This function is kept for API
+ * compatibility (sim policies / projections multiply by it) and returns 0
+ * unconditionally — a card that "deals damage" is now a compile error at the
+ * schema and a no-op here.
  */
 export function calculateSkillDamage(
-    actor: Combatant, 
-    skill: Card,
-    target?: Combatant,
+    _actor: Combatant,
+    _skill: Card,
+    _target?: Combatant,
 ): number {
-    const multiplier = skill.scalingMultiplier ?? 1;
-    const baseDamage = Math.max(
-        0,
-        Math.round(
-            skill.basePower
-            + actor.baseStats[skill.scalingStat] * SKILL_STAT_MULTIPLIER * multiplier,
-        ),
-    );
-    
-    // Phase 93: Apply damage resistance if target provided
-    if (target && baseDamage > 0) {
-        const damageType = getSkillDamageType(skill.scalingStat);
-        return calculateDamageResistance(target, baseDamage, damageType);
-    }
-    
-    return baseDamage;
+    return 0;
 }
 
 /**
@@ -699,57 +681,6 @@ function applySpecialMechanic(
             return { caster: nextCaster, target, events };
         }
 
-        case 'convert_enemy_buff_to_self': {
-            const { target: nextTarget, removed } = removeRandomBuff(target);
-            if (!removed) {
-                events.push({
-                    kind: 'buff-converted', skillId: skill.id, effect: null,
-                    message: 'No buffs to convert.',
-                });
-                return { caster, target: nextTarget, events };
-            }
-            const effect = lookupEffect(removed.effectId);
-            if (!effect) {
-                events.push({
-                    kind: 'buff-converted', skillId: skill.id, effect: null,
-                    message: 'Buff stripped but unknown — could not transfer.',
-                });
-                return { caster, target: nextTarget, events };
-            }
-            const applied = applyEffect(caster.effects, effect, round, {
-                intensityDelta: removed.intensity ?? 1,
-                durationDelta:  removed.remainingDuration,
-                sourceId:       caster.id,
-            });
-            events.push({
-                kind: 'buff-converted', skillId: skill.id, effect,
-                message: `${effect.name} converted onto the caster.`,
-            });
-            return {
-                caster: { ...caster, effects: applied.activeEffects } as Combatant,
-                target: nextTarget,
-                events,
-            };
-        }
-
-        case 'secondary_heal_self': {
-            const multiplier = mechanic.multiplier ?? 1;
-            const amount = Math.max(
-                0,
-                Math.round(caster.baseStats[mechanic.stat] * SKILL_STAT_MULTIPLIER * multiplier),
-            );
-            if (amount <= 0) {
-                return { caster, target, events };
-            }
-            const hpBefore = caster.health;
-            const nextCaster = heal(caster, amount);
-            events.push({
-                kind: 'heal', skillId: skill.id, target: 'self',
-                amount, hpBefore, hpAfter: nextCaster.health,
-            });
-            return { caster: nextCaster, target, events };
-        }
-
         case 'befriend_attempt': {
             // Phase 108 — Check if befriend attempt is valid
             const isEligible = isBefriendAttemptEligible(state);
@@ -774,32 +705,12 @@ function applySpecialMechanic(
             return { caster, target, events };
         }
 
-        case 'guard':
-            // Hazard-Pattern GUARD is granted by the combat engine (playBottom/Top
-            // action → CombatEncounterState.guard); the skill engine no-ops it.
-            return { caster, target, events };
-
-        // ── Hazard-Pattern card mechanics (HP behavior owned by combat.engine) ──
-        // Each mirrors `guard`: the SKILL engine no-ops it (so the shared engine,
-        // legacy resolver, and effect math are untouched); the HP-model combat
-        // engine reads the mechanic at its `playBottomAction` / `resolveThreatPhase`
-        // call sites. Includes the Fate Engine P1 die-manipulation verbs + REACT.
-        // These cases exist for exhaustiveness over the union.
-        case 'rupture':
-        case 'compound':
-        case 'siphon':
-        case 'barrier':
-        case 'riposte':
-        case 'execute':
-        case 'amplify':
-        case 'grant_permanent_wild_die':
-        case 'reroll_spent':
-        case 'refresh_die':
-        case 'convert_die_color':
-        case 'create_temporary_die':
-        case 'grant_pip':
-        case 'bank_spent_die':
-        case 'react':
+        // ── Hazard-Pattern / spec 32 v3 card mechanics ───────────────────────
+        // Every other mechanic kind is COMBAT-ENGINE OWNED: the skill engine
+        // no-ops it (so the shared effect machinery stays untouched) and the
+        // HP-model combat engine reads the mechanic at its `playBottomAction` /
+        // `resolveThreatPhase` / `processBetweenPhases` call sites.
+        default:
             return { caster, target, events };
     }
 }

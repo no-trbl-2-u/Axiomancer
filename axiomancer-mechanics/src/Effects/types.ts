@@ -138,13 +138,28 @@ export interface EffectPayload {
         /** Halve remaining tick damage the instant the bearer receives any heal
          *  (Hemorrhage). */
         decayOnHeal?: boolean;
-        /** Tick damage ramps the longer the effect survives (Unraveling):
+        /** Tick damage ramps the longer the effect survives (POISON, spec 32 v3):
          *  `tickDamage = baseTick * (1 + turnsSurvived * rampFactor)`. Reapplication
          *  resets the ramp rather than stacking. */
         escalatesPerTurn?: boolean;
         /** Multiplier applied per turn survived when `escalatesPerTurn` is set. */
         rampFactor?: number;
+        /** BLEED (spec 32 v3) — front-loaded: the effect loses 1 intensity each
+         *  time it ticks (removed at 0). Big now, gone soon. */
+        decaysPerTick?: boolean;
     };
+    /**
+     * MARK (spec 32 v3, ratified A3) — the universal glue affliction: every DoT
+     * tick on the bearer deals +`tickAmplifyFlat` × intensity extra HP, and the
+     * effect counts as an affliction for RUPTURE / SOUL / REAP payoffs.
+     */
+    tickAmplifyFlat?: number;
+    /**
+     * BACKFIRE (spec 32 v3, Control theme) — engine-gated drip: the bearer takes
+     * `backfirePerRung` × intensity HP per rung its telegraphed action loses
+     * (STAGGER rungs, quagmire attachments, crumbling resolve).
+     */
+    backfirePerRung?: number;
     /** Outgoing-damage multiplier applied to damage the bearer DEALS (Septic's
      *  necrotic seep is the first user) — additive across stacks, -X% each. */
     outgoingDamageMulPct?: number;

@@ -27,7 +27,7 @@ import type { Effect, ActiveEffect } from '../Effects/types';
 import type { Character } from '../Character/types';
 import type { Enemy } from '../Enemy/types';
 import { getCardById } from '../Cards/cards.library';
-import { executeSkill, calculateSkillDamage } from '../Cards/skill.engine';
+import { executeSkill } from '../Cards/skill.engine';
 import type { Card, CardRider, CardSpecialMechanic, CombatResources } from '../Cards/types';
 import type { CombatState, Stance } from './types';
 import { applyDamage, heal, isDefeated } from './health';
@@ -37,14 +37,15 @@ import {
     getDistinctDebuffCount, getDistinctControlCount,
     getHealingReceivedMult, getOutgoingDamageMult, decayDotsOnHeal, consumeEffect,
     hasPayloadFlag, getStanceVulnMult, computeRoundsToKill,
-    RUPTURE_BURST_CAP, COMPOUND_COUNT_CAP, DISRUPT_DENY_AT, EXECUTE_DAMAGE_FRACTION,
-    AMPLIFY_BURST_CAP,
+    consumeAfflictions, consumeOneAffliction, getBackfirePerRung, consumeMarks,
+    RUPTURE_BURST_CAP, RUPTURE_PER_AFFLICTION_STACK, DISRUPT_DENY_AT,
+    THREAT_RUNGS, THREAT_RUNGS_BOSS,
 } from './effects';
 import {
     TURN_DICE_COUNT, rollTurnDice, dieHasStance,
     combatDieCanPower, availableDiceFor, spendDice, refreshOneDie, availableDieCount,
     hasRerollableDice, rerollSpentDice, rollPermanentBonusDice, MAX_PERMANENT_WILD_DICE,
-    RESERVE_MAX, ripenReserve,
+    RESERVE_MAX, ripenReserve, FLOATING_DICE_CAP, materializeFloatingDice,
 } from './combat.dice';
 import {
     COMBAT_HAND_SIZE, buildCombatDeck, drawCombatCards, shuffleCombatDeck,
@@ -67,8 +68,6 @@ import type {
 
 // ── Tunable constants (HP model) ─────────────────────────────────────────────
 
-/** HP a free (top) action chips off the enemy — a die-free, weak contribution. */
-export const TOP_ACTION_CHIP = 2;
 /** Safety cap on total phases processed — prevents a degenerate stalemate loop. */
 const MAX_PHASES = 60;
 
@@ -110,15 +109,14 @@ export const THREAT_DENY_AT = 8;
 export const THREAT_WEAKEN_FLOOR = 0.4;
 /** Conviction is capped so a long grind can't bank a Signature spam. */
 export const CONVICTION_CAP = 12;
-/**
- * Fraction of a POWER action's IMMEDIATE strike (basePower) HP damage that lands.
- * <1 because the engaging, efficient damage is STATUS (DoT erosion ticking the
- * enemy down) — a raw strike is the weak "basic" baseline the doctrine de-emphasises
- * (and the owner explicitly OK'd weaker basic cards). DoT erosion is untouched, so
- * status loadouts out-damage a strike-only line. The strike is then scaled by the
- * read (advantage/disadvantage) and a color-match bonus, so the read still matters.
- */
-export const DIRECT_DAMAGE_WEIGHT = 0.25;
+// Spec 32 v3 §1 — DIRECT_DAMAGE_WEIGHT is DEAD: the strike was purged from the
+// schema (`basePower` no longer exists), so there is no immediate-strike path
+// to weight. Every HP source is DoT ticks, status payoffs, engine-gated drips,
+// or reflect.
+
+/** Spec 32 v3 T8 — SWAY decays this much at every turn boundary (the tension
+ *  knob, ratified A2; `irresistible-grace` removes the decay). Tunable. */
+export const SWAY_DECAY_PER_TURN = 1;
 
 // ── Depth epic (combat-depth-epic) ───────────────────────────────────────────
 
@@ -303,6 +301,10 @@ export function initializeCombatEncounter(
     let uid = 0;
     const hand = draw.drawn.map(cardId => ({ uid: `c${++uid}`, cardId }));
 
+    // Spec 32 v3 §5 — the character's persistent FLOATING dice arrive in the
+    // opening tray (they were forged in earlier combats and never spent).
+    const floatingDice = materializeFloatingDice(clonedPlayer.floatingDice ?? []);
+
     return {
         phase: 'reveal',
         enemy: clonedEnemy,
@@ -320,6 +322,21 @@ export function initializeCombatEncounter(
         discard: draw.discard,
         hand,
         persistentZone: [],
+        enemyAttachments: [],
+        // Spec 32 v3 §10 — enemy persistent passives, authored on the bestiary
+        // record (optional field; absent = none).
+        enemyEnchantments: ((clonedEnemy as Enemy & { enchantments?: string[] }).enchantments ?? []).slice(),
+        playerAttachments: [],
+        floatingDice,
+        premises: 0,
+        peroration: null,
+        souls: 0,
+        sway: 0,
+        omenHits: 0,
+        pendingOmens: [],
+        spellsPlayedThisTurn: 0,
+        lastSpellCardId: null,
+        conjuredUids: [],
         threatPhases,
         threatMarks: threatPhases.map(() => 'pending'),
         currentPhaseIndex: 0,
@@ -394,7 +411,16 @@ export function startTurn(
     if (state.permanentWildDice || state.permanentDeadDice) {
         dice = [...dice, ...rollPermanentBonusDice(turn, state.permanentWildDice ?? 0, state.permanentDeadDice ?? 0)];
     }
-    const next: CombatEncounterState = { ...state, player, dice, draftedDieId: null, turn, lastRead: 'none', carriedDie };
+    // Spec 32 v3 §5 — FLOATING dice join every turn's tray. They are the same
+    // persistent objects each turn (stable ids), never reroll, and are only
+    // removed from the pool when SPENT.
+    if ((state.floatingDice ?? []).length > 0) {
+        dice = [...dice, ...(state.floatingDice ?? []).map(d => ({ ...d, state: 'available' as const }))];
+    }
+    const next: CombatEncounterState = {
+        ...state, player, dice, draftedDieId: null, turn, lastRead: 'none', carriedDie,
+        spellsPlayedThisTurn: 0, echoNextSpell: false,
+    };
     const events: CombatEvent[] = [
         { kind: 'turn-dice-rolled', turn, dice },
         // Mirror the legacy event so existing presenters keep working.
@@ -429,14 +455,19 @@ export function draftStanceDie(
 ): CombatTransition {
     if (state.phase !== 'phase-play') return { state, events: [] };
     if (state.draftedDieId !== null) return { state, events: [] };
-    const drafted = state.dice.find(d => d.id === dieId);
+    // Spec 32 v3 §5 — a FLOATING die cannot be drafted as the stance: it is an
+    // extra power source beyond the turn's 2-die draft (the "bigger turns"
+    // intent), spent directly on PAID plays like a Reserve die.
+    const drafted = state.dice.find(d => d.id === dieId && !d.floating);
     if (!drafted) return { state, events: [] };
 
     const events: CombatEvent[] = [];
     const enemyStance = currentPhaseStance(state);
     const read = clampPlayerRead(state.player, resolveRead(drafted.color, enemyStance));
 
-    const unpicked = state.dice.filter(d => d.id !== dieId);
+    // Floating dice are exempt from the draft economy entirely: they are not
+    // omens, cannot be banked/burned, feed no draft-time resonance.
+    const unpicked = state.dice.filter(d => d.id !== dieId && !d.floating);
     let reserve = (state.reserve ?? []).slice();
     let resonance = { heart: 0, body: 0, mind: 0, ...(state.resonance ?? {}) };
     let revealedStances = state.revealedStances;
@@ -484,6 +515,7 @@ export function draftStanceDie(
         .filter(d => d.id !== banked?.id)
         .map(d => {
             if (d.id === dieId) return { ...d, state: drafted.color === 'x' ? ('locked' as const) : ('available' as const) };
+            if (d.floating) return d;   // floating dice stay live in the tray
             if (d.color === 'x') return d;
             return { ...d, state: 'spent' as const };
         });
@@ -524,7 +556,7 @@ export function endTurn(state: CombatEncounterState): CombatTransition {
     const d = draftedDie(state);
     let reserve = state.reserve ?? [];
     let conviction = state.conviction;
-    if (d && d.state === 'available' && d.color !== 'x') {
+    if (d && !d.floating && d.state === 'available' && d.color !== 'x') {
         if (reserve.length < RESERVE_MAX) {
             reserve = [...reserve, { ...d, pips: 0 }];
             events.push({ kind: 'die-banked', dieId: d.id, color: d.color, pips: 0 });
@@ -677,72 +709,279 @@ function playRetreat(state: CombatEncounterState, uid: string, useBottom: boolea
     return { state: withLog(next, events), events };
 }
 
+// ── Spec 32 v3 — shared rider/state helpers ──────────────────────────────────
+
+/** True when the persistent zones carry a given card id (player enchantment or
+ *  enemy-attached disenchant). The zone IS the hook registry — each persistent
+ *  card's passive is implemented at its trigger site, gated by this check. */
+function zoneHas(state: CombatEncounterState, cardId: string): boolean {
+    return state.persistentZone.includes(cardId)
+        || (state.enemyAttachments ?? []).includes(cardId)
+        || (state.enemyEnchantments ?? []).includes(cardId);
+}
+
+/** SOUL gain (Harvest): bumps the bank; `bone-orchard` (E) drips 1 HP per Soul
+ *  gained — a soul-gated payoff (spec 32 v3 §1 source 3). */
+function gainSouls(
+    state: CombatEncounterState,
+    amount: number,
+    reason: 'expiry' | 'consumed' | 'granted',
+    events: CombatEvent[],
+): CombatEncounterState {
+    if (amount <= 0) return state;
+    const souls = (state.souls ?? 0) + amount;
+    let enemy = state.enemy;
+    let directDamage = state.directDamageDealt;
+    events.push({ kind: 'soul-gained', amount, total: souls, reason });
+    if (zoneHas(state, 'bone-orchard') && !isDefeated(enemy)) {
+        enemy = applyDamage(enemy, amount);
+        directDamage += amount;
+        events.push({ kind: 'damage-dealt', cardId: 'bone-orchard', target: 'enemy', amount });
+    }
+    return { ...state, souls, enemy, directDamageDealt: directDamage };
+}
+
+/** SWAY gain + the CAPITULATE check (spec 32 v3 §9): SWAY ≥ enemy current HP
+ *  → the enemy yields. Checked eagerly on every gain and at turn boundaries. */
+function gainSway(
+    state: CombatEncounterState,
+    amount: number,
+    events: CombatEvent[],
+): CombatEncounterState {
+    if (amount <= 0) return state;
+    const sway = (state.sway ?? 0) + amount;
+    events.push({ kind: 'sway-gained', amount, total: sway });
+    return { ...state, sway };
+}
+
+function swayCapitulates(state: CombatEncounterState): boolean {
+    return (state.sway ?? 0) > 0 && (state.sway ?? 0) >= state.enemy.health;
+}
+
+/** PREMISE gain + the PERORATION trigger (spec 32 v3 T2). When the declared
+ *  conclusion's threshold is met the rider fires FREE and the tally resets;
+ *  reaching `concedeAt` first wins the argument outright (CONCEDE). */
+function gainPremises(
+    state: CombatEncounterState,
+    amount: number,
+    events: CombatEvent[],
+    rng: () => number,
+): { state: CombatEncounterState; concede: boolean } {
+    if (amount <= 0) return { state, concede: false };
+    let next: CombatEncounterState = { ...state, premises: (state.premises ?? 0) + amount };
+    events.push({ kind: 'premise-gained', amount, total: next.premises ?? 0 });
+    const decl = next.peroration;
+    if (!decl) return { state: next, concede: false };
+    const total = next.premises ?? 0;
+    if (decl.concedeAt !== undefined && total >= decl.concedeAt) {
+        events.push({ kind: 'peroration-fired', cardId: decl.cardId, premisesSpent: total });
+        return { state: { ...next, premises: 0, peroration: null }, concede: true };
+    }
+    if (total >= decl.at) {
+        const declCard = lookupSkill(decl.cardId);
+        const mech = (declCard?.specialMechanics ?? []).find(m => m.kind === 'peroration') as
+            Extract<CardSpecialMechanic, { kind: 'peroration' }> | undefined;
+        events.push({ kind: 'peroration-fired', cardId: decl.cardId, premisesSpent: total });
+        next = { ...next, premises: 0 };
+        if (mech) next = applyRiderToState(next, decl.cardId, mech.rider, events, rng);
+    }
+    return { state: next, concede: false };
+}
+
+/** FORETELL (spec 32 v3 T6): glimpse the enemy's next telegraph + reorder the
+ *  top N of the deck — the engine deterministically floats the highest-rank
+ *  card to the top (the "you chose the best future" read, no picker needed). */
+function applyForetell(
+    state: CombatEncounterState,
+    count: number,
+    events: CombatEvent[],
+): CombatEncounterState {
+    let revealedStances = state.revealedStances;
+    const nIdx = Math.min(state.currentPhaseIndex + 1, state.threatPhases.length - 1);
+    if (!revealedStances.includes(nIdx)) {
+        revealedStances = [...revealedStances, nIdx];
+        events.push({ kind: 'stance-revealed', phaseIndex: nIdx, stance: state.threatPhases[nIdx].enemyStance });
+    }
+    let drawPile = state.drawPile;
+    if (drawPile.length > 1 && count > 1) {
+        const top = drawPile.slice(0, count);
+        const rest = drawPile.slice(count);
+        const rankOf = (id: string): number => lookupSkill(id)?.rank ?? 0;
+        const bestIdx = top.reduce((best, id, i) => (rankOf(id) > rankOf(top[best]) ? i : best), 0);
+        const reordered = [top[bestIdx], ...top.filter((_, i) => i !== bestIdx)];
+        drawPile = [...reordered, ...rest];
+    }
+    events.push({ kind: 'foretold', count, topCardId: drawPile[0] ?? null });
+    return { ...state, revealedStances, drawPile };
+}
+
 /**
- * Free top action: a weak, die-free contribution. Buff cards apply the buff to
- * self at intensity 1 (or a small heal); every offensive card chips a sliver of
- * enemy HP — the real status damage needs a powered (die) play, which is the
- * design tension.
+ * Applies a `CardRider` against the encounter state — the shared executor for
+ * FREE lines, threshold/dieBonus/fate riders, omen payoffs, and Peroration
+ * conclusions. Every field is a real engine unit. (Play-scoped fields —
+ * bonusIntensity / bonusDuration / refreshDie / intensityPerPip — are handled
+ * inside `playBottomAction`, which owns the powering die and the landed-status
+ * delta; they no-op here.)
+ */
+function applyRiderToState(
+    state: CombatEncounterState,
+    cardId: string,
+    r: CardRider,
+    events: CombatEvent[],
+    rng: () => number,
+): CombatEncounterState {
+    let next = state;
+    let player = next.player;
+    let enemy = next.enemy;
+    let directDamage = next.directDamageDealt;
+    let conviction = next.conviction;
+    let guard = next.guard ?? 0;
+
+    if (r.guard) guard += r.guard;
+    if (r.conviction) conviction = Math.min(CONVICTION_CAP, conviction + r.conviction);
+    if (r.healHp) {
+        const healAmt = Math.round(r.healHp * getHealingReceivedMult(player));
+        if (healAmt > 0) {
+            player = heal(player, healAmt);
+            events.push({ kind: 'damage-dealt', cardId, target: 'self', amount: -healAmt });
+        }
+    }
+    if (r.cleanse) {
+        let remaining = r.cleanse;
+        player = {
+            ...player,
+            effects: player.effects.filter(ae => {
+                if (remaining > 0 && lookupEffectDef(ae.effectId)?.type === 'debuff') {
+                    remaining -= 1;
+                    return false;
+                }
+                return true;
+            }),
+        };
+    }
+    if (r.tickOne) {
+        // TICK — the strongest enemy DoT deals its per-turn damage now.
+        const ticks = getActiveDotTotal(enemy.effects, next.round).perEffect;
+        const strongest = ticks.reduce<typeof ticks[number] | null>(
+            (best, t) => (best === null || t.amount > best.amount ? t : best), null);
+        if (strongest) {
+            enemy = applyDamage(enemy, strongest.amount);
+            directDamage += strongest.amount;
+            events.push({ kind: 'dot-tick', effectId: strongest.effectId, label: strongest.label, amount: strongest.amount, target: 'enemy' });
+        }
+    }
+    if (r.tickAllDots) {
+        const ticks = getActiveDotTotal(enemy.effects, next.round);
+        if (ticks.total > 0) {
+            enemy = applyDamage(enemy, ticks.total);
+            directDamage += ticks.total;
+            for (const t of ticks.perEffect) {
+                events.push({ kind: 'dot-tick', effectId: t.effectId, label: t.label, amount: t.amount, target: 'enemy' });
+            }
+        }
+    }
+    if (r.ruptureMarks) {
+        // The conclusion lands: consume all marks, burst per stack (payoff class).
+        const consumed = consumeMarks(enemy);
+        if (consumed.stacks > 0) {
+            enemy = consumed.combatant;
+            const burst = Math.min(RUPTURE_BURST_CAP, r.ruptureMarks * consumed.stacks);
+            enemy = applyDamage(enemy, burst);
+            directDamage += burst;
+            events.push({ kind: 'damage-dealt', cardId, target: 'enemy', amount: burst });
+        }
+    }
+    if (r.applyEffect) {
+        const def = lookupEffectDef(r.applyEffect.effectId);
+        if (def) {
+            const toSelf = r.applyEffect.to === 'self';
+            const bearer = toSelf ? player : enemy;
+            const applied = applyEffect(bearer.effects, def, next.round, {
+                intensityDelta: r.applyEffect.intensity ?? 1,
+                ...(r.applyEffect.duration !== undefined
+                    ? { durationMode: 'additive' as const, durationDelta: r.applyEffect.duration }
+                    : {}),
+                sourceId: cardId,
+            });
+            if (toSelf) player = { ...player, effects: applied.activeEffects };
+            else enemy = { ...enemy, effects: applied.activeEffects };
+            if (applied.result.activeEffect) {
+                events.push({
+                    kind: 'effect-landed', cardId, effectId: def.id, target: toSelf ? 'self' : 'enemy',
+                    effectKind: def.payload.damageOverTime ? 'dot' : 'control',
+                    intensity: applied.result.activeEffect.intensity, effect: def,
+                });
+            }
+        }
+    }
+    if (r.revealStance) {
+        const nIdx = Math.min(next.currentPhaseIndex + 1, next.threatPhases.length - 1);
+        if (!next.revealedStances.includes(nIdx)) {
+            next = { ...next, revealedStances: [...next.revealedStances, nIdx] };
+            events.push({ kind: 'stance-revealed', phaseIndex: nIdx, stance: next.threatPhases[nIdx].enemyStance });
+        }
+    }
+
+    next = { ...next, player, enemy, directDamageDealt: directDamage, conviction, guard };
+
+    if (r.foretell) next = applyForetell(next, r.foretell, events);
+    if (r.drawCards) {
+        const room = Math.max(0, COMBAT_HAND_SIZE - next.hand.length);
+        const n = Math.min(r.drawCards, room);
+        if (n > 0) {
+            const draw = drawCombatCards(next.drawPile, next.discard, next.deck, n, rng);
+            next = {
+                ...next,
+                drawPile: draw.drawPile,
+                discard: draw.discard,
+                hand: [...next.hand, ...draw.drawn.map((cid, i) => ({ uid: `cr${next.log.length + i}-${cardId}`, cardId: cid }))],
+            };
+            events.push({ kind: 'hand-drawn', cards: draw.drawn });
+        }
+    }
+    if (r.souls) next = gainSouls(next, r.souls, 'granted', events);
+    if (r.sway) next = gainSway(next, r.sway, events);
+    if (r.premises) {
+        const res = gainPremises(next, r.premises, events, rng);
+        next = res.state;
+        if (res.concede) next = { ...next, phase: 'complete', finalOutcome: 'concede' };
+    }
+    return next;
+}
+
+/**
+ * Spec 32 v3 §2.2 — the FREE (top) action executes the card's AUTHORED free
+ * rider: dieless, small, always available. There is no chip, no auto-derived
+ * weak effect — what is printed is what fires. Persistent cards (enchant /
+ * disenchant) have no FREE line and fizzle.
  */
 function playTopAction(
     state: CombatEncounterState,
     uid: string,
     card: CombatCard,
-    _rng: () => number,
+    rng: () => number,
 ): CombatTransition {
-    const events: CombatEvent[] = [];
-    let player = state.player;
-    let enemy = state.enemy;
-    let directDamage = state.directDamageDealt;
-    let guardGain = 0;
     const skill = card.skillId ? lookupSkill(card.skillId) : undefined;
-
-    events.push({ kind: 'card-played', cardId: card.id, useBottom: false, dieId: null, advantage: 'neutral' });
-
-    if (card.verbClass === 'buff-self' && skill) {
-        // Apply the weak self-buff at intensity 1 (or a small heal when none).
-        const selfEffect = (skill.combatEffects ?? []).find(e => e.appliedTo === 'self')
-            ?? (skill.synergy?.applyEffectOnFire?.appliedTo === 'self' ? skill.synergy.applyEffectOnFire : undefined);
-        if (selfEffect) {
-            const def = lookupEffectDef(selfEffect.effectId);
-            if (def) {
-                const res = applyEffect(player.effects, def, state.round, { intensityDelta: 1, sourceId: player.id });
-                player = { ...player, effects: res.activeEffects };
-                if (res.result.activeEffect) {
-                    events.push({
-                        kind: 'effect-landed', cardId: card.id, effectId: def.id, target: 'self',
-                        effectKind: 'none', intensity: res.result.activeEffect.intensity, effect: def,
-                    });
-                }
-            }
-        } else {
-            const amount = Math.max(1, Math.floor(skill.basePower * 0.15));
-            player = heal(player, amount);
-            events.push({ kind: 'damage-dealt', cardId: card.id, target: 'self', amount: -amount });
-        }
-    } else if (card.verbClass === 'defend' && skill) {
-        // Free brace — a small Guard (half the base), no die, no read scaling.
-        const gm = (skill.specialMechanics ?? []).find(m => m.kind === 'guard') as { amount: number } | undefined;
-        guardGain = Math.max(1, Math.round((gm?.amount ?? 2) * 0.5));
-    } else if (skill) {
-        // Offensive free action — chip a sliver of enemy HP (die-free, weak). A
-        // pure-damage card scales off its damage; a status card chips a flat bit.
-        // VULNERABLE scales even this chip (×1 when the foe carries no marker, so
-        // every pre-0.34.0 case is byte-identical).
-        const base = card.verbClass === 'direct-damage'
-            ? Math.max(1, Math.floor(calculateSkillDamage(player, skill) * 0.15))
-            : TOP_ACTION_CHIP;
-        const amount = Math.round(base * getDamageTakenMultiplier(enemy));
-        enemy = applyDamage(enemy, amount);
-        directDamage += amount;
-        events.push({ kind: 'damage-dealt', cardId: card.id, target: 'enemy', amount });
+    if (skill && skill.cardType !== 'spell') {
+        const events: CombatEvent[] = [{
+            kind: 'effect-fizzled', cardId: card.id, effectId: '',
+            message: 'a persistent card is PAID-only — the die is the commitment',
+        }];
+        return { state: withLog(state, events), events };
     }
-
-    let next: CombatEncounterState = {
-        ...state, player, enemy, directDamageDealt: directDamage,
-        guard: (state.guard ?? 0) + guardGain,
-    };
+    const events: CombatEvent[] = [
+        { kind: 'card-played', cardId: card.id, useBottom: false, dieId: null, advantage: 'neutral' },
+    ];
+    let next = state;
+    if (skill?.free) {
+        next = applyRiderToState(next, card.id, skill.free, events, rng);
+    }
     next = discardEntry(next, uid);
+    if (next.finalOutcome === 'concede') {
+        return endCombat({ ...withLog(next, events), phase: 'phase-play', finalOutcome: null }, 'concede', events);
+    }
     next = withLog(next, events);
+    if (swayCapitulates(next)) return endCombat(next, 'capitulate', events);
     return checkImmediateOutcome(next, events);
 }
 
@@ -764,12 +1003,13 @@ function playBottomAction(
 
     // 1. Resolve the POWERING die — Fate Engine P1 R8: the dieId the player
     //    dragged is HONORED. It may name the drafted die (default when absent),
-    //    a banked Reserve die (R2), or — for `fate` cards only — a locked X die
-    //    in the tray (R4). Anything else is an explicit fizzle.
+    //    a banked Reserve die (R2), a FLOATING die in the tray (spec 32 v3 §5),
+    //    or — for `fate` cards only — a locked X die in the tray (R4). Anything
+    //    else is an explicit fizzle.
     const drafted = draftedDie(state);
     const reserveIn = state.reserve ?? [];
     let powering: CombatManaDie | null = null;
-    let poweringSource: 'drafted' | 'reserve' | 'fate-x' = 'drafted';
+    let poweringSource: 'drafted' | 'reserve' | 'floating' | 'fate-x' = 'drafted';
     if (dieId === undefined || dieId === drafted?.id) {
         if (!drafted) {
             const events: CombatEvent[] = [{ kind: 'effect-fizzled', cardId: card.id, effectId: '', message: 'draft a stance die first' }];
@@ -782,10 +1022,14 @@ function playBottomAction(
         powering = drafted;
     } else {
         const banked = reserveIn.find(d => d.id === dieId);
+        const floating = state.dice.find(d => d.id === dieId && d.floating && d.state === 'available');
         const trayX = state.dice.find(d => d.id === dieId && d.color === 'x');
         if (banked) {
             powering = banked;
             poweringSource = 'reserve';
+        } else if (floating) {
+            powering = floating;
+            poweringSource = 'floating';
         } else if (trayX && skill.fate && trayX.state !== 'spent') {
             powering = trayX;
             poweringSource = 'fate-x';
@@ -797,12 +1041,12 @@ function playBottomAction(
 
     // 2. The read + color-match. The read belongs to the TURN's draft contest
     //    (state.lastRead); a WILD powering die re-reads by adopting the card's
-    //    stance (gold: always advantage); a fate-X play has no stance → none.
+    //    stance; a fate-X play has no stance → none.
     const enemyStance = currentPhaseStance(state);
     const read: CombatReadResult = poweringSource === 'fate-x'
         ? 'none'
         : powering.color === 'wild'
-            ? (card.rarity === 'gold' ? 'advantage' : clampPlayerRead(state.player, resolveRead(card.stance as CombatDieColor, enemyStance)))
+            ? clampPlayerRead(state.player, resolveRead(card.stance as CombatDieColor, enemyStance))
             : state.lastRead;
     const mult = READ_DAMAGE_MULT[read];
     const colorMatch = powering.color === 'wild' || powering.color === card.stance;
@@ -811,39 +1055,79 @@ function playBottomAction(
 
     const events: CombatEvent[] = [{ kind: 'card-played', cardId: card.id, useBottom: true, dieId: powering.id, advantage, colorMatch }];
 
-    // 3. Execute the skill (unchanged engine) against a shim.
+    // ── Spec 32 v3 §2.1 — ENCHANT / DISENCHANT routing. Persistent cards skip
+    //    the spell pipeline entirely: the die is spent, the card leaves the deck
+    //    cycle into its zone, and its passive lives at the engine's hook sites.
+    if (skill.cardType === 'enchantment' || skill.cardType === 'disenchant') {
+        const zone = skill.cardType === 'enchantment' ? state.persistentZone : (state.enemyAttachments ?? []);
+        if (zone.includes(skill.id)) {
+            const fizzle: CombatEvent[] = [{ kind: 'effect-fizzled', cardId: card.id, effectId: '', message: `${card.name} is already in play (unique)` }];
+            return { state: withLog(state, fizzle), events: fizzle };
+        }
+        let dice = state.dice;
+        let reserve = reserveIn;
+        let floatingDice = state.floatingDice ?? [];
+        if (poweringSource === 'reserve') {
+            reserve = reserve.filter(d => d.id !== powering!.id);
+        } else if (poweringSource === 'floating') {
+            dice = dice.filter(d => d.id !== powering!.id);
+            floatingDice = floatingDice.filter(d => d.id !== powering!.id);
+            events.push({ kind: 'floating-die-spent', dieId: powering.id, color: powering.color, poolSize: floatingDice.length });
+        } else {
+            dice = spendDice(dice, [powering.id]);
+        }
+        events.push({ kind: 'die-spent', dieId: powering.id, color: powering.color });
+        events.push(skill.cardType === 'enchantment'
+            ? { kind: 'enchant-played', cardId: card.id, name: card.name }
+            : { kind: 'disenchant-attached', cardId: card.id, name: card.name });
+        let next: CombatEncounterState = {
+            ...state, dice, reserve, floatingDice,
+            persistentZone: skill.cardType === 'enchantment'
+                ? [...state.persistentZone, skill.id] : state.persistentZone,
+            enemyAttachments: skill.cardType === 'disenchant'
+                ? [...(state.enemyAttachments ?? []), skill.id] : state.enemyAttachments,
+        };
+        // The card leaves the deck cycle: pulled from hand WITHOUT entering the
+        // discard (it will not reshuffle back).
+        next = { ...next, hand: next.hand.filter(h => h.uid !== uid), deck: next.deck.filter(id => id !== skill.id) };
+        next = withLog(next, events);
+        return checkImmediateOutcome(next, events);
+    }
+
+    // 3. Execute the skill (unchanged effect machinery) against a shim.
+    //    ECHO (spec 32 v3 T10): the PAID payload fires twice when the card
+    //    carries ECHO, an `echo_next_spell` charge is pending, or the
+    //    `resonant-chamber` enchantment blesses the first spell of the turn.
+    const mechsAll = skill.specialMechanics ?? [];
+    const echoCharge = state.echoNextSpell === true;
+    const chamberEcho = zoneHas(state, 'resonant-chamber') && (state.spellsPlayedThisTurn ?? 0) === 0;
+    const echoed = mechsAll.some(m => m.kind === 'echo') || echoCharge || chamberEcho;
+    const echoPasses = echoed ? 2 : 1;
+
     const before = intensityMap(state.enemy.effects);
-    const shim: CombatState = skillShim(state);
-    const res = executeSkill(shim, skill.id, lookupSkill, 'player');
+    let shimState: CombatState = skillShim(state);
+    let res = executeSkill(shimState, skill.id, lookupSkill, 'player');
+    let allSkillEvents = [...res.events];
+    if (echoed) {
+        // Second pass re-applies the card's status payloads (stacking rules
+        // apply). Runs against the folded state so intensities accumulate.
+        shimState = {
+            ...shimState,
+            player: res.state.player, enemy: res.state.enemy,
+            combatResources: res.state.combatResources,
+        };
+        res = executeSkill(shimState, skill.id, lookupSkill, 'player');
+        allSkillEvents = [...allSkillEvents, ...res.events];
+        events.push({ kind: 'echoed', cardId: card.id });
+    }
 
     let player = res.state.player as Character;
-    // VULNERABLE — the foe's outgoing-damage multiplier, read from state.enemy
-    // BEFORE this card's own debuff lands (the set-up-then-swing beat). Exactly 1
-    // when the foe carries no marker, so every pre-0.34.0 strike is byte-identical.
-    // Composed with the STANCE-KEYED vulnerability (P1 #17): a foe marked
-    // `damageTakenMultForStance` takes extra only from plays powered by that
-    // color die — a debuff that tells the player what to DRAFT.
+    // VULNERABLE — the foe's incoming-damage multiplier, read from state.enemy
+    // BEFORE this card's own debuff lands. Scales payoff bursts (there is no
+    // strike any more). Composed with the STANCE-KEYED vulnerability (P1 #17).
     const vulnMult = getDamageTakenMultiplier(state.enemy)
         * getStanceVulnMult(state.enemy, powering.color);
-    // The skill's IMMEDIATE strike (basePower HP damage) — the WEAK basic baseline,
-    // scaled by DIRECT_DAMAGE_WEIGHT, the read (advantage/disadvantage), VULNERABLE,
-    // the player's own outgoing-damage statuses (SEPTIC / REGRESS FATIGUE — real
-    // now, P0-truth), and a color-match bonus. The engaging damage is STATUS: the
-    // DoT this skill also applies (below) ticks the enemy down each phase.
-    // SYNERGY damage is EXEMPT from DIRECT_DAMAGE_WEIGHT (P0-truth): the combo
-    // payoff a card earns by meeting its predicate is a reward, not a basic
-    // strike — quartering it made every synergy feel like a rounding error.
-    const rawStrike = Math.max(0, state.enemy.health - (res.state.enemy as Enemy).health);
-    const synergyDamage = Math.min(rawStrike, res.events.reduce(
-        (sum, ev) => sum + (ev.kind === 'synergy-fired' ? Math.max(0, ev.bonusDamage) : 0), 0));
-    const baseStrike = rawStrike - synergyDamage;
-    const outgoingMult = getOutgoingDamageMult(state.player);
-    const scaledStrike = rawStrike > 0
-        ? Math.max(1,
-            Math.round((baseStrike * DIRECT_DAMAGE_WEIGHT + synergyDamage) * mult * vulnMult * outgoingMult)
-            + (colorMatch ? COLOR_MATCH_DAMAGE_BONUS : 0))
-        : 0;
-    let enemy = { ...(res.state.enemy as Enemy), health: Math.max(0, state.enemy.health - scaledStrike) };
+    let enemy = res.state.enemy as Enemy;
     // THE READ BITES STATUS in real units (P0-truth): a won read lands THIS card's
     // statuses at +1 intensity; a lost read shortens them by 1 turn (floor 1).
     // Deterministic — the card face previews the exact triplet; a neutral/none read
@@ -865,33 +1149,11 @@ function playBottomAction(
             }),
         };
     }
-    // NOVIKOV CONSISTENCY (P0-truth wiring of `nextDotTierUpgrade`): if the foe
-    // carried the marker BEFORE this card, the first fresh DoT this card lands
-    // arrives +1 intensity, and the marker is consumed (`consumedOnUse`).
-    const novikovId = hasPayloadFlag(state.enemy, 'nextDotTierUpgrade');
-    if (novikovId) {
-        const upgraded = enemy.effects.find(a =>
-            (before[a.effectId] ?? 0) < a.intensity
-            && a.effectId !== novikovId
-            && lookupEffectDef(a.effectId)?.payload.damageOverTime);
-        if (upgraded) {
-            enemy = consumeEffect({
-                ...enemy,
-                effects: enemy.effects.map(a => a === upgraded
-                    ? { ...a, intensity: Math.min(MAX_EFFECT_INTENSITY, a.intensity + 1) }
-                    : a),
-            }, novikovId);
-        }
-    }
     const combatResources = res.state.combatResources;
     let attribution = state.attribution;
-    let directDamage = state.directDamageDealt + scaledStrike;
+    let directDamage = state.directDamageDealt;
     let landedOnEnemy = false;
     let mercyOpened = res.activateMercyChoice === true;
-    if (scaledStrike > 0) {
-        attribution = recordAttribution(attribution, card.id, card.name, null, scaledStrike);
-        events.push({ kind: 'damage-dealt', cardId: card.id, target: 'enemy', amount: scaledStrike });
-    }
 
     // ── Fate Engine P1 — resonance, thresholds, die riders, pips (spec 31 §1) ──
     // Spending the powering die feeds the RESONANCE tally (R1): its own color,
@@ -933,11 +1195,26 @@ function playBottomAction(
         if (recoil > 0) player = applyDamage(player, recoil);
         events.push({ kind: 'fate-powered', cardId: card.id, dieId: powering.id, recoil, riderText: riderText(skill.fate.rider) });
     }
+    // FALLEN (spec 32 v3 T4) — the theme-state condition line: fires free while
+    // the player carries >= 2 distinct self-debuffs at play time.
+    const wasFallen = getDistinctDebuffCount(state.player) >= 2;
+    if (skill.fallen && wasFallen) {
+        firedRiders.push(skill.fallen.rider);
+        events.push({ kind: 'die-bonus-fired', cardId: card.id, riderText: `FALLEN: ${riderText(skill.fallen.rider)}` });
+    }
     // Landed-status adjustments in one pass, all REAL units: rider intensity /
     // duration bonuses, RIPENED pips (+1 intensity per pip on a non-defend play,
-    // R2), and the color-match +1 duration on status cards (R7).
+    // R2), the color-match +1 duration on status cards (R7), and the persistent
+    // zone's blessings — `venom-and-vein` (+1 on bleed/poison) and
+    // `crown-of-thorns` (+1 on everything while FALLEN). Spec 32 v3 §7.
     const isDefendPlay = card.verbClass === 'defend';
+    const landsDot = (skill.combatEffects ?? []).some(ce =>
+        ce.appliedTo === 'opponent' && lookupEffectDef(ce.effectId)?.payload.damageOverTime);
+    const zoneIntensity =
+        (zoneHas(state, 'venom-and-vein') && landsDot ? 1 : 0)
+        + (zoneHas(state, 'crown-of-thorns') && wasFallen ? 1 : 0);
     const bonusIntensity = firedRiders.reduce((n, r) => n + (r.bonusIntensity ?? 0), 0)
+        + zoneIntensity
         + (isDefendPlay ? 0 : poweringPips * PIP_INTENSITY_BONUS);
     const bonusDuration = firedRiders.reduce((n, r) => n + (r.bonusDuration ?? 0), 0)
         + (colorMatch && card.effectKind !== 'none' ? COLOR_MATCH_STATUS_DURATION_BONUS : 0);
@@ -960,173 +1237,380 @@ function playBottomAction(
         }
     }
 
-    // ── 0.34.0 card mechanics — RUPTURE / COMPOUND / EXECUTE / SIPHON ─────────
-    // HP behavior owned here (the skill engine no-ops these kinds). RUPTURE/COMPOUND
-    // read state.enemy (pre-card) so the foe's own fresh debuff never self-counts.
+    // ── Spec 32 v3 — the themed-deck mechanic chain ───────────────────────────
+    // HP behavior owned here (the skill engine no-ops every mechanic kind).
+    // Payoff verbs read state.enemy (pre-card) so a card's own fresh status
+    // never self-counts. Every HP source below is affliction- or engine-gated.
     const mechs = skill.specialMechanics ?? [];
+    const echoFactor = echoed ? 2 : 1;
     let mechanicDamage = 0;
-    const ruptureMech = mechs.find(m => m.kind === 'rupture') as { kind: 'rupture'; bonusPct?: number } | undefined;
-    if (ruptureMech) {
-        const pending = getPendingDotTotal(state.enemy, state.round).total;
-        const consumedRes = consumeDotEffects(enemy);
-        enemy = consumedRes.combatant;
-        const burst = Math.min(
-            RUPTURE_BURST_CAP,
-            Math.round(pending * mult * (1 + (ruptureMech.bonusPct ?? 0)) * vulnMult),
-        );
-        if (burst > 0) {
-            enemy = applyDamage(enemy, burst);
-            mechanicDamage += burst;
-            directDamage += burst;
-            attribution = recordAttribution(attribution, card.id, card.name, null, burst);
-        }
-        events.push({ kind: 'rupture-detonated', amount: burst, consumed: consumedRes.consumed });
-    }
-    const amplifyMech = mechs.find(m => m.kind === 'amplify') as { kind: 'amplify'; multiplier: number } | undefined;
-    if (amplifyMech) {
-        const pending = getPendingDotTotal(state.enemy, state.round).total;
-        const amplifyBurst = Math.min(
-            AMPLIFY_BURST_CAP,
-            Math.round(pending * amplifyMech.multiplier * mult * vulnMult),
-        );
-        if (amplifyBurst > 0) {
-            enemy = applyDamage(enemy, amplifyBurst);
-            mechanicDamage += amplifyBurst;
-            directDamage += amplifyBurst;
-            attribution = recordAttribution(attribution, card.id, card.name, null, amplifyBurst);
-        }
-        events.push({ kind: 'amplify-detonated', amount: amplifyBurst, pendingDot: pending });
-    }
-    const compoundMech = mechs.find(m => m.kind === 'compound') as { kind: 'compound'; perDebuff: number } | undefined;
-    if (compoundMech) {
-        const count = Math.min(getDistinctDebuffCount(state.enemy), COMPOUND_COUNT_CAP);
-        const dmg = Math.round(compoundMech.perDebuff * count * mult * vulnMult);
-        if (dmg > 0) {
-            enemy = applyDamage(enemy, dmg);
-            mechanicDamage += dmg;
-            directDamage += dmg;
-            attribution = recordAttribution(attribution, card.id, card.name, null, dmg);
-        }
-        events.push({ kind: 'compound-hit', amount: dmg, debuffs: count });
-    }
-    const executeMech = mechs.find(m => m.kind === 'execute') as
-        { kind: 'execute'; hpPct: number; dotStacks: number; recoilPct?: number } | undefined;
-    if (executeMech) {
-        const ready = state.enemy.health <= state.enemy.maxHealth * executeMech.hpPct
-            || getPendingDotTotal(state.enemy, state.round).perEffect.length >= executeMech.dotStacks;
-        if (ready) {
-            const large = Math.round(state.enemy.maxHealth * EXECUTE_DAMAGE_FRACTION);
-            const dmg = Math.min(enemy.health, Math.round(large * vulnMult));
-            if (dmg > 0) {
-                enemy = applyDamage(enemy, dmg);
-                mechanicDamage += dmg;
-                directDamage += dmg;
-                attribution = recordAttribution(attribution, card.id, card.name, null, dmg);
-            }
-            const recoil = Math.round(player.maxHealth * (executeMech.recoilPct ?? 0));
-            if (recoil > 0) player = applyDamage(player, recoil);
-            events.push({ kind: 'execute-fired', amount: dmg, recoil });
-        }
-    }
-    // SIPHON — heal for a fraction of all HP this card eroded (strike + bursts).
-    // The player's healing-received statuses (DESPAIR / ISOLATED) gate it (P0-truth).
-    const siphonMech = mechs.find(m => m.kind === 'siphon') as { kind: 'siphon'; pct: number } | undefined;
-    if (siphonMech) {
-        const healAmt = Math.round((scaledStrike + mechanicDamage) * siphonMech.pct * getHealingReceivedMult(state.player));
-        if (healAmt > 0) {
-            player = heal(player, healAmt);
-            events.push({ kind: 'damage-dealt', cardId: card.id, target: 'self', amount: -healAmt });
-        }
-    }
-    // GRANT_PERMANENT_WILD_DIE (Master Spec §4) — grows the wild-die pool for the
-    // REST of the encounter, clamped to MAX_PERMANENT_WILD_DICE; every granted
-    // Wild die pairs with one permanent dead (locked X) die (§4.3 balance guard).
-    // No-op (and no event) once the pool is already at cap.
-    let permanentWildDice = state.permanentWildDice ?? 0;
-    let permanentDeadDice = state.permanentDeadDice ?? 0;
-    const wildGrantMech = mechs.find(m => m.kind === 'grant_permanent_wild_die') as
-        { kind: 'grant_permanent_wild_die'; wildCount: number; deadCount: number } | undefined;
-    if (wildGrantMech) {
-        const addWild = Math.max(0, Math.min(wildGrantMech.wildCount, MAX_PERMANENT_WILD_DICE - permanentWildDice));
-        if (addWild > 0) {
-            permanentWildDice += addWild;
-            permanentDeadDice += wildGrantMech.deadCount;
-            events.push({
-                kind: 'permanent-wild-die-granted',
-                wildAdded: addWild,
-                deadAdded: wildGrantMech.deadCount,
-                totalWild: permanentWildDice,
-            });
-        }
-    }
-    // REACT (Fate Engine P1, spec 31 §3.3) — if the foe carries BOTH reagents at
-    // minIntensity+, CONSUME them and detonate on the mechanic-damage path
-    // (never strike-weighted), optionally leaving a product status. A fired
-    // REACT always refreshes the powering die (the crescendo keeps the turn alive).
-    let reactFired = false;
-    const reactMech = mechs.find(m => m.kind === 'react') as
-        Extract<CardSpecialMechanic, { kind: 'react' }> | undefined;
-    if (reactMech) {
-        const a = state.enemy.effects.find(e => e.effectId === reactMech.a && e.intensity >= reactMech.minIntensity);
-        const b = state.enemy.effects.find(e => e.effectId === reactMech.b && e.intensity >= reactMech.minIntensity);
-        if (a && b) {
-            reactFired = true;
-            enemy = { ...enemy, effects: enemy.effects.filter(e => e.effectId !== reactMech.a && e.effectId !== reactMech.b) };
-            const burst = Math.round(reactMech.burstPerIntensity * (a.intensity + b.intensity) * mult * vulnMult);
-            if (burst > 0) {
-                enemy = applyDamage(enemy, burst);
-                mechanicDamage += burst;
-                directDamage += burst;
-                attribution = recordAttribution(attribution, card.id, card.name, null, burst);
-            }
-            if (reactMech.product) {
-                const def = lookupEffectDef(reactMech.product.effectId);
-                if (def) {
-                    const applied = applyEffect(enemy.effects, def, state.round, {
-                        intensityDelta: reactMech.product.intensity,
-                        durationMode: 'additive',
-                        durationDelta: reactMech.product.duration,
-                        sourceId: card.id,
-                    });
-                    enemy = { ...enemy, effects: applied.activeEffects };
-                }
-            }
-            events.push({ kind: 'react-detonated', cardId: card.id, amount: burst, consumed: [reactMech.a, reactMech.b] });
-        }
-    }
-    // Die-manipulation verbs that don't touch the powering die (P1 §4.1).
     let reserve = reserveIn;
-    if (mechs.some(m => m.kind === 'reroll_spent') && hasRerollableDice(state.dice)) {
-        const rerolled = rerollSpentDice(state.dice, _rng);
-        state = { ...state, dice: rerolled.dice };
-        events.push({ kind: 'dice-rolled', dice: rerolled.dice });
-    }
-    const forgeMech = mechs.find(m => m.kind === 'create_temporary_die') as
-        Extract<CardSpecialMechanic, { kind: 'create_temporary_die' }> | undefined;
-    if (forgeMech) {
-        const forged: CombatManaDie = {
-            id: `forge-${state.turn}-${state.log.length}`, color: forgeMech.color,
-            state: 'available', temporary: true, pips: 0,
-        };
-        if (reserve.length < RESERVE_MAX) {
-            reserve = [...reserve, forged];
-            events.push({ kind: 'die-forged', dieId: forged.id, color: forged.color, destination: 'reserve' });
-        } else {
-            conviction = Math.min(CONVICTION_CAP, conviction + 1);
-            events.push({ kind: 'die-forged', dieId: forged.id, color: forged.color, destination: 'conviction' });
+    let floatingDice = (state.floatingDice ?? []).slice();
+    let souls = state.souls ?? 0;
+    let staggerRungs = state.staggerRungs ?? 0;
+    let stanceLockedNext = state.stanceLockedNext ?? false;
+    let pendingOmens = (state.pendingOmens ?? []).slice();
+    let echoNextSpell = false; // a pending charge is consumed by THIS play
+    let premisesGained = 0;
+    let swayGained = 0;
+    let foretellCount = 0;
+    let perorationDecl = state.peroration ?? null;
+    let spendPremisesMech: Extract<CardSpecialMechanic, { kind: 'spend_premises' }> | null = null;
+    let hand = state.hand;
+    let drawPile = state.drawPile;
+    let discard = state.discard;
+    let conjuredUids = (state.conjuredUids ?? []).slice();
+    let pipsSpentThisPlay = 0;
+    let pipGuardExtra = 0;
+    const reprisedFreeRiders: CardRider[] = [];
+
+    // Local SOUL gain (bone-orchard drips 1 HP per Soul gained — soul-gated).
+    const gainSoulsLocal = (n: number, reason: 'expiry' | 'consumed' | 'granted'): void => {
+        if (n <= 0) return;
+        souls += n;
+        events.push({ kind: 'soul-gained', amount: n, total: souls, reason });
+        if (zoneHas(state, 'bone-orchard')) {
+            enemy = applyDamage(enemy, n);
+            mechanicDamage += n;
+            directDamage += n;
+            events.push({ kind: 'damage-dealt', cardId: 'bone-orchard', target: 'enemy', amount: n });
         }
-    }
-    const pipGrant = mechs.find(m => m.kind === 'grant_pip') as
-        Extract<CardSpecialMechanic, { kind: 'grant_pip' }> | undefined;
-    if (pipGrant && reserve.length > 0) {
-        for (let i = 0; i < pipGrant.count; i++) {
-            const r = ripenReserve(reserve);
-            reserve = r.reserve;
-            for (const id of r.ripenedIds) {
-                events.push({ kind: 'die-ripened', dieId: id, pips: reserve.find(d => d.id === id)?.pips ?? 0 });
+    };
+
+    // `stuck-in-their-head` (D): every ECHO / REPRISE drips 2 (engine-gated).
+    const stuckDrip = (): void => {
+        if (!zoneHas(state, 'stuck-in-their-head')) return;
+        enemy = applyDamage(enemy, 2);
+        mechanicDamage += 2;
+        directDamage += 2;
+        events.push({ kind: 'damage-dealt', cardId: 'stuck-in-their-head', target: 'enemy', amount: 2 });
+    };
+    if (echoed) stuckDrip();
+
+    for (const mech of mechs) {
+        switch (mech.kind) {
+            case 'rider': {
+                // The generic unconditional PAID verb carrier (draw/heal/…).
+                firedRiders.push(mech.rider);
+                break;
             }
+            case 'recoil': {
+                // AKRASIA — the printed blood price (unpreventable).
+                player = applyDamage(player, mech.hp);
+                events.push({ kind: 'recoil-paid', cardId: card.id, amount: mech.hp });
+                break;
+            }
+            case 'stagger': {
+                staggerRungs += mech.rungs;
+                events.push({ kind: 'staggered', rungs: mech.rungs, total: staggerRungs });
+                break;
+            }
+            case 'lock_stance': {
+                stanceLockedNext = true;
+                const nIdx = Math.min(state.currentPhaseIndex + 1, state.threatPhases.length - 1);
+                events.push({ kind: 'stance-locked', phaseIndex: nIdx, stance: currentPhaseStance(state) });
+                break;
+            }
+            case 'foretell': foretellCount += mech.count; break;
+            case 'omen': {
+                const stance: 'heart' | 'body' | 'mind' = dieHasStance(powering.color)
+                    ? (powering.color as 'heart' | 'body' | 'mind')
+                    : dieHasStance(card.stance) ? (card.stance as 'heart' | 'body' | 'mind') : 'heart';
+                const nIdx = Math.min(state.currentPhaseIndex + 1, state.threatPhases.length - 1);
+                pendingOmens.push({ cardId: card.id, stance, phaseIndex: nIdx });
+                events.push({ kind: 'omen-declared', cardId: card.id, stance, phaseIndex: nIdx });
+                break;
+            }
+            case 'premise': premisesGained += mech.count * echoFactor; break;
+            case 'peroration': {
+                perorationDecl = { cardId: card.id, at: mech.at, concedeAt: mech.concedeAt };
+                events.push({ kind: 'peroration-declared', cardId: card.id, at: mech.at });
+                break;
+            }
+            case 'spend_premises': spendPremisesMech = mech; break;
+            case 'spend_all_pips': {
+                // Zero every pip (powering die + Reserve); each grants Guard and
+                // feeds a paired RUPTURE via `fuelPerPip`.
+                let pips = poweringPips;
+                reserve = reserve.map(d => {
+                    pips += d.pips ?? 0;
+                    return (d.pips ?? 0) > 0 ? { ...d, pips: 0 } : d;
+                });
+                if (pips > 0 && mech.guardPerPip) {
+                    pipGuardExtra += pips * mech.guardPerPip;
+                    events.push({ kind: 'pips-cashed', cardId: card.id, pips, bonus: 'guard', amount: pips * mech.guardPerPip });
+                }
+                pipsSpentThisPlay += pips;
+                break;
+            }
+            case 'rupture': {
+                // RUPTURE v3 — consume ALL afflictions: 1.5x... no — burst =
+                // (pending DoT fuel + flat per non-DoT stack + pip/omen fuel),
+                // read + vulnerable scaled, capped. Consumed instances feed SOULS.
+                const pending = getPendingDotTotal(state.enemy, state.round).total;
+                const consumedRes = consumeAfflictions(enemy);
+                enemy = consumedRes.combatant;
+                const fuel = pending
+                    + RUPTURE_PER_AFFLICTION_STACK * consumedRes.nonDotStacks
+                    + (mech.fuelPerPip ?? 0) * pipsSpentThisPlay
+                    + (mech.fuelPerOmenHit ?? 0) * (state.omenHits ?? 0);
+                const burst = Math.min(
+                    RUPTURE_BURST_CAP,
+                    Math.round(fuel * mult * (1 + (mech.bonusPct ?? 0)) * vulnMult),
+                );
+                if (burst > 0) {
+                    enemy = applyDamage(enemy, burst);
+                    mechanicDamage += burst;
+                    directDamage += burst;
+                    attribution = recordAttribution(attribution, card.id, card.name, null, burst);
+                }
+                events.push({ kind: 'rupture-detonated', amount: burst, consumed: consumedRes.consumed });
+                gainSoulsLocal(consumedRes.consumed.length, 'consumed');
+                break;
+            }
+            case 'consume_affliction': {
+                // WINNOWING — the scythe: one affliction's remaining fuel ticks NOW.
+                const res2 = consumeOneAffliction(enemy, state.round);
+                if (res2.consumed) {
+                    enemy = res2.combatant;
+                    if (res2.fuel > 0) {
+                        const dmg = Math.round(res2.fuel * vulnMult);
+                        enemy = applyDamage(enemy, dmg);
+                        mechanicDamage += dmg;
+                        directDamage += dmg;
+                        attribution = recordAttribution(attribution, card.id, card.name, null, dmg);
+                    }
+                    events.push({ kind: 'affliction-consumed', effectId: res2.consumed, fuel: res2.fuel });
+                    gainSoulsLocal(mech.souls, 'consumed');
+                } else {
+                    events.push({ kind: 'effect-fizzled', cardId: card.id, effectId: '', message: 'no affliction to consume' });
+                }
+                break;
+            }
+            case 'soul_gain': gainSoulsLocal(mech.count * echoFactor, 'granted'); break;
+            case 'reap': {
+                if (souls < mech.cost) {
+                    events.push({ kind: 'effect-fizzled', cardId: card.id, effectId: '', message: `need ${mech.cost} Souls (have ${souls})` });
+                    break;
+                }
+                souls -= mech.cost;
+                if (mech.rider) firedRiders.push(mech.rider);
+                if (mech.kindle) {
+                    const forged: CombatManaDie = {
+                        id: `forge-${state.turn}-${state.log.length + events.length}`, color: mech.kindle,
+                        state: 'available', temporary: true,
+                        pips: zoneHas(state, 'anvil-of-form') ? 1 : 0,
+                    };
+                    if (reserve.length < RESERVE_MAX) {
+                        reserve = [...reserve, forged];
+                        events.push({ kind: 'die-forged', dieId: forged.id, color: forged.color, destination: 'reserve' });
+                    } else {
+                        conviction = Math.min(CONVICTION_CAP, conviction + 1);
+                        events.push({ kind: 'die-forged', dieId: forged.id, color: forged.color, destination: 'conviction' });
+                    }
+                }
+                events.push({ kind: 'reaped', cardId: card.id, soulsSpent: mech.cost, amount: 0 });
+                break;
+            }
+            case 'reap_all': {
+                // THE REAPING — spend every Soul: a payoff burst per Soul.
+                const spent = souls;
+                const burst = Math.min(RUPTURE_BURST_CAP, Math.round(mech.burstPerSoul * spent * mult * vulnMult));
+                souls = 0;
+                if (burst > 0) {
+                    enemy = applyDamage(enemy, burst);
+                    mechanicDamage += burst;
+                    directDamage += burst;
+                    attribution = recordAttribution(attribution, card.id, card.name, null, burst);
+                }
+                events.push({ kind: 'reaped', cardId: card.id, soulsSpent: spent, amount: burst });
+                break;
+            }
+            case 'sway': swayGained += mech.amount * echoFactor; break;
+            case 'extend_dots': {
+                const affected: string[] = [];
+                enemy = {
+                    ...enemy,
+                    effects: enemy.effects.map(ae => {
+                        const def = lookupEffectDef(ae.effectId);
+                        if (def?.type === 'debuff' && def.payload.damageOverTime && ae.remainingDuration !== -1) {
+                            affected.push(ae.effectId);
+                            return { ...ae, remainingDuration: ae.remainingDuration + mech.turns };
+                        }
+                        return ae;
+                    }),
+                };
+                events.push({ kind: 'dots-extended', turns: mech.turns, affected });
+                break;
+            }
+            case 'convert_dots': {
+                // CURRY'S CONVERSION — the wound becomes the argument: every enemy
+                // bleed becomes poison and vice versa, +N intensity each.
+                let converted = false;
+                enemy = {
+                    ...enemy,
+                    effects: enemy.effects.map(ae => {
+                        const to = ae.effectId === 'debuff_bleed' ? 'debuff_poison'
+                            : ae.effectId === 'debuff_poison' ? 'debuff_bleed' : null;
+                        if (!to) return ae;
+                        converted = true;
+                        events.push({ kind: 'dots-converted', from: ae.effectId, to, intensity: ae.intensity + mech.bonusIntensity });
+                        return {
+                            ...ae, effectId: to,
+                            intensity: Math.min(MAX_EFFECT_INTENSITY, ae.intensity + mech.bonusIntensity),
+                            appliedAt: state.round,
+                        };
+                    }),
+                };
+                if (!converted) events.push({ kind: 'effect-fizzled', cardId: card.id, effectId: '', message: 'no bleed or poison to convert' });
+                break;
+            }
+            case 'boost_all_dots': {
+                const affected: string[] = [];
+                enemy = {
+                    ...enemy,
+                    effects: enemy.effects.map(ae => {
+                        const def = lookupEffectDef(ae.effectId);
+                        if (def?.type === 'debuff' && def.payload.damageOverTime) {
+                            affected.push(ae.effectId);
+                            return { ...ae, intensity: Math.min(MAX_EFFECT_INTENSITY, ae.intensity + mech.intensity) };
+                        }
+                        return ae;
+                    }),
+                };
+                events.push({ kind: 'dots-boosted', intensity: mech.intensity, affected });
+                break;
+            }
+            case 'echo_next_spell': echoNextSpell = true; break;
+            case 'reprise': {
+                // Return the highest-rank discard(s) to hand; optionally fire the
+                // reprised card's FREE line immediately.
+                const returned: string[] = [];
+                for (let i = 0; i < mech.count * echoFactor && discard.length > 0; i++) {
+                    const rankOf = (id: string): number => lookupSkill(id)?.rank ?? 0;
+                    const bestIdx = discard.reduce((best, id, j) => (rankOf(id) > rankOf(discard[best]) ? j : best), 0);
+                    const cid = discard[bestIdx];
+                    discard = discard.filter((_, j) => j !== bestIdx);
+                    hand = [...hand, { uid: `rp${state.log.length + events.length}-${i}`, cardId: cid }];
+                    returned.push(cid);
+                    const freeRider = lookupSkill(cid)?.free;
+                    if (mech.fireFree && freeRider) reprisedFreeRiders.push(freeRider);
+                }
+                if (returned.length > 0) {
+                    events.push({ kind: 'reprised', cardId: card.id, returned });
+                    stuckDrip();
+                } else {
+                    events.push({ kind: 'effect-fizzled', cardId: card.id, effectId: '', message: 'the discard pile is empty' });
+                }
+                break;
+            }
+            case 'replay_last': {
+                // OUROBOROS — the argument repeats: the last spell's statuses land
+                // again, `times` times. Never chains into another replay.
+                const lastId = state.lastSpellCardId;
+                const lastSkill = lastId && lastId !== skill.id ? lookupSkill(lastId) : undefined;
+                const replayable = lastSkill
+                    && lastSkill.cardType === 'spell'
+                    && !(lastSkill.specialMechanics ?? []).some(m2 => m2.kind === 'replay_last');
+                if (replayable && lastSkill) {
+                    for (let i = 0; i < mech.times; i++) {
+                        const shim2: CombatState = { ...skillShim(state), player, enemy, combatResources: res.state.combatResources };
+                        try {
+                            const replay = executeSkill(shim2, lastSkill.id, lookupSkill, 'player');
+                            player = replay.state.player as Character;
+                            enemy = replay.state.enemy as Enemy;
+                            allSkillEvents = [...allSkillEvents, ...replay.events];
+                        } catch { break; }
+                    }
+                    events.push({ kind: 'echoed', cardId: lastSkill.id });
+                    stuckDrip();
+                } else {
+                    events.push({ kind: 'effect-fizzled', cardId: card.id, effectId: '', message: 'no prior spell to replay' });
+                }
+                break;
+            }
+            case 'conjure_card': {
+                const cj = { uid: `cj${state.log.length + events.length}`, cardId: mech.cardId };
+                hand = [...hand, cj];
+                conjuredUids = [...conjuredUids, cj.uid];
+                events.push({ kind: 'hand-drawn', cards: [mech.cardId] });
+                break;
+            }
+            case 'forge_floating_die': {
+                // FORGE (spec 32 v3 §5) — the floating die joins the tray NOW.
+                const color: 'heart' | 'body' | 'mind' | 'wild' = mech.color === 'wild'
+                    ? 'wild'
+                    : dieHasStance(powering.color)
+                        ? (powering.color as 'heart' | 'body' | 'mind')
+                        : dieHasStance(card.stance) ? (card.stance as 'heart' | 'body' | 'mind') : 'wild';
+                if (floatingDice.length >= FLOATING_DICE_CAP) {
+                    conviction = Math.min(CONVICTION_CAP, conviction + 1);
+                    events.push({ kind: 'conviction-gained', amount: 1, total: conviction, reason: 'effect' });
+                } else {
+                    const die: CombatManaDie = {
+                        id: `float-${state.turn}-${state.log.length + events.length}`,
+                        color, state: 'available', temporary: false, floating: true,
+                        pips: zoneHas(state, 'anvil-of-form') ? 1 : 0,
+                    };
+                    floatingDice = [...floatingDice, die];
+                    events.push({ kind: 'die-floated', dieId: die.id, color, poolSize: floatingDice.length });
+                }
+                break;
+            }
+            case 'create_temporary_die': {
+                // KINDLE — a temporary die (this combat only) joins the Reserve.
+                const forged: CombatManaDie = {
+                    id: `forge-${state.turn}-${state.log.length + events.length}`, color: mech.color,
+                    state: 'available', temporary: true,
+                    pips: zoneHas(state, 'anvil-of-form') ? 1 : 0,
+                };
+                if (reserve.length < RESERVE_MAX) {
+                    reserve = [...reserve, forged];
+                    events.push({ kind: 'die-forged', dieId: forged.id, color: forged.color, destination: 'reserve' });
+                } else {
+                    conviction = Math.min(CONVICTION_CAP, conviction + 1);
+                    events.push({ kind: 'die-forged', dieId: forged.id, color: forged.color, destination: 'conviction' });
+                }
+                break;
+            }
+            case 'grant_pip': {
+                if (reserve.length === 0) break;
+                for (let i = 0; i < mech.count; i++) {
+                    const r = ripenReserve(reserve);
+                    reserve = r.reserve;
+                    for (const id of r.ripenedIds) {
+                        events.push({ kind: 'die-ripened', dieId: id, pips: reserve.find(d => d.id === id)?.pips ?? 0 });
+                    }
+                }
+                break;
+            }
+            case 'reroll_spent': {
+                if (hasRerollableDice(state.dice)) {
+                    const rerolled = rerollSpentDice(state.dice, _rng);
+                    state = { ...state, dice: rerolled.dice };
+                    events.push({ kind: 'dice-rolled', dice: rerolled.dice });
+                }
+                break;
+            }
+            case 'siphon': {
+                // SIPHON — heal a fraction of the HP this card's payoffs eroded.
+                const healAmt = Math.round(mechanicDamage * mech.pct * getHealingReceivedMult(state.player));
+                if (healAmt > 0) {
+                    player = heal(player, healAmt);
+                    events.push({ kind: 'damage-dealt', cardId: card.id, target: 'self', amount: -healAmt });
+                }
+                break;
+            }
+            default: break; // guard/barrier/riposte/echo/befriend etc. handled elsewhere
         }
     }
+    // `practiced-cadence` (E): the first card each turn grants +1 Premise.
+    if (zoneHas(state, 'practiced-cadence') && (state.spellsPlayedThisTurn ?? 0) === 0) {
+        premisesGained += 1;
+    }
+    const reactFired = false;
+    const permanentWildDice = state.permanentWildDice ?? 0;
+    const permanentDeadDice = state.permanentDeadDice ?? 0;
 
     // Offensive status ids this card landed on the enemy — gates the combo loop on
     // VARIETY (a status new to this chain refreshes the die; a repeat spends it).
@@ -1135,7 +1619,8 @@ function playBottomAction(
     // 4. Fold the skill's effect-applications: DoT + control LAND on the enemy.
     //    DoT will tick real HP each phase (the status damage engine); control gates
     //    the enemy's turn via `canAct`. Attribute projected DoT for the summary.
-    for (const ev of res.events) {
+    const selfDebuffsLanded: { effectId: string; intensity: number; duration: number }[] = [];
+    for (const ev of allSkillEvents) {
         if (ev.kind === 'effect-applied') {
             const def = ev.effect;
             const target: 'self' | 'enemy' = ev.appliedTo;
@@ -1151,14 +1636,13 @@ function playBottomAction(
                 if ((before[def.id] ?? 0) < active.intensity) landedOnEnemy = true;
             } else if (active) {
                 events.push({ kind: 'effect-landed', cardId: card.id, effectId: def.id, target, effectKind: 'none', intensity: active.intensity, effect: def });
+                if (target === 'self' && def.type === 'debuff') {
+                    selfDebuffsLanded.push({ effectId: def.id, intensity: active.intensity, duration: active.remainingDuration });
+                }
             }
         } else if (ev.kind === 'buff-fumbled') {
             events.push({ kind: 'effect-fizzled', cardId: card.id, effectId: ev.effect.id, message: ev.message });
         } else if (ev.kind === 'buff-stripped') {
-            // strip_random_buff (e.g. Ad Hominem Strike): the skill engine already
-            // removed the buff from the live snapshot (folded via res.state); surface
-            // the event so the hazard combat log/UI can show it. `effect` is null
-            // when there was no buff to strip.
             events.push({
                 kind: 'buff-stripped', cardId: card.id, target: ev.target,
                 effectId: ev.effect?.id ?? null, effectName: ev.effect?.name ?? null,
@@ -1167,22 +1651,27 @@ function playBottomAction(
             mercyOpened = true;
         }
     }
+    // `mirror-of-guilt` (D): every self-debuff the player takes lands 1 stack of
+    // the same affliction on the enemy — the debt argues for you (spec 32 v3 T4).
+    if (zoneHas(state, 'mirror-of-guilt')) {
+        for (const sd of selfDebuffsLanded) {
+            const def = lookupEffectDef(sd.effectId);
+            if (!def) continue;
+            const applied = applyEffect(enemy.effects, def, state.round, { intensityDelta: 1, sourceId: 'mirror-of-guilt' });
+            enemy = { ...enemy, effects: applied.activeEffects };
+            events.push({
+                kind: 'effect-landed', cardId: 'mirror-of-guilt', effectId: def.id, target: 'enemy',
+                effectKind: def.payload.damageOverTime ? 'dot' : 'control',
+                intensity: applied.result.activeEffect?.intensity ?? 1, effect: def,
+            });
+        }
+    }
 
-    // ── Fate Engine P1 — remaining rider payloads, all exact units ────────────
+    // ── Rider payloads (threshold / dieBonus / fate / fallen / reap), exact units ──
     let revealedStances = state.revealedStances;
-    let hand = state.hand;
-    let drawPile = state.drawPile;
-    let discard = state.discard;
     let riderGuard = 0;
     let riderRefresh = false;
     for (const r of firedRiders) {
-        if (r.chipHp) {
-            enemy = applyDamage(enemy, r.chipHp);
-            mechanicDamage += r.chipHp;
-            directDamage += r.chipHp;
-            attribution = recordAttribution(attribution, card.id, card.name, null, r.chipHp);
-            events.push({ kind: 'damage-dealt', cardId: card.id, target: 'enemy', amount: r.chipHp });
-        }
         if (r.guard) riderGuard += r.guard;
         if (r.conviction) conviction = Math.min(CONVICTION_CAP, conviction + r.conviction);
         if (r.refreshDie) riderRefresh = true;
@@ -1202,6 +1691,58 @@ function playBottomAction(
                 for (const t of ticks.perEffect) {
                     events.push({ kind: 'dot-tick', effectId: t.effectId, label: t.label, amount: t.amount, target: 'enemy' });
                 }
+            }
+        }
+        if (r.tickOne) {
+            const ticks = getActiveDotTotal(enemy.effects, state.round).perEffect;
+            const strongest = ticks.reduce<typeof ticks[number] | null>(
+                (best, t) => (best === null || t.amount > best.amount ? t : best), null);
+            if (strongest) {
+                enemy = applyDamage(enemy, strongest.amount);
+                directDamage += strongest.amount;
+                attribution = recordAttribution(attribution, card.id, card.name, null, strongest.amount);
+                events.push({ kind: 'dot-tick', effectId: strongest.effectId, label: strongest.label, amount: strongest.amount, target: 'enemy' });
+            }
+        }
+        if (r.ruptureMarks) {
+            const consumed = consumeMarks(enemy);
+            if (consumed.stacks > 0) {
+                enemy = consumed.combatant;
+                const burst = Math.min(RUPTURE_BURST_CAP, Math.round(r.ruptureMarks * consumed.stacks * vulnMult));
+                enemy = applyDamage(enemy, burst);
+                mechanicDamage += burst;
+                directDamage += burst;
+                attribution = recordAttribution(attribution, card.id, card.name, null, burst);
+                events.push({ kind: 'damage-dealt', cardId: card.id, target: 'enemy', amount: burst });
+            }
+        }
+        if (r.intensityPerPip && pipsSpentThisPlay > 0) {
+            // +1 intensity to ONE enemy DoT per pip spent (the-overtake class).
+            const dotAe = enemy.effects.find(ae => lookupEffectDef(ae.effectId)?.payload.damageOverTime);
+            if (dotAe) {
+                enemy = {
+                    ...enemy,
+                    effects: enemy.effects.map(ae => ae === dotAe
+                        ? { ...ae, intensity: Math.min(MAX_EFFECT_INTENSITY, ae.intensity + r.intensityPerPip! * pipsSpentThisPlay) }
+                        : ae),
+                };
+                events.push({ kind: 'pips-cashed', cardId: card.id, pips: pipsSpentThisPlay, bonus: 'intensity', amount: r.intensityPerPip * pipsSpentThisPlay });
+            }
+        }
+        if (r.applyEffect) {
+            const def = lookupEffectDef(r.applyEffect.effectId);
+            if (def) {
+                const toSelf = r.applyEffect.to === 'self';
+                const bearer = toSelf ? player : enemy;
+                const applied = applyEffect(bearer.effects, def, state.round, {
+                    intensityDelta: r.applyEffect.intensity ?? 1,
+                    ...(r.applyEffect.duration !== undefined
+                        ? { durationMode: 'additive' as const, durationDelta: r.applyEffect.duration }
+                        : {}),
+                    sourceId: card.id,
+                });
+                if (toSelf) player = { ...player, effects: applied.activeEffects };
+                else enemy = { ...enemy, effects: applied.activeEffects };
             }
         }
         if (r.cleanse) {
@@ -1235,12 +1776,30 @@ function playBottomAction(
                 events.push({ kind: 'hand-drawn', cards: draw.drawn });
             }
         }
+        if (r.premises) premisesGained += r.premises;
+        if (r.sway) swayGained += r.sway;
+        if (r.souls) gainSoulsLocal(r.souls, 'granted');
+        if (r.foretell) foretellCount += r.foretell;
+        if (r.stagger) {
+            staggerRungs += r.stagger;
+            events.push({ kind: 'staggered', rungs: r.stagger, total: staggerRungs });
+        }
+        if (r.pips && reserve.length > 0) {
+            for (let i = 0; i < r.pips; i++) {
+                const rp = ripenReserve(reserve);
+                reserve = rp.reserve;
+                for (const id of rp.ripenedIds) {
+                    events.push({ kind: 'die-ripened', dieId: id, pips: reserve.find(d => d.id === id)?.pips ?? 0 });
+                }
+            }
+        }
     }
 
     // 5. Die spend / refresh — the powering die's fate. The variety chain keeps
-    //    the turn alive on a NEW status (unchanged, R9); a fired REACT or a
-    //    refresh rider/mechanic always refreshes; CONVERT returns it as WILD;
-    //    BANK_SPENT_DIE parks it in the Reserve instead of spending.
+    //    the turn alive on a NEW status (unchanged, R9); a refresh rider/mechanic
+    //    always refreshes; CONVERT returns it as WILD; BANK_SPENT_DIE parks it in
+    //    the Reserve. A FLOATING die is GONE FOREVER when spent (spec 32 v3 §5) —
+    //    refresh effects cannot save it.
     const chainBefore = state.chainEffectIds ?? [];
     const newChainIds = landedOffensiveIds.filter(id => !chainBefore.includes(id));
     const landedNewDistinct = newChainIds.length > 0;
@@ -1249,7 +1808,12 @@ function playBottomAction(
     const refreshed = (landedOnEnemy && landedNewDistinct) || reactFired || riderRefresh
         || mechs.some(m => m.kind === 'refresh_die') || convertMech;
     let dice = state.dice;
-    if (poweringSource === 'reserve') {
+    if (poweringSource === 'floating') {
+        dice = dice.filter(d => d.id !== powering.id);
+        floatingDice = floatingDice.filter(d => d.id !== powering.id);
+        events.push({ kind: 'floating-die-spent', dieId: powering.id, color: powering.color, poolSize: floatingDice.length });
+        events.push({ kind: 'die-spent', dieId: powering.id, color: powering.color });
+    } else if (poweringSource === 'reserve') {
         if (refreshed) {
             // Stays banked; its pips were cashed by this play.
             reserve = reserve.map(d => (d.id === powering.id ? { ...d, pips: 0 } : d));
@@ -1275,11 +1839,23 @@ function playBottomAction(
         dice = spendDice(dice, [powering.id]);
         events.push({ kind: 'die-spent', dieId: powering.id, color: powering.color });
     }
+    // `entropy-tax` (D): spending a KINDLED (temporary) or FLOATING die marks
+    // the enemy — the manufactured resource has a price (spec 32 v3 T3).
+    if (zoneHas(state, 'entropy-tax')
+        && (poweringSource === 'floating' || (poweringSource === 'reserve' && powering.temporary))) {
+        const markDef = lookupEffectDef('debuff_mark');
+        if (markDef) {
+            const applied = applyEffect(enemy.effects, markDef, state.round, { intensityDelta: 1, sourceId: 'entropy-tax' });
+            enemy = { ...enemy, effects: applied.activeEffects };
+            events.push({
+                kind: 'effect-landed', cardId: 'entropy-tax', effectId: markDef.id, target: 'enemy',
+                effectKind: 'control', intensity: applied.result.activeEffect?.intensity ?? 1, effect: markDef,
+            });
+        }
+    }
 
-    // Defense card → GUARD: a shield vs the enemy's NEXT telegraphed threat,
-    // read-scaled (advantage powers a bigger brace) + the color-match bonus, so it
-    // scales like the immediate strike. Ripened pips brace harder (+2 Guard per
-    // pip, R2). Absorbed in `resolveThreatPhase`.
+    // Defense card → GUARD (read-scaled + color-match + pips). Absorbed in
+    // `resolveThreatPhase`.
     const guardMech = (skill.specialMechanics ?? []).find(m => m.kind === 'guard') as { amount: number } | undefined;
     const pipGuard = isDefendPlay ? poweringPips * PIP_GUARD_BONUS : 0;
     if (pipGuard > 0) {
@@ -1287,17 +1863,18 @@ function playBottomAction(
     }
     const guardGain = (guardMech
         ? Math.max(1, Math.round(guardMech.amount * mult)) + (colorMatch ? COLOR_MATCH_DAMAGE_BONUS : 0)
-        : 0) + riderGuard + pipGuard;
+        : 0) + riderGuard + pipGuard + pipGuardExtra;
     // BARRIER — a STACKING, persistent soak (distinct from one-shot guard); read-scaled.
     const barrierMech = mechs.find(m => m.kind === 'barrier') as { kind: 'barrier'; amount: number } | undefined;
     const barrierGain = barrierMech
         ? Math.max(1, Math.round(barrierMech.amount * mult)) + (colorMatch ? COLOR_MATCH_DAMAGE_BONUS : 0)
         : 0;
-    // RIPOSTE — arm a one-shot parry (read-scaled); a prior arming this phase survives.
+    // RIPOSTE — arm the counter-stance (spec 32 v3: fires only on a FULL block —
+    // see `resolveThreatPhase`); a prior arming this phase survives.
     const riposteMech = mechs.find(m => m.kind === 'riposte') as { kind: 'riposte'; damage: number; reduce: number } | undefined;
     const riposteArmed = riposteMech
         ? {
-            damage: Math.max(1, Math.round(riposteMech.damage * mult)) + (colorMatch ? COLOR_MATCH_DAMAGE_BONUS : 0),
+            damage: Math.max(1, Math.round(riposteMech.damage * mult)),
             reduce: Math.max(0, Math.round(riposteMech.reduce * mult)),
           }
         : state.riposte;
@@ -1312,13 +1889,69 @@ function playBottomAction(
         directDamageDealt: directDamage,
         permanentWildDice,
         permanentDeadDice,
+        floatingDice,
+        souls,
+        staggerRungs,
+        stanceLockedNext,
+        pendingOmens,
+        peroration: perorationDecl,
+        echoNextSpell,
+        conjuredUids,
+        spellsPlayedThisTurn: (state.spellsPlayedThisTurn ?? 0) + 1,
+        lastSpellCardId: skill.id,
     };
-    next = discardEntry(next, uid);
+    // Discard the played card — a CONJURED Thoughtform is one-use: it leaves
+    // the combat entirely instead of entering the discard pile.
+    if (conjuredUids.includes(uid)) {
+        next = {
+            ...next,
+            hand: next.hand.filter(h => h.uid !== uid),
+            conjuredUids: conjuredUids.filter(u => u !== uid),
+        };
+    } else {
+        next = discardEntry(next, uid);
+    }
+
+    // ── Post-payload state verbs (foretell / premises / sway / spend) ─────────
+    if (foretellCount > 0) next = applyForetell(next, foretellCount, events);
+    if (spendPremisesMech) {
+        const spent = next.premises ?? 0;
+        if (spent > 0) {
+            const markStacks = Math.floor(spent / spendPremisesMech.markPer);
+            const draws = Math.floor(spent / spendPremisesMech.drawPer);
+            if (markStacks > 0) {
+                const markDef = lookupEffectDef('debuff_mark');
+                if (markDef) {
+                    const applied = applyEffect(next.enemy.effects, markDef, next.round, { intensityDelta: markStacks, sourceId: card.id });
+                    next = { ...next, enemy: { ...next.enemy, effects: applied.activeEffects } };
+                }
+            }
+            events.push({ kind: 'premises-spent', spent, marks: markStacks, drawn: draws });
+            next = { ...next, premises: 0 };
+            if (draws > 0) next = applyRiderToState(next, card.id, { drawCards: draws }, events, _rng);
+        } else {
+            events.push({ kind: 'effect-fizzled', cardId: card.id, effectId: '', message: 'no Premises to spend' });
+        }
+    }
+    if (premisesGained > 0) {
+        const resP = gainPremises(next, premisesGained, events, _rng);
+        next = resP.state;
+        if (resP.concede) {
+            next = withLog(next, events);
+            return endCombat(next, 'concede', events);
+        }
+    }
+    if (swayGained > 0) next = gainSway(next, swayGained, events);
+    for (const fr of reprisedFreeRiders) {
+        next = applyRiderToState(next, card.id, fr, events, _rng);
+    }
+
     if (mercyOpened) {
         next = { ...next, mercyChoiceActive: true };
         events.push({ kind: 'mercy-opened', message: `${enemy.name} falters — spare or exploit?` });
     }
     next = withLog(next, events);
+    if (swayCapitulates(next)) return endCombat(next, 'capitulate', events);
     return checkImmediateOutcome(next, events);
 }
 
@@ -1364,13 +1997,23 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
     const rollPenalty = Math.max(0, -getActiveRollModifier(state.enemy));
     // DISRUPT — an ADDITIVE deny path on top of the legacy roll-penalty deny: a
     // VARIETY of >= DISRUPT_DENY_AT DISTINCT controls cancels the telegraphed turn
-    // even before the cumulative penalty reaches THREAT_DENY_AT. Only denies MORE
-    // often, never less; fires at >=3 distinct controls (new content), so existing
-    // 1-2-control fights are byte-identical.
+    // even before the cumulative penalty reaches THREAT_DENY_AT.
     const controlPips = getDistinctControlCount(state.enemy);
     const disruptDenied = controlPips >= DISRUPT_DENY_AT;
-    const denied = rollPenalty >= THREAT_DENY_AT || disruptDenied;
-    const weakenMult = Math.max(THREAT_WEAKEN_FLOOR, Math.min(1, 1 - rollPenalty * THREAT_WEAKEN_PER_ROLL));
+    // STAGGER RUNGS (spec 32 v3 T5) — the telegraphed action carries
+    // THREAT_RUNGS rungs (bosses one more); accumulated STAGGER plus the
+    // `quagmire-of-doubt` disenchant (-1 standing) remove rungs. At 0 the turn
+    // is DENIED; partial removal weakens the hit proportionally, and each rung
+    // lost feeds BACKFIRE.
+    const rungsTotal = (state.enemy.difficulty === 'boss' || state.enemy.difficulty === 'unique')
+        ? THREAT_RUNGS_BOSS : THREAT_RUNGS;
+    const quagmire = zoneHas(state, 'quagmire-of-doubt') ? 1 : 0;
+    const rungsLost = Math.min(rungsTotal, (state.staggerRungs ?? 0) + quagmire);
+    const rungDenied = rungsLost >= rungsTotal;
+    const denied = rollPenalty >= THREAT_DENY_AT || disruptDenied || rungDenied;
+    const rungMult = rungDenied ? 0 : (rungsTotal - rungsLost) / rungsTotal;
+    const weakenMult = Math.max(THREAT_WEAKEN_FLOOR, Math.min(1, 1 - rollPenalty * THREAT_WEAKEN_PER_ROLL))
+        * (rungsLost > 0 && !rungDenied ? rungMult : 1);
     // THE CLOCK (depth epic): the telegraphed hit escalates each round past the grace
     // window, so a drawn-out fight turns lethal. 1.0 on round ≤ grace (a fast kill is
     // unpunished → those fights are byte-identical to pre-epic).
@@ -1403,40 +2046,62 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
     let player = state.player;
     let enemy = state.enemy;
     // GUARD (one-shot, per-phase) absorbs first; BARRIER (persistent, stacking)
-    // soaks the remainder; RIPOSTE parries + counters once. All no-op when unset
-    // (guard 0 / barrier 0 / riposte null / no player thorns) → byte-identical.
+    // soaks the remainder; RIPOSTE parries and — spec 32 v3 — counters ONLY when
+    // the attack was FULLY blocked (reflect class). All no-op when unset.
     let guard = state.guard ?? 0;
     let barrier = state.barrier ?? 0;
     const riposte = state.riposte ?? null;
     let riposteFired = false;
+    let attacksLanded = 0;
+    let attacksFullyBlocked = 0;
+    let damagePrevented = 0;
+    let directDamage = state.directDamageDealt;
     const penaltiesApplied: CombatThreatEffect[] = [];
+
+    // BACKFIRE (spec 32 v3 T5, engine-gated drip): the enemy takes its
+    // backfire-per-rung total × the rungs its action lost this phase (a fully
+    // denied action counts every rung).
+    const backfirePer = getBackfirePerRung(state.enemy);
+    const rungsForBackfire = hindered ? rungsTotal : rungsLost;
+    if (backfirePer > 0 && rungsForBackfire > 0) {
+        const drip = backfirePer * rungsForBackfire;
+        enemy = applyDamage(enemy, drip);
+        directDamage += drip;
+        events.push({ kind: 'backfired', amount: drip, rungs: rungsForBackfire });
+    }
 
     if (!hindered) {
         // The enemy attacks: its telegraphed threat action fires on the player.
-        // The player's own protective/vulnerable statuses finally bite the
-        // incoming hit (P0-truth: `getDamageTakenMultiplier` was enemy-only).
         const playerTakenMult = getDamageTakenMultiplier(state.player);
         for (const eff of phase.threatAction.effects) {
             if (eff.damage && eff.damage > 0) {
-                // weakenMult (<1) is the soft-control reduction; 1 when the enemy
-                // carries no roll penalty (every pre-0.33.0 case → byte-identical).
+                attacksLanded += 1;
+                // weakenMult folds soft-control AND partial rung loss.
                 let dmg = Math.round(
                     eff.damage * THREAT_DAMAGE_SCALE * weakenMult * escalation
                     * enemyOutgoingMult * (overextendedId ? 0.5 : 1) * playerTakenMult,
                 );
-                // RIPOSTE reduces the incoming hit once this phase.
-                if (riposte && !riposteFired) { dmg = Math.max(0, dmg - riposte.reduce); riposteFired = true; }
+                // RIPOSTE parry reduces the incoming hit once this phase.
+                if (riposte && !riposteFired && riposte.reduce > 0) {
+                    const parried = Math.min(dmg, riposte.reduce);
+                    dmg -= parried;
+                    damagePrevented += parried;
+                    riposteFired = true;
+                }
                 // GUARD soaks first (one-shot, clamped), then BARRIER (persistent).
                 const guardAbsorbed = Math.min(guard, dmg);
                 guard -= guardAbsorbed;
                 dmg -= guardAbsorbed;
+                damagePrevented += guardAbsorbed;
                 const barrierAbsorbed = Math.min(barrier, dmg);
                 if (barrierAbsorbed > 0) {
                     barrier -= barrierAbsorbed;
                     dmg -= barrierAbsorbed;
+                    damagePrevented += barrierAbsorbed;
                     events.push({ kind: 'barrier-absorbed', amount: barrierAbsorbed });
                 }
                 if (dmg > 0) player = applyDamage(player, dmg);
+                else attacksFullyBlocked += 1;
             }
             if (eff.effectId && !doubtId) {
                 const def = lookupEffectDef(eff.effectId);
@@ -1448,12 +2113,15 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
                         sourceId: enemy.id,
                     });
                     player = { ...player, effects: res.activeEffects };
+                    // `mirror-of-guilt` (D): an enemy-inflicted debuff reflects
+                    // 1 stack of itself back onto the enemy.
+                    if (zoneHas(state, 'mirror-of-guilt') && def.type === 'debuff') {
+                        const mirrored = applyEffect(enemy.effects, def, state.round, { intensityDelta: 1, sourceId: 'mirror-of-guilt' });
+                        enemy = { ...enemy, effects: mirrored.activeEffects };
+                    }
                 }
             }
             if (eff.enemyHeal && eff.enemyHeal > 0 && !doubtId) {
-                // DESPAIR (-N% healing) / ISOLATED (cannot heal) gate the foe's
-                // self-heal; a heal that lands washes 1 intensity off every
-                // decay-tagged DoT (HEMORRHAGE — big but fragile). P0-truth.
                 const healAmt = Math.round(eff.enemyHeal * getHealingReceivedMult(enemy));
                 if (healAmt > 0) {
                     enemy = decayDotsOnHeal(heal(enemy, healAmt)).combatant;
@@ -1464,20 +2132,31 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
         // A fired DOUBT / OVEREXTENDED is spent on the phase it bent (consumedOnUse).
         if (doubtId) enemy = consumeEffect(enemy, doubtId);
         if (overextendedId) enemy = consumeEffect(enemy, overextendedId);
-        // RIPOSTE counter + THORNS reflect — both punish the telegraphed swing,
-        // scaled by the foe's own VULNERABLE multiplier (×1 when unmarked).
-        if (riposte) {
+        // RIPOSTE counter — spec 32 v3: fires only when your Guard/Barrier FULLY
+        // blocked an attack this phase (reflect class, §1 source 4).
+        if (riposte && attacksLanded > 0 && attacksFullyBlocked > 0) {
             const counter = Math.round(riposte.damage * getDamageTakenMultiplier(enemy));
             if (counter > 0) {
                 enemy = applyDamage(enemy, counter);
+                directDamage += counter;
                 events.push({ kind: 'riposte-fired', amount: counter });
             }
         }
+        // THORNS reflect — punishes the swing whenever the enemy attacked.
         const reflect = getThornsReflect(state.player);
-        if (reflect > 0) {
+        if (reflect > 0 && attacksLanded > 0) {
             const amount = Math.round(reflect * getDamageTakenMultiplier(enemy));
             enemy = applyDamage(enemy, amount);
+            directDamage += amount;
             events.push({ kind: 'thorns-reflected', amount, target: 'enemy' });
+            // `hedgehogs-dilemma` (E): every THORNS trigger also marks the enemy.
+            if (zoneHas(state, 'hedgehogs-dilemma')) {
+                const markDef = lookupEffectDef('debuff_mark');
+                if (markDef) {
+                    const applied = applyEffect(enemy.effects, markDef, state.round, { intensityDelta: 1, sourceId: 'hedgehogs-dilemma' });
+                    enemy = { ...enemy, effects: applied.activeEffects };
+                }
+            }
         }
         events.push({ kind: 'threat-fired', phaseIndex: phase.index, description: phase.threatAction.description, effects: phase.threatAction.effects });
     }
@@ -1496,25 +2175,42 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
     const threatMarks = state.threatMarks.slice();
     if (idx < threatMarks.length) threatMarks[idx] = mark;
 
+    // `mirror-of-longing` (D): the damage your defenses prevented converts to
+    // SWAY — their aggression argues your case (spec 32 v3 T8).
+    let sway = state.sway ?? 0;
+    if (zoneHas(state, 'mirror-of-longing') && damagePrevented > 0) {
+        sway += damagePrevented;
+        events.push({ kind: 'sway-gained', amount: damagePrevented, total: sway });
+    }
+    // `crumbling-resolve` (D): an attack that failed to break your Guard costs
+    // the enemy a rung on its NEXT telegraph.
+    const crumbleRungs = zoneHas(state, 'crumbling-resolve') && attacksFullyBlocked > 0 ? 1 : 0;
+    // `achilles-and-the-tortoise` (E): a denied turn feeds your next draw.
+    const bonusDraw = zoneHas(state, 'achilles-and-the-tortoise') && hindered ? 1 : 0;
+
     let next: CombatEncounterState = {
         ...state,
         player,
         enemy,
+        sway,
+        directDamageDealt: directDamage,
         guard: 0,                       // brace is spent on this phase's threat; resets each phase
         barrier,                        // persistent soak — carries the unspent remainder across phases
-        riposte: undefined,             // one-shot parry — cleared each phase (like guard)
+        riposte: undefined,             // cleared each phase (like guard)
+        staggerRungs: crumbleRungs,     // consumed this phase; crumbling-resolve seeds the next
         phase: 'phase-resolve',
         threatMarks,
         phaseResults: [...state.phaseResults, result],
     };
     next = withLog(next, events);
 
-    // Outcome checks after the threat action (HP).
+    // Outcome checks after the threat action (HP + capitulation).
+    if (swayCapitulates(next)) return endCombat(next, 'capitulate', events);
     const outcome = pendingOutcome(next);
     if (outcome) return endCombat(next, outcome, events);
 
     // Otherwise advance to between-phases.
-    return processBetweenPhases(next, rng, events);
+    return processBetweenPhases(next, rng, events, bonusDraw);
 }
 
 /** Returns a terminal outcome if one is pending, else null (HP model). */
@@ -1533,19 +2229,51 @@ export function processBetweenPhases(
     state: CombatEncounterState,
     rng: () => number = defaultRng,
     priorEvents: CombatEvent[] = [],
+    bonusDraw: number = 0,
 ): CombatTransition {
     const events: CombatEvent[] = [];
 
     // 1. Per-effect DoT ticks (labeled, §7.5) — computed before processing.
-    //    Round-threaded so escalating DoTs (UNRAVELING ramp) tick their real value.
+    //    Round-threaded so escalating DoTs (POISON ramp) tick their real value.
     const enemyDotTicks = dotTickBreakdown(state.enemy.effects, state.round);
     const playerDotTicks = dotTickBreakdown(state.player.effects, state.round);
 
     // 2. Process a full round of effects on the enemy — DoT ERODES real enemy HP
     //    (the status damage engine; no track, the HP loss is the win progress).
     const enemyStart = processRoundStartEffects(state.enemy, state.round);
-    const enemyEnd = processRoundEndEffects(enemyStart.target, state.round);
+    // `the-tithe` (D): enemy afflictions expire 1 turn sooner — an EXTRA
+    // duration decrement before the normal end-of-round tick (faster churn →
+    // faster Souls). Spec 32 v3 T7.
+    let tithedTarget = enemyStart.target;
+    const tithedExpired: ActiveEffect[] = [];
+    if (zoneHas(state, 'the-tithe')) {
+        const remaining: ActiveEffect[] = [];
+        for (const ae of tithedTarget.effects) {
+            if (ae.remainingDuration === -1 || lookupEffectDef(ae.effectId)?.type !== 'debuff') {
+                remaining.push(ae);
+                continue;
+            }
+            const ticked = { ...ae, remainingDuration: ae.remainingDuration - 1 };
+            if (ticked.remainingDuration <= 0) tithedExpired.push(ticked);
+            else remaining.push(ticked);
+        }
+        tithedTarget = { ...tithedTarget, effects: remaining };
+    }
+    const enemyEnd = processRoundEndEffects(tithedTarget, state.round);
     let enemy = enemyEnd.target as Enemy;
+
+    // SOUL economy (spec 32 v3 T7): every enemy affliction instance that
+    // EXPIRES yields 1 Soul (consumption-side Souls are granted at the verbs).
+    const expiredAfflictions = [...enemyEnd.expired, ...tithedExpired]
+        .filter(ae => lookupEffectDef(ae.effectId)?.type === 'debuff').length;
+
+    // `suppurating-curse` (D): the enemy takes +1 HP per DoT tick it suffered
+    // this round (spec 32 v3 T1; engine-gated drip on the tick count).
+    if (zoneHas(state, 'suppurating-curse') && enemyDotTicks.length > 0 && !isDefeated(enemy)) {
+        const drip = enemyDotTicks.length;
+        enemy = applyDamage(enemy, drip);
+        events.push({ kind: 'dot-tick', effectId: 'suppurating-curse', label: 'Suppuration', amount: drip, target: 'enemy' });
+    }
 
     // VULNERABLE DoT surcharge: the natural tick above lands at ×1 (already
     // combo-amplified). Apply the EXTRA (mult-1) fraction the foe's vulnerability
@@ -1581,9 +2309,100 @@ export function processBetweenPhases(
     const rageGated = candidatePhase.unlockAfterRound !== undefined && resolvedRound < candidatePhase.unlockAfterRound;
     const nextIndex = rageGated ? state.currentPhaseIndex : candidateIndex;
 
+    // ARROW PARADOX (spec 32 v3 T5, `lock_stance`) — the next phase keeps the
+    // CURRENT stance: motion frozen mid-flight. The lock is revealed and spent.
+    let threatPhases = state.threatPhases;
+    let revealedStances = state.revealedStances;
+    if (state.stanceLockedNext && nextIndex !== state.currentPhaseIndex) {
+        const lockedStance = currentPhaseStance(state);
+        threatPhases = threatPhases.map((p, i) => (i === nextIndex ? { ...p, enemyStance: lockedStance } : p));
+        if (!revealedStances.includes(nextIndex)) revealedStances = [...revealedStances, nextIndex];
+        events.push({ kind: 'stance-locked', phaseIndex: nextIndex, stance: lockedStance });
+    }
+
+    // OMENS resolve at the phase boundary (spec 32 v3 T6): a prediction that
+    // matches the INCOMING phase's stance HITS — its rider fires free
+    // (`the-oracles-eye` amplifies; `fated-course` marks the foe on a hit).
+    let omenHits = state.omenHits ?? 0;
+    let omenState: CombatEncounterState = {
+        ...state, player, enemy, threatPhases, revealedStances,
+    };
+    const pendingOmens = state.pendingOmens ?? [];
+    if (pendingOmens.length > 0) {
+        const incomingStance = threatPhases[nextIndex]?.enemyStance;
+        const remaining: typeof pendingOmens = [];
+        for (const omen of pendingOmens) {
+            if (omen.phaseIndex !== nextIndex) {
+                // A stale omen (phase looped past it) simply misses.
+                events.push({ kind: 'omen-missed', cardId: omen.cardId, phaseIndex: omen.phaseIndex });
+                continue;
+            }
+            if (omen.stance === incomingStance) {
+                omenHits += 1;
+                const omenSkill = lookupSkill(omen.cardId);
+                const omenMech = (omenSkill?.specialMechanics ?? []).find(m => m.kind === 'omen') as
+                    Extract<CardSpecialMechanic, { kind: 'omen' }> | undefined;
+                if (omenMech) {
+                    // `the-oracles-eye` (E): omen riders land +50% (rounded up)
+                    // on their numeric fields.
+                    const eye = zoneHas(state, 'the-oracles-eye');
+                    const amp = (n: number | undefined): number | undefined =>
+                        n === undefined ? undefined : (eye ? Math.ceil(n * 1.5) : n);
+                    const rider: CardRider = {
+                        ...omenMech.rider,
+                        guard: amp(omenMech.rider.guard),
+                        healHp: amp(omenMech.rider.healHp),
+                        drawCards: amp(omenMech.rider.drawCards),
+                        sway: amp(omenMech.rider.sway),
+                        souls: amp(omenMech.rider.souls),
+                        premises: amp(omenMech.rider.premises),
+                    };
+                    events.push({ kind: 'omen-hit', cardId: omen.cardId, phaseIndex: nextIndex, riderText: riderText(rider) });
+                    omenState = applyRiderToState(omenState, omen.cardId, rider, events, rng);
+                }
+                if (zoneHas(state, 'fated-course')) {
+                    const markDef = lookupEffectDef('debuff_mark');
+                    if (markDef) {
+                        const applied = applyEffect(omenState.enemy.effects, markDef, state.round, { intensityDelta: 1, sourceId: 'fated-course' });
+                        omenState = { ...omenState, enemy: { ...omenState.enemy, effects: applied.activeEffects } };
+                    }
+                }
+            } else {
+                events.push({ kind: 'omen-missed', cardId: omen.cardId, phaseIndex: nextIndex });
+            }
+        }
+        omenState = { ...omenState, pendingOmens: remaining };
+        // An omen-granted Premise may complete a CONCEDE-grade Peroration.
+        if (omenState.finalOutcome === 'concede') {
+            return { state: withLog(omenState, events), events: [...priorEvents, ...events] };
+        }
+    }
+
+    // SOULS from expiry (base law: 1 per expired enemy affliction instance).
+    if (expiredAfflictions > 0) {
+        omenState = gainSouls(omenState, expiredAfflictions, 'expiry', events);
+    }
+
+    // SWAY decays at the turn boundary (ratified A2) unless `irresistible-grace`
+    // holds it; `captive-audience` (D) keeps the enemy marked while you hold
+    // 4+ Premises.
+    let sway = omenState.sway ?? 0;
+    if (sway > 0 && !zoneHas(state, 'irresistible-grace')) {
+        sway = Math.max(0, sway - SWAY_DECAY_PER_TURN);
+        events.push({ kind: 'sway-decayed', total: sway });
+    }
+    omenState = { ...omenState, sway };
+    if (zoneHas(state, 'captive-audience') && (omenState.premises ?? 0) >= 4) {
+        const markDef = lookupEffectDef('debuff_mark');
+        if (markDef) {
+            const applied = applyEffect(omenState.enemy.effects, markDef, state.round, { intensityDelta: 1, sourceId: 'captive-audience' });
+            omenState = { ...omenState, enemy: { ...omenState.enemy, effects: applied.activeEffects } };
+        }
+    }
+
     // Fate Engine P1 R2 — RESERVE dice RIPEN: +1 pip per threat phase survived
     // (cap RESERVE_PIP_CAP). Holding a die through a telegraph is the gamble.
-    let reserve = state.reserve ?? [];
+    let reserve = omenState.reserve ?? [];
     if (reserve.length > 0) {
         const ripened = ripenReserve(reserve);
         reserve = ripened.reserve;
@@ -1592,18 +2411,22 @@ export function processBetweenPhases(
         }
     }
 
-    // 5. Draw a fresh hand of 5 (discard the old hand — Hazard's "draw fresh").
-    const discardedHand = state.hand.map(h => h.cardId);
-    const draw = drawCombatCards(state.drawPile, [...state.discard, ...discardedHand], state.deck, COMBAT_HAND_SIZE, rng);
+    // 5. Draw a fresh hand (discard the old hand — Hazard's "draw fresh").
+    //    `achilles-and-the-tortoise` adds +1 to the draw after a denied turn.
+    const discardedHand = omenState.hand.map(h => h.cardId);
+    const draw = drawCombatCards(
+        omenState.drawPile, [...omenState.discard, ...discardedHand], omenState.deck,
+        COMBAT_HAND_SIZE + bonusDraw, rng,
+    );
     let uid = state.round * 100;
     const hand = draw.drawn.map(cardId => ({ uid: `c${++uid}`, cardId }));
     events.push({ kind: 'hand-drawn', cards: draw.drawn });
 
     let next: CombatEncounterState = {
-        ...state,
-        player,
-        enemy,
+        ...omenState,
         reserve,
+        omenHits,
+        stanceLockedNext: false,
         currentPhaseIndex: nextIndex,
         drawPile: draw.drawPile,
         discard: draw.discard,
@@ -1618,7 +2441,8 @@ export function processBetweenPhases(
     };
     next = withLog(next, events);
 
-    // 6. Outcome checks after ticks (HP).
+    // 6. Outcome checks after ticks (HP + capitulation).
+    if (swayCapitulates(next)) return endCombat(next, 'capitulate', [...priorEvents, ...events]);
     const outcome = pendingOutcome(next);
     if (outcome) return endCombat(next, outcome, [...priorEvents, ...events]);
 
@@ -1933,7 +2757,11 @@ export function getDraftedDie(state: CombatEncounterState): CombatManaDie | null
  *  A MARKED foe (`revealsStance` payload — Fate Engine P1) is public on EVERY
  *  phase while the mark holds. */
 export function isPhaseStanceRevealed(state: CombatEncounterState, phaseIndex: number): boolean {
-    return state.revealedStances.includes(phaseIndex) || hasPayloadFlag(state.enemy, 'revealsStance') !== null;
+    return state.revealedStances.includes(phaseIndex)
+        || hasPayloadFlag(state.enemy, 'revealsStance') !== null
+        // `the-oracles-eye` (E): the enemy's next stance is ALWAYS revealed.
+        || (zoneHas(state, 'the-oracles-eye')
+            && phaseIndex === Math.min(state.currentPhaseIndex + 1, state.threatPhases.length - 1));
 }
 
 /** The current phase's enemy stance IF revealed, else null (drives the "?" UI). */
@@ -1954,34 +2782,28 @@ export function cardReadPreview(state: CombatEncounterState, card: CombatCard): 
 }
 
 /**
- * UI preview (HP model): projects the IMMEDIATE strike HP damage a card would
- * deal if POWERed RIGHT NOW with the currently drafted die — read multiplier +
- * color-match bonus + the strike weight. (Status DoT damage is over-time, shown
- * separately.) `track` is the card's classification, for flavor. Neutral read
- * when no die is drafted.
+ * UI preview (spec 32 v3): there is NO immediate-strike number any more — the
+ * strike is dead. `amount` is always 0; the card's honest numbers live in its
+ * printed FREE/PAID text and the DoT lifetime preview. Kept for the mobile
+ * presenter contract.
  */
 export function projectCardImpact(
-    state: CombatEncounterState,
+    _state: CombatEncounterState,
     card: CombatCard,
 ): { track: 'dot' | 'control' | 'none'; amount: number } {
-    const d = draftedDie(state);
-    const read: CombatReadResult = d ? state.lastRead : 'neutral';
-    const mult = READ_DAMAGE_MULT[read];
-    const colorMatch = !!d && (d.color === 'wild' || d.color === card.stance);
-    const skill = card.skillId ? lookupSkill(card.skillId) : undefined;
-    // P0-truth: the projection threads the SAME factors execution applies — the
-    // enemy's damage resistance (target argument), its VULNERABLE multiplier, and
-    // the player's outgoing-damage statuses. Preview == applied, by construction.
-    const base = skill
-        ? calculateSkillDamage(state.player, skill, skill.targetType === 'enemy' ? state.enemy : undefined)
-        : 0;
-    const amount = base > 0
-        ? Math.max(1,
-            Math.round(base * DIRECT_DAMAGE_WEIGHT * mult
-                * getDamageTakenMultiplier(state.enemy) * getOutgoingDamageMult(state.player))
-            + (colorMatch ? COLOR_MATCH_DAMAGE_BONUS : 0))
-        : 0;
-    return { track: card.effectKind, amount };
+    return { track: card.effectKind, amount: 0 };
+}
+
+/**
+ * Spec 32 v3 §5 — the floating-die colors to WRITE BACK to the character save
+ * at combat end (they persist across combats until spent).
+ */
+export function getFloatingDiceColors(
+    state: CombatEncounterState,
+): ('heart' | 'body' | 'mind' | 'wild')[] {
+    return (state.floatingDice ?? [])
+        .map(d => d.color)
+        .filter((c): c is 'heart' | 'body' | 'mind' | 'wild' => c !== 'x');
 }
 
 // ── 0.34.0 status-depth epic — honesty selectors (the engine owns the rule) ──
@@ -2025,66 +2847,37 @@ export function projectRupture(state: CombatEncounterState): number {
     );
 }
 
-/** EXECUTE readiness — true when the foe is at/below `hpPct` of max HP OR carries
- *  at least `dotStacks` distinct DoT effects. The finisher's gate (mobile lights
- *  the card off this). */
-export function isExecuteReady(state: CombatEncounterState, hpPct: number, dotStacks: number): boolean {
-    return state.enemy.health <= state.enemy.maxHealth * hpPct
-        || getPendingDotTotal(state.enemy, state.round).perEffect.length >= dotStacks;
-}
-
-/** EXECUTE projection for a card carrying the execute mechanic: whether it is
- *  ready and the HP it would deal (clamped to the foe's remaining HP). */
-export function projectExecute(
-    state: CombatEncounterState,
-    card: CombatCard,
-): { ready: boolean; amount: number } {
-    const skill = card.skillId ? lookupSkill(card.skillId) : undefined;
-    const mech = (skill?.specialMechanics ?? []).find(m => m.kind === 'execute') as
-        { kind: 'execute'; hpPct: number; dotStacks: number; recoilPct?: number } | undefined;
-    if (!mech) return { ready: false, amount: 0 };
-    const ready = isExecuteReady(state, mech.hpPct, mech.dotStacks);
-    if (!ready) return { ready: false, amount: 0 };
-    const large = Math.round(state.enemy.maxHealth * EXECUTE_DAMAGE_FRACTION);
-    return { ready, amount: Math.min(state.enemy.health, Math.round(large * getDamageTakenMultiplier(state.enemy))) };
-}
-
-/** SIPHON projection — the heal a siphon card would grant if powered now (off the
- *  projected strike). Convenience; the live heal in `playBottomAction` also scales
- *  off any rupture/compound/execute burst the same card deals. */
+/** SIPHON projection — the heal a siphon card would grant if powered now (off
+ *  the projected payoff burst). */
 export function projectSiphonHeal(state: CombatEncounterState, card: CombatCard): number {
     const skill = card.skillId ? lookupSkill(card.skillId) : undefined;
     const mech = (skill?.specialMechanics ?? []).find(m => m.kind === 'siphon') as
         { kind: 'siphon'; pct: number } | undefined;
     if (!mech) return 0;
-    return Math.round(projectCardImpact(state, card).amount * mech.pct * getHealingReceivedMult(state.player));
+    return Math.round(projectRupture(state) * mech.pct * getHealingReceivedMult(state.player));
 }
 
-/** AMPLIFY projection — the live amplified detonate total an amplify card would
- *  deal RIGHT NOW (pending DoT x its multiplier x read x vulnerable, capped).
- *  Mirrors `projectRupture`; extracted from the inline amplify-detonate formula
- *  in `playBottomAction` for the finisher readout (`projectCombatOutcome`). */
-export function projectAmplify(state: CombatEncounterState, card: CombatCard): { ready: boolean; amount: number } {
+/** REAP-ALL projection — the burst the Harvest capstone would deal right now. */
+export function projectReapAll(state: CombatEncounterState, card: CombatCard): { ready: boolean; amount: number } {
     const skill = card.skillId ? lookupSkill(card.skillId) : undefined;
-    const mech = (skill?.specialMechanics ?? []).find(m => m.kind === 'amplify') as
-        { kind: 'amplify'; multiplier: number } | undefined;
+    const mech = (skill?.specialMechanics ?? []).find(m => m.kind === 'reap_all') as
+        Extract<CardSpecialMechanic, { kind: 'reap_all' }> | undefined;
     if (!mech) return { ready: false, amount: 0 };
     const d = draftedDie(state);
     const read: CombatReadResult = d ? state.lastRead : 'neutral';
-    const pending = getPendingDotTotal(state.enemy, state.round).total;
     const amount = Math.min(
-        AMPLIFY_BURST_CAP,
-        Math.round(pending * mech.multiplier * READ_DAMAGE_MULT[read] * getDamageTakenMultiplier(state.enemy)),
+        RUPTURE_BURST_CAP,
+        Math.round(mech.burstPerSoul * (state.souls ?? 0) * READ_DAMAGE_MULT[read] * getDamageTakenMultiplier(state.enemy)),
     );
     return { ready: amount > 0, amount };
 }
 
-/** One hand card's finisher (rupture / amplify / execute) readiness, for
+/** One hand card's finisher (rupture / reap) readiness, for
  *  `projectCombatOutcome`. */
 export interface FinisherProjection {
     uid: string;
     cardId: string;
-    mechanic: 'rupture' | 'amplify' | 'execute';
+    mechanic: 'rupture' | 'reap';
     ready: boolean;
     amount: number;
 }
@@ -2107,18 +2900,15 @@ export function projectCombatOutcome(state: CombatEncounterState): CombatOutcome
     for (const { uid, card } of handCards(state)) {
         const skill = card.skillId ? lookupSkill(card.skillId) : undefined;
         const mech = (skill?.specialMechanics ?? []).find(
-            m => m.kind === 'rupture' || m.kind === 'amplify' || m.kind === 'execute',
+            m => m.kind === 'rupture' || m.kind === 'reap_all',
         );
         if (!mech) continue;
         if (mech.kind === 'rupture') {
             const amount = projectRupture(state);
             finishers.push({ uid, cardId: card.id, mechanic: 'rupture', ready: amount > 0, amount });
-        } else if (mech.kind === 'amplify') {
-            const { ready, amount } = projectAmplify(state, card);
-            finishers.push({ uid, cardId: card.id, mechanic: 'amplify', ready, amount });
         } else {
-            const { ready, amount } = projectExecute(state, card);
-            finishers.push({ uid, cardId: card.id, mechanic: 'execute', ready, amount });
+            const { ready, amount } = projectReapAll(state, card);
+            finishers.push({ uid, cardId: card.id, mechanic: 'reap', ready, amount });
         }
     }
     return { pendingDot, roundsToKill, isLethalInFlight: roundsToKill !== null, finishers };
