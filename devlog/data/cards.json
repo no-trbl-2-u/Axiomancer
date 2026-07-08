@@ -187,6 +187,7 @@
   ],
   "lines": [
    "FREE — Guard 2",
+   "Applies Backfire ×1, 2t → enemy",
    "lock the enemy stance",
    "STAGGER 1"
   ]
@@ -341,7 +342,7 @@
    }
   ],
   "lines": [
-   "FREE — tick",
+   "FREE — +1 Soul",
    "Applies Bleed ×2, 1t → enemy"
   ]
  },
@@ -417,7 +418,7 @@
   ],
   "lines": [
    "FREE — draw 1",
-   "OMEN — on hit: Guard 4 · mark i2 d2"
+   "OMEN — on hit: Guard 4 · foretold_wound i2 d2"
   ]
  },
  {
@@ -630,7 +631,7 @@
    },
    {
     "k": "Target",
-    "v": "self"
+    "v": "enemy"
    },
    {
     "k": "Rank",
@@ -646,9 +647,9 @@
    }
   ],
   "lines": [
-   "FREE — FORETELL 1",
-   "FORETELL 3",
-   "rider",
+   "FREE — tick",
+   "consume 1 affliction — its fuel ticks now, +1 Soul",
+   "FORETELL 1",
    "Die bonus: powering die mind fires a rider"
   ]
  },
@@ -759,13 +760,13 @@
    },
    {
     "k": "Learn",
-    "v": "Lv 6"
+    "v": "Lv 8"
    }
   ],
   "lines": [
-   "FREE — draw 1",
-   "FORGE a the powering die's color floating die",
-   "Threshold: 4× mind die fires a rider"
+   "FORGE a WILD floating die",
+   "the spent die BANKS to the Reserve",
+   "Threshold: 3× mind die fires a rider"
   ]
  },
  {
@@ -787,7 +788,7 @@
    },
    {
     "k": "Target",
-    "v": "self"
+    "v": "enemy"
    },
    {
     "k": "Rank",
@@ -804,6 +805,7 @@
   ],
   "lines": [
    "FREE — +1 Premise",
+   "Applies Argument Wound ×1, 2t → enemy",
    "+1 Premise",
    "rider"
   ]
@@ -959,7 +961,7 @@
   ],
   "lines": [
    "FREE — FORETELL 1",
-   "Applies Mark ×1, 2t → enemy",
+   "Applies Foretold Wound ×1, 2t → enemy",
    "FORETELL 2"
   ]
  },
@@ -1000,7 +1002,7 @@
   "lines": [
    "FREE — Guard 2",
    "Guard 5",
-   "+1 pip to every Reserve die"
+   "+2 pip to every Reserve die"
   ]
  },
  {
@@ -1039,7 +1041,8 @@
   ],
   "lines": [
    "FREE — SWAY 1",
-   "SWAY 5",
+   "SWAY 6",
+   "ECHO",
    "rider",
    "Threshold: 5× heart die fires a rider"
   ]
@@ -1191,7 +1194,7 @@
    }
   ],
   "lines": [
-   "FREE — +1 Soul",
+   "FREE — +2 Souls",
    "Applies Mark ×2, 1t → enemy"
   ]
  },
@@ -1304,6 +1307,7 @@
   "lines": [
    "FREE — +1 Premise",
    "Applies Mark ×1, 3t → enemy",
+   "Applies Argument Wound ×2, 4t → enemy",
    "+2 Premises",
    "Threshold: 2× heart die fires a rider"
   ]
@@ -1344,7 +1348,8 @@
   ],
   "lines": [
    "FREE — Guard 2",
-   "Applies Thorns ×2, 2t → self"
+   "Applies Thorns ×2, 2t → self",
+   "Applies Nettle Sting ×1, 2t → enemy"
   ]
  },
  {
@@ -1384,6 +1389,7 @@
   "lines": [
    "FREE — +1 Premise",
    "Applies Mark ×1, 2t → enemy",
+   "Applies Argument Wound ×1, 3t → enemy",
    "+2 Premises"
   ]
  },
@@ -1422,7 +1428,7 @@
    }
   ],
   "lines": [
-   "FREE — draw 1",
+   "FREE — draw 1 · consume all marks — 3 per stack",
    "replay your last spell ×2"
   ]
  },
@@ -1503,8 +1509,9 @@
   ],
   "lines": [
    "FREE — draw 1",
-   "Applies Backfire ×2, 2t → enemy",
-   "STAGGER 2"
+   "Applies Acute Backfire ×3, 3t → enemy",
+   "STAGGER 2",
+   "Die bonus: powering die mind fires a rider"
   ]
  },
  {
@@ -1542,8 +1549,7 @@
    }
   ],
   "lines": [
-   "FREE — draw 1",
-   "spend ALL Premises — +1 mark per 2, draw 1 per 3"
+   "RUPTURE"
   ]
  },
  {
@@ -1734,6 +1740,7 @@
   "lines": [
    "FREE — draw 1",
    "Applies Mark ×1, 2t → enemy",
+   "Applies Echo Sting ×1, 2t → enemy",
    "ECHO"
   ]
  },
@@ -1773,7 +1780,9 @@
   ],
   "lines": [
    "FREE — tick",
-   "RUPTURE"
+   "RUPTURE",
+   "siphon 35%",
+   "REPRISE 2 — its FREE line fires now"
   ]
  },
  {
@@ -1847,7 +1856,7 @@
    }
   ],
   "lines": [
-   "FREE — draw 1",
+   "FREE — draw 1 · consume all marks — 1 per stack",
    "REPRISE 1"
   ]
  },
@@ -1887,8 +1896,8 @@
   ],
   "lines": [
    "FREE — tick",
-   "RECOIL 4",
-   "+1 intensity to ALL enemy DoTs"
+   "RECOIL 5",
+   "RUPTURE"
   ]
  },
  {
@@ -1949,7 +1958,7 @@
    },
    {
     "k": "Target",
-    "v": "self"
+    "v": "enemy"
    },
    {
     "k": "Rank",
@@ -1966,7 +1975,9 @@
   ],
   "lines": [
    "FREE — draw 1",
-   "KINDLE (mind)"
+   "Applies Kindling Ember ×1, 3t → enemy",
+   "KINDLE (mind)",
+   "Die bonus: powering die mind fires a rider"
   ]
  },
  {
@@ -2314,8 +2325,8 @@
    }
   ],
   "lines": [
-   "FREE — draw 1",
-   "REAP 3 — KINDLE (mind) — draw 2"
+   "FREE — draw 1 · +1 Soul",
+   "REAP 2 — KINDLE (mind) — draw 2"
   ]
  },
  {
@@ -2430,8 +2441,9 @@
   ],
   "lines": [
    "FREE — Guard 2",
-   "spend ALL pips (+2 Guard per pip)",
-   "RUPTURE (+2 fuel per pip)"
+   "spend ALL pips (+1 Guard per pip)",
+   "RUPTURE (+2.5 fuel per pip)",
+   "refresh the spent die"
   ]
  },
  {
@@ -2470,7 +2482,8 @@
   ],
   "lines": [
    "FREE — tick",
-   "REAP all — 2 per Soul"
+   "REAP all — 4 per Soul",
+   "siphon 40%"
   ]
  },
  {
@@ -2585,7 +2598,7 @@
   ],
   "lines": [
    "FREE — mark i1 d1",
-   "Applies Backfire ×1, 2t → enemy",
+   "Applies Backfire ×2, 3t → enemy",
    "STAGGER 1",
    "Threshold: 3× mind die fires a rider"
   ]
@@ -2662,7 +2675,7 @@
   ],
   "lines": [
    "FREE — tick",
-   "consume 1 affliction — its fuel ticks now, +1 Soul"
+   "consume 1 affliction — its fuel ticks now, +2 Soul"
   ]
  },
  {
