@@ -1,16 +1,21 @@
 /**
- * Hermetic unit tests — 0.34.0 status-depth selectors + skill-engine no-ops.
+ * Hermetic unit tests — status-depth selectors + skill-engine no-ops,
+ * re-pinned to the spec 32 v3 library (poison ramps, bleed decays, MARK is the
+ * universal glue affliction; the old vulnerable/compound/execute vocabulary is
+ * retired).
  *
  * Pure reads over hand-built `ActiveEffect[]`:
- *   - getDamageTakenMultiplier  (VULNERABLE; clamp at VULNERABLE_MAX_MULT)
- *   - getPendingDotTotal / consumeDotEffects   (RUPTURE fuel)
- *   - getDistinctDebuffCount    (COMPOUND scaler)
- *   - getDistinctControlCount   (DISRUPT meter pips)
+ *   - getDamageTakenMultiplier   (exactly 1 without a marker — no v3 effect
+ *     carries a plain damageTakenMult; the machinery is kept for enemies/tests)
+ *   - getStanceVulnMult          (stance-keyed vulnerability, clamped)
+ *   - getPendingDotTotal / consumeDotEffects / consumeAfflictions (RUPTURE fuel)
+ *   - getDistinctDebuffCount / getDistinctControlCount
  *   - getActiveDotTotal / getActiveDotAmplifications  (amplification surface)
+ *   - getTickAmplifyFlat         (MARK)
  *
- * Plus: every NEW CardSpecialMechanic kind is a NO-OP through `executeSkill`
- * (the HP behavior lives in combat.engine, not the skill engine — same split as
- * `guard`). Self-contained, deterministic, no disk / RNG dependence.
+ * Plus: every combat-engine-owned CardSpecialMechanic kind is a NO-OP through
+ * `executeSkill` (the HP behavior lives in combat.engine, not the skill engine
+ * — same split as `guard`). Self-contained, deterministic, no disk / RNG.
  */
 
 import { describe, it, expect } from 'vitest';
@@ -27,14 +32,16 @@ import { executeSkill } from '../../Cards/skill.engine';
 import type { Card, CardSpecialMechanic } from '../../Cards/types';
 import type { CombatState } from '../types';
 import {
-    getDamageTakenMultiplier, getPendingDotTotal, consumeDotEffects,
+    getDamageTakenMultiplier, getStanceVulnMult, getPendingDotTotal,
+    consumeDotEffects, consumeAfflictions, consumeMarks,
     getDistinctDebuffCount, getDistinctControlCount,
     VULNERABLE_MAX_MULT,
 } from '../effects';
-import { getActiveDotTotal, getActiveDotAmplifications } from '../effect-modifiers';
+import { getActiveDotTotal, getActiveDotAmplifications, getTickAmplifyFlat } from '../effect-modifiers';
 
-// debuff base values (the existing status-combo oracle pins these):
-//   debuff_poison 4/round (start), debuff_bleed 3/round (end),
+// v3 debuff base values:
+//   debuff_poison 2/round (start, ramps +floor(0.5×turnsActive) when a round is
+//   threaded), debuff_bleed 3/round (end, decays 1 intensity per tick),
 //   poison+bleed (combined intensity >= 3) → Hemorrhage ×1.5 on poison.
 const ae = (effectId: string, intensity = 1, remainingDuration = 4, tier: 1 | 2 | 3 = 2): ActiveEffect =>
     ({ effectId, intensity, remainingDuration, appliedAt: 1, tier });
@@ -45,39 +52,55 @@ const combatant = (effects: ActiveEffect[]): Combatant => {
     return c;
 };
 
-describe('getDamageTakenMultiplier (VULNERABLE)', () => {
+describe('getDamageTakenMultiplier — exactly 1 without a marker', () => {
     it('is EXACTLY 1 with no marker (byte-identical guard)', () => {
         expect(getDamageTakenMultiplier(combatant([]))).toBe(1);
         expect(getDamageTakenMultiplier(combatant([ae('debuff_poison', 3)]))).toBe(1);
+        // MARK amplifies TICKS, not the plain incoming-damage multiplier.
+        expect(getDamageTakenMultiplier(combatant([ae('debuff_mark', 3)]))).toBe(1);
+    });
+});
+
+describe('getStanceVulnMult — stance-keyed vulnerability (Fate Engine P1 #17)', () => {
+    it('reads the keyed mult for a matching die color (and wild)', () => {
+        const c = combatant([ae('debuff_vulnerability_body', 1)]);
+        expect(getStanceVulnMult(c, 'body')).toBe(1.5);
+        expect(getStanceVulnMult(c, 'wild')).toBe(1.5);
+        expect(getStanceVulnMult(c, 'mind')).toBe(1);
+        expect(getStanceVulnMult(c, 'x')).toBe(1);
     });
 
-    it('reads a stance-agnostic vulnerable mark (1.5 at intensity 1)', () => {
-        expect(getDamageTakenMultiplier(combatant([ae('debuff_vulnerable', 1)]))).toBe(1.5);
-    });
-
-    it('aggregates additively across markers and clamps at VULNERABLE_MAX_MULT', () => {
-        // vulnerable(2) = 1 + 0.5 + 0.5 = 2.0 (== cap). (vulnerability_body is
-        // STANCE-KEYED now — Fate Engine P1 — and no longer feeds this aggregate.)
-        expect(getDamageTakenMultiplier(combatant([
-            ae('debuff_vulnerable', 2),
-        ]))).toBe(2.0);
-        // intensity 3 → 1 + 0.5×3 = 2.5 → clamped to 2.0.
-        expect(getDamageTakenMultiplier(combatant([ae('debuff_vulnerable', 3)]))).toBe(VULNERABLE_MAX_MULT);
+    it('scales with intensity and clamps at VULNERABLE_MAX_MULT', () => {
+        expect(getStanceVulnMult(combatant([ae('debuff_vulnerability_body', 2)]), 'body')).toBe(2.0);
+        expect(getStanceVulnMult(combatant([ae('debuff_vulnerability_body', 3)]), 'body')).toBe(VULNERABLE_MAX_MULT);
         expect(VULNERABLE_MAX_MULT).toBe(2.0);
     });
 });
 
-describe('getPendingDotTotal / consumeDotEffects (RUPTURE)', () => {
-    it('sums each DoT over its remaining lifetime (amplification-aware)', () => {
-        // canonical poison i2, 4 ticks left → floor(2×2)×4 = 16. No combo (poison alone).
+describe('getPendingDotTotal / consumeDotEffects (RUPTURE fuel)', () => {
+    it('sums each DoT over its remaining lifetime (amplification- and decay-aware)', () => {
+        // v3 poison i2, 4 ticks, NO round threaded → flat floor(2×2)×4 = 16.
         const only = getPendingDotTotal(combatant([ae('debuff_poison', 2, 4)]));
         expect(only.total).toBe(16);
         expect(only.perEffect).toHaveLength(1);
 
         // poison i2 + bleed i1 → Hemorrhage ×1.5 on poison:
-        //   poison floor(2×2×1.5)=6 over 4 → 24; bleed floor(4×1)=4 over 4 → 16. total 40.
+        //   poison floor(2×2×1.5)=6 over 4 → 24; bleed decays per tick — i1 lasts
+        //   exactly ONE tick: floor(3×1)=3. total 27.
         const combo = getPendingDotTotal(combatant([ae('debuff_poison', 2, 4), ae('debuff_bleed', 1, 4)]));
-        expect(combo.total).toBe(40);
+        expect(combo.total).toBe(27);
+    });
+
+    it('bleed pending fuel models the per-tick intensity decay (spec 32 v3)', () => {
+        // bleed i3 d4: ticks 9, 6, 3, then washed out → 18 (NOT 9×4=36).
+        expect(getPendingDotTotal(combatant([ae('debuff_bleed', 3, 4)])).total).toBe(18);
+        // duration shorter than intensity: i3 d2 → 9 + 6 = 15.
+        expect(getPendingDotTotal(combatant([ae('debuff_bleed', 3, 2)])).total).toBe(15);
+    });
+
+    it('poison ramps its future ticks when a round is threaded', () => {
+        // appliedAt 1, currentRound 1 → future dprs 2,2,3,3 × i2 = 4,4,6,6 = 20.
+        expect(getPendingDotTotal(combatant([ae('debuff_poison', 2, 4)]), 1).total).toBe(20);
     });
 
     it('ignores non-DoT effects and treats permanent DoT as one tick', () => {
@@ -92,26 +115,44 @@ describe('getPendingDotTotal / consumeDotEffects (RUPTURE)', () => {
         expect(consumed.sort()).toEqual(['debuff_bleed', 'debuff_poison']);
         expect(stripped.effects.map(e => e.effectId)).toEqual(['debuff_confusion']);
     });
-});
 
-describe('getDistinctDebuffCount (COMPOUND)', () => {
-    it('counts DISTINCT debuff ids (duplicates collapse, buffs excluded)', () => {
-        expect(getDistinctDebuffCount(combatant([
-            ae('debuff_poison', 1), ae('debuff_poison', 2), ae('debuff_bleed', 1), ae('debuff_confusion', 1),
-        ]))).toBe(3);
-        // buffs do not count toward debuff variety.
-        expect(getDistinctDebuffCount(combatant([ae('buff_brazen_thorns', 1)]))).toBe(0);
+    it('consumeAfflictions strips EVERY debuff and counts non-DoT stacks (v3 RUPTURE)', () => {
+        const c = combatant([
+            ae('debuff_poison', 2), ae('debuff_mark', 3), ae('debuff_rapport', 1),
+            ae('buff_thorns', 2),
+        ]);
+        const { combatant: stripped, consumed, nonDotStacks } = consumeAfflictions(c);
+        expect(consumed.sort()).toEqual(['debuff_mark', 'debuff_poison', 'debuff_rapport']);
+        expect(nonDotStacks).toBe(4); // mark 3 + rapport 1 (poison is DoT)
+        expect(stripped.effects.map(e => e.effectId)).toEqual(['buff_thorns']);
+    });
+
+    it('consumeMarks removes only MARK-class stacks (the conclusion fuel)', () => {
+        const c = combatant([ae('debuff_mark', 3), ae('debuff_poison', 2)]);
+        const { combatant: stripped, stacks } = consumeMarks(c);
+        expect(stacks).toBe(3);
+        expect(stripped.effects.map(e => e.effectId)).toEqual(['debuff_poison']);
     });
 });
 
-describe('getDistinctControlCount (DISRUPT)', () => {
-    it('counts action-restriction AND negative-roll controls; excludes pure DoT / vulnerable', () => {
+describe('getDistinctDebuffCount (FALLEN / variety payoffs)', () => {
+    it('counts DISTINCT debuff ids (duplicates collapse, buffs excluded)', () => {
+        expect(getDistinctDebuffCount(combatant([
+            ae('debuff_poison', 1), ae('debuff_poison', 2), ae('debuff_bleed', 1), ae('debuff_mark', 1),
+        ]))).toBe(3);
+        // buffs do not count toward debuff variety.
+        expect(getDistinctDebuffCount(combatant([ae('buff_thorns', 1)]))).toBe(0);
+    });
+});
+
+describe('getDistinctControlCount (DISRUPT meter)', () => {
+    it('counts action-restriction AND negative-roll controls; excludes pure DoT / exposure', () => {
         expect(getDistinctControlCount(combatant([
-            ae('debuff_confusion', 1),       // roll -5
-            ae('debuff_charm', 1),           // forcedStance
-            ae('debuff_silence', 1),         // blockedStances
-            ae('debuff_poison', 1),          // DoT — NOT control
-            ae('debuff_vulnerable', 1),      // amp — NOT control
+            ae('debuff_confusion', 1),            // roll -5 (support-tagged)
+            ae('debuff_charm', 1),                // forcedStance (support-tagged)
+            ae('debuff_silence', 1),              // blockedStances (support-tagged)
+            ae('debuff_poison', 1),               // DoT — NOT control
+            ae('debuff_mark', 1),                 // exposure — NOT control
         ]))).toBe(3);
         expect(getDistinctControlCount(combatant([]))).toBe(0);
     });
@@ -120,12 +161,21 @@ describe('getDistinctControlCount (DISRUPT)', () => {
 describe('getActiveDotTotal / getActiveDotAmplifications (amplification surface)', () => {
     it('per-tick amplified amounts SUM to the real per-round DoT', () => {
         const t = getActiveDotTotal([ae('debuff_poison', 2), ae('debuff_bleed', 1)]);
-        // poison floor(2×2×1.5)=6, bleed floor(4×1)=4 → 10 (matches the legacy oracle).
-        expect(t.total).toBe(10);
+        // poison floor(2×2×1.5)=6, bleed floor(3×1)=3 → 9.
+        expect(t.total).toBe(9);
         const poison = t.perEffect.find(e => e.effectId === 'debuff_poison')!;
         expect(poison.baseAmount).toBe(4);
         expect(poison.amount).toBe(6);
         expect(poison.multiplier).toBe(1.5);
+    });
+
+    it('MARK adds +1 per stack to EVERY DoT tick on the bearer (ratified A3)', () => {
+        expect(getTickAmplifyFlat([ae('debuff_mark', 2)])).toBe(2);
+        const t = getActiveDotTotal([ae('debuff_poison', 1), ae('debuff_bleed', 1), ae('debuff_mark', 2)]);
+        // poison 2+2=4; bleed+mark trigger Opened Veins (×1.5 on bleed):
+        // floor(3×1×1.5)=4, +2 mark = 6 → total 10. (No Hemorrhage at combined
+        // poison+bleed intensity 2.)
+        expect(t.total).toBe(10);
     });
 
     it('reports the live triggered combos with their registry names', () => {
@@ -144,30 +194,33 @@ describe('getActiveDotTotal / getActiveDotAmplifications (amplification surface)
 
 // ── skill-engine no-op (the HP behavior lives in combat.engine) ──────────────
 
-const NEW_KINDS: CardSpecialMechanic[] = [
+const ENGINE_OWNED_KINDS: CardSpecialMechanic[] = [
     { kind: 'rupture' },
-    { kind: 'compound', perDebuff: 6 },
     { kind: 'siphon', pct: 0.5 },
     { kind: 'barrier', amount: 10 },
     { kind: 'riposte', damage: 8, reduce: 6 },
-    { kind: 'execute', hpPct: 0.3, dotStacks: 3 },
+    { kind: 'reap_all', burstPerSoul: 2 },
+    { kind: 'sway', amount: 3 },
+    { kind: 'stagger', rungs: 1 },
+    { kind: 'recoil', hp: 4 },
+    { kind: 'soul_gain', count: 1 },
+    { kind: 'premise', count: 2 },
+    { kind: 'echo' },
+    { kind: 'reprise', count: 1 },
 ];
 
-describe('skill engine — every new mechanic kind is a NO-OP through executeSkill', () => {
-    for (const mech of NEW_KINDS) {
+describe('skill engine — every combat-engine-owned mechanic kind is a NO-OP through executeSkill', () => {
+    for (const mech of ENGINE_OWNED_KINDS) {
         it(`'${mech.kind}' leaves caster/target HP + effects unchanged`, () => {
             const skill: Card = {
                 id: 'test-mech-skill', name: 'Test Mechanic', category: 'fallacy',
                 philosophicalAspect: 'body', description: 'x', tier: 1,
-                targetType: 'enemy',
-                basePower: 0, scalingStat: 'body',
+                targetType: 'enemy', rank: 1, cardType: 'spell',
                 specialMechanics: [mech],
             };
             const player = deepClone(Player) as Character;
             player.knownSkills = ['test-mech-skill'];
             player.effects = [];
-            // Zero stats so the skill's own basePower/stat-scaling deals 0 — then
-            // any HP/effect change could ONLY come from the mechanic (which no-ops).
             player.baseStats = { body: 0, mind: 0, heart: 0 };
             const enemy = deepClone(GraveLarva) as Enemy;
             enemy.health = 100; enemy.maxHealth = 100; enemy.effects = [ae('debuff_poison', 3)];

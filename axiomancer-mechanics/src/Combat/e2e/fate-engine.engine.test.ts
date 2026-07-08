@@ -10,7 +10,9 @@
  *   R5 OMEN — the undrafted die that beats the current stance scouts the NEXT phase
  *   R7 COLOR MATCH — a matched die extends the landed status +1 turn
  *   R8 dieId HONORED — a Reserve die id powers the play; a bogus id fizzles
- *   REACT — both reagents present → consumed → burst + product status
+ *
+ * spec 32 v3 re-pin: REACT is deleted (REAP/RUPTURE absorb the payoff role);
+ * riders carry no chipHp (the strike is dead); fixtures carry rank/cardType.
  */
 
 import { describe, it, expect, afterEach, vi } from 'vitest';
@@ -39,31 +41,21 @@ registerSandboxCards([
     {
         id: 'qa-threshold-dot', name: 'QA Threshold DoT', category: 'fallacy',
         philosophicalAspect: 'body', description: 'threshold fixture', tier: 1,
-        targetType: 'enemy', basePower: 0, scalingStat: 'body',
+        targetType: 'enemy', rank: 1, cardType: 'spell',
         combatEffects: [{ effectId: 'debuff_bleed', appliedTo: 'opponent', intensity: 1, duration: 2 }],
-        threshold: { color: 'body', count: 1, rider: { chipHp: 7, conviction: 2 } },
+        threshold: { color: 'body', count: 1, rider: { conviction: 2, guard: 4 } },
     },
     {
         id: 'qa-fate-card', name: 'QA Fate Card', category: 'paradox',
         philosophicalAspect: 'mind', description: 'fate fixture', tier: 1,
-        targetType: 'enemy', basePower: 0, scalingStat: 'mind',
+        targetType: 'enemy', rank: 1, cardType: 'spell',
         combatEffects: [{ effectId: 'debuff_confusion', appliedTo: 'opponent', duration: 2 }],
         fate: { rider: { bonusDuration: 2 }, recoilHp: 3 },
     },
     {
-        id: 'qa-react-card', name: 'QA React Card', category: 'paradox',
-        philosophicalAspect: 'body', description: 'react fixture', tier: 2,
-        targetType: 'enemy', basePower: 0, scalingStat: 'body',
-        specialMechanics: [{
-            kind: 'react', a: 'debuff_fear', b: 'debuff_confusion', minIntensity: 1,
-            burstPerIntensity: 4,
-            product: { effectId: 'debuff_stagger', intensity: 1, duration: 1 },
-        }],
-    },
-    {
         id: 'qa-guard-card', name: 'QA Guard Card', category: 'fallacy',
         philosophicalAspect: 'heart', description: 'guard fixture', tier: 1,
-        targetType: 'self', basePower: 0, scalingStat: 'heart',
+        targetType: 'self', rank: 1, cardType: 'spell',
         specialMechanics: [{ kind: 'guard', amount: 10 }],
     },
 ]);
@@ -109,16 +101,18 @@ describe('R1 RESONANCE + thresholds', () => {
         s = setDice(s, ['body', 'heart']);
         s = draftStanceDie(s, s.dice[0].id).state; // burns the heart die → heart resonance
         expect(s.resonance?.heart).toBe(1);
-        const hpBefore = s.enemy.health;
         const convBefore = s.conviction;
+        const guardBefore = s.guard ?? 0;
         const entry = s.hand.find(h => h.cardId === 'qa-threshold-dot')!;
         const res = playCombatCard(s, { uid: entry.uid }, true);
-        // The powering body die tallies body 1 ≥ count 1 → rider fires: chip 7 + 2 Conviction.
+        // The powering body die tallies body 1 ≥ count 1 → rider fires:
+        // +2 Conviction, +4 Guard (real units — no chip exists in v3).
         expect(res.state.resonance?.body).toBe(1);
         expect(res.events.some(e => e.kind === 'threshold-fired')).toBe(true);
         expect(res.state.conviction).toBe(Math.min(12, convBefore + 2));
-        // chip 7 + the bleed application; the chip is EXACT (mechanic path, unweighted).
-        expect(hpBefore - res.state.enemy.health).toBeGreaterThanOrEqual(7);
+        expect((res.state.guard ?? 0) - guardBefore).toBe(4);
+        // The strike is dead: only the bleed will erode HP, later.
+        expect(res.state.enemy.health).toBe(500);
     });
 });
 
@@ -222,7 +216,7 @@ describe('R4 FATE — X dice are never dead', () => {
         const xDie = s.dice.find(d => d.color === 'x')!;
         const hp = s.enemy.health;
         const tap = tapFateDie(s, xDie.id, 'dot-tick');
-        expect(hp - tap.state.enemy.health).toBe(8); // floor(4 × 2) — one exact bleed tick
+        expect(hp - tap.state.enemy.health).toBe(6); // floor(3 × 2) — one exact v3 bleed tick
         expect(tap.state.fateTappedTurn).toBe(tap.state.turn);
         // second tap the same turn is a no-op
         const again = tapFateDie(tap.state, xDie.id, 'conviction');
@@ -261,36 +255,6 @@ describe('R7 COLOR MATCH — +1 turn on status plays', () => {
     });
 });
 
-describe('REACT — consuming detonation', () => {
-    it('consumes both reagents, bursts on the mechanic path, applies the product', () => {
-        let s = open(['qa-react-card'], 'heart', [ae('debuff_fear', 2, 2), ae('debuff_confusion', 1, 2)]);
-        s = setDice(s, ['heart', 'mind']);
-        s = draftStanceDie(s, s.dice[0].id).state;  // neutral read
-        const hp = s.enemy.health;
-        const entry = s.hand.find(h => h.cardId === 'qa-react-card')!;
-        const res = playCombatCard(s, { uid: entry.uid }, true);
-        const det = res.events.find(e => e.kind === 'react-detonated') as { amount: number; consumed: string[] } | undefined;
-        expect(det).toBeDefined();
-        expect(det!.amount).toBe(4 * (2 + 1)); // burstPerIntensity × consumed intensities, neutral ×1
-        expect(det!.consumed.sort()).toEqual(['debuff_confusion', 'debuff_fear']);
-        expect(res.state.enemy.effects.some(e => e.effectId === 'debuff_fear')).toBe(false);
-        expect(res.state.enemy.effects.some(e => e.effectId === 'debuff_stagger')).toBe(true);
-        expect(hp - res.state.enemy.health).toBeGreaterThanOrEqual(det!.amount);
-        // a fired REACT refreshes the powering die (the crescendo keeps the turn alive)
-        expect(res.events.some(e => e.kind === 'die-refreshed')).toBe(true);
-    });
-
-    it('without both reagents it is just the card (no detonation)', () => {
-        let s = open(['qa-react-card'], 'heart', [ae('debuff_fear', 2, 2)]);
-        s = setDice(s, ['heart', 'mind']);
-        s = draftStanceDie(s, s.dice[0].id).state;
-        const entry = s.hand.find(h => h.cardId === 'qa-react-card')!;
-        const res = playCombatCard(s, { uid: entry.uid }, true);
-        expect(res.events.some(e => e.kind === 'react-detonated')).toBe(false);
-        expect(res.state.enemy.effects.some(e => e.effectId === 'debuff_fear')).toBe(true);
-    });
-});
-
 describe('R8 — a bogus dieId is an explicit fizzle', () => {
     it('fizzles without touching state', () => {
         let s = open(['qa-threshold-dot'], 'body');
@@ -304,10 +268,12 @@ describe('R8 — a bogus dieId is an explicit fizzle', () => {
 });
 
 describe('the projected card prints its die lines (real units)', () => {
-    it('threshold / fate / die-manipulation lines appear on curated keepers', () => {
-        expect(getCard('hasty-generalization')!.dieLines?.some(l => l.includes('BODY ×2'))).toBe(true);
-        expect(getCard('achilles-gambit')!.dieLines?.some(l => l.includes('X die'))).toBe(true);
-        expect(getCard('ship-of-theseus')!.dieLines?.some(l => l.includes('WILD'))).toBe(true);
-        expect(getCard('suspend-judgment')!.dieLines?.some(l => l.includes('Reserve'))).toBe(true);
+    it('threshold / dieBonus lines appear on v3 library cards', () => {
+        // mounting-case: threshold heart×2 → +1 Premise
+        expect(getCard('mounting-case')!.dieLines?.some(l => l.includes('HEART ×2'))).toBe(true);
+        // straw-mans-jab: dieBonus on a BODY die → +1 intensity
+        expect(getCard('straw-mans-jab')!.dieLines?.some(l => l.includes('BODY die'))).toBe(true);
+        // bootstrap-loop: threshold mind×2 → +1 pip to every Reserve die
+        expect(getCard('bootstrap-loop')!.dieLines?.some(l => l.includes('Reserve'))).toBe(true);
     });
 });

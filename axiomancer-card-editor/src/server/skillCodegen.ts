@@ -47,12 +47,22 @@ function num(n: number): string {
     return String(n);
 }
 
-/** Emit an arbitrary scalar value (string / number / boolean). */
+/** Emit an arbitrary scalar value (string / number / boolean) — objects and
+ *  arrays recurse through an inline literal (nested riders on omen/peroration/
+ *  reap and the FREE line serialize as real TS object literals). */
 function valOf(v: unknown): string {
     if (typeof v === 'string') return str(v);
     if (typeof v === 'number') return num(v);
     if (typeof v === 'boolean') return String(v);
+    if (Array.isArray(v)) return `[${v.map(valOf).join(', ')}]`;
+    if (v != null && typeof v === 'object') return objLiteral(v as Record<string, unknown>);
     return JSON.stringify(v);
+}
+
+/** Inline object literal: `{ k: v, … }` (undefined entries pruned). */
+function objLiteral(o: Record<string, unknown>): string {
+    const entries = Object.entries(o).filter(([, v]) => v !== undefined);
+    return `{ ${entries.map(([k, v]) => `${k}: ${valOf(v)}`).join(', ')} }`;
 }
 
 const notBlank = (s: string | undefined | null): boolean =>
@@ -227,13 +237,15 @@ export function serialize(draft: CardDraft, identOverride?: string): string {
     lines.push(`${IND}category: ${str(draft.category)},`);
     lines.push(`${IND}philosophicalAspect: ${str(draft.philosophicalAspect)},`);
     lines.push(...descriptionLines(draft.description));
-    lines.push(`${IND}tier: ${num(draft.tier)},`);
+    // Spec 32 v3 — tier/rank/cardType share a line, mirroring the library style.
+    lines.push(`${IND}tier: ${num(draft.tier)}, rank: ${num(draft.rank)}, cardType: ${str(draft.cardType)},`);
     lines.push(`${IND}targetType: ${str(draft.targetType)},`);
-    lines.push(`${IND}basePower: ${num(draft.basePower)},`);
-    lines.push(`${IND}scalingStat: ${str(draft.scalingStat)},`);
-    if (draft.scalingMultiplier != null) {
-        lines.push(`${IND}scalingMultiplier: ${num(draft.scalingMultiplier)},`);
-    }
+    // The authored FREE line + die-interaction lines round-trip verbatim.
+    if (draft.free != null) lines.push(`${IND}free: ${objLiteral(draft.free as Record<string, unknown>)},`);
+    if (draft.threshold != null) lines.push(`${IND}threshold: ${objLiteral(draft.threshold as Record<string, unknown>)},`);
+    if (draft.dieBonus != null) lines.push(`${IND}dieBonus: ${objLiteral(draft.dieBonus as Record<string, unknown>)},`);
+    if (draft.fate != null) lines.push(`${IND}fate: ${objLiteral(draft.fate as Record<string, unknown>)},`);
+    if (draft.fallen != null) lines.push(`${IND}fallen: ${objLiteral(draft.fallen as Record<string, unknown>)},`);
     if (draft.combatEffects?.length) lines.push(...combatEffectsLines(draft.combatEffects));
     if (draft.specialMechanics?.length) {
         lines.push(...specialMechanicsLines(draft.specialMechanics));

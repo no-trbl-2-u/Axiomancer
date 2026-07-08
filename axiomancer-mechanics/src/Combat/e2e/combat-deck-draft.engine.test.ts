@@ -153,7 +153,7 @@ describe('draftCombatDeck stage + extraCards pools', () => {
         const extraDot: Card = {
             id: 'draft-test-extra-dot', name: 'Draft Test Dot', category: 'fallacy',
             philosophicalAspect: 'body', description: 'test-only DoT card', tier: 1,
-            targetType: 'enemy', basePower: 8, scalingStat: 'body',
+            targetType: 'enemy', rank: 1, cardType: 'spell',
             combatEffects: [{ effectId: 'debuff_bleed', appliedTo: 'opponent', intensity: 2, duration: 3 }],
             learningRequirement: { level: 1 },
         };
@@ -170,8 +170,8 @@ describe('draftCombatDeck stage + extraCards pools', () => {
 
 describe('resolveDeckSelection', () => {
     it("kind 'preset' delegates to buildPresetDeck (unknown preset → empty)", () => {
-        const selection: CombatDeckSelection = { kind: 'preset', presetId: 'dot-erosion' };
-        expect(resolveDeckSelection(selection, undefined)).toEqual(buildPresetDeck('dot-erosion'));
+        const selection: CombatDeckSelection = { kind: 'preset', presetId: 'erosion' };
+        expect(resolveDeckSelection(selection, undefined)).toEqual(buildPresetDeck('erosion'));
         expect(resolveDeckSelection({ kind: 'preset', presetId: 'nope' }, undefined)).toEqual([]);
     });
 

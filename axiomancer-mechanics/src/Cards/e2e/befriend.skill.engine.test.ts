@@ -1,21 +1,39 @@
 /**
- * Phase 108 — Befriend heart skill end-to-end tests.
+ * Phase 108 — Befriend skill-mechanic end-to-end tests.
  *
- * Tests the Befriend skill implementation:
- * - Starting character skill acquisition
- * - 5-heart cost requirement
- * - HP gate eligibility 
- * - Mercy choice state activation
- * - Spare/exploit choice resolution
+ * The pre-v3 `befriend` LIBRARY CARD retired with the spec 32 v3 overhaul
+ * (Befriend lives in enemy-signature / mercy flows now — ADR-0007 keeps the
+ * path alive, and the Charm theme accelerates it). The `befriend_attempt`
+ * MECHANIC is kept engine machinery, so this suite drives it through a
+ * fixture card + a local lookup:
+ * - HP gate eligibility (fails above the gate, succeeds below)
+ * - Mercy choice state activation via `activateMercyChoice`
  */
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { mockSequentialRng, restoreOriginalRng } from '../../test-utils/rng';
 import { createCharacter } from '../../Character';
 import { executeSkill } from '../skill.engine';
-import { getCardById } from '../cards.library';
+import type { Card } from '../types';
 import { initializeCombat } from '../../Combat';
 import { createEnemy } from '../../Enemy';
+
+/** Fixture card carrying the kept `befriend_attempt` mechanic. */
+const befriendCard: Card = {
+    id: 'fix-befriend',
+    name: 'Fixture Befriend',
+    category: 'fallacy',
+    philosophicalAspect: 'heart',
+    description: 'An open hand (fixture).',
+    tier: 1,
+    rank: 1,
+    cardType: 'spell',
+    targetType: 'enemy',
+    specialMechanics: [{ kind: 'befriend_attempt' }],
+};
+
+const lookup = (id: string): Card | undefined =>
+    id === befriendCard.id ? befriendCard : undefined;
 
 // Test enemy with befriendability config for HP gate testing
 const befriendableEnemy = createEnemy({
@@ -28,10 +46,19 @@ const befriendableEnemy = createEnemy({
     logic: 'random',
     befriendabilityConfig: {
         hpGate: { belowPct: 0.5 }, // Can befriend when below 50% HP
-    }
+    },
 });
 
-describe('Befriend skill (Phase 108)', () => {
+function fixtureCharacter() {
+    return createCharacter({
+        name: 'Test Character',
+        level: 1,
+        baseStats: { heart: 5, body: 5, mind: 5 },
+        knownSkills: [befriendCard.id],
+    });
+}
+
+describe('Befriend mechanic (Phase 108, re-pinned for spec 32 v3)', () => {
     beforeEach(() => {
         mockSequentialRng(0.5); // Fixed RNG for deterministic tests
     });
@@ -43,65 +70,38 @@ describe('Befriend skill (Phase 108)', () => {
         restoreOriginalRng();
     });
 
-    describe('Starting skill acquisition', () => {
-        it('new characters know Befriend skill', () => {
-            const character = createCharacter({
-                name: 'Test Character',
-                level: 1,
-                baseStats: { heart: 5, body: 5, mind: 5 },
-                knownSkills: ['befriend'] // Befriend should be in starting skills
-            });
-
-            expect(character.knownSkills).toContain('befriend');
-        });
-    });
-
     describe('HP gate eligibility', () => {
         it('fails befriend attempt when enemy HP too high', () => {
-            const character = createCharacter({
-                name: 'Test Character', 
-                level: 1,
-                baseStats: { heart: 5, body: 5, mind: 5 },
-                knownSkills: ['befriend']
-            });
-
             const enemy = { ...befriendableEnemy, health: 40 }; // 80% HP - above threshold
 
             const combatState = {
-                ...initializeCombat(character, enemy),
-                combatResources: { heart: 5, body: 0, mind: 0, fallacy: 0, paradox: 0 }
+                ...initializeCombat(fixtureCharacter(), enemy),
+                combatResources: { heart: 5, body: 0, mind: 0, fallacy: 0, paradox: 0 },
             };
 
-            const resolution = executeSkill(combatState, 'befriend', getCardById);
-            
+            const resolution = executeSkill(combatState, befriendCard.id, lookup);
+
             const befriendEvent = resolution.events.find(e => e.kind === 'befriend-attempted');
             expect(befriendEvent).toBeDefined();
             expect(befriendEvent!.successful).toBe(false);
             expect(befriendEvent!.message).toContain('not yet vulnerable');
+            expect(resolution.activateMercyChoice).toBe(false);
         });
 
         it('succeeds befriend attempt when enemy HP below threshold', () => {
-            const character = createCharacter({
-                name: 'Test Character',
-                level: 1, 
-                baseStats: { heart: 5, body: 5, mind: 5 },
-                knownSkills: ['befriend']
-            });
-
-            // Create enemy and manually reduce health to below 50% 
             const enemy = { ...befriendableEnemy };
             enemy.health = Math.floor(enemy.maxHealth * 0.4); // 40% HP - below threshold
 
-            const baseState = initializeCombat(character, enemy);
+            const baseState = initializeCombat(fixtureCharacter(), enemy);
             const combatState = {
                 ...baseState,
                 enemy, // Use the modified enemy with low health
                 friendshipCounter: 15, // Above FRIENDSHIP_COUNTER_MAX to satisfy rounds threshold
-                combatResources: { heart: 5, body: 0, mind: 0, fallacy: 0, paradox: 0 }
+                combatResources: { heart: 5, body: 0, mind: 0, fallacy: 0, paradox: 0 },
             };
 
-            const resolution = executeSkill(combatState, 'befriend', getCardById);
-            
+            const resolution = executeSkill(combatState, befriendCard.id, lookup);
+
             const befriendEvent = resolution.events.find(e => e.kind === 'befriend-attempted');
             expect(befriendEvent).toBeDefined();
             expect(befriendEvent!.successful).toBe(true);
@@ -111,27 +111,19 @@ describe('Befriend skill (Phase 108)', () => {
     });
 
     describe('Mercy choice state', () => {
-        it('activates mercy choice after successful Befriend', () => {
-            const character = createCharacter({
-                name: 'Test Character',
-                level: 1,
-                baseStats: { heart: 5, body: 5, mind: 5 },
-                knownSkills: ['befriend']
-            });
-
-            // Create enemy and manually reduce health to below 50%
+        it('activates mercy choice after a successful befriend attempt', () => {
             const enemy = { ...befriendableEnemy };
             enemy.health = Math.floor(enemy.maxHealth * 0.3); // 30% HP - below threshold
 
-            const baseState = initializeCombat(character, enemy);
+            const baseState = initializeCombat(fixtureCharacter(), enemy);
             const combatState = {
                 ...baseState,
-                enemy, // Use the modified enemy with low health
-                friendshipCounter: 15, // Above FRIENDSHIP_COUNTER_MAX to satisfy rounds threshold
-                combatResources: { heart: 5, body: 0, mind: 0, fallacy: 0, paradox: 0 }
+                enemy,
+                friendshipCounter: 15,
+                combatResources: { heart: 5, body: 0, mind: 0, fallacy: 0, paradox: 0 },
             };
 
-            const resolution = executeSkill(combatState, 'befriend', getCardById);
+            const resolution = executeSkill(combatState, befriendCard.id, lookup);
             expect(resolution.activateMercyChoice).toBe(true);
         });
     });
@@ -139,6 +131,6 @@ describe('Befriend skill (Phase 108)', () => {
     // The legacy `selectMercyChoice` reducer (which wrote the spare/exploit
     // choice onto a turn-based `CombatState`) was removed with the legacy
     // combat driver. The Hazard-Pattern engine owns mercy resolution now
-    // (`selectEncounterMercyChoice`); the befriend SKILL still surfaces
+    // (`selectEncounterMercyChoice`); the befriend MECHANIC still surfaces
     // `activateMercyChoice` via `executeSkill`, covered above.
 });

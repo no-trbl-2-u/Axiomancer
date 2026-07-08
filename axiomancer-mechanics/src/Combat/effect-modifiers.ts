@@ -81,6 +81,7 @@ export interface ActiveDotEntry {
  */
 export function getActiveDotTotal(effects: ActiveEffect[], currentRound?: number): { perEffect: ActiveDotEntry[]; total: number } {
     const dotAmp = getDotAmplificationByEffect(effects);
+    const markBonus = getTickAmplifyFlat(effects);
     const perEffect: ActiveDotEntry[] = [];
     let total = 0;
     for (const ae of effects) {
@@ -91,11 +92,25 @@ export function getActiveDotTotal(effects: ActiveEffect[], currentRound?: number
         const multiplier = dotAmp.get(ae.effectId) ?? 1;
         const dpr = rampedDamagePerRound(ae, dot.damagePerRound, def.payload.dotModifiers, currentRound);
         const baseAmount = Math.floor(dpr * intensity);
-        const amount = Math.floor(dpr * intensity * multiplier);
+        const amount = Math.floor(dpr * intensity * multiplier) + markBonus;
         perEffect.push({ effectId: ae.effectId, label: def.name, baseAmount, amount, multiplier });
         total += amount;
     }
     return { perEffect, total };
+}
+
+/**
+ * MARK (spec 32 v3, ratified A3) — the flat bonus every DoT tick on the bearer
+ * gains: Σ (tickAmplifyFlat × intensity) across the bearer's effects. 0 for an
+ * unmarked bearer (every prior case byte-identical). Pure.
+ */
+export function getTickAmplifyFlat(effects: ActiveEffect[]): number {
+    let bonus = 0;
+    for (const ae of effects) {
+        const flat = lookupEffect(ae.effectId)?.payload.tickAmplifyFlat ?? 0;
+        if (flat > 0) bonus += flat * (ae.intensity ?? 1);
+    }
+    return bonus;
 }
 
 /** One live, triggered DoT-amplification combo (e.g. Hemorrhage), named via the registry. */
@@ -189,6 +204,7 @@ const addToMap = (map: Map<EffectStatTarget, number>, key: EffectStatTarget, val
 export function getActiveEffectModifiers(effects: ActiveEffect[], currentRound?: number): AggregatedEffectModifiers {
     const agg = emptyAgg();
     const dotAmp = getDotAmplificationByEffect(effects);
+    const markBonus = getTickAmplifyFlat(effects);
 
     for (const ae of effects) {
         const def = lookupEffect(ae.effectId);
@@ -234,9 +250,11 @@ export function getActiveEffectModifiers(effects: ActiveEffect[], currentRound?:
             // Multiplier defaults to 1 (no combo) and floors to an integer to
             // match the rest of the unresisted DoT math. P0-truth: the ramp
             // (`escalatesPerTurn`) grows the per-round base when a round is threaded.
+            // MARK (spec 32 v3): each ticking effect gains the bearer's flat
+            // tick-amplify bonus (+1 per Mark stack per tick), added below.
             const multiplier = dotAmp.get(ae.effectId) ?? 1;
             const dpr = rampedDamagePerRound(ae, dot.damagePerRound, payload.dotModifiers, currentRound);
-            const total = Math.floor(dpr * intensity * multiplier);
+            const total = Math.floor(dpr * intensity * multiplier) + markBonus;
             const phase: DotTickPhase = dot.tickPhase ?? 'start';
             if (phase === 'start') agg.dotStart += total;
             else                   agg.dotEnd   += total;

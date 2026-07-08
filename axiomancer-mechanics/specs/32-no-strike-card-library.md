@@ -1,447 +1,441 @@
-# Spec 32 — The No-Strike Library: utility/status card revamp + rank ladder
+# Spec 32 — The Themed Deck Library: 10 themes, 70 cards, 30 keywords
 
-> **Status:** DESIGN v2 — owner-ratified 2026-07-06 (all §9 v1 questions
-> answered in session; remaining open items in §9 are assumption-confirms,
-> not blockers). Authored from the owner's directive (Dawncaster card
-> revamp session) + a mechanics-expert deep-mine of the Dawncaster KB
-> (kb:dawncaster — 1,692 cards / 141 keywords,
-> github.com/no-trbl-2-u/game-knowledge-base,
-> `KnowledgeBase/DigitalCardGames/dawncaster/`).
+> **Status:** DESIGN v3 — supersedes v2 (owner-directed 2026-07-07).
+> v2's catalogue (75 cards / 4 themes / 6-rank recipe / 5 presets) is
+> replaced wholesale; v2's ENGINE machinery (floating-dice live tray,
+> persistent enchant/disenchant zone, Premises/Peroration, power-budget
+> pricing lint, no-strike doctrine) is retained and extended. Authored
+> from the owner's 2026-07-07 directive (themed-deck session; 8 ratified
+> answers recorded in §12) + the Dawncaster KB (kb:dawncaster — 1,692
+> cards / 141 keywords, github.com/no-trbl-2-u/game-knowledge-base).
 >
-> **Owner directives (ratified):**
-> 1. NO raw HP damage — no strikes, no chips. Cards draw, forge floating
->    dice, provide utility, or cause status effects. Status-payoff verbs
->    (rupture/compound/amplify/execute/react) are the ONLY HP-touching
->    cards (they require statuses first).
-> 2. FREE/PAID mixing ("draw 1 / poison 5" vs "poison 2 / draw 3") with an
->    internal exchange rate; some cards are flat-out better ON PURPOSE.
-> 3. Rank ladder beyond 3 tiers: **Doxa → Lemma → Thesis → Theorem →
->    Axiom → Aporia** (6 steps; Aporia = rule-rewriters, not bigger
->    numbers). Mechanical `tier` (resist rules) is a separate field.
-> 4. **Four themes, each covered at EVERY rank:** DoT (bleed+poison
->    merged), Peroration, Forge, Akrasia. Fewer keywords, more cards
->    interacting with each keyword — focused deckbuilding over
->    hodge-podge. (Cassandra/Syllogism/Dialectic cut as named packages;
->    their best verbs survive as plain condition lines and staples.)
-> 5. **Card types:** enchantments (persistent player-side passives, rest
->    of combat), disenchants (persistent effects, rest of combat — §2.1),
->    spells (everything else: play → discard). More types to come.
-> 6. Deck exhaustion → reshuffle the discard into a new deck. (Already
->    the engine's behavior — `combat.deck.ts:92-98`; codified here as
->    law: NO combat-fatigue mechanic may be added on top of it.)
-> 7. Floating dice: live-tray model (§5). Cap 3. Intent: bigger turns.
-> 8. Library ~75 cards while deck types are tested. Win ratio explicitly
->    NOT a constraint (enemies strengthened separately); rank honesty IS.
+> **Owner directives (ratified 2026-07-07):**
+> 1. Delete ALL old keywords and card outcomes; start over. The current
+>    libraries (72 debuffs + 54 buffs, ~80 player-facing keywords) are
+>    retired in full. New registry: **exactly 30 keywords** (§3).
+> 2. **70 unique cards** — 10 themes × 7 uniques. Strictly
+>    self-contained: zero cross-deck card overlap; only the synthetic
+>    Retreat card is shared. Every theme expresses its own
+>    defense/sustain/draw in its own vocabulary.
+> 3. **10 preset decks, 15 cards each**: 4 copies × 2 unique commons,
+>    2 copies × 2 unique uncommons, 1 copy × 3 unique rares — all
+>    in-theme. Each deck must play fundamentally differently.
+> 4. **3 rarities mapped onto the rank ladder** (§4): Common =
+>    Doxa/Lemma, Uncommon = Thesis/Theorem, Rare = Axiom/Aporia. Faces
+>    keep the rank names; recipes and drop weights use rarity.
+> 5. **Card types:** spell (play → discard), enchantment (persistent
+>    positive passive, player-side, rest of combat), disenchant
+>    (persistent negative passive **attached to the enemy** — a standing
+>    curse). Enemies get enchantments too and may attach disenchants to
+>    the player (§10).
+> 6. No raw HP damage — no strikes, no chips (unchanged from v2; §1).
+>    Same FREE/PAID die economy, same art pool (§11 #15).
+> 7. Cards must interact with combat itself: floating dice, card draw,
+>    deck order, the discard pile, the enemy's telegraphs.
+> 8. Alt-wins allowed: HP remains the main threshold; Befriend stays;
+>    CAPITULATE (Charm) is added; one further alt-win is an
+>    assumption-confirm (§9).
+> 9. A PERFORM spin-off is mandatory (T2 Peroration, kept from v2).
 >
 > Builds on Spec 31 (Fate Engine): Resonance thresholds, Reserve
 > ripening, Omen, fate/X dice, riders, projection-truth law all stay.
-> This spec replaces the card LIBRARY, adds the rank ladder, card types,
-> themes, and the floating-die economy; §1.1 lists the two Spec 31
-> amendments.
 
 ---
 
-## 1. Doctrine change — the strike dies
+## 1. Doctrine — the strike stays dead (v2 §1, restated + extended)
 
-**Removed from the player's vocabulary entirely:**
+**Removed from the player's vocabulary entirely, now at the SCHEMA
+level:** `basePower`, `chipHp`, strike/chip projection text. The fields
+are deleted from `Card`/`CardRider` types so a regression is a compile
+error, and a data-lint test bans any card whose resolved play deals HP
+damage outside the legal sources below. (Root cause of the recurring
+"chip/strike" sightings: v2 specced the purge but never shipped it, and
+nothing enforced it — 4 `basePower` cards and 3 `chipHp` riders are
+still live on `main`. This gate is non-negotiable in v3.)
 
-- `basePower` flat damage on any card.
-- `chipHp` riders AND "chip 2" FREE lines ("tick" — one immediate tick of
-  an enemy DoT — is the canonical small line instead).
-- `riposte.damage`; riposte survives as pure parry (`reduce` only).
-- Conviction/token-fueled raw bursts.
+**Enemy HP remains the main win condition.** Every point of enemy HP
+falls to exactly four sources:
 
-**Enemy HP remains the sole win condition** (`isDefeated(enemy)`). Every
-point of enemy HP falls to exactly three sources:
+1. **DoT ticks** — poison / bleed, plus TICK riders.
+2. **Affliction-payoff bursts** — RUPTURE and REAP-class verbs: bursts
+   that exist only because afflictions/Souls were built first (the
+   `mechanicDamage` path; caps kept).
+3. **Engine-gated drips** — small printed drips (1–3 HP) gated behind a
+   running theme engine: BACKFIRE (enemy loses action rungs),
+   `bone-orchard` (Souls), `stuck-in-their-head` (ECHO/REPRISE). Never
+   playable as a raw burst; the engine must be running first.
+4. **Reflect class** — THORNS and RIPOSTE (the enemy's own aggression,
+   returned).
 
-1. **DoT ticks** — poison / bleed / burn / hemorrhage / septic /
-   unraveling / despair, plus `tickAllDots` riders.
-2. **Status-payoff verbs** — RUPTURE / COMPOUND / AMPLIFY / EXECUTE /
-   REACT: HP bursts that exist *only because statuses were built first*.
-   (Already on the separate `mechanicDamage` path — they survive the
-   purge cleanly.)
-3. **Reflect/thorns-class effects.**
+Alt-win thresholds (§9) are the sanctioned exceptions to HP: Befriend
+(existing, ADR-0007) and CAPITULATE (SWAY, §3/§9).
 
-This completes the 2026-06 load-bearing doctrine: status play stops being
-the *efficient* path and becomes the *only* path.
+The v2 no-floor mitigations stand: turn-2 erosion gate, anti-heal
+reachability, enemy cleanse < cheapest DoT output, no-zero-capacity
+sim gate.
 
-### 1.1 Spec 31 amendments
-
-- **§4.2 / R7:** surviving strike cards are re-cut (§7); R7's "+3 flat on
-  strike/defend" becomes "+2 Guard on defend cards" (status cards keep
-  +1 duration). `DIRECT_DAMAGE_WEIGHT` goes dead and is purged.
-- **§6 invariants:** the 2-rolled-dice draft and the single-die law are
-  PRESERVED; floating dice are additional tray dice governed by §5's cap
-  and are exempt from the reroll — the invariant list gains: "floating
-  dice never reroll and never exceed cap 3."
-
-### 1.2 No-floor mitigations (mechanics-expert D1/D2)
-
-- **Turn-2 erosion gate (sim/CI):** every legal starting hand of every
-  preset must be able to begin eroding enemy HP by turn 2.
-- **Anti-heal reachability:** despair must stay reachable from
-  starter-adjacent ranks (it is: §7, Lemma).
-- **Enemy design law:** enemy cleanse/heal per phase < the cheapest Doxa
-  DoT's per-turn output (enforced when enemies are strengthened).
-- **No-zero-capacity gate (sim/CI):** no seeded fight may reach a state
-  where the player's pending damage capacity is 0 with no card that can
-  change it.
-
-## 2. Card anatomy — types + FREE/PAID
-
-### 2.1 Card types (new field: `cardType`)
+## 2. Card anatomy — types + FREE/PAID (v2 §2, unchanged shape)
 
 | type | lifecycle | anatomy |
 |---|---|---|
-| **spell** | play → discard pile; recycled by the reshuffle law | FREE line + PAID line (§2.2) |
-| **enchantment** | play → **persistent zone** for the rest of the combat; leaves the deck cycle; fires its passive continuously/on-trigger | PAID-only (a die is the commitment; no FREE line) |
-| **disenchant** | play → persistent zone for the rest of the combat, **attached to the enemy** — a standing curse/aura working against the foe | PAID-only |
+| **spell** | play → discard; recycled by the reshuffle law | FREE line + PAID line |
+| **enchantment** | play → persistent zone (player side), rest of combat; leaves the deck cycle | PAID-only |
+| **disenchant** | play → persistent zone **attached to the enemy**, rest of combat | PAID-only |
 
-- Enchantments are the owner's "passive bonus that strengthens poison"
-  card; disenchants are their negative mirror (owner-ratified:
-  *enchant = positive persistent passive, disenchant = negative
-  persistent passive — a standing effect working against the enemy*).
-- The persistent zone already exists in the Hazard shape
-  (`persistentZone`, spec 25 §"Enchantment zone"); this wires it for
-  real.
-- More types to come (owner note); `cardType` is an open enum.
-- Spec 25's open Q1 (hand persistence) is unchanged — hands still draw
-  fresh each phase; the reshuffle law (§ header, directive 6) governs
-  the deck/discard cycle underneath it.
+- FREE line: dieless, small, always available. PAID line: one die, the
+  real payload. Budget law: FREE ≈ 25–35% of total points.
+- Conditionality is the third pricing lever; every Tier-2+ card carries
+  at most ONE condition line (threshold / dieBonus / fate / theme-state).
+- Deck exhaustion → reshuffle discard (law; no fatigue mechanic ever).
+- Enchant/disenchant are PAID-only and unique-in-play per name.
+- More types to come; `cardType` stays an open enum.
 
-### 2.2 FREE / PAID (spells)
+## 3. The keyword registry — exactly 30
 
-```
-┌─────────────────────────────┐
-│  CARD NAME          [rank]  │
-│  FREE  draw 1               │   ← dieless, small, always available
-│  PAID  poison i2 d4         │   ← one die, the real payload
-│  ⬡ condition line           │   ← threshold / dieBonus / fate /
-│                             │     theme-state (Premises / Fallen)
-└─────────────────────────────┘
-```
+The old effect libraries (`debuffs.library.json` 72 ids,
+`buffs.library.json` 54 ids) and the mobile keyword map (~80 entries)
+are **retired in full** and rebuilt from this table. The
+deprecated-effects ban-list is regenerated to cover every retired id.
 
-- FREE and PAID draw from the SAME verb menu (§3): "draw 1 / poison 5"
-  and "poison 2 / draw 3" are both legal — same budget, opposite shapes.
-  (Dawncaster runs this exact trade at Common: kb:dawncaster/cards/1565
-  vs /cards/0002.)
-- Budget law: **FREE ≈ 25–35% of the card's total points** (§4).
-- **Conditionality is the third pricing lever** (kb:dawncaster/cards/0364)
-  — conditional riders are discounted, never free.
-- Every Tier-2+ card carries at most ONE condition line (Spec 31 P1 law).
+### Utility (10) — shared across all themes
 
-## 3. The verb menu (post-strike vocabulary)
-
-**B** = suits PAID magnitudes, **T** = suits FREE magnitudes.
-
-| family | verbs |
+| keyword | semantics |
 |---|---|
-| **Status — DoT** (BT) | poison, bleed, burn, hemorrhage, septic, unraveling, despair; "tick" (single immediate tick of one enemy DoT) is the canonical small FREE line |
-| **Status — control** (B) | confusion, fear, slow, root, silence, charm, stagger, sensory-null |
-| **Status — exposure** (BT) | vulnerable, vulnerability(stance), mark, doubt, overextended, novikov (next-DoT-upgrade) |
-| **Status — self-buff** (BT) | resolute, regeneration, life-steal, thorns, clarity, negation |
-| **Draw / hand** (BT) | draw N; conjure_card (one-use Thoughtform into hand) |
-| **Foresight** (BT) | revealStance (1 / 2 / all phases), lock enemy stance, telegraph-downgrade — plain verbs now, no tally |
-| **Dice — in-combat** (B) | create_temporary_die, grant_pip, bank_spent_die, refresh_die, convert_die_color, reroll_spent, spendAllPips (cash total Reserve pips into a rider) |
-| **Dice — persistent** (B) | **forge_floating_die** (§5): joins the tray NOW, never rerolls, carries across rounds AND combats until spent |
-| **Defense** (BT) | guard, barrier, riposte (pure parry), cleanse, heal, conviction |
-| **Status payoffs** (B) | rupture, compound, amplify, execute, react, tickAllDots, siphon |
-| **Theme currencies** (BT) | premise +N / Peroration slot (§6 T2); Fallen state (§6 T4); DoT cross-keyword verbs — extend/convert/boost bleed AND poison (§6 T1) |
-| **Persistent passives** | enchant/disenchant payloads: "(rest of combat) whenever/while X: rider" |
+| **DRAW N** | draw N cards |
+| **FORGE** | create a floating die: joins the tray now, never rerolls, persists across rounds AND combats, gone forever when spent. Cap 3; forging at cap converts to +1 Conviction (printed) |
+| **GUARD N** | block the next N incoming damage; fades at round end |
+| **BARRIER N** | as Guard, but persists until consumed |
+| **TICK** | one enemy DoT deals its per-turn damage now (duration unchanged) |
+| **MARK iN dM** | light universal affliction: each DoT tick / payoff hit deals +1 per stack; counts as an affliction for RUPTURE / SOUL / REAP |
+| **CLEANSE N** | remove N of your own afflictions |
+| **HEAL N** | restore N VITAE |
+| **RUPTURE** | consume ALL enemy afflictions: burst = 1.5× remaining DoT fuel + 3 per non-DoT affliction stack (existing cap kept) |
+| **CONJURE** | create a one-use Thoughtform card into hand (removed after play / combat end) |
 
-All conditions are deterministic and evaluable inside `projectCardPlay` —
-preview==applied survives everything here.
+### Theme signatures (2 × 10 = 20)
 
-## 4. The rank ladder + power budget
+| theme | keyword | semantics |
+|---|---|---|
+| Affliction | **POISON iN dM** | ramping DoT (escalates per turn; honest printed curve) |
+| Affliction | **BLEED iN dM** | front-loaded DoT; decays 1 intensity per trigger |
+| Peroration | **PREMISE** | persistent tally (the argument under construction) |
+| Peroration | **PERORATION** | declared conclusion, one in play: fires FREE at its printed Premise count, then Premises reset |
+| Forge | **KINDLE** | create a temporary die (this combat only) |
+| Forge | **PIP** | add 1 pip to a die you hold; pips empower riders and are spendable by payoff verbs |
+| Akrasia | **RECOIL N** | pay N VITAE (unpreventable) as a printed cost |
+| Akrasia | **FALLEN** | state: you carry ≥2 self-afflictions; FALLEN-gated riders go live |
+| Control | **STAGGER N** | remove N rungs from the enemy's telegraphed action; at 0 rungs it is denied (builds on the P2 threat-downgrade ladder) |
+| Control | **BACKFIRE iN dM** | while active: the enemy takes N per rung its actions lose |
+| Oracle | **FORETELL N** | look at the top N cards of your deck, reorder them, and glimpse the enemy's next telegraph |
+| Oracle | **OMEN** | declare the printed prediction; if it comes true by your next turn, the rider fires free |
+| Harvest | **SOUL** | gain 1 Soul whenever an enemy affliction stack expires or is consumed |
+| Harvest | **REAP N** | spend N Souls to fire the printed effect |
+| Charm | **SWAY N** | stacks on the enemy; decays 1/turn; if SWAY ≥ enemy's current HP at end of your turn → CAPITULATE (§9) |
+| Charm | **RAPPORT iN dM** | the enemy deals N less damage while active |
+| Bulwark | **THORNS iN dM** | attacker takes N whenever it damages you |
+| Bulwark | **RIPOSTE iN dM** | when your Guard/Barrier fully blocks an attack, the enemy takes N |
+| Echo | **ECHO** | the printed line fires twice |
+| Echo | **REPRISE N** | return N cards from your discard pile to hand |
 
-- **`tier` (1/2/3) stays** — the mechanical resist field (Tier 1
-  auto-applies, Tier 2 resisted, Tier 3 nat-20-only). Load-bearing;
-  untouched.
-- **`rank` (new, 1–6)** — the quality axis; drives drop weighting /
-  reward rolls (`combat.rewards.ts` gold-weighting generalizes to
-  per-rank weights).
+Retired (never renamed — ids die, ban-list enforces): burn, hemorrhage,
+septic, unraveling, despair, torment and all DoT clones; stun, sleep,
+petrify, paralyze, charm(old), silence, confusion, fear, slow, root,
+daze and the control zoo; weaken/enfeeble/sunder/vulnerable/expose and
+the stat-down zoo; COMPOUND, AMPLIFY, EXECUTE, REACT as standalone
+verbs (REAP/RUPTURE absorb the payoff role); Premises/verbs not listed
+above. Existing engine tokens (Conviction, Resonance, Reserve, stance
+tiers) are systems, not card keywords — unchanged.
 
-| rank | name | band (pts) | character |
+## 4. Rarity model — the ladder maps onto 3 rarities
+
+`rank: 1..6` (Doxa → Lemma → Thesis → Theorem → Axiom → Aporia) stays
+on the card and on the face; `rarity` is the derived band the deck
+recipe and drop weights use:
+
+| rarity | ranks | band (pts) | recipe slot |
 |---|---|---|---|
-| 1 | **Doxa** | 2 – 4 | common opinion; starters, filler; one verb + one small rider max |
-| 2 | **Lemma** | 4.5 – 6 | stepping-stones; the two-verb free/paid mixing zone |
-| 3 | **Thesis** | 6.5 – 9 | a position worth defending; theme chassis |
-| 4 | **Theorem** | 9.5 – 12 | proven force; theme payoffs, big conditionals, most enchant/disenchants |
-| 5 | **Axiom** | 12.5 – 16 | unarguable; the namesake rank — capstones, floating-die forges |
-| 6 | **Aporia** | rule-rewriting only | the impasse — persistent engine text that changes the fight's rules, NOT bigger integers |
+| **common** | Doxa (1), Lemma (2) | 2 – 6 | 4 copies each of 2 uniques |
+| **uncommon** | Thesis (3), Theorem (4) | 6.5 – 12 | 2 copies each of 2 uniques |
+| **rare** | Axiom (5), Aporia (6) | 12.5+ / rule-text | 1 copy each of 3 uniques |
 
-Aporia follows the corpus's sharpest finding: Dawncaster's top rarity is
-distinguished by *kind* (persistent Unique engine text; 2.55 mean rules
-segments vs ~2.25 below), not magnitude. Enchant/disenchant cards are the
-natural residents of Theorem+; Aporia enchantments are the biggest
-rule-rewriters.
+`tier` (1/2/3 resist rules) is untouched and orthogonal. The v2
+power-budget point table (1 pt ≈ 3 HP neutral-read swing; conditional
+discounts threshold ×0.5, dieBonus ×0.6, fate ×0.7, theme-state ×0.5;
+self-cost credits −0.75×) carries over verbatim, extended with:
+SWAY 1 ≈ 0.8 · RAPPORT i1 d2 ≈ 1.5 · STAGGER 1 ≈ 4 (phase-deny
+equivalent) · BACKFIRE i1 d2 ≈ 1.5 · FORETELL 1 ≈ 1 · OMEN rider ≈
+rider pts × 0.6 · SOUL grant ≈ 0.75 · ECHO ≈ ×1.8 on the doubled line ·
+REPRISE 1 ≈ 2 · KINDLE 2.5 · PIP 1.5 · FORGE 5 (+1 per preloaded pip).
+Coefficients live in one table module; every card ships its arithmetic
+in a comment; a lint test asserts the sum lands in the printed rank's
+band. `/deck-tuning` remains the empirical court.
 
-**Power-budget point table** (anchor: **1 pt ≈ 3 HP of expected
-neutral-read swing**; calibrates starter slippery-slope — poison i1 d4
-ramp, 10 lifetime HP — to ~3.3 pts):
+## 5. Floating dice — the live-tray model (v2 §5, unchanged)
 
-| verb | pts |
-|---|---|
-| DoT apply / extend | printed lifetime HP ÷ 3 (ramps use the honest printed curve) |
-| +1 intensity rider on landed status | ~1.5 |
-| +1 duration rider | ~1 for canonical DoTs |
-| stagger (phase deny) | 4 |
-| fear / confusion d2 | 2.5 · doubt / overextended / sensory-null 2 · slow / mark d2 1.5 · vulnerable d2 2 · silence d3 3 · charm 3.5 · root d2 2 |
-| draw 1 | 2 |
-| +1 Conviction | 1 |
-| Guard | HP ÷ 4 · Barrier HP ÷ 3 · Heal HP ÷ 3 · cleanse 1.5 |
-| reveal next stance 1.5 · reveal 2 phases 2.5 · lock stance 2.5 |
-| pip grant (Reserve +1) 1.5 · create_temporary_die 2.5 · refresh_die 3 · bank_spent_die 2 · reroll_spent 2 · convert-to-wild 1.5 |
-| **forge_floating_die** | **5**, +1 per preloaded pip — the most expensive verb per unit, by design |
-| execute 5 · rupture 4 · react 3.5 · amplify-40% 3 · compound 3 · siphon-50% 2 · tickAllDots 2 |
-| enchant/disenchant persistent text | rider pts × expected triggers (sim-measured), min 4 |
-| **conditional discounts** | threshold ×0.5 · dieBonus ×0.6 (named/off ×0.5) · fate ×0.7 · theme-state (Premises / Fallen) ×0.5 |
-| **self-cost credits** | −0.75 × mirrored-effect pts (never full refund) |
+Grant via FORGE (PAID-only): the die joins the tray NOW, is exempt from
+the round reroll, is written to the character save at combat end, and
+arrives in the next battle's opening tray. Spent = gone forever. Cap 3
+(at cap → +1 Conviction, printed). Floating dice feed Resonance when
+spent and may NOT be banked to Reserve. Intent: bigger turns.
 
-Card score = Σ(unconditional) + Σ(discounted conditionals) − Σ(credits).
-Coefficients live in one table module; every card ships its arithmetic in
-a comment; **a lint test asserts the sum lands in the printed rank's
-band**. "Secretly great" = low-rank cards whose conditional discounts
-undervalue them inside a dedicated theme — never high-rank cards that
-compute low. `/deck-tuning` remains the empirical court.
+## 6. The ten themes
 
-## 5. Floating dice — the live-tray model (owner-ratified)
+Each theme: 7 unique cards (2 common spells, 2 uncommon spells, 1 rare
+spell finisher + 1 rare enchantment + 1 rare disenchant), 2 signature
+keywords, its own in-theme defense/sustain, and a distinct win texture.
 
-*You start battle with your 2 rolled dice. A card grants an extra,
-floating die — it joins the tray immediately. If you don't spend it, it
-carries over between rounds (it does NOT reroll). If you never spend it
-that combat, it carries over to the next combat. Once spent, it is gone
-forever.*
+| # | theme | stance lean | engine | win texture |
+|---|---|---|---|---|
+| T1 | **Affliction** | Body/Mind | stack → extend → convert DoTs | inevitable erosion, detonated |
+| T2 | **Peroration** | Heart | Premises → declared conclusion | periodic conclusion bursts (the PERFORM spin-off) |
+| T3 | **Forge** | Mind | manufacture dice/pips | resource superiority → one overwhelming turn |
+| T4 | **Akrasia** | Heart/Body | self-harm loans, FALLEN | fast erosion paid for in blood |
+| T5 | **Control** | Mind/Body | strip action rungs | the enemy never really acts; BACKFIRE drips it down |
+| T6 | **Oracle** | Mind/Heart | information + predictions | called shots — omens cash into payoffs |
+| T7 | **Harvest** | Body/Mind | churn short afflictions → Souls | REAP executes funded by expiry |
+| T8 | **Charm** | Heart | SWAY + RAPPORT | CAPITULATE / Befriend — wins without dropping HP |
+| T9 | **Bulwark** | Body | Guard/Barrier walls | THORNS/RIPOSTE: their aggression kills them |
+| T10 | **Echo** | Mind | recursion of the discard | small effects, multiplied relentlessly |
 
-- **Grant:** `forge_floating_die` (PAID-only verb) puts the die in the
-  tray NOW — usable this very battle. Colors: the powering die's color,
-  or wild on premium cards.
-- **Persistence:** floating dice are exempt from the round reroll and are
-  written to the character save at combat end. They arrive in the next
-  battle's opening tray.
-- **Spend:** powers a PAID action under the unchanged single-die law;
-  feeds Resonance like any die (§9 A3). Consumed forever on use.
-- **Cap: 3 floating dice** at once (owner-ratified). Forging at cap
-  converts to +1 Conviction, printed on the card face — no silent loss.
-- **Intent (owner-ratified): bigger turns**, not insurance — 2 rolled +
-  3 floating = up to a 4-play turn if you drafted well. This is pure
-  player-side power; enemy strengthening (owner's separate lever) and
-  the top-of-table price (5 pts) are the counterweights. NOTE:
-  Dawncaster deliberately refuses cross-combat persistence for
-  manufactured resources (kb:dawncaster/keywords/conjure, /removed;
-  Souls is threshold-gated) — we are knowingly inverting that rule;
-  floating-die injection is included in the queued combat-tuning pass.
+## 7. The card catalogue (70)
 
-## 6. The four themes (owner-ratified)
+Format: **card (stance+tier, type)** · rank · FREE | PAID | ⬡ condition
+· pts (est.; lint-audited arithmetic ships in the TS). S=spell,
+E=enchantment, D=disenchant. E/D are PAID-only.
 
-Fewer keywords, more cards per keyword — every theme has cards at EVERY
-rank, including ≥1 enchantment and ≥1 disenchant. Cassandra, Syllogism,
-and Dialectic are cut as named packages; reveal/lock verbs and the odd
-sequence-flavored rider survive as unnamed staple texture.
-
-**T1 — DoT** (bleed + poison merged as a theme; each keeps its own
-keyword identity, and the theme's glue is CROSS-KEYWORD cards: extend
-both, boost both, convert one into the other). Provenance: Dawncaster's
-Affliction support web (kb:dawncaster/keywords/affliction, /bleeding,
-/poison). Burn/hemorrhage/septic/unraveling/despair remain spice on
-staples, not theme pillars.
-
-**T2 — PERORATION** (the cumulative case; Perform/Performance —
-kb:dawncaster/keywords/perform, /performance; cards/0002, /0364, /1393,
-/1233). Chassis cards add **Premises** (package tally beside Resonance);
-a **Peroration** card (one in play at a time, like Dawncaster's one-song
-rule) declares a conclusion that fires FREE at N Premises. Heart-leaning.
-
-**T3 — FORGE** (Ex Nihilo + the pip/Reserve game; Conjure/Charges +
-Momentum — kb:dawncaster/keywords/conjure, /charges, /momentum;
-cards/0368, /1580, /0520). Temporary dice, pips, banking, conjured
-one-use **Thoughtforms**, and the floating-die forge itself. The effect
-funds its own cause. Mind/Body.
-
-**T4 — AKRASIA** (Darkness/Blood/Corruption —
-kb:dawncaster/keywords/darkness, /blood, /corruption; cards/0482, /0156).
-Acting against your own better judgment: pay in `recoilHp` and REAL
-self-statuses (credits per §4); the **Fallen** state (you carry ≥2
-self-debuffs) turns the debt into a strategy — Fallen-gated riders go
-live. Akrasia is where forging floating dice is cheapest in points but
-paid in HP.
-
-## 7. The card catalogue (v2 — 75 cards)
-
-Format: **card (stance, tier, type)** · FREE | PAID | ⬡ condition ·
-pts→rank. Types: S=spell, E=enchantment, D=disenchant. Enchant/disenchant
-have no FREE line (PAID-only). "tick" = 1 immediate tick of one enemy
-DoT. Arithmetic comments ship in the TS; pts here are audited sums.
-
-### T1 — DoT (14)
+### T1 — Affliction
 
 | card | rank | FREE | PAID | ⬡ | pts |
 |---|---|---|---|---|---|
 | slippery-slope (B2, S) | Doxa | tick | poison i1 d4 (prints "2,2,3,3 = 10") | — | 3.9 (starter) |
-| straw-mans-jab (B1, S) | Doxa | tick | bleed i1 d2 + mark d2 | dieBonus off-color: +1 int | 3.7 |
-| hasty-generalization (B2, S) | Lemma | tick | bleed i2 d3 | threshold Body 2: +1 int | 5.0 |
-| festering-argument (M2, S) | Lemma | tick | +1 duration to ALL your bleeds AND poisons | — | 5.2 (cross-keyword glue) |
-| appeal-to-pitys-despair (H2, S) | Lemma | heal 2 | despair i2 d4 (anti-heal −50%) | — | 5.4 |
-| currys-conversion (M2, S) | Thesis | draw 1 | convert all enemy bleed → poison at equal intensity, +1 int | — | 7.0 (the wound becomes the argument) |
-| poisoned-well (B2, S) | Thesis | tick | septic i2 d3 (−10% outgoing/stack) | — | 7.0 |
-| resonance-bleed (H2, S) | Thesis | tick | bleed i1 d2 | synergy: already bleeding → i2, +1 dur | 6.6 |
-| venom-and-vein (B2, E) | Theorem | — | *(rest of combat)* your bleed AND poison applications land +1 intensity | — | ~10 |
-| suppurating-curse (M2, D) | Theorem | — | *(rest of combat)* enemy takes +1 HP per DoT tick | — | ~10 |
-| the-final-word (M3, S) | Axiom | draw 1 | poison i3 d5 (honest lifetime curve printed) | powering die is your LAST available: +2 int | 13.4 |
-| hemophilia-hex (B3, D) | Axiom | — | *(rest of combat)* enemy bleed no longer decays when it triggers | — | ~13 |
-| resonance-detonation (H3, S) | Axiom | tick | RUPTURE (consume all DoTs; burn fuel ×1.5; cap kept) | — | 13.0 |
-| sorites-plague (M3, E) | Aporia | — | *(rest of combat)* whenever you apply bleed or poison, it ticks once immediately | — | engine text |
+| straw-mans-jab (B1, S) | Lemma | tick | bleed i2 d2 | dieBonus body: +1 int | 4.6 |
+| festering-argument (M2, S) | Thesis | tick | +1 duration to ALL your bleeds AND poisons | — | 6.8 |
+| currys-conversion (M2, S) | Theorem | draw 1 | convert enemy bleed↔poison at equal intensity, +1 int | — | 8.5 |
+| resonance-detonation (H3, S) | Axiom | tick | RUPTURE | — | 13.0 |
+| venom-and-vein (B2, E) | Axiom | — | *(combat)* your bleed and poison land +1 intensity | — | ~12.5 |
+| suppurating-curse (M2, D) | Aporia | — | *(combat)* enemy takes +1 HP per DoT tick | — | engine text |
 
-### T2 — Peroration (12)
+### T2 — Peroration
 
 | card | rank | FREE | PAID | ⬡ | pts |
 |---|---|---|---|---|---|
 | exordium (H1, S) | Doxa | +1 Premise | draw 1 + 1 Premise | — | 3.6 |
-| opening-statement (H1, S) | Doxa | +1 Premise | mark d2 + 2 Premises | — | 3.8 |
-| rhetorical-flourish (H2, S) | Lemma | draw 1 | fear i1 d2 + 2 Premises | — | 5.5 |
-| mounting-case (M2, S) | Lemma | +1 Premise | unraveling i1 d5 + 1 Premise | threshold Heart 2: +1 Premise | 5.8 |
-| the-gallery-nods (H2, S) | Thesis | +1 Conviction | despair i1 d4 + 2 Premises + draw 1 | dieBonus heart: +1 Premise | 8.7 |
-| filibuster (M2, S) | Thesis | +1 Premise | silence d3 + 1 Premise | — | 7.0 |
-| captive-audience (H2, D) | Theorem | — | *(rest of combat)* while you hold 4+ Premises, enemy is vulnerable i1 | — | ~10 |
-| practiced-cadence (H2, E) | Theorem | — | *(rest of combat)* your first card each turn grants +1 Premise | — | ~10 |
-| peroratio-interrupta (M2, S) | Theorem | draw 1 | spend ALL Premises: +1 int to one enemy status per 2 spent + draw 1 per 3 spent | — | ~10 (cash out early — tempo vs the big conclusion) |
-| the-closing-word (H3, S) | Axiom | +1 Premise | **Peroration** (one in play): at 6 Premises — all enemy DoTs +1 int, draw 2, +2 Conviction | — | ~13 |
-| standing-ovation (H3, E) | Axiom | — | *(rest of combat)* whenever a Peroration fires, gain +2 Conviction and refresh your drafted die | — | ~13 |
-| reductio-ad-absurdum (M3, S) | Aporia | +1 Premise | **Peroration**: at 8 Premises — stagger 1 + RUPTURE | — | engine text |
+| opening-statement (H1, S) | Lemma | +1 Premise | mark d2 + 2 Premises | — | 4.4 |
+| mounting-case (M2, S) | Thesis | +1 Premise | mark d3 + 2 Premises | threshold Heart 2: +1 Premise | 6.9 |
+| peroratio-interrupta (M2, S) | Theorem | draw 1 | spend ALL Premises: +1 mark stack per 2 spent, draw 1 per 3 spent | — | ~9 |
+| the-closing-word (H3, S) | Axiom | +1 Premise | **PERORATION** at 6: consume all marks (3 per stack), draw 2, +2 Conviction | — | ~13 |
+| practiced-cadence (H2, E) | Axiom | — | *(combat)* your first card each turn grants +1 Premise | — | ~12.5 |
+| captive-audience (H2, D) | Aporia | — | *(combat)* while you hold 4+ Premises, enemy is marked i1 (standing) | — | engine text |
 
-### T3 — Forge (13)
+### T3 — Forge
 
 | card | rank | FREE | PAID | ⬡ | pts |
 |---|---|---|---|---|---|
-| sketch-of-a-thought (M1, S) | Doxa | +1 Conviction | create_temporary_die (mind) | — | 3.5 |
-| half-step (B1, S) | Doxa | +1 Conviction | Guard 4 + bank_spent_die | — | 3.9 |
-| suspend-judgment (M2, S) | Lemma | Guard 2 | Guard 6 + bank_spent_die | — | 4.5 (epoché: withhold, and it ripens) |
-| bootstrap-loop (M2, S) | Lemma | +1 Conviction | create_temporary_die (wild) | threshold Mind 2: it arrives with 1 pip | 4.9 |
-| patient-tortoise (B2, S) | Lemma | Guard 2 | Guard 6 + grant_pip | — | 4.9 |
-| stoic-reserve (H2, S) | Thesis | Guard 2 | Guard 6 + grant_pip ×2 | — | 6.5 |
-| thoughtform-legion (H2, S) | Thesis | tick | create_temporary_die (heart) + conjure_card (Bat-Swarm Thoughtform, one-use: fear i1 d2) | — | 7.9 |
-| anvil-of-form (M2, E) | Theorem | — | *(rest of combat)* your temporary AND floating dice arrive with +1 pip | — | ~10 |
-| entropy-tax (M2, D) | Theorem | — | *(rest of combat)* whenever you spend a temporary or floating die, enemy gains vulnerable i1 d1 | — | ~10 |
-| ex-nihilo (M2, S) | Theorem | draw 1 | **forge_floating_die** (color of the powering die) | threshold Mind 4: it lands with 1 pip | 9.8 |
-| the-overtake (B2, S) | Axiom | tick | **spendAllPips**: +1 int to one enemy DoT per pip + Guard 2 per pip | — | ~13 (sudden and total) |
-| unmoved-mover (H3, S) | Axiom | Guard 3 | stagger 1 + Guard 8; all Reserve dice +1 pip | — | ~15 (what waits, ripens) |
-| prime-mover (H3, E) | Aporia | — | *(rest of combat)* whenever you play a temporary or floating die: +1 Conviction and tick | — | engine text (dice from nothing, and the nothing pays) |
+| sketch-of-a-thought (M1, S) | Doxa | draw 1 | KINDLE (mind) | — | 3.5 |
+| half-step (B1, S) | Lemma | Guard 2 | Guard 5 + PIP | — | 4.3 |
+| bootstrap-loop (M2, S) | Thesis | +1 Conviction | KINDLE (wild) | threshold Mind 2: arrives with 1 pip | 6.5 |
+| ex-nihilo (M2, S) | Theorem | draw 1 | **FORGE** (color of the powering die) | threshold Mind 4: lands with 1 pip | 9.8 |
+| the-overtake (B2, S) | Axiom | Guard 2 | spend ALL pips: RUPTURE with +2 fuel per pip spent | — | ~13 |
+| anvil-of-form (M2, E) | Axiom | — | *(combat)* kindled and floating dice arrive with +1 pip | — | ~12.5 |
+| entropy-tax (M2, D) | Aporia | — | *(combat)* whenever you spend a kindled or floating die, enemy gains mark i1 d2 | — | engine text |
 
-### T4 — Akrasia (11)
+### T4 — Akrasia
 
 | card | rank | FREE | PAID | ⬡ | pts |
 |---|---|---|---|---|---|
-| against-my-judgment (H1, S) | Doxa | +1 Conviction | draw 2 − self doubt (credit) | — | 3.5 |
-| willing-wound (B1, S) | Doxa | +1 Conviction | Guard 6 − recoil 2 (credit) | — | 3.4 |
-| sweet-poison (B2, S) | Lemma | tick | poison i2 d4 − self vulnerable d2 (credit) | — | 5.3 |
-| borrowed-resolve (M2, S) | Lemma | +1 Conviction | draw 3 − self overextended (credit) | — | 5.4 |
-| the-weak-will (H2, S) | Thesis | heal 2 | despair i2 d4 + hemorrhage i1 d3 − self overextended (credit) | — | 7.6 |
-| self-flagellant (B2, S) | Thesis | tick | recoil 4 → +1 intensity to ALL enemy DoTs (credit) | — | 7.2 |
-| fallen-grace (H2, S) | Theorem | draw 1 | hemorrhage i2 d3 | **Fallen**: instead RUPTURE + siphon 50% (×0.5) | 10.4 |
-| crown-of-thorns (H2, E) | Theorem | — | *(rest of combat)* while Fallen, your status applications land +1 intensity | — | ~11 |
-| mirror-of-guilt (M2, D) | Theorem | — | *(rest of combat)* whenever you gain a self-debuff, enemy gains 1 stack of it too | — | ~11 |
-| pact-of-akrasia (B3, S) | Axiom | Guard 2 | **forge_floating_die (wild)** − recoil 6 − self vulnerable d2 (credits) | — | 12.6 (cheapest forge in points, paid in blood) |
-| sophists-wager (H3, E) | Aporia | — | *(rest of combat)* while Fallen, your self-debuffs count as enemy debuffs for COMPOUND / REACT / EXECUTE gates | — | engine text (the debt argues for you) |
+| against-my-judgment (H1, S) | Doxa | +1 Conviction | draw 2 + self-mark d2 (credit) | — | 3.4 |
+| sweet-poison (B2, S) | Lemma | tick | poison i2 d4 + self-bleed i1 d2 (credit) | — | 5.2 |
+| self-flagellant (B2, S) | Thesis | tick | RECOIL 4: +1 intensity to ALL enemy DoTs | — | 7.2 |
+| fallen-grace (H2, S) | Theorem | draw 1 | bleed i2 d3 | **FALLEN**: also heal 4 | 9.5 |
+| pact-of-akrasia (B3, S) | Axiom | Guard 2 | **FORGE** (wild) + RECOIL 6 + self-bleed i1 d2 (credits) | — | 12.6 (cheapest forge in points, paid in blood) |
+| crown-of-thorns (H2, E) | Axiom | — | *(combat)* while FALLEN, your status applications land +1 intensity | — | ~12.5 |
+| mirror-of-guilt (M2, D) | Aporia | — | *(combat)* whenever you gain a self-debuff, enemy gains 1 stack of it too | — | engine text |
 
-### Neutral staples (25) — defense, control, utility, payoffs, mercy
+### T5 — Control
+
+| card | rank | FREE | PAID | ⬡ | pts |
+|---|---|---|---|---|---|
+| zenos-half-step (B1, S) | Doxa | Guard 2 | STAGGER 1 | — | 3.8 |
+| red-herring (M1, S) | Lemma | draw 1 | BACKFIRE i2 d2 | dieBonus mind: +1 duration | 4.9 |
+| undistributed-middle (M2, S) | Thesis | mark d1 | STAGGER 1 + BACKFIRE i1 d2 | threshold Mind 3: STAGGER 2 | 7.4 |
+| arrow-paradox (B2, S) | Theorem | Guard 2 | lock enemy stance + STAGGER 1 | — | 9.8 (motion frozen mid-flight) |
+| paralysis-of-analysis (M3, S) | Axiom | draw 1 | STAGGER 2 + BACKFIRE i2 d2 | — | ~13 |
+| achilles-and-the-tortoise (M2, E) | Axiom | — | *(combat)* whenever an enemy action rung is denied, draw 1 | — | ~12.5 |
+| quagmire-of-doubt (M2, D) | Aporia | — | *(combat)* enemy telegraphs enter play 1 rung lower | — | engine text |
+
+### T6 — Oracle
+
+| card | rank | FREE | PAID | ⬡ | pts |
+|---|---|---|---|---|---|
+| glimpse (M1, S) | Doxa | FORETELL 1 | FORETELL 2 + mark d2 | — | 3.8 |
+| signs-and-portents (H1, S) | Lemma | FORETELL 1 | OMEN — enemy's next stance: on hit, draw 2 | — | 4.6 |
+| cassandras-burden (H2, S) | Thesis | draw 1 | OMEN — enemy's next stance: on hit, mark i2 d2 + Guard 4 | — | 7.0 |
+| delphic-ambiguity (M2, S) | Theorem | FORETELL 1 | FORETELL 3 + reveal enemy's next 2 phases | dieBonus mind: also PIP | 9.2 |
+| prophecy-fulfilled (M3, S) | Axiom | FORETELL 1 | RUPTURE: +3 fuel per omen hit this combat | — | ~13 |
+| the-oracles-eye (H2, E) | Axiom | — | *(combat)* enemy's next stance always revealed; your OMEN riders +50% | — | ~12.5 |
+| fated-course (M2, D) | Aporia | — | *(combat)* enemy cannot change a revealed intent; acting into a hit omen marks it i1 | — | engine text |
+
+### T7 — Harvest
+
+| card | rank | FREE | PAID | ⬡ | pts |
+|---|---|---|---|---|---|
+| brief-candle (B1, S) | Doxa | tick | bleed i2 d1 (burns fast; expiry feeds SOUL) | — | 3.4 |
+| memento-mori (M1, S) | Lemma | +1 Soul | mark i2 d1 | — | 4.2 |
+| winnowing (B2, S) | Thesis | tick | consume 1 enemy affliction: its remaining fuel ticks now + gain 1 Soul | — | 7.0 |
+| the-gleaners-due (M2, S) | Theorem | draw 1 | REAP 3: KINDLE + draw 2 | — | ~9 |
+| the-reaping (B3, S) | Axiom | tick | REAP all: burst 2 per Soul spent (cap kept) | — | ~13 |
+| bone-orchard (M2, E) | Axiom | — | *(combat)* whenever you gain a Soul, enemy takes 1 | — | ~12.5 |
+| the-tithe (M2, D) | Aporia | — | *(combat)* enemy afflictions expire 1 turn sooner; each expiry yields +1 Soul | — | engine text |
+
+### T8 — Charm
+
+| card | rank | FREE | PAID | ⬡ | pts |
+|---|---|---|---|---|---|
+| soft-word (H1, S) | Doxa | heal 2 | SWAY 3 | dieBonus heart: +1 SWAY | 3.6 |
+| disarming-smile (H1, S) | Lemma | SWAY 1 | RAPPORT i2 d2 + heal 2 | — | 4.8 |
+| common-ground (H2, S) | Thesis | draw 1 | SWAY 2 + RAPPORT i1 d2 | threshold Heart 3: +2 SWAY | 7.2 |
+| the-olive-branch (B2, S) | Theorem | Guard 2 | SWAY 3 + cleanse 1 + heal 3 | — | 9.0 |
+| heart-of-the-matter (H3, S) | Axiom | SWAY 1 | SWAY 5 + heal 4 | threshold Heart 5: SWAY 8 instead | ~13 |
+| irresistible-grace (H2, E) | Axiom | — | *(combat)* your SWAY no longer decays | — | ~12.5 |
+| mirror-of-longing (H2, D) | Aporia | — | *(combat)* enemy attacks add SWAY equal to the damage your Guard/RAPPORT prevented | — | engine text |
+
+### T9 — Bulwark
 
 | card | rank | FREE | PAID | ⬡ | pts |
 |---|---|---|---|---|---|
 | brace-for-impact (B1, S) | Doxa | Guard 2 | Guard 8 | +2 Guard per pip on spent die | 3.6 (starter) |
-| glimpse (M1, S) | Doxa | reveal next stance | mark d2 + reveal next stance | — | 3.8 |
-| wishful-thinking (H1, S) | Doxa | heal 2 | heal 6 | threshold Heart 3: heal 12 instead | 3.6 |
-| liars-echo (M1, S) | Doxa | mark d2 | mark d2 + doubt | — | 3.9 |
-| soothing-words (H1, S) | Doxa | heal 2 | heal 3 + cleanse 1 | dieBonus heart: cleanse 2 | 3.9 |
-| peaceful-gesture (B1, S) | Doxa | +1 Conviction | +2 heart tokens (mercy economy unchanged) | dieBonus heart: +1 more | ~3 |
-| befriend (H1, S) | Doxa | heal 1 | Befriend attempt (ADR-0007 intact) | — | ~3 |
-| false-dilemma (M2, S) | Lemma | draw 1 | confusion i1 d2 (blocked stance = spent die's color) | dieBonus off: +1 dur | 5.6 |
-| zenos-half-step (B2, S) | Lemma | Guard 2 | slow d2 + telegraph-downgrade 1 rung | — | 5.0 |
-| red-herring (M2, S) | Lemma | draw 1, discard 1 | confusion i1 d2 | dieBonus mind: draw 1 | 5.3 |
-| appeal-to-pity (H2, S) | Lemma | heal 2 | heal heart×2 + resolute i1 d2 | dieBonus heart: cleanse 1 | 5.0 |
-| tu-quoque (H2, S) | Lemma | Guard 2 | thorns i2 d2 | dieBonus match: +1 dur | 4.8 |
-| heap-of-doubt (M2, S) | Lemma | +1 Conviction | doubt + overextended | threshold Mind 4: also stagger 1 | 5.6 |
-| sorites-whisper (M2, S) | Lemma | tick unraveling | unraveling i1 d5 | — | 4.6 |
-| undistributed-middle (M2, S) | Thesis | confusion i1 d1 | confusion i2 d2 | threshold Mind 3: also doubt | 7.8 |
-| breach (M2, S) | Thesis | draw 1 | vulnerable i1 d2 | threshold Mind 3: i2 | 6.6 |
-| eternal-regress (M2, S) | Thesis | tick unraveling | unraveling i2 d5 | dieBonus mind: +1 int | 7.4 |
-| gabriels-bulwark (H2, S) | Thesis | Guard 2 | Barrier 9 | — | 6.5 |
-| leeching-syllogism (H2, S) | Thesis | heal 2 | hemorrhage i2 d3 + siphon 50% | — | 7.4 |
-| empathetic-understanding (M2, S) | Theorem | draw 1 | reveal next 2 phases + mark d2 | dieBonus heart: reveal ALL | 9.6 |
-| arrow-paradox (B2, S) | Theorem | Guard 2 | lock enemy stance + slow d2 | — | 9.8 (motion frozen mid-flight) |
-| grandfather-paradox (B2, S) | Theorem | Guard 2 | cleanse ALL self-debuffs + resolute i2 d2 | threshold Body 4: also refresh_die | 10.2 |
-| mounting-contradictions (M2, S) | Theorem | draw 1 | COMPOUND (3/distinct debuff, cap kept) | — | 9.5 |
-| the-inevitable (M2, S) | Theorem | +1 Conviction | AMPLIFY 50% | threshold Mind 5: 75% | 9.9 |
-| achilles-overtake (B3, S) | Axiom | tick | EXECUTE (≤25% HP or ≥2 DoTs → 25% max-HP burst) | threshold Body 5: threshold 35% | 13.5 |
-| existential-collapse (B3, S) | Axiom | tick | REACT fear+confusion → consume both: stagger + burst 8; else bleed i2 d2 | — | 12.8 |
-| pyrrhic-victory (B3, S) | Aporia | tick ×2 | EXECUTE + 10% max-HP self-recoil (the library's best identity, kept) | — | execute − credit |
+| nettle-cloak (B1, S) | Lemma | Guard 2 | THORNS i2 d2 | — | 4.4 |
+| tu-quoque (H2, S) | Thesis | Guard 2 | THORNS i3 d2 | dieBonus body: +1 duration | 6.8 |
+| measured-answer (B2, S) | Theorem | Guard 3 | Guard 6 + RIPOSTE i3 d2 | — | 9.2 |
+| the-adamant-wall (B3, S) | Axiom | Guard 3 | BARRIER 10 + RIPOSTE i4 d2 | — | ~13 |
+| hedgehogs-dilemma (B2, E) | Axiom | — | *(combat)* THORNS triggers also mark the enemy i1 d2 | — | ~12.5 |
+| crumbling-resolve (B2, D) | Aporia | — | *(combat)* enemy attacks that fail to break your Guard lose 1 rung on the next telegraph | — | engine text |
 
-Counts: 14 + 12 + 13 + 11 + 25 = **75**. Rank spread: Doxa 13 · Lemma 17
-· Thesis 15 · Theorem 17 · Axiom 9 · Aporia 4. Each theme covers all six
-ranks with ≥1 enchantment and ≥1 disenchant.
+### T10 — Echo
 
-**Retired outright** (identity can't survive no-strike; owner: no
-rescues): mob-appeal, straw-giant, metaphysical-drain,
-sunk-cost-momentum, gamblers-ruin, briar-riposte, omnipotence-paradox,
-ship-of-theseus, achilles-gambit, bat-swarm-thoughtform (name survives as
-the Thoughtform conjure), appeal-to-authority, raven-paradox,
-liars-paradox, stoic-bulwark, eternal-recurrence, apophatic-aegis,
-regress-ad-infinitum, transcendent-synthesis, gamblers-folly,
-existential-debt, buridans-wager, buridans-impasse, gamblers-fallacy,
-logical-recursion, nirvana-fallacy, moving-the-goalposts,
-appeal-to-consequences, equivocation-cascade, crescendo-of-suffering,
-composition-fallacy — retire to git history; several are natural theme
-members later via `/deck-tuning` promotion.
+| card | rank | FREE | PAID | ⬡ | pts |
+|---|---|---|---|---|---|
+| refrain (M1, S) | Doxa | draw 1 | mark d2, ECHO | — | 3.7 |
+| second-thoughts (M1, S) | Lemma | draw 1 | REPRISE 1 | — | 4.5 |
+| ad-nauseam (M2, S) | Thesis | mark d1 | your next spell this turn gains ECHO | dieBonus mind: draw 1 | 7.0 |
+| circular-reasoning (M2, S) | Theorem | draw 1 | REPRISE 1; the reprised card's FREE line fires now | — | 9.4 |
+| ouroboros (M3, S) | Axiom | draw 1 | replay the PAID line of the last spell you played, ECHO | — | ~14 |
+| resonant-chamber (M2, E) | Axiom | — | *(combat)* the first spell you play each turn gains ECHO | — | ~12.5 |
+| stuck-in-their-head (H2, D) | Aporia | — | *(combat)* whenever you ECHO or REPRISE, enemy takes 2 | — | engine text |
 
-**Starting deck:** slippery-slope + brace-for-impact + Retreat (both
-starters teach a dice mechanic in fight one; unchanged).
+Counts: 10 themes × 7 = **70**. Per theme: 2 common S, 2 uncommon S,
+1 rare S + 1 rare E + 1 rare D. Registry: 30 keywords exactly (§3).
 
-**Presets re-cut (4 themes + 1):** *Erosion* (T1), *Oratory* (T2),
-*Foundry* (T3), *Penitent* (T4), *Bulwark* (staple defense/control mix —
-the control-and-guard deck for players who want tempo without a theme).
-Every themed preset carries its theme's enchantment by Theorem depth.
+**Retired outright:** every card in the current 49-card library that
+does not appear above retires to git history (no rescues — owner rule
+carried from v2; `/deck-tuning` may re-promote identities later).
+Kept-and-recut from v2's unshipped catalogue where names match.
 
-## 8. Engine-change ledger (sized S/M/L)
+**Starting deck:** slippery-slope + brace-for-impact + Retreat
+(unchanged; both starters teach a mechanic in fight one).
 
-| # | change | files | cost |
-|---|---|---|---|
-| 1 | `rank: 1..6` + `cardType` fields + budget-lint test (pricing table module + per-card arithmetic comments) | Cards/types.ts, new cards.pricing.ts, e2e lint | **M** |
-| 2 | Strike purge: basePower/chipHp/riposte.damage/DIRECT_DAMAGE_WEIGHT removal + test re-pins | combat.engine.ts, skill.engine.ts, tests | **M** |
-| 3 | Floating dice: character-save pool, tray injection at combat start, reroll exemption, cap-3 valve, forge verb | encounter.types, character state, dice roll path, reducer | **M** |
-| 4 | Persistent zone wiring: enchant (player-side) + disenchant (enemy-side) lists, play path (persistent zone instead of discard), trigger evaluation between phases + on-apply hooks | engine, types, presenter | **M/L** |
-| 5 | Premises tally + Peroration slot (one-in-play, fire-at-N) + spend-Premises verb | engine, types, presenter | **M** |
-| 6 | `spendAllPips` payoff rider | engine (R2 path) | **S** |
-| 7 | Fallen state (≥2 self-debuffs) + whileFallen gates | engine condition eval | **S** |
-| 8 | DoT cross-keyword verbs: extend-both, boost-both, convert bleed↔poison | engine status ops | **S/M** |
-| 9 | conjure_card (one-use Thoughtforms) | deck/hand path | **S/M** |
-| 10 | rewards: per-rank drop weights (generalize gold-weighting) | combat.rewards.ts | **S** |
-| 11 | R7 amendment (+2 Guard on defend replaces +3 flat) | engine | **S** |
+## 8. The ten preset decks
 
-CUT from v1 ledger (keywords lessened, per owner): sequence condition
-class, dialectic condition, revealedPhases tally + stay-revealed
-machinery. Reveal/lock stay as plain riders (already engine-real).
-Reshuffle law: no change needed (`combat.deck.ts:92-98` already does it);
-add a pinning test that no fatigue penalty exists.
+Recipe (all decks): C1 ×4, C2 ×4, U1 ×2, U2 ×2, R-spell, R-enchant,
+R-disenchant = **15 cards** + synthetic Retreat.
 
-Implementation order: 1–2 (ladder + purge, pure wins) → 3 (floating
-dice) → 4 (persistent zone — the biggest single lift) → 5/7/8 (theme
-mechanics) → 6/9 → 10–11. Every step re-verifies
-`npm run verify -w axiomancer-mobile` (barrel contract).
+| preset id | name | theme |
+|---|---|---|
+| `erosion` | Erosion | T1 Affliction |
+| `oratory` | Oratory | T2 Peroration |
+| `foundry` | Foundry | T3 Forge |
+| `penitent` | Penitent | T4 Akrasia |
+| `standstill` | Standstill | T5 Control |
+| `augury` | Augury | T6 Oracle |
+| `tithe` | Tithe | T7 Harvest |
+| `grace` | Grace | T8 Charm |
+| `bastion` | Bastion | T9 Bulwark |
+| `refrain` | Refrain | T10 Echo |
 
-## 9. Owner decisions — ratified + remaining assumption-confirms
+Playtest law: the combat-playtest matrix gains a **deck axis** (stage ×
+policy × preset), plus a per-theme **engine-ignition gate**: each
+preset's theme engine must demonstrably turn on by turn N (N per theme,
+sim-pinned) in every seeded run. Win ratio is NOT a constraint (enemies
+strengthened separately); rank honesty and deck distinctness ARE.
 
-**Ratified 2026-07-06:** chip removal (yes) · floating dice live-tray
-model, cap 3, bigger-turns intent (yes) · ladder names (yes) ·
-status-payoffs-only HP line (yes) · 75 cards, 4 themes × all ranks,
-fewer keywords (yes) · no retired-card rescues (yes) · card types:
-enchantment / disenchant / spell, more to come (yes) · reshuffle law
-(yes) · **disenchant scope: enchant = positive persistent passive,
-disenchant = negative persistent passive, all combat (yes — ratified
-2026-07-06 follow-up; §7's D-cards stand as designed)**.
+## 9. Win paths
 
-**Assumption-confirms (non-blocking; flag if wrong):**
+- **HP to 0** — the main threshold, universal.
+- **Befriend** — existing mercy path (ADR-0007, untouched); RAPPORT and
+  the Charm deck accelerate it.
+- **CAPITULATE** (ratified) — SWAY ≥ enemy current HP at end of your
+  turn: the enemy yields. Counts as a merciful resolution for morality
+  systems. Charm's identity: it can win without ever touching HP.
+- **CONCEDE** (ratified 2026-07-07) — second alt-win: a completed
+  8-Premise Aporia-grade Peroration wins the argument outright. Ships
+  as a Peroration upgrade path on `the-closing-word`, not a new card
+  slot.
 
-- **A2 — enchant/disenchant cost.** PAID-only (a die is the commitment;
-  no FREE line). They leave the deck cycle once played (not reshuffled).
-- **A3 — floating dice feed Resonance** when spent, like any die, and
-  may NOT be banked to Reserve (no pip-laundering; Reserve keeps its own
-  ripening game).
+## 10. Enemies
+
+**This overhaul:** enemies keep their telegraph AI but gain the
+persistent layer — each enemy may open with (or play) an enchantment
+(self-side passive) and may attach a disenchant to the player (a
+standing curse in the player's persistent zone; CLEANSE-class answers
+apply). Enemy passives are authored per-enemy in the bestiary, priced
+by the same point table.
+
+**Deferred (logged in `plan/PHASE_CANDIDATES.md`):** enemies drawing
+and playing from their own themed decks — the long-term goal; a
+follow-up phase after the 10 player decks prove out.
+
+## 11. Engine-change ledger (sized S/M/L)
+
+| # | change | cost |
+|---|---|---|
+| 1 | **Strike purge at schema level**: delete `basePower`/`chipHp`/strike riders from types; purge "Chip/strike" projection text; regression lint banning direct-HP fields + a data test that no card damages HP outside §1's four sources | **M** |
+| 2 | `rank` 1–6 + derived `rarity` + `cardType` + pricing-lint (table module, per-card arithmetic comments) | **M** |
+| 3 | Floating dice live tray (save-persisted pool, tray injection, reroll exemption, cap-3 valve, FORGE verb) | **M** |
+| 4 | Persistent zone: player enchantments + enemy-attached disenchants + enemy-side passives (both directions), play path, trigger eval | **M/L** |
+| 5 | Effect-library reset: rebuild `Effects/*.library.json` to the 30-keyword set; regenerate deprecated-ids ban-list; rewrite mobile `state/combat/keywords.ts` (30 entries) | **M** |
+| 6 | Premise tally + PERORATION slot + spend-Premises verb | **M** |
+| 7 | STAGGER rungs + BACKFIRE (extends P2 threat-downgrade ladder) | **M** |
+| 8 | FORETELL + OMEN (extends Spec 31 Omen) | **M** |
+| 9 | SOUL / REAP economy | **S/M** |
+| 10 | SWAY / RAPPORT + CAPITULATE alt-win + morality hook | **M** |
+| 11 | ECHO / REPRISE + CONJURE (Thoughtforms) | **M** |
+| 12 | KINDLE / PIP (wraps existing `create_temporary_die` / `grant_pip`) | **S** |
+| 13 | THORNS / RIPOSTE (thorns exists; full-block riposte trigger) | **S** |
+| 14 | 10 presets + recipe; playtest matrix deck axis + engine-ignition gates; card-coverage and preset tests re-pinned | **M** |
+| 15 | Art: reuse the existing 18 paintings, reassign by theme in mobile `assets/images/cards/index.ts` | **S** |
+| 16 | Rewards: per-rank drop weights (generalize gold-weighting) | **S** |
+
+Implementation order: 1+2+5 (purge, schema, keyword reset — the
+foundation) → 3+4 (dice + persistent zone) → theme mechanics in deck
+pairs (6..13), each landing with its preset + tests → 14 → 15+16.
+Every step re-verifies mobile + card-editor (the `@mechanics` barrel
+contract).
+
+## 12. Owner decisions — ratified 2026-07-07
+
+1. **Supersede v2 with v3**; keep v2's engine machinery. (yes)
+2. **Ladder → 3 rarities** mapping; faces keep rank names. (yes)
+3. **Strictly 70 self-contained cards**; only Retreat shared. (yes)
+4. **Disenchants attach to the enemy** (standing curse); enemies may
+   attach them to the player. (yes)
+5. **10 themes as proposed**: Affliction, Peroration, Forge, Akrasia,
+   Control, Oracle, Harvest, Charm, Bulwark, Echo. (yes)
+6. **Enemies: persistent passives only** this pass; themed enemy decks
+   logged as a phase candidate. (yes)
+7. **Alt-wins**: Befriend + CAPITULATE ratified; 1 more allowed —
+   CONCEDE held as A1. (yes)
+8. **Delivery**: spec v3 → owner ratification → implement in ordered
+   phases. (yes)
+
+**Assumption-confirms — ALL RATIFIED 2026-07-07 ("keep them all"):**
+
+- **A1** — CONCEDE alt-win included (§9).
+- **A2** — SWAY decays 1/turn (the tension knob; `irresistible-grace`
+  removes it). Tune via `/deck-tuning`.
+- **A3** — MARK as the universal glue affliction (+1 per tick per
+  stack; counts for RUPTURE/SOUL/REAP).
+- **A4** — fallacy/paradox categories and their ⚖/∞ tokens unchanged;
+  new cards keep philosophy-flavored naming.
+- **A5** — engine-gated drips (§1 source 3) as a sanctioned HP class:
+  BACKFIRE, bone-orchard, stuck-in-their-head. They are the Control /
+  Harvest / Echo win routes; without them those decks cannot close.

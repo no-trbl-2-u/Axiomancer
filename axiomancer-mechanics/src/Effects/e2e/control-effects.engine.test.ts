@@ -97,32 +97,9 @@ describe('Phase 88 — debuff_blind', () => {
     });
 });
 
-// ─── debuff_berserk — stat distortion (body +3, mind -4, heart -2) + defense -3 ─
-
-describe('Phase 88 — debuff_berserk', () => {
-    it('boosts body but cripples mind and heart', () => {
-        const mods = getActiveEffectModifiers([ae('debuff_berserk')]);
-        expect(mods.statFlat.get('body')).toBe(3);
-        expect(mods.statFlat.get('mind')).toBe(-4);
-        expect(mods.statFlat.get('heart')).toBe(-2);
-        expect(mods.statFlat.get('physicalSkill')).toBe(2);
-        expect(mods.statFlat.get('mentalSkill')).toBe(-3);
-        expect(mods.statFlat.get('mentalDefense')).toBe(-2);
-    });
-
-    it('reduces defense', () => {
-        const mods = getActiveEffectModifiers([ae('debuff_berserk')]);
-        expect(mods.defenseDelta).toBe(-3);
-    });
-
-    it('does not force a stance or skip turn in the aggregator', () => {
-        // berserk has no actionRestriction — the forced-attack behaviour is
-        // handled at a higher level (AI / reducer) not via the payload.
-        const mods = getActiveEffectModifiers([ae('debuff_berserk')]);
-        expect(mods.skipTurn).toBe(false);
-        expect(mods.forcedStance).toBeNull();
-    });
-});
+// debuff_berserk and debuff_dispel were retired outright by the spec 32 v3
+// keyword reset (no support consumer resolves them); their coverage retires
+// with them — the deprecated-effects ban list keeps the ids dead.
 
 // ─── debuff_fatigue — mild stat reduction ─────────────────────────────────────
 
@@ -188,22 +165,6 @@ describe('Phase 88 — debuff_knockdown', () => {
     it('does not skip turn (no actionRestriction)', () => {
         const mods = getActiveEffectModifiers([ae('debuff_knockdown')]);
         expect(mods.skipTurn).toBe(false);
-    });
-});
-
-// ─── debuff_dispel — instant, empty payload ───────────────────────────────────
-
-describe('Phase 88 — debuff_dispel', () => {
-    it('applies without error (duration 0, empty payload)', () => {
-        const effect = lookupEffect('debuff_dispel')!;
-        const { result } = applyEffect([], effect, 1);
-        expect(result.success).toBe(true);
-    });
-
-    it('does not alter any stats', () => {
-        const mods = getActiveEffectModifiers([ae('debuff_dispel')]);
-        expect(mods.statFlat.size).toBe(0);
-        expect(mods.defenseDelta).toBe(0);
     });
 });
 

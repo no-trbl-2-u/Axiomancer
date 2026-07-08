@@ -1,256 +1,27 @@
 {
   "buffs": [
     {
-      "id": "tier1_body_attack",
-      "name": "Ad Baculum",
-      "description": "Your argument doesn't need words when your presence speaks volumes. You don't debate — you loom. Each exchange sharpens the edge of your conviction into something that leaves marks.",
-      "type": "buff",
-      "category": "stat",
-      "duration": 3,
-      "stacking": "intensity",
-      "payload": {
-        "statModifiers": [
-          {
-            "stat": "physicalAttack",
-            "value": 2,
-            "isMultiplier": false
-          }
-        ],
-        "rollModifierPerIntensity": 1
-      },
-      "tier": 1,
-      "tags": [
-        "deprecated"
-      ]
-    },
-    {
-      "id": "tier1_body_defend",
-      "name": "Briar Stance",
-      "description": "You root yourself like a thorn bush — still, patient, dangerous. Striking you is a choice they'll regret. Every blow lands, but something sharp comes back.",
+      "id": "buff_thorns",
+      "name": "Thorns",
+      "description": "The stance answers for itself. Whatever reaches you leaves lighter than it came.",
       "type": "buff",
       "category": "defense",
-      "duration": 3,
+      "duration": 2,
       "stacking": "intensity",
       "payload": {
         "reflectDamage": 1
       },
-      "tier": 1
-    },
-    {
-      "id": "tier1_heart_defend",
-      "name": "Vital Empathy",
-      "description": "You stop fighting for a moment and simply exist. The stillness heals. The compassion you pour outward turns inward just enough — a quiet restoration, round by round.",
-      "type": "buff",
-      "category": "regeneration",
-      "duration": 4,
-      "stacking": "intensity",
-      "payload": {
-        "regeneration": {
-          "healthPerRound": 2
-        }
-      },
-      "tier": 1
-    },
-    {
-      "id": "tier1_heart_attack",
-      "name": "Fleeting Kindness",
-      "description": "Your strike carries no malice — just a gentle redirection. It doesn't hit as hard, but it reaches somewhere deeper. Something in the other combatant softens. Something in you holds on a little longer.",
-      "type": "buff",
-      "category": "stat",
-      "duration": 2,
-      "stacking": "intensity",
-      "payload": {
-        "rollModifier": -5
-      },
       "tier": 1,
+      "addedIn": "2026-07-08",
       "tags": [
-        "deprecated"
-      ]
-    },
-    {
-      "id": "buff_body_attack_up",
-      "name": "Achilles' Momentum",
-      "description": "Like Achilles chasing the tortoise, each strike brings you inexorably closer to overwhelming force. Your Body attacks gain devastating power.",
-      "type": "buff",
-      "category": "stat",
-      "duration": 3,
-      "stacking": "intensity",
-      "resistedBy": "mind",
-      "resistDR": 13,
-      "payload": {
-        "statModifiers": [
-          {
-            "stat": "body",
-            "value": 2,
-            "isMultiplier": false
-          },
-          {
-            "stat": "physicalSkill",
-            "value": 3,
-            "isMultiplier": false
-          }
-        ],
-        "rollModifier": 2
-      },
-      "tier": 2,
-      "tags": [
-        "deprecated"
-      ]
-    },
-    {
-      "id": "buff_mind_attack_up",
-      "name": "Schrödinger's Focus",
-      "description": "Your mind exists in superposition—simultaneously calculating every possible outcome until observation collapses into perfect execution.",
-      "type": "buff",
-      "category": "stat",
-      "duration": 3,
-      "stacking": "intensity",
-      "resistedBy": "heart",
-      "resistDR": 13,
-      "payload": {
-        "statModifiers": [
-          {
-            "stat": "mind",
-            "value": 2,
-            "isMultiplier": false
-          },
-          {
-            "stat": "mentalSkill",
-            "value": 3,
-            "isMultiplier": false
-          }
-        ],
-        "rollModifier": 2
-      },
-      "tier": 2,
-      "tags": [
-        "deprecated"
-      ]
-    },
-    {
-      "id": "buff_heart_attack_up",
-      "name": "Bootstrap Passion",
-      "description": "Your conviction creates itself—passion born from passion, an endless loop of emotional intensity that defies causal logic.",
-      "type": "buff",
-      "category": "stat",
-      "duration": 3,
-      "stacking": "intensity",
-      "resistedBy": "body",
-      "resistDR": 13,
-      "payload": {
-        "statModifiers": [
-          {
-            "stat": "heart",
-            "value": 2,
-            "isMultiplier": false
-          },
-          {
-            "stat": "emotionalSkill",
-            "value": 3,
-            "isMultiplier": false
-          }
-        ],
-        "rollModifier": 2
-      },
-      "tier": 2,
-      "tags": [
-        "deprecated"
-      ]
-    },
-    {
-      "id": "buff_body_defense_up",
-      "name": "Theseus' Constitution",
-      "description": "Like the legendary ship, your body repairs and replaces itself—each wound healed strengthens the whole, though philosophers may debate if you remain the same.",
-      "type": "buff",
-      "category": "defense",
-      "duration": 4,
-      "stacking": "duration",
-      "resistedBy": "mind",
-      "resistDR": 12,
-      "payload": {
-        "statModifiers": [
-          {
-            "stat": "body",
-            "value": 2,
-            "isMultiplier": false
-          },
-          {
-            "stat": "physicalDefense",
-            "value": 3,
-            "isMultiplier": false
-          }
-        ],
-        "defenseModifier": 2
-      },
-      "tier": 2,
-      "tags": [
-        "deprecated"
-      ]
-    },
-    {
-      "id": "buff_mind_defense_up",
-      "name": "Epistemic Shield",
-      "description": "You know that you know that you know—infinite layers of meta-awareness create an impenetrable barrier against mental assault.",
-      "type": "buff",
-      "category": "defense",
-      "duration": 4,
-      "stacking": "duration",
-      "resistedBy": "heart",
-      "resistDR": 12,
-      "payload": {
-        "statModifiers": [
-          {
-            "stat": "mind",
-            "value": 2,
-            "isMultiplier": false
-          },
-          {
-            "stat": "mentalDefense",
-            "value": 3,
-            "isMultiplier": false
-          }
-        ],
-        "defenseModifier": 2
-      },
-      "tier": 2,
-      "tags": [
-        "deprecated"
-      ]
-    },
-    {
-      "id": "buff_heart_defense_up",
-      "name": "Paradox of Tolerance",
-      "description": "By becoming intolerant of harm, you preserve your tolerance for all else. Your emotional resilience strengthens through selective rejection.",
-      "type": "buff",
-      "category": "defense",
-      "duration": 4,
-      "stacking": "duration",
-      "resistedBy": "body",
-      "resistDR": 12,
-      "payload": {
-        "statModifiers": [
-          {
-            "stat": "heart",
-            "value": 2,
-            "isMultiplier": false
-          },
-          {
-            "stat": "emotionalDefense",
-            "value": 3,
-            "isMultiplier": false
-          }
-        ],
-        "defenseModifier": 2
-      },
-      "tier": 2,
-      "tags": [
-        "deprecated"
+        "v3",
+        "bulwark"
       ]
     },
     {
       "id": "buff_defend_up",
       "name": "Hilbert's Shelter",
-      "description": "Your defense is an infinite hotel—no matter how many attacks arrive, there's always room to accommodate them without harm.",
+      "description": "Your defense is an infinite hotel\u2014no matter how many attacks arrive, there's always room to accommodate them without harm.",
       "type": "buff",
       "category": "defense",
       "duration": 3,
@@ -294,7 +65,8 @@
       },
       "tier": 2,
       "tags": [
-        "deprecated"
+        "support",
+        "non-card"
       ]
     },
     {
@@ -329,7 +101,8 @@
       },
       "tier": 2,
       "tags": [
-        "deprecated"
+        "support",
+        "non-card"
       ]
     },
     {
@@ -371,13 +144,14 @@
       },
       "tier": 2,
       "tags": [
-        "deprecated"
+        "support",
+        "non-card"
       ]
     },
     {
       "id": "buff_critical_rate_up",
       "name": "Observer's Collapse",
-      "description": "Your attacks exist in superposition until observed by your enemy. When they look, the wavefunction collapses—always into the deadliest outcome.",
+      "description": "Your attacks exist in superposition until observed by your enemy. When they look, the wavefunction collapses\u2014always into the deadliest outcome.",
       "type": "buff",
       "category": "advantage",
       "duration": 4,
@@ -396,13 +170,14 @@
       },
       "tier": 2,
       "tags": [
-        "deprecated"
+        "support",
+        "non-card"
       ]
     },
     {
       "id": "buff_critical_damage_up",
       "name": "Banach-Tarski Strike",
-      "description": "Your critical hits decompose and reassemble—one devastating blow becomes two, each as powerful as the original. Mathematics defies conservation.",
+      "description": "Your critical hits decompose and reassemble\u2014one devastating blow becomes two, each as powerful as the original. Mathematics defies conservation.",
       "type": "buff",
       "category": "damage",
       "duration": 3,
@@ -430,7 +205,8 @@
       },
       "tier": 2,
       "tags": [
-        "deprecated"
+        "support",
+        "non-card"
       ]
     },
     {
@@ -455,7 +231,8 @@
       },
       "tier": 3,
       "tags": [
-        "deprecated"
+        "support",
+        "non-card"
       ]
     },
     {
@@ -473,12 +250,16 @@
           "healthPerRound": 4
         }
       },
-      "tier": 2
+      "tier": 2,
+      "tags": [
+        "support",
+        "non-card"
+      ]
     },
     {
       "id": "buff_max_hp_up",
       "name": "Galileo's Infinity",
-      "description": "Your vitality is like perfect squares in natural numbers—somehow equal to the whole despite being only a part. Your maximum health expands impossibly.",
+      "description": "Your vitality is like perfect squares in natural numbers\u2014somehow equal to the whole despite being only a part. Your maximum health expands impossibly.",
       "type": "buff",
       "category": "stat",
       "duration": 5,
@@ -496,13 +277,14 @@
       },
       "tier": 2,
       "tags": [
-        "deprecated"
+        "support",
+        "non-card"
       ]
     },
     {
       "id": "buff_barrier",
       "name": "Gabriel's Horn",
-      "description": "A shield of infinite surface but finite volume wraps around you—attacks spread across its endless expanse, their force diluted to nothing.",
+      "description": "A shield of infinite surface but finite volume wraps around you\u2014attacks spread across its endless expanse, their force diluted to nothing.",
       "type": "buff",
       "category": "defense",
       "duration": 3,
@@ -514,7 +296,8 @@
       },
       "tier": 2,
       "tags": [
-        "deprecated"
+        "support",
+        "non-card"
       ]
     },
     {
@@ -532,7 +315,8 @@
       },
       "tier": 2,
       "tags": [
-        "deprecated"
+        "support",
+        "non-card"
       ]
     },
     {
@@ -550,13 +334,14 @@
       },
       "tier": 3,
       "tags": [
-        "deprecated"
+        "support",
+        "non-card"
       ]
     },
     {
       "id": "buff_taunt",
       "name": "Crocodile's Promise",
-      "description": "You present enemies with an impossible choice—attack you or face worse consequences. Like the child-stealing crocodile, your logic traps them.",
+      "description": "You present enemies with an impossible choice\u2014attack you or face worse consequences. Like the child-stealing crocodile, your logic traps them.",
       "type": "buff",
       "category": "control",
       "duration": 3,
@@ -575,13 +360,14 @@
       },
       "tier": 2,
       "tags": [
-        "deprecated"
+        "support",
+        "non-card"
       ]
     },
     {
       "id": "buff_stealth",
       "name": "Fermi's Absence",
-      "description": "Where are you? The paradox of your existence—you should be detectable, yet no evidence of you can be found. You are the universe's silent contradiction.",
+      "description": "Where are you? The paradox of your existence\u2014you should be detectable, yet no evidence of you can be found. You are the universe's silent contradiction.",
       "type": "buff",
       "category": "advantage",
       "duration": 2,
@@ -600,7 +386,8 @@
       },
       "tier": 2,
       "tags": [
-        "deprecated"
+        "support",
+        "non-card"
       ]
     },
     {
@@ -655,7 +442,8 @@
       },
       "tier": 2,
       "tags": [
-        "deprecated"
+        "support",
+        "non-card"
       ]
     },
     {
@@ -673,9 +461,9 @@
       },
       "tier": 2,
       "tags": [
-        "deprecated"
-      ],
-      "deprecatedFor": "buff_brazen_thorns"
+        "support",
+        "non-card"
+      ]
     },
     {
       "id": "buff_counter",
@@ -697,7 +485,8 @@
       },
       "tier": 2,
       "tags": [
-        "deprecated"
+        "support",
+        "non-card"
       ]
     },
     {
@@ -731,7 +520,8 @@
       },
       "tier": 2,
       "tags": [
-        "deprecated"
+        "support",
+        "non-card"
       ]
     },
     {
@@ -765,13 +555,14 @@
       },
       "tier": 2,
       "tags": [
-        "deprecated"
+        "support",
+        "non-card"
       ]
     },
     {
       "id": "buff_resistance_heart",
       "name": "Fiction's Wall",
-      "description": "You know emotional attacks aren't real—merely fictions. Yet somehow, knowing this provides genuine protection. The paradox shields you.",
+      "description": "You know emotional attacks aren't real\u2014merely fictions. Yet somehow, knowing this provides genuine protection. The paradox shields you.",
       "type": "buff",
       "category": "defense",
       "duration": 4,
@@ -799,13 +590,14 @@
       },
       "tier": 2,
       "tags": [
-        "deprecated"
+        "support",
+        "non-card"
       ]
     },
     {
       "id": "buff_cleanse",
       "name": "Barber's Paradox",
-      "description": "You shave away only those effects that don't remove themselves. The logical impossibility resolves—all negative conditions vanish.",
+      "description": "You shave away only those effects that don't remove themselves. The logical impossibility resolves\u2014all negative conditions vanish.",
       "type": "buff",
       "category": "stat",
       "duration": 0,
@@ -815,7 +607,8 @@
       "payload": {},
       "tier": 2,
       "tags": [
-        "deprecated"
+        "support",
+        "non-card"
       ]
     },
     {
@@ -833,7 +626,8 @@
       },
       "tier": 2,
       "tags": [
-        "deprecated"
+        "support",
+        "non-card"
       ]
     },
     {
@@ -851,13 +645,14 @@
       },
       "tier": 2,
       "tags": [
-        "deprecated"
+        "support",
+        "non-card"
       ]
     },
     {
       "id": "buff_life_steal",
       "name": "Maxwell's Siphon",
-      "description": "Like the demon sorting molecules, you separate your enemy's vitality from their form—fast energy to you, slow energy left behind.",
+      "description": "Like the demon sorting molecules, you separate your enemy's vitality from their form\u2014fast energy to you, slow energy left behind.",
       "type": "buff",
       "category": "regeneration",
       "duration": 4,
@@ -870,40 +665,10 @@
         },
         "rollModifier": 1
       },
-      "tier": 2
-    },
-    {
-      "id": "buff_advantage_body",
-      "name": "Predestination Strength",
-      "description": "Your physical dominance was always fated—your attempts to fight destiny only ensure your muscular superiority. Causality loops in your favor.",
-      "type": "buff",
-      "category": "advantage",
-      "duration": 3,
-      "stacking": "none",
-      "resistedBy": "mind",
-      "resistDR": 13,
-      "payload": {
-        "advantageModifier": {
-          "grantAdvantage": [
-            "body"
-          ]
-        },
-        "statModifiers": [
-          {
-            "stat": "body",
-            "value": 1,
-            "isMultiplier": false
-          },
-          {
-            "stat": "physicalSkill",
-            "value": 2,
-            "isMultiplier": false
-          }
-        ]
-      },
       "tier": 2,
       "tags": [
-        "deprecated"
+        "support",
+        "non-card"
       ]
     },
     {
@@ -937,13 +702,14 @@
       },
       "tier": 2,
       "tags": [
-        "deprecated"
+        "support",
+        "non-card"
       ]
     },
     {
       "id": "buff_petitio_pulse",
       "name": "Petitio Principii Pulse",
-      "description": "Your courage assumes itself justified. The argument is circular, the logic bankrupt—yet somehow the conviction holds just long enough to matter.",
+      "description": "Your courage assumes itself justified. The argument is circular, the logic bankrupt\u2014yet somehow the conviction holds just long enough to matter.",
       "type": "buff",
       "category": "stat",
       "duration": 2,
@@ -961,13 +727,14 @@
       },
       "tier": 1,
       "tags": [
-        "deprecated"
+        "support",
+        "non-card"
       ]
     },
     {
       "id": "buff_gettiters_flicker",
       "name": "Gettier's Flicker",
-      "description": "You don't truly know where to strike—your belief is justified and true, but only by coincidence. The attack lands anyway. Epistemology shrugs.",
+      "description": "You don't truly know where to strike\u2014your belief is justified and true, but only by coincidence. The attack lands anyway. Epistemology shrugs.",
       "type": "buff",
       "category": "advantage",
       "duration": 2,
@@ -985,7 +752,8 @@
       },
       "tier": 1,
       "tags": [
-        "deprecated"
+        "support",
+        "non-card"
       ]
     },
     {
@@ -1009,58 +777,8 @@
       },
       "tier": 1,
       "tags": [
-        "deprecated"
-      ]
-    },
-    {
-      "id": "buff_advantage_heart",
-      "name": "Hedonist's Loop",
-      "description": "Pursuing happiness directly fails—so you pursue victory, and happiness follows. Your Heart surges with incidental joy made powerful.",
-      "type": "buff",
-      "category": "advantage",
-      "duration": 3,
-      "stacking": "none",
-      "resistedBy": "body",
-      "resistDR": 13,
-      "payload": {
-        "advantageModifier": {
-          "grantAdvantage": [
-            "heart"
-          ]
-        },
-        "statModifiers": [
-          {
-            "stat": "heart",
-            "value": 1,
-            "isMultiplier": false
-          },
-          {
-            "stat": "emotionalSkill",
-            "value": 2,
-            "isMultiplier": false
-          }
-        ]
-      },
-      "tier": 2,
-      "tags": [
-        "deprecated"
-      ]
-    },
-    {
-      "id": "buff_special_pleading",
-      "name": "Special Pleading",
-      "description": "The bearer carves out the exception they need from the general rule. This case is sacred, this hour is the one the law forgot — and the blow that would have landed slides off the parenthesis.",
-      "type": "buff",
-      "category": "defense",
-      "duration": 2,
-      "stacking": "intensity",
-      "payload": {
-        "defenseModifier": 2
-      },
-      "tier": 1,
-      "sourcedFromCell": "faith-optimistic-individual",
-      "tags": [
-        "deprecated"
+        "support",
+        "non-card"
       ]
     },
     {
@@ -1074,84 +792,14 @@
       "payload": {},
       "tier": 0,
       "tags": [
-        "deprecated"
-      ]
-    },
-    {
-      "id": "buff_quine_resolve",
-      "name": "Quine's Resolve",
-      "description": "A statement that produces a copy of itself when invoked — your conviction reprints its own source each round, never spending itself. The longer you hold, the heavier your strikes land.",
-      "type": "buff",
-      "category": "stat",
-      "duration": 3,
-      "stacking": "intensity",
-      "payload": {
-        "statModifiers": [
-          {
-            "stat": "body",
-            "value": 1,
-            "isMultiplier": false
-          },
-          {
-            "stat": "physicalAttack",
-            "value": 2,
-            "isMultiplier": false
-          }
-        ],
-        "rollModifierPerIntensity": 1
-      },
-      "tier": 1,
-      "addedIn": "2026-04-15",
-      "tags": [
-        "status-effect",
-        "stat",
-        "since-april",
-        "deprecated"
-      ]
-    },
-    {
-      "id": "buff_apollonian_clarity",
-      "name": "Apollonian Clarity",
-      "description": "The dream of perfect form. Every edge of thought sharpened to a clean line, every move foreseen before it begins. Your mind cuts where it intends.",
-      "type": "buff",
-      "category": "stat",
-      "duration": 3,
-      "stacking": "intensity",
-      "resistedBy": "heart",
-      "resistDR": 12,
-      "payload": {
-        "statModifiers": [
-          {
-            "stat": "mind",
-            "value": 2,
-            "isMultiplier": false
-          },
-          {
-            "stat": "mentalAttack",
-            "value": 2,
-            "isMultiplier": false
-          },
-          {
-            "stat": "mentalSkill",
-            "value": 2,
-            "isMultiplier": false
-          }
-        ],
-        "rollModifier": 1
-      },
-      "tier": 2,
-      "addedIn": "2026-04-15",
-      "tags": [
-        "status-effect",
-        "stat",
-        "since-april",
-        "deprecated"
+        "support",
+        "non-card"
       ]
     },
     {
       "id": "buff_promethean_ember",
       "name": "Promethean Ember",
-      "description": "Stolen fire kept burning under the ribs. It mends what the fight tears open, knitting flesh faster than the wound can widen — a gift that keeps costing the giver.",
+      "description": "Stolen fire kept burning under the ribs. It mends what the fight tears open, knitting flesh faster than the wound can widen \u2014 a gift that keeps costing the giver.",
       "type": "buff",
       "category": "regeneration",
       "duration": 4,
@@ -1173,84 +821,14 @@
       "tier": 2,
       "addedIn": "2026-04-15",
       "tags": [
-        "status-effect",
-        "regeneration",
-        "since-april"
-      ]
-    },
-    {
-      "id": "buff_aegis_recursion",
-      "name": "Aegis Recursion",
-      "description": "A shield that quotes itself. Each layer cites the one beneath as proof of its own strength, and the regress — for once — holds. Blows arrive diluted and apologetic.",
-      "type": "buff",
-      "category": "defense",
-      "duration": 3,
-      "stacking": "duration",
-      "resistedBy": "heart",
-      "resistDR": 13,
-      "payload": {
-        "defenseModifier": 4,
-        "statModifiers": [
-          {
-            "stat": "physicalDefense",
-            "value": 2,
-            "isMultiplier": false
-          },
-          {
-            "stat": "physicalSave",
-            "value": 2,
-            "isMultiplier": false
-          }
-        ]
-      },
-      "tier": 2,
-      "addedIn": "2026-04-15",
-      "tags": [
-        "status-effect",
-        "defense",
-        "since-april",
-        "deprecated"
-      ]
-    },
-    {
-      "id": "buff_dionysian_surge",
-      "name": "Dionysian Surge",
-      "description": "Form dissolves into rapture. You stop counting blows and simply become the storm — disadvantage washes off enemies who try to read a current with no banks.",
-      "type": "buff",
-      "category": "advantage",
-      "duration": 2,
-      "stacking": "none",
-      "resistedBy": "mind",
-      "resistDR": 14,
-      "payload": {
-        "rollModifier": 2,
-        "advantageModifier": {
-          "grantAdvantage": [
-            "heart",
-            "body"
-          ]
-        },
-        "statModifiers": [
-          {
-            "stat": "heart",
-            "value": 2,
-            "isMultiplier": false
-          }
-        ]
-      },
-      "tier": 2,
-      "addedIn": "2026-04-15",
-      "tags": [
-        "status-effect",
-        "advantage",
-        "since-april",
-        "deprecated"
+        "support",
+        "non-card"
       ]
     },
     {
       "id": "buff_brazen_thorns",
       "name": "Brazen Thorns",
-      "description": "Your skin answers in kind. To press an argument against you is to be cut by it — the harder the push, the deeper the rebuttal bites back.",
+      "description": "Your skin answers in kind. To press an argument against you is to be cut by it \u2014 the harder the push, the deeper the rebuttal bites back.",
       "type": "buff",
       "category": "defense",
       "duration": 3,
@@ -1264,16 +842,14 @@
       "tier": 2,
       "addedIn": "2026-05-20",
       "tags": [
-        "status-effect",
-        "defense",
-        "reflect",
-        "since-april"
+        "support",
+        "non-card"
       ]
     },
     {
       "id": "buff_oracle_foresight",
       "name": "Oracle's Foresight",
-      "description": "The vapors rise and the next moment unspools before it arrives. You do not react — you arrive early. Every line of approach is already known to you.",
+      "description": "The vapors rise and the next moment unspools before it arrives. You do not react \u2014 you arrive early. Every line of approach is already known to you.",
       "type": "buff",
       "category": "advantage",
       "duration": 3,
@@ -1300,10 +876,8 @@
       "tier": 2,
       "addedIn": "2026-05-20",
       "tags": [
-        "status-effect",
-        "advantage",
-        "since-april",
-        "deprecated"
+        "support",
+        "non-card"
       ]
     },
     {
@@ -1339,10 +913,8 @@
       "tier": 2,
       "addedIn": "2026-05-20",
       "tags": [
-        "status-effect",
-        "defense",
-        "since-april",
-        "deprecated"
+        "support",
+        "non-card"
       ]
     },
     {
@@ -1370,16 +942,14 @@
       "tier": 1,
       "addedIn": "2026-06-07",
       "tags": [
-        "status-effect",
-        "stat",
-        "since-april",
-        "deprecated"
+        "support",
+        "non-card"
       ]
     },
     {
       "id": "buff_phoenix_vigor",
       "name": "Phoenix Vigor",
-      "description": "Ash remembers the bird. The closer you come to ending, the more fiercely you mend — vitality returning in waves, defenses tightening as the pyre cools.",
+      "description": "Ash remembers the bird. The closer you come to ending, the more fiercely you mend \u2014 vitality returning in waves, defenses tightening as the pyre cools.",
       "type": "buff",
       "category": "regeneration",
       "duration": 5,
@@ -1402,89 +972,8 @@
       "tier": 2,
       "addedIn": "2026-06-07",
       "tags": [
-        "status-effect",
-        "regeneration",
-        "since-april"
-      ]
-    },
-    {
-      "id": "buff_focus",
-      "name": "Husserl's Bracket",
-      "description": "You suspend the world and attend to one thing only. Bracketed away, distraction has no purchase; what remains is pure, deliberate intention — and intention, sustained, sharpens every act it rests upon and steadies the body mending beneath it.",
-      "type": "buff",
-      "category": "stat",
-      "duration": 3,
-      "stacking": "intensity",
-      "resistedBy": "heart",
-      "resistDR": 12,
-      "payload": {
-        "statModifiers": [
-          {
-            "stat": "mind",
-            "value": 1,
-            "isMultiplier": false
-          },
-          {
-            "stat": "mentalSkill",
-            "value": 2,
-            "isMultiplier": false
-          }
-        ],
-        "rollModifier": 1
-      },
-      "tier": 2,
-      "addedIn": "2026-06-20",
-      "tags": [
-        "status-effect",
-        "stat",
-        "combo-enabler",
-        "since-april",
-        "deprecated"
-      ]
-    },
-    {
-      "id": "buff_resolute",
-      "name": "Unmoved Mover's Resolve",
-      "description": "Something must move without itself being moved. You anchor yourself there — whatever strikes you now finds a will that does not budge.",
-      "type": "buff",
-      "category": "defense",
-      "duration": 2,
-      "stacking": "intensity",
-      "resistedBy": "heart",
-      "resistDR": 12,
-      "payload": {
-        "damageTakenMult": 0.85
-      },
-      "tier": 2,
-      "addedIn": "2026-07-03",
-      "tags": [
-        "status-effect",
-        "defense",
-        "hybrid-damage-model",
-        "self-buff",
-        "resolute"
-      ]
-    },
-    {
-      "id": "buff_clarity",
-      "name": "Liar's Clarity",
-      "description": "\"This next die is Wild\" — the sentence is either true or it isn't, and by naming it, you've made it so. One clean certainty, carved out of the paradox.",
-      "type": "buff",
-      "category": "advantage",
-      "duration": 1,
-      "stacking": "none",
-      "payload": {
-        "forceWildOnNextDie": true,
-        "consumedOnUse": true
-      },
-      "tier": 1,
-      "addedIn": "2026-07-03",
-      "tags": [
-        "status-effect",
-        "advantage",
-        "hybrid-damage-model",
-        "self-buff",
-        "consumed-on-use"
+        "support",
+        "non-card"
       ]
     }
   ]

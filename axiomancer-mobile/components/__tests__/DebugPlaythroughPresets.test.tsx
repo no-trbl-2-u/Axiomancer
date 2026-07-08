@@ -89,8 +89,8 @@ describe('DebugPlaythroughPresets', () => {
         expect(state.player.level).toBe(20);
         expect(state.player.experience).toBe(20000);
         expect(state.player.baseStats).toEqual({ heart: 15, body: 15, mind: 15 });
-        expect(state.player.knownSkills).toContain('sorites-cascade');
-        expect(state.player.knownSkills).toContain('bootstrap-paradox');
+        expect(state.player.knownSkills).toContain('resonance-detonation');
+        expect(state.player.knownSkills).toContain('the-adamant-wall');
         expect(state.player.currency).toBe(500);
         expect(state.player.inventory.length).toBeGreaterThan(0);
     });

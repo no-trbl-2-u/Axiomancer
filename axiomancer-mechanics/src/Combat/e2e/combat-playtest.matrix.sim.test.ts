@@ -147,14 +147,15 @@ describe('playtest harness — honest failures', () => {
     });
 
     it('grants the stage player knowledge of explicit deck cards (a preset above the stage gate still runs)', () => {
-        // The dot-erosion preset carries tier-3 cards the early-stage player has
-        // not learned; the harness grants deck knowledge so the cell still runs
-        // (the maturity gate lives in DRAFTING, not the engine knownSkills check).
+        // The erosion preset carries tier-3 cards (resonance-detonation) the
+        // early-stage player has not learned; the harness grants deck knowledge
+        // so the cell still runs (the maturity gate lives in DRAFTING, not the
+        // engine knownSkills check).
         const cell = runPlaytestCell({
             stage: 'early', enemySlug: 'grave-larva', policyId: 'greedy',
-            deck: { kind: 'preset', presetId: 'dot-erosion' }, runs: 2, seed: 1,
+            deck: { kind: 'preset', presetId: 'erosion' }, runs: 2, seed: 1,
         });
-        expect(cell.deckCardIds).toContain('pyrrhic-victory');
+        expect(cell.deckCardIds).toContain('resonance-detonation');
         expect(cell.stats.runs).toBe(2);
     }, 30_000);
 });

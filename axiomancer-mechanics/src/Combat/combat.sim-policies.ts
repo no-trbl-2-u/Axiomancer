@@ -27,7 +27,7 @@ import type {
     CombatCard, CombatEncounterState, SignatureSkill, SignatureSkillKind,
 } from './combat.encounter.types';
 import type { CombatDeckFocus } from './combat.deck-presets';
-import { getPendingDotTotal, getDistinctDebuffCount } from './effects';
+import { getPendingDotTotal } from './effects';
 
 /** Every scripted witness the sim can drive. */
 export type CombatSimPolicyId =
@@ -72,8 +72,8 @@ export interface CombatSimPolicy {
 // under BAND_EFFECT). Payoff picks return a FLAT band value so ties between two
 // payoff cards resolve by hand order — exactly like the legacy `cards.find`.
 const BAND_PAYOFF_RUPTURE = 3e15;
-const BAND_PAYOFF_AMPLIFY = 2e15;
-const BAND_PAYOFF_COMPOUND = 1e15;
+const BAND_PAYOFF_REAP = 2e15;
+const BAND_PAYOFF_PREMISES = 1e15;
 const BAND_BEFRIEND_LOW_HP = 1e12;
 const BAND_PRIMARY = 2e8;
 const BAND_SECONDARY = 1e7;
@@ -83,8 +83,10 @@ const BAND_UTILITY_LIVE = 1e6;
 
 /** Legacy payoff thresholds (mirrors the pre-roster `bestCard` preamble). */
 const RUPTURE_PENDING_DOT_AT = 12;
-const AMPLIFY_PENDING_DOT_AT = 8;
-const COMPOUND_DISTINCT_AT = 2;
+/** Spec 32 v3 payoff gates: REAP-all cashes a funded Soul bank; a premise
+ *  spend cashes a built tally. */
+const REAP_SOULS_AT = 4;
+const SPEND_PREMISES_AT = 4;
 /** Legacy low-HP gate for the Befriend/mercy turn. */
 const LOW_HP_FRACTION = 0.30;
 
@@ -123,8 +125,8 @@ function greedyRankCard(s: CombatEncounterState, card: CombatCard): number {
         // Flat returns: ties between payoff cards fall back to hand order,
         // exactly like the legacy first-match `cards.find`.
         if (kinds.has('rupture') && pendingDot >= RUPTURE_PENDING_DOT_AT) return BAND_PAYOFF_RUPTURE;
-        if (kinds.has('amplify') && pendingDot >= AMPLIFY_PENDING_DOT_AT) return BAND_PAYOFF_AMPLIFY;
-        if (kinds.has('compound') && getDistinctDebuffCount(s.enemy) >= COMPOUND_DISTINCT_AT) return BAND_PAYOFF_COMPOUND;
+        if (kinds.has('reap_all') && (s.souls ?? 0) >= REAP_SOULS_AT) return BAND_PAYOFF_REAP;
+        if (kinds.has('spend_premises') && (s.premises ?? 0) >= SPEND_PREMISES_AT) return BAND_PAYOFF_PREMISES;
     }
     let score = card.bottomDamagePreview;
     if (enemyLowHp(s) && card.verbClass === 'befriend') score += BAND_BEFRIEND_LOW_HP;
@@ -168,14 +170,14 @@ export const COMBAT_SIM_POLICIES: Record<CombatSimPolicyId, CombatSimPolicy> = {
     'dot-weaver': {
         id: 'dot-weaver',
         name: 'DoT Weaver',
-        description: 'All-in on erosion: fresh DoTs and rupture/amplify payoffs above all; utility only once the foe is already bleeding.',
+        description: 'All-in on erosion: fresh DoTs and rupture/reap payoffs above all; utility only once the foe is already bleeding.',
         blind: false,
         preferredFocus: 'dot',
         rankCard: (s, card) => {
             const kinds = cardMechKinds(card);
             const pendingDot = getPendingDotTotal(s.enemy).total;
             if (kinds.has('rupture') && pendingDot >= RUPTURE_PENDING_DOT_AT) return BAND_PAYOFF_RUPTURE;
-            if (kinds.has('amplify') && pendingDot >= AMPLIFY_PENDING_DOT_AT) return BAND_PAYOFF_AMPLIFY;
+            if (kinds.has('reap_all') && (s.souls ?? 0) >= REAP_SOULS_AT) return BAND_PAYOFF_REAP;
             if (card.verbClass === 'direct-dot') {
                 return (isNewStatus(s, card) ? BAND_PRIMARY : BAND_SECONDARY) + card.bottomDamagePreview;
             }

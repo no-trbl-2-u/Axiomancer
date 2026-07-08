@@ -95,12 +95,11 @@ describe('createAppActions: dispatch', () => {
         expect(store.getState().currentEncounter?.enemies[0]?.name).toBe('Test Lich');
     });
 
-    // Regression: a level-1 player's starter skills must ALL be learnable at
-    // level 1 and yield a varied, powerable card hand. The old starter sourced
-    // the engine's STARTING_SKILL_IDS, which included a level-14 skill the
-    // player silently failed to learn — collapsing the deck to a single 0-power
-    // guard card, so the hand drew the same ~3 do-nothing duplicates each turn.
-    it('seeds a varied, effective starter deck for a fresh level-1 player', () => {
+    // Spec 32 v3 §7 — the authored starting deck: slippery-slope (poison
+    // erosion) + brace-for-impact (Guard) + the synthetic Retreat. Both
+    // starters must be level-1 learnable (none silently dropped by an unmet
+    // learning requirement) and each teaches a mechanic in fight one.
+    it('seeds the authored v3 starter deck for a fresh level-1 player', () => {
         const store = createAppStore({ adapter });
         const actions = createAppActions(store);
 
@@ -110,27 +109,28 @@ describe('createAppActions: dispatch', () => {
 
         // Every seeded starter skill must actually have been learned (none
         // silently dropped by an unmet learning requirement).
-        expect(player.knownSkills.length).toBeGreaterThanOrEqual(5);
+        expect(player.knownSkills).toEqual(['slippery-slope', 'brace-for-impact']);
         for (const id of player.knownSkills) {
             expect(getSkillById(id)).toBeTruthy();
         }
 
         // The card deck is built from those known skills; after the synthetic
-        // retreat card, the player must draw 5 distinct action cards (the hand
-        // size) with no duplicates.
+        // retreat card, the player must draw both action cards, distinct.
         const deck = buildCombatDeck(player);
         const encounter = initializeCombatEncounter(player, makeEnemy(), undefined, 7);
         const visible = handCards(encounter).filter(
             ({ card }) => card.id !== 'card-retreat' && card.verbClass !== 'retreat',
         );
-        expect(deck.length).toBeGreaterThanOrEqual(6);
-        expect(visible.length).toBeGreaterThanOrEqual(5);
+        expect(deck.length).toBeGreaterThanOrEqual(3);
+        expect(visible.length).toBeGreaterThanOrEqual(2);
+        // A 2-skill deck draws a padded hand — both starters must be present
+        // (duplicates are the reshuffle law at work, not a bug).
         const distinct = new Set(visible.map(({ card }) => card.id));
-        expect(distinct.size).toBe(visible.length);
-        // At least one card must deal damage and at least one must defend —
-        // i.e. the hand is actually playable, not all 0-power guards.
+        expect(distinct).toEqual(new Set(['slippery-slope', 'brace-for-impact']));
+        // One card erodes (DoT) and one defends — the strike is dead, so the
+        // opening hand teaches poison + Guard rather than a raw hit.
         const verbs = visible.map(({ card }) => card.verbClass);
-        expect(verbs.some((v) => v.startsWith('direct'))).toBe(true);
+        expect(verbs).toContain('direct-dot');
         expect(verbs).toContain('defend');
     });
 

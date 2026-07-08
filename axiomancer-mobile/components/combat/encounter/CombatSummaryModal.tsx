@@ -12,8 +12,11 @@ import type { CombatSummary } from '@mechanics';
 import { FONTS } from '@/theme/axm';
 import { makeStyles, usePalette } from '@/theme/runtime';
 
+// Spec 32 v3 §9 — capitulate (SWAY) and concede (Peroration) are merciful
+// resolutions; they wear the mercy hue.
 const OUTCOME_COLOR: Record<string, string> = {
-    victory: '#5bbf6a', mercy: '#a86bdc', defeat: '#e01f33', retreat: '#9c937f',
+    victory: '#5bbf6a', mercy: '#a86bdc', capitulate: '#a86bdc', concede: '#a86bdc',
+    defeat: '#e01f33', retreat: '#9c937f',
 };
 
 export function CombatSummaryModal({ summary, onClose }: { summary: CombatSummary; onClose: () => void }) {

@@ -121,10 +121,29 @@ export function ripenReserve(reserve: readonly CombatManaDie[]): { reserve: Comb
 /**
  * A die Press Fate (the `reroll` signature) re-rolls: one you have USED this turn
  * (`spent`/`exhausted`) or a dead `x` face that can't power anything. A still-
- * usable die — an `available` colored/wild die — is LEFT ALONE.
+ * usable die — an `available` colored/wild die — is LEFT ALONE. FLOATING dice
+ * (spec 32 v3 §5) NEVER reroll — that invariant is part of their identity.
  */
 export function dieIsRerollable(die: CombatManaDie): boolean {
+    if (die.floating) return false;
     return die.state === 'spent' || die.state === 'exhausted' || die.color === 'x';
+}
+
+// ---------------------------------------------------------------------------
+// Spec 32 v3 §5 — FLOATING dice (the live-tray model)
+// ---------------------------------------------------------------------------
+
+/** Hard cap on the floating-die pool. Forging at cap → +1 Conviction instead. */
+export const FLOATING_DICE_CAP = 3;
+
+/** Materializes the persistent floating pool into this turn's tray. Ids are
+ *  stable (`float-N`) so a die keeps its identity across turns and combats. */
+export function materializeFloatingDice(
+    colors: readonly ('heart' | 'body' | 'mind' | 'wild')[],
+): CombatManaDie[] {
+    return colors.slice(0, FLOATING_DICE_CAP).map((color, i) => ({
+        id: `float-${i}`, color, state: 'available' as const, temporary: false, floating: true,
+    }));
 }
 
 /** True when at least one die in the pool would actually be re-rolled. */

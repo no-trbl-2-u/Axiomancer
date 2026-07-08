@@ -42,29 +42,29 @@ import {
     dieIsRerollable, hasRerollableDice, rerollSpentDice,
 } from '../combat.dice';
 import { buildCombatDeck, COMBAT_HAND_SIZE } from '../combat.deck';
-import { classifyVerbClass, toCombatCard, projectDeck, isGoldCard, GOLD_CARD_IDS } from '../combat.cards';
+import { classifyVerbClass, toCombatCard, projectDeck } from '../combat.cards';
 import { generateDefaultThreatSequence, AUTHORED_THREAT_ENEMY_IDS } from '../combat.threat';
 import { ENEMY_REGISTRY } from '../../Enemy/enemy.library';
 import type { CombatManaDie, CombatEvent } from '../combat.encounter.types';
 
-// Master Spec (2026-07-03) doctrine pass converted every real library card off
-// flat `basePower` strikes — no real card can play "pure damage, no status"
-// anymore, so this suite's pure-strike fixture is a sandbox-only test card.
+// Spec 32 v3: basePower no longer exists at the schema level — the "damage
+// class" is the affliction-payoff burst. The fixture is a bare RUPTURE card.
 registerSandboxCards([{
-    id: 'qa-pure-strike-body',
-    name: 'QA Pure Strike (test fixture)',
+    id: 'qa-payoff-burst',
+    name: 'QA Payoff Burst (test fixture)',
     category: 'paradox',
     philosophicalAspect: 'body',
-    description: 'Test-only fixture: a flat direct-damage card with no status payload.',
+    description: 'Test-only fixture: a bare RUPTURE payoff with no status payload.',
     tier: 1,
+    rank: 1,
+    cardType: 'spell',
     targetType: 'enemy',
-    basePower: 12,
-    scalingStat: 'body',
+    specialMechanics: [{ kind: 'rupture' }],
 }]);
 
-const DOT_BODY = 'slippery-slope';       // body starter, DoT (canonical poison)
-const CONTROL_HEART = 'false-dilemma';   // mind, tier 1, control
-const DAMAGE_BODY = 'qa-pure-strike-body'; // body, tier 1, no status effect (sandbox fixture)
+const DOT_BODY = 'slippery-slope';       // body starter, DoT (v3 poison)
+const CONTROL_HEART = 'red-herring';     // mind, control (BACKFIRE)
+const DAMAGE_BODY = 'qa-payoff-burst';   // body, payoff burst (sandbox fixture)
 
 const SEED = 12345;
 
@@ -196,7 +196,7 @@ describe('Spec 25 §6 — card adapters', () => {
         expect(track).toBe('control');
     });
 
-    it('classifyVerbClass marks a pure-damage skill as direct-damage / no track', () => {
+    it('classifyVerbClass marks a payoff-burst skill as direct-damage / no track', () => {
         const { verbClass, track } = classifyVerbClass(getCardById(DAMAGE_BODY)!, lookupEffect);
         expect(verbClass).toBe('direct-damage');
         expect(track).toBe('none');
@@ -647,22 +647,5 @@ describe('Spec 25 §7.7 — buildCombatSummary field shape', () => {
     });
 });
 
-describe('isGoldCard / GOLD_CARD_IDS', () => {
-    it('GOLD_CARD_IDS contains exactly 3 members', () => {
-        expect(GOLD_CARD_IDS.size).toBe(3);
-    });
-
-    it('returns true for each of the 3 gold card ids', () => {
-        for (const id of GOLD_CARD_IDS) {
-            expect(isGoldCard(id)).toBe(true);
-        }
-    });
-
-    it('returns false for a non-gold card id', () => {
-        expect(isGoldCard('slippery-slope')).toBe(false);
-    });
-
-    it('returns false for an empty string', () => {
-        expect(isGoldCard('')).toBe(false);
-    });
-});
+// spec 32 v3: GOLD is gone — GOLD_CARD_IDS / isGoldCard were deleted with the
+// old library; rarity (common/uncommon/rare, derived from rank) replaces it.

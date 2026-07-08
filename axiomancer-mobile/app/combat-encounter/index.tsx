@@ -40,7 +40,7 @@ function readDeckOverride(): string[] | undefined {
     return Array.isArray(g) && g.every((x) => typeof x === 'string') ? (g as string[]) : undefined;
 }
 
-const DEMO_SKILLS = ['slippery-slope', 'eternal-regress', 'achilles-gambit', 'befriend'];
+const DEMO_SKILLS = ['slippery-slope', 'straw-mans-jab', 'brace-for-impact', 'soft-word'];
 function withDemoDeck<T extends { knownSkills?: string[]; baseStats?: { heart: number; body: number; mind: number }; health?: number; maxHealth?: number }>(player: T): T {
     const known = player.knownSkills ?? [];
     if (known.length >= 3) return player;

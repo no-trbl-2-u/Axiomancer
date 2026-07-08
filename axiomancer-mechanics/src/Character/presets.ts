@@ -48,32 +48,31 @@ export interface CharacterPreset {
 // ─── Preset records ───────────────────────────────────────────────────────────
 
 const TIER_1_SKILLS = [
-    'ad-hominem-strike',
-    'false-dilemma',
-    'appeal-to-pity',
-    'achilles-gambit',
-    'liars-echo',
-    'ship-of-theseus',
-    'befriend', // Phase 108 — starting heart skill
+    'brief-candle',
+    'red-herring',
+    'soft-word',
+    'straw-mans-jab',
+    'glimpse',
+    'sketch-of-a-thought',
+    'disarming-smile', // Charm opener (v3 — Befriend lives in signatures)
 ];
 
 const TIER_2_SKILLS = [
-    'mob-appeal',
+    'sweet-poison',
     'undistributed-middle',
-    'eternal-regress',
+    'slippery-slope',
 ];
 
 const TIER_3_SKILLS = [
-    'sorites-cascade',
-    'straw-giant',
-    'bootstrap-paradox',
+    'festering-argument',
+    'self-flagellant',
+    'bootstrap-loop',
 ];
 
+// The synergy-payoff line. straw-mans-jab and sketch-of-a-thought (its
+// setup pieces) already ride in TIER_1_SKILLS — knownSkills is a set-like
+// catalogue, so the lists stay disjoint to avoid duplicate ids.
 const TIER_2_SYNERGY_SKILLS = [
-    'resonance-bleed',
-    'intensity-feedback',
-    'bat-swarm-thoughtform',
-    'resonance-burst',
     'resonance-detonation',
 ];
 

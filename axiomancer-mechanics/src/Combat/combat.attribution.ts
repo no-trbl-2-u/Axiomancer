@@ -44,6 +44,8 @@ export function recordAttribution(
 const HEADLINES: Record<CombatOutcome, string> = {
     victory: 'Victory — the enemy falls',
     mercy: 'Mercy — the enemy is spared',
+    capitulate: 'Capitulation — the enemy yields, swayed',
+    concede: 'Concession — the argument is won outright',
     defeat: 'Defeat',
     retreat: 'Retreat',
 };

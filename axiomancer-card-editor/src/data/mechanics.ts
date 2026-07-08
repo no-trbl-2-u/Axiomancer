@@ -14,7 +14,7 @@
 // ── Live REAL data imports (the heart of "incorporate everything") ───────────
 import { cardLibrary, getCardById } from '@mechanics/Cards/cards.library';
 import { effectsLibrary, lookupEffect } from '@mechanics/Effects/effects.library';
-import { GOLD_CARD_IDS, isGoldCard } from '@mechanics/Combat/combat.cards';
+import { rankToRarity, CARD_RANK_NAMES } from '@mechanics/Cards/types';
 
 // ── Types (erased at runtime; here for full-fidelity editing) ────────────────
 import type {
@@ -23,6 +23,9 @@ import type {
     StatType,
     CardTier,
     CardTarget,
+    CardRank,
+    CardRarity,
+    CardType,
 } from '@mechanics/Cards/types';
 import type { Effect, EffectType, EffectCategory } from '@mechanics/Effects/types';
 import type { Stance } from '@mechanics/Combat/types';
@@ -33,11 +36,11 @@ import type {
 } from '@mechanics/Combat/combat.encounter.types';
 
 // ── Re-exported live data + lookups ──────────────────────────────────────────
-export { cardLibrary, getCardById, effectsLibrary, lookupEffect, GOLD_CARD_IDS };
-export type { Card };
+export { cardLibrary, getCardById, effectsLibrary, lookupEffect, rankToRarity, CARD_RANK_NAMES };
+export type { Card, CardRank, CardRarity, CardType };
 
-/** True when a card id is a GOLD (rare) card. Thin wrapper over the real set. */
-export const isGold = (cardId: string): boolean => isGoldCard(cardId);
+/** Rarity band for a card (spec 32 v3 §4): derived from its rank ladder. */
+export const rarityOf = (card: Pick<Card, 'rank'>): CardRarity => rankToRarity(card.rank);
 
 // ── Effects, flattened for the keyword/effect dropdowns ──────────────────────
 /** A single selectable effect for the editor's effect dropdowns. */
@@ -101,14 +104,24 @@ export const STANCES: Option<StatType>[] = [
     { value: 'mind', label: 'MIND' },
     { value: 'heart', label: 'HEART' },
 ];
-/** Alias — `philosophicalAspect` and `scalingStat` share this domain. */
-export const SCALING_STATS = STANCES;
-
 /** Card tier (1 / 2 / 3) — mirrors the effect tier system. */
 export const TIERS: Option<CardTier>[] = [
     { value: 1, label: 'I' },
     { value: 2, label: 'II' },
     { value: 3, label: 'III' },
+];
+
+/** Spec 32 v3 §4 — the rank ladder (Doxa → Aporia), printed on the face. */
+export const RANKS: Option<CardRank>[] = ([1, 2, 3, 4, 5, 6] as CardRank[]).map((r) => ({
+    value: r,
+    label: CARD_RANK_NAMES[r].toUpperCase(),
+}));
+
+/** Spec 32 v3 §2 — card type (spell / enchantment / disenchant). */
+export const CARD_TYPES: Option<CardType>[] = [
+    { value: 'spell', label: 'SPELL' },
+    { value: 'enchantment', label: 'ENCHANT' },
+    { value: 'disenchant', label: 'DISENCHANT' },
 ];
 
 /** Targeting scope. */
@@ -123,29 +136,47 @@ export const APPLIED_TO: Option<'self' | 'opponent'>[] = [
     { value: 'self', label: 'SELF' },
 ];
 
-/** The discriminated-union `kind`s of `specialMechanics`. */
+/** The discriminated-union `kind`s of `specialMechanics` (spec 32 v3). */
 export const SPECIAL_MECHANIC_KINDS = [
     'strip_random_buff',
-    'convert_enemy_buff_to_self',
-    'secondary_heal_self',
     'befriend_attempt',
     'guard',
     'rupture',
-    'compound',
     'siphon',
     'barrier',
     'riposte',
-    'execute',
-    'amplify',
-    'grant_permanent_wild_die',
-    // Fate Engine P1 (spec 31 §4.1) — die-manipulation verbs + REACT
+    // Fate Engine P1 (spec 31 §4.1) — die-manipulation verbs
     'reroll_spent',
     'refresh_die',
     'convert_die_color',
     'create_temporary_die',
     'grant_pip',
     'bank_spent_die',
-    'react',
+    // Spec 32 v3 — the themed-deck verb set
+    'forge_floating_die',
+    'stagger',
+    'lock_stance',
+    'foretell',
+    'omen',
+    'premise',
+    'peroration',
+    'spend_premises',
+    'spend_all_pips',
+    'recoil',
+    'extend_dots',
+    'convert_dots',
+    'boost_all_dots',
+    'soul_gain',
+    'consume_affliction',
+    'reap',
+    'reap_all',
+    'sway',
+    'echo',
+    'echo_next_spell',
+    'reprise',
+    'replay_last',
+    'conjure_card',
+    'rider',
 ] as const;
 export type SpecialMechanicKind = (typeof SPECIAL_MECHANIC_KINDS)[number];
 
@@ -167,6 +198,8 @@ export const VERB_CLASSES: CombatVerbClass[] = [
     'direct-damage',
     'befriend',
     'defend',
+    'enchant',
+    'disenchant',
     'retreat',
 ];
 

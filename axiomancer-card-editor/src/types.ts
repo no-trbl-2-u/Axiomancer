@@ -17,6 +17,9 @@ import type {
     StatType,
     CardTier,
     CardTarget,
+    CardRank,
+    CardType,
+    CardRider,
     CardCombatEffects,
     CardSpecialMechanic,
     CardLearningRequirement,
@@ -36,9 +39,19 @@ export interface CardDraft {
     description: string;
     tier: CardTier;
     targetType: CardTarget;
-    basePower: number;
-    scalingStat: StatType;
-    scalingMultiplier?: number;
+    /** Spec 32 v3 — the rank ladder (1 Doxa … 6 Aporia); rarity derives from it. */
+    rank: CardRank;
+    /** Spec 32 v3 — spell / enchantment / disenchant. */
+    cardType: CardType;
+    /** Spec 32 v3 — the authored FREE (dieless) line. Round-tripped verbatim;
+     *  edited in source (the rider is a real-unit bundle, not a form field). */
+    free?: CardRider;
+    /** Fate Engine P1 die-interaction lines — round-tripped verbatim so an
+     *  editor save never silently deletes a card's printed die lines. */
+    threshold?: Card['threshold'];
+    dieBonus?: Card['dieBonus'];
+    fate?: Card['fate'];
+    fallen?: Card['fallen'];
     /** Always an array in the draft (default `[]`). */
     combatEffects: CardCombatEffects[];
     /** Always an array in the draft (default `[]`). */
@@ -61,9 +74,13 @@ export function blankCard(): CardDraft {
         description: '',
         tier: 1,
         targetType: 'enemy',
-        basePower: 0,
-        scalingStat: 'body',
-        scalingMultiplier: undefined,
+        rank: 1,
+        cardType: 'spell',
+        free: undefined,
+        threshold: undefined,
+        dieBonus: undefined,
+        fate: undefined,
+        fallen: undefined,
         combatEffects: [],
         specialMechanics: [],
         learningRequirement: undefined,
@@ -84,9 +101,13 @@ export function toDraft(skill: Card): CardDraft {
         description: skill.description,
         tier: skill.tier,
         targetType: skill.targetType,
-        basePower: skill.basePower,
-        scalingStat: skill.scalingStat,
-        scalingMultiplier: skill.scalingMultiplier,
+        rank: skill.rank,
+        cardType: skill.cardType,
+        free: skill.free ? { ...skill.free } : undefined,
+        threshold: skill.threshold ? { ...skill.threshold } : undefined,
+        dieBonus: skill.dieBonus ? { ...skill.dieBonus } : undefined,
+        fate: skill.fate ? { ...skill.fate } : undefined,
+        fallen: skill.fallen ? { ...skill.fallen } : undefined,
         combatEffects: (skill.combatEffects ?? []).map((e) => ({ ...e })),
         specialMechanics: (skill.specialMechanics ?? []).map((m) => ({ ...m })),
         learningRequirement: skill.learningRequirement
@@ -111,11 +132,15 @@ export function fromDraft(draft: CardDraft): Card {
         description: draft.description,
         tier: draft.tier,
         targetType: draft.targetType,
-        basePower: draft.basePower,
-        scalingStat: draft.scalingStat,
+        rank: draft.rank,
+        cardType: draft.cardType,
     };
 
-    if (draft.scalingMultiplier != null) skill.scalingMultiplier = draft.scalingMultiplier;
+    if (draft.free != null) skill.free = { ...draft.free };
+    if (draft.threshold != null) skill.threshold = { ...draft.threshold };
+    if (draft.dieBonus != null) skill.dieBonus = { ...draft.dieBonus };
+    if (draft.fate != null) skill.fate = { ...draft.fate };
+    if (draft.fallen != null) skill.fallen = { ...draft.fallen };
     if (draft.combatEffects.length > 0) {
         skill.combatEffects = draft.combatEffects.map((e) => ({ ...e }));
     }

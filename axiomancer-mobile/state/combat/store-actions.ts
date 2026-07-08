@@ -3,17 +3,18 @@
  *
  * The encounter engine (`CombatEncounterState`) is pure and the
  * `/combat-encounter` screen holds it in local React state, so unlike the
- * gathering/hazard slices there is no mobile combat session slice here. The
- * only thing that must outlive a single encounter is the *first-fight tutorial*
- * flag, so this module is deliberately tiny: one persistent flag and the action
- * that sets it, mirroring `completeGatheringTutorialAction`.
+ * gathering/hazard slices there is no mobile combat session slice here. This
+ * module carries the *first-fight tutorial* flag plus the deck-identity layer:
+ * dev deck presets and the pre-run starter-bundle picker, both sourced from the
+ * engine's ten themed preset decks (spec 32 v3 §8). Mobile invents no cards,
+ * costs, or tuning — every id comes from the engine's own preset table.
  */
 
 import {
     COMBAT_REWARD_POOL,
     STARTING_SKILL_IDS,
     getCard,
-    isGoldCard,
+    listDeckPresets,
     type CombatCard,
     type GameState,
 } from '@mechanics';
@@ -48,154 +49,42 @@ export function completeCombatTutorialAction(store: AppStore, skipped: boolean):
 }
 
 // ---------------------------------------------------------------------------
-// Dev-only combat deck presets (mirrors the hazard deck presets — see
-// `state/hazard/store-actions.ts`). The combat deck the engine deals from is
-// `buildCombatDeck(player)` = `player.knownSkills` + `player.combatRewardCards`
-// + the synthetic cards. So a dev "swap your deck" is just: replace
-// `knownSkills` with the preset's card ids and clear the earned reward cards,
-// leaving the deck EXACTLY the preset (plus the engine's always-on synthetics).
+// Deck presets — spec 32 v3 §8: the TEN themed preset decks, engine-owned.
 //
-// No local rule data: every preset is a curated *selection of engine-defined
-// card ids* (the starter skills + `COMBAT_REWARD_POOL`), categorised by the
-// engine's own card metadata (`getCard`). Mobile invents no cards, costs, or
-// tuning — exactly the contract the hazard presets already satisfy.
+// The combat deck the engine deals from is `buildCombatDeck(player)` =
+// `player.knownSkills` + `player.combatRewardCards` + the synthetic cards. So a
+// "swap your deck" is just: replace `knownSkills` with the preset's card ids
+// (duplicates intentional — the 4/4/2/2/1/1/1 recipe) and clear the earned
+// reward cards, leaving the deck EXACTLY the preset plus the engine's
+// always-on synthetics (Retreat).
 // ---------------------------------------------------------------------------
 
-/** Every distinct combat card the engine can deal: starter skills + reward pool. */
+/** Every distinct combat card the engine can deal: starters + the 70-card pool. */
 const COMBAT_CARD_POOL: readonly string[] = Object.freeze(
     Array.from(new Set([...STARTING_SKILL_IDS, ...COMBAT_REWARD_POOL])),
 );
 
 /**
- * The tier-1 set a brand-new player is seeded with — kept in sync by hand with
- * `STARTER_SKILL_IDS` in `state/actions.ts` (the new-player default deck). The
- * engine's `STARTING_SKILL_IDS` is intentionally NOT used here: it lists
- * `slippery-slope` (a level-14 learn requirement), so it is not the clean
- * level-1 starter the live game actually grants.
+ * The starting deck (spec 32 v3 §7): the engine's `STARTING_SKILL_IDS`
+ * (slippery-slope + brace-for-impact) — each teaches a mechanic in fight one.
+ * The synthetic Retreat rides along via `buildCombatDeck`.
  */
-const STARTER_DECK_IDS: readonly string[] = Object.freeze([
-    'ad-hominem-strike', // body · attack
-    'brace-for-impact', //  body · defend (guard)
-    'false-dilemma', //     mind · attack + control
-    'suspend-judgment', //  mind · defend (guard)
-    'ship-of-theseus', //   heart · attack
-]);
+const STARTER_DECK_IDS: readonly string[] = STARTING_SKILL_IDS;
 
-/** Pool card ids whose engine metadata satisfies `predicate`, in pool order. */
-function poolMatching(predicate: (card: CombatCard) => boolean): string[] {
-    const out: string[] = [];
-    for (const id of COMBAT_CARD_POOL) {
-        const card = getCard(id);
-        if (card && predicate(card)) out.push(id);
-    }
-    return out;
-}
+/** The ten themed preset ids (spec 32 v3 §8), in the engine's display order. */
+export type ThemedDeckId =
+    | 'erosion'
+    | 'oratory'
+    | 'foundry'
+    | 'penitent'
+    | 'standstill'
+    | 'augury'
+    | 'tithe'
+    | 'grace'
+    | 'bastion'
+    | 'refrain';
 
-// ---------------------------------------------------------------------------
-// Keyword deck TYPES — the shared taxonomy behind BOTH the dev deck presets and
-// the pre-run "choose your path" picker. Instead of grouping cards by STANCE
-// COLOUR (Body / Mind / Heart), each deck here is a KEYWORD archetype: a family
-// of cards that share a status keyword or combat role (Bleed, Poison,
-// Confusion, Dread, Guard, Sustain). This lets a tester exercise a real *deck
-// type* — "does a bleed stack actually close a fight?" — rather than just a
-// colour. Every matcher reads the engine's own projected card metadata
-// (`primaryEffectId` / `verbClass`); mobile invents no keywords, costs, or cards.
-// ---------------------------------------------------------------------------
-
-export type KeywordDeckId =
-    | 'bleed'
-    | 'poison'
-    | 'confusion'
-    | 'dread'
-    | 'guard'
-    | 'sustain';
-
-interface KeywordDeckDef {
-    id: KeywordDeckId;
-    /** Keyword archetype name — no stance colour in it. */
-    name: string;
-    /** One-line description of the deck TYPE and how it wins. */
-    blurb: string;
-    /** Keyword pills surfaced on the picker tile. */
-    pills: readonly string[];
-    /** Tile accent — a per-keyword hue, deliberately unrelated to stance colour. */
-    accent: string;
-    /** Reward-skew archetype for the pre-run picker (null → no skew). */
-    archetype: StarterArchetype | null;
-    /** True when a projected card carries this deck's keyword. */
-    match: (card: CombatCard) => boolean;
-}
-
-/** Does the card apply an enemy effect whose id contains any of `needles`? */
-function effectMatches(card: CombatCard, ...needles: string[]): boolean {
-    const effectId = card.primaryEffectId ?? '';
-    return needles.some((needle) => effectId.includes(needle));
-}
-
-/**
- * The canonical keyword deck types. Order is the display order on both
- * surfaces. Two DoT keywords (bleed / poison), two control keywords (confusion /
- * dread), and two defensive/support keywords (guard / sustain) — each a distinct
- * *deck type* a tester can pick to pressure one mechanic.
- */
-const KEYWORD_DECKS: readonly KeywordDeckDef[] = Object.freeze([
-    {
-        id: 'bleed',
-        name: 'Bleed',
-        blurb: 'Stack bleed and hemorrhage, then let the wounds do the killing.',
-        pills: ['BLEED', 'HEMORRHAGE', 'DoT'],
-        accent: '#c0392b',
-        archetype: 'bleeder',
-        match: (c) => effectMatches(c, 'bleed', 'hemorrhage'),
-    },
-    {
-        id: 'poison',
-        name: 'Poison',
-        blurb: 'Seep poison and rot — damage that erodes HP no matter their guard.',
-        pills: ['POISON', 'SEPTIC', 'DoT'],
-        accent: '#5aa02c',
-        archetype: 'bleeder',
-        match: (c) => effectMatches(c, 'poison', 'septic'),
-    },
-    {
-        id: 'confusion',
-        name: 'Confusion',
-        blurb: 'Confuse the foe so it fumbles its own telegraphed turn.',
-        pills: ['CONFUSE', 'DAZE', 'CONTROL'],
-        accent: '#4f7fd6',
-        archetype: 'controller',
-        match: (c) => effectMatches(c, 'confusion'),
-    },
-    {
-        id: 'dread',
-        name: 'Dread',
-        blurb: 'Break the enemy mind with fear and despair until it folds.',
-        pills: ['FEAR', 'DESPAIR', 'CONTROL'],
-        accent: '#6c5ce7',
-        archetype: 'controller',
-        match: (c) => effectMatches(c, 'fear', 'despair'),
-    },
-    {
-        id: 'guard',
-        name: 'Guard',
-        blurb: 'Brace, parry, and barrier — absorb everything and grind them down.',
-        pills: ['GUARD', 'BARRIER', 'PARRY'],
-        accent: '#7f8c9b',
-        archetype: 'guardian',
-        match: (c) => c.verbClass === 'defend',
-    },
-    {
-        id: 'sustain',
-        name: 'Sustain',
-        blurb: 'Regenerate and steel your resolve; outlast every exchange.',
-        pills: ['REGEN', 'HEAL', 'RESOLVE'],
-        accent: '#d4a017',
-        archetype: 'guardian',
-        match: (c) => c.verbClass === 'buff-self',
-    },
-]);
-
-export type CombatDeckPresetId = 'starter-baseline' | KeywordDeckId | 'gold-showcase';
+export type CombatDeckPresetId = 'starter-baseline' | ThemedDeckId;
 
 export interface CombatDeckPreset {
     id: CombatDeckPresetId;
@@ -210,28 +99,21 @@ export interface CombatDeckPresetResult {
     cardIds: string[];
 }
 
-// Dev presets are the PURE keyword selection (every pool card carrying the
-// keyword, no padding) so the tester sees exactly that keyword's cards. The
-// picker bundles below pad the same selection into a playable deck.
+// The dev presets: the starter baseline plus the engine's ten themed decks,
+// verbatim (name/description/recipe are engine truth).
 export const COMBAT_DECK_PRESETS: readonly CombatDeckPreset[] = Object.freeze([
     {
-        id: 'starter-baseline',
+        id: 'starter-baseline' as const,
         label: 'Starter baseline',
-        description: 'The default level-1 deck a new player is seeded with. Clean control.',
+        description: 'The starting deck a new player is seeded with. Clean control.',
         cardIds: STARTER_DECK_IDS,
     },
-    ...KEYWORD_DECKS.map((deck): CombatDeckPreset => ({
-        id: deck.id,
-        label: deck.name,
-        description: deck.blurb,
-        cardIds: poolMatching(deck.match),
+    ...listDeckPresets().map((preset): CombatDeckPreset => ({
+        id: preset.id as ThemedDeckId,
+        label: preset.name,
+        description: preset.description,
+        cardIds: preset.cardIds,
     })),
-    {
-        id: 'gold-showcase',
-        label: 'Gold showcase',
-        description: 'The three Gold rares plus tier-3 support — exercise the rare tier.',
-        cardIds: poolMatching((c) => isGoldCard(c.id) || c.tier === 3),
-    },
 ]);
 
 function combatDeckPresetById(presetId: CombatDeckPresetId): CombatDeckPreset {
@@ -267,8 +149,8 @@ const RANDOMIZE_CARD_COUNT = 8;
 
 /**
  * Dev tool — rebuild the player's combat deck as a random selection from EVERY
- * defined combat card (starter skills + the full reward pool, gold rares
- * included), so dev sessions surface cards normal play rarely reaches. Replaces
+ * defined combat card (starters + the full 70-card pool, rares included), so
+ * dev sessions surface cards normal play rarely reaches. Replaces
  * `knownSkills` with the random unique pull and clears `combatRewardCards`.
  * Returns the granted card ids.
  */
@@ -291,11 +173,11 @@ export function randomizeCombatDeckAction(store: AppStore): string[] {
 // ---------------------------------------------------------------------------
 // Starter bundles (deck identity) — the pre-run "choose your path" decks.
 //
-// A bundle is just a curated knownSkills deck (built from engine card metadata,
-// exactly like the dev presets above) plus a HIDDEN archetype tag. The tag is
-// never shown to the player; it biases combat-card rewards toward the kind of
-// cards their chosen path wants (see `skewRewardsByArchetype`). Mobile invents
-// no cards — every id comes from the engine's own pool.
+// A bundle is one of the engine's themed preset decks plus a HIDDEN archetype
+// tag. The tag is never shown to the player; it biases combat-card rewards
+// toward the kind of cards their chosen path wants (see
+// `skewRewardsByArchetype`). Mobile authors only presentation (accent + the
+// theme's two signature-keyword pills) — every card id is engine truth.
 // ---------------------------------------------------------------------------
 
 export type StarterArchetype = 'bleeder' | 'guardian' | 'controller';
@@ -306,17 +188,17 @@ export interface StarterBundle {
     description: string;
     /**
      * Hidden archetype tag — never surfaced in the UI. Biases later card
-     * rewards (see `skewRewardsByArchetype`). `null` for keyword decks that
-     * don't map onto one of the three reward archetypes (e.g. the gold/rare
-     * showcase): they seed their deck but apply no reward skew.
+     * rewards (see `skewRewardsByArchetype`). `null` for themes whose engine
+     * (Forge's dice manufacture) maps onto none of the three reward
+     * archetypes: they seed their deck but apply no reward skew.
      */
     archetype: StarterArchetype | null;
-    /** Tile accent colour. A per-keyword hue, decoupled from stance colour so
-     *  every deck type reads distinct on the picker. */
+    /** Tile accent colour. A per-theme hue, decoupled from stance colour so
+     *  every deck reads distinct on the picker. */
     accent: string;
-    /** Keyword pills shown on the selection tile. */
+    /** The theme's two signature keywords (spec 32 v3 §3), shown as pills. */
     pills: readonly string[];
-    /** The seeded knownSkills deck (valid engine card ids). */
+    /** The seeded knownSkills deck (the engine recipe — duplicates intended). */
     cardIds: string[];
 }
 
@@ -325,45 +207,38 @@ export const BUNDLE_CHOSEN_FLAG = 'starter-bundle-chosen';
 const BUNDLE_FLAG_PREFIX = 'bundle:';
 const ARCHETYPE_FLAG_PREFIX = 'archetype:';
 
-// Build a playable KEYWORD test deck: EVERY pool card carrying the keyword (so
-// all of the deck type's cards are reachable for testing), plus an attack and a
-// guard staple so the deck can always threaten and brace from turn one, padded
-// from the proven baseline starters so a thin keyword never yields a stub deck.
-function themeDeck(themed: (c: CombatCard) => boolean): string[] {
-    const ids: string[] = [];
-    const add = (id: string | undefined): void => { if (id && !ids.includes(id)) ids.push(id); };
-    poolMatching(themed).forEach(add);
-    add(poolMatching((c) => c.verbClass === 'direct-damage' && c.tier === 1)[0]);
-    add(poolMatching((c) => c.verbClass === 'defend' && c.tier === 1)[0]);
-    for (const id of STARTER_DECK_IDS) { if (ids.length >= 5) break; add(id); }
-    return ids;
-}
+/** Mobile presentation + reward-skew tag per themed preset (spec 32 v3 §6):
+ *  the theme's two signature keywords and the archetype family they feed. */
+const BUNDLE_CHROME: Record<ThemedDeckId, { accent: string; pills: readonly string[]; archetype: StarterArchetype | null }> = {
+    erosion: { accent: '#5aa02c', pills: ['POISON', 'BLEED'], archetype: 'bleeder' },
+    oratory: { accent: '#c98a2b', pills: ['PREMISE', 'PERORATION'], archetype: 'controller' },
+    foundry: { accent: '#b0653a', pills: ['KINDLE', 'PIP'], archetype: null },
+    penitent: { accent: '#a63a3a', pills: ['RECOIL', 'FALLEN'], archetype: 'bleeder' },
+    standstill: { accent: '#4f7fd6', pills: ['STAGGER', 'BACKFIRE'], archetype: 'controller' },
+    augury: { accent: '#6c5ce7', pills: ['FORETELL', 'OMEN'], archetype: 'controller' },
+    tithe: { accent: '#7a8450', pills: ['SOUL', 'REAP'], archetype: 'bleeder' },
+    grace: { accent: '#9a5fd0', pills: ['SWAY', 'RAPPORT'], archetype: 'guardian' },
+    bastion: { accent: '#7f8c9b', pills: ['THORNS', 'RIPOSTE'], archetype: 'guardian' },
+    refrain: { accent: '#4aa6a0', pills: ['ECHO', 'REPRISE'], archetype: 'controller' },
+};
 
-// Every deck TYPE the picker exposes — one per shared-keyword archetype
-// (`KEYWORD_DECKS`), not one per stance colour. Each carries the keyword's
-// reward-skew archetype so wins bias rewards toward the same keyword. A final
-// gold/rare test bench (`archetype: null`, no skew) rounds out the list so a
-// fresh run can also exercise the rare tier.
-export const STARTER_BUNDLES: readonly StarterBundle[] = Object.freeze([
-    ...KEYWORD_DECKS.map((deck): StarterBundle => ({
-        id: deck.id,
-        name: deck.name,
-        description: deck.blurb,
-        archetype: deck.archetype,
-        accent: deck.accent,
-        pills: deck.pills,
-        cardIds: themeDeck(deck.match),
-    })),
-    {
-        id: 'gold-showcase',
-        name: 'Gold Showcase',
-        description: 'Test bench. The Gold rares plus the tier-3 support — exercise the rare tier.',
-        archetype: null,
-        accent: '#d4c026',
-        pills: ['GOLD', 'RARE', 'TIER 3'],
-        cardIds: themeDeck((c) => isGoldCard(c.id) || c.tier === 3),
-    },
-]);
+// One bundle per themed preset deck, in the engine's display order. Each
+// carries its theme's reward-skew archetype so wins bias rewards toward the
+// same family.
+export const STARTER_BUNDLES: readonly StarterBundle[] = Object.freeze(
+    listDeckPresets().map((preset): StarterBundle => {
+        const chrome = BUNDLE_CHROME[preset.id as ThemedDeckId];
+        return {
+            id: preset.id,
+            name: preset.name,
+            description: preset.description,
+            archetype: chrome?.archetype ?? null,
+            accent: chrome?.accent ?? '#8a8273',
+            pills: chrome?.pills ?? [],
+            cardIds: [...preset.cardIds],
+        };
+    }),
+);
 
 export function starterBundleById(id: string): StarterBundle | null {
     return STARTER_BUNDLES.find((b) => b.id === id) ?? null;
@@ -397,7 +272,7 @@ export function seedStarterBundleAction(store: AppStore, bundleId: string): void
     const flags = new Set(state.flags ?? []);
     flags.add(BUNDLE_CHOSEN_FLAG);
     flags.add(`${BUNDLE_FLAG_PREFIX}${bundle.id}`);
-    // Pure theme-test bundles carry no archetype → no reward skew tag.
+    // Themes with no reward-archetype mapping carry no skew tag.
     if (bundle.archetype) flags.add(`${ARCHETYPE_FLAG_PREFIX}${bundle.archetype}`);
     const player = state.player;
     const patch: Record<string, unknown> = { flags: [...flags] };
@@ -413,7 +288,7 @@ function cardArchetypeOf(card: CombatCard | null | undefined): StarterArchetype 
     if (!card) return null;
     if (card.effectKind === 'dot') return 'bleeder';
     if (card.effectKind === 'control') return 'controller';
-    if (card.verbClass === 'defend' || card.verbClass === 'buff-self') return 'guardian';
+    if (card.verbClass === 'defend' || card.verbClass === 'buff-self' || card.verbClass === 'enchant') return 'guardian';
     return null;
 }
 

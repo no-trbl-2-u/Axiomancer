@@ -40,11 +40,11 @@ afterEach(() => {
     vi.restoreAllMocks();
 });
 
-const BRACE = 'brace-for-impact';   // BODY defense (GUARD 12)
-const WARD = 'suspend-judgment';    // MIND defense (GUARD 12)
-const AEGIS = 'stoic-reserve';      // HEART defense (GUARD 18)
+const BRACE = 'brace-for-impact';   // BODY defense (GUARD 8) — Bulwark common
+const HALF_STEP = 'half-step';      // BODY defense (GUARD 5 + PIP) — Forge common
+const ANSWER = 'measured-answer';   // BODY defense (GUARD 6 + RIPOSTE) — Bulwark uncommon
 const DOT_BODY = 'slippery-slope';  // body, DoT — the offensive control case
-const DEFENSE_IDS = [BRACE, WARD, AEGIS] as const;
+const DEFENSE_IDS = [BRACE, HALF_STEP, ANSWER] as const;
 
 function makePlayer(skills: string[]): Character {
     const p = deepClone(Player);
@@ -109,7 +109,7 @@ describe('Spec 26b — playing a defense card grants GUARD', () => {
     it('a POWERED brace scales the shield by the stance read + color match', () => {
         mockSequentialRng(0.05);
         // BODY die vs a MIND-stance enemy = advantage read (1.5×) + color match (+3).
-        // GUARD 12 → round(12 × 1.5) + 3 = 21.
+        // GUARD 8 (v3 brace-for-impact) → round(8 × 1.5) + 3 = 15.
         let state = initializeCombatEncounter(makePlayer([BRACE]), makeEnemy(80, 'mind'), [BRACE, BRACE, BRACE, BRACE, BRACE], 7);
         state = rollEncounterDice(state).state;   // open phase-play (draw hand + roll pool)
         state = setDice(state, ['body', 'mind']);
@@ -119,7 +119,7 @@ describe('Spec 26b — playing a defense card grants GUARD', () => {
         expect(entry, 'brace should be in hand').toBeDefined();
         const res = playCombatCard(state, { uid: entry!.uid }, true);
 
-        expect(res.state.guard).toBe(21);
+        expect(res.state.guard).toBe(15);
         // Defense deals no HP to the enemy (status stays the win path).
         expect(res.state.enemy.health).toBe(80);
     });

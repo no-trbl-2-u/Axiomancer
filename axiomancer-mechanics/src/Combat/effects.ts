@@ -61,26 +61,20 @@ export const VULNERABLE_MAX_MULT = 2.0;
  *  bearer (a fully-stacked protective mult still lets half the hit through).
  *  P0-truth: protective (`damageTakenMult < 1`) payloads are REAL now. Tunable. */
 export const RESOLUTE_MIN_MULT = 0.5;
-/** RUPTURE — hard cap on a single detonation's burst HP, so a long DoT stack
- *  can't one-shot a boss. Tunable. */
+/** RUPTURE — hard cap on a single detonation's burst HP (all payoff bursts —
+ *  RUPTURE, REAP-all, mark conclusions — share it), so a long stack can't
+ *  one-shot a boss. Tunable. */
 export const RUPTURE_BURST_CAP = 80;
-/** COMPOUND — cap on the distinct-debuff count credited to a compound hit, so
- *  variety pays off without unbounded scaling. Tunable. */
-export const COMPOUND_COUNT_CAP = 6;
+/** RUPTURE — flat burst per NON-DoT affliction stack consumed (marks, backfire,
+ *  rapport). Spec 32 v3 §3. Tunable. */
+export const RUPTURE_PER_AFFLICTION_STACK = 3;
 /** DISRUPT — distinct-control pip threshold that DENIES the enemy's telegraphed
  *  turn (an ADDITIVE OR path on top of the legacy roll-penalty deny). Tunable. */
 export const DISRUPT_DENY_AT = 3;
-/** EXECUTE — fraction of the foe's MAX HP a ready finisher deals (clamped to the
- *  foe's remaining HP, so it is typically lethal at/below the HP gate). Tunable. */
-export const EXECUTE_DAMAGE_FRACTION = 0.75;
-/** AMPLIFY — default multiplier applied to the foe's pending DoT total for an
- *  AMPLIFY burst. The per-card `multiplier` field may override this; the tunable
- *  tunes the default that card authors use. */
-export const AMPLIFY_DEFAULT_MULTIPLIER = 1.5;
-/** AMPLIFY — hard cap on a single AMPLIFY detonation's burst HP. Weaker than
- *  RUPTURE_BURST_CAP by design — AMPLIFY does NOT consume the DoT (it keeps
- *  ticking), so the burst is a bonus on top of ongoing damage. Tunable. */
-export const AMPLIFY_BURST_CAP = 60;
+/** STAGGER (spec 32 v3) — rungs a normal telegraphed action carries; removing
+ *  all of them denies the turn. Bosses/uniques carry one more. Tunable. */
+export const THREAT_RUNGS = 2;
+export const THREAT_RUNGS_BOSS = 3;
 
 /**
  * VULNERABLE / RESOLUTE multiplier — the damage multiplier the HP engine applies
@@ -233,13 +227,19 @@ export function getPendingDotTotal(bearer: Combatant, currentRound?: number): { 
         const ticks = Math.max(1, ae.remainingDuration);
         // P0-truth: escalating DoTs (`escalatesPerTurn`) sum their GROWING future
         // ticks when a round is threaded; flat DoTs keep perTick × ticks.
+        // BLEED (spec 32 v3 `decaysPerTick`): intensity falls 1 per future tick
+        // and the instance washes out at 0 — the pending fuel must model that
+        // decay or RUPTURE previews overstate the burst (projection-truth law).
+        const decays = def.payload.dotModifiers?.decaysPerTick === true;
         let amount = 0;
         for (let k = 0; k < ticks; k++) {
+            const tickIntensity = decays ? intensity - k : intensity;
+            if (tickIntensity <= 0) break;
             const dpr = rampedDamagePerRound(
                 ae, dot.damagePerRound, def.payload.dotModifiers,
                 currentRound === undefined ? undefined : currentRound + k,
             );
-            amount += Math.floor(dpr * intensity * multiplier);
+            amount += Math.floor(dpr * tickIntensity * multiplier);
         }
         perEffect.push({ effectId: ae.effectId, label: def.name, amount });
         total += amount;
@@ -268,6 +268,7 @@ export function computeRoundsToKill(bearer: Combatant, currentRound?: number): n
                 intensity: ae.intensity ?? 1,
                 multiplier: dotAmp.get(ae.effectId) ?? 1,
                 ticks: Math.max(1, ae.remainingDuration),
+                decays: def.payload.dotModifiers?.decaysPerTick === true,
             };
         })
         .filter((e): e is NonNullable<typeof e> => e !== null);
@@ -278,11 +279,14 @@ export function computeRoundsToKill(bearer: Combatant, currentRound?: number): n
     for (let k = 0; k < maxTicks; k++) {
         for (const e of dotEffects) {
             if (k >= e.ticks) continue;
+            // BLEED decay — same convention as `getPendingDotTotal`.
+            const tickIntensity = e.decays ? e.intensity - k : e.intensity;
+            if (tickIntensity <= 0) continue;
             const dpr = rampedDamagePerRound(
                 e.ae, e.dot.damagePerRound, e.dotModifiers,
                 currentRound === undefined ? undefined : currentRound + k,
             );
-            cumulative += Math.floor(dpr * e.intensity * e.multiplier);
+            cumulative += Math.floor(dpr * tickIntensity * e.multiplier);
         }
         if (cumulative >= bearer.health) return k + 1;
     }
@@ -305,7 +309,85 @@ export function consumeDotEffects<T extends Combatant>(bearer: T): { combatant: 
     return { combatant: { ...bearer, effects: remaining }, consumed };
 }
 
-/** Count of DISTINCT debuff effect ids on the bearer — COMPOUND's scaler. Pure. */
+/**
+ * Spec 32 v3 RUPTURE — strips EVERY affliction (debuff) from the bearer.
+ * Returns the updated combatant, the consumed effect ids (one entry per
+ * instance — the SOUL economy counts these), and the total intensity stacks of
+ * the consumed NON-DoT afflictions (marks etc. — worth
+ * `RUPTURE_PER_AFFLICTION_STACK` each on the detonation). Pure.
+ */
+export function consumeAfflictions<T extends Combatant>(bearer: T): {
+    combatant: T; consumed: string[]; nonDotStacks: number;
+} {
+    const consumed: string[] = [];
+    let nonDotStacks = 0;
+    const remaining = bearer.effects.filter(ae => {
+        const def = lookupEffect(ae.effectId);
+        if (def?.type !== 'debuff') return true;
+        consumed.push(ae.effectId);
+        if (!def.payload.damageOverTime) nonDotStacks += ae.intensity ?? 1;
+        return false;
+    });
+    return { combatant: { ...bearer, effects: remaining }, consumed, nonDotStacks };
+}
+
+/**
+ * WINNOWING (spec 32 v3, Harvest) — consumes ONE affliction early: the DoT with
+ * the most remaining fuel (falling back to any affliction). Returns the fuel
+ * that should tick NOW (0 for a non-DoT) and the consumed id (null if the
+ * bearer carries no affliction). Pure.
+ */
+export function consumeOneAffliction<T extends Combatant>(bearer: T, currentRound?: number): {
+    combatant: T; consumed: string | null; fuel: number;
+} {
+    const pending = getPendingDotTotal(bearer, currentRound).perEffect;
+    let pick: ActiveEffect | undefined;
+    if (pending.length > 0) {
+        const best = pending.reduce((a, b) => (b.amount > a.amount ? b : a));
+        pick = bearer.effects.find(ae => ae.effectId === best.effectId);
+    } else {
+        pick = bearer.effects.find(ae => lookupEffect(ae.effectId)?.type === 'debuff');
+    }
+    if (!pick) return { combatant: bearer, consumed: null, fuel: 0 };
+    const fuel = pending.find(p => p.effectId === pick!.effectId)?.amount ?? 0;
+    return {
+        combatant: { ...bearer, effects: bearer.effects.filter(ae => ae !== pick) },
+        consumed: pick.effectId,
+        fuel,
+    };
+}
+
+/** BACKFIRE (spec 32 v3) — HP the bearer takes PER RUNG its telegraphed action
+ *  loses: Σ (backfirePerRung × intensity). 0 when unafflicted. Pure. */
+export function getBackfirePerRung(bearer: Combatant): number {
+    return bearer.effects.reduce((total, ae) => {
+        const per = lookupEffect(ae.effectId)?.payload.backfirePerRung ?? 0;
+        return total + per * (ae.intensity ?? 1);
+    }, 0);
+}
+
+/** Total MARK stacks on the bearer (the conclusion-burst fuel). Pure. */
+export function getMarkStacks(bearer: Combatant): number {
+    return bearer.effects.reduce((total, ae) => {
+        const p = lookupEffect(ae.effectId)?.payload;
+        return total + ((p?.tickAmplifyFlat ?? 0) > 0 ? (ae.intensity ?? 1) : 0);
+    }, 0);
+}
+
+/** Consumes every MARK-class effect on the bearer, returning the stacks removed. */
+export function consumeMarks<T extends Combatant>(bearer: T): { combatant: T; stacks: number } {
+    let stacks = 0;
+    const remaining = bearer.effects.filter(ae => {
+        if ((lookupEffect(ae.effectId)?.payload.tickAmplifyFlat ?? 0) > 0) {
+            stacks += ae.intensity ?? 1;
+            return false;
+        }
+        return true;
+    });
+    return { combatant: { ...bearer, effects: remaining }, stacks };
+}
+
+/** Count of DISTINCT debuff effect ids on the bearer — variety payoffs' scaler. Pure. */
 export function getDistinctDebuffCount(bearer: Combatant): number {
     const ids = new Set<string>();
     for (const ae of bearer.effects) {
@@ -440,7 +522,26 @@ export function processDamageOverTime<T extends Combatant>(
     const mods = getActiveEffectModifiers(target.effects, currentRound);
     const damage = phase === 'start' ? mods.dotStart : mods.dotEnd;
     if (damage <= 0) return { target, damage: 0 };
-    return { target: applyDamage(target, damage), damage };
+    let next: T = applyDamage(target, damage);
+    // BLEED (spec 32 v3, `dotModifiers.decaysPerTick`): a front-loaded DoT loses
+    // 1 intensity each time it ticks; the instance washes out at 0. Only effects
+    // that ticked THIS phase decay. No-op for every non-decaying DoT.
+    const decayed = next.effects.reduce<ActiveEffect[]>((acc, ae) => {
+        const p = lookupEffect(ae.effectId)?.payload;
+        const ticksThisPhase = !!p?.damageOverTime && (p.damageOverTime.tickPhase ?? 'start') === phase;
+        if (ticksThisPhase && p?.dotModifiers?.decaysPerTick) {
+            if (ae.intensity > 1) acc.push({ ...ae, intensity: ae.intensity - 1 });
+            // intensity 1 → the instance is spent
+        } else {
+            acc.push(ae);
+        }
+        return acc;
+    }, []);
+    if (decayed.length !== next.effects.length
+        || decayed.some((ae, i) => ae !== next.effects[i])) {
+        next = { ...next, effects: decayed };
+    }
+    return { target: next, damage };
 }
 
 /**

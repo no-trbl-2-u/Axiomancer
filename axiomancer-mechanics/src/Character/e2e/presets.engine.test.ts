@@ -53,7 +53,7 @@ describe('buildCharacterFromPreset', () => {
         const player = buildCharacterFromPreset(wandererPreset);
         expect(player.level).toBe(8);
         expect(player.baseStats).toEqual({ heart: 5, body: 4, mind: 4 });
-        expect(player.knownSkills).toHaveLength(15); // Phase 108 — includes Befriend starting skill + Phase 120 — includes 5 synergy skills
+        expect(player.knownSkills).toHaveLength(11); // spec 32 v3 recipe: 7 openers + 3 mid-tier + the synergy payoff
         expect(player.equipment.weapon?.id).toBe('iron-blade');
         expect(player.equipment.armor?.id).toBe('hide-vest');
         expect(player.equipment.head?.id).toBe('leather-cap');
@@ -65,8 +65,8 @@ describe('buildCharacterFromPreset', () => {
         const player = buildCharacterFromPreset(sagePreset);
         expect(player.level).toBe(15);
         expect(player.baseStats).toEqual({ heart: 20, body: 30, mind: 25 });
-        expect(player.knownSkills).toHaveLength(18); // Phase 121 — includes all tiers + synergy skills
-        expect(player.knownSkills).toContain('bootstrap-paradox');
+        expect(player.knownSkills).toHaveLength(14); // spec 32 v3 recipe: all tiers + the synergy payoff
+        expect(player.knownSkills).toContain('resonance-detonation');
         expect(player.equipment.weapon?.id).toBe('steel-blade');
         expect(player.equipment.armor?.id).toBe('chain-mail');
         expect(player.equipment.head?.id).toBe('chain-coif');

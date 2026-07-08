@@ -61,7 +61,7 @@ export interface CombatSimStats {
     dotHpFraction: number;
     /** Fraction of total enemy HP loss from direct strikes (excl. mechanic bursts) (0–1). */
     strikeFraction: number;
-    /** Fraction of total enemy HP loss from mechanic bursts (rupture/execute/compound/conclude) (0–1). */
+    /** Fraction of total enemy HP loss from mechanic bursts (rupture/reap/backfire/reflect/conclude) (0–1). */
     mechanicBurstFraction: number;
     /** Guard availability ratio: total guard present when an enemy threat fired /
      *  (that guard + total player HP damage taken). A proxy for how often GUARD was relevant. */
@@ -361,10 +361,14 @@ export function runOneEncounter(
     let mechanicBurstDamage = 0;
     for (const ev of state.log) {
         if (ev.kind === 'dot-tick' && ev.target === 'enemy') dotHpDamage += ev.amount;
+        // Spec 32 v3 — the payoff-burst vocabulary: RUPTURE / REAP bursts, the
+        // conclusion classes, plus the engine-gated drips (BACKFIRE, thorns,
+        // riposte are credited via their own events).
         if (ev.kind === 'rupture-detonated') mechanicBurstDamage += ev.amount;
-        if (ev.kind === 'amplify-detonated') mechanicBurstDamage += ev.amount;
-        if (ev.kind === 'execute-fired') mechanicBurstDamage += ev.amount;
-        if (ev.kind === 'compound-hit') mechanicBurstDamage += ev.amount;
+        if (ev.kind === 'reaped') mechanicBurstDamage += ev.amount;
+        if (ev.kind === 'backfired') mechanicBurstDamage += ev.amount;
+        if (ev.kind === 'thorns-reflected') mechanicBurstDamage += ev.amount;
+        if (ev.kind === 'riposte-fired') mechanicBurstDamage += ev.amount;
         if (ev.kind === 'conclude-hit') mechanicBurstDamage += ev.amount;
     }
     // directDamageDealt includes mechanic bursts; subtract them to get pure strikes.
@@ -427,7 +431,9 @@ export function simulateHazardPatternCombatDetailed(
             focusCardIds: options.focusCardIds,
         });
         if (r.outcome === 'victory') victories++;
-        else if (r.outcome === 'mercy') mercies++;
+        // Spec 32 v3 §9 — CAPITULATE (SWAY) and CONCEDE (Peroration) are
+        // merciful resolutions: they count with the mercy wins.
+        else if (r.outcome === 'mercy' || r.outcome === 'capitulate' || r.outcome === 'concede') mercies++;
         else if (r.outcome === 'retreat') retreats++;
         else defeats++;
         totalRounds += r.rounds;

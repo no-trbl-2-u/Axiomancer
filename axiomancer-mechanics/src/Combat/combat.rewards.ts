@@ -15,42 +15,24 @@
  */
 
 import type { Character } from '../Character/types';
-import { getCardById } from '../Cards/cards.library';
-import { isGoldCard } from './combat.cards';
+import { cardLibrary, getCardById } from '../Cards/cards.library';
+import { rankToRarity } from '../Cards/types';
 import { playerArchetype } from './combat.signature';
 import type { PlayerArchetype } from './combat.encounter.types';
 
 /**
- * The card-reward pool — skill ids that make good combat cards (they apply enemy
- * effects → pressure). Curated across aspects + tiers; invalid ids are filtered
- * at roll time so the list is safe to edit. A reward MAY duplicate a card you
- * already run (that's the deckbuilder point).
+ * The card-reward pool — spec 32 v3: the ENTIRE 70-card themed library. Drop
+ * odds are governed by PER-RARITY weights (the generalized gold-weighting,
+ * ledger #16): common cards drop freely, uncommons less, rares are the prize.
+ * Invalid ids are filtered at roll time so the list stays safe to edit.
  */
-export const COMBAT_REWARD_POOL: readonly string[] = Object.freeze([
-    // Fate Engine P1 trim (spec 31 §4.2): pool re-cut over the curated library.
-    // body
-    'slippery-slope', 'ad-hominem-strike', 'hasty-generalization', 'mob-appeal',
-    'achilles-gambit',      // FATE — the impossible strike
-    'brace-for-impact',     // defense (GUARD)
-    'briar-riposte',        // RIPOSTE — parry + counter
-    'appeal-to-consequences', // fear + Body-threshold chip
-    // mind
-    'false-dilemma', 'liars-echo', 'undistributed-middle', 'sorites-cascade',
-    'suspend-judgment',     // defense (GUARD) + bank the die
-    'breach',               // VULNERABLE — mark the foe Breached (set-up-then-swing)
-    'mounting-contradictions', // COMPOUND — HP per distinct debuff
-    'eternal-regress',      // unraveling — the long game
-    // heart
-    'appeal-to-pity', 'soothing-words', 'bat-swarm-thoughtform', 'existential-debt',
-    'tu-quoque',            // THORNS — reflect the telegraphed hit
-    'ship-of-theseus',      // convert the spent die to WILD
-    'stoic-reserve',        // defense (GUARD) + ripen the Reserve
-    'resonance-detonation', // RUPTURE — detonate the foe's DoT
-    'apophatic-aegis',      // BARRIER — stacking, persistent soak
-    'leeching-syllogism',   // SIPHON — offense-scaled sustain
-    // gold (rare) — the strongest tier; weighted RARE in the roll below
-    'pyrrhic-victory', 'the-final-word', 'unmoved-mover',
-]);
+export const COMBAT_REWARD_POOL: readonly string[] = Object.freeze(
+    cardLibrary.map(card => card.id),
+);
+
+/** Per-rarity drop weights (spec 32 v3 §4 — the reward-roll lever). Tunable. */
+export const REWARD_RARITY_WEIGHTS: Readonly<Record<'common' | 'uncommon' | 'rare', number>> =
+    Object.freeze({ common: 1, uncommon: 0.5, rare: 0.2 });
 
 /** The skills a brand-new player starts with: an opening offensive card PLUS a
  *  basic defense card, so every player can GUARD from turn one. The rest unlock
@@ -90,11 +72,12 @@ export function rollCombatCardRewards(
     const offers: string[] = [];
     const remaining = pool.slice();
     while (offers.length < count && remaining.length > 0) {
-        // Weighted pick: archetype-aligned entries get double weight; gold
-        // (rare) cards are heavily down-weighted so they're an occasional prize.
+        // Weighted pick: archetype-aligned entries get double weight; rarity
+        // weights (spec 32 v3 §4) make rares an occasional prize.
         const weights = remaining.map(id => {
             const arch = ASPECT_OF(id) === archetype ? 2 : 1;
-            return isGoldCard(id) ? arch * 0.25 : arch;
+            const rank = getCardById(id)?.rank ?? 1;
+            return arch * REWARD_RARITY_WEIGHTS[rankToRarity(rank)];
         });
         const total = weights.reduce((a, b) => a + b, 0);
         let roll = rng() * total;

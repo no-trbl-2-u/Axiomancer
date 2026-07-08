@@ -21,10 +21,10 @@ describe('Phase 99 unlocked skill access', () => {
             level: 5,
             baseStats: { heart: 8, body: 6, mind: 7 },
             knownSkills: [
-                'ad-hominem-strike',
-                'false-dilemma',
-                'appeal-to-pity',
-                'mob-appeal',
+                'slippery-slope',
+                'brace-for-impact',
+                'soft-word',
+                'glimpse',
             ],
             effects: [],
         });
@@ -47,7 +47,7 @@ describe('Phase 99 unlocked skill access', () => {
         expect(availableSkills).toEqual(player.knownSkills);
 
         // Test skill that player doesn't know
-        const unknownSkillId = 'straw-giant'; // Tier 3 skill
+        const unknownSkillId = 'resonance-detonation'; // rank-5 finisher
         expect(player.knownSkills).not.toContain(unknownSkillId);
     });
 

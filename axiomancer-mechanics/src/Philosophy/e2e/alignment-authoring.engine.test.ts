@@ -113,12 +113,12 @@ describe('Phase 46 — alignment-gated content (live authored gates)', () => {
         expect(noAlignVisible.some(c => c.text === gatedText)).toBe(false);
     });
 
-    it('nirvana-fallacy is learnable only when outlook ≤ -34', async () => {
+    it('pact-of-akrasia is learnable only when outlook ≤ -34', async () => {
         const { getCardById } = await import('../../Cards/cards.library');
         const { meetsLearningRequirement } = await import('../../Cards/skill.engine');
         const { createCharacter } = await import('../../Character');
 
-        const skill = getCardById('nirvana-fallacy')!;
+        const skill = getCardById('pact-of-akrasia')!;
         const ch = createCharacter({
             name: 'Tester', level: 10,
             baseStats: { heart: 6, body: 6, mind: 6 },
@@ -131,12 +131,12 @@ describe('Phase 46 — alignment-gated content (live authored gates)', () => {
         expect(meetsLearningRequirement(ch, skill)).toBe(false); // no alignment → gate fails
     });
 
-    it('appeal-to-consequences is learnable only when scope ≥ 34 (gate inherited from the cut appeal-to-fear)', async () => {
+    it('heart-of-the-matter is learnable only when scope ≥ 34 (gate inherited from the cut appeal-to-consequences)', async () => {
         const { getCardById } = await import('../../Cards/cards.library');
         const { meetsLearningRequirement } = await import('../../Cards/skill.engine');
         const { createCharacter } = await import('../../Character');
 
-        const skill = getCardById('appeal-to-consequences')!;
+        const skill = getCardById('heart-of-the-matter')!;
         const ch = createCharacter({
             name: 'Tester', level: 10,
             baseStats: { heart: 6, body: 6, mind: 6 },
@@ -167,15 +167,15 @@ describe('Phase 46 — alignment-gated content (live authored gates)', () => {
 
         const learned = gameReducer(pessimisticAtLevel, {
             type: 'LEARN_SKILL',
-            payload: { skillId: 'nirvana-fallacy' },
+            payload: { skillId: 'pact-of-akrasia' },
         });
-        expect(learned.player.knownSkills).toContain('nirvana-fallacy');
+        expect(learned.player.knownSkills).toContain('pact-of-akrasia');
 
         const refused = gameReducer(optimisticAtLevel, {
             type: 'LEARN_SKILL',
-            payload: { skillId: 'nirvana-fallacy' },
+            payload: { skillId: 'pact-of-akrasia' },
         });
-        expect(refused.player.knownSkills).not.toContain('nirvana-fallacy');
+        expect(refused.player.knownSkills).not.toContain('pact-of-akrasia');
     });
 });
 

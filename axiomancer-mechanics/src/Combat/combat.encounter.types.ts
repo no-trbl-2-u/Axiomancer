@@ -50,6 +50,13 @@ export interface CombatManaDie {
     /** Created by card effects; expires between phases (display + cleanup). */
     temporary: boolean;
     /**
+     * Spec 32 v3 §5 — a FLOATING die: forged by the FORGE verb, joins the tray
+     * NOW, is exempt from every reroll, persists across rounds AND combats
+     * (written to the character save at combat end), and is gone forever when
+     * spent. Absent/false for rolled, temporary, and Reserve dice.
+     */
+    floating?: boolean;
+    /**
      * Fate Engine P1 (spec 31 R2) — RIPENING pips. Deterministic, no new RNG:
      * fresh-rolled dice have 0; a die BANKED to the Reserve gains +1 pip per
      * threat phase survived (max `RESERVE_PIP_CAP`). Spending a pipped die adds
@@ -68,13 +75,15 @@ export interface CombatManaDie {
  * effect-kind a card applies and its hand icon.
  */
 export type CombatVerbClass =
-    | 'direct-dot'        // applies DoT debuffs (Poison, Bleed, Burn…) → erodes HP
-    | 'direct-control'    // applies control debuffs (Stun, Fear, Charm…) → hinders the enemy
-    | 'stat-debuff'       // applies stat-reduction debuffs → soft control
-    | 'buff-self'         // buffs the player (regen, resistance, accuracy) → utility
-    | 'direct-damage'     // raw HP damage, no status effect
+    | 'direct-dot'        // applies DoT debuffs (Poison, Bleed) → erodes HP
+    | 'direct-control'    // hinders the enemy's turn (STAGGER / BACKFIRE)
+    | 'stat-debuff'       // applies exposure debuffs (MARK / RAPPORT) → soft control
+    | 'buff-self'         // buffs the player / engine verbs → utility
+    | 'direct-damage'     // status-payoff bursts (RUPTURE / REAP) — never raw strikes
     | 'befriend'          // Befriend card → opens the mercy choice (§6 Q6)
     | 'defend'            // Guard/defense card → shields against the enemy's next threat
+    | 'enchant'           // spec 32 v3 — persistent player-side passive
+    | 'disenchant'        // spec 32 v3 — persistent curse attached to the enemy
     | 'retreat';          // Retreat card → leaves combat (§3, §12 Q2)
 
 /** The effect-kind a card's bottom action applies. `none` = utility / damage only. */
@@ -99,10 +108,13 @@ export interface CombatCard {
     /** Which effect-kind the bottom action applies (dot / control / none). */
     effectKind: CardEffectKind;
     tier: 1 | 2 | 3;
-    /** Rare 'gold' marker — the strongest cards: unpowered = a useful utility,
-     *  powered = a MAJOR status + damage. A wild die on a gold card always reads
-     *  advantage. Undefined for normal cards. */
-    rarity?: 'gold';
+    /** Spec 32 v3 — rarity band derived from the rank ladder (§4). Drives the
+     *  deck recipe, drop weights, and the mobile frame. */
+    rarity?: 'common' | 'uncommon' | 'rare';
+    /** Spec 32 v3 — rank 1-6 (Doxa → Aporia); printed on the face. */
+    rank?: 1 | 2 | 3 | 4 | 5 | 6;
+    /** Spec 32 v3 — card type (spell / enchantment / disenchant). */
+    cardType?: 'spell' | 'enchantment' | 'disenchant';
     /** Fallacy (⚖) or Paradox (∞) flavour — preserved token generation. */
     category: 'fallacy' | 'paradox' | null;
     /** Human-readable description of the FREE top action. */
@@ -299,8 +311,10 @@ export interface CombatSummary {
 // ---------------------------------------------------------------------------
 
 export type CombatOutcome =
-    | 'victory'    // enemy HP → 0 (DoT erosion + strikes)
+    | 'victory'    // enemy HP → 0 (DoT erosion + status payoffs)
     | 'mercy'      // spared a low-HP foe via Befriend (the friendship path)
+    | 'capitulate' // spec 32 v3 §9 — SWAY ≥ enemy HP: the enemy yields (merciful)
+    | 'concede'    // spec 32 v3 §9 — an 8-Premise Peroration wins the argument
     | 'defeat'     // player HP → 0
     | 'retreat';   // player used the Retreat card
 
@@ -365,6 +379,33 @@ export type CombatEvent =
     | { kind: 'react-detonated'; cardId: string; amount: number; consumed: string[] }
     | { kind: 'die-forged'; dieId: string; color: CombatDieColor; destination: 'reserve' | 'conviction' }
     | { kind: 'die-converted'; dieId: string; color: CombatDieColor }
+    // ── Spec 32 v3 — themed-deck events ──────────────────────────────────────
+    | { kind: 'die-floated'; dieId: string; color: CombatDieColor; poolSize: number }
+    | { kind: 'floating-die-spent'; dieId: string; color: CombatDieColor; poolSize: number }
+    | { kind: 'enchant-played'; cardId: string; name: string }
+    | { kind: 'disenchant-attached'; cardId: string; name: string }
+    | { kind: 'premise-gained'; amount: number; total: number }
+    | { kind: 'peroration-declared'; cardId: string; at: number }
+    | { kind: 'peroration-fired'; cardId: string; premisesSpent: number }
+    | { kind: 'premises-spent'; spent: number; marks: number; drawn: number }
+    | { kind: 'staggered'; rungs: number; total: number }
+    | { kind: 'backfired'; amount: number; rungs: number }
+    | { kind: 'stance-locked'; phaseIndex: number; stance: Stance }
+    | { kind: 'foretold'; count: number; topCardId: string | null }
+    | { kind: 'omen-declared'; cardId: string; stance: CombatDieColor; phaseIndex: number }
+    | { kind: 'omen-hit'; cardId: string; phaseIndex: number; riderText: string }
+    | { kind: 'omen-missed'; cardId: string; phaseIndex: number }
+    | { kind: 'soul-gained'; amount: number; total: number; reason: 'expiry' | 'consumed' | 'granted' }
+    | { kind: 'reaped'; cardId: string; soulsSpent: number; amount: number }
+    | { kind: 'sway-gained'; amount: number; total: number }
+    | { kind: 'sway-decayed'; total: number }
+    | { kind: 'echoed'; cardId: string }
+    | { kind: 'reprised'; cardId: string; returned: string[] }
+    | { kind: 'dots-extended'; turns: number; affected: string[] }
+    | { kind: 'dots-converted'; from: string; to: string; intensity: number }
+    | { kind: 'dots-boosted'; intensity: number; affected: string[] }
+    | { kind: 'affliction-consumed'; effectId: string; fuel: number }
+    | { kind: 'recoil-paid'; cardId: string; amount: number }
     | { kind: 'phase-resolved'; phaseIndex: number; mark: 'clear' | 'overwhelmed' }
     | { kind: 'threat-fired'; phaseIndex: number; description: string; effects: CombatThreatEffect[] }
     | { kind: 'hand-drawn'; cards: string[] }
@@ -453,7 +494,43 @@ export interface CombatEncounterState {
     drawPile: string[];                    // remaining draw order
     discard: string[];                     // used / discarded card ids
     hand: CombatHandEntry[];               // current hand (up to 5)
-    persistentZone: string[];              // ENCHANT-equivalent persistent buff cards
+    persistentZone: string[];              // player-side ENCHANTMENTS (spec 32 v3 §2.1)
+    /** Spec 32 v3 §2.1 — DISENCHANTS the player attached to the ENEMY (standing
+     *  curses, rest of combat). Optional for back-compat (absent = none). */
+    enemyAttachments?: string[];
+    /** Spec 32 v3 §10 — the enemy's own persistent passives (seeded from the
+     *  bestiary) + disenchants IT attached to the player live here. Optional. */
+    enemyEnchantments?: string[];
+    playerAttachments?: string[];
+    /** Spec 32 v3 §5 — the FLOATING die pool (live tray): merged into every
+     *  turn's dice, exempt from rerolls, persists across combats. Optional. */
+    floatingDice?: CombatManaDie[];
+    /** Spec 32 v3 T2 — the PREMISE tally (Peroration theme). Optional. */
+    premises?: number;
+    /** Spec 32 v3 T2 — the declared PERORATION (one in play at a time). */
+    peroration?: { cardId: string; at: number; concedeAt?: number } | null;
+    /** Spec 32 v3 T5 — STAGGER rungs accumulated against the enemy's NEXT
+     *  telegraphed action (consumed at threat resolution). Optional. */
+    staggerRungs?: number;
+    /** Spec 32 v3 T5 — arrow-paradox: the NEXT phase keeps the current stance. */
+    stanceLockedNext?: boolean;
+    /** Spec 32 v3 T6 — pending OMENS awaiting the next phase boundary. */
+    pendingOmens?: { cardId: string; stance: 'heart' | 'body' | 'mind'; phaseIndex: number }[];
+    /** Spec 32 v3 T6 — omens that CAME TRUE this combat (Oracle payoff fuel). */
+    omenHits?: number;
+    /** Spec 32 v3 T7 — the SOUL bank (Harvest currency). Optional. */
+    souls?: number;
+    /** Spec 32 v3 T8 — SWAY on the enemy (decays 1/turn; ≥ enemy HP at a turn
+     *  boundary → CAPITULATE). Optional. */
+    sway?: number;
+    /** Spec 32 v3 T10 — the next spell played this turn gains ECHO. */
+    echoNextSpell?: boolean;
+    /** Spec 32 v3 T10 — spells played this turn (resonant-chamber's gate). */
+    spellsPlayedThisTurn?: number;
+    /** Spec 32 v3 T10 — the last PAID spell resolved this combat (ouroboros). */
+    lastSpellCardId?: string | null;
+    /** Spec 32 v3 — uids of CONJURED one-use Thoughtforms (removed on play). */
+    conjuredUids?: string[];
     threatPhases: CombatThreatPhase[];     // enemy's authored / generated threat sequence
     threatMarks: CombatThreatMark[];       // O / X ledger per phase (hindered / acted)
     currentPhaseIndex: number;             // 0-indexed into threatPhases

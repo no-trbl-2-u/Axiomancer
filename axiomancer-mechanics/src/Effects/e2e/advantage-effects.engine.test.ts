@@ -34,13 +34,6 @@ describe('Phase 88 — Advantage buffs: advantageGrants via getActiveEffectModif
         expect(mods.statFlat.get('mentalSkill')).toBe(2);
     });
 
-    it('buff_advantage_heart grants advantage on heart', () => {
-        const mods = getActiveEffectModifiers([ae('buff_advantage_heart')]);
-        expect(mods.advantageGrants.has('heart')).toBe(true);
-        expect(mods.statFlat.get('heart')).toBe(1);
-        expect(mods.statFlat.get('emotionalSkill')).toBe(2);
-    });
-
     it('buff_evasion_up grants disadvantage on all stances (to attackers) + defense', () => {
         const mods = getActiveEffectModifiers([ae('buff_evasion_up')]);
         expect(mods.advantageDenies.has('body')).toBe(true);
@@ -103,38 +96,21 @@ describe('Phase 88 — Advantage buffs: advantageGrants via getActiveEffectModif
 
 // ─── Debuff effects in the advantage category ─────────────────────────────────
 
-describe('Phase 88 — Advantage debuffs: disadvantage + stat/defense reduction', () => {
-    it('debuff_evasion_down reduces defense and all defense stats', () => {
-        const mods = getActiveEffectModifiers([ae('debuff_evasion_down')]);
-        expect(mods.defenseDelta).toBe(-3);
-        expect(mods.statFlat.get('physicalDefense')).toBe(-2);
-        expect(mods.statFlat.get('mentalDefense')).toBe(-2);
-        expect(mods.statFlat.get('emotionalDefense')).toBe(-2);
-    });
-
-    it('debuff_accuracy_down reduces all skill stats', () => {
-        const mods = getActiveEffectModifiers([ae('debuff_accuracy_down')]);
-        expect(mods.statFlat.get('physicalSkill')).toBe(-2);
-        expect(mods.statFlat.get('mentalSkill')).toBe(-2);
-        expect(mods.statFlat.get('emotionalSkill')).toBe(-2);
-    });
-
-    it('debuff_defense_down reduces defense and body + physicalDefense', () => {
-        const mods = getActiveEffectModifiers([ae('debuff_defense_down')]);
-        expect(mods.defenseDelta).toBe(-3);
-        expect(mods.statFlat.get('body')).toBe(-1);
-        expect(mods.statFlat.get('physicalDefense')).toBe(-2);
-    });
-});
+// The pre-v3 advantage-debuff band (debuff_evasion_down / debuff_accuracy_down
+// / debuff_defense_down) was retired outright by the spec 32 v3 keyword reset
+// — no support consumer resolves those ids, so their coverage retires with
+// them (the ban list in deprecated-effects.engine.test.ts keeps them dead).
 
 // ─── Application sanity ───────────────────────────────────────────────────────
 
 describe('Phase 88 — Advantage effects: all apply without error', () => {
+    // Retired ids (buff_advantage_heart, debuff_evasion_down,
+    // debuff_accuracy_down, debuff_defense_down) left with the v3 reset;
+    // the survivors below are support-tagged non-card effects.
     const allIds = [
-        'buff_advantage_mind', 'buff_advantage_heart', 'buff_evasion_up',
+        'buff_advantage_mind', 'buff_evasion_up',
         'buff_accuracy_up', 'buff_damage_reduction', 'buff_invincibility',
         'buff_taunt', 'buff_stealth', 'buff_counter', 'buff_life_steal',
-        'debuff_evasion_down', 'debuff_accuracy_down', 'debuff_defense_down',
     ];
 
     it.each(allIds)('%s applies cleanly via applyEffect', (effectId) => {

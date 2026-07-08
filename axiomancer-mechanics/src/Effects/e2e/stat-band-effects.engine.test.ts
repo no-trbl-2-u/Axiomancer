@@ -50,59 +50,12 @@ function combatantWithEffects(effects: ActiveEffect[]): Combatant {
  * When a base stat (body/mind/heart) is bumped by N, the effective base stat
  * is 5 + N and ALL derived stats for that stance re-derive.
  */
+// The attack/defense stat-band buffs (buff_mind_attack_up,
+// buff_heart_attack_up, buff_body/mind/heart_defense_up) were retired
+// outright by the spec 32 v3 keyword reset — no support consumer resolves
+// them, so their cases retire with them. The survivors below are
+// support-tagged non-card effects (items / Skills system).
 const statBandCases = [
-    {
-        effectId: 'buff_mind_attack_up',
-        label: 'buff_mind_attack_up: mind +2, mentalSkill +3',
-        assertions: (eff: ReturnType<typeof getEffectiveStats>) => {
-            // mind base: 5 + 2 = 7
-            expect(eff.baseStats.mind).toBe(7);
-            // mentalSkill re-derives from mind (7×1=7) then flat +3 = 10
-            expect(eff.derivedStats.mentalSkill).toBe(10);
-            // mentalAttack re-derives from mind: 7
-            expect(eff.derivedStats.mentalAttack).toBe(7);
-        },
-    },
-    {
-        effectId: 'buff_heart_attack_up',
-        label: 'buff_heart_attack_up: heart +2, emotionalSkill +3',
-        assertions: (eff: ReturnType<typeof getEffectiveStats>) => {
-            expect(eff.baseStats.heart).toBe(7);
-            // emotionalSkill re-derives from heart (7×1=7) then flat +3 = 10
-            expect(eff.derivedStats.emotionalSkill).toBe(10);
-            expect(eff.derivedStats.emotionalAttack).toBe(7);
-        },
-    },
-    {
-        effectId: 'buff_body_defense_up',
-        label: 'buff_body_defense_up: body +2, physicalDefense +3, defenseModifier +2',
-        assertions: (eff: ReturnType<typeof getEffectiveStats>) => {
-            expect(eff.baseStats.body).toBe(7);
-            // physicalDefense re-derives (7×3=21) then flat +3 = 24
-            expect(eff.derivedStats.physicalDefense).toBe(24);
-            expect(eff.defenseDelta).toBe(2);
-        },
-    },
-    {
-        effectId: 'buff_mind_defense_up',
-        label: 'buff_mind_defense_up: mind +2, mentalDefense +3, defenseModifier +2',
-        assertions: (eff: ReturnType<typeof getEffectiveStats>) => {
-            expect(eff.baseStats.mind).toBe(7);
-            // mentalDefense re-derives (7×3=21) then flat +3 = 24
-            expect(eff.derivedStats.mentalDefense).toBe(24);
-            expect(eff.defenseDelta).toBe(2);
-        },
-    },
-    {
-        effectId: 'buff_heart_defense_up',
-        label: 'buff_heart_defense_up: heart +2, emotionalDefense +3, defenseModifier +2',
-        assertions: (eff: ReturnType<typeof getEffectiveStats>) => {
-            expect(eff.baseStats.heart).toBe(7);
-            // emotionalDefense re-derives (7×3=21) then flat +3 = 24
-            expect(eff.derivedStats.emotionalDefense).toBe(24);
-            expect(eff.defenseDelta).toBe(2);
-        },
-    },
     {
         effectId: 'buff_resistance_body',
         label: 'buff_resistance_body: body +3, physicalDefense +4, physicalSave +3',

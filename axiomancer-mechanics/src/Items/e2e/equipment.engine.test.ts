@@ -67,7 +67,7 @@ const passiveCirclet: Equipment = {
     slot: 'head',
     rarity: 'common',
     requiredLevel: 1,
-    passiveEffects: ['tier1_body_defend'],
+    passiveEffects: ['buff_regeneration'],
 };
 
 const berserkerBand: Equipment = {
@@ -96,7 +96,7 @@ const guaranteedHitProc: Equipment = {
     requiredLevel: 1,
     onHitEffects: [
         {
-            effectId:   'tier1_mind_mark',
+            effectId:   'debuff_mark',
             target:     'opponent',
             tier:       1,
             baseChance: 1,
@@ -156,7 +156,7 @@ describe('equipItem / unequipItem', () => {
         const equipped = equipItem(player, passiveCirclet);
         expect(equipped.effects).toHaveLength(1);
         const active = equipped.effects[0];
-        expect(active.effectId).toBe('tier1_body_defend');
+        expect(active.effectId).toBe('buff_regeneration');
         expect(active.remainingDuration).toBe(-1);
         expect(active.sourceId).toBe(passiveCirclet.id);
 

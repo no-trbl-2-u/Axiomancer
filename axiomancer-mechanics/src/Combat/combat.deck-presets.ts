@@ -1,38 +1,32 @@
 /**
- * Spec 26b deckbuilder — PRESET combat decks (focused starter / sandbox decks).
+ * Spec 32 v3 §8 — the TEN themed preset decks.
  *
- * A preset is a curated, ready-to-play list of skill-card ids with a single
- * design FOCUS — the lever it leans on to drop enemy HP to 0. They give the
- * mobile sandbox, tuning sims, and "pick-a-style" onboarding a hand-authored
- * deck per archetype-of-play WITHOUT requiring the player to have learned the
- * skills first (unlike `buildCombatDeck`, which projects a character's actual
- * `knownSkills`). Pass the result of `buildPresetDeck` straight into
- * `initializeCombatEncounter(player, enemy, deck)`.
+ * Every preset follows the owner's recipe exactly: 4 copies × 2 unique
+ * commons, 2 copies × 2 unique uncommons, 1 copy × 3 unique rares (the rare
+ * spell finisher + the theme's enchantment + its disenchant) = 15 cards, all
+ * in-theme. Themes are strictly self-contained — zero card overlap; only the
+ * synthetic Retreat is shared (appended by `buildPresetDeck`).
  *
- * Doctrine (CLAUDE.md): status effects are the main fun. The DoT and CONTROL
- * presets are the headline kits — they erode / hinder. UTILITY survives and
- * converts; RUSH-EXECUTE is the fastest DoT-stack-into-finisher clock;
- * BALANCED carries one of each lever. RECURSION and ESCALATION (Master Spec
- * §5.6-5.7) sample the newer Skills-token and wild-die-growth systems. Every
- * preset bundles a defensive (GUARD) card so it can brace from turn one,
- * mirroring `STARTING_SKILL_IDS` — ESCALATION keeps exactly one for the same
- * reason but does not lean on it (variance, not turtling, is its identity).
+ * Each deck plays fundamentally differently (the deck-distinctness law):
+ * Erosion ramps DoTs and detonates; Oratory builds Premises toward a declared
+ * conclusion (CONCEDE at 8); Foundry manufactures dice and cashes the pips;
+ * Penitent buys power with blood and turns Fallen into a state of grace;
+ * Standstill strips action rungs and lets BACKFIRE bleed the denied blows;
+ * Augury sees the future and collects when it arrives; Tithe churns short
+ * afflictions into Souls and swings the scythe; Grace never touches HP —
+ * SWAY to CAPITULATION; Bastion lets their aggression kill them; Refrain
+ * replays its greatest hits until the tune kills.
  *
- * Pure data + pure helpers — card ids are validated against the skill library at
- * call time (an id that no longer resolves is dropped), so the lists stay safe to
- * edit as the library evolves.
+ * Pure data + pure helpers — card ids are validated against the library at
+ * call time (an id that no longer resolves is dropped).
  */
 
 import { getCardById } from '../Cards/cards.library';
 import { SYNTHETIC_CARD_IDS } from './combat.cards';
 
 /**
- * The design lever a preset leans on (mirrors the card effect-kinds).
- * `'damage'` is kept (existing draft/sim-policy consumers key off it) and
- * `'rush-execute'` is added alongside it (Master Spec §5.4) rather than
- * replacing it in place, to avoid an engine-wide rename outside this pass's
- * scope — `'damage'` still means "raw direct-damage lever" wherever else it's
- * used (`combat.deck-draft.ts`, `combat.sim-policies.ts`, `combat.cli.ts`).
+ * The design lever a preset leans on. Kept coarse for the draft/sim-policy
+ * consumers; `theme` (below) carries the v3 identity.
  */
 export type CombatDeckFocus = 'dot' | 'control' | 'utility' | 'damage' | 'rush-execute' | 'balanced';
 
@@ -42,136 +36,160 @@ export interface CombatDeckPreset {
     id: string;
     /** Display name (the mobile deck-picker label). */
     name: string;
-    /** The lever this deck leans on. */
+    /** Spec 32 v3 theme key (T1-T10). */
+    theme: string;
+    /** The coarse lever this deck leans on (sim-policy compatibility). */
     focus: CombatDeckFocus;
     /** One-line pitch for the deck-picker. */
     description: string;
-    /** Curated skill-card ids. DUPLICATES are intentional (extra copies of a key
-     *  card are part of the deck's identity — the deckbuilder point). */
+    /** Curated card ids on the 4/4/2/2/1/1/1 recipe. DUPLICATES intentional. */
     cardIds: readonly string[];
-    /** Dev-UI legibility only (Master Spec §5) — which aspect(s) the deck's
-     *  token generation leans on. Omitted where token lean isn't the point. */
-    tokenLean?: string;
-    /** Dev-UI legibility only — count of wild-die (`grant_permanent_wild_die`)
-     *  cards in `cardIds`. */
-    wildDieCards?: number;
 }
 
-/**
- * The preset roster. Card ids are drawn from the skill library and grouped by the
- * verb-class they project to (see `classifyVerbClass`): DoT, control, stat-debuff
- * (soft control), buff-self / defend (utility), and direct-damage.
- */
+/** Builds the 15-card recipe list: commons ×4, uncommons ×2, rares ×1. */
+function recipe(
+    c1: string, c2: string, u1: string, u2: string,
+    rareSpell: string, enchantment: string, disenchant: string,
+): string[] {
+    return [
+        c1, c1, c1, c1,
+        c2, c2, c2, c2,
+        u1, u1,
+        u2, u2,
+        rareSpell, enchantment, disenchant,
+    ];
+}
+
 export const COMBAT_DECK_PRESETS: Record<string, CombatDeckPreset> = {
-    // Fate Engine P1 trim (spec 31 §4.2): presets re-cut over the 48-card
-    // curated library. Every preset carries ≥1 threshold/dieBonus/fate card so
-    // its headline dice mechanic is reachable, and a GUARD so it braces from
-    // turn one. RECURSION and ESCALATION retired with their cut identity cards
-    // (the wild-die line lives on inside FATE FORGE).
-    'dot-erosion': {
-        id: 'dot-erosion',
+    erosion: {
+        id: 'erosion',
         name: 'Erosion',
+        theme: 'affliction',
         focus: 'dot',
-        description: 'Stack damage-over-time across three aspects, amplify it, then detonate — the patient clock, cashed early.',
-        cardIds: [
-            'slippery-slope',        // body poison (ramps)
-            'hasty-generalization',  // body bleed + Body-threshold rider
-            'poisoned-well',         // body septic (damps its hits)
-            'eternal-regress',       // mind unraveling + mind-die rider
-            'leeching-syllogism',    // heart hemorrhage + siphon sustain
-            'the-inevitable',        // AMPLIFY payoff + Mind-threshold tick-all
-            'resonance-detonation',  // RUPTURE payoff
-            'pyrrhic-victory',       // gold — execute gated on DoT stacks
-            'brace-for-impact',      // GUARD — brace from turn one
-        ],
-        wildDieCards: 0,
+        description: 'Stack poison and bleed, stretch them, convert them — then detonate everything at once.',
+        cardIds: recipe(
+            'slippery-slope', 'straw-mans-jab',
+            'festering-argument', 'currys-conversion',
+            'resonance-detonation', 'venom-and-vein', 'suppurating-curse',
+        ),
     },
-    'control-lock': {
-        id: 'control-lock',
-        name: 'Saturation',
-        focus: 'control',
-        description: 'Deny the enemy its telegraphed turns — doubt cancels riders, confusion weakens, fear + confusion DETONATE into a stagger.',
-        cardIds: [
-            'false-dilemma',          // confusion + off-color rider
-            'undistributed-middle',   // confusion + Mind-threshold rider
-            'moving-the-goalposts',   // doubt + overextended (both real)
-            'liars-echo',             // MARK — the stance goes public
-            'appeal-to-consequences', // fear + Body-threshold chip
-            'existential-collapse',   // REACT: fear+confusion → stagger burst
-            'suspend-judgment',       // GUARD + bank the die (Epoché)
-        ],
-        wildDieCards: 0,
+    oratory: {
+        id: 'oratory',
+        name: 'Oratory',
+        theme: 'peroration',
+        focus: 'balanced',
+        description: 'Build the case premise by premise; the declared conclusion fires free — and at eight, they concede.',
+        cardIds: recipe(
+            'exordium', 'opening-statement',
+            'mounting-case', 'peroratio-interrupta',
+            'the-closing-word', 'practiced-cadence', 'captive-audience',
+        ),
     },
-    'utility-bulwark': {
-        id: 'utility-bulwark',
-        name: 'Bulwark',
+    foundry: {
+        id: 'foundry',
+        name: 'Foundry',
+        theme: 'forge',
         focus: 'utility',
-        description: 'Outlast and convert — guards on every color, real damage reduction, thorns, and the mercy line.',
-        cardIds: [
-            'brace-for-impact', 'suspend-judgment', 'stoic-reserve', // GUARD across the colors (+pips)
-            'appeal-to-pity', 'soothing-words',                      // heal + resolute / cleanse
-            'apophatic-aegis', 'tu-quoque',                          // barrier + thorns
-            'briar-riposte',                                         // the parry
-            'befriend',                                              // the mercy line
-            'hasty-generalization',                                  // a win-condition
-        ],
-        wildDieCards: 0, // variance is antithetical to a stall deck
+        description: 'Manufacture dice from nothing, ripen the pips, then spend every one in a single overwhelming stride.',
+        cardIds: recipe(
+            'sketch-of-a-thought', 'half-step',
+            'bootstrap-loop', 'ex-nihilo',
+            'the-overtake', 'anvil-of-form', 'entropy-tax',
+        ),
     },
-    'aggro-strike': {
-        id: 'aggro-strike',
-        name: 'Onslaught',
+    penitent: {
+        id: 'penitent',
+        name: 'Penitent',
+        theme: 'akrasia',
+        focus: 'dot',
+        description: 'Pay in blood for undercosted power; two self-afflictions make you Fallen, and the debt starts arguing for you.',
+        cardIds: recipe(
+            'against-my-judgment', 'sweet-poison',
+            'self-flagellant', 'fallen-grace',
+            'pact-of-akrasia', 'crown-of-thorns', 'mirror-of-guilt',
+        ),
+    },
+    standstill: {
+        id: 'standstill',
+        name: 'Standstill',
+        theme: 'control',
+        focus: 'control',
+        description: 'Strip the rungs from every telegraphed blow; what cannot land, lands inward.',
+        cardIds: recipe(
+            'zenos-half-step', 'red-herring',
+            'undistributed-middle', 'arrow-paradox',
+            'paralysis-of-analysis', 'achilles-and-the-tortoise', 'quagmire-of-doubt',
+        ),
+    },
+    augury: {
+        id: 'augury',
+        name: 'Augury',
+        theme: 'oracle',
+        focus: 'balanced',
+        description: 'See the next move, declare it aloud, and collect on every prophecy that comes true.',
+        cardIds: recipe(
+            'glimpse', 'signs-and-portents',
+            'cassandras-burden', 'delphic-ambiguity',
+            'prophecy-fulfilled', 'the-oracles-eye', 'fated-course',
+        ),
+    },
+    tithe: {
+        id: 'tithe',
+        name: 'Tithe',
+        theme: 'harvest',
         focus: 'rush-execute',
-        description: 'Spend body dice fast and cash the resonance thresholds — the quickest route to an execute.',
-        cardIds: [
-            'hasty-generalization', 'hasty-generalization', // body bleed ×2 — feeds the Body tally
-            'achilles-gambit',                              // bleed + the FATE line
-            'mob-appeal',                                   // strike + Body-threshold chip
-            'appeal-to-consequences',                       // fear + Body-threshold chip
-            'achilles-overtake',                            // the execute
-            'brace-for-impact',                             // GUARD
-        ],
-        wildDieCards: 0,
+        description: 'Plant short afflictions, harvest the Souls as they expire, and swing the scythe when the bank is full.',
+        cardIds: recipe(
+            'brief-candle', 'memento-mori',
+            'winnowing', 'the-gleaners-due',
+            'the-reaping', 'bone-orchard', 'the-tithe',
+        ),
     },
-    'fate-forge': {
-        id: 'fate-forge',
-        name: 'Fate Forge',
-        focus: 'balanced',
-        description: 'The dice ARE the deck — fate cards that spend dead X dice, forged and converted dice, ripened Reserve pips, and the wild-die snowball.',
-        cardIds: [
-            'achilles-gambit',        // FATE — the impossible strike
-            'barbers-paradox',        // FATE — the unresolvable question
-            'pascals-wager',          // FATE — infinite payoff
-            'transcendent-synthesis', // FATE — synthesis of the dead faces
-            'ship-of-theseus',        // convert the die to WILD
-            'bat-swarm-thoughtform',  // forge a temporary die
-            'gamblers-folly',         // wild-die growth (real downside now)
-            'unmoved-mover',          // gold — stagger + ripen the Reserve
-            'brace-for-impact',       // GUARD
-        ],
-        tokenLean: 'n/a — dice-pool focused',
-        wildDieCards: 1,
+    grace: {
+        id: 'grace',
+        name: 'Grace',
+        theme: 'charm',
+        // SWAY/RAPPORT cards classify as the control lever (they hinder and
+        // soften the enemy); 'control' keeps the draft/sim-policy consumers
+        // pointed at the deck's real texture.
+        focus: 'control',
+        description: 'The deck that never strikes: build SWAY past their resolve and win by capitulation — or mercy.',
+        cardIds: recipe(
+            'soft-word', 'disarming-smile',
+            'common-ground', 'the-olive-branch',
+            'heart-of-the-matter', 'irresistible-grace', 'mirror-of-longing',
+        ),
     },
-    'balanced': {
-        id: 'balanced',
-        name: 'Generalist',
+    bastion: {
+        id: 'bastion',
+        name: 'Bastion',
+        theme: 'bulwark',
+        focus: 'utility',
+        description: 'Guard, thorns, riposte — stand behind the wall and let their own aggression kill them.',
+        cardIds: recipe(
+            'brace-for-impact', 'nettle-cloak',
+            'tu-quoque', 'measured-answer',
+            'the-adamant-wall', 'hedgehogs-dilemma', 'crumbling-resolve',
+        ),
+    },
+    refrain: {
+        id: 'refrain',
+        name: 'Refrain',
+        theme: 'echo',
         focus: 'balanced',
-        description: 'One of every lever — DoT, control, anti-heal, a guard, sustain, Befriend, and the execute payoff.',
-        cardIds: [
-            'slippery-slope', 'hasty-generalization', // DoT — poison + bleed
-            'existential-debt',                       // heart despair + isolate (anti-heal)
-            'false-dilemma', 'moving-the-goalposts',  // control — confusion + doubt
-            'appeal-to-pity',                         // heal + resolute
-            'brace-for-impact',                       // GUARD
-            'befriend',                               // mercy line
-            'achilles-overtake',                      // tier-3 execute payoff
-        ],
-        wildDieCards: 0,
+        description: 'Nothing is said once: echo, reprise, replay — the tune they cannot stop hearing is yours.',
+        cardIds: recipe(
+            'refrain', 'second-thoughts',
+            'ad-nauseam', 'circular-reasoning',
+            'ouroboros', 'resonant-chamber', 'stuck-in-their-head',
+        ),
     },
 };
 
-/** Stable display order for the deck-picker (headline status kits first). */
+/** Stable display order for the deck-picker (spec §8 table order). */
 export const COMBAT_DECK_PRESET_ORDER: readonly string[] = Object.freeze([
-    'dot-erosion', 'control-lock', 'utility-bulwark', 'aggro-strike', 'fate-forge', 'balanced',
+    'erosion', 'oratory', 'foundry', 'penitent', 'standstill',
+    'augury', 'tithe', 'grace', 'bastion', 'refrain',
 ]);
 
 /** All presets in display order. */

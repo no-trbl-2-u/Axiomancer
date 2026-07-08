@@ -18,7 +18,8 @@ import { buildCombatViewModel } from '@/state/presenters/combat-encounter.engine
 import { createMockEncounterEnemy } from '@/state/mocks/combat.mock';
 import { withAllProviders } from '@/test-utils/withAllProviders';
 
-const SKILLS = ['slippery-slope', 'eternal-regress', 'achilles-gambit', 'befriend'];
+// Spec 32 v3 fixtures: two Affliction DoTs, the Bulwark guard, a Charm sway.
+const SKILLS = ['slippery-slope', 'straw-mans-jab', 'brace-for-impact', 'soft-word'];
 
 const noopDrag = (): DragController =>
     ({ begin: () => undefined, move: () => undefined, end: () => undefined, active: null } as unknown as DragController);

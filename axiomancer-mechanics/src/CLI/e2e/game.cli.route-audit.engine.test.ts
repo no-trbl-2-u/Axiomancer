@@ -59,15 +59,15 @@ describe('Phase 14 — route survivorship vs coverage-audit classification', () 
     it('a scripted route stops at a combat defeat and downgrades to "blocked" — never reports post-defeat traversal as survivorship', async () => {
         const logPath = tmpPath('defeat-stop');
 
-        // Seed 2 + naive policy reliably loses the fv-6 boss fight
-        // (empirically verified against the current authored boss and
-        // naive auto-policy). fv-7 is listed as a route target but must
+        // Seed 7 + naive policy reliably loses the fv-6 boss fight
+        // (empirically re-verified 2026-07-08 against the spec 32 v3 library
+        // and naive auto-policy). fv-7 is listed as a route target but must
         // never be reached once fv-6 ends in defeat.
         await runGameCli([
             '--route', 'fv-2,fv-3,fv-4,fv-5,fv-6,fv-7',
             '--auto-combat',
             '--combat-policy', 'naive',
-            '--combat-seed', '2',
+            '--combat-seed', '7',
             '--combat-max-turns', '30',
             '--state-log', logPath,
         ]);

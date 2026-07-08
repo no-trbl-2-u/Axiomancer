@@ -15,15 +15,18 @@ status-effect engagement as a balance failure even when win/loss rates look
 healthy.
 
 **Hazard-Pattern Combat (the primary combat system)** keeps status central: the
-enemy's SOLE bar is HP, and status is the EFFICIENT way to drop it to 0 — DoT
-erodes HP far faster than the deliberately weak basic strike, and control hinders
-the enemy (it loses its telegraphed turn). **Updated 2026-06-22:** the old
-two-Pressure-Track win model (DoT Erosion + Control Saturation as the only win
-conditions) was REMOVED; HP is the sole win condition now (`isDefeated(enemy)`),
-basic-attack trading is the weak baseline rather than absent. Hazard-Pattern
-Combat is the ONLY combat engine (witness: `simulateHazardPatternCombat`); the
-legacy turn-based resolver was removed. The combat is LIVE in mobile map
-encounters. Engine constants are tuned manually; **`/deck-tuning`** forges the
+enemy's SOLE bar is HP, and status is the ONLY way to drop it to 0.
+**Updated 2026-07-08 (spec 32 v3 — THE STRIKE IS DEAD):** raw HP damage was
+purged at the schema level (`basePower`/`chipHp` no longer exist on `Card`).
+Every point of enemy HP falls to DoT ticks, affliction-payoff bursts
+(RUPTURE / REAP), engine-gated drips (BACKFIRE and persistent-card hooks), or
+reflect (THORNS / RIPOSTE). Two merciful alt-wins exist beside HP: Befriend
+(signatures) and CAPITULATE (SWAY), plus CONCEDE (an 8-Premise Peroration).
+The library is 70 cards across 10 self-contained themes with exactly 30
+keywords; presets follow the 4/4/2/2/1/1/1 recipe. HP remains the main win
+condition (`isDefeated(enemy)`); Hazard-Pattern Combat is the ONLY combat
+engine (witness: `simulateHazardPatternCombat`). The combat is LIVE in mobile
+map encounters. Engine constants are tuned manually; **`/deck-tuning`** forges the
 card pool (sandbox-first card/deck A/Bs, promotion into the library) and
 **`/combat-playtest`** runs the stage matrix plus qualitative `playtester`
 agents (report only; see `docs/playtest.md`).

@@ -42,3 +42,11 @@ export type {
 export {
     cardLibrary, getCardById,
 } from './cards.library';
+
+// Spec 32 v3 — rank ladder + card types (§4) and the pricing table (ledger #2).
+export type { CardRank, CardRarity, CardType, CardRider } from './types';
+export { rankToRarity, CARD_RANK_NAMES } from './types';
+export {
+    VERB_POINTS, CONDITION_DISCOUNTS, SELF_COST_CREDIT,
+    scoreCard, scoreMechanic, scoreRider, statusPoints, dotLifetimeHp,
+} from './cards.pricing';

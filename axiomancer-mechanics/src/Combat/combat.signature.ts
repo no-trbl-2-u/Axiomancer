@@ -44,7 +44,7 @@ export const SIGNATURE_SKILLS: Record<SignatureSkillId, SignatureSkill> = {
     },
     'sig-overwhelming-argument': {
         id: 'sig-overwhelming-argument', name: 'Overwhelming Argument', kind: 'control', cost: 8,
-        magnitude: 5, effectKind: 'control', effectId: 'debuff_stagger',
+        magnitude: 5, effectKind: 'control', effectId: 'debuff_backfire',
         description: 'Petrify the enemy — it turns to stone and loses its turns while the control holds.',
     },
     'sig-conviction-strike': {
@@ -55,7 +55,7 @@ export const SIGNATURE_SKILLS: Record<SignatureSkillId, SignatureSkill> = {
     // ── Per-archetype exclusives ─────────────────────────────────────────────
     'sig-disarming-plea': {
         id: 'sig-disarming-plea', name: 'Disarming Plea', kind: 'mercy', cost: 6,
-        magnitude: 6, effectKind: 'control', effectId: 'debuff_charm',
+        magnitude: 6, effectKind: 'control', effectId: 'debuff_rapport',
         description: 'HEART — charm the foe (it falters) and strike, softening it toward mercy.',
     },
     'sig-rallying-blow': {

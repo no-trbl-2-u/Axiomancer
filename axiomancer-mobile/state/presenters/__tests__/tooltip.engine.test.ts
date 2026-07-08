@@ -295,17 +295,18 @@ describe('selectTooltipContentFor', () => {
 
     describe('kind: effect (Phase 75 + tighten 2026-05-24)', () => {
         it('returns engine-sourced name + payload-derived stat-effect body for a known effectId', () => {
-            const content = selectTooltipContentFor('effect', 'tier1_body_attack', EMPTY_STATE);
+            // Spec 32 v3 fixture: debuff_poison (the canonical keyword DoT).
+            const content = selectTooltipContentFor('effect', 'debuff_poison', EMPTY_STATE);
             expect(content).not.toBeNull();
             // Title is the engine effect name uppercased.
-            expect(content?.title).toBe('AD BACULUM');
+            expect(content?.title).toBe('POISON');
             // Body is the formatted stat-effect line — not the engine
             // description (which Phase 75 originally surfaced but the
             // user-jot follow-up asked to drop in favour of the
             // payload-derived line).
-            expect(content?.body).toBe('+2 physical attack');
-            // Body-target effect → 'body' accent (rust tint).
-            expect(content?.accent).toBe('body');
+            expect(content?.body).toBe('-2 hp / round');
+            // mentalAttack damage type → 'mind' accent.
+            expect(content?.accent).toBe('mind');
             // Footnote dropped under the tighten — the body now
             // carries the stat info.
             expect(content?.footnote).toBeUndefined();

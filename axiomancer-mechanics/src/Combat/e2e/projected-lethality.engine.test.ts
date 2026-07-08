@@ -1,7 +1,9 @@
 /**
- * Hermetic E2E — Phase 2 (spec 30): `projectCombatOutcome`, the consolidated
- * status kill-path readout (pending DoT, "lethal in N rounds", and hand
- * finisher readiness). Seeded RNG only; no disk / network / TTY.
+ * Hermetic E2E — `projectCombatOutcome`, the consolidated status kill-path
+ * readout (pending DoT, "lethal in N rounds", and hand finisher readiness).
+ * Re-pinned to spec 32 v3: the finisher vocabulary is RUPTURE and REAP
+ * (amplify/execute are deleted); bleed decays 1 intensity per tick and the
+ * projection models it. Seeded RNG only; no disk / network / TTY.
  */
 
 import { describe, it, expect } from 'vitest';
@@ -13,7 +15,7 @@ import { GraveLarva } from '../../Enemy/enemy.library';
 import { deepClone } from '../../Utils';
 import type { ActiveEffect } from '../../Effects/types';
 import {
-    initializeCombatEncounter, projectCombatOutcome, projectRupture, projectAmplify, projectExecute, handCards,
+    initializeCombatEncounter, projectCombatOutcome, projectRupture, projectReapAll, handCards,
 } from '../combat.engine';
 import { getPendingDotTotal } from '../effects';
 
@@ -37,8 +39,7 @@ function makeEnemy(hp: number, effects: ActiveEffect[] = []): Enemy {
 }
 
 const RUPTURE_CARD = 'resonance-detonation';
-const AMPLIFY_CARD = 'the-inevitable';
-const EXECUTE_CARD = 'achilles-overtake'; // hpPct 0.3, dotStacks 2
+const REAP_CARD = 'the-reaping'; // REAP all — 2 per Soul
 
 describe('projectCombatOutcome — the consolidated status kill-path readout', () => {
     it('no DoT on the foe — nothing pending, no foreseeable kill, no finishers', () => {
@@ -50,26 +51,26 @@ describe('projectCombatOutcome — the consolidated status kill-path readout', (
         expect(projection.finishers).toEqual([]);
     });
 
-    it('a single flat DoT (no ramp, no combo) that outpaces a low-HP foe is lethal in N rounds', () => {
-        // debuff_bleed: flat 4/round, no ramp/combo when alone. intensity 3 -> 12/tick.
-        const enemy = makeEnemy(30, [ae('debuff_bleed', 3, 5)]);
+    it('a decaying bleed that outpaces a low-HP foe is lethal in N rounds', () => {
+        // v3 bleed: 3/round, decays 1 intensity per tick. i3 → ticks 9, 6, 3.
+        const enemy = makeEnemy(15, [ae('debuff_bleed', 3, 5)]);
         const state = initializeCombatEncounter(makePlayer([]), enemy, undefined, 7);
         const projection = projectCombatOutcome(state);
 
         expect(projection.pendingDot).toBe(getPendingDotTotal(state.enemy, state.round).total);
-        expect(projection.pendingDot).toBe(60); // 5 ticks x 12
-        // cumulative: 12, 24, 36 >= 30 -> lethal on round 3
-        expect(projection.roundsToKill).toBe(3);
+        expect(projection.pendingDot).toBe(18); // 9 + 6 + 3 (decay-aware, NOT 9×5)
+        // cumulative: 9, 15 >= 15 -> lethal on round 2
+        expect(projection.roundsToKill).toBe(2);
         expect(projection.isLethalInFlight).toBe(true);
     });
 
     it('a DoT that never outpaces a high-HP foe over its remaining duration is not lethal', () => {
-        // debuff_bleed canonical (intensity 1, duration 2): 4/round x 2 ticks = 8 pending.
+        // v3 bleed i1 d2: decays out after ONE tick of 3.
         const enemy = makeEnemy(300, [ae('debuff_bleed', 1, 2)]);
         const state = initializeCombatEncounter(makePlayer([]), enemy, undefined, 7);
         const projection = projectCombatOutcome(state);
 
-        expect(projection.pendingDot).toBe(8);
+        expect(projection.pendingDot).toBe(3);
         expect(projection.roundsToKill).toBeNull();
         expect(projection.isLethalInFlight).toBe(false);
     });
@@ -80,50 +81,52 @@ describe('projectCombatOutcome — the consolidated status kill-path readout', (
         const state = initializeCombatEncounter(makePlayer([]), enemy, undefined, 7);
         const projection = projectCombatOutcome(state);
 
-        // Same fixture as the RUPTURE e2e suite: pending totals 46 (poison 30 ramped+amplified, bleed 16).
-        expect(projection.pendingDot).toBe(46);
+        // Same fixture as the RUPTURE e2e suite: poison ramps + Hemorrhage —
+        // 6,6,9,9 = 30; bleed i1 decays after one tick of 3. pending = 33.
+        expect(projection.pendingDot).toBe(33);
         expect(projection.pendingDot).toBe(getPendingDotTotal(state.enemy, state.round).total);
-        // cumulative per round: 10, 20, 33 >= 25 -> lethal on round 3
-        expect(projection.roundsToKill).toBe(3);
+        // cumulative per round: 9, 15, 24, 33 — crosses 25 on round 4.
+        expect(projection.roundsToKill).toBe(4);
         expect(projection.isLethalInFlight).toBe(true);
     });
 
-    it('a hand with rupture / amplify / execute cards reports each as a ready finisher matching its own selector', () => {
+    it('a hand with rupture / reap cards reports each as a finisher matching its own selector', () => {
         const enemyEffects = [ae('debuff_poison', 2, 4), ae('debuff_bleed', 1, 4)];
         const enemy = makeEnemy(300, enemyEffects);
-        const deck = [RUPTURE_CARD, AMPLIFY_CARD, EXECUTE_CARD];
-        const state = initializeCombatEncounter(makePlayer([RUPTURE_CARD, AMPLIFY_CARD, EXECUTE_CARD]), enemy, deck, 7);
+        const deck = [RUPTURE_CARD, REAP_CARD];
+        const base = initializeCombatEncounter(makePlayer([RUPTURE_CARD, REAP_CARD]), enemy, deck, 7);
+        // Fund the Soul bank so the REAP-all projection is live.
+        const state = { ...base, souls: 3 };
         const projection = projectCombatOutcome(state);
 
-        // Hand size (6) can exceed the 3-card deck, so a card may be redrawn —
-        // assert each finisher mechanic is represented at least once rather than
-        // an exact hand-size-dependent count.
-        expect(projection.finishers.length).toBeGreaterThanOrEqual(3);
-        expect(new Set(projection.finishers.map(f => f.mechanic))).toEqual(new Set(['rupture', 'amplify', 'execute']));
+        // The 2-card deck reshuffles into a 5-card hand, so each finisher
+        // mechanic is represented at least once (counts are hand-order noise).
+        expect(projection.finishers.length).toBeGreaterThanOrEqual(2);
+        expect(new Set(projection.finishers.map(f => f.mechanic))).toEqual(new Set(['rupture', 'reap']));
 
         const rupture = projection.finishers.find(f => f.mechanic === 'rupture')!;
-        expect(rupture).toBeDefined();
         expect(rupture.cardId).toBe(RUPTURE_CARD);
         expect(rupture.ready).toBe(true);
         expect(rupture.amount).toBe(projectRupture(state));
+        expect(rupture.amount).toBe(33);
 
-        const amplifyCard = handCards(state).find(h => h.card.id === AMPLIFY_CARD)!.card;
-        const amplify = projection.finishers.find(f => f.mechanic === 'amplify')!;
-        expect(amplify).toBeDefined();
-        expect(amplify.cardId).toBe(AMPLIFY_CARD);
-        const expectedAmplify = projectAmplify(state, amplifyCard);
-        expect(amplify.amount).toBeGreaterThan(0);
-        expect(amplify.ready).toBe(expectedAmplify.ready);
-        expect(amplify.amount).toBe(expectedAmplify.amount);
+        const reapCard = handCards(state).find(h => h.card.id === REAP_CARD)!.card;
+        const reap = projection.finishers.find(f => f.mechanic === 'reap')!;
+        expect(reap.cardId).toBe(REAP_CARD);
+        const expectedReap = projectReapAll(state, reapCard);
+        expect(reap.ready).toBe(true);
+        expect(reap.ready).toBe(expectedReap.ready);
+        expect(reap.amount).toBe(expectedReap.amount);
+        expect(reap.amount).toBe(6); // 2 per Soul × 3 Souls, neutral read
+    });
 
-        const executeCard = handCards(state).find(h => h.card.id === EXECUTE_CARD)!.card;
-        const execute = projection.finishers.find(f => f.mechanic === 'execute')!;
-        expect(execute).toBeDefined();
-        expect(execute.cardId).toBe(EXECUTE_CARD);
-        const expectedExecute = projectExecute(state, executeCard);
-        expect(execute.ready).toBe(true); // 2 distinct DoT stacks meets sorites-cascade's dotStacks: 2 gate
-        expect(execute.ready).toBe(expectedExecute.ready);
-        expect(execute.amount).toBe(expectedExecute.amount);
+    it('an empty Soul bank leaves the reap finisher present but NOT ready', () => {
+        const state = initializeCombatEncounter(makePlayer([REAP_CARD]), makeEnemy(300), [REAP_CARD], 7);
+        const projection = projectCombatOutcome(state);
+        const reap = projection.finishers.find(f => f.mechanic === 'reap')!;
+        expect(reap).toBeDefined();
+        expect(reap.ready).toBe(false);
+        expect(reap.amount).toBe(0);
     });
 
     it('a hand with no finisher-mechanic cards reports no finishers', () => {

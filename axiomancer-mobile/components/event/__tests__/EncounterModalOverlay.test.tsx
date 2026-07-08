@@ -801,7 +801,7 @@ describe('EncounterModalOverlay: in-place hazard combat (Phase 200)', () => {
                 ...p,
                 knownSkills: Array.from(new Set([
                     ...(p.knownSkills ?? []),
-                    'slippery-slope', 'eternal-regress', 'achilles-gambit',
+                    'slippery-slope', 'straw-mans-jab', 'brace-for-impact',
                 ])),
             },
         });

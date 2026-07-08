@@ -11,7 +11,7 @@
  * the data source moves.
  *
  * Mapping decisions per the Phase 16 brief §"Decisions made upfront":
- *   - `id` = engine `id` (e.g. `'ad-hominem-strike'`)
+ *   - `id` = engine `id` (e.g. `'slippery-slope'`)
  *   - `name` = engine `name`, uppercased for display
  *   - `description` = engine `description` verbatim
  *   - `category` = engine `category` ('fallacy' | 'paradox')

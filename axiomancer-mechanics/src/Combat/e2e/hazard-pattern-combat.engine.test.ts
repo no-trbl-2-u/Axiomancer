@@ -49,25 +49,24 @@ afterEach(() => {
 
 // ── Fixtures ─────────────────────────────────────────────────────────────────
 
-// Master Spec (2026-07-03) doctrine pass converted every real library card off
-// flat `basePower` strikes — no real card can play "pure damage, no status"
-// anymore, so this suite's pure-strike fixture is a sandbox-only test card.
+// Spec 32 v3: basePower is deleted at the schema level — no card can strike.
+// The "damage class" fixture is a bare RUPTURE payoff (affliction-gated burst).
 registerSandboxCards([{
-    id: 'qa-pure-strike-body',
-    name: 'QA Pure Strike (test fixture)',
+    id: 'qa-payoff-burst',
+    name: 'QA Payoff Burst (test fixture)',
     category: 'paradox',
     philosophicalAspect: 'body',
-    description: 'Test-only fixture: a flat direct-damage card with no status payload.',
+    description: 'Test-only fixture: a bare RUPTURE payoff with no status payload.',
     tier: 1,
+    rank: 1,
+    cardType: 'spell',
     targetType: 'enemy',
-    basePower: 12,
-    scalingStat: 'body',
+    specialMechanics: [{ kind: 'rupture' }],
 }]);
 
 const DOT_BODY = 'slippery-slope';       // body starter, applies debuff_poison (ramping DoT)
-const CONTROL_HEART = 'false-dilemma';   // mind, tier 1, confusion (control)
-const DAMAGE_BODY = 'qa-pure-strike-body'; // body, tier 1, basePower 12, no status effect (sandbox fixture)
-const BEFRIEND = 'befriend';             // heart, tier 1
+const CONTROL_CARD = 'red-herring';      // mind, tier 1, BACKFIRE (control)
+const DAMAGE_BODY = 'qa-payoff-burst';   // body, tier 1, RUPTURE payoff (sandbox fixture)
 
 function makePlayer(skills: string[]): Character {
     const p = deepClone(Player);
@@ -164,11 +163,11 @@ describe('Spec 25 §6 — card classification', () => {
         expect(card.bottomDamagePreview).toBeGreaterThan(0);
     });
     it('a control skill is a direct-control card on the control track', () => {
-        const card = getCard(CONTROL_HEART)!;
+        const card = getCard(CONTROL_CARD)!;
         expect(card.effectKind).toBe('control');
         expect(['direct-control', 'stat-debuff']).toContain(card.verbClass);
     });
-    it('a pure-damage skill is direct-damage with 0 pressure preview', () => {
+    it('a payoff-burst skill is direct-damage with 0 preview (no strike number exists)', () => {
         const card = getCard(DAMAGE_BODY)!;
         expect(card.verbClass).toBe('direct-damage');
         expect(card.effectKind).toBe('none');
@@ -181,7 +180,7 @@ describe('Spec 25 §6 — card classification', () => {
 describe('Spec 26b §1 — initialization + draft', () => {
     it('opens in reveal, draws 5, then rolls a 2-die turn pool', () => {
         mockSequentialRng(0.5);
-        let state = initializeCombatEncounter(makePlayer([DOT_BODY, CONTROL_HEART, DAMAGE_BODY]), makeEnemy(30), undefined, 42);
+        let state = initializeCombatEncounter(makePlayer([DOT_BODY, CONTROL_CARD, DAMAGE_BODY]), makeEnemy(30), undefined, 42);
         expect(state.phase).toBe('reveal');
         expect(state.hand.length).toBe(COMBAT_HAND_SIZE);
         state = rollEncounterDice(state).state;
@@ -228,14 +227,19 @@ describe('Spec 26b §1 — initialization + draft', () => {
     });
 });
 
-// ── Direct damage is the weak baseline (HP model) ────────────────────────────
+// ── Payoff bursts are affliction-gated (HP model, spec 32 v3) ────────────────
 
-describe('HP model — a direct-damage card chips HP and spends the die', () => {
-    it('a pure-damage bottom damages enemy HP (no status) and spends the die (no chain)', () => {
+describe('HP model — a payoff card bursts only off afflictions and spends the die', () => {
+    it('a RUPTURE bottom on an afflicted foe bursts HP (no status landed → die spent, no chain)', () => {
         mockSequentialRng(0.05);
         let state = initializeCombatEncounter(makePlayer([DAMAGE_BODY]), makeEnemy(80, 'mind'), [DAMAGE_BODY], 7);
         state = rollEncounterDice(state).state;
         state = setDice(state, ['body', 'heart']);
+        // Seed the fuel: the burst exists ONLY because the affliction does.
+        state = {
+            ...state,
+            enemy: { ...state.enemy, effects: [{ effectId: 'debuff_poison', intensity: 2, remainingDuration: 3, appliedAt: 1, tier: 2 }] },
+        };
         const hpBefore = state.enemy.health;
         const r = draftAndPlay(state, DAMAGE_BODY);
         expect(r.played).toBe(true);
@@ -243,6 +247,17 @@ describe('HP model — a direct-damage card chips HP and spends the die', () => 
         expect(r.state.directDamageDealt).toBeGreaterThan(0);
         // No status landed → the drafted die is spent (no chain).
         expect(getDraftedDie(r.state)?.state).toBe('spent');
+    });
+
+    it('the same RUPTURE on a clean foe bursts 0 — no fuel, no damage (never a raw strike)', () => {
+        mockSequentialRng(0.05);
+        let state = initializeCombatEncounter(makePlayer([DAMAGE_BODY]), makeEnemy(80, 'mind'), [DAMAGE_BODY], 7);
+        state = rollEncounterDice(state).state;
+        state = setDice(state, ['body', 'heart']);
+        const hpBefore = state.enemy.health;
+        const r = draftAndPlay(state, DAMAGE_BODY);
+        expect(r.played).toBe(true);
+        expect(r.state.enemy.health).toBe(hpBefore);
     });
 });
 
@@ -266,16 +281,24 @@ describe('Spec 26b §1 — status-combo loop', () => {
         expect(getDraftedDie(r.state)?.state).toBe('available');
     });
 
-    it('a color-matched advantaged strike deals more HP damage than a disadvantaged off-color one', () => {
+    it('an advantaged color-matched land beats a disadvantaged off-color one in REAL status units', () => {
         mockSequentialRng(0.05);
         const base = () => {
             const s = initializeCombatEncounter(makePlayer([DOT_BODY]), makeEnemy(120, 'mind'), [DOT_BODY], 21);
             return rollEncounterDice(s).state;
         };
+        // THE STRIKE IS DEAD: the read bites the landed STATUS instead —
+        // advantage = +1 intensity; disadvantage = -1 duration (floor 1);
+        // a color match adds +1 duration (R7).
         const adv = draftAndPlay(setDice(base(), ['body', 'heart']), DOT_BODY); // match + advantage
-        const dis = draftAndPlay(setDice(base(), ['mind', 'wild']), DOT_BODY); // off-color + disadvantage
-        // The read + color-match scale the immediate STRIKE damage.
-        expect(adv.state.directDamageDealt).toBeGreaterThan(dis.state.directDamageDealt);
+        const dis = draftAndPlay(setDice(base(), ['mind', 'wild']), DOT_BODY);  // off-color + disadvantage
+        const advPoison = adv.state.enemy.effects.find(e => e.effectId === 'debuff_poison')!;
+        const disPoison = dis.state.enemy.effects.find(e => e.effectId === 'debuff_poison')!;
+        expect(advPoison.intensity).toBeGreaterThan(disPoison.intensity);
+        expect(advPoison.remainingDuration).toBeGreaterThan(disPoison.remainingDuration);
+        // And nobody struck: no direct HP moved on either play.
+        expect(adv.state.directDamageDealt).toBe(0);
+        expect(dis.state.directDamageDealt).toBe(0);
     });
 });
 
@@ -334,7 +357,7 @@ describe('Spec 26b §4 — Signature Skills (Conviction-funded)', () => {
 
     it('scrapping a hand card grants +1 Conviction and discards it', () => {
         mockSequentialRng(0.5);
-        let state = initializeCombatEncounter(makePlayer([DOT_BODY, CONTROL_HEART]), makeEnemy(60), [DOT_BODY, CONTROL_HEART], 6);
+        let state = initializeCombatEncounter(makePlayer([DOT_BODY, CONTROL_CARD]), makeEnemy(60), [DOT_BODY, CONTROL_CARD], 6);
         state = rollEncounterDice(state).state;
         const uid = state.hand[0].uid;
         const before = state.conviction;
@@ -343,14 +366,14 @@ describe('Spec 26b §4 — Signature Skills (Conviction-funded)', () => {
         expect(r.state.hand.find(h => h.uid === uid)).toBeUndefined();
     });
 
-    it('Overwhelming Argument (heart capstone) applies Petrify to the enemy', () => {
+    it('Overwhelming Argument (control capstone) applies BACKFIRE to the enemy (v3 control vocabulary)', () => {
         mockSequentialRng(0.5);
         let state = initializeCombatEncounter(makePlayer([DOT_BODY]), makeEnemy(90, 'heart'), [DOT_BODY], 4);
         state = rollEncounterDice(state).state;
         state = { ...state, conviction: 10 };
         const r = playSignatureSkill(state, 'sig-overwhelming-argument');
         expect(r.state.conviction).toBe(2); // cost 8
-        expect(r.state.enemy.effects.some(e => e.effectId === 'debuff_stagger')).toBe(true);
+        expect(r.state.enemy.effects.some(e => e.effectId === 'debuff_backfire')).toBe(true);
         expect(r.events.some(e => e.kind === 'signature-cast')).toBe(true);
     });
 
@@ -364,26 +387,33 @@ describe('Spec 26b §4 — Signature Skills (Conviction-funded)', () => {
         expect(r.events.some(e => e.kind === 'effect-fizzled')).toBe(true);
     });
 
-    // Funded-path (success) kill-path witness (build-plan Phase 1): the unit
-    // tests above only check the isolated cast; this runs the capstone all the
-    // way to an HP-kill victory so the control path has a population-level
-    // outcome witness, mirroring §11's DoT-only victory below.
-    it('a funded Overwhelming Argument denies the enemy telegraph outright, en route to an HP-kill victory', () => {
+    // Funded-path (success) kill-path witness: the unit tests above only check
+    // the isolated cast; this runs the v3 control loop — BACKFIRE from the
+    // capstone + STAGGER rungs denying the telegraph, the denied rungs feeding
+    // the backfire drip — all the way to an HP-kill victory.
+    it('a funded Overwhelming Argument + full STAGGER denies the telegraph and BACKFIRE drips it down, en route to victory', () => {
         mockSequentialRng(0.05);
         const player = makePlayer([DOT_BODY]);
         const enemy = makeEnemy(30, 'heart');
         let state = initializeCombatEncounter(player, enemy, [DOT_BODY, DOT_BODY, DOT_BODY], 21);
 
-        // Turn 1 — cast the funded capstone; Petrify should deny the enemy's
-        // telegraphed hit outright this phase (no player HP loss).
+        // Turn 1 — cast the funded capstone (BACKFIRE i5 lands guaranteed), then
+        // strip every rung from the telegraph: the denied action turns inward.
         state = rollEncounterDice(state).state;
         state = { ...state, conviction: 10 };
         const healthBeforeCast = state.player.health;
         const cast = playSignatureSkill(state, 'sig-overwhelming-argument');
-        expect(cast.state.enemy.effects.some(e => e.effectId === 'debuff_stagger')).toBe(true);
+        expect(cast.state.enemy.effects.some(e => e.effectId === 'debuff_backfire')).toBe(true);
         expect(cast.events.some(e => e.kind === 'signature-cast')).toBe(true);
-        state = resolveThreatPhase(cast.state).state;
+        const enemyHpBeforePhase = cast.state.enemy.health;
+        const denied = resolveThreatPhase({ ...cast.state, staggerRungs: 99 });
+        state = denied.state;
+        // Fully denied: no player HP lost; BACKFIRE dripped per denied rung.
         expect(state.player.health).toBe(healthBeforeCast);
+        const backfired = denied.events.find(e => e.kind === 'backfired') as { amount: number; rungs: number } | undefined;
+        expect(backfired).toBeDefined();
+        expect(backfired!.amount).toBeGreaterThan(0);
+        expect(state.enemy.health).toBeLessThan(enemyHpBeforePhase);
 
         // Grind the rest out with stacked DoT to a real HP-kill outcome.
         let guard = 0;
@@ -468,34 +498,24 @@ describe('Spec 26b tuning — variety-gated combo + projection + carry', () => {
 
         // Variety: a DoT then a DISTINCT control status — the new status refreshes
         // the die for a genuine combo chain (the Mage-Knight "big turn").
-        let varied = initializeCombatEncounter(makePlayer([DOT_BODY, CONTROL_HEART]), makeEnemy(160, 'mind'), [DOT_BODY, CONTROL_HEART], 7);
+        let varied = initializeCombatEncounter(makePlayer([DOT_BODY, CONTROL_CARD]), makeEnemy(160, 'mind'), [DOT_BODY, CONTROL_CARD], 7);
         varied = rollEncounterDice(varied).state;
         varied = setDice(varied, ['body', 'heart']);
         const dot = draftAndPlay(varied, DOT_BODY);
         expect(dot.events!.some(e => e.kind === 'die-refreshed')).toBe(true);
-        const ctrlEntry = dot.state.hand.find(h => h.cardId === CONTROL_HEART)!;
+        const ctrlEntry = dot.state.hand.find(h => h.cardId === CONTROL_CARD)!;
         const ctrl = playCombatCard(dot.state, { uid: ctrlEntry.uid }, true);
         expect(ctrl.events.some(e => e.kind === 'die-refreshed')).toBe(true);
     });
 
-    it('projectCardImpact previews the strike HP damage (scaled by the read)', () => {
+    it('projectCardImpact advertises NO strike number (spec 32 v3 — the strike is dead)', () => {
         mockSequentialRng(0.5);
         const card = getCard(DOT_BODY)!;
-        // Advantage draft (body vs mind) previews more strike damage than a
-        // disadvantage draft (mind vs body) — the read scales the strike.
-        const adv = (() => {
-            let s = initializeCombatEncounter(makePlayer([DOT_BODY]), makeEnemy(120, 'mind'), [DOT_BODY], 1);
-            s = rollEncounterDice(s).state; s = setDice(s, ['body', 'heart']);
-            return projectCardImpact(draftStanceDie(s, s.dice[0].id).state, card);
-        })();
-        const dis = (() => {
-            let s = initializeCombatEncounter(makePlayer([DOT_BODY]), makeEnemy(120, 'body'), [DOT_BODY], 1);
-            s = rollEncounterDice(s).state; s = setDice(s, ['mind', 'wild']);
-            return projectCardImpact(draftStanceDie(s, s.dice[0].id).state, card);
-        })();
-        expect(adv.track).toBe('dot');
-        expect(adv.amount).toBeGreaterThan(0);
-        expect(adv.amount).toBeGreaterThan(dis.amount);
+        let s = initializeCombatEncounter(makePlayer([DOT_BODY]), makeEnemy(120, 'mind'), [DOT_BODY], 1);
+        s = rollEncounterDice(s).state; s = setDice(s, ['body', 'heart']);
+        const impact = projectCardImpact(draftStanceDie(s, s.dice[0].id).state, card);
+        expect(impact.track).toBe('dot');
+        expect(impact.amount).toBe(0); // the honest numbers live on the FREE/PAID text
     });
 
     it('an unspent drafted die BANKS to the visible Reserve at end of turn (Fate Engine R2)', () => {
@@ -567,15 +587,15 @@ describe('Spec 26b §B/§C/§D — archetype kit, rewards, unlock, difficulty fl
         expect(hpBefore - r.state.enemy.health).toBe(1); // floor(max(1, 0 stacks))
     });
 
-    it('Disarming Plea (heart mercy) charms the enemy and strikes its HP', () => {
+    it('Disarming Plea (heart mercy) applies RAPPORT and lands the disarming hit', () => {
         mockSequentialRng(0.5);
-        let state = initializeCombatEncounter(makePlayer([CONTROL_HEART]), makeEnemy(120, 'body'), [CONTROL_HEART], 1);
+        let state = initializeCombatEncounter(makePlayer([CONTROL_CARD]), makeEnemy(120, 'body'), [CONTROL_CARD], 1);
         state = rollEncounterDice(state).state;
         state = { ...state, conviction: 8 };
         const hpBefore = state.enemy.health;
         const r = playSignatureSkill(state, 'sig-disarming-plea');
-        // Charm (control) lands on the enemy and it takes HP damage.
-        expect(r.state.enemy.effects.some(e => e.effectId === 'debuff_charm')).toBe(true);
+        // RAPPORT (v3 mercy vocabulary) lands on the enemy and it takes the hit.
+        expect(r.state.enemy.effects.some(e => e.effectId === 'debuff_rapport')).toBe(true);
         expect(r.state.enemy.health).toBeLessThan(hpBefore);
     });
 
@@ -700,7 +720,7 @@ describe('0.33.0 — soft control weakens & denies the enemy threat', () => {
 
 describe('Hazard combat — Monte-Carlo sim', () => {
     it('runs 300 seeded combats and reports a coherent outcome distribution', () => {
-        const player = makePlayer([DOT_BODY, CONTROL_HEART, DAMAGE_BODY, BEFRIEND]);
+        const player = makePlayer([DOT_BODY, CONTROL_CARD, DAMAGE_BODY]);
         const enemy = makeEnemy(40);
         const stats = simulateHazardPatternCombat(player, enemy, 300, 1);
         expect(stats.runs).toBe(300);

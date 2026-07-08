@@ -258,8 +258,10 @@ async function bossRoomSequence(
 
     const { combatOutcome } = await arrive(store, act, flags, presetId);
     if (combatOutcome === 'defeat') return 'lost';
-    // A Befriend resolution in the boss fight IS the mercy fork.
-    const outcome = combatOutcome === 'mercy' ? 'spared' : 'slain';
+    // A merciful resolution (Befriend / CAPITULATE / CONCEDE - spec 32 v3 s9)
+    // in the boss fight IS the mercy fork.
+    const outcome = combatOutcome === 'mercy' || combatOutcome === 'capitulate' || combatOutcome === 'concede'
+        ? 'spared' : 'slain';
     setProgress(store, recordBossOutcome(getProgress(store), act.id, outcome));
     return 'won';
 }

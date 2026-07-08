@@ -1,104 +1,168 @@
 /**
- * Hermetic E2E — the CURATED card library (Fate Engine P1 trim, spec 31 §4).
+ * Hermetic E2E — the spec 32 v3 THEMED library shape contract.
  *
- * The 2026-07-05 trim cut the library from 88 cards to the locked-in keepers
- * (owner call: fewer, genuinely distinct cards first — extend from there).
- * This suite is the shape contract: coverage across stance × tier × verb,
- * every mechanic engine-real, the dice layer reachable from cards, and the
- * synergy engine still exercised by a keeper.
+ * The 2026-07-08 overhaul replaced the 49-card curated pool wholesale:
+ * 70 unique cards, 10 self-contained themes × 7, rank ladder 1-6 with
+ * derived rarity, three card types (spell / enchantment / disenchant), and
+ * THE STRIKE IS DEAD at the schema level — no card carries an HP-damage
+ * field, and this suite is the regression gate (spec §1, ledger #1).
  */
+
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 
 import { describe, it, expect } from 'vitest';
 
 import { cardLibrary, getCardById } from '../cards.library';
-import { getCard } from '../../Combat/combat.engine';
+import { rankToRarity, CARD_RANK_NAMES } from '../types';
+import type { Card } from '../types';
 import { COMBAT_REWARD_POOL, STARTING_SKILL_IDS } from '../../Combat/combat.rewards';
-import { COMBAT_DECK_PRESETS, buildPresetDeck } from '../../Combat/combat.deck-presets';
-import { GOLD_CARD_IDS } from '../../Combat/combat.cards';
 
-describe('curated library — shape contract', () => {
-    it('is the locked-in keeper set (49 cards)', () => {
-        expect(cardLibrary.length).toBe(49);
+/** The ten theme tags (spec §6) — every card carries exactly one. */
+const THEMES = [
+    'affliction', 'peroration', 'forge', 'akrasia', 'control',
+    'oracle', 'harvest', 'charm', 'bulwark', 'echo',
+] as const;
+
+function themeOf(card: Card): string | undefined {
+    const themes = (card.tags ?? []).filter(t => (THEMES as readonly string[]).includes(t));
+    return themes.length === 1 ? themes[0] : undefined;
+}
+
+const byTheme = new Map<string, Card[]>(THEMES.map(t => [t, []]));
+for (const card of cardLibrary) {
+    const theme = themeOf(card);
+    if (theme) byTheme.get(theme)!.push(card);
+}
+
+describe('themed library — shape contract (spec 32 v3 §6-7)', () => {
+    it('is exactly 70 unique cards', () => {
+        expect(cardLibrary.length).toBe(70);
         const ids = cardLibrary.map(c => c.id);
-        expect(new Set(ids).size).toBe(ids.length); // no duplicate ids
+        expect(new Set(ids).size).toBe(ids.length);
     });
 
-    it('covers every stance at every tier', () => {
-        for (const tier of [1, 2, 3] as const) {
-            for (const aspect of ['body', 'mind', 'heart'] as const) {
-                const n = cardLibrary.filter(c => c.tier === tier && c.philosophicalAspect === aspect).length;
-                expect(n, `tier ${tier} ${aspect} must have cards`).toBeGreaterThan(0);
-            }
+    it('every card carries exactly one of the ten theme tags', () => {
+        for (const card of cardLibrary) {
+            expect(themeOf(card), `${card.id} must carry exactly one theme tag`).toBeDefined();
         }
     });
 
-    it('keeps the gold trio, the starters, and the mercy line', () => {
-        for (const id of GOLD_CARD_IDS) expect(getCardById(id), id).toBeDefined();
-        for (const id of STARTING_SKILL_IDS) expect(getCardById(id), id).toBeDefined();
-        expect(getCardById('befriend')).toBeDefined();
-        expect(getCardById('peaceful-gesture')).toBeDefined();
+    it('each theme owns exactly 7 cards (10 × 7 = 70)', () => {
+        for (const theme of THEMES) {
+            expect(byTheme.get(theme)!.length, `theme ${theme}`).toBe(7);
+        }
     });
 
-    it('every reward-pool and preset id resolves to a keeper', () => {
+    it('each theme rides the rank recipe: 2 common (1-2), 2 uncommon (3-4), 3 rare (5-6)', () => {
+        for (const theme of THEMES) {
+            const cards = byTheme.get(theme)!;
+            const commons = cards.filter(c => rankToRarity(c.rank) === 'common');
+            const uncommons = cards.filter(c => rankToRarity(c.rank) === 'uncommon');
+            const rares = cards.filter(c => rankToRarity(c.rank) === 'rare');
+            expect(commons.length, `${theme} commons`).toBe(2);
+            expect(uncommons.length, `${theme} uncommons`).toBe(2);
+            expect(rares.length, `${theme} rares`).toBe(3);
+        }
+    });
+
+    it('each theme carries exactly 1 enchantment and 1 disenchant (both rare)', () => {
+        for (const theme of THEMES) {
+            const cards = byTheme.get(theme)!;
+            const enchantments = cards.filter(c => c.cardType === 'enchantment');
+            const disenchants = cards.filter(c => c.cardType === 'disenchant');
+            expect(enchantments.length, `${theme} enchantments`).toBe(1);
+            expect(disenchants.length, `${theme} disenchants`).toBe(1);
+            expect(rankToRarity(enchantments[0].rank)).toBe('rare');
+            expect(rankToRarity(disenchants[0].rank)).toBe('rare');
+        }
+    });
+
+    it('every rank is a named rung on the ladder', () => {
+        for (const card of cardLibrary) {
+            expect(CARD_RANK_NAMES[card.rank], `${card.id} rank ${card.rank}`).toBeTruthy();
+        }
+    });
+});
+
+describe('themed library — FREE/PAID anatomy (spec §2)', () => {
+    it('every SPELL carries an authored FREE rider with substance', () => {
+        for (const card of cardLibrary.filter(c => c.cardType === 'spell')) {
+            expect(card.free, `${card.id} (spell) must author a FREE line`).toBeDefined();
+            const total = Object.values(card.free!).reduce<number>((n, v) => {
+                if (typeof v === 'number') return n + v;
+                if (v === true) return n + 1;
+                if (typeof v === 'object' && v !== null) return n + 1; // applyEffect
+                return n;
+            }, 0);
+            expect(total, `${card.id} FREE line must not be empty`).toBeGreaterThan(0);
+        }
+    });
+
+    it('enchantments and disenchants are PAID-only (no FREE line — the die is the commitment)', () => {
+        for (const card of cardLibrary.filter(c => c.cardType !== 'spell')) {
+            expect(card.free, `${card.id} (${card.cardType}) must not carry a FREE line`).toBeUndefined();
+        }
+    });
+
+    it('enchantments sit player-side; disenchants attach to the enemy', () => {
+        for (const card of cardLibrary.filter(c => c.cardType === 'enchantment')) {
+            expect(card.targetType, `${card.id}`).toBe('self');
+        }
+        for (const card of cardLibrary.filter(c => c.cardType === 'disenchant')) {
+            expect(card.targetType, `${card.id}`).toBe('enemy');
+        }
+    });
+});
+
+describe('themed library — THE STRIKE IS DEAD (spec §1 schema gate)', () => {
+    it("the library source never mentions 'basePower' or 'chipHp'", () => {
+        // Schema-level regression gate: the fields were DELETED from Card/
+        // CardRider, so any reintroduction is a compile error — this string
+        // sweep additionally catches comments, casts, and `as any` smuggling.
+        const source = readFileSync(resolve(__dirname, '..', 'cards.library.ts'), 'utf8');
+        expect(source.includes('basePower')).toBe(false);
+        expect(source.includes('chipHp')).toBe(false);
+    });
+
+    it('no card object carries an HP-damage field at runtime either', () => {
+        for (const card of cardLibrary) {
+            const record = card as unknown as Record<string, unknown>;
+            expect(record.basePower, `${card.id}`).toBeUndefined();
+            expect(record.chipHp, `${card.id}`).toBeUndefined();
+            expect(record.scalingMultiplier, `${card.id}`).toBeUndefined();
+        }
+    });
+});
+
+describe('themed library — id hygiene and provenance', () => {
+    it('every card has the v3 required shape', () => {
+        for (const card of cardLibrary) {
+            expect(card.id).toMatch(/^[a-z][a-z0-9-]*$/);
+            expect([1, 2, 3]).toContain(card.tier);
+            expect([1, 2, 3, 4, 5, 6]).toContain(card.rank);
+            expect(['spell', 'enchantment', 'disenchant']).toContain(card.cardType);
+            expect(['self', 'enemy']).toContain(card.targetType);
+            expect(['body', 'mind', 'heart']).toContain(card.philosophicalAspect);
+            expect(['fallacy', 'paradox']).toContain(card.category);
+            expect(card.addedIn).toBe('2026-07-08');
+        }
+    });
+
+    it('the starting pair resolves and teaches a mechanic each', () => {
+        expect(STARTING_SKILL_IDS).toEqual(['slippery-slope', 'brace-for-impact']);
+        for (const id of STARTING_SKILL_IDS) {
+            const card = getCardById(id);
+            expect(card, id).toBeDefined();
+            expect(card!.rank).toBe(1); // starters are Doxa
+            expect(card!.tags).toContain('starter');
+        }
+    });
+
+    it('the reward pool is the whole 70-card library and every id resolves', () => {
+        expect(COMBAT_REWARD_POOL.length).toBe(70);
         for (const id of COMBAT_REWARD_POOL) {
             expect(getCardById(id), `reward pool: ${id}`).toBeDefined();
-        }
-        for (const preset of Object.values(COMBAT_DECK_PRESETS)) {
-            for (const id of preset.cardIds) {
-                expect(getCardById(id), `${preset.id}: ${id}`).toBeDefined();
-            }
-            expect(buildPresetDeck(preset.id).length).toBeGreaterThan(preset.cardIds.length - 1);
-        }
-    });
-});
-
-describe('curated library — the dice layer is reachable from cards (spec 31 §1)', () => {
-    it('carries thresholds, dieBonus lines, fate cards, and die-manipulation verbs', () => {
-        const thresholds = cardLibrary.filter(c => c.threshold).length;
-        const dieBonuses = cardLibrary.filter(c => c.dieBonus).length;
-        const fates = cardLibrary.filter(c => c.fate).length;
-        const manip = cardLibrary.filter(c => (c.specialMechanics ?? []).some(m =>
-            ['convert_die_color', 'bank_spent_die', 'create_temporary_die', 'grant_pip', 'refresh_die', 'reroll_spent'].includes(m.kind))).length;
-        const react = cardLibrary.filter(c => (c.specialMechanics ?? []).some(m => m.kind === 'react')).length;
-        expect(thresholds).toBeGreaterThanOrEqual(6);
-        expect(dieBonuses).toBeGreaterThanOrEqual(6);
-        expect(fates).toBeGreaterThanOrEqual(4);
-        expect(manip).toBeGreaterThanOrEqual(5);
-        expect(react).toBeGreaterThanOrEqual(1);
-    });
-
-    it('every die-interaction line prints on the projected card in real units', () => {
-        for (const skill of cardLibrary) {
-            const card = getCard(skill.id)!;
-            const lines = skill.threshold || skill.dieBonus || skill.fate
-                || (skill.specialMechanics ?? []).some(m =>
-                    ['convert_die_color', 'bank_spent_die', 'create_temporary_die', 'grant_pip', 'refresh_die', 'reroll_spent', 'react'].includes(m.kind));
-            if (lines) {
-                expect(card.dieLines?.length ?? 0, `${skill.id} must print its die lines`).toBeGreaterThan(0);
-            }
-            if (skill.threshold) {
-                expect(card.bottomActionText).toContain(`×${skill.threshold.count}`);
-            }
-        }
-    });
-
-    it('rider fields carry only real units the engine applies', () => {
-        for (const skill of cardLibrary) {
-            const riders = [skill.threshold?.rider, skill.dieBonus?.rider, skill.fate?.rider].filter(Boolean);
-            for (const r of riders) {
-                const total = Object.values(r!).reduce<number>((n, v) => n + (typeof v === 'number' ? v : v === true ? 1 : 0), 0);
-                expect(total, `${skill.id} rider must not be empty`).toBeGreaterThan(0);
-            }
-        }
-    });
-});
-
-describe('curated library — the synergy engine stays exercised', () => {
-    it('at least one keeper carries a target-side synergy predicate', () => {
-        const withSynergy = cardLibrary.filter(c => c.synergy?.predicate?.on === 'target');
-        expect(withSynergy.length).toBeGreaterThanOrEqual(1);
-        for (const c of withSynergy) {
-            expect(c.synergy!.predicate!.effectId.startsWith('debuff_') || c.synergy!.predicate!.effectId.startsWith('buff_')).toBe(true);
         }
     });
 });

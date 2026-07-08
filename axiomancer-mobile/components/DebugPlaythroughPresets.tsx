@@ -76,21 +76,21 @@ export function DebugPlaythroughPresets() {
                 availableStatPoints: 0, // All points spent
                 baseStats: { heart: 15, body: 15, mind: 15 }, // High balanced stats
                 knownSkills: [
-                    // Tier 1 skills
-                    'ad-hominem-strike',
-                    'false-dilemma',
-                    'appeal-to-pity',
-                    'achilles-gambit',
-                    'liars-echo',
-                    'ship-of-theseus',
-                    // Tier 2 skills
-                    'mob-appeal',
+                    // Spec 32 v3 — a cross-theme endgame spread: commons,
+                    // uncommons, and the rare finishers/persistents.
+                    'slippery-slope',
+                    'straw-mans-jab',
+                    'festering-argument',
+                    'currys-conversion',
+                    'resonance-detonation',
+                    'venom-and-vein',
+                    'suppurating-curse',
+                    'brace-for-impact',
+                    'nettle-cloak',
+                    'measured-answer',
+                    'the-adamant-wall',
+                    'zenos-half-step',
                     'undistributed-middle',
-                    'eternal-regress',
-                    // Tier 3 skills
-                    'sorites-cascade',
-                    'straw-giant',
-                    'bootstrap-paradox',
                 ],
                 inventory: endgameInventory,
                 currency: 500,
