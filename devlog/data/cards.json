@@ -33,7 +33,10 @@
     "v": "Lv 10"
    }
   ],
-  "lines": []
+  "lines": [
+   "FREE (3 rounds) — Draw 1 card each time you deny an enemy turn.",
+   "PAID (rest of combat) — Draw 1 card each time you deny an enemy turn."
+  ]
  },
  {
   "id": "ad-nauseam",
@@ -149,7 +152,10 @@
     "v": "Lv 10"
    }
   ],
-  "lines": []
+  "lines": [
+   "FREE (3 rounds) — Every kindled or floating die arrives with +1 pip.",
+   "PAID (rest of combat) — Every kindled or floating die arrives with +1 pip."
+  ]
  },
  {
   "id": "arrow-paradox",
@@ -226,7 +232,10 @@
     "v": "Lv 10"
    }
   ],
-  "lines": []
+  "lines": [
+   "FREE (3 rounds) — Drain 1 HP from the enemy for every Soul you gain.",
+   "PAID (rest of combat) — Drain 1 HP from the enemy for every Soul you gain."
+  ]
  },
  {
   "id": "bootstrap-loop",
@@ -380,7 +389,10 @@
     "v": "Lv 12"
    }
   ],
-  "lines": []
+  "lines": [
+   "FREE (3 rounds) — While you hold 4+ Premises, the enemy stays marked.",
+   "PAID (rest of combat) — While you hold 4+ Premises, the enemy stays marked. (attaches to the enemy)"
+  ]
  },
  {
   "id": "cassandras-burden",
@@ -536,7 +548,10 @@
     "v": "Lv 10"
    }
   ],
-  "lines": []
+  "lines": [
+   "FREE (3 rounds) — While Fallen, your status applications land at +1 intensity.",
+   "PAID (rest of combat) — While Fallen, your status applications land at +1 intensity."
+  ]
  },
  {
   "id": "crumbling-resolve",
@@ -572,7 +587,10 @@
     "v": "Lv 12"
    }
   ],
-  "lines": []
+  "lines": [
+   "FREE (3 rounds) — A fully-blocked attack costs the enemy a rung on its next telegraph.",
+   "PAID (rest of combat) — A fully-blocked attack costs the enemy a rung on its next telegraph. (attaches to the enemy)"
+  ]
  },
  {
   "id": "currys-conversion",
@@ -728,7 +746,10 @@
     "v": "Lv 12"
    }
   ],
-  "lines": []
+  "lines": [
+   "FREE (3 rounds) — Every kindled or floating die you spend marks the enemy.",
+   "PAID (rest of combat) — Every kindled or floating die you spend marks the enemy. (attaches to the enemy)"
+  ]
  },
  {
   "id": "ex-nihilo",
@@ -886,7 +907,10 @@
     "v": "Lv 12"
    }
   ],
-  "lines": []
+  "lines": [
+   "FREE (3 rounds) — Every omen that hits marks the foe.",
+   "PAID (rest of combat) — Every omen that hits marks the foe. (attaches to the enemy)"
+  ]
  },
  {
   "id": "festering-argument",
@@ -1083,7 +1107,10 @@
     "v": "Lv 10"
    }
   ],
-  "lines": []
+  "lines": [
+   "FREE (3 rounds) — Every THORNS reflection also marks the enemy.",
+   "PAID (rest of combat) — Every THORNS reflection also marks the enemy."
+  ]
  },
  {
   "id": "irresistible-grace",
@@ -1119,7 +1146,10 @@
     "v": "Lv 10"
    }
   ],
-  "lines": []
+  "lines": [
+   "FREE (3 rounds) — Your SWAY stops decaying, and each new gesture of it lands harder.",
+   "PAID (rest of combat) — Your SWAY stops decaying, and each new gesture of it lands harder."
+  ]
  },
  {
   "id": "measured-answer",
@@ -1234,7 +1264,10 @@
     "v": "Lv 12"
    }
   ],
-  "lines": []
+  "lines": [
+   "FREE (3 rounds) — Every self-debuff you take also lands one stack on the enemy.",
+   "PAID (rest of combat) — Every self-debuff you take also lands one stack on the enemy. (attaches to the enemy)"
+  ]
  },
  {
   "id": "mirror-of-longing",
@@ -1270,7 +1303,10 @@
     "v": "Lv 12"
    }
   ],
-  "lines": []
+  "lines": [
+   "FREE (3 rounds) — Damage your defenses prevent is converted into SWAY.",
+   "PAID (rest of combat) — Damage your defenses prevent is converted into SWAY. (attaches to the enemy)"
+  ]
  },
  {
   "id": "mounting-case",
@@ -1590,7 +1626,10 @@
     "v": "Lv 10"
    }
   ],
-  "lines": []
+  "lines": [
+   "FREE (3 rounds) — +1 Premise on the first card you play each turn.",
+   "PAID (rest of combat) — +1 Premise on the first card you play each turn."
+  ]
  },
  {
   "id": "prophecy-fulfilled",
@@ -1665,7 +1704,10 @@
     "v": "Lv 12"
    }
   ],
-  "lines": []
+  "lines": [
+   "FREE (3 rounds) — Enemy telegraphs enter play one rung lower.",
+   "PAID (rest of combat) — Enemy telegraphs enter play one rung lower. (attaches to the enemy)"
+  ]
  },
  {
   "id": "red-herring",
@@ -1823,7 +1865,10 @@
     "v": "Lv 10"
    }
   ],
-  "lines": []
+  "lines": [
+   "FREE (3 rounds) — The first spell you cast each turn gains ECHO (fires twice).",
+   "PAID (rest of combat) — The first spell you cast each turn gains ECHO (fires twice)."
+  ]
  },
  {
   "id": "second-thoughts",
@@ -2138,7 +2183,10 @@
     "v": "Lv 12"
    }
   ],
-  "lines": []
+  "lines": [
+   "FREE (3 rounds) — Every ECHO or REPRISE drips 2 damage to the enemy.",
+   "PAID (rest of combat) — Every ECHO or REPRISE drips 2 damage to the enemy. (attaches to the enemy)"
+  ]
  },
  {
   "id": "suppurating-curse",
@@ -2174,7 +2222,10 @@
     "v": "Lv 12"
    }
   ],
-  "lines": []
+  "lines": [
+   "FREE (3 rounds) — Doubles the total enemy damage-over-time each round.",
+   "PAID (rest of combat) — Doubles the total enemy damage-over-time each round. (attaches to the enemy)"
+  ]
  },
  {
   "id": "sweet-poison",
@@ -2408,7 +2459,10 @@
     "v": "Lv 10"
    }
   ],
-  "lines": []
+  "lines": [
+   "FREE (3 rounds) — The next enemy stance is always revealed, and your omens hit harder.",
+   "PAID (rest of combat) — The next enemy stance is always revealed, and your omens hit harder."
+  ]
  },
  {
   "id": "the-overtake",
@@ -2525,7 +2579,10 @@
     "v": "Lv 12"
    }
   ],
-  "lines": []
+  "lines": [
+   "FREE (3 rounds) — Enemy afflictions expire one turn sooner (faster Soul churn).",
+   "PAID (rest of combat) — Enemy afflictions expire one turn sooner (faster Soul churn). (attaches to the enemy)"
+  ]
  },
  {
   "id": "tu-quoque",
@@ -2642,7 +2699,10 @@
     "v": "Lv 10"
    }
   ],
-  "lines": []
+  "lines": [
+   "FREE (3 rounds) — Every bleed or poison you apply lands at +1 intensity.",
+   "PAID (rest of combat) — Every bleed or poison you apply lands at +1 intensity."
+  ]
  },
  {
   "id": "winnowing",

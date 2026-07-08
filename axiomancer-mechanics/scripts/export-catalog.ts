@@ -31,6 +31,7 @@ import { join } from 'node:path';
 
 import { cardLibrary } from '../src/Cards/cards.library';
 import { CARD_RANK_NAMES, rankToRarity } from '../src/Cards/types';
+import { FREE_ENCHANT_ROUNDS } from '../src/Game/game-mechanics.constants';
 import { mechanicText, riderText } from '../src/Combat/combat.cards';
 import { EnemyLibrary } from '../src/Enemy/enemy.library';
 import { effectsLibrary, lookupEffect } from '../src/Effects/effects.library';
@@ -135,6 +136,14 @@ function cardStats(c: any): { chips: Chip[]; lines: string[] } {
     if (c.learningRequirement?.level) chips.push({ k: 'Learn', v: `Lv ${c.learningRequirement.level}` });
 
     const lines: string[] = [];
+    // Spec 32 v4 — enchant/disenchant passives live in engine hooks; their authored
+    // `persistentEffect` summary is the only card-facing description. Render it on
+    // both lines: FREE grants it timed (a few rounds), PAID makes it permanent.
+    if ((c.cardType === 'enchantment' || c.cardType === 'disenchant') && c.persistentEffect) {
+        const target = c.cardType === 'disenchant' ? ' (attaches to the enemy)' : '';
+        lines.push(`FREE (${FREE_ENCHANT_ROUNDS} rounds) — ${c.persistentEffect}`);
+        lines.push(`PAID (rest of combat) — ${c.persistentEffect}${target}`);
+    }
     if (c.free) lines.push(`FREE — ${riderText(c.free)}`);
     for (const ce of c.combatEffects ?? []) {
         const nm = lookupEffect(ce.effectId)?.name ?? ce.effectId;

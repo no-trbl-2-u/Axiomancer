@@ -289,18 +289,22 @@ export function toCombatCard(cardId: string, lookupSkill: CardLookup, lookupEffe
     const persistent = skill.cardType === 'enchantment' || skill.cardType === 'disenchant';
 
     const paid = paidText(skill, lookupEffect);
+    // Spec 32 v4 — an enchant/disenchant's passive lives in engine hooks, so its
+    // authored one-line summary (`persistentEffect`) is what the card prints; fall
+    // back to the effect-derived text only if a card is missing the summary.
+    const passive = persistent ? (skill.persistentEffect ?? paid) : paid;
 
     // FREE line — the authored dieless rider (spells only). Spec 32 v4: persistent
     // cards get a dieless FREE line that grants a TIMED (FREE_ENCHANT_ROUNDS-round)
     // instance of the same passive; the PAID line makes it permanent.
     const topActionText = persistent
-        ? `FREE — ${paid} for ${FREE_ENCHANT_ROUNDS} rounds (timed). (${rankLabel(skill)})`
+        ? `FREE (${FREE_ENCHANT_ROUNDS} rounds) — ${passive} (${rankLabel(skill)})`
         : skill.free
             ? `FREE — ${riderText(skill.free)}. (${rankLabel(skill)})`
             : `FREE — no effect. (${rankLabel(skill)})`;
 
     const bottomActionText = persistent
-        ? `PAID — ${paid} for the rest of combat. Costs 1 die.${skill.cardType === 'disenchant' ? ' Attaches to the enemy.' : ''}`
+        ? `PAID (rest of combat) — ${passive} Costs 1 die.${skill.cardType === 'disenchant' ? ' Attaches to the enemy.' : ''}`
         : `PAID — ${paid}${preview > 0 ? ` (${preview} HP over its run)` : ''}. Costs 1 die.`;
 
     // Printed DIE LINES, generated from the riders in real units.

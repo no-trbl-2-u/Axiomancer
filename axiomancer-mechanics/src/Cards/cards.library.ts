@@ -908,6 +908,7 @@ const theOraclesEye: Card = {
 
 const fatedCourse: Card = {
     id: 'fated-course',
+    persistentEffect: 'Every omen that hits marks the foe.',
     name: 'Fated Course',
     category: 'paradox',
     philosophicalAspect: 'mind',
@@ -1022,6 +1023,7 @@ const theReaping: Card = {
 
 const boneOrchard: Card = {
     id: 'bone-orchard',
+    persistentEffect: 'Drain 1 HP from the enemy for every Soul you gain.',
     name: 'Bone Orchard',
     category: 'fallacy',
     philosophicalAspect: 'mind',
@@ -1038,6 +1040,7 @@ const boneOrchard: Card = {
 
 const theTithe: Card = {
     id: 'the-tithe',
+    persistentEffect: 'Enemy afflictions expire one turn sooner (faster Soul churn).',
     name: 'The Tithe',
     category: 'fallacy',
     philosophicalAspect: 'mind',
@@ -1165,6 +1168,7 @@ const heartOfTheMatter: Card = {
 
 const irresistibleGrace: Card = {
     id: 'irresistible-grace',
+    persistentEffect: 'Your SWAY stops decaying, and each new gesture of it lands harder.',
     name: 'Irresistible Grace',
     category: 'paradox',
     philosophicalAspect: 'heart',
@@ -1184,6 +1188,7 @@ const irresistibleGrace: Card = {
 
 const mirrorOfLonging: Card = {
     id: 'mirror-of-longing',
+    persistentEffect: 'Damage your defenses prevent is converted into SWAY.',
     name: 'Mirror of Longing',
     category: 'paradox',
     philosophicalAspect: 'heart',
@@ -1300,6 +1305,7 @@ const theAdamantWall: Card = {
 
 const hedgehogsDilemma: Card = {
     id: 'hedgehogs-dilemma',
+    persistentEffect: 'Every THORNS reflection also marks the enemy.',
     name: "Hedgehog's Dilemma",
     category: 'paradox',
     philosophicalAspect: 'body',
@@ -1316,6 +1322,7 @@ const hedgehogsDilemma: Card = {
 
 const crumblingResolve: Card = {
     id: 'crumbling-resolve',
+    persistentEffect: 'A fully-blocked attack costs the enemy a rung on its next telegraph.',
     name: 'Crumbling Resolve',
     category: 'fallacy',
     philosophicalAspect: 'body',
@@ -1451,6 +1458,7 @@ const ouroboros: Card = {
 
 const resonantChamber: Card = {
     id: 'resonant-chamber',
+    persistentEffect: 'The first spell you cast each turn gains ECHO (fires twice).',
     name: 'Resonant Chamber',
     category: 'paradox',
     philosophicalAspect: 'mind',
@@ -1467,6 +1475,7 @@ const resonantChamber: Card = {
 
 const stuckInTheirHead: Card = {
     id: 'stuck-in-their-head',
+    persistentEffect: 'Every ECHO or REPRISE drips 2 damage to the enemy.',
     name: 'Stuck in Their Head',
     category: 'fallacy',
     philosophicalAspect: 'heart',

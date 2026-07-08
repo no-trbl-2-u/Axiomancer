@@ -105,6 +105,12 @@ describe('themed library — FREE/PAID anatomy (spec §2)', () => {
         }
     });
 
+    it('every enchantment and disenchant carries a persistentEffect summary — spec 32 v4 (its hooked passive is otherwise invisible to the card UI + catalog)', () => {
+        for (const card of cardLibrary.filter(c => c.cardType !== 'spell')) {
+            expect(card.persistentEffect, `${card.id} (${card.cardType}) must carry a one-line persistentEffect summary`).toBeTruthy();
+        }
+    });
+
     it('enchantments sit player-side; disenchants attach to the enemy', () => {
         for (const card of cardLibrary.filter(c => c.cardType === 'enchantment')) {
             expect(card.targetType, `${card.id}`).toBe('self');
