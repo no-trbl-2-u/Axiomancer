@@ -31,7 +31,7 @@ import {
     discardCombatCard, handCards, getFloatingDiceColors, getDraftedDie,
 } from '../combat.engine';
 import { FLOATING_DICE_CAP } from '../combat.dice';
-import { RUPTURE_BURST_CAP, THREAT_RUNGS } from '../effects';
+import { REAP_ALL_BURST_CAP, THREAT_RUNGS } from '../effects';
 import { buildPresetDeck, COMBAT_DECK_PRESET_ORDER } from '../combat.deck-presets';
 import type {
     CombatDieColor, CombatEncounterState, CombatEvent, CombatManaDie, CombatThreatPhase,
@@ -96,7 +96,7 @@ function customPhases(stances: ('heart' | 'body' | 'mind')[], damage = 6): Comba
 // ── FLOATING DICE — the live tray (spec 32 v3 §5) ────────────────────────────
 
 describe('FLOATING DICE — forge, spend-forever, cap, exemptions', () => {
-    const FORGE = 'ex-nihilo'; // mind spell: FORGE (color of the powering die)
+    const FORGE = 'ex-nihilo'; // mind spell: FORGE a WILD floating die (v3 rework)
 
     it('FORGE joins the tray NOW, persists into the next turn, and is draft-exempt', () => {
         mockSequentialRng(0.05);
@@ -104,7 +104,7 @@ describe('FLOATING DICE — forge, spend-forever, cap, exemptions', () => {
         const res = playFromHand(state, FORGE);
         const floated = res.events.find(e => e.kind === 'die-floated') as { dieId: string; color: string } | undefined;
         expect(floated).toBeDefined();
-        expect(floated!.color).toBe('mind'); // color of the powering die
+        expect(floated!.color).toBe('wild'); // ex-nihilo forges a WILD die (v3 rework)
         // In the tray NOW (spendable this turn) and in the persistent pool.
         expect(res.state.dice.some(d => d.id === floated!.dieId && d.floating)).toBe(true);
         expect(res.state.floatingDice?.map(d => d.id)).toEqual([floated!.dieId]);
@@ -119,7 +119,7 @@ describe('FLOATING DICE — forge, spend-forever, cap, exemptions', () => {
         expect(draft.state.draftedDieId).toBeNull();
 
         // Save-back surface for the character record.
-        expect(getFloatingDiceColors(state)).toEqual(['mind']);
+        expect(getFloatingDiceColors(state)).toEqual(['wild']);
     });
 
     it('spending a floating die removes it FOREVER (refresh effects cannot save it)', () => {
@@ -333,7 +333,7 @@ describe('SOULS — expiry yields, REAP spends, REAP-all bursts under the cap', 
 
     it('REAP fizzles underfunded; funded, it spends the Souls and fires (draw + KINDLE)', () => {
         mockSequentialRng(0.05);
-        const GLEAN = 'the-gleaners-due'; // REAP 3: KINDLE(mind) + draw 2
+        const GLEAN = 'the-gleaners-due'; // REAP cost 2: KINDLE(mind) + draw 2 + 1 Soul back
         const DOT = 'slippery-slope';
         const deck = [GLEAN, GLEAN, GLEAN, GLEAN, GLEAN, DOT, DOT, DOT, DOT];
         const broke = openAndDraft(makePlayer([GLEAN, DOT]), makeEnemy(300, 'mind'), deck, 'mind');
@@ -345,7 +345,7 @@ describe('SOULS — expiry yields, REAP spends, REAP-all bursts under the cap', 
         funded = { ...funded, souls: 3 };
         funded = discardCombatCard(funded, funded.hand[1].uid).state; // room for the draws
         const res = playFromHand(funded, GLEAN);
-        expect(res.state.souls).toBe(0);
+        expect(res.state.souls).toBe(2); // 3 − cost 2 + 1 Soul back ("a coin pressed back")
         expect(res.events.some(e => e.kind === 'reaped')).toBe(true);
         expect(res.events.some(e => e.kind === 'die-forged')).toBe(true); // KINDLE joins the Reserve
         expect(res.state.reserve?.some(d => d.color === 'mind' && d.temporary)).toBe(true);
@@ -354,18 +354,18 @@ describe('SOULS — expiry yields, REAP spends, REAP-all bursts under the cap', 
         expect(drawn!.cards.length).toBe(2);
     });
 
-    it('REAP-all spends EVERY Soul and the burst respects RUPTURE_BURST_CAP', () => {
+    it('REAP-all spends EVERY Soul and the burst respects REAP_ALL_BURST_CAP', () => {
         mockSequentialRng(0.05);
-        const REAP = 'the-reaping'; // REAP all: 2 per Soul
-        let state = openAndDraft(makePlayer([REAP]), makeEnemy(300, 'body'), [REAP, REAP, REAP], 'body');
-        state = { ...state, souls: 50 };
+        const REAP = 'the-reaping'; // REAP all: 4 per Soul (v3 rework)
+        let state = openAndDraft(makePlayer([REAP]), makeEnemy(600, 'body'), [REAP, REAP, REAP], 'body');
+        state = { ...state, souls: 60 };
         const hpBefore = state.enemy.health;
         const res = playFromHand(state, REAP);
         const reaped = res.events.find(e => e.kind === 'reaped') as { soulsSpent: number; amount: number };
-        expect(reaped.soulsSpent).toBe(50);
-        expect(reaped.amount).toBe(RUPTURE_BURST_CAP); // 2×50 = 100 → capped at 80
+        expect(reaped.soulsSpent).toBe(60);
+        expect(reaped.amount).toBe(REAP_ALL_BURST_CAP); // 4×60 = 240 → capped at 200
         expect(res.state.souls).toBe(0);
-        expect(hpBefore - res.state.enemy.health).toBe(RUPTURE_BURST_CAP);
+        expect(hpBefore - res.state.enemy.health).toBe(REAP_ALL_BURST_CAP);
     });
 });
 

@@ -126,7 +126,10 @@ describe('AMPLIFICATION — the combo registry is surfaced honestly', () => {
 // ── RUPTURE — consume ALL afflictions, deal the pending total ────────────────
 
 describe('RUPTURE — detonate the foe afflictions for the pending total', () => {
-    const RUP = 'resonance-detonation';
+    // A PLAIN rupture card (no bonusPct) so `burst === projectRupture` — the
+    // projection-honesty invariant. (resonance-detonation/the-overtake carry a
+    // deliberate bonusPct amplifier and would burst ABOVE the pending total.)
+    const RUP = 'peroratio-interrupta';
 
     it('strips ALL afflictions, bursts for projectRupture, and yields Souls per instance', () => {
         mockSequentialRng(0.05);

@@ -975,6 +975,25 @@
         "support",
         "non-card"
       ]
+    },
+    {
+      "id": "buff_grace_momentum",
+      "name": "Grace Momentum",
+      "description": "Every round your resolve holds unshaken, it argues harder than the last. Mercy compounds.",
+      "type": "buff",
+      "category": "advantage",
+      "duration": 99,
+      "stacking": "intensity",
+      "payload": {
+        "outgoingSwayGainMulPct": 12,
+        "intensityCapPct": 100
+      },
+      "tier": 3,
+      "tags": [
+        "support",
+        "non-card",
+        "charm"
+      ]
     }
   ]
 }

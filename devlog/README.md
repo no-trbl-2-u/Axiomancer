@@ -1,20 +1,16 @@
 # DevLog
 
 A private, self-contained site served from this one directory. `index.html` is a
-**hub** with four links:
+**hub** with two links:
 
-- **Cards** (`cards.html`) — every combat card: name, painting, and raw stats
-  (stance, type, tier, target, power, and the mechanical effects it applies).
-- **Enemies** (`enemies.html`) — every foe: portrait, name, stats, and attacks
-  (signature skills + how its AI fights).
-- **Effects** (`effects.html`) — every live status effect: name, board glyph,
-  and raw stats (type, category, tier, duration, stacking, and payload
-  modifiers).
+- **Catalog** (`catalog.html`) — one HTML file containing every combat card,
+  enemy, and live status effect, with inline CSS and inline JavaScript. It has no
+  separate catalog page, script file, or stylesheet.
 - **DevLog** (`log.html`) — the accumulating, one-visual-entry-per-day
   development log.
 
-The **catalog** pages (Cards/Enemies/Effects) are generated from the game's
-canonical libraries; the **DevLog** is one **visual** entry per day: a headline,
+The **catalog** (`catalog.html`) is generated from the game's canonical
+libraries; the **DevLog** is one **visual** entry per day: a headline,
 categorized work-item cards (each with *what* changed and *why*), rendered code
 diffs for engine/mechanics work, and before/after screenshots for UI work. The
 nightly `/digest` skill authors a structured markdown entry;
@@ -22,10 +18,10 @@ nightly `/digest` skill authors a structured markdown entry;
 Everything served here — markdown source, built HTML, copied art — is committed;
 no build runs on the host.
 
-## Catalog pages (Cards / Enemies / Effects)
+## Catalog (`catalog.html`)
 
-These are **generated from the mechanics engine**, so they never drift from what
-the game actually ships:
+It is **generated from the mechanics engine**, so it never drifts from what the
+game actually ships:
 
 - `scripts/export-catalog.ts` (run via `npm run catalog:export`, ts-node) reads
   `axiomancer-mechanics` (`cards.library`, `enemy.library`, the effect libraries)
@@ -34,8 +30,8 @@ the game actually ships:
   `assets/catalog/{cards,enemies}/`. This is the one place the art-free mechanics
   package meets the mobile art files.
 - `scripts/build-catalog.mjs` (`npm run catalog:build`, zero-dep) renders those
-  JSON files into `cards.html` / `enemies.html` / `effects.html` using the shared
-  theme in `scripts/devlog-shell.mjs`.
+  JSON files into one `catalog.html` document with inline CSS and inline
+  JavaScript. Cards, enemies, and effects are sections in the same file.
 
 Effect **glyphs** reuse the mobile combat board's presentation mapping
 (`statusGlyphs.ts`); deprecated-tagged effects are omitted.

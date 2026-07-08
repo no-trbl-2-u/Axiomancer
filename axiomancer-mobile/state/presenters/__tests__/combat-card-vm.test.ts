@@ -75,7 +75,7 @@ describe('faceStats — honest real-unit faces', () => {
         const f = faceStats(card, skill);
         expect(f.kind).toBe('reap');
         expect(f.heroText).toBe('all Souls');
-        expect(f.heroSub).toBe('2 per Soul'); // burstPerSoul — a real authored unit
+        expect(f.heroSub).toBe('4 per Soul'); // burstPerSoul — a real authored unit (v3 rework: 2 → 4)
     });
     it('Venom and Vein (enchantment) → persistent, PAID only', () => {
         const { card, skill } = cardOf('venom-and-vein');

@@ -50,6 +50,12 @@ export interface CliFlags {
     combatPolicy?: string;
     combatMaxTurns?: number;
     combatSeed?: number;
+    /** Test/debug: force a specific `ENEMY_REGISTRY` slug at the node named by
+     *  `combatEnemyNode`, overriding that node's authored encounter enemy. Used
+     *  by the route-audit e2e to guarantee a deterministic combat DEFEAT (the
+     *  impossible-tier enemy) independent of card balance. */
+    combatEnemy?: string;
+    combatEnemyNode?: string;
 }
 
 export function parseArgv(args: string[]): CliFlags {
@@ -143,10 +149,26 @@ export function parseArgv(args: string[]): CliFlags {
             if (!next || next.startsWith('--')) throw new Error('--combat-seed requires a number.');
             flags.combatSeed = Number(next);
             i += 2;
+        } else if (arg.startsWith('--combat-enemy=')) {
+            flags.combatEnemy = arg.slice('--combat-enemy='.length);
+            i++;
+        } else if (arg === '--combat-enemy') {
+            const next = args[i + 1];
+            if (!next || next.startsWith('--')) throw new Error('--combat-enemy requires an enemy slug.');
+            flags.combatEnemy = next;
+            i += 2;
+        } else if (arg.startsWith('--combat-enemy-node=')) {
+            flags.combatEnemyNode = arg.slice('--combat-enemy-node='.length);
+            i++;
+        } else if (arg === '--combat-enemy-node') {
+            const next = args[i + 1];
+            if (!next || next.startsWith('--')) throw new Error('--combat-enemy-node requires a node id.');
+            flags.combatEnemyNode = next;
+            i += 2;
         } else {
             throw new Error(
                 `Unknown CLI flag: '${arg}'.\n` +
-                `Usage: npm run game -- [--script <path>] [--stdin] [--json-events] [--state-log <path>] [--save-file <path>] [--route <nodes>] [--resolve-start] [--route-audit <mapName>] [--auto-combat] [--combat-policy <policy>] [--combat-max-turns <n>] [--combat-seed <n>]`,
+                `Usage: npm run game -- [--script <path>] [--stdin] [--json-events] [--state-log <path>] [--save-file <path>] [--route <nodes>] [--resolve-start] [--route-audit <mapName>] [--auto-combat] [--combat-policy <policy>] [--combat-max-turns <n>] [--combat-seed <n>] [--combat-enemy <slug> --combat-enemy-node <id>]`,
             );
         }
     }

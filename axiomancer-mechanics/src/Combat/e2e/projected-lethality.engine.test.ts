@@ -117,7 +117,7 @@ describe('projectCombatOutcome — the consolidated status kill-path readout', (
         expect(reap.ready).toBe(true);
         expect(reap.ready).toBe(expectedReap.ready);
         expect(reap.amount).toBe(expectedReap.amount);
-        expect(reap.amount).toBe(6); // 2 per Soul × 3 Souls, neutral read
+        expect(reap.amount).toBe(12); // 4 per Soul × 3 Souls, neutral read (v3 rework)
     });
 
     it('an empty Soul bank leaves the reap finisher present but NOT ready', () => {

@@ -102,7 +102,7 @@ export const COMBAT_DECK_PRESETS: Record<string, CombatDeckPreset> = {
         name: 'Penitent',
         theme: 'akrasia',
         focus: 'dot',
-        description: 'Pay in blood for undercosted power; two self-afflictions make you Fallen, and the debt starts arguing for you.',
+        description: 'Pay in blood for undercosted power; two different self-afflictions make you Fallen, and the debt starts arguing for you.',
         cardIds: recipe(
             'against-my-judgment', 'sweet-poison',
             'self-flagellant', 'fallen-grace',
