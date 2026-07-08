@@ -59,18 +59,22 @@ describe('Phase 14 — route survivorship vs coverage-audit classification', () 
     it('a scripted route stops at a combat defeat and downgrades to "blocked" — never reports post-defeat traversal as survivorship', async () => {
         const logPath = tmpPath('defeat-stop');
 
-        // Seed 32 + naive policy reliably loses the fv-6 boss fight
-        // (re-measured 2026-07-08 against the retreat-removal + threat-escalation
-        // engine change — the prior pinned seed 7 no longer loses this fight
-        // once the escalation clock and Retreat-free deck draw order shifted
-        // combat outcomes). fv-7 is listed as a route target but must never be
-        // reached once fv-6 ends in defeat.
+        // The fv-6 combat is forced against the impossible-tier enemy
+        // (`the-incompleteness`) so it is a DETERMINISTIC defeat regardless of
+        // card balance. A normal fv-6 boss becomes winnable once the preset decks
+        // are tuned, which repeatedly broke a seed-pinned fixture (seed 7, then
+        // seed 32); the impossible enemy decouples this classifier test from
+        // balance for good. fv-4 (an ordinary encounter) is still won normally;
+        // fv-7 is a route target but must never be reached once fv-6 ends in
+        // defeat.
         await runGameCli([
             '--route', 'fv-2,fv-3,fv-4,fv-5,fv-6,fv-7',
             '--auto-combat',
             '--combat-policy', 'naive',
             '--combat-seed', '32',
             '--combat-max-turns', '30',
+            '--combat-enemy', 'the-incompleteness',
+            '--combat-enemy-node', 'fv-6',
             '--state-log', logPath,
         ]);
 

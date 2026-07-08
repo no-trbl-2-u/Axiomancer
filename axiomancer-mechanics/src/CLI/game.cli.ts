@@ -28,6 +28,7 @@ import { parseArgv, prompt, emit, log, logState, setIoMode, setOutputMode, setSt
 
 import { createCharacter } from '../Character';
 import { ENEMY_REGISTRY, EnemyLibrary, type EnemySlug } from '../Enemy/enemy.library';
+import { deepClone } from '../Utils';
 import type { EquipmentSlot } from '../Items';
 import {
     devSetLevel, devSetStats, devLearnSkills,
@@ -159,8 +160,18 @@ async function resolveCurrentNodeEvent(
 
     let combatOutcome: CombatOutcome | null = null;
     if (result.event.kind === 'encounter') {
-        const enemy = result.event.encounter.enemies[0];
+        let enemy = result.event.encounter.enemies[0];
         if (!enemy) throw new Error(`Encounter at '${nodeLabel}' had no enemy.`);
+        // Test/debug override: force a specific ENEMY_REGISTRY enemy at the node
+        // named by `--combat-enemy-node`. The route-audit e2e uses this to fight
+        // the impossible-tier enemy at fv-6 — a deterministic combat DEFEAT that
+        // exercises the "defeat → blocked" classifier without depending on card
+        // balance (a normal boss is winnable once the decks are tuned).
+        if (flags.combatEnemy && flags.combatEnemyNode === nodeLabel) {
+            const override = (ENEMY_REGISTRY as Record<string, typeof enemy>)[flags.combatEnemy];
+            if (!override) throw new Error(`--combat-enemy '${flags.combatEnemy}' is not in ENEMY_REGISTRY.`);
+            enemy = deepClone(override);
+        }
         const combatResult = await runHazardCombatCliEncounter({
             enemy,
             presetId: 'apprentice',
