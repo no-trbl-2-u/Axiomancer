@@ -47,58 +47,58 @@ const ae = (effectId: string, intensity = 1): ActiveEffect => ({
 });
 
 describe('Phase 48 — statModifiers runtime aggregation (KG Q8)', () => {
-    it('a flat derived-stat buff bumps the corresponding stat accessor', () => {
-        // buff_body_attack_up flat-bumps body by 2 and physicalSkill by 3.
-        // Effective body: 5 + 2 = 7 → physicalAttack re-derives to 7.
-        const c = withEffects([ae('buff_body_attack_up', 1)]);
-        expect(getAttackStat(c, 'body')).toBe(7);
-        expect(getBaseStat(c, 'body')).toBe(7);
+    it('a flat base-stat buff bumps the corresponding stat accessor', () => {
+        // buff_resistance_body flat-bumps body by 3 (+4 physicalDefense direct).
+        // Effective body: 5 + 3 = 8 → physicalAttack re-derives to 8.
+        const c = withEffects([ae('buff_resistance_body', 1)]);
+        expect(getAttackStat(c, 'body')).toBe(8);
+        expect(getBaseStat(c, 'body')).toBe(8);
     });
 
     it('a flat base-stat debuff drops the matching defense accessor', () => {
-        // debuff_all_stats_down at intensity 1: body -3 → effective body 2 (strengthened in Phase 126).
-        // physicalDefense = body × DEFENSE (3) = 2 × 3 = 6.
-        const c = withEffects([ae('debuff_all_stats_down', 1)]);
-        expect(getBaseStat(c, 'body')).toBe(2);
-        expect(getDefenseStat(c, 'body')).toBe(6);
+        // debuff_exhaustion at intensity 1: body -2 → effective body 3.
+        // physicalDefense = body × DEFENSE (3) = 3 × 3 = 9.
+        const c = withEffects([ae('debuff_exhaustion', 1)]);
+        expect(getBaseStat(c, 'body')).toBe(3);
+        expect(getDefenseStat(c, 'body')).toBe(9);
     });
 
     it('base-stat changes re-derive every dependent derived stat', () => {
-        // buff_body_attack_up bumps body by 2 (5 → 7). Re-derive:
-        //   physicalAttack = 7, physicalDefense = 21, physicalSkill = 7 + 3 (flat) = 10.
-        const c = withEffects([ae('buff_body_attack_up', 1)]);
-        expect(getAttackStat(c, 'body')).toBe(7);
-        expect(getDefenseStat(c, 'body')).toBe(21);
+        // buff_resistance_body bumps body by 3 (5 → 8). Re-derive:
+        //   physicalAttack = 8, physicalDefense = 8 × 3 + 4 (flat) = 28.
+        const c = withEffects([ae('buff_resistance_body', 1)]);
+        expect(getAttackStat(c, 'body')).toBe(8);
+        expect(getDefenseStat(c, 'body')).toBe(28);
         // Resist stat reads the (effective) base stat for the named stance.
-        expect(getEffectiveStats(c).baseStats.body).toBe(7);
+        expect(getEffectiveStats(c).baseStats.body).toBe(8);
     });
 });
 
 describe('Phase 48 — intensity scaling on statModifiers (KG Q9)', () => {
     it('intensity multiplies every flat statModifier (value × intensity)', () => {
-        // buff_body_attack_up at intensity 3 adds body × 3 = 6 → effective body 11.
-        // physicalAttack re-derives to 11.
-        const c = withEffects([ae('buff_body_attack_up', 3)]);
-        expect(getBaseStat(c, 'body')).toBe(11);
-        expect(getAttackStat(c, 'body')).toBe(11);
+        // buff_resistance_body at intensity 3 adds body 3 × 3 = 9 → effective body 14.
+        // physicalAttack re-derives to 14.
+        const c = withEffects([ae('buff_resistance_body', 3)]);
+        expect(getBaseStat(c, 'body')).toBe(14);
+        expect(getAttackStat(c, 'body')).toBe(14);
     });
 
     it('intensity scales debuffs the same way', () => {
-        // debuff_all_stats_down at intensity 2: body -6 → effective body -1 (strengthened in Phase 126).
-        // physicalDefense = -1 × 3 = -3.
-        const c = withEffects([ae('debuff_all_stats_down', 2)]);
-        expect(getBaseStat(c, 'body')).toBe(-1);
-        expect(getDefenseStat(c, 'body')).toBe(-3);
+        // debuff_exhaustion at intensity 2: body -4 → effective body 1.
+        // physicalDefense = 1 × 3 = 3.
+        const c = withEffects([ae('debuff_exhaustion', 2)]);
+        expect(getBaseStat(c, 'body')).toBe(1);
+        expect(getDefenseStat(c, 'body')).toBe(3);
     });
 });
 
 describe('Phase 48 — defenseModifier stacks with derived-stat changes', () => {
     it('defenseModifier (stance-agnostic) adds on top of effective derived defense', () => {
         // buff_barrier: defenseModifier 5 (stance-agnostic).
-        // buff_body_attack_up: body +2 → physicalDefense re-derives to 21.
-        // getDefenseStat folds both: 21 + 5 = 26.
-        const c = withEffects([ae('buff_body_attack_up', 1), ae('buff_barrier', 1)]);
-        expect(getDefenseStat(c, 'body')).toBe(26);
+        // buff_resistance_body: body +3 → physicalDefense re-derives to 24 + 4 flat.
+        // getDefenseStat folds both: 24 + 4 + 5 = 33.
+        const c = withEffects([ae('buff_resistance_body', 1), ae('buff_barrier', 1)]);
+        expect(getDefenseStat(c, 'body')).toBe(33);
     });
 
     it('defenseModifier alone doesn\'t shift base-stat-derived attack', () => {
