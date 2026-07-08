@@ -1,21 +1,19 @@
 /**
  * Hermetic sim e2e — card coverage: EVERY card in the library is exercisable.
  *
- * The dead-card detector. For each of the 65 library ids, one seeded
- * `runOneEncounter` against a weak enemy carries a deck stacked with three
- * copies of the card plus a tiny known-good support kit, and `focusCardIds`
- * boosts the card to the front of every ranking band — so if the card can be
- * played AT ALL, it will be. A card that registers zero plays under all three
- * fallback seeds FAILS the suite: that is the point (doctrine: status effects
- * are the MAIN fun, and a card nobody can fire is dead weight in the status
- * toolbox).
+ * The dead-card detector. For each of the 70 spec 32 v3 library ids, one
+ * seeded `runOneEncounter` against a weak enemy carries a deck stacked with
+ * three copies of the card plus a tiny known-good support kit, and
+ * `focusCardIds` boosts the card to the front of every ranking band — so if
+ * the card can be played AT ALL, it will be. A card that registers zero plays
+ * under all three fallback seeds FAILS the suite: that is the point (doctrine:
+ * status effects are the MAIN fun, and a card nobody can fire is dead weight
+ * in the status toolbox).
  *
  * Coverage counts fizzle-drains honestly: the sim drains a token-gated or
- * resource-starved bottom via the card's free top action (a real play), and a
- * gated Befriend attempt against a non-vulnerable enemy still resolves as a
- * bottom play (`befriend-attempted`, successful: false) — so 'befriend' needs
- * no hpGate staging to be exercised here; its SUCCESS path is covered by the
- * balance sim's mercy loadout.
+ * resource-starved bottom via the card's free top action (a real play).
+ * Enchant/disenchant cards are PAID-only but unique-in-play — three copies
+ * still register the first play, and the later copies drain as fizzles.
  *
  * The synthetic 'card-retreat' is policy-invisible (every policy filters the
  * retreat verb), so it is covered by a direct engine assertion instead: its
@@ -42,8 +40,8 @@ const BASE_SEED = 11;
 const SEED_OFFSETS = [0, 1000, 2000] as const;
 
 /** Known-good support kit rounding out every coverage deck (defend + DoT +
- *  befriend keep the encounter honest while the focused card takes the lead). */
-const SUPPORT_KIT = ['brace-for-impact', 'slippery-slope', 'befriend'] as const;
+ *  bleed keep the encounter honest while the focused card takes the lead). */
+const SUPPORT_KIT = ['brace-for-impact', 'slippery-slope', 'straw-mans-jab'] as const;
 
 const WEAK_ENEMY: Enemy = deepClone(
     (ENEMY_REGISTRY as Record<string, Enemy>)['grave-larva'],
@@ -81,10 +79,10 @@ function coveragePlays(cardId: string): { plays: number; seedsTried: number[] } 
 }
 
 describe('card coverage — every library card is exercisable', () => {
-    it('the coverage universe is the curated 49-card library (Fate Engine P1 trim)', () => {
-        // Trimmed 2026-07-05 (spec 31 §4): 49 locked-in keepers.
-        expect(cardLibrary.length).toBe(49);
-        expect(new Set(cardLibrary.map(c => c.id)).size).toBe(49);
+    it('the coverage universe is the 70-card themed library (spec 32 v3 §7)', () => {
+        // 10 themes × 7 uniques = 70; zero cross-theme overlap.
+        expect(cardLibrary.length).toBe(70);
+        expect(new Set(cardLibrary.map(c => c.id)).size).toBe(70);
     });
 
     it.each(cardLibrary.map(c => [c.id] as const))(

@@ -104,7 +104,7 @@ describe('stage-eligible card pools', () => {
         const fits: Card = {
             id: 'stage-test-extra-fit', name: 'Stage Test Extra', category: 'fallacy',
             philosophicalAspect: 'body', description: 'test-only card', tier: 1,
-            targetType: 'enemy', basePower: 5, scalingStat: 'body',
+            targetType: 'enemy', rank: 1, cardType: 'spell',
             learningRequirement: { level: 1 },
         };
         const overTier: Card = { ...fits, id: 'stage-test-extra-tier3', tier: 3 };
