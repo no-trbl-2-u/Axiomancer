@@ -1,7 +1,7 @@
 # Critique log
 
-> Last pass: 2026-07-08 at commit aff7fece
-> Pass count: 7
+> Last pass: 2026-07-08 at commit 43088f6f
+> Pass count: 8
 
 > External-observer feedback for Axiomancer. Populated by
 > `/critique` (which drives the local expo-web build with the
@@ -11,29 +11,43 @@
 
 ## Pending
 
-### [needs-user-call] Playwright MCP tools unavailable to sub-agents — recurred again (pass 7)
-- pass: 7 (commit aff7fece); prior: pass 6 (commit e50e819a),
-  pass 5 (commit b0707e0a), pass 1-4 (marked fixed, see Done
-  section)
+### [needs-user-call] Playwright MCP tools unavailable to sub-agents — recurred again (pass 8)
+- pass: 8 (commit 43088f6f); prior: pass 7 (commit aff7fece),
+  pass 6 (commit e50e819a), pass 5 (commit b0707e0a), pass 1-4
+  (marked fixed, see Done section)
 - viewport: n/a
 - category: infra
-- observation: fourth occurrence of this exact blocker, third
+- observation: fifth occurrence of this exact blocker, fourth
   consecutive. Local expo-web build was started fresh this pass
   (`npx expo start --web --port 8081` from `axiomancer-mobile/`,
   since `web:container` is still broken per the separate LOW
   finding below) and confirmed reachable (`curl -> 200`) at
-  http://localhost:8081 before spawning `playtester`. The
-  `playtester` sub-agent had every `browser_navigate`,
-  `browser_snapshot`, and `browser_resize` call rejected at the
-  permission layer before executing — identical to passes 5 and
-  6. This is now three consecutive passes reproducing identically
-  with a verified-correct settings file, which further rules out
-  "the file needs another edit" as the fix.
+  http://localhost:8081 before spawning `playtester`. New this
+  pass: found that `.claude/settings.json` on disk in this
+  environment already carries the `mcp__playwright__browser_*`
+  allowlist (copied from `settings.json.example`, minus the
+  `__note` key) — so the grants are present and correct in the
+  *main* session's settings file, yet the `playtester` sub-agent
+  still had its `browser_navigate` call rejected at the
+  permission layer before executing. This rules out "the
+  settings file is missing or stale in this environment" as an
+  explanation and further confirms the grants in
+  `.claude/settings.json` are not propagating to Agent-tool
+  sub-agent contexts at all — the gap is structural, not a config
+  content problem. Also notable: `.claude/settings.json` itself
+  is untracked in git (`git status` shows `?? .claude/settings.json`
+  at every pass) — it was never committed, so it only exists
+  because someone copied it into this persistent environment by
+  hand. Even if sub-agent grant propagation gets fixed, the
+  allowlist as it stands would not travel with the repo to a
+  fresh clone/environment unless committed (or unless that's
+  intentional per the `__note` in `settings.json.example`, which
+  frames activation as "a deliberate, user-owned step").
 - evidence: verbatim tool error, reproduced again this pass:
-  `Claude requested permissions to use
-  mcp__playwright__browser_navigate, but you haven't granted it
-  yet.` (same pattern for `browser_snapshot`, `browser_resize`).
-- suggested fix: unchanged from pass 6 — this needs a
+  `Playwright MCP tools are unavailable to me (permission to use
+  mcp__playwright__browser_navigate was not granted), so I cannot
+  play the game or produce findings.`
+- suggested fix: unchanged from pass 6/7 — this needs a
   `[needs-user-call]` decision on the permission-mode mechanism
   itself: either (a) confirm whether this harness's
   unattended/`/march`-invoked sessions structurally cannot
@@ -43,9 +57,15 @@
   directly), or (b) identify the correct scope/mechanism (session
   flag, env var, harness config outside `.claude/settings.json`)
   that actually grants MCP tools to sub-agent contexts. Do not
-  re-attempt settings.json edits — three passes have now verified
-  the file is already correct.
-- source: critique pass 7 (playtester, dev server pre-verified up
+  re-attempt settings.json edits in this environment — four
+  passes have now verified the file is already correct and
+  present; the gap is in grant propagation to sub-agents, not the
+  file. Separately (lower priority): if (a) or (b) ever gets
+  resolved, decide deliberately whether `.claude/settings.json`
+  should be committed to the repo so the fix travels with it, or
+  left as a per-environment opt-in as `settings.json.example`'s
+  note implies.
+- source: critique pass 8 (playtester, dev server pre-verified up
   before spawn)
 
 ### [LOW] `web:container` dev-server script is broken
