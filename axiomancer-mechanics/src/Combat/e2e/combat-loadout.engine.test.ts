@@ -24,44 +24,44 @@ import { lookupEffect } from '../../Effects';
 import { createCharacter } from '../../Character';
 import type { ActiveEffect } from '../../Effects/types';
 
-const SKILL_A = 'slippery-slope';
-const SKILL_B = 'brace-for-impact';
+const CARD_A = 'slippery-slope';
+const CARD_B = 'brace-for-impact';
 
 describe('combat loadout codec', () => {
     it('addToLoadout encodes a card as a flag', () => {
-        const flags = addToLoadout([], SKILL_A);
+        const flags = addToLoadout([], CARD_A);
         expect(flags).toHaveLength(1);
-        expect(flags[0]).toMatch(new RegExp(`^${COMBAT_LOADOUT_FLAG_PREFIX}${SKILL_A}:`));
+        expect(flags[0]).toMatch(new RegExp(`^${COMBAT_LOADOUT_FLAG_PREFIX}${CARD_A}:`));
     });
 
     it('getCombatLoadout decodes in insertion order', () => {
         let flags: string[] = [];
-        flags = addToLoadout(flags, SKILL_A);
-        flags = addToLoadout(flags, SKILL_B);
-        expect(getCombatLoadout(flags)).toEqual([SKILL_A, SKILL_B]);
+        flags = addToLoadout(flags, CARD_A);
+        flags = addToLoadout(flags, CARD_B);
+        expect(getCombatLoadout(flags)).toEqual([CARD_A, CARD_B]);
     });
 
     it('addToLoadout allows duplicate card copies', () => {
         let flags: string[] = [];
-        flags = addToLoadout(flags, SKILL_A);
-        flags = addToLoadout(flags, SKILL_A);
+        flags = addToLoadout(flags, CARD_A);
+        flags = addToLoadout(flags, CARD_A);
         const loadout = getCombatLoadout(flags);
-        expect(loadout).toEqual([SKILL_A, SKILL_A]);
+        expect(loadout).toEqual([CARD_A, CARD_A]);
     });
 
     it('removeFromLoadout removes the first occurrence only', () => {
         let flags: string[] = [];
-        flags = addToLoadout(flags, SKILL_A);
-        flags = addToLoadout(flags, SKILL_A);
-        flags = addToLoadout(flags, SKILL_B);
-        flags = removeFromLoadout(flags, SKILL_A);
-        expect(getCombatLoadout(flags)).toEqual([SKILL_A, SKILL_B]);
+        flags = addToLoadout(flags, CARD_A);
+        flags = addToLoadout(flags, CARD_A);
+        flags = addToLoadout(flags, CARD_B);
+        flags = removeFromLoadout(flags, CARD_A);
+        expect(getCombatLoadout(flags)).toEqual([CARD_A, CARD_B]);
     });
 
     it('removeFromLoadout is a no-op when card not in loadout', () => {
-        const flags = addToLoadout([], SKILL_A);
-        const after = removeFromLoadout(flags, SKILL_B);
-        expect(getCombatLoadout(after)).toEqual([SKILL_A]);
+        const flags = addToLoadout([], CARD_A);
+        const after = removeFromLoadout(flags, CARD_B);
+        expect(getCombatLoadout(after)).toEqual([CARD_A]);
     });
 
     it('getCombatLoadout returns [] when no loadout flags present', () => {
@@ -71,9 +71,9 @@ describe('combat loadout codec', () => {
 
     it('addToLoadout is a no-op when at COMBAT_LOADOUT_MAX capacity', () => {
         let flags: string[] = [];
-        for (let i = 0; i < COMBAT_LOADOUT_MAX; i++) flags = addToLoadout(flags, SKILL_A);
+        for (let i = 0; i < COMBAT_LOADOUT_MAX; i++) flags = addToLoadout(flags, CARD_A);
         const before = getCombatLoadout(flags).length;
-        const after = addToLoadout(flags, SKILL_B);
+        const after = addToLoadout(flags, CARD_B);
         expect(getCombatLoadout(after).length).toBe(before);
     });
 });
@@ -85,34 +85,34 @@ describe('buildCombatDeck with curated loadout', () => {
         baseStats: { heart: 5, body: 5, mind: 5 },
     });
     const EXTRA = 'straw-mans-jab'; // a third real card only knownCards carries
-    const playerWithSkills = { ...player, knownCards: [SKILL_A, SKILL_B, EXTRA] };
+    const playerWithCards = { ...player, knownCards: [CARD_A, CARD_B, EXTRA] };
 
     it('uses the curated loadout when loadout flags are present', () => {
         let flags: string[] = [];
-        flags = addToLoadout(flags, SKILL_A);
-        flags = addToLoadout(flags, SKILL_B);
-        const deck = buildCombatDeck(playerWithSkills, flags);
-        expect(deck).toContain(SKILL_A);
-        expect(deck).toContain(SKILL_B);
+        flags = addToLoadout(flags, CARD_A);
+        flags = addToLoadout(flags, CARD_B);
+        const deck = buildCombatDeck(playerWithCards, flags);
+        expect(deck).toContain(CARD_A);
+        expect(deck).toContain(CARD_B);
         expect(deck).not.toContain(EXTRA);
         expect(deck).not.toContain('card-retreat');
     });
 
     it('falls back to knownCards when flags array is empty', () => {
-        const deck = buildCombatDeck(playerWithSkills, []);
-        expect(deck).toContain(SKILL_A);
-        expect(deck).toContain(SKILL_B);
+        const deck = buildCombatDeck(playerWithCards, []);
+        expect(deck).toContain(CARD_A);
+        expect(deck).toContain(CARD_B);
         expect(deck).toContain(EXTRA);
         expect(deck).not.toContain('card-retreat');
     });
 
     it('falls back to knownCards when flags has no loadout prefix', () => {
-        const deck = buildCombatDeck(playerWithSkills, ['other-flag:1']);
+        const deck = buildCombatDeck(playerWithCards, ['other-flag:1']);
         expect(deck).toContain(EXTRA);
     });
 
     it('falls back to knownCards when flags parameter is omitted', () => {
-        const deck = buildCombatDeck(playerWithSkills);
+        const deck = buildCombatDeck(playerWithCards);
         expect(deck).toContain(EXTRA);
     });
 });
@@ -207,7 +207,7 @@ describe('isCombatSynergySatisfied', () => {
     });
 
     it('returns false for a synthetic card with no library backing', () => {
-        const card = toCombatCard(SKILL_A, getCardById, lookupEffect);
+        const card = toCombatCard(CARD_A, getCardById, lookupEffect);
         expect(card).not.toBeNull();
         const syntheticCard = { ...card!, id: 'card-retreat' };
         expect(isCombatSynergySatisfied(syntheticCard, [])).toBe(false);

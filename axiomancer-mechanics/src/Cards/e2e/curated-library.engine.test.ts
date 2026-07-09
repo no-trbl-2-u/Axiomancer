@@ -16,7 +16,7 @@ import { describe, it, expect } from 'vitest';
 import { cardLibrary, getCardById } from '../cards.library';
 import { rankToRarity, CARD_RANK_NAMES } from '../types';
 import type { Card } from '../types';
-import { COMBAT_REWARD_POOL, STARTING_SKILL_IDS } from '../../Combat/combat.rewards';
+import { COMBAT_REWARD_POOL, STARTING_CARD_IDS } from '../../Combat/combat.rewards';
 import { listDeckPresets, cardOrigin } from '../../Combat/combat.deck-presets';
 
 /** The ten theme tags (spec §6) — every card carries exactly one. */
@@ -184,8 +184,8 @@ describe('themed library — id hygiene and provenance', () => {
     });
 
     it('the starting pair resolves and teaches a mechanic each', () => {
-        expect(STARTING_SKILL_IDS).toEqual(['slippery-slope', 'brace-for-impact']);
-        for (const id of STARTING_SKILL_IDS) {
+        expect(STARTING_CARD_IDS).toEqual(['slippery-slope', 'brace-for-impact']);
+        for (const id of STARTING_CARD_IDS) {
             const card = getCardById(id);
             expect(card, id).toBeDefined();
             expect(card!.rank).toBe(1); // starters are Doxa

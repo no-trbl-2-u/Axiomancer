@@ -27,7 +27,7 @@ export default function Index() {
   // Right after a NEW player dismisses the title (and only then): choose a
   // starter bundle (deck identity). Returning players have showTitleScreen
   // false and skip this; anyone who already chose carries the persisted flag.
-  // `ensureStarterSkills` is the safety net if this is ever bypassed.
+  // `ensureStarterCards` is the safety net if this is ever bypassed.
   const needsBundleSelection =
     onboarding.showTitleScreen && titleScreenDismissed && !bundleChosen && !bundlePicked;
   if (needsBundleSelection) {

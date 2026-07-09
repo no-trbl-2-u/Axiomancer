@@ -6,7 +6,7 @@
  *      and variety. They append to `Character.combatRewardCards`, which
  *      `buildCombatDeck` stacks on top of the learned-skill baseline.
  *   2. SKILL UNLOCKS (rare, via ethical-dilemma events — not implemented yet)
- *      add a NEW card type. `unlockSkillViaDilemma` is the hook those events will
+ *      add a NEW card type. `unlockCardViaDilemma` is the hook those events will
  *      call; it bypasses the normal learning requirements (the dilemma IS the
  *      gate), unlike `learnCard`.
  *
@@ -36,16 +36,16 @@ export const REWARD_RARITY_WEIGHTS: Readonly<Record<'common' | 'uncommon' | 'rar
 
 /** The skills a brand-new player starts with: an opening offensive card PLUS a
  *  basic defense card, so every player can GUARD from turn one. The rest unlock
- *  through ethical-dilemma events via `unlockSkillViaDilemma`. The mobile
+ *  through ethical-dilemma events via `unlockCardViaDilemma`. The mobile
  *  bootstrap seeds a new character's `knownCards` from this list. */
-export const STARTING_SKILL_IDS: readonly string[] = Object.freeze([
+export const STARTING_CARD_IDS: readonly string[] = Object.freeze([
     'slippery-slope',       // opening offense
     'brace-for-impact',     // basic defense (GUARD) — guard from turn one
 ]);
 
 /** The single OFFENSIVE skill a brand-new player starts with. Kept for
- *  back-compat; prefer `STARTING_SKILL_IDS` (which also grants a defense card). */
-export const STARTING_SKILL_ID = 'slippery-slope';
+ *  back-compat; prefer `STARTING_CARD_IDS` (which also grants a defense card). */
+export const STARTING_CARD_ID = 'slippery-slope';
 
 /** A valid reward-pool entry must resolve to a real skill. */
 function validPool(): string[] {
@@ -104,7 +104,7 @@ export function addRewardCard(player: Character, cardId: string): Character {
  * choice is itself the gate. No-op (same ref) when already known or unknown id.
  * The dilemma EVENTS are not implemented yet; this is the hook they will call.
  */
-export function unlockSkillViaDilemma(player: Character, skillId: string): Character {
+export function unlockCardViaDilemma(player: Character, skillId: string): Character {
     if (player.knownCards.includes(skillId)) return player;
     if (!getCardById(skillId)) return player;
     return { ...player, knownCards: [...player.knownCards, skillId] };

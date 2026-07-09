@@ -74,9 +74,9 @@ export default function CharacterScreen() {
   // skills per level gained (the engine applies stacked level-ups in
   // one dispatch, so a multi-level XP dump queues multiple picks).
   // Offers regenerate after each pick; FORGO spends a pick on nothing.
-  const [skillPicksRemaining, setSkillPicksRemaining] = useState<number>(0);
-  const [skillOffers, setSkillOffers] = useState<
-    ReturnType<typeof actions.getLearnableSkillOffers>
+  const [cardPicksRemaining, setCardPicksRemaining] = useState<number>(0);
+  const [cardOffers, setCardOffers] = useState<
+    ReturnType<typeof actions.getLearnableCardOffers>
   >([]);
   const onLevelUp = useCallback(() => {
     const before = store.getState().player?.level ?? 0;
@@ -84,33 +84,33 @@ export default function CharacterScreen() {
     const after = store.getState().player?.level ?? before;
     const gained = Math.max(0, after - before);
     if (gained > 0) {
-      const offers = actions.getLearnableSkillOffers();
+      const offers = actions.getLearnableCardOffers();
       if (offers.length > 0) {
-        setSkillOffers(offers);
-        setSkillPicksRemaining(gained);
+        setCardOffers(offers);
+        setCardPicksRemaining(gained);
       }
     }
     // The stat ledger opens beneath the learn modal — the user
     // allocates points once the picks are spent.
     setLevelUpOpen(true);
   }, [actions, store]);
-  const advanceSkillPick = useCallback(() => {
-    setSkillPicksRemaining((remaining) => {
+  const advanceCardPick = useCallback(() => {
+    setCardPicksRemaining((remaining) => {
       const next = remaining - 1;
       if (next > 0) {
-        setSkillOffers(actions.getLearnableSkillOffers());
+        setCardOffers(actions.getLearnableCardOffers());
       } else {
-        setSkillOffers([]);
+        setCardOffers([]);
       }
       return next;
     });
   }, [actions]);
-  const onPickSkillOffer = useCallback(
+  const onPickCardOffer = useCallback(
     (skillId: string) => {
       actions.learnCard(skillId);
-      advanceSkillPick();
+      advanceCardPick();
     },
-    [actions, advanceSkillPick],
+    [actions, advanceCardPick],
   );
   const onCommitAllocation = useCallback(
     (spent: { heart: number; body: number; mind: number }) => {
@@ -233,12 +233,12 @@ export default function CharacterScreen() {
 
       {/* Learn-skill modal — stacks above the stat ledger (zIndex 60
           vs the LevelUpModal's 50) until every pick is spent. */}
-      {skillPicksRemaining > 0 && skillOffers.length > 0 && (
+      {cardPicksRemaining > 0 && cardOffers.length > 0 && (
         <LearnCardModal
-          offers={skillOffers}
-          picksRemaining={skillPicksRemaining}
-          onPick={onPickSkillOffer}
-          onSkip={advanceSkillPick}
+          offers={cardOffers}
+          picksRemaining={cardPicksRemaining}
+          onPick={onPickCardOffer}
+          onSkip={advanceCardPick}
         />
       )}
 
@@ -445,7 +445,7 @@ export default function CharacterScreen() {
       {vm.skills.length > 0 && (
         <View style={styles.section}>
           <SectionLabel size={13}>✠ FALLACIES &amp; PARADOXES</SectionLabel>
-          <View style={styles.skillsGrid}>
+          <View style={styles.cardsGrid}>
             {vm.skills.map((s) => (
               // Phase 74 follow-up walkthrough Tick 2: wrap each
               // skill card in a TooltipTarget pointing at the
@@ -472,7 +472,7 @@ export default function CharacterScreen() {
                 >
                   <StanceGlyph kind={s.stanceKey} size={16} color={AXM.bone} />
                   <View style={styles.flexOne}>
-                    <Text style={styles.skillName}>{s.name}</Text>
+                    <Text style={styles.cardName}>{s.name}</Text>
                     <Text style={[styles.skillCat, { color: s.category === 'paradox' ? AXM.sulfur : AXM.parchment }]}>
                       {s.category.toUpperCase()}
                     </Text>
@@ -561,13 +561,13 @@ const useStyles = makeStyles((AXM) => ({
   slotEmpty: { backgroundColor: 'transparent', borderStyle: 'dashed' },
   slotName: { fontFamily: FONTS.sans, fontSize: 8, letterSpacing: 1.5, color: AXM.bone },
   slotItem: { fontFamily: FONTS.serif, fontSize: 11, color: AXM.parchment, lineHeight: 14 },
-  skillsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 4, marginTop: 3 },
+  cardsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 4, marginTop: 3 },
   boneText: { color: AXM.bone },
   bloodText: { color: AXM.blood },
   flexOne: { flex: 1 },
   marginTop8: { marginTop: 5 },
   skillCard: { width: '48%', borderWidth: 2, padding: 4, paddingHorizontal: 6, backgroundColor: AXM.bg, flexDirection: 'row', alignItems: 'center', gap: 6 },
-  skillName: { fontFamily: FONTS.gothic, fontSize: 12, color: AXM.parchment, lineHeight: 14 },
+  cardName: { fontFamily: FONTS.gothic, fontSize: 12, color: AXM.parchment, lineHeight: 14 },
   skillCat: { fontFamily: FONTS.mono, fontSize: 8, letterSpacing: 1 },
   poolsCard: { marginTop: 3, backgroundColor: AXM.panelBg, borderWidth: 1, borderColor: AXM.ash, paddingVertical: 5, paddingHorizontal: 12, gap: 4 },
   poolRow: {},

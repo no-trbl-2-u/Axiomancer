@@ -24,7 +24,7 @@ export interface VictoryModalProps {
     enemyEpithet: string;
     /** Final blow details */
     finalBlow: {
-        skillName: string;
+        cardName: string;
         damage: number;
         descriptor: string;
     };
@@ -118,7 +118,7 @@ export default function VictoryModal({
                     {/* Final blow panel */}
                     <TornPanel style={styles.finalBlowPanel}>
                         <Text style={[styles.finalBlowMeta, { fontFamily: FONTS.mono }]}>
-                            FINAL BLOW · {finalBlow.skillName} · {finalBlow.damage}
+                            FINAL BLOW · {finalBlow.cardName} · {finalBlow.damage}
                         </Text>
                         <Text style={[
                             styles.finalBlowPhrase, 

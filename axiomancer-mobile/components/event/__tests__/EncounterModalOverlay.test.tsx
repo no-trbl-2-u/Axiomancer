@@ -391,7 +391,7 @@ describe('EncounterModalOverlay: combat → aftermath swap', () => {
                         description: 'A figure long since gnawed.',
                         level: 3,
                     },
-                    finalBlow: { skillName: 'STRIKE', damage: 24, descriptor: 'cleaves the rib' },
+                    finalBlow: { cardName: 'STRIKE', damage: 24, descriptor: 'cleaves the rib' },
                     xpReward: 18,
                 });
             }, [exitCombatWith]);
@@ -545,7 +545,7 @@ describe('EncounterModalOverlay: combat → aftermath swap (defeat)', () => {
                         level: 7,
                     },
                     characterName: 'Worm-Eaten Pilgrim',
-                    finalBlow: { skillName: 'AXE-FALL', damage: 28, descriptor: 'cleaves the rib' },
+                    finalBlow: { cardName: 'AXE-FALL', damage: 28, descriptor: 'cleaves the rib' },
                     runSummary: { roundsEndured: 4, encountersFaced: 12, deepestNodeId: 'iii.b', currentMapId: 'fishing-village' },
                 });
             }, [exitCombatWith]);
@@ -654,7 +654,7 @@ describe('EncounterModalOverlay: combat → aftermath swap (defeat)', () => {
                         level: 7,
                     },
                     characterName: 'Worm-Eaten Pilgrim',
-                    finalBlow: { skillName: 'AXE-FALL', damage: 28, descriptor: 'cleaves the rib' },
+                    finalBlow: { cardName: 'AXE-FALL', damage: 28, descriptor: 'cleaves the rib' },
                     runSummary: { roundsEndured: 4, encountersFaced: 12, deepestNodeId: 'iii.b', currentMapId: 'fishing-village' },
                 });
             }, [exitCombatWith]);
@@ -748,7 +748,7 @@ describe('EncounterModalOverlay: phase-aware seal chrome', () => {
                 exitCombatWith('victory', {
                     variant: 'victory',
                     enemy: { name: 'Foe', description: 'A figure.', level: 1 },
-                    finalBlow: { skillName: 'STRIKE', damage: 12, descriptor: 'd' },
+                    finalBlow: { cardName: 'STRIKE', damage: 12, descriptor: 'd' },
                     xpReward: 5,
                 });
             }, [exitCombatWith]);
@@ -792,7 +792,7 @@ describe('EncounterModalOverlay: in-place hazard combat (Phase 200)', () => {
         );
     }
 
-    // Mirror the real `beginHazardEncounter` → ensureStarterSkills fallback so
+    // Mirror the real `beginHazardEncounter` → ensureStarterCards fallback so
     // the panel boots from a player with a real deck.
     function seedPlayerWithDeck(store: ReturnType<typeof createAppStore>) {
         const p = store.getState().player;

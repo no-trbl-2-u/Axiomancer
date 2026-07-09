@@ -35,7 +35,7 @@ export function DebugSeedButton() {
     const onPress = () => {
         const result = actions.debugSeed();
         setLastResult(
-            `seeded · ${result.itemsAdded} items · ${result.skillsLearned} skills · map ${result.mapReset ? 'reset' : 'unchanged'}`,
+            `seeded · ${result.itemsAdded} items · ${result.cardsLearned} skills · map ${result.mapReset ? 'reset' : 'unchanged'}`,
         );
     };
 

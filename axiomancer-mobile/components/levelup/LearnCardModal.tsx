@@ -5,7 +5,7 @@
  * tapped: one pick of three qualifying skills per level gained
  * (stacked levels queue consecutive picks). Offers come from the
  * engine's alignment-gated `getAvailableCards` via
- * `actions.getLearnableSkillOffers()`; a pick dispatches
+ * `actions.getLearnableCardOffers()`; a pick dispatches
  * `actions.learnCard(id)` upstream. Non-tap-out-dismissible — the
  * only exits are LEARN (per row) or FORGO.
  */
@@ -18,7 +18,7 @@ import type { LearnableCardOffer } from '@/state/actions';
 import { FONTS } from '@/theme/axm';
 import { makeStyles, usePalette } from '@/theme/runtime';
 
-export interface LearnSkillModalProps {
+export interface LearnCardModalProps {
     offers: LearnableCardOffer[];
     /** Picks left in this level-up session (≥1 while mounted). */
     picksRemaining: number;
@@ -26,7 +26,7 @@ export interface LearnSkillModalProps {
     onSkip: () => void;
 }
 
-export function LearnCardModal({ offers, picksRemaining, onPick, onSkip }: LearnSkillModalProps) {
+export function LearnCardModal({ offers, picksRemaining, onPick, onSkip }: LearnCardModalProps) {
     const styles = useStyles();
     const AXM = usePalette();
     return (

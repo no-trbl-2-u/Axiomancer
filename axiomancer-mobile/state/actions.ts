@@ -20,7 +20,7 @@ import {
     buildCharacterFromPreset,
     defaultAlignment,
     getAvailableCards,
-    learnCard as engineLearnSkill,
+    learnCard as engineLearnCard,
     changeMap as worldChangeMap,
     completeNode as worldCompleteNode,
     consumableLibrary,
@@ -41,7 +41,7 @@ import {
     markNodeConsumed,
     resolveMapEvent,
     revealAdjacent,
-    STARTING_SKILL_IDS,
+    STARTING_CARD_IDS,
     unlockNode as worldUnlockNode,
     type Character,
     type GameStore,
@@ -64,7 +64,7 @@ import {
 
 import {
     COMBAT_CARDS,
-    getCombatSkillById,
+    getCombatCardById,
     cardEffectText,
 } from '@/state/selectors/combat-cards';
 import { equipmentFromTemplate as templateToEquipment } from '@mechanics';
@@ -222,7 +222,7 @@ export interface DebugSeedResult {
     /** Count of items pushed to the player's inventory across categories. */
     itemsAdded: number;
     /** Count of skills appended to the player's `knownCards` list. */
-    skillsLearned: number;
+    cardsLearned: number;
     /** True when the current map was successfully re-seeded. */
     mapReset: boolean;
 }
@@ -686,7 +686,7 @@ export interface AppActions {
      * `getAvailableCards`, alignment-gated). Empty = nothing new to
      * learn; the caller skips the modal.
      */
-    getLearnableSkillOffers: (count?: number) => LearnableCardOffer[];
+    getLearnableCardOffers: (count?: number) => LearnableCardOffer[];
     /** Learns a skill through the engine (requirement-checked). */
     learnCard: (skillId: string) => boolean;
 }
@@ -710,7 +710,7 @@ export interface UseItemResult {
  * the single source of truth for the starting skill set. New games create
  * the player with `knownCards: []` and the normal flow never applies a
  * preset, so the first combat / first level-up seeds these.
- * `engineLearnSkill` enforces requirements, so anything the level-1 player
+ * `engineLearnCard` enforces requirements, so anything the level-1 player
  * doesn't qualify for is skipped.
  */
 // Spec 32 v3 §7 — the new player's starting combat repertoire.
@@ -722,11 +722,11 @@ export interface UseItemResult {
 // skills the level-1 player actually KNOWS.
 //
 // The v3 themed-deck library authors the starting deck explicitly: the engine's
-// `STARTING_SKILL_IDS` (slippery-slope + brace-for-impact, both level-1
+// `STARTING_CARD_IDS` (slippery-slope + brace-for-impact, both level-1
 // learnable) plus the synthetic Retreat. Each starter teaches a mechanic in
-// fight one — poison erosion and Guard. `engineLearnSkill` re-checks each
+// fight one — poison erosion and Guard. `engineLearnCard` re-checks each
 // requirement, so anything unlearnable is skipped safely.
-const STARTER_SKILL_IDS: readonly string[] = STARTING_SKILL_IDS;
+const STARTER_CARD_IDS: readonly string[] = STARTING_CARD_IDS;
 
 function currentAlignment(store: AppStore): PhilosophicalAlignment {
     const state = store.getState() as unknown as GameState;
@@ -735,7 +735,7 @@ function currentAlignment(store: AppStore): PhilosophicalAlignment {
 
 /** Seeds the starter deck when the player knows nothing yet — the chosen
  *  starter bundle if one was picked (deck identity), else the tier-1 default. */
-function ensureStarterSkills(store: AppStore): void {
+function ensureStarterCards(store: AppStore): void {
     const player = store.getState().player;
     if (!player || (player.knownCards?.length ?? 0) > 0) return;
     // Deck-identity path: a bundle was chosen pre-run. Direct-set its curated
@@ -747,8 +747,8 @@ function ensureStarterSkills(store: AppStore): void {
         return;
     }
     let next = player;
-    for (const id of STARTER_SKILL_IDS) {
-        next = engineLearnSkill(next, id);
+    for (const id of STARTER_CARD_IDS) {
+        next = engineLearnCard(next, id);
     }
     if (next !== player) store.setState({ player: next });
 }
@@ -766,7 +766,7 @@ export interface LearnableCardOffer {
 }
 
 function toLearnableOffer(store: AppStore, skill: Card): LearnableCardOffer {
-    const combatSkill = getCombatSkillById(skill.id);
+    const combatCard = getCombatCardById(skill.id);
     // Spec 32 v3 — THE STRIKE IS DEAD: cards deal no immediate damage, so the
     // offer row carries only the status/effect line (never a fabricated number).
     const damage = 0;
@@ -777,8 +777,8 @@ function toLearnableOffer(store: AppStore, skill: Card): LearnableCardOffer {
         stance: skill.philosophicalAspect,
         category: skill.category,
         tier: skill.tier,
-        effectText: combatSkill
-            ? cardEffectText(combatSkill, damage)
+        effectText: combatCard
+            ? cardEffectText(combatCard, damage)
             : 'NO DIRECT EFFECT',
     };
 }
@@ -789,8 +789,8 @@ function toLearnableOffer(store: AppStore, skill: Card): LearnableCardOffer {
  * `getAvailableCards`, alignment-gated). Empty when nothing new is
  * learnable — the caller skips the modal.
  */
-function getLearnableSkillOffersAction(store: AppStore, count = 3): LearnableCardOffer[] {
-    ensureStarterSkills(store);
+function getLearnableCardOffersAction(store: AppStore, count = 3): LearnableCardOffer[] {
+    ensureStarterCards(store);
     const player = store.getState().player;
     if (!player) return [];
     const pool = getAvailableCards(player).slice();
@@ -805,7 +805,7 @@ function getLearnableSkillOffersAction(store: AppStore, count = 3): LearnableCar
 function learnCardAction(store: AppStore, skillId: string): boolean {
     const player = store.getState().player;
     if (!player) return false;
-    const next = engineLearnSkill(player, skillId);
+    const next = engineLearnCard(player, skillId);
     if (next === player) return false;
     store.setState({ player: next });
     return true;
@@ -849,7 +849,7 @@ export function createAppActions(store: AppStore): AppActions {
             // player — the picker and the engine both read the
             // snapshot's knownCards. The engine's `startCombat` records
             // the encounter (`currentEncounter`) and fires `combat:started`.
-            ensureStarterSkills(store);
+            ensureStarterCards(store);
             store.getState().startCombat(enemy);
         },
         beginHazardEncounter: () => {
@@ -865,7 +865,7 @@ export function createAppActions(store: AppStore): AppActions {
             if (!pending || pending.event.kind !== 'encounter') return null;
             const enemy = pending.event.encounter.enemies[0] ?? null;
             if (!enemy) return null;
-            ensureStarterSkills(store);
+            ensureStarterCards(store);
             clearEventSlice(store);
             // Testing: fatten every live foe so encounters run longer (more
             // turns to exercise status-effect play). See ENCOUNTER_ENEMY_HP_MULTIPLIER.
@@ -1032,7 +1032,7 @@ export function createAppActions(store: AppStore): AppActions {
         abandonLootCache: () => abandonLootCacheAction(store),
         buyVillageWare: (itemId) => buyVillageWareAction(store, itemId),
         sellVillageItem: (index) => sellVillageItemAction(store, index),
-        getLearnableSkillOffers: (count) => getLearnableSkillOffersAction(store, count),
+        getLearnableCardOffers: (count) => getLearnableCardOffersAction(store, count),
         learnCard: (skillId) => learnCardAction(store, skillId),
     };
 }
@@ -1324,7 +1324,7 @@ function changeMapAction(store: AppStore, mapName: MapName): void {
 
 function debugSeedAction(store: AppStore): DebugSeedResult {
     let itemsAdded = 0;
-    let skillsLearned = 0;
+    let cardsLearned = 0;
     let mapReset = false;
 
     try {
@@ -1374,17 +1374,17 @@ function debugSeedAction(store: AppStore): DebugSeedResult {
         //    gating which the dev seed should bypass. The ids it adds
         //    are exactly what the picker renders from `COMBAT_CARDS`.
         try {
-            const fixtureSkillIds: ReadonlyArray<string> = COMBAT_CARDS
+            const fixtureCardIds: ReadonlyArray<string> = COMBAT_CARDS
                 .slice(0, 4)
                 .map((s) => s.id);
-            if (fixtureSkillIds.length > 0) {
+            if (fixtureCardIds.length > 0) {
                 const afterAdd = store.getState();
                 const player = afterAdd.player;
                 const known = new Set<string>(player.knownCards ?? []);
-                for (const id of fixtureSkillIds) {
+                for (const id of fixtureCardIds) {
                     if (!known.has(id)) {
                         known.add(id);
-                        skillsLearned++;
+                        cardsLearned++;
                     }
                 }
                 const nextPlayer: Character = {
@@ -1425,7 +1425,7 @@ function debugSeedAction(store: AppStore): DebugSeedResult {
         console.error('Debug seed action failed:', error);
     }
 
-    return { itemsAdded, skillsLearned, mapReset };
+    return { itemsAdded, cardsLearned, mapReset };
 }
 
 /**
@@ -1700,7 +1700,7 @@ function pickEventChoiceAction(store: AppStore, choiceId: string): void {
                     // dated back to Phase 60b's migration; the engine type
                     // exposes `.enemies` directly today.
                     const enemy = processed.encounter.enemies[0];
-                    ensureStarterSkills(store);
+                    ensureStarterCards(store);
                     store.getState().startCombat(enemy);
                     clearEventSlice(store);
                 } catch (error) {

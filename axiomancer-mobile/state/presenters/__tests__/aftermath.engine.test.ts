@@ -17,7 +17,7 @@ const VICTORY_SNAPSHOT: Extract<AftermathData, { variant: 'victory' }> = {
         description: 'A figure long since gnawed by the road.',
         level: 4,
     },
-    finalBlow: { skillName: 'RENDING STRIKE', damage: 24, descriptor: 'cleaves the binding rib' },
+    finalBlow: { cardName: 'RENDING STRIKE', damage: 24, descriptor: 'cleaves the binding rib' },
     xpReward: 18,
 };
 
@@ -65,7 +65,7 @@ describe('selectAftermathViewModel', () => {
     it('passes through final-blow data with fallbacks', () => {
         const vm = selectAftermathViewModel(VICTORY_SNAPSHOT);
         expect(vm?.kind === 'victory' && vm.finalBlow).toEqual({
-            skillName: 'RENDING STRIKE',
+            cardName: 'RENDING STRIKE',
             damage: 24,
             descriptor: 'cleaves the binding rib',
         });
@@ -74,10 +74,10 @@ describe('selectAftermathViewModel', () => {
     it('uses STRIKE / felled-the-foe fallbacks when finalBlow fields are nullish', () => {
         const vm = selectAftermathViewModel({
             ...VICTORY_SNAPSHOT,
-            finalBlow: { skillName: null, damage: 7, descriptor: null },
+            finalBlow: { cardName: null, damage: 7, descriptor: null },
         });
         expect(vm?.kind === 'victory' && vm.finalBlow).toEqual({
-            skillName: 'STRIKE',
+            cardName: 'STRIKE',
             damage: 7,
             descriptor: 'felled the foe',
         });
@@ -99,7 +99,7 @@ describe('selectAftermathViewModel', () => {
     it('picks the quiet phrase for damage in [10, 20)', () => {
         const vm = selectAftermathViewModel({
             ...VICTORY_SNAPSHOT,
-            finalBlow: { skillName: 'STRIKE', damage: 12, descriptor: 'd' },
+            finalBlow: { cardName: 'STRIKE', damage: 12, descriptor: 'd' },
         });
         expect(vm?.kind === 'victory' && vm.finalBlowPhrase).toContain('wet rag folds');
     });
@@ -107,7 +107,7 @@ describe('selectAftermathViewModel', () => {
     it('picks the ironic phrase for damage < 10', () => {
         const vm = selectAftermathViewModel({
             ...VICTORY_SNAPSHOT,
-            finalBlow: { skillName: 'STRIKE', damage: 5, descriptor: 'd' },
+            finalBlow: { cardName: 'STRIKE', damage: 5, descriptor: 'd' },
         });
         expect(vm?.kind === 'victory' && vm.finalBlowPhrase).toContain('bell did not ring');
     });
@@ -245,7 +245,7 @@ const DEFEAT_SNAPSHOT: Extract<AftermathData, { variant: 'defeat' }> = {
     },
     characterName: 'Worm-Eaten Pilgrim',
     finalBlow: {
-        skillName: 'AXE-FALL',
+        cardName: 'AXE-FALL',
         damage: 28,
         descriptor: 'cleaves the binding rib',
     },
@@ -292,7 +292,7 @@ describe('selectAftermathViewModel: defeat branch', () => {
     it('picks the broken-down cause phrase for damage in [10, 20)', () => {
         const vm = selectAftermathViewModel({
             ...DEFEAT_SNAPSHOT,
-            finalBlow: { skillName: 'STRIKE', damage: 12, descriptor: null },
+            finalBlow: { cardName: 'STRIKE', damage: 12, descriptor: null },
         });
         expect(vm?.kind === 'defeat' && vm.causePhrase).toContain('came in pieces');
     });
@@ -300,7 +300,7 @@ describe('selectAftermathViewModel: defeat branch', () => {
     it('picks the quiet cause phrase for damage < 10', () => {
         const vm = selectAftermathViewModel({
             ...DEFEAT_SNAPSHOT,
-            finalBlow: { skillName: 'STRIKE', damage: 4, descriptor: null },
+            finalBlow: { cardName: 'STRIKE', damage: 4, descriptor: null },
         });
         expect(vm?.kind === 'defeat' && vm.causePhrase).toContain('steady one');
     });
@@ -425,7 +425,7 @@ describe('selectAftermathViewModel: engine narrative lines (Phase 76)', () => {
     it('victory: prefers engine finalBlowLines.quiet for damage in [10, 20)', () => {
         const vm = selectAftermathViewModel({
             ...VICTORY_SNAPSHOT,
-            finalBlow: { skillName: 'STRIKE', damage: 12, descriptor: 'd' },
+            finalBlow: { cardName: 'STRIKE', damage: 12, descriptor: 'd' },
             enemy: { ...VICTORY_SNAPSHOT.enemy, finalBlowLines: FINAL_BLOW_LINES },
         });
         expect(vm?.kind === 'victory' && vm.finalBlowPhrase).toBe(FINAL_BLOW_LINES.quiet);
@@ -434,7 +434,7 @@ describe('selectAftermathViewModel: engine narrative lines (Phase 76)', () => {
     it('victory: prefers engine finalBlowLines.ironic for damage < 10', () => {
         const vm = selectAftermathViewModel({
             ...VICTORY_SNAPSHOT,
-            finalBlow: { skillName: 'STRIKE', damage: 5, descriptor: 'd' },
+            finalBlow: { cardName: 'STRIKE', damage: 5, descriptor: 'd' },
             enemy: { ...VICTORY_SNAPSHOT.enemy, finalBlowLines: FINAL_BLOW_LINES },
         });
         expect(vm?.kind === 'victory' && vm.finalBlowPhrase).toBe(FINAL_BLOW_LINES.ironic);
@@ -475,7 +475,7 @@ describe('selectAftermathViewModel: engine narrative lines (Phase 76)', () => {
     it('defeat: prefers engine causeLines.broken for damage in [10, 20)', () => {
         const vm = selectAftermathViewModel({
             ...DEFEAT_SNAPSHOT,
-            finalBlow: { skillName: 'STRIKE', damage: 12, descriptor: null },
+            finalBlow: { cardName: 'STRIKE', damage: 12, descriptor: null },
             enemy: { ...DEFEAT_SNAPSHOT.enemy, causeLines: CAUSE_LINES },
         });
         expect(vm?.kind === 'defeat' && vm.causePhrase).toBe(CAUSE_LINES.broken);
@@ -484,7 +484,7 @@ describe('selectAftermathViewModel: engine narrative lines (Phase 76)', () => {
     it('defeat: prefers engine causeLines.quiet for damage < 10', () => {
         const vm = selectAftermathViewModel({
             ...DEFEAT_SNAPSHOT,
-            finalBlow: { skillName: 'STRIKE', damage: 4, descriptor: null },
+            finalBlow: { cardName: 'STRIKE', damage: 4, descriptor: null },
             enemy: { ...DEFEAT_SNAPSHOT.enemy, causeLines: CAUSE_LINES },
         });
         expect(vm?.kind === 'defeat' && vm.causePhrase).toBe(CAUSE_LINES.quiet);

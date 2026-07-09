@@ -4,7 +4,7 @@
  * Shown once, after EMBARK, to a brand-new player (no skills seeded, no bundle
  * flag). The chosen bundle seeds the starter deck and tags the run with a
  * HIDDEN archetype (never shown here) that biases later card rewards. Returning
- * players never see this; `ensureStarterSkills` is the safety net if skipped.
+ * players never see this; `ensureStarterCards` is the safety net if skipped.
  */
 
 import { View, Text, Pressable, ScrollView } from 'react-native';

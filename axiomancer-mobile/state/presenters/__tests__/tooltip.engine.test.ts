@@ -328,7 +328,7 @@ describe('selectTooltipContentFor', () => {
             const first = cardLibrary[0];
             const content = selectTooltipContentFor('skill', first.id, EMPTY_STATE);
             expect(content).not.toBeNull();
-            // getCombatSkillById uppercases the name.
+            // getCombatCardById uppercases the name.
             expect(content?.title).toBe(first.name.toUpperCase());
             expect(content?.body).toBe(first.description);
             expect(content?.footnote).toMatch(/^stance (HEART|BODY|MIND)$/);

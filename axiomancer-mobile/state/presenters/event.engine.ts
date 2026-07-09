@@ -739,7 +739,7 @@ function extractDialogueConsequences(choice: DialogueChoice): ReadonlyArray<Even
             amount: e.progressQuest.amount ?? 1,
         });
     }
-    if (e.teachSkill) out.push({ kind: 'skill-learn', label: e.teachSkill });
+    if (e.teachCard) out.push({ kind: 'skill-learn', label: e.teachCard });
     if (e.setFlag) out.push({ kind: 'flag', label: e.setFlag });
     return out;
 }

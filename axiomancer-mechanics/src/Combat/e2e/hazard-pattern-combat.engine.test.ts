@@ -33,7 +33,7 @@ import {
     playSignatureSkill, discardCombatCard, projectCardImpact, endTurn,
 } from '../combat.engine';
 import { SIGNATURE_KITS, playerArchetype, CONCLUDE_DMG_PER_STACK } from '../combat.signature';
-import { rollCombatCardRewards, addRewardCard, unlockSkillViaDilemma, COMBAT_REWARD_POOL } from '../combat.rewards';
+import { rollCombatCardRewards, addRewardCard, unlockCardViaDilemma, COMBAT_REWARD_POOL } from '../combat.rewards';
 import { buildCombatDeck, COMBAT_HAND_SIZE } from '../combat.deck';
 import { getCardById } from '../../Cards/cards.library';
 import { registerSandboxCards } from '../../Cards/cards.sandbox';
@@ -616,12 +616,12 @@ describe('Spec 26b §B/§C/§D — archetype kit, rewards, unlock, difficulty fl
         expect(after).toBe(before + 1);
     });
 
-    it('unlockSkillViaDilemma adds a new skill, bypassing gates; no-op if known', () => {
+    it('unlockCardViaDilemma adds a new skill, bypassing gates; no-op if known', () => {
         const player = makePlayer([DOT_BODY]);
         const newId = COMBAT_REWARD_POOL.find(id => id !== DOT_BODY && getCardById(id))!;
-        const unlocked = unlockSkillViaDilemma(player, newId);
+        const unlocked = unlockCardViaDilemma(player, newId);
         expect(unlocked.knownCards).toContain(newId);
-        expect(unlockSkillViaDilemma(unlocked, newId)).toBe(unlocked); // already known → same ref
+        expect(unlockCardViaDilemma(unlocked, newId)).toBe(unlocked); // already known → same ref
     });
 
     it('even a tiny enemy gets a real threat sequence (its attack has bite)', () => {

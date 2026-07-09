@@ -96,8 +96,8 @@ export function CombatVictoryPanel({ vm, onContinue }: CombatVictoryPanelProps) 
                                 {vm.finalBlow !== null && (
                                     <>
                                         {' · '}
-                                        <Text style={styles.finalBlowSkill}>
-                                            {vm.finalBlow.skillName}
+                                        <Text style={styles.finalBlowCard}>
+                                            {vm.finalBlow.cardName}
                                         </Text>
                                         {' · '}
                                         <Text style={styles.finalBlowDamage}>
@@ -375,7 +375,7 @@ const useStyles = makeStyles((AXM) => ({
         letterSpacing: 1.5,
         color: AXM.bone,
     },
-    finalBlowSkill: {
+    finalBlowCard: {
         color: AXM.parchment,
     },
     finalBlowDamage: {

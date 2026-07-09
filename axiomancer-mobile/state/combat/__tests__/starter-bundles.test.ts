@@ -1,5 +1,5 @@
 import { describe, expect, it } from '@jest/globals';
-import { COMBAT_REWARD_POOL, STARTING_SKILL_IDS, getCard } from '@mechanics';
+import { COMBAT_REWARD_POOL, STARTING_CARD_IDS, getCard } from '@mechanics';
 
 import {
     STARTER_BUNDLES,
@@ -11,7 +11,7 @@ import {
 import { createAppStore } from '@/state/store';
 import { createMemoryAdapter } from '@/test-utils/memoryAdapter';
 
-const FULL_POOL = new Set([...STARTING_SKILL_IDS, ...COMBAT_REWARD_POOL]);
+const FULL_POOL = new Set([...STARTING_CARD_IDS, ...COMBAT_REWARD_POOL]);
 
 function makeStore() {
     return createAppStore({ adapter: createMemoryAdapter() });

@@ -104,7 +104,7 @@ describe('createAppActions: dispatch', () => {
         const store = createAppStore({ adapter });
         const actions = createAppActions(store);
 
-        // startCombat runs ensureStarterSkills for a skill-less new player.
+        // startCombat runs ensureStarterCards for a skill-less new player.
         actions.startCombat(makeEnemy());
         const player = selectPlayer(store.getState());
 

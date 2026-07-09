@@ -85,7 +85,7 @@ export interface DialogueChoice {
         startQuest?: QuestName;
         progressQuest?: { name: QuestName; objectiveId: string; amount?: number };
         completeQuest?: QuestName;
-        teachSkill?: string;
+        teachCard?: string;
         setFlag?: string;
         grantCurrency?: number;
         /**

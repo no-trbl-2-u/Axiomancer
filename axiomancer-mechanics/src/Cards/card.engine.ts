@@ -348,11 +348,11 @@ export function executeCard(
             }
 
             // applyEffectOnFire — apply the additional effect on the
-            // caster. Uses the same applySkillEffect path the rest of
+            // caster. Uses the same applyCardEffect path the rest of
             // the engine uses (so resist / rebound / stacking semantics
             // are honoured).
             if (syn.applyEffectOnFire) {
-                const result = applySkillEffect(
+                const result = applyCardEffect(
                     syn.applyEffectOnFire, skill, workingCaster, workingTarget, state.round,
                 );
                 workingCaster = result.caster;
@@ -396,7 +396,7 @@ export function executeCard(
     }
 
     for (const payload of skill.combatEffects ?? []) {
-        const result = applySkillEffect(
+        const result = applyCardEffect(
             payload, skill, workingCaster, workingTarget, state.round,
         );
         workingCaster = result.caster;
@@ -459,7 +459,7 @@ export function executeCard(
     };
 }
 
-interface SkillEffectResult {
+interface CardEffectResult {
     caster: Combatant;
     target: Combatant;
     events: CardEvent[];
@@ -480,13 +480,13 @@ interface SkillEffectResult {
  * `caster.effects`; `'enemy'` routes to `target.effects` (the opposing
  * side, regardless of which Combatant subtype that is).
  */
-function applySkillEffect(
+function applyCardEffect(
     payload: CardCombatEffects,
     skill: Card,
     caster: Combatant,
     target: Combatant,
     round: number,
-): SkillEffectResult {
+): CardEffectResult {
     const events: CardEvent[] = [];
     const effect = lookupEffect(payload.effectId);
     if (!effect) {
@@ -597,7 +597,7 @@ function applySpecialMechanic(
     target: Combatant,
     round: number,
     state: CombatState,
-): SkillEffectResult {
+): CardEffectResult {
     const events: CardEvent[] = [];
 
     switch (mechanic.kind) {

@@ -37,7 +37,7 @@ export interface EnginePayload {
      * array means the levelup didn't unlock anything new. Absent on every
      * other topic.
      */
-    unlockedSkills?: string[];
+    unlockedCards?: string[];
 }
 
 /** GameEvent narrowed by `type`. Payload is always the engine envelope. */

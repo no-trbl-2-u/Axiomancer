@@ -51,7 +51,7 @@ export type AftermathData =
               pactLines?: { quiet: string; setDown: string; heavy: string };
               causeLines?: { brutal: string; broken: string; quiet: string };
           };
-          finalBlow: { skillName: string | null; damage: number; descriptor: string | null } | null;
+          finalBlow: { cardName: string | null; damage: number; descriptor: string | null } | null;
           /** Engine-granted XP (`CombatEndReport.xpGained`). */
           xpReward: number | null;
           /**
@@ -116,7 +116,7 @@ export type AftermathData =
            * field). The damage figure here is the damage taken by
            * the player on the killing round, not damage dealt.
            */
-          finalBlow: { skillName: string | null; damage: number; descriptor: string | null } | null;
+          finalBlow: { cardName: string | null; damage: number; descriptor: string | null } | null;
           /**
            * Run summary snapshot — `roundsEndured` comes from the
            * combat slice; `encountersFaced` + `deepestNodeId` come

@@ -252,8 +252,8 @@ export type { HazardAutoPolicyId, HazardCombatAutoOptions, HazardCombatAutoResul
 // Spec 26b tuning §B/§C/§D — archetype signatures, deckbuilder rewards, unlock hook
 export { SIGNATURE_KITS, signaturesForArchetype, playerArchetype, CONCLUDE_DMG_PER_STACK } from './combat.signature';
 export {
-    COMBAT_REWARD_POOL, STARTING_SKILL_ID, STARTING_SKILL_IDS, rollCombatCardRewards, addRewardCard,
-    unlockSkillViaDilemma,
+    COMBAT_REWARD_POOL, STARTING_CARD_ID, STARTING_CARD_IDS, rollCombatCardRewards, addRewardCard,
+    unlockCardViaDilemma,
 } from './combat.rewards';
 export type { PlayerArchetype } from './combat.encounter.types';
 export {

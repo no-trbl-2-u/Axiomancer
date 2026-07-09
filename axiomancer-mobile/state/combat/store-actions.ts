@@ -12,7 +12,7 @@
 
 import {
     COMBAT_REWARD_POOL,
-    STARTING_SKILL_IDS,
+    STARTING_CARD_IDS,
     getCard,
     listDeckPresets,
     type CombatCard,
@@ -61,15 +61,15 @@ export function completeCombatTutorialAction(store: AppStore, skipped: boolean):
 
 /** Every distinct combat card the engine can deal: starters + the 70-card pool. */
 const COMBAT_CARD_POOL: readonly string[] = Object.freeze(
-    Array.from(new Set([...STARTING_SKILL_IDS, ...COMBAT_REWARD_POOL])),
+    Array.from(new Set([...STARTING_CARD_IDS, ...COMBAT_REWARD_POOL])),
 );
 
 /**
- * The starting deck (spec 32 v3 §7): the engine's `STARTING_SKILL_IDS`
+ * The starting deck (spec 32 v3 §7): the engine's `STARTING_CARD_IDS`
  * (slippery-slope + brace-for-impact) — each teaches a mechanic in fight one.
  * The synthetic Retreat rides along via `buildCombatDeck`.
  */
-const STARTER_DECK_IDS: readonly string[] = STARTING_SKILL_IDS;
+const STARTER_DECK_IDS: readonly string[] = STARTING_CARD_IDS;
 
 /** The ten themed preset ids (spec 32 v3 §8), in the engine's display order. */
 export type ThemedDeckId =
@@ -262,7 +262,7 @@ export function runArchetype(store: AppStore): StarterArchetype | null {
  * Records the player's starter-bundle choice: seeds the bundle deck onto the
  * player (when one is loaded and skill-less), and persists the bundle + hidden
  * archetype tag + the "chosen" flag so the picker never re-shows. Seeding also
- * happens lazily at first combat via `ensureStarterSkills`, so a null/!loaded
+ * happens lazily at first combat via `ensureStarterCards`, so a null/!loaded
  * player here is safe — the choice still rides the save as a flag.
  */
 export function seedStarterBundleAction(store: AppStore, bundleId: string): void {

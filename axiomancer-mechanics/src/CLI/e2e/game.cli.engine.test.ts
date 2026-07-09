@@ -20,7 +20,7 @@ import { randomUUID } from 'crypto';
 // Test the CLI components that we can import directly
 import { parseArgv, setIoMode, setOutputMode } from '../io';
 import { 
-    devSetLevel, devSetStats, devLearnSkills, 
+    devSetLevel, devSetStats, devLearnCards, 
     devGrantAllEquipment, devGrantCurrency 
 } from '../dev-tools';
 
@@ -133,12 +133,12 @@ describe('CLI Game Driver', () => {
     it('should support dev tools skill learning', async () => {
         const emitter = createEventEmitter();
         const store = createGameStore(nullAdapter, emitter);
-        const initialSkillsLength = store.getState().player.knownCards.length;
+        const initialCardsLength = store.getState().player.knownCards.length;
         
-        const result = devLearnSkills(store, ['basic-strike']);
+        const result = devLearnCards(store, ['basic-strike']);
         
         expect(result.ok).toBe(true);
-        expect(store.getState().player.knownCards.length).toBeGreaterThanOrEqual(initialSkillsLength);
+        expect(store.getState().player.knownCards.length).toBeGreaterThanOrEqual(initialCardsLength);
     });
 
     it('should support I/O mode configuration', () => {

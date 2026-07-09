@@ -2,7 +2,7 @@
  * Hermetic e2e — Phase 30 unit 2 (Spec 06 Q7 + Phase 30 brief).
  *
  * Verifies that `character:levelup` events emitted by the store carry
- * an `unlockedSkills: string[]` payload listing skill ids that crossed
+ * an `unlockedCards: string[]` payload listing skill ids that crossed
  * their `learningRequirement` threshold during the promotion. The
  * computation lives in `enrichExtra` in `src/Game/store.ts`; this test
  * drives the public store surface (no internal-helper calls).
@@ -44,12 +44,12 @@ function buildStore(level: number, opts: {
 }
 
 describe('character:levelup payload — cards are no longer level-gated (2026-07-08)', () => {
-    it('emits no unlockedSkills when LEVEL_UP fires without a level change', () => {
+    it('emits no unlockedCards when LEVEL_UP fires without a level change', () => {
         const { store, captured } = buildStore(1, { experience: 0 });
         // experience < threshold → applyLevelUps is a no-op.
         store.getState().levelUp();
         expect(captured).toHaveLength(1);
-        expect(captured[0].payload.unlockedSkills).toBeUndefined();
+        expect(captured[0].payload.unlockedCards).toBeUndefined();
         // (enrichExtra returns the unchanged extra when no promotion fired.)
     });
 
@@ -64,7 +64,7 @@ describe('character:levelup payload — cards are no longer level-gated (2026-07
         });
         store.getState().levelUp();
         expect(store.getState().player.level).toBeGreaterThanOrEqual(14);
-        const unlocked = captured[0].payload.unlockedSkills ?? [];
+        const unlocked = captured[0].payload.unlockedCards ?? [];
         expect(unlocked).toEqual([]);
     });
 
@@ -75,7 +75,7 @@ describe('character:levelup payload — cards are no longer level-gated (2026-07
             knownCards: [someKnown],
         });
         store.getState().levelUp();
-        const unlocked = captured[0].payload.unlockedSkills ?? [];
+        const unlocked = captured[0].payload.unlockedCards ?? [];
         expect(unlocked).toEqual([]);
     });
 });

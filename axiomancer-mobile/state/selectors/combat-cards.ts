@@ -100,7 +100,7 @@ export const COMBAT_CARDS: readonly CombatCardOption[] = Object.freeze(
  * pre-Phase-16 save). Callers should treat `null` the same way they
  * treated a missing fixture entry.
  */
-export function getCombatSkillById(id: string): CombatCardOption | null {
+export function getCombatCardById(id: string): CombatCardOption | null {
     const skill = getCardById(id);
     return skill ? toCombatCardOption(skill) : null;
 }

@@ -1198,7 +1198,7 @@ function playBottomAction(
     const before = intensityMap(state.enemy.effects);
     let shimState: CombatState = skillShim(state);
     let res = executeCard(shimState, skill.id, lookupCard, 'player');
-    let allSkillEvents = [...res.events];
+    let allCardEvents = [...res.events];
     if (echoed) {
         // Second pass re-applies the card's status payloads (stacking rules
         // apply). Runs against the folded state so intensities accumulate.
@@ -1208,7 +1208,7 @@ function playBottomAction(
             combatResources: res.state.combatResources,
         };
         res = executeCard(shimState, skill.id, lookupCard, 'player');
-        allSkillEvents = [...allSkillEvents, ...res.events];
+        allCardEvents = [...allCardEvents, ...res.events];
         events.push({ kind: 'echoed', cardId: card.id });
     }
 
@@ -1652,7 +1652,7 @@ function playBottomAction(
                             const replay = executeCard(shim2, lastSkill.id, lookupCard, 'player');
                             player = replay.state.player as Character;
                             enemy = replay.state.enemy as Enemy;
-                            allSkillEvents = [...allSkillEvents, ...replay.events];
+                            allCardEvents = [...allCardEvents, ...replay.events];
                         } catch { break; }
                     }
                     events.push({ kind: 'echoed', cardId: lastSkill.id });
@@ -1754,7 +1754,7 @@ function playBottomAction(
     //    DoT will tick real HP each phase (the status damage engine); control gates
     //    the enemy's turn via `canAct`. Attribute projected DoT for the summary.
     const selfDebuffsLanded: { effectId: string; intensity: number; duration: number }[] = [];
-    for (const ev of allSkillEvents) {
+    for (const ev of allCardEvents) {
         if (ev.kind === 'effect-applied') {
             const def = ev.effect;
             const target: 'self' | 'enemy' = ev.appliedTo;
@@ -2603,8 +2603,8 @@ export function processBetweenPhases(
             }
             if (omen.stance === incomingStance) {
                 omenHits += 1;
-                const omenSkill = lookupCard(omen.cardId);
-                const omenMech = (omenSkill?.specialMechanics ?? []).find(m => m.kind === 'omen') as
+                const omenCard = lookupCard(omen.cardId);
+                const omenMech = (omenCard?.specialMechanics ?? []).find(m => m.kind === 'omen') as
                     Extract<CardSpecialMechanic, { kind: 'omen' }> | undefined;
                 if (omenMech) {
                     // `the-oracles-eye` (E): omen riders land +50% (rounded up)

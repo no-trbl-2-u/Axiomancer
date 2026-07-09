@@ -26,7 +26,7 @@ const zero: CombatResources = { heart: 0, body: 0, mind: 0, fallacy: 0, paradox:
  * deleted from the schema): the fallacy card applies a DoT, the paradox card
  * a self-buff. Combat-engine-owned verbs (guard etc.) no-op here.
  */
-const dotSkill: Card = {
+const dotCard: Card = {
     id: 'sk_erode',
     name: 'Test Erosion',
     category: 'fallacy',
@@ -40,7 +40,7 @@ const dotSkill: Card = {
     combatEffects: [{ effectId: 'debuff_bleed', appliedTo: 'opponent', intensity: 2, duration: 2 }],
 };
 
-const buffSkill: Card = {
+const buffCard: Card = {
     id: 'sk_resolve',
     name: 'Self-Resolve',
     category: 'paradox',
@@ -54,7 +54,7 @@ const buffSkill: Card = {
     combatEffects: [{ effectId: 'buff_thorns', appliedTo: 'self', intensity: 1, duration: 2 }],
 };
 
-const debuffSkill: Card = {
+const debuffCard: Card = {
     id: 'sk_doubt',
     name: 'Sow Doubt',
     category: 'fallacy',
@@ -73,7 +73,7 @@ const debuffSkill: Card = {
 const fixturePlayer = () => createCharacter({
     name: 'P', level: 1,
     baseStats: { heart: 4, body: 6, mind: 4 },
-    knownCards: [dotSkill.id, buffSkill.id, debuffSkill.id],
+    knownCards: [dotCard.id, buffCard.id, debuffCard.id],
 });
 
 const fixtureEnemy = () => createEnemy({
@@ -88,7 +88,7 @@ const fixtureState = (resources: Partial<CombatResources> = {}): CombatState => 
 };
 
 const lookup = (id: string): Card | undefined =>
-    [dotSkill, buffSkill, debuffSkill].find(s => s.id === id);
+    [dotCard, buffCard, debuffCard].find(s => s.id === id);
 
 describe('generateBasicActionResources', () => {
     it('attack hit on body stance grants +3 body', () => {
@@ -128,9 +128,9 @@ describe('generatePhilosophicalResource', () => {
 describe('calculateCardDamage — THE STRIKE IS DEAD (spec 32 v3 §1)', () => {
     it('returns 0 unconditionally: no card deals stat-scaled damage', () => {
         const player = fixturePlayer(); // body 6 — irrelevant by design
-        expect(calculateCardDamage(player, dotSkill)).toBe(0);
-        expect(calculateCardDamage(player, buffSkill)).toBe(0);
-        expect(calculateCardDamage(player, debuffSkill, fixtureEnemy())).toBe(0);
+        expect(calculateCardDamage(player, dotCard)).toBe(0);
+        expect(calculateCardDamage(player, buffCard)).toBe(0);
+        expect(calculateCardDamage(player, debuffCard, fixtureEnemy())).toBe(0);
     });
 });
 
@@ -139,7 +139,7 @@ describe('executeCard — no direct HP movement (spec 32 v3)', () => {
         mockSequentialRng(0.05); // land the tiered resist roll
         const state = fixtureState({ body: 3 });
         const enemyHpBefore = state.enemy.health;
-        const { state: next, events } = executeCard(state, dotSkill.id, lookup);
+        const { state: next, events } = executeCard(state, dotCard.id, lookup);
 
         // HP falls to DoT ticks / payoffs / drips / reflect — never to the play.
         expect(next.enemy.health).toBe(enemyHpBefore);
@@ -161,7 +161,7 @@ describe('executeCard — no direct HP movement (spec 32 v3)', () => {
             combatResources: { ...zero, heart: 3 },
         };
         const hpBefore = state.player.health;
-        const { state: next, events } = executeCard(state, buffSkill.id, lookup);
+        const { state: next, events } = executeCard(state, buffCard.id, lookup);
 
         expect(next.player.health).toBe(hpBefore); // no stat-scaled self-heal
         expect(events.find(e => e.kind === 'heal')).toBeUndefined();
@@ -175,7 +175,7 @@ describe('executeCard — debuff (effect application)', () => {
         // Tier 2 debuff resist roll → land guaranteed by stubbing nat-2 (low resist roll).
         mockSequentialRng(0.05);
         const state = fixtureState({ mind: 2, fallacy: 1 });
-        const { state: next, events } = executeCard(state, debuffSkill.id, lookup);
+        const { state: next, events } = executeCard(state, debuffCard.id, lookup);
 
         expect(next.enemy.effects.some(e => e.effectId === 'debuff_poison')).toBe(true);
         expect(next.combatResources).toEqual({ ...zero, mind: 2, fallacy: 2 });
@@ -187,7 +187,7 @@ describe('executeCard — guards', () => {
     it('throws when skill is not known', () => {
         const state = fixtureState({ body: 3 });
         const player = { ...state.player, knownCards: [] };
-        expect(() => executeCard({ ...state, player }, dotSkill.id, lookup))
+        expect(() => executeCard({ ...state, player }, dotCard.id, lookup))
             .toThrow(/not known/);
     });
 
@@ -204,8 +204,8 @@ describe('executeCard — guards', () => {
         // owned — otherwise playing a dealt reward card crashes combat.
         mockSequentialRng(0.05);
         const state = fixtureState({ body: 3 });
-        const player = { ...state.player, knownCards: [], combatRewardCards: [dotSkill.id] };
-        expect(() => executeCard({ ...state, player }, dotSkill.id, lookup))
+        const player = { ...state.player, knownCards: [], combatRewardCards: [dotCard.id] };
+        expect(() => executeCard({ ...state, player }, dotCard.id, lookup))
             .not.toThrow();
     });
 });
@@ -213,7 +213,7 @@ describe('executeCard — guards', () => {
 describe('executeCard — Phase 49 casterSide=enemy', () => {
     it("routes an enemy-rotation card's status onto the player, HP untouched", () => {
         mockSequentialRng(0.05);
-        const enemy = { ...fixtureEnemy(), skills: [dotSkill] };
+        const enemy = { ...fixtureEnemy(), skills: [dotCard] };
         const state: CombatState = {
             ...initializeCombat(fixturePlayer(), enemy),
             // D2 sentinel — enemy bypasses resource costs.
@@ -221,7 +221,7 @@ describe('executeCard — Phase 49 casterSide=enemy', () => {
         };
         const playerHpBefore = state.player.health;
 
-        const { state: next, events } = executeCard(state, dotSkill.id, lookup, 'enemy');
+        const { state: next, events } = executeCard(state, dotCard.id, lookup, 'enemy');
 
         // Spec 32 v3: the play itself never moves HP — the DoT does the work.
         expect(next.player.health).toBe(playerHpBefore);
@@ -233,7 +233,7 @@ describe('executeCard — Phase 49 casterSide=enemy', () => {
 
     it("routes a self-target buff onto the enemy when casterSide='enemy'", () => {
         mockSequentialRng(0.5);
-        const enemyLow = { ...fixtureEnemy(), skills: [buffSkill] };
+        const enemyLow = { ...fixtureEnemy(), skills: [buffCard] };
         enemyLow.health = Math.max(1, enemyLow.health - 10);
         const state: CombatState = {
             ...initializeCombat(fixturePlayer(), enemyLow),
@@ -242,7 +242,7 @@ describe('executeCard — Phase 49 casterSide=enemy', () => {
         const enemyHpBefore = state.enemy.health;
         const playerHpBefore = state.player.health;
 
-        const { state: next, events } = executeCard(state, buffSkill.id, lookup, 'enemy');
+        const { state: next, events } = executeCard(state, buffCard.id, lookup, 'enemy');
 
         // No stat-scaled heal any more — the buff is the whole payload.
         expect(next.enemy.health).toBe(enemyHpBefore);
@@ -258,7 +258,7 @@ describe('executeCard — Phase 49 casterSide=enemy', () => {
             ...initializeCombat(fixturePlayer(), enemy),
             combatResources: { heart: 999, body: 999, mind: 999, fallacy: 999, paradox: 999 },
         };
-        expect(() => executeCard(state, dotSkill.id, lookup, 'enemy'))
+        expect(() => executeCard(state, dotCard.id, lookup, 'enemy'))
             .toThrow(/not in the enemy's rotation/);
     });
 
@@ -268,7 +268,7 @@ describe('executeCard — Phase 49 casterSide=enemy', () => {
         mockSequentialRng(0.05);
         const state = fixtureState({ body: 3 });
         const enemyHpBefore = state.enemy.health;
-        const { state: next } = executeCard(state, dotSkill.id, lookup);
+        const { state: next } = executeCard(state, dotCard.id, lookup);
 
         expect(next.enemy.health).toBe(enemyHpBefore);
         expect(next.enemy.effects.some(e => e.effectId === 'debuff_bleed')).toBe(true);
