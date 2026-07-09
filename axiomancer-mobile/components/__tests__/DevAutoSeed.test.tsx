@@ -39,7 +39,7 @@ describe('DevAutoSeed: DEV behaviour', () => {
         // Skills + map are part of the same seed action; their presence
         // confirms `actions.debugSeed()` fired (rather than some other path
         // populating items).
-        expect((store.getState().player.knownSkills ?? []).length).toBeGreaterThan(0);
+        expect((store.getState().player.knownCards ?? []).length).toBeGreaterThan(0);
     });
 
     it('renders nothing visible (side-effect-only component)', () => {

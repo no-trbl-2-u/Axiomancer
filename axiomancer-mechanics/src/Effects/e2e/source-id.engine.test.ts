@@ -16,7 +16,7 @@ import { mockSequentialRng } from '../../test-utils/rng';
 import { createCharacter } from '../../Character';
 import { createEnemy } from '../../Enemy';
 import { initializeCombat } from '../../Combat/combat.reducer';
-import { executeSkill } from '../../Cards/skill.engine';
+import { executeCard } from '../../Cards/card.engine';
 import type { Card } from '../../Cards/types';
 import { applyProcOutcome } from '../../Combat/combat-effects';
 import type { ProcRollOutcome } from '../../Combat/combat-effects';
@@ -59,7 +59,7 @@ function fixturePlayer() {
         name: 'P',
         level: 1,
         baseStats: { heart: 4, body: 6, mind: 4 },
-        knownSkills: [debuffSkill.id, buffSkill.id],
+        knownCards: [debuffSkill.id, buffSkill.id],
     });
 }
 
@@ -83,7 +83,7 @@ describe('Phase 38 — player skill applies debuff onto enemy', () => {
         const base = initializeCombat(player, enemy);
         const state = { ...base, combatResources: { heart: 0, body: 0, mind: 2, fallacy: 0, paradox: 0 } };
 
-        const { state: next } = executeSkill(state, debuffSkill.id, lookup(debuffSkill));
+        const { state: next } = executeCard(state, debuffSkill.id, lookup(debuffSkill));
 
         const applied = next.enemy.effects.find(e => e.effectId === 'debuff_poison');
         expect(applied).toBeDefined();
@@ -99,7 +99,7 @@ describe('Phase 38 — player skill applies buff onto self', () => {
         const base = initializeCombat(player, enemy);
         const state = { ...base, combatResources: { heart: 1, body: 0, mind: 0, fallacy: 0, paradox: 0 } };
 
-        const { state: next } = executeSkill(state, buffSkill.id, lookup(buffSkill));
+        const { state: next } = executeCard(state, buffSkill.id, lookup(buffSkill));
 
         const applied = next.player.effects.find(e => e.effectId === 'buff_thorns');
         expect(applied).toBeDefined();
@@ -166,7 +166,7 @@ describe('Phase 38 — sourceId round-trips through JSON serialization (save/loa
         const enemy = fixtureEnemy();
         const base = initializeCombat(player, enemy);
         const state = { ...base, combatResources: { heart: 0, body: 0, mind: 2, fallacy: 0, paradox: 0 } };
-        const { state: applied } = executeSkill(state, debuffSkill.id, lookup(debuffSkill));
+        const { state: applied } = executeCard(state, debuffSkill.id, lookup(debuffSkill));
 
         const serialized = JSON.stringify(applied);
         const restored = JSON.parse(serialized);

@@ -2,7 +2,7 @@
  * Phase 91 — Friendship increment skill mechanics e2e test.
  *
  * Hermetic coverage of the `incrementsFriendship?: number` field on cards and
- * its integration with `executeSkill`. The pre-v3 library cards that carried
+ * its integration with `executeCard`. The pre-v3 library cards that carried
  * the field (soothing-words, peaceful-gesture, empathetic-understanding)
  * retired with the spec 32 v3 overhaul; the MACHINERY is kept (the Charm
  * theme and enemy signatures lean on it), so this suite drives it through
@@ -13,7 +13,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { createCharacter } from '../../Character';
 import { createEnemy } from '../../Enemy';
 import { initializeCombat } from '../../Combat/combat.reducer';
-import { executeSkill } from '../skill.engine';
+import { executeCard } from '../card.engine';
 import type { Card } from '../types';
 import { CombatState } from '../../Combat/types';
 
@@ -63,7 +63,7 @@ describe('Friendship increment skills', () => {
         name: 'Test Player',
         level: 1,
         baseStats: { body: 6, mind: 4, heart: 4 },
-        knownSkills: [soothe.id, empathize.id, plain.id],
+        knownCards: [soothe.id, empathize.id, plain.id],
     });
     const enemy = createEnemy({
         id: 'test-enemy',
@@ -83,7 +83,7 @@ describe('Friendship increment skills', () => {
     describe('incrementsFriendship: 1', () => {
         it('increments the friendship counter by 1 and emits the event', () => {
             const initialFriendship = state.friendshipCounter;
-            const result = executeSkill(state, soothe.id, lookup);
+            const result = executeCard(state, soothe.id, lookup);
 
             expect(result.state.friendshipCounter).toBe(initialFriendship + 1);
             expect(result.events).toContainEqual(
@@ -99,7 +99,7 @@ describe('Friendship increment skills', () => {
     describe('incrementsFriendship: 2', () => {
         it('increments the friendship counter by 2 and emits the event', () => {
             const initialFriendship = state.friendshipCounter;
-            const result = executeSkill(state, empathize.id, lookup);
+            const result = executeCard(state, empathize.id, lookup);
 
             expect(result.state.friendshipCounter).toBe(initialFriendship + 2);
             expect(result.events).toContainEqual(
@@ -114,7 +114,7 @@ describe('Friendship increment skills', () => {
 
     describe('cards without incrementsFriendship', () => {
         it('do not emit friendship-incremented events', () => {
-            const result = executeSkill(state, plain.id, lookup);
+            const result = executeCard(state, plain.id, lookup);
 
             expect(result.events).not.toContainEqual(
                 expect.objectContaining({
@@ -129,7 +129,7 @@ describe('Friendship increment skills', () => {
         it('increments friendship after effects resolve, on top of existing tally', () => {
             const stateWithFriendship = { ...state, friendshipCounter: 5 };
 
-            const result = executeSkill(stateWithFriendship, soothe.id, lookup);
+            const result = executeCard(stateWithFriendship, soothe.id, lookup);
 
             expect(result.state.friendshipCounter).toBe(6);
             const friendshipEvent = result.events.find(e => e.kind === 'friendship-incremented');

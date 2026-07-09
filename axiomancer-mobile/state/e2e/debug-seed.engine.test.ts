@@ -3,7 +3,7 @@
  *
  * Drives `actions.debugSeed()` end-to-end through the engine store
  * and asserts on the resulting `GameState`: inventory gains items
- * across categories, knownSkills gains fixture ids, current map
+ * across categories, knownCards gains fixture ids, current map
  * resets to its starting node with cleared discovered/consumed
  * sets.
  *
@@ -15,7 +15,7 @@ import { afterEach, describe, expect, it, jest } from '@jest/globals';
 import { createMemoryAdapter } from '@/test-utils/memoryAdapter';
 import { createAppActions } from '@/state/actions';
 import { createAppStore } from '@/state/store';
-import { COMBAT_SKILLS } from '@/state/selectors/combat-skills';
+import { COMBAT_CARDS } from '@/state/selectors/combat-cards';
 
 afterEach(() => {
     jest.restoreAllMocks();
@@ -58,17 +58,17 @@ describe('debugSeed: items + skills + map reset', () => {
     it('teaches at least 2 skills covering both fixture categories', () => {
         const { store, actions } = makeStore();
 
-        const before = store.getState().player.knownSkills ?? [];
+        const before = store.getState().player.knownCards ?? [];
         expect(before).toHaveLength(0);
 
         const result = actions.debugSeed();
 
-        const after = store.getState().player.knownSkills ?? [];
+        const after = store.getState().player.knownCards ?? [];
         expect(after.length).toBeGreaterThanOrEqual(2);
 
         // Cover both paradox + fallacy from the engine library so
         // the skills picker has at least one of each.
-        const learnedSkills = COMBAT_SKILLS.filter((s) =>
+        const learnedSkills = COMBAT_CARDS.filter((s) =>
             after.includes(s.id),
         );
         const categories = new Set(learnedSkills.map((s) => s.category));
@@ -126,14 +126,14 @@ describe('debugSeed: items + skills + map reset', () => {
         expect(typeof result.mapReset).toBe('boolean');
     });
 
-    it('is idempotent on skills — re-seeding does not duplicate knownSkills', () => {
+    it('is idempotent on skills — re-seeding does not duplicate knownCards', () => {
         const { store, actions } = makeStore();
 
         actions.debugSeed();
-        const afterFirst = store.getState().player.knownSkills ?? [];
+        const afterFirst = store.getState().player.knownCards ?? [];
 
         actions.debugSeed();
-        const afterSecond = store.getState().player.knownSkills ?? [];
+        const afterSecond = store.getState().player.knownCards ?? [];
 
         expect(afterSecond.length).toBe(afterFirst.length);
         // Set equality — same ids both times.

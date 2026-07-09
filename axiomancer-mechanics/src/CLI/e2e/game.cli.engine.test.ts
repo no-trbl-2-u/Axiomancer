@@ -73,7 +73,7 @@ describe('CLI Game Driver', () => {
         
         expect(store.getState().player.name).toBe('Player');
         expect(store.getState().player.level).toBe(1);
-        expect(store.getState().version).toBe(10);
+        expect(store.getState().version).toBe(11);
     });
 
     it('should bootstrap game store with node adapter for save/load', async () => {
@@ -133,12 +133,12 @@ describe('CLI Game Driver', () => {
     it('should support dev tools skill learning', async () => {
         const emitter = createEventEmitter();
         const store = createGameStore(nullAdapter, emitter);
-        const initialSkillsLength = store.getState().player.knownSkills.length;
+        const initialSkillsLength = store.getState().player.knownCards.length;
         
         const result = devLearnSkills(store, ['basic-strike']);
         
         expect(result.ok).toBe(true);
-        expect(store.getState().player.knownSkills.length).toBeGreaterThanOrEqual(initialSkillsLength);
+        expect(store.getState().player.knownCards.length).toBeGreaterThanOrEqual(initialSkillsLength);
     });
 
     it('should support I/O mode configuration', () => {

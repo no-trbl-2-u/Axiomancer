@@ -17,7 +17,7 @@ import { afterEach, beforeEach, describe, it, expect, jest } from '@jest/globals
 import {
     buildCombatDeck,
     createEnemy,
-    getSkillById,
+    getCardById,
     initializeCombatEncounter,
     handCards,
     selectIsInCombat,
@@ -110,9 +110,9 @@ describe('createAppActions: dispatch', () => {
 
         // Every seeded starter skill must actually have been learned (none
         // silently dropped by an unmet learning requirement).
-        expect(player.knownSkills).toEqual(['slippery-slope', 'brace-for-impact']);
-        for (const id of player.knownSkills) {
-            expect(getSkillById(id)).toBeTruthy();
+        expect(player.knownCards).toEqual(['slippery-slope', 'brace-for-impact']);
+        for (const id of player.knownCards) {
+            expect(getCardById(id)).toBeTruthy();
         }
 
         // The card deck is built from those known skills; the player must

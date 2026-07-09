@@ -539,10 +539,10 @@ export async function runHazardCombatCliEncounter(
     let player = options.player
         ?? (stageProfile ? buildStagePlayer(stageProfile) : buildCharacterFromPreset(preset!));
     if (options.deck && options.deck.length > 0) {
-        // The engine refuses to fire cards outside knownSkills; an explicit
+        // The engine refuses to fire cards outside knownCards; an explicit
         // deck may reach beyond the player's learned pool. Grant on a copy so
         // a caller-supplied player is never mutated.
-        player = { ...player, knownSkills: [...player.knownSkills] };
+        player = { ...player, knownCards: [...player.knownCards] };
         grantDeckKnowledge(player, options.deck);
     }
     const playerLabel = options.player ? presetId

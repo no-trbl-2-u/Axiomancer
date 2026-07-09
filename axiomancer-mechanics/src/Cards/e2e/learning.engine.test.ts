@@ -1,7 +1,7 @@
 /**
  * Hermetic e2e — card learning (Spec 06 Q7, revised 2026-07-08).
  *
- * Drives `getAvailableSkills`, `meetsLearningRequirement`, and `learnSkill`
+ * Drives `getAvailableCards`, `meetsLearningRequirement`, and `learnCard`
  * through the public Skills barrel. No I/O, no RNG.
  *
  * 2026-07-08 — the character-LEVEL requirement was REMOVED from cards (a legacy
@@ -14,20 +14,20 @@ import { describe, it, expect } from 'vitest';
 
 import { createCharacter } from '../../Character';
 import {
-    getAvailableSkills,
-    learnSkill,
+    getAvailableCards,
+    learnCard,
     meetsLearningRequirement,
-} from '../skill.engine';
+} from '../card.engine';
 import { cardLibrary } from '../cards.library';
 
 const buildPlayer = (level: number, overrides: Partial<{
     baseStats: { heart: number; body: number; mind: number };
-    knownSkills: string[];
+    knownCards: string[];
 }> = {}) => createCharacter({
     name: 'Learner',
     level,
     baseStats: overrides.baseStats ?? { heart: 5, body: 5, mind: 5 },
-    knownSkills: overrides.knownSkills ?? [],
+    knownCards: overrides.knownCards ?? [],
 });
 
 const bareCard = (tier: 1 | 2 | 3, rank: 1 | 5 = 1): typeof cardLibrary[number] => ({
@@ -76,7 +76,7 @@ describe('meetsLearningRequirement — stat / prerequisite gates (fabricated fix
         const gated = { ...bareCard(1), id: 'fab-prereq-gate',
             learningRequirement: { prerequisiteSkill: 'some-prior' } };
         expect(meetsLearningRequirement(buildPlayer(99), gated)).toBe(false);
-        expect(meetsLearningRequirement(buildPlayer(1, { knownSkills: ['some-prior'] }), gated)).toBe(true);
+        expect(meetsLearningRequirement(buildPlayer(1, { knownCards: ['some-prior'] }), gated)).toBe(true);
     });
 });
 
@@ -108,10 +108,10 @@ describe('meetsLearningRequirement — requiresAlignment (Phase 46, level-indepe
     });
 });
 
-describe('getAvailableSkills', () => {
+describe('getAvailableCards', () => {
     it('returns every library skill the character does not already know AND qualifies for', () => {
         const ch = buildPlayer(1);
-        const available = getAvailableSkills(ch, PASS_BOTH);
+        const available = getAvailableCards(ch, PASS_BOTH);
         const expected = cardLibrary.filter(s => meetsLearningRequirement(ch, s, PASS_BOTH));
         expect(available.length).toBe(expected.length);
         expect(available.length).toBeGreaterThan(0);
@@ -120,20 +120,20 @@ describe('getAvailableSkills', () => {
     it('excludes an alignment-gated skill the player misses', () => {
         const ch = buildPlayer(1);
         const neutral = { epistemology: 0, outlook: 0, scope: 0 };
-        const availIds = getAvailableSkills(ch, neutral).map(s => s.id);
+        const availIds = getAvailableCards(ch, neutral).map(s => s.id);
         expect(availIds).not.toContain(PACT);
         expect(availIds).not.toContain(HEART);
     });
 
     it('omits already-known skills from the result', () => {
         const known = cardLibrary.map(s => s.id);
-        const ch = buildPlayer(1, { knownSkills: known });
-        expect(getAvailableSkills(ch, PASS_BOTH)).toEqual([]);
+        const ch = buildPlayer(1, { knownCards: known });
+        expect(getAvailableCards(ch, PASS_BOTH)).toEqual([]);
     });
 
     it('preserves library order so the UI list is stable', () => {
         const ch = buildPlayer(1);
-        const available = getAvailableSkills(ch, PASS_BOTH).map(s => s.id);
+        const available = getAvailableCards(ch, PASS_BOTH).map(s => s.id);
         const expected = cardLibrary
             .filter(s => meetsLearningRequirement(ch, s, PASS_BOTH))
             .map(s => s.id);
@@ -141,29 +141,29 @@ describe('getAvailableSkills', () => {
     });
 });
 
-describe('learnSkill', () => {
-    it('appends the id to knownSkills when eligible — regardless of level', () => {
+describe('learnCard', () => {
+    it('appends the id to knownCards when eligible — regardless of level', () => {
         const ch = buildPlayer(1);
         const anyCard = cardLibrary.find(s => !s.learningRequirement)!;
-        const after = learnSkill(ch, anyCard.id);
-        expect(after.knownSkills).toContain(anyCard.id);
-        expect(after.knownSkills.length).toBe(ch.knownSkills.length + 1);
+        const after = learnCard(ch, anyCard.id);
+        expect(after.knownCards).toContain(anyCard.id);
+        expect(after.knownCards.length).toBe(ch.knownCards.length + 1);
     });
 
     it('is a no-op (same reference) when the skill is already known', () => {
         const anyCard = cardLibrary.find(s => !s.learningRequirement)!;
-        const ch = buildPlayer(1, { knownSkills: [anyCard.id] });
-        expect(learnSkill(ch, anyCard.id)).toBe(ch);
+        const ch = buildPlayer(1, { knownCards: [anyCard.id] });
+        expect(learnCard(ch, anyCard.id)).toBe(ch);
     });
 
     it('is a no-op when the skill id is unknown to the library', () => {
         const ch = buildPlayer(1);
-        expect(learnSkill(ch, 'no-such-skill')).toBe(ch);
+        expect(learnCard(ch, 'no-such-skill')).toBe(ch);
     });
 
-    it('is a no-op when an alignment requirement is not met (learnSkill passes no alignment)', () => {
+    it('is a no-op when an alignment requirement is not met (learnCard passes no alignment)', () => {
         // The real alignment-gated cards fail with no alignment threaded in.
         const ch = buildPlayer(1);
-        expect(learnSkill(ch, PACT)).toBe(ch);
+        expect(learnCard(ch, PACT)).toBe(ch);
     });
 });

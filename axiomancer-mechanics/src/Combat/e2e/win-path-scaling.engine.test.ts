@@ -42,7 +42,7 @@ afterEach(() => { vi.restoreAllMocks(); });
 
 function makePlayer(skills: string[]): Character {
     const p = deepClone(Player);
-    p.knownSkills = skills.slice();
+    p.knownCards = skills.slice();
     p.baseStats = { heart: 8, body: 8, mind: 8 };
     p.health = 200; p.maxHealth = 200; p.effects = [];
     return p;

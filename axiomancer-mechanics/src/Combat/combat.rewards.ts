@@ -8,7 +8,7 @@
  *   2. SKILL UNLOCKS (rare, via ethical-dilemma events — not implemented yet)
  *      add a NEW card type. `unlockSkillViaDilemma` is the hook those events will
  *      call; it bypasses the normal learning requirements (the dilemma IS the
- *      gate), unlike `learnSkill`.
+ *      gate), unlike `learnCard`.
  *
  * Pure: rolling takes an explicit `rng`. The mobile aftermath offers the 1-of-N
  * and persists the pick.
@@ -37,7 +37,7 @@ export const REWARD_RARITY_WEIGHTS: Readonly<Record<'common' | 'uncommon' | 'rar
 /** The skills a brand-new player starts with: an opening offensive card PLUS a
  *  basic defense card, so every player can GUARD from turn one. The rest unlock
  *  through ethical-dilemma events via `unlockSkillViaDilemma`. The mobile
- *  bootstrap seeds a new character's `knownSkills` from this list. */
+ *  bootstrap seeds a new character's `knownCards` from this list. */
 export const STARTING_SKILL_IDS: readonly string[] = Object.freeze([
     'slippery-slope',       // opening offense
     'brace-for-impact',     // basic defense (GUARD) — guard from turn one
@@ -100,12 +100,12 @@ export function addRewardCard(player: Character, cardId: string): Character {
 
 /**
  * Spec 26b §D — unlock a NEW skill from an ethical-dilemma event. Bypasses the
- * normal `learnSkill` requirement gates (level/stat/prereq) because the dilemma
+ * normal `learnCard` requirement gates (level/stat/prereq) because the dilemma
  * choice is itself the gate. No-op (same ref) when already known or unknown id.
  * The dilemma EVENTS are not implemented yet; this is the hook they will call.
  */
 export function unlockSkillViaDilemma(player: Character, skillId: string): Character {
-    if (player.knownSkills.includes(skillId)) return player;
+    if (player.knownCards.includes(skillId)) return player;
     if (!getCardById(skillId)) return player;
-    return { ...player, knownSkills: [...player.knownSkills, skillId] };
+    return { ...player, knownCards: [...player.knownCards, skillId] };
 }

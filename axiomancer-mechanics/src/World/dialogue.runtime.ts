@@ -93,8 +93,8 @@ export function applyDialogueChoice(
             }
         }
         if (e.teachSkill) {
-            if (!player.knownSkills.includes(e.teachSkill)) {
-                player = { ...player, knownSkills: [...player.knownSkills, e.teachSkill] };
+            if (!player.knownCards.includes(e.teachSkill)) {
+                player = { ...player, knownCards: [...player.knownCards, e.teachSkill] };
                 effects.learnedSkill = e.teachSkill;
             }
         }

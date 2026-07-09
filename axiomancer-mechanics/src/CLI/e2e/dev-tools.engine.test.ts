@@ -73,7 +73,7 @@ describe('devLearnSkills', () => {
         const store = freshStore();
         const r = devLearnSkills(store, 'all');
         expect(r.ok).toBe(true);
-        const known = store.getState().player.knownSkills;
+        const known = store.getState().player.knownCards;
         for (const skill of cardLibrary) {
             expect(known).toContain(skill.id);
         }
@@ -82,7 +82,7 @@ describe('devLearnSkills', () => {
     it('learns specific skills', () => {
         const store = freshStore();
         devLearnSkills(store, ['mob-appeal', 'sorites-cascade']);
-        const known = store.getState().player.knownSkills;
+        const known = store.getState().player.knownCards;
         expect(known).toContain('mob-appeal');
         expect(known).toContain('sorites-cascade');
     });
@@ -91,7 +91,7 @@ describe('devLearnSkills', () => {
         const store = freshStore();
         devLearnSkills(store, ['mob-appeal']);
         devLearnSkills(store, ['mob-appeal']);
-        const count = store.getState().player.knownSkills.filter(id => id === 'mob-appeal').length;
+        const count = store.getState().player.knownCards.filter(id => id === 'mob-appeal').length;
         expect(count).toBe(1);
     });
 });
@@ -191,7 +191,7 @@ describe('devMaxOut', () => {
         const { player, } = store.getState();
         expect(player.level).toBe(20);
         expect(player.baseStats.heart).toBe(20);
-        expect(player.knownSkills.length).toBe(cardLibrary.length);
+        expect(player.knownCards.length).toBe(cardLibrary.length);
         expect(player.inventory.length).toBeGreaterThan(0);
         expect(player.currency).toBeGreaterThanOrEqual(999);
     });

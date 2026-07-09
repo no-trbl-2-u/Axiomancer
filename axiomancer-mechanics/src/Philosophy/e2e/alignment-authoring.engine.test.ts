@@ -115,7 +115,7 @@ describe('Phase 46 — alignment-gated content (live authored gates)', () => {
 
     it('pact-of-akrasia is learnable only when outlook ≤ -34', async () => {
         const { getCardById } = await import('../../Cards/cards.library');
-        const { meetsLearningRequirement } = await import('../../Cards/skill.engine');
+        const { meetsLearningRequirement } = await import('../../Cards/card.engine');
         const { createCharacter } = await import('../../Character');
 
         const skill = getCardById('pact-of-akrasia')!;
@@ -133,7 +133,7 @@ describe('Phase 46 — alignment-gated content (live authored gates)', () => {
 
     it('heart-of-the-matter is learnable only when scope ≥ 34 (gate inherited from the cut appeal-to-consequences)', async () => {
         const { getCardById } = await import('../../Cards/cards.library');
-        const { meetsLearningRequirement } = await import('../../Cards/skill.engine');
+        const { meetsLearningRequirement } = await import('../../Cards/card.engine');
         const { createCharacter } = await import('../../Character');
 
         const skill = getCardById('heart-of-the-matter')!;
@@ -148,7 +148,7 @@ describe('Phase 46 — alignment-gated content (live authored gates)', () => {
             { epistemology: 0, outlook: 0, scope: 0 })).toBe(false);
     });
 
-    it('LEARN_SKILL dispatched through gameReducer respects the alignment gate', async () => {
+    it('LEARN_CARD dispatched through gameReducer respects the alignment gate', async () => {
         const { gameReducer, createNewGameState } = await import('../../Game/game.reducer');
 
         const state = createNewGameState();
@@ -166,16 +166,16 @@ describe('Phase 46 — alignment-gated content (live authored gates)', () => {
         };
 
         const learned = gameReducer(pessimisticAtLevel, {
-            type: 'LEARN_SKILL',
+            type: 'LEARN_CARD',
             payload: { skillId: 'pact-of-akrasia' },
         });
-        expect(learned.player.knownSkills).toContain('pact-of-akrasia');
+        expect(learned.player.knownCards).toContain('pact-of-akrasia');
 
         const refused = gameReducer(optimisticAtLevel, {
-            type: 'LEARN_SKILL',
+            type: 'LEARN_CARD',
             payload: { skillId: 'pact-of-akrasia' },
         });
-        expect(refused.player.knownSkills).not.toContain('pact-of-akrasia');
+        expect(refused.player.knownCards).not.toContain('pact-of-akrasia');
     });
 });
 

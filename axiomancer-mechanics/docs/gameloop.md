@@ -56,7 +56,7 @@ type GameAction =
   | { type: 'UNEQUIP_ITEM';        payload: { slot: EquipmentSlot } }
   | { type: 'LEVEL_UP'      }
   | { type: 'ALLOCATE_STAT_POINT'; payload: { stat: 'body' | 'mind' | 'heart' } }  // Phase 29
-  | { type: 'LEARN_SKILL';         payload: { skillId: string } }                  // Phase 30
+  | { type: 'LEARN_CARD';         payload: { skillId: string } }                  // Phase 30
   | { type: 'SHIFT_MORAL_METER';   payload: { delta: number; gating?: { min?: number; max?: number } } }
   | { type: 'SAVE_GAME'     }   // reducer stamps `rngState`; store handles I/O
   | { type: 'LOAD_GAME'     };  // reducer no-op — store handles I/O
@@ -269,7 +269,7 @@ store.resetRun({ keepCharacter: true }): GameState
 
 | Field | `keepCharacter: true` | `keepCharacter: false` |
 | --- | --- | --- |
-| `player` | preserved (id, name, level, baseStats, equipment, knownSkills, inventory) | fresh `createCharacter` (level 1) |
+| `player` | preserved (id, name, level, baseStats, equipment, knownCards, inventory) | fresh `createCharacter` (level 1) |
 | `player.health` | refilled to `maxHealth` | new character → full health |
 | `player.effects` | cleared (defensive — already empty between combats) | empty |
 | `philosophicalAlignment` | preserved (character ledger) | `defaultAlignment()` |

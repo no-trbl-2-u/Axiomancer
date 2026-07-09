@@ -28,7 +28,7 @@ export function devSetLevel(store: Store, targetLevel: number): DevResult {
         inventory: [...p.inventory],
         currency: p.currency,
         equipment: { ...p.equipment },
-        knownSkills: [...p.knownSkills],
+        knownCards: [...p.knownCards],
         effects: [...p.effects],
         procUnlocks: p.procUnlocks,
     });
@@ -54,7 +54,7 @@ export function devSetStats(store: Store, stats: Partial<BaseStats>): DevResult 
         inventory: [...p.inventory],
         currency: p.currency,
         equipment: { ...p.equipment },
-        knownSkills: [...p.knownSkills],
+        knownCards: [...p.knownCards],
         effects: [...p.effects],
         procUnlocks: p.procUnlocks,
     });
@@ -69,17 +69,17 @@ export function devLearnSkills(store: Store, skillIds: string[] | 'all'): DevRes
         : skillIds;
 
     const state = store.getState();
-    const known = new Set(state.player.knownSkills);
+    const known = new Set(state.player.knownCards);
     for (const id of ids) known.add(id);
 
     store.setState({
-        player: { ...state.player, knownSkills: [...known] },
+        player: { ...state.player, knownCards: [...known] },
     });
     return { ok: true, detail: `${ids.length} skill(s) learned (total known: ${known.size})` };
 }
 
 /**
- * Grant/unlock named skills or all skills by writing knownSkills.
+ * Grant/unlock named skills or all skills by writing knownCards.
  * (Phase 99 / ADR-0002 — skills are known, not equipped; the legacy
  * `devEquipSkills` was removed in Phase 159.)
  */
@@ -88,10 +88,10 @@ export function devUnlockSkills(store: Store, skillIds: string[] | 'all'): DevRe
         ? cardLibrary.map(s => s.id)
         : skillIds;
     const state = store.getState();
-    const known = new Set(state.player.knownSkills);
+    const known = new Set(state.player.knownCards);
     for (const id of ids) known.add(id);
     store.setState({
-        player: { ...state.player, knownSkills: [...known] },
+        player: { ...state.player, knownCards: [...known] },
     });
     return { ok: true, detail: `${ids.length} skill(s) unlocked (total known: ${known.size})` };
 }

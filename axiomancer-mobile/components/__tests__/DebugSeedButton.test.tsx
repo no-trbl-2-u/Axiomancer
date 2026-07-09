@@ -51,13 +51,13 @@ describe('DebugSeedButton: press routing', () => {
     it('a tap mutates the engine state (inventory + skills + map)', () => {
         const store = makeStore();
         const inventoryBefore = (store.getState().player.inventory ?? []).length;
-        const skillsBefore = (store.getState().player.knownSkills ?? []).length;
+        const skillsBefore = (store.getState().player.knownCards ?? []).length;
 
         const tree = render(withProvider(store, <DebugSeedButton />));
         fireEvent.press(tree.getByTestId('debug-seed-button'));
 
         const inventoryAfter = (store.getState().player.inventory ?? []).length;
-        const skillsAfter = (store.getState().player.knownSkills ?? []).length;
+        const skillsAfter = (store.getState().player.knownCards ?? []).length;
 
         expect(inventoryAfter).toBeGreaterThan(inventoryBefore);
         expect(skillsAfter).toBeGreaterThan(skillsBefore);
@@ -82,7 +82,7 @@ describe('DebugSeedButton: press routing', () => {
         const tree = render(withProvider(store, <DebugSeedButton />));
 
         fireEvent.press(tree.getByTestId('debug-seed-button'));
-        const firstSkillCount = (store.getState().player.knownSkills ?? []).length;
+        const firstSkillCount = (store.getState().player.knownCards ?? []).length;
 
         // Second press: skills should stay the same (set semantics in
         // the action), items may grow (the engine's addItem doesn't
@@ -91,7 +91,7 @@ describe('DebugSeedButton: press routing', () => {
             fireEvent.press(tree.getByTestId('debug-seed-button')),
         ).not.toThrow();
 
-        const secondSkillCount = (store.getState().player.knownSkills ?? []).length;
+        const secondSkillCount = (store.getState().player.knownCards ?? []).length;
         expect(secondSkillCount).toBe(firstSkillCount);
     });
 });

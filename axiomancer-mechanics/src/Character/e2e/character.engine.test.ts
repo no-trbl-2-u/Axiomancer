@@ -152,7 +152,7 @@ describe('createCharacter — defaults and option pass-through', () => {
         expect(ch.currency).toBe(0);
         expect(ch.equipment).toEqual({});
         expect(ch.effects).toEqual([]);
-        expect(ch.knownSkills).toEqual([]);
+        expect(ch.knownCards).toEqual([]);
         expect(ch.procUnlocks).toBeUndefined();
         // Spec 06 Q3 — points start at zero; level-ups add STAT_POINTS_PER_LEVEL.
         expect(ch.availableStatPoints).toBe(0);
@@ -162,7 +162,7 @@ describe('createCharacter — defaults and option pass-through', () => {
         mockSequentialRng(0.5);
         const ch = buildPlayer({
             currency: 42,
-            knownSkills: ['skill-a', 'skill-b'],
+            knownCards: ['skill-a', 'skill-b'],
             procUnlocks: {
                 body:  { attack: 2, defend: 1 },
                 mind:  { attack: 1, defend: 1 },
@@ -170,7 +170,7 @@ describe('createCharacter — defaults and option pass-through', () => {
             },
         });
         expect(ch.currency).toBe(42);
-        expect(ch.knownSkills).toEqual(['skill-a', 'skill-b']);
+        expect(ch.knownCards).toEqual(['skill-a', 'skill-b']);
         expect(ch.procUnlocks).toEqual({
             body:  { attack: 2, defend: 1 },
             mind:  { attack: 1, defend: 1 },

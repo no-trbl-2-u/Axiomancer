@@ -3,13 +3,13 @@
  *
  * Drives `isBefriendAttemptEligible` (in `src/Combat/index.ts`) through
  * synthetic CombatState fixtures so each config axis (hpGate, requiredStances,
- * requiredSkillUse) is pinned in isolation, then in AND-composition.
+ * requiredCardUse) is pinned in isolation, then in AND-composition.
  *
  * The legacy combat-end predicates (`isFriendshipEligible`,
  * `determineCombatEnd`, `isCombatOngoing`) and the passive both-defend counter
  * threshold were removed with the legacy turn-based combat driver. The
  * surviving surface is the explicit Befriend-attempt eligibility check, which
- * the shared skill engine still consults via `executeSkill`.
+ * the shared skill engine still consults via `executeCard`.
  *
  * Cases mirror the brief at `plan/phases/phase_68_befriendability_config.md`
  * D2 (semantics) + Unit 1's case list.
@@ -91,7 +91,7 @@ function makeState(enemy: Enemy, overrides: Partial<CombatState> = {}): CombatSt
                 emotionalSave: 0, emotionalTest: 0,
             },
             inventory: [], currency: 0, equipment: {}, effects: [],
-            knownSkills: [],
+            knownCards: [],
             availableStatPoints: 0,
         },
         enemy,
@@ -167,9 +167,9 @@ describe('Phase 68 — BefriendabilityConfig predicate (isBefriendAttemptEligibl
         });
     });
 
-    describe('Case 5 — requiredSkillUse (existential)', () => {
+    describe('Case 5 — requiredCardUse (existential)', () => {
         it('blocks eligibility when no listed skill ID was cast', () => {
-            const enemy = makeEnemy({ requiredSkillUse: ['palm-strike'] });
+            const enemy = makeEnemy({ requiredCardUse: ['palm-strike'] });
             const state = makeState(enemy, {
                 log: [logEntry(1, 'body', 'jab')],
             });
@@ -177,7 +177,7 @@ describe('Phase 68 — BefriendabilityConfig predicate (isBefriendAttemptEligibl
         });
 
         it('allows eligibility when at least one listed skill ID was cast', () => {
-            const enemy = makeEnemy({ requiredSkillUse: ['palm-strike'] });
+            const enemy = makeEnemy({ requiredCardUse: ['palm-strike'] });
             const state = makeState(enemy, {
                 log: [logEntry(1, 'body'), logEntry(2, 'heart', 'palm-strike')],
             });
@@ -185,7 +185,7 @@ describe('Phase 68 — BefriendabilityConfig predicate (isBefriendAttemptEligibl
         });
 
         it('ignores log entries whose action is not "skill"', () => {
-            const enemy = makeEnemy({ requiredSkillUse: ['palm-strike'] });
+            const enemy = makeEnemy({ requiredCardUse: ['palm-strike'] });
             const state = makeState(enemy, {
                 log: [{
                     ...logEntry(1, 'heart'),
@@ -200,7 +200,7 @@ describe('Phase 68 — BefriendabilityConfig predicate (isBefriendAttemptEligibl
         const fullConfig: BefriendabilityConfig = {
             hpGate: { belowPct: 0.4 },
             requiredStances: ['heart'],
-            requiredSkillUse: ['palm-strike'],
+            requiredCardUse: ['palm-strike'],
             roundsThreshold: 5,
         };
 
@@ -229,7 +229,7 @@ describe('Phase 68 — BefriendabilityConfig predicate (isBefriendAttemptEligibl
             expect(isBefriendAttemptEligible(state)).toBe(false);
         });
 
-        it('fails when requiredSkillUse not satisfied', () => {
+        it('fails when requiredCardUse not satisfied', () => {
             const state = passingState();
             state.log = [logEntry(1, 'heart')];
             expect(isBefriendAttemptEligible(state)).toBe(false);

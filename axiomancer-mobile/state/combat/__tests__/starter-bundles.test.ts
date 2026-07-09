@@ -60,21 +60,21 @@ describe('Starter bundles — the pre-run deck picker (spec 32 v3 themed decks)'
 
     it('seeding a reward-archetype bundle tags the run with its hidden archetype', () => {
         const store = makeStore();
-        store.setState({ player: { ...store.getState().player, knownSkills: [] } } as never);
+        store.setState({ player: { ...store.getState().player, knownCards: [] } } as never);
         seedStarterBundleAction(store, 'erosion');
         const flags = (store.getState() as unknown as { flags?: string[] }).flags ?? [];
         expect(flags).toContain(BUNDLE_CHOSEN_FLAG);
         expect(chosenStarterBundle(store)?.id).toBe('erosion');
         expect(runArchetype(store)).toBe('bleeder');
-        expect(store.getState().player.knownSkills.length).toBeGreaterThan(0);
+        expect(store.getState().player.knownCards.length).toBeGreaterThan(0);
     });
 
     it('seeding an unmapped-archetype bundle seeds its deck but applies no reward skew', () => {
         const store = makeStore();
-        store.setState({ player: { ...store.getState().player, knownSkills: [] } } as never);
+        store.setState({ player: { ...store.getState().player, knownCards: [] } } as never);
         seedStarterBundleAction(store, 'foundry'); // Forge maps to no reward archetype
         expect(chosenStarterBundle(store)?.id).toBe('foundry');
         expect(runArchetype(store)).toBeNull(); // archetype: null → no skew tag
-        expect(store.getState().player.knownSkills.length).toBeGreaterThan(0);
+        expect(store.getState().player.knownCards.length).toBeGreaterThan(0);
     });
 });

@@ -1,12 +1,12 @@
 /**
- * LearnSkillModal — "a new turn of phrase"
+ * LearnCardModal — "a new turn of phrase"
  *
  * Pops ON TOP of the stat-allocation LevelUpModal when LEVEL UP is
  * tapped: one pick of three qualifying skills per level gained
  * (stacked levels queue consecutive picks). Offers come from the
- * engine's alignment-gated `getAvailableSkills` via
+ * engine's alignment-gated `getAvailableCards` via
  * `actions.getLearnableSkillOffers()`; a pick dispatches
- * `actions.learnSkill(id)` upstream. Non-tap-out-dismissible — the
+ * `actions.learnCard(id)` upstream. Non-tap-out-dismissible — the
  * only exits are LEARN (per row) or FORGO.
  */
 
@@ -14,19 +14,19 @@ import React from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { StanceGlyph } from '@/components/StanceGlyph';
-import type { LearnableSkillOffer } from '@/state/actions';
+import type { LearnableCardOffer } from '@/state/actions';
 import { FONTS } from '@/theme/axm';
 import { makeStyles, usePalette } from '@/theme/runtime';
 
 export interface LearnSkillModalProps {
-    offers: LearnableSkillOffer[];
+    offers: LearnableCardOffer[];
     /** Picks left in this level-up session (≥1 while mounted). */
     picksRemaining: number;
     onPick: (skillId: string) => void;
     onSkip: () => void;
 }
 
-export function LearnSkillModal({ offers, picksRemaining, onPick, onSkip }: LearnSkillModalProps) {
+export function LearnCardModal({ offers, picksRemaining, onPick, onSkip }: LearnSkillModalProps) {
     const styles = useStyles();
     const AXM = usePalette();
     return (

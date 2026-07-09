@@ -5,9 +5,9 @@
  *
  *  - victory spoils are engine-owned: `endCombat('victory')`'s report
  *    carries the rolled loot + granted XP, already applied to the player;
- *  - starter skills seed an empty `knownSkills` before combat starts;
+ *  - starter skills seed an empty `knownCards` before combat starts;
  *  - level-up learn offers come alignment-gated from the engine and
- *    `learnSkill` grows `knownSkills`.
+ *    `learnCard` grows `knownCards`.
  *
  * Legacy turn-based combat (the `state.combat` slice, its per-round
  * bridges + cross-combat resource carry) was removed from the engine in
@@ -92,10 +92,10 @@ describe('victory spoils come from the engine endCombat report', () => {
 // ---------------------------------------------------------------------------
 
 describe('starter skills + learn-skill flow', () => {
-    it('startCombat seeds the tier-1 starter set into an empty knownSkills', () => {
-        expect(store.getState().player.knownSkills ?? []).toHaveLength(0);
+    it('startCombat seeds the tier-1 starter set into an empty knownCards', () => {
+        expect(store.getState().player.knownCards ?? []).toHaveLength(0);
         actions.startCombat(makeEnemy());
-        const known = store.getState().player.knownSkills ?? [];
+        const known = store.getState().player.knownCards ?? [];
         expect(known.length).toBeGreaterThan(0);
         expect(known).toContain('brace-for-impact');
     });
@@ -104,7 +104,7 @@ describe('starter skills + learn-skill flow', () => {
         const offers = actions.getLearnableSkillOffers();
         expect(offers.length).toBeGreaterThan(0);
         expect(offers.length).toBeLessThanOrEqual(3);
-        const known = store.getState().player.knownSkills ?? [];
+        const known = store.getState().player.knownCards ?? [];
         for (const offer of offers) {
             expect(known).not.toContain(offer.id);
             expect(offer.effectText.length).toBeGreaterThan(0);
@@ -112,12 +112,12 @@ describe('starter skills + learn-skill flow', () => {
         }
     });
 
-    it('learnSkill grows knownSkills through the engine and is idempotent', () => {
+    it('learnCard grows knownCards through the engine and is idempotent', () => {
         const offers = actions.getLearnableSkillOffers();
         const pick = offers[0];
-        expect(actions.learnSkill(pick.id)).toBe(true);
-        expect(store.getState().player.knownSkills).toContain(pick.id);
+        expect(actions.learnCard(pick.id)).toBe(true);
+        expect(store.getState().player.knownCards).toContain(pick.id);
         // already known → engine returns the same character → false
-        expect(actions.learnSkill(pick.id)).toBe(false);
+        expect(actions.learnCard(pick.id)).toBe(false);
     });
 });

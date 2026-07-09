@@ -23,7 +23,7 @@
  * `src/Effects/e2e/deprecated-effects.engine.test.ts`.
  *
  * This file is data-only. All runtime behaviour lives in
- * `src/Cards/skill.engine.ts` and `src/Combat/combat.engine.ts`.
+ * `src/Cards/card.engine.ts` and `src/Combat/combat.engine.ts`.
  */
 
 import { Card } from './types';

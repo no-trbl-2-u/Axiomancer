@@ -1,7 +1,7 @@
 /**
  * Card engine — pure resource and execution helpers for Spec 04.
  *
- * The combat resolver routes `action: 'skill'` through `executeSkill`. Every
+ * The combat resolver routes `action: 'skill'` through `executeCard`. Every
  * helper here is pure: callers thread the updated state forward themselves.
  *
  * Resource economy (locked 2026-05-11):
@@ -30,7 +30,7 @@ import { applyEquipmentGenerationBonus } from '../Items/equipment.engine';
 import { applySetGenerationBonus } from '../Items/set.engine';
 import {
     CombatResources, Card, CardCategory, CardCombatEffects,
-    CardSpecialMechanic, CardTier,
+    CardSpecialMechanic,
 } from './types';
 import { cardLibrary, getCardById } from './cards.library';
 
@@ -93,7 +93,7 @@ export function generatePhilosophicalResource(
  * unconditionally — a card that "deals damage" is now a compile error at the
  * schema and a no-op here.
  */
-export function calculateSkillDamage(
+export function calculateCardDamage(
     _actor: Combatant,
     _skill: Card,
     _target?: Combatant,
@@ -130,7 +130,7 @@ export function philosophicalCategoryFor(skill: Card): CardCategory {
  *   the dialogue `requiresAlignment` semantic).
  */
 export function meetsLearningRequirement(
-    character: Pick<Character, 'level' | 'baseStats' | 'knownSkills'>,
+    character: Pick<Character, 'level' | 'baseStats' | 'knownCards'>,
     skill: Card,
     alignment?: PhilosophicalAlignment,
 ): boolean {
@@ -141,7 +141,7 @@ export function meetsLearningRequirement(
             return false;
         }
     }
-    if (req.prerequisiteSkill && !character.knownSkills.includes(req.prerequisiteSkill)) {
+    if (req.prerequisiteSkill && !character.knownCards.includes(req.prerequisiteSkill)) {
         return false;
     }
     if (req.requiresAlignment) {
@@ -163,18 +163,18 @@ export function meetsLearningRequirement(
  *   so alignment-gated skills are filtered out when the character's
  *   alignment doesn't match (or isn't provided).
  */
-export function getAvailableSkills(
-    character: Pick<Character, 'level' | 'baseStats' | 'knownSkills'>,
+export function getAvailableCards(
+    character: Pick<Character, 'level' | 'baseStats' | 'knownCards'>,
     alignment?: PhilosophicalAlignment,
 ): Card[] {
     return cardLibrary.filter(s =>
-        !character.knownSkills.includes(s.id)
+        !character.knownCards.includes(s.id)
         && meetsLearningRequirement(character, s, alignment),
     );
 }
 
 /**
- * Appends `skillId` to `character.knownSkills` when the skill exists, is not
+ * Appends `skillId` to `character.knownCards` when the skill exists, is not
  * already known, and the character meets its learning requirement. Pure;
  * returns the unchanged character (same reference) on any guard miss.
  *
@@ -182,18 +182,18 @@ export function getAvailableSkills(
  *   so alignment-gated skills can only be learned by characters whose
  *   alignment matches the gate.
  */
-export function learnSkill(
+export function learnCard(
     character: Character,
     skillId: string,
     alignment?: PhilosophicalAlignment,
 ): Character {
-    if (character.knownSkills.includes(skillId)) return character;
+    if (character.knownCards.includes(skillId)) return character;
     const skill = getCardById(skillId);
     if (!skill) return character;
     if (!meetsLearningRequirement(character, skill, alignment)) return character;
     return {
         ...character,
-        knownSkills: [...character.knownSkills, skillId],
+        knownCards: [...character.knownCards, skillId],
     };
 }
 
@@ -255,7 +255,7 @@ export type CardEvent =
         successful: boolean;
         message: string };
 
-/** Result of `executeSkill`. */
+/** Result of `executeCard`. */
 export interface CardResolution {
     state: CombatState;
     events: CardEvent[];
@@ -263,7 +263,7 @@ export interface CardResolution {
     activateMercyChoice?: boolean;
 }
 
-/** Lookup helper used by `executeSkill` to resolve a skill ID against an actor. */
+/** Lookup helper used by `executeCard` to resolve a skill ID against an actor. */
 export interface CardLookup {
     (skillId: string): Card | undefined;
 }
@@ -286,17 +286,17 @@ export interface CardLookup {
  * and the player is the target; `skill.targetType` is interpreted relative
  * to the caster (`'self'` → caster's effects; `'enemy'` → opposing side).
  * Enemy-cast skills are validated against `Enemy.skills?` rather than
- * `Character.knownSkills`. Resource handling stays uniform — the caller
+ * `Character.knownCards`. Resource handling stays uniform — the caller
  * is responsible for passing a sentinel `combatResources` for the enemy
  * path (per D2 in plan/phases/phase_49_enemy_skill_caster.md).
  *
  * @throws if the skill is not known (player path) or not in the enemy's
  *   rotation (enemy path), or not found in the lookup.
  */
-export function executeSkill(
+export function executeCard(
     state: CombatState,
     skillId: string,
-    lookupSkill: CardLookup,
+    lookupCard: CardLookup,
     casterSide: 'player' | 'enemy' = 'player',
 ): CardResolution {
     const isPlayerCaster = casterSide === 'player';
@@ -306,12 +306,12 @@ export function executeSkill(
     if (isPlayerCaster) {
         // A player OWNS a combat card when it is a learned skill OR a card-reward
         // pickup — the exact two sources `buildCombatDeck` deals from. Reward
-        // cards (`combatRewardCards`) enter the deck WITHOUT joining `knownSkills`
+        // cards (`combatRewardCards`) enter the deck WITHOUT joining `knownCards`
         // (they bypass the learning gate — the won combat is the gate), so a
-        // knownSkills-only check wrongly rejected legitimately-dealt reward cards
+        // knownCards-only check wrongly rejected legitimately-dealt reward cards
         // and crashed combat when one was played.
         const playerCaster = caster as Character;
-        const owned = playerCaster.knownSkills.includes(skillId)
+        const owned = playerCaster.knownCards.includes(skillId)
             || (playerCaster.combatRewardCards ?? []).includes(skillId);
         if (!owned) {
             throw new Error(`Card '${skillId}' is not known.`);
@@ -323,7 +323,7 @@ export function executeSkill(
         }
     }
 
-    const skill = lookupSkill(skillId);
+    const skill = lookupCard(skillId);
     if (!skill) {
         throw new Error(`Card '${skillId}' not found in library.`);
     }
@@ -336,7 +336,7 @@ export function executeSkill(
     // Phase 93: Only apply damage resistance for enemy-targeting skills
     // Self-targeting skills (heals) shouldn't have resistance applied
     const resistanceTarget = skill.targetType === 'enemy' ? workingTarget : undefined;
-    const damage = calculateSkillDamage(workingCaster, skill, resistanceTarget);
+    const damage = calculateCardDamage(workingCaster, skill, resistanceTarget);
 
     // Phase 66 — synergy clause. Evaluate predicate against the
     // pre-damage effects pool (so the matched effect's intensity /

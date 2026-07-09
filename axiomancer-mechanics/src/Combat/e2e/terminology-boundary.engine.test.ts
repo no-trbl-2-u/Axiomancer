@@ -1,7 +1,7 @@
 /**
  * Regression guard — Phase 166 Skills vs Cards terminology boundary.
  *
- * Skills are always-available token-spending actions in `knownSkills`.
+ * Skills are always-available token-spending actions in `knownCards`.
  * Cards are Hazard-style deck/hand/reward objects (CombatCard).
  * A card may be projected from a skill, but the projected object is a card.
  *

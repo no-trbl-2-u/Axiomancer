@@ -3,7 +3,7 @@
  *
  * Pins the DURABLE_ACTIONS allowlist by counting `adapter.save` calls
  * across a series of dispatched actions. UI-tier actions (USE_ITEM,
- * EQUIP_ITEM, ALLOCATE_STAT_POINT, LEARN_SKILL, SHIFT_MORAL_METER,
+ * EQUIP_ITEM, ALLOCATE_STAT_POINT, LEARN_CARD, SHIFT_MORAL_METER,
  * SHIFT_PHILOSOPHICAL_ALIGNMENT, START_COMBAT, PROCESS_NODE) must NOT
  * trigger `adapter.save`. The curated durable set (COMBAT_ROUND,
  * LEVEL_UP, END_COMBAT, MOVE_TO_NODE, APPLY_DIALOGUE, SAVE_GAME) must.
@@ -103,7 +103,7 @@ describe('Phase 51 — autosave throttling restricts adapter.save to DURABLE_ACT
         expect(adapter.saves).toBe(2);
     });
 
-    it('LEVEL_UP triggers adapter.save (durable); LEARN_SKILL does not (UI-tier)', () => {
+    it('LEVEL_UP triggers adapter.save (durable); LEARN_CARD does not (UI-tier)', () => {
         const adapter = countingAdapter();
         // Override XP to threshold so the LEVEL_UP reducer actually fires.
         const seededPlayer = {
@@ -116,12 +116,12 @@ describe('Phase 51 — autosave throttling restricts adapter.save to DURABLE_ACT
         store.getState().dispatch({ type: 'LEVEL_UP' });
         expect(adapter.saves).toBe(1);
 
-        // LEARN_SKILL — not in durable set. Use a skill the seeded player
+        // LEARN_CARD — not in durable set. Use a skill the seeded player
         // can plausibly learn; the test asserts the save-count not the
         // learn outcome (the reducer is a no-op on a bogus id, but autosave
         // doesn't fire either way).
         store.getState().dispatch({
-            type: 'LEARN_SKILL',
+            type: 'LEARN_CARD',
             payload: { skillId: 'this-skill-id-does-not-exist' },
         });
         expect(adapter.saves).toBe(1);

@@ -11,7 +11,7 @@ import { calculateDamageResistance, getSkillDamageType } from '../damage-resist'
 import { Player } from '../../Character/characters.mock';
 import { FloatEye } from '../../Enemy/enemy.library';
 import { getCardById } from '../../Cards/cards.library';
-import { calculateSkillDamage } from '../../Cards/skill.engine';
+import { calculateCardDamage } from '../../Cards/card.engine';
 
 describe('Phase 93 — Damage-resist primitive', () => {
     it('reduces damage by target resistance stats', () => {
@@ -48,15 +48,15 @@ describe('Phase 93 — Damage-resist primitive', () => {
         expect(getSkillDamageType('heart')).toBe('emotional');
     });
 
-    it('calculateSkillDamage is 0 for EVERY library card — the strike is dead (spec 32 v3 §1)', () => {
+    it('calculateCardDamage is 0 for EVERY library card — the strike is dead (spec 32 v3 §1)', () => {
         // basePower was deleted at the schema level; the skill engine's damage
         // step is a permanent 0. The resist primitive survives for the threat
         // side and future non-card consumers.
         const attacker = Player;
         const defender = { ...FloatEye };
         const skill = getCardById('slippery-slope')!;
-        expect(calculateSkillDamage(attacker, skill, defender)).toBe(0);
-        expect(calculateSkillDamage(attacker, skill)).toBe(0);
+        expect(calculateCardDamage(attacker, skill, defender)).toBe(0);
+        expect(calculateCardDamage(attacker, skill)).toBe(0);
     });
 
     it('handles zero or negative base damage gracefully', () => {

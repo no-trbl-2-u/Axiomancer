@@ -3,7 +3,7 @@
  *
  * Drives `actions.applyCharacterPreset(presetId)` end-to-end
  * through the engine store and asserts on the resulting
- * `player` slice: name / level / baseStats / knownSkills /
+ * `player` slice: name / level / baseStats / knownCards /
  * inventory match the engine preset; subsequent applies
  * cleanly replace prior preset state.
  *
@@ -56,7 +56,7 @@ describe('applyCharacterPreset: replaces player with engine preset', () => {
         expect(player.health).toBe(player.maxHealth);
         expect(player.derivedStats).toBeDefined();
         expect(player.derivedStats.physicalDefense).toBeGreaterThan(0);
-        expect(player.knownSkills?.length ?? 0).toBeGreaterThan(0);
+        expect(player.knownCards?.length ?? 0).toBeGreaterThan(0);
         expect(player.inventory?.length ?? 0).toBeGreaterThan(0);
     });
 
@@ -65,11 +65,11 @@ describe('applyCharacterPreset: replaces player with engine preset', () => {
 
         actions.applyCharacterPreset('wanderer');
         const wandererName = store.getState().player.name;
-        const wandererSkills = store.getState().player.knownSkills ?? [];
+        const wandererSkills = store.getState().player.knownCards ?? [];
 
         actions.applyCharacterPreset('sage');
         const sageName = store.getState().player.name;
-        const sageSkills = store.getState().player.knownSkills ?? [];
+        const sageSkills = store.getState().player.knownCards ?? [];
 
         expect(sageName).toBe('Sage');
         expect(sageName).not.toBe(wandererName);

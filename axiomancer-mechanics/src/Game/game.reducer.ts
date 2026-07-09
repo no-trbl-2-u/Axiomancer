@@ -28,7 +28,7 @@ import {
     unequipItem as unequipItemReducer,
 } from '../Character/equipment.reducer';
 import { createCharacter, allocateStatPoint } from '../Character';
-import { learnSkill } from '../Cards';
+import { learnCard } from '../Cards';
 import { createStartingWorld, emptyQuestLog } from '../World';
 import { moveToNode as moveWorld } from '../World/world.reducer';
 import { resolveMapEvent } from '../World';
@@ -54,8 +54,9 @@ import { STARTING_SKILL_IDS } from '../Combat/combat.rewards';
  * legacy v6 saves.
  * Phase 109 — bumped 8 → 9 to add the required `regionConsequences: RegionConsequences` slice.
  * Phase 110 — bumped 9 → 10 to add the required `factionReputations: FactionReputations` slice.
+ * skill→card rename — bumped 10 → 11 to rename persisted `player.knownSkills` → `knownCards`.
  */
-export const GAME_STATE_VERSION = 10;
+export const GAME_STATE_VERSION = 11;
 
 /** Builds a brand-new GameState with default player and world. */
 export function createNewGameState(): GameState {
@@ -386,10 +387,10 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
             return { ...state, player: allocateStatPoint(state.player, action.payload.stat) };
         }
 
-        case 'LEARN_SKILL': {
+        case 'LEARN_CARD': {
             return {
                 ...state,
-                player: learnSkill(
+                player: learnCard(
                     state.player,
                     action.payload.skillId,
                     state.philosophicalAlignment,

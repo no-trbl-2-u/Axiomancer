@@ -58,12 +58,12 @@ describe('Combat deck presets', () => {
         }
     });
 
-    it('applying a preset replaces knownSkills with the deck and clears reward cards', () => {
+    it('applying a preset replaces knownCards with the deck and clears reward cards', () => {
         const store = makeStore();
         store.setState({
             player: {
                 ...store.getState().player,
-                knownSkills: ['some-old-skill'],
+                knownCards: ['some-old-skill'],
                 combatRewardCards: ['some-reward'],
             },
         } as never);
@@ -72,7 +72,7 @@ describe('Combat deck presets', () => {
 
         expect(result.presetId).toBe('erosion');
         expect(result.cardIds.length).toBeGreaterThan(0);
-        expect(store.getState().player.knownSkills).toEqual(result.cardIds);
+        expect(store.getState().player.knownCards).toEqual(result.cardIds);
         expect(store.getState().player.combatRewardCards).toEqual([]);
     });
 
@@ -114,7 +114,7 @@ describe('Combat deck presets', () => {
         }
     });
 
-    it('randomizer deals unique cards from the full pool into knownSkills', () => {
+    it('randomizer deals unique cards from the full pool into knownCards', () => {
         const store = makeStore();
         store.setState({
             player: { ...store.getState().player, combatRewardCards: ['stale'] },
@@ -125,7 +125,7 @@ describe('Combat deck presets', () => {
         expect(granted.length).toBeGreaterThan(0);
         expect(new Set(granted).size).toBe(granted.length); // no duplicates
         expect(granted.every((id) => FULL_POOL.has(id))).toBe(true);
-        expect(store.getState().player.knownSkills).toEqual(granted);
+        expect(store.getState().player.knownCards).toEqual(granted);
         expect(store.getState().player.combatRewardCards).toEqual([]);
     });
 });

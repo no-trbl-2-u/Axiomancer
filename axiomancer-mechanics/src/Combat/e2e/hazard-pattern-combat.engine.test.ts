@@ -70,7 +70,7 @@ const DAMAGE_BODY = 'qa-payoff-burst';   // body, tier 1, RUPTURE payoff (sandbo
 
 function makePlayer(skills: string[]): Character {
     const p = deepClone(Player);
-    p.knownSkills = skills.slice();
+    p.knownCards = skills.slice();
     p.baseStats = { heart: 8, body: 8, mind: 8 };
     p.health = 200;
     p.maxHealth = 200;
@@ -620,7 +620,7 @@ describe('Spec 26b §B/§C/§D — archetype kit, rewards, unlock, difficulty fl
         const player = makePlayer([DOT_BODY]);
         const newId = COMBAT_REWARD_POOL.find(id => id !== DOT_BODY && getCardById(id))!;
         const unlocked = unlockSkillViaDilemma(player, newId);
-        expect(unlocked.knownSkills).toContain(newId);
+        expect(unlocked.knownCards).toContain(newId);
         expect(unlockSkillViaDilemma(unlocked, newId)).toBe(unlocked); // already known → same ref
     });
 

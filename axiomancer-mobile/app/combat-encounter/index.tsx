@@ -40,11 +40,11 @@ function readDeckOverride(): string[] | undefined {
     return Array.isArray(g) && g.every((x) => typeof x === 'string') ? (g as string[]) : undefined;
 }
 
-const DEMO_SKILLS = ['slippery-slope', 'straw-mans-jab', 'brace-for-impact', 'soft-word'];
-function withDemoDeck<T extends { knownSkills?: string[]; baseStats?: { heart: number; body: number; mind: number }; health?: number; maxHealth?: number }>(player: T): T {
-    const known = player.knownSkills ?? [];
+const DEMO_CARDS = ['slippery-slope', 'straw-mans-jab', 'brace-for-impact', 'soft-word'];
+function withDemoDeck<T extends { knownCards?: string[]; baseStats?: { heart: number; body: number; mind: number }; health?: number; maxHealth?: number }>(player: T): T {
+    const known = player.knownCards ?? [];
     if (known.length >= 3) return player;
-    return { ...player, knownSkills: Array.from(new Set([...known, ...DEMO_SKILLS])), baseStats: { heart: 12, body: 12, mind: 12 }, health: 160, maxHealth: 160 };
+    return { ...player, knownCards: Array.from(new Set([...known, ...DEMO_CARDS])), baseStats: { heart: 12, body: 12, mind: 12 }, health: 160, maxHealth: 160 };
 }
 
 export default function CombatEncounterScreen() {
@@ -63,7 +63,7 @@ export default function CombatEncounterScreen() {
     const deckOverride = readDeckOverride();
     const base = withDemoDeck(player);
     const bootstrapPlayer = deckOverride
-        ? { ...base, knownSkills: Array.from(new Set([...(base.knownSkills ?? []), ...deckOverride])) }
+        ? { ...base, knownCards: Array.from(new Set([...(base.knownCards ?? []), ...deckOverride])) }
         : base;
 
     return (

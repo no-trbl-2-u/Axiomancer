@@ -31,7 +31,7 @@ const DOT_BODY = 'slippery-slope'; // body stance, applies a bleed DoT
 
 function makePlayer(skills: string[]): Character {
     const p = deepClone(Player);
-    p.knownSkills = skills.slice();
+    p.knownCards = skills.slice();
     p.baseStats = { heart: 8, body: 8, mind: 8 };
     p.health = 400; p.maxHealth = 400;
     return p;

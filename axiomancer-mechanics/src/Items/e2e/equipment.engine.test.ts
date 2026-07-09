@@ -33,7 +33,7 @@ import {
     getEquipmentProcTriggers,
 } from '../equipment.engine';
 import { initializeCombat } from '../../Combat/combat.reducer';
-import { generateBasicActionResources } from '../../Cards/skill.engine';
+import { generateBasicActionResources } from '../../Cards/card.engine';
 import { mockSequentialRng } from '../../test-utils/rng';
 import { Consumable, Equipment } from '../types';
 

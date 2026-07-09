@@ -121,9 +121,9 @@ function buildFixtureState(): CombatEncounterState {
     const player: Character = deepClone(Player);
     player.baseStats = { heart: 10, body: 10, mind: 10 };
     player.level = 20;
-    // executeSkill's ownership gate requires the played card in knownSkills
+    // executeCard's ownership gate requires the played card in knownCards
     // (or combatRewardCards) — own the whole library so any card id is legal.
-    player.knownSkills = cardLibrary.map(c => c.id);
+    player.knownCards = cardLibrary.map(c => c.id);
     player.maxHealth = 300;
     player.health = 150; // pre-damaged so `healHp` riders are observable, not capped
     // Two DISTINCT self-debuffs -> FALLEN active (getDistinctDebuffCount >= 2);

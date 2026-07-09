@@ -5,7 +5,7 @@ import { FONTS } from '@/theme/axm';
 import { makeStyles, usePalette } from '@/theme/runtime';
 import { TooltipTarget } from '@/components/tooltip/TooltipTarget';
 import { AscendStrip } from '@/components/levelup/AscendStrip';
-import { LearnSkillModal } from '@/components/levelup/LearnSkillModal';
+import { LearnCardModal } from '@/components/levelup/LearnCardModal';
 import { LevelReadyStrip } from '@/components/levelup/LevelReadyStrip';
 import { LevelUpModal } from '@/components/levelup/LevelUpModal';
 import { DevToolsLink } from '@/components/dev/DevToolsLink';
@@ -107,7 +107,7 @@ export default function CharacterScreen() {
   }, [actions]);
   const onPickSkillOffer = useCallback(
     (skillId: string) => {
-      actions.learnSkill(skillId);
+      actions.learnCard(skillId);
       advanceSkillPick();
     },
     [actions, advanceSkillPick],
@@ -234,7 +234,7 @@ export default function CharacterScreen() {
       {/* Learn-skill modal — stacks above the stat ledger (zIndex 60
           vs the LevelUpModal's 50) until every pick is spent. */}
       {skillPicksRemaining > 0 && skillOffers.length > 0 && (
-        <LearnSkillModal
+        <LearnCardModal
           offers={skillOffers}
           picksRemaining={skillPicksRemaining}
           onPick={onPickSkillOffer}

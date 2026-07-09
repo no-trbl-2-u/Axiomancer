@@ -72,7 +72,7 @@ export interface NonCombatStats {
  *                                    the character's `derivedStats` is
  *                                    already "post-equipment".
  * @property effects                - Active status effects on the character.
- * @property knownSkills            - IDs of skills the character has learned/unlocked.
+ * @property knownCards            - IDs of skills the character has learned/unlocked.
  *                                    The combat catalogue is the learned set
  *                                    filtered by affordability (ADR-0002 / Phase
  *                                    99); there is no equipped-skill loadout gate.
@@ -101,7 +101,7 @@ export interface Character {
     currency: number;
     equipment: Partial<Record<EquipmentSlot, Equipment>>;
     effects: ActiveEffect[];
-    knownSkills: string[];
+    knownCards: string[];
     availableStatPoints: number;
     /**
      * Per-cell Spec 03 proc unlock caps. Defaults to tier 1 in every cell —
@@ -112,7 +112,7 @@ export interface Character {
     /**
      * Spec 26b deckbuilder — extra combat cards earned as play rewards (skill
      * ids, duplicates allowed), MERGED into the combat deck on top of the cards
-     * derived from `knownSkills`. Distinct from `knownSkills`: a reward grows the
+     * derived from `knownCards`. Distinct from `knownCards`: a reward grows the
      * deck (more copies / variety), while learning a skill (e.g. via an ethical
      * dilemma) unlocks a new card type. Optional + sparse — absent means none.
      */

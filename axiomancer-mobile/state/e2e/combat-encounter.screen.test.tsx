@@ -35,7 +35,7 @@ afterEach(() => {
 function mount(): { store: AppStore } {
     const { tree, store } = withAllProviders(<CombatEncounterScreen />);
     const player = store.getState().player;
-    store.setState({ player: { ...player, knownSkills: SKILLS, baseStats: { heart: 8, body: 8, mind: 8 }, health: 200, maxHealth: 200 } });
+    store.setState({ player: { ...player, knownCards: SKILLS, baseStats: { heart: 8, body: 8, mind: 8 }, health: 200, maxHealth: 200 } });
     render(tree);
     return { store };
 }

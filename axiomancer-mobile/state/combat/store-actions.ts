@@ -52,8 +52,8 @@ export function completeCombatTutorialAction(store: AppStore, skipped: boolean):
 // Deck presets — spec 32 v3 §8: the TEN themed preset decks, engine-owned.
 //
 // The combat deck the engine deals from is `buildCombatDeck(player)` =
-// `player.knownSkills` + `player.combatRewardCards` + the synthetic cards. So a
-// "swap your deck" is just: replace `knownSkills` with the preset's card ids
+// `player.knownCards` + `player.combatRewardCards` + the synthetic cards. So a
+// "swap your deck" is just: replace `knownCards` with the preset's card ids
 // (duplicates intentional — the 4/4/2/2/1/1/1 recipe) and clear the earned
 // reward cards, leaving the deck EXACTLY the preset plus the engine's
 // always-on synthetics (Retreat).
@@ -124,7 +124,7 @@ function combatDeckPresetById(presetId: CombatDeckPresetId): CombatDeckPreset {
 
 /**
  * Dev tool — swap the player's combat deck for a preset. Sets
- * `player.knownSkills` to the preset's card ids and clears earned
+ * `player.knownCards` to the preset's card ids and clears earned
  * `combatRewardCards`, so the next encounter deals exactly the preset deck
  * (`buildCombatDeck` adds only the engine's synthetic cards on top). No-op
  * with an empty result shape if there is no player loaded.
@@ -138,7 +138,7 @@ export function applyCombatDeckPresetAction(
     const player = (store.getState() as unknown as GameState).player;
     if (player) {
         store.setState({
-            player: { ...player, knownSkills: cardIds, combatRewardCards: [] },
+            player: { ...player, knownCards: cardIds, combatRewardCards: [] },
         } as never);
     }
     return { presetId: preset.id, label: preset.label, cardIds };
@@ -151,7 +151,7 @@ const RANDOMIZE_CARD_COUNT = 8;
  * Dev tool — rebuild the player's combat deck as a random selection from EVERY
  * defined combat card (starters + the full 70-card pool, rares included), so
  * dev sessions surface cards normal play rarely reaches. Replaces
- * `knownSkills` with the random unique pull and clears `combatRewardCards`.
+ * `knownCards` with the random unique pull and clears `combatRewardCards`.
  * Returns the granted card ids.
  */
 export function randomizeCombatDeckAction(store: AppStore): string[] {
@@ -164,7 +164,7 @@ export function randomizeCombatDeckAction(store: AppStore): string[] {
     const player = (store.getState() as unknown as GameState).player;
     if (player) {
         store.setState({
-            player: { ...player, knownSkills: granted, combatRewardCards: [] },
+            player: { ...player, knownCards: granted, combatRewardCards: [] },
         } as never);
     }
     return granted;
@@ -198,7 +198,7 @@ export interface StarterBundle {
     accent: string;
     /** The theme's two hallmark keywords (spec 32 v3 §3), shown as pills. */
     pills: readonly string[];
-    /** The seeded knownSkills deck (the engine recipe — duplicates intended). */
+    /** The seeded knownCards deck (the engine recipe — duplicates intended). */
     cardIds: string[];
 }
 
@@ -276,8 +276,8 @@ export function seedStarterBundleAction(store: AppStore, bundleId: string): void
     if (bundle.archetype) flags.add(`${ARCHETYPE_FLAG_PREFIX}${bundle.archetype}`);
     const player = state.player;
     const patch: Record<string, unknown> = { flags: [...flags] };
-    if (player && (player.knownSkills?.length ?? 0) === 0) {
-        patch.player = { ...player, knownSkills: [...bundle.cardIds], combatRewardCards: [] };
+    if (player && (player.knownCards?.length ?? 0) === 0) {
+        patch.player = { ...player, knownCards: [...bundle.cardIds], combatRewardCards: [] };
     }
     store.setState(patch as never);
     try { store.getState().save(); } catch { /* persistence must not block the run */ }

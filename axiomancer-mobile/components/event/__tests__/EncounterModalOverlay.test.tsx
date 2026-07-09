@@ -799,8 +799,8 @@ describe('EncounterModalOverlay: in-place hazard combat (Phase 200)', () => {
         store.setState({
             player: {
                 ...p,
-                knownSkills: Array.from(new Set([
-                    ...(p.knownSkills ?? []),
+                knownCards: Array.from(new Set([
+                    ...(p.knownCards ?? []),
                     'slippery-slope', 'straw-mans-jab', 'brace-for-impact',
                 ])),
             },

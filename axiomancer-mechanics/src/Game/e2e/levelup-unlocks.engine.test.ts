@@ -21,7 +21,7 @@ import type { TypedLevelUpEvent } from '../events.types';
 
 function buildStore(level: number, opts: {
     experience?: number;
-    knownSkills?: string[];
+    knownCards?: string[];
     /** Phase 46 — override alignment so alignment-gated tier-3 skills can pass. */
     philosophicalAlignment?: { epistemology: number; outlook: number; scope: number };
 } = {}) {
@@ -30,7 +30,7 @@ function buildStore(level: number, opts: {
         name: 'Learner',
         level,
         baseStats: { heart: 5, body: 5, mind: 5 },
-        knownSkills: opts.knownSkills ?? [],
+        knownCards: opts.knownCards ?? [],
     });
     const state = { ...createNewGameState(), player };
     if (opts.experience !== undefined) state.player.experience = opts.experience;
@@ -72,7 +72,7 @@ describe('character:levelup payload — cards are no longer level-gated (2026-07
         const someKnown = cardLibrary.find(s => s.tier === 2)!.id;
         const { store, captured } = buildStore(4, {
             experience: 4 * EXPERIENCE_PER_LEVEL + 1,
-            knownSkills: [someKnown],
+            knownCards: [someKnown],
         });
         store.getState().levelUp();
         const unlocked = captured[0].payload.unlockedSkills ?? [];

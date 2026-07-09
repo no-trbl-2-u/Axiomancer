@@ -95,13 +95,13 @@ function buildCandidates(options: DeckDraftOptions): DraftCandidate[] {
     const poolIds = options.stage
         ? stageEligibleCardIds(options.stage, extra)
         : [...merged.keys()];
-    const lookupSkill = (id: string): Card | undefined => merged.get(id) ?? getCardById(id);
+    const lookupCard = (id: string): Card | undefined => merged.get(id) ?? getCardById(id);
     const maxCopies = Math.max(1, options.maxCopies ?? DEFAULT_MAX_COPIES);
 
     const candidates: DraftCandidate[] = [];
     for (const id of poolIds) {
         if (isSyntheticCard(id)) continue; // synthetic cards (if any) are never drafted.
-        const card = toCombatCard(id, lookupSkill, lookupEffect);
+        const card = toCombatCard(id, lookupCard, lookupEffect);
         if (!card) continue;
         candidates.push({
             id,

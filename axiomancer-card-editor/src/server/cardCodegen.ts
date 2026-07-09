@@ -1,5 +1,5 @@
 /**
- * skillCodegen — pure Node codegen for the card (Action) editor write-back.
+ * cardCodegen — pure Node codegen for the card (Action) editor write-back.
  *
  * Renders a {@link CardDraft} into a `const <ident>: Card = { … };` TypeScript
  * block that matches the hand-authored style of
@@ -343,12 +343,12 @@ function findLibraryArray(text: string): { openIdx: number; closeIdx: number } {
     const declRe = /export\s+const\s+cardLibrary\s*:\s*Card\s*\[\s*\]\s*=\s*\[/;
     const m = declRe.exec(text);
     if (!m) {
-        throw new Error('skillCodegen: `export const cardLibrary: Card[] = [` not found.');
+        throw new Error('cardCodegen: `export const cardLibrary: Card[] = [` not found.');
     }
     const openIdx = text.indexOf('[', m.index + m[0].length - 1);
     const closeIdx = matchDelimiter(text, openIdx);
     if (closeIdx === -1) {
-        throw new Error('skillCodegen: unbalanced cardLibrary array brackets.');
+        throw new Error('cardCodegen: unbalanced cardLibrary array brackets.');
     }
     return { openIdx, closeIdx };
 }
@@ -407,7 +407,7 @@ function removeFromArray(text: string, ident: string): string {
  */
 export function upsertCard(fileText: string, draft: CardDraft): string {
     const id = draft.id.trim();
-    if (id === '') throw new Error('skillCodegen.upsertCard: draft.id is required.');
+    if (id === '') throw new Error('cardCodegen.upsertCard: draft.id is required.');
 
     const found = findBlockById(fileText, id);
     if (found) {

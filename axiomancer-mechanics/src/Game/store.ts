@@ -50,7 +50,7 @@ import { GameEventEmitter, GameEvent, GameEventType } from './events';
 import { PersistenceAdapter } from './persistence/types';
 import { rollEncounterLoot, totalEncounterXp } from './combat-grants';
 import { getRng } from '../Utils/rng';
-import { getAvailableSkills } from '../Cards';
+import { getAvailableCards } from '../Cards';
 import {
     addItem as addItemReducer,
     removeItem as removeItemReducer,
@@ -62,7 +62,7 @@ import {
  * provided `PersistenceAdapter` (Phase 51, Spec 09 Q4 path B).
  *
  * UI-tier actions (`USE_ITEM`, `EQUIP_ITEM`, `ALLOCATE_STAT_POINT`,
- * `LEARN_SKILL`, `SHIFT_MORAL_METER`, `SHIFT_PHILOSOPHICAL_ALIGNMENT`,
+ * `LEARN_CARD`, `SHIFT_MORAL_METER`, `SHIFT_PHILOSOPHICAL_ALIGNMENT`,
  * `START_COMBAT`, `PROCESS_NODE`, `LOAD_GAME`) are intentionally excluded —
  * they will save on the next durable transition or via an explicit
  * `SAVE_GAME` / `save()` call.
@@ -184,7 +184,7 @@ export interface GameActions {
     // ── Progression / persistence ────────────────────────────────────────────
     levelUp: () => void;
     allocateStatPoint: (stat: 'heart' | 'body' | 'mind') => void;
-    learnSkill: (skillId: string) => void;
+    learnCard: (skillId: string) => void;
     save: () => void;
     // ── Morality ─────────────────────────────────────────────────────────────
     shiftMoralMeter: (delta: number, gating?: { min?: number; max?: number }) => void;
@@ -238,8 +238,8 @@ function enrichExtra(
     // Phase 46 — thread the alignment so the unlockedSkills diff reflects
     // alignment-gated skill availability changes (e.g. a SHIFT_PHILOSOPHICAL_ALIGNMENT
     // that crosses a gate threshold should surface the newly-eligible skills).
-    const before = new Set(getAvailableSkills(prev.player, prev.philosophicalAlignment).map(s => s.id));
-    const after = getAvailableSkills(next.player, next.philosophicalAlignment).map(s => s.id);
+    const before = new Set(getAvailableCards(prev.player, prev.philosophicalAlignment).map(s => s.id));
+    const after = getAvailableCards(next.player, next.philosophicalAlignment).map(s => s.id);
     const unlockedSkills = after.filter(id => !before.has(id));
     return { ...(extra ?? {}), unlockedSkills };
 }
@@ -481,8 +481,8 @@ export function createGameStore(
                 dispatch({ type: 'ALLOCATE_STAT_POINT', payload: { stat } });
             },
 
-            learnSkill(skillId) {
-                dispatch({ type: 'LEARN_SKILL', payload: { skillId } });
+            learnCard(skillId) {
+                dispatch({ type: 'LEARN_CARD', payload: { skillId } });
             },
 
             save() {

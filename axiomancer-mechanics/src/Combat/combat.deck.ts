@@ -41,19 +41,19 @@ export function shuffleCombatDeck<T>(items: readonly T[], rng: () => number = de
 
 /**
  * Builds the player's combat deck from the curated loadout (Phase 169) when
- * `flags` contains loadout entries, or falls back to the full `knownSkills`
+ * `flags` contains loadout entries, or falls back to the full `knownCards`
  * list for backwards compatibility with saves that pre-date Phase 169.
  *
  * Card ids are skill ids (kebab-case). Reward cards stack on top of the skill
  * base. No escape card is appended — see the file header.
  *
- * @param player - Character whose `knownSkills` / `combatRewardCards` supply the base.
+ * @param player - Character whose `knownCards` / `combatRewardCards` supply the base.
  * @param flags  - `GameState.flags` — when non-empty loadout flags are present
- *                 the curated list is used instead of all `knownSkills`.
+ *                 the curated list is used instead of all `knownCards`.
  */
 export function buildCombatDeck(player: Character, flags?: readonly string[]): string[] {
     const loadout = flags && flags.length > 0 ? getCombatLoadout(flags) : [];
-    const known = loadout.length > 0 ? loadout : (player.knownSkills ?? []);
+    const known = loadout.length > 0 ? loadout : (player.knownCards ?? []);
     // De-dup the skill base; preserve order so opening hands feel authored.
     const seen = new Set<string>();
     const deck: string[] = [];

@@ -41,7 +41,7 @@ describe('buildCharacterFromPreset', () => {
         expect(player.level).toBe(1);
         expect(player.baseStats).toEqual({ heart: 5, body: 5, mind: 5 });
         expect(player.equipment).toEqual({});
-        expect(player.knownSkills).toHaveLength(7); // Phase 108 — includes Befriend starting skill
+        expect(player.knownCards).toHaveLength(7); // Phase 108 — includes Befriend starting skill
         expect(player.inventory).toHaveLength(1);
         expect(player.inventory[0]?.id).toBe('minor-healing-potion');
         expect((player.inventory[0] as Consumable | undefined)?.quantity).toBe(3);
@@ -53,7 +53,7 @@ describe('buildCharacterFromPreset', () => {
         const player = buildCharacterFromPreset(wandererPreset);
         expect(player.level).toBe(8);
         expect(player.baseStats).toEqual({ heart: 5, body: 4, mind: 4 });
-        expect(player.knownSkills).toHaveLength(11); // spec 32 v3 recipe: 7 openers + 3 mid-tier + the synergy payoff
+        expect(player.knownCards).toHaveLength(11); // spec 32 v3 recipe: 7 openers + 3 mid-tier + the synergy payoff
         expect(player.equipment.weapon?.id).toBe('iron-blade');
         expect(player.equipment.armor?.id).toBe('hide-vest');
         expect(player.equipment.head?.id).toBe('leather-cap');
@@ -65,8 +65,8 @@ describe('buildCharacterFromPreset', () => {
         const player = buildCharacterFromPreset(sagePreset);
         expect(player.level).toBe(15);
         expect(player.baseStats).toEqual({ heart: 20, body: 30, mind: 25 });
-        expect(player.knownSkills).toHaveLength(14); // spec 32 v3 recipe: all tiers + the synergy payoff
-        expect(player.knownSkills).toContain('resonance-detonation');
+        expect(player.knownCards).toHaveLength(14); // spec 32 v3 recipe: all tiers + the synergy payoff
+        expect(player.knownCards).toContain('resonance-detonation');
         expect(player.equipment.weapon?.id).toBe('steel-blade');
         expect(player.equipment.armor?.id).toBe('chain-mail');
         expect(player.equipment.head?.id).toBe('chain-coif');

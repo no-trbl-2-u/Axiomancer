@@ -51,8 +51,8 @@ function FilterChip({
     );
 }
 
-function LibThumb({ skill, selected, onClick }: { skill: Card; selected: boolean; onClick: () => void }) {
-    const rar: RarityKey = rarityOf(skill);
+function LibThumb({ card, selected, onClick }: { card: Card; selected: boolean; onClick: () => void }) {
+    const rar: RarityKey = rarityOf(card);
     return (
         <button
             onClick={onClick}
@@ -69,9 +69,9 @@ function LibThumb({ skill, selected, onClick }: { skill: Card; selected: boolean
                 gap: 5,
             }}
         >
-            <CardFace card={toDraft(skill)} width={96} height={134} />
+            <CardFace card={toDraft(card)} width={96} height={134} />
             <div style={{ fontFamily: WX.serif, fontSize: 11, lineHeight: 1.1, color: WX.parchment, textAlign: 'center', maxWidth: 96, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                {skill.name}
+                {card.name}
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                 <span style={{ width: 7, height: 7, borderRadius: 2, background: RARITY[rar].color, display: 'inline-block' }} />
@@ -96,7 +96,7 @@ export function EditTab({
     draft: CardDraft;
     setDraft: (d: CardDraft) => void;
     selectedId: string | null;
-    onSelect: (skill: Card) => void;
+    onSelect: (card: Card) => void;
     onUpdate: () => void;
     onDuplicate: () => void;
     onDelete: () => void;
@@ -157,7 +157,7 @@ export function EditTab({
                     <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: 24, fontFamily: WX.serif, fontStyle: 'italic', color: WX.ash }}>no cards match</div>
                 )}
                 {filtered.map((s) => (
-                    <LibThumb key={s.id} skill={s} selected={s.id === selectedId} onClick={() => onSelect(s)} />
+                    <LibThumb key={s.id} card={s} selected={s.id === selectedId} onClick={() => onSelect(s)} />
                 ))}
             </div>
 

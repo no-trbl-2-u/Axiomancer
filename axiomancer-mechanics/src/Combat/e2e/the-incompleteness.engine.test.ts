@@ -100,7 +100,7 @@ describe('The Incompleteness — seeded encounter smoke', () => {
         // Mirrors the `impossible` stage profile shape: level-50 stats, 260 HP,
         // a doctrine-faithful status loadout (DoT erosion + soft control).
         const p = deepClone(Player);
-        p.knownSkills = ['slippery-slope', 'false-dilemma'];
+        p.knownCards = ['slippery-slope', 'false-dilemma'];
         p.baseStats = { heart: 22, body: 22, mind: 22 };
         p.health = 260;
         p.maxHealth = 260;

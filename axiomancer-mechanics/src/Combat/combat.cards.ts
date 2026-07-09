@@ -278,10 +278,10 @@ function rankLabel(skill: Card): string {
 }
 
 /** Projects a learned skill (or synthetic card) into a `CombatCard` view. */
-export function toCombatCard(cardId: string, lookupSkill: CardLookup, lookupEffect: EffectLookup): CombatCard | null {
+export function toCombatCard(cardId: string, lookupCard: CardLookup, lookupEffect: EffectLookup): CombatCard | null {
     if (isSyntheticCard(cardId)) return SYNTHETIC_CARDS[cardId];
 
-    const skill = lookupSkill(cardId);
+    const skill = lookupCard(cardId);
     if (!skill) return null;
 
     const { verbClass, track } = classifyVerbClass(skill, lookupEffect);
@@ -348,11 +348,11 @@ export function toCombatCard(cardId: string, lookupSkill: CardLookup, lookupEffe
 /** Projects an entire deck (card ids) into card views, dropping unknown ids. */
 export function projectDeck(
     cardIds: readonly string[],
-    lookupSkill: CardLookup,
+    lookupCard: CardLookup,
     lookupEffect: EffectLookup,
 ): CombatCard[] {
     return cardIds
-        .map(id => toCombatCard(id, lookupSkill, lookupEffect))
+        .map(id => toCombatCard(id, lookupCard, lookupEffect))
         .filter((c): c is CombatCard => c !== null);
 }
 

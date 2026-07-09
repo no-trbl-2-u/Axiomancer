@@ -28,7 +28,7 @@ import type { CombatThreatPhase } from '../combat.encounter.types';
 
 function makePlayer(): Character {
     const p = deepClone(Player);
-    p.knownSkills = [];
+    p.knownCards = [];
     p.baseStats = { heart: 8, body: 8, mind: 8 };
     p.health = 200;
     p.maxHealth = 200;

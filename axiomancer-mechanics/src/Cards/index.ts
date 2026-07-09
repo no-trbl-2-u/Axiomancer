@@ -30,14 +30,14 @@ export {
 
 export {
     generateBasicActionResources, generatePhilosophicalResource,
-    calculateSkillDamage, executeSkill,
+    calculateCardDamage, executeCard,
     philosophicalCategoryFor,
-    meetsLearningRequirement, getAvailableSkills, learnSkill,
-} from './skill.engine';
+    meetsLearningRequirement, getAvailableCards, learnCard,
+} from './card.engine';
 
 export type {
     CardEvent, CardResolution, CardLookup,
-} from './skill.engine';
+} from './card.engine';
 
 export {
     cardLibrary, getCardById,
