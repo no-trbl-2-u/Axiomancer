@@ -206,10 +206,10 @@ describe('isCombatSynergySatisfied', () => {
         expect(isCombatSynergySatisfied(card!, enemyEffects)).toBe(false);
     });
 
-    it('returns false for a card with no backing skillId (no crash on a null skillId)', () => {
+    it('returns false for a synthetic card with no library backing', () => {
         const card = toCombatCard(SKILL_A, getCardById, lookupEffect);
         expect(card).not.toBeNull();
-        const noSkillCard = { ...card!, skillId: null };
-        expect(isCombatSynergySatisfied(noSkillCard, [])).toBe(false);
+        const syntheticCard = { ...card!, id: 'card-retreat' };
+        expect(isCombatSynergySatisfied(syntheticCard, [])).toBe(false);
     });
 });

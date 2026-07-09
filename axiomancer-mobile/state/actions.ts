@@ -746,10 +746,9 @@ function ensureStarterSkills(store: AppStore): void {
         store.setState({ player: { ...player, knownCards: [...bundle.cardIds], combatRewardCards: [] } });
         return;
     }
-    const alignment = currentAlignment(store);
     let next = player;
     for (const id of STARTER_SKILL_IDS) {
-        next = engineLearnSkill(next, id, alignment);
+        next = engineLearnSkill(next, id);
     }
     if (next !== player) store.setState({ player: next });
 }
@@ -794,7 +793,7 @@ function getLearnableSkillOffersAction(store: AppStore, count = 3): LearnableCar
     ensureStarterSkills(store);
     const player = store.getState().player;
     if (!player) return [];
-    const pool = getAvailableCards(player, currentAlignment(store)).slice();
+    const pool = getAvailableCards(player).slice();
     for (let i = pool.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [pool[i], pool[j]] = [pool[j], pool[i]];
@@ -806,7 +805,7 @@ function getLearnableSkillOffersAction(store: AppStore, count = 3): LearnableCar
 function learnCardAction(store: AppStore, skillId: string): boolean {
     const player = store.getState().player;
     if (!player) return false;
-    const next = engineLearnSkill(player, skillId, currentAlignment(store));
+    const next = engineLearnSkill(player, skillId);
     if (next === player) return false;
     store.setState({ player: next });
     return true;

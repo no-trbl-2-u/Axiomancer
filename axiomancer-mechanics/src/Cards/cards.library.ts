@@ -591,11 +591,6 @@ const pactOfAkrasia: Card = {
     free: { guard: 2 },
     combatEffects: [{ effectId: 'debuff_bleed', appliedTo: 'self', intensity: 1, duration: 2 }],
     specialMechanics: [{ kind: 'forge_floating_die', color: 'wild' }, { kind: 'recoil', hp: 6 }],
-    // Phase 46 alignment gate — only a pessimist signs in blood (inherits the
-    // cut nirvana-fallacy's outlook gate).
-    learningRequirement: {
-        requiresAlignment: { axis: 'outlook', op: 'lte', value: -34 },
-    },
     addedIn: '2026-07-08',
     tags: ['akrasia', 'floating'],
 };
@@ -1159,10 +1154,6 @@ const heartOfTheMatter: Card = {
         { kind: 'rider', rider: { healHp: 4 } },
     ],
     threshold: { color: 'heart', count: 5, rider: { sway: 4 } },
-    // Phase 46 alignment gate (inherited from the cut appeal-to-consequences):
-    // the deepest act of seeing-another is learnable only at high Relational
-    // scope. Dropped by the rework; restored to satisfy the authored gate.
-    learningRequirement: { requiresAlignment: { axis: 'scope', op: 'gte', value: 34 } },
     addedIn: '2026-07-08',
     tags: ['charm', 'alt-win'],
 };

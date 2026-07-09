@@ -327,7 +327,6 @@ export function toCombatCard(cardId: string, lookupCard: CardLookup, lookupEffec
 
     return {
         id: skill.id,
-        skillId: skill.id,
         name: skill.name,
         stance: cardStanceColor(skill),
         verbClass,
@@ -365,8 +364,8 @@ export function isCombatSynergySatisfied(
     card: CombatCard,
     enemyActiveEffects: readonly ActiveEffect[],
 ): boolean {
-    if (!card.skillId) return false;
-    const skill = getCardById(card.skillId);
+    if (isSyntheticCard(card.id)) return false;
+    const skill = getCardById(card.id);
     if (!skill?.synergy?.predicate) return false;
     const { predicate } = skill.synergy;
     if (predicate.on !== 'target') return false;

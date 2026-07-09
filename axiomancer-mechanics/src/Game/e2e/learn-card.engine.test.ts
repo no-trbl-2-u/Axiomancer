@@ -3,7 +3,7 @@
  *
  * Drives the LEARN_CARD action through the public game-store surface
  * to verify the reducer + store wiring. The underlying eligibility
- * filter (`getAvailableCards`, `meetsLearningRequirement`) is tested
+ * filter (`getAvailableCards`) is tested
  * by `src/Cards/e2e/learning.engine.test.ts`; this suite focuses on
  * the action-level path (already-known no-op, eligible-learn appends,
  * requirement-blocked no-op).
@@ -46,17 +46,6 @@ describe('LEARN_CARD action — Phase 30 unit 3', () => {
         store.getState().learnCard(t1.id);
         const after = store.getState().player.knownCards;
         expect(after).toEqual(before);
-    });
-
-    it('is a no-op when the learning requirement is not met', () => {
-        // Axiom (rank 5) cards gate at level 10; level-5 character is below it.
-        const t3 = cardLibrary.find(s => s.rank === 5)!;
-        const store = buildStore(5, []);
-        const before = store.getState().player.knownCards.slice();
-        store.getState().learnCard(t3.id);
-        const after = store.getState().player.knownCards;
-        expect(after).toEqual(before);
-        expect(after).not.toContain(t3.id);
     });
 
     it('is a no-op for an unknown skill id', () => {

@@ -146,7 +146,7 @@ Agent-graded walkthrough at `automation/scripts/walkthroughs/codex-unlock.*`.
 runnable code samples: [`quickstart-character.md`](./quickstart-character.md),
 [`quickstart-combat.md`](./quickstart-combat.md),
 [`quickstart-items.md`](./quickstart-items.md),
-[`quickstart-skills.md`](./quickstart-skills.md),
+`quickstart-skills.md`,
 [`quickstart-world.md`](./quickstart-world.md).
 
 ### Events (Beta)

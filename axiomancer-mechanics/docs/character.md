@@ -54,7 +54,7 @@ maxHealth = level × average(body, heart) × HEALTH_PER_STAT (10)
 ```
 
 Health starts at max on character creation. Skills run on the per-combat
-five-resource economy described in [`docs/skills.md`](./skills.md), tracked
+five-resource economy described in `docs/skills.md`, tracked
 on `CombatState.combatResources` rather than the character itself.
 
 ## Skills

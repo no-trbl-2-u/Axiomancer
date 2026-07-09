@@ -122,35 +122,6 @@ function specialMechanicsLines(mechs: CardDraft['specialMechanics']): string[] {
     return lines;
 }
 
-function alignmentObj(a: { axis: string; op: string; value: number }): string {
-    return `{ axis: ${str(a.axis)}, op: ${str(a.op)}, value: ${num(a.value)} }`;
-}
-
-function learningReqLines(lr: NonNullable<CardDraft['learningRequirement']>): string[] {
-    const extra =
-        lr.statRequirementType != null ||
-        lr.statRequirementValue != null ||
-        notBlank(lr.prerequisiteSkill) ||
-        lr.requiresAlignment != null;
-    if (!extra) return [`${IND}learningRequirement: {},`];
-
-    const lines = [`${IND}learningRequirement: {`];
-    if (lr.statRequirementType != null) {
-        lines.push(`${IND}${IND}statRequirementType: ${str(lr.statRequirementType)},`);
-    }
-    if (lr.statRequirementValue != null) {
-        lines.push(`${IND}${IND}statRequirementValue: ${num(lr.statRequirementValue)},`);
-    }
-    if (notBlank(lr.prerequisiteSkill)) {
-        lines.push(`${IND}${IND}prerequisiteSkill: ${str(lr.prerequisiteSkill as string)},`);
-    }
-    if (lr.requiresAlignment != null) {
-        lines.push(`${IND}${IND}requiresAlignment: ${alignmentObj(lr.requiresAlignment)},`);
-    }
-    lines.push(`${IND}},`);
-    return lines;
-}
-
 function predicateObj(p: NonNullable<NonNullable<CardDraft['synergy']>['predicate']>): string {
     const parts = [`effectId: ${str(p.effectId)}`, `on: ${str(p.on)}`];
     if (p.intensityMin != null) parts.push(`intensityMin: ${num(p.intensityMin)}`);
@@ -248,9 +219,6 @@ export function serialize(draft: CardDraft, identOverride?: string): string {
     if (draft.combatEffects?.length) lines.push(...combatEffectsLines(draft.combatEffects));
     if (draft.specialMechanics?.length) {
         lines.push(...specialMechanicsLines(draft.specialMechanics));
-    }
-    if (draft.learningRequirement != null) {
-        lines.push(...learningReqLines(draft.learningRequirement));
     }
     if (draft.synergy != null) lines.push(...synergyLines(draft.synergy));
     if (draft.incrementsFriendship != null) {

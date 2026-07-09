@@ -436,17 +436,18 @@ with the legacy driver.)
 | `Combatant` | `Character \| Enemy` — the union type for any participant in a combat encounter |
 | `BattleLogEntry` | Per-round log record (`round`, `playerAction`, `enemyAction`, `advantage`, rolls, damage fields, `result`) stored in `CombatState.log` |
 
-## Skills vs Cards — Terminology Boundary
+## Card terminology
 
-**Skills** and **cards** are distinct concepts. Do not use them interchangeably.
+The combat deck is built from **cards** (`knownCards`): a card is a Hazard-style
+combat entity in the deck/hand/reward loop — free/powered action halves, a stance
+color, a die cost, and draw/discard/deck cadence. A card in hand is projected from
+a library `Card` via `toCombatCard`; the engine resolves its powered action through
+`executeCard`.
 
-| Concept | Definition |
-|---------|-----------|
-| **Skill** | A learned/unlocked action in `knownSkills`, gated only by token/resource affordability (`combatResources`). Always available once learned. Executed through `executeSkill`. |
-| **Card** | A Hazard-style combat entity in the deck/hand/reward loop — with free/powered action halves, a stance color, a die cost, and draw/discard/deck cadence. |
-| **Projected card** | A card derived from a skill-library entry via `toCombatCard`. The *source* is a skill; the *object in play* is still a card. Call it a "projected card" or "skill-sourced card", never a "skill". |
-
-Cross-reference: `docs/skills.md` → Skills vs Cards.
+The word **"skill"** in combat now refers ONLY to **Signature Skills** — the
+Conviction-funded, always-available kit (`SIGNATURE_SKILLS` in
+`combat.signature.ts`), independent of the shuffled deck. Everything the player
+draws and plays is a card.
 
 > **Naming collision warning (2026-07):** the table above is the *legacy*
 > "Skill" — `Cards/skill.engine.ts`'s card-resolution engine (confusingly

@@ -54,11 +54,6 @@ describe('Phase 166 — Skills vs Cards terminology guard', () => {
         });
     }
 
-    it('CombatCard.skillId field is the accepted skill-source field name', () => {
-        const src = read('src/Combat/combat.encounter.types.ts');
-        expect(src).toContain('skillId: string | null');
-    });
-
     it('toCombatCard is the accepted projection entry-point name', () => {
         const src = read('src/Combat/combat.cards.ts');
         expect(src).toContain('export function toCombatCard(');

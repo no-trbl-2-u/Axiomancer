@@ -22,7 +22,6 @@ import type {
     CardRider,
     CardCombatEffects,
     CardSpecialMechanic,
-    CardLearningRequirement,
     CardSynergy,
 } from '@mechanics/Cards/types';
 
@@ -56,7 +55,6 @@ export interface CardDraft {
     combatEffects: CardCombatEffects[];
     /** Always an array in the draft (default `[]`). */
     specialMechanics: CardSpecialMechanic[];
-    learningRequirement?: CardLearningRequirement;
     synergy?: CardSynergy;
     incrementsFriendship?: number;
     addedIn?: string;
@@ -83,7 +81,6 @@ export function blankCard(): CardDraft {
         fallen: undefined,
         combatEffects: [],
         specialMechanics: [],
-        learningRequirement: undefined,
         synergy: undefined,
         incrementsFriendship: undefined,
         addedIn: undefined,
@@ -110,9 +107,6 @@ export function toDraft(card: Card): CardDraft {
         fallen: card.fallen ? { ...card.fallen } : undefined,
         combatEffects: (card.combatEffects ?? []).map((e) => ({ ...e })),
         specialMechanics: (card.specialMechanics ?? []).map((m) => ({ ...m })),
-        learningRequirement: card.learningRequirement
-            ? { ...card.learningRequirement }
-            : undefined,
         synergy: card.synergy ? { ...card.synergy } : undefined,
         incrementsFriendship: card.incrementsFriendship,
         addedIn: card.addedIn,
@@ -146,9 +140,6 @@ export function fromDraft(draft: CardDraft): Card {
     }
     if (draft.specialMechanics.length > 0) {
         card.specialMechanics = draft.specialMechanics.map((m) => ({ ...m }));
-    }
-    if (draft.learningRequirement != null) {
-        card.learningRequirement = { ...draft.learningRequirement };
     }
     if (draft.synergy != null) card.synergy = { ...draft.synergy };
     if (draft.incrementsFriendship != null) {

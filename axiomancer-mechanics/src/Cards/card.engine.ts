@@ -14,7 +14,6 @@
  */
 
 import { Character } from '../Character/types';
-import type { PhilosophicalAlignment } from '../Philosophy/types';
 import { Enemy } from '../Enemy/types';
 import { ActiveEffect, Effect } from '../Effects/types';
 import { lookupEffect, applyEffect } from '../Effects';
@@ -115,85 +114,35 @@ export function philosophicalCategoryFor(skill: Card): CardCategory {
     return skill.category;
 }
 
-// ─── Card Learning (Spec 06 Q7 / Phase 30) ──────────────────────────────────
-
-/**
- * True iff `character` meets every clause on `skill.learningRequirement`
- * (optional stat threshold, optional prerequisite skill, optional alignment
- * gate). Cards no longer carry a character-LEVEL requirement (removed
- * 2026-07-08 — a legacy-combat carry-over), so a card with no requirement, or
- * one whose only clauses pass, is learnable unconditionally.
- *
- * @param alignment - Phase 46 optional. When provided AND the skill carries
- *   `requiresAlignment`, the gate must pass. When the skill carries the
- *   gate but no alignment is passed in, the requirement fails (parallel to
- *   the dialogue `requiresAlignment` semantic).
- */
-export function meetsLearningRequirement(
-    character: Pick<Character, 'level' | 'baseStats' | 'knownCards'>,
-    skill: Card,
-    alignment?: PhilosophicalAlignment,
-): boolean {
-    const req = skill.learningRequirement;
-    if (!req) return true;
-    if (req.statRequirementType && req.statRequirementValue !== undefined) {
-        if (character.baseStats[req.statRequirementType] < req.statRequirementValue) {
-            return false;
-        }
-    }
-    if (req.prerequisiteSkill && !character.knownCards.includes(req.prerequisiteSkill)) {
-        return false;
-    }
-    if (req.requiresAlignment) {
-        if (!alignment) return false;
-        const { axis, op, value } = req.requiresAlignment;
-        const v = alignment[axis];
-        if (op === 'gte' && !(v >= value)) return false;
-        if (op === 'lte' && !(v <= value)) return false;
-    }
-    return true;
-}
+// ─── Card Learning (Phase 30) ───────────────────────────────────────────────
 
 /**
  * Returns every entry in `cardLibrary` that the character has not already
- * learned AND meets the learning requirement for. Order matches the library
- * order so the UI can show a stable list across calls.
- *
- * @param alignment - Phase 46 optional. Threaded into `meetsLearningRequirement`
- *   so alignment-gated skills are filtered out when the character's
- *   alignment doesn't match (or isn't provided).
+ * learned. Order matches the library order so the UI can show a stable list
+ * across calls. Cards are learnable unconditionally — the legacy
+ * learning-requirement gate (level / stat / prerequisite / alignment) was
+ * removed 2026-07-08.
  */
 export function getAvailableCards(
-    character: Pick<Character, 'level' | 'baseStats' | 'knownCards'>,
-    alignment?: PhilosophicalAlignment,
+    character: Pick<Character, 'knownCards'>,
 ): Card[] {
-    return cardLibrary.filter(s =>
-        !character.knownCards.includes(s.id)
-        && meetsLearningRequirement(character, s, alignment),
-    );
+    return cardLibrary.filter(s => !character.knownCards.includes(s.id));
 }
 
 /**
- * Appends `skillId` to `character.knownCards` when the skill exists, is not
- * already known, and the character meets its learning requirement. Pure;
- * returns the unchanged character (same reference) on any guard miss.
- *
- * @param alignment - Phase 46 optional. Threaded into `meetsLearningRequirement`
- *   so alignment-gated skills can only be learned by characters whose
- *   alignment matches the gate.
+ * Appends `cardId` to `character.knownCards` when the card exists and is not
+ * already known. Pure; returns the unchanged character (same reference) on any
+ * guard miss.
  */
 export function learnCard(
     character: Character,
-    skillId: string,
-    alignment?: PhilosophicalAlignment,
+    cardId: string,
 ): Character {
-    if (character.knownCards.includes(skillId)) return character;
-    const skill = getCardById(skillId);
-    if (!skill) return character;
-    if (!meetsLearningRequirement(character, skill, alignment)) return character;
+    if (character.knownCards.includes(cardId)) return character;
+    if (!getCardById(cardId)) return character;
     return {
         ...character,
-        knownCards: [...character.knownCards, skillId],
+        knownCards: [...character.knownCards, cardId],
     };
 }
 

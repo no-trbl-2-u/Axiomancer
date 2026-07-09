@@ -5,7 +5,6 @@
  * `specs/04-skills-engine.md` for the full economy design.
  */
 
-import type { AlignmentGate } from '../NPCs/types';
 import type { CardTheme } from './card-themes';
 
 /**
@@ -85,31 +84,6 @@ export interface CombatResources {
     mind: number;
     fallacy: number;
     paradox: number;
-}
-
-/**
- * Learning requirement for a card.
- * Defines the prerequisites a character must meet to learn this card.
- *
- * NOTE (2026-07-08): the `level` minimum was REMOVED — cards no longer carry a
- * character-level requirement (a carry-over from the legacy combat system that
- * is no longer true). The remaining clauses (stat / prerequisite / alignment)
- * are all optional; a card with none of them is learnable unconditionally.
- *
- * @property statRequirementType - Optional: which base stat must meet the requirement (body/mind/heart)
- * @property statRequirementValue - Optional: minimum value for the specified stat
- * @property prerequisiteSkill - Optional: skill that must be learned before this skill can be learned
- */
-export interface CardLearningRequirement {
-    statRequirementType?: StatType;
-    statRequirementValue?: number;
-    prerequisiteSkill?: string;
-    /**
-     * Phase 46 — alignment gate. Locks the skill behind a position on the
-     * Phase 42 alignment cube. Single-clause gate (axis + op + value);
-     * missing alignment on the character implicitly fails the gate.
-     */
-    requiresAlignment?: AlignmentGate;
 }
 
 /**
@@ -402,7 +376,6 @@ export interface CardSynergy {
  *                              `combatEffects`. (Spec 32 v3: there is NO
  *                              damage step — `basePower` was deleted from the
  *                              schema; raw HP damage is a compile error.)
- * @property learningRequirement - Optional prerequisites needed to learn.
  */
 export interface Card {
     id: string;
@@ -454,7 +427,6 @@ export interface Card {
     persistentEffect?: string;
     combatEffects?: CardCombatEffects[];
     specialMechanics?: CardSpecialMechanic[];
-    learningRequirement?: CardLearningRequirement;
     /**
      * Phase 66 — Tier 2 synergy clause. When present, the skill engine
      * evaluates the synergy after `calculateCardDamage` and before

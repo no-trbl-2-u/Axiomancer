@@ -96,16 +96,15 @@ export type CombatVerbClass =
 export type CardEffectKind = 'dot' | 'control' | 'none';
 
 /**
- * A combat card — an adapter VIEW over a learned `Card` (or a synthetic card
- * like Retreat). Pure projection: never mutated, recomputed from the skill +
- * effect libraries. The `skillId` is the learned-skill id the card executes.
+ * A combat card — an adapter VIEW over a library `Card` (or a synthetic card
+ * like Retreat). Pure projection: never mutated, recomputed from the card +
+ * effect libraries. `id` is the backing library-card id; `isSyntheticCard(id)`
+ * distinguishes a synthetic card (which has no library backing) from a real one.
  */
 export interface CombatCard {
-    /** Card id. For skill-backed cards this is the skill id; synthetic cards
-     *  use a `card-` prefix (e.g. `card-retreat`). */
+    /** Card id. For library-backed cards this is the source card id; synthetic
+     *  cards use a `card-` prefix (e.g. `card-retreat`). */
     id: string;
-    /** Backing learned-skill id, or null for synthetic cards. */
-    skillId: string | null;
     name: string;
     /** Stance color identity (Heart / Body / Mind). Derived from the skill's
      *  `philosophicalAspect`. Synthetic cards may be `wild`. */

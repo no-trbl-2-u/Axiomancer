@@ -393,7 +393,6 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                 player: learnCard(
                     state.player,
                     action.payload.skillId,
-                    state.philosophicalAlignment,
                 ),
             };
         }

@@ -151,7 +151,7 @@ function selectCard(
     let bestScore = -Infinity;
     for (const c of cards) {
         let score = policy.rankCard(s, c.card, rng);
-        if (focusIds && (focusIds.has(c.card.id) || (c.card.skillId !== null && focusIds.has(c.card.skillId)))) {
+        if (focusIds && focusIds.has(c.card.id)) {
             score += FOCUS_CARD_BOOST;
         }
         if (score > bestScore) { bestScore = score; best = c; }
@@ -183,7 +183,7 @@ function bumpUsage(
     kind: 'top' | 'bottom',
     landedStatus = false,
 ): void {
-    const key = card.skillId ?? card.id;
+    const key = card.id;
     const row = usage[key] ?? (usage[key] = {
         cardId: key, plays: 0, bottomPlays: 0, topPlays: 0, statusLands: 0, discards: 0,
     });

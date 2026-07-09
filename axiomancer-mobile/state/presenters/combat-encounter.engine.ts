@@ -13,7 +13,7 @@
  */
 
 import {
-    handCards as engineHandCards, getCard, getCardById,
+    handCards as engineHandCards, getCard, getCardById, isSyntheticCard,
     getDraftedDie, isPhaseStanceRevealed, cardReadPreview,
     revealedCurrentStance, resolveRead, getSignatureSkill,
     lookupEffect, READ_DAMAGE_MULT, COLOR_MATCH_DAMAGE_BONUS,
@@ -534,7 +534,7 @@ interface CardCalc extends PrimaryResolution {
 
 /** Single source of the numbers — faceStats AND detailStats both read this, so the
  *  face and the inspect modal can never drift. All values are AUTHORED units from
- *  getCardById(card.skillId).combatEffects (not effect-library defaults). */
+ *  getCardById(card.id).combatEffects (not effect-library defaults). */
 function cardCalc(card: CombatCard, skill: Card | undefined): CardCalc {
     const pr = resolvePrimary(card, skill);
     const out: CardCalc = {
@@ -935,7 +935,7 @@ function handVM(state: CombatEncounterState): CombatCardVM[] {
         .filter(({ card }: { card: CombatCard }) => card.id !== 'card-retreat' && card.verbClass !== 'retreat')
         .map(({ uid, card }: { uid: string; card: CombatCard }) => {
         const preview = drafted ? cardReadPreview(state, card) : null;
-        const skill = card.skillId ? getCardById(card.skillId) : undefined;
+        const skill = isSyntheticCard(card.id) ? undefined : getCardById(card.id);
         return {
             uid, cardId: card.id, name: card.name, stance: card.stance,
             stanceColor: STANCE_COLORS[card.stance] ?? '#888',

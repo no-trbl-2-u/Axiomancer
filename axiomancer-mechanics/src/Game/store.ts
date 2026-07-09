@@ -235,11 +235,12 @@ function enrichExtra(
 ): { report?: CombatEndReport; unlockedSkills?: string[] } | undefined {
     if (action.type !== 'LEVEL_UP') return extra;
     if (next.player.level === prev.player.level) return extra; // No promotion → no diff.
-    // Phase 46 — thread the alignment so the unlockedSkills diff reflects
-    // alignment-gated skill availability changes (e.g. a SHIFT_PHILOSOPHICAL_ALIGNMENT
-    // that crosses a gate threshold should surface the newly-eligible skills).
-    const before = new Set(getAvailableCards(prev.player, prev.philosophicalAlignment).map(s => s.id));
-    const after = getAvailableCards(next.player, next.philosophicalAlignment).map(s => s.id);
+    // Card availability no longer has level/stat/alignment gates (learning
+    // requirements were removed 2026-07-08), so a level-up never changes the
+    // available set — this diff is now always empty. Kept for event-shape
+    // stability; the field can be retired when its consumers are.
+    const before = new Set(getAvailableCards(prev.player).map(s => s.id));
+    const after = getAvailableCards(next.player).map(s => s.id);
     const unlockedSkills = after.filter(id => !before.has(id));
     return { ...(extra ?? {}), unlockedSkills };
 }
