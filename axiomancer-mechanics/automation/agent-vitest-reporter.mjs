@@ -205,7 +205,12 @@ export default class AgentVitestReporter {
         if (!absPath) return absPath;
         try {
             const rel = path.relative(this.rootDir, absPath);
-            return rel === '' ? absPath : rel;
+            // Normalize to POSIX separators so the emitted test ids
+            // (`src/X/e2e/x.engine.test.ts`) are stable across platforms —
+            // `path.relative` yields backslashes on Windows, which would
+            // otherwise leak `src\X\...` into the report and every consumer
+            // (diff keys, prefixes, snapshots) that assumes `/`.
+            return rel === '' ? absPath : rel.split(path.sep).join('/');
         } catch {
             return absPath;
         }
