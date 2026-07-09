@@ -124,6 +124,50 @@ Tick in this file in the same commit that ships the phase.
       tutorial (GAP-001 follow-up), mirroring the Rest/Gathering/Combat
       tutorials (mobile)
 
+**Equipment / signature refactor (T-directed 2026-07-09 — a 4-phase
+epic; ship in order, each phase leaves `main` green + playable):**
+
+The end state: equipment is decoupled from effects and from the
+procedural modifier/rarity/affix machinery; the only equipment is a
+fixed set of **8 "signet" relic pieces**, each granting **one**
+signature skill plus a **static stat bump**. Signatures are no longer
+selected by archetype — they come solely from worn relics, and the
+player wears **up to 5 of the 8** (the wear-cap IS the gate / build
+choice). Briefs carry the full decision log (see each phase file).
+
+- [ ] Phase 18 — Equipment-granted signatures + the 8 signet relics
+      (retire archetype gating). Add `grantsSignature` to equipment, a
+      capacity-5 relic loadout on the character, the 8 fixed relic
+      pieces (each = one signature + its final stat bump, incl. a new
+      first-class `maxHp` stat modifier for the two +HP relics), seed
+      all 8 into the starting loadout (5 worn), and flip
+      `initCombatEncounter` to derive `signatures` from worn relics
+      instead of `SIGNATURE_KITS[archetype]`. The gate flip is
+      inseparable from the signature-granting pieces, so user-intent
+      phases 1+"the item carrier of 3" ship together here (both;
+      mechanics-led — generate brief before shipping) — brief:
+      `plan/phases/phase_18_equipment_granted_signatures.md`
+- [ ] Phase 19 — Decouple equipment from effects (static stat bumps
+      only). Strip `passiveEffects` / `onHitEffects` / `onDefendEffects`
+      / `resourceInteraction` / `critStyle` application out of the equip
+      pipeline and its combat consumers so ALL equipment contributes
+      only `statModifiers` (+ `grantsSignature`). User-intent phase 2
+      (mechanics; verify mobile) — brief:
+      `plan/phases/phase_19_equipment_effect_decouple.md`
+- [ ] Phase 20 — Retire the procedural equipment library. Delete the 56
+      templates + 7 uniques + the `dropItem`/roll/resolve/affix factory;
+      the 8 relics become the whole library. Convert loot surfaces (The
+      Reliquary, enemy drops, shops) to consumables/materials/currency.
+      User-intent phase 3 remainder (both; large) — brief:
+      `plan/phases/phase_20_retire_procedural_library.md`
+- [ ] Phase 21 — Teardown of dead equipment machinery. Delete the
+      modifier catalogue, the affix (prefix/suffix) library, item sets,
+      the rarity model, and the equipment-only effect definitions; prune
+      the `@mechanics` barrel and reconcile docs/specs 05–05e as
+      superseded. User-intent phase 4 + full teardown (mechanics; verify
+      mobile + card-editor) — brief:
+      `plan/phases/phase_21_equipment_machinery_teardown.md`
+
 > **After the queue drains:** `/march` transitions to `/iterate`
 > — draining `plan/AUDIT.md` + `plan/CRITIQUE.md`, doc-drift,
 > `as any` clusters, hex-literal -> AXM migration, a11y, and
