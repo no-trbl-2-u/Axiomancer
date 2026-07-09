@@ -118,11 +118,12 @@ Tick in this file in the same commit that ships the phase.
       parity confirmed (all 6 named hazards + 11 starter + 8 reward
       cards + crack resolve in mechanics). Recorded this tick —
       `plan: phase 13 shipped — hazard v2 port verified already landed`
-- [ ] Phase 15 — Hazard first-crossing tutorial (GAP-001 follow-up):
+- [x] Phase 15 — Hazard first-crossing tutorial (GAP-001 follow-up):
       guided first-run coach for the Hazard minigame, mirroring the
-      Rest/Gathering/Combat tutorials. Largest remaining gap — route
-      selection, staging/powering cards, foretell — generate a brief
-      before shipping (mobile)
+      Rest/Gathering/Combat tutorials. Teaches route/stage/power/apply/
+      resolve via a pinned seed (3, cracked-cliff); FORETELL out of
+      scope (brief: `plan/phases/phase_15_hazard_tutorial.md`) (mobile)
+      — `feat(mobile): guided first-crossing hazard tutorial — phase 15` (0e03ee02)
 - [ ] Phase 16 — Loot-Cache ("The Reliquary") first-delve tutorial
       (GAP-001 follow-up), mirroring the Rest/Gathering/Combat
       tutorials (mobile)
