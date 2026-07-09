@@ -213,7 +213,7 @@ bonuses, and combat difficulty scaling. Future phases will expand the system:
 - **Multi-axis morality:** Honor, cunning, and compassion as separate tracks
 - **NPC reputation:** Per-character relationship scores
 - **Ending gates:** Multiple conclusions based on moral standing
-- **Skill restrictions:** Alignment-locked abilities and equipment
+- **Card restrictions:** Alignment-locked abilities and equipment
 - **Advanced scaling:** Non-linear curves, per-enemy overrides, loot scaling
 
 ## Save Compatibility

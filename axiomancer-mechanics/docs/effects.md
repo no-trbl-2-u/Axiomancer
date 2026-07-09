@@ -34,10 +34,10 @@ shape. Full per-tier / per-category verdict tables in
 
 **Coverage gap surfaced.** 56 of 88 (64%) effects carry **zero direct
 test-file references** by effect id. Larger gap than Phase 78's
-8-of-21 skills audit (38%), but structurally different: many of the 56
+8-of-21 cards audit (38%), but structurally different: many of the 56
 uncovered effects share the same engine resolution path (`applyEffect`
 + `tickAllEffects` + tier-keyed `resolveEffectApplication` dispatch),
-so the per-case test cost is lower than per-skill cases. The gap
+so the per-case test cost is lower than per-card cases. The gap
 concentrates by category — stat (20/25 uncovered), defense (14/19),
 advantage (13/14), control (10/17), damage (5/10); regeneration is
 100% covered.
@@ -249,7 +249,7 @@ Aggregation rules:
   additively per Q3: `final = base × (1 + Σ bonus)`.
 - **Base-stat targets re-derive every dependent.** A `statModifiers:
   [{ stat: 'body', value: 2 }]` buff bumps body, then `physicalAttack`,
-  `physicalSkill`, `physicalDefense`, `luck`, and (for Characters) the
+  `physicalDefense`, `luck`, and (for Characters) the
   `physicalSave` / `physicalTest` non-combat pair all re-derive from
   the effective body.
 - **Derived-stat targets patch directly.** A `statModifiers: [{ stat:
@@ -301,13 +301,13 @@ combatant:
 
 ### Attribution — `sourceId` (Phase 38)
 
-Every `applyEffect` call on the combat / skill path stamps the new
+Every `applyEffect` call on the combat / card path stamps the new
 `ActiveEffect` with a `sourceId` so consumers can answer "who applied
 this?" without inferring from context. The convention:
 
 | Surface | sourceId | Set by |
 |---|---|---|
-| Skill engine (skill caster on opponent or self) | `player.id` | `src/Skills/skill.engine.ts` |
+| Card engine (card caster on opponent or self) | `player.id` | `src/Cards/card.engine.ts` |
 | Combat proc (primary application) | `actor.id` | `src/Combat/combat-effects.ts` |
 | Combat proc (rebound onto attacker) | `actor.id` (original attacker) | `src/Combat/combat-effects.ts` |
 | Combat fumble (self-application) | `actor.id` | `src/Combat/phases/scenario.ts` (passes `actor.id` to `applyFumbleOutcome`) |
@@ -496,9 +496,9 @@ Full per-effect documentation: [`docs/effects/buffs/`](./effects/buffs/)
 | `tier1_body_defend` | Briar Stance | Tier 1 | defense | 3 | intensity | — | — | `reflectDamage 1` per intensity |
 | `tier1_heart_defend` | Vital Empathy | Tier 1 | regeneration | 3 | intensity | — | — | `healthPerRound 1` per intensity |
 | `tier1_heart_attack` | Fleeting Kindness | Tier 1 | stat | 2 | intensity | — | — | `rollModifier -5` |
-| `buff_body_attack_up` | Achilles' Momentum | Tier 2 | stat | 3 | intensity | mind | 13 | `+body 2`, `+physicalSkill 3`, `rollModifier +2` |
-| `buff_mind_attack_up` | Schrödinger's Focus | Tier 2 | stat | 3 | intensity | heart | 13 | `+mind 2`, `+mentalSkill 3`, `rollModifier +2` |
-| `buff_heart_attack_up` | Bootstrap Passion | Tier 2 | stat | 3 | intensity | body | 13 | `+heart 2`, `+emotionalSkill 3`, `rollModifier +2` |
+| `buff_body_attack_up` | Achilles' Momentum | Tier 2 | stat | 3 | intensity | mind | 13 | `+body 2`, `rollModifier +2` |
+| `buff_mind_attack_up` | Schrödinger's Focus | Tier 2 | stat | 3 | intensity | heart | 13 | `+mind 2`, `rollModifier +2` |
+| `buff_heart_attack_up` | Bootstrap Passion | Tier 2 | stat | 3 | intensity | body | 13 | `+heart 2`, `rollModifier +2` |
 | `buff_body_defense_up` | Theseus' Constitution | Tier 2 | defense | 4 | duration | mind | 12 | `+body 2`, `+physicalDefense 3`, `defenseModifier +2` |
 | `buff_mind_defense_up` | Epistemic Shield | Tier 2 | defense | 4 | duration | heart | 12 | `+mind 2`, `+mentalDefense 3`, `defenseModifier +2` |
 | `buff_heart_defense_up` | Paradox of Tolerance | Tier 2 | defense | 4 | duration | body | 12 | `+heart 2`, `+emotionalDefense 3`, `defenseModifier +2` |
@@ -521,16 +521,16 @@ Full per-effect documentation: [`docs/effects/buffs/`](./effects/buffs/)
 | `buff_resistance_body` | Pole in Barn | Tier 2 | defense | 4 | duration | mind | 13 | `+body 3`, `+physicalDefense 4`, `+physicalSave 3` |
 | `buff_resistance_mind` | Liar's Shield | Tier 2 | defense | 4 | duration | heart | 13 | `+mind 3`, `+mentalDefense 4`, `+mentalSave 3` |
 | `buff_resistance_heart` | Fiction's Wall | Tier 2 | defense | 4 | duration | body | 13 | `+heart 3`, `+emotionalDefense 4`, `+emotionalSave 3` |
-| `buff_cleanse` | Barber's Paradox | Tier 2 | stat | 0 | none | heart | 12 | `{}` (instant — `applyCleanse` ready; wired via skills in Spec 04) |
+| `buff_cleanse` | Barber's Paradox | Tier 2 | stat | 0 | none | heart | 12 | `{}` (instant — `applyCleanse` ready; wired via cards in Spec 04) |
 | `buff_buff_duration_up` | Unexpected Extension | Tier 2 | advantage | 3 | none | heart | 12 | `rollModifier +1` |
 | `buff_status_chance_up` | Monty's Advantage | Tier 2 | advantage | 4 | none | heart | 13 | `rollModifier +3` |
 | `buff_life_steal` | Maxwell's Siphon | Tier 2 | regeneration | 4 | intensity | mind | 12 | `healthPerRound 2` per intensity, `rollModifier +1` |
-| `buff_advantage_body` | Predestination Strength | Tier 2 | advantage | 3 | none | mind | 13 | `grantAdvantage [body]`, `+body 1`, `+physicalSkill 2` |
-| `buff_advantage_mind` | Knowability Insight | Tier 2 | advantage | 3 | none | heart | 13 | `grantAdvantage [mind]`, `+mind 1`, `+mentalSkill 2` |
-| `buff_advantage_heart` | Hedonist's Loop | Tier 2 | advantage | 3 | none | body | 13 | `grantAdvantage [heart]`, `+heart 1`, `+emotionalSkill 2` |
+| `buff_advantage_body` | Predestination Strength | Tier 2 | advantage | 3 | none | mind | 13 | `grantAdvantage [body]`, `+body 1` |
+| `buff_advantage_mind` | Knowability Insight | Tier 2 | advantage | 3 | none | heart | 13 | `grantAdvantage [mind]`, `+mind 1` |
+| `buff_advantage_heart` | Hedonist's Loop | Tier 2 | advantage | 3 | none | body | 13 | `grantAdvantage [heart]`, `+heart 1` |
 | `buff_petitio_pulse` | Petitio Principii Pulse | Tier 1 | stat | 2 | none | body | 10 | `+heart 1` |
 | `buff_gettiters_flicker` | Gettier's Flicker | Tier 1 | advantage | 2 | none | heart | 10 | `+luck 1` |
-| `buff_ad_hoc_patch` | Ad Hoc Patch | Tier 1 | stat | 2 | none | mind | 10 | `+physicalSkill 1` |
+| `buff_ad_hoc_patch` | Ad Hoc Patch | Tier 1 | stat | 2 | none | mind | 10 | `+physicalDefense 1` |
 
 ---
 
@@ -553,39 +553,39 @@ Full per-effect documentation: [`docs/effects/debuffs/`](./effects/debuffs/)
 | `debuff_wound` | Berry's Injury | Tier 2 | stat | 4 | intensity | mind | 13 | `-body 2`, `defenseModifier -2` |
 | `debuff_stun` | Buridan's Paralysis | Tier 2 | control | 1 | duration | heart | 14 | `skipTurn true` |
 | `debuff_sleep` | Sleeping Beauty's Rest | Tier 2 | control | 2 | none | heart | 13 | `skipTurn true`, `defenseModifier -3` |
-| `debuff_daze` | Simpson's Confusion | Tier 2 | control | 2 | duration | heart | 12 | `rollModifier -3`, `-mind 2`, `-mentalSkill 2`, `-mentalDefense 1` |
+| `debuff_daze` | Simpson's Confusion | Tier 2 | control | 2 | duration | heart | 12 | `rollModifier -3`, `-mind 2`, `-mentalDefense 1` |
 | `debuff_petrify` | Zeno's Stillness | Tier 3 | control | 2 | none | heart | 17 | `skipTurn true`, `defenseModifier -4` |
-| `debuff_fear` | Grandfather's Terror | Tier 2 | control | 2 | duration | body | 13 | `rollModifier -3`, `-heart 3`, `-emotionalSkill 2`, `-emotionalDefense 2` |
+| `debuff_fear` | Grandfather's Terror | Tier 2 | control | 2 | duration | body | 13 | `rollModifier -3`, `-heart 3`, `-emotionalDefense 2` |
 | `debuff_charm` | Wigner's Friendship | Tier 2 | control | 2 | none | body | 14 | `forcedStance heart`, `-heart 2`, `-emotionalDefense 2` |
 | `debuff_confusion` | Two Envelope Delirium | Tier 2 | control | 3 | duration | heart | 13 | `rollModifier -4`, `grantDisadvantage [body,mind,heart]` |
 | `debuff_blind` | Quantum Erasure | Tier 2 | control | 2 | duration | heart | 13 | `rollModifier -5`, `grantDisadvantage [body,mind]` |
-| `debuff_silence` | Moore's Muteness | Tier 2 | control | 3 | none | body | 13 | `blockedStances [heart]`, `-heart 2`, `-emotionalSkill 3` |
+| `debuff_silence` | Moore's Muteness | Tier 2 | control | 3 | none | body | 13 | `blockedStances [heart]`, `-heart 2` |
 | `debuff_berserk` | Problem of Evil | Tier 2 | stat | 3 | none | heart | 13 | `+body 3`, `-mind 4`, `-heart 2`, `+physSkill 2`, `-menSkill 3`, `-menDef 2`, `defenseModifier -3` |
 | `debuff_fatigue` | Preface Exhaustion | Tier 2 | stat | 4 | intensity | heart | 12 | `-body/mind 1`, `-physSkill/menSkill 1`, `rollModifier -1` |
 | `debuff_exhaustion` | Lottery Despair | Tier 2 | stat | 3 | intensity | heart | 13 | `-body/mind/heart 2`, `-allSkill 1`, `rollModifier -2` |
-| `debuff_slow` | Achilles' Burden | Tier 2 | control | 3 | duration | mind | 12 | `rollModifier -2`, `-physicalSkill 2`, `grantDisadvantage [body]` |
+| `debuff_slow` | Achilles' Burden | Tier 2 | control | 3 | duration | mind | 12 | `rollModifier -2`, `grantDisadvantage [body]` |
 | `debuff_root` | Braess Binding | Tier 2 | control | 2 | duration | mind | 13 | `defenseModifier -2`, `rollModifier -2` |
 | `debuff_knockdown` | Ross-Littlewood Fall | Tier 2 | control | 1 | none | mind | 12 | `defenseModifier -4`, `rollModifier -3` |
 | `debuff_vulnerability_body` | Richard's Exposure | Tier 2 | defense | 3 | duration | mind | 13 | `-body 3`, `-physicalDefense 4`, `-physicalSave 3` |
 | `debuff_vulnerability_mind` | Cantor's Gap | Tier 2 | defense | 3 | duration | heart | 13 | `-mind 3`, `-mentalDefense 4`, `-mentalSave 3` |
 | `debuff_vulnerability_heart` | Burali-Forti Wound | Tier 2 | defense | 3 | duration | body | 13 | `-heart 3`, `-emotionalDefense 4`, `-emotionalSave 3` |
 | `debuff_mark` | Raven's Target | Tier 2 | advantage | 3 | none | heart | 13 | `defenseModifier -3`, `grantDisadvantage [body,mind,heart]` |
-| `debuff_body_attack_down` | Omnipotence Failure | Tier 2 | stat | 3 | intensity | mind | 13 | `-body 2`, `-physicalSkill 3`, `rollModifier -1` |
-| `debuff_mind_attack_down` | GHZ Collapse | Tier 2 | stat | 3 | intensity | heart | 13 | `-mind 2`, `-mentalSkill 3`, `rollModifier -1` |
-| `debuff_heart_attack_down` | Toxin Hesitation | Tier 2 | stat | 3 | intensity | body | 13 | `-heart 2`, `-emotionalSkill 3`, `rollModifier -1` |
+| `debuff_body_attack_down` | Omnipotence Failure | Tier 2 | stat | 3 | intensity | mind | 13 | `-body 2`, `rollModifier -1` |
+| `debuff_mind_attack_down` | GHZ Collapse | Tier 2 | stat | 3 | intensity | heart | 13 | `-mind 2`, `rollModifier -1` |
+| `debuff_heart_attack_down` | Toxin Hesitation | Tier 2 | stat | 3 | intensity | body | 13 | `-heart 2`, `rollModifier -1` |
 | `debuff_evasion_down` | Dartboard Certainty | Tier 2 | defense | 3 | duration | heart | 13 | `defenseModifier -3`, `-allDefense 2` |
 | `debuff_accuracy_down` | Ellsberg's Doubt | Tier 2 | advantage | 3 | duration | heart | 12 | `rollModifier -3`, `-allSkill 2` |
 | `debuff_defense_down` | Prisoner's Betrayal | Tier 2 | defense | 3 | intensity | heart | 13 | `defenseModifier -3`, `-body 1`, `-physicalDefense 2` |
-| `debuff_dispel` | Skolem's Reduction | Tier 2 | stat | 0 | none | heart | 12 | `{}` (instant — `applyDispel` ready; wired via skills in Spec 04) |
+| `debuff_dispel` | Skolem's Reduction | Tier 2 | stat | 0 | none | heart | 12 | `{}` (instant — `applyDispel` ready; wired via cards in Spec 04) |
 | `debuff_hex` | Allais' Curse | Tier 2 | damage | 3 | none | body | 13 | `DoT 2/rd (heart)` |
 | `debuff_hp_decay` | Centipede's End | Tier 2 | damage | 4 | none | mind | 13 | `DoT 3/rd (body)`, `healthPerRound -2` (drain — via `applyDrain`) |
-| `debuff_moral_learning` | Moral Blindness | Tier 2 | control | 3 | none | body | 12 | `-heart 2`, `-mind 1`, `-emotionalSkill 2`, `-mentalSkill 1`, `rollModifier -1` |
-| `debuff_transformative` | Transformative Terror | Tier 2 | control | 2 | none | heart | 13 | `rollModifier -2`, `-mind 2`, `-heart 1`, `-mentalSkill 2`, `-emotionalDefense 1` |
-| `debuff_rational_disagreement` | Peer Doubt | Tier 2 | stat | 2 | duration | heart | 12 | `-mind 3`, `-mentalSkill 2`, `-mentalDefense 1`, `rollModifier -2` |
+| `debuff_moral_learning` | Moral Blindness | Tier 2 | control | 3 | none | body | 12 | `-heart 2`, `-mind 1`, `rollModifier -1` |
+| `debuff_transformative` | Transformative Terror | Tier 2 | control | 2 | none | heart | 13 | `rollModifier -2`, `-mind 2`, `-heart 1`, `-emotionalDefense 1` |
+| `debuff_rational_disagreement` | Peer Doubt | Tier 2 | stat | 2 | duration | heart | 12 | `-mind 3`, `-mentalDefense 1`, `rollModifier -2` |
 | `debuff_straw_man_echo` | Straw Man's Echo | Tier 1 | advantage | 2 | none | body | 10 | `rollModifier -1` |
 | `debuff_post_hoc_tremor` | Post Hoc Tremor | Tier 1 | stat | 2 | none | mind | 10 | `-body 1` |
-| `debuff_affirming_consequent` | Affirming the Consequent | Tier 1 | stat | 2 | none | mind | 10 | `-physicalSkill 1` |
-| `debuff_causal_emergence` | Emergence Failure | Tier 2 | control | 2 | none | heart | 13 | `rollModifier -2`, `-mind 2`, `-mentalSkill 2`, `-physicalSkill 1`, `grantDisadvantage [mind]` |
+| `debuff_affirming_consequent` | Affirming the Consequent | Tier 1 | stat | 2 | none | mind | 10 | `-physicalAttack 1` |
+| `debuff_causal_emergence` | Emergence Failure | Tier 2 | control | 2 | none | heart | 13 | `rollModifier -2`, `-mind 2`, `grantDisadvantage [mind]` |
 
 ---
 
@@ -680,7 +680,7 @@ All constants above are on the root barrel. The interaction-engine source lives 
 
 | Mechanic | Affected effects | Why deferred |
 |----------|-----------------|--------------|
-| Cleanse / dispel landing via skills | `buff_cleanse`, `debuff_dispel` | Skill system arrives in Spec 04. `applyCleanse` / `applyDispel` helpers are ready. |
+| Cleanse / dispel landing via cards | `buff_cleanse`, `debuff_dispel` | Card system arrives in Spec 04. `applyCleanse` / `applyDispel` helpers are ready. |
 | `processWorldEffectTick` for hazards while exploring | World hazards | Covered by Spec 08. |
 | Equipment-driven `passiveEffects` | Gear that emits effects | Covered by Spec 05. |
 | DoT immunity by `damageType` (Q5 future-extension) | All DoT effects | Q5 explicitly defers; DoT is unresisted today. |
@@ -706,8 +706,8 @@ All three reuse existing `EffectPayload` primitives — no new payload
 kinds. The fallacy framing is purely thematic on top of the existing
 tier-1/2/3 application + resist machinery. See
 [docs/philosophy.md](./philosophy.md) for the full 27-cell map and
-docs/skills.md
-for the matching skill payloads.
+docs/cards.md
+for the matching card payloads.
 
 ## Pending
 

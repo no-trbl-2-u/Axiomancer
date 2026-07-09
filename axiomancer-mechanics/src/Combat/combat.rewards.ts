@@ -5,7 +5,7 @@
  *   1. CARD REWARDS (frequent, after a won combat) grow the DECK — extra copies
  *      and variety. They append to `Character.combatRewardCards`, which
  *      `buildCombatDeck` stacks on top of the learned-card baseline.
- *   2. SKILL UNLOCKS (rare, via ethical-dilemma events — not implemented yet)
+ *   2. CARD UNLOCKS (rare, via ethical-dilemma events — not implemented yet)
  *      add a NEW card type. `unlockCardViaDilemma` is the hook those events will
  *      call; it bypasses the normal learning requirements (the dilemma IS the
  *      gate), unlike `learnCard`.

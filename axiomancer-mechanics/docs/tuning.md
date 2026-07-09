@@ -41,7 +41,7 @@ The module is intentionally NOT re-exported from the package's public API (`src/
 
 ### Knowledge & Learning
 
-- `strategist.knowledge.ts` — Machine learning for status-effect optimization. Tracks damage and status leverage per enemy and skill, used by the STRATEGIST playstyle.
+- `strategist.knowledge.ts` — Machine learning for status-effect optimization. Tracks damage and status leverage per enemy and card, used by the STRATEGIST playstyle.
 - `ledger.ts` — Experiment history to avoid repeating recently-rejected changes
 - `focus.parser.ts` — Focus filters for targeted testing (by category, level band, tags, etc.)
 
@@ -76,7 +76,7 @@ All balance changes are validated through:
 
 The system supports targeted optimization through focus filters:
 
-- **Categories** — fundamental, enemy, item, effect, skill, loot
+- **Categories** — fundamental, enemy, item, effect, card, loot
 - **Level bands** — early, mid, late, end
 - **Tags** — custom groupings for related parameters
 - **Date filters** — test only recent changes
@@ -130,7 +130,7 @@ interface FocusFilter {
 ```typescript
 interface TunableParam {
   id: string;
-  kind: 'constant' | 'multiplier' | 'enemy-stat' | 'item-modifier' | 'skill-power' | 'effect-duration' | 'drop-weight';
+  kind: 'constant' | 'multiplier' | 'enemy-stat' | 'item-modifier' | 'card-power' | 'effect-duration' | 'drop-weight';
   category: TuningCategory;
   file: string;                // Repo-relative path
   locator: TunableLocator;     // AST navigation to exact value
@@ -174,9 +174,9 @@ const result = await runExperiment(candidate, plan, deps);
 ```typescript
 import { parseFocus, buildMatrix } from './tuning';
 
-const focus = parseFocus('skill,effect --level=early,mid --added-after=2026-06-01');
+const focus = parseFocus('card,effect --level=early,mid --added-after=2026-06-01');
 const plan = buildMatrix({ focus, sampleScale: 2.0 });
-// Tests only skill/effect parameters from recent changes, double sample size
+// Tests only card/effect parameters from recent changes, double sample size
 ```
 
 ### Knowledge Learning

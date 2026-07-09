@@ -95,7 +95,7 @@ export function generatePhilosophicalResource(
  */
 export function calculateCardDamage(
     _actor: Combatant,
-    _skill: Card,
+    _card: Card,
     _target?: Combatant,
 ): number {
     return 0;

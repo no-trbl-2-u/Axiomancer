@@ -114,7 +114,7 @@ export interface EquipmentSlotRow {
     item: string | null;
 }
 
-export interface CharacterSkillRow {
+export interface CharacterCardRow {
     /**
      * Phase 74 follow-up walkthrough Tick 2 — engine card id
      * threaded through so the SELF tap-tooltip wrapper can fire
@@ -170,7 +170,7 @@ export interface CharacterViewModel {
      */
     emptyEffectsMessage: string;
     equipment: readonly EquipmentSlotRow[];
-    cards: readonly CharacterSkillRow[];
+    cards: readonly CharacterCardRow[];
     /**
      * Philosophical alignment cube (Phase 52, engine 0.10.0).
      * Computed from `state.philosophicalAlignment` via the engine's

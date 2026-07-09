@@ -20,7 +20,7 @@ The `GameState` type is the root object that aggregates all game data:
 | Property | Type | Purpose |
 |----------|------|---------|
 | `version` | `number` | Schema version for save file migration |
-| `player` | `Character` | Player character with stats, equipment, skills |
+| `player` | `Character` | Player character with stats, equipment, cards |
 | `world` | `WorldState` | Current region, map position, and world flags |
 | `combat` | `CombatState \| null` | Active combat encounter or null when exploring |
 | `currentEncounter` | `Encounter \| null` | Full encounter context (transient, not saved) |
@@ -65,7 +65,7 @@ store.getState().dispatch({
   payload: { report: combatEndReport } 
 });
 
-// Learn a skill
+// Learn a card
 store.getState().dispatch({ 
   type: 'LEARN_CARD', 
   payload: { skillId: 'skill_heart_barrier' } 
@@ -80,8 +80,8 @@ For backward compatibility, the store provides legacy method-style actions:
 |--------|---------|
 | `startCombat(enemy)` | Begin combat with specified enemy |
 | `endCombat(report)` | End combat and apply rewards |
-| `learnCard(skillId)` | Learn a skill by ID |
-| `useSkill(skillId, targetId?)` | Use a skill in combat |
+| `learnCard(skillId)` | Learn a card by ID |
+| `useSkill(skillId, targetId?)` | Use a card in combat |
 | `useItem(itemId, targetId?)` | Use an item |
 | `equipItem(item, slot)` | Equip an item to a slot |
 | `unequipItem(slot)` | Remove equipped item |
@@ -114,10 +114,10 @@ function gameReducer(state: GameState, action: GameAction): GameState
 |-------------|---------|
 | `START_COMBAT` | Initialize combat with an enemy |
 | `END_COMBAT` | Apply combat rewards and cleanup |
-| `USE_SKILL` | Execute a skill during combat |
+| `USE_SKILL` | Execute a card during combat |
 | `USE_ITEM` | Use a consumable or equipment item |
 | `EQUIP_ITEM` / `UNEQUIP_ITEM` | Manage character equipment |
-| `LEARN_CARD` | Add a skill to character's known skills |
+| `LEARN_CARD` | Add a card to character's known cards |
 | `ADVANCE_DIALOGUE` | Progress through NPC conversations |
 | `MAKE_MORAL_CHOICE` | Record player moral decisions |
 | `UPDATE_QUEST_OBJECTIVES` | Progress quest completion |
@@ -146,7 +146,7 @@ events.on('combat:started', (event) => {
 |-------|---------|--------------|
 | `combat:started` | `{ enemy: Enemy }` | Combat begins |
 | `combat:ended` | `{ outcome: string, report: CombatEndReport }` | Combat concludes |
-| `skill:learned` | `{ skillId: string }` | Player learns new skill |
+| `card:learned` | `{ skillId: string }` | Player learns new card |
 | `quest:updated` | `{ questId: string, objectives: ObjectiveProgress[] }` | Quest progress changes |
 | `alignment:changed` | `{ moralMeter: number, philosophical: PhilosophicalAlignment }` | Player alignment shifts |
 | `faction:reputation:changed` | `{ factionId: string, reputation: number }` | Faction standing changes |
@@ -194,7 +194,7 @@ Core balance values are defined in `game-mechanics.constants.ts`:
 |----------|-------|---------|
 | `STAT_MULTIPLIERS.ATTACK` | `1` | Base stat to attack conversion |
 | `STAT_MULTIPLIERS.DEFENSE` | `3` | Base stat to defense conversion |
-| `STAT_MULTIPLIERS.SKILL` | `1` | Base stat to skill power conversion |
+| `STAT_MULTIPLIERS.CARD` | `1` | Base stat to card power conversion |
 | `RESOURCE_MULTIPLIERS.HP` | `10` | Base (body + heart) to HP conversion |
 | `EXPERIENCE_PER_LEVEL` | `100` | XP required per level |
 | `STAT_POINTS_PER_LEVEL` | `2` | Stat points gained per level |

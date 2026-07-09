@@ -22,7 +22,7 @@ Defined in [`src/Enemy/types.d.ts`](../src/Enemy/types.d.ts).
 | `tier1Overrides?` | `Tier1EffectOverrides` | Per-stance Tier 1 effect ID overrides. |
 | `procUnlocks?` | `ProcUnlocks` | Spec 03 — per-cell tier cap (default 1). Elites bump to 2, bosses to 3. |
 | `procOverrides?` | `ProcOverrides` | Spec 03 — per-cell custom proc tables. |
-| `skills?` | `Skill[]` | Optional skill list (Spec 04 / 04b — currently unused on shipped enemies; reserved for elite/boss skill rotations). |
+| `cards?` | `Card[]` | Optional card list (Spec 04 / 04b — currently unused on shipped enemies; reserved for elite/boss card rotations). |
 | `loot?` | `LootTableEntry[]` | Weighted drop table (Spec 07 Q7B). |
 | `xpReward?` | `number` | Flat XP awarded on kill. Defaults to `level × DEFAULT_XP_BY_DIFFICULTY[difficulty]`. |
 | `effects` | `ActiveEffect[]` | Live status effects. |
@@ -84,7 +84,7 @@ result through `applyOutlookBias`:
 - **Optimistic enemies** (outlook bucket `'high'`, value `>= 34`): with
   probability `0.25` per round, a `defend` decision flips to `attack`.
 - **Neutral enemies** (outlook bucket `'mid'`): bias is a no-op.
-- **Non-basic actions** (`skill` / `item` / `flee`): bias is a no-op.
+- **Non-basic actions** (`card` / `item` / `flee`): bias is a no-op.
 
 The bias spends one `getRng().random()` call per dispatch — deterministic
 under the `src/test-utils/rng.ts` stubs. Enemies without an alignment pin
@@ -200,7 +200,7 @@ Forest Sprite (mind), Hollow-Eyed Beggar (heart), Argumentative Crow (mind).
 **Elite (2)** — Cindergeist Revenant (heart, ghost of flame), Obsidian Colossus (body, volcanic glass guardian).
 **Boss (1)** — The Lich of Missing Steps (mind+heart, undead philosopher-king with flawed eternal proof).
 
-The ancient-ruins family explores undead/construct/elemental themes with comprehensive befriendability configurations, skill rotations using Tier 3 effects, rich friendship reward content including unique items and alignment shifts, complete aftermath narrative (finalBlowLines/pactLines/causeLines), and journal entries that unlock ancient lore. All five enemies are thematically placed in the northern-forest map but represent a distinct archetype family focused on philosophical examination of existence, duty, and transformation.
+The ancient-ruins family explores undead/construct/elemental themes with comprehensive befriendability configurations, card rotations using Tier 3 effects, rich friendship reward content including unique items and alignment shifts, complete aftermath narrative (finalBlowLines/pactLines/causeLines), and journal entries that unlock ancient lore. All five enemies are thematically placed in the northern-forest map but represent a distinct archetype family focused on philosophical examination of existence, duty, and transformation.
 
 `EnemiesByMap` indexes them per map for `generateEncounter`. `ENEMY_REGISTRY`
 keys them by CLI slug (`tidepool-crab`, `thorned-sentinel`, `disatree`, `sandbag`, ...) for the
@@ -221,23 +221,23 @@ Victory grants are surfaced inside the Combat tab after each encounter
 resolves; the hermetic e2e suite (`src/**/e2e/*.engine.test.ts`) is the
 durable way to exercise specific enemy fixtures.
 
-## Skill use (Phase 49)
+## Card use (Phase 49)
 
-Enemies with a non-empty `Enemy.skills?: Skill[]` field can fire skills
+Enemies with a non-empty `Enemy.cards?: Card[]` field can fire cards
 during combat. `decideEnemyAction` consults a new helper
 `pickEnemySkill(enemy)` BEFORE the per-strategy dispatch — when the
 rotation is non-empty AND `getRng().random() < ENEMY_SKILL_PICK_CHANCE`
-(0.35), it returns `{ action: 'skill', skillId, stance }`. Otherwise
+(0.35), it returns `{ action: 'card', skillId, stance }`. Otherwise
 the strategy resolves normally. The stance is sourced from
-`skill.philosophicalAspect` so a body-aspected skill arrives with
+`card.philosophicalAspect` so a body-aspected card arrives with
 `stance: 'body'`.
 
 Nine enemies carry rotations — 2 from Phase 49, 7 from Phase 57.
-Picks come exclusively from the existing `skillLibrary` (no new skill
-content); each is single-skill per the current `pickEnemySkill`
+Picks come exclusively from the existing `skillLibrary` (no new card
+content); each is single-card per the current `pickEnemySkill`
 contract (first-pick semantics).
 
-| Enemy | Difficulty | Skill | Skill aspect | Phase |
+| Enemy | Difficulty | Card | Card aspect | Phase |
 |---|---|---|---|---|
 | Mournful Gull | normal | `appeal-to-pity` | heart | 57 |
 | Hollow-Eyed Beggar | normal | `pascals-wager` | heart | 57 |
@@ -250,14 +250,14 @@ contract (first-pick semantics).
 | Echo of Pyrrhonia | unique | `eternal-regress` | heart | 57 |
 
 The 3 simplest normals (Tidepool Crab, Sea-Mist Wisp, Lullaby Moth)
-stay skill-less per Phase 57 D2 — early-game pacing benefits from
+stay card-less per Phase 57 D2 — early-game pacing benefits from
 straight basic-action encounters before the player has the reactive
-budget for enemy skill rotations.
+budget for enemy card rotations.
 
-The actual skill execution runs through `executeSkill` with
-`casterSide: 'enemy'` — see `docs/skills.md` "Enemy caster path
+The actual card execution runs through `executeSkill` with
+`casterSide: 'enemy'` — see `docs/cards.md` "Enemy caster path
 (Phase 49)" for the engine-side semantics, including D2 (enemies
-bypass the player's `combatResources` pool) and D3 (`skill.targetType`
+bypass the player's `combatResources` pool) and D3 (`card.targetType`
 is relative to the caster).
 
 Calibration: the 0.35 fire rate is colocated with the Phase 45
@@ -312,7 +312,7 @@ Seven enemies ship authored predicates / rewards (Phase 102 expanded from 3 → 
 | **HollowEyedBeggar** | normal | `fv-18` back alley (Inland Streets, on the way to the abandoned-shack loop via `fv-5` → `fv-18` or `fv-3` → `fv-16` → `fv-17` → `fv-18`) | 1 × healing-potion + 1 × antidote | +15 | `{ scope: -3 }` — re-grounds toward the relational individual | default Phase 36 mechanic (no config) | Reversal of the begging dynamic; they offer what they carry. |
 | **TideflukeReaver** | elite | `fv-*` fishing-village elite encounters | 1 × body-elixir + 1 × healing-potion | +35 | `{ outlook: +2, scope: +1 }` — softens pessimism, opens to relationship | `{ hpGate: { belowPct: 0.3 }, requiredStances: ['heart'], roundsThreshold: 4 }` | Salt-bound reaver's chains dissolve; empathy required. Sets flag `befriended-tidefluke-reaver` (Phase 102). |
 | **HushWraith** | elite | `nf-*` northern-forest elite encounters | 1 × clarity-serum + 1 × antidote | +40 | `{ outlook: +1 }` — slight hope in cosmic indifference | `{ hpGate: { belowPct: 0.25 }, requiredStances: ['heart'], roundsThreshold: 6 }` | Transcendent silence breaks into whisper; patience required. Sets flag `befriended-hush-wraith` (Phase 102). |
-| **HollowSaint** | elite | `nf-*` northern-forest elite encounters | 1 × resonance-crystal + 1 × heart-draught + 1 × healing-potion | +45 | `{ scope: -2 }` — turns inward from transcendent to individual | `{ hpGate: { belowPct: 0.4 }, requiredStances: ['heart'], requiredSkillUse: ['prayer'], roundsThreshold: 3 }` | Martyr finds purpose in witness; prayer skill connection if available. Sets flag `befriended-hollow-saint` (Phase 102). |
+| **HollowSaint** | elite | `nf-*` northern-forest elite encounters | 1 × resonance-crystal + 1 × heart-draught + 1 × healing-potion | +45 | `{ scope: -2 }` — turns inward from transcendent to individual | `{ hpGate: { belowPct: 0.4 }, requiredStances: ['heart'], requiredSkillUse: ['prayer'], roundsThreshold: 3 }` | Martyr finds purpose in witness; prayer card connection if available. Sets flag `befriended-hollow-saint` (Phase 102). |
 | **CoastalTyrant** | boss | `coastal-continent` fishing-village boss tile | `paradox-loop` (unique circlet, requiredLevel 15) + healing-potion + heart-draught | +75 | `{ outlook: +3, scope: -2 }` — recognition + release; he gave up his despair toward optimism, and saw a person rather than a doctrine | `{ hpGate: { belowPct: 0.4 }, requiredStances: ['heart'], roundsThreshold: 3 }` | Magistrate-fallen-priest; friendship opens only after he's been brought low, the player has shown empathy at least once, and 3 both-defend rounds have passed. The fallen-priest hands over his regalia (Paradox Loop unique — "a sentence which forever ends without finishing") + healing tokens; multi-paragraph narrative captures the recognition + release. Sets flag `befriended-coastal-tyrant` (Phase 62) for downstream dialogue / quest gates. Demonstrates the full Phase 60+62+68+69 stack on a single high-stakes encounter (Phase 70). |
 | **TheDisagreement** | boss | `coastal-continent` northern-forest boss tile | 1 × philosopher-tea + 1 × focus-vial + 1 × healing-potion + 1 × clarity-serum | +80 | `{ scope: +1 }` — opens to relational despite absurdism | `{ hpGate: { belowPct: 0.2 }, requiredStances: ['mind'], roundsThreshold: 8 }` | Disagreement resolves into dialogue; reasoned argumentation and boss patience required. Sets flag `befriended-the-disagreement` (Phase 102). |
 
@@ -382,7 +382,7 @@ Total authored: **15 of 16** enemies; the only un-authored entry
 is `Sandbag_01` (Phase 74 D1 — test sandbox with no narrative
 weight). Each new sweep voice extends the existing enemy
 identity (description + Phase 45 alignment archetype + Phase 49
-skill rotation where present). Mobile presenter's `derive*Phrase`
+card rotation where present). Mobile presenter's `derive*Phrase`
 fallback now only fires on the test sandbox — the player-visible
 roster all renders engine-authored prose.
 

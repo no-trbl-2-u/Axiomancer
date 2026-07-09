@@ -9,7 +9,7 @@
  * `src/Combat/effect-modifiers.test.ts`; this file pins the consumer-facing
  * accessor path so a future stats.ts refactor can't silently regress.
  *
- * Math baseline (`STAT_MULTIPLIERS`): ATTACK=1, SKILL=1, DEFENSE=3.
+ * Math baseline (`STAT_MULTIPLIERS`): ATTACK=1, DEFENSE=3.
  * Reference effects (spec 32 v3 — support-tagged non-card entries):
  *   - buff_resistance_body: statModifiers [body +3, physicalDefense +4, physicalSave +3], flat
  *   - buff_max_hp_up: statModifiers [body ×1.25], multiplier

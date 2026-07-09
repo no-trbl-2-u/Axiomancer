@@ -46,7 +46,7 @@ describe('LearnCardModal: mount contract', () => {
             />,
         );
         expect(tree.queryByText('✠ A NEW TURN OF PHRASE')).not.toBeNull();
-        expect(tree.queryByText('LEARN A SKILL')).not.toBeNull();
+        expect(tree.queryByText('LEARN A CARD')).not.toBeNull();
         expect(tree.queryByText('choose one — the mind keeps what it names')).not.toBeNull();
     });
 

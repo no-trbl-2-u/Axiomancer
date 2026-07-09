@@ -323,13 +323,10 @@ function buildEquipmentModal(player: Character, item: Item): ItemModalViewModel 
 const STAT_LABELS: Record<string, string> = {
     maxHealth: 'MAX HP',
     physicalAttack: 'PHYS ATK',
-    physicalSkill: 'PHYS SKL',
     physicalDefense: 'PHYS DEF',
     mentalAttack: 'MENT ATK',
-    mentalSkill: 'MENT SKL',
     mentalDefense: 'MENT DEF',
     emotionalAttack: 'EMOT ATK',
-    emotionalSkill: 'EMOT SKL',
     emotionalDefense: 'EMOT DEF',
     luck: 'LUCK',
     physicalSave: 'BODY SAVE',

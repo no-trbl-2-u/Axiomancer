@@ -22,7 +22,7 @@ export interface LearnCardModalProps {
     offers: LearnableCardOffer[];
     /** Picks left in this level-up session (≥1 while mounted). */
     picksRemaining: number;
-    onPick: (skillId: string) => void;
+    onPick: (cardId: string) => void;
     onSkip: () => void;
 }
 
@@ -33,7 +33,7 @@ export function LearnCardModal({ offers, picksRemaining, onPick, onSkip }: Learn
         <View style={styles.root} testID="learn-card-modal">
             <View style={styles.panel}>
                 <Text style={styles.eyebrow}>✠ A NEW TURN OF PHRASE</Text>
-                <Text style={styles.title}>LEARN A SKILL</Text>
+                <Text style={styles.title}>LEARN A CARD</Text>
                 <Text style={styles.sub}>
                     {picksRemaining > 1
                         ? `choose one · ${picksRemaining} picks remain`

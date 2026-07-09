@@ -6,9 +6,8 @@
  * Phase 60f engine bump) to the mobile presentation row consumed by
  * the combat card picker.
  *
- * Drains `state/mocks/combat.cards.fixture.ts`. The presenter
- * contract (`SkillOption` in `combat.engine.ts`) is unchanged; only
- * the data source moves.
+ * The combat card-picker row contract is unchanged; only the data
+ * source moves.
  *
  * Mapping decisions per the Phase 16 brief §"Decisions made upfront":
  *   - `id` = engine `id` (e.g. `'slippery-slope'`)

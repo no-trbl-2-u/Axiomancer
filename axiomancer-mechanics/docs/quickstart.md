@@ -20,19 +20,19 @@ canonical entry points. Cross-link to the per-module doc for depth.
 | **Character** | `createCharacter`, presets (`apprentice`/`wanderer`/`sage`), equipment + stat allocation, `Character.id` auto-gen | 18, 29, 35 | [character.md](./character.md) |
 | **Combat** | Hazard-Pattern Combat (`initializeCombatEncounter` / `playCombatCard` / `resolveThreatPhase` / `simulateHazardPatternCombat`), stat accessors, advantage / crit / friendship | 9, 15, 32, 36, 38, 165+ | [combat.md](./combat.md) |
 | **Effects** | `applyEffect`, Tier 1-3 procs, `statModifiers` + intensity scaling, fallacy payloads | 1, 3, 38, 44, 48 | [effects.md](./effects.md) |
-| **Enemy** | `createEnemy`, AI strategies + outlook-bias (Phase 45), enemy-skill caster path (Phase 49), per-enemy alignment + `friendshipReward` (+ Phase 69 `alignmentDelta`) + Phase 68 `BefriendabilityConfig` | 7, 45, 49, 57, 60, 62, 68, 69 | [enemy.md](./enemy.md) |
+| **Enemy** | `createEnemy`, AI strategies + outlook-bias (Phase 45), enemy-card caster path (Phase 49), per-enemy alignment + `friendshipReward` (+ Phase 69 `alignmentDelta`) + Phase 68 `BefriendabilityConfig` | 7, 45, 49, 57, 60, 62, 68, 69 | [enemy.md](./enemy.md) |
 | **Game** | `createGameStore`, save/load + migrators (`GAME_STATE_VERSION` 7), event surface, autosave throttling, persistence adapters, run-loop semantics (`resetRun` + `runId`), Codex slice | 9, 11, 12, 21, 35, 38, 50, 51, 55, 72, 73 | [gameloop.md](./gameloop.md) |
 | **Items** | `addItem` / shop reducers (`buyItem`/`sellItem`/`defaultSellPrice` — Phase 37), set items engine (Phase 54), `previewTemplateAtRarity` UI-tier preview helper (Phase 75 — closes the user-jot for mobile item-library mod-visibility), `previewTemplateAtAllRarities` batch wrapper (Phase 76 — UI tooltip / item-detail rarity-strip views in a single call) | 5, 5b, 37, 54, 75, 76 | [items.md](./items.md), [equipment.md](./equipment.md) |
 | **NPCs** | `getDialogueNode` + `visibleChoices`, alignment gates (Phase 46), tree-id observer cache (Phase 63) | 14, 22, 46, 63 | [npcs.md](./npcs.md) |
 | **Philosophy** | 3-axis alignment cube + 27-cell library, `alignmentDelta` authoring, fallacies-as-spells (Phase 44), enemy alignment + AI bias (Phase 45), alignment-gated content (Phase 46) | 42-46 | [philosophy.md](./philosophy.md) |
-| **Skills** | `executeCard` caster-agnostic (Phase 49), `learnCard` + runtime learning (Phase 30), Tier 1-3 skill library + Tier 2 synergy clauses (Phase 66) | 4, 4b, 30, 33, 44, 49, 66 | skills.md |
+| **Cards** | `executeCard` caster-agnostic (Phase 49), `learnCard` + runtime learning (Phase 30), Tier 1-3 card library + Tier 2 synergy clauses (Phase 66) | 4, 4b, 30, 33, 44, 49, 66 | cards.md |
 | **World** | `createStartingWorld` + per-continent maps, MapEvents engine (`resolveMapEvent`, nine-kind pool taxonomy — Phase 23/24, 'quest' added Phase 137), expanded fishing-village (Phase 65 — 25 nodes, 3 sub-areas) | 8, 23, 24, 25, 31, 65 | [world.md](./world.md) |
 | **Utils** | RNG harness, derived stats, dice / type guards | 11 | — |
 
 Marquee mechanics shipped end-to-end: moral meter (Phase 10), set
 bonuses (Phase 54), befriendable enemies with per-enemy reward
 content + flag-gated dialogue (Phase 60 / 62), and the Tier 2
-synergy primitive (Phase 66 — five authored skills covering
+synergy primitive (Phase 66 — five authored cards covering
 duration / intensity amps, buff type-swap, resonance burst, and
 the resonance-detonation apex burn).
 
@@ -52,7 +52,7 @@ tabs:
 
 | Tab | Surface |
 |---|---|
-| **Self** | View items, allocate stat points (Phase 29), learn skills (Phase 30) |
+| **Self** | View items, allocate stat points (Phase 29), learn cards (Phase 30) |
 | **Map** | Walk available nodes, resolve MapEvents (`resolveMapEvent`), see discovered / consumed nodes |
 | **Combat** | Hazard-Pattern Combat via the `combat` subcommand (`npm run combat`): draft a stance die, play cards, resolve the threat phase |
 | **Save / Load** | Persistence via the configured `PersistenceAdapter` (default: file slot via `--save-file`) |
@@ -91,13 +91,13 @@ npm run game -- --script automation/scripts/walkthroughs/<name>.json  # direct r
 |---|---|---|---|
 | `boss-encounter` | Long combat loop driving a boss-tier enemy through `debugSpawn` + body attacks | sage | coastal-tyrant |
 | `character-sheet` | Character tab rendering (Phase 26 unit 3) | apprentice | — |
-| `endgame-loadout` | **Phase 64** — Tier 3 skill (`bootstrap-paradox`) + boss combat + enemy alignment bias | sage | coastal-tyrant |
+| `endgame-loadout` | **Phase 64** — Tier 3 card (`bootstrap-paradox`) + boss combat + enemy alignment bias | sage | coastal-tyrant |
 | `item-use` | In-combat `item` action consuming a `healing-potion` | wanderer | sandbag (debug) |
 | `map-events` | Map tab + `resolveMapEvent` dispatcher firing on `fv-2` | apprentice | — |
 | `save-load` | Save / Load tabs + `--save-file` slot + Phase 31 fv-1 → fv-2 → fv-3 rollback | apprentice | — |
 | `shop` | Phase 37 `buyItem` / `sellItem` round-trip + `defaultSellPrice` invariant | wanderer | — |
-| `skill-learning` | Character-tab Learn prompt (Phase 30 unit 3) | wanderer | — |
-| `skills-in-combat` | In-combat `skill` action with `ad-hominem-strike` | wanderer | wet-hound (debug) |
+| `card-learning` | Character-tab Learn prompt (Phase 30 unit 3) | wanderer | — |
+| `cards-in-combat` | In-combat `card` action with `ad-hominem-strike` | wanderer | wet-hound (debug) |
 | `stat-allocation` | Phase 29 stat-allocation prompt loop driven by post-combat level-ups | sage | coastal-tyrant |
 
 See [`automation/scripts/walkthroughs/README.md`](../automation/scripts/walkthroughs/README.md) for
@@ -194,13 +194,13 @@ For React Native, implement the `PersistenceAdapter` interface (see
 ### Alignment-gated content (Phase 46 + 63)
 
 Player position on the 3-axis Philosophy cube
-(`epistemology × outlook × scope`) drives dialogue + skill-learning
+(`epistemology × outlook × scope`) drives dialogue + card-learning
 gates:
 
 - `DialogueChoice.requires.requiresAlignment?` — gate a choice on an
   axis threshold (e.g. `{ axis: 'scope', op: 'gte', value: 34 }`).
 - `CardLearningRequirement.requiresAlignment?` — same shape; gates
-  whether the skill is learnable.
+  whether the card is learnable.
 - `DialogueChoice.requires.playerAlignmentCellChangedSince?: true`
   (Phase 63) — surfaces the choice only when the player's cell has
   shifted since the last visit; requires an identified tree
@@ -245,10 +245,10 @@ Focused guides with runnable code samples for each major module:
 
 | Module | Quickstart | Covers |
 |--------|-----------|--------|
-| Character | [quickstart-character.md](./quickstart-character.md) | `createCharacter`, presets, stat allocation, skill learning |
+| Character | [quickstart-character.md](./quickstart-character.md) | `createCharacter`, presets, stat allocation, card learning |
 | Combat | [quickstart-combat.md](./quickstart-combat.md) | `initializeCombatEncounter`, `playCombatCard`, threat phases, outcomes, sim |
 | Items | [quickstart-items.md](./quickstart-items.md) | `dropItem`, `previewTemplateAtRarity`, equip, shop, set bonuses |
-| Skills | quickstart-skills.md | `executeCard`, resource generation, synergy events, Tier 1/2/3 |
+| Cards | quickstart-cards.md | `executeCard`, resource generation, synergy events, Tier 1/2/3 |
 | World | [quickstart-world.md](./quickstart-world.md) | `resolveMapEvent`, MapEventPool authoring, `alignmentDelta` |
 
 ---

@@ -16,11 +16,11 @@ See [§Hazard-Pattern Combat](#hazard-pattern-combat-spec-25) below for the full
 The shared combat mechanics live in:
 
 - `Combat/index.ts` — module barrel + small mechanics helpers (advantage, stats, dice, damage, health, effect queries).
-- `Combat/combat.reducer.ts` — `initializeCombat`, the `CombatState` constructor shared by the skill / effects / equipment engines, plus `incrementFriendship`.
+- `Combat/combat.reducer.ts` — `initializeCombat`, the `CombatState` constructor shared by the card / effects / equipment engines, plus `incrementFriendship`.
 - `Combat/combat.engine.ts` — the Hazard-Pattern Combat driver (see §Hazard-Pattern Combat below).
 
 The sections that follow document the shared mechanics (stances, advantage,
-effects, procs, damage resistance, the friendship path) that both the skill /
+effects, procs, damage resistance, the friendship path) that both the card /
 effects engines and the Hazard-Pattern driver consume.
 
 ## Type System
@@ -51,7 +51,7 @@ Advantage modifier (flat roll bonus/penalty from `getAdvantageModifier()`):
 |--------|-------------|
 | `attack` | Offensive — deals damage |
 | `defend` | Defensive — reduces incoming damage |
-| `skill` | Use a learned/unlocked skill that is currently affordable (Spec 04 / 04b; legacy equipped gate removed in Phase 98) |
+| `card` | Use a learned/unlocked card that is currently affordable (Spec 04 / 04b; legacy equipped gate removed in Phase 98) |
 | `item` | Use an inventory consumable (Spec 05 / 05b) |
 | `flee` | Attempt to escape |
 | `spare` | Phase 108 — mercy choice to spare/befriend the enemy (sets `friendshipResolutionAuthorized`) |
@@ -61,7 +61,7 @@ Advantage modifier (flat roll bonus/penalty from `getAdvantageModifier()`):
 
 `choosing_stance` → `choosing_action` → `choosing_skill` → `mercy_choice` → `resolving` → `ended`
 
-The `mercy_choice` phase activates after a successful Befriend skill cast, presenting
+The `mercy_choice` phase activates after a successful Befriend card cast, presenting
 the player with a choice between `spare` (mercy/friendship) and `exploit` (critical attack).
 
 The Combat CLI currently drives both selection phases inline rather than persisting them
@@ -141,7 +141,7 @@ Clamped to [0, 1].
 
 **Enemy customisation (Q7)** — `Enemy.procOverrides` swaps the entire cell's table wholesale (used for bosses with signature procs and elite / basic enemies whose tables depend on the encounter map). `Enemy.procUnlocks` raises the per-cell tier cap independently.
 
-**Switching (Q5)** — out of scope for this spec. The skill engine (Spec 04) will hook switching into a different effect pool; basic procs do not currently apply a switching multiplier.
+**Switching (Q5)** — out of scope for this spec. The card engine (Spec 04) will hook switching into a different effect pool; basic procs do not currently apply a switching multiplier.
 
 ## Effect Application Rules (`resolveEffectApplication`)
 
@@ -158,16 +158,16 @@ See `docs/effects.md` for the full per-tier breakdown and stacking rules.
 
 Phase 93 completes Phase 80's direction (a) "pure split": effects always land (Phase 80), damage applies resistance separately (Phase 93).
 
-Skills now apply damage resistance based on the target's stats:
-- **Physical damage** (body-scaling skills) → reduced by target's body stat
-- **Mental damage** (mind-scaling skills) → reduced by target's mind stat  
-- **Emotional damage** (heart-scaling skills) → reduced by target's heart stat
+Cards now apply damage resistance based on the target's stats:
+- **Physical damage** (body-scaling cards) → reduced by target's body stat
+- **Mental damage** (mind-scaling cards) → reduced by target's mind stat  
+- **Emotional damage** (heart-scaling cards) → reduced by target's heart stat
 
 **Linear resistance model:** Each point of resistance stat reduces damage by 1.
 **Minimum damage:** Damage is clamped to at least 1 (high resistance reduces but never completely negates damage).
 
 ```typescript
-// Physical skill against high-body target
+// Physical card against high-body target
 const damage = calculateSkillDamage(caster, bodySkill, target);
 // If bodySkill would deal 10 damage, but target has 7 body stat,
 // final damage = 10 - 7 = 3
@@ -278,7 +278,7 @@ existential (at least one element).
 | `roundsThreshold?: number` | Per-enemy override of `FRIENDSHIP_COUNTER_MAX`. Defaults to the global value (3) when absent on a config that sets other fields. |
 | `hpGate?: { belowPct: number }` | Enemy HP fraction must be ≤ `belowPct` at the eligibility check. Pure snapshot — healing back above the threshold un-qualifies. Range [0, 1]. |
 | `requiredStances?: Stance[]` | Player must have used at least one of the named stances during combat (existential). Derived from `state.log[].playerAction.stance`. Empty array = no requirement. |
-| `requiredSkillUse?: string[]` | Player must have cast at least one of the named skill IDs during combat (existential). Derived from `state.log[].playerAction` entries with `action === 'skill'`. Empty array = no requirement. |
+| `requiredSkillUse?: string[]` | Player must have cast at least one of the named card IDs during combat (existential). Derived from `state.log[].playerAction` entries with `action === 'card'`. Empty array = no requirement. |
 | `defaultFallback?: 'both-defend-cap'` | Explicit "fall through to Phase 36". When set, other fields are ignored for THIS enemy; eligibility uses the global counter cap exactly. |
 
 The engine helper that evaluates the predicate lives in
@@ -316,8 +316,8 @@ Phase 112 hardened the Befriend doctrine to ensure friendship resolution
 is always explicit and intentional. **Passive friendship counter pressure
 alone no longer ends combat.** The friendship outcome requires:
 
-1. **Explicit Befriend skill cast** — the player must actively use the
-   Befriend skill (5 heart tokens) when the enemy is vulnerable.
+1. **Explicit Befriend card cast** — the player must actively use the
+   Befriend card (5 heart tokens) when the enemy is vulnerable.
 2. **Mercy choice selection** — successful Befriend opens a choice between
    `spare` (mercy/friendship) and `exploit` (critical attack).
 3. **Authorization flag** — only `spare` choice sets
@@ -382,7 +382,7 @@ with the legacy driver.)
 
 | Function | Alias(es) | Description |
 |----------|-----------|-------------|
-| `initializeCombat(player, enemy)` | — | Creates fresh CombatState with deep-cloned combatants — the `CombatState` constructor shared by the skill / effects / equipment engines |
+| `initializeCombat(player, enemy)` | — | Creates fresh CombatState with deep-cloned combatants — the `CombatState` constructor shared by the card / effects / equipment engines |
 | `incrementFriendship(state)` | — | Increments the friendship counter |
 
 ## Combat Mechanics API
@@ -401,7 +401,7 @@ with the legacy driver.)
 | `calculateFinalDamage(base, reduction, crit, bonus)` | Damage after reductions. On crit, picks the higher of `double` (2× base − defence) vs `pierce` (base, defence ignored) — Phase 32 auto-selection. |
 | `selectCritDamage(base, reduction, bonus)` | Phase 32 — returns `{ style, damage }` for the crit auto-selection in isolation, useful for tests / future damage previews. |
 | `calculateDamageResistance(target, baseDamage, damageType)` | Phase 93 — applies target's resistance to damage (linear reduction, minimum 1) |
-| `getSkillDamageType(scalingStat)` | Phase 93 — maps skill scaling stat to damage type for resistance calculation |
+| `getSkillDamageType(scalingStat)` | Phase 93 — maps card scaling stat to damage type for resistance calculation |
 | `applyDamage(entity, damage)` | Reduces HP (clamps to 0) |
 | `heal(entity, amount)` (alias `healCharacter`) | Restores HP (clamps to max) |
 | `resolveEffectApplication(target, effect, type, heart, equip)` | Effect application (Tier 2 buff fumble/crit; Tier 2 debuff + Tier 3 always land) |
@@ -450,17 +450,17 @@ Conviction-funded, always-available kit (`SIGNATURE_SKILLS` in
 draws and plays is a card.
 
 > **Naming collision warning (2026-07):** the table above is the *legacy*
-> "Skill" — `Cards/skill.engine.ts`'s card-resolution engine (confusingly
-> named; a "skill" here is a card source, projected into play via
-> `toCombatCard`). A second, unrelated **Skills system** (`src/Skills/`,
+> "Card" — `Cards/card.engine.ts`'s card-resolution engine (confusingly
+> named; a "card" here is a card source, projected into play via
+> `toCombatCard`). A second, unrelated **Cards system** (`src/Cards/`,
 > `SKILLS_LIBRARY`, `triggerCombatSkill`) now also exists — see the next
-> section. The two are NOT the same concept; when reading "skill" in this
+> section. The two are NOT the same concept; when reading "card" in this
 > codebase, check which module it's coming from.
 
-## Status-Focused Card Doctrine, the Skills/Token System, and Wild-Die Growth
+## Status-Focused Card Doctrine, the Cards/Token System, and Wild-Die Growth
 
 Three locked product-owner decisions layered onto Hazard-Pattern Combat (full
-detail in the card/skill library files themselves, not duplicated here):
+detail in the card/card library files themselves, not duplicated here):
 
 - **No card deals direct damage — THE STRIKE IS DEAD (Spec 32 v3,
   2026-07-08).** `basePower` / `chipHp` were deleted from the `Card` schema
@@ -492,8 +492,8 @@ detail in the card/skill library files themselves, not duplicated here):
   `rare` = 5-6) consumed by mobile via `CARD_RANK_NAMES`. This axis family
   replaced the old ad hoc "gold card" list (`GOLD_CARD_IDS` / `isGoldCard`
   — deleted; see the API table below).
-- **Skills are a separate, always-on ability system — NOT cards.** Cards are
-  drawn/played from the hand; **Skills** (`src/Skills/skills.library.ts`,
+- **Cards are a separate, always-on ability system — NOT cards.** Cards are
+  drawn/played from the hand; **Cards** (`src/Cards/cards.library.ts`,
   `SKILLS_LIBRARY`) are triggered any time the player can afford their
   `CombatResources` token cost, independent of the current hand — see
   `Combat/combat.engine.ts`'s `triggerCombatSkill`. `SkillDefinition` (the
@@ -501,7 +501,7 @@ detail in the card/skill library files themselves, not duplicated here):
   player currently has access to) so race/class/equipment gating can be added
   later without a rewrite; today `getKnownSkills()` returns everything with
   `requiresUnlock: null` (i.e. all of them). See the naming-collision warning
-  just above — this is unrelated to the legacy `Cards/skill.engine.ts`.
+  just above — this is unrelated to the legacy `Cards/card.engine.ts`.
 - **Wild-die cards are permanent pool growth, not a one-turn trick.**
   Playing a `grant_permanent_wild_die` card (`CardSpecialMechanic`) adds a
   Wild die to `CombatEncounterState.permanentWildDice` for the **rest of the
@@ -516,8 +516,8 @@ external "Master Spec" handed to the implementing agents and was never
 checked into `specs/`; `specs/32-no-strike-card-library.md` supersedes it
 as the canonical mechanical-structure doc for the current (spec 32 v3)
 library, alongside `specs/25-hazard-pattern-combat.md` for the underlying
-engine loop. `src/Skills/skills.types.ts` / `skill-trigger.engine.ts` carry
-the most complete design rationale for the separate Skills system.
+engine loop. `src/Cards/cards.types.ts` / `card-trigger.engine.ts` carry
+the most complete design rationale for the separate Cards system.
 
 ## Hazard-Pattern Combat (Spec 25)
 
@@ -541,7 +541,7 @@ The engine lives in `src/Combat/`:
   self-reinforcing die-refresh loop, and `buildCombatSummary`.
 - `combat.dice.ts` — the four colored mana dice and their state machine.
 - `combat.deck.ts` — Fisher-Yates shuffle + draw-up-to-`COMBAT_HAND_SIZE`.
-- `combat.cards.ts` — the skill→card adapter and verb classification.
+- `combat.cards.ts` — the card→card adapter and verb classification.
 - `combat.threat.ts` — authored + generated enemy threat sequences.
 - `combat.encounter.sim.ts` — `simulateHazardPatternCombat`, a Monte-Carlo
   greedy bot used for balance evidence.
@@ -555,8 +555,8 @@ The engine lives in `src/Combat/`:
 | `resolveCardDieCost(cardColor, enemyPhaseStance)` | Returns the `CardDieCost` for playing a card: `{ cost, advantage }`. Advantage if card stance beats the enemy phase stance (RPS), disadvantage if beaten, neutral otherwise. Wild/X dice always cost 1. |
 | `COMBAT_DICE_COUNT` / `COMBAT_HAND_SIZE` / `COMBAT_DIE_FACES` | Spec 25 tuning constants: opening dice pool size (4), max hand size (6), and the die-face bag (`heart`/`body`/`mind`/`wild` at 1/6 each; `x` at 2/6). |
 | `rollCombatDice(count?, rng?)` / `combatDieCanPower(die, cardColor)` / `refreshOneDie(dice, color)` | Dice helpers: roll the opening pool; check whether a die can power a card of a given color (wild powers any; x powers nothing unless flipped); refresh one spent die of a matching color back to available (self-reinforcing status loop, §4.7). |
-| `toCombatCard(cardId, lookupSkill, lookupEffect)` / `projectDeck(cardIds, lookupSkill, lookupEffect)` | Card-view converters: project a single skill (or synthetic card) into a `CombatCard` view, or an entire deck of ids into a `CombatCard[]` (unknown ids dropped). |
-| `classifyVerbClass(skill, lookupEffect)` | Classifies a skill into a `CombatVerbClass` + `CardEffectKind` pair. Priority: DoT > control > stat-debuff > buff > direct-damage. Used by `toCombatCard` to generate top/bottom action text. |
+| `toCombatCard(cardId, lookupSkill, lookupEffect)` / `projectDeck(cardIds, lookupSkill, lookupEffect)` | Card-view converters: project a single card (or synthetic card) into a `CombatCard` view, or an entire deck of ids into a `CombatCard[]` (unknown ids dropped). |
+| `classifyVerbClass(card, lookupEffect)` | Classifies a card into a `CombatVerbClass` + `CardEffectKind` pair. Priority: DoT > control > stat-debuff > buff > direct-damage. Used by `toCombatCard` to generate top/bottom action text. |
 | `buildCombatDeck(player)` | Assembles the player's combat deck from `knownSkills` + `combatRewardCards` (de-duped for the baseline, duplicates kept for reward cards). No escape card is appended — there is no in-combat retreat. Ready to feed `initializeCombatEncounter`. |
 | `playCombatCard(state, cardId, dice)` | Plays one combat card, spending dice; lands its effects and deals HP damage via status/strike. |
 | `resolveCombatPhase(state, cardsPlayed)` | Resolves a full player phase (card-play driven; replaces the per-round attack/defend resolution). |
@@ -567,7 +567,7 @@ The engine lives in `src/Combat/`:
 | `buildCombatSummary(state)` | End-of-fight `CombatSummary` with per-effect attribution rows. |
 | `simulateHazardPatternCombat(...)` | Monte-Carlo greedy bot returning `CombatSimStats` for balance runs. |
 | `CardEffectKind` | `'dot' \| 'control' \| 'none'` — the status-payload classification tag on every `CombatCard` (set by `classifyVerbClass`); drives the mobile card frame and deck-preset focus logic. The baseline GUARD defense card (`'brace-for-impact'`) is included in `STARTING_SKILL_IDS`. **`GOLD_CARD_IDS` / `isGoldCard` were deleted in Spec 32 v3** (2026-07-08) along with the three rare card ids they named — rarity is now derived from `rank` via `rankToRarity` (`rare` = rank 5-6), and the wild-die-auto-advantage-on-gold behavior was removed with them (a wild/x die is always neutral advantage now — see `resolveCardDieCost`). |
-| `CombatEncounterState`, `CombatCard`, `CombatThreatPhase`, `CombatOutcome`, `CombatSummary` | The core encounter type family. (`CombatPressureTracks` was REMOVED 2026-06-22 — HP is the sole win condition.) `CombatCard.skillId` is the canonical field for the backing learned-skill id (`string \| null`; `null` for synthetic cards, if any are ever added again). `CombatOutcome`/`CombatVerbClass` still list `'retreat'` as a union member for now (no live code path can produce it — no escape card exists) rather than risk an unverified type-cascade removal. Use `skillId` to trace a projected card back to its source skill. |
+| `CombatEncounterState`, `CombatCard`, `CombatThreatPhase`, `CombatOutcome`, `CombatSummary` | The core encounter type family. (`CombatPressureTracks` was REMOVED 2026-06-22 — HP is the sole win condition.) `CombatCard.skillId` is the canonical field for the backing learned-card id (`string \| null`; `null` for synthetic cards, if any are ever added again). `CombatOutcome`/`CombatVerbClass` still list `'retreat'` as a union member for now (no live code path can produce it — no escape card exists) rather than risk an unverified type-cascade removal. Use `skillId` to trace a projected card back to its source card. |
 | `CombatAttributionRow`, `LandedEffect` | Attribution sub-types for `buildCombatSummary`. `CombatAttributionRow` is a per-card row (`cardId`, `name`, `dotDamage`, `damageDealt`, `phases`); `LandedEffect` is a snapshot of one live effect used internally during attribution (`effectId`, `effect`, `active`, `target`). |
 
 ### Spec 26 / 26b — stance draft, the read, Conviction, Signature Skills, deckbuilding
@@ -599,7 +599,7 @@ progression levers, keeping status effects the win path.
   gated on Conviction.
 - **Deckbuilding.** After a won combat, `rollCombatCardRewards` offers a
   1-of-N card draft (archetype-biased) that `addRewardCard` appends to the
-  player's persistent collection. New *skills* (a new card type) are unlocked
+  player's persistent collection. New *cards* (a new card type) are unlocked
   rarely via ethical-dilemma events through the `unlockSkillViaDilemma` hook;
   a new player starts with `STARTING_SKILL_ID` only.
 
@@ -614,7 +614,7 @@ progression levers, keeping status effects the win path.
 | `playSignatureSkill(state, id, ...)` / `getSignatureSkill` | Spend Conviction on an always-available Signature Skill. |
 | `SIGNATURE_SKILLS` / `SIGNATURE_SKILL_LIST` / `SIGNATURE_KITS` / `signaturesForArchetype` / `playerArchetype` | The signature kit catalogue + per-archetype selection. |
 | `rollCombatCardRewards` / `addRewardCard` / `COMBAT_REWARD_POOL` | Post-combat deckbuilder draft + persist. |
-| `unlockSkillViaDilemma` / `STARTING_SKILL_ID` / `STARTING_SKILL_IDS` | Forward hook for ethical-dilemma skill unlocks; the new-player starting card (`STARTING_SKILL_ID = 'slippery-slope'`). `STARTING_SKILL_IDS` is the preferred array (`['slippery-slope', 'brace-for-impact']`) that also grants the baseline GUARD defense card — use this to seed `knownSkills` for a new character. |
+| `unlockSkillViaDilemma` / `STARTING_SKILL_ID` / `STARTING_SKILL_IDS` | Forward hook for ethical-dilemma card unlocks; the new-player starting card (`STARTING_SKILL_ID = 'slippery-slope'`). `STARTING_SKILL_IDS` is the preferred array (`['slippery-slope', 'brace-for-impact']`) that also grants the baseline GUARD defense card — use this to seed `knownSkills` for a new character. |
 | `READ_DAMAGE_MULT`, `CONVICTION_PER_UNPICKED_DIE`, `CONVICTION_READ_WIN_BONUS`, `COLOR_MATCH_DAMAGE_BONUS`, `TURN_DICE_COUNT` | Tuning constants for the read / Conviction / draft economy. (`READ_PRESSURE_MULT` / `COLOR_MATCH_PRESSURE_BONUS` were renamed 2026-06-22 on HP-model landing.) |
 | `rollTurnDice` / `dieHasStance` / `deriveIntentType` | Draft-pool roll + stance helpers. |
 | `AUTHORED_THREAT_ENEMY_IDS` | Read-only array of every enemy slug that has a deterministic authored threat sequence (i.e. keys of `combat.threat-sequences.ts`). Length = 61 at `v0.32.0`. |
@@ -639,7 +639,7 @@ always has a valid curated loadout from first boot.
 
 `isCombatSynergySatisfied` is a pure read-only helper for mobile: pass a `CombatCard` in
 hand and the enemy's current `ActiveEffect[]` — it returns `true` when the card's backing
-skill has a `CardSynergy.predicate` that is currently satisfied (target-side only; caster-
+card has a `CardSynergy.predicate` that is currently satisfied (target-side only; caster-
 side predicates return `false` here and are resolved at execution time inside `executeSkill`).
 
 | Function / Constant | Description |
@@ -718,7 +718,7 @@ Phase 167 extends `CombatSimStats` (returned by `simulateHazardPatternCombat`)
 with five doctrine-critical fields that make "low status-engagement = balance
 failure" mechanically enforceable by the balance loops. Phase 168 adds the AMPLIFY
 burst mechanic (reads pending DoT × multiplier without consuming effects). The
-Conclusion sig-skill redesign adds `CONCLUDE_DMG_PER_STACK` for the BODY
+Conclusion sig-card redesign adds `CONCLUDE_DMG_PER_STACK` for the BODY
 archetype's stack-based finisher.
 
 #### CombatSimStats extensions (Phase 167)

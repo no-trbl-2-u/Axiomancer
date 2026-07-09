@@ -143,14 +143,14 @@ Calculates combat-relevant derived stats from base stats (body/heart/mind). Used
 
 ```typescript
 const derivedStats = deriveStats({ body: 10, heart: 8, mind: 12 });
-// Returns: physicalAttack, physicalSkill, physicalDefense,
-//          mentalAttack, mentalSkill, mentalDefense,  
-//          emotionalAttack, emotionalSkill, emotionalDefense, luck
+// Returns: physicalAttack, physicalDefense,
+//          mentalAttack, mentalDefense,  
+//          emotionalAttack, emotionalDefense, luck
 ```
 
 The derivation uses constants from `game-mechanics.constants.ts`:
 - Attack stats: `baseStatValue * ATTACK_MULTIPLIER`
-- Skill stats: `baseStatValue * SKILL_MULTIPLIER`  
+- Card stats: `baseStatValue * SKILL_MULTIPLIER`  
 - Defense stats: `baseStatValue * DEFENSE_MULTIPLIER`
 - Luck: `average(body, heart, mind)`
 

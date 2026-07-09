@@ -14,7 +14,7 @@ The primary CLI driver that provides a tabbed inquirer interface for playing the
 
 - **Map** - Navigate between nodes and trigger map events. Hazard-Pattern Combat is reached via `npm run combat` (a subcommand of the game CLI).
 - **Journal** - View active/completed quests and philosophical alignment
-- **Skills** - View learned/unlocked skills; combat should show only currently affordable skills
+- **Cards** - View learned/unlocked cards; combat should show only currently affordable cards
 - **Inventory** - View carried items and equipment
 
 **Usage:**
@@ -102,7 +102,7 @@ npm run combat-sim -- --runs=300 --seed=1 --blind
 | --- | --- |
 | `--blind` | Realistic-player witness: the bot drafts using only information a real player can see (no hidden-stance peek). Use to gauge the difficulty a real player feels. Default is `--greedy` (omniscient bot, the balance ceiling). |
 | `--enemy <Name>` | Run against one enemy only (e.g. `CoastalTyrant`, `HushWraith`). Omit to run the full tier sweep. |
-| `--loadout <ids>` | Comma-separated skill IDs for the player's deck (default `slippery-slope`). |
+| `--loadout <ids>` | Comma-separated card IDs for the player's deck (default `slippery-slope`). |
 | `--runs <n>` | Number of Monte-Carlo playthroughs (default `200`). |
 | `--seed <n>` | Deterministic RNG seed for reproducible runs (default `1`). |
 
@@ -273,7 +273,7 @@ Development utilities for testing and debugging the game engine.
 **Key Functions:**
 - `devSetLevel()` - Set character level
 - `devSetStats()` - Modify character base stats
-- `devLearnSkills()` - Manage skill progression (Phase 99 removed separate skill equipment; `devEquipSkills` was removed in Phase 159)
+- `devLearnSkills()` - Manage card progression (Phase 99 removed separate card equipment; `devEquipSkills` was removed in Phase 159)
 - `devGrantAllEquipment()` / `devGrantAllConsumables()` - Grant items
 - `devSpawnEnemy()` - Spawn specific enemies for testing
 - `devMaxOut()` - Max out character for endgame testing

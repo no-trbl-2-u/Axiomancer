@@ -146,7 +146,7 @@ Agent-graded walkthrough at `automation/scripts/walkthroughs/codex-unlock.*`.
 runnable code samples: [`quickstart-character.md`](./quickstart-character.md),
 [`quickstart-combat.md`](./quickstart-combat.md),
 [`quickstart-items.md`](./quickstart-items.md),
-`quickstart-skills.md`,
+`quickstart-cards.md`,
 [`quickstart-world.md`](./quickstart-world.md).
 
 ### Events (Beta)
@@ -162,7 +162,7 @@ interface EnginePayload {
 }
 ```
 
-`unlockedSkills` (Phase 30 unit 2) lists skill ids newly eligible to
+`unlockedSkills` (Phase 30 unit 2) lists card ids newly eligible to
 learn after a level promotion crossed a tier-eligibility threshold. An
 empty array means the levelup didn't unlock anything new; the field is
 absent on every other topic.
@@ -229,8 +229,8 @@ predicates AND-compose:
   of the named stances during combat (existential; derived from
   `state.log[].playerAction.stance`).
 - `requiredCardUse?: string[]` — player must have cast at least one
-  of the named skill IDs during combat (existential; derived from
-  `state.log[].playerAction` entries with `action === 'skill'`).
+  of the named card IDs during combat (existential; derived from
+  `state.log[].playerAction` entries with `action === 'card'`).
 - `defaultFallback?: 'both-defend-cap'` — explicit escape hatch that
   treats other fields as no-ops and uses the global counter cap.
 
@@ -382,44 +382,44 @@ reality.
   Phase 54)" for runtime application notes + the "Adding a new set"
   steps.
 
-### Skills
+### Cards
 
-- Skill execution (`executeCard`, `canUseSkill`,
+- Card execution (`executeCard`, `canUseSkill`,
   `generateBasicActionResources`, `generatePhilosophicalResource`,
   `calculateCardDamage`, `spendResources`) — Stable.
-- Skill types (`Skill`, `SkillCategory`, `SkillsStatType`,
+- Card types (`Card`, `SkillCategory`, `SkillsStatType`,
   `SkillTier`, `SkillTarget`, `ResourceCost`, `CombatResources`,
   `SkillResolution`, etc.) — Stable.
-- **Top-level skill library (Phase 50):** `cardLibrary: Skill[]` +
-  `getCardById(id: string): Skill | undefined` re-exported on the
+- **Top-level card library (Phase 50):** `cardLibrary: Card[]` +
+  `getCardById(id: string): Card | undefined` re-exported on the
   top-level barrel (Phase 50 unit 1 — `19f2015`, engine-handoff fix
   for `axiomancer-mobile`). Consumers no longer need to import from a
-  deep path; the canonical 21-skill library (6 Tier 1 + 8 Tier 2 +
+  deep path; the canonical 21-card library (6 Tier 1 + 8 Tier 2 +
   7 Tier 3 as of Phase 66 + Phase 44) is reachable directly from
   `import { cardLibrary, getCardById } from 'axiomancer-mechanics'`.
 - **Runtime learning (Phase 30):** `learnCard(character, skillId)`,
   `getAvailableCards(character)`, `meetsLearningRequirement(character,
-  skill)` — Stable. The `LEARN_CARD` action wires this through the
+  card)` — Stable. The `LEARN_CARD` action wires this through the
   game reducer; the Character tab in `npm run game` exposes it. Closes
   Spec 06 Q7.
 - **Tier 2 synergy (Phase 66):** Beta. Optional
-  `Skill.synergy?: SkillSynergy` clause + matching `SynergyPredicate`
-  shape lets a skill condition bonus damage / effect consumption /
+  `Card.synergy?: SkillSynergy` clause + matching `SynergyPredicate`
+  shape lets a card condition bonus damage / effect consumption /
   type-swap / detonation on the presence of an `ActiveEffect` already
   on the field. `executeCard` evaluates synergy after
   `calculateCardDamage` but before `combatEffects` apply. A new
   `synergy-fired` `SkillEvent` (and matching `SkillPhaseEvent`
   variant) surfaces the bonus damage, consumed effect ids,
   consumed-token count, and clear/consume flags for UI / agent
-  rendering. Five Tier 2 skills ship as the first authored batch:
+  rendering. Five Tier 2 cards ship as the first authored batch:
   `resonance-bleed` (heart, cross-stance duration amp),
   `intensity-feedback` (mind, cross-stance intensity amp),
   `bat-swarm-thoughtform` (heart, buff type-swap consuming
   `tier1_body_defend`), `resonance-burst` (mind, consume opposing
   debuff for damage), `resonance-detonation` (heart, no predicate;
   apex burn — consume full combat-resource pool + clear all effects
-  + damage proportional to consumed tokens). See `docs/skills.md` §
-  "Tier 2 synergy (Phase 66)" for the schema + the per-skill table.
+  + damage proportional to consumed tokens). See `docs/cards.md` §
+  "Tier 2 synergy (Phase 66)" for the schema + the per-card table.
 - **Phase 84 SkillEvent cleanup:** `effect-resisted` renamed to
   `buff-fumbled` (only fires on Tier 2 buff caster fumble); dead-code
   `effect-rebounded` variant removed. **BREAKING** for consumers
@@ -498,7 +498,7 @@ hermetic walkthrough.
   `shiftPhilosophicalAlignment(delta: Partial<PhilosophicalAlignment>)` — Beta.
 
 Orthogonal to `moralMeter` — both fields persist independently. The
-three fallacies per cell are content fuel for skill/effect/spell
+three fallacies per cell are content fuel for card/effect/spell
 authoring; the first batch is live as of Phase 44.
 
 **Phase 43 — content authoring surfaces:**
@@ -506,9 +506,9 @@ authoring; the first batch is live as of Phase 44.
 - `MapEventPoolEntry.alignmentDelta?: Partial<PhilosophicalAlignment>` — Beta. Applied by `resolveMapEvent` after the matching handler runs.
 
 **Phase 44 — fallacies-as-spells / abilities:**
-- `Skill.sourcedFromCell?: string` — Beta. Cross-link to the originating cell id for fallacy-themed skills.
+- `Card.sourcedFromCell?: string` — Beta. Cross-link to the originating cell id for fallacy-themed cards.
 - `Effect.sourcedFromCell?: string` — Beta. Same for fallacy-themed status effects.
-- 4 new Tier 3 fallacy skills (`appeal-to-consequences`, `nirvana-fallacy`, `pascals-wager`, `appeal-to-fear`) in `cardLibrary`.
+- 4 new Tier 3 fallacy cards (`appeal-to-consequences`, `nirvana-fallacy`, `pascals-wager`, `appeal-to-fear`) in `cardLibrary`.
 - 3 new fallacy status effects (`debuff_no_true_scotsman`, `buff_special_pleading`, `debuff_category_error`) in `effectsLibrary`.
 
 **Phase 46 — alignment-gated content:**

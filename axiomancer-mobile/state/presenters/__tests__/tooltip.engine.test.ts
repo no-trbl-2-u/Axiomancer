@@ -346,14 +346,14 @@ describe('selectTooltipContentFor', () => {
     describe('card kind threads stance accent', () => {
         it('card on body stance returns body accent', () => {
             const { cardLibrary } = require('@mechanics');
-            const bodySkill = cardLibrary.find((s: { philosophicalAspect: string }) => s.philosophicalAspect === 'body');
-            if (!bodySkill) {
+            const bodyCard = cardLibrary.find((s: { philosophicalAspect: string }) => s.philosophicalAspect === 'body');
+            if (!bodyCard) {
                 // No body-stance card in library; skip without
                 // failing — the contract is still pinned by stat
                 // tests below.
                 return;
             }
-            const content = selectTooltipContentFor('card', bodySkill.id, EMPTY_STATE);
+            const content = selectTooltipContentFor('card', bodyCard.id, EMPTY_STATE);
             expect(content?.accent).toBe('body');
         });
     });

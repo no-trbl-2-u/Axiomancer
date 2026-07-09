@@ -688,7 +688,7 @@ export interface AppActions {
      */
     getLearnableCardOffers: (count?: number) => LearnableCardOffer[];
     /** Learns a card through the engine (requirement-checked). */
-    learnCard: (skillId: string) => boolean;
+    learnCard: (cardId: string) => boolean;
 }
 
 export interface UseItemResult {
@@ -802,10 +802,10 @@ function getLearnableCardOffersAction(store: AppStore, count = 3): LearnableCard
 }
 
 /** Learns a card through the engine (requirement-checked). */
-function learnCardAction(store: AppStore, skillId: string): boolean {
+function learnCardAction(store: AppStore, cardId: string): boolean {
     const player = store.getState().player;
     if (!player) return false;
-    const next = engineLearnCard(player, skillId);
+    const next = engineLearnCard(player, cardId);
     if (next === player) return false;
     store.setState({ player: next });
     return true;
@@ -1033,7 +1033,7 @@ export function createAppActions(store: AppStore): AppActions {
         buyVillageWare: (itemId) => buyVillageWareAction(store, itemId),
         sellVillageItem: (index) => sellVillageItemAction(store, index),
         getLearnableCardOffers: (count) => getLearnableCardOffersAction(store, count),
-        learnCard: (skillId) => learnCardAction(store, skillId),
+        learnCard: (cardId) => learnCardAction(store, cardId),
     };
 }
 
