@@ -49,7 +49,7 @@ npm run combat -- [flags]             # convenience alias
 
 | Flag | Effect |
 | --- | --- |
-| `--enemy <slug>` | Enemy from the registry (default `mournful-gull`). |
+| `--enemy <slug>` | Enemy from the registry (default `little-belle`). |
 | `--preset <id>` | Character preset id (default `apprentice`). |
 | `--seed <n>` | Deterministic RNG seed — same seed → same dice, same outcome. |
 | `--auto` | Run a bot policy without TTY (no prompts). |
@@ -63,11 +63,11 @@ npm run combat -- [flags]             # convenience alias
 **Examples:**
 ```bash
 # Deterministic auto run (status-focused bot, reproducible)
-npm run combat -- --auto --policy status --enemy mournful-gull --seed 42 \
+npm run combat -- --auto --policy status --enemy little-belle --seed 42 \
   --max-turns 12 --json-events --state-log /tmp/combat.jsonl
 
 # Interactive TTY play
-npm run combat -- --enemy wet-hound --preset wanderer
+npm run combat -- --enemy foot-stealer --preset wanderer
 ```
 
 **State-log records** (for agentic consumers):
