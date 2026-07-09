@@ -152,12 +152,14 @@ import {
     beginLootCacheAction,
     channelLootCacheInsightAction,
     claimLootCacheOutcomeAction,
+    completeLootCacheTutorialAction,
     continueLootCacheCardAction,
     delveLootCacheAction,
     pushLootCachePickAction,
     retreatLootCachePickAction,
     sealLootCacheAction,
     startLootCacheDelvingAction,
+    CACHE_TUTORIAL_FLAG,
     type BeginLootCacheOptions,
     type ClaimLootCacheResult,
 } from './cache/store-actions';
@@ -630,6 +632,8 @@ export interface AppActions {
     claimLootCacheOutcome: () => ClaimLootCacheResult;
     /** Clear the cache without loot or bites (dev / escape hatch). */
     abandonLootCache: () => void;
+    /** Mark the guided first delve done (completed or skipped) and persist. */
+    completeLootCacheTutorial: (skipped: boolean) => void;
 
     // -----------------------------------------------------------------
     // The Labyrinth — THE APORIA (W-01; see state/labyrinth/). Dev-menu
@@ -1035,6 +1039,7 @@ export function createAppActions(store: AppStore): AppActions {
         continueLootCacheCard: () => continueLootCacheCardAction(store),
         claimLootCacheOutcome: () => claimLootCacheOutcomeAction(store),
         abandonLootCache: () => abandonLootCacheAction(store),
+        completeLootCacheTutorial: (skipped) => completeLootCacheTutorialAction(store, skipped),
         buyVillageWare: (itemId) => buyVillageWareAction(store, itemId),
         sellVillageItem: (index) => sellVillageItemAction(store, index),
         getLearnableCardOffers: (count) => getLearnableCardOffersAction(store, count),
@@ -1648,12 +1653,20 @@ function resolveCurrentMapEventAction(store: AppStore, sourceNodeType?: string):
                 player: gameState.player,
                 event: EMPTY_EVENT_SLICE,
             });
-            const mapName = resolvedState.world?.currentMap?.name;
-            const tier: CacheLootTier = mapName === 'northern-forest' ? 'rich' : 'modest';
-            beginLootCacheAction(store, {
-                lootTable: { tier },
-                currency: result.event.currency,
-            });
+            // The first-ever delve runs as the guided tutorial (pinned
+            // seed + tier + currency, coach overlay); the persistent flag
+            // set on completion/skip keeps every later cache organic.
+            const tutorialDone = (gameState.flags ?? []).includes(CACHE_TUTORIAL_FLAG);
+            if (tutorialDone) {
+                const mapName = resolvedState.world?.currentMap?.name;
+                const tier: CacheLootTier = mapName === 'northern-forest' ? 'rich' : 'modest';
+                beginLootCacheAction(store, {
+                    lootTable: { tier },
+                    currency: result.event.currency,
+                });
+            } else {
+                beginLootCacheAction(store, { tutorial: true });
+            }
             return true;
         }
 

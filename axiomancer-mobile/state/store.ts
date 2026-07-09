@@ -129,10 +129,12 @@ export interface MobileRestSlice {
  * active cache (engine: World/LootCache) — `null` outside one. The
  * engine deals in item REFS; `stash` keeps the real `Item`s behind
  * those refs (keyed by ref uid) so claim can map kept uids back.
+ * `tutorial` marks the guided first delve (the coach overlay).
  */
 export interface MobileCacheSlice {
     session: LootCacheSession | null;
     stash: Readonly<Record<string, Item>>;
+    tutorial: boolean;
 }
 
 /**
@@ -212,6 +214,7 @@ export const EMPTY_REST_SLICE: MobileRestSlice = Object.freeze({
 export const EMPTY_CACHE_SLICE: MobileCacheSlice = Object.freeze({
     session: null,
     stash: Object.freeze({}),
+    tutorial: false,
 });
 
 export const EMPTY_LABYRINTH_SLICE: MobileLabyrinthSlice = Object.freeze({ session: null });

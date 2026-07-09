@@ -18,7 +18,10 @@ import * as Haptics from 'expo-haptics';
 import { TREASURE_CHEST_CLOSED, TREASURE_GOLD_HOARD } from '@/assets/images/treasure';
 import { CacheDie } from '@/components/cache/CacheDie';
 import { CacheProgressMeter } from '@/components/cache/CacheProgressMeter';
+import { CacheTutorialCoach } from '@/components/cache/CacheTutorialCoach';
+import { currentTutorialStep } from '@/components/cache/tutorial-steps';
 import { ScreenBg } from '@/components/ScreenBg';
+import { CACHE_TUTORIAL_FLAG } from '@/state/cache/store-actions';
 import { useGameActions, useGameState } from '@/state/GameStoreProvider';
 import {
     selectCacheVM,
@@ -170,6 +173,19 @@ export default function CacheScreen() {
     const vm = useMemo(() => selectCacheVM({ cache: slice }), [slice]);
     const actions = useGameActions();
     const router = useRouter();
+
+    const tutorialDone = useGameState((s) =>
+        ((s as unknown as { flags?: string[] }).flags ?? []).includes(CACHE_TUTORIAL_FLAG),
+    );
+    // The coach rides the guided first delve until its script is done or
+    // skipped; the persistent flag gates it (and the map trigger).
+    const session = slice?.session ?? null;
+    const coachActive = slice?.tutorial === true && session !== null && !tutorialDone;
+    useEffect(() => {
+        if (coachActive && currentTutorialStep(session!, vm) === -1) {
+            actions.completeLootCacheTutorial(false);
+        }
+    }, [coachActive, session, vm, actions]);
 
     useEffect(() => {
         if (!vm.active && router.canGoBack()) router.back();
@@ -403,6 +419,14 @@ export default function CacheScreen() {
                     </TouchableOpacity>
                 )}
             </ScrollView>
+
+            {coachActive && (
+                <CacheTutorialCoach
+                    session={session!}
+                    vm={vm}
+                    onSkip={() => actions.completeLootCacheTutorial(true)}
+                />
+            )}
         </ScreenBg>
     );
 }

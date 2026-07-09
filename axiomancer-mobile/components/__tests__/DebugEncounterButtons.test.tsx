@@ -46,6 +46,7 @@ describe('DebugEncounterButtons: DEV gate', () => {
         expect(tree.queryByTestId('debug-quest-button')).not.toBeNull();
         expect(tree.queryByTestId('debug-rest-button')).not.toBeNull();
         expect(tree.queryByTestId('debug-cache-button')).not.toBeNull();
+        expect(tree.queryByTestId('debug-cache-tutorial-button')).not.toBeNull();
     });
 
     it('renders null when dev tools are disabled (production build simulation)', () => {
@@ -60,6 +61,7 @@ describe('DebugEncounterButtons: DEV gate', () => {
             expect(tree.queryByTestId('debug-quest-button')).toBeNull();
             expect(tree.queryByTestId('debug-rest-button')).toBeNull();
             expect(tree.queryByTestId('debug-cache-button')).toBeNull();
+            expect(tree.queryByTestId('debug-cache-tutorial-button')).toBeNull();
         } finally {
             buildProfile.isDevToolsEnabled = original;
         }
@@ -101,6 +103,18 @@ describe('DebugEncounterButtons: press routing', () => {
         // After beginLootCache fires, the engine populates the cache slice.
         expect(store.getState().cache?.session).not.toBeNull();
         expect(store.getState().cache?.session?.phase).toBe('intro');
+    });
+
+    it('cache tutorial button calls beginLootCache with tutorial option — session has tutorial flag', () => {
+        const store = makeStore();
+        expect(store.getState().cache?.session).toBeNull();
+
+        const tree = render(withProviders(store, <DebugEncounterButtons />));
+        fireEvent.press(tree.getByTestId('debug-cache-tutorial-button'));
+
+        const cacheState = store.getState().cache;
+        expect(cacheState?.session).not.toBeNull();
+        expect(cacheState?.tutorial).toBe(true);
     });
 
     it('quest button with specific boardId — session contains the requested board', () => {
@@ -147,5 +161,9 @@ describe('DebugEncounterButtons: accessibility', () => {
         const cacheBtn = tree.getByTestId('debug-cache-button');
         expect(cacheBtn.props.accessibilityRole).toBe('button');
         expect(cacheBtn.props.accessibilityLabel).toMatch(/dig|cache|loot/i);
+
+        const cacheTutorialBtn = tree.getByTestId('debug-cache-tutorial-button');
+        expect(cacheTutorialBtn.props.accessibilityRole).toBe('button');
+        expect(cacheTutorialBtn.props.accessibilityLabel).toMatch(/cache|tutorial/i);
     });
 });

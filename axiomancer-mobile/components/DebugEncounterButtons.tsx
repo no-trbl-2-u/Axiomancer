@@ -48,6 +48,38 @@ function DebugRow({
     );
 }
 
+function DebugCacheRow() {
+    const styles = useStyles();
+    const actions = useGameActions();
+
+    return (
+        <View style={styles.row}>
+            <View style={styles.labelCol}>
+                <Text style={styles.label}>DEBUG · LOOT CACHE</Text>
+                <Text style={styles.sub}>start the reliquary (10 shillings seeded)</Text>
+            </View>
+            <Pressable
+                style={[styles.button, styles.tutorialButton]}
+                onPress={() => actions.beginLootCache({ tutorial: true })}
+                accessibilityRole="button"
+                accessibilityLabel="Start the loot-cache tutorial session"
+                testID="debug-cache-tutorial-button"
+            >
+                <Text style={[styles.buttonLabel, styles.tutorialLabel]}>TUTORIAL</Text>
+            </Pressable>
+            <Pressable
+                style={styles.button}
+                onPress={() => actions.beginLootCache({ currency: 10 })}
+                accessibilityRole="button"
+                accessibilityLabel="Start a debug loot-cache encounter"
+                testID="debug-cache-button"
+            >
+                <Text style={styles.buttonLabel}>DIG</Text>
+            </Pressable>
+        </View>
+    );
+}
+
 export function DebugEncounterButtons() {
     const actions = useGameActions();
 
@@ -69,13 +101,7 @@ export function DebugEncounterButtons() {
                 onPress={() => actions.beginRest()}
                 testID="debug-rest-button"
             />
-            <DebugRow
-                label="DEBUG · LOOT CACHE"
-                sub="start the reliquary (10 shillings seeded)"
-                buttonLabel="DIG"
-                onPress={() => actions.beginLootCache({ currency: 10 })}
-                testID="debug-cache-button"
-            />
+            <DebugCacheRow />
         </>
     );
 }
@@ -101,4 +127,6 @@ const useStyles = makeStyles((AXM) => ({
         backgroundColor: 'rgba(134,168,33,0.08)',
     },
     buttonLabel: { fontFamily: FONTS.gothic, fontSize: 14, letterSpacing: 2, color: '#86a821' },
+    tutorialButton: { borderColor: AXM.sulfur, backgroundColor: AXM.sulfurSubtle, marginRight: 6 },
+    tutorialLabel: { color: AXM.sulfur },
 }));

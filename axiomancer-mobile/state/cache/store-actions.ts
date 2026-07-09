@@ -31,6 +31,19 @@ import { rollCacheLoot, type CacheLootTier } from '@mechanics';
 /** Flag prefix banking a keeper's keepsake. */
 export const CACHE_KEEPSAKE_FLAG_PREFIX = 'cache-keepsake:';
 
+/** Flag set once the guided first delve is completed or skipped. */
+export const CACHE_TUTORIAL_FLAG = 'cache-tutorial-done';
+
+/**
+ * The tutorial session is pinned so the coach script always matches the
+ * board: seed 1's first pick pool on THE LID (difficulty 5) rolls
+ * `[6, 1, 2]` — one slip, eight progress — cracking the layer clean on
+ * the very first push without ever brushing the jam threshold (2 slips).
+ */
+export const CACHE_TUTORIAL_SEED = 1;
+export const CACHE_TUTORIAL_TIER: CacheLootTier = 'modest';
+export const CACHE_TUTORIAL_CURRENCY = 4;
+
 /**
  * Dev/test seed override (`globalThis.__AXM_CACHE_SEED__`), mirroring
  * the hazard/gathering/quest hooks.
@@ -58,21 +71,33 @@ export interface BeginLootCacheOptions {
      * the engine owns rarity. See `state/cache/loot-table.ts`.
      */
     lootTable?: { tier: CacheLootTier };
+    /** Start the guided first delve (pinned seed + tier/currency unless overridden). */
+    tutorial?: boolean;
 }
 
 export function beginLootCacheAction(store: AppStore, options: BeginLootCacheOptions = {}): boolean {
     const state = store.getState();
     if (state.cache?.session) return false; // one cache at a time
-    const seed = resolveMinigameSeed('cache', options.seed, globalThis.__AXM_CACHE_SEED__);
+    const seed = resolveMinigameSeed(
+        'cache',
+        options.seed,
+        globalThis.__AXM_CACHE_SEED__,
+        options.tutorial ? CACHE_TUTORIAL_SEED : undefined,
+    );
 
-    // Explicit authored items win; otherwise roll the level-scaled
-    // table when the caller opts in. Falls back to an empty list
-    // (currency-only cache) when neither is supplied.
+    // Explicit authored items win; otherwise roll the level-scaled table
+    // when the caller opts in (organic play) or this is the pinned
+    // tutorial delve (fixed 'modest' tier). Falls back to an empty list
+    // (currency-only cache) when neither applies.
     let items: readonly Item[] = options.items ?? [];
-    if (options.items === undefined && options.lootTable) {
-        const playerLevel = (state as unknown as GameState).player?.level ?? 1;
-        items = rollCacheLoot({ playerLevel, seed, tier: options.lootTable.tier });
+    if (options.items === undefined) {
+        const lootTable = options.lootTable ?? (options.tutorial ? { tier: CACHE_TUTORIAL_TIER } : undefined);
+        if (lootTable) {
+            const playerLevel = (state as unknown as GameState).player?.level ?? 1;
+            items = rollCacheLoot({ playerLevel, seed, tier: lootTable.tier });
+        }
     }
+    const currency = options.currency ?? (options.tutorial ? CACHE_TUTORIAL_CURRENCY : 0);
     const stash: Record<string, Item> = {};
     const refs: CacheItemRef[] = items.map((item, i) => {
         const uid = `cache-${i}`;
@@ -82,11 +107,30 @@ export function beginLootCacheAction(store: AppStore, options: BeginLootCacheOpt
 
     store.setState({
         cache: {
-            session: createLootCacheSession(seed, refs, options.currency ?? 0),
+            session: createLootCacheSession(seed, refs, currency),
             stash,
+            tutorial: options.tutorial === true,
         },
     });
     return true;
+}
+
+/**
+ * Marks the guided first delve as done (completed or skipped): sets the
+ * persistent flag so the map trigger never re-runs it, and persists. The
+ * session (if any) keeps running as normal play.
+ */
+export function completeLootCacheTutorialAction(store: AppStore, skipped: boolean): void {
+    const state = store.getState() as unknown as GameState;
+    if (!(state.flags ?? []).includes(CACHE_TUTORIAL_FLAG)) {
+        store.setState({ flags: [...(state.flags ?? []), CACHE_TUTORIAL_FLAG] } as never);
+        try {
+            store.getState().save();
+        } catch {
+            // Persistence failures must not strand the coach.
+        }
+    }
+    void skipped;
 }
 
 /** The find acknowledged: intro → delving. */
