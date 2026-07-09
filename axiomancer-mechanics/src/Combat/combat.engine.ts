@@ -269,7 +269,6 @@ function cardShim(enc: CombatEncounterState): CombatState {
         enemy: enc.enemy,
         playerChoice: {},
         enemyChoice: {},
-        log: [],
         combatResources: enc.combatResources,
     };
 }
@@ -2907,11 +2906,11 @@ export function selectMercyChoice(
  */
 export function playSignatureSkill(
     state: CombatEncounterState,
-    skillId: string,
+    signatureId: string,
     rng: () => number = defaultRng,
 ): CombatTransition {
     if (state.phase !== 'phase-play') return { state, events: [] };
-    const skill = getSignatureSkill(skillId);
+    const skill = getSignatureSkill(signatureId);
     if (!skill) return { state, events: [] };
     if (state.conviction < skill.cost) {
         const events: CombatEvent[] = [{ kind: 'effect-fizzled', cardId: skill.id, effectId: '', message: `need ${skill.cost} ◆ Conviction (have ${state.conviction})` }];
@@ -2926,7 +2925,7 @@ export function playSignatureSkill(
     const spent: CombatEncounterState = { ...state, conviction: state.conviction - skill.cost };
     const applied = applySignatureSkill(spent, skill, rng);
     const events: CombatEvent[] = [
-        { kind: 'signature-cast', skillId: skill.id, name: skill.name, cost: skill.cost },
+        { kind: 'signature-cast', signatureId: skill.id, name: skill.name, cost: skill.cost },
         ...applied.events,
     ];
     const next = withLog(applied.state, events);

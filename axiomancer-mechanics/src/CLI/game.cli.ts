@@ -671,16 +671,16 @@ async function characterTab(store: GameStoreHandle): Promise<void> {
             };
         });
         choices.push({ name: 'leave them unlearned', value: 'skip' });
-        const { skillId } = await prompt<{ skillId: string }>([{
-            type: 'rawlist', name: 'skillId',
-            message: `Learn a skill? (${learnable.length} available)`,
+        const { cardId } = await prompt<{ cardId: string }>([{
+            type: 'rawlist', name: 'cardId',
+            message: `Learn a card? (${learnable.length} available)`,
             choices,
         }]);
-        if (skillId === 'skip') break;
+        if (cardId === 'skip') break;
         const before = store.getState();
-        store.getState().learnCard(skillId);
-        logState('learnCard', before, store.getState(), { skillId });
-        log(`Learned ${skillId}.`);
+        store.getState().learnCard(cardId);
+        logState('learnCard', before, store.getState(), { cardId });
+        log(`Learned ${cardId}.`);
         learnable = getAvailableCards(
             store.getState().player,
             store.getState().philosophicalAlignment,

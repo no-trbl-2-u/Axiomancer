@@ -31,9 +31,9 @@ describe('Phase 99 unlocked skill access', () => {
     });
 
     test('every known skill resolves in the library', () => {
-        for (const skillId of player.knownCards) {
-            const skill = getCardById(skillId);
-            expect(skill, `skill ${skillId} missing from library`).toBeDefined();
+        for (const cardId of player.knownCards) {
+            const card = getCardById(cardId);
+            expect(card, `card ${cardId} missing from library`).toBeDefined();
         }
     });
 
@@ -47,8 +47,8 @@ describe('Phase 99 unlocked skill access', () => {
         expect(availableCards).toEqual(player.knownCards);
 
         // Test skill that player doesn't know
-        const unknownSkillId = 'resonance-detonation'; // rank-5 finisher
-        expect(player.knownCards).not.toContain(unknownSkillId);
+        const unknownCardId = 'resonance-detonation'; // rank-5 finisher
+        expect(player.knownCards).not.toContain(unknownCardId);
     });
 
     test('the combat catalogue is exactly the known set', () => {

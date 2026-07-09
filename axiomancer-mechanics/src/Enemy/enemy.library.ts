@@ -408,7 +408,6 @@ export const BrineHag = createEnemy({
     skills: [skill('soft-word')],
     befriendabilityConfig: {
         hpGate: { belowPct: 0.3 },
-        requiredStances: ['heart'],
         roundsThreshold: 4,
     },
     friendshipReward: {
@@ -471,7 +470,6 @@ export const TheFerryman = createEnemy({
     skills: [skill('festering-argument')],
     befriendabilityConfig: {
         hpGate: { belowPct: 0.25 },
-        requiredStances: ['heart'],
         roundsThreshold: 6,
     },
     friendshipReward: {
@@ -548,7 +546,6 @@ export const KingOfRevenge = createEnemy({
     skills: [skill('straw-mans-jab'), skill('brief-candle'), skill('red-herring')],
     befriendabilityConfig: {
         hpGate: { belowPct: 0.7 },
-        requiredStances: ['heart'],
         roundsThreshold: 1,
     },
     friendshipReward: {
@@ -795,7 +792,6 @@ export const TriEyes = createEnemy({
     skills: [skill('red-herring'), skill('brief-candle')],
     befriendabilityConfig: {
         hpGate: { belowPct: 0.7 },
-        requiredStances: ['mind'],
         roundsThreshold: 1,
     },
     friendshipReward: {
@@ -1022,7 +1018,6 @@ export const HasshakuSama = createEnemy({
     skills: [skill('soft-word'), skill('soft-word')],
     befriendabilityConfig: {
         hpGate: { belowPct: 0.4 },
-        requiredStances: ['heart'],
         roundsThreshold: 3,
     },
     friendshipReward: {
@@ -1197,7 +1192,6 @@ export const FateSpinner = createEnemy({
     skills: [skill('glimpse'), skill('red-herring'), skill('slippery-slope')],
     befriendabilityConfig: {
         hpGate: { belowPct: 0.2 },
-        requiredStances: ['mind'],
         roundsThreshold: 8,
     },
     friendshipReward: {
@@ -1329,7 +1323,6 @@ export const LadyGabriella = createEnemy({
     skills: [skill('soft-word'), skill('soft-word')],
     befriendabilityConfig: {
         hpGate: { belowPct: 0.35 },
-        requiredStances: ['heart'],
         roundsThreshold: 5,
     },
     friendshipReward: {
@@ -1560,7 +1553,6 @@ export const Rangda = createEnemy({
     skills: [skill('soft-word'), skill('festering-argument'), skill('glimpse')],
     befriendabilityConfig: {
         hpGate: { belowPct: 0.2 },
-        requiredStances: ['heart'],
         roundsThreshold: 8,
     },
     friendshipReward: {
@@ -2053,7 +2045,6 @@ export const TheSophist = createEnemy({
     skills: [skill('bootstrap-loop'), skill('glimpse'), skill('red-herring')],
     befriendabilityConfig: {
         hpGate: { belowPct: 0.25 },
-        requiredStances: ['mind'],
         roundsThreshold: 6,
     },
     friendshipReward: {

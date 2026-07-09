@@ -16,11 +16,11 @@
 
 import { BefriendabilityConfig } from '../Enemy/types';
 import { FRIENDSHIP_COUNTER_MAX } from '../Game/game-mechanics.constants';
-import { CombatState, Stance } from './types';
+import { CombatState } from './types';
 
 export type {
     Stance, Action, Advantage, CritStyle, CombatAction, PlayerCombatAction,
-    CombatPhase, BattleLogEntry, CombatState, Combatant,
+    CombatPhase, CombatState, Combatant,
 } from './types';
 
 export { determineAdvantage, hasAdvantage, getAdvantageModifier, resolveEffectiveAdvantage } from './advantage';
@@ -85,14 +85,14 @@ export { initializeCombat } from './combat.reducer';
  *
  * Not exported from the public barrel — internal helper for
  * `isBefriendAttemptEligible`, the explicit Befriend-attempt check the shared
- * skill engine consults via `executeCard`. (The legacy combat-end predicates
+ * card engine consults via `executeCard`. (The legacy combat-end predicates
  * that also consumed it — `determineCombatEnd` / `isCombatOngoing` /
  * `isFriendshipEligible` — were removed with the legacy turn-based driver.)
  *
- * D5: `requiredStances` / `requiredCardUse` derive from `state.log` rather
- * than separate tracking state on `CombatState`. The log already captures
- * `playerAction.stance` and (when `action === 'skill'`) `playerAction.skillId`
- * per resolved round.
+ * Remaining predicates are the passive both-defend counter, `roundsThreshold`,
+ * and `hpGate`. The former per-round history predicates (`requiredStances` /
+ * `requiredCardUse`) were removed with the legacy `CombatState.log`: the
+ * Hazard-Pattern engine never populated that log, so they were inert.
  */
 function befriendabilityPredicatesPass(
     state: CombatState,
@@ -112,32 +112,14 @@ function befriendabilityPredicatesPass(
         const hpFraction = state.enemy.health / maxHp;
         if (hpFraction > config.hpGate.belowPct) return false;
     }
-    if (config.requiredStances && config.requiredStances.length > 0) {
-        const usedStances = new Set<Stance>(
-            state.log.map(entry => entry.playerAction.stance),
-        );
-        if (!config.requiredStances.some(stance => usedStances.has(stance))) {
-            return false;
-        }
-    }
-    if (config.requiredCardUse && config.requiredCardUse.length > 0) {
-        const castCards = new Set<string>(
-            state.log
-                .filter(entry => entry.playerAction.action === 'skill' && entry.playerAction.skillId !== undefined)
-                .map(entry => entry.playerAction.skillId as string),
-        );
-        if (!config.requiredCardUse.some(skillId => castCards.has(skillId))) {
-            return false;
-        }
-    }
     return true;
 }
 
 /**
  * Phase 112 — returns true when the enemy is vulnerable to an explicit
- * Befriend skill attempt. HP gates and authored stance/skill predicates still
- * matter, but passive both-defend counter pressure is not, by itself, a combat
- * end or a mercy decision.
+ * Befriend attempt. HP gates and the `roundsThreshold` still matter, but
+ * passive both-defend counter pressure is not, by itself, a combat end or a
+ * mercy decision.
  */
 export function isBefriendAttemptEligible(state: CombatState): boolean {
     return befriendabilityPredicatesPass(state, { requirePassiveCounter: false });

@@ -86,7 +86,7 @@ export {
 } from './Combat';
 export type {
     Stance, Action, Advantage, CritStyle, CombatAction, CombatPhase,
-    BattleLogEntry, CombatState, Combatant,
+    CombatState, Combatant,
     AggregatedEffectModifiers, EffectiveStats, DamageType,
     // 0.34.0 status-depth epic — selector result types
     PendingDotEntry, ActiveDotEntry, ActiveDotAmplification,

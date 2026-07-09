@@ -116,13 +116,13 @@ describe('Phase 51 — autosave throttling restricts adapter.save to DURABLE_ACT
         store.getState().dispatch({ type: 'LEVEL_UP' });
         expect(adapter.saves).toBe(1);
 
-        // LEARN_CARD — not in durable set. Use a skill the seeded player
+        // LEARN_CARD — not in durable set. Use a card the seeded player
         // can plausibly learn; the test asserts the save-count not the
         // learn outcome (the reducer is a no-op on a bogus id, but autosave
         // doesn't fire either way).
         store.getState().dispatch({
             type: 'LEARN_CARD',
-            payload: { skillId: 'this-skill-id-does-not-exist' },
+            payload: { cardId: 'this-card-id-does-not-exist' },
         });
         expect(adapter.saves).toBe(1);
     });

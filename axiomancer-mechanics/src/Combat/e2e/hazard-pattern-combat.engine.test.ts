@@ -97,10 +97,10 @@ function setDice(state: CombatEncounterState, colors: CombatDieColor[]): CombatE
     return { ...state, dice, draftedDieId: null, turn };
 }
 
-/** Drafts dice index 0 and plays `skillId`'s bottom action. */
-function draftAndPlay(state: CombatEncounterState, skillId: string, dieIndex = 0) {
+/** Drafts dice index 0 and plays `cardId`'s bottom action. */
+function draftAndPlay(state: CombatEncounterState, cardId: string, dieIndex = 0) {
     let s = draftStanceDie(state, state.dice[dieIndex].id).state;
-    const entry = s.hand.find(h => h.cardId === skillId);
+    const entry = s.hand.find(h => h.cardId === cardId);
     if (!entry) return { state: s, played: false } as const;
     const res = playCombatCard(s, { uid: entry.uid }, true);
     return { state: res.state, events: res.events, played: res.state !== s } as const;

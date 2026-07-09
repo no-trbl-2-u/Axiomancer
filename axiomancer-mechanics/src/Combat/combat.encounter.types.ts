@@ -344,7 +344,7 @@ export type CombatEvent =
     | { kind: 'conviction-gained'; amount: number; total: number; reason: 'unpicked-die' | 'read-win' | 'effect' }
     | { kind: 'stance-revealed'; phaseIndex: number; stance: Stance }
     | { kind: 'read-result'; stance: CombatDieColor; enemyStance: Stance; result: CombatReadResult }
-    | { kind: 'signature-cast'; skillId: SignatureSkillId; name: string; cost: number }
+    | { kind: 'signature-cast'; signatureId: SignatureSkillId; name: string; cost: number }
     | { kind: 'card-played'; cardId: string; useBottom: boolean; dieId: string | null;
         advantage: 'advantage' | 'neutral' | 'disadvantage'; colorMatch?: boolean }
     | { kind: 'effect-landed'; cardId: string; effectId: string; target: 'self' | 'enemy';

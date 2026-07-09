@@ -90,7 +90,6 @@ export function initializeCombat(player: Character, enemy: Enemy): CombatState {
         enemy: deepClone(enemy),
         playerChoice: {},
         enemyChoice: {},
-        log: [],
         combatResources: seeded,
     };
 }

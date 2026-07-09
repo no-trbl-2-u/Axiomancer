@@ -227,7 +227,7 @@ describe('skill engine — every combat-engine-owned mechanic kind is a NO-OP th
 
             const state: CombatState = {
                 active: true, phase: 'resolving', round: 1, friendshipCounter: 0,
-                player, enemy, playerChoice: {}, enemyChoice: {}, log: [],
+                player, enemy, playerChoice: {}, enemyChoice: {},
                 combatResources: { heart: 0, body: 5, mind: 0, fallacy: 0, paradox: 0 },
             };
             const res = executeCard(state, 'test-mech-skill', id => id === 'test-mech-skill' ? skill : getCardById(id), 'player');

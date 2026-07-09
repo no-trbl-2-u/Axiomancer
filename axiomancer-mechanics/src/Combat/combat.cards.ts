@@ -20,7 +20,7 @@ import type {
 import { getCardById } from '../Cards/cards.library';
 
 export type EffectLookup = (effectId: string) => Effect | undefined;
-export type CardLookup = (skillId: string) => Card | undefined;
+export type CardLookup = (cardId: string) => Card | undefined;
 
 /** Enemy-targeted effect payloads on a skill (`appliedTo: 'opponent'`). */
 function enemyEffects(skill: Card): CardCombatEffects[] {

@@ -118,7 +118,7 @@ describe('buildCombatDeck with curated loadout', () => {
 });
 
 describe('isCombatSynergySatisfied', () => {
-    const buildCard = (skillId: string) => toCombatCard(skillId, getCardById, lookupEffect);
+    const buildCard = (cardId: string) => toCombatCard(cardId, getCardById, lookupEffect);
 
     // spec 32 v3: no library card carries a synergy clause any more — the
     // machinery survives for sandbox/tuning experiments, so the fixtures are

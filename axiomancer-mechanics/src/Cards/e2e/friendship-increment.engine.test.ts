@@ -89,7 +89,7 @@ describe('Friendship increment skills', () => {
             expect(result.events).toContainEqual(
                 expect.objectContaining({
                     kind: 'friendship-incremented',
-                    skillId: soothe.id,
+                    cardId: soothe.id,
                     amount: 1,
                 }),
             );
@@ -105,7 +105,7 @@ describe('Friendship increment skills', () => {
             expect(result.events).toContainEqual(
                 expect.objectContaining({
                     kind: 'friendship-incremented',
-                    skillId: empathize.id,
+                    cardId: empathize.id,
                     amount: 2,
                 }),
             );

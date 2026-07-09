@@ -31,7 +31,6 @@ describe('Phase 130 — Constants and config verification', () => {
         it('Tri-Eyes (Normal anchor) keeps the Phase 138 befriend tuning', () => {
             expect(TriEyes.befriendabilityConfig).toBeDefined();
             expect(TriEyes.befriendabilityConfig?.hpGate?.belowPct).toBe(0.7); // Phase 138 tuning
-            expect(TriEyes.befriendabilityConfig?.requiredStances).toContain('mind');
             expect(TriEyes.befriendabilityConfig?.roundsThreshold).toBe(1); // Phase 138 tuning
             expect(TriEyes.friendshipReward).toBeDefined();
             expect(TriEyes.friendshipReward?.flagSet).toBe('befriended-tri-eyes');
@@ -40,7 +39,6 @@ describe('Phase 130 — Constants and config verification', () => {
         it('Lady Gabriella is befriendable on the mercy path', () => {
             expect(LadyGabriella.befriendabilityConfig).toBeDefined();
             expect(LadyGabriella.befriendabilityConfig?.hpGate?.belowPct).toBe(0.35);
-            expect(LadyGabriella.befriendabilityConfig?.requiredStances).toContain('heart');
             expect(LadyGabriella.befriendabilityConfig?.roundsThreshold).toBe(5);
             expect(LadyGabriella.friendshipReward).toBeDefined();
             expect(LadyGabriella.friendshipReward?.flagSet).toBe('befriended-lady-gabriella');
@@ -49,7 +47,6 @@ describe('Phase 130 — Constants and config verification', () => {
         it('Hasshaku-sama carries mid-band befriendability thresholds', () => {
             expect(HasshakuSama.befriendabilityConfig).toBeDefined();
             expect(HasshakuSama.befriendabilityConfig?.hpGate?.belowPct).toBe(0.4);
-            expect(HasshakuSama.befriendabilityConfig?.requiredStances).toContain('heart');
             expect(HasshakuSama.befriendabilityConfig?.roundsThreshold).toBe(3);
         });
     });

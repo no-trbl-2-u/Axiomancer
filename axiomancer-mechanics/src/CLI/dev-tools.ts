@@ -63,10 +63,10 @@ export function devSetStats(store: Store, stats: Partial<BaseStats>): DevResult 
     return { ok: true, detail: `Stats set to H:${next.heart} B:${next.body} M:${next.mind}` };
 }
 
-export function devLearnCards(store: Store, skillIds: string[] | 'all'): DevResult {
-    const ids = skillIds === 'all'
+export function devLearnCards(store: Store, cardIds: string[] | 'all'): DevResult {
+    const ids = cardIds === 'all'
         ? cardLibrary.map(s => s.id)
-        : skillIds;
+        : cardIds;
 
     const state = store.getState();
     const known = new Set(state.player.knownCards);
@@ -75,18 +75,18 @@ export function devLearnCards(store: Store, skillIds: string[] | 'all'): DevResu
     store.setState({
         player: { ...state.player, knownCards: [...known] },
     });
-    return { ok: true, detail: `${ids.length} skill(s) learned (total known: ${known.size})` };
+    return { ok: true, detail: `${ids.length} card(s) learned (total known: ${known.size})` };
 }
 
 /**
- * Grant/unlock named skills or all skills by writing knownCards.
- * (Phase 99 / ADR-0002 — skills are known, not equipped; the legacy
+ * Grant/unlock named cards or all cards by writing knownCards.
+ * (Phase 99 / ADR-0002 — cards are known, not equipped; the legacy
  * `devEquipCards` was removed in Phase 159.)
  */
-export function devUnlockCards(store: Store, skillIds: string[] | 'all'): DevResult {
-    const ids = skillIds === 'all'
+export function devUnlockCards(store: Store, cardIds: string[] | 'all'): DevResult {
+    const ids = cardIds === 'all'
         ? cardLibrary.map(s => s.id)
-        : skillIds;
+        : cardIds;
     const state = store.getState();
     const known = new Set(state.player.knownCards);
     for (const id of ids) known.add(id);
