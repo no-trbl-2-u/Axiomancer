@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Axiomancer digest — 2026-07-09</title>
+<style>
+:root {
+  color-scheme: light dark;
+  --bg: #0e1116; --fg: #d7dde5; --fg-strong: #f0f3f7; --muted: #6b7480;
+  --accent: #8ab4f8; --panel: #161b22; --card: #12171f; --border: #222833;
+  --row: #141a22; --code-bg: #1b212b; --th: #aeb7c2; --list-head: #9aa4b0;
+  --add: rgba(80,200,120,.16); --del: rgba(230,90,90,.16);
+}
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg: #f7f5ef; --fg: #33302a; --fg-strong: #1a160f; --muted: #6f6656;
+    --accent: #3a5db0; --panel: #efece3; --card: #fbfaf5; --border: #ddd7c9;
+    --row: #efece3; --code-bg: #e9e5d9; --th: #5c5344; --list-head: #6f6656;
+    --add: rgba(35,140,75,.16); --del: rgba(190,55,55,.16);
+  }
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--bg); color: var(--fg);
+  font: 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  -webkit-text-size-adjust: 100%;
+}
+.wrap { max-width: 46rem; margin: 0 auto; padding: 20px 18px 80px; }
+header.top {
+  position: sticky; top: 0; z-index: 5;
+  background: var(--bg); border-bottom: 1px solid var(--border); margin: 0 0 20px;
+}
+header.top .wrap { padding-top: 14px; padding-bottom: 14px; display: flex; align-items: baseline; gap: 14px; }
+header.top a.home, header.top .home { color: var(--accent); text-decoration: none; font-weight: 600; }
+header.top .crumb { color: var(--muted); font-size: 14px; font-variant-numeric: tabular-nums; }
+h1, h2, h3, h4 { line-height: 1.25; color: var(--fg-strong); }
+h1 { font-size: 26px; margin: 0 0 6px; }
+h2 { font-size: 19px; margin: 0; }
+a { color: var(--accent); }
+p { margin: 8px 0; }
+code { background: var(--code-bg); padding: 1px 6px; border-radius: 5px; font-size: 0.86em; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+pre { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; overflow-x: auto; }
+pre code { background: none; padding: 0; }
+.tablewrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+th { background: var(--panel); color: var(--th); font-weight: 600; white-space: nowrap; }
+tr:last-child td { border-bottom: none; }
+ul, ol { padding-left: 22px; }
+li { margin: 4px 0; }
+.muted { color: var(--muted); }
+
+.st { font-weight: 600; white-space: nowrap; }
+.st::before { content: ""; display: inline-block; width: .5em; height: .5em; border-radius: 50%; margin-right: .38em; background: currentColor; vertical-align: middle; }
+.st-ok { color: #4bb96a; }
+.st-neutral { color: var(--muted); }
+.st-warn { color: #d0a92b; }
+.st-bad { color: #e0574b; }
+
+.headline { font-size: 19px; color: var(--fg-strong); margin: 0 0 12px; }
+.counts { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 22px; }
+
+.chip {
+  display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: .04em;
+  text-transform: uppercase; padding: 2px 9px; border-radius: 999px;
+  color: #0b0d10; background: var(--cat, var(--accent)); white-space: nowrap;
+}
+.cat-mechanics { --cat: #d0a92b; }
+.cat-ui { --cat: #5aa9e6; }
+.cat-content { --cat: #7fc45a; }
+.cat-infra { --cat: #b08bf0; }
+.cat-balance { --cat: #e6864b; }
+
+.card {
+  background: var(--card); border: 1px solid var(--border);
+  border-left: 4px solid var(--cat, var(--accent));
+  border-radius: 10px; padding: 14px 18px; margin: 14px 0; scroll-margin-top: 72px;
+}
+.card-head { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.card-head h2 { font-size: 18px; }
+.field { margin: 6px 0; }
+.flabel {
+  display: inline-block; min-width: 3.2em; margin-right: 4px; color: var(--muted);
+  font-weight: 700; font-size: 12px; text-transform: uppercase; letter-spacing: .04em;
+}
+.commits { margin: 8px 0 2px; }
+.commit { font-size: 12px; }
+
+.panel { margin: 22px 0; scroll-margin-top: 72px; }
+.panel > h2 { padding-bottom: 6px; border-bottom: 1px solid var(--border); margin-bottom: 8px; }
+
+.diff {
+  border: 1px solid var(--border); border-radius: 8px; overflow-x: auto; margin: 12px 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; line-height: 1.5;
+  background: var(--bg);
+}
+.dl { padding: 0 12px; white-space: pre; }
+.dl.add { background: var(--add); }
+.dl.del { background: var(--del); }
+.dl.hunk { color: var(--accent); }
+.dl.meta { color: var(--muted); }
+
+figure.shotset { margin: 14px 0; }
+figure.shotset > figcaption { font-size: 14px; color: var(--fg); margin-bottom: 8px; }
+.shots { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+.shot { margin: 0; }
+.shot .role { font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); text-align: center; margin-bottom: 3px; }
+.shot img { width: 100%; height: auto; border: 1px solid var(--border); border-radius: 8px; display: block; }
+
+.entry-list { list-style: none; padding: 0; margin: 8px 0 0; }
+.entry-list li { margin: 0; border-bottom: 1px solid var(--border); }
+.entry-list a { display: block; padding: 14px 4px; text-decoration: none; color: var(--fg); }
+.entry-list a:hover { background: var(--row); }
+.entry-list .date { color: var(--accent); font-weight: 600; font-variant-numeric: tabular-nums; }
+.entry-list .head { color: var(--list-head); font-size: 14px; margin: 2px 0 6px; }
+footer.foot { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--border); color: var(--muted); font-size: 13px; }
+
+/* ── Hub (landing page) ──────────────────────────────────────────────── */
+.hub { display: grid; grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr)); gap: 14px; margin: 22px 0 0; }
+.hub a {
+  display: block; text-decoration: none; color: var(--fg);
+  background: var(--card); border: 1px solid var(--border);
+  border-left: 4px solid var(--hue, var(--accent));
+  border-radius: 12px; padding: 18px 20px; transition: background .12s, transform .12s;
+}
+.hub a:hover { background: var(--row); transform: translateY(-1px); }
+.hub .h-title { font-size: 19px; font-weight: 700; color: var(--fg-strong); margin: 0 0 4px; }
+.hub .h-sub { font-size: 14px; color: var(--muted); }
+.hub .h-glyph { font-size: 22px; line-height: 1; margin-bottom: 8px; display: block; }
+.hue-cards { --hue: #5aa9e6; }
+.hue-enemies { --hue: #e0574b; }
+.hue-effects { --hue: #b08bf0; }
+.hue-log { --hue: #d0a92b; }
+.hue-tuning { --hue: #3ec9b0; }
+
+/* ── Catalog: cards grid ─────────────────────────────────────────────── */
+.searchbar { margin: 14px 0 4px; }
+.searchbar input {
+  width: 100%; padding: 10px 14px; border-radius: 10px; font-size: 15px;
+  background: var(--card); color: var(--fg); border: 1px solid var(--border);
+}
+.count-note { color: var(--muted); font-size: 13px; margin: 6px 0 16px; }
+.grid-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr)); gap: 16px; }
+.gcard {
+  background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+  overflow: hidden; display: flex; flex-direction: column;
+}
+.gcard .art { aspect-ratio: 4 / 3; background: var(--panel); overflow: hidden; }
+.gcard .art img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.gcard .art.none { display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 26px; }
+.gcard .body { padding: 12px 14px 14px; }
+.gcard .name { font-weight: 700; color: var(--fg-strong); margin: 0 0 8px; }
+.gcard .statrow { margin: 0 0 8px; }
+
+/* ── Catalog: enemies ────────────────────────────────────────────────── */
+.grid-enemies { display: grid; grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr)); gap: 16px; }
+.ecard { background: var(--card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+/* Enemy paintings are alpha-matted (figures float on a keyed-out black), so a
+   solid black plate behind them reads as intended in both themes. */
+.ecard .portrait { aspect-ratio: 1 / 1; background: #000; overflow: hidden; }
+.ecard .portrait img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.ecard .portrait.none { display: flex; align-items: center; justify-content: center; color: #6b7480; font-size: 34px; }
+.ecard .body { padding: 12px 15px 15px; }
+.ecard .name { font-size: 18px; font-weight: 700; color: var(--fg-strong); margin: 0; }
+.ecard .sub { color: var(--muted); font-size: 13px; margin: 2px 0 10px; text-transform: capitalize; }
+.statrow { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 10px; }
+.stat { font-size: 12px; font-weight: 700; padding: 2px 9px; border-radius: 999px; background: var(--panel); border: 1px solid var(--border); color: var(--fg); white-space: nowrap; }
+.stat .k { color: var(--muted); font-weight: 600; margin-right: 3px; }
+.stat.hp { --sc: #e0574b; } .stat.body { --sc: #e6864b; } .stat.mind { --sc: #5aa9e6; } .stat.heart { --sc: #7fc45a; }
+.stat.hp, .stat.body, .stat.mind, .stat.heart { border-color: color-mix(in srgb, var(--sc) 55%, var(--border)); }
+.sec-label { font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 700; margin: 10px 0 5px; }
+.fights { font-size: 14px; margin: 0 0 4px; }
+.hint { font-size: 13px; color: var(--muted); font-style: italic; margin: 4px 0 0; }
+.skill { border-top: 1px solid var(--border); padding: 8px 0 0; margin: 8px 0 0; }
+.skill .sk-name { font-weight: 700; color: var(--fg-strong); font-size: 14px; }
+.skill .sk-text { font-size: 13px; color: var(--fg); margin: 2px 0 0; }
+.no-skills { font-size: 13px; color: var(--muted); }
+
+/* ── Catalog: effects ────────────────────────────────────────────────── */
+.eff-list { display: grid; gap: 10px; margin: 8px 0 0; }
+.eff {
+  display: grid; grid-template-columns: 3rem 1fr; gap: 14px; align-items: start;
+  background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px;
+}
+.eff .glyph {
+  width: 3rem; height: 3rem; border-radius: 10px; display: flex; align-items: center; justify-content: center;
+  font-size: 26px; line-height: 1; color: #0b0d10; font-weight: 700;
+  background: var(--gc, var(--accent)); box-shadow: inset 0 0 0 1px rgba(0,0,0,.15);
+}
+.eff .name { font-weight: 700; color: var(--fg-strong); margin: 0 0 6px; }
+.eff .statrow { margin: 0 0 6px; }
+
+/* ── Raw-stat mechanic lines (cards + effects) ───────────────────────── */
+.mods { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 3px; }
+.mods li {
+  margin: 0; font-size: 13px; line-height: 1.4; color: var(--fg);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  padding-left: 12px; position: relative;
+}
+.mods li::before { content: "›"; position: absolute; left: 0; color: var(--muted); }
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap"><a class="home" href="../log.html">← DevLog</a><span class="crumb">2026-07-09</span></div></header>
+<main class="wrap">
+<h1 id="headline">2026-07-09</h1>
+<p class="headline">The biggest single day since nexus adoption. The loop drained four</p>
+<div class="counts"><span class="chip cat-mechanics">2 mechanics</span><span class="chip cat-ui">1 UI</span><span class="chip cat-content">1 content</span><span class="chip cat-infra">3 infra</span><span class="chip cat-balance">2 balance</span></div>
+<section class="card cat-mechanics" id="phase-9-character-story-world-specs"><div class="card-head"><span class="chip cat-mechanics">mechanics</span><h2>Phase 9 — character/story/world specs</h2></div>
+<p class="field"><span class="flabel">What</span> verified the first real character/story/world specs</p>
+<p class="field"><span class="flabel">Why</span> each spec folder's template defines "the first real spec is</p>
+<p class="commits"><code class="commit">a5625f6b</code> <code class="commit">66eb6986</code></p>
+<p>(<code>C-01-the-sophist</code>, <code>W-01-aporia-labyrinth-continent</code>, <code>S-01-fishing-village-northern-forest-dilemmas</code>) already satisfy this row and recorded the phase as shipped. <code>*-01-*.md</code>" — all three already existed pre-tracking; the phase closed without new authoring.</p></section>
+<section class="card cat-mechanics" id="phase-10-cross-screen-integration-test-harness"><div class="card-head"><span class="chip cat-mechanics">mechanics</span><h2>Phase 10 — cross-screen integration test harness</h2></div>
+<p class="field"><span class="flabel">What</span> added Jest full-provider mounts + a Playwright web flow</p>
+<p class="field"><span class="flabel">Why</span> closed the cross-screen regression blind spot flagged in</p>
+<p class="commits"><code class="commit">7692758e</code> <code class="commit">31817335</code></p>
+<p>pinning the <code>ExplorationScreen</code> + <code>(tabs)/_layout</code> seam (<code>state/e2e/cross-screen-integration.engine.test.tsx</code> + <code>scripts/exploration-combat-roundtrip-e2e.mjs</code>). <code>plan/CURRENT-STATE.md</code> — hermetic per-screen tests were blind to the FIGHT-modal-unmount class of bug.</p></section>
+<section class="card cat-ui" id="phase-11-guided-first-night-rest-tutorial"><div class="card-head"><span class="chip cat-ui">UI</span><h2>Phase 11 — guided first-night rest tutorial</h2></div>
+<p class="field"><span class="flabel">What</span> a guided intro for the Rest encounter (The Night Watch), the</p>
+<p class="field"><span class="flabel">Why</span> GAMEPLAY_GAPS GAP-001 — no minigame had a guided first-time</p>
+<p class="commits"><code class="commit">1fb1d7f8</code> <code class="commit">7396093f</code></p>
+<p>smallest of the four unguided minigames. intro; hazard/cache/quest tutorials queued as follow-ups.</p></section>
+<section class="card cat-infra" id="phase-12-doc-sync-pass"><div class="card-head"><span class="chip cat-infra">infra</span><h2>Phase 12 — doc-sync pass</h2></div>
+<p class="field"><span class="flabel">What</span> collapsed the orphaned pre-monorepo <code>axiomancer-mechanics/spec.md</code></p>
+<p class="field"><span class="flabel">Why</span> the engine doc-drift AUDIT row is chronic — new surfaces</p>
+<p class="commits"><code class="commit">c011596a</code> <code class="commit">cb5c6467</code> <code class="commit">b778a0c3</code></p>
+<p>duplicate to a pointer, fixed <code>docs/combat.md</code>'s dead-API references (<code>basePower</code>/<code>chipHp</code>/<code>DIRECT_DAMAGE_WEIGHT</code>/<code>GOLD_CARD_IDS</code>) against spec 32 v3, and documented the previously-undocumented rank/rarity/ cardType axis. outrun the docs every few weeks; this closed the current backlog.</p></section>
+<section class="card cat-balance" id="pr-41-thematic-rebalance-of-all-10-preset-decks-owner-direct"><div class="card-head"><span class="chip cat-balance">balance</span><h2>PR #41 — thematic rebalance of all 10 preset decks (owner, direct)</h2></div>
+<p class="field"><span class="flabel">What</span> the 21-agent card-rebalance PR merged after <code>verify</code> caught</p>
+<p class="field"><span class="flabel">Why</span> direct response to the URGENT "combat challenge-gradient</p>
+<p class="commits"><code class="commit">7248c7a2</code> <code class="commit">(merge)</code> <code class="commit">62c27254</code> <code class="commit">2822db3c</code> <code class="commit">7714d1b9</code></p>
+<p>and fixed two real regressions pre-merge (<code>debuff_kindling_ember</code> missing from the v3 support-tag registry; an inverted <code>alignment-authoring</code> assertion) plus a Grace <code>swayCapitulates()</code> follow-up fix. retune" candidate — early/mid/late win rates were pinned near 1.00; this moved them to 53.75→68.75% / 42.5→62.5% / 31.25→43.75% against a 90 / 75-80 / 60-70 target.</p></section>
+<section class="card cat-balance" id="win-path-scaling-5-of-7-battle-lab-round-2-items-shipped-owner-direct"><div class="card-head"><span class="chip cat-balance">balance</span><h2>Win-path scaling — 5 of 7 Battle Lab round 2 items shipped (owner, direct)</h2></div>
+<p class="field"><span class="flabel">What</span> per-preset floors + dominance ceiling, a 70/70 card</p>
+<p class="field"><span class="flabel">Why</span> continuation of the challenge-gradient retune — the burst-cap</p>
+<p class="commits"><code class="commit">43088f6f</code> <code class="commit">60b1e26b</code> <code class="commit">8f646629</code> <code class="commit">8d853dcb</code> <code class="commit">679ba168</code> <code class="commit">9eaaf8d7</code> <code class="commit">63cfb3ba</code></p>
+<p>effectiveness lint, keyword-atlas gate marks, <code>RUPTURE</code>/<code>REAP-ALL</code> burst caps scaled to <code>max(floor, 0.25 × enemy maxHealth)</code>, and the CONCEDE/CAPITULATE win-path scaling item (boss rung-regrowth capped at 2× natural). Oratory/standstill still hit the 1.00 ceiling late — reclassified as a <code>/deck-tuning</code> BACKFIRE-tuning item, not an engine threshold; DoT persistence-by-stack and the theme pressure valve remain open. formula alone erased the Penitent late-game regression (0.02→0.40).</p>
+<div class="diff" role="img" aria-label="code diff"><div class="dl hunk">@@ axiomancer-mechanics/src/Combat/combat.engine.ts @@</div><div class="dl del">-                const burst = Math.min(RUPTURE_BURST_CAP, r.ruptureMarks * consumed.stacks);</div><div class="dl add">+                const burst = Math.min(ruptureBurstCap(enemy.maxHealth), r.ruptureMarks * consumed.stacks);</div></div></section>
+<section class="panel" id="refactor-skill-card-terminology-purge-owner-direct-prs-48-49-50"><h2>[refactor] "skill" → "card" terminology purge (owner, direct — PRs #48, #49, #50)</h2>
+<p><strong>What:</strong> three PRs retired the last vestiges of the pre-Hazard-Pattern "skill" combat system: unified <code>skill</code>→<code>card</code> across the combat system and deleted the dead <code>src/Skills/</code> ability system (PR #48); dropped the save-migration chain and the <code>physicalSkill</code>/<code>mentalSkill</code>/ <code>emotionalSkill</code> derived-stat axis (PR #49); deleted the dead <code>CombatState.log</code> befriend machinery — <code>requiredCardUse</code> was authored on zero enemies, <code>requiredStances</code> on nine but never evaluated true under the Hazard-Pattern shim's always-empty log — and renamed the residual <code>skillId</code> to <code>cardId</code>/<code>signatureId</code> by what it actually holds (PR #50). A fourth PR (<code>ci-autofix</code>) caught and fixed a stale <code>learningRequirement.level</code> reference in card-editor within three minutes of the red run. <code>plan/cleanup/legacy-skill-removal.md</code> tracks WI-2 through WI-6 as the remaining backlog (effect content, data enums, one-offs, comments, docs); the only surviving "skill" is now <code>SignatureSkill</code>. <strong>Why:</strong> the rename had been chased piecemeal for weeks; this was the first pass with a written definition of done (<code>grep -rioE "\bskills?\b"</code> returns zero non-<code>SignatureSkill</code> hits). <strong>Commits:</strong> 5d5fcca7, 911dd3c4, 4e9d9d01, ae48ae2a, ffab2cc5, 8d6baba0, 44c9bb97, f3aa8900, 9fa7f670, f5a96468, 55ee82a3, 51479b05, d0c7fdd9</p></section>
+<section class="card cat-infra" id="actions-cron-throttle-owner-direct"><div class="card-head"><span class="chip cat-infra">infra</span><h2>Actions cron throttle (owner, direct)</h2></div>
+<p class="field"><span class="flabel">What</span> <code>march</code> cron dropped from hourly to every 6h, <code>preview-build</code></p>
+<p class="field"><span class="flabel">Why</span> hit 90% of the monthly Actions-minute quota within days of</p>
+<p class="commits"><code class="commit">47259bec</code></p>
+<p>from 2×/day to 1×/day, and nine weekly tuning/report crons disabled (workflow_dispatch still available) until the next billing cycle. turning the crons on.</p></section>
+<section class="card cat-content" id="card-themes-enchantment-fixes-hallmark-terminology-owner-direct"><div class="card-head"><span class="chip cat-content">content</span><h2>Card themes, enchantment fixes, HALLMARK terminology (owner, direct)</h2></div>
+<p class="field"><span class="flabel">What</span> tagged cards with their originating deck-preset theme (for</p>
+<p class="field"><span class="flabel">Why</span> small follow-through on the Themed Deck Library v3 /</p>
+<p class="commits"><code class="commit">347bfc3d</code> <code class="commit">dfd8d162</code> <code class="commit">222ad91f</code> <code class="commit">bd961694</code></p>
+<p>the catalog export), fixed the FREE-line enchantment/disenchant effects, and corrected "signature" prose to HALLMARK terminology across agents, commands, and the card-editor face. enchantment-redesign work from the prior digest.</p></section>
+<section class="card cat-infra" id="devlog-restructure-tuning-lab-section-owner-direct"><div class="card-head"><span class="chip cat-infra">infra</span><h2>DevLog restructure — tuning-lab section (owner, direct)</h2></div>
+<p class="field"><span class="flabel">What</span> reorganized the devlog into a cleaner structure and added a</p>
+<p class="field"><span class="flabel">Why</span> the round-2 conclusions previously lived only in an</p>
+<p class="commits"><code class="commit">d1e86174</code> <code class="commit">29b8a5a3</code> <code class="commit">36b33b1f</code> <code class="commit">68c2ccbf</code></p>
+<p><code>devlog/tuning-lab/</code> section holding the Battle Lab round 2 HTML artifacts. out-of-repo HTML artifact; this gives them a permanent, linkable home next to the atlas gate-mark update (win-path scaling item 7).</p></section>
+<section class="panel" id="while-you-were-out"><h2>While you were out</h2>
+<div class="tablewrap"><table><thead><tr><th>Time (UTC)</th><th>Verb</th><th>Outcome</th></tr></thead><tbody><tr><td>2026-07-08 11:12</td><td>merge (owner, PR #41)</td><td>thematic rebalance of all 10 preset decks, two <code>verify</code>-caught regressions fixed pre-merge</td></tr><tr><td>2026-07-08 11:17 → 15:07</td><td>owner (direct, Battle Lab round 2)</td><td>win-path-scaling plan authored; items 4, 6, 7, 2, 1 <span class="st st-ok">shipped</span> in sequence</td></tr><tr><td>2026-07-08 11:58 → 12:07</td><td>march</td><td>critique <span class="st st-ok">pass</span> 7 dispatched in-tick</td></tr><tr><td>2026-07-08 12:05</td><td>critique <span class="st st-ok">pass</span> 7</td><td>0 findings</td></tr><tr><td>2026-07-08 14:42 → 14:53</td><td>march</td><td>phase 9 <span class="st st-ok">shipped</span></td></tr><tr><td>2026-07-08 14:55 → 15:07</td><td>owner (direct)</td><td>tuning-lab devlog pages added</td></tr><tr><td>2026-07-08 16:51 → 17:03</td><td>march</td><td>critique <span class="st st-ok">pass</span> 8 — 0 findings, 4th consecutive playwright block</td></tr><tr><td>2026-07-08 18:36 → 20:27</td><td>owner (direct)</td><td>card theme tagging, card edits, enchantment fixes, HALLMARK terminology <span class="st st-ok">pass</span></td></tr><tr><td>2026-07-08 18:49 → 19:27</td><td>march</td><td>phase 10 <span class="st st-ok">shipped</span> (cross-screen integration harness)</td></tr><tr><td>2026-07-08 20:38 → 20:49</td><td>march</td><td>critique <span class="st st-ok">pass</span> 9 — 0 findings, 5th consecutive playwright block</td></tr><tr><td>2026-07-08 22:00 → 23:53</td><td>owner (direct, PRs #48/#49)</td><td>skill→card purge waves 1-2: combat system unified, save-migration + Skill stat axis dropped</td></tr><tr><td>2026-07-08 22:18 → 22:42</td><td>march</td><td>phase 11 <span class="st st-ok">shipped</span> (rest tutorial)</td></tr><tr><td>2026-07-08 22:51</td><td>ci (owner, direct)</td><td>Actions cron schedules throttled — 90% of monthly minute quota hit</td></tr><tr><td>2026-07-08 23:31 → 23:49</td><td>march</td><td>phase 12 <span class="st st-ok">shipped</span> (doc-sync <span class="st st-ok">pass</span>)</td></tr><tr><td>2026-07-09 00:15 → 00:18</td><td>ci-autofix (PR #48 branch)</td><td><code>verify-mechanics</code>/<code>verify-card-editor</code> red — stale <code>learningRequirement.level</code> caught and fixed in 3 minutes</td></tr><tr><td>2026-07-09 00:22 → 01:00</td><td>owner (direct, PR #50)</td><td>WI-1 — dead <code>CombatState.log</code> befriend machinery retired; residual <code>skillId</code> renamed</td></tr><tr><td>2026-07-09 01:25 → 01:31</td><td>owner (direct)</td><td>phases 18-21 briefs added — equipment/signature refactor epic queued</td></tr><tr><td>2026-07-09 10:00 → 10:10</td><td>march</td><td><span class="st st-neutral">no-op</span> tick</td></tr><tr><td>2026-07-09 11:34 (this run)</td><td>night</td><td>digest — breadth check needed the same manual Playwright browser install as every prior night run</td></tr></tbody></table></div>
+<p>Build-plan queue (<code>plan/steps/01_build_plan.md</code>): 14/22 shipped (phases 0, 14, 1-12) — four shipped by the loop since yesterday (9, 10, 11, 12); phases 18-21 (equipment/signature refactor epic) newly queued by the owner, bringing pending to 8 (13, 15-21). <code>plan/AUDIT.md</code> 7 pending (unchanged). <code>plan/CRITIQUE.md</code> 3 pending (same recurring rows, now at critique pass 9 on the playwright block). <code>plan/PHASE_CANDIDATES.md</code> 9 pending (<code>/expand</code> still hasn't run since the 2026-07-03 seed). No open <code>triage:needs-user</code> or <code>loop:do</code> issues. Deploy gate: no gated workflow for HEAD yet (grace window) — nothing to check. Breadth check (<code>npm run e2e:minigames</code>, browser installed by hand): hazard, combat, gathering, encounter-routing, exploration-roundtrip — ALL PASS.</p></section>
+<section class="panel" id="needs-you"><h2>Needs you</h2>
+<ul><li><strong>The night workflow still never installs Playwright's browser.</strong></li></ul>
+<p><code>plan/AUDIT.md</code> row [3.2] is unchanged — worked around by hand again this run, as every prior night run. <code>/iterate</code> has not picked it up despite an <code>impact 4 / ease 8</code> score that should make it a near-top-of-queue drain target.</p>
+<ul><li>**The playwright-permissions gap is now a fifth consecutive</li></ul>
+<p>recurrence** (passes 5-9), unchanged since the last digest. <code>plan/CRITIQUE.md</code> still carries this as <code>[needs-user-call]</code> awaiting an <code>/oversight</code> decision on the grant-propagation mechanism rather than a 10th identical pass.</p>
+<ul><li><strong>Oratory/standstill still hit the 1.00 win-rate ceiling late-game</strong></li></ul>
+<p>after 5 of 7 win-path-scaling items shipped. Per the tuning doc this is now scoped as a <code>/deck-tuning</code> BACKFIRE-tuning item rather than an engine-threshold fix — flagging so it doesn't silently drop off between the tuning doc and the forge's queue.</p>
+<ul><li><strong>Actions minutes are throttled until the next billing cycle</strong> —</li></ul>
+<p><code>march</code> is now every 6h (was hourly) and nine weekly tuning/report crons are <code>workflow_dispatch</code>-only. Loop cadence and the tuning-loop cadence are both slower than the standing rules assume until this lifts; worth a deliberate call on whether any of the nine disabled crons should be prioritized back on first.</p>
+<ul><li>**<code>plan/cleanup/legacy-skill-removal.md</code> WI-2 through WI-6 are open</li></ul>
+<p>backlog** (inert <code>*Skill</code> effect content, the <code>World</code> reward-kind enum, <code>Enemy.skills</code> rename, a ~1,100-mention comment sweep, and a ~111-file docs sweep) — sequenced but unscheduled; a real drain target once <code>/iterate</code> has room.</p></section>
+<section class="panel" id="tuning-proposals"><h2>Tuning proposals</h2>
+<p>None filed by digest this pass (in scope: loop-gate mistuning only — game-balance tuning routes through <code>/expand</code> or the domain tuning skills). The Actions-minute throttle above is an operational capacity change already applied by the owner directly, not a gate constant this loop can propose against.</p></section>
+<footer class="foot">Axiomancer DevLog &middot; generated by <code>scripts/build-devlog.mjs</code></footer>
+</main>
+</body>
+</html>
