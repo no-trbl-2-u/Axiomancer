@@ -107,7 +107,7 @@ solely from the worn loadout, so the slot model IS the wear-cap and the
 build choice (2 × 2 × C(4,3) = 16 loadouts). Briefs carry the full
 decision log (see each phase file).
 
-- [ ] Phase 18 — 5-slot equipment model (weapon / armor / accessory ×3).
+- [x] Phase 18 — 5-slot equipment model (weapon / armor / accessory ×3).
       Collapse `EquipmentSlot` 7 → 3; `Character.equipment` becomes an
       `EquipmentLoadout { weapon, armor, accessories[≤3] }` with
       `SLOT_CAPACITY` semantics (fill-first-free, guarded no-op when the
@@ -120,6 +120,7 @@ decision log (see each phase file).
       character screen renders the 5 rows (both; breaking barrel change —
       all three gates) — brief:
       `plan/phases/phase_18_equipment_slot_consolidation.md`
+      — `refactor(mechanics): 5-slot equipment model — phase 18` (5e4ca6e0)
 - [ ] Phase 19 — Equipment-granted signatures + the 8 signet relics
       (retire archetype gating). Add `grantsSignature` to equipment and
       the 8 fixed relics typed into the phase-18 slots (2 weapon / 2
