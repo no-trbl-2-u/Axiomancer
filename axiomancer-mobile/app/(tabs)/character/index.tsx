@@ -69,9 +69,9 @@ export default function CharacterScreen() {
     });
   }, [store]);
 
-  // Learn-skill pass — LEVEL UP opens the stat ledger with the
-  // learn-skill modal stacked on top: one pick of three qualifying
-  // skills per level gained (the engine applies stacked level-ups in
+  // Learn-card pass — LEVEL UP opens the stat ledger with the
+  // learn-card modal stacked on top: one pick of three qualifying
+  // cards per level gained (the engine applies stacked level-ups in
   // one dispatch, so a multi-level XP dump queues multiple picks).
   // Offers regenerate after each pick; FORGO spends a pick on nothing.
   const [cardPicksRemaining, setCardPicksRemaining] = useState<number>(0);
@@ -106,8 +106,8 @@ export default function CharacterScreen() {
     });
   }, [actions]);
   const onPickCardOffer = useCallback(
-    (skillId: string) => {
-      actions.learnCard(skillId);
+    (cardId: string) => {
+      actions.learnCard(cardId);
       advanceCardPick();
     },
     [actions, advanceCardPick],
@@ -231,7 +231,7 @@ export default function CharacterScreen() {
         />
       )}
 
-      {/* Learn-skill modal — stacks above the stat ledger (zIndex 60
+      {/* Learn-card modal — stacks above the stat ledger (zIndex 60
           vs the LevelUpModal's 50) until every pick is spent. */}
       {cardPicksRemaining > 0 && cardOffers.length > 0 && (
         <LearnCardModal
@@ -441,29 +441,29 @@ export default function CharacterScreen() {
           2026-06) — equipment lives in the SATCHEL tab; the SELF sheet
           keeps to identity + stats so it fits one screen. */}
 
-      {/* Skills */}
-      {vm.skills.length > 0 && (
+      {/* Cards */}
+      {vm.cards.length > 0 && (
         <View style={styles.section}>
           <SectionLabel size={13}>✠ FALLACIES &amp; PARADOXES</SectionLabel>
           <View style={styles.cardsGrid}>
-            {vm.skills.map((s) => (
+            {vm.cards.map((s) => (
               // Phase 74 follow-up walkthrough Tick 2: wrap each
-              // skill card in a TooltipTarget pointing at the
-              // existing kind:'skill' content (Phase 75 authored
+              // card card in a TooltipTarget pointing at the
+              // existing kind:'card' content (Phase 75 authored
               // — engine description + cost/stance footnote).
-              // vm.skills is currently dead surface ([] in the
+              // vm.cards is currently dead surface ([] in the
               // presenter); the wire-up is forward-looking.
               <TooltipTarget
                 key={s.id || s.name}
-                kind="skill"
+                kind="card"
                 id={s.id}
-                accessibilityLabel={`Explain ${s.name} skill`}
+                accessibilityLabel={`Explain ${s.name} card`}
                 accessibilityHint="tap to read description"
-                testID={`self-skill-${s.id || s.name}`}
+                testID={`self-card-${s.id || s.name}`}
               >
                 <View
                   style={[
-                    styles.skillCard,
+                    styles.cardTile,
                     {
                       borderColor: s.category === 'paradox' ? AXM.sulfur : AXM.parchment,
                       borderStyle: s.category === 'paradox' ? 'solid' : 'dashed',
@@ -473,7 +473,7 @@ export default function CharacterScreen() {
                   <StanceGlyph kind={s.stanceKey} size={16} color={AXM.bone} />
                   <View style={styles.flexOne}>
                     <Text style={styles.cardName}>{s.name}</Text>
-                    <Text style={[styles.skillCat, { color: s.category === 'paradox' ? AXM.sulfur : AXM.parchment }]}>
+                    <Text style={[styles.cardCat, { color: s.category === 'paradox' ? AXM.sulfur : AXM.parchment }]}>
                       {s.category.toUpperCase()}
                     </Text>
                   </View>
@@ -566,9 +566,9 @@ const useStyles = makeStyles((AXM) => ({
   bloodText: { color: AXM.blood },
   flexOne: { flex: 1 },
   marginTop8: { marginTop: 5 },
-  skillCard: { width: '48%', borderWidth: 2, padding: 4, paddingHorizontal: 6, backgroundColor: AXM.bg, flexDirection: 'row', alignItems: 'center', gap: 6 },
+  cardTile: { width: '48%', borderWidth: 2, padding: 4, paddingHorizontal: 6, backgroundColor: AXM.bg, flexDirection: 'row', alignItems: 'center', gap: 6 },
   cardName: { fontFamily: FONTS.gothic, fontSize: 12, color: AXM.parchment, lineHeight: 14 },
-  skillCat: { fontFamily: FONTS.mono, fontSize: 8, letterSpacing: 1 },
+  cardCat: { fontFamily: FONTS.mono, fontSize: 8, letterSpacing: 1 },
   poolsCard: { marginTop: 3, backgroundColor: AXM.panelBg, borderWidth: 1, borderColor: AXM.ash, paddingVertical: 5, paddingHorizontal: 12, gap: 4 },
   poolRow: {},
   poolHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 2 },

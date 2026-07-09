@@ -2,11 +2,11 @@
  * Sandbox card registry — the deck-forge experimentation surface.
  *
  * A module-level mutable registry that lets balance loops (the `/deck-tuning`
- * skill, the playtest CLI) trial NEW experimental cards and numeric OVERRIDES
+ * card, the playtest CLI) trial NEW experimental cards and numeric OVERRIDES
  * of library cards without touching `cards.library.ts`. The library's
  * `getCardById` consults this registry FIRST, so a registered sandbox card is
  * live everywhere cards are looked up — deck building, `toCombatCard`
- * projection, and skill execution — with zero engine changes.
+ * projection, and card execution — with zero engine changes.
  *
  * Doctrine: status effects are the MAIN fun and the EFFICIENT path to dropping
  * enemy HP. The sandbox exists so new status-applying cards can be A/B-tested

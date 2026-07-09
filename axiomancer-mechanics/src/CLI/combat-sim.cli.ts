@@ -42,9 +42,9 @@ const seed = Number(flag('seed') ?? '1');
 const loadout = (flag('loadout') ?? 'slippery-slope,brace-for-impact').split(',').map(s => s.trim()).filter(Boolean);
 const only = flag('enemy');
 
-function player(skills: string[]): Character {
+function player(cards: string[]): Character {
     const p = deepClone(Player);
-    p.knownCards = skills.slice();
+    p.knownCards = cards.slice();
     p.baseStats = { heart: 10, body: 10, mind: 10 };
     p.health = 150;
     p.maxHealth = 150;

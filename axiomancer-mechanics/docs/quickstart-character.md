@@ -23,7 +23,7 @@ const hero = createCharacter({
 import { buildCharacterFromPreset, getPresetById } from 'axiomancer-mechanics';
 
 const sage = buildCharacterFromPreset('sage');
-// Level 15, pre-equipped gear, full skill roster
+// Level 15, pre-equipped gear, full card roster
 // Presets: 'apprentice' (L1), 'wanderer' (L8), 'sage' (L15)
 ```
 
@@ -39,7 +39,7 @@ const upgraded = allocateStatPoint(hero, 'mind');
 // upgraded.availableStatPoints decremented by 1
 ```
 
-## Learn a skill
+## Learn a card
 
 ```typescript
 import { learnCard, getAvailableCards } from 'axiomancer-mechanics';
@@ -49,7 +49,7 @@ const available = getAvailableCards(hero, hero.knownCards);
 
 // Learn if requirements met
 const result = learnCard(hero, 'false-dilemma');
-// result.character has the skill in knownCards; there is no equipped-skill gate (ADR-0002)
+// result.character has the card in knownCards; there is no equipped-card gate (ADR-0002)
 ```
 
 ## Equip items

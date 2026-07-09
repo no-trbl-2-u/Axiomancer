@@ -116,7 +116,7 @@ distinct philosophical positions, each with a representative
 philosopher, literary character, and three characteristic logical
 fallacies that could serve as 'spells' or abilities in your RPG
 system"), the fallacies are reserved as content fuel for a future
-skill/effect/spell phase. See `plan/phases/phase_42_philosophical_alignment.md`
+card/effect/spell phase. See `plan/phases/phase_42_philosophical_alignment.md`
 "Follow-ups" for the planned content arcs.
 
 ## Authoring deltas (Phase 43)
@@ -194,7 +194,7 @@ directions across a starting-area playthrough.
 ## Authoring gates (Phase 46)
 
 Phase 46 introduces `AlignmentGate` — a single-clause predicate that
-locks dialogue choices and skill learning behind a position on the
+locks dialogue choices and card learning behind a position on the
 alignment cube.
 
 ```ts
@@ -214,7 +214,7 @@ The predicate sits on two existing requirement shapes:
   field implicitly hides the gated content.
 
 - `SkillLearningRequirement.requiresAlignment?: AlignmentGate` —
-  evaluated by `meetsLearningRequirement(character, skill, alignment?)`.
+  evaluated by `meetsLearningRequirement(character, card, alignment?)`.
   `getAvailableSkills` and `learnSkill` accept an optional `alignment`
   parameter and thread it through. The reducer's `LEARN_SKILL` action
   reads `state.philosophicalAlignment` automatically.
@@ -235,13 +235,13 @@ range form if real content authoring needs it.
 
 ### Phase 46 first-pass authoring
 
-Authored gates (`src/Skills/skill.library.ts` +
+Authored gates (`src/Cards/card.library.ts` +
 `src/World/Continents/Coastal-Village/maps.ts`):
 
 | Surface | Author | Gate | Rationale |
 |---|---|---|---|
-| Skill | `nirvana-fallacy` | `outlook lte -34` | Schopenhauer's metaphysics; only learnable by a pessimistic caster. |
-| Skill | `appeal-to-fear` | `scope gte 34` | Lovecraftian indifference; only learnable by a transcendent-leaning caster. |
+| Card | `nirvana-fallacy` | `outlook lte -34` | Schopenhauer's metaphysics; only learnable by a pessimistic caster. |
+| Card | `appeal-to-fear` | `scope gte 34` | Lovecraftian indifference; only learnable by a transcendent-leaning caster. |
 | Dialogue | Old Marrow `offer` "You speak like someone who already lost everything" | `outlook lte -34` | Two-broken-people recognition — gate accepts the quest with a different framing. |
 | Dialogue | Coastal Beggar `greet` "Sit with them a while. Their grief is part of yours." | `scope gte 34` | Transcendent player hears the beggar as part of the larger weave. |
 

@@ -140,7 +140,7 @@ describe('buildStagePlayer', () => {
         }
     });
 
-    it('knows exactly the stage-eligible pool as its skills', () => {
+    it('knows exactly the stage-eligible pool as its cards', () => {
         for (const id of COMBAT_STAGE_ORDER) {
             const stage = COMBAT_STAGE_PROFILES[id];
             const player = buildStagePlayer(stage);

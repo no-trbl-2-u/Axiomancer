@@ -30,9 +30,9 @@ const BASE_PROPS = {
 
 // Phase 88: derived stats for ribbon testing
 const DERIVED_STATS = {
-    heart: { attack: 12, skill: 10, defense: 8 },
-    body: { attack: 14, skill: 8, defense: 11 },
-    mind: { attack: 9, skill: 13, defense: 7 },
+    heart: { attack: 12, card: 10, defense: 8 },
+    body: { attack: 14, card: 8, defense: 11 },
+    mind: { attack: 9, card: 13, defense: 7 },
 };
 
 const PROPS_WITH_DERIVED = {

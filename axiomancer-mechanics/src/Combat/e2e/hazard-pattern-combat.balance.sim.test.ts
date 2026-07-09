@@ -24,9 +24,9 @@ import { simulateHazardPatternCombat, runOneEncounter } from '../combat.encounte
 const RUNS = 80;
 const SEED = 1;
 
-function loadout(skills: string[]): Character {
+function loadout(cards: string[]): Character {
     const p = deepClone(Player);
-    p.knownCards = skills.slice();
+    p.knownCards = cards.slice();
     p.baseStats = { heart: 10, body: 10, mind: 10 };
     p.health = 150;
     p.maxHealth = 150;

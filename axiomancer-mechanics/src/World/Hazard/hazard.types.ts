@@ -622,7 +622,7 @@ export interface HazardSessionState {
 }
 
 // Round-shape constants now live in the central tuning module so the
-// hazard-tuning skill has one file to edit. Re-exported here under their
+// hazard-tuning card has one file to edit. Re-exported here under their
 // long-standing names for every existing import site.
 export {
     HAZARD_DICE_COUNT,

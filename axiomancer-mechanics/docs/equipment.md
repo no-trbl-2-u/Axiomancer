@@ -43,7 +43,7 @@ interface Equipment extends BaseItem {
     passiveEffects?:      string[];                 // effect IDs applied as permanent ActiveEffects
     onHitEffects?:        EquipmentProcTrigger[];   // surfaced into the Spec 03 proc roll on attack
     onDefendEffects?:     EquipmentProcTrigger[];   // surfaced into the Spec 03 proc roll on defend
-    critStyle?:           'double' | 'pierce';      // default crit style (per-skill override wins)
+    critStyle?:           'double' | 'pierce';      // default crit style (per-card override wins)
     resourceInteraction?: ResourceInteraction;      // optional combat-start tokens + generation bonuses
 }
 
@@ -253,7 +253,7 @@ ensuring status-effect play is the expected affix outcome on these slots.
 | Affix id | Word | Slots | Mod ids | Rarity | Min lvl |
 |----------|------|-------|---------|--------|---------|
 | `pfx-keen` | Keen | weapon | `wm-flat-damage` | common | 1 |
-| `pfx-honed` | Honed | weapon | `wm-skill-edge` | common | 1 |
+| `pfx-honed` | Honed | weapon | `wm-card-edge` | common | 1 |
 | `pfx-vicious` | Vicious | weapon | `wm-flat-damage`, `wm-crit-rate` | uncommon | 10 |
 | `pfx-savage` | Savage | weapon | `wm-crit-damage` | rare | 20 |
 | `pfx-vampiric` | Vampiric | weapon | `wm-lifesteal` | uncommon | 1 |
@@ -510,7 +510,7 @@ canonical; the tables below mirror it.
 | `wm-lifesteal` | Vampiric Strike | `uncommon_mod` | 1 → [1,2], 10 → [2,3], 20 → [3,5] |
 | `wm-body-gen` | Body Resonance | `uncommon_mod` | 1 → [1,1], 10 → [1,2], 20 → [2,3] |
 | `wm-exploit` | Exploit Weakness | `rare_mod` | 10 → [2,4], 20 → [5,8] |
-| `wm-skill-edge` | Honed Technique | `common_mod` | 1 → [1,2], 10 → [3,5], 20 → [6,10], 30 → [11,16], 40 → [17,24], 50 → [25,34] |
+| `wm-card-edge` | Honed Technique | `common_mod` | 1 → [1,2], 10 → [3,5], 20 → [6,10], 30 → [11,16], 40 → [17,24], 50 → [25,34] |
 | `wm-crit-rate` | Cruel Point | `uncommon_mod` | 10 → [1,1], 30 → [1,1] |
 | `wm-crit-damage` | Savage Bite | `rare_mod` | 20 → [1,1], 40 → [1,1] |
 | `wm-mind-rend` | Mind Render | `rare_mod` | 20 → [3,6], 30 → [7,11], 40 → [12,18], 50 → [19,27] |
@@ -692,7 +692,7 @@ is responsible for decrementing the inventory stack via the existing
 `useConsumable` inventory reducer.
 
 Per Spec 05b Q3 (option B) philosophical tokens (`fallacy` / `paradox`) remain
-skill-only. Library authors should restrict `resourceGrant` to `heart` /
+card-only. Library authors should restrict `resourceGrant` to `heart` /
 `body` / `mind` keys even though the type permits the full union.
 
 ## Reducers

@@ -2,7 +2,7 @@
  * Phase 93 — Damage-resist primitive
  *
  * Completes Phase 80 direction (a) "damage rolls separately + applies its own
- * resistance." Skills' damage output is reduced by the target's resistance
+ * resistance." Cards' damage output is reduced by the target's resistance
  * stats before being applied.
  *
  * Direction (a) pure split: effects always land (Phase 80 shipped), damage

@@ -3,7 +3,7 @@
  *
  * Four buttons — `L1` / `L15` / `L30` / `L50` — one per
  * `PLAYER_TIER_PRESETS` row. Press rebuilds the player at that level
- * with level-relevant skills and equipment via the engine's
+ * with level-relevant cards and equipment via the engine's
  * `buildCharacterFromPreset` (through `actions.applyPlayerTierPreset`).
  *
  * This is the finer ladder T asked for the Kid's mobile evidence

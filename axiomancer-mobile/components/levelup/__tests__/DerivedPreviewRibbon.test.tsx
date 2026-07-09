@@ -15,15 +15,15 @@ import React from 'react';
 import { DerivedPreviewRibbon } from '@/components/levelup/DerivedPreviewRibbon';
 
 const BASE_CURRENT = {
-    heart: { attack: 12, skill: 10, defense: 8 },
-    body: { attack: 14, skill: 8, defense: 11 },
-    mind: { attack: 9, skill: 13, defense: 7 },
+    heart: { attack: 12, card: 10, defense: 8 },
+    body: { attack: 14, card: 8, defense: 11 },
+    mind: { attack: 9, card: 13, defense: 7 },
 };
 
 const PREVIEW_WITH_DELTAS = {
-    heart: { attack: 14, skill: 12, defense: 9 },
-    body: { attack: 16, skill: 10, defense: 13 },
-    mind: { attack: 11, skill: 15, defense: 8 },
+    heart: { attack: 14, card: 12, defense: 9 },
+    body: { attack: 16, card: 10, defense: 13 },
+    mind: { attack: 11, card: 15, defense: 8 },
 };
 
 describe('DerivedPreviewRibbon: layout and headers', () => {
@@ -104,7 +104,7 @@ describe('DerivedPreviewRibbon: allocations mode', () => {
     it('shows current value when hasAllocations=true but no delta', () => {
         const noDeltaPreview = {
             ...BASE_CURRENT,
-            heart: { ...BASE_CURRENT.heart, skill: 12 }, // only skill changed
+            heart: { ...BASE_CURRENT.heart, card: 12 }, // only card changed
         };
         
         const tree = render(

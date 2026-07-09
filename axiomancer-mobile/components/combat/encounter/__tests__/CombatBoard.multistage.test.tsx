@@ -19,7 +19,7 @@ import { createMockEncounterEnemy } from '@/state/mocks/combat.mock';
 import { withAllProviders } from '@/test-utils/withAllProviders';
 
 // Spec 32 v3 fixtures: two Affliction DoTs, the Bulwark guard, a Charm sway.
-const SKILLS = ['slippery-slope', 'straw-mans-jab', 'brace-for-impact', 'soft-word'];
+const CARDS = ['slippery-slope', 'straw-mans-jab', 'brace-for-impact', 'soft-word'];
 
 const noopDrag = (): DragController =>
     ({ begin: () => undefined, move: () => undefined, end: () => undefined, active: null } as unknown as DragController);
@@ -35,7 +35,7 @@ describe('CombatBoard — multi-card staging', () => {
     it('renders one staged frame per uid in stagedUids and shows the count', () => {
         const { store } = withAllProviders(<></>);
         const base = store.getState().player;
-        const player = { ...base, knownCards: SKILLS, baseStats: { heart: 8, body: 8, mind: 8 }, health: 200, maxHealth: 200 };
+        const player = { ...base, knownCards: CARDS, baseStats: { heart: 8, body: 8, mind: 8 }, health: 200, maxHealth: 200 };
 
         let s = initializeCombatEncounter(player, createMockEncounterEnemy(), undefined, 16);
         s = rollEncounterDice(s).state;
@@ -64,7 +64,7 @@ describe('CombatBoard — multi-card staging', () => {
     it('END PHASE auto-applies every still-staged card, then resolves the phase', () => {
         const { store } = withAllProviders(<></>);
         const base = store.getState().player;
-        const player = { ...base, knownCards: SKILLS, baseStats: { heart: 8, body: 8, mind: 8 }, health: 200, maxHealth: 200 };
+        const player = { ...base, knownCards: CARDS, baseStats: { heart: 8, body: 8, mind: 8 }, health: 200, maxHealth: 200 };
 
         let s = initializeCombatEncounter(player, createMockEncounterEnemy(), undefined, 16);
         s = rollEncounterDice(s).state;
@@ -91,7 +91,7 @@ describe('CombatBoard — multi-card staging', () => {
     it('renders the empty play area (no staged cards) when stagedUids is empty', () => {
         const { store } = withAllProviders(<></>);
         const base = store.getState().player;
-        const player = { ...base, knownCards: SKILLS, baseStats: { heart: 8, body: 8, mind: 8 }, health: 200, maxHealth: 200 };
+        const player = { ...base, knownCards: CARDS, baseStats: { heart: 8, body: 8, mind: 8 }, health: 200, maxHealth: 200 };
 
         let s = initializeCombatEncounter(player, createMockEncounterEnemy(), undefined, 16);
         s = rollEncounterDice(s).state;
@@ -115,7 +115,7 @@ describe('CombatBoard — die-attribution + DoT-notation invariants', () => {
     it('the shared drafted die arms exactly ONE staged card (one staged-die slot)', () => {
         const { store } = withAllProviders(<></>);
         const base = store.getState().player;
-        const player = { ...base, knownCards: SKILLS, baseStats: { heart: 8, body: 8, mind: 8 }, health: 200, maxHealth: 200 };
+        const player = { ...base, knownCards: CARDS, baseStats: { heart: 8, body: 8, mind: 8 }, health: 200, maxHealth: 200 };
 
         let s = initializeCombatEncounter(player, createMockEncounterEnemy(), undefined, 16);
         s = rollEncounterDice(s).state;
@@ -141,7 +141,7 @@ describe('CombatBoard — die-attribution + DoT-notation invariants', () => {
     it('the DoT VM yields total + "over N turns", never the rejected n/t·t form', () => {
         const { store } = withAllProviders(<></>);
         const base = store.getState().player;
-        const player = { ...base, knownCards: SKILLS, baseStats: { heart: 8, body: 8, mind: 8 }, health: 200, maxHealth: 200 };
+        const player = { ...base, knownCards: CARDS, baseStats: { heart: 8, body: 8, mind: 8 }, health: 200, maxHealth: 200 };
 
         let s = initializeCombatEncounter(player, createMockEncounterEnemy(), undefined, 16);
         s = rollEncounterDice(s).state;

@@ -218,7 +218,7 @@ Each NPC demonstrates the alignment system across diverse life situations with m
 ## Pending
 
 - **Dialogue-driven combat triggers** — currently choices can start quests
-  and teach skills but cannot directly seed an encounter; a `startEncounter`
+  and teach cards but cannot directly seed an encounter; a `startEncounter`
   effect on `DialogueChoice.effect` is being scoped for a later spec.
 - **Per-NPC alignment observers** — Phase 63 shipped tree-level observers
   (`DialogueTree.id?` + `GameState.lastSeenAlignmentCells?`). NPC-level

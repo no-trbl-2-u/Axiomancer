@@ -58,9 +58,9 @@ registerSandboxCards([
 const ae = (effectId: string, intensity = 1, remainingDuration = 4, tier: 1 | 2 | 3 = 2): ActiveEffect =>
     ({ effectId, intensity, remainingDuration, appliedAt: 1, tier });
 
-function makePlayer(skills: string[], effects: ActiveEffect[] = []): Character {
+function makePlayer(cards: string[], effects: ActiveEffect[] = []): Character {
     const p = deepClone(Player);
-    p.knownCards = skills.slice();
+    p.knownCards = cards.slice();
     p.baseStats = { heart: 8, body: 8, mind: 8 };
     p.health = 200; p.maxHealth = 200; p.effects = effects;
     return p;
@@ -384,9 +384,9 @@ describe('card projection — the v3 library classifies + advertises sensibly', 
 
     for (const [id, verbClass, track] of cases) {
         it(`${id} → ${verbClass}/${track} and is reachable via COMBAT_REWARD_POOL`, () => {
-            const skill = getCardById(id);
-            expect(skill, `${id} must be a real skill`).toBeDefined();
-            const c = classifyVerbClass(skill!, lookupEffect);
+            const sourceCard = getCardById(id);
+            expect(sourceCard, `${id} must be a real card`).toBeDefined();
+            const c = classifyVerbClass(sourceCard!, lookupEffect);
             expect(c.verbClass, id).toBe(verbClass);
             expect(c.track, id).toBe(track);
             const card = toCombatCard(id, getCardById, lookupEffect)!;

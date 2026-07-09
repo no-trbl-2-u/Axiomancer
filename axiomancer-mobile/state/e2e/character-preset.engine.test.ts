@@ -47,7 +47,7 @@ describe('applyCharacterPreset: replaces player with engine preset', () => {
         },
     );
 
-    it('builds a complete Character — derived stats, max health, equipped skills all populated', () => {
+    it('builds a complete Character — derived stats, max health, equipped cards all populated', () => {
         const { store, actions } = makeStore();
         actions.applyCharacterPreset('apprentice');
 
@@ -73,7 +73,7 @@ describe('applyCharacterPreset: replaces player with engine preset', () => {
 
         expect(sageName).toBe('Sage');
         expect(sageName).not.toBe(wandererName);
-        // Skill set is rebuilt from the new preset, not appended.
+        // Card set is rebuilt from the new preset, not appended.
         expect(sageCards).not.toEqual(wandererCards);
     });
 });

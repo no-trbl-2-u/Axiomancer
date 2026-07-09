@@ -69,17 +69,17 @@ describe('devSetStats', () => {
 });
 
 describe('devLearnCards', () => {
-    it('learns all skills', () => {
+    it('learns all cards', () => {
         const store = freshStore();
         const r = devLearnCards(store, 'all');
         expect(r.ok).toBe(true);
         const known = store.getState().player.knownCards;
-        for (const skill of cardLibrary) {
-            expect(known).toContain(skill.id);
+        for (const card of cardLibrary) {
+            expect(known).toContain(card.id);
         }
     });
 
-    it('learns specific skills', () => {
+    it('learns specific cards', () => {
         const store = freshStore();
         devLearnCards(store, ['mob-appeal', 'sorites-cascade']);
         const known = store.getState().player.knownCards;
@@ -87,7 +87,7 @@ describe('devLearnCards', () => {
         expect(known).toContain('sorites-cascade');
     });
 
-    it('does not duplicate already-known skills', () => {
+    it('does not duplicate already-known cards', () => {
         const store = freshStore();
         devLearnCards(store, ['mob-appeal']);
         devLearnCards(store, ['mob-appeal']);
@@ -184,7 +184,7 @@ describe('devSpawnEnemy', () => {
 });
 
 describe('devMaxOut', () => {
-    it('maxes level, stats, skills, items, and currency', () => {
+    it('maxes level, stats, cards, items, and currency', () => {
         const store = freshStore();
         const r = devMaxOut(store);
         expect(r.ok).toBe(true);

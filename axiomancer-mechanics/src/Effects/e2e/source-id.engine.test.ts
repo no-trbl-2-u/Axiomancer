@@ -2,7 +2,7 @@
  * Hermetic e2e — ActiveEffect.sourceId attribution (Phase 38).
  *
  * Pins the convention that every applied effect carries a sourceId
- * pointing back to the agent that caused it: player.id on the skill
+ * pointing back to the agent that caused it: player.id on the card
  * path, actor.id on the proc path (Character | Enemy), item.id for
  * equipment passives, and undefined for environmental hazards.
  *
@@ -24,8 +24,8 @@ import type { Effect } from '../types';
 
 afterEach(() => vi.restoreAllMocks());
 
-const lookup = (skill: Card) => (id: string): Card | undefined =>
-    id === skill.id ? skill : undefined;
+const lookup = (card: Card) => (id: string): Card | undefined =>
+    id === card.id ? card : undefined;
 
 const debuffCard: Card = {
     id: 'sk_doubt',
@@ -75,7 +75,7 @@ function fixtureEnemy() {
     });
 }
 
-describe('Phase 38 — player skill applies debuff onto enemy', () => {
+describe('Phase 38 — player card applies debuff onto enemy', () => {
     it('enemy effect carries sourceId === player.id', () => {
         mockSequentialRng(0.05);
         const player = fixturePlayer();
@@ -91,7 +91,7 @@ describe('Phase 38 — player skill applies debuff onto enemy', () => {
     });
 });
 
-describe('Phase 38 — player skill applies buff onto self', () => {
+describe('Phase 38 — player card applies buff onto self', () => {
     it('player effect carries sourceId === player.id', () => {
         mockSequentialRng(0.5);
         const player = fixturePlayer();

@@ -22,9 +22,9 @@ import { getPendingDotTotal } from '../effects';
 const ae = (effectId: string, intensity = 1, remainingDuration = 4): ActiveEffect =>
     ({ effectId, intensity, remainingDuration, appliedAt: 1, tier: 2 });
 
-function makePlayer(skills: string[]): Character {
+function makePlayer(cards: string[]): Character {
     const p = deepClone(Player);
-    p.knownCards = skills.slice();
+    p.knownCards = cards.slice();
     p.baseStats = { heart: 8, body: 8, mind: 8 };
     p.health = 200; p.maxHealth = 200; p.effects = [];
     return p;

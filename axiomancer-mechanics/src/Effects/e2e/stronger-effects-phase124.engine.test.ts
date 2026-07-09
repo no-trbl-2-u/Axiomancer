@@ -6,7 +6,7 @@
 import { describe, it, expect } from 'vitest';
 import { lookupEffect } from '../effects.library';
 
-describe('Phase 124 - Stronger skills/effects', () => {
+describe('Phase 124 - Stronger cards/effects', () => {
     // The tier1_heart_defend / tier1_body_attack cases retired with the
     // spec 32 v3 keyword reset (the tier1_* stance layer is gone from the
     // library). The surviving Phase 124 tuning below lives on support-tagged
@@ -29,17 +29,15 @@ describe('Phase 124 - Stronger skills/effects', () => {
         expect(fear).toBeDefined();
         
         // Phase 124: increased rollModifier: -3 → -4, duration: 2 → 3,
-        // heart stat: -3 → -4, emotionalSkill: -2 → -3, emotionalDefense: -2 → -3
+        // heart stat: -3 → -4, emotionalDefense: -2 → -3
         expect(fear!.duration).toBe(3);
         expect(fear!.payload.rollModifier).toBe(-4);
-        
+
         const statMods = fear!.payload.statModifiers || [];
         const heartMod = statMods.find(m => m.stat === 'heart');
-        const skillMod = statMods.find(m => m.stat === 'emotionalSkill');
         const defenseMod = statMods.find(m => m.stat === 'emotionalDefense');
-        
+
         expect(heartMod?.value).toBe(-4);
-        expect(skillMod?.value).toBe(-3);
         expect(defenseMod?.value).toBe(-3);
     });
 

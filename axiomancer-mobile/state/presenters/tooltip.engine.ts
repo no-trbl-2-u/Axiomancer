@@ -13,7 +13,7 @@
  *   line derived from `Effect.payload`; engine `description`
  *   is intentionally dropped per user request.
  * - `'stance-chip'` — static ADV / DIS dice rules (Phase 75).
- * - `'skill'` — engine-sourced via `getCombatCardById(id)` (Phase 75).
+ * - `'card'` — engine-sourced via `getCombatCardById(id)` (Phase 75).
  *
  * Voice: title in uppercase mono / gothic, body in lowercase
  * chronicle (IM Fell English), footnote in mono for engine numbers.
@@ -33,7 +33,7 @@ export type TooltipKind =
     | 'blessing'
     | 'effect'
     | 'stance-chip'
-    | 'skill'
+    | 'card'
     | 'slot'
     | 'burden'
     | 'item-stat'
@@ -74,7 +74,7 @@ const STAT_CONTENT: Record<string, TooltipContent> = {
     },
     MIND: {
         title: 'MIND',
-        body: 'the discipline of attention. governs focus, skill cost recovery, and mind-stance damage curves.',
+        body: 'the discipline of attention. governs focus, card cost recovery, and mind-stance damage curves.',
         footnote: '+1 focus per mind point',
         accent: 'mind',
     },
@@ -268,7 +268,7 @@ const SLOT_CONTENT: Record<string, TooltipContent> = {
     },
     hands: {
         title: 'HANDS',
-        body: 'gauntlets, gloves, wraps. shapes how you strike — sharpens physical attack, sometimes carries fingered sigils for skill cost.',
+        body: 'gauntlets, gloves, wraps. shapes how you strike — sharpens physical attack, sometimes carries fingered sigils for card cost.',
     },
     feet: {
         title: 'FEET',
@@ -437,7 +437,7 @@ export function formatEffectStatEffect(
  */
 const VERB_DESCRIPTIONS: Record<string, string> = {
     Attack: 'active offense in this dimension. higher means more damage on a successful hit.',
-    Skill: 'active skill power in this dimension. higher means skills land harder.',
+    Card: 'active card power in this dimension. higher means cards land harder.',
     Defense: 'passive defense in this dimension. higher absorbs more damage.',
     Save: 'passive resistance roll. higher resists more effects.',
     Test: 'active check modifier. higher passes more checks.',
@@ -552,15 +552,15 @@ export function selectTooltipContentFor(
             accent: accentForEffect(def.payload as EffectPayloadLike | undefined),
         };
     }
-    if (kind === 'skill') {
+    if (kind === 'card') {
         if (!id) return null;
-        const skill = getCombatCardById(id);
-        if (!skill) return null;
+        const card = getCombatCardById(id);
+        if (!card) return null;
         return {
-            title: skill.name,
-            body: skill.description,
-            footnote: `stance ${skill.stance.toUpperCase()}`,
-            accent: accentForStat(skill.stance),
+            title: card.name,
+            body: card.description,
+            footnote: `stance ${card.stance.toUpperCase()}`,
+            accent: accentForStat(card.stance),
         };
     }
     if (kind === 'disabled-action') {

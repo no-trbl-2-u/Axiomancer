@@ -90,10 +90,10 @@ const SPEND_PREMISES_AT = 4;
 /** Legacy low-HP gate for the Befriend/mercy turn. */
 const LOW_HP_FRACTION = 0.30;
 
-/** The special-mechanic kinds a card's backing skill carries (0.34.0 payoffs). */
+/** The special-mechanic kinds a card's backing card carries (0.34.0 payoffs). */
 function cardMechKinds(card: CombatCard): Set<string> {
-    const skill = getCardById(card.id);
-    return new Set((skill?.specialMechanics ?? []).map(m => m.kind));
+    const sourceCard = getCardById(card.id);
+    return new Set((sourceCard?.specialMechanics ?? []).map(m => m.kind));
 }
 
 function enemyLowHp(s: CombatEncounterState): boolean {

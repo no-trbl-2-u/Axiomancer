@@ -5,10 +5,10 @@
  * minigame (`src/World/Hazard/`). HP MODEL: the enemy's SOLE bar is HP and the
  * player drops it to 0. Status effects are the EFFICIENT path (DoT erodes HP;
  * control hinders the enemy's turn); a raw strike is the weak baseline — every
- * verb is a combat card (projected from a learned skill).
+ * verb is a combat card (projected from a learned card).
  *
  * This is the sole combat driver. It reuses the shared effects engine and
- * skill engine (Spec 25 §12 Q4 recommendation (b)): the `executeCard` /
+ * card engine (Spec 25 §12 Q4 recommendation (b)): the `executeCard` /
  * `applyEffect` machinery is untouched — the engine *drives* it differently.
  *
  * Doctrine (CLAUDE.md): status effects are the MAIN fun. DoT erosion + control
@@ -105,7 +105,7 @@ export interface CombatCard {
      *  cards use a `card-` prefix (e.g. `card-retreat`). */
     id: string;
     name: string;
-    /** Stance color identity (Heart / Body / Mind). Derived from the skill's
+    /** Stance color identity (Heart / Body / Mind). Derived from the card's
      *  `philosophicalAspect`. Synthetic cards may be `wild`. */
     stance: CombatDieColor;
     verbClass: CombatVerbClass;
@@ -133,7 +133,7 @@ export interface CombatCard {
     primaryEffectId: string | null;
     /**
      * Fate Engine P1 — the card's printed DIE LINES (threshold / dieBonus /
-     * fate / die-manipulation), generated from the skill's riders in REAL units
+     * fate / die-manipulation), generated from the card's riders in REAL units
      * (printed == applied). Absent for cards with no dice interaction.
      */
     dieLines?: string[];
@@ -200,9 +200,9 @@ export interface SignatureSkill {
     /** Conviction (◆) cost. */
     cost: number;
     kind: SignatureSkillKind;
-    /** Which effect-kind a `control`/`dot` skill applies (default of the kind). */
+    /** Which effect-kind a `control`/`dot` card applies (default of the kind). */
     effectKind?: CardEffectKind;
-    /** Effect id a `control`/`dot` skill applies to the enemy. */
+    /** Effect id a `control`/`dot` card applies to the enemy. */
     effectId?: string;
     /** Magnitude knob (intensity / heal / draw count). */
     magnitude: number;
@@ -287,7 +287,7 @@ export interface CombatPhaseResult {
 // the enemy's turn via `canAct`. There are no abstract effect kinds/bars.
 // ---------------------------------------------------------------------------
 
-/** Per-skill attribution row for the post-combat summary (§7.7). */
+/** Per-card attribution row for the post-combat summary (§7.7). */
 export interface CombatAttributionRow {
     cardId: string;
     name: string;

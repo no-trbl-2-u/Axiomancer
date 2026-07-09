@@ -39,8 +39,8 @@ function lcg(seed: number): () => number {
 }
 
 function verbClassOf(cardId: string): CombatVerbClass | null {
-    const skill = getCardById(cardId);
-    return skill ? classifyVerbClass(skill, lookupEffect).verbClass : null;
+    const card = getCardById(cardId);
+    return card ? classifyVerbClass(card, lookupEffect).verbClass : null;
 }
 
 function withoutRetreat(deck: string[]): string[] {

@@ -2,7 +2,7 @@
  * Tooltip presenter pins.
  *
  * Tick A authored `kind: 'stat'`. Phase 75 authored `kind: 'effect'`,
- * `kind: 'stance-chip'`, `kind: 'skill'`. All current branches read
+ * `kind: 'stance-chip'`, `kind: 'card'`. All current branches read
  * engine static data; state is passed as `{}` cast to AppStoreState.
  * Later kinds (alignment, codex, slot, item-stat, …) will exercise
  * live state reads.
@@ -322,11 +322,11 @@ describe('selectTooltipContentFor', () => {
         });
     });
 
-    describe('kind: skill (Phase 75)', () => {
-        it('returns engine-sourced name + description + stance for a known skill id', () => {
-            // Pick any known engine skill — the first one is stable.
+    describe('kind: card (Phase 75)', () => {
+        it('returns engine-sourced name + description + stance for a known card id', () => {
+            // Pick any known engine card — the first one is stable.
             const first = cardLibrary[0];
-            const content = selectTooltipContentFor('skill', first.id, EMPTY_STATE);
+            const content = selectTooltipContentFor('card', first.id, EMPTY_STATE);
             expect(content).not.toBeNull();
             // getCombatCardById uppercases the name.
             expect(content?.title).toBe(first.name.toUpperCase());
@@ -334,26 +334,26 @@ describe('selectTooltipContentFor', () => {
             expect(content?.footnote).toMatch(/^stance (HEART|BODY|MIND)$/);
         });
 
-        it('returns null for an unknown skill id', () => {
-            expect(selectTooltipContentFor('skill', 'no-such-skill', EMPTY_STATE)).toBeNull();
+        it('returns null for an unknown card id', () => {
+            expect(selectTooltipContentFor('card', 'no-such-card', EMPTY_STATE)).toBeNull();
         });
 
-        it('returns null for an empty skill id', () => {
-            expect(selectTooltipContentFor('skill', '', EMPTY_STATE)).toBeNull();
+        it('returns null for an empty card id', () => {
+            expect(selectTooltipContentFor('card', '', EMPTY_STATE)).toBeNull();
         });
     });
 
-    describe('skill kind threads stance accent', () => {
-        it('skill on body stance returns body accent', () => {
+    describe('card kind threads stance accent', () => {
+        it('card on body stance returns body accent', () => {
             const { cardLibrary } = require('@mechanics');
-            const bodySkill = cardLibrary.find((s: { philosophicalAspect: string }) => s.philosophicalAspect === 'body');
-            if (!bodySkill) {
-                // No body-stance skill in library; skip without
+            const bodyCard = cardLibrary.find((s: { philosophicalAspect: string }) => s.philosophicalAspect === 'body');
+            if (!bodyCard) {
+                // No body-stance card in library; skip without
                 // failing — the contract is still pinned by stat
                 // tests below.
                 return;
             }
-            const content = selectTooltipContentFor('skill', bodySkill.id, EMPTY_STATE);
+            const content = selectTooltipContentFor('card', bodyCard.id, EMPTY_STATE);
             expect(content?.accent).toBe('body');
         });
     });
@@ -389,7 +389,7 @@ describe('accentForStat', () => {
     });
 
     it('maps mental* → mind', () => {
-        expect(accentForStat('mentalSkill')).toBe('mind');
+        expect(accentForStat('mentalAttack')).toBe('mind');
         expect(accentForStat('mind')).toBe('mind');
     });
 

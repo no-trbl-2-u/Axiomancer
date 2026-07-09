@@ -6,7 +6,7 @@
  * point in the campaign: level, base stats, and max HP — plus the deck-maturity
  * gate (`maxCardTier`) and the enemy roster that stage is measured against.
  * `buildStagePlayer` turns a profile into a ready-to-fight `Character` whose
- * known skills are exactly the stage-eligible card pool.
+ * known cards are exactly the stage-eligible card pool.
  *
  * Doctrine (CLAUDE.md): status effects are the MAIN fun — HP is the sole win
  * condition and status is the EFFICIENT way to drop it. Stage rosters exist so

@@ -47,7 +47,7 @@ Examples of e2e entry points by module:
 | `World`          | World reducer chained through map → node → continent transitions                      |
 | `Items`          | Item reducer chained through `addItem` → `useConsumable` → `removeItem`               |
 | `Character`      | `createCharacter` → `deriveStats` → `calculateMaxHealth` round-trip                   |
-| `Skills`         | `executeSkill` driving a SkillLookup against the live `skillLibrary`; `learnSkill` / `getAvailableSkills` for the Phase 30 runtime path; `fallacy-skills.engine.test.ts` (Phase 88), `phase83-skill-coverage.engine.test.ts` (Phase 83) |
+| `Cards`         | `executeSkill` driving a SkillLookup against the live `skillLibrary`; `learnSkill` / `getAvailableSkills` for the Phase 30 runtime path; `fallacy-cards.engine.test.ts` (Phase 88), `phase83-card-coverage.engine.test.ts` (Phase 83) |
 | `NPCs`           | `getDialogueNode` + `visibleChoices` walking a `DialogueTree`; `applyDialogueChoice` through the Game store |
 | `CLI`            | `parseArgv`, `logState`, `setStateLogPath`, `prompt` (script mode) in `src/CLI/e2e/io.engine.test.ts` — covers the Phase 20 scripted surface |
 
@@ -84,15 +84,15 @@ the canonical correctness signal stays in `src/**/e2e/*.engine.test.ts`.
 See `automation/scripts/walkthroughs/README.md` for the inventory and
 how to add a new walkthrough. The Phase 64 `endgame-loadout`
 walkthrough is the canonical example of a *demonstration-grade*
-script — it exercises multi-phase interactions (Tier 3 skill content,
-equipped-skill rotation, enemy alignment AI bias, enemy-skill caster
+script — it exercises multi-phase interactions (Tier 3 card content,
+equipped-card rotation, enemy alignment AI bias, enemy-card caster
 path, boss combat resolution) without requiring a kill-completion
 outcome.
 
 **Phase 81 catalog expansion (2026-05-24).** Three new walkthroughs
 ship for Phase 65 / 80 / 68 coverage: `fishing-village-exploration`
 (Apprentice Harbor District traversal → MournfulGull encounter at
-fv-15, Phase 60 befriendable placement), `tier2-skill-chain`
+fv-15, Phase 60 befriendable placement), `tier2-card-chain`
 (Wanderer casts Tier 2 `eternal-regress` two-effect compound under
 the **Phase 80 always-land contract**; closes one of Phase 78's MED
 zero-coverage primitives at the player-experience tier), and
@@ -100,11 +100,11 @@ zero-coverage primitives at the player-experience tier), and
 `BefriendabilityConfig` AND-composition; grades on
 predicate-attempt visibility per the brief D3). The Phase 66 synergy
 walkthrough originally scoped for Phase 81 pivoted per brief D2 (the
-5 synergy skills aren't in any preset's `knownSkills`).
+5 synergy cards aren't in any preset's `knownSkills`).
 
 **Phase 120 (2026-06-05).** Ships the deferred Phase 66 synergy
-walkthrough: `synergy-skills-chain`. Wanderer preset extended to
-include all 5 Phase 66 synergy skills; walkthrough exercises
+walkthrough: `synergy-cards-chain`. Wanderer preset extended to
+include all 5 Phase 66 synergy cards; walkthrough exercises
 `resonance-burst` synergy firing by first casting `eternal-regress`
 (applies `debuff_confusion`) then casting `resonance-burst` (synergizes
 with the confusion debuff). Closes the Phase 81 Unit 2 deferred

@@ -8,7 +8,7 @@
  * loop are the only normal ways to reclaim a spent die.
  *
  * Randomness flows through the seedable global RNG singleton (`src/Utils/rng`),
- * exactly like the rest of the combat/skills/effects engine, so hermetic tests
+ * exactly like the rest of the combat/cards/effects engine, so hermetic tests
  * pin rolls via `mockFixedRng` / `setSeed` and the Monte-Carlo sim is
  * reproducible. Every public roll accepts an explicit `rng: () => number`
  * (Spec 25 §9) that defaults to the singleton.

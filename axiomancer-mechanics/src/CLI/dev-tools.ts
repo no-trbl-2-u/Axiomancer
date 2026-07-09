@@ -93,7 +93,7 @@ export function devUnlockCards(store: Store, cardIds: string[] | 'all'): DevResu
     store.setState({
         player: { ...state.player, knownCards: [...known] },
     });
-    return { ok: true, detail: `${ids.length} skill(s) unlocked (total known: ${known.size})` };
+    return { ok: true, detail: `${ids.length} card(s) unlocked (total known: ${known.size})` };
 }
 
 export function devGrantAllEquipment(store: Store, rarity: ItemRarity = 'common'): DevResult {
@@ -166,7 +166,7 @@ export function devMaxOut(store: Store): DevResult {
     devGrantAllEquipment(store, 'rare');
     devGrantAllConsumables(store, 10);
     devGrantCurrency(store, 999);
-    return { ok: true, detail: 'Maxed out: level 20, 20/20/20 stats, all skills, all items, 999 currency' };
+    return { ok: true, detail: 'Maxed out: level 20, 20/20/20 stats, all cards, all items, 999 currency' };
 }
 
 export function getEnemySlugs(): EnemySlug[] {

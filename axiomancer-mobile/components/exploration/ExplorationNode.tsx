@@ -25,7 +25,7 @@ interface ExplorationNodeProps {
  * Single-tap commits movement (existing onNodePress behaviour);
  * long-press fires the kind:'map-node' tooltip (Phase 74 follow-up
  * walkthrough — Exploration Tick 1). Mirrors the Phase 75
- * skill-row pattern: tap is reserved for the action, long-press
+ * card-row pattern: tap is reserved for the action, long-press
  * for the explanation. Extracted from the parent's map() body so
  * each node owns its own measure ref.
  */

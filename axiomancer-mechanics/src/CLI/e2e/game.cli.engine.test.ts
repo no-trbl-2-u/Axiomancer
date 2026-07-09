@@ -130,7 +130,7 @@ describe('CLI Game Driver', () => {
         expect(store.getState().player.inventory.length).toBeGreaterThan(initialInventorySize);
     });
 
-    it('should support dev tools skill learning', async () => {
+    it('should support dev tools card learning', async () => {
         const emitter = createEventEmitter();
         const store = createGameStore(nullAdapter, emitter);
         const initialCardsLength = store.getState().player.knownCards.length;

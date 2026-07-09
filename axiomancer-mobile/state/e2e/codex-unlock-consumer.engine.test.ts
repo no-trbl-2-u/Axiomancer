@@ -32,10 +32,10 @@ function makeFriendlyEnemy(journalEntryBody?: string) {
         baseStats: { heart: 5, body: 5, mind: 5 },
         derivedStats: {
             heart: 5, body: 5, mind: 5,
-            physicalAttack: 5, physicalSkill: 5, physicalDefense: 5,
+            physicalAttack: 5, physicalDefense: 5,
             physicalSave: 5, physicalTest: 0, mentalAttack: 5,
-            mentalSkill: 5, mentalDefense: 5, mentalSave: 5,
-            mentalTest: 0, emotionalAttack: 5, emotionalSkill: 5,
+            mentalDefense: 5, mentalSave: 5,
+            mentalTest: 0, emotionalAttack: 5,
             emotionalDefense: 5, emotionalSave: 5, emotionalTest: 0,
             luck: 0,
             // Type assertion for test mock data - partial Enemy derivedStats

@@ -48,17 +48,17 @@ owns phase — it reads `vm.phase` and dispatches `setCombatPhase` /
 `resolveRound` / `nextRound` to advance.
 
 Per [Q5](../specs/04-combat-screen-wiring.md), the three choosing-phase
-pickers (stance / action / skill) sit in a horizontal pager so the
-player can swipe back to reselect a stance or swipe forward to skills.
+pickers (stance / action / card) sit in a horizontal pager so the
+player can swipe back to reselect a stance or swipe forward to cards.
 The pager's page index stays in sync with `vm.phase`; resolving the
 round swaps the pager out for the resolve panel.
 
 | Phase | What renders | What the user can do | VM slice |
 |---|---|---|---|
 | `choosing_stance` | Three stance cards (Heart / Body / Mind) with derived stats and ADV / DIS badges relative to the enemy's last stance. | Tap a stance to commit. | `vm.stancePicker` |
-| `choosing_action` | Attack / Defend / Skill / Item action grid + flee link. | Tap Attack to dispatch a basic attack and resolve. Tap Skill to slide forward to the skill picker. Item surfaces a `'Hands are empty.'` toast; Flee surfaces `vm.actionPicker.fleeMessage` (currently `'No fleeing yet.'`) — both are no-ops pending follow-up phases ([Q6](../specs/04-combat-screen-wiring.md) = C). | `vm.actionPicker` |
-| `choosing_skill` | Horizontal scroll of skill cards filtered by current stance; greys out skills with `wrong-stance` or `insufficient-mana`. Skills come from a fixture ([Q3](../specs/04-combat-screen-wiring.md) = A); the swap site lives in [`state/mocks/combat.skills.fixture.ts`](../state/mocks/combat.skills.fixture.ts). Phase 16 (`[skipped]`) drains this when the engine ships the top-level `skillLibrary` / `getSkillById` re-export — see `plan/AUDIT.md` `[needs-engine-release]`. | Tap a skill to open the **confirm overlay** (Phase 127): a detail card of the deterministic result (damage / effects / cost) with explicit COMMIT / CANCEL controls. COMMIT spends mana and resolves; CANCEL returns to the picker with no side effects. | `vm.skillPicker` |
-| `resolving` | VS layout with player + enemy stance glyphs, advantage label, roll totals, and a damage / friendship banner. **Skill rounds (Phase 127) suppress the attack-roll tracker** — `vm.resolve.playerActionWasSkill` is `true`, so the panel renders a deterministic doctrine banner (no dice imagery) instead of the contested roll bars. | Tap "Next Round" to clear `playerChoice` and return to `choosing_stance`. When the engine signals `endReason !== 'ongoing'` the button changes to "Depart". | `vm.resolve` |
+| `choosing_action` | Attack / Defend / Card / Item action grid + flee link. | Tap Attack to dispatch a basic attack and resolve. Tap Card to slide forward to the card picker. Item surfaces a `'Hands are empty.'` toast; Flee surfaces `vm.actionPicker.fleeMessage` (currently `'No fleeing yet.'`) — both are no-ops pending follow-up phases ([Q6](../specs/04-combat-screen-wiring.md) = C). | `vm.actionPicker` |
+| `choosing_skill` | Horizontal scroll of card cards filtered by current stance; greys out cards with `wrong-stance` or `insufficient-mana`. Cards come from a fixture ([Q3](../specs/04-combat-screen-wiring.md) = A); the swap site lives in [`state/mocks/combat.cards.fixture.ts`](../state/mocks/combat.cards.fixture.ts). Phase 16 (`[skipped]`) drains this when the engine ships the top-level `skillLibrary` / `getSkillById` re-export — see `plan/AUDIT.md` `[needs-engine-release]`. | Tap a card to open the **confirm overlay** (Phase 127): a detail card of the deterministic result (damage / effects / cost) with explicit COMMIT / CANCEL controls. COMMIT spends mana and resolves; CANCEL returns to the picker with no side effects. | `vm.skillPicker` |
+| `resolving` | VS layout with player + enemy stance glyphs, advantage label, roll totals, and a damage / friendship banner. **Card rounds (Phase 127) suppress the attack-roll tracker** — `vm.resolve.playerActionWasSkill` is `true`, so the panel renders a deterministic doctrine banner (no dice imagery) instead of the contested roll bars. | Tap "Next Round" to clear `playerChoice` and return to `choosing_stance`. When the engine signals `endReason !== 'ongoing'` the button changes to "Depart". | `vm.resolve` |
 
 ## Always-visible panels
 
@@ -103,13 +103,13 @@ and emit the severity from the action layer's `summarizeRoundEvents`.
 The engine does not yet ship a player mana system. The action layer
 seeds `combat.player.mana = 9` and `maxMana = 14` on `startCombat`
 ([state/actions.ts](../state/actions.ts) → `ensureManaOnCombatPlayer`).
-Skills decrement the in-combat snapshot's mana. The whole accounting
+Cards decrement the in-combat snapshot's mana. The whole accounting
 goes away once engine Spec 04 lands.
 
 ## What's still placeholder
 
-- **Skills** — see [Spec 04 Q3](../specs/04-combat-screen-wiring.md);
-  fixture at [`state/mocks/combat.skills.fixture.ts`](../state/mocks/combat.skills.fixture.ts).
+- **Cards** — see [Spec 04 Q3](../specs/04-combat-screen-wiring.md);
+  fixture at [`state/mocks/combat.cards.fixture.ts`](../state/mocks/combat.cards.fixture.ts).
 - **Mana** — see "Placeholder mana" above.
 - **Flee** — surfaces `vm.actionPicker.fleeMessage` (currently `'No fleeing yet.'`); presenter-sourced post-Phase-29 critique drain ([Q6](../specs/04-combat-screen-wiring.md)).
 - **Item** action — disabled until Spec 06 wires the inventory's
@@ -119,36 +119,36 @@ goes away once engine Spec 04 lands.
   `state/presenters/combat.engine.ts` (Phase 26, commit `d8d2e33`).
   The presenter maps the engine's three stat dimensions —
   `emotional*` (Heart), `physical*` (Body), `mental*` (Mind) — onto
-  the `{attack, skill, defense}` triple per stance, rounded at the
+  the `{attack, card, defense}` triple per stance, rounded at the
   mapper boundary because engine stats are real-valued.
 
-## Phase 127 — deterministic skills & the enemy-answer blocker
+## Phase 127 — deterministic cards & the enemy-answer blocker
 
-Player skills are deterministic doctrine: they always hit and carry
+Player cards are deterministic doctrine: they always hit and carry
 static, mechanics-owned damage (the engine's `executeSkill` /
 `calculateSkillDamage` path — no contested attack roll). Phase 127
 makes the UI honest about that:
 
 - **Confirm overlay** ([`components/combat/SkillConfirmOverlay.tsx`](../components/combat/SkillConfirmOverlay.tsx))
-  — tapping a skill stages it (local `pendingSkill` state in
+  — tapping a card stages it (local `pendingSkill` state in
   `app/(tabs)/combat.tsx`) and opens a detail card before the round
   commits. COMMIT routes through the existing
-  `setPlayerAction('skill', id)` + `resolveRound()` path; CANCEL clears
-  the staged skill with no side effects.
-- **No skill dice tracker** — the action layer stamps `wasSkill` onto
+  `setPlayerAction('card', id)` + `resolveRound()` path; CANCEL clears
+  the staged card with no side effects.
+- **No card dice tracker** — the action layer stamps `wasSkill` onto
   the round-resolve summary (`state/actions.ts`), the presenter lifts it
   to `vm.resolve.playerActionWasSkill`, and `ResolvePanel` swaps the
-  contested roll bars for a deterministic banner on skill rounds. Roll
+  contested roll bars for a deterministic banner on card rounds. Roll
   UI is preserved for genuine attack / defend rounds.
 
-**Blocked — enemy skill-answer display.** The brief's stretch goal is to
-show how the enemy *responds* to a player skill (Phase 150 of
+**Blocked — enemy card-answer display.** The brief's stretch goal is to
+show how the enemy *responds* to a player card (Phase 150 of
 `axiomancer-mechanics`). The pinned engine (`axiomancer-mechanics`
-**0.21.0**) does not publish an enemy skill-answer event: `SkillPhaseEvent`
+**0.21.0**) does not publish an enemy card-answer event: `SkillPhaseEvent`
 (`dist/Combat/combat.resolver.d.ts`) carries only player-cast outcomes
 (`damage`, `heal`, `effect-applied`, `buff-stripped`, `synergy-fired`,
 …) and `determineEnemyAction` selects a stance/action, never a
-counter-skill keyed to the player's technique. Until the engine ships a
+counter-card keyed to the player's technique. Until the engine ships a
 typed enemy-response event (mechanics Phase 150), mobile cannot surface
 it without inventing combat logic — which the thin-client law forbids.
 This is the exact contract gap to drain when the engine bump lands.

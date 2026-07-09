@@ -1,8 +1,8 @@
 /**
- * Skills module — types and runtime engine.
+ * Cards module — types and runtime engine.
  *
- * Skills (fallacies and paradoxes) run on the five-resource resonance
- * economy described in `specs/04-skills-engine.md`. The engine functions
+ * Cards (fallacies and paradoxes) run on the five-resource resonance
+ * economy described in `specs/04-cards-engine.md`. The engine functions
  * here are pure: callers thread state forward themselves.
  *
  * Card content (the named library) lives in Spec 04b.

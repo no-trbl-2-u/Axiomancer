@@ -11,7 +11,7 @@
  *                       Encounters are staged into combat state; the
  *                       Hazard-Pattern combat driver runs via `npm run combat`.
  *   • Journal         — read-only: active / completed quests + alignment stub.
- *   • Skills          — read-only: known/unlocked skills.
+ *   • Cards          — read-only: known/unlocked cards.
  *   • Inventory       — read-only listing of carried items.
  *
  * Logic stays in the store / reducer. This file only formats and dispatches.
@@ -56,7 +56,7 @@ import { bucketAxis, getAlignmentCell } from '../Philosophy';
 import { runHazardCombatCliEncounter, type CombatAutoPolicyId } from './combat.cli';
 import type { CombatOutcome } from '../Combat/combat.encounter.types';
 
-type Tab = 'map' | 'journal' | 'skills' | 'codex' | 'inventory' | 'character' | 'dev' | 'reset' | 'save' | 'load' | 'quit';
+type Tab = 'map' | 'journal' | 'cards' | 'codex' | 'inventory' | 'character' | 'dev' | 'reset' | 'save' | 'load' | 'quit';
 
 type GameStoreHandle = ReturnType<typeof createGameStore>;
 
@@ -78,13 +78,13 @@ const codexLookup: Map<string, CodexEntry> = (() => {
 async function bootstrapStore(adapter: PersistenceAdapter): Promise<GameStoreHandle> {
     const events = createEventEmitter();
     events.onAny(emit);
-    // Phase 30 unit 2 — surface newly-eligible skills after a level-up.
+    // Phase 30 unit 2 — surface newly-eligible cards after a level-up.
     // The store's dispatch enriches the payload with `unlockedCards`; the
     // CLI just renders the message.
     events.on('character:levelup', evt => {
         const unlocked = (evt as TypedLevelUpEvent).payload.unlockedCards ?? [];
         if (unlocked.length > 0) {
-            log(`You can now learn ${unlocked.length} new skill${unlocked.length === 1 ? '' : 's'}: ${unlocked.join(', ')}`);
+            log(`You can now learn ${unlocked.length} new card${unlocked.length === 1 ? '' : 's'}: ${unlocked.join(', ')}`);
         }
     });
 
@@ -104,11 +104,11 @@ async function pickTab(): Promise<Tab> {
     const tabs: Array<{ name: string; value: Tab }> = [
         { name: 'Map             — travel + resolve node events', value: 'map' },
         { name: 'Journal    — quests + alignment', value: 'journal' },
-        { name: 'Skills     — known/unlocked', value: 'skills' },
+        { name: 'Cards     — known/unlocked', value: 'cards' },
         { name: 'Codex      — unlocked journal entries from befriended foes (Phase 73)', value: 'codex' },
         { name: 'Inventory  — items in pack', value: 'inventory' },
         { name: 'Character  — full stats + equipment + effects sheet', value: 'character' },
-        { name: 'DEV        — manipulate character, grant items/skills, spawn enemies', value: 'dev' },
+        { name: 'DEV        — manipulate character, grant items/cards, spawn enemies', value: 'dev' },
         { name: 'Begin again — reset to starting hearth, full or keep-character (Phase 72)', value: 'reset' },
         { name: 'Save       — write the current state to the save file', value: 'save' },
         { name: 'Load       — restore state from the save file', value: 'load' },
@@ -487,8 +487,8 @@ function journalTab(store: GameStoreHandle): void {
 
 function cardsTab(store: GameStoreHandle): void {
     const { player } = store.getState();
-    log('\n— Skills —');
-    log('Known skills:');
+    log('\n— Cards —');
+    log('Known cards:');
     for (const id of player.knownCards) {
         const s = getCardById(id);
         log(`  • ${s?.name ?? id}`);
@@ -582,7 +582,7 @@ async function characterTab(store: GameStoreHandle): Promise<void> {
     const ds = p.derivedStats;
     log(`  physical  attack ${ds.physicalAttack}    defense ${ds.physicalDefense}`);
     log(`  mental    attack ${ds.mentalAttack}        defense ${ds.mentalDefense}`);
-    log(`  emotional attack ${ds.emotionalAttack}   skill ${ds.emotionalSkill}   defense ${ds.emotionalDefense}`);
+    log(`  emotional attack ${ds.emotionalAttack}   defense ${ds.emotionalDefense}`);
     log(`  luck      ${ds.luck}`);
 
     log('\nNon-combat stats:');
@@ -612,7 +612,7 @@ async function characterTab(store: GameStoreHandle): Promise<void> {
         }
     }
 
-    log('\nSkills:');
+    log('\nCards:');
     log(`  Known/Unlocked: ${p.knownCards.length > 0 ? p.knownCards.join(', ') : '(none)'}`);
 
     log('\nInventory summary:');
@@ -652,7 +652,7 @@ async function characterTab(store: GameStoreHandle): Promise<void> {
         log(`Allocated 1 point to ${stat}.`);
     }
 
-    // Spec 06 Q7 — runtime skill learning (Phase 30 unit 3). Prompt loop
+    // Spec 06 Q7 — runtime card learning (Phase 30 unit 3). Prompt loop
     // mirrors the Allocate flow: visible only when there's something eligible
     // to learn, scriptable via a "skip" exit. Each learn dispatches so the
     // autosave + state log records the change.
@@ -734,7 +734,7 @@ function loadTab(store: GameStoreHandle, snapshotAdapter: PersistenceAdapter | n
     log('\nGame loaded.');
 }
 
-type DevAction = 'set-level' | 'set-stats' | 'learn-skills'
+type DevAction = 'set-level' | 'set-stats' | 'learn-cards'
     | 'grant-equipment' | 'grant-consumables' | 'equip-item' | 'grant-currency'
     | 'set-moral' | 'set-alignment' | 'spawn-enemy' | 'max-out' | 'back';
 
@@ -745,7 +745,7 @@ async function devTab(store: GameStoreHandle): Promise<void> {
         choices: [
             { name: 'Set level',               value: 'set-level' },
             { name: 'Set base stats',           value: 'set-stats' },
-            { name: 'Learn skills (pick/all)',   value: 'learn-skills' },
+            { name: 'Learn cards (pick/all)',   value: 'learn-cards' },
             { name: 'Grant all equipment',       value: 'grant-equipment' },
             { name: 'Grant all consumables',     value: 'grant-consumables' },
             { name: 'Equip specific item',       value: 'equip-item' },
@@ -753,7 +753,7 @@ async function devTab(store: GameStoreHandle): Promise<void> {
             { name: 'Set moral meter',           value: 'set-moral' },
             { name: 'Set philosophical alignment', value: 'set-alignment' },
             { name: 'Spawn enemy',              value: 'spawn-enemy' },
-            { name: 'MAX OUT (level 20, all skills/items)', value: 'max-out' },
+            { name: 'MAX OUT (level 20, all cards/items)', value: 'max-out' },
             { name: '← Back',                  value: 'back' },
         ],
     }]);
@@ -777,11 +777,11 @@ async function devTab(store: GameStoreHandle): Promise<void> {
             log(`\n${r.detail}\n`);
             break;
         }
-        case 'learn-skills': {
+        case 'learn-cards': {
             const { mode } = await prompt<{ mode: 'all' | 'pick' }>([{
                 type: 'rawlist', name: 'mode', message: 'Learn:',
                 choices: [
-                    { name: 'All skills', value: 'all' },
+                    { name: 'All cards', value: 'all' },
                     { name: 'Pick specific', value: 'pick' },
                 ],
             }]);
@@ -791,12 +791,12 @@ async function devTab(store: GameStoreHandle): Promise<void> {
             } else {
                 const known = new Set(store.getState().player.knownCards);
                 const available = getCardIds().filter(id => !known.has(id));
-                if (available.length === 0) { log('\nAll skills already known.\n'); break; }
-                const { skills } = await prompt<{ skills: string[] }>([{
-                    type: 'checkbox', name: 'skills', message: 'Pick skills to learn:',
+                if (available.length === 0) { log('\nAll cards already known.\n'); break; }
+                const { cards } = await prompt<{ cards: string[] }>([{
+                    type: 'checkbox', name: 'cards', message: 'Pick cards to learn:',
                     choices: available.map(id => ({ name: id, value: id })),
                 }]);
-                const r = devLearnCards(store, skills);
+                const r = devLearnCards(store, cards);
                 log(`\n${r.detail}\n`);
             }
             break;
@@ -977,7 +977,7 @@ export async function runGameCli(rawArgs = process.argv.slice(2)): Promise<void>
             switch (tab) {
                 case 'map':       await mapTab(store, flags);                  break;
                 case 'journal':   journalTab(store);                         break;
-                case 'skills':    cardsTab(store);                          break;
+                case 'cards':    cardsTab(store);                          break;
                 case 'codex':     codexTab(store);                           break;
                 case 'inventory': inventoryTab(store);                       break;
                 case 'character': await characterTab(store);                 break;

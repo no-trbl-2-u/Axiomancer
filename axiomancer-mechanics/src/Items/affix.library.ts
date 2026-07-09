@@ -46,7 +46,7 @@ export const prefixes: Affix[] = [
         id: 'pfx-honed',
         word: 'Honed',
         role: 'prefix',
-        modIds: ['wm-skill-edge'],
+        modIds: ['wm-card-edge'],
         validSlots: ['weapon'],
         hiddenRarity: 'common_mod',
         minLevel: 1,
@@ -1007,7 +1007,7 @@ export const suffixes: Affix[] = [
         addedIn: '2026-06-16',
         tags: ['affix', 'suffix', 'weapon', 'mental', 'status'],
     },
-    // Resource / skill suffixes
+    // Resource / card suffixes
     {
         id: 'sfx-of-focus',
         word: 'of Focus',

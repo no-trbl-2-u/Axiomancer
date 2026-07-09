@@ -32,7 +32,7 @@
  *     dispatches on whichever of its fields are populated.
  *   - `enchantment` / `disenchant` cards short-circuit the spell pipeline in
  *     the engine (see `combat.engine.ts` — the die is spent and the card
- *     joins its zone with no skill execution), so their sole promise is zone
+ *     joins its zone with no card execution), so their sole promise is zone
  *     membership.
  *
  * Card-state-construction pattern (hand/dice/draft) follows
@@ -69,7 +69,7 @@ afterEach(() => vi.restoreAllMocks());
 // by a coverage assertion), so a fixture-specific precise mapping would be
 // unverifiable against real data. A stricter, kind-specific mapping is
 // welcome once a card actually authors one of these:
-//   - `strip_random_buff` / `befriend_attempt`: skill-engine owned (not the
+//   - `strip_random_buff` / `befriend_attempt`: card-engine owned (not the
 //     combat-engine `mechs` switch); their outcome depends on a target
 //     actually holding a buff / the befriend HP-gate, neither of which this
 //     shared fixture stages.

@@ -323,13 +323,10 @@ function buildEquipmentModal(player: Character, item: Item): ItemModalViewModel 
 const STAT_LABELS: Record<string, string> = {
     maxHealth: 'MAX HP',
     physicalAttack: 'PHYS ATK',
-    physicalSkill: 'PHYS SKL',
     physicalDefense: 'PHYS DEF',
     mentalAttack: 'MENT ATK',
-    mentalSkill: 'MENT SKL',
     mentalDefense: 'MENT DEF',
     emotionalAttack: 'EMOT ATK',
-    emotionalSkill: 'EMOT SKL',
     emotionalDefense: 'EMOT DEF',
     luck: 'LUCK',
     physicalSave: 'BODY SAVE',
@@ -344,7 +341,7 @@ const STAT_LABELS: Record<string, string> = {
  * resolve (`<dimension><Verb>` — see `tooltip.engine.ts`). Only these
  * get a `StatDelta.id` so the row's TooltipTarget never renders an
  * empty chip for a key the synthesizer can't describe. */
-const TOOLTIP_STAT_KEY = /^(physical|mental|emotional)(Attack|Skill|Defense|Save|Test)$/;
+const TOOLTIP_STAT_KEY = /^(physical|mental|emotional)(Attack|Card|Defense|Save|Test)$/;
 
 function statLabelFor(key: string): string {
     return (

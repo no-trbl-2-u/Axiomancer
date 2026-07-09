@@ -1,11 +1,11 @@
 /**
- * Hermetic E2E Tests — engine-owned spoils + skill learning.
+ * Hermetic E2E Tests — engine-owned spoils + card learning.
  *
  * Drives `createAppStore` + the typed action layer end-to-end:
  *
  *  - victory spoils are engine-owned: `endCombat('victory')`'s report
  *    carries the rolled loot + granted XP, already applied to the player;
- *  - starter skills seed an empty `knownCards` before combat starts;
+ *  - starter cards seed an empty `knownCards` before combat starts;
  *  - level-up learn offers come alignment-gated from the engine and
  *    `learnCard` grows `knownCards`.
  *
@@ -88,10 +88,10 @@ describe('victory spoils come from the engine endCombat report', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Skill learning
+// Card learning
 // ---------------------------------------------------------------------------
 
-describe('starter skills + learn-skill flow', () => {
+describe('starter cards + learn-card flow', () => {
     it('startCombat seeds the tier-1 starter set into an empty knownCards', () => {
         expect(store.getState().player.knownCards ?? []).toHaveLength(0);
         actions.startCombat(makeEnemy());

@@ -2,7 +2,7 @@
  * Hermetic e2e — Character presets.
  *
  * Verifies that the three shipped presets build into valid Characters
- * whose level / stats / skill rotation / inventory match the
+ * whose level / stats / card rotation / inventory match the
  * declarative recipe, and that two builds with the same RNG produce
  * structurally equal Characters.
  */
@@ -41,14 +41,14 @@ describe('buildCharacterFromPreset', () => {
         expect(player.level).toBe(1);
         expect(player.baseStats).toEqual({ heart: 5, body: 5, mind: 5 });
         expect(player.equipment).toEqual({});
-        expect(player.knownCards).toHaveLength(7); // Phase 108 — includes Befriend starting skill
+        expect(player.knownCards).toHaveLength(7); // Phase 108 — includes Befriend starting card
         expect(player.inventory).toHaveLength(1);
         expect(player.inventory[0]?.id).toBe('minor-healing-potion');
         expect((player.inventory[0] as Consumable | undefined)?.quantity).toBe(3);
         expect(player.currency).toBe(0);
     });
 
-    it('builds Wanderer with light armor and mixed-tier skills', () => {
+    it('builds Wanderer with light armor and mixed-tier cards', () => {
         mockSequentialRng(0.5);
         const player = buildCharacterFromPreset(wandererPreset);
         expect(player.level).toBe(8);
@@ -60,7 +60,7 @@ describe('buildCharacterFromPreset', () => {
         expect(player.currency).toBe(25);
     });
 
-    it('builds Sage with mid-tier gear and every skill known', () => {
+    it('builds Sage with mid-tier gear and every card known', () => {
         mockSequentialRng(0.5);
         const player = buildCharacterFromPreset(sagePreset);
         expect(player.level).toBe(15);

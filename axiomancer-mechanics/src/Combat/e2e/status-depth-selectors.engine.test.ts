@@ -1,5 +1,5 @@
 /**
- * Hermetic unit tests — status-depth selectors + skill-engine no-ops,
+ * Hermetic unit tests — status-depth selectors + card-engine no-ops,
  * re-pinned to the spec 32 v3 library (poison ramps, bleed decays, MARK is the
  * universal glue affliction; the old vulnerable/compound/execute vocabulary is
  * retired).
@@ -14,7 +14,7 @@
  *   - getTickAmplifyFlat         (MARK)
  *
  * Plus: every combat-engine-owned CardSpecialMechanic kind is a NO-OP through
- * `executeCard` (the HP behavior lives in combat.engine, not the skill engine
+ * `executeCard` (the HP behavior lives in combat.engine, not the card engine
  * — same split as `guard`). Self-contained, deterministic, no disk / RNG.
  */
 
@@ -192,7 +192,7 @@ describe('getActiveDotTotal / getActiveDotAmplifications (amplification surface)
     });
 });
 
-// ── skill-engine no-op (the HP behavior lives in combat.engine) ──────────────
+// ── card-engine no-op (the HP behavior lives in combat.engine) ──────────────
 
 const ENGINE_OWNED_KINDS: CardSpecialMechanic[] = [
     { kind: 'rupture' },
@@ -209,17 +209,17 @@ const ENGINE_OWNED_KINDS: CardSpecialMechanic[] = [
     { kind: 'reprise', count: 1 },
 ];
 
-describe('skill engine — every combat-engine-owned mechanic kind is a NO-OP through executeCard', () => {
+describe('card engine — every combat-engine-owned mechanic kind is a NO-OP through executeCard', () => {
     for (const mech of ENGINE_OWNED_KINDS) {
         it(`'${mech.kind}' leaves caster/target HP + effects unchanged`, () => {
-            const skill: Card = {
-                id: 'test-mech-skill', name: 'Test Mechanic', category: 'fallacy',
+            const card: Card = {
+                id: 'test-mech-card', name: 'Test Mechanic', category: 'fallacy',
                 philosophicalAspect: 'body', description: 'x', tier: 1,
                 targetType: 'enemy', rank: 1, cardType: 'spell',
                 specialMechanics: [mech],
             };
             const player = deepClone(Player) as Character;
-            player.knownCards = ['test-mech-skill'];
+            player.knownCards = ['test-mech-card'];
             player.effects = [];
             player.baseStats = { body: 0, mind: 0, heart: 0 };
             const enemy = deepClone(GraveLarva) as Enemy;
@@ -230,7 +230,7 @@ describe('skill engine — every combat-engine-owned mechanic kind is a NO-OP th
                 player, enemy, playerChoice: {}, enemyChoice: {},
                 combatResources: { heart: 0, body: 5, mind: 0, fallacy: 0, paradox: 0 },
             };
-            const res = executeCard(state, 'test-mech-skill', id => id === 'test-mech-skill' ? skill : getCardById(id), 'player');
+            const res = executeCard(state, 'test-mech-card', id => id === 'test-mech-card' ? card : getCardById(id), 'player');
 
             // No damage/heal/effect events from the mechanic itself.
             expect(res.events.some(e => e.kind === 'damage' || e.kind === 'heal' || e.kind === 'effect-applied')).toBe(false);

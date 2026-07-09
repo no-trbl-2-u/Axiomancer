@@ -19,7 +19,7 @@
  * add a button that 'populates' items and gives the player every
  * item in the game". Sibling to `DebugSeedButton` (which seeds a
  * representative sample — head/body/weapon + one potion + a few
- * skills + map reset); this one is the full registry dump for
+ * cards + map reset); this one is the full registry dump for
  * targeted UI testing.
  *
  * Renders null in production builds (`__DEV__` is false). Mount

@@ -3,7 +3,7 @@
  *
  * The dialogue tree itself lives under `src/NPCs/`; this module orchestrates
  * the side effects on `GameState` (start quest, advance objective, complete
- * quest, teach skill, set flag, grant currency).
+ * quest, teach card, set flag, grant currency).
  */
 
 import { GameState } from '../Game/types';

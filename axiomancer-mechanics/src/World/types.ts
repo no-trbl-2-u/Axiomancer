@@ -7,17 +7,17 @@ import { NPC } from '../NPCs/types';
 
 /**
  * A reward grantable on event/combat completion. Either a tag (`'experience'`,
- * `'currency'`, `'skill'`, `'quest'`) or a concrete `Item`.
+ * `'currency'`, `'card'`, `'quest'`) or a concrete `Item`.
  */
 export type Reward =
     | 'experience'
     | 'currency'
-    | 'skill'
+    | 'card'
     | 'quest'
     | Item
     | { kind: 'currency'; amount: number }
     | { kind: 'experience'; amount: number }
-    | { kind: 'skill'; skillId: string }
+    | { kind: 'card'; cardId: string }
     | { kind: 'item'; item: Item };
 
 /**

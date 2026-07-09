@@ -112,7 +112,7 @@ The architecture distinguishes between **engine state** (persisted game truth) a
 | Combat phase | Engine | `'choosing_stance'`, `'resolving'` |
 | Player HP | Engine | `{ health: 45, maxHealth: 100 }` |
 | Stance preview | Mobile | User hovering over Heart stance card |
-| Modal visibility | Mobile | Skill picker expanded state |
+| Modal visibility | Mobile | Card picker expanded state |
 | Animation state | Mobile | Damage number fade transition |
 
 Ephemeral UI state flows through the `localUi` parameter:
@@ -120,7 +120,7 @@ Ephemeral UI state flows through the `localUi` parameter:
 ```typescript
 interface CombatLocalUi {
   selectedStance?: StanceKey;    // Preview before commit
-  selectedSkillId?: string;      // Skill picker selection
+  selectedSkillId?: string;      // Card picker selection
   // NO game logic — just mobile presentation state
 }
 ```
@@ -199,7 +199,7 @@ export function useCombatViewModel(localUi: CombatLocalUi = {}): CombatViewModel
 
 | Component | Responsibility | Examples |
 |-----------|----------------|----------|
-| **Engine** | Game rules, state mutations, calculations | Damage formulas, stance advantages, skill effects |
+| **Engine** | Game rules, state mutations, calculations | Damage formulas, stance advantages, card effects |
 | **Presenters** | State-to-UI translation, mobile formatting | HP ratios, truncated lists, display strings |
 | **Components** | Visual rendering, touch handling, React lifecycle | StyleSheets, animations, gesture handling |
 
@@ -224,11 +224,11 @@ Investigation path:
 When the engine evolves, mobile follows a predictable upgrade path:
 
 ```
-Engine 0.15.0 → 0.16.0: New skill resource system
+Engine 0.15.0 → 0.16.0: New card resource system
 
 Mobile migration:
 1. Update npm dependency: axiomancer-mechanics@^0.16.0
-2. Update presenters: combat.engine.ts skill picker logic  
+2. Update presenters: combat.engine.ts card picker logic  
 3. Update components: New resource displays (if needed)
 4. Update tests: New presenter contracts
 
@@ -241,7 +241,7 @@ UI components rarely change for engine upgrades
 
 ```typescript
 // Engine provides raw data
-const skillDamage = calculateSkillDamage(caster, skill);
+const skillDamage = calculateSkillDamage(caster, card);
 
 // Mobile adds presentation concerns
 const effectText = `${skillDamage} DMG · BLEED 2 (3R)`;
@@ -293,15 +293,15 @@ If you're coming from web development or engine work, React Native introduces un
 
 #### Screen Size Constraints
 ```typescript
-// Engine: provides all available skills (could be 20+)
+// Engine: provides all available cards (could be 20+)
 const allSkills = engine.getPlayerSkills();
 
 // Mobile: must limit to fit screen real estate
 const visibleSkills = allSkills
-  .slice(0, MOBILE_SKILL_LIMIT)  // Show only 6 skills
-  .map(skill => ({
-    ...skill,
-    shortName: truncateForMobile(skill.name)  // "Lightning Bolt" → "Lightning"
+  .slice(0, MOBILE_SKILL_LIMIT)  // Show only 6 cards
+  .map(card => ({
+    ...card,
+    shortName: truncateForMobile(card.name)  // "Lightning Bolt" → "Lightning"
   }));
 ```
 

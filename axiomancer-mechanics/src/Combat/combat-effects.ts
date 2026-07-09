@@ -20,7 +20,7 @@
  *        Fumble (nat 1) applies the entry's `fumbleEffectId` as a self-debuff.
  *   Q4 — Each eligible entry rolls independently. Cell unlock caps which
  *        tiers are eligible — basic actors only roll the T1 entry.
- *   Q5 — Switching is out of scope here; it feeds the skill system later.
+ *   Q5 — Switching is out of scope here; it feeds the card system later.
  *   Q6 — Storage is JSON (this file's sibling), loaded once at module init.
  *   Q7 — Enemies use the same table by default; `procOverrides` on the
  *        Enemy / map can swap effectIds or chances for elites / bosses.

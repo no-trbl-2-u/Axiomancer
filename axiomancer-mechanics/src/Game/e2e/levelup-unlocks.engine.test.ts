@@ -2,7 +2,7 @@
  * Hermetic e2e — Phase 30 unit 2 (Spec 06 Q7 + Phase 30 brief).
  *
  * Verifies that `character:levelup` events emitted by the store carry
- * an `unlockedCards: string[]` payload listing skill ids that crossed
+ * an `unlockedCards: string[]` payload listing card ids that crossed
  * their `learningRequirement` threshold during the promotion. The
  * computation lives in `enrichExtra` in `src/Game/store.ts`; this test
  * drives the public store surface (no internal-helper calls).
@@ -22,7 +22,7 @@ import type { TypedLevelUpEvent } from '../events.types';
 function buildStore(level: number, opts: {
     experience?: number;
     knownCards?: string[];
-    /** Phase 46 — override alignment so alignment-gated tier-3 skills can pass. */
+    /** Phase 46 — override alignment so alignment-gated tier-3 cards can pass. */
     philosophicalAlignment?: { epistemology: number; outlook: number; scope: number };
 } = {}) {
     const events = createEventEmitter();
@@ -55,7 +55,7 @@ describe('character:levelup payload — cards are no longer level-gated (2026-07
 
     it('a real promotion unlocks NOTHING — card eligibility no longer depends on level', () => {
         // Cross level 5 (and beyond): under the removed level gate this used to
-        // unlock the tier-2/3 skills. Now that cards carry no level requirement,
+        // unlock the tier-2/3 cards. Now that cards carry no level requirement,
         // eligibility is identical before and after the promotion, so the diff
         // is empty (only alignment/stat/prereq gates could ever change it, and
         // none of those move on a plain level-up).

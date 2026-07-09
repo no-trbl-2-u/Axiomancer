@@ -142,7 +142,7 @@ const ACTION_TAG_BY_TYPE: Record<NodeType, string> = {
     gather: 'NODE · GATHER',
     current: 'YOU ARE HERE',
     encounter: 'TRAVEL · 1 TURN',
-    treasure: 'SKILL · MIND',
+    treasure: 'CARD · MIND',
     boss: 'TRAVEL · BOSS',
     quest: 'LORE',
     hazard: 'PERIL · BRAVE IT',

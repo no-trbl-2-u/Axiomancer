@@ -37,9 +37,9 @@ export type EffectCategory =
  */
 export type EffectStatTarget =
     | Stance
-    | 'physicalAttack'  | 'physicalSkill' | 'physicalDefense' | 'physicalSave' | 'physicalTest'
-    | 'mentalAttack'    | 'mentalSkill'   | 'mentalDefense'   | 'mentalSave'   | 'mentalTest'
-    | 'emotionalAttack' | 'emotionalSkill'| 'emotionalDefense'| 'emotionalSave'| 'emotionalTest'
+    | 'physicalAttack'  | 'physicalDefense' | 'physicalSave' | 'physicalTest'
+    | 'mentalAttack'    | 'mentalDefense'   | 'mentalSave'   | 'mentalTest'
+    | 'emotionalAttack' | 'emotionalDefense'| 'emotionalSave'| 'emotionalTest'
     | 'luck';
 
 /** A single stat modifier applied by an effect's payload. */
@@ -126,7 +126,7 @@ export interface EffectPayload {
      */
     revealsStance?: boolean;
     /**
-     * Skills/Status Master Spec §1 — extensions for the 12 new status
+     * Cards/Status Master Spec §1 — extensions for the 12 new status
      * entries. Data-only for now: no resolver reads these fields yet (the
      * DoT tick resolver, card-play resolution, and die-roll resolution paths
      * that would consume them are a later implementation stage). Kept on

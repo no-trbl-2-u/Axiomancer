@@ -1,9 +1,9 @@
 /**
- * Spec 32 v3 — The Themed Deck Library: skill→card projection adapter.
+ * Spec 32 v3 — The Themed Deck Library: Card → CombatCard projection adapter.
  *
  * Projects a learned `Card` into a `CombatCard` view: stance color, verb
  * class, rank/rarity, card type, and FREE/PAID action text. The projection is
- * pure — it reads the skill + effect libraries and never mutates.
+ * pure — it reads the card + effect libraries and never mutates.
  *
  * THE STRIKE IS DEAD (§1): there is no chip line, no strike line, and no
  * damage-preview path for raw HP. Every printed number is a real engine unit
@@ -22,9 +22,9 @@ import { getCardById } from '../Cards/cards.library';
 export type EffectLookup = (effectId: string) => Effect | undefined;
 export type CardLookup = (cardId: string) => Card | undefined;
 
-/** Enemy-targeted effect payloads on a skill (`appliedTo: 'opponent'`). */
-function enemyEffects(skill: Card): CardCombatEffects[] {
-    return (skill.combatEffects ?? []).filter(e => e.appliedTo === 'opponent');
+/** Enemy-targeted effect payloads on a card (`appliedTo: 'opponent'`). */
+function enemyEffects(card: Card): CardCombatEffects[] {
+    return (card.combatEffects ?? []).filter(e => e.appliedTo === 'opponent');
 }
 
 /** True if the effect is a DoT (ticks HP damage). */
@@ -84,26 +84,26 @@ export function effectImpact(
 }
 
 /** Stance color for a projected combat card — its philosophical aspect (§4.3). */
-export function cardStanceColor(skill: Card): CombatDieColor {
-    return skill.philosophicalAspect;
+export function cardStanceColor(card: Card): CombatDieColor {
+    return card.philosophicalAspect;
 }
 
 /** Payoff mechanics that read as the "closer" class (status-payoff bursts). */
 const PAYOFF_KINDS: ReadonlySet<string> = new Set(['rupture', 'reap_all', 'reap']);
 
 /**
- * Classifies a skill into a verb class + the effect kind its PAID action
+ * Classifies a card into a verb class + the effect kind its PAID action
  * advances. Priority: enchant/disenchant > befriend > defend > DoT > control >
  * exposure > payoff > utility.
  */
 export function classifyVerbClass(
-    skill: Card,
+    card: Card,
     lookupEffect: EffectLookup,
 ): { verbClass: CombatVerbClass; track: CardEffectKind } {
-    if (skill.cardType === 'enchantment') return { verbClass: 'enchant', track: 'none' };
-    if (skill.cardType === 'disenchant') return { verbClass: 'disenchant', track: 'control' };
+    if (card.cardType === 'enchantment') return { verbClass: 'enchant', track: 'none' };
+    if (card.cardType === 'disenchant') return { verbClass: 'disenchant', track: 'control' };
 
-    const mechs = skill.specialMechanics ?? [];
+    const mechs = card.specialMechanics ?? [];
     if (mechs.some(m => m.kind === 'befriend_attempt')) {
         return { verbClass: 'befriend', track: 'control' };
     }
@@ -111,7 +111,7 @@ export function classifyVerbClass(
         return { verbClass: 'defend', track: 'none' };
     }
 
-    const enemy = enemyEffects(skill);
+    const enemy = enemyEffects(card);
     const defs = enemy.map(e => lookupEffect(e.effectId)).filter((e): e is Effect => !!e);
 
     if (defs.some(isDot)) return { verbClass: 'direct-dot', track: 'dot' };
@@ -134,9 +134,9 @@ export function classifyVerbClass(
  * a neutral read — Σ floor(damagePerRound × intensity) × duration, ramp-aware.
  * 0 for everything else (no strike preview exists any more).
  */
-export function bottomDamagePreview(skill: Card, lookupEffect: EffectLookup): number {
+export function bottomDamagePreview(card: Card, lookupEffect: EffectLookup): number {
     let total = 0;
-    for (const ce of enemyEffects(skill)) {
+    for (const ce of enemyEffects(card)) {
         const def = lookupEffect(ce.effectId);
         const dot = def?.payload.damageOverTime;
         if (!def || !dot) continue;
@@ -151,8 +151,8 @@ export function bottomDamagePreview(skill: Card, lookupEffect: EffectLookup): nu
 }
 
 /** The primary enemy effect id a card applies (first that contributes impact). */
-export function primaryEnemyEffectId(skill: Card, lookupEffect: EffectLookup): string | null {
-    for (const ce of enemyEffects(skill)) {
+export function primaryEnemyEffectId(card: Card, lookupEffect: EffectLookup): string | null {
+    for (const ce of enemyEffects(card)) {
         const def = lookupEffect(ce.effectId);
         if (def && effectImpact(def, ce.intensity ?? 1, ce.duration ?? def.duration).track !== 'none') {
             return def.id;
@@ -239,9 +239,9 @@ export function mechanicText(m: CardSpecialMechanic): string | null {
 }
 
 /** Human text for a card's PAID payload: statuses + mechanics, real units. */
-function paidText(skill: Card, lookupEffect: EffectLookup): string {
+function paidText(card: Card, lookupEffect: EffectLookup): string {
     const parts: string[] = [];
-    for (const ce of skill.combatEffects ?? []) {
+    for (const ce of card.combatEffects ?? []) {
         const def = lookupEffect(ce.effectId);
         if (!def) continue;
         const label = def.name.toLowerCase();
@@ -249,78 +249,78 @@ function paidText(skill: Card, lookupEffect: EffectLookup): string {
         const d = ce.duration ?? def.duration;
         parts.push(`${label} i${i} d${d}${ce.appliedTo === 'self' ? ' (self)' : ''}`);
     }
-    for (const m of skill.specialMechanics ?? []) {
+    for (const m of card.specialMechanics ?? []) {
         const t = mechanicText(m);
         if (t) parts.push(t);
     }
     return parts.join(' + ') || 'utility';
 }
 
-function rankLabel(skill: Card): string {
-    return CARD_RANK_NAMES[skill.rank];
+function rankLabel(card: Card): string {
+    return CARD_RANK_NAMES[card.rank];
 }
 
 /** Projects a library card into a `CombatCard` view. */
 export function toCombatCard(cardId: string, lookupCard: CardLookup, lookupEffect: EffectLookup): CombatCard | null {
-    const skill = lookupCard(cardId);
-    if (!skill) return null;
+    const card = lookupCard(cardId);
+    if (!card) return null;
 
-    const { verbClass, track } = classifyVerbClass(skill, lookupEffect);
-    const preview = bottomDamagePreview(skill, lookupEffect);
-    const persistent = skill.cardType === 'enchantment' || skill.cardType === 'disenchant';
+    const { verbClass, track } = classifyVerbClass(card, lookupEffect);
+    const preview = bottomDamagePreview(card, lookupEffect);
+    const persistent = card.cardType === 'enchantment' || card.cardType === 'disenchant';
 
-    const paid = paidText(skill, lookupEffect);
+    const paid = paidText(card, lookupEffect);
     // Spec 32 v4 — an enchant/disenchant's passive lives in engine hooks, so its
     // authored one-line summary (`persistentEffect`) is what the card prints; fall
     // back to the effect-derived text only if a card is missing the summary.
-    const passive = persistent ? (skill.persistentEffect ?? paid) : paid;
+    const passive = persistent ? (card.persistentEffect ?? paid) : paid;
 
     // FREE line — the authored dieless rider (spells only). Spec 32 v4: persistent
     // cards get a dieless FREE line that grants a TIMED (FREE_ENCHANT_ROUNDS-round)
     // instance of the same passive; the PAID line makes it permanent.
     const topActionText = persistent
-        ? `FREE (${FREE_ENCHANT_ROUNDS} rounds) — ${passive} (${rankLabel(skill)})`
-        : skill.free
-            ? `FREE — ${riderText(skill.free)}. (${rankLabel(skill)})`
-            : `FREE — no effect. (${rankLabel(skill)})`;
+        ? `FREE (${FREE_ENCHANT_ROUNDS} rounds) — ${passive} (${rankLabel(card)})`
+        : card.free
+            ? `FREE — ${riderText(card.free)}. (${rankLabel(card)})`
+            : `FREE — no effect. (${rankLabel(card)})`;
 
     const bottomActionText = persistent
-        ? `PAID (rest of combat) — ${passive} Costs 1 die.${skill.cardType === 'disenchant' ? ' Attaches to the enemy.' : ''}`
+        ? `PAID (rest of combat) — ${passive} Costs 1 die.${card.cardType === 'disenchant' ? ' Attaches to the enemy.' : ''}`
         : `PAID — ${paid}${preview > 0 ? ` (${preview} HP over its run)` : ''}. Costs 1 die.`;
 
     // Printed DIE LINES, generated from the riders in real units.
     const dieLines: string[] = [];
-    if (skill.threshold) {
-        dieLines.push(`⬡ ${skill.threshold.color.toUpperCase()} ×${skill.threshold.count} spent: ${riderText(skill.threshold.rider)}`);
+    if (card.threshold) {
+        dieLines.push(`⬡ ${card.threshold.color.toUpperCase()} ×${card.threshold.count} spent: ${riderText(card.threshold.rider)}`);
     }
-    if (skill.dieBonus) {
-        const on = skill.dieBonus.onColor === 'match'
-            ? `${cardStanceColor(skill).toUpperCase()}/WILD die`
-            : skill.dieBonus.onColor === 'off'
+    if (card.dieBonus) {
+        const on = card.dieBonus.onColor === 'match'
+            ? `${cardStanceColor(card).toUpperCase()}/WILD die`
+            : card.dieBonus.onColor === 'off'
                 ? 'off-color die'
-                : `${skill.dieBonus.onColor.toUpperCase()} die`;
-        dieLines.push(`⬢ ${on}: ${riderText(skill.dieBonus.rider)}`);
+                : `${card.dieBonus.onColor.toUpperCase()} die`;
+        dieLines.push(`⬢ ${on}: ${riderText(card.dieBonus.rider)}`);
     }
-    if (skill.fate) {
-        const recoil = skill.fate.recoilHp ? ` (recoil ${skill.fate.recoilHp} HP)` : '';
-        dieLines.push(`✕ an X die may power this: +${riderText(skill.fate.rider)}${recoil}`);
+    if (card.fate) {
+        const recoil = card.fate.recoilHp ? ` (recoil ${card.fate.recoilHp} HP)` : '';
+        dieLines.push(`✕ an X die may power this: +${riderText(card.fate.rider)}${recoil}`);
     }
 
     return {
-        id: skill.id,
-        name: skill.name,
-        stance: cardStanceColor(skill),
+        id: card.id,
+        name: card.name,
+        stance: cardStanceColor(card),
         verbClass,
         effectKind: track,
-        tier: skill.tier,
-        rank: skill.rank,
-        rarity: rankToRarity(skill.rank),
-        cardType: skill.cardType,
-        category: skill.category,
+        tier: card.tier,
+        rank: card.rank,
+        rarity: rankToRarity(card.rank),
+        cardType: card.cardType,
+        category: card.category,
         topActionText,
         bottomActionText: dieLines.length ? `${bottomActionText} ${dieLines.join(' · ')}` : bottomActionText,
         bottomDamagePreview: preview,
-        primaryEffectId: primaryEnemyEffectId(skill, lookupEffect),
+        primaryEffectId: primaryEnemyEffectId(card, lookupEffect),
         ...(dieLines.length ? { dieLines } : {}),
     };
 }
@@ -337,7 +337,7 @@ export function projectDeck(
 }
 
 /**
- * Phase 169 — Returns `true` when the card's backing skill has a
+ * Phase 169 — Returns `true` when the card's backing card has a
  * `CardSynergy.predicate` whose target-side (`on === 'target'`) condition is
  * currently satisfied by `enemyActiveEffects`. Pure read-only preview helper.
  */
@@ -345,9 +345,9 @@ export function isCombatSynergySatisfied(
     card: CombatCard,
     enemyActiveEffects: readonly ActiveEffect[],
 ): boolean {
-    const skill = getCardById(card.id);
-    if (!skill?.synergy?.predicate) return false;
-    const { predicate } = skill.synergy;
+    const sourceCard = getCardById(card.id);
+    if (!sourceCard?.synergy?.predicate) return false;
+    const { predicate } = sourceCard.synergy;
     if (predicate.on !== 'target') return false;
     return enemyActiveEffects.some((ae) => {
         if (ae.effectId !== predicate.effectId) return false;

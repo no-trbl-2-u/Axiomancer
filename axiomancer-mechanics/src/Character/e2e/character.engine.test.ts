@@ -161,7 +161,7 @@ describe('createCharacter — defaults and option pass-through', () => {
         mockSequentialRng(0.5);
         const ch = buildPlayer({
             currency: 42,
-            knownCards: ['skill-a', 'skill-b'],
+            knownCards: ['card-a', 'card-b'],
             procUnlocks: {
                 body:  { attack: 2, defend: 1 },
                 mind:  { attack: 1, defend: 1 },
@@ -169,7 +169,7 @@ describe('createCharacter — defaults and option pass-through', () => {
             },
         });
         expect(ch.currency).toBe(42);
-        expect(ch.knownCards).toEqual(['skill-a', 'skill-b']);
+        expect(ch.knownCards).toEqual(['card-a', 'card-b']);
         expect(ch.procUnlocks).toEqual({
             body:  { attack: 2, defend: 1 },
             mind:  { attack: 1, defend: 1 },

@@ -89,7 +89,7 @@ export interface CombatSimStats {
      *  deck (0–1). 1.0 = every card earned a play; a low value on a big deck is
      *  the bloat witness (a 2x late preset that only ever plays 6 of its 15+
      *  uniques). Denominator falls back to distinct cards played when no explicit
-     *  deck was threaded (the known-skills path), so it reads 1.0 there. */
+     *  deck was threaded (the known-cards path), so it reads 1.0 there. */
     deckUtilization: number;
     /** Normalized Shannon entropy (0–1) over the per-card PLAYS vector — the
      *  decision-spread witness. 0 = one card carried every play (one-note spam);
@@ -104,7 +104,7 @@ export interface CombatSimStats {
 }
 
 /** Per-card telemetry for one run (or aggregated over many), keyed by the
- *  card/skill id — NOT the hand-entry uid. `statusLands` counts powered plays
+ *  card/card id — NOT the hand-entry uid. `statusLands` counts powered plays
  *  that landed at least one status on the enemy (the doctrine witness). */
 export interface CombatCardUsage {
     cardId: string;
@@ -118,7 +118,7 @@ export interface CombatCardUsage {
 /** Optional per-run knobs threaded through `runOneEncounter`. */
 export interface CombatSimRunOptions {
     /** Explicit deck (card ids) passed to `initializeCombatEncounter`; omitted →
-     *  the engine builds the deck from the player's known skills. */
+     *  the engine builds the deck from the player's known cards. */
     deck?: readonly string[];
     /** Card ids boosted to the FRONT of every policy's ranking — used by the
      *  card-coverage e2e to guarantee a specific card gets exercised. */
@@ -175,7 +175,7 @@ function bestSignature(s: CombatEncounterState, policy: CombatSimPolicy, rng: ()
     return best;
 }
 
-/** Records one play against the card's usage row (keyed by skill/card id). */
+/** Records one play against the card's usage row (keyed by card/card id). */
 function bumpUsage(
     usage: Record<string, CombatCardUsage>,
     card: CombatCard,
@@ -545,7 +545,7 @@ export function simulateHazardPatternCombatDetailed(
     // Distinct cards that earned at least one play across the runs.
     const playedIds = Object.values(cardUsage).filter(u => u.plays > 0).map(u => u.cardId);
     // Denominator: distinct non-synthetic cards in the threaded deck; when no
-    // explicit deck was given (known-skills path) fall back to the played set so
+    // explicit deck was given (known-cards path) fall back to the played set so
     // utilization reads 1.0 rather than dividing by an unknown pool.
     const deckDistinct = options.deck
         ? new Set(options.deck).size

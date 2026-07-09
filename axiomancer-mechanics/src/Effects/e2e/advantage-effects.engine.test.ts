@@ -29,9 +29,8 @@ describe('Phase 88 — Advantage buffs: advantageGrants via getActiveEffectModif
     it('buff_advantage_mind grants advantage on mind', () => {
         const mods = getActiveEffectModifiers([ae('buff_advantage_mind')]);
         expect(mods.advantageGrants.has('mind')).toBe(true);
-        // Also has stat bumps: mind +1, mentalSkill +2
+        // Also has a stat bump: mind +1
         expect(mods.statFlat.get('mind')).toBe(1);
-        expect(mods.statFlat.get('mentalSkill')).toBe(2);
     });
 
     it('buff_evasion_up grants disadvantage on all stances (to attackers) + defense', () => {
@@ -46,16 +45,15 @@ describe('Phase 88 — Advantage buffs: advantageGrants via getActiveEffectModif
         expect(mods.statFlat.get('emotionalDefense')).toBe(2);
     });
 
-    it('buff_accuracy_up has rollModifier and skill bumps (no advantageModifier)', () => {
+    it('buff_accuracy_up has rollModifier and no advantageModifier', () => {
         const effect = lookupEffect('buff_accuracy_up');
         expect(effect).toBeDefined();
         const { activeEffects } = applyEffect([], effect!, 1);
         const mods = getActiveEffectModifiers(activeEffects);
-        // No advantageModifier in the payload — just stat + roll
+        // No advantageModifier in the payload — just the roll bonus
         expect(mods.advantageGrants.size).toBe(0);
-        expect(mods.statFlat.get('physicalSkill')).toBe(2);
-        expect(mods.statFlat.get('mentalSkill')).toBe(2);
-        expect(mods.statFlat.get('emotionalSkill')).toBe(2);
+        expect(effect!.payload.rollModifier).toBe(3);
+        expect(effect!.payload.statModifiers ?? []).toEqual([]);
     });
 
     it('buff_damage_reduction has defenseModifier 5', () => {

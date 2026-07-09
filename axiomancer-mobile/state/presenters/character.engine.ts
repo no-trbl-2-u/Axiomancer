@@ -3,7 +3,7 @@
  *
  * Implements `selectCharacterViewModel` from engine state (Spec 05).
  * Reads player stats, derived stats, save/test modifiers, active effects,
- * and equipment slots directly from `state.player`. Skills are deferred
+ * and equipment slots directly from `state.player`. Cards are deferred
  * to engine Spec 04.
  *
  * VM is *data only* per Q5 — no colour tokens, no icons. The screen
@@ -114,11 +114,11 @@ export interface EquipmentSlotRow {
     item: string | null;
 }
 
-export interface CharacterSkillRow {
+export interface CharacterCardRow {
     /**
-     * Phase 74 follow-up walkthrough Tick 2 — engine skill id
+     * Phase 74 follow-up walkthrough Tick 2 — engine card id
      * threaded through so the SELF tap-tooltip wrapper can fire
-     * `selectTooltipContentFor('skill', id)`. `vm.skills` is the
+     * `selectTooltipContentFor('card', id)`. `vm.cards` is the
      * dead `[]` surface today; the field is in place for when
      * `player.knownCards` consumption ships.
      */
@@ -170,7 +170,7 @@ export interface CharacterViewModel {
      */
     emptyEffectsMessage: string;
     equipment: readonly EquipmentSlotRow[];
-    skills: readonly CharacterSkillRow[];
+    cards: readonly CharacterCardRow[];
     /**
      * Philosophical alignment cube (Phase 52, engine 0.10.0).
      * Computed from `state.philosophicalAlignment` via the engine's
@@ -293,8 +293,8 @@ function buildEquipment(player: Character): readonly EquipmentSlotRow[] {
 
 /**
  * Derives the character view-model from game state.
- * All fields are driven by the engine's `state.player`. Skills are
- * empty until engine Spec 04 ships known-skill reads.
+ * All fields are driven by the engine's `state.player`. Cards are
+ * empty until engine Spec 04 ships known-card reads.
  */
 const ALIGNMENT_AXIS_LABELS: Record<AlignmentAxisKey, string> = {
     epistemology: 'EPISTEMOLOGY',
@@ -351,7 +351,7 @@ export function selectCharacterViewModel(state: GameStore): CharacterViewModel {
         effects,
         emptyEffectsMessage: 'none at hand.',
         equipment: buildEquipment(player),
-        skills: [],
+        cards: [],
         alignment,
         morale: state.moralMeter,
         a11y: {
@@ -359,7 +359,7 @@ export function selectCharacterViewModel(state: GameStore): CharacterViewModel {
             level: `Level ${player.level}`,
             experience: `Experience: ${player.experience} of ${player.experienceToNextLevel}`,
             baseStats: 'Base statistics: Heart, Body, Mind',
-            derivedStats: 'Derived statistics: attack, skill, and defense values',
+            derivedStats: 'Derived statistics: attack, card, and defense values',
             saves: 'Saving throws and ability tests',
             equipment: 'Equipment slots and equipped items',
             effects: effects.length > 0

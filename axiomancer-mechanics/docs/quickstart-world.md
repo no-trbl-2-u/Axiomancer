@@ -45,7 +45,7 @@ const entry: MapEventPoolEntry = {
 | `rest` | healPercent | Campfire rest stop |
 | `dialogue` | treeId | NPC conversation |
 | `trade` | wares | Wandering merchant |
-| `puzzle` | — | Skill-check gate |
+| `puzzle` | — | Card-check gate |
 
 ## Alignment deltas on map events
 

@@ -127,6 +127,6 @@ describe('DebugPlaythroughPresets', () => {
         expect(freshButton.props.accessibilityLabel).toBe('Apply fresh start preset (level 1, minimal gear)');
         
         expect(endgameButton.props.accessibilityRole).toBe('button');
-        expect(endgameButton.props.accessibilityLabel).toBe('Apply endgame preset (max level, all skills/items)');
+        expect(endgameButton.props.accessibilityLabel).toBe('Apply endgame preset (max level, all cards/items)');
     });
 });

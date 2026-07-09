@@ -439,7 +439,7 @@ Balance bands are verified in `src/World/Gathering/e2e/gathering.balance.sim.tes
 The remaining Phase 137 minigames each gained a deterministic policy-bot sim
 (`rest.sim.ts`, `lootcache.sim.ts`), mirroring the gathering/hazard pattern.
 Together with `quest-board.sim.ts` this gives every minigame a real sim for the
-`rest-tuning` / `loot-cache-tuning` skills to drive.
+`rest-tuning` / `loot-cache-tuning` cards to drive.
 
 ### Rest ("The Night Watch") — `rest.sim.ts`
 
@@ -469,7 +469,7 @@ with its bonus die. With that fix, the informed matches or beats greedy on RAW
 currency and wins decisively on **risk-adjusted value** (same loot, fewer
 jams). The report exposes both a `currencyGradient` and a `riskAdjusted`
 gradient (`avgCurrency − LOOT_CACHE_BITE_PENALTY × avgBitten`) so the tuning
-skill can judge Insight's worth. Bands verified in
+card can judge Insight's worth. Bands verified in
 `src/World/LootCache/e2e/lootcache.balance.sim.test.ts`.
 
 ## See Also

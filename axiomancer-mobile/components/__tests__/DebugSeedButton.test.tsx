@@ -48,7 +48,7 @@ describe('DebugSeedButton: DEV gate', () => {
 });
 
 describe('DebugSeedButton: press routing', () => {
-    it('a tap mutates the engine state (inventory + skills + map)', () => {
+    it('a tap mutates the engine state (inventory + cards + map)', () => {
         const store = makeStore();
         const inventoryBefore = (store.getState().player.inventory ?? []).length;
         const cardsBefore = (store.getState().player.knownCards ?? []).length;
@@ -66,15 +66,15 @@ describe('DebugSeedButton: press routing', () => {
     it('a tap updates the visible result line with a "seeded · ..." summary', () => {
         const store = makeStore();
         const tree = render(withProvider(store, <DebugSeedButton />));
-        // Before press, the row shows the static "items + skills + map reset" subtitle.
-        expect(tree.queryByText('items + skills + map reset')).not.toBeNull();
+        // Before press, the row shows the static "items + cards + map reset" subtitle.
+        expect(tree.queryByText('items + cards + map reset')).not.toBeNull();
 
         fireEvent.press(tree.getByTestId('debug-seed-button'));
 
         // After press, the subtitle reflects the seed result.
         const after = tree.toJSON();
         const text = JSON.stringify(after);
-        expect(text).toMatch(/seeded · \d+ items · \d+ skills · map (reset|unchanged)/);
+        expect(text).toMatch(/seeded · \d+ items · \d+ cards · map (reset|unchanged)/);
     });
 
     it('a second tap is non-destructive — keeps inventory growing or stable, never crashes', () => {
@@ -84,7 +84,7 @@ describe('DebugSeedButton: press routing', () => {
         fireEvent.press(tree.getByTestId('debug-seed-button'));
         const firstCardCount = (store.getState().player.knownCards ?? []).length;
 
-        // Second press: skills should stay the same (set semantics in
+        // Second press: cards should stay the same (set semantics in
         // the action), items may grow (the engine's addItem doesn't
         // dedupe equipment — non-stackable items create new stacks).
         expect(() =>

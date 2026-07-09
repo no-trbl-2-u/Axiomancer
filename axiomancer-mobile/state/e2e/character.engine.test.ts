@@ -57,7 +57,7 @@ describe('selectCharacterViewModel: shape contract', () => {
         expect(Array.isArray(vm.saves)).toBe(true);
         expect(Array.isArray(vm.effects)).toBe(true);
         expect(Array.isArray(vm.equipment)).toBe(true);
-        expect(Array.isArray(vm.skills)).toBe(true);
+        expect(Array.isArray(vm.cards)).toBe(true);
         expect(typeof vm.morale).toBe('number');
     });
 
@@ -134,7 +134,7 @@ describe('selectCharacterViewModel: shape contract', () => {
         }
     });
 
-    it('every derived row has attack/skill/defense as numbers', () => {
+    it('every derived row has attack/card/defense as numbers', () => {
         const store = createGameStore(createMemoryAdapter());
 
         const vm = selectCharacterViewModel(store.getState());
