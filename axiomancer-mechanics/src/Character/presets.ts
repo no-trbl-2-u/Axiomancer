@@ -20,12 +20,18 @@ import { Character, BaseStats } from './types';
 import { createCharacter } from './index';
 import { dropItem } from '../Items/item.factory';
 import { consumableLibrary } from '../Items/consumable.library';
-import type { EquipmentSlot, Equipment, Item } from '../Items/types';
+import { SLOT_CAPACITY } from '../Items/types';
+import type { Equipment, Item } from '../Items/types';
 
 export interface CharacterPresetEquipmentEntry {
-    /** EquipmentTemplate id (e.g. 'iron-blade'). */
+    /**
+     * EquipmentTemplate id (e.g. 'iron-blade'). The dropped item's slot kind is
+     * taken from the template itself (Phase 18 — presets no longer restate the
+     * slot). Declaration order is the equip order: the worn loadout takes the
+     * first weapon, first armor, and first 3 accessories; the rest seed the
+     * inventory.
+     */
     templateId: string;
-    slot: EquipmentSlot;
 }
 
 export interface CharacterPreset {
@@ -97,9 +103,9 @@ export const wandererPreset: CharacterPreset = {
     level: 8,
     baseStats: { heart: 5, body: 4, mind: 4 },
     equipment: [
-        { templateId: 'iron-blade', slot: 'weapon' },
-        { templateId: 'hide-vest', slot: 'armor' },
-        { templateId: 'leather-cap', slot: 'head' },
+        { templateId: 'iron-blade' },
+        { templateId: 'hide-vest' },
+        { templateId: 'leather-cap' },
     ],
     knownCards: [...TIER_1_CARDS, ...TIER_2_CARDS, ...TIER_2_SYNERGY_CARDS],
     consumables: [
@@ -116,9 +122,9 @@ export const sagePreset: CharacterPreset = {
     level: 15,
     baseStats: { heart: 20, body: 30, mind: 25 },
     equipment: [
-        { templateId: 'steel-blade', slot: 'weapon' },
-        { templateId: 'chain-mail', slot: 'armor' },
-        { templateId: 'chain-coif', slot: 'head' },
+        { templateId: 'steel-blade' },
+        { templateId: 'chain-mail' },
+        { templateId: 'chain-coif' },
     ],
     knownCards: [...TIER_1_CARDS, ...TIER_2_CARDS, ...TIER_3_CARDS, ...TIER_2_SYNERGY_CARDS],
     consumables: [
@@ -162,13 +168,13 @@ export const ladderL15Preset: CharacterPreset = {
     level: 15,
     baseStats: { heart: 12, body: 14, mind: 12 },
     equipment: [
-        { templateId: 'steel-blade', slot: 'weapon' },
-        { templateId: 'chain-mail', slot: 'armor' },
-        { templateId: 'chain-coif', slot: 'head' },
-        { templateId: 'leather-coat', slot: 'body' },
-        { templateId: 'chain-gauntlets', slot: 'hands' },
-        { templateId: 'leather-boots', slot: 'feet' },
-        { templateId: 'silver-ring', slot: 'accessory' },
+        { templateId: 'steel-blade' },
+        { templateId: 'chain-mail' },
+        { templateId: 'chain-coif' },
+        { templateId: 'leather-coat' },
+        { templateId: 'chain-gauntlets' },
+        { templateId: 'leather-boots' },
+        { templateId: 'silver-ring' },
     ],
     knownCards: [...TIER_1_CARDS, ...TIER_2_CARDS, ...TIER_2_SYNERGY_CARDS],
     consumables: [
@@ -185,13 +191,13 @@ export const ladderL30Preset: CharacterPreset = {
     level: 30,
     baseStats: { heart: 24, body: 28, mind: 26 },
     equipment: [
-        { templateId: 'mithril-blade', slot: 'weapon' },
-        { templateId: 'plate-mail', slot: 'armor' },
-        { templateId: 'full-helm', slot: 'head' },
-        { templateId: 'scaled-coat', slot: 'body' },
-        { templateId: 'plate-gauntlets', slot: 'hands' },
-        { templateId: 'iron-greaves', slot: 'feet' },
-        { templateId: 'gold-ring', slot: 'accessory' },
+        { templateId: 'mithril-blade' },
+        { templateId: 'plate-mail' },
+        { templateId: 'full-helm' },
+        { templateId: 'scaled-coat' },
+        { templateId: 'plate-gauntlets' },
+        { templateId: 'iron-greaves' },
+        { templateId: 'gold-ring' },
     ],
     knownCards: [
         ...TIER_1_CARDS,
@@ -217,13 +223,13 @@ export const ladderL50Preset: CharacterPreset = {
     // rows the library ships — so the build still arrives geared and
     // affix-backed.
     equipment: [
-        { templateId: 'savage-mithril-blade-of-ruin', slot: 'weapon' },
-        { templateId: 'adamant-plate-mail-of-warding', slot: 'armor' },
-        { templateId: 'full-helm-of-insight', slot: 'head' },
-        { templateId: 'scaled-coat-of-thorns', slot: 'body' },
-        { templateId: 'plate-gauntlets-of-the-duelist', slot: 'hands' },
-        { templateId: 'phantom-iron-greaves-of-shadows', slot: 'feet' },
-        { templateId: 'silver-ring-of-resilience', slot: 'accessory' },
+        { templateId: 'savage-mithril-blade-of-ruin' },
+        { templateId: 'adamant-plate-mail-of-warding' },
+        { templateId: 'full-helm-of-insight' },
+        { templateId: 'scaled-coat-of-thorns' },
+        { templateId: 'plate-gauntlets-of-the-duelist' },
+        { templateId: 'phantom-iron-greaves-of-shadows' },
+        { templateId: 'silver-ring-of-resilience' },
     ],
     knownCards: [
         ...TIER_1_CARDS,
@@ -256,7 +262,7 @@ export function buildCharacterFromPreset(
     preset: CharacterPreset,
     rng: () => number = Math.random,
 ): Character {
-    const inventory: Item[] = preset.consumables.map(({ id, quantity }) => {
+    const consumables: Item[] = preset.consumables.map(({ id, quantity }) => {
         const source = consumableLibrary.find(c => c.id === id);
         if (!source) {
             throw new Error(`buildCharacterFromPreset: unknown consumable id '${id}'.`);
@@ -264,9 +270,28 @@ export function buildCharacterFromPreset(
         return { ...source, quantity };
     });
 
-    const equipment: Partial<Record<EquipmentSlot, Equipment>> = {};
+    // Drop each declared piece, then bucket into a legal 5-slot loadout in
+    // declaration order (Phase 18): first weapon, first armor, first 3
+    // accessories are worn; anything past capacity seeds the inventory.
+    const worn: Equipment[] = [];
+    const benched: Equipment[] = [];
+    let hasWeapon = false;
+    let hasArmor = false;
+    let accessoryCount = 0;
     for (const entry of preset.equipment) {
-        equipment[entry.slot] = dropItem(entry.templateId, preset.level, 'common', rng);
+        const piece = dropItem(entry.templateId, preset.level, 'common', rng);
+        if (piece.slot === 'weapon' && !hasWeapon) {
+            worn.push(piece);
+            hasWeapon = true;
+        } else if (piece.slot === 'armor' && !hasArmor) {
+            worn.push(piece);
+            hasArmor = true;
+        } else if (piece.slot === 'accessory' && accessoryCount < SLOT_CAPACITY.accessory) {
+            worn.push(piece);
+            accessoryCount += 1;
+        } else {
+            benched.push(piece);
+        }
     }
 
     return createCharacter({
@@ -274,8 +299,8 @@ export function buildCharacterFromPreset(
         level: preset.level,
         baseStats: preset.baseStats,
         currency: preset.currency,
-        inventory,
-        equipment,
+        inventory: [...consumables, ...benched],
+        equipment: worn,
         knownCards: preset.knownCards,
     });
 }

@@ -10,6 +10,8 @@
 
 import { afterEach, describe, expect, it, jest } from '@jest/globals';
 
+import { getEquippedItems } from '@mechanics';
+
 import { createMemoryAdapter } from '@/test-utils/memoryAdapter';
 import { createAppActions } from '@/state/actions';
 import { createAppStore } from '@/state/store';
@@ -54,10 +56,12 @@ describe('applyPlayerTierPreset: L1/L15/L30/L50 ladder', () => {
 
         actions.applyPlayerTierPreset('kid-l50');
         const player = store.getState().player;
-        // L50 preset declares seven equipment slots; the engine builds
-        // them into the equipment map.
-        const equippedSlots = Object.keys(player.equipment ?? {});
-        expect(equippedSlots.length).toBeGreaterThanOrEqual(7);
+        // L50 declares seven equipment pieces; Phase 18's 5-slot loadout
+        // wears the first weapon, first armor, and three accessories
+        // (capacity-capped), benching the overflow into inventory. So the
+        // build arrives with the full five worn pieces.
+        const worn = getEquippedItems(player.equipment);
+        expect(worn).toHaveLength(5);
     });
 
     it('L1 is a leaner build than L50 (ladder escalates)', () => {

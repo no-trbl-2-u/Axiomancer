@@ -19,8 +19,8 @@
  *   not modelled as `ActiveEffect`s on the character.
  */
 
-import { Character, BaseStats, DerivedStats } from './types';
-import { Equipment, EquipmentSlot } from '../Items/types';
+import { Character, BaseStats, DerivedStats, EquipmentLoadout } from './types';
+import { Equipment, EquipmentSlot, SLOT_CAPACITY } from '../Items/types';
 import { ActiveEffect, StatModifier } from '../Effects/types';
 import { Stance } from '../Combat/types';
 import { lookupEffect } from '../Effects/effects.library';
@@ -50,18 +50,17 @@ const isStanceKey = (s: string): s is Stance =>
     (STANCE_KEYS as readonly string[]).includes(s);
 
 /**
- * Folds every equipped item's `statModifiers` into a single aggregated bundle.
+ * Folds every worn item's `statModifiers` into a single aggregated bundle.
  * Same intensity / multiplier conventions as the active-effects path: flat
  * mods sum, multiplier mods accumulate additively over 1.0 so the consumer
  * applies them as `base × (1 + Σ (m - 1))`.
  */
 export function getEquipmentModifiers(
-    equipment: Partial<Record<EquipmentSlot, Equipment>>,
+    loadout: EquipmentLoadout,
 ): AggregatedEquipmentModifiers {
     const agg = emptyAgg();
-    for (const slot of Object.keys(equipment) as EquipmentSlot[]) {
-        const piece = equipment[slot];
-        if (!piece?.statModifiers) continue;
+    for (const piece of getEquippedItems(loadout)) {
+        if (!piece.statModifiers) continue;
         for (const mod of piece.statModifiers) {
             if (mod.isMultiplier) {
                 addToMap(agg.statMultBonus, mod.stat, mod.value - 1);
@@ -160,77 +159,120 @@ function removePassiveEffects(
 }
 
 /**
- * Equips `item` onto the wearer, replacing whatever currently occupies its
- * slot. Recomputes `derivedStats` to fold in the new stat modifiers and
- * applies the item's passive effects.
- *
- * Pure — returns a new `Character`; input is untouched.
+ * Rebuilds a `Character` around a new loadout: recomputes `derivedStats`,
+ * swaps the displaced piece's passives out (`displacedId`) and applies the
+ * newly-worn item's passives (`applied`). Shared tail for equip/unequip.
  */
-export function equipItem(character: Character, item: Equipment): Character {
-    // Drop whatever's currently in the slot so its modifiers / passives don't
-    // double up. Note: we don't return the unequipped item here — callers
-    // that need to push it back into `inventory` should call `unequipItem`
-    // first and chain through `addItem`.
-    const slot = item.slot;
-    const previous = character.equipment[slot];
-
+function withLoadout(
+    character: Character,
+    nextLoadout: EquipmentLoadout,
+    displacedId: string | null,
+    applied: Equipment | null,
+): Character {
     let nextEffects = character.effects;
-    if (previous) {
-        nextEffects = removePassiveEffects(nextEffects, previous.id);
+    if (displacedId) nextEffects = removePassiveEffects(nextEffects, displacedId);
+    if (applied)     nextEffects = applyPassiveEffects(nextEffects, applied);
+
+    const mods = getEquipmentModifiers(nextLoadout);
+    const nextDerived = recomputeDerivedStats(character.baseStats, mods);
+
+    return {
+        ...character,
+        equipment:    nextLoadout,
+        derivedStats: nextDerived,
+        effects:      nextEffects,
+    };
+}
+
+/**
+ * Equips `item` into its slot kind (Phase 18):
+ *
+ * - **weapon / armor** — replace in place (today's semantics). We don't return
+ *   the displaced piece here; callers that need it back in `inventory` chain
+ *   `unequipItem` + `addItem` first, per the existing convention.
+ * - **accessory** — fills the first free accessory position. When all 3 are
+ *   full, a passed `replaceIndex` (0-2) swaps that position; without it the
+ *   equip is a **guarded no-op** (returns the same character reference — the
+ *   caller surfaces "accessory slots full"), never a throw or silent replace.
+ *
+ * Pure — returns a new `Character` (or the same reference on the full no-op).
+ */
+export function equipItem(
+    character: Character,
+    item: Equipment,
+    opts?: { replaceIndex?: number },
+): Character {
+    const loadout = character.equipment;
+    const slot = item.slot;
+
+    if (slot === 'weapon') {
+        return withLoadout(character, { ...loadout, weapon: item }, loadout.weapon?.id ?? null, item);
     }
-    nextEffects = applyPassiveEffects(nextEffects, item);
+    if (slot === 'armor') {
+        return withLoadout(character, { ...loadout, armor: item }, loadout.armor?.id ?? null, item);
+    }
 
-    const nextEquipment = { ...character.equipment, [slot]: item };
-    const mods = getEquipmentModifiers(nextEquipment);
-    const nextDerived = recomputeDerivedStats(character.baseStats, mods);
-
-    return {
-        ...character,
-        equipment:    nextEquipment,
-        derivedStats: nextDerived,
-        effects:      nextEffects,
-    };
+    // accessory
+    const acc = loadout.accessories;
+    if (acc.length < SLOT_CAPACITY.accessory) {
+        return withLoadout(character, { ...loadout, accessories: [...acc, item] }, null, item);
+    }
+    // Full row: honour an explicit replaceIndex, otherwise guarded no-op.
+    const idx = opts?.replaceIndex;
+    if (idx === undefined || !Number.isInteger(idx) || idx < 0 || idx >= acc.length) {
+        return character;
+    }
+    const displaced = acc[idx];
+    const nextAcc = acc.slice();
+    nextAcc[idx] = item;
+    return withLoadout(character, { ...loadout, accessories: nextAcc }, displaced.id, item);
 }
 
 /**
- * Unequips whatever currently occupies `slot`. No-op (returns the same
- * character reference) when the slot is empty. Pure.
+ * Unequips the piece in `slot`. For `'accessory'`, `index` selects which of the
+ * ≤3 positions to free (required); the remaining accessories compact toward the
+ * front (positions have no identity). For weapon/armor, `index` is ignored.
+ * No-op (returns the same character reference) when the target is empty or the
+ * accessory index is out of range. Pure.
  */
-export function unequipItem(character: Character, slot: EquipmentSlot): Character {
-    const previous = character.equipment[slot];
-    if (!previous) return character;
+export function unequipItem(
+    character: Character,
+    slot: EquipmentSlot,
+    index?: number,
+): Character {
+    const loadout = character.equipment;
 
-    const nextEquipment = { ...character.equipment };
-    delete nextEquipment[slot];
+    if (slot === 'weapon') {
+        if (!loadout.weapon) return character;
+        return withLoadout(character, { ...loadout, weapon: null }, loadout.weapon.id, null);
+    }
+    if (slot === 'armor') {
+        if (!loadout.armor) return character;
+        return withLoadout(character, { ...loadout, armor: null }, loadout.armor.id, null);
+    }
 
-    const mods = getEquipmentModifiers(nextEquipment);
-    const nextDerived = recomputeDerivedStats(character.baseStats, mods);
-    const nextEffects = removePassiveEffects(character.effects, previous.id);
-
-    return {
-        ...character,
-        equipment:    nextEquipment,
-        derivedStats: nextDerived,
-        effects:      nextEffects,
-    };
+    // accessory
+    const acc = loadout.accessories;
+    if (index === undefined || !Number.isInteger(index) || index < 0 || index >= acc.length) {
+        return character;
+    }
+    const removed = acc[index];
+    const nextAcc = acc.slice();
+    nextAcc.splice(index, 1);
+    return withLoadout(character, { ...loadout, accessories: nextAcc }, removed.id, null);
 }
 
 /**
- * List of every currently-equipped piece in slot order. Used by combat
- * helpers that need to walk equipment without caring about slot identity
- * (combat-start tokens, generation bonuses, proc triggers).
+ * List of every worn piece in canonical order (weapon, armor, accessories by
+ * position). Used by combat helpers that walk equipment without caring about
+ * slot identity (combat-start tokens, generation bonuses, proc triggers) and
+ * by `getEquipmentModifiers`.
  */
-export function getEquippedItems(
-    equipment: Partial<Record<EquipmentSlot, Equipment>>,
-): Equipment[] {
-    const SLOT_ORDER: EquipmentSlot[] = [
-        'weapon', 'armor', 'accessory', 'head', 'body', 'hands', 'feet',
-    ];
+export function getEquippedItems(loadout: EquipmentLoadout): Equipment[] {
     const out: Equipment[] = [];
-    for (const slot of SLOT_ORDER) {
-        const piece = equipment[slot];
-        if (piece) out.push(piece);
-    }
+    if (loadout.weapon) out.push(loadout.weapon);
+    if (loadout.armor)  out.push(loadout.armor);
+    for (const a of loadout.accessories) out.push(a);
     return out;
 }
 

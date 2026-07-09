@@ -46,8 +46,8 @@ export type GameAction =
     | { type: 'PROCESS_NODE';   payload?: undefined }
     | { type: 'APPLY_DIALOGUE'; payload: { tree: DialogueTree; choice: DialogueChoice } }
     | { type: 'USE_ITEM';       payload: { itemId: string } }
-    | { type: 'EQUIP_ITEM';     payload: { item: Equipment } }
-    | { type: 'UNEQUIP_ITEM';   payload: { slot: EquipmentSlot } }
+    | { type: 'EQUIP_ITEM';     payload: { item: Equipment; opts?: { replaceIndex?: number } } }
+    | { type: 'UNEQUIP_ITEM';   payload: { slot: EquipmentSlot; index?: number } }
     | { type: 'LEVEL_UP';       payload?: undefined }
     | { type: 'ALLOCATE_STAT_POINT'; payload: { stat: 'heart' | 'body' | 'mind' } }
     | { type: 'LEARN_CARD';    payload: { cardId: string } }

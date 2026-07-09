@@ -1,0 +1,122 @@
+/**
+ * Hermetic E2E — Phase 18 five-slot equipment loadout.
+ *
+ * Proves the `EquipmentLoadout` semantics end-to-end:
+ *   • weapon / armor replace in place.
+ *   • accessories fill the first free of 3 positions; a 4th with the row full
+ *     is a guarded no-op (same reference) unless `replaceIndex` is passed.
+ *   • unequipItem frees the right accessory position (index required).
+ *   • getEquippedItems / getEquipmentModifiers fold the whole loadout.
+ *   • derivedStats track every equip/unequip.
+ */
+
+import { describe, it, expect } from 'vitest';
+
+import { createCharacter } from '../index';
+import {
+    equipItem, unequipItem, getEquippedItems, getEquipmentModifiers,
+} from '../equipment.reducer';
+import type { Equipment, AccessoryKind } from '../../Items/types';
+import type { StatModifier } from '../../Effects/types';
+
+function weapon(id: string, body = 0): Equipment {
+    const statModifiers: StatModifier[] = body ? [{ stat: 'body', value: body, isMultiplier: false }] : [];
+    return { id, name: id, description: '', category: 'equipment', slot: 'weapon', rarity: 'common', requiredLevel: 0, statModifiers };
+}
+function armor(id: string, body = 0): Equipment {
+    const statModifiers: StatModifier[] = body ? [{ stat: 'body', value: body, isMultiplier: false }] : [];
+    return { id, name: id, description: '', category: 'equipment', slot: 'armor', rarity: 'common', requiredLevel: 0, statModifiers };
+}
+function accessory(id: string, kind: AccessoryKind = 'ring', mind = 0): Equipment {
+    const statModifiers: StatModifier[] = mind ? [{ stat: 'mind', value: mind, isMultiplier: false }] : [];
+    return { id, name: id, description: '', category: 'equipment', slot: 'accessory', accessoryKind: kind, rarity: 'common', requiredLevel: 0, statModifiers };
+}
+
+const fresh = () => createCharacter({ name: 'Test', level: 5, baseStats: { heart: 5, body: 5, mind: 5 } });
+
+describe('Phase 18 — EquipmentLoadout equip/unequip', () => {
+    it('starts with an empty loadout', () => {
+        const c = fresh();
+        expect(c.equipment).toEqual({ weapon: null, armor: null, accessories: [] });
+        expect(getEquippedItems(c.equipment)).toEqual([]);
+    });
+
+    it('weapon and armor replace in place', () => {
+        let c = fresh();
+        c = equipItem(c, weapon('sword'));
+        c = equipItem(c, weapon('axe'));
+        expect(c.equipment.weapon?.id).toBe('axe');
+        c = equipItem(c, armor('mail'));
+        expect(c.equipment.armor?.id).toBe('mail');
+        expect(getEquippedItems(c.equipment).map(i => i.id)).toEqual(['axe', 'mail']);
+    });
+
+    it('accessories fill the first free position (up to 3)', () => {
+        let c = fresh();
+        c = equipItem(c, accessory('a'));
+        c = equipItem(c, accessory('b'));
+        c = equipItem(c, accessory('c'));
+        expect(c.equipment.accessories.map(i => i.id)).toEqual(['a', 'b', 'c']);
+    });
+
+    it('a 4th accessory with the row full is a guarded no-op (same reference)', () => {
+        let c = fresh();
+        c = equipItem(c, accessory('a'));
+        c = equipItem(c, accessory('b'));
+        c = equipItem(c, accessory('c'));
+        const blocked = equipItem(c, accessory('d'));
+        expect(blocked).toBe(c);
+        expect(blocked.equipment.accessories.map(i => i.id)).toEqual(['a', 'b', 'c']);
+    });
+
+    it('replaceIndex swaps a specific accessory position when full', () => {
+        let c = fresh();
+        c = equipItem(c, accessory('a'));
+        c = equipItem(c, accessory('b'));
+        c = equipItem(c, accessory('c'));
+        c = equipItem(c, accessory('d'), { replaceIndex: 1 });
+        expect(c.equipment.accessories.map(i => i.id)).toEqual(['a', 'd', 'c']);
+    });
+
+    it('unequipItem frees exactly the indexed accessory and compacts the rest', () => {
+        let c = fresh();
+        c = equipItem(c, accessory('a'));
+        c = equipItem(c, accessory('b'));
+        c = equipItem(c, accessory('c'));
+        c = unequipItem(c, 'accessory', 0);
+        expect(c.equipment.accessories.map(i => i.id)).toEqual(['b', 'c']);
+    });
+
+    it('unequipItem on accessory with no / out-of-range index is a no-op', () => {
+        let c = fresh();
+        c = equipItem(c, accessory('a'));
+        expect(unequipItem(c, 'accessory')).toBe(c);
+        expect(unequipItem(c, 'accessory', 5)).toBe(c);
+    });
+
+    it('unequip weapon/armor clears the slot', () => {
+        let c = fresh();
+        c = equipItem(c, weapon('sword'));
+        c = equipItem(c, armor('mail'));
+        c = unequipItem(c, 'weapon');
+        expect(c.equipment.weapon).toBeNull();
+        expect(c.equipment.armor?.id).toBe('mail');
+    });
+
+    it('derivedStats fold every worn piece and drop on unequip', () => {
+        let c = fresh();
+        const bodyBefore = c.derivedStats.physicalAttack;
+        c = equipItem(c, weapon('sword', 4));
+        c = equipItem(c, accessory('ring', 'ring', 6));
+        const withGear = c.derivedStats;
+        expect(withGear.physicalAttack).toBeGreaterThan(bodyBefore);
+
+        // getEquipmentModifiers over the loadout sees both flat mods.
+        const mods = getEquipmentModifiers(c.equipment);
+        expect(mods.statFlat.get('body')).toBe(4);
+        expect(mods.statFlat.get('mind')).toBe(6);
+
+        c = unequipItem(c, 'weapon');
+        expect(c.derivedStats.physicalAttack).toBeLessThan(withGear.physicalAttack);
+    });
+});

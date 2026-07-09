@@ -38,19 +38,19 @@ describe('debugSeed: items + cards + map reset', () => {
 
         const after = store.getState().player.inventory ?? [];
         expect(after.length).toBeGreaterThanOrEqual(4);
-        // One consumable + three equipment (head/body/weapon).
+        // One consumable + three equipment (weapon/armor/accessory).
         const categories = new Set(after.map((i: { category: string }) => i.category));
         expect(categories.has('consumable')).toBe(true);
         expect(categories.has('equipment')).toBe(true);
-        // Equipment slots covered: head/body/weapon.
+        // Equipment slots covered by the Phase-18 3-kind seed: weapon/armor/accessory.
         const equipmentSlots = new Set(
             after
                 .filter((i: { category: string }) => i.category === 'equipment')
                 .map((i) => (i as { slot?: string }).slot),
         );
-        expect(equipmentSlots.has('head')).toBe(true);
-        expect(equipmentSlots.has('body')).toBe(true);
         expect(equipmentSlots.has('weapon')).toBe(true);
+        expect(equipmentSlots.has('armor')).toBe(true);
+        expect(equipmentSlots.has('accessory')).toBe(true);
 
         expect(result.itemsAdded).toBeGreaterThanOrEqual(4);
     });

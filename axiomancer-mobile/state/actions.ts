@@ -29,6 +29,8 @@ import {
     createMapState,
     equipItem as engineEquipItem,
     unequipItem as engineUnequipItem,
+    wornPerSlot,
+    SLOT_CAPACITY,
     getDialogueNode,
     getTemplatesBySlot,
     getMapDefinition,
@@ -1114,16 +1116,45 @@ function useItemAction(store: AppStore, itemId: string): UseItemResult {
     };
 }
 
+/** Surface a one-shot toast, preserving the existing level-up ack flag. */
+function pushToast(store: AppStore, text: string): void {
+    const prev = store.getState().notifications;
+    store.setState({
+        notifications: {
+            levelUpAcknowledged: prev?.levelUpAcknowledged ?? true,
+            toast: { text, id: (prev?.toast?.id ?? 0) + 1 },
+        },
+    });
+}
+
 function equipItemAction(store: AppStore, itemId: string): void {
     const state = store.getState();
     const inventory: readonly Item[] = state.player.inventory;
     const target = inventory.find((i: Item) => i.id === itemId);
     if (!target || !isEquipment(target)) return;
 
-    // EQUIPMENT STATS FIX: Call engine's equipItem to apply stat bonuses
-    const updatedPlayer = engineEquipItem(state.player, target as Equipment);
+    const equip = target as Equipment;
+    const targetSlot = equip.slot;
 
-    const targetSlot = (target as Equipment).slot;
+    // Accessory-full guard (Phase 18): with all 3 accessory positions worn and
+    // the target not already among them, refuse rather than silently displace.
+    let updatedPlayer = state.player;
+    if (targetSlot === 'accessory') {
+        const wornAcc = wornPerSlot(inventory).get('accessory') ?? [];
+        const alreadyWorn = wornAcc.some((a) => a.id === equip.id);
+        if (!alreadyWorn) {
+            if (wornAcc.length >= SLOT_CAPACITY.accessory) {
+                pushToast(store, 'Accessory slots full — remove one first.');
+                return;
+            }
+            // EQUIPMENT STATS FIX: engine equipItem folds stat bonuses / passives.
+            updatedPlayer = engineEquipItem(state.player, equip);
+        }
+        // alreadyWorn → reorder only (avoid a duplicate loadout entry).
+    } else {
+        // weapon / armor replace in place.
+        updatedPlayer = engineEquipItem(state.player, equip);
+    }
 
     // Build the reordered inventory:
     //   1. The target item (now first in its slot).
@@ -1146,39 +1177,36 @@ function equipItemAction(store: AppStore, itemId: string): void {
 }
 
 function unequipItemAction(store: AppStore, itemId: string): void {
-    // Mobile "worn" convention: first equipment item per slot is
-    // worn (see `state/selectors/equipment.ts:firstEquippedPerSlot`).
-    // To "unequip" the worn item under that convention, move it
-    // to the END of its slot peers in inventory; the next peer
-    // (formerly second in slot) becomes the new first-in-slot
-    // worn item. If there's only one item in the slot, the move
-    // is a no-op — the convention can't express "wearing nothing"
-    // without a richer flag (could be added when engine surfaces a
-    // proper `unequipItem(slot)` API and the mobile presenter
-    // reads from `character.equipment` directly).
+    // Mobile "worn" convention: the first `SLOT_CAPACITY[slot]` equipment items
+    // per slot are worn (Phase 18 — capacity-aware `wornPerSlot`). To "unequip"
+    // the target under that convention, move it to the END of its slot peers so
+    // a benched peer scrolls into the worn window. When a slot has no more items
+    // than its capacity the move can't reduce the worn set, so it's a no-op —
+    // the inventory convention can't express "wearing fewer than are carried".
     const state = store.getState();
     const inventory: readonly Item[] = state.player.inventory;
     const target = inventory.find((i: Item) => i.id === itemId);
     if (!target || !isEquipment(target)) return;
     const targetSlot = (target as Equipment).slot;
 
-    // Count slot peers (including target). If only one, no-op —
-    // there's no other item to "swap to."
     const slotPeerCount = inventory.filter(
         (it: Item) => isEquipment(it) && (it as Equipment).slot === targetSlot,
     ).length;
-    if (slotPeerCount <= 1) return;
+    if (slotPeerCount <= SLOT_CAPACITY[targetSlot]) return;
 
-    // EQUIPMENT STATS FIX: Call engine's unequipItem to remove stat bonuses
-    const updatedPlayer = engineUnequipItem(state.player, targetSlot);
+    // EQUIPMENT STATS FIX: engine unequipItem strips the piece's stat bonuses.
+    // For an accessory, pass the loadout index so the right position is freed.
+    const accessoryIndex =
+        targetSlot === 'accessory'
+            ? state.player.equipment.accessories.findIndex((a) => a.id === target.id)
+            : undefined;
+    let updatedPlayer = engineUnequipItem(state.player, targetSlot, accessoryIndex);
 
     // Rebuild inventory:
     //   1. All non-target, non-slot items in their original order.
     //   2. All slot peers (except target) in their original order
-    //      — the formerly-second-in-slot becomes first-in-slot
-    //      and so on.
-    //   3. Target appended at the end of its slot peers (so it's
-    //      last-in-slot, definitively NOT worn).
+    //      — the formerly-benched peer scrolls into the worn window.
+    //   3. Target appended at the end of its slot peers (definitively NOT worn).
     const slotPeersExceptTarget: Item[] = [];
     const nonSlot: Item[] = [];
     for (const it of inventory) {
@@ -1190,6 +1218,18 @@ function unequipItemAction(store: AppStore, itemId: string): void {
         }
     }
     const next: Item[] = [...nonSlot, ...slotPeersExceptTarget, target];
+
+    // Reconcile the engine loadout with the new worn window: an accessory that
+    // scrolled into the worn set but isn't in the loadout gets equipped so its
+    // stats fold in (keeps the loadout and the inventory-worn view consistent).
+    if (targetSlot === 'accessory') {
+        const loadoutAccIds = new Set(updatedPlayer.equipment.accessories.map((a) => a.id));
+        for (const acc of wornPerSlot(next).get('accessory') ?? []) {
+            if (!loadoutAccIds.has(acc.id)) {
+                updatedPlayer = engineEquipItem(updatedPlayer, acc);
+            }
+        }
+    }
 
     store.setState({ player: { ...updatedPlayer, inventory: next } });
 }
@@ -1355,14 +1395,14 @@ function debugSeedAction(store: AppStore): DebugSeedResult {
             console.warn('Failed to add consumable item:', error);
         }
 
-        // 2. One equipment per major slot (head / body / weapon). The
+        // 2. One equipment per slot kind (weapon / armor / accessory). The
         //    inventory dock and equip-replace preview both key off slot,
-        //    so covering three slots gives a meaningful smoke test. The
+        //    so covering all three kinds gives a meaningful smoke test. The
         //    slot list is typed by engine `EquipmentSlot` so an engine
         //    rename is a tsc error; templates are pulled via the engine's
         //    `getTemplatesBySlot` rather than a local `equipmentTemplates`
         //    scan, so new templates per slot pick the first available.
-        const seedSlots: ReadonlyArray<EquipmentSlot> = ['head', 'body', 'weapon'];
+        const seedSlots: ReadonlyArray<EquipmentSlot> = ['weapon', 'armor', 'accessory'];
         for (const slot of seedSlots) {
             try {
                 const tpl = getTemplatesBySlot(slot)[0];

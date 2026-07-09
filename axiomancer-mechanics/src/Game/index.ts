@@ -19,6 +19,11 @@ export type { GameAction, GameActionOf } from './actions.types';
 export { migrate } from './game.migrate';
 
 export {
+    LEGACY_SLOT_MAP, reslotLegacyEquipment, reslotLegacyLoadout,
+} from './legacy-slots';
+export type { LegacySlot, LegacySlotMapping } from './legacy-slots';
+
+export {
     createEventEmitter,
 } from './events';
 export type {

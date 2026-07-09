@@ -13,13 +13,14 @@ export {
     createCharacter,
     allocateStatPoint,
     previewStatAllocation,
-    equipItem, unequipItem, getEquipmentModifiers,
+    equipItem, unequipItem, getEquipmentModifiers, getEquippedItems,
+    emptyLoadout,
     computeEquipDelta,
     characterPresets, getPresetById, buildCharacterFromPreset,
     levelLadderPresets, ladderL1Preset, ladderL15Preset, ladderL30Preset, ladderL50Preset,
 } from './Character';
 export type {
-    Character, BaseStats, DerivedStats, NonCombatStats,
+    Character, BaseStats, DerivedStats, NonCombatStats, EquipmentLoadout,
     PreviewAllocation, PreviewResult,
     CreateCharacterOptions, AggregatedEquipmentModifiers,
     CharacterPreset, CharacterPresetEquipmentEntry,
@@ -231,7 +232,8 @@ export {
     previewTemplateAtRarity, previewTemplateAtAllRarities,
     dropItemAtRarity, AFFIXES_PER_RARITY, countNamedAffixes, hasBakedAffix,
     equipmentFromTemplate, rollCacheLoot, CACHE_LOOT_TUNING, generateRarityDrop,
-    firstEquippedPerSlot, isEquippedFirstOfSlot, findEquippedInSlot,
+    wornPerSlot, firstEquippedPerSlot, isEquippedFirstOfSlot, findEquippedInSlot,
+    SLOT_CAPACITY,
     prefixes, suffixes, allAffixes, getAffixById,
     composeItemName, affixesForSlot, AFFIX_RARITY_WEIGHTS,
     consumableLibrary, getConsumableById,
@@ -243,7 +245,7 @@ export {
 } from './Items';
 export type {
     Item, Equipment, Consumable, Material, QuestItem,
-    ItemCategory, EquipmentSlot, BaseItem,
+    ItemCategory, EquipmentSlot, AccessoryKind, BaseItem,
     EquipmentProcTrigger, ResourceInteraction, ResourceGenerationBonus,
     ItemRarity, RolledModifier, EquipmentTemplate, UniqueItemTemplate,
     ConsumableUseResult,
@@ -292,12 +294,14 @@ export {
     MAX_EFFECT_INTENSITY, MAX_EFFECT_DURATION, FRIENDSHIP_COUNTER_MAX,
     RESOURCE_CARRY,
     generateRunId, STARTING_REGION,
+    LEGACY_SLOT_MAP, reslotLegacyEquipment, reslotLegacyLoadout,
 } from './Game';
 export type {
     GameState, GameStore, GameActions, PersistenceAdapter, StoreApi,
     GameAction, GameActionOf,
     GameEvent, GameEventEmitter, GameEventHandler, GameEventType,
     CodexEntry, CodexState, RegionConsequences,
+    LegacySlot, LegacySlotMapping,
 } from './Game';
 
 // ─── World ────────────────────────────────────────────────────────────────────

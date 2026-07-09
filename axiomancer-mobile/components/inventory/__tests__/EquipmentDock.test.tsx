@@ -33,8 +33,13 @@ jest.mock('../EquipmentSlot', () => {
         }) => {
             const React = require('react');
             const { TouchableOpacity, Text } = require('react-native');
-            
-            if (slot === null) return null;
+
+            // Phase 18 shrank the dock to 3 slots, but the source
+            // `pairDockRows` still builds a 4-row grid (slots[0..6]),
+            // so trailing grid cells arrive as `undefined`. Treat any
+            // absent slot as an empty cell (the real EquipmentSlot's
+            // null-slot path).
+            if (slot === null || slot === undefined) return null;
             return React.createElement(
                 TouchableOpacity,
                 {
@@ -48,15 +53,14 @@ jest.mock('../EquipmentSlot', () => {
     };
 });
 
+// Phase 18 collapsed the dock to a 3-kind paper-doll: Weapon, Armor,
+// Trinket (accessory). The legacy head/body/hands/feet slots folded
+// into armor + accessory.
 const mockEquippedSlots: EquipmentDockViewModel = {
     slots: [
-        { key: 'head', label: 'HEAD', item: { id: 'helm-1', name: 'Iron Helm', sub: 'helmet' } },
-        { key: 'body', label: 'BODY', item: { id: 'armor-1', name: 'Leather Armor', sub: 'armor' } },
         { key: 'weapon', label: 'WEAPON', item: { id: 'sword-1', name: 'Iron Sword', sub: 'sword' } },
-        { key: 'armor', label: 'ARMOR', item: null },
-        { key: 'hands', label: 'HANDS', item: null },
-        { key: 'accessory', label: 'ACCESSORY', item: null },
-        { key: 'feet', label: 'FEET', item: null },
+        { key: 'armor', label: 'ARMOR', item: { id: 'armor-1', name: 'Leather Armor', sub: 'armor' } },
+        { key: 'accessory', label: 'TRINKET', item: { id: 'helm-1', name: 'Iron Helm', sub: 'helmet' } },
     ],
     headerLabel: 'equipment dock',
     hintLabel: 'worn vs unworn at a glance',
@@ -69,13 +73,9 @@ const mockEquippedSlots: EquipmentDockViewModel = {
 
 const mockEmptySlots: EquipmentDockViewModel = {
     slots: [
-        { key: 'head', label: 'HEAD', item: null },
-        { key: 'body', label: 'BODY', item: null },
         { key: 'weapon', label: 'WEAPON', item: null },
         { key: 'armor', label: 'ARMOR', item: null },
-        { key: 'hands', label: 'HANDS', item: null },
-        { key: 'accessory', label: 'ACCESSORY', item: null },
-        { key: 'feet', label: 'FEET', item: null },
+        { key: 'accessory', label: 'TRINKET', item: null },
     ],
     headerLabel: 'equipment dock',
     hintLabel: 'worn vs unworn at a glance',
@@ -153,7 +153,7 @@ describe('EquipmentDock', () => {
     });
 
     describe('Slot pairing and grid layout', () => {
-        it('renders all 7 slots in correct paired order', () => {
+        it('renders all 3 slots in correct paired order', () => {
             const { getByTestId } = render(
                 <EquipmentDock
                     vm={mockEquippedSlots}
@@ -162,14 +162,10 @@ describe('EquipmentDock', () => {
                 />
             );
 
-            // All 7 slots should be rendered
-            expect(getByTestId('equipment-slot-head')).toBeDefined();
-            expect(getByTestId('equipment-slot-body')).toBeDefined();
+            // All 3 slots should be rendered
             expect(getByTestId('equipment-slot-weapon')).toBeDefined();
             expect(getByTestId('equipment-slot-armor')).toBeDefined();
-            expect(getByTestId('equipment-slot-hands')).toBeDefined();
             expect(getByTestId('equipment-slot-accessory')).toBeDefined();
-            expect(getByTestId('equipment-slot-feet')).toBeDefined();
         });
 
         it('passes bare label to all slots consistently', () => {
@@ -182,12 +178,13 @@ describe('EquipmentDock', () => {
             );
 
             // Test that slot components are rendered (bare label is internal to EquipmentSlot)
-            const headSlot = getByTestId('equipment-slot-head');
-            expect(headSlot).toBeDefined();
+            const weaponSlot = getByTestId('equipment-slot-weapon');
+            expect(weaponSlot).toBeDefined();
         });
 
         it('handles grid layout with null slots in right column correctly', () => {
-            // The 7th slot (feet) should appear in left column, right column should be null
+            // The trailing accessory slot lands in the grid; the component
+            // handles a null right-column cell.
             const { queryByTestId } = render(
                 <EquipmentDock
                     vm={mockEquippedSlots}
@@ -197,7 +194,7 @@ describe('EquipmentDock', () => {
             );
 
             // All slots should exist - the component handles null slots in EquipmentSlot
-            expect(queryByTestId('equipment-slot-feet')).toBeDefined();
+            expect(queryByTestId('equipment-slot-accessory')).toBeDefined();
         });
     });
 
@@ -212,10 +209,10 @@ describe('EquipmentDock', () => {
             );
 
             const weaponSlot = getByTestId('equipment-slot-weapon');
-            const headSlot = getByTestId('equipment-slot-head');
+            const armorSlot = getByTestId('equipment-slot-armor');
 
             expect(weaponSlot.props.accessibilityState.selected).toBe(true);
-            expect(headSlot.props.accessibilityState.selected).toBe(false);
+            expect(armorSlot.props.accessibilityState.selected).toBe(false);
         });
 
         it('handles null selectedSlot correctly', () => {
@@ -258,11 +255,11 @@ describe('EquipmentDock', () => {
             );
 
             // Verify slots are rendered
-            expect(getByTestId('equipment-slot-head')).toBeDefined();
+            expect(getByTestId('equipment-slot-accessory')).toBeDefined();
             expect(getByTestId('equipment-slot-weapon')).toBeDefined();
-            
+
             // Verify content is displayed through Text components
-            expect(getByText('HEAD - Iron Helm')).toBeDefined();
+            expect(getByText('TRINKET - Iron Helm')).toBeDefined();
             expect(getByText('WEAPON - Iron Sword')).toBeDefined();
         });
 
@@ -276,11 +273,11 @@ describe('EquipmentDock', () => {
             );
 
             // Verify slots are rendered
-            expect(getByTestId('equipment-slot-head')).toBeDefined();
+            expect(getByTestId('equipment-slot-accessory')).toBeDefined();
             expect(getByTestId('equipment-slot-weapon')).toBeDefined();
-            
+
             // Verify empty content is displayed
-            expect(getByText('HEAD - empty')).toBeDefined();
+            expect(getByText('TRINKET - empty')).toBeDefined();
             expect(getByText('WEAPON - empty')).toBeDefined();
         });
     });
@@ -290,13 +287,13 @@ describe('EquipmentDock', () => {
             const { getByTestId } = render(
                 <EquipmentDock
                     vm={mockEquippedSlots}
-                    selectedSlot="head"
+                    selectedSlot="accessory"
                     onSelectSlot={mockOnSelectSlot}
                 />
             );
 
-            const headSlot = getByTestId('equipment-slot-head');
-            expect(headSlot.props.accessibilityState.selected).toBe(true);
+            const accessorySlot = getByTestId('equipment-slot-accessory');
+            expect(accessorySlot.props.accessibilityState.selected).toBe(true);
         });
 
         it('forwards callback to all interactive slots', () => {
@@ -309,14 +306,14 @@ describe('EquipmentDock', () => {
             );
 
             // Test multiple slot interactions
-            fireEvent.press(getByTestId('equipment-slot-head'));
             fireEvent.press(getByTestId('equipment-slot-weapon'));
             fireEvent.press(getByTestId('equipment-slot-armor'));
+            fireEvent.press(getByTestId('equipment-slot-accessory'));
 
             expect(mockOnSelectSlot).toHaveBeenCalledTimes(3);
-            expect(mockOnSelectSlot).toHaveBeenNthCalledWith(1, 'head');
-            expect(mockOnSelectSlot).toHaveBeenNthCalledWith(2, 'weapon');
-            expect(mockOnSelectSlot).toHaveBeenNthCalledWith(3, 'armor');
+            expect(mockOnSelectSlot).toHaveBeenNthCalledWith(1, 'weapon');
+            expect(mockOnSelectSlot).toHaveBeenNthCalledWith(2, 'armor');
+            expect(mockOnSelectSlot).toHaveBeenNthCalledWith(3, 'accessory');
         });
     });
 
@@ -325,7 +322,7 @@ describe('EquipmentDock', () => {
             const updatedSlots: EquipmentDockViewModel = {
                 ...mockEmptySlots,
                 slots: [
-                    { key: 'head', label: 'HEAD', item: { id: 'new-helm', name: 'Steel Helm', sub: 'helmet' } },
+                    { key: 'accessory', label: 'TRINKET', item: { id: 'new-helm', name: 'Steel Helm', sub: 'helmet' } },
                     ...mockEmptySlots.slots.slice(1),
                 ],
             };
@@ -347,7 +344,7 @@ describe('EquipmentDock', () => {
             );
 
             // Verify the updated content is displayed
-            expect(getByText('HEAD - Steel Helm')).toBeDefined();
+            expect(getByText('TRINKET - Steel Helm')).toBeDefined();
         });
 
         it('handles selectedSlot changes correctly', () => {
@@ -377,13 +374,9 @@ describe('EquipmentDock', () => {
             const mixedSlots: EquipmentDockViewModel = {
                 ...mockEquippedSlots,
                 slots: [
-                    { key: 'head', label: 'HEAD', item: { id: 'helm-1', name: 'Iron Helm', sub: 'helmet' } },
-                    { key: 'body', label: 'BODY', item: null },
                     { key: 'weapon', label: 'WEAPON', item: { id: 'sword-1', name: 'Iron Sword', sub: 'sword' } },
                     { key: 'armor', label: 'ARMOR', item: null },
-                    { key: 'hands', label: 'HANDS', item: null },
-                    { key: 'accessory', label: 'ACCESSORY', item: null },
-                    { key: 'feet', label: 'FEET', item: null },
+                    { key: 'accessory', label: 'TRINKET', item: { id: 'helm-1', name: 'Iron Helm', sub: 'helmet' } },
                 ],
             };
 
@@ -395,15 +388,15 @@ describe('EquipmentDock', () => {
                 />
             );
 
-            const headSlot = getByTestId('equipment-slot-head');
-            const bodySlot = getByTestId('equipment-slot-body');
+            const weaponSlot = getByTestId('equipment-slot-weapon');
+            const armorSlot = getByTestId('equipment-slot-armor');
 
-            expect(headSlot).toBeDefined();
-            expect(bodySlot).toBeDefined();
-            
+            expect(weaponSlot).toBeDefined();
+            expect(armorSlot).toBeDefined();
+
             // Verify content through text queries
-            expect(getByText('HEAD - Iron Helm')).toBeDefined();
-            expect(getByText('BODY - empty')).toBeDefined();
+            expect(getByText('WEAPON - Iron Sword')).toBeDefined();
+            expect(getByText('ARMOR - empty')).toBeDefined();
         });
 
         it('handles selection of non-existent slot keys gracefully', () => {
@@ -416,8 +409,8 @@ describe('EquipmentDock', () => {
             );
 
             // All slots should be unselected when selectedSlot doesn't match any
-            const headSlot = getByTestId('equipment-slot-head');
-            expect(headSlot.props.accessibilityState.selected).toBe(false);
+            const weaponSlot = getByTestId('equipment-slot-weapon');
+            expect(weaponSlot.props.accessibilityState.selected).toBe(false);
         });
     });
 });

@@ -9,6 +9,7 @@
 import { describe, it, expect } from 'vitest';
 import { buyItem, sellItem, defaultSellPrice } from './shop.reducer';
 import type { Character } from '../Character/types';
+import { emptyLoadout } from '../Character/types';
 import type { Consumable } from './types';
 import type { ShopWare } from './shop.types';
 
@@ -35,7 +36,7 @@ function freshCharacter(overrides: Partial<Character> = {}): Character {
         },
         inventory: [],
         currency: 0,
-        equipment: {},
+        equipment: emptyLoadout(),
         effects: [],
         knownCards: [],
         availableStatPoints: 0,

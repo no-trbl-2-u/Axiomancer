@@ -178,8 +178,9 @@ export interface GameActions {
     stackItem: (itemId: string, amount: number) => void;
 
     // ── Equipment ────────────────────────────────────────────────────────────
-    equipItem: (item: Equipment) => void;
-    unequipItem: (slot: EquipmentSlot) => void;
+    equipItem: (item: Equipment, opts?: { replaceIndex?: number }) => void;
+    /** For `slot === 'accessory'`, `index` selects which of the ≤3 to remove. */
+    unequipItem: (slot: EquipmentSlot, index?: number) => void;
 
     // ── Progression / persistence ────────────────────────────────────────────
     levelUp: () => void;
@@ -465,12 +466,12 @@ export function createGameStore(
             },
 
             // ── Equipment ────────────────────────────────────────────────────
-            equipItem(item) {
-                dispatch({ type: 'EQUIP_ITEM', payload: { item } });
+            equipItem(item, opts) {
+                dispatch({ type: 'EQUIP_ITEM', payload: { item, opts } });
             },
 
-            unequipItem(slot) {
-                dispatch({ type: 'UNEQUIP_ITEM', payload: { slot } });
+            unequipItem(slot, index) {
+                dispatch({ type: 'UNEQUIP_ITEM', payload: { slot, index } });
             },
 
             // ── Progression / persistence ────────────────────────────────────

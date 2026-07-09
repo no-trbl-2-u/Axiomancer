@@ -676,24 +676,23 @@ describe('selectInventoryViewModel: chrome strings', () => {
 // ---------------------------------------------------------------------------
 
 describe('selectInventoryViewModel: equipmentDock', () => {
+    // Phase 18 — the dock is now a 3-kind paper-doll: Weapon, Armor,
+    // Trinket (accessory). The legacy head/body/hands/feet slots folded
+    // into armor + accessory.
     const expectedSlotOrder: ReadonlyArray<{ key: string; label: string }> = [
-        { key: 'head', label: 'HEAD' },
-        { key: 'body', label: 'BODY' },
         { key: 'weapon', label: 'WEAPON' },
         { key: 'armor', label: 'ARMOR' },
-        { key: 'hands', label: 'HANDS' },
         { key: 'accessory', label: 'TRINKET' },
-        { key: 'feet', label: 'FEET' },
     ];
 
-    it('ships 7 slots in the design grid order with chrome labels and null items by default', () => {
+    it('ships 3 slots in the design grid order with chrome labels and null items by default', () => {
         const store = createGameStore(createMemoryAdapter());
         const vm: InventoryViewModel = selectInventoryViewModel(store.getState());
 
         expect(vm.equipmentDock.headerLabel).toBe('✠ WORN UPON THE BODY');
         expect(vm.equipmentDock.hintLabel).toBe('WORN VS. UNWORN AT A GLANCE');
         expect(vm.equipmentDock.bareLabel).toBe('— bare —');
-        expect(vm.equipmentDock.slots).toHaveLength(7);
+        expect(vm.equipmentDock.slots).toHaveLength(3);
         vm.equipmentDock.slots.forEach((slot, i) => {
             expect(slot.key).toBe(expectedSlotOrder[i].key);
             expect(slot.label).toBe(expectedSlotOrder[i].label);

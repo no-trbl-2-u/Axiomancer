@@ -464,6 +464,7 @@ function buildEquipment(
         description:   template.description,
         category:      'equipment',
         slot:          template.slot,
+        ...(template.accessoryKind ? { accessoryKind: template.accessoryKind } : {}),
         rarity,
         requiredLevel: template.requiredLevel,
         ...resolved,

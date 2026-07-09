@@ -409,7 +409,13 @@ export function computeEquipDelta(
                 ? computeStatDeltas(new Map(), aggregateStats(candidate))
                 : fullOrItemStatDeltas(
                       player,
-                      engineUnequipItem(player, candidate.slot),
+                      engineUnequipItem(
+                          player,
+                          candidate.slot,
+                          candidate.slot === 'accessory'
+                              ? player.equipment.accessories.findIndex(a => a.id === candidate.id)
+                              : undefined,
+                      ),
                       new Map(),
                       aggregateStats(candidate),
                   );
@@ -428,7 +434,17 @@ export function computeEquipDelta(
             ? computeStatDeltas(aggregateStats(candidate), aggregateStats(worn))
             : fullOrItemStatDeltas(
                   player,
-                  engineEquipItem(player, candidate),
+                  // A non-null `worn` sibling in the swap branch means the
+                  // slot is occupied (weapon/armor) or the accessory row is
+                  // full — replace the displaced piece in place so the delta
+                  // reflects the swap rather than a full-row no-op (Phase 18).
+                  engineEquipItem(
+                      player,
+                      candidate,
+                      candidate.slot === 'accessory'
+                          ? { replaceIndex: player.equipment.accessories.findIndex(a => a.id === worn.id) }
+                          : undefined,
+                  ),
                   aggregateStats(candidate),
                   aggregateStats(worn),
               );

@@ -30,6 +30,7 @@ import { createCharacter } from '../Character';
 import { ENEMY_REGISTRY, EnemyLibrary, type EnemySlug } from '../Enemy/enemy.library';
 import { deepClone } from '../Utils';
 import type { EquipmentSlot } from '../Items';
+import { SLOT_CAPACITY } from '../Items';
 import {
     devSetLevel, devSetStats, devLearnCards,
     devGrantAllEquipment, devGrantAllConsumables, devEquipItem,
@@ -592,15 +593,20 @@ async function characterTab(store: GameStoreHandle): Promise<void> {
     log(`  emotional save ${nc.emotionalSave}   test ${nc.emotionalTest}`);
 
     log('\nEquipment:');
-    const slots = ['weapon', 'armor', 'accessory', 'head', 'body', 'hands', 'feet'] as const;
-    for (const slot of slots) {
-        const eq = p.equipment[slot];
+    const loadout = p.equipment;
+    const logSlot = (label: string, eq: typeof loadout.weapon): void => {
         if (!eq) {
-            log(`  ${slot.padEnd(10)} (empty)`);
+            log(`  ${label.padEnd(12)} (empty)`);
         } else {
             const rarity = eq.rarity ? ` [${eq.rarity}]` : '';
-            log(`  ${slot.padEnd(10)} ${eq.name}${rarity}`);
+            const kind = eq.accessoryKind ? ` (${eq.accessoryKind})` : '';
+            log(`  ${label.padEnd(12)} ${eq.name}${rarity}${kind}`);
         }
+    };
+    logSlot('weapon', loadout.weapon);
+    logSlot('armor', loadout.armor);
+    for (let i = 0; i < SLOT_CAPACITY.accessory; i++) {
+        logSlot(`accessory ${i + 1}`, loadout.accessories[i] ?? null);
     }
 
     log('\nActive effects:');
@@ -811,7 +817,7 @@ async function devTab(store: GameStoreHandle): Promise<void> {
                 type: 'rawlist', name: 'templateId', message: 'Which template?',
                 choices: templates.map(id => ({ name: id, value: id })),
             }]);
-            const slots: EquipmentSlot[] = ['weapon', 'armor', 'head', 'accessory'];
+            const slots: EquipmentSlot[] = ['weapon', 'armor', 'accessory'];
             const { slot } = await prompt<{ slot: EquipmentSlot }>([{
                 type: 'rawlist', name: 'slot', message: 'Slot:',
                 choices: slots.map(s => ({ name: s, value: s })),

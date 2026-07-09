@@ -23,6 +23,7 @@
 import { describe, it, expect, afterEach, vi } from 'vitest';
 
 import { createCharacter, allocateStatPoint } from '../index';
+import { emptyLoadout } from '../types';
 import { mockSequentialRng } from '../../test-utils/rng';
 import {
     equipItem,
@@ -149,7 +150,7 @@ describe('createCharacter — defaults and option pass-through', () => {
         const ch = buildPlayer();
         expect(ch.inventory).toEqual([]);
         expect(ch.currency).toBe(0);
-        expect(ch.equipment).toEqual({});
+        expect(ch.equipment).toEqual(emptyLoadout());
         expect(ch.effects).toEqual([]);
         expect(ch.knownCards).toEqual([]);
         expect(ch.procUnlocks).toBeUndefined();
@@ -181,7 +182,7 @@ describe('createCharacter — defaults and option pass-through', () => {
 describe('createCharacter — Spec 05 Q3 starting equipment fold-in', () => {
     it('folds a flat base-stat modifier into derivedStats at create-time', () => {
         mockSequentialRng(0.5);
-        const ch = buildPlayer({ equipment: { armor: armorFlatBody() } });
+        const ch = buildPlayer({ equipment: [armorFlatBody()] });
         // body 3 + 2 = 5 → physicalAttack = 5 × STAT_MULTIPLIERS.ATTACK.
         expect(ch.derivedStats.physicalAttack).toBe(5 * STAT_MULTIPLIERS.ATTACK);
         expect(ch.derivedStats.physicalDefense).toBe(5 * STAT_MULTIPLIERS.DEFENSE);
@@ -195,7 +196,7 @@ describe('createCharacter — Spec 05 Q3 starting equipment fold-in', () => {
 
     it('applies a passive equipment effect as a permanent ActiveEffect with sourceId = item.id', () => {
         mockSequentialRng(0.5);
-        const ch = buildPlayer({ equipment: { armor: armorWithPassive() } });
+        const ch = buildPlayer({ equipment: [armorWithPassive()] });
         const passive = ch.effects.find(e => e.sourceId === 'test-armor-with-passive');
         expect(passive).toBeDefined();
         expect(passive?.effectId).toBe('buff_regeneration');
@@ -209,7 +210,7 @@ describe('createCharacter — Spec 05 Q3 starting equipment fold-in', () => {
 describe('equipItem — slot replacement', () => {
     it('replaces the existing occupant and recomputes derivedStats', () => {
         mockSequentialRng(0.5);
-        const start = buildPlayer({ equipment: { armor: armorFlatBody() } });
+        const start = buildPlayer({ equipment: [armorFlatBody()] });
         // Before: body 3 + 2 flat = 5 effective → physicalAttack 5.
         expect(start.derivedStats.physicalAttack).toBe(5 * STAT_MULTIPLIERS.ATTACK);
 
@@ -225,7 +226,7 @@ describe('equipItem — slot replacement', () => {
         const prior = armorWithPassive();
         const replacement = armorFlatBody();
         mockSequentialRng(0.5);
-        const start = buildPlayer({ equipment: { armor: prior } });
+        const start = buildPlayer({ equipment: [prior] });
         expect(start.effects.some(e => e.sourceId === prior.id)).toBe(true);
 
         // Inject an unrelated combat effect that should survive the swap.
@@ -259,11 +260,11 @@ describe('unequipItem', () => {
 
     it('removes the slot, restores derivedStats, and clears its passive effects', () => {
         mockSequentialRng(0.5);
-        const start = buildPlayer({ equipment: { armor: armorWithPassive() } });
+        const start = buildPlayer({ equipment: [armorWithPassive()] });
         expect(start.effects.some(e => e.sourceId === 'test-armor-with-passive')).toBe(true);
 
         const stripped = unequipItem(start, 'armor');
-        expect(stripped.equipment.armor).toBeUndefined();
+        expect(stripped.equipment.armor).toBeNull();
         // Body modifier was zero on this armor (passive only), so derivedStats
         // returns to the bare-base-stat shape.
         expect(stripped.derivedStats.physicalAttack).toBe(3 * STAT_MULTIPLIERS.ATTACK);
@@ -275,15 +276,16 @@ describe('unequipItem', () => {
 
 describe('getEquipmentModifiers', () => {
     it('returns empty aggregates when no equipment is worn', () => {
-        const agg = getEquipmentModifiers({});
+        const agg = getEquipmentModifiers(emptyLoadout());
         expect(agg.statFlat.size).toBe(0);
         expect(agg.statMultBonus.size).toBe(0);
     });
 
     it('sums flat modifiers for the same stat across multiple slots', () => {
         const agg = getEquipmentModifiers({
-            armor: armorFlatBody(),     // +2 body flat
             weapon: weaponFlatPhysAtk(), // +4 physicalAttack flat
+            armor: armorFlatBody(),      // +2 body flat
+            accessories: [],
         });
         expect(agg.statFlat.get('body')).toBe(2);
         expect(agg.statFlat.get('physicalAttack')).toBe(4);
@@ -291,15 +293,18 @@ describe('getEquipmentModifiers', () => {
     });
 
     it('stores multipliers as (value − 1) in statMultBonus', () => {
-        const agg = getEquipmentModifiers({ armor: armorMultBody() }); // 1.5
+        const agg = getEquipmentModifiers({ weapon: null, armor: armorMultBody(), accessories: [] }); // 1.5
         expect(agg.statMultBonus.get('body')).toBeCloseTo(0.5);
         expect(agg.statFlat.size).toBe(0);
     });
 
     it('keeps flat and multiplier streams independent for the same stat', () => {
+        // The aggregator walks every worn piece regardless of slot kind, so the
+        // second body-modifying piece rides an accessory position here.
         const agg = getEquipmentModifiers({
-            armor:  armorFlatBody(),    // +2 body flat
-            weapon: armorMultBody(),    // +50% body multiplier (slot ignored by aggregator)
+            weapon: null,
+            armor:  armorFlatBody(),        // +2 body flat
+            accessories: [armorMultBody()], // +50% body multiplier
         });
         expect(agg.statFlat.get('body')).toBe(2);
         expect(agg.statMultBonus.get('body')).toBeCloseTo(0.5);

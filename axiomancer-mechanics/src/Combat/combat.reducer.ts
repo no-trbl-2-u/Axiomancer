@@ -35,7 +35,7 @@ import { CombatState } from './types';
  * enemies pre-Spec 07 do not carry equipment.
  */
 export function initializeCombat(player: Character, enemy: Enemy): CombatState {
-    const equipment = player.equipment ?? {};
+    const equipment = player.equipment;
     const itemTokens = aggregateCombatStartTokens(equipment);
     const setTokens = aggregateSetStartTokens(equipment);
     // Sum per-item + per-set start tokens additively (Spec 05e Q2 — no cap).

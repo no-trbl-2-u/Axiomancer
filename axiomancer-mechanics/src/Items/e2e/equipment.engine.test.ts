@@ -24,6 +24,7 @@ import { afterEach, describe, it, expect, vi } from 'vitest';
 
 import { createCharacter } from '../../Character/index';
 import { equipItem, unequipItem, getEquipmentModifiers } from '../../Character/equipment.reducer';
+import { emptyLoadout, type EquipmentLoadout } from '../../Character/types';
 import { FloatEye } from '../../Enemy/enemy.library';
 import { createGameStore } from '../../Game/store';
 import { nullAdapter } from '../../Game/persistence/null.adapter';
@@ -38,6 +39,18 @@ import { mockSequentialRng } from '../../test-utils/rng';
 import { Consumable, Equipment } from '../types';
 
 // ─── Fixtures ────────────────────────────────────────────────────────────────
+
+/** Build an `EquipmentLoadout` from an ordered list of pieces (Phase 18):
+ * weapon/armor slot in place, everything else fills accessory positions. */
+const toLoadout = (pieces: Equipment[]): EquipmentLoadout => {
+    const l = emptyLoadout();
+    for (const p of pieces) {
+        if (p.slot === 'weapon') l.weapon = p;
+        else if (p.slot === 'armor') l.armor = p;
+        else l.accessories.push(p);
+    }
+    return l;
+};
 
 const buildPlayer = () => createCharacter({
     name: 'TestPlayer',
@@ -64,7 +77,8 @@ const passiveCirclet: Equipment = {
     name: 'Circlet of Courage',
     description: 'Grants Briar Stance permanently while worn.',
     category: 'equipment',
-    slot: 'head',
+    slot: 'accessory',
+    accessoryKind: 'head',
     rarity: 'common',
     requiredLevel: 1,
     passiveEffects: ['buff_regeneration'],
@@ -144,7 +158,7 @@ describe('equipItem / unequipItem', () => {
         expect(equipped.baseStats.body).toBe(3);
 
         const unequipped = unequipItem(equipped, 'weapon');
-        expect(unequipped.equipment.weapon).toBeUndefined();
+        expect(unequipped.equipment.weapon).toBeNull();
         expect(unequipped.derivedStats.physicalAttack).toBe(3);
         expect(unequipped.derivedStats.physicalDefense).toBe(9);
     });
@@ -160,32 +174,45 @@ describe('equipItem / unequipItem', () => {
         expect(active.remainingDuration).toBe(-1);
         expect(active.sourceId).toBe(passiveCirclet.id);
 
-        const unequipped = unequipItem(equipped, 'head');
+        const unequipped = unequipItem(equipped, 'accessory', 0);
         expect(unequipped.effects).toHaveLength(0);
     });
 
     it('replacing an item in a slot drops the previous item\'s passive effects and statModifiers', () => {
+        // Weapon is a single-capacity slot: equipping a second weapon replaces
+        // the first in place (Phase 18), the direct analog of the pre-Phase-18
+        // per-slot replace this test asserts.
         const player = buildPlayer();
-        const withCirclet = equipItem(player, passiveCirclet);
-        expect(withCirclet.effects).toHaveLength(1);
+        const passiveWeapon: Equipment = {
+            id:             'eq_passive_weapon',
+            name:           'Passive Weapon',
+            description:    'Grants regeneration while worn.',
+            category:       'equipment',
+            slot:           'weapon',
+            rarity:         'common',
+            requiredLevel:  1,
+            passiveEffects: ['buff_regeneration'],
+        };
+        const withWeapon = equipItem(player, passiveWeapon);
+        expect(withWeapon.effects).toHaveLength(1);
 
-        const replacementCirclet: Equipment = {
-            ...passiveCirclet,
-            id:             'eq_other_circlet',
+        const replacementWeapon: Equipment = {
+            ...passiveWeapon,
+            id:             'eq_other_weapon',
             passiveEffects: ['buff_haste'],
         };
-        const replaced = equipItem(withCirclet, replacementCirclet);
+        const replaced = equipItem(withWeapon, replacementWeapon);
         expect(replaced.effects).toHaveLength(1);
         expect(replaced.effects[0]!.effectId).toBe('buff_haste');
-        expect(replaced.effects[0]!.sourceId).toBe('eq_other_circlet');
+        expect(replaced.effects[0]!.sourceId).toBe('eq_other_weapon');
     });
 
-    it('createCharacter accepts a starting equipment map and applies it via equipItem', () => {
+    it('createCharacter accepts a starting equipment list and applies it via equipItem', () => {
         const player = createCharacter({
             name: 'Equipped',
             level: 1,
             baseStats: { heart: 4, body: 3, mind: 2 },
-            equipment: { weapon: ironWeapon, head: passiveCirclet },
+            equipment: [ironWeapon, passiveCirclet],
         });
         expect(player.derivedStats.physicalAttack).toBe(6);
         expect(player.effects.some(e => e.sourceId === passiveCirclet.id)).toBe(true);
@@ -202,7 +229,7 @@ describe('initializeCombat: combat-start token seeding', () => {
             name: 'Seeded',
             level: 1,
             baseStats: { heart: 4, body: 3, mind: 2 },
-            equipment: { accessory: berserkerBand },
+            equipment: [berserkerBand],
         });
         const state = initializeCombat(player, FloatEye);
         expect(state.combatResources).toEqual({
@@ -215,7 +242,7 @@ describe('initializeCombat: combat-start token seeding', () => {
             name: 'NoTokens',
             level: 1,
             baseStats: { heart: 4, body: 3, mind: 2 },
-            equipment: { weapon: ironWeapon },
+            equipment: [ironWeapon],
         });
         const state = initializeCombat(player, FloatEye);
         expect(state.combatResources).toEqual({
@@ -235,12 +262,13 @@ describe('initializeCombat: combat-start token seeding', () => {
             name: 'Offhand',
             description: '',
             category: 'equipment',
-            slot: 'hands',
+            slot: 'accessory',
+            accessoryKind: 'hands',
             rarity: 'common',
             requiredLevel: 1,
             resourceInteraction: { combatStartTokens: { body: 4, heart: 1 } },
         };
-        const tokens = aggregateCombatStartTokens({ accessory, hands: offhand });
+        const tokens = aggregateCombatStartTokens(toLoadout([accessory, offhand]));
         expect(tokens).toEqual({
             heart: 1, body: 5, mind: 0, fallacy: 0, paradox: 2,
         });
@@ -253,7 +281,7 @@ describe('initializeCombat: combat-start token seeding', () => {
 
 describe('generateBasicActionResources: equipment generation bonus', () => {
     it('applies matching generationBonus entries on top of the base table', () => {
-        const equipment = { accessory: berserkerBand };
+        const equipment = toLoadout([berserkerBand]);
         const base = { heart: 0, body: 0, mind: 0, fallacy: 0, paradox: 0 };
         // body attack hit base = +3 body; bonus = +2 body on hit → 5
         const hit = generateBasicActionResources(base, 'body', 'hit', equipment);
@@ -269,7 +297,8 @@ describe('generateBasicActionResources: equipment generation bonus', () => {
             name: 'Any',
             description: '',
             category: 'equipment',
-            slot: 'feet',
+            slot: 'accessory',
+            accessoryKind: 'feet',
             rarity: 'common',
             requiredLevel: 1,
             resourceInteraction: {
@@ -277,9 +306,10 @@ describe('generateBasicActionResources: equipment generation bonus', () => {
             },
         };
         const base = { heart: 0, body: 0, mind: 0, fallacy: 0, paradox: 0 };
-        expect(applyEquipmentGenerationBonus(base, { feet: universal }, 'hit').mind).toBe(1);
-        expect(applyEquipmentGenerationBonus(base, { feet: universal }, 'miss').mind).toBe(1);
-        expect(applyEquipmentGenerationBonus(base, { feet: universal }, 'defend').mind).toBe(1);
+        const loadout = toLoadout([universal]);
+        expect(applyEquipmentGenerationBonus(base, loadout, 'hit').mind).toBe(1);
+        expect(applyEquipmentGenerationBonus(base, loadout, 'miss').mind).toBe(1);
+        expect(applyEquipmentGenerationBonus(base, loadout, 'defend').mind).toBe(1);
     });
 });
 
@@ -289,7 +319,7 @@ describe('generateBasicActionResources: equipment generation bonus', () => {
 
 describe('Equipment proc triggers', () => {
     it('getEquipmentProcTriggers returns onHit/onDefend entries from every equipped piece', () => {
-        const equipment = { weapon: guaranteedHitProc };
+        const equipment = toLoadout([guaranteedHitProc]);
         expect(getEquipmentProcTriggers(equipment, 'attack')).toHaveLength(1);
         expect(getEquipmentProcTriggers(equipment, 'defend')).toHaveLength(0);
     });
@@ -301,7 +331,7 @@ describe('Equipment proc triggers', () => {
 
 describe('Invariants', () => {
     it('getEquipmentModifiers on an empty slot map returns zeroed maps', () => {
-        const agg = getEquipmentModifiers({});
+        const agg = getEquipmentModifiers(emptyLoadout());
         expect(agg.statFlat.size).toBe(0);
         expect(agg.statMultBonus.size).toBe(0);
     });
@@ -334,7 +364,7 @@ describe('Game store lifecycle: equipment & consumables with nullAdapter', () =>
         expect(store.getState().player.derivedStats.physicalAttack).toBe(6);
 
         store.getState().unequipItem('weapon');
-        expect(store.getState().player.equipment.weapon).toBeUndefined();
+        expect(store.getState().player.equipment.weapon).toBeNull();
         expect(store.getState().player.derivedStats.physicalAttack).toBe(3);
 
         // Phase 51: EQUIP_ITEM and UNEQUIP_ITEM are UI-tier actions and are
@@ -377,7 +407,7 @@ describe('Game store lifecycle: equipment & consumables with nullAdapter', () =>
             name: 'Equipped',
             level: 1,
             baseStats: { heart: 4, body: 3, mind: 2 },
-            equipment: { accessory: berserkerBand },
+            equipment: [berserkerBand],
         });
         // Combat is decoupled from the store now; build the CombatState
         // directly to inspect the combat-start token seeding.

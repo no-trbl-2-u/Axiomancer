@@ -58,6 +58,7 @@ export function equipmentFromTemplate(template: EquipmentTemplate): Equipment {
         description: template.description,
         category: 'equipment',
         slot: template.slot,
+        ...(template.accessoryKind ? { accessoryKind: template.accessoryKind } : {}),
         rarity: 'common',
         requiredLevel: template.requiredLevel,
         statModifiers: template.baseStatModifiers ?? [],

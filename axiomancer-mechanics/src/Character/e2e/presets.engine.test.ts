@@ -13,6 +13,7 @@ import {
     characterPresets, getPresetById, buildCharacterFromPreset,
 } from '../presets';
 import { mockSequentialRng } from '../../test-utils/rng';
+import { emptyLoadout } from '../types';
 import type { Consumable } from '../../Items/types';
 
 afterEach(() => {
@@ -40,7 +41,7 @@ describe('buildCharacterFromPreset', () => {
         expect(player.name).toBe('Apprentice');
         expect(player.level).toBe(1);
         expect(player.baseStats).toEqual({ heart: 5, body: 5, mind: 5 });
-        expect(player.equipment).toEqual({});
+        expect(player.equipment).toEqual(emptyLoadout());
         expect(player.knownCards).toHaveLength(7); // Phase 108 — includes Befriend starting card
         expect(player.inventory).toHaveLength(1);
         expect(player.inventory[0]?.id).toBe('minor-healing-potion');
@@ -56,7 +57,8 @@ describe('buildCharacterFromPreset', () => {
         expect(player.knownCards).toHaveLength(11); // spec 32 v3 recipe: 7 openers + 3 mid-tier + the synergy payoff
         expect(player.equipment.weapon?.id).toBe('iron-blade');
         expect(player.equipment.armor?.id).toBe('hide-vest');
-        expect(player.equipment.head?.id).toBe('leather-cap');
+        // leather-cap re-slotted from head → accessory (Phase 18).
+        expect(player.equipment.accessories[0]?.id).toBe('leather-cap');
         expect(player.currency).toBe(25);
     });
 
@@ -69,7 +71,8 @@ describe('buildCharacterFromPreset', () => {
         expect(player.knownCards).toContain('resonance-detonation');
         expect(player.equipment.weapon?.id).toBe('steel-blade');
         expect(player.equipment.armor?.id).toBe('chain-mail');
-        expect(player.equipment.head?.id).toBe('chain-coif');
+        // chain-coif re-slotted from head → accessory (Phase 18).
+        expect(player.equipment.accessories[0]?.id).toBe('chain-coif');
         expect(player.currency).toBe(75);
     });
 

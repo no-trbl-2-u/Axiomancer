@@ -648,7 +648,7 @@ export const headModPool: Modifier[] = [
         id: 'hm-max-hp',
         name: 'Resilient Mind',
         hiddenRarity: 'common_mod',
-        validSlots: ['head'],
+        validSlots: ['accessory'],
         levelTiers: [
             { levelReq: 1,  range: [5, 15] },
             { levelReq: 10, range: [16, 35] },
@@ -668,7 +668,7 @@ export const headModPool: Modifier[] = [
         id: 'hm-mind-gen',
         name: 'Clear Thought',
         hiddenRarity: 'uncommon_mod',
-        validSlots: ['head'],
+        validSlots: ['accessory'],
         levelTiers: [
             { levelReq: 1,  range: [1, 1] },
             { levelReq: 10, range: [1, 2] },
@@ -684,7 +684,7 @@ export const headModPool: Modifier[] = [
         id: 'hm-effect-dur',
         name: 'Focused Channel',
         hiddenRarity: 'rare_mod',
-        validSlots: ['head'],
+        validSlots: ['accessory'],
         levelTiers: [
             { levelReq: 10, range: [1, 1] },
         ],
@@ -697,7 +697,7 @@ export const headModPool: Modifier[] = [
         id: 'hm-mental-defense',
         name: 'Warded Crown',
         hiddenRarity: 'common_mod',
-        validSlots: ['head'],
+        validSlots: ['accessory'],
         levelTiers: [
             { levelReq: 1,  range: [2, 5] },
             { levelReq: 10, range: [6, 12] },
@@ -716,7 +716,7 @@ export const headModPool: Modifier[] = [
         id: 'hm-insight',
         name: 'Insightful',
         hiddenRarity: 'uncommon_mod',
-        validSlots: ['head'],
+        validSlots: ['accessory'],
         levelTiers: [
             { levelReq: 5,  range: [1, 2] },
             { levelReq: 20, range: [3, 5] },
@@ -733,7 +733,7 @@ export const headModPool: Modifier[] = [
         id: 'hm-foresight',
         name: 'Oracle Sight',
         hiddenRarity: 'rare_mod',
-        validSlots: ['head'],
+        validSlots: ['accessory'],
         levelTiers: [
             { levelReq: 20, range: [1, 1] },
             { levelReq: 40, range: [1, 1] },
@@ -749,7 +749,7 @@ export const headModPool: Modifier[] = [
         id: 'hm-effect-duration',
         name: 'Lingering Sigil',
         hiddenRarity: 'rare_mod',
-        validSlots: ['head'],
+        validSlots: ['accessory'],
         levelTiers: [
             { levelReq: 5,  range: [1, 1] },
             { levelReq: 25, range: [1, 1] },
@@ -764,7 +764,7 @@ export const headModPool: Modifier[] = [
         id: 'hm-mind-resist',
         name: 'Stoic Mind',
         hiddenRarity: 'common_mod',
-        validSlots: ['head'],
+        validSlots: ['accessory'],
         levelTiers: [
             { levelReq: 1,  range: [1, 1] },
             { levelReq: 20, range: [1, 1] },
@@ -779,7 +779,7 @@ export const headModPool: Modifier[] = [
         id: 'hm-heart-focus',
         name: 'Empathic Crown',
         hiddenRarity: 'uncommon_mod',
-        validSlots: ['head'],
+        validSlots: ['accessory'],
         levelTiers: [
             { levelReq: 1,  range: [1, 2] },
             { levelReq: 15, range: [3, 5] },
@@ -797,7 +797,7 @@ export const headModPool: Modifier[] = [
         id: 'hm-oracle',
         name: 'Oracle\'s Eye',
         hiddenRarity: 'rare_mod',
-        validSlots: ['head'],
+        validSlots: ['accessory'],
         levelTiers: [
             { levelReq: 20, range: [1, 1] },
             { levelReq: 40, range: [1, 1] },
@@ -812,7 +812,7 @@ export const headModPool: Modifier[] = [
         id: 'hm-open-mind',
         name: 'Open Mind',
         hiddenRarity: 'uncommon_mod',
-        validSlots: ['head'],
+        validSlots: ['accessory'],
         levelTiers: [
             { levelReq: 5,  range: [1, 1] },
             { levelReq: 25, range: [1, 1] },
@@ -832,7 +832,7 @@ export const bodyModPool: Modifier[] = [
         id: 'bm-armor',
         name: 'Fortified',
         hiddenRarity: 'common_mod',
-        validSlots: ['body'],
+        validSlots: ['armor'],
         levelTiers: [
             { levelReq: 1,  range: [2, 5] },
             { levelReq: 10, range: [6, 12] },
@@ -849,7 +849,7 @@ export const bodyModPool: Modifier[] = [
         id: 'bm-heart-gen',
         name: 'Steady Heart',
         hiddenRarity: 'uncommon_mod',
-        validSlots: ['body'],
+        validSlots: ['armor'],
         levelTiers: [
             { levelReq: 1,  range: [1, 1] },
             { levelReq: 10, range: [1, 2] },
@@ -865,7 +865,7 @@ export const bodyModPool: Modifier[] = [
         id: 'bm-reflect',
         name: 'Thorned',
         hiddenRarity: 'rare_mod',
-        validSlots: ['body'],
+        validSlots: ['armor'],
         levelTiers: [
             { levelReq: 10, range: [1, 3] },
             { levelReq: 20, range: [4, 7] },
@@ -881,7 +881,7 @@ export const bodyModPool: Modifier[] = [
         id: 'bm-vitality',
         name: 'Stalwart',
         hiddenRarity: 'common_mod',
-        validSlots: ['body'],
+        validSlots: ['armor'],
         levelTiers: [
             { levelReq: 1,  range: [1, 2] },
             { levelReq: 10, range: [3, 5] },
@@ -900,7 +900,7 @@ export const bodyModPool: Modifier[] = [
         id: 'bm-damage-reduction',
         name: 'Bulwark',
         hiddenRarity: 'rare_mod',
-        validSlots: ['body'],
+        validSlots: ['armor'],
         levelTiers: [
             { levelReq: 15, range: [1, 1] },
             { levelReq: 35, range: [1, 1] },
@@ -915,7 +915,7 @@ export const bodyModPool: Modifier[] = [
         id: 'bm-thorns-proc',
         name: 'Brazen Thorns',
         hiddenRarity: 'uncommon_mod',
-        validSlots: ['body'],
+        validSlots: ['armor'],
         levelTiers: [
             { levelReq: 10, range: [1, 1] },
             { levelReq: 30, range: [1, 1] },
@@ -937,7 +937,7 @@ export const bodyModPool: Modifier[] = [
         id: 'bm-taunt-proc',
         name: 'Provoking Plate',
         hiddenRarity: 'uncommon_mod',
-        validSlots: ['body'],
+        validSlots: ['armor'],
         levelTiers: [
             { levelReq: 5,  range: [1, 1] },
             { levelReq: 25, range: [1, 1] },
@@ -957,7 +957,7 @@ export const bodyModPool: Modifier[] = [
         id: 'bm-barrier-proc',
         name: 'Wardweave',
         hiddenRarity: 'rare_mod',
-        validSlots: ['body'],
+        validSlots: ['armor'],
         levelTiers: [
             { levelReq: 10, range: [1, 1] },
             { levelReq: 30, range: [1, 1] },
@@ -977,7 +977,7 @@ export const bodyModPool: Modifier[] = [
         id: 'bm-heart-start',
         name: 'Resolute Bearing',
         hiddenRarity: 'uncommon_mod',
-        validSlots: ['body'],
+        validSlots: ['armor'],
         levelTiers: [
             { levelReq: 1,  range: [1, 2] },
             { levelReq: 20, range: [2, 4] },
@@ -995,7 +995,7 @@ export const bodyModPool: Modifier[] = [
         id: 'bm-defend-up',
         name: 'Bracing Plate',
         hiddenRarity: 'common_mod',
-        validSlots: ['body'],
+        validSlots: ['armor'],
         levelTiers: [
             { levelReq: 1,  range: [1, 1] },
             { levelReq: 20, range: [1, 1] },
@@ -1015,7 +1015,7 @@ export const handsModPool: Modifier[] = [
         id: 'hndm-body-gen',
         name: 'Iron Grip',
         hiddenRarity: 'common_mod',
-        validSlots: ['hands'],
+        validSlots: ['accessory'],
         levelTiers: [
             { levelReq: 1,  range: [1, 1] },
             { levelReq: 10, range: [1, 2] },
@@ -1031,7 +1031,7 @@ export const handsModPool: Modifier[] = [
         id: 'hndm-crit',
         name: 'Precise Hands',
         hiddenRarity: 'uncommon_mod',
-        validSlots: ['hands'],
+        validSlots: ['accessory'],
         levelTiers: [
             { levelReq: 1,  range: [1, 2] },
             { levelReq: 10, range: [3, 5] },
@@ -1045,7 +1045,7 @@ export const handsModPool: Modifier[] = [
         id: 'hndm-block',
         name: 'Shield Training',
         hiddenRarity: 'rare_mod',
-        validSlots: ['hands'],
+        validSlots: ['accessory'],
         levelTiers: [
             { levelReq: 5, range: [1, 1] },
         ],
@@ -1063,7 +1063,7 @@ export const handsModPool: Modifier[] = [
         id: 'hndm-strength',
         name: 'Crushing Grasp',
         hiddenRarity: 'common_mod',
-        validSlots: ['hands'],
+        validSlots: ['accessory'],
         levelTiers: [
             { levelReq: 1,  range: [1, 3] },
             { levelReq: 10, range: [4, 7] },
@@ -1082,7 +1082,7 @@ export const handsModPool: Modifier[] = [
         id: 'hndm-crit-rate',
         name: 'Deft Fingers',
         hiddenRarity: 'uncommon_mod',
-        validSlots: ['hands'],
+        validSlots: ['accessory'],
         levelTiers: [
             { levelReq: 10, range: [1, 1] },
             { levelReq: 30, range: [1, 1] },
@@ -1098,7 +1098,7 @@ export const handsModPool: Modifier[] = [
         id: 'hndm-counter',
         name: 'Riposte Form',
         hiddenRarity: 'rare_mod',
-        validSlots: ['hands'],
+        validSlots: ['accessory'],
         levelTiers: [
             { levelReq: 20, range: [1, 1] },
             { levelReq: 40, range: [1, 1] },
@@ -1119,7 +1119,7 @@ export const handsModPool: Modifier[] = [
         id: 'hndm-disarm',
         name: 'Disarming Grip',
         hiddenRarity: 'rare_mod',
-        validSlots: ['hands'],
+        validSlots: ['accessory'],
         levelTiers: [
             { levelReq: 10, range: [1, 1] },
             { levelReq: 30, range: [1, 1] },
@@ -1139,7 +1139,7 @@ export const handsModPool: Modifier[] = [
         id: 'hndm-blinding',
         name: 'Blinding Flurry',
         hiddenRarity: 'uncommon_mod',
-        validSlots: ['hands'],
+        validSlots: ['accessory'],
         levelTiers: [
             { levelReq: 5,  range: [1, 1] },
             { levelReq: 25, range: [1, 1] },
@@ -1159,7 +1159,7 @@ export const handsModPool: Modifier[] = [
         id: 'hndm-mind-gen',
         name: 'Calculating Hands',
         hiddenRarity: 'common_mod',
-        validSlots: ['hands'],
+        validSlots: ['accessory'],
         levelTiers: [
             { levelReq: 1,  range: [1, 1] },
             { levelReq: 10, range: [1, 2] },
@@ -1178,7 +1178,7 @@ export const handsModPool: Modifier[] = [
         id: 'hndm-sap',
         name: 'Sapping Grip',
         hiddenRarity: 'common_mod',
-        validSlots: ['hands'],
+        validSlots: ['accessory'],
         levelTiers: [
             { levelReq: 1,  range: [1, 1] },
             { levelReq: 20, range: [1, 1] },
@@ -1198,7 +1198,7 @@ export const handsModPool: Modifier[] = [
         id: 'hndm-hobbling',
         name: 'Ensnaring Grip',
         hiddenRarity: 'uncommon_mod',
-        validSlots: ['hands'],
+        validSlots: ['accessory'],
         levelTiers: [
             { levelReq: 10, range: [1, 1] },
             { levelReq: 30, range: [1, 1] },
@@ -1218,7 +1218,7 @@ export const handsModPool: Modifier[] = [
         id: 'hndm-toppling',
         name: 'Toppling Strike',
         hiddenRarity: 'uncommon_mod',
-        validSlots: ['hands'],
+        validSlots: ['accessory'],
         levelTiers: [
             { levelReq: 10, range: [1, 1] },
             { levelReq: 30, range: [1, 1] },
@@ -1238,7 +1238,7 @@ export const handsModPool: Modifier[] = [
         id: 'hndm-enfeeble',
         name: 'Enfeebling Grip',
         hiddenRarity: 'uncommon_mod',
-        validSlots: ['hands'],
+        validSlots: ['accessory'],
         levelTiers: [
             { levelReq: 15, range: [1, 1] },
             { levelReq: 35, range: [1, 1] },
@@ -1258,7 +1258,7 @@ export const handsModPool: Modifier[] = [
         id: 'hndm-enthrall',
         name: 'Enthralling Touch',
         hiddenRarity: 'rare_mod',
-        validSlots: ['hands'],
+        validSlots: ['accessory'],
         levelTiers: [
             { levelReq: 20, range: [1, 1] },
             { levelReq: 40, range: [1, 1] },
@@ -1283,7 +1283,7 @@ export const feetModPool: Modifier[] = [
         id: 'fm-evasion',
         name: 'Swift Feet',
         hiddenRarity: 'common_mod',
-        validSlots: ['feet'],
+        validSlots: ['accessory'],
         levelTiers: [
             { levelReq: 1,  range: [1, 3] },
             { levelReq: 10, range: [4, 7] },
@@ -1300,7 +1300,7 @@ export const feetModPool: Modifier[] = [
         id: 'fm-cs-tokens',
         name: 'Ready Stride',
         hiddenRarity: 'uncommon_mod',
-        validSlots: ['feet'],
+        validSlots: ['accessory'],
         levelTiers: [
             { levelReq: 1,  range: [1, 1] },
             { levelReq: 10, range: [1, 2] },
@@ -1319,7 +1319,7 @@ export const feetModPool: Modifier[] = [
         id: 'fm-initiative',
         name: 'First Step',
         hiddenRarity: 'rare_mod',
-        validSlots: ['feet'],
+        validSlots: ['accessory'],
         levelTiers: [
             { levelReq: 5,  range: [1, 3] },
             { levelReq: 20, range: [4, 7] },
@@ -1333,7 +1333,7 @@ export const feetModPool: Modifier[] = [
         id: 'fm-evasion-proc',
         name: 'Phantom Step',
         hiddenRarity: 'uncommon_mod',
-        validSlots: ['feet'],
+        validSlots: ['accessory'],
         levelTiers: [
             { levelReq: 10, range: [1, 1] },
             { levelReq: 30, range: [1, 1] },
@@ -1349,7 +1349,7 @@ export const feetModPool: Modifier[] = [
         id: 'fm-physical-save',
         name: 'Sure Footing',
         hiddenRarity: 'common_mod',
-        validSlots: ['feet'],
+        validSlots: ['accessory'],
         levelTiers: [
             { levelReq: 1,  range: [2, 4] },
             { levelReq: 15, range: [5, 9] },
@@ -1367,7 +1367,7 @@ export const feetModPool: Modifier[] = [
         id: 'fm-haste',
         name: 'Fleetfoot',
         hiddenRarity: 'rare_mod',
-        validSlots: ['feet'],
+        validSlots: ['accessory'],
         levelTiers: [
             { levelReq: 20, range: [1, 1] },
             { levelReq: 40, range: [1, 1] },
@@ -1383,7 +1383,7 @@ export const feetModPool: Modifier[] = [
         id: 'fm-stealth',
         name: 'Shadowstep',
         hiddenRarity: 'rare_mod',
-        validSlots: ['feet'],
+        validSlots: ['accessory'],
         levelTiers: [
             { levelReq: 10, range: [1, 1] },
             { levelReq: 30, range: [1, 1] },
@@ -1398,7 +1398,7 @@ export const feetModPool: Modifier[] = [
         id: 'fm-initiative-tokens',
         name: 'Vanguard Stride',
         hiddenRarity: 'uncommon_mod',
-        validSlots: ['feet'],
+        validSlots: ['accessory'],
         levelTiers: [
             { levelReq: 1,  range: [1, 1] },
             { levelReq: 20, range: [1, 2] },
@@ -1415,7 +1415,7 @@ export const feetModPool: Modifier[] = [
         id: 'fm-luck',
         name: 'Fortune\'s Tread',
         hiddenRarity: 'uncommon_mod',
-        validSlots: ['feet'],
+        validSlots: ['accessory'],
         levelTiers: [
             { levelReq: 1,  range: [1, 2] },
             { levelReq: 20, range: [3, 5] },
@@ -1900,7 +1900,7 @@ export const uniqueModPool: Modifier[] = [
         id: 'um-phoenix-heart',
         name: 'Phoenix Heart',
         hiddenRarity: 'rare_mod',
-        validSlots: ['armor', 'body', 'accessory'],
+        validSlots: ['armor', 'accessory'],
         levelTiers: [
             { levelReq: 25, range: [1, 1] },
             { levelReq: 45, range: [1, 1] },
@@ -1922,7 +1922,7 @@ export const uniqueModPool: Modifier[] = [
         id: 'um-gorgon-stare',
         name: 'Gorgon Stare',
         hiddenRarity: 'rare_mod',
-        validSlots: ['weapon', 'head'],
+        validSlots: ['weapon', 'accessory'],
         levelTiers: [
             { levelReq: 30, range: [4, 8] },
             { levelReq: 50, range: [9, 16] },
@@ -1972,18 +1972,31 @@ export const uniqueModPool: Modifier[] = [
 
 // ─── Slot → procedural pool map (Spec 05d §4 helper) ─────────────────────────
 
+/** Concatenate pools, dropping later duplicates by mod `id` (Phase 18 merge). */
+const dedupeModsById = (...pools: Modifier[][]): Modifier[] => {
+    const seen = new Set<string>();
+    const out: Modifier[] = [];
+    for (const pool of pools) {
+        for (const mod of pool) {
+            if (seen.has(mod.id)) continue;
+            seen.add(mod.id);
+            out.push(mod);
+        }
+    }
+    return out;
+};
+
 /**
- * Procedural mod pools keyed by slot. `rollModifiers` (`item.factory.ts`)
- * draws from these; `uniqueModPool` is excluded by design (Q4).
+ * Procedural mod pools keyed by the Phase-18 3-slot model. `rollModifiers`
+ * (`item.factory.ts`) draws from these; `uniqueModPool` is excluded by design
+ * (Q4). The legacy per-slot pools (`headModPool` / `handsModPool` /
+ * `feetModPool` fold into `accessory`; `bodyModPool` folds into `armor`) are
+ * kept as named exports for content tooling but merged here (dedup by mod id).
  */
 export const MOD_POOLS: Record<EquipmentSlot, Modifier[]> = {
     weapon:    weaponModPool,
-    armor:     armorModPool,
-    head:      headModPool,
-    body:      bodyModPool,
-    hands:     handsModPool,
-    feet:      feetModPool,
-    accessory: accessoryModPool,
+    armor:     dedupeModsById(armorModPool, bodyModPool),
+    accessory: dedupeModsById(accessoryModPool, headModPool, handsModPool, feetModPool),
 };
 
 // ─── Unified registry for O(1) resolve-time lookups ──────────────────────────

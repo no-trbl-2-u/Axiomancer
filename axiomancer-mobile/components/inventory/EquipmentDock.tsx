@@ -7,19 +7,18 @@ import { PaperDoll } from './PaperDoll';
 import { EquipmentSlot } from './EquipmentSlot';
 import type { EquipmentDockViewModel, EquipmentDockSlot } from '@/state/presenters/inventory.engine';
 
-/** Pair the flat slot list into 4 rows of {left, right} per the design grid. */
+/** Pair the flat slot list into rows of {left, right} per the design grid. */
 function pairDockRows(
     slots: readonly EquipmentDockSlot[],
 ): readonly (readonly [EquipmentDockSlot, EquipmentDockSlot | null])[] {
-    // Design order: head, body / weapon, armor / hands, accessory / feet, —.
-    // Presenter ships the 7 slots in that order (state/presenters/inventory.engine.ts
-    // `DOCK_SLOT_ORDER`). Pair index 0..1, 2..3, 4..5, and trailing 6 alone.
-    return [
-        [slots[0], slots[1]] as const,
-        [slots[2], slots[3]] as const,
-        [slots[4], slots[5]] as const,
-        [slots[6], null] as const,
-    ];
+    // Chunk two-per-row in `DOCK_SLOT_ORDER` order, padding a trailing odd slot
+    // with `null` (Phase 18: the dock ships 3 slots — Weapon, Armor, Trinket —
+    // so this yields [weapon, armor] and [accessory, null]).
+    const rows: (readonly [EquipmentDockSlot, EquipmentDockSlot | null])[] = [];
+    for (let i = 0; i < slots.length; i += 2) {
+        rows.push([slots[i], slots[i + 1] ?? null] as const);
+    }
+    return rows;
 }
 
 interface EquipmentDockProps {

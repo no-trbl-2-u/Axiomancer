@@ -1,4 +1,5 @@
 import { createCharacter } from '../Character';
+import { getEquippedItems } from '../Character/equipment.reducer';
 import type { BaseStats } from '../Character/types';
 import type { EquipmentSlot } from '../Items/types';
 import type { ItemRarity } from '../Items/types';
@@ -27,7 +28,7 @@ export function devSetLevel(store: Store, targetLevel: number): DevResult {
         baseStats: { ...p.baseStats },
         inventory: [...p.inventory],
         currency: p.currency,
-        equipment: { ...p.equipment },
+        equipment: getEquippedItems(p.equipment),
         knownCards: [...p.knownCards],
         effects: [...p.effects],
         procUnlocks: p.procUnlocks,
@@ -53,7 +54,7 @@ export function devSetStats(store: Store, stats: Partial<BaseStats>): DevResult 
         baseStats: next,
         inventory: [...p.inventory],
         currency: p.currency,
-        equipment: { ...p.equipment },
+        equipment: getEquippedItems(p.equipment),
         knownCards: [...p.knownCards],
         effects: [...p.effects],
         procUnlocks: p.procUnlocks,

@@ -40,6 +40,7 @@ export const uniqueTemplates: UniqueItemTemplate[] = [
         name: 'Paradox Loop',
         description: 'A circlet that contains a sentence which forever ends without finishing.',
         slot: 'accessory',
+        accessoryKind: 'charm',
         requiredLevel: 15,
         baseStatModifiers: [
             { stat: 'mind', value: 2 },
@@ -112,6 +113,7 @@ export const uniqueTemplates: UniqueItemTemplate[] = [
         name: 'Oracle Eye',
         description: 'A pendant set with an eye that blinks a heartbeat before the future does.',
         slot: 'accessory',
+        accessoryKind: 'charm',
         requiredLevel: 40,
         baseStatModifiers: [
             { stat: 'mind', value: 4 },
@@ -129,7 +131,7 @@ export const uniqueTemplates: UniqueItemTemplate[] = [
         id: 'titans-girdle',
         name: "Titan's Girdle",
         description: 'A belt of fused alloy plate that makes its wearer immovable.',
-        slot: 'body',
+        slot: 'armor',
         requiredLevel: 45,
         setMembership: 'embers-of-rebirth',
         baseStatModifiers: [

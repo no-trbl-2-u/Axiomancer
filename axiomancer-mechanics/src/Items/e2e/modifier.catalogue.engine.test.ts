@@ -58,7 +58,9 @@ afterEach(() => vi.restoreAllMocks());
 
 describe('modifier.catalogue: inventory (Spec 05d §4 / §7)', () => {
     it('exports one pool per equipment slot via MOD_POOLS', () => {
-        const slots = ['weapon', 'armor', 'head', 'body', 'hands', 'feet', 'accessory'] as const;
+        // Phase 18: MOD_POOLS collapsed to the 3 surviving slots (the legacy
+        // head/hands/feet pools merged into `accessory`, body into `armor`).
+        const slots = ['weapon', 'armor', 'accessory'] as const;
         for (const slot of slots) {
             expect(MOD_POOLS[slot]).toBeDefined();
             expect(MOD_POOLS[slot].length).toBeGreaterThanOrEqual(3);

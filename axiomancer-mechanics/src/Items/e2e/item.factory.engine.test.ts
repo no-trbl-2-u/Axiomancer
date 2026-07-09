@@ -39,6 +39,7 @@ import {
     getTemplatesBySlot,
     rarityWeightTable,
 } from '../index';
+import type { EquipmentSlot } from '../types';
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -68,26 +69,37 @@ describe('equipment.templates: inventory (Spec 05c §6 / Phase 152)', () => {
         expect(equipmentTemplates).toHaveLength(56);
     });
 
-    it('every slot ships 3 base templates at lvl 1 / 10 / 20 + 5 affixed variants, ascending', () => {
-        const slots = ['weapon', 'armor', 'head', 'body', 'hands', 'feet', 'accessory'] as const;
-        for (const slot of slots) {
+    it('every slot ships base templates at lvl 1 / 10 / 20 + curated affixed variants, ascending', () => {
+        // Phase 18 folded the 7 legacy slots into 3. Each surviving slot now
+        // bundles the templates of every legacy slot that folded into it:
+        //   weapon    ← weapon                          (3 base + 5 affixed = 8)
+        //   armor     ← armor + body                    (6 base + 10 affixed = 16)
+        //   accessory ← head + hands + feet + accessory (12 base + 20 affixed = 32)
+        // Every legacy family still contributes its own lvl-1/10/20 base ladder,
+        // so the *set* of base levels stays {1,10,20} even where the count grew.
+        const perSlot: Record<EquipmentSlot, { total: number; affixed: number }> = {
+            weapon:    { total: 8,  affixed: 5 },
+            armor:     { total: 16, affixed: 10 },
+            accessory: { total: 32, affixed: 20 },
+        };
+        for (const slot of Object.keys(perSlot) as EquipmentSlot[]) {
+            const { total, affixed: affixedCount } = perSlot[slot];
             const list = getTemplatesBySlot(slot);
-            expect(list).toHaveLength(8); // 3 base + 5 affixed variants
+            expect(list, slot).toHaveLength(total);
             // `getTemplatesBySlot` sorts ascending by requiredLevel.
             const levels = list.map(t => t.requiredLevel);
             const sorted = [...levels].sort((a, b) => a - b);
             expect(levels).toEqual(sorted);
 
-            // The three *base* (affix-free) templates cover lvl 1/10/20.
-            const baseLevels = list
+            // The *base* (affix-free) templates cover lvl 1/10/20.
+            const baseLevels = [...new Set(list
                 .filter(t => !t.prefixId && !t.suffixId)
-                .map(t => t.requiredLevel)
-                .sort((a, b) => a - b);
+                .map(t => t.requiredLevel))].sort((a, b) => a - b);
             expect(baseLevels).toEqual([1, 10, 20]);
 
-            // Exactly 5 curated affixed variants per slot.
+            // Curated affixed variants per slot.
             const affixed = list.filter(t => t.prefixId || t.suffixId);
-            expect(affixed, `slot ${slot} affixed count`).toHaveLength(5);
+            expect(affixed, `slot ${slot} affixed count`).toHaveLength(affixedCount);
         }
     });
 

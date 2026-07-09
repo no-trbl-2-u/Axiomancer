@@ -88,14 +88,15 @@ describe('affix.library: invariants', () => {
     });
 
     it('every slot has at least one prefix and one suffix at a high level', () => {
-        const slots = ['weapon', 'armor', 'head', 'body', 'hands', 'feet', 'accessory'] as const;
+        // Phase 18 collapsed the 7 legacy slots to 3 (head/hands/feet → accessory,
+        // body → armor). Every remaining slot still carries affix coverage.
+        const slots = ['weapon', 'armor', 'accessory'] as const;
         for (const slot of slots) {
             const pre = allAffixes.filter(a =>
                 a.role === 'prefix' && a.validSlots.includes(slot) && a.minLevel <= 50);
             const suf = allAffixes.filter(a =>
                 a.role === 'suffix' && a.validSlots.includes(slot) && a.minLevel <= 50);
-            // Weapon/armor/body/head/hands/feet/accessory all carry coverage now.
-            // (head/weapon-only slots may lean on one role — assert union > 0.)
+            // (Some slots may lean on one role — assert the union is non-empty.)
             expect(pre.length + suf.length, `slot ${slot} affix coverage`).toBeGreaterThan(0);
         }
     });
@@ -155,8 +156,9 @@ describe('affixesForSlot', () => {
     });
 
     it('returns no prefixes for a slot with only suffix coverage at that level', () => {
-        // Sanity: a low-level head slot still surfaces at least one suffix.
-        expect(affixesForSlot('head', 1, 'suffix').length).toBeGreaterThanOrEqual(0);
+        // Sanity: a low-level accessory slot (Phase 18 home of the legacy head
+        // affixes) still surfaces suffix coverage.
+        expect(affixesForSlot('accessory', 1, 'suffix').length).toBeGreaterThanOrEqual(0);
     });
 });
 
@@ -443,11 +445,15 @@ describe('Phase 152: dropItem rarity-default affixes', () => {
 describe('Phase 152: curated affixed library variants', () => {
     const affixedVariants = equipmentTemplates.filter(t => t.prefixId || t.suffixId);
 
-    it('ships exactly 5 affixed variants per slot (35 total)', () => {
+    it('ships 35 affixed variants, re-slotted into the Phase-18 3-slot model', () => {
         expect(affixedVariants).toHaveLength(35);
-        const slots = ['weapon', 'armor', 'head', 'body', 'hands', 'feet', 'accessory'] as const;
-        for (const slot of slots) {
-            expect(affixedVariants.filter(t => t.slot === slot)).toHaveLength(5);
+        // Originally 5 per slot × 7 legacy slots. Phase 18 folds head/hands/feet
+        // into accessory and body into armor, so the 35 variants redistribute:
+        // weapon keeps its 5, armor gains the 5 body variants (→10), accessory
+        // absorbs head+hands+feet+accessory (4 × 5 → 20). Total is unchanged.
+        const perSlot: Record<string, number> = { weapon: 5, armor: 10, accessory: 20 };
+        for (const [slot, count] of Object.entries(perSlot)) {
+            expect(affixedVariants.filter(t => t.slot === slot), slot).toHaveLength(count);
         }
     });
 
@@ -523,17 +529,22 @@ describe('Phase 157: status-affix draw bias', () => {
         const purity = getAffixById('sfx-of-purity')!;
         expect(purity.tags).toContain('status');
         expect(isOffensiveStatusAffix(purity)).toBe(false);
-        // am-status-amp accessory hex is status-tagged but not on a status-
-        // applying slot (accessory), so it is not an offensive-application affix.
+        // am-status-amp accessory hex is status-tagged and sits on the accessory
+        // slot. Phase 18 folded the offensive-status 'hands' slot INTO accessory,
+        // so accessory is now a status-applying slot (see STATUS_APPLYING_SLOTS)
+        // and this hex is classified as an offensive-status affix — an accepted
+        // side effect of the re-slot documented in the engine.
         const hex = getAffixById('sfx-of-the-hex')!;
         expect(hex.tags).toContain('status');
-        expect(isOffensiveStatusAffix(hex)).toBe(false);
+        expect(isOffensiveStatusAffix(hex)).toBe(true);
     });
 
-    it('every classified affix sits on a status-applying slot (weapon/hands)', () => {
+    it('every classified affix sits on a status-applying slot (weapon/accessory)', () => {
+        // Phase 18: STATUS_APPLYING_SLOTS is now {weapon, accessory} — the legacy
+        // offensive 'hands' slot folded into accessory.
         for (const affix of allAffixes.filter(isOffensiveStatusAffix)) {
             expect(
-                affix.validSlots.some(s => s === 'weapon' || s === 'hands'),
+                affix.validSlots.some(s => s === 'weapon' || s === 'accessory'),
                 affix.id,
             ).toBe(true);
             expect(affix.tags ?? []).toContain('status');

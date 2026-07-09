@@ -55,8 +55,11 @@ import { STARTING_CARD_IDS } from '../Combat/combat.rewards';
  * Phase 109 — bumped 8 → 9 to add the required `regionConsequences: RegionConsequences` slice.
  * Phase 110 — bumped 9 → 10 to add the required `factionReputations: FactionReputations` slice.
  * knownSkills→knownCards rename — bumped 10 → 11 to rename the persisted `player.knownSkills` field to `knownCards`.
+ * Phase 18 — bumped 11 → 12: `player.equipment` moves from the 7-slot record to
+ *   the 5-slot `EquipmentLoadout`; worn gear re-slots deterministically and
+ *   accessory/body overflow returns to inventory (see `game.migrate.ts`).
  */
-export const GAME_STATE_VERSION = 11;
+export const GAME_STATE_VERSION = 12;
 
 /** Builds a brand-new GameState with default player and world. */
 export function createNewGameState(): GameState {
@@ -372,11 +375,11 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         }
 
         case 'EQUIP_ITEM': {
-            return { ...state, player: equipItemReducer(state.player, action.payload.item) };
+            return { ...state, player: equipItemReducer(state.player, action.payload.item, action.payload.opts) };
         }
 
         case 'UNEQUIP_ITEM': {
-            return { ...state, player: unequipItemReducer(state.player, action.payload.slot) };
+            return { ...state, player: unequipItemReducer(state.player, action.payload.slot, action.payload.index) };
         }
 
         case 'LEVEL_UP': {

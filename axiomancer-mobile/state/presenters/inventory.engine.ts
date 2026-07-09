@@ -24,7 +24,7 @@ import {
 
 import { freezeViewModel } from './freeze';
 import { computeEquipDelta, type EquipDelta } from '@mechanics';
-import { firstEquippedPerSlot } from '@mechanics';
+import { wornPerSlot, SLOT_CAPACITY } from '@mechanics';
 
 export type { EquipDelta } from '@mechanics';
 
@@ -246,45 +246,30 @@ const SLOT_LABELS: Record<Equipment['slot'], string> = {
     weapon: 'Weapon',
     armor: 'Armor',
     accessory: 'Accessory',
-    head: 'Head',
-    body: 'Body',
-    hands: 'Hands',
-    feet: 'Feet',
 };
 
 const BURDEN_MAX = 50;
 const EMPTY_MESSAGE = 'nothing in the satchel.';
 
 /**
- * Equipment Dock display order — matches the design handoff's 4-row
- * paper-doll grid: head, body / weapon, armor / hands, accessory /
- * feet. `feet` sits alone in the fourth row in the screen layout;
- * the array order here keeps the VM stable and lets the view do its
- * own grid pairing.
+ * Equipment Dock display order — the Phase-18 3-kind paper-doll:
+ * Weapon, Armor, Trinket (accessory). The accessory slot holds up to 3
+ * interchangeable pieces; the dock surfaces the first worn one per kind.
  */
 const DOCK_SLOT_ORDER: readonly Equipment['slot'][] = [
-    'head',
-    'body',
     'weapon',
     'armor',
-    'hands',
     'accessory',
-    'feet',
 ] as const;
 
 /**
  * Uppercase chrome label per slot — distinct from `SLOT_LABELS`
  * (which is title-case "Weapon" / "Armor" for the item-row sub
- * field). The dock chrome uses TRINKET for accessory per the design
- * (chat 1's "HEAD, WEAPON, HANDS, FEET, BODY, ARMOR, TRINKET" list).
+ * field). The dock chrome uses TRINKET for accessory per the design.
  */
 const DOCK_SLOT_TITLE: Record<Equipment['slot'], string> = {
-    head: 'HEAD',
-    body: 'BODY',
     weapon: 'WEAPON',
     armor: 'ARMOR',
-    hands: 'HANDS',
-    feet: 'FEET',
     accessory: 'TRINKET',
 };
 
@@ -381,10 +366,20 @@ function buildRows(state: GameStore): InventoryItemRow[] {
     const inventory = state.player?.inventory ?? [];
     const rowsById = new Map<string, InventoryItemRow>();
     const order: string[] = [];
-    // Worn-state convention lives in `state/selectors/equipment.ts`
-    // (AUDIT [3.5] inventory-audit row 1). Compute once; all
-    // consumers in this function read from the same map.
-    const equippedBySlot = firstEquippedPerSlot(inventory);
+    // Worn-state convention lives in the engine's capacity-aware `wornPerSlot`
+    // (Phase 18). Compute once; all consumers in this function read from it.
+    const wornBySlot = wornPerSlot(inventory);
+    const isWorn = (item: Equipment): boolean =>
+        (wornBySlot.get(item.slot) ?? []).some((w) => w.id === item.id);
+    // The worn sibling a candidate is compared against: itself when already worn
+    // (→ unequip delta), null when a position is free (→ equip), or the piece it
+    // would displace when the slot is at capacity (→ swap).
+    const siblingFor = (item: Equipment): Equipment | null => {
+        const worn = wornBySlot.get(item.slot) ?? [];
+        if (worn.some((w) => w.id === item.id)) return item;
+        if (worn.length < SLOT_CAPACITY[item.slot]) return null;
+        return worn[worn.length - 1];
+    };
     // First-seen engine item per ID — used to grab the StatModifier
     // array on non-equipped equipment when we compute the preview.
     const itemById = new Map<string, Equipment>();
@@ -402,8 +397,7 @@ function buildRows(state: GameStore): InventoryItemRow[] {
 
         let equipped = false;
         if (isEquipment(item)) {
-            const worn = equippedBySlot.get(item.slot);
-            equipped = worn !== undefined && worn.id === item.id;
+            equipped = isWorn(item);
             itemById.set(item.id, item);
         }
 
@@ -439,7 +433,7 @@ function buildRows(state: GameStore): InventoryItemRow[] {
         const item = itemById.get(id);
         if (item === undefined) continue;
 
-        const equippedSibling = equippedBySlot.get(item.slot) ?? null;
+        const equippedSibling = siblingFor(item);
         const equipDelta = computeEquipDelta(item, equippedSibling, state.player);
 
         let replacePreview: ReplacePreview | null = null;

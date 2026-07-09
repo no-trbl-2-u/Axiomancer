@@ -173,18 +173,20 @@ describe('selectCharacterViewModel: shape contract', () => {
         expect(labels).toContain('Heart Test');
     });
 
-    it('exposes seven equipment slot rows in display order', () => {
+    it('exposes five equipment slot rows in display order', () => {
         const store = createGameStore(createMemoryAdapter());
 
         const vm = selectCharacterViewModel(store.getState());
 
-        expect(vm.equipment).toHaveLength(7);
+        // Phase 18 collapsed the slot model to Weapon, Armor, and three
+        // interchangeable accessory positions. 'Trinket' (not 'Accessory')
+        // aligns the SELF tab with the inventory dock's TRINKET chrome.
+        expect(vm.equipment).toHaveLength(5);
         const names = vm.equipment.map((s) => s.name);
-        // 'Trinket' (not 'Accessory') aligns the SELF tab with
-        // the inventory dock's TRINKET chrome + chat 1's "HEAD,
-        // WEAPON, HANDS, FEET, BODY, ARMOR, TRINKET" specimen.
-        // Character-audit [3.0] fix 2026-05-22.
-        expect(names).toEqual(['Head', 'Body', 'Hands', 'Feet', 'Weapon', 'Armor', 'Trinket']);
+        expect(names).toEqual(['Weapon', 'Armor', 'Trinket', 'Trinket', 'Trinket']);
+        // The three accessory rows carry their 0-2 position index.
+        const accessories = vm.equipment.filter((s) => s.slotKey === 'accessory');
+        expect(accessories.map((s) => s.accessoryIndex)).toEqual([0, 1, 2]);
     });
 });
 

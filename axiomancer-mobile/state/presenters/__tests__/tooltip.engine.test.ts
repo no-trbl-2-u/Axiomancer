@@ -213,7 +213,10 @@ describe('selectTooltipContentFor', () => {
     });
 
     describe('kind: slot (Phase 74 walkthrough Tick 3)', () => {
-        const slotKeys = ['head', 'body', 'hands', 'feet', 'weapon', 'armor', 'accessory'] as const;
+        // Phase 18 collapsed the slot model — only weapon / armor /
+        // accessory tooltip ids now resolve (head/body/hands/feet folded
+        // into armor + accessory).
+        const slotKeys = ['weapon', 'armor', 'accessory'] as const;
         it.each(slotKeys)('returns content for slot id %s', (key) => {
             const content = selectTooltipContentFor('slot', key, EMPTY_STATE);
             expect(content).not.toBeNull();

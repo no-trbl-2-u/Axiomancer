@@ -1,6 +1,26 @@
-import { Item, Equipment, EquipmentSlot } from '../Items/types';
+import { Item, Equipment } from '../Items/types';
 import { ActiveEffect } from '../Effects/types';
 import { ProcUnlocks } from '../Combat/combat-effects';
+
+/**
+ * A character's worn loadout (Phase 18). Exactly 5 worn pieces across 3 slot
+ * kinds: 1 weapon, 1 armor, up to 3 interchangeable accessories. The three
+ * accessory positions have no identity — an accessory occupies *an* accessory
+ * position; declaration/array order is cosmetic. `accessories.length` is capped
+ * at `SLOT_CAPACITY.accessory` (3). Replaces the legacy 7-slot record.
+ */
+export interface EquipmentLoadout {
+    weapon: Equipment | null;
+    armor: Equipment | null;
+    accessories: Equipment[];
+}
+
+/** A fresh, empty loadout (no piece worn in any slot). */
+export const emptyLoadout = (): EquipmentLoadout => ({
+    weapon: null,
+    armor: null,
+    accessories: [],
+});
 
 /**
  * The three core attributes from which all other character/enemy stats derive.
@@ -62,12 +82,11 @@ export interface NonCombatStats {
  * @property derivedStats           - Combat stats derived from baseStats.
  * @property nonCombatStats         - Saves and ability tests.
  * @property inventory              - Items the character is carrying.
- * @property equipment              - Items currently equipped, keyed by slot.
- *                                    Spec 05 Q1: all seven slots may be
- *                                    occupied simultaneously. Spec 05 Q3:
- *                                    equipment `statModifiers` are folded
- *                                    into `derivedStats` at equip-time, so
- *                                    the character's `derivedStats` is
+ * @property equipment              - The worn `EquipmentLoadout` (Phase 18):
+ *                                    1 weapon + 1 armor + ≤3 accessories.
+ *                                    Spec 05 Q3: equipment `statModifiers` are
+ *                                    folded into `derivedStats` at equip-time,
+ *                                    so the character's `derivedStats` is
  *                                    already "post-equipment".
  * @property effects                - Active status effects on the character.
  * @property knownCards            - IDs of cards the character has learned/unlocked.
@@ -97,7 +116,7 @@ export interface Character {
      * so only the number is tracked; shop reducers come in a later spec.
      */
     currency: number;
-    equipment: Partial<Record<EquipmentSlot, Equipment>>;
+    equipment: EquipmentLoadout;
     effects: ActiveEffect[];
     knownCards: string[];
     availableStatPoints: number;

@@ -38,9 +38,32 @@ export interface BaseItem {
     category: ItemCategory;
 }
 
-/** Equipment slots available on a character. Per Spec 05 Q1 every slot may be
- * occupied simultaneously. */
-export type EquipmentSlot = 'weapon' | 'armor' | 'accessory' | 'head' | 'body' | 'hands' | 'feet';
+/**
+ * Equipment slot kinds (Phase 18). Collapsed from the legacy 7-slot union
+ * (`weapon | armor | accessory | head | body | hands | feet`) to exactly 3
+ * kinds. A character wears at most 5 pieces: 1 weapon, 1 armor, 3 accessories
+ * (see `SLOT_CAPACITY`). The legacy `head`/`hands`/`feet` slots fold into
+ * `accessory` as `AccessoryKind`s; `body` folds into `armor` (torso wear is
+ * armor, not an accessory). See `LEGACY_SLOT_MAP` in the save migration.
+ */
+export type EquipmentSlot = 'weapon' | 'armor' | 'accessory';
+
+/**
+ * The kind of an `accessory`-slot piece (Phase 18). Explicit and deliberately
+ * extensible — adding a kind later is additive (no slot change). Set on an
+ * `Equipment` iff `slot === 'accessory'`; absent on weapons and armor.
+ */
+export type AccessoryKind = 'head' | 'hands' | 'feet' | 'amulet' | 'ring' | 'charm';
+
+/**
+ * Worn capacity per slot kind (Phase 18). The wear-cap of 5 is not a bolt-on
+ * counter — it *is* the slot model: 1 weapon + 1 armor + 3 accessories.
+ */
+export const SLOT_CAPACITY: Record<EquipmentSlot, number> = {
+    weapon: 1,
+    armor: 1,
+    accessory: 3,
+};
 
 /**
  * Per-instance rarity grade (Spec 05c). Drives modifier count and value bands.
@@ -160,6 +183,13 @@ export interface ResourceInteraction {
 export interface Equipment extends BaseItem {
     category: 'equipment';
     slot: EquipmentSlot;
+    /**
+     * The accessory kind (Phase 18). Required-by-invariant when
+     * `slot === 'accessory'`, absent otherwise. Distinguishes the six worn
+     * flavours (head / hands / feet / amulet / ring / charm) that all share
+     * the single `accessory` slot kind.
+     */
+    accessoryKind?: AccessoryKind;
     rarity: ItemRarity;
     requiredLevel: number;
     rolledMods?: RolledModifier[];
@@ -196,6 +226,8 @@ export interface EquipmentTemplate {
     name: string;
     description: string;
     slot: EquipmentSlot;
+    /** Set iff `slot === 'accessory'` (Phase 18); copied onto dropped instances. */
+    accessoryKind?: AccessoryKind;
     requiredLevel: number;
     baseStatModifiers?: StatModifier[];
     /**

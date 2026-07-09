@@ -1,63 +1,92 @@
 /**
  * Worn-state convention over an inventory list (Phase 154 — absorbed from the
- * mobile app's `state/selectors/equipment.ts`).
+ * mobile app's `state/selectors/equipment.ts`; generalized to slot capacity in
+ * Phase 18).
  *
  * The engine ships no `equipped` flag on `Equipment`. Inventory-driven clients
- * encode "worn" via ordering: the FIRST equipment item per slot is treated as
- * worn (a reorder that moves a target item to the front of its slot equips it).
- * Every consumer that surfaces worn-state must agree on this convention for the
- * picture to stay coherent, so it lives here as the single source of truth
- * rather than re-implemented per call site.
+ * encode "worn" via ordering: the FIRST `SLOT_CAPACITY[slot]` equipment items
+ * per slot are treated as worn (a reorder that moves a target item to the front
+ * of its slot equips it). For weapon/armor the cap is 1 (first-per-slot); for
+ * accessories it is 3. Every consumer that surfaces worn-state must agree on
+ * this convention for the picture to stay coherent, so it lives here as the
+ * single source of truth rather than re-implemented per call site.
  */
 
-import { isEquipment } from './types';
-import type { Equipment, Item } from './types';
+import { isEquipment, SLOT_CAPACITY } from './types';
+import type { Equipment, EquipmentSlot, Item } from './types';
 
 /**
- * Walk the inventory in order; for each slot, capture the FIRST equipment item
- * seen in that slot. Returns a Map keyed by engine slot key; empty slots are
- * absent.
+ * Walk the inventory in order; for each slot, capture the first
+ * `SLOT_CAPACITY[slot]` equipment items seen in that slot (the worn set).
+ * Returns a Map keyed by engine slot kind; empty slots are absent, and each
+ * list preserves inventory order and never exceeds the slot's capacity.
  *
  * Stable under permutation of non-equipment items between equipment items (only
  * equipment-slot order matters) and under stack-quantity changes (does not read
  * `.quantity`).
  */
-export function firstEquippedPerSlot(
+export function wornPerSlot(
     inventory: readonly Item[],
-): Map<Equipment['slot'], Equipment> {
-    const out = new Map<Equipment['slot'], Equipment>();
+): Map<EquipmentSlot, Equipment[]> {
+    const out = new Map<EquipmentSlot, Equipment[]>();
     for (const item of inventory) {
         if (!isEquipment(item)) continue;
-        if (out.has(item.slot)) continue;
-        out.set(item.slot, item);
+        const list = out.get(item.slot);
+        if (list === undefined) {
+            out.set(item.slot, [item]);
+            continue;
+        }
+        if (list.length >= SLOT_CAPACITY[item.slot]) continue;
+        list.push(item);
     }
     return out;
 }
 
 /**
- * True iff `target` is the worn item in its slot per the first-per-slot
- * convention. Returns `false` for equipment whose slot has a different
- * first-equipment entry.
+ * Walk the inventory in order; for each slot, capture the FIRST equipment item
+ * seen in that slot. Deprecated thin wrapper over `wornPerSlot` (Phase 18 —
+ * removed in phase 23): reports only the first worn piece per slot, so for a
+ * multi-capacity accessory row it hides positions 2-3.
+ */
+export function firstEquippedPerSlot(
+    inventory: readonly Item[],
+): Map<EquipmentSlot, Equipment> {
+    const out = new Map<EquipmentSlot, Equipment>();
+    for (const [slot, list] of wornPerSlot(inventory)) {
+        if (list.length > 0) out.set(slot, list[0]);
+    }
+    return out;
+}
+
+/**
+ * True iff `target` is among the worn items in its slot per the capacity-aware
+ * convention (first `SLOT_CAPACITY[slot]` items of that slot). Returns `false`
+ * for equipment pushed past the worn window.
  */
 export function isEquippedFirstOfSlot(
     inventory: readonly Item[],
     target: Equipment,
 ): boolean {
-    const worn = firstEquippedPerSlot(inventory).get(target.slot);
-    return worn !== undefined && worn.id === target.id;
+    const worn = wornPerSlot(inventory).get(target.slot);
+    return worn !== undefined && worn.some(w => w.id === target.id);
 }
 
 /**
- * Find the currently-worn equipment item in the same slot as `target`, or
- * `null` when the slot is empty / `target` is itself the worn one. Useful for
- * replace-preview UIs that need the equipment-to-be-replaced.
+ * Find the worn equipment item that equipping `target` would displace, or
+ * `null` when nothing is displaced. Semantics (Phase 18):
+ *   - `target` already worn → `null` (no swap).
+ *   - the slot has a free position (`worn.length < capacity`) → `null`
+ *     (`target` fills a gap, displaces nothing).
+ *   - the slot is at capacity → the LAST worn piece (the one a fresh equip
+ *     would push out). For weapon/armor (capacity 1) this is the sole worn
+ *     piece, matching the pre-Phase-18 replace-preview behaviour.
  */
 export function findEquippedInSlot(
     inventory: readonly Item[],
     target: Equipment,
 ): Equipment | null {
-    const worn = firstEquippedPerSlot(inventory).get(target.slot);
-    if (worn === undefined) return null;
-    if (worn.id === target.id) return null;
-    return worn;
+    const worn = wornPerSlot(inventory).get(target.slot) ?? [];
+    if (worn.some(w => w.id === target.id)) return null;
+    if (worn.length < SLOT_CAPACITY[target.slot]) return null;
+    return worn[worn.length - 1];
 }

@@ -1,7 +1,7 @@
-import { Character, BaseStats, PreviewAllocation, PreviewResult } from './types';
+import { Character, BaseStats, PreviewAllocation, PreviewResult, emptyLoadout } from './types';
 import { ActiveEffect } from '../Effects/types';
 import { ProcUnlocks } from '../Combat/combat-effects';
-import { Equipment, EquipmentSlot, Item } from '../Items/types';
+import { Equipment, Item } from '../Items/types';
 import { deriveStats, deriveNonCombatStats, calculateMaxHealth } from '../Utils';
 import { getRng } from '../Utils/rng';
 import { EXPERIENCE_PER_LEVEL } from '../Game/game-mechanics.constants';
@@ -37,12 +37,15 @@ export interface CreateCharacterOptions {
     /** Starting currency (Spec 08 Q8). Defaults to 0. */
     currency?: number;
     /**
-     * Optional starting equipment, keyed by slot. Stat modifiers from each
-     * piece are folded into the resulting `derivedStats` at character-create
-     * time (Spec 05 Q3 option A) so the returned `Character` is already
+     * Optional starting equipment as an ordered list of pieces to equip
+     * (Phase 18). Each is equipped via `equipItem`, so weapon/armor replace in
+     * place and accessories fill the first 3 free positions (a 4th accessory is
+     * a guarded no-op — order the list so the worn 3 come first). Stat
+     * modifiers are folded into the resulting `derivedStats` at create-time
+     * (Spec 05 Q3 option A) so the returned `Character` is already
      * "post-equipment".
      */
-    equipment?: Partial<Record<EquipmentSlot, Equipment>>;
+    equipment?: Equipment[];
     effects?: ActiveEffect[];
     knownCards?: string[];
     procUnlocks?: ProcUnlocks;
@@ -54,7 +57,7 @@ export interface CreateCharacterOptions {
  */
 export function createCharacter(options: CreateCharacterOptions): Character {
     const {
-        id, name, level, baseStats, inventory = [], currency = 0, equipment = {}, effects = [],
+        id, name, level, baseStats, inventory = [], currency = 0, equipment = [], effects = [],
         knownCards = [], procUnlocks,
     } = options;
 
@@ -73,19 +76,18 @@ export function createCharacter(options: CreateCharacterOptions): Character {
         nonCombatStats: deriveNonCombatStats(baseStats),
         inventory,
         currency,
-        equipment: {},
+        equipment: emptyLoadout(),
         effects,
         knownCards,
         availableStatPoints: 0,
         procUnlocks,
     };
 
-    // Equip every slot in `equipment` so stat modifiers and passive effects
-    // get folded in via the canonical path.
+    // Equip every piece in order so stat modifiers and passive effects get
+    // folded in via the canonical path (weapon/armor replace, accessories fill
+    // the first 3 positions).
     let initialised = baseChar;
-    for (const slot of Object.keys(equipment) as EquipmentSlot[]) {
-        const piece = equipment[slot];
-        if (!piece) continue;
+    for (const piece of equipment) {
         initialised = equipItem(initialised, piece);
     }
     return initialised;
@@ -163,8 +165,9 @@ export function previewStatAllocation(
     };
 }
 
-export type { Character, BaseStats, DerivedStats, NonCombatStats, PreviewAllocation, PreviewResult } from './types';
-export { equipItem, unequipItem, getEquipmentModifiers } from './equipment.reducer';
+export type { Character, BaseStats, DerivedStats, NonCombatStats, PreviewAllocation, PreviewResult, EquipmentLoadout } from './types';
+export { emptyLoadout } from './types';
+export { equipItem, unequipItem, getEquipmentModifiers, getEquippedItems } from './equipment.reducer';
 export type { AggregatedEquipmentModifiers } from './equipment.reducer';
 export { computeEquipDelta } from './equip-delta';
 export type {

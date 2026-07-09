@@ -19,12 +19,12 @@
  *     the existing `useConsumable` reducer.
  */
 
-import { Equipment, EquipmentProcTrigger, EquipmentSlot, Consumable } from './types';
+import { EquipmentProcTrigger, Consumable } from './types';
 import { Effect } from '../Effects/types';
 import { applyEffect } from '../Effects';
 import { heal } from '../Combat/health';
 import { CombatResources } from '../Cards/types';
-import { Character } from '../Character/types';
+import { Character, EquipmentLoadout } from '../Character/types';
 import { getEquippedItems } from '../Character/equipment.reducer';
 
 /**
@@ -33,7 +33,7 @@ import { getEquippedItems } from '../Character/equipment.reducer';
  * zero to every counter. Pure.
  */
 export function aggregateCombatStartTokens(
-    equipment: Partial<Record<EquipmentSlot, Equipment>>,
+    equipment: EquipmentLoadout,
 ): CombatResources {
     const totals: CombatResources = { heart: 0, body: 0, mind: 0, fallacy: 0, paradox: 0 };
     for (const piece of getEquippedItems(equipment)) {
@@ -62,7 +62,7 @@ export type EquipmentBonusOutcome = 'hit' | 'miss' | 'defend';
  */
 export function applyEquipmentGenerationBonus(
     resources: CombatResources,
-    equipment: Partial<Record<EquipmentSlot, Equipment>>,
+    equipment: EquipmentLoadout,
     outcome: EquipmentBonusOutcome,
 ): CombatResources {
     const next: CombatResources = { ...resources };
@@ -83,7 +83,7 @@ export function applyEquipmentGenerationBonus(
  * returns every equipped item's `onDefendEffects`. Pure.
  */
 export function getEquipmentProcTriggers(
-    equipment: Partial<Record<EquipmentSlot, Equipment>>,
+    equipment: EquipmentLoadout,
     action: 'attack' | 'defend',
 ): EquipmentProcTrigger[] {
     const out: EquipmentProcTrigger[] = [];

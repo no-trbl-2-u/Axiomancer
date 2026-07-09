@@ -23,6 +23,7 @@ import { isBefriendAttemptEligible } from '../../Combat';
 import { CombatState } from '../../Combat/types';
 import { Enemy, BefriendabilityConfig } from '../types';
 import { createEnemy } from '../index';
+import { emptyLoadout } from '../../Character/types';
 import { FRIENDSHIP_COUNTER_MAX } from '../../Game/game-mechanics.constants';
 
 function makeEnemy(config?: BefriendabilityConfig, overrides: Partial<Enemy> = {}): Enemy {
@@ -70,7 +71,7 @@ function makeState(enemy: Enemy, overrides: Partial<CombatState> = {}): CombatSt
                 mentalSave: 0, mentalTest: 0,
                 emotionalSave: 0, emotionalTest: 0,
             },
-            inventory: [], currency: 0, equipment: {}, effects: [],
+            inventory: [], currency: 0, equipment: emptyLoadout(), effects: [],
             knownCards: [],
             availableStatPoints: 0,
         },

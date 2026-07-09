@@ -21,7 +21,7 @@ import {
 } from '@mechanics';
 
 import { freezeViewModel } from './freeze';
-import { firstEquippedPerSlot } from '@mechanics';
+import { wornPerSlot, SLOT_CAPACITY } from '@mechanics';
 
 export type StanceKey = 'heart' | 'body' | 'mind';
 export type EffectKind = 'buff' | 'debuff' | 'poison' | 'bleed';
@@ -102,13 +102,16 @@ export interface CharacterEffectRow {
 
 export interface EquipmentSlotRow {
     /**
-     * Phase 74 follow-up walkthrough Tick 3 — engine slot literal
-     * (`head | body | hands | feet | weapon | armor | accessory`).
-     * The SELF tooltip wrapper passes this to
-     * `selectTooltipContentFor('slot', slotKey)`.
+     * Engine slot kind (Phase 18 — `weapon | armor | accessory`). The SELF
+     * tooltip wrapper passes this to `selectTooltipContentFor('slot', slotKey)`.
      */
-    slotKey: 'head' | 'body' | 'hands' | 'feet' | 'weapon' | 'armor' | 'accessory';
-    /** Slot label, e.g. `'Head'`. */
+    slotKey: 'weapon' | 'armor' | 'accessory';
+    /**
+     * Which of the 3 interchangeable accessory positions this row is (0-2).
+     * Present only on `accessory` rows; absent for weapon/armor.
+     */
+    accessoryIndex?: 0 | 1 | 2;
+    /** Slot label, e.g. `'Weapon'`. */
     name: string;
     /** Equipped item name, or `null` when empty. */
     item: string | null;
@@ -206,22 +209,14 @@ export interface CharacterViewModel {
     };
 }
 
-// Equipment slots in display order, matching engine EquipmentSlot literals 1:1.
-const SLOT_ORDER = ['head', 'body', 'hands', 'feet', 'weapon', 'armor', 'accessory'] as const;
-type SlotKey = typeof SLOT_ORDER[number];
+// Equipment slot kinds, matching the engine's Phase-18 EquipmentSlot literals.
+type SlotKey = 'weapon' | 'armor' | 'accessory';
 
 const SLOT_LABELS: Record<SlotKey, string> = {
-    head: 'Head',
-    body: 'Body',
-    hands: 'Hands',
-    feet: 'Feet',
     weapon: 'Weapon',
     armor: 'Armor',
-    // [3.0] DRIFT fix: aligned to 'Trinket' (matches inventory
-    // dock's 'TRINKET' chrome + chat 1's "HEAD, WEAPON, HANDS,
-    // FEET, BODY, ARMOR, TRINKET" specimen). Pre-fix the SELF tab
-    // read 'Accessory' for the same slot — inconsistent
-    // vocabulary across tabs.
+    // [3.0] DRIFT fix: aligned to 'Trinket' (matches the inventory dock's
+    // 'TRINKET' chrome). The three accessory rows share this label.
     accessory: 'Trinket',
 };
 
@@ -281,14 +276,24 @@ function buildEffects(player: Character): readonly CharacterEffectRow[] {
 }
 
 function buildEquipment(player: Character): readonly EquipmentSlotRow[] {
-    // Worn-state convention lives in `state/selectors/equipment.ts`
-    // (AUDIT [3.5] inventory-audit row 1).
-    const worn = firstEquippedPerSlot(player.inventory);
-    return SLOT_ORDER.map((slot) => ({
-        slotKey: slot,
-        name: SLOT_LABELS[slot],
-        item: worn.get(slot)?.name ?? null,
-    }));
+    // Worn-state convention lives in the engine's `Items/equipped.ts`
+    // (capacity-aware `wornPerSlot`, Phase 18). Five rows: Weapon, Armor, then
+    // three interchangeable accessory positions.
+    const worn = wornPerSlot(player.inventory);
+    const accessories = worn.get('accessory') ?? [];
+    const rows: EquipmentSlotRow[] = [
+        { slotKey: 'weapon', name: SLOT_LABELS.weapon, item: worn.get('weapon')?.[0]?.name ?? null },
+        { slotKey: 'armor', name: SLOT_LABELS.armor, item: worn.get('armor')?.[0]?.name ?? null },
+    ];
+    for (let i = 0; i < SLOT_CAPACITY.accessory; i++) {
+        rows.push({
+            slotKey: 'accessory',
+            accessoryIndex: i as 0 | 1 | 2,
+            name: SLOT_LABELS.accessory,
+            item: accessories[i]?.name ?? null,
+        });
+    }
+    return rows;
 }
 
 /**

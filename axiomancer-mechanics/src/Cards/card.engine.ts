@@ -14,7 +14,7 @@
  *     implicitly require resonance — caller must hold ≥ each cost.
  */
 
-import { Character } from '../Character/types';
+import { Character, EquipmentLoadout } from '../Character/types';
 import { Enemy } from '../Enemy/types';
 import { ActiveEffect, Effect } from '../Effects/types';
 import { lookupEffect, applyEffect } from '../Effects';
@@ -25,7 +25,6 @@ import { incrementFriendship } from '../Combat/combat.reducer';
 import { isBefriendAttemptEligible } from '../Combat/index';
 import { Combatant, CombatState, Stance } from '../Combat/types';
 import { RESOURCE_GENERATION } from '../Game/game-mechanics.constants';
-import { Equipment, EquipmentSlot } from '../Items/types';
 import { applyEquipmentGenerationBonus } from '../Items/equipment.engine';
 import { applySetGenerationBonus } from '../Items/set.engine';
 import {
@@ -55,7 +54,7 @@ export function generateBasicActionResources(
     resources: CombatResources,
     stance: Stance,
     outcome: 'hit' | 'miss' | 'defend',
-    equipment?: Partial<Record<EquipmentSlot, Equipment>>,
+    equipment?: EquipmentLoadout,
 ): CombatResources {
     const amount =
         outcome === 'defend' ? RESOURCE_GENERATION.DEFEND

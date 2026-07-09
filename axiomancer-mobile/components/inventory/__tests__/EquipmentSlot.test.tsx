@@ -3,8 +3,8 @@ import { render, fireEvent } from '@testing-library/react-native';
 import { EquipmentSlot } from '../EquipmentSlot';
 
 const mockSlot = {
-    key: 'head' as const,
-    label: 'Head',
+    key: 'accessory' as const,
+    label: 'Trinket',
     item: {
         id: 'item-1',
         name: 'Iron Helm',
@@ -35,9 +35,9 @@ describe('EquipmentSlot', () => {
             />
         );
 
-        expect(getByText('Head')).toBeDefined();
+        expect(getByText('Trinket')).toBeDefined();
         expect(getByText('Iron Helm')).toBeDefined();
-        expect(getByTestId('dock-slot-head')).toBeDefined();
+        expect(getByTestId('dock-slot-accessory')).toBeDefined();
     });
 
     it('renders empty slot correctly', () => {
@@ -79,8 +79,8 @@ describe('EquipmentSlot', () => {
             />
         );
 
-        fireEvent.press(getByTestId('dock-slot-head'));
-        expect(mockOnPress).toHaveBeenCalledWith('head');
+        fireEvent.press(getByTestId('dock-slot-accessory'));
+        expect(mockOnPress).toHaveBeenCalledWith('accessory');
     });
 
     it('shows selected state correctly', () => {
@@ -93,7 +93,7 @@ describe('EquipmentSlot', () => {
             />
         );
 
-        const button = getByTestId('dock-slot-head');
+        const button = getByTestId('dock-slot-accessory');
         expect(button.props.accessibilityState).toEqual({ selected: true });
     });
 });

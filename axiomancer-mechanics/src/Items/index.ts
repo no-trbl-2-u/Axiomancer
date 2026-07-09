@@ -1,8 +1,9 @@
 export {
     type Item, type ItemCategory, type Equipment, type Consumable, type Material, type QuestItem,
-    type EquipmentSlot, type BaseItem,
+    type EquipmentSlot, type AccessoryKind, type BaseItem,
     type EquipmentProcTrigger, type ResourceInteraction, type ResourceGenerationBonus,
     type ItemRarity, type RolledModifier, type EquipmentTemplate, type UniqueItemTemplate,
+    SLOT_CAPACITY,
     isEquipment, isConsumable, isMaterial, isQuestItem,
 } from './types';
 export {
@@ -46,7 +47,7 @@ export type {
     GenerateRarityDropOptions, GenerateRarityDropResult,
 } from './loot.generation';
 export {
-    firstEquippedPerSlot, isEquippedFirstOfSlot, findEquippedInSlot,
+    wornPerSlot, firstEquippedPerSlot, isEquippedFirstOfSlot, findEquippedInSlot,
 } from './equipped';
 export {
     prefixes, suffixes, allAffixes, getAffixById,

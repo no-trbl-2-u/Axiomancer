@@ -56,10 +56,10 @@ export function DebugPlaythroughPresets() {
         // Set to high-level with maxed progression and equipment
         const currentState = store.getState();
         
-        // Create endgame equipment inventory by taking the first available item for each slot
+        // Create endgame equipment inventory by taking the first available item for each slot kind
         const endgameInventory = [];
-        const slots = ['head', 'body', 'hands', 'feet', 'weapon', 'armor', 'accessory'] as const;
-        
+        const slots = ['weapon', 'armor', 'accessory'] as const;
+
         for (const slot of slots) {
             const templates = getTemplatesBySlot(slot);
             if (templates.length > 0) {

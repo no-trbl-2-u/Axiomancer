@@ -10,8 +10,7 @@
  * `src/Items/set.library.ts`.
  */
 
-import type { Character } from '../Character/types';
-import type { Equipment, EquipmentSlot } from './types';
+import type { Character, EquipmentLoadout } from '../Character/types';
 import type { ItemSet, SetBonus } from './set.types';
 import type { CombatResources } from '../Cards/types';
 import { itemSetLibrary } from './set.library';
@@ -36,7 +35,7 @@ import type { EquipmentBonusOutcome } from './equipment.engine';
  * within a set are iterated 2 → 3 → 4.
  */
 export function getActiveSetBonuses(
-    equipment: Partial<Record<EquipmentSlot, Equipment>>,
+    equipment: EquipmentLoadout,
 ): SetBonus[] {
     const items = getEquippedItems(equipment);
     const equippedIds = items.map(i => i.id);
@@ -66,7 +65,7 @@ export function getActiveSetBonuses(
  * Returns an all-zero counter when no sets are active.
  */
 export function aggregateSetStartTokens(
-    equipment: Partial<Record<EquipmentSlot, Equipment>>,
+    equipment: EquipmentLoadout,
 ): CombatResources {
     const totals: CombatResources = { heart: 0, body: 0, mind: 0, fallacy: 0, paradox: 0 };
     for (const bonus of getActiveSetBonuses(equipment)) {
@@ -90,7 +89,7 @@ export function aggregateSetStartTokens(
  */
 export function applySetGenerationBonus(
     resources: CombatResources,
-    equipment: Partial<Record<EquipmentSlot, Equipment>>,
+    equipment: EquipmentLoadout,
     outcome: EquipmentBonusOutcome,
 ): CombatResources {
     const next: CombatResources = { ...resources };
@@ -113,7 +112,7 @@ export function applySetGenerationBonus(
  * (per Spec Q4 — combat-scoped lifecycle).
  */
 export function getActiveSetPassiveEffectIds(
-    equipment: Partial<Record<EquipmentSlot, Equipment>>,
+    equipment: EquipmentLoadout,
 ): string[] {
     const ids: string[] = [];
     for (const bonus of getActiveSetBonuses(equipment)) {
@@ -131,7 +130,7 @@ export function getActiveSetPassiveEffectIds(
  * Discipline" even when no threshold is met yet.
  */
 export function getEquippedItemSets(
-    equipment: Partial<Record<EquipmentSlot, Equipment>>,
+    equipment: EquipmentLoadout,
 ): Array<{ set: ItemSet; equipped: number }> {
     const items = getEquippedItems(equipment);
     const equippedIds = items.map(i => i.id);
@@ -152,5 +151,5 @@ export function getEquippedItemSets(
  * the slot map in hand).
  */
 export function getActiveSetBonusesForCharacter(character: Character): SetBonus[] {
-    return getActiveSetBonuses(character.equipment ?? {});
+    return getActiveSetBonuses(character.equipment);
 }

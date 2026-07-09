@@ -32,6 +32,7 @@ import { itemSetLibrary, getItemSetById } from '../set.library';
 import { FloatEye } from '../../Enemy/enemy.library';
 import { tickAllEffects } from '../../Combat/effects';
 import type { Equipment, EquipmentSlot } from '../types';
+import { emptyLoadout, type EquipmentLoadout } from '../../Character/types';
 import type { CombatResources } from '../../Cards/types';
 
 // ─── Fixtures ────────────────────────────────────────────────────────────────
@@ -60,10 +61,25 @@ function makeEquipment(
     };
 }
 
-const sandals     = makeEquipment('sandals',     'feet');
-const leatherCap  = makeEquipment('leather-cap', 'head');
-const clothWrap   = makeEquipment('cloth-wrap',  'body');
-const clothGloves = makeEquipment('cloth-gloves','hands');
+/** Distribute an ordered list of pieces into a Phase-18 `EquipmentLoadout`
+ * (weapon/armor slot in place, everything else fills accessory positions). */
+function toLoadout(pieces: Equipment[]): EquipmentLoadout {
+    const l = emptyLoadout();
+    for (const p of pieces) {
+        if (p.slot === 'weapon') l.weapon = p;
+        else if (p.slot === 'armor') l.armor = p;
+        else l.accessories.push(p);
+    }
+    return l;
+}
+
+// Phase 18 re-slotting: legacy head/hands/feet fold into `accessory`, body
+// into `armor`. Set membership is by template id, so the slot change is
+// mechanically inert to the set engine — it only decides loadout placement.
+const sandals     = makeEquipment('sandals',     'accessory');
+const leatherCap  = makeEquipment('leather-cap', 'accessory');
+const clothWrap   = makeEquipment('cloth-wrap',  'armor');
+const clothGloves = makeEquipment('cloth-gloves','accessory');
 const copperRing  = makeEquipment('copper-ring', 'accessory');
 
 const ZERO_RESOURCES: CombatResources = { heart: 0, body: 0, mind: 0, fallacy: 0, paradox: 0 };
@@ -90,7 +106,7 @@ describe('Phase 54 — set library', () => {
 
 describe('Phase 54 — getActiveSetBonuses', () => {
     it('returns the Wanderer\'s Road 2-piece bonus when sandals + leather-cap are equipped', () => {
-        const equipment = { feet: sandals, head: leatherCap };
+        const equipment = toLoadout([sandals, leatherCap]);
         const bonuses = getActiveSetBonuses(equipment);
 
         expect(bonuses).toHaveLength(1);
@@ -98,16 +114,12 @@ describe('Phase 54 — getActiveSetBonuses', () => {
     });
 
     it('returns no bonuses when only one member of a set is equipped (count < 2)', () => {
-        const equipment = { feet: sandals };
+        const equipment = toLoadout([sandals]);
         expect(getActiveSetBonuses(equipment)).toEqual([]);
     });
 
     it('returns BOTH 2-piece and 3-piece bonuses when 3 Iron Discipline members are equipped', () => {
-        const equipment = {
-            head: leatherCap,
-            body: clothWrap,
-            hands: clothGloves,
-        };
+        const equipment = toLoadout([leatherCap, clothWrap, clothGloves]);
         const bonuses = getActiveSetBonuses(equipment);
 
         // Iron Discipline's 2-piece is a statModifier; its 3-piece is a generationBonus.
@@ -126,11 +138,7 @@ describe('Phase 54 — getActiveSetBonuses', () => {
     it('activates overlapping partial bonuses from multiple sets independently', () => {
         // leather-cap is in all 3 sets. Pair with sandals → Wanderer's Road active.
         // Pair with copper-ring → Scholar's Circle ALSO active.
-        const equipment = {
-            head: leatherCap,
-            feet: sandals,
-            accessory: copperRing,
-        };
+        const equipment = toLoadout([leatherCap, sandals, copperRing]);
         const bonuses = getActiveSetBonuses(equipment);
 
         // Wanderer's Road 2-piece + Scholar's Circle 2-piece both fire.
@@ -147,11 +155,7 @@ describe('Phase 54 — getActiveSetBonuses', () => {
 
 describe('Phase 54 — aggregateSetStartTokens + applySetGenerationBonus', () => {
     it('aggregateSetStartTokens sums combatStartTokens across active sets', () => {
-        const equipment = {
-            head: leatherCap,
-            feet: sandals,
-            accessory: copperRing,
-        };
+        const equipment = toLoadout([leatherCap, sandals, copperRing]);
         const tokens = aggregateSetStartTokens(equipment);
 
         // Wanderer's Road +2 heart + Scholar's Circle +2 mind.
@@ -163,11 +167,7 @@ describe('Phase 54 — aggregateSetStartTokens + applySetGenerationBonus', () =>
     });
 
     it('applySetGenerationBonus folds in 3-piece Iron Discipline body generation', () => {
-        const equipment = {
-            head: leatherCap,
-            body: clothWrap,
-            hands: clothGloves,
-        };
+        const equipment = toLoadout([leatherCap, clothWrap, clothGloves]);
         const result = applySetGenerationBonus(
             { ...ZERO_RESOURCES, body: 0 },
             equipment,
@@ -178,7 +178,7 @@ describe('Phase 54 — aggregateSetStartTokens + applySetGenerationBonus', () =>
     });
 
     it('applySetGenerationBonus is a no-op when no set qualifies', () => {
-        const equipment = { feet: sandals };
+        const equipment = toLoadout([sandals]);
         const start: CombatResources = { ...ZERO_RESOURCES, mind: 5 };
         const result = applySetGenerationBonus(start, equipment, 'hit');
         expect(result).toEqual(start);
@@ -202,7 +202,7 @@ describe('Phase 54 — initializeCombat seeds set tokens additively', () => {
         };
         const player = {
             ...buildPlayer(),
-            equipment: { feet: sandals, head: leatherCap, accessory: heartAccessory },
+            equipment: toLoadout([sandals, leatherCap, heartAccessory]),
         };
 
         const state = initializeCombat(player, FloatEye);
@@ -222,15 +222,12 @@ describe('Phase 54 — initializeCombat seeds set tokens additively', () => {
 
 describe('Phase 54 — set passiveEffects are combat-scoped (Spec Q4)', () => {
     it('Scholar\'s Circle 2-piece applies buff_critical_rate_up at combat start', () => {
-        const passiveIds = getActiveSetPassiveEffectIds({
-            head: leatherCap,
-            accessory: copperRing,
-        });
+        const passiveIds = getActiveSetPassiveEffectIds(toLoadout([leatherCap, copperRing]));
         expect(passiveIds).toContain('buff_critical_rate_up');
 
         const player = {
             ...buildPlayer(),
-            equipment: { head: leatherCap, accessory: copperRing },
+            equipment: toLoadout([leatherCap, copperRing]),
         };
         const state = initializeCombat(player, FloatEye);
 
@@ -244,7 +241,7 @@ describe('Phase 54 — set passiveEffects are combat-scoped (Spec Q4)', () => {
     it('out-of-combat character.effects does NOT carry the set passive', () => {
         const player = {
             ...buildPlayer(),
-            equipment: { head: leatherCap, accessory: copperRing },
+            equipment: toLoadout([leatherCap, copperRing]),
         };
         // initializeCombat clones the player and applies effects to the clone.
         // The original player's effects array stays unchanged — set passives
@@ -259,7 +256,7 @@ describe('Phase 54 — set passiveEffects are combat-scoped (Spec Q4)', () => {
         // the -1 sentinel that tickAllEffects skips.
         const player = {
             ...buildPlayer(),
-            equipment: { head: leatherCap, accessory: copperRing },
+            equipment: toLoadout([leatherCap, copperRing]),
         };
         let state = initializeCombat(player, FloatEye);
 
@@ -282,22 +279,24 @@ describe('Phase 158 — every set anchors on a status-effect passive', () => {
     const STATUS_OFFENSE = 'buff_status_chance_up';
     const STATUS_DEFENSE = ['buff_resistance_body', 'buff_resistance_mind', 'buff_resistance_heart'];
 
-    /** Equip the full member roster of a set by id, matched to plausible slots. */
-    function equipAll(memberIds: string[]): Partial<Record<EquipmentSlot, Equipment>> {
+    /** Equip the full member roster of a set by id, matched to Phase-18 slots
+     * (legacy head/hands/feet → accessory, body → armor). Every set's roster
+     * fits within the 1-weapon/1-armor/3-accessory loadout caps. */
+    function equipAll(memberIds: string[]): EquipmentLoadout {
         const SLOT_BY_TEMPLATE: Record<string, EquipmentSlot> = {
-            sandals: 'feet', 'leather-cap': 'head', 'cloth-wrap': 'body',
-            'cloth-gloves': 'hands', 'copper-ring': 'accessory',
-            'plate-mail': 'armor', 'full-helm': 'head', 'plate-gauntlets': 'hands',
-            'iron-greaves': 'feet', 'scaled-coat': 'body', 'gold-ring': 'accessory',
-            'phoenix-mantle': 'body', 'titans-girdle': 'accessory',
-            'leather-coat': 'body', 'chain-gauntlets': 'hands',
+            sandals: 'accessory', 'leather-cap': 'accessory', 'cloth-wrap': 'armor',
+            'cloth-gloves': 'accessory', 'copper-ring': 'accessory',
+            'plate-mail': 'armor', 'full-helm': 'accessory', 'plate-gauntlets': 'accessory',
+            'iron-greaves': 'accessory', 'scaled-coat': 'armor', 'gold-ring': 'accessory',
+            'phoenix-mantle': 'armor', 'titans-girdle': 'accessory',
+            'leather-coat': 'armor', 'chain-gauntlets': 'accessory',
         };
-        const equipment: Partial<Record<EquipmentSlot, Equipment>> = {};
+        const pieces: Equipment[] = [];
         for (const id of memberIds) {
             const slot = SLOT_BY_TEMPLATE[id];
-            if (slot) equipment[slot] = makeEquipment(id, slot);
+            if (slot) pieces.push(makeEquipment(id, slot));
         }
-        return equipment;
+        return toLoadout(pieces);
     }
 
     it('every set (except the already status-rich Embers of Rebirth) grants a status-offense or status-resistance passive', () => {
@@ -370,7 +369,7 @@ describe('Phase 158 — every set anchors on a status-effect passive', () => {
 
 describe('Phase 54 — getEquippedItemSets surfaces partial counts for UI', () => {
     it('returns partial counts (1/3 of Iron Discipline) when only one member is equipped', () => {
-        const equipment = { head: leatherCap };
+        const equipment = toLoadout([leatherCap]);
         const entries = getEquippedItemSets(equipment);
         // leather-cap is in all 3 sets, so all 3 show partial counts.
         expect(entries).toHaveLength(3);
@@ -381,11 +380,7 @@ describe('Phase 54 — getEquippedItemSets surfaces partial counts for UI', () =
 
 describe('Phase 54 — generateBasicActionResources chains set bonuses after item bonuses', () => {
     it('Iron Discipline 3-piece grants +1 body on a hit (set bonus on top of base)', () => {
-        const equipment = {
-            head: leatherCap,
-            body: clothWrap,
-            hands: clothGloves,
-        };
+        const equipment = toLoadout([leatherCap, clothWrap, clothGloves]);
         const before: CombatResources = { ...ZERO_RESOURCES, body: 0 };
 
         // Body stance + hit + Iron Discipline 3-piece → base body gen + set +1.
