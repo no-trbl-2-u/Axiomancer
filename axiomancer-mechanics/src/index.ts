@@ -55,7 +55,7 @@ export {
     determineAdvantage, getAdvantageModifier, hasAdvantage,
     resolveEffectiveAdvantage,
     getBaseStat, getAttackStat, getDefenseStat, getSaveStat,
-    rollSkillCheck, isCriticalHit, isCriticalMiss,
+    isCriticalHit, isCriticalMiss,
     applyCriticalMultiplier, calculateFinalDamage, selectCritDamage, isAttackSuccessful,
     applyDamage, heal, isAlive, isDefeated, getHealthPercentage,
     getStudyMarkIntensity, getActiveRollModifier, getThornsReflect,
@@ -75,7 +75,7 @@ export {
     hasPayloadFlag,
     getDotAmplificationByEffect, getActiveDotTotal, getActiveDotAmplifications,
     resolveEffectApplication,
-    calculateDamageResistance, getSkillDamageType,
+    calculateDamageResistance,
     healCharacter,
     calculateEnemyStatMultiplier, applyMoralMeterScaling,
     // `CombatState` constructor — shared infrastructure for the skill / effects

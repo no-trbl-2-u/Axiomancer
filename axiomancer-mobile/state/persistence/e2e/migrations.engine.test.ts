@@ -227,25 +227,16 @@ describe('migrations.engine', () => {
     });
 
     describe('engine migration delegation (engine owns GameState versioning)', () => {
-        test('an engine-shaped save below GAME_STATE_VERSION is migrated up by the engine', () => {
-            // Take a current engine state, knock it back to an older engine
-            // version, and strip a field a later engine migration adds. The
-            // adapter must delegate to the engine `migrate`, which re-adds it —
-            // proving mobile no longer needs per-engine-version steps.
+        test('an engine-shaped save below GAME_STATE_VERSION is rejected (old-save migration was dropped)', () => {
+            // Old-save migration was removed (2026-07-08): only the current
+            // engine version loads. A below-current save throws, surfacing to
+            // the host so it can start a fresh game.
             const current = createNewGameState() as unknown as Record<string, unknown>;
-            const stale = {
-                ...current,
-                version: 9, // engine v9 → factionReputations added at v9→v10
-            };
-            delete (stale as Record<string, unknown>).factionReputations;
+            const stale = { ...current, version: 9 };
 
-            const result = unwrap({ schemaVersion: CURRENT_SCHEMA_VERSION, state: stale }) as unknown as Record<
-                string,
-                unknown
-            >;
-
-            expect(result.version).toBe(GAME_STATE_VERSION);
-            expect(result.factionReputations).toBeDefined();
+            expect(() =>
+                unwrap({ schemaVersion: CURRENT_SCHEMA_VERSION, state: stale }),
+            ).toThrow(/not supported/);
         });
 
         test('a current-version engine save passes through untouched', () => {

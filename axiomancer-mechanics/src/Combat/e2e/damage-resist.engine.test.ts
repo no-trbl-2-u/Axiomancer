@@ -7,7 +7,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { calculateDamageResistance, getSkillDamageType } from '../damage-resist';
+import { calculateDamageResistance } from '../damage-resist';
 import { Player } from '../../Character/characters.mock';
 import { FloatEye } from '../../Enemy/enemy.library';
 import { getCardById } from '../../Cards/cards.library';
@@ -40,12 +40,6 @@ describe('Phase 93 — Damage-resist primitive', () => {
         // High resistance should not completely negate damage
         const damage = calculateDamageResistance(target, 5, 'physical');
         expect(damage).toBe(1); // Minimum 1 damage, not 0 or negative
-    });
-
-    it('maps skill scaling stats to damage types correctly', () => {
-        expect(getSkillDamageType('body')).toBe('physical');
-        expect(getSkillDamageType('mind')).toBe('mental');
-        expect(getSkillDamageType('heart')).toBe('emotional');
     });
 
     it('calculateCardDamage is 0 for EVERY library card — the strike is dead (spec 32 v3 §1)', () => {

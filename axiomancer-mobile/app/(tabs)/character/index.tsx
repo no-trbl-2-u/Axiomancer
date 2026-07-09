@@ -221,9 +221,9 @@ export default function CharacterScreen() {
             if (!physical || !mental || !emotional) return undefined;
             
             return {
-              heart: { attack: emotional.attack, skill: emotional.skill, defense: emotional.defense },
-              body: { attack: physical.attack, skill: physical.skill, defense: physical.defense },
-              mind: { attack: mental.attack, skill: mental.skill, defense: mental.defense },
+              heart: { attack: emotional.attack, defense: emotional.defense },
+              body: { attack: physical.attack, defense: physical.defense },
+              mind: { attack: mental.attack, defense: mental.defense },
             };
           })()}
           onCommit={onCommitAllocation}
@@ -340,9 +340,6 @@ export default function CharacterScreen() {
               <Text style={[styles.derivedCell, styles.derivedRowLabel]}>{row.label.slice(0, 4)}</Text>
               <TooltipTarget kind="item-stat" id={row.attackId} style={styles.derivedCell} accessibilityLabel={`Explain ${row.label} attack`} accessibilityHint="tap to read description" testID={`self-derived-${row.attackId}`}>
                 <Text style={styles.derivedData}>{row.attack}</Text>
-              </TooltipTarget>
-              <TooltipTarget kind="item-stat" id={row.skillId} style={styles.derivedCell} accessibilityLabel={`Explain ${row.label} skill`} accessibilityHint="tap to read description" testID={`self-derived-${row.skillId}`}>
-                <Text style={styles.derivedData}>{row.skill}</Text>
               </TooltipTarget>
               <TooltipTarget kind="item-stat" id={row.defenseId} style={styles.derivedCell} accessibilityLabel={`Explain ${row.label} defense`} accessibilityHint="tap to read description" testID={`self-derived-${row.defenseId}`}>
                 <Text style={styles.derivedData}>{row.defense}</Text>

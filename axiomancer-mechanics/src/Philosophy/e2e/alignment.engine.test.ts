@@ -22,7 +22,6 @@ import { philosophicalAlignmentLibrary } from '../alignment.library';
 import { createNewGameState, gameReducer, GAME_STATE_VERSION } from '../../Game/game.reducer';
 import { createGameStore } from '../../Game/store';
 import { nullAdapter } from '../../Game/persistence/null.adapter';
-import { migrate } from '../../Game/game.migrate';
 
 describe('Philosophy — bucketAxis boundary table', () => {
     it('buckets the canonical boundary values correctly', () => {
@@ -118,32 +117,6 @@ describe('Philosophy — save/load round-trip', () => {
         expect(restored.philosophicalAlignment).toEqual({
             epistemology: 60, outlook: -40, scope: 20,
         });
-    });
-});
-
-describe('Philosophy — v4 → v5 save migrator', () => {
-    it('defaults philosophicalAlignment to {0,0,0} on v4 saves', () => {
-        const v4Payload = {
-            version: 4,
-            player: createNewGameState().player,
-            world: createNewGameState().world,
-            combat: null,
-            quests: { active: [], complete: [], known: [] },
-            flags: [],
-            moralMeter: 7,
-            rngState: 12345,
-        };
-        const migrated = migrate(v4Payload, 4);
-        // Phase 72 — migrate() funnels all the way to current
-        // (GAME_STATE_VERSION = 6 post-runId bump); the v4→v5 step still
-        // applies and defaults philosophicalAlignment, and the v5→v6 step
-        // defaults runId on top.
-        expect(migrated.version).toBe(GAME_STATE_VERSION);
-        expect(migrated.philosophicalAlignment).toEqual({
-            epistemology: 0, outlook: 0, scope: 0,
-        });
-        expect(migrated.moralMeter).toBe(7); // pre-existing field survives
-        expect(migrated.runId).toMatch(/^[0-9a-f]{16}$/); // Phase 72 — defaulted by v5→v6
     });
 });
 

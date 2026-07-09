@@ -741,9 +741,9 @@ export function CombatEncounterPanel({
                 const d = p.derivedStats ?? ({} as Partial<Character['derivedStats']>);
                 const nc = p.nonCombatStats ?? ({} as Partial<Character['nonCombatStats']>);
                 const axes = [
-                    { label: 'PHYSICAL', color: STANCE_COLORS.body, atk: d.physicalAttack, skl: d.physicalSkill, def: d.physicalDefense, save: nc.physicalSave, test: nc.physicalTest },
-                    { label: 'MENTAL', color: STANCE_COLORS.mind, atk: d.mentalAttack, skl: d.mentalSkill, def: d.mentalDefense, save: nc.mentalSave, test: nc.mentalTest },
-                    { label: 'EMOTIONAL', color: STANCE_COLORS.heart, atk: d.emotionalAttack, skl: d.emotionalSkill, def: d.emotionalDefense, save: nc.emotionalSave, test: nc.emotionalTest },
+                    { label: 'PHYSICAL', color: STANCE_COLORS.body, atk: d.physicalAttack, def: d.physicalDefense, save: nc.physicalSave, test: nc.physicalTest },
+                    { label: 'MENTAL', color: STANCE_COLORS.mind, atk: d.mentalAttack, def: d.mentalDefense, save: nc.mentalSave, test: nc.mentalTest },
+                    { label: 'EMOTIONAL', color: STANCE_COLORS.heart, atk: d.emotionalAttack, def: d.emotionalDefense, save: nc.emotionalSave, test: nc.emotionalTest },
                 ] as const;
                 return (
                     <Pressable style={styles.backdrop} testID="combat-pilgrim-modal" onPress={() => setPilgrimOpen(false)}>
@@ -766,17 +766,17 @@ export function CombatEncounterPanel({
                                     ))}
                                 </View>
 
-                                {/* the FULL stat table — attack/skill/defense + save/test per axis */}
+                                {/* the FULL stat table — attack/defense + save/test per axis */}
                                 <View style={styles.pilgrimGridHead}>
                                     <Text style={styles.pilgrimGridLabel} />
-                                    {['ATK', 'SKL', 'DEF', 'SAVE', 'TEST'].map((h) => (
+                                    {['ATK', 'DEF', 'SAVE', 'TEST'].map((h) => (
                                         <Text key={h} style={styles.pilgrimGridCol} allowFontScaling={false}>{h}</Text>
                                     ))}
                                 </View>
                                 {axes.map((a) => (
                                     <View key={a.label} style={styles.pilgrimGridRow}>
                                         <Text style={[styles.pilgrimGridLabel, { color: a.color }]} allowFontScaling={false}>{a.label}</Text>
-                                        {[a.atk, a.skl, a.def, a.save, a.test].map((v, i) => (
+                                        {[a.atk, a.def, a.save, a.test].map((v, i) => (
                                             <Text key={i} style={styles.pilgrimGridVal} allowFontScaling={false}>{v ?? 0}</Text>
                                         ))}
                                     </View>

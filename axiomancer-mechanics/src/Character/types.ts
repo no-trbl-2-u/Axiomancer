@@ -16,21 +16,19 @@ export interface BaseStats {
 }
 
 /**
- * Combat stats derived from BaseStats. Each stance contributes three values:
- * `*Attack` (used in attack rolls), `*Card` (used by skills/philosophy),
- * and `*Defense` (used as damage reduction).
+ * Combat stats derived from BaseStats. Each stance contributes two values:
+ * `*Attack` (used in attack rolls) and `*Defense` (used as damage reduction).
+ * The legacy `*Skill` axis (a carry-over from the removed turn-based skill-check
+ * combat) was deleted 2026-07-08.
  *
  * `luck` is the average of the three base stats and gates random outcomes.
  */
 export interface DerivedStats {
     physicalAttack: number;
-    physicalSkill: number;
     physicalDefense: number;
     mentalAttack: number;
-    mentalSkill: number;
     mentalDefense: number;
     emotionalAttack: number;
-    emotionalSkill: number;
     emotionalDefense: number;
     luck: number;
 }

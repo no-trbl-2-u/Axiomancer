@@ -103,9 +103,9 @@ export function recomputeDerivedStats(
     const derived = deriveStats(effBase);
 
     const derivedKeys = [
-        'physicalAttack', 'physicalSkill', 'physicalDefense',
-        'mentalAttack',   'mentalSkill',   'mentalDefense',
-        'emotionalAttack','emotionalSkill','emotionalDefense',
+        'physicalAttack', 'physicalDefense',
+        'mentalAttack',   'mentalDefense',
+        'emotionalAttack','emotionalDefense',
         'luck',
     ] as const;
 

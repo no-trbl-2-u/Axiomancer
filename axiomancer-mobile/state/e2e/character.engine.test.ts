@@ -143,7 +143,6 @@ describe('selectCharacterViewModel: shape contract', () => {
         for (const row of vm.derived) {
             expect(typeof row.label).toBe('string');
             expect(typeof row.attack).toBe('number');
-            expect(typeof row.skill).toBe('number');
             expect(typeof row.defense).toBe('number');
         }
     });
@@ -151,11 +150,11 @@ describe('selectCharacterViewModel: shape contract', () => {
     it('every derived row carries engine stat ids for tooltip wiring', () => {
         const store = createGameStore(createMemoryAdapter());
         const vm = selectCharacterViewModel(store.getState());
-        const ids = vm.derived.flatMap((r) => [r.attackId, r.skillId, r.defenseId]);
+        const ids = vm.derived.flatMap((r) => [r.attackId, r.defenseId]);
         expect(ids).toEqual([
-            'physicalAttack', 'physicalSkill', 'physicalDefense',
-            'mentalAttack', 'mentalSkill', 'mentalDefense',
-            'emotionalAttack', 'emotionalSkill', 'emotionalDefense',
+            'physicalAttack', 'physicalDefense',
+            'mentalAttack', 'mentalDefense',
+            'emotionalAttack', 'emotionalDefense',
         ]);
     });
 

@@ -25,7 +25,7 @@ export type {
 
 export { determineAdvantage, hasAdvantage, getAdvantageModifier, resolveEffectiveAdvantage } from './advantage';
 export { getBaseStat, getAttackStat, getDefenseStat, getSaveStat } from './stats';
-export { rollSkillCheck, isCriticalHit, isCriticalMiss } from './dice';
+export { isCriticalHit, isCriticalMiss } from './dice';
 export { applyCriticalMultiplier, calculateFinalDamage, selectCritDamage, isAttackSuccessful } from './damage';
 export { applyDamage, heal, isAlive, isDefeated, getHealthPercentage } from './health';
 export {
@@ -59,7 +59,7 @@ export type {
     ActiveDotEntry, ActiveDotAmplification,
 } from './effect-modifiers';
 export { resolveEffectApplication } from './resist';
-export { calculateDamageResistance, getSkillDamageType } from './damage-resist';
+export { calculateDamageResistance } from './damage-resist';
 export type { DamageType } from './damage-resist';
 export {
     rollForCombatEffects, applyProcOutcome, applyFumbleOutcome,

@@ -14,7 +14,6 @@ import { makeStyles } from '@/theme/runtime';
 
 export interface StancePreview {
     attack: number;
-    skill: number;
     defense: number;
 }
 
@@ -41,7 +40,7 @@ const STANCE_LABELS = {
     mind: 'MIND',
 } as const;
 
-const STAT_HEADERS = ['', 'ATK', 'SKL', 'DEF'] as const;
+const STAT_HEADERS = ['', 'ATK', 'DEF'] as const;
 
 export function DerivedPreviewRibbon({
     current,
@@ -80,14 +79,6 @@ export function DerivedPreviewRibbon({
                         preview={preview[stance].attack}
                         hasAllocations={hasAllocations}
                         testID={`preview-${stance}-attack`}
-                    />
-
-                    {/* Skill stat */}
-                    <StatCell
-                        current={current[stance].skill}
-                        preview={preview[stance].skill}
-                        hasAllocations={hasAllocations}
-                        testID={`preview-${stance}-skill`}
                     />
 
                     {/* Defense stat */}

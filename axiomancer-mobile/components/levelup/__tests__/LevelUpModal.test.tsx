@@ -210,10 +210,9 @@ describe('LevelUpModal: derived preview ribbon (Phase 88)', () => {
         expect(tree.queryByTestId('derived-preview-ribbon')).not.toBeNull();
     });
 
-    it('ribbon shows ATK/SKL/DEF headers', () => {
+    it('ribbon shows ATK/DEF headers', () => {
         const tree = render(<LevelUpModal {...PROPS_WITH_DERIVED} />);
         expect(tree.queryByText('ATK')).not.toBeNull();
-        expect(tree.queryByText('SKL')).not.toBeNull();
         expect(tree.queryByText('DEF')).not.toBeNull();
     });
 
@@ -225,7 +224,7 @@ describe('LevelUpModal: derived preview ribbon (Phase 88)', () => {
         
         // Should show some of the derived stat values in the ribbon
         expect(tree.queryByTestId('preview-body-attack')).not.toBeNull();
-        expect(tree.queryByTestId('preview-mind-skill')).not.toBeNull();
+        expect(tree.queryByTestId('preview-mind-defense')).not.toBeNull();
         
         // Should not show delta arrows initially
         expect(tree.queryByText('→')).toBeNull();
