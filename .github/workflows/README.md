@@ -27,7 +27,7 @@ Two layers live here:
 
 | Workflow | Skill | Trigger | Notes |
 |---|---|---|---|
-| `march.yml` | `/march` | hourly cron + manual | The autonomous-beast tick: triage → critique → ship-a-phase → iterate. Pushes to `main`. |
+| `march.yml` | `/march` | 6-hour cron + manual | The autonomous-beast tick: triage → critique → ship-a-phase → iterate. Manual runs accept `focus_phase`; when set, the run dispatches `/ship-a-phase phase <focus_phase>` instead of normal `/march`. Pushes to `main`. |
 | `night.yml` | `/digest` | daily 08:47 UTC + manual | Morning briefing to `plan/DIGEST.html` (stylized, self-contained page) + nightly breadth checks. |
 | `triage.yml` | `/triage` | issue opened/reopened + manual | Immediate triage on arrival; march still sweeps as backstop. |
 | `ci-autofix.yml` | `/fix-ci` | `verify-*` failure on `main` + manual | Red-main first responder. Pushes the fix to `main`. |
