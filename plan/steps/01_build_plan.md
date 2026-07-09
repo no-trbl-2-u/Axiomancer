@@ -176,15 +176,17 @@ choice). Briefs carry the full decision log (see each phase file).
 
 **CLI verification guardrail (T-directed 2026-07-09):**
 
-- [ ] Phase 22 — Mechanics CLI verify-gate coverage. Add a dedicated
-      CLI typecheck lane and command-level smoke/e2e witnesses so
-      `src/CLI` TypeScript failures and stale CLI examples fail before
-      `main` ships. Guard the exact failure class caught on 2026-07-09:
-      `npm run game` / `npm run combat` failing under `ts-node` while
-      mechanics `type-check` and `type-check:tests` stayed green because
-      both configs excluded `src/CLI` (mechanics; verify no mobile/card
-      editor impact unless exports change) — brief:
+- [x] Phase 22 — Mechanics CLI verify-gate coverage. Added
+      `tsconfig.cli.json` + `npm run type-check:cli` (wired into
+      `verify`/`verify:agent`); fixed the real stale-call type errors it
+      surfaced in the existing CLI e2e tests; added a real-process smoke
+      suite (`cli.process-smoke.engine.test.ts`) spawning `npm run
+      combat` / `npm run game -- --route` as child processes; added a
+      docs/registry parity test (`cli.docs-examples.engine.test.ts`) and
+      fixed two stale `docs/cli.md` enemy examples (CoastalTyrant/
+      HushWraith, long retired) — brief:
       `plan/phases/phase_22_cli_verify_gate.md`
+      — `feat(mechanics): CLI verify-gate coverage — phase 22` (01a3d2ed)
 
 > **After the queue drains:** `/march` transitions to `/iterate`
 > — draining `plan/AUDIT.md` + `plan/CRITIQUE.md`, doc-drift,
