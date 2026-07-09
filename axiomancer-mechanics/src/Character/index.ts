@@ -44,7 +44,7 @@ export interface CreateCharacterOptions {
      */
     equipment?: Partial<Record<EquipmentSlot, Equipment>>;
     effects?: ActiveEffect[];
-    knownSkills?: string[];
+    knownCards?: string[];
     procUnlocks?: ProcUnlocks;
 }
 
@@ -55,7 +55,7 @@ export interface CreateCharacterOptions {
 export function createCharacter(options: CreateCharacterOptions): Character {
     const {
         id, name, level, baseStats, inventory = [], currency = 0, equipment = {}, effects = [],
-        knownSkills = [], procUnlocks,
+        knownCards = [], procUnlocks,
     } = options;
 
     const maxHealth = calculateMaxHealth(level, baseStats);
@@ -75,7 +75,7 @@ export function createCharacter(options: CreateCharacterOptions): Character {
         currency,
         equipment: {},
         effects,
-        knownSkills,
+        knownCards,
         availableStatPoints: 0,
         procUnlocks,
     };

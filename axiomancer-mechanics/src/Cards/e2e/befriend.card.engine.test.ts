@@ -13,7 +13,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { mockSequentialRng, restoreOriginalRng } from '../../test-utils/rng';
 import { createCharacter } from '../../Character';
-import { executeSkill } from '../skill.engine';
+import { executeCard } from '../card.engine';
 import type { Card } from '../types';
 import { initializeCombat } from '../../Combat';
 import { createEnemy } from '../../Enemy';
@@ -54,7 +54,7 @@ function fixtureCharacter() {
         name: 'Test Character',
         level: 1,
         baseStats: { heart: 5, body: 5, mind: 5 },
-        knownSkills: [befriendCard.id],
+        knownCards: [befriendCard.id],
     });
 }
 
@@ -79,7 +79,7 @@ describe('Befriend mechanic (Phase 108, re-pinned for spec 32 v3)', () => {
                 combatResources: { heart: 5, body: 0, mind: 0, fallacy: 0, paradox: 0 },
             };
 
-            const resolution = executeSkill(combatState, befriendCard.id, lookup);
+            const resolution = executeCard(combatState, befriendCard.id, lookup);
 
             const befriendEvent = resolution.events.find(e => e.kind === 'befriend-attempted');
             expect(befriendEvent).toBeDefined();
@@ -100,7 +100,7 @@ describe('Befriend mechanic (Phase 108, re-pinned for spec 32 v3)', () => {
                 combatResources: { heart: 5, body: 0, mind: 0, fallacy: 0, paradox: 0 },
             };
 
-            const resolution = executeSkill(combatState, befriendCard.id, lookup);
+            const resolution = executeCard(combatState, befriendCard.id, lookup);
 
             const befriendEvent = resolution.events.find(e => e.kind === 'befriend-attempted');
             expect(befriendEvent).toBeDefined();
@@ -123,7 +123,7 @@ describe('Befriend mechanic (Phase 108, re-pinned for spec 32 v3)', () => {
                 combatResources: { heart: 5, body: 0, mind: 0, fallacy: 0, paradox: 0 },
             };
 
-            const resolution = executeSkill(combatState, befriendCard.id, lookup);
+            const resolution = executeCard(combatState, befriendCard.id, lookup);
             expect(resolution.activateMercyChoice).toBe(true);
         });
     });
@@ -132,5 +132,5 @@ describe('Befriend mechanic (Phase 108, re-pinned for spec 32 v3)', () => {
     // choice onto a turn-based `CombatState`) was removed with the legacy
     // combat driver. The Hazard-Pattern engine owns mercy resolution now
     // (`selectEncounterMercyChoice`); the befriend MECHANIC still surfaces
-    // `activateMercyChoice` via `executeSkill`, covered above.
+    // `activateMercyChoice` via `executeCard`, covered above.
 });

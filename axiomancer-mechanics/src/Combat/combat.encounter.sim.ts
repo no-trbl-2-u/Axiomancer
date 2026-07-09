@@ -26,7 +26,6 @@ import {
     tapFateDie,
 } from './combat.engine';
 import { RESERVE_MAX } from './combat.dice';
-import { isSyntheticCard } from './combat.cards';
 import { getPendingDotTotal } from './effects';
 import { getRng } from '../Utils/rng';
 import type {
@@ -151,7 +150,7 @@ function selectCard(
     let bestScore = -Infinity;
     for (const c of cards) {
         let score = policy.rankCard(s, c.card, rng);
-        if (focusIds && (focusIds.has(c.card.id) || (c.card.skillId !== null && focusIds.has(c.card.skillId)))) {
+        if (focusIds && focusIds.has(c.card.id)) {
             score += FOCUS_CARD_BOOST;
         }
         if (score > bestScore) { bestScore = score; best = c; }
@@ -183,7 +182,7 @@ function bumpUsage(
     kind: 'top' | 'bottom',
     landedStatus = false,
 ): void {
-    const key = card.skillId ?? card.id;
+    const key = card.id;
     const row = usage[key] ?? (usage[key] = {
         cardId: key, plays: 0, bottomPlays: 0, topPlays: 0, statusLands: 0, discards: 0,
     });
@@ -549,7 +548,7 @@ export function simulateHazardPatternCombatDetailed(
     // explicit deck was given (known-skills path) fall back to the played set so
     // utilization reads 1.0 rather than dividing by an unknown pool.
     const deckDistinct = options.deck
-        ? new Set(options.deck.filter(id => !isSyntheticCard(id))).size
+        ? new Set(options.deck).size
         : playedIds.length;
     const deckUtilization = deckDistinct > 0 ? Math.min(1, playedIds.length / deckDistinct) : 0;
 

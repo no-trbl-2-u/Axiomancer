@@ -122,9 +122,9 @@ export function App() {
     };
 
     // ── EDIT ──
-    const selectForEdit = (skill: Card) => {
-        setSelectedId(skill.id);
-        setEditDraft(toDraft(skill));
+    const selectForEdit = (card: Card) => {
+        setSelectedId(card.id);
+        setEditDraft(toDraft(card));
     };
     const closeEdit = () => {
         setSelectedId(null);

@@ -60,7 +60,7 @@ const ae = (effectId: string, intensity = 1, remainingDuration = 4, tier: 1 | 2 
 
 function makePlayer(skills: string[], effects: ActiveEffect[] = []): Character {
     const p = deepClone(Player);
-    p.knownSkills = skills.slice();
+    p.knownCards = skills.slice();
     p.baseStats = { heart: 8, body: 8, mind: 8 };
     p.health = 200; p.maxHealth = 200; p.effects = effects;
     return p;

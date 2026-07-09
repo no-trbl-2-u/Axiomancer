@@ -2,7 +2,7 @@
  * Keyword registry — the player-facing combat vocabulary (spec 32 v3).
  *
  * EXACTLY 30 KEYWORDS. The themed-deck library speaks a deliberately small
- * language: 10 shared utility keywords + 2 signature keywords per theme.
+ * language: 10 shared utility keywords + 2 hallmark keywords per theme.
  * Every mechanic is a terse, learnable KEYWORD (BLEED, STAGGER, FORGE), not a
  * flavour name. The engine keeps its thematic effect names as lore; this
  * module is the PRESENTATION-layer mapping the board, card faces, glossary,

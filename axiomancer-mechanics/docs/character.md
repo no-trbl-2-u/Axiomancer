@@ -54,7 +54,7 @@ maxHealth = level × average(body, heart) × HEALTH_PER_STAT (10)
 ```
 
 Health starts at max on character creation. Skills run on the per-combat
-five-resource economy described in [`docs/skills.md`](./skills.md), tracked
+five-resource economy described in `docs/skills.md`, tracked
 on `CombatState.combatResources` rather than the character itself.
 
 ## Skills
@@ -62,16 +62,16 @@ on `CombatState.combatResources` rather than the character itself.
 Characters track learned/unlocked skills as ID arrays:
 
 ```ts
-knownSkills: string[]      // every skill ever learned/unlocked
+knownCards: string[]      // every skill ever learned/unlocked
 ```
 
 Canonical design has no separate skill equipment/loadout gate. Once a skill is
 learned, it is part of the character's combat-accessible catalogue; combat
-selection filters `knownSkills` by current affordability. The legacy
+selection filters `knownCards` by current affordability. The legacy
 `equippedSkills` field was fully removed in Phase 159 (ADR-0002): there is no
 equipped-skill field on `Character`, no preset field, and no CLI loadout
 wiring. Legacy v7 saves still fold their old `equippedSkills` rotation into
-`knownSkills` via the v7→v8 save migration.
+`knownCards` via the v7→v8 save migration.
 
 ## Experience
 
@@ -128,7 +128,7 @@ via `getEffectiveStats(target).baseStats[stance]` in `Combat/effect-modifiers.ts
 |----------|-------------|
 | `createCharacter(options)` | Factory — creates a fully derived Character from name, level, and base stats |
 | `getEffectiveStats(target).baseStats[resistedBy]` | Base stat value for the resisting stance (lives in `Combat/effect-modifiers.ts`) |
-| `characterPresets` / `getPresetById` / `buildCharacterFromPreset` | Curated progression-tier roster (apprentice / wanderer / sage). The builder lifts a declarative `CharacterPreset` into a `Character` via the canonical `createCharacter` + `dropItem` paths. Presets express skill progression as unlocked `knownSkills`; the legacy `equippedSkills` preset field was removed in Phase 159. `npm run game` prompts the player to pick one at boot. |
+| `characterPresets` / `getPresetById` / `buildCharacterFromPreset` | Curated progression-tier roster (apprentice / wanderer / sage). The builder lifts a declarative `CharacterPreset` into a `Character` via the canonical `createCharacter` + `dropItem` paths. Presets express skill progression as unlocked `knownCards`; the legacy `equippedSkills` preset field was removed in Phase 159. `npm run game` prompts the player to pick one at boot. |
 | `levelLadderPresets` / `ladderL1Preset` / `ladderL15Preset` / `ladderL30Preset` / `ladderL50Preset` | Level-explicit evidence ladder (L1 / L15 / L30 / L50), kept **separate** from `characterPresets`. Used for tuning/evidence runs that need a clean per-level baseline. `getPresetById` resolves ladder ids (`kid-l1` … `kid-l50`) as well as the curated roster. |
 | `computeEquipDelta(candidate, worn, player?)` | Equip-change delta model (Phase 154). Simulates equipping/unequipping `candidate` against the worn sibling in the same slot through the `equipItem` / `unequipItem` reducers and diffs the resulting `Character` stats, returning an `EquipDelta` (`mode`: `equip` / `unequip` / `swap`; `stats`; `gained` / `lost` sides; `isEmpty`). Lets a client show **only what changes** without rendering the full sheet. Pure — no string formatting beyond engine effect/affix labels. |
 
@@ -152,7 +152,7 @@ them in `characterPresets`.
 Phase 99 / Phase 159 complete: the legacy skill loadout GATE is gone and the
 `equippedSkills` field was removed entirely — all learned/unlocked skills are
 available in combat, and the combat UI shows only currently affordable skills.
-Legacy v7 saves fold their old rotation into `knownSkills` at load. The `id`
+Legacy v7 saves fold their old rotation into `knownCards` at load. The `id`
 field shipped at
 Phase 35 (Knowledge-Gaps Q12); see the `id` JSDoc on `Character` in
 `src/Character/types.d.ts` and the auto-gen path in `createCharacter`.

@@ -25,7 +25,7 @@ canonical entry points. Cross-link to the per-module doc for depth.
 | **Items** | `addItem` / shop reducers (`buyItem`/`sellItem`/`defaultSellPrice` — Phase 37), set items engine (Phase 54), `previewTemplateAtRarity` UI-tier preview helper (Phase 75 — closes the user-jot for mobile item-library mod-visibility), `previewTemplateAtAllRarities` batch wrapper (Phase 76 — UI tooltip / item-detail rarity-strip views in a single call) | 5, 5b, 37, 54, 75, 76 | [items.md](./items.md), [equipment.md](./equipment.md) |
 | **NPCs** | `getDialogueNode` + `visibleChoices`, alignment gates (Phase 46), tree-id observer cache (Phase 63) | 14, 22, 46, 63 | [npcs.md](./npcs.md) |
 | **Philosophy** | 3-axis alignment cube + 27-cell library, `alignmentDelta` authoring, fallacies-as-spells (Phase 44), enemy alignment + AI bias (Phase 45), alignment-gated content (Phase 46) | 42-46 | [philosophy.md](./philosophy.md) |
-| **Skills** | `executeSkill` caster-agnostic (Phase 49), `learnSkill` + runtime learning (Phase 30), Tier 1-3 skill library + Tier 2 synergy clauses (Phase 66) | 4, 4b, 30, 33, 44, 49, 66 | [skills.md](./skills.md) |
+| **Skills** | `executeCard` caster-agnostic (Phase 49), `learnCard` + runtime learning (Phase 30), Tier 1-3 skill library + Tier 2 synergy clauses (Phase 66) | 4, 4b, 30, 33, 44, 49, 66 | skills.md |
 | **World** | `createStartingWorld` + per-continent maps, MapEvents engine (`resolveMapEvent`, nine-kind pool taxonomy — Phase 23/24, 'quest' added Phase 137), expanded fishing-village (Phase 65 — 25 nodes, 3 sub-areas) | 8, 23, 24, 25, 31, 65 | [world.md](./world.md) |
 | **Utils** | RNG harness, derived stats, dice / type guards | 11 | — |
 
@@ -130,7 +130,7 @@ the full inventory + exit expectations.
 6. **Per-enemy befriend predicate** (Phase 68) — if the enemy
    carries `Enemy.befriendabilityConfig`, the Phase 36 cap is
    overridden by an AND-composed predicate set (`roundsThreshold`
-   / `hpGate { belowPct }` / `requiredStances[]` / `requiredSkillUse[]`
+   / `hpGate { belowPct }` / `requiredStances[]` / `requiredCardUse[]`
    / `defaultFallback`). The internal predicate helper backs
    `isBefriendAttemptEligible` (the legacy `isFriendshipEligible` /
    `determineCombatEnd` / `isCombatOngoing` consumers were removed
@@ -199,7 +199,7 @@ gates:
 
 - `DialogueChoice.requires.requiresAlignment?` — gate a choice on an
   axis threshold (e.g. `{ axis: 'scope', op: 'gte', value: 34 }`).
-- `SkillLearningRequirement.requiresAlignment?` — same shape; gates
+- `CardLearningRequirement.requiresAlignment?` — same shape; gates
   whether the skill is learnable.
 - `DialogueChoice.requires.playerAlignmentCellChangedSince?: true`
   (Phase 63) — surfaces the choice only when the player's cell has
@@ -248,7 +248,7 @@ Focused guides with runnable code samples for each major module:
 | Character | [quickstart-character.md](./quickstart-character.md) | `createCharacter`, presets, stat allocation, skill learning |
 | Combat | [quickstart-combat.md](./quickstart-combat.md) | `initializeCombatEncounter`, `playCombatCard`, threat phases, outcomes, sim |
 | Items | [quickstart-items.md](./quickstart-items.md) | `dropItem`, `previewTemplateAtRarity`, equip, shop, set bonuses |
-| Skills | [quickstart-skills.md](./quickstart-skills.md) | `executeSkill`, resource generation, synergy events, Tier 1/2/3 |
+| Skills | quickstart-skills.md | `executeCard`, resource generation, synergy events, Tier 1/2/3 |
 | World | [quickstart-world.md](./quickstart-world.md) | `resolveMapEvent`, MapEventPool authoring, `alignmentDelta` |
 
 ---

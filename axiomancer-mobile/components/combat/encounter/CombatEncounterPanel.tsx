@@ -59,9 +59,9 @@ type DropResolver = (payload: DragPayload, x: number, y: number) => void | Promi
 export interface CombatEncounterPanelProps {
     /** The foe to fight (live: the real map encounter enemy; dev: a mock). */
     enemy: Enemy;
-    /** Player snapshot used to initialise the encounter (deck derives from knownSkills). */
+    /** Player snapshot used to initialise the encounter (deck derives from knownCards). */
     bootstrapPlayer: Character;
-    /** Optional explicit deck (engine derives one from knownSkills when omitted). */
+    /** Optional explicit deck (engine derives one from knownCards when omitted). */
     deck?: string[];
     /** Deterministic seed. */
     seed?: number;

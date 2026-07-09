@@ -294,10 +294,6 @@ export function CardForm({ card, setCard }: { card: CardDraft; setCard: (c: Card
     };
     const removeTag = (t: string) => set({ tags: card.tags.filter((x) => x !== t) });
 
-    // ── learningRequirement helpers ──
-    const lr = card.learningRequirement;
-    const toggleLR = () => set({ learningRequirement: lr ? undefined : {} });
-
     return (
         <div style={{ display: 'flex', flexDirection: 'column' }}>
             {/* ════ IDENTITY (open by default) ════ */}
@@ -482,45 +478,6 @@ export function CardForm({ card, setCard }: { card: CardDraft; setCard: (c: Card
                 <Btn kind="ghost" onClick={addMechanic} style={{ fontSize: 13 }}>
                     + ADD MECHANIC
                 </Btn>
-            </Section>
-
-            {/* ════ LEARNING REQUIREMENT ════ */}
-            <Section title="LEARNING REQUIREMENT" badge={lr ? 'set' : undefined}>
-                <Toggle on={!!lr} onClick={toggleLR} label={lr ? 'GATED' : 'NO REQUIREMENT'} />
-                {lr && (
-                    <>
-                        <div>
-                            <FieldLabel hint="optional stat gate">STAT REQUIREMENT</FieldLabel>
-                            <Segmented
-                                options={[{ value: 'none', label: 'NONE' }, ...STANCES] as { value: string; label: string }[]}
-                                value={lr.statRequirementType ?? 'none'}
-                                onChange={(v) =>
-                                    set({
-                                        learningRequirement: {
-                                            ...lr,
-                                            statRequirementType: v === 'none' ? undefined : (v as StatType),
-                                            statRequirementValue: v === 'none' ? undefined : (lr.statRequirementValue ?? 1),
-                                        },
-                                    })
-                                }
-                            />
-                        </div>
-                        {lr.statRequirementType && (
-                            <div>
-                                <FieldLabel>STAT VALUE</FieldLabel>
-                                <Stepper value={lr.statRequirementValue ?? 1} onChange={(v) => set({ learningRequirement: { ...lr, statRequirementValue: v } })} min={1} max={99} />
-                            </div>
-                        )}
-                        <div>
-                            <FieldLabel hint="card id">PREREQUISITE CARD</FieldLabel>
-                            <TextField
-                                value={lr.prerequisiteSkill ?? ''}
-                                onChange={(v) => set({ learningRequirement: { ...lr, prerequisiteSkill: v.trim() === '' ? undefined : v } })}
-                                placeholder="e.g. ad-hominem-strike"
-                            />
-                        </div>
-                    </>
-                )}
             </Section>
 
             {/* ════ TAGS & METADATA ════ */}

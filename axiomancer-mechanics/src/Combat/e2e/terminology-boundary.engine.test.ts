@@ -1,7 +1,7 @@
 /**
  * Regression guard — Phase 166 Skills vs Cards terminology boundary.
  *
- * Skills are always-available token-spending actions in `knownSkills`.
+ * Skills are always-available token-spending actions in `knownCards`.
  * Cards are Hazard-style deck/hand/reward objects (CombatCard).
  * A card may be projected from a skill, but the projected object is a card.
  *
@@ -53,11 +53,6 @@ describe('Phase 166 — Skills vs Cards terminology guard', () => {
             }
         });
     }
-
-    it('CombatCard.skillId field is the accepted skill-source field name', () => {
-        const src = read('src/Combat/combat.encounter.types.ts');
-        expect(src).toContain('skillId: string | null');
-    });
 
     it('toCombatCard is the accepted projection entry-point name', () => {
         const src = read('src/Combat/combat.cards.ts');

@@ -3,7 +3,7 @@
  *
  * Pins the dev combat-deck controls: a per-preset "swap your deck" button for
  * each strategy deck plus a "random deck" button that deals from the full card
- * pool. Both replace the player's `knownSkills` and clear earned reward cards.
+ * pool. Both replace the player's `knownCards` and clear earned reward cards.
  */
 
 import { afterEach, describe, expect, it, jest } from '@jest/globals';
@@ -49,24 +49,24 @@ describe('DebugCombatDeck: deck controls', () => {
         expect(tree.queryByTestId('debug-combat-deck-randomize')).not.toBeNull();
     });
 
-    it('pressing a preset swaps the player deck (knownSkills) for that preset', () => {
+    it('pressing a preset swaps the player deck (knownCards) for that preset', () => {
         const store = makeStore();
         const tree = render(withProviders(store, <DebugCombatDeck />));
 
         fireEvent.press(tree.getByTestId('debug-combat-deck-preset-erosion'));
 
-        expect(store.getState().player.knownSkills.length).toBeGreaterThan(0);
+        expect(store.getState().player.knownCards.length).toBeGreaterThan(0);
         expect(store.getState().player.combatRewardCards).toEqual([]);
         expect(tree.getByText(/Erosion: \d+-card deck/i)).toBeTruthy();
     });
 
-    it('pressing random deck deals a random hand into knownSkills', () => {
+    it('pressing random deck deals a random hand into knownCards', () => {
         const store = makeStore();
         const tree = render(withProviders(store, <DebugCombatDeck />));
 
         fireEvent.press(tree.getByTestId('debug-combat-deck-randomize'));
 
-        expect(store.getState().player.knownSkills.length).toBeGreaterThan(0);
+        expect(store.getState().player.knownCards.length).toBeGreaterThan(0);
         expect(tree.getByText(/random deck:/i)).toBeTruthy();
     });
 });

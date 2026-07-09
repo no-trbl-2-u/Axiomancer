@@ -14,7 +14,7 @@
  *   - getTickAmplifyFlat         (MARK)
  *
  * Plus: every combat-engine-owned CardSpecialMechanic kind is a NO-OP through
- * `executeSkill` (the HP behavior lives in combat.engine, not the skill engine
+ * `executeCard` (the HP behavior lives in combat.engine, not the skill engine
  * — same split as `guard`). Self-contained, deterministic, no disk / RNG.
  */
 
@@ -28,7 +28,7 @@ import { Player } from '../../Character/characters.mock';
 import { GraveLarva } from '../../Enemy/enemy.library';
 import { deepClone } from '../../Utils';
 import { getCardById } from '../../Cards/cards.library';
-import { executeSkill } from '../../Cards/skill.engine';
+import { executeCard } from '../../Cards/card.engine';
 import type { Card, CardSpecialMechanic } from '../../Cards/types';
 import type { CombatState } from '../types';
 import {
@@ -209,7 +209,7 @@ const ENGINE_OWNED_KINDS: CardSpecialMechanic[] = [
     { kind: 'reprise', count: 1 },
 ];
 
-describe('skill engine — every combat-engine-owned mechanic kind is a NO-OP through executeSkill', () => {
+describe('skill engine — every combat-engine-owned mechanic kind is a NO-OP through executeCard', () => {
     for (const mech of ENGINE_OWNED_KINDS) {
         it(`'${mech.kind}' leaves caster/target HP + effects unchanged`, () => {
             const skill: Card = {
@@ -219,7 +219,7 @@ describe('skill engine — every combat-engine-owned mechanic kind is a NO-OP th
                 specialMechanics: [mech],
             };
             const player = deepClone(Player) as Character;
-            player.knownSkills = ['test-mech-skill'];
+            player.knownCards = ['test-mech-skill'];
             player.effects = [];
             player.baseStats = { body: 0, mind: 0, heart: 0 };
             const enemy = deepClone(GraveLarva) as Enemy;
@@ -230,7 +230,7 @@ describe('skill engine — every combat-engine-owned mechanic kind is a NO-OP th
                 player, enemy, playerChoice: {}, enemyChoice: {}, log: [],
                 combatResources: { heart: 0, body: 5, mind: 0, fallacy: 0, paradox: 0 },
             };
-            const res = executeSkill(state, 'test-mech-skill', id => id === 'test-mech-skill' ? skill : getCardById(id), 'player');
+            const res = executeCard(state, 'test-mech-skill', id => id === 'test-mech-skill' ? skill : getCardById(id), 'player');
 
             // No damage/heal/effect events from the mechanic itself.
             expect(res.events.some(e => e.kind === 'damage' || e.kind === 'heal' || e.kind === 'effect-applied')).toBe(false);

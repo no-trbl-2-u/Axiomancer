@@ -34,7 +34,7 @@ describe('migrations.engine', () => {
                 inventory: [],
                 currency: 0,
                 effects: [],
-                knownSkills: [],
+                knownCards: [],
                 equippedSkills: [],
             },
             combat: null,

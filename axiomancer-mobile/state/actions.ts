@@ -19,8 +19,8 @@ import {
     defaultSellPrice as engineDefaultSellPrice,
     buildCharacterFromPreset,
     defaultAlignment,
-    getAvailableSkills,
-    learnSkill as engineLearnSkill,
+    getAvailableCards,
+    learnCard as engineLearnSkill,
     changeMap as worldChangeMap,
     completeNode as worldCompleteNode,
     consumableLibrary,
@@ -34,7 +34,7 @@ import {
     getMapDefinition,
     getNodePrimaryEventKind,
     getPresetById,
-    getSkillById,
+    getCardById,
     healCharacter,
     isConsumable,
     isEquipment,
@@ -57,16 +57,16 @@ import {
     type MapState,
     type PhilosophicalAlignment,
     type ResolveMapEventResult,
-    type Skill,
+    type Card,
     type WorldState,
 } from '@mechanics';
 
 
 import {
-    COMBAT_SKILLS,
+    COMBAT_CARDS,
     getCombatSkillById,
-    skillEffectText,
-} from '@/state/selectors/combat-skills';
+    cardEffectText,
+} from '@/state/selectors/combat-cards';
 import { equipmentFromTemplate as templateToEquipment } from '@mechanics';
 import { resolveWareItem } from '@/state/presenters/village.engine';
 import {
@@ -221,7 +221,7 @@ export interface MoveToResult {
 export interface DebugSeedResult {
     /** Count of items pushed to the player's inventory across categories. */
     itemsAdded: number;
-    /** Count of skills appended to the player's `knownSkills` list. */
+    /** Count of skills appended to the player's `knownCards` list. */
     skillsLearned: number;
     /** True when the current map was successfully re-seeded. */
     mapReset: boolean;
@@ -510,7 +510,7 @@ export interface AppActions {
     applyHazardDeckPreset: (presetId: HazardDeckPresetId) => HazardDeckPresetResult;
     /**
      * Dev tool — swap the player's combat deck for a preset: replaces
-     * `knownSkills` with the preset's card ids and clears earned reward
+     * `knownCards` with the preset's card ids and clears earned reward
      * cards, so the next encounter deals exactly that deck.
      */
     applyCombatDeckPreset: (presetId: CombatDeckPresetId) => CombatDeckPresetResult;
@@ -677,18 +677,18 @@ export interface AppActions {
     sellVillageItem: (index: number) => boolean;
 
     // -----------------------------------------------------------------
-    // Skill-learning pass.
+    // Card-learning pass.
     // -----------------------------------------------------------------
 
     /**
      * Rolls up to `count` (default 3) level-up skill offers from
      * everything the player currently qualifies for (engine
-     * `getAvailableSkills`, alignment-gated). Empty = nothing new to
+     * `getAvailableCards`, alignment-gated). Empty = nothing new to
      * learn; the caller skips the modal.
      */
-    getLearnableSkillOffers: (count?: number) => LearnableSkillOffer[];
+    getLearnableSkillOffers: (count?: number) => LearnableCardOffer[];
     /** Learns a skill through the engine (requirement-checked). */
-    learnSkill: (skillId: string) => boolean;
+    learnCard: (skillId: string) => boolean;
 }
 
 export interface UseItemResult {
@@ -701,14 +701,14 @@ export interface UseItemResult {
 }
 
 // ---------------------------------------------------------------------------
-// Skill learning (level-up picks)
+// Card learning (level-up picks)
 // ---------------------------------------------------------------------------
 
 /**
  * Starter repertoire — sourced from the engine's level-1 `apprentice`
- * preset (`getPresetById('apprentice').knownSkills`) so the engine remains
+ * preset (`getPresetById('apprentice').knownCards`) so the engine remains
  * the single source of truth for the starting skill set. New games create
- * the player with `knownSkills: []` and the normal flow never applies a
+ * the player with `knownCards: []` and the normal flow never applies a
  * preset, so the first combat / first level-up seeds these.
  * `engineLearnSkill` enforces requirements, so anything the level-1 player
  * doesn't qualify for is skipped.
@@ -716,8 +716,8 @@ export interface UseItemResult {
 // Spec 32 v3 §7 — the new player's starting combat repertoire.
 //
 // In this engine a combat *card* is the draw-able projection of a *skill*: the
-// draw pile is built from `player.knownSkills` (`buildCombatDeck`), and a card's
-// POWERED action runs `executeSkill`, which THROWS unless the player knows that
+// draw pile is built from `player.knownCards` (`buildCombatDeck`), and a card's
+// POWERED action runs `executeCard`, which THROWS unless the player knows that
 // skill. So the hand can only be as varied — and as effective — as the set of
 // skills the level-1 player actually KNOWS.
 //
@@ -737,25 +737,24 @@ function currentAlignment(store: AppStore): PhilosophicalAlignment {
  *  starter bundle if one was picked (deck identity), else the tier-1 default. */
 function ensureStarterSkills(store: AppStore): void {
     const player = store.getState().player;
-    if (!player || (player.knownSkills?.length ?? 0) > 0) return;
+    if (!player || (player.knownCards?.length ?? 0) > 0) return;
     // Deck-identity path: a bundle was chosen pre-run. Direct-set its curated
     // deck (the cards are valid engine ids; learn-requirements don't gate the
-    // combat deal — knownSkills IS the deck source).
+    // combat deal — knownCards IS the deck source).
     const bundle = chosenStarterBundle(store);
     if (bundle) {
-        store.setState({ player: { ...player, knownSkills: [...bundle.cardIds], combatRewardCards: [] } });
+        store.setState({ player: { ...player, knownCards: [...bundle.cardIds], combatRewardCards: [] } });
         return;
     }
-    const alignment = currentAlignment(store);
     let next = player;
     for (const id of STARTER_SKILL_IDS) {
-        next = engineLearnSkill(next, id, alignment);
+        next = engineLearnSkill(next, id);
     }
     if (next !== player) store.setState({ player: next });
 }
 
 /** One learnable-skill offer row for the level-up learn modal. */
-export interface LearnableSkillOffer {
+export interface LearnableCardOffer {
     id: string;
     name: string;
     description: string;
@@ -766,7 +765,7 @@ export interface LearnableSkillOffer {
     effectText: string;
 }
 
-function toLearnableOffer(store: AppStore, skill: Skill): LearnableSkillOffer {
+function toLearnableOffer(store: AppStore, skill: Card): LearnableCardOffer {
     const combatSkill = getCombatSkillById(skill.id);
     // Spec 32 v3 — THE STRIKE IS DEAD: cards deal no immediate damage, so the
     // offer row carries only the status/effect line (never a fabricated number).
@@ -779,7 +778,7 @@ function toLearnableOffer(store: AppStore, skill: Skill): LearnableSkillOffer {
         category: skill.category,
         tier: skill.tier,
         effectText: combatSkill
-            ? skillEffectText(combatSkill, damage)
+            ? cardEffectText(combatSkill, damage)
             : 'NO DIRECT EFFECT',
     };
 }
@@ -787,14 +786,14 @@ function toLearnableOffer(store: AppStore, skill: Skill): LearnableSkillOffer {
 /**
  * Rolls the level-up skill offers: up to `count` random picks from
  * everything the player currently qualifies for (engine
- * `getAvailableSkills`, alignment-gated). Empty when nothing new is
+ * `getAvailableCards`, alignment-gated). Empty when nothing new is
  * learnable — the caller skips the modal.
  */
-function getLearnableSkillOffersAction(store: AppStore, count = 3): LearnableSkillOffer[] {
+function getLearnableSkillOffersAction(store: AppStore, count = 3): LearnableCardOffer[] {
     ensureStarterSkills(store);
     const player = store.getState().player;
     if (!player) return [];
-    const pool = getAvailableSkills(player, currentAlignment(store)).slice();
+    const pool = getAvailableCards(player).slice();
     for (let i = pool.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [pool[i], pool[j]] = [pool[j], pool[i]];
@@ -803,10 +802,10 @@ function getLearnableSkillOffersAction(store: AppStore, count = 3): LearnableSki
 }
 
 /** Learns a skill through the engine (requirement-checked). */
-function learnSkillAction(store: AppStore, skillId: string): boolean {
+function learnCardAction(store: AppStore, skillId: string): boolean {
     const player = store.getState().player;
     if (!player) return false;
-    const next = engineLearnSkill(player, skillId, currentAlignment(store));
+    const next = engineLearnSkill(player, skillId);
     if (next === player) return false;
     store.setState({ player: next });
     return true;
@@ -848,7 +847,7 @@ export function createAppActions(store: AppStore): AppActions {
         startCombat: (enemy) => {
             // Starter skills must exist BEFORE the engine snapshots the
             // player — the picker and the engine both read the
-            // snapshot's knownSkills. The engine's `startCombat` records
+            // snapshot's knownCards. The engine's `startCombat` records
             // the encounter (`currentEncounter`) and fires `combat:started`.
             ensureStarterSkills(store);
             store.getState().startCombat(enemy);
@@ -1034,7 +1033,7 @@ export function createAppActions(store: AppStore): AppActions {
         buyVillageWare: (itemId) => buyVillageWareAction(store, itemId),
         sellVillageItem: (index) => sellVillageItemAction(store, index),
         getLearnableSkillOffers: (count) => getLearnableSkillOffersAction(store, count),
-        learnSkill: (skillId) => learnSkillAction(store, skillId),
+        learnCard: (skillId) => learnCardAction(store, skillId),
     };
 }
 
@@ -1368,20 +1367,20 @@ function debugSeedAction(store: AppStore): DebugSeedResult {
 
         // 3. Two skills from the engine's library (covers both paradox +
         //    fallacy categories). Phase 16 swapped the data source from
-        //    the local mock to `state/selectors/combat-skills`; engine
-        //    0.10.2 now re-exports `skillLibrary` at the top level.
-        //    Push directly onto `player.knownSkills` rather than via
-        //    `engine.learnSkill` — `learnSkill` enforces level-/stat-
+        //    the local mock to `state/selectors/combat-cards`; engine
+        //    0.10.2 now re-exports `cardLibrary` at the top level.
+        //    Push directly onto `player.knownCards` rather than via
+        //    `engine.learnCard` — `learnCard` enforces level-/stat-
         //    gating which the dev seed should bypass. The ids it adds
-        //    are exactly what the picker renders from `COMBAT_SKILLS`.
+        //    are exactly what the picker renders from `COMBAT_CARDS`.
         try {
-            const fixtureSkillIds: ReadonlyArray<string> = COMBAT_SKILLS
+            const fixtureSkillIds: ReadonlyArray<string> = COMBAT_CARDS
                 .slice(0, 4)
                 .map((s) => s.id);
             if (fixtureSkillIds.length > 0) {
                 const afterAdd = store.getState();
                 const player = afterAdd.player;
-                const known = new Set<string>(player.knownSkills ?? []);
+                const known = new Set<string>(player.knownCards ?? []);
                 for (const id of fixtureSkillIds) {
                     if (!known.has(id)) {
                         known.add(id);
@@ -1390,7 +1389,7 @@ function debugSeedAction(store: AppStore): DebugSeedResult {
                 }
                 const nextPlayer: Character = {
                     ...player,
-                    knownSkills: Array.from(known),
+                    knownCards: Array.from(known),
                 };
                 store.setState({ player: nextPlayer });
             }

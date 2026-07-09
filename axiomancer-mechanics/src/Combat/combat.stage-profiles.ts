@@ -165,7 +165,7 @@ export function stageEligibleCardIds(
 /**
  * Builds the stage's player: a deep clone of the canonical `Player` mock with
  * level / base stats / HP set from the profile, derived stats recomputed from
- * the new base stats, and `knownSkills` = the full stage-eligible card pool
+ * the new base stats, and `knownCards` = the full stage-eligible card pool
  * (so `buildCombatDeck` and deck drafting both see the same maturity gate).
  */
 export function buildStagePlayer(stage: CombatStageProfile): Character {
@@ -175,6 +175,6 @@ export function buildStagePlayer(stage: CombatStageProfile): Character {
     player.derivedStats = deriveStats(player.baseStats);
     player.maxHealth = stage.playerMaxHealth;
     player.health = stage.playerMaxHealth;
-    player.knownSkills = stageEligibleCardIds(stage);
+    player.knownCards = stageEligibleCardIds(stage);
     return player;
 }

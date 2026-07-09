@@ -92,7 +92,7 @@ const LOW_HP_FRACTION = 0.30;
 
 /** The special-mechanic kinds a card's backing skill carries (0.34.0 payoffs). */
 function cardMechKinds(card: CombatCard): Set<string> {
-    const skill = card.skillId ? getCardById(card.skillId) : undefined;
+    const skill = getCardById(card.id);
     return new Set((skill?.specialMechanics ?? []).map(m => m.kind));
 }
 

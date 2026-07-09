@@ -5,7 +5,7 @@
  *  1. Codec round-trip: addToLoadout / getCombatLoadout / removeFromLoadout.
  *  2. Max-capacity guard.
  *  3. buildCombatDeck — curated loadout when flags present.
- *  4. buildCombatDeck — fallback to knownSkills when no loadout flags.
+ *  4. buildCombatDeck — fallback to knownCards when no loadout flags.
  *  5. isCombatSynergySatisfied — target-side predicate (true / false).
  *  6. isCombatSynergySatisfied — caster-side predicate always false.
  *  7. isCombatSynergySatisfied — synthetic card always false.
@@ -84,8 +84,8 @@ describe('buildCombatDeck with curated loadout', () => {
         level: 1,
         baseStats: { heart: 5, body: 5, mind: 5 },
     });
-    const EXTRA = 'straw-mans-jab'; // a third real card only knownSkills carries
-    const playerWithSkills = { ...player, knownSkills: [SKILL_A, SKILL_B, EXTRA] };
+    const EXTRA = 'straw-mans-jab'; // a third real card only knownCards carries
+    const playerWithSkills = { ...player, knownCards: [SKILL_A, SKILL_B, EXTRA] };
 
     it('uses the curated loadout when loadout flags are present', () => {
         let flags: string[] = [];
@@ -98,7 +98,7 @@ describe('buildCombatDeck with curated loadout', () => {
         expect(deck).not.toContain('card-retreat');
     });
 
-    it('falls back to knownSkills when flags array is empty', () => {
+    it('falls back to knownCards when flags array is empty', () => {
         const deck = buildCombatDeck(playerWithSkills, []);
         expect(deck).toContain(SKILL_A);
         expect(deck).toContain(SKILL_B);
@@ -106,12 +106,12 @@ describe('buildCombatDeck with curated loadout', () => {
         expect(deck).not.toContain('card-retreat');
     });
 
-    it('falls back to knownSkills when flags has no loadout prefix', () => {
+    it('falls back to knownCards when flags has no loadout prefix', () => {
         const deck = buildCombatDeck(playerWithSkills, ['other-flag:1']);
         expect(deck).toContain(EXTRA);
     });
 
-    it('falls back to knownSkills when flags parameter is omitted', () => {
+    it('falls back to knownCards when flags parameter is omitted', () => {
         const deck = buildCombatDeck(playerWithSkills);
         expect(deck).toContain(EXTRA);
     });
@@ -206,10 +206,10 @@ describe('isCombatSynergySatisfied', () => {
         expect(isCombatSynergySatisfied(card!, enemyEffects)).toBe(false);
     });
 
-    it('returns false for a card with no backing skillId (no crash on a null skillId)', () => {
+    it('returns false for a synthetic card with no library backing', () => {
         const card = toCombatCard(SKILL_A, getCardById, lookupEffect);
         expect(card).not.toBeNull();
-        const noSkillCard = { ...card!, skillId: null };
-        expect(isCombatSynergySatisfied(noSkillCard, [])).toBe(false);
+        const syntheticCard = { ...card!, id: 'card-retreat' };
+        expect(isCombatSynergySatisfied(syntheticCard, [])).toBe(false);
     });
 });

@@ -9,7 +9,7 @@
  */
 
 import { describe, expect, it } from '@jest/globals';
-import { skillLibrary } from '@mechanics';
+import { cardLibrary } from '@mechanics';
 
 import {
     accentForStat,
@@ -325,7 +325,7 @@ describe('selectTooltipContentFor', () => {
     describe('kind: skill (Phase 75)', () => {
         it('returns engine-sourced name + description + stance for a known skill id', () => {
             // Pick any known engine skill — the first one is stable.
-            const first = skillLibrary[0];
+            const first = cardLibrary[0];
             const content = selectTooltipContentFor('skill', first.id, EMPTY_STATE);
             expect(content).not.toBeNull();
             // getCombatSkillById uppercases the name.
@@ -345,8 +345,8 @@ describe('selectTooltipContentFor', () => {
 
     describe('skill kind threads stance accent', () => {
         it('skill on body stance returns body accent', () => {
-            const { skillLibrary } = require('@mechanics');
-            const bodySkill = skillLibrary.find((s: { philosophicalAspect: string }) => s.philosophicalAspect === 'body');
+            const { cardLibrary } = require('@mechanics');
+            const bodySkill = cardLibrary.find((s: { philosophicalAspect: string }) => s.philosophicalAspect === 'body');
             if (!bodySkill) {
                 // No body-stance skill in library; skip without
                 // failing — the contract is still pinned by stat

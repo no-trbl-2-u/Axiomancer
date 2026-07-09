@@ -48,7 +48,7 @@ import { getMapDefinition } from '../World/map.registry';
 import { resolveMapEvent, MAP_REGISTRY, getNodePrimaryEventKind } from '../World';
 import type { ResolvedEvent, ContinentName, MapName } from '../World';
 import { getCardById } from '../Cards/cards.library';
-import { getAvailableSkills } from '../Cards/skill.engine';
+import { getAvailableCards } from '../Cards/card.engine';
 import { isConsumable } from '../Items/types';
 import { buyItem, sellItem, defaultSellPrice } from '../Items/shop.reducer';
 import { getConsumableById } from '../Items/consumable.library';
@@ -489,7 +489,7 @@ function skillsTab(store: GameStoreHandle): void {
     const { player } = store.getState();
     log('\n— Skills —');
     log('Known skills:');
-    for (const id of player.knownSkills) {
+    for (const id of player.knownCards) {
         const s = getCardById(id);
         log(`  • ${s?.name ?? id}`);
     }
@@ -613,7 +613,7 @@ async function characterTab(store: GameStoreHandle): Promise<void> {
     }
 
     log('\nSkills:');
-    log(`  Known/Unlocked: ${p.knownSkills.length > 0 ? p.knownSkills.join(', ') : '(none)'}`);
+    log(`  Known/Unlocked: ${p.knownCards.length > 0 ? p.knownCards.join(', ') : '(none)'}`);
 
     log('\nInventory summary:');
     const grouped = new Map<string, number>();
@@ -656,7 +656,7 @@ async function characterTab(store: GameStoreHandle): Promise<void> {
     // mirrors the Allocate flow: visible only when there's something eligible
     // to learn, scriptable via a "skip" exit. Each learn dispatches so the
     // autosave + state log records the change.
-    let learnable = getAvailableSkills(
+    let learnable = getAvailableCards(
         store.getState().player,
         store.getState().philosophicalAlignment,
     );
@@ -678,10 +678,10 @@ async function characterTab(store: GameStoreHandle): Promise<void> {
         }]);
         if (skillId === 'skip') break;
         const before = store.getState();
-        store.getState().learnSkill(skillId);
-        logState('learnSkill', before, store.getState(), { skillId });
+        store.getState().learnCard(skillId);
+        logState('learnCard', before, store.getState(), { skillId });
         log(`Learned ${skillId}.`);
-        learnable = getAvailableSkills(
+        learnable = getAvailableCards(
             store.getState().player,
             store.getState().philosophicalAlignment,
         );
@@ -789,7 +789,7 @@ async function devTab(store: GameStoreHandle): Promise<void> {
                 const r = devLearnSkills(store, 'all');
                 log(`\n${r.detail}\n`);
             } else {
-                const known = new Set(store.getState().player.knownSkills);
+                const known = new Set(store.getState().player.knownCards);
                 const available = getSkillIds().filter(id => !known.has(id));
                 if (available.length === 0) { log('\nAll skills already known.\n'); break; }
                 const { skills } = await prompt<{ skills: string[] }>([{

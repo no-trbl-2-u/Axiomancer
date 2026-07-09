@@ -1,5 +1,5 @@
 /**
- * Hermetic component tests — LearnSkillModal surface.
+ * Hermetic component tests — LearnCardModal surface.
  *
  * Pins the skill-learning modal: copy register, offer rendering,
  * button interactions, accessibility labels. Tests the overlay that
@@ -10,10 +10,10 @@ import { describe, expect, it, jest } from '@jest/globals';
 import { fireEvent, render } from '@testing-library/react-native';
 import React from 'react';
 
-import { LearnSkillModal } from '@/components/levelup/LearnSkillModal';
-import type { LearnableSkillOffer } from '@/state/actions';
+import { LearnCardModal } from '@/components/levelup/LearnCardModal';
+import type { LearnableCardOffer } from '@/state/actions';
 
-const mockOffer: LearnableSkillOffer = {
+const mockOffer: LearnableCardOffer = {
     id: 'test-skill-id',
     name: 'Test Skill',
     tier: 2,
@@ -23,10 +23,10 @@ const mockOffer: LearnableSkillOffer = {
     description: 'A test skill for unit testing',
 };
 
-describe('LearnSkillModal: mount contract', () => {
+describe('LearnCardModal: mount contract', () => {
     it('renders the modal root with testID', () => {
         const tree = render(
-            <LearnSkillModal
+            <LearnCardModal
                 offers={[mockOffer]}
                 picksRemaining={1}
                 onPick={() => undefined}
@@ -38,7 +38,7 @@ describe('LearnSkillModal: mount contract', () => {
 
     it('renders the header copy (eyebrow + title + subtitle)', () => {
         const tree = render(
-            <LearnSkillModal
+            <LearnCardModal
                 offers={[mockOffer]}
                 picksRemaining={1}
                 onPick={() => undefined}
@@ -52,7 +52,7 @@ describe('LearnSkillModal: mount contract', () => {
 
     it('renders multiple picks subtitle when picksRemaining > 1', () => {
         const tree = render(
-            <LearnSkillModal
+            <LearnCardModal
                 offers={[mockOffer]}
                 picksRemaining={3}
                 onPick={() => undefined}
@@ -64,7 +64,7 @@ describe('LearnSkillModal: mount contract', () => {
 
     it('renders skill offer with all required fields', () => {
         const tree = render(
-            <LearnSkillModal
+            <LearnCardModal
                 offers={[mockOffer]}
                 picksRemaining={1}
                 onPick={() => undefined}
@@ -80,7 +80,7 @@ describe('LearnSkillModal: mount contract', () => {
 
     it('renders skip button with expected copy', () => {
         const tree = render(
-            <LearnSkillModal
+            <LearnCardModal
                 offers={[mockOffer]}
                 picksRemaining={1}
                 onPick={() => undefined}
@@ -92,12 +92,12 @@ describe('LearnSkillModal: mount contract', () => {
     });
 });
 
-describe('LearnSkillModal: callbacks', () => {
+describe('LearnCardModal: callbacks', () => {
     it('skill offer button fires onPick with skill id exactly once', () => {
         const onPick = jest.fn();
         const onSkip = jest.fn();
         const tree = render(
-            <LearnSkillModal
+            <LearnCardModal
                 offers={[mockOffer]}
                 picksRemaining={1}
                 onPick={onPick}
@@ -114,7 +114,7 @@ describe('LearnSkillModal: callbacks', () => {
         const onPick = jest.fn();
         const onSkip = jest.fn();
         const tree = render(
-            <LearnSkillModal
+            <LearnCardModal
                 offers={[mockOffer]}
                 picksRemaining={1}
                 onPick={onPick}
@@ -127,10 +127,10 @@ describe('LearnSkillModal: callbacks', () => {
     });
 });
 
-describe('LearnSkillModal: voice register', () => {
+describe('LearnCardModal: voice register', () => {
     it('subtitle uses lowercase ritual register (no second-person archaic pronouns)', () => {
         const tree = render(
-            <LearnSkillModal
+            <LearnCardModal
                 offers={[mockOffer]}
                 picksRemaining={1}
                 onPick={() => undefined}
@@ -145,7 +145,7 @@ describe('LearnSkillModal: voice register', () => {
 
     it('skip text uses lowercase ritual register (no second-person archaic pronouns)', () => {
         const tree = render(
-            <LearnSkillModal
+            <LearnCardModal
                 offers={[mockOffer]}
                 picksRemaining={1}
                 onPick={() => undefined}
@@ -159,10 +159,10 @@ describe('LearnSkillModal: voice register', () => {
     });
 });
 
-describe('LearnSkillModal: accessibility', () => {
+describe('LearnCardModal: accessibility', () => {
     it('skill offer button surfaces descriptive accessibilityLabel', () => {
         const tree = render(
-            <LearnSkillModal
+            <LearnCardModal
                 offers={[mockOffer]}
                 picksRemaining={1}
                 onPick={() => undefined}
@@ -178,7 +178,7 @@ describe('LearnSkillModal: accessibility', () => {
 
     it('skip button surfaces descriptive accessibilityLabel', () => {
         const tree = render(
-            <LearnSkillModal
+            <LearnCardModal
                 offers={[mockOffer]}
                 picksRemaining={1}
                 onPick={() => undefined}
@@ -191,15 +191,15 @@ describe('LearnSkillModal: accessibility', () => {
     });
 });
 
-describe('LearnSkillModal: multiple offers', () => {
+describe('LearnCardModal: multiple offers', () => {
     it('renders all provided skill offers with unique testIDs', () => {
-        const offers: LearnableSkillOffer[] = [
+        const offers: LearnableCardOffer[] = [
             { ...mockOffer, id: 'skill-1', name: 'First Skill' },
             { ...mockOffer, id: 'skill-2', name: 'Second Skill' },
             { ...mockOffer, id: 'skill-3', name: 'Third Skill' },
         ];
         const tree = render(
-            <LearnSkillModal
+            <LearnCardModal
                 offers={offers}
                 picksRemaining={1}
                 onPick={() => undefined}

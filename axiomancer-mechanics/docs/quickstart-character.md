@@ -42,14 +42,14 @@ const upgraded = allocateStatPoint(hero, 'mind');
 ## Learn a skill
 
 ```typescript
-import { learnSkill, getAvailableSkills } from 'axiomancer-mechanics';
+import { learnCard, getAvailableCards } from 'axiomancer-mechanics';
 
 // Check what's learnable at current level + alignment
-const available = getAvailableSkills(hero, hero.knownSkills);
+const available = getAvailableCards(hero, hero.knownCards);
 
 // Learn if requirements met
-const result = learnSkill(hero, 'false-dilemma');
-// result.character has the skill in knownSkills; there is no equipped-skill gate (ADR-0002)
+const result = learnCard(hero, 'false-dilemma');
+// result.character has the skill in knownCards; there is no equipped-skill gate (ADR-0002)
 ```
 
 ## Equip items

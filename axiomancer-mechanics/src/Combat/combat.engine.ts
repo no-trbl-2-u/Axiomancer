@@ -6,10 +6,10 @@
  * stance dice and plays cards, where STATUS effects are the efficient damage
  * (DoT erodes HP; control hinders the enemy's turn) and a raw strike is the weak
  * baseline. The legacy resolver, the effects engine, the skill engine, and all
- * effects are UNCHANGED — this engine *drives* `executeSkill` / `applyEffect`
+ * effects are UNCHANGED — this engine *drives* `executeCard` / `applyEffect`
  * differently.
  *
- * Card bottom actions execute through the unchanged `executeSkill`: the drafted
+ * Card bottom actions execute through the unchanged `executeCard`: the drafted
  * stance die is the card's whole cost — combat cards carry no resource cost.
  * Landed `effect-applied` events drive the post-combat attribution and the
  * self-reinforcing die loop (§4.7).
@@ -27,13 +27,13 @@ import type { Effect, ActiveEffect } from '../Effects/types';
 import type { Character } from '../Character/types';
 import type { Enemy } from '../Enemy/types';
 import { getCardById } from '../Cards/cards.library';
-import { executeSkill } from '../Cards/skill.engine';
+import { executeCard } from '../Cards/card.engine';
 import type { Card, CardRider, CardSpecialMechanic, CombatResources } from '../Cards/types';
 import type { CombatState, Stance } from './types';
 import { applyDamage, heal, isDefeated } from './health';
 import {
     processRoundStartEffects, processRoundEndEffects, getActiveRollModifier,
-    getThornsReflect, getDamageTakenMultiplier, getPendingDotTotal, consumeDotEffects,
+    getThornsReflect, getDamageTakenMultiplier, getPendingDotTotal,
     getDistinctDebuffCount, getDistinctControlCount,
     getHealingReceivedMult, getOutgoingDamageMult, decayDotsOnHeal, consumeEffect,
     hasPayloadFlag, getStanceVulnMult, computeRoundsToKill,
@@ -60,9 +60,6 @@ import { recordAttribution } from './combat.attribution';
 import { canAct, getActiveEffectModifiers, getActiveDotTotal } from './effect-modifiers';
 import { getThreatSequence } from './combat.threat';
 import { getSignatureSkill, applySignatureSkill, playerArchetype, SIGNATURE_KITS } from './combat.signature';
-import {
-    lookupSkill as lookupSkillDefinition, canAffordSkill, triggerSkill,
-} from '../Skills';
 import type {
     CombatCard, CombatDieColor, CombatEncounterState, CombatEvent, CardPlay,
     CombatManaDie, CombatPhaseResult, CombatTransition, LandedEffect, CombatReadResult,
@@ -205,12 +202,12 @@ const defaultRng = (): number => getRng().random();
 
 // ── Card / lookup adapters ──────────────────────────────────────────────────
 
-const lookupSkill = (id: string): Card | undefined => getCardById(id);
+const lookupCard = (id: string): Card | undefined => getCardById(id);
 const lookupEffectDef = (id: string): Effect | undefined => lookupEffect(id);
 
 /** Projects a card id into its card view (skill or synthetic). */
 export function getCard(cardId: string): CombatCard | null {
-    return toCombatCard(cardId, lookupSkill, lookupEffectDef);
+    return toCombatCard(cardId, lookupCard, lookupEffectDef);
 }
 
 // ── RPS advantage — per-phase die-cost scaling (§4.8) ────────────────────────
@@ -261,7 +258,7 @@ function readToAdvantage(read: CombatReadResult): 'advantage' | 'neutral' | 'dis
 
 // ── Internal helpers ─────────────────────────────────────────────────────────
 
-/** Builds the legacy `CombatState` shim `executeSkill` needs. */
+/** Builds the legacy `CombatState` shim `executeCard` needs. */
 function skillShim(enc: CombatEncounterState): CombatState {
     return {
         active: true,
@@ -818,7 +815,7 @@ function gainPremises(
         return { state: { ...next, premises: 0, peroration: null }, concede: true };
     }
     if (total >= decl.at) {
-        const declCard = lookupSkill(decl.cardId);
+        const declCard = lookupCard(decl.cardId);
         const mech = (declCard?.specialMechanics ?? []).find(m => m.kind === 'peroration') as
             Extract<CardSpecialMechanic, { kind: 'peroration' }> | undefined;
         events.push({ kind: 'peroration-fired', cardId: decl.cardId, premisesSpent: total });
@@ -846,7 +843,7 @@ function applyForetell(
     if (drawPile.length > 1 && count > 1) {
         const top = drawPile.slice(0, count);
         const rest = drawPile.slice(count);
-        const rankOf = (id: string): number => lookupSkill(id)?.rank ?? 0;
+        const rankOf = (id: string): number => lookupCard(id)?.rank ?? 0;
         const bestIdx = top.reduce((best, id, i) => (rankOf(id) > rankOf(top[best]) ? i : best), 0);
         const reordered = [top[bestIdx], ...top.filter((_, i) => i !== bestIdx)];
         drawPile = [...reordered, ...rest];
@@ -1049,7 +1046,7 @@ function playTopAction(
     card: CombatCard,
     rng: () => number,
 ): CombatTransition {
-    const skill = card.skillId ? lookupSkill(card.skillId) : undefined;
+    const skill = lookupCard(card.id);
     if (skill && skill.cardType !== 'spell') {
         return playFreeEnchant(state, uid, card, skill);
     }
@@ -1072,7 +1069,7 @@ function playTopAction(
 
 /**
  * Powered bottom action (§4.3, §4.7, §4.8): pays dice via RPS scaling, runs the
- * full skill through `executeSkill`, folds landed effects into the impact
+ * full skill through `executeCard`, folds landed effects into the impact
  * tracks + attribution, and refreshes a matching die when a status effect
  * meaningfully lands.
  */
@@ -1083,7 +1080,7 @@ function playBottomAction(
     dieId: string | undefined,
     _rng: () => number,
 ): CombatTransition {
-    const skill = card.skillId ? lookupSkill(card.skillId) : undefined;
+    const skill = lookupCard(card.id);
     if (!skill) return { state, events: [] };
 
     // 1. Resolve the POWERING die — Fate Engine P1 R8: the dieId the player
@@ -1200,7 +1197,7 @@ function playBottomAction(
 
     const before = intensityMap(state.enemy.effects);
     let shimState: CombatState = skillShim(state);
-    let res = executeSkill(shimState, skill.id, lookupSkill, 'player');
+    let res = executeCard(shimState, skill.id, lookupCard, 'player');
     let allSkillEvents = [...res.events];
     if (echoed) {
         // Second pass re-applies the card's status payloads (stacking rules
@@ -1210,7 +1207,7 @@ function playBottomAction(
             player: res.state.player, enemy: res.state.enemy,
             combatResources: res.state.combatResources,
         };
-        res = executeSkill(shimState, skill.id, lookupSkill, 'player');
+        res = executeCard(shimState, skill.id, lookupCard, 'player');
         allSkillEvents = [...allSkillEvents, ...res.events];
         events.push({ kind: 'echoed', cardId: card.id });
     }
@@ -1623,13 +1620,13 @@ function playBottomAction(
                 // reprised card's FREE line immediately.
                 const returned: string[] = [];
                 for (let i = 0; i < mech.count * echoFactor && discard.length > 0; i++) {
-                    const rankOf = (id: string): number => lookupSkill(id)?.rank ?? 0;
+                    const rankOf = (id: string): number => lookupCard(id)?.rank ?? 0;
                     const bestIdx = discard.reduce((best, id, j) => (rankOf(id) > rankOf(discard[best]) ? j : best), 0);
                     const cid = discard[bestIdx];
                     discard = discard.filter((_, j) => j !== bestIdx);
                     hand = [...hand, { uid: `rp${state.log.length + events.length}-${i}`, cardId: cid }];
                     returned.push(cid);
-                    const freeRider = lookupSkill(cid)?.free;
+                    const freeRider = lookupCard(cid)?.free;
                     if (mech.fireFree && freeRider) reprisedFreeRiders.push(freeRider);
                 }
                 if (returned.length > 0) {
@@ -1644,7 +1641,7 @@ function playBottomAction(
                 // OUROBOROS — the argument repeats: the last spell's statuses land
                 // again, `times` times. Never chains into another replay.
                 const lastId = state.lastSpellCardId;
-                const lastSkill = lastId && lastId !== skill.id ? lookupSkill(lastId) : undefined;
+                const lastSkill = lastId && lastId !== skill.id ? lookupCard(lastId) : undefined;
                 const replayable = lastSkill
                     && lastSkill.cardType === 'spell'
                     && !(lastSkill.specialMechanics ?? []).some(m2 => m2.kind === 'replay_last');
@@ -1652,7 +1649,7 @@ function playBottomAction(
                     for (let i = 0; i < mech.times; i++) {
                         const shim2: CombatState = { ...skillShim(state), player, enemy, combatResources: res.state.combatResources };
                         try {
-                            const replay = executeSkill(shim2, lastSkill.id, lookupSkill, 'player');
+                            const replay = executeCard(shim2, lastSkill.id, lookupCard, 'player');
                             player = replay.state.player as Character;
                             enemy = replay.state.enemy as Enemy;
                             allSkillEvents = [...allSkillEvents, ...replay.events];
@@ -2606,7 +2603,7 @@ export function processBetweenPhases(
             }
             if (omen.stance === incomingStance) {
                 omenHits += 1;
-                const omenSkill = lookupSkill(omen.cardId);
+                const omenSkill = lookupCard(omen.cardId);
                 const omenMech = (omenSkill?.specialMechanics ?? []).find(m => m.kind === 'omen') as
                     Extract<CardSpecialMechanic, { kind: 'omen' }> | undefined;
                 if (omenMech) {
@@ -2936,111 +2933,6 @@ export function playSignatureSkill(
     return checkImmediateOutcome(next, events);
 }
 
-/**
- * Master Spec §3 — Skills trigger hook. Skills are NOT cards (locked product
- * doctrine): a separate, always-available ability system funded by
- * `CombatResources` tokens, triggerable independent of the drawn hand / card
- * plays and independent of the drafted-die turn structure (no `phase-play`
- * gate, unlike `playCombatCard`) — only affordability + `SkillLimit` gate it.
- *
- * `apply_effect` / `cleanse_self` / `strip_enemy_buff` are fully resolved by
- * `Skills/skill-trigger.engine.ts`'s `triggerSkill`; `consume_bank_burst` /
- * `detonate_stacks` / `grant_barrier` come back as an `engineHandoff`
- * descriptor and are finished HERE (mirrors the card `rupture`/`compound`/
- * `barrier` handlers above — same pattern, Skills-owned trigger instead of a
- * card play).
- */
-export function triggerCombatSkill(
-    state: CombatEncounterState,
-    skillId: string,
-): CombatTransition {
-    const def = lookupSkillDefinition(skillId);
-    if (!def) return { state, events: [] };
-
-    const uses = state.skillUses ?? {};
-    const lastUsedRound = state.skillLastUsedRound ?? {};
-
-    if (def.limit?.kind === 'once_per_combat' && (uses[def.id] ?? 0) >= 1) {
-        const events: CombatEvent[] = [{ kind: 'skill-fizzled', skillId: def.id, message: `${def.name} already used this combat.` }];
-        return { state: withLog(state, events), events };
-    }
-    if (def.limit?.kind === 'cooldown') {
-        const last = lastUsedRound[def.id];
-        if (last !== undefined && state.round - last < def.limit.rounds) {
-            const events: CombatEvent[] = [{ kind: 'skill-fizzled', skillId: def.id, message: `${def.name} is on cooldown.` }];
-            return { state: withLog(state, events), events };
-        }
-    }
-    if (!canAffordSkill(state.combatResources, def.cost)) {
-        const events: CombatEvent[] = [{ kind: 'skill-fizzled', skillId: def.id, message: `not enough tokens for ${def.name}.` }];
-        return { state: withLog(state, events), events };
-    }
-
-    const result = triggerSkill(
-        { round: state.round, casterEffects: state.player.effects, enemyEffects: state.enemy.effects },
-        state.combatResources,
-        def,
-    );
-
-    const combatResources: CombatResources = { ...state.combatResources };
-    (Object.keys(result.resourceDelta) as (keyof CombatResources)[]).forEach(key => {
-        combatResources[key] = Math.max(0, combatResources[key] + (result.resourceDelta[key] ?? 0));
-    });
-
-    let player: Character = { ...state.player, effects: result.casterEffects };
-    let enemy: Enemy = { ...state.enemy, effects: result.enemyEffects };
-    let barrier = state.barrier ?? 0;
-    const events: CombatEvent[] = [
-        { kind: 'skill-triggered', skillId: def.id, name: def.name, cost: def.cost, landed: result.landed, message: result.message },
-    ];
-
-    if (result.engineHandoff) {
-        switch (result.engineHandoff.kind) {
-            case 'grant_barrier': {
-                barrier += result.engineHandoff.amount;
-                break;
-            }
-            case 'detonate_stacks': {
-                const distinct = getDistinctDebuffCount(enemy);
-                if (distinct >= result.engineHandoff.minDistinctDebuffs) {
-                    const consumedRes = consumeDotEffects(enemy);
-                    enemy = consumedRes.combatant;
-                    const burst = Math.round(enemy.maxHealth * (result.engineHandoff.perDebuffPct / 100) * distinct);
-                    if (burst > 0) {
-                        enemy = applyDamage(enemy, burst);
-                        events.push({ kind: 'rupture-detonated', amount: burst, consumed: consumedRes.consumed });
-                    }
-                } else {
-                    events.push({ kind: 'skill-fizzled', skillId: def.id, message: `${def.name}: not enough distinct debuffs to detonate.` });
-                }
-                break;
-            }
-            case 'consume_bank_burst': {
-                const burst = Math.round(
-                    enemy.maxHealth * (result.engineHandoff.tokensBurned * result.engineHandoff.pctPerToken / 100),
-                );
-                if (burst > 0) {
-                    enemy = applyDamage(enemy, burst);
-                    events.push({ kind: 'damage-dealt', cardId: def.id, target: 'enemy', amount: burst });
-                }
-                break;
-            }
-            default: break;
-        }
-    }
-
-    const skillUses = { ...uses };
-    const skillLastUsedRound = { ...lastUsedRound };
-    if (def.limit?.kind === 'once_per_combat') skillUses[def.id] = (skillUses[def.id] ?? 0) + 1;
-    if (def.limit?.kind === 'cooldown') skillLastUsedRound[def.id] = state.round;
-
-    let next: CombatEncounterState = {
-        ...state, player, enemy, combatResources, barrier, skillUses, skillLastUsedRound,
-    };
-    next = withLog(next, events);
-    return checkImmediateOutcome(next, events);
-}
-
 /** The baseline signature kit (for the presenter / UI bar). */
 export { SIGNATURE_SKILLS, SIGNATURE_SKILL_LIST, getSignatureSkill } from './combat.signature';
 
@@ -3171,7 +3063,7 @@ export function projectRupture(state: CombatEncounterState): number {
 /** SIPHON projection — the heal a siphon card would grant if powered now (off
  *  the projected payoff burst). */
 export function projectSiphonHeal(state: CombatEncounterState, card: CombatCard): number {
-    const skill = card.skillId ? lookupSkill(card.skillId) : undefined;
+    const skill = lookupCard(card.id);
     const mech = (skill?.specialMechanics ?? []).find(m => m.kind === 'siphon') as
         { kind: 'siphon'; pct: number } | undefined;
     if (!mech) return 0;
@@ -3180,7 +3072,7 @@ export function projectSiphonHeal(state: CombatEncounterState, card: CombatCard)
 
 /** REAP-ALL projection — the burst the Harvest capstone would deal right now. */
 export function projectReapAll(state: CombatEncounterState, card: CombatCard): { ready: boolean; amount: number } {
-    const skill = card.skillId ? lookupSkill(card.skillId) : undefined;
+    const skill = lookupCard(card.id);
     const mech = (skill?.specialMechanics ?? []).find(m => m.kind === 'reap_all') as
         Extract<CardSpecialMechanic, { kind: 'reap_all' }> | undefined;
     if (!mech) return { ready: false, amount: 0 };
@@ -3219,7 +3111,7 @@ export function projectCombatOutcome(state: CombatEncounterState): CombatOutcome
     const roundsToKill = computeRoundsToKill(state.enemy, state.round);
     const finishers: FinisherProjection[] = [];
     for (const { uid, card } of handCards(state)) {
-        const skill = card.skillId ? lookupSkill(card.skillId) : undefined;
+        const skill = lookupCard(card.id);
         const mech = (skill?.specialMechanics ?? []).find(
             m => m.kind === 'rupture' || m.kind === 'reap_all',
         );

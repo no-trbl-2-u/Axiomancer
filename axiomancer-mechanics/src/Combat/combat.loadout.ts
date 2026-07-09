@@ -11,7 +11,7 @@
  * order (flag-array order is preserved by the Zustand store).
  *
  * When no loadout flags exist `getCombatLoadout` returns `[]` and
- * `buildCombatDeck` falls back to `player.knownSkills` — full backwards
+ * `buildCombatDeck` falls back to `player.knownCards` — full backwards
  * compatibility with saves that pre-date Phase 169.
  */
 
@@ -21,7 +21,7 @@ export const COMBAT_LOADOUT_FLAG_PREFIX = 'combat-loadout-card:';
 export const COMBAT_LOADOUT_MAX = 20;
 
 /** Decodes the ordered loadout from `GameState.flags`. Returns [] when no
- *  loadout flags are present (caller falls back to knownSkills). */
+ *  loadout flags are present (caller falls back to knownCards). */
 export function decodeCombatLoadout(flags: readonly string[]): string[] {
     const out: string[] = [];
     for (const flag of flags) {

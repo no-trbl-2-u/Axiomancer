@@ -43,7 +43,7 @@ export function DebugPlaythroughPresets() {
                 experience: 0,
                 availableStatPoints: 0,
                 baseStats: { heart: 3, body: 3, mind: 3 },
-                knownSkills: [],
+                knownCards: [],
                 inventory: [], // Empty inventory for fresh start
                 currency: 0,
                 effects: [],
@@ -75,7 +75,7 @@ export function DebugPlaythroughPresets() {
                 experience: 20000, // 20 levels * 1000 XP per level
                 availableStatPoints: 0, // All points spent
                 baseStats: { heart: 15, body: 15, mind: 15 }, // High balanced stats
-                knownSkills: [
+                knownCards: [
                     // Spec 32 v3 — a cross-theme endgame spread: commons,
                     // uncommons, and the rare finishers/persistents.
                     'slippery-slope',

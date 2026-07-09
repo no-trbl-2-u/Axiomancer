@@ -43,7 +43,7 @@ function hasFlag(store: AppStore): boolean {
 function mount(opts: { seenTutorial?: boolean } = {}): { store: AppStore } {
     const { tree, store } = withAllProviders(<CombatEncounterScreen />);
     const player = store.getState().player;
-    store.setState({ player: { ...player, knownSkills: SKILLS, baseStats: { heart: 8, body: 8, mind: 8 }, health: 200, maxHealth: 200 } });
+    store.setState({ player: { ...player, knownCards: SKILLS, baseStats: { heart: 8, body: 8, mind: 8 }, health: 200, maxHealth: 200 } });
     if (opts.seenTutorial) {
         const flags = (store.getState() as unknown as { flags?: string[] }).flags ?? [];
         store.setState({ flags: [...flags, COMBAT_TUTORIAL_FLAG] } as never);

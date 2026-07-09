@@ -22,7 +22,6 @@ import type {
     CardRider,
     CardCombatEffects,
     CardSpecialMechanic,
-    CardLearningRequirement,
     CardSynergy,
 } from '@mechanics/Cards/types';
 
@@ -56,7 +55,6 @@ export interface CardDraft {
     combatEffects: CardCombatEffects[];
     /** Always an array in the draft (default `[]`). */
     specialMechanics: CardSpecialMechanic[];
-    learningRequirement?: CardLearningRequirement;
     synergy?: CardSynergy;
     incrementsFriendship?: number;
     addedIn?: string;
@@ -83,7 +81,6 @@ export function blankCard(): CardDraft {
         fallen: undefined,
         combatEffects: [],
         specialMechanics: [],
-        learningRequirement: undefined,
         synergy: undefined,
         incrementsFriendship: undefined,
         addedIn: undefined,
@@ -92,31 +89,28 @@ export function blankCard(): CardDraft {
 }
 
 /** Real `Card` → editable `CardDraft` (fills the array fields with defaults). */
-export function toDraft(skill: Card): CardDraft {
+export function toDraft(card: Card): CardDraft {
     return {
-        id: skill.id,
-        name: skill.name,
-        category: skill.category,
-        philosophicalAspect: skill.philosophicalAspect,
-        description: skill.description,
-        tier: skill.tier,
-        targetType: skill.targetType,
-        rank: skill.rank,
-        cardType: skill.cardType,
-        free: skill.free ? { ...skill.free } : undefined,
-        threshold: skill.threshold ? { ...skill.threshold } : undefined,
-        dieBonus: skill.dieBonus ? { ...skill.dieBonus } : undefined,
-        fate: skill.fate ? { ...skill.fate } : undefined,
-        fallen: skill.fallen ? { ...skill.fallen } : undefined,
-        combatEffects: (skill.combatEffects ?? []).map((e) => ({ ...e })),
-        specialMechanics: (skill.specialMechanics ?? []).map((m) => ({ ...m })),
-        learningRequirement: skill.learningRequirement
-            ? { ...skill.learningRequirement }
-            : undefined,
-        synergy: skill.synergy ? { ...skill.synergy } : undefined,
-        incrementsFriendship: skill.incrementsFriendship,
-        addedIn: skill.addedIn,
-        tags: skill.tags ? [...skill.tags] : [],
+        id: card.id,
+        name: card.name,
+        category: card.category,
+        philosophicalAspect: card.philosophicalAspect,
+        description: card.description,
+        tier: card.tier,
+        targetType: card.targetType,
+        rank: card.rank,
+        cardType: card.cardType,
+        free: card.free ? { ...card.free } : undefined,
+        threshold: card.threshold ? { ...card.threshold } : undefined,
+        dieBonus: card.dieBonus ? { ...card.dieBonus } : undefined,
+        fate: card.fate ? { ...card.fate } : undefined,
+        fallen: card.fallen ? { ...card.fallen } : undefined,
+        combatEffects: (card.combatEffects ?? []).map((e) => ({ ...e })),
+        specialMechanics: (card.specialMechanics ?? []).map((m) => ({ ...m })),
+        synergy: card.synergy ? { ...card.synergy } : undefined,
+        incrementsFriendship: card.incrementsFriendship,
+        addedIn: card.addedIn,
+        tags: card.tags ? [...card.tags] : [],
     };
 }
 
@@ -124,7 +118,7 @@ const isBlank = (s: string | undefined): boolean => s == null || s.trim() === ''
 
 /** Editable `CardDraft` → real `Card` (prunes empty arrays / blank optionals). */
 export function fromDraft(draft: CardDraft): Card {
-    const skill: Card = {
+    const card: Card = {
         id: draft.id.trim(),
         name: draft.name.trim(),
         category: draft.category,
@@ -136,26 +130,23 @@ export function fromDraft(draft: CardDraft): Card {
         cardType: draft.cardType,
     };
 
-    if (draft.free != null) skill.free = { ...draft.free };
-    if (draft.threshold != null) skill.threshold = { ...draft.threshold };
-    if (draft.dieBonus != null) skill.dieBonus = { ...draft.dieBonus };
-    if (draft.fate != null) skill.fate = { ...draft.fate };
-    if (draft.fallen != null) skill.fallen = { ...draft.fallen };
+    if (draft.free != null) card.free = { ...draft.free };
+    if (draft.threshold != null) card.threshold = { ...draft.threshold };
+    if (draft.dieBonus != null) card.dieBonus = { ...draft.dieBonus };
+    if (draft.fate != null) card.fate = { ...draft.fate };
+    if (draft.fallen != null) card.fallen = { ...draft.fallen };
     if (draft.combatEffects.length > 0) {
-        skill.combatEffects = draft.combatEffects.map((e) => ({ ...e }));
+        card.combatEffects = draft.combatEffects.map((e) => ({ ...e }));
     }
     if (draft.specialMechanics.length > 0) {
-        skill.specialMechanics = draft.specialMechanics.map((m) => ({ ...m }));
+        card.specialMechanics = draft.specialMechanics.map((m) => ({ ...m }));
     }
-    if (draft.learningRequirement != null) {
-        skill.learningRequirement = { ...draft.learningRequirement };
-    }
-    if (draft.synergy != null) skill.synergy = { ...draft.synergy };
+    if (draft.synergy != null) card.synergy = { ...draft.synergy };
     if (draft.incrementsFriendship != null) {
-        skill.incrementsFriendship = draft.incrementsFriendship;
+        card.incrementsFriendship = draft.incrementsFriendship;
     }
-    if (!isBlank(draft.addedIn)) skill.addedIn = draft.addedIn!.trim();
-    if (draft.tags.length > 0) skill.tags = [...draft.tags];
+    if (!isBlank(draft.addedIn)) card.addedIn = draft.addedIn!.trim();
+    if (draft.tags.length > 0) card.tags = [...draft.tags];
 
-    return skill;
+    return card;
 }

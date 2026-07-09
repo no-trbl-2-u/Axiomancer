@@ -436,17 +436,18 @@ with the legacy driver.)
 | `Combatant` | `Character \| Enemy` — the union type for any participant in a combat encounter |
 | `BattleLogEntry` | Per-round log record (`round`, `playerAction`, `enemyAction`, `advantage`, rolls, damage fields, `result`) stored in `CombatState.log` |
 
-## Skills vs Cards — Terminology Boundary
+## Card terminology
 
-**Skills** and **cards** are distinct concepts. Do not use them interchangeably.
+The combat deck is built from **cards** (`knownCards`): a card is a Hazard-style
+combat entity in the deck/hand/reward loop — free/powered action halves, a stance
+color, a die cost, and draw/discard/deck cadence. A card in hand is projected from
+a library `Card` via `toCombatCard`; the engine resolves its powered action through
+`executeCard`.
 
-| Concept | Definition |
-|---------|-----------|
-| **Skill** | A learned/unlocked action in `knownSkills`, gated only by token/resource affordability (`combatResources`). Always available once learned. Executed through `executeSkill`. |
-| **Card** | A Hazard-style combat entity in the deck/hand/reward loop — with free/powered action halves, a stance color, a die cost, and draw/discard/deck cadence. |
-| **Projected card** | A card derived from a skill-library entry via `toCombatCard`. The *source* is a skill; the *object in play* is still a card. Call it a "projected card" or "skill-sourced card", never a "skill". |
-
-Cross-reference: `docs/skills.md` → Skills vs Cards.
+The word **"skill"** in combat now refers ONLY to **Signature Skills** — the
+Conviction-funded, always-available kit (`SIGNATURE_SKILLS` in
+`combat.signature.ts`), independent of the shuffled deck. Everything the player
+draws and plays is a card.
 
 > **Naming collision warning (2026-07):** the table above is the *legacy*
 > "Skill" — `Cards/skill.engine.ts`'s card-resolution engine (confusingly
@@ -565,7 +566,6 @@ The engine lives in `src/Combat/`:
 | `getCard` / `handCards` / `cardDieCostPreview` / `availableDice` | Read-only previews for a UI to render the hand and affordances. |
 | `buildCombatSummary(state)` | End-of-fight `CombatSummary` with per-effect attribution rows. |
 | `simulateHazardPatternCombat(...)` | Monte-Carlo greedy bot returning `CombatSimStats` for balance runs. |
-| `SYNTHETIC_CARD_IDS` / `isSyntheticCard` | `SYNTHETIC_CARD_IDS` is a `readonly string[]` of built-in non-deck cards — currently empty (the synthetic Retreat card was removed; no in-combat retreat exists). Kept as a registry, not deleted, so a future synthetic card has somewhere to register. `isSyntheticCard(id)` is the boolean predicate; always `false` today. |
 | `CardEffectKind` | `'dot' \| 'control' \| 'none'` — the status-payload classification tag on every `CombatCard` (set by `classifyVerbClass`); drives the mobile card frame and deck-preset focus logic. The baseline GUARD defense card (`'brace-for-impact'`) is included in `STARTING_SKILL_IDS`. **`GOLD_CARD_IDS` / `isGoldCard` were deleted in Spec 32 v3** (2026-07-08) along with the three rare card ids they named — rarity is now derived from `rank` via `rankToRarity` (`rare` = rank 5-6), and the wild-die-auto-advantage-on-gold behavior was removed with them (a wild/x die is always neutral advantage now — see `resolveCardDieCost`). |
 | `CombatEncounterState`, `CombatCard`, `CombatThreatPhase`, `CombatOutcome`, `CombatSummary` | The core encounter type family. (`CombatPressureTracks` was REMOVED 2026-06-22 — HP is the sole win condition.) `CombatCard.skillId` is the canonical field for the backing learned-skill id (`string \| null`; `null` for synthetic cards, if any are ever added again). `CombatOutcome`/`CombatVerbClass` still list `'retreat'` as a union member for now (no live code path can produce it — no escape card exists) rather than risk an unverified type-cascade removal. Use `skillId` to trace a projected card back to its source skill. |
 | `CombatAttributionRow`, `LandedEffect` | Attribution sub-types for `buildCombatSummary`. `CombatAttributionRow` is a per-card row (`cardId`, `name`, `dotDamage`, `damageDealt`, `phases`); `LandedEffect` is a snapshot of one live effect used internally during attribution (`effectId`, `effect`, `active`, `target`). |

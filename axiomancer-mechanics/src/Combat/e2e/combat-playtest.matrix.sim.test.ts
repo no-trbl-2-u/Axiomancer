@@ -150,7 +150,7 @@ describe('playtest harness — honest failures', () => {
         // The erosion preset carries tier-3 cards (resonance-detonation) the
         // early-stage player has not learned; the harness grants deck knowledge
         // so the cell still runs (the maturity gate lives in DRAFTING, not the
-        // engine knownSkills check).
+        // engine knownCards check).
         const cell = runPlaytestCell({
             stage: 'early', enemySlug: 'grave-larva', policyId: 'greedy',
             deck: { kind: 'preset', presetId: 'erosion' }, runs: 2, seed: 1,

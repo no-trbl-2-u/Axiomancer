@@ -4,12 +4,12 @@
  * The legacy turn-based combat *driver* (round resolution, stance/action
  * progression, the battle log, the Pressure-Track win model) was removed.
  * What remains is `CombatState` — the state shape the Hazard-Pattern engine
- * builds as a shim to drive the shared `executeSkill` (see `combat.engine.ts`)
+ * builds as a shim to drive the shared `executeCard` (see `combat.engine.ts`)
  * — plus:
  *   - `initializeCombat`: the canonical `CombatState` constructor. Used by the
  *     skill / effects / equipment engines (and their tests) to build a fresh
  *     combat state with deep-cloned combatants and equipment-seeded resources.
- *   - `incrementFriendship`: the friendship-counter bump `executeSkill` applies
+ *   - `incrementFriendship`: the friendship-counter bump `executeCard` applies
  *     on a successful Befriend.
  */
 
@@ -98,8 +98,8 @@ export function initializeCombat(player: Character, enemy: Enemy): CombatState {
 /**
  * Increments the friendship counter on a `CombatState`.
  *
- * Used by the shared skill engine (`executeSkill`) when a Befriend attempt
- * lands — the Hazard-Pattern engine drives `executeSkill` against a
+ * Used by the shared skill engine (`executeCard`) when a Befriend attempt
+ * lands — the Hazard-Pattern engine drives `executeCard` against a
  * `CombatState` shim, so this bump still fires inside the new combat system.
  */
 export function incrementFriendship(state: CombatState): CombatState {

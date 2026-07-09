@@ -108,7 +108,7 @@ export {
     AUTHORED_THREAT_ENEMY_IDS,
     RAGE_UNLOCK_ROUND, RAGE_DAMAGE_WEIGHT, RAGE_HEAL_FRACTION,
     simulateHazardPatternCombat, runHazardCombatAutoEncounter,
-    SYNTHETIC_CARD_IDS, isSyntheticCard, mechanicText,
+    mechanicText,
     // Spec 26 / 26b — stance draft, hidden read, Conviction, Signature Skills
     TURN_DICE_COUNT, rollTurnDice, dieHasStance,
     startTurn, draftStanceDie, endTurn, resolveRead, chooseDraft, discardCombatCard,
@@ -144,8 +144,6 @@ export {
     // Fate Engine P1 (spec 31) — the dice get a second read
     tapFateDie, riderText, RESERVE_MAX, RESERVE_PIP_CAP, ripenReserve,
     PIP_INTENSITY_BONUS, PIP_GUARD_BONUS, COLOR_MATCH_STATUS_DURATION_BONUS, FATE_TAP_CONVICTION,
-    // Master Spec §3 — Skills trigger hook (Skills are NOT cards)
-    triggerCombatSkill,
 } from './Combat';
 export type {
     CombatEncounterState, CombatEncounterPhase, CombatTransition,
@@ -261,7 +259,7 @@ export type {
 export type {
     Card, CardCategory, StatType, CardTier, CardTarget,
     CombatResources,
-    CardLearningRequirement, CardCombatEffects, CardSpecialMechanic,
+    CardCombatEffects, CardSpecialMechanic,
     CardEvent, CardResolution, CardLookup,
     CardSynergy, SynergyPredicate,
     // Spec 32 v3 — the rank ladder / rarity / card-type axes
@@ -271,56 +269,15 @@ export type {
 } from './Cards';
 export {
     generateBasicActionResources, generatePhilosophicalResource,
-    calculateSkillDamage, executeSkill,
+    calculateCardDamage, executeCard,
     // Spec 32 v3 — rank/rarity helpers (mobile renders rank names off these)
     CARD_RANK_NAMES, rankToRarity,
-    meetsLearningRequirement, getAvailableSkills, learnSkill,
+    getAvailableCards, learnCard,
     cardLibrary, getCardById,
     // Phase 142 — Extended synergy predicate functionality
     evaluateExtendedSynergyPredicate, checkSinglePredicate, checkAnyCountPredicate,
     checkAllRequiredPredicate, checkBuffDebuffCombo, checkTotalIntensityPredicate,
 } from './Cards';
-// ─── Deprecated card aliases (legacy "skill" public names) ────────────────────
-// Kept so external consumers (axiomancer-mobile) keep working until they migrate.
-/** @deprecated renamed to cardLibrary */
-export { cardLibrary as skillLibrary } from './Cards';
-/** @deprecated renamed to getCardById */
-export { getCardById as getSkillById } from './Cards';
-/**
- * @deprecated The card type family was renamed off the legacy "skill" naming.
- * Use `Card`, `CardCategory`, `StatType`, `CardTier`, `CardTarget`,
- * `CardLearningRequirement`, `CardCombatEffects`, `CardSpecialMechanic`,
- * `CardSynergy`, `CardLookup`, `CardEvent`, `CardResolution`. These aliases
- * will be removed in a future minor.
- */
-export type {
-    Card as Skill,
-    CardCategory as SkillCategory,
-    StatType as SkillsStatType,
-    CardTier as SkillTier,
-    CardTarget as SkillTarget,
-    CardLearningRequirement as SkillLearningRequirement,
-    CardCombatEffects as SkillCombatEffects,
-    CardSpecialMechanic as SkillSpecialMechanic,
-    CardSynergy as SkillSynergy,
-    CardLookup as SkillLookup,
-    CardEvent as SkillEvent,
-    CardResolution as SkillResolution,
-} from './Cards';
-
-// ─── Skills system (Master Spec §3) — NOT the legacy "skill" card aliases
-// above. A separate, always-available ability system funded by
-// `CombatResources` tokens, triggerable mid-combat independent of the drawn
-// hand (see `Combat`'s `triggerCombatSkill`, exported above). ─────────────────
-export type {
-    SkillCost, SkillEffect, SkillLimit, SkillDefinition,
-    SkillTriggerContext, SkillTriggerResult, SkillEngineHandoff,
-} from './Skills';
-export {
-    SKILLS_LIBRARY, lookupSkill as lookupSkillDefinition, getAllSkillIds,
-    getKnownSkills,
-    canAffordSkill as canAffordSkillDefinition, spendSkillCost, triggerSkill as triggerSkillDefinition,
-} from './Skills';
 
 // ─── Game (state, store, persistence, constants) ──────────────────────────────
 export {

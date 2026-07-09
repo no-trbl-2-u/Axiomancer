@@ -146,7 +146,7 @@ Agent-graded walkthrough at `automation/scripts/walkthroughs/codex-unlock.*`.
 runnable code samples: [`quickstart-character.md`](./quickstart-character.md),
 [`quickstart-combat.md`](./quickstart-combat.md),
 [`quickstart-items.md`](./quickstart-items.md),
-[`quickstart-skills.md`](./quickstart-skills.md),
+`quickstart-skills.md`,
 [`quickstart-world.md`](./quickstart-world.md).
 
 ### Events (Beta)
@@ -228,7 +228,7 @@ predicates AND-compose:
 - `requiredStances?: Stance[]` — player must have used at least one
   of the named stances during combat (existential; derived from
   `state.log[].playerAction.stance`).
-- `requiredSkillUse?: string[]` — player must have cast at least one
+- `requiredCardUse?: string[]` — player must have cast at least one
   of the named skill IDs during combat (existential; derived from
   `state.log[].playerAction` entries with `action === 'skill'`).
 - `defaultFallback?: 'both-defend-cap'` — explicit escape hatch that
@@ -384,30 +384,30 @@ reality.
 
 ### Skills
 
-- Skill execution (`executeSkill`, `canUseSkill`,
+- Skill execution (`executeCard`, `canUseSkill`,
   `generateBasicActionResources`, `generatePhilosophicalResource`,
-  `calculateSkillDamage`, `spendResources`) — Stable.
+  `calculateCardDamage`, `spendResources`) — Stable.
 - Skill types (`Skill`, `SkillCategory`, `SkillsStatType`,
   `SkillTier`, `SkillTarget`, `ResourceCost`, `CombatResources`,
   `SkillResolution`, etc.) — Stable.
-- **Top-level skill library (Phase 50):** `skillLibrary: Skill[]` +
-  `getSkillById(id: string): Skill | undefined` re-exported on the
+- **Top-level skill library (Phase 50):** `cardLibrary: Skill[]` +
+  `getCardById(id: string): Skill | undefined` re-exported on the
   top-level barrel (Phase 50 unit 1 — `19f2015`, engine-handoff fix
   for `axiomancer-mobile`). Consumers no longer need to import from a
   deep path; the canonical 21-skill library (6 Tier 1 + 8 Tier 2 +
   7 Tier 3 as of Phase 66 + Phase 44) is reachable directly from
-  `import { skillLibrary, getSkillById } from 'axiomancer-mechanics'`.
-- **Runtime learning (Phase 30):** `learnSkill(character, skillId)`,
-  `getAvailableSkills(character)`, `meetsLearningRequirement(character,
-  skill)` — Stable. The `LEARN_SKILL` action wires this through the
+  `import { cardLibrary, getCardById } from 'axiomancer-mechanics'`.
+- **Runtime learning (Phase 30):** `learnCard(character, skillId)`,
+  `getAvailableCards(character)`, `meetsLearningRequirement(character,
+  skill)` — Stable. The `LEARN_CARD` action wires this through the
   game reducer; the Character tab in `npm run game` exposes it. Closes
   Spec 06 Q7.
 - **Tier 2 synergy (Phase 66):** Beta. Optional
   `Skill.synergy?: SkillSynergy` clause + matching `SynergyPredicate`
   shape lets a skill condition bonus damage / effect consumption /
   type-swap / detonation on the presence of an `ActiveEffect` already
-  on the field. `executeSkill` evaluates synergy after
-  `calculateSkillDamage` but before `combatEffects` apply. A new
+  on the field. `executeCard` evaluates synergy after
+  `calculateCardDamage` but before `combatEffects` apply. A new
   `synergy-fired` `SkillEvent` (and matching `SkillPhaseEvent`
   variant) surfaces the bonus damage, consumed effect ids,
   consumed-token count, and clear/consume flags for UI / agent
@@ -508,13 +508,13 @@ authoring; the first batch is live as of Phase 44.
 **Phase 44 — fallacies-as-spells / abilities:**
 - `Skill.sourcedFromCell?: string` — Beta. Cross-link to the originating cell id for fallacy-themed skills.
 - `Effect.sourcedFromCell?: string` — Beta. Same for fallacy-themed status effects.
-- 4 new Tier 3 fallacy skills (`appeal-to-consequences`, `nirvana-fallacy`, `pascals-wager`, `appeal-to-fear`) in `skillLibrary`.
+- 4 new Tier 3 fallacy skills (`appeal-to-consequences`, `nirvana-fallacy`, `pascals-wager`, `appeal-to-fear`) in `cardLibrary`.
 - 3 new fallacy status effects (`debuff_no_true_scotsman`, `buff_special_pleading`, `debuff_category_error`) in `effectsLibrary`.
 
 **Phase 46 — alignment-gated content:**
 - `AlignmentGate` type (`{ axis: 'epistemology' | 'outlook' | 'scope', op: 'gte' | 'lte', value: number }`) — Beta. Predicate shape for gating content on the player's current alignment cube position.
 - `DialogueChoice.requires.requiresAlignment?: AlignmentGate` — Beta. Applied by `visibleChoices` (gated choices are hidden when the gate misses).
-- `SkillLearningRequirement.requiresAlignment?: AlignmentGate` — Beta. Applied by `meetsLearningRequirement` / `getAvailableSkills` / `learnSkill` (each accepts an optional `alignment` argument; the `LEARN_SKILL` reducer reads `state.philosophicalAlignment` automatically).
+- `CardLearningRequirement.requiresAlignment?: AlignmentGate` — Beta. Applied by `meetsLearningRequirement` / `getAvailableCards` / `learnCard` (each accepts an optional `alignment` argument; the `LEARN_CARD` reducer reads `state.philosophicalAlignment` automatically).
 - `DialogueContext.alignment?: PhilosophicalAlignment` — Beta. Optional context field threaded through `visibleChoices` so callers can preview gates without committing dispatch.
 - 2 live gates authored on `nirvana-fallacy` (`outlook ≤ -34`) + `appeal-to-fear` (`scope ≥ 34`); 2 dialogue branches gated on Old Marrow + Coastal Beggar. See [docs/philosophy.md "Authoring gates (Phase 46)"](./philosophy.md) for operator semantics + authoring guidance.
 

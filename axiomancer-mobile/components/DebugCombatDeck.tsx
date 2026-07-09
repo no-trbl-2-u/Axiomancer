@@ -3,7 +3,7 @@
  * deck for a curated selection (starter baseline plus the ten themed preset
  * decks — Erosion, Oratory, Foundry, Penitent, Standstill, Augury, Tithe,
  * Grace, Bastion, Refrain); the randomizer deals a chaos hand from the full
- * card pool. Each preset replaces `player.knownSkills` and clears earned
+ * card pool. Each preset replaces `player.knownCards` and clears earned
  * reward cards, so the next encounter deals exactly that deck. Renders null
  * outside dev builds.
  */

@@ -45,7 +45,7 @@ describe('applyPlayerTierPreset: L1/L15/L30/L50 ladder', () => {
             expect(player.derivedStats).toBeDefined();
             // Every tier seeds known skills (the full combat catalogue per
             // ADR-0002 — there is no separate equipped rotation).
-            expect(player.knownSkills?.length ?? 0).toBeGreaterThan(0);
+            expect(player.knownCards?.length ?? 0).toBeGreaterThan(0);
         },
     );
 

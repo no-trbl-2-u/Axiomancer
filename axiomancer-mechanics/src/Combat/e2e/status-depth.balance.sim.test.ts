@@ -20,7 +20,7 @@ const SEED = 1;
 
 function loadout(skills: string[]): Character {
     const p = deepClone(Player);
-    p.knownSkills = skills.slice();
+    p.knownCards = skills.slice();
     p.baseStats = { heart: 10, body: 10, mind: 10 };
     p.health = 150; p.maxHealth = 150;
     return p;

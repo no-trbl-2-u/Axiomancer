@@ -25,7 +25,7 @@ export type { CodexEntry };
  *
  * Authors leave predicates undefined when they don't apply (e.g. low-tier
  * enemies that only need the rounds threshold drop the other three fields).
- * Within a single list-valued predicate (`requiredStances`, `requiredSkillUse`)
+ * Within a single list-valued predicate (`requiredStances`, `requiredCardUse`)
  * the match is existential — at least one element of the list must appear in
  * the player's combat log.
  */
@@ -60,7 +60,7 @@ export interface BefriendabilityConfig {
      * `action === 'skill'` and matching `skillId`.
      * Empty array is treated as "no requirement" (same as undefined).
      */
-    requiredSkillUse?: string[];
+    requiredCardUse?: string[];
     /**
      * Explicit "fall through to Phase 36 mechanic". When set, the engine
      * treats this config as if the field were absent — useful for

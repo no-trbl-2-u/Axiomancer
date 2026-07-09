@@ -8,7 +8,7 @@
  * verb is a combat card (projected from a learned skill).
  *
  * This is the sole combat driver. It reuses the shared effects engine and
- * skill engine (Spec 25 §12 Q4 recommendation (b)): the `executeSkill` /
+ * skill engine (Spec 25 §12 Q4 recommendation (b)): the `executeCard` /
  * `applyEffect` machinery is untouched — the engine *drives* it differently.
  *
  * Doctrine (CLAUDE.md): status effects are the MAIN fun. DoT erosion + control
@@ -96,16 +96,14 @@ export type CombatVerbClass =
 export type CardEffectKind = 'dot' | 'control' | 'none';
 
 /**
- * A combat card — an adapter VIEW over a learned `Card` (or a synthetic card
- * like Retreat). Pure projection: never mutated, recomputed from the skill +
- * effect libraries. The `skillId` is the learned-skill id the card executes.
+ * A combat card — an adapter VIEW over a library `Card`. Pure projection: never
+ * mutated, recomputed from the card + effect libraries. `id` is the backing
+ * library-card id.
  */
 export interface CombatCard {
-    /** Card id. For skill-backed cards this is the skill id; synthetic cards
-     *  use a `card-` prefix (e.g. `card-retreat`). */
+    /** Card id. For library-backed cards this is the source card id; synthetic
+     *  cards use a `card-` prefix (e.g. `card-retreat`). */
     id: string;
-    /** Backing learned-skill id, or null for synthetic cards. */
-    skillId: string | null;
     name: string;
     /** Stance color identity (Heart / Body / Mind). Derived from the skill's
      *  `philosophicalAspect`. Synthetic cards may be `wild`. */
@@ -424,12 +422,6 @@ export type CombatEvent =
     | { kind: 'threat-fired'; phaseIndex: number; description: string; effects: CombatThreatEffect[] }
     | { kind: 'hand-drawn'; cards: string[] }
     | { kind: 'mercy-opened'; message: string }
-    // Master Spec §3 — Skills system. Skills are NOT cards: a separate,
-    // always-available ability system triggered via `triggerCombatSkill`,
-    // independent of card plays / the drawn hand.
-    | { kind: 'skill-triggered'; skillId: string; name: string; cost: Partial<CombatResources>;
-        landed: boolean; message: string }
-    | { kind: 'skill-fizzled'; skillId: string; message: string }
     // THE CLOCK, discrete tier (combat-depth-epic): every
     // THREAT_ENCHANT_CURSE_EVERY_ROUNDS the enemy grows a new passive
     // strength or lays a fresh curse on the player.
@@ -594,16 +586,6 @@ export interface CombatEncounterState {
     /** See `permanentWildDice`. Every permanent Wild die is paired with one
      *  permanent dead (locked `x`) die — the visible "fate pushes back" cost. */
     permanentDeadDice?: number;
-    /**
-     * Master Spec §3.3 — `SkillLimit` bookkeeping for `triggerCombatSkill`.
-     * `skillUses[skillId]` counts triggers so far this combat (gates
-     * `once_per_combat`); `skillLastUsedRound[skillId]` is the `round` a
-     * cooldown-limited skill last fired (gates `cooldown`). Optional for
-     * back-compat with state literals (treated as empty/never-used when absent).
-     */
-    skillUses?: Record<string, number>;
-    /** See `skillUses`. */
-    skillLastUsedRound?: Record<string, number>;
     seed?: number;                         // seed used to drive the encounter (sim/tests)
 }
 

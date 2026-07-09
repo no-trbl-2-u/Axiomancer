@@ -15,7 +15,6 @@
 import { describe, it, expect, afterEach, vi } from 'vitest';
 
 import { runPlaytestMatrix } from '../combat.playtest';
-import { isSyntheticCard } from '../combat.cards';
 import type { CombatStageId } from '../combat.stage-profiles';
 
 afterEach(() => vi.restoreAllMocks());
@@ -63,7 +62,7 @@ describe('free-metrics — win-path mix is un-collapsed and reconciles', () => {
 describe('free-metrics — deck utilization recomputes exactly', () => {
     it('deckUtilization = distinct-played / distinct-deck for every cell', () => {
         for (const cell of report.cells) {
-            const distinctDeck = new Set(cell.deckCardIds.filter(id => !isSyntheticCard(id))).size;
+            const distinctDeck = new Set(cell.deckCardIds).size;
             const distinctPlayed = Object.values(cell.cardUsage).filter(u => u.plays > 0).length;
             const expected = distinctDeck > 0 ? Math.min(1, distinctPlayed / distinctDeck) : 0;
             expect(cell.stats.deckUtilization).toBeCloseTo(expected, 6);

@@ -15,28 +15,44 @@ import { defaultAlignment } from '../Philosophy';
 import { createDefaultFactionReputations } from '../Faction';
 import { generateRunId } from './run-loop';
 
+/**
+ * Persisted player shape before v11 renamed the deck-source field
+ * `knownSkills` → `knownCards` (skill→card terminology unification). Every save
+ * at v10 and earlier carries the literal `knownSkills` key on disk; `migrateV10toV11`
+ * renames it. Historical migrations below read/write `knownSkills` against this
+ * shape, never the live `knownCards`.
+ */
+type PreV11Player = Omit<GameState['player'], 'knownCards'> & { knownSkills: string[] };
+
+/**
+ * Current GameState but with the pre-v11 player key. All historical (v2–v10)
+ * shapes derive from this, so the whole chain reads `knownSkills` until the
+ * final v10→v11 rename produces the live `GameState` (with `knownCards`).
+ */
+type GameStatePreV11 = Omit<GameState, 'player'> & { player: PreV11Player };
+
 /** GameState shape before v3 (before moralMeter field was added). */
-interface GameStateV2 extends Omit<GameState, 'moralMeter' | 'rngState' | 'philosophicalAlignment'> {
+interface GameStateV2 extends Omit<GameStatePreV11, 'moralMeter' | 'rngState' | 'philosophicalAlignment'> {
     version: 2;
 }
 
 /** GameState shape before v4 (before rngState field was added). */
-interface GameStateV3 extends Omit<GameState, 'rngState' | 'philosophicalAlignment'> {
+interface GameStateV3 extends Omit<GameStatePreV11, 'rngState' | 'philosophicalAlignment'> {
     version: 3;
 }
 
 /** GameState shape before v5 (before philosophicalAlignment field was added). */
-interface GameStateV4 extends Omit<GameState, 'philosophicalAlignment' | 'runId'> {
+interface GameStateV4 extends Omit<GameStatePreV11, 'philosophicalAlignment' | 'runId'> {
     version: 4;
 }
 
 /** GameState shape before v6 (before Phase 72 runId field was added). */
-interface GameStateV5 extends Omit<GameState, 'runId' | 'codex'> {
+interface GameStateV5 extends Omit<GameStatePreV11, 'runId' | 'codex'> {
     version: 5;
 }
 
 /** GameState shape before v7 (before Phase 73 codex slice was added). */
-interface GameStateV6 extends Omit<GameState, 'codex'> {
+interface GameStateV6 extends Omit<GameStatePreV11, 'codex'> {
     version: 6;
 }
 
@@ -48,17 +64,28 @@ interface GameStateV6 extends Omit<GameState, 'codex'> {
  */
 interface GameStateV7 extends Omit<GameState, 'player'> {
     version: 7;
-    player: GameState['player'] & { equippedSkills?: string[] };
+    player: PreV11Player & { equippedSkills?: string[] };
 }
 
 /** GameState shape before v9 (before Phase 109 regionConsequences was added). */
-interface GameStateV8 extends Omit<GameState, 'regionConsequences'> {
+interface GameStateV8 extends Omit<GameState, 'regionConsequences' | 'player'> {
     version: 8;
+    player: PreV11Player;
 }
 
 /** GameState shape before v10 (before Phase 110 factionReputations was added). */
-interface GameStateV9 extends Omit<GameState, 'factionReputations'> {
+interface GameStateV9 extends Omit<GameState, 'factionReputations' | 'player'> {
     version: 9;
+    player: PreV11Player;
+}
+
+/**
+ * GameState shape before v11 (before the knownSkills → knownCards rename). The
+ * last version whose player carries the legacy `knownSkills` key.
+ */
+interface GameStateV10 extends Omit<GameState, 'player'> {
+    version: 10;
+    player: PreV11Player;
 }
 
 /**
@@ -131,10 +158,11 @@ function migrateV6toV7(v6: GameStateV6): GameStateV7 {
 /**
  * Migrate from v7 to v8 (Phase 99 — unlocked skill access): merge the legacy
  * `equippedSkills` rotation into `knownSkills` so old saves don't lose access to
- * skills. Post-migration, combat uses `knownSkills` directly as the catalogue
- * (ADR-0002). Phase 159 removed `equippedSkills` from the live
- * `Character` type entirely, so the legacy field is read off the v7 payload and
- * dropped — it is never written back onto the migrated player.
+ * their cards. Post-migration, combat uses `knownSkills` directly as the catalogue
+ * (ADR-0002; the field is renamed to `knownCards` later, at v11). Phase 159
+ * removed `equippedSkills` from the live `Character` type entirely, so the legacy
+ * field is read off the v7 payload and dropped — it is never written back onto
+ * the migrated player.
  */
 function migrateV7toV8(v7: GameStateV7): GameStateV8 {
     const mergedKnown = new Set(v7.player.knownSkills);
@@ -174,11 +202,30 @@ function migrateV8toV9(v8: GameStateV8): GameStateV9 {
  * the new field defaults to `{}` (all factions neutral) so existing saves
  * continue to load without any faction reputation history.
  */
-function migrateV9toV10(v9: GameStateV9): GameState {
+function migrateV9toV10(v9: GameStateV9): GameStateV10 {
     return {
         ...v9,
         version: 10,
         factionReputations: createDefaultFactionReputations(),
+    };
+}
+
+/**
+ * Migrate from v10 to v11 (skill→card terminology unification): rename the
+ * persisted deck-source field `player.knownSkills` → `player.knownCards`. The
+ * value is carried across verbatim (same card ids); only the key changes so the
+ * live engine — which now reads `knownCards` everywhere — keeps loading old
+ * saves. Signature Skills are unaffected (a separate system, never persisted here).
+ */
+function migrateV10toV11(v10: GameStateV10): GameState {
+    const { knownSkills, ...player } = v10.player;
+    return {
+        ...v10,
+        version: 11,
+        player: {
+            ...player,
+            knownCards: knownSkills ?? [],
+        },
     };
 }
 
@@ -244,6 +291,10 @@ export function migrate(
 
     if (fromVersion < 10) {
         migrated = migrateV9toV10(migrated as GameStateV9);
+    }
+
+    if (fromVersion < 11) {
+        migrated = migrateV10toV11(migrated as GameStateV10);
     }
 
     return assertGameState(migrated);

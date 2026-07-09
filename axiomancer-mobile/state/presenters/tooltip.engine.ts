@@ -22,7 +22,7 @@
 
 import { lookupEffect } from '@mechanics';
 
-import { getCombatSkillById } from '@/state/selectors/combat-skills';
+import { getCombatSkillById } from '@/state/selectors/combat-cards';
 import type { AppStoreState } from '@/state/store';
 
 export type TooltipKind =

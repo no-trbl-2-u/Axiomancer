@@ -122,7 +122,7 @@ deprecated-effects ban-list is regenerated to cover every retired id.
 | **RUPTURE** | consume ALL enemy afflictions: burst = 1.5× remaining DoT fuel + 3 per non-DoT affliction stack (existing cap kept) |
 | **CONJURE** | create a one-use Thoughtform card into hand (removed after play / combat end) |
 
-### Theme signatures (2 × 10 = 20)
+### Theme hallmarks (2 × 10 = 20)
 
 | theme | keyword | semantics |
 |---|---|---|
@@ -191,7 +191,7 @@ spent and may NOT be banked to Reserve. Intent: bigger turns.
 ## 6. The ten themes
 
 Each theme: 7 unique cards (2 common spells, 2 uncommon spells, 1 rare
-spell finisher + 1 rare enchantment + 1 rare disenchant), 2 signature
+spell finisher + 1 rare enchantment + 1 rare disenchant), 2 hallmark
 keywords, its own in-theme defense/sustain, and a distinct win texture.
 
 | # | theme | stance lean | engine | win texture |

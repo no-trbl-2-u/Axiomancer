@@ -20,7 +20,7 @@ import { describe, it, expect } from 'vitest';
 
 import { createCharacter } from '../../Character/index';
 import { initializeCombat } from '../../Combat/combat.reducer';
-import { generateBasicActionResources } from '../../Cards/skill.engine';
+import { generateBasicActionResources } from '../../Cards/card.engine';
 import {
     getActiveSetBonuses,
     aggregateSetStartTokens,

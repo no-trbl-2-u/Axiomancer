@@ -42,7 +42,6 @@ import {
 import {
     COMBAT_DECK_PRESET_ORDER, getDeckPreset, type CombatDeckFocus,
 } from './combat.deck-presets';
-import { isSyntheticCard } from './combat.cards';
 import { COMBAT_SIM_POLICIES, type CombatSimPolicy, type CombatSimPolicyId } from './combat.sim-policies';
 import {
     simulateHazardPatternCombatDetailed,
@@ -157,7 +156,7 @@ function resolveCellDeck(
 
 /**
  * Grants every non-synthetic card in `deckCardIds` to the player's
- * `knownSkills` (in place, duplicates removed). The engine's `executeSkill`
+ * `knownCards` (in place, duplicates removed). The engine's `executeCard`
  * refuses to fire a card the player does not know, and an explicit deck
  * selection (preset / draft / sandbox cards) may reach beyond what the player
  * has learned — the maturity gate belongs to deck SELECTION, not the engine
@@ -165,9 +164,9 @@ function resolveCellDeck(
  * grants the deck before the encounter.
  */
 export function grantDeckKnowledge(player: Character, deckCardIds: readonly string[]): void {
-    player.knownSkills = [...new Set([
-        ...player.knownSkills,
-        ...deckCardIds.filter(id => !isSyntheticCard(id)),
+    player.knownCards = [...new Set([
+        ...player.knownCards,
+        ...deckCardIds,
     ])];
 }
 
@@ -186,7 +185,7 @@ export function runPlaytestCell(spec: PlaytestCellSpec): PlaytestCellResult {
     // refuses to play it: explicit selections (preset/cards) may reach above
     // the stage's learned pool, and drafted sandbox cards are never in it.
     // The stage maturity gate lives in DRAFTING (the pool), not in the
-    // engine's knownSkills check — so grant the deck's non-synthetic cards.
+    // engine's knownCards check — so grant the deck's non-synthetic cards.
     grantDeckKnowledge(player, deckCardIds);
     const enemy = deepClone(enemyBase);
     const { stats, cardUsage } = simulateHazardPatternCombatDetailed({

@@ -67,7 +67,7 @@ store.getState().dispatch({
 
 // Learn a skill
 store.getState().dispatch({ 
-  type: 'LEARN_SKILL', 
+  type: 'LEARN_CARD', 
   payload: { skillId: 'skill_heart_barrier' } 
 });
 ```
@@ -80,7 +80,7 @@ For backward compatibility, the store provides legacy method-style actions:
 |--------|---------|
 | `startCombat(enemy)` | Begin combat with specified enemy |
 | `endCombat(report)` | End combat and apply rewards |
-| `learnSkill(skillId)` | Learn a skill by ID |
+| `learnCard(skillId)` | Learn a skill by ID |
 | `useSkill(skillId, targetId?)` | Use a skill in combat |
 | `useItem(itemId, targetId?)` | Use an item |
 | `equipItem(item, slot)` | Equip an item to a slot |
@@ -117,7 +117,7 @@ function gameReducer(state: GameState, action: GameAction): GameState
 | `USE_SKILL` | Execute a skill during combat |
 | `USE_ITEM` | Use a consumable or equipment item |
 | `EQUIP_ITEM` / `UNEQUIP_ITEM` | Manage character equipment |
-| `LEARN_SKILL` | Add a skill to character's known skills |
+| `LEARN_CARD` | Add a skill to character's known skills |
 | `ADVANCE_DIALOGUE` | Progress through NPC conversations |
 | `MAKE_MORAL_CHOICE` | Record player moral decisions |
 | `UPDATE_QUEST_OBJECTIVES` | Progress quest completion |

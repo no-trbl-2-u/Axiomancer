@@ -1,8 +1,8 @@
 /**
  * Engine skill-library adapter (Phase 16).
  *
- * Bridges the engine's `Skill` shape (axiomancer-mechanics 0.10.2's
- * `skillLibrary` + `getSkillById`, top-level re-exported as of the
+ * Bridges the engine's `Card` shape (axiomancer-mechanics 0.10.2's
+ * `cardLibrary` + `getCardById`, top-level re-exported as of the
  * Phase 60f engine bump) to the mobile presentation row consumed by
  * the combat skill picker.
  *
@@ -19,11 +19,11 @@
  */
 
 import {
-    skillLibrary,
-    getSkillById,
-    type Skill,
-    type SkillCombatEffects,
-    type SkillTarget,
+    cardLibrary,
+    getCardById,
+    type Card,
+    type CardCombatEffects,
+    type CardTarget,
 } from '@mechanics';
 
 import { keywordForEffect } from '@/state/combat/keywords';
@@ -35,23 +35,23 @@ import { keywordForEffect } from '@/state/combat/keywords';
  */
 export type StanceKey = 'heart' | 'body' | 'mind';
 
-export type SkillCategoryKey = 'fallacy' | 'paradox';
+export type CardCategoryKey = 'fallacy' | 'paradox';
 
-export interface CombatSkill {
+export interface CombatCardOption {
     /** Stable engine skill id. */
     id: string;
     /** Display name in caps. */
     name: string;
     /** Display description. */
     description: string;
-    /** Skill category — drives chip tint in the picker. */
-    category: SkillCategoryKey;
+    /** Card category — drives chip tint in the picker. */
+    category: CardCategoryKey;
     /** Stance the skill is locked to. */
     stance: StanceKey;
     /** 'enemy' = damage; 'self' = heal. */
-    targetType: SkillTarget;
+    targetType: CardTarget;
     /** Status effects the skill applies on cast. */
-    combatEffects: readonly SkillCombatEffects[];
+    combatEffects: readonly CardCombatEffects[];
 }
 
 /** The keyword for an effect id (e.g. 'debuff_bleed' → 'BLEED'), or a humanised id. */
@@ -62,10 +62,10 @@ function effectName(effectId: string): string {
 /**
  * Compact effect line for the picker row, e.g.
  * `"12 DMG · BLEED 2 (3R)"` or `"9 HEAL · CLARITY (2R)"`.
- * `damage` comes from the engine's `calculateSkillDamage` with the
+ * `damage` comes from the engine's `calculateCardDamage` with the
  * live player's stats (no target resistance — it's an estimate).
  */
-export function skillEffectText(skill: CombatSkill, damage: number): string {
+export function cardEffectText(skill: CombatCardOption, damage: number): string {
     const parts: string[] = [];
     if (damage > 0) parts.push(`${damage} ${skill.targetType === 'self' ? 'HEAL' : 'DMG'}`);
     for (const fx of skill.combatEffects) {
@@ -77,7 +77,7 @@ export function skillEffectText(skill: CombatSkill, damage: number): string {
     return parts.length > 0 ? parts.join(' · ') : 'NO DIRECT EFFECT';
 }
 
-function toCombatSkill(skill: Skill): CombatSkill {
+function toCombatCardOption(skill: Card): CombatCardOption {
     return {
         id: skill.id,
         name: skill.name.toUpperCase(),
@@ -90,8 +90,8 @@ function toCombatSkill(skill: Skill): CombatSkill {
 }
 
 /** Full engine skill library, projected into the combat picker shape. */
-export const COMBAT_SKILLS: readonly CombatSkill[] = Object.freeze(
-    skillLibrary.map(toCombatSkill),
+export const COMBAT_CARDS: readonly CombatCardOption[] = Object.freeze(
+    cardLibrary.map(toCombatCardOption),
 );
 
 /**
@@ -100,7 +100,7 @@ export const COMBAT_SKILLS: readonly CombatSkill[] = Object.freeze(
  * pre-Phase-16 save). Callers should treat `null` the same way they
  * treated a missing fixture entry.
  */
-export function getCombatSkillById(id: string): CombatSkill | null {
-    const skill = getSkillById(id);
-    return skill ? toCombatSkill(skill) : null;
+export function getCombatSkillById(id: string): CombatCardOption | null {
+    const skill = getCardById(id);
+    return skill ? toCombatCardOption(skill) : null;
 }

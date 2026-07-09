@@ -39,7 +39,7 @@ export interface CharacterPreset {
     equipment: CharacterPresetEquipmentEntry[];
     /** Card IDs the character knows. The full known set is the combat
      *  catalogue (ADR-0002); there is no equipped-skill rotation. */
-    knownSkills: string[];
+    knownCards: string[];
     /** Consumable IDs (and quantities) to seed the inventory. */
     consumables: { id: string; quantity: number }[];
     currency: number;
@@ -70,7 +70,7 @@ const TIER_3_SKILLS = [
 ];
 
 // The synergy-payoff line. straw-mans-jab and sketch-of-a-thought (its
-// setup pieces) already ride in TIER_1_SKILLS — knownSkills is a set-like
+// setup pieces) already ride in TIER_1_SKILLS — knownCards is a set-like
 // catalogue, so the lists stay disjoint to avoid duplicate ids.
 const TIER_2_SYNERGY_SKILLS = [
     'resonance-detonation',
@@ -83,7 +83,7 @@ export const apprenticePreset: CharacterPreset = {
     level: 1,
     baseStats: { heart: 5, body: 5, mind: 5 },
     equipment: [],
-    knownSkills: [...TIER_1_SKILLS],
+    knownCards: [...TIER_1_SKILLS],
     consumables: [
         { id: 'minor-healing-potion', quantity: 3 },
     ],
@@ -101,7 +101,7 @@ export const wandererPreset: CharacterPreset = {
         { templateId: 'hide-vest', slot: 'armor' },
         { templateId: 'leather-cap', slot: 'head' },
     ],
-    knownSkills: [...TIER_1_SKILLS, ...TIER_2_SKILLS, ...TIER_2_SYNERGY_SKILLS],
+    knownCards: [...TIER_1_SKILLS, ...TIER_2_SKILLS, ...TIER_2_SYNERGY_SKILLS],
     consumables: [
         { id: 'healing-potion', quantity: 5 },
         { id: 'antidote', quantity: 2 },
@@ -120,7 +120,7 @@ export const sagePreset: CharacterPreset = {
         { templateId: 'chain-mail', slot: 'armor' },
         { templateId: 'chain-coif', slot: 'head' },
     ],
-    knownSkills: [...TIER_1_SKILLS, ...TIER_2_SKILLS, ...TIER_3_SKILLS, ...TIER_2_SYNERGY_SKILLS],
+    knownCards: [...TIER_1_SKILLS, ...TIER_2_SKILLS, ...TIER_3_SKILLS, ...TIER_2_SYNERGY_SKILLS],
     consumables: [
         { id: 'healing-potion', quantity: 6 },
         { id: 'clarity-serum', quantity: 2 },
@@ -150,7 +150,7 @@ export const ladderL1Preset: CharacterPreset = {
     level: 1,
     baseStats: { heart: 5, body: 5, mind: 5 },
     equipment: [],
-    knownSkills: [...TIER_1_SKILLS],
+    knownCards: [...TIER_1_SKILLS],
     consumables: [{ id: 'minor-healing-potion', quantity: 3 }],
     currency: 0,
 };
@@ -170,7 +170,7 @@ export const ladderL15Preset: CharacterPreset = {
         { templateId: 'leather-boots', slot: 'feet' },
         { templateId: 'silver-ring', slot: 'accessory' },
     ],
-    knownSkills: [...TIER_1_SKILLS, ...TIER_2_SKILLS, ...TIER_2_SYNERGY_SKILLS],
+    knownCards: [...TIER_1_SKILLS, ...TIER_2_SKILLS, ...TIER_2_SYNERGY_SKILLS],
     consumables: [
         { id: 'healing-potion', quantity: 5 },
         { id: 'antidote', quantity: 2 },
@@ -193,7 +193,7 @@ export const ladderL30Preset: CharacterPreset = {
         { templateId: 'iron-greaves', slot: 'feet' },
         { templateId: 'gold-ring', slot: 'accessory' },
     ],
-    knownSkills: [
+    knownCards: [
         ...TIER_1_SKILLS,
         ...TIER_2_SKILLS,
         ...TIER_3_SKILLS,
@@ -225,7 +225,7 @@ export const ladderL50Preset: CharacterPreset = {
         { templateId: 'phantom-iron-greaves-of-shadows', slot: 'feet' },
         { templateId: 'silver-ring-of-resilience', slot: 'accessory' },
     ],
-    knownSkills: [
+    knownCards: [
         ...TIER_1_SKILLS,
         ...TIER_2_SKILLS,
         ...TIER_3_SKILLS,
@@ -276,6 +276,6 @@ export function buildCharacterFromPreset(
         currency: preset.currency,
         inventory,
         equipment,
-        knownSkills: preset.knownSkills,
+        knownCards: preset.knownCards,
     });
 }

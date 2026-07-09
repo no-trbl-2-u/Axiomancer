@@ -144,7 +144,7 @@ describe('buildStagePlayer', () => {
         for (const id of COMBAT_STAGE_ORDER) {
             const stage = COMBAT_STAGE_PROFILES[id];
             const player = buildStagePlayer(stage);
-            expect([...player.knownSkills].sort()).toEqual(stageEligibleCardIds(stage).sort());
+            expect([...player.knownCards].sort()).toEqual(stageEligibleCardIds(stage).sort());
         }
     });
 
@@ -159,8 +159,8 @@ describe('buildStagePlayer', () => {
         const b = buildStagePlayer(COMBAT_STAGE_PROFILES.mid);
         expect(a).not.toBe(b);
         a.baseStats.body = 99;
-        a.knownSkills.push('mutation-canary');
+        a.knownCards.push('mutation-canary');
         expect(b.baseStats.body).toBe(COMBAT_STAGE_PROFILES.mid.playerBaseStats.body);
-        expect(b.knownSkills).not.toContain('mutation-canary');
+        expect(b.knownCards).not.toContain('mutation-canary');
     });
 });

@@ -85,11 +85,11 @@ export { initializeCombat } from './combat.reducer';
  *
  * Not exported from the public barrel — internal helper for
  * `isBefriendAttemptEligible`, the explicit Befriend-attempt check the shared
- * skill engine consults via `executeSkill`. (The legacy combat-end predicates
+ * skill engine consults via `executeCard`. (The legacy combat-end predicates
  * that also consumed it — `determineCombatEnd` / `isCombatOngoing` /
  * `isFriendshipEligible` — were removed with the legacy turn-based driver.)
  *
- * D5: `requiredStances` / `requiredSkillUse` derive from `state.log` rather
+ * D5: `requiredStances` / `requiredCardUse` derive from `state.log` rather
  * than separate tracking state on `CombatState`. The log already captures
  * `playerAction.stance` and (when `action === 'skill'`) `playerAction.skillId`
  * per resolved round.
@@ -120,13 +120,13 @@ function befriendabilityPredicatesPass(
             return false;
         }
     }
-    if (config.requiredSkillUse && config.requiredSkillUse.length > 0) {
-        const castSkills = new Set<string>(
+    if (config.requiredCardUse && config.requiredCardUse.length > 0) {
+        const castCards = new Set<string>(
             state.log
                 .filter(entry => entry.playerAction.action === 'skill' && entry.playerAction.skillId !== undefined)
                 .map(entry => entry.playerAction.skillId as string),
         );
-        if (!config.requiredSkillUse.some(skillId => castSkills.has(skillId))) {
+        if (!config.requiredCardUse.some(skillId => castCards.has(skillId))) {
             return false;
         }
     }
@@ -190,8 +190,6 @@ export {
     projectCombatOutcome,
     // Spec 32 v3 — floating dice save-back + sway decay knob
     getFloatingDiceColors, SWAY_DECAY_PER_TURN,
-    // Master Spec §3 — Skills trigger hook (Skills are NOT cards)
-    triggerCombatSkill,
 } from './combat.engine';
 export type { CardDieCost, FinisherProjection, CombatOutcomeProjection } from './combat.engine';
 export {
@@ -211,7 +209,7 @@ export {
 export type { CombatDeckPreset, CombatDeckFocus } from './combat.deck-presets';
 export {
     toCombatCard, projectDeck, classifyVerbClass,
-    isSyntheticCard, SYNTHETIC_CARD_IDS,
+
     mechanicText,
     isCombatSynergySatisfied,
 } from './combat.cards';

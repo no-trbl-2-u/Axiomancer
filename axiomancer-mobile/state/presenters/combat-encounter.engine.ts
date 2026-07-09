@@ -13,7 +13,7 @@
  */
 
 import {
-    handCards as engineHandCards, getCard, getSkillById,
+    handCards as engineHandCards, getCard, getCardById,
     getDraftedDie, isPhaseStanceRevealed, cardReadPreview,
     revealedCurrentStance, resolveRead, getSignatureSkill,
     lookupEffect, READ_DAMAGE_MULT, COLOR_MATCH_DAMAGE_BONUS,
@@ -23,11 +23,11 @@ import {
     type CombatEncounterState, type CombatCard, type CombatManaDie,
     type CombatThreatPhase, type CombatIntentType, type CombatReadResult,
     type CombatSummary, type SignatureSkill, type Stance,
-    type Skill, type SkillCombatEffects,
+    type Card, type CardCombatEffects,
 } from '@mechanics';
 
-/** The barrel doesn't re-export the union, so derive it from Skill. */
-type SkillSpecialMechanic = NonNullable<Skill['specialMechanics']>[number];
+/** The barrel doesn't re-export the union, so derive it from Card. */
+type CardSpecialMechanic = NonNullable<Card['specialMechanics']>[number];
 import { effectGlyph, GLYPH_COLORS, type StatusGlyph } from '@/components/combat/statusGlyphs';
 import { keywordForEffect, keywordForVerb, keywordGloss } from '@/state/combat/keywords';
 
@@ -60,7 +60,7 @@ const ENCHANT_COLOR = '#7fb3a6';
 /** The authored FREE (no-die) line in real engine units — riderText over the
  *  skill's `free` rider; persistent (enchant/disenchant) cards are PAID-only.
  *  Never a fabricated number. */
-function freeLineText(card: CombatCard, skill?: Skill): string {
+function freeLineText(card: CombatCard, skill?: Card): string {
     if (card.cardType === 'enchantment' || card.cardType === 'disenchant') return 'PAID only';
     return skill?.free ? riderText(skill.free) : 'no effect';
 }
@@ -420,22 +420,22 @@ function glyphFor(effectId: string): string {
 
 interface PrimaryResolution {
     kind: CombatCardKind;
-    ce: SkillCombatEffects | null;
+    ce: CardCombatEffects | null;
     guardAmount: number | null;
-    riders: SkillCombatEffects[];
+    riders: CardCombatEffects[];
     /** The driving special mechanic for the mechanic-led kinds (barrier/riposte/
      *  siphon/rupture/reap); null for effect- or verb-driven kinds. */
-    mech: SkillSpecialMechanic | null;
+    mech: CardSpecialMechanic | null;
 }
 
 /** Resolve a card's PRIMARY combat effect + its kind. Reads the skill's
  *  combatEffects / specialMechanics directly — NOT card.primaryEffectId, which is
  *  null for guard/regen cards (it = primaryEnemyEffectId). */
-export function resolvePrimary(card: CombatCard, skill: Skill | undefined): PrimaryResolution {
+export function resolvePrimary(card: CombatCard, skill: Card | undefined): PrimaryResolution {
     const vc = card.verbClass;
     const mechs = skill?.specialMechanics ?? [];
-    const findMech = <K extends SkillSpecialMechanic['kind']>(k: K) =>
-        mechs.find(m => m.kind === k) as Extract<SkillSpecialMechanic, { kind: K }> | undefined;
+    const findMech = <K extends CardSpecialMechanic['kind']>(k: K) =>
+        mechs.find(m => m.kind === k) as Extract<CardSpecialMechanic, { kind: K }> | undefined;
 
     if (vc === 'defend') {
         // 0.34.0: a defend card can carry barrier (stacking soak) or riposte (counter)
@@ -534,8 +534,8 @@ interface CardCalc extends PrimaryResolution {
 
 /** Single source of the numbers — faceStats AND detailStats both read this, so the
  *  face and the inspect modal can never drift. All values are AUTHORED units from
- *  getSkillById(card.skillId).combatEffects (not effect-library defaults). */
-function cardCalc(card: CombatCard, skill: Skill | undefined): CardCalc {
+ *  getCardById(card.id).combatEffects (not effect-library defaults). */
+function cardCalc(card: CombatCard, skill: Card | undefined): CardCalc {
     const pr = resolvePrimary(card, skill);
     const out: CardCalc = {
         ...pr, keyword: null, glyph: '◆', categoryColor: PAYOFF_COLOR,
@@ -782,7 +782,7 @@ function buildDetailKeywords(card: CombatCard, c: CardCalc): { name: string; def
 }
 
 /** Honest card FACE view-model (the 5-zone hand card). */
-export function faceStats(card: CombatCard, skill?: Skill): CombatCardFaceVM {
+export function faceStats(card: CombatCard, skill?: Card): CombatCardFaceVM {
     const c = cardCalc(card, skill);
     const stanceColor = STANCE_COLORS[card.stance] ?? '#888';
     const kw = c.keyword ? c.keyword.toUpperCase() : null;
@@ -821,7 +821,7 @@ export function faceStats(card: CombatCard, skill?: Skill): CombatCardFaceVM {
 }
 
 /** Honest card DETAIL view-model CORE (everything but the pill table). */
-function detailCore(card: CombatCard, skill?: Skill): DetailCore {
+function detailCore(card: CombatCard, skill?: Card): DetailCore {
     const c = cardCalc(card, skill);
     const Title = c.keyword ?? '';
     const STANCE = STANCE_LABELS[card.stance] ?? card.stance.toUpperCase();
@@ -876,7 +876,7 @@ function detailCore(card: CombatCard, skill?: Skill): DetailCore {
  *  NO-DIE / +DIE pill table that replaces the old prose FREE/POWER fork. Same
  *  numbers as the face; read-scaling math is pulled into the +DIE pill (the prose
  *  is flattened, NOT the math). */
-export function detailStats(card: CombatCard, skill?: Skill): CombatCardDetailVM {
+export function detailStats(card: CombatCard, skill?: Card): CombatCardDetailVM {
     const core = detailCore(card, skill);
     const c = cardCalc(card, skill);
     const face = faceStats(card, skill);
@@ -935,7 +935,7 @@ function handVM(state: CombatEncounterState): CombatCardVM[] {
         .filter(({ card }: { card: CombatCard }) => card.id !== 'card-retreat' && card.verbClass !== 'retreat')
         .map(({ uid, card }: { uid: string; card: CombatCard }) => {
         const preview = drafted ? cardReadPreview(state, card) : null;
-        const skill = card.skillId ? getSkillById(card.skillId) : undefined;
+        const skill = getCardById(card.id);
         return {
             uid, cardId: card.id, name: card.name, stance: card.stance,
             stanceColor: STANCE_COLORS[card.stance] ?? '#888',

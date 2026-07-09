@@ -36,7 +36,7 @@ describe('Phase 72 — run-loop semantics', () => {
         expect(next.player.level).toBe(before.player.level);
         expect(next.player.baseStats).toEqual(before.player.baseStats);
         expect(next.player.equipment).toEqual(before.player.equipment);
-        expect(next.player.knownSkills).toEqual(before.player.knownSkills);
+        expect(next.player.knownCards).toEqual(before.player.knownCards);
         expect(next.player.inventory).toEqual(before.player.inventory);
         expect(next.player.health).toBe(next.player.maxHealth); // D1 — HP refill
         expect(next.player.effects).toEqual([]); // D1 — defensive clear

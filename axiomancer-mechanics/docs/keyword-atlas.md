@@ -11,7 +11,7 @@ proving gate holds). Two jobs:
 2. **Proving-gate scoreboard.** The `gate` cell tracks the §4b criteria
    from `/deck-tuning`, in order **E**xercised / **P**riced honestly /
    not **D**ominant / **T**heme-honest (T applies to the 20 theme
-   signatures; utility keywords carry `T:n/a`). Marks: `+` passing,
+   hallmarks; utility keywords carry `T:n/a`). Marks: `+` passing,
    `!` failing (forge target), `?` not yet assessed. When all 30 rows
    are `+` across a full sweep, the proving gate is satisfied and the
    owner decides whether to open the registry past 30.
@@ -35,7 +35,7 @@ one-line summaries — spec 32 §3 stays authoritative.
 | RUPTURE | consume ALL enemy afflictions: 1.5x remaining DoT fuel + 3/non-DoT stack | — | `!???` T:n/a | plan #2 landed (8d853dcb): cap now max(80, 0.25x enemy maxHP); erosion late 0.03->0.08 — decay wall (plan #3) is the remaining brake |
 | CONJURE | create one-use Thoughtform card in hand | — | `????` T:n/a | |
 
-## Theme signatures (2 x 10)
+## Theme hallmarks (2 x 10)
 
 | theme | keyword | semantics | Dawncaster analogues (receipts) | gate (E/P/D/T) | notes |
 |---|---|---|---|---|---|

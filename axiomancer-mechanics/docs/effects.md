@@ -706,7 +706,7 @@ All three reuse existing `EffectPayload` primitives — no new payload
 kinds. The fallacy framing is purely thematic on top of the existing
 tier-1/2/3 application + resist machinery. See
 [docs/philosophy.md](./philosophy.md) for the full 27-cell map and
-[docs/skills.md](./skills.md#philosophical-fallacy-payloads-phase-44)
+docs/skills.md
 for the matching skill payloads.
 
 ## Pending

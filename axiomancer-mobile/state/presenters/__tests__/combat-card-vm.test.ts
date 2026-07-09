@@ -18,7 +18,7 @@
  */
 
 import { describe, it, expect } from '@jest/globals';
-import { getCard, getSkillById, READ_DAMAGE_MULT, COLOR_MATCH_DAMAGE_BONUS } from '@mechanics';
+import { getCard, getCardById, READ_DAMAGE_MULT, COLOR_MATCH_DAMAGE_BONUS } from '@mechanics';
 import {
     faceStats, detailStats, engineHonestKind, resolvePrimary, armedReadValue,
 } from '@/state/presenters/combat-encounter.engine';
@@ -26,7 +26,7 @@ import {
 const cardOf = (id: string) => {
     const card = getCard(id);
     if (!card) throw new Error(`fixture card missing: ${id}`);
-    const skill = card.skillId ? getSkillById(card.skillId) : undefined;
+    const skill = getCardById(card.id);
     return { card, skill };
 };
 
@@ -149,15 +149,15 @@ describe('detailStats — same numbers as the face', () => {
 
 describe('resolvePrimary + armedReadValue', () => {
     it('resolvePrimary routes by verb-class + honesty (the v3 shapes)', () => {
-        expect(resolvePrimary(getCard('brace-for-impact')!, getSkillById('brace-for-impact')).kind).toBe('guard');
-        expect(resolvePrimary(getCard('slippery-slope')!, getSkillById('slippery-slope')).kind).toBe('dot');
-        expect(resolvePrimary(getCard('resonance-detonation')!, getSkillById('resonance-detonation')).kind).toBe('rupture');
-        expect(resolvePrimary(getCard('the-reaping')!, getSkillById('the-reaping')).kind).toBe('reap');
-        expect(resolvePrimary(getCard('venom-and-vein')!, getSkillById('venom-and-vein')).kind).toBe('enchant');
-        expect(resolvePrimary(getCard('suppurating-curse')!, getSkillById('suppurating-curse')).kind).toBe('disenchant');
+        expect(resolvePrimary(getCard('brace-for-impact')!, getCardById('brace-for-impact')).kind).toBe('guard');
+        expect(resolvePrimary(getCard('slippery-slope')!, getCardById('slippery-slope')).kind).toBe('dot');
+        expect(resolvePrimary(getCard('resonance-detonation')!, getCardById('resonance-detonation')).kind).toBe('rupture');
+        expect(resolvePrimary(getCard('the-reaping')!, getCardById('the-reaping')).kind).toBe('reap');
+        expect(resolvePrimary(getCard('venom-and-vein')!, getCardById('venom-and-vein')).kind).toBe('enchant');
+        expect(resolvePrimary(getCard('suppurating-curse')!, getCardById('suppurating-curse')).kind).toBe('disenchant');
     });
     it('armedReadValue scales Guard by the DAMAGE read (+colour match)', () => {
-        const guard = faceStats(getCard('brace-for-impact')!, getSkillById('brace-for-impact'));
+        const guard = faceStats(getCard('brace-for-impact')!, getCardById('brace-for-impact'));
         const adv = Math.max(1, Math.round(8 * READ_DAMAGE_MULT.advantage));
         const dis = Math.max(1, Math.round(8 * READ_DAMAGE_MULT.disadvantage));
         expect(armedReadValue(guard, 'neutral', false)).toBe(8);
@@ -167,7 +167,7 @@ describe('resolvePrimary + armedReadValue', () => {
     });
     it('armedReadValue follows the P0-truth deterministic read rule for DoT (exact, ramp-aware)', () => {
         // Slippery Slope: canonical poison dpr 2, ramp 0.5, i1, 4 turns.
-        const dot = faceStats(getCard('slippery-slope')!, getSkillById('slippery-slope'));
+        const dot = faceStats(getCard('slippery-slope')!, getCardById('slippery-slope'));
         expect(armedReadValue(dot, 'neutral', false)).toBe(10);         // 2+2+3+3, printed exactly
         expect(armedReadValue(dot, 'advantage', false)).toBe(20);       // +1 intensity: 4+4+6+6
         expect(armedReadValue(dot, 'disadvantage', false)).toBe(7);     // −1 turn: 2+2+3

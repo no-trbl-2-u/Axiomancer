@@ -16,7 +16,7 @@ import {
     COMBAT_DECK_PRESETS, COMBAT_DECK_PRESET_ORDER,
     listDeckPresets, getDeckPreset, buildPresetDeck,
 } from '../combat.deck-presets';
-import { SYNTHETIC_CARD_IDS, classifyVerbClass } from '../combat.cards';
+import { classifyVerbClass } from '../combat.cards';
 import { getCardById } from '../../Cards/cards.library';
 import { rankToRarity } from '../../Cards/types';
 import { lookupEffect } from '../../Effects';
@@ -114,7 +114,6 @@ describe('preset combat decks (spec 32 v3 §8)', () => {
     });
 
     it('buildPresetDeck appends no escape-hatch card (no in-combat retreat exists)', () => {
-        expect(SYNTHETIC_CARD_IDS.length).toBe(0);
         for (const id of COMBAT_DECK_PRESET_ORDER) {
             const deck = buildPresetDeck(id);
             // 15 recipe cards, no synthetic baseline.

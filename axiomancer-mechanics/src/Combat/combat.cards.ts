@@ -22,23 +22,6 @@ import { getCardById } from '../Cards/cards.library';
 export type EffectLookup = (effectId: string) => Effect | undefined;
 export type CardLookup = (skillId: string) => Card | undefined;
 
-/**
- * Synthetic (non-skill) card ids always present in a combat deck. Empty by
- * design: no in-combat retreat exists — once a fight is joined it resolves
- * only by winning or losing. Kept as a (now-empty) registry rather than
- * deleted outright so `isSyntheticCard` / `toCombatCard`'s synthetic-card
- * branch, and every deck-builder that iterates `SYNTHETIC_CARD_IDS`, stay
- * valid no-ops if a different synthetic card is ever introduced.
- */
-export const SYNTHETIC_CARD_IDS: readonly string[] = Object.freeze([]);
-
-const SYNTHETIC_CARDS: Record<string, CombatCard> = {};
-
-/** True when the id names a synthetic (non-skill) card. */
-export function isSyntheticCard(cardId: string): boolean {
-    return cardId in SYNTHETIC_CARDS;
-}
-
 /** Enemy-targeted effect payloads on a skill (`appliedTo: 'opponent'`). */
 function enemyEffects(skill: Card): CardCombatEffects[] {
     return (skill.combatEffects ?? []).filter(e => e.appliedTo === 'opponent');
@@ -277,11 +260,9 @@ function rankLabel(skill: Card): string {
     return CARD_RANK_NAMES[skill.rank];
 }
 
-/** Projects a learned skill (or synthetic card) into a `CombatCard` view. */
-export function toCombatCard(cardId: string, lookupSkill: CardLookup, lookupEffect: EffectLookup): CombatCard | null {
-    if (isSyntheticCard(cardId)) return SYNTHETIC_CARDS[cardId];
-
-    const skill = lookupSkill(cardId);
+/** Projects a library card into a `CombatCard` view. */
+export function toCombatCard(cardId: string, lookupCard: CardLookup, lookupEffect: EffectLookup): CombatCard | null {
+    const skill = lookupCard(cardId);
     if (!skill) return null;
 
     const { verbClass, track } = classifyVerbClass(skill, lookupEffect);
@@ -327,7 +308,6 @@ export function toCombatCard(cardId: string, lookupSkill: CardLookup, lookupEffe
 
     return {
         id: skill.id,
-        skillId: skill.id,
         name: skill.name,
         stance: cardStanceColor(skill),
         verbClass,
@@ -348,11 +328,11 @@ export function toCombatCard(cardId: string, lookupSkill: CardLookup, lookupEffe
 /** Projects an entire deck (card ids) into card views, dropping unknown ids. */
 export function projectDeck(
     cardIds: readonly string[],
-    lookupSkill: CardLookup,
+    lookupCard: CardLookup,
     lookupEffect: EffectLookup,
 ): CombatCard[] {
     return cardIds
-        .map(id => toCombatCard(id, lookupSkill, lookupEffect))
+        .map(id => toCombatCard(id, lookupCard, lookupEffect))
         .filter((c): c is CombatCard => c !== null);
 }
 
@@ -365,8 +345,7 @@ export function isCombatSynergySatisfied(
     card: CombatCard,
     enemyActiveEffects: readonly ActiveEffect[],
 ): boolean {
-    if (!card.skillId) return false;
-    const skill = getCardById(card.skillId);
+    const skill = getCardById(card.id);
     if (!skill?.synergy?.predicate) return false;
     const { predicate } = skill.synergy;
     if (predicate.on !== 'target') return false;

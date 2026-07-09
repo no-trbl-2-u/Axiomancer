@@ -122,7 +122,7 @@ export interface CharacterSkillRow {
      * threaded through so the SELF tap-tooltip wrapper can fire
      * `selectTooltipContentFor('skill', id)`. `vm.skills` is the
      * dead `[]` surface today; the field is in place for when
-     * `player.knownSkills` consumption ships.
+     * `player.knownCards` consumption ships.
      */
     id: string;
     name: string;

@@ -2,7 +2,7 @@
  * Phase 99 — unlocked skill access migration test.
  *
  * Verifies that legacy saves with `equippedSkills` get properly migrated
- * to merge those skills into `knownSkills` without losing progress. The
+ * to merge those skills into `knownCards` without losing progress. The
  * legacy field was removed from the live `Character` type in Phase 159, so
  * v7 fixtures attach it onto the player payload explicitly; post-migration
  * the field no longer exists on the player.
@@ -17,17 +17,23 @@ import { nullAdapter } from '../persistence/null.adapter';
 import { createCharacter } from '../../Character';
 import { createStartingWorld } from '../../World';
 
-/** Build a legacy v7 player payload carrying the removed `equippedSkills` field. */
+/**
+ * Build a legacy v7 player payload carrying the removed `equippedSkills` field
+ * and the pre-v11 `knownSkills` key (v7 saves predate the knownSkills→knownCards
+ * rename). The character's `knownCards` is relabelled to the legacy key so the
+ * payload matches what a real v7 save carried on disk.
+ */
 function legacyV7Player(
     opts: Parameters<typeof createCharacter>[0],
     equippedSkills: string[],
 ): Record<string, unknown> {
-    return { ...createCharacter(opts), equippedSkills };
+    const { knownCards, ...rest } = createCharacter(opts);
+    return { ...rest, knownSkills: knownCards, equippedSkills };
 }
 
 describe('Phase 99 migration', () => {
-    test('merges equippedSkills into knownSkills for v7 saves', () => {
-        // Create a v7 save with separate equippedSkills and knownSkills
+    test('merges equippedSkills into knownCards for v7 saves', () => {
+        // Create a v7 save with separate equippedSkills and knownCards
         const v7Save = {
             version: 7,
             runId: 'test-run-1234567',
@@ -35,7 +41,7 @@ describe('Phase 99 migration', () => {
                 name: 'TestPlayer',
                 level: 5,
                 baseStats: { heart: 8, body: 6, mind: 7 },
-                knownSkills: ['ad-hominem-strike', 'false-dilemma'],
+                knownCards: ['ad-hominem-strike', 'false-dilemma'],
             }, ['ad-hominem-strike', 'appeal-to-pity']),
             world: createStartingWorld(),
             combat: null,
@@ -56,16 +62,16 @@ describe('Phase 99 migration', () => {
 
         // Verify the migration merged skills correctly
         expect(migrated.version).toBe(GAME_STATE_VERSION);
-        expect(migrated.player.knownSkills).toEqual(
+        expect(migrated.player.knownCards).toEqual(
             expect.arrayContaining(['ad-hominem-strike', 'false-dilemma', 'appeal-to-pity'])
         );
-        expect(migrated.player.knownSkills).toHaveLength(3);
+        expect(migrated.player.knownCards).toHaveLength(3);
 
         // The legacy field is dropped — never written back onto the player.
         expect('equippedSkills' in migrated.player).toBe(false);
     });
 
-    test('handles v7 saves where equippedSkills is subset of knownSkills', () => {
+    test('handles v7 saves where equippedSkills is subset of knownCards', () => {
         const v7Save = {
             version: 7,
             runId: 'test-run-abcdefgh',
@@ -73,7 +79,7 @@ describe('Phase 99 migration', () => {
                 name: 'TestPlayer',
                 level: 3,
                 baseStats: { heart: 5, body: 5, mind: 5 },
-                knownSkills: ['ad-hominem-strike', 'false-dilemma', 'appeal-to-pity'],
+                knownCards: ['ad-hominem-strike', 'false-dilemma', 'appeal-to-pity'],
             }, ['ad-hominem-strike', 'false-dilemma']),
             world: createStartingWorld(),
             combat: null,
@@ -92,8 +98,8 @@ describe('Phase 99 migration', () => {
         const migrated = migrate(v7Save, 7, 8);
 
         // Should not add duplicates
-        expect(migrated.player.knownSkills).toEqual(['ad-hominem-strike', 'false-dilemma', 'appeal-to-pity']);
-        expect(migrated.player.knownSkills).toHaveLength(3);
+        expect(migrated.player.knownCards).toEqual(['ad-hominem-strike', 'false-dilemma', 'appeal-to-pity']);
+        expect(migrated.player.knownCards).toHaveLength(3);
     });
 
     test('handles v7 saves with empty equippedSkills', () => {
@@ -104,7 +110,7 @@ describe('Phase 99 migration', () => {
                 name: 'TestPlayer',
                 level: 1,
                 baseStats: { heart: 5, body: 5, mind: 5 },
-                knownSkills: ['ad-hominem-strike'],
+                knownCards: ['ad-hominem-strike'],
             }, []),
             world: createStartingWorld(),
             combat: null,
@@ -123,7 +129,7 @@ describe('Phase 99 migration', () => {
         const migrated = migrate(v7Save, 7, 8);
 
         // Known skills should remain unchanged; legacy field is dropped.
-        expect(migrated.player.knownSkills).toEqual(['ad-hominem-strike']);
+        expect(migrated.player.knownCards).toEqual(['ad-hominem-strike']);
         expect('equippedSkills' in migrated.player).toBe(false);
     });
 
@@ -135,7 +141,7 @@ describe('Phase 99 migration', () => {
                 name: 'TestPlayer',
                 level: 2,
                 baseStats: { heart: 6, body: 4, mind: 5 },
-                knownSkills: ['false-dilemma'],
+                knownCards: ['false-dilemma'],
             }, ['ad-hominem-strike']),
             world: createStartingWorld(),
             combat: null,
@@ -159,9 +165,9 @@ describe('Phase 99 migration', () => {
         const state = store.getState();
 
         expect(state.version).toBe(GAME_STATE_VERSION);
-        expect(state.player.knownSkills).toEqual(
+        expect(state.player.knownCards).toEqual(
             expect.arrayContaining(['false-dilemma', 'ad-hominem-strike'])
         );
-        expect(state.player.knownSkills).toHaveLength(2);
+        expect(state.player.knownCards).toHaveLength(2);
     });
 });

@@ -1,10 +1,10 @@
 /**
  * Phase 99 / ADR-0002 — unlocked skill access e2e tests.
  *
- * Verifies that the combat catalogue is exactly the player's knownSkills; there
+ * Verifies that the combat catalogue is exactly the player's knownCards; there
  * is no equipped-skill loadout gate (the legacy `equippedSkills` field was
  * removed entirely in Phase 159), and combat cards carry no resource cost.
- * Save-side migration of legacy `equippedSkills` into `knownSkills` is covered
+ * Save-side migration of legacy `equippedSkills` into `knownCards` is covered
  * by `src/Game/e2e/phase99-migration.engine.test.ts`.
  */
 
@@ -20,7 +20,7 @@ describe('Phase 99 unlocked skill access', () => {
             name: 'TestPlayer',
             level: 5,
             baseStats: { heart: 8, body: 6, mind: 7 },
-            knownSkills: [
+            knownCards: [
                 'slippery-slope',
                 'brace-for-impact',
                 'soft-word',
@@ -31,30 +31,30 @@ describe('Phase 99 unlocked skill access', () => {
     });
 
     test('every known skill resolves in the library', () => {
-        for (const skillId of player.knownSkills) {
+        for (const skillId of player.knownCards) {
             const skill = getCardById(skillId);
             expect(skill, `skill ${skillId} missing from library`).toBeDefined();
         }
     });
 
     test('skills not in known skills are not available', () => {
-        const availableSkills = player.knownSkills.filter(id => {
+        const availableSkills = player.knownCards.filter(id => {
             const skill = getCardById(id);
             return skill !== undefined;
         });
 
         // Should match exactly the known skills for the player
-        expect(availableSkills).toEqual(player.knownSkills);
+        expect(availableSkills).toEqual(player.knownCards);
 
         // Test skill that player doesn't know
         const unknownSkillId = 'resonance-detonation'; // rank-5 finisher
-        expect(player.knownSkills).not.toContain(unknownSkillId);
+        expect(player.knownCards).not.toContain(unknownSkillId);
     });
 
     test('the combat catalogue is exactly the known set', () => {
         // Post-Phase-159 there is no equipped rotation: every known skill that
         // resolves in the library is part of the catalogue.
-        for (const skillId of player.knownSkills) {
+        for (const skillId of player.knownCards) {
             const skill = getCardById(skillId);
             expect(skill).toBeDefined();
         }

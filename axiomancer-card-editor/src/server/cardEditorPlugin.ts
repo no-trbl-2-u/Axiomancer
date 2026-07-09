@@ -20,7 +20,7 @@ import path from 'node:path';
 import { promises as fs } from 'node:fs';
 import type { Plugin, ViteDevServer, Connect } from 'vite';
 import type { ServerResponse } from 'node:http';
-import { upsertCard, removeCard } from './skillCodegen';
+import { upsertCard, removeCard } from './cardCodegen';
 import type { CardDraft } from '../types';
 
 /** Module specifier (via the `@mechanics` alias) of the live library. */

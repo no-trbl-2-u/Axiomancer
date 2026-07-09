@@ -11,7 +11,7 @@
 export type {
     Card, CardCategory, StatType, CardTier, CardTarget,
     CombatResources,
-    CardLearningRequirement, CardCombatEffects, CardSpecialMechanic,
+    CardCombatEffects, CardSpecialMechanic,
     CardSynergy, SynergyPredicate,
 } from './types';
 
@@ -30,14 +30,14 @@ export {
 
 export {
     generateBasicActionResources, generatePhilosophicalResource,
-    calculateSkillDamage, executeSkill,
+    calculateCardDamage, executeCard,
     philosophicalCategoryFor,
-    meetsLearningRequirement, getAvailableSkills, learnSkill,
-} from './skill.engine';
+    getAvailableCards, learnCard,
+} from './card.engine';
 
 export type {
     CardEvent, CardResolution, CardLookup,
-} from './skill.engine';
+} from './card.engine';
 
 export {
     cardLibrary, getCardById,
