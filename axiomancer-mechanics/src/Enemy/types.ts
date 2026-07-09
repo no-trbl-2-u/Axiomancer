@@ -24,10 +24,7 @@ export type { CodexEntry };
  * (`friendshipCounter >= FRIENDSHIP_COUNTER_MAX` -> friendship).
  *
  * Authors leave predicates undefined when they don't apply (e.g. low-tier
- * enemies that only need the rounds threshold drop the other three fields).
- * Within a single list-valued predicate (`requiredStances`, `requiredCardUse`)
- * the match is existential — at least one element of the list must appear in
- * the player's combat log.
+ * enemies that only need the rounds threshold drop the other fields).
  */
 export interface BefriendabilityConfig {
     /**
@@ -45,22 +42,6 @@ export interface BefriendabilityConfig {
      * eligibility. Range [0, 1].
      */
     hpGate?: { belowPct: number };
-    /**
-     * Friendship eligibility requires the player to have used AT LEAST
-     * ONE of the named stances during combat (existential, not universal).
-     * Derived from `state.log[].playerAction.stance`; no separate
-     * tracking state is kept on `CombatState`.
-     * Empty array is treated as "no requirement" (same as undefined).
-     */
-    requiredStances?: Stance[];
-    /**
-     * Friendship eligibility requires the player to have cast AT LEAST
-     * ONE of the named skill IDs during combat (existential, not universal).
-     * Derived from `state.log[].playerAction` entries with
-     * `action === 'skill'` and matching `skillId`.
-     * Empty array is treated as "no requirement" (same as undefined).
-     */
-    requiredCardUse?: string[];
     /**
      * Explicit "fall through to Phase 36 mechanic". When set, the engine
      * treats this config as if the field were absent — useful for

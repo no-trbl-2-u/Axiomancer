@@ -2,14 +2,17 @@
  * Phase 68 — `BefriendabilityConfig` predicate hermetic coverage.
  *
  * Drives `isBefriendAttemptEligible` (in `src/Combat/index.ts`) through
- * synthetic CombatState fixtures so each config axis (hpGate, requiredStances,
- * requiredCardUse) is pinned in isolation, then in AND-composition.
+ * synthetic CombatState fixtures so each surviving config axis (hpGate,
+ * roundsThreshold fallback) is pinned in isolation, then in AND-composition.
  *
  * The legacy combat-end predicates (`isFriendshipEligible`,
  * `determineCombatEnd`, `isCombatOngoing`) and the passive both-defend counter
  * threshold were removed with the legacy turn-based combat driver. The
- * surviving surface is the explicit Befriend-attempt eligibility check, which
- * the shared skill engine still consults via `executeCard`.
+ * per-round history predicates (`requiredStances` / `requiredCardUse`) were
+ * removed with `CombatState.log` — the Hazard-Pattern engine never populated
+ * that log, so they were inert. The surviving surface is the explicit
+ * Befriend-attempt eligibility check, which the shared card engine consults
+ * via `executeCard`.
  *
  * Cases mirror the brief at `plan/phases/phase_68_befriendability_config.md`
  * D2 (semantics) + Unit 1's case list.
@@ -17,7 +20,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { isBefriendAttemptEligible } from '../../Combat';
-import { CombatState, BattleLogEntry, Stance } from '../../Combat/types';
+import { CombatState } from '../../Combat/types';
 import { Enemy, BefriendabilityConfig } from '../types';
 import { createEnemy } from '../index';
 import { FRIENDSHIP_COUNTER_MAX } from '../../Game/game-mechanics.constants';
@@ -38,35 +41,12 @@ function makeEnemy(config?: BefriendabilityConfig, overrides: Partial<Enemy> = {
     };
 }
 
-function logEntry(round: number, stance: Stance, skillId?: string): BattleLogEntry {
-    return {
-        round,
-        playerAction: {
-            stance,
-            action: skillId ? 'skill' : 'attack',
-            ...(skillId ? { skillId } : {}),
-        },
-        enemyAction: { stance: 'body', action: 'defend' },
-        advantage: 'neutral',
-        playerRoll: 10,
-        playerRollDetails: '',
-        enemyRoll: 10,
-        enemyRollDetails: '',
-        damageToPlayer: 0,
-        damageToEnemy: 0,
-        playerHPAfter: 50,
-        enemyHPAfter: 50,
-        result: '',
-    };
-}
-
 function makeState(enemy: Enemy, overrides: Partial<CombatState> = {}): CombatState {
     return {
         active: true,
         phase: 'choosing_stance',
         round: 1,
         friendshipCounter: 0,
-        log: [],
         playerChoice: {},
         enemyChoice: {},
         combatResources: { heart: 0, body: 0, mind: 0, fallacy: 0, paradox: 0 },
@@ -143,72 +123,15 @@ describe('Phase 68 — BefriendabilityConfig predicate (isBefriendAttemptEligibl
         });
     });
 
-    describe('Case 4 — requiredStances (existential)', () => {
-        it('blocks eligibility when none of the named stances appear in the log', () => {
-            const enemy = makeEnemy({ requiredStances: ['heart'] });
-            const state = makeState(enemy, {
-                log: [logEntry(1, 'body'), logEntry(2, 'mind')],
-            });
-            expect(isBefriendAttemptEligible(state)).toBe(false);
-        });
-
-        it('allows eligibility when at least one named stance appears in the log', () => {
-            const enemy = makeEnemy({ requiredStances: ['heart'] });
-            const state = makeState(enemy, {
-                log: [logEntry(1, 'body'), logEntry(2, 'heart')],
-            });
-            expect(isBefriendAttemptEligible(state)).toBe(true);
-        });
-
-        it('treats an empty list as no requirement', () => {
-            const enemy = makeEnemy({ requiredStances: [] });
-            const state = makeState(enemy, { log: [] });
-            expect(isBefriendAttemptEligible(state)).toBe(true);
-        });
-    });
-
-    describe('Case 5 — requiredCardUse (existential)', () => {
-        it('blocks eligibility when no listed skill ID was cast', () => {
-            const enemy = makeEnemy({ requiredCardUse: ['palm-strike'] });
-            const state = makeState(enemy, {
-                log: [logEntry(1, 'body', 'jab')],
-            });
-            expect(isBefriendAttemptEligible(state)).toBe(false);
-        });
-
-        it('allows eligibility when at least one listed skill ID was cast', () => {
-            const enemy = makeEnemy({ requiredCardUse: ['palm-strike'] });
-            const state = makeState(enemy, {
-                log: [logEntry(1, 'body'), logEntry(2, 'heart', 'palm-strike')],
-            });
-            expect(isBefriendAttemptEligible(state)).toBe(true);
-        });
-
-        it('ignores log entries whose action is not "skill"', () => {
-            const enemy = makeEnemy({ requiredCardUse: ['palm-strike'] });
-            const state = makeState(enemy, {
-                log: [{
-                    ...logEntry(1, 'heart'),
-                    playerAction: { stance: 'heart', action: 'attack', skillId: 'palm-strike' },
-                }],
-            });
-            expect(isBefriendAttemptEligible(state)).toBe(false);
-        });
-    });
-
-    describe('Case 6 — AND-composition', () => {
+    describe('Case 4 — AND-composition', () => {
         const fullConfig: BefriendabilityConfig = {
             hpGate: { belowPct: 0.4 },
-            requiredStances: ['heart'],
-            requiredCardUse: ['palm-strike'],
             roundsThreshold: 5,
         };
 
         function passingState(): CombatState {
             const enemy = makeEnemy(fullConfig);
-            const state = makeState(enemy, {
-                log: [logEntry(1, 'heart', 'palm-strike')],
-            });
+            const state = makeState(enemy);
             state.enemy.health = Math.floor(state.enemy.maxHealth * 0.3);
             return state;
         }
@@ -220,18 +143,6 @@ describe('Phase 68 — BefriendabilityConfig predicate (isBefriendAttemptEligibl
         it('fails when hpGate not reached', () => {
             const state = passingState();
             state.enemy.health = state.enemy.maxHealth;
-            expect(isBefriendAttemptEligible(state)).toBe(false);
-        });
-
-        it('fails when requiredStances not satisfied', () => {
-            const state = passingState();
-            state.log = [logEntry(1, 'body', 'palm-strike')];
-            expect(isBefriendAttemptEligible(state)).toBe(false);
-        });
-
-        it('fails when requiredCardUse not satisfied', () => {
-            const state = passingState();
-            state.log = [logEntry(1, 'heart')];
             expect(isBefriendAttemptEligible(state)).toBe(false);
         });
     });

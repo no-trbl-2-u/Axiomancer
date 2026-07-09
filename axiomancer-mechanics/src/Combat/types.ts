@@ -12,13 +12,12 @@ export type Stance = 'heart' | 'body' | 'mind';
  * The action a combatant performs each round.
  * - `attack` deals damage based on the attacker's stance.
  * - `defend` reduces incoming damage based on the defender's stance.
- * - `skill`  uses a learned skill (spends `combatResources`).
  * - `item`   uses an item from the inventory.
  * - `flee`   attempts to leave combat.
  * - `spare`  Phase 108 - mercy choice to spare/befriend the enemy.
  * - `exploit` Phase 108 - mercy choice to exploit the opening for a free critical.
  */
-export type Action = 'attack' | 'defend' | 'skill' | 'item' | 'flee' | 'spare' | 'exploit';
+export type Action = 'attack' | 'defend' | 'item' | 'flee' | 'spare' | 'exploit';
 
 /**
  * The advantage state of a roll, from the attacker's perspective.
@@ -38,8 +37,7 @@ export type CritStyle = 'double' | 'pierce';
  * A combatant's choice for a single round: their stance plus their action.
  *
  * @property stance  - heart/body/mind.
- * @property action  - attack/defend/skill/item/flee.
- * @property skillId - Card ID, required when `action === 'skill'`.
+ * @property action  - attack/defend/item/flee.
  * @property itemId  - Inventory item ID, required when `action === 'item'`.
  *                    Per Spec 05 only consumables are usable in combat — the
  *                    resolver emits an `item-blocked` event for anything else.
@@ -47,7 +45,6 @@ export type CritStyle = 'double' | 'pierce';
 export interface CombatAction {
     stance: Stance;
     action: Action;
-    skillId?: string;
     itemId?: string;
 }
 
@@ -61,8 +58,7 @@ export type PlayerCombatAction = CombatAction;
 /**
  * The current phase of a combat encounter.
  * - `choosing_stance` — selecting heart/body/mind.
- * - `choosing_action` — selecting attack/defend/skill/item/flee.
- * - `choosing_skill`  — selecting a skill (when action is 'skill').
+ * - `choosing_action` — selecting attack/defend/item/flee.
  * - `mercy_choice`    — Phase 108 - choosing spare/befriend vs exploit after successful Befriend.
  * - `resolving`       — round resolution in progress.
  * - `ended`           — combat is over.
@@ -70,29 +66,9 @@ export type PlayerCombatAction = CombatAction;
 export type CombatPhase =
     | 'choosing_stance'
     | 'choosing_action'
-    | 'choosing_skill'
     | 'mercy_choice'
     | 'resolving'
     | 'ended';
-
-/**
- * A record of one resolved round, suitable for the battle log.
- */
-export interface BattleLogEntry {
-    round: number;
-    playerAction: CombatAction;
-    enemyAction: CombatAction;
-    advantage: Advantage;
-    playerRoll: number;
-    playerRollDetails: string;
-    enemyRoll: number;
-    enemyRollDetails: string;
-    damageToPlayer: number;
-    damageToEnemy: number;
-    playerHPAfter: number;
-    enemyHPAfter: number;
-    result: string;
-}
 
 /**
  * Snapshot of a combat encounter in progress.
@@ -106,8 +82,7 @@ export interface BattleLogEntry {
  * @property friendshipCounter - Increments when both combatants defend.
  * @property playerChoice      - Player's choice for the current round (built up over phases).
  * @property enemyChoice       - Enemy's choice for the current round.
- * @property log               - Resolved-round entries, oldest first.
- * @property combatResources   - Per-combat player resource counters for skill
+ * @property combatResources   - Per-combat player resource counters for card
  *                                usage. Seeded in `initializeCombat` from
  *                                equipped item/set combat-start token grants
  *                                (zero when no such gear is equipped). Heart /
@@ -124,7 +99,6 @@ export interface CombatState {
     enemy: Enemy;
     playerChoice: Partial<CombatAction>;
     enemyChoice: Partial<CombatAction>;
-    log: BattleLogEntry[];
     combatResources: CombatResources;
     /** Phase 108 - when true, indicates a successful Befriend has opened mercy choice state */
     mercyChoiceActive?: boolean;

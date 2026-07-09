@@ -269,7 +269,6 @@ function cardShim(enc: CombatEncounterState): CombatState {
         enemy: enc.enemy,
         playerChoice: {},
         enemyChoice: {},
-        log: [],
         combatResources: enc.combatResources,
     };
 }
