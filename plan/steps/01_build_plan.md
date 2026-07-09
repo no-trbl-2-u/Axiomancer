@@ -106,12 +106,18 @@ Tick in this file in the same commit that ships the phase.
       fixed spec-32-v3 dead-API references in `docs/combat.md`
       (basePower/chipHp/DIRECT_DAMAGE_WEIGHT/GOLD_CARD_IDS) —
       `docs(mechanics): reconcile spec.md / docs/combat.md with spec 32 v3 — phase 12` (cb5c6467)
-- [ ] Phase 13 — Hazard v2 engine port (DIV-MECH-002, promoted via
-      `/oversight` 2026-07-03): mechanics absorbs mobile's
-      `state/hazard/` engine into `World/Hazard/`; mobile migrates
-      to the mechanics engine and deletes its duplicate. Gap list:
-      `axiomancer-mechanics/docs/hazard-v2-vs-mechanics-divergence.md`.
-      (both; large — generate a brief before shipping)
+- [x] Phase 13 — Hazard v2 engine port (DIV-MECH-002, promoted via
+      `/oversight` 2026-07-03): verified the port already landed —
+      mechanics owns the full v2 engine under `src/World/Hazard/`
+      (`hazard.engine.ts` `createHazardSession`, gold-wild powering,
+      staged card instances + apply/lock, salvage, no-between-round
+      recast, momentum carry, Perfect/Complete/Failure) with a
+      `audit/` parity harness against the divergence catalogue; mobile
+      deleted its local `state/hazard/{engine,types,content,sim}.ts`
+      and now consumes `@mechanics` from `store-actions.ts`. Content
+      parity confirmed (all 6 named hazards + 11 starter + 8 reward
+      cards + crack resolve in mechanics). Recorded this tick —
+      `plan: phase 13 shipped — hazard v2 port verified already landed`
 - [ ] Phase 15 — Hazard first-crossing tutorial (GAP-001 follow-up):
       guided first-run coach for the Hazard minigame, mirroring the
       Rest/Gathering/Combat tutorials. Largest remaining gap — route
@@ -213,3 +219,4 @@ phases with linked notes here.)
 - phase 6 — 48d2c802 — memoir REMAINS section (death tally via hazardDeathCount + merged Rest/LootCache keepsake read-back)
 - phase 4 — d9763659 — balance-sim population witnesses (execute finisher + escalation clock; Conclusion/BODY-sig already had coverage)
 - phase 9 — 7ea06a6e / 6fa7f090 — character/story/world specs (C-01 the Sophist, W-01 the Aporia, S-01 fishing-village dilemmas; already shipped pre-tracking, recorded this tick)
+- phase 13 — (port pre-tracking; mechanics `src/World/Hazard/` + `audit/` parity harness, mobile `state/hazard/store-actions.ts` consumer) — hazard v2 engine port verified already landed, mobile duplicate deleted, content parity confirmed; recorded this tick
