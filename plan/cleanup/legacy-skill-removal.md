@@ -1,7 +1,43 @@
 # Legacy "skill" removal — remaining cleanup spec
 
-> Status: **open backlog** · Created 2026-07-09 · Scope: purge the last legacy
+> Status: **COMPLETE** · Created 2026-07-09 · Scope: purge the last legacy
 > "skill" vestiges from the codebase so the word means **only** `SignatureSkill`.
+
+## Completion record (2026-07-09) — bundled PR `refactor/legacy-skill-purge-final`
+
+WI-1 through WI-6 all shipped on one branch (WI-1's three commits + WI-2…WI-6):
+
+- **WI-2** ✅ purged the inert `*Skill` stat modifiers (effects JSON, affix
+  catalogue, `EffectStatTarget` union, CLI, effect tests); the two live sole-Skill
+  procs were repointed (`buff_ad_hoc_patch`→physicalDefense,
+  `debuff_affirming_consequent`→physicalAttack).
+- **WI-3** ✅ World `Reward` kind `'skill'`/`{kind:'skill';skillId}` →
+  `'card'`/`{kind:'card';cardId}` (never constructed/consumed).
+- **WI-4** ✅ `Enemy.skills`→`Enemy.cards` (field, `createEnemy`, `skill()`→`card()`
+  helper across ~55 records, `executeCard` reader, catalog scripts, tests); plus the
+  compound one-offs (`CharacterSkillRow`→`CharacterCardRow`, mobile `skillId`
+  params→`cardId`, `skillCard`/`skillCat` styles, `bodySkill`, CLI/comment one-offs).
+- **WI-5** ✅ swept `skill`-named `Card` locals→`card`/`sourceCard` and residual
+  JSDoc/comment prose across mechanics + mobile source and e2e suites.
+- **WI-6** ✅ living reference docs updated (deleted `*Skill` stat rows, repointed
+  effect mods, `Enemy.cards` prose).
+
+**Verify:** green across all three packages — mechanics (type-check,
+type-check:tests, lint, build; vitest bar the 7 known Windows path-separator
+`agent-vitest-reporter` failures), mobile (typecheck, expo lint, 2421 jest),
+card-editor (type-check, build).
+
+**Deliberately left as-is (per Non-goals / accuracy):**
+- `SignatureSkill` / `combat.signature.ts` and the Phase-166
+  `terminology-boundary.engine.test.ts` guard — skill = the Conviction kit is the
+  one legitimate meaning.
+- Accurate **legacy-migration history** comments that name the pre-rename fields
+  (`knownSkills`/`equippedSkills`) and the `phase_49_enemy_skill_caster.md` path —
+  renaming them would falsify history.
+- Dated **historical reports** (audits, playtest reports, reconciliation-gaps,
+  design prompts) and `plan/`/`CHANGELOG`/`RELEASES` — history, left untouched.
+- `effects.md` has broader pre-existing drift (lists retired effects); only the
+  `*Skill` token was removed, not a full reconciliation.
 
 ## Context — what's already done
 

@@ -54,7 +54,7 @@ import { STARTING_CARD_IDS } from '../Combat/combat.rewards';
  * legacy v6 saves.
  * Phase 109 — bumped 8 → 9 to add the required `regionConsequences: RegionConsequences` slice.
  * Phase 110 — bumped 9 → 10 to add the required `factionReputations: FactionReputations` slice.
- * card→card rename — bumped 10 → 11 to rename persisted `player.knownSkills` → `knownCards`.
+ * knownSkills→knownCards rename — bumped 10 → 11 to rename the persisted `player.knownSkills` field to `knownCards`.
  */
 export const GAME_STATE_VERSION = 11;
 

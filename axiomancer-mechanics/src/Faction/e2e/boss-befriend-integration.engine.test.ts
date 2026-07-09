@@ -106,7 +106,7 @@ describe('Boss befriend faction reputation integration', () => {
         // In a new game state, faction reputation should be initialized
         expect(state.factionReputations).toBeDefined();
         expect(typeof state.factionReputations).toBe('object');
-        expect(state.version).toBe(11); // card→card rename bumped version to 11
+        expect(state.version).toBe(11); // knownSkills→knownCards rename bumped version to 11
     });
 
     it('demonstrates boss befriend tradeoff pattern', () => {

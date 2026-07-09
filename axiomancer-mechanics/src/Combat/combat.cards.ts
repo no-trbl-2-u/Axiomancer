@@ -1,5 +1,5 @@
 /**
- * Spec 32 v3 — The Themed Deck Library: card→card projection adapter.
+ * Spec 32 v3 — The Themed Deck Library: Card → CombatCard projection adapter.
  *
  * Projects a learned `Card` into a `CombatCard` view: stance color, verb
  * class, rank/rarity, card type, and FREE/PAID action text. The projection is

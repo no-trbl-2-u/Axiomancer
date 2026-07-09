@@ -612,7 +612,7 @@ async function characterTab(store: GameStoreHandle): Promise<void> {
         }
     }
 
-    log('\nSkills:');
+    log('\nCards:');
     log(`  Known/Unlocked: ${p.knownCards.length > 0 ? p.knownCards.join(', ') : '(none)'}`);
 
     log('\nInventory summary:');

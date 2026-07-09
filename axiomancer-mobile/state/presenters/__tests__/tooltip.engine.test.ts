@@ -389,7 +389,7 @@ describe('accentForStat', () => {
     });
 
     it('maps mental* → mind', () => {
-        expect(accentForStat('mentalSkill')).toBe('mind');
+        expect(accentForStat('mentalAttack')).toBe('mind');
         expect(accentForStat('mind')).toBe('mind');
     });
 

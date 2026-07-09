@@ -22,7 +22,7 @@ jest.mock('expo-router', () => ({
     useLocalSearchParams: () => ({}),
 }));
 
-const SKILLS = ['slippery-slope', 'straw-mans-jab', 'brace-for-impact', 'soft-word'];
+const CARDS = ['slippery-slope', 'straw-mans-jab', 'brace-for-impact', 'soft-word'];
 
 beforeEach(() => {
     (globalThis as { __AXM_COMBAT_SEED__?: number }).__AXM_COMBAT_SEED__ = 16;
@@ -35,7 +35,7 @@ afterEach(() => {
 function mount(): { store: AppStore } {
     const { tree, store } = withAllProviders(<CombatEncounterScreen />);
     const player = store.getState().player;
-    store.setState({ player: { ...player, knownCards: SKILLS, baseStats: { heart: 8, body: 8, mind: 8 }, health: 200, maxHealth: 200 } });
+    store.setState({ player: { ...player, knownCards: CARDS, baseStats: { heart: 8, body: 8, mind: 8 }, health: 200, maxHealth: 200 } });
     render(tree);
     return { store };
 }

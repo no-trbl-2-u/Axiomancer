@@ -54,8 +54,8 @@ describe('Phase 99 unlocked card access', () => {
     test('the combat catalogue is exactly the known set', () => {
         // Post-Phase-159 there is no equipped rotation: every known card that
         // resolves in the library is part of the catalogue.
-        for (const skillId of player.knownCards) {
-            const card = getCardById(skillId);
+        for (const cardId of player.knownCards) {
+            const card = getCardById(cardId);
             expect(card).toBeDefined();
         }
     });
