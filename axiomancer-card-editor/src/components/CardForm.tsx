@@ -296,7 +296,7 @@ export function CardForm({ card, setCard }: { card: CardDraft; setCard: (c: Card
 
     // ── learningRequirement helpers ──
     const lr = card.learningRequirement;
-    const toggleLR = () => set({ learningRequirement: lr ? undefined : { level: 1 } });
+    const toggleLR = () => set({ learningRequirement: lr ? undefined : {} });
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -489,10 +489,6 @@ export function CardForm({ card, setCard }: { card: CardDraft; setCard: (c: Card
                 <Toggle on={!!lr} onClick={toggleLR} label={lr ? 'GATED' : 'NO REQUIREMENT'} />
                 {lr && (
                     <>
-                        <div>
-                            <FieldLabel hint="min character level">LEVEL</FieldLabel>
-                            <Stepper value={lr.level} onChange={(v) => set({ learningRequirement: { ...lr, level: v } })} min={1} max={50} />
-                        </div>
                         <div>
                             <FieldLabel hint="optional stat gate">STAT REQUIREMENT</FieldLabel>
                             <Segmented

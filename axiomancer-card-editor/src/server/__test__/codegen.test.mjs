@@ -50,7 +50,7 @@ const newDraft = {
     free: { tickOne: true },
     combatEffects: [{ effectId: 'debuff_mark', appliedTo: 'opponent', duration: 2 }],
     specialMechanics: [{ kind: 'guard', amount: 3 }],
-    learningRequirement: { level: 5, requiresAlignment: { axis: 'outlook', op: 'lte', value: -10 } },
+    learningRequirement: { requiresAlignment: { axis: 'outlook', op: 'lte', value: -10 } },
     tags: ['test', 'control'],
 };
 

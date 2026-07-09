@@ -132,10 +132,9 @@ function learningReqLines(lr: NonNullable<CardDraft['learningRequirement']>): st
         lr.statRequirementValue != null ||
         notBlank(lr.prerequisiteSkill) ||
         lr.requiresAlignment != null;
-    if (!extra) return [`${IND}learningRequirement: { level: ${num(lr.level)} },`];
+    if (!extra) return [`${IND}learningRequirement: {},`];
 
     const lines = [`${IND}learningRequirement: {`];
-    lines.push(`${IND}${IND}level: ${num(lr.level)},`);
     if (lr.statRequirementType != null) {
         lines.push(`${IND}${IND}statRequirementType: ${str(lr.statRequirementType)},`);
     }
