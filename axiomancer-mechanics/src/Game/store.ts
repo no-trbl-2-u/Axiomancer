@@ -223,7 +223,7 @@ export type GameStore = GameState & GameActions;
  */
 /**
  * Compute the extra envelope fields that depend on the prev→next diff.
- * Today this is only the Phase 30 `unlockedSkills` bag for level-ups —
+ * Today this is only the Phase 30 `unlockedCards` bag for level-ups —
  * the list of skill ids that became eligible because the promotion
  * crossed a learning-requirement threshold.
  */
@@ -232,7 +232,7 @@ function enrichExtra(
     prev: GameState,
     next: GameState,
     extra?: { report?: CombatEndReport },
-): { report?: CombatEndReport; unlockedSkills?: string[] } | undefined {
+): { report?: CombatEndReport; unlockedCards?: string[] } | undefined {
     if (action.type !== 'LEVEL_UP') return extra;
     if (next.player.level === prev.player.level) return extra; // No promotion → no diff.
     // Card availability no longer has level/stat/alignment gates (learning
@@ -241,14 +241,14 @@ function enrichExtra(
     // stability; the field can be retired when its consumers are.
     const before = new Set(getAvailableCards(prev.player).map(s => s.id));
     const after = getAvailableCards(next.player).map(s => s.id);
-    const unlockedSkills = after.filter(id => !before.has(id));
-    return { ...(extra ?? {}), unlockedSkills };
+    const unlockedCards = after.filter(id => !before.has(id));
+    return { ...(extra ?? {}), unlockedCards };
 }
 
 function eventForAction(
     action: GameAction,
     nextState: GameState,
-    extra?: { report?: CombatEndReport; unlockedSkills?: string[] },
+    extra?: { report?: CombatEndReport; unlockedCards?: string[] },
 ): GameEvent | null {
     const map: Partial<Record<GameAction['type'], GameEventType>> = {
         START_COMBAT:   'combat:started',

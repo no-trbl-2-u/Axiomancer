@@ -25,7 +25,7 @@ export type {
 
 export { determineAdvantage, hasAdvantage, getAdvantageModifier, resolveEffectiveAdvantage } from './advantage';
 export { getBaseStat, getAttackStat, getDefenseStat, getSaveStat } from './stats';
-export { rollSkillCheck, isCriticalHit, isCriticalMiss } from './dice';
+export { isCriticalHit, isCriticalMiss } from './dice';
 export { applyCriticalMultiplier, calculateFinalDamage, selectCritDamage, isAttackSuccessful } from './damage';
 export { applyDamage, heal, isAlive, isDefeated, getHealthPercentage } from './health';
 export {
@@ -59,7 +59,7 @@ export type {
     ActiveDotEntry, ActiveDotAmplification,
 } from './effect-modifiers';
 export { resolveEffectApplication } from './resist';
-export { calculateDamageResistance, getSkillDamageType } from './damage-resist';
+export { calculateDamageResistance } from './damage-resist';
 export type { DamageType } from './damage-resist';
 export {
     rollForCombatEffects, applyProcOutcome, applyFumbleOutcome,
@@ -252,8 +252,8 @@ export type { HazardAutoPolicyId, HazardCombatAutoOptions, HazardCombatAutoResul
 // Spec 26b tuning §B/§C/§D — archetype signatures, deckbuilder rewards, unlock hook
 export { SIGNATURE_KITS, signaturesForArchetype, playerArchetype, CONCLUDE_DMG_PER_STACK } from './combat.signature';
 export {
-    COMBAT_REWARD_POOL, STARTING_SKILL_ID, STARTING_SKILL_IDS, rollCombatCardRewards, addRewardCard,
-    unlockSkillViaDilemma,
+    COMBAT_REWARD_POOL, STARTING_CARD_ID, STARTING_CARD_IDS, rollCombatCardRewards, addRewardCard,
+    unlockCardViaDilemma,
 } from './combat.rewards';
 export type { PlayerArchetype } from './combat.encounter.types';
 export {

@@ -107,7 +107,7 @@ describe('aftermath snapshot regression tests', () => {
                 ?? null;
             
             snapshot = {
-                skillName: rawName !== null ? rawName.toUpperCase() : null,
+                cardName: rawName !== null ? rawName.toUpperCase() : null,
                 damage: last.damageToEnemy ?? 0,
                 descriptor:
                     typeof last.result === 'string' && last.result.length > 0
@@ -118,7 +118,7 @@ describe('aftermath snapshot regression tests', () => {
 
         // Should handle undefined gracefully
         expect(snapshot).toEqual({
-            skillName: null, // Falls back to null when no action found
+            cardName: null, // Falls back to null when no action found
             damage: 15,      // Uses the provided damageToEnemy value
             descriptor: null, // Falls back to null when result empty
         });
@@ -150,7 +150,7 @@ describe('aftermath snapshot regression tests', () => {
                 ?? null;
             
             finalBlow = {
-                skillName: rawName !== null ? rawName.toUpperCase() : null,
+                cardName: rawName !== null ? rawName.toUpperCase() : null,
                 damage: last.damageToPlayer ?? 0,
                 descriptor: 
                     typeof last.result === 'string' && last.result.length > 0
@@ -161,7 +161,7 @@ describe('aftermath snapshot regression tests', () => {
 
         // Should handle undefined gracefully
         expect(finalBlow).toEqual({
-            skillName: null,
+            cardName: null,
             damage: 28,
             descriptor: 'The hierophant\'s axe-fall cleaves the binding rib.',
         });
@@ -187,7 +187,7 @@ describe('aftermath snapshot regression tests', () => {
                 ?? null;
             
             victorySnapshot = {
-                skillName: victoryRawName !== null ? victoryRawName.toUpperCase() : null,
+                cardName: victoryRawName !== null ? victoryRawName.toUpperCase() : null,
                 damage: last.damageToEnemy ?? 0,
                 descriptor:
                     typeof last.result === 'string' && last.result.length > 0
@@ -202,7 +202,7 @@ describe('aftermath snapshot regression tests', () => {
                 ?? null;
 
             defeatSnapshot = {
-                skillName: defeatRawName !== null ? defeatRawName.toUpperCase() : null,
+                cardName: defeatRawName !== null ? defeatRawName.toUpperCase() : null,
                 damage: last.damageToPlayer ?? 0,
                 descriptor:
                     typeof last.result === 'string' && last.result.length > 0
@@ -212,13 +212,13 @@ describe('aftermath snapshot regression tests', () => {
         }).not.toThrow();
 
         expect(victorySnapshot).toEqual({
-            skillName: null,
+            cardName: null,
             damage: 0,
             descriptor: null,
         });
 
         expect(defeatSnapshot).toEqual({
-            skillName: null,
+            cardName: null,
             damage: 0,
             descriptor: null,
         });
@@ -291,7 +291,7 @@ describe('aftermath snapshot regression tests', () => {
                 ?? null;                     // Final fallback
 
             finalBlow = {
-                skillName: rawName !== null ? rawName.toUpperCase() : null,
+                cardName: rawName !== null ? rawName.toUpperCase() : null,
                 damage: last.damageToPlayer ?? 0,
                 descriptor:
                     typeof last.result === 'string' && last.result.length > 0
@@ -302,7 +302,7 @@ describe('aftermath snapshot regression tests', () => {
 
         // Should produce usable snapshot despite malformed enemyAction
         expect(finalBlow).toEqual({
-            skillName: null, // No skill name due to undefined enemyAction
+            cardName: null, // No skill name due to undefined enemyAction
             damage: 35,      // Damage properly captured
             descriptor: 'The hierophant raises its axe. The axe falls.', // Result preserved
         });

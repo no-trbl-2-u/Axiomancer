@@ -22,7 +22,7 @@ export interface DefeatModalProps {
     cause: {
         killerName: string;
         killerEpithet: string;
-        finalSkill: string;
+        finalCard: string;
         damage: number;
     };
     /** Chronicle line describing the death */

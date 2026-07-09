@@ -68,14 +68,14 @@ describe('debugSeed: items + skills + map reset', () => {
 
         // Cover both paradox + fallacy from the engine library so
         // the skills picker has at least one of each.
-        const learnedSkills = COMBAT_CARDS.filter((s) =>
+        const learnedCards = COMBAT_CARDS.filter((s) =>
             after.includes(s.id),
         );
-        const categories = new Set(learnedSkills.map((s) => s.category));
+        const categories = new Set(learnedCards.map((s) => s.category));
         expect(categories.has('paradox')).toBe(true);
         expect(categories.has('fallacy')).toBe(true);
 
-        expect(result.skillsLearned).toBeGreaterThanOrEqual(2);
+        expect(result.cardsLearned).toBeGreaterThanOrEqual(2);
     });
 
     it('resets the current map back to its starting node with cleared discovered/consumed sets', () => {
@@ -122,7 +122,7 @@ describe('debugSeed: items + skills + map reset', () => {
         const result = actions.debugSeed();
 
         expect(typeof result.itemsAdded).toBe('number');
-        expect(typeof result.skillsLearned).toBe('number');
+        expect(typeof result.cardsLearned).toBe('number');
         expect(typeof result.mapReset).toBe('boolean');
     });
 

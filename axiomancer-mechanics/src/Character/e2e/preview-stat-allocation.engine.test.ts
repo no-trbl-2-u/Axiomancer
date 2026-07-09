@@ -12,7 +12,6 @@ describe('previewStatAllocation', () => {
         const preview = previewStatAllocation(baseStats, level, allocation);
 
         expect(preview.derivedStats.emotionalAttack).toBeGreaterThan(0);
-        expect(preview.derivedStats.emotionalSkill).toBeGreaterThan(0);
         expect(preview.derivedStats.emotionalDefense).toBeGreaterThan(0);
         expect(preview.nonCombatStats.emotionalSave).toBeGreaterThan(0);
         expect(preview.nonCombatStats.emotionalTest).toBeGreaterThan(0);

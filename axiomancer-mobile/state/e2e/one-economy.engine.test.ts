@@ -100,8 +100,8 @@ describe('starter skills + learn-skill flow', () => {
         expect(known).toContain('brace-for-impact');
     });
 
-    it('getLearnableSkillOffers returns ≤3 unknown, requirement-met offers with effect lines', () => {
-        const offers = actions.getLearnableSkillOffers();
+    it('getLearnableCardOffers returns ≤3 unknown, requirement-met offers with effect lines', () => {
+        const offers = actions.getLearnableCardOffers();
         expect(offers.length).toBeGreaterThan(0);
         expect(offers.length).toBeLessThanOrEqual(3);
         const known = store.getState().player.knownCards ?? [];
@@ -113,7 +113,7 @@ describe('starter skills + learn-skill flow', () => {
     });
 
     it('learnCard grows knownCards through the engine and is idempotent', () => {
-        const offers = actions.getLearnableSkillOffers();
+        const offers = actions.getLearnableCardOffers();
         const pick = offers[0];
         expect(actions.learnCard(pick.id)).toBe(true);
         expect(store.getState().player.knownCards).toContain(pick.id);

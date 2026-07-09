@@ -31,10 +31,10 @@ import { ENEMY_REGISTRY, EnemyLibrary, type EnemySlug } from '../Enemy/enemy.lib
 import { deepClone } from '../Utils';
 import type { EquipmentSlot } from '../Items';
 import {
-    devSetLevel, devSetStats, devLearnSkills,
+    devSetLevel, devSetStats, devLearnCards,
     devGrantAllEquipment, devGrantAllConsumables, devEquipItem,
     devGrantCurrency, devSetMoralMeter, devSetAlignment,
-    devSpawnEnemy, devMaxOut, getEnemySlugs, getSkillIds,
+    devSpawnEnemy, devMaxOut, getEnemySlugs, getCardIds,
     getEquipmentTemplateIds,
 } from './dev-tools';
 import type { CodexEntry } from '../Game/types';
@@ -79,10 +79,10 @@ async function bootstrapStore(adapter: PersistenceAdapter): Promise<GameStoreHan
     const events = createEventEmitter();
     events.onAny(emit);
     // Phase 30 unit 2 — surface newly-eligible skills after a level-up.
-    // The store's dispatch enriches the payload with `unlockedSkills`; the
+    // The store's dispatch enriches the payload with `unlockedCards`; the
     // CLI just renders the message.
     events.on('character:levelup', evt => {
-        const unlocked = (evt as TypedLevelUpEvent).payload.unlockedSkills ?? [];
+        const unlocked = (evt as TypedLevelUpEvent).payload.unlockedCards ?? [];
         if (unlocked.length > 0) {
             log(`You can now learn ${unlocked.length} new skill${unlocked.length === 1 ? '' : 's'}: ${unlocked.join(', ')}`);
         }
@@ -485,7 +485,7 @@ function journalTab(store: GameStoreHandle): void {
     log('Alignment       : neutral (Spec 10 will compute this)');
 }
 
-function skillsTab(store: GameStoreHandle): void {
+function cardsTab(store: GameStoreHandle): void {
     const { player } = store.getState();
     log('\n— Skills —');
     log('Known skills:');
@@ -580,8 +580,8 @@ async function characterTab(store: GameStoreHandle): Promise<void> {
 
     log('\nDerived stats:');
     const ds = p.derivedStats;
-    log(`  physical  attack ${ds.physicalAttack}    skill ${ds.physicalSkill}    defense ${ds.physicalDefense}`);
-    log(`  mental    attack ${ds.mentalAttack}      skill ${ds.mentalSkill}      defense ${ds.mentalDefense}`);
+    log(`  physical  attack ${ds.physicalAttack}    defense ${ds.physicalDefense}`);
+    log(`  mental    attack ${ds.mentalAttack}        defense ${ds.mentalDefense}`);
     log(`  emotional attack ${ds.emotionalAttack}   skill ${ds.emotionalSkill}   defense ${ds.emotionalDefense}`);
     log(`  luck      ${ds.luck}`);
 
@@ -786,17 +786,17 @@ async function devTab(store: GameStoreHandle): Promise<void> {
                 ],
             }]);
             if (mode === 'all') {
-                const r = devLearnSkills(store, 'all');
+                const r = devLearnCards(store, 'all');
                 log(`\n${r.detail}\n`);
             } else {
                 const known = new Set(store.getState().player.knownCards);
-                const available = getSkillIds().filter(id => !known.has(id));
+                const available = getCardIds().filter(id => !known.has(id));
                 if (available.length === 0) { log('\nAll skills already known.\n'); break; }
                 const { skills } = await prompt<{ skills: string[] }>([{
                     type: 'checkbox', name: 'skills', message: 'Pick skills to learn:',
                     choices: available.map(id => ({ name: id, value: id })),
                 }]);
-                const r = devLearnSkills(store, skills);
+                const r = devLearnCards(store, skills);
                 log(`\n${r.detail}\n`);
             }
             break;
@@ -977,7 +977,7 @@ export async function runGameCli(rawArgs = process.argv.slice(2)): Promise<void>
             switch (tab) {
                 case 'map':       await mapTab(store, flags);                  break;
                 case 'journal':   journalTab(store);                         break;
-                case 'skills':    skillsTab(store);                          break;
+                case 'skills':    cardsTab(store);                          break;
                 case 'codex':     codexTab(store);                           break;
                 case 'inventory': inventoryTab(store);                       break;
                 case 'character': await characterTab(store);                 break;

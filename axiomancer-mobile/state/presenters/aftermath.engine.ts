@@ -77,7 +77,7 @@ export interface AftermathVictoryViewModel {
      *  epithet; the presenter picks the first clause as a best-effort
      *  epithet, returning null when no usable text is found. */
     enemyEpithet: string | null;
-    finalBlow: { skillName: string; damage: number; descriptor: string } | null;
+    finalBlow: { cardName: string; damage: number; descriptor: string } | null;
     finalBlowPhrase: string;
     rewards: AftermathRewards;
 }
@@ -130,7 +130,7 @@ export interface AftermathDefeatViewModel {
     killer: {
         name: string;
         epithet: string | null;
-        finalSkill: string;
+        finalCard: string;
         damage: number;
     } | null;
     /** Chronicle paragraph rendered with the `axm-dropcap` rule.
@@ -223,13 +223,13 @@ export function selectAftermathViewModel(
             ? {
                   name: data.enemy.name.toUpperCase(),
                   epithet: deriveEpithet(data.enemy.description),
-                  finalSkill: data.finalBlow.skillName ?? 'STRIKE',
+                  finalCard: data.finalBlow.cardName ?? 'STRIKE',
                   damage: data.finalBlow.damage,
               }
             : {
                   name: data.enemy.name.toUpperCase(),
                   epithet: deriveEpithet(data.enemy.description),
-                  finalSkill: 'STRIKE',
+                  finalCard: 'STRIKE',
                   damage: 0,
               },
         causePhrase: deriveCausePhrase(data),
@@ -276,7 +276,7 @@ function deriveFinalBlow(
 ): AftermathVictoryViewModel['finalBlow'] {
     if (data.finalBlow === null) return null;
     return {
-        skillName: data.finalBlow.skillName ?? 'STRIKE',
+        cardName: data.finalBlow.cardName ?? 'STRIKE',
         damage: data.finalBlow.damage,
         descriptor: data.finalBlow.descriptor ?? 'felled the foe',
     };

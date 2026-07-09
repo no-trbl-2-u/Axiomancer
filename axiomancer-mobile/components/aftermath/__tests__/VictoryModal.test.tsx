@@ -10,7 +10,7 @@ const mockVictoryProps = {
     enemyName: 'THE HIEROPHANT',
     enemyEpithet: 'iron-tongued',
     finalBlow: {
-        skillName: 'AXE-FALL',
+        cardName: 'AXE-FALL',
         damage: 28,
         descriptor: 'cleaves the binding rib',
     },

@@ -63,7 +63,7 @@ export function devSetStats(store: Store, stats: Partial<BaseStats>): DevResult 
     return { ok: true, detail: `Stats set to H:${next.heart} B:${next.body} M:${next.mind}` };
 }
 
-export function devLearnSkills(store: Store, skillIds: string[] | 'all'): DevResult {
+export function devLearnCards(store: Store, skillIds: string[] | 'all'): DevResult {
     const ids = skillIds === 'all'
         ? cardLibrary.map(s => s.id)
         : skillIds;
@@ -81,9 +81,9 @@ export function devLearnSkills(store: Store, skillIds: string[] | 'all'): DevRes
 /**
  * Grant/unlock named skills or all skills by writing knownCards.
  * (Phase 99 / ADR-0002 — skills are known, not equipped; the legacy
- * `devEquipSkills` was removed in Phase 159.)
+ * `devEquipCards` was removed in Phase 159.)
  */
-export function devUnlockSkills(store: Store, skillIds: string[] | 'all'): DevResult {
+export function devUnlockCards(store: Store, skillIds: string[] | 'all'): DevResult {
     const ids = skillIds === 'all'
         ? cardLibrary.map(s => s.id)
         : skillIds;
@@ -162,7 +162,7 @@ export function devSpawnEnemy(store: Store, slug: EnemySlug): DevResult {
 export function devMaxOut(store: Store): DevResult {
     devSetLevel(store, 20);
     devSetStats(store, { heart: 20, body: 20, mind: 20 });
-    devUnlockSkills(store, 'all');
+    devUnlockCards(store, 'all');
     devGrantAllEquipment(store, 'rare');
     devGrantAllConsumables(store, 10);
     devGrantCurrency(store, 999);
@@ -173,7 +173,7 @@ export function getEnemySlugs(): EnemySlug[] {
     return Object.keys(ENEMY_REGISTRY) as EnemySlug[];
 }
 
-export function getSkillIds(): string[] {
+export function getCardIds(): string[] {
     return cardLibrary.map(s => s.id);
 }
 

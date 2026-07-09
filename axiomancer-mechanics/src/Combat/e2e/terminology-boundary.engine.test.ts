@@ -48,7 +48,7 @@ describe('Phase 166 — Skills vs Cards terminology guard', () => {
             for (const phrase of BANNED_PHRASES) {
                 expect(
                     src.includes(phrase),
-                    `"${phrase}" found in ${file} — use "combatCard", "projectedCard", or "sourceSkill" instead`,
+                    `"${phrase}" found in ${file} — use "combatCard", "projectedCard", or "sourceCard" instead`,
                 ).toBe(false);
             }
         });

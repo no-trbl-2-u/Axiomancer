@@ -38,7 +38,7 @@ const DEFEAT_VM: AftermathDefeatViewModel = {
     killer: {
         name: 'Grave Larva',
         epithet: 'the bilge’s long patience',
-        finalSkill: 'STRIKE',
+        finalCard: 'STRIKE',
         damage: 6,
     },
     causePhrase:

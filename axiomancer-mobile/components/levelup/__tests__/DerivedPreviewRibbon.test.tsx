@@ -38,7 +38,7 @@ describe('DerivedPreviewRibbon: layout and headers', () => {
         expect(tree.queryByTestId('derived-preview-ribbon')).not.toBeNull();
     });
 
-    it('renders ATK/SKL/DEF column headers', () => {
+    it('renders ATK/DEF column headers', () => {
         const tree = render(
             <DerivedPreviewRibbon
                 current={BASE_CURRENT}
@@ -47,7 +47,6 @@ describe('DerivedPreviewRibbon: layout and headers', () => {
             />
         );
         expect(tree.queryByText('ATK')).not.toBeNull();
-        expect(tree.queryByText('SKL')).not.toBeNull();
         expect(tree.queryByText('DEF')).not.toBeNull();
     });
 
@@ -135,7 +134,6 @@ describe('DerivedPreviewRibbon: stance-specific cells', () => {
         
         // Test a few representative cells
         expect(tree.queryByTestId('preview-heart-attack')).not.toBeNull();
-        expect(tree.queryByTestId('preview-body-skill')).not.toBeNull();
         expect(tree.queryByTestId('preview-mind-defense')).not.toBeNull();
     });
 });

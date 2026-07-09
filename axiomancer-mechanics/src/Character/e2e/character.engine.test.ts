@@ -108,7 +108,6 @@ describe('createCharacter — derivation contracts', () => {
         // physical → body, mental → mind, emotional → heart.
         expect(ch.derivedStats.physicalAttack).toBe(3 * STAT_MULTIPLIERS.ATTACK);
         expect(ch.derivedStats.physicalDefense).toBe(3 * STAT_MULTIPLIERS.DEFENSE);
-        expect(ch.derivedStats.mentalSkill).toBe(2 * STAT_MULTIPLIERS.SKILL);
         expect(ch.derivedStats.emotionalDefense).toBe(4 * STAT_MULTIPLIERS.DEFENSE);
         // luck = average(body, heart, mind) = (3+4+2)/3 = 3.
         expect(ch.derivedStats.luck).toBe(3);

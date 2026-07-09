@@ -145,7 +145,7 @@ describe('combat-mode: aftermathData + dismissAftermath', () => {
             result.current.exitCombatWith('victory', {
                 variant: 'victory',
                 enemy: { name: 'Larch-Stalker', description: 'A figure long since gnawed.', level: 3 },
-                finalBlow: { skillName: 'STRIKE', damage: 24, descriptor: 'cleaves the rib' },
+                finalBlow: { cardName: 'STRIKE', damage: 24, descriptor: 'cleaves the rib' },
                 xpReward: 18,
             }),
         );
@@ -153,7 +153,7 @@ describe('combat-mode: aftermathData + dismissAftermath', () => {
         expect(result.current.aftermathData).toEqual({
             variant: 'victory',
             enemy: { name: 'Larch-Stalker', description: 'A figure long since gnawed.', level: 3 },
-            finalBlow: { skillName: 'STRIKE', damage: 24, descriptor: 'cleaves the rib' },
+            finalBlow: { cardName: 'STRIKE', damage: 24, descriptor: 'cleaves the rib' },
             xpReward: 18,
         });
     });

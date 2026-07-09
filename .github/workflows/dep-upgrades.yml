@@ -7,8 +7,10 @@ name: dep-upgrades
 # a human decision.
 
 on:
-  schedule:
-    - cron: '13 6 * * 1'
+  # schedule trigger disabled 2026-07-08 (Actions minute budget review) —
+  # run manually via workflow_dispatch until next billing cycle.
+  # schedule:
+  #   - cron: '13 6 * * 1'
   workflow_dispatch:
 
 permissions:

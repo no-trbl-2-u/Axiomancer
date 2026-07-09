@@ -259,7 +259,7 @@ function readToAdvantage(read: CombatReadResult): 'advantage' | 'neutral' | 'dis
 // ── Internal helpers ─────────────────────────────────────────────────────────
 
 /** Builds the legacy `CombatState` shim `executeCard` needs. */
-function skillShim(enc: CombatEncounterState): CombatState {
+function cardShim(enc: CombatEncounterState): CombatState {
     return {
         active: true,
         phase: 'resolving',
@@ -1196,9 +1196,9 @@ function playBottomAction(
     const echoed = mechsAll.some(m => m.kind === 'echo') || echoCharge || chamberEcho;
 
     const before = intensityMap(state.enemy.effects);
-    let shimState: CombatState = skillShim(state);
+    let shimState: CombatState = cardShim(state);
     let res = executeCard(shimState, skill.id, lookupCard, 'player');
-    let allSkillEvents = [...res.events];
+    let allCardEvents = [...res.events];
     if (echoed) {
         // Second pass re-applies the card's status payloads (stacking rules
         // apply). Runs against the folded state so intensities accumulate.
@@ -1208,7 +1208,7 @@ function playBottomAction(
             combatResources: res.state.combatResources,
         };
         res = executeCard(shimState, skill.id, lookupCard, 'player');
-        allSkillEvents = [...allSkillEvents, ...res.events];
+        allCardEvents = [...allCardEvents, ...res.events];
         events.push({ kind: 'echoed', cardId: card.id });
     }
 
@@ -1641,21 +1641,21 @@ function playBottomAction(
                 // OUROBOROS — the argument repeats: the last spell's statuses land
                 // again, `times` times. Never chains into another replay.
                 const lastId = state.lastSpellCardId;
-                const lastSkill = lastId && lastId !== skill.id ? lookupCard(lastId) : undefined;
-                const replayable = lastSkill
-                    && lastSkill.cardType === 'spell'
-                    && !(lastSkill.specialMechanics ?? []).some(m2 => m2.kind === 'replay_last');
-                if (replayable && lastSkill) {
+                const lastCard = lastId && lastId !== skill.id ? lookupCard(lastId) : undefined;
+                const replayable = lastCard
+                    && lastCard.cardType === 'spell'
+                    && !(lastCard.specialMechanics ?? []).some(m2 => m2.kind === 'replay_last');
+                if (replayable && lastCard) {
                     for (let i = 0; i < mech.times; i++) {
-                        const shim2: CombatState = { ...skillShim(state), player, enemy, combatResources: res.state.combatResources };
+                        const shim2: CombatState = { ...cardShim(state), player, enemy, combatResources: res.state.combatResources };
                         try {
-                            const replay = executeCard(shim2, lastSkill.id, lookupCard, 'player');
+                            const replay = executeCard(shim2, lastCard.id, lookupCard, 'player');
                             player = replay.state.player as Character;
                             enemy = replay.state.enemy as Enemy;
-                            allSkillEvents = [...allSkillEvents, ...replay.events];
+                            allCardEvents = [...allCardEvents, ...replay.events];
                         } catch { break; }
                     }
-                    events.push({ kind: 'echoed', cardId: lastSkill.id });
+                    events.push({ kind: 'echoed', cardId: lastCard.id });
                     stuckDrip();
                 } else {
                     events.push({ kind: 'effect-fizzled', cardId: card.id, effectId: '', message: 'no prior spell to replay' });
@@ -1754,7 +1754,7 @@ function playBottomAction(
     //    DoT will tick real HP each phase (the status damage engine); control gates
     //    the enemy's turn via `canAct`. Attribute projected DoT for the summary.
     const selfDebuffsLanded: { effectId: string; intensity: number; duration: number }[] = [];
-    for (const ev of allSkillEvents) {
+    for (const ev of allCardEvents) {
         if (ev.kind === 'effect-applied') {
             const def = ev.effect;
             const target: 'self' | 'enemy' = ev.appliedTo;
@@ -2603,8 +2603,8 @@ export function processBetweenPhases(
             }
             if (omen.stance === incomingStance) {
                 omenHits += 1;
-                const omenSkill = lookupCard(omen.cardId);
-                const omenMech = (omenSkill?.specialMechanics ?? []).find(m => m.kind === 'omen') as
+                const omenCard = lookupCard(omen.cardId);
+                const omenMech = (omenCard?.specialMechanics ?? []).find(m => m.kind === 'omen') as
                     Extract<CardSpecialMechanic, { kind: 'omen' }> | undefined;
                 if (omenMech) {
                     // `the-oracles-eye` (E): omen riders land +50% (rounded up)

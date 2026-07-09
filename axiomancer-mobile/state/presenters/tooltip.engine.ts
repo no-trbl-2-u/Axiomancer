@@ -13,7 +13,7 @@
  *   line derived from `Effect.payload`; engine `description`
  *   is intentionally dropped per user request.
  * - `'stance-chip'` — static ADV / DIS dice rules (Phase 75).
- * - `'skill'` — engine-sourced via `getCombatSkillById(id)` (Phase 75).
+ * - `'skill'` — engine-sourced via `getCombatCardById(id)` (Phase 75).
  *
  * Voice: title in uppercase mono / gothic, body in lowercase
  * chronicle (IM Fell English), footnote in mono for engine numbers.
@@ -22,7 +22,7 @@
 
 import { lookupEffect } from '@mechanics';
 
-import { getCombatSkillById } from '@/state/selectors/combat-cards';
+import { getCombatCardById } from '@/state/selectors/combat-cards';
 import type { AppStoreState } from '@/state/store';
 
 export type TooltipKind =
@@ -554,7 +554,7 @@ export function selectTooltipContentFor(
     }
     if (kind === 'skill') {
         if (!id) return null;
-        const skill = getCombatSkillById(id);
+        const skill = getCombatCardById(id);
         if (!skill) return null;
         return {
             title: skill.name,

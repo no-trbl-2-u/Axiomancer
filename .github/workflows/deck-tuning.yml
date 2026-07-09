@@ -7,8 +7,10 @@ name: deck-tuning
 # adjust or delete the cron to change cadence.
 
 on:
-  schedule:
-    - cron: "29 3 * * 1"
+  # schedule trigger disabled 2026-07-08 (Actions minute budget review) —
+  # run manually via workflow_dispatch until next billing cycle.
+  # schedule:
+  #   - cron: "29 3 * * 1"
   workflow_dispatch:
 
 permissions:

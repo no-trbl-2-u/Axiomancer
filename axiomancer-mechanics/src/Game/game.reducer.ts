@@ -42,7 +42,7 @@ import { applyAlignmentDelta, defaultAlignment } from '../Philosophy';
 import { applyFactionReputationDeltas, createDefaultFactionReputations } from '../Faction';
 import { generateRunId } from './run-loop';
 import { addToLoadout } from '../Combat/combat.loadout';
-import { STARTING_SKILL_IDS } from '../Combat/combat.rewards';
+import { STARTING_CARD_IDS } from '../Combat/combat.rewards';
 
 /**
  * Increment when GameState's shape changes. Save loaders branch on this so
@@ -61,14 +61,14 @@ export const GAME_STATE_VERSION = 11;
 /** Builds a brand-new GameState with default player and world. */
 export function createNewGameState(): GameState {
     let flags: string[] = [];
-    for (const id of STARTING_SKILL_IDS) flags = addToLoadout(flags, id);
+    for (const id of STARTING_CARD_IDS) flags = addToLoadout(flags, id);
     return {
         version: GAME_STATE_VERSION,
         runId: generateRunId(() => getRng().random()),
         // A fresh player starts at the apprentice baseline ({5,5,5} → 75 HP),
         // not the {1,1,1}/15 HP placeholder — a 15 HP start is one-shot
         // territory for the early encounters. Starter skills are seeded by the
-        // client on first combat (`ensureStarterSkills`).
+        // client on first combat (`ensureStarterCards`).
         player: createCharacter({
             name: 'Player',
             level: 1,

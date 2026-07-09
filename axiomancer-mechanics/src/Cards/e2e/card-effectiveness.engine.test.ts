@@ -458,10 +458,10 @@ function assertMechanic(
             // bug — prove the replayed spell's own promised effect actually
             // landed again, not merely that an 'echoed' event was emitted.
             const lastId = before.lastSpellCardId;
-            const lastSkill = lastId ? getCardById(lastId) : undefined;
-            expect(lastSkill, label).toBeDefined();
-            for (const ce of lastSkill?.combatEffects ?? []) {
-                assertCombatEffectLanded(`${card.id} (replaying ${lastSkill!.id})`, ce, before, after);
+            const lastCard = lastId ? getCardById(lastId) : undefined;
+            expect(lastCard, label).toBeDefined();
+            for (const ce of lastCard?.combatEffects ?? []) {
+                assertCombatEffectLanded(`${card.id} (replaying ${lastCard!.id})`, ce, before, after);
             }
             return;
         }

@@ -28,7 +28,7 @@ const BASE_VM: AftermathVictoryViewModel = {
     enemyName: 'THE LARCH-STALKER',
     enemyEpithet: 'cold-of-tooth',
     finalBlow: {
-        skillName: 'RENDING STRIKE',
+        cardName: 'RENDING STRIKE',
         damage: 24,
         descriptor: 'cleaves the binding rib',
     },

@@ -22,9 +22,9 @@ const testRegionBoss: Enemy = {
     maxHealth: 100,
     baseStats: { body: 6, mind: 3, heart: 4 },
     derivedStats: {
-        physicalAttack: 12, physicalDefense: 12, physicalSkill: 12,
-        mentalAttack: 6, mentalDefense: 6, mentalSkill: 6,
-        emotionalAttack: 8, emotionalDefense: 8, emotionalSkill: 8,
+        physicalAttack: 12, physicalDefense: 12,
+        mentalAttack: 6, mentalDefense: 6,
+        emotionalAttack: 8, emotionalDefense: 8,
         luck: 4
     },
     mapName: 'fishing-village', // Same region as elite

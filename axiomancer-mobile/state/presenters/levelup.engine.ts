@@ -28,9 +28,9 @@ export interface LevelUpViewModel {
     current: { heart: number; body: number; mind: number };
     /** Current derived stats for preview baseline */
     currentDerived: {
-        heart: { attack: number; skill: number; defense: number };
-        body: { attack: number; skill: number; defense: number };
-        mind: { attack: number; skill: number; defense: number };
+        heart: { attack: number; defense: number };
+        body: { attack: number; defense: number };
+        mind: { attack: number; defense: number };
     };
 }
 
@@ -58,17 +58,14 @@ export function selectLevelUpViewModel(
     const currentDerived = {
         heart: {
             attack: player.derivedStats.emotionalAttack,
-            skill: player.derivedStats.emotionalSkill,
             defense: player.derivedStats.emotionalDefense,
         },
         body: {
             attack: player.derivedStats.physicalAttack,
-            skill: player.derivedStats.physicalSkill,
             defense: player.derivedStats.physicalDefense,
         },
         mind: {
             attack: player.derivedStats.mentalAttack,
-            skill: player.derivedStats.mentalSkill,
             defense: player.derivedStats.mentalDefense,
         },
     };
@@ -106,9 +103,9 @@ export function calculateDerivedPreview(
     allocation: PreviewAllocation,
     level: number = 1
 ): {
-    heart: { attack: number; skill: number; defense: number };
-    body: { attack: number; skill: number; defense: number };
-    mind: { attack: number; skill: number; defense: number };
+    heart: { attack: number; defense: number };
+    body: { attack: number; defense: number };
+    mind: { attack: number; defense: number };
 } {
     // Engine owns the apply-allocation + derive orchestration.
     const { derivedStats } = previewStatAllocation(baseStats, level, allocation);
@@ -117,17 +114,14 @@ export function calculateDerivedPreview(
     return {
         heart: {
             attack: derivedStats.emotionalAttack,
-            skill: derivedStats.emotionalSkill,
             defense: derivedStats.emotionalDefense,
         },
         body: {
             attack: derivedStats.physicalAttack,
-            skill: derivedStats.physicalSkill,
             defense: derivedStats.physicalDefense,
         },
         mind: {
             attack: derivedStats.mentalAttack,
-            skill: derivedStats.mentalSkill,
             defense: derivedStats.mentalDefense,
         },
     };

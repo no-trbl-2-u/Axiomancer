@@ -326,13 +326,10 @@ export function getEffectiveStats(combatant: Combatant): EffectiveStats {
     const reDerived = deriveStats(baseStats);
     const derivedStats: DerivedStats = {
         physicalAttack:   applyFlatAndMult(reDerived.physicalAttack,   derivedFlat(mods, 'physicalAttack'),   derivedMult(mods, 'physicalAttack')),
-        physicalSkill:    applyFlatAndMult(reDerived.physicalSkill,    derivedFlat(mods, 'physicalSkill'),    derivedMult(mods, 'physicalSkill')),
         physicalDefense:  applyFlatAndMult(reDerived.physicalDefense,  derivedFlat(mods, 'physicalDefense'),  derivedMult(mods, 'physicalDefense')),
         mentalAttack:     applyFlatAndMult(reDerived.mentalAttack,     derivedFlat(mods, 'mentalAttack'),     derivedMult(mods, 'mentalAttack')),
-        mentalSkill:      applyFlatAndMult(reDerived.mentalSkill,      derivedFlat(mods, 'mentalSkill'),      derivedMult(mods, 'mentalSkill')),
         mentalDefense:    applyFlatAndMult(reDerived.mentalDefense,    derivedFlat(mods, 'mentalDefense'),    derivedMult(mods, 'mentalDefense')),
         emotionalAttack:  applyFlatAndMult(reDerived.emotionalAttack,  derivedFlat(mods, 'emotionalAttack'),  derivedMult(mods, 'emotionalAttack')),
-        emotionalSkill:   applyFlatAndMult(reDerived.emotionalSkill,   derivedFlat(mods, 'emotionalSkill'),   derivedMult(mods, 'emotionalSkill')),
         emotionalDefense: applyFlatAndMult(reDerived.emotionalDefense, derivedFlat(mods, 'emotionalDefense'), derivedMult(mods, 'emotionalDefense')),
         luck:             applyFlatAndMult(reDerived.luck,             derivedFlat(mods, 'luck'),             derivedMult(mods, 'luck')),
     };

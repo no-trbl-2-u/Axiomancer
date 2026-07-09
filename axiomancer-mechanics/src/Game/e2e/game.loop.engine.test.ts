@@ -153,10 +153,10 @@ describe('migrate — version handling', () => {
         expect(out).toEqual(s);
     });
 
-    it('refuses payloads from a newer runtime', () => {
+    it('refuses payloads from a non-current runtime version', () => {
         const s = createNewGameState();
         expect(() => migrate(s, GAME_STATE_VERSION + 1, GAME_STATE_VERSION))
-            .toThrow(/refusing to downgrade/);
+            .toThrow(/not supported/);
     });
 
     it('throws on a malformed payload', () => {

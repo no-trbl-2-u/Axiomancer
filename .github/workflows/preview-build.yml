@@ -6,10 +6,10 @@ name: preview-build
 
 on:
   schedule:
-    # GitHub Actions cron uses UTC. These are fixed EST times:
-    # 09:15 EST -> 14:15 UTC; 17:00 EST -> 22:00 UTC.
+    # GitHub Actions cron uses UTC. Fixed EST time: 09:15 EST -> 14:15 UTC.
+    # Throttled from 2x/day to 1x/day to cut Actions minutes (2026-07-08
+    # usage review) — each run is a full EAS build (~22 min avg).
     - cron: '15 14 * * *'
-    - cron: '0 22 * * *'
   workflow_dispatch:
     inputs:
       platform:

@@ -38,9 +38,9 @@ export interface LevelUpModalProps {
     current: { heart: number; body: number; mind: number };
     /** Current derived stats for preview baseline (Phase 88) */
     currentDerived?: {
-        heart: { attack: number; skill: number; defense: number };
-        body: { attack: number; skill: number; defense: number };
-        mind: { attack: number; skill: number; defense: number };
+        heart: { attack: number; defense: number };
+        body: { attack: number; defense: number };
+        mind: { attack: number; defense: number };
     };
     /**
      * Called once per allocation; the parent dispatches the engine

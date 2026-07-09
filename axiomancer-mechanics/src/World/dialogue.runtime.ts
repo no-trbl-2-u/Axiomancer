@@ -25,7 +25,7 @@ export interface ApplyDialogueChoiceResult {
         startedQuest?: QuestName;
         completedQuest?: QuestName;
         progressedObjective?: { name: QuestName; objectiveId: string; amount: number };
-        learnedSkill?: string;
+        learnedCard?: string;
         setFlag?: string;
         grantedCurrency?: number;
         moralShift?: number;
@@ -92,10 +92,10 @@ export function applyDialogueChoice(
                 effects.completedQuest = e.completeQuest;
             }
         }
-        if (e.teachSkill) {
-            if (!player.knownCards.includes(e.teachSkill)) {
-                player = { ...player, knownCards: [...player.knownCards, e.teachSkill] };
-                effects.learnedSkill = e.teachSkill;
+        if (e.teachCard) {
+            if (!player.knownCards.includes(e.teachCard)) {
+                player = { ...player, knownCards: [...player.knownCards, e.teachCard] };
+                effects.learnedCard = e.teachCard;
             }
         }
         if (e.setFlag) {

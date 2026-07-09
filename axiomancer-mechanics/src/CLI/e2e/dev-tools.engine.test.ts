@@ -7,7 +7,7 @@ import { nullAdapter } from '../../Game/persistence/null.adapter';
 import { cardLibrary } from '../../Cards/cards.library';
 import { consumableLibrary } from '../../Items/consumable.library';
 import {
-    devSetLevel, devSetStats, devLearnSkills,
+    devSetLevel, devSetStats, devLearnCards,
     devGrantAllEquipment, devGrantAllConsumables, devGrantCurrency,
     devSetMoralMeter, devSetAlignment, devSpawnEnemy, devMaxOut,
 } from '../dev-tools';
@@ -68,10 +68,10 @@ describe('devSetStats', () => {
     });
 });
 
-describe('devLearnSkills', () => {
+describe('devLearnCards', () => {
     it('learns all skills', () => {
         const store = freshStore();
-        const r = devLearnSkills(store, 'all');
+        const r = devLearnCards(store, 'all');
         expect(r.ok).toBe(true);
         const known = store.getState().player.knownCards;
         for (const skill of cardLibrary) {
@@ -81,7 +81,7 @@ describe('devLearnSkills', () => {
 
     it('learns specific skills', () => {
         const store = freshStore();
-        devLearnSkills(store, ['mob-appeal', 'sorites-cascade']);
+        devLearnCards(store, ['mob-appeal', 'sorites-cascade']);
         const known = store.getState().player.knownCards;
         expect(known).toContain('mob-appeal');
         expect(known).toContain('sorites-cascade');
@@ -89,8 +89,8 @@ describe('devLearnSkills', () => {
 
     it('does not duplicate already-known skills', () => {
         const store = freshStore();
-        devLearnSkills(store, ['mob-appeal']);
-        devLearnSkills(store, ['mob-appeal']);
+        devLearnCards(store, ['mob-appeal']);
+        devLearnCards(store, ['mob-appeal']);
         const count = store.getState().player.knownCards.filter(id => id === 'mob-appeal').length;
         expect(count).toBe(1);
     });

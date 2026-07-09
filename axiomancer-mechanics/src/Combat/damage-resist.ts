@@ -47,14 +47,3 @@ export function calculateDamageResistance(
     
     return finalDamage;
 }
-
-/**
- * Determines damage type based on skill's scaling stat.
- * Body scales → physical damage, Mind scales → mental damage, 
- * Heart scales → emotional damage.
- */
-export function getSkillDamageType(scalingStat: 'body' | 'mind' | 'heart'): DamageType {
-    return scalingStat === 'body' ? 'physical'
-        : scalingStat === 'mind' ? 'mental' 
-        : 'emotional';
-}

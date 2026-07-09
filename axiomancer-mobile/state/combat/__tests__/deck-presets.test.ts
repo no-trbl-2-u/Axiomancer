@@ -1,5 +1,5 @@
 import { describe, expect, it } from '@jest/globals';
-import { COMBAT_REWARD_POOL, STARTING_SKILL_IDS, getCard, listDeckPresets } from '@mechanics';
+import { COMBAT_REWARD_POOL, STARTING_CARD_IDS, getCard, listDeckPresets } from '@mechanics';
 
 import {
     applyCombatDeckPresetAction,
@@ -24,7 +24,7 @@ const expectedPresetIds = [
     'refrain',
 ];
 
-const FULL_POOL = new Set([...STARTING_SKILL_IDS, ...COMBAT_REWARD_POOL]);
+const FULL_POOL = new Set([...STARTING_CARD_IDS, ...COMBAT_REWARD_POOL]);
 
 function makeStore() {
     return createAppStore({ adapter: createMemoryAdapter() });
@@ -84,7 +84,7 @@ describe('Combat deck presets', () => {
 
     it('starter-baseline restores the engine starting deck (spec 32 v3 §7)', () => {
         const result = applyCombatDeckPresetAction(makeStore(), 'starter-baseline');
-        expect(result.cardIds).toEqual([...STARTING_SKILL_IDS]);
+        expect(result.cardIds).toEqual([...STARTING_CARD_IDS]);
         expect(result.cardIds).toContain('slippery-slope');
         expect(result.cardIds).toContain('brace-for-impact');
     });

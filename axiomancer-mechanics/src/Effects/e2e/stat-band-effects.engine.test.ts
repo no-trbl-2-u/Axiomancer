@@ -97,9 +97,6 @@ const statBandCases = [
             expect(eff.baseStats.mind).toBe(7);
             expect(eff.baseStats.heart).toBe(7);
             // physicalSkill re-derives (7×1=7) then flat +1 = 8
-            expect(eff.derivedStats.physicalSkill).toBe(8);
-            expect(eff.derivedStats.mentalSkill).toBe(8);
-            expect(eff.derivedStats.emotionalSkill).toBe(8);
             // luck re-derives as average(7,7,7) = 7 then flat +1 = 8
             expect(eff.derivedStats.luck).toBe(8);
         },

@@ -9,8 +9,7 @@
 import { describe, it, expect } from 'vitest';
 import { createGameStore } from '../store';
 import { nullAdapter } from '../persistence/null.adapter';
-import { createNewGameState, GAME_STATE_VERSION } from '../game.reducer';
-import { migrate } from '../game.migrate';
+import { createNewGameState } from '../game.reducer';
 import { STARTING_REGION } from '../run-loop';
 import { getMapDefinition } from '../../World';
 import { GraveLarva } from '../../Enemy/enemy.library';
@@ -97,17 +96,6 @@ describe('Phase 72 — run-loop semantics', () => {
         expect(next.runId).toMatch(/^[0-9a-f]{16}$/);
     });
 
-    it('migrateV5toV6 defaults runId on legacy saves; other fields pass through', () => {
-        // Build a v5 payload (current shape minus runId, version forced to 5).
-        const fresh = createNewGameState();
-        const { runId: _drop, ...rest } = fresh;
-        const v5Payload = { ...rest, version: 5, moralMeter: 11 };
-        const migrated = migrate(v5Payload, 5);
-        expect(migrated.version).toBe(GAME_STATE_VERSION);
-        expect(migrated.runId).toMatch(/^[0-9a-f]{16}$/);
-        expect(migrated.moralMeter).toBe(11); // pass-through
-        expect(migrated.player).toEqual(fresh.player); // pass-through
-    });
 
     it('resetRun persists through the adapter on the new runId (DURABLE_ACTIONS)', () => {
         let lastSave: { runId: string } | null = null;

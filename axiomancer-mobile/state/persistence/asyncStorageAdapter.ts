@@ -89,6 +89,10 @@ export function createAsyncStorageAdapter(
                 cache = null;
                 return;
             }
+            // Corrupt / future / old-version saves throw here and surface to the
+            // host (Q7=A). Old-save migration was dropped (2026-07-08) — a
+            // below-current save is rejected the same as a corrupt one, so the
+            // host prompts a fresh start.
             const envelope = JSON.parse(raw) as StoredEnvelope;
             cache = unwrap(envelope, migrations);
         },

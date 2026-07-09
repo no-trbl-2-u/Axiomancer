@@ -10,8 +10,7 @@
 import { describe, it, expect } from 'vitest';
 import { createGameStore } from '../store';
 import { nullAdapter } from '../persistence/null.adapter';
-import { createNewGameState, GAME_STATE_VERSION } from '../game.reducer';
-import { migrate } from '../game.migrate';
+import { createNewGameState } from '../game.reducer';
 import {
     LittleBelle,
     GraveLarva,
@@ -62,15 +61,4 @@ describe('Phase 73 — codex / journal-entry surface', () => {
         expect(report.friendshipReward).toBeUndefined();
     });
 
-    it('migrateV6toV7 defaults codex on legacy v6 saves', () => {
-        const fresh = createNewGameState();
-        const { codex: _drop, ...rest } = fresh;
-        const v6Payload = { ...rest, version: 6 };
-        const migrated = migrate(v6Payload, 6);
-        expect(migrated.version).toBe(GAME_STATE_VERSION);
-        expect(migrated.codex).toEqual({ unlockedEntries: [] });
-        // Other fields pass through.
-        expect(migrated.runId).toBe(fresh.runId);
-        expect(migrated.moralMeter).toBe(fresh.moralMeter);
-    });
 });

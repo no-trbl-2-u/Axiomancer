@@ -11,7 +11,7 @@ import { cardLibrary } from '@mechanics';
 
 import {
     COMBAT_CARDS,
-    getCombatSkillById,
+    getCombatCardById,
     type CombatCardOption,
 } from '@/state/selectors/combat-cards';
 
@@ -49,24 +49,24 @@ describe('COMBAT_CARDS: library coverage', () => {
     });
 });
 
-describe('getCombatSkillById: resolution', () => {
+describe('getCombatCardById: resolution', () => {
     it('returns the mapped row for a known engine id', () => {
         const first = COMBAT_CARDS[0];
-        const found = getCombatSkillById(first.id);
+        const found = getCombatCardById(first.id);
         expect(found).not.toBeNull();
         expect(found!.id).toBe(first.id);
         expect(found!.name).toBe(first.name);
     });
 
     it('returns null for an unknown id (e.g. legacy pre-Phase-16 ids)', () => {
-        expect(getCombatSkillById('not-a-real-skill')).toBeNull();
+        expect(getCombatCardById('not-a-real-skill')).toBeNull();
         // Legacy mock id from the fixture that did NOT match an engine id.
-        expect(getCombatSkillById('ad-hominem')).toBeNull();
+        expect(getCombatCardById('ad-hominem')).toBeNull();
     });
 
     it('round-trips: every COMBAT_CARDS entry resolves via id', () => {
         for (const skill of COMBAT_CARDS) {
-            const resolved = getCombatSkillById(skill.id);
+            const resolved = getCombatCardById(skill.id);
             expect(resolved).toEqual(skill);
         }
     });

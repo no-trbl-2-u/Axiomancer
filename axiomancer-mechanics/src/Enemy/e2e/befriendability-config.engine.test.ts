@@ -80,9 +80,9 @@ function makeState(enemy: Enemy, overrides: Partial<CombatState> = {}): CombatSt
             maxHealth: 50,
             baseStats: { heart: 3, body: 5, mind: 2 },
             derivedStats: {
-                physicalAttack: 0, physicalSkill: 0, physicalDefense: 0,
-                mentalAttack: 0, mentalSkill: 0, mentalDefense: 0,
-                emotionalAttack: 0, emotionalSkill: 0, emotionalDefense: 0,
+                physicalAttack: 0, physicalDefense: 0,
+                mentalAttack: 0, mentalDefense: 0,
+                emotionalAttack: 0, emotionalDefense: 0,
                 luck: 0,
             },
             nonCombatStats: {

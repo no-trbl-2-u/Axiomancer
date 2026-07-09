@@ -179,13 +179,10 @@ describe('Utils engine', () => {
       
       // Derived stats use STAT_MULTIPLIERS (attack=1, skill=1, defense=3)
       expect(derived.physicalAttack).toBe(10);    // 10 * 1
-      expect(derived.physicalSkill).toBe(10);     // 10 * 1
       expect(derived.physicalDefense).toBe(30);   // 10 * 3
       expect(derived.mentalAttack).toBe(12);      // 12 * 1
-      expect(derived.mentalSkill).toBe(12);       // 12 * 1
       expect(derived.mentalDefense).toBe(36);     // 12 * 3
       expect(derived.emotionalAttack).toBe(8);    // 8 * 1
-      expect(derived.emotionalSkill).toBe(8);     // 8 * 1
       expect(derived.emotionalDefense).toBe(24);  // 8 * 3
       expect(derived.luck).toBe(10);              // average(10, 8, 12) = 10
     });

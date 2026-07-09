@@ -55,7 +55,7 @@ export {
     determineAdvantage, getAdvantageModifier, hasAdvantage,
     resolveEffectiveAdvantage,
     getBaseStat, getAttackStat, getDefenseStat, getSaveStat,
-    rollSkillCheck, isCriticalHit, isCriticalMiss,
+    isCriticalHit, isCriticalMiss,
     applyCriticalMultiplier, calculateFinalDamage, selectCritDamage, isAttackSuccessful,
     applyDamage, heal, isAlive, isDefeated, getHealthPercentage,
     getStudyMarkIntensity, getActiveRollModifier, getThornsReflect,
@@ -75,7 +75,7 @@ export {
     hasPayloadFlag,
     getDotAmplificationByEffect, getActiveDotTotal, getActiveDotAmplifications,
     resolveEffectApplication,
-    calculateDamageResistance, getSkillDamageType,
+    calculateDamageResistance,
     healCharacter,
     calculateEnemyStatMultiplier, applyMoralMeterScaling,
     // `CombatState` constructor — shared infrastructure for the skill / effects
@@ -125,8 +125,8 @@ export {
     getFloatingDiceColors, SWAY_DECAY_PER_TURN,
     // Spec 26b tuning §B/§C/§D
     SIGNATURE_KITS, signaturesForArchetype, playerArchetype, CONCLUDE_DMG_PER_STACK,
-    COMBAT_REWARD_POOL, STARTING_SKILL_ID, STARTING_SKILL_IDS, rollCombatCardRewards, addRewardCard,
-    unlockSkillViaDilemma,
+    COMBAT_REWARD_POOL, STARTING_CARD_ID, STARTING_CARD_IDS, rollCombatCardRewards, addRewardCard,
+    unlockCardViaDilemma,
     // PR #190 Press Fate partial re-roll
     dieIsRerollable, hasRerollableDice, rerollSpentDice,
     // soft-control + stat-debuff threat tunables

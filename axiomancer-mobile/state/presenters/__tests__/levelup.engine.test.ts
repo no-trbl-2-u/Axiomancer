@@ -54,15 +54,12 @@ describe('Phase 105: Engine truth stat preview', () => {
         const result = calculateDerivedPreview(baseStats, allocation);
         
         expect(result.heart.attack).toBe(expected.emotionalAttack);
-        expect(result.heart.skill).toBe(expected.emotionalSkill);
         expect(result.heart.defense).toBe(expected.emotionalDefense);
-        
+
         expect(result.body.attack).toBe(expected.physicalAttack);
-        expect(result.body.skill).toBe(expected.physicalSkill);
         expect(result.body.defense).toBe(expected.physicalDefense);
-        
+
         expect(result.mind.attack).toBe(expected.mentalAttack);
-        expect(result.mind.skill).toBe(expected.mentalSkill);
         expect(result.mind.defense).toBe(expected.mentalDefense);
     });
 

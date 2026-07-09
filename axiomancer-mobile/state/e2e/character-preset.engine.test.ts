@@ -65,16 +65,16 @@ describe('applyCharacterPreset: replaces player with engine preset', () => {
 
         actions.applyCharacterPreset('wanderer');
         const wandererName = store.getState().player.name;
-        const wandererSkills = store.getState().player.knownCards ?? [];
+        const wandererCards = store.getState().player.knownCards ?? [];
 
         actions.applyCharacterPreset('sage');
         const sageName = store.getState().player.name;
-        const sageSkills = store.getState().player.knownCards ?? [];
+        const sageCards = store.getState().player.knownCards ?? [];
 
         expect(sageName).toBe('Sage');
         expect(sageName).not.toBe(wandererName);
         // Skill set is rebuilt from the new preset, not appended.
-        expect(sageSkills).not.toEqual(wandererSkills);
+        expect(sageCards).not.toEqual(wandererCards);
     });
 });
 

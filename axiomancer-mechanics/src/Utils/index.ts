@@ -160,13 +160,10 @@ export function createDieRoll(advantage: Advantage): () => number {
  */
 export const deriveStats = ({ body, heart, mind }: BaseStats): DerivedStats => ({
   physicalAttack:    body  * STAT_MULTIPLIERS.ATTACK,
-  physicalSkill:     body  * STAT_MULTIPLIERS.SKILL,
   physicalDefense:   body  * STAT_MULTIPLIERS.DEFENSE,
   mentalAttack:      mind  * STAT_MULTIPLIERS.ATTACK,
-  mentalSkill:       mind  * STAT_MULTIPLIERS.SKILL,
   mentalDefense:     mind  * STAT_MULTIPLIERS.DEFENSE,
   emotionalAttack:   heart * STAT_MULTIPLIERS.ATTACK,
-  emotionalSkill:    heart * STAT_MULTIPLIERS.SKILL,
   emotionalDefense:  heart * STAT_MULTIPLIERS.DEFENSE,
   luck: average(body, heart, mind),
 });
