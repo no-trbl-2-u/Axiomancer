@@ -28,7 +28,7 @@ export interface CreateEnemyOptions {
     tier1Overrides?: Tier1EffectOverrides;
     procUnlocks?: ProcUnlocks;
     procOverrides?: ProcOverrides;
-    skills?: Card[];
+    cards?: Card[];
     loot?: LootTableEntry[];
     xpReward?: number;
     effects?: ActiveEffect[];
@@ -147,7 +147,7 @@ export function createEnemy(options: CreateEnemyOptions): Enemy {
     const {
         id, name, description, level, baseStats, mapName, logic,
         difficulty, tier1Overrides, procUnlocks, procOverrides,
-        skills, loot, xpReward, effects = [], philosophicalAlignment,
+        cards, loot, xpReward, effects = [], philosophicalAlignment,
         friendshipReward, befriendabilityConfig,
         finalBlowLines, pactLines, causeLines,
         journalEntry, addedIn, tags,
@@ -166,7 +166,7 @@ export function createEnemy(options: CreateEnemyOptions): Enemy {
         mapName, logic,
         difficulty, tier1Overrides,
         procUnlocks, procOverrides,
-        skills,
+        cards,
         loot,
         xpReward: resolvedXp,
         effects,

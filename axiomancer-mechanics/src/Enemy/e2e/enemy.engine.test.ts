@@ -37,44 +37,44 @@ describe('authored skill rotations (art-driven roster)', () => {
     // rotation skill, elites 1-2, bosses/uniques 2-3.
 
     it('Ghast carries the red-herring rotation', () => {
-        expect(Ghast.skills).toBeDefined();
-        expect(Ghast.skills?.length).toBe(1);
-        expect(Ghast.skills?.[0].id).toBe('red-herring');
+        expect(Ghast.cards).toBeDefined();
+        expect(Ghast.cards?.length).toBe(1);
+        expect(Ghast.cards?.[0].id).toBe('red-herring');
     });
 
     it('The King of Revenge carries the straw-mans-jab rotation (Easy anchor kit)', () => {
-        expect(KingOfRevenge.skills).toBeDefined();
-        expect(KingOfRevenge.skills?.length).toBe(3);
-        const skillIds = KingOfRevenge.skills?.map(s => s.id) || [];
-        expect(skillIds).toContain('straw-mans-jab');
+        expect(KingOfRevenge.cards).toBeDefined();
+        expect(KingOfRevenge.cards?.length).toBe(3);
+        const cardIds = KingOfRevenge.cards?.map(s => s.id) || [];
+        expect(cardIds).toContain('straw-mans-jab');
     });
 
     it('The Butcher carries the sweet-poison rotation', () => {
-        expect(TheButcher.skills?.[0].id).toBe('sweet-poison');
+        expect(TheButcher.cards?.[0].id).toBe('sweet-poison');
     });
 
     it('The Ferryman carries the festering-argument rotation', () => {
-        expect(TheFerryman.skills?.[0].id).toBe('festering-argument');
+        expect(TheFerryman.cards?.[0].id).toBe('festering-argument');
     });
 
     it('Hasshaku-sama carries the soft-word rotation', () => {
-        expect(HasshakuSama.skills?.[0].id).toBe('soft-word');
+        expect(HasshakuSama.cards?.[0].id).toBe('soft-word');
     });
 
     it('The Fate-Spinner carries the glimpse rotation', () => {
-        expect(FateSpinner.skills?.[0].id).toBe('glimpse');
+        expect(FateSpinner.cards?.[0].id).toBe('glimpse');
     });
 
     it('Kudan carries the slippery-slope rotation', () => {
-        expect(Kudan.skills?.[0].id).toBe('slippery-slope');
+        expect(Kudan.cards?.[0].id).toBe('slippery-slope');
     });
 
     it('Little Belle carries the soft-word rotation', () => {
-        expect(LittleBelle.skills?.[0].id).toBe('soft-word');
+        expect(LittleBelle.cards?.[0].id).toBe('soft-word');
     });
 
     it('Water-Holger carries the soft-word rotation', () => {
-        expect(WaterHolger.skills?.[0].id).toBe('soft-word');
+        expect(WaterHolger.cards?.[0].id).toBe('soft-word');
     });
 });
 
@@ -85,11 +85,11 @@ describe('stat law compliance for playtest balance anchors', () => {
         expect(total).toBe(30);
     });
 
-    it('The King of Revenge has skills for Easy anchor testing', () => {
-        expect(KingOfRevenge.skills).toBeDefined();
-        expect(KingOfRevenge.skills?.length).toBeGreaterThanOrEqual(3);
-        const skillIds = KingOfRevenge.skills?.map(s => s.id) || [];
-        expect(skillIds).toContain('straw-mans-jab');
+    it('The King of Revenge has cards for Easy anchor testing', () => {
+        expect(KingOfRevenge.cards).toBeDefined();
+        expect(KingOfRevenge.cards?.length).toBeGreaterThanOrEqual(3);
+        const cardIds = KingOfRevenge.cards?.map(s => s.id) || [];
+        expect(cardIds).toContain('straw-mans-jab');
     });
 
     it('Tri-Eyes level 15 has exactly 75 total stats (5 × level)', () => {
@@ -99,11 +99,11 @@ describe('stat law compliance for playtest balance anchors', () => {
         expect(total).toBe(75);
     });
 
-    it('Tri-Eyes has 1-2 low-tier skills for Normal anchor', () => {
+    it('Tri-Eyes has 1-2 low-tier cards for Normal anchor', () => {
         const TriEyes = ENEMY_REGISTRY['tri-eyes'];
-        expect(TriEyes.skills).toBeDefined();
-        expect(TriEyes.skills?.length).toBeGreaterThanOrEqual(1);
-        expect(TriEyes.skills?.length).toBeLessThanOrEqual(2);
+        expect(TriEyes.cards).toBeDefined();
+        expect(TriEyes.cards?.length).toBeGreaterThanOrEqual(1);
+        expect(TriEyes.cards?.length).toBeLessThanOrEqual(2);
     });
 
     it('Mirac level 18 has exactly 90 total stats (5 × level)', () => {
@@ -113,11 +113,11 @@ describe('stat law compliance for playtest balance anchors', () => {
         expect(total).toBe(90);
     });
 
-    it('Mirac has several devastating skills for Difficult anchor', () => {
+    it('Mirac has several devastating cards for Difficult anchor', () => {
         const Mirac = ENEMY_REGISTRY['mirac'];
-        expect(Mirac.skills).toBeDefined();
-        expect(Mirac.skills?.length).toBeGreaterThanOrEqual(3);
-        const skillIds = Mirac.skills?.map(s => s.id) || [];
-        expect(skillIds).toContain('bootstrap-loop'); // the Forge engine piece
+        expect(Mirac.cards).toBeDefined();
+        expect(Mirac.cards?.length).toBeGreaterThanOrEqual(3);
+        const cardIds = Mirac.cards?.map(s => s.id) || [];
+        expect(cardIds).toContain('bootstrap-loop'); // the Forge engine piece
     });
 });

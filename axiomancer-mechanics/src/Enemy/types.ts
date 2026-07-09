@@ -213,7 +213,7 @@ export interface CauseLines {
  * @property logic        - AI strategy.
  * @property difficulty   - Optional encounter classification.
  * @property tier1Overrides - Optional Tier 1 effect ID overrides per stance.
- * @property skills       - Optional skill list the enemy can use.
+ * @property cards        - Optional card rotation the enemy can use.
  * @property loot         - Optional weighted drop table (Spec 07 Q7B). Each
  *                          successful kill rolls the table once. May be empty
  *                          / undefined for enemies that don't drop anything.
@@ -243,7 +243,7 @@ export interface Enemy {
      * elite / basic enemies receive map-themed overrides (Q7).
      */
     procOverrides?: ProcOverrides;
-    skills?: Card[];
+    cards?: Card[];
     /** Weighted drop table — see {@link LootTableEntry}. */
     loot?: LootTableEntry[];
     /** Flat experience-point award on kill. Defaults computed by difficulty. */

@@ -235,7 +235,7 @@ export interface CardLookup {
  * `src/Combat/phases/scenario.ts`. When `'enemy'`, the enemy is the caster
  * and the player is the target; `skill.targetType` is interpreted relative
  * to the caster (`'self'` → caster's effects; `'enemy'` → opposing side).
- * Enemy-cast skills are validated against `Enemy.skills?` rather than
+ * Enemy-cast cards are validated against `Enemy.cards?` rather than
  * `Character.knownCards`. Resource handling stays uniform — the caller
  * is responsible for passing a sentinel `combatResources` for the enemy
  * path (per D2 in plan/phases/phase_49_enemy_skill_caster.md).
@@ -267,7 +267,7 @@ export function executeCard(
             throw new Error(`Card '${cardId}' is not known.`);
         }
     } else {
-        const rotation = (caster as Enemy).skills ?? [];
+        const rotation = (caster as Enemy).cards ?? [];
         if (!rotation.some(s => s.id === cardId)) {
             throw new Error(`Card '${cardId}' is not in the enemy's rotation.`);
         }

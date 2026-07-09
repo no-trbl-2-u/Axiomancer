@@ -152,8 +152,8 @@ function renderEnemies(enemies) {
         `<span class="stat heart"><span class="k">Heart</span>${e.stats.heart}</span>` +
         `</div>`;
 
-      const skills = (e.skills || []).length
-        ? e.skills
+      const skills = (e.cards || []).length
+        ? e.cards
             .map(
               (s) =>
                 `<div class="skill"><div class="sk-name">${inline(s.name)}</div>` +

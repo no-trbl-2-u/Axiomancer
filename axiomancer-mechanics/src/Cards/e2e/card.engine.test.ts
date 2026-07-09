@@ -213,7 +213,7 @@ describe('executeCard — guards', () => {
 describe('executeCard — Phase 49 casterSide=enemy', () => {
     it("routes an enemy-rotation card's status onto the player, HP untouched", () => {
         mockSequentialRng(0.05);
-        const enemy = { ...fixtureEnemy(), skills: [dotCard] };
+        const enemy = { ...fixtureEnemy(), cards: [dotCard] };
         const state: CombatState = {
             ...initializeCombat(fixturePlayer(), enemy),
             // D2 sentinel — enemy bypasses resource costs.
@@ -233,7 +233,7 @@ describe('executeCard — Phase 49 casterSide=enemy', () => {
 
     it("routes a self-target buff onto the enemy when casterSide='enemy'", () => {
         mockSequentialRng(0.5);
-        const enemyLow = { ...fixtureEnemy(), skills: [buffCard] };
+        const enemyLow = { ...fixtureEnemy(), cards: [buffCard] };
         enemyLow.health = Math.max(1, enemyLow.health - 10);
         const state: CombatState = {
             ...initializeCombat(fixturePlayer(), enemyLow),
@@ -253,7 +253,7 @@ describe('executeCard — Phase 49 casterSide=enemy', () => {
     });
 
     it("throws when skill is not in the enemy's rotation", () => {
-        const enemy = { ...fixtureEnemy(), skills: [] as Card[] };
+        const enemy = { ...fixtureEnemy(), cards: [] as Card[] };
         const state: CombatState = {
             ...initializeCombat(fixturePlayer(), enemy),
             combatResources: { heart: 999, body: 999, mind: 999, fallacy: 999, paradox: 999 },
