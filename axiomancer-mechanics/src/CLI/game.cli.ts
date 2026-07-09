@@ -656,10 +656,7 @@ async function characterTab(store: GameStoreHandle): Promise<void> {
     // mirrors the Allocate flow: visible only when there's something eligible
     // to learn, scriptable via a "skip" exit. Each learn dispatches so the
     // autosave + state log records the change.
-    let learnable = getAvailableCards(
-        store.getState().player,
-        store.getState().philosophicalAlignment,
-    );
+    let learnable = getAvailableCards(store.getState().player);
     while (learnable.length > 0) {
         const choices = learnable.map(s => {
             const blurb = s.description.length > 60
@@ -681,10 +678,7 @@ async function characterTab(store: GameStoreHandle): Promise<void> {
         store.getState().learnCard(cardId);
         logState('learnCard', before, store.getState(), { cardId });
         log(`Learned ${cardId}.`);
-        learnable = getAvailableCards(
-            store.getState().player,
-            store.getState().philosophicalAlignment,
-        );
+        learnable = getAvailableCards(store.getState().player);
     }
 }
 
