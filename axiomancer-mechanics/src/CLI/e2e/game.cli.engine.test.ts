@@ -69,7 +69,7 @@ describe('CLI Game Driver', () => {
 
     it('should bootstrap game store with null adapter', async () => {
         const emitter = createEventEmitter();
-        const store = createGameStore(nullAdapter, emitter);
+        const store = createGameStore(nullAdapter, undefined, emitter);
         
         expect(store.getState().player.name).toBe('Player');
         expect(store.getState().player.level).toBe(1);
@@ -80,7 +80,7 @@ describe('CLI Game Driver', () => {
         const saveFile = tmpPath('savegame');
         const adapter = createNodeAdapter(saveFile);
         const emitter = createEventEmitter();
-        const store = createGameStore(adapter, emitter);
+        const store = createGameStore(adapter, undefined, emitter);
         
         expect(store.getState().player.name).toBe('Player');
         expect(store.getState().player.level).toBe(1);
@@ -88,7 +88,7 @@ describe('CLI Game Driver', () => {
 
     it('should support dev tools level setting', async () => {
         const emitter = createEventEmitter();
-        const store = createGameStore(nullAdapter, emitter);
+        const store = createGameStore(nullAdapter, undefined, emitter);
         
         const result = devSetLevel(store, 5);
         
@@ -99,7 +99,7 @@ describe('CLI Game Driver', () => {
 
     it('should support dev tools stats manipulation', async () => {
         const emitter = createEventEmitter();
-        const store = createGameStore(nullAdapter, emitter);
+        const store = createGameStore(nullAdapter, undefined, emitter);
         
         const result = devSetStats(store, { body: 20, mind: 15 });
         
@@ -110,7 +110,7 @@ describe('CLI Game Driver', () => {
 
     it('should support dev tools currency grants', async () => {
         const emitter = createEventEmitter();
-        const store = createGameStore(nullAdapter, emitter);
+        const store = createGameStore(nullAdapter, undefined, emitter);
         const initialCurrency = store.getState().player.currency;
         
         const result = devGrantCurrency(store, 100);
@@ -121,7 +121,7 @@ describe('CLI Game Driver', () => {
 
     it('should support dev tools equipment granting', async () => {
         const emitter = createEventEmitter();
-        const store = createGameStore(nullAdapter, emitter);
+        const store = createGameStore(nullAdapter, undefined, emitter);
         const initialInventorySize = store.getState().player.inventory.length;
         
         const result = devGrantAllEquipment(store);
@@ -132,7 +132,7 @@ describe('CLI Game Driver', () => {
 
     it('should support dev tools card learning', async () => {
         const emitter = createEventEmitter();
-        const store = createGameStore(nullAdapter, emitter);
+        const store = createGameStore(nullAdapter, undefined, emitter);
         const initialCardsLength = store.getState().player.knownCards.length;
         
         const result = devLearnCards(store, ['basic-strike']);
@@ -148,8 +148,8 @@ describe('CLI Game Driver', () => {
         // Test stdin mode  
         setIoMode({ kind: 'stdin' });
         
-        // Test interactive mode (default)
-        setIoMode({ kind: 'interactive' });
+        // Test tty mode (default)
+        setIoMode({ kind: 'tty' });
         
         // No errors thrown indicates success
         expect(true).toBe(true);
@@ -169,7 +169,7 @@ describe('CLI Game Driver', () => {
         const emitter = createEventEmitter();
         
         // Create and modify a game store
-        const store = createGameStore(adapter, emitter);
+        const store = createGameStore(adapter, undefined, emitter);
         devSetLevel(store, 10);
         
         // Save should work without throwing

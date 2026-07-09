@@ -91,7 +91,7 @@ balance tuning — not player-facing.
 ```bash
 npm run combat-sim
 npm run combat-sim -- --blind
-npm run combat-sim -- --enemy=CoastalTyrant
+npm run combat-sim -- --enemy=KingOfRevenge
 npm run combat-sim -- --loadout=slippery-slope,eternal-regress,befriend
 npm run combat-sim -- --runs=300 --seed=1 --blind
 ```
@@ -101,7 +101,7 @@ npm run combat-sim -- --runs=300 --seed=1 --blind
 | Flag | Effect |
 | --- | --- |
 | `--blind` | Realistic-player witness: the bot drafts using only information a real player can see (no hidden-stance peek). Use to gauge the difficulty a real player feels. Default is `--greedy` (omniscient bot, the balance ceiling). |
-| `--enemy <Name>` | Run against one enemy only (e.g. `CoastalTyrant`, `HushWraith`). Omit to run the full tier sweep. |
+| `--enemy <Name>` | Run against one enemy only (e.g. `KingOfRevenge`, `FateSpinner`). Omit to run the full tier sweep. |
 | `--loadout <ids>` | Comma-separated card IDs for the player's deck (default `slippery-slope`). |
 | `--runs <n>` | Number of Monte-Carlo playthroughs (default `200`). |
 | `--seed <n>` | Deterministic RNG seed for reproducible runs (default `1`). |

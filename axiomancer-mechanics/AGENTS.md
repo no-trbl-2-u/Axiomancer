@@ -22,11 +22,13 @@ All commands are in `package.json`:
 |---|---|
 | Build | `npm run build` |
 | Type-check | `npm run type-check` |
+| Type-check (tests) | `npm run type-check:tests` |
+| Type-check (CLI) | `npm run type-check:cli` — covers `src/CLI/**` (Phase 22; excluded from the two configs above) |
 | Test | `npm test` (vitest) |
 | Lint | `npm run lint` |
 | Lint + type-check | `npm run check` |
 | Demo CLI | `npm run game` (tabbed map / combat / journal / skills / inventory / debug loop) |
-| Verify gate | `npm run verify` (type-check + type-check:tests + lint + test + build) |
+| Verify gate | `npm run verify` (type-check + type-check:tests + type-check:cli + lint + test + build) |
 | Deploy gate | `npm run deploy:check` — lives at the monorepo ROOT, not in this package; run `npm run deploy:check` from the repo root |
 
 For automated / agent-driven CLI runs, the Phase 20 flags expose
@@ -66,8 +68,15 @@ Never squash or amend after pushing unless explicitly asked.
   `--json-events`) over `pexpect` / tmux `send-keys`. The Python harness
   was removed in Phase 17 — hermetic e2e tests are the durable path.
 - **Test runner**: `npm test` runs vitest. Use alongside `npm run type-check`,
-  `npm run type-check:tests`, `npm run lint`, and `npm run build` (all five
-  chained by `npm run verify`).
+  `npm run type-check:tests`, `npm run type-check:cli`, `npm run lint`, and
+  `npm run build` (all six chained by `npm run verify`).
+- **CLI files are not exempt from type-check** (Phase 22): `tsconfig.json`
+  and `tsconfig.tests.json` both exclude `src/CLI` — that gap once let a
+  `TS2554` stale-call bug ship to `main` because `npm run type-check` and
+  `npm run type-check:tests` stayed green while `ts-node src/CLI/game.cli.ts`
+  failed at runtime. `npm run type-check:cli` (`tsconfig.cli.json`) closes
+  that gap and is wired into `npm run verify`. Any new file under `src/CLI`
+  is covered automatically — do not add another exclusion.
 - **State file**: The Node persistence adapter writes `game-state.json` in
   the project root when used. This file is gitignored and ephemeral.
 - **Spec update**: If using a spec file to implement a change, update the

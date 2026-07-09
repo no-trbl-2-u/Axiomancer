@@ -116,7 +116,21 @@ The CI gate lives at the monorepo root
 (`.github/workflows/verify-mechanics.yml`) and fires on every
 `pull_request` against `main` and every `push` to `main` that touches
 this package. It runs `npm run verify --workspace axiomancer-mechanics`
-(`type-check` + `type-check:tests` + `lint` + tests + `build`).
+(`type-check` + `type-check:tests` + `type-check:cli` + `lint` + tests +
+`build`).
+
+**`type-check:cli` (Phase 22).** `tsconfig.json` and `tsconfig.tests.json`
+both exclude `src/CLI`, so a TypeScript failure inside the CLI drivers
+(`game.cli.ts`, `combat.cli.ts`, …) previously passed `npm run verify`
+and only surfaced at runtime under `ts-node` — exactly what happened
+when `game.cli.ts` called a since-simplified `getAvailableCards` with a
+stale second argument (`TS2554`). `tsconfig.cli.json` covers
+`src/CLI/**/*` (implementation + its `e2e/` tests) and is wired in as
+`npm run type-check:cli`. `src/CLI/e2e/cli.process-smoke.engine.test.ts`
+additionally spawns `npm run combat` / `npm run game -- --route …` as
+real child processes, so a `ts-node`-only failure (module resolution,
+argv forwarding, the `require.main === module` bootstrap) fails the
+suite even if `tsc` alone would not catch it.
 
 **No publish / deploy gate.** The monorepo consumes mechanics as local
 source via the `@mechanics` workspace alias; the package is not
@@ -298,13 +312,21 @@ Before opening a PR, confirm:
 - [ ] The new test runs green via `npm test` — no flakes when run twice.
 - [ ] Every randomness source is stubbed (`mockAlternatingRng`,
       `mockFixedRng`, etc.) — no raw `Math.random` in the test.
-- [ ] No file I/O, network, or subprocess in the test path.
+- [ ] No file I/O, network, or subprocess in the test path. **Exception
+      (Phase 22):** `src/CLI/e2e/cli.process-smoke.engine.test.ts`
+      deliberately spawns real `ts-node` child processes — that is the
+      point of a *process-level smoke test*, distinct from the hermetic
+      standard above. Don't use it as precedent outside the CLI-startup
+      guardrail; new CLI behavior should still get a hermetic
+      `e2e/*.engine.test.ts` first.
 - [ ] `vi.restoreAllMocks()` (or equivalent) runs in `afterEach`.
 - [ ] If the change is CLI-only, the underlying engine logic was extracted
       and tested hermetically through its module's `e2e/*.engine.test.ts`.
-- [ ] `npm run type-check`, `npm run type-check:tests`, and `npm test` are
-      clean. (Test files are excluded from the build tsconfig, so
-      `type-check:tests` is the only thing keeping fixtures honest.)
+- [ ] `npm run type-check`, `npm run type-check:tests`,
+      `npm run type-check:cli`, and `npm test` are clean. (Test files are
+      excluded from the build tsconfig, so `type-check:tests` /
+      `type-check:cli` are the only things keeping fixtures under
+      `src/**/e2e` and `src/CLI` honest.)
 
 If you cannot satisfy this list, write a one-paragraph "Hermetic-test debt"
 note in the PR description explaining why and what would unblock it.

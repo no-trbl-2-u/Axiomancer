@@ -40,8 +40,9 @@
     "test": "vitest run",
     "type-check": "tsc --noEmit",
     "type-check:tests": "tsc -p tsconfig.tests.json",
-    "verify": "npm run type-check && npm run type-check:tests && npm run lint && npm test && npm run build",
-    "verify:agent": "npm run type-check && npm run type-check:tests && npm run lint && vitest run --reporter=default --reporter=./automation/agent-vitest-reporter.mjs && npm run build"
+    "type-check:cli": "tsc -p tsconfig.cli.json",
+    "verify": "npm run type-check && npm run type-check:tests && npm run type-check:cli && npm run lint && npm test && npm run build",
+    "verify:agent": "npm run type-check && npm run type-check:tests && npm run type-check:cli && npm run lint && vitest run --reporter=default --reporter=./automation/agent-vitest-reporter.mjs && npm run build"
   },
   "keywords": [
     "rpg",

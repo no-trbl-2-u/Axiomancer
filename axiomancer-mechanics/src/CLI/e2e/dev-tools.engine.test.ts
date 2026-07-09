@@ -179,7 +179,7 @@ describe('devSpawnEnemy', () => {
         const store = freshStore();
         const r = devSpawnEnemy(store, 'foot-stealer');
         expect(r.ok).toBe(true);
-        expect(store.getState().combat).not.toBeNull();
+        expect(store.getState().currentEncounter).toBeDefined();
     });
 });
 
