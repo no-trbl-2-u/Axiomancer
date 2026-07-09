@@ -10,10 +10,10 @@
  *   - the status-combo loop refreshes the drafted die for a chain
  *   - between-phases fires DoT ticks + ticks durations + draws a fresh hand
  *   - Signature Skills spend Conviction (scout / DoT / pressure) regardless of hand
- *   - victory by HP depletion via status play (skill-sourced cards only); post-combat attribution
+ *   - victory by HP depletion via status play (card-sourced cards only); post-combat attribution
  *   - the Monte-Carlo sim reports per-phase Clear rates
  *
- * The effects + skill engines are unchanged, so their suites (run separately)
+ * The effects + card engines are unchanged, so their suites (run separately)
  * are the witness that this driver did not perturb them.
  */
 
@@ -68,9 +68,9 @@ const DOT_BODY = 'slippery-slope';       // body starter, applies debuff_poison 
 const CONTROL_CARD = 'red-herring';      // mind, tier 1, BACKFIRE (control)
 const DAMAGE_BODY = 'qa-payoff-burst';   // body, tier 1, RUPTURE payoff (sandbox fixture)
 
-function makePlayer(skills: string[]): Character {
+function makePlayer(cards: string[]): Character {
     const p = deepClone(Player);
-    p.knownCards = skills.slice();
+    p.knownCards = cards.slice();
     p.baseStats = { heart: 8, body: 8, mind: 8 };
     p.health = 200;
     p.maxHealth = 200;
@@ -155,19 +155,19 @@ describe('Spec 26 §2 — intent derivation', () => {
 // ── Card classification (§6) — pure ──────────────────────────────────────────
 
 describe('Spec 25 §6 — card classification', () => {
-    it('a DoT skill is a direct-dot card on the dot track', () => {
+    it('a DoT card is a direct-dot card on the dot track', () => {
         const card = getCard(DOT_BODY)!;
         expect(card.verbClass).toBe('direct-dot');
         expect(card.effectKind).toBe('dot');
         expect(card.stance).toBe('body');
         expect(card.bottomDamagePreview).toBeGreaterThan(0);
     });
-    it('a control skill is a direct-control card on the control track', () => {
+    it('a control card is a direct-control card on the control track', () => {
         const card = getCard(CONTROL_CARD)!;
         expect(card.effectKind).toBe('control');
         expect(['direct-control', 'stat-debuff']).toContain(card.verbClass);
     });
-    it('a payoff-burst skill is direct-damage with 0 preview (no strike number exists)', () => {
+    it('a payoff-burst card is direct-damage with 0 preview (no strike number exists)', () => {
         const card = getCard(DAMAGE_BODY)!;
         expect(card.verbClass).toBe('direct-damage');
         expect(card.effectKind).toBe('none');
@@ -599,7 +599,7 @@ describe('Spec 26b §B/§C/§D — archetype kit, rewards, unlock, difficulty fl
         expect(r.state.enemy.health).toBeLessThan(hpBefore);
     });
 
-    it('rollCombatCardRewards offers valid distinct skill-sourced cards, biased to archetype', () => {
+    it('rollCombatCardRewards offers valid distinct card-sourced cards, biased to archetype', () => {
         const player = makePlayer([DOT_BODY]); player.baseStats = { heart: 2, body: 9, mind: 2 };
         let i = 0; const rng = () => [0.1, 0.5, 0.9, 0.3, 0.7][i++ % 5];
         const offers = rollCombatCardRewards(player, rng, 3);
@@ -616,7 +616,7 @@ describe('Spec 26b §B/§C/§D — archetype kit, rewards, unlock, difficulty fl
         expect(after).toBe(before + 1);
     });
 
-    it('unlockCardViaDilemma adds a new skill, bypassing gates; no-op if known', () => {
+    it('unlockCardViaDilemma adds a new card, bypassing gates; no-op if known', () => {
         const player = makePlayer([DOT_BODY]);
         const newId = COMBAT_REWARD_POOL.find(id => id !== DOT_BODY && getCardById(id))!;
         const unlocked = unlockCardViaDilemma(player, newId);
@@ -634,9 +634,9 @@ describe('Spec 26b §B/§C/§D — archetype kit, rewards, unlock, difficulty fl
     });
 });
 
-// ── Full victory by HP depletion via status play (skill-sourced cards only) (§11) ─────
+// ── Full victory by HP depletion via status play (card-sourced cards only) (§11) ─────
 
-describe('Spec 25 §11 — victory by HP depletion via status play, skill-sourced cards only', () => {
+describe('Spec 25 §11 — victory by HP depletion via status play, card-sourced cards only', () => {
     it('a small enemy is destroyed by stacked DoT pressure with no attack/defend', () => {
         mockSequentialRng(0.05);
         const player = makePlayer([DOT_BODY]);

@@ -108,7 +108,7 @@ export const weaponModPool: Modifier[] = [
     },
     // ── Content expansion 2026-06-07 ──
     {
-        id: 'wm-skill-edge',
+        id: 'wm-card-edge',
         name: 'Honed Technique',
         hiddenRarity: 'common_mod',
         validSlots: ['weapon'],

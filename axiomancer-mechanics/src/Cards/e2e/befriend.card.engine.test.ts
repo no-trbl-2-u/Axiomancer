@@ -1,5 +1,5 @@
 /**
- * Phase 108 — Befriend skill-mechanic end-to-end tests.
+ * Phase 108 — Befriend card-mechanic end-to-end tests.
  *
  * The pre-v3 `befriend` LIBRARY CARD retired with the spec 32 v3 overhaul
  * (Befriend lives in enemy-signature / mercy flows now — ADR-0007 keeps the

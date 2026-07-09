@@ -78,7 +78,7 @@ export {
     calculateDamageResistance,
     healCharacter,
     calculateEnemyStatMultiplier, applyMoralMeterScaling,
-    // `CombatState` constructor — shared infrastructure for the skill / effects
+    // `CombatState` constructor — shared infrastructure for the card / effects
     // / equipment engines (the Hazard-Pattern shim builds the same shape).
     initializeCombat,
     // Phase 142 — effect-interaction amplification bounds (shared infrastructure).
@@ -255,7 +255,7 @@ export type {
     SetBonus, ItemSet,
 } from './Items';
 
-// ─── Skills ───────────────────────────────────────────────────────────────────
+// ─── Cards ───────────────────────────────────────────────────────────────────
 export type {
     Card, CardCategory, StatType, CardTier, CardTarget,
     CombatResources,

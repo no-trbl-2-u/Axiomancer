@@ -29,7 +29,7 @@ function buildStore(level: number, knownCards: string[] = []) {
 }
 
 describe('LEARN_CARD action — Phase 30 unit 3', () => {
-    it('appends an eligible skill id to knownCards', () => {
+    it('appends an eligible card id to knownCards', () => {
         const t1 = cardLibrary.find(s => s.rank === 1)!; // Doxa cards gate at level 1
         const store = buildStore(1, []);
         const before = store.getState().player.knownCards.length;
@@ -39,7 +39,7 @@ describe('LEARN_CARD action — Phase 30 unit 3', () => {
         expect(after.length).toBe(before + 1);
     });
 
-    it('is a no-op when the skill is already known', () => {
+    it('is a no-op when the card is already known', () => {
         const t1 = cardLibrary.find(s => s.rank === 1)!;
         const store = buildStore(1, [t1.id]);
         const before = store.getState().player.knownCards.slice();
@@ -48,10 +48,10 @@ describe('LEARN_CARD action — Phase 30 unit 3', () => {
         expect(after).toEqual(before);
     });
 
-    it('is a no-op for an unknown skill id', () => {
+    it('is a no-op for an unknown card id', () => {
         const store = buildStore(15, []);
         const before = store.getState().player.knownCards.slice();
-        store.getState().learnCard('no-such-skill');
+        store.getState().learnCard('no-such-card');
         expect(store.getState().player.knownCards).toEqual(before);
     });
 });

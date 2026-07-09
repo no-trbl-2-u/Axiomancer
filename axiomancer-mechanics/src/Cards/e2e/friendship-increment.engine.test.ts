@@ -1,5 +1,5 @@
 /**
- * Phase 91 — Friendship increment skill mechanics e2e test.
+ * Phase 91 — Friendship increment card mechanics e2e test.
  *
  * Hermetic coverage of the `incrementsFriendship?: number` field on cards and
  * its integration with `executeCard`. The pre-v3 library cards that carried
@@ -58,7 +58,7 @@ const plain: Card = {
 const lookup = (id: string): Card | undefined =>
     [soothe, empathize, plain].find(s => s.id === id);
 
-describe('Friendship increment skills', () => {
+describe('Friendship increment cards', () => {
     const player = createCharacter({
         name: 'Test Player',
         level: 1,

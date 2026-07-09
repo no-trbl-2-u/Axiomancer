@@ -5,7 +5,7 @@
  * a transient shield that absorbs the enemy's NEXT telegraphed threat in
  * `resolveThreatPhase`, then resets each phase. This suite pins the contract:
  *
- *   - the card adapter classifies a `guard` skill as the `defend` verb class
+ *   - the card adapter classifies a `guard` card as the `defend` verb class
  *     (0 pressure — it's a tempo/survival tool, not a pressure source);
  *   - playing one (POWER) grants read-scaled GUARD onto the state;
  *   - GUARD absorbs the next threat — a defending player takes strictly LESS HP
@@ -46,9 +46,9 @@ const ANSWER = 'measured-answer';   // BODY defense (GUARD 6 + RIPOSTE) — Bulw
 const DOT_BODY = 'slippery-slope';  // body, DoT — the offensive control case
 const DEFENSE_IDS = [BRACE, HALF_STEP, ANSWER] as const;
 
-function makePlayer(skills: string[]): Character {
+function makePlayer(cards: string[]): Character {
     const p = deepClone(Player);
-    p.knownCards = skills.slice();
+    p.knownCards = cards.slice();
     p.baseStats = { heart: 8, body: 8, mind: 8 };
     p.health = 200;
     p.maxHealth = 200;
@@ -78,11 +78,11 @@ function setDice(state: CombatEncounterState, colors: CombatDieColor[]): CombatE
 // ── Card adapter (§6) ────────────────────────────────────────────────────────
 
 describe('Spec 26b — defense cards classify as `defend`', () => {
-    it('a `guard` skill is the defend verb class on the NO-pressure track', () => {
+    it('a `guard` card is the defend verb class on the NO-pressure track', () => {
         for (const id of DEFENSE_IDS) {
-            const skill = getCardById(id);
-            expect(skill, `${id} must be a real skill`).toBeDefined();
-            const { verbClass, track } = classifyVerbClass(skill!, lookupEffect);
+            const card = getCardById(id);
+            expect(card, `${id} must be a real card`).toBeDefined();
+            const { verbClass, track } = classifyVerbClass(card!, lookupEffect);
             expect(verbClass, id).toBe('defend');
             expect(track, id).toBe('none');
         }

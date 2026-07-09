@@ -1,7 +1,7 @@
 /**
  * Hazard minigame — centralised balance tuning.
  *
- * Every numeric knob the hazard-tuning skill is allowed to move lives
+ * Every numeric knob the hazard-tuning card is allowed to move lives
  * here, in one object, so balance passes never have to hunt through the
  * engine, content, or components. Nothing in this file decides rules —
  * it only supplies the magnitudes that the rules and authored content

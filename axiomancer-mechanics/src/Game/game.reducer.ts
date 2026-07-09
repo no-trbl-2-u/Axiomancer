@@ -54,7 +54,7 @@ import { STARTING_CARD_IDS } from '../Combat/combat.rewards';
  * legacy v6 saves.
  * Phase 109 — bumped 8 → 9 to add the required `regionConsequences: RegionConsequences` slice.
  * Phase 110 — bumped 9 → 10 to add the required `factionReputations: FactionReputations` slice.
- * skill→card rename — bumped 10 → 11 to rename persisted `player.knownSkills` → `knownCards`.
+ * card→card rename — bumped 10 → 11 to rename persisted `player.knownSkills` → `knownCards`.
  */
 export const GAME_STATE_VERSION = 11;
 
@@ -67,7 +67,7 @@ export function createNewGameState(): GameState {
         runId: generateRunId(() => getRng().random()),
         // A fresh player starts at the apprentice baseline ({5,5,5} → 75 HP),
         // not the {1,1,1}/15 HP placeholder — a 15 HP start is one-shot
-        // territory for the early encounters. Starter skills are seeded by the
+        // territory for the early encounters. Starter cards are seeded by the
         // client on first combat (`ensureStarterCards`).
         player: createCharacter({
             name: 'Player',
@@ -97,7 +97,7 @@ function isEncounter(target: Enemy | Encounter): target is Encounter {
  * Minimal level-up step (placeholder per Phase 09 brief). While the player has
  * accumulated enough XP for the next level, increment `level`, recompute
  * `maxHealth`, raise the threshold, and refill HP. Spec 06's full progression
- * (stat allocation, skill unlocks) flows in later.
+ * (stat allocation, card unlocks) flows in later.
  */
 function applyLevelUps(player: Character): Character {
     let next = player;

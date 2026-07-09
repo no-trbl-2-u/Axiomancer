@@ -67,9 +67,9 @@ const ALL_POLICY_IDS: readonly CombatSimPolicyId[] = [
     'greedy', 'blind', 'dot-weaver', 'control-lock', 'aggro-brute', 'turtle', 'chaos', 'mercy-seeker',
 ];
 
-function loadout(skills: string[]): Character {
+function loadout(cards: string[]): Character {
     const p = deepClone(Player);
-    p.knownCards = skills.slice();
+    p.knownCards = cards.slice();
     p.baseStats = { heart: 10, body: 10, mind: 10 };
     p.health = 150;
     p.maxHealth = 150;

@@ -143,7 +143,7 @@ export interface ResourceInteraction {
  *                              wearer's `defend` proc roll.
  * @property critStyle        - Default critical-hit resolution style. Spec 05
  *                              Q7: weapon-set default which can be overridden
- *                              by a skill's per-skill `critStyle` (Spec 04+).
+ *                              by a card's per-card `critStyle` (Spec 04+).
  * @property resourceInteraction - Optional combat-start token grants and per-
  *                                 action generation bonuses (Spec 05 Q10C).
  * @property prefixId         - Affix provenance (Phase 152). When the instance
@@ -251,7 +251,7 @@ export interface UniqueItemTemplate extends EquipmentTemplate {
  * adds to the active `combatResources` snapshot when the item is used via
  * the `'item'` action. Using the item still costs the player's turn, so the
  * grant is a strategic option rather than free tempo. Per Spec 05b Q3
- * philosophical tokens (`fallacy` / `paradox`) remain skill-only — library
+ * philosophical tokens (`fallacy` / `paradox`) remain card-only — library
  * authors should restrict `resourceGrant` to `heart` / `body` / `mind` keys
  * even though the type permits the full union.
  *

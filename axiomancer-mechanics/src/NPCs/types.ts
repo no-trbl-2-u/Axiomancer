@@ -26,7 +26,7 @@ export interface AlignmentGate {
  * - `DialogueTree` is the Spec 08 Q9 branching tree — every node has text and
  *   optional `choices` that traverse to other nodes, gated by requirements
  *   and able to fire side effects (start quest, advance objective, teach a
- *   skill, set a flag).
+ *   card, set a flag).
  */
 
 /**
@@ -53,7 +53,7 @@ export interface DialogueMap {
  *                          `flag` is satisfied when the named flag is set in `gameState.flags`.
  * @property effect       - Optional side effect when chosen. Each field is
  *                          independent so a choice can both start a quest and
- *                          teach a skill.
+ *                          teach a card.
  */
 export interface DialogueChoice {
     text: string;

@@ -29,9 +29,9 @@ import type { CombatDieColor, CombatEncounterState } from '../combat.encounter.t
 
 const DOT_BODY = 'slippery-slope'; // body stance, applies a bleed DoT
 
-function makePlayer(skills: string[]): Character {
+function makePlayer(cards: string[]): Character {
     const p = deepClone(Player);
-    p.knownCards = skills.slice();
+    p.knownCards = cards.slice();
     p.baseStats = { heart: 8, body: 8, mind: 8 };
     p.health = 400; p.maxHealth = 400;
     return p;

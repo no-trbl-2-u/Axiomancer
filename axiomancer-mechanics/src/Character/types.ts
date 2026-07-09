@@ -18,7 +18,7 @@ export interface BaseStats {
 /**
  * Combat stats derived from BaseStats. Each stance contributes two values:
  * `*Attack` (used in attack rolls) and `*Defense` (used as damage reduction).
- * The legacy `*Skill` axis (a carry-over from the removed turn-based skill-check
+ * The legacy `*Card` axis (a carry-over from the removed turn-based card-check
  * combat) was deleted 2026-07-08.
  *
  * `luck` is the average of the three base stats and gates random outcomes.
@@ -70,10 +70,10 @@ export interface NonCombatStats {
  *                                    the character's `derivedStats` is
  *                                    already "post-equipment".
  * @property effects                - Active status effects on the character.
- * @property knownCards            - IDs of skills the character has learned/unlocked.
+ * @property knownCards            - IDs of cards the character has learned/unlocked.
  *                                    The combat catalogue is the learned set
  *                                    filtered by affordability (ADR-0002 / Phase
- *                                    99); there is no equipped-skill loadout gate.
+ *                                    99); there is no equipped-card loadout gate.
  * @property availableStatPoints    - Unspent stat points awaiting allocation
  *                                    (Spec 06 Q3 + Q8). Granted on level-up,
  *                                    spent via `allocateStatPoint`. Defaults
@@ -103,15 +103,15 @@ export interface Character {
     availableStatPoints: number;
     /**
      * Per-cell Spec 03 proc unlock caps. Defaults to tier 1 in every cell —
-     * basic actors only roll the lowest-tier proc table entries. Skills /
+     * basic actors only roll the lowest-tier proc table entries. Cards /
      * progression in Spec 04 / 06 raise the cap to unlock T2 / T3 entries.
      */
     procUnlocks?: ProcUnlocks;
     /**
-     * Spec 26b deckbuilder — extra combat cards earned as play rewards (skill
+     * Spec 26b deckbuilder — extra combat cards earned as play rewards (card
      * ids, duplicates allowed), MERGED into the combat deck on top of the cards
      * derived from `knownCards`. Distinct from `knownCards`: a reward grows the
-     * deck (more copies / variety), while learning a skill (e.g. via an ethical
+     * deck (more copies / variety), while learning a card (e.g. via an ethical
      * dilemma) unlocks a new card type. Optional + sparse — absent means none.
      */
     combatRewardCards?: string[];

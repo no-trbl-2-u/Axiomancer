@@ -392,7 +392,7 @@ export const AUTHORED_THREAT_SEQUENCES: Record<string, AuthoredThreatPhase[]> = 
     ],
 
     // ══ THE INCOMPLETENESS — the impossible playtest ceiling ═══════════════════
-    // (unique, level 110) — the skill-ceiling benchmark: calibrated so the BEST
+    // (unique, level 110) — the card-ceiling benchmark: calibrated so the BEST
     // policy line scrapes a 1-5% win rate (near-impossible, not scripted-unwinnable).
     // Erosion-stubborn AND control-shrugging: almost nothing you bring is complete
     // enough to hold it.

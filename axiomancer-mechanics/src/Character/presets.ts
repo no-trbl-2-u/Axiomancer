@@ -38,7 +38,7 @@ export interface CharacterPreset {
     /** Equipment to drop and equip. Each slot is filled at 'common' rarity. */
     equipment: CharacterPresetEquipmentEntry[];
     /** Card IDs the character knows. The full known set is the combat
-     *  catalogue (ADR-0002); there is no equipped-skill rotation. */
+     *  catalogue (ADR-0002); there is no equipped-card rotation. */
     knownCards: string[];
     /** Consumable IDs (and quantities) to seed the inventory. */
     consumables: { id: string; quantity: number }[];
@@ -79,7 +79,7 @@ const TIER_2_SYNERGY_CARDS = [
 export const apprenticePreset: CharacterPreset = {
     id: 'apprentice',
     name: 'Apprentice',
-    summary: 'Just stepping out — balanced stats, basic skills, no gear.',
+    summary: 'Just stepping out — balanced stats, basic cards, no gear.',
     level: 1,
     baseStats: { heart: 5, body: 5, mind: 5 },
     equipment: [],
@@ -93,7 +93,7 @@ export const apprenticePreset: CharacterPreset = {
 export const wandererPreset: CharacterPreset = {
     id: 'wanderer',
     name: 'Wanderer',
-    summary: 'Mid-game — light armor, mixed-tier skills, a pouch of coin.',
+    summary: 'Mid-game — light armor, mixed-tier cards, a pouch of coin.',
     level: 8,
     baseStats: { heart: 5, body: 4, mind: 4 },
     equipment: [
@@ -112,7 +112,7 @@ export const wandererPreset: CharacterPreset = {
 export const sagePreset: CharacterPreset = {
     id: 'sage',
     name: 'Sage',
-    summary: 'Late-game — mid-tier kit, every skill known, paradox in reach.',
+    summary: 'Late-game — mid-tier kit, every card known, paradox in reach.',
     level: 15,
     baseStats: { heart: 20, body: 30, mind: 25 },
     equipment: [
@@ -140,7 +140,7 @@ export const characterPresets: CharacterPreset[] = [
 // SEPARATE array so the canonical archetype picker (`characterPresets`)
 // stays apprentice / wanderer / sage; `getPresetById` searches both.
 // Previously authored client-side (`axiomancer-mobile`); moved here so the
-// engine owns the preset data (curated level / stat / skill / gear
+// engine owns the preset data (curated level / stat / card / gear
 // selection) — `buildCharacterFromPreset` validates every id at build time.
 
 export const ladderL1Preset: CharacterPreset = {

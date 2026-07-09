@@ -10,7 +10,7 @@
  *
  *   watcher      — thinnest heal, never restored, finds the most keepsakes.
  *   deep-sleeper — richer baseHeal but pays for stirs unwatched.
- *   fire-tender  — banks warmth into heal AND the cleanse line; the skill take.
+ *   fire-tender  — banks warmth into heal AND the cleanse line; the card take.
  *
  * If content changes break a band, this suite fails and the numbers need
  * re-tuning (or the band needs a deliberate, documented update). 400 seeded

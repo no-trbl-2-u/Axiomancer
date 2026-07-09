@@ -2,9 +2,9 @@
  * Hermetic e2e — public barrel surface (Phase 50).
  *
  * Pins the top-level `axiomancer-mechanics` exports that consumers
- * (notably `axiomancer-mobile`) rely on. The Skills library + lookup
+ * (notably `axiomancer-mobile`) rely on. The Cards library + lookup
  * were the original Phase 50 motivator (mobile-side stop-gap at
- * `state/mocks/combat.skills.fixture.ts`); the broader purpose is a
+ * `state/mocks/combat.cards.fixture.ts`); the broader purpose is a
  * compact contract test that catches accidental removal of any
  * locked public name without forcing every consumer to set up an
  * out-of-repo smoke.
@@ -38,10 +38,10 @@ describe('Phase 50 — public barrel exposes cardLibrary + getCardById', () => {
     });
 
     it('every entry in cardLibrary carries a non-empty id', () => {
-        for (const skill of cardLibrary) {
-            expect(skill.id).toBeDefined();
-            expect(typeof skill.id).toBe('string');
-            expect(skill.id.length).toBeGreaterThan(0);
+        for (const card of cardLibrary) {
+            expect(card.id).toBeDefined();
+            expect(typeof card.id).toBe('string');
+            expect(card.id.length).toBeGreaterThan(0);
         }
     });
 
@@ -50,14 +50,14 @@ describe('Phase 50 — public barrel exposes cardLibrary + getCardById', () => {
         expect(typeof getCardById).toBe('function');
 
         const firstId = cardLibrary[0].id;
-        const skill = getCardById(firstId);
+        const card = getCardById(firstId);
 
-        expect(skill).toBeDefined();
-        expect(skill?.id).toBe(firstId);
+        expect(card).toBeDefined();
+        expect(card?.id).toBe(firstId);
     });
 
     it('getCardById returns undefined for an unknown id', () => {
-        const result = getCardById('this-skill-id-does-not-exist-anywhere');
+        const result = getCardById('this-card-id-does-not-exist-anywhere');
         expect(result).toBeUndefined();
     });
 });

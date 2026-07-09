@@ -1,6 +1,6 @@
 /**
  * Named sandbox card SETS — curated experiment bundles the playtest CLI and
- * the `/deck-tuning` skill load with one flag (`--sandbox=<setId>`).
+ * the `/deck-tuning` card load with one flag (`--sandbox=<setId>`).
  *
  * A set bundles new experimental cards and/or numeric overrides of library
  * cards. Applying a set registers everything into the sandbox registry

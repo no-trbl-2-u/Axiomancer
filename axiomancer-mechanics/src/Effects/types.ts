@@ -126,7 +126,7 @@ export interface EffectPayload {
      */
     revealsStance?: boolean;
     /**
-     * Skills/Status Master Spec §1 — extensions for the 12 new status
+     * Cards/Status Master Spec §1 — extensions for the 12 new status
      * entries. Data-only for now: no resolver reads these fields yet (the
      * DoT tick resolver, card-play resolution, and die-roll resolution paths
      * that would consume them are a later implementation stage). Kept on

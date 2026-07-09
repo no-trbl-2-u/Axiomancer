@@ -6,7 +6,7 @@
 import { describe, it, expect } from 'vitest';
 import { lookupEffect } from '../effects.library';
 
-describe('Phase 124 - Stronger skills/effects', () => {
+describe('Phase 124 - Stronger cards/effects', () => {
     // The tier1_heart_defend / tier1_body_attack cases retired with the
     // spec 32 v3 keyword reset (the tier1_* stance layer is gone from the
     // library). The surviving Phase 124 tuning below lives on support-tagged

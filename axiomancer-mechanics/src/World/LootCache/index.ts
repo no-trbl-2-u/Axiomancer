@@ -2,7 +2,7 @@
  * Loot-cache encounter ("The Reliquary") — Public API.
  *
  * Three layers, a public per-layer difficulty, a live d6 "Pick Pool"
- * skill check, one Insight charge, push-your-luck. The engine deals in
+ * card check, one Insight charge, push-your-luck. The engine deals in
  * item REFS; the host maps kept uids back to real items and settles the
  * bite at claim time.
  *

@@ -1,10 +1,10 @@
 /**
- * Spec 26b deckbuilder — combat card rewards + the skill-unlock hook.
+ * Spec 26b deckbuilder — combat card rewards + the card-unlock hook.
  *
  * Two distinct progression levers (per the design):
  *   1. CARD REWARDS (frequent, after a won combat) grow the DECK — extra copies
  *      and variety. They append to `Character.combatRewardCards`, which
- *      `buildCombatDeck` stacks on top of the learned-skill baseline.
+ *      `buildCombatDeck` stacks on top of the learned-card baseline.
  *   2. SKILL UNLOCKS (rare, via ethical-dilemma events — not implemented yet)
  *      add a NEW card type. `unlockCardViaDilemma` is the hook those events will
  *      call; it bypasses the normal learning requirements (the dilemma IS the
@@ -34,7 +34,7 @@ export const COMBAT_REWARD_POOL: readonly string[] = Object.freeze(
 export const REWARD_RARITY_WEIGHTS: Readonly<Record<'common' | 'uncommon' | 'rare', number>> =
     Object.freeze({ common: 1, uncommon: 0.5, rare: 0.2 });
 
-/** The skills a brand-new player starts with: an opening offensive card PLUS a
+/** The cards a brand-new player starts with: an opening offensive card PLUS a
  *  basic defense card, so every player can GUARD from turn one. The rest unlock
  *  through ethical-dilemma events via `unlockCardViaDilemma`. The mobile
  *  bootstrap seeds a new character's `knownCards` from this list. */
@@ -43,11 +43,11 @@ export const STARTING_CARD_IDS: readonly string[] = Object.freeze([
     'brace-for-impact',     // basic defense (GUARD) — guard from turn one
 ]);
 
-/** The single OFFENSIVE skill a brand-new player starts with. Kept for
+/** The single OFFENSIVE card a brand-new player starts with. Kept for
  *  back-compat; prefer `STARTING_CARD_IDS` (which also grants a defense card). */
 export const STARTING_CARD_ID = 'slippery-slope';
 
-/** A valid reward-pool entry must resolve to a real skill. */
+/** A valid reward-pool entry must resolve to a real card. */
 function validPool(): string[] {
     return COMBAT_REWARD_POOL.filter(id => !!getCardById(id));
 }
@@ -99,7 +99,7 @@ export function addRewardCard(player: Character, cardId: string): Character {
 }
 
 /**
- * Spec 26b §D — unlock a NEW skill from an ethical-dilemma event. Bypasses the
+ * Spec 26b §D — unlock a NEW card from an ethical-dilemma event. Bypasses the
  * normal `learnCard` requirement gates (level/stat/prereq) because the dilemma
  * choice is itself the gate. No-op (same ref) when already known or unknown id.
  * The dilemma EVENTS are not implemented yet; this is the hook they will call.

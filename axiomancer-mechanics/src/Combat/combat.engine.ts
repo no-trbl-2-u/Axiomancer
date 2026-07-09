@@ -2,10 +2,10 @@
  * Spec 25 — Hazard-Pattern Combat: the engine (§4, §9).
  *
  * `resolveCombatPhase` drives the HP-model combat: the enemy's SOLE bar is HP,
- * and the player drops it to 0. Every verb is a combat card (projected from a learned skill); the player rolls
+ * and the player drops it to 0. Every verb is a combat card (projected from a learned card); the player rolls
  * stance dice and plays cards, where STATUS effects are the efficient damage
  * (DoT erodes HP; control hinders the enemy's turn) and a raw strike is the weak
- * baseline. The legacy resolver, the effects engine, the skill engine, and all
+ * baseline. The legacy resolver, the effects engine, the card engine, and all
  * effects are UNCHANGED — this engine *drives* `executeCard` / `applyEffect`
  * differently.
  *
@@ -205,7 +205,7 @@ const defaultRng = (): number => getRng().random();
 const lookupCard = (id: string): Card | undefined => getCardById(id);
 const lookupEffectDef = (id: string): Effect | undefined => lookupEffect(id);
 
-/** Projects a card id into its card view (skill or synthetic). */
+/** Projects a card id into its card view (card or synthetic). */
 export function getCard(cardId: string): CombatCard | null {
     return toCombatCard(cardId, lookupCard, lookupEffectDef);
 }
@@ -650,7 +650,7 @@ function withLog(state: CombatEncounterState, events: CombatEvent[]): CombatEnco
 
 /**
  * Plays one card from hand. `useBottom` powers the full effect (costs dice via
- * RPS scaling, executes the skill, drives impact + the die-refresh loop); the
+ * RPS scaling, executes the card, drives impact + the die-refresh loop); the
  * free top action contributes a weak flat impact with no die.
  */
 export function playCombatCard(
@@ -998,11 +998,11 @@ function playFreeEnchant(
     state: CombatEncounterState,
     uid: string,
     card: CombatCard,
-    skill: Card,
+    sourceCard: Card,
 ): CombatTransition {
-    const isEnchant = skill.cardType === 'enchantment';
+    const isEnchant = sourceCard.cardType === 'enchantment';
     const permanentZone = isEnchant ? state.persistentZone : (state.enemyAttachments ?? []);
-    if (permanentZone.includes(skill.id)) {
+    if (permanentZone.includes(sourceCard.id)) {
         const fizzle: CombatEvent[] = [{
             kind: 'effect-fizzled', cardId: card.id, effectId: '',
             message: `${card.name} is already in play (permanent)`,
@@ -1015,7 +1015,7 @@ function playFreeEnchant(
     ];
     // Refresh-or-add the timed entry (a re-cast resets the countdown to full).
     const bumpTimed = (zone: { cardId: string; roundsLeft: number }[]) =>
-        [...zone.filter(t => t.cardId !== skill.id), { cardId: skill.id, roundsLeft: FREE_ENCHANT_ROUNDS }];
+        [...zone.filter(t => t.cardId !== sourceCard.id), { cardId: sourceCard.id, roundsLeft: FREE_ENCHANT_ROUNDS }];
     let next: CombatEncounterState = isEnchant
         ? { ...state, tempZone: bumpTimed(state.tempZone ?? []) }
         : { ...state, enemyTempAttachments: bumpTimed(state.enemyTempAttachments ?? []) };
@@ -1045,9 +1045,9 @@ function playTopAction(
     card: CombatCard,
     rng: () => number,
 ): CombatTransition {
-    const skill = lookupCard(card.id);
-    if (skill && skill.cardType !== 'spell') {
-        return playFreeEnchant(state, uid, card, skill);
+    const sourceCard = lookupCard(card.id);
+    if (sourceCard && sourceCard.cardType !== 'spell') {
+        return playFreeEnchant(state, uid, card, sourceCard);
     }
     const events: CombatEvent[] = [
         { kind: 'card-played', cardId: card.id, useBottom: false, dieId: null, advantage: 'neutral' },
@@ -1055,8 +1055,8 @@ function playTopAction(
     // Discard the played card BEFORE the free rider fires so a printed
     // "draw N" is never blocked by the card's own hand slot (P0-truth).
     let next = discardEntry(state, uid);
-    if (skill?.free) {
-        next = applyRiderToState(next, card.id, skill.free, events, rng);
+    if (sourceCard?.free) {
+        next = applyRiderToState(next, card.id, sourceCard.free, events, rng);
     }
     if (next.finalOutcome === 'concede') {
         return endCombat({ ...withLog(next, events), phase: 'phase-play', finalOutcome: null }, 'concede', events);
@@ -1068,7 +1068,7 @@ function playTopAction(
 
 /**
  * Powered bottom action (§4.3, §4.7, §4.8): pays dice via RPS scaling, runs the
- * full skill through `executeCard`, folds landed effects into the impact
+ * full card through `executeCard`, folds landed effects into the impact
  * tracks + attribution, and refreshes a matching die when a status effect
  * meaningfully lands.
  */
@@ -1079,8 +1079,8 @@ function playBottomAction(
     dieId: string | undefined,
     _rng: () => number,
 ): CombatTransition {
-    const skill = lookupCard(card.id);
-    if (!skill) return { state, events: [] };
+    const sourceCard = lookupCard(card.id);
+    if (!sourceCard) return { state, events: [] };
 
     // 1. Resolve the POWERING die — Fate Engine P1 R8: the dieId the player
     //    dragged is HONORED. It may name the drafted die (default when absent),
@@ -1111,7 +1111,7 @@ function playBottomAction(
         } else if (floating) {
             powering = floating;
             poweringSource = 'floating';
-        } else if (trayX && skill.fate && trayX.state !== 'spent') {
+        } else if (trayX && sourceCard.fate && trayX.state !== 'spent') {
             powering = trayX;
             poweringSource = 'fate-x';
         } else {
@@ -1144,9 +1144,9 @@ function playBottomAction(
     // ── Spec 32 v3 §2.1 — ENCHANT / DISENCHANT routing. Persistent cards skip
     //    the spell pipeline entirely: the die is spent, the card leaves the deck
     //    cycle into its zone, and its passive lives at the engine's hook sites.
-    if (skill.cardType === 'enchantment' || skill.cardType === 'disenchant') {
-        const zone = skill.cardType === 'enchantment' ? state.persistentZone : (state.enemyAttachments ?? []);
-        if (zone.includes(skill.id)) {
+    if (sourceCard.cardType === 'enchantment' || sourceCard.cardType === 'disenchant') {
+        const zone = sourceCard.cardType === 'enchantment' ? state.persistentZone : (state.enemyAttachments ?? []);
+        if (zone.includes(sourceCard.id)) {
             const fizzle: CombatEvent[] = [{ kind: 'effect-fizzled', cardId: card.id, effectId: '', message: `${card.name} is already in play (unique)` }];
             return { state: withLog(state, fizzle), events: fizzle };
         }
@@ -1163,7 +1163,7 @@ function playBottomAction(
             dice = spendDice(dice, [powering.id]);
         }
         events.push({ kind: 'die-spent', dieId: powering.id, color: powering.color });
-        events.push(skill.cardType === 'enchantment'
+        events.push(sourceCard.cardType === 'enchantment'
             ? { kind: 'enchant-played', cardId: card.id, name: card.name }
             : { kind: 'disenchant-attached', cardId: card.id, name: card.name });
         // Spec 32 v4 — a PAID play makes the passive PERMANENT; if a FREE-line timed
@@ -1171,32 +1171,32 @@ function playBottomAction(
         // temp zone so the same id is not counted twice).
         let next: CombatEncounterState = {
             ...state, dice, reserve, floatingDice,
-            persistentZone: skill.cardType === 'enchantment'
-                ? [...state.persistentZone, skill.id] : state.persistentZone,
-            enemyAttachments: skill.cardType === 'disenchant'
-                ? [...(state.enemyAttachments ?? []), skill.id] : state.enemyAttachments,
-            tempZone: (state.tempZone ?? []).filter(t => t.cardId !== skill.id),
-            enemyTempAttachments: (state.enemyTempAttachments ?? []).filter(t => t.cardId !== skill.id),
+            persistentZone: sourceCard.cardType === 'enchantment'
+                ? [...state.persistentZone, sourceCard.id] : state.persistentZone,
+            enemyAttachments: sourceCard.cardType === 'disenchant'
+                ? [...(state.enemyAttachments ?? []), sourceCard.id] : state.enemyAttachments,
+            tempZone: (state.tempZone ?? []).filter(t => t.cardId !== sourceCard.id),
+            enemyTempAttachments: (state.enemyTempAttachments ?? []).filter(t => t.cardId !== sourceCard.id),
         };
         // The card leaves the deck cycle: pulled from hand WITHOUT entering the
         // discard (it will not reshuffle back).
-        next = { ...next, hand: next.hand.filter(h => h.uid !== uid), deck: next.deck.filter(id => id !== skill.id) };
+        next = { ...next, hand: next.hand.filter(h => h.uid !== uid), deck: next.deck.filter(id => id !== sourceCard.id) };
         next = withLog(next, events);
         return checkImmediateOutcome(next, events);
     }
 
-    // 3. Execute the skill (unchanged effect machinery) against a shim.
+    // 3. Execute the card (unchanged effect machinery) against a shim.
     //    ECHO (spec 32 v3 T10): the PAID payload fires twice when the card
     //    carries ECHO, an `echo_next_spell` charge is pending, or the
     //    `resonant-chamber` enchantment blesses the first spell of the turn.
-    const mechsAll = skill.specialMechanics ?? [];
+    const mechsAll = sourceCard.specialMechanics ?? [];
     const echoCharge = state.echoNextSpell === true;
     const chamberEcho = zoneHas(state, 'resonant-chamber') && (state.spellsPlayedThisTurn ?? 0) === 0;
     const echoed = mechsAll.some(m => m.kind === 'echo') || echoCharge || chamberEcho;
 
     const before = intensityMap(state.enemy.effects);
     let shimState: CombatState = cardShim(state);
-    let res = executeCard(shimState, skill.id, lookupCard, 'player');
+    let res = executeCard(shimState, sourceCard.id, lookupCard, 'player');
     let allCardEvents = [...res.events];
     if (echoed) {
         // Second pass re-applies the card's status payloads (stacking rules
@@ -1206,7 +1206,7 @@ function playBottomAction(
             player: res.state.player, enemy: res.state.enemy,
             combatResources: res.state.combatResources,
         };
-        res = executeCard(shimState, skill.id, lookupCard, 'player');
+        res = executeCard(shimState, sourceCard.id, lookupCard, 'player');
         allCardEvents = [...allCardEvents, ...res.events];
         events.push({ kind: 'echoed', cardId: card.id });
     }
@@ -1262,35 +1262,35 @@ function playBottomAction(
     // this spend already counted: one spend, two payoffs), DIE BONUS (powering
     // color matches the card's line), and FATE (powered by an X die).
     const firedRiders: CardRider[] = [];
-    if (skill.threshold && resonance[skill.threshold.color] >= skill.threshold.count) {
-        firedRiders.push(skill.threshold.rider);
+    if (sourceCard.threshold && resonance[sourceCard.threshold.color] >= sourceCard.threshold.count) {
+        firedRiders.push(sourceCard.threshold.rider);
         events.push({
-            kind: 'threshold-fired', cardId: card.id, color: skill.threshold.color,
-            count: skill.threshold.count, riderText: riderText(skill.threshold.rider),
+            kind: 'threshold-fired', cardId: card.id, color: sourceCard.threshold.color,
+            count: sourceCard.threshold.count, riderText: riderText(sourceCard.threshold.rider),
         });
     }
-    if (skill.dieBonus) {
-        const on = skill.dieBonus.onColor;
+    if (sourceCard.dieBonus) {
+        const on = sourceCard.dieBonus.onColor;
         const hit = on === 'match' ? colorMatch
             : on === 'off' ? (dieHasStance(powering.color) && powering.color !== card.stance)
                 : powering.color === on;
         if (hit) {
-            firedRiders.push(skill.dieBonus.rider);
-            events.push({ kind: 'die-bonus-fired', cardId: card.id, riderText: riderText(skill.dieBonus.rider) });
+            firedRiders.push(sourceCard.dieBonus.rider);
+            events.push({ kind: 'die-bonus-fired', cardId: card.id, riderText: riderText(sourceCard.dieBonus.rider) });
         }
     }
-    if (skill.fate && poweringSource === 'fate-x') {
-        firedRiders.push(skill.fate.rider);
-        const recoil = skill.fate.recoilHp ?? 0;
+    if (sourceCard.fate && poweringSource === 'fate-x') {
+        firedRiders.push(sourceCard.fate.rider);
+        const recoil = sourceCard.fate.recoilHp ?? 0;
         if (recoil > 0) { player = applyDamage(player, recoil); recoilTaken += recoil; }
-        events.push({ kind: 'fate-powered', cardId: card.id, dieId: powering.id, recoil, riderText: riderText(skill.fate.rider) });
+        events.push({ kind: 'fate-powered', cardId: card.id, dieId: powering.id, recoil, riderText: riderText(sourceCard.fate.rider) });
     }
     // FALLEN (spec 32 v3 T4) — the theme-state condition line: fires free while
     // the player carries >= 2 distinct self-debuffs at play time.
     const wasFallen = getDistinctDebuffCount(state.player) >= 2;
-    if (skill.fallen && wasFallen) {
-        firedRiders.push(skill.fallen.rider);
-        events.push({ kind: 'die-bonus-fired', cardId: card.id, riderText: `FALLEN: ${riderText(skill.fallen.rider)}` });
+    if (sourceCard.fallen && wasFallen) {
+        firedRiders.push(sourceCard.fallen.rider);
+        events.push({ kind: 'die-bonus-fired', cardId: card.id, riderText: `FALLEN: ${riderText(sourceCard.fallen.rider)}` });
     }
     // Landed-status adjustments in one pass, all REAL units: rider intensity /
     // duration bonuses, RIPENED pips (+1 intensity per pip on a non-defend play,
@@ -1298,7 +1298,7 @@ function playBottomAction(
     // zone's blessings — `venom-and-vein` (+1 on bleed/poison) and
     // `crown-of-thorns` (+1 on everything while FALLEN). Spec 32 v3 §7.
     const isDefendPlay = card.verbClass === 'defend';
-    const landsDot = (skill.combatEffects ?? []).some(ce =>
+    const landsDot = (sourceCard.combatEffects ?? []).some(ce =>
         ce.appliedTo === 'opponent' && lookupEffectDef(ce.effectId)?.payload.damageOverTime);
     // Penitent rebalance (2026-07-08): crown-of-thorns used to grant a flat
     // +1 regardless of how deep into Fallen the player had gone. It now
@@ -1346,10 +1346,10 @@ function playBottomAction(
     }
 
     // ── Spec 32 v3 — the themed-deck mechanic chain ───────────────────────────
-    // HP behavior owned here (the skill engine no-ops every mechanic kind).
+    // HP behavior owned here (the card engine no-ops every mechanic kind).
     // Payoff verbs read state.enemy (pre-card) so a card's own fresh status
     // never self-counts. Every HP source below is affliction- or engine-gated.
-    const mechs = skill.specialMechanics ?? [];
+    const mechs = sourceCard.specialMechanics ?? [];
     const echoFactor = echoed ? 2 : 1;
     let mechanicDamage = 0;
     let reserve = reserveIn;
@@ -1640,7 +1640,7 @@ function playBottomAction(
                 // OUROBOROS — the argument repeats: the last spell's statuses land
                 // again, `times` times. Never chains into another replay.
                 const lastId = state.lastSpellCardId;
-                const lastCard = lastId && lastId !== skill.id ? lookupCard(lastId) : undefined;
+                const lastCard = lastId && lastId !== sourceCard.id ? lookupCard(lastId) : undefined;
                 const replayable = lastCard
                     && lastCard.cardType === 'spell'
                     && !(lastCard.specialMechanics ?? []).some(m2 => m2.kind === 'replay_last');
@@ -1749,7 +1749,7 @@ function playBottomAction(
     // VARIETY (a status new to this chain refreshes the die; a repeat spends it).
     const landedOffensiveIds: string[] = [];
 
-    // 4. Fold the skill's effect-applications: DoT + control LAND on the enemy.
+    // 4. Fold the card's effect-applications: DoT + control LAND on the enemy.
     //    DoT will tick real HP each phase (the status damage engine); control gates
     //    the enemy's turn via `canAct`. Attribute projected DoT for the summary.
     const selfDebuffsLanded: { effectId: string; intensity: number; duration: number }[] = [];
@@ -2025,7 +2025,7 @@ function playBottomAction(
 
     // Defense card → GUARD (read-scaled + color-match + pips). Absorbed in
     // `resolveThreatPhase`.
-    const guardMech = (skill.specialMechanics ?? []).find(m => m.kind === 'guard') as { amount: number } | undefined;
+    const guardMech = (sourceCard.specialMechanics ?? []).find(m => m.kind === 'guard') as { amount: number } | undefined;
     const pipGuard = isDefendPlay ? poweringPips * PIP_GUARD_BONUS : 0;
     if (pipGuard > 0) {
         events.push({ kind: 'pips-cashed', cardId: card.id, pips: poweringPips, bonus: 'guard', amount: pipGuard });
@@ -2067,7 +2067,7 @@ function playBottomAction(
         echoNextSpell,
         conjuredUids,
         spellsPlayedThisTurn: (state.spellsPlayedThisTurn ?? 0) + 1,
-        lastSpellCardId: skill.id,
+        lastSpellCardId: sourceCard.id,
     };
     // Discard the played card — a CONJURED Thoughtform is one-use: it leaves
     // the combat entirely instead of entering the discard pile.
@@ -3062,8 +3062,8 @@ export function projectRupture(state: CombatEncounterState): number {
 /** SIPHON projection — the heal a siphon card would grant if powered now (off
  *  the projected payoff burst). */
 export function projectSiphonHeal(state: CombatEncounterState, card: CombatCard): number {
-    const skill = lookupCard(card.id);
-    const mech = (skill?.specialMechanics ?? []).find(m => m.kind === 'siphon') as
+    const sourceCard = lookupCard(card.id);
+    const mech = (sourceCard?.specialMechanics ?? []).find(m => m.kind === 'siphon') as
         { kind: 'siphon'; pct: number } | undefined;
     if (!mech) return 0;
     return Math.round(projectRupture(state) * mech.pct * getHealingReceivedMult(state.player));
@@ -3071,8 +3071,8 @@ export function projectSiphonHeal(state: CombatEncounterState, card: CombatCard)
 
 /** REAP-ALL projection — the burst the Harvest capstone would deal right now. */
 export function projectReapAll(state: CombatEncounterState, card: CombatCard): { ready: boolean; amount: number } {
-    const skill = lookupCard(card.id);
-    const mech = (skill?.specialMechanics ?? []).find(m => m.kind === 'reap_all') as
+    const sourceCard = lookupCard(card.id);
+    const mech = (sourceCard?.specialMechanics ?? []).find(m => m.kind === 'reap_all') as
         Extract<CardSpecialMechanic, { kind: 'reap_all' }> | undefined;
     if (!mech) return { ready: false, amount: 0 };
     const d = draftedDie(state);
@@ -3110,8 +3110,8 @@ export function projectCombatOutcome(state: CombatEncounterState): CombatOutcome
     const roundsToKill = computeRoundsToKill(state.enemy, state.round);
     const finishers: FinisherProjection[] = [];
     for (const { uid, card } of handCards(state)) {
-        const skill = lookupCard(card.id);
-        const mech = (skill?.specialMechanics ?? []).find(
+        const sourceCard = lookupCard(card.id);
+        const mech = (sourceCard?.specialMechanics ?? []).find(
             m => m.kind === 'rupture' || m.kind === 'reap_all',
         );
         if (!mech) continue;

@@ -4,7 +4,7 @@
  * now a LIVE dice-pool "Pick Pool" gamble: every layer's difficulty is
  * public, and the player rolls to crack it, choosing after every roll
  * whether to push, retreat, or (once per session) channel Insight for a
- * bonus die. The bands encode the skill expression — INFORMED risk
+ * bonus die. The bands encode the card expression — INFORMED risk
  * management beats blind greed, which beats early restraint —
  *
  *   prudent (retreat after one push, stop once bitten: safest, poorest)

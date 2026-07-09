@@ -60,9 +60,9 @@ registerSandboxCards([
     },
 ]);
 
-function makePlayer(skills: string[]): Character {
+function makePlayer(cards: string[]): Character {
     const p = deepClone(Player);
-    p.knownCards = skills.slice();
+    p.knownCards = cards.slice();
     p.baseStats = { heart: 8, body: 8, mind: 8 };
     p.health = 400; p.maxHealth = 400;
     return p;
@@ -89,8 +89,8 @@ function setDice(state: CombatEncounterState, colors: CombatDieColor[]): CombatE
     return { ...state, dice, draftedDieId: null, turn };
 }
 
-function open(skills: string[], enemyStance: 'heart' | 'body' | 'mind' = 'body', enemyEffects: ActiveEffect[] = []): CombatEncounterState {
-    let s = initializeCombatEncounter(makePlayer(skills), makeEnemy(500, enemyStance, enemyEffects), skills, 7);
+function open(cards: string[], enemyStance: 'heart' | 'body' | 'mind' = 'body', enemyEffects: ActiveEffect[] = []): CombatEncounterState {
+    let s = initializeCombatEncounter(makePlayer(cards), makeEnemy(500, enemyStance, enemyEffects), cards, 7);
     s = rollEncounterDice(s).state;
     return s;
 }

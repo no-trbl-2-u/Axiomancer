@@ -8,7 +8,7 @@
  *
  *   - the self-reinforcing status-loop dice primitives (`combatDieCanPower` /
  *     `refreshOneDie` / `rollCombatDice`) — HP is the sole win condition
- *     (2026-06-22); DoT/control skills deplete HP far faster than the weak
+ *     (2026-06-22); DoT/control cards deplete HP far faster than the weak
  *     basic strike; `dotErosionReached` / `controlSaturationReached` were
  *     removed with the old Pressure-Track model;
  *   - the Befriend mercy entry (`selectEncounterMercyChoice`);
@@ -68,9 +68,9 @@ const DAMAGE_BODY = 'qa-payoff-burst';   // body, payoff burst (sandbox fixture)
 
 const SEED = 12345;
 
-function makePlayer(skills: string[]): Character {
+function makePlayer(cards: string[]): Character {
     const p = deepClone(Player);
-    p.knownCards = skills.slice();
+    p.knownCards = cards.slice();
     p.baseStats = { heart: 8, body: 8, mind: 8 };
     p.health = 200;
     p.maxHealth = 200;
@@ -163,20 +163,20 @@ describe('Spec 25 §4.7 — refreshOneDie (status-loop reclaim)', () => {
 // ── Deck building (§4.3) ─────────────────────────────────────────────────────
 
 describe('Spec 25 §4.3 — buildCombatDeck', () => {
-    it('builds the deck from known skills, with no escape card appended', () => {
+    it('builds the deck from known cards, with no escape card appended', () => {
         const deck = buildCombatDeck(makePlayer([DOT_BODY, CONTROL_HEART]));
         expect(deck).toContain(DOT_BODY);
         expect(deck).toContain(CONTROL_HEART);
         expect(deck).not.toContain('card-retreat'); // no in-combat retreat exists
     });
 
-    it('de-dups known skills and preserves learn order', () => {
+    it('de-dups known cards and preserves learn order', () => {
         const deck = buildCombatDeck(makePlayer([DOT_BODY, DOT_BODY, CONTROL_HEART]));
         expect(deck.filter(id => id === DOT_BODY)).toHaveLength(1);
         expect(deck.indexOf(DOT_BODY)).toBeLessThan(deck.indexOf(CONTROL_HEART));
     });
 
-    it('yields an empty deck for a player with no skills (unreachable via any real preset)', () => {
+    it('yields an empty deck for a player with no cards (unreachable via any real preset)', () => {
         expect(buildCombatDeck(makePlayer([]))).toEqual([]);
     });
 });
@@ -184,19 +184,19 @@ describe('Spec 25 §4.3 — buildCombatDeck', () => {
 // ── Card adapters (§6) ───────────────────────────────────────────────────────
 
 describe('Spec 25 §6 — card adapters', () => {
-    it('classifyVerbClass routes a DoT skill to the dot track', () => {
+    it('classifyVerbClass routes a DoT card to the dot track', () => {
         const { verbClass, track } = classifyVerbClass(getCardById(DOT_BODY)!, lookupEffect);
         expect(verbClass).toBe('direct-dot');
         expect(track).toBe('dot');
     });
 
-    it('classifyVerbClass routes a control skill to the control track', () => {
+    it('classifyVerbClass routes a control card to the control track', () => {
         const { verbClass, track } = classifyVerbClass(getCardById(CONTROL_HEART)!, lookupEffect);
         expect(['direct-control', 'stat-debuff']).toContain(verbClass);
         expect(track).toBe('control');
     });
 
-    it('classifyVerbClass marks a payoff-burst skill as direct-damage / no track', () => {
+    it('classifyVerbClass marks a payoff-burst card as direct-damage / no track', () => {
         const { verbClass, track } = classifyVerbClass(getCardById(DAMAGE_BODY)!, lookupEffect);
         expect(verbClass).toBe('direct-damage');
         expect(track).toBe('none');
@@ -207,11 +207,11 @@ describe('Spec 25 §6 — card adapters', () => {
     });
 
     it('toCombatCard returns null for an unknown card id', () => {
-        expect(toCombatCard('not-a-real-skill', getCardById, lookupEffect)).toBeNull();
+        expect(toCombatCard('not-a-real-card', getCardById, lookupEffect)).toBeNull();
     });
 
     it('projectDeck maps known ids and drops unknown ones', () => {
-        const cards = projectDeck([DOT_BODY, 'not-a-real-skill', CONTROL_HEART], getCardById, lookupEffect);
+        const cards = projectDeck([DOT_BODY, 'not-a-real-card', CONTROL_HEART], getCardById, lookupEffect);
         expect(cards.map(c => c.id)).toEqual([DOT_BODY, CONTROL_HEART]);
     });
 });

@@ -184,14 +184,14 @@ describe('executeCard — debuff (effect application)', () => {
 });
 
 describe('executeCard — guards', () => {
-    it('throws when skill is not known', () => {
+    it('throws when card is not known', () => {
         const state = fixtureState({ body: 3 });
         const player = { ...state.player, knownCards: [] };
         expect(() => executeCard({ ...state, player }, dotCard.id, lookup))
             .toThrow(/not known/);
     });
 
-    it('throws when skill id is unknown', () => {
+    it('throws when card id is unknown', () => {
         const state = fixtureState({ body: 3 });
         const player = { ...state.player, knownCards: ['sk_unknown'] };
         expect(() => executeCard({ ...state, player }, 'sk_unknown', () => undefined))
@@ -252,7 +252,7 @@ describe('executeCard — Phase 49 casterSide=enemy', () => {
         expect(next.player.effects.some(e => e.effectId === 'buff_thorns')).toBe(false);
     });
 
-    it("throws when skill is not in the enemy's rotation", () => {
+    it("throws when card is not in the enemy's rotation", () => {
         const enemy = { ...fixtureEnemy(), cards: [] as Card[] };
         const state: CombatState = {
             ...initializeCombat(fixturePlayer(), enemy),

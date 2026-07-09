@@ -177,7 +177,7 @@ describe('Utils engine', () => {
       const baseStats = { body: 10, heart: 8, mind: 12 };
       const derived = deriveStats(baseStats);
       
-      // Derived stats use STAT_MULTIPLIERS (attack=1, skill=1, defense=3)
+      // Derived stats use STAT_MULTIPLIERS (attack=1, card=1, defense=3)
       expect(derived.physicalAttack).toBe(10);    // 10 * 1
       expect(derived.physicalDefense).toBe(30);   // 10 * 3
       expect(derived.mentalAttack).toBe(12);      // 12 * 1

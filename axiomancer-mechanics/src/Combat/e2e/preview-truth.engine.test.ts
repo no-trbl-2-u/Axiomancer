@@ -36,9 +36,9 @@ import {
 import { getActiveDotTotal } from '../effect-modifiers';
 import type { CombatDieColor, CombatEncounterState, CombatThreatPhase } from '../combat.encounter.types';
 
-function makePlayer(skills: string[]): Character {
+function makePlayer(cards: string[]): Character {
     const p = deepClone(Player);
-    p.knownCards = skills.slice();
+    p.knownCards = cards.slice();
     p.baseStats = { heart: 8, body: 8, mind: 8 };
     p.health = 400; p.maxHealth = 400;
     return p;
@@ -104,13 +104,13 @@ describe('P0-truth — the card preview is the applied number', () => {
         // v3 library: slippery-slope, straw-mans-jab, sweet-poison,
         // fallen-grace, brief-candle at minimum.
         expect(dotCards.length).toBeGreaterThanOrEqual(5);
-        for (const skill of dotCards) {
-            const card = getCard(skill.id)!;
+        for (const entry of dotCards) {
+            const card = getCard(entry.id)!;
             // Expected: Σ over enemy-targeted DoT payloads of floor(dpr×int)×dur
             // (ramp-aware) — the exact un-amplified pending total the enemy
             // carries the moment the card lands on a neutral read.
             let expected = 0;
-            for (const ce of skill.combatEffects ?? []) {
+            for (const ce of entry.combatEffects ?? []) {
                 if (ce.appliedTo !== 'opponent') continue;
                 const def = lookupEffect(ce.effectId);
                 const dot = def?.payload.damageOverTime;
@@ -122,15 +122,15 @@ describe('P0-truth — the card preview is the applied number', () => {
                     expected += Math.floor((dot.damagePerRound + Math.floor(ramp * k)) * intensity);
                 }
             }
-            expect(card.bottomDamagePreview, `${skill.id} preview must be its real lifetime HP`).toBe(expected);
+            expect(card.bottomDamagePreview, `${card.id} preview must be its real lifetime HP`).toBe(expected);
         }
     });
 
     it('non-DoT cards print NO number (real-units-or-no-number; the strike is dead)', () => {
-        for (const skill of cardLibrary) {
-            const card = getCard(skill.id)!;
+        for (const entry of cardLibrary) {
+            const card = getCard(entry.id)!;
             if (card.verbClass !== 'direct-dot') {
-                expect(card.bottomDamagePreview, `${skill.id} has no honest single number`).toBe(0);
+                expect(card.bottomDamagePreview, `${card.id} has no honest single number`).toBe(0);
             }
             expect(card.bottomActionText).not.toContain('impact ~');
         }
@@ -170,10 +170,10 @@ describe('P0-truth — the card preview is the applied number', () => {
 
     it('projectCardImpact never advertises a strike number — the strike is dead (spec 32 v3 §1)', () => {
         const s = initializeCombatEncounter(makePlayer(['slippery-slope']), makeEnemy(500, 'body'), ['slippery-slope'], 7);
-        for (const skill of cardLibrary) {
-            const card = getCard(skill.id)!;
+        for (const entry of cardLibrary) {
+            const card = getCard(entry.id)!;
             const impact = projectCardImpact(s, card);
-            expect(impact.amount, `${skill.id} must not advertise an immediate-strike number`).toBe(0);
+            expect(impact.amount, `${card.id} must not advertise an immediate-strike number`).toBe(0);
             expect(impact.track).toBe(card.effectKind);
         }
     });

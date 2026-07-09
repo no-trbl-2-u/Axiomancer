@@ -4,7 +4,7 @@
  * Combat-specific logic is split across focused modules:
  *   advantage.ts        — type-advantage relationships and modifiers
  *   stats.ts            — stat lookups for combatants
- *   dice.ts             — skill checks and crit detection
+ *   dice.ts             — card checks and crit detection
  *   damage.ts           — final damage and attack outcome
  *   health.ts           — applyDamage / heal / status checks
  *   effects.ts          — combatant-side effect manipulations
@@ -71,7 +71,7 @@ export type {
 } from './combat-effects';
 export { calculateEnemyStatMultiplier, applyMoralMeterScaling } from './difficulty';
 
-// `CombatState` constructor — shared by the skill / effects / equipment engines
+// `CombatState` constructor — shared by the card / effects / equipment engines
 // (and the Hazard-Pattern shim builds the same shape inline). The legacy
 // turn-based driver verbs that lived alongside it were removed.
 export { initializeCombat } from './combat.reducer';
@@ -134,7 +134,7 @@ export { INTERACTION_AMPLIFICATION } from './resolution.constants';
 
 // ─── Spec 25 — Hazard-Pattern Combat ──────────────────────────────────────────
 // The card-and-dice combat driver; the
-// effects + skill engines are unchanged (Spec 25 §12 Q4 recommendation (b)).
+// effects + card engines are unchanged (Spec 25 §12 Q4 recommendation (b)).
 export type {
     CombatEncounterState, CombatEncounterPhase, CombatTransition,
     CombatManaDie, CombatDieColor, CombatDieState,

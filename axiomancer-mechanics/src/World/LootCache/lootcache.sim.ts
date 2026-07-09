@@ -9,7 +9,7 @@
  * The Reliquary is PUSH-YOUR-LUCK on a LIVE dice-pool "Pick Pool": three
  * layers (the lid is easiest and richest-in-safety; deeper layers need
  * more cumulative progress AND bite harder on a jam), a single Insight
- * charge that grants a bonus die on a layer's opening roll. The skill
+ * charge that grants a bonus die on a layer's opening roll. The card
  * expression is INFORMED risk management — the policies witness it:
  *
  *  - `greedy`  — always delve, always push to crack or resist, never

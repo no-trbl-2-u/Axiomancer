@@ -1,5 +1,5 @@
 /**
- * Combat state factory + the one reducer the shared skill engine still uses.
+ * Combat state factory + the one reducer the shared card engine still uses.
  *
  * The legacy turn-based combat *driver* (round resolution, stance/action
  * progression, the battle log, the Pressure-Track win model) was removed.
@@ -7,7 +7,7 @@
  * builds as a shim to drive the shared `executeCard` (see `combat.engine.ts`)
  * — plus:
  *   - `initializeCombat`: the canonical `CombatState` constructor. Used by the
- *     skill / effects / equipment engines (and their tests) to build a fresh
+ *     card / effects / equipment engines (and their tests) to build a fresh
  *     combat state with deep-cloned combatants and equipment-seeded resources.
  *   - `incrementFriendship`: the friendship-counter bump `executeCard` applies
  *     on a successful Befriend.
@@ -97,7 +97,7 @@ export function initializeCombat(player: Character, enemy: Enemy): CombatState {
 /**
  * Increments the friendship counter on a `CombatState`.
  *
- * Used by the shared skill engine (`executeCard`) when a Befriend attempt
+ * Used by the shared card engine (`executeCard`) when a Befriend attempt
  * lands — the Hazard-Pattern engine drives `executeCard` against a
  * `CombatState` shim, so this bump still fires inside the new combat system.
  */

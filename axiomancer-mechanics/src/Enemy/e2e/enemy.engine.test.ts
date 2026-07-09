@@ -4,7 +4,7 @@
  * The Spec 07 turn-based AI strategy tests were removed with the legacy
  * turn-based combat driver — the Hazard-Pattern engine drives enemies via
  * authored threat sequences, not these strategies. What remains here is the
- * enemy registry shape, the authored skill rotations, and the stat-law
+ * enemy registry shape, the authored card rotations, and the stat-law
  * compliance guards used by the balance anchors.
  */
 
@@ -31,10 +31,10 @@ describe('ENEMY_REGISTRY', () => {
     });
 });
 
-describe('authored skill rotations (art-driven roster)', () => {
+describe('authored card rotations (art-driven roster)', () => {
     // Fodder (Grave Larva, Chattering Skull, Float-Eye, Foot-Stealer…)
-    // intentionally stays skill-less for early-game pacing; normals carry one
-    // rotation skill, elites 1-2, bosses/uniques 2-3.
+    // intentionally stays card-less for early-game pacing; normals carry one
+    // rotation card, elites 1-2, bosses/uniques 2-3.
 
     it('Ghast carries the red-herring rotation', () => {
         expect(Ghast.cards).toBeDefined();

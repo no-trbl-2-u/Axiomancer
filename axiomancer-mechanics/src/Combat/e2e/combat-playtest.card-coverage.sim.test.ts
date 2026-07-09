@@ -45,7 +45,7 @@ const WEAK_ENEMY: Enemy = deepClone(
 );
 
 /** Late-stage player who additionally knows EVERY library card — the engine's
- *  `executeCard` throws on unknown skills, and coverage must reach cards the
+ *  `executeCard` throws on unknown cards, and coverage must reach cards the
  *  stage pool might not include. (`runOneEncounter` deep-clones per run, so a
  *  single shared player is safe.) */
 function buildCoveragePlayer(): Character {

@@ -38,8 +38,8 @@ const FOCUS_CLASSES: Record<string, CombatVerbClass[]> = {
 };
 
 function verbClassOf(cardId: string): CombatVerbClass | null {
-    const skill = getCardById(cardId);
-    return skill ? classifyVerbClass(skill, lookupEffect).verbClass : null;
+    const card = getCardById(cardId);
+    return card ? classifyVerbClass(card, lookupEffect).verbClass : null;
 }
 
 const SPEC_PRESET_IDS = [
@@ -55,7 +55,7 @@ describe('preset combat decks (spec 32 v3 §8)', () => {
         expect(listDeckPresets().map(p => p.id)).toEqual([...COMBAT_DECK_PRESET_ORDER]);
     });
 
-    it('every card id in every preset resolves to a real skill', () => {
+    it('every card id in every preset resolves to a real card', () => {
         for (const preset of listDeckPresets()) {
             for (const id of preset.cardIds) {
                 expect(getCardById(id), `${preset.id} → ${id}`).toBeDefined();
@@ -72,8 +72,8 @@ describe('preset combat decks (spec 32 v3 §8)', () => {
 
             const byRarity = { common: [] as string[], uncommon: [] as string[], rare: [] as string[] };
             for (const [id, n] of counts) {
-                const skill = getCardById(id)!;
-                const rarity = rankToRarity(skill.rank);
+                const card = getCardById(id)!;
+                const rarity = rankToRarity(card.rank);
                 byRarity[rarity].push(id);
                 const expectedCopies = rarity === 'common' ? 4 : rarity === 'uncommon' ? 2 : 1;
                 expect(n, `${preset.id} → ${id} copies`).toBe(expectedCopies);

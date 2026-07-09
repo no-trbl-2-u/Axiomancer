@@ -1,7 +1,7 @@
 /**
  * Phase 93 — Damage-resist primitive hermetic e2e test
  *
- * Tests damage resistance calculation and integration with skill execution.
+ * Tests damage resistance calculation and integration with card execution.
  * Verifies Phase 80 direction (a) completion: "damage rolls separately +
  * applies its own resistance."
  */
@@ -43,14 +43,14 @@ describe('Phase 93 — Damage-resist primitive', () => {
     });
 
     it('calculateCardDamage is 0 for EVERY library card — the strike is dead (spec 32 v3 §1)', () => {
-        // basePower was deleted at the schema level; the skill engine's damage
+        // basePower was deleted at the schema level; the card engine's damage
         // step is a permanent 0. The resist primitive survives for the threat
         // side and future non-card consumers.
         const attacker = Player;
         const defender = { ...FloatEye };
-        const skill = getCardById('slippery-slope')!;
-        expect(calculateCardDamage(attacker, skill, defender)).toBe(0);
-        expect(calculateCardDamage(attacker, skill)).toBe(0);
+        const card = getCardById('slippery-slope')!;
+        expect(calculateCardDamage(attacker, card, defender)).toBe(0);
+        expect(calculateCardDamage(attacker, card)).toBe(0);
     });
 
     it('handles zero or negative base damage gracefully', () => {

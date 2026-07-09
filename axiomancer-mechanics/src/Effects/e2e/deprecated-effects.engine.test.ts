@@ -7,7 +7,7 @@
  *   debuff_poison · debuff_bleed · debuff_mark · debuff_backfire ·
  *   debuff_rapport · buff_thorns
  *
- * Effect ids that non-card content (items, consumables, the Skills system,
+ * Effect ids that non-card content (items, consumables, the Cards system,
  * enemy passives) still resolves were restored with tags
  * `["support", "non-card"]` — those may EXIST in the library JSONs but may
  * never be referenced by a combat card. Every OTHER old id is gone, and the
@@ -55,7 +55,7 @@ const CARD_EFFECT_SET = new Set([
  * Retired card-vocabulary ids (spec 32 v3 §3 "Retired"). These were the
  * pre-v3 card library's working set — every one is banned from the card
  * library forever. Some survive in the JSONs as support/non-card entries
- * (items and the Skills system still resolve them); cards may not touch them.
+ * (items and the Cards system still resolve them); cards may not touch them.
  */
 const RETIRED_CARD_VOCABULARY = [
     // DoT clones
@@ -164,7 +164,7 @@ describe('effect deprecation contract (spec 32 v3 §3) — the ban list', () => 
 
     it('support-tagged effects may EXIST in the JSONs but are never card-referenced', () => {
         // Existence: support entries stay resolvable forever (items, consumables,
-        // the Skills system, and old saves resolve them).
+        // the Cards system, and old saves resolve them).
         for (const id of supportIds) {
             expect(lookupEffect(id), `support id ${id} must stay resolvable`).toBeDefined();
         }

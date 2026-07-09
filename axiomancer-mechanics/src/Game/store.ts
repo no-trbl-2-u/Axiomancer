@@ -224,7 +224,7 @@ export type GameStore = GameState & GameActions;
 /**
  * Compute the extra envelope fields that depend on the prev→next diff.
  * Today this is only the Phase 30 `unlockedCards` bag for level-ups —
- * the list of skill ids that became eligible because the promotion
+ * the list of card ids that became eligible because the promotion
  * crossed a learning-requirement threshold.
  */
 function enrichExtra(

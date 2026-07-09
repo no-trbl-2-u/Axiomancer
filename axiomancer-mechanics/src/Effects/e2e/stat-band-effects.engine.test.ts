@@ -53,7 +53,7 @@ function combatantWithEffects(effects: ActiveEffect[]): Combatant {
 // buff_heart_attack_up, buff_body/mind/heart_defense_up) were retired
 // outright by the spec 32 v3 keyword reset — no support consumer resolves
 // them, so their cases retire with them. The survivors below are
-// support-tagged non-card effects (items / Skills system).
+// support-tagged non-card effects (items / Cards system).
 const statBandCases = [
     {
         effectId: 'buff_resistance_body',

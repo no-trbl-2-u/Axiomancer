@@ -113,7 +113,7 @@ export interface RunHazardCombatCliOptions {
     policy?: CombatAutoPolicyId;
     maxTurns?: number;
     /** Explicit deck (card ids) threaded into `initializeCombatEncounter`;
-     *  default: the engine builds one from the player's known skills. */
+     *  default: the engine builds one from the player's known cards. */
     deck?: readonly string[];
     /** Playtest stage: builds the stage player when no `player` is given. */
     stage?: CombatStageId;

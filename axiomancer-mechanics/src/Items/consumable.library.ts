@@ -6,7 +6,7 @@
  * and combat-resource grants via `resourceGrant`.
  *
  * Design notes (Spec 05b resolutions):
- *   - Q3 (B): philosophical tokens (`fallacy` / `paradox`) remain skill-only.
+ *   - Q3 (B): philosophical tokens (`fallacy` / `paradox`) remain card-only.
  *     `philosopher-tea` and `void-essence` were rewritten to grant
  *     stance tokens (`heart` / `body` / `mind`) instead so the Tier-1 →
  *     Tier-3 generation chain isn't short-circuited by an item slot.
@@ -100,7 +100,7 @@ export const consumableLibrary: Consumable[] = [
             'lingers on the tongue as a fresh argument.',
         category: 'consumable',
         // Spec 05b Q3 (B): consumables grant stance tokens only — philosophical
-        // tokens stay skill-only. The lore framing still hints at paradoxes.
+        // tokens stay card-only. The lore framing still hints at paradoxes.
         effectId: 'buff_critical_damage_up',
         resourceGrant: { mind: 2 },
         quantity: 1,

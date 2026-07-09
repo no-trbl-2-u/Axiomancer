@@ -5,12 +5,12 @@
  * `drawFromPile` / `refillPile`): Fisher-Yates shuffle, draw-up-to-N, and
  * reshuffle-the-discard when the draw pile runs dry. The Hazard engine threads
  * its own `HazardRngState`; combat threads the seedable global RNG singleton so
- * dice, deck, and skill procs share one reproducible stream (hermetic via
+ * dice, deck, and card procs share one reproducible stream (hermetic via
  * `mockFixedRng` / `setSeed`).
  *
- * The player's combat deck is built from their learned skills (§4.3). There is
+ * The player's combat deck is built from their learned cards (§4.3). There is
  * no in-combat escape card — once a fight is joined it resolves only by
- * winning or losing. Every character preset grants a starting kit of skills
+ * winning or losing. Every character preset grants a starting kit of cards
  * (`TIER_1_CARDS`), so a real player never reaches combat with an empty
  * deck; the always-available `Signature Skills` kit (`combat.signature.ts`,
  * funded by Conviction, independent of the drawn hand) is the real fallback
@@ -44,7 +44,7 @@ export function shuffleCombatDeck<T>(items: readonly T[], rng: () => number = de
  * `flags` contains loadout entries, or falls back to the full `knownCards`
  * list for backwards compatibility with saves that pre-date Phase 169.
  *
- * Card ids are skill ids (kebab-case). Reward cards stack on top of the skill
+ * Card ids are card ids (kebab-case). Reward cards stack on top of the card
  * base. No escape card is appended — see the file header.
  *
  * @param player - Character whose `knownCards` / `combatRewardCards` supply the base.
@@ -54,7 +54,7 @@ export function shuffleCombatDeck<T>(items: readonly T[], rng: () => number = de
 export function buildCombatDeck(player: Character, flags?: readonly string[]): string[] {
     const loadout = flags && flags.length > 0 ? getCombatLoadout(flags) : [];
     const known = loadout.length > 0 ? loadout : (player.knownCards ?? []);
-    // De-dup the skill base; preserve order so opening hands feel authored.
+    // De-dup the card base; preserve order so opening hands feel authored.
     const seen = new Set<string>();
     const deck: string[] = [];
     for (const id of known) {

@@ -58,7 +58,7 @@ describe('gathering balance bands', () => {
         expect(greedy.avgBitten).toBeGreaterThanOrEqual(3);
     });
 
-    it('the incentive gradient holds: greed < restraint < skill', () => {
+    it('the incentive gradient holds: greed < restraint < card', () => {
         expect(greedy.avgKeptRichness).toBeLessThan(timid.avgKeptRichness);
         expect(timid.avgKeptRichness).toBeLessThan(balanced.avgKeptRichness);
     });
