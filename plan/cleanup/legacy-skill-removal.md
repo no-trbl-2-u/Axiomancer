@@ -18,6 +18,9 @@ The bulk of the skill→card unification shipped in two merged PRs:
   `physicalSkill`/`mentalSkill`/`emotionalSkill` **derived-stat axis** and the
   dead `rollSkillCheck`/`getSkillDamageType` helpers; **(C)** renamed ~55 legacy
   card-system identifiers to `card` (waves 1–2) + preset arrays + test fixtures.
+- **WI-1** (branch `refactor/wi1-retire-legacy-combatstate-log`): retired the
+  dead `CombatState.log` befriend machinery and renamed the residual `skillId`.
+  See the WI-1 section below for the full record.
 
 Everything below is what those PRs **deliberately did not touch** because each
 item is either data-shaped, content/balance, collision-prone, or high-volume
@@ -48,45 +51,51 @@ Conviction-funded kit) and the dev-tooling sense in `.claude/` + `skills/`.
 Ordered by recommended sequence. Each is independently shippable behind its own
 PR; run `npm run verify` (mechanics + mobile + editor) before each.
 
-### WI-1 — Retire the legacy `CombatState` turn-based cluster  ★ biggest, do first
+### WI-1 — Retire the legacy `CombatState` turn-based cluster  ✅ DONE
 
-**Why it's not a rename:** `skillId` (~107 occurrences) is the combat-log field
-`playerAction.skillId` on the legacy turn-based `CombatState` — a *different*
-thing from a card id, and it **collides with `cardId`** in 8 files, so a blanket
-`skillId`→`cardId` is unsafe. The right move is to remove the legacy cluster
-rather than rename it.
+> Done 2026-07-09 on branch `refactor/wi1-retire-legacy-combatstate-log`
+> (commits `9fa7f670` machinery deletion, `f5a96468` renames). Owner decision:
+> **delete the machinery** (befriend flows through signatures + SWAY/CAPITULATE).
 
-**The cluster (all in `src/Combat/types.ts` unless noted):**
-- `Action = 'attack' | 'defend' | 'skill' | 'item' | 'flee' | 'spare' | 'exploit'`
-- `CombatPhase` value `'choosing_skill'`
-- `PlayerCombatAction.skillId`, `BattleLogEntry`, `CombatState.log`
-- The `CombatState` shim that `executeCard` runs on (`card.engine.ts`,
-  `combat.engine.ts`, `combat.reducer.ts`)
-- The **befriend predicate** `befriendabilityPredicatesPass` in
-  `src/Combat/index.ts` — it reads `state.log` filtering
-  `playerAction.action === 'skill' && playerAction.skillId !== undefined`, and
-  `Enemy.befriendabilityConfig.requiredCardUse` depends on it.
+**Investigation finding (the decider):** the `skillId`-on-log cluster was
+*already dead in the live game*, not merely legacy —
+- No live card carries the `befriend_attempt` mechanic, so
+  `isBefriendAttemptEligible` (the sole reader of the befriend predicate) is
+  never reached in real combat.
+- Even if it were, the Hazard-Pattern engine drives `executeCard` through a shim
+  (`cardShim`) that hard-codes `log: []` and never appends a `BattleLogEntry`.
+- `requiredCardUse` (the actual `skillId`-on-log reader) was authored on **zero**
+  enemies; `requiredStances` was authored on **9** enemies but read the same
+  always-empty log, so that stance-gate never evaluated true in live combat.
 
-**Files with the `skillId`↔`cardId` collision (handle per-file, no blanket sed):**
-`Cards/card.engine.ts`, `Combat/combat.cards.ts`, `Combat/combat.encounter.types.ts`,
-`Combat/combat.engine.ts`, `Combat/combat.loadout.ts`, `Combat/combat.rewards.ts`,
-`Combat/e2e/hazard-pattern-combat.engine.test.ts`, `axiomancer-mobile/state/actions.ts`.
+**What shipped:**
+- Deleted `BattleLogEntry`, `CombatState.log`, and the `'skill'` / `'choosing_skill'`
+  tokens + `CombatAction.skillId` from `Combat/types.ts`; dropped the
+  `BattleLogEntry` re-exports.
+- Gutted the `requiredStances` / `requiredCardUse` log-reading branches of
+  `befriendabilityPredicatesPass`; removed both fields from `BefriendabilityConfig`
+  and stripped the 9 vestigial `requiredStances` configs from `enemy.library.ts`.
+  Surviving befriend predicates: passive counter, `roundsThreshold`, `hpGate`.
+- Removed `CombatState.log` from the `cardShim` + `initializeCombat` constructors.
+- Renamed the residual `skillId` by what it actually holds: card ids → `cardId`
+  (card engine, `CardEvent`, `CardLookup`, `LEARN_CARD` payload, `learnCard`,
+  `combat.rewards`, `combat.loadout` codec, CLI dev-tools/game.cli); signature
+  ids → `signatureId` (`signature-cast` event, `playSignatureSkill`).
+- Deleted two mobile vestiges of the pre-Hazard-Pattern combat log
+  (`RUNTIME_TYPE_DIVERGENCE_ISSUE.md`, `aftermath-snapshot.engine.test.ts`) —
+  no live mobile source read them.
+- Updated the affected mechanics tests (befriendability-config, phase130-constants,
+  friendship-increment, autosave-throttling, phase99, combat-loadout, hazard-pattern).
 
-**Approach:**
-1. Investigate whether the legacy `CombatState`/`Action`/log is still genuinely
-   needed, or whether the Hazard-Pattern engine (`CombatEncounterState`) can
-   fully replace the shim `executeCard` runs on.
-2. If it can be retired: delete `Action`/`choosing_skill`/`PlayerCombatAction`/
-   `BattleLogEntry`/`CombatState.log`, and re-express the befriend
-   `requiredCardUse` predicate against the Hazard-Pattern play log instead of
-   the legacy log. `skillId` disappears wholesale.
-3. If it must stay: rename `skillId`→`cardId` **per file**, resolving each
-   collision by hand (an object never legitimately carries both).
+**Verify:** green across mechanics (type-check, tests-tsc, lint, vitest — the 7
+`agent-vitest-reporter` failures are the known Windows path-separator baseline),
+mobile (typecheck, lint, jest 2421), card-editor (type-check).
 
-**Acceptance:** no `skillId`/`choosing_skill`/`action: 'skill'` in code; the
-befriend `requiredCardUse` path still works (Enemy befriendability e2e green).
-
-**Risk:** high — data-shaped, collision-prone, touches the befriend win-path.
+**Deferred to other WIs (out of the CombatState cluster):**
+- `World/types.ts` reward `{ kind: 'skill'; skillId: string }` → **WI-3** (data value).
+- `Enemy.skills` (the enemy card-rotation field) + its readers, e.g. the
+  `skillIds` locals in `enemy.engine.test.ts` — a large, separate field rename;
+  **new item, see WI-4**. It was never part of the legacy log cluster.
 
 ### WI-2 — Purge the deleted `*Skill` stat from effect/affix content
 
@@ -136,14 +145,25 @@ Rename or remove (each is small, verify individually):
 - `skillCard` / `SkillCard` / `skill_card` / `SkillOption` — leftover types/vars.
 - `bodySkill` / `skillMod` / `skillCat` — stat-adjacent leftovers (may be dead
   after WI-2).
-- `nSkills`, `_skill`, `_enemy_skill_caster`, `unknownSkillId`.
+- `nSkills`, `_skill`, `_enemy_skill_caster`. (`unknownSkillId` already renamed
+  in WI-1.)
 - Residual `equippedSkills` / `knownSkills` **in comments** (`game.migrate.ts`,
   `game.reducer.ts`, a couple of test comments) — the code is gone; update the
   prose.
 
-**Acceptance:** none of the above tokens remain.
+**Bigger, not a one-off — `Enemy.skills` (the enemy card-rotation field).**
+Surfaced during WI-1. `Enemy.skills?: Card[]` is the enemy's combat card
+rotation (read by `executeCard`'s enemy path, authored across `enemy.library.ts`
+via the `skill(...)` helper, and asserted by `enemy.engine.test.ts`'s `skillIds`
+locals). Renaming it to `Enemy.cards` / `cardRotation` touches the type, the
+authoring helper, ~every enemy record, and the mobile presenters — do it as its
+own focused pass, not inline with the small one-offs above.
 
-**Risk:** low.
+**Acceptance:** none of the above tokens remain; `Enemy.skills` renamed to a
+`card`-based name (or explicitly deferred with owner sign-off).
+
+**Risk:** low for the one-offs; medium for `Enemy.skills` (wide, authored-content
+churn).
 
 ### WI-5 — Prose / comment sweep (~1,100 mentions)
 
