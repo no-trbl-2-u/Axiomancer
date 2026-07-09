@@ -1,7 +1,7 @@
 # Critique log
 
-> Last pass: 2026-07-08 at commit 31817335
-> Pass count: 9
+> Last pass: 2026-07-09 at commit 2e0a2324
+> Pass count: 10
 
 > External-observer feedback for Axiomancer. Populated by
 > `/critique` (which drives the local expo-web build with the
@@ -21,10 +21,28 @@
 - suggested fix: [user has not specified — iterate to determine]
 - source: user
 
-### [needs-user-call] Playwright MCP tools unavailable to sub-agents — recurred again (pass 9)
-- pass: 9 (commit 31817335); prior: pass 8 (commit 43088f6f),
-  pass 7 (commit aff7fece), pass 6 (commit e50e819a), pass 5
-  (commit b0707e0a), pass 1-4 (marked fixed, see Done section)
+### [needs-user-call] Playwright MCP tools unavailable to sub-agents — recurred again (pass 10)
+- pass: 10 (commit 2e0a2324); prior: pass 9 (commit 31817335),
+  pass 8 (commit 43088f6f), pass 7 (commit aff7fece), pass 6
+  (commit e50e819a), pass 5 (commit b0707e0a), pass 1-4 (marked
+  fixed, see Done section)
+- pass 10 update: seventh occurrence, sixth consecutive. Local
+  expo-web build started fresh this pass (`npx expo start --web
+  --port 8081` from `axiomancer-mobile/`) and confirmed reachable
+  (`curl -> 200`) at http://localhost:8081 before spawning
+  `playtester` — identical pre-flight to pass 9. The `playtester`
+  sub-agent's very first tool call, `mcp__playwright__browser_navigate`,
+  was rejected twice with "Claude requested permissions to use
+  mcp__playwright__browser_navigate, but you haven't granted it
+  yet." No page ever loaded; zero screens covered; zero product
+  findings this pass. `.claude/settings.json` on disk is unchanged
+  from pass 9 (still carries the 14-tool `mcp__playwright__browser_*`
+  allowlist, still untracked in git). This continues to confirm
+  the pass 6-9 diagnosis: the gap is in grant propagation to
+  Agent-tool sub-agent contexts, not the settings file content.
+  No new information surfaced this pass beyond "still broken,
+  identically" — deferring to the existing suggested fix below
+  rather than re-diagnosing.
 - viewport: n/a
 - category: infra
 - observation: fifth occurrence of this exact blocker, fourth
