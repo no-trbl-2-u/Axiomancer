@@ -42,7 +42,6 @@ import {
 import {
     COMBAT_DECK_PRESET_ORDER, getDeckPreset, type CombatDeckFocus,
 } from './combat.deck-presets';
-import { isSyntheticCard } from './combat.cards';
 import { COMBAT_SIM_POLICIES, type CombatSimPolicy, type CombatSimPolicyId } from './combat.sim-policies';
 import {
     simulateHazardPatternCombatDetailed,
@@ -167,7 +166,7 @@ function resolveCellDeck(
 export function grantDeckKnowledge(player: Character, deckCardIds: readonly string[]): void {
     player.knownCards = [...new Set([
         ...player.knownCards,
-        ...deckCardIds.filter(id => !isSyntheticCard(id)),
+        ...deckCardIds,
     ])];
 }
 

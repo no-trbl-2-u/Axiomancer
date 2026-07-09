@@ -54,7 +54,7 @@ import {
     COMBAT_HAND_SIZE, buildCombatDeck, drawCombatCards, shuffleCombatDeck,
 } from './combat.deck';
 import {
-    toCombatCard, cardStanceColor, effectImpact, riderText, isSyntheticCard,
+    toCombatCard, cardStanceColor, effectImpact, riderText,
 } from './combat.cards';
 import { recordAttribution } from './combat.attribution';
 import { canAct, getActiveEffectModifiers, getActiveDotTotal } from './effect-modifiers';
@@ -1046,7 +1046,7 @@ function playTopAction(
     card: CombatCard,
     rng: () => number,
 ): CombatTransition {
-    const skill = isSyntheticCard(card.id) ? undefined : lookupCard(card.id);
+    const skill = lookupCard(card.id);
     if (skill && skill.cardType !== 'spell') {
         return playFreeEnchant(state, uid, card, skill);
     }
@@ -1080,7 +1080,7 @@ function playBottomAction(
     dieId: string | undefined,
     _rng: () => number,
 ): CombatTransition {
-    const skill = isSyntheticCard(card.id) ? undefined : lookupCard(card.id);
+    const skill = lookupCard(card.id);
     if (!skill) return { state, events: [] };
 
     // 1. Resolve the POWERING die — Fate Engine P1 R8: the dieId the player
@@ -3063,7 +3063,7 @@ export function projectRupture(state: CombatEncounterState): number {
 /** SIPHON projection — the heal a siphon card would grant if powered now (off
  *  the projected payoff burst). */
 export function projectSiphonHeal(state: CombatEncounterState, card: CombatCard): number {
-    const skill = isSyntheticCard(card.id) ? undefined : lookupCard(card.id);
+    const skill = lookupCard(card.id);
     const mech = (skill?.specialMechanics ?? []).find(m => m.kind === 'siphon') as
         { kind: 'siphon'; pct: number } | undefined;
     if (!mech) return 0;
@@ -3072,7 +3072,7 @@ export function projectSiphonHeal(state: CombatEncounterState, card: CombatCard)
 
 /** REAP-ALL projection — the burst the Harvest capstone would deal right now. */
 export function projectReapAll(state: CombatEncounterState, card: CombatCard): { ready: boolean; amount: number } {
-    const skill = isSyntheticCard(card.id) ? undefined : lookupCard(card.id);
+    const skill = lookupCard(card.id);
     const mech = (skill?.specialMechanics ?? []).find(m => m.kind === 'reap_all') as
         Extract<CardSpecialMechanic, { kind: 'reap_all' }> | undefined;
     if (!mech) return { ready: false, amount: 0 };
@@ -3111,7 +3111,7 @@ export function projectCombatOutcome(state: CombatEncounterState): CombatOutcome
     const roundsToKill = computeRoundsToKill(state.enemy, state.round);
     const finishers: FinisherProjection[] = [];
     for (const { uid, card } of handCards(state)) {
-        const skill = isSyntheticCard(card.id) ? undefined : lookupCard(card.id);
+        const skill = lookupCard(card.id);
         const mech = (skill?.specialMechanics ?? []).find(
             m => m.kind === 'rupture' || m.kind === 'reap_all',
         );

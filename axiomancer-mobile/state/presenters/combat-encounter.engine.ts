@@ -13,7 +13,7 @@
  */
 
 import {
-    handCards as engineHandCards, getCard, getCardById, isSyntheticCard,
+    handCards as engineHandCards, getCard, getCardById,
     getDraftedDie, isPhaseStanceRevealed, cardReadPreview,
     revealedCurrentStance, resolveRead, getSignatureSkill,
     lookupEffect, READ_DAMAGE_MULT, COLOR_MATCH_DAMAGE_BONUS,
@@ -935,7 +935,7 @@ function handVM(state: CombatEncounterState): CombatCardVM[] {
         .filter(({ card }: { card: CombatCard }) => card.id !== 'card-retreat' && card.verbClass !== 'retreat')
         .map(({ uid, card }: { uid: string; card: CombatCard }) => {
         const preview = drafted ? cardReadPreview(state, card) : null;
-        const skill = isSyntheticCard(card.id) ? undefined : getCardById(card.id);
+        const skill = getCardById(card.id);
         return {
             uid, cardId: card.id, name: card.name, stance: card.stance,
             stanceColor: STANCE_COLORS[card.stance] ?? '#888',

@@ -18,7 +18,7 @@
  */
 
 import { describe, it, expect } from '@jest/globals';
-import { getCard, getCardById, isSyntheticCard, READ_DAMAGE_MULT, COLOR_MATCH_DAMAGE_BONUS } from '@mechanics';
+import { getCard, getCardById, READ_DAMAGE_MULT, COLOR_MATCH_DAMAGE_BONUS } from '@mechanics';
 import {
     faceStats, detailStats, engineHonestKind, resolvePrimary, armedReadValue,
 } from '@/state/presenters/combat-encounter.engine';
@@ -26,7 +26,7 @@ import {
 const cardOf = (id: string) => {
     const card = getCard(id);
     if (!card) throw new Error(`fixture card missing: ${id}`);
-    const skill = isSyntheticCard(card.id) ? undefined : getCardById(card.id);
+    const skill = getCardById(card.id);
     return { card, skill };
 };
 

@@ -96,10 +96,9 @@ export type CombatVerbClass =
 export type CardEffectKind = 'dot' | 'control' | 'none';
 
 /**
- * A combat card — an adapter VIEW over a library `Card` (or a synthetic card
- * like Retreat). Pure projection: never mutated, recomputed from the card +
- * effect libraries. `id` is the backing library-card id; `isSyntheticCard(id)`
- * distinguishes a synthetic card (which has no library backing) from a real one.
+ * A combat card — an adapter VIEW over a library `Card`. Pure projection: never
+ * mutated, recomputed from the card + effect libraries. `id` is the backing
+ * library-card id.
  */
 export interface CombatCard {
     /** Card id. For library-backed cards this is the source card id; synthetic

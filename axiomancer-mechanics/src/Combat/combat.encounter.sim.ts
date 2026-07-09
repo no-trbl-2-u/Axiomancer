@@ -26,7 +26,6 @@ import {
     tapFateDie,
 } from './combat.engine';
 import { RESERVE_MAX } from './combat.dice';
-import { isSyntheticCard } from './combat.cards';
 import { getPendingDotTotal } from './effects';
 import { getRng } from '../Utils/rng';
 import type {
@@ -549,7 +548,7 @@ export function simulateHazardPatternCombatDetailed(
     // explicit deck was given (known-skills path) fall back to the played set so
     // utilization reads 1.0 rather than dividing by an unknown pool.
     const deckDistinct = options.deck
-        ? new Set(options.deck.filter(id => !isSyntheticCard(id))).size
+        ? new Set(options.deck).size
         : playedIds.length;
     const deckUtilization = deckDistinct > 0 ? Math.min(1, playedIds.length / deckDistinct) : 0;
 

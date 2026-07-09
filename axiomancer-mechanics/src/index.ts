@@ -108,7 +108,7 @@ export {
     AUTHORED_THREAT_ENEMY_IDS,
     RAGE_UNLOCK_ROUND, RAGE_DAMAGE_WEIGHT, RAGE_HEAL_FRACTION,
     simulateHazardPatternCombat, runHazardCombatAutoEncounter,
-    SYNTHETIC_CARD_IDS, isSyntheticCard, mechanicText,
+    mechanicText,
     // Spec 26 / 26b — stance draft, hidden read, Conviction, Signature Skills
     TURN_DICE_COUNT, rollTurnDice, dieHasStance,
     startTurn, draftStanceDie, endTurn, resolveRead, chooseDraft, discardCombatCard,

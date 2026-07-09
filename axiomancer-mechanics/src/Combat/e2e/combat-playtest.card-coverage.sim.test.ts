@@ -16,9 +16,8 @@
  * instance of the passive), so their top action is a real play; the PAID line
  * is permanent + unique-in-play, so a second PAID copy drains as a fizzle.
  *
- * There is no synthetic retreat card any more (no in-combat retreat exists —
- * `SYNTHETIC_CARD_IDS` is now empty), so the coverage universe is exactly the
- * 70-card library with no separate synthetic-card assertion.
+ * There is no synthetic retreat card (no in-combat retreat exists), so the
+ * coverage universe is exactly the 70-card library.
  */
 
 import { describe, it, expect, afterEach, vi } from 'vitest';

@@ -209,7 +209,7 @@ export {
 export type { CombatDeckPreset, CombatDeckFocus } from './combat.deck-presets';
 export {
     toCombatCard, projectDeck, classifyVerbClass,
-    isSyntheticCard, SYNTHETIC_CARD_IDS,
+
     mechanicText,
     isCombatSynergySatisfied,
 } from './combat.cards';

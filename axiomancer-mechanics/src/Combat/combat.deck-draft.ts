@@ -22,7 +22,7 @@ import { getCardById, cardLibrary } from '../Cards/cards.library';
 import { lookupEffect } from '../Effects';
 import { getRng } from '../Utils/rng';
 import type { CombatVerbClass } from './combat.encounter.types';
-import { toCombatCard, isSyntheticCard } from './combat.cards';
+import { toCombatCard } from './combat.cards';
 import type { CombatDeckFocus } from './combat.deck-presets';
 import { buildPresetDeck } from './combat.deck-presets';
 import type { CombatStageProfile } from './combat.stage-profiles';
@@ -100,7 +100,6 @@ function buildCandidates(options: DeckDraftOptions): DraftCandidate[] {
 
     const candidates: DraftCandidate[] = [];
     for (const id of poolIds) {
-        if (isSyntheticCard(id)) continue; // synthetic cards (if any) are never drafted.
         const card = toCombatCard(id, lookupCard, lookupEffect);
         if (!card) continue;
         candidates.push({
@@ -211,7 +210,7 @@ export function resolveDeckSelection(
         case 'draft':
             return draftCombatDeck({ focus: selection.focus, size: selection.size, stage, rng });
         case 'cards':
-            return selection.cardIds.filter(id => isSyntheticCard(id) || !!getCardById(id));
+            return selection.cardIds.filter(id => !!getCardById(id));
         case 'policy-pick':
             throw new Error(
                 'resolveDeckSelection: \'policy-pick\' must be resolved by the playtest '
