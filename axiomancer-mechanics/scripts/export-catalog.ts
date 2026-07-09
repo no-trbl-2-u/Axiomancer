@@ -32,6 +32,8 @@ import { join } from 'node:path';
 import { cardLibrary } from '../src/Cards/cards.library';
 import { CARD_RANK_NAMES, rankToRarity } from '../src/Cards/types';
 import { FREE_ENCHANT_ROUNDS } from '../src/Game/game-mechanics.constants';
+import { cardOrigin } from '../src/Combat/combat.deck-presets';
+import { THEME_KEYWORDS, type CardTheme } from '../src/Cards/card-themes';
 import { mechanicText, riderText } from '../src/Combat/combat.cards';
 import { EnemyLibrary } from '../src/Enemy/enemy.library';
 import { effectsLibrary, lookupEffect } from '../src/Effects/effects.library';
@@ -133,7 +135,14 @@ function cardStats(c: any): { chips: Chip[]; lines: string[] } {
     ];
     chips.push({ k: 'Rank', v: `${CARD_RANK_NAMES[c.rank as 1] ?? c.rank} (${rankToRarity(c.rank)})` });
     chips.push({ k: 'Kind', v: c.cardType });
-    if (c.learningRequirement?.level) chips.push({ k: 'Learn', v: `Lv ${c.learningRequirement.level}` });
+    if (c.theme) {
+        chips.push({ k: 'Theme', v: c.theme });
+        const kws = THEME_KEYWORDS[c.theme as CardTheme];
+        if (kws && kws.length) chips.push({ k: 'Keywords', v: kws.join(' · ') });
+    }
+    const origin = cardOrigin(c.id);
+    chips.push({ k: 'Source', v: origin.source });
+    if (origin.presetDeck) chips.push({ k: 'Preset', v: origin.presetDeck });
 
     const lines: string[] = [];
     // Spec 32 v4 — enchant/disenchant passives live in engine hooks; their authored

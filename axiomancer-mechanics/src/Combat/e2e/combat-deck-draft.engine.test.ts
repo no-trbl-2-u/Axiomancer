@@ -15,7 +15,7 @@ import {
     draftCombatDeck, resolveDeckSelection,
     type CombatDeckSelection, type DeckDraftOptions,
 } from '../combat.deck-draft';
-import { COMBAT_STAGE_PROFILES, stageEligibleCardIds, buildStagePlayer } from '../combat.stage-profiles';
+import { COMBAT_STAGE_PROFILES, stageEligibleCardIds, buildStagePlayer, rankMaturityLevel } from '../combat.stage-profiles';
 import { buildPresetDeck } from '../combat.deck-presets';
 import { classifyVerbClass } from '../combat.cards';
 import { getCardById } from '../../Cards/cards.library';
@@ -136,7 +136,7 @@ describe('draftCombatDeck focus weighting', () => {
 });
 
 describe('draftCombatDeck stage + extraCards pools', () => {
-    it('an early-stage draft contains only tier-1, level-gated cards', () => {
+    it('an early-stage draft contains only tier-1, rank-maturity-gated cards', () => {
         const early = COMBAT_STAGE_PROFILES.early;
         for (const seed of [1, 2, 3]) {
             const deck = draftCombatDeck({ focus: 'dot', stage: early, rng: lcg(seed) });
@@ -144,7 +144,7 @@ describe('draftCombatDeck stage + extraCards pools', () => {
                 const card = getCardById(id);
                 expect(card, `unknown drafted card ${id}`).toBeDefined();
                 expect(card!.tier).toBe(1);
-                expect(card!.learningRequirement?.level ?? 1).toBeLessThanOrEqual(early.playerLevel);
+                expect(rankMaturityLevel(card!.rank)).toBeLessThanOrEqual(early.playerLevel);
             }
         }
     });
@@ -155,7 +155,6 @@ describe('draftCombatDeck stage + extraCards pools', () => {
             philosophicalAspect: 'body', description: 'test-only DoT card', tier: 1,
             targetType: 'enemy', rank: 1, cardType: 'spell',
             combatEffects: [{ effectId: 'debuff_bleed', appliedTo: 'opponent', intensity: 2, duration: 3 }],
-            learningRequirement: { level: 1 },
         };
         const overTier: Card = { ...extraDot, id: 'draft-test-extra-t3', tier: 3 };
         const options: DeckDraftOptions = {

@@ -17,6 +17,7 @@ import { cardLibrary, getCardById } from '../cards.library';
 import { rankToRarity, CARD_RANK_NAMES } from '../types';
 import type { Card } from '../types';
 import { COMBAT_REWARD_POOL, STARTING_SKILL_IDS } from '../../Combat/combat.rewards';
+import { listDeckPresets, cardOrigin } from '../../Combat/combat.deck-presets';
 
 /** The ten theme tags (spec §6) — every card carries exactly one. */
 const THEMES = [
@@ -109,6 +110,33 @@ describe('themed library — FREE/PAID anatomy (spec §2)', () => {
         for (const card of cardLibrary.filter(c => c.cardType !== 'spell')) {
             expect(card.persistentEffect, `${card.id} (${card.cardType}) must carry a one-line persistentEffect summary`).toBeTruthy();
         }
+    });
+
+    it('every library card declares a `theme` that matches its tag-derived theme (spec 32)', () => {
+        for (const card of cardLibrary) {
+            expect(card.theme, `${card.id} must declare a theme`).toBeDefined();
+            expect(card.theme, `${card.id} theme must equal its tag theme`).toBe(themeOf(card));
+        }
+    });
+
+    it("a starter card's `theme` matches its preset deck's theme", () => {
+        for (const preset of listDeckPresets()) {
+            for (const id of new Set(preset.cardIds)) {
+                expect(getCardById(id)?.theme, `${id} in preset ${preset.id}`).toBe(preset.theme);
+            }
+        }
+    });
+
+    it('cardOrigin tags every current library card as a starter of its preset deck', () => {
+        for (const card of cardLibrary) {
+            const origin = cardOrigin(card.id);
+            expect(origin.source, `${card.id} source`).toBe('starter');
+            expect(origin.presetDeck, `${card.id} presetDeck`).toBeTruthy();
+        }
+    });
+
+    it('cardOrigin tags a non-preset id as a reward', () => {
+        expect(cardOrigin('no-such-card-not-in-any-preset').source).toBe('reward');
     });
 
     it('enchantments sit player-side; disenchants attach to the enemy', () => {

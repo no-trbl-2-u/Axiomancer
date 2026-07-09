@@ -210,6 +210,44 @@ function isValidPresetCard(id: string): boolean {
 }
 
 /**
+ * How a card enters the player's collection.
+ * - `starter` — it lives in at least one preset deck (the decks a player can
+ *   pick at the start); `presetDeck` names that deck.
+ * - `reward`  — it is earned some other way (encounter reward, quest, drop).
+ *
+ * Today the rule is one-directional (starters come from presets; rewards do
+ * not appear in presets), but that is NOT enforced — a card could in future be
+ * BOTH a preset staple and a reward. This is a derived VIEW of the library, not
+ * a gate.
+ */
+export type CardSource = 'starter' | 'reward';
+
+/** A card's origin, DERIVED live from {@link COMBAT_DECK_PRESETS}. */
+export interface CardOrigin {
+    source: CardSource;
+    /** The preset deck this card belongs to (only when `source === 'starter'`). */
+    presetDeck?: string;
+    /** The preset's stable id (only when `source === 'starter'`). */
+    presetDeckId?: string;
+}
+
+/**
+ * Computes a card's origin dynamically: a card in any preset's recipe is a
+ * `starter` tagged with that preset; everything else is a `reward`. Because it
+ * reads the presets at call time, adding a card to (or removing it from) a
+ * preset re-tags it automatically — no per-card metadata to keep in sync.
+ */
+export function cardOrigin(cardId: string): CardOrigin {
+    for (const id of COMBAT_DECK_PRESET_ORDER) {
+        const preset = COMBAT_DECK_PRESETS[id];
+        if (preset && preset.cardIds.includes(cardId)) {
+            return { source: 'starter', presetDeck: preset.name, presetDeckId: preset.id };
+        }
+    }
+    return { source: 'reward' };
+}
+
+/**
  * Builds a ready-to-play deck from a preset: the curated cards (invalid ids
  * dropped). There is no escape-hatch card appended — once combat is joined it
  * resolves only by winning or losing (no in-combat retreat exists). Returns an

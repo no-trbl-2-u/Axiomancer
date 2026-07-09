@@ -43,8 +43,8 @@ function buildStore(level: number, opts: {
     return { store, captured };
 }
 
-describe('character:levelup payload — Phase 30 unit 2', () => {
-    it('emits unlockedSkills = [] when LEVEL_UP fires without a level change', () => {
+describe('character:levelup payload — cards are no longer level-gated (2026-07-08)', () => {
+    it('emits no unlockedSkills when LEVEL_UP fires without a level change', () => {
         const { store, captured } = buildStore(1, { experience: 0 });
         // experience < threshold → applyLevelUps is a no-op.
         store.getState().levelUp();
@@ -53,55 +53,29 @@ describe('character:levelup payload — Phase 30 unit 2', () => {
         // (enrichExtra returns the unchanged extra when no promotion fired.)
     });
 
-    it('lists newly-eligible tier-2 skills when crossing level 5', () => {
-        // Level 4 → level 5 unlocks the 3 tier-2 skills (default level requirement = 5).
-        // Seed XP just over the level-5 threshold.
-        const { store, captured } = buildStore(4, {
-            experience: 4 * EXPERIENCE_PER_LEVEL + 1,
-        });
-        store.getState().levelUp();
-        expect(captured).toHaveLength(1);
-        const unlocked = captured[0].payload.unlockedSkills ?? [];
-        // Default-gated tier-2 skills (level requirement = 5) unlock at L5.
-        // Content-expansion tier-2 skills carry higher explicit levels and
-        // unlock later, so assert containment rather than exact equality.
-        const defaultTier2Ids = cardLibrary
-            .filter(s => s.tier === 2 && !s.learningRequirement)
-            .map(s => s.id);
-        expect(unlocked).toEqual(expect.arrayContaining(defaultTier2Ids));
-    });
-
-    it('lists both tier-2 and tier-3 skills when a cascade crosses both thresholds', () => {
-        // Level 4 with 14000 XP (level-14 worth) cascades through 5..14.
-        // Crosses both T2 (level 5) and T3 (level 10) gates.
-        // Phase 46 — pass an alignment that satisfies both authored tier-3
-        // gates (nirvana-fallacy outlook ≤ -34, appeal-to-fear scope ≥ 34).
+    it('a real promotion unlocks NOTHING — card eligibility no longer depends on level', () => {
+        // Cross level 5 (and beyond): under the removed level gate this used to
+        // unlock the tier-2/3 skills. Now that cards carry no level requirement,
+        // eligibility is identical before and after the promotion, so the diff
+        // is empty (only alignment/stat/prereq gates could ever change it, and
+        // none of those move on a plain level-up).
         const { store, captured } = buildStore(4, {
             experience: 14 * EXPERIENCE_PER_LEVEL,
-            philosophicalAlignment: { epistemology: 0, outlook: -50, scope: 50 },
         });
         store.getState().levelUp();
-        const finalLevel = store.getState().player.level;
-        expect(finalLevel).toBeGreaterThanOrEqual(14);
-
+        expect(store.getState().player.level).toBeGreaterThanOrEqual(14);
         const unlocked = captured[0].payload.unlockedSkills ?? [];
-        // Default-gated tier-2 (level 5) and tier-3 (level 10) skills must all
-        // unlock by level 14. Higher explicit-requirement content skills only
-        // appear once their level is reached, so assert containment.
-        const defaultT2T3Ids = cardLibrary
-            .filter(s => (s.tier === 2 || s.tier === 3) && !s.learningRequirement)
-            .map(s => s.id);
-        expect(unlocked).toEqual(expect.arrayContaining(defaultT2T3Ids));
+        expect(unlocked).toEqual([]);
     });
 
-    it('omits already-known skills from the unlock list', () => {
-        const tier2KnownId = cardLibrary.find(s => s.tier === 2)!.id;
+    it('having some cards already known does not surface them on level-up either', () => {
+        const someKnown = cardLibrary.find(s => s.tier === 2)!.id;
         const { store, captured } = buildStore(4, {
             experience: 4 * EXPERIENCE_PER_LEVEL + 1,
-            knownSkills: [tier2KnownId],
+            knownSkills: [someKnown],
         });
         store.getState().levelUp();
         const unlocked = captured[0].payload.unlockedSkills ?? [];
-        expect(unlocked).not.toContain(tier2KnownId);
+        expect(unlocked).toEqual([]);
     });
 });

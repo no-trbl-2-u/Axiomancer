@@ -6,6 +6,7 @@
  */
 
 import type { AlignmentGate } from '../NPCs/types';
+import type { CardTheme } from './card-themes';
 
 /**
  * Philosophical aspect alignment for skills
@@ -87,17 +88,19 @@ export interface CombatResources {
 }
 
 /**
- * Learning requirement for a skill
- * Defines the prerequisites a character must meet to learn this skill.
- * Moral-alignment gates (Spec 10) are deferred.
+ * Learning requirement for a card.
+ * Defines the prerequisites a character must meet to learn this card.
  *
- * @property level - Minimum character level required to learn this skill
+ * NOTE (2026-07-08): the `level` minimum was REMOVED — cards no longer carry a
+ * character-level requirement (a carry-over from the legacy combat system that
+ * is no longer true). The remaining clauses (stat / prerequisite / alignment)
+ * are all optional; a card with none of them is learnable unconditionally.
+ *
  * @property statRequirementType - Optional: which base stat must meet the requirement (body/mind/heart)
  * @property statRequirementValue - Optional: minimum value for the specified stat
  * @property prerequisiteSkill - Optional: skill that must be learned before this skill can be learned
  */
 export interface CardLearningRequirement {
-    level: number;
     statRequirementType?: StatType;
     statRequirementValue?: number;
     prerequisiteSkill?: string;
@@ -424,6 +427,14 @@ export interface Card {
      * attaches to the ENEMY as a standing curse.
      */
     cardType: CardType;
+    /**
+     * Spec 32 — the card's THEME (one of ten). A theme is a family of keywords
+     * ({@link CardTheme} / `THEME_KEYWORDS`): the two signatures plus the utility
+     * keywords it synergises with. Drives the catalog's theme/keyword search.
+     * Every library card declares one; optional only so throwaway test fixtures
+     * need not (the curated-library suite asserts real cards carry it).
+     */
+    theme?: CardTheme;
     /**
      * Spec 32 v3 — the authored FREE (dieless) line for SPELLS. Budget law:
      * FREE ≈ 25-35% of the card's total points.

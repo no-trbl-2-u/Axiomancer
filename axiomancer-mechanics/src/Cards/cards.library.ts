@@ -33,6 +33,7 @@ import { bindSandboxLibraryGuard, getSandboxCard } from './cards.sandbox';
 
 const slipperySlope: Card = {
     id: 'slippery-slope',
+    theme: 'affliction',
     name: 'Slippery Slope',
     category: 'fallacy',
     philosophicalAspect: 'body',
@@ -44,13 +45,13 @@ const slipperySlope: Card = {
     // pts: poison i1 d4 ramp lifetime 10/3 ≈ 3.3 + FREE tick 0.6 = 3.9 → Doxa (starter)
     free: { tickOne: true },
     combatEffects: [{ effectId: 'debuff_poison', appliedTo: 'opponent', intensity: 1 }],
-    learningRequirement: { level: 1 },
     addedIn: '2026-07-08',
     tags: ['affliction', 'dot', 'starter'],
 };
 
 const strawMansJab: Card = {
     id: 'straw-mans-jab',
+    theme: 'affliction',
     name: "Straw Man's Jab",
     category: 'fallacy',
     philosophicalAspect: 'body',
@@ -63,13 +64,13 @@ const strawMansJab: Card = {
     free: { tickOne: true },
     combatEffects: [{ effectId: 'debuff_bleed', appliedTo: 'opponent', intensity: 2, duration: 2 }],
     dieBonus: { onColor: 'body', rider: { bonusIntensity: 1 } },
-    learningRequirement: { level: 2 },
     addedIn: '2026-07-08',
     tags: ['affliction', 'dot'],
 };
 
 const festeringArgument: Card = {
     id: 'festering-argument',
+    theme: 'affliction',
     name: 'Festering Argument',
     category: 'fallacy',
     philosophicalAspect: 'mind',
@@ -81,13 +82,13 @@ const festeringArgument: Card = {
     // pts: +1 duration to ALL DoTs ≈ 1/dot × expected 2-3 live dots ≈ 5.5 + tick 0.6 ≈ 6.1 → Thesis
     free: { tickOne: true },
     specialMechanics: [{ kind: 'extend_dots', turns: 1 }],
-    learningRequirement: { level: 4 },
     addedIn: '2026-07-08',
     tags: ['affliction', 'glue'],
 };
 
 const currysConversion: Card = {
     id: 'currys-conversion',
+    theme: 'affliction',
     name: "Curry's Conversion",
     category: 'paradox',
     philosophicalAspect: 'mind',
@@ -99,13 +100,13 @@ const currysConversion: Card = {
     // pts: convert bleed↔poison +1 int ≈ 1.5/instance × ~2 + tempo value ≈ 6.5 + draw 2 ≈ 8.5 → Theorem
     free: { drawCards: 1 },
     specialMechanics: [{ kind: 'convert_dots', bonusIntensity: 1 }],
-    learningRequirement: { level: 6 },
     addedIn: '2026-07-08',
     tags: ['affliction', 'glue'],
 };
 
 const resonanceDetonation: Card = {
     id: 'resonance-detonation',
+    theme: 'affliction',
     name: 'Resonance Detonation',
     category: 'paradox',
     philosophicalAspect: 'heart',
@@ -142,13 +143,13 @@ const resonanceDetonation: Card = {
         { kind: 'siphon', pct: 0.35 },
         { kind: 'reprise', count: 2, fireFree: true },
     ],
-    learningRequirement: { level: 10 },
     addedIn: '2026-07-08',
     tags: ['affliction', 'payoff', 'recursion'],
 };
 
 const venomAndVein: Card = {
     id: 'venom-and-vein',
+    theme: 'affliction',
     persistentEffect: 'Every bleed or poison you apply lands at +1 intensity.',
     name: 'Venom and Vein',
     category: 'fallacy',
@@ -159,13 +160,13 @@ const venomAndVein: Card = {
     tier: 2, rank: 5, cardType: 'enchantment',
     targetType: 'self',
     // pts: persistent +1 intensity on every bleed/poison application ≈ 1.5 × ~8 triggers × min-4 law ≈ 12 → Axiom
-    learningRequirement: { level: 10 },
     addedIn: '2026-07-08',
     tags: ['affliction', 'enchantment'],
 };
 
 const suppuratingCurse: Card = {
     id: 'suppurating-curse',
+    theme: 'affliction',
     persistentEffect: 'Doubles the total enemy damage-over-time each round.',
     name: 'Suppurating Curse',
     category: 'fallacy',
@@ -180,7 +181,6 @@ const suppuratingCurse: Card = {
     // second tick equal to the round's real DoT throughput), rest of combat
     // (Aporia: rule-rewriter). Deliberate late-stage lever; see engine comment
     // at the `suppurating-curse` hook (the description matches this doubling).
-    learningRequirement: { level: 12 },
     addedIn: '2026-07-08',
     tags: ['affliction', 'disenchant'],
 };
@@ -189,6 +189,7 @@ const suppuratingCurse: Card = {
 
 const exordium: Card = {
     id: 'exordium',
+    theme: 'peroration',
     name: 'Exordium',
     category: 'fallacy',
     philosophicalAspect: 'heart',
@@ -202,13 +203,13 @@ const exordium: Card = {
     free: { premises: 1 },
     combatEffects: [{ effectId: 'debuff_argument_wound', appliedTo: 'opponent', duration: 2 }],
     specialMechanics: [{ kind: 'premise', count: 1 }, { kind: 'rider', rider: { drawCards: 1 } }],
-    learningRequirement: { level: 1 },
     addedIn: '2026-07-08',
     tags: ['peroration', 'exposure'],
 };
 
 const openingStatement: Card = {
     id: 'opening-statement',
+    theme: 'peroration',
     name: 'Opening Statement',
     category: 'fallacy',
     philosophicalAspect: 'heart',
@@ -225,13 +226,13 @@ const openingStatement: Card = {
         { effectId: 'debuff_argument_wound', appliedTo: 'opponent', duration: 3 },
     ],
     specialMechanics: [{ kind: 'premise', count: 2 }],
-    learningRequirement: { level: 2 },
     addedIn: '2026-07-08',
     tags: ['peroration', 'exposure'],
 };
 
 const mountingCase: Card = {
     id: 'mounting-case',
+    theme: 'peroration',
     name: 'Mounting Case',
     category: 'fallacy',
     philosophicalAspect: 'mind',
@@ -249,13 +250,13 @@ const mountingCase: Card = {
     ],
     specialMechanics: [{ kind: 'premise', count: 2 }],
     threshold: { color: 'heart', count: 2, rider: { premises: 1 } },
-    learningRequirement: { level: 4 },
     addedIn: '2026-07-08',
     tags: ['peroration', 'exposure'],
 };
 
 const peroratioInterrupta: Card = {
     id: 'peroratio-interrupta',
+    theme: 'peroration',
     name: 'Peroratio Interrupta',
     category: 'paradox',
     philosophicalAspect: 'mind',
@@ -271,13 +272,13 @@ const peroratioInterrupta: Card = {
     // (0.6) keeps the card in the uncommon band; a draw rider tips it over.
     free: { tickOne: true },
     specialMechanics: [{ kind: 'rupture' }],
-    learningRequirement: { level: 6 },
     addedIn: '2026-07-08',
     tags: ['peroration', 'payoff'],
 };
 
 const theClosingWord: Card = {
     id: 'the-closing-word',
+    theme: 'peroration',
     name: 'The Closing Word',
     category: 'fallacy',
     philosophicalAspect: 'heart',
@@ -293,13 +294,13 @@ const theClosingWord: Card = {
         kind: 'peroration', at: 6, concedeAt: 8,
         rider: { ruptureMarks: 3, drawCards: 2, conviction: 2 },
     }],
-    learningRequirement: { level: 10 },
     addedIn: '2026-07-08',
     tags: ['peroration', 'payoff', 'alt-win'],
 };
 
 const practicedCadence: Card = {
     id: 'practiced-cadence',
+    theme: 'peroration',
     persistentEffect: '+1 Premise on the first card you play each turn.',
     name: 'Practiced Cadence',
     category: 'fallacy',
@@ -310,13 +311,13 @@ const practicedCadence: Card = {
     tier: 2, rank: 5, cardType: 'enchantment',
     targetType: 'self',
     // pts: persistent +1 Premise on the first card each turn ≈ 0.8 × ~10 turns, min-4 law ≈ 12 → Axiom
-    learningRequirement: { level: 10 },
     addedIn: '2026-07-08',
     tags: ['peroration', 'enchantment'],
 };
 
 const captiveAudience: Card = {
     id: 'captive-audience',
+    theme: 'peroration',
     persistentEffect: 'While you hold 4+ Premises, the enemy stays marked.',
     name: 'Captive Audience',
     category: 'fallacy',
@@ -327,7 +328,6 @@ const captiveAudience: Card = {
     tier: 2, rank: 6, cardType: 'disenchant',
     targetType: 'enemy',
     // pts: engine text — while you hold 4+ Premises the enemy stays marked (Aporia)
-    learningRequirement: { level: 12 },
     addedIn: '2026-07-08',
     tags: ['peroration', 'disenchant'],
 };
@@ -336,6 +336,7 @@ const captiveAudience: Card = {
 
 const sketchOfAThought: Card = {
     id: 'sketch-of-a-thought',
+    theme: 'forge',
     name: 'Sketch of a Thought',
     category: 'paradox',
     philosophicalAspect: 'mind',
@@ -351,13 +352,13 @@ const sketchOfAThought: Card = {
     combatEffects: [{ effectId: 'debuff_kindling_ember', appliedTo: 'opponent', intensity: 1, duration: 3 }],
     dieBonus: { onColor: 'mind', rider: { bonusIntensity: 1 } },
     specialMechanics: [{ kind: 'create_temporary_die', color: 'mind' }],
-    learningRequirement: { level: 1 },
     addedIn: '2026-07-08',
     tags: ['forge', 'dice', 'dot'],
 };
 
 const halfStep: Card = {
     id: 'half-step',
+    theme: 'forge',
     name: 'Half-Step',
     category: 'paradox',
     philosophicalAspect: 'body',
@@ -370,13 +371,13 @@ const halfStep: Card = {
     // against scoreCard(), fits the 1.5-7.5 Doxa/Lemma band for rank 2.
     free: { guard: 2 },
     specialMechanics: [{ kind: 'guard', amount: 5 }, { kind: 'grant_pip', count: 2 }],
-    learningRequirement: { level: 2 },
     addedIn: '2026-07-08',
     tags: ['forge', 'defense'],
 };
 
 const bootstrapLoop: Card = {
     id: 'bootstrap-loop',
+    theme: 'forge',
     name: 'Bootstrap Loop',
     category: 'paradox',
     philosophicalAspect: 'mind',
@@ -389,13 +390,13 @@ const bootstrapLoop: Card = {
     free: { conviction: 1 },
     specialMechanics: [{ kind: 'create_temporary_die', color: 'wild' }],
     threshold: { color: 'mind', count: 2, rider: { pips: 1 } },
-    learningRequirement: { level: 4 },
     addedIn: '2026-07-08',
     tags: ['forge', 'dice'],
 };
 
 const exNihilo: Card = {
     id: 'ex-nihilo',
+    theme: 'forge',
     name: 'Ex Nihilo',
     category: 'paradox',
     philosophicalAspect: 'mind',
@@ -416,13 +417,13 @@ const exNihilo: Card = {
         { kind: 'bank_spent_die' },
     ],
     threshold: { color: 'mind', count: 3, rider: { pips: 1 } },
-    learningRequirement: { level: 6 },
     addedIn: '2026-07-08',
     tags: ['forge', 'dice', 'floating'],
 };
 
 const theOvertake: Card = {
     id: 'the-overtake',
+    theme: 'forge',
     name: 'The Overtake',
     category: 'paradox',
     philosophicalAspect: 'body',
@@ -449,13 +450,13 @@ const theOvertake: Card = {
         { kind: 'rupture', fuelPerPip: 3.5, bonusPct: 0.5 },
         { kind: 'refresh_die' },
     ],
-    learningRequirement: { level: 10 },
     addedIn: '2026-07-08',
     tags: ['forge', 'payoff'],
 };
 
 const anvilOfForm: Card = {
     id: 'anvil-of-form',
+    theme: 'forge',
     persistentEffect: 'Every kindled or floating die arrives with +1 pip.',
     name: 'Anvil of Form',
     category: 'paradox',
@@ -466,13 +467,13 @@ const anvilOfForm: Card = {
     tier: 2, rank: 5, cardType: 'enchantment',
     targetType: 'self',
     // pts: persistent +1 pip on every kindled/floating die ≈ 1.5 × ~6 forges, min-4 ≈ 12 → Axiom
-    learningRequirement: { level: 10 },
     addedIn: '2026-07-08',
     tags: ['forge', 'enchantment'],
 };
 
 const entropyTax: Card = {
     id: 'entropy-tax',
+    theme: 'forge',
     persistentEffect: 'Every kindled or floating die you spend marks the enemy.',
     name: 'Entropy Tax',
     category: 'paradox',
@@ -483,7 +484,6 @@ const entropyTax: Card = {
     tier: 2, rank: 6, cardType: 'disenchant',
     targetType: 'enemy',
     // pts: engine text — every kindled/floating spend marks the enemy (Aporia)
-    learningRequirement: { level: 12 },
     addedIn: '2026-07-08',
     tags: ['forge', 'disenchant'],
 };
@@ -492,6 +492,7 @@ const entropyTax: Card = {
 
 const againstMyJudgment: Card = {
     id: 'against-my-judgment',
+    theme: 'akrasia',
     name: 'Against My Judgment',
     category: 'paradox',
     philosophicalAspect: 'heart',
@@ -504,13 +505,13 @@ const againstMyJudgment: Card = {
     free: { conviction: 1 },
     combatEffects: [{ effectId: 'debuff_mark', appliedTo: 'self', duration: 2 }],
     specialMechanics: [{ kind: 'rider', rider: { drawCards: 2 } }],
-    learningRequirement: { level: 1 },
     addedIn: '2026-07-08',
     tags: ['akrasia'],
 };
 
 const sweetPoison: Card = {
     id: 'sweet-poison',
+    theme: 'akrasia',
     name: 'Sweet Poison',
     category: 'fallacy',
     philosophicalAspect: 'body',
@@ -525,13 +526,13 @@ const sweetPoison: Card = {
         { effectId: 'debuff_poison', appliedTo: 'opponent', intensity: 2 },
         { effectId: 'debuff_bleed', appliedTo: 'self', intensity: 1, duration: 2 },
     ],
-    learningRequirement: { level: 2 },
     addedIn: '2026-07-08',
     tags: ['akrasia', 'dot'],
 };
 
 const selfFlagellant: Card = {
     id: 'self-flagellant',
+    theme: 'akrasia',
     name: 'Self-Flagellant',
     category: 'fallacy',
     philosophicalAspect: 'body',
@@ -552,13 +553,13 @@ const selfFlagellant: Card = {
         { kind: 'recoil', hp: 5 },
         { kind: 'rupture', bonusPct: 0.1 },
     ],
-    learningRequirement: { level: 4 },
     addedIn: '2026-07-08',
     tags: ['akrasia', 'dot'],
 };
 
 const fallenGrace: Card = {
     id: 'fallen-grace',
+    theme: 'akrasia',
     name: 'Fallen Grace',
     category: 'paradox',
     philosophicalAspect: 'heart',
@@ -571,13 +572,13 @@ const fallenGrace: Card = {
     free: { drawCards: 1 },
     combatEffects: [{ effectId: 'debuff_bleed', appliedTo: 'opponent', intensity: 2, duration: 3 }],
     fallen: { rider: { healHp: 4 } },
-    learningRequirement: { level: 6 },
     addedIn: '2026-07-08',
     tags: ['akrasia', 'dot'],
 };
 
 const pactOfAkrasia: Card = {
     id: 'pact-of-akrasia',
+    theme: 'akrasia',
     name: 'Pact of Akrasia',
     category: 'paradox',
     philosophicalAspect: 'body',
@@ -593,7 +594,6 @@ const pactOfAkrasia: Card = {
     // Phase 46 alignment gate — only a pessimist signs in blood (inherits the
     // cut nirvana-fallacy's outlook gate).
     learningRequirement: {
-        level: 10,
         requiresAlignment: { axis: 'outlook', op: 'lte', value: -34 },
     },
     addedIn: '2026-07-08',
@@ -602,6 +602,7 @@ const pactOfAkrasia: Card = {
 
 const crownOfThorns: Card = {
     id: 'crown-of-thorns',
+    theme: 'akrasia',
     persistentEffect: 'While Fallen, your status applications land at +1 intensity.',
     name: 'Crown of Thorns',
     category: 'paradox',
@@ -612,13 +613,13 @@ const crownOfThorns: Card = {
     tier: 2, rank: 5, cardType: 'enchantment',
     targetType: 'self',
     // pts: persistent +1 intensity on applications while FALLEN ≈ 1.5 × ~7 gated ×0.5 ≈ 11 → Axiom
-    learningRequirement: { level: 10 },
     addedIn: '2026-07-08',
     tags: ['akrasia', 'enchantment'],
 };
 
 const mirrorOfGuilt: Card = {
     id: 'mirror-of-guilt',
+    theme: 'akrasia',
     persistentEffect: 'Every self-debuff you take also lands one stack on the enemy.',
     name: 'Mirror of Guilt',
     category: 'paradox',
@@ -629,7 +630,6 @@ const mirrorOfGuilt: Card = {
     tier: 2, rank: 6, cardType: 'disenchant',
     targetType: 'enemy',
     // pts: engine text — every self-debuff you gain lands 1 stack on the enemy (Aporia)
-    learningRequirement: { level: 12 },
     addedIn: '2026-07-08',
     tags: ['akrasia', 'disenchant'],
 };
@@ -638,6 +638,7 @@ const mirrorOfGuilt: Card = {
 
 const zenosHalfStep: Card = {
     id: 'zenos-half-step',
+    theme: 'control',
     name: "Zeno's Half-Step",
     category: 'paradox',
     philosophicalAspect: 'body',
@@ -649,13 +650,13 @@ const zenosHalfStep: Card = {
     // pts: STAGGER 1 (~half a phase-deny, 2) + FREE guard 2 (0.5) + tempo ≈ 3.5 → Doxa
     free: { guard: 2 },
     specialMechanics: [{ kind: 'stagger', rungs: 1 }],
-    learningRequirement: { level: 1 },
     addedIn: '2026-07-08',
     tags: ['control'],
 };
 
 const redHerring: Card = {
     id: 'red-herring',
+    theme: 'control',
     name: 'Red Herring',
     category: 'fallacy',
     philosophicalAspect: 'mind',
@@ -668,13 +669,13 @@ const redHerring: Card = {
     free: { drawCards: 1 },
     combatEffects: [{ effectId: 'debuff_backfire', appliedTo: 'opponent', intensity: 2, duration: 2 }],
     dieBonus: { onColor: 'mind', rider: { bonusDuration: 1 } },
-    learningRequirement: { level: 2 },
     addedIn: '2026-07-08',
     tags: ['control'],
 };
 
 const undistributedMiddle: Card = {
     id: 'undistributed-middle',
+    theme: 'control',
     name: 'Undistributed Middle',
     category: 'fallacy',
     philosophicalAspect: 'mind',
@@ -693,13 +694,13 @@ const undistributedMiddle: Card = {
     combatEffects: [{ effectId: 'debuff_backfire', appliedTo: 'opponent', intensity: 2, duration: 3 }],
     specialMechanics: [{ kind: 'stagger', rungs: 1 }],
     threshold: { color: 'mind', count: 3, rider: { stagger: 1, bonusIntensity: 1 } },
-    learningRequirement: { level: 4 },
     addedIn: '2026-07-08',
     tags: ['control'],
 };
 
 const arrowParadox: Card = {
     id: 'arrow-paradox',
+    theme: 'control',
     name: 'Arrow Paradox',
     category: 'paradox',
     philosophicalAspect: 'body',
@@ -715,13 +716,13 @@ const arrowParadox: Card = {
     free: { guard: 2 },
     specialMechanics: [{ kind: 'lock_stance' }, { kind: 'stagger', rungs: 1 }],
     combatEffects: [{ effectId: 'debuff_backfire', appliedTo: 'opponent', intensity: 1, duration: 2 }],
-    learningRequirement: { level: 6 },
     addedIn: '2026-07-08',
     tags: ['control'],
 };
 
 const paralysisOfAnalysis: Card = {
     id: 'paralysis-of-analysis',
+    theme: 'control',
     name: 'Paralysis of Analysis',
     category: 'fallacy',
     philosophicalAspect: 'mind',
@@ -741,13 +742,13 @@ const paralysisOfAnalysis: Card = {
     combatEffects: [{ effectId: 'debuff_backfire_acute', appliedTo: 'opponent', intensity: 3, duration: 3 }],
     specialMechanics: [{ kind: 'stagger', rungs: 2 }],
     dieBonus: { onColor: 'mind', rider: { bonusIntensity: 2, bonusDuration: 1 } },
-    learningRequirement: { level: 10 },
     addedIn: '2026-07-08',
     tags: ['control', 'payoff'],
 };
 
 const achillesAndTheTortoise: Card = {
     id: 'achilles-and-the-tortoise',
+    theme: 'control',
     persistentEffect: 'Draw 1 card each time you deny an enemy turn.',
     name: 'Achilles and the Tortoise',
     category: 'paradox',
@@ -758,13 +759,13 @@ const achillesAndTheTortoise: Card = {
     tier: 2, rank: 5, cardType: 'enchantment',
     targetType: 'self',
     // pts: persistent draw 1 per denied enemy turn ≈ 2 × ~5 denies gated, min-4 ≈ 12 → Axiom
-    learningRequirement: { level: 10 },
     addedIn: '2026-07-08',
     tags: ['control', 'enchantment'],
 };
 
 const quagmireOfDoubt: Card = {
     id: 'quagmire-of-doubt',
+    theme: 'control',
     persistentEffect: 'Enemy telegraphs enter play one rung lower.',
     name: 'Quagmire of Doubt',
     category: 'fallacy',
@@ -775,7 +776,6 @@ const quagmireOfDoubt: Card = {
     tier: 2, rank: 6, cardType: 'disenchant',
     targetType: 'enemy',
     // pts: engine text — telegraphs enter play 1 rung lower, rest of combat (Aporia)
-    learningRequirement: { level: 12 },
     addedIn: '2026-07-08',
     tags: ['control', 'disenchant'],
 };
@@ -784,6 +784,7 @@ const quagmireOfDoubt: Card = {
 
 const glimpse: Card = {
     id: 'glimpse',
+    theme: 'oracle',
     name: 'Glimpse',
     category: 'paradox',
     philosophicalAspect: 'mind',
@@ -798,13 +799,13 @@ const glimpse: Card = {
     free: { foretell: 1 },
     combatEffects: [{ effectId: 'debuff_foretold_wound', appliedTo: 'opponent', duration: 2 }],
     specialMechanics: [{ kind: 'foretell', count: 2 }],
-    learningRequirement: { level: 1 },
     addedIn: '2026-07-08',
     tags: ['oracle', 'exposure'],
 };
 
 const signsAndPortents: Card = {
     id: 'signs-and-portents',
+    theme: 'oracle',
     name: 'Signs and Portents',
     category: 'paradox',
     philosophicalAspect: 'heart',
@@ -816,13 +817,13 @@ const signsAndPortents: Card = {
     // pts: OMEN(draw 2 = 4 ×0.6 omen-odds = 2.4) + FREE foretell (0.35) + info value ≈ 4.4 → Lemma
     free: { foretell: 1 },
     specialMechanics: [{ kind: 'omen', rider: { drawCards: 2 } }],
-    learningRequirement: { level: 2 },
     addedIn: '2026-07-08',
     tags: ['oracle'],
 };
 
 const cassandrasBurden: Card = {
     id: 'cassandras-burden',
+    theme: 'oracle',
     name: "Cassandra's Burden",
     category: 'paradox',
     philosophicalAspect: 'heart',
@@ -841,13 +842,13 @@ const cassandrasBurden: Card = {
         kind: 'omen',
         rider: { guard: 4 },
     }],
-    learningRequirement: { level: 4 },
     addedIn: '2026-07-08',
     tags: ['oracle', 'exposure'],
 };
 
 const delphicAmbiguity: Card = {
     id: 'delphic-ambiguity',
+    theme: 'oracle',
     name: 'Delphic Ambiguity',
     category: 'paradox',
     philosophicalAspect: 'mind',
@@ -866,13 +867,13 @@ const delphicAmbiguity: Card = {
         { kind: 'foretell', count: 1 },
     ],
     dieBonus: { onColor: 'mind', rider: { pips: 1 } },
-    learningRequirement: { level: 6 },
     addedIn: '2026-07-08',
     tags: ['oracle', 'payoff'],
 };
 
 const prophecyFulfilled: Card = {
     id: 'prophecy-fulfilled',
+    theme: 'oracle',
     name: 'Prophecy Fulfilled',
     category: 'paradox',
     philosophicalAspect: 'mind',
@@ -884,13 +885,13 @@ const prophecyFulfilled: Card = {
     // pts: RUPTURE (4 + fuel) + 3 fuel per omen hit ≈ 13 with a played oracle engine → Axiom
     free: { foretell: 1 },
     specialMechanics: [{ kind: 'rupture', fuelPerOmenHit: 3 }],
-    learningRequirement: { level: 10 },
     addedIn: '2026-07-08',
     tags: ['oracle', 'payoff'],
 };
 
 const theOraclesEye: Card = {
     id: 'the-oracles-eye',
+    theme: 'oracle',
     persistentEffect: 'The next enemy stance is always revealed, and your omens hit harder.',
     name: "The Oracle's Eye",
     category: 'paradox',
@@ -901,13 +902,13 @@ const theOraclesEye: Card = {
     tier: 2, rank: 5, cardType: 'enchantment',
     targetType: 'self',
     // pts: persistent always-revealed next stance + omen riders ×1.5 ≈ 12 (min-4 law) → Axiom
-    learningRequirement: { level: 10 },
     addedIn: '2026-07-08',
     tags: ['oracle', 'enchantment'],
 };
 
 const fatedCourse: Card = {
     id: 'fated-course',
+    theme: 'oracle',
     persistentEffect: 'Every omen that hits marks the foe.',
     name: 'Fated Course',
     category: 'paradox',
@@ -918,7 +919,6 @@ const fatedCourse: Card = {
     tier: 2, rank: 6, cardType: 'disenchant',
     targetType: 'enemy',
     // pts: engine text — every hit omen marks the foe, rest of combat (Aporia)
-    learningRequirement: { level: 12 },
     addedIn: '2026-07-08',
     tags: ['oracle', 'disenchant'],
 };
@@ -927,6 +927,7 @@ const fatedCourse: Card = {
 
 const briefCandle: Card = {
     id: 'brief-candle',
+    theme: 'harvest',
     name: 'Brief Candle',
     category: 'fallacy',
     philosophicalAspect: 'body',
@@ -939,13 +940,13 @@ const briefCandle: Card = {
     // Doxa, in-budget.
     free: { souls: 1 },
     combatEffects: [{ effectId: 'debuff_bleed', appliedTo: 'opponent', intensity: 2, duration: 1 }],
-    learningRequirement: { level: 1 },
     addedIn: '2026-07-08',
     tags: ['harvest', 'dot'],
 };
 
 const mementoMori: Card = {
     id: 'memento-mori',
+    theme: 'harvest',
     name: 'Memento Mori',
     category: 'paradox',
     philosophicalAspect: 'mind',
@@ -958,13 +959,13 @@ const mementoMori: Card = {
     // (1.5) ≈ 4.25 — matches Lemma-tier budget.
     free: { souls: 2 },
     combatEffects: [{ effectId: 'debuff_mark', appliedTo: 'opponent', intensity: 2, duration: 1 }],
-    learningRequirement: { level: 2 },
     addedIn: '2026-07-08',
     tags: ['harvest', 'exposure'],
 };
 
 const winnowing: Card = {
     id: 'winnowing',
+    theme: 'harvest',
     name: 'Winnowing',
     category: 'fallacy',
     philosophicalAspect: 'body',
@@ -977,13 +978,13 @@ const winnowing: Card = {
     // tick 0.6 ≈ 7.5-8.5 → Thesis-tier.
     free: { tickOne: true },
     specialMechanics: [{ kind: 'consume_affliction', souls: 2 }],
-    learningRequirement: { level: 4 },
     addedIn: '2026-07-08',
     tags: ['harvest', 'payoff'],
 };
 
 const theGleanersDue: Card = {
     id: 'the-gleaners-due',
+    theme: 'harvest',
     name: "The Gleaner's Due",
     category: 'fallacy',
     philosophicalAspect: 'mind',
@@ -997,13 +998,13 @@ const theGleanersDue: Card = {
     // Soul ("a coin pressed back into your palm on the way out"), net drain 1.
     free: { drawCards: 1, souls: 1 },
     specialMechanics: [{ kind: 'reap', cost: 2, rider: { drawCards: 2, souls: 1 }, kindle: 'mind' }],
-    learningRequirement: { level: 6 },
     addedIn: '2026-07-08',
     tags: ['harvest'],
 };
 
 const theReaping: Card = {
     id: 'the-reaping',
+    theme: 'harvest',
     name: 'The Reaping',
     category: 'fallacy',
     philosophicalAspect: 'body',
@@ -1016,13 +1017,13 @@ const theReaping: Card = {
     // bank) + SIPHON 40% of the burst back as healing + FREE tick 0.6 ≈ 17-19.
     free: { tickOne: true },
     specialMechanics: [{ kind: 'reap_all', burstPerSoul: 4 }, { kind: 'siphon', pct: 0.4 }],
-    learningRequirement: { level: 10 },
     addedIn: '2026-07-08',
     tags: ['harvest', 'payoff'],
 };
 
 const boneOrchard: Card = {
     id: 'bone-orchard',
+    theme: 'harvest',
     persistentEffect: 'Drain 1 HP from the enemy for every Soul you gain.',
     name: 'Bone Orchard',
     category: 'fallacy',
@@ -1033,13 +1034,13 @@ const boneOrchard: Card = {
     tier: 2, rank: 5, cardType: 'enchantment',
     targetType: 'self',
     // pts: persistent 1 HP per Soul gained (soul-gated drip) ≈ 1 × ~12 souls, min-4 ≈ 12 → Axiom
-    learningRequirement: { level: 10 },
     addedIn: '2026-07-08',
     tags: ['harvest', 'enchantment'],
 };
 
 const theTithe: Card = {
     id: 'the-tithe',
+    theme: 'harvest',
     persistentEffect: 'Enemy afflictions expire one turn sooner (faster Soul churn).',
     name: 'The Tithe',
     category: 'fallacy',
@@ -1050,7 +1051,6 @@ const theTithe: Card = {
     tier: 2, rank: 6, cardType: 'disenchant',
     targetType: 'enemy',
     // pts: engine text — enemy afflictions expire 1 turn sooner (faster Soul churn) (Aporia)
-    learningRequirement: { level: 12 },
     addedIn: '2026-07-08',
     tags: ['harvest', 'disenchant'],
 };
@@ -1059,6 +1059,7 @@ const theTithe: Card = {
 
 const softWord: Card = {
     id: 'soft-word',
+    theme: 'charm',
     name: 'Soft Word',
     category: 'fallacy',
     philosophicalAspect: 'heart',
@@ -1071,13 +1072,13 @@ const softWord: Card = {
     free: { healHp: 2 },
     specialMechanics: [{ kind: 'sway', amount: 3 }],
     dieBonus: { onColor: 'heart', rider: { sway: 1 } },
-    learningRequirement: { level: 1 },
     addedIn: '2026-07-08',
     tags: ['charm', 'alt-win'],
 };
 
 const disarmingSmile: Card = {
     id: 'disarming-smile',
+    theme: 'charm',
     name: 'Disarming Smile',
     category: 'fallacy',
     philosophicalAspect: 'heart',
@@ -1090,13 +1091,13 @@ const disarmingSmile: Card = {
     free: { sway: 1 },
     combatEffects: [{ effectId: 'debuff_rapport', appliedTo: 'opponent', intensity: 2, duration: 2 }],
     specialMechanics: [{ kind: 'rider', rider: { healHp: 2 } }],
-    learningRequirement: { level: 2 },
     addedIn: '2026-07-08',
     tags: ['charm'],
 };
 
 const commonGround: Card = {
     id: 'common-ground',
+    theme: 'charm',
     name: 'Common Ground',
     category: 'fallacy',
     philosophicalAspect: 'heart',
@@ -1110,13 +1111,13 @@ const commonGround: Card = {
     combatEffects: [{ effectId: 'debuff_rapport', appliedTo: 'opponent', intensity: 1, duration: 2 }],
     specialMechanics: [{ kind: 'sway', amount: 2 }],
     threshold: { color: 'heart', count: 3, rider: { sway: 2 } },
-    learningRequirement: { level: 4 },
     addedIn: '2026-07-08',
     tags: ['charm'],
 };
 
 const theOliveBranch: Card = {
     id: 'the-olive-branch',
+    theme: 'charm',
     name: 'The Olive Branch',
     category: 'paradox',
     philosophicalAspect: 'body',
@@ -1131,13 +1132,13 @@ const theOliveBranch: Card = {
         { kind: 'sway', amount: 3 },
         { kind: 'rider', rider: { cleanse: 1, healHp: 3 } },
     ],
-    learningRequirement: { level: 6 },
     addedIn: '2026-07-08',
     tags: ['charm', 'defense'],
 };
 
 const heartOfTheMatter: Card = {
     id: 'heart-of-the-matter',
+    theme: 'charm',
     name: 'Heart of the Matter',
     category: 'fallacy',
     philosophicalAspect: 'heart',
@@ -1161,13 +1162,14 @@ const heartOfTheMatter: Card = {
     // Phase 46 alignment gate (inherited from the cut appeal-to-consequences):
     // the deepest act of seeing-another is learnable only at high Relational
     // scope. Dropped by the rework; restored to satisfy the authored gate.
-    learningRequirement: { level: 10, requiresAlignment: { axis: 'scope', op: 'gte', value: 34 } },
+    learningRequirement: { requiresAlignment: { axis: 'scope', op: 'gte', value: 34 } },
     addedIn: '2026-07-08',
     tags: ['charm', 'alt-win'],
 };
 
 const irresistibleGrace: Card = {
     id: 'irresistible-grace',
+    theme: 'charm',
     persistentEffect: 'Your SWAY stops decaying, and each new gesture of it lands harder.',
     name: 'Irresistible Grace',
     category: 'paradox',
@@ -1181,13 +1183,13 @@ const irresistibleGrace: Card = {
     // pts: persistent — SWAY no longer decays (≈ +1/turn saved) AND stacks
     // buff_grace_momentum (+12%/stack, cap 9) so every future SWAY gain
     // compounds while held, rest of combat, min-4 ≈ 12 → Axiom
-    learningRequirement: { level: 10 },
     addedIn: '2026-07-08',
     tags: ['charm', 'enchantment'],
 };
 
 const mirrorOfLonging: Card = {
     id: 'mirror-of-longing',
+    theme: 'charm',
     persistentEffect: 'Damage your defenses prevent is converted into SWAY.',
     name: 'Mirror of Longing',
     category: 'paradox',
@@ -1199,7 +1201,6 @@ const mirrorOfLonging: Card = {
     tier: 2, rank: 6, cardType: 'disenchant',
     targetType: 'enemy',
     // pts: engine text — damage your defenses prevent becomes SWAY (Aporia)
-    learningRequirement: { level: 12 },
     addedIn: '2026-07-08',
     tags: ['charm', 'disenchant', 'alt-win'],
 };
@@ -1208,6 +1209,7 @@ const mirrorOfLonging: Card = {
 
 const braceForImpact: Card = {
     id: 'brace-for-impact',
+    theme: 'bulwark',
     name: 'Brace for Impact',
     category: 'paradox',
     philosophicalAspect: 'body',
@@ -1219,13 +1221,13 @@ const braceForImpact: Card = {
     // pts: Guard 8 (2) + FREE guard 2 (0.5) + pip line (+2/pip, situational ≈ 0.8) ≈ 3.3 → Doxa (starter)
     free: { guard: 2 },
     specialMechanics: [{ kind: 'guard', amount: 8 }],
-    learningRequirement: { level: 1 },
     addedIn: '2026-07-08',
     tags: ['bulwark', 'defense', 'starter'],
 };
 
 const nettleCloak: Card = {
     id: 'nettle-cloak',
+    theme: 'bulwark',
     name: 'Nettle Cloak',
     category: 'fallacy',
     philosophicalAspect: 'body',
@@ -1243,13 +1245,13 @@ const nettleCloak: Card = {
         { effectId: 'buff_thorns', appliedTo: 'self', intensity: 2, duration: 2 },
         { effectId: 'debuff_nettle_sting', appliedTo: 'opponent', intensity: 1, duration: 2 },
     ],
-    learningRequirement: { level: 2 },
     addedIn: '2026-07-08',
     tags: ['bulwark', 'reflect'],
 };
 
 const tuQuoque: Card = {
     id: 'tu-quoque',
+    theme: 'bulwark',
     name: 'Tu Quoque',
     category: 'fallacy',
     philosophicalAspect: 'heart',
@@ -1262,13 +1264,13 @@ const tuQuoque: Card = {
     free: { guard: 2 },
     combatEffects: [{ effectId: 'buff_thorns', appliedTo: 'self', intensity: 3, duration: 2 }],
     dieBonus: { onColor: 'body', rider: { guard: 2 } },
-    learningRequirement: { level: 4 },
     addedIn: '2026-07-08',
     tags: ['bulwark', 'reflect'],
 };
 
 const measuredAnswer: Card = {
     id: 'measured-answer',
+    theme: 'bulwark',
     name: 'Measured Answer',
     category: 'paradox',
     philosophicalAspect: 'body',
@@ -1280,13 +1282,13 @@ const measuredAnswer: Card = {
     // pts: Guard 6 (1.5) + RIPOSTE 3/parry 2 (~4) + FREE guard 3 (0.75) + full-block gate + tempo ≈ 9 → Theorem
     free: { guard: 3 },
     specialMechanics: [{ kind: 'guard', amount: 6 }, { kind: 'riposte', damage: 3, reduce: 2 }],
-    learningRequirement: { level: 6 },
     addedIn: '2026-07-08',
     tags: ['bulwark', 'reflect'],
 };
 
 const theAdamantWall: Card = {
     id: 'the-adamant-wall',
+    theme: 'bulwark',
     name: 'The Adamant Wall',
     category: 'paradox',
     philosophicalAspect: 'body',
@@ -1298,13 +1300,13 @@ const theAdamantWall: Card = {
     // pts: BARRIER 10 (3.3) + RIPOSTE 4/parry 2 (~5) + FREE guard 3 (0.75) + persistence ≈ 13 → Axiom
     free: { guard: 3 },
     specialMechanics: [{ kind: 'barrier', amount: 10 }, { kind: 'riposte', damage: 4, reduce: 2 }],
-    learningRequirement: { level: 10 },
     addedIn: '2026-07-08',
     tags: ['bulwark', 'reflect', 'payoff'],
 };
 
 const hedgehogsDilemma: Card = {
     id: 'hedgehogs-dilemma',
+    theme: 'bulwark',
     persistentEffect: 'Every THORNS reflection also marks the enemy.',
     name: "Hedgehog's Dilemma",
     category: 'paradox',
@@ -1315,13 +1317,13 @@ const hedgehogsDilemma: Card = {
     tier: 2, rank: 5, cardType: 'enchantment',
     targetType: 'self',
     // pts: persistent — every THORNS trigger also marks the enemy ≈ 1 × ~8 triggers, min-4 ≈ 12 → Axiom
-    learningRequirement: { level: 10 },
     addedIn: '2026-07-08',
     tags: ['bulwark', 'enchantment'],
 };
 
 const crumblingResolve: Card = {
     id: 'crumbling-resolve',
+    theme: 'bulwark',
     persistentEffect: 'A fully-blocked attack costs the enemy a rung on its next telegraph.',
     name: 'Crumbling Resolve',
     category: 'fallacy',
@@ -1338,7 +1340,6 @@ const crumblingResolve: Card = {
     // (leftover guard + persistent barrier) > 0, the enemy takes direct damage
     // = max(4, round(0.2 x (guard+barrier))) -- fires whether or not the enemy
     // attacked that round. See combat.engine.ts hook (2026-07-08 engine pass).
-    learningRequirement: { level: 12 },
     addedIn: '2026-07-08',
     tags: ['bulwark', 'disenchant'],
 };
@@ -1347,6 +1348,7 @@ const crumblingResolve: Card = {
 
 const refrain: Card = {
     id: 'refrain',
+    theme: 'echo',
     name: 'Refrain',
     category: 'paradox',
     philosophicalAspect: 'mind',
@@ -1364,13 +1366,13 @@ const refrain: Card = {
         { effectId: 'debuff_echo_sting', appliedTo: 'opponent', duration: 2 },
     ],
     specialMechanics: [{ kind: 'echo' }],
-    learningRequirement: { level: 1 },
     addedIn: '2026-07-08',
     tags: ['echo', 'exposure'],
 };
 
 const secondThoughts: Card = {
     id: 'second-thoughts',
+    theme: 'echo',
     name: 'Second Thoughts',
     category: 'paradox',
     philosophicalAspect: 'mind',
@@ -1388,13 +1390,13 @@ const secondThoughts: Card = {
         { kind: 'reprise', count: 1 },
         { kind: 'rider', rider: { ruptureMarks: 1 } },
     ],
-    learningRequirement: { level: 2 },
     addedIn: '2026-07-08',
     tags: ['echo', 'recursion'],
 };
 
 const adNauseam: Card = {
     id: 'ad-nauseam',
+    theme: 'echo',
     name: 'Ad Nauseam',
     category: 'fallacy',
     philosophicalAspect: 'mind',
@@ -1407,13 +1409,13 @@ const adNauseam: Card = {
     free: { applyEffect: { effectId: 'debuff_mark', duration: 1 } },
     specialMechanics: [{ kind: 'echo_next_spell' }],
     dieBonus: { onColor: 'mind', rider: { drawCards: 1 } },
-    learningRequirement: { level: 4 },
     addedIn: '2026-07-08',
     tags: ['echo', 'recursion'],
 };
 
 const circularReasoning: Card = {
     id: 'circular-reasoning',
+    theme: 'echo',
     name: 'Circular Reasoning',
     category: 'fallacy',
     philosophicalAspect: 'mind',
@@ -1425,13 +1427,13 @@ const circularReasoning: Card = {
     // pts: REPRISE 1 + its FREE line fires now (2 + ~1.5) + FREE draw (0.7) + selection ≈ 9 → Theorem
     free: { drawCards: 1 },
     specialMechanics: [{ kind: 'reprise', count: 1, fireFree: true }],
-    learningRequirement: { level: 6 },
     addedIn: '2026-07-08',
     tags: ['echo', 'recursion'],
 };
 
 const ouroboros: Card = {
     id: 'ouroboros',
+    theme: 'echo',
     name: 'Ouroboros',
     category: 'paradox',
     philosophicalAspect: 'mind',
@@ -1451,13 +1453,13 @@ const ouroboros: Card = {
         { kind: 'replay_last', times: 2 },
         { kind: 'rider', rider: { ruptureMarks: 3 } },
     ],
-    learningRequirement: { level: 10 },
     addedIn: '2026-07-08',
     tags: ['echo', 'recursion', 'payoff'],
 };
 
 const resonantChamber: Card = {
     id: 'resonant-chamber',
+    theme: 'echo',
     persistentEffect: 'The first spell you cast each turn gains ECHO (fires twice).',
     name: 'Resonant Chamber',
     category: 'paradox',
@@ -1468,13 +1470,13 @@ const resonantChamber: Card = {
     tier: 2, rank: 5, cardType: 'enchantment',
     targetType: 'self',
     // pts: persistent — the first spell each turn gains ECHO ≈ ×0.8 spell/turn × rest, min-4 ≈ 12 → Axiom
-    learningRequirement: { level: 10 },
     addedIn: '2026-07-08',
     tags: ['echo', 'enchantment'],
 };
 
 const stuckInTheirHead: Card = {
     id: 'stuck-in-their-head',
+    theme: 'echo',
     persistentEffect: 'Every ECHO or REPRISE drips 2 damage to the enemy.',
     name: 'Stuck in Their Head',
     category: 'fallacy',
@@ -1485,7 +1487,6 @@ const stuckInTheirHead: Card = {
     tier: 2, rank: 6, cardType: 'disenchant',
     targetType: 'enemy',
     // pts: engine text — every ECHO / REPRISE drips 2 (echo-gated, §1 source 3) (Aporia)
-    learningRequirement: { level: 12 },
     addedIn: '2026-07-08',
     tags: ['echo', 'disenchant'],
 };

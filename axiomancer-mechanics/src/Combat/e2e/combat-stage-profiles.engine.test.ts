@@ -12,7 +12,7 @@ import { describe, it, expect, afterEach, vi } from 'vitest';
 import {
     COMBAT_STAGE_ORDER, COMBAT_STAGE_PROFILES,
     getStageProfile, isCombatStageId,
-    stageEligibleCardIds, buildStagePlayer,
+    stageEligibleCardIds, buildStagePlayer, rankMaturityLevel,
 } from '../combat.stage-profiles';
 import { ENEMY_REGISTRY } from '../../Enemy/enemy.library';
 import { getCardById, cardLibrary } from '../../Cards/cards.library';
@@ -65,7 +65,7 @@ describe('stage roster shape', () => {
 });
 
 describe('stage-eligible card pools', () => {
-    it('every stage pool is non-empty and respects the tier + level gates', () => {
+    it('every stage pool is non-empty and respects the tier + rank-maturity gates', () => {
         for (const id of COMBAT_STAGE_ORDER) {
             const stage = COMBAT_STAGE_PROFILES[id];
             const pool = stageEligibleCardIds(stage);
@@ -75,7 +75,7 @@ describe('stage-eligible card pools', () => {
                 expect(card, `stage ${id} → unknown card ${cardId}`).toBeDefined();
                 expect(card!.tier, `stage ${id} → ${cardId} over tier gate`)
                     .toBeLessThanOrEqual(stage.maxCardTier);
-                expect(card!.learningRequirement?.level ?? 1, `stage ${id} → ${cardId} over level gate`)
+                expect(rankMaturityLevel(card!.rank), `stage ${id} → ${cardId} over rank-maturity gate`)
                     .toBeLessThanOrEqual(stage.playerLevel);
             }
         }
@@ -87,7 +87,7 @@ describe('stage-eligible card pools', () => {
             const pool = new Set(stageEligibleCardIds(stage));
             const expected = cardLibrary.filter(c =>
                 c.tier <= stage.maxCardTier
-                && (c.learningRequirement?.level ?? 1) <= stage.playerLevel);
+                && rankMaturityLevel(c.rank) <= stage.playerLevel);
             expect(pool.size).toBe(expected.length);
             for (const card of expected) expect(pool.has(card.id)).toBe(true);
         }
@@ -105,15 +105,16 @@ describe('stage-eligible card pools', () => {
             id: 'stage-test-extra-fit', name: 'Stage Test Extra', category: 'fallacy',
             philosophicalAspect: 'body', description: 'test-only card', tier: 1,
             targetType: 'enemy', rank: 1, cardType: 'spell',
-            learningRequirement: { level: 1 },
         };
         const overTier: Card = { ...fits, id: 'stage-test-extra-tier3', tier: 3 };
-        const overLevel: Card = { ...fits, id: 'stage-test-extra-lv40', learningRequirement: { level: 40 } };
+        // rank 6 → maturity 12, above the early stage's player level → excluded
+        // by the rank-maturity gate (not the tier gate).
+        const overRank: Card = { ...fits, id: 'stage-test-extra-rank6', rank: 6 };
 
-        const pool = stageEligibleCardIds(early, [fits, overTier, overLevel]);
+        const pool = stageEligibleCardIds(early, [fits, overTier, overRank]);
         expect(pool).toContain('stage-test-extra-fit');
         expect(pool).not.toContain('stage-test-extra-tier3');
-        expect(pool).not.toContain('stage-test-extra-lv40');
+        expect(pool).not.toContain('stage-test-extra-rank6');
 
         // An extra card sharing a library id overrides that entry for filtering.
         const baseline = stageEligibleCardIds(early);

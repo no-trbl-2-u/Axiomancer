@@ -18,10 +18,23 @@
  */
 
 import type { BaseStats, Character } from '../Character/types';
-import type { Card, CardTier } from '../Cards/types';
+import type { Card, CardTier, CardRank } from '../Cards/types';
 import { cardLibrary } from '../Cards/cards.library';
 import { Player } from '../Character/characters.mock';
 import { deepClone, deriveStats } from '../Utils';
+
+/**
+ * Deck-MATURITY level implied by a card's RANK (the quality ladder Doxa 1 …
+ * Aporia 6). Cards no longer carry a player-level requirement (removed
+ * 2026-07-08); the playtest harness instead uses this rank→maturity mapping to
+ * decide which cards a player "at stage X" would plausibly hold — so the stage
+ * pools (and the balance-band win-rate curve they feed) are unchanged. This is
+ * a SIM-harness heuristic only; it is not a gate the game enforces on the
+ * player. Mapping mirrors the retired rank-ladder level gates exactly.
+ */
+export function rankMaturityLevel(rank: CardRank): number {
+    return ({ 1: 1, 2: 2, 3: 4, 4: 6, 5: 10, 6: 12 } as Record<CardRank, number>)[rank];
+}
 
 /** The four campaign moments the playtest matrix measures. */
 export type CombatStageId = 'early' | 'mid' | 'late' | 'impossible';
@@ -33,7 +46,8 @@ export interface CombatStageProfile {
     name: string;
     /** One-line pitch: what this stage is measuring. */
     description: string;
-    /** Player level at this stage (also gates `learningRequirement.level`). */
+    /** Player level at this stage (drives player stat scaling, and — via
+     *  `rankMaturityLevel` — the deck-maturity gate in `stageEligibleCardIds`). */
     playerLevel: number;
     /** Heart/Body/Mind core attributes at this stage. */
     playerBaseStats: BaseStats;
@@ -127,9 +141,10 @@ export function isCombatStageId(id: string): id is CombatStageId {
  * The card pool eligible at a stage: every library card (plus any
  * `extraCards` — e.g. registered sandbox cards, which may also OVERRIDE a
  * library card by sharing its id) filtered by `tier <= maxCardTier` and
- * `(learningRequirement?.level ?? 1) <= playerLevel`. Excludes nothing else —
- * the point is the WHOLE maturity-gated library, so the playtest matrix can
- * measure coverage of it.
+ * `rankMaturityLevel(rank) <= playerLevel`. Excludes nothing else — the point
+ * is the WHOLE maturity-gated library, so the playtest matrix can measure
+ * coverage of it. (Cards no longer carry a level requirement; the rank→maturity
+ * heuristic reproduces the retired level gate so stage pools are unchanged.)
  */
 export function stageEligibleCardIds(
     stage: CombatStageProfile,
@@ -141,7 +156,7 @@ export function stageEligibleCardIds(
     const ids: string[] = [];
     for (const card of pool.values()) {
         if (card.tier > stage.maxCardTier) continue;
-        if ((card.learningRequirement?.level ?? 1) > stage.playerLevel) continue;
+        if (rankMaturityLevel(card.rank) > stage.playerLevel) continue;
         ids.push(card.id);
     }
     return ids;

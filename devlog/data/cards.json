@@ -29,8 +29,20 @@
     "v": "enchantment"
    },
    {
-    "k": "Learn",
-    "v": "Lv 10"
+    "k": "Theme",
+    "v": "control"
+   },
+   {
+    "k": "Keywords",
+    "v": "STAGGER · BACKFIRE · FORETELL · DRAW"
+   },
+   {
+    "k": "Source",
+    "v": "starter"
+   },
+   {
+    "k": "Preset",
+    "v": "Standstill"
    }
   ],
   "lines": [
@@ -68,8 +80,20 @@
     "v": "spell"
    },
    {
-    "k": "Learn",
-    "v": "Lv 4"
+    "k": "Theme",
+    "v": "echo"
+   },
+   {
+    "k": "Keywords",
+    "v": "ECHO · REPRISE · CONJURE · DRAW"
+   },
+   {
+    "k": "Source",
+    "v": "starter"
+   },
+   {
+    "k": "Preset",
+    "v": "Refrain"
    }
   ],
   "lines": [
@@ -108,8 +132,20 @@
     "v": "spell"
    },
    {
-    "k": "Learn",
-    "v": "Lv 1"
+    "k": "Theme",
+    "v": "akrasia"
+   },
+   {
+    "k": "Keywords",
+    "v": "RECOIL · FALLEN · MARK · HEAL · CLEANSE"
+   },
+   {
+    "k": "Source",
+    "v": "starter"
+   },
+   {
+    "k": "Preset",
+    "v": "Penitent"
    }
   ],
   "lines": [
@@ -148,8 +184,20 @@
     "v": "enchantment"
    },
    {
-    "k": "Learn",
-    "v": "Lv 10"
+    "k": "Theme",
+    "v": "forge"
+   },
+   {
+    "k": "Keywords",
+    "v": "KINDLE · PIP · FORGE · DRAW"
+   },
+   {
+    "k": "Source",
+    "v": "starter"
+   },
+   {
+    "k": "Preset",
+    "v": "Foundry"
    }
   ],
   "lines": [
@@ -187,8 +235,20 @@
     "v": "spell"
    },
    {
-    "k": "Learn",
-    "v": "Lv 6"
+    "k": "Theme",
+    "v": "control"
+   },
+   {
+    "k": "Keywords",
+    "v": "STAGGER · BACKFIRE · FORETELL · DRAW"
+   },
+   {
+    "k": "Source",
+    "v": "starter"
+   },
+   {
+    "k": "Preset",
+    "v": "Standstill"
    }
   ],
   "lines": [
@@ -228,8 +288,20 @@
     "v": "enchantment"
    },
    {
-    "k": "Learn",
-    "v": "Lv 10"
+    "k": "Theme",
+    "v": "harvest"
+   },
+   {
+    "k": "Keywords",
+    "v": "SOUL · REAP · MARK · TICK · RUPTURE"
+   },
+   {
+    "k": "Source",
+    "v": "starter"
+   },
+   {
+    "k": "Preset",
+    "v": "Tithe"
    }
   ],
   "lines": [
@@ -267,8 +339,20 @@
     "v": "spell"
    },
    {
-    "k": "Learn",
-    "v": "Lv 4"
+    "k": "Theme",
+    "v": "forge"
+   },
+   {
+    "k": "Keywords",
+    "v": "KINDLE · PIP · FORGE · DRAW"
+   },
+   {
+    "k": "Source",
+    "v": "starter"
+   },
+   {
+    "k": "Preset",
+    "v": "Foundry"
    }
   ],
   "lines": [
@@ -307,8 +391,20 @@
     "v": "spell"
    },
    {
-    "k": "Learn",
-    "v": "Lv 1"
+    "k": "Theme",
+    "v": "bulwark"
+   },
+   {
+    "k": "Keywords",
+    "v": "THORNS · RIPOSTE · GUARD · BARRIER · HEAL"
+   },
+   {
+    "k": "Source",
+    "v": "starter"
+   },
+   {
+    "k": "Preset",
+    "v": "Bastion"
    }
   ],
   "lines": [
@@ -346,8 +442,20 @@
     "v": "spell"
    },
    {
-    "k": "Learn",
-    "v": "Lv 1"
+    "k": "Theme",
+    "v": "harvest"
+   },
+   {
+    "k": "Keywords",
+    "v": "SOUL · REAP · MARK · TICK · RUPTURE"
+   },
+   {
+    "k": "Source",
+    "v": "starter"
+   },
+   {
+    "k": "Preset",
+    "v": "Tithe"
    }
   ],
   "lines": [
@@ -385,8 +493,20 @@
     "v": "disenchant"
    },
    {
-    "k": "Learn",
-    "v": "Lv 12"
+    "k": "Theme",
+    "v": "peroration"
+   },
+   {
+    "k": "Keywords",
+    "v": "PREMISE · PERORATION · DRAW · GUARD"
+   },
+   {
+    "k": "Source",
+    "v": "starter"
+   },
+   {
+    "k": "Preset",
+    "v": "Oratory"
    }
   ],
   "lines": [
@@ -424,8 +544,20 @@
     "v": "spell"
    },
    {
-    "k": "Learn",
-    "v": "Lv 4"
+    "k": "Theme",
+    "v": "oracle"
+   },
+   {
+    "k": "Keywords",
+    "v": "FORETELL · OMEN · DRAW · RUPTURE"
+   },
+   {
+    "k": "Source",
+    "v": "starter"
+   },
+   {
+    "k": "Preset",
+    "v": "Augury"
    }
   ],
   "lines": [
@@ -464,8 +596,20 @@
     "v": "spell"
    },
    {
-    "k": "Learn",
-    "v": "Lv 6"
+    "k": "Theme",
+    "v": "echo"
+   },
+   {
+    "k": "Keywords",
+    "v": "ECHO · REPRISE · CONJURE · DRAW"
+   },
+   {
+    "k": "Source",
+    "v": "starter"
+   },
+   {
+    "k": "Preset",
+    "v": "Refrain"
    }
   ],
   "lines": [
@@ -503,8 +647,20 @@
     "v": "spell"
    },
    {
-    "k": "Learn",
-    "v": "Lv 4"
+    "k": "Theme",
+    "v": "charm"
+   },
+   {
+    "k": "Keywords",
+    "v": "SWAY · RAPPORT · CLEANSE · HEAL"
+   },
+   {
+    "k": "Source",
+    "v": "starter"
+   },
+   {
+    "k": "Preset",
+    "v": "Grace"
    }
   ],
   "lines": [
@@ -544,8 +700,20 @@
     "v": "enchantment"
    },
    {
-    "k": "Learn",
-    "v": "Lv 10"
+    "k": "Theme",
+    "v": "akrasia"
+   },
+   {
+    "k": "Keywords",
+    "v": "RECOIL · FALLEN · MARK · HEAL · CLEANSE"
+   },
+   {
+    "k": "Source",
+    "v": "starter"
+   },
+   {
+    "k": "Preset",
+    "v": "Penitent"
    }
   ],
   "lines": [
@@ -583,8 +751,20 @@
     "v": "disenchant"
    },
    {
-    "k": "Learn",
-    "v": "Lv 12"
+    "k": "Theme",
+    "v": "bulwark"
+   },
+   {
+    "k": "Keywords",
+    "v": "THORNS · RIPOSTE · GUARD · BARRIER · HEAL"
+   },
+   {
+    "k": "Source",
+    "v": "starter"
+   },
+   {
+    "k": "Preset",
+    "v": "Bastion"
    }
   ],
   "lines": [
@@ -622,8 +802,20 @@
     "v": "spell"
    },
    {
-    "k": "Learn",
-    "v": "Lv 6"
+    "k": "Theme",
+    "v": "affliction"
+   },
+   {
+    "k": "Keywords",
+    "v": "POISON · BLEED · MARK · TICK · RUPTURE · CLEANSE"
+   },
+   {
+    "k": "Source",
+    "v": "starter"
+   },
+   {
+    "k": "Preset",
+    "v": "Erosion"
    }
   ],
   "lines": [
@@ -661,8 +853,20 @@
     "v": "spell"
    },
    {
-    "k": "Learn",
-    "v": "Lv 6"
+    "k": "Theme",
+    "v": "oracle"
+   },
+   {
+    "k": "Keywords",
+    "v": "FORETELL · OMEN · DRAW · RUPTURE"
+   },
+   {
+    "k": "Source",
+    "v": "starter"
+   },
+   {
+    "k": "Preset",
+    "v": "Augury"
    }
   ],
   "lines": [
@@ -702,8 +906,20 @@
     "v": "spell"
    },
    {
-    "k": "Learn",
-    "v": "Lv 2"
+    "k": "Theme",
+    "v": "charm"
+   },
+   {
+    "k": "Keywords",
+    "v": "SWAY · RAPPORT · CLEANSE · HEAL"
+   },
+   {
+    "k": "Source",
+    "v": "starter"
+   },
+   {
+    "k": "Preset",
+    "v": "Grace"
    }
   ],
   "lines": [
@@ -742,8 +958,20 @@
     "v": "disenchant"
    },
    {
-    "k": "Learn",
-    "v": "Lv 12"
+    "k": "Theme",
+    "v": "forge"
+   },
+   {
+    "k": "Keywords",
+    "v": "KINDLE · PIP · FORGE · DRAW"
+   },
+   {
+    "k": "Source",
+    "v": "starter"
+   },
+   {
+    "k": "Preset",
+    "v": "Foundry"
    }
   ],
   "lines": [
@@ -781,8 +1009,20 @@
     "v": "spell"
    },
    {
-    "k": "Learn",
-    "v": "Lv 6"
+    "k": "Theme",
+    "v": "forge"
+   },
+   {
+    "k": "Keywords",
+    "v": "KINDLE · PIP · FORGE · DRAW"
+   },
+   {
+    "k": "Source",
+    "v": "starter"
+   },
+   {
+    "k": "Preset",
+    "v": "Foundry"
    }
   ],
   "lines": [
@@ -822,8 +1062,20 @@
     "v": "spell"
    },
    {
-    "k": "Learn",
-    "v": "Lv 1"
+    "k": "Theme",
+    "v": "peroration"
+   },
+   {
+    "k": "Keywords",
+    "v": "PREMISE · PERORATION · DRAW · GUARD"
+   },
+   {
+    "k": "Source",
+    "v": "starter"
+   },
+   {
+    "k": "Preset",
+    "v": "Oratory"
    }
   ],
   "lines": [
@@ -863,8 +1115,20 @@
     "v": "spell"
    },
    {
-    "k": "Learn",
-    "v": "Lv 6"
+    "k": "Theme",
+    "v": "akrasia"
+   },
+   {
+    "k": "Keywords",
+    "v": "RECOIL · FALLEN · MARK · HEAL · CLEANSE"
+   },
+   {
+    "k": "Source",
+    "v": "starter"
+   },
+   {
+    "k": "Preset",
+    "v": "Penitent"
    }
   ],
   "lines": [
@@ -903,8 +1167,20 @@
     "v": "disenchant"
    },
    {
-    "k": "Learn",
-    "v": "Lv 12"
+    "k": "Theme",
+    "v": "oracle"
+   },
+   {
+    "k": "Keywords",
+    "v": "FORETELL · OMEN · DRAW · RUPTURE"
+   },
+   {
+    "k": "Source",
+    "v": "starter"
+   },
+   {
+    "k": "Preset",
+    "v": "Augury"
    }
   ],
   "lines": [
@@ -942,8 +1218,20 @@
     "v": "spell"
    },
    {
-    "k": "Learn",
-    "v": "Lv 4"
+    "k": "Theme",
+    "v": "affliction"
+   },
+   {
+    "k": "Keywords",
+    "v": "POISON · BLEED · MARK · TICK · RUPTURE · CLEANSE"
+   },
+   {
+    "k": "Source",
+    "v": "starter"
+   },
+   {
+    "k": "Preset",
+    "v": "Erosion"
    }
   ],
   "lines": [
@@ -981,8 +1269,20 @@
     "v": "spell"
    },
    {
-    "k": "Learn",
-    "v": "Lv 1"
+    "k": "Theme",
+    "v": "oracle"
+   },
+   {
+    "k": "Keywords",
+    "v": "FORETELL · OMEN · DRAW · RUPTURE"
+   },
+   {
+    "k": "Source",
+    "v": "starter"
+   },
+   {
+    "k": "Preset",
+    "v": "Augury"
    }
   ],
   "lines": [
@@ -1021,8 +1321,20 @@
     "v": "spell"
    },
    {
-    "k": "Learn",
-    "v": "Lv 2"
+    "k": "Theme",
+    "v": "forge"
+   },
+   {
+    "k": "Keywords",
+    "v": "KINDLE · PIP · FORGE · DRAW"
+   },
+   {
+    "k": "Source",
+    "v": "starter"
+   },
+   {
+    "k": "Preset",
+    "v": "Foundry"
    }
   ],
   "lines": [
@@ -1061,8 +1373,20 @@
     "v": "spell"
    },
    {
-    "k": "Learn",
-    "v": "Lv 10"
+    "k": "Theme",
+    "v": "charm"
+   },
+   {
+    "k": "Keywords",
+    "v": "SWAY · RAPPORT · CLEANSE · HEAL"
+   },
+   {
+    "k": "Source",
+    "v": "starter"
+   },
+   {
+    "k": "Preset",
+    "v": "Grace"
    }
   ],
   "lines": [
@@ -1103,8 +1427,20 @@
     "v": "enchantment"
    },
    {
-    "k": "Learn",
-    "v": "Lv 10"
+    "k": "Theme",
+    "v": "bulwark"
+   },
+   {
+    "k": "Keywords",
+    "v": "THORNS · RIPOSTE · GUARD · BARRIER · HEAL"
+   },
+   {
+    "k": "Source",
+    "v": "starter"
+   },
+   {
+    "k": "Preset",
+    "v": "Bastion"
    }
   ],
   "lines": [
@@ -1142,8 +1478,20 @@
     "v": "enchantment"
    },
    {
-    "k": "Learn",
-    "v": "Lv 10"
+    "k": "Theme",
+    "v": "charm"
+   },
+   {
+    "k": "Keywords",
+    "v": "SWAY · RAPPORT · CLEANSE · HEAL"
+   },
+   {
+    "k": "Source",
+    "v": "starter"
+   },
+   {
+    "k": "Preset",
+    "v": "Grace"
    }
   ],
   "lines": [
@@ -1181,8 +1529,20 @@
     "v": "spell"
    },
    {
-    "k": "Learn",
-    "v": "Lv 6"
+    "k": "Theme",
+    "v": "bulwark"
+   },
+   {
+    "k": "Keywords",
+    "v": "THORNS · RIPOSTE · GUARD · BARRIER · HEAL"
+   },
+   {
+    "k": "Source",
+    "v": "starter"
+   },
+   {
+    "k": "Preset",
+    "v": "Bastion"
    }
   ],
   "lines": [
@@ -1221,8 +1581,20 @@
     "v": "spell"
    },
    {
-    "k": "Learn",
-    "v": "Lv 2"
+    "k": "Theme",
+    "v": "harvest"
+   },
+   {
+    "k": "Keywords",
+    "v": "SOUL · REAP · MARK · TICK · RUPTURE"
+   },
+   {
+    "k": "Source",
+    "v": "starter"
+   },
+   {
+    "k": "Preset",
+    "v": "Tithe"
    }
   ],
   "lines": [
@@ -1260,8 +1632,20 @@
     "v": "disenchant"
    },
    {
-    "k": "Learn",
-    "v": "Lv 12"
+    "k": "Theme",
+    "v": "akrasia"
+   },
+   {
+    "k": "Keywords",
+    "v": "RECOIL · FALLEN · MARK · HEAL · CLEANSE"
+   },
+   {
+    "k": "Source",
+    "v": "starter"
+   },
+   {
+    "k": "Preset",
+    "v": "Penitent"
    }
   ],
   "lines": [
@@ -1299,8 +1683,20 @@
     "v": "disenchant"
    },
    {
-    "k": "Learn",
-    "v": "Lv 12"
+    "k": "Theme",
+    "v": "charm"
+   },
+   {
+    "k": "Keywords",
+    "v": "SWAY · RAPPORT · CLEANSE · HEAL"
+   },
+   {
+    "k": "Source",
+    "v": "starter"
+   },
+   {
+    "k": "Preset",
+    "v": "Grace"
    }
   ],
   "lines": [
@@ -1338,8 +1734,20 @@
     "v": "spell"
    },
    {
-    "k": "Learn",
-    "v": "Lv 4"
+    "k": "Theme",
+    "v": "peroration"
+   },
+   {
+    "k": "Keywords",
+    "v": "PREMISE · PERORATION · DRAW · GUARD"
+   },
+   {
+    "k": "Source",
+    "v": "starter"
+   },
+   {
+    "k": "Preset",
+    "v": "Oratory"
    }
   ],
   "lines": [
@@ -1380,8 +1788,20 @@
     "v": "spell"
    },
    {
-    "k": "Learn",
-    "v": "Lv 2"
+    "k": "Theme",
+    "v": "bulwark"
+   },
+   {
+    "k": "Keywords",
+    "v": "THORNS · RIPOSTE · GUARD · BARRIER · HEAL"
+   },
+   {
+    "k": "Source",
+    "v": "starter"
+   },
+   {
+    "k": "Preset",
+    "v": "Bastion"
    }
   ],
   "lines": [
@@ -1420,8 +1840,20 @@
     "v": "spell"
    },
    {
-    "k": "Learn",
-    "v": "Lv 2"
+    "k": "Theme",
+    "v": "peroration"
+   },
+   {
+    "k": "Keywords",
+    "v": "PREMISE · PERORATION · DRAW · GUARD"
+   },
+   {
+    "k": "Source",
+    "v": "starter"
+   },
+   {
+    "k": "Preset",
+    "v": "Oratory"
    }
   ],
   "lines": [
@@ -1461,8 +1893,20 @@
     "v": "spell"
    },
    {
-    "k": "Learn",
-    "v": "Lv 10"
+    "k": "Theme",
+    "v": "echo"
+   },
+   {
+    "k": "Keywords",
+    "v": "ECHO · REPRISE · CONJURE · DRAW"
+   },
+   {
+    "k": "Source",
+    "v": "starter"
+   },
+   {
+    "k": "Preset",
+    "v": "Refrain"
    }
   ],
   "lines": [
@@ -1501,8 +1945,20 @@
     "v": "spell"
    },
    {
-    "k": "Learn",
-    "v": "Lv 10"
+    "k": "Theme",
+    "v": "akrasia"
+   },
+   {
+    "k": "Keywords",
+    "v": "RECOIL · FALLEN · MARK · HEAL · CLEANSE"
+   },
+   {
+    "k": "Source",
+    "v": "starter"
+   },
+   {
+    "k": "Preset",
+    "v": "Penitent"
    }
   ],
   "lines": [
@@ -1542,8 +1998,20 @@
     "v": "spell"
    },
    {
-    "k": "Learn",
-    "v": "Lv 10"
+    "k": "Theme",
+    "v": "control"
+   },
+   {
+    "k": "Keywords",
+    "v": "STAGGER · BACKFIRE · FORETELL · DRAW"
+   },
+   {
+    "k": "Source",
+    "v": "starter"
+   },
+   {
+    "k": "Preset",
+    "v": "Standstill"
    }
   ],
   "lines": [
@@ -1583,8 +2051,20 @@
     "v": "spell"
    },
    {
-    "k": "Learn",
-    "v": "Lv 6"
+    "k": "Theme",
+    "v": "peroration"
+   },
+   {
+    "k": "Keywords",
+    "v": "PREMISE · PERORATION · DRAW · GUARD"
+   },
+   {
+    "k": "Source",
+    "v": "starter"
+   },
+   {
+    "k": "Preset",
+    "v": "Oratory"
    }
   ],
   "lines": [
@@ -1622,8 +2102,20 @@
     "v": "enchantment"
    },
    {
-    "k": "Learn",
-    "v": "Lv 10"
+    "k": "Theme",
+    "v": "peroration"
+   },
+   {
+    "k": "Keywords",
+    "v": "PREMISE · PERORATION · DRAW · GUARD"
+   },
+   {
+    "k": "Source",
+    "v": "starter"
+   },
+   {
+    "k": "Preset",
+    "v": "Oratory"
    }
   ],
   "lines": [
@@ -1661,8 +2153,20 @@
     "v": "spell"
    },
    {
-    "k": "Learn",
-    "v": "Lv 10"
+    "k": "Theme",
+    "v": "oracle"
+   },
+   {
+    "k": "Keywords",
+    "v": "FORETELL · OMEN · DRAW · RUPTURE"
+   },
+   {
+    "k": "Source",
+    "v": "starter"
+   },
+   {
+    "k": "Preset",
+    "v": "Augury"
    }
   ],
   "lines": [
@@ -1700,8 +2204,20 @@
     "v": "disenchant"
    },
    {
-    "k": "Learn",
-    "v": "Lv 12"
+    "k": "Theme",
+    "v": "control"
+   },
+   {
+    "k": "Keywords",
+    "v": "STAGGER · BACKFIRE · FORETELL · DRAW"
+   },
+   {
+    "k": "Source",
+    "v": "starter"
+   },
+   {
+    "k": "Preset",
+    "v": "Standstill"
    }
   ],
   "lines": [
@@ -1739,8 +2255,20 @@
     "v": "spell"
    },
    {
-    "k": "Learn",
-    "v": "Lv 2"
+    "k": "Theme",
+    "v": "control"
+   },
+   {
+    "k": "Keywords",
+    "v": "STAGGER · BACKFIRE · FORETELL · DRAW"
+   },
+   {
+    "k": "Source",
+    "v": "starter"
+   },
+   {
+    "k": "Preset",
+    "v": "Standstill"
    }
   ],
   "lines": [
@@ -1779,8 +2307,20 @@
     "v": "spell"
    },
    {
-    "k": "Learn",
-    "v": "Lv 1"
+    "k": "Theme",
+    "v": "echo"
+   },
+   {
+    "k": "Keywords",
+    "v": "ECHO · REPRISE · CONJURE · DRAW"
+   },
+   {
+    "k": "Source",
+    "v": "starter"
+   },
+   {
+    "k": "Preset",
+    "v": "Refrain"
    }
   ],
   "lines": [
@@ -1820,8 +2360,20 @@
     "v": "spell"
    },
    {
-    "k": "Learn",
-    "v": "Lv 10"
+    "k": "Theme",
+    "v": "affliction"
+   },
+   {
+    "k": "Keywords",
+    "v": "POISON · BLEED · MARK · TICK · RUPTURE · CLEANSE"
+   },
+   {
+    "k": "Source",
+    "v": "starter"
+   },
+   {
+    "k": "Preset",
+    "v": "Erosion"
    }
   ],
   "lines": [
@@ -1861,8 +2413,20 @@
     "v": "enchantment"
    },
    {
-    "k": "Learn",
-    "v": "Lv 10"
+    "k": "Theme",
+    "v": "echo"
+   },
+   {
+    "k": "Keywords",
+    "v": "ECHO · REPRISE · CONJURE · DRAW"
+   },
+   {
+    "k": "Source",
+    "v": "starter"
+   },
+   {
+    "k": "Preset",
+    "v": "Refrain"
    }
   ],
   "lines": [
@@ -1900,8 +2464,20 @@
     "v": "spell"
    },
    {
-    "k": "Learn",
-    "v": "Lv 2"
+    "k": "Theme",
+    "v": "echo"
+   },
+   {
+    "k": "Keywords",
+    "v": "ECHO · REPRISE · CONJURE · DRAW"
+   },
+   {
+    "k": "Source",
+    "v": "starter"
+   },
+   {
+    "k": "Preset",
+    "v": "Refrain"
    }
   ],
   "lines": [
@@ -1940,8 +2516,20 @@
     "v": "spell"
    },
    {
-    "k": "Learn",
-    "v": "Lv 4"
+    "k": "Theme",
+    "v": "akrasia"
+   },
+   {
+    "k": "Keywords",
+    "v": "RECOIL · FALLEN · MARK · HEAL · CLEANSE"
+   },
+   {
+    "k": "Source",
+    "v": "starter"
+   },
+   {
+    "k": "Preset",
+    "v": "Penitent"
    }
   ],
   "lines": [
@@ -1980,8 +2568,20 @@
     "v": "spell"
    },
    {
-    "k": "Learn",
-    "v": "Lv 2"
+    "k": "Theme",
+    "v": "oracle"
+   },
+   {
+    "k": "Keywords",
+    "v": "FORETELL · OMEN · DRAW · RUPTURE"
+   },
+   {
+    "k": "Source",
+    "v": "starter"
+   },
+   {
+    "k": "Preset",
+    "v": "Augury"
    }
   ],
   "lines": [
@@ -2019,8 +2619,20 @@
     "v": "spell"
    },
    {
-    "k": "Learn",
-    "v": "Lv 1"
+    "k": "Theme",
+    "v": "forge"
+   },
+   {
+    "k": "Keywords",
+    "v": "KINDLE · PIP · FORGE · DRAW"
+   },
+   {
+    "k": "Source",
+    "v": "starter"
+   },
+   {
+    "k": "Preset",
+    "v": "Foundry"
    }
   ],
   "lines": [
@@ -2060,8 +2672,20 @@
     "v": "spell"
    },
    {
-    "k": "Learn",
-    "v": "Lv 1"
+    "k": "Theme",
+    "v": "affliction"
+   },
+   {
+    "k": "Keywords",
+    "v": "POISON · BLEED · MARK · TICK · RUPTURE · CLEANSE"
+   },
+   {
+    "k": "Source",
+    "v": "starter"
+   },
+   {
+    "k": "Preset",
+    "v": "Erosion"
    }
   ],
   "lines": [
@@ -2099,8 +2723,20 @@
     "v": "spell"
    },
    {
-    "k": "Learn",
-    "v": "Lv 1"
+    "k": "Theme",
+    "v": "charm"
+   },
+   {
+    "k": "Keywords",
+    "v": "SWAY · RAPPORT · CLEANSE · HEAL"
+   },
+   {
+    "k": "Source",
+    "v": "starter"
+   },
+   {
+    "k": "Preset",
+    "v": "Grace"
    }
   ],
   "lines": [
@@ -2139,8 +2775,20 @@
     "v": "spell"
    },
    {
-    "k": "Learn",
-    "v": "Lv 2"
+    "k": "Theme",
+    "v": "affliction"
+   },
+   {
+    "k": "Keywords",
+    "v": "POISON · BLEED · MARK · TICK · RUPTURE · CLEANSE"
+   },
+   {
+    "k": "Source",
+    "v": "starter"
+   },
+   {
+    "k": "Preset",
+    "v": "Erosion"
    }
   ],
   "lines": [
@@ -2179,8 +2827,20 @@
     "v": "disenchant"
    },
    {
-    "k": "Learn",
-    "v": "Lv 12"
+    "k": "Theme",
+    "v": "echo"
+   },
+   {
+    "k": "Keywords",
+    "v": "ECHO · REPRISE · CONJURE · DRAW"
+   },
+   {
+    "k": "Source",
+    "v": "starter"
+   },
+   {
+    "k": "Preset",
+    "v": "Refrain"
    }
   ],
   "lines": [
@@ -2218,8 +2878,20 @@
     "v": "disenchant"
    },
    {
-    "k": "Learn",
-    "v": "Lv 12"
+    "k": "Theme",
+    "v": "affliction"
+   },
+   {
+    "k": "Keywords",
+    "v": "POISON · BLEED · MARK · TICK · RUPTURE · CLEANSE"
+   },
+   {
+    "k": "Source",
+    "v": "starter"
+   },
+   {
+    "k": "Preset",
+    "v": "Erosion"
    }
   ],
   "lines": [
@@ -2257,8 +2929,20 @@
     "v": "spell"
    },
    {
-    "k": "Learn",
-    "v": "Lv 2"
+    "k": "Theme",
+    "v": "akrasia"
+   },
+   {
+    "k": "Keywords",
+    "v": "RECOIL · FALLEN · MARK · HEAL · CLEANSE"
+   },
+   {
+    "k": "Source",
+    "v": "starter"
+   },
+   {
+    "k": "Preset",
+    "v": "Penitent"
    }
   ],
   "lines": [
@@ -2297,8 +2981,20 @@
     "v": "spell"
    },
    {
-    "k": "Learn",
-    "v": "Lv 10"
+    "k": "Theme",
+    "v": "bulwark"
+   },
+   {
+    "k": "Keywords",
+    "v": "THORNS · RIPOSTE · GUARD · BARRIER · HEAL"
+   },
+   {
+    "k": "Source",
+    "v": "starter"
+   },
+   {
+    "k": "Preset",
+    "v": "Bastion"
    }
   ],
   "lines": [
@@ -2337,8 +3033,20 @@
     "v": "spell"
    },
    {
-    "k": "Learn",
-    "v": "Lv 10"
+    "k": "Theme",
+    "v": "peroration"
+   },
+   {
+    "k": "Keywords",
+    "v": "PREMISE · PERORATION · DRAW · GUARD"
+   },
+   {
+    "k": "Source",
+    "v": "starter"
+   },
+   {
+    "k": "Preset",
+    "v": "Oratory"
    }
   ],
   "lines": [
@@ -2376,8 +3084,20 @@
     "v": "spell"
    },
    {
-    "k": "Learn",
-    "v": "Lv 6"
+    "k": "Theme",
+    "v": "harvest"
+   },
+   {
+    "k": "Keywords",
+    "v": "SOUL · REAP · MARK · TICK · RUPTURE"
+   },
+   {
+    "k": "Source",
+    "v": "starter"
+   },
+   {
+    "k": "Preset",
+    "v": "Tithe"
    }
   ],
   "lines": [
@@ -2415,8 +3135,20 @@
     "v": "spell"
    },
    {
-    "k": "Learn",
-    "v": "Lv 6"
+    "k": "Theme",
+    "v": "charm"
+   },
+   {
+    "k": "Keywords",
+    "v": "SWAY · RAPPORT · CLEANSE · HEAL"
+   },
+   {
+    "k": "Source",
+    "v": "starter"
+   },
+   {
+    "k": "Preset",
+    "v": "Grace"
    }
   ],
   "lines": [
@@ -2455,8 +3187,20 @@
     "v": "enchantment"
    },
    {
-    "k": "Learn",
-    "v": "Lv 10"
+    "k": "Theme",
+    "v": "oracle"
+   },
+   {
+    "k": "Keywords",
+    "v": "FORETELL · OMEN · DRAW · RUPTURE"
+   },
+   {
+    "k": "Source",
+    "v": "starter"
+   },
+   {
+    "k": "Preset",
+    "v": "Augury"
    }
   ],
   "lines": [
@@ -2494,8 +3238,20 @@
     "v": "spell"
    },
    {
-    "k": "Learn",
-    "v": "Lv 10"
+    "k": "Theme",
+    "v": "forge"
+   },
+   {
+    "k": "Keywords",
+    "v": "KINDLE · PIP · FORGE · DRAW"
+   },
+   {
+    "k": "Source",
+    "v": "starter"
+   },
+   {
+    "k": "Preset",
+    "v": "Foundry"
    }
   ],
   "lines": [
@@ -2535,8 +3291,20 @@
     "v": "spell"
    },
    {
-    "k": "Learn",
-    "v": "Lv 10"
+    "k": "Theme",
+    "v": "harvest"
+   },
+   {
+    "k": "Keywords",
+    "v": "SOUL · REAP · MARK · TICK · RUPTURE"
+   },
+   {
+    "k": "Source",
+    "v": "starter"
+   },
+   {
+    "k": "Preset",
+    "v": "Tithe"
    }
   ],
   "lines": [
@@ -2575,8 +3343,20 @@
     "v": "disenchant"
    },
    {
-    "k": "Learn",
-    "v": "Lv 12"
+    "k": "Theme",
+    "v": "harvest"
+   },
+   {
+    "k": "Keywords",
+    "v": "SOUL · REAP · MARK · TICK · RUPTURE"
+   },
+   {
+    "k": "Source",
+    "v": "starter"
+   },
+   {
+    "k": "Preset",
+    "v": "Tithe"
    }
   ],
   "lines": [
@@ -2614,8 +3394,20 @@
     "v": "spell"
    },
    {
-    "k": "Learn",
-    "v": "Lv 4"
+    "k": "Theme",
+    "v": "bulwark"
+   },
+   {
+    "k": "Keywords",
+    "v": "THORNS · RIPOSTE · GUARD · BARRIER · HEAL"
+   },
+   {
+    "k": "Source",
+    "v": "starter"
+   },
+   {
+    "k": "Preset",
+    "v": "Bastion"
    }
   ],
   "lines": [
@@ -2654,8 +3446,20 @@
     "v": "spell"
    },
    {
-    "k": "Learn",
-    "v": "Lv 4"
+    "k": "Theme",
+    "v": "control"
+   },
+   {
+    "k": "Keywords",
+    "v": "STAGGER · BACKFIRE · FORETELL · DRAW"
+   },
+   {
+    "k": "Source",
+    "v": "starter"
+   },
+   {
+    "k": "Preset",
+    "v": "Standstill"
    }
   ],
   "lines": [
@@ -2695,8 +3499,20 @@
     "v": "enchantment"
    },
    {
-    "k": "Learn",
-    "v": "Lv 10"
+    "k": "Theme",
+    "v": "affliction"
+   },
+   {
+    "k": "Keywords",
+    "v": "POISON · BLEED · MARK · TICK · RUPTURE · CLEANSE"
+   },
+   {
+    "k": "Source",
+    "v": "starter"
+   },
+   {
+    "k": "Preset",
+    "v": "Erosion"
    }
   ],
   "lines": [
@@ -2734,8 +3550,20 @@
     "v": "spell"
    },
    {
-    "k": "Learn",
-    "v": "Lv 4"
+    "k": "Theme",
+    "v": "harvest"
+   },
+   {
+    "k": "Keywords",
+    "v": "SOUL · REAP · MARK · TICK · RUPTURE"
+   },
+   {
+    "k": "Source",
+    "v": "starter"
+   },
+   {
+    "k": "Preset",
+    "v": "Tithe"
    }
   ],
   "lines": [
@@ -2773,8 +3601,20 @@
     "v": "spell"
    },
    {
-    "k": "Learn",
-    "v": "Lv 1"
+    "k": "Theme",
+    "v": "control"
+   },
+   {
+    "k": "Keywords",
+    "v": "STAGGER · BACKFIRE · FORETELL · DRAW"
+   },
+   {
+    "k": "Source",
+    "v": "starter"
+   },
+   {
+    "k": "Preset",
+    "v": "Standstill"
    }
   ],
   "lines": [

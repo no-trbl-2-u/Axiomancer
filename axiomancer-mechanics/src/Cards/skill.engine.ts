@@ -118,19 +118,11 @@ export function philosophicalCategoryFor(skill: Card): CardCategory {
 // ─── Card Learning (Spec 06 Q7 / Phase 30) ──────────────────────────────────
 
 /**
- * Default minimum character level for a skill that didn't author an explicit
- * `learningRequirement`. Mirrors the preset progression: T1 skills come for
- * free, T2 unlocks around mid-game, T3 deep into late-game.
- */
-function defaultLevelForTier(tier: CardTier): number {
-    return tier === 1 ? 1 : tier === 2 ? 5 : 10;
-}
-
-/**
  * True iff `character` meets every clause on `skill.learningRequirement`
- * (level minimum, optional stat threshold, optional prerequisite skill,
- * optional alignment gate). When the skill has no explicit requirement,
- * falls back to a tier-derived level minimum per `defaultLevelForTier`.
+ * (optional stat threshold, optional prerequisite skill, optional alignment
+ * gate). Cards no longer carry a character-LEVEL requirement (removed
+ * 2026-07-08 — a legacy-combat carry-over), so a card with no requirement, or
+ * one whose only clauses pass, is learnable unconditionally.
  *
  * @param alignment - Phase 46 optional. When provided AND the skill carries
  *   `requiresAlignment`, the gate must pass. When the skill carries the
@@ -142,8 +134,8 @@ export function meetsLearningRequirement(
     skill: Card,
     alignment?: PhilosophicalAlignment,
 ): boolean {
-    const req = skill.learningRequirement ?? { level: defaultLevelForTier(skill.tier) };
-    if (character.level < req.level) return false;
+    const req = skill.learningRequirement;
+    if (!req) return true;
     if (req.statRequirementType && req.statRequirementValue !== undefined) {
         if (character.baseStats[req.statRequirementType] < req.statRequirementValue) {
             return false;
