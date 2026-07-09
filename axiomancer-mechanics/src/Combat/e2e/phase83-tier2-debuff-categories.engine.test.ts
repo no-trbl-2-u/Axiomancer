@@ -13,9 +13,9 @@ const minimalCombatant = (): Combatant => ({
     baseStats: { body: 5, mind: 5, heart: 5 },
     derivedStats: {
         maxHealth: 30, health: 30,
-        physicalAttack: 5, physicalSkill: 5, physicalDefense: 5, physicalSave: 5, physicalTest: 5,
-        mentalAttack: 5, mentalSkill: 5, mentalDefense: 5, mentalSave: 5, mentalTest: 5,
-        emotionalAttack: 5, emotionalSkill: 5, emotionalDefense: 5, emotionalSave: 5, emotionalTest: 5,
+        physicalAttack: 5, physicalDefense: 5, physicalSave: 5, physicalTest: 5,
+        mentalAttack: 5, mentalDefense: 5, mentalSave: 5, mentalTest: 5,
+        emotionalAttack: 5, emotionalDefense: 5, emotionalSave: 5, emotionalTest: 5,
         luck: 0,
     },
     nonCombatStats: { wisdom: 0, charisma: 0, perception: 0, willpower: 0 },

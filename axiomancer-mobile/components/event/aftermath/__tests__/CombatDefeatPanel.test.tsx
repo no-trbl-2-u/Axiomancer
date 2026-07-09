@@ -21,7 +21,7 @@ const BASE_VM: AftermathDefeatViewModel = {
     killer: {
         name: 'THE HIEROPHANT',
         epithet: 'iron-tongued',
-        finalSkill: 'AXE-FALL',
+        finalCard: 'AXE-FALL',
         damage: 28,
     },
     causePhrase: 'And so the pilgrim laid down where it stood.',

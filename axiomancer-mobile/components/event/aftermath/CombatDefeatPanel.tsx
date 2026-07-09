@@ -78,7 +78,7 @@ export function CombatDefeatPanel({ vm, onBeginAgain, onLetClose }: CombatDefeat
 
                 {vm.killer !== null && (
                     <Text style={styles.damageLedger}>
-                        {vm.killer.finalSkill} · {vm.killer.damage}
+                        {vm.killer.finalCard} · {vm.killer.damage}
                     </Text>
                 )}
 

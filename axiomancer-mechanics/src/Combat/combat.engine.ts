@@ -259,7 +259,7 @@ function readToAdvantage(read: CombatReadResult): 'advantage' | 'neutral' | 'dis
 // ── Internal helpers ─────────────────────────────────────────────────────────
 
 /** Builds the legacy `CombatState` shim `executeCard` needs. */
-function skillShim(enc: CombatEncounterState): CombatState {
+function cardShim(enc: CombatEncounterState): CombatState {
     return {
         active: true,
         phase: 'resolving',
@@ -1196,7 +1196,7 @@ function playBottomAction(
     const echoed = mechsAll.some(m => m.kind === 'echo') || echoCharge || chamberEcho;
 
     const before = intensityMap(state.enemy.effects);
-    let shimState: CombatState = skillShim(state);
+    let shimState: CombatState = cardShim(state);
     let res = executeCard(shimState, skill.id, lookupCard, 'player');
     let allCardEvents = [...res.events];
     if (echoed) {
@@ -1641,21 +1641,21 @@ function playBottomAction(
                 // OUROBOROS — the argument repeats: the last spell's statuses land
                 // again, `times` times. Never chains into another replay.
                 const lastId = state.lastSpellCardId;
-                const lastSkill = lastId && lastId !== skill.id ? lookupCard(lastId) : undefined;
-                const replayable = lastSkill
-                    && lastSkill.cardType === 'spell'
-                    && !(lastSkill.specialMechanics ?? []).some(m2 => m2.kind === 'replay_last');
-                if (replayable && lastSkill) {
+                const lastCard = lastId && lastId !== skill.id ? lookupCard(lastId) : undefined;
+                const replayable = lastCard
+                    && lastCard.cardType === 'spell'
+                    && !(lastCard.specialMechanics ?? []).some(m2 => m2.kind === 'replay_last');
+                if (replayable && lastCard) {
                     for (let i = 0; i < mech.times; i++) {
-                        const shim2: CombatState = { ...skillShim(state), player, enemy, combatResources: res.state.combatResources };
+                        const shim2: CombatState = { ...cardShim(state), player, enemy, combatResources: res.state.combatResources };
                         try {
-                            const replay = executeCard(shim2, lastSkill.id, lookupCard, 'player');
+                            const replay = executeCard(shim2, lastCard.id, lookupCard, 'player');
                             player = replay.state.player as Character;
                             enemy = replay.state.enemy as Enemy;
                             allCardEvents = [...allCardEvents, ...replay.events];
                         } catch { break; }
                     }
-                    events.push({ kind: 'echoed', cardId: lastSkill.id });
+                    events.push({ kind: 'echoed', cardId: lastCard.id });
                     stuckDrip();
                 } else {
                     events.push({ kind: 'effect-fizzled', cardId: card.id, effectId: '', message: 'no prior spell to replay' });

@@ -11,7 +11,7 @@
  * The player's combat deck is built from their learned skills (§4.3). There is
  * no in-combat escape card — once a fight is joined it resolves only by
  * winning or losing. Every character preset grants a starting kit of skills
- * (`TIER_1_SKILLS`), so a real player never reaches combat with an empty
+ * (`TIER_1_CARDS`), so a real player never reaches combat with an empty
  * deck; the always-available `Signature Skills` kit (`combat.signature.ts`,
  * funded by Conviction, independent of the drawn hand) is the real fallback
  * action space regardless of deck contents.

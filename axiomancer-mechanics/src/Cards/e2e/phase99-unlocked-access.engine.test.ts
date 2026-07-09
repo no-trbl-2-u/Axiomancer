@@ -38,13 +38,13 @@ describe('Phase 99 unlocked skill access', () => {
     });
 
     test('skills not in known skills are not available', () => {
-        const availableSkills = player.knownCards.filter(id => {
+        const availableCards = player.knownCards.filter(id => {
             const skill = getCardById(id);
             return skill !== undefined;
         });
 
         // Should match exactly the known skills for the player
-        expect(availableSkills).toEqual(player.knownCards);
+        expect(availableCards).toEqual(player.knownCards);
 
         // Test skill that player doesn't know
         const unknownSkillId = 'resonance-detonation'; // rank-5 finisher

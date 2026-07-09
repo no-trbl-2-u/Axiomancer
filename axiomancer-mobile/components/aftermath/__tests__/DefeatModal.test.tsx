@@ -11,7 +11,7 @@ const mockDefeatProps = {
     cause: {
         killerName: 'THE HIEROPHANT',
         killerEpithet: 'iron-tongued',
-        finalSkill: 'BINDING WORD',
+        finalCard: 'BINDING WORD',
         damage: 15,
     },
     causePhrase: 'the word fell like a stone and the seeker could not rise again.',
@@ -96,7 +96,7 @@ describe('DefeatModal', () => {
             cause: {
                 killerName: 'SHADOW WARDEN',
                 killerEpithet: 'void-touched',
-                finalSkill: 'DRAIN',
+                finalCard: 'DRAIN',
                 damage: 22,
             },
         };

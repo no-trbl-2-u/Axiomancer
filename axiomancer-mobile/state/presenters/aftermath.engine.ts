@@ -130,7 +130,7 @@ export interface AftermathDefeatViewModel {
     killer: {
         name: string;
         epithet: string | null;
-        finalSkill: string;
+        finalCard: string;
         damage: number;
     } | null;
     /** Chronicle paragraph rendered with the `axm-dropcap` rule.
@@ -223,13 +223,13 @@ export function selectAftermathViewModel(
             ? {
                   name: data.enemy.name.toUpperCase(),
                   epithet: deriveEpithet(data.enemy.description),
-                  finalSkill: data.finalBlow.cardName ?? 'STRIKE',
+                  finalCard: data.finalBlow.cardName ?? 'STRIKE',
                   damage: data.finalBlow.damage,
               }
             : {
                   name: data.enemy.name.toUpperCase(),
                   epithet: deriveEpithet(data.enemy.description),
-                  finalSkill: 'STRIKE',
+                  finalCard: 'STRIKE',
                   damage: 0,
               },
         causePhrase: deriveCausePhrase(data),

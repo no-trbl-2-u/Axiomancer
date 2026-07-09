@@ -269,7 +269,7 @@ describe('selectAftermathViewModel: defeat branch', () => {
         expect(vm?.kind === 'defeat' && vm.killer).toEqual({
             name: 'HIEROPHANT',
             epithet: 'figure long since gnawed by iron tongues',
-            finalSkill: 'AXE-FALL',
+            finalCard: 'AXE-FALL',
             damage: 28,
         });
     });
@@ -279,7 +279,7 @@ describe('selectAftermathViewModel: defeat branch', () => {
         expect(vm?.kind === 'defeat' && vm.killer).toEqual({
             name: 'HIEROPHANT',
             epithet: 'figure long since gnawed by iron tongues',
-            finalSkill: 'STRIKE',
+            finalCard: 'STRIKE',
             damage: 0,
         });
     });
