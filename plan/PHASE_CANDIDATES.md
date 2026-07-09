@@ -95,6 +95,11 @@
 
 ## Promoted
 
+### Mechanics CLI verify-gate coverage
+- source: T direct promotion 2026-07-09 after the mechanics game CLI failed under `ts-node` while the normal mechanics typecheck lanes stayed green.
+- decision: add a durable CLI typecheck/smoke lane so `src/CLI` TypeScript errors and stale documented CLI examples fail before `main` ships.
+- promoted to build plan as **Phase 22**.
+
 ### First-map route audit and survivorship semantics
 - source: Kid playthrough report `/root/Workspace/reports/axiomancer-playthrough/2026-07-04.md`
 - decision (T direct promotion 2026-07-04): fix the map/playthrough evidence issue before trusting first-continent coverage. The current route reaches 19/25 Fishing Village nodes, cannot prove all branch nodes in one legal run, counts `fv-1` only as a start position, and continues after boss combat `defeat`.

@@ -174,6 +174,18 @@ choice). Briefs carry the full decision log (see each phase file).
       mobile + card-editor) — brief:
       `plan/phases/phase_21_equipment_machinery_teardown.md`
 
+**CLI verification guardrail (T-directed 2026-07-09):**
+
+- [ ] Phase 22 — Mechanics CLI verify-gate coverage. Add a dedicated
+      CLI typecheck lane and command-level smoke/e2e witnesses so
+      `src/CLI` TypeScript failures and stale CLI examples fail before
+      `main` ships. Guard the exact failure class caught on 2026-07-09:
+      `npm run game` / `npm run combat` failing under `ts-node` while
+      mechanics `type-check` and `type-check:tests` stayed green because
+      both configs excluded `src/CLI` (mechanics; verify no mobile/card
+      editor impact unless exports change) — brief:
+      `plan/phases/phase_22_cli_verify_gate.md`
+
 > **After the queue drains:** `/march` transitions to `/iterate`
 > — draining `plan/AUDIT.md` + `plan/CRITIQUE.md`, doc-drift,
 > `as any` clusters, hex-literal -> AXM migration, a11y, and
