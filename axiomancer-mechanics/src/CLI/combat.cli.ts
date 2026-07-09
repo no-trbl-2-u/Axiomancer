@@ -429,7 +429,7 @@ async function interactiveHazardCombatLoop(
             const beforeSig = s;
             const cast = playSignatureSkill(s, sigId);
             s = cast.state;
-            logState('hazardCombat:signature', beforeSig, s, { skillId: sigId });
+            logState('hazardCombat:signature', beforeSig, s, { signatureId: sigId });
         }
 
         // Card play loop.

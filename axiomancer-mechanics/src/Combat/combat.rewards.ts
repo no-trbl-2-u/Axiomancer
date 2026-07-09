@@ -104,8 +104,8 @@ export function addRewardCard(player: Character, cardId: string): Character {
  * choice is itself the gate. No-op (same ref) when already known or unknown id.
  * The dilemma EVENTS are not implemented yet; this is the hook they will call.
  */
-export function unlockCardViaDilemma(player: Character, skillId: string): Character {
-    if (player.knownCards.includes(skillId)) return player;
-    if (!getCardById(skillId)) return player;
-    return { ...player, knownCards: [...player.knownCards, skillId] };
+export function unlockCardViaDilemma(player: Character, cardId: string): Character {
+    if (player.knownCards.includes(cardId)) return player;
+    if (!getCardById(cardId)) return player;
+    return { ...player, knownCards: [...player.knownCards, cardId] };
 }

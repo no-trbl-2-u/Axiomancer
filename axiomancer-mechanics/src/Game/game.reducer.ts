@@ -392,7 +392,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                 ...state,
                 player: learnCard(
                     state.player,
-                    action.payload.skillId,
+                    action.payload.cardId,
                 ),
             };
         }

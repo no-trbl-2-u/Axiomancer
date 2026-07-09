@@ -50,7 +50,7 @@ export type GameAction =
     | { type: 'UNEQUIP_ITEM';   payload: { slot: EquipmentSlot } }
     | { type: 'LEVEL_UP';       payload?: undefined }
     | { type: 'ALLOCATE_STAT_POINT'; payload: { stat: 'heart' | 'body' | 'mind' } }
-    | { type: 'LEARN_CARD';    payload: { skillId: string } }
+    | { type: 'LEARN_CARD';    payload: { cardId: string } }
     | { type: 'SHIFT_MORAL_METER'; payload: { delta: number; gating?: { min?: number; max?: number } } }
     | { type: 'SHIFT_PHILOSOPHICAL_ALIGNMENT'; payload: { delta: Partial<PhilosophicalAlignment> } }
     | { type: 'SAVE_GAME';      payload?: undefined }

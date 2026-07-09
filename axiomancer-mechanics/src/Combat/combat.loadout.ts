@@ -1,11 +1,11 @@
 /**
  * Phase 169 — Curated Combat Deck: loadout persistence codec.
  *
- * The player's curated combat loadout is an ordered list of skill ids
+ * The player's curated combat loadout is an ordered list of card ids
  * persisted on `GameState.flags` via a `combat-loadout-card:` prefix —
  * exact mirror of the Hazard deck-flags codec (`hazard.deck-flags.ts`).
  *
- * Encoding: one flag per slot, `combat-loadout-card:<skillId>:<n>` where
+ * Encoding: one flag per slot, `combat-loadout-card:<cardId>:<n>` where
  * `<n>` disambiguates duplicate copies (`combat-loadout-card:slippery-slope:1`,
  * `combat-loadout-card:slippery-slope:2`, …). Decode order mirrors insertion
  * order (flag-array order is preserved by the Zustand store).
