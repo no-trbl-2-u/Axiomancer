@@ -47,9 +47,29 @@ import type { AppStore } from '../store';
 
 export interface MobileHazardSlice {
     session: HazardSessionState | null;
+    /**
+     * True while this session is the guided first crossing. The coach
+     * overlay (`components/hazard/HazardTutorialCoach.tsx`) renders on
+     * top of the normal screen; completion/skip sets
+     * `HAZARD_TUTORIAL_FLAG`, which gates both the trigger and the
+     * coach's visibility.
+     */
+    tutorial: boolean;
 }
 
-export const EMPTY_HAZARD_SLICE: MobileHazardSlice = Object.freeze({ session: null });
+export const EMPTY_HAZARD_SLICE: MobileHazardSlice = Object.freeze({ session: null, tutorial: false });
+
+/** Flag set once the guided first crossing is completed or skipped. */
+export const HAZARD_TUTORIAL_FLAG = 'hazard-tutorial-done';
+
+/**
+ * The tutorial session is pinned so the coach script always matches the
+ * board: seed 3 on the cracked-cliff crossing opens with a zero-hex dice
+ * roll (`purple, red, purple, red`) and a hand (`ironwill`, `footing`
+ * ×2, `refrain`, `spite`) where every card's colour has a matching die.
+ */
+export const HAZARD_TUTORIAL_SEED = 3;
+export const HAZARD_TUTORIAL_ID = 'cracked-cliff';
 
 /** Flag set by the `curse` consequence — future combat integration hook. */
 export const HAZARD_HEXED_FLAG = 'hazard-hexed';
@@ -114,12 +134,15 @@ function currentBag(store: AppStore): string[] {
 }
 
 function setSession(store: AppStore, session: HazardSessionState | null): void {
-    store.setState({ hazard: { session } });
+    const prev = store.getState().hazard ?? EMPTY_HAZARD_SLICE;
+    store.setState({ hazard: { ...prev, session } });
 }
 
 export interface BeginHazardOptions {
     hazardId?: string;
     seed?: number;
+    /** Start the guided first crossing (pinned seed + hazard unless overridden). */
+    tutorial?: boolean;
 }
 
 export type HazardDeckPresetId =
@@ -309,19 +332,43 @@ function hazardDeckPresetById(presetId: HazardDeckPresetId): HazardDeckPreset {
 export function beginHazardAction(store: AppStore, options: BeginHazardOptions = {}): boolean {
     const state = store.getState();
     if (state.hazard?.session) return false; // one crisis at a time
-    const seed = resolveMinigameSeed('hazard', options.seed, globalThis.__AXM_HAZARD_SEED__);
+    const seed = resolveMinigameSeed(
+        'hazard',
+        options.seed,
+        globalThis.__AXM_HAZARD_SEED__,
+        options.tutorial ? HAZARD_TUTORIAL_SEED : undefined,
+    );
     let hazardId = resolveMinigameString(
         'hazard',
         ['hazardId', 'id'],
         options.hazardId,
         globalThis.__AXM_HAZARD_ID__,
+        options.tutorial ? HAZARD_TUTORIAL_ID : undefined,
     );
     if (!hazardId) {
         hazardId = HAZARD_LIBRARY[Math.abs(seed) % HAZARD_LIBRARY.length].id;
     }
     const session = createHazardSession(seed, currentBag(store), hazardId);
-    setSession(store, session);
+    store.setState({ hazard: { session, tutorial: options.tutorial === true } });
     return true;
+}
+
+/**
+ * Marks the guided first crossing as done (completed or skipped): sets
+ * the persistent flag so the map trigger never re-runs it, and persists.
+ * The session (if any) keeps running as normal play.
+ */
+export function completeHazardTutorialAction(store: AppStore, skipped: boolean): void {
+    const state = store.getState() as unknown as GameState;
+    if (!(state.flags ?? []).includes(HAZARD_TUTORIAL_FLAG)) {
+        store.setState({ flags: [...(state.flags ?? []), HAZARD_TUTORIAL_FLAG] } as never);
+        try {
+            store.getState().save();
+        } catch {
+            // Persistence failures must not strand the coach.
+        }
+    }
+    void skipped;
 }
 
 export function selectHazardRouteAction(store: AppStore, route: HazardRouteKey): void {

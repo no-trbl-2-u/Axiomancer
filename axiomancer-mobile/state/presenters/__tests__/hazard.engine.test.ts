@@ -24,7 +24,7 @@ import { selectHazardViewModel, selectHasActiveHazard } from '@/state/presenters
 const BAG = hazardStarterBag();
 
 function vmOf(session: HazardSessionState | null) {
-    return selectHazardViewModel({ hazard: { session } });
+    return selectHazardViewModel({ hazard: { session, tutorial: false } });
 }
 
 function entries(cardId: string, n: number): HazardHandEntry[] {
@@ -55,7 +55,7 @@ describe('hazard presenter — reveal phase', () => {
 
     it('inactive store maps to the inert empty VM', () => {
         expect(vmOf(null).active).toBe(false);
-        expect(selectHasActiveHazard({ hazard: { session: null } })).toBe(false);
+        expect(selectHasActiveHazard({ hazard: { session: null, tutorial: false } })).toBe(false);
     });
 });
 

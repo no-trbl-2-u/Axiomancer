@@ -49,7 +49,7 @@ function restSession(store: AppStore): RestSession {
 function rigHand(store: AppStore, cards: { uid: string; cardId: string }[]): void {
     const s = hazardSession(store);
     const hand: HazardHandEntry[] = cards.map((c) => ({ ...c, dieId: null }));
-    store.setState({ hazard: { session: { ...s, hand, play: [] } } });
+    store.setState({ hazard: { session: { ...s, hand, play: [] }, tutorial: false } });
 }
 
 /** Plays one rigged losing round: stage a single CRACK, resolve, continue. */

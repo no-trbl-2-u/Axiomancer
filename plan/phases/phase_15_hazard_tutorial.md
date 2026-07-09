@@ -180,7 +180,11 @@ script, per Rest's "recommended, not forced" doctrine):
    `done: (s) => s.round > 1 || s.phase === 'resolve-flash' || s.phase === 'outcome' || s.phase === 'rewards' || s.phase === 'done'`.
 6. `outcome` — "read the ledger" — the crossing's tier, rewards, and any
    consequences; claim to leave.
-   `done: (s) => s.phase === 'done'`.
+   `done: (s) => s.phase === 'rewards' || s.phase === 'done'` (claiming
+   nulls the session in the same store update as the engine's internal
+   `'done'` phase, so a predicate gated on `'done'` alone would never be
+   observed live — same OR-across-terminal-phases shape as gathering's
+   `withdraw` step, for the same reason).
 
 ## 7. Empty / loading / error states
 

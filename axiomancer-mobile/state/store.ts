@@ -79,9 +79,11 @@ export interface DevOverridesSlice {
  * Sessions are transient by design: abandoning mid-hazard forfeits
  * progress. The persistent piece (the player's hazard action deck)
  * rides `GameState.flags` via the package's deck-flags codec.
+ * `tutorial` marks the guided first crossing (the coach overlay).
  */
 export interface MobileHazardSlice {
     session: HazardSessionState | null;
+    tutorial: boolean;
 }
 
 /**
@@ -193,7 +195,7 @@ export const EMPTY_EVENT_SLICE: MobileEventSlice = Object.freeze({
     sourceNodeType: null,
 });
 
-export const EMPTY_HAZARD_SLICE: MobileHazardSlice = Object.freeze({ session: null });
+export const EMPTY_HAZARD_SLICE: MobileHazardSlice = Object.freeze({ session: null, tutorial: false });
 
 export const EMPTY_GATHERING_SLICE: MobileGatheringSlice = Object.freeze({
     session: null,

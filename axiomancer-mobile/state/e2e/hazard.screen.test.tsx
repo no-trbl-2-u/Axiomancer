@@ -45,7 +45,7 @@ function rigHand(store: AppStore, cards: { uid: string; cardId: string }[]): voi
     const s = store.getState().hazard.session;
     if (!s) throw new Error('no session');
     const hand: HazardHandEntry[] = cards.map((c) => ({ ...c, dieId: null }));
-    store.setState({ hazard: { session: { ...s, hand, play: [] } } });
+    store.setState({ hazard: { session: { ...s, hand, play: [] }, tutorial: false } });
 }
 
 describe('hazard screen — danger intro', () => {
@@ -184,6 +184,7 @@ describe('hazard screen — round play board', () => {
                             { id: 'd2', kind: 'hex', state: 'available' },
                         ],
                     },
+                    tutorial: false,
                 },
             });
         });

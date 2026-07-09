@@ -24,12 +24,28 @@ export function DebugHazardButton() {
         // <HazardGate> observes the slice and pushes /hazard.
     };
 
+    const onTutorial = () => {
+        // The pinned tutorial session (seed + hazard). The coach only
+        // shows while the done-flag is unset — once it is set, this is
+        // still useful as a reproducible session for layout work.
+        actions.beginHazard({ tutorial: true });
+    };
+
     return (
         <View style={styles.row}>
             <View style={styles.labelCol}>
                 <Text style={styles.label}>DEBUG · HAZARD</Text>
                 <Text style={styles.sub}>start the hazard minigame</Text>
             </View>
+            <Pressable
+                style={[styles.button, styles.tutorialButton]}
+                onPress={onTutorial}
+                accessibilityRole="button"
+                accessibilityLabel="Start the hazard tutorial session"
+                testID="debug-hazard-tutorial-button"
+            >
+                <Text style={[styles.buttonLabel, styles.tutorialLabel]}>TUTORIAL</Text>
+            </Pressable>
             <Pressable
                 style={styles.button}
                 onPress={onPress}
@@ -64,4 +80,6 @@ const useStyles = makeStyles((AXM) => ({
         backgroundColor: AXM.rustSubtle,
     },
     buttonLabel: { fontFamily: FONTS.gothic, fontSize: 14, letterSpacing: 2, color: AXM.rust },
+    tutorialButton: { borderColor: AXM.sulfur, backgroundColor: AXM.sulfurSubtle, marginRight: 6 },
+    tutorialLabel: { color: AXM.sulfur },
 }));

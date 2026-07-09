@@ -24,8 +24,11 @@ import {
     ResolveFlashOverlay,
 } from '@/components/hazard/HazardOverlays';
 import { HazardIntroOverlay } from '@/components/hazard/HazardIntroOverlay';
+import { HazardTutorialCoach } from '@/components/hazard/HazardTutorialCoach';
+import { currentTutorialStep } from '@/components/hazard/tutorial-steps';
 import { RewardsOverlay } from '@/components/hazard/RewardsOverlay';
 import { RouteSelect } from '@/components/hazard/RouteSelect';
+import { HAZARD_TUTORIAL_FLAG } from '@/state/hazard/store-actions';
 import { useGameActions, useGameState } from '@/state/GameStoreProvider';
 import { selectHazardViewModel, type HazardCardVM } from '@/state/presenters/hazard.engine';
 import type { SeedInput } from '@mechanics';
@@ -34,6 +37,9 @@ type DropResolver = (payload: DragPayload, x: number, y: number) => void | Promi
 
 export default function HazardScreen() {
     const hazard = useGameState((s) => s.hazard);
+    const tutorialDone = useGameState((s) =>
+        ((s as unknown as { flags?: string[] }).flags ?? []).includes(HAZARD_TUTORIAL_FLAG),
+    );
     const vm = useMemo(() => selectHazardViewModel({ hazard }), [hazard]);
     const actions = useGameActions();
     const router = useRouter();
@@ -44,6 +50,16 @@ export default function HazardScreen() {
     // route select — for map-triggered AND dev-triggered hazards alike.
     const [introAckSeed, setIntroAckSeed] = useState<SeedInput | null>(null);
     const showIntro = vm.active && vm.phase === 'route-select' && introAckSeed !== vm.sessionSeed;
+
+    // The coach rides the guided first crossing until its script is done
+    // or skipped; the persistent flag gates it (and the map trigger).
+    const session = hazard?.session ?? null;
+    const coachActive = hazard?.tutorial === true && session !== null && !tutorialDone;
+    useEffect(() => {
+        if (coachActive && currentTutorialStep(session!, vm) === -1) {
+            actions.completeHazardTutorial(false);
+        }
+    }, [coachActive, session, vm, actions]);
 
     // ── screen-level drag controller ──
     const [dragActive, setDragActive] = useState<DragPayload | null>(null);
@@ -163,6 +179,14 @@ export default function HazardScreen() {
                     onConfirm={(cardId) => {
                         actions.claimHazardRewards(cardId);
                     }}
+                />
+            )}
+
+            {coachActive && !showIntro && (
+                <HazardTutorialCoach
+                    session={session!}
+                    vm={vm}
+                    onSkip={() => actions.completeHazardTutorial(true)}
                 />
             )}
 

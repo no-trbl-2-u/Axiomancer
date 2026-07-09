@@ -40,7 +40,7 @@ function shapeOf(v: unknown): unknown {
 }
 
 function vmOf(session: HazardSessionState) {
-    return selectHazardViewModel({ hazard: { session } });
+    return selectHazardViewModel({ hazard: { session, tutorial: false } });
 }
 
 describe('hazard view-model lock-in', () => {

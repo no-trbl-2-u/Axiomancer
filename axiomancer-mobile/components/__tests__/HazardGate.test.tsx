@@ -45,7 +45,7 @@ function makeStore(): AppStore {
 }
 
 function setHazardSession(store: AppStore, session: HazardSessionState | null) {
-    const hazardSlice: MobileHazardSlice = { session };
+    const hazardSlice: MobileHazardSlice = { session, tutorial: false };
     store.setState({ hazard: hazardSlice });
 }
 

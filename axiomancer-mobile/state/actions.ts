@@ -85,9 +85,11 @@ import {
     beginHazardAction,
     chooseHazardCardKeyAction,
     claimHazardRewardsAction,
+    completeHazardTutorialAction,
     continueHazardAfterResolveAction,
     discardHazardCardAction,
     finishHazardRollingAction,
+    HAZARD_TUTORIAL_FLAG,
     powerHazardCardAction,
     randomizeHazardDeckAction,
     resolveHazardRoundAction,
@@ -508,6 +510,8 @@ export interface AppActions {
     randomizeHazardDeck: () => string[];
     /** Dev tool — apply one deterministic Kid strategy deck preset. */
     applyHazardDeckPreset: (presetId: HazardDeckPresetId) => HazardDeckPresetResult;
+    /** Marks the guided first crossing done (completed or skipped). */
+    completeHazardTutorial: (skipped: boolean) => void;
     /**
      * Dev tool — swap the player's combat deck for a preset: replaces
      * `knownCards` with the preset's card ids and clears earned reward
@@ -956,6 +960,7 @@ export function createAppActions(store: AppStore): AppActions {
         abandonHazard: () => abandonHazardAction(store),
         randomizeHazardDeck: () => randomizeHazardDeckAction(store),
         applyHazardDeckPreset: (presetId) => applyHazardDeckPresetAction(store, presetId),
+        completeHazardTutorial: (skipped) => completeHazardTutorialAction(store, skipped),
         applyCombatDeckPreset: (presetId) => applyCombatDeckPresetAction(store, presetId),
         randomizeCombatDeck: () => randomizeCombatDeckAction(store),
         beginGathering: (options) => beginGatheringAction(store, options),
@@ -1562,7 +1567,11 @@ function resolveCurrentMapEventAction(store: AppStore, sourceNodeType?: string):
                 player: gameState.player,
                 event: EMPTY_EVENT_SLICE,
             });
-            beginHazardAction(store);
+            // The first-ever crossing runs as the guided tutorial (pinned
+            // seed + hazard, coach overlay); the persistent flag set on
+            // completion/skip keeps every later crossing organic.
+            const tutorialDone = (gameState.flags ?? []).includes(HAZARD_TUTORIAL_FLAG);
+            beginHazardAction(store, tutorialDone ? {} : { tutorial: true });
             return true;
         }
 

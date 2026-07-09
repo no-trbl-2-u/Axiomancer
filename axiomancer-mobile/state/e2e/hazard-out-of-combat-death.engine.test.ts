@@ -57,7 +57,7 @@ function setHealth(store: AppStore, health: number, maxHealth: number): void {
 function playLosingRound(store: AppStore, actions: AppActions): void {
     const s = hazardSession(store);
     const hand: HazardHandEntry[] = [{ uid: `t${s.round}-0`, cardId: HAZARD_CRACK_CARD.id, dieId: null }];
-    store.setState({ hazard: { session: { ...s, hand, play: [] } } });
+    store.setState({ hazard: { session: { ...s, hand, play: [] }, tutorial: false } });
     for (const h of hazardSession(store).hand.slice()) actions.stageHazardCard(h.uid);
     actions.resolveHazardRound();
     actions.continueHazardAfterResolve();
