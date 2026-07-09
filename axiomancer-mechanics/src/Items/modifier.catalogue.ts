@@ -121,7 +121,7 @@ export const weaponModPool: Modifier[] = [
             { levelReq: 50, range: [25, 34] },
         ],
         payload: {
-            statModifiers: [{ stat: 'physicalSkill', value: 0 }],
+            statModifiers: [{ stat: 'physicalAttack', value: 0 }],
         },
         addedIn: '2026-06-07',
         tags: ['weapon', 'offense'],
@@ -724,7 +724,7 @@ export const headModPool: Modifier[] = [
             { levelReq: 50, range: [10, 14] },
         ],
         payload: {
-            statModifiers: [{ stat: 'mentalSkill', value: 0 }],
+            statModifiers: [{ stat: 'mentalAttack', value: 0 }],
         },
         addedIn: '2026-06-07',
         tags: ['head', 'offense', 'mental'],
@@ -1038,7 +1038,7 @@ export const handsModPool: Modifier[] = [
             { levelReq: 20, range: [6, 9] },
         ],
         payload: {
-            statModifiers: [{ stat: 'physicalSkill', value: 0 }],
+            statModifiers: [{ stat: 'physicalAttack', value: 0 }],
         },
     },
     {

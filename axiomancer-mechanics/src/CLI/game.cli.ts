@@ -582,7 +582,7 @@ async function characterTab(store: GameStoreHandle): Promise<void> {
     const ds = p.derivedStats;
     log(`  physical  attack ${ds.physicalAttack}    defense ${ds.physicalDefense}`);
     log(`  mental    attack ${ds.mentalAttack}        defense ${ds.mentalDefense}`);
-    log(`  emotional attack ${ds.emotionalAttack}   skill ${ds.emotionalSkill}   defense ${ds.emotionalDefense}`);
+    log(`  emotional attack ${ds.emotionalAttack}   defense ${ds.emotionalDefense}`);
     log(`  luck      ${ds.luck}`);
 
     log('\nNon-combat stats:');

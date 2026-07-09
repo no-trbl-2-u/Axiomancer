@@ -364,11 +364,6 @@
             "isMultiplier": false
           },
           {
-            "stat": "mentalSkill",
-            "value": -2,
-            "isMultiplier": false
-          },
-          {
             "stat": "mentalDefense",
             "value": -1,
             "isMultiplier": false
@@ -419,11 +414,6 @@
           {
             "stat": "heart",
             "value": -4,
-            "isMultiplier": false
-          },
-          {
-            "stat": "emotionalSkill",
-            "value": -3,
             "isMultiplier": false
           },
           {
@@ -544,11 +534,6 @@
             "stat": "heart",
             "value": -2,
             "isMultiplier": false
-          },
-          {
-            "stat": "emotionalSkill",
-            "value": -3,
-            "isMultiplier": false
           }
         ]
       },
@@ -577,16 +562,6 @@
           },
           {
             "stat": "mind",
-            "value": -1,
-            "isMultiplier": false
-          },
-          {
-            "stat": "physicalSkill",
-            "value": -1,
-            "isMultiplier": false
-          },
-          {
-            "stat": "mentalSkill",
             "value": -1,
             "isMultiplier": false
           }
@@ -625,21 +600,6 @@
             "stat": "heart",
             "value": -2,
             "isMultiplier": false
-          },
-          {
-            "stat": "physicalSkill",
-            "value": -1,
-            "isMultiplier": false
-          },
-          {
-            "stat": "mentalSkill",
-            "value": -1,
-            "isMultiplier": false
-          },
-          {
-            "stat": "emotionalSkill",
-            "value": -1,
-            "isMultiplier": false
           }
         ],
         "rollModifier": -2
@@ -662,13 +622,6 @@
       "resistDR": 12,
       "payload": {
         "rollModifier": -2,
-        "statModifiers": [
-          {
-            "stat": "physicalSkill",
-            "value": -2,
-            "isMultiplier": false
-          }
-        ],
         "advantageModifier": {
           "grantDisadvantage": [
             "body"
@@ -891,7 +844,7 @@
       "payload": {
         "statModifiers": [
           {
-            "stat": "physicalSkill",
+            "stat": "physicalAttack",
             "value": -1,
             "isMultiplier": false
           }

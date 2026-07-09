@@ -42,7 +42,6 @@ function combatantWithEffects(effects: ActiveEffect[]): Combatant {
  *
  * The math: base stats are all 5.
  *   - ATTACK multiplier = 1, so physicalAttack = body × 1 = 5.
- *   - SKILL multiplier = 1, so physicalSkill = body × 1 = 5.
  *   - DEFENSE multiplier = 3, so physicalDefense = body × 3 = 15.
  *   - SAVE multiplier = 2, so physicalSave = body × 2 = 10.
  *   - luck = average(body, mind, heart) = 5.
@@ -91,12 +90,11 @@ const statBandCases = [
     },
     {
         effectId: 'buff_all_stats_up',
-        label: 'buff_all_stats_up: body/mind/heart +2, skills +1, luck +1',
+        label: 'buff_all_stats_up: body/mind/heart +2, luck +1',
         assertions: (eff: ReturnType<typeof getEffectiveStats>) => {
             expect(eff.baseStats.body).toBe(7);
             expect(eff.baseStats.mind).toBe(7);
             expect(eff.baseStats.heart).toBe(7);
-            // physicalSkill re-derives (7×1=7) then flat +1 = 8
             // luck re-derives as average(7,7,7) = 7 then flat +1 = 8
             expect(eff.derivedStats.luck).toBe(8);
         },

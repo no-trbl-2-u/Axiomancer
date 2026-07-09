@@ -80,24 +80,7 @@
       "resistedBy": "heart",
       "resistDR": 13,
       "payload": {
-        "rollModifier": 3,
-        "statModifiers": [
-          {
-            "stat": "physicalSkill",
-            "value": 2,
-            "isMultiplier": false
-          },
-          {
-            "stat": "mentalSkill",
-            "value": 2,
-            "isMultiplier": false
-          },
-          {
-            "stat": "emotionalSkill",
-            "value": 2,
-            "isMultiplier": false
-          }
-        ]
+        "rollModifier": 3
       },
       "tier": 2,
       "tags": [
@@ -418,21 +401,6 @@
             "isMultiplier": false
           },
           {
-            "stat": "physicalSkill",
-            "value": 1,
-            "isMultiplier": false
-          },
-          {
-            "stat": "mentalSkill",
-            "value": 1,
-            "isMultiplier": false
-          },
-          {
-            "stat": "emotionalSkill",
-            "value": 1,
-            "isMultiplier": false
-          },
-          {
             "stat": "luck",
             "value": 1,
             "isMultiplier": false
@@ -692,11 +660,6 @@
             "stat": "mind",
             "value": 1,
             "isMultiplier": false
-          },
-          {
-            "stat": "mentalSkill",
-            "value": 2,
-            "isMultiplier": false
           }
         ]
       },
@@ -769,7 +732,7 @@
       "payload": {
         "statModifiers": [
           {
-            "stat": "physicalSkill",
+            "stat": "physicalDefense",
             "value": 1,
             "isMultiplier": false
           }

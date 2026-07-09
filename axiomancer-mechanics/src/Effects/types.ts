@@ -37,9 +37,9 @@ export type EffectCategory =
  */
 export type EffectStatTarget =
     | Stance
-    | 'physicalAttack'  | 'physicalSkill' | 'physicalDefense' | 'physicalSave' | 'physicalTest'
-    | 'mentalAttack'    | 'mentalSkill'   | 'mentalDefense'   | 'mentalSave'   | 'mentalTest'
-    | 'emotionalAttack' | 'emotionalSkill'| 'emotionalDefense'| 'emotionalSave'| 'emotionalTest'
+    | 'physicalAttack'  | 'physicalDefense' | 'physicalSave' | 'physicalTest'
+    | 'mentalAttack'    | 'mentalDefense'   | 'mentalSave'   | 'mentalTest'
+    | 'emotionalAttack' | 'emotionalDefense'| 'emotionalSave'| 'emotionalTest'
     | 'luck';
 
 /** A single stat modifier applied by an effect's payload. */

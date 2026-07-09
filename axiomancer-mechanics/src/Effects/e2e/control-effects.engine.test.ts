@@ -42,7 +42,7 @@ describe('Phase 88 — debuff_sleep', () => {
     });
 });
 
-// ─── debuff_daze — stat debuff (mind -2, mentalSkill -2, mentalDefense -1) ───
+// ─── debuff_daze — stat debuff (mind -2, mentalDefense -1) ───
 
 describe('Phase 88 — debuff_daze', () => {
     it('does NOT skip turn (no actionRestriction)', () => {
@@ -53,7 +53,6 @@ describe('Phase 88 — debuff_daze', () => {
     it('reduces mind-related stats', () => {
         const mods = getActiveEffectModifiers([ae('debuff_daze')]);
         expect(mods.statFlat.get('mind')).toBe(-2);
-        expect(mods.statFlat.get('mentalSkill')).toBe(-2);
         expect(mods.statFlat.get('mentalDefense')).toBe(-1);
     });
 
@@ -64,7 +63,7 @@ describe('Phase 88 — debuff_daze', () => {
     });
 });
 
-// ─── debuff_fear — stat debuff (heart -3, emotionalSkill -2, emotionalDefense -2) ─
+// ─── debuff_fear — stat debuff (heart -4, emotionalDefense -3) ─
 
 describe('Phase 88 — debuff_fear', () => {
     it('does NOT force a stance or skip turn', () => {
@@ -76,7 +75,6 @@ describe('Phase 88 — debuff_fear', () => {
     it('reduces heart-related stats', () => {
         const mods = getActiveEffectModifiers([ae('debuff_fear')]);
         expect(mods.statFlat.get('heart')).toBe(-4);
-        expect(mods.statFlat.get('emotionalSkill')).toBe(-3);
         expect(mods.statFlat.get('emotionalDefense')).toBe(-3);
     });
 });
@@ -108,8 +106,6 @@ describe('Phase 88 — debuff_fatigue', () => {
         const mods = getActiveEffectModifiers([ae('debuff_fatigue')]);
         expect(mods.statFlat.get('body')).toBe(-1);
         expect(mods.statFlat.get('mind')).toBe(-1);
-        expect(mods.statFlat.get('physicalSkill')).toBe(-1);
-        expect(mods.statFlat.get('mentalSkill')).toBe(-1);
     });
 
     it('scales with intensity', () => {
@@ -122,14 +118,11 @@ describe('Phase 88 — debuff_fatigue', () => {
 // ─── debuff_exhaustion — broader stat reduction ───────────────────────────────
 
 describe('Phase 88 — debuff_exhaustion', () => {
-    it('reduces all three base stats and all skill stats', () => {
+    it('reduces all three base stats', () => {
         const mods = getActiveEffectModifiers([ae('debuff_exhaustion')]);
         expect(mods.statFlat.get('body')).toBe(-2);
         expect(mods.statFlat.get('mind')).toBe(-2);
         expect(mods.statFlat.get('heart')).toBe(-2);
-        expect(mods.statFlat.get('physicalSkill')).toBe(-1);
-        expect(mods.statFlat.get('mentalSkill')).toBe(-1);
-        expect(mods.statFlat.get('emotionalSkill')).toBe(-1);
     });
 });
 
