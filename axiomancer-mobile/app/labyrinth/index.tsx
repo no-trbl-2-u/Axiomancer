@@ -44,6 +44,7 @@ export default function LabyrinthScreen() {
     const finaleVm = useGameState(selectLabyrinthFinaleViewModel);
     const eventVm = useGameState(selectEventViewModel);
     const hasEvent = useGameState(selectHasActiveEvent);
+    const hasSession = useGameState((s) => s.labyrinthUi?.session != null);
 
     const [selectedDoor, setSelectedDoor] = useState<{ to: string; display: string; gated: boolean } | null>(null);
     const [showMap, setShowMap] = useState(false);
@@ -102,10 +103,29 @@ export default function LabyrinthScreen() {
         return () => clearTimeout(t);
     }, [arrivalToast, actions]);
 
+    const leavingRef = useRef(false);
     const leave = useCallback(() => {
+        leavingRef.current = true;
         actions.exitLabyrinth();
         if (router.canGoBack()) router.back();
     }, [actions, router]);
+
+    // If the visit's session is cleared out from under us — a run reset on
+    // death (`resetRun`) regenerates the overworld and drops the session —
+    // pop back to the map. Without this the still-mounted route would strand
+    // the player on the act-select screen after BEGIN AGAIN. The `leave`
+    // button clears the session too, so its ref guards against a double pop.
+    const hadSessionRef = useRef(false);
+    useEffect(() => {
+        if (hasSession) {
+            hadSessionRef.current = true;
+            return;
+        }
+        if (hadSessionRef.current && !leavingRef.current) {
+            hadSessionRef.current = false;
+            if (router.canGoBack()) router.back();
+        }
+    }, [hasSession, router]);
 
     const onEncounterFight = () => {
         const enemy = actions.beginHazardEncounter();

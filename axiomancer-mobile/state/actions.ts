@@ -78,7 +78,7 @@ import {
     type CombatDeckPresetId,
     type CombatDeckPresetResult,
 } from './combat/store-actions';
-import { EMPTY_EVENT_SLICE, type AppStore } from './store';
+import { EMPTY_EVENT_SLICE, EMPTY_LABYRINTH_SLICE, type AppStore } from './store';
 import {
     abandonHazardAction,
     acknowledgeHazardOutcomeAction,
@@ -933,6 +933,16 @@ export function createAppActions(store: AppStore): AppActions {
                 resetRun?: (o: { keepCharacter: boolean }) => unknown;
             };
             engineStore.resetRun?.(opts);
+            // A run reset regenerates the overworld (seating the player at
+            // the starting node), so any in-flight Labyrinth visit is over.
+            // Clear the mobile session slice — otherwise the still-mounted
+            // Labyrinth presenter looks the fresh overworld node up in the
+            // act and throws LabyrinthContentError (the "battle loss → THE
+            // BINDING TORE" crash). This is the single choke point for
+            // every reset (combat defeat + hazard out-of-combat death).
+            if (store.getState().labyrinthUi?.session) {
+                store.setState({ labyrinthUi: EMPTY_LABYRINTH_SLICE });
+            }
         },
         levelUp: () => {
             // Phase 73 follow-up — engine `levelUp` action. Same
