@@ -124,9 +124,13 @@ Tick in this file in the same commit that ships the phase.
       resolve via a pinned seed (3, cracked-cliff); FORETELL out of
       scope (brief: `plan/phases/phase_15_hazard_tutorial.md`) (mobile)
       — `feat(mobile): guided first-crossing hazard tutorial — phase 15` (0e03ee02)
-- [ ] Phase 16 — Loot-Cache ("The Reliquary") first-delve tutorial
-      (GAP-001 follow-up), mirroring the Rest/Gathering/Combat
-      tutorials (mobile)
+- [x] Phase 16 — Loot-Cache ("The Reliquary") first-delve tutorial
+      (GAP-001 follow-up): guided first-run coach for the Reliquary,
+      mirroring the Rest/Gathering/Hazard tutorials. Teaches begin/
+      delve/push/card/outcome via a pinned seed (1, modest tier, 4
+      currency); Insight (STEADY THE HAND) out of scope (brief:
+      `plan/phases/phase_16_reliquary_tutorial.md`) (mobile)
+      — `feat(mobile): guided first-delve reliquary tutorial — phase 16` (95f67302)
 - [ ] Phase 17 — Quest Board ("The Boy's Almanac") first-session
       tutorial (GAP-001 follow-up), mirroring the Rest/Gathering/Combat
       tutorials (mobile)
