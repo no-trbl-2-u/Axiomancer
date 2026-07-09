@@ -67,7 +67,7 @@ status the efficient route there. So the forge's questions are:
    single card carries >70% of a win's impact (`buildCombatSummary`
    attribution). Dead cards and dominant cards are both forge failures.
 3. **Do the presets and draft weights produce honest archetypes?** Each
-   of the 10 theme presets must win through its own signature keywords
+   of the 10 theme presets must win through its own hallmark keywords
    (spec 32 §8-9), a `dot`-focus draft must actually out-DoT a `balanced`
    draft, and the `aggro-brute` sim policy must remain the weak baseline
    (its underperformance IS the design — status play must beat
@@ -196,7 +196,7 @@ Card-level targets on top of the bands:
 | Dead cards | every library card shows plays in the card-coverage e2e and non-trivial usage somewhere in the full `--cards` matrix |
 | Pool ratios (v3 — re-derive from the live library before relying on them) | direct damage = 0 by LAW (spec 32: THE STRIKE IS DEAD — a card printing raw HP damage is a spec violation, not a tuning finding); DoT >= 25%; control >= 15%; GUARD/BARRIER >= 1 per theme; Befriend >= 1; state-interactive >= 2 |
 | Per-stage pool health | each stage's eligible pool (`stageEligibleCardIds`) contains at least one live DoT, control, and defend line |
-| Archetype honesty | each of the 10 theme presets (`erosion` … `refrain`) wins through its own SIGNATURE keywords, not just the shared utility 10 (spec 32 §8-9); `dot`-focus drafts land more DoT than `balanced` drafts; the `aggro-brute` POLICY stays the weak baseline (a sim policy — the v2 `aggro-strike` preset is retired) |
+| Archetype honesty | each of the 10 theme presets (`erosion` … `refrain`) wins through its own HALLMARK keywords, not just the shared utility 10 (spec 32 §8-9); `dot`-focus drafts land more DoT than `balanced` drafts; the `aggro-brute` POLICY stays the weak baseline (a sim policy — the v2 `aggro-strike` preset is retired) |
 | Per-deck floors & ceiling (balance the VARIANCE, not the mean) | FLOORS are graded on the starter deck's design window only — every theme preset >= 40% early, >= 25% mid (target ratchets). **Late is informational telemetry, NOT a graded floor** (deck-progression model, owner-confirmed 2026-07-08: starter presets are early-game decks; the player matures the deck by drafting through the labyrinth and by late has kept a built-up deck or swapped to a not-yet-built late-game preset — so an un-matured starter losing late is correct, not a dead-on-arrival bug). The DOMINANCE ceiling still applies on EVERY stage incl. late: NO preset at >98% on any stage — a 100% cell is a dominance finding regardless of stage (Oratory/Standstill). Impossible should target a hard 0% ceiling for starter presets. Live enforcement values are the `PRESET_FLOORS` (early+mid) / `PRESET_CEILING` (all stages) constants in the balance-band e2e (`// PLAYTEST-CALIBRATION`, pinned loose today) — ratchet floors toward these targets as forge items land; stage averages that hit band while presets sit at 0% on a graded stage or 100% anywhere are a FAIL |
 
 Every run's report includes the per-preset spread table (min/median/max
@@ -218,7 +218,7 @@ against these criteria, per keyword:
 | Exercised | the keyword's cards show non-trivial plays in the full `--cards` matrix (not just the coverage e2e minimum) |
 | Not dominant | no keyword's cards jointly account for >70% of a typical win's impact on any stage (`buildCombatSummary` attribution) |
 | Priced honestly | every card carrying it passes the pricing lint, and its A/B history shows no standing "known-cheap/known-dear" note |
-| Theme-honest (signatures only) | the keyword's home preset wins through it (§4 archetype honesty), not around it |
+| Theme-honest (hallmarks only) | the keyword's home preset wins through it (§4 archetype honesty), not around it |
 
 A keyword failing a criterion is a forge target, not a retirement
 candidate by default — fix the cards first, the keyword second. When

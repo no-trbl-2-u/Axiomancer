@@ -110,7 +110,7 @@ before opining or editing; spec answers outrank your judgment.
   `rank` (1-6, Doxa/Lemma/Thesis/Theorem/Axiom/Aporia) is the QUALITY
   axis. Rarity derives from rank (common 1-2 / uncommon 3-4 / rare 5-6).
 - **Exactly 30 keywords today** (spec 32 §3): 10 utility shared by all
-  themes + 2 signatures × 10 themes. The cap is a PROVING GATE, not a
+  themes + 2 hallmarks × 10 themes. The cap is a PROVING GATE, not a
   forever rule — the owner intends to grow the registry past 30 once
   the current 30 are proven correct (exercised, priced honestly, no
   dead or dominant keywords). Until that gate opens: no keyword #31
@@ -121,7 +121,7 @@ before opining or editing; spec answers outrank your judgment.
   recommendation is part of your job. Retired ids are never renamed;
   the ban-list test enforces their death.
 - **10 self-contained themes**, zero cross-deck card overlap. A new
-  card must speak its theme's vocabulary (its 2 signature keywords +
+  card must speak its theme's vocabulary (its 2 hallmark keywords +
   utility 10), not borrow a neighbor's.
 
 **File map (where the answers live):**
@@ -275,7 +275,7 @@ and what does / does not transfer.
   in the `// pts:` comment — the pricing lint will check you anyway.
 - **Preset honesty:** the 10 presets (`erosion` … `refrain` in
   `combat.deck-presets.ts`) map 1:1 onto the themes; each must win
-  through its own signature keywords. A preset that only wins via the
+  through its own hallmark keywords. A preset that only wins via the
   shared utility verbs is a dishonest archetype — that's a design
   finding, not a numbers problem. Don't "fix" intentional asymmetries
   between themes without checking spec 32 §8-9 first.

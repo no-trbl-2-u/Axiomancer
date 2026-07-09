@@ -429,7 +429,7 @@ export interface Card {
     cardType: CardType;
     /**
      * Spec 32 — the card's THEME (one of ten). A theme is a family of keywords
-     * ({@link CardTheme} / `THEME_KEYWORDS`): the two signatures plus the utility
+     * ({@link CardTheme} / `THEME_KEYWORDS`): the two hallmark keywords plus the utility
      * keywords it synergises with. Drives the catalog's theme/keyword search.
      * Every library card declares one; optional only so throwaway test fixtures
      * need not (the curated-library suite asserts real cards carry it).

@@ -62,7 +62,7 @@ function controlKeyword(effectId: string, skipTurn: boolean): KeywordId {
     return 'control';
 }
 
-/** Best-effort: the card's signature keyword + its representative value. */
+/** Best-effort: the card's primary keyword + its representative value. */
 function primaryKeyword(card: CardDraft): { kw: KeywordId; val: number } {
     // Persistent cards read as their card type.
     if (card.cardType === 'enchantment') return { kw: 'enchant', val: 0 };

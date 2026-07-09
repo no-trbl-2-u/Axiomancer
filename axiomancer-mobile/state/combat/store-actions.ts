@@ -177,7 +177,7 @@ export function randomizeCombatDeckAction(store: AppStore): string[] {
 // tag. The tag is never shown to the player; it biases combat-card rewards
 // toward the kind of cards their chosen path wants (see
 // `skewRewardsByArchetype`). Mobile authors only presentation (accent + the
-// theme's two signature-keyword pills) — every card id is engine truth.
+// theme's two hallmark-keyword pills) — every card id is engine truth.
 // ---------------------------------------------------------------------------
 
 export type StarterArchetype = 'bleeder' | 'guardian' | 'controller';
@@ -196,7 +196,7 @@ export interface StarterBundle {
     /** Tile accent colour. A per-theme hue, decoupled from stance colour so
      *  every deck reads distinct on the picker. */
     accent: string;
-    /** The theme's two signature keywords (spec 32 v3 §3), shown as pills. */
+    /** The theme's two hallmark keywords (spec 32 v3 §3), shown as pills. */
     pills: readonly string[];
     /** The seeded knownSkills deck (the engine recipe — duplicates intended). */
     cardIds: string[];
@@ -208,7 +208,7 @@ const BUNDLE_FLAG_PREFIX = 'bundle:';
 const ARCHETYPE_FLAG_PREFIX = 'archetype:';
 
 /** Mobile presentation + reward-skew tag per themed preset (spec 32 v3 §6):
- *  the theme's two signature keywords and the archetype family they feed. */
+ *  the theme's two hallmark keywords and the archetype family they feed. */
 const BUNDLE_CHROME: Record<ThemedDeckId, { accent: string; pills: readonly string[]; archetype: StarterArchetype | null }> = {
     erosion: { accent: '#5aa02c', pills: ['POISON', 'BLEED'], archetype: 'bleeder' },
     oratory: { accent: '#c98a2b', pills: ['PREMISE', 'PERORATION'], archetype: 'controller' },

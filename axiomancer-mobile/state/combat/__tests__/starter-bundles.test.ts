@@ -35,7 +35,7 @@ describe('Starter bundles — the pre-run deck picker (spec 32 v3 themed decks)'
                 expect(FULL_POOL.has(id)).toBe(true);
                 expect(getCard(id)).toBeTruthy();
             }
-            // Presentation: every tile carries its theme's two signature keywords.
+            // Presentation: every tile carries its theme's two hallmark keywords.
             expect(b.pills.length).toBe(2);
             expect(b.description.length).toBeGreaterThan(0);
         }

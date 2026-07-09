@@ -1,14 +1,16 @@
 /**
  * Card THEMES and their KEYWORD FAMILIES (spec 32).
  *
- * A theme is a family of keywords: its two signature keywords (spec 32 §3) plus
- * the shared utility keywords its cards lean on. Keywords deliberately recur
- * across themes — DRAW, MARK, RUPTURE, etc. are shared connective tissue — so a
- * theme reads as "the keywords that play well together here", not an exclusive
- * bucket. Every library card declares its `theme`; the catalog lets you search
- * by theme or by any keyword in a theme's family.
+ * A theme is a family of keywords: its two HALLMARK keywords (the theme's own,
+ * spec 32 §3) plus the shared utility keywords its cards lean on. Keywords
+ * deliberately recur across themes — DRAW, MARK, RUPTURE, etc. are shared
+ * connective tissue — so a theme reads as "the keywords that play well together
+ * here", not an exclusive bucket. Every library card declares its `theme`; the
+ * catalog lets you search by theme or by any keyword in a theme's family.
  *
- * The 30-keyword registry itself is spec 32 §3 (10 utility + 2 × 10 signatures).
+ * The 30-keyword registry itself is spec 32 §3: 10 utility keywords (shared) +
+ * 2 hallmark keywords × 10 themes = 20, for 30 total. ("Hallmark", not
+ * "signature" — `SignatureSkill` is the unrelated Befriend concept.)
  */
 
 /** The ten preset deck card themes */
@@ -31,10 +33,11 @@ export const CARD_THEMES: readonly CardTheme[] = Object.freeze([
 ]);
 
 /**
- * Each theme's keyword FAMILY: the two signatures (spec §3) first, then the
- * utility keywords its cards genuinely synergise with. Keywords appear in more
- * than one family on purpose (e.g. DRAW spans several build-around themes).
- * These are the searchable keywords the catalog exposes per theme.
+ * Each theme's keyword FAMILY: the two HALLMARK keywords (the theme's own, spec
+ * §3) first, then the utility keywords its cards genuinely synergise with.
+ * Keywords appear in more than one family on purpose (e.g. DRAW spans several
+ * build-around themes). These are the searchable keywords the catalog exposes
+ * per theme.
  */
 export const THEME_KEYWORDS: Record<CardTheme, readonly string[]> = Object.freeze({
     affliction: ['POISON', 'BLEED', 'MARK', 'TICK', 'RUPTURE', 'CLEANSE'],
