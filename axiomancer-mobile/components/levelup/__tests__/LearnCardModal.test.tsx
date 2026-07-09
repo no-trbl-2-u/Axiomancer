@@ -1,9 +1,9 @@
 /**
  * Hermetic component tests — LearnCardModal surface.
  *
- * Pins the skill-learning modal: copy register, offer rendering,
+ * Pins the card-learning modal: copy register, offer rendering,
  * button interactions, accessibility labels. Tests the overlay that
- * appears during character level-up for skill selection.
+ * appears during character level-up for card selection.
  */
 
 import { describe, expect, it, jest } from '@jest/globals';
@@ -14,13 +14,13 @@ import { LearnCardModal } from '@/components/levelup/LearnCardModal';
 import type { LearnableCardOffer } from '@/state/actions';
 
 const mockOffer: LearnableCardOffer = {
-    id: 'test-skill-id',
-    name: 'Test Skill',
+    id: 'test-card-id',
+    name: 'Test Card',
     tier: 2,
     category: 'fallacy',
     stance: 'mind',
     effectText: 'deals +2 damage',
-    description: 'A test skill for unit testing',
+    description: 'A test card for unit testing',
 };
 
 describe('LearnCardModal: mount contract', () => {
@@ -33,7 +33,7 @@ describe('LearnCardModal: mount contract', () => {
                 onSkip={() => undefined}
             />,
         );
-        expect(tree.getByTestId('learn-skill-modal')).toBeTruthy();
+        expect(tree.getByTestId('learn-card-modal')).toBeTruthy();
     });
 
     it('renders the header copy (eyebrow + title + subtitle)', () => {
@@ -62,7 +62,7 @@ describe('LearnCardModal: mount contract', () => {
         expect(tree.queryByText('choose one · 3 picks remain')).not.toBeNull();
     });
 
-    it('renders skill offer with all required fields', () => {
+    it('renders card offer with all required fields', () => {
         const tree = render(
             <LearnCardModal
                 offers={[mockOffer]}
@@ -71,10 +71,10 @@ describe('LearnCardModal: mount contract', () => {
                 onSkip={() => undefined}
             />,
         );
-        expect(tree.queryByText('Test Skill')).not.toBeNull();
+        expect(tree.queryByText('Test Card')).not.toBeNull();
         expect(tree.queryByText('T2 · FALLACY')).not.toBeNull();
         expect(tree.queryByText('deals +2 damage')).not.toBeNull();
-        expect(tree.queryByText('A test skill for unit testing')).not.toBeNull();
+        expect(tree.queryByText('A test card for unit testing')).not.toBeNull();
         expect(tree.queryByText('LEARN ›')).not.toBeNull();
     });
 
@@ -87,13 +87,13 @@ describe('LearnCardModal: mount contract', () => {
                 onSkip={() => undefined}
             />,
         );
-        expect(tree.getByTestId('learn-skill-skip')).toBeTruthy();
+        expect(tree.getByTestId('learn-card-skip')).toBeTruthy();
         expect(tree.queryByText('forgo — let the words go unlearned')).not.toBeNull();
     });
 });
 
 describe('LearnCardModal: callbacks', () => {
-    it('skill offer button fires onPick with skill id exactly once', () => {
+    it('card offer button fires onPick with card id exactly once', () => {
         const onPick = jest.fn();
         const onSkip = jest.fn();
         const tree = render(
@@ -104,9 +104,9 @@ describe('LearnCardModal: callbacks', () => {
                 onSkip={onSkip}
             />,
         );
-        fireEvent.press(tree.getByTestId('learn-skill-offer-test-skill-id'));
+        fireEvent.press(tree.getByTestId('learn-card-offer-test-card-id'));
         expect(onPick).toHaveBeenCalledTimes(1);
-        expect(onPick).toHaveBeenCalledWith('test-skill-id');
+        expect(onPick).toHaveBeenCalledWith('test-card-id');
         expect(onSkip).not.toHaveBeenCalled();
     });
 
@@ -121,7 +121,7 @@ describe('LearnCardModal: callbacks', () => {
                 onSkip={onSkip}
             />,
         );
-        fireEvent.press(tree.getByTestId('learn-skill-skip'));
+        fireEvent.press(tree.getByTestId('learn-card-skip'));
         expect(onSkip).toHaveBeenCalledTimes(1);
         expect(onPick).not.toHaveBeenCalled();
     });
@@ -160,7 +160,7 @@ describe('LearnCardModal: voice register', () => {
 });
 
 describe('LearnCardModal: accessibility', () => {
-    it('skill offer button surfaces descriptive accessibilityLabel', () => {
+    it('card offer button surfaces descriptive accessibilityLabel', () => {
         const tree = render(
             <LearnCardModal
                 offers={[mockOffer]}
@@ -169,9 +169,9 @@ describe('LearnCardModal: accessibility', () => {
                 onSkip={() => undefined}
             />,
         );
-        const button = tree.getByTestId('learn-skill-offer-test-skill-id');
+        const button = tree.getByTestId('learn-card-offer-test-card-id');
         expect(button.props.accessibilityLabel).toBe(
-            'Learn Test Skill, deals +2 damage',
+            'Learn Test Card, deals +2 damage',
         );
         expect(button.props.accessibilityRole).toBe('button');
     });
@@ -185,18 +185,18 @@ describe('LearnCardModal: accessibility', () => {
                 onSkip={() => undefined}
             />,
         );
-        const button = tree.getByTestId('learn-skill-skip');
-        expect(button.props.accessibilityLabel).toBe('Forgo learning a skill this level');
+        const button = tree.getByTestId('learn-card-skip');
+        expect(button.props.accessibilityLabel).toBe('Forgo learning a card this level');
         expect(button.props.accessibilityRole).toBe('button');
     });
 });
 
 describe('LearnCardModal: multiple offers', () => {
-    it('renders all provided skill offers with unique testIDs', () => {
+    it('renders all provided card offers with unique testIDs', () => {
         const offers: LearnableCardOffer[] = [
-            { ...mockOffer, id: 'skill-1', name: 'First Skill' },
-            { ...mockOffer, id: 'skill-2', name: 'Second Skill' },
-            { ...mockOffer, id: 'skill-3', name: 'Third Skill' },
+            { ...mockOffer, id: 'card-1', name: 'First Card' },
+            { ...mockOffer, id: 'card-2', name: 'Second Card' },
+            { ...mockOffer, id: 'card-3', name: 'Third Card' },
         ];
         const tree = render(
             <LearnCardModal
@@ -206,11 +206,11 @@ describe('LearnCardModal: multiple offers', () => {
                 onSkip={() => undefined}
             />,
         );
-        expect(tree.getByTestId('learn-skill-offer-skill-1')).toBeTruthy();
-        expect(tree.getByTestId('learn-skill-offer-skill-2')).toBeTruthy();
-        expect(tree.getByTestId('learn-skill-offer-skill-3')).toBeTruthy();
-        expect(tree.queryByText('First Skill')).not.toBeNull();
-        expect(tree.queryByText('Second Skill')).not.toBeNull();
-        expect(tree.queryByText('Third Skill')).not.toBeNull();
+        expect(tree.getByTestId('learn-card-offer-card-1')).toBeTruthy();
+        expect(tree.getByTestId('learn-card-offer-card-2')).toBeTruthy();
+        expect(tree.getByTestId('learn-card-offer-card-3')).toBeTruthy();
+        expect(tree.queryByText('First Card')).not.toBeNull();
+        expect(tree.queryByText('Second Card')).not.toBeNull();
+        expect(tree.queryByText('Third Card')).not.toBeNull();
     });
 });

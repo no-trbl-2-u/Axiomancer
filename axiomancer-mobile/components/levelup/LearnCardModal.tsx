@@ -2,7 +2,7 @@
  * LearnCardModal — "a new turn of phrase"
  *
  * Pops ON TOP of the stat-allocation LevelUpModal when LEVEL UP is
- * tapped: one pick of three qualifying skills per level gained
+ * tapped: one pick of three qualifying cards per level gained
  * (stacked levels queue consecutive picks). Offers come from the
  * engine's alignment-gated `getAvailableCards` via
  * `actions.getLearnableCardOffers()`; a pick dispatches
@@ -30,7 +30,7 @@ export function LearnCardModal({ offers, picksRemaining, onPick, onSkip }: Learn
     const styles = useStyles();
     const AXM = usePalette();
     return (
-        <View style={styles.root} testID="learn-skill-modal">
+        <View style={styles.root} testID="learn-card-modal">
             <View style={styles.panel}>
                 <Text style={styles.eyebrow}>✠ A NEW TURN OF PHRASE</Text>
                 <Text style={styles.title}>LEARN A SKILL</Text>
@@ -46,7 +46,7 @@ export function LearnCardModal({ offers, picksRemaining, onPick, onSkip }: Learn
                             onPress={() => onPick(offer.id)}
                             accessibilityRole="button"
                             accessibilityLabel={`Learn ${offer.name}, ${offer.effectText}`}
-                            testID={`learn-skill-offer-${offer.id}`}
+                            testID={`learn-card-offer-${offer.id}`}
                             style={({ pressed }) => [styles.offerRow, pressed && styles.offerPressed]}
                         >
                             <StanceGlyph kind={offer.stance} size={26} color={AXM.parchment} />
@@ -67,8 +67,8 @@ export function LearnCardModal({ offers, picksRemaining, onPick, onSkip }: Learn
                 <Pressable
                     onPress={onSkip}
                     accessibilityRole="button"
-                    accessibilityLabel="Forgo learning a skill this level"
-                    testID="learn-skill-skip"
+                    accessibilityLabel="Forgo learning a card this level"
+                    testID="learn-card-skip"
                     style={styles.skip}
                 >
                     <Text style={styles.skipText}>forgo — let the words go unlearned</Text>

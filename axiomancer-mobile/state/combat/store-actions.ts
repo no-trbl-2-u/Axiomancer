@@ -260,7 +260,7 @@ export function runArchetype(store: AppStore): StarterArchetype | null {
 
 /**
  * Records the player's starter-bundle choice: seeds the bundle deck onto the
- * player (when one is loaded and skill-less), and persists the bundle + hidden
+ * player (when one is loaded and card-less), and persists the bundle + hidden
  * archetype tag + the "chosen" flag so the picker never re-shows. Seeding also
  * happens lazily at first combat via `ensureStarterCards`, so a null/!loaded
  * player here is safe — the choice still rides the save as a flag.

@@ -4,7 +4,7 @@
  * Proves:
  * - Stat preview matches engine API (engine has no cross-stat effects)
  * - Combat resource values come from engine state
- * - Skill affordability follows engine truth, not local approximation
+ * - Card affordability follows engine truth, not local approximation
  */
 
 import { deriveStats, createCharacter } from '@mechanics';

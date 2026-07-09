@@ -264,7 +264,7 @@ describe('selectAftermathViewModel: defeat branch', () => {
         expect(vm?.kind === 'defeat' && vm.characterName).toBe('WORM-EATEN PILGRIM');
     });
 
-    it('populates the killer block (uppercased name + epithet + final skill + damage)', () => {
+    it('populates the killer block (uppercased name + epithet + final card + damage)', () => {
         const vm = selectAftermathViewModel(DEFEAT_SNAPSHOT);
         expect(vm?.kind === 'defeat' && vm.killer).toEqual({
             name: 'HIEROPHANT',

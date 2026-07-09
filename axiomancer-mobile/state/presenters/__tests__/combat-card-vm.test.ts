@@ -26,8 +26,8 @@ import {
 const cardOf = (id: string) => {
     const card = getCard(id);
     if (!card) throw new Error(`fixture card missing: ${id}`);
-    const skill = getCardById(card.id);
-    return { card, skill };
+    const sourceCard = getCardById(card.id);
+    return { card, sourceCard };
 };
 
 describe('engineHonestKind — the honesty gate', () => {
@@ -44,8 +44,8 @@ describe('engineHonestKind — the honesty gate', () => {
 
 describe('faceStats — honest real-unit faces', () => {
     it('Slippery Slope (ramping Poison) → 10 lifetime (2,2,3,3) · 4 turns · FREE tick', () => {
-        const { card, skill } = cardOf('slippery-slope');
-        const f = faceStats(card, skill);
+        const { card, sourceCard } = cardOf('slippery-slope');
+        const f = faceStats(card, sourceCard);
         expect(f.kind).toBe('dot');
         expect(f.heroText).toBe('10');        // ramp-aware: 2+2+3+3 (rampFactor 0.5)
         expect(f.heroSub).toBe('over 4 turns');
@@ -55,53 +55,53 @@ describe('faceStats — honest real-unit faces', () => {
         expect(f.inert).toBe(false);
     });
     it('Brace for Impact (Guard) → Guard 8 · the authored FREE Guard 2', () => {
-        const { card, skill } = cardOf('brace-for-impact');
-        const f = faceStats(card, skill);
+        const { card, sourceCard } = cardOf('brace-for-impact');
+        const f = faceStats(card, sourceCard);
         expect(f.kind).toBe('guard');
         expect(f.heroText).toBe('Guard 8');
-        expect(f.freeHeroText).toBe('Guard 2');   // skill.free.guard — never a halved fabrication
+        expect(f.freeHeroText).toBe('Guard 2');   // sourceCard.free.guard — never a halved fabrication
         expect(f.readDependent).toBe(true);
         expect(f.guardBase).toBe(8);
     });
     it('Resonance Detonation (RUPTURE) → a word, never a number', () => {
-        const { card, skill } = cardOf('resonance-detonation');
-        const f = faceStats(card, skill);
+        const { card, sourceCard } = cardOf('resonance-detonation');
+        const f = faceStats(card, sourceCard);
         expect(f.kind).toBe('rupture');
         expect(f.heroText).toBe('detonate');  // live burst → qualitative word only
         expect(f.freeHeroText).toBe('tick');
     });
     it('The Reaping (REAP all) → spends the Soul bank, burst stays live', () => {
-        const { card, skill } = cardOf('the-reaping');
-        const f = faceStats(card, skill);
+        const { card, sourceCard } = cardOf('the-reaping');
+        const f = faceStats(card, sourceCard);
         expect(f.kind).toBe('reap');
         expect(f.heroText).toBe('all Souls');
         expect(f.heroSub).toBe('4 per Soul'); // burstPerSoul — a real authored unit (v3 rework: 2 → 4)
     });
     it('Venom and Vein (enchantment) → persistent, PAID only', () => {
-        const { card, skill } = cardOf('venom-and-vein');
-        const f = faceStats(card, skill);
+        const { card, sourceCard } = cardOf('venom-and-vein');
+        const f = faceStats(card, sourceCard);
         expect(f.kind).toBe('enchant');
         expect(f.heroSub).toBe('rest of combat');
         expect(f.freeHeroText).toBe('PAID only');
         expect(card.cardType).toBe('enchantment');
     });
     it('Suppurating Curse (disenchant) → a standing curse on the enemy', () => {
-        const { card, skill } = cardOf('suppurating-curse');
-        const f = faceStats(card, skill);
+        const { card, sourceCard } = cardOf('suppurating-curse');
+        const f = faceStats(card, sourceCard);
         expect(f.kind).toBe('disenchant');
         expect(f.freeHeroText).toBe('PAID only');
         expect(card.cardType).toBe('disenchant');
     });
     it('Memento Mori (MARK i2 d1) → +2 per DoT tick, real units', () => {
-        const { card, skill } = cardOf('memento-mori');
-        const f = faceStats(card, skill);
+        const { card, sourceCard } = cardOf('memento-mori');
+        const f = faceStats(card, sourceCard);
         expect(f.kind).toBe('mark');
         expect(f.heroText).toBe('+2/tick');   // tickAmplifyFlat 1 × intensity 2
         expect(f.inert).toBe(false);
     });
     it('Red Herring (BACKFIRE i2 d2) → 2 per denied rung, real units', () => {
-        const { card, skill } = cardOf('red-herring');
-        const f = faceStats(card, skill);
+        const { card, sourceCard } = cardOf('red-herring');
+        const f = faceStats(card, sourceCard);
         expect(f.kind).toBe('backfire');
         expect(f.heroText).toBe('2/rung');    // backfirePerRung 1 × intensity 2
         expect(f.inert).toBe(false);
@@ -121,8 +121,8 @@ describe('rank / rarity projection (spec 32 v3 §4)', () => {
 
 describe('detailStats — same numbers as the face', () => {
     it('Slippery Slope outcome + stats + pill all agree on the ramp-aware 10', () => {
-        const { card, skill } = cardOf('slippery-slope');
-        const d = detailStats(card, skill);
+        const { card, sourceCard } = cardOf('slippery-slope');
+        const d = detailStats(card, sourceCard);
         expect(d.outcomeStats.find(st => st.label === 'TOTAL')?.value).toBe('10');
         expect(d.stacksText).toBe('Stacks up to 10×.');
         // §C: the +DIE read triplet is the deterministic rule, base = 10.
@@ -134,14 +134,14 @@ describe('detailStats — same numbers as the face', () => {
         expect(d.metaChip).toContain('SPELL');
     });
     it('Brace for Impact (Guard) → terse "Gain Guard 8."', () => {
-        const { card, skill } = cardOf('brace-for-impact');
-        const d = detailStats(card, skill);
+        const { card, sourceCard } = cardOf('brace-for-impact');
+        const d = detailStats(card, sourceCard);
         expect(d.outcomeLine).toBe('Gain Guard 8.');
         expect(d.stacksText).toBeNull();
     });
     it('Enchantment detail leans on the engine-generated PAID text', () => {
-        const { card, skill } = cardOf('venom-and-vein');
-        const d = detailStats(card, skill);
+        const { card, sourceCard } = cardOf('venom-and-vein');
+        const d = detailStats(card, sourceCard);
         expect(d.powerLine).toContain(card.bottomActionText);
         expect(d.metaChip).toContain('ENCHANTMENT');
     });

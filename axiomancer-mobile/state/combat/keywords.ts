@@ -28,7 +28,7 @@ const EFFECT_KEYWORD: Record<string, string> = {
 };
 
 /**
- * SUPPORT effect ids (items / consumables / the Skills token system — tagged
+ * SUPPORT effect ids (items / consumables / the Cards token system — tagged
  * `support`/`non-card` in the effect libraries). NOT card keywords and NOT in
  * the 30-keyword glossary; mapped so the combat log never prints a raw id.
  */

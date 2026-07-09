@@ -182,7 +182,7 @@ export const PlayerMedallion = React.memo(function PlayerMedallion({
 }: {
     player: CombatPlayerPaneVM;
     enemyIntentDamage: number;
-    /** Tap the medallion → inspect the pilgrim (stats/effects/skills modal). */
+    /** Tap the medallion → inspect the pilgrim (stats/effects/cards modal). */
     onPress?: () => void;
     fx?: CombatFx;
     bottomInset?: number;
@@ -271,7 +271,7 @@ export const PlayerMedallion = React.memo(function PlayerMedallion({
                     style={styles.medallion}
                     testID="combat-player-medallion"
                     accessibilityRole="button"
-                    accessibilityLabel={`${player.name}, VITAE ${player.hp} of ${player.maxHp}. Inspect your pilgrim — stats, status effects and skills.`}
+                    accessibilityLabel={`${player.name}, VITAE ${player.hp} of ${player.maxHp}. Inspect your pilgrim — stats, status effects and cards.`}
                     hitSlop={6}
                 >
                     <View style={styles.medallionClip}>

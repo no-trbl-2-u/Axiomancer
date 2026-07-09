@@ -91,11 +91,11 @@ export function selectLevelUpViewModel(
  *
  * NOTE: The engine currently has no cross-stat effects. Each base stat only
  * affects its primary category:
- * - Heart only affects emotional stats (emotionalAttack/Skill/Defense)
- * - Body only affects physical stats (physicalAttack/Skill/Defense)
- * - Mind only affects mental stats (mentalAttack/Skill/Defense)
+ * - Heart only affects emotional stats (emotionalAttack/Card/Defense)
+ * - Body only affects physical stats (physicalAttack/Card/Defense)
+ * - Mind only affects mental stats (mentalAttack/Card/Defense)
  *
- * `level` is forwarded to the engine API; derived attack/skill/defense are
+ * `level` is forwarded to the engine API; derived attack/card/defense are
  * level-independent today, so it defaults to the character's level when known.
  */
 export function calculateDerivedPreview(

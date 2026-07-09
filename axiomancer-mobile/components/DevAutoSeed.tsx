@@ -4,7 +4,7 @@
  * User-jot: "the starting character to have a bunch of items
  * to test the equipment and consumable mechanics." A blank
  * inventory is the wrong default for DEV builds since manual
- * testing depends on having items + skills + a seeded map.
+ * testing depends on having items + cards + a seeded map.
  *
  * Behavior:
  *   - Production (`__DEV__` false): renders null, no effect.

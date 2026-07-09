@@ -3,7 +3,7 @@
  *
  * Two buttons for reproducible test state initialization:
  * - FRESH START: level-1, minimal gear, start-of-game state
- * - ENDGAME: max-level, all items/skills, endgame state
+ * - ENDGAME: max-level, all items/cards, endgame state
  *
  * Enables testing game extremes that are hard to reach through
  * normal play progression. Direct game state manipulation via
@@ -124,7 +124,7 @@ export function DebugPlaythroughPresets() {
                     style={[styles.button, active === 'endgame' && styles.buttonActive]}
                     onPress={onApplyEndgame}
                     accessibilityRole="button"
-                    accessibilityLabel="Apply endgame preset (max level, all skills/items)"
+                    accessibilityLabel="Apply endgame preset (max level, all cards/items)"
                     testID="debug-preset-endgame"
                 >
                     <Text style={[styles.buttonLabel, active === 'endgame' && styles.buttonLabelActive]}>

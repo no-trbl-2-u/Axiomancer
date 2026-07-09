@@ -2,7 +2,7 @@
  * Dev-only debug seed button (Phase 54).
  *
  * Press to fire `actions.debugSeed()` — adds representative items
- * across categories, teaches a handful of fixture skills, and
+ * across categories, teaches a handful of fixture cards, and
  * resets the current map back to its starting state. Renders null
  * in production builds (`__DEV__` is false).
  *
@@ -13,7 +13,7 @@
  *
  * User-requested via `/oversight` 2026-05-19: "Could I add a
  * 'debug' button that makes my character have a few items from
- * each category and a few skills that also resets the current
+ * each category and a few cards that also resets the current
  * map? I want to make sure I'm able to test items and combat."
  */
 
@@ -35,7 +35,7 @@ export function DebugSeedButton() {
     const onPress = () => {
         const result = actions.debugSeed();
         setLastResult(
-            `seeded · ${result.itemsAdded} items · ${result.cardsLearned} skills · map ${result.mapReset ? 'reset' : 'unchanged'}`,
+            `seeded · ${result.itemsAdded} items · ${result.cardsLearned} cards · map ${result.mapReset ? 'reset' : 'unchanged'}`,
         );
     };
 
@@ -44,14 +44,14 @@ export function DebugSeedButton() {
             <View style={styles.labelCol}>
                 <Text style={styles.label}>DEBUG · SEED</Text>
                 <Text style={styles.sub}>
-                    {lastResult ?? 'items + skills + map reset'}
+                    {lastResult ?? 'items + cards + map reset'}
                 </Text>
             </View>
             <Pressable
                 style={styles.button}
                 onPress={onPress}
                 accessibilityRole="button"
-                accessibilityLabel="Seed debug items, skills, and reset the current map"
+                accessibilityLabel="Seed debug items, cards, and reset the current map"
                 testID="debug-seed-button"
             >
                 <Text style={styles.buttonLabel}>SEED</Text>

@@ -8,7 +8,7 @@
  * 60a migration from the deprecated `getCoastalMap`) — fresh
  * `currentNode`, cleared `discoveredNodes` / `consumedNodes` /
  * `completedNodes`. Map-only escape hatch (vs.
- * `DebugSeedButton` which also touches inventory + skills).
+ * `DebugSeedButton` which also touches inventory + cards).
  *
  * Renders null in production.
  */

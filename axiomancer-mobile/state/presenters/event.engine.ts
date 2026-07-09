@@ -57,7 +57,7 @@ export type ConsequenceKind =
     | 'moral'
     | 'quest-start'
     | 'quest-progress'
-    | 'skill-learn';
+    | 'card-learn';
 
 export interface EventConsequence {
     kind: ConsequenceKind;
@@ -739,7 +739,7 @@ function extractDialogueConsequences(choice: DialogueChoice): ReadonlyArray<Even
             amount: e.progressQuest.amount ?? 1,
         });
     }
-    if (e.teachCard) out.push({ kind: 'skill-learn', label: e.teachCard });
+    if (e.teachCard) out.push({ kind: 'card-learn', label: e.teachCard });
     if (e.setFlag) out.push({ kind: 'flag', label: e.setFlag });
     return out;
 }

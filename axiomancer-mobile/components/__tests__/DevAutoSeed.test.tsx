@@ -36,7 +36,7 @@ describe('DevAutoSeed: DEV behaviour', () => {
         render(withProvider(store));
 
         expect((store.getState().player.inventory ?? []).length).toBeGreaterThan(0);
-        // Skills + map are part of the same seed action; their presence
+        // Cards + map are part of the same seed action; their presence
         // confirms `actions.debugSeed()` fired (rather than some other path
         // populating items).
         expect((store.getState().player.knownCards ?? []).length).toBeGreaterThan(0);

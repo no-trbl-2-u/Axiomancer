@@ -27,7 +27,7 @@ function makeStore() {
     return { store, actions };
 }
 
-describe('debugSeed: items + skills + map reset', () => {
+describe('debugSeed: items + cards + map reset', () => {
     it('seeds the inventory with at least one item per represented category', () => {
         const { store, actions } = makeStore();
 
@@ -55,7 +55,7 @@ describe('debugSeed: items + skills + map reset', () => {
         expect(result.itemsAdded).toBeGreaterThanOrEqual(4);
     });
 
-    it('teaches at least 2 skills covering both fixture categories', () => {
+    it('teaches at least 2 cards covering both fixture categories', () => {
         const { store, actions } = makeStore();
 
         const before = store.getState().player.knownCards ?? [];
@@ -67,7 +67,7 @@ describe('debugSeed: items + skills + map reset', () => {
         expect(after.length).toBeGreaterThanOrEqual(2);
 
         // Cover both paradox + fallacy from the engine library so
-        // the skills picker has at least one of each.
+        // the cards picker has at least one of each.
         const learnedCards = COMBAT_CARDS.filter((s) =>
             after.includes(s.id),
         );
@@ -126,7 +126,7 @@ describe('debugSeed: items + skills + map reset', () => {
         expect(typeof result.mapReset).toBe('boolean');
     });
 
-    it('is idempotent on skills — re-seeding does not duplicate knownCards', () => {
+    it('is idempotent on cards — re-seeding does not duplicate knownCards', () => {
         const { store, actions } = makeStore();
 
         actions.debugSeed();

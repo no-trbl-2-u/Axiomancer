@@ -58,11 +58,11 @@ const INERT_COLOR = '#6b6257';
 const ENCHANT_COLOR = '#7fb3a6';
 
 /** The authored FREE (no-die) line in real engine units — riderText over the
- *  skill's `free` rider; persistent (enchant/disenchant) cards are PAID-only.
+ *  card's `free` rider; persistent (enchant/disenchant) cards are PAID-only.
  *  Never a fabricated number. */
-function freeLineText(card: CombatCard, skill?: Card): string {
+function freeLineText(card: CombatCard, sourceCard?: Card): string {
     if (card.cardType === 'enchantment' || card.cardType === 'disenchant') return 'PAID only';
-    return skill?.free ? riderText(skill.free) : 'no effect';
+    return sourceCard?.free ? riderText(sourceCard.free) : 'no effect';
 }
 
 // ── Intent vocabulary (Spec 26 §2.4) ─────────────────────────────────────────
@@ -145,7 +145,7 @@ export type CombatCardKind =
     | 'resolute';     // buff_resolute → real -N% damage-taken reduction (the inverse of vulnerable)
 
 /** Render-ready, HONEST card FACE. Every number is a real unit derived from the
- *  skill's AUTHORED effect (never the abstract "impact"). `heroText` is '' when the
+ *  card's AUTHORED effect (never the abstract "impact"). `heroText` is '' when the
  *  kind has no honest number (strike/weaken/inert/befriend) — the face renders a
  *  qualitative word there instead. Real-units-or-no-number: never a fabricated value. */
 export interface CombatCardFaceVM {
@@ -428,12 +428,12 @@ interface PrimaryResolution {
     mech: CardSpecialMechanic | null;
 }
 
-/** Resolve a card's PRIMARY combat effect + its kind. Reads the skill's
+/** Resolve a card's PRIMARY combat effect + its kind. Reads the sourceCard's
  *  combatEffects / specialMechanics directly — NOT card.primaryEffectId, which is
  *  null for guard/regen cards (it = primaryEnemyEffectId). */
-export function resolvePrimary(card: CombatCard, skill: Card | undefined): PrimaryResolution {
+export function resolvePrimary(card: CombatCard, sourceCard: Card | undefined): PrimaryResolution {
     const vc = card.verbClass;
-    const mechs = skill?.specialMechanics ?? [];
+    const mechs = sourceCard?.specialMechanics ?? [];
     const findMech = <K extends CardSpecialMechanic['kind']>(k: K) =>
         mechs.find(m => m.kind === k) as Extract<CardSpecialMechanic, { kind: K }> | undefined;
 
@@ -465,7 +465,7 @@ export function resolvePrimary(card: CombatCard, skill: Card | undefined): Prima
         return { kind: 'inert', ce: null, guardAmount: null, riders: [], mech: null };
     }
     if (vc === 'buff-self') {
-        const self = (skill?.combatEffects ?? []).filter(e => e.appliedTo === 'self');
+        const self = (sourceCard?.combatEffects ?? []).filter(e => e.appliedTo === 'self');
         // 0.34.0: a self-buff that reflects (Thorns) is now real.
         const thorns = self.find(s => engineHonestKind(s.effectId) === 'thorns');
         if (thorns) return { kind: 'thorns', ce: thorns, guardAmount: null, riders: self.filter(s => s !== thorns), mech: null };
@@ -480,13 +480,13 @@ export function resolvePrimary(card: CombatCard, skill: Card | undefined): Prima
         return { kind, ce: primary, guardAmount: null, riders: self.filter(s => s !== primary), mech: null };
     }
     // direct-dot | direct-control | stat-debuff → opponent effects
-    const opp = (skill?.combatEffects ?? []).filter(e => e.appliedTo === 'opponent');
+    const opp = (sourceCard?.combatEffects ?? []).filter(e => e.appliedTo === 'opponent');
     // card-overhaul (2026-07-03): a self-cost/self-buff effect riding a card
     // classified by its opponent effect (e.g. Existential Debt's Resolute +
     // Overextended alongside a Despair DoT) was previously dropped entirely —
     // it wasn't even a rider. Surface it as a rider too, so the (now honest)
     // keyword shows in the inspect modal rather than vanishing.
-    const selfFx = (skill?.combatEffects ?? []).filter(e => e.appliedTo === 'self');
+    const selfFx = (sourceCard?.combatEffects ?? []).filter(e => e.appliedTo === 'self');
     const primary = opp.find(o => engineHonestKind(o.effectId)) ?? opp[0] ?? null;
     const k = engineHonestKind(primary?.effectId);
     const kind: CombatCardKind =
@@ -535,8 +535,8 @@ interface CardCalc extends PrimaryResolution {
 /** Single source of the numbers — faceStats AND detailStats both read this, so the
  *  face and the inspect modal can never drift. All values are AUTHORED units from
  *  getCardById(card.id).combatEffects (not effect-library defaults). */
-function cardCalc(card: CombatCard, skill: Card | undefined): CardCalc {
-    const pr = resolvePrimary(card, skill);
+function cardCalc(card: CombatCard, sourceCard: Card | undefined): CardCalc {
+    const pr = resolvePrimary(card, sourceCard);
     const out: CardCalc = {
         ...pr, keyword: null, glyph: '◆', categoryColor: PAYOFF_COLOR,
         perTurn: 0, turns: 0, total: 0, freePerTurn: 0, freeTurns: 0, freeTotal: 0,
@@ -782,12 +782,12 @@ function buildDetailKeywords(card: CombatCard, c: CardCalc): { name: string; def
 }
 
 /** Honest card FACE view-model (the 5-zone hand card). */
-export function faceStats(card: CombatCard, skill?: Card): CombatCardFaceVM {
-    const c = cardCalc(card, skill);
+export function faceStats(card: CombatCard, sourceCard?: Card): CombatCardFaceVM {
+    const c = cardCalc(card, sourceCard);
     const stanceColor = STANCE_COLORS[card.stance] ?? '#888';
     const kw = c.keyword ? c.keyword.toUpperCase() : null;
     // The authored FREE line (engine riderText) — never a fabricated chip.
-    const free = freeLineText(card, skill);
+    const free = freeLineText(card, sourceCard);
     const base = { glyph: c.glyph, categoryColor: c.categoryColor, stanceColor, statusBase: null, statusAdv: null, statusDis: null };
     switch (c.kind) {
         case 'dot': return { ...base, kind: 'dot', keyword: kw, heroText: `${c.total}`, heroSub: `over ${c.turns} turns`, freeHeroText: free, freeHeroSub: null, verbLine: 'foe loses HP each turn', powerRail: c.keyword ?? 'DoT', readDependent: true, inert: false, guardBase: null, statusBase: c.total, statusAdv: c.totalAdv, statusDis: c.totalDis };
@@ -821,8 +821,8 @@ export function faceStats(card: CombatCard, skill?: Card): CombatCardFaceVM {
 }
 
 /** Honest card DETAIL view-model CORE (everything but the pill table). */
-function detailCore(card: CombatCard, skill?: Card): DetailCore {
-    const c = cardCalc(card, skill);
+function detailCore(card: CombatCard, sourceCard?: Card): DetailCore {
+    const c = cardCalc(card, sourceCard);
     const Title = c.keyword ?? '';
     const STANCE = STANCE_LABELS[card.stance] ?? card.stance.toUpperCase();
     // Spec 32 v3 — the meta chip surfaces the RANK NAME + CARD TYPE (where the
@@ -839,7 +839,7 @@ function detailCore(card: CombatCard, skill?: Card): DetailCore {
     ].join(' · ');
     const keywords = buildDetailKeywords(card, c);
     // The authored FREE line (engine riderText) — the strike/chip is dead.
-    const free = freeLineText(card, skill);
+    const free = freeLineText(card, sourceCard);
     const freeLine = `◇ FREE (no die): ${free}.`;
     switch (c.kind) {
         case 'dot': return { subtitle: `${Title} the enemy — damage over time.`, metaChip, outcomeLine: `Apply ${Title} ${c.total} over ${c.turns} turns.`, outcomeStats: [{ label: 'PER TURN', value: `${c.perTurn}` }, { label: 'TURNS', value: `${c.turns}` }, { label: 'TOTAL', value: `${c.total}` }], stacksText: c.stacks ? 'Stacks up to 10×.' : null, freeLine, powerLine: `◆ WITH A DIE: apply ${Title} — ${c.perTurn} HP/turn for ${c.turns} turns (${c.total} total), plus a small hit.`, readNote: `The read is exact: ▲ won read lands +${READ_ADVANTAGE_INTENSITY_BONUS} intensity (${c.totalAdv} total), ▼ lost read −${READ_DISADVANTAGE_DURATION_PENALTY} turn (${c.totalDis} total); ${c.total} on an even read.`, mathLine: `${c.perTurn}/turn = ${c.dpr} base × ${c.intensity} intensity · ${c.turns} turns · ${c.total} HP total on an even read${c.stacks ? ' · stacks to 10×' : ''}.`, keywords };
@@ -876,10 +876,10 @@ function detailCore(card: CombatCard, skill?: Card): DetailCore {
  *  NO-DIE / +DIE pill table that replaces the old prose FREE/POWER fork. Same
  *  numbers as the face; read-scaling math is pulled into the +DIE pill (the prose
  *  is flattened, NOT the math). */
-export function detailStats(card: CombatCard, skill?: Card): CombatCardDetailVM {
-    const core = detailCore(card, skill);
-    const c = cardCalc(card, skill);
-    const face = faceStats(card, skill);
+export function detailStats(card: CombatCard, sourceCard?: Card): CombatCardDetailVM {
+    const core = detailCore(card, sourceCard);
+    const c = cardCalc(card, sourceCard);
+    const face = faceStats(card, sourceCard);
     const STANCE = STANCE_LABELS[card.stance] ?? card.stance.toUpperCase();
     // NO-DIE pill: the free (die-optional) value.
     const freePill = face.freeHeroText + (face.freeHeroSub ? ` (${face.freeHeroSub})` : '');
@@ -935,7 +935,7 @@ function handVM(state: CombatEncounterState): CombatCardVM[] {
         .filter(({ card }: { card: CombatCard }) => card.id !== 'card-retreat' && card.verbClass !== 'retreat')
         .map(({ uid, card }: { uid: string; card: CombatCard }) => {
         const preview = drafted ? cardReadPreview(state, card) : null;
-        const skill = getCardById(card.id);
+        const sourceCard = getCardById(card.id);
         return {
             uid, cardId: card.id, name: card.name, stance: card.stance,
             stanceColor: STANCE_COLORS[card.stance] ?? '#888',
@@ -947,8 +947,8 @@ function handVM(state: CombatEncounterState): CombatCardVM[] {
             topActionText: card.topActionText, bottomActionText: card.bottomActionText,
             bottomDamagePreview: card.bottomDamagePreview,
             dieLines: card.dieLines,
-            face: faceStats(card, skill),
-            detail: detailStats(card, skill),
+            face: faceStats(card, sourceCard),
+            detail: detailStats(card, sourceCard),
             read: preview?.read ?? null, colorMatch: preview?.colorMatch ?? false,
         };
     });

@@ -1,7 +1,7 @@
 /**
  * Hermetic unit tests — combat-cards adapter (Phase 16).
  *
- * Pins the mapping contract from the engine's `Skill` to the
+ * Pins the mapping contract from the engine's `Card` to the
  * mobile `CombatCardOption` row: shape coverage, name uppercased,
  * category + stance literal-union safety.
  */
@@ -21,30 +21,30 @@ describe('COMBAT_CARDS: library coverage', () => {
     });
 
     it('every entry has a non-empty id, name, description', () => {
-        for (const skill of COMBAT_CARDS) {
-            expect(skill.id.length).toBeGreaterThan(0);
-            expect(skill.name.length).toBeGreaterThan(0);
-            expect(skill.description.length).toBeGreaterThan(0);
+        for (const card of COMBAT_CARDS) {
+            expect(card.id.length).toBeGreaterThan(0);
+            expect(card.name.length).toBeGreaterThan(0);
+            expect(card.description.length).toBeGreaterThan(0);
         }
     });
 
     it('every name is uppercase', () => {
-        for (const skill of COMBAT_CARDS) {
-            expect(skill.name).toBe(skill.name.toUpperCase());
+        for (const card of COMBAT_CARDS) {
+            expect(card.name).toBe(card.name.toUpperCase());
         }
     });
 
     it('every category is a known CardCategoryKey literal', () => {
         const known: ReadonlyArray<CombatCardOption['category']> = ['fallacy', 'paradox'];
-        for (const skill of COMBAT_CARDS) {
-            expect(known).toContain(skill.category);
+        for (const card of COMBAT_CARDS) {
+            expect(known).toContain(card.category);
         }
     });
 
     it('every stance is a known StanceKey literal', () => {
         const known: ReadonlyArray<CombatCardOption['stance']> = ['heart', 'body', 'mind'];
-        for (const skill of COMBAT_CARDS) {
-            expect(known).toContain(skill.stance);
+        for (const card of COMBAT_CARDS) {
+            expect(known).toContain(card.stance);
         }
     });
 });
@@ -59,15 +59,15 @@ describe('getCombatCardById: resolution', () => {
     });
 
     it('returns null for an unknown id (e.g. legacy pre-Phase-16 ids)', () => {
-        expect(getCombatCardById('not-a-real-skill')).toBeNull();
+        expect(getCombatCardById('not-a-real-card')).toBeNull();
         // Legacy mock id from the fixture that did NOT match an engine id.
         expect(getCombatCardById('ad-hominem')).toBeNull();
     });
 
     it('round-trips: every COMBAT_CARDS entry resolves via id', () => {
-        for (const skill of COMBAT_CARDS) {
-            const resolved = getCombatCardById(skill.id);
-            expect(resolved).toEqual(skill);
+        for (const card of COMBAT_CARDS) {
+            const resolved = getCombatCardById(card.id);
+            expect(resolved).toEqual(card);
         }
     });
 });

@@ -344,7 +344,7 @@ const STAT_LABELS: Record<string, string> = {
  * resolve (`<dimension><Verb>` — see `tooltip.engine.ts`). Only these
  * get a `StatDelta.id` so the row's TooltipTarget never renders an
  * empty chip for a key the synthesizer can't describe. */
-const TOOLTIP_STAT_KEY = /^(physical|mental|emotional)(Attack|Skill|Defense|Save|Test)$/;
+const TOOLTIP_STAT_KEY = /^(physical|mental|emotional)(Attack|Card|Defense|Save|Test)$/;
 
 function statLabelFor(key: string): string {
     return (

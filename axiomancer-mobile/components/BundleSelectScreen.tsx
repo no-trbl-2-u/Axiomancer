@@ -1,7 +1,7 @@
 /**
  * Starter-bundle selection — the pre-run "choose your path" screen.
  *
- * Shown once, after EMBARK, to a brand-new player (no skills seeded, no bundle
+ * Shown once, after EMBARK, to a brand-new player (no cards seeded, no bundle
  * flag). The chosen bundle seeds the starter deck and tags the run with a
  * HIDDEN archetype (never shown here) that biases later card rewards. Returning
  * players never see this; `ensureStarterCards` is the safety net if skipped.

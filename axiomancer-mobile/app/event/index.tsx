@@ -55,7 +55,7 @@ function consequenceLabel(c: EventConsequence): string {
     if (c.kind === 'flag') return c.label ?? 'flag';
     if (c.kind === 'quest-start') return `quest: ${c.label ?? ''}`;
     if (c.kind === 'quest-progress') return `progress: ${c.label ?? ''}`;
-    if (c.kind === 'skill-learn') return `skill: ${c.label ?? ''}`;
+    if (c.kind === 'card-learn') return `card: ${c.label ?? ''}`;
     return '';
 }
 

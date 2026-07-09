@@ -221,7 +221,7 @@ export interface MoveToResult {
 export interface DebugSeedResult {
     /** Count of items pushed to the player's inventory across categories. */
     itemsAdded: number;
-    /** Count of skills appended to the player's `knownCards` list. */
+    /** Count of cards appended to the player's `knownCards` list. */
     cardsLearned: number;
     /** True when the current map was successfully re-seeded. */
     mapReset: boolean;
@@ -263,7 +263,7 @@ export interface AppActions {
     /**
      * Phase 200 — begin a LIVE map encounter on the new hazard-pattern
      * combat (Spec 26b) instead of legacy `startCombat`. Pulls the foe out
-     * of the pending combat-prelude event, guarantees starter skills (the
+     * of the pending combat-prelude event, guarantees starter cards (the
      * real-deck safe fallback), clears the event slice, and returns the
      * `Enemy` for the in-place `<CombatEncounterPanel>` to initialise from.
      * Deliberately does NOT touch the engine `combat` slice — the new
@@ -327,7 +327,7 @@ export interface AppActions {
     changeMap: (mapName: MapName) => void;
     /**
      * Dev-only seed action (Phase 54). Adds representative items
-     * across categories, teaches a handful of fixture skills, and
+     * across categories, teaches a handful of fixture cards, and
      * resets the current map back to its starting node. Returns a
      * summary so the calling UI can toast the result. Component
      * mount is `__DEV__`-guarded; production never reaches this.
@@ -355,7 +355,7 @@ export interface AppActions {
      * mobile `PLAYER_TIER_PRESETS` row (`kid-l1` / `kid-l15` /
      * `kid-l30` / `kid-l50`) and replaces the player slice with a
      * fresh `buildCharacterFromPreset` build at that level — seeded
-     * with level-relevant skills and equipment for the Kid's
+     * with level-relevant cards and equipment for the Kid's
      * evidence runs. No-op (`applied: false`) on unknown ids.
      * Component mount is `isDevToolsEnabled()`-guarded.
      */
@@ -681,13 +681,13 @@ export interface AppActions {
     // -----------------------------------------------------------------
 
     /**
-     * Rolls up to `count` (default 3) level-up skill offers from
+     * Rolls up to `count` (default 3) level-up card offers from
      * everything the player currently qualifies for (engine
      * `getAvailableCards`, alignment-gated). Empty = nothing new to
      * learn; the caller skips the modal.
      */
     getLearnableCardOffers: (count?: number) => LearnableCardOffer[];
-    /** Learns a skill through the engine (requirement-checked). */
+    /** Learns a card through the engine (requirement-checked). */
     learnCard: (skillId: string) => boolean;
 }
 
@@ -707,7 +707,7 @@ export interface UseItemResult {
 /**
  * Starter repertoire — sourced from the engine's level-1 `apprentice`
  * preset (`getPresetById('apprentice').knownCards`) so the engine remains
- * the single source of truth for the starting skill set. New games create
+ * the single source of truth for the starting card set. New games create
  * the player with `knownCards: []` and the normal flow never applies a
  * preset, so the first combat / first level-up seeds these.
  * `engineLearnCard` enforces requirements, so anything the level-1 player
@@ -715,11 +715,11 @@ export interface UseItemResult {
  */
 // Spec 32 v3 §7 — the new player's starting combat repertoire.
 //
-// In this engine a combat *card* is the draw-able projection of a *skill*: the
+// In this engine a combat *card* is the draw-able projection of a *card*: the
 // draw pile is built from `player.knownCards` (`buildCombatDeck`), and a card's
 // POWERED action runs `executeCard`, which THROWS unless the player knows that
-// skill. So the hand can only be as varied — and as effective — as the set of
-// skills the level-1 player actually KNOWS.
+// card. So the hand can only be as varied — and as effective — as the set of
+// cards the level-1 player actually KNOWS.
 //
 // The v3 themed-deck library authors the starting deck explicitly: the engine's
 // `STARTING_CARD_IDS` (slippery-slope + brace-for-impact, both level-1
@@ -753,7 +753,7 @@ function ensureStarterCards(store: AppStore): void {
     if (next !== player) store.setState({ player: next });
 }
 
-/** One learnable-skill offer row for the level-up learn modal. */
+/** One learnable-card offer row for the level-up learn modal. */
 export interface LearnableCardOffer {
     id: string;
     name: string;
@@ -765,18 +765,18 @@ export interface LearnableCardOffer {
     effectText: string;
 }
 
-function toLearnableOffer(store: AppStore, skill: Card): LearnableCardOffer {
-    const combatCard = getCombatCardById(skill.id);
+function toLearnableOffer(store: AppStore, card: Card): LearnableCardOffer {
+    const combatCard = getCombatCardById(card.id);
     // Spec 32 v3 — THE STRIKE IS DEAD: cards deal no immediate damage, so the
     // offer row carries only the status/effect line (never a fabricated number).
     const damage = 0;
     return {
-        id: skill.id,
-        name: skill.name.toUpperCase(),
-        description: skill.description,
-        stance: skill.philosophicalAspect,
-        category: skill.category,
-        tier: skill.tier,
+        id: card.id,
+        name: card.name.toUpperCase(),
+        description: card.description,
+        stance: card.philosophicalAspect,
+        category: card.category,
+        tier: card.tier,
         effectText: combatCard
             ? cardEffectText(combatCard, damage)
             : 'NO DIRECT EFFECT',
@@ -784,7 +784,7 @@ function toLearnableOffer(store: AppStore, skill: Card): LearnableCardOffer {
 }
 
 /**
- * Rolls the level-up skill offers: up to `count` random picks from
+ * Rolls the level-up card offers: up to `count` random picks from
  * everything the player currently qualifies for (engine
  * `getAvailableCards`, alignment-gated). Empty when nothing new is
  * learnable — the caller skips the modal.
@@ -801,7 +801,7 @@ function getLearnableCardOffersAction(store: AppStore, count = 3): LearnableCard
     return pool.slice(0, count).map((s) => toLearnableOffer(store, s));
 }
 
-/** Learns a skill through the engine (requirement-checked). */
+/** Learns a card through the engine (requirement-checked). */
 function learnCardAction(store: AppStore, skillId: string): boolean {
     const player = store.getState().player;
     if (!player) return false;
@@ -845,7 +845,7 @@ export function withScaledEnemyHp(enemy: Enemy, mult: number): Enemy {
 export function createAppActions(store: AppStore): AppActions {
     return {
         startCombat: (enemy) => {
-            // Starter skills must exist BEFORE the engine snapshots the
+            // Starter cards must exist BEFORE the engine snapshots the
             // player — the picker and the engine both read the
             // snapshot's knownCards. The engine's `startCombat` records
             // the encounter (`currentEncounter`) and fires `combat:started`.
@@ -856,7 +856,7 @@ export function createAppActions(store: AppStore): AppActions {
             // Live map encounters now run the new hazard-pattern combat
             // (Spec 26b), not the legacy stance engine. Pull the foe out of
             // the pending combat-prelude event, guarantee a real deck via
-            // starter skills, clear the event slice, and hand the enemy back
+            // starter cards, clear the event slice, and hand the enemy back
             // for the in-place panel to bootstrap. Crucially we do NOT call
             // the legacy `startCombat` — the new engine state is owned by the
             // panel's local React state, so `state.combat` stays null.
@@ -1365,7 +1365,7 @@ function debugSeedAction(store: AppStore): DebugSeedResult {
             }
         }
 
-        // 3. Two skills from the engine's library (covers both paradox +
+        // 3. Two cards from the engine's library (covers both paradox +
         //    fallacy categories). Phase 16 swapped the data source from
         //    the local mock to `state/selectors/combat-cards`; engine
         //    0.10.2 now re-exports `cardLibrary` at the top level.
@@ -1394,7 +1394,7 @@ function debugSeedAction(store: AppStore): DebugSeedResult {
                 store.setState({ player: nextPlayer });
             }
         } catch (error) {
-            console.warn('Failed to add skills:', error);
+            console.warn('Failed to add cards:', error);
         }
 
         // 4. Reset the current map: re-seed via the engine's two-step

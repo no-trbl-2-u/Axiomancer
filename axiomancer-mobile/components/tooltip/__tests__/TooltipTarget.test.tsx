@@ -105,7 +105,7 @@ describe('<TooltipTarget>', () => {
             { kind: 'blessing', id: 'blessed' },
             { kind: 'effect', id: 'tier1_heart_attack' },
             { kind: 'stance-chip', id: 'BODY' },
-            { kind: 'skill', id: 'ad_baculum' },
+            { kind: 'card', id: 'ad_baculum' },
             { kind: 'slot', id: 'Head' },
             { kind: 'burden', id: 'current-burden' },
         ];
@@ -172,11 +172,11 @@ describe('<TooltipTarget>', () => {
     it('handles multiple presses correctly', () => {
         const { tree } = withAllProviders(
             <TooltipTarget
-                kind="skill"
+                kind="card"
                 id="fleeting_kindness"
                 testID="multi-press-target"
             >
-                <Text>Skill</Text>
+                <Text>Card</Text>
             </TooltipTarget>
         );
         const screen = render(tree);
@@ -189,7 +189,7 @@ describe('<TooltipTarget>', () => {
 
         expect(mockShow).toHaveBeenCalledTimes(3);
         expect(mockShow).toHaveBeenCalledWith({
-            kind: 'skill',
+            kind: 'card',
             id: 'fleeting_kindness',
             anchorRef: expect.any(Object),
         });

@@ -104,18 +104,18 @@ describe('createAppActions: dispatch', () => {
         const store = createAppStore({ adapter });
         const actions = createAppActions(store);
 
-        // startCombat runs ensureStarterCards for a skill-less new player.
+        // startCombat runs ensureStarterCards for a card-less new player.
         actions.startCombat(makeEnemy());
         const player = selectPlayer(store.getState());
 
-        // Every seeded starter skill must actually have been learned (none
+        // Every seeded starter card must actually have been learned (none
         // silently dropped by an unmet learning requirement).
         expect(player.knownCards).toEqual(['slippery-slope', 'brace-for-impact']);
         for (const id of player.knownCards) {
             expect(getCardById(id)).toBeTruthy();
         }
 
-        // The card deck is built from those known skills; the player must
+        // The card deck is built from those known cards; the player must
         // draw both action cards, distinct.
         const deck = buildCombatDeck(player);
         const encounter = initializeCombatEncounter(player, makeEnemy(), undefined, 7);
@@ -124,7 +124,7 @@ describe('createAppActions: dispatch', () => {
         );
         expect(deck.length).toBeGreaterThanOrEqual(2);
         expect(visible.length).toBeGreaterThanOrEqual(2);
-        // A 2-skill deck draws a padded hand — both starters must be present
+        // A 2-card deck draws a padded hand — both starters must be present
         // (duplicates are the reshuffle law at work, not a bug).
         const distinct = new Set(visible.map(({ card }) => card.id));
         expect(distinct).toEqual(new Set(['slippery-slope', 'brace-for-impact']));

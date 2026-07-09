@@ -7,7 +7,7 @@
  * `L1`, `L15`, `L30`, `L50`.
  *
  * **The preset DATA now lives in the engine** (`levelLadderPresets`),
- * so the curated level / stat / skill / gear selection is engine-owned
+ * so the curated level / stat / card / gear selection is engine-owned
  * and validated by `buildCharacterFromPreset`. This file keeps only the
  * mobile-side presentation wrapper (button `label` + one-line `summary`)
  * and the dev store-apply glue.
@@ -52,9 +52,9 @@ export interface ApplyPlayerTierPresetResult {
  */
 const TIER_DISPLAY: Record<PlayerTierPresetId, { label: string; summary: string }> = {
     'kid-l1': { label: 'L1', summary: 'fresh start — tier-1 fallacies, no gear' },
-    'kid-l15': { label: 'L15', summary: 'mid kit — tier-1/2 skills, steel + chain' },
+    'kid-l15': { label: 'L15', summary: 'mid kit — tier-1/2 cards, steel + chain' },
     'kid-l30': { label: 'L30', summary: 'late kit — every tier, mithril + plate' },
-    'kid-l50': { label: 'L50', summary: 'endgame — all skills, top-tier affixed gear' },
+    'kid-l50': { label: 'L50', summary: 'endgame — all cards, top-tier affixed gear' },
 };
 
 export const PLAYER_TIER_PRESETS: readonly PlayerTierPreset[] = Object.freeze(

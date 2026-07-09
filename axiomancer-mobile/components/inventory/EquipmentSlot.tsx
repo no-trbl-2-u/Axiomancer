@@ -17,7 +17,7 @@ export function EquipmentSlot({ slot, bareLabel, selected, onPress }: EquipmentS
     // Phase 74 follow-up walkthrough Tick 1: long-press fires the
     // kind:'slot' tooltip (content shared with the SELF surface).
     // Single-tap stays for slot-filter select (existing behaviour),
-    // mirroring Phase 75 skill-row pattern.
+    // mirroring Phase 75 card-row pattern.
     const styles = useStyles();
     const tooltip = useTooltip();
     const slotRef = useRef<View | null>(null);

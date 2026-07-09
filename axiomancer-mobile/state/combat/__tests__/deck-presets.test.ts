@@ -63,7 +63,7 @@ describe('Combat deck presets', () => {
         store.setState({
             player: {
                 ...store.getState().player,
-                knownCards: ['some-old-skill'],
+                knownCards: ['some-old-card'],
                 combatRewardCards: ['some-reward'],
             },
         } as never);
