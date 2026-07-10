@@ -82,15 +82,43 @@ own loop shape with its own cadence.
      citing the enforcement point. `reflexes.md` stays ≤50
      lines; if it is over, draining is the pass's priority.
 
-5. **Log the pass.** Append one line to
+5. **Terminology sweep — the janitor mandate.** `check-lexicon`
+   is CI-enforced and should already be green; that's not the
+   pass's job. The pass's job is the unknown-unknowns it can't
+   catch on its own:
+
+   - Run `node scripts/check-lexicon.mjs`. A finding here means
+     CI's own gate has a hole (an exemption zone/banner/pragma
+     hiding a real regression) — treat it as a bug in the gate,
+     not just a doc fix.
+   - Skim the live doc surfaces changed since the last consolidate
+     pass (`git log --since="<last pass>" --name-only -- '*.md'`,
+     excluding the lexicon's own zoned paths) for claims that
+     contradict current specs/engine (e.g. spec 32 v3, the phase
+     18-23 equipment epic).
+   - **Newly-dead concept found** → add a `lexicon.json` row (+ a
+     `docs/LEXICON.md` table row if load-bearing) and fix/banner/
+     pragma the flags it produces in the same pass. The registry
+     grows via the curator, not via ad-hoc 3-day cleanups.
+   - **Dated doc posing as current law** → add a `**Status:**
+     HISTORICAL` banner (existing convention — see
+     `docs/hazard-pattern-combat-reconciliation-gaps.md`).
+   - **Suspected-dead agent-facing file** (references a removed
+     system, e.g. an engine path deleted per a lexicon row) →
+     flag it as a `plan/AUDIT.md` finding. Do not delete it —
+     that call belongs to whoever owns the surface it documents.
+
+6. **Log the pass.** Append one line to
    `plan/archive/CONSOLIDATE_LOG.md`:
 
    ```
    - <YYYY-MM-DD>: bearings <N>→<M> lines, CRITIQUE <N>→<M>,
-     lessons <N>→<M>; <K> rows archived, <J> merged. <one-line note>
+     lessons <N>→<M>; <K> rows archived, <J> merged; terminology
+     sweep <clean | K lexicon rows added | K files banked/flagged>.
+     <one-line note>
    ```
 
-6. **Gate + commit + push:** `npm run verify` foreground, then
+7. **Gate + commit + push:** `npm run verify` foreground, then
    one commit `consolidate: <YYYY-MM-DD>` and push. Same
    single-invocation warning as `/digest` §3.6: never end the
    turn with the commit pending on a backgrounded command.
@@ -99,7 +127,11 @@ own loop shape with its own cadence.
 
 1. **Curation, never authorship.** This verb adds no new
    decisions, rules, findings, or opinions. Its entire output
-   is the same memory, smaller.
+   is the same memory, smaller. Narrow exception: the
+   terminology sweep (§3.5) may add a `lexicon.json` row or a
+   `HISTORICAL` banner — that's recording a fact already true of
+   the code (a concept is dead, a doc is dated), not authoring a
+   new one.
 2. **Locked sections and standing decisions are immutable in
    meaning.** Reformat yes; merge away, weaken, or summarize
    into ambiguity, no.
@@ -133,6 +165,8 @@ own loop shape with its own cadence.
 plan/bearings.md                      # compact prose, never contracts
 plan/CRITIQUE.md                      # archive Done >60d, collapse recurrences
 plan/lessons.md · plan/reflexes.md    # merge dupes, propose promotions, drain enforced
+node scripts/check-lexicon.mjs        # terminology sweep — should be green; hunt unknown-unknowns
+plan/AUDIT.md                         # suspected-dead files land here, not deleted
 plan/archive/                         # CRITIQUE_<year>.md · CONSOLIDATE_LOG.md
 npm run verify
 git commit -m "consolidate: <YYYY-MM-DD>" && git push origin main

@@ -96,6 +96,28 @@
   length outliers. Extract sub-components with their own tests.
 - next: /iterate
 
+### [2.1] Two agent-e2e walkthroughs describe a deleted engine surface
+- category: gap
+- impact: 3
+- ease: 7
+- detail: spotted 2026-07-10 during the `/consolidate` terminology
+  sweep design (phase 25). `axiomancer-mechanics/automation/scripts/
+  walkthroughs/skill-learning.goal.md` names
+  `learnSkill(character, skillId)` from `src/Skills/skill.engine.ts`;
+  `tier2-skill-chain.goal.md` narrates `executeSkill`/`basePower` in
+  the same retired vocabulary (`base-power` and `src-skills-path` are
+  both live `lexicon.json` rows for exactly this concept). Neither
+  `src/Skills/` nor `learnSkill` exist in `axiomancer-mechanics/src`
+  today. Both files sit in `automation/`, a lexicon-exempt
+  dated-record zone, so `check-lexicon` never sees them, and their
+  paired `.json` scripts may already be dead too (`node
+  automation/agent-e2e.mjs skill-learning` / `tier2-skill-chain`
+  would confirm). Left un-deleted per the janitor mandate's
+  suspected-dead-file rule — the automation/README.md inventory
+  table and the harness owner should confirm dead-vs-superseded
+  before removal.
+- next: /iterate
+
 ## Done
 
 ### fishing-village CLI + spec08 e2e drive legacy combat
