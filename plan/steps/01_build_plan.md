@@ -242,7 +242,7 @@ decision log (see each phase file).
       _keywords`), and the same four tool names appended to card-expert /
       mechanics-expert frontmatter — brief:
       `plan/phases/phase_24_axio_query.md`
-- [ ] Phase 25 — /consolidate memory curator + 2026-07-09 harness
+- [x] Phase 25 — /consolidate memory curator + 2026-07-09 harness
       re-apply. Part A: re-apply the harness work lost to the local
       working-tree reset (consolidate verb + monthly workflow, runner
       model/effort inputs + Opus-medium iterate, cross-package CI job,
@@ -250,6 +250,7 @@ decision log (see each phase file).
       Part B: consolidate gains the terminology-sweep janitor mandate
       over `docs/lexicon.json` (harness; multi-file) — brief:
       `plan/phases/phase_25_consolidate_janitor.md`
+      — `feat(harness): consolidate janitor mandate + stale impact-path fix — phase 25` (f7868e2a)
 
 **Engagement-overhaul roadmap (promoted via `/oversight` 2026-07-10 —
 owner-ratified 2026-07-10, all four decision gates cleared; ship in
@@ -382,3 +383,4 @@ phases with linked notes here.)
 - phase 4 — d9763659 — balance-sim population witnesses (execute finisher + escalation clock; Conclusion/BODY-sig already had coverage)
 - phase 9 — 7ea06a6e / 6fa7f090 — character/story/world specs (C-01 the Sophist, W-01 the Aporia, S-01 fishing-village dilemmas; already shipped pre-tracking, recorded this tick)
 - phase 13 — (port pre-tracking; mechanics `src/World/Hazard/` + `audit/` parity harness, mobile `state/hazard/store-actions.ts` consumer) — hazard v2 engine port verified already landed, mobile duplicate deleted, content parity confirmed; recorded this tick
+- phase 25 — f7868e2a — /consolidate janitor mandate (terminology-sweep step + AUDIT finding) + `verify-mechanics.yml` stale `src/Skills/` impact-path fix; Part A harness re-apply verified already present at HEAD, no re-derivation needed
