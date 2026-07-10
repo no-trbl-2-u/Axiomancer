@@ -142,13 +142,14 @@ decision log (see each phase file).
       (mechanics; verify mobile) — brief:
       `plan/phases/phase_20_equipment_effect_decouple.md`
       — `refactor(mechanics): decouple equipment from effects — phase 20` (8907c08f)
-- [ ] Phase 21 — Retire the procedural equipment library. Delete the 56
+- [x] Phase 21 — Retire the procedural equipment library. Delete the 56
       templates + 7 uniques + the `dropItem`/roll/resolve/affix factory;
       the 8 relics become the whole library. Convert loot surfaces (The
       Reliquary, enemy drops, shops) to consumables/materials/currency;
       purge procedural gear from old saves (v13→14). User-intent phase 3
       remainder (both; large) — brief:
       `plan/phases/phase_21_retire_procedural_library.md`
+      — `refactor(mechanics): retire procedural equipment library — phase 21` (51c2cb51)
 - [ ] Phase 23 — Teardown of dead equipment machinery. Delete the
       modifier catalogue, the affix (prefix/suffix) library, item sets,
       the rarity model, the dead effect-channel types, the archetype
