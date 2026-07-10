@@ -27,7 +27,10 @@ export function EquipmentSlot({ slot, bareLabel, selected, onPress }: EquipmentS
     }
     
     const filled = slot.item !== null;
-    
+    // The three accessory rows share `key: 'accessory'`; disambiguate the
+    // testID / a11y identity by position so each of the 5 rows is unique.
+    const slotId = slot.accessoryIndex !== undefined ? `${slot.key}-${slot.accessoryIndex}` : slot.key;
+
     return (
         <TouchableOpacity
             ref={slotRef}
@@ -42,7 +45,7 @@ export function EquipmentSlot({ slot, bareLabel, selected, onPress }: EquipmentS
                 filled ? styles.dockSlotFilled : styles.dockSlotBare,
                 selected && styles.dockSlotSelected,
             ]}
-            testID={`dock-slot-${slot.key}`}
+            testID={`dock-slot-${slotId}`}
         >
             <View style={[styles.dockSlotGlyph, filled ? styles.dockSlotGlyphFilled : styles.dockSlotGlyphBare]}>
                 {filled && slot.item !== null ? (

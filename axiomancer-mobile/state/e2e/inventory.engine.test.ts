@@ -65,8 +65,19 @@ function dagger(id = 'bone-dagger'): Equipment {
         description: 'Whittled from a saint\'s rib.',
         category: 'equipment',
         slot: 'weapon',
-        
-        
+
+
+    };
+}
+
+function trinket(id: string, name = 'Iron Ring'): Equipment {
+    return {
+        id,
+        name,
+        description: 'A small worn thing.',
+        category: 'equipment',
+        slot: 'accessory',
+        accessoryKind: 'ring',
     };
 }
 
@@ -720,16 +731,22 @@ describe('selectInventoryViewModel: chrome strings', () => {
 // ---------------------------------------------------------------------------
 
 describe('selectInventoryViewModel: equipmentDock', () => {
-    // Phase 18 — the dock is now a 3-kind paper-doll: Weapon, Armor,
-    // Trinket (accessory). The legacy head/body/hands/feet slots folded
-    // into armor + accessory.
-    const expectedSlotOrder: ReadonlyArray<{ key: string; label: string }> = [
+    // The dock renders the full loadout: Weapon, Armor, and the 3 interchangeable
+    // accessory positions (Trinket I/II/III). The three accessory rows share
+    // `key: 'accessory'` and disambiguate via `accessoryIndex`.
+    const expectedSlotOrder: ReadonlyArray<{
+        key: string;
+        label: string;
+        accessoryIndex?: number;
+    }> = [
         { key: 'weapon', label: 'WEAPON' },
         { key: 'armor', label: 'ARMOR' },
-        { key: 'accessory', label: 'TRINKET' },
+        { key: 'accessory', label: 'TRINKET I', accessoryIndex: 0 },
+        { key: 'accessory', label: 'TRINKET II', accessoryIndex: 1 },
+        { key: 'accessory', label: 'TRINKET III', accessoryIndex: 2 },
     ];
 
-    it('ships 3 slots in the design grid order with chrome labels and null items by default', () => {
+    it('ships 5 slots in the design grid order with chrome labels and null items by default', () => {
         // A fresh game now wears the signet relics (Phase 19); force an empty
         // inventory to exercise the bare-dock default.
         const store = makeStore([]);
@@ -738,12 +755,34 @@ describe('selectInventoryViewModel: equipmentDock', () => {
         expect(vm.equipmentDock.headerLabel).toBe('✠ WORN UPON THE BODY');
         expect(vm.equipmentDock.hintLabel).toBe('WORN VS. UNWORN AT A GLANCE');
         expect(vm.equipmentDock.bareLabel).toBe('— bare —');
-        expect(vm.equipmentDock.slots).toHaveLength(3);
+        expect(vm.equipmentDock.slots).toHaveLength(5);
         vm.equipmentDock.slots.forEach((slot, i) => {
             expect(slot.key).toBe(expectedSlotOrder[i].key);
             expect(slot.label).toBe(expectedSlotOrder[i].label);
+            expect(slot.accessoryIndex).toBe(expectedSlotOrder[i].accessoryIndex);
             expect(slot.item).toBeNull();
         });
+    });
+
+    it('fills all three accessory positions with the worn accessories in order', () => {
+        const store = makeStore([
+            trinket('ring-1', 'Iron Ring'),
+            trinket('ring-2', 'Bone Charm'),
+            trinket('ring-3', 'Copper Band'),
+        ]);
+        const vm: InventoryViewModel = selectInventoryViewModel(store.getState());
+
+        const accessorySlots = vm.equipmentDock.slots.filter((s) => s.key === 'accessory');
+        expect(accessorySlots).toHaveLength(3);
+        expect(accessorySlots.map((s) => s.item?.id)).toEqual(['ring-1', 'ring-2', 'ring-3']);
+    });
+
+    it('leaves later accessory positions bare when fewer than three are worn', () => {
+        const store = makeStore([trinket('ring-1', 'Iron Ring')]);
+        const vm: InventoryViewModel = selectInventoryViewModel(store.getState());
+
+        const accessorySlots = vm.equipmentDock.slots.filter((s) => s.key === 'accessory');
+        expect(accessorySlots.map((s) => s.item?.id ?? null)).toEqual(['ring-1', null, null]);
     });
 
     it('fills the weapon slot with the equipped weapon row when one is in inventory', () => {

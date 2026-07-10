@@ -83,6 +83,29 @@ describe('EquipmentSlot', () => {
         expect(mockOnPress).toHaveBeenCalledWith('accessory');
     });
 
+    it('disambiguates the testID by accessory position', () => {
+        const positioned = {
+            key: 'accessory' as const,
+            accessoryIndex: 1 as const,
+            label: 'Trinket II',
+            item: null,
+        };
+        const { getByTestId } = render(
+            <EquipmentSlot
+                slot={positioned}
+                bareLabel="empty"
+                selected={false}
+                onPress={mockOnPress}
+            />
+        );
+
+        // Per-position testID, but the press still forwards the shared slot key.
+        const button = getByTestId('dock-slot-accessory-1');
+        expect(button).toBeDefined();
+        fireEvent.press(button);
+        expect(mockOnPress).toHaveBeenCalledWith('accessory');
+    });
+
     it('shows selected state correctly', () => {
         const { getByTestId } = render(
             <EquipmentSlot

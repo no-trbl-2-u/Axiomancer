@@ -3,7 +3,7 @@ import { View, Text } from 'react-native';
 import { FONTS } from '@/theme/axm';
 import { makeStyles, usePalette } from '@/theme/runtime';
 import { SectionLabel } from '@/components/SectionLabel';
-import { PaperDoll } from './PaperDoll';
+import { PlayerPortraitImage } from '@/components/art/PlayerPortraitImage';
 import { EquipmentSlot } from './EquipmentSlot';
 import type { EquipmentDockViewModel, EquipmentDockSlot } from '@/state/presenters/inventory.engine';
 
@@ -11,9 +11,10 @@ import type { EquipmentDockViewModel, EquipmentDockSlot } from '@/state/presente
 function pairDockRows(
     slots: readonly EquipmentDockSlot[],
 ): readonly (readonly [EquipmentDockSlot, EquipmentDockSlot | null])[] {
-    // Chunk two-per-row in `DOCK_SLOT_ORDER` order, padding a trailing odd slot
-    // with `null` (Phase 18: the dock ships 3 slots — Weapon, Armor, Trinket —
-    // so this yields [weapon, armor] and [accessory, null]).
+    // Chunk two-per-row in slot order, padding a trailing odd slot with `null`.
+    // The dock ships 5 slots — Weapon, Armor, Trinket I/II/III — so this yields
+    // rows [weapon, armor], [accessory-0, accessory-1], [accessory-2, null].
+    // The portrait sits in the centre column, flanked by the two slot columns.
     const rows: (readonly [EquipmentDockSlot, EquipmentDockSlot | null])[] = [];
     for (let i = 0; i < slots.length; i += 2) {
         rows.push([slots[i], slots[i + 1] ?? null] as const);
@@ -67,7 +68,7 @@ export function EquipmentDock({ vm, selectedSlot, onSelectSlot }: EquipmentDockP
                     ))}
                 </View>
                 <View style={styles.dockSilhouette}>
-                    <PaperDoll />
+                    <PlayerPortraitImage width={64} height={160} fit="contain" />
                 </View>
                 <View style={styles.dockCol}>
                     {rows.map(([, R], r) => (

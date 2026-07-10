@@ -131,22 +131,29 @@ export interface InventoryTabRow {
 }
 
 /**
- * One paper-doll Equipment Dock slot. The dock surface ported in
- * commit `02beaeb` ("inventory equipment dock — port from design
- * handoff") renders 7 of these in a 4-row grid around a gothic
- * silhouette so worn vs. unworn is unmistakable at a glance.
+ * One paper-doll Equipment Dock slot. The dock renders the wearer's full
+ * loadout — 5 rows (1 weapon, 1 armor, 3 interchangeable accessories) around
+ * the player portrait — so worn vs. unworn is unmistakable at a glance.
  *
- * `key` mirrors the engine `Equipment.slot` union ("head", "body",
- * "weapon", "armor", "hands", "feet", "accessory"). `label` is the
- * uppercase chrome label for the slot. `item` is the currently-worn
- * equipment row (first equipment item per slot per the
- * `selectCharacterViewModel` convention) or `null` when the slot is
- * bare.
+ * `key` mirrors the engine `Equipment.slot` union ("weapon", "armor",
+ * "accessory") and drives the sack-filter / slot-tooltip lookup. The three
+ * accessory rows share `key: 'accessory'` (the positions are interchangeable —
+ * see `SLOT_CAPACITY`) and disambiguate via `accessoryIndex`. `label` is the
+ * uppercase chrome label for the row. `item` is the worn equipment row at this
+ * position (worn set per the `selectCharacterViewModel` convention) or `null`
+ * when the position is bare.
  */
 export interface EquipmentDockSlot {
     key: Equipment['slot'];
+    /**
+     * Which of the 3 interchangeable accessory positions this row is (0-2).
+     * Present only on `accessory` rows; absent for weapon/armor. Mirrors
+     * `EquipmentSlotRow.accessoryIndex` on the SELF character presenter, and
+     * gives each accessory row a stable identity for React keys / testIDs.
+     */
+    accessoryIndex?: 0 | 1 | 2;
     label: string;
-    /** First equipped item in this slot, or `null`. */
+    /** Worn item at this position, or `null`. */
     item: { id: string; name: string; sub: string | null; grantsSignature?: string | null } | null;
 }
 
@@ -156,7 +163,7 @@ export interface EquipmentDockSlot {
  * the dock above the tabs.
  */
 export interface EquipmentDockViewModel {
-    /** All 7 slots in the design's display order (head, body, weapon, armor, hands, accessory, feet). */
+    /** All 5 worn positions in display order: weapon, armor, accessory ×3. */
     slots: readonly EquipmentDockSlot[];
     /** Section eyebrow on the dock outer panel (ritual lowercase chrome). */
     headerLabel: string;
@@ -258,26 +265,19 @@ const BURDEN_MAX = 50;
 const EMPTY_MESSAGE = 'nothing in the satchel.';
 
 /**
- * Equipment Dock display order — the Phase-18 3-kind paper-doll:
- * Weapon, Armor, Trinket (accessory). The accessory slot holds up to 3
- * interchangeable pieces; the dock surfaces the first worn one per kind.
- */
-const DOCK_SLOT_ORDER: readonly Equipment['slot'][] = [
-    'weapon',
-    'armor',
-    'accessory',
-] as const;
-
-/**
  * Uppercase chrome label per slot — distinct from `SLOT_LABELS`
  * (which is title-case "Weapon" / "Armor" for the item-row sub
- * field). The dock chrome uses TRINKET for accessory per the design.
+ * field). The dock chrome uses TRINKET for accessory per the design;
+ * the three accessory rows append a numeral (TRINKET I/II/III).
  */
 const DOCK_SLOT_TITLE: Record<Equipment['slot'], string> = {
     weapon: 'WEAPON',
     armor: 'ARMOR',
     accessory: 'TRINKET',
 };
+
+/** Roman numeral suffix per accessory position (indexed by `accessoryIndex`). */
+const DOCK_ACCESSORY_NUMERALS = ['I', 'II', 'III'] as const;
 
 const DOCK_HEADER_LABEL = '✠ WORN UPON THE BODY';
 const DOCK_HINT_LABEL = 'WORN VS. UNWORN AT A GLANCE';
@@ -540,22 +540,38 @@ function buildEquipmentDock(
     rows: readonly InventoryItemRow[],
     selectedSlot: Equipment['slot'] | null,
 ): EquipmentDockViewModel {
-    const worn: Partial<Record<Equipment['slot'], InventoryItemRow>> = {};
+    // Bucket the worn rows by slot kind. Weapon/armor keep the first worn row;
+    // accessories collect up to `SLOT_CAPACITY.accessory` in worn order so each
+    // of the 3 positions renders its own dock row (worn window per the
+    // `wornPerSlot` convention already caps `r.equipped` at capacity).
+    let weapon: InventoryItemRow | null = null;
+    let armor: InventoryItemRow | null = null;
+    const accessories: InventoryItemRow[] = [];
     for (const r of rows) {
         if (r.category !== 'equipment' || !r.equipped || r.sub === null) continue;
         const slot = SUB_TO_SLOT[r.sub];
-        if (slot === undefined) continue;
-        if (slot in worn) continue;
-        worn[slot] = r;
+        if (slot === 'weapon') {
+            if (weapon === null) weapon = r;
+        } else if (slot === 'armor') {
+            if (armor === null) armor = r;
+        } else if (slot === 'accessory') {
+            if (accessories.length < SLOT_CAPACITY.accessory) accessories.push(r);
+        }
     }
-    const slots = DOCK_SLOT_ORDER.map((slot) => {
-        const row = worn[slot] ?? null;
-        return {
-            key: slot,
-            label: DOCK_SLOT_TITLE[slot],
-            item: row === null ? null : { id: row.id, name: row.name, sub: row.sub, grantsSignature: row.grantsSignature },
-        };
-    });
+    const toItem = (row: InventoryItemRow | null): EquipmentDockSlot['item'] =>
+        row === null
+            ? null
+            : { id: row.id, name: row.name, sub: row.sub, grantsSignature: row.grantsSignature };
+    const slots: EquipmentDockSlot[] = [
+        { key: 'weapon', label: DOCK_SLOT_TITLE.weapon, item: toItem(weapon) },
+        { key: 'armor', label: DOCK_SLOT_TITLE.armor, item: toItem(armor) },
+        ...Array.from({ length: SLOT_CAPACITY.accessory }, (_, i): EquipmentDockSlot => ({
+            key: 'accessory',
+            accessoryIndex: i as 0 | 1 | 2,
+            label: `${DOCK_SLOT_TITLE.accessory} ${DOCK_ACCESSORY_NUMERALS[i]}`,
+            item: toItem(accessories[i] ?? null),
+        })),
+    ];
     return {
         slots,
         headerLabel: DOCK_HEADER_LABEL,
