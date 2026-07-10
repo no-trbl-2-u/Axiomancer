@@ -110,49 +110,99 @@ const VERB_KEYWORD: Record<string, string> = {
  */
 const KEYWORD_GLOSS: Record<string, string> = {
     // ── Utility (10) ──
-    Draw: 'Draw cards from your deck.',
-    Forge: 'Create a FLOATING die: joins your tray now, never rerolls, carries across combats, gone forever when spent. Cap 3.',
-    Guard: "Absorbs the enemy's next attack, then fades. One-shot — resets each phase.",
-    Barrier: 'Absorbs incoming damage until depleted. Persists across phases. Stacks.',
-    Tick: 'The strongest damage-over-time on the enemy deals its turn damage NOW; its duration is untouched.',
-    Mark: 'An exposure: every damage-over-time tick on the bearer deals +1 per Mark stack. Counts as an affliction.',
-    Cleanse: 'Removes negative effects from you.',
-    Heal: 'Restore VITAE.',
-    Rupture: "Consumes ALL the foe's afflictions and detonates their remaining harm as one burst.",
-    Conjure: 'Creates a one-use Thoughtform card into your hand. It leaves the combat after it is played.',
+    Draw: 'Immediately draw that many cards from your deck, up to your hand limit.',
+    Forge:
+        'Creates a FLOATING die — or converts a dead X die in your tray into a floating WILD die. '
+        + 'Floating dice join the tray now, play in addition to your drafted die, never reroll, '
+        + 'carry across combats, and are gone forever when spent; at the cap of 3, Forge grants +1 Conviction instead.',
+    Guard:
+        'Absorbs incoming attack damage during the next threat phase, up to its amount. '
+        + 'One-shot: whatever Guard the phase does not use is lost when the phase ends.',
+    Barrier:
+        'Absorbs incoming attack damage after Guard is used up, until its amount is spent. '
+        + 'Persists across phases, and new Barrier adds to what remains.',
+    Tick:
+        'Your strongest damage-over-time effect on the enemy deals its per-round damage again, immediately. '
+        + 'Its duration and stacks are unchanged.',
+    Mark:
+        'Every damage-over-time effect on the bearer deals +1 HP per Mark stack, each time it ticks. '
+        + 'Counts as an affliction: RUPTURE and conclusion payoffs consume Marks for their printed burst.',
+    Cleanse: 'Removes up to that many afflictions (debuffs) from you.',
+    Heal: 'Restores that much VITAE (HP), up to your maximum.',
+    Rupture:
+        'Consumes EVERY affliction on the enemy: their remaining damage-over-time detonates as one immediate burst, '
+        + 'plus 3 HP per stack of the consumed non-damage afflictions. '
+        + "The burst is capped at a quarter of the enemy's max HP (or 80, whichever is larger).",
+    Conjure:
+        'Creates a one-use Thoughtform card in your hand. '
+        + 'It is removed from the combat after it is played, or when the combat ends.',
     // ── Affliction (T1) ──
-    Poison: 'Loses HP each turn — and the poison grows stronger the longer it holds.',
-    Bleed: 'Loses HP at each turn end, heavily — then the wound closes by one stack.',
+    Poison:
+        'Deals 2 HP per stack at the START of each round, and that 2 grows by +1 for every 2 full rounds the poison has held. '
+        + 'Applying poison again resets the growth.',
+    Bleed: 'Deals 3 HP per stack at the END of each round, then loses 1 stack; it ends at 0 stacks.',
     // ── Peroration (T2) ──
-    Premise: 'The running tally of your argument. Premises persist until a Peroration spends them.',
-    Peroration: 'A declared conclusion, one in play at a time: it fires FREE when your Premises reach its number. At eight, the enemy concedes outright.',
+    Premise:
+        'A persistent tally your cards add to. '
+        + "When it reaches a declared Peroration's number, the Peroration fires and the tally resets to 0.",
+    Peroration:
+        'A declared conclusion, one in play at a time: its printed effect fires FREE the moment your Premise tally reaches its number, then the tally resets to 0. '
+        + 'A concede-line Peroration instead ends the fight outright — at 8 Premises against normal enemies, 10 against elites, 12 against bosses.',
     // ── Forge (T3) ──
-    Kindle: 'Create a temporary die (this combat only). It joins your Reserve.',
-    Pip: 'Ripening on a held die: each pip adds +1 intensity to the status a spend lands (+2 Guard on a defend).',
+    Kindle:
+        'Creates a temporary die of the printed color (this combat only); it joins your Reserve with 0 pips. '
+        + 'If the Reserve (2 slots) is full, it becomes +1 Conviction instead.',
+    Pip:
+        'A charge on a Reserve die: each die ripens +1 pip per threat phase it survives, to a max of 2. '
+        + 'When the die is spent, each pip adds +1 intensity to the statuses that play lands — or +2 Guard on a defend card.',
     // ── Akrasia (T4) ──
-    Recoil: 'Pay VITAE as a printed cost. Unpreventable.',
-    Fallen: 'You carry two or more afflictions of your own. Fallen-gated card lines go live.',
+    Recoil: 'Pay the printed HP (VITAE) as a cost when the card is played. Guard, Barrier, and defenses cannot prevent it.',
+    Fallen:
+        'A state: you carry 2 or more DIFFERENT afflictions of your own. '
+        + "A card's FALLEN line fires free if you are Fallen at the moment you play it.",
     // ── Control (T5) ──
-    Stagger: "Removes rungs from the enemy's next telegraphed action. Strip them all and the turn is denied.",
-    Backfire: 'While afflicted, the enemy takes damage for every rung its actions lose.',
+    Stagger:
+        "Removes that many rungs from the enemy's next telegraphed action — normal actions carry 2 rungs, boss actions 3, and each rung lost weakens the hit proportionally. "
+        + 'Removing every rung denies the action outright; all accumulated Stagger is spent when that action resolves.',
+    Backfire:
+        'While it holds, the enemy takes 1 HP per Backfire stack for EACH rung its telegraphed action loses. '
+        + 'A fully denied action counts all of its rungs.',
     // ── Oracle (T6) ──
-    Foretell: 'Look at the top of your deck (the best future floats up) and glimpse the enemy\'s next telegraph.',
-    Omen: 'Cast your die as a prediction of the enemy\'s next stance. If it comes true, the printed payoff fires free.',
+    Foretell:
+        "Reveals the enemy's next telegraphed stance, and looks at that many cards from the top of your deck, "
+        + 'moving the highest-rank one to the top.',
+    Omen:
+        "A prediction: the color of the die that paid this card (WILD predicts the card's own stance) is cast against the enemy's next stance. "
+        + 'If the next telegraph matches, the printed payoff fires free at the phase boundary; otherwise the omen misses.',
     // ── Harvest (T7) ──
-    Soul: 'Gained whenever an enemy affliction expires or is consumed. Spent by REAP.',
-    Reap: 'Spend Souls for the printed effect. The capstone spends them all.',
+    Soul: 'You gain 1 Soul each time an affliction on the enemy expires or is consumed. Souls persist until spent by REAP.',
+    Reap:
+        'Spends the printed number of Souls to fire the printed effect; with fewer Souls, the card fizzles. '
+        + 'The capstone instead spends your entire Soul bank at once.',
     // ── Charm (T8) ──
-    Sway: 'Builds on the enemy and decays each turn. If your Sway ever meets their remaining VITAE, they capitulate.',
-    Rapport: 'The enemy deals less damage while it holds. It is hard to strike what has listened.',
+    Sway:
+        'Builds on the enemy and decays 1 at the end of each round. '
+        + "The enemy CAPITULATES the moment your Sway reaches its resolve: 35% of its max HP (never below 10), or its current HP if that is lower.",
+    Rapport: "The enemy's attacks deal 10% less damage per Rapport stack while it holds.",
     // ── Bulwark (T9) ──
-    Thorns: 'Attackers take damage back whenever they hurt you.',
-    Riposte: 'Armed for one phase: an attack your Guard or Barrier FULLY blocks is answered with a counter.',
+    Thorns:
+        'Each threat phase in which the enemy attacks you, it takes 1 HP per Thorns stack — even if the attack was fully blocked.',
+    Riposte:
+        'Armed for one threat phase: the first incoming attack is reduced by the printed parry amount, '
+        + 'and if your Guard or Barrier FULLY blocks an attack this phase, the enemy takes the printed counter damage. '
+        + 'Cleared when the phase ends.',
     // ── Echo (T10) ──
-    Echo: 'The card\'s paid effect fires twice.',
-    Reprise: 'Return a card from your discard pile to your hand — the best one rises.',
+    Echo:
+        "The card's PAID line fires twice: its statuses apply a second time, and its Premise, Sway, Soul, and Reprise amounts are doubled. "
+        + 'FREE lines never echo.',
+    Reprise: 'Returns that many cards from your discard pile to your hand — the highest-rank cards are chosen.',
     // ── Card types (labels, not keywords) ──
-    Enchantment: 'A persistent passive on your side for the rest of the combat. Paid only — the die is the commitment.',
-    Disenchant: 'A standing curse attached to the ENEMY for the rest of the combat. Paid only.',
+    Enchantment:
+        'A passive on your side. Played FREE (no die) it lasts 3 rounds; '
+        + 'paid with a die it becomes permanent for the rest of the combat, is unique in play, and leaves the deck cycle.',
+    Disenchant:
+        'A standing curse attached to the ENEMY. Played FREE (no die) it lasts 3 rounds; '
+        + 'paid with a die it becomes permanent for the rest of the combat, is unique in play, and leaves the deck cycle.',
 };
 
 /**

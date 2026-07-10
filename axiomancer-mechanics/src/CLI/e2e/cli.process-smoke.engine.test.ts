@@ -21,6 +21,12 @@ import { randomUUID } from 'crypto';
 
 const PACKAGE_ROOT = path.resolve(__dirname, '../../..');
 
+// Windows: `npx` is a .cmd shim — Node's execFileSync can't resolve or spawn
+// it without a shell (spawnSync npx ENOENT / the .cmd CVE-2024-27980 guard).
+// No argument here contains spaces, so shell quoting is safe.
+const NPX = process.platform === 'win32' ? 'npx.cmd' : 'npx';
+const SPAWN_OPTS = { cwd: PACKAGE_ROOT, stdio: 'pipe' as const, timeout: 60_000, shell: process.platform === 'win32' };
+
 const tmpFiles: string[] = [];
 function tmpPath(suffix: string): string {
     const p = path.join(os.tmpdir(), `axiomancer-cli-smoke-${suffix}-${randomUUID()}.jsonl`);
@@ -42,14 +48,14 @@ describe('CLI process-level smoke (real ts-node startup)', () => {
         const logPath = tmpPath('combat');
 
         execFileSync(
-            'npx',
+            NPX,
             [
                 'ts-node', 'src/CLI/game.cli.ts', 'combat',
                 '--auto', '--policy', 'status', '--enemy', 'little-belle',
                 '--seed', '42', '--max-turns', '12',
                 '--json-events', '--state-log', logPath,
             ],
-            { cwd: PACKAGE_ROOT, stdio: 'pipe', timeout: 60_000 },
+            SPAWN_OPTS,
         );
 
         const actions = readLog(logPath).map(r => r.action);
@@ -62,7 +68,7 @@ describe('CLI process-level smoke (real ts-node startup)', () => {
         const logPath = tmpPath('route');
 
         execFileSync(
-            'npx',
+            NPX,
             [
                 'ts-node', 'src/CLI/game.cli.ts',
                 '--route', 'fv-2,fv-12', '--auto-combat',
@@ -70,7 +76,7 @@ describe('CLI process-level smoke (real ts-node startup)', () => {
                 '--combat-max-turns', '12',
                 '--json-events', '--state-log', logPath,
             ],
-            { cwd: PACKAGE_ROOT, stdio: 'pipe', timeout: 60_000 },
+            SPAWN_OPTS,
         );
 
         const actions = readLog(logPath).map(r => r.action);

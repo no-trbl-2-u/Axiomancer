@@ -8,7 +8,7 @@
  * always available and ends the tutorial; finishing the script fires the same
  * completion (the parent owns the dispatch).
  *
- * It sits above the board's fixed dock (the SCRAP / hand / END PHASE row, 150px
+ * It sits above the board's fixed dock (the SCRAP / hand / END PHASE row, 216px
  * tall) and is `pointerEvents="box-none"`, so it never covers or blocks the
  * controls it is pointing the player at.
  */
@@ -74,9 +74,10 @@ const useStyles = makeStyles((AXM) => ({
         position: 'absolute',
         left: 0,
         right: 0,
-        // Sits above the board's fixed dock (SCRAP / hand / END PHASE, 150px)
-        // so the coach never covers the controls it is pointing the player at.
-        bottom: 158,
+        // Sits above the board's fixed dock (SCRAP / hand / END PHASE) so the
+        // coach never covers the controls it is pointing the player at.
+        // Option A hand cards are 194pt raised 20pt — clear the whole dock.
+        bottom: 216,
         zIndex: 55,
         paddingHorizontal: 10,
         paddingBottom: 8,

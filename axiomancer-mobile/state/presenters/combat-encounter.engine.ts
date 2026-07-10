@@ -65,6 +65,60 @@ function freeLineText(card: CombatCard, sourceCard?: Card): string {
     return sourceCard?.free ? riderText(sourceCard.free) : 'no effect';
 }
 
+/** The barrel doesn't export CardRider — derive it from Card. */
+type CardRider = NonNullable<Card['free']>;
+
+/** Option A split rail — project the authored FREE rider into a KEYWORD · value
+ *  pair for the face's ◇ column. Clause order mirrors the engine's riderText so
+ *  the head clause is the same one the prose leads with; a multi-clause free
+ *  line keeps the head pair and marks the rest with a trailing '+' (the overlay
+ *  freePill remains the full-truth line). Never a fabricated number. */
+function freeRail(card: CombatCard, sourceCard?: Card): { freeKeyword: string | null; freeValue: string | null } {
+    if (card.cardType === 'enchantment' || card.cardType === 'disenchant') {
+        return { freeKeyword: null, freeValue: 'PAID only' };
+    }
+    const r: CardRider | undefined = sourceCard?.free;
+    if (!r) return { freeKeyword: null, freeValue: null };
+    const pairs: [string, string][] = [];
+    if (r.bonusIntensity) pairs.push(['INTENSITY', `+${r.bonusIntensity}`]);
+    if (r.bonusDuration) pairs.push(['DURATION', `+${r.bonusDuration}t`]);
+    if (r.guard) pairs.push(['GUARD', `${r.guard}`]);
+    if (r.conviction) pairs.push(['CONVICTION', `+${r.conviction} ◆`]);
+    if (r.refreshDie) pairs.push(['REFRESH', 'die']);
+    if (r.revealStance) pairs.push(['REVEAL', 'stance']);
+    if (r.tickAllDots) pairs.push(['TICK', 'all DoTs']);
+    if (r.tickOne) pairs.push(['TICK', '1']);
+    if (r.cleanse) pairs.push(['CLEANSE', `${r.cleanse}`]);
+    if (r.healHp) pairs.push(['HEAL', `${r.healHp}`]);
+    if (r.drawCards) pairs.push(['DRAW', `${r.drawCards}`]);
+    if (r.premises) pairs.push(['PREMISE', `+${r.premises}`]);
+    if (r.sway) pairs.push(['SWAY', `${r.sway}`]);
+    if (r.souls) pairs.push(['SOUL', `+${r.souls}`]);
+    if (r.foretell) pairs.push(['FORETELL', `${r.foretell}`]);
+    if (r.applyEffect) {
+        const kw = keywordForEffect(r.applyEffect.effectId)
+            ?? r.applyEffect.effectId.replace(/^(debuff|buff)_/, '');
+        const i = r.applyEffect.intensity ?? 1;
+        const d = r.applyEffect.duration;
+        pairs.push([kw.toUpperCase(), `i${i}${d ? ` d${d}` : ''}`]);
+    }
+    if (r.ruptureMarks) pairs.push(['RUPTURE', `${r.ruptureMarks}/stack`]);
+    if (r.intensityPerPip) pairs.push(['PIP', `+${r.intensityPerPip} int`]);
+    if (r.pips) pairs.push(['PIP', `+${r.pips}`]);
+    if (r.stagger) pairs.push(['STAGGER', `${r.stagger}`]);
+    if (pairs.length === 0) return { freeKeyword: null, freeValue: null };
+    const [kw, val] = pairs[0];
+    return { freeKeyword: kw, freeValue: pairs.length > 1 ? `${val} +` : val };
+}
+
+/** Option A type strip — stance + player-facing card type (CURSE for disenchant). */
+function typeStripText(card: CombatCard): string {
+    const typeLabel = card.cardType === 'enchantment' ? 'ENCHANTMENT'
+        : card.cardType === 'disenchant' ? 'CURSE'
+            : card.cardType === 'spell' ? 'SPELL' : null;
+    return [card.stance.toUpperCase(), ...(typeLabel ? [typeLabel] : [])].join(' · ');
+}
+
 // ── Intent vocabulary (Spec 26 §2.4) ─────────────────────────────────────────
 
 export const INTENT_ICONS: Record<CombatIntentType, { icon: string; label: string; color: string }> = {
@@ -120,6 +174,14 @@ export interface CombatDieVM {
     pips?: number;
     /** A dead X face that can still be FATE-TAPPED this turn (R4). */
     fateTappable?: boolean;
+    /** Spec 32 v3 §5 — a FLOATING die: always spendable (bypasses the one-die
+     *  draft), consumed forever when spent, persists across combats. */
+    floating?: boolean;
+    /** The board may attach a drag gesture to this die. Computed HERE (not in
+     *  the render) so it can never depend on transient drag state — flipping
+     *  it mid-drag unmounts the GestureDetector, which on web kills the pan
+     *  without onEnd/onFinalize (the stuck-ghost / dead-drop bug). */
+    draggable: boolean;
 }
 export type CombatCardKind =
     | 'dot' | 'stun' | 'regen' | 'guard' | 'weaken' | 'inert' | 'befriend'
@@ -131,6 +193,7 @@ export type CombatCardKind =
     | 'reap'         // spec 32 v3 — spend Souls for a burst (live total → a word)
     | 'enchant'      // spec 32 v3 — persistent player-side passive (rest of combat)
     | 'disenchant'   // spec 32 v3 — standing curse attached to the enemy
+    | 'forge'        // die-manipulation verbs (FORGE / KINDLE / PIP / TRANSMUTE)
     | 'barrier'      // stacking soak shield on YOU
     | 'thorns'       // reflect attacker damage back
     | 'siphon'       // heal for a % of the damage dealt
@@ -158,6 +221,15 @@ export interface CombatCardFaceVM {
     heroSub: string | null;        // e.g. '(18)'
     freeHeroText: string;          // the no-die value
     freeHeroSub: string | null;
+    /** Option A split rail (owner-picked 2026-07-09) — the FREE column's
+     *  KEYWORD · value projection of the authored free rider (e.g. TICK · 1).
+     *  null keyword = no free effect / PAID only; the overlay's freePill keeps
+     *  the full riderText prose. */
+    freeKeyword: string | null;
+    freeValue: string | null;
+    /** Option A type strip at the card foot — 'BODY · SPELL' (CURSE for
+     *  disenchant; the engine term never prints). */
+    typeStrip: string;
     verbLine: string;              // plain who/what
     powerRail: string;
     readDependent: boolean;        // the read scales this: guard/strike (damage mult) AND
@@ -219,6 +291,9 @@ export interface CombatCardVM {
     detail: CombatCardDetailVM;
     /** Read tier if powered with the current drafted die (null until a die is drafted). */
     read: CombatReadResult | null; colorMatch: boolean;
+    /** Authored flavor prose (`Card.description`) — overlay BOTTOM only, never
+     *  on the face (owner directive 2026-07-09: the face is purely functional). */
+    flavor: string | null;
 }
 export interface CombatSignatureVM {
     id: string; name: string; description: string; cost: number; affordable: boolean; icon: string;
@@ -326,16 +401,30 @@ function playerPane(state: CombatEncounterState): CombatPlayerPaneVM {
 
 function diceVM(state: CombatEncounterState): CombatDieVM[] {
     const drafted = getDraftedDie(state);
+    const hasDraft = !!state.draftedDieId;
     // Per-die read pip — only once the phase stance is known (revealed/scouted).
     const stance = revealedCurrentStance(state) as Stance | null;
-    const tray: CombatDieVM[] = state.dice.map((d: CombatManaDie) => ({
-        id: d.id, color: d.color, colorHex: STANCE_COLORS[d.color] ?? '#888',
-        glyph: DIE_GLYPHS[d.color] ?? '?', stanceLabel: STANCE_LABELS[d.color] ?? '?',
-        drafted: drafted?.id === d.id, spent: d.state === 'spent', isX: d.color === 'x',
-        readPip: stance ? resolveRead(d.color, stance) : null,
-        // R4 — a dead X face is never dead: tappable once per turn.
-        fateTappable: d.color === 'x' && d.state !== 'spent' && state.fateTappedTurn !== state.turn,
-    }));
+    const tray: CombatDieVM[] = state.dice.map((d: CombatManaDie) => {
+        const isDrafted = drafted?.id === d.id;
+        const spent = d.state === 'spent';
+        const isX = d.color === 'x';
+        const floating = d.floating === true;
+        return {
+            id: d.id, color: d.color, colorHex: STANCE_COLORS[d.color] ?? '#888',
+            glyph: DIE_GLYPHS[d.color] ?? '?', stanceLabel: STANCE_LABELS[d.color] ?? '?',
+            drafted: isDrafted, spent, isX,
+            readPip: stance ? resolveRead(d.color, stance) : null,
+            // R4 — a dead X face is never dead: tappable once per turn.
+            fateTappable: isX && d.state !== 'spent' && state.fateTappedTurn !== state.turn,
+            // Spec 32 v3 §5 — the board must know a floating die from a turn die:
+            // floats stay draggable after the draft (they bypass the one-die law).
+            floating: floating || undefined,
+            // A float drags whenever unspent (post-draft too); a turn die only
+            // before the draft. NEVER a function of live drag state (see the
+            // CombatDieVM.draggable doc note).
+            draggable: floating ? !spent : !hasDraft && !isX && !isDrafted && !spent,
+        };
+    });
     // R2 — the Reserve renders in the same tray as a second power source.
     const banked: CombatDieVM[] = (state.reserve ?? []).map((d: CombatManaDie) => ({
         id: d.id, color: d.color, colorHex: STANCE_COLORS[d.color] ?? '#888',
@@ -343,6 +432,7 @@ function diceVM(state: CombatEncounterState): CombatDieVM[] {
         drafted: false, spent: false, isX: false,
         readPip: null,
         reserve: true, pips: d.pips ?? 0,
+        draggable: true,
     }));
     return [...tray, ...banked];
 }
@@ -465,6 +555,13 @@ export function resolvePrimary(card: CombatCard, sourceCard: Card | undefined): 
         return { kind: 'inert', ce: null, guardAmount: null, riders: [], mech: null };
     }
     if (vc === 'buff-self') {
+        // Dice-verb cards (FORGE / TRANSMUTE / KINDLE / PIP) headline their die
+        // mechanic — previously they fell through to 'inert' and printed the
+        // ambiguous "DEBUFF · buff yourself" (owner directive 2026-07-09).
+        const dieMech = findMech('forge_floating_die') ?? findMech('float_x_die')
+            ?? findMech('create_temporary_die') ?? findMech('grant_pip')
+            ?? findMech('spend_all_pips') ?? findMech('reroll_spent');
+        if (dieMech) return { kind: 'forge', ce: null, guardAmount: null, riders: [], mech: dieMech };
         const self = (sourceCard?.combatEffects ?? []).filter(e => e.appliedTo === 'self');
         // 0.34.0: a self-buff that reflects (Thorns) is now real.
         const thorns = self.find(s => engineHonestKind(s.effectId) === 'thorns');
@@ -744,6 +841,14 @@ function cardCalc(card: CombatCard, sourceCard: Card | undefined): CardCalc {
             out.keyword = 'Reap'; out.glyph = '☠'; out.categoryColor = GLYPH_COLORS.dot;
             break;
         }
+        case 'forge': {
+            // Die-verb cards: FORGE / TRANSMUTE / KINDLE headline as FORGE;
+            // pip manipulation headlines as PIP. Word, never a number.
+            const mk = pr.mech?.kind;
+            out.keyword = mk === 'grant_pip' || mk === 'spend_all_pips' ? 'Pip' : 'Forge';
+            out.glyph = '⚒'; out.categoryColor = PAYOFF_COLOR;
+            break;
+        }
         case 'enchant':
             out.keyword = 'Enchantment'; out.glyph = '◈'; out.categoryColor = ENCHANT_COLOR; break;
         case 'disenchant':
@@ -760,6 +865,26 @@ function cardCalc(card: CombatCard, sourceCard: Card | undefined): CardCalc {
             break;
     }
     return out;
+}
+
+/** Exact one-line clause for a die-verb card's face/detail (no vibes). */
+function forgeClause(mech: CardSpecialMechanic | null): string | null {
+    switch (mech?.kind) {
+        case 'forge_floating_die':
+            return `forge a ${mech.color === 'wild' ? 'WILD' : 'matching'} FLOATING die`;
+        case 'float_x_die':
+            return 'dead X die → WILD FLOATING die (no X: +1 ◆)';
+        case 'create_temporary_die':
+            return `KINDLE a ${mech.color} die to the Reserve`;
+        case 'grant_pip':
+            return `+${mech.count} pip to every Reserve die`;
+        case 'spend_all_pips':
+            return 'spend ALL pips for their printed payoff';
+        case 'reroll_spent':
+            return 're-roll every spent or dead die';
+        default:
+            return null;
+    }
 }
 
 function buildDetailKeywords(card: CombatCard, c: CardCalc): { name: string; def: string; minor: boolean }[] {
@@ -788,7 +913,11 @@ export function faceStats(card: CombatCard, sourceCard?: Card): CombatCardFaceVM
     const kw = c.keyword ? c.keyword.toUpperCase() : null;
     // The authored FREE line (engine riderText) — never a fabricated chip.
     const free = freeLineText(card, sourceCard);
-    const base = { glyph: c.glyph, categoryColor: c.categoryColor, stanceColor, statusBase: null, statusAdv: null, statusDis: null };
+    const base = {
+        glyph: c.glyph, categoryColor: c.categoryColor, stanceColor,
+        statusBase: null, statusAdv: null, statusDis: null,
+        ...freeRail(card, sourceCard), typeStrip: typeStripText(card),
+    };
     switch (c.kind) {
         case 'dot': return { ...base, kind: 'dot', keyword: kw, heroText: `${c.total}`, heroSub: `over ${c.turns} turns`, freeHeroText: free, freeHeroSub: null, verbLine: 'foe loses HP each turn', powerRail: c.keyword ?? 'DoT', readDependent: true, inert: false, guardBase: null, statusBase: c.total, statusAdv: c.totalAdv, statusDis: c.totalDis };
         case 'stun': return { ...base, kind: 'stun', keyword: kw, heroText: `skip ${c.skips} turns`, heroSub: null, freeHeroText: free, freeHeroSub: null, verbLine: "the foe can't act", powerRail: c.keyword ?? 'Stun', readDependent: false, inert: false, guardBase: null };
@@ -813,6 +942,7 @@ export function faceStats(card: CombatCard, sourceCard?: Card): CombatCardFaceVM
         case 'siphon': return { ...base, kind: 'siphon', keyword: 'SIPHON', heroText: `Heal ${c.siphonPct}%`, heroSub: 'of the burst', freeHeroText: free, freeHeroSub: null, verbLine: 'heal from the harm you cash in', powerRail: c.keyword ?? 'Siphon', readDependent: false, inert: false, guardBase: null };
         case 'rupture': return { ...base, kind: 'rupture', keyword: 'RUPTURE', heroText: 'detonate', heroSub: 'all afflictions', freeHeroText: free, freeHeroSub: null, verbLine: "consume the foe's afflictions and detonate them", powerRail: c.keyword ?? 'Rupture', readDependent: false, inert: false, guardBase: null };
         case 'reap': return { ...base, kind: 'reap', keyword: 'REAP', heroText: c.reapCost > 0 ? `${c.reapCost} Souls` : 'all Souls', heroSub: c.reapPerSoul > 0 ? `${c.reapPerSoul} per Soul` : 'spend the bank', freeHeroText: free, freeHeroSub: null, verbLine: 'spend Souls for the printed payoff', powerRail: c.keyword ?? 'Reap', readDependent: false, inert: false, guardBase: null };
+        case 'forge': { const clause = forgeClause(c.mech) ?? 'shape your dice'; return { ...base, kind: 'forge', keyword: kw, heroText: '', heroSub: clause, freeHeroText: free, freeHeroSub: null, verbLine: clause, powerRail: c.keyword ?? 'Forge', readDependent: false, inert: false, guardBase: null }; }
         case 'enchant': return { ...base, kind: 'enchant', keyword: 'ENCHANTMENT', heroText: '', heroSub: 'rest of combat', freeHeroText: free, freeHeroSub: null, verbLine: 'a persistent passive on your side', powerRail: c.keyword ?? 'Enchantment', readDependent: false, inert: false, guardBase: null };
         case 'disenchant': return { ...base, kind: 'disenchant', keyword: 'DISENCHANT', heroText: '', heroSub: 'curse · rest of combat', freeHeroText: free, freeHeroSub: null, verbLine: 'a standing curse attached to the enemy', powerRail: c.keyword ?? 'Disenchant', readDependent: false, inert: false, guardBase: null };
         case 'inert':
@@ -828,8 +958,10 @@ function detailCore(card: CombatCard, sourceCard?: Card): DetailCore {
     // Spec 32 v3 — the meta chip surfaces the RANK NAME + CARD TYPE (where the
     // gold tag used to sit): e.g. 'BODY · DOXA · SPELL · DOT'.
     const rankName = card.rank ? RANK_NAMES[card.rank] : null;
+    // Player-facing type vocabulary (owner directive 2026-07-09): a disenchant
+    // prints as CURSE — the engine term stays `disenchant` internally.
     const typeLabel = card.cardType === 'enchantment' ? 'ENCHANTMENT'
-        : card.cardType === 'disenchant' ? 'DISENCHANT'
+        : card.cardType === 'disenchant' ? 'CURSE'
             : card.cardType === 'spell' ? 'SPELL' : null;
     const metaChip = [
         card.stance.toUpperCase(),
@@ -847,7 +979,7 @@ function detailCore(card: CombatCard, sourceCard?: Card): DetailCore {
         case 'weaken': return { subtitle: `${Title} the enemy — its attacks hit softer.`, metaChip, outcomeLine: c.turns > 0 ? `Apply ${Title} · ${c.turns} turns.` : `Apply ${Title}.`, outcomeStats: c.turns > 0 ? [{ label: 'TURNS', value: `${c.turns}` }] : [], stacksText: c.stacks ? 'Stacks by intensity.' : null, freeLine, powerLine: `◆ WITH A DIE: apply ${Title} — the foe's hits land softer while it holds.`, readNote: `${Title} weakens the enemy's blows; pile on STAGGER to deny the turn outright.`, mathLine: `${Title} reduces the enemy's outgoing damage while active (real engine units).`, keywords };
         case 'mark': return { subtitle: `${Title} the enemy — the flaw is named.`, metaChip, outcomeLine: `Apply ${Title} +${c.markAmp}/tick · ${c.turns} turns.`, outcomeStats: [{ label: 'PER TICK', value: `+${c.markAmp}` }, { label: 'TURNS', value: `${c.turns}` }], stacksText: c.stacks ? 'Stacks by intensity.' : null, freeLine, powerLine: `◆ WITH A DIE: apply ${Title} — every DoT tick and payoff hit on the foe deals +${c.markAmp} while it holds.`, readNote: `${Title} counts as an affliction — RUPTURE, SOUL, and REAP all feed on it.`, mathLine: `+${c.markAmp}/tick = tickAmplifyFlat × intensity, for ${c.turns} turns.`, keywords };
         case 'backfire': return { subtitle: `${Title} — denied blows land inward.`, metaChip, outcomeLine: `Apply ${Title} ${c.backfireN}/rung · ${c.turns} turns.`, outcomeStats: [{ label: 'PER RUNG', value: `${c.backfireN}` }, { label: 'TURNS', value: `${c.turns}` }], stacksText: c.stacks ? 'Stacks by intensity.' : null, freeLine, powerLine: `◆ WITH A DIE: apply ${Title} — the foe takes ${c.backfireN} per rung its actions lose while it holds.`, readNote: `Pair with STAGGER: every rung you strip is ${c.backfireN} HP off the foe.`, mathLine: `${c.backfireN}/rung = backfirePerRung × intensity, for ${c.turns} turns.`, keywords };
-        case 'regen': return { subtitle: 'Heal yourself over time.', metaChip, outcomeLine: `${Title || 'Regenerate'} ${c.total} over ${c.turns} turns.`, outcomeStats: [{ label: 'PER TURN', value: `${c.perTurn}` }, { label: 'TURNS', value: `${c.turns}` }, { label: 'TOTAL', value: `${c.total}` }], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: regenerate ${c.perTurn} HP/turn for ${c.turns} turns (${c.total} total). Any die; a ${STANCE} die matches.`, readNote: `Heals YOU — no read needed; ${c.total} is exact.`, mathLine: `${c.perTurn}/turn = ${c.dpr} base × ${c.intensity} intensity · ${c.turns} turns · ${c.total} total.`, keywords };
+        case 'regen': return { subtitle: 'Heal yourself over time.', metaChip, outcomeLine: `${Title || 'Regenerate'} ${c.total} over ${c.turns} turns.`, outcomeStats: [{ label: 'PER TURN', value: `${c.perTurn}` }, { label: 'TURNS', value: `${c.turns}` }, { label: 'TOTAL', value: `${c.total}` }], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: regenerate ${c.perTurn} HP/turn for ${c.turns} turns (${c.total} total). Needs a ${STANCE} or WILD die.`, readNote: `Heals YOU — no read needed; ${c.total} is exact.`, mathLine: `${c.perTurn}/turn = ${c.dpr} base × ${c.intensity} intensity · ${c.turns} turns · ${c.total} total.`, keywords };
         case 'guard': { const b = c.guardAmount ?? 0; const adv = Math.max(1, Math.round(b * READ_DAMAGE_MULT.advantage)); const dis = Math.max(1, Math.round(b * READ_DAMAGE_MULT.disadvantage)); return { subtitle: 'Guard yourself — soak the next hit.', metaChip, outcomeLine: `Gain ${Title} ${b}.`, outcomeStats: [{ label: 'GUARD', value: `${b} (▲${adv} · —${b} · ▼${dis})` }], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: Guard ${b}; ▲ read raises it to ${adv}, ▼ read drops it to ${dis}; +${COLOR_MATCH_DAMAGE_BONUS} if a ${STANCE} die matches.`, readNote: `The read scales this: ▲ advantage ×${READ_DAMAGE_MULT.advantage}, ▼ disadvantage ×${READ_DAMAGE_MULT.disadvantage}.`, mathLine: `POWER = round(${b} × read) + ${COLOR_MATCH_DAMAGE_BONUS} on a colour match.`, keywords }; }
         case 'befriend': return { subtitle: 'Spare a near-dead foe.', metaChip, outcomeLine: 'Spare a near-dead foe — end combat peacefully.', outcomeStats: [], stacksText: null, freeLine, powerLine: '◆ WITH A DIE: if the enemy HP is low, end combat peacefully (befriend).', readNote: 'Watch the enemy HP bar — befriend lands only when it is low.', mathLine: 'No fixed number — a conditional outcome gated on low enemy HP.', keywords };
         case 'vulnerable': { const cap = Math.round((VULNERABLE_MAX_MULT - 1) * 100); return { subtitle: `${Title} the enemy — it takes more damage.`, metaChip, outcomeLine: `Apply ${Title} +${c.vulnPct}% · ${c.turns} turns.`, outcomeStats: [{ label: 'DMG TAKEN', value: `+${c.vulnPct}%` }, { label: 'TURNS', value: `${c.turns}` }], stacksText: `Stacks to +${cap}%.`, freeLine, powerLine: `◆ WITH A DIE: apply ${Title} — +${c.vulnPct}% damage taken for ${c.turns} turns, plus a small hit.`, readNote: `The read is exact: ▲ won read lands +${READ_ADVANTAGE_INTENSITY_BONUS} intensity (+${c.vulnPctAdv}%), ▼ lost read −${READ_DISADVANTAGE_DURATION_PENALTY} turn; +${c.vulnPct}% on an even read.`, mathLine: `+${c.vulnPct}% = (damageTakenMult − 1) × 100 × intensity on an even read; combined Vulnerable caps at +${cap}%.`, keywords }; }
@@ -865,6 +997,8 @@ function detailCore(card: CombatCard, sourceCard?: Card): DetailCore {
         case 'siphon': return { subtitle: 'Siphon — heal for part of the harm you cash in.', metaChip, outcomeLine: `${Title} ${c.siphonPct}%.`, outcomeStats: [{ label: 'LIFESTEAL', value: `${c.siphonPct}%` }], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: heal ${c.siphonPct}% of the HP this card's payoff erodes.`, readNote: `The burst is live; the ${c.siphonPct}% rate is exact.`, mathLine: `Heal = ${c.siphonPct}% × (the payoff burst) — the burst is live, so no fixed heal number.`, keywords };
         case 'rupture': return { subtitle: "Rupture — consume the foe's afflictions and detonate them.", metaChip, outcomeLine: `${Title} · max ${RUPTURE_BURST_CAP}.`, outcomeStats: [{ label: 'BURST', value: 'live total' }, { label: 'CAP', value: `${RUPTURE_BURST_CAP}` }], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: consume ALL the foe's afflictions — burst = their remaining harm (up to ${RUPTURE_BURST_CAP}).`, readNote: 'Stack afflictions first — the burst equals what they still owed, so it has no fixed number until you fire it.', mathLine: `Burst = remaining affliction fuel (capped ${RUPTURE_BURST_CAP}) — live, so no fixed number (real-units-or-no-number).`, keywords };
         case 'reap': return { subtitle: 'Reap — spend Souls for the printed payoff.', metaChip, outcomeLine: c.reapCost > 0 ? `${Title} ${c.reapCost} Souls.` : `${Title} ALL Souls${c.reapPerSoul > 0 ? ` — ${c.reapPerSoul} per Soul` : ''}.`, outcomeStats: c.reapPerSoul > 0 ? [{ label: 'PER SOUL', value: `${c.reapPerSoul}` }, { label: 'CAP', value: `${RUPTURE_BURST_CAP}` }] : [{ label: 'COST', value: `${c.reapCost} Souls` }], stacksText: null, freeLine, powerLine: c.reapPerSoul > 0 ? `◆ WITH A DIE: spend EVERY Soul — burst ${c.reapPerSoul} per Soul spent (up to ${RUPTURE_BURST_CAP}).` : `◆ WITH A DIE: spend ${c.reapCost} Souls to fire the printed effect (fizzles when underfunded).`, readNote: 'Souls come from expiring or consumed enemy afflictions — fill the bank first.', mathLine: c.reapPerSoul > 0 ? `Burst = ${c.reapPerSoul} × Souls spent (live, capped ${RUPTURE_BURST_CAP}).` : `Costs ${c.reapCost} Souls — the payoff is the printed line, in real units.`, keywords };
+        case 'forge': { const clause = forgeClause(c.mech) ?? 'shape your dice'; return { subtitle: `${Title} — dice are the resource.`, metaChip, outcomeLine: `${clause.charAt(0).toUpperCase()}${clause.slice(1)}.`, outcomeStats: [], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: ${card.bottomActionText}`, readNote: 'Die-forging takes no read — the printed line is exact.', mathLine: 'A die-economy verb — the printed line is the applied effect.', keywords };
+        }
         case 'enchant': return { subtitle: 'Enchantment — a persistent passive, rest of combat.', metaChip, outcomeLine: 'In play for the rest of the combat.', outcomeStats: [], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: ${card.bottomActionText}`, readNote: 'PAID only — the die is the commitment. It leaves the deck cycle once played.', mathLine: 'A standing rule, not a number — its text is the engine text.', keywords };
         case 'disenchant': return { subtitle: 'Disenchant — a standing curse on the enemy.', metaChip, outcomeLine: 'Attaches to the enemy for the rest of the combat.', outcomeStats: [], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: ${card.bottomActionText}`, readNote: 'PAID only — the die is the commitment. It leaves the deck cycle once played.', mathLine: 'A standing rule, not a number — its text is the engine text.', keywords };
         case 'inert':
@@ -904,8 +1038,8 @@ export function detailStats(card: CombatCard, sourceCard?: Card): CombatCardDeta
     } else {
         diePill = face.heroSub ?? face.keyword ?? '';
     }
-    // The colour-match rule — rendered ONCE per modal (was boilerplated onto every powerLine).
-    const colorMatchHint = `Any die works — a ${STANCE} die matches: +${COLOR_MATCH_DAMAGE_BONUS} damage and a stronger read.`;
+    // The colour law (dice-law rework 2026-07-09) — rendered ONCE per modal.
+    const colorMatchHint = `Only a ${STANCE} or WILD die can power this card.`;
     return { ...core, freePill, diePillKeyword, diePill, colorMatchHint };
 }
 
@@ -925,6 +1059,27 @@ export function armedReadValue(face: CombatCardFaceVM, read: CombatReadResult, c
         return face.statusBase;
     }
     return null;
+}
+
+/**
+ * How an APPLY commit routes its dragged die (dice-law 2026-07-09 / spec 32 v3
+ * §5): a Reserve, fate-X, or FLOATING die is its OWN power source — it is
+ * forwarded to `playCombatCard` as the explicit dieId and must never be
+ * drafted (the engine rejects drafting a floating die, which used to make the
+ * drop silently fizzle and snap back). A fresh tray die drafts first.
+ */
+export function resolveApplyRouting(
+    state: CombatEncounterState,
+    dieId: string | null,
+): { draftFirst: boolean; explicitDieId: string | undefined } {
+    const isReserveDie = !!dieId && (state.reserve ?? []).some((d) => d.id === dieId);
+    const isFateX = !!dieId && state.dice.some((d) => d.id === dieId && d.color === 'x');
+    const isFloating = !!dieId && state.dice.some((d) => d.id === dieId && d.floating === true);
+    const explicit = isReserveDie || isFateX || isFloating;
+    return {
+        draftFirst: !!dieId && !explicit && state.draftedDieId === null,
+        explicitDieId: explicit && dieId ? dieId : undefined,
+    };
 }
 
 function handVM(state: CombatEncounterState): CombatCardVM[] {
@@ -950,6 +1105,7 @@ function handVM(state: CombatEncounterState): CombatCardVM[] {
             face: faceStats(card, sourceCard),
             detail: detailStats(card, sourceCard),
             read: preview?.read ?? null, colorMatch: preview?.colorMatch ?? false,
+            flavor: sourceCard?.description ?? null,
         };
     });
 }

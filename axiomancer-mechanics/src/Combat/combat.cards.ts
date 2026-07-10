@@ -204,6 +204,7 @@ export function mechanicText(m: CardSpecialMechanic): string | null {
         case 'rupture': return `RUPTURE${m.fuelPerPip ? ` (+${m.fuelPerPip} fuel per pip)` : ''}${m.fuelPerOmenHit ? ` (+${m.fuelPerOmenHit} fuel per omen hit)` : ''}`;
         case 'siphon': return `siphon ${Math.round(m.pct * 100)}%`;
         case 'forge_floating_die': return `FORGE a ${m.color === 'wild' ? 'WILD' : "the powering die's color"} floating die`;
+        case 'float_x_die': return 'FORGE a dead X die into a WILD floating die (no X: +1 Conviction)';
         case 'stagger': return `STAGGER ${m.rungs}`;
         case 'lock_stance': return 'lock the enemy stance';
         case 'foretell': return `FORETELL ${m.count}`;

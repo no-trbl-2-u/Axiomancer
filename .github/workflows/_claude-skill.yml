@@ -15,11 +15,11 @@ name: _claude-skill
 #      expo-web playtest loops).
 #   4. Materialize `.env` (GH_TOKEN / GH_REPO) — the skills load gh auth
 #      from `.env` by design.
-#   5. Activate the dormant nexus enforcement layer
-#      (.claude/settings.json.example → .claude/settings.json): guard
-#      hooks + deny walls for force-push / --no-verify / destructive
-#      resets. CI runs are unattended (intervention level 3+), exactly
-#      the case the layer exists for.
+#   5. Self-test the nexus enforcement layer (.claude/settings.json is
+#      committed and always active: guard hooks + deny walls for
+#      force-push / --no-verify / destructive resets). CI runs are
+#      unattended (intervention level 3+), so a broken guard must fail
+#      the job before Claude starts.
 #   6. Run anthropics/claude-code-action with the given prompt.
 #
 # Secrets (via `secrets: inherit` from callers):
@@ -29,8 +29,10 @@ name: _claude-skill
 #                            issues, pull-requests RW; actions read).
 #                            Without it the default GITHUB_TOKEN is used
 #                            and pushes/PRs made by the skills will NOT
-#                            trigger the verify-* workflows, which
-#                            silently weakens the deploy gate.
+#                            trigger the verify-* workflows — deploy-check
+#                            then FAILS CLOSED on any code tick (zero
+#                            verify runs for a code diff = exit 1, not a
+#                            vacuous pass).
 #   NOTIFY_NTFY_TOPIC        optional — scripts/notify.mjs pager channel.
 #   NOTIFY_WEBHOOK_URL       optional — scripts/notify.mjs webhook channel.
 
@@ -51,6 +53,14 @@ on:
         default: false
       extra_claude_args:
         description: 'Extra Claude Code CLI args appended to the defaults'
+        type: string
+        default: ''
+      model:
+        description: 'Model for the run. Default Sonnet 5; scheduled/high-frequency callers should stay on the default — premium tiers are for deliberate, manually dispatched passes.'
+        type: string
+        default: 'claude-sonnet-5'
+      effort:
+        description: 'Reasoning effort for models that support it (low|medium|high|xhigh|max). Empty = model default.'
         type: string
         default: ''
 
@@ -87,15 +97,8 @@ jobs:
       - name: Materialize .env for the skills
         run: printf 'GH_TOKEN=%s\nGH_REPO=%s\n' "$GH_TOKEN" "$GH_REPO" > .env
 
-      - name: Activate nexus enforcement layer (guard hooks + deny walls)
-        run: |
-          node -e "
-            const fs = require('fs');
-            const s = JSON.parse(fs.readFileSync('.claude/settings.json.example', 'utf8'));
-            delete s.__note;
-            fs.writeFileSync('.claude/settings.json', JSON.stringify(s, null, 2));
-          "
-          node .claude/hooks/guard.mjs self-test
+      - name: Self-test nexus enforcement layer (guard hooks + deny walls)
+        run: node .claude/hooks/guard.mjs self-test
 
       - name: Run Claude Code
         id: claude
@@ -106,7 +109,8 @@ jobs:
           prompt: ${{ inputs.prompt }}
           show_full_output: true
           claude_args: |
-            --model claude-sonnet-5
+            --model ${{ inputs.model }}
+            ${{ inputs.effort != '' && format('--effort {0}', inputs.effort) || '' }}
             --allowedTools "Bash,Edit,Write,Read,Glob,Grep,Task,TodoWrite,WebFetch,WebSearch${{ inputs.install_playwright && ',mcp__playwright__browser_navigate,mcp__playwright__browser_click,mcp__playwright__browser_snapshot,mcp__playwright__browser_take_screenshot,mcp__playwright__browser_console_messages,mcp__playwright__browser_close,mcp__playwright__browser_resize,mcp__playwright__browser_press_key,mcp__playwright__browser_hover,mcp__playwright__browser_evaluate,mcp__playwright__browser_wait_for,mcp__playwright__browser_tabs,mcp__playwright__browser_network_requests,mcp__playwright__browser_navigate_back' || '' }}"
             ${{ inputs.extra_claude_args }}
 

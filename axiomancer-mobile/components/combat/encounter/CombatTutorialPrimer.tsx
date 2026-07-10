@@ -45,10 +45,10 @@ const PANELS: PrimerPanel[] = [
         eyebrow: 'DICE & CARDS',
         title: 'DRAFT, THEN POWER',
         body:
-            'Each turn you roll two stance dice — keep one, bank the other as ◆ Conviction. ' +
-            'Every card plays FREE (no die, weaker) or POWER (spend your stance die, full effect). ' +
-            'Land a NEW status and your die REFRESHES — so you can chain another. ' +
-            'Tap any card to read its keywords and full effect.',
+            'Each turn you roll three dice — keep one; every unused die banks as ◆ tokens ' +
+            '(gold banks 2, a dead ✕ banks none). A die only powers cards of ITS color — gold ' +
+            'powers anything. Land a NEW status and your die REFRESHES — so you can chain ' +
+            'another. Tap any card to read its keywords and full effect.',
     },
 ];
 

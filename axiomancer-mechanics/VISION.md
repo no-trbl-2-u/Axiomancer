@@ -42,6 +42,15 @@ The intended mastery path is:
 
 The player may sometimes win by attacking over and over. The player may sometimes win through friendliness. But if the player is not utilizing skills and planning status effects, the game should be more difficult for them.
 
+**Doctrine (load-bearing, set 2026-07-09): the FREE line builds the engine.**
+A card's free (dieless) line must never be a dead play or a weaker copy of the
+paid line. It should advance the deck's engine — theme currency (Premises,
+Souls, pips, DoT stacks) or general utility that feeds any engine (DRAW,
+Conviction). Small is fine; flat chip damage with no engine value is not.
+Test: after a free play, is the player closer to their deck's win condition?
+(Owner directive 2026-07-09; library enforcement pass belongs to
+`/deck-tuning`, tracked in `plan/CRITIQUE.md`.)
+
 Balance should prove AGGRESSIVE, DEFENSIVE, MIXED, and STRATEGIST play styles. STRATEGIST — skill/status/resource planning — is the witness for the intended mastery path.
 
 **Doctrine (load-bearing, set 2026-07-08): starter preset decks must adhere to

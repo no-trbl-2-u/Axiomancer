@@ -1,0 +1,32 @@
+name: consolidate
+
+# The memory curator: /consolidate compacts the loop's durable memory
+# (plan/bearings.md, plan/CRITIQUE.md, plan/lessons.md + reflexes.md) so
+# the always-read context stays flat as the project grows (see
+# skills/consolidate.md — it names this workflow). Monthly, on the 2nd at
+# an off-peak minute so it never queues behind the march cadence or the
+# nightly digest.
+
+on:
+  schedule:
+    - cron: '23 7 2 * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+  actions: read
+  id-token: write
+
+concurrency:
+  group: nexus-loop
+  cancel-in-progress: false
+
+jobs:
+  consolidate:
+    uses: ./.github/workflows/_claude-skill.yml
+    secrets: inherit
+    with:
+      prompt: '/consolidate'
+      timeout_minutes: 60

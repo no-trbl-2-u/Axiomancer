@@ -53,3 +53,82 @@ jobs:
 
       - name: Verify (type-check + tests + build)
         run: npm run verify --workspace axiomancer-mechanics
+
+  # The AGENTS.md "cross-package impact checklist", mechanized. Mobile and
+  # the card editor consume mechanics as local source via @mechanics, so a
+  # mechanics-only push can break them without verify-mobile /
+  # verify-card-editor ever triggering (their path filters don't watch
+  # mechanics). Witness: edba726 shipped mechanics+mobile green but broke
+  # the editor's SpecialMechanicKind union, leaving main red for half a
+  # day until 3c9bbaf.
+  cross-package:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout (full history for diff detection)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect impact-path changes
+        id: impact
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            range="origin/${{ github.base_ref }}...HEAD"
+          elif [ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ] \
+            && git cat-file -e "${{ github.event.before }}" 2>/dev/null; then
+            range="${{ github.event.before }}..${{ github.sha }}"
+          else
+            range="HEAD~1..HEAD"
+          fi
+          echo "diff range: $range"
+
+          mobile_paths=(
+            'axiomancer-mechanics/src/Combat/'
+            'axiomancer-mechanics/src/Cards/'
+            'axiomancer-mechanics/src/Effects/'
+            'axiomancer-mechanics/src/Skills/'
+            'axiomancer-mechanics/src/index.ts'
+            'axiomancer-mechanics/src/World/LootCache/'
+            'axiomancer-mechanics/src/World/Gathering/'
+            'axiomancer-mechanics/src/World/Hazard/'
+            'axiomancer-mechanics/src/World/Rest/'
+            'axiomancer-mechanics/src/World/QuestBoard/'
+          )
+          editor_paths=(
+            'axiomancer-mechanics/src/Cards/'
+            'axiomancer-mechanics/src/Effects/'
+            'axiomancer-mechanics/src/Combat/'
+            'axiomancer-mechanics/src/index.ts'
+          )
+
+          mobile=false; editor=false
+          if git diff --name-only "$range" -- "${mobile_paths[@]}" | grep -q .; then
+            mobile=true
+          fi
+          if git diff --name-only "$range" -- "${editor_paths[@]}" | grep -q .; then
+            editor=true
+          fi
+          echo "mobile=$mobile" >> "$GITHUB_OUTPUT"
+          echo "editor=$editor" >> "$GITHUB_OUTPUT"
+          echo "mobile impact: $mobile / editor impact: $editor"
+
+      - name: Setup Node
+        if: ${{ steps.impact.outputs.mobile == 'true' || steps.impact.outputs.editor == 'true' }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install workspace dependencies
+        if: ${{ steps.impact.outputs.mobile == 'true' || steps.impact.outputs.editor == 'true' }}
+        run: npm ci
+
+      - name: Verify mobile against mechanics change
+        if: ${{ steps.impact.outputs.mobile == 'true' }}
+        run: npm run verify --workspace axiomancer-mobile
+
+      - name: Type-check card editor against mechanics change
+        if: ${{ steps.impact.outputs.editor == 'true' }}
+        run: npm run type-check --workspace axiomancer-card-editor

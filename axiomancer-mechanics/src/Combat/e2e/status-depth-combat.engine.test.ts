@@ -134,8 +134,9 @@ describe('RUPTURE — detonate the foe afflictions for the pending total', () =>
     it('strips ALL afflictions, bursts for projectRupture, and yields Souls per instance', () => {
         mockSequentialRng(0.05);
         const enemyEffects = [ae('debuff_poison', 2, 4), ae('debuff_bleed', 1, 4)];
-        const state = openAndDraft(makePlayer([RUP]), makeEnemy(300, 'heart', enemyEffects), [RUP, RUP, RUP], 'heart');
-        const projected = projectRupture(state); // neutral read (heart die vs heart) → ×1
+        // MIND die on the mind card (color law) vs a mind foe → neutral read ×1.
+        const state = openAndDraft(makePlayer([RUP]), makeEnemy(300, 'mind', enemyEffects), [RUP, RUP, RUP], 'mind');
+        const projected = projectRupture(state); // neutral read (mind die vs mind) → ×1
         // v3 poison RAMPS + Hemorrhage: ticks 6,6,9,9 = 30; bleed i1 DECAYS —
         // exactly one tick of 3. pending = 33.
         expect(projected).toBe(33);
@@ -156,7 +157,7 @@ describe('RUPTURE — detonate the foe afflictions for the pending total', () =>
     it('adds a flat burst per NON-DoT affliction stack consumed (marks)', () => {
         mockSequentialRng(0.05);
         const enemyEffects = [ae('debuff_mark', 3, 2)];
-        const state = openAndDraft(makePlayer([RUP]), makeEnemy(300, 'heart', enemyEffects), [RUP, RUP, RUP], 'heart');
+        const state = openAndDraft(makePlayer([RUP]), makeEnemy(300, 'mind', enemyEffects), [RUP, RUP, RUP], 'mind');
         const res = playCombatCard(state, { uid: state.hand.find(h => h.cardId === RUP)!.uid }, true);
         const det = res.events.find(e => e.kind === 'rupture-detonated') as { amount: number } | undefined;
         // No DoT fuel; RUPTURE_PER_AFFLICTION_STACK (3) × 3 mark stacks = 9.
@@ -168,7 +169,7 @@ describe('RUPTURE — detonate the foe afflictions for the pending total', () =>
         // stays relevant against boss pools — max(flat floor, fraction × maxHP).
         mockSequentialRng(0.05);
         const enemyEffects = [ae('debuff_poison', 10, 10)];
-        const state = openAndDraft(makePlayer([RUP]), makeEnemy(900, 'heart', enemyEffects), [RUP, RUP, RUP], 'heart');
+        const state = openAndDraft(makePlayer([RUP]), makeEnemy(900, 'mind', enemyEffects), [RUP, RUP, RUP], 'mind');
         const res = playCombatCard(state, { uid: state.hand.find(h => h.cardId === RUP)!.uid }, true);
         const det = res.events.find(e => e.kind === 'rupture-detonated') as { amount: number } | undefined;
         expect(ruptureBurstCap(900)).toBeGreaterThan(RUPTURE_BURST_CAP); // 900 HP: the fraction term wins
@@ -178,7 +179,7 @@ describe('RUPTURE — detonate the foe afflictions for the pending total', () =>
     it('keeps the flat floor on a small enemy (early/mid behavior unchanged)', () => {
         mockSequentialRng(0.05);
         const enemyEffects = [ae('debuff_poison', 10, 10)];
-        const state = openAndDraft(makePlayer([RUP]), makeEnemy(300, 'heart', enemyEffects), [RUP, RUP, RUP], 'heart');
+        const state = openAndDraft(makePlayer([RUP]), makeEnemy(300, 'mind', enemyEffects), [RUP, RUP, RUP], 'mind');
         const res = playCombatCard(state, { uid: state.hand.find(h => h.cardId === RUP)!.uid }, true);
         const det = res.events.find(e => e.kind === 'rupture-detonated') as { amount: number } | undefined;
         expect(ruptureBurstCap(300)).toBe(RUPTURE_BURST_CAP); // fraction term below the floor

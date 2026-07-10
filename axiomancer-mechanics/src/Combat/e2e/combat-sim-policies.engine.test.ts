@@ -177,22 +177,26 @@ describe('greedy object reproduces the pinned decision sequences', () => {
     // exists any more) changed MIX's deck length from 5 to 4 cards, which
     // reshuffles every seed-derived draw order for `loadout(MIX)` — both
     // pins below were re-measured against the current engine.
+    //
+    // Re-pinned 2026-07-09 (dice-law rework): 3 dice per turn, strict color
+    // match, per-die token accrual — every seed-derived roll and greedy
+    // decision shifted; both pins re-measured against the current engine.
     it('seed 11 vs LittleBelle: a two-round status victory', () => {
         const r = runOneEncounter(loadout(MIX), LittleBelle, 11, 'greedy');
         expect({ outcome: r.outcome, rounds: r.rounds, plays: r.plays, statusPlays: r.statusPlays })
-            .toEqual({ outcome: 'victory', rounds: 2, plays: 6, statusPlays: 5 });
+            .toEqual({ outcome: 'victory', rounds: 2, plays: 8, statusPlays: 7 });
         expect(r.cardUsage['slippery-slope']).toEqual({
             cardId: 'slippery-slope', plays: 2, bottomPlays: 2, topPlays: 0, statusLands: 2, discards: 0,
         });
         expect(r.cardUsage['straw-mans-jab']).toEqual({
-            cardId: 'straw-mans-jab', plays: 1, bottomPlays: 1, topPlays: 0, statusLands: 1, discards: 0,
+            cardId: 'straw-mans-jab', plays: 3, bottomPlays: 3, topPlays: 0, statusLands: 3, discards: 0,
         });
     });
 
-    it('seed 11 vs KingOfRevenge: a two-round status victory', () => {
+    it('seed 11 vs KingOfRevenge: a three-round status victory', () => {
         const r = runOneEncounter(loadout(MIX), KingOfRevenge, 11, 'greedy');
         expect({ outcome: r.outcome, rounds: r.rounds, plays: r.plays, statusPlays: r.statusPlays })
-            .toEqual({ outcome: 'victory', rounds: 2, plays: 12, statusPlays: 9 });
+            .toEqual({ outcome: 'victory', rounds: 3, plays: 12, statusPlays: 9 });
         expect(r.cardUsage['straw-mans-jab']).toEqual({
             cardId: 'straw-mans-jab', plays: 3, bottomPlays: 3, topPlays: 0, statusLands: 3, discards: 0,
         });

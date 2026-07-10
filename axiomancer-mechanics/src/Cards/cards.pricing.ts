@@ -242,6 +242,11 @@ export function scoreMechanic(mechanic: CardSpecialMechanic): number {
         case 'forge_floating_die':
             return V.forgeFloating + V.forgePersistence
                 + (mechanic.color === 'wild' ? V.forgeWildBonus : 0);
+        case 'float_x_die':
+            // TRANSMUTE — a full wild FORGE, discounted for needing a dead X in
+            // the tray (fate-conditional), floored by the +1 Conviction fallback.
+            return (V.forgeFloating + V.forgePersistence + V.forgeWildBonus) * CONDITION_DISCOUNTS.fate
+                + V.conviction * (1 - CONDITION_DISCOUNTS.fate);
         case 'stagger': return mechanic.rungs * V.staggerPerRung;
         case 'lock_stance': return V.lockStance;
         case 'foretell': return mechanic.count * V.foretellPerCard;

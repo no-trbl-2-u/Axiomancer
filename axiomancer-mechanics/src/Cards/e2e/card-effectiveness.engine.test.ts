@@ -474,6 +474,19 @@ function assertMechanic(
         case 'forge_floating_die':
             expect((after.floatingDice ?? []).length, label).toBeGreaterThan((before.floatingDice ?? []).length);
             return;
+        case 'float_x_die': {
+            // TRANSMUTE promises one of its two printed outcomes: a dead X in
+            // the tray became a WILD floating die, or (no X / at cap) the +1
+            // Conviction fallback fired.
+            const floated = events.some(e => e.kind === 'die-floated');
+            const fellBack = events.some(e => e.kind === 'conviction-gained' && e.reason === 'effect');
+            expect(floated || fellBack, label).toBe(true);
+            if (floated) {
+                expect((after.floatingDice ?? []).length, label).toBeGreaterThan((before.floatingDice ?? []).length);
+                expect(after.floatingDice?.[after.floatingDice.length - 1]?.color, label).toBe('wild');
+            }
+            return;
+        }
         case 'create_temporary_die':
             expect((after.reserve ?? []).length, label).toBeGreaterThan((before.reserve ?? []).length);
             return;

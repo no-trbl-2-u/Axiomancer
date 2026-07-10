@@ -175,7 +175,12 @@ describe('balance bands (loose) — per-preset floors and dominance ceiling', ()
 // the constant when a forge item legitimately reshapes a curve.
 const CURVE_STAGES: readonly CombatStageId[] = ['early', 'mid', 'late'];
 // seed 1, greedy, 2 enemies/stage, 30 runs/cell (matches this file's matrix).
-const KNOWN_CURVE_VIOLATORS: readonly string[] = ['grace', 'oratory', 'standstill'];
+//
+// Re-derived 2026-07-09 (dice-law rework: 3 dice/turn, strict color match,
+// per-die token accrual): 'grace' and 'oratory' now pass the curve; 'refrain'
+// (1.00/1.00/0.92) joined 'standstill' (flat 1.00) as an offender. Both are
+// findings for /deck-tuning, not fixes made by this pass.
+const KNOWN_CURVE_VIOLATORS: readonly string[] = ['refrain', 'standstill'];
 
 let cachedCurve: PlaytestReport | null = null;
 function curveReport(): PlaytestReport {

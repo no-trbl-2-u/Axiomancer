@@ -108,6 +108,7 @@ function primaryKeyword(card: CardDraft): { kw: KeywordId; val: number } {
             case 'replay_last':
                 return { kw: 'echo', val: 0 };
             case 'forge_floating_die':
+            case 'float_x_die':
             case 'create_temporary_die':
                 return { kw: 'forge', val: 0 };
             case 'extend_dots':
@@ -476,6 +477,27 @@ export function CardFace({
                         {fmtVal(face.paidKw, face.paidVal) || '—'}
                     </div>
                 </div>
+            </div>
+
+            {/* TYPE STRIP at the very foot (Option A, 2026-07-09) — printed
+                identity, mirrors the mobile face: 'BODY · SPELL', CURSE for
+                disenchant (the engine term never prints). */}
+            <div
+                style={{
+                    borderTop: '1px solid rgba(255,255,255,0.12)',
+                    background: 'rgba(0,0,0,0.55)',
+                    textAlign: 'center',
+                    padding: `${px(2)}px 0`,
+                    fontFamily: WX.sans,
+                    fontSize: px(8),
+                    letterSpacing: 1.5,
+                    color: WX.bone,
+                }}
+            >
+                {card.philosophicalAspect.toUpperCase()}
+                {card.cardType
+                    ? ` · ${card.cardType === 'disenchant' ? 'CURSE' : card.cardType.toUpperCase()}`
+                    : ''}
             </div>
         </div>
     );

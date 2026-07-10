@@ -83,7 +83,9 @@ function Section({
 }
 
 // ── A decimal numeric input (for multipliers) ────────────────────────────────
-function NumField({
+// Currently unreferenced; underscore-named to keep it available without
+// tripping the unused-vars gate.
+function _NumField({
     value,
     onChange,
     placeholder,
@@ -124,7 +126,9 @@ function NumField({
 }
 
 // ── A toggle pill (enable optional blocks) ───────────────────────────────────
-function Toggle({ on, onClick, label }: { on: boolean; onClick: () => void; label: string }) {
+// Currently unreferenced; underscore-named to keep it available without
+// tripping the unused-vars gate.
+function _Toggle({ on, onClick, label }: { on: boolean; onClick: () => void; label: string }) {
     return (
         <button
             onClick={onClick}
@@ -176,6 +180,8 @@ function defaultMechanic(kind: SpecialMechanicKind): CardSpecialMechanic {
         // Spec 32 v3 — the themed-deck verb set
         case 'forge_floating_die':
             return { kind, color: 'powering' };
+        case 'float_x_die':
+            return { kind };
         case 'stagger':
             return { kind, rungs: 1 };
         case 'lock_stance':

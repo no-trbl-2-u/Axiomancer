@@ -581,17 +581,23 @@ progression levers, keeping status effects the win path.
 > yet, and is distinct from
 > [`specs/26-catalyst-multiplicative-scaling.md`](../specs/26-catalyst-multiplicative-scaling.md).
 
-- **Stance draft + the read.** Each turn rolls a small pool of dice
-  (`TURN_DICE_COUNT`); the player **drafts** one as their stance — the unpicked
-  die is not wasted (it grants Conviction and can carry forward). The enemy's
-  phase stance is hidden behind a thematic hint; the drafted die's color is the
-  player's **read** of it. A winning read (`resolveRead` → `advantage`)
-  multiplies the HP damage of cards played that turn (the read bonus scales the
-  direct-damage fraction), and a card whose stance matches the drafted die color
-  earns a flat `COLOR_MATCH_DAMAGE_BONUS` HP damage. Reading the hidden stance is
-  therefore the primary lever for amplifying card output — the doctrine path.
-- **Conviction (◆).** A second resource that accrues from the unpicked draft die
-  (`CONVICTION_PER_UNPICKED_DIE`) and from winning the read
+- **Stance draft + the read (dice-law rework 2026-07-09).** Each turn rolls
+  `TURN_DICE_COUNT` (**3**) dice — an honest roll, no stance-die guarantee; the
+  player **drafts** one as their stance. **THE COLOR LAW:** a die can only power
+  a card of ITS color — WILD (rendered gold) is the sole exception and matches
+  every card; an off-color play hard-fizzles in `playBottomAction`. Every
+  unpicked die converts to Conviction tokens: colored `+CONVICTION_PER_UNPICKED_DIE`
+  (1), wild `+CONVICTION_PER_UNPICKED_WILD` (2), dead X `+0` (a card effect —
+  `float_x_die`, TRANSMUTE — can turn a tray X into a wild FLOATING die instead).
+  The enemy's phase stance is hidden behind a thematic hint; the drafted die's
+  color is the player's **read** of it. A winning read (`resolveRead` →
+  `advantage`) multiplies the HP damage of cards played that turn, and a color
+  match earns a flat `COLOR_MATCH_DAMAGE_BONUS` (now near-unconditional under
+  the color law — a fold-in candidate). Floating dice (spec 32 v3 §5) bypass the
+  one-die draft entirely: all of them may be spent in one round, each is
+  consumed forever, and they never bank tokens.
+- **Conviction (◆).** The generic token pool that accrues per unused rolled die
+  (see the color law above) and from winning the read
   (`CONVICTION_READ_WIN_BONUS`). It funds Signature Skills.
 - **Signature Skills.** A small, **always-available** kit (`SIGNATURE_SKILLS`,
   `SIGNATURE_KITS`, biased per `playerArchetype`) independent of the shuffled
@@ -615,7 +621,7 @@ progression levers, keeping status effects the win path.
 | `SIGNATURE_SKILLS` / `SIGNATURE_SKILL_LIST` / `SIGNATURE_KITS` / `signaturesForArchetype` / `playerArchetype` | The signature kit catalogue + per-archetype selection. |
 | `rollCombatCardRewards` / `addRewardCard` / `COMBAT_REWARD_POOL` | Post-combat deckbuilder draft + persist. |
 | `unlockSkillViaDilemma` / `STARTING_SKILL_ID` / `STARTING_SKILL_IDS` | Forward hook for ethical-dilemma card unlocks; the new-player starting card (`STARTING_SKILL_ID = 'slippery-slope'`). `STARTING_SKILL_IDS` is the preferred array (`['slippery-slope', 'brace-for-impact']`) that also grants the baseline GUARD defense card — use this to seed `knownSkills` for a new character. |
-| `READ_DAMAGE_MULT`, `CONVICTION_PER_UNPICKED_DIE`, `CONVICTION_READ_WIN_BONUS`, `COLOR_MATCH_DAMAGE_BONUS`, `TURN_DICE_COUNT` | Tuning constants for the read / Conviction / draft economy. (`READ_PRESSURE_MULT` / `COLOR_MATCH_PRESSURE_BONUS` were renamed 2026-06-22 on HP-model landing.) |
+| `READ_DAMAGE_MULT`, `CONVICTION_PER_UNPICKED_DIE`, `CONVICTION_PER_UNPICKED_WILD`, `CONVICTION_READ_WIN_BONUS`, `COLOR_MATCH_DAMAGE_BONUS`, `TURN_DICE_COUNT` | Tuning constants for the read / Conviction / draft economy. `TURN_DICE_COUNT` = 3 and wild banks double since the dice-law rework (2026-07-09). (`READ_PRESSURE_MULT` / `COLOR_MATCH_PRESSURE_BONUS` were renamed 2026-06-22 on HP-model landing.) |
 | `rollTurnDice` / `dieHasStance` / `deriveIntentType` | Draft-pool roll + stance helpers. |
 | `AUTHORED_THREAT_ENEMY_IDS` | Read-only array of every enemy slug that has a deterministic authored threat sequence (i.e. keys of `combat.threat-sequences.ts`). Length = 61 at `v0.32.0`. |
 | `getThreatSequence(enemy)` | Returns the threat phase sequence for an enemy: explicit `enemy.threatSequence` wins; otherwise an authored sequence keyed by enemy id; otherwise the generated default. |

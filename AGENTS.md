@@ -53,6 +53,12 @@ Witness: the `grant_permanent_wild_die` variant added to `Cards/types.ts`
 `SpecialMechanicKind` union, leaving `verify-card-editor` red on `main`
 for half a day until 3c9bbaf.
 
+This checklist is also mechanized in CI: the `cross-package` job in
+`.github/workflows/verify-mechanics.yml` diffs the pushed range against
+the impact paths above and runs the mobile verify / editor type-check
+automatically. Run them locally anyway — CI catching it means the break
+already reached `main`.
+
 The
 mechanics-only tuning skills (`combat-playtest`, `deck-tuning`,
 `hazard-tuning`, `gathering-tuning`, `rest-tuning`, `loot-cache-tuning`,
@@ -120,7 +126,9 @@ working in a package.
 
 - `npm run verify --workspace axiomancer-mechanics` — type-check + tests + build
 - `npm run verify --workspace axiomancer-mobile` — lint + typecheck + jest
-- `npm run type-check --workspace axiomancer-card-editor`
+- `npm run verify --workspace axiomancer-card-editor` — type-check (incl. the
+  `mechanics.contract.ts` drift assertions) + lint + build
+  (`type-check` alone remains the fast cross-package gate)
 
 ## Nexus — the autonomous loop (live)
 
@@ -128,7 +136,8 @@ The unified **nexus** harness was re-onboarded onto the monorepo on
 2026-07-03 (`chore: adopt nexus methodology`). It is now live at the repo root:
 
 - `skills/` — the loop verbs: `ship-a-phase`, `plan-a-phase`, `iterate`,
-  `critique`, `triage`, `expand`, `march`, `oversight`, `jot`, `digest`.
+  `critique`, `triage`, `expand`, `march`, `oversight`, `jot`, `digest`,
+  `consolidate`.
   (Heavyweight source-of-truth files; the `.claude/commands/<verb>.md`
   pointers are the doorways.)
 - `plan/` — the loop's durable memory: `bearings.md` (standing context —
@@ -153,13 +162,14 @@ weekly tuning loops, `/fix-ci` on red main, `@claude` mentions, auto PR
 review). See `.github/workflows/README.md` for the full map, cadences,
 and required secrets (`CLAUDE_CODE_OAUTH_TOKEN`, recommended `GH_PAT`).
 
-**Enforcement layer (opt-in).** `.claude/hooks/guard.mjs` (guard hook)
-ships dormant. To activate the mechanical hard-rule enforcement +
-permission allowlist for unattended runs, copy
-`.claude/settings.json.example` → `.claude/settings.json` (and delete
-its `__note` key). This widens the agent's own grants, so it is a
-deliberate, user-owned step needed only at level 3+; adoption did not
-enable it. Self-test the guard any time with
+**Enforcement layer (always on).** `.claude/settings.json` is committed
+and active in every session, attended or not: permission allowlist (so
+unattended `/loop` ticks never stall on a prompt), deny walls for
+force-push / `--no-verify` / destructive resets / `.env` reads, and the
+`.claude/hooks/guard.mjs` hooks that block forbidden commands at the
+harness and warn on unclean turn-ends. Personal overrides go in
+`.claude/settings.local.json` (gitignored), never in the shared file.
+Self-test the guard any time with
 `node .claude/hooks/guard.mjs self-test`.
 
 Distinct from the domain **design** skills in `.claude/skills/`

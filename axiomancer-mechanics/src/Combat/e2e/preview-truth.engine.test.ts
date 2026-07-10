@@ -136,20 +136,18 @@ describe('P0-truth — the card preview is the applied number', () => {
         }
     });
 
-    it('a neutral-read, OFF-color DoT play lands EXACTLY the authored intensity and duration', () => {
-        // slippery-slope is a BODY card; a heart die vs a heart-stance enemy is a
-        // neutral read with NO color match → the printed numbers land untouched.
+    it('an OFF-color die cannot power a card — the play fizzles honestly (the color law)', () => {
+        // Dice-law rework (2026-07-09): slippery-slope is a BODY card; a heart
+        // die may not power it at all. The old "off-color lands untouched
+        // numbers" case no longer exists — the fizzle IS the truth now.
         let s = initializeCombatEncounter(makePlayer(['slippery-slope']), makeEnemy(500, 'heart'), ['slippery-slope'], 7);
         s = rollEncounterDice(s).state;
         s = setDice(s, ['heart']);
         s = draftStanceDie(s, s.dice[0].id).state;
         const entry = s.hand.find(h => h.cardId === 'slippery-slope')!;
-        const after = playCombatCard(s, { uid: entry.uid }, true).state;
-        const authored = cardLibrary.find(c => c.id === 'slippery-slope')!.combatEffects!
-            .find(e => e.appliedTo === 'opponent')!;
-        const landed = after.enemy.effects.find(e => e.effectId === authored.effectId)!;
-        expect(landed.intensity).toBe(authored.intensity ?? 1);
-        expect(landed.remainingDuration).toBe(authored.duration ?? lookupEffect(authored.effectId)!.duration);
+        const res = playCombatCard(s, { uid: entry.uid }, true);
+        expect(res.events.some(e => e.kind === 'effect-fizzled')).toBe(true);
+        expect(res.state.enemy.effects.length).toBe(0);
     });
 
     it('a color-MATCHED status play lands +1 duration (Fate Engine R7 — printed on the card)', () => {

@@ -178,14 +178,14 @@ describe('Spec 25 §6 — card classification', () => {
 // ── Initialization + the 2-die draft (§1) ────────────────────────────────────
 
 describe('Spec 26b §1 — initialization + draft', () => {
-    it('opens in reveal, draws 5, then rolls a 2-die turn pool', () => {
+    it('opens in reveal, draws 5, then rolls a 3-die turn pool (dice-law 2026-07-09)', () => {
         mockSequentialRng(0.5);
         let state = initializeCombatEncounter(makePlayer([DOT_BODY, CONTROL_CARD, DAMAGE_BODY]), makeEnemy(30), undefined, 42);
         expect(state.phase).toBe('reveal');
         expect(state.hand.length).toBe(COMBAT_HAND_SIZE);
         state = rollEncounterDice(state).state;
         expect(state.phase).toBe('phase-play');
-        expect(state.dice.length).toBe(2);
+        expect(state.dice.length).toBe(3);
         expect(state.draftedDieId).toBeNull();
     });
 
@@ -208,11 +208,23 @@ describe('Spec 26b §1 — initialization + draft', () => {
         mockSequentialRng(0.5);
         let state = initializeCombatEncounter(makePlayer([DOT_BODY]), makeEnemy(40, 'mind'), [DOT_BODY], 1);
         state = rollEncounterDice(state).state;
-        state = setDice(state, ['heart', 'wild']); // heart loses to mind → disadvantage
+        // heart loses to mind → disadvantage. (Unpicked BODY, not wild: a wild
+        // left unused banks 2 tokens under the dice-law rework.)
+        state = setDice(state, ['heart', 'body']);
         const before = state.conviction;
         state = draftStanceDie(state, state.dice[0].id).state;
         expect(state.conviction).toBe(before + 1);
         expect(state.lastRead).toBe('disadvantage');
+    });
+
+    it('an unused WILD (gold) die banks 2 tokens, a dead X banks none (dice-law 2026-07-09)', () => {
+        mockSequentialRng(0.5);
+        let state = initializeCombatEncounter(makePlayer([DOT_BODY]), makeEnemy(40, 'mind'), [DOT_BODY], 1);
+        state = rollEncounterDice(state).state;
+        state = setDice(state, ['heart', 'wild', 'x']); // draft heart → wild +2, x +0
+        const before = state.conviction;
+        state = draftStanceDie(state, state.dice[0].id).state;
+        expect(state.conviction).toBe(before + 2);
     });
 
     it('getThreatSequence gives every enemy a telegraphed attack each phase (HP model)', () => {
@@ -281,17 +293,17 @@ describe('Spec 26b §1 — status-combo loop', () => {
         expect(getDraftedDie(r.state)?.state).toBe('available');
     });
 
-    it('an advantaged color-matched land beats a disadvantaged off-color one in REAL status units', () => {
+    it('an advantaged land beats a disadvantaged one in REAL status units (both color-legal)', () => {
         mockSequentialRng(0.05);
-        const base = () => {
-            const s = initializeCombatEncounter(makePlayer([DOT_BODY]), makeEnemy(120, 'mind'), [DOT_BODY], 21);
+        // The color law (2026-07-09) outlaws off-color plays entirely, so both
+        // plays match the body card and the READ carries the whole difference:
+        // advantage (+1 intensity) vs disadvantage (-1 duration, floor 1).
+        const base = (enemyStance: 'heart' | 'body' | 'mind') => {
+            const s = initializeCombatEncounter(makePlayer([DOT_BODY]), makeEnemy(120, enemyStance), [DOT_BODY], 21);
             return rollEncounterDice(s).state;
         };
-        // THE STRIKE IS DEAD: the read bites the landed STATUS instead —
-        // advantage = +1 intensity; disadvantage = -1 duration (floor 1);
-        // a color match adds +1 duration (R7).
-        const adv = draftAndPlay(setDice(base(), ['body', 'heart']), DOT_BODY); // match + advantage
-        const dis = draftAndPlay(setDice(base(), ['mind', 'wild']), DOT_BODY);  // off-color + disadvantage
+        const adv = draftAndPlay(setDice(base('mind'), ['body', 'heart']), DOT_BODY);  // body beats mind
+        const dis = draftAndPlay(setDice(base('heart'), ['body', 'mind']), DOT_BODY);  // heart beats body
         const advPoison = adv.state.enemy.effects.find(e => e.effectId === 'debuff_poison')!;
         const disPoison = dis.state.enemy.effects.find(e => e.effectId === 'debuff_poison')!;
         expect(advPoison.intensity).toBeGreaterThan(disPoison.intensity);
@@ -299,6 +311,16 @@ describe('Spec 26b §1 — status-combo loop', () => {
         // And nobody struck: no direct HP moved on either play.
         expect(adv.state.directDamageDealt).toBe(0);
         expect(dis.state.directDamageDealt).toBe(0);
+    });
+
+    it('an OFF-COLOR die cannot power a card at all — the play fizzles (the color law)', () => {
+        mockSequentialRng(0.05);
+        let s = initializeCombatEncounter(makePlayer([DOT_BODY]), makeEnemy(120, 'mind'), [DOT_BODY], 21);
+        s = rollEncounterDice(s).state;
+        s = setDice(s, ['mind', 'heart']);
+        const r = draftAndPlay(s, DOT_BODY); // mind die on a body card
+        expect(r.events!.some(e => e.kind === 'effect-fizzled')).toBe(true);
+        expect(r.state.enemy.effects.some(e => e.effectId === 'debuff_poison')).toBe(false);
     });
 });
 
@@ -452,7 +474,9 @@ describe('Spec 26b §4 — Signature Skills (Conviction-funded)', () => {
 
     it('Press Fate re-rolls a dead X die', () => {
         mockSequentialRng(0.1); // re-rolled face → floor(0.1*6)=0 → heart
-        let state = initializeCombatEncounter(makePlayer([DOT_BODY]), makeEnemy(60, 'mind'), [DOT_BODY], 2);
+        // No seed: a seed installs its own rng stream (whose position shifted
+        // with the 3-die roll), so the mock must govern the re-rolled face.
+        let state = initializeCombatEncounter(makePlayer([DOT_BODY]), makeEnemy(60, 'mind'), [DOT_BODY]);
         state = rollEncounterDice(state).state;
         state = { ...state, conviction: 6, dice: [
             { id: 't1-d0', color: 'heart', state: 'available', temporary: false },
@@ -498,9 +522,11 @@ describe('Spec 26b tuning — variety-gated combo + projection + carry', () => {
 
         // Variety: a DoT then a DISTINCT control status — the new status refreshes
         // the die for a genuine combo chain (the Mage-Knight "big turn").
+        // WILD draft: the color law would bar one die from powering both the
+        // body DoT and the mind control card; wild is the printed exception.
         let varied = initializeCombatEncounter(makePlayer([DOT_BODY, CONTROL_CARD]), makeEnemy(160, 'mind'), [DOT_BODY, CONTROL_CARD], 7);
         varied = rollEncounterDice(varied).state;
-        varied = setDice(varied, ['body', 'heart']);
+        varied = setDice(varied, ['wild', 'heart']);
         const dot = draftAndPlay(varied, DOT_BODY);
         expect(dot.events!.some(e => e.kind === 'die-refreshed')).toBe(true);
         const ctrlEntry = dot.state.hand.find(h => h.cardId === CONTROL_CARD)!;
