@@ -117,6 +117,23 @@ skill in `.claude/skills/kb-query/`):
   when present; CI runs don't sync `kb/`, so cloud ticks stay on the
   sync-then-grep path.
 
+## Live engine data (`axio-query`)
+
+The engine's OWN generated truth (card/effect/keyword facts) is queryable
+the same way the external KB corpus is, via the sibling `axio-query` stdio
+server (`scripts/axio-mcp-server.mjs`, registered in `.mcp.json`): `axio_cards`
+/ `axio_effects` / `axio_keywords` / `axio_overview`. It reads
+`devlog/data/{cards,enemies,effects}.json` (regenerating via
+`npm run catalog:export` when stale) and
+`axiomancer-mechanics/docs/keyword-atlas.md` — always exactly as current as
+the working tree, never hand-written prose. Same accelerator-never-dependency
+posture as `kb-query`: Grep/Read the libraries directly (`src/Cards/cards.library.ts`,
+`src/Effects/effects.library.ts`) when the tools are absent. `axio-query` vs
+`kb-query`: ours is the repo's own card/effect/keyword facts (never stale,
+never a dependency); `kb-query` is the genre's external prior art (community
+sourced, cite with `src-NNN` receipts). The `card-expert` and
+`mechanics-expert` sub-agents carry both tool sets.
+
 ## Per-package guides
 
 Each package keeps its own `AGENTS.md` / `CLAUDE.md` with domain specifics

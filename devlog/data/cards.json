@@ -3,6 +3,7 @@
   "id": "achilles-and-the-tortoise",
   "name": "Achilles and the Tortoise",
   "image": "./assets/catalog/cards/freeze.webp",
+  "pricing": "persistent draw 1 per denied enemy turn ≈ 2 × ~5 denies gated, min-4 ≈ 12 → Axiom",
   "chips": [
    {
     "k": "Stance",
@@ -54,6 +55,7 @@
   "id": "ad-nauseam",
   "name": "Ad Nauseam",
   "image": "./assets/catalog/cards/confuse.webp",
+  "pricing": "next spell gains ECHO (≈ ×0.8 of an avg spell ≈ 5) + FREE mark (0.5) + dieBonus(draw ×0.6 = 1.2) ≈ 6.7 → Thesis",
   "chips": [
    {
     "k": "Stance",
@@ -106,6 +108,7 @@
   "id": "against-my-judgment",
   "name": "Against My Judgment",
   "image": "./assets/catalog/cards/devil-book.webp",
+  "pricing": "draw 2 (4) − self-mark d2 credit (−0.75×1.5 ≈ −1.1) + FREE conviction 0.35 ≈ 3.3 → Doxa",
   "chips": [
    {
     "k": "Stance",
@@ -158,6 +161,7 @@
   "id": "anvil-of-form",
   "name": "Anvil of Form",
   "image": "./assets/catalog/cards/guard-1.webp",
+  "pricing": "persistent +1 pip on every kindled/floating die ≈ 1.5 × ~6 forges, min-4 ≈ 12 → Axiom",
   "chips": [
    {
     "k": "Stance",
@@ -209,6 +213,7 @@
   "id": "arrow-paradox",
   "name": "Arrow Paradox",
   "image": "./assets/catalog/cards/freeze.webp",
+  "pricing": null,
   "chips": [
    {
     "k": "Stance",
@@ -262,6 +267,7 @@
   "id": "bone-orchard",
   "name": "Bone Orchard",
   "image": "./assets/catalog/cards/yggdrasil.webp",
+  "pricing": "persistent 1 HP per Soul gained (soul-gated drip) ≈ 1 × ~12 souls, min-4 ≈ 12 → Axiom",
   "chips": [
    {
     "k": "Stance",
@@ -313,6 +319,7 @@
   "id": "bootstrap-loop",
   "name": "Bootstrap Loop",
   "image": "./assets/catalog/cards/spark.webp",
+  "pricing": "TRANSMUTE dead X → WILD floating ((5+3+1)×0.7 + 1×0.3 = 6.6) + FREE",
   "chips": [
    {
     "k": "Stance",
@@ -365,6 +372,7 @@
   "id": "brace-for-impact",
   "name": "Brace for Impact",
   "image": "./assets/catalog/cards/guard-2.webp",
+  "pricing": "Guard 8 (2) + FREE guard 2 (0.5) + pip line (+2/pip, situational ≈ 0.8) ≈ 3.3 → Doxa (starter)",
   "chips": [
    {
     "k": "Stance",
@@ -416,6 +424,7 @@
   "id": "brief-candle",
   "name": "Brief Candle",
   "image": "./assets/catalog/cards/burn.webp",
+  "pricing": "bleed i2 d1 (~2) + fast expiry→Soul (0.75) + FREE souls 1 (0.75) ≈ 3.5 →",
   "chips": [
    {
     "k": "Stance",
@@ -467,6 +476,7 @@
   "id": "captive-audience",
   "name": "Captive Audience",
   "image": "./assets/catalog/cards/will-o-wisp.webp",
+  "pricing": "engine text — while you hold 4+ Premises the enemy stays marked (Aporia)",
   "chips": [
    {
     "k": "Stance",
@@ -518,6 +528,7 @@
   "id": "cassandras-burden",
   "name": "Cassandra's Burden",
   "image": "./assets/catalog/cards/god-eye-silver.webp",
+  "pricing": "immediate Foretold Wound i2 d2 (~3.2) + OMEN(Guard 4, ×0.6 = 0.6) +",
   "chips": [
    {
     "k": "Stance",
@@ -570,6 +581,7 @@
   "id": "circular-reasoning",
   "name": "Circular Reasoning",
   "image": "./assets/catalog/cards/light-ring.webp",
+  "pricing": "REPRISE 1 + its FREE line fires now (2 + ~1.5) + FREE draw (0.7) + selection ≈ 9 → Theorem",
   "chips": [
    {
     "k": "Stance",
@@ -621,6 +633,7 @@
   "id": "common-ground",
   "name": "Common Ground",
   "image": "./assets/catalog/cards/bright-sphere-yellow.webp",
+  "pricing": "SWAY 2 (1.6) + rapport i1 d2 (1.5) + FREE draw (0.7) + threshold(SWAY 2 ×0.5 = 0.8) + tempo ≈ 7 → Thesis",
   "chips": [
    {
     "k": "Stance",
@@ -674,6 +687,7 @@
   "id": "crown-of-thorns",
   "name": "Crown of Thorns",
   "image": "./assets/catalog/cards/yggdrasil.webp",
+  "pricing": "persistent +1 intensity on applications while FALLEN ≈ 1.5 × ~7 gated ×0.5 ≈ 11 → Axiom",
   "chips": [
    {
     "k": "Stance",
@@ -725,6 +739,7 @@
   "id": "crumbling-resolve",
   "name": "Crumbling Resolve",
   "image": "./assets/catalog/cards/guard-2.webp",
+  "pricing": "engine text (Aporia). RETAINS the old clause (a fully-blocked attack",
   "chips": [
    {
     "k": "Stance",
@@ -776,6 +791,7 @@
   "id": "currys-conversion",
   "name": "Curry's Conversion",
   "image": "./assets/catalog/cards/bleed.webp",
+  "pricing": "convert bleed↔poison +1 int ≈ 1.5/instance × ~2 + tempo value ≈ 6.5 + draw 2 ≈ 8.5 → Theorem",
   "chips": [
    {
     "k": "Stance",
@@ -827,6 +843,7 @@
   "id": "delphic-ambiguity",
   "name": "Delphic Ambiguity",
   "image": "./assets/catalog/cards/confuse.webp",
+  "pricing": "consume_affliction (Foretold Wound fuel, ~4-5) + 1 Soul (0.75) +",
   "chips": [
    {
     "k": "Stance",
@@ -880,6 +897,7 @@
   "id": "disarming-smile",
   "name": "Disarming Smile",
   "image": "./assets/catalog/cards/light-ring.webp",
+  "pricing": "rapport i2 d2 (3) + heal 2 (0.65) + FREE sway 1 (0.3) ≈ 4.5 → Lemma",
   "chips": [
    {
     "k": "Stance",
@@ -932,6 +950,7 @@
   "id": "entropy-tax",
   "name": "Entropy Tax",
   "image": "./assets/catalog/cards/devil-book.webp",
+  "pricing": "engine text — every kindled/floating spend marks the enemy (Aporia)",
   "chips": [
    {
     "k": "Stance",
@@ -983,6 +1002,7 @@
   "id": "ex-nihilo",
   "name": "Ex Nihilo",
   "image": "./assets/catalog/cards/bright-sphere-yellow.webp",
+  "pricing": "FORGE floating WILD (5) + BANK own powering die + threshold(mind×3,",
   "chips": [
    {
     "k": "Stance",
@@ -1036,6 +1056,7 @@
   "id": "exordium",
   "name": "Exordium",
   "image": "./assets/catalog/cards/light-ring.webp",
+  "pricing": "argument-wound i1 d2 (1.33) + 1 Premise (0.8) + draw rider (2) + FREE premise (0.8) = 4.93 → Doxa",
   "chips": [
    {
     "k": "Stance",
@@ -1089,6 +1110,7 @@
   "id": "fallen-grace",
   "name": "Fallen Grace",
   "image": "./assets/catalog/cards/light-ring.webp",
+  "pricing": "bleed i2 d3 (~5) + draw 0.7 + FALLEN(heal 4 ≈ 1.3 ×0.5 = 0.7) + tempo ≈ 9 → Theorem",
   "chips": [
    {
     "k": "Stance",
@@ -1141,6 +1163,7 @@
   "id": "fated-course",
   "name": "Fated Course",
   "image": "./assets/catalog/cards/freeze.webp",
+  "pricing": "engine text — every hit omen marks the foe, rest of combat (Aporia)",
   "chips": [
    {
     "k": "Stance",
@@ -1192,6 +1215,7 @@
   "id": "festering-argument",
   "name": "Festering Argument",
   "image": "./assets/catalog/cards/dream-flutter.webp",
+  "pricing": "+1 duration to ALL DoTs ≈ 1/dot × expected 2-3 live dots ≈ 5.5 + tick 0.6 ≈ 6.1 → Thesis",
   "chips": [
    {
     "k": "Stance",
@@ -1243,6 +1267,7 @@
   "id": "glimpse",
   "name": "Glimpse",
   "image": "./assets/catalog/cards/god-eye-silver.webp",
+  "pricing": "FORETELL 2 (2) + Foretold Wound d2 (now real DoT, ~2.0) + FREE",
   "chips": [
    {
     "k": "Stance",
@@ -1295,6 +1320,7 @@
   "id": "half-step",
   "name": "Half-Step",
   "image": "./assets/catalog/cards/blue-light.webp",
+  "pricing": "Guard 5 (1.25) + 2 pips (3.0) + FREE guard 2 (0.5) = 4.75 -- verified",
   "chips": [
    {
     "k": "Stance",
@@ -1347,6 +1373,7 @@
   "id": "heart-of-the-matter",
   "name": "Heart of the Matter",
   "image": "./assets/catalog/cards/bright-sphere-yellow.webp",
+  "pricing": "SWAY 6 x ECHO (engine echoFactor) + heal-4 rider (NOT echoed) + FREE",
   "chips": [
    {
     "k": "Stance",
@@ -1401,6 +1428,7 @@
   "id": "hedgehogs-dilemma",
   "name": "Hedgehog's Dilemma",
   "image": "./assets/catalog/cards/guard-3.webp",
+  "pricing": "persistent — every THORNS trigger also marks the enemy ≈ 1 × ~8 triggers, min-4 ≈ 12 → Axiom",
   "chips": [
    {
     "k": "Stance",
@@ -1452,6 +1480,7 @@
   "id": "irresistible-grace",
   "name": "Irresistible Grace",
   "image": "./assets/catalog/cards/light-ring.webp",
+  "pricing": "persistent — SWAY no longer decays (≈ +1/turn saved) AND stacks",
   "chips": [
    {
     "k": "Stance",
@@ -1503,6 +1532,7 @@
   "id": "measured-answer",
   "name": "Measured Answer",
   "image": "./assets/catalog/cards/guard-3.webp",
+  "pricing": "Guard 6 (1.5) + RIPOSTE 3/parry 2 (~4) + FREE guard 3 (0.75) + full-block gate + tempo ≈ 9 → Theorem",
   "chips": [
    {
     "k": "Stance",
@@ -1555,6 +1585,7 @@
   "id": "memento-mori",
   "name": "Memento Mori",
   "image": "./assets/catalog/cards/meat-pecker.webp",
+  "pricing": "mark i2 d1 (2, unresisted) + its expiry Soul (0.75) + FREE souls 2",
   "chips": [
    {
     "k": "Stance",
@@ -1606,6 +1637,7 @@
   "id": "mirror-of-guilt",
   "name": "Mirror of Guilt",
   "image": "./assets/catalog/cards/god-eye-silver.webp",
+  "pricing": "engine text — every self-debuff you gain lands 1 stack on the enemy (Aporia)",
   "chips": [
    {
     "k": "Stance",
@@ -1657,6 +1689,7 @@
   "id": "mirror-of-longing",
   "name": "Mirror of Longing",
   "image": "./assets/catalog/cards/god-eye-silver.webp",
+  "pricing": "engine text — damage your defenses prevent becomes SWAY (Aporia)",
   "chips": [
    {
     "k": "Stance",
@@ -1708,6 +1741,7 @@
   "id": "mounting-case",
   "name": "Mounting Case",
   "image": "./assets/catalog/cards/bright-sphere-yellow.webp",
+  "pricing": "mark d3 (2.25) + argument-wound i2 d4 (6.67) + 2 Premises (1.6) + FREE premise (0.8)",
   "chips": [
    {
     "k": "Stance",
@@ -1762,6 +1796,7 @@
   "id": "nettle-cloak",
   "name": "Nettle Cloak",
   "image": "./assets/catalog/cards/yggdrasil.webp",
+  "pricing": "thorns i2 d2 (~3, reactive, unchanged) + NEW non-reactive Nettle",
   "chips": [
    {
     "k": "Stance",
@@ -1814,6 +1849,7 @@
   "id": "opening-statement",
   "name": "Opening Statement",
   "image": "./assets/catalog/cards/light-ring.webp",
+  "pricing": "mark d2 (1.5) + argument-wound i1 d3 (2.33) + 2 Premises (1.6) + FREE premise (0.8) = 6.23 → Lemma",
   "chips": [
    {
     "k": "Stance",
@@ -1867,6 +1903,7 @@
   "id": "ouroboros",
   "name": "Ouroboros",
   "image": "./assets/catalog/cards/blue-light.webp",
+  "pricing": "replay last spell PAID x2 (~10) + FREE draw (0.7) + PAID",
   "chips": [
    {
     "k": "Stance",
@@ -1919,6 +1956,7 @@
   "id": "pact-of-akrasia",
   "name": "Pact of Akrasia",
   "image": "./assets/catalog/cards/devil-book.webp",
+  "pricing": "FORGE wild floating (6) + persistence − recoil 6 (−1.5) − self-bleed credit (−1.3) + wild premium ≈ 12.6 → Axiom",
   "chips": [
    {
     "k": "Stance",
@@ -1972,6 +2010,7 @@
   "id": "paralysis-of-analysis",
   "name": "Paralysis of Analysis",
   "image": "./assets/catalog/cards/confuse.webp",
+  "pricing": null,
   "chips": [
    {
     "k": "Stance",
@@ -2025,6 +2064,7 @@
   "id": "peroratio-interrupta",
   "name": "Peroratio Interrupta",
   "image": "./assets/catalog/cards/light-ring.webp",
+  "pricing": "RUPTURE (verb 4 + expected fuel) -> ~12 Theorem. FREE tickOne is the",
   "chips": [
    {
     "k": "Stance",
@@ -2076,6 +2116,7 @@
   "id": "practiced-cadence",
   "name": "Practiced Cadence",
   "image": "./assets/catalog/cards/light-ring.webp",
+  "pricing": "persistent +1 Premise on the first card each turn ≈ 0.8 × ~10 turns, min-4 law ≈ 12 → Axiom",
   "chips": [
    {
     "k": "Stance",
@@ -2127,6 +2168,7 @@
   "id": "prophecy-fulfilled",
   "name": "Prophecy Fulfilled",
   "image": "./assets/catalog/cards/god-eye-silver.webp",
+  "pricing": "RUPTURE (4 + fuel) + 3 fuel per omen hit ≈ 13 with a played oracle engine → Axiom",
   "chips": [
    {
     "k": "Stance",
@@ -2178,6 +2220,7 @@
   "id": "quagmire-of-doubt",
   "name": "Quagmire of Doubt",
   "image": "./assets/catalog/cards/confuse.webp",
+  "pricing": "engine text — telegraphs enter play 1 rung lower, rest of combat (Aporia)",
   "chips": [
    {
     "k": "Stance",
@@ -2229,6 +2272,7 @@
   "id": "red-herring",
   "name": "Red Herring",
   "image": "./assets/catalog/cards/will-o-wisp.webp",
+  "pricing": "backfire i2 d2 (3) + FREE draw (0.7) + dieBonus(+1 dur ×0.6 = 0.6) ≈ 4.3 → Lemma",
   "chips": [
    {
     "k": "Stance",
@@ -2281,6 +2325,7 @@
   "id": "refrain",
   "name": "Refrain",
   "image": "./assets/catalog/cards/will-o-wisp.webp",
+  "pricing": "[mark d2 (1.5) + echo_sting d2 (1.5)] × ECHO(x2 applications) ≈ 6 +",
   "chips": [
    {
     "k": "Stance",
@@ -2334,6 +2379,7 @@
   "id": "resonance-detonation",
   "name": "Resonance Detonation",
   "image": "./assets/catalog/cards/spark.webp",
+  "pricing": null,
   "chips": [
    {
     "k": "Stance",
@@ -2387,6 +2433,7 @@
   "id": "resonant-chamber",
   "name": "Resonant Chamber",
   "image": "./assets/catalog/cards/spark.webp",
+  "pricing": "persistent — the first spell each turn gains ECHO ≈ ×0.8 spell/turn × rest, min-4 ≈ 12 → Axiom",
   "chips": [
    {
     "k": "Stance",
@@ -2438,6 +2485,7 @@
   "id": "second-thoughts",
   "name": "Second Thoughts",
   "image": "./assets/catalog/cards/blue-light.webp",
+  "pricing": "REPRISE 1 (2) + FREE draw (0.7) + PAID ruptureMarks:1 (~1.5) +",
   "chips": [
    {
     "k": "Stance",
@@ -2490,6 +2538,7 @@
   "id": "self-flagellant",
   "name": "Self-Flagellant",
   "image": "./assets/catalog/cards/burn.webp",
+  "pricing": "RUPTURE (4 + fuel 8, bonusPct 0.10 ≈ +0.004) − recoil 5 credit",
   "chips": [
    {
     "k": "Stance",
@@ -2542,6 +2591,7 @@
   "id": "signs-and-portents",
   "name": "Signs and Portents",
   "image": "./assets/catalog/cards/will-o-wisp.webp",
+  "pricing": "OMEN(draw 2 = 4 ×0.6 omen-odds = 2.4) + FREE foretell (0.35) + info value ≈ 4.4 → Lemma",
   "chips": [
    {
     "k": "Stance",
@@ -2593,6 +2643,7 @@
   "id": "sketch-of-a-thought",
   "name": "Sketch of a Thought",
   "image": "./assets/catalog/cards/blue-light.webp",
+  "pricing": "KINDLE mind (2.5) + FREE draw 1 (2) + ember i1 d3 lifetime 3/3=1 +",
   "chips": [
    {
     "k": "Stance",
@@ -2646,6 +2697,7 @@
   "id": "slippery-slope",
   "name": "Slippery Slope",
   "image": "./assets/catalog/cards/dream-flutter.webp",
+  "pricing": "poison i1 d4 ramp lifetime 10/3 ≈ 3.3 + FREE tick 0.6 = 3.9 → Doxa (starter)",
   "chips": [
    {
     "k": "Stance",
@@ -2697,6 +2749,7 @@
   "id": "soft-word",
   "name": "Soft Word",
   "image": "./assets/catalog/cards/meat-pecker.webp",
+  "pricing": "SWAY 3 (2.4) + FREE heal 2 (0.65) + dieBonus(SWAY 1 ×0.6 = 0.5) ≈ 3.6 → Doxa",
   "chips": [
    {
     "k": "Stance",
@@ -2749,6 +2802,7 @@
   "id": "straw-mans-jab",
   "name": "Straw Man's Jab",
   "image": "./assets/catalog/cards/bleed.webp",
+  "pricing": "bleed i2 d2 lifetime ~10/3 ≈ 3.3 + tick 0.6 + dieBonus(+1 int ~1.5 ×0.6 = 0.9) ≈ 4.8 → Lemma",
   "chips": [
    {
     "k": "Stance",
@@ -2801,6 +2855,7 @@
   "id": "stuck-in-their-head",
   "name": "Stuck in Their Head",
   "image": "./assets/catalog/cards/will-o-wisp.webp",
+  "pricing": "engine text — every ECHO / REPRISE drips 2 (echo-gated, §1 source 3) (Aporia)",
   "chips": [
    {
     "k": "Stance",
@@ -2852,6 +2907,7 @@
   "id": "suppurating-curse",
   "name": "Suppurating Curse",
   "image": "./assets/catalog/cards/devil-book.webp",
+  "pricing": "engine text — DOUBLES the enemy's total DoT damage each round (a",
   "chips": [
    {
     "k": "Stance",
@@ -2903,6 +2959,7 @@
   "id": "sweet-poison",
   "name": "Sweet Poison",
   "image": "./assets/catalog/cards/dream-flutter.webp",
+  "pricing": "poison i2 d4 (~6.7) − self-bleed i1 d2 credit (−0.75×1.7 ≈ −1.3) + tick 0.6 ≈ 6.0 → Lemma (deliberately rich — the akratic bargain)",
   "chips": [
    {
     "k": "Stance",
@@ -2955,6 +3012,7 @@
   "id": "the-adamant-wall",
   "name": "The Adamant Wall",
   "image": "./assets/catalog/cards/guard-1.webp",
+  "pricing": "BARRIER 10 (3.3) + RIPOSTE 4/parry 2 (~5) + FREE guard 3 (0.75) + persistence ≈ 13 → Axiom",
   "chips": [
    {
     "k": "Stance",
@@ -3007,6 +3065,7 @@
   "id": "the-closing-word",
   "name": "The Closing Word",
   "image": "./assets/catalog/cards/bright-sphere-yellow.webp",
+  "pricing": "PERORATION at 6 → consume marks 3/stack + draw 2 + 2 Conviction ≈ 13 (CONCEDE at 8 — alt-win, §9) → Axiom",
   "chips": [
    {
     "k": "Stance",
@@ -3058,6 +3117,7 @@
   "id": "the-gleaners-due",
   "name": "The Gleaner's Due",
   "image": "./assets/catalog/cards/meat-pecker.webp",
+  "pricing": "REAP 2 → KINDLE (2.5) + draw 2 (4) − soul cost 2 + rider soul 1 + FREE",
   "chips": [
    {
     "k": "Stance",
@@ -3109,6 +3169,7 @@
   "id": "the-olive-branch",
   "name": "The Olive Branch",
   "image": "./assets/catalog/cards/yggdrasil.webp",
+  "pricing": "SWAY 3 (2.4) + cleanse (1.5) + heal 3 (1) + FREE guard (0.5) + tempo ≈ 9 → Theorem",
   "chips": [
    {
     "k": "Stance",
@@ -3161,6 +3222,7 @@
   "id": "the-oracles-eye",
   "name": "The Oracle's Eye",
   "image": "./assets/catalog/cards/god-eye-silver.webp",
+  "pricing": "persistent always-revealed next stance + omen riders ×1.5 ≈ 12 (min-4 law) → Axiom",
   "chips": [
    {
     "k": "Stance",
@@ -3212,6 +3274,7 @@
   "id": "the-overtake",
   "name": "The Overtake",
   "image": "./assets/catalog/cards/ice-sword.webp",
+  "pricing": "spend ALL pips (+1 Guard per) + RUPTURE (3.5 fuel/pip, +50% burst) —",
   "chips": [
    {
     "k": "Stance",
@@ -3265,6 +3328,7 @@
   "id": "the-reaping",
   "name": "The Reaping",
   "image": "./assets/catalog/cards/ice-sword.webp",
+  "pricing": "REAP ALL — 4 per Soul (burstPerSoul 2→4; caps at 80 dmg off a ~20-Soul",
   "chips": [
    {
     "k": "Stance",
@@ -3317,6 +3381,7 @@
   "id": "the-tithe",
   "name": "The Tithe",
   "image": "./assets/catalog/cards/devil-book.webp",
+  "pricing": "engine text — enemy afflictions expire 1 turn sooner (faster Soul churn) (Aporia)",
   "chips": [
    {
     "k": "Stance",
@@ -3368,6 +3433,7 @@
   "id": "tu-quoque",
   "name": "Tu Quoque",
   "image": "./assets/catalog/cards/yggdrasil.webp",
+  "pricing": "thorns i3 d2 (~4.5) + FREE guard 2 (0.5) + dieBonus(guard 2 ×0.6 = 0.3) + tempo ≈ 6.5 → Thesis",
   "chips": [
    {
     "k": "Stance",
@@ -3420,6 +3486,7 @@
   "id": "undistributed-middle",
   "name": "Undistributed Middle",
   "image": "./assets/catalog/cards/confuse.webp",
+  "pricing": null,
   "chips": [
    {
     "k": "Stance",
@@ -3473,6 +3540,7 @@
   "id": "venom-and-vein",
   "name": "Venom and Vein",
   "image": "./assets/catalog/cards/dream-flutter.webp",
+  "pricing": "persistent +1 intensity on every bleed/poison application ≈ 1.5 × ~8 triggers × min-4 law ≈ 12 → Axiom",
   "chips": [
    {
     "k": "Stance",
@@ -3524,6 +3592,7 @@
   "id": "winnowing",
   "name": "Winnowing",
   "image": "./assets/catalog/cards/ice-sword.webp",
+  "pricing": "consume 1 affliction → fuel ticks NOW (~4-5) + 2 Souls (1.5) + FREE",
   "chips": [
    {
     "k": "Stance",
@@ -3575,6 +3644,7 @@
   "id": "zenos-half-step",
   "name": "Zeno's Half-Step",
   "image": "./assets/catalog/cards/confuse.webp",
+  "pricing": "STAGGER 1 (~half a phase-deny, 2) + FREE guard 2 (0.5) + tempo ≈ 3.5 → Doxa",
   "chips": [
    {
     "k": "Stance",
