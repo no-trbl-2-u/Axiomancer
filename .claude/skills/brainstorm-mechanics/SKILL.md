@@ -97,7 +97,11 @@ Stop asking when the user signals enough; don't grind.
 
 ## Phase 3 — Prior art
 
-**Consult the knowledge base first.** Run `node scripts/kb-sync.mjs`
+**Consult the knowledge base first.** Fast path: when the
+`mcp__kb-query__*` tools are available, use `kb_find_games` (filter by
+mechanics slug / better-if label) and `kb_search` / `kb_read_doc` —
+they read the same corpus and produce the same citations. Otherwise:
+run `node scripts/kb-sync.mjs`
 (clones/refreshes the OKF corpus into `kb/`, gitignored), then grep
 `kb/KnowledgeBase/BoardGames/` for the mechanic or problem shape under
 discussion. KB documents carry source-backed claims with per-claim

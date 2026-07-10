@@ -111,7 +111,10 @@ skill in `.claude/skills/kb-query/`):
   `kb_overview` / `kb_find_games` / `kb_search` / `kb_read_doc` /
   `kb_cards` / `kb_keyword`. It is an accelerator, never a dependency —
   if `kb/` is unsynced its tools answer with the recovery command and
-  the grep path still works.
+  the grep path still works. The `mechanics-expert` and `card-expert`
+  sub-agents carry these tools in their frontmatter and prefer them
+  when present; CI runs don't sync `kb/`, so cloud ticks stay on the
+  sync-then-grep path.
 
 ## Per-package guides
 
