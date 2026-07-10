@@ -1,7 +1,7 @@
 # Critique log
 
-> Last pass: 2026-07-09 at commit 2e0a2324
-> Pass count: 10
+> Last pass: 2026-07-10 at commit 2648961f
+> Pass count: 11
 
 > External-observer feedback for Axiomancer. Populated by
 > `/critique` (which drives the local expo-web build with the
@@ -40,11 +40,31 @@
 - suggested fix: [user has not specified — iterate to determine]
 - source: user
 
-### [needs-user-call] Playwright MCP tools unavailable to sub-agents — recurred again (pass 10)
-- pass: 10 (commit 2e0a2324); prior: pass 9 (commit 31817335),
-  pass 8 (commit 43088f6f), pass 7 (commit aff7fece), pass 6
-  (commit e50e819a), pass 5 (commit b0707e0a), pass 1-4 (marked
-  fixed, see Done section)
+### [needs-user-call] Playwright MCP tools unavailable to sub-agents — recurred again (pass 11)
+- pass: 11 (commit 2648961f); prior: pass 10 (commit 2e0a2324),
+  pass 9 (commit 31817335), pass 8 (commit 43088f6f), pass 7
+  (commit aff7fece), pass 6 (commit e50e819a), pass 5 (commit
+  b0707e0a), pass 1-4 (marked fixed, see Done section)
+- pass 11 update: eighth occurrence, seventh consecutive.
+  Identical failure mode: local expo-web build started fresh
+  (`npx expo start --web --port 8081` from `axiomancer-mobile/`),
+  confirmed reachable (`curl -> 200`) before spawning
+  `playtester`; its first tool call (`browser_navigate`) was
+  rejected with "you haven't granted it yet." Zero screens
+  covered, zero product findings. One new data point:
+  `.claude/settings.json` is now tracked in git (committed at
+  `d958da04`, "Added new kb-query MCP server") rather than
+  untracked as in passes 5-10 — but the working tree still
+  carries an uncommitted diff on top of that commit (a dedup
+  cleanup of duplicate `mcp__playwright__*`/`mcp__kb-query__*`
+  allow-list entries), so the file the sub-agent actually saw
+  this pass differs slightly from HEAD. Neither the untracked
+  state (passes 5-10) nor the tracked-plus-local-diff state
+  (this pass) has changed the outcome, which continues to rule
+  out "the file's committed status" as a variable and reinforces
+  the standing diagnosis: the gap is in grant propagation to
+  Agent-tool sub-agent contexts, not the settings file's content
+  or its git status.
 - pass 10 update: seventh occurrence, sixth consecutive. Local
   expo-web build started fresh this pass (`npx expo start --web
   --port 8081` from `axiomancer-mobile/`) and confirmed reachable
