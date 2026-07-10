@@ -105,4 +105,26 @@ describe('floating-die APPLY routing (the snap-back bug)', () => {
         const float = vm.dice.find(d => d.floating);
         expect(float).toBeDefined();
     });
+
+    // The stuck-ghost / dead-drop bug (found live 2026-07-10): draggability
+    // flipped false the moment the die's OWN drag began, unmounting its
+    // GestureDetector mid-gesture — on web the pan died without onEnd, so the
+    // drop never resolved. `draggable` is now presenter-owned and depends only
+    // on engine state, never on live drag state.
+    it('draggable is presenter-computed: floats stay draggable AFTER the draft; turn dice do not', () => {
+        let s = openEncounter(['wild']);
+        const preDraft = buildCombatViewModel(s);
+        const float = preDraft.dice.find(d => d.floating)!;
+        expect(float.draggable).toBe(true);
+        const tray = preDraft.dice.find(d => !d.floating && d.color !== 'x')!;
+        expect(tray.draggable).toBe(true);
+
+        // Draft a turn die → floats STILL draggable, undrafted turn dice not.
+        s = draftStanceDie(s, tray.id).state;
+        const post = buildCombatViewModel(s);
+        expect(post.dice.find(d => d.floating)!.draggable).toBe(true);
+        for (const d of post.dice.filter(x => !x.floating && !x.reserve)) {
+            expect(d.draggable).toBe(false);
+        }
+    });
 });

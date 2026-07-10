@@ -478,6 +478,27 @@ export function CardFace({
                     </div>
                 </div>
             </div>
+
+            {/* TYPE STRIP at the very foot (Option A, 2026-07-09) — printed
+                identity, mirrors the mobile face: 'BODY · SPELL', CURSE for
+                disenchant (the engine term never prints). */}
+            <div
+                style={{
+                    borderTop: '1px solid rgba(255,255,255,0.12)',
+                    background: 'rgba(0,0,0,0.55)',
+                    textAlign: 'center',
+                    padding: `${px(2)}px 0`,
+                    fontFamily: WX.sans,
+                    fontSize: px(8),
+                    letterSpacing: 1.5,
+                    color: WX.bone,
+                }}
+            >
+                {card.philosophicalAspect.toUpperCase()}
+                {card.cardType
+                    ? ` · ${card.cardType === 'disenchant' ? 'CURSE' : card.cardType.toUpperCase()}`
+                    : ''}
+            </div>
         </div>
     );
 }
