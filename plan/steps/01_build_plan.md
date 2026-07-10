@@ -121,7 +121,7 @@ decision log (see each phase file).
       all three gates) — brief:
       `plan/phases/phase_18_equipment_slot_consolidation.md`
       — `refactor(mechanics): 5-slot equipment model — phase 18` (5e4ca6e0)
-- [ ] Phase 19 — Equipment-granted signatures + the 8 signet relics
+- [x] Phase 19 — Equipment-granted signatures + the 8 signet relics
       (retire archetype gating). Add `grantsSignature` to equipment and
       the 8 fixed relics typed into the phase-18 slots (2 weapon / 2
       armor / 4 accessory; one signature + a static stat bump each,
@@ -133,6 +133,7 @@ decision log (see each phase file).
       so user-intent phases 1+"the item carrier of 3" ship together here
       (both; mechanics-led) — brief:
       `plan/phases/phase_19_equipment_granted_signatures.md`
+      — `feat(mechanics): equipment-granted signatures + 8 signet relics — phase 19` (fbf3d52c)
 - [ ] Phase 20 — Decouple equipment from effects (static stat bumps
       only). Strip `passiveEffects` / `onHitEffects` / `onDefendEffects`
       / `resourceInteraction` / `critStyle` application out of the equip
