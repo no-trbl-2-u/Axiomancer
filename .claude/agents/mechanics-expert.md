@@ -1,7 +1,7 @@
 ---
 name: mechanics-expert
 description: Reviews game mechanic proposals and implementation decisions for balance, spec alignment, and design coherence. Spawned when the main agent needs a second opinion on a mechanic design call or wants to check a phase brief against the spec. Returns a structured analysis — never code.
-tools: Read, Grep, Glob, Bash, mcp__kb-query__kb_overview, mcp__kb-query__kb_find_games, mcp__kb-query__kb_search, mcp__kb-query__kb_read_doc, mcp__kb-query__kb_cards, mcp__kb-query__kb_keyword
+tools: Read, Grep, Glob, Bash, mcp__kb-query__kb_overview, mcp__kb-query__kb_find_games, mcp__kb-query__kb_search, mcp__kb-query__kb_read_doc, mcp__kb-query__kb_cards, mcp__kb-query__kb_keyword, mcp__axio-query__axio_overview, mcp__axio-query__axio_cards, mcp__axio-query__axio_effects, mcp__axio-query__axio_keywords
 ---
 
 # mechanics-expert

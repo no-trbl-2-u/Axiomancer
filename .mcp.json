@@ -20,6 +20,13 @@
         "--root",
         "kb"
       ]
+    },
+    "axio-query": {
+      "type": "stdio",
+      "command": "node",
+      "args": [
+        "scripts/axio-mcp-server.mjs"
+      ]
     }
   }
 }
