@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { View, Text } from 'react-native';
 import { FONTS } from '@/theme/axm';
 import { makeStyles, usePalette } from '@/theme/runtime';
@@ -7,19 +7,10 @@ import { PlayerPortraitImage } from '@/components/art/PlayerPortraitImage';
 import { EquipmentSlot } from './EquipmentSlot';
 import type { EquipmentDockViewModel, EquipmentDockSlot } from '@/state/presenters/inventory.engine';
 
-/** Pair the flat slot list into rows of {left, right} per the design grid. */
-function pairDockRows(
-    slots: readonly EquipmentDockSlot[],
-): readonly (readonly [EquipmentDockSlot, EquipmentDockSlot | null])[] {
-    // Chunk two-per-row in slot order, padding a trailing odd slot with `null`.
-    // The dock ships 5 slots — Weapon, Armor, Trinket I/II/III — so this yields
-    // rows [weapon, armor], [accessory-0, accessory-1], [accessory-2, null].
-    // The portrait sits in the centre column, flanked by the two slot columns.
-    const rows: (readonly [EquipmentDockSlot, EquipmentDockSlot | null])[] = [];
-    for (let i = 0; i < slots.length; i += 2) {
-        rows.push([slots[i], slots[i + 1] ?? null] as const);
-    }
-    return rows;
+/** Stable React key per dock slot (the 3 accessory rows share a slot key, so
+ *  fold in `accessoryIndex` to disambiguate — mirrors EquipmentSlot's testID). */
+function dockSlotKey(slot: EquipmentDockSlot): string {
+    return slot.accessoryIndex !== undefined ? `${slot.key}-${slot.accessoryIndex}` : slot.key;
 }
 
 interface EquipmentDockProps {
@@ -31,7 +22,6 @@ interface EquipmentDockProps {
 export function EquipmentDock({ vm, selectedSlot, onSelectSlot }: EquipmentDockProps) {
     const styles = useStyles();
     const AXM = usePalette();
-    const rows = useMemo(() => pairDockRows(vm.slots), [vm.slots]);
 
     return (
         <View style={styles.dock} testID="equipment-dock">
@@ -55,28 +45,19 @@ export function EquipmentDock({ vm, selectedSlot, onSelectSlot }: EquipmentDockP
                 <SectionLabel size={9} color={AXM.bone}>{vm.headerLabel}</SectionLabel>
                 <Text style={styles.dockHint}>{vm.hintLabel}</Text>
             </View>
+            {/* Portrait on the left, all 5 worn slots stacked in a single column
+                on the right. */}
             <View style={styles.dockGrid}>
-                <View style={styles.dockCol}>
-                    {rows.map(([L], r) => (
-                        <EquipmentSlot
-                            key={r}
-                            slot={L}
-                            bareLabel={vm.bareLabel}
-                            selected={L !== null && selectedSlot === L.key}
-                            onPress={onSelectSlot}
-                        />
-                    ))}
-                </View>
-                <View style={styles.dockSilhouette}>
-                    <PlayerPortraitImage width={64} height={160} fit="contain" />
+                <View style={styles.dockPortrait}>
+                    <PlayerPortraitImage width={176} height={344} fit="contain" />
                 </View>
                 <View style={styles.dockCol}>
-                    {rows.map(([, R], r) => (
+                    {vm.slots.map((slot) => (
                         <EquipmentSlot
-                            key={r}
-                            slot={R}
+                            key={dockSlotKey(slot)}
+                            slot={slot}
                             bareLabel={vm.bareLabel}
-                            selected={R !== null && selectedSlot === R.key}
+                            selected={selectedSlot === slot.key}
                             onPress={onSelectSlot}
                         />
                     ))}
@@ -117,14 +98,16 @@ const useStyles = makeStyles((AXM) => ({
     },
     dockGrid: {
         flexDirection: 'row',
+        alignItems: 'center',
         gap: 12,
     },
     dockCol: {
         flex: 1,
+        // Narrower (60%-width) slots hug the container's right edge.
+        alignItems: 'flex-end',
     },
-    dockSilhouette: {
+    dockPortrait: {
         alignItems: 'center',
         justifyContent: 'center',
-        paddingVertical: 12,
     },
 }));

@@ -80,6 +80,9 @@ const useStyles = makeStyles((AXM) => ({
         flexDirection: 'row',
         alignItems: 'center',
         gap: 8,
+        // ~68% of the stacked column's width — the portrait carries the left
+        // half of the dock, so the slots read as compact chips beside it.
+        width: '68%',
         height: 64,
         borderWidth: 1,
         borderColor: AXM.divider,
@@ -148,9 +151,9 @@ const useStyles = makeStyles((AXM) => ({
     // Phase 19 — signet relic's granted signature, a quiet sub-label.
     dockSlotSignature: {
         fontFamily: FONTS.sans,
-        fontSize: 8,
+        fontSize: 10,
         color: AXM.sulfur,
         letterSpacing: 0.6,
-        lineHeight: 11,
+        lineHeight: 13,
     },
 }));

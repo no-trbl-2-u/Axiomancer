@@ -35,9 +35,9 @@ jest.mock('../EquipmentSlot', () => {
             const React = require('react');
             const { TouchableOpacity, Text } = require('react-native');
 
-            // `pairDockRows` builds a 2-column grid over the 5 slots, padding the
-            // trailing odd cell with `null` — treat any absent slot as an empty
-            // cell (the real EquipmentSlot's null-slot path).
+            // Defensive null-slot path (the real EquipmentSlot renders an empty
+            // spacer for a null slot); the dock stacks all 5 real slots in one
+            // column, so this branch is not normally hit.
             if (slot === null || slot === undefined) return null;
             // The three accessory rows share `key: 'accessory'`; disambiguate the
             // testID by position, mirroring the real component's `slotId`.
@@ -190,9 +190,7 @@ describe('EquipmentDock', () => {
             expect(weaponSlot).toBeDefined();
         });
 
-        it('handles grid layout with a null trailing cell correctly', () => {
-            // The 5th slot (accessory-2) lands alone in the last grid row; the
-            // component pads the right column with a null cell.
+        it('renders the final accessory slot in the stacked column', () => {
             const { queryByTestId } = render(
                 <EquipmentDock
                     vm={mockEquippedSlots}
