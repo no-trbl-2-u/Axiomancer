@@ -11,6 +11,15 @@
         "--headless",
         "--isolated"
       ]
+    },
+    "kb-query": {
+      "type": "stdio",
+      "command": "node",
+      "args": [
+        "kb/scripts/kb-mcp-server.mjs",
+        "--root",
+        "kb"
+      ]
     }
   }
 }

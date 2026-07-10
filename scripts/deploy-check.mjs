@@ -191,6 +191,46 @@ else if (PROVIDER === 'github-actions') {
         await sleep(POLL_MS)
         continue
       }
+      // Fail closed: "zero runs" is only a pass for a genuinely
+      // docs/plan-only tick. It is ALSO what a missing/expired GH_PAT
+      // looks like — pushes made with the default GITHUB_TOKEN never
+      // trigger verify-* (see .github/workflows/README.md), which used
+      // to make this gate pass vacuously. If HEAD's diff touches any
+      // gated path, zero runs means the gate is broken, not green.
+      const gatedPaths = (
+        process.env.DEPLOY_GATED_PATHS ??
+        'axiomancer-mechanics/,axiomancer-mobile/,axiomancer-card-editor/,package-lock.json'
+      )
+        .split(',')
+        .map((p) => p.trim())
+        .filter(Boolean)
+      let changed = []
+      try {
+        changed = execSync('git diff --name-only HEAD~1..HEAD', { encoding: 'utf-8' })
+          .trim()
+          .split('\n')
+          .filter(Boolean)
+      } catch {
+        // HEAD~1 unavailable (first commit / shallow clone) — cannot
+        // prove the tick was docs-only, so stay closed.
+        changed = ['<unknown: HEAD~1 unavailable>']
+      }
+      const gatedTouch = changed.filter(
+        (f) => f.startsWith('<unknown') || gatedPaths.some((p) => f === p || f.startsWith(p)),
+      )
+      if (gatedTouch.length > 0) {
+        console.error(`DEPLOY GATE FAILED (fail-closed).`)
+        console.error(
+          `  HEAD ${sha.slice(0, 7)} touches gated paths but NO verify-* workflow ran for it:`,
+        )
+        for (const f of gatedTouch.slice(0, 10)) console.error(`    ${f}`)
+        console.error(``)
+        console.error(`  Most likely cause: the push was made with the default GITHUB_TOKEN`)
+        console.error(`  (missing/expired GH_PAT secret), which never triggers workflows.`)
+        console.error(`  Diagnose with .github/workflows/pat-probe.yml.`)
+        console.error(`  Do not push past this gate.`)
+        process.exit(1)
+      }
       console.log(
         `No verify-* workflow triggered for HEAD's paths (docs/plan-only tick). Nothing to check.`,
       )

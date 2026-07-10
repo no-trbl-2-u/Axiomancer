@@ -9,14 +9,14 @@
     "axiomancer-card-editor"
   ],
   "engines": {
-    "node": ">=20.0.0",
+    "node": ">=22.0.0",
     "npm": ">=10.0.0"
   },
   "scripts": {
     "mechanics": "npm --workspace axiomancer-mechanics run",
     "mobile": "npm --workspace axiomancer-mobile run",
     "editor": "npm --workspace axiomancer-card-editor run",
-    "verify": "npm run verify --workspace axiomancer-mechanics && npm run verify --workspace axiomancer-mobile && npm run type-check --workspace axiomancer-card-editor",
+    "verify": "npm run verify --workspace axiomancer-mechanics && npm run verify --workspace axiomancer-mobile && npm run verify --workspace axiomancer-card-editor",
     "deploy:check": "node scripts/deploy-check.mjs",
     "devlog:build": "node scripts/build-devlog.mjs",
     "devlog:shots": "node axiomancer-mobile/scripts/devlog-shots.mjs",

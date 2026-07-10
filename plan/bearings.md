@@ -154,7 +154,7 @@ Axiomancer/
 │   ├── commands/               # loop-verb pointers + domain tuning cmds
 │   ├── agents/                 # scout · reader · mechanics-expert · playtester
 │   ├── skills/                 # domain DESIGN skills (brainstorm/character/story/world-spec)
-│   ├── hooks/guard.mjs · settings.json.example (opt-in enforcement)
+│   ├── hooks/guard.mjs · settings.json (enforcement, always on)
 ```
 
 Note the deliberate split: **nexus loop verbs live in root

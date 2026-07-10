@@ -10,7 +10,7 @@ import { useEffect, useRef, useState } from 'react';
 import { toDraft } from '../../types';
 import type { Card } from '../../data/mechanics';
 import { CardFace, DiePip, KwGlyph, projectFace } from '../CardFace';
-import { WX, WX_NOISE, DIE, KEYWORDS, fmtVal, kwLine, type KeywordMeta } from '../../theme/wx';
+import { WX, WX_NOISE, DIE, KEYWORDS, kwLine, type KeywordMeta } from '../../theme/wx';
 import { Btn } from '../form';
 
 const DUMMY_MAX = 100;

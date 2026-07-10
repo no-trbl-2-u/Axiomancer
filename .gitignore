@@ -31,5 +31,8 @@ web-build/
 # Nexus worktrees (transient)
 .claude/worktrees/
 
+# Personal settings overrides (shared enforcement lives in .claude/settings.json)
+.claude/settings.local.json
+
 # Game knowledge base (synced clone — see scripts/kb-sync.mjs)
 kb/

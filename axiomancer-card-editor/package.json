@@ -8,6 +8,8 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "type-check": "tsc --noEmit",
+    "lint": "eslint src",
+    "verify": "npm run type-check && npm run lint && npm run build",
     "preview": "vite preview"
   },
   "devDependencies": {

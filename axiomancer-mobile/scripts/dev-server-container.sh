@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Spin up Expo Web inside a node:20-alpine container, bound to a host
+# Spin up Expo Web inside a node:22-alpine container, bound to a host
 # port the Playwright MCP can reach. Use this when you (or Claude) want
 # a containerised, throw-away dev server for screenshot walkthroughs.
 #
@@ -23,7 +23,7 @@ set -euo pipefail
 CMD="${1:-up}"
 PORT="${2:-18081}"
 NAME="axiomancer-web"
-IMAGE="node:20-alpine"
+IMAGE="node:22-alpine"
 : "${DOCKER_HOST:=unix:///var/run/docker.sock}"
 export DOCKER_HOST
 
