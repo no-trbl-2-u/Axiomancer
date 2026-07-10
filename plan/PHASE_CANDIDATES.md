@@ -9,6 +9,87 @@
 
 ## Pending
 
+> Batch added 2026-07-10 (T direct request) from the engagement-audit
+> roadmap — `plan/tuning/2026-07-10-engagement-overhaul-roadmap.md`.
+> Sequencing and evidence live in the tuning docs; the entries below
+> carry only scope + gating. **All four owner calls were ratified the
+> same day** (roadmap §4 decisions of record: FREE lines = constrained
+> fork + weak-deposit DRAW kicker; momentum wheel = global,
+> engine-native, keeps the name; TICK = killed entirely; DoT clocks =
+> distinct triggers). No EA phase is owner-blocked; remaining gates are
+> inter-phase only (EA-2 needs EA-1; EA-5/6 repricing needs EA-2).
+
+### EA-1 — The Turn Law (engine + tooling)
+- source: 2026-07-10 audit, `plan/tuning/2026-07-10-turn-law-and-honest-baseline.md` §1-2
+- One dice-turn per threat phase becomes an engine invariant
+  (startTurn refuses a second tray; resolveThreatPhase resets);
+  sim policies + auto CLI rewritten to play legally; tooling fixes
+  (auto-mode transcripts, overkill-clamped attribution, `--stage`
+  fields the stage's enemy roster). Test-pinned. Blocks every
+  numeric tuning decision repo-wide. ~1 session, no owner input.
+
+### EA-2 — Re-baseline (measurement)
+- source: same doc §3
+- Full matrix re-run under the law; re-derive curve bands vs the
+  locked 80/50/25-35/0 doctrine, KNOWN_CURVE_VIOLATORS,
+  statusEngagement by stage, signature damage share, dead-card
+  rate; publish the re-triage report. Every pre-2026-07-10
+  plan/tuning number gets an asterisk until this lands. Gated on
+  EA-1. ~1 session.
+
+### EA-3 — Show the Engine (legibility sweep)
+- source: `plan/tuning/2026-07-10-turn-texture.md` §4 + per-theme
+  S-tier UX items in `2026-07-10-theme-identity.md`
+- Premise track + CONCEDE beat, rupture fuel/cap preview (engine
+  projection exists), BACKFIRE attribution, foretell picker, REPRISE
+  songbook choice, wall-math readout, Overtake gate/preview,
+  lying-copy fixes, color-match bonus fold-ins. Parallel-safe with
+  EA-1/2. ~1-2 sessions, no owner input.
+
+### EA-4 — The Language (keyword registry)
+- source: `plan/tuning/2026-07-10-keyword-registry.md`
+- KW-1/KW-3 (fold 6 unmapped debuff ids, rename pass) are ungated;
+  KW-2/KW-6 (merge/retire + single-source registry with parity
+  lints) and KW-5/KW-7 (persistent-card keyword-reach lint, systems
+  glossary) follow. KW-4 (TICK killed entirely — owner-ratified
+  2026-07-10) rides EA-5. ~1-2 sessions.
+
+### EA-5 — FREE Lines (70-card content pass)
+- source: `plan/tuning/2026-07-10-turn-texture.md` §1
+- Rewrite every FREE line to theme-currency verbs + FREE-currency
+  lint + pricing re-arithmetic. Shape RATIFIED 2026-07-10: Option A
+  (constrain the fork) + weak-deposit `DRAW 1` kicker amendment;
+  TICK dies in the same pass. ~2 sessions.
+
+### EA-6 — The Roll and the Read
+- source: `plan/tuning/2026-07-10-momentum-scoping.md` +
+  `2026-07-10-out-of-flow-mechanics.md` §1 + turn-law doc §4
+- Momentum wheel engine-native (kills the host-side write; sims
+  learn it), THE STAKE (pre-draft Conviction wager on the hidden
+  stance, paid in floats), signature economy repriced against EA-2
+  income. Momentum scope/naming RATIFIED 2026-07-10 (wheel global,
+  keeps the name; hazard carry + grace buff rename); repricing
+  gated on EA-2. ~1-2 sessions.
+
+### EA-7 — Theme Deep Work (sandbox-first, /deck-tuning owns)
+- source: `plan/tuning/2026-07-10-theme-identity.md` §2
+- One sub-phase per rework: harvest (REAP attacks max HP +
+  travelling Souls), bulwark (RIPOSTE reflects the prevented blow),
+  akrasia (DEBT ledger), then the remaining per-theme M items.
+  Register → A/B → promote; re-run the ten-theme matrix after.
+  DoT-clock direction RATIFIED 2026-07-10 (distinct triggers —
+  exact triggers specced here); partially gated on EA-5's FREE
+  verbs. ~3-4 sessions, parallelizable per theme.
+
+### EA-8 — Enemy Answers (specs 29/30 slice + enemy counterplay)
+- source: `plan/tuning/2026-07-10-turn-texture.md` §3 +
+  theme-identity §1 + out-of-flow doc §2
+- One reactive verb engine-wide, lethality readout, variable-rung
+  telegraphs, CAUTERIZE/Premise-shed/SWAY-cleanse enemies, THE
+  COVETED DIE; GLYPHS pilot rides at the end as the Option-B
+  grammar experiment. Largest phase; ~2-3 sessions. Gated on EA-1
+  (numbers) but design-independent of the owner session.
+
 > Seeded 2026-07-03 from the retired `/archive` phase history —
 > the strongest ideas already went straight into
 > `plan/steps/01_build_plan.md` (phases 1-12). These are the

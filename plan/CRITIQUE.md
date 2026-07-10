@@ -11,25 +11,6 @@
 
 ## Pending
 
-### [HIGH] combat design — kill the "weak basic chip OR real status effect" fork
-- pass: user-jot (2026-07-09, dice-law rework session)
-- viewport: unspecified
-- auth_state: anonymous
-- category: design
-- observation: owner, verbatim intent — "I really want Axiomancer to
-  FUNDAMENTALLY do away with these 'do low basic damage OR a status effect'
-  [forks]. I think it's bogging the game down." Trigger: the new split-face
-  layout (◇ FREE | ◆ PAID) made authored FREE lines like slippery-slope's
-  `tickOne` (one weak DoT tick) visibly read as a worse copy of the paid
-  effect. The complaint targets the FREE/PAID fork's CONTENT (weak-chip
-  free lines), possibly the fork itself — not the layout.
-- evidence: user-spotted while reviewing card layout mock-ups,
-  2026-07-09; see plan/HANDOFF-2026-07-09-dice-law-rework.md § DESIGN SIGNAL
-- suggested fix: [owner explicitly parked it — "a conversation for another
-  time"; needs a /brainstorm-mechanics or /oversight session, NOT an /iterate
-  fix. Candidate directions recorded in the handoff: FREE line shouldn't carry "raw" damage but rather lay a foundation for bigger, PAID effects, all within the theme]
-- source: user
-
 ### [MED] general — rethink early-game as canned preset-deck tutorial, defer deckbuilding to labyrinth choice
 - pass: user-jot (commit 63cfb3ba)
 - viewport: unspecified
@@ -198,6 +179,17 @@
   Phase 2).
 
 ## Done
+
+### [x] [HIGH] combat design — kill the "weak basic chip OR real status effect" fork (RESOLVED 2026-07-10, owner session)
+- The parked 2026-07-09 design signal got its session: the 2026-07-10
+  engagement-audit sitting ratified **Option A — constrain the fork**:
+  every FREE line deposits theme currency; a weak-enough deposit may also
+  carry a `DRAW 1`-class kicker; generic draw alone and all FREE damage
+  banned (TICK killed registry-wide). Decisions of record:
+  `plan/tuning/2026-07-10-engagement-overhaul-roadmap.md` §4; doctrine
+  refined in `VISION.md`; spec 32 amendment block added; execution queued
+  as EA-5 (70-card pass + FREE-currency lint) in `plan/PHASE_CANDIDATES.md`.
+- source: user (ratified via owner Q&A, 2026-07-10)
 
 ### [x] [needs-user-call] Playwright MCP tools unavailable to sub-agents (pass 1-4; addressed at 525cd25 follow-up)
 - Root cause: two allowlist gaps, not a Playwright bug. (1)

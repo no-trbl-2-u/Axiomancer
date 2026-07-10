@@ -42,14 +42,17 @@ The intended mastery path is:
 
 The player may sometimes win by attacking over and over. The player may sometimes win through friendliness. But if the player is not utilizing skills and planning status effects, the game should be more difficult for them.
 
-**Doctrine (load-bearing, set 2026-07-09): the FREE line builds the engine.**
-A card's free (dieless) line must never be a dead play or a weaker copy of the
-paid line. It should advance the deck's engine — theme currency (Premises,
-Souls, pips, DoT stacks) or general utility that feeds any engine (DRAW,
-Conviction). Small is fine; flat chip damage with no engine value is not.
+**Doctrine (load-bearing, set 2026-07-09; refined 2026-07-10): the FREE line
+builds the engine.** A card's free (dieless) line must never be a dead play or
+a weaker copy of the paid line. Refined by owner ratification 2026-07-10
+(engagement-audit session): the FREE line must deposit THEME currency
+(Premises, Souls, pips, DoT seeds, rapport, loop advancement) — a
+weak-enough deposit may additionally carry a `DRAW 1`-class utility kicker,
+but generic utility ALONE no longer qualifies, and FREE damage (incl. TICK,
+now retired registry-wide) never does. Small is fine; filler is not.
 Test: after a free play, is the player closer to their deck's win condition?
-(Owner directive 2026-07-09; library enforcement pass belongs to
-`/deck-tuning`, tracked in `plan/CRITIQUE.md`.)
+(Owner directives 2026-07-09 + 2026-07-10; enforcement = the EA-5 library
+pass + FREE-currency lint, `plan/tuning/2026-07-10-turn-texture.md` §1.)
 
 Balance should prove AGGRESSIVE, DEFENSIVE, MIXED, and STRATEGIST play styles. STRATEGIST — skill/status/resource planning — is the witness for the intended mastery path.
 

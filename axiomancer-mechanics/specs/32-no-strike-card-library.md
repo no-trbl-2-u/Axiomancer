@@ -1,5 +1,26 @@
 # Spec 32 — The Themed Deck Library: 10 themes, 70 cards, 30 keywords
 
+> **AMENDMENT (owner-ratified 2026-07-10, engagement-audit session —
+> decisions of record in
+> `plan/tuning/2026-07-10-engagement-overhaul-roadmap.md` §4):**
+> 1. **FREE-line law (amends §2):** every FREE line must deposit theme
+>    currency (Premises, Souls, pips, DoT seeds, rapport, wheel/loop
+>    advancement…) — never damage, never a bare generic draw. A
+>    weak-enough deposit MAY additionally carry a `DRAW 1`-class utility
+>    kicker. Lint-enforced like the no-strike gate. Executes as the
+>    70-card pass in `plan/tuning/2026-07-10-turn-texture.md` §1 (EA-5).
+> 2. **TICK is retired from the registry (amends §3):** killed entirely,
+>    not renamed; the 10 `free: tickOne` lines die with the FREE pass and
+>    PAID tick effects re-author as theme verbs. The registry count may
+>    drop below 30 — the "exactly 30" directive yields to earned support
+>    (see `plan/tuning/2026-07-10-keyword-registry.md`).
+> 3. **DoT clocks differentiate by TRIGGER (amends §3 semantics):**
+>    POISON / BLEED / MARK get distinct firing conditions (per-card-played
+>    / per-damage-instance / on-payoff class), specced in EA-7.
+> 4. **MOMENTUM names the global combat wheel** (engine-native port
+>    pending); the Hazard minigame's carry system and
+>    `buff_grace_momentum` rename (`plan/tuning/2026-07-10-momentum-scoping.md`).
+>
 > **Status:** DESIGN v4 — v4 revises the enchant/disenchant model
 > (owner-directed 2026-07-08): these cards gain a FREE (dieless) line that
 > grants a TIMED 3-round instance of their passive, with the PAID line
