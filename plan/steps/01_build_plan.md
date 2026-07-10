@@ -232,13 +232,28 @@ decision log (see each phase file).
 
 **Docs/harness integrity (T-directed 2026-07-10):**
 
-- [ ] Phase 24 — axio-query: MCP surface over the live engine data.
-      Zero-dep stdio MCP server (`scripts/axio-mcp-server.mjs`, sibling
-      of the KB's kb-mcp-server) exposing `axio_cards` / `axio_effects`
-      / `axio_keywords` / `axio_overview` from the `catalog:export`
-      JSON (regenerate-if-stale; read-only; accelerator-never-
-      dependency). Register in `.mcp.json` + settings allowlist; grant
-      to card-expert / mechanics-expert (both; harness) — brief:
+- [blocked: needs human-granted edits to .mcp.json / .claude/settings.json /
+  .claude/agents/*.md 2026-07-10] Phase 24 — axio-query: MCP surface over
+      the live engine data. Server + hermetic smoke test + exporter
+      pricing field + AGENTS.md doc shipped and verified —
+      `feat: axio-query MCP server over the live engine data — phase 24`
+      (7a33efbc). Remaining wiring is permission-gated in unattended
+      `/march` ticks (Edit/Write on these three paths returns "you
+      haven't granted it yet" with no prompt to answer — a deliberate
+      harness guard on files that grant an agent's own tool access, not
+      a design ambiguity). `/oversight` needs to apply:
+      1. `.mcp.json` — add an `axio-query` stdio entry:
+         `{"type": "stdio", "command": "node", "args": ["scripts/axio-mcp-server.mjs"]}`
+         (sibling of the existing `kb-query` entry).
+      2. `.claude/settings.json` `permissions.allow` — add
+         `mcp__axio-query__axio_overview`, `mcp__axio-query__axio_cards`,
+         `mcp__axio-query__axio_effects`, `mcp__axio-query__axio_keywords`
+         next to the `mcp__kb-query__*` rows.
+      3. `.claude/agents/card-expert.md` and
+         `.claude/agents/mechanics-expert.md` — append the same four
+         `mcp__axio-query__*` tool names to each file's `tools:`
+         frontmatter line.
+      Once applied, flip this row to `[x]` — brief:
       `plan/phases/phase_24_axio_query.md`
 - [ ] Phase 25 — /consolidate memory curator + 2026-07-09 harness
       re-apply. Part A: re-apply the harness work lost to the local
