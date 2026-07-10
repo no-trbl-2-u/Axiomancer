@@ -96,6 +96,20 @@ corpus — 1,692 card records, 141 keywords). Coverage misses are filed with
 `node scripts/kb-sync.mjs wish "..."` — the KB's daily scout consumes
 that wishlist.
 
+Two consumption surfaces (both grep-first; see the `kb-query` design
+skill in `.claude/skills/kb-query/`):
+- **Direct**: Grep/Read `kb/` frontmatter + generated indexes (the
+  metadata firewall), then only the docs they point at.
+- **MCP**: the `kb-query` stdio server (`.mcp.json` →
+  `kb/scripts/kb-mcp-server.mjs`, spawned per session) exposes
+  `kb_overview` / `kb_find_games` / `kb_search` / `kb_read_doc` /
+  `kb_cards` / `kb_keyword`. It is an accelerator, never a dependency —
+  if `kb/` is unsynced its tools answer with the recovery command and
+  the grep path still works. The `mechanics-expert` and `card-expert`
+  sub-agents carry these tools in their frontmatter and prefer them
+  when present; CI runs don't sync `kb/`, so cloud ticks stay on the
+  sync-then-grep path.
+
 ## Per-package guides
 
 Each package keeps its own `AGENTS.md` / `CLAUDE.md` with domain specifics
