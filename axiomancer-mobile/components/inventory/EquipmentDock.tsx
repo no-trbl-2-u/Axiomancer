@@ -49,7 +49,7 @@ export function EquipmentDock({ vm, selectedSlot, onSelectSlot }: EquipmentDockP
                 on the right. */}
             <View style={styles.dockGrid}>
                 <View style={styles.dockPortrait}>
-                    <PlayerPortraitImage width={190} height={340} fit="contain" contentPosition="center" />
+                    <PlayerPortraitImage width="100%" height={300} fit="contain" contentPosition="center" />
                 </View>
                 <View style={styles.dockCol}>
                     {vm.slots.map((slot) => (
@@ -102,15 +102,14 @@ const useStyles = makeStyles((AXM) => ({
         gap: 12,
     },
     dockCol: {
-        // Content-sized to the fixed-width slots and pinned to the container's
-        // right edge; the portrait takes all the remaining space on the left.
-        // Keeping the slot width independent of this column means growing the
-        // portrait never shrinks the equipment side.
-        alignItems: 'flex-end',
+        // The slot stack takes half the dock; its rows fill that half so
+        // equipment names have room instead of truncating.
+        flex: 1,
+        alignItems: 'stretch',
     },
     dockPortrait: {
-        // Fill the space left of the slots; the portrait centres within it, so
-        // it reads as larger and sits off the left border toward the middle.
+        // The portrait takes the other half; the image fills it (width '100%')
+        // so it reads large without floating in empty space.
         flex: 1,
         alignItems: 'center',
         justifyContent: 'center',

@@ -8,14 +8,16 @@
  */
 
 import React from 'react';
+import type { DimensionValue } from 'react-native';
 import { Image } from 'expo-image';
 
 import { getPlayerPortrait, portraitIdFromFlags } from '@/assets/images/portraits';
 import { useGameState } from '@/state/GameStoreProvider';
 
 interface PlayerPortraitImageProps {
-    width?: number;
-    height?: number;
+    /** Accepts a percentage (e.g. '100%') so the portrait can fill a flex column. */
+    width?: DimensionValue;
+    height?: DimensionValue;
     /** 'contain' shows the full figure (sheet header); 'cover' crops toward the
      *  head for tight circular frames (combat medallion). */
     fit?: 'contain' | 'cover';

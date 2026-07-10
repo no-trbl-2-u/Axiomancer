@@ -80,9 +80,6 @@ const useStyles = makeStyles((AXM) => ({
         flexDirection: 'row',
         alignItems: 'center',
         gap: 8,
-        // Fixed chip width, pinned to the dock's right edge. Independent of the
-        // portrait so enlarging the portrait never shrinks the equipment side.
-        width: 130,
         height: 64,
         borderWidth: 1,
         borderColor: AXM.divider,
