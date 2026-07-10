@@ -1,0 +1,120 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git status:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push origin main)",
+      "Bash(git pull --ff-only:*)",
+      "Bash(git fetch:*)",
+      "Bash(git log:*)",
+      "Bash(git diff:*)",
+      "Bash(git show:*)",
+      "Bash(git rev-parse:*)",
+      "Bash(git rev-list:*)",
+      "Bash(git ls-files:*)",
+      "Bash(npm run verify:*)",
+      "Bash(npm run deploy:check:*)",
+      "Bash(npm run type-check:*)",
+      "Bash(npm run build:*)",
+      "Bash(npm run lint:*)",
+      "Bash(npm test:*)",
+      "Bash(npm run game:*)",
+      "Bash(npm run combat-sim:*)",
+      "Bash(npm run combat-playtest:*)",
+      "Bash(npm ci)",
+      "Bash(node scripts/deploy-check.mjs:*)",
+      "Bash(node scripts/kb-sync.mjs:*)",
+      "mcp__kb-query__kb_overview",
+      "mcp__kb-query__kb_find_games",
+      "mcp__kb-query__kb_search",
+      "mcp__kb-query__kb_read_doc",
+      "mcp__kb-query__kb_cards",
+      "mcp__kb-query__kb_keyword",
+      "Bash(node scripts/notify.mjs:*)",
+      "Bash(node scripts/loop-issue.mjs:*)",
+      "Bash(node .claude/hooks/guard.mjs:*)",
+      "Bash(gh auth status:*)",
+      "Bash(gh issue list:*)",
+      "Bash(gh issue view:*)",
+      "Bash(gh issue comment:*)",
+      "Bash(gh issue create:*)",
+      "Bash(gh issue edit:*)",
+      "Bash(gh issue reopen:*)",
+      "Bash(gh label create:*)",
+      "Bash(gh run list:*)",
+      "Bash(gh run view:*)",
+      "Bash(awk:*)",
+      "Bash(mktemp:*)",
+      "Bash(echo:*)",
+      "Bash(printenv:*)",
+      "Bash(env)",
+      "Bash(date:*)",
+      "Bash(wc:*)",
+      "Bash(cat:*)",
+      "Bash(ls:*)",
+      "Bash(cp:*)",
+      "Bash(mkdir:*)",
+      "Bash(sed:*)",
+      "Bash(grep:*)",
+      "Bash(head:*)",
+      "Bash(tail:*)",
+      "mcp__playwright__browser_navigate",
+      "mcp__playwright__browser_click",
+      "mcp__playwright__browser_snapshot",
+      "mcp__playwright__browser_take_screenshot",
+      "mcp__playwright__browser_console_messages",
+      "mcp__playwright__browser_close",
+      "mcp__playwright__browser_resize",
+      "mcp__playwright__browser_press_key",
+      "mcp__playwright__browser_hover",
+      "mcp__playwright__browser_evaluate",
+      "mcp__playwright__browser_wait_for",
+      "mcp__playwright__browser_tabs",
+      "mcp__playwright__browser_network_requests",
+      "mcp__playwright__browser_navigate_back",
+      "mcp__kb-query__kb_overview",
+      "mcp__kb-query__kb_find_games",
+      "mcp__kb-query__kb_search",
+      "mcp__kb-query__kb_read_doc",
+      "mcp__kb-query__kb_cards",
+      "mcp__kb-query__kb_keyword"
+    ],
+    "deny": [
+      "Bash(git push --force:*)",
+      "Bash(git push -f:*)",
+      "Bash(git push --force-with-lease:*)",
+      "Bash(git commit --no-verify:*)",
+      "Bash(git commit -n:*)",
+      "Bash(git reset --hard:*)",
+      "Bash(git clean -fd:*)",
+      "Bash(git clean -f:*)",
+      "Bash(git branch -D:*)",
+      "Read(.env)",
+      "Read(.env.*)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/guard.mjs pre-bash"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/guard.mjs stop"
+          }
+        ]
+      }
+    ]
+  }
+}
