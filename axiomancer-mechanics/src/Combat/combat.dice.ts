@@ -21,8 +21,10 @@ import type { CombatDieColor, CombatManaDie } from './combat.encounter.types';
 /** Legacy: dice rolled once at combat start (Spec 25). Kept for the shim. */
 export const COMBAT_DICE_COUNT = 4;
 
-/** Spec 26b §1 — dice rolled fresh at the start of EVERY turn (draft 1 of 2). */
-export const TURN_DICE_COUNT = 2;
+/** Dice-law rework (2026-07-09) — dice rolled fresh at the start of EVERY turn.
+ *  The player drafts 1 of 3; every unused die converts to Conviction tokens
+ *  (wild = 2, colored = 1, X = 0). */
+export const TURN_DICE_COUNT = 3;
 
 /**
  * The die-face bag (Spec 25 §4.2): Heart / Body / Mind / Wild at 1/6 each, and
@@ -61,9 +63,13 @@ export function rollCombatDice(
 }
 
 /**
- * Spec 26b §1 — rolls THIS TURN's draft pool of 2 dice. Ids are turn-scoped
- * (`t{turn}-d{0|1}`) so the UI can animate fresh dice each turn. X faces start
- * `locked` (a drafted X can't power a card); colored/wild start `available`.
+ * Rolls THIS TURN's draft pool. Ids are turn-scoped (`t{turn}-d{n}`) so the UI
+ * can animate fresh dice each turn. X faces start `locked` (a drafted X can't
+ * power a card); colored/wild start `available`.
+ *
+ * Dice-law rework (2026-07-09): the roll is HONEST — no stance-bearing-die
+ * guarantee. A colorless roll is a pure token turn (every unused die still
+ * banks Conviction), not a rigged reroll.
  */
 const STANCE_FACES: readonly CombatDieColor[] = Object.freeze(['heart', 'body', 'mind']);
 
@@ -81,13 +87,6 @@ export function rollTurnDice(
             state: color === 'x' ? 'locked' : 'available',
             temporary: false,
         });
-    }
-    // Spec 26b tuning §3 — guarantee at least one STANCE-bearing die (heart/body/
-    // mind) so every turn offers a real read + a usable play (no dead both-X /
-    // wild-only rolls). Convert the last die when none qualifies.
-    if (dice.length > 0 && !dice.some(d => dieHasStance(d.color))) {
-        const color = STANCE_FACES[Math.min(2, Math.floor(rng() * 3))];
-        dice[dice.length - 1] = { ...dice[dice.length - 1], color, state: 'available' };
     }
     return dice;
 }

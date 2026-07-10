@@ -47,7 +47,7 @@ import { CombatTutorialCoach } from '@/components/combat/encounter/CombatTutoria
 import { currentCombatTutorialStep } from '@/components/combat/encounter/combat-tutorial-steps';
 import { Image } from 'expo-image';
 import { getEncounterEnemyArt } from '@/assets/images/enemies';
-import { INTENT_ICONS, buildCombatViewModel, rewardOfferVMs, STANCE_COLORS, type CombatCardVM, type CombatEffectChipVM, type CombatSignatureVM } from '@/state/presenters/combat-encounter.engine';
+import { INTENT_ICONS, buildCombatViewModel, resolveApplyRouting, rewardOfferVMs, STANCE_COLORS, type CombatCardVM, type CombatEffectChipVM, type CombatSignatureVM } from '@/state/presenters/combat-encounter.engine';
 import { PlayerPortraitImage } from '@/components/art/PlayerPortraitImage';
 import { useGameState, useGameStore } from '@/state/GameStoreProvider';
 import { COMBAT_TUTORIAL_FLAG, completeCombatTutorialAction, runArchetype, skewRewardsByArchetype } from '@/state/combat/store-actions';
@@ -153,6 +153,7 @@ function keywordTypeTag(kind: string, index: number): string {
         case 'befriend': return 'MERCY';
         case 'enchant': return 'ENCHANT';
         case 'disenchant': return 'CURSE';
+        case 'forge': return 'DICE';
         default: return 'EFFECT';
     }
 }
@@ -161,6 +162,7 @@ function keywordTypeTag(kind: string, index: number): string {
 const TAG_COLORS: Record<string, string> = {
     DOT: '#e2543b', CONTROL: '#a86bdc', GUARD: '#9aa0a6', REGEN: '#5bbf6a',
     MERCY: '#5bbf6a', ENCHANT: '#7fb3a6', CURSE: '#a86bdc', EFFECT: '#8a8273',
+    DICE: '#d9c66a',
 };
 
 // Category plaque for the status tooltip — glyph kind → badge label + colour.
@@ -311,8 +313,16 @@ export function CombatEncounterPanel({
     const dragY = useSharedValue(0);
     const dragShown = useSharedValue(0);
     const begin = useCallback((payload: DragPayload, x: number, y: number) => {
-        dragRef.current = payload; dragX.value = x; dragY.value = y; dragShown.value = 1; setDragActive(payload);
-    }, [dragX, dragY, dragShown]);
+        // NOTE: dragShown is NOT set here. The ghost keeps the PREVIOUS drag's
+        // payload until React commits `dragActive`, so showing it synchronously
+        // flashed the last-dragged card's face for a frame when a DIE drag began
+        // (the "die looks like a card" bug). The effect below reveals it on the
+        // commit that carries the right payload.
+        dragRef.current = payload; dragX.value = x; dragY.value = y; setDragActive(payload);
+    }, [dragX, dragY]);
+    useEffect(() => {
+        if (dragActive) dragShown.value = 1;
+    }, [dragActive, dragShown]);
     const drag: DragController = useMemo(() => ({ begin, end: () => undefined, active: dragActive, x: dragX, y: dragY }), [begin, dragActive, dragX, dragY]);
     const end = useCallback((x: number, y: number) => {
         const payload = dragRef.current; dragRef.current = null; dragShown.value = 0; setDragActive(null);
@@ -377,12 +387,14 @@ export function CombatEncounterPanel({
             // Fate Engine P1 R8 — the dragged die is HONORED: a banked Reserve die
             // (or, for fate cards, a dead X die) powers the play directly; a fresh
             // tray die drafts first (bank-or-burn applies to the spare die).
-            const isReserveDie = !!dieId && (s.reserve ?? []).some((d) => d.id === dieId);
-            const isFateX = !!dieId && s.dice.some((d) => d.id === dieId && d.color === 'x');
-            if (power && dieId && !isReserveDie && !isFateX && s.draftedDieId === null) {
+            // Spec 32 v3 §5 — a Reserve / fate-X / FLOATING die is its own power
+            // source (explicit dieId, never drafted); a fresh tray die drafts
+            // first. Routing extracted to `resolveApplyRouting` (tested).
+            const routing = resolveApplyRouting(s, dieId);
+            if (power && routing.draftFirst && dieId) {
                 ns = draftStanceDie(ns, dieId, { bankUnpicked: bankSpareRef.current }).state;
             }
-            const t = playCombatCard(ns, { uid }, power, (isReserveDie || isFateX) ? dieId : undefined);
+            const t = playCombatCard(ns, { uid }, power, routing.explicitDieId);
             fxRef.current = t.events;
             ns = t.state;
             // TODO(engine): momentum belongs in axiomancer-mechanics as a first-class
@@ -615,8 +627,14 @@ export function CombatEncounterPanel({
                                     <Text style={styles.detailPillVal} numberOfLines={2}>{detailCard.detail.diePill}</Text>
                                 </View>
                             </View>
-                            {/* the colour-match rule — ONE global legend (was boilerplated onto every card) */}
+                            {/* the colour law — ONE global legend (was boilerplated onto every card) */}
                             <Text style={styles.detailColorMatch}>{detailCard.detail.colorMatchHint}</Text>
+
+                            {/* (4) FLAVOR — authored prose, overlay BOTTOM only (owner
+                                directive 2026-07-09: the face stays purely functional). */}
+                            {detailCard.flavor ? (
+                                <Text style={styles.detailFlavor} testID="combat-card-detail-flavor">{detailCard.flavor}</Text>
+                            ) : null}
                         </ScrollView>
 
                     </View>
@@ -891,6 +909,7 @@ const useStyles = makeStyles((AXM) => ({
     detailPillKw: { fontFamily: FONTS.gothic, fontSize: 13, letterSpacing: 0.5 },
     detailPillVal: { flex: 1, fontFamily: FONTS.mono, fontSize: 12.5, color: AXM.parchment, letterSpacing: 0.2 },
     detailColorMatch: { alignSelf: 'stretch', fontFamily: FONTS.sans, fontSize: 9, letterSpacing: 1.6, color: AXM.bone, opacity: 0.6, lineHeight: 14, marginBottom: 4, textAlign: 'center' },
+    detailFlavor: { alignSelf: 'stretch', fontFamily: FONTS.serifItalic, fontStyle: 'italic', fontSize: 12, color: AXM.bone, opacity: 0.75, lineHeight: 17, marginTop: 10, textAlign: 'center' },
     detailReadNote: { fontFamily: FONTS.serifItalic, fontStyle: 'italic', fontSize: 11, color: AXM.bone, lineHeight: 15 },
     detailLine: { fontFamily: FONTS.serif, fontSize: 13, color: AXM.parchment, lineHeight: 18 },
     detailKeywords: { alignSelf: 'stretch', marginBottom: 10 },

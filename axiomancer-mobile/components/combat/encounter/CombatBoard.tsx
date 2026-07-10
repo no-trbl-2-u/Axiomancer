@@ -172,8 +172,10 @@ function DiceRow({
             {vm.dice.map((die) => {
                 // Fate Engine P1 — a Reserve die is a SECOND power source: draggable
                 // onto a card any time (the single-die law still holds per play).
-                const draggable = die.reserve
-                    ? draggingDieId !== die.id
+                // Spec 32 v3 §5 — a FLOATING die likewise bypasses the one-die
+                // draft: draggable whenever it is unspent, drafted or not.
+                const draggable = die.reserve || die.floating
+                    ? draggingDieId !== die.id && !die.spent
                     : !vm.hasDraft && !die.isX && !die.drafted && !die.spent;
                 const isAssigned = assignedDieIds.has(die.id);
                 // R4 — a dead X face is never dead: tap it to advance the strongest
@@ -199,18 +201,23 @@ function DiceRow({
                 }
                 const node = (
                     <View style={isAssigned ? styles.dieAssigned : undefined}>
-                        <CombatDie die={die} size={54} dimmed={(!die.reserve && vm.hasDraft && !die.drafted) || draggingDieId === die.id} />
+                        <CombatDie die={die} size={54} dimmed={(!die.reserve && !die.floating && vm.hasDraft && !die.drafted) || draggingDieId === die.id} />
                         {die.reserve ? (
                             <Text style={[styles.dieConv, { color: AXM.sulfur }]} testID={`combat-reserve-${die.id}`}>
                                 ⏳{die.pips ? ` +${die.pips}✦` : ''} BANKED
                             </Text>
                         ) : null}
-                        {draggable && !die.reserve && die.readPip && die.readPip !== 'none' ? (
+                        {die.floating ? (
+                            <Text style={[styles.dieConv, { color: AXM.sulfur }]} testID={`combat-floating-${die.id}`}>
+                                ✦ FLOATING
+                            </Text>
+                        ) : null}
+                        {draggable && !die.reserve && !die.floating && die.readPip && die.readPip !== 'none' ? (
                             <Text style={[styles.diePip, { color: READ_ACCENT[die.readPip] }]}>
                                 {die.readPip === 'advantage' ? '▲ ADV' : die.readPip === 'disadvantage' ? '▼ DIS' : '— EVEN'}
                             </Text>
                         ) : null}
-                        {!die.reserve && vm.hasDraft && !die.drafted && <Text style={styles.dieConv}>→ +1 ◆</Text>}
+                        {!die.reserve && !die.floating && vm.hasDraft && !die.drafted && <Text style={styles.dieConv}>→ +1 ◆</Text>}
                         {die.drafted && <Text style={[styles.dieConv, { color: AXM.sulfur }]}>{die.spent ? 'SPENT' : 'STANCE'}</Text>}
                     </View>
                 );
@@ -1003,41 +1010,29 @@ export const CombatCardFace = React.memo(function CombatCardFace({
                         <View style={styles.nameBandShade} pointerEvents="none" />
                         <Text style={[styles.nameText, large && styles.nameTextLarge]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>{card.name}</Text>
                     </View>
-                    {large ? (
-                        /* large inspect card: the effect SENTENCE (keywords bolded, hero number
-                           inside it) replaces the small card's terse keyword line — stated
-                           ONCE, on the card itself (Sanguine-Step shape). */
-                        <View style={styles.faceBody}>
-                            <OutcomeText
-                                text={card.detail.outcomeLine}
-                                names={card.detail.keywords.map((k) => k.name)}
-                                base={styles.faceEffect}
-                                bold={styles.faceEffectBold}
-                            />
-                            {/* Fate Engine P1 — the card's printed DIE LINES (real units). */}
-                            {card.dieLines?.map((line) => (
-                                <Text key={line} style={styles.faceDieLine} numberOfLines={2}>{line}</Text>
-                            ))}
-                        </View>
-                    ) : (
-                        /* small face: ONE keyword line — "◆ KEYWORD value" */
-                        <View style={styles.kwLine}>
-                            <Text style={[styles.kwText, { color: kwColor }]} numberOfLines={1} adjustsFontSizeToFit>
-                                ◆ {f.keyword ?? 'DIE'}{readPip ? ` ${readPip}` : ''}
-                            </Text>
-                            {!numberless ? (
-                                <Text style={[styles.kwValue, { color: kwColor }]} numberOfLines={1} adjustsFontSizeToFit>{value}</Text>
-                            ) : null}
-                            {f.heroSub ? <Text style={styles.kwSub} numberOfLines={1} adjustsFontSizeToFit>{f.heroSub}</Text> : null}
-                        </View>
-                    )}
-                    {/* large-only TYPE-TAB pinned to the card's bottom edge (replaces the floating
-                        detailTypeBanner in the modal). */}
-                    {large ? (
-                        <View style={styles.typeTab}>
-                            <Text style={styles.typeTabText} numberOfLines={1}>{card.detail.metaChip}</Text>
-                        </View>
-                    ) : null}
+                    {/* IDENTICAL wording at BOTH sizes (owner directive 2026-07-09):
+                        ONE keyword line — "◆ KEYWORD value" — plus the printed die
+                        lines. Definitions/pills live OUTSIDE the face in the inspect
+                        overlay; the face itself may never drift between the hand and
+                        the modal. */}
+                    <View style={styles.kwLine}>
+                        <Text style={[styles.kwText, large && styles.kwTextLarge, { color: kwColor }]} numberOfLines={1} adjustsFontSizeToFit>
+                            ◆ {f.keyword ?? 'DIE'}{readPip ? ` ${readPip}` : ''}
+                        </Text>
+                        {!numberless ? (
+                            <Text style={[styles.kwValue, large && styles.kwValueLarge, { color: kwColor }]} numberOfLines={1} adjustsFontSizeToFit>{value}</Text>
+                        ) : null}
+                        {f.heroSub ? <Text style={[styles.kwSub, large && styles.kwSubLarge]} numberOfLines={1} adjustsFontSizeToFit>{f.heroSub}</Text> : null}
+                        {/* Fate Engine P1 — the card's printed DIE LINES (real units). */}
+                        {card.dieLines?.map((line) => (
+                            <Text key={line} style={[styles.faceDieLine, !large && styles.faceDieLineSmall]} numberOfLines={large ? 2 : 1} adjustsFontSizeToFit>{line}</Text>
+                        ))}
+                    </View>
+                    {/* TYPE-TAB pinned to the card's bottom edge — both sizes (the
+                        type — SPELL / ENCHANTMENT / CURSE — is printed identity). */}
+                    <View style={[styles.typeTab, !large && styles.typeTabSmall]}>
+                        <Text style={[styles.typeTabText, !large && styles.typeTabTextSmall]} numberOfLines={1} adjustsFontSizeToFit>{card.detail.metaChip}</Text>
+                    </View>
                 </View>
             </View>
         </View>
@@ -1208,15 +1203,22 @@ const useStyles = makeStyles((AXM) => ({
     kwText: { fontFamily: FONTS.sans, fontSize: 11, letterSpacing: 1 },
     kwValue: { fontFamily: FONTS.mono, fontSize: 15, lineHeight: 17, marginTop: 0 },
     kwSub: { fontFamily: FONTS.mono, fontSize: 8, lineHeight: 10, color: AXM.bone },
+    // large-face scale-ups of the SAME keyword line (identical wording law).
+    kwTextLarge: { fontSize: 16, letterSpacing: 1.4 },
+    kwValueLarge: { fontSize: 24, lineHeight: 27, marginTop: 2 },
+    kwSubLarge: { fontSize: 12, lineHeight: 15, marginTop: 1 },
+    faceDieLineSmall: { fontSize: 7, marginTop: 1 },
     // large-only effect body (Sanguine-Step shape) — fills the space under the name band.
     // Warm parchment-tone panel behind the effect text anchors it like a scroll.
     faceBody: { flex: 1, justifyContent: 'center', paddingHorizontal: 12, paddingVertical: 8, backgroundColor: 'rgba(38,30,20,0.6)' },
     faceEffect: { fontFamily: FONTS.serif, fontSize: 14, lineHeight: 20, color: AXM.parchment, textAlign: 'center' },
     faceEffectBold: { fontFamily: FONTS.gothic, color: AXM.sulfur },
-    // large-only TYPE-TAB pinned to the card's bottom edge.
+    // TYPE-TAB pinned to the card's bottom edge — both sizes.
     typeTab: {
         alignSelf: 'center', marginBottom: 10, borderWidth: 1, borderColor: 'rgba(255,255,255,0.18)',
         backgroundColor: 'rgba(0,0,0,0.55)', borderRadius: 3, paddingHorizontal: 12, paddingVertical: 3,
     },
     typeTabText: { fontFamily: FONTS.sans, fontSize: 9, letterSpacing: 1.6, color: AXM.bone },
+    typeTabSmall: { marginBottom: 3, paddingHorizontal: 5, paddingVertical: 1 },
+    typeTabTextSmall: { fontSize: 6, letterSpacing: 0.8 },
 }));

@@ -56,10 +56,10 @@ export const COMBAT_TUTORIAL_STEPS: CombatTutorialStep[] = [
         id: 'draft',
         title: 'DRAFT YOUR STANCE',
         body:
-            'You rolled two stance dice. Keep ONE — tap it. The other you leave behind ' +
-            'banks as ◆ Conviction, fuel for your Signature Skills. The die you keep is your ' +
-            'stance for the turn: it decides which cards you can POWER.',
-        lookFor: 'the two dice — TAP ONE',
+            'You rolled three dice. Keep ONE — tap it. Every die you leave behind banks as ' +
+            '◆ tokens for your Signature Skills (gold banks 2; a dead ✕ banks none). The die ' +
+            'you keep can only power cards of ITS color — gold powers anything.',
+        lookFor: 'the three dice — TAP ONE',
         done: (s) => !!s.draftedDieId || s.conviction >= 1 || playedACard(s) || advanced(s),
     },
     {

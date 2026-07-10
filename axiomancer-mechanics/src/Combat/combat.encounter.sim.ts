@@ -143,9 +143,13 @@ function selectCard(
     rng: () => number,
     notUids?: Set<string>,
     focusIds?: ReadonlySet<string>,
+    matchColor?: string,
 ): { uid: string; card: CombatCard } | null {
+    // Dice-law (2026-07-09): with a powering die in hand, only cards of ITS
+    // color are playable (wild matches everything) — mismatches hard-fizzle.
     const cards = handCards(s)
-        .filter(c => c.card.verbClass !== 'retreat' && !(notUids && notUids.has(c.uid)));
+        .filter(c => c.card.verbClass !== 'retreat' && !(notUids && notUids.has(c.uid)))
+        .filter(c => !matchColor || matchColor === 'wild' || c.card.stance === matchColor);
     let best: { uid: string; card: CombatCard } | null = null;
     let bestScore = -Infinity;
     for (const c of cards) {
@@ -226,7 +230,7 @@ function policyPlayPhase(
             // oldest (ripest) banked die before rolling the next turn.
             const banked = (working.reserve ?? [])[0];
             if (banked) {
-                const wantR = selectCard(working, policy, rng, fizzledUids, focusIds);
+                const wantR = selectCard(working, policy, rng, fizzledUids, focusIds, banked.color);
                 if (wantR) {
                     const resR = playCombatCard(working, { uid: wantR.uid }, true, banked.id);
                     if (!resR.events.some(e => e.kind === 'effect-fizzled')) {
@@ -280,7 +284,7 @@ function policyPlayPhase(
             }
         }
 
-        const want = selectCard(working, policy, rng, fizzledUids, focusIds);
+        const want = selectCard(working, policy, rng, fizzledUids, focusIds, drafted.color);
         if (!want) {
             const top = handCards(working)[0];
             if (top) {

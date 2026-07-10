@@ -215,9 +215,12 @@ describe('STAGGER rungs — full removal denies the turn; BACKFIRE drips per run
     const ZENO = 'zenos-half-step'; // STAGGER 1
 
     it('stripping every rung DENIES the telegraph and BACKFIRE drips per denied rung', () => {
-        mockSequentialRng(0.05);
+        // 0.2 rolls BODY dice — zeno's-half-step is a body spell and the color
+        // law (2026-07-09) demands a matching (or wild) powering die. No seed:
+        // a seed installs its own rng stream and the mock would never apply.
+        mockSequentialRng(0.2);
         const enemy = makeEnemy(300, 'mind', [ae('debuff_backfire', 1, 3)]);
-        const state = initializeCombatEncounter(makePlayer([ZENO]), enemy, [ZENO, ZENO, ZENO, ZENO, ZENO], 7);
+        const state = initializeCombatEncounter(makePlayer([ZENO]), enemy, [ZENO, ZENO, ZENO, ZENO, ZENO]);
         // Two STAGGER 1 plays = THREAT_RUNGS (2) → the action is denied.
         const res = resolveCombatPhase(rollEncounterDice(state).state, [
             { cardId: ZENO, useBottom: true },
@@ -305,8 +308,11 @@ describe('OMEN — declare with the powering die; resolve at the phase boundary'
             makePlayer([OMEN_CARD]), makeEnemy(300, 'mind'),
             [OMEN_CARD, OMEN_CARD, OMEN_CARD, OMEN_CARD, OMEN_CARD], 7);
         state = rollEncounterDice(state).state;
-        state = withPhases(state, ['mind', 'heart']); // next phase stance: HEART
-        state = setDice(state, ['mind', 'x']);        // mind die → predicts MIND
+        // signs-and-portents is a HEART spell: the color law demands a heart
+        // (or wild) powering die, so the MISS comes from the phases instead —
+        // the heart die predicts HEART, but the next phase stays MIND.
+        state = withPhases(state, ['mind', 'mind']);
+        state = setDice(state, ['heart', 'x']);       // heart die → predicts HEART
         state = draftStanceDie(state, state.dice[0].id).state;
         const played = playFromHand(state, OMEN_CARD);
         const res = resolveThreatPhase(played.state);
@@ -447,13 +453,16 @@ describe('ECHO — the PAID payload fires twice; stuck-in-their-head drips per e
         mockSequentialRng(0.05);
         const CHARGE = 'ad-nauseam';
         const BLEEDER = 'straw-mans-jab';
+        // Enemy stance BODY: the wild die re-reads as the bleeder's body stance,
+        // so the read stays NEUTRAL and no read-intensity bonus muddies the echo.
         let state = openAndDraft(
-            makePlayer([CHARGE, BLEEDER]), makeEnemy(300, 'mind'),
+            makePlayer([CHARGE, BLEEDER]), makeEnemy(300, 'body'),
             [CHARGE, BLEEDER, BLEEDER, BLEEDER, BLEEDER], 'mind');
         // A banked Reserve die powers the second spell in the SAME turn.
-        // (heart — deliberately NOT body, so straw-mans-jab's own body
-        // dieBonus (+1 intensity) stays quiet and the echo is isolated.)
-        state = { ...state, reserve: [{ id: 'bank-echo', color: 'heart', state: 'available', temporary: false, pips: 0 }] };
+        // (WILD — the color law demands a matching die for the body spell, and
+        // wild is the exception; it does NOT trigger straw-mans-jab's body
+        // dieBonus (+1 intensity), so the echo stays isolated.)
+        state = { ...state, reserve: [{ id: 'bank-echo', color: 'wild', state: 'available', temporary: false, pips: 0 }] };
         const charged = playFromHand(state, CHARGE);
         expect(charged.state.echoNextSpell).toBe(true);
         const res = playFromHand(charged.state, BLEEDER, true, 'bank-echo');
@@ -519,8 +528,8 @@ describe('ENCHANT / DISENCHANT — FREE timed line, PAID permanent, unique-in-pl
 
     it('a TEMP enchant fires the exact same hook as the permanent one (venom blesses a DoT)', () => {
         mockSequentialRng(0.05);
-        const DOT = 'slippery-slope';
-        let state = openAndDraft(makePlayer([DOT]), makeEnemy(300, 'heart'), [DOT, DOT, DOT], 'heart');
+        const DOT = 'slippery-slope'; // body spell — color law needs a body die (neutral read vs body foe)
+        let state = openAndDraft(makePlayer([DOT]), makeEnemy(300, 'body'), [DOT, DOT, DOT], 'body');
         state = { ...state, tempZone: [{ cardId: 'venom-and-vein', roundsLeft: 3 }] };
         const res = playFromHand(state, DOT);
         const poison = res.state.enemy.effects.find(e => e.effectId === 'debuff_poison');
@@ -593,8 +602,8 @@ describe('ENCHANT / DISENCHANT — FREE timed line, PAID permanent, unique-in-pl
 describe('persistent hooks — venom-and-vein, mirror-of-guilt, crumbling-resolve', () => {
     it('venom-and-vein (E): bleed/poison land +1 intensity', () => {
         mockSequentialRng(0.05);
-        const DOT = 'slippery-slope';
-        let state = openAndDraft(makePlayer([DOT]), makeEnemy(300, 'heart'), [DOT, DOT, DOT], 'heart');
+        const DOT = 'slippery-slope'; // body spell — color law needs a body die (neutral read vs body foe)
+        let state = openAndDraft(makePlayer([DOT]), makeEnemy(300, 'body'), [DOT, DOT, DOT], 'body');
         state = { ...state, persistentZone: ['venom-and-vein'] };
         const res = playFromHand(state, DOT);
         const poison = res.state.enemy.effects.find(e => e.effectId === 'debuff_poison');

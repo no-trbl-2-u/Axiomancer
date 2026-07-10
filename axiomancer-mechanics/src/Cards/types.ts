@@ -173,6 +173,11 @@ export type CardSpecialMechanic =
      *  converts to +1 Conviction (printed). `color: 'powering'` = the powering
      *  die's color; `'wild'` on premium cards. */
     | { kind: 'forge_floating_die'; color: 'powering' | 'wild' }
+    /** TRANSMUTE (dice-law 2026-07-09) — convert one dead X die in the tray into
+     *  a FLOATING WILD die (all floating rules apply: joins the tray now, never
+     *  rerolls, persists across combats, gone forever when spent). With no X in
+     *  the tray, or at the floating cap, it burns for +1 Conviction (printed). */
+    | { kind: 'float_x_die' }
     /** STAGGER — remove `rungs` rungs from the enemy's next telegraphed action;
      *  at 0 rungs the action is denied outright. */
     | { kind: 'stagger'; rungs: number }

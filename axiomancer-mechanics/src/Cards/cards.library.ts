@@ -382,16 +382,19 @@ const bootstrapLoop: Card = {
     category: 'paradox',
     philosophicalAspect: 'mind',
     description:
-        'The proof assumes itself and, scandalously, works. The effect funds ' +
-        'its own cause.',
+        'The proof assumes itself and, scandalously, works. Even a dead ' +
+        'premise funds its own cause.',
     tier: 2, rank: 3, cardType: 'spell',
     targetType: 'self',
-    // pts: KINDLE wild (3) + FREE conviction (1×0.35) + threshold(pip 1.5 ×0.5 = 0.75) + tempo ≈ 6.5 → Thesis
+    // pts: TRANSMUTE dead X → WILD floating ((5+3+1)×0.7 + 1×0.3 = 6.6) + FREE
+    // conviction (1×0.35) + threshold(pip 1.5 ×0.5 = 0.75) ≈ 7.7 — fits the
+    // 4.5-13 uncommon band for rank 3. (Dice-law rework 2026-07-09: KINDLE wild
+    // swapped for float_x_die — the card-effect path that softens dead X faces.)
     free: { conviction: 1 },
-    specialMechanics: [{ kind: 'create_temporary_die', color: 'wild' }],
+    specialMechanics: [{ kind: 'float_x_die' }],
     threshold: { color: 'mind', count: 2, rider: { pips: 1 } },
     addedIn: '2026-07-08',
-    tags: ['forge', 'dice'],
+    tags: ['forge', 'dice', 'floating'],
 };
 
 const exNihilo: Card = {

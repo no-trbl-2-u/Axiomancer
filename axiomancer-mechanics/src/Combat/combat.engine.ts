@@ -78,8 +78,11 @@ const MAX_PHASES = 60;
 export const READ_DAMAGE_MULT: Record<CombatReadResult, number> = {
     advantage: 1.5, neutral: 1.0, disadvantage: 0.5, none: 1.0,
 };
-/** Conviction granted by the unpicked die each draft (§1). */
+/** Conviction granted by EACH unpicked colored die at draft (dice-law 2026-07-09:
+ *  every unused rolled die is a token; X faces bank nothing). */
 export const CONVICTION_PER_UNPICKED_DIE = 1;
+/** A WILD (gold) die left unused banks double — the payday for not spending it. */
+export const CONVICTION_PER_UNPICKED_WILD = 2;
 /** Bonus Conviction for winning the stance read (§1 — reading fuels power). */
 export const CONVICTION_READ_WIN_BONUS = 1;
 /** Flat bonus HP damage when the drafted die color matches the card's stance (§3). */
@@ -544,9 +547,17 @@ export function draftStanceDie(
 
     let conviction = state.conviction;
     events.push({ kind: 'die-drafted', dieId, color: drafted.color, read });
-    if (!banked) {
-        conviction = Math.min(CONVICTION_CAP, conviction + CONVICTION_PER_UNPICKED_DIE);
-        events.push({ kind: 'conviction-gained', amount: CONVICTION_PER_UNPICKED_DIE, total: conviction, reason: 'unpicked-die' });
+    // Dice-law rework (2026-07-09): EVERY unused rolled die converts to tokens —
+    // +1 Conviction per colored die, +2 for a WILD (gold) die, +0 for a dead X.
+    // A banked die is saved, not unused: it earns no token.
+    for (const d of unpicked) {
+        if (d.id === banked?.id) continue;
+        const gain = d.color === 'wild' ? CONVICTION_PER_UNPICKED_WILD
+            : d.color === 'x' ? 0 : CONVICTION_PER_UNPICKED_DIE;
+        if (gain > 0) {
+            conviction = Math.min(CONVICTION_CAP, conviction + gain);
+            events.push({ kind: 'conviction-gained', amount: gain, total: conviction, reason: 'unpicked-die' });
+        }
     }
     if (read === 'advantage') {
         conviction = Math.min(CONVICTION_CAP, conviction + CONVICTION_READ_WIN_BONUS);
@@ -583,8 +594,9 @@ export function endTurn(state: CombatEncounterState): CombatTransition {
             reserve = [...reserve, { ...d, pips: 0 }];
             events.push({ kind: 'die-banked', dieId: d.id, color: d.color, pips: 0 });
         } else {
-            conviction = Math.min(CONVICTION_CAP, conviction + CONVICTION_PER_UNPICKED_DIE);
-            events.push({ kind: 'conviction-gained', amount: CONVICTION_PER_UNPICKED_DIE, total: conviction, reason: 'unpicked-die' });
+            const gain = d.color === 'wild' ? CONVICTION_PER_UNPICKED_WILD : CONVICTION_PER_UNPICKED_DIE;
+            conviction = Math.min(CONVICTION_CAP, conviction + gain);
+            events.push({ kind: 'conviction-gained', amount: gain, total: conviction, reason: 'unpicked-die' });
         }
     }
     const next: CombatEncounterState = {
@@ -1120,6 +1132,18 @@ function playBottomAction(
         }
     }
 
+    // 1b. THE COLOR LAW (dice-law rework 2026-07-09): a die can only power a
+    //     card of ITS color. WILD (gold) is the sole exception — it matches
+    //     every card. A fate-X play acts wild by definition. Applies to every
+    //     power source: drafted, Reserve, and floating alike.
+    if (poweringSource !== 'fate-x' && powering.color !== 'wild' && powering.color !== card.stance) {
+        const events: CombatEvent[] = [{
+            kind: 'effect-fizzled', cardId: card.id, effectId: '',
+            message: `a ${powering.color} die cannot power a ${card.stance} card — colors must match`,
+        }];
+        return { state: withLog(state, events), events };
+    }
+
     // 2. The read + color-match. The read belongs to the TURN's draft contest
     //    (state.lastRead); a WILD powering die re-reads by adopting the card's
     //    stance; a fate-X play has no stance → none.
@@ -1374,6 +1398,9 @@ function playBottomAction(
     // FORGE (spec 32 v3 §5): a freshly forged floating die joins the TRAY NOW —
     // collected here and merged into `dice` after the powering-die spend.
     const forgedFloating: CombatManaDie[] = [];
+    // TRANSMUTE (dice-law 2026-07-09): X dice consumed by `float_x_die` this
+    // play — removed from the tray after the powering-die spend.
+    const transmutedXIds: string[] = [];
 
     // Local SOUL gain (bone-orchard drips 1 HP per Soul gained — soul-gated).
     const gainSoulsLocal = (n: number, reason: 'expiry' | 'consumed' | 'granted'): void => {
@@ -1690,6 +1717,28 @@ function playBottomAction(
                 }
                 break;
             }
+            case 'float_x_die': {
+                // TRANSMUTE (dice-law 2026-07-09) — a dead X face in the tray
+                // becomes a FLOATING WILD die: dead fate turned live. Falls back
+                // to +1 Conviction (printed) with no X or at the floating cap.
+                const xDie = state.dice.find(d =>
+                    d.color === 'x' && d.state !== 'spent' && !d.floating && !transmutedXIds.includes(d.id));
+                if (!xDie || floatingDice.length >= FLOATING_DICE_CAP) {
+                    conviction = Math.min(CONVICTION_CAP, conviction + 1);
+                    events.push({ kind: 'conviction-gained', amount: 1, total: conviction, reason: 'effect' });
+                } else {
+                    transmutedXIds.push(xDie.id);
+                    const die: CombatManaDie = {
+                        id: `float-${state.turn}-${state.log.length + events.length}`,
+                        color: 'wild', state: 'available', temporary: false, floating: true,
+                        pips: zoneHas(state, 'anvil-of-form') ? 1 : 0,
+                    };
+                    floatingDice = [...floatingDice, die];
+                    forgedFloating.push(die);
+                    events.push({ kind: 'die-floated', dieId: die.id, color: 'wild', poolSize: floatingDice.length });
+                }
+                break;
+            }
             case 'create_temporary_die': {
                 // KINDLE — a temporary die (this combat only) joins the Reserve.
                 const forged: CombatManaDie = {
@@ -1968,7 +2017,11 @@ function playBottomAction(
     const bankSpentMech = mechs.some(m => m.kind === 'bank_spent_die');
     const refreshed = (landedOnEnemy && landedNewDistinct) || reactFired || riderRefresh
         || mechs.some(m => m.kind === 'refresh_die') || convertMech;
-    let dice = state.dice;
+    // TRANSMUTE — X dice consumed by `float_x_die` leave the tray (their wild
+    // floating successors join it below via `forgedFloating`).
+    let dice = transmutedXIds.length > 0
+        ? state.dice.filter(d => !transmutedXIds.includes(d.id))
+        : state.dice;
     if (poweringSource === 'floating') {
         dice = dice.filter(d => d.id !== powering.id);
         floatingDice = floatingDice.filter(d => d.id !== powering.id);
@@ -2787,9 +2840,12 @@ function dotTickBreakdown(effects: readonly ActiveEffect[], currentRound?: numbe
 
 /**
  * Picks the best die to draft from this turn's pool for a card of `cardStance`
- * against `enemyStance`: prefer a die that wins the read (advantage), then a
- * color-match, then any usable die, else the first (an X draft just banks the
- * token). Used by the batch entry + sim to auto-play.
+ * against `enemyStance`. Under the color law (2026-07-09) only a MATCHING die
+ * (exact color or wild) can power the card at all, so matching is the hard
+ * requirement: prefer a matching die that also wins the read, then any
+ * matching die, then — when nothing matches — a read-winning or first usable
+ * die (the turn plays free tops and cashes the rest for tokens). Used by the
+ * batch entry + sim to auto-play.
  */
 export function chooseDraft(
     dice: readonly CombatManaDie[],
@@ -2797,16 +2853,18 @@ export function chooseDraft(
     enemyStance: Stance | null,
 ): string | null {
     if (dice.length === 0) return null;
-    const usable = dice.filter(d => d.state === 'available' && d.color !== 'x');
-    if (usable.length === 0) return dice[0]?.id ?? null; // forced X — bank the token
+    const usable = dice.filter(d => d.state === 'available' && d.color !== 'x' && !d.floating);
+    if (usable.length === 0) return dice.find(d => !d.floating)?.id ?? null; // forced X — bank the token
+    const matches = usable.filter(d => d.color === 'wild' || d.color === cardStance);
     // `enemyStance === null` ⇒ the player can't see the stance yet (blind play):
     // skip the advantage seek and draft for a color-match instead.
-    const advantage = enemyStance !== null
-        ? usable.find(d => dieHasStance(d.color) && stanceBeats(d.color as Stance, enemyStance))
-        : undefined;
+    const winsRead = (d: CombatManaDie): boolean => enemyStance !== null
+        && dieHasStance(d.color) && stanceBeats(d.color as Stance, enemyStance);
+    const matchAdvantage = matches.find(winsRead);
+    if (matchAdvantage) return matchAdvantage.id;
+    if (matches.length > 0) return matches[0].id;
+    const advantage = usable.find(winsRead);
     if (advantage) return advantage.id;
-    const match = usable.find(d => d.color === 'wild' || d.color === cardStance);
-    if (match) return match.id;
     return usable[0].id;
 }
 

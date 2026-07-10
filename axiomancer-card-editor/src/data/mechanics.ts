@@ -154,6 +154,7 @@ export const SPECIAL_MECHANIC_KINDS = [
     'bank_spent_die',
     // Spec 32 v3 — the themed-deck verb set
     'forge_floating_die',
+    'float_x_die',
     'stagger',
     'lock_stance',
     'foretell',

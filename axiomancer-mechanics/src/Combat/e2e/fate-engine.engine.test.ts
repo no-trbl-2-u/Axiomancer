@@ -142,11 +142,13 @@ describe('R2 RESERVE — bank, ripen, cash', () => {
         let s = open(['qa-threshold-dot'], 'heart'); // heart stance: body die = disadvantage? body vs heart → heart beats body = disadvantage; draft heart neutral
         s = setDice(s, ['heart', 'mind']);
         s = draftStanceDie(s, s.dice[0].id).state;   // neutral read (heart vs heart)
-        s = { ...s, reserve: [{ id: 'bank-2', color: 'mind', state: 'available', temporary: false, pips: 2 }] };
+        // BODY reserve die — the color law (2026-07-09) demands the powering die
+        // match the body card; the turn read stays neutral (heart draft vs heart).
+        s = { ...s, reserve: [{ id: 'bank-2', color: 'body', state: 'available', temporary: false, pips: 2 }] };
         const entry = s.hand.find(h => h.cardId === 'qa-threshold-dot')!;
         const res = playCombatCard(s, { uid: entry.uid }, true, 'bank-2');
         const bleed = res.state.enemy.effects.find(e => e.effectId === 'debuff_bleed')!;
-        // authored i1 + 2 pips × PIP_INTENSITY_BONUS (mind die on a body card: no match, neutral turn read)
+        // authored i1 + 2 pips × PIP_INTENSITY_BONUS (neutral turn read: no read bonus)
         expect(bleed.intensity).toBe(1 + 2 * PIP_INTENSITY_BONUS);
         expect(res.events.some(e => e.kind === 'pips-cashed')).toBe(true);
         // the fresh bleed fired the VARIETY CHAIN (R9) → the reserve die stays

@@ -34,8 +34,11 @@ export interface HazardCombatAutoResult {
     phaseCount: number;
 }
 
-const bestAutoCard = (s: CombatEncounterState, policy: HazardAutoPolicyId): { uid: string; card: CombatCard } | null => {
-    const cards = handCards(s).filter(c => c.card.verbClass !== 'retreat');
+const bestAutoCard = (s: CombatEncounterState, policy: HazardAutoPolicyId, matchColor?: string): { uid: string; card: CombatCard } | null => {
+    // Dice-law (2026-07-09): with a powering die in hand, only same-color cards
+    // are playable (wild matches everything).
+    const cards = handCards(s).filter(c => c.card.verbClass !== 'retreat')
+        .filter(c => !matchColor || matchColor === 'wild' || c.card.stance === matchColor);
     if (cards.length === 0) return null;
     const activeIds = new Set(s.enemy.effects.map(e => e.effectId));
     return cards.sort((a, b) => {
@@ -101,7 +104,7 @@ const playAutoPhase = (state: CombatEncounterState, policy: HazardAutoPolicyId, 
                 continue;
             }
         }
-        const want = bestAutoCard(s, policy);
+        const want = bestAutoCard(s, policy, drafted.color);
         if (!want) {
             const topCard = handCards(s)[0];
             if (topCard) s = playCombatCard(s, { uid: topCard.uid }, false).state;

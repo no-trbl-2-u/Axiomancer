@@ -34,6 +34,19 @@
 
 Die shape: `CombatManaDie` gains `pips: 0|1|2` (deterministic) — no numeric face, no new RNG. Roll/draft cycle (2 dice, draft 1, `combat.dice.ts:25, 85-92`) unchanged. Single-die law unchanged.
 
+> **AMENDED — dice-law rework (owner directive 2026-07-09).** The roll/draft
+> cycle is now **3 dice, draft 1, no stance-die guarantee** (an honest roll —
+> a colorless turn is a pure token turn). **THE COLOR LAW:** a die can only
+> power a card of ITS color; WILD (gold) is the sole exception; off-color plays
+> hard-fizzle (this supersedes the "any die works" half of R7 — the +1-duration
+> match bonus survives but is now near-unconditional). Every unpicked die banks
+> Conviction tokens per die: colored +1, wild +2, dead X +0; the flat
+> once-per-draft `CONVICTION_PER_UNPICKED_DIE` accrual is per-die now. A card
+> effect (`float_x_die`, TRANSMUTE — carried by `bootstrap-loop`) converts a
+> tray X into a wild FLOATING die (spec 32 v3 §5 rules apply). Floating dice
+> bypass the single-die law entirely: any number may power plays in one turn,
+> each is consumed forever, none bank tokens.
+
 **R1 — RESONANCE (Spirit Island element thresholds).** Every die you spend — powering a card, burning for Conviction, banking, or the universal discard — adds 1 Resonance of its color to an encounter tally (`resonance: {heart,body,mind}` on `CombatEncounterState`; Wild: choose the color as you spend; X feeds nothing). Cards with `threshold: {color, count, rider}` check the tally when played and fire the rider automatically, free. One spend, two payoffs.
 
 **R2 — RESERVE & RIPENING (Ark Nova).** At end of turn, instead of burning the undrafted die for +1 Conviction you may **BANK** it (Reserve max 2 dice). A Reserve die gains **+1 pip per threat phase survived, max 2**. A bottom action may be powered by the drafted die **or** a Reserve die (still exactly 1 die). A spent die's pips add **+1 intensity per pip** to the status it lands, or **+2 Guard per pip** on defend cards. Replaces the invisible `carriedDie` (`combat.engine.ts:419-425, 350-355`) with a visible, player-owned version. Holding a die through a telegraph is a gamble against the telegraph.

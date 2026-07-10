@@ -108,6 +108,7 @@ function primaryKeyword(card: CardDraft): { kw: KeywordId; val: number } {
             case 'replay_last':
                 return { kw: 'echo', val: 0 };
             case 'forge_floating_die':
+            case 'float_x_die':
             case 'create_temporary_die':
                 return { kw: 'forge', val: 0 };
             case 'extend_dots':
