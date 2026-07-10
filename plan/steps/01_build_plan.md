@@ -150,7 +150,7 @@ decision log (see each phase file).
       remainder (both; large) — brief:
       `plan/phases/phase_21_retire_procedural_library.md`
       — `refactor(mechanics): retire procedural equipment library — phase 21` (51c2cb51)
-- [ ] Phase 23 — Teardown of dead equipment machinery. Delete the
+- [x] Phase 23 — Teardown of dead equipment machinery. Delete the
       modifier catalogue, the affix (prefix/suffix) library, item sets,
       the rarity model, the dead effect-channel types, the archetype
       signature vestiges, the phase-18 deprecated worn-convention
@@ -159,6 +159,10 @@ decision log (see each phase file).
       User-intent phase 4 + full teardown (mechanics; verify mobile +
       card-editor) — brief:
       `plan/phases/phase_23_equipment_machinery_teardown.md`
+      — `refactor(mechanics): teardown dead equipment machinery — phase 23` (e4d02d21).
+      **Equipment-signature epic (18-21 + 23) COMPLETE.** (Effect-deletion
+      dropped from scope: all 14 candidates gained live non-equipment consumers;
+      buffs library unchanged.)
 
 **Cross-cutting / debt:**
 - [x] Phase 10 — Multi-screen integration test harness (Jest
