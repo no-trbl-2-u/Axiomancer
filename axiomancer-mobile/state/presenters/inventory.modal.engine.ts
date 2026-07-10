@@ -14,7 +14,6 @@ import {
     type Character,
     type Consumable,
     type Equipment,
-    type EquipmentProcTrigger,
     type GameStore,
     type Item,
 } from '@mechanics';
@@ -22,7 +21,7 @@ import {
 import { keywordForEffect } from '@/state/combat/keywords';
 import { freezeViewModel } from './freeze';
 import { parseHealAmount } from '../actions';
-import { computeEquipDelta, type EquipDeltaSide } from '@mechanics';
+import { computeEquipDelta } from '@mechanics';
 import {
     findEquippedInSlot as selectFindEquippedInSlot,
     isEquippedFirstOfSlot as selectIsEquippedFirstOfSlot,
@@ -454,50 +453,16 @@ function computeItemModifiers(eq: Equipment): ItemModifierLine[] {
             : { label: `${value} ${statLabelFor(mod.stat)}` };
         out.push(line);
     }
-    for (const id of eq.passiveEffects ?? []) {
-        out.push({ label: effectName(id) });
-    }
-    for (const proc of (eq.onHitEffects ?? []) as readonly EquipmentProcTrigger[]) {
-        out.push({ label: `on-hit: ${effectName(proc.effectId)}` });
-    }
-    for (const proc of (eq.onDefendEffects ?? []) as readonly EquipmentProcTrigger[]) {
-        out.push({ label: `on-defend: ${effectName(proc.effectId)}` });
-    }
-    return out;
-}
-
-/** Summarise a combat-resource interaction for a one-line effect row. */
-function resourceLabel(entry: EquipDeltaSide['resources'][number]): string {
-    const sign = entry.amount > 0 ? '+' : '';
-    const when = entry.kind === 'start' ? 'start' : entry.kind;
-    return `${entry.resource} ${sign}${entry.amount} (${when})`;
-}
-
-/**
- * Flatten one side (gained or lost) of an equip delta into labels —
- * the *non-stat* changes only: passive effects, on-hit / on-defend
- * status adjustments, and combat-resource interactions. Affix/keyword
- * labels and rolled modifiers are deliberately excluded: their effect
- * is the stat change (already in the stat table) plus any passive
- * effect (already covered here), so listing the affix/modifier
- * add/remove on top is redundant noise.
- */
-function effectLabelsForSide(side: EquipDeltaSide): string[] {
-    const out: string[] = [];
-    for (const e of side.passiveEffects) out.push(e.name ?? e.id);
-    for (const e of side.onHitEffects) out.push(`on-hit: ${e.name ?? e.id}`);
-    for (const e of side.onDefendEffects) out.push(`on-defend: ${e.name ?? e.id}`);
-    for (const r of side.resources) out.push(resourceLabel(r));
+    // Phase 23 — equipment is stat-only + `grantsSignature`; there are no
+    // passive-effect / proc / resource lines to list. The granted signature is
+    // surfaced separately (see `computeEffectDeltas`).
     return out;
 }
 
 /**
- * Compute the non-stat changes the equip causes by diffing the
- * newly-worn item against the one it removes — passive effects, on-hit /
- * on-defend status adjustments, and resource interactions. Stat changes
- * ride on `computeStatDeltas`; affix/keyword and rolled-modifier
- * add/removes are intentionally omitted (their effect is already the
- * stat change), so this block shows only genuine non-stat changes.
+ * The non-stat change the equip causes: the signet-relic signature gained /
+ * lost (Phase 23 — equipment carries no other non-stat channel). Stat changes
+ * ride on `computeStatDeltas`.
  */
 function computeEffectDeltas(
     newlyWorn: Equipment,
@@ -506,11 +471,11 @@ function computeEffectDeltas(
 ): ModalEffectDelta[] {
     const equipDelta = computeEquipDelta(newlyWorn, removed, player);
     const out: ModalEffectDelta[] = [];
-    for (const label of effectLabelsForSide(equipDelta.gained)) {
-        out.push({ label, direction: 'gained' });
+    for (const s of equipDelta.signatures.gained) {
+        out.push({ label: `grants ${s.name ?? s.id}`, direction: 'gained' });
     }
-    for (const label of effectLabelsForSide(equipDelta.lost)) {
-        out.push({ label, direction: 'lost' });
+    for (const s of equipDelta.signatures.lost) {
+        out.push({ label: `loses ${s.name ?? s.id}`, direction: 'lost' });
     }
     return out;
 }

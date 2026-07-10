@@ -43,22 +43,6 @@ export function wornPerSlot(
 }
 
 /**
- * Walk the inventory in order; for each slot, capture the FIRST equipment item
- * seen in that slot. Deprecated thin wrapper over `wornPerSlot` (Phase 18 —
- * removed in phase 23): reports only the first worn piece per slot, so for a
- * multi-capacity accessory row it hides positions 2-3.
- */
-export function firstEquippedPerSlot(
-    inventory: readonly Item[],
-): Map<EquipmentSlot, Equipment> {
-    const out = new Map<EquipmentSlot, Equipment>();
-    for (const [slot, list] of wornPerSlot(inventory)) {
-        if (list.length > 0) out.set(slot, list[0]);
-    }
-    return out;
-}
-
-/**
  * True iff `target` is among the worn items in its slot per the capacity-aware
  * convention (first `SLOT_CAPACITY[slot]` items of that slot). Returns `false`
  * for equipment pushed past the worn window.

@@ -15,7 +15,7 @@ import type { Equipment } from '../../Items/types';
 
 const oldSword: Equipment = {
     id: 'old-sword', name: 'Old Sword', description: '', category: 'equipment',
-    slot: 'weapon', rarity: 'common', requiredLevel: 0,
+    slot: 'weapon', 
     statModifiers: [{ stat: 'body', value: 1, isMultiplier: false }],
 };
 

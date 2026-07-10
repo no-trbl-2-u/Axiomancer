@@ -44,17 +44,16 @@ describe('relic library — roster + slot split', () => {
         expect([...granted].sort()).toEqual([...ALL_SIGNATURE_IDS].sort());
     });
 
-    it('relics are fixed content — common rarity, no rolled mods / affixes / effects / procs', () => {
+    it('relics are the lean signet shape — only stat/signature fields (Phase 23)', () => {
         for (const r of relicLibrary) {
-            expect(r.rarity).toBe('common');
-            expect(r.requiredLevel).toBe(0);
-            expect(r.rolledMods).toBeUndefined();
-            expect(r.prefixId).toBeUndefined();
-            expect(r.suffixId).toBeUndefined();
-            expect(r.passiveEffects).toBeUndefined();
-            expect(r.onHitEffects).toBeUndefined();
-            expect(r.onDefendEffects).toBeUndefined();
-            expect(r.resourceInteraction).toBeUndefined();
+            // Phase 23 — the rarity / rolled-mod / affix / effect / proc / resource
+            // fields are gone from the Equipment type entirely.
+            const keys = Object.keys(r).sort();
+            expect(keys).toEqual(
+                (r.slot === 'accessory'
+                    ? ['accessoryKind', 'category', 'description', 'grantsSignature', 'id', 'name', 'slot', 'statModifiers']
+                    : ['category', 'description', 'grantsSignature', 'id', 'name', 'slot', 'statModifiers']),
+            );
         }
     });
 

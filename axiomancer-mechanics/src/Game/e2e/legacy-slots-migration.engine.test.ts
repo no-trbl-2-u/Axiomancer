@@ -23,7 +23,7 @@ function legacy(id: string, slot: LegacySlot, mind = 0): Equipment {
     const statModifiers: StatModifier[] = mind ? [{ stat: 'mind', value: mind, isMultiplier: false }] : [];
     return {
         id, name: id, description: '', category: 'equipment',
-        slot: slot as Equipment['slot'], rarity: 'common', requiredLevel: 0, statModifiers,
+        slot: slot as Equipment['slot'], statModifiers,
     };
 }
 

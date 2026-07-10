@@ -70,25 +70,14 @@ export const SIGNATURE_SKILLS: Record<SignatureSkillId, SignatureSkill> = {
     },
 };
 
-/** Per-archetype Signature kit (Spec 26b tuning §B). Everyone gets the scout;
- *  the rest is flavored to the archetype's stat identity. */
-export const SIGNATURE_KITS: Record<PlayerArchetype, SignatureSkillId[]> = {
-    heart: ['sig-read-opponent', 'sig-second-wind', 'sig-overwhelming-argument', 'sig-disarming-plea'],
-    body: ['sig-read-opponent', 'sig-press-the-point', 'sig-second-wind', 'sig-rallying-blow'],
-    mind: ['sig-read-opponent', 'sig-press-the-point', 'sig-conviction-strike', 'sig-clever-gambit'],
-};
-
-/** The player's archetype from their dominant base stat (heart > body > mind tiebreak). */
+/** The player's archetype from their dominant base stat (heart > body > mind
+ *  tiebreak). Phase 19 retired archetype→signature gating; `playerArchetype`
+ *  survives only to flavour the mobile portrait. */
 export function playerArchetype(player: { baseStats: { heart: number; body: number; mind: number } }): PlayerArchetype {
     const { heart, body, mind } = player.baseStats;
     if (body >= heart && body >= mind) return 'body';
     if (mind >= heart && mind >= body) return 'mind';
     return 'heart';
-}
-
-/** The resolved signature kit (full objects) for an archetype. */
-export function signaturesForArchetype(archetype: PlayerArchetype): SignatureSkill[] {
-    return SIGNATURE_KITS[archetype].map(id => SIGNATURE_SKILLS[id]);
 }
 
 export const SIGNATURE_SKILL_LIST: readonly SignatureSkill[] = Object.freeze(Object.values(SIGNATURE_SKILLS));

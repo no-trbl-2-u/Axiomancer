@@ -1,99 +1,24 @@
 /**
- * Equipment & Consumable Engine — combat-side helpers for Spec 05.
+ * Consumable engine — combat-side consumable helper (Spec 05).
  *
- * Pure functions that the combat resolver and the game store consume to wire
- * equipment and consumables into combat:
+ * Phases 20-23 decoupled equipment from combat entirely: equipment contributes
+ * only `statModifiers` (folded into `derivedStats` at equip-time), so the old
+ * equipment combat helpers (`aggregateCombatStartTokens`,
+ * `applyEquipmentGenerationBonus`, `getEquipmentProcTriggers`) are gone. Only
+ * the consumable helper remains here:
  *
- *   - `aggregateCombatStartTokens` — sums `combatStartTokens` across every
- *     equipped piece. The resolver folds the result into `combatResources`
- *     in `initializeCombat` so battles can begin with non-zero stance / phil
- *     counters when the wearer carries Berserker Band-style accessories.
- *   - `applyEquipmentGenerationBonus` — folds equipment `generationBonus`
- *     entries on top of the base `generateBasicActionResources` table.
- *   - `getEquipmentProcTriggers` — assembles the `EquipmentProcTrigger[]` the
- *     combat resolver appends to the Spec 03 proc roll for an `attack` or
- *     `defend` action.
  *   - `useConsumableEffect` — resolves a consumable's heal / effect payload
  *     against the caller's `ActiveEffect` array and HP, returning the new
  *     player snapshot. The caller decrements the inventory stack itself via
  *     the existing `useConsumable` reducer.
  */
 
-import { EquipmentProcTrigger, Consumable } from './types';
+import { Consumable } from './types';
 import { Effect } from '../Effects/types';
 import { applyEffect } from '../Effects';
 import { heal } from '../Combat/health';
 import { CombatResources } from '../Cards/types';
-import { Character, EquipmentLoadout } from '../Character/types';
-import { getEquippedItems } from '../Character/equipment.reducer';
-
-/**
- * Sums each item's `resourceInteraction.combatStartTokens` into a flat
- * `CombatResources` snapshot. Items without `resourceInteraction` contribute
- * zero to every counter. Pure.
- */
-export function aggregateCombatStartTokens(
-    equipment: EquipmentLoadout,
-): CombatResources {
-    const totals: CombatResources = { heart: 0, body: 0, mind: 0, fallacy: 0, paradox: 0 };
-    for (const piece of getEquippedItems(equipment)) {
-        const grant = piece.resourceInteraction?.combatStartTokens;
-        if (!grant) continue;
-        for (const key of Object.keys(totals) as Array<keyof CombatResources>) {
-            const value = grant[key];
-            if (typeof value === 'number') totals[key] += value;
-        }
-    }
-    return totals;
-}
-
-/** Outcome of a basic action — kept aligned with the `outcome` argument of
- *  `generateBasicActionResources` in the cards module to avoid an awkward
- *  import cycle. */
-export type EquipmentBonusOutcome = 'hit' | 'miss' | 'defend';
-
-/**
- * Applies every applicable equipment `generationBonus` entry on top of a
- * `CombatResources` snapshot that already has the base-table token baked in.
- * Bonuses with `trigger: 'any'` apply to every basic action; matching triggers
- * apply only to the actor's chosen action outcome. Negative bonuses are
- * tolerated but each counter is clamped to ≥ 0 so an item never zeroes out a
- * pool the player legitimately earned.
- */
-export function applyEquipmentGenerationBonus(
-    resources: CombatResources,
-    equipment: EquipmentLoadout,
-    outcome: EquipmentBonusOutcome,
-): CombatResources {
-    const next: CombatResources = { ...resources };
-    for (const piece of getEquippedItems(equipment)) {
-        const bonuses = piece.resourceInteraction?.generationBonus;
-        if (!bonuses) continue;
-        for (const entry of bonuses) {
-            if (entry.trigger !== 'any' && entry.trigger !== outcome) continue;
-            next[entry.resourceType] = Math.max(0, next[entry.resourceType] + entry.bonus);
-        }
-    }
-    return next;
-}
-
-/**
- * Returns the equipment-provided proc triggers the wearer rolls for on this
- * action. `'attack'` returns every equipped item's `onHitEffects`; `'defend'`
- * returns every equipped item's `onDefendEffects`. Pure.
- */
-export function getEquipmentProcTriggers(
-    equipment: EquipmentLoadout,
-    action: 'attack' | 'defend',
-): EquipmentProcTrigger[] {
-    const out: EquipmentProcTrigger[] = [];
-    for (const piece of getEquippedItems(equipment)) {
-        const source = action === 'attack' ? piece.onHitEffects : piece.onDefendEffects;
-        if (!source) continue;
-        out.push(...source);
-    }
-    return out;
-}
+import { Character } from '../Character/types';
 
 /**
  * Result of applying a consumable's payload to a player snapshot. The caller

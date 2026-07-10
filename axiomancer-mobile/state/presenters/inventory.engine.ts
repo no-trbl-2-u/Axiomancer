@@ -60,12 +60,11 @@ export interface InventoryItemRow {
     /** Stack size — always 1 for non-stackable items. */
     quantity: number;
     /**
-     * Equipment rarity (`common | uncommon | rare | unique`) or `null`
-     * for non-equipment rows. Drives the rarity shine / outline
-     * affordance (Phase 135). Read straight from the engine
-     * `Equipment.rarity`; never inferred from the name or affix fields.
+     * Phase 23 — the rarity model is retired; equipment (the signet relics) is
+     * uniform, so this is always `null` now. The field is kept optional so the
+     * rarity-shine affordance degrades to "no shine" without a wider UI change.
      */
-    rarity: 'common' | 'uncommon' | 'rare' | 'unique' | null;
+    rarity?: 'common' | 'uncommon' | 'rare' | 'unique' | null;
     equipped: boolean;
     description: string;
     /** Whether the item can currently be used / equipped. */
@@ -302,8 +301,10 @@ function subFor(item: Item): string | null {
     return null;
 }
 
-function rarityFor(item: Item): InventoryItemRow['rarity'] {
-    return isEquipment(item) ? item.rarity : null;
+function rarityFor(_item: Item): InventoryItemRow['rarity'] {
+    // Phase 23 — the rarity model is retired; equipment (the signet relics) is
+    // uniform, so no row carries a rarity shine any more.
+    return null;
 }
 
 /** Phase 19 — the display name of the signature a signet relic grants, or

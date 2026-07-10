@@ -19,12 +19,13 @@
  * this.
  */
 
-import { relicLibrary, type Equipment, type ItemRarity } from '@mechanics';
+import { relicLibrary, type Equipment } from '@mechanics';
 
 import type { AppStore } from '@/state/store';
 
-/** Procedural drop rarities this dev tool can request. */
-export type LootRarity = ItemRarity;
+/** The four dev-button labels. Phase 23 retired the rarity model, but the four
+ *  buttons persist as a familiar dev affordance — each now grants a relic. */
+export type LootRarity = 'common' | 'uncommon' | 'rare' | 'unique';
 
 export interface LootRarityResult {
     /** True when a real drop was generated and pushed to inventory. */

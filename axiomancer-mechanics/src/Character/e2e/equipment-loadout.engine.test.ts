@@ -21,15 +21,15 @@ import type { StatModifier } from '../../Effects/types';
 
 function weapon(id: string, body = 0): Equipment {
     const statModifiers: StatModifier[] = body ? [{ stat: 'body', value: body, isMultiplier: false }] : [];
-    return { id, name: id, description: '', category: 'equipment', slot: 'weapon', rarity: 'common', requiredLevel: 0, statModifiers };
+    return { id, name: id, description: '', category: 'equipment', slot: 'weapon', statModifiers };
 }
 function armor(id: string, body = 0): Equipment {
     const statModifiers: StatModifier[] = body ? [{ stat: 'body', value: body, isMultiplier: false }] : [];
-    return { id, name: id, description: '', category: 'equipment', slot: 'armor', rarity: 'common', requiredLevel: 0, statModifiers };
+    return { id, name: id, description: '', category: 'equipment', slot: 'armor', statModifiers };
 }
 function accessory(id: string, kind: AccessoryKind = 'ring', mind = 0): Equipment {
     const statModifiers: StatModifier[] = mind ? [{ stat: 'mind', value: mind, isMultiplier: false }] : [];
-    return { id, name: id, description: '', category: 'equipment', slot: 'accessory', accessoryKind: kind, rarity: 'common', requiredLevel: 0, statModifiers };
+    return { id, name: id, description: '', category: 'equipment', slot: 'accessory', accessoryKind: kind, statModifiers };
 }
 
 const fresh = () => createCharacter({ name: 'Test', level: 5, baseStats: { heart: 5, body: 5, mind: 5 } });

@@ -10,16 +10,16 @@
 import { describe, it, expect } from 'vitest';
 
 import {
-    wornPerSlot, firstEquippedPerSlot, isEquippedFirstOfSlot, findEquippedInSlot,
+    wornPerSlot, isEquippedFirstOfSlot, findEquippedInSlot,
     SLOT_CAPACITY,
 } from '../index';
 import type { Equipment, Item, AccessoryKind } from '../types';
 
 function acc(id: string, kind: AccessoryKind = 'ring'): Equipment {
-    return { id, name: id, description: '', category: 'equipment', slot: 'accessory', accessoryKind: kind, rarity: 'common', requiredLevel: 0 };
+    return { id, name: id, description: '', category: 'equipment', slot: 'accessory', accessoryKind: kind };
 }
 function wpn(id: string): Equipment {
-    return { id, name: id, description: '', category: 'equipment', slot: 'weapon', rarity: 'common', requiredLevel: 0 };
+    return { id, name: id, description: '', category: 'equipment', slot: 'weapon' };
 }
 const material: Item = { id: 'wood', name: 'Wood', description: '', category: 'material', quantity: 3 };
 
@@ -39,13 +39,6 @@ describe('Phase 18 — wornPerSlot capacity', () => {
     it('is stable under non-equipment items interleaved', () => {
         const inv: Item[] = [acc('a'), material, acc('b'), material, acc('c')];
         expect((wornPerSlot(inv).get('accessory') ?? []).map(i => i.id)).toEqual(['a', 'b', 'c']);
-    });
-
-    it('firstEquippedPerSlot returns the first worn piece per slot', () => {
-        const inv: Item[] = [acc('a'), acc('b'), wpn('sword')];
-        const first = firstEquippedPerSlot(inv);
-        expect(first.get('accessory')?.id).toBe('a');
-        expect(first.get('weapon')?.id).toBe('sword');
     });
 
     it('isEquippedFirstOfSlot is true for any of the worn 3, false past the window', () => {

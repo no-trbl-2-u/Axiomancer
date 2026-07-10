@@ -24,9 +24,8 @@ export type {
     PreviewAllocation, PreviewResult,
     CreateCharacterOptions, AggregatedEquipmentModifiers,
     CharacterPreset, CharacterPresetEquipmentEntry,
-    EquipDelta, EquipDeltaMode, EquipDeltaSide,
-    StatDeltaEntry, ModifierDeltaEntry, EffectDeltaEntry,
-    ResourceDeltaEntry, KeywordDeltaEntry, SignatureDeltaEntry,
+    EquipDelta, EquipDeltaMode,
+    StatDeltaEntry, SignatureDeltaEntry,
 } from './Character';
 
 // ─── Enemy ────────────────────────────────────────────────────────────────────
@@ -125,7 +124,7 @@ export {
     // Spec 32 v3 — floating dice save-back + sway decay knob
     getFloatingDiceColors, SWAY_DECAY_PER_TURN,
     // Spec 26b tuning §B/§C/§D
-    SIGNATURE_KITS, signaturesForArchetype, playerArchetype, CONCLUDE_DMG_PER_STACK,
+    playerArchetype, CONCLUDE_DMG_PER_STACK,
     COMBAT_REWARD_POOL, STARTING_CARD_ID, STARTING_CARD_IDS, rollCombatCardRewards, addRewardCard,
     unlockCardViaDilemma,
     // PR #190 Press Fate partial re-roll
@@ -224,34 +223,24 @@ export {
     addItem, removeItem, useConsumable, stackItem,
     addItemToInventory, removeItemFromInventory,
     isEquipment, isConsumable, isMaterial, isQuestItem,
-    aggregateCombatStartTokens, applyEquipmentGenerationBonus,
-    getEquipmentProcTriggers, useConsumableEffect,
+    useConsumableEffect,
     // Phase 21 — procedural equipment factory/templates retired; loot caches
-    // yield consumables via rollCacheReward.
+    // yield consumables via rollCacheReward. Phase 23 — modifier catalogue,
+    // affix library, item sets, and the rarity model are torn down.
     rollCacheReward, CACHE_REWARD_TUNING,
-    wornPerSlot, firstEquippedPerSlot, isEquippedFirstOfSlot, findEquippedInSlot,
+    wornPerSlot, isEquippedFirstOfSlot, findEquippedInSlot,
     SLOT_CAPACITY,
-    prefixes, suffixes, allAffixes, getAffixById,
-    composeItemName, affixesForSlot, AFFIX_RARITY_WEIGHTS,
     consumableLibrary, getConsumableById,
     buyItem, sellItem, defaultSellPrice,
-    getActiveSetBonuses, getActiveSetBonusesForCharacter,
-    aggregateSetStartTokens, applySetGenerationBonus,
-    getActiveSetPassiveEffectIds, getEquippedItemSets,
-    itemSetLibrary, getItemSetById,
     relicLibrary, getRelicById, getSignaturesForLoadout, cloneStartingRelics,
     DEFAULT_WORN_RELIC_IDS, BENCHED_RELIC_IDS,
 } from './Items';
 export type {
     Item, Equipment, Consumable, Material, QuestItem,
     ItemCategory, EquipmentSlot, AccessoryKind, BaseItem,
-    EquipmentProcTrigger, ResourceInteraction, ResourceGenerationBonus,
-    ItemRarity, RolledModifier, EquipmentTemplate, UniqueItemTemplate,
     ConsumableUseResult,
     CacheLootTier, RollCacheRewardOptions,
-    Affix, AffixRole,
     ShopWare, ShopInventory,
-    SetBonus, ItemSet,
 } from './Items';
 
 // ─── Cards ───────────────────────────────────────────────────────────────────

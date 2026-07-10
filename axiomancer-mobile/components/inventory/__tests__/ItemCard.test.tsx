@@ -26,7 +26,7 @@ const mockEquipmentWeapon: InventoryItemRow = {
     category: 'equipment',
     sub: 'Weapon',
     quantity: 1,
-    rarity: 'common',
+    
     equipped: false,
     description: 'A sturdy iron blade.',
     canUse: true,
@@ -41,7 +41,7 @@ const mockEquippedArmor: InventoryItemRow = {
     category: 'equipment',
     sub: 'Armor',
     quantity: 1,
-    rarity: 'common',
+    
     equipped: true,
     description: 'Well-worn protection.',
     canUse: false,
@@ -101,7 +101,7 @@ const mockEquipmentWithPreview: InventoryItemRow = {
     category: 'equipment',
     sub: 'Weapon',
     quantity: 1,
-    rarity: 'common',
+    
     equipped: false,
     description: 'Sharp steel blade.',
     canUse: true,
@@ -466,37 +466,24 @@ describe('ItemCard: equipDelta panel (Phase 133)', () => {
                 { stat: 'attack', delta: 2 },
                 { stat: 'stamina', delta: -1 },
             ],
-            gained: {
-                modifiers: [],
-                passiveEffects: [{ id: 'thirst', name: 'Bloodthirst' }],
-                onHitEffects: [],
-                onDefendEffects: [],
-                resources: [{ key: 'start:mind', resource: 'mind', amount: 2, kind: 'start' }],
-                keywords: [{ key: 'prefix:Gilded', label: 'Gilded' }],
+            signatures: {
+                gained: [{ id: 'sig-second-wind', name: 'Second Wind' }],
+                lost: [{ id: 'sig-read-opponent', name: 'Read the Opponent' }],
             },
-            lost: {
-                modifiers: [{ id: 'mod-old', name: null, value: 3 }],
-                passiveEffects: [],
-                onHitEffects: [],
-                onDefendEffects: [{ id: 'ward', name: null }],
-                resources: [],
-                keywords: [],
-            },
-            signatures: { gained: [], lost: [] },
             isEmpty: false,
         },
     };
 
-    it('renders the panel with gained and lost sections when expanded', () => {
+    it('renders the panel with stat + signature changes when expanded (Phase 23)', () => {
         const { tree } = withAllProviders(
             <ItemCard item={swapItem} expanded={true} {...handlers} />
         );
         const r = render(tree);
         expect(r.getByTestId('equip-delta-fang')).toBeTruthy();
-        expect(r.getByTestId('equip-delta-gained-fang')).toBeTruthy();
-        expect(r.getByTestId('equip-delta-lost-fang')).toBeTruthy();
-        expect(r.getByText('Bloodthirst')).toBeTruthy();
-        expect(r.getByText('Gilded')).toBeTruthy();
+        expect(r.getByTestId('equip-delta-stats-fang')).toBeTruthy();
+        expect(r.getByTestId('equip-delta-signatures-fang')).toBeTruthy();
+        expect(r.getByText('grants Second Wind')).toBeTruthy();
+        expect(r.getByText('loses Read the Opponent')).toBeTruthy();
     });
 
     it('does not render the panel when collapsed', () => {
@@ -515,14 +502,6 @@ describe('ItemCard: equipDelta panel (Phase 133)', () => {
                 mode: 'swap',
                 against: { id: 'x', name: 'X' },
                 stats: [],
-                gained: {
-                    modifiers: [], passiveEffects: [], onHitEffects: [],
-                    onDefendEffects: [], resources: [], keywords: [],
-                },
-                lost: {
-                    modifiers: [], passiveEffects: [], onHitEffects: [],
-                    onDefendEffects: [], resources: [], keywords: [],
-                },
                 signatures: { gained: [], lost: [] },
                 isEmpty: true,
             },

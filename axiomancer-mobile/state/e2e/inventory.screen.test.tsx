@@ -73,8 +73,8 @@ const sword: Equipment = {
     description: 'Iron, notched.',
     category: 'equipment',
     slot: 'weapon',
-    rarity: 'common',
-    requiredLevel: 1,
+    
+    
 };
 
 describe('inventory screen: rendering', () => {
@@ -134,8 +134,8 @@ describe('inventory screen: item-modal stat tooltips (Phase 80a)', () => {
             description: 'Etched with a humming sigil.',
             category: 'equipment',
             slot: 'weapon',
-            rarity: 'uncommon',
-            requiredLevel: 1,
+            
+            
             statModifiers: [
                 { stat: 'physicalAttack', value: 5, isMultiplier: false },
                 { stat: 'physicalDefense', value: 3, isMultiplier: false },

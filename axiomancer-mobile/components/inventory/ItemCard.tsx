@@ -142,8 +142,9 @@ export function ItemCard({ item, expanded, onTap, onUseOrEquip, onDiscard }: Ite
     const AXM = usePalette();
     const [isFocused, setIsFocused] = useState(false);
 
-    const affordance = rarityAffordance(item.rarity);
-    const colors = rarityColors(item.rarity, AXM);
+    // Phase 23 — the rarity model is retired; `rarity` is always null now.
+    const affordance = rarityAffordance(item.rarity ?? null);
+    const colors = rarityColors(item.rarity ?? null, AXM);
 
     const baseLabel = item.equipped
         ? `${item.name}, worn`

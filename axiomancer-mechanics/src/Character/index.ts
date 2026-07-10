@@ -198,9 +198,8 @@ export { equipItem, unequipItem, getEquipmentModifiers, getEquippedItems } from 
 export type { AggregatedEquipmentModifiers } from './equipment.reducer';
 export { computeEquipDelta } from './equip-delta';
 export type {
-    EquipDelta, EquipDeltaMode, EquipDeltaSide,
-    StatDeltaEntry, ModifierDeltaEntry, EffectDeltaEntry,
-    ResourceDeltaEntry, KeywordDeltaEntry, SignatureDeltaEntry,
+    EquipDelta, EquipDeltaMode,
+    StatDeltaEntry, SignatureDeltaEntry,
 } from './equip-delta';
 export {
     characterPresets, apprenticePreset, wandererPreset, sagePreset,

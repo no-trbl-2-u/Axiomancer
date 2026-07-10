@@ -49,8 +49,8 @@ const blade: Equipment = {
     description: 'Iron, notched.',
     category: 'equipment',
     slot: 'weapon',
-    rarity: 'common',
-    requiredLevel: 1,
+    
+    
 };
 
 // A stat-bearing weapon used to exercise the equip stat-delta surface:
@@ -62,10 +62,9 @@ const runeBlade: Equipment = {
     description: 'Etched with a humming sigil.',
     category: 'equipment',
     slot: 'weapon',
-    rarity: 'uncommon',
-    requiredLevel: 1,
+    
+    
     statModifiers: [{ stat: 'physicalAttack', value: 5, isMultiplier: false }],
-    passiveEffects: ['rune-ward'],
 };
 
 // A weapon granting a fractional luck modifier — exercises the
@@ -76,8 +75,8 @@ const luckBlade: Equipment = {
     description: 'Suspiciously fortunate.',
     category: 'equipment',
     slot: 'weapon',
-    rarity: 'uncommon',
-    requiredLevel: 1,
+    
+    
     statModifiers: [{ stat: 'luck', value: 1.55432728, isMultiplier: false }],
 };
 
@@ -89,10 +88,8 @@ const affixBladeWorn: Equipment = {
     description: 'A worn affixed blade.',
     category: 'equipment',
     slot: 'weapon',
-    rarity: 'uncommon',
-    requiredLevel: 1,
-    prefixId: 'p-dull',
-    prefixName: 'Dull',
+    
+    
 };
 const affixBladeCandidate: Equipment = {
     id: 'affix-candidate',
@@ -100,11 +97,8 @@ const affixBladeCandidate: Equipment = {
     description: 'A bright affixed blade with a ward.',
     category: 'equipment',
     slot: 'weapon',
-    rarity: 'uncommon',
-    requiredLevel: 1,
-    prefixId: 'p-glitter',
-    prefixName: 'Glittering',
-    passiveEffects: ['rune-ward'],
+    
+    
 };
 
 // ---------------------------------------------------------------------------
@@ -181,8 +175,8 @@ describe('selectItemModalViewModel: equipment preview (Q5)', () => {
             description: 'Heavy.',
             category: 'equipment',
             slot: 'armor',
-            rarity: 'common',
-            requiredLevel: 1,
+            
+            
         };
         // armor is first-in-slot for `armor` so it's worn. To exercise
         // the "bare slot, would equip" path we need an unworn item in
@@ -235,8 +229,8 @@ describe('selectItemModalViewModel: equipment preview (Q5)', () => {
             description: 'Cracked at the hilt.',
             category: 'equipment',
             slot: 'weapon',
-            rarity: 'common',
-            requiredLevel: 1,
+            
+            
         };
         const store = makeStore([blade, peer]);
 
@@ -257,8 +251,8 @@ describe('selectItemModalViewModel: equipment preview (Q5)', () => {
             description: 'Cracked at the hilt.',
             category: 'equipment',
             slot: 'weapon',
-            rarity: 'common',
-            requiredLevel: 1,
+            
+            
         };
         const store = makeStore([blade, peer]);
 
@@ -313,18 +307,15 @@ describe('selectItemModalViewModel: equipment preview (Q5)', () => {
         expect(vm.statDeltas).toHaveLength(0);
     });
 
-    // The item's own modifiers surface (with values) regardless of equip
-    // state, so an affixed drop shows *what* its affixes grant.
-    it('exposes the item\'s intrinsic modifiers with values', () => {
+    // The item's own stat modifiers surface (with values). Phase 23 — equipment
+    // has only stat modifiers (no passive-effect / affix lines).
+    it('exposes the item\'s intrinsic stat modifiers with values', () => {
         const store = makeStore([blade, runeBlade]);
 
         const vm = selectItemModalViewModel(store.getState(), 'rune-blade')!;
 
         const labels = vm.itemModifiers.map((m) => m.label);
         expect(labels).toContain('+5 PHYS ATK');
-        // The passive effect id surfaces (resolved name, or the id when
-        // the engine has no definition for the fixture id).
-        expect(labels.some((l) => l.includes('rune-ward'))).toBe(true);
         // The stat line carries its engine key for tooltip wiring.
         const atk = vm.itemModifiers.find((m) => m.label === '+5 PHYS ATK');
         expect(atk?.id).toBe('physicalAttack');
@@ -364,31 +355,20 @@ describe('selectItemModalViewModel: equipment preview (Q5)', () => {
         }
     });
 
-    // Brief: the equip/swap block shows non-stat changes (passive effects
-    // / status adjustments), NOT affix/keyword add-removes.
-    it('omits affix/keyword labels from the equip/swap effect block', () => {
+    // Phase 23 — the equip/swap effect block shows only the signet-relic
+    // signature gained/lost; plain gear (no affixes / passive effects) surfaces
+    // no non-stat effect lines.
+    it('surfaces no non-stat effect lines for plain gear (no affixes / passives)', () => {
         const store = makeStore([affixBladeWorn, affixBladeCandidate]);
 
         const vm = selectItemModalViewModel(store.getState(), 'affix-candidate')!;
 
         const labels = vm.effectDeltas.map((e) => e.label);
-        // Affix words never appear as add/remove lines…
         expect(labels.some((l) => l.includes('Glittering'))).toBe(false);
         expect(labels.some((l) => l.includes('Dull'))).toBe(false);
-        // …but the genuine non-stat change (the gained passive effect) does.
-        expect(labels.some((l) => l.includes('rune-ward'))).toBe(true);
+        expect(labels.some((l) => l.includes('rune-ward'))).toBe(false);
     });
 
-    // Brief fix #3: non-stat changes (passive effects, etc.) surface in
-    // `effectDeltas` so the preview shows all of an item's effect.
-    it('surfaces gained passive effects in effectDeltas', () => {
-        const store = makeStore([blade, runeBlade]);
-
-        const vm = selectItemModalViewModel(store.getState(), 'rune-blade')!;
-
-        const gained = vm.effectDeltas.filter((e) => e.direction === 'gained');
-        expect(gained.some((e) => e.label === 'rune-ward')).toBe(true);
-    });
 
     // Phase 80a — equipment stat-delta rows carry an `id` engine-stat
     // key so the inventory item modal's TooltipTarget wrap can fire a

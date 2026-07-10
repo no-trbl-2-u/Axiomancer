@@ -2,7 +2,6 @@ import { createCharacter } from '../Character';
 import { getEquippedItems } from '../Character/equipment.reducer';
 import type { BaseStats } from '../Character/types';
 import type { EquipmentSlot } from '../Items/types';
-import type { ItemRarity } from '../Items/types';
 import { relicLibrary, getRelicById } from '../Items/relic.library';
 import { consumableLibrary } from '../Items/consumable.library';
 import { cardLibrary } from '../Cards/cards.library';
@@ -96,7 +95,7 @@ export function devUnlockCards(store: Store, cardIds: string[] | 'all'): DevResu
     return { ok: true, detail: `${ids.length} card(s) unlocked (total known: ${known.size})` };
 }
 
-export function devGrantAllEquipment(store: Store, _rarity: ItemRarity = 'common'): DevResult {
+export function devGrantAllEquipment(store: Store, _rarity: string = 'common'): DevResult {
     // Phase 21 — the procedural library is retired; the only equipment is the 8
     // signet relics. Grant a fresh clone of each (rarity is meaningless now).
     const state = store.getState();
@@ -118,7 +117,7 @@ export function devGrantAllConsumables(store: Store, quantity = 5): DevResult {
     return { ok: true, detail: `Granted ${count} consumable types (×${quantity} each)` };
 }
 
-export function devEquipItem(store: Store, templateId: string, slot: EquipmentSlot, _rarity: ItemRarity = 'common'): DevResult {
+export function devEquipItem(store: Store, templateId: string, slot: EquipmentSlot, _rarity: string = 'common'): DevResult {
     // Phase 21 — equipment ids resolve to signet relics (the only equipment).
     const relic = getRelicById(templateId);
     if (!relic) return { ok: false, detail: `Unknown relic id: ${templateId}` };

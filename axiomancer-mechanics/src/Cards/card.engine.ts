@@ -25,7 +25,6 @@ import { incrementFriendship } from '../Combat/combat.reducer';
 import { isBefriendAttemptEligible } from '../Combat/index';
 import { Combatant, CombatState, Stance } from '../Combat/types';
 import { RESOURCE_GENERATION } from '../Game/game-mechanics.constants';
-import { applySetGenerationBonus } from '../Items/set.engine';
 import {
     CombatResources, Card, CardCategory, CardCombatEffects,
     CardSpecialMechanic,
@@ -53,18 +52,16 @@ export function generateBasicActionResources(
     resources: CombatResources,
     stance: Stance,
     outcome: 'hit' | 'miss' | 'defend',
-    equipment?: EquipmentLoadout,
+    _equipment?: EquipmentLoadout,
 ): CombatResources {
     const amount =
         outcome === 'defend' ? RESOURCE_GENERATION.DEFEND
       : outcome === 'hit'    ? RESOURCE_GENERATION.ATTACK_HIT
       :                        RESOURCE_GENERATION.ATTACK_MISS;
-    const base: CombatResources = { ...resources, [stance]: resources[stance] + amount };
-    if (!equipment) return base;
-    // Phase 20 — individual equipment no longer contributes generation bonuses
-    // (equipment is stat-only). Item-SET generation bonuses still apply (sets are
-    // a separate surface, torn down later).
-    return applySetGenerationBonus(base, equipment, outcome);
+    // Phase 23 — neither individual equipment nor item sets contribute to basic-
+    // action generation any more (item sets are torn down; equipment is stat-only).
+    // The `_equipment` param is retained for call-site compatibility but ignored.
+    return { ...resources, [stance]: resources[stance] + amount };
 }
 
 /**

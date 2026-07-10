@@ -22,30 +22,26 @@ function makeEquipment(id: string, extra: Partial<Equipment> = {}): Equipment {
         description: '',
         category: 'equipment',
         slot: 'weapon',
-        rarity: 'common',
-        requiredLevel: 1,
         ...extra,
     };
 }
 
-describe('computeEquipDelta', () => {
-    it('equip into an empty slot → mode equip, gained only', () => {
+describe('computeEquipDelta (Phase 23 — stat + signature diff only)', () => {
+    it('equip into an empty slot → mode equip, stat gain surfaced', () => {
         const candidate = makeEquipment('blade', {
             statModifiers: [{ stat: 'physicalAttack', value: 3 }],
         });
         const d = computeEquipDelta(candidate, null, buildPlayer());
         expect(d.mode).toBe('equip');
         expect(d.against).toBeNull();
-        expect(d.lost).toMatchObject({ modifiers: [], keywords: [] });
         expect(d.stats.some((s) => s.delta > 0)).toBe(true);
     });
 
-    it('unequip the worn item → mode unequip, lost only', () => {
+    it('unequip the worn item → mode unequip, against the item', () => {
         const worn = makeEquipment('blade', { statModifiers: [{ stat: 'physicalAttack', value: 3 }] });
         const d = computeEquipDelta(worn, worn, buildPlayer());
         expect(d.mode).toBe('unequip');
         expect(d.against).toEqual({ id: 'blade', name: 'blade' });
-        expect(d.gained).toMatchObject({ modifiers: [], keywords: [] });
     });
 
     it('swap → mode swap, against the worn sibling', () => {
@@ -54,16 +50,6 @@ describe('computeEquipDelta', () => {
         const d = computeEquipDelta(candidate, worn, buildPlayer());
         expect(d.mode).toBe('swap');
         expect(d.against).toEqual({ id: 'old', name: 'old' });
-    });
-
-    it('surfaces structured prefix/suffix affixes as keyword deltas', () => {
-        const candidate = makeEquipment('keen-blade', {
-            prefixName: 'Keen',
-            suffixName: 'of Clarity',
-        });
-        const d = computeEquipDelta(candidate, null);
-        const labels = d.gained.keywords.map((k) => k.label).sort();
-        expect(labels).toEqual(['Keen', 'of Clarity']);
     });
 
     it('is empty when nothing changes (identical worn item, no player)', () => {

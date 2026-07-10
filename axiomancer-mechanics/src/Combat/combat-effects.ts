@@ -42,7 +42,6 @@ import {
 } from './combat.constants';
 import { applyEffect } from '../Effects';
 import { getBaseStat } from './stats';
-import { EquipmentProcTrigger } from '../Items/types';
 import { getRng } from '../Utils/rng';
 import { EFFECT_BASE_PROC_INTENSITY } from '../Game/game-mechanics.constants';
 
@@ -109,59 +108,26 @@ function unlockedTier(
 }
 
 /**
- * Adapts an `EquipmentProcTrigger` into the `CombatEffectTrigger` shape the
- * proc roller expects. Equipment triggers don't carry a `stance` of their own
- * — they inherit the wearer's current stance — and they always pair with the
- * action that surfaced them (`onHitEffects` ↔ attack, `onDefendEffects` ↔
- * defend). Per Spec 05 Q6 (option A) these adapted entries share the same
- * proc machinery as the JSON-defined Stance × action triggers.
- */
-function adaptEquipmentTrigger(
-    eq: EquipmentProcTrigger,
-    stance: Stance,
-    action: 'attack' | 'defend',
-): CombatEffectTrigger {
-    return {
-        stance,
-        action,
-        tier:              eq.tier,
-        effectId:          eq.effectId,
-        target:            eq.target,
-        baseChance:        eq.baseChance,
-        intensityOverride: eq.intensityOverride,
-        durationOverride:  eq.durationOverride,
-        fumbleEffectId:    eq.fumbleEffectId,
-    };
-}
-
-/**
  * Pulls the proc entries the actor is allowed to roll for. Per-cell overrides
  * (boss / map-themed enemies) take precedence over the global table; otherwise
  * we filter the global table by Stance × action × tier ≤ unlocked cap.
  *
- * Per Spec 05 Q6 option A: `equipmentTriggers` (equipment-provided onHit /
- * onDefend entries) are appended on top of the cell's eligible list, filtered
- * by the same per-cell unlock cap so equipment can't sneak past tier gating.
+ * Phase 23 — equipment no longer contributes proc triggers (the equipment proc
+ * channel is torn down); only the JSON Stance × action table + per-cell
+ * overrides feed the roll.
  */
 export function getEligibleTriggers(
     stance: Stance,
     action: 'attack' | 'defend',
     unlocks?: ProcUnlocks,
     overrides?: ProcOverrides,
-    equipmentTriggers?: EquipmentProcTrigger[],
 ): CombatEffectTrigger[] {
     const cap = unlockedTier(unlocks, stance, action);
-    const base = overrides?.[stance]?.[action]
+    return overrides?.[stance]?.[action]
         ? overrides[stance]![action]!.filter(t => t.tier <= cap)
         : TRIGGER_TABLE.filter(t =>
             t.stance === stance && t.action === action && t.tier <= cap,
           );
-
-    if (!equipmentTriggers || equipmentTriggers.length === 0) return base;
-    const adapted = equipmentTriggers
-        .filter(eq => eq.tier <= cap)
-        .map(eq => adaptEquipmentTrigger(eq, stance, action));
-    return [...base, ...adapted];
 }
 
 /**
@@ -212,12 +178,6 @@ export interface RollForCombatEffectsParams {
     unlocks?: ProcUnlocks;
     overrides?: ProcOverrides;
     /**
-     * Equipment-provided proc triggers from the actor's currently-equipped
-     * items. Per Spec 05 Q6 option A these are folded into the eligible list
-     * before the proc roll, sharing the same chance / crit / fumble math.
-     */
-    equipmentTriggers?: EquipmentProcTrigger[];
-    /**
      * RNG used for the per-trigger proc roll. Defaults to `Math.random`.
      * Injected so tests can pin behavior deterministically alongside the
      * existing `mockFixedRng` flow used elsewhere in Combat.
@@ -239,7 +199,7 @@ export function rollForCombatEffects(
 ): { procs: ProcRollOutcome[]; fumble: FumbleOutcome | null } {
     const rng = p.rng ?? (() => getRng().random());
     const eligible = getEligibleTriggers(
-        p.stance, p.action, p.unlocks, p.overrides, p.equipmentTriggers,
+        p.stance, p.action, p.unlocks, p.overrides,
     );
 
     if (isFumble(p.rawAttackRoll)) {

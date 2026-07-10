@@ -598,9 +598,9 @@ async function characterTab(store: GameStoreHandle): Promise<void> {
         if (!eq) {
             log(`  ${label.padEnd(12)} (empty)`);
         } else {
-            const rarity = eq.rarity ? ` [${eq.rarity}]` : '';
+            const sig = eq.grantsSignature ? ` [grants ${eq.grantsSignature}]` : '';
             const kind = eq.accessoryKind ? ` (${eq.accessoryKind})` : '';
-            log(`  ${label.padEnd(12)} ${eq.name}${rarity}${kind}`);
+            log(`  ${label.padEnd(12)} ${eq.name}${sig}${kind}`);
         }
     };
     logSlot('weapon', loadout.weapon);

@@ -61,8 +61,6 @@ const armorFlatBody = (): Equipment => ({
     description: 'Adds flat body.',
     category: 'equipment',
     slot: 'armor',
-    rarity: 'common',
-    requiredLevel: 1,
     statModifiers: [{ stat: 'body', value: 2 }],
 });
 
@@ -72,8 +70,6 @@ const armorMultBody = (): Equipment => ({
     description: '+50% body multiplier.',
     category: 'equipment',
     slot: 'armor',
-    rarity: 'uncommon',
-    requiredLevel: 1,
     statModifiers: [{ stat: 'body', value: 1.5, isMultiplier: true }],
 });
 
@@ -83,8 +79,6 @@ const weaponFlatPhysAtk = (): Equipment => ({
     description: '+4 physicalAttack.',
     category: 'equipment',
     slot: 'weapon',
-    rarity: 'common',
-    requiredLevel: 1,
     statModifiers: [{ stat: 'physicalAttack', value: 4 }],
 });
 
@@ -95,9 +89,6 @@ const armorWithPassive = (): Equipment => ({
     description: 'Passive body buff while worn.',
     category: 'equipment',
     slot: 'armor',
-    rarity: 'rare',
-    requiredLevel: 1,
-    passiveEffects: ['buff_regeneration'],
 });
 
 // ─── createCharacter — derivation + defaults ─────────────────────────────────

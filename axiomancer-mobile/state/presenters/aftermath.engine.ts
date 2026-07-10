@@ -47,8 +47,10 @@ export interface AftermathLootEntry {
  * slot and read as `common` (they have no rarity axis).
  */
 function toAftermathLootEntry(item: Item): AftermathLootEntry {
+    // Phase 23 — the rarity model is retired; all equipment (the signet relics)
+    // reports as `common` for the aftermath loot list.
     return isEquipment(item)
-        ? { name: item.name, slot: item.slot, rarity: item.rarity }
+        ? { name: item.name, slot: item.slot, rarity: 'common' }
         : { name: item.name, slot: item.category, rarity: 'common' };
 }
 

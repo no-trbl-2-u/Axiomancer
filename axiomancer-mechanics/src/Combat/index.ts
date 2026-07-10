@@ -231,8 +231,8 @@ export type {
 } from './combat.playtest';
 export { runHazardCombatAutoEncounter } from './combat.autoplay';
 export type { HazardAutoPolicyId, HazardCombatAutoOptions, HazardCombatAutoResult } from './combat.autoplay';
-// Spec 26b tuning §B/§C/§D — archetype signatures, deckbuilder rewards, unlock hook
-export { SIGNATURE_KITS, signaturesForArchetype, playerArchetype, CONCLUDE_DMG_PER_STACK } from './combat.signature';
+// Phase 19/23 — archetype→signature gating retired; playerArchetype kept for portrait.
+export { playerArchetype, CONCLUDE_DMG_PER_STACK } from './combat.signature';
 export {
     COMBAT_REWARD_POOL, STARTING_CARD_ID, STARTING_CARD_IDS, rollCombatCardRewards, addRewardCard,
     unlockCardViaDilemma,

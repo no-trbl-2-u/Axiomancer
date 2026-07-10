@@ -141,8 +141,9 @@ describe('selectAftermathViewModel', () => {
                 },
             ] as never,
         });
+        // Phase 23 — the rarity model is retired; all equipment reports `common`.
         expect(vm?.kind === 'victory' && vm.rewards.loot).toEqual([
-            { name: 'Rusted Cutlass', slot: 'weapon', rarity: 'uncommon' },
+            { name: 'Rusted Cutlass', slot: 'weapon', rarity: 'common' },
             { name: 'Minor Healing Potion', slot: 'consumable', rarity: 'common' },
         ]);
     });

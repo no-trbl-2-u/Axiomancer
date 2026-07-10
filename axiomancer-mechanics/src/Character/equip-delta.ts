@@ -1,38 +1,31 @@
 /**
- * Equip-change delta model (Phase 154 — absorbed from the mobile app's
- * `state/presenters/equipDelta.ts`).
+ * Equip-change delta model (Phase 154; slimmed to the signet model in Phase 23).
  *
  * When the player equips, unequips, or swaps an equipment item, a client wants
- * to show **only what changes** — not the whole item or the full character
- * sheet. This computes that delta from item-instance truth, simulating the
- * equip/unequip through the engine's own `equipItem` / `unequipItem` reducers
- * and diffing the resulting `Character` stats. Effect ids resolve to their
- * engine names via `lookupEffect`.
+ * to show **only what changes**. After the equipment-signature epic (phases
+ * 18-23) equipment carries only `statModifiers` (incl. the phase-19 `maxHp`)
+ * and one `grantsSignature` — the rarity / affix / rolled-modifier / passive-
+ * effect / proc / resource machinery is gone. So the delta is just:
+ *
+ *   - net signed **stat** deltas (derived stats + maxHealth), and
+ *   - the **signature** gained / lost (signet relics).
  *
  * Contract:
  *   - Compare the candidate against the currently-worn sibling in the same slot.
  *   - No worn sibling   → gained-only (`mode: 'equip'`).
  *   - Candidate is worn → lost-only   (`mode: 'unequip'`).
- *   - Both present      → gained + lost split (`mode: 'swap'`).
+ *   - Both present      → swap.
  *   - Deltas only — unchanged values never surface.
- *   - Never parse affix truth out of a display name; read structured
- *     `prefixName` / `suffixName` provenance instead.
  *
- * Pure: no rendering, no string formatting beyond the engine's own effect /
- * affix labels. Voice-register chrome (canon terms, colours) is the view's job.
+ * Pure: no rendering. Voice-register chrome (canon terms, colours) is the view's
+ * job.
  */
 
 import { equipItem as engineEquipItem, unequipItem as engineUnequipItem } from './equipment.reducer';
-import { lookupEffect } from '../Effects';
 import { getSignatureSkill } from '../Combat/combat.signature';
 import type { Character } from './types';
-import type {
-    Equipment,
-    EquipmentProcTrigger,
-    ResourceGenerationBonus,
-} from '../Items/types';
+import type { Equipment } from '../Items/types';
 import type { SignatureSkillId } from '../Combat/combat.encounter.types';
-import type { CombatResources } from '../Cards/types';
 import type { StatModifier } from '../Effects/types';
 
 // ─── Public types ─────────────────────────────────────────────────────────────
@@ -41,7 +34,7 @@ import type { StatModifier } from '../Effects/types';
  * Which equip operation produced this delta.
  *   - `equip`   — candidate worn into a previously-empty slot (gained only).
  *   - `unequip` — currently-worn item taken off (lost only).
- *   - `swap`    — candidate replaces a worn sibling (gained + lost).
+ *   - `swap`    — candidate replaces a worn sibling.
  */
 export type EquipDeltaMode = 'equip' | 'unequip' | 'swap';
 
@@ -52,55 +45,11 @@ export interface StatDeltaEntry {
     delta: number;
 }
 
-/** A modifier gained or lost. */
-export interface ModifierDeltaEntry {
-    id: string;
-    name: string | null;
-    /** Rolled value, when the source carried a `RolledModifier`. */
-    value: number | null;
-}
-
-/** A passive / on-hit / on-defend effect gained or lost. `name` is the engine
- * effect name when resolvable, else `null`. */
-export interface EffectDeltaEntry {
-    id: string;
-    name: string | null;
-}
-
-/** A resource interaction (start-tokens or generation bonus) gained or lost. */
-export interface ResourceDeltaEntry {
-    /** Stable key used for list rendering and tests. */
-    key: string;
-    resource: keyof CombatResources;
-    /** Signed amount for start-tokens, or the generation bonus amount. */
-    amount: number;
-    /** `'start'` for combat-start tokens, or the generation trigger. */
-    kind: 'start' | ResourceGenerationBonus['trigger'];
-}
-
-/** A keyword / affix label gained or lost. Only populated when the item
- * instance carries structured keyword/affix metadata; never synthesised from a
- * display name. */
-export interface KeywordDeltaEntry {
-    key: string;
-    label: string;
-}
-
 /** A signature skill gained or lost by equipping a signet relic (Phase 19).
  * `name` is the engine signature name when resolvable, else `null`. */
 export interface SignatureDeltaEntry {
     id: SignatureSkillId;
     name: string | null;
-}
-
-/** One side (gained or lost) of the equip-change comparison. */
-export interface EquipDeltaSide {
-    modifiers: readonly ModifierDeltaEntry[];
-    passiveEffects: readonly EffectDeltaEntry[];
-    onHitEffects: readonly EffectDeltaEntry[];
-    onDefendEffects: readonly EffectDeltaEntry[];
-    resources: readonly ResourceDeltaEntry[];
-    keywords: readonly KeywordDeltaEntry[];
 }
 
 export interface EquipDelta {
@@ -111,23 +60,17 @@ export interface EquipDelta {
     against: { id: string; name: string } | null;
     /** Net signed additive stat deltas, zero entries dropped. */
     stats: readonly StatDeltaEntry[];
-    gained: EquipDeltaSide;
-    lost: EquipDeltaSide;
     /** Signet-relic signatures gained / lost by this equip change (Phase 19).
-     * Empty on non-relic gear. Zero-change swaps (same signature both sides)
-     * surface nothing. */
+     * Empty on non-relic gear. Same-signature swaps surface nothing. */
     signatures: { gained: readonly SignatureDeltaEntry[]; lost: readonly SignatureDeltaEntry[] };
-    /** True when nothing actually changed (all sections empty). */
+    /** True when nothing actually changed. */
     isEmpty: boolean;
 }
 
-// ─── Internal aggregation helpers ─────────────────────────────────────────────
+// ─── Stat aggregation ──────────────────────────────────────────────────────────
 
-/**
- * Aggregate flat additive `statModifiers` into a stat → value map. Multipliers
- * are skipped (the engine still applies multipliers on the real equip; the
- * display delta is additive-only for legibility).
- */
+/** Aggregate flat additive `statModifiers` into a stat → value map. Multipliers
+ * are skipped (the display delta is additive-only for legibility). */
 function aggregateStats(equipment: Equipment): Map<string, number> {
     const out = new Map<string, number>();
     for (const mod of equipment.statModifiers ?? []) {
@@ -137,10 +80,7 @@ function aggregateStats(equipment: Equipment): Map<string, number> {
     return out;
 }
 
-function computeStatDeltas(
-    candidate: Map<string, number>,
-    against: Map<string, number>,
-): StatDeltaEntry[] {
+function computeStatDeltas(candidate: Map<string, number>, against: Map<string, number>): StatDeltaEntry[] {
     const keys = new Set<string>([...candidate.keys(), ...against.keys()]);
     const out: StatDeltaEntry[] = [];
     for (const stat of keys) {
@@ -165,10 +105,8 @@ function characterStats(character: Character): Map<string, number> {
     return out;
 }
 
-function computeCharacterStatDeltas(player: Character, after: Character): StatDeltaEntry[] {
-    return computeStatDeltas(characterStats(after), characterStats(player));
-}
-
+/** Full recomputed-character stat diff when a `player` is supplied, else the
+ * item-level additive diff. */
 function fullOrItemStatDeltas(
     player: Character | undefined,
     after: Character,
@@ -176,173 +114,22 @@ function fullOrItemStatDeltas(
     fallbackAgainst: Map<string, number>,
 ): StatDeltaEntry[] {
     if (player !== undefined) {
-        const full = computeCharacterStatDeltas(player, after);
+        const full = computeStatDeltas(characterStats(after), characterStats(player));
         if (full.length > 0) return full;
     }
     return computeStatDeltas(fallbackCandidate, fallbackAgainst);
 }
 
-/** Resolve an effect ID to its engine name, gracefully returning `null` when
- * the engine has no definition (e.g. content not yet published). */
-function resolveEffectName(id: string): string | null {
-    try {
-        const def = lookupEffect(id);
-        return def?.name ?? null;
-    } catch {
-        return null;
-    }
-}
+// ─── Signature diff ─────────────────────────────────────────────────────────────
 
-/** Build a `modId → value` map of rolled-modifier ids for set-difference. */
-function rolledModMap(equipment: Equipment): Map<string, number> {
-    const out = new Map<string, number>();
-    for (const rolled of equipment.rolledMods ?? []) {
-        out.set(rolled.modId, rolled.value);
-    }
-    return out;
-}
-
-function diffModifiers(fromItem: Equipment, notIn: Equipment): ModifierDeltaEntry[] {
-    const present = rolledModMap(fromItem);
-    const other = rolledModMap(notIn);
-    const out: ModifierDeltaEntry[] = [];
-    for (const [id, value] of present) {
-        if (other.has(id)) continue;
-        out.push({ id, name: null, value });
-    }
-    out.sort((a, b) => a.id.localeCompare(b.id));
-    return out;
-}
-
-function diffEffectIds(
-    fromList: readonly string[] | undefined,
-    notInList: readonly string[] | undefined,
-): EffectDeltaEntry[] {
-    const exclude = new Set(notInList ?? []);
-    const out: EffectDeltaEntry[] = [];
-    const seen = new Set<string>();
-    for (const id of fromList ?? []) {
-        if (exclude.has(id) || seen.has(id)) continue;
-        seen.add(id);
-        out.push({ id, name: resolveEffectName(id) });
-    }
-    out.sort((a, b) => a.id.localeCompare(b.id));
-    return out;
-}
-
-function procKey(p: EquipmentProcTrigger): string {
-    return `${p.effectId}:${p.target}`;
-}
-
-function diffProcs(
-    fromList: readonly EquipmentProcTrigger[] | undefined,
-    notInList: readonly EquipmentProcTrigger[] | undefined,
-): EffectDeltaEntry[] {
-    const exclude = new Set((notInList ?? []).map(procKey));
-    const out: EffectDeltaEntry[] = [];
-    const seen = new Set<string>();
-    for (const p of fromList ?? []) {
-        const key = procKey(p);
-        if (exclude.has(key) || seen.has(key)) continue;
-        seen.add(key);
-        out.push({ id: p.effectId, name: resolveEffectName(p.effectId) });
-    }
-    out.sort((a, b) => a.id.localeCompare(b.id));
-    return out;
-}
-
-function resourceEntries(equipment: Equipment): Map<string, ResourceDeltaEntry> {
-    const out = new Map<string, ResourceDeltaEntry>();
-    const ri = equipment.resourceInteraction;
-    if (ri === undefined) return out;
-    for (const [resource, amount] of Object.entries(ri.combatStartTokens ?? {})) {
-        if (amount === undefined || amount === 0) continue;
-        const key = `start:${resource}`;
-        out.set(key, {
-            key,
-            resource: resource as keyof CombatResources,
-            amount,
-            kind: 'start',
-        });
-    }
-    for (const bonus of ri.generationBonus ?? []) {
-        if (bonus.bonus === 0) continue;
-        const key = `${bonus.trigger}:${bonus.resourceType}`;
-        out.set(key, {
-            key,
-            resource: bonus.resourceType,
-            amount: bonus.bonus,
-            kind: bonus.trigger,
-        });
-    }
-    return out;
-}
-
-function diffResources(fromItem: Equipment, notIn: Equipment): ResourceDeltaEntry[] {
-    const present = resourceEntries(fromItem);
-    const other = resourceEntries(notIn);
-    const out: ResourceDeltaEntry[] = [];
-    for (const [key, entry] of present) {
-        if (other.has(key)) continue;
-        out.push(entry);
-    }
-    out.sort((a, b) => a.key.localeCompare(b.key));
-    return out;
-}
-
-/**
- * Keyword / affix labels from structured `prefixName` / `suffixName` provenance
- * (rare drops carry both, uncommon one, common/unique neither). A `keywords`
- * array is not part of the published `Equipment` surface yet; we read it
- * defensively via a cast so the label set widens for free if it is added. Affix
- * truth is never parsed from the display name.
- */
-function keywordEntries(equipment: Equipment): Map<string, KeywordDeltaEntry> {
-    const out = new Map<string, KeywordDeltaEntry>();
-    const provenance = equipment as Equipment & { keywords?: readonly string[] };
-    if (typeof provenance.prefixName === 'string' && provenance.prefixName.length > 0) {
-        out.set(`prefix:${provenance.prefixName}`, {
-            key: `prefix:${provenance.prefixName}`,
-            label: provenance.prefixName,
-        });
-    }
-    if (typeof provenance.suffixName === 'string' && provenance.suffixName.length > 0) {
-        out.set(`suffix:${provenance.suffixName}`, {
-            key: `suffix:${provenance.suffixName}`,
-            label: provenance.suffixName,
-        });
-    }
-    for (const kw of provenance.keywords ?? []) {
-        if (typeof kw !== 'string' || kw.length === 0) continue;
-        out.set(`kw:${kw}`, { key: `kw:${kw}`, label: kw });
-    }
-    return out;
-}
-
-function diffKeywords(fromItem: Equipment, notIn: Equipment): KeywordDeltaEntry[] {
-    const present = keywordEntries(fromItem);
-    const other = keywordEntries(notIn);
-    const out: KeywordDeltaEntry[] = [];
-    for (const [key, entry] of present) {
-        if (other.has(key)) continue;
-        out.push(entry);
-    }
-    out.sort((a, b) => a.key.localeCompare(b.key));
-    return out;
-}
-
-/** Resolve a signet relic's granted signature into a delta entry (name via the
- * signature library), or `null` when the piece grants none. */
 function signatureEntry(equipment: Equipment): SignatureDeltaEntry | null {
     const id = equipment.grantsSignature;
     if (!id) return null;
     return { id, name: getSignatureSkill(id)?.name ?? null };
 }
 
-/**
- * The signatures gained / lost when `candidate` replaces `against`. A swap where
- * both sides grant the same signature nets to nothing.
- */
+/** Signatures gained / lost when `candidate` replaces `against`. A swap where
+ * both grant the same signature nets to nothing. */
 function diffSignatures(
     candidate: Equipment | null,
     against: Equipment | null,
@@ -354,51 +141,6 @@ function diffSignatures(
     return { gained, lost };
 }
 
-function emptySide(): EquipDeltaSide {
-    return {
-        modifiers: [],
-        passiveEffects: [],
-        onHitEffects: [],
-        onDefendEffects: [],
-        resources: [],
-        keywords: [],
-    };
-}
-
-function buildSide(fromItem: Equipment, notIn: Equipment): EquipDeltaSide {
-    return {
-        modifiers: diffModifiers(fromItem, notIn),
-        passiveEffects: diffEffectIds(fromItem.passiveEffects, notIn.passiveEffects),
-        onHitEffects: diffProcs(fromItem.onHitEffects, notIn.onHitEffects),
-        onDefendEffects: diffProcs(fromItem.onDefendEffects, notIn.onDefendEffects),
-        resources: diffResources(fromItem, notIn),
-        keywords: diffKeywords(fromItem, notIn),
-    };
-}
-
-function sideIsEmpty(side: EquipDeltaSide): boolean {
-    return (
-        side.modifiers.length === 0 &&
-        side.passiveEffects.length === 0 &&
-        side.onHitEffects.length === 0 &&
-        side.onDefendEffects.length === 0 &&
-        side.resources.length === 0 &&
-        side.keywords.length === 0
-    );
-}
-
-/** A zero-valued equipment used as the "other" side when computing a one-sided
- * (equip-into-empty / unequip) delta. */
-const EMPTY_EQUIPMENT: Equipment = {
-    id: '__none__',
-    name: '',
-    description: '',
-    category: 'equipment',
-    slot: 'weapon',
-    rarity: 'common',
-    requiredLevel: 0,
-};
-
 // ─── Public API ───────────────────────────────────────────────────────────────
 
 /**
@@ -407,10 +149,6 @@ const EMPTY_EQUIPMENT: Equipment = {
  * supplied, stat deltas are the full recomputed-character diff (via the engine
  * `equipItem` / `unequipItem` reducers); otherwise they fall back to the
  * item-level additive stat diff.
- *
- *   - `worn === null`            → `equip`   (gained only)
- *   - `worn.id === candidate.id` → `unequip` (lost only)
- *   - otherwise                  → `swap`    (gained + lost)
  */
 export function computeEquipDelta(
     candidate: Equipment,
@@ -418,30 +156,21 @@ export function computeEquipDelta(
     player?: Character,
 ): EquipDelta {
     if (worn === null) {
-        const gained = buildSide(candidate, EMPTY_EQUIPMENT);
         const stats =
             player === undefined
                 ? computeStatDeltas(aggregateStats(candidate), new Map())
-                : fullOrItemStatDeltas(
-                      player,
-                      engineEquipItem(player, candidate),
-                      aggregateStats(candidate),
-                      new Map(),
-                  );
+                : fullOrItemStatDeltas(player, engineEquipItem(player, candidate), aggregateStats(candidate), new Map());
         const signatures = diffSignatures(candidate, null);
         return {
             mode: 'equip',
             against: null,
             stats,
-            gained,
-            lost: emptySide(),
             signatures,
-            isEmpty: stats.length === 0 && sideIsEmpty(gained) && signatures.gained.length === 0,
+            isEmpty: stats.length === 0 && signatures.gained.length === 0,
         };
     }
 
     if (worn.id === candidate.id) {
-        const lost = buildSide(candidate, EMPTY_EQUIPMENT);
         const stats =
             player === undefined
                 ? computeStatDeltas(new Map(), aggregateStats(candidate))
@@ -462,10 +191,8 @@ export function computeEquipDelta(
             mode: 'unequip',
             against: { id: candidate.id, name: candidate.name },
             stats,
-            gained: emptySide(),
-            lost,
             signatures,
-            isEmpty: stats.length === 0 && sideIsEmpty(lost) && signatures.lost.length === 0,
+            isEmpty: stats.length === 0 && signatures.lost.length === 0,
         };
     }
 
@@ -474,10 +201,6 @@ export function computeEquipDelta(
             ? computeStatDeltas(aggregateStats(candidate), aggregateStats(worn))
             : fullOrItemStatDeltas(
                   player,
-                  // A non-null `worn` sibling in the swap branch means the
-                  // slot is occupied (weapon/armor) or the accessory row is
-                  // full — replace the displaced piece in place so the delta
-                  // reflects the swap rather than a full-row no-op (Phase 18).
                   engineEquipItem(
                       player,
                       candidate,
@@ -488,18 +211,13 @@ export function computeEquipDelta(
                   aggregateStats(candidate),
                   aggregateStats(worn),
               );
-    const gained = buildSide(candidate, worn);
-    const lost = buildSide(worn, candidate);
     const signatures = diffSignatures(candidate, worn);
     return {
         mode: 'swap',
         against: { id: worn.id, name: worn.name },
         stats,
-        gained,
-        lost,
         signatures,
-        isEmpty: stats.length === 0 && sideIsEmpty(gained) && sideIsEmpty(lost)
-            && signatures.gained.length === 0 && signatures.lost.length === 0,
+        isEmpty: stats.length === 0 && signatures.gained.length === 0 && signatures.lost.length === 0,
     };
 }
 

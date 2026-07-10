@@ -1,4 +1,6 @@
 # Spec 05c — Item Rarity & Instance Model
+> **SUPERSEDED (2026-07-10) by the equipment-signature epic — phases 18-21 + 23.** The procedural equipment library, rarity model, affix system, item sets, modifier catalogue, and equipment→combat effect channels described below are retired. Equipment is now the 8 fixed signet relics (stat bump + one signature each). This spec is kept for design provenance only; see `docs/equipment.md` for the shipped model.
+
 
 ## Goal
 

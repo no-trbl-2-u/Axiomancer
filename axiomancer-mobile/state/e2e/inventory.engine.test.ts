@@ -53,8 +53,8 @@ function sword(id = 'long-blade'): Equipment {
         description: 'Iron, notched. Drinks blood.',
         category: 'equipment',
         slot: 'weapon',
-        rarity: 'common',
-        requiredLevel: 1,
+        
+        
     };
 }
 
@@ -65,8 +65,8 @@ function dagger(id = 'bone-dagger'): Equipment {
         description: 'Whittled from a saint\'s rib.',
         category: 'equipment',
         slot: 'weapon',
-        rarity: 'common',
-        requiredLevel: 1,
+        
+        
     };
 }
 
@@ -272,13 +272,12 @@ describe('selectInventoryViewModel: engine read', () => {
         expect(vm.items[0].sub).toBe('Weapon');
     });
 
-    it('exposes the engine equipment rarity on the `rarity` row field (Phase 135)', () => {
-        const unique: Equipment = { ...sword('relic'), rarity: 'unique' };
-        const store = makeStore([unique]);
+    it('Phase 23 — the rarity model is retired; equipment rows carry no rarity', () => {
+        const store = makeStore([sword('relic')]);
 
         const vm = selectInventoryViewModel(store.getState());
 
-        expect(vm.items[0].rarity).toBe('unique');
+        expect(vm.items[0].rarity ?? null).toBeNull();
     });
 
     it('leaves `rarity` null on non-equipment rows (Phase 135)', () => {
@@ -854,8 +853,8 @@ function swordWithStats(
         description: 'A blade.',
         category: 'equipment',
         slot: 'weapon',
-        rarity: 'common',
-        requiredLevel: 1,
+        
+        
         // Test fixtures use synthetic stat names ('attack', 'stamina', etc.)
         // rather than engine's tight `EffectStatTarget` literal union. The
         // presenter under test only diffs by stat name, so the broader
@@ -893,8 +892,8 @@ describe('selectInventoryViewModel: equip-preview replacePreview', () => {
             description: 'Heavy.',
             category: 'equipment',
             slot: 'armor',
-            rarity: 'common',
-            requiredLevel: 1,
+            
+            
         };
         const store = makeStore([armor]);
         const vm = selectInventoryViewModel(store.getState());
@@ -1022,20 +1021,14 @@ describe('selectInventoryViewModel: equipDelta surface (Phase 133)', () => {
         ]);
     });
 
-    it('surfaces gained/lost passive effects on a swap', () => {
-        const equipped: Equipment = {
-            ...sword('worn-blade'),
-            passiveEffects: ['shared', 'old-ward'],
-        };
-        const replacer: Equipment = {
-            ...dagger('new-fang'),
-            passiveEffects: ['shared', 'new-thirst'],
-        };
-        const store = makeStore([equipped, replacer]);
+    // Phase 23 — equipment carries no passive effects; the equip-delta surfaces
+    // stat + signature changes only. A plain-gear swap surfaces just the stat diff.
+    it('surfaces the stat diff on a plain-gear swap', () => {
+        const store = makeStore([sword('worn-blade'), dagger('new-fang')]);
         const vm = selectInventoryViewModel(store.getState());
         const row = vm.items.find((r) => r.id === 'new-fang')!;
         expect(row.equipDelta!.mode).toBe('swap');
-        expect(row.equipDelta!.gained.passiveEffects.map((e) => e.id)).toEqual(['new-thirst']);
-        expect(row.equipDelta!.lost.passiveEffects.map((e) => e.id)).toEqual(['old-ward']);
+        expect(row.equipDelta!.signatures.gained).toEqual([]);
+        expect(row.equipDelta!.signatures.lost).toEqual([]);
     });
 });

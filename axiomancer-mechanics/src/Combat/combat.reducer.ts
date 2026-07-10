@@ -16,9 +16,6 @@
 import { Character } from '../Character/types';
 import { Enemy } from '../Enemy/types';
 import { deepClone } from '../Utils';
-import { aggregateSetStartTokens, getActiveSetPassiveEffectIds } from '../Items/set.engine';
-import { lookupEffect } from '../Effects';
-import type { ActiveEffect } from '../Effects/types';
 import type { CombatResources } from '../Cards/types';
 import { CombatState } from './types';
 
@@ -26,62 +23,20 @@ import { CombatState } from './types';
  * Builds a fresh CombatState. Combatants are deep-cloned so combat
  * mutations don't bleed back into the canonical player/enemy.
  *
- * Phase 20 — equipment is decoupled from effects: individual equipment no
- * longer seeds combat-start tokens. Item-SET start tokens still apply (sets are
- * a separate surface, torn down later). Items contribute nothing here beyond
- * their `statModifiers` (folded into `derivedStats` at equip-time).
+ * Phase 20 decoupled equipment from effects; phase 23 tore down item sets. No
+ * equipment (individual or set) seeds combat-start tokens or applies passive
+ * effects any more — the counters start at zero. Items contribute only their
+ * `statModifiers` (folded into `derivedStats` at equip-time).
  */
 export function initializeCombat(player: Character, enemy: Enemy): CombatState {
-    const equipment = player.equipment;
-    const setTokens = aggregateSetStartTokens(equipment);
-    const seeded: CombatResources = {
-        heart:    setTokens.heart,
-        body:     setTokens.body,
-        mind:     setTokens.mind,
-        fallacy:  setTokens.fallacy,
-        paradox:  setTokens.paradox,
-    };
-
-    // Apply set-bonus passive effects as combat-LIFETIME ActiveEffects
-    // (Spec 05e Q4). remainingDuration: -1 is the engine's "infinite-duration"
-    // sentinel — tickAllEffects skips the tick decrement for these entries,
-    // so set passives survive every round of combat. Combat-end cleanup
-    // discards the cloned player along with the effects, so persistence is
-    // bounded by the combat lifetime even though duration is unbounded.
-    //
-    // We construct ActiveEffect directly here rather than going through
-    // applyEffect — applyEffect clamps remainingDuration to MAX_EFFECT_DURATION
-    // (10), which would let the passive expire on an unusually long combat
-    // (e.g. boss-encounter walkthrough at ~16+ rounds). The -1 sentinel
-    // bypasses that ceiling.
-    const clonedPlayer = deepClone(player);
-    const setPassiveIds = getActiveSetPassiveEffectIds(equipment);
-    let playerWithSetEffects = clonedPlayer;
-    for (const effectId of setPassiveIds) {
-        const effect = lookupEffect(effectId);
-        if (!effect) continue;
-        const newEffect: ActiveEffect = {
-            effectId:          effect.id,
-            remainingDuration: -1,        // combat-lifetime sentinel (tickAllEffects skips)
-            intensity:         1,
-            appliedAt:         1,
-            tier:              effect.tier,
-            resistedBy:        effect.resistedBy,
-            resistDR:          effect.resistDR,
-            sourceId:          'set-bonus',
-        };
-        playerWithSetEffects = {
-            ...playerWithSetEffects,
-            effects: [...(playerWithSetEffects.effects ?? []), newEffect],
-        };
-    }
+    const seeded: CombatResources = { heart: 0, body: 0, mind: 0, fallacy: 0, paradox: 0 };
 
     return {
         active: true,
         phase: 'choosing_stance',
         round: 1,
         friendshipCounter: 0,
-        player: playerWithSetEffects,
+        player: deepClone(player),
         enemy: deepClone(enemy),
         playerChoice: {},
         enemyChoice: {},

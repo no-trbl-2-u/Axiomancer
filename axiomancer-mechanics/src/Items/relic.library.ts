@@ -111,8 +111,6 @@ function relicFromSpec(spec: RelicSpec): Equipment {
         description: spec.description,
         category: 'equipment',
         slot: spec.slot,
-        rarity: 'common',
-        requiredLevel: 0,
         statModifiers: [{ stat: spec.stat, value: spec.value, isMultiplier: false }],
         grantsSignature: spec.grantsSignature,
     };
