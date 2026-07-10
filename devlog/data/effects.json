@@ -29,7 +29,7 @@
    }
   ],
   "lines": [
-   "physicalSkill +1"
+   "physicalDefense +1"
   ]
  },
  {
@@ -165,9 +165,6 @@
    }
   ],
   "lines": [
-   "physicalSkill +2",
-   "mentalSkill +2",
-   "emotionalSkill +2",
    "Roll +3"
   ]
  },
@@ -574,7 +571,6 @@
   ],
   "lines": [
    "mind +1",
-   "mentalSkill +2",
    "Advantage: mind"
   ]
  },
@@ -1051,9 +1047,6 @@
    "body +2",
    "mind +2",
    "heart +2",
-   "physicalSkill +1",
-   "mentalSkill +1",
-   "emotionalSkill +1",
    "luck +1",
    "Roll +1"
   ]
@@ -1257,7 +1250,6 @@
    }
   ],
   "lines": [
-   "physicalSkill -2",
    "Roll -2",
    "Disadvantage: body"
   ]
@@ -1323,7 +1315,7 @@
    }
   ],
   "lines": [
-   "physicalSkill -1"
+   "physicalAttack -1"
   ]
  },
  {
@@ -1823,7 +1815,6 @@
   ],
   "lines": [
    "heart -4",
-   "emotionalSkill -3",
    "emotionalDefense -3",
    "Roll -4"
   ]
@@ -1998,9 +1989,6 @@
    "body -2",
    "mind -2",
    "heart -2",
-   "physicalSkill -1",
-   "mentalSkill -1",
-   "emotionalSkill -1",
    "Roll -2"
   ]
  },
@@ -2066,7 +2054,6 @@
   ],
   "lines": [
    "heart -2",
-   "emotionalSkill -3",
    "Blocks stance: heart"
   ]
  },
@@ -2234,8 +2221,6 @@
   "lines": [
    "body -1",
    "mind -1",
-   "physicalSkill -1",
-   "mentalSkill -1",
    "Roll -1"
   ]
  },
@@ -2404,7 +2389,6 @@
   ],
   "lines": [
    "mind -2",
-   "mentalSkill -2",
    "mentalDefense -1",
    "Roll -3"
   ]

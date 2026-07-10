@@ -14,7 +14,7 @@
   "logic": "balanced",
   "logicBlurb": "Balanced — presses while healthy, defends once below half HP.",
   "stanceHint": "It only watches — whatever it does next, it has watched you do first.",
-  "skills": []
+  "cards": []
  },
  {
   "id": "enemy-grave-larva",
@@ -31,7 +31,7 @@
   "logic": "aggressive",
   "logicBlurb": "Aggressive — attacks most turns, countering your last stance.",
   "stanceHint": "It is all appetite and no argument — it simply chews toward you.",
-  "skills": []
+  "cards": []
  },
  {
   "id": "enemy-chattering-skull",
@@ -48,7 +48,7 @@
   "logic": "random",
   "logicBlurb": "Unpredictable — any stance, any action, no pattern to read.",
   "stanceHint": "It repeats its last argument on a loop — cold, toothy, and rehearsed.",
-  "skills": []
+  "cards": []
  },
  {
   "id": "enemy-little-belle",
@@ -65,7 +65,7 @@
   "logic": "balanced",
   "logicBlurb": "Balanced — presses while healthy, defends once below half HP.",
   "stanceHint": "A creature of pure mourning; it acts on raw feeling, not calculation.",
-  "skills": [
+  "cards": [
    {
     "name": "Soft Word",
     "text": "It turns away wrath — not by winning, but by making wrath feel over-dressed for the occasion."
@@ -87,7 +87,7 @@
   "logic": "aggressive",
   "logicBlurb": "Aggressive — attacks most turns, countering your last stance.",
   "stanceHint": "It goes for your footing first — everything it does is leverage.",
-  "skills": []
+  "cards": []
  },
  {
   "id": "enemy-water-holger",
@@ -104,7 +104,7 @@
   "logic": "strategic",
   "logicBlurb": "Strategic — reads your active effects and exploits your vulnerabilities.",
   "stanceHint": "Grief moves it more than hunger — the sea returned the feeling parts.",
-  "skills": [
+  "cards": [
    {
     "name": "Soft Word",
     "text": "It turns away wrath — not by winning, but by making wrath feel over-dressed for the occasion."
@@ -126,7 +126,7 @@
   "logic": "random",
   "logicBlurb": "Unpredictable — any stance, any action, no pattern to read.",
   "stanceHint": "It leads with feeling — the grudge does the talking.",
-  "skills": []
+  "cards": []
  },
  {
   "id": "enemy-ghast",
@@ -143,7 +143,7 @@
   "logic": "strategic",
   "logicBlurb": "Strategic — reads your active effects and exploits your vulnerabilities.",
   "stanceHint": "It calculates its hunger — every request is a trap already sprung.",
-  "skills": [
+  "cards": [
    {
     "name": "Red Herring",
     "text": "Something glints in the corner of the argument. They lunge for it — and every lunge you deny becomes the wound."
@@ -165,7 +165,7 @@
   "logic": "defensive",
   "logicBlurb": "Defensive — turtles until wounded, then strikes your weakest stat.",
   "stanceHint": "It does not attack so much as incubate — the danger is the countdown.",
-  "skills": []
+  "cards": []
  },
  {
   "id": "enemy-the-butcher",
@@ -182,7 +182,7 @@
   "logic": "aggressive",
   "logicBlurb": "Aggressive — attacks most turns, countering your last stance.",
   "stanceHint": "He answers everything with the cleaver — force is his entire rhetoric.",
-  "skills": [
+  "cards": [
    {
     "name": "Sweet Poison",
     "text": "You taste it first, to prove the vintage. The enemy drinks deeper — but you did drink."
@@ -204,7 +204,7 @@
   "logic": "boss",
   "logicBlurb": "Boss script — a telegraphed, round-keyed signature pattern.",
   "stanceHint": "A grievance with a crown — he answers everything with feeling first, and the feeling is old.",
-  "skills": [
+  "cards": [
    {
     "name": "Straw Man's Jab",
     "text": "You hit the version of them that is easiest to hit. It bleeds all the same — wounds do not check citations."
@@ -234,7 +234,7 @@
   "logic": "strategic",
   "logicBlurb": "Strategic — reads your active effects and exploits your vulnerabilities.",
   "stanceHint": "She works on the feelings first — the bargain is already half-made in your chest.",
-  "skills": [
+  "cards": [
    {
     "name": "Soft Word",
     "text": "It turns away wrath — not by winning, but by making wrath feel over-dressed for the occasion."
@@ -256,7 +256,7 @@
   "logic": "boss",
   "logicBlurb": "Boss script — a telegraphed, round-keyed signature pattern.",
   "stanceHint": "He answers every motion with a jamb — where you would step, a threshold has already been installed.",
-  "skills": [
+  "cards": [
    {
     "name": "Red Herring",
     "text": "Something glints in the corner of the argument. They lunge for it — and every lunge you deny becomes the wound."
@@ -286,7 +286,7 @@
   "logic": "strategic",
   "logicBlurb": "Strategic — reads your active effects and exploits your vulnerabilities.",
   "stanceHint": "A cold calculator of crossings; only at the end does the pole swing on feeling.",
-  "skills": [
+  "cards": [
    {
     "name": "Festering Argument",
     "text": "Left unanswered, a wound of reasoning does not close. You decline to answer it. Everything they carry runs a little longer."
@@ -308,7 +308,7 @@
   "logic": "defensive",
   "logicBlurb": "Defensive — turtles until wounded, then strikes your weakest stat.",
   "stanceHint": "It measures and portends — every knock is a calculation about your ending.",
-  "skills": [
+  "cards": [
    {
     "name": "Red Herring",
     "text": "Something glints in the corner of the argument. They lunge for it — and every lunge you deny becomes the wound."
@@ -330,7 +330,7 @@
   "logic": "strategic",
   "logicBlurb": "Strategic — reads your active effects and exploits your vulnerabilities.",
   "stanceHint": "It grieves what it knows — the prophecy hurts it more than you can.",
-  "skills": [
+  "cards": [
    {
     "name": "Slippery Slope",
     "text": "One concession, then the next, then the avalanche you promised was inevitable. The ground tilts, and they slide the whole way down."
@@ -352,7 +352,7 @@
   "logic": "aggressive",
   "logicBlurb": "Aggressive — attacks most turns, countering your last stance.",
   "stanceHint": "It begs with a raised fist — the asking and the taking are one motion.",
-  "skills": []
+  "cards": []
  },
  {
   "id": "enemy-goblin-shaman",
@@ -369,7 +369,7 @@
   "logic": "strategic",
   "logicBlurb": "Strategic — reads your active effects and exploits your vulnerabilities.",
   "stanceHint": "It consults before it strikes — three small gods, all of them owed.",
-  "skills": [
+  "cards": [
    {
     "name": "Glimpse",
     "text": "A crack in the next moment, wide enough for one eye. You look, and mark what looks back — the wound starts arriving a beat before the blow that causes it."
@@ -391,7 +391,7 @@
   "logic": "boss",
   "logicBlurb": "Boss script — a telegraphed, round-keyed signature pattern.",
   "stanceHint": "It files before it strikes — by the time the blow lands, your counter is already catalogued under errata.",
-  "skills": [
+  "cards": [
    {
     "name": "Festering Argument",
     "text": "Left unanswered, a wound of reasoning does not close. You decline to answer it. Everything they carry runs a little longer."
@@ -421,7 +421,7 @@
   "logic": "defensive",
   "logicBlurb": "Defensive — turtles until wounded, then strikes your weakest stat.",
   "stanceHint": "It fights the way it cries: continuously, and at you.",
-  "skills": [
+  "cards": [
    {
     "name": "Soft Word",
     "text": "It turns away wrath — not by winning, but by making wrath feel over-dressed for the occasion."
@@ -443,7 +443,7 @@
   "logic": "random",
   "logicBlurb": "Unpredictable — any stance, any action, no pattern to read.",
   "stanceHint": "It moves on pure feeling — stopping, it fears, would finish the erasing.",
-  "skills": []
+  "cards": []
  },
  {
   "id": "enemy-mabadi",
@@ -460,7 +460,7 @@
   "logic": "strategic",
   "logicBlurb": "Strategic — reads your active effects and exploits your vulnerabilities.",
   "stanceHint": "The cane is a metronome — he strikes on beats you have not learned yet.",
-  "skills": [
+  "cards": [
    {
     "name": "Straw Man's Jab",
     "text": "You hit the version of them that is easiest to hit. It bleeds all the same — wounds do not check citations."
@@ -482,7 +482,7 @@
   "logic": "aggressive",
   "logicBlurb": "Aggressive — attacks most turns, countering your last stance.",
   "stanceHint": "It remembers being winged — the fury is all forward.",
-  "skills": []
+  "cards": []
  },
  {
   "id": "enemy-tri-eyes",
@@ -499,7 +499,7 @@
   "logic": "balanced",
   "logicBlurb": "Balanced — presses while healthy, defends once below half HP.",
   "stanceHint": "It counts your errors through whichever eye you fail to watch.",
-  "skills": [
+  "cards": [
    {
     "name": "Red Herring",
     "text": "Something glints in the corner of the argument. They lunge for it — and every lunge you deny becomes the wound."
@@ -525,7 +525,7 @@
   "logic": "defensive",
   "logicBlurb": "Defensive — turtles until wounded, then strikes your weakest stat.",
   "stanceHint": "It stands its ground because it IS its ground — the curse assembles one word per skull.",
-  "skills": [
+  "cards": [
    {
     "name": "Sweet Poison",
     "text": "You taste it first, to prove the vintage. The enemy drinks deeper — but you did drink."
@@ -547,7 +547,7 @@
   "logic": "strategic",
   "logicBlurb": "Strategic — reads your active effects and exploits your vulnerabilities.",
   "stanceHint": "It thinks in loose threads — and every thread it loses, it takes from something else.",
-  "skills": [
+  "cards": [
    {
     "name": "Festering Argument",
     "text": "Left unanswered, a wound of reasoning does not close. You decline to answer it. Everything they carry runs a little longer."
@@ -569,10 +569,10 @@
   "logic": "boss",
   "logicBlurb": "Boss script — a telegraphed, round-keyed signature pattern.",
   "stanceHint": "He argues in your grammar — every stance you take, he has already taken it better, and returned it used.",
-  "skills": [
+  "cards": [
    {
     "name": "Bootstrap Loop",
-    "text": "The proof assumes itself and, scandalously, works. The effect funds its own cause."
+    "text": "The proof assumes itself and, scandalously, works. Even a dead premise funds its own cause."
    },
    {
     "name": "Glimpse",
@@ -599,7 +599,7 @@
   "logic": "strategic",
   "logicBlurb": "Strategic — reads your active effects and exploits your vulnerabilities.",
   "stanceHint": "Pure study moves it — the flesh was a distraction it graded and discarded.",
-  "skills": [
+  "cards": [
    {
     "name": "Slippery Slope",
     "text": "One concession, then the next, then the avalanche you promised was inevitable. The ground tilts, and they slide the whole way down."
@@ -621,7 +621,7 @@
   "logic": "boss",
   "logicBlurb": "Boss script — a telegraphed, round-keyed signature pattern.",
   "stanceHint": "The verdict is felt before it is reasoned — the red court rules from the chest.",
-  "skills": [
+  "cards": [
    {
     "name": "Festering Argument",
     "text": "Left unanswered, a wound of reasoning does not close. You decline to answer it. Everything they carry runs a little longer."
@@ -632,7 +632,7 @@
    },
    {
     "name": "Bootstrap Loop",
-    "text": "The proof assumes itself and, scandalously, works. The effect funds its own cause."
+    "text": "The proof assumes itself and, scandalously, works. Even a dead premise funds its own cause."
    }
   ]
  },
@@ -651,7 +651,7 @@
   "logic": "balanced",
   "logicBlurb": "Balanced — presses while healthy, defends once below half HP.",
   "stanceHint": "The armor swings on muscle memory — the oath does the aiming.",
-  "skills": [
+  "cards": [
    {
     "name": "Straw Man's Jab",
     "text": "You hit the version of them that is easiest to hit. It bleeds all the same — wounds do not check citations."
@@ -677,7 +677,7 @@
   "logic": "aggressive",
   "logicBlurb": "Aggressive — attacks most turns, countering your last stance.",
   "stanceHint": "It throws itself forward — its will is elsewhere, holding the leash.",
-  "skills": [
+  "cards": [
    {
     "name": "Sweet Poison",
     "text": "You taste it first, to prove the vintage. The enemy drinks deeper — but you did drink."
@@ -699,7 +699,7 @@
   "logic": "strategic",
   "logicBlurb": "Strategic — reads your active effects and exploits your vulnerabilities.",
   "stanceHint": "Everything she does is affection, scaled wrong — the choosing came from the heart.",
-  "skills": [
+  "cards": [
    {
     "name": "Soft Word",
     "text": "It turns away wrath — not by winning, but by making wrath feel over-dressed for the occasion."
@@ -725,7 +725,7 @@
   "logic": "defensive",
   "logicBlurb": "Defensive — turtles until wounded, then strikes your weakest stat.",
   "stanceHint": "It feeds on wanting — the whole fight is an appeal to your appetite.",
-  "skills": [
+  "cards": [
    {
     "name": "Soft Word",
     "text": "It turns away wrath — not by winning, but by making wrath feel over-dressed for the occasion."
@@ -747,7 +747,7 @@
   "logic": "aggressive",
   "logicBlurb": "Aggressive — attacks most turns, countering your last stance.",
   "stanceHint": "Coils first, questions never — it swallows counterarguments whole.",
-  "skills": [
+  "cards": [
    {
     "name": "Sweet Poison",
     "text": "You taste it first, to prove the vintage. The enemy drinks deeper — but you did drink."
@@ -769,7 +769,7 @@
   "logic": "strategic",
   "logicBlurb": "Strategic — reads your active effects and exploits your vulnerabilities.",
   "stanceHint": "It could fly and chooses to crawl — everything it does is a pointed refusal.",
-  "skills": [
+  "cards": [
    {
     "name": "Straw Man's Jab",
     "text": "You hit the version of them that is easiest to hit. It bleeds all the same — wounds do not check citations."
@@ -791,7 +791,7 @@
   "logic": "boss",
   "logicBlurb": "Boss script — a telegraphed, round-keyed signature pattern.",
   "stanceHint": "A cellar-thing of pure muscle — the courtesy is over.",
-  "skills": [
+  "cards": [
    {
     "name": "Sweet Poison",
     "text": "You taste it first, to prove the vintage. The enemy drinks deeper — but you did drink."
@@ -821,7 +821,7 @@
   "logic": "boss",
   "logicBlurb": "Boss script — a telegraphed, round-keyed signature pattern.",
   "stanceHint": "Every move a reasoned counter — the web was drafted before you arrived.",
-  "skills": [
+  "cards": [
    {
     "name": "Glimpse",
     "text": "A crack in the next moment, wide enough for one eye. You look, and mark what looks back — the wound starts arriving a beat before the blow that causes it."
@@ -851,7 +851,7 @@
   "logic": "balanced",
   "logicBlurb": "Balanced — presses while healthy, defends once below half HP.",
   "stanceHint": "What remains of it is the part that says no — force, distilled.",
-  "skills": [
+  "cards": [
    {
     "name": "Straw Man's Jab",
     "text": "You hit the version of them that is easiest to hit. It bleeds all the same — wounds do not check citations."
@@ -877,10 +877,10 @@
   "logic": "boss",
   "logicBlurb": "Boss script — a telegraphed, round-keyed signature pattern.",
   "stanceHint": "Cold administration — every strike is a decree, countersigned.",
-  "skills": [
+  "cards": [
    {
     "name": "Bootstrap Loop",
-    "text": "The proof assumes itself and, scandalously, works. The effect funds its own cause."
+    "text": "The proof assumes itself and, scandalously, works. Even a dead premise funds its own cause."
    },
    {
     "name": "Slippery Slope",
@@ -907,7 +907,7 @@
   "logic": "strategic",
   "logicBlurb": "Strategic — reads your active effects and exploits your vulnerabilities.",
   "stanceHint": "Courtesy is the weapon — the feelings are real, which is the trap.",
-  "skills": [
+  "cards": [
    {
     "name": "Soft Word",
     "text": "It turns away wrath — not by winning, but by making wrath feel over-dressed for the occasion."
@@ -933,7 +933,7 @@
   "logic": "strategic",
   "logicBlurb": "Strategic — reads your active effects and exploits your vulnerabilities.",
   "stanceHint": "Two minds, one patient argument — they disagree only about which of them loves you less.",
-  "skills": [
+  "cards": [
    {
     "name": "Red Herring",
     "text": "Something glints in the corner of the argument. They lunge for it — and every lunge you deny becomes the wound."
@@ -959,7 +959,7 @@
   "logic": "strategic",
   "logicBlurb": "Strategic — reads your active effects and exploits your vulnerabilities.",
   "stanceHint": "The same metronome, colder — the river taught him new beats.",
-  "skills": [
+  "cards": [
    {
     "name": "Straw Man's Jab",
     "text": "You hit the version of them that is easiest to hit. It bleeds all the same — wounds do not check citations."
@@ -985,7 +985,7 @@
   "logic": "strategic",
   "logicBlurb": "Strategic — reads your active effects and exploits your vulnerabilities.",
   "stanceHint": "The tally continues without a reason — cold arithmetic, self-sustaining.",
-  "skills": [
+  "cards": [
    {
     "name": "Brief Candle",
     "text": "Out, out. It burns bright, it burns fast, and what it leaves behind is yours to gather — some of it before it even finishes burning."
@@ -1011,7 +1011,7 @@
   "logic": "aggressive",
   "logicBlurb": "Aggressive — attacks most turns, countering your last stance.",
   "stanceHint": "A plague with posture — it spreads by main force now.",
-  "skills": [
+  "cards": [
    {
     "name": "Sweet Poison",
     "text": "You taste it first, to prove the vintage. The enemy drinks deeper — but you did drink."
@@ -1037,7 +1037,7 @@
   "logic": "strategic",
   "logicBlurb": "Strategic — reads your active effects and exploits your vulnerabilities.",
   "stanceHint": "It thinks in shapes language was built to avoid.",
-  "skills": [
+  "cards": [
    {
     "name": "Slippery Slope",
     "text": "One concession, then the next, then the avalanche you promised was inevitable. The ground tilts, and they slide the whole way down."
@@ -1063,7 +1063,7 @@
   "logic": "aggressive",
   "logicBlurb": "Aggressive — attacks most turns, countering your last stance.",
   "stanceHint": "A furnace with a genealogy — everything he does is a hammer blow.",
-  "skills": [
+  "cards": [
    {
     "name": "Sweet Poison",
     "text": "You taste it first, to prove the vintage. The enemy drinks deeper — but you did drink."
@@ -1089,14 +1089,14 @@
   "logic": "strategic",
   "logicBlurb": "Strategic — reads your active effects and exploits your vulnerabilities.",
   "stanceHint": "It administers rather than rages — the contract is the cage.",
-  "skills": [
+  "cards": [
    {
     "name": "Red Herring",
     "text": "Something glints in the corner of the argument. They lunge for it — and every lunge you deny becomes the wound."
    },
    {
     "name": "Bootstrap Loop",
-    "text": "The proof assumes itself and, scandalously, works. The effect funds its own cause."
+    "text": "The proof assumes itself and, scandalously, works. Even a dead premise funds its own cause."
    }
   ]
  },
@@ -1115,7 +1115,7 @@
   "logic": "boss",
   "logicBlurb": "Boss script — a telegraphed, round-keyed signature pattern.",
   "stanceHint": "Grief that learned sorcery — every curse arrives still weeping.",
-  "skills": [
+  "cards": [
    {
     "name": "Soft Word",
     "text": "It turns away wrath — not by winning, but by making wrath feel over-dressed for the occasion."
@@ -1145,14 +1145,14 @@
   "logic": "boss",
   "logicBlurb": "Boss script — a telegraphed, round-keyed signature pattern.",
   "stanceHint": "The two voices agree now — consensus, it turns out, was the threat.",
-  "skills": [
+  "cards": [
    {
     "name": "Glimpse",
     "text": "A crack in the next moment, wide enough for one eye. You look, and mark what looks back — the wound starts arriving a beat before the blow that causes it."
    },
    {
     "name": "Bootstrap Loop",
-    "text": "The proof assumes itself and, scandalously, works. The effect funds its own cause."
+    "text": "The proof assumes itself and, scandalously, works. Even a dead premise funds its own cause."
    },
    {
     "name": "Red Herring",
@@ -1175,7 +1175,7 @@
   "logic": "boss",
   "logicBlurb": "Boss script — a telegraphed, round-keyed signature pattern.",
   "stanceHint": "A fire gone white with age — it burns the way glaciers move: entirely.",
-  "skills": [
+  "cards": [
    {
     "name": "Sweet Poison",
     "text": "You taste it first, to prove the vintage. The enemy drinks deeper — but you did drink."
@@ -1205,14 +1205,14 @@
   "logic": "boss",
   "logicBlurb": "Boss script — a telegraphed, round-keyed signature pattern.",
   "stanceHint": "The smoking mirror calculates — it shows you the you that already lost.",
-  "skills": [
+  "cards": [
    {
     "name": "Glimpse",
     "text": "A crack in the next moment, wide enough for one eye. You look, and mark what looks back — the wound starts arriving a beat before the blow that causes it."
    },
    {
     "name": "Bootstrap Loop",
-    "text": "The proof assumes itself and, scandalously, works. The effect funds its own cause."
+    "text": "The proof assumes itself and, scandalously, works. Even a dead premise funds its own cause."
    },
    {
     "name": "Festering Argument",
@@ -1235,7 +1235,7 @@
   "logic": "boss",
   "logicBlurb": "Boss script — a telegraphed, round-keyed signature pattern.",
   "stanceHint": "Appetite promoted past restraint — the violence is administrative.",
-  "skills": [
+  "cards": [
    {
     "name": "Sweet Poison",
     "text": "You taste it first, to prove the vintage. The enemy drinks deeper — but you did drink."
@@ -1246,7 +1246,7 @@
    },
    {
     "name": "Bootstrap Loop",
-    "text": "The proof assumes itself and, scandalously, works. The effect funds its own cause."
+    "text": "The proof assumes itself and, scandalously, works. Even a dead premise funds its own cause."
    }
   ]
  },
@@ -1265,7 +1265,7 @@
   "logic": "strategic",
   "logicBlurb": "Strategic — reads your active effects and exploits your vulnerabilities.",
   "stanceHint": "It is not cruel. It is punctual, and it has already read your schedule.",
-  "skills": [
+  "cards": [
    {
     "name": "Slippery Slope",
     "text": "One concession, then the next, then the avalanche you promised was inevitable. The ground tilts, and they slide the whole way down."
@@ -1276,7 +1276,7 @@
    },
    {
     "name": "Bootstrap Loop",
-    "text": "The proof assumes itself and, scandalously, works. The effect funds its own cause."
+    "text": "The proof assumes itself and, scandalously, works. Even a dead premise funds its own cause."
    }
   ]
  },
@@ -1295,7 +1295,7 @@
   "logic": "boss",
   "logicBlurb": "Boss script — a telegraphed, round-keyed signature pattern.",
   "stanceHint": "Each fly is a small opinion; together they are policy.",
-  "skills": [
+  "cards": [
    {
     "name": "Sweet Poison",
     "text": "You taste it first, to prove the vintage. The enemy drinks deeper — but you did drink."
@@ -1306,7 +1306,7 @@
    },
    {
     "name": "Bootstrap Loop",
-    "text": "The proof assumes itself and, scandalously, works. The effect funds its own cause."
+    "text": "The proof assumes itself and, scandalously, works. Even a dead premise funds its own cause."
    }
   ]
  },
@@ -1325,10 +1325,10 @@
   "logic": "boss",
   "logicBlurb": "Boss script — a telegraphed, round-keyed signature pattern.",
   "stanceHint": "It feels everything it never got to be — the grief predates the griever.",
-  "skills": [
+  "cards": [
    {
     "name": "Bootstrap Loop",
-    "text": "The proof assumes itself and, scandalously, works. The effect funds its own cause."
+    "text": "The proof assumes itself and, scandalously, works. Even a dead premise funds its own cause."
    },
    {
     "name": "Slippery Slope",
@@ -1355,10 +1355,10 @@
   "logic": "boss",
   "logicBlurb": "Boss script — a telegraphed, round-keyed signature pattern.",
   "stanceHint": "It cannot be read from inside any system you carry; every tell is consistent, and none is complete.",
-  "skills": [
+  "cards": [
    {
     "name": "Bootstrap Loop",
-    "text": "The proof assumes itself and, scandalously, works. The effect funds its own cause."
+    "text": "The proof assumes itself and, scandalously, works. Even a dead premise funds its own cause."
    },
    {
     "name": "Slippery Slope",
