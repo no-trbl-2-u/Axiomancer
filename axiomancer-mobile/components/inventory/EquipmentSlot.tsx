@@ -80,9 +80,9 @@ const useStyles = makeStyles((AXM) => ({
         flexDirection: 'row',
         alignItems: 'center',
         gap: 8,
-        // ~68% of the stacked column's width — the portrait carries the left
-        // half of the dock, so the slots read as compact chips beside it.
-        width: '68%',
+        // Fixed chip width, pinned to the dock's right edge. Independent of the
+        // portrait so enlarging the portrait never shrinks the equipment side.
+        width: 130,
         height: 64,
         borderWidth: 1,
         borderColor: AXM.divider,
