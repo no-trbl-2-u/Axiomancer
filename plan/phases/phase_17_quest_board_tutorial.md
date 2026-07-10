@@ -175,31 +175,38 @@ roll button (the base board's `rollButton` sits mid-scroll, not pinned to
 the screen bottom like Hazard's hand fan — dock at `bottom: 24`, Rest's
 convention, since Quest's `idle`-phase content scrolls like Rest's does).
 
-Three steps (predicates written against `phase` / `metrics.rolls` only —
-never the exact roll or landed space — so a player who ignores the coach
-and rolls ahead, or lands on a different space than DRIFTWOOD COVE because
-they overrode the seed, still completes the script):
+**Two steps, not the usual four to six** (revised during implementation —
+see the correction note below): `phase` cycles `idle ⇄ space` every loop
+rather than passing through once the way Hazard's `playing` phase does, so
+a predicate gated on "left the space phase" is not monotonic here — a
+later loop reopens a new space and un-flips it. Only `metrics.rolls`,
+which never decreases, is safe to key a step on:
 
 1. `roll` — "CAST THE BONE" — tap the bone die at the board's heart; it
-   moves your piece and opens whatever it lands on.
-   `done: (s) => s.metrics.rolls >= 1`.
-2. `space` — "MIND THE ISLAND" — every space plays its own small game;
-   read the card, make a choice, then WALK ON to close it out.
-   `done: (s) => s.phase === 'idle' && s.metrics.rolls >= 1` — structurally
-   unable to ever be seen live (see §0): the coach only renders during
-   `idle`, and this predicate is already true the instant the coach is
-   next allowed to render (right when the player returns to `idle` after
-   resolving the space). Same acknowledged trade-off as Hazard's
-   `resolve`/`outcome` steps and Reliquary's `outcome` step — its job is
-   solely to occupy the step-index between `roll` and `again` so the coach
-   doesn't flicker mid-transition; the visible banners are steps 1 and 3.
-3. `again` — "THE LOOP CONTINUES" — watch VOWS and the hull ledger fill as
+   moves your piece and opens whatever it lands on — every space plays
+   its own small game. Read the card, make a choice, then WALK ON to
+   close it out. `done: (s) => s.metrics.rolls >= 1`. This step's body
+   previews the whole loop up front (roll → read → WALK ON) since there
+   is no safe render slot to narrate the middle of it — the coach only
+   ever renders during `idle`.
+2. `again` — "THE LOOP CONTINUES" — watch VOWS and the hull ledger fill as
    the board turns; cast the bone again whenever ready.
    `done: (s) => s.metrics.rolls >= 2 || s.phase === 'dusk' || s.phase ===
    'outcome' || s.phase === 'done'` — the OR-across-terminal-phases shape
    used by every prior tutorial's final step, for the same reason: a
    player who happens to end day 1 or complete the board outright on their
    next roll still completes the script.
+
+**Correction note (caught during implementation, not in the original
+draft of this brief):** the first draft of this section specified a
+three-step script with a middle `space` step gated on
+`s.phase !== 'space'`. A live engine e2e test (`quest.tutorial.engine.test.ts`)
+caught that this predicate is not monotonic — after the *second* roll
+reopens a new space, `phase` becomes `'space'` again and the step's `done`
+result flips back to `false`, breaking the stateless-scan contract every
+other tutorial's steps rely on (a later loop must never un-satisfy an
+earlier step). Rolled back to the two-step script above rather than
+patching around it with extra state.
 
 ## 7. Empty / loading / error states
 

@@ -29,6 +29,18 @@ import { EMPTY_QUEST_SLICE, type AppStore } from '../store';
 /** Flag prefix recording a finished board: `quest-board-done:<id>:<tier>`. */
 export const QUEST_BOARD_DONE_FLAG_PREFIX = 'quest-board-done:';
 
+/** Flag set once the guided first session is completed or skipped. */
+export const QUEST_TUTORIAL_FLAG = 'quest-tutorial-done';
+
+/**
+ * The tutorial session is pinned: seed 3's opening roll on `build-the-boat`
+ * lands on DRIFTWOOD COVE (a GATHER space) and cracks a clean +2 HULL
+ * PLANKS haul on a press-then-stop line, landing back at `idle` after
+ * exactly one loop (stretch 1 of 6 — nowhere near dusk). Verified directly
+ * against `createQuestBoardSession`/`rollQuestBone`/`chooseQuestSpaceOption`.
+ */
+export const QUEST_TUTORIAL_SEED = 3;
+
 /** Returns the recorded tier for a board, or null if never finished. */
 export function questBoardDoneTier(flags: readonly string[] | undefined, boardId: string): QuestOutcomeTier | null {
     for (const flag of flags ?? []) {
@@ -51,18 +63,26 @@ declare global {
 }
 
 function setSession(store: AppStore, session: QuestBoardSession | null): void {
-    store.setState({ quest: { session } });
+    const prev = store.getState().quest ?? EMPTY_QUEST_SLICE;
+    store.setState({ quest: { ...prev, session } });
 }
 
 export interface BeginQuestBoardOptions {
     boardId?: string;
     seed?: number;
+    /** Start the guided first session (pinned seed unless overridden). */
+    tutorial?: boolean;
 }
 
 export function beginQuestBoardAction(store: AppStore, options: BeginQuestBoardOptions = {}): boolean {
     const state = store.getState();
     if (state.quest?.session) return false; // one board on the table at a time
-    const seed = resolveMinigameSeed('quest', options.seed, globalThis.__AXM_QUEST_SEED__);
+    const seed = resolveMinigameSeed(
+        'quest',
+        options.seed,
+        globalThis.__AXM_QUEST_SEED__,
+        options.tutorial ? QUEST_TUTORIAL_SEED : undefined,
+    );
     const boardId = resolveMinigameString(
         'quest',
         ['boardId', 'board'],
@@ -70,8 +90,28 @@ export function beginQuestBoardAction(store: AppStore, options: BeginQuestBoardO
         globalThis.__AXM_QUEST_BOARD__,
         QUEST_BOARDS[0].id,
     )!;
-    setSession(store, createQuestBoardSession(seed, boardId));
+    store.setState({
+        quest: { session: createQuestBoardSession(seed, boardId), tutorial: options.tutorial === true },
+    });
     return true;
+}
+
+/**
+ * Marks the guided first session as done (completed or skipped): sets the
+ * persistent flag so the map trigger never re-runs it, and persists. The
+ * session (if any) keeps running as normal play.
+ */
+export function completeQuestBoardTutorialAction(store: AppStore, skipped: boolean): void {
+    const state = store.getState() as unknown as GameState;
+    if (!(state.flags ?? []).includes(QUEST_TUTORIAL_FLAG)) {
+        store.setState({ flags: [...(state.flags ?? []), QUEST_TUTORIAL_FLAG] } as never);
+        try {
+            store.getState().save();
+        } catch {
+            // Persistence failures must not strand the coach.
+        }
+    }
+    void skipped;
 }
 
 /** Board-reveal overlay acknowledged: intro → idle. */

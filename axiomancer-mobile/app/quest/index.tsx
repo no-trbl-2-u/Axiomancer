@@ -22,6 +22,8 @@ import { QuestBoardTrack } from '@/components/quest/QuestBoardTrack';
 import { QuestDie } from '@/components/quest/QuestDie';
 import { QuestHullMeter } from '@/components/quest/QuestHullMeter';
 import { QuestLegend } from '@/components/quest/QuestLegend';
+import { QuestTutorialCoach } from '@/components/quest/QuestTutorialCoach';
+import { currentTutorialStep } from '@/components/quest/tutorial-steps';
 import { useQuestLanding } from '@/components/quest/useQuestLanding';
 import {
     QuestDuskOverlay,
@@ -32,6 +34,7 @@ import {
 import { ScreenBg } from '@/components/ScreenBg';
 import { useGameActions, useGameState } from '@/state/GameStoreProvider';
 import { QUEST_TIER_LABELS, selectQuestBoardVM } from '@/state/presenters/quest.engine';
+import { QUEST_TUTORIAL_FLAG } from '@/state/quest/store-actions';
 import type { QuestSpaceKind } from '@mechanics';
 import { FONTS } from '@/theme/axm';
 import { makeStyles, usePalette } from '@/theme/runtime';
@@ -66,6 +69,19 @@ export default function QuestScreen() {
 
     // Presentation-only choreography: tumble → walk the piece → reveal.
     const land = useQuestLanding(vm);
+
+    const tutorialDone = useGameState((s) =>
+        ((s as unknown as { flags?: string[] }).flags ?? []).includes(QUEST_TUTORIAL_FLAG),
+    );
+    // The coach rides the guided first session until its script is done or
+    // skipped; the persistent flag gates it (and the map trigger).
+    const session = slice?.session ?? null;
+    const coachActive = slice?.tutorial === true && session !== null && !tutorialDone;
+    useEffect(() => {
+        if (coachActive && currentTutorialStep(session!, vm) === -1) {
+            actions.completeQuestBoardTutorial(false);
+        }
+    }, [coachActive, session, vm, actions]);
 
     // Auto-close when the session clears (claim or abandon).
     useEffect(() => {
@@ -259,6 +275,14 @@ export default function QuestScreen() {
                 <QuestOutcomeOverlay
                     outcome={vm.outcome}
                     onClaim={actions.claimQuestBoardCompletion}
+                />
+            )}
+
+            {coachActive && (
+                <QuestTutorialCoach
+                    session={session!}
+                    vm={vm}
+                    onSkip={() => actions.completeQuestBoardTutorial(true)}
                 />
             )}
         </ScreenBg>

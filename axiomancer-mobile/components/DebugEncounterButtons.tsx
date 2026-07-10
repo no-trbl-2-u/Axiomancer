@@ -48,6 +48,38 @@ function DebugRow({
     );
 }
 
+function DebugQuestRow() {
+    const styles = useStyles();
+    const actions = useGameActions();
+
+    return (
+        <View style={styles.row}>
+            <View style={styles.labelCol}>
+                <Text style={styles.label}>DEBUG · QUEST BOARD</Text>
+                <Text style={styles.sub}>start the build-the-boat board</Text>
+            </View>
+            <Pressable
+                style={[styles.button, styles.tutorialButton]}
+                onPress={() => actions.beginQuestBoard({ tutorial: true })}
+                accessibilityRole="button"
+                accessibilityLabel="Start the quest-board tutorial session"
+                testID="debug-quest-tutorial-button"
+            >
+                <Text style={[styles.buttonLabel, styles.tutorialLabel]}>TUTORIAL</Text>
+            </Pressable>
+            <Pressable
+                style={styles.button}
+                onPress={() => actions.beginQuestBoard({ boardId: 'build-the-boat' })}
+                accessibilityRole="button"
+                accessibilityLabel="Start a debug quest-board encounter"
+                testID="debug-quest-button"
+            >
+                <Text style={styles.buttonLabel}>UNFOLD</Text>
+            </Pressable>
+        </View>
+    );
+}
+
 function DebugCacheRow() {
     const styles = useStyles();
     const actions = useGameActions();
@@ -87,13 +119,7 @@ export function DebugEncounterButtons() {
 
     return (
         <>
-            <DebugRow
-                label="DEBUG · QUEST BOARD"
-                sub="start the build-the-boat board"
-                buttonLabel="UNFOLD"
-                onPress={() => actions.beginQuestBoard({ boardId: 'build-the-boat' })}
-                testID="debug-quest-button"
-            />
+            <DebugQuestRow />
             <DebugRow
                 label="DEBUG · REST"
                 sub="start the night watch"

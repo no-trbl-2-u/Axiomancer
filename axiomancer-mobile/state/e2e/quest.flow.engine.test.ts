@@ -36,7 +36,8 @@ function session(store: AppStore): QuestBoardSession {
 }
 
 function rigSession(store: AppStore, over: Partial<QuestBoardSession>): void {
-    store.setState({ quest: { session: { ...session(store), ...over } } });
+    const prev = store.getState().quest;
+    store.setState({ quest: { ...prev, session: { ...session(store), ...over } } });
 }
 
 /** Plays whole turns (first-enabled-option policy) until the outcome. */

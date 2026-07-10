@@ -126,7 +126,9 @@ import {
     beginQuestBoardAction,
     chooseQuestSpaceOptionAction,
     claimQuestBoardCompletionAction,
+    completeQuestBoardTutorialAction,
     continueQuestSpaceAction,
+    QUEST_TUTORIAL_FLAG,
     rollQuestBoneAction,
     startQuestBoardPlayAction,
     useQuestCharmAction,
@@ -585,6 +587,8 @@ export interface AppActions {
     claimQuestBoardCompletion: () => ClaimQuestBoardResult;
     /** Clear the board without a record (dev / escape hatch). */
     abandonQuestBoard: () => void;
+    /** Mark the guided first session done (completed or skipped) and persist. */
+    completeQuestBoardTutorial: (skipped: boolean) => void;
 
     // -----------------------------------------------------------------
     // Rest encounter ("The Night Watch" — see state/rest/). Phase
@@ -997,6 +1001,7 @@ export function createAppActions(store: AppStore): AppActions {
         acknowledgeQuestDusk: () => acknowledgeQuestDuskAction(store),
         claimQuestBoardCompletion: () => claimQuestBoardCompletionAction(store),
         abandonQuestBoard: () => abandonQuestBoardAction(store),
+        completeQuestBoardTutorial: (skipped) => completeQuestBoardTutorialAction(store, skipped),
         // ── The Labyrinth (THE APORIA) ──
         enterLabyrinth: (actId) => {
             enterLabyrinthAction(store, actId);
@@ -1640,7 +1645,14 @@ function resolveCurrentMapEventAction(store: AppStore, sourceNodeType?: string):
                 ...resolvedState,
                 event: EMPTY_EVENT_SLICE,
             });
-            beginQuestBoardAction(store, { boardId: result.event.boardId });
+            // The first-ever quest runs as the guided tutorial (pinned
+            // seed, coach overlay); the persistent flag set on
+            // completion/skip keeps every later quest organic.
+            const tutorialDone = (gameState.flags ?? []).includes(QUEST_TUTORIAL_FLAG);
+            beginQuestBoardAction(
+                store,
+                tutorialDone ? { boardId: result.event.boardId } : { tutorial: true },
+            );
             return true;
         }
 
