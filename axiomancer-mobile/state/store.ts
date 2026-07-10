@@ -102,12 +102,10 @@ export interface MobileGatheringSlice {
  * Holds the active board session (engine: `axiomancer-mechanics`
  * World/QuestBoard) — `null` outside a quest. Fully sandboxed by
  * design: only the completion record (board id + tier) flows back to
- * `GameState.flags` at claim. `tutorial` marks the guided first
- * session (the coach overlay).
+ * `GameState.flags` at claim.
  */
 export interface MobileQuestSlice {
     session: QuestBoardSession | null;
-    tutorial: boolean;
 }
 
 /**
@@ -206,7 +204,7 @@ export const EMPTY_GATHERING_SLICE: MobileGatheringSlice = Object.freeze({
     tutorial: false,
 });
 
-export const EMPTY_QUEST_SLICE: MobileQuestSlice = Object.freeze({ session: null, tutorial: false });
+export const EMPTY_QUEST_SLICE: MobileQuestSlice = Object.freeze({ session: null });
 
 export const EMPTY_REST_SLICE: MobileRestSlice = Object.freeze({
     session: null,

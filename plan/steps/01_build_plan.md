@@ -206,10 +206,9 @@ decision log (see each phase file).
       currency); Insight (STEADY THE HAND) out of scope (brief:
       `plan/phases/phase_16_reliquary_tutorial.md`) (mobile)
       — `feat(mobile): guided first-delve reliquary tutorial — phase 16` (95f67302)
-- [x] Phase 17 — Quest Board ("The Boy's Almanac") first-session
+- [ ] Phase 17 — Quest Board ("The Boy's Almanac") first-session
       tutorial (GAP-001 follow-up), mirroring the Rest/Gathering/Combat
-      tutorials (mobile; brief: `plan/phases/phase_17_quest_board_tutorial.md`)
-      — `feat(mobile): guided first-session quest-board tutorial — phase 17` (9a3bb75c)
+      tutorials (mobile)
 
 **CLI verification guardrail (T-directed 2026-07-09):**
 

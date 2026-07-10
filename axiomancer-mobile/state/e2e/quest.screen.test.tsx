@@ -50,10 +50,9 @@ function mount(element: React.ReactElement): { store: AppStore; actions: AppActi
 }
 
 function rigQuest(store: AppStore, over: Partial<QuestBoardSession>): void {
-    const prev = store.getState().quest;
-    const s = prev.session;
+    const s = store.getState().quest.session;
     if (!s) throw new Error('no quest session');
-    store.setState({ quest: { ...prev, session: { ...s, ...over } } });
+    store.setState({ quest: { session: { ...s, ...over } } });
 }
 
 /** Concatenates all rendered text under a testID (handles nested <Text>). */
