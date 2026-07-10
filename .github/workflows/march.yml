@@ -38,3 +38,12 @@ jobs:
     with:
       prompt: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.focus_phase != '' && format('/ship-a-phase phase {0}', github.event.inputs.focus_phase) || '/march' }}
       timeout_minutes: 90
+      # /march can dispatch into /critique (rate-limited: ≥12 commits +
+      # ≥24h, green deploy), which drives the local expo-web build with the
+      # playtester sub-agent over Playwright. Without this the browser tools
+      # are not granted, the playtester is denied `browser_navigate`, and the
+      # critique tick no-ops (empty findings, no commit) while reporting
+      # success — and since it never advances CRITIQUE.md's last-pass marker,
+      # every following tick re-dispatches to the same dead end and starves
+      # pending phases. Grant Playwright so a march-dispatched critique runs.
+      install_playwright: true
