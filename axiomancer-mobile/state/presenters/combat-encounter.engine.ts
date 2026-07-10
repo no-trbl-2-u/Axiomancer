@@ -29,7 +29,7 @@ import {
 /** The barrel doesn't re-export the union, so derive it from Card. */
 type CardSpecialMechanic = NonNullable<Card['specialMechanics']>[number];
 import { effectGlyph, GLYPH_COLORS, type StatusGlyph } from '@/components/combat/statusGlyphs';
-import { keywordForEffect, keywordForVerb, keywordGloss } from '@/state/combat/keywords';
+import { keywordForEffect, keywordForVerb, keywordForMechanic, keywordGloss } from '@/state/combat/keywords';
 
 // ── Stance palette (Heart/Body/Mind/Wild/X) ──────────────────────────────────
 
@@ -73,12 +73,7 @@ type CardRider = NonNullable<Card['free']>;
  *  the head clause is the same one the prose leads with; a multi-clause free
  *  line keeps the head pair and marks the rest with a trailing '+' (the overlay
  *  freePill remains the full-truth line). Never a fabricated number. */
-function freeRail(card: CombatCard, sourceCard?: Card): { freeKeyword: string | null; freeValue: string | null } {
-    if (card.cardType === 'enchantment' || card.cardType === 'disenchant') {
-        return { freeKeyword: null, freeValue: 'PAID only' };
-    }
-    const r: CardRider | undefined = sourceCard?.free;
-    if (!r) return { freeKeyword: null, freeValue: null };
+function riderPairs(r: CardRider): [string, string][] {
     const pairs: [string, string][] = [];
     if (r.bonusIntensity) pairs.push(['INTENSITY', `+${r.bonusIntensity}`]);
     if (r.bonusDuration) pairs.push(['DURATION', `+${r.bonusDuration}t`]);
@@ -106,6 +101,16 @@ function freeRail(card: CombatCard, sourceCard?: Card): { freeKeyword: string | 
     if (r.intensityPerPip) pairs.push(['PIP', `+${r.intensityPerPip} int`]);
     if (r.pips) pairs.push(['PIP', `+${r.pips}`]);
     if (r.stagger) pairs.push(['STAGGER', `${r.stagger}`]);
+    return pairs;
+}
+
+function freeRail(card: CombatCard, sourceCard?: Card): { freeKeyword: string | null; freeValue: string | null } {
+    if (card.cardType === 'enchantment' || card.cardType === 'disenchant') {
+        return { freeKeyword: null, freeValue: 'PAID only' };
+    }
+    const r: CardRider | undefined = sourceCard?.free;
+    if (!r) return { freeKeyword: null, freeValue: null };
+    const pairs = riderPairs(r);
     if (pairs.length === 0) return { freeKeyword: null, freeValue: null };
     const [kw, val] = pairs[0];
     return { freeKeyword: kw, freeValue: pairs.length > 1 ? `${val} +` : val };
@@ -205,7 +210,11 @@ export type CombatCardKind =
     | 'isolated'      // debuff_isolated → denies ally-buff targeting (qualitative)
     | 'overextended'  // debuff_overextended → self-cost: your next play is weakened (qualitative)
     | 'clarity'       // buff_clarity → next die counts as WILD
-    | 'resolute';     // buff_resolute → real -N% damage-taken reduction (the inverse of vulnerable)
+    | 'resolute'      // buff_resolute → real -N% damage-taken reduction (the inverse of vulnerable)
+    // ── card-honesty (2026-07-10) — the generic MECHANIC-LED face ──
+    | 'mechanic';     // a specialMechanics verb (STAGGER / SWAY / PERORATION / …) or a
+                      // rider-carried verb (DRAW / HEAL / …) is the card's paid identity;
+                      // keyword + value come from the mechanic, never a fabricated fallback
 
 /** Render-ready, HONEST card FACE. Every number is a real unit derived from the
  *  card's AUTHORED effect (never the abstract "impact"). `heroText` is '' when the
@@ -552,6 +561,8 @@ export function resolvePrimary(card: CombatCard, sourceCard: Card | undefined): 
         if (reap) return { kind: 'reap', ce: null, guardAmount: null, riders: [], mech: reap };
         const siphon = findMech('siphon');
         if (siphon) return { kind: 'siphon', ce: null, guardAmount: null, riders: [], mech: siphon };
+        const led = headlineMechanic(mechs);
+        if (led) return { kind: 'mechanic', ce: null, guardAmount: null, riders: [], mech: led };
         return { kind: 'inert', ce: null, guardAmount: null, riders: [], mech: null };
     }
     if (vc === 'buff-self') {
@@ -572,9 +583,15 @@ export function resolvePrimary(card: CombatCard, sourceCard: Card | undefined): 
         if (resolute) return { kind: 'resolute', ce: resolute, guardAmount: null, riders: self.filter(s => s !== resolute), mech: null };
         const clarity = self.find(s => engineHonestKind(s.effectId) === 'clarity');
         if (clarity) return { kind: 'clarity', ce: clarity, guardAmount: null, riders: self.filter(s => s !== clarity), mech: null };
-        const primary = self.find(s => engineHonestKind(s.effectId) === 'regen') ?? self[0] ?? null;
-        const kind: CombatCardKind = engineHonestKind(primary?.effectId) === 'regen' ? 'regen' : 'inert';
-        return { kind, ce: primary, guardAmount: null, riders: self.filter(s => s !== primary), mech: null };
+        const regenFx = self.find(s => engineHonestKind(s.effectId) === 'regen');
+        if (regenFx) return { kind: 'regen', ce: regenFx, guardAmount: null, riders: self.filter(s => s !== regenFx), mech: null };
+        // Not a recognised self-EFFECT — headline the driving MECHANIC (FORGE
+        // was handled above; DRAW/HEAL riders, ECHO, etc. resolve here). The
+        // self effects (e.g. a self-cost MARK) ride along as keyword chips.
+        const led = headlineMechanic(mechs);
+        if (led) return { kind: 'mechanic', ce: null, guardAmount: null, riders: self, mech: led };
+        const primary = self[0] ?? null;
+        return { kind: 'inert', ce: primary, guardAmount: null, riders: self.filter(s => s !== primary), mech: null };
     }
     // direct-dot | direct-control | stat-debuff → opponent effects
     const opp = (sourceCard?.combatEffects ?? []).filter(e => e.appliedTo === 'opponent');
@@ -598,6 +615,13 @@ export function resolvePrimary(card: CombatCard, sourceCard: Card | undefined): 
                                         : k === 'sensoryNull' ? 'sensoryNull'
                                             : k === 'isolated' ? 'isolated'
                                                 : 'inert';
+    // A card classified by verb (e.g. direct-control STAGGER/SWAY) with no
+    // engine-honest opponent EFFECT lands here as 'inert'. Headline its driving
+    // MECHANIC instead of the ambiguous fallback; the effects ride as chips.
+    if (kind === 'inert') {
+        const led = headlineMechanic(mechs);
+        if (led) return { kind: 'mechanic', ce: null, guardAmount: null, riders: [...opp, ...selfFx], mech: led };
+    }
     return { kind, ce: primary, guardAmount: null, riders: [...opp.filter(o => o !== primary), ...selfFx], mech: null };
 }
 
@@ -857,6 +881,19 @@ function cardCalc(card: CombatCard, sourceCard: Card | undefined): CardCalc {
             out.keyword = 'Guard'; out.glyph = '🛡'; out.categoryColor = GUARD_COLOR; break;
         case 'befriend':
             out.keyword = null; out.glyph = '🕊'; out.categoryColor = BEFRIEND_COLOR; break;
+        case 'mechanic': {
+            const h = mechanicHeadline(pr.mech);
+            out.keyword = h?.keyword ?? null;
+            const mk = pr.mech?.kind;
+            const control = mk === 'stagger' || mk === 'lock_stance' || mk === 'sway'
+                || mk === 'omen' || mk === 'foretell' || mk === 'peroration'
+                || mk === 'premise' || mk === 'spend_premises';
+            const affliction = mk === 'extend_dots' || mk === 'convert_dots'
+                || mk === 'boost_all_dots' || mk === 'consume_affliction' || mk === 'soul_gain';
+            out.glyph = control ? '✦' : affliction ? '☠' : '◆';
+            out.categoryColor = control ? GLYPH_COLORS.control : affliction ? GLYPH_COLORS.dot : PAYOFF_COLOR;
+            break;
+        }
         case 'inert':
         default:
             out.keyword = keywordForEffect(pr.ce?.effectId);
@@ -885,6 +922,89 @@ function forgeClause(mech: CardSpecialMechanic | null): string | null {
         default:
             return null;
     }
+}
+
+/** A headline-able special mechanic → its face keyword + real-unit value. THE
+ *  generic honesty path: any specialMechanics verb that isn't a self-standing
+ *  face kind (guard/rupture/forge/…) resolves here to `KEYWORD · value` instead
+ *  of falling through to the ambiguous "DEBUFF / buff yourself" fallback.
+ *  `keyword` is Title-Case (matches the glossary); returns null for kinds with
+ *  no player headline (pure die-plumbing riders never reach here as primary). */
+interface MechHeadline { keyword: string; heroText: string; heroSub: string | null; verbLine: string }
+function mechanicHeadline(mech: CardSpecialMechanic | null): MechHeadline | null {
+    if (!mech) return null;
+    const kw = keywordForMechanic(mech.kind);
+    switch (mech.kind) {
+        case 'stagger':
+            return { keyword: kw ?? 'Stagger', heroText: `−${mech.rungs}`, heroSub: `rung${mech.rungs === 1 ? '' : 's'} · next action`, verbLine: "weaken the foe's next telegraphed action" };
+        case 'lock_stance':
+            return { keyword: kw ?? 'Stagger', heroText: '', heroSub: "lock the foe's next stance", verbLine: "the foe's next stance is locked and revealed" };
+        case 'sway':
+            return { keyword: kw ?? 'Sway', heroText: `+${mech.amount}`, heroSub: 'toward capitulation', verbLine: 'push the foe toward capitulation' };
+        case 'peroration':
+            return { keyword: kw ?? 'Peroration', heroText: `at ${mech.at}`, heroSub: mech.concedeAt ? `concede at ${mech.concedeAt}` : 'fires free', verbLine: 'a declared conclusion that fires on your Premise tally' };
+        case 'premise':
+            return { keyword: kw ?? 'Premise', heroText: `+${mech.count}`, heroSub: 'to the tally', verbLine: 'add to your Premise tally' };
+        case 'spend_premises':
+            return { keyword: kw ?? 'Premise', heroText: '', heroSub: 'spend the tally', verbLine: 'spend your whole Premise tally' };
+        case 'foretell':
+            return { keyword: kw ?? 'Foretell', heroText: `${mech.count}`, heroSub: 'look ahead', verbLine: "reveal the foe's next stance and reorder your deck" };
+        case 'omen':
+            return { keyword: kw ?? 'Omen', heroText: '', heroSub: 'fires free if the read matches', verbLine: "a prediction cast against the foe's next stance" };
+        case 'soul_gain':
+            return { keyword: kw ?? 'Soul', heroText: `+${mech.count}`, heroSub: `Soul${mech.count === 1 ? '' : 's'}`, verbLine: 'gain Souls' };
+        case 'consume_affliction':
+            return { keyword: kw ?? 'Soul', heroText: `+${mech.souls}`, heroSub: `Soul${mech.souls === 1 ? '' : 's'} · consume 1 affliction`, verbLine: 'consume an affliction — its fuel ticks now — for Souls' };
+        case 'reprise':
+            return { keyword: kw ?? 'Reprise', heroText: `${mech.count}`, heroSub: mech.fireFree ? 'from discard · fires free' : 'from discard', verbLine: 'return your highest-rank discards to hand' };
+        case 'echo':
+            return { keyword: kw ?? 'Echo', heroText: '', heroSub: 'paid line fires twice', verbLine: 'the paid line fires twice' };
+        case 'echo_next_spell':
+            return { keyword: kw ?? 'Echo', heroText: '', heroSub: 'your next spell', verbLine: 'your next spell this turn gains Echo' };
+        case 'replay_last':
+            return { keyword: kw ?? 'Echo', heroText: `×${mech.times}`, heroSub: 'your last spell', verbLine: 'your last spell resolves again' };
+        case 'conjure_card':
+            return { keyword: kw ?? 'Conjure', heroText: '', heroSub: 'a Thoughtform', verbLine: 'create a one-use Thoughtform card' };
+        case 'recoil':
+            return { keyword: kw ?? 'Recoil', heroText: `${mech.hp}`, heroSub: 'VITAE cost', verbLine: 'pay VITAE as an unpreventable cost' };
+        case 'extend_dots':
+            return { keyword: kw ?? 'Fester', heroText: `+${mech.turns}`, heroSub: 'turns · all your DoTs', verbLine: 'extend every damage-over-time you hold on the foe' };
+        case 'boost_all_dots':
+            return { keyword: kw ?? 'Fester', heroText: `+${mech.intensity}`, heroSub: 'intensity · all DoTs', verbLine: "amplify every affliction on the foe" };
+        case 'convert_dots':
+            return { keyword: kw ?? 'Transmute', heroText: `+${mech.bonusIntensity}`, heroSub: 'intensity · bleed ↔ poison', verbLine: "flip the foe's Bleed and Poison, each landing harder" };
+        case 'strip_random_buff':
+            return { keyword: 'Cleanse', heroText: '', heroSub: mech.appliedTo === 'enemy' ? 'strip a foe buff' : 'strip a buff', verbLine: 'strip a random buff' };
+        case 'rider': {
+            const pairs = riderPairs(mech.rider);
+            if (!pairs.length) return null;
+            const [rk, rv] = pairs[0];
+            const title = rk.charAt(0) + rk.slice(1).toLowerCase();
+            return { keyword: title, heroText: rv, heroSub: pairs.length > 1 ? 'and more' : null, verbLine: 'the printed rider' };
+        }
+        default:
+            return null;
+    }
+}
+
+/** Priority order for WHICH mechanic a multi-mechanic card headlines: the
+ *  identity/payoff verb wins over its modifiers (ECHO doubles SWAY → headline
+ *  SWAY), and a plain `rider` verb is the last resort. */
+const MECH_HEADLINE_PRIORITY: readonly string[] = [
+    'peroration', 'sway', 'stagger', 'lock_stance', 'reprise', 'replay_last',
+    'omen', 'consume_affliction', 'soul_gain', 'spend_premises', 'premise',
+    'foretell', 'extend_dots', 'convert_dots', 'boost_all_dots', 'recoil',
+    'conjure_card', 'strip_random_buff', 'echo', 'echo_next_spell', 'rider',
+];
+
+/** The single mechanic a card should headline (highest-priority headline-able
+ *  entry), or null when none of its mechanics carries a player headline. */
+function headlineMechanic(mechs: readonly CardSpecialMechanic[]): CardSpecialMechanic | null {
+    for (const kind of MECH_HEADLINE_PRIORITY) {
+        const m = mechs.find(x => x.kind === kind);
+        if (m && mechanicHeadline(m)) return m;
+    }
+    return null;
 }
 
 function buildDetailKeywords(card: CombatCard, c: CardCalc): { name: string; def: string; minor: boolean }[] {
@@ -945,6 +1065,7 @@ export function faceStats(card: CombatCard, sourceCard?: Card): CombatCardFaceVM
         case 'forge': { const clause = forgeClause(c.mech) ?? 'shape your dice'; return { ...base, kind: 'forge', keyword: kw, heroText: '', heroSub: clause, freeHeroText: free, freeHeroSub: null, verbLine: clause, powerRail: c.keyword ?? 'Forge', readDependent: false, inert: false, guardBase: null }; }
         case 'enchant': return { ...base, kind: 'enchant', keyword: 'ENCHANTMENT', heroText: '', heroSub: 'rest of combat', freeHeroText: free, freeHeroSub: null, verbLine: 'a persistent passive on your side', powerRail: c.keyword ?? 'Enchantment', readDependent: false, inert: false, guardBase: null };
         case 'disenchant': return { ...base, kind: 'disenchant', keyword: 'DISENCHANT', heroText: '', heroSub: 'curse · rest of combat', freeHeroText: free, freeHeroSub: null, verbLine: 'a standing curse attached to the enemy', powerRail: c.keyword ?? 'Disenchant', readDependent: false, inert: false, guardBase: null };
+        case 'mechanic': { const h = mechanicHeadline(c.mech); return { ...base, kind: 'mechanic', keyword: kw, heroText: h?.heroText ?? '', heroSub: h?.heroSub ?? null, freeHeroText: free, freeHeroSub: null, verbLine: h?.verbLine ?? '', powerRail: c.keyword ?? '—', readDependent: false, inert: false, guardBase: null }; }
         case 'inert':
         default: return { ...base, kind: 'inert', keyword: kw ?? 'DEBUFF', heroText: '', heroSub: card.verbClass === 'buff-self' ? 'buff yourself' : 'weakens the foe', freeHeroText: free, freeHeroSub: null, verbLine: card.verbClass === 'buff-self' ? 'buff yourself' : 'weakens the foe', powerRail: c.keyword ?? '—', readDependent: false, inert: true, guardBase: null };
     }
@@ -1001,6 +1122,7 @@ function detailCore(card: CombatCard, sourceCard?: Card): DetailCore {
         }
         case 'enchant': return { subtitle: 'Enchantment — a persistent passive, rest of combat.', metaChip, outcomeLine: 'In play for the rest of the combat.', outcomeStats: [], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: ${card.bottomActionText}`, readNote: 'PAID only — the die is the commitment. It leaves the deck cycle once played.', mathLine: 'A standing rule, not a number — its text is the engine text.', keywords };
         case 'disenchant': return { subtitle: 'Disenchant — a standing curse on the enemy.', metaChip, outcomeLine: 'Attaches to the enemy for the rest of the combat.', outcomeStats: [], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: ${card.bottomActionText}`, readNote: 'PAID only — the die is the commitment. It leaves the deck cycle once played.', mathLine: 'A standing rule, not a number — its text is the engine text.', keywords };
+        case 'mechanic': { const h = mechanicHeadline(c.mech); const val = [h?.heroText, h?.heroSub].filter(Boolean).join(' '); return { subtitle: `${Title} — ${h?.verbLine ?? 'a special mechanic'}.`, metaChip, outcomeLine: val ? `${Title} ${val}.` : `${Title}.`, outcomeStats: h?.heroText ? [{ label: Title.toUpperCase(), value: h.heroText }] : [], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: ${card.bottomActionText}`, readNote: `${Title} takes no read — the printed line is the applied effect.`, mathLine: `${Title}: ${h?.verbLine ?? card.bottomActionText}.`, keywords }; }
         case 'inert':
         default: return { subtitle: `${Title || 'Effect'} — minor right now.`, metaChip, outcomeLine: `${Title || 'This effect'} — minor for now.`, outcomeStats: [], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: ${card.bottomActionText}`, readNote: 'The engine text above is the whole truth for this card.', mathLine: `${Title || 'This effect'} carries no headline number — the printed line is the applied effect.`, keywords };
     }

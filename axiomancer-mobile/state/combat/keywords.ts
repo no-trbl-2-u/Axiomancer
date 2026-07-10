@@ -1,12 +1,16 @@
 /**
  * Keyword registry — the player-facing combat vocabulary (spec 32 v3).
  *
- * EXACTLY 30 KEYWORDS. The themed-deck library speaks a deliberately small
- * language: 10 shared utility keywords + 2 hallmark keywords per theme.
- * Every mechanic is a terse, learnable KEYWORD (BLEED, STAGGER, FORGE), not a
- * flavour name. The engine keeps its thematic effect names as lore; this
- * module is the PRESENTATION-layer mapping the board, card faces, glossary,
- * and combat log read instead. Pure + dependency-free.
+ * 32 KEYWORDS (spec 32 v3 shipped 30: 10 shared utility + 2 hallmark per
+ * theme). The card-honesty pass of 2026-07-10 added 2 more — FESTER and
+ * TRANSMUTE — because two affliction-glue cards (`festering-argument`,
+ * `currys-conversion`) drove mechanics (extend_dots / convert_dots) that had NO
+ * keyword home, so they rendered the ambiguous "DEBUFF / buff yourself" face.
+ * The doctrine is now "every mechanic is a terse, learnable KEYWORD" over "the
+ * count is exactly 30" — a mechanic without a keyword here is the bug (see the
+ * card-face-honesty guard test). The engine keeps its thematic effect names as
+ * lore; this module is the PRESENTATION-layer mapping the board, card faces,
+ * glossary, and combat log read instead. Pure + dependency-free.
  *
  * Why mobile-side: a player-facing label is presentation (ADR-0001/0003 — the
  * engine owns truth, mobile owns how it reads). Never rename engine effect ids
@@ -104,6 +108,52 @@ const VERB_KEYWORD: Record<string, string> = {
 };
 
 /**
+ * Special-mechanic kind → keyword (Title-Case). The MISSING half of the
+ * vocabulary map: `EFFECT_KEYWORD` covers effect-backed cards (Poison / Mark /
+ * …), but a card whose PAID identity is a `specialMechanics` verb (STAGGER,
+ * SWAY, PERORATION, …) had no keyword resolution and fell through to the
+ * ambiguous "DEBUFF / buff yourself" face. Every headline-able mechanic maps to
+ * a real glossary keyword here so the face can always print `KEYWORD · value`.
+ *
+ * Kinds handled by their OWN face kind (guard/barrier/riposte/rupture/reap/
+ * siphon and the FORGE die-verb cluster) are intentionally absent — they never
+ * reach the generic mechanic path.
+ */
+const MECHANIC_KEYWORD: Record<string, string> = {
+    // ── Control ──
+    stagger: 'Stagger',
+    lock_stance: 'Stagger',
+    // ── Oracle ──
+    foretell: 'Foretell',
+    omen: 'Omen',
+    // ── Peroration ──
+    premise: 'Premise',
+    peroration: 'Peroration',
+    spend_premises: 'Premise',
+    // ── Akrasia ──
+    recoil: 'Recoil',
+    // ── Harvest ──
+    soul_gain: 'Soul',
+    consume_affliction: 'Soul',
+    // ── Charm ──
+    sway: 'Sway',
+    // ── Echo ──
+    echo: 'Echo',
+    echo_next_spell: 'Echo',
+    reprise: 'Reprise',
+    // replay_last replays your LAST spell (not this card's line) — same Echo
+    // family concept ("a spell resolves again"); the face heroSub names the
+    // target so it never reads as this card's own payoff firing twice.
+    replay_last: 'Echo',
+    // ── Conjuration ──
+    conjure_card: 'Conjure',
+    // ── Affliction glue ──
+    extend_dots: 'Fester',
+    convert_dots: 'Transmute',
+    boost_all_dots: 'Fester',
+};
+
+/**
  * Keyword → a short, general definition (the glossary rule). The card's own
  * numbers live on the face/preview; this explains the keyword. EXACTLY the 30
  * keywords of spec 32 v3 §3 (plus the two card-type labels).
@@ -137,6 +187,12 @@ const KEYWORD_GLOSS: Record<string, string> = {
         'Creates a one-use Thoughtform card in your hand. '
         + 'It is removed from the combat after it is played, or when the combat ends.',
     // ── Affliction (T1) ──
+    Fester:
+        'Adds that many turns of duration to EVERY damage-over-time effect you '
+        + 'have on the enemy — the wounds you have already opened simply run longer.',
+    Transmute:
+        'Converts the enemy’s Bleed into Poison and its Poison into Bleed, '
+        + 'and adds that much intensity to each as it flips — the same wound, re-argued.',
     Poison:
         'Deals 2 HP per stack at the START of each round, and that 2 grows by +1 for every 2 full rounds the poison has held. '
         + 'Applying poison again resets the growth.',
@@ -225,6 +281,13 @@ export function keywordForEffect(effectId: string | null | undefined): string | 
 export function keywordForVerb(verbClass: string | null | undefined): string | null {
     if (!verbClass) return null;
     return VERB_KEYWORD[verbClass] ?? null;
+}
+
+/** The keyword a special-mechanic kind headlines (e.g. stagger → Stagger), or
+ *  null for kinds that carry their own face kind (guard/rupture/forge/…). */
+export function keywordForMechanic(kind: string | null | undefined): string | null {
+    if (!kind) return null;
+    return MECHANIC_KEYWORD[kind] ?? null;
 }
 
 /** The general glossary definition for a keyword, or null. */
