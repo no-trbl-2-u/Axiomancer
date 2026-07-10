@@ -108,6 +108,44 @@ describe('faceStats — honest real-unit faces', () => {
     });
 });
 
+describe('Option A split rail — freeKeyword/freeValue + typeStrip (owner-picked 2026-07-09)', () => {
+    it('Slippery Slope → ◇ TICK · 1 | BODY · SPELL foot strip', () => {
+        const { card, sourceCard } = cardOf('slippery-slope');
+        const f = faceStats(card, sourceCard);
+        expect(f.freeKeyword).toBe('TICK');
+        expect(f.freeValue).toBe('1');
+        expect(f.typeStrip).toBe('BODY · SPELL');
+    });
+    it('Brace for Impact → ◇ GUARD · 2 (the authored free rider, never halved)', () => {
+        const { card, sourceCard } = cardOf('brace-for-impact');
+        const f = faceStats(card, sourceCard);
+        expect(f.freeKeyword).toBe('GUARD');
+        expect(f.freeValue).toBe('2');
+    });
+    it('enchantment / disenchant → PAID only rail; disenchant foot prints CURSE', () => {
+        const venom = cardOf('venom-and-vein');
+        const fv = faceStats(venom.card, venom.sourceCard);
+        expect(fv.freeKeyword).toBeNull();
+        expect(fv.freeValue).toBe('PAID only');
+        expect(fv.typeStrip).toContain('ENCHANTMENT');
+        const curse = cardOf('suppurating-curse');
+        const fc = faceStats(curse.card, curse.sourceCard);
+        expect(fc.freeValue).toBe('PAID only');
+        expect(fc.typeStrip).toContain('CURSE');
+        expect(fc.typeStrip).not.toContain('DISENCHANT');
+    });
+    it("multi-clause free line keeps the head clause and marks the rest with '+'", () => {
+        const { card, sourceCard } = cardOf('the-gleaners-due');  // free: draw 1 · +1 Soul
+        const f = faceStats(card, sourceCard);
+        expect(f.freeKeyword).toBe('DRAW');
+        expect(f.freeValue).toBe('1 +');
+        // The overlay's freePill still carries the full-truth prose.
+        const d = detailStats(card, sourceCard);
+        expect(d.freePill).toContain('draw 1');
+        expect(d.freePill).toContain('Soul');
+    });
+});
+
 describe('rank / rarity projection (spec 32 v3 §4)', () => {
     it('rank rides the card; rarity derives from it (rare frame keys off rarity)', () => {
         expect(getCard('slippery-slope')!.rank).toBe(1);

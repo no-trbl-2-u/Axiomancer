@@ -174,9 +174,11 @@ function DiceRow({
                 // onto a card any time (the single-die law still holds per play).
                 // Spec 32 v3 §5 — a FLOATING die likewise bypasses the one-die
                 // draft: draggable whenever it is unspent, drafted or not.
-                const draggable = die.reserve || die.floating
-                    ? draggingDieId !== die.id && !die.spent
-                    : !vm.hasDraft && !die.isX && !die.drafted && !die.spent;
+                // Presenter-computed (CombatDieVM.draggable) so it can never flip
+                // while the die's own drag is live — that unmounted the
+                // GestureDetector mid-gesture, which on web killed the pan without
+                // onEnd/onFinalize: the drop never resolved and the ghost stuck.
+                const draggable = die.draggable;
                 const isAssigned = assignedDieIds.has(die.id);
                 // R4 — a dead X face is never dead: tap it to advance the strongest
                 // enemy DoT (or bank +1 Conviction), once per turn.
@@ -282,8 +284,9 @@ const StagedCard = React.memo(function StagedCard({
     const popStyle = useAnimatedStyle(() => ({ transform: [{ scale: pop.value }] }));
     const armed = assignedDie !== null;
     const readColor = armed ? (READ_ACCENT[read] ?? AXM.bone) : AXM.bone;
-    const cardW = compact ? 92 : 118;
-    const cardH = compact ? 128 : 164;
+    // Option A rail needs width: staged faces track the hand-card proportion.
+    const cardW = compact ? 100 : 122;
+    const cardH = compact ? 147 : 179;
     // The keyword line shows the POWER value; for read-dependent kinds (guard) it is
     // recomputed live at the known read so the staged number is exact at commit.
     let heroOverride: string | undefined;
@@ -938,16 +941,24 @@ function artMirrored(cardId: string): boolean {
     return (h & 1) === 1;
 }
 
+// Option A rail values are terse: "over N turns" → "over Nt" etc.
+function compactSub(s: string): string {
+    return s.replace(/(\d+)\s*turns?\b/g, '$1t');
+}
+
 /**
- * The shared card FACE — art-forward reference shape — instanced small in the
- * hand and LARGE in the inspect modal so the two can never drift.
- *   · per-card ART (temp pool, keyword-matched) fills the top ~64% behind a
+ * The shared card FACE — Option A layout (owner-picked 2026-07-09) — instanced
+ * small in the hand and LARGE in the inspect modal so the two can never drift.
+ *   · per-card ART (temp pool, keyword-matched) fills the top region behind a
  *     stance-tint gradient wash;
  *   · a glossy stance ORB (category glyph, stance colour) top-left;
- *   · the card NAME on a stance-coloured bevelled band;
- *   · small face: ONE keyword line ("◆ KEYWORD value") — the FREE/POWER fork
- *     lives on the APPLY ribbon + the detail modal;
- *   · large face: the effect SENTENCE with bolded keywords + the type tab.
+ *   · the card NAME on a stance-coloured bevelled band, mid-card;
+ *   · a bottom rail SPLIT 50/50: ◇ FREE (keyword · value) | ◆ PAID (keyword ·
+ *     value, category colour), a visible divider between the halves;
+ *   · printed die lines as ONE small line under the split (when present);
+ *   · the TYPE STRIP at the very foot ("BODY · SPELL" — CURSE for disenchant).
+ * Identical wording at both sizes; definitions/pills/flavor live in the
+ * inspect overlay, never on the face.
  */
 export const CombatCardFace = React.memo(function CombatCardFace({
     card, width, height, large = false, accent = null, readPip = null, heroOverride, children,
@@ -974,14 +985,19 @@ export const CombatCardFace = React.memo(function CombatCardFace({
     const baseKw = f.inert ? AXM.ash : f.categoryColor;
     const kwColor = accent ?? baseKw;
     const borderColor = accent ?? f.categoryColor;
+    // ◆ PAID column value: the powered number (+ compact sub), or the exact
+    // clause/word for numberless kinds — never a fabricated value.
     const numberless = !f.heroText && !heroOverride;
-    const value = numberless ? (f.keyword ?? heroFace(f)) : paidValueText(f, heroOverride);
+    const paidValue = numberless
+        ? (f.heroSub ? compactSub(f.heroSub) : heroFace(f))
+        : `${paidValueText(f, heroOverride)}${f.heroSub ? ` ${compactSub(f.heroSub)}` : ''}`;
+    const freeValue = f.freeValue ?? f.freeHeroText;
     const orbR = large ? 22 : 13;
     return (
         <View style={[styles.faceOuter, { width, height }]}>
             <View style={[styles.faceCard, { borderColor }]}>
-                {/* ART window — top ~64% behind a bottom-up stance gradient */}
-                <View style={[styles.faceArt, large && { height: '52%' }]} pointerEvents="none">
+                {/* ART window — top region behind a bottom-up stance gradient */}
+                <View style={[styles.faceArt, large && { height: '48%' }]} pointerEvents="none">
                     <Image
                         source={getCardArt(card.cardId)}
                         style={[StyleSheet.absoluteFill, artMirrored(card.cardId) && { transform: [{ scaleX: -1 }] }]}
@@ -1010,28 +1026,41 @@ export const CombatCardFace = React.memo(function CombatCardFace({
                         <View style={styles.nameBandShade} pointerEvents="none" />
                         <Text style={[styles.nameText, large && styles.nameTextLarge]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>{card.name}</Text>
                     </View>
-                    {/* IDENTICAL wording at BOTH sizes (owner directive 2026-07-09):
-                        ONE keyword line — "◆ KEYWORD value" — plus the printed die
-                        lines. Definitions/pills live OUTSIDE the face in the inspect
-                        overlay; the face itself may never drift between the hand and
-                        the modal. */}
-                    <View style={styles.kwLine}>
-                        <Text style={[styles.kwText, large && styles.kwTextLarge, { color: kwColor }]} numberOfLines={1} adjustsFontSizeToFit>
-                            ◆ {f.keyword ?? 'DIE'}{readPip ? ` ${readPip}` : ''}
-                        </Text>
-                        {!numberless ? (
-                            <Text style={[styles.kwValue, large && styles.kwValueLarge, { color: kwColor }]} numberOfLines={1} adjustsFontSizeToFit>{value}</Text>
-                        ) : null}
-                        {f.heroSub ? <Text style={[styles.kwSub, large && styles.kwSubLarge]} numberOfLines={1} adjustsFontSizeToFit>{f.heroSub}</Text> : null}
-                        {/* Fate Engine P1 — the card's printed DIE LINES (real units). */}
-                        {card.dieLines?.map((line) => (
-                            <Text key={line} style={[styles.faceDieLine, !large && styles.faceDieLineSmall]} numberOfLines={large ? 2 : 1} adjustsFontSizeToFit>{line}</Text>
-                        ))}
+                    {/* Option A bottom rail — IDENTICAL wording at BOTH sizes:
+                        ◇ FREE keyword·value | divider | ◆ PAID keyword·value.
+                        Definitions/pills live OUTSIDE the face in the inspect
+                        overlay; the face itself may never drift between the hand
+                        and the modal. */}
+                    <View style={styles.railSplit}>
+                        <View style={styles.railHalf}>
+                            <Text style={[styles.railHead, large && styles.railHeadLarge, { color: AXM.bone }]} numberOfLines={1} adjustsFontSizeToFit>
+                                ◇ {f.freeKeyword ?? 'FREE'}
+                            </Text>
+                            <Text style={[styles.railValue, large && styles.railValueLarge, { color: AXM.parchment }]} numberOfLines={large ? 3 : 2} adjustsFontSizeToFit>
+                                {freeValue}
+                            </Text>
+                        </View>
+                        <View style={styles.railDivider} pointerEvents="none" />
+                        <View style={styles.railHalf}>
+                            <Text style={[styles.railHead, large && styles.railHeadLarge, { color: kwColor }]} numberOfLines={1} adjustsFontSizeToFit>
+                                ◆ {f.keyword ?? 'DIE'}{readPip ? ` ${readPip}` : ''}
+                            </Text>
+                            <Text style={[styles.railValue, large && styles.railValueLarge, { color: kwColor }]} numberOfLines={large ? 3 : 2} adjustsFontSizeToFit>
+                                {paidValue}
+                            </Text>
+                        </View>
                     </View>
-                    {/* TYPE-TAB pinned to the card's bottom edge — both sizes (the
-                        type — SPELL / ENCHANTMENT / CURSE — is printed identity). */}
-                    <View style={[styles.typeTab, !large && styles.typeTabSmall]}>
-                        <Text style={[styles.typeTabText, !large && styles.typeTabTextSmall]} numberOfLines={1} adjustsFontSizeToFit>{card.detail.metaChip}</Text>
+                    {/* Fate Engine P1 — printed DIE LINES: one small line under the
+                        split (Option A gives them no rail slot). */}
+                    {card.dieLines?.length ? (
+                        <Text style={[styles.faceDieLine, styles.railDieLine, !large && styles.faceDieLineSmall]} numberOfLines={1} adjustsFontSizeToFit>
+                            {card.dieLines.join(' · ')}
+                        </Text>
+                    ) : null}
+                    {/* TYPE STRIP at the very foot — printed identity, both sizes
+                        (SPELL / ENCHANTMENT / CURSE; stance first). */}
+                    <View style={styles.typeStrip}>
+                        <Text style={[styles.typeStripText, large && styles.typeStripTextLarge]} numberOfLines={1} adjustsFontSizeToFit>{f.typeStrip}</Text>
                     </View>
                 </View>
             </View>
@@ -1041,9 +1070,10 @@ export const CombatCardFace = React.memo(function CombatCardFace({
 
 // The fanned hand card — a small instance of the shared face, art-forward at the
 // reference's ~1:1.5 proportion. The fan-overlap math (band fit) keys off these
-// same constants — keep them in sync.
-const HAND_CARD_W = 108;
-const HAND_CARD_H = 158;
+// same constants — keep them in sync. Option A: 108×158 → 132×194 (the split
+// rail needs the room; the old size was illegible). Exported for the drag ghost.
+export const HAND_CARD_W = 132;
+export const HAND_CARD_H = 194;
 function HandCard({ card }: { card: CombatCardVM }) {
     return <CombatCardFace card={card} width={HAND_CARD_W} height={HAND_CARD_H} />;
 }
@@ -1110,8 +1140,9 @@ const useStyles = makeStyles((AXM) => ({
     dieConv: { fontFamily: FONTS.mono, fontSize: 9, color: AXM.bone, textAlign: 'center', marginTop: 2, letterSpacing: 0.5, textShadowColor: 'rgba(0,0,0,0.9)', textShadowRadius: 3 },
     diePip: { fontFamily: FONTS.sans, fontSize: 10, textAlign: 'center', marginTop: 2, letterSpacing: 0.6, textShadowColor: 'rgba(0,0,0,0.9)', textShadowRadius: 3 },
 
-    // ── the hand dock ──
-    dock: { height: 178, overflow: 'hidden' },
+    // ── the hand dock ── (Option A: fits the 194pt card raised ~20pt off the
+    // screen bottom — was 178 for the 158pt card flush against the rail)
+    dock: { height: 216, overflow: 'hidden' },
 
     // ── momentum wheel ──
     wheelRow: { alignSelf: 'center', flexDirection: 'row', alignItems: 'center', gap: 5, paddingVertical: 3, paddingHorizontal: 10, marginBottom: 2 },
@@ -1121,7 +1152,7 @@ const useStyles = makeStyles((AXM) => ({
     wheelChevron: { fontFamily: FONTS.sans, fontSize: 13, color: '#5a5346', marginHorizontal: -1 },
     wheelCharged: { fontFamily: FONTS.sans, fontSize: 11, letterSpacing: 1.6, marginLeft: 7, textShadowRadius: 7, textShadowOffset: { width: 0, height: 0 } },
     fanGlow: { position: 'absolute', bottom: 0, left: 0 },
-    fan: { ...StyleSheet.absoluteFillObject, flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'center', paddingHorizontal: 12 },
+    fan: { ...StyleSheet.absoluteFillObject, flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'center', paddingHorizontal: 12, paddingBottom: 20 },
 
     // ── bottom rail ──
     rail: {
@@ -1173,9 +1204,9 @@ const useStyles = makeStyles((AXM) => ({
         shadowColor: '#000', shadowOpacity: 0.5, shadowRadius: 6, shadowOffset: { width: 0, height: 3 }, elevation: 6,
     },
     faceCard: { flex: 1, borderWidth: 1.5, borderRadius: 6, backgroundColor: '#14110e', overflow: 'hidden' },
-    // Art fills the top ~64% (art-forward reference proportion) — the name band
-    // anchors directly beneath it, the keyword line fills the remainder.
-    faceArt: { width: '100%', height: '64%', backgroundColor: '#0c0a08' },
+    // Option A: art fills the top region — the name band anchors mid-card
+    // beneath it, the split rail + type strip fill the remainder.
+    faceArt: { width: '100%', height: '46%', backgroundColor: '#0c0a08' },
     faceArtTint: { ...StyleSheet.absoluteFillObject, opacity: 0.14 },
     faceArtTintLow: { position: 'absolute', left: 0, right: 0, bottom: 0, height: '40%', opacity: 0.22 },
     faceLower: { flex: 1 },
@@ -1198,27 +1229,30 @@ const useStyles = makeStyles((AXM) => ({
         textShadowColor: 'rgba(0,0,0,0.8)', textShadowRadius: 2, textShadowOffset: { width: 0, height: 1 },
     },
     nameTextLarge: { fontFamily: FONTS.gothic, fontSize: 22, lineHeight: 26, color: '#f3e9d2', textShadowColor: 'rgba(0,0,0,0.6)', textShadowRadius: 3, textShadowOffset: { width: 0, height: 1 } },
-    // Small-face keyword line — the ONE statement under the name band.
-    kwLine: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 5, backgroundColor: 'rgba(10,8,6,0.62)' },
-    kwText: { fontFamily: FONTS.sans, fontSize: 11, letterSpacing: 1 },
-    kwValue: { fontFamily: FONTS.mono, fontSize: 15, lineHeight: 17, marginTop: 0 },
-    kwSub: { fontFamily: FONTS.mono, fontSize: 8, lineHeight: 10, color: AXM.bone },
-    // large-face scale-ups of the SAME keyword line (identical wording law).
-    kwTextLarge: { fontSize: 16, letterSpacing: 1.4 },
-    kwValueLarge: { fontSize: 24, lineHeight: 27, marginTop: 2 },
-    kwSubLarge: { fontSize: 12, lineHeight: 15, marginTop: 1 },
+    // Option A bottom rail — 50/50 FREE | PAID split with a visible divider.
+    railSplit: {
+        flex: 1, flexDirection: 'row', alignItems: 'stretch',
+        backgroundColor: 'rgba(10,8,6,0.62)',
+    },
+    railHalf: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 3, paddingVertical: 3, gap: 1 },
+    railDivider: { width: 1, backgroundColor: 'rgba(255,255,255,0.18)', marginVertical: 4 },
+    railHead: { fontFamily: FONTS.sans, fontSize: 9, letterSpacing: 0.8 },
+    railValue: { fontFamily: FONTS.mono, fontSize: 12, lineHeight: 14, textAlign: 'center' },
+    // large-face scale-ups of the SAME rail (identical wording law).
+    railHeadLarge: { fontSize: 15, letterSpacing: 1.4 },
+    railValueLarge: { fontSize: 20, lineHeight: 23, marginTop: 2 },
+    railDieLine: { alignSelf: 'center', marginTop: 0, marginBottom: 2, paddingHorizontal: 4 },
     faceDieLineSmall: { fontSize: 7, marginTop: 1 },
+    // Option A type strip — full-width foot bar (printed identity).
+    typeStrip: {
+        borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.12)',
+        backgroundColor: 'rgba(0,0,0,0.55)', alignItems: 'center', paddingVertical: 2,
+    },
+    typeStripText: { fontFamily: FONTS.sans, fontSize: 7, letterSpacing: 1.2, color: AXM.bone },
+    typeStripTextLarge: { fontSize: 10, letterSpacing: 1.8, paddingVertical: 2 },
     // large-only effect body (Sanguine-Step shape) — fills the space under the name band.
     // Warm parchment-tone panel behind the effect text anchors it like a scroll.
     faceBody: { flex: 1, justifyContent: 'center', paddingHorizontal: 12, paddingVertical: 8, backgroundColor: 'rgba(38,30,20,0.6)' },
     faceEffect: { fontFamily: FONTS.serif, fontSize: 14, lineHeight: 20, color: AXM.parchment, textAlign: 'center' },
     faceEffectBold: { fontFamily: FONTS.gothic, color: AXM.sulfur },
-    // TYPE-TAB pinned to the card's bottom edge — both sizes.
-    typeTab: {
-        alignSelf: 'center', marginBottom: 10, borderWidth: 1, borderColor: 'rgba(255,255,255,0.18)',
-        backgroundColor: 'rgba(0,0,0,0.55)', borderRadius: 3, paddingHorizontal: 12, paddingVertical: 3,
-    },
-    typeTabText: { fontFamily: FONTS.sans, fontSize: 9, letterSpacing: 1.6, color: AXM.bone },
-    typeTabSmall: { marginBottom: 3, paddingHorizontal: 5, paddingVertical: 1 },
-    typeTabTextSmall: { fontSize: 6, letterSpacing: 0.8 },
 }));

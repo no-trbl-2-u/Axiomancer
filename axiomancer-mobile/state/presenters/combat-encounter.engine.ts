@@ -65,6 +65,60 @@ function freeLineText(card: CombatCard, sourceCard?: Card): string {
     return sourceCard?.free ? riderText(sourceCard.free) : 'no effect';
 }
 
+/** The barrel doesn't export CardRider — derive it from Card. */
+type CardRider = NonNullable<Card['free']>;
+
+/** Option A split rail — project the authored FREE rider into a KEYWORD · value
+ *  pair for the face's ◇ column. Clause order mirrors the engine's riderText so
+ *  the head clause is the same one the prose leads with; a multi-clause free
+ *  line keeps the head pair and marks the rest with a trailing '+' (the overlay
+ *  freePill remains the full-truth line). Never a fabricated number. */
+function freeRail(card: CombatCard, sourceCard?: Card): { freeKeyword: string | null; freeValue: string | null } {
+    if (card.cardType === 'enchantment' || card.cardType === 'disenchant') {
+        return { freeKeyword: null, freeValue: 'PAID only' };
+    }
+    const r: CardRider | undefined = sourceCard?.free;
+    if (!r) return { freeKeyword: null, freeValue: null };
+    const pairs: [string, string][] = [];
+    if (r.bonusIntensity) pairs.push(['INTENSITY', `+${r.bonusIntensity}`]);
+    if (r.bonusDuration) pairs.push(['DURATION', `+${r.bonusDuration}t`]);
+    if (r.guard) pairs.push(['GUARD', `${r.guard}`]);
+    if (r.conviction) pairs.push(['CONVICTION', `+${r.conviction} ◆`]);
+    if (r.refreshDie) pairs.push(['REFRESH', 'die']);
+    if (r.revealStance) pairs.push(['REVEAL', 'stance']);
+    if (r.tickAllDots) pairs.push(['TICK', 'all DoTs']);
+    if (r.tickOne) pairs.push(['TICK', '1']);
+    if (r.cleanse) pairs.push(['CLEANSE', `${r.cleanse}`]);
+    if (r.healHp) pairs.push(['HEAL', `${r.healHp}`]);
+    if (r.drawCards) pairs.push(['DRAW', `${r.drawCards}`]);
+    if (r.premises) pairs.push(['PREMISE', `+${r.premises}`]);
+    if (r.sway) pairs.push(['SWAY', `${r.sway}`]);
+    if (r.souls) pairs.push(['SOUL', `+${r.souls}`]);
+    if (r.foretell) pairs.push(['FORETELL', `${r.foretell}`]);
+    if (r.applyEffect) {
+        const kw = keywordForEffect(r.applyEffect.effectId)
+            ?? r.applyEffect.effectId.replace(/^(debuff|buff)_/, '');
+        const i = r.applyEffect.intensity ?? 1;
+        const d = r.applyEffect.duration;
+        pairs.push([kw.toUpperCase(), `i${i}${d ? ` d${d}` : ''}`]);
+    }
+    if (r.ruptureMarks) pairs.push(['RUPTURE', `${r.ruptureMarks}/stack`]);
+    if (r.intensityPerPip) pairs.push(['PIP', `+${r.intensityPerPip} int`]);
+    if (r.pips) pairs.push(['PIP', `+${r.pips}`]);
+    if (r.stagger) pairs.push(['STAGGER', `${r.stagger}`]);
+    if (pairs.length === 0) return { freeKeyword: null, freeValue: null };
+    const [kw, val] = pairs[0];
+    return { freeKeyword: kw, freeValue: pairs.length > 1 ? `${val} +` : val };
+}
+
+/** Option A type strip — stance + player-facing card type (CURSE for disenchant). */
+function typeStripText(card: CombatCard): string {
+    const typeLabel = card.cardType === 'enchantment' ? 'ENCHANTMENT'
+        : card.cardType === 'disenchant' ? 'CURSE'
+            : card.cardType === 'spell' ? 'SPELL' : null;
+    return [card.stance.toUpperCase(), ...(typeLabel ? [typeLabel] : [])].join(' · ');
+}
+
 // ── Intent vocabulary (Spec 26 §2.4) ─────────────────────────────────────────
 
 export const INTENT_ICONS: Record<CombatIntentType, { icon: string; label: string; color: string }> = {
@@ -123,6 +177,11 @@ export interface CombatDieVM {
     /** Spec 32 v3 §5 — a FLOATING die: always spendable (bypasses the one-die
      *  draft), consumed forever when spent, persists across combats. */
     floating?: boolean;
+    /** The board may attach a drag gesture to this die. Computed HERE (not in
+     *  the render) so it can never depend on transient drag state — flipping
+     *  it mid-drag unmounts the GestureDetector, which on web kills the pan
+     *  without onEnd/onFinalize (the stuck-ghost / dead-drop bug). */
+    draggable: boolean;
 }
 export type CombatCardKind =
     | 'dot' | 'stun' | 'regen' | 'guard' | 'weaken' | 'inert' | 'befriend'
@@ -162,6 +221,15 @@ export interface CombatCardFaceVM {
     heroSub: string | null;        // e.g. '(18)'
     freeHeroText: string;          // the no-die value
     freeHeroSub: string | null;
+    /** Option A split rail (owner-picked 2026-07-09) — the FREE column's
+     *  KEYWORD · value projection of the authored free rider (e.g. TICK · 1).
+     *  null keyword = no free effect / PAID only; the overlay's freePill keeps
+     *  the full riderText prose. */
+    freeKeyword: string | null;
+    freeValue: string | null;
+    /** Option A type strip at the card foot — 'BODY · SPELL' (CURSE for
+     *  disenchant; the engine term never prints). */
+    typeStrip: string;
     verbLine: string;              // plain who/what
     powerRail: string;
     readDependent: boolean;        // the read scales this: guard/strike (damage mult) AND
@@ -333,19 +401,30 @@ function playerPane(state: CombatEncounterState): CombatPlayerPaneVM {
 
 function diceVM(state: CombatEncounterState): CombatDieVM[] {
     const drafted = getDraftedDie(state);
+    const hasDraft = !!state.draftedDieId;
     // Per-die read pip — only once the phase stance is known (revealed/scouted).
     const stance = revealedCurrentStance(state) as Stance | null;
-    const tray: CombatDieVM[] = state.dice.map((d: CombatManaDie) => ({
-        id: d.id, color: d.color, colorHex: STANCE_COLORS[d.color] ?? '#888',
-        glyph: DIE_GLYPHS[d.color] ?? '?', stanceLabel: STANCE_LABELS[d.color] ?? '?',
-        drafted: drafted?.id === d.id, spent: d.state === 'spent', isX: d.color === 'x',
-        readPip: stance ? resolveRead(d.color, stance) : null,
-        // R4 — a dead X face is never dead: tappable once per turn.
-        fateTappable: d.color === 'x' && d.state !== 'spent' && state.fateTappedTurn !== state.turn,
-        // Spec 32 v3 §5 — the board must know a floating die from a turn die:
-        // floats stay draggable after the draft (they bypass the one-die law).
-        floating: d.floating === true || undefined,
-    }));
+    const tray: CombatDieVM[] = state.dice.map((d: CombatManaDie) => {
+        const isDrafted = drafted?.id === d.id;
+        const spent = d.state === 'spent';
+        const isX = d.color === 'x';
+        const floating = d.floating === true;
+        return {
+            id: d.id, color: d.color, colorHex: STANCE_COLORS[d.color] ?? '#888',
+            glyph: DIE_GLYPHS[d.color] ?? '?', stanceLabel: STANCE_LABELS[d.color] ?? '?',
+            drafted: isDrafted, spent, isX,
+            readPip: stance ? resolveRead(d.color, stance) : null,
+            // R4 — a dead X face is never dead: tappable once per turn.
+            fateTappable: isX && d.state !== 'spent' && state.fateTappedTurn !== state.turn,
+            // Spec 32 v3 §5 — the board must know a floating die from a turn die:
+            // floats stay draggable after the draft (they bypass the one-die law).
+            floating: floating || undefined,
+            // A float drags whenever unspent (post-draft too); a turn die only
+            // before the draft. NEVER a function of live drag state (see the
+            // CombatDieVM.draggable doc note).
+            draggable: floating ? !spent : !hasDraft && !isX && !isDrafted && !spent,
+        };
+    });
     // R2 — the Reserve renders in the same tray as a second power source.
     const banked: CombatDieVM[] = (state.reserve ?? []).map((d: CombatManaDie) => ({
         id: d.id, color: d.color, colorHex: STANCE_COLORS[d.color] ?? '#888',
@@ -353,6 +432,7 @@ function diceVM(state: CombatEncounterState): CombatDieVM[] {
         drafted: false, spent: false, isX: false,
         readPip: null,
         reserve: true, pips: d.pips ?? 0,
+        draggable: true,
     }));
     return [...tray, ...banked];
 }
@@ -833,7 +913,11 @@ export function faceStats(card: CombatCard, sourceCard?: Card): CombatCardFaceVM
     const kw = c.keyword ? c.keyword.toUpperCase() : null;
     // The authored FREE line (engine riderText) — never a fabricated chip.
     const free = freeLineText(card, sourceCard);
-    const base = { glyph: c.glyph, categoryColor: c.categoryColor, stanceColor, statusBase: null, statusAdv: null, statusDis: null };
+    const base = {
+        glyph: c.glyph, categoryColor: c.categoryColor, stanceColor,
+        statusBase: null, statusAdv: null, statusDis: null,
+        ...freeRail(card, sourceCard), typeStrip: typeStripText(card),
+    };
     switch (c.kind) {
         case 'dot': return { ...base, kind: 'dot', keyword: kw, heroText: `${c.total}`, heroSub: `over ${c.turns} turns`, freeHeroText: free, freeHeroSub: null, verbLine: 'foe loses HP each turn', powerRail: c.keyword ?? 'DoT', readDependent: true, inert: false, guardBase: null, statusBase: c.total, statusAdv: c.totalAdv, statusDis: c.totalDis };
         case 'stun': return { ...base, kind: 'stun', keyword: kw, heroText: `skip ${c.skips} turns`, heroSub: null, freeHeroText: free, freeHeroSub: null, verbLine: "the foe can't act", powerRail: c.keyword ?? 'Stun', readDependent: false, inert: false, guardBase: null };

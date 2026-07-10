@@ -1,5 +1,18 @@
 # HANDOFF — dice-law rework + card wording (2026-07-09)
 
+> **PICKED UP 2026-07-10** (branch `claude/pr57-handoff-testing-lkhn6v`, stacked
+> on PR #57): Option A card face SHIPPED at both sizes (+ card-editor type-strip
+> mirror); cross-combat float persistence + dieBonus color-law lint pinned in
+> mechanics e2e; the "drag a floating die onto a card" item was MACHINE-VERIFIED
+> live in expo-web (trusted CDP input activates RNGH — synthetic JS events were
+> the earlier blocker) and exposed a REAL bug: `draggable` flipped false the
+> moment a float/Reserve die's own drag began, unmounting its GestureDetector
+> mid-gesture — on web the pan died without onEnd, the drop never resolved and
+> the ghost stuck on screen. Fixed (draggability is now presenter-owned on
+> `CombatDieVM.draggable`, never a function of live drag state) and pinned.
+> Still open below: the DESIGN SIGNAL (owner session), the case-by-case card
+> audit, tu-quoque's dead line (lint whitelists it), and the tuning candidates.
+
 Owner-directed session (not a /ship-a-phase). All changes are **uncommitted on
 `main`'s working tree** as of this handoff. Root `npm run verify` passes green
 (mechanics 2285 · mobile 2473 · card-editor typecheck).
