@@ -13,7 +13,6 @@ import {
     characterPresets, getPresetById, buildCharacterFromPreset,
 } from '../presets';
 import { mockSequentialRng } from '../../test-utils/rng';
-import { emptyLoadout } from '../types';
 import type { Consumable } from '../../Items/types';
 
 afterEach(() => {
@@ -41,11 +40,18 @@ describe('buildCharacterFromPreset', () => {
         expect(player.name).toBe('Apprentice');
         expect(player.level).toBe(1);
         expect(player.baseStats).toEqual({ heart: 5, body: 5, mind: 5 });
-        expect(player.equipment).toEqual(emptyLoadout());
+        // Phase 19 — every preset wears the default 5-relic loadout (signatures
+        // come from worn equipment, not archetype).
+        expect(player.equipment.weapon?.id).toBe('relic-overwhelming');
+        expect(player.equipment.armor?.id).toBe('relic-read');
+        expect(player.equipment.accessories).toHaveLength(3);
         expect(player.knownCards).toHaveLength(7); // Phase 108 — includes Befriend starting card
-        expect(player.inventory).toHaveLength(1);
-        expect(player.inventory[0]?.id).toBe('minor-healing-potion');
-        expect((player.inventory[0] as Consumable | undefined)?.quantity).toBe(3);
+        // Apprentice declares no procedural gear: inventory = 8 relics (worn-first)
+        // + the 1 declared potion.
+        expect(player.inventory).toHaveLength(9);
+        const potion = player.inventory.find(i => i.id === 'minor-healing-potion');
+        expect(potion).toBeDefined();
+        expect((potion as Consumable | undefined)?.quantity).toBe(3);
         expect(player.currency).toBe(0);
     });
 
@@ -55,10 +61,14 @@ describe('buildCharacterFromPreset', () => {
         expect(player.level).toBe(8);
         expect(player.baseStats).toEqual({ heart: 5, body: 4, mind: 4 });
         expect(player.knownCards).toHaveLength(11); // spec 32 v3 recipe: 7 openers + 3 mid-tier + the synergy payoff
-        expect(player.equipment.weapon?.id).toBe('iron-blade');
-        expect(player.equipment.armor?.id).toBe('hide-vest');
-        // leather-cap re-slotted from head → accessory (Phase 18).
-        expect(player.equipment.accessories[0]?.id).toBe('leather-cap');
+        // Phase 19 — wears the relic loadout; the declared procedural gear is
+        // benched to inventory (unworn), not deleted.
+        expect(player.equipment.weapon?.id).toBe('relic-overwhelming');
+        expect(player.equipment.armor?.id).toBe('relic-read');
+        const invIds = player.inventory.map(i => i.id);
+        expect(invIds).toContain('iron-blade');
+        expect(invIds).toContain('hide-vest');
+        expect(invIds).toContain('leather-cap');
         expect(player.currency).toBe(25);
     });
 
@@ -69,10 +79,13 @@ describe('buildCharacterFromPreset', () => {
         expect(player.baseStats).toEqual({ heart: 20, body: 30, mind: 25 });
         expect(player.knownCards).toHaveLength(14); // spec 32 v3 recipe: all tiers + the synergy payoff
         expect(player.knownCards).toContain('resonance-detonation');
-        expect(player.equipment.weapon?.id).toBe('steel-blade');
-        expect(player.equipment.armor?.id).toBe('chain-mail');
-        // chain-coif re-slotted from head → accessory (Phase 18).
-        expect(player.equipment.accessories[0]?.id).toBe('chain-coif');
+        // Phase 19 — wears the relic loadout; declared procedural gear benched.
+        expect(player.equipment.weapon?.id).toBe('relic-overwhelming');
+        expect(player.equipment.armor?.id).toBe('relic-read');
+        const invIds = player.inventory.map(i => i.id);
+        expect(invIds).toContain('steel-blade');
+        expect(invIds).toContain('chain-mail');
+        expect(invIds).toContain('chain-coif');
         expect(player.currency).toBe(75);
     });
 

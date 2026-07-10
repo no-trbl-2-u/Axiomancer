@@ -58,8 +58,12 @@ import { STARTING_CARD_IDS } from '../Combat/combat.rewards';
  * Phase 18 — bumped 11 → 12: `player.equipment` moves from the 7-slot record to
  *   the 5-slot `EquipmentLoadout`; worn gear re-slots deterministically and
  *   accessory/body overflow returns to inventory (see `game.migrate.ts`).
+ * Phase 19 — bumped 12 → 13: seed the 8 signet relics onto the player (default 5
+ *   worn, displaced gear + other 3 relics to inventory) so loaded saves derive a
+ *   full signature kit from the worn loadout instead of the retired archetype
+ *   kit; recompute derivedStats/maxHealth (see `game.migrate.ts`).
  */
-export const GAME_STATE_VERSION = 12;
+export const GAME_STATE_VERSION = 13;
 
 /** Builds a brand-new GameState with default player and world. */
 export function createNewGameState(): GameState {
@@ -76,6 +80,9 @@ export function createNewGameState(): GameState {
             name: 'Player',
             level: 1,
             baseStats: { heart: 5, body: 5, mind: 5 },
+            // Phase 19 — start with the 8 signet relics (5 worn) so the player
+            // enters combat with a full signature kit derived from the loadout.
+            seedStartingRelics: true,
         }),
         world: createStartingWorld(),
         quests: emptyQuestLog(),

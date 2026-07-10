@@ -106,7 +106,7 @@ describe('Boss befriend faction reputation integration', () => {
         // In a new game state, faction reputation should be initialized
         expect(state.factionReputations).toBeDefined();
         expect(typeof state.factionReputations).toBe('object');
-        expect(state.version).toBe(12); // Phase 18 bumped 11 → 12 (equipment loadout)
+        expect(state.version).toBe(13); // Phase 19 bumped 12 → 13 (signet relics)
     });
 
     it('demonstrates boss befriend tradeoff pattern', () => {

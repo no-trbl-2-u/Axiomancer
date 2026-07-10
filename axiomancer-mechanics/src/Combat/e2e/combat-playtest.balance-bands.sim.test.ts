@@ -177,10 +177,13 @@ const CURVE_STAGES: readonly CombatStageId[] = ['early', 'mid', 'late'];
 // seed 1, greedy, 2 enemies/stage, 30 runs/cell (matches this file's matrix).
 //
 // Re-derived 2026-07-09 (dice-law rework: 3 dice/turn, strict color match,
-// per-die token accrual): 'grace' and 'oratory' now pass the curve; 'refrain'
-// (1.00/1.00/0.92) joined 'standstill' (flat 1.00) as an offender. Both are
+// per-die token accrual): 'oratory' passes the curve; 'refrain' (1.00/1.00/0.92)
+// joined 'standstill' (flat 1.00) as an offender.
+// Re-pinned 2026-07-10 (Phase 19): the player now wears the default signet-relic
+// loadout (+5 maxHp from the armor relic improves survival), which nudges
+// 'grace' back over the late floor — it rejoins the offender set. All three are
 // findings for /deck-tuning, not fixes made by this pass.
-const KNOWN_CURVE_VIOLATORS: readonly string[] = ['refrain', 'standstill'];
+const KNOWN_CURVE_VIOLATORS: readonly string[] = ['grace', 'refrain', 'standstill'];
 
 let cachedCurve: PlaytestReport | null = null;
 function curveReport(): PlaytestReport {

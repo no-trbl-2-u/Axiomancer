@@ -24,12 +24,14 @@
 
 import { equipItem as engineEquipItem, unequipItem as engineUnequipItem } from './equipment.reducer';
 import { lookupEffect } from '../Effects';
+import { getSignatureSkill } from '../Combat/combat.signature';
 import type { Character } from './types';
 import type {
     Equipment,
     EquipmentProcTrigger,
     ResourceGenerationBonus,
 } from '../Items/types';
+import type { SignatureSkillId } from '../Combat/combat.encounter.types';
 import type { CombatResources } from '../Cards/types';
 import type { StatModifier } from '../Effects/types';
 
@@ -84,6 +86,13 @@ export interface KeywordDeltaEntry {
     label: string;
 }
 
+/** A signature skill gained or lost by equipping a signet relic (Phase 19).
+ * `name` is the engine signature name when resolvable, else `null`. */
+export interface SignatureDeltaEntry {
+    id: SignatureSkillId;
+    name: string | null;
+}
+
 /** One side (gained or lost) of the equip-change comparison. */
 export interface EquipDeltaSide {
     modifiers: readonly ModifierDeltaEntry[];
@@ -104,6 +113,10 @@ export interface EquipDelta {
     stats: readonly StatDeltaEntry[];
     gained: EquipDeltaSide;
     lost: EquipDeltaSide;
+    /** Signet-relic signatures gained / lost by this equip change (Phase 19).
+     * Empty on non-relic gear. Zero-change swaps (same signature both sides)
+     * surface nothing. */
+    signatures: { gained: readonly SignatureDeltaEntry[]; lost: readonly SignatureDeltaEntry[] };
     /** True when nothing actually changed (all sections empty). */
     isEmpty: boolean;
 }
@@ -318,6 +331,29 @@ function diffKeywords(fromItem: Equipment, notIn: Equipment): KeywordDeltaEntry[
     return out;
 }
 
+/** Resolve a signet relic's granted signature into a delta entry (name via the
+ * signature library), or `null` when the piece grants none. */
+function signatureEntry(equipment: Equipment): SignatureDeltaEntry | null {
+    const id = equipment.grantsSignature;
+    if (!id) return null;
+    return { id, name: getSignatureSkill(id)?.name ?? null };
+}
+
+/**
+ * The signatures gained / lost when `candidate` replaces `against`. A swap where
+ * both sides grant the same signature nets to nothing.
+ */
+function diffSignatures(
+    candidate: Equipment | null,
+    against: Equipment | null,
+): { gained: SignatureDeltaEntry[]; lost: SignatureDeltaEntry[] } {
+    const cand = candidate ? signatureEntry(candidate) : null;
+    const other = against ? signatureEntry(against) : null;
+    const gained = cand && cand.id !== other?.id ? [cand] : [];
+    const lost = other && other.id !== cand?.id ? [other] : [];
+    return { gained, lost };
+}
+
 function emptySide(): EquipDeltaSide {
     return {
         modifiers: [],
@@ -392,13 +428,15 @@ export function computeEquipDelta(
                       aggregateStats(candidate),
                       new Map(),
                   );
+        const signatures = diffSignatures(candidate, null);
         return {
             mode: 'equip',
             against: null,
             stats,
             gained,
             lost: emptySide(),
-            isEmpty: stats.length === 0 && sideIsEmpty(gained),
+            signatures,
+            isEmpty: stats.length === 0 && sideIsEmpty(gained) && signatures.gained.length === 0,
         };
     }
 
@@ -419,13 +457,15 @@ export function computeEquipDelta(
                       new Map(),
                       aggregateStats(candidate),
                   );
+        const signatures = diffSignatures(null, candidate);
         return {
             mode: 'unequip',
             against: { id: candidate.id, name: candidate.name },
             stats,
             gained: emptySide(),
             lost,
-            isEmpty: stats.length === 0 && sideIsEmpty(lost),
+            signatures,
+            isEmpty: stats.length === 0 && sideIsEmpty(lost) && signatures.lost.length === 0,
         };
     }
 
@@ -450,13 +490,16 @@ export function computeEquipDelta(
               );
     const gained = buildSide(candidate, worn);
     const lost = buildSide(worn, candidate);
+    const signatures = diffSignatures(candidate, worn);
     return {
         mode: 'swap',
         against: { id: worn.id, name: worn.name },
         stats,
         gained,
         lost,
-        isEmpty: stats.length === 0 && sideIsEmpty(gained) && sideIsEmpty(lost),
+        signatures,
+        isEmpty: stats.length === 0 && sideIsEmpty(gained) && sideIsEmpty(lost)
+            && signatures.gained.length === 0 && signatures.lost.length === 0,
     };
 }
 

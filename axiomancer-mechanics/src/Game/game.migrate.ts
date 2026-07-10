@@ -4,10 +4,10 @@
  * Save files are tagged with `version`. The step-wise migration chain was
  * dropped 2026-07-08 (legacy cleanup) because there were no shipped saves to
  * preserve; a save at an unsupported version is rejected so the caller starts a
- * fresh game. Phase 18 re-introduces exactly ONE targeted hop — v11 → v12 —
- * because the equipment-signature epic (phases 18-21) changes the persisted
- * `player.equipment` shape and the re-slot transform (`LEGACY_SLOT_MAP`) has to
- * exist and be exercised regardless. Every other version mismatch still
+ * fresh game. The equipment-signature epic (phases 18-21) re-introduces a short
+ * targeted chain: v11 → v12 (Phase 18, re-slot equipment to the 5-slot model)
+ * and v12 → v13 (Phase 19, seed the signet relics). The hops chain, so a v11
+ * save lands at v13 in one `migrate` call. Every other version mismatch still
  * rejects.
  */
 
@@ -15,7 +15,9 @@ import { GameState } from './types';
 import type { Character, EquipmentLoadout } from '../Character/types';
 import type { Equipment, Item } from '../Items/types';
 import { isEquipment } from '../Items/types';
-import { getEquipmentModifiers, recomputeDerivedStats } from '../Character/equipment.reducer';
+import { getEquipmentModifiers, recomputeDerivedStats, getEquippedItems, wornMaxHpBonus } from '../Character/equipment.reducer';
+import { cloneStartingRelics } from '../Items/relic.library';
+import { calculateMaxHealth } from '../Utils';
 import { reslotLegacyLoadout, reslotLegacyEquipment, type LegacySlot } from './legacy-slots';
 import { GAME_STATE_VERSION } from './game.reducer';
 
@@ -55,6 +57,59 @@ function migrateV11ToV12(raw: Record<string, unknown>): Record<string, unknown> 
 }
 
 /**
+ * v12 → v13 (Phase 19): seed the 8 signet relics onto the player so a loaded
+ * save derives a full signature kit from the worn loadout (signatures no longer
+ * come from the archetype). The fixed default 5 relics become the worn loadout;
+ * any previously-worn gear is displaced to inventory; the other 3 relics also go
+ * to inventory. `derivedStats` + `maxHealth` are recomputed off the relic
+ * loadout (the two armor relics fold a +5 maxHp bonus onto `maxHealth`), and
+ * current `health` is clamped to the new ceiling. Pure over a raw save payload.
+ */
+function migrateV12ToV13(raw: Record<string, unknown>): Record<string, unknown> {
+    const player = raw.player as (Partial<Character> & {
+        equipment?: EquipmentLoadout;
+        inventory?: Item[];
+    }) | undefined;
+    if (!player || typeof player !== 'object' || player.baseStats == null || typeof player.level !== 'number') {
+        return { ...raw, version: 13 };
+    }
+
+    const { worn, benched } = cloneStartingRelics();
+    const relicLoadout: EquipmentLoadout = {
+        weapon: worn.find(w => w.slot === 'weapon') ?? null,
+        armor: worn.find(w => w.slot === 'armor') ?? null,
+        accessories: worn.filter(w => w.slot === 'accessory'),
+    };
+
+    // The relics lead the inventory (worn-first per slot) so the presenter's
+    // inventory-position worn convention agrees with the new loadout; the old
+    // worn gear stays in inventory but is demoted out of the worn window.
+    // Nothing is lost: any previously-worn piece not already present in
+    // inventory (a pure-engine save with worn gear only in the loadout) is
+    // re-appended.
+    const oldInventory: Item[] = Array.isArray(player.inventory) ? player.inventory.slice() : [];
+    const oldIds = new Set(oldInventory.map(i => i.id));
+    const displaced: Equipment[] = player.equipment ? getEquippedItems(player.equipment) : [];
+    const displacedMissing = displaced.filter(d => !oldIds.has(d.id));
+    const inventory: Item[] = [...worn, ...benched, ...oldInventory, ...displacedMissing];
+
+    const baseMaxHealth = calculateMaxHealth(player.level, player.baseStats);
+    const nextMaxHealth = baseMaxHealth + wornMaxHpBonus(relicLoadout);
+    const priorHealth = typeof player.health === 'number' ? player.health : nextMaxHealth;
+
+    const migratedPlayer: Character = {
+        ...(player as Character),
+        equipment: relicLoadout,
+        inventory,
+        derivedStats: recomputeDerivedStats(player.baseStats, getEquipmentModifiers(relicLoadout)),
+        maxHealth: nextMaxHealth,
+        health: Math.max(0, Math.min(priorHealth, nextMaxHealth)),
+    };
+
+    return { ...raw, player: migratedPlayer, version: 13 };
+}
+
+/**
  * Narrow a raw save payload to the current `GameState`. Only the current
  * version is accepted; any other version throws (the caller resets to a new
  * game). The name/signature is kept so the persistence layer's call site is
@@ -78,10 +133,16 @@ export function migrate(
     let working = raw as Record<string, unknown>;
     let version = fromVersion;
 
-    // Single supported hop: v11 → v12 re-slots equipment to the Phase-18 model.
+    // Supported hops: v11 → v12 re-slots equipment to the Phase-18 model; then
+    // v12 → v13 seeds the Phase-19 signet relics. Chained so a v11 save lands at
+    // v13 in one call.
     if (version === 11 && toVersion >= 12) {
         working = migrateV11ToV12(working);
         version = 12;
+    }
+    if (version === 12 && toVersion >= 13) {
+        working = migrateV12ToV13(working);
+        version = 13;
     }
 
     if (version !== toVersion) {

@@ -32,7 +32,9 @@ import {
     draftStanceDie, getDraftedDie, isPhaseStanceRevealed,
     playSignatureSkill, discardCombatCard, projectCardImpact, endTurn,
 } from '../combat.engine';
-import { SIGNATURE_KITS, playerArchetype, CONCLUDE_DMG_PER_STACK } from '../combat.signature';
+import { CONCLUDE_DMG_PER_STACK } from '../combat.signature';
+import { getSignaturesForLoadout, getRelicById } from '../../Items/relic.library';
+import { equipItem } from '../../Character';
 import { rollCombatCardRewards, addRewardCard, unlockCardViaDilemma, COMBAT_REWARD_POOL } from '../combat.rewards';
 import { buildCombatDeck, COMBAT_HAND_SIZE } from '../combat.deck';
 import { getCardById } from '../../Cards/cards.library';
@@ -573,13 +575,24 @@ describe('Spec 26b tuning — variety-gated combo + projection + carry', () => {
 // ── Tuning pass 3: archetype signatures, deckbuilder, unlock hook, floors ────
 
 describe('Spec 26b §B/§C/§D — archetype kit, rewards, unlock, difficulty floor', () => {
-    it('the signature kit is the player archetype kit (dominant base stat)', () => {
-        expect(playerArchetype({ baseStats: { heart: 2, body: 9, mind: 2 } })).toBe('body');
+    it('the signature kit is derived from the worn signet-relic loadout, not archetype', () => {
+        // Phase 19 — signatures come from worn equipment. The fixture player
+        // wears the default 5-relic loadout, so the kit is the 5 default-worn
+        // signatures regardless of the (portrait-only) archetype / base stats.
         const bodyPlayer = makePlayer([DOT_BODY]); bodyPlayer.baseStats = { heart: 2, body: 9, mind: 2 };
         const s = initializeCombatEncounter(bodyPlayer, makeEnemy(60), [DOT_BODY], 1);
-        expect(s.archetype).toBe('body');
-        expect(s.signatures).toEqual(SIGNATURE_KITS.body);
-        expect(s.signatures).toContain('sig-rallying-blow'); // body exclusive
+        expect(s.archetype).toBe('body'); // archetype still derived (portrait flavour)
+        expect(s.signatures).toEqual(getSignaturesForLoadout(bodyPlayer.equipment));
+        expect(s.signatures).toEqual([
+            'sig-overwhelming-argument', 'sig-read-opponent',
+            'sig-conviction-strike', 'sig-clever-gambit', 'sig-disarming-plea',
+        ]);
+        // Swapping the worn weapon relic changes which signature is available —
+        // independent of base stats (the old archetype gate is gone).
+        const swapped = equipItem(bodyPlayer, getRelicById('relic-conclusion')!);
+        const s2 = initializeCombatEncounter(swapped, makeEnemy(60), [DOT_BODY], 1);
+        expect(s2.signatures).toContain('sig-rallying-blow');        // Capstone Maul grants Conclusion
+        expect(s2.signatures).not.toContain('sig-overwhelming-argument');
     });
 
     it('Conclusion (body finisher) deals per-stack damage and refreshes the drafted die', () => {

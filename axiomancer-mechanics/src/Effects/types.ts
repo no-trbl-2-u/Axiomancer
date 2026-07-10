@@ -40,7 +40,12 @@ export type EffectStatTarget =
     | 'physicalAttack'  | 'physicalDefense' | 'physicalSave' | 'physicalTest'
     | 'mentalAttack'    | 'mentalDefense'   | 'mentalSave'   | 'mentalTest'
     | 'emotionalAttack' | 'emotionalDefense'| 'emotionalSave'| 'emotionalTest'
-    | 'luck';
+    | 'luck'
+    // Phase 19 — first-class max-HP modifier. Handled specially by the equip
+    // reducers (folded onto `Character.maxHealth`, NOT into `DerivedStats`,
+    // which has no HP field); the two armor relics are its only users. Inert
+    // for effects (no effect payload targets it today).
+    | 'maxHp';
 
 /** A single stat modifier applied by an effect's payload. */
 export interface StatModifier {

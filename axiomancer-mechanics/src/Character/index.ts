@@ -6,6 +6,7 @@ import { deriveStats, deriveNonCombatStats, calculateMaxHealth } from '../Utils'
 import { getRng } from '../Utils/rng';
 import { EXPERIENCE_PER_LEVEL } from '../Game/game-mechanics.constants';
 import { equipItem, getEquipmentModifiers, recomputeDerivedStats } from './equipment.reducer';
+import { cloneStartingRelics } from '../Items/relic.library';
 
 /**
  * Phase 35 — produce a stable character id drawn from `getRng()`. Seeded
@@ -46,6 +47,17 @@ export interface CreateCharacterOptions {
      * "post-equipment".
      */
     equipment?: Equipment[];
+    /**
+     * Phase 19 — seed the 8 signet relics: the fixed default 5 are worn (1
+     * weapon + 1 armor + 3 accessories) and the other 3 seed the inventory, so a
+     * fresh character always enters combat with a full signature kit (signatures
+     * derive from the worn loadout, not archetype). Off by default so bare
+     * `createCharacter` fixtures keep their exact (relic-free) stats; the real
+     * player-origination points (`createNewGameState`, `buildCharacterFromPreset`,
+     * the `Player` mock) opt in. Ignored when an explicit `equipment` list is
+     * passed (the caller is choosing the loadout).
+     */
+    seedStartingRelics?: boolean;
     effects?: ActiveEffect[];
     knownCards?: string[];
     procUnlocks?: ProcUnlocks;
@@ -58,8 +70,23 @@ export interface CreateCharacterOptions {
 export function createCharacter(options: CreateCharacterOptions): Character {
     const {
         id, name, level, baseStats, inventory = [], currency = 0, equipment = [], effects = [],
-        knownCards = [], procUnlocks,
+        knownCards = [], procUnlocks, seedStartingRelics = false,
     } = options;
+
+    // Phase 19 — the 8 signet relics: 5 default-worn, 3 benched.
+    // Opt-in and only when the caller hasn't chosen an explicit loadout.
+    const useRelics = seedStartingRelics && equipment.length === 0;
+    const relics = useRelics ? cloneStartingRelics() : { worn: [] as Equipment[], benched: [] as Equipment[] };
+    const wornPieces = useRelics ? relics.worn : equipment;
+
+    // The worn relics live in inventory too, ordered worn-first per slot, so the
+    // presenter's inventory-position worn convention (`wornPerSlot`) agrees with
+    // the engine `equipment` loadout combat reads. Benched relics follow, then
+    // the caller's inventory (kept after so its gear never displaces a relic from
+    // the worn window).
+    const seededInventory: Item[] = useRelics
+        ? [...relics.worn, ...relics.benched, ...inventory]
+        : [...inventory];
 
     const maxHealth = calculateMaxHealth(level, baseStats);
 
@@ -74,7 +101,7 @@ export function createCharacter(options: CreateCharacterOptions): Character {
         baseStats,
         derivedStats: deriveStats(baseStats),
         nonCombatStats: deriveNonCombatStats(baseStats),
-        inventory,
+        inventory: seededInventory,
         currency,
         equipment: emptyLoadout(),
         effects,
@@ -83,11 +110,11 @@ export function createCharacter(options: CreateCharacterOptions): Character {
         procUnlocks,
     };
 
-    // Equip every piece in order so stat modifiers and passive effects get
-    // folded in via the canonical path (weapon/armor replace, accessories fill
-    // the first 3 positions).
+    // Equip every worn piece in order so stat modifiers, passive effects, and
+    // the maxHp fold get applied via the canonical path (weapon/armor replace,
+    // accessories fill the first 3 positions).
     let initialised = baseChar;
-    for (const piece of equipment) {
+    for (const piece of wornPieces) {
         initialised = equipItem(initialised, piece);
     }
     return initialised;
@@ -173,7 +200,7 @@ export { computeEquipDelta } from './equip-delta';
 export type {
     EquipDelta, EquipDeltaMode, EquipDeltaSide,
     StatDeltaEntry, ModifierDeltaEntry, EffectDeltaEntry,
-    ResourceDeltaEntry, KeywordDeltaEntry,
+    ResourceDeltaEntry, KeywordDeltaEntry, SignatureDeltaEntry,
 } from './equip-delta';
 export {
     characterPresets, apprenticePreset, wandererPreset, sagePreset,

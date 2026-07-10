@@ -311,7 +311,9 @@ describe('selectCharacterViewModel: boundary conditions', () => {
     });
 
     it('character with no inventory: all equipment slots are null', () => {
-        const store = createGameStore(createMemoryAdapter());
+        // Use the relic-free fixture player (a fresh game seeds the signet relics,
+        // Phase 19) so the worn window is genuinely empty.
+        const store = makeStore();
 
         const vm = selectCharacterViewModel(store.getState());
 

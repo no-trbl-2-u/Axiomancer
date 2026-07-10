@@ -159,9 +159,22 @@ function removePassiveEffects(
 }
 
 /**
- * Rebuilds a `Character` around a new loadout: recomputes `derivedStats`,
- * swaps the displaced piece's passives out (`displacedId`) and applies the
- * newly-worn item's passives (`applied`). Shared tail for equip/unequip.
+ * Summed worn `maxHp` bonus (Phase 19). The two armor relics carry a flat
+ * `{ stat: 'maxHp' }` modifier; it is folded onto `Character.maxHealth` here,
+ * NOT into `DerivedStats` (which has no HP field — `recomputeDerivedStats`
+ * reads only stance/derived keys, so a `maxHp` entry in `statFlat` is inert
+ * there). Multiplier `maxHp` mods are unsupported (no content uses them).
+ */
+export function wornMaxHpBonus(loadout: EquipmentLoadout): number {
+    return getEquipmentModifiers(loadout).statFlat.get('maxHp') ?? 0;
+}
+
+/**
+ * Rebuilds a `Character` around a new loadout: recomputes `derivedStats`, folds
+ * the worn `maxHp` delta onto `maxHealth` (growing/clamping current `health` by
+ * the same delta, mirroring the stat-allocation HP convention), and swaps the
+ * displaced piece's passives out (`displacedId`) / applies the newly-worn item's
+ * passives (`applied`). Shared tail for equip/unequip.
  */
 function withLoadout(
     character: Character,
@@ -176,10 +189,20 @@ function withLoadout(
     const mods = getEquipmentModifiers(nextLoadout);
     const nextDerived = recomputeDerivedStats(character.baseStats, mods);
 
+    // Fold the worn maxHp delta onto maxHealth. Equipping a +maxHp armor relic
+    // grows current health by the same delta; unequipping lowers maxHealth and
+    // clamps health down. `character.maxHealth` already includes the previous
+    // loadout's bonus, so the delta is exact and idempotent.
+    const hpDelta = (mods.statFlat.get('maxHp') ?? 0) - wornMaxHpBonus(character.equipment);
+    const nextMaxHealth = character.maxHealth + hpDelta;
+    const nextHealth = Math.max(0, Math.min(character.health + hpDelta, nextMaxHealth));
+
     return {
         ...character,
         equipment:    nextLoadout,
         derivedStats: nextDerived,
+        maxHealth:    nextMaxHealth,
+        health:       nextHealth,
         effects:      nextEffects,
     };
 }

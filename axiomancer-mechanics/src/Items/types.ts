@@ -20,6 +20,7 @@
 import { Effect, EffectTier, StatModifier } from '../Effects/types';
 import { Stance } from '../Combat/types';
 import { CombatResources } from '../Cards/types';
+import type { SignatureSkillId } from '../Combat/combat.encounter.types';
 
 /** Item categories */
 export type ItemCategory = 'equipment' | 'consumable' | 'material' | 'quest-item';
@@ -199,6 +200,13 @@ export interface Equipment extends BaseItem {
     onDefendEffects?: EquipmentProcTrigger[];
     critStyle?: 'double' | 'pierce';
     resourceInteraction?: ResourceInteraction;
+    /**
+     * Phase 19 — a "signet" relic grants exactly ONE signature skill while worn.
+     * Combat-init derives `CombatEncounterState.signatures` from the worn
+     * loadout's `grantsSignature` values (`getSignaturesForLoadout`), replacing
+     * the retired archetype kit. Absent on non-relic equipment.
+     */
+    grantsSignature?: SignatureSkillId;
     prefixId?: string;
     suffixId?: string;
     prefixName?: string;

@@ -21,7 +21,8 @@ import {
 } from '@mechanics';
 
 import { freezeViewModel } from './freeze';
-import { wornPerSlot, SLOT_CAPACITY } from '@mechanics';
+import { wornPerSlot, SLOT_CAPACITY, getSignatureSkill } from '@mechanics';
+import type { Equipment } from '@mechanics';
 
 export type StanceKey = 'heart' | 'body' | 'mind';
 export type EffectKind = 'buff' | 'debuff' | 'poison' | 'bleed';
@@ -115,6 +116,12 @@ export interface EquipmentSlotRow {
     name: string;
     /** Equipped item name, or `null` when empty. */
     item: string | null;
+    /**
+     * Phase 19 — the signature this worn signet relic grants (display name), or
+     * `null` when the slot is empty or the worn piece is not a relic. The view
+     * renders it as a "grants <name>" sub-label.
+     */
+    grantsSignature: string | null;
 }
 
 export interface CharacterCardRow {
@@ -275,6 +282,22 @@ function buildEffects(player: Character): readonly CharacterEffectRow[] {
     });
 }
 
+/** Build one equipment slot row, resolving a worn signet relic's granted
+ *  signature to its display name (Phase 19). */
+function equipmentRow(
+    slotKey: 'weapon' | 'armor' | 'accessory',
+    name: string,
+    piece: Equipment | undefined,
+): EquipmentSlotRow {
+    const sigId = piece?.grantsSignature;
+    return {
+        slotKey,
+        name,
+        item: piece?.name ?? null,
+        grantsSignature: sigId ? getSignatureSkill(sigId)?.name ?? null : null,
+    };
+}
+
 function buildEquipment(player: Character): readonly EquipmentSlotRow[] {
     // Worn-state convention lives in the engine's `Items/equipped.ts`
     // (capacity-aware `wornPerSlot`, Phase 18). Five rows: Weapon, Armor, then
@@ -282,15 +305,13 @@ function buildEquipment(player: Character): readonly EquipmentSlotRow[] {
     const worn = wornPerSlot(player.inventory);
     const accessories = worn.get('accessory') ?? [];
     const rows: EquipmentSlotRow[] = [
-        { slotKey: 'weapon', name: SLOT_LABELS.weapon, item: worn.get('weapon')?.[0]?.name ?? null },
-        { slotKey: 'armor', name: SLOT_LABELS.armor, item: worn.get('armor')?.[0]?.name ?? null },
+        equipmentRow('weapon', SLOT_LABELS.weapon, worn.get('weapon')?.[0]),
+        equipmentRow('armor', SLOT_LABELS.armor, worn.get('armor')?.[0]),
     ];
     for (let i = 0; i < SLOT_CAPACITY.accessory; i++) {
         rows.push({
-            slotKey: 'accessory',
+            ...equipmentRow('accessory', SLOT_LABELS.accessory, accessories[i]),
             accessoryIndex: i as 0 | 1 | 2,
-            name: SLOT_LABELS.accessory,
-            item: accessories[i]?.name ?? null,
         });
     }
     return rows;

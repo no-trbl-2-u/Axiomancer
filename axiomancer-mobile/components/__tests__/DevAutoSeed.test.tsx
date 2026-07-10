@@ -29,16 +29,18 @@ function withProvider(store: AppStore) {
 }
 
 describe('DevAutoSeed: DEV behaviour', () => {
-    it('seeds the player inventory on first mount when inventory is empty', () => {
+    it('seeds the player inventory on first mount when it holds only the signet relics', () => {
         const store = makeStore();
-        expect(store.getState().player.inventory ?? []).toHaveLength(0);
+        // A fresh game seeds the 8 signet relics (Phase 19) but no test gear /
+        // consumables yet — still a fresh, un-seeded dev character.
+        const nonRelic = (store.getState().player.inventory ?? []).filter((i) => !i.id.startsWith('relic-'));
+        expect(nonRelic).toHaveLength(0);
 
         render(withProvider(store));
 
-        expect((store.getState().player.inventory ?? []).length).toBeGreaterThan(0);
-        // Cards + map are part of the same seed action; their presence
-        // confirms `actions.debugSeed()` fired (rather than some other path
-        // populating items).
+        // debugSeed adds non-relic items (consumables/gear) + cards + map.
+        expect((store.getState().player.inventory ?? []).filter((i) => !i.id.startsWith('relic-')).length)
+            .toBeGreaterThan(0);
         expect((store.getState().player.knownCards ?? []).length).toBeGreaterThan(0);
     });
 
@@ -95,7 +97,11 @@ describe('DevAutoSeed: production gate', () => {
         try {
             const store = makeStore();
             render(withProvider(store));
-            expect((store.getState().player.inventory ?? []).length).toBe(0);
+            // The seed never fires in production: no non-relic items are added
+            // (the 8 signet relics come from the engine's fresh-game seed, not
+            // DevAutoSeed), and no cards are learned.
+            expect((store.getState().player.inventory ?? []).filter((i) => !i.id.startsWith('relic-')).length).toBe(0);
+            expect((store.getState().player.knownCards ?? []).length).toBe(0);
         } finally {
             g.__DEV__ = original;
         }

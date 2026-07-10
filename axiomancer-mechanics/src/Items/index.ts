@@ -68,3 +68,8 @@ export {
 } from './set.engine';
 export { itemSetLibrary, getItemSetById } from './set.library';
 export type { ShopWare, ShopInventory } from './shop.types';
+// Phase 19 — the 8 signet relics + worn-loadout signature derivation.
+export {
+    relicLibrary, getRelicById, getSignaturesForLoadout, cloneStartingRelics,
+    DEFAULT_WORN_RELIC_IDS, BENCHED_RELIC_IDS,
+} from './relic.library';

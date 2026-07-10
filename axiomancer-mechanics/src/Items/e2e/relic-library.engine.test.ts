@@ -1,0 +1,138 @@
+/**
+ * Hermetic engine test — the 8 signet relics (Phase 19).
+ *
+ * Locks the relic library invariants (roster, slot split, stat pool, default
+ * loadout legality) and the `getSignaturesForLoadout` derivation that replaces
+ * the retired archetype kit at combat-init.
+ */
+
+import { describe, it, expect } from 'vitest';
+import {
+    relicLibrary, getRelicById, getSignaturesForLoadout, cloneStartingRelics,
+    DEFAULT_WORN_RELIC_IDS, BENCHED_RELIC_IDS,
+} from '../relic.library';
+import { SIGNATURE_SKILLS } from '../../Combat/combat.signature';
+import { SLOT_CAPACITY } from '../types';
+import type { SignatureSkillId } from '../../Combat/combat.encounter.types';
+import { emptyLoadout } from '../../Character/types';
+
+const ALL_SIGNATURE_IDS = Object.keys(SIGNATURE_SKILLS) as SignatureSkillId[];
+
+describe('relic library — roster + slot split', () => {
+    it('ships exactly 8 relics', () => {
+        expect(relicLibrary).toHaveLength(8);
+    });
+
+    it('splits 2 weapon / 2 armor / 4 accessory', () => {
+        const bySlot = (slot: string) => relicLibrary.filter(r => r.slot === slot);
+        expect(bySlot('weapon')).toHaveLength(2);
+        expect(bySlot('armor')).toHaveLength(2);
+        expect(bySlot('accessory')).toHaveLength(4);
+    });
+
+    it('every accessory relic carries an accessoryKind; weapons/armor do not', () => {
+        for (const r of relicLibrary) {
+            if (r.slot === 'accessory') expect(r.accessoryKind).toBeDefined();
+            else expect(r.accessoryKind).toBeUndefined();
+        }
+    });
+
+    it('every relic grants exactly one signature; the 8 cover the full roster with no dupes', () => {
+        const granted = relicLibrary.map(r => r.grantsSignature);
+        expect(granted.every(Boolean)).toBe(true);
+        expect(new Set(granted).size).toBe(8);
+        expect([...granted].sort()).toEqual([...ALL_SIGNATURE_IDS].sort());
+    });
+
+    it('relics are fixed content — common rarity, no rolled mods / affixes / effects / procs', () => {
+        for (const r of relicLibrary) {
+            expect(r.rarity).toBe('common');
+            expect(r.requiredLevel).toBe(0);
+            expect(r.rolledMods).toBeUndefined();
+            expect(r.prefixId).toBeUndefined();
+            expect(r.suffixId).toBeUndefined();
+            expect(r.passiveEffects).toBeUndefined();
+            expect(r.onHitEffects).toBeUndefined();
+            expect(r.onDefendEffects).toBeUndefined();
+            expect(r.resourceInteraction).toBeUndefined();
+        }
+    });
+
+    it('stat pool is Body×2 (weapons), maxHp×2 (armor), Mind×2 + Heart×2 (accessories)', () => {
+        const statOf = (id: string) => getRelicById(id)!.statModifiers![0];
+        for (const r of relicLibrary) {
+            const mod = r.statModifiers![0];
+            expect(r.statModifiers).toHaveLength(1);
+            expect(mod.isMultiplier).toBe(false);
+            if (r.slot === 'weapon') { expect(mod.stat).toBe('body'); expect(mod.value).toBe(2); }
+            else if (r.slot === 'armor') { expect(mod.stat).toBe('maxHp'); expect(mod.value).toBe(5); }
+            else { expect(['mind', 'heart']).toContain(mod.stat); expect(mod.value).toBe(2); }
+        }
+        // Exactly 2 mind + 2 heart across the accessories.
+        const accStats = relicLibrary.filter(r => r.slot === 'accessory').map(r => statOf(r.id).stat);
+        expect(accStats.filter(s => s === 'mind')).toHaveLength(2);
+        expect(accStats.filter(s => s === 'heart')).toHaveLength(2);
+    });
+});
+
+describe('relic library — default loadout', () => {
+    it('DEFAULT_WORN_RELIC_IDS is a legal loadout (1 weapon + 1 armor + 3 accessories)', () => {
+        const worn = DEFAULT_WORN_RELIC_IDS.map(id => getRelicById(id)!);
+        expect(worn.filter(r => r.slot === 'weapon')).toHaveLength(1);
+        expect(worn.filter(r => r.slot === 'armor')).toHaveLength(1);
+        expect(worn.filter(r => r.slot === 'accessory')).toHaveLength(SLOT_CAPACITY.accessory);
+        expect(worn).toHaveLength(5);
+    });
+
+    it('the 3 benched relics are exactly the non-default weapon/armor/accessory', () => {
+        expect(BENCHED_RELIC_IDS).toHaveLength(3);
+        const overlap = BENCHED_RELIC_IDS.filter(id => DEFAULT_WORN_RELIC_IDS.includes(id));
+        expect(overlap).toEqual([]);
+        // Worn + benched partition the full 8.
+        expect([...DEFAULT_WORN_RELIC_IDS, ...BENCHED_RELIC_IDS].sort())
+            .toEqual(relicLibrary.map(r => r.id).sort());
+    });
+
+    it('cloneStartingRelics returns fresh, non-aliased objects in canonical worn order', () => {
+        const a = cloneStartingRelics();
+        const b = cloneStartingRelics();
+        expect(a.worn).toHaveLength(5);
+        expect(a.benched).toHaveLength(3);
+        // canonical order: weapon, armor, then accessories.
+        expect(a.worn.map(r => r.slot)).toEqual(['weapon', 'armor', 'accessory', 'accessory', 'accessory']);
+        // Fresh objects each call (equipping must not mutate the singleton library).
+        expect(a.worn[0]).not.toBe(b.worn[0]);
+        const singleton = getRelicById(a.worn[0].id);
+        expect(a.worn[0]).not.toBe(singleton);
+    });
+});
+
+describe('getSignaturesForLoadout', () => {
+    it('derives the 5 default-worn signatures in slot order (weapon, armor, accessories)', () => {
+        const { worn } = cloneStartingRelics();
+        const loadout = {
+            weapon: worn.find(r => r.slot === 'weapon')!,
+            armor: worn.find(r => r.slot === 'armor')!,
+            accessories: worn.filter(r => r.slot === 'accessory'),
+        };
+        expect(getSignaturesForLoadout(loadout)).toEqual([
+            'sig-overwhelming-argument', 'sig-read-opponent',
+            'sig-conviction-strike', 'sig-clever-gambit', 'sig-disarming-plea',
+        ]);
+    });
+
+    it('returns [] for an empty loadout (combat may legally begin signature-less)', () => {
+        expect(getSignaturesForLoadout(emptyLoadout())).toEqual([]);
+    });
+
+    it('dedupes when two worn pieces grant the same signature (first occurrence wins)', () => {
+        const overwhelming = getRelicById('relic-overwhelming')!;
+        const loadout = { weapon: overwhelming, armor: null, accessories: [{ ...overwhelming, id: 'dup', slot: 'accessory' as const, accessoryKind: 'charm' as const }] };
+        expect(getSignaturesForLoadout(loadout)).toEqual(['sig-overwhelming-argument']);
+    });
+
+    it('ignores non-relic worn pieces (no grantsSignature)', () => {
+        const plainWeapon = { ...getRelicById('relic-overwhelming')!, id: 'plain', grantsSignature: undefined };
+        expect(getSignaturesForLoadout({ weapon: plainWeapon, armor: null, accessories: [] })).toEqual([]);
+    });
+});

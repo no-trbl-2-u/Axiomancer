@@ -11,6 +11,7 @@ import type {
     KeywordDeltaEntry,
     ModifierDeltaEntry,
     ResourceDeltaEntry,
+    SignatureDeltaEntry,
 } from '@mechanics';
 
 /**
@@ -80,8 +81,36 @@ export function EquipDeltaPanel({ itemId, delta }: EquipDeltaPanelProps) {
                 </View>
             )}
 
+            <SignatureRow itemId={itemId} signatures={delta.signatures} />
+
             <SideBlock itemId={itemId} tone="gained" label="GAINED" side={delta.gained} />
             <SideBlock itemId={itemId} tone="lost" label="LOST" side={delta.lost} />
+        </View>
+    );
+}
+
+/** Phase 19 — signet relic signature swap: the signature gained (green) and/or
+ *  lost (red) by this equip change. */
+function SignatureRow({
+    itemId,
+    signatures,
+}: {
+    itemId: string;
+    signatures: EquipDelta['signatures'];
+}) {
+    const styles = useStyles();
+    if (signatures.gained.length === 0 && signatures.lost.length === 0) return null;
+    return (
+        <View style={styles.sideBlock} testID={`equip-delta-signatures-${itemId}`}>
+            <Text style={[styles.sideLabel, styles.sideLabelPos]}>SIGNATURE</Text>
+            <View style={styles.tagWrap}>
+                {signatures.gained.map((s: SignatureDeltaEntry) => (
+                    <Tag key={`sig-gain-${s.id}`} positive text={`grants ${s.name ?? s.id}`} testID={`equip-delta-sig-gained-${itemId}-${s.id}`} />
+                ))}
+                {signatures.lost.map((s: SignatureDeltaEntry) => (
+                    <Tag key={`sig-lost-${s.id}`} positive={false} text={`loses ${s.name ?? s.id}`} testID={`equip-delta-sig-lost-${itemId}-${s.id}`} />
+                ))}
+            </View>
         </View>
     );
 }

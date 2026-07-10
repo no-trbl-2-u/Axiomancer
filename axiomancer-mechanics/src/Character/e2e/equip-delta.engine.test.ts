@@ -72,4 +72,46 @@ describe('computeEquipDelta', () => {
         expect(d.mode).toBe('unequip');
         expect(d.isEmpty).toBe(true);
     });
+
+    // ── Phase 19 — signet relic signature swap ────────────────────────────────
+    it('surfaces the granted signature (with name) when equipping a signet relic', () => {
+        const relic = makeEquipment('relic-x', { grantsSignature: 'sig-overwhelming-argument' });
+        const d = computeEquipDelta(relic, null);
+        expect(d.signatures.gained).toEqual([
+            { id: 'sig-overwhelming-argument', name: 'Overwhelming Argument' },
+        ]);
+        expect(d.signatures.lost).toEqual([]);
+        expect(d.isEmpty).toBe(false);
+    });
+
+    it('surfaces the lost signature when unequipping a signet relic', () => {
+        const relic = makeEquipment('relic-x', { grantsSignature: 'sig-read-opponent' });
+        const d = computeEquipDelta(relic, relic);
+        expect(d.mode).toBe('unequip');
+        expect(d.signatures.lost).toEqual([{ id: 'sig-read-opponent', name: 'Read the Opponent' }]);
+        expect(d.signatures.gained).toEqual([]);
+    });
+
+    it('swapping two relics surfaces the gained and lost signatures', () => {
+        const worn = makeEquipment('relic-a', { grantsSignature: 'sig-read-opponent' });
+        const candidate = makeEquipment('relic-b', { grantsSignature: 'sig-second-wind' });
+        const d = computeEquipDelta(candidate, worn);
+        expect(d.mode).toBe('swap');
+        expect(d.signatures.gained.map(s => s.id)).toEqual(['sig-second-wind']);
+        expect(d.signatures.lost.map(s => s.id)).toEqual(['sig-read-opponent']);
+    });
+
+    it('a same-signature swap nets to no signature change', () => {
+        const worn = makeEquipment('relic-a', { grantsSignature: 'sig-read-opponent' });
+        const candidate = makeEquipment('relic-b', { grantsSignature: 'sig-read-opponent' });
+        const d = computeEquipDelta(candidate, worn);
+        expect(d.signatures.gained).toEqual([]);
+        expect(d.signatures.lost).toEqual([]);
+    });
+
+    it('non-relic gear surfaces no signatures', () => {
+        const d = computeEquipDelta(makeEquipment('plain-blade'), null);
+        expect(d.signatures.gained).toEqual([]);
+        expect(d.signatures.lost).toEqual([]);
+    });
 });

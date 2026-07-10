@@ -11,6 +11,7 @@ import { afterEach, describe, it, expect, jest } from '@jest/globals';
 import {
     createCharacter,
     createGameStore,
+    getRelicById,
     type Consumable,
     type Equipment,
     type Item,
@@ -92,10 +93,51 @@ function tooth(): QuestItem {
 function makeStore(items: readonly Item[]) {
     const store = createAppStore({ adapter: createMemoryAdapter() });
     const state = store.getState();
-    const player = { ...state.player, inventory: [...items] };
-    store.setState({ player });
+    // Rebuild a clean, unequipped player (no signet relics) so the worn window
+    // and equip-delta computations reflect exactly the provided items. Phase 19
+    // seeds the 8 relics onto a fresh game — these fixtures don't want them, and
+    // a stale relic loadout/derivedStats would skew the deltas.
+    const clean = createCharacter({
+        id: state.player.id,
+        name: state.player.name,
+        level: state.player.level,
+        baseStats: state.player.baseStats,
+        currency: state.player.currency,
+        knownCards: state.player.knownCards,
+        inventory: [...items],
+    });
+    store.setState({ player: { ...state.player, ...clean } });
     return store;
 }
+
+// ---------------------------------------------------------------------------
+// Phase 19 — signet relic granted-signature label surfacing
+// ---------------------------------------------------------------------------
+
+describe('selectInventoryViewModel: signet relic granted signature (Phase 19)', () => {
+    it('surfaces the granted signature name on a signet relic row', () => {
+        const relic = getRelicById('relic-overwhelming')!;
+        const vm = selectInventoryViewModel(makeStore([relic]).getState());
+        const row = vm.items.find((r) => r.id === 'relic-overwhelming');
+        expect(row?.grantsSignature).toBe('Overwhelming Argument');
+    });
+
+    it('leaves non-relic equipment without a granted signature', () => {
+        const vm = selectInventoryViewModel(makeStore([sword()]).getState());
+        const row = vm.items.find((r) => r.id === 'long-blade');
+        expect(row?.grantsSignature ?? null).toBeNull();
+    });
+
+    it('threads the granted signature into the worn equipment dock', () => {
+        const relic = getRelicById('relic-overwhelming')!;
+        const vm = selectInventoryViewModel(makeStore([relic]).getState());
+        const weaponSlot = vm.equipmentDock.slots.find((s) => s.key === 'weapon');
+        // A lone worn weapon relic surfaces its signature in the dock slot.
+        if (weaponSlot?.item) {
+            expect(weaponSlot.item.grantsSignature).toBe('Overwhelming Argument');
+        }
+    });
+});
 
 // ---------------------------------------------------------------------------
 // Shape contract — preserved from the stub
@@ -177,7 +219,9 @@ describe('selectInventoryViewModel: localUi argument', () => {
 
 describe('selectInventoryViewModel: empty state', () => {
     it('reports isEmpty=true and an empty-state message for a fresh character', () => {
-        const store = createGameStore(createMemoryAdapter());
+        // A fresh game now owns the 8 signet relics (Phase 19); force a genuinely
+        // empty inventory to exercise the empty-state branch.
+        const store = makeStore([]);
 
         const vm = selectInventoryViewModel(store.getState());
 
@@ -187,7 +231,7 @@ describe('selectInventoryViewModel: empty state', () => {
     });
 
     it('every tab count is 0 when inventory is empty', () => {
-        const store = createGameStore(createMemoryAdapter());
+        const store = makeStore([]);
 
         const vm = selectInventoryViewModel(store.getState());
 
@@ -686,7 +730,9 @@ describe('selectInventoryViewModel: equipmentDock', () => {
     ];
 
     it('ships 3 slots in the design grid order with chrome labels and null items by default', () => {
-        const store = createGameStore(createMemoryAdapter());
+        // A fresh game now wears the signet relics (Phase 19); force an empty
+        // inventory to exercise the bare-dock default.
+        const store = makeStore([]);
         const vm: InventoryViewModel = selectInventoryViewModel(store.getState());
 
         expect(vm.equipmentDock.headerLabel).toBe('✠ WORN UPON THE BODY');
@@ -710,6 +756,7 @@ describe('selectInventoryViewModel: equipmentDock', () => {
             id: 'long-blade-1',
             name: 'Long Blade',
             sub: 'Weapon',
+            grantsSignature: null, // Phase 19 — non-relic gear grants no signature
         });
     });
 

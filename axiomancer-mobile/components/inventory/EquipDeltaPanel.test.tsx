@@ -48,6 +48,7 @@ function makeDelta(overrides: Partial<EquipDelta> = {}): EquipDelta {
         stats: [],
         gained: emptySide(),
         lost: emptySide(),
+        signatures: { gained: [], lost: [] },
         isEmpty: false,
         ...overrides,
     };
@@ -217,5 +218,28 @@ describe('EquipDeltaPanel', () => {
         const label = getByText('GAINED');
         expect(textColor(label)).toBe(AXM.heal);
         expect(textColor(label)).not.toBe(AXM.sulfur);
+    });
+
+    // Phase 19 — signet relic signature swap.
+    it('renders the gained and lost signatures of a relic swap', () => {
+        const { getByText, getByTestId } = renderPanel(
+            makeDelta({
+                mode: 'swap',
+                signatures: {
+                    gained: [{ id: 'sig-second-wind', name: 'Second Wind' }],
+                    lost: [{ id: 'sig-read-opponent', name: 'Read the Opponent' }],
+                },
+            }),
+        );
+        expect(getByTestId(`equip-delta-signatures-${ITEM_ID}`)).toBeTruthy();
+        expect(getByText('grants Second Wind')).toBeTruthy();
+        expect(getByText('loses Read the Opponent')).toBeTruthy();
+    });
+
+    it('omits the signature row when nothing changes', () => {
+        const { queryByTestId } = renderPanel(
+            makeDelta({ gained: { ...emptySide(), keywords: [{ key: 'k', label: 'Keen' }] } }),
+        );
+        expect(queryByTestId(`equip-delta-signatures-${ITEM_ID}`)).toBeNull();
     });
 });

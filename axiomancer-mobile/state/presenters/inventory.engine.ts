@@ -24,7 +24,7 @@ import {
 
 import { freezeViewModel } from './freeze';
 import { computeEquipDelta, type EquipDelta } from '@mechanics';
-import { wornPerSlot, SLOT_CAPACITY } from '@mechanics';
+import { wornPerSlot, SLOT_CAPACITY, getSignatureSkill } from '@mechanics';
 
 export type { EquipDelta } from '@mechanics';
 
@@ -89,6 +89,13 @@ export interface InventoryItemRow {
      */
     replacePreview: ReplacePreview | null;
     /**
+     * Phase 19 — the signature this signet relic grants (display name), or
+     * `null` when the item is not a relic. Surfaced as a "grants <name>"
+     * sub-label on equipment rows and in the worn dock. Optional (sparse):
+     * the presenter always sets it, but fixtures may omit it.
+     */
+    grantsSignature?: string | null;
+    /**
      * Rich equip-change delta surface (Phase 133). Where `replacePreview`
      * collapses the change into a single signed net-stat list, this model
      * splits the change into gained vs. lost across stats, rolled
@@ -141,7 +148,7 @@ export interface EquipmentDockSlot {
     key: Equipment['slot'];
     label: string;
     /** First equipped item in this slot, or `null`. */
-    item: { id: string; name: string; sub: string | null } | null;
+    item: { id: string; name: string; sub: string | null; grantsSignature?: string | null } | null;
 }
 
 /**
@@ -299,6 +306,13 @@ function rarityFor(item: Item): InventoryItemRow['rarity'] {
     return isEquipment(item) ? item.rarity : null;
 }
 
+/** Phase 19 — the display name of the signature a signet relic grants, or
+ *  `null` for non-relic items. */
+function grantsSignatureName(item: Item): string | null {
+    if (!isEquipment(item) || !item.grantsSignature) return null;
+    return getSignatureSkill(item.grantsSignature)?.name ?? null;
+}
+
 function quantityFor(item: Item): number {
     if (isConsumable(item) || isMaterial(item)) {
         // `?? 1` defends against fixtures that omit the engine-required
@@ -412,6 +426,7 @@ function buildRows(state: GameStore): InventoryItemRow[] {
             description: item.description,
             canUse: canUseFor(item),
             canDiscard: canDiscardFor(item),
+            grantsSignature: grantsSignatureName(item),
             replacePreview: null,
             equipDelta: null,
         };
@@ -537,7 +552,7 @@ function buildEquipmentDock(
         return {
             key: slot,
             label: DOCK_SLOT_TITLE[slot],
-            item: row === null ? null : { id: row.id, name: row.name, sub: row.sub },
+            item: row === null ? null : { id: row.id, name: row.name, sub: row.sub, grantsSignature: row.grantsSignature },
         };
     });
     return {

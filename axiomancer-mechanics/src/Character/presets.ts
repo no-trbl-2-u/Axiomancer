@@ -20,7 +20,6 @@ import { Character, BaseStats } from './types';
 import { createCharacter } from './index';
 import { dropItem } from '../Items/item.factory';
 import { consumableLibrary } from '../Items/consumable.library';
-import { SLOT_CAPACITY } from '../Items/types';
 import type { Equipment, Item } from '../Items/types';
 
 export interface CharacterPresetEquipmentEntry {
@@ -270,37 +269,23 @@ export function buildCharacterFromPreset(
         return { ...source, quantity };
     });
 
-    // Drop each declared piece, then bucket into a legal 5-slot loadout in
-    // declaration order (Phase 18): first weapon, first armor, first 3
-    // accessories are worn; anything past capacity seeds the inventory.
-    const worn: Equipment[] = [];
-    const benched: Equipment[] = [];
-    let hasWeapon = false;
-    let hasArmor = false;
-    let accessoryCount = 0;
-    for (const entry of preset.equipment) {
-        const piece = dropItem(entry.templateId, preset.level, 'common', rng);
-        if (piece.slot === 'weapon' && !hasWeapon) {
-            worn.push(piece);
-            hasWeapon = true;
-        } else if (piece.slot === 'armor' && !hasArmor) {
-            worn.push(piece);
-            hasArmor = true;
-        } else if (piece.slot === 'accessory' && accessoryCount < SLOT_CAPACITY.accessory) {
-            worn.push(piece);
-            accessoryCount += 1;
-        } else {
-            benched.push(piece);
-        }
-    }
+    // Phase 19 — presets no longer WEAR procedural gear (it would compete with
+    // the signet relics for the same 5 slots). The declared `preset.equipment`
+    // pieces are still dropped and kept in inventory (nothing is lost), but the
+    // worn loadout is the fixed 8-relic default seeded by `createCharacter`.
+    // Preset combat numbers shift (their procedural stat sticks are unworn) —
+    // that is a phase-21 tuning follow-up, not a dual loadout.
+    const dropped: Equipment[] = preset.equipment.map(
+        entry => dropItem(entry.templateId, preset.level, 'common', rng),
+    );
 
     return createCharacter({
         name: preset.name,
         level: preset.level,
         baseStats: preset.baseStats,
         currency: preset.currency,
-        inventory: [...consumables, ...benched],
-        equipment: worn,
+        inventory: [...consumables, ...dropped],
+        seedStartingRelics: true,
         knownCards: preset.knownCards,
     });
 }

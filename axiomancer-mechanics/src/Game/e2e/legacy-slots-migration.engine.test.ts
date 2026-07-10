@@ -11,7 +11,7 @@ import { describe, it, expect } from 'vitest';
 
 import {
     reslotLegacyEquipment, reslotLegacyLoadout, LEGACY_SLOT_MAP,
-    migrate, createNewGameState, GAME_STATE_VERSION,
+    migrate, createNewGameState,
 } from '../index';
 import { getEquippedItems } from '../../Character';
 import type { Equipment } from '../../Items/types';
@@ -101,8 +101,11 @@ describe('Phase 18 — migrate v11 → v12', () => {
     }
 
     it('folds the legacy record into a loadout and recomputes derivedStats', () => {
-        const migrated = migrate(v11Save(), 11);
-        expect(migrated.version).toBe(GAME_STATE_VERSION);
+        // Pin toVersion=12 to exercise the Phase-18 hop in isolation; the
+        // Phase-19 v12→v13 relic seeding (which would replace this loadout) is
+        // covered separately in the relic-library migration test.
+        const migrated = migrate(v11Save(), 11, 12);
+        expect(migrated.version).toBe(12);
 
         const loadout = migrated.player.equipment;
         expect(loadout.weapon?.id).toBe('sword');
@@ -113,7 +116,7 @@ describe('Phase 18 — migrate v11 → v12', () => {
     });
 
     it('returns worn overflow (body + 4th accessory) and re-slots inventory equipment', () => {
-        const migrated = migrate(v11Save(), 11);
+        const migrated = migrate(v11Save(), 11, 12);
         const invIds = migrated.player.inventory.map(i => i.id);
         // coat (body loses to armor) and one accessory overflow land in inventory,
         // alongside the pre-existing spare-cap (re-slotted to accessory).

@@ -59,6 +59,11 @@ export function EquipmentSlot({ slot, bareLabel, selected, onPress }: EquipmentS
                 >
                     {filled && slot.item !== null ? slot.item.name : bareLabel}
                 </Text>
+                {filled && slot.item?.grantsSignature ? (
+                    <Text numberOfLines={1} style={styles.dockSlotSignature}>
+                        grants {slot.item.grantsSignature}
+                    </Text>
+                ) : null}
             </View>
         </TouchableOpacity>
     );
@@ -136,5 +141,13 @@ const useStyles = makeStyles((AXM) => ({
         fontSize: 12,
         color: AXM.bone,
         lineHeight: 14,
+    },
+    // Phase 19 — signet relic's granted signature, a quiet sub-label.
+    dockSlotSignature: {
+        fontFamily: FONTS.sans,
+        fontSize: 8,
+        color: AXM.sulfur,
+        letterSpacing: 0.6,
+        lineHeight: 11,
     },
 }));

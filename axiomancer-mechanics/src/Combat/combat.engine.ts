@@ -59,7 +59,8 @@ import {
 import { recordAttribution } from './combat.attribution';
 import { canAct, getActiveEffectModifiers, getActiveDotTotal } from './effect-modifiers';
 import { getThreatSequence } from './combat.threat';
-import { getSignatureSkill, applySignatureSkill, playerArchetype, SIGNATURE_KITS } from './combat.signature';
+import { getSignatureSkill, applySignatureSkill, playerArchetype } from './combat.signature';
+import { getSignaturesForLoadout } from '../Items/relic.library';
 import type {
     CombatCard, CombatDieColor, CombatEncounterState, CombatEvent, CardPlay,
     CombatManaDie, CombatPhaseResult, CombatTransition, LandedEffect, CombatReadResult,
@@ -337,8 +338,11 @@ export function initializeCombatEncounter(
         conviction: 0,
         revealedStances: [],
         lastRead: 'none',
+        // `archetype` is kept for the mobile portrait flavour only — it no
+        // longer selects signatures (Phase 19). Signatures come from the worn
+        // signet-relic loadout.
         archetype: playerArchetype(clonedPlayer),
-        signatures: SIGNATURE_KITS[playerArchetype(clonedPlayer)],
+        signatures: getSignaturesForLoadout(clonedPlayer.equipment),
         deck,
         drawPile: draw.drawPile,
         discard: draw.discard,

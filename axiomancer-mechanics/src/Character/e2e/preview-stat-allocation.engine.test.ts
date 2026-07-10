@@ -1,6 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { previewStatAllocation, allocateStatPoint } from '../index';
-import { apprenticePreset, buildCharacterFromPreset } from '../presets';
+import { previewStatAllocation, allocateStatPoint, createCharacter } from '../index';
 import { BaseStats } from '../types';
 
 describe('previewStatAllocation', () => {
@@ -19,8 +18,12 @@ describe('previewStatAllocation', () => {
     });
 
     it('should match allocateStatPoint results without character mutation', () => {
-        // Start with apprentice preset
-        let character = buildCharacterFromPreset(apprenticePreset);
+        // `previewStatAllocation` is equipment-agnostic (base-stat math only), so
+        // it only equals `allocateStatPoint` for an UNEQUIPPED character — build a
+        // bare one (Phase 19 presets wear relics whose stat bumps would diverge).
+        const character = createCharacter({
+            name: 'Preview Test', level: 2, baseStats: { heart: 3, body: 4, mind: 5 },
+        });
         character.availableStatPoints = 1;
 
         const originalBaseStats = character.baseStats;

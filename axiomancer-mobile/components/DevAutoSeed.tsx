@@ -8,12 +8,14 @@
  *
  * Behavior:
  *   - Production (`__DEV__` false): renders null, no effect.
- *   - DEV with empty player.inventory: fires `actions.debugSeed()`
- *     once on mount; persistence saves the seeded state, so
- *     subsequent launches see a non-empty inventory and skip
- *     the auto-seed.
- *   - DEV with non-empty player.inventory: no-op; the player's
- *     prior session state stands.
+ *   - DEV with no non-relic items in player.inventory: fires
+ *     `actions.debugSeed()` once on mount; persistence saves the
+ *     seeded state, so subsequent launches see real items and skip
+ *     the auto-seed. (A fresh game now seeds the 8 signet relics —
+ *     Phase 19 — so "empty inventory" is no longer the fresh signal;
+ *     "only relics, no test gear/consumables yet" is.)
+ *   - DEV with any non-relic item: no-op; the player's prior session
+ *     state stands.
  *
  * Renders null — it's a side-effect-only component.
  */
@@ -27,7 +29,13 @@ declare const __DEV__: boolean | undefined;
 
 export function DevAutoSeed() {
     const actions = useGameActions();
-    const inventoryLength = useGameState((s) => s.player.inventory?.length ?? 0);
+    // Count only NON-relic items: a fresh game seeds the 8 signet relics
+    // (Phase 19), so a relic-only inventory is still a fresh, un-seeded dev
+    // character. Any consumable / material / non-relic gear means a real (or
+    // already-seeded) session.
+    const nonRelicCount = useGameState(
+        (s) => (s.player.inventory ?? []).filter((i) => !i.id.startsWith('relic-')).length,
+    );
     const seeded = useRef(false);
 
     useEffect(() => {
@@ -38,17 +46,16 @@ export function DevAutoSeed() {
         if (typeof __DEV__ !== 'undefined' && !__DEV__) return;
         if (!isDevToolsEnabled()) return;
         if (seeded.current) return;
-        if (inventoryLength > 0) {
-            // Either the prior session already seeded, or the
-            // player has a real (non-empty) inventory — either way,
-            // don't re-seed. Mark as done so subsequent inventory
-            // changes don't retrigger.
+        if (nonRelicCount > 0) {
+            // Either the prior session already seeded, or the player has a real
+            // (non-relic) inventory — either way, don't re-seed. Mark as done so
+            // subsequent inventory changes don't retrigger.
             seeded.current = true;
             return;
         }
         seeded.current = true;
         actions.debugSeed();
-    }, [actions, inventoryLength]);
+    }, [actions, nonRelicCount]);
 
     return null;
 }

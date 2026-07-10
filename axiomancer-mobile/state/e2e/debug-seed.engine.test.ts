@@ -32,7 +32,8 @@ describe('debugSeed: items + cards + map reset', () => {
         const { store, actions } = makeStore();
 
         const before = store.getState().player.inventory ?? [];
-        expect(before).toHaveLength(0);
+        // A fresh game seeds the 8 signet relics (Phase 19); no other items yet.
+        expect(before.filter((i: { id: string }) => !i.id.startsWith('relic-'))).toHaveLength(0);
 
         const result = actions.debugSeed();
 

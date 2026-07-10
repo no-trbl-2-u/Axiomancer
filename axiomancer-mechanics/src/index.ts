@@ -26,7 +26,7 @@ export type {
     CharacterPreset, CharacterPresetEquipmentEntry,
     EquipDelta, EquipDeltaMode, EquipDeltaSide,
     StatDeltaEntry, ModifierDeltaEntry, EffectDeltaEntry,
-    ResourceDeltaEntry, KeywordDeltaEntry,
+    ResourceDeltaEntry, KeywordDeltaEntry, SignatureDeltaEntry,
 } from './Character';
 
 // ─── Enemy ────────────────────────────────────────────────────────────────────
@@ -242,6 +242,8 @@ export {
     aggregateSetStartTokens, applySetGenerationBonus,
     getActiveSetPassiveEffectIds, getEquippedItemSets,
     itemSetLibrary, getItemSetById,
+    relicLibrary, getRelicById, getSignaturesForLoadout, cloneStartingRelics,
+    DEFAULT_WORN_RELIC_IDS, BENCHED_RELIC_IDS,
 } from './Items';
 export type {
     Item, Equipment, Consumable, Material, QuestItem,

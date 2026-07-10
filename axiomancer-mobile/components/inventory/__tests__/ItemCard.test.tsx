@@ -482,6 +482,7 @@ describe('ItemCard: equipDelta panel (Phase 133)', () => {
                 resources: [],
                 keywords: [],
             },
+            signatures: { gained: [], lost: [] },
             isEmpty: false,
         },
     };
@@ -522,6 +523,7 @@ describe('ItemCard: equipDelta panel (Phase 133)', () => {
                     modifiers: [], passiveEffects: [], onHitEffects: [],
                     onDefendEffects: [], resources: [], keywords: [],
                 },
+                signatures: { gained: [], lost: [] },
                 isEmpty: true,
             },
         };
