@@ -134,13 +134,14 @@ decision log (see each phase file).
       (both; mechanics-led) — brief:
       `plan/phases/phase_19_equipment_granted_signatures.md`
       — `feat(mechanics): equipment-granted signatures + 8 signet relics — phase 19` (fbf3d52c)
-- [ ] Phase 20 — Decouple equipment from effects (static stat bumps
+- [x] Phase 20 — Decouple equipment from effects (static stat bumps
       only). Strip `passiveEffects` / `onHitEffects` / `onDefendEffects`
       / `resourceInteraction` / `critStyle` application out of the equip
       pipeline and its combat consumers so ALL equipment contributes
       only `statModifiers` (+ `grantsSignature`). User-intent phase 2
       (mechanics; verify mobile) — brief:
       `plan/phases/phase_20_equipment_effect_decouple.md`
+      — `refactor(mechanics): decouple equipment from effects — phase 20` (8907c08f)
 - [ ] Phase 21 — Retire the procedural equipment library. Delete the 56
       templates + 7 uniques + the `dropItem`/roll/resolve/affix factory;
       the 8 relics become the whole library. Convert loot surfaces (The
