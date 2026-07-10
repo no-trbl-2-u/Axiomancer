@@ -1,7 +1,7 @@
 # Critique log
 
-> Last pass: 2026-07-10 at commit 2648961f
-> Pass count: 11
+> Last pass: 2026-07-10 at commit 3dc27d24
+> Pass count: 12
 
 > External-observer feedback for Axiomancer. Populated by
 > `/critique` (which drives the local expo-web build with the
@@ -10,6 +10,102 @@
 > `plan/bearings.md` § Surface for the local-build adaptation.
 
 ## Pending
+
+### [HIGH] persistent header — MORALE meter renders literal "v of x" placeholder
+- pass: 12 (commit 3dc27d24)
+- viewport: mobile
+- category: visual
+- observation: the always-visible top header's MORALE meter shows the
+  unresolved template placeholder text "v of x" instead of real numbers,
+  on every screen in the app (title, exploration, combat, SELF, SATCHEL,
+  MEMOIR). The correct value renders fine in the SELF tab's POOLS panel
+  just below ("MORALE · resolve to walk 5 / 10"), so the data exists —
+  it just isn't reaching the header component.
+- evidence: accessibility snapshot on every screen: "MORALE / · RESOLVE
+  TO WALK / v of x"; SELF tab POOLS panel correctly shows "5 / 10" for
+  the same stat.
+- suggested fix: wire the header MORALE display to the same
+  morale value/formatter already used in the SELF tab's POOLS panel.
+- source: playtester (critique pass 12)
+
+### [HIGH] title screen — wordmark cropped above the mobile fold
+- pass: 12 (commit 3dc27d24)
+- viewport: mobile
+- category: visual
+- observation: on the title screen at 414x896, the game's wordmark
+  bleeds off the top of the screen — only "xiomance..." is visible, the
+  leading "A" and trailing letters cut off above the fold. No full
+  title text is visible on load.
+- evidence: title-screen screenshot shows the stained-glass artwork
+  with "xiomance" cropped at the top edge; no scroll reveals the rest.
+- suggested fix: reflow or rescale the title art/wordmark so the full
+  name fits inside the mobile viewport without requiring scroll.
+- source: playtester (critique pass 12)
+
+### [HIGH] combat tutorial never teaches the drag-to-play gesture
+- pass: 12 (commit 3dc27d24)
+- viewport: mobile
+- category: comprehension
+- observation: the only way to play a card in combat is a drag from
+  hand to a staging zone; a plain tap only opens a read-only
+  card-detail modal. The 3-page "FIRST FIGHT" tutorial never mentions
+  the drag gesture — it only says tapping a card shows its keywords.
+  A first-time player tapping cards (the only affordance taught) would
+  plausibly never discover how to actually play one.
+- evidence: tutorial page 3/3 verbatim: "...Tap any card to read its
+  keywords and full effect." No drag instruction anywhere; the
+  "APPLY · FREE" staged state required a synthetic drag sequence to
+  find.
+- suggested fix: add an explicit tutorial step demonstrating the
+  drag-to-stage/APPLY gesture, and/or a visible "drag to play"
+  affordance on card faces.
+- source: playtester (critique pass 12)
+
+### [MED] persistent header VITAE bar doesn't update during combat
+- pass: 12 (commit 3dc27d24)
+- viewport: mobile
+- category: inconsistency
+- observation: the always-visible header's player VITAE bar stays
+  frozen at "80/80" through an entire combat, while the in-combat HUD
+  correctly shows VITAE dropping (71 -> 59 -> 35 -> 7 -> 0) as the
+  fight progresses.
+- evidence: accessibility snapshots at multiple combat states show
+  header progressbar "VITAE: 80 out of 80, 100 percent" alongside the
+  in-combat element reading "Player, VITAE 0 of 80."
+- suggested fix: bind the persistent header VITAE bar to the same live
+  combat state store the in-combat HUD reads from.
+- source: playtester (critique pass 12)
+
+### [MED] pre-fight enemy preview disagrees with live combat VITAE
+- pass: 12 (commit 3dc27d24)
+- viewport: mobile
+- category: inconsistency
+- observation: the pre-fight encounter card for "Little Belle"
+  previews the enemy as "level 2 · 50 hp.", but immediately on
+  entering combat the same enemy's VITAE bar reads 100/100 — double
+  the previewed value.
+- evidence: encounter card text "level 2 · 50 hp." / "Lv 2 foe · 50 HP
+  · advantage not yet scouted"; combat screen progressbar "Enemy VITAE
+  100 of 100" for the same enemy in the same encounter.
+- suggested fix: source the pre-fight preview and the live combat
+  VITAE bar from the same computed enemy stat.
+- source: playtester (critique pass 12)
+
+### [MED] card/tooltip copy still says "HP" instead of canon VITAE
+- pass: 12 (commit 3dc27d24)
+- viewport: mobile
+- category: voice
+- observation: canon term VITAE is used inconsistently against "HP"
+  within the same screens — the pre-fight card mixes "hp.", "HP", and
+  "vitae" for one stat; in live combat, card copy and the BLEED
+  keyword tooltip both say "HP" instead of VITAE, contradicting the
+  tutorial text ("The enemy has ONE bar: VITAE") shown moments before.
+- evidence: quoted "level 2 · 50 hp."; "Lv 2 foe · 50 HP"; combat card
+  aria-label "Slippery Slope, body card. foe loses HP each turn.";
+  BLEED tooltip "Deals 3 HP per stack at the END of each round...".
+- suggested fix: replace remaining "HP"/"hp" occurrences in encounter
+  and card copy with VITAE per bearings' copy canon.
+- source: playtester (critique pass 12)
 
 ### [MED] general — rethink early-game as canned preset-deck tutorial, defer deckbuilding to labyrinth choice
 - pass: user-jot (commit 63cfb3ba)
