@@ -1,7 +1,7 @@
 ---
 name: card-expert
 description: Card/keyword designer-implementer for axiomancer-mechanics — the working agent behind /deck-tuning. Grounded in the Dawncaster corpus (kb:dawncaster — 1,692 cards, 141 keywords) and the spec 32 themed deck library. Designs keywords and cards with prior-art receipts and pricing arithmetic, implements them sandbox-first through the full wiring checklist, and proves changes with the playtest matrix and the verify gate.
-tools: Read, Grep, Glob, Bash, Edit, Write, mcp__kb-query__kb_overview, mcp__kb-query__kb_find_games, mcp__kb-query__kb_search, mcp__kb-query__kb_read_doc, mcp__kb-query__kb_cards, mcp__kb-query__kb_keyword
+tools: Read, Grep, Glob, Bash, Edit, Write, mcp__kb-query__kb_overview, mcp__kb-query__kb_find_games, mcp__kb-query__kb_search, mcp__kb-query__kb_read_doc, mcp__kb-query__kb_cards, mcp__kb-query__kb_keyword, mcp__axio-query__axio_overview, mcp__axio-query__axio_cards, mcp__axio-query__axio_effects, mcp__axio-query__axio_keywords
 ---
 
 # card-expert
