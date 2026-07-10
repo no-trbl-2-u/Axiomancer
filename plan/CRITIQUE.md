@@ -18,119 +18,8 @@
 - category: design
 - observation: for the early game / "child" levels, potentially remove the deck-building aspect entirely. Instead each battle is a canned tutorial introducing a new preset deck, teaching each mechanic in a controlled vacuum. Pre-maze gameplay is really just the tutorial: "build a boat" -> "sail to friend" -> "go to labyrinth". The labyrinth is when the player commits to which deck they want to start the game with, which dictates their reward offering for the labyrinth. When the player completes the labyrinth and lands in the new city, they gain the ability to switch base decks post-labyrinth and trade their current deck for a new mid-game deck (since during the labyrinth they earn card rewards focused on their current deck's theme).
 - evidence: user-spotted at 2026-07-08T18:36:36Z
-- suggested fix: [user has not specified — iterate to determine]
+- suggested fix: [user has not specified — iterate to determine]. Related: build-plan Phase 17 (quest-board tutorial) was dropped via `/oversight` 2026-07-10 because its narrow scope overlaps this rethink — the correct next step is to route this design idea through `/iterate` or a design skill and re-derive any per-minigame tutorial phases from whatever it lands on.
 - source: user
-
-### [needs-user-call] Playwright MCP tools unavailable to sub-agents — recurred again (pass 11)
-- pass: 11 (commit 2648961f); prior: pass 10 (commit 2e0a2324),
-  pass 9 (commit 31817335), pass 8 (commit 43088f6f), pass 7
-  (commit aff7fece), pass 6 (commit e50e819a), pass 5 (commit
-  b0707e0a), pass 1-4 (marked fixed, see Done section)
-- pass 11 update: eighth occurrence, seventh consecutive.
-  Identical failure mode: local expo-web build started fresh
-  (`npx expo start --web --port 8081` from `axiomancer-mobile/`),
-  confirmed reachable (`curl -> 200`) before spawning
-  `playtester`; its first tool call (`browser_navigate`) was
-  rejected with "you haven't granted it yet." Zero screens
-  covered, zero product findings. One new data point:
-  `.claude/settings.json` is now tracked in git (committed at
-  `d958da04`, "Added new kb-query MCP server") rather than
-  untracked as in passes 5-10 — but the working tree still
-  carries an uncommitted diff on top of that commit (a dedup
-  cleanup of duplicate `mcp__playwright__*`/`mcp__kb-query__*`
-  allow-list entries), so the file the sub-agent actually saw
-  this pass differs slightly from HEAD. Neither the untracked
-  state (passes 5-10) nor the tracked-plus-local-diff state
-  (this pass) has changed the outcome, which continues to rule
-  out "the file's committed status" as a variable and reinforces
-  the standing diagnosis: the gap is in grant propagation to
-  Agent-tool sub-agent contexts, not the settings file's content
-  or its git status.
-- pass 10 update: seventh occurrence, sixth consecutive. Local
-  expo-web build started fresh this pass (`npx expo start --web
-  --port 8081` from `axiomancer-mobile/`) and confirmed reachable
-  (`curl -> 200`) at http://localhost:8081 before spawning
-  `playtester` — identical pre-flight to pass 9. The `playtester`
-  sub-agent's very first tool call, `mcp__playwright__browser_navigate`,
-  was rejected twice with "Claude requested permissions to use
-  mcp__playwright__browser_navigate, but you haven't granted it
-  yet." No page ever loaded; zero screens covered; zero product
-  findings this pass. `.claude/settings.json` on disk is unchanged
-  from pass 9 (still carries the 14-tool `mcp__playwright__browser_*`
-  allowlist, still untracked in git). This continues to confirm
-  the pass 6-9 diagnosis: the gap is in grant propagation to
-  Agent-tool sub-agent contexts, not the settings file content.
-  No new information surfaced this pass beyond "still broken,
-  identically" — deferring to the existing suggested fix below
-  rather than re-diagnosing.
-- viewport: n/a
-- category: infra
-- observation: fifth occurrence of this exact blocker, fourth
-  consecutive. Local expo-web build was started fresh this pass
-  (`npx expo start --web --port 8081` from `axiomancer-mobile/`,
-  since `web:container` is still broken per the separate LOW
-  finding below) and confirmed reachable (`curl -> 200`) at
-  http://localhost:8081 before spawning `playtester`. New this
-  pass: found that `.claude/settings.json` on disk in this
-  environment already carries the `mcp__playwright__browser_*`
-  allowlist (copied from `settings.json.example`, minus the
-  `__note` key) — so the grants are present and correct in the
-  *main* session's settings file, yet the `playtester` sub-agent
-  still had its `browser_navigate` call rejected at the
-  permission layer before executing. This rules out "the
-  settings file is missing or stale in this environment" as an
-  explanation and further confirms the grants in
-  `.claude/settings.json` are not propagating to Agent-tool
-  sub-agent contexts at all — the gap is structural, not a config
-  content problem. Also notable: `.claude/settings.json` itself
-  is untracked in git (`git status` shows `?? .claude/settings.json`
-  at every pass) — it was never committed, so it only exists
-  because someone copied it into this persistent environment by
-  hand. Even if sub-agent grant propagation gets fixed, the
-  allowlist as it stands would not travel with the repo to a
-  fresh clone/environment unless committed (or unless that's
-  intentional per the `__note` in `settings.json.example`, which
-  frames activation as "a deliberate, user-owned step").
-  New this pass: the *calling* session (this one) was itself
-  offered direct `mcp__playwright__browser_*` tool access mid-run
-  (surfaced via a deferred-tool listing, and callable without a
-  permission prompt) — yet the `playtester` sub-agent it spawned
-  moments later, using the identical repo-level
-  `.claude/settings.json` allowlist, still had every
-  `browser_navigate`/`browser_snapshot` call rejected as
-  ungranted. This is the clearest signal yet that the grant is
-  session-scoped and does not inherit into Agent-tool sub-agent
-  contexts even when the top-level session holds it — reinforcing
-  (not just repeating) the pass 5-8 diagnosis that this is a
-  structural sub-agent propagation gap, not a stale-config or
-  missing-file problem.
-- evidence: sixth occurrence, fifth consecutive. Verbatim
-  sub-agent tool errors this pass: "Claude requested permissions
-  to use mcp__playwright__browser_navigate, but you haven't
-  granted it yet." and "...mcp__playwright__browser_snapshot,
-  but you haven't granted it yet." — raised on every attempt
-  before any page load.
-- suggested fix: unchanged from pass 6/7 — this needs a
-  `[needs-user-call]` decision on the permission-mode mechanism
-  itself: either (a) confirm whether this harness's
-  unattended/`/march`-invoked sessions structurally cannot
-  auto-approve MCP tool grants for sub-agents (in which case
-  `/critique` needs a non-Playwright transport for unattended
-  ticks — e.g. a headless script driving the expo-web build
-  directly), or (b) identify the correct scope/mechanism (session
-  flag, env var, harness config outside `.claude/settings.json`)
-  that actually grants MCP tools to sub-agent contexts. Do not
-  re-attempt settings.json edits in this environment — four
-  passes have now verified the file is already correct and
-  present; the gap is in grant propagation to sub-agents, not the
-  file. Separately (lower priority): if (a) or (b) ever gets
-  resolved, decide deliberately whether `.claude/settings.json`
-  should be committed to the repo so the fix travels with it, or
-  left as a per-environment opt-in as `settings.json.example`'s
-  note implies.
-- source: critique pass 9 (playtester, dev server pre-verified up
-  before spawn; expo web bound at http://localhost:8081 via
-  `npx expo start --web --port 8081` from `axiomancer-mobile/`)
 
 ### [LOW] `web:container` dev-server script is broken
 - pass: 1 (commit 6e23724a)
@@ -190,6 +79,30 @@
   refined in `VISION.md`; spec 32 amendment block added; execution queued
   as EA-5 (70-card pass + FREE-currency lint) in `plan/PHASE_CANDIDATES.md`.
 - source: user (ratified via owner Q&A, 2026-07-10)
+
+### [x] [needs-user-call] Playwright MCP tools unavailable to sub-agents — RESOLVED via /oversight 2026-07-10 (switch transport)
+- 8 consecutive occurrences (of 11 total passes, pass 5 through pass
+  11) of the identical failure: `playtester`'s first
+  `mcp__playwright__browser_*` tool call is rejected with "you
+  haven't granted it yet", even when the calling session's own
+  `.claude/settings.json` carries the full `mcp__playwright__browser_*`
+  allowlist and the calling session itself can use those tools
+  directly. Ruled out across passes: settings-file content, settings
+  file git-tracked-vs-untracked status, dev-server reachability (all
+  confirmed up via `curl -> 200` before every spawn). Standing
+  diagnosis (unchanged since pass 6): the grant is session-scoped and
+  does not propagate into Agent-tool sub-agent contexts — a
+  structural gap, not a config problem. Zero product findings across
+  all 8 occurrences.
+- decision (via `/oversight` 2026-07-10): stop retrying the grant
+  mechanism. Give `/critique` a headless, non-Agent-tool transport
+  for unattended ticks instead — a standalone script driving the
+  expo-web build directly as a subprocess, not an MCP-gated
+  sub-agent. Interactive `playtester` usage elsewhere is unaffected;
+  this only covers the unattended-loop path. Tracked as build-plan
+  **Phase 34**; `skills/critique.md` gets a matching note once
+  Phase 34 lands.
+- source: `/oversight` 2026-07-10, synthesizing critique passes 5-11
 
 ### [x] [needs-user-call] Playwright MCP tools unavailable to sub-agents (pass 1-4; addressed at 525cd25 follow-up)
 - Root cause: two allowlist gaps, not a Playwright bug. (1)

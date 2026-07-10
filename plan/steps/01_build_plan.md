@@ -206,9 +206,15 @@ decision log (see each phase file).
       currency); Insight (STEADY THE HAND) out of scope (brief:
       `plan/phases/phase_16_reliquary_tutorial.md`) (mobile)
       — `feat(mobile): guided first-delve reliquary tutorial — phase 16` (95f67302)
-- [ ] Phase 17 — Quest Board ("The Boy's Almanac") first-session
+- [skipped] Phase 17 — Quest Board ("The Boy's Almanac") first-session
       tutorial (GAP-001 follow-up), mirroring the Rest/Gathering/Combat
-      tutorials (mobile)
+      tutorials (mobile) (skipped via /oversight 2026-07-10 — already
+      shipped-then-reverted once as premature (`375b141f`); a pending
+      CRITIQUE.md finding proposes redesigning the entire early game as
+      canned per-battle preset-deck tutorials, which would subsume or
+      reshape this scope. Drop rather than reship narrow; let the
+      early-game rethink go through `/iterate`/a design pass first, and
+      re-derive a quest-board tutorial phase from whatever that lands on.)
 
 **CLI verification guardrail (T-directed 2026-07-09):**
 
@@ -242,6 +248,91 @@ decision log (see each phase file).
       Part B: consolidate gains the terminology-sweep janitor mandate
       over `docs/lexicon.json` (harness; multi-file) — brief:
       `plan/phases/phase_25_consolidate_janitor.md`
+
+**Engagement-overhaul roadmap (promoted via `/oversight` 2026-07-10 —
+owner-ratified 2026-07-10, all four decision gates cleared; ship in
+order, intra-batch gates noted per phase):**
+
+- [ ] Phase 26 — The Turn Law (engine + tooling). One dice-turn per
+      threat phase becomes an engine invariant (`startTurn` refuses a
+      second tray; `resolveThreatPhase` resets); sim policies + auto
+      CLI rewritten to play legally; tooling fixes (auto-mode
+      transcripts, overkill-clamped attribution, `--stage` fields the
+      stage's enemy roster). Test-pinned; blocks every numeric tuning
+      decision repo-wide (mechanics) — source:
+      `plan/tuning/2026-07-10-turn-law-and-honest-baseline.md` §1-2
+- [ ] Phase 27 — Re-baseline (measurement). Full matrix re-run under
+      the Turn Law; re-derive curve bands vs. the locked
+      80/50/25-35/0 doctrine, KNOWN_CURVE_VIOLATORS, statusEngagement
+      by stage, signature damage share, dead-card rate; publish the
+      re-triage report. Every pre-2026-07-10 plan/tuning number gets
+      an asterisk until this lands. Gated on Phase 26 (mechanics) —
+      source: `plan/tuning/2026-07-10-turn-law-and-honest-baseline.md` §3
+- [ ] Phase 28 — Show the Engine (legibility sweep). Premise track +
+      CONCEDE beat, rupture fuel/cap preview, BACKFIRE attribution,
+      foretell picker, REPRISE songbook choice, wall-math readout,
+      Overtake gate/preview, lying-copy fixes, color-match bonus
+      fold-ins. Parallel-safe with Phase 26/27 (mobile + mechanics) —
+      source: `plan/tuning/2026-07-10-turn-texture.md` §4 +
+      `plan/tuning/2026-07-10-theme-identity.md` (per-theme S-tier UX)
+- [ ] Phase 29 — The Language (keyword registry). KW-1/KW-3 (fold 6
+      unmapped debuff ids, rename pass) ungated; KW-2/KW-6
+      (merge/retire + single-source registry with parity lints) and
+      KW-5/KW-7 (persistent-card keyword-reach lint, systems glossary)
+      follow; KW-4 (TICK killed entirely — owner-ratified 2026-07-10)
+      rides Phase 30 (mechanics + mobile) — source:
+      `plan/tuning/2026-07-10-keyword-registry.md`
+- [ ] Phase 30 — FREE Lines (70-card content pass). Rewrite every
+      FREE line to theme-currency verbs + FREE-currency lint +
+      pricing re-arithmetic. Shape ratified 2026-07-10: Option A
+      (constrain the fork) + weak-deposit `DRAW 1` kicker amendment;
+      TICK dies in the same pass (mechanics; content-sized;
+      `/deck-tuning` owns) — source:
+      `plan/tuning/2026-07-10-turn-texture.md` §1
+- [ ] Phase 31 — The Roll and the Read. Momentum wheel engine-native
+      (kills the host-side write; sims learn it), THE STAKE (pre-draft
+      Conviction wager on the hidden stance, paid in floats), signature
+      economy repriced against Phase 27 income. Momentum scope/naming
+      ratified 2026-07-10 (wheel global, keeps the name; hazard carry
+      + grace buff rename); repricing gated on Phase 27 (mechanics) —
+      source: `plan/tuning/2026-07-10-momentum-scoping.md` +
+      `plan/tuning/2026-07-10-out-of-flow-mechanics.md` §1 +
+      turn-law doc §4
+- [ ] Phase 32 — Theme Deep Work (sandbox-first, `/deck-tuning` owns).
+      One sub-phase per rework: harvest (REAP attacks max HP +
+      travelling Souls), bulwark (RIPOSTE reflects the prevented
+      blow), akrasia (DEBT ledger), then remaining per-theme M items.
+      Register -> A/B -> promote; re-run the ten-theme matrix after.
+      DoT-clock direction ratified 2026-07-10 (distinct triggers);
+      partially gated on Phase 30's FREE verbs (mechanics;
+      parallelizable per theme) — source:
+      `plan/tuning/2026-07-10-theme-identity.md` §2
+- [ ] Phase 33 — Enemy Answers (specs 29/30 slice + enemy
+      counterplay). One reactive verb engine-wide, lethality readout,
+      variable-rung telegraphs, CAUTERIZE/Premise-shed/SWAY-cleanse
+      enemies, THE COVETED DIE; GLYPHS pilot rides at the end as the
+      Option-B grammar experiment. Largest phase; gated on Phase 26
+      (numbers) but design-independent of the owner session
+      (mechanics) — source: `plan/tuning/2026-07-10-turn-texture.md` §3
+      + `plan/tuning/2026-07-10-theme-identity.md` §1 +
+      `plan/tuning/2026-07-10-out-of-flow-mechanics.md` §2
+
+**Critique infra (promoted via `/oversight` 2026-07-10):**
+
+- [ ] Phase 34 — Non-Playwright transport for unattended `/critique`.
+      8 consecutive `/critique` passes (of 11 total) have returned
+      zero product findings because the `playtester` sub-agent's
+      Playwright MCP tool grants don't propagate into Agent-tool
+      sub-agent contexts in unattended runs (see `plan/CRITIQUE.md`
+      Done section, "Playwright MCP tools unavailable to sub-agents").
+      Decision via `/oversight` 2026-07-10: stop retrying the grant
+      mechanism; give `/critique` a headless transport for unattended
+      ticks that doesn't route through the Agent-tool sandbox (e.g. a
+      standalone script driving the expo-web build directly with
+      Playwright, invoked as a subprocess rather than an MCP-gated
+      sub-agent). `playtester`/interactive `/critique` usage is
+      unaffected — this only covers the unattended-loop path
+      (harness; `skills/critique.md` + a new script under `scripts/`)
 
 > **After the queue drains:** `/march` transitions to `/iterate`
 > — draining `plan/AUDIT.md` + `plan/CRITIQUE.md`, doc-drift,

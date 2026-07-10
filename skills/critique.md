@@ -62,6 +62,20 @@ already covers every screen; critique is for *quality*.
 
 Skip screens that don't exist yet. Note in pass log.
 
+## 3.5 Known limitation (unattended ticks)
+
+The `playtester` sub-agent's Playwright MCP tool grants have not
+propagated into Agent-tool sub-agent contexts for 8 consecutive
+unattended passes (`plan/CRITIQUE.md` Done section — "Playwright MCP
+tools unavailable to sub-agents"). Decided via `/oversight`
+2026-07-10: build-plan **Phase 34** gives unattended `/critique`
+ticks a headless, non-Agent-tool transport instead of retrying the
+grant. Until Phase 34 ships, an unattended `/critique` invocation
+that gets the same "you haven't granted it yet" rejection on its
+first `playtester` call should log the occurrence in
+`plan/CRITIQUE.md` and exit — do not re-diagnose the grant mechanism
+again; that's closed.
+
 ## 4. Delegate to `playtester`
 
 The `playtester` sub-agent at `.claude/agents/playtester.md` is
