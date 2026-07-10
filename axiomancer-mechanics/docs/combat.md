@@ -465,7 +465,7 @@ detail in the card/card library files themselves, not duplicated here):
 - **No card deals direct damage — THE STRIKE IS DEAD (Spec 32 v3,
   2026-07-08).** `basePower` / `chipHp` were deleted from the `Card` schema
   entirely, not merely zeroed — a card carrying either field is now a
-  compile error. `calculateSkillDamage` is kept only for call-site
+  compile error. <!-- lexicon-ok: base-power, chip-hp --> `calculateSkillDamage` is kept only for call-site
   compatibility (sim policies / projections still call it) and
   unconditionally returns `0`. Every point of enemy HP now falls to DoT
   ticks, affliction-payoff bursts (RUPTURE / AMPLIFY / Conclusion), engine-

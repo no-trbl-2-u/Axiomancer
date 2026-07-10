@@ -344,7 +344,7 @@ next in 2–3 lines.
    files over 1 dense file.
 8. **Content stays in mechanics src/* + mobile *.copy.ts.** Data stays in
    `n/a (no data layer)`. No hardcoded copy/records in components.
-9. Axiomancer name capitalized; VITAE/STANCE copy canon; HP is sole win condition (never Pressure Tracks)
+9. Axiomancer name capitalized; VITAE/STANCE copy canon; HP is sole win condition (never Pressure Tracks) <!-- lexicon-ok: pressure-tracks -->
 10. **Phase issue mirror is best-effort, not gating.** If
     `loop-issue.mjs phase-open` fails, the phase still ships;
     log the stderr and continue. The mirror is a public timeline,

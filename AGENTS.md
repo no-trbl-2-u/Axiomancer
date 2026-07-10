@@ -1,5 +1,7 @@
 # Axiomancer monorepo — agent guide
 
+<!-- lexicon-ok: pressure-tracks -->
+
 npm-workspaces monorepo. Three packages, flat at the root:
 
 | Package | Role |
@@ -32,7 +34,6 @@ be verified against it before a PR lands:
 - `src/Combat/**`
 - `src/Cards/**`
 - `src/Effects/**`
-- `src/Skills/**`
 - `src/index.ts`
 - `src/World/LootCache/**`
 - `src/World/Gathering/**`

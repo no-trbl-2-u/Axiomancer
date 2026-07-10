@@ -1,0 +1,30 @@
+{
+  "__comment": "SINGLE SOURCE for retired Axiomancer terminology. scripts/check-lexicon.mjs (repo root) enforces this registry against every live prose surface in CI; docs/LEXICON.md is the human-readable mirror with the canonical-terms guide. To retire a concept: add a row here, run the lint, fix what it flags — that IS the cleanup. Patterns are JS regexes (case-sensitive unless the pattern says otherwise). Legitimate mentions of a retired term (e.g. 'basePower no longer exists') stay allowed via a file-level pragma: <!-- lexicon-ok: <id>, <id> -->. Files whose head carries '**Status:** HISTORICAL' are dated records and exempt entirely.",
+  "retired": [
+    {
+      "id": "src-skills-path",
+      "pattern": "src/Skills",
+      "replacement": "src/Cards/ — the combat-action data layer was renamed off the legacy 'skill' naming; genuine token abilities are the SignatureSkill family (Second Wind, signatures), a separate living concept",
+      "since": "2026-07 (PR #48 deleted the dead src/Skills/ ability system; see CHANGELOG 'De-conflation')",
+      "note": "'signature skill' remains canonical and is NOT retired; the AI-harness skills/ directory (loop verbs) is out of scope for this registry"
+    },
+    {
+      "id": "base-power",
+      "pattern": "\\bbasePower\\b",
+      "replacement": "(none — THE STRIKE IS DEAD; enemy HP falls only via DoT ticks, affliction payoffs RUPTURE/REAP, engine-gated drips, or reflect)",
+      "since": "2026-07-08 (spec 32 v3 strike purge at schema level)"
+    },
+    {
+      "id": "chip-hp",
+      "pattern": "\\bchipHp\\b",
+      "replacement": "(none — removed with the spec 32 v3 strike purge; no card or rider deals raw HP damage)",
+      "since": "2026-07-08 (spec 32 v3)"
+    },
+    {
+      "id": "pressure-tracks",
+      "pattern": "Pressure Tracks?",
+      "replacement": "the HP-only win model — status effects are the only way to drop enemy HP to 0; the two-track (DoT Erosion / Control Saturation) win-condition model was replaced 2026-06-22",
+      "since": "2026-06-22 (Hazard-Pattern Combat reconciliation)"
+    }
+  ]
+}

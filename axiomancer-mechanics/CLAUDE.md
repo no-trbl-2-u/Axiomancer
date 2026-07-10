@@ -1,5 +1,7 @@
 # CLAUDE.md
 
+<!-- lexicon-ok: base-power, chip-hp -->
+
 Canonical agent guidance lives in **`AGENTS.md`** and **`VISION.md`** (game
 doctrine). This file exists so the load-bearing doctrine is always in context.
 

@@ -1,5 +1,11 @@
 # Combat card + effect library audit — 2026-07-05
 
+> **Status:** HISTORICAL — point-in-time audit, 2026-07-05. Its findings
+> drove spec 31 and the spec 32 v3 strike purge (2026-07-08), so the
+> pre-purge fields and numbers below describe the engine AS AUDITED, not
+> the current schema. Current law: `specs/32-no-strike-card-library.md`
+> and `docs/combat.md`.
+
 > **Method:** ultracode workflow, 36 agents / ~2.9M tokens. Five parallel
 > auditors (card↔dice interaction, effect-library depth, number-mismatch bug
 > hunt, knowledge-base prior art, spec-doctrine alignment) → 27 critical/major

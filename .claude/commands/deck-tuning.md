@@ -132,6 +132,8 @@ The tunable surface is TIERED. Work from the freest tier inward:
   pricing lint (`src/Cards/e2e/pricing.engine.test.ts`) checks the sum
   against the printed rank's band. (`basePower`/`scalingMultiplier` were
   deleted with spec 32 v3 — raw damage fields no longer exist.)
+  <!-- lexicon-ok: base-power -->
+
 - **Propose-only — structure.** New `specialMechanics` kinds, new verb
   classes, changes to `toCombatCard` classification, `effectImpact`, or any
   engine path are propose-only. You MAY prototype a structural idea as a

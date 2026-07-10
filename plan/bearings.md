@@ -196,6 +196,7 @@ ambiguity.)
   playtest.
 - **Win condition:** HP is the sole win condition. Never
   reintroduce Pressure Tracks / `CombatPressureTracks`.
+  <!-- lexicon-ok: pressure-tracks -->
 - **Copy canon:** VITAE, STANCE. Never HEALTH / GUARD.
 - **Content location:** engine content in mechanics `src/*`
   libraries; player-facing strings in mobile presenters /
