@@ -217,6 +217,25 @@ decision log (see each phase file).
       `plan/phases/phase_22_cli_verify_gate.md`
       — `feat(mechanics): CLI verify-gate coverage — phase 22` (01a3d2ed)
 
+**Docs/harness integrity (T-directed 2026-07-10):**
+
+- [ ] Phase 24 — axio-query: MCP surface over the live engine data.
+      Zero-dep stdio MCP server (`scripts/axio-mcp-server.mjs`, sibling
+      of the KB's kb-mcp-server) exposing `axio_cards` / `axio_effects`
+      / `axio_keywords` / `axio_overview` from the `catalog:export`
+      JSON (regenerate-if-stale; read-only; accelerator-never-
+      dependency). Register in `.mcp.json` + settings allowlist; grant
+      to card-expert / mechanics-expert (both; harness) — brief:
+      `plan/phases/phase_24_axio_query.md`
+- [ ] Phase 25 — /consolidate memory curator + 2026-07-09 harness
+      re-apply. Part A: re-apply the harness work lost to the local
+      working-tree reset (consolidate verb + monthly workflow, runner
+      model/effort inputs + Opus-medium iterate, cross-package CI job,
+      deploy-check fail-closed, card-editor guards, small fixes).
+      Part B: consolidate gains the terminology-sweep janitor mandate
+      over `docs/lexicon.json` (harness; multi-file) — brief:
+      `plan/phases/phase_25_consolidate_janitor.md`
+
 > **After the queue drains:** `/march` transitions to `/iterate`
 > — draining `plan/AUDIT.md` + `plan/CRITIQUE.md`, doc-drift,
 > `as any` clusters, hex-literal -> AXM migration, a11y, and
