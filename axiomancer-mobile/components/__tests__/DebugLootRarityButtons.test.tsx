@@ -86,8 +86,7 @@ describe('DebugLootRarityButtons', () => {
         expect(text).toMatch(/\d+ mods?/);
     });
 
-    it('loots a unique relic and surfaces its modifier count', () => {
-        store.setState({ player: { ...store.getState().player, level: 30 } });
+    it('the unique button grants a relic (Phase 21 — no modifiers/rarity)', () => {
         const { getByTestId } = render(
             <GameStoreProvider store={store}>
                 <DebugLootRarityButtons />
@@ -100,10 +99,10 @@ describe('DebugLootRarityButtons', () => {
         expect(store.getState().player.inventory?.length ?? 0).toBe(before + 1);
         const text = getByTestId('debug-loot-rarity-feedback').props.children as string;
         expect(text).toContain('looted unique');
-        expect(text).toMatch(/3 mods/);
+        expect(text).toMatch(/0 mods/); // relics carry no rolled modifiers
     });
 
-    it('renders a graceful failure reason when no drop can be generated', () => {
+    it('grants a relic even at level 0 (no level gate after the procedural retire)', () => {
         store.setState({ player: { ...store.getState().player, level: 0 } });
         const { getByTestId } = render(
             <GameStoreProvider store={store}>
@@ -114,8 +113,7 @@ describe('DebugLootRarityButtons', () => {
         const before = store.getState().player.inventory?.length ?? 0;
         fireEvent.press(getByTestId('debug-loot-uncommon-button'));
 
-        expect(store.getState().player.inventory?.length ?? 0).toBe(before);
-        const text = getByTestId('debug-loot-rarity-feedback').props.children as string;
-        expect(text).toContain('level 0');
+        // Phase 21 — the grant always succeeds now; a relic is added.
+        expect(store.getState().player.inventory?.length ?? 0).toBe(before + 1);
     });
 });

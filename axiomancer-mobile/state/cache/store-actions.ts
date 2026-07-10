@@ -26,7 +26,7 @@ import {
 import type { CacheItemRef, LootCacheOutcomeTier, LootCacheSession } from '@mechanics';
 import { resolveMinigameSeed } from '../minigame-seeds';
 import { EMPTY_CACHE_SLICE, type AppStore } from '../store';
-import { rollCacheLoot, type CacheLootTier } from '@mechanics';
+import { rollCacheReward, type CacheLootTier } from '@mechanics';
 
 /** Flag prefix banking a keeper's keepsake. */
 export const CACHE_KEEPSAKE_FLAG_PREFIX = 'cache-keepsake:';
@@ -94,7 +94,7 @@ export function beginLootCacheAction(store: AppStore, options: BeginLootCacheOpt
         const lootTable = options.lootTable ?? (options.tutorial ? { tier: CACHE_TUTORIAL_TIER } : undefined);
         if (lootTable) {
             const playerLevel = (state as unknown as GameState).player?.level ?? 1;
-            items = rollCacheLoot({ playerLevel, seed, tier: lootTable.tier });
+            items = rollCacheReward({ playerLevel, seed, tier: lootTable.tier });
         }
     }
     const currency = options.currency ?? (options.tutorial ? CACHE_TUTORIAL_CURRENCY : 0);

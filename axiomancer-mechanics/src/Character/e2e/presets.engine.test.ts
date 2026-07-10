@@ -61,14 +61,13 @@ describe('buildCharacterFromPreset', () => {
         expect(player.level).toBe(8);
         expect(player.baseStats).toEqual({ heart: 5, body: 4, mind: 4 });
         expect(player.knownCards).toHaveLength(11); // spec 32 v3 recipe: 7 openers + 3 mid-tier + the synergy payoff
-        // Phase 19 — wears the relic loadout; the declared procedural gear is
-        // benched to inventory (unworn), not deleted.
+        // Phase 21 — the procedural library is retired; presets wear the relic
+        // loadout and carry NO procedural gear (only relics as equipment).
         expect(player.equipment.weapon?.id).toBe('relic-overwhelming');
         expect(player.equipment.armor?.id).toBe('relic-read');
-        const invIds = player.inventory.map(i => i.id);
-        expect(invIds).toContain('iron-blade');
-        expect(invIds).toContain('hide-vest');
-        expect(invIds).toContain('leather-cap');
+        const invEquipmentIds = player.inventory.filter(i => i.category === 'equipment').map(i => i.id);
+        expect(invEquipmentIds.every(id => id.startsWith('relic-'))).toBe(true);
+        expect(invEquipmentIds).not.toContain('iron-blade');
         expect(player.currency).toBe(25);
     });
 
@@ -82,10 +81,10 @@ describe('buildCharacterFromPreset', () => {
         // Phase 19 — wears the relic loadout; declared procedural gear benched.
         expect(player.equipment.weapon?.id).toBe('relic-overwhelming');
         expect(player.equipment.armor?.id).toBe('relic-read');
-        const invIds = player.inventory.map(i => i.id);
-        expect(invIds).toContain('steel-blade');
-        expect(invIds).toContain('chain-mail');
-        expect(invIds).toContain('chain-coif');
+        // Phase 21 — no procedural gear; only relics as equipment.
+        const invEquipmentIds = player.inventory.filter(i => i.category === 'equipment').map(i => i.id);
+        expect(invEquipmentIds.every(id => id.startsWith('relic-'))).toBe(true);
+        expect(invEquipmentIds).not.toContain('steel-blade');
         expect(player.currency).toBe(75);
     });
 

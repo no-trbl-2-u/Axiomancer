@@ -46,7 +46,7 @@ describe('DebugAddItemById', () => {
         );
 
         const before = store.getState().player.inventory?.length ?? 0;
-        fireEvent.changeText(getByTestId('debug-add-item-input'), 'steel-blade');
+        fireEvent.changeText(getByTestId('debug-add-item-input'), 'relic-read');
         fireEvent.press(getByTestId('debug-add-item-button'));
 
         expect((store.getState().player.inventory?.length ?? 0)).toBe(before + 1);

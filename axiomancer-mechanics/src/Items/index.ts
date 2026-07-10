@@ -20,32 +20,15 @@ export {
 } from './equipment.engine';
 export type { ConsumableUseResult } from './equipment.engine';
 export {
-    equipmentTemplates, getEquipmentTemplate, getTemplatesBySlot,
-} from './equipment.templates';
-export {
-    uniqueTemplates, getUniqueTemplate,
-} from './unique.templates';
-export {
     weaponModPool, headModPool, bodyModPool, handsModPool, feetModPool,
     accessoryModPool, armorModPool, uniqueModPool,
     MOD_POOLS, getModifierById, pickValueTier, allModifiers,
 } from './modifier.catalogue';
-export {
-    dropItem, rollModifiers, resolveModifiers, rarityWeightTable,
-    previewTemplateAtRarity, previewTemplateAtAllRarities,
-    dropItemWithAffixes,
-    dropItemAtRarity, AFFIXES_PER_RARITY, countNamedAffixes, hasBakedAffix,
-} from './item.factory';
-export type { DropWithAffixesOptions, AffixControl } from './item.factory';
-export {
-    equipmentFromTemplate,
-    rollCacheLoot, CACHE_LOOT_TUNING,
-    generateRarityDrop,
-} from './loot.generation';
-export type {
-    CacheLootTier, RollCacheLootOptions,
-    GenerateRarityDropOptions, GenerateRarityDropResult,
-} from './loot.generation';
+// Phase 21 — the procedural equipment library + factory are retired. Loot
+// caches yield consumables via `rollCacheReward` (relics are a fixed kit, not
+// loot). Modifier catalogue / affix library / item sets stay for phase 23.
+export { rollCacheReward, CACHE_REWARD_TUNING } from './cache-reward';
+export type { CacheLootTier, RollCacheRewardOptions } from './cache-reward';
 export {
     wornPerSlot, firstEquippedPerSlot, isEquippedFirstOfSlot, findEquippedInSlot,
 } from './equipped';

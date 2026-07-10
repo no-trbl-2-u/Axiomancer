@@ -1,3 +1,8 @@
+/**
+ * Phase 21 — the procedural equipment library + rarity/affix system are retired.
+ * The dev "loot rarity" buttons no longer roll rarity drops; each grants a signet
+ * relic (the only equipment). These tests pin the new behavior.
+ */
 import {
     lootRarityItem,
     lootCommonItemAction,
@@ -6,82 +11,38 @@ import {
     lootUniqueItemAction,
 } from '../loot-rarity';
 import { createAppStore } from '@/state/store';
-import type { Equipment } from '@mechanics';
+import { isEquipment } from '@mechanics';
 
-describe('loot-rarity dev helper', () => {
+describe('loot-rarity dev helper (Phase 21 — grants signet relics)', () => {
     let store: ReturnType<typeof createAppStore>;
 
     beforeEach(() => {
         store = createAppStore();
     });
 
-    it('loots a real common drop with exactly zero modifiers', () => {
+    it.each([
+        ['common', lootCommonItemAction],
+        ['uncommon', lootUncommonItemAction],
+        ['rare', lootRareItemAction],
+        ['unique', lootUniqueItemAction],
+    ] as const)('the %s button grants a signet relic (rarity is meaningless now)', (_label, action) => {
         const before = store.getState().player.inventory?.length ?? 0;
-        const result = lootCommonItemAction(store);
+        const result = action(store);
 
         expect(result.added).toBe(true);
-        expect(result.rarity).toBe('common');
         expect(result.name).toBeTruthy();
         expect(result.affixCount).toBe(0);
         expect(store.getState().player.inventory?.length ?? 0).toBe(before + 1);
-    });
-
-    it('loots a real uncommon drop with exactly one modifier', () => {
-        const before = store.getState().player.inventory?.length ?? 0;
-        const result = lootUncommonItemAction(store);
-
-        expect(result.added).toBe(true);
-        expect(result.rarity).toBe('uncommon');
-        expect(result.name).toBeTruthy();
-        expect(result.affixCount).toBe(1);
-        expect(store.getState().player.inventory?.length ?? 0).toBe(before + 1);
-    });
-
-    it('loots a real rare drop with exactly two modifiers', () => {
-        const before = store.getState().player.inventory?.length ?? 0;
-        const result = lootRareItemAction(store);
-
-        expect(result.added).toBe(true);
-        expect(result.rarity).toBe('rare');
-        expect(result.name).toBeTruthy();
-        expect(result.affixCount).toBe(2);
-        expect(store.getState().player.inventory?.length ?? 0).toBe(before + 1);
-    });
-
-    it('loots a unique relic with exactly three fixed modifiers', () => {
-        // Uniques gate behind a required level; lift the player so a
-        // relic is eligible.
-        store.setState({ player: { ...store.getState().player, level: 30 } });
-        const before = store.getState().player.inventory?.length ?? 0;
-        const result = lootUniqueItemAction(store);
-
-        expect(result.added).toBe(true);
-        expect(result.rarity).toBe('unique');
-        expect(result.name).toBeTruthy();
-        expect(result.affixCount).toBe(3);
-        expect(store.getState().player.inventory?.length ?? 0).toBe(before + 1);
         const inv = store.getState().player.inventory ?? [];
-        expect((inv[inv.length - 1] as Equipment).rarity).toBe('unique');
+        const last = inv[inv.length - 1];
+        expect(isEquipment(last) && last.id.startsWith('relic-')).toBe(true);
     });
 
-    it('adds the generated item at the requested engine rarity', () => {
-        lootRarityItem(store, 'rare');
-        const inv = store.getState().player.inventory ?? [];
-        const last = inv[inv.length - 1] as Equipment;
-        expect(last.rarity).toBe('rare');
-    });
-
-    it('returns a graceful failure when no base template is level-eligible', () => {
-        store.setState({
-            player: { ...store.getState().player, level: 0 },
-        });
+    it('adds a relic regardless of the requested rarity (no level gate)', () => {
+        store.setState({ player: { ...store.getState().player, level: 0 } });
         const before = store.getState().player.inventory?.length ?? 0;
-        const result = lootRarityItem(store, 'uncommon');
-
-        expect(result.added).toBe(false);
-        expect(result.name).toBeNull();
-        expect(result.affixCount).toBeNull();
-        expect(result.reason).toBeTruthy();
-        expect(store.getState().player.inventory?.length ?? 0).toBe(before);
+        const result = lootRarityItem(store, 'rare');
+        expect(result.added).toBe(true);
+        expect(store.getState().player.inventory?.length ?? 0).toBe(before + 1);
     });
 });

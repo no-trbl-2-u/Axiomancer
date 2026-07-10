@@ -17,7 +17,7 @@
 
 import {
     consumableLibrary,
-    equipmentTemplates,
+    relicLibrary,
     type Item,
     type NPC,
     type ShopWare,
@@ -29,7 +29,8 @@ import {
 import type { AppStoreState } from '@/state/store';
 
 const REAL_CONSUMABLE_ID = consumableLibrary[0]?.id;
-const REAL_TEMPLATE_ID = equipmentTemplates[0]?.id;
+// Phase 21 — equipment wares resolve to signet relics (the only equipment).
+const REAL_TEMPLATE_ID = relicLibrary[0]?.id;
 
 type VillageState = Pick<AppStoreState, 'event' | 'player'>;
 
@@ -104,7 +105,7 @@ describe('resolveWareItem', () => {
         expect(item!.id).toBe(REAL_CONSUMABLE_ID);
     });
 
-    it('resolves a ware id against the equipment templates', () => {
+    it('resolves an equipment ware id against the signet relics', () => {
         expect(REAL_TEMPLATE_ID).toBeDefined();
         const item = resolveWareItem({ itemId: REAL_TEMPLATE_ID!, price: 5 });
         expect(item).not.toBeNull();

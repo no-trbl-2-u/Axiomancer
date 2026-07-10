@@ -16,11 +16,10 @@
 
 import React, { useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
-import { getTemplatesBySlot } from '@mechanics';
+import { relicLibrary } from '@mechanics';
 
 import { isDevToolsEnabled } from '@/lib/buildProfile';
 import { useGameStore } from '@/state/GameStoreProvider';
-import { equipmentFromTemplate as templateToEquipment } from '@mechanics';
 import { FONTS } from '@/theme/axm';
 import { makeStyles } from '@/theme/runtime';
 
@@ -56,16 +55,14 @@ export function DebugPlaythroughPresets() {
         // Set to high-level with maxed progression and equipment
         const currentState = store.getState();
         
-        // Create endgame equipment inventory by taking the first available item for each slot kind
+        // Phase 21 — the only equipment is the 8 signet relics; seed one per
+        // slot kind (weapon / armor / accessory) for the endgame inventory.
         const endgameInventory = [];
         const slots = ['weapon', 'armor', 'accessory'] as const;
 
         for (const slot of slots) {
-            const templates = getTemplatesBySlot(slot);
-            if (templates.length > 0) {
-                // Take the first available equipment for each slot
-                endgameInventory.push(templateToEquipment(templates[0]));
-            }
+            const relic = relicLibrary.find(r => r.slot === slot);
+            if (relic) endgameInventory.push({ ...relic });
         }
         
         store.setState({

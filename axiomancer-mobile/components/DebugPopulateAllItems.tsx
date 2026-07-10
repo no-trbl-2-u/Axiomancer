@@ -43,9 +43,9 @@ export function DebugPopulateAllItems() {
 
     const onPress = () => {
         const result = actions.populateAllItems();
-        const { equipment, unique, consumable } = result.breakdown;
+        const { equipment, consumable } = result.breakdown;
         setLastResult(
-            `populated · ${result.itemsAdded} total · ${equipment} eq / ${unique} uniq / ${consumable} cons`,
+            `populated · ${result.itemsAdded} total · ${equipment} relics / ${consumable} cons`,
         );
     };
 
@@ -55,14 +55,14 @@ export function DebugPopulateAllItems() {
                 <Text style={styles.label}>DEBUG · POPULATE</Text>
                 <Text style={styles.sub} testID="debug-populate-sub">
                     {lastResult ??
-                        'common/base + unique registry gear + consumables · uncommon/rare via LOOT buttons'}
+                        'the 8 signet relics + every consumable · relics are the only equipment now'}
                 </Text>
             </View>
             <Pressable
                 style={styles.button}
                 onPress={onPress}
                 accessibilityRole="button"
-                accessibilityLabel="Populate inventory with registry gear: common/base equipment, unique relics, and consumables"
+                accessibilityLabel="Populate inventory with the 8 signet relics and every consumable"
                 testID="debug-populate-all-items"
             >
                 <Text style={styles.buttonLabel}>POPULATE</Text>

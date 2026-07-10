@@ -15,14 +15,12 @@
 
 import {
     getConsumableById,
-    getEquipmentTemplate,
-    getUniqueTemplate,
+    getRelicById,
 } from '@mechanics';
 
 import type { AppStore } from '@/state/store';
-import { equipmentFromTemplate as templateToEquipment } from '@mechanics';
 
-export type AddItemByIdKind = 'equipment' | 'unique' | 'consumable';
+export type AddItemByIdKind = 'equipment' | 'consumable';
 
 export interface AddItemByIdResult {
     added: boolean;
@@ -62,27 +60,15 @@ export function addItemByIdAction(
     try {
         const addItem = store.getState().addItem;
 
-        const equipmentTemplate = getEquipmentTemplate(id);
-        if (equipmentTemplate) {
-            addItem(templateToEquipment(equipmentTemplate));
+        // Phase 21 — the only equipment is the 8 signet relics (resolve by id).
+        const relic = getRelicById(id);
+        if (relic) {
+            addItem({ ...relic });
             return {
                 added: true,
                 id,
                 kind: 'equipment',
-                name: equipmentTemplate.name,
-                reason: null,
-            };
-        }
-
-        const uniqueTemplate = getUniqueTemplate(id);
-        if (uniqueTemplate) {
-            const base = templateToEquipment(uniqueTemplate);
-            addItem({ ...base, rarity: 'unique' });
-            return {
-                added: true,
-                id,
-                kind: 'unique',
-                name: uniqueTemplate.name,
+                name: relic.name,
                 reason: null,
             };
         }

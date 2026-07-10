@@ -103,27 +103,16 @@ describe('applyPlayerTierPreset: L1/L15/L30/L50 ladder', () => {
 });
 
 describe('addItemById: registry resolution', () => {
-    it('adds an equipment template by id', () => {
+    it('adds a signet relic by id (Phase 21 — relics are the only equipment)', () => {
         const { store, actions } = makeStore();
         const before = store.getState().player.inventory?.length ?? 0;
 
-        const result = actions.addItemById('steel-blade');
+        const result = actions.addItemById('relic-read');
 
         expect(result.added).toBe(true);
         expect(result.kind).toBe('equipment');
         expect(result.name).toBeTruthy();
         expect((store.getState().player.inventory?.length ?? 0)).toBe(before + 1);
-    });
-
-    it('adds a unique template by id, tagged unique', () => {
-        const { store, actions } = makeStore();
-
-        const result = actions.addItemById('axioms-edge');
-
-        expect(result.added).toBe(true);
-        expect(result.kind).toBe('unique');
-        const last = store.getState().player.inventory?.slice(-1)[0] as { rarity?: string };
-        expect(last?.rarity).toBe('unique');
     });
 
     it('adds a consumable by id', () => {
@@ -138,10 +127,10 @@ describe('addItemById: registry resolution', () => {
     it('trims surrounding whitespace before lookup', () => {
         const { store, actions } = makeStore();
 
-        const result = actions.addItemById('  iron-blade  ');
+        const result = actions.addItemById('  relic-read  ');
 
         expect(result.added).toBe(true);
-        expect(result.id).toBe('iron-blade');
+        expect(result.id).toBe('relic-read');
         expect(result.kind).toBe('equipment');
     });
 

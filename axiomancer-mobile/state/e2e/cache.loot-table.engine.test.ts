@@ -92,9 +92,9 @@ describe('cache loot-table reward depth', () => {
 
         const after = store.getState() as unknown as GameState;
         expect(after.player.inventory.length).toBe(beforeInv + result.itemsAdded);
-        // The rolled items are real equipment with engine-resolved rarity.
+        // Phase 21 — the Reliquary yields consumables (procedural equipment is retired).
         const added = after.player.inventory.slice(beforeInv);
-        expect(added.every((i) => i.category === 'equipment')).toBe(true);
+        expect(added.every((i) => i.category === 'consumable')).toBe(true);
     });
 
     it('honours explicit authored items over the loot table', () => {
@@ -123,11 +123,21 @@ describe('cache loot-table reward depth', () => {
         expect(allLoot).toHaveLength(1);
     });
 
-    it('falls back to a currency-only cache when level gates out all gear', () => {
+    it('yields consumables at any level (Phase 21 — no level gate on the reward roll)', () => {
         const { store, actions } = makeStoreAndActions();
         setLevel(store, 0);
 
         actions.beginLootCache({ lootTable: { tier: 'modest' }, currency: 8, seed: 5 });
+        const allLoot = session(store).layers.flatMap((l) => l.loot.items);
+        // The consumable reward roll is level-agnostic — a modest cache still
+        // yields 1–2 consumables even at level 0.
+        expect(allLoot.length).toBeGreaterThan(0);
+    });
+
+    it('is currency-only when no loot table is requested', () => {
+        const { store, actions } = makeStoreAndActions();
+        setLevel(store, 10);
+        actions.beginLootCache({ currency: 8, seed: 5 });
         const allLoot = session(store).layers.flatMap((l) => l.loot.items);
         expect(allLoot).toHaveLength(0);
     });

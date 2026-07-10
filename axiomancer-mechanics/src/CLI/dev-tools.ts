@@ -3,8 +3,7 @@ import { getEquippedItems } from '../Character/equipment.reducer';
 import type { BaseStats } from '../Character/types';
 import type { EquipmentSlot } from '../Items/types';
 import type { ItemRarity } from '../Items/types';
-import { dropItem } from '../Items/item.factory';
-import { equipmentTemplates } from '../Items/equipment.templates';
+import { relicLibrary, getRelicById } from '../Items/relic.library';
 import { consumableLibrary } from '../Items/consumable.library';
 import { cardLibrary } from '../Cards/cards.library';
 import { ENEMY_REGISTRY, EnemySlug } from '../Enemy/enemy.library';
@@ -97,17 +96,16 @@ export function devUnlockCards(store: Store, cardIds: string[] | 'all'): DevResu
     return { ok: true, detail: `${ids.length} card(s) unlocked (total known: ${known.size})` };
 }
 
-export function devGrantAllEquipment(store: Store, rarity: ItemRarity = 'common'): DevResult {
+export function devGrantAllEquipment(store: Store, _rarity: ItemRarity = 'common'): DevResult {
+    // Phase 21 — the procedural library is retired; the only equipment is the 8
+    // signet relics. Grant a fresh clone of each (rarity is meaningless now).
     const state = store.getState();
-    const level = state.player.level;
-    const eligible = equipmentTemplates.filter(t => t.requiredLevel <= level);
     let count = 0;
-    for (const t of eligible) {
-        const item = dropItem(t.id, level, rarity);
-        state.addItem(item);
+    for (const relic of relicLibrary) {
+        state.addItem({ ...relic });
         count++;
     }
-    return { ok: true, detail: `Granted ${count} equipment pieces at ${rarity} rarity` };
+    return { ok: true, detail: `Granted ${count} signet relics` };
 }
 
 export function devGrantAllConsumables(store: Store, quantity = 5): DevResult {
@@ -120,11 +118,12 @@ export function devGrantAllConsumables(store: Store, quantity = 5): DevResult {
     return { ok: true, detail: `Granted ${count} consumable types (×${quantity} each)` };
 }
 
-export function devEquipItem(store: Store, templateId: string, slot: EquipmentSlot, rarity: ItemRarity = 'common'): DevResult {
-    const state = store.getState();
-    const item = dropItem(templateId, state.player.level, rarity);
-    state.equipItem(item);
-    return { ok: true, detail: `Equipped ${templateId} (${rarity}) in ${slot}` };
+export function devEquipItem(store: Store, templateId: string, slot: EquipmentSlot, _rarity: ItemRarity = 'common'): DevResult {
+    // Phase 21 — equipment ids resolve to signet relics (the only equipment).
+    const relic = getRelicById(templateId);
+    if (!relic) return { ok: false, detail: `Unknown relic id: ${templateId}` };
+    store.getState().equipItem({ ...relic });
+    return { ok: true, detail: `Equipped ${templateId} in ${slot}` };
 }
 
 export function devGrantCurrency(store: Store, amount: number): DevResult {
@@ -179,5 +178,6 @@ export function getCardIds(): string[] {
 }
 
 export function getEquipmentTemplateIds(): string[] {
-    return equipmentTemplates.map(t => t.id);
+    // Phase 21 — the "equipment templates" are now the 8 signet relics.
+    return relicLibrary.map(r => r.id);
 }

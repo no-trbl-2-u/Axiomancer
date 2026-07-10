@@ -16,10 +16,9 @@ import { describe, expect, it } from '@jest/globals';
 import { fireEvent, render } from '@testing-library/react-native';
 import {
     consumableLibrary,
-    equipmentTemplates,
     isConsumable,
     isEquipment,
-    uniqueTemplates,
+    relicLibrary,
 } from '@mechanics';
 import React from 'react';
 
@@ -66,22 +65,16 @@ describe('DebugPopulateAllItems: press routing', () => {
         fireEvent.press(tree.getByTestId('debug-populate-all-items'));
 
         const inventoryAfter = store.getState().player.inventory ?? [];
-        // Total count matches the sum of the three registries.
-        const expected =
-            equipmentTemplates.length + uniqueTemplates.length + consumableLibrary.length;
+        // Phase 21 — "every item" is the 8 signet relics + every consumable.
+        const expected = relicLibrary.length + consumableLibrary.length;
         expect(inventoryAfter.length - inventoryBefore).toBe(expected);
 
-        // Inventory contains at least one of each category — pins the
-        // "every registry" intent, not just "items grew".
+        // Inventory contains at least one of each surviving category.
         expect(inventoryAfter.some(isEquipment)).toBe(true);
         expect(inventoryAfter.some(isConsumable)).toBe(true);
-        // Unique-marker check: at least one equipment carries
-        // `rarity: 'unique'` (the action overrides per-unique).
-        const uniques = inventoryAfter.filter(
-            (item): item is import('@mechanics').Equipment =>
-                isEquipment(item) && item.rarity === 'unique',
-        );
-        expect(uniques.length).toBeGreaterThan(0);
+        // Every equipment item is a signet relic (no more uniques/procedural gear).
+        const equipmentItems = inventoryAfter.filter(isEquipment);
+        expect(equipmentItems.every(e => e.id.startsWith('relic-'))).toBe(true);
     });
 
     it('updates the visible result line with a populated · breakdown summary', () => {
@@ -91,19 +84,16 @@ describe('DebugPopulateAllItems: press routing', () => {
         fireEvent.press(tree.getByTestId('debug-populate-all-items'));
 
         const text = JSON.stringify(tree.toJSON());
-        expect(text).toMatch(/populated · \d+ total · \d+ eq \/ \d+ uniq \/ \d+ cons/);
+        expect(text).toMatch(/populated · \d+ total · \d+ relics \/ \d+ cons/);
     });
 
-    it('static copy is honest about rarity: registry gear only, not uncommon/rare static dump', () => {
+    it('static copy is honest: the signet relics + consumables (no procedural gear)', () => {
         const store = makeStore();
         const tree = render(withProvider(store, <DebugPopulateAllItems />));
         const sub = tree.getByTestId('debug-populate-sub').props.children as string;
-        // No longer claims to dump "every item in the game".
         expect(sub).not.toMatch(/every item in the game/i);
-        // Truthfully scopes to registry content + points at the loot buttons.
-        expect(sub).toMatch(/common\/base/i);
-        expect(sub).toMatch(/unique/i);
-        expect(sub).toMatch(/LOOT/);
+        expect(sub).toMatch(/relic/i);
+        expect(sub).toMatch(/consumable/i);
     });
 
     it('a second tap is non-destructive — never throws', () => {

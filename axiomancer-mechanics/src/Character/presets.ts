@@ -18,9 +18,8 @@
 
 import { Character, BaseStats } from './types';
 import { createCharacter } from './index';
-import { dropItem } from '../Items/item.factory';
 import { consumableLibrary } from '../Items/consumable.library';
-import type { Equipment, Item } from '../Items/types';
+import type { Item } from '../Items/types';
 
 export interface CharacterPresetEquipmentEntry {
     /**
@@ -257,10 +256,7 @@ export function getPresetById(id: string): CharacterPreset | undefined {
 
 // ─── Builder ──────────────────────────────────────────────────────────────────
 
-export function buildCharacterFromPreset(
-    preset: CharacterPreset,
-    rng: () => number = Math.random,
-): Character {
+export function buildCharacterFromPreset(preset: CharacterPreset): Character {
     const consumables: Item[] = preset.consumables.map(({ id, quantity }) => {
         const source = consumableLibrary.find(c => c.id === id);
         if (!source) {
@@ -269,22 +265,17 @@ export function buildCharacterFromPreset(
         return { ...source, quantity };
     });
 
-    // Phase 19 — presets no longer WEAR procedural gear (it would compete with
-    // the signet relics for the same 5 slots). The declared `preset.equipment`
-    // pieces are still dropped and kept in inventory (nothing is lost), but the
-    // worn loadout is the fixed 8-relic default seeded by `createCharacter`.
-    // Preset combat numbers shift (their procedural stat sticks are unworn) —
-    // that is a phase-21 tuning follow-up, not a dual loadout.
-    const dropped: Equipment[] = preset.equipment.map(
-        entry => dropItem(entry.templateId, preset.level, 'common', rng),
-    );
-
+    // Phase 21 — the procedural equipment library + factory are retired. The
+    // declared `preset.equipment` template entries no longer resolve to anything
+    // (there is no more procedural gear), so presets carry only their consumables
+    // and wear the fixed 8-relic default loadout seeded by `createCharacter`. The
+    // `equipment` field is retained on the recipe as vestigial metadata.
     return createCharacter({
         name: preset.name,
         level: preset.level,
         baseStats: preset.baseStats,
         currency: preset.currency,
-        inventory: [...consumables, ...dropped],
+        inventory: consumables,
         seedStartingRelics: true,
         knownCards: preset.knownCards,
     });

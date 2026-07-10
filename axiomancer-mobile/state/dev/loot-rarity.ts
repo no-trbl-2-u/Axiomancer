@@ -19,7 +19,7 @@
  * this.
  */
 
-import { generateRarityDrop, type Equipment, type ItemRarity } from '@mechanics';
+import { relicLibrary, type Equipment, type ItemRarity } from '@mechanics';
 
 import type { AppStore } from '@/state/store';
 
@@ -58,28 +58,26 @@ export function lootRarityItem(store: AppStore, rarity: LootRarity): LootRarityR
     try {
         const state = store.getState();
         const addItem = state.addItem;
-        const playerLevel = state.player?.level ?? 1;
 
-        const drop = generateRarityDrop(rarity, { playerLevel });
-        if (drop.item === null) {
-            return { added: false, rarity, name: null, affixCount: null, reason: drop.reason };
+        // Phase 21 — the procedural equipment library is retired. There are no
+        // rarity drops any more; this dev button now grants a signet relic (the
+        // only equipment), rotating through the 8 by inventory length.
+        if (relicLibrary.length === 0) {
+            return { added: false, rarity, name: null, affixCount: null, reason: 'no relics available' };
         }
-
-        const instancedItem: Equipment = {
-            ...drop.item,
-            id: instanceId(drop.item, store, rarity),
-        };
+        const base = relicLibrary[state.player.inventory.length % relicLibrary.length];
+        const instancedItem: Equipment = { ...base, id: instanceId(base, store, rarity) };
         addItem(instancedItem);
         return {
             added: true,
             rarity,
-            name: instancedItem.name,
-            affixCount: drop.affixCount,
+            name: base.name,
+            affixCount: 0,
             reason: null,
         };
     } catch (error) {
-        console.error(`Failed to loot ${rarity} item:`, error);
-        return { added: false, rarity, name: null, affixCount: null, reason: 'loot failed — see console' };
+        console.error(`Failed to grant a relic (${rarity} button):`, error);
+        return { added: false, rarity, name: null, affixCount: null, reason: 'grant failed — see console' };
     }
 }
 

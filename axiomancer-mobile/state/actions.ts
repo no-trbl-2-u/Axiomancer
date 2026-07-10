@@ -24,15 +24,13 @@ import {
     changeMap as worldChangeMap,
     completeNode as worldCompleteNode,
     consumableLibrary,
-    equipmentTemplates,
-    uniqueTemplates,
+    relicLibrary,
     createMapState,
     equipItem as engineEquipItem,
     unequipItem as engineUnequipItem,
     wornPerSlot,
     SLOT_CAPACITY,
     getDialogueNode,
-    getTemplatesBySlot,
     getMapDefinition,
     getNodePrimaryEventKind,
     getPresetById,
@@ -69,7 +67,6 @@ import {
     getCombatCardById,
     cardEffectText,
 } from '@/state/selectors/combat-cards';
-import { equipmentFromTemplate as templateToEquipment } from '@mechanics';
 import { resolveWareItem } from '@/state/presenters/village.engine';
 import {
     applyCombatDeckPresetAction,
@@ -1405,23 +1402,20 @@ function debugSeedAction(store: AppStore): DebugSeedResult {
             console.warn('Failed to add consumable item:', error);
         }
 
-        // 2. One equipment per slot kind (weapon / armor / accessory). The
-        //    inventory dock and equip-replace preview both key off slot,
-        //    so covering all three kinds gives a meaningful smoke test. The
-        //    slot list is typed by engine `EquipmentSlot` so an engine
-        //    rename is a tsc error; templates are pulled via the engine's
-        //    `getTemplatesBySlot` rather than a local `equipmentTemplates`
-        //    scan, so new templates per slot pick the first available.
+        // 2. One relic per slot kind (weapon / armor / accessory). Phase 21 —
+        //    the only equipment is the 8 signet relics; grant the first of each
+        //    slot kind so the inventory dock + equip-replace preview have a
+        //    piece to render for every slot.
         const seedSlots: ReadonlyArray<EquipmentSlot> = ['weapon', 'armor', 'accessory'];
         for (const slot of seedSlots) {
             try {
-                const tpl = getTemplatesBySlot(slot)[0];
-                if (tpl) {
-                    addItem(templateToEquipment(tpl));
+                const relic = relicLibrary.find(r => r.slot === slot);
+                if (relic) {
+                    addItem({ ...relic });
                     itemsAdded++;
                 }
             } catch (error) {
-                console.warn(`Failed to add equipment for slot ${slot}:`, error);
+                console.warn(`Failed to add relic for slot ${slot}:`, error);
             }
         }
 
@@ -1506,34 +1500,21 @@ function debugSeedAction(store: AppStore): DebugSeedResult {
  */
 function populateAllItemsAction(store: AppStore): PopulateAllItemsResult {
     let equipment = 0;
-    let unique = 0;
+    const unique = 0; // Phase 21 — uniques retired; kept in the breakdown as 0.
     let consumable = 0;
 
     try {
         const state = store.getState();
         const addItem = state.addItem;
 
-        // Add equipment templates with error handling
-        for (const tpl of equipmentTemplates) {
+        // Phase 21 — the procedural equipment library is retired; "every item"
+        // equipment is now the 8 signet relics. Uniques no longer exist.
+        for (const relic of relicLibrary) {
             try {
-                addItem(templateToEquipment(tpl));
+                addItem({ ...relic });
                 equipment++;
             } catch (error) {
-                console.warn(`Failed to add equipment template ${tpl.name}:`, error);
-            }
-        }
-
-        // Uniques share the EquipmentTemplate shape (UniqueItemTemplate
-        // extends it) so `templateToEquipment` works, but the helper
-        // hard-codes `rarity: 'common'`. Override per-item so the
-        // inventory chrome surfaces the unique rarity correctly.
-        for (const tpl of uniqueTemplates) {
-            try {
-                const base = templateToEquipment(tpl);
-                addItem({ ...base, rarity: 'unique' });
-                unique++;
-            } catch (error) {
-                console.warn(`Failed to add unique template ${tpl.name}:`, error);
+                console.warn(`Failed to add relic ${relic.name}:`, error);
             }
         }
 

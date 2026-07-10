@@ -62,8 +62,12 @@ import { STARTING_CARD_IDS } from '../Combat/combat.rewards';
  *   worn, displaced gear + other 3 relics to inventory) so loaded saves derive a
  *   full signature kit from the worn loadout instead of the retired archetype
  *   kit; recompute derivedStats/maxHealth (see `game.migrate.ts`).
+ * Phase 21 — bumped 13 → 14: the procedural equipment library is retired, so
+ *   purge every non-relic `Equipment` from the loadout + inventory (relics are
+ *   the only equipment that survives); backfill any stripped loadout slot with
+ *   the default relic (see `game.migrate.ts`).
  */
-export const GAME_STATE_VERSION = 13;
+export const GAME_STATE_VERSION = 14;
 
 /** Builds a brand-new GameState with default player and world. */
 export function createNewGameState(): GameState {

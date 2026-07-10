@@ -236,10 +236,10 @@ describe('Phase 70 — King of Revenge boss-tier friendshipReward (full Phase 60
         const report = store.getState().endCombat('friendship');
         expect(report.outcome).toBe('friendship');
 
-        // Items thread — boss-tier reward includes the Paradox Loop unique
-        // + two consumables (healing-potion + heart-draught).
+        // Items thread — Phase 21 retired procedural equipment; the boss-tier
+        // friendship reward is now consumables only (healing-potion + heart-draught).
         const lootIds = report.loot.map(i => i.id);
-        expect(lootIds).toContain('paradox-loop');
+        expect(lootIds).not.toContain('paradox-loop');
         expect(lootIds).toContain('healing-potion');
         expect(lootIds).toContain('heart-draught');
 

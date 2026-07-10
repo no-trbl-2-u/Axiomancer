@@ -37,9 +37,11 @@ function v12Save(): Record<string, unknown> {
     };
 }
 
+// Pin toVersion=13 to exercise the Phase-19 hop in isolation; the Phase-21
+// v13→v14 purge is covered in its own block below.
 describe('migrate v12 → v13 — seed the signet relics', () => {
     it('seeds the default 5-relic loadout onto a v12 save', () => {
-        const migrated = migrate(v12Save(), 12);
+        const migrated = migrate(v12Save(), 12, 13);
         expect(migrated.version).toBe(13);
         expect(migrated.player.equipment.weapon?.id).toBe('relic-overwhelming');
         expect(migrated.player.equipment.armor?.id).toBe('relic-read');
@@ -47,8 +49,8 @@ describe('migrate v12 → v13 — seed the signet relics', () => {
     });
 
     it('displaces the old worn gear to inventory and adds the 3 benched relics', () => {
-        const invIds = migrate(v12Save(), 12).player.inventory.map(i => i.id);
-        expect(invIds).toContain('old-sword'); // nothing lost
+        const invIds = migrate(v12Save(), 12, 13).player.inventory.map(i => i.id);
+        expect(invIds).toContain('old-sword'); // nothing lost at v13
         expect(invIds).toContain('relic-conclusion');
         expect(invIds).toContain('relic-second-wind');
         expect(invIds).toContain('relic-press-the-point');
@@ -58,13 +60,13 @@ describe('migrate v12 → v13 — seed the signet relics', () => {
         const raw = v12Save();
         const player = raw.player as { level: number; baseStats: { heart: number; body: number; mind: number } };
         const base = calculateMaxHealth(player.level, player.baseStats);
-        const migrated = migrate(raw, 12);
+        const migrated = migrate(raw, 12, 13);
         expect(migrated.player.maxHealth).toBe(base + 5);
         expect(migrated.player.health).toBeLessThanOrEqual(migrated.player.maxHealth);
     });
 
     it('the migrated player derives a full 5-signature kit from the worn loadout', () => {
-        const migrated = migrate(v12Save(), 12);
+        const migrated = migrate(v12Save(), 12, 13);
         expect(getSignaturesForLoadout(migrated.player.equipment)).toEqual([
             'sig-overwhelming-argument', 'sig-read-opponent',
             'sig-conviction-strike', 'sig-clever-gambit', 'sig-disarming-plea',
@@ -73,5 +75,47 @@ describe('migrate v12 → v13 — seed the signet relics', () => {
 
     it('still rejects an unsupported (pre-v11) version', () => {
         expect(() => migrate({ version: 9 }, 9)).toThrow(/not supported/);
+    });
+});
+
+// Phase 21 — v13 → v14 purges non-relic equipment.
+describe('migrate v13 → v14 — purge non-relic equipment', () => {
+    it('strips the old procedural weapon (worn + inventory) and keeps only relics as equipment', () => {
+        // A v12 save chained all the way to current (v14): the old sword parked in
+        // inventory at v13 is stripped at v14; only relic equipment survives.
+        const migrated = migrate(v12Save(), 12);
+        expect(migrated.version).toBe(14);
+        const equipmentIds = migrated.player.inventory
+            .filter((i): i is typeof i => (i as { category?: string }).category === 'equipment')
+            .map(i => i.id);
+        expect(equipmentIds).not.toContain('old-sword');
+        expect(equipmentIds.every(id => id.startsWith('relic-'))).toBe(true);
+        // The worn loadout is relics and still derives a full signature kit.
+        expect(migrated.player.equipment.weapon?.id).toBe('relic-overwhelming');
+        expect(getSignaturesForLoadout(migrated.player.equipment)).toHaveLength(5);
+    });
+
+    it('backfills a loadout slot that held procedural gear with the default relic', () => {
+        // A hand-built v13 save whose loadout still wears the old sword (edge case).
+        const fresh = createNewGameState();
+        const base = calculateMaxHealth(fresh.player.level, fresh.player.baseStats);
+        const v13 = {
+            ...fresh,
+            version: 13,
+            player: {
+                ...fresh.player,
+                equipment: { weapon: oldSword, armor: null, accessories: [] },
+                inventory: [oldSword],
+                maxHealth: base,
+                health: base,
+            },
+        };
+        const migrated = migrate(v13, 13);
+        expect(migrated.version).toBe(14);
+        // The procedural weapon slot is backfilled with the default weapon relic.
+        expect(migrated.player.equipment.weapon?.id).toBe('relic-overwhelming');
+        expect(migrated.player.equipment.armor?.id).toBe('relic-read');
+        expect(migrated.player.equipment.accessories).toHaveLength(3);
+        expect(migrated.player.inventory.map(i => i.id)).not.toContain('old-sword');
     });
 });

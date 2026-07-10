@@ -5,10 +5,11 @@
  * dropped 2026-07-08 (legacy cleanup) because there were no shipped saves to
  * preserve; a save at an unsupported version is rejected so the caller starts a
  * fresh game. The equipment-signature epic (phases 18-21) re-introduces a short
- * targeted chain: v11 → v12 (Phase 18, re-slot equipment to the 5-slot model)
- * and v12 → v13 (Phase 19, seed the signet relics). The hops chain, so a v11
- * save lands at v13 in one `migrate` call. Every other version mismatch still
- * rejects.
+ * targeted chain: v11 → v12 (Phase 18, re-slot equipment to the 5-slot model),
+ * v12 → v13 (Phase 19, seed the signet relics), and v13 → v14 (Phase 21, purge
+ * non-relic equipment now that the procedural library is retired). The hops
+ * chain, so a v11 save lands at v14 in one `migrate` call. Every other version
+ * mismatch still rejects.
  */
 
 import { GameState } from './types';
@@ -110,6 +111,62 @@ function migrateV12ToV13(raw: Record<string, unknown>): Record<string, unknown> 
 }
 
 /**
+ * v13 → v14 (Phase 21): the procedural equipment library + factory are retired,
+ * so any non-relic `Equipment` in a save is unresolvable dead data. Strip every
+ * non-relic equipment from the loadout and inventory (relics are the only
+ * equipment that survives); if a loadout slot held procedural gear, backfill it
+ * with the default relic for that slot so combat never begins signature-short.
+ * Consumables/materials/quest items are untouched. Pure over a raw save payload.
+ */
+function migrateV13ToV14(raw: Record<string, unknown>): Record<string, unknown> {
+    const player = raw.player as (Partial<Character> & {
+        equipment?: EquipmentLoadout;
+        inventory?: Item[];
+    }) | undefined;
+    if (!player || typeof player !== 'object' || player.baseStats == null || typeof player.level !== 'number') {
+        return { ...raw, version: 14 };
+    }
+
+    const isRelic = (e: Equipment): boolean =>
+        typeof e.grantsSignature === 'string' || e.id.startsWith('relic-');
+
+    // Strip non-relic equipment from inventory (keep consumables/materials/quest
+    // items and the relic equipment).
+    const inventory: Item[] = (Array.isArray(player.inventory) ? player.inventory : [])
+        .filter(it => !isEquipment(it) || isRelic(it));
+
+    // Rebuild the loadout: keep worn relics, replace any non-relic worn piece
+    // with the default relic for that slot, and backfill the accessory row to 3.
+    const { worn: defaults } = cloneStartingRelics();
+    const loadout = player.equipment;
+    const weapon = loadout?.weapon && isRelic(loadout.weapon)
+        ? loadout.weapon : defaults.find(r => r.slot === 'weapon')!;
+    const armor = loadout?.armor && isRelic(loadout.armor)
+        ? loadout.armor : defaults.find(r => r.slot === 'armor')!;
+    const accessories: Equipment[] = (loadout?.accessories ?? []).filter(isRelic).slice(0, 3);
+    for (const d of defaults.filter(r => r.slot === 'accessory')) {
+        if (accessories.length >= 3) break;
+        if (!accessories.some(a => a.id === d.id)) accessories.push(d);
+    }
+    const relicLoadout: EquipmentLoadout = { weapon, armor, accessories };
+
+    const baseMaxHealth = calculateMaxHealth(player.level, player.baseStats);
+    const nextMaxHealth = baseMaxHealth + wornMaxHpBonus(relicLoadout);
+    const priorHealth = typeof player.health === 'number' ? player.health : nextMaxHealth;
+
+    const migratedPlayer: Character = {
+        ...(player as Character),
+        equipment: relicLoadout,
+        inventory,
+        derivedStats: recomputeDerivedStats(player.baseStats, getEquipmentModifiers(relicLoadout)),
+        maxHealth: nextMaxHealth,
+        health: Math.max(0, Math.min(priorHealth, nextMaxHealth)),
+    };
+
+    return { ...raw, player: migratedPlayer, version: 14 };
+}
+
+/**
  * Narrow a raw save payload to the current `GameState`. Only the current
  * version is accepted; any other version throws (the caller resets to a new
  * game). The name/signature is kept so the persistence layer's call site is
@@ -143,6 +200,10 @@ export function migrate(
     if (version === 12 && toVersion >= 13) {
         working = migrateV12ToV13(working);
         version = 13;
+    }
+    if (version === 13 && toVersion >= 14) {
+        working = migrateV13ToV14(working);
+        version = 14;
     }
 
     if (version !== toVersion) {

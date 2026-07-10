@@ -16,11 +16,10 @@
 import {
     consumableLibrary,
     defaultSellPrice,
-    equipmentTemplates,
+    getRelicById,
     type Item,
     type ShopWare,
 } from '@mechanics';
-import { equipmentFromTemplate as templateToEquipment } from '@mechanics';
 import type { AppStoreState } from '@/state/store';
 
 export interface VillageMerchantVM {
@@ -79,8 +78,11 @@ const EMPTY_VM: VillageVM = Object.freeze({
 export function resolveWareItem(ware: ShopWare): Item | null {
     const consumable = consumableLibrary.find(c => c.id === ware.itemId);
     if (consumable) return consumable;
-    const template = equipmentTemplates.find(t => t.id === ware.itemId);
-    if (template) return templateToEquipment(template);
+    // Phase 21 — the procedural equipment library is retired; a shop selling
+    // equipment sells a signet relic by fixed id (no rarity roll). Unknown ids
+    // (e.g. a dead procedural template) resolve to null and drop from the stall.
+    const relic = getRelicById(ware.itemId);
+    if (relic) return { ...relic };
     return null;
 }
 

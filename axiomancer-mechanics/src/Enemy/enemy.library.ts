@@ -44,7 +44,6 @@
 import { createEnemy, enemyStatBudget } from './index';
 import { LootTableEntry } from './types';
 import { consumableLibrary, getConsumableById } from '../Items/consumable.library';
-import { dropItem } from '../Items/item.factory';
 import { Consumable } from '../Items/types';
 import { getCardById } from '../Cards/cards.library';
 import type { Card } from '../Cards/types';
@@ -549,8 +548,9 @@ export const KingOfRevenge = createEnemy({
         roundsThreshold: 1,
     },
     friendshipReward: {
+        // Phase 21 — procedural equipment retired; friendship rewards are
+        // consumables/currency (relics are a fixed starting kit, not loot).
         items: [
-            dropItem('paradox-loop', 15, 'unique', () => 0.5),
             { ...getConsumableById('healing-potion')! },
             { ...getConsumableById('heart-draught')! },
         ],
@@ -1556,8 +1556,8 @@ export const Rangda = createEnemy({
         roundsThreshold: 8,
     },
     friendshipReward: {
+        // Phase 21 — procedural equipment retired (consumables/currency only).
         items: [
-            dropItem('paradox-loop', 44, 'unique', () => 0.5),
             { ...getConsumableById('phoenix-tear')! },
             { ...getConsumableById('revive-crystal')! },
         ],

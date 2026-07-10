@@ -27,29 +27,15 @@ describe('addItemByIdAction dev helper', () => {
         expect(result.reason).toBe('enter an item id');
     });
 
-    it('resolves an equipment template id and adds it', () => {
+    it('resolves a signet relic id and adds it (Phase 21 — relics are the only equipment)', () => {
         const before = store.getState().player.inventory?.length ?? 0;
-        const result = addItemByIdAction(store, 'iron-blade');
+        const result = addItemByIdAction(store, 'relic-overwhelming');
 
         expect(result.added).toBe(true);
         expect(result.kind).toBe('equipment');
         expect(result.name).toBeTruthy();
         expect(result.reason).toBeNull();
         expect(store.getState().player.inventory?.length ?? 0).toBe(before + 1);
-    });
-
-    it('resolves a unique template id and tags the added item rarity unique', () => {
-        const before = store.getState().player.inventory?.length ?? 0;
-        const result = addItemByIdAction(store, 'axioms-edge');
-
-        expect(result.added).toBe(true);
-        expect(result.kind).toBe('unique');
-        expect(result.name).toBeTruthy();
-
-        const inventory = store.getState().player.inventory ?? [];
-        expect(inventory.length).toBe(before + 1);
-        const added = inventory[inventory.length - 1];
-        expect((added as { rarity?: string }).rarity).toBe('unique');
     });
 
     it('resolves a consumable id and adds it', () => {
@@ -63,10 +49,10 @@ describe('addItemByIdAction dev helper', () => {
     });
 
     it('trims surrounding whitespace before resolving a real id', () => {
-        const result = addItemByIdAction(store, '  iron-blade  ');
+        const result = addItemByIdAction(store, '  relic-overwhelming  ');
 
         expect(result.added).toBe(true);
-        expect(result.id).toBe('iron-blade');
+        expect(result.id).toBe('relic-overwhelming');
         expect(result.kind).toBe('equipment');
     });
 

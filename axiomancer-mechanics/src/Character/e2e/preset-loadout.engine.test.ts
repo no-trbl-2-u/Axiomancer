@@ -13,11 +13,10 @@ import { getEquippedItems } from '../equipment.reducer';
 import { SLOT_CAPACITY, isEquipment } from '../../Items/types';
 
 const allPresets = [...characterPresets, ...levelLadderPresets];
-const seeded = () => { let s = 1; return () => { s = (s * 1103515245 + 12345) & 0x7fffffff; return s / 0x7fffffff; }; };
 
-describe('Phase 18 — preset loadouts', () => {
+describe('Phase 18 — preset loadouts (Phase 21: relics are the only equipment)', () => {
     it.each(allPresets.map(p => [p.id, p] as const))('%s builds a legal loadout', (_id, preset) => {
-        const c = buildCharacterFromPreset(preset, seeded());
+        const c = buildCharacterFromPreset(preset);
         const l = c.equipment;
         expect(l.accessories.length).toBeLessThanOrEqual(SLOT_CAPACITY.accessory);
         expect(getEquippedItems(l).length).toBeLessThanOrEqual(5);
@@ -27,12 +26,14 @@ describe('Phase 18 — preset loadouts', () => {
         if (l.armor) expect(l.armor.slot).toBe('armor');
     });
 
-    it('overflow gear seeds the inventory (L50 ladder wears 5, benches the rest)', () => {
+    it('every preset wears the 5 default relics and owns all 8 (no procedural gear)', () => {
         const l50 = levelLadderPresets.find(p => p.id === 'kid-l50')!;
-        const c = buildCharacterFromPreset(l50, seeded());
-        // 7 declared pieces → 5 worn, 2 benched among the inventory equipment.
+        const c = buildCharacterFromPreset(l50);
         expect(getEquippedItems(c.equipment).length).toBe(5);
-        const benchedEquipment = c.inventory.filter(isEquipment);
-        expect(benchedEquipment.length).toBeGreaterThanOrEqual(2);
+        // The only inventory equipment is the 8 signet relics (worn-first per the
+        // phase-19 convention); no procedural gear survives.
+        const invEquipment = c.inventory.filter(isEquipment);
+        expect(invEquipment).toHaveLength(8);
+        expect(invEquipment.every(e => e.id.startsWith('relic-'))).toBe(true);
     });
 });
