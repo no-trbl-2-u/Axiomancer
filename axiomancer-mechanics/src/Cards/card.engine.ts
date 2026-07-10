@@ -25,7 +25,6 @@ import { incrementFriendship } from '../Combat/combat.reducer';
 import { isBefriendAttemptEligible } from '../Combat/index';
 import { Combatant, CombatState, Stance } from '../Combat/types';
 import { RESOURCE_GENERATION } from '../Game/game-mechanics.constants';
-import { applyEquipmentGenerationBonus } from '../Items/equipment.engine';
 import { applySetGenerationBonus } from '../Items/set.engine';
 import {
     CombatResources, Card, CardCategory, CardCombatEffects,
@@ -62,11 +61,10 @@ export function generateBasicActionResources(
       :                        RESOURCE_GENERATION.ATTACK_MISS;
     const base: CombatResources = { ...resources, [stance]: resources[stance] + amount };
     if (!equipment) return base;
-    // Apply per-item generation bonuses first, then per-set bonuses on top.
-    // Both share the same `EquipmentBonusOutcome` semantics and the same ≥0
-    // clamp per counter (Spec 05e Q2 — additive, no cap).
-    const withItemBonuses = applyEquipmentGenerationBonus(base, equipment, outcome);
-    return applySetGenerationBonus(withItemBonuses, equipment, outcome);
+    // Phase 20 — individual equipment no longer contributes generation bonuses
+    // (equipment is stat-only). Item-SET generation bonuses still apply (sets are
+    // a separate surface, torn down later).
+    return applySetGenerationBonus(base, equipment, outcome);
 }
 
 /**

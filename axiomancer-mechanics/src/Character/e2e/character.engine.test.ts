@@ -194,14 +194,10 @@ describe('createCharacter — Spec 05 Q3 starting equipment fold-in', () => {
         expect(ch.equipment.armor?.id).toBe('test-armor-flat-body');
     });
 
-    it('applies a passive equipment effect as a permanent ActiveEffect with sourceId = item.id', () => {
+    it('Phase 20 — a passiveEffects item applies NO ActiveEffect (equipment is stat-only)', () => {
         mockSequentialRng(0.5);
         const ch = buildPlayer({ equipment: [armorWithPassive()] });
-        const passive = ch.effects.find(e => e.sourceId === 'test-armor-with-passive');
-        expect(passive).toBeDefined();
-        expect(passive?.effectId).toBe('buff_regeneration');
-        expect(passive?.remainingDuration).toBe(-1);
-        expect(passive?.intensity).toBe(1);
+        expect(ch.effects.some(e => e.sourceId === 'test-armor-with-passive')).toBe(false);
     });
 });
 
@@ -222,18 +218,18 @@ describe('equipItem — slot replacement', () => {
         expect(start.derivedStats.physicalAttack).toBe(5 * STAT_MULTIPLIERS.ATTACK);
     });
 
-    it('strips the prior occupant`s passive effects but keeps unrelated effects', () => {
+    it('Phase 20 — equipping/swapping never adds equipment effects and leaves unrelated effects untouched', () => {
         const prior = armorWithPassive();
         const replacement = armorFlatBody();
         mockSequentialRng(0.5);
         const start = buildPlayer({ equipment: [prior] });
-        expect(start.effects.some(e => e.sourceId === prior.id)).toBe(true);
+        // The passive item added no effect in the first place.
+        expect(start.effects.some(e => e.sourceId === prior.id)).toBe(false);
 
-        // Inject an unrelated combat effect that should survive the swap.
+        // Inject an unrelated combat effect that must survive the swap untouched.
         const seeded = {
             ...start,
             effects: [
-                ...start.effects,
                 {
                     effectId: 'debuff_mark',
                     remainingDuration: 5,
@@ -246,6 +242,7 @@ describe('equipItem — slot replacement', () => {
         };
 
         const next = equipItem(seeded, replacement);
+        // Equip doesn't touch Character.effects at all now.
         expect(next.effects.some(e => e.sourceId === prior.id)).toBe(false);
         expect(next.effects.some(e => e.sourceId === 'other-source')).toBe(true);
     });
@@ -258,10 +255,10 @@ describe('unequipItem', () => {
         expect(unequipItem(ch, 'armor')).toBe(ch);
     });
 
-    it('removes the slot, restores derivedStats, and clears its passive effects', () => {
+    it('removes the slot and restores derivedStats (equipment never added effects — Phase 20)', () => {
         mockSequentialRng(0.5);
         const start = buildPlayer({ equipment: [armorWithPassive()] });
-        expect(start.effects.some(e => e.sourceId === 'test-armor-with-passive')).toBe(true);
+        expect(start.effects.some(e => e.sourceId === 'test-armor-with-passive')).toBe(false);
 
         const stripped = unequipItem(start, 'armor');
         expect(stripped.equipment.armor).toBeNull();

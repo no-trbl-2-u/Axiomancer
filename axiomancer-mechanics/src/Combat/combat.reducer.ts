@@ -16,7 +16,6 @@
 import { Character } from '../Character/types';
 import { Enemy } from '../Enemy/types';
 import { deepClone } from '../Utils';
-import { aggregateCombatStartTokens } from '../Items/equipment.engine';
 import { aggregateSetStartTokens, getActiveSetPassiveEffectIds } from '../Items/set.engine';
 import { lookupEffect } from '../Effects';
 import type { ActiveEffect } from '../Effects/types';
@@ -27,24 +26,20 @@ import { CombatState } from './types';
  * Builds a fresh CombatState. Combatants are deep-cloned so combat
  * mutations don't bleed back into the canonical player/enemy.
  *
- * Per Spec 05, the per-combat resource counters are NOT unconditionally
- * zeroed — they are seeded from the sum of every equipped item's
- * `resourceInteraction.combatStartTokens`. Items without a
- * `resourceInteraction` contribute zero, so the default behaviour (no
- * equipment) is unchanged. Today only the player's equipment seeds tokens;
- * enemies pre-Spec 07 do not carry equipment.
+ * Phase 20 — equipment is decoupled from effects: individual equipment no
+ * longer seeds combat-start tokens. Item-SET start tokens still apply (sets are
+ * a separate surface, torn down later). Items contribute nothing here beyond
+ * their `statModifiers` (folded into `derivedStats` at equip-time).
  */
 export function initializeCombat(player: Character, enemy: Enemy): CombatState {
     const equipment = player.equipment;
-    const itemTokens = aggregateCombatStartTokens(equipment);
     const setTokens = aggregateSetStartTokens(equipment);
-    // Sum per-item + per-set start tokens additively (Spec 05e Q2 — no cap).
     const seeded: CombatResources = {
-        heart:    itemTokens.heart    + setTokens.heart,
-        body:     itemTokens.body     + setTokens.body,
-        mind:     itemTokens.mind     + setTokens.mind,
-        fallacy:  itemTokens.fallacy  + setTokens.fallacy,
-        paradox:  itemTokens.paradox  + setTokens.paradox,
+        heart:    setTokens.heart,
+        body:     setTokens.body,
+        mind:     setTokens.mind,
+        fallacy:  setTokens.fallacy,
+        paradox:  setTokens.paradox,
     };
 
     // Apply set-bonus passive effects as combat-LIFETIME ActiveEffects

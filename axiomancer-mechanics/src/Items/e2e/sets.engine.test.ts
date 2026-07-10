@@ -6,7 +6,8 @@
  *      SetBonus with combatStartTokens.heart === 2.
  *   2. Only sandals equipped → getActiveSetBonuses returns empty.
  *   3. initializeCombat with Wanderer's Road 2-piece + a per-item +1
- *      heart token grant → combatResources.heart === 3 (1 item + 2 set).
+ *      heart token grant → combatResources.heart === 2 (set only; the
+ *      per-item token is inert after the Phase-20 equipment/effect decouple).
  *   4. 3-piece Iron Discipline equipped → both the 2-piece statModifier
  *      bonus AND the 3-piece generationBonus are active simultaneously.
  *   5. Overlapping membership — leather-cap + items from two different
@@ -186,7 +187,7 @@ describe('Phase 54 — aggregateSetStartTokens + applySetGenerationBonus', () =>
 });
 
 describe('Phase 54 — initializeCombat seeds set tokens additively', () => {
-    it('Wanderer\'s Road 2-piece + a per-item +1 heart token yields combatResources.heart === 3', () => {
+    it('Wanderer\'s Road 2-piece seeds 2 heart; a per-item +1 heart token is now inert (Phase 20)', () => {
         // Equip Wanderer's Road members; add an accessory with a per-item heart grant.
         const heartAccessory: Equipment = {
             id: 'eq_heart_token',
@@ -206,9 +207,10 @@ describe('Phase 54 — initializeCombat seeds set tokens additively', () => {
         };
 
         const state = initializeCombat(player, FloatEye);
-        // 2 (set) + 1 (item) = 3.
-        expect(state.combatResources.heart).toBe(3);
-        // Other resources stay at the equipment/set baseline (all zero here).
+        // Phase 20 — individual equipment tokens are decoupled; only the SET
+        // 2-piece bonus seeds tokens now: 2 (set) + 0 (item, inert) = 2.
+        expect(state.combatResources.heart).toBe(2);
+        // Other resources stay at the set baseline (all zero here).
         expect(state.combatResources.body).toBe(0);
         expect(state.combatResources.mind).toBe(0);
     });

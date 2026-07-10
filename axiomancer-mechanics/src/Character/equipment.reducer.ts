@@ -10,20 +10,18 @@
  *   *at equip-time*. We recompute `derivedStats` from `baseStats` (+ equipment
  *   modifiers) on every equip / unequip, mirroring `deriveStats` so the math
  *   stays in one place.
- * - Equipment `passiveEffects` are pushed into `Character.effects` as
- *   permanent `ActiveEffect`s (`remainingDuration: -1`). The `sourceId` is
- *   set to the item's `id` so `unequipItem` can remove exactly those entries.
- *   Per Spec 05 Q5 they never tick and disappear when the item is removed.
- * - Equipment `onHitEffects` / `onDefendEffects` are consumed by the combat
- *   resolver (Spec 05 Q6 option A — they share the Spec 03 proc roll) and are
- *   not modelled as `ActiveEffect`s on the character.
+ * - Phase 20 — equipment is DECOUPLED FROM EFFECTS. Equipping/unequipping no
+ *   longer applies `passiveEffects` (or any effect) to `Character.effects`, and
+ *   nothing reads an item's `onHitEffects` / `onDefendEffects` / `combatStartTokens`
+ *   / `generationBonus` any more. `statModifiers` (incl. the phase-19 `maxHp`)
+ *   is the SOLE channel from equipment to the character. The now-inert effect
+ *   fields stay on the `Equipment` type until the phase-23 teardown.
  */
 
 import { Character, BaseStats, DerivedStats, EquipmentLoadout } from './types';
 import { Equipment, EquipmentSlot, SLOT_CAPACITY } from '../Items/types';
-import { ActiveEffect, StatModifier } from '../Effects/types';
+import { StatModifier } from '../Effects/types';
 import { Stance } from '../Combat/types';
-import { lookupEffect } from '../Effects/effects.library';
 import { deriveStats } from '../Utils';
 
 /**
@@ -118,47 +116,6 @@ export function recomputeDerivedStats(
 }
 
 /**
- * Pushes the equipment's `passiveEffects` onto the character's `effects`
- * array as permanent (`remainingDuration: -1`) ActiveEffects, tagging each
- * with `sourceId = item.id` so `unequipItem` can later remove exactly those
- * entries. Unknown effect IDs are skipped silently.
- */
-function applyPassiveEffects(
-    effects: ActiveEffect[],
-    item: Equipment,
-): ActiveEffect[] {
-    if (!item.passiveEffects || item.passiveEffects.length === 0) return effects;
-    const additions: ActiveEffect[] = [];
-    for (const effectId of item.passiveEffects) {
-        const def = lookupEffect(effectId);
-        if (!def) continue;
-        additions.push({
-            effectId,
-            remainingDuration: -1,
-            intensity:         1,
-            appliedAt:         0,
-            tier:              def.tier,
-            resistedBy:        def.resistedBy,
-            resistDR:          def.resistDR,
-            sourceId:          item.id,
-        });
-    }
-    return [...effects, ...additions];
-}
-
-/**
- * Removes every passive `ActiveEffect` whose `sourceId` matches the unequipped
- * item's `id`. Active effects from other sources (other equipment, ongoing
- * combat) are preserved.
- */
-function removePassiveEffects(
-    effects: ActiveEffect[],
-    itemId: string,
-): ActiveEffect[] {
-    return effects.filter(ae => ae.sourceId !== itemId);
-}
-
-/**
  * Summed worn `maxHp` bonus (Phase 19). The two armor relics carry a flat
  * `{ stat: 'maxHp' }` modifier; it is folded onto `Character.maxHealth` here,
  * NOT into `DerivedStats` (which has no HP field — `recomputeDerivedStats`
@@ -170,22 +127,20 @@ export function wornMaxHpBonus(loadout: EquipmentLoadout): number {
 }
 
 /**
- * Rebuilds a `Character` around a new loadout: recomputes `derivedStats`, folds
- * the worn `maxHp` delta onto `maxHealth` (growing/clamping current `health` by
- * the same delta, mirroring the stat-allocation HP convention), and swaps the
- * displaced piece's passives out (`displacedId`) / applies the newly-worn item's
- * passives (`applied`). Shared tail for equip/unequip.
+ * Rebuilds a `Character` around a new loadout: recomputes `derivedStats` and
+ * folds the worn `maxHp` delta onto `maxHealth` (growing/clamping current
+ * `health` by the same delta, mirroring the stat-allocation HP convention).
+ * Shared tail for equip/unequip.
+ *
+ * Phase 20 — equipment is decoupled from effects: equipping/unequipping no
+ * longer touches `Character.effects` (no `passiveEffects` are applied or
+ * removed). `statModifiers` (incl. the phase-19 `maxHp`) is the SOLE channel
+ * from equipment to the character.
  */
 function withLoadout(
     character: Character,
     nextLoadout: EquipmentLoadout,
-    displacedId: string | null,
-    applied: Equipment | null,
 ): Character {
-    let nextEffects = character.effects;
-    if (displacedId) nextEffects = removePassiveEffects(nextEffects, displacedId);
-    if (applied)     nextEffects = applyPassiveEffects(nextEffects, applied);
-
     const mods = getEquipmentModifiers(nextLoadout);
     const nextDerived = recomputeDerivedStats(character.baseStats, mods);
 
@@ -203,7 +158,6 @@ function withLoadout(
         derivedStats: nextDerived,
         maxHealth:    nextMaxHealth,
         health:       nextHealth,
-        effects:      nextEffects,
     };
 }
 
@@ -229,26 +183,25 @@ export function equipItem(
     const slot = item.slot;
 
     if (slot === 'weapon') {
-        return withLoadout(character, { ...loadout, weapon: item }, loadout.weapon?.id ?? null, item);
+        return withLoadout(character, { ...loadout, weapon: item });
     }
     if (slot === 'armor') {
-        return withLoadout(character, { ...loadout, armor: item }, loadout.armor?.id ?? null, item);
+        return withLoadout(character, { ...loadout, armor: item });
     }
 
     // accessory
     const acc = loadout.accessories;
     if (acc.length < SLOT_CAPACITY.accessory) {
-        return withLoadout(character, { ...loadout, accessories: [...acc, item] }, null, item);
+        return withLoadout(character, { ...loadout, accessories: [...acc, item] });
     }
     // Full row: honour an explicit replaceIndex, otherwise guarded no-op.
     const idx = opts?.replaceIndex;
     if (idx === undefined || !Number.isInteger(idx) || idx < 0 || idx >= acc.length) {
         return character;
     }
-    const displaced = acc[idx];
     const nextAcc = acc.slice();
     nextAcc[idx] = item;
-    return withLoadout(character, { ...loadout, accessories: nextAcc }, displaced.id, item);
+    return withLoadout(character, { ...loadout, accessories: nextAcc });
 }
 
 /**
@@ -267,11 +220,11 @@ export function unequipItem(
 
     if (slot === 'weapon') {
         if (!loadout.weapon) return character;
-        return withLoadout(character, { ...loadout, weapon: null }, loadout.weapon.id, null);
+        return withLoadout(character, { ...loadout, weapon: null });
     }
     if (slot === 'armor') {
         if (!loadout.armor) return character;
-        return withLoadout(character, { ...loadout, armor: null }, loadout.armor.id, null);
+        return withLoadout(character, { ...loadout, armor: null });
     }
 
     // accessory
@@ -279,10 +232,9 @@ export function unequipItem(
     if (index === undefined || !Number.isInteger(index) || index < 0 || index >= acc.length) {
         return character;
     }
-    const removed = acc[index];
     const nextAcc = acc.slice();
     nextAcc.splice(index, 1);
-    return withLoadout(character, { ...loadout, accessories: nextAcc }, removed.id, null);
+    return withLoadout(character, { ...loadout, accessories: nextAcc });
 }
 
 /**

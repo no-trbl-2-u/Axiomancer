@@ -163,25 +163,19 @@ describe('equipItem / unequipItem', () => {
         expect(unequipped.derivedStats.physicalDefense).toBe(9);
     });
 
-    it('pushes passiveEffects as permanent ActiveEffects sourced to the item, and removes them on unequip', () => {
+    it('Phase 20 — equipping a passiveEffects item applies NO ActiveEffect (equipment is stat-only)', () => {
         const player = buildPlayer();
         expect(player.effects).toHaveLength(0);
 
         const equipped = equipItem(player, passiveCirclet);
-        expect(equipped.effects).toHaveLength(1);
-        const active = equipped.effects[0];
-        expect(active.effectId).toBe('buff_regeneration');
-        expect(active.remainingDuration).toBe(-1);
-        expect(active.sourceId).toBe(passiveCirclet.id);
+        // Equipment no longer pushes passiveEffects onto Character.effects.
+        expect(equipped.effects).toHaveLength(0);
 
         const unequipped = unequipItem(equipped, 'accessory', 0);
         expect(unequipped.effects).toHaveLength(0);
     });
 
-    it('replacing an item in a slot drops the previous item\'s passive effects and statModifiers', () => {
-        // Weapon is a single-capacity slot: equipping a second weapon replaces
-        // the first in place (Phase 18), the direct analog of the pre-Phase-18
-        // per-slot replace this test asserts.
+    it('Phase 20 — replacing an item swaps its statModifiers but touches no effects', () => {
         const player = buildPlayer();
         const passiveWeapon: Equipment = {
             id:             'eq_passive_weapon',
@@ -192,22 +186,24 @@ describe('equipItem / unequipItem', () => {
             rarity:         'common',
             requiredLevel:  1,
             passiveEffects: ['buff_regeneration'],
+            statModifiers:  [{ stat: 'body', value: 2 }],
         };
         const withWeapon = equipItem(player, passiveWeapon);
-        expect(withWeapon.effects).toHaveLength(1);
+        expect(withWeapon.effects).toHaveLength(0);          // no passive applied
+        expect(withWeapon.derivedStats.physicalAttack).toBe(5); // +2 body (3→5) still folds in
 
         const replacementWeapon: Equipment = {
             ...passiveWeapon,
             id:             'eq_other_weapon',
             passiveEffects: ['buff_haste'],
+            statModifiers:  [],
         };
         const replaced = equipItem(withWeapon, replacementWeapon);
-        expect(replaced.effects).toHaveLength(1);
-        expect(replaced.effects[0]!.effectId).toBe('buff_haste');
-        expect(replaced.effects[0]!.sourceId).toBe('eq_other_weapon');
+        expect(replaced.effects).toHaveLength(0);            // still no effects
+        expect(replaced.derivedStats.physicalAttack).toBe(3); // prior +2 body reverted
     });
 
-    it('createCharacter accepts a starting equipment list and applies it via equipItem', () => {
+    it('createCharacter accepts a starting equipment list and folds stats but applies no effects', () => {
         const player = createCharacter({
             name: 'Equipped',
             level: 1,
@@ -215,7 +211,8 @@ describe('equipItem / unequipItem', () => {
             equipment: [ironWeapon, passiveCirclet],
         });
         expect(player.derivedStats.physicalAttack).toBe(6);
-        expect(player.effects.some(e => e.sourceId === passiveCirclet.id)).toBe(true);
+        // Phase 20 — the passive circlet contributes stats only, no ActiveEffect.
+        expect(player.effects).toHaveLength(0);
     });
 });
 
@@ -224,16 +221,17 @@ describe('equipItem / unequipItem', () => {
 // ────────────────────────────────────────────────────────────────────────────
 
 describe('initializeCombat: combat-start token seeding', () => {
-    it('seeds combatResources from each equipped item\'s combatStartTokens', () => {
+    it('Phase 20 — equipment combatStartTokens no longer seed combatResources (decoupled)', () => {
         const player = createCharacter({
             name: 'Seeded',
             level: 1,
             baseStats: { heart: 4, body: 3, mind: 2 },
-            equipment: [berserkerBand],
+            equipment: [berserkerBand], // carries combatStartTokens: { body: 3 }
         });
         const state = initializeCombat(player, FloatEye);
+        // Individual equipment contributes nothing to the token economy now.
         expect(state.combatResources).toEqual({
-            heart: 0, body: 3, mind: 0, fallacy: 0, paradox: 0,
+            heart: 0, body: 0, mind: 0, fallacy: 0, paradox: 0,
         });
     });
 
@@ -280,13 +278,13 @@ describe('initializeCombat: combat-start token seeding', () => {
 // ────────────────────────────────────────────────────────────────────────────
 
 describe('generateBasicActionResources: equipment generation bonus', () => {
-    it('applies matching generationBonus entries on top of the base table', () => {
-        const equipment = toLoadout([berserkerBand]);
+    it('Phase 20 — equipment generationBonus no longer applies over the base table (decoupled)', () => {
+        const equipment = toLoadout([berserkerBand]); // carries a +2 body-on-hit generationBonus
         const base = { heart: 0, body: 0, mind: 0, fallacy: 0, paradox: 0 };
-        // body attack hit base = +3 body; bonus = +2 body on hit → 5
+        // body attack hit base = +3 body; the equipment bonus is NOT applied → 3
         const hit = generateBasicActionResources(base, 'body', 'hit', equipment);
-        expect(hit.body).toBe(5);
-        // body attack miss base = +1 body; no bonus for miss → 1
+        expect(hit.body).toBe(3);
+        // body attack miss base = +1 body → 1
         const miss = generateBasicActionResources(base, 'body', 'miss', equipment);
         expect(miss.body).toBe(1);
     });
@@ -401,7 +399,7 @@ describe('Game store lifecycle: equipment & consumables with nullAdapter', () =>
         expect(store.getState().player.inventory).toEqual(player.inventory);
     });
 
-    it('a Berserker Band wearer\'s combat starts with non-zero body tokens', () => {
+    it('Phase 20 — a Berserker Band wearer\'s combat starts with ZERO body tokens (equipment decoupled)', () => {
         mockSequentialRng(0.5);
         const player = createCharacter({
             name: 'Equipped',
@@ -409,9 +407,8 @@ describe('Game store lifecycle: equipment & consumables with nullAdapter', () =>
             baseStats: { heart: 4, body: 3, mind: 2 },
             equipment: [berserkerBand],
         });
-        // Combat is decoupled from the store now; build the CombatState
-        // directly to inspect the combat-start token seeding.
         const combat = initializeCombat(player, FloatEye);
-        expect(combat.combatResources.body).toBe(3);
+        // Equipment no longer seeds combat-start tokens — the band's body: 3 is inert.
+        expect(combat.combatResources.body).toBe(0);
     });
 });

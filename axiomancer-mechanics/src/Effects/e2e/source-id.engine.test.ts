@@ -180,8 +180,8 @@ describe('Phase 38 — sourceId round-trips through JSON serialization (save/loa
     });
 });
 
-describe('Phase 38 — regression: equipment passives keep sourceId === item.id', () => {
-    it('equipping an item that grants a passive effect stamps sourceId with the item id', async () => {
+describe('Phase 20 — equipment applies no effect, so equipment never sources an ActiveEffect', () => {
+    it('equipping an item with passiveEffects adds no ActiveEffect (no sourceId leak from equipment)', async () => {
         const { equipItem } = await import('../../Character/equipment.reducer');
         const player = fixturePlayer();
         const passiveEquipment = {
@@ -197,8 +197,8 @@ describe('Phase 38 — regression: equipment passives keep sourceId === item.id'
         };
 
         const equipped = equipItem(player, passiveEquipment);
-        const passive = equipped.effects.find(e => e.effectId === 'buff_regeneration');
-        expect(passive).toBeDefined();
-        expect(passive!.sourceId).toBe('eq_regen_band');
+        // Phase 20 — equipment is stat-only; no effect (and thus no sourceId) is added.
+        expect(equipped.effects.some(e => e.sourceId === 'eq_regen_band')).toBe(false);
+        expect(equipped.effects.some(e => e.effectId === 'buff_regeneration')).toBe(false);
     });
 });
