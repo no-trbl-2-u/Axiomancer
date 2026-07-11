@@ -256,13 +256,14 @@ decision log (see each phase file).
 owner-ratified 2026-07-10, all four decision gates cleared; ship in
 order, intra-batch gates noted per phase):**
 
-- [ ] Phase 26 — The Turn Law (engine + tooling). One dice-turn per
+- [x] Phase 26 — The Turn Law (engine + tooling). One dice-turn per
       threat phase becomes an engine invariant (`startTurn` refuses a
       second tray; `resolveThreatPhase` resets); sim policies + auto
       CLI rewritten to play legally; tooling fixes (auto-mode
       transcripts, overkill-clamped attribution, `--stage` fields the
       stage's enemy roster). Test-pinned; blocks every numeric tuning
-      decision repo-wide (mechanics) — source:
+      decision repo-wide (mechanics) — `feat(mechanics): enforce the
+      one-turn-per-phase law — phase 26` (f849c5a2) — source:
       `plan/tuning/2026-07-10-turn-law-and-honest-baseline.md` §1-2
 - [ ] Phase 27 — Re-baseline (measurement). Full matrix re-run under
       the Turn Law; re-derive curve bands vs. the locked
