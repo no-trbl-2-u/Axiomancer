@@ -683,6 +683,9 @@ export function playCombatCard(
     useBottom: boolean,
     dieId?: string,
     rng: () => number = defaultRng,
+    /** REPRISE songbook choice (phase 28) — see `playBottomAction`. Optional
+     *  and additive; omitted callers keep the pre-existing auto-pick. */
+    reprisalCardId?: string,
 ): CombatTransition {
     if (state.phase !== 'phase-play') return { state, events: [] };
 
@@ -695,7 +698,7 @@ export function playCombatCard(
     if (!card) return { state, events: [] };
 
     return useBottom
-        ? playBottomAction(state, entry.uid, card, dieId, rng)
+        ? playBottomAction(state, entry.uid, card, dieId, rng, reprisalCardId)
         : playTopAction(state, entry.uid, card, rng);
 }
 
@@ -1102,6 +1105,13 @@ function playBottomAction(
     card: CombatCard,
     dieId: string | undefined,
     _rng: () => number,
+    /** REPRISE songbook choice (phase 28) — the FIRST card a `reprise`
+     *  mechanic returns, when given and still present in `state.discard`.
+     *  Any additional returns (a `count > 1` reprise) still auto-pick by
+     *  rank — mobile ships the picker for the count-1 canonical case
+     *  (`second-thoughts`). Omitted/invalid falls back to the pre-existing
+     *  highest-rank auto-pick, so every non-mobile caller is unaffected. */
+    reprisalCardId?: string,
 ): CombatTransition {
     const sourceCard = lookupCard(card.id);
     if (!sourceCard) return { state, events: [] };
@@ -1513,6 +1523,20 @@ function playBottomAction(
                 break;
             }
             case 'rupture': {
+                // Overtake 2-pip gate (phase 28, CONFIRMED in
+                // plan/tuning/2026-07-10-theme-identity.md — "the Overtake
+                // fires for 18 on turn 1 because nothing marks a CHARGED
+                // Overtake"). Scoped to fuelPerPip-paired rupture only (only
+                // `the-overtake` carries fuelPerPip today) — a plain rupture
+                // card (resonance-detonation, peroratio-interrupta,
+                // prophecy-fulfilled) is untouched. Below 2 spent pips the
+                // whole payoff no-ops (a gate, not a taper) — mirrors the
+                // existing effect-fizzled convention used for empty-discard
+                // REPRISE / no-Premises spend elsewhere in this switch.
+                if (mech.fuelPerPip && pipsSpentThisPlay < 2) {
+                    events.push({ kind: 'effect-fizzled', cardId: card.id, effectId: '', message: 'needs 2+ spent pips to detonate' });
+                    break;
+                }
                 // RUPTURE v3 — consume ALL afflictions: 1.5x... no — burst =
                 // (pending DoT fuel + flat per non-DoT stack + pip/omen fuel),
                 // read + vulnerable scaled, capped. Consumed instances feed SOULS.
@@ -1657,12 +1681,18 @@ function playBottomAction(
             }
             case 'echo_next_spell': echoNextSpell = true; break;
             case 'reprise': {
-                // Return the highest-rank discard(s) to hand; optionally fire the
-                // reprised card's FREE line immediately.
+                // Return the discard(s) to hand — the player's songbook choice
+                // (phase 28) for the first return if given and still in the
+                // discard pile, else the pre-existing highest-rank auto-pick
+                // for every subsequent return (and for callers that never pass
+                // a choice). Optionally fires the reprised card's FREE line
+                // immediately.
                 const returned: string[] = [];
                 for (let i = 0; i < mech.count * echoFactor && discard.length > 0; i++) {
                     const rankOf = (id: string): number => lookupCard(id)?.rank ?? 0;
-                    const bestIdx = discard.reduce((best, id, j) => (rankOf(id) > rankOf(discard[best]) ? j : best), 0);
+                    const chosenIdx = i === 0 && reprisalCardId ? discard.indexOf(reprisalCardId) : -1;
+                    const bestIdx = chosenIdx >= 0 ? chosenIdx
+                        : discard.reduce((best, id, j) => (rankOf(id) > rankOf(discard[best]) ? j : best), 0);
                     const cid = discard[bestIdx];
                     discard = discard.filter((_, j) => j !== bestIdx);
                     hand = [...hand, { uid: `rp${state.log.length + events.length}-${i}`, cardId: cid }];
@@ -2214,6 +2244,29 @@ function endCombat(state: CombatEncounterState, outcome: CombatEncounterState['f
 // ── Phase resolution + between-phases (§4.4, §4.5, §9) ───────────────────────
 
 /**
+ * STAGGER-rung denial (spec 32 v3 T5), extracted so `resolveThreatPhase` and
+ * `getDisruptMeter` read the exact same math instead of drifting — the two
+ * used to disagree (`getDisruptMeter.willDeny` never saw a pure-rung deny;
+ * phase 28 fixed that by sharing this helper instead of patching the symptom
+ * in two places). Boss/unique rung REGROWTH
+ * (plan/tuning/2026-07-08-win-path-scaling.md item 1c, anti-permalock):
+ * accrued resilience from prior rounds where this boss's telegraph was
+ * denied/weakened. `quagmire-of-doubt` (-1 standing) also removes a rung.
+ */
+function computeRungDenial(state: CombatEncounterState): {
+    rungsTotal: number; rungsLost: number; rungDenied: boolean; naturalRungsTotal: number; rungGrowth: number;
+} {
+    const isBossTier = state.enemy.difficulty === 'boss' || state.enemy.difficulty === 'unique';
+    const naturalRungsTotal = isBossTier ? THREAT_RUNGS_BOSS : THREAT_RUNGS;
+    const rungGrowth = isBossTier ? Math.min(state.bossRungGrowth ?? 0, bossRungGrowthCap(naturalRungsTotal)) : 0;
+    const rungsTotal = naturalRungsTotal + rungGrowth;
+    const quagmire = zoneHas(state, 'quagmire-of-doubt') ? 1 : 0;
+    const rungsLost = Math.min(rungsTotal, (state.staggerRungs ?? 0) + quagmire);
+    const rungDenied = rungsLost >= rungsTotal;
+    return { rungsTotal, rungsLost, rungDenied, naturalRungsTotal, rungGrowth };
+}
+
+/**
  * Resolves the current threat phase (HP model): the enemy executes its
  * telegraphed threat action on the player UNLESS a control status hinders it
  * (`canAct` → skipTurn). This is how control "hinders the enemy" — it loses its
@@ -2246,18 +2299,7 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
     // `quagmire-of-doubt` disenchant (-1 standing) remove rungs. At 0 the turn
     // is DENIED; partial removal weakens the hit proportionally, and each rung
     // lost feeds BACKFIRE.
-    const naturalRungsTotal = isBossTier ? THREAT_RUNGS_BOSS : THREAT_RUNGS;
-    // Boss/unique rung REGROWTH (plan/tuning/2026-07-08-win-path-scaling.md
-    // item 1c, anti-permalock): accrued resilience from prior rounds where
-    // this boss's telegraph was denied/weakened — see the `bossRungGrowth`
-    // write-back below. Normal/elite enemies never accrue it (isBossTier
-    // gates the write-back too), so their rungsTotal is byte-identical to
-    // before.
-    const rungGrowth = isBossTier ? Math.min(state.bossRungGrowth ?? 0, bossRungGrowthCap(naturalRungsTotal)) : 0;
-    const rungsTotal = naturalRungsTotal + rungGrowth;
-    const quagmire = zoneHas(state, 'quagmire-of-doubt') ? 1 : 0;
-    const rungsLost = Math.min(rungsTotal, (state.staggerRungs ?? 0) + quagmire);
-    const rungDenied = rungsLost >= rungsTotal;
+    const { rungsTotal, rungsLost, rungDenied, naturalRungsTotal, rungGrowth } = computeRungDenial(state);
     const denied = rollPenalty >= THREAT_DENY_AT || disruptDenied || rungDenied;
     const rungMult = rungDenied ? 0 : (rungsTotal - rungsLost) / rungsTotal;
     const weakenMult = Math.max(THREAT_WEAKEN_FLOOR, Math.min(1, 1 - rollPenalty * THREAT_WEAKEN_PER_ROLL))
@@ -3108,8 +3150,10 @@ export function getEnemyIncomingDamageMultiplier(state: CombatEncounterState): n
  * DISRUPT meter (the engine owns the threshold; mobile must NOT hard-code it):
  * the live DISTINCT-control pip count, the deny threshold, the cumulative roll
  * penalty, and whether the next telegraphed turn WILL be denied (matching the
- * resolved phase mark === 'clear': hard skip, legacy roll-penalty deny, OR the
- * additive distinct-control deny).
+ * resolved phase mark === 'clear': hard skip, legacy roll-penalty deny, the
+ * additive distinct-control deny, OR a STAGGER-rung deny — phase 28 fix: this
+ * used to omit the rung path entirely, so a turn denied purely by accumulated
+ * STAGGER reported `willDeny: false`).
  */
 export function getDisruptMeter(state: CombatEncounterState): {
     pips: number; threshold: number; rollPenalty: number; willDeny: boolean;
@@ -3118,7 +3162,8 @@ export function getDisruptMeter(state: CombatEncounterState): {
     const pips = getDistinctControlCount(enemy);
     const rollPenalty = Math.max(0, -getActiveRollModifier(enemy));
     const act = canAct(enemy.effects as ActiveEffect[], currentPhaseStance(state));
-    const willDeny = !act.canAct || rollPenalty >= THREAT_DENY_AT || pips >= DISRUPT_DENY_AT;
+    const { rungDenied } = computeRungDenial(state);
+    const willDeny = !act.canAct || rollPenalty >= THREAT_DENY_AT || pips >= DISRUPT_DENY_AT || rungDenied;
     return { pips, threshold: DISRUPT_DENY_AT, rollPenalty, willDeny };
 }
 
@@ -3134,6 +3179,39 @@ export function projectRupture(state: CombatEncounterState): number {
     return Math.min(
         ruptureBurstCap(state.enemy.maxHealth),
         Math.round(pending * READ_DAMAGE_MULT[read] * getDamageTakenMultiplier(state.enemy)),
+    );
+}
+
+/**
+ * Per-card RUPTURE projection (phase 28) — `projectRupture` above uses
+ * `bonusPct 0` (the per-card bonus is applied separately in
+ * `playBottomAction`), which undershoots any card with its own `bonusPct` or
+ * `fuelPerPip` (`resonance-detonation`, `the-overtake`, others). Mirrors the
+ * `projectSiphonHeal` convention: look up the card's own mechanic and scale
+ * accordingly. `fuelPerPip` fuel is approximated off *currently banked*
+ * Reserve + floating pips (a preview can't know a not-yet-drafted die's
+ * hypothetical spend) — the "if you cashed in everything banked right now"
+ * reading. Falls back to the flat `projectRupture(state)` for cards with no
+ * card-specific rupture mechanic.
+ */
+export function projectRuptureBurst(state: CombatEncounterState, card: CombatCard): number {
+    const sourceCard = lookupCard(card.id);
+    const mech = (sourceCard?.specialMechanics ?? []).find(m => m.kind === 'rupture') as
+        Extract<CardSpecialMechanic, { kind: 'rupture' }> | undefined;
+    if (!mech) return projectRupture(state);
+    const d = draftedDie(state);
+    const read: CombatReadResult = d ? state.lastRead : 'neutral';
+    const pending = getPendingDotTotal(state.enemy, state.round).total;
+    const nonDotStacks = consumeAfflictions(state.enemy).nonDotStacks;
+    const bankedPips = (state.reserve ?? []).reduce((n, die) => n + (die.pips ?? 0), 0)
+        + (state.floatingDice ?? []).reduce((n, die) => n + (die.pips ?? 0), 0);
+    const fuel = pending
+        + RUPTURE_PER_AFFLICTION_STACK * nonDotStacks
+        + (mech.fuelPerPip ?? 0) * bankedPips
+        + (mech.fuelPerOmenHit ?? 0) * (state.omenHits ?? 0);
+    return Math.min(
+        ruptureBurstCap(state.enemy.maxHealth),
+        Math.round(fuel * READ_DAMAGE_MULT[read] * (1 + (mech.bonusPct ?? 0)) * getDamageTakenMultiplier(state.enemy)),
     );
 }
 
@@ -3160,6 +3238,62 @@ export function projectReapAll(state: CombatEncounterState, card: CombatCard): {
         Math.round(mech.burstPerSoul * (state.souls ?? 0) * READ_DAMAGE_MULT[read] * getDamageTakenMultiplier(state.enemy)),
     );
     return { ready: amount > 0, amount };
+}
+
+/**
+ * Wall-math projection (phase 28 / Gate 1 §4) — what the CURRENTLY
+ * telegraphed hit would actually deal right now, netted against live
+ * guard/barrier. `IntentIcon` today shows only the raw, unscaled
+ * `phase.threatAction.effects` damage sum; this selector runs that same raw
+ * total through the live `weakenMult` / rung / escalation / outgoing-damage
+ * multiplier stack `resolveThreatPhase` applies, then nets guard/barrier —
+ * the actual number the player is about to take, or 0 if the turn will be
+ * denied outright. Approximates a phase's damage as a single hit (matching
+ * `intentVM`'s existing raw-sum granularity) — a phase with more than one
+ * damaging effect is summed before scaling, not scaled per-effect like the
+ * real resolution; a known, documented simplification (see phase 28 brief).
+ */
+export function projectIncomingThreat(state: CombatEncounterState): {
+    rawDamage: number; projectedDamage: number; willDeny: boolean; guard: number; barrier: number; netDamage: number;
+} {
+    const idx = Math.min(state.currentPhaseIndex, state.threatPhases.length - 1);
+    const phase = state.threatPhases[idx];
+    const rawDamage = phase.threatAction.effects.reduce((s, e) => s + (e.damage ?? 0), 0);
+
+    const act = canAct(state.enemy.effects as ActiveEffect[], phase.enemyStance);
+    const rollPenalty = Math.max(0, -getActiveRollModifier(state.enemy));
+    const controlPips = getDistinctControlCount(state.enemy);
+    const disruptDenied = controlPips >= DISRUPT_DENY_AT;
+    const isBossTier = state.enemy.difficulty === 'boss' || state.enemy.difficulty === 'unique';
+    const { rungsTotal, rungsLost, rungDenied } = computeRungDenial(state);
+    const denied = rollPenalty >= THREAT_DENY_AT || disruptDenied || rungDenied;
+    const willDeny = !act.canAct || denied;
+
+    const rungMult = rungDenied ? 0 : (rungsTotal - rungsLost) / rungsTotal;
+    const weakenMult = Math.max(THREAT_WEAKEN_FLOOR, Math.min(1, 1 - rollPenalty * THREAT_WEAKEN_PER_ROLL))
+        * (rungsLost > 0 && !rungDenied ? rungMult : 1);
+    const escalationRate = THREAT_ESCALATION_PER_ROUND * (isBossTier ? THREAT_ESCALATION_BOSS_MULT : 1);
+    const escalation = hasPayloadFlag(state.enemy, 'blocksAdvantage')
+        ? 1
+        : Math.min(THREAT_ESCALATION_MAX, 1 + escalationRate * Math.max(0, state.round - THREAT_ESCALATION_GRACE));
+    const enemyOutgoingMult = getOutgoingDamageMult(state.enemy);
+    const overextendedId = hasPayloadFlag(state.enemy, 'forcesWeakTierNextPlay');
+    const playerTakenMult = getDamageTakenMultiplier(state.player);
+
+    const projectedDamage = willDeny ? 0 : Math.round(
+        rawDamage * THREAT_DAMAGE_SCALE * weakenMult * escalation
+        * enemyOutgoingMult * (overextendedId ? 0.5 : 1) * playerTakenMult,
+    );
+
+    const guard = state.guard ?? 0;
+    const barrier = state.barrier ?? 0;
+    const riposte = state.riposte ?? null;
+    let remaining = projectedDamage;
+    if (riposte && riposte.reduce > 0) remaining = Math.max(0, remaining - riposte.reduce);
+    remaining = Math.max(0, remaining - guard);
+    remaining = Math.max(0, remaining - barrier);
+
+    return { rawDamage, projectedDamage, willDeny, guard, barrier, netDamage: remaining };
 }
 
 /** One hand card's finisher (rupture / reap) readiness, for

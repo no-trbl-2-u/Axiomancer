@@ -1257,7 +1257,9 @@ const tuQuoque: Card = {
     // pts: thorns i3 d2 (~4.5) + FREE guard 2 (0.5) + dieBonus(guard 2 ×0.6 = 0.3) + tempo ≈ 6.5 → Thesis
     free: { guard: 2 },
     combatEffects: [{ effectId: 'buff_thorns', appliedTo: 'self', intensity: 3, duration: 2 }],
-    dieBonus: { onColor: 'body', rider: { guard: 2 } },
+    // phase 28: recolored 'body' -> 'heart' — the card is philosophicalAspect
+    // 'heart', so the old onColor:'body' bonus was dead text on a heart card.
+    dieBonus: { onColor: 'heart', rider: { guard: 2 } },
     addedIn: '2026-07-08',
     tags: ['bulwark', 'reflect'],
 };

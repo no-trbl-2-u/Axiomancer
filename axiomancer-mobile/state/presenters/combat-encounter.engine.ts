@@ -20,6 +20,9 @@ import {
     READ_ADVANTAGE_INTENSITY_BONUS, READ_DISADVANTAGE_DURATION_PENALTY, RESERVE_MAX,
     RUPTURE_BURST_CAP, riderText,
     VULNERABLE_MAX_MULT, DISRUPT_DENY_AT,
+    // phase 28 — legibility sweep
+    projectRuptureBurst, projectIncomingThreat,
+    CONCEDE_PREMISES_BASE, CONCEDE_PREMISES_ELITE, CONCEDE_PREMISES_BOSS,
     type CombatEncounterState, type CombatCard, type CombatManaDie,
     type CombatThreatPhase, type CombatIntentType, type CombatReadResult,
     type CombatSummary, type SignatureSkill, type Stance,
@@ -144,11 +147,16 @@ export interface CombatEffectChipVM {
 }
 export interface CombatIntentVM {
     type: CombatIntentType; icon: string; label: string; color: string; description: string;
-    /** Total HP damage this phase's threat action deals if NOT cleared (0 if none). */
+    /** Total HP damage this phase's threat action deals if NOT cleared (0 if none).
+     *  Raw face value — NOT run through live modifiers; see `wallMath` for that. */
     damage: number;
     /** True if the threat action also applies a debuff to the player. */
     debuffs: boolean;
     next: { type: CombatIntentType; icon: string; label: string } | null;
+    /** phase 28 — the wall-math readout (`projectIncomingThreat`): what this
+     *  telegraphed hit actually deals right now, netted against live guard/
+     *  barrier and denial state — the number `damage` above can't show. */
+    wallMath: { projectedDamage: number; netDamage: number; willDeny: boolean; guard: number; barrier: number };
 }
 export interface CombatEnemyPaneVM {
     name: string; artKey: string; isBoss: boolean;
@@ -303,6 +311,10 @@ export interface CombatCardVM {
     /** Authored flavor prose (`Card.description`) — overlay BOTTOM only, never
      *  on the face (owner directive 2026-07-09: the face is purely functional). */
     flavor: string | null;
+    /** phase 28 — true for a `reprise`-mechanic card: APPLYing it should prompt
+     *  the discard-pile songbook picker instead of going straight to the
+     *  engine's default highest-rank auto-pick. */
+    needsReprisalChoice: boolean;
 }
 export interface CombatSignatureVM {
     id: string; name: string; description: string; cost: number; affordable: boolean; icon: string;
@@ -310,6 +322,18 @@ export interface CombatSignatureVM {
 export interface CombatReadVM {
     active: boolean; result: CombatReadResult; dieStance: string; enemyStance: string | null;
     text: string;
+}
+/** phase 28 — the Premise track + CONCEDE beat (Peroration theme). Was fully
+ *  engine-side state with zero combat-UI rendering before this phase. */
+export interface CombatPerorationVM {
+    active: boolean;
+    premises: number;
+    /** Premise count at which the declared card's rider fires (tally resets). */
+    at: number;
+    /** Premise count at which the fight ends outright (CONCEDE) — tier-floored
+     *  by enemy difficulty; null if the declared card carries no concede line. */
+    concedeAt: number | null;
+    cardName: string;
 }
 export interface CombatViewModel {
     phase: CombatEncounterState['phase'];
@@ -335,6 +359,10 @@ export interface CombatViewModel {
     turnLabel: string;
     deckCount: number;
     discardCount: number;
+    /** phase 28 — discard-pile card ids + names, for the REPRISE songbook picker. */
+    discardCards: { id: string; name: string }[];
+    /** phase 28 — the Premise track + CONCEDE beat. */
+    peroration: CombatPerorationVM;
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -369,9 +397,14 @@ function intentVM(state: CombatEncounterState): CombatIntentVM {
     const effects = cur?.threatAction.effects ?? [];
     const damage = effects.reduce((s, e) => s + (e.damage ?? 0), 0);
     const debuffs = effects.some((e) => !!e.effectId);
+    const threat = projectIncomingThreat(state);
     return {
         type, icon: meta.icon, label: cur?.intentLabel ?? meta.label, color: meta.color,
         description: cur?.threatAction.description ?? '', damage, debuffs, next,
+        wallMath: {
+            projectedDamage: threat.projectedDamage, netDamage: threat.netDamage,
+            willDeny: threat.willDeny, guard: threat.guard, barrier: threat.barrier,
+        },
     };
 }
 
@@ -1213,6 +1246,17 @@ function handVM(state: CombatEncounterState): CombatCardVM[] {
         .map(({ uid, card }: { uid: string; card: CombatCard }) => {
         const preview = drafted ? cardReadPreview(state, card) : null;
         const sourceCard = getCardById(card.id);
+        const rawFace = faceStats(card, sourceCard);
+        // phase 28 — RUPTURE's live burst is an honest, already-computed engine
+        // number (projectRuptureBurst); the word-only "detonate" face predates
+        // that selector's existence. Real-units-or-no-number, now with a number.
+        const face = rawFace.kind === 'rupture'
+            ? { ...rawFace, heroText: `${projectRuptureBurst(state, card)}`, heroSub: 'now, if detonated' }
+            : rawFace;
+        // phase 28 — REPRISE songbook choice: cards carrying a `reprise`
+        // mechanic prompt a discard-pile picker on APPLY instead of the
+        // engine's default highest-rank auto-pick.
+        const needsReprisalChoice = (sourceCard?.specialMechanics ?? []).some(m => m.kind === 'reprise');
         return {
             uid, cardId: card.id, name: card.name, stance: card.stance,
             stanceColor: STANCE_COLORS[card.stance] ?? '#888',
@@ -1224,10 +1268,11 @@ function handVM(state: CombatEncounterState): CombatCardVM[] {
             topActionText: card.topActionText, bottomActionText: card.bottomActionText,
             bottomDamagePreview: card.bottomDamagePreview,
             dieLines: card.dieLines,
-            face: faceStats(card, sourceCard),
+            face,
             detail: detailStats(card, sourceCard),
             read: preview?.read ?? null, colorMatch: preview?.colorMatch ?? false,
             flavor: sourceCard?.description ?? null,
+            needsReprisalChoice,
         };
     });
 }
@@ -1298,6 +1343,23 @@ export function rewardOfferVMs(ids: string[]): CombatRewardOfferVM[] {
     return out;
 }
 
+// ── phase 28 — Premise track + CONCEDE beat ──────────────────────────────────
+
+/** Mirrors `gainPremises`'s tier-floor exactly (combat.engine.ts) so the
+ *  displayed CONCEDE threshold never lies about the live one. */
+function perorationVM(state: CombatEncounterState): CombatPerorationVM {
+    const decl = state.peroration;
+    if (!decl) return { active: false, premises: 0, at: 0, concedeAt: null, cardName: '' };
+    const tierFloor = state.enemy.difficulty === 'boss' || state.enemy.difficulty === 'unique'
+        ? CONCEDE_PREMISES_BOSS
+        : state.enemy.difficulty === 'elite'
+            ? CONCEDE_PREMISES_ELITE
+            : CONCEDE_PREMISES_BASE;
+    const concedeAt = decl.concedeAt !== undefined ? Math.max(decl.concedeAt, tierFloor) : null;
+    const card = getCardById(decl.cardId);
+    return { active: true, premises: state.premises ?? 0, at: decl.at, concedeAt, cardName: card?.name ?? '' };
+}
+
 // ── Entry point ──────────────────────────────────────────────────────────────
 
 export function buildCombatViewModel(state: CombatEncounterState): CombatViewModel {
@@ -1326,5 +1388,7 @@ export function buildCombatViewModel(state: CombatEncounterState): CombatViewMod
         turnLabel: `TURN ${state.turn}`,
         deckCount: state.drawPile.length,
         discardCount: state.discard.length,
+        discardCards: state.discard.map((id) => ({ id, name: getCardById(id)?.name ?? id })),
+        peroration: perorationVM(state),
     };
 }

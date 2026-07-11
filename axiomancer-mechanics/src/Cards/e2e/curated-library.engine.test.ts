@@ -208,11 +208,11 @@ describe('themed library — dieBonus reachability under THE COLOR LAW (dice-law
     // honest spelling of that), and onColor:'off' — a non-wild die of another
     // stance — can never fire at all: the play would have fizzled first.
     //
-    // tu-quoque (HEART card, onColor:'body') is the one KNOWN dead line —
-    // handoff audit item 1, the owner decides the redesign. This lint pins the
-    // class shut against future authoring; when the card is fixed, remove it
-    // from KNOWN_DEAD so the pin tightens to zero.
-    const KNOWN_DEAD = ['tu-quoque'];
+    // tu-quoque (HEART card, was onColor:'body') was the one KNOWN dead line —
+    // handoff audit item 1 — fixed in phase 28 (recolored to 'heart', its own
+    // philosophicalAspect). The pin has tightened to zero; the next author who
+    // ships a dead dieBonus line reopens this list.
+    const KNOWN_DEAD: string[] = [];
     it("no card authors an unreachable dieBonus line (onColor 'off' or an off-stance color)", () => {
         const dead = cardLibrary
             .filter(c => c.dieBonus)
