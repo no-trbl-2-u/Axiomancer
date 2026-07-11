@@ -1,5 +1,10 @@
 # Card-library improvement plan — how, exactly
 
+> Step-level decomposition, working-tree corrections (C-1..C-11), and
+> the reconciliation against build-plan Phases 26-33 live in
+> `2026-07-11-card-library-improvement-plan-detailed.md` — read it
+> before executing any workstream here.
+>
 > The execution plan built from `2026-07-11-dawncaster-comparison.md`
 > (three-lens Dawncaster comparison, PR #68) plus an external GPT-Sol
 > analysis (verified below — not taken as law). Deduped against
