@@ -119,7 +119,7 @@ describe('isAttackSuccessful', () => {
 });
 
 const BUFF_ID = 'buff_accuracy_up'; // spec 32 v3 re-pin: tier1_* card effects retired; support-tagged buff
-const DEBUFF_ID = 'debuff_burn';
+const DEBUFF_ID = 'debuff_poison'; // spec 32 v3 re-pin: surviving affliction debuff
 const makeActiveBuff = (overrides: Partial<ActiveEffect> = {}): ActiveEffect => ({
   effectId: BUFF_ID, remainingDuration: 3, intensity: 1, appliedAt: 0, tier: 1, ...overrides,
 });
@@ -251,7 +251,7 @@ describe('getStudyMarkIntensity', () => {
   });
 
   it('returns 0 when only a non-mark effect is present', () => {
-    const other: ActiveEffect = { effectId: 'debuff_burn', remainingDuration: 2, intensity: 2, appliedAt: 0, tier: 1 };
+    const other: ActiveEffect = { effectId: 'debuff_poison', remainingDuration: 2, intensity: 2, appliedAt: 0, tier: 1 };
     const p = { ...makePlayer(), effects: [other] };
     expect(getStudyMarkIntensity(p)).toBe(0);
   });
@@ -268,14 +268,8 @@ describe('getThornsReflect', () => {
     expect(getThornsReflect(p)).toBe(2);
   });
 
-  it('returns reflectDamage × intensity for buff_brazen_thorns (reflectDamage: 2)', () => {
-    const thorns: ActiveEffect = { effectId: 'buff_brazen_thorns', remainingDuration: 3, intensity: 3, appliedAt: 0, tier: 2 };
-    const p = { ...makePlayer(), effects: [thorns] };
-    expect(getThornsReflect(p)).toBe(6);
-  });
-
   it('returns 0 for an effect with no reflectDamage payload', () => {
-    const burn: ActiveEffect = { effectId: 'debuff_burn', remainingDuration: 2, intensity: 4, appliedAt: 0, tier: 1 };
+    const burn: ActiveEffect = { effectId: 'debuff_poison', remainingDuration: 2, intensity: 4, appliedAt: 0, tier: 1 };
     const p = { ...makePlayer(), effects: [burn] };
     expect(getThornsReflect(p)).toBe(0);
   });
@@ -286,24 +280,25 @@ describe('getActiveRollModifier', () => {
     expect(getActiveRollModifier(makePlayer())).toBe(0);
   });
 
-  it('returns flat rollModifier for an effect with a flat modifier (debuff_confusion: -5)', () => {
-    const confusion: ActiveEffect = { effectId: 'debuff_confusion', remainingDuration: 3, intensity: 1, appliedAt: 0, tier: 2 };
-    const p = { ...makePlayer(), effects: [confusion] };
-    expect(getActiveRollModifier(p)).toBe(-5);
+  it('returns flat rollModifier for an effect with a flat modifier (debuff_curse: -2)', () => {
+    const curse: ActiveEffect = { effectId: 'debuff_curse', remainingDuration: 3, intensity: 1, appliedAt: 0, tier: 2 };
+    const p = { ...makePlayer(), effects: [curse] };
+    expect(getActiveRollModifier(p)).toBe(-2);
   });
 
-  it('a flat rollModifier is intensity-independent (debuff_frostbite: -2 at intensity 3)', () => {
+  it('a flat rollModifier is intensity-independent (debuff_curse: -2 at intensity 3)', () => {
     // spec 32 v3 re-pin: no library effect carries rollModifierPerIntensity any
     // more — flat modifiers must NOT scale with intensity.
-    const frostbite: ActiveEffect = { effectId: 'debuff_frostbite', remainingDuration: 2, intensity: 3, appliedAt: 0, tier: 2 };
-    const p = { ...makePlayer(), effects: [frostbite] };
+    const curse: ActiveEffect = { effectId: 'debuff_curse', remainingDuration: 2, intensity: 3, appliedAt: 0, tier: 2 };
+    const p = { ...makePlayer(), effects: [curse] };
     expect(getActiveRollModifier(p)).toBe(-2);
   });
 
-  it('sums flat and per-intensity contributions across multiple effects', () => {
-    const confusion: ActiveEffect = { effectId: 'debuff_confusion', remainingDuration: 3, intensity: 1, appliedAt: 0, tier: 2 };
+  it('sums flat rollModifier contributions across multiple effects', () => {
+    // debuff_curse rollModifier -2 + buff_accuracy_up rollModifier +3 = +1
+    const curse: ActiveEffect = { effectId: 'debuff_curse', remainingDuration: 3, intensity: 1, appliedAt: 0, tier: 2 };
     const accuracy: ActiveEffect = { effectId: 'buff_accuracy_up', remainingDuration: 2, intensity: 1, appliedAt: 0, tier: 2 };
-    const p = { ...makePlayer(), effects: [confusion, accuracy] };
-    expect(getActiveRollModifier(p)).toBe(-2);
+    const p = { ...makePlayer(), effects: [curse, accuracy] };
+    expect(getActiveRollModifier(p)).toBe(1);
   });
 });

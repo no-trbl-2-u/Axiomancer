@@ -18,9 +18,10 @@
  * — same split as `guard`). Self-contained, deterministic, no disk / RNG.
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 
-import type { ActiveEffect } from '../../Effects/types';
+import { effectsLibrary } from '../../Effects/effects.library';
+import type { ActiveEffect, Effect } from '../../Effects/types';
 import type { Combatant } from '../types';
 import type { Character } from '../../Character/types';
 import type { Enemy } from '../../Enemy/types';
@@ -52,6 +53,20 @@ const combatant = (effects: ActiveEffect[]): Combatant => {
     return c;
 };
 
+// The spec 32 v3 keyword reset deleted the stance-keyed VULNERABLE debuff and
+// the negative-roll / action-restriction control debuffs. No surviving library
+// effect carries those shapes, so the stance-vuln and distinct-control machinery
+// is driven by test-only fixtures registered into the shared registry (the same
+// lookup the selectors read). Never touches the library JSON.
+const SELECTOR_FIXTURES: Effect[] = [
+    { id: 'test_vuln_body', name: 'test vuln body', description: 'stance-keyed vulnerable body ×1.5', type: 'debuff', category: 'stat', duration: 4, stacking: 'intensity', tier: 2, payload: { damageTakenMultForStance: { stance: 'body', mult: 1.5 } } },
+    { id: 'test_ctrl_confusion', name: 'test confusion', description: 'control -5', type: 'debuff', category: 'control', duration: 4, stacking: 'intensity', tier: 2, payload: { rollModifier: -5 } },
+    { id: 'test_charm', name: 'test charm', description: 'forcedStance heart', type: 'debuff', category: 'control', duration: 4, stacking: 'none', tier: 2, payload: { actionRestriction: { forcedStance: 'heart' } } },
+    { id: 'test_silence', name: 'test silence', description: 'blockedStances heart', type: 'debuff', category: 'control', duration: 4, stacking: 'none', tier: 2, payload: { actionRestriction: { blockedStances: ['heart'] } } },
+];
+beforeAll(() => { for (const e of SELECTOR_FIXTURES) effectsLibrary.registry.set(e.id, e); });
+afterAll(() => { for (const e of SELECTOR_FIXTURES) effectsLibrary.registry.delete(e.id); });
+
 describe('getDamageTakenMultiplier — exactly 1 without a marker', () => {
     it('is EXACTLY 1 with no marker (byte-identical guard)', () => {
         expect(getDamageTakenMultiplier(combatant([]))).toBe(1);
@@ -63,7 +78,7 @@ describe('getDamageTakenMultiplier — exactly 1 without a marker', () => {
 
 describe('getStanceVulnMult — stance-keyed vulnerability (Fate Engine P1 #17)', () => {
     it('reads the keyed mult for a matching die color (and wild)', () => {
-        const c = combatant([ae('debuff_vulnerability_body', 1)]);
+        const c = combatant([ae('test_vuln_body', 1)]);
         expect(getStanceVulnMult(c, 'body')).toBe(1.5);
         expect(getStanceVulnMult(c, 'wild')).toBe(1.5);
         expect(getStanceVulnMult(c, 'mind')).toBe(1);
@@ -71,8 +86,8 @@ describe('getStanceVulnMult — stance-keyed vulnerability (Fate Engine P1 #17)'
     });
 
     it('scales with intensity and clamps at VULNERABLE_MAX_MULT', () => {
-        expect(getStanceVulnMult(combatant([ae('debuff_vulnerability_body', 2)]), 'body')).toBe(2.0);
-        expect(getStanceVulnMult(combatant([ae('debuff_vulnerability_body', 3)]), 'body')).toBe(VULNERABLE_MAX_MULT);
+        expect(getStanceVulnMult(combatant([ae('test_vuln_body', 2)]), 'body')).toBe(2.0);
+        expect(getStanceVulnMult(combatant([ae('test_vuln_body', 3)]), 'body')).toBe(VULNERABLE_MAX_MULT);
         expect(VULNERABLE_MAX_MULT).toBe(2.0);
     });
 });
@@ -104,16 +119,16 @@ describe('getPendingDotTotal / consumeDotEffects (RUPTURE fuel)', () => {
     });
 
     it('ignores non-DoT effects and treats permanent DoT as one tick', () => {
-        expect(getPendingDotTotal(combatant([ae('debuff_confusion', 1)])).total).toBe(0);
+        expect(getPendingDotTotal(combatant([ae('debuff_curse', 1)])).total).toBe(0);
         // remainingDuration -1 (permanent) → max(1, -1) = 1 tick.
         expect(getPendingDotTotal(combatant([ae('debuff_poison', 1, -1)])).total).toBe(2);
     });
 
     it('consumeDotEffects strips ONLY DoT effects and reports the ids', () => {
-        const c = combatant([ae('debuff_poison', 2), ae('debuff_confusion', 1), ae('debuff_bleed', 1)]);
+        const c = combatant([ae('debuff_poison', 2), ae('debuff_curse', 1), ae('debuff_bleed', 1)]);
         const { combatant: stripped, consumed } = consumeDotEffects(c);
         expect(consumed.sort()).toEqual(['debuff_bleed', 'debuff_poison']);
-        expect(stripped.effects.map(e => e.effectId)).toEqual(['debuff_confusion']);
+        expect(stripped.effects.map(e => e.effectId)).toEqual(['debuff_curse']);
     });
 
     it('consumeAfflictions strips EVERY debuff and counts non-DoT stacks (v3 RUPTURE)', () => {
@@ -148,9 +163,9 @@ describe('getDistinctDebuffCount (FALLEN / variety payoffs)', () => {
 describe('getDistinctControlCount (DISRUPT meter)', () => {
     it('counts action-restriction AND negative-roll controls; excludes pure DoT / exposure', () => {
         expect(getDistinctControlCount(combatant([
-            ae('debuff_confusion', 1),            // roll -5 (support-tagged)
-            ae('debuff_charm', 1),                // forcedStance (support-tagged)
-            ae('debuff_silence', 1),              // blockedStances (support-tagged)
+            ae('test_ctrl_confusion', 1),         // roll -5 (test fixture)
+            ae('test_charm', 1),                  // forcedStance (test fixture)
+            ae('test_silence', 1),                // blockedStances (test fixture)
             ae('debuff_poison', 1),               // DoT — NOT control
             ae('debuff_mark', 1),                 // exposure — NOT control
         ]))).toBe(3);

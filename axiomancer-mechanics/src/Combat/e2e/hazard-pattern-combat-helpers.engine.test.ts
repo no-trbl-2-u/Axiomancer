@@ -17,7 +17,7 @@
  * Pure math + an explicit fixed RNG only; no disk / network / TTY.
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 
 import { Player } from '../../Character/characters.mock';
 import type { Character } from '../../Character/types';
@@ -27,6 +27,8 @@ import { deepClone } from '../../Utils';
 import { getCardById } from '../../Cards/cards.library';
 import { registerSandboxCards } from '../../Cards/cards.sandbox';
 import { lookupEffect, applyEffect } from '../../Effects';
+import { effectsLibrary } from '../../Effects/effects.library';
+import type { Effect } from '../../Effects/types';
 
 import {
     initializeCombatEncounter, rollEncounterDice,
@@ -452,6 +454,32 @@ describe('Spec 25 §7 — handCards', () => {
 // ── Enemy threat resolver (§4.5) — `resolveThreatPhase` ─────────────────────
 
 describe('Spec 25 §4.5 — resolveThreatPhase', () => {
+    // The spec 32 v3 keyword reset deleted the skipTurn (Sleep) and
+    // negative-rollModifier control debuffs (Confusion -5, Fear -4). No surviving
+    // library effect carries those shapes, so the skipTurn-clear and
+    // weaken/deny-split machinery is driven by test-only fixtures registered into
+    // the shared registry (the same lookup the threat engine reads). Never
+    // touches the library JSON.
+    const THREAT_FIXTURES: Effect[] = [
+        {
+            id: 'test_skip', name: 'test sleep', description: 'test skipTurn control',
+            type: 'debuff', category: 'control', duration: 3, stacking: 'none', tier: 2,
+            payload: { actionRestriction: { skipTurn: true } },
+        },
+        {
+            id: 'test_ctrl_confusion', name: 'test confusion', description: 'test control -5',
+            type: 'debuff', category: 'control', duration: 3, stacking: 'intensity', tier: 2,
+            payload: { rollModifier: -5 },
+        },
+        {
+            id: 'test_ctrl_fear', name: 'test fear', description: 'test control -4',
+            type: 'debuff', category: 'control', duration: 3, stacking: 'intensity', tier: 2,
+            payload: { rollModifier: -4 },
+        },
+    ];
+    beforeAll(() => { for (const e of THREAT_FIXTURES) effectsLibrary.registry.set(e.id, e); });
+    afterAll(() => { for (const e of THREAT_FIXTURES) effectsLibrary.registry.delete(e.id); });
+
     it('fires the threat (mark=overwhelmed) when enemy can act', () => {
         let state = initializeCombatEncounter(makePlayer([DOT_BODY]), makeEnemy(100, 'heart'), undefined, SEED);
         state = rollEncounterDice(state).state;
@@ -463,7 +491,7 @@ describe('Spec 25 §4.5 — resolveThreatPhase', () => {
     });
 
     it('hinders the enemy (mark=clear) when a skipTurn effect is active on it', () => {
-        const sleepEffect = lookupEffect('debuff_sleep')!;
+        const sleepEffect = lookupEffect('test_skip')!;
         const player = makePlayer([DOT_BODY]);
         const enemy = makeEnemy(100, 'heart');
         const { activeEffects: enemyEffects } = applyEffect(enemy.effects, sleepEffect, 1);
@@ -484,7 +512,7 @@ describe('Spec 25 §4.5 — resolveThreatPhase', () => {
     });
 
     it('weakens (but does not deny) the threat when rollPenalty < THREAT_DENY_AT', () => {
-        const confusionEffect = lookupEffect('debuff_confusion')!;
+        const confusionEffect = lookupEffect('test_ctrl_confusion')!;
         const player = makePlayer([DOT_BODY]);
         const enemy = makeEnemy(100, 'heart');
         const { activeEffects: enemyEffects } = applyEffect(enemy.effects, confusionEffect, 1);
@@ -505,8 +533,8 @@ describe('Spec 25 §4.5 — resolveThreatPhase', () => {
     });
 
     it('denies the threat via soft-control when rollPenalty >= THREAT_DENY_AT', () => {
-        const confusionEffect = lookupEffect('debuff_confusion')!;
-        const fearEffect = lookupEffect('debuff_fear')!;
+        const confusionEffect = lookupEffect('test_ctrl_confusion')!;
+        const fearEffect = lookupEffect('test_ctrl_fear')!;
         const player = makePlayer([DOT_BODY]);
         const enemy = makeEnemy(100, 'heart');
         const { activeEffects: withConfusion } = applyEffect(enemy.effects, confusionEffect, 1);
