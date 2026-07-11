@@ -265,13 +265,18 @@ order, intra-batch gates noted per phase):**
       decision repo-wide (mechanics) — `feat(mechanics): enforce the
       one-turn-per-phase law — phase 26` (f849c5a2) — source:
       `plan/tuning/2026-07-10-turn-law-and-honest-baseline.md` §1-2
-- [ ] Phase 27 — Re-baseline (measurement). Full matrix re-run under
+- [x] Phase 27 — Re-baseline (measurement). Full matrix re-run under
       the Turn Law; re-derive curve bands vs. the locked
       80/50/25-35/0 doctrine, KNOWN_CURVE_VIOLATORS, statusEngagement
       by stage, signature damage share, dead-card rate; publish the
       re-triage report. Every pre-2026-07-10 plan/tuning number gets
       an asterisk until this lands. Gated on Phase 26 (mechanics) —
       source: `plan/tuning/2026-07-10-turn-law-and-honest-baseline.md` §3
+      — headline: mid/late win rates were almost entirely farm-propped
+      (honest mid 3%, late flat 0%); KNOWN_CURVE_VIOLATORS confirmed
+      empty; repricing (Phase 31) now unblocked —
+      `plan: re-baseline the combat matrix under the Turn Law — phase 27`
+      (30e43eb2)
 - [ ] Phase 28 — Show the Engine (legibility sweep). Premise track +
       CONCEDE beat, rupture fuel/cap preview, BACKFIRE attribution,
       foretell picker, REPRISE songbook choice, wall-math readout,
