@@ -277,13 +277,14 @@ order, intra-batch gates noted per phase):**
       empty; repricing (Phase 31) now unblocked —
       `plan: re-baseline the combat matrix under the Turn Law — phase 27`
       (30e43eb2)
-- [ ] Phase 28 — Show the Engine (legibility sweep). Premise track +
+- [x] Phase 28 — Show the Engine (legibility sweep). Premise track +
       CONCEDE beat, rupture fuel/cap preview, BACKFIRE attribution,
       foretell picker, REPRISE songbook choice, wall-math readout,
       Overtake gate/preview, lying-copy fixes, color-match bonus
       fold-ins. Parallel-safe with Phase 26/27 (mobile + mechanics) —
       source: `plan/tuning/2026-07-10-turn-texture.md` §4 +
       `plan/tuning/2026-07-10-theme-identity.md` (per-theme S-tier UX)
+      — `feat: show the engine — legibility sweep across 9 surfaces — phase 28` (60af3044)
 - [ ] Phase 29 — The Language (keyword registry). KW-1/KW-3 (fold 6
       unmapped debuff ids, rename pass) ungated; KW-2/KW-6
       (merge/retire + single-source registry with parity lints) and
