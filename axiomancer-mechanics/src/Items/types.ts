@@ -2,15 +2,12 @@
  * Item System Types
  * Discriminated union of all item types with type guards.
  *
- * Equipment (Spec 05) carries persistent stat modifiers, passive effect IDs,
- * optional onHit / onDefend proc triggers that share Spec 03's proc machinery,
- * and an optional `resourceInteraction` payload the combat resolver reads to
- * seed token counters at battle start and amplify per-action generation.
- *
- * Per Spec 05c, `Equipment` is an *instance* shape — every drop carries an
- * instance-level `rarity` and `requiredLevel`, optionally with a list of
- * rolled modifiers in `rolledMods`. The definition shape lives in
- * `EquipmentTemplate` (procedural) and `UniqueItemTemplate` (curated).
+ * Equipment is now the lean signet-relic shape (phases 18-23): persistent
+ * `statModifiers` plus an optional `grantsSignature`. The procedural library,
+ * rarity/affix model, item sets, and every equipment->combat effect channel
+ * (`passiveEffects` / `onHit` / `onDefend` procs / `resourceInteraction`,
+ * along with `EquipmentTemplate` / `UniqueItemTemplate` / `rolledMods` /
+ * `rarity` / `requiredLevel`) were retired. See `docs/equipment.md`.
  *
  * Consumables (Spec 05) reference real effects from the effects library —
  * either by ID, by inline `Effect`, and/or with an immediate `healAmount` —
@@ -136,7 +133,8 @@ export interface Consumable extends BaseItem {
     resourceGrant?: Partial<CombatResources>;
     intensityOverride?: number;
     durationOverride?: number;
-    /** Content-provenance metadata (see `EquipmentTemplate.addedIn`). */
+    /** Content-provenance metadata: `addedIn` is an ISO date / phase tag;
+     *  `tags` are freeform labels. Both optional, ignored by the engine. */
     addedIn?: string;
     tags?: string[];
 }
@@ -165,9 +163,7 @@ export interface QuestItem extends BaseItem {
 export type Item = Equipment | Consumable | Material | QuestItem;
 
 /** Re-export `Stance` so downstream consumers of `EquipmentSlot` don't need
- *  a separate import path; some library authors key generation bonuses to
- *  stance-aligned items (Spec 05 Q10b is OFF for now but keep the surface).
- */
+ *  a separate import path. */
 export type { Stance };
 
 // ============================================================================

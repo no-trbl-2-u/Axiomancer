@@ -10,12 +10,12 @@
  *   *at equip-time*. We recompute `derivedStats` from `baseStats` (+ equipment
  *   modifiers) on every equip / unequip, mirroring `deriveStats` so the math
  *   stays in one place.
- * - Phase 20 — equipment is DECOUPLED FROM EFFECTS. Equipping/unequipping no
- *   longer applies `passiveEffects` (or any effect) to `Character.effects`, and
- *   nothing reads an item's `onHitEffects` / `onDefendEffects` / `combatStartTokens`
- *   / `generationBonus` any more. `statModifiers` (incl. the phase-19 `maxHp`)
- *   is the SOLE channel from equipment to the character. The now-inert effect
- *   fields stay on the `Equipment` type until the phase-23 teardown.
+ * - Equipment is DECOUPLED FROM EFFECTS (phases 20-23). Equipping/unequipping
+ *   applies no effect to `Character.effects`; the old effect channels
+ *   (`passiveEffects` / `onHitEffects` / `onDefendEffects` / `combatStartTokens`
+ *   / `generationBonus`) and their fields were stripped from `Equipment` in the
+ *   phase-23 teardown. `statModifiers` (incl. the phase-19 `maxHp`) is now the
+ *   SOLE channel from equipment to the character.
  */
 
 import { Character, BaseStats, DerivedStats, EquipmentLoadout } from './types';

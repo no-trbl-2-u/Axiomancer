@@ -319,6 +319,15 @@ reality.
 
 ### Items, Equipment & Inventory
 
+> **Superseded (phases 18-21 + 23):** the procedural template / generation /
+> rarity entries below were retired. `equipmentTemplates`,
+> `getEquipmentTemplate`, `getTemplatesBySlot`, `uniqueTemplates`,
+> `getUniqueTemplate`, `dropItem`, `rollModifiers`, `resolveModifiers`,
+> `rarityWeightTable`, `previewTemplateAtRarity`, and the set-bonus/item-set
+> APIs no longer exist. The live equipment surface is the 8 signet relics
+> (`relicLibrary`, `getRelicById`, `getSignaturesForLoadout`) plus the equip
+> reducers and `wornPerSlot`. See [`equipment.md`](./equipment.md).
+
 - Item creation and manipulation functions — Stable.
 - Equipment templates and generation (`equipmentTemplates`,
   `getEquipmentTemplate`, `getTemplatesBySlot`, `uniqueTemplates`,
