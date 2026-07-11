@@ -1,5 +1,7 @@
 # Simpson's Confusion — `debuff_daze`
 
+> **FOLDED (WS8.1 KW-2, 2026-07-11):** this id was a duplicate grip and was folded into `debuff_confusion`. The id is deleted from the library JSONs and banned by the deprecated-effects list; this page is historical.
+
 > *"Each part of your thinking is superior, yet combined they're inferior. Your mind's aggregation betrays its components."*
 
 ---

@@ -427,7 +427,11 @@ export type CombatEvent =
     | { kind: 'threshold-fired'; cardId: string; color: 'heart' | 'body' | 'mind'; count: number; riderText: string }
     | { kind: 'die-bonus-fired'; cardId: string; riderText: string }
     | { kind: 'fate-powered'; cardId: string; dieId: string; recoil: number; riderText: string }
-    | { kind: 'pips-cashed'; cardId: string; pips: number; bonus: 'intensity' | 'guard'; amount: number }
+    // WS4.1 — `bonus: 'mark'` = spend_all_pips `markPer` (amount = MARK stacks
+    // landed); `pips-overflowed` = grant_pip pips that found no room and fired
+    // the printed overflow rider instead (Slag Runoff class).
+    | { kind: 'pips-cashed'; cardId: string; pips: number; bonus: 'intensity' | 'guard' | 'mark'; amount: number }
+    | { kind: 'pips-overflowed'; cardId: string; pips: number; riderText: string }
     | { kind: 'react-detonated'; cardId: string; amount: number; consumed: string[] }
     | { kind: 'die-forged'; dieId: string; color: CombatDieColor; destination: 'reserve' | 'conviction' }
     | { kind: 'die-converted'; dieId: string; color: CombatDieColor }

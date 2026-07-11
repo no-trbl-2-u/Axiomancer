@@ -22,6 +22,7 @@ import { Player } from '../Character/characters.mock';
 import type { Character } from '../Character/types';
 import { deepClone } from '../Utils';
 import { getCardById } from '../Cards/cards.library';
+import { SANDBOX_CARD_SETS, applySandboxSet } from '../Cards/cards.sandbox-sets';
 import { rankToRarity, type StatType } from '../Cards/types';
 import { lookupEffect } from '../Effects';
 import { rollCombatCardRewards } from './combat.rewards';
@@ -75,6 +76,30 @@ function makeOriginPlayer(archetype: StatType): Character {
     return p;
 }
 
+/**
+ * WS6.2 — the sandbox-injection hook: how extra (non-library) cards enter the
+ * simulated reward pool so they can be MEASURED at reward screens.
+ *
+ * - `sandboxSetId` names a set in `SANDBOX_CARD_SETS`; the sim resolves it
+ *   (throwing on an unknown id), APPLIES it into the process-global sandbox
+ *   registry when its cards are not yet resolvable (so `getCardById` — and
+ *   therefore the roll's validity filter — can see them), and appends the
+ *   set's new-card ids to the reward pool. NOTE the one impurity this buys:
+ *   applying a set registers into the module-level sandbox registry and the
+ *   sim does NOT clear it (the caller owns the experiment lifecycle — the
+ *   playtest CLI's `--sandbox` law; tests clear via `clearSandboxCards()`).
+ *   Determinism is unaffected: same (origin, seed, screens, injected ids) →
+ *   identical counts.
+ * - `extraPool` appends explicit ids; they must already resolve through
+ *   `getCardById` (register first) or the roll's filter drops them silently.
+ */
+export interface RewardDraftSimOptions {
+    /** A `SANDBOX_CARD_SETS` id whose cards join the reward pool. */
+    sandboxSetId?: string;
+    /** Explicit extra candidate ids (must already be registered/resolvable). */
+    extraPool?: readonly string[];
+}
+
 /** Result of one origin's reward-draft sim (telemetry, no judgment). */
 export interface RewardDraftSimResult {
     /** The preset origin simulated (e.g. 'erosion'). */
@@ -93,6 +118,11 @@ export interface RewardDraftSimResult {
      *  `screens × 3`. Distinguishes "never offered" from "offered, never
      *  picked" when WS6.3 reads the pick rates. */
     offers: Record<string, number>;
+    /** WS6.2 — the extra (non-library) ids injected into this run's pool, in
+     *  injection order (explicit `extraPool` first, then the sandbox set's
+     *  cards). Empty for a plain library run. Part of the reproduction
+     *  contract: the same (origin, seed, screens, extraPoolIds) → same counts. */
+    extraPoolIds: readonly string[];
 }
 
 /** Ranks one screen's offers by focus fit, tie-break by rarity, tie-break by
@@ -117,18 +147,46 @@ function pickOffer(offerIds: readonly string[], focus: CombatDeckFocus): string 
 }
 
 /**
+ * WS6.2 — resolves the injected extra pool for a run: the explicit
+ * `extraPool` ids first, then the named sandbox set's new-card ids. Applies
+ * the sandbox set into the global registry when its cards do not yet resolve
+ * (see {@link RewardDraftSimOptions} for the lifecycle contract). Throws on an
+ * unknown set id — a silently-empty injection would read as a dead-bridge
+ * finding in WS6.3.
+ */
+function resolveExtraPool(options: RewardDraftSimOptions): string[] {
+    const extra = [...(options.extraPool ?? [])];
+    if (options.sandboxSetId !== undefined) {
+        const set = SANDBOX_CARD_SETS[options.sandboxSetId];
+        if (!set) {
+            throw new Error(`runRewardDraftSim: unknown sandbox set '${options.sandboxSetId}'`);
+        }
+        // Apply unless every new card already resolves (idempotent re-entry
+        // for callers — e.g. the playtest CLI — that applied the set earlier).
+        // Overrides-only sets always re-apply: override merging is idempotent.
+        const live = set.cards.length > 0 && set.cards.every(c => !!getCardById(c.id));
+        if (!live) applySandboxSet(set.id);
+        for (const card of set.cards) {
+            if (!extra.includes(card.id)) extra.push(card.id);
+        }
+    }
+    return extra;
+}
+
+/**
  * Simulates `screens` reward screens for one preset origin: each screen rolls
  * `rollCombatCardRewards` (3 distinct offers, archetype-biased 2×, rarity
  * weights per spec 32 v3 §4) with the origin's derived archetype, then the
  * pick policy takes the best offer by `focusWeight(origin.focus, verbClass)`,
- * rarity tie-break. Deterministic for a given (originId, seed, screens).
- * Throws on an unknown origin id — a silent empty result would read as a
- * dead-origin finding.
+ * rarity tie-break. Deterministic for a given (originId, seed, screens) — and,
+ * with the WS6.2 hook, a given injected pool. Throws on an unknown origin id —
+ * a silent empty result would read as a dead-origin finding.
  */
 export function runRewardDraftSim(
     originId: string,
     seed: number,
     screens = DEFAULT_SCREENS,
+    options: RewardDraftSimOptions = {},
 ): RewardDraftSimResult {
     const preset = getDeckPreset(originId);
     if (!preset) throw new Error(`runRewardDraftSim: unknown preset origin '${originId}'`);
@@ -136,15 +194,16 @@ export function runRewardDraftSim(
     const archetype = originArchetype(preset);
     const player = makeOriginPlayer(archetype);
     const rng = makeSeededRng(seed);
+    const extraPoolIds = resolveExtraPool(options);
 
     const picks: Record<string, number> = {};
     const offers: Record<string, number> = {};
     for (let i = 0; i < screens; i++) {
-        const offerIds = rollCombatCardRewards(player, rng, OFFERS_PER_SCREEN);
+        const offerIds = rollCombatCardRewards(player, rng, OFFERS_PER_SCREEN, extraPoolIds);
         for (const id of offerIds) offers[id] = (offers[id] ?? 0) + 1;
         const picked = pickOffer(offerIds, preset.focus);
         picks[picked] = (picks[picked] ?? 0) + 1;
     }
 
-    return { originId, archetype, focus: preset.focus, screens, seed, picks, offers };
+    return { originId, archetype, focus: preset.focus, screens, seed, picks, offers, extraPoolIds };
 }

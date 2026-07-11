@@ -181,22 +181,27 @@ describe('greedy object reproduces the pinned decision sequences', () => {
     // Re-pinned 2026-07-09 (dice-law rework): 3 dice per turn, strict color
     // match, per-die token accrual — every seed-derived roll and greedy
     // decision shifted; both pins re-measured against the current engine.
+    //
+    // Re-pinned 2026-07-11 (WS3.3 DoT-clock data sweep): poison rides the
+    // card-played clock (each subsequent play ticks it) and bleed the
+    // damage-instance clock — kills land earlier on the same seeds; both
+    // pins re-measured against the current engine.
     it('seed 11 vs LittleBelle: a two-round status victory', () => {
         const r = runOneEncounter(loadout(MIX), LittleBelle, 11, 'greedy');
         expect({ outcome: r.outcome, rounds: r.rounds, plays: r.plays, statusPlays: r.statusPlays })
-            .toEqual({ outcome: 'victory', rounds: 2, plays: 8, statusPlays: 7 });
+            .toEqual({ outcome: 'victory', rounds: 2, plays: 7, statusPlays: 6 });
         expect(r.cardUsage['slippery-slope']).toEqual({
             cardId: 'slippery-slope', plays: 2, bottomPlays: 2, topPlays: 0, statusLands: 2, discards: 0,
         });
         expect(r.cardUsage['straw-mans-jab']).toEqual({
-            cardId: 'straw-mans-jab', plays: 3, bottomPlays: 3, topPlays: 0, statusLands: 3, discards: 0,
+            cardId: 'straw-mans-jab', plays: 2, bottomPlays: 2, topPlays: 0, statusLands: 2, discards: 0,
         });
     });
 
-    it('seed 11 vs KingOfRevenge: a three-round status victory', () => {
+    it('seed 11 vs KingOfRevenge: a two-round status victory (WS3.3 clocks land it a round earlier)', () => {
         const r = runOneEncounter(loadout(MIX), KingOfRevenge, 11, 'greedy');
         expect({ outcome: r.outcome, rounds: r.rounds, plays: r.plays, statusPlays: r.statusPlays })
-            .toEqual({ outcome: 'victory', rounds: 3, plays: 12, statusPlays: 9 });
+            .toEqual({ outcome: 'victory', rounds: 2, plays: 10, statusPlays: 8 });
         expect(r.cardUsage['straw-mans-jab']).toEqual({
             cardId: 'straw-mans-jab', plays: 3, bottomPlays: 3, topPlays: 0, statusLands: 3, discards: 0,
         });

@@ -327,8 +327,11 @@ describe('OMEN — declare with the powering die; resolve at the phase boundary'
 
 describe('SOULS — expiry yields, REAP spends, REAP-all bursts under the cap', () => {
     it('an enemy affliction instance EXPIRING yields exactly 1 Soul', () => {
+        // WS3.3: MARK is battle-long now (`calendarExpiry: false`) — the
+        // calendar-expiry witness is BLEED, whose calendar still counts down
+        // (only its TICK moved to the damage-instance clock).
         const base = initializeCombatEncounter(makePlayer([]), makeEnemy(300, 'mind'), undefined, 7);
-        const seeded = { ...base, enemy: { ...base.enemy, effects: [ae('debuff_mark', 2, 1)] } };
+        const seeded = { ...base, enemy: { ...base.enemy, effects: [ae('debuff_bleed', 2, 1)] } };
         const res = processBetweenPhases(seeded);
         const gained = res.events.find(e => e.kind === 'soul-gained') as
             { amount: number; total: number; reason: string } | undefined;
@@ -336,6 +339,15 @@ describe('SOULS — expiry yields, REAP spends, REAP-all bursts under the cap', 
         expect(gained!.reason).toBe('expiry');
         expect(gained!.amount).toBe(1); // per INSTANCE, not per stack
         expect(res.state.souls).toBe(1);
+    });
+
+    it('a battle-long MARK never expires at the boundary — no calendar Soul from it (WS3.3)', () => {
+        const base = initializeCombatEncounter(makePlayer([]), makeEnemy(300, 'mind'), undefined, 7);
+        const seeded = { ...base, enemy: { ...base.enemy, effects: [ae('debuff_mark', 2, 1)] } };
+        const res = processBetweenPhases(seeded);
+        expect(res.events.some(e => e.kind === 'soul-gained')).toBe(false);
+        const mark = res.state.enemy.effects.find(e => e.effectId === 'debuff_mark');
+        expect(mark).toMatchObject({ intensity: 2, remainingDuration: 1 }); // held, not counted down
     });
 
     it('REAP fizzles underfunded; funded, it spends the Souls and fires (draw + KINDLE)', () => {
@@ -638,39 +650,48 @@ describe('persistent hooks — venom-and-vein, mirror-of-guilt, crumbling-resolv
 
 // ── BLEED decay + MARK amplification (T1 / A3) ───────────────────────────────
 
-describe('BLEED — front-loaded, decays 1 intensity per tick (engine round)', () => {
-    it('one between-phases round: full tick, then the intensity falls', () => {
+describe('BLEED — damage-instance clocked (WS3.3), decays 1 intensity per tick', () => {
+    it('the round boundary leaves it alone: no tick, no decay, only the calendar counts', () => {
         const base = initializeCombatEncounter(makePlayer([]), makeEnemy(300, 'mind'), undefined, 7);
         const seeded = { ...base, enemy: { ...base.enemy, effects: [ae('debuff_bleed', 2, 3)] } };
         const res = processBetweenPhases(seeded);
-        expect(300 - res.state.enemy.health).toBe(6); // floor(3 × 2), the front-loaded tick
+        expect(300 - res.state.enemy.health).toBe(0); // event clock — no boundary tick
         const bleed = res.state.enemy.effects.find(e => e.effectId === 'debuff_bleed');
-        expect(bleed?.intensity).toBe(1);             // decayed 1 per tick
-        expect(bleed?.remainingDuration).toBe(2);
+        expect(bleed?.intensity).toBe(2);             // no tick → no decay
+        expect(bleed?.remainingDuration).toBe(2);     // the calendar still counts down
     });
 
-    it('the instance washes out entirely once the intensity is spent', () => {
+    it('a real damage instance (THORNS reflect) ticks it, then the intensity falls', () => {
+        mockSequentialRng(0.5);
         const base = initializeCombatEncounter(makePlayer([]), makeEnemy(300, 'mind'), undefined, 7);
-        const seeded = { ...base, enemy: { ...base.enemy, effects: [ae('debuff_bleed', 1, 4)] } };
-        const res = processBetweenPhases(seeded);
-        expect(300 - res.state.enemy.health).toBe(3);
-        expect(res.state.enemy.effects.some(e => e.effectId === 'debuff_bleed')).toBe(false);
+        const seeded = {
+            ...base,
+            enemy: { ...base.enemy, effects: [ae('debuff_bleed', 2, 3)] },
+            player: { ...base.player, effects: [ae('buff_thorns', 2, 3)] }, // reflect 1 × 2
+        };
+        const res = resolveThreatPhase(seeded);
+        const tick = res.events.find(e => e.kind === 'dot-tick' && e.effectId === 'debuff_bleed') as { amount: number } | undefined;
+        expect(tick?.amount).toBe(6); // floor(3 × 2), the front-loaded tick
+        const bleed = res.state.enemy.effects.find(e => e.effectId === 'debuff_bleed');
+        expect(bleed?.intensity).toBe(1); // decayed 1 per tick
     });
 });
 
 describe('MARK — +1 per stack on EVERY DoT tick on the bearer (ratified A3)', () => {
-    it('a marked foe bleeds harder from the same poison', () => {
+    it('a marked foe bleeds harder from the same round-clocked DoT', () => {
+        // WS3.3: poison left the round clocks — kindling ember (round-start,
+        // dpr 1) is the boundary witness; MARK amplifies its tick the same.
         const base = initializeCombatEncounter(makePlayer([]), makeEnemy(300, 'mind'), undefined, 7);
-        const plain = processBetweenPhases({ ...base, enemy: { ...base.enemy, effects: [ae('debuff_poison', 1, 4)] } });
-        expect(300 - plain.state.enemy.health).toBe(2); // v3 poison i1 → 2
+        const plain = processBetweenPhases({ ...base, enemy: { ...base.enemy, effects: [ae('debuff_kindling_ember', 1, 4)] } });
+        expect(300 - plain.state.enemy.health).toBe(1); // ember i1 → 1
 
         const marked = processBetweenPhases({
             ...base,
-            enemy: { ...base.enemy, effects: [ae('debuff_poison', 1, 4), ae('debuff_mark', 2, 3)] },
+            enemy: { ...base.enemy, effects: [ae('debuff_kindling_ember', 1, 4), ae('debuff_mark', 2, 3)] },
         });
-        expect(300 - marked.state.enemy.health).toBe(4); // 2 + 2 mark stacks
-        const tick = marked.events.find(e => e.kind === 'dot-tick' && e.effectId === 'debuff_poison') as { amount: number };
-        expect(tick.amount).toBe(4); // the emitted tick is the real amplified number
+        expect(300 - marked.state.enemy.health).toBe(3); // 1 + 2 mark stacks
+        const tick = marked.events.find(e => e.kind === 'dot-tick' && e.effectId === 'debuff_kindling_ember') as { amount: number };
+        expect(tick.amount).toBe(3); // the emitted tick is the real amplified number
     });
 });
 

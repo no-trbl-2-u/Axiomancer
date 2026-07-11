@@ -69,7 +69,7 @@
       "stance": "mind",
       "action": "attack",
       "tier": 2,
-      "effectId": "debuff_daze",
+      "effectId": "debuff_confusion",
       "target": "opponent",
       "baseChance": 0.18,
       "fumbleEffectId": "debuff_affirming_consequent"

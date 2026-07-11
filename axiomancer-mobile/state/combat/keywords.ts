@@ -29,6 +29,11 @@ const EFFECT_KEYWORD: Record<string, string> = {
     debuff_backfire: 'Backfire',
     debuff_rapport: 'Rapport',
     buff_thorns: 'Thorns',
+    // ── Card-local species (2026-07-10 card-keyword doctrine — a face
+    // keyword + gloss, NOT a registry row until it reaches ~3 cards) ──
+    // WS3.4 Doom species (spec 32 §12 #3 — ratified card-local, not
+    // keyword #31); applied by the 'doom-species' sandbox set.
+    debuff_creeping_doom: 'Doom',
 };
 
 /**
@@ -60,10 +65,10 @@ const SUPPORT_KEYWORD: Record<string, string> = {
     debuff_slow: 'Backfire',
     debuff_root: 'Backfire',
     debuff_blind: 'Backfire',
-    debuff_daze: 'Backfire',
+    // debuff_daze → folded into debuff_confusion (WS8.1 KW-2, 2026-07-11)
     debuff_stagger: 'Stagger',
     debuff_knockdown: 'Stagger',
-    debuff_fatigue: 'Mark',
+    // debuff_fatigue → folded into debuff_exhaustion (WS8.1 KW-2, 2026-07-11)
     debuff_exhaustion: 'Mark',
     buff_regeneration: 'Heal',
     buff_phoenix_vigor: 'Heal',
@@ -179,6 +184,7 @@ const KEYWORD_GLOSS: Record<string, string> = {
         + 'Its duration and stacks are unchanged.',
     Mark:
         'Every damage-over-time effect on the bearer deals +1 HP per Mark stack, each time it ticks. '
+        + 'Marks do not expire on their own — they hold until consumed or the combat ends. '
         + 'Counts as an affliction: RUPTURE and conclusion payoffs consume Marks for their printed burst.',
     Cleanse: 'Removes up to that many afflictions (debuffs) from you.',
     Heal: 'Restores that much VITAE (HP), up to your maximum.',
@@ -197,9 +203,13 @@ const KEYWORD_GLOSS: Record<string, string> = {
         'Converts the enemy’s Bleed into Poison and its Poison into Bleed, '
         + 'and adds that much intensity to each as it flips — the same wound, re-argued.',
     Poison:
-        'Deals 2 HP per stack at the START of each round, and that 2 grows by +1 for every 2 full rounds the poison has held. '
+        'Deals 2 HP per stack each time a card is played, and that 2 grows by +1 for every 2 full rounds the poison has held. '
         + 'Applying poison again resets the growth.',
-    Bleed: 'Deals 3 HP per stack at the END of each round, then loses 1 stack; it ends at 0 stacks.',
+    Bleed:
+        'Each time the bearer takes a hit of damage, the Bleed deals 3 more HP per stack, then loses 1 stack; it ends at 0 stacks.',
+    Doom:
+        'Deals 1 HP per stack at the start of each round, and GROWS +1 stack every time the enemy acts. '
+        + 'It never runs out on its own — it ends only when consumed or the combat ends.',
     // ── Peroration (T2) ──
     Premise:
         'A persistent tally your cards add to. '

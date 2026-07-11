@@ -272,6 +272,8 @@ export type {
     CardRank, CardRarity, CardType, CardRider,
     // Phase 142 — Extended synergy predicates
     ExtendedSynergyPredicate,
+    // WS4.2 — combat-state synergy predicate + its ledger view (spec 32 §12 #4)
+    SynergyStatePredicate, SynergyLedgerView,
 } from './Cards';
 export {
     generateBasicActionResources, generatePhilosophicalResource,
@@ -280,9 +282,13 @@ export {
     CARD_RANK_NAMES, rankToRarity,
     getAvailableCards, learnCard,
     cardLibrary, getCardById,
+    // WS2.1 — the Thoughtform registry (CONJURE targets; outside the pinned 70)
+    thoughtformLibrary, getThoughtformById,
     // Phase 142 — Extended synergy predicate functionality
     evaluateExtendedSynergyPredicate, checkSinglePredicate, checkAnyCountPredicate,
     checkAllRequiredPredicate, checkBuffDebuffCombo, checkTotalIntensityPredicate,
+    // WS4.2 — the combat-ledger gate evaluator
+    checkStatePredicate,
 } from './Cards';
 
 // ─── Game (state, store, persistence, constants) ──────────────────────────────

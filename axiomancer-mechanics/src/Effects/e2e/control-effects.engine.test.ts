@@ -42,26 +42,11 @@ describe('Phase 88 — debuff_sleep', () => {
     });
 });
 
-// ─── debuff_daze — stat debuff (mind -2, mentalDefense -1) ───
-
-describe('Phase 88 — debuff_daze', () => {
-    it('does NOT skip turn (no actionRestriction)', () => {
-        const mods = getActiveEffectModifiers([ae('debuff_daze')]);
-        expect(mods.skipTurn).toBe(false);
-    });
-
-    it('reduces mind-related stats', () => {
-        const mods = getActiveEffectModifiers([ae('debuff_daze')]);
-        expect(mods.statFlat.get('mind')).toBe(-2);
-        expect(mods.statFlat.get('mentalDefense')).toBe(-1);
-    });
-
-    it('applies cleanly', () => {
-        const effect = lookupEffect('debuff_daze')!;
-        const { result } = applyEffect([], effect, 1);
-        expect(result.success).toBe(true);
-    });
-});
+// debuff_daze folded into debuff_confusion (WS8.1 KW-2, 2026-07-11): both
+// gripped the same stance-certainty surface. Its id is deleted from the
+// library and banned by the deprecated-effects list; confusion's coverage
+// (blursStanceHints) lives in the WS8.2 blocks below and in the status-depth
+// suites.
 
 // ─── debuff_fear — stat debuff (heart -4, emotionalDefense -3) ─
 
@@ -105,23 +90,11 @@ describe('Phase 88 — debuff_blind', () => {
 // keyword reset (no support consumer resolves them); their coverage retires
 // with them — the deprecated-effects ban list keeps the ids dead.
 
-// ─── debuff_fatigue — mild stat reduction ─────────────────────────────────────
+// debuff_fatigue folded into debuff_exhaustion (WS8.1 KW-2, 2026-07-11):
+// duplicate mild stat drain on the same telegraph-damage surface. Its id is
+// deleted from the library and banned by the deprecated-effects list.
 
-describe('Phase 88 — debuff_fatigue', () => {
-    it('reduces body and mind related stats', () => {
-        const mods = getActiveEffectModifiers([ae('debuff_fatigue')]);
-        expect(mods.statFlat.get('body')).toBe(-1);
-        expect(mods.statFlat.get('mind')).toBe(-1);
-    });
-
-    it('scales with intensity', () => {
-        const mods = getActiveEffectModifiers([ae('debuff_fatigue', 2)]);
-        expect(mods.statFlat.get('body')).toBe(-2);
-        expect(mods.statFlat.get('mind')).toBe(-2);
-    });
-});
-
-// ─── debuff_exhaustion — broader stat reduction ───────────────────────────────
+// ─── debuff_exhaustion — broader stat reduction (fold SURVIVOR) ───────────────
 
 describe('Phase 88 — debuff_exhaustion', () => {
     it('reduces all three base stats', () => {
@@ -129,6 +102,12 @@ describe('Phase 88 — debuff_exhaustion', () => {
         expect(mods.statFlat.get('body')).toBe(-2);
         expect(mods.statFlat.get('mind')).toBe(-2);
         expect(mods.statFlat.get('heart')).toBe(-2);
+    });
+
+    it('scales with intensity', () => {
+        const mods = getActiveEffectModifiers([ae('debuff_exhaustion', 2)]);
+        expect(mods.statFlat.get('body')).toBe(-4);
+        expect(mods.statFlat.get('mind')).toBe(-4);
     });
 
     it('WS8.2 — owns the telegraph-DAMAGE surface: weakened hits softer (-25%)', () => {

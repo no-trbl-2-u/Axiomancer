@@ -50,7 +50,7 @@ one-line summaries — spec 32 §3 stays authoritative.
 | GUARD N | block next N damage; fades at round end | — | `????` T:n/a | |
 | BARRIER N | as Guard, persists until consumed | — | `????` T:n/a | |
 | TICK | one enemy DoT ticks now (duration unchanged) | — | `????` T:n/a | |
-| MARK iN dM | +1 per stack to each DoT tick / payoff hit; counts as affliction | — | `????` T:n/a | |
+| MARK iN dM | +1 per stack to each DoT tick / payoff hit; counts as affliction; BATTLE-LONG (WS3.3 `calendarExpiry: false` — bounded by payoff consumption, not a calendar) | — | `????` T:n/a | WS3.3 (2026-07-11): printed durations on MARK applications are nominal; absorbed half of the foretold_wound fold (KW-1) |
 | CLEANSE N | remove N of your own afflictions | — | `????` T:n/a | |
 | HEAL N | restore N VITAE | — | `????` T:n/a | |
 | RUPTURE | consume ALL enemy afflictions: 1.5x remaining DoT fuel + 3/non-DoT stack | — | `!???` T:n/a | plan #2 landed (8d853dcb): cap now max(80, 0.25x enemy maxHP); erosion late 0.03->0.08 — decay wall (plan #3) is the remaining brake |
@@ -60,8 +60,8 @@ one-line summaries — spec 32 §3 stays authoritative.
 
 | theme | keyword | semantics | Dawncaster analogues (receipts) | gate (E/P/D/T) | notes |
 |---|---|---|---|---|---|
-| Affliction | POISON iN dM | ramping DoT, escalates per turn | — | `+??!` | round 2: Erosion mid 21→55 but late 0% — durationed DoTs decay before eroding 1,000+ HP bosses (plan #3 persistence-by-stack) |
-| Affliction | BLEED iN dM | front-loaded DoT, decays 1 intensity per trigger | Bleeding — kb:dawncaster/keywords/bleeding.okf.md (src-001, community, medium): reactive ("when dealt damage, +1 per stack, then stacks −1") vs our proactive per-round tick; their stack economy transfers, their magnitudes do not | `+??!` | round 2: same late decay wall as POISON (plan #3) |
+| Affliction | POISON iN dM | ramping DoT on the CARD-PLAYED clock (WS3.3: ticks per player card play, ~2 expected/round; per-round ramp held) | — | `+??!` | WS3.3 sweep (2026-07-11): lifetime pricing walks the clock (2 ticks/round → i1 d4 = 20 HP); absorbed the argument_wound + echo_sting folds and half of foretold_wound (KW-1); WS3.6 matrix re-read pending |
+| Affliction | BLEED iN dM | front-loaded DoT on the DAMAGE-INSTANCE clock (WS3.3: ticks per enemy damage instance), decays 1 intensity per trigger | Bleeding — kb:dawncaster/keywords/bleeding.okf.md (src-001, community, medium): reactive ("when dealt damage, +1 per stack, then stacks −1") — WS3.3 moved ours onto that reactive shape, so their stack ECONOMY now transfers directly; their magnitudes still do not | `+??!` | WS3.3: decay-limited lifetime is clock-invariant (i2 d2 = 9 HP on any clock) — the clock changes tempo, not total; WS3.6 matrix re-read pending |
 | Peroration | PREMISE | persistent tally (argument under construction) | — | `++!?` | round 2: Oratory 100/100/100 — flat 8-Premise CONCEDE ignores the stage curve (plan #1 scaled thresholds + boss Premise-shed) |
 | Peroration | PERORATION | declared conclusion; fires FREE at printed Premise count | — | `++!?` | round 2: dominance carrier of the CONCEDE path (plan #1); NERF target, not buff |
 | Forge | KINDLE | temporary die, this combat only | — | `!???` | round 2: Foundry mid/late 0% — pip engine has no uncapped spender (plan #2 cap, plan #5 boss-tech rare) |

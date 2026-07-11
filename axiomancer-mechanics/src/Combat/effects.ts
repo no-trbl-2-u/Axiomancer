@@ -753,11 +753,18 @@ export interface DotTriggerResult<T extends Combatant> {
  * The tick damage is applied with the plain `applyDamage`, so a
  * 'damage-instance' DoT can never re-trigger itself. Pure; exact no-op
  * (same object) when nothing matches.
+ *
+ * `eligible` (WS3.3) — optional per-instance gate: an instance for which it
+ * returns false neither ticks nor decays on this trigger. The card-play
+ * resolver passes "existed BEFORE this play" so a play's own fresh stacks are
+ * never on their own clock (doctrine witness: a PAID line must not chip a
+ * clean enemy — the stacks start paying from the NEXT play).
  */
 export function fireDotTrigger<T extends Combatant>(
     target: T,
     trigger: DotEventTrigger,
     currentRound?: number,
+    eligible?: (ae: ActiveEffect) => boolean,
 ): DotTriggerResult<T> {
     const dotAmp = getDotAmplificationByEffect(target.effects);
     const markBonus = getTickAmplifyFlat(target.effects);
@@ -767,6 +774,7 @@ export function fireDotTrigger<T extends Combatant>(
         const def = lookupEffect(ae.effectId);
         const dot = def?.payload.damageOverTime;
         if (!def || !dot || dot.trigger !== trigger) continue;
+        if (eligible && !eligible(ae)) continue;
         const multiplier = dotAmp.get(ae.effectId) ?? 1;
         const dpr = rampedDamagePerRound(ae, dot.damagePerRound, def.payload.dotModifiers, currentRound);
         const amount = Math.floor(dpr * (ae.intensity ?? 1) * multiplier) + markBonus;
@@ -780,7 +788,8 @@ export function fireDotTrigger<T extends Combatant>(
     const washedOut: ActiveEffect[] = [];
     const decayed = next.effects.reduce<ActiveEffect[]>((acc, ae) => {
         const p = lookupEffect(ae.effectId)?.payload;
-        const tickedThisTrigger = p?.damageOverTime?.trigger === trigger;
+        const tickedThisTrigger = p?.damageOverTime?.trigger === trigger
+            && (!eligible || eligible(ae));
         if (tickedThisTrigger && p?.dotModifiers?.decaysPerTick) {
             if (ae.intensity > 1) acc.push({ ...ae, intensity: ae.intensity - 1 });
             else washedOut.push(ae); // intensity 1 → the instance is spent

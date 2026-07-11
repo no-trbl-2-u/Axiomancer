@@ -79,34 +79,39 @@ describe('getStanceVulnMult — stance-keyed vulnerability (Fate Engine P1 #17)'
 
 describe('getPendingDotTotal / consumeDotEffects (RUPTURE fuel)', () => {
     it('sums each DoT over its remaining lifetime (amplification- and decay-aware)', () => {
-        // v3 poison i2, 4 ticks, NO round threaded → flat floor(2×2)×4 = 16.
+        // WS3.3: poison rides the card-played clock — 2 expected ticks/round.
+        // i2, 4 rounds, NO round threaded → flat floor(2×2) × 8 ticks = 32.
         const only = getPendingDotTotal(combatant([ae('debuff_poison', 2, 4)]));
-        expect(only.total).toBe(16);
+        expect(only.total).toBe(32);
         expect(only.perEffect).toHaveLength(1);
 
         // poison i2 + bleed i1 → Hemorrhage ×1.5 on poison:
-        //   poison floor(2×2×1.5)=6 over 4 → 24; bleed decays per tick — i1 lasts
-        //   exactly ONE tick: floor(3×1)=3. total 27.
+        //   poison floor(2×2×1.5)=6 × 8 ticks → 48; bleed decays per tick —
+        //   i1 lasts exactly ONE tick: floor(3×1)=3. total 51.
         const combo = getPendingDotTotal(combatant([ae('debuff_poison', 2, 4), ae('debuff_bleed', 1, 4)]));
-        expect(combo.total).toBe(27);
+        expect(combo.total).toBe(51);
     });
 
     it('bleed pending fuel models the per-tick intensity decay (spec 32 v3)', () => {
-        // bleed i3 d4: ticks 9, 6, 3, then washed out → 18 (NOT 9×4=36).
+        // WS3.3: bleed rides the damage-instance clock (2 expected/round) but
+        // stays decay-LIMITED: i3 ticks 9, 6, 3, then washes out → 18 on any
+        // clock (NOT 9 × ticks).
         expect(getPendingDotTotal(combatant([ae('debuff_bleed', 3, 4)])).total).toBe(18);
-        // duration shorter than intensity: i3 d2 → 9 + 6 = 15.
-        expect(getPendingDotTotal(combatant([ae('debuff_bleed', 3, 2)])).total).toBe(15);
+        // i3 d2: 2 ticks/round fit all three ticks inside the window → 18 too.
+        expect(getPendingDotTotal(combatant([ae('debuff_bleed', 3, 2)])).total).toBe(18);
     });
 
     it('poison ramps its future ticks when a round is threaded', () => {
-        // appliedAt 1, currentRound 1 → future dprs 2,2,3,3 × i2 = 4,4,6,6 = 20.
-        expect(getPendingDotTotal(combatant([ae('debuff_poison', 2, 4)]), 1).total).toBe(20);
+        // appliedAt 1, currentRound 1 → future dprs 2,2,3,3 × i2 × 2 ticks/round
+        // = (4+4+6+6) × 2 = 40.
+        expect(getPendingDotTotal(combatant([ae('debuff_poison', 2, 4)]), 1).total).toBe(40);
     });
 
-    it('ignores non-DoT effects and treats permanent DoT as one tick', () => {
+    it('ignores non-DoT effects and treats permanent DoT as one round of expected ticks', () => {
         expect(getPendingDotTotal(combatant([ae('debuff_confusion', 1)])).total).toBe(0);
-        // remainingDuration -1 (permanent) → max(1, -1) = 1 tick.
-        expect(getPendingDotTotal(combatant([ae('debuff_poison', 1, -1)])).total).toBe(2);
+        // remainingDuration -1 (permanent) → max(1, -1) = 1 round → 2 expected
+        // card-played ticks × floor(2×1) = 4.
+        expect(getPendingDotTotal(combatant([ae('debuff_poison', 1, -1)])).total).toBe(4);
     });
 
     it('consumeDotEffects strips ONLY DoT effects and reports the ids', () => {
@@ -148,11 +153,12 @@ describe('getDistinctDebuffCount (FALLEN / variety payoffs)', () => {
 describe('getDistinctControlCount (DISRUPT meter — WS8.3 counts SURFACES, not ids)', () => {
     it('counts distinct control SURFACES; same-surface ids collapse to one pip', () => {
         // Five control ids on THREE surfaces: charm + silence share 'action',
-        // daze + slow share 'roll', root owns 'stance' (WS8.2 lockedStance).
+        // knockdown + slow share 'roll', root owns 'stance' (WS8.2
+        // lockedStance). (daze folded into confusion, WS8.1 KW-2.)
         expect(getDistinctControlCount(combatant([
             ae('debuff_charm', 1),                // forcedStance    → action
             ae('debuff_silence', 1),              // blockedStances  → action
-            ae('debuff_daze', 1),                 // roll -3         → roll
+            ae('debuff_knockdown', 1),            // roll -3         → roll
             ae('debuff_slow', 1),                 // roll -2         → roll
             ae('debuff_root', 1),                 // lockedStance    → stance
             ae('debuff_poison', 1),               // DoT — NOT control
@@ -160,7 +166,7 @@ describe('getDistinctControlCount (DISRUPT meter — WS8.3 counts SURFACES, not 
         ]))).toBe(3);
         // Three ids of the SAME grip are ONE pip (the WS8.3 design intent).
         expect(getDistinctControlCount(combatant([
-            ae('debuff_daze', 1), ae('debuff_slow', 1), ae('debuff_knockdown', 1),
+            ae('debuff_fear', 1), ae('debuff_slow', 1), ae('debuff_knockdown', 1),
         ]))).toBe(1);
         expect(getDistinctControlCount(combatant([]))).toBe(0);
     });

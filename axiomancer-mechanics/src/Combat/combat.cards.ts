@@ -12,7 +12,7 @@
 
 import { MAX_EFFECT_INTENSITY, FREE_ENCHANT_ROUNDS } from '../Game/game-mechanics.constants';
 import type { Effect, ActiveEffect } from '../Effects/types';
-import type { Card, CardCombatEffects, CardRider, CardSpecialMechanic } from '../Cards/types';
+import type { Card, CardCombatEffects, CardRider, CardSpecialMechanic, SynergyStatePredicate } from '../Cards/types';
 import { rankToRarity, CARD_RANK_NAMES } from '../Cards/types';
 import type {
     CombatCard, CombatDieColor, CombatVerbClass, CardEffectKind,
@@ -195,6 +195,31 @@ export function riderText(r: CardRider): string {
     return parts.join(' · ');
 }
 
+/**
+ * WS4.2 / WS5.2 — human text for a combat-state synergy predicate (the
+ * printed condition line; P0-truth: the text IS the evaluated condition).
+ * Face-term budget (card-keyword doctrine): OPENING is the microset's ONE
+ * shared face term — card-local, registered nowhere; the other turn-shape
+ * conditions print as plain lowercase glosses (RECOIL is existing registry
+ * vocabulary, not a new term).
+ */
+export function statePredicateText(p: SynergyStatePredicate): string {
+    switch (p.kind) {
+        case 'enemy-dealt-no-damage-last-round':
+            return 'UNMOVED (the enemy dealt you no damage last round)';
+        case 'opening':
+            return p.maxPriorSpells === 0
+                ? 'OPENING (your first spell this turn)'
+                : `OPENING (within your first ${p.maxPriorSpells + 1} spells this turn)`;
+        case 'finale':
+            return `your closing play (${p.cardsLeftAtMost} or fewer cards left in hand after this)`;
+        case 'recoil-paid-this-turn':
+            return 'blood already paid (you paid RECOIL earlier this turn)';
+        case 'enemy-drew-blood':
+            return 'the enemy drew blood since your last turn';
+    }
+}
+
 /** Human text for one special mechanic (PAID line clauses, real units). */
 export function mechanicText(m: CardSpecialMechanic): string | null {
     switch (m.kind) {
@@ -212,7 +237,7 @@ export function mechanicText(m: CardSpecialMechanic): string | null {
         case 'premise': return `+${m.count} Premise${m.count === 1 ? '' : 's'}`;
         case 'peroration': return `PERORATION at ${m.at}${m.concedeAt ? ` (CONCEDE at ${m.concedeAt})` : ''}`;
         case 'spend_premises': return `spend ALL Premises — +1 mark per ${m.markPer}, draw 1 per ${m.drawPer}`;
-        case 'spend_all_pips': return `spend ALL pips${m.guardPerPip ? ` (+${m.guardPerPip} Guard per pip)` : ''}`;
+        case 'spend_all_pips': return `spend ALL pips${m.guardPerPip ? ` (+${m.guardPerPip} Guard per pip)` : ''}${m.markPer ? ` (+1 MARK per ${m.markPer} spent, uncapped)` : ''}`;
         case 'recoil': return `RECOIL ${m.hp}`;
         case 'recoil_x': return `RECOIL X (min ${m.min}): POISON per ${Math.round(1 / m.poisonPerX)}`;
         case 'extend_dots': return `+${m.turns} duration to ALL your DoTs`;
@@ -229,7 +254,7 @@ export function mechanicText(m: CardSpecialMechanic): string | null {
         case 'replay_last': return `replay your last spell ×${m.times}`;
         case 'conjure_card': return 'CONJURE a Thoughtform';
         case 'create_temporary_die': return `KINDLE (${m.color})`;
-        case 'grant_pip': return `+${m.count} pip to every Reserve die`;
+        case 'grant_pip': return `+${m.count} pip to every Reserve die${m.overflow ? ` — each pip with no room: ${riderText(m.overflow)}` : ''}`;
         case 'bank_spent_die': return 'the spent die BANKS to the Reserve';
         case 'convert_die_color': return 'the spent die returns as WILD';
         case 'refresh_die': return 'refresh the spent die';
@@ -306,6 +331,11 @@ export function toCombatCard(cardId: string, lookupCard: CardLookup, lookupEffec
     if (card.fate) {
         const recoil = card.fate.recoilHp ? ` (recoil ${card.fate.recoilHp} HP)` : '';
         dieLines.push(`✕ an X die may power this: +${riderText(card.fate.rider)}${recoil}`);
+    }
+    // WS4.2 — combat-state synergy condition (dieless, ledger-read): printed
+    // exactly as evaluated (P0-truth).
+    if (card.synergy?.statePredicate && card.synergy.rider) {
+        dieLines.push(`◆ ${statePredicateText(card.synergy.statePredicate)}: ${riderText(card.synergy.rider)}`);
     }
 
     return {

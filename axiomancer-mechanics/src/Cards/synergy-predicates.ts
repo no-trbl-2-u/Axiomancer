@@ -6,7 +6,7 @@
  */
 
 import type { ActiveEffect } from '../Effects/types';
-import type { SynergyPredicate } from './types';
+import type { SynergyPredicate, SynergyStatePredicate } from './types';
 
 /** Extended predicate supporting multi-effect requirements. */
 export interface ExtendedSynergyPredicate {
@@ -42,6 +42,59 @@ export interface ExtendedSynergyPredicate {
         /** Optional filter to specific effect types. */
         effectType?: 'buff' | 'debuff';
     };
+}
+
+/**
+ * WS4.2 / WS5.2 — the combat-ledger view a {@link SynergyStatePredicate}
+ * reads: a structural subset of `CombatEncounterState` (spec 32 §12 item 4
+ * ledgers + the turn-shape fields), so this module never imports the Combat
+ * package. The engine passes the INCOMING play state, so every field is
+ * pre-this-play (see the timing note on {@link SynergyStatePredicate}).
+ */
+export interface SynergyLedgerView {
+    /** Post-soak HP the enemy's threat landed in the PRIOR round. */
+    enemyDamageLastRound?: number;
+    /** Post-soak HP the enemy's threat landed THIS turn (0 during the play
+     *  window today — threats resolve between player turns). */
+    enemyDamageThisTurn?: number;
+    /** PAID spells already resolved this turn (this play not yet counted). */
+    spellsPlayedThisTurn?: number;
+    /** RECOIL HP paid by PRIOR plays this turn (this play's own not counted). */
+    recoilPaidThisTurn?: number;
+    /** The current hand — only its LENGTH is read (the played card is still
+     *  in it at eval time). Structural: `CombatHandEntry[]` satisfies this. */
+    hand?: readonly unknown[];
+}
+
+/**
+ * WS4.2 — evaluate a combat-state synergy predicate against the encounter
+ * ledgers. Pure and deterministic; exhaustive over the closed predicate union
+ * (a new predicate kind fails compilation here until it is handled).
+ *
+ * Absent-field conventions (bare views in tests / legacy state literals):
+ * counters default to 0 — so `opening` is vacuously TRUE (no spells played),
+ * `recoil-paid-this-turn` / `enemy-drew-blood` are FALSE (no cost on the
+ * ledger), and a missing `hand` makes `finale` vacuously TRUE (mirrors the
+ * unmoved predicate's vacuous-truth convention; the engine always has a hand).
+ */
+export function checkStatePredicate(
+    predicate: SynergyStatePredicate,
+    ledgers: SynergyLedgerView,
+): boolean {
+    switch (predicate.kind) {
+        case 'enemy-dealt-no-damage-last-round':
+            return (ledgers.enemyDamageLastRound ?? 0) === 0;
+        case 'opening':
+            return (ledgers.spellsPlayedThisTurn ?? 0) <= predicate.maxPriorSpells;
+        case 'finale':
+            // The eval-time hand still contains the card being played.
+            return (ledgers.hand?.length ?? 0) - 1 <= predicate.cardsLeftAtMost;
+        case 'recoil-paid-this-turn':
+            return (ledgers.recoilPaidThisTurn ?? 0) > 0;
+        case 'enemy-drew-blood':
+            return (ledgers.enemyDamageThisTurn ?? 0) > 0
+                || (ledgers.enemyDamageLastRound ?? 0) > 0;
+    }
 }
 
 /**

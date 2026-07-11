@@ -331,11 +331,14 @@ describe('Spec 26b §1 — status-combo loop', () => {
 describe('Spec 25 §4.5 — between-phases processing', () => {
     it('fires enemy DoT ticks (erodes HP), ticks effect durations, draws a fresh hand', () => {
         mockSequentialRng(0.05);
-        let state = initializeCombatEncounter(makePlayer([DOT_BODY]), makeEnemy(80, 'mind'), [DOT_BODY], 5);
+        // WS3.3: poison/bleed ride EVENT clocks now — the round-boundary
+        // witness here is Nettle Cloak's Nettle Sting (round-end round clock).
+        const NETTLE = 'nettle-cloak';
+        let state = initializeCombatEncounter(makePlayer([NETTLE]), makeEnemy(80, 'mind'), [NETTLE], 5);
         state = rollEncounterDice(state).state;
         state = setDice(state, ['body', 'heart']);
-        state = draftAndPlay(state, DOT_BODY).state;
-        const dotBefore = state.enemy.effects.find(e => e.effectId === 'debuff_poison');
+        state = draftAndPlay(state, NETTLE).state;
+        const dotBefore = state.enemy.effects.find(e => e.effectId === 'debuff_nettle_sting');
         expect(dotBefore).toBeDefined();
         const hpBefore = state.enemy.health;
         const durBefore = dotBefore!.remainingDuration;
@@ -344,7 +347,7 @@ describe('Spec 25 §4.5 — between-phases processing', () => {
         const after = bp.state;
         expect(after.enemy.health).toBeLessThan(hpBefore);
         expect(bp.events.some(e => e.kind === 'dot-tick' && e.target === 'enemy')).toBe(true);
-        const dotAfter = after.enemy.effects.find(e => e.effectId === 'debuff_poison');
+        const dotAfter = after.enemy.effects.find(e => e.effectId === 'debuff_nettle_sting');
         if (dotAfter) expect(dotAfter.remainingDuration).toBeLessThan(durBefore);
         expect(after.hand.length).toBe(COMBAT_HAND_SIZE);
         // A new phase resets the draft so the next turn rolls fresh.

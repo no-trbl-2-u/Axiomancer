@@ -77,13 +77,22 @@ describe('pricing lint — every spell lands in its rank band', () => {
     });
 });
 
-describe('pricing table — pinned anchors from the spec §4 arithmetic', () => {
-    it('poison i1 d4 prints the honest ramp curve "2,2,3,3 = 10"', () => {
-        expect(dotLifetimeHp('debuff_poison', 1, 4)).toBe(10);
+describe('pricing table — pinned anchors from the spec §4 arithmetic (WS3.5 clock pricing)', () => {
+    it('poison i1 d4 prices its card-played clock: ramp 2,2,3,3 × 2 ticks/round = 20', () => {
+        // WS3.3 (spec 32 §12 #3): POISON ticks on the card-played clock —
+        // EXPECTED_TRIGGERS_PER_ROUND 2 — so the printed lifetime doubles.
+        expect(dotLifetimeHp('debuff_poison', 1, 4)).toBe(20);
     });
 
-    it('bleed decays 1 intensity per tick (i2 d2 = 6 + 3 = 9)', () => {
+    it('bleed decays 1 intensity per tick and washes out (i2 d2 = 6 + 3 = 9 on ANY clock)', () => {
+        // BLEED is decay-limited: the damage-instance clock changes WHEN the
+        // 9 HP lands (faster), not HOW MUCH — the lifetime anchor holds.
         expect(dotLifetimeHp('debuff_bleed', 2, 2)).toBe(9);
+        expect(dotLifetimeHp('debuff_bleed', 3, 2)).toBe(18); // i3: 9+6+3
+    });
+
+    it('creeping doom (WS3.4) prices growth over the no-calendar horizon (i2 → 2+3+4+5 = 14)', () => {
+        expect(dotLifetimeHp('debuff_creeping_doom', 2, 3)).toBe(14);
     });
 
     it('non-DoT statuses price at 0.75 per intensity-turn', () => {
@@ -119,8 +128,8 @@ describe('pricing table — pinned anchors from the spec §4 arithmetic', () => 
 
     it('the starter pair prices at its authored comments (regression anchors)', () => {
         const slipperySlope = spells.find(s => s.id === 'slippery-slope')!;
-        // poison lifetime 10/3 + FREE tick 0.6 = 3.93
-        expect(scoreCard(slipperySlope)).toBeCloseTo(10 / 3 + 0.6, 2);
+        // poison lifetime 20/3 (card-played clock) + FREE tick 0.6 = 7.27
+        expect(scoreCard(slipperySlope)).toBeCloseTo(20 / 3 + 0.6, 2);
         const brace = spells.find(s => s.id === 'brace-for-impact')!;
         // Guard 8/4 + FREE guard 2/4 = 2.5
         expect(scoreCard(brace)).toBeCloseTo(2.5, 2);

@@ -3,11 +3,13 @@
  * 2026-07-11 #3; plan/tuning/2026-07-11-card-library-improvement-plan-detailed.md
  * WS3).
  *
- * The substrate is MECHANICALLY INERT for shipped data — no library effect
- * carries a `damageOverTime.trigger`, `calendarExpiry`, or `growth` field yet
- * (the WS3.3 data sweep is a separate PR) — so every scenario here registers
- * SYNTHETIC effects into the shared effect registry (removed in `afterAll`;
- * vitest isolates module state per file, so no other suite can observe them).
+ * The WS3.3 data sweep (2026-07-11) put the substrate on live data: POISON
+ * ticks the card-played clock, BLEED the damage-instance clock, MARK is
+ * battle-long (`calendarExpiry: false`), and `debuff_creeping_doom` (WS3.4)
+ * grows per enemy action. The scenarios here still register SYNTHETIC effects
+ * into the shared effect registry (removed in `afterAll`; vitest isolates
+ * module state per file) so the SUBSTRATE semantics stay pinned independently
+ * of the library's tuning numbers.
  *
  * Covered:
  *   1. `fireDotTrigger` unit semantics — trigger matching, exact no-op,
@@ -400,9 +402,11 @@ describe('legacy parity — an untagged DoT keeps exactly the old behavior', () 
             return total;
         };
 
-        // Real library DoTs (ramping poison + decaying bleed + mark combo food).
+        // Real STILL-LEGACY library DoTs (WS3.3 moved poison/bleed onto event
+        // clocks — the round-clocked card-local species and the support hex
+        // are the remaining untagged witnesses).
         const enemy = stateWithEnemyEffects([
-            ae('debuff_poison', 3, 4), ae('debuff_bleed', 3, 3), ae('debuff_mark', 2, 2),
+            ae('debuff_kindling_ember', 3, 4), ae('debuff_nettle_sting', 3, 3), ae('debuff_hex', 2, 2),
         ]).enemy;
         expect(getPendingDotTotal(enemy, 2).total).toBe(legacyPending(enemy, 2));
         expect(getPendingDotTotal(enemy).total).toBe(legacyPending(enemy));

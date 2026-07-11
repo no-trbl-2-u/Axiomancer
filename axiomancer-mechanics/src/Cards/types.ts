@@ -163,8 +163,12 @@ export type CardSpecialMechanic =
      *  only). It joins the RESERVE at 0 pips when a slot is free; otherwise it
      *  burns for +1 Conviction. */
     | { kind: 'create_temporary_die'; color: 'heart' | 'body' | 'mind' | 'wild' }
-    /** PIP — every die currently in the Reserve ripens +`count` pips. */
-    | { kind: 'grant_pip'; count: number }
+    /** PIP — every die currently in the Reserve ripens +`count` pips.
+     *  WS4.1 (`overflow`): each granted pip that finds NO room — the Reserve is
+     *  empty, or every Reserve die sits at `RESERVE_PIP_CAP` — fires the
+     *  printed overflow rider once instead of vanishing (Slag Runoff: the slag
+     *  that misses the mold becomes a Kindling Ember on the foe). */
+    | { kind: 'grant_pip'; count: number; overflow?: CardRider }
     /** BANK_SPENT_DIE — instead of being spent, the powering die goes to the
      *  Reserve at 0 pips (if a slot is free; otherwise it is spent normally). */
     | { kind: 'bank_spent_die' }
@@ -203,8 +207,11 @@ export type CardSpecialMechanic =
      *  `markPer` spent and draw 1 per `drawPer` spent. */
     | { kind: 'spend_premises'; markPer: number; drawPer: number }
     /** SPEND ALL PIPS — zero every pip on the powering die + Reserve; a paired
-     *  `rupture` gains `fuelPerPip` per pip, and each pip grants `guardPerPip`. */
-    | { kind: 'spend_all_pips'; guardPerPip?: number }
+     *  `rupture` gains `fuelPerPip` per pip, and each pip grants `guardPerPip`.
+     *  WS4.1 (`markPer`): +1 MARK stack on the foe per `markPer` pips spent,
+     *  UNCAPPED (spec 32 §12 item 5 — the ALL-spender's price is the input
+     *  opportunity cost of emptying the bank, not a numeric ceiling). */
+    | { kind: 'spend_all_pips'; guardPerPip?: number; markPer?: number }
     /** RECOIL — pay `hp` VITAE (unpreventable, printed cost). */
     | { kind: 'recoil'; hp: number }
     /** RECOIL X (WS7.2, spec 32 §12 item 5 — the first chosen X-cost): pay X
@@ -319,6 +326,47 @@ export interface SynergyPredicate {
 }
 
 /**
+ * WS4.2 (spec 32 §12 item 4) — a COMBAT-STATE synergy predicate: instead of
+ * matching an ActiveEffect, it reads one of the ratified encounter ledgers at
+ * play time. A closed union — extend it here (the existing synergy machinery
+ * is the ONE conditional gate; do not grow a parallel one).
+ *
+ * Evaluation timing (all kinds): `playBottomAction` checks the predicate
+ * against the INCOMING state — before this play increments
+ * `spellsPlayedThisTurn`, before its own recoil posts to
+ * `recoilPaidThisTurn`, and before the played card leaves `hand`. PAID face
+ * only (the FREE line never evaluates conditions).
+ *
+ * - `enemy-dealt-no-damage-last-round` — true when `enemyDamageLastRound`
+ *   (post-soak HP the enemy's threat landed between the player's turns) is 0:
+ *   fully blocked, denied, or the enemy simply did not act. Vacuously true on
+ *   the opening turn (no prior round exists) — deterministic and printable.
+ *
+ * WS5.2 (sequencing grammar, plan §WS5) — the turn-SHAPE conditions:
+ * - `opening` — at most `maxPriorSpells` PAID spells have resolved this turn
+ *   (0 = this is the turn's first spell; 1 = first or second). FREE plays
+ *   never consume the opening (they don't increment the counter).
+ * - `finale` — playing this card leaves at most `cardsLeftAtMost` cards in
+ *   hand (the eval-time hand still CONTAINS this card, so the check is
+ *   `hand.length - 1 <= cardsLeftAtMost`). "≤ 2 left behind" fires on the
+ *   third PAID play of a standard 5-card, 3-die turn.
+ * - `recoil-paid-this-turn` — a PRIOR play this turn paid a blood price
+ *   (`recoilPaidThisTurn > 0`; this play's own recoil does not count — the
+ *   Frenzy shape needs the cost already on the ledger).
+ * - `enemy-drew-blood` — the enemy landed damage since the start of the
+ *   player's previous turn (`enemyDamageThisTurn > 0` OR
+ *   `enemyDamageLastRound > 0`). The enemy hits BETWEEN player turns, so at
+ *   play time the live leg is the rollover; the this-turn leg is included so
+ *   the predicate stays honest if mid-turn enemy damage ever exists.
+ */
+export type SynergyStatePredicate =
+    | { kind: 'enemy-dealt-no-damage-last-round' }
+    | { kind: 'opening'; maxPriorSpells: number }
+    | { kind: 'finale'; cardsLeftAtMost: number }
+    | { kind: 'recoil-paid-this-turn' }
+    | { kind: 'enemy-drew-blood' };
+
+/**
  * Phase 66 — Tier 2 synergy clause. Optional payload on `Card` that
  * rewards stance-switching by conditioning damage / effect application
  * on the presence of an ActiveEffect already on the field (or, for
@@ -353,6 +401,21 @@ export interface CardSynergy {
     /** Optional predicate. If absent, the synergy fires unconditionally
      *  when the card is cast (used by Resonance Detonation per D6). */
     predicate?: SynergyPredicate;
+    /**
+     * WS4.2 — a combat-STATE predicate (encounter-ledger read; see
+     * {@link SynergyStatePredicate}). Hazard-Pattern-combat-owned: the legacy
+     * card engine no-ops a synergy clause that carries one (mirroring how it
+     * no-ops `specialMechanics`). Evaluated by `playCombatCard` at play time;
+     * when it holds, {@link CardSynergy.rider} fires FREE. Prices at the
+     * `threshold` ×0.5 condition discount (`CONDITION_DISCOUNTS`).
+     */
+    statePredicate?: SynergyStatePredicate;
+    /**
+     * WS4.2 — the rider fired (free, real units) when `statePredicate` holds.
+     * Post-v3 vocabulary: the damage-multiplier fields below are dead with the
+     * strike; new state-gated synergies speak `CardRider` instead.
+     */
+    rider?: CardRider;
     /** Flat bonus damage on match. */
     bonusDamage?: number;
     /** Multiplier × matched effect's `remainingDuration`. */

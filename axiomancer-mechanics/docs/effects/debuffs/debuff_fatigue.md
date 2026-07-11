@@ -1,5 +1,7 @@
 # Preface Exhaustion — `debuff_fatigue`
 
+> **FOLDED (WS8.1 KW-2, 2026-07-11):** this id was a duplicate grip and was folded into `debuff_exhaustion`. The id is deleted from the library JSONs and banned by the deprecated-effects list; this page is historical.
+
 > *"You believe each action you take is correct. You also believe some of your actions must be mistakes. The inconsistency drains you."*
 
 ---

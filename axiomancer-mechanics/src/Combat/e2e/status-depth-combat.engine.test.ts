@@ -100,15 +100,19 @@ const enemyDotSum = (events: readonly CombatEvent[]): number =>
 // ── AMPLIFICATION surface (Hemorrhage) ───────────────────────────────────────
 
 describe('AMPLIFICATION — the combo registry is surfaced honestly', () => {
-    it('poison+bleed dot-ticks SUM to the real HP lost and report the Hemorrhage combo', () => {
+    it('poison+bleed surface the Hemorrhage combo; event clocks never round-tick', () => {
         const base = initializeCombatEncounter(makePlayer([]), makeEnemy(300, 'mind'), undefined, 7);
         const enemyEffects = [ae('debuff_poison', 2), ae('debuff_bleed', 1)];
         const res = processBetweenPhases({ ...base, enemy: { ...base.enemy, effects: enemyEffects } });
         const lost = 300 - res.state.enemy.health;
-        // v3: poison start floor(2×2×1.5)=6 (Hemorrhage) + bleed end floor(3×1)=3.
-        expect(lost).toBe(9);
-        expect(enemyDotSum(res.events)).toBe(lost);  // honesty: emitted == landed
+        // WS3.3: poison (card-played clock) and bleed (damage-instance clock)
+        // no longer tick at the round boundary — the boundary leaves them
+        // untouched, honestly (emitted == landed == 0).
+        expect(lost).toBe(0);
+        expect(enemyDotSum(res.events)).toBe(0);
 
+        // The per-tick amplification surface is clock-agnostic:
+        // poison floor(2×2×1.5)=6 (Hemorrhage) + bleed floor(3×1)=3.
         expect(getActiveDotTotal(enemyEffects).total).toBe(9);
         const amps = getActiveDotAmplifications(enemyEffects);
         expect(amps).toHaveLength(1);
@@ -137,9 +141,10 @@ describe('RUPTURE — detonate the foe afflictions for the pending total', () =>
         // MIND die on the mind card (color law) vs a mind foe → neutral read ×1.
         const state = openAndDraft(makePlayer([RUP]), makeEnemy(300, 'mind', enemyEffects), [RUP, RUP, RUP], 'mind');
         const projected = projectRupture(state); // neutral read (mind die vs mind) → ×1
-        // v3 poison RAMPS + Hemorrhage: ticks 6,6,9,9 = 30; bleed i1 DECAYS —
-        // exactly one tick of 3. pending = 33.
-        expect(projected).toBe(33);
+        // WS3.3 clock fuel: poison RAMPS + Hemorrhage on the card-played
+        // clock (2 expected ticks/round): per-round dprs 6,6,9,9 × 2 = 60;
+        // bleed i1 DECAYS — exactly one tick of 3. pending = 63.
+        expect(projected).toBe(63);
 
         const hpBefore = state.enemy.health;
         const res = playCombatCard(state, { uid: state.hand.find(h => h.cardId === RUP)!.uid }, true);
@@ -197,9 +202,11 @@ describe('RUPTURE — detonate the foe afflictions for the pending total', () =>
 describe('DISRUPT — a variety of control SURFACES denies the telegraphed turn (WS8.3)', () => {
     // Support-tagged (non-card) controls carried by enemy threats / legacy
     // sources — each on a DIFFERENT surface (spec 32 §12 #6):
-    //   daze → roll (-3), root → stance (lockedStance),
+    //   knockdown → roll (-3), root → stance (lockedStance),
     //   blind → rider-suppress (suppressesThreatRiders).
-    const twoSurfaces = () => [ae('debuff_daze', 1), ae('debuff_root', 1)];
+    // (daze folded into confusion, WS8.1 KW-2 — knockdown is the -3 roll
+    // carrier now.)
+    const twoSurfaces = () => [ae('debuff_knockdown', 1), ae('debuff_root', 1)];
     const threeSurfaces = () => [...twoSurfaces(), ae('debuff_blind', 1)];
 
     it('does NOT deny at 2 distinct surfaces (roll penalty 3 < 8)', () => {
@@ -216,8 +223,8 @@ describe('DISRUPT — a variety of control SURFACES denies the telegraphed turn 
 
     it('does NOT deny at 3 controls of the SAME grip (three roll shreds = 1 pip)', () => {
         mockSequentialRng(0.05);
-        // daze -3 + slow -2 + straw_man_echo -1 = penalty 6 < 8, all 'roll'.
-        const sameGrip = [ae('debuff_daze', 1), ae('debuff_slow', 1), ae('debuff_straw_man_echo', 1)];
+        // knockdown -3 + slow -2 + straw_man_echo -1 = penalty 6 < 8, all 'roll'.
+        const sameGrip = [ae('debuff_knockdown', 1), ae('debuff_slow', 1), ae('debuff_straw_man_echo', 1)];
         const base = initializeCombatEncounter(makePlayer([]), makeEnemy(300, 'mind', sameGrip), undefined, 7);
         const state = rollEncounterDice(base).state;
         const meter = getDisruptMeter(state);
@@ -371,16 +378,19 @@ describe('INVARIANT — no new behavior fires without its marker', () => {
 
     it('a plain enemy + plain player emit ZERO new-kind events and un-amplified DoT', () => {
         mockSequentialRng(0.05);
-        // One control (roll -3) → below every deny threshold; one poison DoT, no combo.
-        const enemyEffects = [ae('debuff_daze', 1), ae('debuff_poison', 2)];
+        // One control (roll -3) → below every deny threshold; one ROUND-CLOCKED
+        // DoT, no combo. (WS3.3: poison moved to the card-played clock — it no
+        // longer ticks at the round boundary, so the round-tick witness here is
+        // nettle_sting, the bulwark card-local species: dpr 2, round-end.)
+        const enemyEffects = [ae('debuff_knockdown', 1), ae('debuff_nettle_sting', 2)];
         const base = initializeCombatEncounter(makePlayer([]), makeEnemy(300, 'mind', enemyEffects), undefined, 7);
         const state = rollEncounterDice(base).state;
         const res = resolveThreatPhase(state); // fires threat + processBetweenPhases
 
         for (const ev of res.events) expect(NEW_KINDS.has(ev.kind), ev.kind).toBe(false);
         expect(res.events.some(e => e.kind === 'dot-tick' && e.effectId === 'vulnerable-surcharge')).toBe(false);
-        // v3 poison i2, round 1, no combo → floor(2×2)=4 exactly.
-        const tick = res.events.find(e => e.kind === 'dot-tick' && e.effectId === 'debuff_poison') as { amount: number } | undefined;
+        // nettle_sting i2, round 1, no combo → floor(2×2)=4 exactly.
+        const tick = res.events.find(e => e.kind === 'dot-tick' && e.effectId === 'debuff_nettle_sting') as { amount: number } | undefined;
         expect(tick!.amount).toBe(4);
         expect(res.events.some(e => e.kind === 'threat-fired')).toBe(true); // enemy still acts
     });

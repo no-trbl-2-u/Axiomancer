@@ -215,6 +215,8 @@ export {
     toCombatCard, projectDeck, classifyVerbClass,
 
     mechanicText,
+    // WS4.2 — printed text for a combat-state synergy condition (P0-truth)
+    statePredicateText,
     isCombatSynergySatisfied,
 } from './combat.cards';
 export {

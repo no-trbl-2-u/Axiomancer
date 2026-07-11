@@ -424,7 +424,7 @@
   "id": "brief-candle",
   "name": "Brief Candle",
   "image": "./assets/catalog/cards/burn.webp",
-  "pricing": "bleed i2 d1 (~2) + fast expiry→Soul (0.75) + FREE souls 1 (0.75) ≈ 3.5 →",
+  "pricing": null,
   "chips": [
    {
     "k": "Stance",
@@ -528,7 +528,7 @@
   "id": "cassandras-burden",
   "name": "Cassandra's Burden",
   "image": "./assets/catalog/cards/god-eye-silver.webp",
-  "pricing": "immediate Foretold Wound i2 d2 (~3.2) + OMEN(Guard 4, ×0.6 = 0.6) +",
+  "pricing": null,
   "chips": [
    {
     "k": "Stance",
@@ -573,7 +573,8 @@
   ],
   "lines": [
    "FREE — draw 1",
-   "Applies Foretold Wound ×2, 2t → enemy",
+   "Applies Poison ×1, 2t → enemy",
+   "Applies Mark ×1, 2t → enemy",
    "OMEN — on hit: Guard 4"
   ]
  },
@@ -1056,7 +1057,7 @@
   "id": "exordium",
   "name": "Exordium",
   "image": "./assets/catalog/cards/light-ring.webp",
-  "pricing": "argument-wound i1 d2 (1.33) + 1 Premise (0.8) + draw rider (2) + FREE premise (0.8) = 4.93 → Doxa",
+  "pricing": null,
   "chips": [
    {
     "k": "Stance",
@@ -1101,7 +1102,7 @@
   ],
   "lines": [
    "FREE — +1 Premise",
-   "Applies Argument Wound ×1, 2t → enemy",
+   "Applies Poison ×1, 2t → enemy",
    "+1 Premise",
    "rider"
   ]
@@ -1267,7 +1268,7 @@
   "id": "glimpse",
   "name": "Glimpse",
   "image": "./assets/catalog/cards/god-eye-silver.webp",
-  "pricing": "FORETELL 2 (2) + Foretold Wound d2 (now real DoT, ~2.0) + FREE",
+  "pricing": null,
   "chips": [
    {
     "k": "Stance",
@@ -1312,7 +1313,8 @@
   ],
   "lines": [
    "FREE — FORETELL 1",
-   "Applies Foretold Wound ×1, 2t → enemy",
+   "Applies Poison ×1, 1t → enemy",
+   "Applies Mark ×1, 2t → enemy",
    "FORETELL 2"
   ]
  },
@@ -1741,7 +1743,7 @@
   "id": "mounting-case",
   "name": "Mounting Case",
   "image": "./assets/catalog/cards/bright-sphere-yellow.webp",
-  "pricing": "mark d3 (2.25) + argument-wound i2 d4 (6.67) + 2 Premises (1.6) + FREE premise (0.8)",
+  "pricing": null,
   "chips": [
    {
     "k": "Stance",
@@ -1787,7 +1789,7 @@
   "lines": [
    "FREE — +1 Premise",
    "Applies Mark ×1, 3t → enemy",
-   "Applies Argument Wound ×2, 4t → enemy",
+   "Applies Poison ×1, 4t → enemy",
    "+2 Premises",
    "Threshold: 2× heart die fires a rider"
   ]
@@ -1849,7 +1851,7 @@
   "id": "opening-statement",
   "name": "Opening Statement",
   "image": "./assets/catalog/cards/light-ring.webp",
-  "pricing": "mark d2 (1.5) + argument-wound i1 d3 (2.33) + 2 Premises (1.6) + FREE premise (0.8) = 6.23 → Lemma",
+  "pricing": null,
   "chips": [
    {
     "k": "Stance",
@@ -1895,7 +1897,7 @@
   "lines": [
    "FREE — +1 Premise",
    "Applies Mark ×1, 2t → enemy",
-   "Applies Argument Wound ×1, 3t → enemy",
+   "Applies Poison ×1, 2t → enemy",
    "+2 Premises"
   ]
  },
@@ -2055,7 +2057,7 @@
   ],
   "lines": [
    "FREE — draw 1",
-   "Applies Acute Backfire ×3, 3t → enemy",
+   "Applies Backfire ×3, 3t → enemy",
    "STAGGER 2",
    "Die bonus: powering die mind fires a rider"
   ]
@@ -2325,7 +2327,7 @@
   "id": "refrain",
   "name": "Refrain",
   "image": "./assets/catalog/cards/will-o-wisp.webp",
-  "pricing": "[mark d2 (1.5) + echo_sting d2 (1.5)] × ECHO(x2 applications) ≈ 6 +",
+  "pricing": null,
   "chips": [
    {
     "k": "Stance",
@@ -2371,7 +2373,7 @@
   "lines": [
    "FREE — draw 1",
    "Applies Mark ×1, 2t → enemy",
-   "Applies Echo Sting ×1, 2t → enemy",
+   "Applies Poison ×1, 1t → enemy",
    "ECHO"
   ]
  },
@@ -2697,7 +2699,7 @@
   "id": "slippery-slope",
   "name": "Slippery Slope",
   "image": "./assets/catalog/cards/dream-flutter.webp",
-  "pricing": "poison i1 d4 ramp lifetime 10/3 ≈ 3.3 + FREE tick 0.6 = 3.9 → Doxa (starter)",
+  "pricing": null,
   "chips": [
    {
     "k": "Stance",
@@ -2959,7 +2961,7 @@
   "id": "sweet-poison",
   "name": "Sweet Poison",
   "image": "./assets/catalog/cards/dream-flutter.webp",
-  "pricing": "poison i2 d4 (~6.7) − self-bleed i1 d2 credit (−0.75×1.7 ≈ −1.3) + tick 0.6 ≈ 6.0 → Lemma (deliberately rich — the akratic bargain)",
+  "pricing": null,
   "chips": [
    {
     "k": "Stance",
@@ -3004,7 +3006,7 @@
   ],
   "lines": [
    "FREE — tick",
-   "Applies Poison ×2 → enemy",
+   "Applies Poison ×1 → enemy",
    "Applies Bleed ×1, 2t → self"
   ]
  },

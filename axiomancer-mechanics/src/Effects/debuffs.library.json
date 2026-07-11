@@ -14,7 +14,7 @@
         "damageOverTime": {
           "damagePerRound": 2,
           "damageType": "mentalAttack",
-          "tickPhase": "start"
+          "trigger": "card-played"
         },
         "dotModifiers": {
           "escalatesPerTurn": true,
@@ -43,7 +43,7 @@
         "damageOverTime": {
           "damagePerRound": 3,
           "damageType": "physicalAttack",
-          "tickPhase": "end"
+          "trigger": "damage-instance"
         },
         "dotModifiers": {
           "decaysPerTick": true
@@ -66,7 +66,10 @@
       "duration": 2,
       "stacking": "intensity",
       "payload": {
-        "tickAmplifyFlat": 1
+        "tickAmplifyFlat": 1,
+        "dotModifiers": {
+          "calendarExpiry": false
+        }
       },
       "tier": 1,
       "addedIn": "2026-07-08",
@@ -131,7 +134,8 @@
       "payload": {
         "damageOverTime": {
           "damagePerRound": 5,
-          "damageType": "body"
+          "damageType": "body",
+          "trigger": "card-played"
         },
         "statModifiers": [
           {
@@ -346,37 +350,6 @@
       ]
     },
     {
-      "id": "debuff_daze",
-      "name": "Simpson's Confusion",
-      "description": "Each part of your thinking is superior, yet combined they're inferior. Your mind's aggregation betrays its components.",
-      "type": "debuff",
-      "category": "control",
-      "duration": 2,
-      "stacking": "duration",
-      "resistedBy": "heart",
-      "resistDR": 12,
-      "payload": {
-        "rollModifier": -3,
-        "statModifiers": [
-          {
-            "stat": "mind",
-            "value": -2,
-            "isMultiplier": false
-          },
-          {
-            "stat": "mentalDefense",
-            "value": -1,
-            "isMultiplier": false
-          }
-        ]
-      },
-      "tier": 2,
-      "tags": [
-        "support",
-        "non-card"
-      ]
-    },
-    {
       "id": "debuff_petrify",
       "name": "Zeno's Stillness",
       "description": "To move, you must first move half the distance. Then half again. Infinite steps in finite time\u2014but your muscles refuse the mathematics.",
@@ -536,37 +509,6 @@
             "isMultiplier": false
           }
         ]
-      },
-      "tier": 2,
-      "tags": [
-        "support",
-        "non-card"
-      ]
-    },
-    {
-      "id": "debuff_fatigue",
-      "name": "Preface Exhaustion",
-      "description": "You believe each action you take is correct. You also believe some of your actions must be mistakes. The inconsistency drains you.",
-      "type": "debuff",
-      "category": "stat",
-      "duration": 4,
-      "stacking": "intensity",
-      "resistedBy": "heart",
-      "resistDR": 12,
-      "payload": {
-        "statModifiers": [
-          {
-            "stat": "body",
-            "value": -1,
-            "isMultiplier": false
-          },
-          {
-            "stat": "mind",
-            "value": -1,
-            "isMultiplier": false
-          }
-        ],
-        "rollModifier": -1
       },
       "tier": 2,
       "tags": [
@@ -887,34 +829,6 @@
       ]
     },
     {
-      "id": "debuff_argument_wound",
-      "name": "Argument Wound",
-      "description": "Each premise it cannot answer opens the cut a little wider — the case itself is bleeding them now.",
-      "type": "debuff",
-      "category": "damage",
-      "duration": 3,
-      "stacking": "intensity",
-      "resistedBy": "mind",
-      "resistDR": 12,
-      "payload": {
-        "damageOverTime": {
-          "damagePerRound": 2,
-          "damageType": "heart",
-          "tickPhase": "end"
-        },
-        "dotModifiers": {
-          "escalatesPerTurn": true,
-          "rampFactor": 0.5
-        }
-      },
-      "tier": 1,
-      "addedIn": "2026-07-08",
-      "tags": [
-        "v3",
-        "peroration"
-      ]
-    },
-    {
       "id": "debuff_kindling_ember",
       "name": "Kindling Ember",
       "description": "A spark thrown loose from the forge, caught in cloth that hasn't noticed yet. It will.",
@@ -938,54 +852,6 @@
         "forge",
         "dot",
         "ember"
-      ]
-    },
-    {
-      "id": "debuff_backfire_acute",
-      "name": "Acute Backfire",
-      "description": "The denial doesn't just cost them the turn — it costs them the argument entirely. What cannot happen collapses the mind that tried to make it happen.",
-      "type": "debuff",
-      "category": "control",
-      "duration": 3,
-      "stacking": "intensity",
-      "resistedBy": "mind",
-      "resistDR": 14,
-      "payload": {
-        "backfirePerRung": 3
-      },
-      "tier": 3,
-      "addedIn": "2026-07-08",
-      "tags": [
-        "v3",
-        "control",
-        "affliction"
-      ]
-    },
-    {
-      "id": "debuff_foretold_wound",
-      "name": "Foretold Wound",
-      "description": "The wound is already written; the body just hasn't caught up to the sentence yet.",
-      "type": "debuff",
-      "category": "damage",
-      "duration": 2,
-      "stacking": "intensity",
-      "resistedBy": "mind",
-      "resistDR": 12,
-      "payload": {
-        "damageOverTime": {
-          "damagePerRound": 1,
-          "damageType": "mind",
-          "tickPhase": "start"
-        },
-        "tickAmplifyFlat": 1
-      },
-      "tier": 1,
-      "addedIn": "2026-07-08",
-      "tags": [
-        "v3",
-        "oracle",
-        "exposure",
-        "affliction"
       ]
     },
     {
@@ -1018,31 +884,32 @@
       ]
     },
     {
-      "id": "debuff_echo_sting",
-      "name": "Echo Sting",
-      "description": "The words repeat until they cut. Every echo leaves the same phrase ringing a little deeper.",
+      "id": "debuff_creeping_doom",
+      "name": "Creeping Doom",
+      "description": "It is not the argument that ruins them — it is every answer they attempt. The doom keeps their own effort as interest, and it never forgets the principal.",
       "type": "debuff",
       "category": "damage",
-      "duration": 2,
+      "duration": 3,
       "stacking": "intensity",
-      "resistedBy": "mind",
-      "resistDR": 10,
+      "resistedBy": "heart",
+      "resistDR": 13,
       "payload": {
         "damageOverTime": {
           "damagePerRound": 1,
-          "damageType": "mind",
-          "tickPhase": "end"
+          "damageType": "mentalAttack"
         },
         "dotModifiers": {
-          "escalatesPerTurn": true,
-          "rampFactor": 0.5
+          "calendarExpiry": false,
+          "growth": "per-enemy-action"
         }
       },
-      "tier": 1,
-      "addedIn": "2026-07-08",
+      "tier": 2,
+      "addedIn": "2026-07-11",
       "tags": [
         "v3",
-        "echo"
+        "dot",
+        "affliction",
+        "doom"
       ]
     }
   ]

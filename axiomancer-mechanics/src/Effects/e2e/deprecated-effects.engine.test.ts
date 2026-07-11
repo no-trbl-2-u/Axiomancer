@@ -29,13 +29,16 @@ import { flattenAuthoredSteps } from '../../Combat/combat.threat';
 // ─── The canonical card vocabulary (spec 32 v3 §3) ───────────────────────────
 
 // The v3 card vocabulary. The reset (spec 32 v3 §3) rebuilt it as six effects;
-// the 2026-07-08 themed-deck rebalance added six THEMED afflictions on top (five
-// DoT variants that carry a distinct resist axis / tick behaviour the canonical
-// two don't, plus an acute BACKFIRE), all card-referenced by cardType:'spell'
-// cards. They are blessed here so the library is honest about what it ships.
-// NOTE: these six are slated to be RE-HOMED into the persistent disenchant/curse
-// layer (owner direction — Doom/Charmed-style, no tick-down); when that lands,
-// they leave the card channel and this set returns to the canonical six.
+// the 2026-07-08 themed-deck rebalance added six THEMED afflictions on top.
+// WS10.1 / Phase 29 KW-1 (2026-07-11, with the WS3.3 clock sweep) folded four
+// of those keyword-less clones back into the canonical set: argument_wound and
+// echo_sting → POISON, foretold_wound → POISON + MARK double-apply,
+// backfire_acute → BACKFIRE @ i3. The two survivors are CARD-LOCAL SPECIES
+// under the 2026-07-10 card-keyword doctrine (one card each, face keyword on
+// the card, no atlas row): kindling_ember (forge) and nettle_sting (bulwark).
+// debuff_creeping_doom is the WS3.4 Doom species (grows per enemy action, no
+// calendar — ratified as card-local, NOT keyword #31); its only card lives in
+// the 'doom-species' sandbox set until promotion.
 const CARD_EFFECT_SET = new Set([
     'debuff_poison',
     'debuff_bleed',
@@ -43,13 +46,10 @@ const CARD_EFFECT_SET = new Set([
     'debuff_backfire',
     'debuff_rapport',
     'buff_thorns',
-    // themed afflictions (pending curse re-home):
-    'debuff_argument_wound',
+    // card-local species (card-keyword doctrine, 2026-07-10):
     'debuff_kindling_ember',
-    'debuff_foretold_wound',
-    'debuff_echo_sting',
     'debuff_nettle_sting',
-    'debuff_backfire_acute',
+    'debuff_creeping_doom',
 ]);
 
 /**
@@ -59,6 +59,11 @@ const CARD_EFFECT_SET = new Set([
  * (items and the Cards system still resolve them); cards may not touch them.
  */
 const RETIRED_CARD_VOCABULARY = [
+    // WS10.1 / Phase 29 KW-1 (2026-07-11) — keyword-less themed clones, folded
+    // into POISON / MARK / BACKFIRE and DELETED from the library JSONs.
+    // Ids die; they are never renamed and never resurrected.
+    'debuff_argument_wound', 'debuff_echo_sting', 'debuff_foretold_wound',
+    'debuff_backfire_acute',
     // DoT clones
     'debuff_burn', 'debuff_hemorrhage', 'debuff_septic', 'debuff_unraveling',
     'debuff_despair', 'debuff_torment', 'debuff_strong_poison',

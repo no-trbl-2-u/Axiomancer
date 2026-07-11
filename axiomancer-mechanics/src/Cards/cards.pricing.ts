@@ -15,6 +15,8 @@
 
 import type { Card, CardRider, CardSpecialMechanic } from './types';
 import { lookupEffect } from '../Effects/effects.library';
+import { dotEventTrigger } from '../Combat/effect-modifiers';
+import { EXPECTED_TRIGGERS_PER_ROUND } from '../Combat/effects';
 
 // ─── The point table (spec 32 v3 §4) ─────────────────────────────────────────
 
@@ -66,6 +68,9 @@ export const VERB_POINTS = Object.freeze({
     expectedSouls: 4,
     /** Expected pips banked when a Forge payoff fires. */
     expectedPips: 2,
+    /** Expected pips that OVERFLOW a `grant_pip` (no Reserve room) per cast —
+     *  the neutral read: one wave lands, one finds the Reserve at cap. */
+    expectedOverflowPips: 1,
     /** Expected chosen X on a chosen-X cost (`recoil_x`, WS7.2): min 3, cap ≈
      *  live HP — a mid-fight commit prices at ~6. */
     expectedChosenX: 6,
@@ -145,23 +150,49 @@ export const SELF_COST_CREDIT = 0.75;
 // ─── Status pricing ──────────────────────────────────────────────────────────
 
 /**
- * Printed lifetime HP of a DoT application, honouring the v3 modifiers:
- * poison escalates (`rampFactor` per elapsed turn, floored, per intensity)
- * and bleed decays 1 intensity per tick. Returns 0 for non-DoT effects.
+ * Pricing horizon for a NO-CALENDAR DoT (`calendarExpiry: false` — expires
+ * only via decay washout or combat end): its printed duration is nominal, so
+ * the lifetime is priced over this many rounds instead (the same conservative
+ * "min-4-triggers" convention the enchantment comments use).
+ * // PLAYTEST-CALIBRATION
+ */
+export const NO_CALENDAR_PRICING_ROUNDS = 4;
+
+/**
+ * Expected lifetime HP of a DoT application, priced BY ITS CLOCK (WS3.5,
+ * spec 32 §12 #3): round-clocked (legacy) DoTs tick once per printed-duration
+ * round; event-clocked DoTs tick `EXPECTED_TRIGGERS_PER_ROUND[trigger]` times
+ * per round over the same horizon — the SAME constants the engine fuel math
+ * (`getPendingDotTotal` / `computeRoundsToKill`) prices with, so the lint and
+ * the RUPTURE preview never diverge. Honours the v3 modifiers with the
+ * engine's own per-tick walk: POISON ramps per elapsed ROUND (`rampFactor`,
+ * floored into the per-tick base), BLEED decays 1 intensity per TICK and
+ * washes out at 0, Doom (`growth: 'per-enemy-action'`) gains +1 intensity per
+ * round (~1 enemy action/round), and a no-calendar instance prices over
+ * `NO_CALENDAR_PRICING_ROUNDS`. Returns 0 for non-DoT effects.
  */
 export function dotLifetimeHp(effectId: string, intensity: number, duration: number): number {
     const def = lookupEffect(effectId);
     const dot = def?.payload.damageOverTime;
     if (!def || !dot) return 0;
     const mods = def.payload.dotModifiers;
+    const eventClock = dotEventTrigger(dot);
+    const ticksPerRound = eventClock ? EXPECTED_TRIGGERS_PER_ROUND[eventClock] : 1;
+    const rounds = mods?.calendarExpiry === false
+        ? Math.max(duration, NO_CALENDAR_PRICING_ROUNDS)
+        : duration;
     let total = 0;
-    let liveIntensity = intensity;
-    for (let t = 1; t <= duration; t++) {
-        if (mods?.decaysPerTick && t > 1) liveIntensity = Math.max(liveIntensity - 1, 0);
-        const perRound = mods?.escalatesPerTurn
-            ? liveIntensity * (dot.damagePerRound + Math.floor((t - 1) * (mods.rampFactor ?? 0.5)))
-            : liveIntensity * dot.damagePerRound;
-        total += perRound;
+    let tickNo = 0;
+    for (let r = 1; r <= rounds; r++) {
+        const dpr = mods?.escalatesPerTurn
+            ? dot.damagePerRound + Math.floor((r - 1) * (mods.rampFactor ?? 0.5))
+            : dot.damagePerRound;
+        const grownIntensity = mods?.growth === 'per-enemy-action' ? intensity + (r - 1) : intensity;
+        for (let t = 0; t < ticksPerRound; t++, tickNo++) {
+            const tickIntensity = mods?.decaysPerTick ? grownIntensity - tickNo : grownIntensity;
+            if (tickIntensity <= 0) return total; // BLEED washout — the instance is spent
+            total += Math.floor(dpr * tickIntensity);
+        }
     }
     return total;
 }
@@ -240,7 +271,11 @@ export function scoreMechanic(mechanic: CardSpecialMechanic): number {
         case 'convert_die_color': return V.convertDieColor;
         case 'create_temporary_die':
             return V.kindle + (mechanic.color === 'wild' ? V.kindleWildBonus : 0);
-        case 'grant_pip': return mechanic.count * V.pip;
+        case 'grant_pip':
+            // WS4.1 — the overflow rider prices at its per-fire value × the
+            // expected wasted pips (the conversion is opportunistic, not free).
+            return mechanic.count * V.pip
+                + (mechanic.overflow ? scoreRider(mechanic.overflow) * V.expectedOverflowPips : 0);
         case 'bank_spent_die': return V.bankSpentDie;
         case 'forge_floating_die':
             return V.forgeFloating + V.forgePersistence
@@ -257,7 +292,13 @@ export function scoreMechanic(mechanic: CardSpecialMechanic): number {
         case 'premise': return mechanic.count * V.premise;
         case 'peroration': return scoreRider(mechanic.rider);
         case 'spend_premises': return V.spendPremises;
-        case 'spend_all_pips': return V.spendAllPips + (mechanic.guardPerPip ?? 0) * 0.5;
+        case 'spend_all_pips':
+            // WS4.1 — `markPer` prices the MARK stacks landed at the expected
+            // pip bank (uncapped upside rides REAL pips; the table stays coarse).
+            return V.spendAllPips + (mechanic.guardPerPip ?? 0) * 0.5
+                + (mechanic.markPer
+                    ? statusPoints('debuff_mark', Math.max(1, Math.floor(V.expectedPips / mechanic.markPer)))
+                    : 0);
         case 'recoil': return -(mechanic.hp * V.healPerHp) * SELF_COST_CREDIT;
         case 'recoil_x':
             // Chosen X-cost: the payoff is the POISON landed at the expected X
@@ -329,6 +370,11 @@ export function scoreCard(card: Card): number {
         pts -= (card.fate.recoilHp ?? 0) * VERB_POINTS.healPerHp * SELF_COST_CREDIT;
     }
     if (card.fallen) pts += scoreRider(card.fallen.rider) * CONDITION_DISCOUNTS.fallen;
+    // WS4.2 — a combat-state synergy condition (ledger-read gate) prices at
+    // the threshold ×0.5 discount, per the ratified item-4 direction.
+    if (card.synergy?.statePredicate && card.synergy.rider) {
+        pts += scoreRider(card.synergy.rider) * CONDITION_DISCOUNTS.threshold;
+    }
 
     return pts;
 }
