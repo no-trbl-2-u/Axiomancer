@@ -1,5 +1,13 @@
 # Quickstart — Items
 
+> **Superseded (phases 18-21 + 23):** the procedural drop / rarity-preview /
+> set-bonus flow shown below was retired. `dropItem`, `getEquipmentTemplate`,
+> `getActiveSetBonuses`, `itemSetLibrary`, `getItemSetById`, and `SetBonus` no
+> longer exist — equipment is now the 8 fixed signet relics
+> (`relicLibrary` / `getSignaturesForLoadout`). See
+> [`equipment.md`](./equipment.md) for the shipped model; the samples here are
+> retained as design history.
+
 > Drop items, preview at rarity, equip gear, and work with set
 > bonuses. For full API reference see [`items.md`](./items.md) and
 > [`equipment.md`](./equipment.md).

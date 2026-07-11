@@ -17,7 +17,7 @@
  * are the witness that this driver did not perturb them.
  */
 
-import { describe, it, expect, afterEach, vi } from 'vitest';
+import { describe, it, expect, afterEach, afterAll, beforeAll, vi } from 'vitest';
 
 import { Player } from '../../Character/characters.mock';
 import type { Character } from '../../Character/types';
@@ -42,7 +42,8 @@ import { registerSandboxCards } from '../../Cards/cards.sandbox';
 import { simulateHazardPatternCombat } from '../combat.encounter.sim';
 import { getThreatSequence, deriveIntentType } from '../combat.threat';
 import type { CombatDieColor, CombatEncounterState } from '../combat.encounter.types';
-import type { ActiveEffect } from '../../Effects/types';
+import type { ActiveEffect, Effect } from '../../Effects/types';
+import { effectsLibrary } from '../../Effects/effects.library';
 import { lookupEffect, applyEffect } from '../../Effects';
 
 afterEach(() => {
@@ -138,9 +139,9 @@ describe('Spec 26b §1 — the hidden-stance read', () => {
 describe('Spec 26 §2 — intent derivation', () => {
     it('classifies damage / debuff / buff / combo / pass', () => {
         expect(deriveIntentType([{ damage: 5 }])).toBe('damage');
-        expect(deriveIntentType([{ effectId: 'debuff_fear' }])).toBe('debuff');
+        expect(deriveIntentType([{ effectId: 'debuff_bleed' }])).toBe('debuff');
         expect(deriveIntentType([{ enemyHeal: 6 }])).toBe('buff');
-        expect(deriveIntentType([{ damage: 5, effectId: 'debuff_fear' }])).toBe('combo');
+        expect(deriveIntentType([{ damage: 5, effectId: 'debuff_bleed' }])).toBe('combo');
         expect(deriveIntentType([{}])).toBe('pass');
     });
     it('stamps an intentType on every resolved threat phase', () => {
@@ -721,6 +722,27 @@ describe('Spec 25 §9 — resolveCombatPhase batch entry point', () => {
 // telegraphed hit, and a committed VARIETY denies it — making ~24 previously
 // inert debuffs actually do something.
 describe('0.33.0 — soft control weakens & denies the enemy threat', () => {
+    // The spec 32 v3 keyword reset deleted the negative-rollModifier control
+    // debuffs (Confusion -5, Fear -4). No surviving library effect carries a
+    // roll penalty deep enough to test the weaken-vs-VARIETY-deny split, so we
+    // register two test-only control fixtures into the shared registry (the
+    // same lookup the threat engine's roll-penalty sum reads). Never touches the
+    // library JSON.
+    const CONTROL_FIXTURES: Effect[] = [
+        {
+            id: 'test_ctrl_confusion', name: 'test confusion', description: 'test control -5',
+            type: 'debuff', category: 'control', duration: 3, stacking: 'intensity', tier: 2,
+            payload: { rollModifier: -5 },
+        },
+        {
+            id: 'test_ctrl_fear', name: 'test fear', description: 'test control -4',
+            type: 'debuff', category: 'control', duration: 3, stacking: 'intensity', tier: 2,
+            payload: { rollModifier: -4 },
+        },
+    ];
+    beforeAll(() => { for (const e of CONTROL_FIXTURES) effectsLibrary.registry.set(e.id, e); });
+    afterAll(() => { for (const e of CONTROL_FIXTURES) effectsLibrary.registry.delete(e.id); });
+
     const ae = (effectId: string): ActiveEffect => ({
         effectId, remainingDuration: 3, intensity: 1, appliedAt: 0, tier: 1,
     });
@@ -745,13 +767,13 @@ describe('0.33.0 — soft control weakens & denies the enemy threat', () => {
 
     it('one soft-control (Confusion, roll -5) WEAKENS the hit but does not deny it', () => {
         const clean = hpLoss([]);
-        const weakened = hpLoss([ae('debuff_confusion')]);
+        const weakened = hpLoss([ae('test_ctrl_confusion')]);
         expect(weakened).toBeGreaterThan(0);   // a single soft-control only reduces
         expect(weakened).toBeLessThan(clean);  // ~30% weaker telegraphed hit
     });
 
     it('a VARIETY of soft-controls (Confusion -5 + Fear -4 = 9 ≥ deny) denies the turn', () => {
-        expect(hpLoss([ae('debuff_confusion'), ae('debuff_fear')])).toBe(0);
+        expect(hpLoss([ae('test_ctrl_confusion'), ae('test_ctrl_fear')])).toBe(0);
     });
 });
 

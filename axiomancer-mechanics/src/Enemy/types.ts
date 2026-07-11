@@ -62,8 +62,8 @@ export interface BefriendabilityConfig {
  *                  the player has the *lowest* base stat in.
  * - `balanced`   — attacks while HP > 50%; defends below that threshold.
  * - `strategic`  — inspects the player's active effects and exploits
- *                  matching vulnerabilities (e.g. `debuff_vulnerability_body`
- *                  pulls Body attacks). Falls back to `aggressive` heuristics
+ *                  matching debuffs (e.g. a Body-stat debuff pulls Body
+ *                  attacks). Falls back to `aggressive` heuristics
  *                  when no exploit is on the board.
  * - `boss`       — deterministic phase script keyed off `state.round`. Used
  *                  by `bossLogic` enemies for telegraphed signature patterns.

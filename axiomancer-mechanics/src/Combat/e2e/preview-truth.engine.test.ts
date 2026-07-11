@@ -15,7 +15,7 @@
  *      outgoing threat damage; CHARM's forced stance is visible to the read.
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 
 import { Player } from '../../Character/characters.mock';
 import type { Character } from '../../Character/types';
@@ -23,8 +23,8 @@ import type { Enemy } from '../../Enemy/types';
 import { GraveLarva } from '../../Enemy/enemy.library';
 import { cardLibrary } from '../../Cards/cards.library';
 import { deepClone } from '../../Utils';
-import { lookupEffect } from '../../Effects/effects.library';
-import type { ActiveEffect } from '../../Effects/types';
+import { lookupEffect, effectsLibrary } from '../../Effects/effects.library';
+import type { ActiveEffect, Effect } from '../../Effects/types';
 import {
     initializeCombatEncounter, rollEncounterDice, playCombatCard, resolveThreatPhase,
     draftStanceDie, getCard, projectCardImpact,
@@ -178,6 +178,18 @@ describe('P0-truth — the card preview is the applied number', () => {
 });
 
 describe('P0-truth — threat-side payloads bite for real', () => {
+    // CHARM's forcedStance debuff was deleted by the spec 32 v3 keyword reset and
+    // no surviving library effect carries an actionRestriction, so the
+    // forced-stance-is-visible-to-the-read law is driven by a test-only fixture
+    // registered into the shared registry. Never touches the library JSON.
+    const CHARM_FIXTURE: Effect = {
+        id: 'test_charm', name: 'test charm', description: 'test forcedStance heart',
+        type: 'debuff', category: 'control', duration: 3, stacking: 'none', tier: 2,
+        payload: { actionRestriction: { forcedStance: 'heart' } },
+    };
+    beforeAll(() => { effectsLibrary.registry.set(CHARM_FIXTURE.id, CHARM_FIXTURE); });
+    afterAll(() => { effectsLibrary.registry.delete(CHARM_FIXTURE.id); });
+
     it('baseline: a 10-damage threat lands round(10 × THREAT_DAMAGE_SCALE)', () => {
         const s = threatState([{ damage: 10 }]);
         const after = resolveThreatPhase(s).state;
@@ -196,7 +208,7 @@ describe('P0-truth — threat-side payloads bite for real', () => {
         // Enemy phase stance is body, but charm forces heart → a MIND die now
         // reads ADVANTAGE (mind beats heart), where vs body it would read
         // disadvantage. The charm names the door.
-        s = { ...s, enemy: { ...s.enemy, effects: [activeEffect('debuff_charm', 1, 2)] } };
+        s = { ...s, enemy: { ...s.enemy, effects: [activeEffect('test_charm', 1, 2)] } };
         s = setDice(s, ['mind']);
         s = draftStanceDie(s, s.dice[0].id).state;
         expect(s.lastRead).toBe('advantage');

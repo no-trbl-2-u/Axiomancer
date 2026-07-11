@@ -153,23 +153,6 @@ export const EFFECTS_RESOLUTION_DOT_MAX_ROUNDS_TO_KILL = 10;
 // guard bounds it; engagement-positive (more decisive status). Tuned by the loop.
 export const EFFECT_BASE_PROC_INTENSITY = 2; // Phase 130 — raised from 1 for l15 STRATEGIST targeting
 
-// Phase 157 — Status-centered affix draw bias.
-// The affix library (`src/Items/affix.library.ts`) is content-rich with status-
-// applying prefixes/suffixes (poison/burn/bleed/stun/fear/curse/sleep/…), but
-// most of them sit at `uncommon_mod`/`rare_mod` draw weight (3/1) while the
-// flat-stat affixes (Keen/Crushing/Fortified/…) are `common_mod` (10). Left
-// unbiased, a weighted affix draw is dominated by boring flat-stat trading and
-// the rich status content is mathematically suppressed — a direct violation of
-// the load-bearing doctrine ("status effects are the MAIN fun").
-//
-// This multiplier is applied to the draw weight of OFFENSIVE status-applying
-// affixes (status-tagged, on a status-applying slot, not pure defensive/sustain)
-// so a roll meaningfully *feeds status-effect play* without erasing flat-stat
-// variety entirely. At the default `3`, an uncommon status affix (3×3=9) is
-// competitive with a common flat-stat affix (10) and a rare status affix (1×3=3)
-// matches an uncommon flat-stat one. Engagement-positive; tuned by the loop.
-export const STATUS_AFFIX_DRAW_BIAS = 3;
-
 // ============================================================================
 // ENEMY — STAT BUDGET PER LEVEL
 // ============================================================================

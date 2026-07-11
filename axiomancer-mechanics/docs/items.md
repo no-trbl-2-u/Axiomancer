@@ -1,5 +1,14 @@
 # Items
 
+> **Superseded history:** the four-tier rarity system, the modifier catalogue,
+> the affix (prefix/suffix) library, item sets, and the procedural loot factory
+> described below were retired across the equipment-signature epic (phases
+> 18-21 + 23). Equipment is now the 8 fixed signet relics only — see
+> [`equipment.md`](./equipment.md) for the shipped model. The API references to
+> `dropItem` / `getEquipmentTemplate` / `itemSetLibrary` / `rarityWeightTable`
+> / `SetBonus` on this page and in [`quickstart-items.md`](./quickstart-items.md)
+> point at deleted symbols and are kept only as design history.
+
 ## Overview
 
 The `Items` module spans four item kinds, a four-tier rarity system, a

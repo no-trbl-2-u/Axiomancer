@@ -10,7 +10,7 @@
  * and the card-projection / reward-pool contract for the v3 library.
  */
 
-import { describe, it, expect, afterEach, vi } from 'vitest';
+import { describe, it, expect, afterEach, afterAll, beforeAll, vi } from 'vitest';
 
 import { Player } from '../../Character/characters.mock';
 import type { Character } from '../../Character/types';
@@ -21,7 +21,8 @@ import { mockSequentialRng } from '../../test-utils/rng';
 import { getCardById } from '../../Cards/cards.library';
 import { registerSandboxCards } from '../../Cards/cards.sandbox';
 import { lookupEffect } from '../../Effects';
-import type { ActiveEffect } from '../../Effects/types';
+import { effectsLibrary } from '../../Effects/effects.library';
+import type { ActiveEffect, Effect } from '../../Effects/types';
 import {
     initializeCombatEncounter, rollEncounterDice, draftStanceDie, playCombatCard,
     resolveThreatPhase, processBetweenPhases,
@@ -57,6 +58,20 @@ registerSandboxCards([
 
 const ae = (effectId: string, intensity = 1, remainingDuration = 4, tier: 1 | 2 | 3 = 2): ActiveEffect =>
     ({ effectId, intensity, remainingDuration, appliedAt: 1, tier });
+
+// The spec 32 v3 keyword reset deleted the negative-rollModifier control debuffs
+// (Daze -3, Slow -2, Root -2). No surviving library effect carries a roll
+// penalty, so the DISRUPT distinct-control machinery is driven by test-only
+// control fixtures registered into the shared registry (the same lookup the
+// engine's roll-penalty / distinct-control readers consult). Never touches the
+// library JSON.
+const CONTROL_FIXTURES: Effect[] = [
+    { id: 'test_ctrl_daze', name: 'test daze', description: 'control -3', type: 'debuff', category: 'control', duration: 4, stacking: 'intensity', tier: 2, payload: { rollModifier: -3 } },
+    { id: 'test_ctrl_slow', name: 'test slow', description: 'control -2', type: 'debuff', category: 'control', duration: 4, stacking: 'intensity', tier: 2, payload: { rollModifier: -2 } },
+    { id: 'test_ctrl_root', name: 'test root', description: 'control -2', type: 'debuff', category: 'control', duration: 4, stacking: 'intensity', tier: 2, payload: { rollModifier: -2 } },
+];
+beforeAll(() => { for (const e of CONTROL_FIXTURES) effectsLibrary.registry.set(e.id, e); });
+afterAll(() => { for (const e of CONTROL_FIXTURES) effectsLibrary.registry.delete(e.id); });
 
 function makePlayer(cards: string[], effects: ActiveEffect[] = []): Character {
     const p = deepClone(Player);
@@ -192,8 +207,8 @@ describe('RUPTURE — detonate the foe afflictions for the pending total', () =>
 describe('DISRUPT — a variety of controls denies the telegraphed turn', () => {
     // Support-tagged (non-card) controls carried by enemy threats / legacy
     // sources — each a distinct negative-roll control, none a DoT.
-    const twoControls = () => [ae('debuff_daze', 1), ae('debuff_slow', 1)];
-    const threeControls = () => [...twoControls(), ae('debuff_root', 1)];
+    const twoControls = () => [ae('test_ctrl_daze', 1), ae('test_ctrl_slow', 1)];
+    const threeControls = () => [...twoControls(), ae('test_ctrl_root', 1)];
 
     it('does NOT deny at 2 distinct controls (roll penalty 5 < 8)', () => {
         mockSequentialRng(0.05);
@@ -230,16 +245,16 @@ describe('DISRUPT — a variety of controls denies the telegraphed turn', () => 
 describe('THORNS — the foe telegraphed hit rebounds onto it', () => {
     it('reflects reflectDamage back at the enemy when it attacks', () => {
         mockSequentialRng(0.05);
-        const player = makePlayer([], [ae('buff_brazen_thorns', 1)]); // reflectDamage 2
+        const player = makePlayer([], [ae('buff_thorns', 1)]); // reflectDamage 1
         const base = initializeCombatEncounter(player, makeEnemy(300, 'mind'), undefined, 7);
         const state = rollEncounterDice(base).state;
         const hpBefore = state.enemy.health;
         const res = resolveThreatPhase(state);
         const reflected = res.events.find(e => e.kind === 'thorns-reflected') as { amount: number; target: string } | undefined;
         expect(reflected).toBeDefined();
-        expect(reflected!.amount).toBe(2);
+        expect(reflected!.amount).toBe(1);
         expect(reflected!.target).toBe('enemy');
-        expect(hpBefore - res.state.enemy.health).toBe(2); // enemy has no DoT — only the reflect
+        expect(hpBefore - res.state.enemy.health).toBe(1); // enemy has no DoT — only the reflect
     });
 
     it('the v3 buff_thorns card effect reflects 1 per intensity', () => {
@@ -351,7 +366,7 @@ describe('INVARIANT — no new behavior fires without its marker', () => {
     it('a plain enemy + plain player emit ZERO new-kind events and un-amplified DoT', () => {
         mockSequentialRng(0.05);
         // One control (roll -3) → below every deny threshold; one poison DoT, no combo.
-        const enemyEffects = [ae('debuff_daze', 1), ae('debuff_poison', 2)];
+        const enemyEffects = [ae('test_ctrl_daze', 1), ae('debuff_poison', 2)];
         const base = initializeCombatEncounter(makePlayer([]), makeEnemy(300, 'mind', enemyEffects), undefined, 7);
         const state = rollEncounterDice(base).state;
         const res = resolveThreatPhase(state); // fires threat + processBetweenPhases
