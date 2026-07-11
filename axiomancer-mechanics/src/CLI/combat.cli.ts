@@ -83,6 +83,10 @@ export type CombatAutoPolicyId = 'naive' | 'safe' | 'aggressive' | 'status';
 
 export interface CombatCliFlags {
     enemySlug: string;
+    /** True when --enemy was passed explicitly (a --stage run only replaces
+     *  the default enemy with the stage roster's first slug when the enemy
+     *  was NOT asked for). */
+    enemyExplicit: boolean;
     presetId: string;
     /** True when --preset was passed explicitly (a --stage player only
      *  replaces the preset player when the preset was NOT asked for). */
@@ -162,6 +166,7 @@ function takeValue(args: string[], i: number, flag: string): [string, number] {
 export function parseCombatArgv(args: string[]): CombatCliFlags {
     const flags: CombatCliFlags = {
         enemySlug: 'little-belle',
+        enemyExplicit: false,
         presetId: 'apprentice',
         presetExplicit: false,
         auto: false,
@@ -177,7 +182,7 @@ export function parseCombatArgv(args: string[]): CombatCliFlags {
         else if (arg === '--json-events') { flags.jsonEvents = true; i++; }
         else if (arg === '--stdin') { flags.stdin = true; i++; }
         else if (arg.startsWith('--enemy')) {
-            const [v, ni] = takeValue(args, i, '--enemy'); flags.enemySlug = v; i = ni;
+            const [v, ni] = takeValue(args, i, '--enemy'); flags.enemySlug = v; flags.enemyExplicit = true; i = ni;
         } else if (arg.startsWith('--preset')) {
             const [v, ni] = takeValue(args, i, '--preset');
             flags.presetId = v; flags.presetExplicit = true; i = ni;
@@ -285,6 +290,18 @@ function autoPlayPhase(
         if (!drafted || drafted.state !== 'available' || drafted.color === 'x') {
             if (s.draftedDieId !== null) s = endTurn(s).state;
             if (s.dice.length === 0) {
+                // Phase 26 (the Turn Law) — one dice-turn per threat phase;
+                // once already taken, no more BOTTOM plays are legal this
+                // phase, but FREE (dieless) top plays stay legal all turn —
+                // spend down the rest of the hand via its free line instead
+                // of giving up on the phase.
+                if (s.turnTakenThisPhase) {
+                    const topCard = handCards(s)[0];
+                    if (!topCard) break;
+                    s = playCombatCard(s, { uid: topCard.uid }, false).state;
+                    if (s.finalOutcome || s.mercyChoiceActive) break;
+                    continue;
+                }
                 s = startTurn(s).state;
                 if (s.phase !== 'phase-play') break;
             }
@@ -499,6 +516,14 @@ async function autoHazardCombatLoop(
 
         s = autoPlayPhase(s, flags.policy, flags.maxTurns);
         logState('hazardCombat:autoPhase', before, s, { phaseCount, policy: flags.policy });
+        // Phase 26 tooling fix — auto mode emitted no turn-by-turn transcript
+        // to --json-events (only start/end); this boundary marker mirrors
+        // interactive mode's per-phase hazardCombat:resolvedPhase event so an
+        // auditor doesn't need a bespoke harness to see progress.
+        emit({
+            type: 'hazardCombat:autoPhase',
+            payload: { phaseCount, enemyHealth: s.enemy.health, playerHealth: s.player.health },
+        });
 
         if (s.finalOutcome) break;
         if (s.mercyChoiceActive) {
@@ -549,6 +574,7 @@ export async function runHazardCombatCliEncounter(
         : stageProfile ? `stage:${stageProfile.id}` : presetId;
     const flags: CombatCliFlags = {
         enemySlug: '',
+        enemyExplicit: true,
         presetId,
         presetExplicit: options.presetId !== undefined,
         auto: options.auto ?? false,
@@ -623,10 +649,22 @@ export async function runCombatCli(rawArgs: string[]): Promise<void> {
     }
     if (flags.stateLogPath) setStateLogPath(flags.stateLogPath);
 
-    const enemyDef = ENEMY_REGISTRY[flags.enemySlug as EnemySlug];
+    // Phase 26 tooling fix — `--stage X` previously scaled only the player
+    // (enemySlug stayed the hardcoded default 'little-belle'); when a stage
+    // was given and no explicit --enemy overrides it, default to that
+    // stage's own roster (first slug) instead.
+    let enemySlug = flags.enemySlug;
+    if (!flags.enemyExplicit && flags.stage) {
+        const stageProfile = getStageProfile(flags.stage);
+        if (stageProfile && stageProfile.enemySlugs.length > 0) {
+            enemySlug = stageProfile.enemySlugs[0]!;
+        }
+    }
+
+    const enemyDef = ENEMY_REGISTRY[enemySlug as EnemySlug];
     if (!enemyDef) {
         const valid = Object.keys(ENEMY_REGISTRY).join(', ');
-        throw new Error(`Unknown enemy slug: '${flags.enemySlug}'. Valid: ${valid}`);
+        throw new Error(`Unknown enemy slug: '${enemySlug}'. Valid: ${valid}`);
     }
 
     // Sandbox set (if any) goes live BEFORE deck resolution so drafted /

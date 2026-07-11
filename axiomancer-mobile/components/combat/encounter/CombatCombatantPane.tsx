@@ -37,7 +37,7 @@ import { makeStyles, usePalette } from '@/theme/runtime';
 import type {
     CombatEnemyPaneVM, CombatPlayerPaneVM, CombatEffectChipVM,
 } from '@/state/presenters/combat-encounter.engine';
-import type { CombatEvent } from '@mechanics';
+import { getCardById, type CombatEvent } from '@mechanics';
 import { effectGlyph } from '@/components/combat/statusGlyphs';
 import { keywordForEffect } from '@/state/combat/keywords';
 import { IntentIcon } from './IntentIcon';
@@ -378,6 +378,17 @@ export const CombatCombatantPane = React.memo(function CombatCombatantPane({
                 const side = e.target === 'self' ? 'player' : 'enemy';
                 const label = e.effectName ? `STRIP ${e.effectName.toUpperCase()}` : 'STRIP';
                 statusFloats.push({ side, text: label, color: side === 'player' ? '#a86bdc' : '#d9b44a' });
+            } else if (e.kind === 'backfired') {
+                // phase 28 — BACKFIRE previously had NO fx case at all (its HP
+                // loss was completely unrendered, not merely unlabeled). Always
+                // targets the enemy; a distinct gold "BACKFIRE -N" float, never
+                // folded into the generic damage color.
+                pushEnemy(`BACKFIRE -${e.amount}`, '#d9b44a', 0);
+            } else if (e.kind === 'foretold' && e.topCardId) {
+                // phase 28 — the engine reorders the draw pile but never told
+                // the player what it saw; surface the winner as a toast.
+                const name = getCardById(e.topCardId)?.name ?? e.topCardId;
+                pushEnemy(`FORETOLD: ${name.toUpperCase()}`, '#4f7fd6', 0);
             }
         }
         // (a) the player took damage → enemy ANTICIPATION (pull back) → scale-led

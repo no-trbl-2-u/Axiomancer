@@ -57,7 +57,14 @@ make the re-baseline untrustworthy if unfixed:
 
 **Files.** `src/CLI/combat.cli.ts`, `src/Combat/combat.attribution.ts`.
 
-## 3. Re-derive the baseline  [blocked by #1-2 · S · measurement]
+## 3. Re-derive the baseline  [DONE 2026-07-11 · S · measurement]
+
+> Satisfied by `2026-07-11-phase27-rebaseline.md` (Phase 27). Honest
+> stage curve: early 75% / mid 3% / late 0% / impossible 0% — mid/late
+> were almost entirely farm-propped, not merely farm-inflated.
+> `KNOWN_CURVE_VIOLATORS` confirmed empty. Repricing (#4 below) is now
+> unblocked but must account for a much larger mid/late gap than the
+> farmed numbers ever suggested.
 
 Re-run the full matrix (`--stage=all --policy=all`, ≥60 runs/cell, plus
 per-card tables) under the law. Re-derive:

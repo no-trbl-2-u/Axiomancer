@@ -88,6 +88,19 @@ const playAutoPhase = (state: CombatEncounterState, policy: HazardAutoPolicyId, 
         if (!drafted || drafted.state !== 'available' || drafted.color === 'x') {
             if (s.draftedDieId !== null) s = endTurn(s).state;
             if (s.dice.length === 0) {
+                // Phase 26 (the Turn Law) — one dice-turn per threat phase.
+                // This is the live mobile map auto-runner, so this fix
+                // applies to real encounters too. Once already taken, no
+                // more BOTTOM plays are legal this phase, but FREE (dieless)
+                // top plays stay legal all turn — spend down the rest of the
+                // hand via its free line instead of giving up on the phase.
+                if (s.turnTakenThisPhase) {
+                    const topCard = handCards(s)[0];
+                    if (!topCard) break;
+                    s = playCombatCard(s, { uid: topCard.uid }, false).state;
+                    if (s.finalOutcome || s.mercyChoiceActive) break;
+                    continue;
+                }
                 s = startTurn(s).state;
                 if (s.phase !== 'phase-play') break;
             }

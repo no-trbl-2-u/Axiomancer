@@ -10,7 +10,7 @@
  *   - All four auto policies complete without throwing
  */
 
-import { describe, it, expect, afterEach } from 'vitest';
+import { describe, it, expect, afterEach, vi } from 'vitest';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
@@ -20,7 +20,7 @@ import {
     parseCombatArgv,
     runCombatCli,
 } from '../combat.cli';
-import { setStateLogPath } from '../io';
+import { setStateLogPath, setOutputMode } from '../io';
 
 const tmpFiles: string[] = [];
 function tmpPath(suffix: string, ext = 'jsonl'): string {
@@ -38,6 +38,8 @@ afterEach(() => {
     tmpFiles.forEach(f => fs.existsSync(f) && fs.unlinkSync(f));
     tmpFiles.length = 0;
     setStateLogPath(null);
+    setOutputMode('human');
+    vi.restoreAllMocks();
 });
 
 describe('Combat CLI — flag parsing', () => {
@@ -70,6 +72,13 @@ describe('Combat CLI — flag parsing', () => {
         expect(flags.auto).toBe(true);
         expect(flags.policy).toBe('status');
         expect(flags.maxTurns).toBe(8);
+    });
+
+    it('marks enemyExplicit only when --enemy was actually passed (phase 26)', () => {
+        expect(parseCombatArgv([]).enemyExplicit).toBe(false);
+        expect(parseCombatArgv(['--stage', 'early']).enemyExplicit).toBe(false);
+        expect(parseCombatArgv(['--enemy', 'foot-stealer']).enemyExplicit).toBe(true);
+        expect(parseCombatArgv(['--stage', 'early', '--enemy', 'foot-stealer']).enemyExplicit).toBe(true);
     });
 
     it('rejects unknown flags', () => {
@@ -145,5 +154,80 @@ describe('Combat CLI — deterministic auto playthrough', () => {
             const logs = readLog(logPath);
             expect(logs.find(r => r.action === 'hazardCombat:end')).toBeDefined();
         }
+    });
+
+    it('the Turn Law holds through a full CLI auto run: at most one tray per resolved phase', async () => {
+        const logPath = tmpPath('turn-law');
+        await runCombatCli([
+            '--auto', '--policy', 'status',
+            '--enemy', 'little-belle',
+            '--preset', 'apprentice',
+            '--seed', '42',
+            '--max-turns', '12',
+            '--state-log', logPath,
+        ]);
+        const logs = readLog(logPath);
+        const end = logs.find(r => r.action === 'hazardCombat:end');
+        expect(end).toBeDefined();
+        const after = end!.after as { log: Array<{ kind: string }>; phaseResults: unknown[] };
+        const trayRolls = after.log.filter(e => e.kind === 'turn-dice-rolled').length;
+        expect(trayRolls).toBeLessThanOrEqual(after.phaseResults.length + 1);
+    });
+});
+
+describe('Combat CLI — phase 26: --stage defaults the enemy roster too', () => {
+    it('--stage with no --enemy resolves to that stage roster\'s first slug, not little-belle', async () => {
+        const logPath = tmpPath('stage-default-enemy');
+        await runCombatCli([
+            '--auto', '--policy', 'status',
+            '--stage', 'early',
+            '--seed', '5',
+            '--max-turns', '4',
+            '--state-log', logPath,
+        ]);
+        const logs = readLog(logPath);
+        const start = logs.find(r => r.action === 'hazardCombat:start');
+        const enemyName = (start!.after as { enemy: { name: string } }).enemy.name;
+        expect(enemyName).toBe('Grave Larva'); // COMBAT_STAGE_PROFILES.early.enemySlugs[0]
+        expect(enemyName).not.toBe('Little Belle');
+    });
+
+    it('an explicit --enemy still wins over the stage default', async () => {
+        const logPath = tmpPath('stage-explicit-enemy');
+        await runCombatCli([
+            '--auto', '--policy', 'status',
+            '--stage', 'early',
+            '--enemy', 'little-belle',
+            '--seed', '5',
+            '--max-turns', '4',
+            '--state-log', logPath,
+        ]);
+        const logs = readLog(logPath);
+        const start = logs.find(r => r.action === 'hazardCombat:start');
+        const enemyName = (start!.after as { enemy: { name: string } }).enemy.name;
+        expect(enemyName).toBe('Little Belle');
+    });
+});
+
+describe('Combat CLI — phase 26: auto mode emits a per-phase JSON transcript', () => {
+    it('--json-events --auto emits hazardCombat:autoPhase between start and end', async () => {
+        const written: string[] = [];
+        vi.spyOn(process.stdout, 'write').mockImplementation(((chunk: string) => {
+            written.push(String(chunk));
+            return true;
+        }) as typeof process.stdout.write);
+
+        await runCombatCli([
+            '--auto', '--policy', 'status', '--json-events',
+            '--enemy', 'little-belle',
+            '--preset', 'apprentice',
+            '--seed', '42',
+            '--max-turns', '12',
+        ]);
+
+        const events = written.map(w => JSON.parse(w.trim()));
+        expect(events.some(e => e.type === 'hazardCombat:start')).toBe(true);
+        expect(events.some(e => e.type === 'hazardCombat:autoPhase')).toBe(true);
+        expect(events.some(e => e.type === 'hazardCombat:end')).toBe(true);
     });
 });

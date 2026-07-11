@@ -80,13 +80,17 @@ const GENERICALLY_ASSERTED: readonly CardSpecialMechanic['kind'][] = [
 ];
 
 // ── Per-card fixture tweaks ───────────────────────────────────────────────────
-// Empty: the shared fixture below (rich afflictions + DoT fuel + MARK stacks +
-// Souls + Premises + discard + reserve/floating dice with pip headroom + a
-// pre-damaged, Fallen player) satisfies every one of the 70 cards' PAID-face
-// preconditions. Kept as the sanctioned per-card escape hatch (never a
-// skip/exemption) for the next author who ships a card this fixture can't
-// satisfy.
-const FIXTURE_OVERRIDES: Readonly<Record<string, (state: CombatEncounterState) => CombatEncounterState>> = {};
+// The shared fixture's 1-pip reserve (headroom for pip-adding mechanics, not a
+// floor) satisfies every card except `the-overtake`, which phase 28 gated at
+// 2+ spent pips (plan/tuning/2026-07-10-theme-identity.md — "the Overtake
+// fires for 18 on turn 1"). Bump its reserve to clear the gate; every other
+// card keeps the unmodified shared fixture.
+const FIXTURE_OVERRIDES: Readonly<Record<string, (state: CombatEncounterState) => CombatEncounterState>> = {
+    'the-overtake': (state) => ({
+        ...state,
+        reserve: [{ id: 'fx-reserve-0', color: 'heart', state: 'available', temporary: false, pips: 2 }],
+    }),
+};
 
 // ── Known, honest defects ─────────────────────────────────────────────────────
 // Empty: no card in the current library fails its strict effectiveness
