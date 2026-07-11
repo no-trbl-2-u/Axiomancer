@@ -29,7 +29,7 @@ import { RESERVE_MAX } from './combat.dice';
 import { getPendingDotTotal } from './effects';
 import { getRng } from '../Utils/rng';
 import type {
-    CombatAttributionRow, CombatCard, CombatEncounterState, CombatOutcome,
+    CombatAttributionRow, CombatCard, CombatEncounterState, CombatEvent, CombatOutcome,
 } from './combat.encounter.types';
 import { COMBAT_SIM_POLICIES, type CombatSimPolicy, type CombatSimPolicyId } from './combat.sim-policies';
 
@@ -105,7 +105,13 @@ export interface CombatSimStats {
 
 /** Per-card telemetry for one run (or aggregated over many), keyed by the
  *  card/card id — NOT the hand-entry uid. `statusLands` counts powered plays
- *  that landed at least one status on the enemy (the doctrine witness). */
+ *  that landed at least one status on the enemy (the doctrine witness).
+ *
+ *  WS1.1 line telemetry — the OPTIONAL fields below are populated only on
+ *  AGGREGATED rows (`simulateHazardPatternCombatDetailed` / the playtest
+ *  report); per-run rows from `runOneEncounter` omit them so the pinned
+ *  per-run row shapes stay stable (the numbers ride the parallel
+ *  `cardLineTelemetry` record instead). */
 export interface CombatCardUsage {
     cardId: string;
     plays: number;
@@ -113,6 +119,34 @@ export interface CombatCardUsage {
     topPlays: number;
     statusLands: number;
     discards: number;
+    /** Attempted plays (either line) that emitted an `effect-fizzled` event
+     *  for this card. A fizzled PAID attempt that the policy drains via the
+     *  FREE line counts one fizzle AND one top play. */
+    fizzles?: number;
+    /** HP-swing attributed per line: immediate enemy-HP loss during the play
+     *  plus the projected DoT of effects it landed (`damagePerRound ×
+     *  intensity × remainingDuration` — the `recordAttribution` formula).
+     *  `free` = top-line plays, `paid` = powered bottom-line plays. */
+    lineContribution?: { free: number; paid: number };
+    /** Hand entries discarded un-played at phase end (the engine's draw-fresh
+     *  discard site) — the dead-in-hand denominator. */
+    unplayedAtPhaseEnd?: number;
+}
+
+/** WS1.1 — per-run FREE/PAID line telemetry, kept SEPARATE from the per-run
+ *  `CombatCardUsage` rows (whose exact shape is pinned by the sim-policy
+ *  decision-sequence e2e). Aggregators fold these into the optional
+ *  `CombatCardUsage` fields. */
+export interface CombatCardLineTelemetry {
+    cardId: string;
+    /** Attempted plays that emitted `effect-fizzled` for this card. */
+    fizzles: number;
+    /** HP swing (immediate + projected DoT) from FREE (top) plays. */
+    freeHpSwing: number;
+    /** HP swing (immediate + projected DoT) from PAID (bottom) plays. */
+    paidHpSwing: number;
+    /** Hand entries discarded un-played at phase end. */
+    unplayedAtPhaseEnd: number;
 }
 
 /** Optional per-run knobs threaded through `runOneEncounter`. */
@@ -179,6 +213,43 @@ function bestSignature(s: CombatEncounterState, policy: CombatSimPolicy, rng: ()
     return best;
 }
 
+/** The card's line-telemetry row, created zeroed on first touch. */
+function lineRow(
+    lines: Record<string, CombatCardLineTelemetry>,
+    cardId: string,
+): CombatCardLineTelemetry {
+    return lines[cardId] ?? (lines[cardId] = {
+        cardId, fizzles: 0, freeHpSwing: 0, paidHpSwing: 0, unplayedAtPhaseEnd: 0,
+    });
+}
+
+/**
+ * WS1.1 — the HP swing one play produced, measured sim-side so it needs no
+ * engine tag: the enemy HP the play removed RIGHT NOW (payoff bursts, TICK
+ * advances, reflect) plus the projected DoT of every enemy-side effect it
+ * landed — the same `damagePerRound × max(1,intensity) ×
+ * max(1,remainingDuration)` projection `recordAttribution` uses, read off the
+ * post-play active effect (falling back to the landed intensity × 1 when the
+ * active row is gone, e.g. instantly consumed).
+ */
+function playHpSwing(
+    before: CombatEncounterState,
+    after: CombatEncounterState,
+    events: readonly CombatEvent[],
+): number {
+    let swing = Math.max(0, before.enemy.health - after.enemy.health);
+    for (const ev of events) {
+        if (ev.kind !== 'effect-landed' || ev.target !== 'enemy') continue;
+        const dot = ev.effect.payload.damageOverTime;
+        if (!dot) continue;
+        const active = after.enemy.effects.find(ae => ae.effectId === ev.effectId);
+        swing += dot.damagePerRound
+            * Math.max(1, active?.intensity ?? ev.intensity)
+            * Math.max(1, active?.remainingDuration ?? 1);
+    }
+    return swing;
+}
+
 /** Records one play against the card's usage row (keyed by card/card id). */
 function bumpUsage(
     usage: Record<string, CombatCardUsage>,
@@ -202,6 +273,7 @@ function policyPlayPhase(
     policy: CombatSimPolicy,
     rng: () => number,
     usage: Record<string, CombatCardUsage>,
+    lines: Record<string, CombatCardLineTelemetry>,
     focusIds?: ReadonlySet<string>,
 ): { state: CombatEncounterState; plays: number; statusPlays: number } {
     let working = state;
@@ -209,6 +281,19 @@ function policyPlayPhase(
     let statusPlays = 0;
     let guard = 0;
     const fizzledUids = new Set<string>();
+
+    // WS1.1 — plays the FREE (top) line and records its line telemetry. A top
+    // play can itself fizzle (e.g. a free enchant whose permanent is already
+    // standing); it still counts a play, exactly as before the telemetry.
+    const playFreeTop = (uid: string, card: CombatCard): void => {
+        const resT = playCombatCard(working, { uid }, false);
+        const row = lineRow(lines, card.id);
+        row.freeHpSwing += playHpSwing(working, resT.state, resT.events);
+        if (resT.events.some(e => e.kind === 'effect-fizzled')) row.fizzles++;
+        working = resT.state;
+        plays++;
+        bumpUsage(usage, card, 'top');
+    };
 
     while (working.phase === 'phase-play' && guard < 60) {
         guard++;
@@ -234,6 +319,7 @@ function policyPlayPhase(
                 if (wantR) {
                     const resR = playCombatCard(working, { uid: wantR.uid }, true, banked.id);
                     if (!resR.events.some(e => e.kind === 'effect-fizzled')) {
+                        lineRow(lines, wantR.card.id).paidHpSwing += playHpSwing(working, resR.state, resR.events);
                         working = resR.state;
                         plays++;
                         const landedR = resR.events.some(e => e.kind === 'effect-landed' && e.target === 'enemy');
@@ -242,6 +328,7 @@ function policyPlayPhase(
                         if (working.finalOutcome || working.mercyChoiceActive) break;
                         continue;
                     }
+                    lineRow(lines, wantR.card.id).fizzles++;
                     fizzledUids.add(wantR.uid);
                 }
             }
@@ -273,11 +360,7 @@ function policyPlayPhase(
             if (!drafted || drafted.state !== 'available' || drafted.color === 'x') {
                 // Forced X — chip with a free top, then end the turn.
                 const top = handCards(working)[0];
-                if (top) {
-                    working = playCombatCard(working, { uid: top.uid }, false).state;
-                    plays++;
-                    bumpUsage(usage, top.card, 'top');
-                }
+                if (top) playFreeTop(top.uid, top.card);
                 working = endTurn(working).state;
                 if (handCards(working).length === 0 && working.dice.length === 0) break;
                 continue;
@@ -287,11 +370,7 @@ function policyPlayPhase(
         const want = selectCard(working, policy, rng, fizzledUids, focusIds, drafted.color);
         if (!want) {
             const top = handCards(working)[0];
-            if (top) {
-                working = playCombatCard(working, { uid: top.uid }, false).state;
-                plays++;
-                bumpUsage(usage, top.card, 'top');
-            }
+            if (top) playFreeTop(top.uid, top.card);
             working = endTurn(working).state;
             if (handCards(working).length === 0 && working.dice.length === 0) break;
             continue;
@@ -300,12 +379,12 @@ function policyPlayPhase(
         const res = playCombatCard(working, { uid: want.uid }, true);
         if (res.events.some(e => e.kind === 'effect-fizzled')) {
             // Token-gated with no banked token — drain via the free top and skip it.
+            lineRow(lines, want.card.id).fizzles++;
             fizzledUids.add(want.uid);
-            working = playCombatCard(working, { uid: want.uid }, false).state;
-            plays++;
-            bumpUsage(usage, want.card, 'top');
+            playFreeTop(want.uid, want.card);
             continue;
         }
+        lineRow(lines, want.card.id).paidHpSwing += playHpSwing(working, res.state, res.events);
         working = res.state;
         plays++;
         const landed = res.events.some(e => e.kind === 'effect-landed' && e.target === 'enemy');
@@ -333,6 +412,10 @@ export function runOneEncounter(
     guardOnAttack: number; playerHpTaken: number;
     activeEffectSamples: number[];
     cardUsage: Record<string, CombatCardUsage>;
+    /** WS1.1 — per-card FREE/PAID line telemetry (fizzles, per-line HP swing,
+     *  unplayed-at-phase-end), parallel to `cardUsage` so the pinned per-run
+     *  usage-row shape stays untouched. */
+    cardLineTelemetry: Record<string, CombatCardLineTelemetry>;
     /** The final per-card HP-damage ledger (already accumulated by the engine —
      *  surfaced, not recomputed) so the detailed sim can aggregate the
      *  dominant-card share across runs. */
@@ -357,6 +440,7 @@ export function runOneEncounter(
     let playerHpTaken = 0;
     const activeEffectSamples: number[] = [];
     const cardUsage: Record<string, CombatCardUsage> = {};
+    const cardLineTelemetry: Record<string, CombatCardLineTelemetry> = {};
 
     while (state.phase !== 'complete' && loopGuard < 200) {
         loopGuard++;
@@ -366,7 +450,7 @@ export function runOneEncounter(
             continue;
         }
         if (state.phase === 'phase-play') {
-            const r = policyPlayPhase(state, policyObj, rng, cardUsage, focusIds);
+            const r = policyPlayPhase(state, policyObj, rng, cardUsage, cardLineTelemetry, focusIds);
             state = r.state;
             plays += r.plays;
             statusPlays += r.statusPlays;
@@ -377,6 +461,12 @@ export function runOneEncounter(
                 continue;
             }
             if (state.phase === 'phase-play') {
+                // WS1.1 — every hand entry still here is about to be discarded
+                // un-played by the engine's draw-fresh site in
+                // `resolveThreatPhase` (the phase-end discard).
+                for (const h of handCards(state)) {
+                    lineRow(cardLineTelemetry, h.card.id).unplayedAtPhaseEnd++;
+                }
                 // Sample active effects and guard BEFORE the threat resolves.
                 activeEffectSamples.push(state.enemy.effects.length);
                 const guardBefore = state.guard ?? 0;
@@ -427,6 +517,7 @@ export function runOneEncounter(
         playerHpTaken,
         activeEffectSamples,
         cardUsage,
+        cardLineTelemetry,
         attribution: state.attribution,
     };
 }
@@ -445,6 +536,15 @@ export interface CombatSimDetailedOptions {
     deck?: readonly string[];
     /** Cards boosted to the front of ranking in every run (coverage harness). */
     focusCardIds?: readonly string[];
+}
+
+/** The AGGREGATED usage row for a card, created zeroed (WS1.1 line-telemetry
+ *  fields included — aggregated rows always carry them) on first touch. */
+function aggUsageRow(cardUsage: Record<string, CombatCardUsage>, cardId: string): CombatCardUsage {
+    return cardUsage[cardId] ?? (cardUsage[cardId] = {
+        cardId, plays: 0, bottomPlays: 0, topPlays: 0, statusLands: 0, discards: 0,
+        fizzles: 0, lineContribution: { free: 0, paid: 0 }, unplayedAtPhaseEnd: 0,
+    });
 }
 
 /** A zeroed win-path tally with every `CombatOutcome` key present. */
@@ -532,14 +632,22 @@ export function simulateHazardPatternCombatDetailed(
         for (const s of r.activeEffectSamples) totalActiveEffectSamples += s;
         totalPhaseSamples += r.activeEffectSamples.length;
         for (const row of Object.values(r.cardUsage)) {
-            const agg = cardUsage[row.cardId] ?? (cardUsage[row.cardId] = {
-                cardId: row.cardId, plays: 0, bottomPlays: 0, topPlays: 0, statusLands: 0, discards: 0,
-            });
+            const agg = aggUsageRow(cardUsage, row.cardId);
             agg.plays += row.plays;
             agg.bottomPlays += row.bottomPlays;
             agg.topPlays += row.topPlays;
             agg.statusLands += row.statusLands;
             agg.discards += row.discards;
+        }
+        // WS1.1 — fold the per-run line telemetry into the aggregated rows
+        // (per-run usage rows deliberately omit these fields; see the type).
+        for (const row of Object.values(r.cardLineTelemetry)) {
+            const agg = aggUsageRow(cardUsage, row.cardId);
+            agg.fizzles = (agg.fizzles ?? 0) + row.fizzles;
+            agg.unplayedAtPhaseEnd = (agg.unplayedAtPhaseEnd ?? 0) + row.unplayedAtPhaseEnd;
+            const lc = agg.lineContribution ?? (agg.lineContribution = { free: 0, paid: 0 });
+            lc.free += row.freeHpSwing;
+            lc.paid += row.paidHpSwing;
         }
     }
 

@@ -452,6 +452,14 @@ export interface Card {
      */
     addedIn?: string;
     tags?: string[];
+    /**
+     * WS1.3 line-telemetry lint exemption: this card's FREE/PAID line split is
+     * asymmetric BY DESIGN (e.g. a setup-only FREE line or a paid-only
+     * finisher), so the soft 85/15 dominance bands in
+     * `src/Combat/e2e/combat-playtest.line-telemetry.sim.test.ts` skip it.
+     * Purely lint metadata — the engines ignore it.
+     */
+    intentionallyAsymmetric?: boolean;
     // ── Fate Engine P1 (spec 31 §4.1) — per-card die-interaction lines. Design
     //    law: every Tier-2+ card carries exactly ONE of threshold / dieBonus /
     //    fate / die-manipulation / react; Tier-1 at most one. All combat-engine

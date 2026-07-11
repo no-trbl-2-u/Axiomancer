@@ -535,6 +535,16 @@ CRITIQUE entry, not a silent drop.
 
 - [ ] WS0 doctrine hygiene (free legs) — [owner-call] batch pending
 - [ ] WS1 FREE/PAID telemetry + baseline offender list
+  - 2026-07-11: telemetry counters + soft lint in tree; **PROVISIONAL
+    offender list cut pre-Phase-26** (seeds 1/2/3, commit `f196d219`)
+    — eight cards, all the same failure mode (FREE line <15% of
+    plays ⇔ PAID >85%): `cassandras-burden`, `common-ground`,
+    `disarming-smile`, `glimpse`, `half-step`, `refrain`,
+    `sketch-of-a-thought`, `slippery-slope`. Full table (per-seed
+    use %, stage spread, near-band watch list) in the detailed plan's
+    "WS1.5 provisional offender list (pre-Phase-26)" subsection
+    (`2026-07-11-card-library-improvement-plan-detailed.md`). Numbers
+    are pre-Turn-Law — re-cut after Phase 27 before judging any gate.
 - [ ] WS2 CONJURE exercise + FREE-line conversions
 - [ ] WS3 trigger-clock DoTs (absorbs win-path item #3) — [owner-call]
 - [ ] WS4 roles/boss-tech per theme (absorbs win-path item #5)

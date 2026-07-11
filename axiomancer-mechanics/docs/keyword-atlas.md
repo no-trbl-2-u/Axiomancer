@@ -20,6 +20,27 @@ Update discipline: `/deck-tuning` (via card-expert) updates affected
 rows in the same PR as any card/keyword change. Semantics cells are
 one-line summaries — spec 32 §3 stays authoritative.
 
+## Row policy (2026-07-11, WS10.2)
+
+- **One-card mechanics stay card-local.** Per the 2026-07-10
+  card-keyword doctrine (FESTER and TRANSMUTE are the precedents),
+  a mechanic that lives on a single card reads as a face keyword —
+  KEYWORD·value + gloss on the card face, with the guard test
+  (`axiomancer-mobile/state/presenters/__tests__/card-face-honesty.guard.test.ts`)
+  blocking the ambiguous fallback — and gets NO atlas row.
+- **A term earns a row at ~3+ cards.** Only vocabulary the library
+  actually repeats belongs in the registry.
+- **Drill target.** As the library grows, keep the median at ~4-6
+  cards per keyword — keywords get drilled, not orphaned.
+- **BARRIER/GUARD merge** sits on Phase 29 KW-2's owner merge/retire
+  list (`plan/tuning/2026-07-10-keyword-registry.md`).
+- **Row-count gate (restated per the detailed plan §0.1 C-5).** Row
+  count changes ONLY via ratified add/retire. TICK was owner-ratified
+  killed 2026-07-10 (spec 32 amendment #2, rides Phase 30): when that
+  retirement lands the count is **29** unless the owner ratifies a
+  replacement row — the "exactly 30" framing above yields to earned
+  support.
+
 ## Utility (10)
 
 | keyword | semantics | Dawncaster analogues (receipts) | gate (E/P/D/T) | notes |

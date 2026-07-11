@@ -334,6 +334,57 @@ balance-bands run; offender list filed. No kill condition
 (measurement). **Deliverable:** one PR: counters + report + soft lint
 + template + (provisional) offender list.
 
+### WS1.5 provisional offender list (pre-Phase-26)
+
+> **PROVISIONAL (§0.2/§0.3).** Cut 2026-07-11 at commit `f196d219`
+> from the standing baseline (`--stage=all --policy=all --runs=60
+> --cards`, seeds 1/2/3). Phase 26 (Turn Law) has NOT landed — every
+> number below carries the pre-Turn-Law asterisk and the list is
+> re-cut after Phase 27 re-baselines. Use it to AIM WS2/WS4 work, not
+> to judge gates.
+
+Band: FREE or PAID line >85% or <15% of plays, consistent across all
+three seeds, ≥20 plays per seed. Eight offenders; **all eight are the
+same failure mode — the FREE line is dead (<15%), i.e. the PAID line
+takes >85%**. No card trips the opposite band (FREE >85%). The
+`free%` columns are FREE-line share of plays (`topPlays/plays`);
+stage spread is seed-1 FREE share with per-stage play counts (`-` =
+card not in any deck at that stage).
+
+| card id | line band | free% s1/s2/s3 | plays s1/s2/s3 | stage spread (seed 1) |
+|---|---|---|---|---|
+| `cassandras-burden` | FREE <15% (PAID >85%) | 5.3 / 6.9 / 4.0 | 7149 / 4767 / 3664 | mid 5.4% (n=5398) · late 5.3% (n=1402) · imp 4.3% (n=349) |
+| `common-ground` | FREE <15% (PAID >85%) | 3.6 / 10.5 / 13.1 | 6118 / 4330 / 3186 | mid 3.9% (n=4007) · late 2.8% (n=1491) · imp 3.2% (n=620) |
+| `disarming-smile` | FREE <15% (PAID >85%) | 8.0 / 9.0 / 13.6 | 4957 / 2567 / 7490 | early 8.2% (n=3972) · mid 7.2% (n=985) |
+| `glimpse` | FREE <15% (PAID >85%) | 11.3 / 13.5 / 7.5 | 5326 / 9188 / 3505 | early 19.7% (n=1378) · mid 8.4% (n=3948) |
+| `half-step` | FREE <15% (PAID >85%) | 13.7 / 11.9 / 10.9 | 25958 / 22062 / 14183 | early 14.1% (n=5381) · mid 14.4% (n=9802) · late 12.9% (n=8330) · imp 13.3% (n=2445) |
+| `refrain` | FREE <15% (PAID >85%) | 8.5 / 9.3 / 12.3 | 3189 / 6545 / 8352 | early 8.5% (n=3189) |
+| `sketch-of-a-thought` | FREE <15% (PAID >85%) | 7.4 / 7.4 / 3.6 | 2554 / 13859 / 4659 | early 7.4% (n=2554) |
+| `slippery-slope` | FREE <15% (PAID >85%) | 9.1 / 10.9 / 10.5 | 18207 / 18067 / 15569 | mid 10.7% (n=8308) · late 7.5% (n=7567) · imp 8.3% (n=2332) |
+
+Adjacent findings from the same runs:
+
+- **Near-band, seed-inconsistent** (in the <15%/>85% band on some
+  seeds but not all three — watch list, not offenders):
+  `ad-nauseam`, `against-my-judgment`, `brace-for-impact`,
+  `brief-candle`, `captive-audience`, `exordium`, `fallen-grace`,
+  `opening-statement`, `practiced-cadence`, `signs-and-portents`,
+  `straw-mans-jab`, `sweet-poison`, `the-olive-branch`, `tu-quoque`,
+  `zenos-half-step`. All lean the same direction (weak FREE line).
+- **Never-played cards are excluded** — line telemetry needs plays.
+  Seed-1 dead-card rate 24.3% (17/70 never played); that is the
+  standing dead-card finding, not a WS1 band violation.
+- **No exemptions applied**: no library card carries
+  `intentionallyAsymmetric` yet.
+- Context (pre-Turn-Law, PROVISIONAL): stage win rates seed 1
+  early 99.7 / mid 63.0 / late 5.7 / imp 11.0; seed 2
+  99.5 / 44.0 / 3.0 / 10.8; seed 3 97.7 / 37.4 / 0.2 / 0.2 — mid/late
+  seed variance is itself a re-baseline argument.
+- `docs/reports/baselines/deck-matrix-baseline.json`
+  (axiomancer-mechanics) did not exist; generated per the deck-tuning
+  §5 procedure (seed-1 `--json` output, commit-stamped, marked
+  provisional). This run therefore has no drift signal.
+
 ---
 
 ## WS2 — Exercise CONJURE + FREE-lines-as-setup
@@ -838,8 +889,47 @@ stance certainty (the reveal system), rung strength
 **WS8.1 — audit map (free, doc-first).** Table all 13 carriers →
 ONE primary surface each; mark true duplicates for KW-2 fold-in
 (candidates: `debuff_fatigue` + `debuff_exhaustion`;
-`debuff_daze` + `debuff_confusion`). Deliverable: the table in this
-doc + `cross-keywords.md` cross-reference.
+`debuff_daze` + `debuff_confusion`). Deliverable: the table below
+(shipped 2026-07-11; every payload value re-read from
+`src/Effects/debuffs.library.json` at edit time) +
+`cross-keywords.md` §10 cross-reference.
+
+#### WS8.1 deliverable — control-surface audit map (2026-07-11)
+
+All 13 ids and roll penalties confirmed against the working tree.
+Surfaces are the WS8 list: telegraph damage / rider / stance
+certainty / rung strength / escalation / roll. "Primary surface" is
+the ONE surface the carrier should own after WS8.2 — carriers marked
+*roll (keep)* stay on the Roll surface deliberately; carriers whose
+control payload is a secondary rider on a non-control identity are
+marked *roll (rider)*.
+
+| Carrier id | Name | Roll (confirmed) | Other payload (confirmed) | Primary surface | Disposition |
+|---|---|---|---|---|---|
+| `debuff_slow` | Achilles' Burden | −2 | body disadvantage | roll (keep) | Canonical light roll shred; unchanged |
+| `debuff_root` | Braess Binding | −2 | defense −2 | stance certainty | WS8.2 LOCK shape — `lockStance` verb already priced (`cards.pricing.ts:90/251`); "paralysis through possibility" = enemy locked into its revealed stance |
+| `debuff_blind` | Quantum Erasure | −5 | body+mind disadvantage | rider | WS8.2 `suppressesThreatRiders` candidate — "information erased" = the phase's `threatEffectId` cannot land |
+| `debuff_knockdown` | Ross-Littlewood Fall | −3 | defense −4, duration 1 | roll (keep) | 1-round burst spike. Near-overlap with STAGGER flagged, but rung strength is reserved to STAGGER (WS8.2 rule) — no fold |
+| `debuff_daze` | Simpson's Confusion | −3 | mind −2, mentalDefense −1 | stance certainty | **DUPLICATE → fold into `debuff_confusion` (KW-2)** |
+| `debuff_curse` | Grelling's Malediction | −2 | body −1, mind −1, heart −2 | roll (rider) | Identity is the 3-stat drain (category `stat`); candidate to DROP the roll rider in the WS8.2 session rather than re-payload |
+| `debuff_exhaustion` | Lottery Despair | −2 | body/mind/heart −2 | telegraph damage | WS8.2 `outgoingThreatDamageMulPct` candidate ("weakened hits softer"); fold SURVIVOR of the fatigue pair |
+| `debuff_fatigue` | Preface Exhaustion | −1 | body −1, mind −1 | telegraph damage | **DUPLICATE → fold into `debuff_exhaustion` (KW-2)** |
+| `debuff_frostbite` | Boltzmann's Chill | −2 | DoT 3/round (body) | roll (rider) | DoT is the identity (category `damage`); −2 roll stays as secondary chip |
+| `debuff_shock` | Hardy's Discharge | −1 | DoT 3/round (mind) | roll (rider) | Same shape as frostbite; −1 roll stays as secondary chip |
+| `debuff_fear` | Grandfather's Terror | −4 | heart −4, emotionalDefense −3 | roll (keep) | Becomes THE heavy roll hammer once blind/confusion move off-surface |
+| `debuff_confusion` | Two Envelope Delirium | −5 | body+mind+heart disadvantage | stance certainty | WS8.2 `blursStanceHints` (enemy-side) candidate; absorbs `debuff_daze` |
+| `debuff_straw_man_echo` | Straw Man's Echo | −1 | — (tier 1) | roll (keep) | Smallest legit roll carrier (BACKFIRE echo); unchanged |
+
+Surface census after the map: **roll ×7** (of which only slow,
+knockdown, fear, straw_man_echo are roll-PRIMARY; curse, frostbite,
+shock hold roll as a rider on a stat/DoT identity), **stance
+certainty ×2** (root = lock, confusion = blur; daze folded in),
+**telegraph damage ×1** (exhaustion; fatigue folded in), **rider ×1**
+(blind), **rung strength ×0** (reserved to STAGGER per WS8.2),
+**escalation ×0** (deliberately untouched per WS8.2). Post-fold the
+DISRUPT meter's id-pool shrinks 13 → 11, which is the correct
+direction for WS8.3's surface-count read: three distinct SURFACES
+(not three ids of the same grip) trip `DISRUPT_DENY_AT = 3`.
 
 **WS8.2 — re-payload three soft controls** (data +, where a payload
 field is missing, one `EffectPayload` addition each through the
@@ -1013,10 +1103,22 @@ kill decisions wait for Turn-Law-honest telemetry.
 
 ## Status
 
-- [ ] WS0.1 + WS0.4 doctrine inventory + witness test (free)
-- [ ] WS1 telemetry counters + soft lint + (provisional) offender list
-- [ ] WS6.1 reward-draft harness (free, unblocks WS5/WS6 evidence)
-- [ ] WS8.1 control-surface audit table (free)
+- [x] WS0.1 + WS0.4 doctrine inventory + witness test (free) —
+  shipped 2026-07-11: `doctrine-strike-dead.engine.test.ts` (inventory
+  frozen in its header, empty exception map, signature extension,
+  mechanized strike sweep) + shared clean fixture builder
+  `src/test-utils/card-fixture.ts`
+- [x] WS1 telemetry counters + soft lint + (provisional) offender list
+  — shipped 2026-07-11: counters/report columns/soft lint in tree;
+  PROVISIONAL pre-Phase-26 list cut (8 dead-FREE-line cards; see
+  "WS1.5 provisional offender list" under WS1). Remaining: re-cut
+  after Phase 26/27
+- [x] WS6.1 reward-draft harness (free, unblocks WS5/WS6 evidence) —
+  shipped 2026-07-11: `combat.reward-draft.sim.ts` (`runRewardDraftSim`)
+  + telemetry test. Follow-up noted: sandbox-card injection hook needed
+  before WS5.4/WS6.3 can measure sandbox cards
+- [x] WS8.1 control-surface audit table (free) — shipped 2026-07-11
+  (table under WS8.1 above; cross-referenced from `cross-keywords.md`)
 - [ ] Owner ratification batch (agenda above)
 - [ ] WS0.2/0.3 post-ratification cuts
 - [ ] WS2.1 CONJURE exercise (Thoughtform registry + 2 cards)
@@ -1028,4 +1130,6 @@ kill decisions wait for Turn-Law-honest telemetry.
 - [ ] WS7 cap sweep + The Open Vein/chooseX
 - [ ] WS8.2/8.4 re-payloads + test; WS8.3 meter change
 - [ ] WS9 branch prototype (Phase 33 slice)
-- [ ] WS10.2/10.3 atlas policy + orphan drilling
+- [ ] WS10.2/10.3 atlas policy + orphan drilling — WS10.2 policy note
+  shipped 2026-07-11 (`docs/keyword-atlas.md`); WS10.3 waits on
+  WS4/WS6 drilling

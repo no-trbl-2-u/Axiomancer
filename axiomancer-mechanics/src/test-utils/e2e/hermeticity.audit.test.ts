@@ -105,7 +105,10 @@ describe('hermeticity guard: isolation (no disk / network / subprocess)', () => 
      *  - the vitest-reporter test exercises the reporter's file output;
      *  - this guard reads committed sources;
      *  - the curated-library strike gate reads cards.library.ts to assert
-     *    the banned strings basePower/chipHp never reappear (spec 32 v3 §1).
+     *    the banned strings basePower/chipHp never reappear (spec 32 v3 §1);
+     *  - the doctrine-strike-dead witness reads combat.engine.ts +
+     *    combat.signature.ts for its mechanized strike-vocabulary sweep
+     *    (WS0.4 step 5 — same source-lint carve-out as curated-library).
      * Add to this list only when the FEATURE under test is the
      * disk/process seam itself.
      */
@@ -127,6 +130,7 @@ describe('hermeticity guard: isolation (no disk / network / subprocess)', () => 
         'test-utils/e2e/hermeticity.audit.test.ts',
         'Combat/e2e/terminology-boundary.engine.test.ts',
         'Cards/e2e/curated-library.engine.test.ts',
+        'Cards/e2e/doctrine-strike-dead.engine.test.ts',
     ]);
 
     const IO_PATTERN =

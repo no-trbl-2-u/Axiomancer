@@ -196,6 +196,7 @@ Card-level targets on top of the bands:
 |---|---|
 | Single-card spam | no card id accounts for >70% of a typical win's impact (`buildCombatSummary`) |
 | Dead cards | every library card shows plays in the card-coverage e2e and non-trivial usage somewhere in the full `--cards` matrix |
+| FREE/PAID line balance | for every common/uncommon in its home preset, NEITHER printed line takes >85% or <15% of the card's plays (`free%`/`paid%` in the `--cards` table) — both tails mean one line is dead weight. Soft bands: the lint (`src/Combat/e2e/combat-playtest.line-telemetry.sim.test.ts`, thresholds `// PLAYTEST-CALIBRATION`) flags via `console.info`, never fails; cards tagged `intentionallyAsymmetric` (`Card`, `src/Cards/types.ts`) are exempt by design declaration |
 | Pool ratios (v3 — re-derive from the live library before relying on them) | direct damage = 0 by LAW (spec 32: THE STRIKE IS DEAD — a card printing raw HP damage is a spec violation, not a tuning finding); DoT >= 25%; control >= 15%; GUARD/BARRIER >= 1 per theme; Befriend >= 1; state-interactive >= 2 |
 | Per-stage pool health | each stage's eligible pool (`stageEligibleCardIds`) contains at least one live DoT, control, and defend line |
 | Archetype honesty | each of the 10 theme presets (`erosion` … `refrain`) wins through its own HALLMARK keywords, not just the shared utility 10 (spec 32 §8-9); `dot`-focus drafts land more DoT than `balanced` drafts; the `aggro-brute` POLICY stays the weak baseline (a sim policy — the v2 `aggro-strike` preset is retired) |
@@ -313,7 +314,12 @@ change per axis at a time; measure each before the next.
 - Write `docs/reports/deck-tuning-<ts>.md` (create `docs/reports/` if it
   doesn't exist yet): pool audit, baseline matrix, every A/B
   with `old → new` + rationale + evidence, promotions, propose-only findings,
-  open questions.
+  open questions, and the **per-deck line-telemetry appendix** — one table
+  per preset touched by the run (all ten on a full sweep): each card's
+  `free%` / `paid%` / `fizz%` / `unpl%` and per-line HP contribution
+  (`hpF`/`hpP`) from the `--cards` matrix, with offenders against the §4
+  85/15 line-balance bands flagged (mirror of the
+  `combat-playtest.line-telemetry` lint's `[line-telemetry]` output).
 - Commit: `balance(deck): <ts> report + forge changes (<n> applied)`.
 - Push and open a PR (ready for review, never draft, never auto-merged):
   title `balance(deck): card forge <ts> (<n> applied)`; body carries the
