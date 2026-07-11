@@ -183,7 +183,11 @@ const CURVE_STAGES: readonly CombatStageId[] = ['early', 'mid', 'late'];
 // loadout (+5 maxHp from the armor relic improves survival), which nudges
 // 'grace' back over the late floor — it rejoins the offender set. All three are
 // findings for /deck-tuning, not fixes made by this pass.
-const KNOWN_CURVE_VIOLATORS: readonly string[] = ['grace', 'refrain', 'standstill'];
+// Re-derived 2026-07-11 (Gate 0 round-turn law): the farm-inflated flat 1.00
+// early/mid/late shapes were an artifact of illegal endTurn→startTurn tray
+// re-rolls; under one-tray-per-phase play every preset decays and the offender
+// set is EMPTY. pre-Phase-27 interim — re-derived in the honest re-baseline.
+const KNOWN_CURVE_VIOLATORS: readonly string[] = [];
 
 let cachedCurve: PlaytestReport | null = null;
 function curveReport(): PlaytestReport {

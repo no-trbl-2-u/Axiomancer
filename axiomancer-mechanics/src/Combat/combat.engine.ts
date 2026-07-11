@@ -357,6 +357,8 @@ export function initializeCombatEncounter(
         dice: [],
         draftedDieId: null,
         turn: 0,
+        // Gate 0 (round-turn law) — no tray rolled yet this phase.
+        turnTakenThisPhase: false,
         conviction: 0,
         revealedStances: [],
         lastRead: 'none',
@@ -441,6 +443,20 @@ export function startTurn(
 ): CombatTransition {
     if (state.phase !== 'phase-play') return { state, events: [] };
     if (state.draftedDieId !== null) return { state, events: [] }; // already drafted this turn
+    // Gate 0 (2026-07-10) — the ROUND-TURN LAW: ONE tray roll per threat
+    // phase. A second roll in the same phase is refused outright (state
+    // untouched) with a `turn-law-blocked` event so callers and telemetry can
+    // see the attempt. The law caps TRAY ROLLS, not card plays — Reserve dice
+    // and floating dice still power extra plays WITHIN the one turn (the
+    // multi-float turn is owner-locked: ALL floats may be spent in one round).
+    if (state.turnTakenThisPhase) {
+        const blocked: CombatEvent[] = [
+            { kind: 'turn-law-blocked', turn: state.turn, phaseIndex: state.currentPhaseIndex },
+        ];
+        // The tray/draft/turn are untouched — only the log records the attempt
+        // (auditor transcripts must show illegal rolls being refused).
+        return { state: withLog(state, blocked), events: blocked };
+    }
     const turn = state.turn + 1;
     let dice = rollTurnDice(turn, TURN_DICE_COUNT, rng);
     // CLARITY (P0-truth `forceWildOnNextDie` wiring): the bearer's next roll
@@ -478,6 +494,8 @@ export function startTurn(
         spellsPlayedThisTurn: 0, echoNextSpell: false,
         // Spec 32 §12 #4 — the per-turn RECOIL ledger resets with the turn.
         recoilPaidThisTurn: 0,
+        // Gate 0 — this phase's one legal tray roll is now taken.
+        turnTakenThisPhase: true,
     };
     const events: CombatEvent[] = [
         { kind: 'turn-dice-rolled', turn, dice },
@@ -1716,12 +1734,13 @@ function playBottomAction(
                     Math.round(fuel * mult * (1 + (mech.bonusPct ?? 0)) * vulnMult),
                 );
                 if (burst > 0) {
+                    const hpBefore = enemy.health;
                     const hit = applyEnemyDamage(enemy, burst, state.round, events);
                     enemy = hit.enemy;
                     mechanicDamage += burst;
                     directDamage += burst + hit.clockDamage;
                     gainSoulsLocal(soulWorthyWashouts(hit.washedOut), 'expiry');
-                    attribution = recordAttribution(attribution, card.id, card.name, null, burst);
+                    attribution = recordAttribution(attribution, card.id, card.name, null, burst, hpBefore);
                 }
                 events.push({ kind: 'rupture-detonated', amount: burst, consumed: consumedRes.consumed });
                 gainSoulsLocal(consumedRes.consumed.length, 'consumed');
@@ -1736,12 +1755,13 @@ function playBottomAction(
                     enemy = res2.combatant;
                     if (res2.fuel > 0) {
                         const dmg = Math.round(res2.fuel * vulnMult);
+                        const hpBefore = enemy.health;
                         const hit = applyEnemyDamage(enemy, dmg, state.round, events);
                         enemy = hit.enemy;
                         mechanicDamage += dmg;
                         directDamage += dmg + hit.clockDamage;
                         gainSoulsLocal(soulWorthyWashouts(hit.washedOut), 'expiry');
-                        attribution = recordAttribution(attribution, card.id, card.name, null, dmg);
+                        attribution = recordAttribution(attribution, card.id, card.name, null, dmg, hpBefore);
                     }
                     events.push({ kind: 'affliction-consumed', effectId: res2.consumed, fuel: res2.fuel });
                     gainSoulsLocal(mech.souls, 'consumed');
@@ -1785,12 +1805,13 @@ function playBottomAction(
                 const burst = Math.round(mech.burstPerSoul * spent * mult * vulnMult);
                 souls = 0;
                 if (burst > 0) {
+                    const hpBefore = enemy.health;
                     const hit = applyEnemyDamage(enemy, burst, state.round, events);
                     enemy = hit.enemy;
                     mechanicDamage += burst;
                     directDamage += burst + hit.clockDamage;
                     gainSoulsLocal(soulWorthyWashouts(hit.washedOut), 'expiry');
-                    attribution = recordAttribution(attribution, card.id, card.name, null, burst);
+                    attribution = recordAttribution(attribution, card.id, card.name, null, burst, hpBefore);
                 }
                 events.push({ kind: 'reaped', cardId: card.id, soulsSpent: spent, amount: burst });
                 break;
@@ -2039,7 +2060,7 @@ function playBottomAction(
             if (active && target === 'enemy') {
                 const landed: LandedEffect = { effectId: def.id, effect: def, active, target };
                 const cls = effectImpact(def, active.intensity, active.remainingDuration).track;
-                attribution = recordAttribution(attribution, card.id, card.name, landed, 0);
+                attribution = recordAttribution(attribution, card.id, card.name, landed, 0, enemy.health);
                 events.push({ kind: 'effect-landed', cardId: card.id, effectId: def.id, target: 'enemy', effectKind: cls, intensity: active.intensity, effect: def });
                 if (cls === 'dot' || cls === 'control') landedOffensiveIds.push(def.id);
                 // Meaningful land = intensity increased over the snapshot (or new).
@@ -2143,9 +2164,10 @@ function playBottomAction(
         if (r.tickAllDots) {
             const ticks = getActiveDotTotal(enemy.effects, state.round);
             if (ticks.total > 0) {
+                const hpBefore = enemy.health;
                 enemy = applyDamage(enemy, ticks.total);
                 directDamage += ticks.total;
-                attribution = recordAttribution(attribution, card.id, card.name, null, ticks.total);
+                attribution = recordAttribution(attribution, card.id, card.name, null, ticks.total, hpBefore);
                 for (const t of ticks.perEffect) {
                     events.push({ kind: 'dot-tick', effectId: t.effectId, label: t.label, amount: t.amount, target: 'enemy' });
                 }
@@ -2156,9 +2178,10 @@ function playBottomAction(
             const strongest = ticks.reduce<typeof ticks[number] | null>(
                 (best, t) => (best === null || t.amount > best.amount ? t : best), null);
             if (strongest) {
+                const hpBefore = enemy.health;
                 enemy = applyDamage(enemy, strongest.amount);
                 directDamage += strongest.amount;
-                attribution = recordAttribution(attribution, card.id, card.name, null, strongest.amount);
+                attribution = recordAttribution(attribution, card.id, card.name, null, strongest.amount, hpBefore);
                 events.push({ kind: 'dot-tick', effectId: strongest.effectId, label: strongest.label, amount: strongest.amount, target: 'enemy' });
             }
         }
@@ -2169,12 +2192,13 @@ function playBottomAction(
             if (consumed.stacks > 0) {
                 enemy = consumed.combatant;
                 const burst = Math.min(ruptureBurstCap(enemy.maxHealth), Math.round(r.ruptureMarks * consumed.stacks * vulnMult));
+                const hpBefore = enemy.health;
                 const hit = applyEnemyDamage(enemy, burst, state.round, events);
                 enemy = hit.enemy;
                 mechanicDamage += burst;
                 directDamage += burst + hit.clockDamage;
                 gainSoulsLocal(soulWorthyWashouts(hit.washedOut), 'expiry');
-                attribution = recordAttribution(attribution, card.id, card.name, null, burst);
+                attribution = recordAttribution(attribution, card.id, card.name, null, burst, hpBefore);
                 events.push({ kind: 'damage-dealt', cardId: card.id, target: 'enemy', amount: burst });
             }
         }
@@ -3166,6 +3190,9 @@ export function processBetweenPhases(
         draftedDieId: null,
         lastRead: 'none',
         carriedDie: null,
+        // Gate 0 (round-turn law) — the phase boundary re-arms the one legal
+        // tray roll for the incoming phase.
+        turnTakenThisPhase: false,
     };
     next = withLog(next, events);
 
@@ -3243,14 +3270,22 @@ function ensureDraftForCard(
     if (cur && cur.state === 'available' && cur.color !== 'x') return { state, events: [] };
     let working = state;
     const events: CombatEvent[] = [];
-    if (working.draftedDieId !== null) working = endTurn(working).state;
-    const started = startTurn(working, rng);
-    working = started.state; events.push(...started.events);
-    const enemyStance = currentPhaseStance(working);
-    const pick = chooseDraft(working.dice, cardStance, enemyStance);
-    if (pick) {
-        const drafted = draftStanceDie(working, pick);
-        working = drafted.state; events.push(...drafted.events);
+    // Gate 0 (round-turn law) — roll the phase's ONE tray only if it hasn't
+    // been rolled yet. Once it has, keep the live tray as-is: a re-roll is
+    // illegal, and ending the turn here would wipe floating dice mid-turn
+    // (the caller falls back to Reserve/floating power instead).
+    if (!working.turnTakenThisPhase) {
+        if (working.draftedDieId !== null) working = endTurn(working).state;
+        const started = startTurn(working, rng);
+        working = started.state; events.push(...started.events);
+    }
+    if (working.draftedDieId === null) {
+        const enemyStance = currentPhaseStance(working);
+        const pick = chooseDraft(working.dice, cardStance, enemyStance);
+        if (pick) {
+            const drafted = draftStanceDie(working, pick);
+            working = drafted.state; events.push(...drafted.events);
+        }
     }
     return { state: working, events };
 }
@@ -3273,13 +3308,31 @@ export function resolveCombatPhase(
     const allEvents: CombatEvent[] = [];
     for (const play of cardsPlayed) {
         if (working.phase !== 'phase-play') break;
+        let dieId = play.dieId;
         if (play.useBottom) {
             const card = getCard(play.cardId);
             const drafted = ensureDraftForCard(working, card?.stance ?? 'wild', rng);
             working = drafted.state; allEvents.push(...drafted.events);
+            // Gate 0 (round-turn law) — the phase's one tray roll may already
+            // be spent; a fresh draft cannot be conjured. Fall back to a
+            // color-legal Reserve or FLOATING die (legal extra power WITHIN
+            // the turn — the law caps tray rolls, not card plays).
+            if (dieId === undefined) {
+                const cur = getDraftedDie(working);
+                const stance = card?.stance ?? 'wild';
+                const curUsable = cur && cur.state === 'available' && cur.color !== 'x'
+                    && (cur.color === 'wild' || cur.color === stance);
+                if (!curUsable) {
+                    const alt = [
+                        ...(working.reserve ?? []),
+                        ...working.dice.filter(d => d.floating && d.state === 'available'),
+                    ].find(d => d.color === 'wild' || d.color === stance);
+                    if (alt) dieId = alt.id;
+                }
+            }
         }
         const res = playCombatCard(
-            working, { uid: play.uid, cardId: play.cardId }, play.useBottom, play.dieId, rng,
+            working, { uid: play.uid, cardId: play.cardId }, play.useBottom, dieId, rng,
             play.chosenX !== undefined ? { chosenX: play.chosenX } : undefined,
         );
         working = res.state;

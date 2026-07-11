@@ -36,7 +36,7 @@ import {
     THREAT_WEAKEN_PER_ROLL, THREAT_DENY_AT, THREAT_WEAKEN_FLOOR,
 } from '../combat.engine';
 import { recordAttribution, buildCombatSummary } from '../combat.attribution';
-import type { CombatAttributionRow } from '../combat.encounter.types';
+import type { CombatAttributionRow, LandedEffect } from '../combat.encounter.types';
 import {
     rollCombatDice, combatDieCanPower, refreshOneDie, COMBAT_DICE_COUNT,
     dieIsRerollable, hasRerollableDice, rerollSpentDice,
@@ -579,6 +579,50 @@ describe('Spec 25 §7.7 — recordAttribution field shape', () => {
         expect(Object.keys(ledger)).toHaveLength(2);
         expect(ledger['slippery-slope'].damageDealt).toBe(5);
         expect(ledger['achilles-gambit'].damageDealt).toBe(12);
+    });
+});
+
+// ── Overkill clamp (Gate 0 §2, 2026-07-10) — attribution honesty ─────────────
+// The audit found 740 projected DoT attributed against a 40-max-HP enemy: the
+// ledger claimed damage the fight could never contain. With `targetHpBefore`
+// given, a record is clamped at damage actually applicable.
+
+describe('Gate 0 §2 — recordAttribution overkill clamp', () => {
+    /** A real landed poison, intensity/duration forced to the projection we need. */
+    const poisonLanded = (intensity: number, remainingDuration: number): LandedEffect => {
+        const def = lookupEffect('debuff_poison')!;
+        const applied = applyEffect([], def, 1, { intensityDelta: intensity });
+        const active = { ...applied.activeEffects[0]!, intensity, remainingDuration };
+        return { effectId: def.id, effect: def, active, target: 'enemy' };
+    };
+
+    it('clamps direct damage at the HP the target had left', () => {
+        const ledger = recordAttribution({}, 'qa-card', 'QA Card', null, 100, 40);
+        expect(ledger['qa-card'].damageDealt).toBe(40);
+    });
+
+    it('clamps the projected DoT at the HP the target had left (740 projected vs 40 HP → 40)', () => {
+        // debuff_poison: 2 dmg/round × intensity 5 × 74 rounds = 740 projected.
+        const ledger = recordAttribution({}, 'qa-card', 'QA Card', poisonLanded(5, 74), 0, 40);
+        expect(ledger['qa-card'].dotDamage).toBe(40);
+    });
+
+    it('the strike claims HP first; the DoT projection gets only what remains', () => {
+        const ledger = recordAttribution({}, 'qa-card', 'QA Card', poisonLanded(5, 74), 30, 40);
+        expect(ledger['qa-card'].damageDealt).toBe(30);
+        expect(ledger['qa-card'].dotDamage).toBe(10);
+    });
+
+    it('attributes nothing against an already-dead target (cap 0)', () => {
+        const ledger = recordAttribution({}, 'qa-card', 'QA Card', poisonLanded(3, 3), 12, 0);
+        expect(ledger['qa-card'].damageDealt).toBe(0);
+        expect(ledger['qa-card'].dotDamage).toBe(0);
+        expect(ledger['qa-card'].phases).toBe(1);
+    });
+
+    it('keeps the unclamped legacy projection when no cap is given', () => {
+        const ledger = recordAttribution({}, 'qa-card', 'QA Card', poisonLanded(5, 74), 0);
+        expect(ledger['qa-card'].dotDamage).toBe(740);
     });
 });
 

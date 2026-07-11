@@ -29,9 +29,10 @@ import type { ActiveEffect } from '../../Effects/types';
 import {
     initializeCombatEncounter, rollEncounterDice, playCombatCard, resolveCombatPhase,
     resolveThreatPhase, processBetweenPhases, draftStanceDie, startTurn, endTurn,
-    discardCombatCard, handCards, getFloatingDiceColors, getDraftedDie,
+    discardCombatCard, getFloatingDiceColors, getDraftedDie,
 } from '../combat.engine';
 import { FLOATING_DICE_CAP } from '../combat.dice';
+import { runHazardCombatAutoEncounter } from '../combat.autoplay';
 import { THREAT_RUNGS } from '../effects';
 import { buildPresetDeck, COMBAT_DECK_PRESET_ORDER } from '../combat.deck-presets';
 import type {
@@ -111,7 +112,10 @@ describe('FLOATING DICE — forge, spend-forever, cap, exemptions', () => {
         expect(res.state.floatingDice?.map(d => d.id)).toEqual([floated!.dieId]);
 
         // It survives the turn boundary with a STABLE id (never rerolled).
+        // Gate 0 (round-turn law): the next legal tray arrives only after the
+        // threat phase resolves, so cross the boundary the legal way.
         state = endTurn(res.state).state;
+        state = resolveThreatPhase(state).state;
         state = startTurn(state).state;
         expect(state.dice.some(d => d.id === floated!.dieId && d.floating && d.state === 'available')).toBe(true);
 
@@ -220,9 +224,16 @@ describe('STAGGER rungs — full removal denies the turn; BACKFIRE drips per run
         // a seed installs its own rng stream and the mock would never apply.
         mockSequentialRng(0.2);
         const enemy = makeEnemy(300, 'mind', [ae('debuff_backfire', 1, 3)]);
-        const state = initializeCombatEncounter(makePlayer([ZENO]), enemy, [ZENO, ZENO, ZENO, ZENO, ZENO]);
+        let opened = rollEncounterDice(
+            initializeCombatEncounter(makePlayer([ZENO]), enemy, [ZENO, ZENO, ZENO, ZENO, ZENO]),
+        ).state;
+        // Gate 0 (round-turn law): the second ZENO can no longer ride a free
+        // tray re-roll — arm a FLOATING body die so both plays are legal
+        // inside the phase's ONE turn (the multi-source turn is the intent).
+        const float: CombatManaDie = { id: 'float-qa-stagger', color: 'body', state: 'available', temporary: false, floating: true };
+        opened = { ...opened, dice: [...opened.dice, float], floatingDice: [...(opened.floatingDice ?? []), float] };
         // Two STAGGER 1 plays = THREAT_RUNGS (2) → the action is denied.
-        const res = resolveCombatPhase(rollEncounterDice(state).state, [
+        const res = resolveCombatPhase(opened, [
             { cardId: ZENO, useBottom: true },
             { cardId: ZENO, useBottom: true },
         ]);
@@ -713,6 +724,11 @@ describe('preset ignition — every themed deck reaches its engine within a few 
         refrain: e => e.kind === 'echoed' || e.kind === 'reprised',
     };
 
+    // Gate 0 (2026-07-11 round-turn law) — the old harness fed every hand card
+    // to `resolveCombatPhase`, which quietly re-rolled a tray per card (an
+    // illegal farm). The smoke now drives the LEGAL auto player (one tray per
+    // phase, paid plays + FREE-top drain) over an 8-phase window.
+    // pre-Phase-27 interim — re-derived in the honest re-baseline.
     it.each(COMBAT_DECK_PRESET_ORDER.map(id => [id] as const))(
         "preset '%s' ignites its theme engine in a seeded auto-encounter",
         (presetId) => {
@@ -721,27 +737,18 @@ describe('preset ignition — every themed deck reaches its engine within a few 
             const enemy = deepClone(LittleBelle);
             // Enough HP that slower engines (Souls-from-expiry) get their runway.
             enemy.health = 150; enemy.maxHealth = 150;
-            let state = initializeCombatEncounter(player, enemy, deck, 21);
-            state = rollEncounterDice(state).state;
-
-            let phases = 0;
-            while (state.phase === 'phase-play' && !state.finalOutcome && phases < 5) {
-                phases++;
-                const plays = handCards(state)
-                    .filter(c => c.card.verbClass !== 'retreat')
-                    .map(c => ({ uid: c.uid, cardId: c.card.id, useBottom: true }));
-                state = resolveCombatPhase(state, plays).state;
-                if (state.mercyChoiceActive) break;
-            }
+            const r = runHazardCombatAutoEncounter(player, enemy, {
+                seed: 21, policy: 'status', maxTurns: 8,
+            });
 
             const signal = SIGNALS[presetId];
             expect(signal, `no signal registered for preset '${presetId}'`).toBeDefined();
             expect(
-                state.log.some(signal),
-                `preset '${presetId}' never ignited its theme engine within ${phases} phases`,
+                r.state.log.some(signal),
+                `preset '${presetId}' never ignited its theme engine within ${r.phaseCount} phases`,
             ).toBe(true);
             // And the encounter stayed healthy (no stalemate runaway).
-            expect(state.round).toBeLessThanOrEqual(10);
+            expect(r.state.round).toBeLessThanOrEqual(10);
         },
         30_000,
     );

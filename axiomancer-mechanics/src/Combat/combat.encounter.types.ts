@@ -386,6 +386,9 @@ export type CombatEncounterPhase =
 export type CombatEvent =
     | { kind: 'dice-rolled'; dice: CombatManaDie[] }
     | { kind: 'turn-dice-rolled'; turn: number; dice: CombatManaDie[] }
+    // Gate 0 (2026-07-10 round-turn law) — a second `startTurn` inside one
+    // threat phase was refused (the state is untouched; the tray stays as-is).
+    | { kind: 'turn-law-blocked'; turn: number; phaseIndex: number }
     | { kind: 'die-drafted'; dieId: string; color: CombatDieColor; read: CombatReadResult }
     | { kind: 'conviction-gained'; amount: number; total: number; reason: 'unpicked-die' | 'read-win' | 'effect' }
     | { kind: 'stance-revealed'; phaseIndex: number; stance: Stance }
@@ -497,6 +500,15 @@ export interface CombatEncounterState {
     draftedDieId: string | null;
     /** Turn counter within the encounter (drives die ids + display). */
     turn: number;
+    /** Gate 0 (2026-07-10 round-turn law) — true once this threat phase's ONE
+     *  legal tray roll has happened (`startTurn` stamps it; the phase
+     *  boundary in `resolveThreatPhase`/`processBetweenPhases` re-arms it).
+     *  A second `startTurn` in the same phase is refused with a
+     *  `turn-law-blocked` event. The law caps TRAY ROLLS, not card plays —
+     *  Reserve and floating dice still power extra plays within the turn.
+     *  Optional for back-compat with state literals (absent = false — the
+     *  migration default). */
+    turnTakenThisPhase?: boolean;
     /** Conviction (◆) bank — funds Signature Skills (Spec 26b §4). */
     conviction: number;
     /** Hazard GUARD — a transient shield (HP) granted by defense cards that

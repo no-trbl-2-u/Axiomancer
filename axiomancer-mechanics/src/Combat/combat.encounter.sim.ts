@@ -267,7 +267,15 @@ function bumpUsage(
     if (landedStatus) row.statusLands++;
 }
 
-/** Plays a single threat phase to a stop (enemy dead, mercy opened, or hand/dice out). */
+/**
+ * Plays a single threat phase to a stop under the ROUND-TURN LAW (Gate 0,
+ * 2026-07-10): ONE tray roll (`startTurn`) per phase. The turn's powered plays
+ * run off the drafted die (riding the combo refresh), then the Reserve, then
+ * the floating pool — the law caps TRAY ROLLS, not card plays — after which
+ * the policy drains the leftover hand through the FREE tops and ends the turn.
+ * The guard counters are kept but never bind on legal play: the old
+ * `endTurn → startTurn` Conviction farm is gone.
+ */
 function policyPlayPhase(
     state: CombatEncounterState,
     policy: CombatSimPolicy,
@@ -305,6 +313,38 @@ function policyPlayPhase(
         bumpUsage(usage, card, 'top');
     };
 
+    // ── The ONE legal tray roll + stance draft for this phase ────────────────
+    if (working.dice.length === 0 && working.draftedDieId === null && !working.turnTakenThisPhase) {
+        working = startTurn(working).state;
+        if (working.phase !== 'phase-play') return { state: working, plays, statusPlays };
+    }
+    if (working.draftedDieId === null && working.dice.some(d => !d.floating)) {
+        const want = selectCard(working, policy, rng, fizzledUids, focusIds);
+        // Blind play drafts off only what the player can see: the stance is
+        // `null` until revealed (via the read or a Scout), so chooseDraft can't
+        // pre-seek advantage — it color-matches like a real player on turn one.
+        const enemyStance = policy.blind ? revealedCurrentStance(working) : currentPhase(working).enemyStance;
+        const pick = chooseDraft(working.dice, want?.card.stance ?? 'wild', enemyStance);
+        if (pick) {
+            // Fate Engine P1 — BANK the unpicked die when the Reserve has room
+            // and Conviction isn't starved (pips beat a flat +1◆).
+            const bankUnpicked = (working.reserve ?? []).length < RESERVE_MAX && working.conviction >= 2;
+            working = draftStanceDie(working, pick, { bankUnpicked }).state;
+        }
+        // Fate Engine P1 — the universal FATE TAP: a dead X die in the tray
+        // advances the strongest enemy DoT (or banks +1 Conviction).
+        const xDie = working.dice.find(d => d.color === 'x' && d.state !== 'spent' && d.id !== working.draftedDieId);
+        if (xDie && working.fateTappedTurn !== working.turn) {
+            const choice = getPendingDotTotal(working.enemy, working.round).total > 0 ? 'dot-tick' as const : 'conviction' as const;
+            working = tapFateDie(working, xDie.id, choice).state;
+        }
+    }
+
+    // ── Powered plays WITHIN the one turn ────────────────────────────────────
+    // Power sources in order: the drafted die while it lives (the combo
+    // refresh keeps it alive across NEW statuses), then the Reserve (oldest =
+    // ripest first), then the floating pool (the multi-float turn: ALL floats
+    // are spendable in this one round).
     while (working.phase === 'phase-play' && guard < 60) {
         guard++;
         if (working.finalOutcome || working.mercyChoiceActive) break;
@@ -318,92 +358,54 @@ function policyPlayPhase(
             }
         }
 
-        // Ensure a usable drafted die for this turn.
-        let drafted = getDraftedDie(working);
-        if (!drafted || drafted.state !== 'available' || drafted.color === 'x') {
-            // Fate Engine P1 — the RESERVE is a second power source: spend the
-            // oldest (ripest) banked die before rolling the next turn.
-            const banked = (working.reserve ?? [])[0];
-            if (banked) {
-                const wantR = selectCard(working, policy, rng, fizzledUids, focusIds, banked.color);
-                if (wantR) {
-                    const resR = playCombatCard(working, { uid: wantR.uid }, true, banked.id, undefined, chosenXFor(wantR.card));
-                    if (!resR.events.some(e => e.kind === 'effect-fizzled')) {
-                        lineRow(lines, wantR.card.id).paidHpSwing += playHpSwing(working, resR.state, resR.events);
-                        working = resR.state;
-                        plays++;
-                        const landedR = resR.events.some(e => e.kind === 'effect-landed' && e.target === 'enemy');
-                        if (landedR) statusPlays++;
-                        bumpUsage(usage, wantR.card, 'bottom', landedR);
-                        if (working.finalOutcome || working.mercyChoiceActive) break;
-                        continue;
-                    }
-                    lineRow(lines, wantR.card.id).fizzles++;
-                    fizzledUids.add(wantR.uid);
-                }
-            }
-            if (working.draftedDieId !== null) working = endTurn(working).state;
-            if (working.dice.length === 0) {
-                working = startTurn(working).state;
-                if (working.phase !== 'phase-play') break;
-            }
-            const want = selectCard(working, policy, rng, fizzledUids, focusIds);
-            // Blind play drafts off only what the player can see: the stance is
-            // `null` until revealed (via the read or a Scout), so chooseDraft can't
-            // pre-seek advantage — it color-matches like a real player on turn one.
-            const enemyStance = policy.blind ? revealedCurrentStance(working) : currentPhase(working).enemyStance;
-            const pick = chooseDraft(working.dice, want?.card.stance ?? 'wild', enemyStance);
-            if (!pick) break;
-            // Fate Engine P1 — BANK the unpicked die when the Reserve has room
-            // and Conviction isn't starved (pips beat a flat +1◆).
-            const bankUnpicked = (working.reserve ?? []).length < RESERVE_MAX && working.conviction >= 2;
-            working = draftStanceDie(working, pick, { bankUnpicked }).state;
-            // Fate Engine P1 — the universal FATE TAP: a dead X die in the tray
-            // advances the strongest enemy DoT (or banks +1 Conviction).
-            const xDie = working.dice.find(d => d.color === 'x' && d.state !== 'spent' && d.id !== working.draftedDieId);
-            if (xDie && working.fateTappedTurn !== working.turn) {
-                const choice = getPendingDotTotal(working.enemy, working.round).total > 0 ? 'dot-tick' as const : 'conviction' as const;
-                working = tapFateDie(working, xDie.id, choice).state;
-                if (working.finalOutcome) break;
-            }
-            drafted = getDraftedDie(working);
-            if (!drafted || drafted.state !== 'available' || drafted.color === 'x') {
-                // Forced X — chip with a free top, then end the turn.
-                const top = handCards(working)[0];
-                if (top) playFreeTop(top.uid, top.card);
-                working = endTurn(working).state;
-                if (handCards(working).length === 0 && working.dice.length === 0) break;
-                continue;
-            }
+        const drafted = getDraftedDie(working);
+        const sources: { dieId?: string; color: string }[] = [];
+        if (drafted && drafted.state === 'available' && drafted.color !== 'x') {
+            sources.push({ color: drafted.color });
         }
-
-        const want = selectCard(working, policy, rng, fizzledUids, focusIds, drafted.color);
-        if (!want) {
-            const top = handCards(working)[0];
-            if (top) playFreeTop(top.uid, top.card);
-            working = endTurn(working).state;
-            if (handCards(working).length === 0 && working.dice.length === 0) break;
-            continue;
+        for (const banked of working.reserve ?? []) sources.push({ dieId: banked.id, color: banked.color });
+        for (const f of working.dice) {
+            if (f.floating && f.state === 'available') sources.push({ dieId: f.id, color: f.color });
         }
+        if (sources.length === 0) break; // powered plays exhausted — wind down
 
-        const res = playCombatCard(working, { uid: want.uid }, true, undefined, undefined, chosenXFor(want.card));
-        if (res.events.some(e => e.kind === 'effect-fizzled')) {
-            // Token-gated with no banked token — drain via the free top and skip it.
-            lineRow(lines, want.card.id).fizzles++;
-            fizzledUids.add(want.uid);
-            playFreeTop(want.uid, want.card);
-            continue;
+        let attempted = false;
+        for (const src of sources) {
+            const want = selectCard(working, policy, rng, fizzledUids, focusIds, src.color);
+            if (!want) continue;
+            attempted = true;
+            const res = playCombatCard(working, { uid: want.uid }, true, src.dieId, undefined, chosenXFor(want.card));
+            if (res.events.some(e => e.kind === 'effect-fizzled')) {
+                // Token-gated with no banked token — skip it (the wind-down
+                // drain below still gets its free top).
+                lineRow(lines, want.card.id).fizzles++;
+                fizzledUids.add(want.uid);
+                break; // re-enter the loop with the fizzle excluded
+            }
+            lineRow(lines, want.card.id).paidHpSwing += playHpSwing(working, res.state, res.events);
+            working = res.state;
+            plays++;
+            const landed = res.events.some(e => e.kind === 'effect-landed' && e.target === 'enemy');
+            if (landed) statusPlays++;
+            bumpUsage(usage, want.card, 'bottom', landed);
+            break;
         }
-        lineRow(lines, want.card.id).paidHpSwing += playHpSwing(working, res.state, res.events);
-        working = res.state;
-        plays++;
-        const landed = res.events.some(e => e.kind === 'effect-landed' && e.target === 'enemy');
-        if (landed) statusPlays++;
-        bumpUsage(usage, want.card, 'bottom', landed);
-        if (working.finalOutcome || working.mercyChoiceActive) break;
+        if (!attempted) break; // no card matches any live die color — wind down
+    }
 
-        const after = getDraftedDie(working);
-        if (!after || after.state !== 'available') working = endTurn(working).state;
+    // ── Wind-down: the turn's dice are exhausted or colorless — drain the
+    // leftover hand through the FREE tops (legal, dieless; retreat stays in
+    // hand), then end the turn. The engine's draw-fresh site discards what
+    // remains at the phase boundary.
+    let drain = 0;
+    while (working.phase === 'phase-play' && !working.finalOutcome && !working.mercyChoiceActive && drain < 30) {
+        drain++;
+        const top = handCards(working).find(c => c.card.verbClass !== 'retreat');
+        if (!top) break;
+        playFreeTop(top.uid, top.card);
+    }
+    if (working.phase === 'phase-play' && !working.finalOutcome && working.draftedDieId !== null) {
+        working = endTurn(working).state;
     }
 
     return { state: working, plays, statusPlays };
@@ -420,6 +422,10 @@ export function runOneEncounter(
     outcome: CombatOutcome; rounds: number; plays: number; statusPlays: number; convictionSpent: number;
     dotHpDamage: number; mechanicBurstDamage: number; directHpDamage: number;
     guardOnAttack: number; playerHpTaken: number;
+    /** Gate 0 (round-turn law) — `turn-law-blocked` events in the run's
+     *  transcript. A legal policy NEVER trips the law: pinned 0 by the
+     *  turn-law e2e. */
+    turnLawBlocked: number;
     activeEffectSamples: number[];
     cardUsage: Record<string, CombatCardUsage>;
     /** WS1.1 — per-card FREE/PAID line telemetry (fizzles, per-line HP swing,
@@ -520,6 +526,7 @@ export function runOneEncounter(
         plays,
         statusPlays,
         convictionSpent,
+        turnLawBlocked: state.log.filter(ev => ev.kind === 'turn-law-blocked').length,
         dotHpDamage,
         mechanicBurstDamage,
         directHpDamage,

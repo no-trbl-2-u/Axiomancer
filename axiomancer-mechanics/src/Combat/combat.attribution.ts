@@ -17,6 +17,12 @@ import type {
  * `landed` (when present) projects the DoT damage the effect will deal over its
  * life (damagePerRound × intensity × remainingDuration); `damage` is the HP the
  * play dealt right now (the strike). Either can be 0.
+ *
+ * Overkill clamp (Gate 0 §2, 2026-07-10): when `targetHpBefore` — the target's
+ * HP at the moment of the record, BEFORE this record's damage — is given, the
+ * record is clamped at damage actually applicable: the strike claims at most
+ * that HP, and the DoT projection at most what remains after the strike. The
+ * pre-clamp ledger attributed 740 projected DoT against a 40-max-HP enemy.
  */
 export function recordAttribution(
     attribution: Record<string, CombatAttributionRow>,
@@ -24,18 +30,22 @@ export function recordAttribution(
     cardName: string,
     landed: LandedEffect | null,
     damage: number,
+    targetHpBefore?: number,
 ): Record<string, CombatAttributionRow> {
     const prev = attribution[cardId] ?? { cardId, name: cardName, dotDamage: 0, damageDealt: 0, phases: 0 };
     const dot = landed?.effect.payload.damageOverTime;
-    const projected = dot
+    const projectedRaw = dot
         ? dot.damagePerRound * Math.max(1, landed!.active.intensity) * Math.max(1, landed!.active.remainingDuration)
         : 0;
+    const cap = targetHpBefore !== undefined ? Math.max(0, targetHpBefore) : undefined;
+    const applied = cap !== undefined ? Math.min(damage, cap) : damage;
+    const projected = cap !== undefined ? Math.min(projectedRaw, cap - applied) : projectedRaw;
     return {
         ...attribution,
         [cardId]: {
             ...prev,
             dotDamage: prev.dotDamage + projected,
-            damageDealt: prev.damageDealt + damage,
+            damageDealt: prev.damageDealt + applied,
             phases: prev.phases + 1,
         },
     };

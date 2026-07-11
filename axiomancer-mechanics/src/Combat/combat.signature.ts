@@ -153,7 +153,7 @@ export function applySignatureSkill(
             const totalStacks = state.enemy.effects.reduce((sum, ae) => sum + ae.intensity, 0);
             const dmg = Math.max(1, Math.round(CONCLUDE_DMG_PER_STACK * totalStacks));
             const enemy = applyDamage(state.enemy, dmg) as Enemy;
-            const attribution = recordAttribution(state.attribution, skill.id, skill.name, null, dmg);
+            const attribution = recordAttribution(state.attribution, skill.id, skill.name, null, dmg, state.enemy.health);
             events.push({ kind: 'conclude-hit', amount: dmg, totalStacks });
             events.push({ kind: 'damage-dealt', cardId: skill.id, target: 'enemy', amount: dmg });
             next = refreshDraftedDie({ ...state, enemy, attribution });
@@ -178,7 +178,7 @@ export function applySignatureSkill(
                 if (active) {
                     const landed: LandedEffect = { effectId: def.id, effect: def, active, target: 'enemy' };
                     const cls = effectImpact(def, active.intensity, active.remainingDuration).track;
-                    attribution = recordAttribution(attribution, skill.id, skill.name, landed, 0);
+                    attribution = recordAttribution(attribution, skill.id, skill.name, landed, 0, enemy.health);
                     events.push({ kind: 'effect-landed', cardId: skill.id, effectId: def.id, target: 'enemy', effectKind: cls, intensity: active.intensity, effect: def });
                 }
             }
@@ -186,8 +186,9 @@ export function applySignatureSkill(
             // foe toward the mercy screen (Disarming Plea's ratified exception).
             if (skill.kind === 'mercy') {
                 const dmg = skill.magnitude;
+                const hpBefore = enemy.health;
                 enemy = applyDamage(enemy, dmg) as Enemy;
-                attribution = recordAttribution(attribution, skill.id, skill.name, null, dmg);
+                attribution = recordAttribution(attribution, skill.id, skill.name, null, dmg, hpBefore);
                 events.push({ kind: 'damage-dealt', cardId: skill.id, target: 'enemy', amount: dmg });
             }
             next = { ...state, enemy, attribution };

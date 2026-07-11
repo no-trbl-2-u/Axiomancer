@@ -22,7 +22,9 @@
  *   --max-turns <n>      stop auto play after this many phases (default 8)
  *   --stage <id>         playtest stage profile (early|mid|late|impossible);
  *                        builds the stage player when no explicit --preset is
- *                        given, and scopes --deck drafting to the stage pool
+ *                        given, scopes --deck drafting to the stage pool, and
+ *                        defaults the enemy to the stage's roster when no
+ *                        explicit --enemy is given (seed-deterministic pick)
  *   --deck <selection>   preset:<id> | draft:<focus> | cards:a,b,c | policy-pick
  *                        (policy-pick drafts with the --policy's natural focus;
  *                        status → dot, because status play is the efficient path)
@@ -33,7 +35,9 @@
  *                        X argument: `bot:<uid>:<X>` (engine-clamped to
  *                        [min, affordable])
  *   --stdin              JSONL answers (shared io.ts layer)
- *   --json-events        machine-clean stdout event stream
+ *   --json-events        machine-clean stdout event stream; --auto runs emit
+ *                        the full per-play transcript (turnStart / draft /
+ *                        signature / card / turnEnd / resolvedPhase / mercy)
  *   --state-log <path>   JSONL state mutation log
  *
  * Logic stays in the engine modules. This file only parses flags, prompts,
@@ -87,6 +91,9 @@ export type CombatAutoPolicyId = 'naive' | 'safe' | 'aggressive' | 'status';
 
 export interface CombatCliFlags {
     enemySlug: string;
+    /** True when --enemy was passed explicitly (a --stage roster enemy only
+     *  replaces the default when the enemy was NOT asked for). */
+    enemyExplicit: boolean;
     presetId: string;
     /** True when --preset was passed explicitly (a --stage player only
      *  replaces the preset player when the preset was NOT asked for). */
@@ -166,6 +173,7 @@ function takeValue(args: string[], i: number, flag: string): [string, number] {
 export function parseCombatArgv(args: string[]): CombatCliFlags {
     const flags: CombatCliFlags = {
         enemySlug: 'little-belle',
+        enemyExplicit: false,
         presetId: 'apprentice',
         presetExplicit: false,
         auto: false,
@@ -181,7 +189,8 @@ export function parseCombatArgv(args: string[]): CombatCliFlags {
         else if (arg === '--json-events') { flags.jsonEvents = true; i++; }
         else if (arg === '--stdin') { flags.stdin = true; i++; }
         else if (arg.startsWith('--enemy')) {
-            const [v, ni] = takeValue(args, i, '--enemy'); flags.enemySlug = v; i = ni;
+            const [v, ni] = takeValue(args, i, '--enemy');
+            flags.enemySlug = v; flags.enemyExplicit = true; i = ni;
         } else if (arg.startsWith('--preset')) {
             const [v, ni] = takeValue(args, i, '--preset');
             flags.presetId = v; flags.presetExplicit = true; i = ni;
@@ -263,7 +272,18 @@ function bestAutoSignature(s: CombatEncounterState): string | null {
     return null;
 }
 
-/** Runs one full phase in auto mode (start-turn → draft → play → end-turn loop). */
+/**
+ * Runs one full phase in auto mode under the ROUND-TURN LAW (Gate 0,
+ * 2026-07-10): ONE tray roll per phase — draft once, ride the drafted die's
+ * combo refresh for the paid plays, drain the leftover hand through the FREE
+ * tops, then end the turn. The safety counter is kept but never binds on
+ * legal play (the old `endTurn → startTurn` loop is gone).
+ *
+ * Every engine verb `emit`s its events (Gate 0 §2, 2026-07-10): auto mode
+ * carries the same per-play transcript the interactive loop does, so a
+ * `--json-events` run is an honest turn-by-turn audit record — no bespoke
+ * harness needed.
+ */
 function autoPlayPhase(
     state: CombatEncounterState,
     policy: CombatAutoPolicyId,
@@ -272,6 +292,31 @@ function autoPlayPhase(
     let s = state;
     let safety = 0;
 
+    // The ONE legal tray roll + stance draft for this phase.
+    if (s.dice.length === 0 && s.draftedDieId === null && !s.turnTakenThisPhase) {
+        const turned = startTurn(s);
+        s = turned.state;
+        emit({
+            type: 'hazardCombat:turnStart',
+            payload: { turn: s.turn, dice: s.dice.map(d => `${d.id}[${d.color}]`), events: turned.events },
+        });
+        if (s.phase !== 'phase-play') return s;
+    }
+    if (s.draftedDieId === null && s.dice.length > 0) {
+        const want = bestAutoCard(s, policy);
+        const enemyStance = revealedCurrentStance(s);
+        const pick = chooseDraft(s.dice, want?.card.stance ?? 'wild', enemyStance);
+        if (pick) {
+            const drafted = draftStanceDie(s, pick);
+            s = drafted.state;
+            emit({
+                type: 'hazardCombat:draft',
+                payload: { dieId: pick, color: getDraftedDie(s)?.color, read: s.lastRead, events: drafted.events },
+            });
+        }
+    }
+
+    // Paid plays off the drafted die while the combo refresh keeps it alive.
     while (s.phase === 'phase-play' && !s.finalOutcome && !s.mercyChoiceActive && safety < phaseTurnLimit * 6) {
         safety++;
 
@@ -280,53 +325,55 @@ function autoPlayPhase(
             const sigId = bestAutoSignature(s);
             if (sigId) {
                 const cast = playSignatureSkill(s, sigId);
-                if (cast.state !== s) { s = cast.state; if (s.finalOutcome) break; continue; }
+                if (cast.state !== s) {
+                    s = cast.state;
+                    emit({ type: 'hazardCombat:signature', payload: { signatureId: sigId, events: cast.events } });
+                    if (s.finalOutcome) break;
+                    continue;
+                }
             }
         }
 
-        // Ensure a drafted die exists.
-        let drafted = getDraftedDie(s);
-        if (!drafted || drafted.state !== 'available' || drafted.color === 'x') {
-            if (s.draftedDieId !== null) s = endTurn(s).state;
-            if (s.dice.length === 0) {
-                s = startTurn(s).state;
-                if (s.phase !== 'phase-play') break;
-            }
-            const want = bestAutoCard(s, policy);
-            const enemyStance = revealedCurrentStance(s);
-            const pick = chooseDraft(s.dice, want?.card.stance ?? 'wild', enemyStance);
-            if (!pick) break;
-            s = draftStanceDie(s, pick).state;
-            drafted = getDraftedDie(s);
-            // Forced X die — chip with a free top, then end the turn.
-            if (!drafted || drafted.state !== 'available' || drafted.color === 'x') {
-                const topCard = handCards(s)[0];
-                if (topCard) s = playCombatCard(s, { uid: topCard.uid }, false).state;
-                s = endTurn(s).state;
-                continue;
-            }
-        }
-
+        const drafted = getDraftedDie(s);
+        if (!drafted || drafted.state !== 'available' || drafted.color === 'x') break;
         const want = bestAutoCard(s, policy);
-        if (!want) {
-            // No suitable card — play first card top action and end turn.
-            const topCard = handCards(s)[0];
-            if (topCard) s = playCombatCard(s, { uid: topCard.uid }, false).state;
-            s = endTurn(s).state;
-            continue;
-        }
+        if (!want) break;
 
         const res = playCombatCard(s, { uid: want.uid }, true);
         if (res.events.some(e => e.kind === 'effect-fizzled')) {
             // Fizzled — drain via free top.
-            s = playCombatCard(s, { uid: want.uid }, false).state;
+            const free = playCombatCard(s, { uid: want.uid }, false);
+            s = free.state;
+            emit({
+                type: 'hazardCombat:card',
+                payload: { uid: want.uid, cardId: want.card.id, useBottom: false, events: free.events },
+            });
             continue;
         }
         s = res.state;
-        if (s.finalOutcome || s.mercyChoiceActive) break;
+        emit({
+            type: 'hazardCombat:card',
+            payload: { uid: want.uid, cardId: want.card.id, useBottom: true, events: res.events },
+        });
+    }
 
-        const after = getDraftedDie(s);
-        if (!after || after.state !== 'available') s = endTurn(s).state;
+    // Wind-down: drain the leftover hand via the FREE tops, then end the turn.
+    let drain = 0;
+    while (s.phase === 'phase-play' && !s.finalOutcome && !s.mercyChoiceActive && drain < 30) {
+        drain++;
+        const topCard = handCards(s).find(c => c.card.verbClass !== 'retreat');
+        if (!topCard) break;
+        const free = playCombatCard(s, { uid: topCard.uid }, false);
+        s = free.state;
+        emit({
+            type: 'hazardCombat:card',
+            payload: { uid: topCard.uid, cardId: topCard.card.id, useBottom: false, events: free.events },
+        });
+    }
+    if (s.phase === 'phase-play' && !s.finalOutcome && s.draftedDieId !== null) {
+        const ended = endTurn(s);
+        s = ended.state;
+        emit({ type: 'hazardCombat:turnEnd', payload: { events: ended.events } });
     }
 
     return s;
@@ -515,14 +562,18 @@ async function autoHazardCombatLoop(
         if (s.finalOutcome) break;
         if (s.mercyChoiceActive) {
             const beforeMercy = s;
-            s = selectMercyChoice(s, 'spare').state;
+            const mercyRes = selectMercyChoice(s, 'spare');
+            s = mercyRes.state;
             logState('hazardCombat:mercy', beforeMercy, s, { choice: 'spare' });
+            emit({ type: 'hazardCombat:mercy', payload: { choice: 'spare', events: mercyRes.events } });
             break;
         }
         if (s.phase === 'phase-play') {
             const beforeResolve = s;
-            s = resolveThreatPhase(s).state;
+            const resolved = resolveThreatPhase(s);
+            s = resolved.state;
             logState('hazardCombat:resolveThreat', beforeResolve, s, { phaseCount });
+            emit({ type: 'hazardCombat:resolvedPhase', payload: { events: resolved.events } });
         }
     }
     return s;
@@ -561,6 +612,7 @@ export async function runHazardCombatCliEncounter(
         : stageProfile ? `stage:${stageProfile.id}` : presetId;
     const flags: CombatCliFlags = {
         enemySlug: '',
+        enemyExplicit: true, // the caller resolved the enemy already
         presetId,
         presetExplicit: options.presetId !== undefined,
         auto: options.auto ?? false,
@@ -634,6 +686,18 @@ export async function runCombatCli(rawArgs: string[]): Promise<void> {
         setIoMode({ kind: 'stdin' });
     }
     if (flags.stateLogPath) setStateLogPath(flags.stateLogPath);
+
+    // --stage without --enemy fights the STAGE'S roster, not the default
+    // little-belle (Gate 0 §2, 2026-07-10 — a stage-scaled player against a
+    // 40-HP early enemy is a stomp that reads as engagement). Seeded runs
+    // pick deterministically from the roster; unseeded runs pick at random.
+    if (flags.stage !== undefined && !flags.enemyExplicit) {
+        const roster = getStageProfile(flags.stage)!.enemySlugs;
+        const idx = flags.seed !== undefined
+            ? Math.abs(Math.trunc(flags.seed)) % roster.length
+            : Math.floor(Math.random() * roster.length);
+        flags.enemySlug = roster[idx]!;
+    }
 
     const enemyDef = ENEMY_REGISTRY[flags.enemySlug as EnemySlug];
     if (!enemyDef) {
