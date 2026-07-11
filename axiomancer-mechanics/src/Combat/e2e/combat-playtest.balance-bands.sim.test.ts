@@ -189,8 +189,17 @@ const CURVE_STAGES: readonly CombatStageId[] = ['early', 'mid', 'late'];
 // propping up mid/late-stage win rates specifically (more phases survived ->
 // more farmed turns -> more banked Conviction/Signature casts) — with it gone,
 // all three previously-listed offenders now decay honestly and pass the
-// curve. Zero offenders is itself a finding for Phase 27's re-baseline to
-// confirm at the full matrix, not assumed permanent here.
+// curve.
+// Confirmed 2026-07-11 (Phase 27, full-matrix re-baseline,
+// plan/tuning/2026-07-11-phase27-rebaseline.md §3): zero offenders holds at
+// the full 18-enemy matrix, not just this file's 2-enemies-per-stage slice.
+// Read this pass carefully though — it is a pass for the wrong reason: 9/10
+// presets hit literal 0.00 at mid and all 10 hit <=0.02 at late, so
+// "monotone decay" is trivially satisfied by a cliff, not a graceful curve.
+// The mid floor below is still pinned at the loose value (0); do not read
+// this empty violator list as "the curve is healthy" — it means "nothing is
+// FLAT," which is a much weaker claim. Phase 31/32 own ratcheting the mid
+// floor toward its 0.25 target.
 const KNOWN_CURVE_VIOLATORS: readonly string[] = [];
 
 let cachedCurve: PlaytestReport | null = null;
