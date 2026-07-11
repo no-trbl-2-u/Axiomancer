@@ -18,7 +18,7 @@ import {
     revealedCurrentStance, resolveRead, getSignatureSkill,
     lookupEffect, READ_DAMAGE_MULT, COLOR_MATCH_DAMAGE_BONUS,
     READ_ADVANTAGE_INTENSITY_BONUS, READ_DISADVANTAGE_DURATION_PENALTY, RESERVE_MAX,
-    RUPTURE_BURST_CAP, riderText,
+    RUPTURE_CAP_FRACTION, recoilXRange, riderText,
     VULNERABLE_MAX_MULT, DISRUPT_DENY_AT,
     type CombatEncounterState, type CombatCard, type CombatManaDie,
     type CombatThreatPhase, type CombatIntentType, type CombatReadResult,
@@ -142,13 +142,25 @@ export interface CombatEffectChipVM {
     /** General keyword definition for the on-board status tooltip (null if unmapped). */
     gloss: string | null;
 }
+/** WS9 (spec 32 §12 #7) — the fork telegraph of a BRANCH phase: the condition
+ *  plus BOTH outcomes stay visible; `taken` is stamped once the phase starts. */
+export interface CombatIntentBranchVM {
+    /** Human condition text, e.g. "if it carries 3+ afflictions". */
+    condition: string;
+    thenText: string;
+    elseText: string;
+    /** The committed fork — null while the phase is still upcoming. */
+    taken: 'then' | 'else' | null;
+}
 export interface CombatIntentVM {
     type: CombatIntentType; icon: string; label: string; color: string; description: string;
     /** Total HP damage this phase's threat action deals if NOT cleared (0 if none). */
     damage: number;
     /** True if the threat action also applies a debuff to the player. */
     debuffs: boolean;
-    next: { type: CombatIntentType; icon: string; label: string } | null;
+    /** WS9 — fork info for the CURRENT phase (null on linear phases). */
+    branch: CombatIntentBranchVM | null;
+    next: { type: CombatIntentType; icon: string; label: string; branch: CombatIntentBranchVM | null } | null;
 }
 export interface CombatEnemyPaneVM {
     name: string; artKey: string; isBoss: boolean;
@@ -303,6 +315,11 @@ export interface CombatCardVM {
     /** Authored flavor prose (`Card.description`) — overlay BOTTOM only, never
      *  on the face (owner directive 2026-07-09: the face is purely functional). */
     flavor: string | null;
+    /** WS7.2 chosen X-cost (`recoil_x`): the ENGINE's live clamp range
+     *  (`recoilXRange` — min = printed floor, max = affordable). Non-null only
+     *  when the card carries an X mechanic; the board shows the stepper off
+     *  this and passes the pick through the play call as `chosenX`. */
+    chooseX: { min: number; max: number } | null;
 }
 export interface CombatSignatureVM {
     id: string; name: string; description: string; cost: number; affordable: boolean; icon: string;
@@ -358,20 +375,33 @@ function chips(effects: { effectId: string; intensity: number; remainingDuration
     });
 }
 
+/** WS9 — maps a phase's branch payload to the fork telegraph (null if linear). */
+function branchVM(phase: CombatThreatPhase | undefined): CombatIntentBranchVM | null {
+    const b = phase?.branch;
+    if (!b) return null;
+    return {
+        condition: b.conditionText,
+        thenText: b.then.threatAction.description,
+        elseText: b.else.threatAction.description,
+        taken: b.taken ?? null,
+    };
+}
+
 function intentVM(state: CombatEncounterState): CombatIntentVM {
     const cur = currentPhase(state);
     const type = (cur?.intentType ?? 'pass') as CombatIntentType;
     const meta = INTENT_ICONS[type];
     const nextPhase = state.threatPhases[state.currentPhaseIndex + 1];
     const next = nextPhase && !cur?.isFinalPhase
-        ? (() => { const t = (nextPhase.intentType ?? 'pass') as CombatIntentType; const m = INTENT_ICONS[t]; return { type: t, icon: m.icon, label: m.label }; })()
+        ? (() => { const t = (nextPhase.intentType ?? 'pass') as CombatIntentType; const m = INTENT_ICONS[t]; return { type: t, icon: m.icon, label: m.label, branch: branchVM(nextPhase) }; })()
         : null;
     const effects = cur?.threatAction.effects ?? [];
     const damage = effects.reduce((s, e) => s + (e.damage ?? 0), 0);
     const debuffs = effects.some((e) => !!e.effectId);
     return {
         type, icon: meta.icon, label: cur?.intentLabel ?? meta.label, color: meta.color,
-        description: cur?.threatAction.description ?? '', damage, debuffs, next,
+        description: cur?.threatAction.description ?? '', damage, debuffs,
+        branch: branchVM(cur), next,
     };
 }
 
@@ -967,6 +997,10 @@ function mechanicHeadline(mech: CardSpecialMechanic | null): MechHeadline | null
             return { keyword: kw ?? 'Conjure', heroText: '', heroSub: 'a Thoughtform', verbLine: 'create a one-use Thoughtform card' };
         case 'recoil':
             return { keyword: kw ?? 'Recoil', heroText: `${mech.hp}`, heroSub: 'VITAE cost', verbLine: 'pay VITAE as an unpreventable cost' };
+        case 'recoil_x': {
+            const per = Math.max(1, Math.round(1 / mech.poisonPerX));
+            return { keyword: kw ?? 'Recoil', heroText: `X (min ${mech.min})`, heroSub: `VITAE · POISON per ${per}`, verbLine: `pay X VITAE of your choosing — POISON the foe 1 per ${per} paid` };
+        }
         case 'extend_dots':
             return { keyword: kw ?? 'Fester', heroText: `+${mech.turns}`, heroSub: 'turns · all your DoTs', verbLine: 'extend every damage-over-time you hold on the foe' };
         case 'boost_all_dots':
@@ -993,7 +1027,7 @@ function mechanicHeadline(mech: CardSpecialMechanic | null): MechHeadline | null
 const MECH_HEADLINE_PRIORITY: readonly string[] = [
     'peroration', 'sway', 'stagger', 'lock_stance', 'reprise', 'replay_last',
     'omen', 'consume_affliction', 'soul_gain', 'spend_premises', 'premise',
-    'foretell', 'extend_dots', 'convert_dots', 'boost_all_dots', 'recoil',
+    'foretell', 'extend_dots', 'convert_dots', 'boost_all_dots', 'recoil_x', 'recoil',
     'conjure_card', 'strip_random_buff', 'echo', 'echo_next_spell', 'rider',
 ];
 
@@ -1116,8 +1150,8 @@ function detailCore(card: CombatCard, sourceCard?: Card): DetailCore {
         case 'barrier': { const b = c.barrierAmt; const adv = Math.max(1, Math.round(b * READ_DAMAGE_MULT.advantage)); const dis = Math.max(1, Math.round(b * READ_DAMAGE_MULT.disadvantage)); return { subtitle: 'Barrier — a stacking shield that soaks damage.', metaChip, outcomeLine: `Gain ${Title} ${b}.`, outcomeStats: [{ label: 'SOAK', value: `${b} (▲${adv} · —${b} · ▼${dis})` }], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: gain Barrier ${b}; ▲ read raises it to ${adv}, ▼ drops it to ${dis}; +${COLOR_MATCH_DAMAGE_BONUS} on a ${STANCE} match.`, readNote: `The read scales the Barrier granted: ▲ ×${READ_DAMAGE_MULT.advantage}, ▼ ×${READ_DAMAGE_MULT.disadvantage}.`, mathLine: `Soak ${b} base × read + ${COLOR_MATCH_DAMAGE_BONUS} on a colour match; barriers stack.`, keywords }; }
         case 'riposte': { const guardLine = c.guardAmount ? ` · Guard ${c.guardAmount}` : ''; const stats = [{ label: 'COUNTER', value: `${c.riposteDmg}` }, { label: 'REDUCE', value: `-${c.riposteReduce}` }]; if (c.guardAmount) stats.push({ label: 'GUARD', value: `${c.guardAmount}` }); return { subtitle: 'Riposte — counter the next hit and blunt it.', metaChip, outcomeLine: `Arm ${Title} — Counter ${c.riposteDmg} · Cut ${c.riposteReduce}${guardLine}.`, outcomeStats: stats, stacksText: null, freeLine, powerLine: `◆ WITH A DIE: arm Riposte — counter ${c.riposteDmg}, reduce ${c.riposteReduce}${c.guardAmount ? `, +Guard ${c.guardAmount}` : ''}; the read scales it.`, readNote: 'The read scales both the counter damage and the reduction.', mathLine: `Counter ${c.riposteDmg} & reduce ${c.riposteReduce}, each × read (+${COLOR_MATCH_DAMAGE_BONUS} counter on a colour match).`, keywords }; }
         case 'siphon': return { subtitle: 'Siphon — heal for part of the harm you cash in.', metaChip, outcomeLine: `${Title} ${c.siphonPct}%.`, outcomeStats: [{ label: 'LIFESTEAL', value: `${c.siphonPct}%` }], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: heal ${c.siphonPct}% of the HP this card's payoff erodes.`, readNote: `The burst is live; the ${c.siphonPct}% rate is exact.`, mathLine: `Heal = ${c.siphonPct}% × (the payoff burst) — the burst is live, so no fixed heal number.`, keywords };
-        case 'rupture': return { subtitle: "Rupture — consume the foe's afflictions and detonate them.", metaChip, outcomeLine: `${Title} · max ${RUPTURE_BURST_CAP}.`, outcomeStats: [{ label: 'BURST', value: 'live total' }, { label: 'CAP', value: `${RUPTURE_BURST_CAP}` }], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: consume ALL the foe's afflictions — burst = their remaining harm (up to ${RUPTURE_BURST_CAP}).`, readNote: 'Stack afflictions first — the burst equals what they still owed, so it has no fixed number until you fire it.', mathLine: `Burst = remaining affliction fuel (capped ${RUPTURE_BURST_CAP}) — live, so no fixed number (real-units-or-no-number).`, keywords };
-        case 'reap': return { subtitle: 'Reap — spend Souls for the printed payoff.', metaChip, outcomeLine: c.reapCost > 0 ? `${Title} ${c.reapCost} Souls.` : `${Title} ALL Souls${c.reapPerSoul > 0 ? ` — ${c.reapPerSoul} per Soul` : ''}.`, outcomeStats: c.reapPerSoul > 0 ? [{ label: 'PER SOUL', value: `${c.reapPerSoul}` }, { label: 'CAP', value: `${RUPTURE_BURST_CAP}` }] : [{ label: 'COST', value: `${c.reapCost} Souls` }], stacksText: null, freeLine, powerLine: c.reapPerSoul > 0 ? `◆ WITH A DIE: spend EVERY Soul — burst ${c.reapPerSoul} per Soul spent (up to ${RUPTURE_BURST_CAP}).` : `◆ WITH A DIE: spend ${c.reapCost} Souls to fire the printed effect (fizzles when underfunded).`, readNote: 'Souls come from expiring or consumed enemy afflictions — fill the bank first.', mathLine: c.reapPerSoul > 0 ? `Burst = ${c.reapPerSoul} × Souls spent (live, capped ${RUPTURE_BURST_CAP}).` : `Costs ${c.reapCost} Souls — the payoff is the printed line, in real units.`, keywords };
+        case 'rupture': { const capPct = Math.round(RUPTURE_CAP_FRACTION * 100); return { subtitle: "Rupture — consume the foe's afflictions and detonate them.", metaChip, outcomeLine: `${Title} · max ${capPct}% of the foe's max HP.`, outcomeStats: [{ label: 'BURST', value: 'live total' }, { label: 'CAP', value: `${capPct}% max HP` }], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: consume ALL the foe's afflictions — burst = their remaining harm (up to ${capPct}% of the foe's max HP).`, readNote: 'Stack afflictions first — the burst equals what they still owed, so it has no fixed number until you fire it.', mathLine: `Burst = remaining affliction fuel (capped at ${capPct}% of the foe's max HP) — live, so no fixed number (real-units-or-no-number).`, keywords }; }
+        case 'reap': return { subtitle: 'Reap — spend Souls for the printed payoff.', metaChip, outcomeLine: c.reapCost > 0 ? `${Title} ${c.reapCost} Souls.` : `${Title} ALL Souls${c.reapPerSoul > 0 ? ` — ${c.reapPerSoul} per Soul` : ''}.`, outcomeStats: c.reapPerSoul > 0 ? [{ label: 'PER SOUL', value: `${c.reapPerSoul}` }, { label: 'CAP', value: 'none' }] : [{ label: 'COST', value: `${c.reapCost} Souls` }], stacksText: null, freeLine, powerLine: c.reapPerSoul > 0 ? `◆ WITH A DIE: spend EVERY Soul — burst ${c.reapPerSoul} per Soul spent, uncapped.` : `◆ WITH A DIE: spend ${c.reapCost} Souls to fire the printed effect (fizzles when underfunded).`, readNote: 'Souls come from expiring or consumed enemy afflictions — fill the bank first.', mathLine: c.reapPerSoul > 0 ? `Burst = ${c.reapPerSoul} × Souls spent (live, UNCAPPED — the emptied bank is the price).` : `Costs ${c.reapCost} Souls — the payoff is the printed line, in real units.`, keywords };
         case 'forge': { const clause = forgeClause(c.mech) ?? 'shape your dice'; return { subtitle: `${Title} — dice are the resource.`, metaChip, outcomeLine: `${clause.charAt(0).toUpperCase()}${clause.slice(1)}.`, outcomeStats: [], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: ${card.bottomActionText}`, readNote: 'Die-forging takes no read — the printed line is exact.', mathLine: 'A die-economy verb — the printed line is the applied effect.', keywords };
         }
         case 'enchant': return { subtitle: 'Enchantment — a persistent passive, rest of combat.', metaChip, outcomeLine: 'In play for the rest of the combat.', outcomeStats: [], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: ${card.bottomActionText}`, readNote: 'PAID only — the die is the commitment. It leaves the deck cycle once played.', mathLine: 'A standing rule, not a number — its text is the engine text.', keywords };
@@ -1228,6 +1262,8 @@ function handVM(state: CombatEncounterState): CombatCardVM[] {
             detail: detailStats(card, sourceCard),
             read: preview?.read ?? null, colorMatch: preview?.colorMatch ?? false,
             flavor: sourceCard?.description ?? null,
+            // WS7.2 — the engine's live chosen-X clamp range (null = no X mechanic).
+            chooseX: recoilXRange(state, card),
         };
     });
 }

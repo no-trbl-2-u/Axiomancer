@@ -7,11 +7,14 @@
 import { ActiveEffect } from '../Effects/types';
 import { lookupEffect } from '../Effects/effects.library';
 import { removeEffectsByType } from '../Effects';
-import { MAX_EFFECT_DURATION } from '../Game/game-mechanics.constants';
+import { MAX_EFFECT_DURATION, MAX_EFFECT_INTENSITY } from '../Game/game-mechanics.constants';
 import { Combatant } from './types';
 import type { Enemy } from '../Enemy/types';
 import { applyDamage, heal } from './health';
-import { getActiveEffectModifiers, getDotAmplificationByEffect, rampedDamagePerRound } from './effect-modifiers';
+import {
+    getActiveEffectModifiers, getDotAmplificationByEffect, rampedDamagePerRound,
+    getTickAmplifyFlat, dotRoundClockPhase, dotEventTrigger, DotEventTrigger,
+} from './effect-modifiers';
 import { getRng } from '../Utils/rng';
 
 /** ID of the Mind studying mark. Used by Mind/Attack to add bonus damage. */
@@ -62,28 +65,20 @@ export const VULNERABLE_MAX_MULT = 2.0;
  *  bearer (a fully-stacked protective mult still lets half the hit through).
  *  P0-truth: protective (`damageTakenMult < 1`) payloads are REAL now. Tunable. */
 export const RESOLUTE_MIN_MULT = 0.5;
-/** RUPTURE — hard cap on a single detonation's burst HP (RUPTURE + mark
- *  conclusions share it), so a long stack can't one-shot a boss. Tunable. */
-export const RUPTURE_BURST_CAP = 80;
-/** REAP-ALL — the Harvest capstone (`the-reaping`) empties the WHOLE Soul bank
- *  in one swing, so its ceiling is deliberately higher than the shared RUPTURE
- *  cap: "every soul you gathered, swung at once" must actually pay off a big
- *  bank instead of silently wasting Souls past the 80 line. Tunable. */
-export const REAP_ALL_BURST_CAP = 200;
-/** Burst caps scale with enemy MAX HP (plan/tuning/2026-07-08-win-path-scaling.md
- *  item 2): the flat 80/200 caps were the direct late-game bottleneck named by
- *  four decks in Battle Lab round 2 (a full detonation cannot dent a
- *  1,000-1,500 HP boss). The flat constants above become FLOORS, so early/mid
- *  behavior is unchanged; against big pools the cap grows with the enemy.
- *  Sweep-tuned via the playtest matrix. Tunable. */
-export const BURST_CAP_FRACTION = 0.25;
-/** RUPTURE cap for a given enemy: max(flat floor, fraction of enemy max HP). */
+/** RUPTURE cap fraction (spec 32 §12 item 5 — flat cap floors retired): the
+ *  burst cap is a PURE fraction of the enemy's max HP, with NO flat floor.
+ *  RUPTURE keeps a cap because it consumes enemy-side state the player seeded
+ *  cheaply; ALL-spenders (REAP-ALL, spend-all-pips payoffs) are UNCAPPED —
+ *  emptying the whole bank IS the price.
+ *  // PLAYTEST-CALIBRATION: 0.35 is the initial sweep candidate; the ratified
+ *  //  sweep set is F ∈ {0.25, 0.35, 0.45, 0.60}. Removing the old 80-HP floor
+ *  //  LOWERS early caps (the floor WAS early behavior: F × ~100-HP early
+ *  //  enemies sits under 80), so F must rise as the floor falls — the
+ *  //  supervised sweep picks the final value. */
+export const RUPTURE_CAP_FRACTION = 0.35;
+/** RUPTURE cap for a given enemy: round(fraction × enemy max HP) — no floor. */
 export function ruptureBurstCap(enemyMaxHealth: number): number {
-    return Math.max(RUPTURE_BURST_CAP, Math.round(BURST_CAP_FRACTION * enemyMaxHealth));
-}
-/** REAP-ALL cap for a given enemy: keeps its deliberately higher floor. */
-export function reapAllBurstCap(enemyMaxHealth: number): number {
-    return Math.max(REAP_ALL_BURST_CAP, Math.round(BURST_CAP_FRACTION * enemyMaxHealth));
+    return Math.round(RUPTURE_CAP_FRACTION * enemyMaxHealth);
 }
 /** CONCEDE Premises required (plan/tuning/2026-07-08-win-path-scaling.md item
  *  1a): `the-closing-word`'s flat 8-Premise `concedeAt` let Oratory land its
@@ -204,6 +199,24 @@ export function getOutgoingDamageMult(bearer: Combatant): number {
 }
 
 /**
+ * WS8.2 telegraph-damage surface (spec 32 §12 #6) — multiplier on the HP the
+ * bearer's TELEGRAPHED threat action deals, from `outgoingThreatDamageMulPct`
+ * payloads (EXHAUSTION -25: "weakened hits softer"):
+ *   mult = 1 + Σ (outgoingThreatDamageMulPct/100 × intensity)
+ * clamped to [0.1, 2] like its sibling `getOutgoingDamageMult` (which also
+ * covers non-telegraph sources). Exactly 1 for an unmarked bearer. Read in
+ * `resolveThreatPhase` where the budgeted damage lands. Pure.
+ */
+export function getOutgoingThreatDamageMult(bearer: Combatant): number {
+    let mult = 1;
+    for (const ae of bearer.effects) {
+        const pct = lookupEffect(ae.effectId)?.payload.outgoingThreatDamageMulPct ?? 0;
+        if (pct !== 0) mult += (pct / 100) * (ae.intensity ?? 1);
+    }
+    return Math.min(2, Math.max(0.1, mult));
+}
+
+/**
  * HEMORRHAGE decay (P0-truth wiring of `dotModifiers.decayOnHeal`): when the
  * bearer receives a heal, every decay-tagged DoT on them loses 1 intensity
  * (removed at 0) — big but fragile. Returns the updated combatant and the
@@ -258,7 +271,9 @@ export function getStanceVulnMult(bearer: Combatant, dieColor: string): number {
 /** True when the bearer carries a given payload flag (P0-truth gate reads). */
 export function hasPayloadFlag(
     bearer: Combatant,
-    flag: 'blocksAdvantage' | 'restrictsSurgeAccess' | 'forcesWeakTierNextPlay' | 'forceWildOnNextDie' | 'nextDotTierUpgrade' | 'revealsStance',
+    flag: 'blocksAdvantage' | 'restrictsSurgeAccess' | 'forcesWeakTierNextPlay' | 'forceWildOnNextDie' | 'nextDotTierUpgrade' | 'revealsStance'
+        // WS8.2 (spec 32 §12 #6) — control-surface payloads
+        | 'suppressesThreatRiders' | 'blursStanceHints' | 'lockedStance',
 ): string | null {
     for (const ae of bearer.effects) {
         const p = lookupEffect(ae.effectId)?.payload;
@@ -272,15 +287,34 @@ export function hasPayloadFlag(
 export interface PendingDotEntry {
     effectId: string;
     label: string;
-    /** floor(damagePerRound × intensity × comboMultiplier) × max(1, remainingDuration). */
+    /** floor(damagePerRound × intensity × comboMultiplier) summed over the
+     *  effect's expected remaining ticks (per-round for round clocks,
+     *  `EXPECTED_TRIGGERS_PER_ROUND` per round for event clocks). */
     amount: number;
 }
+
+/** WS3 fuel math — how many times each EVENT clock is expected to fire per
+ *  round. Legacy (no-trigger) DoTs never read this: their math is unchanged
+ *  (one tick per remaining-duration round).
+ *  // PLAYTEST-CALIBRATION: conservative constants until WS3.6 telemetry
+ *  // replaces them with the sim's own per-policy averages — 2 player plays
+ *  // per round drive the card-played and damage-instance clocks; payoff
+ *  // verbs fire about once a round at most. */
+export const EXPECTED_TRIGGERS_PER_ROUND: Readonly<Record<DotEventTrigger, number>> = {
+    'card-played': 2,
+    'damage-instance': 2,
+    'payoff': 1,
+};
 
 /**
  * The total DoT HP still pending on the bearer over the effects' remaining
  * lifetimes — the figure RUPTURE detonates. Amplification-aware (reuses the same
- * combo multiplier the aggregator applies), floored per-tick then multiplied by
- * the remaining duration (permanent DoT counts one tick). Pure.
+ * combo multiplier the aggregator applies), floored per-tick. Round-clocked
+ * (legacy) DoTs tick once per remaining-duration round (permanent counts one
+ * tick — exactly today's math); event-clocked DoTs expect
+ * `EXPECTED_TRIGGERS_PER_ROUND` ticks over the same round horizon (a
+ * no-calendar instance, `remainingDuration` -1, counts one round —
+ * conservative, bounded). Pure.
  */
 export function getPendingDotTotal(bearer: Combatant, currentRound?: number): { total: number; perEffect: PendingDotEntry[] } {
     const dotAmp = getDotAmplificationByEffect(bearer.effects);
@@ -292,7 +326,9 @@ export function getPendingDotTotal(bearer: Combatant, currentRound?: number): { 
         if (!def || !dot) continue;
         const intensity = ae.intensity ?? 1;
         const multiplier = dotAmp.get(ae.effectId) ?? 1;
-        const ticks = Math.max(1, ae.remainingDuration);
+        const eventClock = dotEventTrigger(dot);
+        const ticksPerRound = eventClock ? EXPECTED_TRIGGERS_PER_ROUND[eventClock] : 1;
+        const rounds = Math.max(1, ae.remainingDuration);
         // P0-truth: escalating DoTs (`escalatesPerTurn`) sum their GROWING future
         // ticks when a round is threaded; flat DoTs keep perTick × ticks.
         // BLEED (spec 32 v3 `decaysPerTick`): intensity falls 1 per future tick
@@ -300,14 +336,17 @@ export function getPendingDotTotal(bearer: Combatant, currentRound?: number): { 
         // decay or RUPTURE previews overstate the burst (projection-truth law).
         const decays = def.payload.dotModifiers?.decaysPerTick === true;
         let amount = 0;
-        for (let k = 0; k < ticks; k++) {
-            const tickIntensity = decays ? intensity - k : intensity;
-            if (tickIntensity <= 0) break;
+        let tickNo = 0;
+        outer: for (let k = 0; k < rounds; k++) {
             const dpr = rampedDamagePerRound(
                 ae, dot.damagePerRound, def.payload.dotModifiers,
                 currentRound === undefined ? undefined : currentRound + k,
             );
-            amount += Math.floor(dpr * tickIntensity * multiplier);
+            for (let t = 0; t < ticksPerRound; t++, tickNo++) {
+                const tickIntensity = decays ? intensity - tickNo : intensity;
+                if (tickIntensity <= 0) break outer;
+                amount += Math.floor(dpr * tickIntensity * multiplier);
+            }
         }
         perEffect.push({ effectId: ae.effectId, label: def.name, amount });
         total += amount;
@@ -319,10 +358,12 @@ export function getPendingDotTotal(bearer: Combatant, currentRound?: number): { 
  * Rounds until the bearer's currently-stacked DoT effects alone would drop it
  * to 0 HP, walking round-by-round with the same per-tick formula
  * `getPendingDotTotal` sums in lump form (ramp- and combo-amplification-aware).
- * Each effect's tick count is capped at `Math.max(1, remainingDuration)` — the
- * same "permanent DoT counts one tick" convention `getPendingDotTotal` uses —
- * so the two figures never diverge. Returns `null` when the DoT alone won't
- * finish the bearer over its remaining duration. Pure.
+ * Each effect's round horizon is capped at `Math.max(1, remainingDuration)` —
+ * the same "permanent DoT counts one round" convention `getPendingDotTotal`
+ * uses — and event-clocked DoTs (WS3) contribute their expected
+ * `EXPECTED_TRIGGERS_PER_ROUND` ticks each round, so the two figures never
+ * diverge. Returns `null` when the DoT alone won't finish the bearer over its
+ * remaining duration. Pure.
  */
 export function computeRoundsToKill(bearer: Combatant, currentRound?: number): number | null {
     const dotAmp = getDotAmplificationByEffect(bearer.effects);
@@ -331,30 +372,35 @@ export function computeRoundsToKill(bearer: Combatant, currentRound?: number): n
             const def = lookupEffect(ae.effectId);
             const dot = def?.payload.damageOverTime;
             if (!def || !dot) return null;
+            const eventClock = dotEventTrigger(dot);
             return {
                 ae, dot, dotModifiers: def.payload.dotModifiers,
                 intensity: ae.intensity ?? 1,
                 multiplier: dotAmp.get(ae.effectId) ?? 1,
-                ticks: Math.max(1, ae.remainingDuration),
+                rounds: Math.max(1, ae.remainingDuration),
+                ticksPerRound: eventClock ? EXPECTED_TRIGGERS_PER_ROUND[eventClock] : 1,
                 decays: def.payload.dotModifiers?.decaysPerTick === true,
+                ticksTaken: 0,
             };
         })
         .filter((e): e is NonNullable<typeof e> => e !== null);
     if (dotEffects.length === 0) return null;
 
-    const maxTicks = Math.max(...dotEffects.map(e => e.ticks));
+    const maxRounds = Math.max(...dotEffects.map(e => e.rounds));
     let cumulative = 0;
-    for (let k = 0; k < maxTicks; k++) {
+    for (let k = 0; k < maxRounds; k++) {
         for (const e of dotEffects) {
-            if (k >= e.ticks) continue;
-            // BLEED decay — same convention as `getPendingDotTotal`.
-            const tickIntensity = e.decays ? e.intensity - k : e.intensity;
-            if (tickIntensity <= 0) continue;
+            if (k >= e.rounds) continue;
             const dpr = rampedDamagePerRound(
                 e.ae, e.dot.damagePerRound, e.dotModifiers,
                 currentRound === undefined ? undefined : currentRound + k,
             );
-            cumulative += Math.floor(dpr * tickIntensity * e.multiplier);
+            for (let t = 0; t < e.ticksPerRound; t++, e.ticksTaken++) {
+                // BLEED decay — same convention as `getPendingDotTotal`.
+                const tickIntensity = e.decays ? e.intensity - e.ticksTaken : e.intensity;
+                if (tickIntensity <= 0) break;
+                cumulative += Math.floor(dpr * tickIntensity * e.multiplier);
+            }
         }
         if (cumulative >= bearer.health) return k + 1;
     }
@@ -464,23 +510,37 @@ export function getDistinctDebuffCount(bearer: Combatant): number {
     return ids.size;
 }
 
+/** The control surfaces the DISRUPT meter distinguishes (WS8.3). */
+type ControlSurface = 'action' | 'roll' | 'threat-damage' | 'rider-suppress' | 'stance';
+
 /**
- * Count of DISTINCT CONTROL effect ids on the bearer — the DISRUPT deny meter's
- * pip count. Control = an `actionRestriction` (skip/forced/blocked) OR a NEGATIVE
- * roll modifier (the soft-control / accuracy-down bucket). Centralizes the
- * predicate so the engine and the mobile meter agree on what counts. Pure.
+ * Count of DISTINCT control SURFACES touched on the bearer — the DISRUPT deny
+ * meter's pip count. WS8.3 (spec 32 §12, ratified 2026-07-11 #6): the meter
+ * counts KINDS of grip, not effect ids — three roll shreds are ONE pip;
+ * `DISRUPT_DENY_AT = 3` means "three different kinds of grip". Surfaces,
+ * classified by payload shape:
+ *   - action         — an `actionRestriction` (skip / forced / blocked)
+ *   - roll           — a negative roll modifier (the accuracy-down bucket)
+ *   - threat-damage  — `outgoingThreatDamageMulPct < 0` (EXHAUSTION)
+ *   - rider-suppress — `suppressesThreatRiders` (BLIND)
+ *   - stance         — `lockedStance` (ROOT) or `blursStanceHints` (CONFUSION)
+ * Centralizes the predicate so the engine and the mobile meter agree. Pure.
  */
 export function getDistinctControlCount(bearer: Combatant): number {
-    const ids = new Set<string>();
+    const surfaces = new Set<ControlSurface>();
     for (const ae of bearer.effects) {
         const p = lookupEffect(ae.effectId)?.payload;
         if (!p) continue;
         const r = p.actionRestriction;
-        const restricts = !!r && (r.skipTurn === true || r.forcedStance !== undefined || (r.blockedStances?.length ?? 0) > 0);
-        const softControl = (p.rollModifier ?? 0) < 0 || (p.rollModifierPerIntensity ?? 0) < 0;
-        if (restricts || softControl) ids.add(ae.effectId);
+        if (!!r && (r.skipTurn === true || r.forcedStance !== undefined || (r.blockedStances?.length ?? 0) > 0)) {
+            surfaces.add('action');
+        }
+        if ((p.rollModifier ?? 0) < 0 || (p.rollModifierPerIntensity ?? 0) < 0) surfaces.add('roll');
+        if ((p.outgoingThreatDamageMulPct ?? 0) < 0) surfaces.add('threat-damage');
+        if (p.suppressesThreatRiders === true) surfaces.add('rider-suppress');
+        if (p.lockedStance === true || p.blursStanceHints === true) surfaces.add('stance');
     }
-    return ids.size;
+    return surfaces.size;
 }
 
 /**
@@ -500,12 +560,15 @@ export function updateEffectDuration<T extends Combatant>(target: T, effectId: s
 /**
  * Decrements every non-permanent effect's remaining duration by 1, removes
  * any that expired, and returns both the updated combatant and the list of
- * expired effects (for UI announcements).
+ * expired effects (for UI announcements). WS3: effects that opted out of the
+ * calendar (`dotModifiers.calendarExpiry === false`) never count down — they
+ * expire only via their own decay (e.g. `decaysPerTick` washout) or combat end.
  */
 export function tickAllEffects<T extends Combatant>(target: T): { target: T; expired: ActiveEffect[] } {
     const expired: ActiveEffect[] = [];
     const remaining = target.effects.reduce<ActiveEffect[]>((acc, effect) => {
-        if (effect.remainingDuration === -1) {
+        if (effect.remainingDuration === -1
+            || lookupEffect(effect.effectId)?.payload.dotModifiers?.calendarExpiry === false) {
             acc.push(effect);
             return acc;
         }
@@ -580,26 +643,30 @@ export function applyDrain<T extends Combatant>(target: T): { target: T; drained
  * Applies damage-over-time damage for the given phase (Q4). Each DoT effect
  * declares an optional `tickPhase` (`'start'` or `'end'`); without one the
  * effect ticks at start. Per Q5, DoT damage is unresisted — it bypasses
- * defense and the `damageType` is purely informational for now.
+ * defense and the `damageType` is purely informational for now. WS3:
+ * event-clocked DoTs never tick here (the aggregator already excludes them);
+ * `washedOut` surfaces decay-consumed instances so the Soul economy can count
+ * no-calendar expiries.
  */
 export function processDamageOverTime<T extends Combatant>(
     target: T,
     phase: 'start' | 'end',
     currentRound?: number,
-): { target: T; damage: number } {
+): { target: T; damage: number; washedOut: ActiveEffect[] } {
     const mods = getActiveEffectModifiers(target.effects, currentRound);
     const damage = phase === 'start' ? mods.dotStart : mods.dotEnd;
-    if (damage <= 0) return { target, damage: 0 };
+    if (damage <= 0) return { target, damage: 0, washedOut: [] };
     let next: T = applyDamage(target, damage);
     // BLEED (spec 32 v3, `dotModifiers.decaysPerTick`): a front-loaded DoT loses
     // 1 intensity each time it ticks; the instance washes out at 0. Only effects
     // that ticked THIS phase decay. No-op for every non-decaying DoT.
+    const washedOut: ActiveEffect[] = [];
     const decayed = next.effects.reduce<ActiveEffect[]>((acc, ae) => {
         const p = lookupEffect(ae.effectId)?.payload;
-        const ticksThisPhase = !!p?.damageOverTime && (p.damageOverTime.tickPhase ?? 'start') === phase;
+        const ticksThisPhase = !!p?.damageOverTime && dotRoundClockPhase(p.damageOverTime) === phase;
         if (ticksThisPhase && p?.dotModifiers?.decaysPerTick) {
             if (ae.intensity > 1) acc.push({ ...ae, intensity: ae.intensity - 1 });
-            // intensity 1 → the instance is spent
+            else washedOut.push(ae); // intensity 1 → the instance is spent
         } else {
             acc.push(ae);
         }
@@ -609,7 +676,7 @@ export function processDamageOverTime<T extends Combatant>(
         || decayed.some((ae, i) => ae !== next.effects[i])) {
         next = { ...next, effects: decayed };
     }
-    return { target: next, damage };
+    return { target: next, damage, washedOut };
 }
 
 /**
@@ -626,15 +693,18 @@ export function processRoundStartEffects<T extends Combatant>(target: T, current
     healed: number;
     drained: number;
     dotDamage: number;
+    /** WS3 — decay-consumed DoT instances (Soul economy reads no-calendar ones). */
+    dotWashedOut: ActiveEffect[];
 } {
     const regen = applyRegen(target);
     const drain = applyDrain(regen.target);
     const dot   = processDamageOverTime(drain.target, 'start', currentRound);
     return {
-        target:    dot.target,
-        healed:    regen.healed,
-        drained:   drain.drained,
-        dotDamage: dot.damage,
+        target:       dot.target,
+        healed:       regen.healed,
+        drained:      drain.drained,
+        dotDamage:    dot.damage,
+        dotWashedOut: dot.washedOut,
     };
 }
 
@@ -647,6 +717,8 @@ export function processRoundEndEffects<T extends Combatant>(target: T, currentRo
     target: T;
     dotDamage: number;
     expired: ActiveEffect[];
+    /** WS3 — decay-consumed DoT instances (Soul economy reads no-calendar ones). */
+    washedOut: ActiveEffect[];
 } {
     const dot   = processDamageOverTime(target, 'end', currentRound);
     const ticked = tickAllEffects(dot.target);
@@ -654,7 +726,91 @@ export function processRoundEndEffects<T extends Combatant>(target: T, currentRo
         target:    ticked.target,
         dotDamage: dot.damage,
         expired:   ticked.expired,
+        washedOut: dot.washedOut,
     };
+}
+
+// ── WS3.2 — trigger-clock DoT substrate (spec 32 §12, ratified 2026-07-11 #3) ─
+
+/** One `fireDotTrigger` outcome. */
+export interface DotTriggerResult<T extends Combatant> {
+    target: T;
+    /** Total HP the matching effects ticked for (0 = no matching clock fired). */
+    damage: number;
+    /** Per-effect breakdown for `dot-tick` event emission. */
+    perEffect: { effectId: string; label: string; amount: number }[];
+    /** `decaysPerTick` instances consumed by this tick (intensity hit 0) — the
+     *  Soul economy counts the no-calendar ones as expiries. */
+    washedOut: ActiveEffect[];
+}
+
+/**
+ * Advances one EVENT clock (WS3): ticks exactly the effects whose
+ * `damageOverTime.trigger` matches, with the same per-tick body
+ * `processDamageOverTime` uses — combo amplification, POISON ramp
+ * (`escalatesPerTurn`), MARK flat amplification, and BLEED `decaysPerTick`
+ * washout. Legacy (untriggered) and round-clocked DoTs never match here.
+ * The tick damage is applied with the plain `applyDamage`, so a
+ * 'damage-instance' DoT can never re-trigger itself. Pure; exact no-op
+ * (same object) when nothing matches.
+ */
+export function fireDotTrigger<T extends Combatant>(
+    target: T,
+    trigger: DotEventTrigger,
+    currentRound?: number,
+): DotTriggerResult<T> {
+    const dotAmp = getDotAmplificationByEffect(target.effects);
+    const markBonus = getTickAmplifyFlat(target.effects);
+    const perEffect: DotTriggerResult<T>['perEffect'] = [];
+    let damage = 0;
+    for (const ae of target.effects) {
+        const def = lookupEffect(ae.effectId);
+        const dot = def?.payload.damageOverTime;
+        if (!def || !dot || dot.trigger !== trigger) continue;
+        const multiplier = dotAmp.get(ae.effectId) ?? 1;
+        const dpr = rampedDamagePerRound(ae, dot.damagePerRound, def.payload.dotModifiers, currentRound);
+        const amount = Math.floor(dpr * (ae.intensity ?? 1) * multiplier) + markBonus;
+        perEffect.push({ effectId: ae.effectId, label: def.name, amount });
+        damage += amount;
+    }
+    if (damage <= 0) return { target, damage: 0, perEffect: [], washedOut: [] };
+    let next: T = applyDamage(target, damage);
+    // Same decay rule as the round clocks: only effects that ticked THIS
+    // trigger decay; the instance washes out at intensity 0.
+    const washedOut: ActiveEffect[] = [];
+    const decayed = next.effects.reduce<ActiveEffect[]>((acc, ae) => {
+        const p = lookupEffect(ae.effectId)?.payload;
+        const tickedThisTrigger = p?.damageOverTime?.trigger === trigger;
+        if (tickedThisTrigger && p?.dotModifiers?.decaysPerTick) {
+            if (ae.intensity > 1) acc.push({ ...ae, intensity: ae.intensity - 1 });
+            else washedOut.push(ae); // intensity 1 → the instance is spent
+        } else {
+            acc.push(ae);
+        }
+        return acc;
+    }, []);
+    if (decayed.length !== next.effects.length
+        || decayed.some((ae, i) => ae !== next.effects[i])) {
+        next = { ...next, effects: decayed };
+    }
+    return { target: next, damage, perEffect, washedOut };
+}
+
+/**
+ * WS3 Doom growth (`dotModifiers.growth: 'per-enemy-action'`) — every matching
+ * effect on the bearer gains +1 intensity (capped at `MAX_EFFECT_INTENSITY`).
+ * The engine calls this on the ENEMY after its telegraphed action actually
+ * fires (a denied turn never grows the Doom). Pure; no-op when none match.
+ */
+export function growPerEnemyActionDots<T extends Combatant>(bearer: T): { combatant: T; grown: string[] } {
+    const grown: string[] = [];
+    const effects = bearer.effects.map(ae => {
+        const p = lookupEffect(ae.effectId)?.payload;
+        if (p?.dotModifiers?.growth !== 'per-enemy-action') return ae;
+        grown.push(ae.effectId);
+        return { ...ae, intensity: Math.min(MAX_EFFECT_INTENSITY, ae.intensity + 1) };
+    });
+    return grown.length ? { combatant: { ...bearer, effects }, grown } : { combatant: bearer, grown };
 }
 
 /**

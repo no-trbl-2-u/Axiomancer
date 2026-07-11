@@ -24,6 +24,7 @@ import { cardLibrary } from '../../Cards/cards.library';
 import type { Card, CardRider } from '../../Cards/types';
 import { EFFECT_INTERACTIONS } from '../amplification.registry';
 import { AUTHORED_THREAT_SEQUENCES } from '../../Combat/combat.threat-sequences';
+import { flattenAuthoredSteps } from '../../Combat/combat.threat';
 
 // ─── The canonical card vocabulary (spec 32 v3 §3) ───────────────────────────
 
@@ -182,9 +183,10 @@ describe('effect deprecation contract (spec 32 v3 §3) — the ban list', () => 
     });
 
     it('threat sequences and the combo registry speak only live ids; combos speak only card ids', () => {
-        for (const [slug, phases] of Object.entries(AUTHORED_THREAT_SEQUENCES)) {
-            for (const p of phases) {
-                const id = (p as { threatEffectId?: string }).threatEffectId;
+        for (const [slug, steps] of Object.entries(AUTHORED_THREAT_SEQUENCES)) {
+            // WS9 — branch steps contribute BOTH forks to the id audit.
+            for (const p of flattenAuthoredSteps(steps)) {
+                const id = p.threatEffectId;
                 if (id) expect(libraryIds.has(id), `${slug} threat uses unknown ${id}`).toBe(true);
             }
         }

@@ -255,6 +255,7 @@ function DiceRow({
 
 const StagedCard = React.memo(function StagedCard({
     card, assignedDie, read, onApply, gesture, register, compact = false, popKey = 0, socketPulse = false,
+    chosenX = null, onChangeX,
 }: {
     card: CombatCardVM;
     assignedDie: CombatDieVM | null;
@@ -265,6 +266,11 @@ const StagedCard = React.memo(function StagedCard({
     /** Stable registrar — (uid, node) for the die drop-target measurement. */
     register: (uid: string, node: View | null) => void;
     compact?: boolean;
+    /** WS7.2 chosen X-cost — the current pick (null → the card's printed min).
+     *  Rendered only when `card.chooseX` is non-null (the card has an X mech). */
+    chosenX?: number | null;
+    /** Stable dispatcher — (uid, x) steps the chosen X. */
+    onChangeX?: (uid: string, x: number) => void;
     /** Rising nonce: when it changes (>0) this card just received a dropped die →
      *  a brief 1.05 scale-pop confirms the drop landed HERE (and only here). */
     popKey?: number;
@@ -338,6 +344,39 @@ const StagedCard = React.memo(function StagedCard({
                   </Animated.View>
                 </Animated.View>
             </GestureDetector>
+            {/* WS7.2 chosen X-cost — the amount picker, only on a card with an
+                X mechanic. The range is the ENGINE's live clamp (vm.chooseX). */}
+            {card.chooseX ? (() => {
+                const range = card.chooseX;
+                const x = Math.min(Math.max(chosenX ?? range.min, range.min), range.max);
+                return (
+                    <View style={[styles.xRow, { width: cardW }]} testID={`combat-choose-x-${card.uid}`}>
+                        <Pressable
+                            onPress={() => onChangeX?.(card.uid, Math.max(range.min, x - 1))}
+                            disabled={x <= range.min}
+                            hitSlop={6}
+                            style={[styles.xStepBtn, x <= range.min && { opacity: 0.35 }]}
+                            accessibilityRole="button"
+                            accessibilityLabel={`Pay less: RECOIL ${Math.max(range.min, x - 1)}`}
+                            testID={`combat-choose-x-minus-${card.uid}`}
+                        >
+                            <Text style={styles.xStepGlyph}>−</Text>
+                        </Pressable>
+                        <Text style={styles.xValue} accessibilityLabel={`RECOIL X = ${x}`}>X {x}</Text>
+                        <Pressable
+                            onPress={() => onChangeX?.(card.uid, Math.min(range.max, x + 1))}
+                            disabled={x >= range.max}
+                            hitSlop={6}
+                            style={[styles.xStepBtn, x >= range.max && { opacity: 0.35 }]}
+                            accessibilityRole="button"
+                            accessibilityLabel={`Pay more: RECOIL ${Math.min(range.max, x + 1)}`}
+                            testID={`combat-choose-x-plus-${card.uid}`}
+                        >
+                            <Text style={styles.xStepGlyph}>+</Text>
+                        </Pressable>
+                    </View>
+                );
+            })() : null}
             <Pressable
                 onPress={() => { Haptics.impactAsync(armed ? Haptics.ImpactFeedbackStyle.Heavy : Haptics.ImpactFeedbackStyle.Medium).catch(() => undefined); onApply(card.uid); }}
                 testID={`combat-apply-${card.uid}`}
@@ -460,8 +499,9 @@ export interface CombatBoardProps {
     stagedUids: string[];
     /** Commit the staged card. `power` true → power it with `dieId` (null when a die
      *  is already drafted, the combo case); `power` false → the FREE base action,
-     *  no die (hazard model — the die is optional). */
-    onApply: (uid: string, dieId: string | null, power: boolean) => void;
+     *  no die (hazard model — the die is optional). `chosenX` (WS7.2) rides along
+     *  only when the card carries an X mechanic and the stepper was touched. */
+    onApply: (uid: string, dieId: string | null, power: boolean, chosenX?: number) => void;
     onStage: (uid: string) => void;
     onUnstage: (uid: string) => void;
     onDiscard: (uid: string) => void;
@@ -510,6 +550,14 @@ export const CombatBoard = React.memo(function CombatBoard({
     // it — or its combo refresh — powers whichever card APPLYs next; before that,
     // each staged card shows the die dragged onto it.)
     const [pendingDieByUid, setPendingDieByUid] = useState<Record<string, string>>({});
+    // WS7.2 chosen X-cost: the stepper pick per staged X card (absent → the
+    // card's printed min). Local UI state; APPLY forwards it as `chosenX`.
+    const [chosenXByUid, setChosenXByUid] = useState<Record<string, number>>({});
+    const chosenXRef = useRef(chosenXByUid);
+    chosenXRef.current = chosenXByUid;
+    const onChangeX = useCallback((uid: string, x: number) => {
+        setChosenXByUid((prev) => ({ ...prev, [uid]: x }));
+    }, []);
     // Rising drop-confirmation nonce for the card a die just landed on (scale-pop).
     const [dropPop, setDropPop] = useState<{ uid: string; n: number }>({ uid: '', n: 0 });
     const stagedKey = stagedUids.join(',');
@@ -714,15 +762,22 @@ export const CombatBoard = React.memo(function CombatBoard({
     // re-render just because the board did.
     const handleApplyRef = useRef<(uid: string) => void>(() => undefined);
     handleApplyRef.current = (uid: string) => {
+        // WS7.2 — forward the stepper's chosen X (arity preserved when absent).
+        const chosenX = chosenXRef.current[uid];
+        const commit = (dieId: string | null, power: boolean): void => {
+            if (chosenX !== undefined) onApply(uid, dieId, power, chosenX);
+            else onApply(uid, dieId, power);
+        };
         if (draftedDie) {
-            onApply(uid, null, true);
+            commit(null, true);
         } else {
             const pid = pendingDieByUid[uid];
             const pending = pid ? vm.dice.find((x) => x.id === pid) ?? null : null;
-            if (pending && !pending.spent && !pending.isX && !pending.drafted) onApply(uid, pending.id, true);
-            else onApply(uid, null, false);
+            if (pending && !pending.spent && !pending.isX && !pending.drafted) commit(pending.id, true);
+            else commit(null, false);
         }
         setPendingDieByUid((prev) => { const next = { ...prev }; delete next[uid]; return next; });
+        setChosenXByUid((prev) => { const next = { ...prev }; delete next[uid]; return next; });
     };
     const handleApply = useCallback((uid: string) => handleApplyRef.current(uid), []);
     // Stable staged-frame registrar (drop-target measurement).
@@ -793,6 +848,8 @@ export const CombatBoard = React.memo(function CombatBoard({
                                         compact={stagedCards.length > 2}
                                         popKey={dropPop.uid === card.uid ? dropPop.n : 0}
                                         socketPulse={dieDragLive}
+                                        chosenX={chosenXByUid[card.uid] ?? null}
+                                        onChangeX={onChangeX}
                                     />
                                 );
                             })}
@@ -1108,6 +1165,14 @@ const useStyles = makeStyles((AXM) => ({
         paddingVertical: 5, alignItems: 'center',
     },
     applyText: { fontFamily: FONTS.sans, fontSize: 12, letterSpacing: 1.5 },
+    // WS7.2 chosen X-cost — the amount picker row on a staged X card.
+    xRow: {
+        marginTop: -2, flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+        borderWidth: 1.5, borderTopWidth: 0, borderColor: AXM.bone, backgroundColor: 'rgba(0,0,0,0.55)',
+    },
+    xStepBtn: { paddingHorizontal: 10, paddingVertical: 3 },
+    xStepGlyph: { fontFamily: FONTS.sans, fontSize: 14, color: AXM.parchment },
+    xValue: { fontFamily: FONTS.sans, fontSize: 12, letterSpacing: 1, color: AXM.sulfur, minWidth: 34, textAlign: 'center' },
 
     // ── signature rune column ──
     sigColumn: { position: 'absolute', left: 6, top: '34%', alignItems: 'center', gap: 8, zIndex: 30 },

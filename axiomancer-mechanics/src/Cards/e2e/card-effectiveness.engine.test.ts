@@ -349,6 +349,14 @@ function assertMechanic(
         case 'recoil':
             expect(after.player.health, label).toBeLessThan(before.player.health);
             return;
+        case 'recoil_x': {
+            // Chosen X-cost (WS7.2): the harness plays without a chosenX, so
+            // the printed minimum is paid and POISON lands at ceil(min × perX).
+            expect(before.player.health - after.player.health, label).toBeGreaterThanOrEqual(mech.min);
+            const poison = after.enemy.effects.find(e => e.effectId === 'debuff_poison');
+            expect(poison, label).toBeDefined();
+            return;
+        }
         case 'extend_dots': {
             const ev = findEvent(events, 'dots-extended');
             expect(ev, label).toBeDefined();

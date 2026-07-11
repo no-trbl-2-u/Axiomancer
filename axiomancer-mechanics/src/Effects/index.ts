@@ -319,6 +319,8 @@ export type {
     ActiveEffect, EffectApplicationResult,
     StatModifier, DamageOverTime, RegenerationConfig, ActionRestriction, AdvantageModifier,
     EffectStatTarget,
+    // WS3 (spec 32 §12 #3) — trigger-clock DoT substrate
+    DotTriggerClock,
 } from './types';
 // Phase 142 — Status effect interaction types
 export type {

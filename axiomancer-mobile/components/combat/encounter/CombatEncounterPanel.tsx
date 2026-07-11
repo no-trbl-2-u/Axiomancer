@@ -366,7 +366,7 @@ export function CombatEncounterPanel({
         });
         setFxSeq((n) => n + 1);
     }, [apply]);
-    const onApply = useCallback((uid: string, dieId: string | null, power: boolean) => {
+    const onApply = useCallback((uid: string, dieId: string | null, power: boolean, chosenX?: number) => {
         // Momentum: advance the wheel with this card's stance (looked up BEFORE the
         // play removes it from the hand). A completed cycle forges a wild momentum
         // die into the tray; while that die is live, plays don't advance the wheel.
@@ -394,7 +394,12 @@ export function CombatEncounterPanel({
             if (power && routing.draftFirst && dieId) {
                 ns = draftStanceDie(ns, dieId, { bankUnpicked: bankSpareRef.current }).state;
             }
-            const t = playCombatCard(ns, { uid }, power, routing.explicitDieId);
+            // WS7.2 — the board's chosen X (only set for X-mechanic cards)
+            // rides through to the engine, which clamps it to [min, affordable].
+            const t = playCombatCard(
+                ns, { uid }, power, routing.explicitDieId, undefined,
+                chosenX !== undefined ? { chosenX } : undefined,
+            );
             fxRef.current = t.events;
             ns = t.state;
             // TODO(engine): momentum belongs in axiomancer-mechanics as a first-class
@@ -539,7 +544,21 @@ export function CombatEncounterPanel({
                                     <Text style={[styles.revealPhaseIcon, { color: meta.color }]}>{meta.icon}</Text>
                                     <View style={{ flex: 1 }}>
                                         <Text style={styles.revealPhaseLabel}>PHASE {p.index} · {meta.label}</Text>
-                                        <Text style={styles.revealPhaseText} numberOfLines={2}>{p.threatAction.description}</Text>
+                                        {p.branch ? (
+                                            /* WS9 — a branch phase telegraphs its condition + BOTH
+                                               outcomes before commit; the taken fork is marked after. */
+                                            <View>
+                                                <Text style={styles.revealBranchCond}>⑂ {p.branch.conditionText}</Text>
+                                                <Text style={[styles.revealPhaseText, p.branch.taken === 'then' ? styles.revealBranchTaken : null]} numberOfLines={2}>
+                                                    {p.branch.taken === 'then' ? '▶ ' : ''}then: {p.branch.then.threatAction.description}
+                                                </Text>
+                                                <Text style={[styles.revealPhaseText, p.branch.taken === 'else' ? styles.revealBranchTaken : null]} numberOfLines={2}>
+                                                    {p.branch.taken === 'else' ? '▶ ' : ''}otherwise: {p.branch.else.threatAction.description}
+                                                </Text>
+                                            </View>
+                                        ) : (
+                                            <Text style={styles.revealPhaseText} numberOfLines={2}>{p.threatAction.description}</Text>
+                                        )}
                                         {p.stanceHint ? <Text style={styles.revealPhaseTell}>🜲 stance hidden — {p.stanceHint}</Text> : null}
                                     </View>
                                 </View>
@@ -985,6 +1004,9 @@ const useStyles = makeStyles((AXM) => ({
     revealPhaseLabel: { fontFamily: FONTS.sans, fontSize: 11, letterSpacing: 0.6, color: AXM.parchment },
     revealPhaseText: { fontFamily: FONTS.serif, fontSize: 12, color: AXM.bone, marginTop: 2, lineHeight: 15 },
     revealPhaseTell: { fontFamily: FONTS.serifItalic, fontStyle: 'italic', fontSize: 10, color: AXM.ash, marginTop: 3, lineHeight: 13 },
+    // WS9 — branch fork rows in the threat sequence
+    revealBranchCond: { fontFamily: FONTS.sans, fontSize: 10, letterSpacing: 0.6, color: AXM.sulfur, marginTop: 2 },
+    revealBranchTaken: { color: AXM.parchment },
     revealBtn: { borderWidth: 2, paddingHorizontal: 30, paddingVertical: 12, marginTop: 22, backgroundColor: 'rgba(212,192,38,0.12)' },
     revealBtnText: { fontFamily: FONTS.gothic, fontSize: 18, letterSpacing: 1 },
 

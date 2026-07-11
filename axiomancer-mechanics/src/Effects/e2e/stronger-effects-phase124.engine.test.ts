@@ -12,14 +12,17 @@ describe('Phase 124 - Stronger cards/effects', () => {
     // library). The surviving Phase 124 tuning below lives on support-tagged
     // non-card effects.
 
-    it('debuff_confusion has stronger penalty and longer duration', async () => {
+    it('debuff_confusion blurs stance hints and keeps its longer duration', async () => {
         const confusion = lookupEffect('debuff_confusion');
         expect(confusion).toBeDefined();
-        
-        // Phase 124: increased rollModifier: -4 → -5, duration: 3 → 4
+
+        // Phase 124 duration bump survives: 3 → 4. WS8.2 (spec 32 §12 #6):
+        // the -5 rollModifier moved OFF the roll surface — confusion's grip is
+        // stance certainty now (`blursStanceHints`).
         expect(confusion!.duration).toBe(4);
-        expect(confusion!.payload.rollModifier).toBe(-5);
-        
+        expect(confusion!.payload.rollModifier).toBeUndefined();
+        expect(confusion!.payload.blursStanceHints).toBe(true);
+
         // Should grant disadvantage to all three stance types
         expect(confusion!.payload.advantageModifier?.grantDisadvantage).toEqual(['body', 'mind', 'heart']);
     });

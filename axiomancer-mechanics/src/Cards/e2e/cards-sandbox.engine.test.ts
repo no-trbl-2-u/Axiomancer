@@ -143,10 +143,11 @@ describe('sandbox registry — library-card overrides', () => {
 
 // ── Set registry (post-v3 reset) ─────────────────────────────────────────────
 
-describe('sandbox sets — the post-v3 empty registry', () => {
-    it('ships EMPTY: the pre-v3 experiment sets retired with the keyword reset', () => {
-        expect(SANDBOX_CARD_SETS).toEqual({});
-        expect(listSandboxSets()).toEqual([]);
+describe('sandbox sets — the registry after the post-v3 reset', () => {
+    it('carries exactly the WS7.2 chooseX set (the pre-v3 experiment sets stayed retired)', () => {
+        expect(Object.keys(SANDBOX_CARD_SETS)).toEqual(['chooseX-vein']);
+        expect(listSandboxSets().map(s => s.id)).toEqual(['chooseX-vein']);
+        expect(SANDBOX_CARD_SETS['chooseX-vein'].cards.map(c => c.id)).toEqual(['the-open-vein']);
     });
 
     it('applySandboxSet returns undefined for an unknown id and registers nothing', () => {

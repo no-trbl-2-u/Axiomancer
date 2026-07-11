@@ -16,12 +16,20 @@ import { FONTS } from '@/theme/axm';
 import { makeStyles } from '@/theme/runtime';
 import type { CombatIntentVM } from '@/state/presenters/combat-encounter.engine';
 
+/** WS9 — one a11y sentence for a fork: condition + both outcomes (+ taken). */
+function branchA11y(branch: NonNullable<CombatIntentVM['branch']>): string {
+    return ` Forked threat — ${branch.condition}: ${branch.thenText} Otherwise: ${branch.elseText}`
+        + (branch.taken ? ` It committed to the ${branch.taken === 'then' ? 'conditional' : 'baseline'} path.` : '');
+}
+
 export function IntentIcon({ intent, onPress }: { intent: CombatIntentVM; onPress?: () => void }) {
     const styles = useStyles();
     const a11y = `Enemy intent: ${intent.label}. ${intent.description}`
         + (intent.damage > 0 ? ` Deals ${intent.damage} damage.` : '')
         + (intent.debuffs ? ' Applies a debuff.' : '')
-        + (intent.next ? ` Next: ${intent.next.label}.` : '');
+        + (intent.branch ? branchA11y(intent.branch) : '')
+        + (intent.next ? ` Next: ${intent.next.label}.` : '')
+        + (intent.next?.branch ? branchA11y(intent.next.branch) : '');
     return (
         <View
             style={styles.wrap}
@@ -34,10 +42,12 @@ export function IntentIcon({ intent, onPress }: { intent: CombatIntentVM; onPres
             <View style={[styles.disc, { borderColor: intent.color, backgroundColor: `${intent.color}2e` }]}>
                 <Text style={[styles.icon, { color: intent.color, textShadowColor: intent.color }]}>{intent.icon}</Text>
             </View>
-            {(intent.damage > 0 || intent.debuffs) && (
+            {(intent.damage > 0 || intent.debuffs || intent.branch) && (
                 <View style={styles.pill}>
                     {intent.damage > 0 && <Text style={[styles.pillText, { color: intent.color }]} allowFontScaling={false}>♥{intent.damage}</Text>}
                     {intent.debuffs && <Text style={styles.debuffMark} allowFontScaling={false}>☠</Text>}
+                    {/* WS9 — the fork glyph marks a committed branch phase */}
+                    {intent.branch && <Text style={[styles.pillText, { color: intent.color }]} allowFontScaling={false}>⑂</Text>}
                 </View>
             )}
         </View>

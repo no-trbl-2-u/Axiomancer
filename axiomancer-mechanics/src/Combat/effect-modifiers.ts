@@ -8,7 +8,7 @@
  * (Q2) are applied here so the consumers stay simple.
  */
 
-import { ActiveEffect, DotTickPhase, EffectStatTarget } from '../Effects/types';
+import { ActiveEffect, DamageOverTime, DotTickPhase, EffectStatTarget } from '../Effects/types';
 import { lookupEffect } from '../Effects/effects.library';
 import { evaluateInteractions, checkInteractionTrigger } from '../Effects/interactions';
 import { EFFECT_INTERACTIONS } from '../Effects/amplification.registry';
@@ -40,6 +40,31 @@ export function getDotAmplificationByEffect(effects: ActiveEffect[]): Map<string
         if (clamped > current) amp.set(result.targetEffectId, clamped);
     }
     return amp;
+}
+
+// ── WS3 trigger-clock DoT substrate (spec 32 §12, ratified 2026-07-11 #3) ─────
+
+/** The three EVENT clocks — DoTs that tick on game events, never at the round
+ *  boundary. Round-clock triggers ('round-start'/'round-end') stay on the
+ *  legacy `tickPhase` aggregation path. */
+export type DotEventTrigger = 'card-played' | 'damage-instance' | 'payoff';
+
+/** The event clock a DoT ticks on, or null when it rides a round clock. */
+export function dotEventTrigger(dot: DamageOverTime): DotEventTrigger | null {
+    return dot.trigger === 'card-played' || dot.trigger === 'damage-instance' || dot.trigger === 'payoff'
+        ? dot.trigger
+        : null;
+}
+
+/** Effective round-clock phase for a DoT: `tickPhase` stays the alias for the
+ *  two round clocks ('round-start'/'round-end' map onto it; absent trigger =
+ *  legacy `tickPhase ?? 'start'`); null for event-clocked DoTs — they tick
+ *  only via `fireDotTrigger`, never at the round boundary. */
+export function dotRoundClockPhase(dot: DamageOverTime): DotTickPhase | null {
+    if (dot.trigger === undefined) return dot.tickPhase ?? 'start';
+    if (dot.trigger === 'round-start') return 'start';
+    if (dot.trigger === 'round-end') return 'end';
+    return null;
 }
 
 /**
@@ -252,12 +277,16 @@ export function getActiveEffectModifiers(effects: ActiveEffect[], currentRound?:
             // (`escalatesPerTurn`) grows the per-round base when a round is threaded.
             // MARK (spec 32 v3): each ticking effect gains the bearer's flat
             // tick-amplify bonus (+1 per Mark stack per tick), added below.
-            const multiplier = dotAmp.get(ae.effectId) ?? 1;
-            const dpr = rampedDamagePerRound(ae, dot.damagePerRound, payload.dotModifiers, currentRound);
-            const total = Math.floor(dpr * intensity * multiplier) + markBonus;
-            const phase: DotTickPhase = dot.tickPhase ?? 'start';
-            if (phase === 'start') agg.dotStart += total;
-            else                   agg.dotEnd   += total;
+            // WS3: event-clocked DoTs (null round phase) never tick at the
+            // round boundary — `fireDotTrigger` owns their clock.
+            const phase = dotRoundClockPhase(dot);
+            if (phase !== null) {
+                const multiplier = dotAmp.get(ae.effectId) ?? 1;
+                const dpr = rampedDamagePerRound(ae, dot.damagePerRound, payload.dotModifiers, currentRound);
+                const total = Math.floor(dpr * intensity * multiplier) + markBonus;
+                if (phase === 'start') agg.dotStart += total;
+                else                   agg.dotEnd   += total;
+            }
         }
 
         const regen = payload.regeneration;

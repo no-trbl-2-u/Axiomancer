@@ -680,7 +680,7 @@ EXECUTE, VULNERABLE, SIPHON) and by mobile for hit-preview rendering.
 | `getDistinctDebuffCount(target)` | Counts the number of distinct active debuff effect types on the target. Drives COMPOUND damage scaling (capped at `COMPOUND_COUNT_CAP`). |
 | `getDistinctControlCount(target)` | Counts the number of distinct active control effects. Drives DISRUPT — when ≥ `DISRUPT_DENY_AT` the target's next action is denied. |
 | `VULNERABLE_MAX_MULT` | Maximum incoming-damage multiplier cap when Vulnerable is active. |
-| `RUPTURE_BURST_CAP` | Maximum HP burst from a single RUPTURE consume. |
+| `RUPTURE_CAP_FRACTION` / `ruptureBurstCap(maxHp)` | RUPTURE burst cap: `round(fraction × enemy max HP)` — a pure fraction, no flat floor (spec 32 §12 item 5). ALL-spenders (REAP-ALL, spend-all-pips payoffs) are uncapped. |
 | `COMPOUND_COUNT_CAP` | Maximum distinct debuff count credited by COMPOUND. |
 | `DISRUPT_DENY_AT` | Distinct-control-effect threshold at which DISRUPT denies the next enemy action. |
 | `EXECUTE_DAMAGE_FRACTION` | Fraction of enemy max HP dealt by EXECUTE when the threshold is met. |

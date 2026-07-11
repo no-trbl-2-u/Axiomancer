@@ -27,7 +27,11 @@
  *                        (policy-pick drafts with the --policy's natural focus;
  *                        status → dot, because status play is the efficient path)
  *   --sandbox <setId>    apply a sandbox card set (cards.sandbox-sets) first
- *   --script <path>      JSON answer array (shared io.ts layer)
+ *   --script <path>      JSON answer array (shared io.ts layer). Play steps
+ *                        answer the card prompt as `top:<uid>` or `bot:<uid>`;
+ *                        a chosen-X card (WS7.2 `recoil_x`) takes an optional
+ *                        X argument: `bot:<uid>:<X>` (engine-clamped to
+ *                        [min, affordable])
  *   --stdin              JSONL answers (shared io.ts layer)
  *   --json-events        machine-clean stdout event stream
  *   --state-log <path>   JSONL state mutation log
@@ -344,7 +348,7 @@ async function promptDraftChoice(state: CombatEncounterState): Promise<string | 
     return dieId === '__skip__' ? null : dieId;
 }
 
-async function promptCardChoice(state: CombatEncounterState): Promise<{ uid: string; useBottom: boolean } | null> {
+async function promptCardChoice(state: CombatEncounterState): Promise<{ uid: string; useBottom: boolean; chosenX?: number } | null> {
     const cards = handCards(state);
     if (cards.length === 0) return null;
     const enemyStance = revealedCurrentStance(state);
@@ -367,8 +371,12 @@ async function promptCardChoice(state: CombatEncounterState): Promise<{ uid: str
     }]);
     if (action === '__resolve__') return null;
     if (action === '__end__') return { uid: '__end__', useBottom: false };
-    const [mode, uid] = action.split(':') as [string, string];
-    return { uid, useBottom: mode === 'bot' };
+    // Play-step grammar: `top:<uid>` | `bot:<uid>` | `bot:<uid>:<X>` — the
+    // optional third segment is the chosen X for a chosen-X card (WS7.2);
+    // interactive picks omit it, --script answers may carry it.
+    const [mode, uid, xArg] = action.split(':') as [string, string, string | undefined];
+    const chosenX = xArg !== undefined && Number.isFinite(Number(xArg)) ? Number(xArg) : undefined;
+    return { uid, useBottom: mode === 'bot', ...(chosenX !== undefined ? { chosenX } : {}) };
 }
 
 async function promptSignatureChoice(state: CombatEncounterState): Promise<string | null> {
@@ -440,10 +448,14 @@ async function interactiveHazardCombatLoop(
             if (cardChoice.uid === '__end__') { s = endTurn(s).state; break; }
 
             const beforeCard = s;
-            const res = playCombatCard(s, { uid: cardChoice.uid }, cardChoice.useBottom);
+            const res = playCombatCard(
+                s, { uid: cardChoice.uid }, cardChoice.useBottom, undefined, undefined,
+                cardChoice.chosenX !== undefined ? { chosenX: cardChoice.chosenX } : undefined,
+            );
             s = res.state;
             logState('hazardCombat:playCard', beforeCard, s, {
                 uid: cardChoice.uid, useBottom: cardChoice.useBottom,
+                ...(cardChoice.chosenX !== undefined ? { chosenX: cardChoice.chosenX } : {}),
                 events: res.events.map(e => e.kind),
             });
             emit({ type: 'hazardCombat:card', payload: { events: res.events } });

@@ -23,7 +23,7 @@ import {
     initializeCombatEncounter, rollEncounterDice, playCombatCard,
     resolveThreatPhase, startTurn, draftStanceDie, endTurn, chooseDraft, revealedCurrentStance,
     playSignatureSkill, getDraftedDie, handCards, selectMercyChoice, getSignatureSkill,
-    tapFateDie,
+    tapFateDie, recoilXRange,
 } from './combat.engine';
 import { RESERVE_MAX } from './combat.dice';
 import { getPendingDotTotal } from './effects';
@@ -282,6 +282,16 @@ function policyPlayPhase(
     let guard = 0;
     const fizzledUids = new Set<string>();
 
+    // WS7.2 chosen X-costs — the policy's temperament picks X inside the
+    // engine's own clamp range; policies without a `chooseX` play the printed
+    // minimum. Undefined for cards without a chosen-X mechanic.
+    const chosenXFor = (card: CombatCard): { chosenX: number } | undefined => {
+        const range = recoilXRange(working, card);
+        if (!range) return undefined;
+        const x = policy.chooseX ? policy.chooseX(working, card, range, rng) : range.min;
+        return { chosenX: x };
+    };
+
     // WS1.1 — plays the FREE (top) line and records its line telemetry. A top
     // play can itself fizzle (e.g. a free enchant whose permanent is already
     // standing); it still counts a play, exactly as before the telemetry.
@@ -317,7 +327,7 @@ function policyPlayPhase(
             if (banked) {
                 const wantR = selectCard(working, policy, rng, fizzledUids, focusIds, banked.color);
                 if (wantR) {
-                    const resR = playCombatCard(working, { uid: wantR.uid }, true, banked.id);
+                    const resR = playCombatCard(working, { uid: wantR.uid }, true, banked.id, undefined, chosenXFor(wantR.card));
                     if (!resR.events.some(e => e.kind === 'effect-fizzled')) {
                         lineRow(lines, wantR.card.id).paidHpSwing += playHpSwing(working, resR.state, resR.events);
                         working = resR.state;
@@ -376,7 +386,7 @@ function policyPlayPhase(
             continue;
         }
 
-        const res = playCombatCard(working, { uid: want.uid }, true);
+        const res = playCombatCard(working, { uid: want.uid }, true, undefined, undefined, chosenXFor(want.card));
         if (res.events.some(e => e.kind === 'effect-fizzled')) {
             // Token-gated with no banked token — drain via the free top and skip it.
             lineRow(lines, want.card.id).fizzles++;

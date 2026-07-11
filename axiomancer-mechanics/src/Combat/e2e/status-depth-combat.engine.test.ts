@@ -30,7 +30,7 @@ import {
 } from '../combat.engine';
 import { classifyVerbClass, toCombatCard } from '../combat.cards';
 import { getActiveDotTotal, getActiveDotAmplifications } from '../effect-modifiers';
-import { RUPTURE_BURST_CAP, ruptureBurstCap } from '../effects';
+import { RUPTURE_CAP_FRACTION, ruptureBurstCap } from '../effects';
 import { COMBAT_REWARD_POOL } from '../combat.rewards';
 import type { CombatDieColor, CombatEncounterState, CombatEvent } from '../combat.encounter.types';
 
@@ -164,40 +164,47 @@ describe('RUPTURE — detonate the foe afflictions for the pending total', () =>
         expect(det!.amount).toBe(9);
     });
 
-    it('respects the SCALING burst cap on a huge DoT stack (big enemy → cap grows)', () => {
-        // Plan item 2: the cap scales with enemy max HP so a full detonation
-        // stays relevant against boss pools — max(flat floor, fraction × maxHP).
+    it('respects the PURE-FRACTION burst cap on a huge DoT stack (big enemy → cap grows)', () => {
+        // WS7.1 (spec 32 §12 item 5): the cap is a pure fraction of enemy max
+        // HP — round(F × maxHp), no flat floor.
         mockSequentialRng(0.05);
         const enemyEffects = [ae('debuff_poison', 10, 10)];
         const state = openAndDraft(makePlayer([RUP]), makeEnemy(900, 'mind', enemyEffects), [RUP, RUP, RUP], 'mind');
         const res = playCombatCard(state, { uid: state.hand.find(h => h.cardId === RUP)!.uid }, true);
         const det = res.events.find(e => e.kind === 'rupture-detonated') as { amount: number } | undefined;
-        expect(ruptureBurstCap(900)).toBeGreaterThan(RUPTURE_BURST_CAP); // 900 HP: the fraction term wins
+        expect(ruptureBurstCap(900)).toBe(Math.round(RUPTURE_CAP_FRACTION * 900));
         expect(det!.amount).toBe(ruptureBurstCap(900));
     });
 
-    it('keeps the flat floor on a small enemy (early/mid behavior unchanged)', () => {
+    it('the cap is a pure fraction on a small enemy too — the flat floor is retired (WS7.1)', () => {
         mockSequentialRng(0.05);
         const enemyEffects = [ae('debuff_poison', 10, 10)];
         const state = openAndDraft(makePlayer([RUP]), makeEnemy(300, 'mind', enemyEffects), [RUP, RUP, RUP], 'mind');
         const res = playCombatCard(state, { uid: state.hand.find(h => h.cardId === RUP)!.uid }, true);
         const det = res.events.find(e => e.kind === 'rupture-detonated') as { amount: number } | undefined;
-        expect(ruptureBurstCap(300)).toBe(RUPTURE_BURST_CAP); // fraction term below the floor
-        expect(det!.amount).toBe(RUPTURE_BURST_CAP);
+        // No floor term: round(F × 300), full stop. Against truly small pools
+        // (~100 HP) the fraction lands BELOW the retired 80-HP floor — that
+        // early-cap drop is the ratified trade; the sweep raises F, never
+        // re-adds a floor.
+        expect(ruptureBurstCap(300)).toBe(Math.round(RUPTURE_CAP_FRACTION * 300));
+        expect(ruptureBurstCap(100)).toBeLessThan(80); // the retired floor no longer props tiny pools
+        expect(det!.amount).toBe(ruptureBurstCap(300));
     });
 });
 
 // ── DISRUPT — distinct-control deny meter ────────────────────────────────────
 
-describe('DISRUPT — a variety of controls denies the telegraphed turn', () => {
+describe('DISRUPT — a variety of control SURFACES denies the telegraphed turn (WS8.3)', () => {
     // Support-tagged (non-card) controls carried by enemy threats / legacy
-    // sources — each a distinct negative-roll control, none a DoT.
-    const twoControls = () => [ae('debuff_daze', 1), ae('debuff_slow', 1)];
-    const threeControls = () => [...twoControls(), ae('debuff_root', 1)];
+    // sources — each on a DIFFERENT surface (spec 32 §12 #6):
+    //   daze → roll (-3), root → stance (lockedStance),
+    //   blind → rider-suppress (suppressesThreatRiders).
+    const twoSurfaces = () => [ae('debuff_daze', 1), ae('debuff_root', 1)];
+    const threeSurfaces = () => [...twoSurfaces(), ae('debuff_blind', 1)];
 
-    it('does NOT deny at 2 distinct controls (roll penalty 5 < 8)', () => {
+    it('does NOT deny at 2 distinct surfaces (roll penalty 3 < 8)', () => {
         mockSequentialRng(0.05);
-        const base = initializeCombatEncounter(makePlayer([]), makeEnemy(300, 'mind', twoControls()), undefined, 7);
+        const base = initializeCombatEncounter(makePlayer([]), makeEnemy(300, 'mind', twoSurfaces()), undefined, 7);
         const state = rollEncounterDice(base).state;
         const meter = getDisruptMeter(state);
         expect(meter.pips).toBe(2);
@@ -207,13 +214,27 @@ describe('DISRUPT — a variety of controls denies the telegraphed turn', () => 
         expect(res.events.some(e => e.kind === 'threat-fired')).toBe(true);
     });
 
-    it('DENIES at exactly 3 distinct controls (the additive path, roll penalty 7 < 8)', () => {
+    it('does NOT deny at 3 controls of the SAME grip (three roll shreds = 1 pip)', () => {
         mockSequentialRng(0.05);
-        const base = initializeCombatEncounter(makePlayer([]), makeEnemy(300, 'mind', threeControls()), undefined, 7);
+        // daze -3 + slow -2 + straw_man_echo -1 = penalty 6 < 8, all 'roll'.
+        const sameGrip = [ae('debuff_daze', 1), ae('debuff_slow', 1), ae('debuff_straw_man_echo', 1)];
+        const base = initializeCombatEncounter(makePlayer([]), makeEnemy(300, 'mind', sameGrip), undefined, 7);
+        const state = rollEncounterDice(base).state;
+        const meter = getDisruptMeter(state);
+        expect(meter.pips).toBe(1);
+        expect(meter.willDeny).toBe(false);
+        const res = resolveThreatPhase(state);
+        expect(res.events.some(e => e.kind === 'disrupt-denied')).toBe(false);
+        expect(res.events.some(e => e.kind === 'threat-fired')).toBe(true);
+    });
+
+    it('DENIES at exactly 3 distinct surfaces (the additive path, roll penalty 3 < 8)', () => {
+        mockSequentialRng(0.05);
+        const base = initializeCombatEncounter(makePlayer([]), makeEnemy(300, 'mind', threeSurfaces()), undefined, 7);
         const state = rollEncounterDice(base).state;
         const meter = getDisruptMeter(state);
         expect(meter.pips).toBe(3);
-        expect(meter.rollPenalty).toBe(7); // < THREAT_DENY_AT(8): legacy path would NOT deny
+        expect(meter.rollPenalty).toBe(3); // < THREAT_DENY_AT(8): legacy path would NOT deny
         expect(meter.willDeny).toBe(true);
         const res = resolveThreatPhase(state);
         const denied = res.events.find(e => e.kind === 'disrupt-denied') as { pips: number } | undefined;

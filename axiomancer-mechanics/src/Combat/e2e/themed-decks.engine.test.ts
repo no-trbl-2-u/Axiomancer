@@ -32,7 +32,7 @@ import {
     discardCombatCard, handCards, getFloatingDiceColors, getDraftedDie,
 } from '../combat.engine';
 import { FLOATING_DICE_CAP } from '../combat.dice';
-import { REAP_ALL_BURST_CAP, THREAT_RUNGS } from '../effects';
+import { THREAT_RUNGS } from '../effects';
 import { buildPresetDeck, COMBAT_DECK_PRESET_ORDER } from '../combat.deck-presets';
 import type {
     CombatDieColor, CombatEncounterState, CombatEvent, CombatManaDie, CombatThreatPhase,
@@ -361,7 +361,7 @@ describe('SOULS — expiry yields, REAP spends, REAP-all bursts under the cap', 
         expect(drawn!.cards.length).toBe(2);
     });
 
-    it('REAP-all spends EVERY Soul and the burst respects REAP_ALL_BURST_CAP', () => {
+    it('REAP-all spends EVERY Soul and the burst is UNCAPPED (WS7.1, spec 32 §12 item 5)', () => {
         mockSequentialRng(0.05);
         const REAP = 'the-reaping'; // REAP all: 4 per Soul (v3 rework)
         let state = openAndDraft(makePlayer([REAP]), makeEnemy(600, 'body'), [REAP, REAP, REAP], 'body');
@@ -370,9 +370,12 @@ describe('SOULS — expiry yields, REAP spends, REAP-all bursts under the cap', 
         const res = playFromHand(state, REAP);
         const reaped = res.events.find(e => e.kind === 'reaped') as { soulsSpent: number; amount: number };
         expect(reaped.soulsSpent).toBe(60);
-        expect(reaped.amount).toBe(REAP_ALL_BURST_CAP); // 4×60 = 240 → capped at 200
+        // 4 × 60 = 240 lands whole (neutral read: body die vs body foe) — the
+        // ALL-spender's price is the emptied bank, not a cap (the old 200 flat
+        // cap would have swallowed 40 of it).
+        expect(reaped.amount).toBe(240);
         expect(res.state.souls).toBe(0);
-        expect(hpBefore - res.state.enemy.health).toBe(REAP_ALL_BURST_CAP);
+        expect(hpBefore - res.state.enemy.health).toBe(240);
     });
 });
 

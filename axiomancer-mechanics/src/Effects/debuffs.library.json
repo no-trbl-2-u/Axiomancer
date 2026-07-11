@@ -473,7 +473,7 @@
       "resistedBy": "heart",
       "resistDR": 13,
       "payload": {
-        "rollModifier": -5,
+        "blursStanceHints": true,
         "advantageModifier": {
           "grantDisadvantage": [
             "body",
@@ -499,7 +499,7 @@
       "resistedBy": "heart",
       "resistDR": 13,
       "payload": {
-        "rollModifier": -5,
+        "suppressesThreatRiders": true,
         "advantageModifier": {
           "grantDisadvantage": [
             "body",
@@ -602,7 +602,7 @@
             "isMultiplier": false
           }
         ],
-        "rollModifier": -2
+        "outgoingThreatDamageMulPct": -25
       },
       "tier": 2,
       "tags": [
@@ -646,7 +646,7 @@
       "resistDR": 13,
       "payload": {
         "defenseModifier": -2,
-        "rollModifier": -2
+        "lockedStance": true
       },
       "tier": 2,
       "tags": [

@@ -14,6 +14,7 @@
 import { describe, it, expect } from 'vitest';
 import { ENEMY_REGISTRY, EnemyLibrary, TheIncompleteness, Sandbag_01 } from '../enemy.library';
 import { AUTHORED_THREAT_SEQUENCES } from '../../Combat/combat.threat-sequences';
+import { flattenAuthoredSteps } from '../../Combat/combat.threat';
 import type { Enemy } from '../types';
 
 /** The Aporia act bosses (W-01) — authored labyrinth content, not paintings. */
@@ -62,7 +63,8 @@ describe('2026-07-06: the art-driven base roster', () => {
     it('escalates every authored sequence (Aeon\'s-End pressure: the back half outweighs the opener)', () => {
         for (const slug of ROSTER_SLUGS) {
             const enemy = ENEMY_REGISTRY[slug] as Enemy;
-            const seq = AUTHORED_THREAT_SEQUENCES[enemy.id]!;
+            // WS9 — flattened: a branch step contributes both forks.
+            const seq = flattenAuthoredSteps(AUTHORED_THREAT_SEQUENCES[enemy.id]!);
             const opener = seq[0].damageWeight ?? 1;
             const peak = Math.max(...seq.map(p => p.damageWeight ?? 1));
             expect(peak, `enemy ${enemy.id} never escalates past its opener`).toBeGreaterThan(opener);
@@ -137,8 +139,9 @@ describe('2026-07-06: the art-driven base roster', () => {
                 const seq = AUTHORED_THREAT_SEQUENCES[enemy.id];
                 expect(seq, `enemy ${enemy.id} has no authored threat sequence`).toBeDefined();
                 expect(seq!.length).toBeGreaterThanOrEqual(2);
-                const opener = seq![0].damageWeight ?? 1;
-                const peak = Math.max(...seq!.map(p => p.damageWeight ?? 1));
+                const phases = flattenAuthoredSteps(seq!);
+                const opener = phases[0].damageWeight ?? 1;
+                const peak = Math.max(...phases.map(p => p.damageWeight ?? 1));
                 expect(peak, `enemy ${enemy.id} never escalates past its opener`).toBeGreaterThan(opener);
             }
         });

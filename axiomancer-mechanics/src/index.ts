@@ -65,7 +65,7 @@ export {
     // 0.34.0 status-depth epic — HP-model selectors + tunable scalars
     getDamageTakenMultiplier, getPendingDotTotal, consumeDotEffects,
     getDistinctDebuffCount, getDistinctControlCount,
-    VULNERABLE_MAX_MULT, RESOLUTE_MIN_MULT, RUPTURE_BURST_CAP,
+    VULNERABLE_MAX_MULT, RESOLUTE_MIN_MULT, RUPTURE_CAP_FRACTION, ruptureBurstCap,
     RUPTURE_PER_AFFLICTION_STACK, DISRUPT_DENY_AT, THREAT_RUNGS, THREAT_RUNGS_BOSS,
     // Spec 32 v3 — themed-deck selectors
     consumeAfflictions, consumeOneAffliction, getBackfirePerRung,
@@ -73,6 +73,8 @@ export {
     // P0-truth — formerly-inert payload channels, now real + presenter-readable
     getHealingReceivedMult, getOutgoingDamageMult, decayDotsOnHeal, consumeEffect,
     hasPayloadFlag,
+    // WS8.2 — telegraph-damage control surface (spec 32 §12 #6)
+    getOutgoingThreatDamageMult,
     getDotAmplificationByEffect, getActiveDotTotal, getActiveDotAmplifications,
     resolveEffectApplication,
     calculateDamageResistance,
@@ -113,12 +115,16 @@ export {
     TURN_DICE_COUNT, rollTurnDice, dieHasStance,
     startTurn, draftStanceDie, endTurn, resolveRead, chooseDraft, discardCombatCard,
     playSignatureSkill, getDraftedDie, isPhaseStanceRevealed, revealedCurrentStance,
+    // WS8.2 — stance-blur readout flag (mobile renders the stance panel fogged)
+    isStanceReadoutBlurred,
     cardReadPreview, projectCardImpact, getSignatureSkill, SIGNATURE_SKILLS, SIGNATURE_SKILL_LIST,
     READ_DAMAGE_MULT, CONVICTION_PER_UNPICKED_DIE, CONVICTION_PER_UNPICKED_WILD, CONVICTION_READ_WIN_BONUS,
     COLOR_MATCH_DAMAGE_BONUS, deriveIntentType,
     // 0.34.0 status-depth epic — honesty selectors + deny-threshold consts
     getEnemyIncomingDamageMultiplier, getDisruptMeter,
     projectRupture, projectSiphonHeal, projectReapAll,
+    // WS7.2 — chosen X-cost clamp range (`recoil_x`), engine-owned
+    recoilXRange,
     // Phase 2 — projected-lethality readout (spec 30)
     computeRoundsToKill, projectCombatOutcome,
     // Spec 32 v3 — floating dice save-back + sway decay knob
@@ -161,6 +167,9 @@ export type {
     CombatThreatPhase, CombatThreatAction, CombatThreatEffect,
     CombatThreatMark, CombatPhaseResult, CombatOutcome, CombatEvent,
     CombatSummary, CombatAttributionRow, LandedEffect,
+    // WS9 (spec 32 §12 #7) — legible conditional threat branches
+    ThreatBranchCondition, CombatThreatBranch, CombatThreatBranchOutcome,
+    AuthoredThreatPhase, AuthoredThreatBranch, AuthoredThreatStep,
     CombatSimStats, CombatSimPolicyId,
     HazardAutoPolicyId, HazardCombatAutoOptions, HazardCombatAutoResult,
     CombatIntentType, CombatReadResult,

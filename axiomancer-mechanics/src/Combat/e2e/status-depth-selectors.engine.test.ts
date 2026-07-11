@@ -145,16 +145,36 @@ describe('getDistinctDebuffCount (FALLEN / variety payoffs)', () => {
     });
 });
 
-describe('getDistinctControlCount (DISRUPT meter)', () => {
-    it('counts action-restriction AND negative-roll controls; excludes pure DoT / exposure', () => {
+describe('getDistinctControlCount (DISRUPT meter — WS8.3 counts SURFACES, not ids)', () => {
+    it('counts distinct control SURFACES; same-surface ids collapse to one pip', () => {
+        // Five control ids on THREE surfaces: charm + silence share 'action',
+        // daze + slow share 'roll', root owns 'stance' (WS8.2 lockedStance).
         expect(getDistinctControlCount(combatant([
-            ae('debuff_confusion', 1),            // roll -5 (support-tagged)
-            ae('debuff_charm', 1),                // forcedStance (support-tagged)
-            ae('debuff_silence', 1),              // blockedStances (support-tagged)
+            ae('debuff_charm', 1),                // forcedStance    → action
+            ae('debuff_silence', 1),              // blockedStances  → action
+            ae('debuff_daze', 1),                 // roll -3         → roll
+            ae('debuff_slow', 1),                 // roll -2         → roll
+            ae('debuff_root', 1),                 // lockedStance    → stance
             ae('debuff_poison', 1),               // DoT — NOT control
             ae('debuff_mark', 1),                 // exposure — NOT control
         ]))).toBe(3);
+        // Three ids of the SAME grip are ONE pip (the WS8.3 design intent).
+        expect(getDistinctControlCount(combatant([
+            ae('debuff_daze', 1), ae('debuff_slow', 1), ae('debuff_knockdown', 1),
+        ]))).toBe(1);
         expect(getDistinctControlCount(combatant([]))).toBe(0);
+    });
+
+    it('classifies the WS8.2 re-payloaded surfaces (threat-damage / rider-suppress / stance)', () => {
+        expect(getDistinctControlCount(combatant([
+            ae('debuff_exhaustion', 1),           // outgoingThreatDamageMulPct → threat-damage
+            ae('debuff_blind', 1),                // suppressesThreatRiders     → rider-suppress
+            ae('debuff_confusion', 1),            // blursStanceHints           → stance
+        ]))).toBe(3);
+        // ROOT (lock) and CONFUSION (blur) are the same stance surface.
+        expect(getDistinctControlCount(combatant([
+            ae('debuff_root', 1), ae('debuff_confusion', 1),
+        ]))).toBe(1);
     });
 });
 

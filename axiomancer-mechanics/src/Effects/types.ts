@@ -59,6 +59,15 @@ export interface StatModifier {
 export type DotTickPhase = 'start' | 'end';
 
 /**
+ * WS3 trigger-clock DoT substrate (spec 32 §12, ratified 2026-07-11 #3) — the
+ * clock a DoT ticks on. The two round clocks alias the legacy `tickPhase`
+ * pair; the three EVENT clocks tick on game events instead of the round
+ * boundary ('card-played' counts PLAYER-side card plays only, ratified).
+ */
+export type DotTriggerClock =
+    | 'round-start' | 'round-end' | 'card-played' | 'damage-instance' | 'payoff';
+
+/**
  * Damage dealt each round to the bearer. Total per tick = `damagePerRound × intensity`
  * and is dealt as raw HP loss — DoT bypasses `damageType`-keyed defense (Q5). The
  * `damageType` is informational today and reserved for future immunities.
@@ -68,6 +77,11 @@ export interface DamageOverTime {
     damageType: EffectStatTarget;
     /** Where in the round this DoT ticks. Defaults to `'start'`. */
     tickPhase?: DotTickPhase;
+    /** WS3 trigger clock. Absent = legacy `tickPhase` behavior (round clock);
+     *  `tickPhase` stays as the alias for the two round clocks. Event-clocked
+     *  DoTs ('card-played' / 'damage-instance' / 'payoff') never tick at the
+     *  round boundary — the engine advances them via `fireDotTrigger`. */
+    trigger?: DotTriggerClock;
 }
 
 /** Health restored (positive) or drained (negative) at the start of each round. */
@@ -152,6 +166,13 @@ export interface EffectPayload {
         /** BLEED (spec 32 v3) — front-loaded: the effect loses 1 intensity each
          *  time it ticks (removed at 0). Big now, gone soon. */
         decaysPerTick?: boolean;
+        /** WS3 (spec 32 §12 #3) — explicit opt-out of the round-end duration
+         *  countdown: the instance expires only via its own decay (e.g.
+         *  `decaysPerTick` washout) or combat end. Absent = legacy calendar. */
+        calendarExpiry?: false;
+        /** WS3 Doom species (spec 32 §12 #3, card-local — NOT keyword #31):
+         *  the effect's intensity grows +1 each time the enemy acts. */
+        growth?: 'per-enemy-action';
     };
     /**
      * MARK (spec 32 v3, ratified A3) — the universal glue affliction: every DoT
@@ -168,6 +189,39 @@ export interface EffectPayload {
     /** Outgoing-damage multiplier applied to damage the bearer DEALS (Septic's
      *  necrotic seep is the first user) — additive across stacks, -X% each. */
     outgoingDamageMulPct?: number;
+    /**
+     * WS8.2 telegraph-DAMAGE surface (spec 32 §12 #6) — multiplier on the HP
+     * the bearer's TELEGRAPHED threat action deals: -25 = "weakened hits
+     * softer" (EXHAUSTION). Additive across stacks; aggregated + clamped by
+     * `getOutgoingThreatDamageMult` and read in `resolveThreatPhase` where the
+     * budgeted damage lands. Distinct from `outgoingDamageMulPct`, which also
+     * dampens the bearer's non-telegraph HP sources.
+     */
+    outgoingThreatDamageMulPct?: number;
+    /**
+     * WS8.2 RIDER surface — while active on the enemy, its telegraphed
+     * phase's `threatEffectId` rider cannot land (BLIND — "information
+     * erased"). The phase's damage and self-heal still resolve; only the
+     * status rider is suppressed. Read in `resolveThreatPhase`.
+     */
+    suppressesThreatRiders?: boolean;
+    /**
+     * WS8.2 STANCE surface (blur) — the bearer's stance perception is fogged
+     * (CONFUSION): while the PLAYER carries this, revealed enemy stances read
+     * as hidden again (`isPhaseStanceRevealed`) and the readout layer renders
+     * the stance panel blurred (`isStanceReadoutBlurred` — mobile consumes
+     * that selector). On the ENEMY it counts as the stance surface for the
+     * DISRUPT meter (there is no enemy-side stance read to fog).
+     */
+    blursStanceHints?: boolean;
+    /**
+     * WS8.2 STANCE surface (lock) — the bearer is locked into its revealed
+     * stance (ROOT — "paralysis through possibility"): while the ENEMY
+     * carries this, the phase advance keeps the CURRENT stance and reveals
+     * it. The status twin of the `lock_stance` card mechanic; read where
+     * stances swap in `processBetweenPhases`.
+     */
+    lockedStance?: boolean;
     /** Multiplier applied to a card's effective "power" for math purposes
      *  (Fatigue-style chip debuffs feeding tier-3 execute setup). */
     powerMulPct?: number;

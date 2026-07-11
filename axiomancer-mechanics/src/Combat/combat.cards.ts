@@ -214,6 +214,7 @@ export function mechanicText(m: CardSpecialMechanic): string | null {
         case 'spend_premises': return `spend ALL Premises — +1 mark per ${m.markPer}, draw 1 per ${m.drawPer}`;
         case 'spend_all_pips': return `spend ALL pips${m.guardPerPip ? ` (+${m.guardPerPip} Guard per pip)` : ''}`;
         case 'recoil': return `RECOIL ${m.hp}`;
+        case 'recoil_x': return `RECOIL X (min ${m.min}): POISON per ${Math.round(1 / m.poisonPerX)}`;
         case 'extend_dots': return `+${m.turns} duration to ALL your DoTs`;
         case 'convert_dots': return `convert bleed↔poison, +${m.bonusIntensity} intensity`;
         case 'boost_all_dots': return `+${m.intensity} intensity to ALL enemy DoTs`;

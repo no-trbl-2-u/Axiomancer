@@ -1,0 +1,178 @@
+/**
+ * Hermetic E2E — RECOIL X, the first chosen X-cost (WS7.2, spec 32 §12
+ * item 5), LIVE through the HP-model combat engine via the `chooseX-vein`
+ * sandbox set (The Open Vein: RECOIL X of your choosing, min 3 → POISON at
+ * ceil(X/3) intensity).
+ *
+ * Pins the engine clamp (X ∈ [min, affordable], affordable = live HP − 1,
+ * floored at min), the POISON payoff scaling with the paid X, and the WS7.2
+ * non-degeneracy gate: across sim policies the chosen-X distribution must
+ * vary (at least two policies' MODAL X differ) — if every temperament maxes
+ * X, the picker is dead weight and the ratified fallback is an ALL-spender.
+ */
+
+import { describe, it, expect, afterEach, vi } from 'vitest';
+
+import { Player } from '../../Character/characters.mock';
+import type { Character } from '../../Character/types';
+import type { Enemy } from '../../Enemy/types';
+import { GraveLarva } from '../../Enemy/enemy.library';
+import { deepClone } from '../../Utils';
+import { mockSequentialRng } from '../../test-utils/rng';
+import { applySandboxSet } from '../../Cards/cards.sandbox-sets';
+import type { ActiveEffect } from '../../Effects/types';
+import {
+    initializeCombatEncounter, rollEncounterDice, draftStanceDie, playCombatCard,
+    handCards, recoilXRange,
+} from '../combat.engine';
+import { COMBAT_SIM_POLICIES } from '../combat.sim-policies';
+import type { CombatDieColor, CombatEncounterState, CombatTransition } from '../combat.encounter.types';
+
+afterEach(() => { vi.restoreAllMocks(); });
+
+// The sandbox set is live for this whole process (registering twice throws,
+// so it happens once at module scope — the same pattern as the QA fixtures).
+applySandboxSet('chooseX-vein');
+
+const VEIN = 'the-open-vein';
+const MIN_X = 3; // the card's printed minimum
+
+function makePlayer(cards: string[], effects: ActiveEffect[] = []): Character {
+    const p = deepClone(Player);
+    p.knownCards = cards.slice();
+    p.baseStats = { heart: 8, body: 8, mind: 8 };
+    p.health = 200; p.maxHealth = 200; p.effects = effects;
+    return p;
+}
+
+function makeEnemy(hp: number, stance: 'heart' | 'body' | 'mind' = 'body', effects: ActiveEffect[] = []): Enemy {
+    const e = deepClone(GraveLarva);
+    e.id = 'enemy-test-dummy';
+    e.health = hp; e.maxHealth = hp; e.effects = effects;
+    e.baseStats = { heart: stance === 'heart' ? 6 : 2, body: stance === 'body' ? 6 : 2, mind: stance === 'mind' ? 6 : 2 };
+    return e;
+}
+
+/** Forces this turn's draft pool to known colors (deterministic reads). */
+function setDice(state: CombatEncounterState, colors: CombatDieColor[]): CombatEncounterState {
+    const turn = state.turn || 1;
+    const dice = colors.map((c, i) => ({
+        id: `t${turn}-d${i}`, color: c,
+        state: c === 'x' ? ('locked' as const) : ('available' as const), temporary: false,
+    }));
+    return { ...state, dice, draftedDieId: null, turn };
+}
+
+/** Opens phase-play, forces the pool, and drafts a BODY die (The Open Vein is
+ *  a body card vs a body foe → neutral read, no intensity skew). */
+function openAndDraft(player: Character, enemy: Enemy, seed = 7): CombatEncounterState {
+    const deck = [VEIN, VEIN, VEIN, VEIN, VEIN];
+    let state = initializeCombatEncounter(player, enemy, deck, seed);
+    state = rollEncounterDice(state).state;
+    state = setDice(state, ['body', 'x']);
+    state = draftStanceDie(state, state.dice[0].id).state;
+    return state;
+}
+
+function playVein(state: CombatEncounterState, chosenX?: number): CombatTransition {
+    const uid = state.hand.find(h => h.cardId === VEIN)!.uid;
+    return playCombatCard(
+        state, { uid }, true, undefined, undefined,
+        chosenX !== undefined ? { chosenX } : undefined,
+    );
+}
+
+const recoilPaid = (t: CombatTransition): number =>
+    (t.events.find(e => e.kind === 'recoil-paid') as { amount: number } | undefined)?.amount ?? 0;
+
+const poisonIntensity = (t: CombatTransition): number =>
+    t.state.enemy.effects.find(e => e.effectId === 'debuff_poison')?.intensity ?? 0;
+
+/** Deterministic per-test LCG (never the engine's global stream). */
+function lcg(seed: number): () => number {
+    let s = seed >>> 0;
+    return () => {
+        s = (s * 1664525 + 1013904223) >>> 0;
+        return s / 2 ** 32;
+    };
+}
+
+// ── Engine clamp + payoff scaling ────────────────────────────────────────────
+
+describe('RECOIL X — the engine clamps X and scales the POISON payoff', () => {
+    it('absent chosenX plays the printed minimum (RECOIL 3 → POISON i1)', () => {
+        mockSequentialRng(0.05);
+        const state = openAndDraft(makePlayer([VEIN]), makeEnemy(400));
+        const hpBefore = state.player.health;
+        const res = playVein(state);
+        expect(recoilPaid(res)).toBe(MIN_X);
+        expect(hpBefore - res.state.player.health).toBe(MIN_X);
+        expect(poisonIntensity(res)).toBe(Math.ceil(MIN_X / 3)); // 1
+    });
+
+    it('clamps a chosenX below the printed minimum up to it', () => {
+        mockSequentialRng(0.05);
+        const state = openAndDraft(makePlayer([VEIN]), makeEnemy(400));
+        const res = playVein(state, 1);
+        expect(recoilPaid(res)).toBe(MIN_X);
+        expect(poisonIntensity(res)).toBe(1);
+    });
+
+    it('clamps a greedy chosenX to affordability (live HP − 1) — the play never self-kills', () => {
+        mockSequentialRng(0.05);
+        let state = openAndDraft(makePlayer([VEIN]), makeEnemy(400));
+        state = { ...state, player: { ...state.player, health: 10 } };
+        expect(recoilXRange(state, { id: VEIN })).toEqual({ min: MIN_X, max: 9 });
+        const res = playVein(state, 50);
+        expect(recoilPaid(res)).toBe(9);
+        expect(res.state.player.health).toBe(1);
+        expect(poisonIntensity(res)).toBe(Math.ceil(9 / 3)); // 3
+    });
+
+    it('POISON scales with the paid X: ceil(X × 1/3) intensity', () => {
+        mockSequentialRng(0.05);
+        const state = openAndDraft(makePlayer([VEIN]), makeEnemy(400));
+        const hpBefore = state.player.health;
+        const res = playVein(state, 12);
+        expect(recoilPaid(res)).toBe(12);
+        expect(hpBefore - res.state.player.health).toBe(12);
+        expect(poisonIntensity(res)).toBe(4);
+        // The blood price feeds the spec 32 §12 #4 RECOIL ledger too.
+        expect(res.state.recoilPaidThisTurn).toBe(12);
+    });
+});
+
+// ── WS7.2 non-degeneracy gate — the chosen-X distribution must vary ─────────
+
+describe('chosen-X non-degeneracy across sim policies (the WS7.2 gate)', () => {
+    it('at least two policies have a different MODAL X on the same encounters', () => {
+        const probes = ['greedy', 'turtle', 'chaos'] as const;
+        const modal: Record<string, number> = {};
+        for (const pid of probes) {
+            const policy = COMBAT_SIM_POLICIES[pid];
+            const paid: number[] = [];
+            for (let seed = 1; seed <= 5; seed++) {
+                mockSequentialRng(0.05);
+                const state = openAndDraft(makePlayer([VEIN]), makeEnemy(400), seed);
+                const entry = handCards(state).find(h => h.card.id === VEIN)!;
+                const range = recoilXRange(state, entry.card)!;
+                const x = policy.chooseX
+                    ? policy.chooseX(state, entry.card, range, lcg(seed))
+                    : range.min;
+                paid.push(recoilPaid(playVein(state, x)));
+                vi.restoreAllMocks();
+            }
+            // Modal X = the most frequent ENGINE-PAID amount (post-clamp).
+            const counts = new Map<number, number>();
+            for (const x of paid) counts.set(x, (counts.get(x) ?? 0) + 1);
+            modal[pid] = [...counts.entries()].sort((a, b) => b[1] - a[1])[0][0];
+        }
+        // The gate: if every temperament converged on one X the picker is
+        // degenerate (kill it, keep ALL-spenders). Greedy hunts the useful
+        // max, turtle the printed min — their modes must differ.
+        const distinctModes = new Set(Object.values(modal));
+        expect(distinctModes.size).toBeGreaterThanOrEqual(2);
+        expect(modal['greedy']).toBeGreaterThan(modal['turtle']);
+        expect(modal['turtle']).toBe(MIN_X);
+    });
+});

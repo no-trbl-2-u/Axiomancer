@@ -154,6 +154,9 @@ export interface CardPlay {
     useBottom: boolean;
     /** Die spent to power the bottom action (ignored for top actions). */
     dieId?: string;
+    /** Chosen X for a chosen-X mechanic (`recoil_x`, WS7.2); the engine clamps
+     *  it to [min, affordable]. Absent → the printed minimum. */
+    chosenX?: number;
 }
 
 // ---------------------------------------------------------------------------
@@ -224,6 +227,10 @@ export interface CombatThreatEffect {
     duration?: number;
     /** Self-heal the enemy performs (escalation). */
     enemyHeal?: number;
+    /** WS9 (spec 32 §12 #7) — the enemy sheds up to this many of its OWN
+     *  afflictions when the action fires (spec 29 guardrail: a fraction,
+     *  never the last one). Written only by the threat-branch resolver. */
+    enemyCleanse?: number;
 }
 
 export interface CombatThreatAction {
@@ -245,6 +252,41 @@ export type CombatIntentType =
     | 'block'      // a defensive / damage-reduction effect on the enemy
     | 'pass'       // no effects (damage 0, no effectId)
     | 'combo';     // multiple types at once
+
+/**
+ * WS9 (spec 32 §12 item 7, Ratified 2026-07-11) — a threat branch's authored
+ * condition. CLOSED union, authored data only, zero RNG: the fork commits from
+ * observable state at phase START, so the telegraph can show both outcomes AND
+ * the reason the taken one was taken.
+ */
+export type ThreatBranchCondition =
+    | { kind: 'bearer-afflictions-gte'; n: number }   // the ENEMY carries >= n afflictions
+    | { kind: 'prior-threat-fully-blocked' };         // `lastThreatFullyBlocked` ledger
+
+/** One fully-resolved fork of a branch phase (the telegraph shows both). */
+export interface CombatThreatBranchOutcome {
+    enemyStance: Stance;
+    threatAction: CombatThreatAction;
+    intentType?: CombatIntentType;
+    stanceHint?: string;
+}
+
+/**
+ * WS9 — the branch payload carried on a resolved `CombatThreatPhase`. While the
+ * phase is upcoming (`taken` undefined) the phase's top-level face is the ELSE
+ * (baseline) fork and the telegraph surfaces `conditionText` + both outcomes;
+ * at phase START the engine evaluates the condition, copies the taken fork
+ * onto the face, and stamps `taken`.
+ */
+export interface CombatThreatBranch {
+    condition: ThreatBranchCondition;
+    /** Human condition text, e.g. "if it carries 3+ afflictions". */
+    conditionText: string;
+    then: CombatThreatBranchOutcome;
+    else: CombatThreatBranchOutcome;
+    /** The fork committed at phase START (undefined while still upcoming). */
+    taken?: 'then' | 'else';
+}
 
 export interface CombatThreatPhase {
     index: number;                            // 1-indexed for display
@@ -269,6 +311,11 @@ export interface CombatThreatPhase {
      *  advancing into this one. Undefined = never locked (every phase
      *  authored before this epic behaves exactly as before). */
     unlockAfterRound?: number;
+
+    /** WS9 (spec 32 §12 #7) — conditional fork: condition + BOTH outcomes,
+     *  committed at phase START (`commitThreatBranch`). Undefined on every
+     *  linear phase — byte-identical to before. */
+    branch?: CombatThreatBranch;
 }
 
 export type CombatThreatMark = 'clear' | 'overwhelmed' | 'pending';
@@ -419,6 +466,10 @@ export type CombatEvent =
     | { kind: 'recoil-paid'; cardId: string; amount: number }
     | { kind: 'phase-resolved'; phaseIndex: number; mark: 'clear' | 'overwhelmed' }
     | { kind: 'threat-fired'; phaseIndex: number; description: string; effects: CombatThreatEffect[] }
+    // WS9 (spec 32 §12 #7) — a branch phase committed its fork at phase START.
+    | { kind: 'threat-branch'; phaseIndex: number; conditionText: string; taken: 'then' | 'else' }
+    // WS9 — the enemy's reactive cleanse shed some of its own afflictions.
+    | { kind: 'threat-cleansed'; phaseIndex: number; effectIds: string[] }
     | { kind: 'hand-drawn'; cards: string[] }
     | { kind: 'mercy-opened'; message: string }
     // THE CLOCK, discrete tier (combat-depth-epic): every
@@ -556,6 +607,19 @@ export interface CombatEncounterState {
     spellsPlayedThisTurn?: number;
     /** Spec 32 v3 T10 — the last PAID spell resolved this combat (ouroboros). */
     lastSpellCardId?: string | null;
+    /** Spec 32 §12 #4 (combat ledgers) — RECOIL HP paid this turn (`recoil`
+     *  mechanic + fate recoil). Reset with `spellsPlayedThisTurn` at turn start. */
+    recoilPaidThisTurn?: number;
+    /** Spec 32 §12 #4 — HP the enemy's threat dealt the player this turn
+     *  (post-soak budget); rolls into `enemyDamageLastRound` between phases. */
+    enemyDamageThisTurn?: number;
+    /** Spec 32 §12 #4 — the prior round's `enemyDamageThisTurn`. The enemy hits
+     *  BETWEEN player turns, so this is the value a card played this turn reads. */
+    enemyDamageLastRound?: number;
+    /** Spec 32 §12 #4 — the prior threat's damage was FULLY prevented (every
+     *  budgeted hit soaked to 0 by riposte/guard/barrier). Persists until the
+     *  next threat resolves (WS9 `prior-threat-fully-blocked` branch fuel). */
+    lastThreatFullyBlocked?: boolean;
     /** Spec 32 v3 — uids of CONJURED one-use Thoughtforms (removed on play). */
     conjuredUids?: string[];
     threatPhases: CombatThreatPhase[];     // enemy's authored / generated threat sequence

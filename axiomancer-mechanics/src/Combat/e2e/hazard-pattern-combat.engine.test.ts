@@ -743,15 +743,26 @@ describe('0.33.0 — soft control weakens & denies the enemy threat', () => {
         expect(hpLoss([])).toBeGreaterThan(0);
     });
 
-    it('one soft-control (Confusion, roll -5) WEAKENS the hit but does not deny it', () => {
+    // WS8.2 (spec 32 §12 #6): confusion/blind moved OFF the roll surface —
+    // FEAR (-4) is the heavy roll hammer now; knockdown (-3) + slow (-2) fill
+    // the cumulative-deny witness. All three share the 'roll' surface, so the
+    // deny below is the LEGACY cumulative path, not the DISRUPT variety path.
+    it('one soft-control (Fear, roll -4) WEAKENS the hit but does not deny it', () => {
         const clean = hpLoss([]);
-        const weakened = hpLoss([ae('debuff_confusion')]);
+        const weakened = hpLoss([ae('debuff_fear')]);
         expect(weakened).toBeGreaterThan(0);   // a single soft-control only reduces
-        expect(weakened).toBeLessThan(clean);  // ~30% weaker telegraphed hit
+        expect(weakened).toBeLessThan(clean);  // ~24% weaker telegraphed hit
     });
 
-    it('a VARIETY of soft-controls (Confusion -5 + Fear -4 = 9 ≥ deny) denies the turn', () => {
-        expect(hpLoss([ae('debuff_confusion'), ae('debuff_fear')])).toBe(0);
+    it('a heavy roll-shred pile (Fear -4 + Knockdown -3 + Slow -2 = 9 ≥ deny) denies the turn', () => {
+        expect(hpLoss([ae('debuff_fear'), ae('debuff_knockdown'), ae('debuff_slow')])).toBe(0);
+    });
+
+    it('WS8.2 — Exhaustion softens the telegraphed hit on the threat-damage surface', () => {
+        const clean = hpLoss([]);
+        const softened = hpLoss([ae('debuff_exhaustion')]);
+        expect(softened).toBeGreaterThan(0);   // -25% softens, never denies alone
+        expect(softened).toBeLessThan(clean);
     });
 });
 

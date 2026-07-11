@@ -164,6 +164,7 @@ export const SPECIAL_MECHANIC_KINDS = [
     'spend_premises',
     'spend_all_pips',
     'recoil',
+    'recoil_x',
     'extend_dots',
     'convert_dots',
     'boost_all_dots',

@@ -79,7 +79,7 @@ describe('Phase 88 — debuff_fear', () => {
     });
 });
 
-// ─── debuff_blind — disadvantage on body + mind + rollModifier -5 ─────────────
+// ─── debuff_blind — disadvantage on body + mind + rider suppression (WS8.2) ──
 
 describe('Phase 88 — debuff_blind', () => {
     it('grants disadvantage on body and mind', () => {
@@ -92,6 +92,12 @@ describe('Phase 88 — debuff_blind', () => {
     it('does not skip turn', () => {
         const mods = getActiveEffectModifiers([ae('debuff_blind')]);
         expect(mods.skipTurn).toBe(false);
+    });
+
+    it('WS8.2 — owns the RIDER surface: suppresses threat riders, no roll penalty', () => {
+        const blind = lookupEffect('debuff_blind')!;
+        expect(blind.payload.suppressesThreatRiders).toBe(true);
+        expect(blind.payload.rollModifier).toBeUndefined();
     });
 });
 
@@ -124,20 +130,33 @@ describe('Phase 88 — debuff_exhaustion', () => {
         expect(mods.statFlat.get('mind')).toBe(-2);
         expect(mods.statFlat.get('heart')).toBe(-2);
     });
+
+    it('WS8.2 — owns the telegraph-DAMAGE surface: weakened hits softer (-25%)', () => {
+        const exhaustion = lookupEffect('debuff_exhaustion')!;
+        expect(exhaustion.payload.outgoingThreatDamageMulPct).toBe(-25);
+        expect(exhaustion.payload.rollModifier).toBeUndefined();
+    });
 });
 
-// ─── debuff_root — defenseModifier -2, rollModifier -2 (no blockedStances in payload) ─
+// ─── debuff_root — defenseModifier -2 + stance LOCK (WS8.2, no blockedStances) ─
 
 describe('Phase 88 — debuff_root', () => {
     it('reduces defense and has no action restriction in the library payload', () => {
-        // Root's payload: { defenseModifier: -2, rollModifier: -2 }
-        // The "blocks stance-change" semantics are handled at the reducer layer,
+        // Root's payload: { defenseModifier: -2, lockedStance: true }
+        // The "blocks stance-change" semantics are the WS8.2 LOCK shape —
+        // `lockedStance` is read where stances swap (`processBetweenPhases`),
         // not via the effect payload's actionRestriction field.
         const mods = getActiveEffectModifiers([ae('debuff_root')]);
         expect(mods.defenseDelta).toBe(-2);
         expect(mods.skipTurn).toBe(false);
         expect(mods.forcedStance).toBeNull();
         expect(mods.blockedStances.size).toBe(0);
+    });
+
+    it('WS8.2 — owns the STANCE surface: locks the bearer into its revealed stance', () => {
+        const root = lookupEffect('debuff_root')!;
+        expect(root.payload.lockedStance).toBe(true);
+        expect(root.payload.rollModifier).toBeUndefined();
     });
 
     it('applies cleanly', () => {

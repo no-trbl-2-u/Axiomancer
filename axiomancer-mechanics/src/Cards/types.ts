@@ -130,7 +130,8 @@ export type CardSpecialMechanic =
     | { kind: 'guard'; amount: number }
     /** RUPTURE — consume ALL afflictions on the foe and detonate: 1.5× the
      *  remaining DoT fuel + a flat amount per non-DoT affliction stack (read +
-     *  vulnerable scaled, capped at `RUPTURE_BURST_CAP`). `bonusPct` is an extra
+     *  vulnerable scaled, capped at `ruptureBurstCap()` — a pure fraction of
+     *  the enemy's max HP). `bonusPct` is an extra
      *  flat fraction; `fuelPerPip` adds fuel per pip spent by a paired
      *  `spend_all_pips`; `fuelPerOmenHit` adds fuel per omen hit this combat
      *  (Oracle capstone). HP behavior owned by the combat engine (mirrors
@@ -206,6 +207,11 @@ export type CardSpecialMechanic =
     | { kind: 'spend_all_pips'; guardPerPip?: number }
     /** RECOIL — pay `hp` VITAE (unpreventable, printed cost). */
     | { kind: 'recoil'; hp: number }
+    /** RECOIL X (WS7.2, spec 32 §12 item 5 — the first chosen X-cost): pay X
+     *  VITAE of the player's CHOOSING (X ≥ `min`, clamped to what the player
+     *  can survive), landing POISON at ceil(X × `poisonPerX`) intensity.
+     *  X arrives via `playCombatCard`'s `play.chosenX`; absent → `min`. */
+    | { kind: 'recoil_x'; min: number; poisonPerX: number }
     /** EXTEND DOTS — +`turns` duration to ALL your DoTs on the enemy. */
     | { kind: 'extend_dots'; turns: number }
     /** CONVERT DOTS — convert enemy bleed↔poison at equal intensity,
@@ -222,7 +228,8 @@ export type CardSpecialMechanic =
      *  and/or KINDLE a die of `kindle` color. */
     | { kind: 'reap'; cost: number; rider?: CardRider; kindle?: 'heart' | 'body' | 'mind' | 'wild' }
     /** REAP ALL — spend every Soul: burst `burstPerSoul` HP per Soul spent
-     *  (mechanic-damage path, capped at `RUPTURE_BURST_CAP`). */
+     *  (mechanic-damage path, UNCAPPED — spec 32 §12 item 5: emptying the
+     *  whole bank is the ALL-spender's price). */
     | { kind: 'reap_all'; burstPerSoul: number }
     /** SWAY — add `amount` SWAY to the enemy. SWAY decays 1/turn; if SWAY ≥ the
      *  enemy's current HP at a turn boundary, it CAPITULATES (alt-win). */

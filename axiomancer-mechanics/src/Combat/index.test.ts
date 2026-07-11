@@ -286,10 +286,12 @@ describe('getActiveRollModifier', () => {
     expect(getActiveRollModifier(makePlayer())).toBe(0);
   });
 
-  it('returns flat rollModifier for an effect with a flat modifier (debuff_confusion: -5)', () => {
-    const confusion: ActiveEffect = { effectId: 'debuff_confusion', remainingDuration: 3, intensity: 1, appliedAt: 0, tier: 2 };
-    const p = { ...makePlayer(), effects: [confusion] };
-    expect(getActiveRollModifier(p)).toBe(-5);
+  // WS8.2 (spec 32 §12 #6): confusion moved off the roll surface (it blurs
+  // stance hints now) — fear is the canonical heavy flat roll carrier.
+  it('returns flat rollModifier for an effect with a flat modifier (debuff_fear: -4)', () => {
+    const fear: ActiveEffect = { effectId: 'debuff_fear', remainingDuration: 3, intensity: 1, appliedAt: 0, tier: 2 };
+    const p = { ...makePlayer(), effects: [fear] };
+    expect(getActiveRollModifier(p)).toBe(-4);
   });
 
   it('a flat rollModifier is intensity-independent (debuff_frostbite: -2 at intensity 3)', () => {
@@ -301,9 +303,9 @@ describe('getActiveRollModifier', () => {
   });
 
   it('sums flat and per-intensity contributions across multiple effects', () => {
-    const confusion: ActiveEffect = { effectId: 'debuff_confusion', remainingDuration: 3, intensity: 1, appliedAt: 0, tier: 2 };
+    const fear: ActiveEffect = { effectId: 'debuff_fear', remainingDuration: 3, intensity: 1, appliedAt: 0, tier: 2 };
     const accuracy: ActiveEffect = { effectId: 'buff_accuracy_up', remainingDuration: 2, intensity: 1, appliedAt: 0, tier: 2 };
-    const p = { ...makePlayer(), effects: [confusion, accuracy] };
-    expect(getActiveRollModifier(p)).toBe(-2);
+    const p = { ...makePlayer(), effects: [fear, accuracy] };
+    expect(getActiveRollModifier(p)).toBe(-1);
   });
 });

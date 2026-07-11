@@ -66,6 +66,9 @@ export const VERB_POINTS = Object.freeze({
     expectedSouls: 4,
     /** Expected pips banked when a Forge payoff fires. */
     expectedPips: 2,
+    /** Expected chosen X on a chosen-X cost (`recoil_x`, WS7.2): min 3, cap ≈
+     *  live HP — a mid-fight commit prices at ~6. */
+    expectedChosenX: 6,
     /** Expected omen hits when an Oracle payoff fires. */
     expectedOmenHits: 2,
     /** Expected live enemy DoTs when a glue verb (extend/boost) fires. */
@@ -256,6 +259,12 @@ export function scoreMechanic(mechanic: CardSpecialMechanic): number {
         case 'spend_premises': return V.spendPremises;
         case 'spend_all_pips': return V.spendAllPips + (mechanic.guardPerPip ?? 0) * 0.5;
         case 'recoil': return -(mechanic.hp * V.healPerHp) * SELF_COST_CREDIT;
+        case 'recoil_x':
+            // Chosen X-cost: the payoff is the POISON landed at the expected X
+            // (ceil(X × poisonPerX) intensity, default duration); the blood
+            // price refunds the standard −0.75× self-cost credit at that X.
+            return statusPoints('debuff_poison', Math.ceil(V.expectedChosenX * mechanic.poisonPerX))
+                - V.expectedChosenX * V.healPerHp * SELF_COST_CREDIT;
         case 'extend_dots': return mechanic.turns * V.extendDotsPerTurn;
         case 'convert_dots': return V.convertDots + mechanic.bonusIntensity * V.bonusIntensity;
         case 'boost_all_dots': return mechanic.intensity * V.boostAllDotsPerIntensity;

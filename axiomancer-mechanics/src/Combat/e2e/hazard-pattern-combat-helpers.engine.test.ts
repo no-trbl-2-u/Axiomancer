@@ -484,10 +484,12 @@ describe('Spec 25 §4.5 — resolveThreatPhase', () => {
     });
 
     it('weakens (but does not deny) the threat when rollPenalty < THREAT_DENY_AT', () => {
-        const confusionEffect = lookupEffect('debuff_confusion')!;
+        // WS8.2 (spec 32 §12 #6): confusion moved off the roll surface — FEAR
+        // (-4) is the heavy roll carrier that weakens without denying.
+        const fearEffect = lookupEffect('debuff_fear')!;
         const player = makePlayer([DOT_BODY]);
         const enemy = makeEnemy(100, 'heart');
-        const { activeEffects: enemyEffects } = applyEffect(enemy.effects, confusionEffect, 1);
+        const { activeEffects: enemyEffects } = applyEffect(enemy.effects, fearEffect, 1);
 
         let baseState = initializeCombatEncounter(player, makeEnemy(100, 'heart'), undefined, SEED);
         baseState = rollEncounterDice(baseState).state;
@@ -505,12 +507,18 @@ describe('Spec 25 §4.5 — resolveThreatPhase', () => {
     });
 
     it('denies the threat via soft-control when rollPenalty >= THREAT_DENY_AT', () => {
-        const confusionEffect = lookupEffect('debuff_confusion')!;
+        // WS8.2: the cumulative roll-deny witness stacks the roll-surface
+        // carriers (fear -4 + knockdown -3 + slow -2 = 9 ≥ 8). All three share
+        // ONE DISRUPT surface, so this is the legacy penalty path, not the
+        // distinct-surface deny.
         const fearEffect = lookupEffect('debuff_fear')!;
+        const knockdownEffect = lookupEffect('debuff_knockdown')!;
+        const slowEffect = lookupEffect('debuff_slow')!;
         const player = makePlayer([DOT_BODY]);
         const enemy = makeEnemy(100, 'heart');
-        const { activeEffects: withConfusion } = applyEffect(enemy.effects, confusionEffect, 1);
-        const { activeEffects: enemyEffects } = applyEffect(withConfusion, fearEffect, 1);
+        const { activeEffects: withFear } = applyEffect(enemy.effects, fearEffect, 1);
+        const { activeEffects: withKnockdown } = applyEffect(withFear, knockdownEffect, 1);
+        const { activeEffects: enemyEffects } = applyEffect(withKnockdown, slowEffect, 1);
 
         let state = initializeCombatEncounter(player, { ...enemy, effects: enemyEffects }, undefined, SEED);
         state = rollEncounterDice(state).state;

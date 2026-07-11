@@ -119,8 +119,9 @@ const resonanceDetonation: Card = {
     targetType: 'enemy',
     // pts (DRASTIC late-stage rework, 2026-07-08 — deliberately overrides the
     // normal pricing curve per directive): RUPTURE alone caps at
-    // RUPTURE_BURST_CAP (80 HP) per cast, a hard global engine constant this
-    // card cannot raise. Even fully fueled, one 80-cap burst cannot close a
+    // ruptureBurstCap() per cast (WS7.1: a pure fraction of enemy max HP), a
+    // hard global engine rule this card cannot raise. Even fully fueled, one
+    // capped burst cannot close a
     // 1080-1500 HP late pool — the deck's real problem was never a single
     // cast's magnitude, it was ACCESS (only one copy) + TIMING (rupture wipes
     // your own DoT board, so rebuilding fuel for cast #2 was pure redraw luck
@@ -133,7 +134,7 @@ const resonanceDetonation: Card = {
     // instead of waiting on a natural redraw — this is the deck's real
     // second access route to its own payoff, without a second printed copy.
     // bonusPct 0.5 makes the FIRST detonation of a long fight (thinnest
-    // fuel) land closer to the 80 cap instead of undershooting it.
+    // fuel) land closer to the fraction cap instead of undershooting it.
     // This card is tier 3, and combat.stage-profiles.ts caps MID at
     // maxCardTier:2, so this rework is structurally late-stage-only — it
     // cannot leak into the mid-stage roster.
@@ -441,7 +442,7 @@ const theOvertake: Card = {
     // the RUPTURE deliberately ALSO consumes every enemy affliction (its whole
     // DoT board tears loose into the burst), so the finisher must land big to
     // be worth cashing your own DoTs; fuelPerPip 3.5 + bonusPct 0.5 push a
-    // fully-charged forge turn to the RUPTURE_BURST_CAP. + REFRESH own powering
+    // fully-charged forge turn to the ruptureBurstCap() fraction cap. + REFRESH own powering
     // die + FREE guard 2 -- top of the rank-5 Axiom band.
     //
     // CAVEAT (verified in combat.engine.ts): a FLOATING die is spent-and-gone-

@@ -132,6 +132,9 @@ const MECHANIC_KEYWORD: Record<string, string> = {
     spend_premises: 'Premise',
     // ── Akrasia ──
     recoil: 'Recoil',
+    // Chosen X-cost (WS7.2): same keyword family — the blood price, sized by
+    // the player at commit.
+    recoil_x: 'Recoil',
     // ── Harvest ──
     soul_gain: 'Soul',
     consume_affliction: 'Soul',
