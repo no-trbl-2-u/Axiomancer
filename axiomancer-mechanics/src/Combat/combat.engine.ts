@@ -901,6 +901,8 @@ function applyRiderToState(
     let guard = next.guard ?? 0;
 
     if (r.guard) guard += r.guard;
+    let barrier = next.barrier ?? 0;
+    if (r.barrier) barrier += r.barrier;
     if (r.conviction) conviction = Math.min(CONVICTION_CAP, conviction + r.conviction);
     if (r.healHp) {
         const healAmt = Math.round(r.healHp * getHealingReceivedMult(player));
@@ -908,6 +910,11 @@ function applyRiderToState(
             player = heal(player, healAmt);
             events.push({ kind: 'damage-dealt', cardId, target: 'self', amount: -healAmt });
         }
+    }
+    if (r.recoil) {
+        // AKRASIA — the printed blood price (unpreventable, mirrors the PAID 'recoil' mechanic).
+        player = applyDamage(player, r.recoil);
+        events.push({ kind: 'recoil-paid', cardId, amount: r.recoil });
     }
     if (r.cleanse) {
         let remaining = r.cleanse;
@@ -985,7 +992,7 @@ function applyRiderToState(
         }
     }
 
-    next = { ...next, player, enemy, directDamageDealt: directDamage, conviction, guard };
+    next = { ...next, player, enemy, directDamageDealt: directDamage, conviction, guard, barrier };
 
     if (r.foretell) next = applyForetell(next, r.foretell, events);
     if (r.drawCards) {
@@ -1002,12 +1009,34 @@ function applyRiderToState(
             events.push({ kind: 'hand-drawn', cards: draw.drawn });
         }
     }
+    if (r.millCards) {
+        // ECHO — advance the loop: cards go straight to discard, never to hand.
+        const mill = drawCombatCards(next.drawPile, next.discard, next.deck, r.millCards, rng);
+        next = { ...next, drawPile: mill.drawPile, discard: [...mill.discard, ...mill.drawn] };
+        events.push({ kind: 'cards-milled', cards: mill.drawn });
+    }
     if (r.souls) next = gainSouls(next, r.souls, 'granted', events);
     if (r.sway) next = gainSway(next, r.sway, events);
     if (r.premises) {
         const res = gainPremises(next, r.premises, events, rng);
         next = res.state;
         if (res.concede) next = { ...next, phase: 'complete', finalOutcome: 'concede' };
+    }
+    if (r.stagger) {
+        const total = (next.staggerRungs ?? 0) + r.stagger;
+        next = { ...next, staggerRungs: total };
+        events.push({ kind: 'staggered', rungs: r.stagger, total });
+    }
+    if (r.pips && (next.reserve ?? []).length > 0) {
+        let reserve = next.reserve ?? [];
+        for (let i = 0; i < r.pips; i++) {
+            const rp = ripenReserve(reserve);
+            reserve = rp.reserve;
+            for (const id of rp.ripenedIds) {
+                events.push({ kind: 'die-ripened', dieId: id, pips: reserve.find(d => d.id === id)?.pips ?? 0 });
+            }
+        }
+        next = { ...next, reserve };
     }
     return next;
 }

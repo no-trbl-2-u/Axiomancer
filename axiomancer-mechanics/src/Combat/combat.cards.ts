@@ -192,6 +192,9 @@ export function riderText(r: CardRider): string {
     if (r.intensityPerPip) parts.push(`+${r.intensityPerPip} intensity to one DoT per pip`);
     if (r.pips) parts.push(`+${r.pips} pip to every Reserve die`);
     if (r.stagger) parts.push(`STAGGER ${r.stagger}`);
+    if (r.barrier) parts.push(`GUARD ${r.barrier} (persists)`);
+    if (r.recoil) parts.push(`RECOIL ${r.recoil}`);
+    if (r.millCards) parts.push(`mill ${r.millCards} to discard`);
     return parts.join(' · ');
 }
 
