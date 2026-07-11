@@ -175,6 +175,7 @@ automation/                # standalone walkthrough script + replay fixtures
 
 ## Documentation
 
+- [`docs/narrative/STYLE_CONSTITUTION.md`](./docs/narrative/STYLE_CONSTITUTION.md) — narrative constitution, with linked voice registers, lexicon, anti-imitation safeguards, evaluation rubric, and encounter pilot
 - [`plan/steps/01_build_plan.md`](./plan/steps/01_build_plan.md) — phased development plan with progress tracking
 - [`docs/source-of-truth-hierarchy.md`](./docs/source-of-truth-hierarchy.md) — Nexus hierarchy for resolving T decisions, CDRs/ADRs, central ledger, build plans, candidates, critique/audit, and reports
 - [`plan/AUDIT.md`](./plan/AUDIT.md) — code audit and quality findings (drained by `/iterate`)
