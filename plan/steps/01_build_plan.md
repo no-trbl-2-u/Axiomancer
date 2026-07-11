@@ -294,13 +294,15 @@ order, intra-batch gates noted per phase):**
       `plan/tuning/2026-07-10-keyword-registry.md` — brief:
       `plan/phases/phase_29_keyword_registry.md`
       — `feat: keyword-language honesty pass — phase 29` (cc39fb5f)
-- [ ] Phase 30 — FREE Lines (70-card content pass). Rewrite every
+- [x] Phase 30 — FREE Lines (70-card content pass). Rewrite every
       FREE line to theme-currency verbs + FREE-currency lint +
       pricing re-arithmetic. Shape ratified 2026-07-10: Option A
       (constrain the fork) + weak-deposit `DRAW 1` kicker amendment;
       TICK dies in the same pass (mechanics; content-sized;
       `/deck-tuning` owns) — source:
-      `plan/tuning/2026-07-10-turn-texture.md` §1
+      `plan/tuning/2026-07-10-turn-texture.md` §1 — brief:
+      `plan/phases/phase_30_free_lines.md`
+      — `feat: FREE-currency law — 70-card content pass — phase 30` (5e723df3)
 - [ ] Phase 31 — The Roll and the Read. Momentum wheel engine-native
       (kills the host-side write; sims learn it), THE STAKE (pre-draft
       Conviction wager on the hidden stance, paid in floats), signature
