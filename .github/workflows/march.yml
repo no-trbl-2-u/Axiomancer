@@ -36,6 +36,9 @@ jobs:
     uses: ./.github/workflows/_claude-skill.yml
     secrets: inherit
     with:
+      extra_claude_args: |
+        -p
+        --dangerously-skip-permissions
       prompt: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.focus_phase != '' && format('/ship-a-phase phase {0}', github.event.inputs.focus_phase) || '/march' }}
       timeout_minutes: 90
       # /march can dispatch into /critique (rate-limited: ≥12 commits +

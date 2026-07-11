@@ -30,5 +30,8 @@ jobs:
     uses: ./.github/workflows/_claude-skill.yml
     secrets: inherit
     with:
+      extra_claude_args: |
+        -p
+        --dangerously-skip-permissions
       prompt: "/gathering-tuning"
       timeout_minutes: 90

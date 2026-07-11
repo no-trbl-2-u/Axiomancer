@@ -22,5 +22,8 @@ jobs:
     uses: ./.github/workflows/_claude-skill.yml
     secrets: inherit
     with:
+      extra_claude_args: |
+        -p
+        --dangerously-skip-permissions
       prompt: '/plan-a-phase'
       timeout_minutes: 45

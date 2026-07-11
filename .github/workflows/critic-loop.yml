@@ -25,6 +25,9 @@ jobs:
     uses: ./.github/workflows/_claude-skill.yml
     secrets: inherit
     with:
+      extra_claude_args: |
+        -p
+        --dangerously-skip-permissions
       prompt: "/critic-loop"
       timeout_minutes: 120
       install_playwright: true
