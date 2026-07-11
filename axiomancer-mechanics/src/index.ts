@@ -268,7 +268,10 @@ export {
     // Phase 142 — Extended synergy predicate functionality
     evaluateExtendedSynergyPredicate, checkSinglePredicate, checkAnyCountPredicate,
     checkAllRequiredPredicate, checkBuffDebuffCombo, checkTotalIntensityPredicate,
+    // Spec 32 §3/§6 — card themes + keyword families (phase 29 parity lint)
+    CARD_THEMES, THEME_KEYWORDS, keywordsForTheme, isCardTheme,
 } from './Cards';
+export type { CardTheme } from './Cards';
 
 // ─── Game (state, store, persistence, constants) ──────────────────────────────
 export {

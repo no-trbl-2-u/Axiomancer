@@ -1,16 +1,25 @@
 /**
- * Keyword registry — the player-facing combat vocabulary (spec 32 v3).
+ * Keyword registry — the player-facing combat vocabulary (spec 32 §3,
+ * amended 2026-07-11 by the Phase 29 language pass).
  *
- * 32 KEYWORDS (spec 32 v3 shipped 30: 10 shared utility + 2 hallmark per
- * theme). The card-honesty pass of 2026-07-10 added 2 more — FESTER and
- * TRANSMUTE — because two affliction-glue cards (`festering-argument`,
- * `currys-conversion`) drove mechanics (extend_dots / convert_dots) that had NO
- * keyword home, so they rendered the ambiguous "DEBUFF / buff yourself" face.
- * The doctrine is now "every mechanic is a terse, learnable KEYWORD" over "the
- * count is exactly 30" — a mechanic without a keyword here is the bug (see the
- * card-face-honesty guard test). The engine keeps its thematic effect names as
- * lore; this module is the PRESENTATION-layer mapping the board, card faces,
- * glossary, and combat log read instead. Pure + dependency-free.
+ * 30 KEYWORDS (down from a drifted 32 — the "exactly 30" directive yields
+ * to earned support: see `plan/tuning/2026-07-10-keyword-registry.md`).
+ * Phase 29 (`plan/phases/phase_29_keyword_registry.md`) folded six
+ * previously-unmapped debuff ids into registry keywords, renamed three
+ * colliding words (FESTER→PROLONG, TRANSMUTE→REARGUE, REPRISE→RECALL),
+ * retired/merged three ghosts (BARRIER into GUARD, CONJURE — zero library
+ * cards, PERORATION — demoted to card-local text on its sole carrier), and
+ * promoted one (SIPHON — was raw unglossed text). TICK and KINDLE are
+ * UNCHANGED this phase: TICK's retirement rides Phase 30's FREE-line
+ * rework, and KINDLE's fold-into-FORGE is conditional on Phase 30/32
+ * content work giving it more carriers — neither is a registry-honesty
+ * question this pass.
+ *
+ * The doctrine: "every mechanic is a terse, learnable KEYWORD" over "the
+ * count is exactly 30" — a mechanic without a keyword here is the bug (see
+ * the card-face-honesty guard test). The engine keeps its thematic effect
+ * names as lore; this module is the PRESENTATION-layer mapping the board,
+ * card faces, glossary, and combat log read instead. Pure + dependency-free.
  *
  * Why mobile-side: a player-facing label is presentation (ADR-0001/0003 — the
  * engine owns truth, mobile owns how it reads). Never rename engine effect ids
@@ -29,6 +38,19 @@ const EFFECT_KEYWORD: Record<string, string> = {
     debuff_backfire: 'Backfire',
     debuff_rapport: 'Rapport',
     buff_thorns: 'Thorns',
+    // ── KW-1 fold (phase 29): six DoT-species ids that had no keyword home
+    // and rendered the blank "◆ DIE" face. Presentation-only — none of the
+    // six effect payloads change; `debuff_backfire_acute` keeps its separate
+    // stacking track (a deliberate design feature on paralysis-of-analysis),
+    // only the printed word changes. ──
+    debuff_argument_wound: 'Poison',
+    debuff_echo_sting: 'Poison',
+    debuff_kindling_ember: 'Bleed',
+    debuff_nettle_sting: 'Bleed',
+    // tickAmplifyFlat:1 IS Mark's mechanical signature (+1 per stack each
+    // tick) — a closer semantic fit than Poison for this DoT+amplify hybrid.
+    debuff_foretold_wound: 'Mark',
+    debuff_backfire_acute: 'Backfire',
 };
 
 /**
@@ -68,7 +90,8 @@ const SUPPORT_KEYWORD: Record<string, string> = {
     buff_regeneration: 'Heal',
     buff_phoenix_vigor: 'Heal',
     buff_cleanse: 'Cleanse',
-    buff_barrier: 'Barrier',
+    // BARRIER merged into GUARD (KW-2, phase 29) — one card carried it.
+    buff_barrier: 'Guard',
     buff_damage_reduction: 'Guard',
     buff_defend_up: 'Guard',
     buff_minor_fortitude: 'Guard',
@@ -89,7 +112,7 @@ const SUPPORT_KEYWORD: Record<string, string> = {
     buff_evasion_up: 'Guard',
     buff_stealth: 'Guard',
     buff_taunt: 'Guard',
-    buff_invincibility: 'Barrier',
+    buff_invincibility: 'Guard',
     buff_open_minded: 'Cleanse',
     buff_resistance_body: 'Guard',
     buff_resistance_mind: 'Guard',
@@ -111,13 +134,24 @@ const VERB_KEYWORD: Record<string, string> = {
  * Special-mechanic kind → keyword (Title-Case). The MISSING half of the
  * vocabulary map: `EFFECT_KEYWORD` covers effect-backed cards (Poison / Mark /
  * …), but a card whose PAID identity is a `specialMechanics` verb (STAGGER,
- * SWAY, PERORATION, …) had no keyword resolution and fell through to the
- * ambiguous "DEBUFF / buff yourself" face. Every headline-able mechanic maps to
- * a real glossary keyword here so the face can always print `KEYWORD · value`.
+ * SWAY, …) had no keyword resolution and fell through to the ambiguous
+ * "DEBUFF / buff yourself" face. Every headline-able mechanic maps to a real
+ * glossary keyword here so the face can always print `KEYWORD · value`.
  *
- * Kinds handled by their OWN face kind (guard/barrier/riposte/rupture/reap/
- * siphon and the FORGE die-verb cluster) are intentionally absent — they never
+ * Kinds handled by their OWN face kind (guard/barrier/riposte/rupture/reap
+ * and the FORGE die-verb cluster) are intentionally absent — they never
  * reach the generic mechanic path.
+ *
+ * Phase 29 (KW-2/KW-3): `peroration` demoted (no keyword entry — its sole
+ * carrier, the-closing-word, prints "PERORATION at N" via `mechanicText`
+ * directly; the PREMISE gloss below explains the trigger). `consume_affliction`
+ * re-mapped Soul→Rupture (extends RUPTURE's printed sense instead of minting
+ * CONSUME). `reprise`→Recall, `extend_dots`/`boost_all_dots`→Prolong,
+ * `convert_dots`→Reargue (renames). `replay_last`→Echo mapping DELETED
+ * (ouroboros is a 1-of rare; `mechanicText`'s own case already gives it full
+ * descriptive text — no keyword badge needed). `conjure_card` DELETED
+ * (CONJURE retired — zero library cards). `siphon` PROMOTED to a real
+ * keyword (was raw lowercase text with no gloss).
  */
 const MECHANIC_KEYWORD: Record<string, string> = {
     // ── Control ──
@@ -128,38 +162,33 @@ const MECHANIC_KEYWORD: Record<string, string> = {
     omen: 'Omen',
     // ── Peroration ──
     premise: 'Premise',
-    peroration: 'Peroration',
     spend_premises: 'Premise',
     // ── Akrasia ──
     recoil: 'Recoil',
     // ── Harvest ──
     soul_gain: 'Soul',
-    consume_affliction: 'Soul',
+    consume_affliction: 'Rupture',
+    siphon: 'Siphon',
     // ── Charm ──
     sway: 'Sway',
     // ── Echo ──
     echo: 'Echo',
     echo_next_spell: 'Echo',
-    reprise: 'Reprise',
-    // replay_last replays your LAST spell (not this card's line) — same Echo
-    // family concept ("a spell resolves again"); the face heroSub names the
-    // target so it never reads as this card's own payoff firing twice.
-    replay_last: 'Echo',
-    // ── Conjuration ──
-    conjure_card: 'Conjure',
+    reprise: 'Recall',
     // ── Affliction glue ──
-    extend_dots: 'Fester',
-    convert_dots: 'Transmute',
-    boost_all_dots: 'Fester',
+    extend_dots: 'Prolong',
+    convert_dots: 'Reargue',
+    boost_all_dots: 'Prolong',
 };
 
 /**
  * Keyword → a short, general definition (the glossary rule). The card's own
- * numbers live on the face/preview; this explains the keyword. EXACTLY the 30
- * keywords of spec 32 v3 §3 (plus the two card-type labels).
+ * numbers live on the face/preview; this explains the keyword. The 30
+ * keywords of spec 32 §3 (amended by phase 29) plus the two card-type
+ * labels. TICK/KINDLE are unchanged this phase (see the module doc above).
  */
 const KEYWORD_GLOSS: Record<string, string> = {
-    // ── Utility (10) ──
+    // ── Utility (9) ──
     Draw: 'Immediately draw that many cards from your deck, up to your hand limit.',
     Forge:
         'Creates a FLOATING die — or converts a dead X die in your tray into a floating WILD die. '
@@ -167,10 +196,8 @@ const KEYWORD_GLOSS: Record<string, string> = {
         + 'carry across combats, and are gone forever when spent; at the cap of 3, Forge grants +1 Conviction instead.',
     Guard:
         'Absorbs incoming attack damage during the next threat phase, up to its amount. '
-        + 'One-shot: whatever Guard the phase does not use is lost when the phase ends.',
-    Barrier:
-        'Absorbs incoming attack damage after Guard is used up, until its amount is spent. '
-        + 'Persists across phases, and new Barrier adds to what remains.',
+        + 'One-shot: whatever Guard the phase does not use is lost when the phase ends — unless the card prints '
+        + '"persists", in which case it carries over untouched until it is spent.',
     Tick:
         'Your strongest damage-over-time effect on the enemy deals its per-round damage again, immediately. '
         + 'Its duration and stacks are unchanged.',
@@ -180,17 +207,16 @@ const KEYWORD_GLOSS: Record<string, string> = {
     Cleanse: 'Removes up to that many afflictions (debuffs) from you.',
     Heal: 'Restores that much VITAE (HP), up to your maximum.',
     Rupture:
-        'Consumes EVERY affliction on the enemy: their remaining damage-over-time detonates as one immediate burst, '
-        + 'plus 3 HP per stack of the consumed non-damage afflictions. '
+        'Consumes afflictions on the enemy — the printed number, or EVERY affliction on a finisher: their remaining '
+        + 'damage-over-time detonates as one immediate burst, plus 3 HP per stack of the consumed non-damage afflictions '
+        + '(consuming a single affliction this way also yields a Soul, on the cards that print it). '
         + "The burst is capped at a quarter of the enemy's max HP (or 80, whichever is larger).",
-    Conjure:
-        'Creates a one-use Thoughtform card in your hand. '
-        + 'It is removed from the combat after it is played, or when the combat ends.',
+    Siphon: 'Heals you for the printed percentage of the HP this play deals to the enemy.',
     // ── Affliction (T1) ──
-    Fester:
+    Prolong:
         'Adds that many turns of duration to EVERY damage-over-time effect you '
         + 'have on the enemy — the wounds you have already opened simply run longer.',
-    Transmute:
+    Reargue:
         'Converts the enemy’s Bleed into Poison and its Poison into Bleed, '
         + 'and adds that much intensity to each as it flips — the same wound, re-argued.',
     Poison:
@@ -200,10 +226,9 @@ const KEYWORD_GLOSS: Record<string, string> = {
     // ── Peroration (T2) ──
     Premise:
         'A persistent tally your cards add to. '
-        + "When it reaches a declared Peroration's number, the Peroration fires and the tally resets to 0.",
-    Peroration:
-        'A declared conclusion, one in play at a time: its printed effect fires FREE the moment your Premise tally reaches its number, then the tally resets to 0. '
-        + 'A concede-line Peroration instead ends the fight outright — at 8 Premises against normal enemies, 10 against elites, 12 against bosses.',
+        + 'When it reaches a declared conclusion (a Peroration) — printed on the card that carries it — the '
+        + 'conclusion fires FREE and the tally resets to 0. A concede-line conclusion instead ends the fight outright '
+        + '— at 8 Premises against normal enemies, 10 against elites, 12 against bosses.',
     // ── Forge (T3) ──
     Kindle:
         'Creates a temporary die of the printed color (this combat only); it joins your Reserve with 0 pips. '
@@ -212,7 +237,7 @@ const KEYWORD_GLOSS: Record<string, string> = {
         'A charge on a Reserve die: each die ripens +1 pip per threat phase it survives, to a max of 2. '
         + 'When the die is spent, each pip adds +1 intensity to the statuses that play lands — or +2 Guard on a defend card.',
     // ── Akrasia (T4) ──
-    Recoil: 'Pay the printed HP (VITAE) as a cost when the card is played. Guard, Barrier, and defenses cannot prevent it.',
+    Recoil: 'Pay the printed HP (VITAE) as a cost when the card is played. Guard and other defenses cannot prevent it.',
     Fallen:
         'A state: you carry 2 or more DIFFERENT afflictions of your own. '
         + "A card's FALLEN line fires free if you are Fallen at the moment you play it.",
@@ -245,13 +270,13 @@ const KEYWORD_GLOSS: Record<string, string> = {
         'Each threat phase in which the enemy attacks you, it takes 1 HP per Thorns stack — even if the attack was fully blocked.',
     Riposte:
         'Armed for one threat phase: the first incoming attack is reduced by the printed parry amount, '
-        + 'and if your Guard or Barrier FULLY blocks an attack this phase, the enemy takes the printed counter damage. '
+        + 'and if your Guard FULLY blocks an attack this phase, the enemy takes the printed counter damage. '
         + 'Cleared when the phase ends.',
     // ── Echo (T10) ──
     Echo:
-        "The card's PAID line fires twice: its statuses apply a second time, and its Premise, Sway, Soul, and Reprise amounts are doubled. "
+        "The card's PAID line fires twice: its statuses apply a second time, and its Premise, Sway, Soul, and Recall amounts are doubled. "
         + 'FREE lines never echo.',
-    Reprise: 'Returns that many cards from your discard pile to your hand — the highest-rank cards are chosen.',
+    Recall: 'Returns that many cards from your discard pile to your hand — the highest-rank cards are chosen.',
     // ── Card types (labels, not keywords) ──
     Enchantment:
         'A passive on your side. Played FREE (no die) it lasts 3 rounds; '
@@ -267,8 +292,8 @@ const KEYWORD_GLOSS: Record<string, string> = {
  */
 export const ARCHETYPE_KEYWORDS: Record<string, string[]> = {
     bleeder: ['Poison', 'Bleed', 'Tick', 'Rupture', 'Soul', 'Reap', 'Recoil', 'Fallen'],
-    guardian: ['Guard', 'Barrier', 'Thorns', 'Riposte', 'Heal', 'Cleanse', 'Rapport', 'Sway'],
-    controller: ['Stagger', 'Backfire', 'Mark', 'Foretell', 'Omen', 'Premise', 'Peroration', 'Echo', 'Reprise'],
+    guardian: ['Guard', 'Thorns', 'Riposte', 'Heal', 'Cleanse', 'Rapport', 'Sway'],
+    controller: ['Stagger', 'Backfire', 'Mark', 'Foretell', 'Omen', 'Premise', 'Echo', 'Recall'],
 };
 
 /** The keyword for an engine effect id, or null if unmapped. */
@@ -295,6 +320,30 @@ export function keywordGloss(keyword: string | null | undefined): string | null 
     if (!keyword) return null;
     return KEYWORD_GLOSS[keyword] ?? null;
 }
+
+/** Every registered keyword name (Title-Case), including the two card-type
+ *  labels. The KW-6/KW-1/KW-5 lints (phase 29) assert against this list —
+ *  it IS the registry, not a copy of it. */
+export function allRegistryKeywords(): readonly string[] {
+    return Object.keys(KEYWORD_GLOSS);
+}
+
+/**
+ * KW-7 (phase 29) — the "systems glossary": engine tokens spec 32 §3 calls
+ * out as "systems, not card keywords" (Conviction, Resonance, Reserve/Pips,
+ * Floating dice, rungs, WILD/X) but that the player still reads on cards and
+ * threshold lines with no definition anywhere. Rendered once in the combat
+ * card detail overlay, beside the color-law legend — the same anchor point,
+ * zero engine work.
+ */
+export const SYSTEM_GLOSSARY: readonly { term: string; def: string }[] = [
+    { term: 'CONVICTION ◆', def: 'A spend-anytime resource banked from overflow (Forge at cap, Overtake, signature costs). Never decays.' },
+    { term: 'RESONANCE ⬡', def: 'A per-round tally of dice spent by color. Threshold lines ("⬡ MIND ×3 spent") fire once the tally is reached that round.' },
+    { term: 'RESERVE & PIPS', def: 'Up to 2 dice held between phases instead of played. Each Reserve die ripens +1 pip per phase it survives (cap 2); pips add intensity or Guard when the die is finally spent.' },
+    { term: 'FLOATING ✦', def: 'A die forged into the tray permanently: plays alongside your drafted die, never rerolls, carries across combats, gone forever when spent.' },
+    { term: 'RUNGS', def: "The enemy's telegraphed action's steps of magnitude. STAGGER removes rungs; losing all of them denies the action outright." },
+    { term: 'WILD / X', def: 'A WILD die counts as any color for dieBonus and card requirements. A dead X die rolled no pips this round and can be Forged into a WILD floating die instead.' },
+];
 
 /** True if a keyword belongs to the given hidden archetype's family. */
 export function keywordInArchetype(keyword: string | null | undefined, archetype: string | null | undefined): boolean {

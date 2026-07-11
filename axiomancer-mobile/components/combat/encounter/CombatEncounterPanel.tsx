@@ -36,6 +36,7 @@ import {
 } from '@mechanics';
 
 import { advanceWheel, isMomentumDieId, isWheelStance, momentumDieId, type WheelStance } from '@/state/combat/momentum';
+import { SYSTEM_GLOSSARY } from '@/state/combat/keywords';
 
 import { CombatBoard, CombatCardFace, HAND_CARD_W, HAND_CARD_H, type DragController, type DragPayload } from '@/components/combat/encounter/CombatBoard';
 import { type CombatFx } from '@/components/combat/encounter/CombatCombatantPane';
@@ -649,6 +650,20 @@ export function CombatEncounterPanel({
                             {/* the colour law — ONE global legend (was boilerplated onto every card) */}
                             <Text style={styles.detailColorMatch}>{detailCard.detail.colorMatchHint}</Text>
 
+                            {/* KW-7 (phase 29) — the systems glossary: engine tokens the player
+                                reads on cards (Conviction, Resonance, Reserve/Pips, Floating,
+                                rungs, WILD/X) but that spec 32 §3 explicitly keeps OUT of the
+                                card-keyword registry. Same anchor point as the colour-law legend
+                                above — the overlay is where mid-fight questions get answered. */}
+                            <View style={styles.systemsGlossary}>
+                                {SYSTEM_GLOSSARY.map(s => (
+                                    <Text key={s.term} style={styles.systemsGlossaryLine}>
+                                        <Text style={styles.systemsGlossaryTerm}>{s.term}</Text>
+                                        {' — ' + s.def}
+                                    </Text>
+                                ))}
+                            </View>
+
                             {/* (4) FLAVOR — authored prose, overlay BOTTOM only (owner
                                 directive 2026-07-09: the face stays purely functional). */}
                             {detailCard.flavor ? (
@@ -967,6 +982,10 @@ const useStyles = makeStyles((AXM) => ({
     detailPillKw: { fontFamily: FONTS.gothic, fontSize: 13, letterSpacing: 0.5 },
     detailPillVal: { flex: 1, fontFamily: FONTS.mono, fontSize: 12.5, color: AXM.parchment, letterSpacing: 0.2 },
     detailColorMatch: { alignSelf: 'stretch', fontFamily: FONTS.sans, fontSize: 9, letterSpacing: 1.6, color: AXM.bone, opacity: 0.6, lineHeight: 14, marginBottom: 4, textAlign: 'center' },
+    // KW-7 (phase 29) — systems glossary (Conviction/Resonance/Reserve+Pips/Floating/rungs/WILD-X).
+    systemsGlossary: { alignSelf: 'stretch', marginTop: 6, marginBottom: 4, paddingTop: 6, borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.08)' },
+    systemsGlossaryLine: { fontFamily: FONTS.sans, fontSize: 9.5, color: AXM.bone, opacity: 0.65, lineHeight: 15, marginBottom: 3 },
+    systemsGlossaryTerm: { fontFamily: FONTS.sans, fontSize: 9.5, letterSpacing: 1, color: AXM.ash, opacity: 1 },
     detailFlavor: { alignSelf: 'stretch', fontFamily: FONTS.serifItalic, fontStyle: 'italic', fontSize: 12, color: AXM.bone, opacity: 0.75, lineHeight: 17, marginTop: 10, textAlign: 'center' },
     detailReadNote: { fontFamily: FONTS.serifItalic, fontStyle: 'italic', fontSize: 11, color: AXM.bone, lineHeight: 15 },
     detailLine: { fontFamily: FONTS.serif, fontSize: 13, color: AXM.parchment, lineHeight: 18 },

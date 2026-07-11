@@ -72,10 +72,13 @@ by 9 card-instances across 7 cards, but resolve to `null` from
      false CLEANSE claim, harvest drops the false RUPTURE claim, bulwark
      drops BARRIER (merged), peroration drops PERORATION (demoted), echo
      swaps REPRISE→RECALL and drops CONJURE (retired).
-   - Net: 32 registered keywords → **27** (matches the evidence doc's
-     target exactly). KINDLE is NOT folded this phase — its "≥3 carriers"
-     bar is a Phase-30/32 FREE-line-content question, not a registry
-     question; touching it now would be scope creep into content work.
+   - Net: 32 registered keywords → **30** (−3 retired/merged: BARRIER,
+     CONJURE, PERORATION; +1 promoted: SIPHON). This is short of the
+     evidence doc's aggressive 27-keyword target because that target also
+     folds TICK (−1, explicitly deferred to phase 30) and conditionally
+     KINDLE (−1, its "≥3 carriers" bar is a Phase-30/32 FREE-line-content
+     question, not a registry-honesty one — touching it now would be scope
+     creep into content work this phase doesn't own).
 4. **KW-6 "single-source"** is scoped to a **parity lint**, not a module
    move. `keywords.ts`'s own docstring declares it "pure + dependency-free"
    by design (ADR-0001/0003: engine owns truth, mobile owns how it reads;
@@ -101,16 +104,16 @@ by 9 card-instances across 7 cards, but resolve to `null` from
    responded). Per the doc's own rule ("no receipt, no entry"), only
    receipts already surfaced with citations in
    `cross-prior-art.md` are backfilled (POISON, STAGGER, SWAY, SOUL, REAP,
-   FALLEN, RECOIL, ECHO — 8 new + the existing BLEED = 9 of 27 rows). The
-   remaining rows keep `—` with a one-line note pointing at a follow-up KB
-   pass rather than inventing analogues.
+   FALLEN, RECOIL, ECHO — 8 new + the existing BLEED = 9 of the atlas's
+   rows). The remaining rows keep `—` with a one-line note pointing at a
+   follow-up KB pass rather than inventing analogues.
 
 ## Acceptance
 
 - No card renders a blank "◆ DIE" face for the six debuff ids (unit test:
   every `debuffs.library.json` id used by `cards.library.ts` resolves via
   `keywordForEffect`/`keywordForMechanic`).
-- `KEYWORD_GLOSS` key count drops from 34 (32 + 2 labels) to 29 (27 + 2
+- `KEYWORD_GLOSS` key count drops from 34 (32 + 2 labels) to 32 (30 + 2
   labels); a test pins the exact count so silent drift is caught.
 - Parity test: every `THEME_KEYWORDS` entry (mechanics) resolves in
   mobile's glossary.

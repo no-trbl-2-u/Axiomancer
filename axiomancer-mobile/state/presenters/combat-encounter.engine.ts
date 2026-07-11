@@ -866,9 +866,11 @@ function cardCalc(card: CombatCard, sourceCard: Card | undefined): CardCalc {
             break;
         }
         case 'barrier': {
+            // KW-2 (phase 29): BARRIER merged into GUARD — the one card that
+            // carries it (the-adamant-wall) now headlines GUARD, "persists".
             const m = pr.mech?.kind === 'barrier' ? pr.mech : undefined;
             out.barrierAmt = m?.amount ?? 0;
-            out.keyword = 'Barrier'; out.glyph = '⬡'; out.categoryColor = GUARD_COLOR;
+            out.keyword = 'Guard'; out.glyph = '⬡'; out.categoryColor = GUARD_COLOR;
             break;
         }
         case 'riposte': {
@@ -963,7 +965,7 @@ function forgeClause(mech: CardSpecialMechanic | null): string | null {
  *  of falling through to the ambiguous "DEBUFF / buff yourself" fallback.
  *  `keyword` is Title-Case (matches the glossary); returns null for kinds with
  *  no player headline (pure die-plumbing riders never reach here as primary). */
-interface MechHeadline { keyword: string; heroText: string; heroSub: string | null; verbLine: string }
+interface MechHeadline { keyword: string | null; heroText: string; heroSub: string | null; verbLine: string }
 function mechanicHeadline(mech: CardSpecialMechanic | null): MechHeadline | null {
     if (!mech) return null;
     const kw = keywordForMechanic(mech.kind);
@@ -975,7 +977,10 @@ function mechanicHeadline(mech: CardSpecialMechanic | null): MechHeadline | null
         case 'sway':
             return { keyword: kw ?? 'Sway', heroText: `+${mech.amount}`, heroSub: 'toward capitulation', verbLine: 'push the foe toward capitulation' };
         case 'peroration':
-            return { keyword: kw ?? 'Peroration', heroText: `at ${mech.at}`, heroSub: mech.concedeAt ? `concede at ${mech.concedeAt}` : 'fires free', verbLine: 'a declared conclusion that fires on your Premise tally' };
+            // KW-2 (phase 29): PERORATION demoted — its sole carrier
+            // (the-closing-word) headlines under PREMISE, the keyword whose
+            // gloss already explains the payoff-trigger mechanic.
+            return { keyword: kw ?? 'Premise', heroText: `at ${mech.at}`, heroSub: mech.concedeAt ? `concede at ${mech.concedeAt}` : 'fires free', verbLine: 'a declared conclusion that fires on your Premise tally' };
         case 'premise':
             return { keyword: kw ?? 'Premise', heroText: `+${mech.count}`, heroSub: 'to the tally', verbLine: 'add to your Premise tally' };
         case 'spend_premises':
@@ -987,25 +992,29 @@ function mechanicHeadline(mech: CardSpecialMechanic | null): MechHeadline | null
         case 'soul_gain':
             return { keyword: kw ?? 'Soul', heroText: `+${mech.count}`, heroSub: `Soul${mech.count === 1 ? '' : 's'}`, verbLine: 'gain Souls' };
         case 'consume_affliction':
-            return { keyword: kw ?? 'Soul', heroText: `+${mech.souls}`, heroSub: `Soul${mech.souls === 1 ? '' : 's'} · consume 1 affliction`, verbLine: 'consume an affliction — its fuel ticks now — for Souls' };
+            // KW-2 (phase 29): re-mapped Soul→Rupture — extends RUPTURE's
+            // printed sense ("consume N afflictions") instead of a redundant
+            // CONSUME word; the Soul gain stays a printed rider.
+            return { keyword: kw ?? 'Rupture', heroText: `+${mech.souls}`, heroSub: `Soul${mech.souls === 1 ? '' : 's'} · consume 1 affliction`, verbLine: 'consume an affliction — its fuel ticks now — for Souls' };
         case 'reprise':
-            return { keyword: kw ?? 'Reprise', heroText: `${mech.count}`, heroSub: mech.fireFree ? 'from discard · fires free' : 'from discard', verbLine: 'return your highest-rank discards to hand' };
+            return { keyword: kw ?? 'Recall', heroText: `${mech.count}`, heroSub: mech.fireFree ? 'from discard · fires free' : 'from discard', verbLine: 'return your highest-rank discards to hand' };
         case 'echo':
             return { keyword: kw ?? 'Echo', heroText: '', heroSub: 'paid line fires twice', verbLine: 'the paid line fires twice' };
         case 'echo_next_spell':
             return { keyword: kw ?? 'Echo', heroText: '', heroSub: 'your next spell', verbLine: 'your next spell this turn gains Echo' };
         case 'replay_last':
-            return { keyword: kw ?? 'Echo', heroText: `×${mech.times}`, heroSub: 'your last spell', verbLine: 'your last spell resolves again' };
-        case 'conjure_card':
-            return { keyword: kw ?? 'Conjure', heroText: '', heroSub: 'a Thoughtform', verbLine: 'create a one-use Thoughtform card' };
+            // KW-3 (phase 29): the replay_last→Echo mapping is deleted —
+            // ouroboros (its sole, 1-of-rare carrier) gets no keyword badge;
+            // this heroText/heroSub still carry its card-local rules text.
+            return { keyword: kw ?? null, heroText: `×${mech.times}`, heroSub: 'your last spell', verbLine: 'your last spell resolves again' };
         case 'recoil':
             return { keyword: kw ?? 'Recoil', heroText: `${mech.hp}`, heroSub: 'VITAE cost', verbLine: 'pay VITAE as an unpreventable cost' };
         case 'extend_dots':
-            return { keyword: kw ?? 'Fester', heroText: `+${mech.turns}`, heroSub: 'turns · all your DoTs', verbLine: 'extend every damage-over-time you hold on the foe' };
+            return { keyword: kw ?? 'Prolong', heroText: `+${mech.turns}`, heroSub: 'turns · all your DoTs', verbLine: 'extend every damage-over-time you hold on the foe' };
         case 'boost_all_dots':
-            return { keyword: kw ?? 'Fester', heroText: `+${mech.intensity}`, heroSub: 'intensity · all DoTs', verbLine: "amplify every affliction on the foe" };
+            return { keyword: kw ?? 'Prolong', heroText: `+${mech.intensity}`, heroSub: 'intensity · all DoTs', verbLine: "amplify every affliction on the foe" };
         case 'convert_dots':
-            return { keyword: kw ?? 'Transmute', heroText: `+${mech.bonusIntensity}`, heroSub: 'intensity · bleed ↔ poison', verbLine: "flip the foe's Bleed and Poison, each landing harder" };
+            return { keyword: kw ?? 'Reargue', heroText: `+${mech.bonusIntensity}`, heroSub: 'intensity · bleed ↔ poison', verbLine: "flip the foe's Bleed and Poison, each landing harder" };
         case 'strip_random_buff':
             return { keyword: 'Cleanse', heroText: '', heroSub: mech.appliedTo === 'enemy' ? 'strip a foe buff' : 'strip a buff', verbLine: 'strip a random buff' };
         case 'rider': {
@@ -1027,7 +1036,7 @@ const MECH_HEADLINE_PRIORITY: readonly string[] = [
     'peroration', 'sway', 'stagger', 'lock_stance', 'reprise', 'replay_last',
     'omen', 'consume_affliction', 'soul_gain', 'spend_premises', 'premise',
     'foretell', 'extend_dots', 'convert_dots', 'boost_all_dots', 'recoil',
-    'conjure_card', 'strip_random_buff', 'echo', 'echo_next_spell', 'rider',
+    'strip_random_buff', 'echo', 'echo_next_spell', 'rider',
 ];
 
 /** The single mechanic a card should headline (highest-priority headline-able
@@ -1090,7 +1099,7 @@ export function faceStats(card: CombatCard, sourceCard?: Card): CombatCardFaceVM
         case 'overextended': return { ...base, kind: 'overextended', keyword: kw, heroText: '', heroSub: 'your next play is weakened', freeHeroText: free, freeHeroSub: null, verbLine: 'a self-cost: your next play is forced to weak tier', powerRail: c.keyword ?? 'Overextended', readDependent: false, inert: false, guardBase: null };
         case 'clarity': return { ...base, kind: 'clarity', keyword: kw, heroText: 'WILD', heroSub: 'next die', freeHeroText: free, freeHeroSub: null, verbLine: 'your next die counts as Wild', powerRail: c.keyword ?? 'Clarity', readDependent: false, inert: false, guardBase: null };
         case 'resolute': return { ...base, kind: 'resolute', keyword: kw, heroText: `${c.resolutePct}%`, heroSub: `dmg taken · ${c.turns} turns`, freeHeroText: free, freeHeroSub: null, verbLine: 'you take less damage', powerRail: c.keyword ?? 'Resolute', readDependent: false, inert: false, guardBase: null, statusBase: c.resolutePct };
-        case 'barrier': return { ...base, kind: 'barrier', keyword: 'BARRIER', heroText: `Soak ${c.barrierAmt}`, heroSub: 'stacks', freeHeroText: free, freeHeroSub: null, verbLine: 'soak incoming damage', powerRail: c.keyword ?? 'Barrier', readDependent: false, inert: false, guardBase: null };
+        case 'barrier': return { ...base, kind: 'barrier', keyword: 'GUARD', heroText: `Guard ${c.barrierAmt}`, heroSub: 'persists', freeHeroText: free, freeHeroSub: null, verbLine: 'soak incoming damage', powerRail: c.keyword ?? 'Guard', readDependent: false, inert: false, guardBase: null };
         case 'riposte': return { ...base, kind: 'riposte', keyword: 'RIPOSTE', heroText: `CTR ${c.riposteDmg} · CUT ${c.riposteReduce}`, heroSub: 'counter · reduce', freeHeroText: free, freeHeroSub: null, verbLine: 'counter the next hit', powerRail: c.keyword ?? 'Riposte', readDependent: false, inert: false, guardBase: null };
         case 'siphon': return { ...base, kind: 'siphon', keyword: 'SIPHON', heroText: `Heal ${c.siphonPct}%`, heroSub: 'of the burst', freeHeroText: free, freeHeroSub: null, verbLine: 'heal from the harm you cash in', powerRail: c.keyword ?? 'Siphon', readDependent: false, inert: false, guardBase: null };
         case 'rupture': return { ...base, kind: 'rupture', keyword: 'RUPTURE', heroText: 'detonate', heroSub: 'all afflictions', freeHeroText: free, freeHeroSub: null, verbLine: "consume the foe's afflictions and detonate them", powerRail: c.keyword ?? 'Rupture', readDependent: false, inert: false, guardBase: null };
