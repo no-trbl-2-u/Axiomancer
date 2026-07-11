@@ -172,7 +172,6 @@ export type SignatureSkillKind =
     | 'control'        // apply a control debuff to the enemy (hinders its turn)
     | 'dot'            // guaranteed DoT application at boosted intensity
     | 'mercy'          // disarming hit that softens a low-HP foe toward mercy (heart)
-    | 'strike'         // big DoT + refreshes the drafted die for a chain (body)
     | 'conclude'       // finisher: damage = sum of (intensity × per-stack weight) across all enemy effects (body)
     | 'draw';          // draw cards + refund Conviction (mind economy)
 

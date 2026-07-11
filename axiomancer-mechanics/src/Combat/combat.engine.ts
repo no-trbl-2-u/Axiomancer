@@ -2,12 +2,14 @@
  * Spec 25 — Hazard-Pattern Combat: the engine (§4, §9).
  *
  * `resolveCombatPhase` drives the HP-model combat: the enemy's SOLE bar is HP,
- * and the player drops it to 0. Every verb is a combat card (projected from a learned card); the player rolls
- * stance dice and plays cards, where STATUS effects are the efficient damage
- * (DoT erodes HP; control hinders the enemy's turn) and a raw strike is the weak
- * baseline. The legacy resolver, the effects engine, the card engine, and all
- * effects are UNCHANGED — this engine *drives* `executeCard` / `applyEffect`
- * differently.
+ * and the player drops it to 0. Every verb is a combat card (projected from a
+ * learned card); the player rolls stance dice and plays cards. Combat is
+ * STATUS-FIRST — the strike is dead (spec 32 §12): every point of enemy HP
+ * falls through a printed status or its payoff (DoT ticks, affliction bursts
+ * like RUPTURE/REAP, ratified enchant-gated drips, reflect), never because a
+ * spell "hit". Control hinders the enemy's turn instead. The legacy resolver,
+ * the effects engine, the card engine, and all effects are UNCHANGED — this
+ * engine *drives* `executeCard` / `applyEffect` differently.
  *
  * Card bottom actions execute through the unchanged `executeCard`: the drafted
  * stance die is the card's whole cost — combat cards carry no resource cost.
@@ -72,10 +74,14 @@ import type {
 /** Safety cap on total phases processed — prevents a degenerate stalemate loop. */
 const MAX_PHASES = 60;
 
-// ── Read & color-match tuning (now scale the strike's HP damage) ─────────────
+// ── Read & color-match tuning (scales STATUS payoffs, guard, and riposte) ────
+// Status-first combat (spec 32 §12): these knobs never price a raw hit — the
+// read multiplier scales the printed status payoffs (RUPTURE fuel, REAP bursts)
+// and the defensive setups (guard/barrier/riposte magnitudes).
 
-/** Strike-damage multipliers by stance-read result (drafted die vs hidden enemy
- *  stance). Winning the read hits harder; losing it glances. */
+/** Read multipliers by stance-read result (drafted die vs hidden enemy
+ *  stance). Winning the read makes payoffs/setups bite harder; losing it
+ *  glances. */
 export const READ_DAMAGE_MULT: Record<CombatReadResult, number> = {
     advantage: 1.5, neutral: 1.0, disadvantage: 0.5, none: 1.0,
 };
@@ -214,7 +220,7 @@ export function getCard(cardId: string): CombatCard | null {
     return toCombatCard(cardId, lookupCard, lookupEffectDef);
 }
 
-// ── RPS advantage — per-phase die-cost scaling (§4.8) ────────────────────────
+// ── RPS advantage — legacy die-cost classifier + the live read (§4.8) ────────
 
 /** Heart > Body > Mind > Heart. True if stance `a` beats stance `b`. */
 export function stanceBeats(a: Stance, b: Stance): boolean {
@@ -229,9 +235,17 @@ export interface CardDieCost {
 }
 
 /**
- * Resolves the die cost of a card's bottom action against the current enemy
- * phase stance (§4.8). Advantage → free (0 dice). Neutral → 1 die. Disadvantage
- * → 2 dice. Wild cards are always neutral.
+ * LEGACY die-cost classifier (spec 25 §4.8 — RPS advantage). Maps a card color
+ * against the enemy's phase stance onto the historical 0/1/2-die price
+ * (advantage → 0, neutral → 1, disadvantage → 2; Wild/X → neutral). NO play
+ * path charges this price any more: play legality and the actual die COST are
+ * owned by THE COLOR LAW inside `playCombatCard` (~:1150 — a die powers only a
+ * card of its color; WILD is the sole exception), and the read's power scaling
+ * lives in `READ_DAMAGE_MULT`. This function survives ONLY as the
+ * advantage-read classifier behind `cardDieCostPreview` (the UI/CLI RPS
+ * indicator): consumers should read `advantage` and ignore `cost`.
+ * Deprecated on the public barrels (`src/Combat/index.ts`, `src/index.ts`);
+ * kept because barrel removal is a semver-major phase.
  */
 export function resolveCardDieCost(cardColor: CombatDieColor, enemyPhaseStance: Stance): CardDieCost {
     if (cardColor === 'wild' || cardColor === 'x') return { cost: 1, advantage: 'neutral' };
@@ -3010,7 +3024,15 @@ export function handCards(state: CombatEncounterState): Array<{ uid: string; car
         .filter((x): x is { uid: string; card: CombatCard } => x.card !== null);
 }
 
-/** Die-cost preview for a card against the current phase (RPS indicator, §7.3). */
+/**
+ * Advantage-read preview for a card against the current phase (RPS indicator,
+ * spec 25 §4.8 / §7.3) — the state-curried wrapper over the legacy classifier
+ * `resolveCardDieCost`. It owns the READ surface only: the `advantage` label
+ * for a hand renderer (today's sole consumer is the mechanics CLI). The `cost`
+ * field is historical — play legality and the real die COST are owned by
+ * THE COLOR LAW inside `playCombatCard`. Deprecated on the public barrels
+ * alongside `resolveCardDieCost`.
+ */
 export function cardDieCostPreview(state: CombatEncounterState, card: CombatCard): CardDieCost {
     return resolveCardDieCost(card.stance, currentPhaseStance(state));
 }

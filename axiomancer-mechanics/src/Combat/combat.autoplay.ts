@@ -67,7 +67,7 @@ const bestAutoSignature = (s: CombatEncounterState): string | null => {
     for (const id of s.signatures) {
         const sig = getSignatureSkill(id);
         if (!sig || s.conviction < sig.cost) continue;
-        if (['dot', 'strike', 'control'].includes(sig.kind)) return id;
+        if (['dot', 'control'].includes(sig.kind)) return id;
     }
     return null;
 };

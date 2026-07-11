@@ -41,18 +41,19 @@
  * | (c) alternate-outcome consequence | :2949 mercy-exploit
  * |   `max(10, 0.5 × maxHP)` (Phase 108 — legal only from the mercy screen) |
  * | (d) signature | combat.signature.ts:158 Conclusion per-stack
- * |   (`CONCLUDE_DMG_PER_STACK = 2`, :96) · :190-191 the strike/mercy HP
- * |   branch |
- * | (e) legacy contradiction | engine header line 7 + comment block ~75; the
- * |   `strike` kind arm (combat.signature.ts:189-197) + `STRIKE_DAMAGE_MULT
- * |   = 3` (:93) — NO shipped signature has kind `strike` (plan §0.1 C-4) |
+ * |   (`CONCLUDE_DMG_PER_STACK = 2`, :96) · the mercy flat-magnitude HP
+ * |   branch in the control/dot/mercy arm |
+ * | (e) legacy contradiction | DELETED by WS0.2 (2026-07-11): the `strike`
+ * |   signature arm, `STRIKE_DAMAGE_MULT`, and the `'strike'` member of
+ * |   `SignatureSkillKind` are gone; the engine header + read-tuning banner
+ * |   now describe status-first combat (spec 32 §12). NO shipped signature
+ * |   ever had kind `strike` (plan §0.1 C-4) |
  * | player-directed (not doctrine-relevant) | :1313 fate recoil · :1447
  * |   RECOIL · :2341 enemy attack |
  *
- * WS0.2 ([owner-call], pending) ratifies classes (a)-(d) in spec 32 §12 and
- * DELETES class (e) — the `strike` signature arm, `STRIKE_DAMAGE_MULT`, and
- * the `'strike'` member of `SignatureSkillKind`. When that lands, the class-e
- * allowlist entries and presence witnesses below shrink to zero.
+ * WS0.2 (landed 2026-07-11) ratifies classes (a)-(d) in spec 32 §12 and
+ * deleted class (e). The class-e allowlist entries and the pre-ratification
+ * presence witnesses were removed with it.
  *
  * Fixture/RNG conventions follow `card-effectiveness.engine.test.ts` (shared
  * builder in `src/test-utils/card-fixture.ts`, `mockSequentialRng(0.5)`,
@@ -141,8 +142,10 @@ describe('doctrine witness — no card PAID line chips a clean enemy', () => {
 // ── Witness 2: only ratified signature kinds change enemy HP ─────────────────
 
 describe('doctrine witness — signature skills', () => {
-    it("no shipped signature carries kind 'strike' (plan §0.1 C-4 — the arm is dead vocabulary)", () => {
-        expect(SIGNATURE_SKILL_LIST.some(s => s.kind === 'strike')).toBe(false);
+    it("no shipped signature carries kind 'strike' (plan §0.1 C-4 — WS0.2 removed the union member; cast-widened runtime witness)", () => {
+        // `'strike'` is no longer a `SignatureSkillKind`, so the comparison
+        // needs a widening cast — which is itself the type-level witness.
+        expect(SIGNATURE_SKILL_LIST.some(s => (s.kind as string) === 'strike')).toBe(false);
     });
 
     const sigCases = SIGNATURE_SKILL_LIST.map(s => [s.id, s.kind] as const);
@@ -178,10 +181,10 @@ describe('doctrine witness — signature skills', () => {
 // /\bstrike\b/i: the underscore in `STRIKE_DAMAGE_MULT` is a word character,
 // so a \b regex would let the class-e constant slip through unswept).
 //
-// Class (e) entries — the dead `strike` signature arm and
-// `STRIKE_DAMAGE_MULT` — still exist PRE-ratification. WS0.2 deletes them;
-// when it lands, remove every entry marked `class: 'e'` (and the presence
-// witnesses) so the live-code allowlist shrinks to zero.
+// Class (e) — the dead `strike` signature arm and `STRIKE_DAMAGE_MULT` —
+// was DELETED by WS0.2 (2026-07-11); its allowlist entries and the
+// pre-ratification presence witnesses were removed with it. Everything
+// left below is doctrine/history commentary or the ratified classes.
 
 interface StrikeAllowance {
     /** Matched against the offending line; content-keyed so line drift is harmless. */
@@ -192,9 +195,6 @@ interface StrikeAllowance {
 }
 
 const ENGINE_ALLOWED: readonly StrikeAllowance[] = [
-    { pattern: /raw strike is the weak/i, class: 'e', why: 'engine header line ~7 — WS0.2 rewrites it to status-first' },
-    { pattern: /now scale the strike's HP damage/i, class: 'e', why: 'read-tuning banner ~75 — WS0.2 rewrites' },
-    { pattern: /Strike-damage multipliers/i, class: 'e', why: 'READ_DAMAGE_MULT doc comment' },
     { pattern: /the strike was purged from the/i, class: 'doc', why: 'spec 32 v3 §1 purge note (DIRECT_DAMAGE_WEIGHT is DEAD)' },
     { pattern: /no immediate-strike path/i, class: 'doc', why: 'spec 32 v3 §1 purge note, second line' },
     { pattern: /Strike\/defend keep the flat/i, class: 'doc', why: 'stance-extension doc comment' },
@@ -204,21 +204,13 @@ const ENGINE_ALLOWED: readonly StrikeAllowance[] = [
     { pattern: /const strike = Math\.max\(10, Math\.round\(state\.enemy\.maxHealth \* 0\.5\)\)/, class: 'c', why: 'mercy-exploit magnitude — alternate-outcome consequence, mercy screen only' },
     { pattern: /applyDamage\(state\.enemy, strike\)/, class: 'c', why: 'mercy-exploit applies its consequence' },
     { pattern: /amount: strike \}/, class: 'c', why: 'mercy-exploit damage-dealt event' },
-    { pattern: /immediate-strike number any more/i, class: 'doc', why: 'cardDieCostPreview doc — amount is always 0' },
+    { pattern: /immediate-strike number any more/i, class: 'doc', why: 'projectCardImpact doc — amount is always 0' },
     { pattern: /strike is dead/i, class: 'doc', why: 'the doctrine, by name' },
 ];
 
 const SIGNATURE_ALLOWED: readonly StrikeAllowance[] = [
     { pattern: /sig-conviction-strike/i, class: 'doc', why: "id/name only — the skill's KIND is 'dot' (poison applier), not strike (plan §0.1 C-4)" },
     { pattern: /and strike, softening it toward mercy/i, class: 'd', why: "Disarming Plea flavour copy (kind 'mercy')" },
-    { pattern: /strike-class signature/i, class: 'e', why: 'STRIKE_DAMAGE_MULT doc comment — WS0.2 deletes' },
-    { pattern: /STRIKE_DAMAGE_MULT/, class: 'e', why: 'the dead constant (decl + sole use) — WS0.2 deletes' },
-    { pattern: /case 'strike':/, class: 'e', why: 'the unreachable kind arm — WS0.2 deletes' },
-    { pattern: /'strike'\/'mercy' also hit HP/, class: 'e', why: 'kind-arm comment — WS0.2 deletes' },
-    { pattern: /strike = a heavy bleeding blow/i, class: 'e', why: 'kind-arm comment — WS0.2 deletes' },
-    { pattern: /skill\.kind === 'strike'/, class: 'e', why: 'kind-arm guards (three sites) — WS0.2 deletes' },
-    { pattern: /BODY strike/i, class: 'e', why: 'kind-arm comment — WS0.2 deletes' },
-    { pattern: /for strike\/draw/i, class: 'e', why: 'refreshDraftedDie doc — WS0.2 rewords to draw-only' },
 ];
 
 function sweepSource(label: string, absPath: string, allowed: readonly StrikeAllowance[]): void {
@@ -254,9 +246,9 @@ describe('doctrine witness — strike-vocabulary sweep (mechanized grep)', () =>
         sweepSource('combat.signature.ts', signaturePath, SIGNATURE_ALLOWED);
     });
 
-    it('pre-ratification witnesses: the class-e vocabulary still exists (WS0.2 deletes it — then DELETE this test and the class-e allowances)', () => {
+    it('post-ratification witnesses: the class-e vocabulary stays dead (no constant, no kind arm)', () => {
         const src = readFileSync(signaturePath, 'utf8');
-        expect(src).toMatch(/const STRIKE_DAMAGE_MULT = 3/);
-        expect(src).toMatch(/case 'strike': \{/);
+        expect(src).not.toMatch(/STRIKE_DAMAGE_MULT/);
+        expect(src).not.toMatch(/case 'strike'/);
     });
 });

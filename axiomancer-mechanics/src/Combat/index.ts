@@ -149,8 +149,8 @@ export type {
 export {
     initializeCombatEncounter, rollEncounterDice, playCombatCard,
     resolveCombatPhase, resolveThreatPhase, processBetweenPhases,
-    selectMercyChoice as selectEncounterMercyChoice, resolveCardDieCost, getCard,
-    handCards, cardDieCostPreview, availableDice, buildCombatSummary,
+    selectMercyChoice as selectEncounterMercyChoice, getCard,
+    handCards, availableDice, buildCombatSummary,
     // Spec 26b — turn lifecycle + read + Conviction + Signature Skills
     startTurn, draftStanceDie, endTurn, resolveRead, chooseDraft, discardCombatCard,
     playSignatureSkill, getDraftedDie, isPhaseStanceRevealed, revealedCurrentStance,
@@ -173,6 +173,15 @@ export {
     // Spec 32 v3 — floating dice save-back + sway decay knob
     getFloatingDiceColors, SWAY_DECAY_PER_TURN,
 } from './combat.engine';
+/**
+ * @deprecated Superseded by the COLOR LAW for die COST / play legality
+ * (`playCombatCard`'s color-match gate); retained only as the legacy 0/1/2
+ * advantage-READ classifier (spec 25 §4.8). No `axiomancer-mobile` consumers
+ * as of 2026-07-11 (grep-verified) — the mechanics CLI hand renderer is the
+ * sole caller; any future mobile adopter migrates next minor. Removal is a
+ * semver-major phase (locked-barrel rule), so the exports stay.
+ */
+export { resolveCardDieCost, cardDieCostPreview } from './combat.engine';
 export type { CardDieCost, FinisherProjection, CombatOutcomeProjection } from './combat.engine';
 export {
     COMBAT_DICE_COUNT, TURN_DICE_COUNT, COMBAT_DIE_FACES, rollCombatDice, rollTurnDice,

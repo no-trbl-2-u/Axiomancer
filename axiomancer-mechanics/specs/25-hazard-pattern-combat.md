@@ -304,6 +304,8 @@ This means: the player reads the enemy's active phase stance and selects cards a
 
 **RPS advantage is displayed prominently** in the UI as a colored indicator on each card in hand showing cheap / normal / costly for the current phase.
 
+> **Note (2026-07-11):** die-COST semantics moved to the Color Law (spec 31 / engine). §4.8's 0/1/2 classification survives as the advantage-READ preview surface (`resolveCardDieCost`), per spec 32 §12 WS0.3 decision (ratified 2026-07-11).
+
 ---
 
 ## 5. Status Pressure Track — Detail

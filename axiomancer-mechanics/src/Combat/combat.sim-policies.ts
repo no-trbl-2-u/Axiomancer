@@ -137,10 +137,10 @@ function greedyRankCard(s: CombatEncounterState, card: CombatCard): number {
 
 /** The legacy signature preference list (order-insensitive membership check). */
 const LEGACY_SIGNATURE_KINDS: readonly SignatureSkillKind[] =
-    Object.freeze(['dot', 'strike', 'control', 'mercy', 'conclude']);
+    Object.freeze(['dot', 'control', 'mercy', 'conclude']);
 
 const ALL_SIGNATURE_KINDS: readonly SignatureSkillKind[] = Object.freeze([
-    'scout', 'reroll', 'sustain', 'control', 'dot', 'mercy', 'strike', 'conclude', 'draw',
+    'scout', 'reroll', 'sustain', 'control', 'dot', 'mercy', 'conclude', 'draw',
 ]);
 
 /** The scripted witness roster. */
@@ -186,7 +186,7 @@ export const COMBAT_SIM_POLICIES: Record<CombatSimPolicyId, CombatSimPolicy> = {
             if (card.effectKind !== 'none') return BAND_EFFECT + card.bottomDamagePreview;
             return 100 + card.bottomDamagePreview;
         },
-        signatureKinds: ['dot', 'strike', 'conclude'],
+        signatureKinds: ['dot', 'conclude'],
         convictionThreshold: 7,
         mercyChoice: 'exploit',
     },
@@ -215,7 +215,7 @@ export const COMBAT_SIM_POLICIES: Record<CombatSimPolicyId, CombatSimPolicy> = {
         blind: false,
         preferredFocus: 'damage',
         rankCard: (_s, card) => card.bottomDamagePreview,
-        signatureKinds: ['strike', 'conclude'],
+        signatureKinds: ['conclude'],
         convictionThreshold: 7,
         mercyChoice: 'exploit',
     },
