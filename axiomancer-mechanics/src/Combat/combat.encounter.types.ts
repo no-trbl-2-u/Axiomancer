@@ -426,6 +426,8 @@ export type CombatEvent =
     // THREAT_ENCHANT_CURSE_EVERY_ROUNDS the enemy grows a new passive
     // strength or lays a fresh curse on the player.
     | { kind: 'threat-clock-enchant'; target: 'enemy' | 'player'; effectId: string; round: number }
+    // Phase 26 (the Turn Law) — startTurn refused a second dice tray this phase.
+    | { kind: 'turn-law-blocked'; phaseIndex: number }
     | { kind: 'combat-ended'; outcome: CombatOutcome };
 
 // ---------------------------------------------------------------------------
@@ -441,6 +443,14 @@ export interface CombatEncounterState {
     dice: CombatManaDie[];
     /** The drafted stance die id for this turn (null before draft / between turns). */
     draftedDieId: string | null;
+    /** The Turn Law (phase 26) — true once `startTurn` has produced a dice
+     *  tray for the CURRENT threat phase; blocks a second `startTurn` call
+     *  until `processBetweenPhases` opens the next phase and clears it. Does
+     *  NOT gate card plays — floating dice and Reserve dice remain a
+     *  separate, legal power source within the one drafted turn. Optional
+     *  for back-compat with state literals (absent = false = pre-law
+     *  behavior). */
+    turnTakenThisPhase?: boolean;
     /** Turn counter within the encounter (drives die ids + display). */
     turn: number;
     /** Conviction (◆) bank — funds Signature Skills (Spec 26b §4). */

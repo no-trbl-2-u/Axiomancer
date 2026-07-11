@@ -247,6 +247,22 @@ function policyPlayPhase(
             }
             if (working.draftedDieId !== null) working = endTurn(working).state;
             if (working.dice.length === 0) {
+                // Phase 26 (the Turn Law) — one dice-turn per threat phase;
+                // once already taken (and Reserve above is spent too), no
+                // more BOTTOM plays are legal this phase (was the
+                // endTurn/startTurn Conviction-farm exploit the audit
+                // flagged). FREE (dieless) top plays stay legal all turn
+                // long, though — spend down the rest of the hand via its
+                // free line instead of just giving up on the phase.
+                if (working.turnTakenThisPhase) {
+                    const top = handCards(working)[0];
+                    if (!top) break;
+                    working = playCombatCard(working, { uid: top.uid }, false).state;
+                    plays++;
+                    bumpUsage(usage, top.card, 'top');
+                    if (working.finalOutcome || working.mercyChoiceActive) break;
+                    continue;
+                }
                 working = startTurn(working).state;
                 if (working.phase !== 'phase-play') break;
             }

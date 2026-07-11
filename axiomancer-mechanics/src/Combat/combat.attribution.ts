@@ -17,6 +17,13 @@ import type {
  * `landed` (when present) projects the DoT damage the effect will deal over its
  * life (damagePerRound × intensity × remainingDuration); `damage` is the HP the
  * play dealt right now (the strike). Either can be 0.
+ *
+ * Phase 26 (turn-law-and-honest-baseline audit) — `enemyHealthRemaining` is
+ * the enemy's HP immediately BEFORE this damage instance (or before this DoT
+ * lands, for the projected case). Both the forecast and the direct hit are
+ * clamped to it, since neither can ever cost the enemy more HP than it had
+ * left at that moment — without this a long DoT chain could log e.g. 740
+ * projected damage against a 40-max-HP enemy.
  */
 export function recordAttribution(
     attribution: Record<string, CombatAttributionRow>,
@@ -24,18 +31,22 @@ export function recordAttribution(
     cardName: string,
     landed: LandedEffect | null,
     damage: number,
+    enemyHealthRemaining: number,
 ): Record<string, CombatAttributionRow> {
     const prev = attribution[cardId] ?? { cardId, name: cardName, dotDamage: 0, damageDealt: 0, phases: 0 };
     const dot = landed?.effect.payload.damageOverTime;
-    const projected = dot
+    const rawProjected = dot
         ? dot.damagePerRound * Math.max(1, landed!.active.intensity) * Math.max(1, landed!.active.remainingDuration)
         : 0;
+    const ceiling = Math.max(0, enemyHealthRemaining);
+    const projected = Math.min(rawProjected, ceiling);
+    const clampedDamage = Math.min(Math.max(0, damage), ceiling);
     return {
         ...attribution,
         [cardId]: {
             ...prev,
             dotDamage: prev.dotDamage + projected,
-            damageDealt: prev.damageDealt + damage,
+            damageDealt: prev.damageDealt + clampedDamage,
             phases: prev.phases + 1,
         },
     };

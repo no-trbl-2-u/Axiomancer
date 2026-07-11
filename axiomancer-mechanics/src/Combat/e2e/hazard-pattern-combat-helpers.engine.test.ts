@@ -36,7 +36,7 @@ import {
     THREAT_WEAKEN_PER_ROLL, THREAT_DENY_AT, THREAT_WEAKEN_FLOOR,
 } from '../combat.engine';
 import { recordAttribution, buildCombatSummary } from '../combat.attribution';
-import type { CombatAttributionRow } from '../combat.encounter.types';
+import type { CombatAttributionRow, LandedEffect } from '../combat.encounter.types';
 import {
     rollCombatDice, combatDieCanPower, refreshOneDie, COMBAT_DICE_COUNT,
     dieIsRerollable, hasRerollableDice, rerollSpentDice,
@@ -548,7 +548,7 @@ describe('Soft-control threat tunables — contract values', () => {
 
 describe('Spec 25 §7.7 — recordAttribution field shape', () => {
     it('creates a new CombatAttributionRow with all required fields', () => {
-        const ledger = recordAttribution({}, 'slippery-slope', 'Slippery Slope', null, 10);
+        const ledger = recordAttribution({}, 'slippery-slope', 'Slippery Slope', null, 10, Number.MAX_SAFE_INTEGER);
         const row: CombatAttributionRow = ledger['slippery-slope'];
         expect(row.cardId).toBe('slippery-slope');
         expect(row.name).toBe('Slippery Slope');
@@ -558,19 +558,61 @@ describe('Spec 25 §7.7 — recordAttribution field shape', () => {
     });
 
     it('accumulates damageDealt and phases across multiple calls for the same card', () => {
-        let ledger = recordAttribution({}, 'slippery-slope', 'Slippery Slope', null, 5);
-        ledger = recordAttribution(ledger, 'slippery-slope', 'Slippery Slope', null, 8);
+        let ledger = recordAttribution({}, 'slippery-slope', 'Slippery Slope', null, 5, Number.MAX_SAFE_INTEGER);
+        ledger = recordAttribution(ledger, 'slippery-slope', 'Slippery Slope', null, 8, Number.MAX_SAFE_INTEGER);
         const row = ledger['slippery-slope'];
         expect(row.damageDealt).toBe(13);
         expect(row.phases).toBe(2);
     });
 
     it('tracks separate rows for different cards in the same ledger', () => {
-        let ledger = recordAttribution({}, 'slippery-slope', 'Slippery Slope', null, 5);
-        ledger = recordAttribution(ledger, 'achilles-gambit', 'Achilles Gambit', null, 12);
+        let ledger = recordAttribution({}, 'slippery-slope', 'Slippery Slope', null, 5, Number.MAX_SAFE_INTEGER);
+        ledger = recordAttribution(ledger, 'achilles-gambit', 'Achilles Gambit', null, 12, Number.MAX_SAFE_INTEGER);
         expect(Object.keys(ledger)).toHaveLength(2);
         expect(ledger['slippery-slope'].damageDealt).toBe(5);
         expect(ledger['achilles-gambit'].damageDealt).toBe(12);
+    });
+});
+
+// ── Attribution overkill clamp (phase 26 — turn-law-and-honest-baseline audit) ──
+// A long DoT chain (or a big direct/mechanic burst) can no longer log more
+// damage than the enemy actually had left at the moment of the hit/land.
+
+describe('Phase 26 — recordAttribution clamps overkill to enemyHealthRemaining', () => {
+    it('a DoT projection far exceeding a low-HP enemy is clamped to that HP, not the raw forecast', () => {
+        const poison = lookupEffect('debuff_poison')!;
+        expect(poison.payload.damageOverTime?.damagePerRound).toBe(2);
+        const landed: LandedEffect = {
+            effectId: poison.id,
+            effect: poison,
+            active: { effectId: poison.id, intensity: 20, remainingDuration: 20, appliedAt: 1, tier: 2 },
+            target: 'enemy',
+        };
+        // raw projection: 2 * 20 * 20 = 800 — comfortably over a 40-HP enemy.
+        const ledger = recordAttribution({}, 'slippery-slope', 'Slippery Slope', landed, 0, 40);
+        expect(ledger['slippery-slope'].dotDamage).toBe(40);
+    });
+
+    it('a direct/mechanic burst exceeding the enemy remaining HP is clamped to that HP', () => {
+        const ledger = recordAttribution({}, 'rupture-card', 'Rupture Card', null, 90, 25);
+        expect(ledger['rupture-card'].damageDealt).toBe(25);
+    });
+
+    it('an unclamped case (enemy comfortably above the hit) is byte-identical to the unclamped ledger', () => {
+        const poison = lookupEffect('debuff_poison')!;
+        const landed: LandedEffect = {
+            effectId: poison.id,
+            effect: poison,
+            active: { effectId: poison.id, intensity: 2, remainingDuration: 3, appliedAt: 1, tier: 2 },
+            target: 'enemy',
+        };
+        // raw projection: 2 * 2 * 3 = 12, enemy has 500 HP — the clamp must
+        // never LOWER a ledger entry when there's no overkill.
+        const dotLedger = recordAttribution({}, 'slippery-slope', 'Slippery Slope', landed, 0, 500);
+        expect(dotLedger['slippery-slope'].dotDamage).toBe(12);
+
+        const directLedger = recordAttribution({}, 'strike-card', 'Strike Card', null, 30, 500);
+        expect(directLedger['strike-card'].damageDealt).toBe(30);
     });
 });
 
@@ -584,7 +626,7 @@ describe('Spec 25 §7.7 — buildCombatSummary field shape', () => {
             phase: 'complete' as const,
             finalOutcome: 'victory' as const,
             directDamageDealt: 30,
-            attribution: recordAttribution({}, DOT_BODY, 'Slippery Slope', null, 20),
+            attribution: recordAttribution({}, DOT_BODY, 'Slippery Slope', null, 20, Number.MAX_SAFE_INTEGER),
         };
         const summary = buildCombatSummary(complete);
         expect(summary.outcome).toBe('victory');
@@ -593,7 +635,7 @@ describe('Spec 25 §7.7 — buildCombatSummary field shape', () => {
     });
 
     it('rows carry all CombatAttributionRow fields (cardId, name, dotDamage, damageDealt, phases)', () => {
-        const ledger = recordAttribution({}, DOT_BODY, 'Slippery Slope', null, 15);
+        const ledger = recordAttribution({}, DOT_BODY, 'Slippery Slope', null, 15, Number.MAX_SAFE_INTEGER);
         const state = initializeCombatEncounter(makePlayer([DOT_BODY]), makeEnemy(100), undefined, SEED);
         const complete = {
             ...state,
@@ -613,8 +655,8 @@ describe('Spec 25 §7.7 — buildCombatSummary field shape', () => {
     });
 
     it('rows are sorted descending by damageDealt and bestCard names the top contributor', () => {
-        let ledger = recordAttribution({}, DOT_BODY, 'Slippery Slope', null, 5);
-        ledger = recordAttribution(ledger, DAMAGE_BODY, 'Achilles Gambit', null, 20);
+        let ledger = recordAttribution({}, DOT_BODY, 'Slippery Slope', null, 5, Number.MAX_SAFE_INTEGER);
+        ledger = recordAttribution(ledger, DAMAGE_BODY, 'Achilles Gambit', null, 20, Number.MAX_SAFE_INTEGER);
         const state = initializeCombatEncounter(makePlayer([DOT_BODY, DAMAGE_BODY]), makeEnemy(100), undefined, SEED);
         const complete = {
             ...state,

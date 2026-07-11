@@ -414,6 +414,14 @@ export function startTurn(
 ): CombatTransition {
     if (state.phase !== 'phase-play') return { state, events: [] };
     if (state.draftedDieId !== null) return { state, events: [] }; // already drafted this turn
+    // Phase 26 (the Turn Law) — one dice-turn per threat phase, an engine
+    // invariant. A second startTurn call within the same phase is refused;
+    // it does not touch card plays — floating/Reserve dice remain a
+    // separate power source within the one turn already taken.
+    if (state.turnTakenThisPhase) {
+        const blocked: CombatEvent[] = [{ kind: 'turn-law-blocked', phaseIndex: state.currentPhaseIndex }];
+        return { state: withLog(state, blocked), events: blocked };
+    }
     const turn = state.turn + 1;
     let dice = rollTurnDice(turn, TURN_DICE_COUNT, rng);
     // CLARITY (P0-truth `forceWildOnNextDie` wiring): the bearer's next roll
@@ -448,7 +456,7 @@ export function startTurn(
     }
     const next: CombatEncounterState = {
         ...state, player, dice, draftedDieId: null, turn, lastRead: 'none', carriedDie,
-        spellsPlayedThisTurn: 0, echoNextSpell: false,
+        spellsPlayedThisTurn: 0, echoNextSpell: false, turnTakenThisPhase: true,
     };
     const events: CombatEvent[] = [
         { kind: 'turn-dice-rolled', turn, dice },
@@ -1520,10 +1528,11 @@ function playBottomAction(
                     Math.round(fuel * mult * (1 + (mech.bonusPct ?? 0)) * vulnMult),
                 );
                 if (burst > 0) {
+                    const beforeHp = enemy.health;
                     enemy = applyDamage(enemy, burst);
                     mechanicDamage += burst;
                     directDamage += burst;
-                    attribution = recordAttribution(attribution, card.id, card.name, null, burst);
+                    attribution = recordAttribution(attribution, card.id, card.name, null, burst, beforeHp);
                 }
                 events.push({ kind: 'rupture-detonated', amount: burst, consumed: consumedRes.consumed });
                 gainSoulsLocal(consumedRes.consumed.length, 'consumed');
@@ -1536,10 +1545,11 @@ function playBottomAction(
                     enemy = res2.combatant;
                     if (res2.fuel > 0) {
                         const dmg = Math.round(res2.fuel * vulnMult);
+                        const beforeHp = enemy.health;
                         enemy = applyDamage(enemy, dmg);
                         mechanicDamage += dmg;
                         directDamage += dmg;
-                        attribution = recordAttribution(attribution, card.id, card.name, null, dmg);
+                        attribution = recordAttribution(attribution, card.id, card.name, null, dmg, beforeHp);
                     }
                     events.push({ kind: 'affliction-consumed', effectId: res2.consumed, fuel: res2.fuel });
                     gainSoulsLocal(mech.souls, 'consumed');
@@ -1581,10 +1591,11 @@ function playBottomAction(
                 const burst = Math.min(reapAllBurstCap(enemy.maxHealth), Math.round(mech.burstPerSoul * spent * mult * vulnMult));
                 souls = 0;
                 if (burst > 0) {
+                    const beforeHp = enemy.health;
                     enemy = applyDamage(enemy, burst);
                     mechanicDamage += burst;
                     directDamage += burst;
-                    attribution = recordAttribution(attribution, card.id, card.name, null, burst);
+                    attribution = recordAttribution(attribution, card.id, card.name, null, burst, beforeHp);
                 }
                 events.push({ kind: 'reaped', cardId: card.id, soulsSpent: spent, amount: burst });
                 break;
@@ -1815,7 +1826,7 @@ function playBottomAction(
             if (active && target === 'enemy') {
                 const landed: LandedEffect = { effectId: def.id, effect: def, active, target };
                 const cls = effectImpact(def, active.intensity, active.remainingDuration).track;
-                attribution = recordAttribution(attribution, card.id, card.name, landed, 0);
+                attribution = recordAttribution(attribution, card.id, card.name, landed, 0, enemy.health);
                 events.push({ kind: 'effect-landed', cardId: card.id, effectId: def.id, target: 'enemy', effectKind: cls, intensity: active.intensity, effect: def });
                 if (cls === 'dot' || cls === 'control') landedOffensiveIds.push(def.id);
                 // Meaningful land = intensity increased over the snapshot (or new).
@@ -1896,9 +1907,10 @@ function playBottomAction(
         if (r.tickAllDots) {
             const ticks = getActiveDotTotal(enemy.effects, state.round);
             if (ticks.total > 0) {
+                const beforeHp = enemy.health;
                 enemy = applyDamage(enemy, ticks.total);
                 directDamage += ticks.total;
-                attribution = recordAttribution(attribution, card.id, card.name, null, ticks.total);
+                attribution = recordAttribution(attribution, card.id, card.name, null, ticks.total, beforeHp);
                 for (const t of ticks.perEffect) {
                     events.push({ kind: 'dot-tick', effectId: t.effectId, label: t.label, amount: t.amount, target: 'enemy' });
                 }
@@ -1909,9 +1921,10 @@ function playBottomAction(
             const strongest = ticks.reduce<typeof ticks[number] | null>(
                 (best, t) => (best === null || t.amount > best.amount ? t : best), null);
             if (strongest) {
+                const beforeHp = enemy.health;
                 enemy = applyDamage(enemy, strongest.amount);
                 directDamage += strongest.amount;
-                attribution = recordAttribution(attribution, card.id, card.name, null, strongest.amount);
+                attribution = recordAttribution(attribution, card.id, card.name, null, strongest.amount, beforeHp);
                 events.push({ kind: 'dot-tick', effectId: strongest.effectId, label: strongest.label, amount: strongest.amount, target: 'enemy' });
             }
         }
@@ -1920,10 +1933,11 @@ function playBottomAction(
             if (consumed.stacks > 0) {
                 enemy = consumed.combatant;
                 const burst = Math.min(ruptureBurstCap(enemy.maxHealth), Math.round(r.ruptureMarks * consumed.stacks * vulnMult));
+                const beforeHp = enemy.health;
                 enemy = applyDamage(enemy, burst);
                 mechanicDamage += burst;
                 directDamage += burst;
-                attribution = recordAttribution(attribution, card.id, card.name, null, burst);
+                attribution = recordAttribution(attribution, card.id, card.name, null, burst, beforeHp);
                 events.push({ kind: 'damage-dealt', cardId: card.id, target: 'enemy', amount: burst });
             }
         }
@@ -2812,6 +2826,8 @@ export function processBetweenPhases(
         draftedDieId: null,
         lastRead: 'none',
         carriedDie: null,
+        // Phase 26 (the Turn Law) — a new phase opens a fresh allowance.
+        turnTakenThisPhase: false,
     };
     next = withLog(next, events);
 

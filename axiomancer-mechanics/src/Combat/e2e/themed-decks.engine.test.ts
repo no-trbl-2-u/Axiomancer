@@ -110,8 +110,14 @@ describe('FLOATING DICE — forge, spend-forever, cap, exemptions', () => {
         expect(res.state.dice.some(d => d.id === floated!.dieId && d.floating)).toBe(true);
         expect(res.state.floatingDice?.map(d => d.id)).toEqual([floated!.dieId]);
 
-        // It survives the turn boundary with a STABLE id (never rerolled).
+        // It survives the PHASE boundary with a STABLE id (never rerolled).
+        // Phase 26 (the Turn Law) — a second startTurn within the same phase
+        // is refused, so "the next turn" is reached via a real phase
+        // transition (resolveThreatPhase -> processBetweenPhases), then the
+        // next phase's own startTurn — not a same-phase endTurn/startTurn cycle.
         state = endTurn(res.state).state;
+        state = resolveThreatPhase(state).state;
+        expect(state.phase).toBe('phase-play');
         state = startTurn(state).state;
         expect(state.dice.some(d => d.id === floated!.dieId && d.floating && d.state === 'available')).toBe(true);
 
@@ -215,25 +221,40 @@ describe('STAGGER rungs — full removal denies the turn; BACKFIRE drips per run
     const ZENO = 'zenos-half-step'; // STAGGER 1
 
     it('stripping every rung DENIES the telegraph and BACKFIRE drips per denied rung', () => {
-        // 0.2 rolls BODY dice — zeno's-half-step is a body spell and the color
-        // law (2026-07-09) demands a matching (or wild) powering die. No seed:
-        // a seed installs its own rng stream and the mock would never apply.
-        mockSequentialRng(0.2);
+        // Phase 26 (the Turn Law) — one dice-turn per threat phase, so two
+        // STAGGER plays inside ONE phase can no longer come from two
+        // farmed endTurn/startTurn cycles (`resolveCombatPhase`'s
+        // `ensureDraftForCard` used to force exactly that). The LEGAL way
+        // to power two bottom plays within one turn is the "bigger turn"
+        // mechanic: draft one die, BANK a second unpicked die into Reserve,
+        // then power the second play off the banked die — both dice come
+        // from the SAME single dice-turn.
         const enemy = makeEnemy(300, 'mind', [ae('debuff_backfire', 1, 3)]);
-        const state = initializeCombatEncounter(makePlayer([ZENO]), enemy, [ZENO, ZENO, ZENO, ZENO, ZENO]);
-        // Two STAGGER 1 plays = THREAT_RUNGS (2) → the action is denied.
-        const res = resolveCombatPhase(rollEncounterDice(state).state, [
-            { cardId: ZENO, useBottom: true },
-            { cardId: ZENO, useBottom: true },
-        ]);
-        const staggers = res.events.filter(e => e.kind === 'staggered');
+        const initial = initializeCombatEncounter(makePlayer([ZENO]), enemy, [ZENO, ZENO, ZENO, ZENO, ZENO]);
+        let state = rollEncounterDice(initial).state;
+        state = setDice(state, ['body', 'body', 'x']);
+        state = draftStanceDie(state, state.dice[0].id, { bankUnpicked: true }).state;
+        expect(state.reserve?.length).toBe(1);
+
+        const hand1 = state.hand.find(h => h.cardId === ZENO)!;
+        const play1 = playCombatCard(state, { uid: hand1.uid }, true);
+        state = play1.state;
+
+        const banked = state.reserve![0];
+        const hand2 = state.hand.find(h => h.cardId === ZENO && h.uid !== hand1.uid)!;
+        const play2 = playCombatCard(state, { uid: hand2.uid }, true, banked.id);
+        state = play2.state;
+
+        const resolved = resolveThreatPhase(state);
+        const allEvents = [...play1.events, ...play2.events, ...resolved.events];
+        const staggers = allEvents.filter(e => e.kind === 'staggered');
         expect(staggers.length).toBe(2);
-        expect(res.events.some(e => e.kind === 'threat-fired')).toBe(false);
-        const resolved = res.events.find(e => e.kind === 'phase-resolved') as { mark: string };
-        expect(resolved.mark).toBe('clear');
-        expect(res.state.player.health).toBe(200); // the denied blow never landed
+        expect(allEvents.some(e => e.kind === 'threat-fired')).toBe(false);
+        const resolvedPhase = allEvents.find(e => e.kind === 'phase-resolved') as { mark: string };
+        expect(resolvedPhase.mark).toBe('clear');
+        expect(resolved.state.player.health).toBe(200); // the denied blow never landed
         // BACKFIRE i1 × THREAT_RUNGS(2) denied rungs = 2 HP inward.
-        const backfired = res.events.find(e => e.kind === 'backfired') as { amount: number; rungs: number } | undefined;
+        const backfired = allEvents.find(e => e.kind === 'backfired') as { amount: number; rungs: number } | undefined;
         expect(backfired).toBeDefined();
         expect(backfired!.rungs).toBe(THREAT_RUNGS);
         expect(backfired!.amount).toBe(THREAT_RUNGS);
@@ -701,7 +722,13 @@ describe('preset ignition — every themed deck reaches its engine within a few 
             state = rollEncounterDice(state).state;
 
             let phases = 0;
-            while (state.phase === 'phase-play' && !state.finalOutcome && phases < 5) {
+            // Phase 26 (the Turn Law) — one legal dice-turn per phase means
+            // `resolveCombatPhase`'s whole-hand play batch now only reliably
+            // lands its FIRST card each phase (the rest have no die left to
+            // power a bottom play); the theme signal needs more phases to
+            // surface than the old multi-turn-per-phase farm allowed. Budget
+            // widened to match the encounter's own round<=10 health bound.
+            while (state.phase === 'phase-play' && !state.finalOutcome && phases < 10) {
                 phases++;
                 const plays = handCards(state)
                     .filter(c => c.card.verbClass !== 'retreat')
@@ -716,8 +743,10 @@ describe('preset ignition — every themed deck reaches its engine within a few 
                 state.log.some(signal),
                 `preset '${presetId}' never ignited its theme engine within ${phases} phases`,
             ).toBe(true);
-            // And the encounter stayed healthy (no stalemate runaway).
-            expect(state.round).toBeLessThanOrEqual(10);
+            // And the encounter stayed healthy (no stalemate runaway) — one
+            // round per resolved phase, so the bound tracks the loop's own
+            // phase budget above (10) plus the opening round.
+            expect(state.round).toBeLessThanOrEqual(11);
         },
         30_000,
     );

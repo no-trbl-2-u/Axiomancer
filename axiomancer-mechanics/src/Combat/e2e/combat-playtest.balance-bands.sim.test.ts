@@ -183,7 +183,15 @@ const CURVE_STAGES: readonly CombatStageId[] = ['early', 'mid', 'late'];
 // loadout (+5 maxHp from the armor relic improves survival), which nudges
 // 'grace' back over the late floor — it rejoins the offender set. All three are
 // findings for /deck-tuning, not fixes made by this pass.
-const KNOWN_CURVE_VIOLATORS: readonly string[] = ['grace', 'refrain', 'standstill'];
+// Re-derived 2026-07-11 (phase 26, the Turn Law): 'greedy' could no longer
+// farm endTurn/startTurn cycles for extra Conviction within one threat phase
+// (plan/tuning/2026-07-10-turn-law-and-honest-baseline.md §1). The farm was
+// propping up mid/late-stage win rates specifically (more phases survived ->
+// more farmed turns -> more banked Conviction/Signature casts) — with it gone,
+// all three previously-listed offenders now decay honestly and pass the
+// curve. Zero offenders is itself a finding for Phase 27's re-baseline to
+// confirm at the full matrix, not assumed permanent here.
+const KNOWN_CURVE_VIOLATORS: readonly string[] = [];
 
 let cachedCurve: PlaytestReport | null = null;
 function curveReport(): PlaytestReport {
