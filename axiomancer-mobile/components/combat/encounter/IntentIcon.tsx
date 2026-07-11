@@ -18,9 +18,17 @@ import type { CombatIntentVM } from '@/state/presenters/combat-encounter.engine'
 
 export function IntentIcon({ intent, onPress }: { intent: CombatIntentVM; onPress?: () => void }) {
     const styles = useStyles();
+    // phase 28 — wall-math: the raw `damage` stake above is face value only;
+    // `wallMath` is what actually lands right now, netted against live
+    // guard/barrier/modifiers. State the REAL outcome in a11y, not the raw one.
+    const { willDeny, netDamage } = intent.wallMath;
+    const wallMathLabel = willDeny
+        ? ' This turn will be DENIED — no damage lands.'
+        : intent.damage > 0 ? ` ${netDamage} will actually land through your current guard.` : '';
     const a11y = `Enemy intent: ${intent.label}. ${intent.description}`
         + (intent.damage > 0 ? ` Deals ${intent.damage} damage.` : '')
         + (intent.debuffs ? ' Applies a debuff.' : '')
+        + wallMathLabel
         + (intent.next ? ` Next: ${intent.next.label}.` : '');
     return (
         <View
@@ -40,6 +48,11 @@ export function IntentIcon({ intent, onPress }: { intent: CombatIntentVM; onPres
                     {intent.debuffs && <Text style={styles.debuffMark} allowFontScaling={false}>☠</Text>}
                 </View>
             )}
+            {willDeny ? (
+                <Text style={styles.wallMathDenied} testID="combat-intent-wallmath" allowFontScaling={false}>DENIED</Text>
+            ) : intent.damage > 0 && netDamage !== intent.damage ? (
+                <Text style={styles.wallMathNet} testID="combat-intent-wallmath" allowFontScaling={false}>→{netDamage}</Text>
+            ) : null}
         </View>
     );
 }
@@ -58,4 +71,6 @@ const useStyles = makeStyles(() => ({
     },
     pillText: { fontFamily: FONTS.mono, fontSize: 11, letterSpacing: 0.3 },
     debuffMark: { fontFamily: FONTS.sans, fontSize: 10, color: '#a86bdc' },
+    wallMathDenied: { fontFamily: FONTS.mono, fontSize: 9, color: '#d9b44a', marginTop: 1, letterSpacing: 0.5 },
+    wallMathNet: { fontFamily: FONTS.mono, fontSize: 9, color: '#8a8273', marginTop: 1 },
 }));

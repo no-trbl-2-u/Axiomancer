@@ -169,6 +169,54 @@ describe('themed library — THE STRIKE IS DEAD (spec §1 schema gate)', () => {
     });
 });
 
+describe('themed library — THE FREE-CURRENCY LAW (phase 30, turn-texture.md §1)', () => {
+    // Owner-ratified 2026-07-10: every FREE line must deposit theme currency
+    // — never damage, never a bare generic draw. A weak-enough deposit MAY
+    // additionally carry a DRAW-1-class utility kicker; generic draw ALONE
+    // remains banned. TICK is dead registry-wide (retired with this pass,
+    // not merely renamed) — the ten `free: { tickOne: true }` lines the
+    // 2026-07-10 audit counted are gone.
+    const CURRENCY_FIELDS = [
+        'applyEffect', 'premises', 'sway', 'souls', 'foretell', 'pips',
+        'stagger', 'barrier', 'recoil', 'millCards', 'revealStance',
+    ] as const;
+    const UTILITY_ONLY_FIELDS = ['drawCards', 'guard', 'healHp', 'cleanse', 'conviction'] as const;
+
+    it("the library source never mentions 'tickOne' — TICK is dead, not renamed", () => {
+        const source = readFileSync(resolve(__dirname, '..', 'cards.library.ts'), 'utf8');
+        expect(source.includes('tickOne')).toBe(false);
+    });
+
+    it('no spell FREE line carries tickAllDots or ruptureMarks (damage verbs are not FREE-legal)', () => {
+        for (const card of cardLibrary.filter(c => c.cardType === 'spell')) {
+            expect(card.free?.tickAllDots, `${card.id}`).toBeFalsy();
+            expect(card.free?.ruptureMarks, `${card.id}`).toBeFalsy();
+        }
+    });
+
+    it('every spell FREE line deposits at least one theme-currency verb', () => {
+        const noncompliant = cardLibrary
+            .filter(c => c.cardType === 'spell')
+            .filter(c => !CURRENCY_FIELDS.some(f => (c.free as Record<string, unknown> | undefined)?.[f]))
+            .map(c => c.id);
+        expect(noncompliant).toEqual([]);
+    });
+
+    it('a bare utility field (draw/guard/heal/cleanse/conviction) never stands alone on FREE', () => {
+        const bareUtility = cardLibrary
+            .filter(c => c.cardType === 'spell')
+            .filter((c) => {
+                const free = c.free as Record<string, unknown> | undefined;
+                if (!free) return false;
+                const hasCurrency = CURRENCY_FIELDS.some(f => free[f]);
+                const hasUtility = UTILITY_ONLY_FIELDS.some(f => free[f]);
+                return hasUtility && !hasCurrency;
+            })
+            .map(c => c.id);
+        expect(bareUtility).toEqual([]);
+    });
+});
+
 describe('themed library — id hygiene and provenance', () => {
     it('every card has the v3 required shape', () => {
         for (const card of cardLibrary) {
@@ -208,11 +256,11 @@ describe('themed library — dieBonus reachability under THE COLOR LAW (dice-law
     // honest spelling of that), and onColor:'off' — a non-wild die of another
     // stance — can never fire at all: the play would have fizzled first.
     //
-    // tu-quoque (HEART card, onColor:'body') is the one KNOWN dead line —
-    // handoff audit item 1, the owner decides the redesign. This lint pins the
-    // class shut against future authoring; when the card is fixed, remove it
-    // from KNOWN_DEAD so the pin tightens to zero.
-    const KNOWN_DEAD = ['tu-quoque'];
+    // tu-quoque (HEART card, was onColor:'body') was the one KNOWN dead line —
+    // handoff audit item 1 — fixed in phase 28 (recolored to 'heart', its own
+    // philosophicalAspect). The pin has tightened to zero; the next author who
+    // ships a dead dieBonus line reopens this list.
+    const KNOWN_DEAD: string[] = [];
     it("no card authors an unreachable dieBonus line (onColor 'off' or an off-stance color)", () => {
         const dead = cardLibrary
             .filter(c => c.dieBonus)

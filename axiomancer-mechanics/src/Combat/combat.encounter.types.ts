@@ -421,6 +421,7 @@ export type CombatEvent =
     | { kind: 'phase-resolved'; phaseIndex: number; mark: 'clear' | 'overwhelmed' }
     | { kind: 'threat-fired'; phaseIndex: number; description: string; effects: CombatThreatEffect[] }
     | { kind: 'hand-drawn'; cards: string[] }
+    | { kind: 'cards-milled'; cards: string[] }
     | { kind: 'mercy-opened'; message: string }
     // THE CLOCK, discrete tier (combat-depth-epic): every
     // THREAT_ENCHANT_CURSE_EVERY_ROUNDS the enemy grows a new passive

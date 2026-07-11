@@ -84,13 +84,17 @@ const GENERICALLY_ASSERTED: readonly CardSpecialMechanic['kind'][] = [
 ];
 
 // ── Per-card fixture tweaks ───────────────────────────────────────────────────
-// Empty: the shared fixture below (rich afflictions + DoT fuel + MARK stacks +
-// Souls + Premises + discard + reserve/floating dice with pip headroom + a
-// pre-damaged, Fallen player) satisfies every one of the 70 cards' PAID-face
-// preconditions. Kept as the sanctioned per-card escape hatch (never a
-// skip/exemption) for the next author who ships a card this fixture can't
-// satisfy.
-const FIXTURE_OVERRIDES: Readonly<Record<string, (state: CombatEncounterState) => CombatEncounterState>> = {};
+// The shared fixture's 1-pip reserve (headroom for pip-adding mechanics, not a
+// floor) satisfies every card except `the-overtake`, which phase 28 gated at
+// 2+ spent pips (plan/tuning/2026-07-10-theme-identity.md — "the Overtake
+// fires for 18 on turn 1"). Bump its reserve to clear the gate; every other
+// card keeps the unmodified shared fixture.
+const FIXTURE_OVERRIDES: Readonly<Record<string, (state: CombatEncounterState) => CombatEncounterState>> = {
+    'the-overtake': (state) => ({
+        ...state,
+        reserve: [{ id: 'fx-reserve-0', color: 'heart', state: 'available', temporary: false, pips: 2 }],
+    }),
+};
 
 // ── Known, honest defects ─────────────────────────────────────────────────────
 // Empty: no card in the current library fails its strict effectiveness
@@ -321,6 +325,18 @@ function assertRiderPromise(
     if (rider.pips) {
         const sum = (s: CombatEncounterState) => (s.reserve ?? []).reduce((n, d) => n + (d.pips ?? 0), 0);
         expect(sum(after), label('pips')).toBeGreaterThan(sum(before));
+    }
+    if (rider.barrier) {
+        expect(after.barrier ?? 0, label('barrier')).toBeGreaterThan(before.barrier ?? 0);
+    }
+    if (rider.recoil) {
+        expect(after.player.health, label('recoil')).toBeLessThan(before.player.health);
+    }
+    if (rider.millCards) {
+        expect(
+            events.some(e => e.kind === 'cards-milled' && e.cards.length > 0),
+            label('millCards'),
+        ).toBe(true);
     }
     if (rider.applyEffect) {
         const side = rider.applyEffect.to === 'self' ? 'player' : 'enemy';
@@ -597,3 +613,44 @@ describe.each(Object.entries(KNOWN_INEFFECTIVE))(
         });
     },
 );
+
+// ── Phase 30 — the FREE line gets the same rigor as the PAID line ────────────
+// The FREE-currency law (turn-texture.md §1, ratified 2026-07-10) rewrote
+// every spell's FREE line to deposit theme currency instead of TICK/generic
+// draw/guard chaff. This suite is `assertCardEffective`'s twin for the TOP
+// (dieless) action: it reuses the exact same `assertRiderPromise` dispatch
+// table, so a FREE line that authors a rider field with no real engine
+// promise fails here the same way a broken PAID mechanic fails above.
+// Enchant/disenchant cards are excluded — their FREE line is engine-derived
+// (a timed instance of the persistent passive), never an authored `card.free`.
+
+function playFree(cardId: string): PlayResult {
+    mockSequentialRng(0.5);
+    const staged = buildFixtureState();
+    const before = { ...staged, hand: [{ uid: 'under-test', cardId }] };
+    const { state: after, events } = playCombatCard(before, { uid: 'under-test' }, false);
+    return { events, before, after };
+}
+
+function assertFreeCardEffective(cardId: string): void {
+    const card = getCardById(cardId);
+    expect(card, cardId).toBeDefined();
+    expect(card!.free, `${cardId}: no authored FREE rider`).toBeDefined();
+    const { events, before, after } = playFree(cardId);
+    const fizzle = events.find(e => e.kind === 'effect-fizzled');
+    expect(fizzle, `${cardId} (FREE): unexpected fizzle`).toBeUndefined();
+    assertRiderPromise(cardId, card!.free!, events, before, after);
+}
+
+describe('card effectiveness lint — every authored FREE line produces its promised observable delta', () => {
+    const freeSpells = cardLibrary.filter(c => c.cardType === 'spell' && c.free);
+
+    it('every spell authors a FREE rider (spec §2 FREE/PAID anatomy)', () => {
+        expect(freeSpells.length).toBe(cardLibrary.filter(c => c.cardType === 'spell').length);
+    });
+
+    it.each(freeSpells.map(c => [c.id] as const))(
+        "'%s' FREE face produces its promised observable delta",
+        (cardId) => { assertFreeCardEffective(cardId); },
+    );
+});

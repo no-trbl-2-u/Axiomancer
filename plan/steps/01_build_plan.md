@@ -277,27 +277,32 @@ order, intra-batch gates noted per phase):**
       empty; repricing (Phase 31) now unblocked —
       `plan: re-baseline the combat matrix under the Turn Law — phase 27`
       (30e43eb2)
-- [ ] Phase 28 — Show the Engine (legibility sweep). Premise track +
+- [x] Phase 28 — Show the Engine (legibility sweep). Premise track +
       CONCEDE beat, rupture fuel/cap preview, BACKFIRE attribution,
       foretell picker, REPRISE songbook choice, wall-math readout,
       Overtake gate/preview, lying-copy fixes, color-match bonus
       fold-ins. Parallel-safe with Phase 26/27 (mobile + mechanics) —
       source: `plan/tuning/2026-07-10-turn-texture.md` §4 +
       `plan/tuning/2026-07-10-theme-identity.md` (per-theme S-tier UX)
-- [ ] Phase 29 — The Language (keyword registry). KW-1/KW-3 (fold 6
+      — `feat: show the engine — legibility sweep across 9 surfaces — phase 28` (60af3044)
+- [x] Phase 29 — The Language (keyword registry). KW-1/KW-3 (fold 6
       unmapped debuff ids, rename pass) ungated; KW-2/KW-6
       (merge/retire + single-source registry with parity lints) and
       KW-5/KW-7 (persistent-card keyword-reach lint, systems glossary)
       follow; KW-4 (TICK killed entirely — owner-ratified 2026-07-10)
       rides Phase 30 (mechanics + mobile) — source:
-      `plan/tuning/2026-07-10-keyword-registry.md`
-- [ ] Phase 30 — FREE Lines (70-card content pass). Rewrite every
+      `plan/tuning/2026-07-10-keyword-registry.md` — brief:
+      `plan/phases/phase_29_keyword_registry.md`
+      — `feat: keyword-language honesty pass — phase 29` (cc39fb5f)
+- [x] Phase 30 — FREE Lines (70-card content pass). Rewrite every
       FREE line to theme-currency verbs + FREE-currency lint +
       pricing re-arithmetic. Shape ratified 2026-07-10: Option A
       (constrain the fork) + weak-deposit `DRAW 1` kicker amendment;
       TICK dies in the same pass (mechanics; content-sized;
       `/deck-tuning` owns) — source:
-      `plan/tuning/2026-07-10-turn-texture.md` §1
+      `plan/tuning/2026-07-10-turn-texture.md` §1 — brief:
+      `plan/phases/phase_30_free_lines.md`
+      — `feat: FREE-currency law — 70-card content pass — phase 30` (5e723df3)
 - [ ] Phase 31 — The Roll and the Read. Momentum wheel engine-native
       (kills the host-side write; sims learn it), THE STAKE (pre-draft
       Conviction wager on the hidden stance, paid in floats), signature
