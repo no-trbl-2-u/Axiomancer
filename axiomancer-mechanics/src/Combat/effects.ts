@@ -9,7 +9,7 @@ import { lookupEffect } from '../Effects/effects.library';
 import { removeEffectsByType } from '../Effects';
 import { MAX_EFFECT_DURATION, MAX_EFFECT_INTENSITY } from '../Game/game-mechanics.constants';
 import { Combatant } from './types';
-import type { Enemy } from '../Enemy/types';
+import type { Enemy, EnemyDifficulty } from '../Enemy/types';
 import { applyDamage, heal } from './health';
 import {
     getActiveEffectModifiers, getDotAmplificationByEffect, rampedDamagePerRound,
@@ -99,6 +99,17 @@ export function ruptureBurstCap(enemyMaxHealth: number): number {
 export const CONCEDE_PREMISES_BASE = 8;
 export const CONCEDE_PREMISES_ELITE = 10;
 export const CONCEDE_PREMISES_BOSS = 12;
+/** The Premise-tally FLOOR a CONCEDE Peroration must clear against an enemy of
+ *  this difficulty — the SINGLE source the engine's concede resolution AND every
+ *  presenter/catalog surface read, so a card face can never advertise the base 8
+ *  while the live fight demands 10 (elite) or 12 (boss/unique). WI-6. */
+export function concedeFloorFor(difficulty: EnemyDifficulty | undefined): number {
+    return difficulty === 'boss' || difficulty === 'unique'
+        ? CONCEDE_PREMISES_BOSS
+        : difficulty === 'elite'
+            ? CONCEDE_PREMISES_ELITE
+            : CONCEDE_PREMISES_BASE;
+}
 /** CAPITULATE resolve threshold (Dawncaster Charmed-style rework, plan/
  *  tuning/2026-07-08-win-path-scaling.md item 1a): the old check (SWAY ≥
  *  enemy CURRENT HP) made Grace's alt-win match a boss's ENTIRE HP bar —

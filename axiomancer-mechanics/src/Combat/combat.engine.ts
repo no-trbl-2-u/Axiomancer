@@ -46,7 +46,7 @@ import {
     RUPTURE_PER_AFFLICTION_STACK, DISRUPT_DENY_AT,
     ruptureBurstCap,
     THREAT_RUNGS, THREAT_RUNGS_BOSS, BOSS_RUNG_REGROWTH, bossRungGrowthCap,
-    CONCEDE_PREMISES_BASE, CONCEDE_PREMISES_ELITE, CONCEDE_PREMISES_BOSS,
+    concedeFloorFor,
     capitulateThreshold,
 } from './effects';
 import {
@@ -989,11 +989,7 @@ function gainPremises(
     // unique enemies raise the bar to CONCEDE_PREMISES_ELITE/_BOSS. Replaces
     // the narrower per-level bump that only ever fired against the
     // Impossible-tier ceiling probe.
-    const concedeTierFloor = next.enemy.difficulty === 'boss' || next.enemy.difficulty === 'unique'
-        ? CONCEDE_PREMISES_BOSS
-        : next.enemy.difficulty === 'elite'
-            ? CONCEDE_PREMISES_ELITE
-            : CONCEDE_PREMISES_BASE;
+    const concedeTierFloor = concedeFloorFor(next.enemy.difficulty);
     const effectiveConcedeAt = decl.concedeAt !== undefined ? Math.max(decl.concedeAt, concedeTierFloor) : undefined;
     if (effectiveConcedeAt !== undefined && total >= effectiveConcedeAt) {
         events.push({ kind: 'peroration-fired', cardId: decl.cardId, premisesSpent: total });

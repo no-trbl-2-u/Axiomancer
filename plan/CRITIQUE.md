@@ -323,6 +323,125 @@
   projected-lethality readout would close the gap (build-plan
   Phase 2).
 
+### [HIGH] suppurating-curse can never fire on poison or bleed
+- pass: owner-playtest 2026-07-12
+- viewport: n/a (engine truth-probe + expo-web via Playwright)
+- category: mechanics
+- observation: suppurating-curse's only hook reads the round-clock
+  tick pool (`dotTickBreakdown`), but poison fires on card-played and
+  bleed fires on damage-instance — both event-triggered, not
+  round-clock. The keyword can never observe either DoT ticking, so it
+  is permanently inert against the two DoTs a player is most likely to
+  pair it with. Directly relevant to Phase 32 / EA-7 (trigger-clock DoT
+  substrate, `plan/tuning/2026-07-10-theme-identity.md` §2): this is
+  the exact class of bug that phase is supposed to formalize away, and
+  should be treated as its starting state rather than rediscovered
+  mid-phase.
+- evidence: engine truth-probe against
+  `require('axiomancer-mechanics/dist/index.js')` with a mocked
+  poison/bleed-afflicted enemy — `dotTickBreakdown` never contains a
+  poison or bleed entry; live expo-web combat confirms the same via
+  Playwright drag-to-stage + `combat-apply-*`.
+- suggested fix: either re-hook suppurating-curse off the
+  event-triggered clocks directly (per-card-played / per-damage-instance)
+  or fold it into whatever unified trigger-clock substrate Phase 32
+  builds — do not ship Phase 32 without closing this specific keyword.
+- source: playtester (owner-directed break-test session)
+
+### [MED] DoT card faces print round-clock math that contradicts their own keyword glosses
+- pass: owner-playtest 2026-07-12
+- viewport: mobile (expo-web via Playwright)
+- category: content/copy
+- observation: all DoT card faces still print round-clock phrasing
+  ("12 over 2t" / "foe loses HP each turn"), but the underlying
+  keyword glosses (and the actual trigger, per the finding above) are
+  event-triggered — per-card-played for poison, per-damage-instance
+  for bleed. The face text describes a mechanic the card doesn't run.
+  Same root cause as Phase 29's keyword-honesty doctrine (`plan/steps/
+  01_build_plan.md` Phase 29, KW-2/5/6/7 still open) and squarely in
+  Phase 32's DoT-clock scope.
+- evidence: card-face aria-labels captured during the same Playwright
+  session read round-clock phrasing on cards whose keyword definition
+  is event-triggered.
+- suggested fix: fold into Phase 32's DoT-clock work — regenerate DoT
+  card-face text from the same trigger-clock source of truth once it
+  exists, rather than patching copy ad hoc.
+- source: playtester (owner-directed break-test session)
+
+### [HIGH] combat END-phase button has no in-flight guard — rapid clicks skip player turns
+- pass: owner-playtest 2026-07-12
+- viewport: mobile (expo-web via Playwright)
+- category: functional
+- observation: the END phase button has no in-flight/disabled guard
+  while its action is resolving. Rapid clicks resolve multiple enemy
+  phases in a row, letting the player's own turn get skipped entirely.
+  This is a plain functional bug, not gated on any of the pending
+  design phases — worth fixing standalone rather than waiting for
+  Phase 31/33 to touch the turn loop.
+- evidence: reproduced via Playwright rapid-click on `combat-apply-*`
+  / END phase control against the running expo-web dev server; event
+  log shows multiple enemy-phase resolutions per click burst.
+- suggested fix: disable the END phase control (or debounce/queue its
+  handler) for the duration of phase resolution.
+- source: playtester (owner-directed break-test session)
+
+### [HIGH] momentum wheel's forged wild die cannot be spent — silently burns as a spare
+- pass: owner-playtest 2026-07-12
+- viewport: mobile (expo-web via Playwright)
+- category: functional
+- observation: the momentum-wheel's forged wild die is rejected by
+  drop routing wherever it's dragged, so it can never actually be
+  spent; instead it silently burns as a spare (+1◆) at end of turn.
+  Directly relevant to Phase 31 ("The Roll and the Read" — momentum
+  wheel going engine-native, `plan/tuning/2026-07-10-momentum-scoping.md`):
+  the phase should absorb this concrete die-routing bug as part of
+  making the wheel engine-native, not build the global wheel on top of
+  a broken die-routing path.
+- evidence: reproduced via Playwright drag of the forged wild die onto
+  every valid-looking staged card; drop routing rejects it in every
+  case; end-of-turn event log shows it converted to +1◆ Reserve
+  instead of consumed.
+- suggested fix: fix drop-routing acceptance for the wild die kind (or
+  explicitly document+telegraph the auto-convert as intended, if it
+  is) before Phase 31 builds momentum's engine-native version on top
+  of it.
+- source: playtester (owner-directed break-test session)
+
+### [MED] SWAY has no meter anywhere in the combat UI
+- pass: owner-playtest 2026-07-12
+- viewport: mobile (expo-web via Playwright)
+- category: visual/legibility
+- observation: SWAY (decays 1/turn, capitulate at ≥ enemy VITAE — per
+  the card-editor's own mechanic hint) has no visible meter anywhere
+  in the combat UI, despite `axiomancer-card-editor` already modeling
+  it as a real mechanic (see PR #68's `CardForm.tsx` SWAY field). A
+  player has no way to see SWAY progress toward capitulation.
+  Sequencing risk for Phase 33 (Enemy Answers, SWAY-cleanse enemies,
+  `plan/tuning/2026-07-10-theme-identity.md` §1): that phase plans
+  enemy counterplay against a mechanic the player currently cannot
+  observe.
+- evidence: full-screen accessibility snapshot of an in-progress
+  combat with an active SWAY effect shows no SWAY meter/readout
+  anywhere in the tree.
+- suggested fix: land a SWAY meter (mirroring the Premise-track /
+  disrupt-meter legibility work from Phase 28) before or alongside
+  Phase 33's SWAY-cleanse enemy work.
+- source: playtester (owner-directed break-test session)
+
+### [LOW] "the-closing-word" card face states a threshold that doesn't match the live floor
+- pass: owner-playtest 2026-07-12
+- viewport: mobile (expo-web via Playwright)
+- category: content/copy
+- observation: the-closing-word's card face says "CONCEDE at 8", but
+  the live elite floor is 10 and the boss floor is 12 — the printed
+  number is only correct against a non-elite, non-boss enemy.
+- evidence: card-face aria-label captured during the Playwright
+  session vs. the CONCEDE-gate constants for elite/boss floors.
+- suggested fix: either make the face text stage-relative (e.g.
+  "CONCEDE at the current floor") or print the correct per-stage
+  numbers if the card's threshold is meant to scale with stage.
+- source: playtester (owner-directed break-test session)
+
 ## Done
 
 ### [x] [HIGH] combat design — kill the "weak basic chip OR real status effect" fork (RESOLVED 2026-07-10, owner session)

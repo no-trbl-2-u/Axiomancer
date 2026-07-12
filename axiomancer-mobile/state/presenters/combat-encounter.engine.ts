@@ -23,6 +23,7 @@ import {
     // phase 28 — legibility sweep
     projectRuptureBurst, projectIncomingThreat,
     CONCEDE_PREMISES_BASE, CONCEDE_PREMISES_ELITE, CONCEDE_PREMISES_BOSS,
+    capitulateThreshold,
     type CombatEncounterState, type CombatCard, type CombatManaDie,
     type CombatThreatPhase, type CombatIntentType, type CombatReadResult,
     type CombatSummary, type SignatureSkill, type Stance,
@@ -221,6 +222,14 @@ export interface CombatEnemyPaneVM {
     stanceColor: string;      // accent (revealed stance colour, else neutral)
     stanceLabel: string;      // 'HEART' / '?' …
     stanceHint: string;       // the thematic tell (always shown)
+    /** WI-5 — the invisible alt-win currencies, now surfaced as slim meters
+     *  under the VITAE bar. `sway`/`swayTarget` drive the CAPITULATE track
+     *  (SWAY ≥ target at a turn boundary ends the fight); `premises`/`premiseAt`
+     *  drive the ORATORY track (a declared PERORATION fires on its tally). Each
+     *  meter renders when its value > 0 OR the player holds a card that feeds it
+     *  (so a whole-plan-is-SWAY preset like GRACE sees the track from turn 1). */
+    sway: number; swayTarget: number; swayVisible: boolean;
+    premises: number; premiseAt: number; premiseVisible: boolean;
 }
 export interface CombatPlayerPaneVM {
     name: string; hp: number; maxHp: number; hpPct: number; guard: number; effects: CombatEffectChipVM[];
@@ -510,6 +519,19 @@ function intentVM(state: CombatEncounterState): CombatIntentVM {
     };
 }
 
+/** WI-5 — does any card the player can still draw feed one of these alt-win
+ *  currencies? Scans the whole combat deck (not just the current hand) so a
+ *  whole-plan-is-SWAY preset like GRACE shows its meter from turn 1, before the
+ *  first sway card is drawn. */
+function deckFeedsMechanic(state: CombatEncounterState, kinds: readonly string[]): boolean {
+    const ids = new Set<string>([...state.deck, ...state.hand.map(h => h.cardId)]);
+    for (const id of ids) {
+        const src = getCardById(id);
+        if (src?.specialMechanics?.some(m => kinds.includes(m.kind))) return true;
+    }
+    return false;
+}
+
 function enemyPane(state: CombatEncounterState): CombatEnemyPaneVM {
     const e = state.enemy;
     const cur = currentPhase(state);
@@ -517,6 +539,11 @@ function enemyPane(state: CombatEncounterState): CombatEnemyPaneVM {
     const stance = revealed ? cur?.enemyStance ?? null : null;
     const isBoss = e.difficulty === 'boss' || e.difficulty === 'unique'
         || (e.tags ?? []).includes('boss') || (e.tags ?? []).includes('unique');
+    // WI-5 — the alt-win meters. SWAY target is the engine-owned capitulate
+    // threshold; the PREMISE target is a declared PERORATION's tally (0 until one
+    // is declared). Each meter shows when it has a value OR the deck feeds it.
+    const sway = state.sway ?? 0;
+    const premises = state.premises ?? 0;
     return {
         name: e.name,
         artKey: e.portraitAsset ?? e.id,
@@ -530,6 +557,13 @@ function enemyPane(state: CombatEncounterState): CombatEnemyPaneVM {
         stanceColor: stance ? STANCE_COLORS[stance] : '#6b6257',
         stanceLabel: stance ? STANCE_LABELS[stance] : '?',
         stanceHint: cur?.stanceHint ?? (e as { stanceHint?: string }).stanceHint ?? '',
+        sway, swayTarget: capitulateThreshold(e),
+        swayVisible: sway > 0 || deckFeedsMechanic(state, ['sway']),
+        premises, premiseAt: state.peroration?.at ?? 0,
+        // Only the UNDECLARED tally: once a PERORATION is declared, the existing
+        // peroration track (combat-peroration) owns the premises/at readout.
+        premiseVisible: !state.peroration
+            && (premises > 0 || deckFeedsMechanic(state, ['premise', 'peroration', 'spend_premises'])),
     };
 }
 

@@ -6,7 +6,7 @@
  */
 
 import { describe, it, expect } from '@jest/globals';
-import { createCharacter, initializeCombatEncounter, rollEncounterDice } from '@mechanics';
+import { createCharacter, initializeCombatEncounter, rollEncounterDice, capitulateThreshold } from '@mechanics';
 import type { CombatEncounterState } from '@mechanics';
 
 import { buildCombatViewModel } from '@/state/presenters/combat-encounter.engine';
@@ -41,6 +41,51 @@ describe('CombatViewModel.peroration — the Premise track + CONCEDE beat (phase
         expect(vm.peroration.at).toBe(6);
         expect(vm.peroration.concedeAt).toBe(10); // tier-floored, not the raw 8
         expect(vm.peroration.cardName).toBe('The Closing Word');
+    });
+});
+
+// WI-5 — the invisible alt-win currencies (SWAY → CAPITULATE, PREMISE →
+// ORATORY) now render as meters on the enemy pane. A GRACE run used to play its
+// whole plan and die with zero feedback on progress.
+describe('WI-5 — SWAY / PREMISE alt-win meters', () => {
+    function deckState(deck: string[], seed = 7): CombatEncounterState {
+        const player = createCharacter({ name: 'Hero', level: 3, baseStats: { heart: 8, body: 8, mind: 8 } });
+        player.knownCards = deck.slice();
+        return rollEncounterDice(initializeCombatEncounter(player, createMockEncounterEnemy(), deck, seed)).state;
+    }
+
+    it('surfaces the SWAY meter with the engine capitulate target when sway accrues', () => {
+        const s = { ...openState(), sway: 5 };
+        const vm = buildCombatViewModel(s);
+        expect(vm.enemy.swayVisible).toBe(true);
+        expect(vm.enemy.sway).toBe(5);
+        expect(vm.enemy.swayTarget).toBe(capitulateThreshold(s.enemy)); // engine-owned, not duplicated
+    });
+
+    it('shows the SWAY meter from turn 1 when the deck plan is SWAY, before any is gained (GRACE)', () => {
+        const vm = buildCombatViewModel(deckState(['soft-word', 'soft-word', 'soft-word']));
+        expect(vm.enemy.sway).toBe(0);
+        expect(vm.enemy.swayVisible).toBe(true);
+    });
+
+    it('surfaces the undeclared PREMISE tally, then yields to the peroration track once declared', () => {
+        let s = deckState(['exordium', 'exordium', 'exordium']);
+        s = { ...s, premises: 2 };
+        let vm = buildCombatViewModel(s);
+        expect(vm.enemy.premiseVisible).toBe(true);
+        expect(vm.enemy.premises).toBe(2);
+        expect(vm.enemy.premiseAt).toBe(0); // no target bar until a Peroration is declared
+
+        // Declaring a PERORATION hands the readout to the existing peroration track.
+        s = { ...s, peroration: { cardId: 'the-closing-word', at: 6, concedeAt: 8 } };
+        vm = buildCombatViewModel(s);
+        expect(vm.enemy.premiseVisible).toBe(false);
+    });
+
+    it('hides both meters for a deck that feeds neither currency', () => {
+        const vm = buildCombatViewModel(openState()); // DECK: rupture / reprise / dot
+        expect(vm.enemy.swayVisible).toBe(false);
+        expect(vm.enemy.premiseVisible).toBe(false);
     });
 });
 

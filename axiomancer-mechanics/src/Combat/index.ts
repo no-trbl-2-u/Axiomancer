@@ -41,6 +41,12 @@ export {
     VULNERABLE_MAX_MULT, RESOLUTE_MIN_MULT, RUPTURE_CAP_FRACTION, ruptureBurstCap,
     RUPTURE_PER_AFFLICTION_STACK, DISRUPT_DENY_AT, THREAT_RUNGS, THREAT_RUNGS_BOSS,
     CONCEDE_PREMISES_BASE, CONCEDE_PREMISES_ELITE, CONCEDE_PREMISES_BOSS,
+    // CONCEDE Premise floor per enemy difficulty — the single source the engine
+    // AND every presenter/catalog surface share (WI-6 concede ladder).
+    concedeFloorFor,
+    // CAPITULATE (SWAY) resolve threshold — presenters read the live target off
+    // this instead of duplicating the rule (WI-5 sway meter).
+    capitulateThreshold, CAPITULATE_RESOLVE_FRACTION, CAPITULATE_MIN,
     // Spec 32 v3 — themed-deck selectors
     consumeAfflictions, consumeOneAffliction, getBackfirePerRung,
     getMarkStacks, consumeMarks,

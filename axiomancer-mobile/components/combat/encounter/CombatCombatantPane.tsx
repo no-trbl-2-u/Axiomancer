@@ -113,6 +113,36 @@ function EnemyHpBar({ pct, value, max }: { pct: number; value: number; max: numb
     );
 }
 
+/** WI-5 — a slim alt-win meter under the VITAE bar (SWAY → CAPITULATE, PREMISE
+ *  → ORATORY). These currencies used to accumulate with NO combat surface: a
+ *  GRACE run could play its whole plan and die with zero feedback on progress.
+ *  `target` 0 renders the tally with no fill bar (an undeclared premise count). */
+function AltWinMeter({ glyph, label, value, target, color, testID }: {
+    glyph: string; label: string; value: number; target: number; color: string; testID: string;
+}) {
+    const styles = useStyles();
+    const pct = target > 0 ? Math.max(0, Math.min(1, value / target)) : 0;
+    return (
+        <View
+            style={styles.altMeter}
+            testID={testID}
+            accessible
+            accessibilityRole="progressbar"
+            accessibilityLabel={`${label} ${value}${target > 0 ? ` of ${target}` : ''}`}
+            accessibilityValue={{ min: 0, max: target || Math.max(1, value), now: value }}
+        >
+            <Text style={styles.altMeterLabel} allowFontScaling={false} numberOfLines={1}>
+                {glyph} {label} {value}{target > 0 ? `/${target}` : ''}
+            </Text>
+            {target > 0 ? (
+                <View style={styles.altMeterTrack}>
+                    <View style={[styles.altMeterFill, { width: `${pct * 100}%`, backgroundColor: color }]} />
+                </View>
+            ) : null}
+        </View>
+    );
+}
+
 /** A single floating "-N" / "DENIED" / keyword that rises and fades, then
  *  self-removes. `dx` jitters it horizontally so simultaneous floats (−N + DoT
  *  tick + BLOCKED) don't pile onto one pixel. */
@@ -521,6 +551,13 @@ export const CombatCombatantPane = React.memo(function CombatCombatantPane({
                     {metaLine ? <Text style={styles.hudMeta} allowFontScaling={false}>{metaLine}</Text> : null}
                 </View>
                 <EnemyHpBar pct={enemy.hpPct} value={enemy.hp} max={enemy.maxHp} />
+                {/* WI-5 — alt-win meters (SWAY → capitulate, PREMISE → oratory) */}
+                {enemy.swayVisible ? (
+                    <AltWinMeter glyph="🕊" label="SWAY" value={enemy.sway} target={enemy.swayTarget} color={AXM.sulfur} testID="combat-sway-meter" />
+                ) : null}
+                {enemy.premiseVisible ? (
+                    <AltWinMeter glyph="☞" label="PREMISE" value={enemy.premises} target={enemy.premiseAt} color={AXM.sulfur} testID="combat-premise-meter" />
+                ) : null}
                 <View style={styles.hudUnderBar} pointerEvents="box-none">
                     {/* hidden-stance read — badge only, no text telegraph */}
                     <Text
@@ -584,6 +621,17 @@ const useStyles = makeStyles((AXM) => ({
     },
     crestMax: { fontFamily: FONTS.mono, fontSize: 9, lineHeight: 10, color: AXM.bone, marginTop: -1 },
 
+    // WI-5 — slim alt-win meters under the VITAE bar (SWAY / PREMISE).
+    altMeter: { marginTop: 4 },
+    altMeterLabel: {
+        fontFamily: FONTS.sans, fontSize: 10, letterSpacing: 1, color: AXM.bone,
+        textShadowColor: '#000', textShadowRadius: 3, textShadowOffset: { width: 0, height: 1 },
+    },
+    altMeterTrack: {
+        marginTop: 2, height: 5, borderRadius: 3, backgroundColor: 'rgba(0,0,0,0.6)',
+        borderWidth: 1, borderColor: 'rgba(0,0,0,0.9)', overflow: 'hidden',
+    },
+    altMeterFill: { height: '100%', position: 'absolute', left: 0, top: 0, bottom: 0, borderRadius: 3 },
     hudUnderBar: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', marginTop: 2 },
     hudRight: { alignItems: 'flex-end', gap: 6, flexShrink: 1 },
     stanceBadge: {
