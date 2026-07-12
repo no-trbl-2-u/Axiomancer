@@ -8,8 +8,8 @@
  *   - brace-for-impact      Guard 8               → FREE Guard 2
  *   - resonance-detonation  RUPTURE               → a word, never a number
  *   - the-reaping           REAP all (2/Soul)     → live burst, never headlined
- *   - venom-and-vein        enchantment           → persistent, PAID only
- *   - suppurating-curse     disenchant            → standing curse, PAID only
+ *   - venom-and-vein        enchantment           → FREE timed (3 rounds) / PAID permanent
+ *   - suppurating-curse     disenchant            → standing curse, FREE timed / PAID permanent
  *   - memento-mori          MARK i2 d1            → +2 per DoT tick
  *   - red-herring           BACKFIRE i2 d2        → 2 per denied rung
  *
@@ -77,19 +77,23 @@ describe('faceStats — honest real-unit faces', () => {
         expect(f.heroText).toBe('all Souls');
         expect(f.heroSub).toBe('4 per Soul'); // burstPerSoul — a real authored unit (v3 rework: 2 → 4)
     });
-    it('Venom and Vein (enchantment) → persistent, PAID only', () => {
+    it('Venom and Vein (enchantment) → FREE = timed instance, PAID = rest of combat (spec 32 v4)', () => {
         const { card, sourceCard } = cardOf('venom-and-vein');
         const f = faceStats(card, sourceCard);
         expect(f.kind).toBe('enchant');
-        expect(f.heroSub).toBe('rest of combat');
-        expect(f.freeHeroText).toBe('PAID only');
+        expect(f.heroSub).toBe('rest of combat');            // the ◆ PAID rail truth
+        // The ◇ FREE line is the ENGINE's timed instance — never 'PAID only'.
+        expect(f.freeHeroText).toContain('3 rounds');
+        expect(f.freeHeroText).toContain('BLEED');           // the passive itself, engine-printed
+        expect(f.freeHeroText).not.toMatch(/paid only/i);
         expect(card.cardType).toBe('enchantment');
     });
-    it('Suppurating Curse (disenchant) → a standing curse on the enemy', () => {
+    it('Suppurating Curse (disenchant) → a standing curse; FREE = timed instance', () => {
         const { card, sourceCard } = cardOf('suppurating-curse');
         const f = faceStats(card, sourceCard);
         expect(f.kind).toBe('disenchant');
-        expect(f.freeHeroText).toBe('PAID only');
+        expect(f.freeHeroText).toContain('3 rounds');
+        expect(f.freeHeroText).not.toMatch(/paid only/i);
         expect(card.cardType).toBe('disenchant');
     });
     it('Memento Mori (MARK i2 d1) → +2 per DoT tick, real units', () => {
@@ -122,15 +126,15 @@ describe('Option A split rail — freeKeyword/freeValue + typeStrip (owner-picke
         expect(f.freeKeyword).toBe('GUARD');
         expect(f.freeValue).toBe('2');
     });
-    it('enchantment / disenchant → PAID only rail; disenchant foot prints CURSE', () => {
+    it('enchantment / disenchant → ◇ FREE · timed rounds rail; disenchant foot prints CURSE', () => {
         const venom = cardOf('venom-and-vein');
         const fv = faceStats(venom.card, venom.sourceCard);
         expect(fv.freeKeyword).toBeNull();
-        expect(fv.freeValue).toBe('PAID only');
+        expect(fv.freeValue).toBe('3 rounds');   // the engine's FREE_ENCHANT_ROUNDS truth, via topActionText
         expect(fv.typeStrip).toContain('ENCHANTMENT');
         const curse = cardOf('suppurating-curse');
         const fc = faceStats(curse.card, curse.sourceCard);
-        expect(fc.freeValue).toBe('PAID only');
+        expect(fc.freeValue).toBe('3 rounds');
         expect(fc.typeStrip).toContain('CURSE');
         expect(fc.typeStrip).not.toContain('DISENCHANT');
     });
@@ -182,6 +186,28 @@ describe('detailStats — same numbers as the face', () => {
         const d = detailStats(card, sourceCard);
         expect(d.powerLine).toContain(card.bottomActionText);
         expect(d.metaChip).toContain('ENCHANTMENT');
+    });
+    it('persistent detail tells the v4 fork (FREE timed / PAID permanent), never PAID only', () => {
+        const { card, sourceCard } = cardOf('suppurating-curse');
+        const d = detailStats(card, sourceCard);
+        expect(d.outcomeLine).toBe('FREE: on the enemy for 3 rounds. PAID: rest of combat.');
+        expect(d.readNote).toContain('permanent');
+        expect(d.readNote).toContain('leaves the deck cycle');
+        expect(d.readNote).not.toMatch(/paid only/i);
+        expect(d.freePill).toContain('3 rounds');
+        expect(d.freeLine).toContain('3 rounds');
+    });
+    it('persistent keyword chips lead with the TYPE, then the PAYLOAD keywords with glosses', () => {
+        // suppurating-curse's passive doubles POISON and BLEED damage — the
+        // explainer slot must surface those, not just the card-type label.
+        const curse = cardOf('suppurating-curse');
+        const names = detailStats(curse.card, curse.sourceCard).keywords.map(k => k.name);
+        expect(names[0]).toBe('DISENCHANT');                  // the type, clearly first
+        expect(names).toEqual(expect.arrayContaining(['POISON', 'BLEED']));
+        const venom = cardOf('venom-and-vein');
+        const vk = detailStats(venom.card, venom.sourceCard).keywords;
+        expect(vk.map(k => k.name)).toEqual(expect.arrayContaining(['BLEED', 'POISON']));
+        expect(vk.every(k => k.def.length > 0)).toBe(true);  // every chip carries its gloss
     });
 });
 

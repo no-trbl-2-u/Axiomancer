@@ -304,6 +304,38 @@ export const ARCHETYPE_KEYWORDS: Record<string, string[]> = {
     controller: ['Stagger', 'Backfire', 'Mark', 'Foretell', 'Omen', 'Premise', 'Echo', 'Recall'],
 };
 
+/** Authored persistentEffect spellings that predate the phase-29 renames —
+ *  mechanics text is engine-owned, so the old word maps here instead. */
+const PERSISTENT_TEXT_ALIAS: Record<string, string> = {
+    REPRISE: 'Recall',
+};
+
+/**
+ * 2026-07-11 card-face-truth fix — PAYLOAD keywords for a persistent card.
+ *
+ * An enchant/disenchant's passive lives in ENGINE HOOKS keyed by card id (no
+ * effect id ever reaches mobile), so the payload keyword is recovered from the
+ * card's authored one-line summary (`Card.persistentEffect`), which prints its
+ * mechanics as UPPERCASE registry words ('Every BLEED or POISON you apply…' —
+ * the KW-5 lint guarantees at least one resolves for every library card).
+ * Returns Title-Case registry keywords in text order, deduped; [] when nothing
+ * resolves (callers keep the type-label-only fallback). The card-TYPE labels
+ * (Enchantment/Disenchant) are types, not payloads, and are never returned.
+ */
+export function keywordsInPersistentText(text: string | null | undefined): string[] {
+    if (!text) return [];
+    const out: string[] = [];
+    const seen = new Set<string>();
+    for (const run of text.match(/[A-Z]{2,}/g) ?? []) {
+        const title = run.charAt(0) + run.slice(1).toLowerCase();
+        const kw = PERSISTENT_TEXT_ALIAS[run] ?? (KEYWORD_GLOSS[title] ? title : null);
+        if (!kw || kw === 'Enchantment' || kw === 'Disenchant' || seen.has(kw)) continue;
+        seen.add(kw);
+        out.push(kw);
+    }
+    return out;
+}
+
 /** The keyword for an engine effect id, or null if unmapped. */
 export function keywordForEffect(effectId: string | null | undefined): string | null {
     if (!effectId) return null;

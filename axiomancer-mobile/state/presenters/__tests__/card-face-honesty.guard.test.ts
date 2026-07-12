@@ -38,6 +38,33 @@ describe('card-face honesty guard', () => {
         expect(offenders).toEqual([]);
     });
 
+    it("no persistent card lies about its FREE line — 'PAID only' is dead (spec 32 v4)", () => {
+        // The engine prints BOTH lines on enchant/disenchant cards: the FREE
+        // play is a TIMED instance ('FREE (3 rounds) — <passive>'), the PAID
+        // play is permanent. A presenter surface that claims 'PAID only' (the
+        // 2026-07-11 playtest report) or drops the timed truth is the lie this
+        // guard exists to catch. It also enforces the chip doctrine: the
+        // keyword-explainer slot must resolve at least one PAYLOAD keyword
+        // beyond the card-type label (via combatEffects or the persistentEffect
+        // summary — KW-5 guarantees the words are there to find).
+        const offenders: string[] = [];
+        for (const { id } of cardLibrary) {
+            const card = getCard(id);
+            if (!card || (card.cardType !== 'enchantment' && card.cardType !== 'disenchant')) continue;
+            const f = faceStats(card, getCardById(id));
+            const d = detailStats(card, getCardById(id));
+            const surfaces = [f.freeHeroText, f.freeValue ?? '', d.freeLine, d.freePill, d.outcomeLine, d.readNote];
+            if (surfaces.some(s => /paid only/i.test(s))) offenders.push(`${id} → still claims 'PAID only'`);
+            const rounds = card.topActionText.match(/^FREE \((\d+ rounds?)\)/)?.[1];
+            if (!rounds || !f.freeHeroText.includes(rounds) || f.freeValue !== rounds) {
+                offenders.push(`${id} → FREE surface missing the engine's timed '${rounds ?? '(n rounds)'}' truth`);
+            }
+            const payload = d.keywords.filter(k => k.name !== 'ENCHANTMENT' && k.name !== 'DISENCHANT');
+            if (payload.length === 0) offenders.push(`${id} → no payload keyword chip resolved from its passive`);
+        }
+        expect(offenders).toEqual([]);
+    });
+
     it('every headlined PAID keyword has a glossary definition (the "description above the card")', () => {
         const missing: string[] = [];
         for (const { id } of cardLibrary) {

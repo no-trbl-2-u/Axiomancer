@@ -57,6 +57,10 @@ import { makeStyles, usePalette } from '@/theme/runtime';
 
 type DropResolver = (payload: DragPayload, x: number, y: number) => void | Promise<void>;
 
+/** Rendered size of the dragged-die ghost chip — the die ghost anchors on HALF
+ *  of this so it tracks the pointer (see dieGhostStyle). */
+const DIE_GHOST_SIZE = 56;
+
 export interface CombatEncounterPanelProps {
     /** The foe to fight (live: the real map encounter enemy; dev: a mock). */
     enemy: Enemy;
@@ -337,7 +341,12 @@ export function CombatEncounterPanel({
     drag.end = end;
     // Centre the hand-card face under the finger (half of HAND_CARD_W/H)
     // and lift it above the fingertip so the card stays readable mid-drag.
-    const ghostStyle = useAnimatedStyle(() => ({ opacity: dragShown.value, transform: [{ translateX: dragX.value - HAND_CARD_W / 2 }, { translateY: dragY.value - HAND_CARD_H / 2 - 24 }, { scale: 1.1 }] }));
+    const cardGhostStyle = useAnimatedStyle(() => ({ opacity: dragShown.value, transform: [{ translateX: dragX.value - HAND_CARD_W / 2 }, { translateY: dragY.value - HAND_CARD_H / 2 - 24 }, { scale: 1.1 }] }));
+    // The DIE ghost is a small chip, not a card: it must anchor at ITS OWN
+    // half-size so the die stays centred under the pointer for the whole drag.
+    // CONSTRAINT: never reuse the card's half-W/H anchor for the die — that was
+    // the "die renders up-and-left of the finger" bug (playtest, 2026-07-11).
+    const dieGhostStyle = useAnimatedStyle(() => ({ opacity: dragShown.value, transform: [{ translateX: dragX.value - DIE_GHOST_SIZE / 2 }, { translateY: dragY.value - DIE_GHOST_SIZE / 2 }, { scale: 1.1 }] }));
 
     // ── engine wiring ──
     const apply = useCallback((fn: (s: CombatEncounterState) => CombatEncounterState) => {
@@ -947,13 +956,13 @@ export function CombatEncounterPanel({
             {/* drag ghost — persistently mounted after the first drag; dragShown
                 gates visibility so a finished drag leaves it hidden, not unmounted */}
             {ghostPayload && (
-                <Animated.View pointerEvents="none" style={[styles.ghost, ghostStyle]}>
+                <Animated.View pointerEvents="none" style={[styles.ghost, ghostPayload.type === 'card' ? cardGhostStyle : dieGhostStyle]}>
                     {ghostPayload.type === 'card' ? (
                         // The dragged card keeps its real face (was a stripped name-only box
                         // that looked like a different, "old" card mid-drag).
                         <CombatCardFace card={ghostPayload.card} width={HAND_CARD_W} height={HAND_CARD_H} />
                     ) : (
-                        <CombatDie die={ghostPayload.die} size={56} />
+                        <CombatDie die={ghostPayload.die} size={DIE_GHOST_SIZE} />
                     )}
                 </Animated.View>
             )}

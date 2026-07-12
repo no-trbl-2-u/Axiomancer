@@ -32,7 +32,7 @@ import {
 /** The barrel doesn't re-export the union, so derive it from Card. */
 type CardSpecialMechanic = NonNullable<Card['specialMechanics']>[number];
 import { effectGlyph, GLYPH_COLORS, type StatusGlyph } from '@/components/combat/statusGlyphs';
-import { keywordForEffect, keywordForVerb, keywordForMechanic, keywordGloss } from '@/state/combat/keywords';
+import { keywordForEffect, keywordForVerb, keywordForMechanic, keywordGloss, keywordsInPersistentText } from '@/state/combat/keywords';
 
 // ── Stance palette (Heart/Body/Mind/Wild/X) ──────────────────────────────────
 
@@ -60,11 +60,31 @@ const BEFRIEND_COLOR = '#5bbf6a';
 const INERT_COLOR = '#6b6257';
 const ENCHANT_COLOR = '#7fb3a6';
 
+/** Spec 32 v4 §2.1 — a persistent (enchant/disenchant) card's FREE line is a
+ *  TIMED instance of its passive; the engine prints it on `topActionText` as
+ *  'FREE (3 rounds) — <passive> (Rank)'. Reuse THAT line (strip the FREE head,
+ *  the rank tag, and the trailing stop) so the presenter can never contradict
+ *  the engine — the old hardcoded 'PAID only' label was exactly such a lie. */
+function persistentFreeText(card: CombatCard): string {
+    return card.topActionText
+        .replace(/^FREE\s*/, '')
+        .replace(/\s*\((?:Doxa|Lemma|Thesis|Theorem|Axiom|Aporia)\)\s*$/, '')
+        .replace(/\.\s*$/, '');
+}
+
+/** The terse timed-instance chip for the face's ◇ FREE rail — the '(3 rounds)'
+ *  the engine printed, without re-authoring the number mobile-side. */
+function persistentFreeRounds(card: CombatCard): string {
+    const m = card.topActionText.match(/^FREE\s*\(([^)]+)\)/);
+    return m ? m[1] : 'timed';
+}
+
 /** The authored FREE (no-die) line in real engine units — riderText over the
- *  card's `free` rider; persistent (enchant/disenchant) cards are PAID-only.
+ *  card's `free` rider; a persistent (enchant/disenchant) card's FREE line is
+ *  its engine-printed timed instance (spec 32 v4: 3 rounds of the passive).
  *  Never a fabricated number. */
 function freeLineText(card: CombatCard, sourceCard?: Card): string {
-    if (card.cardType === 'enchantment' || card.cardType === 'disenchant') return 'PAID only';
+    if (card.cardType === 'enchantment' || card.cardType === 'disenchant') return persistentFreeText(card);
     return sourceCard?.free ? riderText(sourceCard.free) : 'no effect';
 }
 
@@ -109,7 +129,9 @@ function riderPairs(r: CardRider): [string, string][] {
 
 function freeRail(card: CombatCard, sourceCard?: Card): { freeKeyword: string | null; freeValue: string | null } {
     if (card.cardType === 'enchantment' || card.cardType === 'disenchant') {
-        return { freeKeyword: null, freeValue: 'PAID only' };
+        // Spec 32 v4 — the FREE play is a real, timed instance of the passive
+        // (never 'PAID only'): the rail prints the engine's own round count.
+        return { freeKeyword: null, freeValue: persistentFreeRounds(card) };
     }
     const r: CardRider | undefined = sourceCard?.free;
     if (!r) return { freeKeyword: null, freeValue: null };
@@ -252,8 +274,8 @@ export interface CombatCardFaceVM {
     freeHeroSub: string | null;
     /** Option A split rail (owner-picked 2026-07-09) — the FREE column's
      *  KEYWORD · value projection of the authored free rider (e.g. TICK · 1).
-     *  null keyword = no free effect / PAID only; the overlay's freePill keeps
-     *  the full riderText prose. */
+     *  null keyword = no free effect (or, on a persistent card, the timed
+     *  '3 rounds' instance); the overlay's freePill keeps the full prose. */
     freeKeyword: string | null;
     freeValue: string | null;
     /** Option A type strip at the card foot — 'BODY · SPELL' (CURSE for
@@ -1086,7 +1108,7 @@ function headlineMechanic(mechs: readonly CardSpecialMechanic[]): CardSpecialMec
     return null;
 }
 
-function buildDetailKeywords(card: CombatCard, c: CardCalc): { name: string; def: string; minor: boolean }[] {
+function buildDetailKeywords(card: CombatCard, c: CardCalc, sourceCard?: Card): { name: string; def: string; minor: boolean }[] {
     const out: { name: string; def: string; minor: boolean }[] = [];
     const seen = new Set<string>();
     const push = (kw: string | null, minor: boolean) => {
@@ -1098,6 +1120,17 @@ function buildDetailKeywords(card: CombatCard, c: CardCalc): { name: string; def
     };
     if (c.kind === 'guard') push(keywordForVerb(card.verbClass), false);
     else push(c.keyword, c.kind === 'inert');
+    // 2026-07-11 card-face-truth fix — a persistent card's PAYLOAD keywords.
+    // The type label (ENCHANTMENT/DISENCHANT) stays FIRST — index 0 renders the
+    // ENCHANT/CURSE type tag, clearly a type — then the passive's ACTUAL
+    // keywords (e.g. a poison curse's POISON) follow with their glosses:
+    // resolved from an authored effect id when one exists, else recovered from
+    // the persistentEffect summary; falls back to the type-only chip when
+    // neither resolves.
+    if (c.kind === 'enchant' || c.kind === 'disenchant') {
+        for (const ce of sourceCard?.combatEffects ?? []) push(keywordForEffect(ce.effectId), false);
+        for (const kw of keywordsInPersistentText(sourceCard?.persistentEffect)) push(kw, false);
+    }
     // A riposte card also grants Guard — surface it as a secondary keyword.
     if (c.kind === 'riposte' && c.guardAmount) push(keywordForVerb('defend'), false);
     // A rider is "minor" only if the engine still doesn't read it (engineHonestKind null).
@@ -1169,7 +1202,7 @@ function detailCore(card: CombatCard, sourceCard?: Card): DetailCore {
         ...(typeLabel ? [typeLabel] : []),
         card.effectKind === 'dot' ? 'DOT' : card.effectKind === 'control' ? 'CONTROL' : card.verbClass.toUpperCase(),
     ].join(' · ');
-    const keywords = buildDetailKeywords(card, c);
+    const keywords = buildDetailKeywords(card, c, sourceCard);
     // The authored FREE line (engine riderText) — the strike/chip is dead.
     const free = freeLineText(card, sourceCard);
     const freeLine = `◇ FREE (no die): ${free}.`;
@@ -1199,8 +1232,11 @@ function detailCore(card: CombatCard, sourceCard?: Card): DetailCore {
         case 'reap': return { subtitle: 'Reap — spend Souls for the printed payoff.', metaChip, outcomeLine: c.reapCost > 0 ? `${Title} ${c.reapCost} Souls.` : `${Title} ALL Souls${c.reapPerSoul > 0 ? ` — ${c.reapPerSoul} per Soul` : ''}.`, outcomeStats: c.reapPerSoul > 0 ? [{ label: 'PER SOUL', value: `${c.reapPerSoul}` }, { label: 'CAP', value: 'none' }] : [{ label: 'COST', value: `${c.reapCost} Souls` }], stacksText: null, freeLine, powerLine: c.reapPerSoul > 0 ? `◆ WITH A DIE: spend EVERY Soul — burst ${c.reapPerSoul} per Soul spent, uncapped.` : `◆ WITH A DIE: spend ${c.reapCost} Souls to fire the printed effect (fizzles when underfunded).`, readNote: 'Souls come from expiring or consumed enemy afflictions — fill the bank first.', mathLine: c.reapPerSoul > 0 ? `Burst = ${c.reapPerSoul} × Souls spent (live, UNCAPPED — the emptied bank is the price).` : `Costs ${c.reapCost} Souls — the payoff is the printed line, in real units.`, keywords };
         case 'forge': { const clause = forgeClause(c.mech) ?? 'shape your dice'; return { subtitle: `${Title} — dice are the resource.`, metaChip, outcomeLine: `${clause.charAt(0).toUpperCase()}${clause.slice(1)}.`, outcomeStats: [], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: ${card.bottomActionText}`, readNote: 'Die-forging takes no read — the printed line is exact.', mathLine: 'A die-economy verb — the printed line is the applied effect.', keywords };
         }
-        case 'enchant': return { subtitle: 'Enchantment — a persistent passive, rest of combat.', metaChip, outcomeLine: 'In play for the rest of the combat.', outcomeStats: [], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: ${card.bottomActionText}`, readNote: 'PAID only — the die is the commitment. It leaves the deck cycle once played.', mathLine: 'A standing rule, not a number — its text is the engine text.', keywords };
-        case 'disenchant': return { subtitle: 'Disenchant — a standing curse on the enemy.', metaChip, outcomeLine: 'Attaches to the enemy for the rest of the combat.', outcomeStats: [], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: ${card.bottomActionText}`, readNote: 'PAID only — the die is the commitment. It leaves the deck cycle once played.', mathLine: 'A standing rule, not a number — its text is the engine text.', keywords };
+        // Spec 32 v4 — persistent cards carry BOTH lines: the FREE play is a
+        // timed instance of the passive; the PAID play makes it permanent,
+        // unique in play, and pulls the card out of the deck cycle.
+        case 'enchant': return { subtitle: 'Enchantment — a persistent passive on your side.', metaChip, outcomeLine: `FREE: yours for ${persistentFreeRounds(card)}. PAID: rest of combat.`, outcomeStats: [], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: ${card.bottomActionText}`, readNote: `Played FREE it runs ${persistentFreeRounds(card)} and ticks out; paid with a die it is permanent — unique in play, and it leaves the deck cycle.`, mathLine: 'A standing rule, not a number — its text is the engine text.', keywords };
+        case 'disenchant': return { subtitle: 'Disenchant — a standing curse on the enemy.', metaChip, outcomeLine: `FREE: on the enemy for ${persistentFreeRounds(card)}. PAID: rest of combat.`, outcomeStats: [], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: ${card.bottomActionText}`, readNote: `Played FREE it holds ${persistentFreeRounds(card)} and ticks out; paid with a die it is permanent — unique in play, and it leaves the deck cycle.`, mathLine: 'A standing rule, not a number — its text is the engine text.', keywords };
         case 'mechanic': { const h = mechanicHeadline(c.mech); const val = [h?.heroText, h?.heroSub].filter(Boolean).join(' '); return { subtitle: `${Title} — ${h?.verbLine ?? 'a special mechanic'}.`, metaChip, outcomeLine: val ? `${Title} ${val}.` : `${Title}.`, outcomeStats: h?.heroText ? [{ label: Title.toUpperCase(), value: h.heroText }] : [], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: ${card.bottomActionText}`, readNote: `${Title} takes no read — the printed line is the applied effect.`, mathLine: `${Title}: ${h?.verbLine ?? card.bottomActionText}.`, keywords }; }
         case 'inert':
         default: return { subtitle: `${Title || 'Effect'} — minor right now.`, metaChip, outcomeLine: `${Title || 'This effect'} — minor for now.`, outcomeStats: [], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: ${card.bottomActionText}`, readNote: 'The engine text above is the whole truth for this card.', mathLine: `${Title || 'This effect'} carries no headline number — the printed line is the applied effect.`, keywords };
