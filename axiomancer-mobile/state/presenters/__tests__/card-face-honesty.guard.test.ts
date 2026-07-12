@@ -61,6 +61,38 @@ describe('card-face honesty guard', () => {
             }
             const payload = d.keywords.filter(k => k.name !== 'ENCHANTMENT' && k.name !== 'DISENCHANT');
             if (payload.length === 0) offenders.push(`${id} → no payload keyword chip resolved from its passive`);
+            // 2026-07-12 (owner directive) — the face's verb slot must lead
+            // with a PAYLOAD keyword (what the card DOES), never the bare type
+            // word, whenever a payload resolves.
+            if (payload.length > 0 && (f.keyword === 'ENCHANTMENT' || f.keyword === 'DISENCHANT')) {
+                offenders.push(`${id} → verb slot shows the bare type word despite payload '${payload[0].name}'`);
+            }
+        }
+        expect(offenders).toEqual([]);
+    });
+
+    it('every explainer term renders at most once per overlay (no dump, no double-gloss)', () => {
+        // 2026-07-12 (owner playtest) — the inspect overlay may explain each
+        // term at most once: keyword chips are deduped, and the per-card
+        // systems slice may not restate a chip (e.g. FLOATING beside FORGE) or
+        // repeat a term. Also pins the dump eviction: a card whose printed
+        // lines reference no system token gets NO systems entries at all.
+        const offenders: string[] = [];
+        for (const { id } of cardLibrary) {
+            const card = getCard(id);
+            if (!card) continue;
+            const d = detailStats(card, getCardById(id));
+            const names = [...d.keywords.map(k => k.name), ...d.systemTerms.map(s => s.term)];
+            const seen = new Set<string>();
+            for (const n of names) {
+                if (seen.has(n)) offenders.push(`${id} → '${n}' explained twice`);
+                seen.add(n);
+            }
+            const printed = [card.topActionText, card.bottomActionText, ...(card.dieLines ?? [])].join(' ');
+            if (d.systemTerms.length === 6) offenders.push(`${id} → full systems dump rendered`);
+            if (d.systemTerms.length > 0 && !/conviction|⬡|resonance|reserve|pip|floating|rung|wild|X die/i.test(printed)) {
+                offenders.push(`${id} → systems entries without any printed reference`);
+            }
         }
         expect(offenders).toEqual([]);
     });

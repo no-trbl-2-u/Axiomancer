@@ -214,7 +214,7 @@ const KEYWORD_GLOSS: Record<string, string> = {
         'Consumes afflictions on the enemy — the printed number, or EVERY affliction on a finisher: their remaining '
         + 'damage-over-time detonates as one immediate burst, plus 3 HP per stack of the consumed non-damage afflictions '
         + '(consuming a single affliction this way also yields a Soul, on the cards that print it). '
-        + "The burst is capped at a quarter of the enemy's max HP (or 80, whichever is larger).",
+        + "The burst is capped at 60% of the enemy's max HP.",
     Siphon: 'Heals you for the printed percentage of the HP this play deals to the enemy.',
     // ── Affliction (T1) ──
     Prolong:
@@ -336,6 +336,21 @@ export function keywordsInPersistentText(text: string | null | undefined): strin
     return out;
 }
 
+/**
+ * The persistent card's VERB-slot keyword (owner directive 2026-07-12: the
+ * face's ◆ line leads with what the card DOES — Entropy Tax leads MARK — while
+ * the type word stays on the type strip / type chip). Authored summaries put
+ * the outcome LAST ('Every KINDLEd or FORGEd die you spend MARKs the enemy.'),
+ * so the last keyword mentioned wins; a summary that OPENS with its keyword
+ * ('DRAW 1 card each time…') is already leading with the verb and wins outright.
+ */
+export function persistentVerbKeyword(text: string | null | undefined): string | null {
+    const kws = keywordsInPersistentText(text);
+    if (kws.length === 0) return null;
+    if (text && text.toUpperCase().startsWith(kws[0].toUpperCase())) return kws[0];
+    return kws[kws.length - 1];
+}
+
 /** The keyword for an engine effect id, or null if unmapped. */
 export function keywordForEffect(effectId: string | null | undefined): string | null {
     if (!effectId) return null;
@@ -372,9 +387,14 @@ export function allRegistryKeywords(): readonly string[] {
  * KW-7 (phase 29) — the "systems glossary": engine tokens spec 32 §3 calls
  * out as "systems, not card keywords" (Conviction, Resonance, Reserve/Pips,
  * Floating dice, rungs, WILD/X) but that the player still reads on cards and
- * threshold lines with no definition anywhere. Rendered once in the combat
- * card detail overlay, beside the color-law legend — the same anchor point,
- * zero engine work.
+ * threshold lines with no definition anywhere.
+ *
+ * 2026-07-12 (owner playtest) — NO LONGER dumped wholesale into every card's
+ * inspect overlay: six always-on dice-system entries made every inspect a
+ * scrolling wall, with some terms explained twice. A card's inspect now shows
+ * only the entries its OWN printed lines reference ({@link systemTermsForCard});
+ * the full list stays exported as the single source of truth for any future
+ * dedicated help/glossary surface.
  */
 export const SYSTEM_GLOSSARY: readonly { term: string; def: string }[] = [
     { term: 'CONVICTION ◆', def: 'A spend-anytime resource banked from overflow (Forge at cap, Overtake, signature costs). Never decays.' },
@@ -384,6 +404,46 @@ export const SYSTEM_GLOSSARY: readonly { term: string; def: string }[] = [
     { term: 'RUNGS', def: "The enemy's telegraphed action's steps of magnitude. STAGGER removes rungs; losing all of them denies the action outright." },
     { term: 'WILD / X', def: 'A WILD die counts as any color for dieBonus and card requirements. A dead X die rolled no pips this round and can be Forged into a WILD floating die instead.' },
 ];
+
+/** How a card's PRINTED lines reference each system term. Matched against the
+ *  card's own engine text (top/bottom action lines + die lines) — never against
+ *  keyword glosses, which would drag the whole dump back in. */
+const SYSTEM_TERM_MATCH: Record<string, RegExp> = {
+    'CONVICTION ◆': /\bconviction\b/i,
+    'RESONANCE ⬡': /\bresonance\b|⬡/,
+    'RESERVE & PIPS': /\breserve\b|\bpips?\b/i,
+    'FLOATING ✦': /\bfloating\b/i,
+    'RUNGS': /\brungs?\b/i,
+    'WILD / X': /\bwild\b|\bX die\b/,
+};
+
+/** Keyword chips whose own gloss already explains a system term — when such a
+ *  chip renders on the card, the system entry is a duplicate and is skipped
+ *  (owner directive 2026-07-12: each term explained at most once per overlay). */
+const SYSTEM_TERM_COVERED_BY: Record<string, readonly string[]> = {
+    'FLOATING ✦': ['FORGE'],           // the Forge gloss defines floating dice
+    'RESERVE & PIPS': ['PIP', 'KINDLE'], // Pip/Kindle glosses define the Reserve
+    'RUNGS': ['STAGGER', 'BACKFIRE'],  // both glosses define rungs
+    'WILD / X': ['FORGE', 'CLARITY'],  // Forge (X→WILD) / Clarity (next die WILD)
+};
+
+/**
+ * 2026-07-12 (owner playtest) — the per-card slice of the systems glossary:
+ * only the entries the card's printed text actually references, minus any
+ * already explained by one of its keyword chips. `printedText` is the joined
+ * engine lines; `chipNames` the UPPERCASE keyword-panel names already shown.
+ */
+export function systemTermsForCard(
+    printedText: string,
+    chipNames: readonly string[],
+): { term: string; def: string }[] {
+    const chips = new Set(chipNames.map(n => n.toUpperCase()));
+    return SYSTEM_GLOSSARY.filter(({ term }) => {
+        const rx = SYSTEM_TERM_MATCH[term];
+        if (!rx || !rx.test(printedText)) return false;
+        return !(SYSTEM_TERM_COVERED_BY[term] ?? []).some(kw => chips.has(kw));
+    });
+}
 
 /** True if a keyword belongs to the given hidden archetype's family. */
 export function keywordInArchetype(keyword: string | null | undefined, archetype: string | null | undefined): boolean {

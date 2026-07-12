@@ -32,7 +32,7 @@ import {
 /** The barrel doesn't re-export the union, so derive it from Card. */
 type CardSpecialMechanic = NonNullable<Card['specialMechanics']>[number];
 import { effectGlyph, GLYPH_COLORS, type StatusGlyph } from '@/components/combat/statusGlyphs';
-import { keywordForEffect, keywordForVerb, keywordForMechanic, keywordGloss, keywordsInPersistentText } from '@/state/combat/keywords';
+import { keywordForEffect, keywordForVerb, keywordForMechanic, keywordGloss, keywordsInPersistentText, persistentVerbKeyword, systemTermsForCard } from '@/state/combat/keywords';
 
 // ── Stance palette (Heart/Body/Mind/Wild/X) ──────────────────────────────────
 
@@ -77,6 +77,18 @@ function persistentFreeText(card: CombatCard): string {
 function persistentFreeRounds(card: CombatCard): string {
     const m = card.topActionText.match(/^FREE\s*\(([^)]+)\)/);
     return m ? m[1] : 'timed';
+}
+
+/** The persistent card's PAYLOAD keyword for the face's ◆ verb slot (owner
+ *  directive 2026-07-12: the face leads with what the passive DOES — MARK,
+ *  POISON — never the bare type word). An authored effect id wins; else the
+ *  verb is recovered from the persistentEffect summary. */
+function persistentPayloadKeyword(sourceCard?: Card): string | null {
+    for (const ce of sourceCard?.combatEffects ?? []) {
+        const kw = keywordForEffect(ce.effectId);
+        if (kw) return kw;
+    }
+    return persistentVerbKeyword(sourceCard?.persistentEffect);
 }
 
 /** The authored FREE (no-die) line in real engine units — riderText over the
@@ -315,10 +327,15 @@ export interface CombatCardDetailVM {
     diePill: string;
     /** The colour-match rule — rendered ONCE per modal (not per powerLine). */
     colorMatchHint: string;
+    /** 2026-07-12 (owner playtest) — the per-card slice of the systems
+     *  glossary: ONLY the system terms this card's printed lines reference
+     *  (and that no keyword chip already explains). Replaces the KW-7 dump of
+     *  all six entries on every inspect. */
+    systemTerms: { term: string; def: string }[];
 }
 
 /** detailStats' switch builds everything BUT the pill fields; the wrapper appends them. */
-type DetailCore = Omit<CombatCardDetailVM, 'freePill' | 'diePillKeyword' | 'diePill' | 'colorMatchHint'>;
+type DetailCore = Omit<CombatCardDetailVM, 'freePill' | 'diePillKeyword' | 'diePill' | 'colorMatchHint' | 'systemTerms'>;
 
 export interface CombatCardVM {
     uid: string; cardId: string; name: string; stance: string; stanceColor: string;
@@ -960,10 +977,18 @@ function cardCalc(card: CombatCard, sourceCard: Card | undefined): CardCalc {
             out.glyph = '⚒'; out.categoryColor = PAYOFF_COLOR;
             break;
         }
+        // 2026-07-12 (owner directive) — the persistent card's verb slot leads
+        // with its PAYLOAD keyword (what the passive DOES: Entropy Tax leads
+        // MARK); the type word stays on the type strip / type chip. An
+        // authored effect id wins; else the verb is recovered from the
+        // persistentEffect summary; the bare type word is the no-payload
+        // fallback only.
         case 'enchant':
-            out.keyword = 'Enchantment'; out.glyph = '◈'; out.categoryColor = ENCHANT_COLOR; break;
+            out.keyword = persistentPayloadKeyword(sourceCard) ?? 'Enchantment';
+            out.glyph = '◈'; out.categoryColor = ENCHANT_COLOR; break;
         case 'disenchant':
-            out.keyword = 'Disenchant'; out.glyph = '⛓'; out.categoryColor = GLYPH_COLORS.control; break;
+            out.keyword = persistentPayloadKeyword(sourceCard) ?? 'Disenchant';
+            out.glyph = '⛓'; out.categoryColor = GLYPH_COLORS.control; break;
         case 'guard':
             out.keyword = 'Guard'; out.glyph = '🛡'; out.categoryColor = GUARD_COLOR; break;
         case 'befriend':
@@ -1119,18 +1144,20 @@ function buildDetailKeywords(card: CombatCard, c: CardCalc, sourceCard?: Card): 
         out.push({ name: up, def: keywordGloss(kw) ?? '', minor });
     };
     if (c.kind === 'guard') push(keywordForVerb(card.verbClass), false);
-    else push(c.keyword, c.kind === 'inert');
-    // 2026-07-11 card-face-truth fix — a persistent card's PAYLOAD keywords.
-    // The type label (ENCHANTMENT/DISENCHANT) stays FIRST — index 0 renders the
+    // 2026-07-11/12 card-face-truth fix — a persistent card's chips: the type
+    // label (ENCHANTMENT/DISENCHANT) stays FIRST — index 0 renders the
     // ENCHANT/CURSE type tag, clearly a type — then the passive's ACTUAL
-    // keywords (e.g. a poison curse's POISON) follow with their glosses:
-    // resolved from an authored effect id when one exists, else recovered from
-    // the persistentEffect summary; falls back to the type-only chip when
-    // neither resolves.
-    if (c.kind === 'enchant' || c.kind === 'disenchant') {
+    // keywords (e.g. a poison curse's POISON) with their glosses: the face's
+    // verb-slot keyword, then any authored effect ids, then the rest of the
+    // persistentEffect summary's keywords. Falls back to the type-only chip
+    // when no payload resolves. (c.keyword is the PAYLOAD verb here, so the
+    // type chip must come from the verb class, not from c.keyword.)
+    else if (c.kind === 'enchant' || c.kind === 'disenchant') {
+        push(keywordForVerb(card.verbClass), false);
+        push(c.keyword, false);
         for (const ce of sourceCard?.combatEffects ?? []) push(keywordForEffect(ce.effectId), false);
         for (const kw of keywordsInPersistentText(sourceCard?.persistentEffect)) push(kw, false);
-    }
+    } else push(c.keyword, c.kind === 'inert');
     // A riposte card also grants Guard — surface it as a secondary keyword.
     if (c.kind === 'riposte' && c.guardAmount) push(keywordForVerb('defend'), false);
     // A rider is "minor" only if the engine still doesn't read it (engineHonestKind null).
@@ -1175,8 +1202,11 @@ export function faceStats(card: CombatCard, sourceCard?: Card): CombatCardFaceVM
         case 'rupture': return { ...base, kind: 'rupture', keyword: 'RUPTURE', heroText: 'detonate', heroSub: 'all afflictions', freeHeroText: free, freeHeroSub: null, verbLine: "consume the foe's afflictions and detonate them", powerRail: c.keyword ?? 'Rupture', readDependent: false, inert: false, guardBase: null };
         case 'reap': return { ...base, kind: 'reap', keyword: 'REAP', heroText: c.reapCost > 0 ? `${c.reapCost} Souls` : 'all Souls', heroSub: c.reapPerSoul > 0 ? `${c.reapPerSoul} per Soul` : 'spend the bank', freeHeroText: free, freeHeroSub: null, verbLine: 'spend Souls for the printed payoff', powerRail: c.keyword ?? 'Reap', readDependent: false, inert: false, guardBase: null };
         case 'forge': { const clause = forgeClause(c.mech) ?? 'shape your dice'; return { ...base, kind: 'forge', keyword: kw, heroText: '', heroSub: clause, freeHeroText: free, freeHeroSub: null, verbLine: clause, powerRail: c.keyword ?? 'Forge', readDependent: false, inert: false, guardBase: null }; }
-        case 'enchant': return { ...base, kind: 'enchant', keyword: 'ENCHANTMENT', heroText: '', heroSub: 'rest of combat', freeHeroText: free, freeHeroSub: null, verbLine: 'a persistent passive on your side', powerRail: c.keyword ?? 'Enchantment', readDependent: false, inert: false, guardBase: null };
-        case 'disenchant': return { ...base, kind: 'disenchant', keyword: 'DISENCHANT', heroText: '', heroSub: 'curse · rest of combat', freeHeroText: free, freeHeroSub: null, verbLine: 'a standing curse attached to the enemy', powerRail: c.keyword ?? 'Disenchant', readDependent: false, inert: false, guardBase: null };
+        // 2026-07-12 — the verb slot is the PAYLOAD keyword (cardCalc), never
+        // the bare type word unless no payload resolves; the type stays on the
+        // type strip (ENCHANTMENT / CURSE) and the type chip.
+        case 'enchant': return { ...base, kind: 'enchant', keyword: kw ?? 'ENCHANTMENT', heroText: '', heroSub: 'rest of combat', freeHeroText: free, freeHeroSub: null, verbLine: 'a persistent passive on your side', powerRail: c.keyword ?? 'Enchantment', readDependent: false, inert: false, guardBase: null };
+        case 'disenchant': return { ...base, kind: 'disenchant', keyword: kw ?? 'DISENCHANT', heroText: '', heroSub: 'curse · rest of combat', freeHeroText: free, freeHeroSub: null, verbLine: 'a standing curse attached to the enemy', powerRail: c.keyword ?? 'Disenchant', readDependent: false, inert: false, guardBase: null };
         case 'mechanic': { const h = mechanicHeadline(c.mech); return { ...base, kind: 'mechanic', keyword: kw, heroText: h?.heroText ?? '', heroSub: h?.heroSub ?? null, freeHeroText: free, freeHeroSub: null, verbLine: h?.verbLine ?? '', powerRail: c.keyword ?? '—', readDependent: false, inert: false, guardBase: null }; }
         case 'inert':
         default: return { ...base, kind: 'inert', keyword: kw ?? 'DEBUFF', heroText: '', heroSub: card.verbClass === 'buff-self' ? 'buff yourself' : 'weakens the foe', freeHeroText: free, freeHeroSub: null, verbLine: card.verbClass === 'buff-self' ? 'buff yourself' : 'weakens the foe', powerRail: c.keyword ?? '—', readDependent: false, inert: true, guardBase: null };
@@ -1277,7 +1307,14 @@ export function detailStats(card: CombatCard, sourceCard?: Card): CombatCardDeta
     }
     // The colour law (dice-law rework 2026-07-09) — rendered ONCE per modal.
     const colorMatchHint = `Only a ${STANCE} or WILD die can power this card.`;
-    return { ...core, freePill, diePillKeyword, diePill, colorMatchHint };
+    // 2026-07-12 — the per-card systems-glossary slice: scan the card's OWN
+    // printed lines (colorMatchHint excluded — its WILD is the global colour
+    // law, not a card reference) and drop terms a keyword chip already covers.
+    const systemTerms = systemTermsForCard(
+        [card.topActionText, card.bottomActionText, ...(card.dieLines ?? [])].join(' '),
+        core.keywords.map(k => k.name),
+    );
+    return { ...core, freePill, diePillKeyword, diePill, colorMatchHint, systemTerms };
 }
 
 /** Read-scaled hero value at the moment of commit (read known) — StagedCard only.

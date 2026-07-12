@@ -96,6 +96,18 @@ describe('faceStats — honest real-unit faces', () => {
         expect(f.freeHeroText).not.toMatch(/paid only/i);
         expect(card.cardType).toBe('disenchant');
     });
+    it('persistent verb slot leads with the PAYLOAD keyword, never the bare type word (owner, 2026-07-12)', () => {
+        // entropy-tax: 'Every KINDLEd or FORGEd die you spend MARKs the enemy.'
+        // — the outcome verb (MARK) wins, not the trigger (KINDLE/FORGE).
+        const tax = cardOf('entropy-tax');
+        expect(faceStats(tax.card, tax.sourceCard).keyword).toBe('MARK');
+        // venom-and-vein boosts BLEED/POISON — a payload keyword, not ENCHANTMENT.
+        const venom = cardOf('venom-and-vein');
+        expect(faceStats(venom.card, venom.sourceCard).keyword).toBe('POISON');
+        // achilles-and-the-tortoise opens with its verb: 'DRAW 1 card each time…'
+        const draw = cardOf('achilles-and-the-tortoise');
+        expect(faceStats(draw.card, draw.sourceCard).keyword).toBe('DRAW');
+    });
     it('Memento Mori (MARK i2 d1) → +2 per DoT tick, real units', () => {
         const { card, sourceCard } = cardOf('memento-mori');
         const f = faceStats(card, sourceCard);
@@ -208,6 +220,23 @@ describe('detailStats — same numbers as the face', () => {
         const vk = detailStats(venom.card, venom.sourceCard).keywords;
         expect(vk.map(k => k.name)).toEqual(expect.arrayContaining(['BLEED', 'POISON']));
         expect(vk.every(k => k.def.length > 0)).toBe(true);  // every chip carries its gloss
+    });
+    it('systemTerms is the PER-CARD glossary slice, not the KW-7 dump (owner, 2026-07-12)', () => {
+        // entropy-tax's printed lines reference no dice-system token → NO
+        // systems glossary at all (the old dump rendered all six on every card).
+        const tax = cardOf('entropy-tax');
+        expect(detailStats(tax.card, tax.sourceCard).systemTerms).toEqual([]);
+        // bootstrap-loop prints '+1 Conviction' and a '⬡ MIND ×2 spent'
+        // threshold line → CONVICTION and RESONANCE render; FLOATING/WILD are
+        // already explained by its FORGE keyword chip → deduped away.
+        const loop = cardOf('bootstrap-loop');
+        const d = detailStats(loop.card, loop.sourceCard);
+        const terms = d.systemTerms.map(s => s.term);
+        expect(terms).toEqual(expect.arrayContaining(['CONVICTION ◆', 'RESONANCE ⬡']));
+        expect(terms).not.toContain('FLOATING ✦');
+        expect(terms).not.toContain('WILD / X');
+        expect(terms).not.toContain('RUNGS');
+        expect(d.keywords.map(k => k.name)).toContain('FORGE');
     });
 });
 

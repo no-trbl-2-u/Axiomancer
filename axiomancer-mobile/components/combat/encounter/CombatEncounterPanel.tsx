@@ -36,7 +36,6 @@ import {
 } from '@mechanics';
 
 import { advanceWheel, isMomentumDieId, isWheelStance, momentumDieId, type WheelStance } from '@/state/combat/momentum';
-import { SYSTEM_GLOSSARY } from '@/state/combat/keywords';
 
 import { CombatBoard, CombatCardFace, HAND_CARD_W, HAND_CARD_H, type DragController, type DragPayload } from '@/components/combat/encounter/CombatBoard';
 import { type CombatFx } from '@/components/combat/encounter/CombatCombatantPane';
@@ -682,19 +681,23 @@ export function CombatEncounterPanel({
                             {/* the colour law — ONE global legend (was boilerplated onto every card) */}
                             <Text style={styles.detailColorMatch}>{detailCard.detail.colorMatchHint}</Text>
 
-                            {/* KW-7 (phase 29) — the systems glossary: engine tokens the player
-                                reads on cards (Conviction, Resonance, Reserve/Pips, Floating,
-                                rungs, WILD/X) but that spec 32 §3 explicitly keeps OUT of the
-                                card-keyword registry. Same anchor point as the colour-law legend
-                                above — the overlay is where mid-fight questions get answered. */}
-                            <View style={styles.systemsGlossary}>
-                                {SYSTEM_GLOSSARY.map(s => (
-                                    <Text key={s.term} style={styles.systemsGlossaryLine}>
-                                        <Text style={styles.systemsGlossaryTerm}>{s.term}</Text>
-                                        {' — ' + s.def}
-                                    </Text>
-                                ))}
-                            </View>
+                            {/* KW-7 (phase 29, re-scoped 2026-07-12) — system-term definitions
+                                (Conviction, Resonance, Reserve/Pips, Floating, rungs, WILD/X):
+                                ONLY the entries THIS card's printed lines reference, derived
+                                per-card by the presenter (systemTermsForCard). The wholesale
+                                six-entry dump made every inspect a scrolling wall (owner
+                                playtest) — a card's inspect explains only what the card
+                                actually uses, each term at most once. */}
+                            {detailCard.detail.systemTerms.length > 0 && (
+                                <View style={styles.systemsGlossary}>
+                                    {detailCard.detail.systemTerms.map(s => (
+                                        <Text key={s.term} style={styles.systemsGlossaryLine}>
+                                            <Text style={styles.systemsGlossaryTerm}>{s.term}</Text>
+                                            {' — ' + s.def}
+                                        </Text>
+                                    ))}
+                                </View>
+                            )}
 
                             {/* (4) FLAVOR — authored prose, overlay BOTTOM only (owner
                                 directive 2026-07-09: the face stays purely functional). */}
