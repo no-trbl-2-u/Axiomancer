@@ -44,8 +44,12 @@ export const SIGNATURE_SKILLS: Record<SignatureSkillId, SignatureSkill> = {
     },
     'sig-overwhelming-argument': {
         id: 'sig-overwhelming-argument', name: 'Overwhelming Argument', kind: 'control', cost: 8,
-        magnitude: 5, effectKind: 'control', effectId: 'debuff_backfire',
-        description: 'Petrify the enemy — it turns to stone and loses its turns while the control holds.',
+        // WI-8 (2026-07-12) — was wired to `debuff_backfire`, which only pays on
+        // rung loss: 4 casts in one fight moved the enemy's HP by ZERO. Now it
+        // applies REAL hard control (`debuff_petrify`, a 1-phase skipTurn honored
+        // by `canAct`) so an 8-Conviction flagship actually denies the foe's turn.
+        magnitude: 1, effectKind: 'control', effectId: 'debuff_petrify',
+        description: 'Petrify the foe — it turns to stone and loses its next turn. A boss is too willful to freeze: it is STAGGERED instead.',
     },
     'sig-conviction-strike': {
         id: 'sig-conviction-strike', name: 'Conviction Strike', kind: 'dot', cost: 7,
@@ -91,6 +95,11 @@ const SECOND_WIND_HEAL_FRAC = 0.12;
 
 /** Damage dealt per stack of any active effect on the enemy (Conclusion finisher). */
 export const CONCLUDE_DMG_PER_STACK = 2;
+
+/** WI-8 — STAGGER rungs a HARD-control signature lays on a boss/unique instead
+ *  of the (forbidden) turn-skip: bosses can't be frozen (anti-permalock), so the
+ *  8-Conviction cast still buys an observable weaken of their next telegraph. */
+export const HARD_CONTROL_BOSS_STAGGER = 2;
 
 /**
  * Applies a signature skill's effect to the encounter (HP model). Pure: returns
@@ -169,6 +178,19 @@ export function applySignatureSkill(
             let enemy = state.enemy;
             let attribution = state.attribution;
             const def = skill.effectId ? lookupEffect(skill.effectId) : undefined;
+            // WI-8 — bosses/uniques RESIST hard control (a skipTurn effect): the
+            // anti-permalock doctrine (cf. `bossRungGrowth`) forbids freezing
+            // them outright. A hard-control signature instead STAGGERS the boss's
+            // next telegraph — a real, observable weaken — while normal foes take
+            // the full turn-skip below.
+            const isHardControl = !!def?.payload.actionRestriction?.skipTurn;
+            const bossImmune = state.enemy.difficulty === 'boss' || state.enemy.difficulty === 'unique';
+            if (def && isHardControl && bossImmune) {
+                const total = (state.staggerRungs ?? 0) + HARD_CONTROL_BOSS_STAGGER;
+                events.push({ kind: 'staggered', rungs: HARD_CONTROL_BOSS_STAGGER, total });
+                next = { ...state, staggerRungs: total };
+                break;
+            }
             if (def) {
                 const res = applyEffect(enemy.effects, def, state.round, {
                     intensityDelta: skill.magnitude, sourceId: state.player.id,

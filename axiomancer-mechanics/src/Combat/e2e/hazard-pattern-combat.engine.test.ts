@@ -394,15 +394,25 @@ describe('Spec 26b §4 — Signature Skills (Conviction-funded)', () => {
         expect(r.state.hand.find(h => h.uid === uid)).toBeUndefined();
     });
 
-    it('Overwhelming Argument (control capstone) applies BACKFIRE to the enemy (v3 control vocabulary)', () => {
+    it('Overwhelming Argument PETRIFIES a normal foe — real hard control, not the old inert BACKFIRE (WI-8)', () => {
         mockSequentialRng(0.5);
         let state = initializeCombatEncounter(makePlayer([DOT_BODY]), makeEnemy(90, 'heart'), [DOT_BODY], 4);
         state = rollEncounterDice(state).state;
         state = { ...state, conviction: 10 };
         const r = playSignatureSkill(state, 'sig-overwhelming-argument');
         expect(r.state.conviction).toBe(2); // cost 8
-        expect(r.state.enemy.effects.some(e => e.effectId === 'debuff_backfire')).toBe(true);
+        // The petrify lands; the old debuff_backfire lie is gone.
+        expect(r.state.enemy.effects.some(e => e.effectId === 'debuff_petrify')).toBe(true);
+        expect(r.state.enemy.effects.some(e => e.effectId === 'debuff_backfire')).toBe(false);
         expect(r.events.some(e => e.kind === 'signature-cast')).toBe(true);
+        // OBSERVABLE enemy state change (the whole point of WI-8): the petrified
+        // foe's next telegraph is DENIED — the player takes zero, the phase marks
+        // 'clear' (hindered). The old signature let the foe attack through 4 casts.
+        const hpBefore = r.state.player.health;
+        const phase = resolveThreatPhase(r.state);
+        expect(phase.state.player.health).toBe(hpBefore);
+        expect(phase.events.some(e => e.kind === 'phase-resolved'
+            && (e as { mark: string }).mark === 'clear')).toBe(true);
     });
 
     it('a signature skill fizzles (no-op) when underfunded', () => {
@@ -415,33 +425,29 @@ describe('Spec 26b §4 — Signature Skills (Conviction-funded)', () => {
         expect(r.events.some(e => e.kind === 'effect-fizzled')).toBe(true);
     });
 
-    // Funded-path (success) kill-path witness: the unit tests above only check
-    // the isolated cast; this runs the v3 control loop — BACKFIRE from the
-    // capstone + STAGGER rungs denying the telegraph, the denied rungs feeding
-    // the backfire drip — all the way to an HP-kill victory.
-    it('a funded Overwhelming Argument + full STAGGER denies the telegraph and BACKFIRE drips it down, en route to victory', () => {
+    // Funded-path (success) kill-path witness: the unit test above checks the
+    // isolated cast; this runs the loop — PETRIFY denies the telegraph outright
+    // (hard control, no STAGGER needed), then stacked DoT grinds to an HP-kill.
+    it('a funded Overwhelming Argument PETRIFIES the telegraph away, en route to victory (WI-8)', () => {
         mockSequentialRng(0.05);
         const player = makePlayer([DOT_BODY]);
         const enemy = makeEnemy(30, 'heart');
         let state = initializeCombatEncounter(player, enemy, [DOT_BODY, DOT_BODY, DOT_BODY], 21);
 
-        // Turn 1 — cast the funded capstone (BACKFIRE i5 lands guaranteed), then
-        // strip every rung from the telegraph: the denied action turns inward.
+        // Turn 1 — cast the funded capstone: petrify lands guaranteed and the
+        // enemy loses its next action outright (canAct → skipTurn), no STAGGER.
         state = rollEncounterDice(state).state;
         state = { ...state, conviction: 10 };
         const healthBeforeCast = state.player.health;
         const cast = playSignatureSkill(state, 'sig-overwhelming-argument');
-        expect(cast.state.enemy.effects.some(e => e.effectId === 'debuff_backfire')).toBe(true);
+        expect(cast.state.enemy.effects.some(e => e.effectId === 'debuff_petrify')).toBe(true);
         expect(cast.events.some(e => e.kind === 'signature-cast')).toBe(true);
-        const enemyHpBeforePhase = cast.state.enemy.health;
-        const denied = resolveThreatPhase({ ...cast.state, staggerRungs: 99 });
+        const denied = resolveThreatPhase(cast.state); // no staggerRungs injected
         state = denied.state;
-        // Fully denied: no player HP lost; BACKFIRE dripped per denied rung.
+        // Denied by the petrify alone: no player HP lost, the phase marks 'clear'.
         expect(state.player.health).toBe(healthBeforeCast);
-        const backfired = denied.events.find(e => e.kind === 'backfired') as { amount: number; rungs: number } | undefined;
-        expect(backfired).toBeDefined();
-        expect(backfired!.amount).toBeGreaterThan(0);
-        expect(state.enemy.health).toBeLessThan(enemyHpBeforePhase);
+        expect(denied.events.some(e => e.kind === 'phase-resolved'
+            && (e as { mark: string }).mark === 'clear')).toBe(true);
 
         // Grind the rest out with stacked DoT to a real HP-kill outcome.
         let guard = 0;
@@ -457,6 +463,20 @@ describe('Spec 26b §4 — Signature Skills (Conviction-funded)', () => {
         expect(state.finalOutcome).toBe('victory');
         const summary = buildCombatSummary(state);
         expect(summary.outcome).toBe('victory');
+    });
+
+    it('a boss RESISTS the petrify — it is STAGGERED instead of frozen (anti-permalock, WI-8)', () => {
+        mockSequentialRng(0.5);
+        const enemy = { ...makeEnemy(200, 'heart'), difficulty: 'boss' as const };
+        let state = initializeCombatEncounter(makePlayer([DOT_BODY]), enemy, [DOT_BODY], 4);
+        state = rollEncounterDice(state).state;
+        state = { ...state, conviction: 10, staggerRungs: 0 };
+        const r = playSignatureSkill(state, 'sig-overwhelming-argument');
+        expect(r.state.conviction).toBe(2); // still funded + spent
+        // No freeze on a boss; a real, observable weaken (STAGGER) lands instead.
+        expect(r.state.enemy.effects.some(e => e.effectId === 'debuff_petrify')).toBe(false);
+        expect(r.state.staggerRungs).toBeGreaterThan(0);
+        expect(r.events.some(e => e.kind === 'staggered')).toBe(true);
     });
 
     it('Press Fate re-rolls ONLY spent dice and keeps a still-usable die', () => {

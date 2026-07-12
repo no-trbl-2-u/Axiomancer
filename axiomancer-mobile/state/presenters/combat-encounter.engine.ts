@@ -23,11 +23,11 @@ import {
     // phase 28 — legibility sweep
     projectRuptureBurst, projectIncomingThreat,
     CONCEDE_PREMISES_BASE, CONCEDE_PREMISES_ELITE, CONCEDE_PREMISES_BOSS,
-    capitulateThreshold,
+    capitulateThreshold, concedeFloorFor,
     type CombatEncounterState, type CombatCard, type CombatManaDie,
     type CombatThreatPhase, type CombatIntentType, type CombatReadResult,
     type CombatSummary, type SignatureSkill, type Stance,
-    type Card, type CardCombatEffects,
+    type Card, type CardCombatEffects, type EnemyDifficulty,
 } from '@mechanics';
 
 /** The barrel doesn't re-export the union, so derive it from Card. */
@@ -1129,7 +1129,7 @@ function forgeClause(mech: CardSpecialMechanic | null): string | null {
  *  `keyword` is Title-Case (matches the glossary); returns null for kinds with
  *  no player headline (pure die-plumbing riders never reach here as primary). */
 interface MechHeadline { keyword: string | null; heroText: string; heroSub: string | null; verbLine: string }
-function mechanicHeadline(mech: CardSpecialMechanic | null): MechHeadline | null {
+function mechanicHeadline(mech: CardSpecialMechanic | null, enemyDifficulty?: EnemyDifficulty): MechHeadline | null {
     if (!mech) return null;
     const kw = keywordForMechanic(mech.kind);
     switch (mech.kind) {
@@ -1139,11 +1139,25 @@ function mechanicHeadline(mech: CardSpecialMechanic | null): MechHeadline | null
             return { keyword: kw ?? 'Stagger', heroText: '', heroSub: "lock the foe's next stance", verbLine: "the foe's next stance is locked and revealed" };
         case 'sway':
             return { keyword: kw ?? 'Sway', heroText: `+${mech.amount}`, heroSub: 'toward capitulation', verbLine: 'push the foe toward capitulation' };
-        case 'peroration':
+        case 'peroration': {
             // KW-2 (phase 29): PERORATION demoted — its sole carrier
             // (the-closing-word) headlines under PREMISE, the keyword whose
             // gloss already explains the payoff-trigger mechanic.
-            return { keyword: kw ?? 'Premise', heroText: `at ${mech.at}`, heroSub: mech.concedeAt ? `concede at ${mech.concedeAt}` : 'fires free', verbLine: 'a declared conclusion that fires on your Premise tally' };
+            // WI-6 — the concede threshold tier-FLOORS against the live foe
+            // (base 8 / elite 10 / boss 12). The old face printed the raw
+            // authored 8 unconditionally, a lie against an elite/boss. In combat
+            // (difficulty known) show the effective threshold; in the static
+            // catalog show the whole ladder.
+            const authored = mech.concedeAt;
+            const concedeSub = authored === undefined
+                ? 'fires free'
+                : enemyDifficulty
+                    ? `concede at ${Math.max(authored, concedeFloorFor(enemyDifficulty))} vs this foe`
+                    : `concede ${Math.max(authored, CONCEDE_PREMISES_BASE)}`
+                        + `/${Math.max(authored, CONCEDE_PREMISES_ELITE)} elite`
+                        + `/${Math.max(authored, CONCEDE_PREMISES_BOSS)} boss`;
+            return { keyword: kw ?? 'Premise', heroText: `at ${mech.at}`, heroSub: concedeSub, verbLine: 'a declared conclusion that fires on your Premise tally' };
+        }
         case 'premise':
             return { keyword: kw ?? 'Premise', heroText: `+${mech.count}`, heroSub: 'to the tally', verbLine: 'add to your Premise tally' };
         case 'spend_premises':
@@ -1253,7 +1267,7 @@ function buildDetailKeywords(card: CombatCard, c: CardCalc, sourceCard?: Card): 
 }
 
 /** Honest card FACE view-model (the 5-zone hand card). */
-export function faceStats(card: CombatCard, sourceCard?: Card): CombatCardFaceVM {
+export function faceStats(card: CombatCard, sourceCard?: Card, enemyDifficulty?: EnemyDifficulty): CombatCardFaceVM {
     const c = cardCalc(card, sourceCard);
     const stanceColor = STANCE_COLORS[card.stance] ?? '#888';
     const kw = c.keyword ? c.keyword.toUpperCase() : null;
@@ -1311,14 +1325,14 @@ export function faceStats(card: CombatCard, sourceCard?: Card): CombatCardFaceVM
         // type strip (ENCHANTMENT / CURSE) and the type chip.
         case 'enchant': return { ...base, kind: 'enchant', keyword: kw ?? 'ENCHANTMENT', heroText: '', heroSub: 'rest of combat', freeHeroText: free, freeHeroSub: null, verbLine: 'a persistent passive on your side', powerRail: c.keyword ?? 'Enchantment', readDependent: false, inert: false, guardBase: null };
         case 'disenchant': return { ...base, kind: 'disenchant', keyword: kw ?? 'DISENCHANT', heroText: '', heroSub: 'curse · rest of combat', freeHeroText: free, freeHeroSub: null, verbLine: 'a standing curse attached to the enemy', powerRail: c.keyword ?? 'Disenchant', readDependent: false, inert: false, guardBase: null };
-        case 'mechanic': { const h = mechanicHeadline(c.mech); return { ...base, kind: 'mechanic', keyword: kw, heroText: h?.heroText ?? '', heroSub: h?.heroSub ?? null, freeHeroText: free, freeHeroSub: null, verbLine: h?.verbLine ?? '', powerRail: c.keyword ?? '—', readDependent: false, inert: false, guardBase: null }; }
+        case 'mechanic': { const h = mechanicHeadline(c.mech, enemyDifficulty); return { ...base, kind: 'mechanic', keyword: kw, heroText: h?.heroText ?? '', heroSub: h?.heroSub ?? null, freeHeroText: free, freeHeroSub: null, verbLine: h?.verbLine ?? '', powerRail: c.keyword ?? '—', readDependent: false, inert: false, guardBase: null }; }
         case 'inert':
         default: return { ...base, kind: 'inert', keyword: kw ?? 'DEBUFF', heroText: '', heroSub: card.verbClass === 'buff-self' ? 'buff yourself' : 'weakens the foe', freeHeroText: free, freeHeroSub: null, verbLine: card.verbClass === 'buff-self' ? 'buff yourself' : 'weakens the foe', powerRail: c.keyword ?? '—', readDependent: false, inert: true, guardBase: null };
     }
 }
 
 /** Honest card DETAIL view-model CORE (everything but the pill table). */
-function detailCore(card: CombatCard, sourceCard?: Card): DetailCore {
+function detailCore(card: CombatCard, sourceCard?: Card, enemyDifficulty?: EnemyDifficulty): DetailCore {
     const c = cardCalc(card, sourceCard);
     const Title = c.keyword ?? '';
     const STANCE = STANCE_LABELS[card.stance] ?? card.stance.toUpperCase();
@@ -1393,7 +1407,7 @@ function detailCore(card: CombatCard, sourceCard?: Card): DetailCore {
         // unique in play, and pulls the card out of the deck cycle.
         case 'enchant': return { subtitle: 'Enchantment — a persistent passive on your side.', metaChip, outcomeLine: `FREE: yours for ${persistentFreeRounds(card)}. PAID: rest of combat.`, outcomeStats: [], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: ${card.bottomActionText}`, readNote: `Played FREE it runs ${persistentFreeRounds(card)} and ticks out; paid with a die it is permanent — unique in play, and it leaves the deck cycle.`, mathLine: 'A standing rule, not a number — its text is the engine text.', keywords };
         case 'disenchant': return { subtitle: 'Disenchant — a standing curse on the enemy.', metaChip, outcomeLine: `FREE: on the enemy for ${persistentFreeRounds(card)}. PAID: rest of combat.`, outcomeStats: [], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: ${card.bottomActionText}`, readNote: `Played FREE it holds ${persistentFreeRounds(card)} and ticks out; paid with a die it is permanent — unique in play, and it leaves the deck cycle.`, mathLine: 'A standing rule, not a number — its text is the engine text.', keywords };
-        case 'mechanic': { const h = mechanicHeadline(c.mech); const val = [h?.heroText, h?.heroSub].filter(Boolean).join(' '); return { subtitle: `${Title} — ${h?.verbLine ?? 'a special mechanic'}.`, metaChip, outcomeLine: val ? `${Title} ${val}.` : `${Title}.`, outcomeStats: h?.heroText ? [{ label: Title.toUpperCase(), value: h.heroText }] : [], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: ${card.bottomActionText}`, readNote: `${Title} takes no read — the printed line is the applied effect.`, mathLine: `${Title}: ${h?.verbLine ?? card.bottomActionText}.`, keywords }; }
+        case 'mechanic': { const h = mechanicHeadline(c.mech, enemyDifficulty); const val = [h?.heroText, h?.heroSub].filter(Boolean).join(' '); return { subtitle: `${Title} — ${h?.verbLine ?? 'a special mechanic'}.`, metaChip, outcomeLine: val ? `${Title} ${val}.` : `${Title}.`, outcomeStats: h?.heroText ? [{ label: Title.toUpperCase(), value: h.heroText }] : [], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: ${card.bottomActionText}`, readNote: `${Title} takes no read — the printed line is the applied effect.`, mathLine: `${Title}: ${h?.verbLine ?? card.bottomActionText}.`, keywords }; }
         case 'inert':
         default: return { subtitle: `${Title || 'Effect'} — minor right now.`, metaChip, outcomeLine: `${Title || 'This effect'} — minor for now.`, outcomeStats: [], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: ${card.bottomActionText}`, readNote: 'The engine text above is the whole truth for this card.', mathLine: `${Title || 'This effect'} carries no headline number — the printed line is the applied effect.`, keywords };
     }
@@ -1403,10 +1417,10 @@ function detailCore(card: CombatCard, sourceCard?: Card): DetailCore {
  *  NO-DIE / +DIE pill table that replaces the old prose FREE/POWER fork. Same
  *  numbers as the face; read-scaling math is pulled into the +DIE pill (the prose
  *  is flattened, NOT the math). */
-export function detailStats(card: CombatCard, sourceCard?: Card): CombatCardDetailVM {
-    const core = detailCore(card, sourceCard);
+export function detailStats(card: CombatCard, sourceCard?: Card, enemyDifficulty?: EnemyDifficulty): CombatCardDetailVM {
+    const core = detailCore(card, sourceCard, enemyDifficulty);
     const c = cardCalc(card, sourceCard);
-    const face = faceStats(card, sourceCard);
+    const face = faceStats(card, sourceCard, enemyDifficulty);
     const STANCE = STANCE_LABELS[card.stance] ?? card.stance.toUpperCase();
     // NO-DIE pill: the free (die-optional) value.
     const freePill = face.freeHeroText + (face.freeHeroSub ? ` (${face.freeHeroSub})` : '');
@@ -1499,7 +1513,10 @@ function handVM(state: CombatEncounterState): CombatCardVM[] {
         .map(({ uid, card }: { uid: string; card: CombatCard }) => {
         const preview = drafted ? cardReadPreview(state, card) : null;
         const sourceCard = getCardById(card.id);
-        const rawFace = faceStats(card, sourceCard);
+        // WI-6 — the hand is IN combat, so the live enemy difficulty is known:
+        // a CONCEDE face resolves its tier-floored threshold ("concede at 10 vs
+        // this foe") instead of the raw authored 8.
+        const rawFace = faceStats(card, sourceCard, state.enemy.difficulty);
         // phase 28 — RUPTURE's live burst is an honest, already-computed engine
         // number (projectRuptureBurst); the word-only "detonate" face predates
         // that selector's existence. Real-units-or-no-number, now with a number.
@@ -1522,7 +1539,7 @@ function handVM(state: CombatEncounterState): CombatCardVM[] {
             bottomDamagePreview: card.bottomDamagePreview,
             dieLines: card.dieLines,
             face,
-            detail: detailStats(card, sourceCard),
+            detail: detailStats(card, sourceCard, state.enemy.difficulty),
             read: preview?.read ?? null, colorMatch: preview?.colorMatch ?? false,
             flavor: sourceCard?.description ?? null,
             // WS7.2 — the engine's live chosen-X clamp range (null = no X mechanic).
@@ -1605,12 +1622,11 @@ export function rewardOfferVMs(ids: string[]): CombatRewardOfferVM[] {
 function perorationVM(state: CombatEncounterState): CombatPerorationVM {
     const decl = state.peroration;
     if (!decl) return { active: false, premises: 0, at: 0, concedeAt: null, cardName: '' };
-    const tierFloor = state.enemy.difficulty === 'boss' || state.enemy.difficulty === 'unique'
-        ? CONCEDE_PREMISES_BOSS
-        : state.enemy.difficulty === 'elite'
-            ? CONCEDE_PREMISES_ELITE
-            : CONCEDE_PREMISES_BASE;
-    const concedeAt = decl.concedeAt !== undefined ? Math.max(decl.concedeAt, tierFloor) : null;
+    // WI-6 — the tier floor is the engine's own `concedeFloorFor`, never a
+    // presenter-local copy that can drift from the live concede resolution.
+    const concedeAt = decl.concedeAt !== undefined
+        ? Math.max(decl.concedeAt, concedeFloorFor(state.enemy.difficulty))
+        : null;
     const card = getCardById(decl.cardId);
     return { active: true, premises: state.premises ?? 0, at: decl.at, concedeAt, cardName: card?.name ?? '' };
 }

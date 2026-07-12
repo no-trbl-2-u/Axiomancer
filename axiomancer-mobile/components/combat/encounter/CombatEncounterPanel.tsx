@@ -38,6 +38,7 @@ import {
 import { advanceWheel, isMomentumDieId, isWheelStance, momentumDieId, type WheelStance } from '@/state/combat/momentum';
 
 import { CombatBoard, CombatCardFace, HAND_CARD_W, HAND_CARD_H, type DragController, type DragPayload, type Rect } from '@/components/combat/encounter/CombatBoard';
+import { useDragInterruptRecovery } from '@/components/combat/encounter/useDragInterruptRecovery';
 import { type CombatFx } from '@/components/combat/encounter/CombatCombatantPane';
 import { CombatDie } from '@/components/combat/encounter/CombatDie';
 import { CombatSummaryModal } from '@/components/combat/encounter/CombatSummaryModal';
@@ -66,6 +67,13 @@ const DIE_GHOST_SIZE = 56;
  *  exists only to swallow machine-gun double-taps; a legitimately new end-phase
  *  after the state has fully advanced is always ~1s away. */
 const RESOLVE_LOCK_MS = 1100;
+
+/** WI-7 — if a live drag goes this long with no pointer movement, its input
+ *  stream is assumed dead (a killed/interrupted pointer that never delivered an
+ *  end event) and the drag is force-finalized so it can't wedge staging or leave
+ *  a permanent ghost. Every `pointermove` resets the clock, so a slow-but-live
+ *  drag is never cut short. */
+const DRAG_WATCHDOG_MS = 4000;
 
 export interface CombatEncounterPanelProps {
     /** The foe to fight (live: the real map encounter enemy; dev: a mock). */
@@ -365,6 +373,12 @@ export function CombatEncounterPanel({
         if (resolver) void resolver(payload, x, y);
     }, [drag, dragShown]);
     drag.end = end;
+    // WI-7 — force-finalize a live drag whose pointer stream was interrupted
+    // (pointercancel / blur / tab hidden / dead stream) so it can't leave a
+    // permanent ghost or wedge staging. The finalizer is the SAME snap-home path
+    // the cancel branch uses (`end(-1,-1)`).
+    const finalizeDrag = useCallback(() => end(-1, -1), [end]);
+    useDragInterruptRecovery(!!dragActive, finalizeDrag, DRAG_WATCHDOG_MS);
     // Centre the hand-card face under the finger (half of HAND_CARD_W/H)
     // and lift it above the fingertip so the card stays readable mid-drag.
     const cardGhostStyle = useAnimatedStyle(() => ({ opacity: dragShown.value, transform: [{ translateX: dragX.value - HAND_CARD_W / 2 }, { translateY: dragY.value - HAND_CARD_H / 2 - 24 }, { scale: 1.1 }] }));
@@ -1048,7 +1062,19 @@ export function CombatEncounterPanel({
             {/* drag ghost — persistently mounted after the first drag; dragShown
                 gates visibility so a finished drag leaves it hidden, not unmounted */}
             {ghostPayload && (
-                <Animated.View pointerEvents="none" style={[styles.ghost, ghostPayload.type === 'card' ? cardGhostStyle : dieGhostStyle]}>
+                // WI-7 — the ghost is a purely-visual clone that follows the
+                // finger. It must carry its OWN testID and be hidden from
+                // accessibility: without this it inherited the source node's
+                // testID + aria, which surfaced DUPLICATE dice (two
+                // `combat-die-*` nodes) and phantom "available to draft" entries
+                // to screen readers.
+                <Animated.View
+                    pointerEvents="none"
+                    testID="combat-drag-ghost"
+                    accessibilityElementsHidden
+                    importantForAccessibility="no-hide-descendants"
+                    style={[styles.ghost, ghostPayload.type === 'card' ? cardGhostStyle : dieGhostStyle]}
+                >
                     {ghostPayload.type === 'card' ? (
                         // The dragged card keeps its real face (was a stripped name-only box
                         // that looked like a different, "old" card mid-drag).

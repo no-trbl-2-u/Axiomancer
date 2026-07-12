@@ -72,6 +72,16 @@ describe('faceStats — honest real-unit faces', () => {
         expect(f.heroSub).toBe('over 3 turns');
         expect(f.verbLine).toBe('foe loses VITAE each turn');
     });
+    it('The Closing Word (CONCEDE) tier-floors: ladder in catalog, effective vs the live foe (WI-6)', () => {
+        // The face used to print the raw authored "concede at 8" unconditionally
+        // — a lie against an elite (10) or boss (12). Static catalog shows the
+        // whole ladder; in combat the live difficulty resolves the real number.
+        const { card, sourceCard } = cardOf('the-closing-word');
+        expect(faceStats(card, sourceCard).heroSub).toBe('concede 8/10 elite/12 boss');
+        expect(faceStats(card, sourceCard, 'elite').heroSub).toBe('concede at 10 vs this foe');
+        expect(faceStats(card, sourceCard, 'boss').heroSub).toBe('concede at 12 vs this foe');
+        expect(faceStats(card, sourceCard, 'normal').heroSub).toBe('concede at 8 vs this foe');
+    });
     it('Brace for Impact (Guard) → Guard 8 · the authored FREE persistent Guard 2', () => {
         const { card, sourceCard } = cardOf('brace-for-impact');
         const f = faceStats(card, sourceCard);

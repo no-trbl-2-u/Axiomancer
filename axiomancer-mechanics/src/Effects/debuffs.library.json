@@ -240,6 +240,28 @@
         "affliction",
         "doom"
       ]
+    },
+    {
+      "id": "debuff_petrify",
+      "name": "Petrify",
+      "description": "The argument lands like a gaze out of the old stories: mid-gesture, the foe sets. Stone does not rebut. Stone does not act.",
+      "type": "debuff",
+      "category": "control",
+      "duration": 1,
+      "stacking": "none",
+      "resistedBy": "mind",
+      "resistDR": 12,
+      "payload": {
+        "actionRestriction": {
+          "skipTurn": true
+        }
+      },
+      "tier": 3,
+      "addedIn": "2026-07-12",
+      "tags": [
+        "control",
+        "hard-control"
+      ]
     }
   ]
 }
