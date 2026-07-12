@@ -558,6 +558,13 @@ async function autoHazardCombatLoop(
 
         s = autoPlayPhase(s, flags.policy, flags.maxTurns);
         logState('hazardCombat:autoPhase', before, s, { phaseCount, policy: flags.policy });
+        // Phase 26 tooling (cloud fold-in) — a per-phase boundary marker with
+        // an HP snapshot, alongside the per-play transcript above, so an
+        // auditor can see phase-level progress without diffing play events.
+        emit({
+            type: 'hazardCombat:autoPhase',
+            payload: { phaseCount, enemyHealth: s.enemy.health, playerHealth: s.player.health },
+        });
 
         if (s.finalOutcome) break;
         if (s.mercyChoiceActive) {

@@ -61,3 +61,10 @@ export {
     VERB_POINTS, CONDITION_DISCOUNTS, SELF_COST_CREDIT,
     scoreCard, scoreMechanic, scoreRider, statusPoints, dotLifetimeHp,
 } from './cards.pricing';
+
+// Card themes + their keyword families (spec 32 §3/§6) — the public shape
+// mobile's KW-6 parity lint (phase 29) checks its glossary against.
+export type { CardTheme } from './card-themes';
+export {
+    CARD_THEMES, THEME_KEYWORDS, keywordsForTheme, isCardTheme,
+} from './card-themes';

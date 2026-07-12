@@ -40,6 +40,7 @@ export {
     getDistinctDebuffCount, getDistinctControlCount,
     VULNERABLE_MAX_MULT, RESOLUTE_MIN_MULT, RUPTURE_CAP_FRACTION, ruptureBurstCap,
     RUPTURE_PER_AFFLICTION_STACK, DISRUPT_DENY_AT, THREAT_RUNGS, THREAT_RUNGS_BOSS,
+    CONCEDE_PREMISES_BASE, CONCEDE_PREMISES_ELITE, CONCEDE_PREMISES_BOSS,
     // Spec 32 v3 — themed-deck selectors
     consumeAfflictions, consumeOneAffliction, getBackfirePerRung,
     getMarkStacks, consumeMarks,
@@ -178,7 +179,9 @@ export {
     PIP_INTENSITY_BONUS, PIP_GUARD_BONUS, COLOR_MATCH_STATUS_DURATION_BONUS, FATE_TAP_CONVICTION,
     // 0.34.0 status-depth epic — honesty selectors
     getEnemyIncomingDamageMultiplier, getDisruptMeter,
-    projectRupture, projectSiphonHeal, projectReapAll,
+    projectRupture, projectRuptureBurst, projectSiphonHeal, projectReapAll,
+    // phase 28 — legibility sweep
+    projectIncomingThreat,
     // WS7.2 — chosen X-cost clamp range (`recoil_x`), engine-owned
     recoilXRange,
     // Phase 2 — projected-lethality readout (spec 30)

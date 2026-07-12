@@ -21,6 +21,21 @@
 >    pending); the Hazard minigame's carry system and
 >    `buff_grace_momentum` rename (`plan/tuning/2026-07-10-momentum-scoping.md`).
 >
+> **AMENDMENT (phase 29, 2026-07-11 — the keyword-language pass,
+> `plan/phases/phase_29_keyword_registry.md`):** §3's table below is
+> corrected to the shipped registry (30 keywords, drifted from the
+> original 30 via renames/merges/retirements — not the same 30):
+> FESTER→PROLONG, TRANSMUTE→REARGUE, REPRISE→RECALL (renames); BARRIER
+> merges into GUARD ("persists" tag); CONJURE retires (zero library
+> cards — re-admit if Thoughtform cards ever ship); PERORATION demotes to
+> card-local text on its sole carrier (the-closing-word) — the PREMISE
+> entry explains the trigger; SIPHON promotes from unglossed card text to
+> a registered keyword. TICK is untouched here — amendment 2 above still
+> governs its eventual retirement. The CAPITULATE/SWAY rule in the table
+> and in §9 is also corrected below to match the 2026-07-08
+> resolve-threshold rework (it had drifted stale since that rework
+> shipped, independent of this amendment).
+>
 > **Status:** DESIGN v4 — v4 revises the enchant/disenchant model
 > (owner-directed 2026-07-08): these cards gain a FREE (dieless) line that
 > grants a TIMED 3-round instance of their passive, with the PAID line
@@ -121,36 +136,41 @@ sim gate.
   only the duration differs. A PAID play promotes a live FREE instance.
 - More types to come; `cardType` stays an open enum.
 
-## 3. The keyword registry — exactly 30
+## 3. The keyword registry — 30, amended by phase 29
 
 The old effect libraries (`debuffs.library.json` 72 ids,
 `buffs.library.json` 54 ids) and the mobile keyword map (~80 entries)
-are **retired in full** and rebuilt from this table. The
-deprecated-effects ban-list is regenerated to cover every retired id.
+were **retired in full** and rebuilt from this table (v3, 2026-07-08).
+Phase 29 (2026-07-11, see the amendment block above) corrected drift that
+accumulated since: FESTER→PROLONG, TRANSMUTE→REARGUE, REPRISE→RECALL
+(renames); BARRIER merged into GUARD; CONJURE and PERORATION retired from
+the table below (CONJURE — zero library cards; PERORATION — demoted to
+card-local text, its trigger explained by PREMISE); SIPHON promoted from
+unglossed card text. The deprecated-effects ban-list still governs every
+id retired in the original v3 purge — phase 29 did not retire any effect
+ids, only presentation-layer keyword labels.
 
-### Utility (10) — shared across all themes
+### Utility (9) — shared across all themes
 
 | keyword | semantics |
 |---|---|
 | **DRAW N** | draw N cards |
 | **FORGE** | create a floating die: joins the tray now, never rerolls, persists across rounds AND combats, gone forever when spent. Cap 3; forging at cap converts to +1 Conviction (printed) |
-| **GUARD N** | block the next N incoming damage; fades at round end |
-| **BARRIER N** | as Guard, but persists until consumed |
+| **GUARD N** | block the next N incoming damage; fades at round end — unless the card prints "persists" (the merged BARRIER sense), in which case it carries over until consumed |
 | **TICK** | one enemy DoT deals its per-turn damage now (duration unchanged) |
 | **MARK iN dM** | light universal affliction: each DoT tick / payoff hit deals +1 per stack; counts as an affliction for RUPTURE / SOUL / REAP |
 | **CLEANSE N** | remove N of your own afflictions |
 | **HEAL N** | restore N VITAE |
-| **RUPTURE** | consume ALL enemy afflictions: burst = 1.5× remaining DoT fuel + 3 per non-DoT affliction stack (existing cap kept) |
-| **CONJURE** | create a one-use Thoughtform card into hand (removed after play / combat end) |
+| **RUPTURE N** | consume up to N afflictions on the enemy (ALL, on a finisher): their remaining DoT fuel detonates as one burst, + 3 per non-DoT affliction stack (existing cap kept); consuming a single affliction this way also yields a Soul on the cards that print it |
+| **SIPHON N%** | heal for N% of the HP this play deals to the enemy |
 
-### Theme hallmarks (2 × 10 = 20)
+### Theme hallmarks (19 — Peroration keeps one, not two)
 
 | theme | keyword | semantics |
 |---|---|---|
 | Affliction | **POISON iN dM** | ramping DoT (escalates per turn; honest printed curve) |
 | Affliction | **BLEED iN dM** | front-loaded DoT; decays 1 intensity per trigger |
-| Peroration | **PREMISE** | persistent tally (the argument under construction) |
-| Peroration | **PERORATION** | declared conclusion, one in play: fires FREE at its printed Premise count, then Premises reset |
+| Peroration | **PREMISE** | persistent tally (the argument under construction); when it reaches a declared conclusion's printed number, the conclusion fires FREE and the tally resets — a concede-line conclusion ends the fight outright |
 | Forge | **KINDLE** | create a temporary die (this combat only) |
 | Forge | **PIP** | add 1 pip to a die you hold; pips empower riders and are spendable by payoff verbs |
 | Akrasia | **RECOIL N** | pay N VITAE (unpreventable) as a printed cost |
@@ -161,12 +181,17 @@ deprecated-effects ban-list is regenerated to cover every retired id.
 | Oracle | **OMEN** | declare the printed prediction; if it comes true by your next turn, the rider fires free |
 | Harvest | **SOUL** | gain 1 Soul whenever an enemy affliction stack expires or is consumed |
 | Harvest | **REAP N** | spend N Souls to fire the printed effect |
-| Charm | **SWAY N** | stacks on the enemy; decays 1/turn; if SWAY ≥ enemy's current HP at end of your turn → CAPITULATE (§9) |
+| Charm | **SWAY N** | stacks on the enemy; decays 1/turn; CAPITULATE (§9) fires the moment SWAY reaches the enemy's resolve — 35% of its max HP (never below 10), or its current HP if that is lower |
 | Charm | **RAPPORT iN dM** | the enemy deals N less damage while active |
 | Bulwark | **THORNS iN dM** | attacker takes N whenever it damages you |
-| Bulwark | **RIPOSTE iN dM** | when your Guard/Barrier fully blocks an attack, the enemy takes N |
+| Bulwark | **RIPOSTE iN dM** | when your Guard fully blocks an attack, the enemy takes N |
 | Echo | **ECHO** | the printed line fires twice |
-| Echo | **REPRISE N** | return N cards from your discard pile to hand |
+| Echo | **RECALL N** | return N cards from your discard pile to hand |
+
+Affliction also carries two glue keywords beyond its hallmark pair —
+**PROLONG N** (extend all your DoTs by N turns) and **REARGUE iN** (flip
+the enemy's Bleed↔Poison, +N intensity) — bringing the shipped registry to
+30 total (9 utility + 19 hallmarks + 2 affliction glue).
 
 Retired (never renamed — ids die, ban-list enforces): burn, hemorrhage,
 septic, unraveling, despair, torment and all DoT clones; stun, sleep,
@@ -395,9 +420,11 @@ strengthened separately); rank honesty and deck distinctness ARE.
 - **HP to 0** — the main threshold, universal.
 - **Befriend** — existing mercy path (ADR-0007, untouched); RAPPORT and
   the Charm deck accelerate it.
-- **CAPITULATE** (ratified) — SWAY ≥ enemy current HP at end of your
-  turn: the enemy yields. Counts as a merciful resolution for morality
-  systems. Charm's identity: it can win without ever touching HP.
+- **CAPITULATE** (ratified; corrected by phase 29 to the shipped
+  2026-07-08 resolve-threshold rework) — the enemy yields the moment your
+  SWAY reaches its resolve: 35% of its max HP (never below 10), or its
+  current HP if that is lower. Counts as a merciful resolution for
+  morality systems. Charm's identity: it can win without ever touching HP.
 - **CONCEDE** (ratified 2026-07-07) — second alt-win: a completed
   8-Premise Aporia-grade Peroration wins the argument outright. Ships
   as a Peroration upgrade path on `the-closing-word`, not a new card

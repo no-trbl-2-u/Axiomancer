@@ -256,35 +256,52 @@ decision log (see each phase file).
 owner-ratified 2026-07-10, all four decision gates cleared; ship in
 order, intra-batch gates noted per phase):**
 
-- [ ] Phase 26 — The Turn Law (engine + tooling). One dice-turn per
+- [x] Phase 26 — The Turn Law (engine + tooling). One dice-turn per
       threat phase becomes an engine invariant (`startTurn` refuses a
       second tray; `resolveThreatPhase` resets); sim policies + auto
       CLI rewritten to play legally; tooling fixes (auto-mode
       transcripts, overkill-clamped attribution, `--stage` fields the
       stage's enemy roster). Test-pinned; blocks every numeric tuning
-      decision repo-wide (mechanics) — source:
-      `plan/tuning/2026-07-10-turn-law-and-honest-baseline.md` §1-2
-- [ ] Phase 27 — Re-baseline (measurement). Full matrix re-run under
+      decision repo-wide (mechanics) — `feat(mechanics): enforce the
+      one-turn-per-phase law — phase 26` (f849c5a2) — source:
+      `plan/tuning/2026-07-10-turn-law-and-honest-baseline.md` §1-2.
+      Shipped TWICE independently (cloud f849c5a2 + local 6ea123fc);
+      reconciled at the branch merge — the local implementation's
+      semantics won (richer event payload, legal-play sim rewrite,
+      seed-deterministic --stage roster), cloud-only pins folded in.
+- [x] Phase 27 — Re-baseline (measurement). Full matrix re-run under
       the Turn Law; re-derive curve bands vs. the locked
       80/50/25-35/0 doctrine, KNOWN_CURVE_VIOLATORS, statusEngagement
       by stage, signature damage share, dead-card rate; publish the
       re-triage report. Every pre-2026-07-10 plan/tuning number gets
       an asterisk until this lands. Gated on Phase 26 (mechanics) —
       source: `plan/tuning/2026-07-10-turn-law-and-honest-baseline.md` §3
-- [ ] Phase 28 — Show the Engine (legibility sweep). Premise track +
+      — headline: mid/late win rates were almost entirely farm-propped
+      (honest mid 3%, late flat 0%); KNOWN_CURVE_VIOLATORS confirmed
+      empty; repricing (Phase 31) now unblocked —
+      `plan: re-baseline the combat matrix under the Turn Law — phase 27`
+      (30e43eb2). Also shipped TWICE (cloud report 30e43eb2 + the local
+      session's seeds-1/2/3 cut in
+      `axiomancer-mechanics/docs/reports/rebaseline-scratch/`); both kept
+      with cross-notes — the local cut stamps the checked-in
+      deck-matrix baseline.
+- [x] Phase 28 — Show the Engine (legibility sweep). Premise track +
       CONCEDE beat, rupture fuel/cap preview, BACKFIRE attribution,
       foretell picker, REPRISE songbook choice, wall-math readout,
       Overtake gate/preview, lying-copy fixes, color-match bonus
       fold-ins. Parallel-safe with Phase 26/27 (mobile + mechanics) —
       source: `plan/tuning/2026-07-10-turn-texture.md` §4 +
       `plan/tuning/2026-07-10-theme-identity.md` (per-theme S-tier UX)
-- [ ] Phase 29 — The Language (keyword registry). KW-1/KW-3 (fold 6
+      — `feat: show the engine — legibility sweep across 9 surfaces — phase 28` (60af3044)
+- [x] Phase 29 — The Language (keyword registry). KW-1/KW-3 (fold 6
       unmapped debuff ids, rename pass) ungated; KW-2/KW-6
       (merge/retire + single-source registry with parity lints) and
       KW-5/KW-7 (persistent-card keyword-reach lint, systems glossary)
       follow; KW-4 (TICK killed entirely — owner-ratified 2026-07-10)
       rides Phase 30 (mechanics + mobile) — source:
-      `plan/tuning/2026-07-10-keyword-registry.md`
+      `plan/tuning/2026-07-10-keyword-registry.md` — brief:
+      `plan/phases/phase_29_keyword_registry.md`
+      — `feat: keyword-language honesty pass — phase 29` (cc39fb5f)
 - [ ] Phase 30 — FREE Lines (70-card content pass). Rewrite every
       FREE line to theme-currency verbs + FREE-currency lint +
       pricing re-arithmetic. Shape ratified 2026-07-10: Option A

@@ -154,7 +154,7 @@ const resonanceDetonation: Card = {
 const venomAndVein: Card = {
     id: 'venom-and-vein',
     theme: 'affliction',
-    persistentEffect: 'Every bleed or poison you apply lands at +1 intensity.',
+    persistentEffect: 'Every BLEED or POISON you apply lands at +1 intensity.',
     name: 'Venom and Vein',
     category: 'fallacy',
     philosophicalAspect: 'body',
@@ -171,7 +171,7 @@ const venomAndVein: Card = {
 const suppuratingCurse: Card = {
     id: 'suppurating-curse',
     theme: 'affliction',
-    persistentEffect: 'Doubles the total enemy damage-over-time each round.',
+    persistentEffect: 'Doubles the total POISON and BLEED damage the enemy takes each round.',
     name: 'Suppurating Curse',
     category: 'fallacy',
     philosophicalAspect: 'mind',
@@ -311,7 +311,7 @@ const theClosingWord: Card = {
 const practicedCadence: Card = {
     id: 'practiced-cadence',
     theme: 'peroration',
-    persistentEffect: '+1 Premise on the first card you play each turn.',
+    persistentEffect: '+1 PREMISE on the first card you play each turn.',
     name: 'Practiced Cadence',
     category: 'fallacy',
     philosophicalAspect: 'heart',
@@ -328,7 +328,7 @@ const practicedCadence: Card = {
 const captiveAudience: Card = {
     id: 'captive-audience',
     theme: 'peroration',
-    persistentEffect: 'While you hold 4+ Premises, the enemy stays marked.',
+    persistentEffect: 'While you hold 4+ PREMISEs, the enemy stays MARKed.',
     name: 'Captive Audience',
     category: 'fallacy',
     philosophicalAspect: 'heart',
@@ -470,7 +470,7 @@ const theOvertake: Card = {
 const anvilOfForm: Card = {
     id: 'anvil-of-form',
     theme: 'forge',
-    persistentEffect: 'Every kindled or floating die arrives with +1 pip.',
+    persistentEffect: 'Every KINDLEd or FORGEd die arrives with +1 PIP.',
     name: 'Anvil of Form',
     category: 'paradox',
     philosophicalAspect: 'mind',
@@ -487,7 +487,7 @@ const anvilOfForm: Card = {
 const entropyTax: Card = {
     id: 'entropy-tax',
     theme: 'forge',
-    persistentEffect: 'Every kindled or floating die you spend marks the enemy.',
+    persistentEffect: 'Every KINDLEd or FORGEd die you spend MARKs the enemy.',
     name: 'Entropy Tax',
     category: 'paradox',
     philosophicalAspect: 'mind',
@@ -615,7 +615,7 @@ const pactOfAkrasia: Card = {
 const crownOfThorns: Card = {
     id: 'crown-of-thorns',
     theme: 'akrasia',
-    persistentEffect: 'While Fallen, your status applications land at +1 intensity.',
+    persistentEffect: 'While FALLEN, your status applications land at +1 intensity.',
     name: 'Crown of Thorns',
     category: 'paradox',
     philosophicalAspect: 'heart',
@@ -632,7 +632,7 @@ const crownOfThorns: Card = {
 const mirrorOfGuilt: Card = {
     id: 'mirror-of-guilt',
     theme: 'akrasia',
-    persistentEffect: 'Every self-debuff you take also lands one stack on the enemy.',
+    persistentEffect: 'Every self-debuff you take toward FALLEN also lands one stack on the enemy.',
     name: 'Mirror of Guilt',
     category: 'paradox',
     philosophicalAspect: 'mind',
@@ -760,7 +760,7 @@ const paralysisOfAnalysis: Card = {
 const achillesAndTheTortoise: Card = {
     id: 'achilles-and-the-tortoise',
     theme: 'control',
-    persistentEffect: 'Draw 1 card each time you deny an enemy turn.',
+    persistentEffect: 'DRAW 1 card each time your STAGGER denies an enemy turn.',
     name: 'Achilles and the Tortoise',
     category: 'paradox',
     philosophicalAspect: 'mind',
@@ -777,7 +777,7 @@ const achillesAndTheTortoise: Card = {
 const quagmireOfDoubt: Card = {
     id: 'quagmire-of-doubt',
     theme: 'control',
-    persistentEffect: 'Enemy telegraphs enter play one rung lower.',
+    persistentEffect: 'Enemy telegraphs enter play one STAGGER rung lower.',
     name: 'Quagmire of Doubt',
     category: 'fallacy',
     philosophicalAspect: 'mind',
@@ -912,7 +912,7 @@ const prophecyFulfilled: Card = {
 const theOraclesEye: Card = {
     id: 'the-oracles-eye',
     theme: 'oracle',
-    persistentEffect: 'The next enemy stance is always revealed, and your omens hit harder.',
+    persistentEffect: 'The next enemy stance is always revealed (FORETELL), and your OMENs hit harder.',
     name: "The Oracle's Eye",
     category: 'paradox',
     philosophicalAspect: 'heart',
@@ -929,7 +929,7 @@ const theOraclesEye: Card = {
 const fatedCourse: Card = {
     id: 'fated-course',
     theme: 'oracle',
-    persistentEffect: 'Every omen that hits marks the foe.',
+    persistentEffect: 'Every OMEN that hits MARKs the foe.',
     name: 'Fated Course',
     category: 'paradox',
     philosophicalAspect: 'mind',
@@ -1046,7 +1046,7 @@ const theReaping: Card = {
 const boneOrchard: Card = {
     id: 'bone-orchard',
     theme: 'harvest',
-    persistentEffect: 'Drain 1 HP from the enemy for every Soul you gain.',
+    persistentEffect: 'Drain 1 HP from the enemy for every SOUL you gain.',
     name: 'Bone Orchard',
     category: 'fallacy',
     philosophicalAspect: 'mind',
@@ -1063,7 +1063,7 @@ const boneOrchard: Card = {
 const theTithe: Card = {
     id: 'the-tithe',
     theme: 'harvest',
-    persistentEffect: 'Enemy afflictions expire one turn sooner (faster Soul churn).',
+    persistentEffect: 'Enemy afflictions expire one turn sooner (faster SOUL churn).',
     name: 'The Tithe',
     category: 'fallacy',
     philosophicalAspect: 'mind',
@@ -1281,7 +1281,9 @@ const tuQuoque: Card = {
     // pts: thorns i3 d2 (~4.5) + FREE guard 2 (0.5) + dieBonus(guard 2 ×0.6 = 0.3) + tempo ≈ 6.5 → Thesis
     free: { guard: 2 },
     combatEffects: [{ effectId: 'buff_thorns', appliedTo: 'self', intensity: 3, duration: 2 }],
-    dieBonus: { onColor: 'body', rider: { guard: 2 } },
+    // phase 28: recolored 'body' -> 'heart' — the card is philosophicalAspect
+    // 'heart', so the old onColor:'body' bonus was dead text on a heart card.
+    dieBonus: { onColor: 'heart', rider: { guard: 2 } },
     addedIn: '2026-07-08',
     tags: ['bulwark', 'reflect'],
 };
@@ -1342,7 +1344,7 @@ const hedgehogsDilemma: Card = {
 const crumblingResolve: Card = {
     id: 'crumbling-resolve',
     theme: 'bulwark',
-    persistentEffect: 'A fully-blocked attack costs the enemy a rung on its next telegraph.',
+    persistentEffect: 'A fully-blocked (GUARD) attack STAGGERs the enemy a rung on its next telegraph.',
     name: 'Crumbling Resolve',
     category: 'fallacy',
     philosophicalAspect: 'body',

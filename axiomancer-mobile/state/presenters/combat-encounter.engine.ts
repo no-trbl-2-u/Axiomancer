@@ -20,6 +20,9 @@ import {
     READ_ADVANTAGE_INTENSITY_BONUS, READ_DISADVANTAGE_DURATION_PENALTY, RESERVE_MAX,
     RUPTURE_CAP_FRACTION, recoilXRange, riderText,
     VULNERABLE_MAX_MULT, DISRUPT_DENY_AT,
+    // phase 28 — legibility sweep
+    projectRuptureBurst, projectIncomingThreat,
+    CONCEDE_PREMISES_BASE, CONCEDE_PREMISES_ELITE, CONCEDE_PREMISES_BOSS,
     type CombatEncounterState, type CombatCard, type CombatManaDie,
     type CombatThreatPhase, type CombatIntentType, type CombatReadResult,
     type CombatSummary, type SignatureSkill, type Stance,
@@ -154,13 +157,18 @@ export interface CombatIntentBranchVM {
 }
 export interface CombatIntentVM {
     type: CombatIntentType; icon: string; label: string; color: string; description: string;
-    /** Total HP damage this phase's threat action deals if NOT cleared (0 if none). */
+    /** Total HP damage this phase's threat action deals if NOT cleared (0 if none).
+     *  Raw face value — NOT run through live modifiers; see `wallMath` for that. */
     damage: number;
     /** True if the threat action also applies a debuff to the player. */
     debuffs: boolean;
     /** WS9 — fork info for the CURRENT phase (null on linear phases). */
     branch: CombatIntentBranchVM | null;
     next: { type: CombatIntentType; icon: string; label: string; branch: CombatIntentBranchVM | null } | null;
+    /** phase 28 — the wall-math readout (`projectIncomingThreat`): what this
+     *  telegraphed hit actually deals right now, netted against live guard/
+     *  barrier and denial state — the number `damage` above can't show. */
+    wallMath: { projectedDamage: number; netDamage: number; willDeny: boolean; guard: number; barrier: number };
 }
 export interface CombatEnemyPaneVM {
     name: string; artKey: string; isBoss: boolean;
@@ -320,6 +328,10 @@ export interface CombatCardVM {
      *  when the card carries an X mechanic; the board shows the stepper off
      *  this and passes the pick through the play call as `chosenX`. */
     chooseX: { min: number; max: number } | null;
+    /** phase 28 — true for a `reprise`-mechanic card: APPLYing it should prompt
+     *  the discard-pile songbook picker instead of going straight to the
+     *  engine's default highest-rank auto-pick. */
+    needsReprisalChoice: boolean;
 }
 export interface CombatSignatureVM {
     id: string; name: string; description: string; cost: number; affordable: boolean; icon: string;
@@ -327,6 +339,18 @@ export interface CombatSignatureVM {
 export interface CombatReadVM {
     active: boolean; result: CombatReadResult; dieStance: string; enemyStance: string | null;
     text: string;
+}
+/** phase 28 — the Premise track + CONCEDE beat (Peroration theme). Was fully
+ *  engine-side state with zero combat-UI rendering before this phase. */
+export interface CombatPerorationVM {
+    active: boolean;
+    premises: number;
+    /** Premise count at which the declared card's rider fires (tally resets). */
+    at: number;
+    /** Premise count at which the fight ends outright (CONCEDE) — tier-floored
+     *  by enemy difficulty; null if the declared card carries no concede line. */
+    concedeAt: number | null;
+    cardName: string;
 }
 export interface CombatViewModel {
     phase: CombatEncounterState['phase'];
@@ -352,6 +376,10 @@ export interface CombatViewModel {
     turnLabel: string;
     deckCount: number;
     discardCount: number;
+    /** phase 28 — discard-pile card ids + names, for the REPRISE songbook picker. */
+    discardCards: { id: string; name: string }[];
+    /** phase 28 — the Premise track + CONCEDE beat. */
+    peroration: CombatPerorationVM;
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -398,10 +426,15 @@ function intentVM(state: CombatEncounterState): CombatIntentVM {
     const effects = cur?.threatAction.effects ?? [];
     const damage = effects.reduce((s, e) => s + (e.damage ?? 0), 0);
     const debuffs = effects.some((e) => !!e.effectId);
+    const threat = projectIncomingThreat(state);
     return {
         type, icon: meta.icon, label: cur?.intentLabel ?? meta.label, color: meta.color,
         description: cur?.threatAction.description ?? '', damage, debuffs,
         branch: branchVM(cur), next,
+        wallMath: {
+            projectedDamage: threat.projectedDamage, netDamage: threat.netDamage,
+            willDeny: threat.willDeny, guard: threat.guard, barrier: threat.barrier,
+        },
     };
 }
 
@@ -863,9 +896,11 @@ function cardCalc(card: CombatCard, sourceCard: Card | undefined): CardCalc {
             break;
         }
         case 'barrier': {
+            // KW-2 (phase 29): BARRIER merged into GUARD — the one card that
+            // carries it (the-adamant-wall) now headlines GUARD, "persists".
             const m = pr.mech?.kind === 'barrier' ? pr.mech : undefined;
             out.barrierAmt = m?.amount ?? 0;
-            out.keyword = 'Barrier'; out.glyph = '⬡'; out.categoryColor = GUARD_COLOR;
+            out.keyword = 'Guard'; out.glyph = '⬡'; out.categoryColor = GUARD_COLOR;
             break;
         }
         case 'riposte': {
@@ -960,7 +995,7 @@ function forgeClause(mech: CardSpecialMechanic | null): string | null {
  *  of falling through to the ambiguous "DEBUFF / buff yourself" fallback.
  *  `keyword` is Title-Case (matches the glossary); returns null for kinds with
  *  no player headline (pure die-plumbing riders never reach here as primary). */
-interface MechHeadline { keyword: string; heroText: string; heroSub: string | null; verbLine: string }
+interface MechHeadline { keyword: string | null; heroText: string; heroSub: string | null; verbLine: string }
 function mechanicHeadline(mech: CardSpecialMechanic | null): MechHeadline | null {
     if (!mech) return null;
     const kw = keywordForMechanic(mech.kind);
@@ -972,7 +1007,10 @@ function mechanicHeadline(mech: CardSpecialMechanic | null): MechHeadline | null
         case 'sway':
             return { keyword: kw ?? 'Sway', heroText: `+${mech.amount}`, heroSub: 'toward capitulation', verbLine: 'push the foe toward capitulation' };
         case 'peroration':
-            return { keyword: kw ?? 'Peroration', heroText: `at ${mech.at}`, heroSub: mech.concedeAt ? `concede at ${mech.concedeAt}` : 'fires free', verbLine: 'a declared conclusion that fires on your Premise tally' };
+            // KW-2 (phase 29): PERORATION demoted — its sole carrier
+            // (the-closing-word) headlines under PREMISE, the keyword whose
+            // gloss already explains the payoff-trigger mechanic.
+            return { keyword: kw ?? 'Premise', heroText: `at ${mech.at}`, heroSub: mech.concedeAt ? `concede at ${mech.concedeAt}` : 'fires free', verbLine: 'a declared conclusion that fires on your Premise tally' };
         case 'premise':
             return { keyword: kw ?? 'Premise', heroText: `+${mech.count}`, heroSub: 'to the tally', verbLine: 'add to your Premise tally' };
         case 'spend_premises':
@@ -984,17 +1022,21 @@ function mechanicHeadline(mech: CardSpecialMechanic | null): MechHeadline | null
         case 'soul_gain':
             return { keyword: kw ?? 'Soul', heroText: `+${mech.count}`, heroSub: `Soul${mech.count === 1 ? '' : 's'}`, verbLine: 'gain Souls' };
         case 'consume_affliction':
-            return { keyword: kw ?? 'Soul', heroText: `+${mech.souls}`, heroSub: `Soul${mech.souls === 1 ? '' : 's'} · consume 1 affliction`, verbLine: 'consume an affliction — its fuel ticks now — for Souls' };
+            // KW-2 (phase 29): re-mapped Soul→Rupture — extends RUPTURE's
+            // printed sense ("consume N afflictions") instead of a redundant
+            // CONSUME word; the Soul gain stays a printed rider.
+            return { keyword: kw ?? 'Rupture', heroText: `+${mech.souls}`, heroSub: `Soul${mech.souls === 1 ? '' : 's'} · consume 1 affliction`, verbLine: 'consume an affliction — its fuel ticks now — for Souls' };
         case 'reprise':
-            return { keyword: kw ?? 'Reprise', heroText: `${mech.count}`, heroSub: mech.fireFree ? 'from discard · fires free' : 'from discard', verbLine: 'return your highest-rank discards to hand' };
+            return { keyword: kw ?? 'Recall', heroText: `${mech.count}`, heroSub: mech.fireFree ? 'from discard · fires free' : 'from discard', verbLine: 'return your highest-rank discards to hand' };
         case 'echo':
             return { keyword: kw ?? 'Echo', heroText: '', heroSub: 'paid line fires twice', verbLine: 'the paid line fires twice' };
         case 'echo_next_spell':
             return { keyword: kw ?? 'Echo', heroText: '', heroSub: 'your next spell', verbLine: 'your next spell this turn gains Echo' };
         case 'replay_last':
-            return { keyword: kw ?? 'Echo', heroText: `×${mech.times}`, heroSub: 'your last spell', verbLine: 'your last spell resolves again' };
-        case 'conjure_card':
-            return { keyword: kw ?? 'Conjure', heroText: '', heroSub: 'a Thoughtform', verbLine: 'create a one-use Thoughtform card' };
+            // KW-3 (phase 29): the replay_last→Echo mapping is deleted —
+            // ouroboros (its sole, 1-of-rare carrier) gets no keyword badge;
+            // this heroText/heroSub still carry its card-local rules text.
+            return { keyword: kw ?? null, heroText: `×${mech.times}`, heroSub: 'your last spell', verbLine: 'your last spell resolves again' };
         case 'recoil':
             return { keyword: kw ?? 'Recoil', heroText: `${mech.hp}`, heroSub: 'VITAE cost', verbLine: 'pay VITAE as an unpreventable cost' };
         case 'recoil_x': {
@@ -1002,11 +1044,11 @@ function mechanicHeadline(mech: CardSpecialMechanic | null): MechHeadline | null
             return { keyword: kw ?? 'Recoil', heroText: `X (min ${mech.min})`, heroSub: `VITAE · POISON per ${per}`, verbLine: `pay X VITAE of your choosing — POISON the foe 1 per ${per} paid` };
         }
         case 'extend_dots':
-            return { keyword: kw ?? 'Fester', heroText: `+${mech.turns}`, heroSub: 'turns · all your DoTs', verbLine: 'extend every damage-over-time you hold on the foe' };
+            return { keyword: kw ?? 'Prolong', heroText: `+${mech.turns}`, heroSub: 'turns · all your DoTs', verbLine: 'extend every damage-over-time you hold on the foe' };
         case 'boost_all_dots':
-            return { keyword: kw ?? 'Fester', heroText: `+${mech.intensity}`, heroSub: 'intensity · all DoTs', verbLine: "amplify every affliction on the foe" };
+            return { keyword: kw ?? 'Prolong', heroText: `+${mech.intensity}`, heroSub: 'intensity · all DoTs', verbLine: "amplify every affliction on the foe" };
         case 'convert_dots':
-            return { keyword: kw ?? 'Transmute', heroText: `+${mech.bonusIntensity}`, heroSub: 'intensity · bleed ↔ poison', verbLine: "flip the foe's Bleed and Poison, each landing harder" };
+            return { keyword: kw ?? 'Reargue', heroText: `+${mech.bonusIntensity}`, heroSub: 'intensity · bleed ↔ poison', verbLine: "flip the foe's Bleed and Poison, each landing harder" };
         case 'strip_random_buff':
             return { keyword: 'Cleanse', heroText: '', heroSub: mech.appliedTo === 'enemy' ? 'strip a foe buff' : 'strip a buff', verbLine: 'strip a random buff' };
         case 'rider': {
@@ -1027,6 +1069,9 @@ function mechanicHeadline(mech: CardSpecialMechanic | null): MechHeadline | null
 const MECH_HEADLINE_PRIORITY: readonly string[] = [
     'peroration', 'sway', 'stagger', 'lock_stance', 'reprise', 'replay_last',
     'omen', 'consume_affliction', 'soul_gain', 'spend_premises', 'premise',
+    // (`conjure_card` stays: cloud phase 29 retired CONJURE off zero library
+    // carriers, but this session's WS2.1 Thoughtform work ships live sandbox
+    // conjure cards — the mechanic is card-local vocabulary, not a ghost.)
     'foretell', 'extend_dots', 'convert_dots', 'boost_all_dots', 'recoil_x', 'recoil',
     'conjure_card', 'strip_random_buff', 'echo', 'echo_next_spell', 'rider',
 ];
@@ -1091,7 +1136,7 @@ export function faceStats(card: CombatCard, sourceCard?: Card): CombatCardFaceVM
         case 'overextended': return { ...base, kind: 'overextended', keyword: kw, heroText: '', heroSub: 'your next play is weakened', freeHeroText: free, freeHeroSub: null, verbLine: 'a self-cost: your next play is forced to weak tier', powerRail: c.keyword ?? 'Overextended', readDependent: false, inert: false, guardBase: null };
         case 'clarity': return { ...base, kind: 'clarity', keyword: kw, heroText: 'WILD', heroSub: 'next die', freeHeroText: free, freeHeroSub: null, verbLine: 'your next die counts as Wild', powerRail: c.keyword ?? 'Clarity', readDependent: false, inert: false, guardBase: null };
         case 'resolute': return { ...base, kind: 'resolute', keyword: kw, heroText: `${c.resolutePct}%`, heroSub: `dmg taken · ${c.turns} turns`, freeHeroText: free, freeHeroSub: null, verbLine: 'you take less damage', powerRail: c.keyword ?? 'Resolute', readDependent: false, inert: false, guardBase: null, statusBase: c.resolutePct };
-        case 'barrier': return { ...base, kind: 'barrier', keyword: 'BARRIER', heroText: `Soak ${c.barrierAmt}`, heroSub: 'stacks', freeHeroText: free, freeHeroSub: null, verbLine: 'soak incoming damage', powerRail: c.keyword ?? 'Barrier', readDependent: false, inert: false, guardBase: null };
+        case 'barrier': return { ...base, kind: 'barrier', keyword: 'GUARD', heroText: `Guard ${c.barrierAmt}`, heroSub: 'persists', freeHeroText: free, freeHeroSub: null, verbLine: 'soak incoming damage', powerRail: c.keyword ?? 'Guard', readDependent: false, inert: false, guardBase: null };
         case 'riposte': return { ...base, kind: 'riposte', keyword: 'RIPOSTE', heroText: `CTR ${c.riposteDmg} · CUT ${c.riposteReduce}`, heroSub: 'counter · reduce', freeHeroText: free, freeHeroSub: null, verbLine: 'counter the next hit', powerRail: c.keyword ?? 'Riposte', readDependent: false, inert: false, guardBase: null };
         case 'siphon': return { ...base, kind: 'siphon', keyword: 'SIPHON', heroText: `Heal ${c.siphonPct}%`, heroSub: 'of the burst', freeHeroText: free, freeHeroSub: null, verbLine: 'heal from the harm you cash in', powerRail: c.keyword ?? 'Siphon', readDependent: false, inert: false, guardBase: null };
         case 'rupture': return { ...base, kind: 'rupture', keyword: 'RUPTURE', heroText: 'detonate', heroSub: 'all afflictions', freeHeroText: free, freeHeroSub: null, verbLine: "consume the foe's afflictions and detonate them", powerRail: c.keyword ?? 'Rupture', readDependent: false, inert: false, guardBase: null };
@@ -1247,6 +1292,17 @@ function handVM(state: CombatEncounterState): CombatCardVM[] {
         .map(({ uid, card }: { uid: string; card: CombatCard }) => {
         const preview = drafted ? cardReadPreview(state, card) : null;
         const sourceCard = getCardById(card.id);
+        const rawFace = faceStats(card, sourceCard);
+        // phase 28 — RUPTURE's live burst is an honest, already-computed engine
+        // number (projectRuptureBurst); the word-only "detonate" face predates
+        // that selector's existence. Real-units-or-no-number, now with a number.
+        const face = rawFace.kind === 'rupture'
+            ? { ...rawFace, heroText: `${projectRuptureBurst(state, card)}`, heroSub: 'now, if detonated' }
+            : rawFace;
+        // phase 28 — REPRISE songbook choice: cards carrying a `reprise`
+        // mechanic prompt a discard-pile picker on APPLY instead of the
+        // engine's default highest-rank auto-pick.
+        const needsReprisalChoice = (sourceCard?.specialMechanics ?? []).some(m => m.kind === 'reprise');
         return {
             uid, cardId: card.id, name: card.name, stance: card.stance,
             stanceColor: STANCE_COLORS[card.stance] ?? '#888',
@@ -1258,12 +1314,13 @@ function handVM(state: CombatEncounterState): CombatCardVM[] {
             topActionText: card.topActionText, bottomActionText: card.bottomActionText,
             bottomDamagePreview: card.bottomDamagePreview,
             dieLines: card.dieLines,
-            face: faceStats(card, sourceCard),
+            face,
             detail: detailStats(card, sourceCard),
             read: preview?.read ?? null, colorMatch: preview?.colorMatch ?? false,
             flavor: sourceCard?.description ?? null,
             // WS7.2 — the engine's live chosen-X clamp range (null = no X mechanic).
             chooseX: recoilXRange(state, card),
+            needsReprisalChoice,
         };
     });
 }
@@ -1334,6 +1391,23 @@ export function rewardOfferVMs(ids: string[]): CombatRewardOfferVM[] {
     return out;
 }
 
+// ── phase 28 — Premise track + CONCEDE beat ──────────────────────────────────
+
+/** Mirrors `gainPremises`'s tier-floor exactly (combat.engine.ts) so the
+ *  displayed CONCEDE threshold never lies about the live one. */
+function perorationVM(state: CombatEncounterState): CombatPerorationVM {
+    const decl = state.peroration;
+    if (!decl) return { active: false, premises: 0, at: 0, concedeAt: null, cardName: '' };
+    const tierFloor = state.enemy.difficulty === 'boss' || state.enemy.difficulty === 'unique'
+        ? CONCEDE_PREMISES_BOSS
+        : state.enemy.difficulty === 'elite'
+            ? CONCEDE_PREMISES_ELITE
+            : CONCEDE_PREMISES_BASE;
+    const concedeAt = decl.concedeAt !== undefined ? Math.max(decl.concedeAt, tierFloor) : null;
+    const card = getCardById(decl.cardId);
+    return { active: true, premises: state.premises ?? 0, at: decl.at, concedeAt, cardName: card?.name ?? '' };
+}
+
 // ── Entry point ──────────────────────────────────────────────────────────────
 
 export function buildCombatViewModel(state: CombatEncounterState): CombatViewModel {
@@ -1362,5 +1436,7 @@ export function buildCombatViewModel(state: CombatEncounterState): CombatViewMod
         turnLabel: `TURN ${state.turn}`,
         deckCount: state.drawPile.length,
         discardCount: state.discard.length,
+        discardCards: state.discard.map((id) => ({ id, name: getCardById(id)?.name ?? id })),
+        peroration: perorationVM(state),
     };
 }

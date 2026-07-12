@@ -36,6 +36,7 @@ import {
 } from '@mechanics';
 
 import { advanceWheel, isMomentumDieId, isWheelStance, momentumDieId, type WheelStance } from '@/state/combat/momentum';
+import { SYSTEM_GLOSSARY } from '@/state/combat/keywords';
 
 import { CombatBoard, CombatCardFace, HAND_CARD_W, HAND_CARD_H, type DragController, type DragPayload } from '@/components/combat/encounter/CombatBoard';
 import { type CombatFx } from '@/components/combat/encounter/CombatCombatantPane';
@@ -263,6 +264,9 @@ export function CombatEncounterPanel({
     // Signature-rune info popup (long-press / unaffordable tap) + pilgrim modal.
     const [sigInfo, setSigInfo] = useState<CombatSignatureVM | null>(null);
     const [pilgrimOpen, setPilgrimOpen] = useState(false);
+    // phase 28 — REPRISE songbook picker: set by CombatBoard's onReprisalNeeded
+    // when a staged reprise-mechanic card is APPLYd with a non-empty discard.
+    const [reprisalPrompt, setReprisalPrompt] = useState<{ uid: string; dieId: string | null; power: boolean } | null>(null);
     // Deckbuilder reward (Spec 26b §C) — rolled once on victory, claimed before the summary.
     const [rewardOffers, setRewardOffers] = useState<string[]>([]);
     const [rewardsClaimed, setRewardsClaimed] = useState(false);
@@ -366,7 +370,11 @@ export function CombatEncounterPanel({
         });
         setFxSeq((n) => n + 1);
     }, [apply]);
-    const onApply = useCallback((uid: string, dieId: string | null, power: boolean, chosenX?: number) => {
+    // Per-play choices threaded to `playCombatCard`: WS7.2 `chosenX` (the
+    // X-cost stepper's pick) and phase 28 `reprisalCardId` (the REPRISE
+    // songbook discard-pile pick — omitted/skipped falls back to the engine's
+    // pre-existing highest-rank auto-pick).
+    const onApply = useCallback((uid: string, dieId: string | null, power: boolean, choices?: { chosenX?: number; reprisalCardId?: string }) => {
         // Momentum: advance the wheel with this card's stance (looked up BEFORE the
         // play removes it from the hand). A completed cycle forges a wild momentum
         // die into the tray; while that die is live, plays don't advance the wheel.
@@ -394,11 +402,14 @@ export function CombatEncounterPanel({
             if (power && routing.draftFirst && dieId) {
                 ns = draftStanceDie(ns, dieId, { bankUnpicked: bankSpareRef.current }).state;
             }
-            // WS7.2 — the board's chosen X (only set for X-mechanic cards)
-            // rides through to the engine, which clamps it to [min, affordable].
+            // WS7.2 chosenX + phase 28 reprisalCardId ride through to the
+            // engine (which clamps X to [min, affordable] and validates the
+            // reprisal pick against the live discard pile).
             const t = playCombatCard(
                 ns, { uid }, power, routing.explicitDieId, undefined,
-                chosenX !== undefined ? { chosenX } : undefined,
+                choices && (choices.chosenX !== undefined || choices.reprisalCardId !== undefined)
+                    ? choices
+                    : undefined,
             );
             fxRef.current = t.events;
             ns = t.state;
@@ -416,6 +427,18 @@ export function CombatEncounterPanel({
         setFxSeq((n) => n + 1);
         unstageUid(uid);
     }, [apply, unstageUid]);
+    // phase 28 — opens the songbook picker instead of applying immediately.
+    const onReprisalNeeded = useCallback((uid: string, dieId: string | null, power: boolean) => {
+        setReprisalPrompt({ uid, dieId, power });
+    }, []);
+    // A tap on a discard entry commits that choice; `null` (the skip row)
+    // omits it — falls back to the engine's highest-rank auto-pick.
+    const onReprisalPick = useCallback((cardId: string | null) => {
+        if (!reprisalPrompt) return;
+        const { uid, dieId, power } = reprisalPrompt;
+        setReprisalPrompt(null);
+        onApply(uid, dieId, power, cardId ? { reprisalCardId: cardId } : undefined);
+    }, [reprisalPrompt, onApply]);
     const onDiscard = useCallback((uid: string) => { apply((s) => discardCombatCard(s, uid).state); unstageUid(uid); }, [apply, unstageUid]);
     const onSignature = useCallback((id: string) => apply((s) => playSignatureSkill(s, id).state), [apply]);
     const onEndPhase = useCallback(() => {
@@ -516,6 +539,7 @@ export function CombatEncounterPanel({
                     onFateTap={onFateTap}
                     bankSpare={bankSpare}
                     onToggleBankSpare={onToggleBankSpare}
+                    onReprisalNeeded={onReprisalNeeded}
                 />
             )}
 
@@ -649,6 +673,20 @@ export function CombatEncounterPanel({
                             {/* the colour law — ONE global legend (was boilerplated onto every card) */}
                             <Text style={styles.detailColorMatch}>{detailCard.detail.colorMatchHint}</Text>
 
+                            {/* KW-7 (phase 29) — the systems glossary: engine tokens the player
+                                reads on cards (Conviction, Resonance, Reserve/Pips, Floating,
+                                rungs, WILD/X) but that spec 32 §3 explicitly keeps OUT of the
+                                card-keyword registry. Same anchor point as the colour-law legend
+                                above — the overlay is where mid-fight questions get answered. */}
+                            <View style={styles.systemsGlossary}>
+                                {SYSTEM_GLOSSARY.map(s => (
+                                    <Text key={s.term} style={styles.systemsGlossaryLine}>
+                                        <Text style={styles.systemsGlossaryTerm}>{s.term}</Text>
+                                        {' — ' + s.def}
+                                    </Text>
+                                ))}
+                            </View>
+
                             {/* (4) FLAVOR — authored prose, overlay BOTTOM only (owner
                                 directive 2026-07-09: the face stays purely functional). */}
                             {detailCard.flavor ? (
@@ -766,6 +804,45 @@ export function CombatEncounterPanel({
                                     <Text style={[styles.tipBadgeText, { color: AXM.sulfur }]} allowFontScaling={false}>COMBO</Text>
                                 </View>
                             </View>
+                        </View>
+                    </View>
+                </Pressable>
+            )}
+
+            {/* phase 28 — REPRISE songbook picker: choose which discarded card
+                returns to hand (the engine's default is the highest-rank one). */}
+            {reprisalPrompt && (
+                <Pressable style={styles.backdrop} testID="combat-reprisal-picker" onPress={() => onReprisalPick(null)}>
+                    <View style={[styles.tipPlaque, { borderColor: `${AXM.sulfur}66` }]} onStartShouldSetResponder={() => true}>
+                        <View style={[styles.tipCorner, styles.tipCornerTl, { borderColor: AXM.sulfur }]} pointerEvents="none" />
+                        <View style={[styles.tipCorner, styles.tipCornerTr, { borderColor: AXM.sulfur }]} pointerEvents="none" />
+                        <View style={[styles.tipCorner, styles.tipCornerBl, { borderColor: AXM.sulfur }]} pointerEvents="none" />
+                        <View style={[styles.tipCorner, styles.tipCornerBr, { borderColor: AXM.sulfur }]} pointerEvents="none" />
+                        <GlyphBurst color={AXM.sulfur} glyph="↺" />
+                        <Text style={[styles.tipName, { color: AXM.sulfur, textShadowColor: AXM.sulfur }]}>REPRISE — CHOOSE</Text>
+                        <Text style={styles.tipGloss}>Return one discarded card to your hand.</Text>
+                        <View style={styles.reprisalList}>
+                            {vm.discardCards.map((c) => (
+                                <Pressable
+                                    key={c.id}
+                                    style={styles.reprisalRow}
+                                    testID={`combat-reprisal-option-${c.id}`}
+                                    onPress={() => onReprisalPick(c.id)}
+                                    accessibilityRole="button"
+                                    accessibilityLabel={`Return ${c.name} to hand`}
+                                >
+                                    <Text style={styles.reprisalRowText}>{c.name}</Text>
+                                </Pressable>
+                            ))}
+                            <Pressable
+                                style={[styles.reprisalRow, styles.reprisalSkipRow]}
+                                testID="combat-reprisal-skip"
+                                onPress={() => onReprisalPick(null)}
+                                accessibilityRole="button"
+                                accessibilityLabel="Skip — the engine picks the highest-rank card"
+                            >
+                                <Text style={[styles.reprisalRowText, { color: AXM.bone }]}>skip · let it pick the best</Text>
+                            </Pressable>
                         </View>
                     </View>
                 </Pressable>
@@ -928,6 +1005,10 @@ const useStyles = makeStyles((AXM) => ({
     detailPillKw: { fontFamily: FONTS.gothic, fontSize: 13, letterSpacing: 0.5 },
     detailPillVal: { flex: 1, fontFamily: FONTS.mono, fontSize: 12.5, color: AXM.parchment, letterSpacing: 0.2 },
     detailColorMatch: { alignSelf: 'stretch', fontFamily: FONTS.sans, fontSize: 9, letterSpacing: 1.6, color: AXM.bone, opacity: 0.6, lineHeight: 14, marginBottom: 4, textAlign: 'center' },
+    // KW-7 (phase 29) — systems glossary (Conviction/Resonance/Reserve+Pips/Floating/rungs/WILD-X).
+    systemsGlossary: { alignSelf: 'stretch', marginTop: 6, marginBottom: 4, paddingTop: 6, borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.08)' },
+    systemsGlossaryLine: { fontFamily: FONTS.sans, fontSize: 9.5, color: AXM.bone, opacity: 0.65, lineHeight: 15, marginBottom: 3 },
+    systemsGlossaryTerm: { fontFamily: FONTS.sans, fontSize: 9.5, letterSpacing: 1, color: AXM.ash, opacity: 1 },
     detailFlavor: { alignSelf: 'stretch', fontFamily: FONTS.serifItalic, fontStyle: 'italic', fontSize: 12, color: AXM.bone, opacity: 0.75, lineHeight: 17, marginTop: 10, textAlign: 'center' },
     detailReadNote: { fontFamily: FONTS.serifItalic, fontStyle: 'italic', fontSize: 11, color: AXM.bone, lineHeight: 15 },
     detailLine: { fontFamily: FONTS.serif, fontSize: 13, color: AXM.parchment, lineHeight: 18 },
@@ -959,6 +1040,14 @@ const useStyles = makeStyles((AXM) => ({
     },
     tipGloss: { fontFamily: FONTS.serif, fontSize: 14, lineHeight: 20, color: AXM.parchmentDim, textAlign: 'center', marginTop: 8 },
     tipMeta: { fontFamily: FONTS.mono, fontSize: 11, color: AXM.bone, letterSpacing: 0.6, marginTop: 10 },
+    // ── REPRISE songbook picker (phase 28) ──
+    reprisalList: { width: '100%', marginTop: 14, gap: 6 },
+    reprisalRow: {
+        borderWidth: 1, borderColor: AXM.ash, borderRadius: 6, paddingVertical: 10, paddingHorizontal: 12,
+        backgroundColor: 'rgba(0,0,0,0.35)',
+    },
+    reprisalSkipRow: { borderStyle: 'dashed', marginTop: 4 },
+    reprisalRowText: { fontFamily: FONTS.sans, fontSize: 13, color: AXM.parchment, textAlign: 'center' },
     tipBadgeWrap: { position: 'absolute', bottom: -15, alignSelf: 'center', width: 128, height: 30 },
     tipBadgeInner: { flex: 1, alignItems: 'center', justifyContent: 'center' },
     tipBadgeText: { fontFamily: FONTS.sans, fontSize: 12, letterSpacing: 2 },

@@ -1,5 +1,12 @@
 # Phase 27 §3 — honest re-baseline re-derivations (2026-07-11)
 
+> Cross-note (merge reconciliation): the cloud loop independently shipped its
+> own Phase 27 re-baseline against ITS tree (post f849c5a2, pre the WS card
+> sweep) — see `plan/tuning/2026-07-11-phase27-rebaseline.md`. The two measured
+> different trees; this report is the one cut against the merged engine
+> semantics (70c64501) and is the one the checked-in deck-matrix baseline
+> corresponds to.
+
 **Commit:** `6ea123fce1646824fe13857e5541c4bbc17ddf66` (Turn Law, Phase 26 — these are
 the FIRST Turn-Law-honest measurements). **Command:** `npm run combat-playtest --
 --stage=all --policy=all --runs=60 --seed={1,2,3} --cards [--json]` — 144 cells/seed

@@ -224,10 +224,12 @@ export function statePredicateText(p: SynergyStatePredicate): string {
 export function mechanicText(m: CardSpecialMechanic): string | null {
     switch (m.kind) {
         case 'guard': return `Guard ${m.amount}`;
-        case 'barrier': return `Barrier ${m.amount}`;
+        // KW-2 (phase 29): BARRIER merged into GUARD — prints "persists" on
+        // its one carrier (the-adamant-wall) rather than a separate word.
+        case 'barrier': return `GUARD ${m.amount} (persists)`;
         case 'riposte': return `RIPOSTE ${m.damage}${m.reduce ? ` (parry ${m.reduce})` : ''}`;
         case 'rupture': return `RUPTURE${m.fuelPerPip ? ` (+${m.fuelPerPip} fuel per pip)` : ''}${m.fuelPerOmenHit ? ` (+${m.fuelPerOmenHit} fuel per omen hit)` : ''}`;
-        case 'siphon': return `siphon ${Math.round(m.pct * 100)}%`;
+        case 'siphon': return `SIPHON ${Math.round(m.pct * 100)}%`;
         case 'forge_floating_die': return `FORGE a ${m.color === 'wild' ? 'WILD' : "the powering die's color"} floating die`;
         case 'float_x_die': return 'FORGE a dead X die into a WILD floating die (no X: +1 Conviction)';
         case 'stagger': return `STAGGER ${m.rungs}`;
@@ -240,19 +242,26 @@ export function mechanicText(m: CardSpecialMechanic): string | null {
         case 'spend_all_pips': return `spend ALL pips${m.guardPerPip ? ` (+${m.guardPerPip} Guard per pip)` : ''}${m.markPer ? ` (+1 MARK per ${m.markPer} spent, uncapped)` : ''}`;
         case 'recoil': return `RECOIL ${m.hp}`;
         case 'recoil_x': return `RECOIL X (min ${m.min}): POISON per ${Math.round(1 / m.poisonPerX)}`;
-        case 'extend_dots': return `+${m.turns} duration to ALL your DoTs`;
-        case 'convert_dots': return `convert bleed↔poison, +${m.bonusIntensity} intensity`;
-        case 'boost_all_dots': return `+${m.intensity} intensity to ALL enemy DoTs`;
+        // KW-3 (phase 29): FESTER→PROLONG, TRANSMUTE→REARGUE (renames).
+        case 'extend_dots': return `PROLONG +${m.turns} duration to ALL your DoTs`;
+        case 'convert_dots': return `REARGUE — convert bleed↔poison, +${m.bonusIntensity} intensity`;
+        case 'boost_all_dots': return `PROLONG +${m.intensity} intensity to ALL enemy DoTs`;
         case 'soul_gain': return `+${m.count} Soul${m.count === 1 ? '' : 's'}`;
-        case 'consume_affliction': return `consume 1 affliction — its fuel ticks now, +${m.souls} Soul`;
+        // KW-2 (phase 29): re-mapped Soul→Rupture — extends RUPTURE's
+        // printed sense ("consume N afflictions") instead of a redundant
+        // CONSUME word.
+        case 'consume_affliction': return `RUPTURE 1 — its fuel ticks now, +${m.souls} Soul`;
         case 'reap': return `REAP ${m.cost}${m.kindle ? ` — KINDLE (${m.kindle})` : ''}${m.rider ? ` — ${riderText(m.rider)}` : ''}`;
         case 'reap_all': return `REAP all — ${m.burstPerSoul} per Soul`;
         case 'sway': return `SWAY ${m.amount}`;
         case 'echo': return 'ECHO';
         case 'echo_next_spell': return 'your next spell gains ECHO';
-        case 'reprise': return `REPRISE ${m.count}${m.fireFree ? ' — its FREE line fires now' : ''}`;
+        // KW-3 (phase 29): REPRISE→RECALL (rename; frees REPRISE — see the
+        // audit's near-synonym-pair finding against ECHO/replay_last).
+        case 'reprise': return `RECALL ${m.count}${m.fireFree ? ' — its FREE line fires now' : ''}`;
+        // KW-2 (phase 29): no keyword badge — ouroboros (this mechanic's
+        // sole, 1-of-rare carrier) speaks card-local rules text only.
         case 'replay_last': return `replay your last spell ×${m.times}`;
-        case 'conjure_card': return 'CONJURE a Thoughtform';
         case 'create_temporary_die': return `KINDLE (${m.color})`;
         case 'grant_pip': return `+${m.count} pip to every Reserve die${m.overflow ? ` — each pip with no room: ${riderText(m.overflow)}` : ''}`;
         case 'bank_spent_die': return 'the spent die BANKS to the Reserve';

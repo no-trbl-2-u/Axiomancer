@@ -42,7 +42,7 @@ import { FONTS } from '@/theme/axm';
 import { makeStyles, usePalette } from '@/theme/runtime';
 import type {
     CombatViewModel, CombatCardVM, CombatDieVM,
-    CombatSignatureVM, CombatEffectChipVM, CombatCardFaceVM,
+    CombatSignatureVM, CombatEffectChipVM, CombatCardFaceVM, CombatPerorationVM,
 } from '@/state/presenters/combat-encounter.engine';
 import { armedReadValue, STANCE_COLORS } from '@/state/presenters/combat-encounter.engine';
 import { wheelNext, type WheelStance } from '@/state/combat/momentum';
@@ -451,6 +451,30 @@ function MomentumWheel({ lit, charged, onPress }: { lit: WheelStance[]; charged:
     );
 }
 
+// ── Premise track + CONCEDE beat (phase 28) ──────────────────────────────────
+
+/** Peroration was fully engine-side state with zero combat-UI rendering
+ *  before phase 28 — "the deck's whole win condition is invisible." */
+function PerorationTrack({ peroration }: { peroration: CombatPerorationVM }) {
+    const AXM = usePalette();
+    const styles = useStyles();
+    if (!peroration.active) return null;
+    const pct = peroration.at > 0 ? Math.min(1, peroration.premises / peroration.at) : 0;
+    const a11y = `Peroration declared: ${peroration.cardName}. Premise ${peroration.premises} of ${peroration.at}`
+        + (peroration.concedeAt ? `, concedes the fight outright at ${peroration.concedeAt} Premises.` : '.');
+    return (
+        <View style={styles.perorationTrack} testID="combat-peroration" accessible accessibilityRole="text" accessibilityLabel={a11y}>
+            <Text style={styles.perorationLabel} numberOfLines={1} allowFontScaling={false}>
+                ☞ {peroration.cardName.toUpperCase()} · {peroration.premises}/{peroration.at}
+                {peroration.concedeAt ? ` · CONCEDE ${peroration.concedeAt}` : ''}
+            </Text>
+            <View style={styles.perorationBarTrack}>
+                <View style={[styles.perorationBarFill, { width: `${pct * 100}%`, backgroundColor: AXM.sulfur }]} />
+            </View>
+        </View>
+    );
+}
+
 // ── END PHASE medallion ──────────────────────────────────────────────────────
 
 function EndPhaseMedallion({ onPress }: { onPress: () => void }) {
@@ -499,9 +523,10 @@ export interface CombatBoardProps {
     stagedUids: string[];
     /** Commit the staged card. `power` true → power it with `dieId` (null when a die
      *  is already drafted, the combo case); `power` false → the FREE base action,
-     *  no die (hazard model — the die is optional). `chosenX` (WS7.2) rides along
-     *  only when the card carries an X mechanic and the stepper was touched. */
-    onApply: (uid: string, dieId: string | null, power: boolean, chosenX?: number) => void;
+     *  no die (hazard model — the die is optional). `choices.chosenX` (WS7.2)
+     *  rides along only when the card carries an X mechanic and the stepper was
+     *  touched; `choices.reprisalCardId` (phase 28) carries the songbook pick. */
+    onApply: (uid: string, dieId: string | null, power: boolean, choices?: { chosenX?: number; reprisalCardId?: string }) => void;
     onStage: (uid: string) => void;
     onUnstage: (uid: string) => void;
     onDiscard: (uid: string) => void;
@@ -526,11 +551,18 @@ export interface CombatBoardProps {
     /** Bank-or-burn choice for the spare die at draft (panel-owned). */
     bankSpare?: boolean;
     onToggleBankSpare?: () => void;
+    /** phase 28 — REPRISE songbook choice. Called INSTEAD of `onApply` when the
+     *  card being APPLYd carries a `reprise` mechanic and the discard pile is
+     *  non-empty; the panel opens its picker and calls `onApply` itself once
+     *  the player chooses (or skips, which omits the choice — auto-pick). Not
+     *  consulted from the END PHASE auto-apply batch (never pop a picker
+     *  mid-batch — that path always auto-picks). */
+    onReprisalNeeded?: (uid: string, dieId: string | null, power: boolean) => void;
 }
 
 export const CombatBoard = React.memo(function CombatBoard({
     vm, drag, stagedUids, onApply, onStage, onUnstage, onDiscard, onSignature, onEndPhase, onInspect, onChip, onSignatureInfo, onPlayerInspect, momentum, onMomentumInfo, fx,
-    onFateTap, bankSpare, onToggleBankSpare,
+    onFateTap, bankSpare, onToggleBankSpare, onReprisalNeeded,
 }: CombatBoardProps) {
     const AXM = usePalette();
     const styles = useStyles();
@@ -760,21 +792,33 @@ export const CombatBoard = React.memo(function CombatBoard({
     // draft+power it; else FREE (no die).
     // Latest-closure ref + a stable dispatcher so memoized StagedCards never
     // re-render just because the board did.
-    const handleApplyRef = useRef<(uid: string) => void>(() => undefined);
-    handleApplyRef.current = (uid: string) => {
-        // WS7.2 — forward the stepper's chosen X (arity preserved when absent).
+    // `autoResolve` (phase 28) — true only from the END PHASE batch below: a
+    // staged REPRISE card must still land (never silently dropped), but
+    // there's no player present mid-batch to answer a picker, so it always
+    // auto-picks (the engine's pre-existing highest-rank default) instead of
+    // calling `onReprisalNeeded`.
+    const handleApplyRef = useRef<(uid: string, autoResolve?: boolean) => void>(() => undefined);
+    handleApplyRef.current = (uid: string, autoResolve = false) => {
+        // WS7.2 — forward the stepper's chosen X (absent = no X mechanic).
         const chosenX = chosenXRef.current[uid];
-        const commit = (dieId: string | null, power: boolean): void => {
-            if (chosenX !== undefined) onApply(uid, dieId, power, chosenX);
-            else onApply(uid, dieId, power);
-        };
+        let dieId: string | null = null;
+        let power: boolean;
         if (draftedDie) {
-            commit(null, true);
+            dieId = null; power = true;
         } else {
             const pid = pendingDieByUid[uid];
             const pending = pid ? vm.dice.find((x) => x.id === pid) ?? null : null;
-            if (pending && !pending.spent && !pending.isX && !pending.drafted) commit(pending.id, true);
-            else commit(null, false);
+            if (pending && !pending.spent && !pending.isX && !pending.drafted) { dieId = pending.id; power = true; }
+            else { dieId = null; power = false; }
+        }
+        const card = handMapRef.current.get(uid);
+        if (!autoResolve && power && card?.needsReprisalChoice && vm.discardCards.length > 0 && onReprisalNeeded) {
+            onReprisalNeeded(uid, dieId, power);
+        } else if (chosenX !== undefined) {
+            // WS7.2 — arity preserved when no X was chosen (see the multistage pins).
+            onApply(uid, dieId, power, { chosenX });
+        } else {
+            onApply(uid, dieId, power);
         }
         setPendingDieByUid((prev) => { const next = { ...prev }; delete next[uid]; return next; });
         setChosenXByUid((prev) => { const next = { ...prev }; delete next[uid]; return next; });
@@ -791,7 +835,7 @@ export const CombatBoard = React.memo(function CombatBoard({
     // applies and the resolve all compose through the panel's functional setState, so
     // cards land before the enemy acts.
     const handleEndPhase = () => {
-        for (const uid of stagedUids) handleApply(uid);
+        for (const uid of stagedUids) handleApplyRef.current(uid, true);
         onEndPhase();
     };
 
@@ -864,6 +908,9 @@ export const CombatBoard = React.memo(function CombatBoard({
                 {momentum ? (
                     <MomentumWheel lit={momentum.lit} charged={momentum.charged} onPress={onMomentumInfo} />
                 ) : null}
+
+                {/* Premise track + CONCEDE beat (phase 28) — the peroration theme's win condition */}
+                <PerorationTrack peroration={vm.peroration} />
 
                 {/* player status strip — IN FLOW (not floated over the fan, where the
                     hand's gesture area swallowed the taps) so every tile stays tappable */}
@@ -1247,6 +1294,12 @@ const useStyles = makeStyles((AXM) => ({
         backgroundColor: 'rgba(0,0,0,0.7)', borderWidth: 1, borderColor: '#6fb3e055', borderRadius: 4,
         paddingHorizontal: 5, paddingVertical: 2, overflow: 'hidden',
     },
+
+    // ── Premise track (phase 28) ──
+    perorationTrack: { paddingHorizontal: 12, paddingBottom: 6, gap: 3 },
+    perorationLabel: { fontFamily: FONTS.mono, fontSize: 10, color: '#d9b44a', letterSpacing: 0.4 },
+    perorationBarTrack: { height: 4, borderRadius: 2, backgroundColor: 'rgba(0,0,0,0.6)', overflow: 'hidden' },
+    perorationBarFill: { height: '100%', borderRadius: 2 },
 
     // ── corner medallions ──
     cornerStack: { position: 'absolute', right: 10, alignItems: 'center', gap: 8, zIndex: 40 },

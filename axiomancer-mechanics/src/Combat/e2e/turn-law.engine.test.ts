@@ -28,6 +28,7 @@ import {
     initializeCombatEncounter, rollEncounterDice, playCombatCard,
     draftStanceDie, startTurn, endTurn, resolveThreatPhase,
 } from '../combat.engine';
+import { runHazardCombatAutoEncounter } from '../combat.autoplay';
 import { runOneEncounter } from '../combat.encounter.sim';
 import { COMBAT_SIM_POLICY_ORDER } from '../combat.sim-policies';
 import type { CombatEncounterState } from '../combat.encounter.types';
@@ -161,6 +162,34 @@ describe('Gate 0 — the round-turn law (one tray roll per threat phase)', () =>
         expect(s.floatingDice ?? []).toHaveLength(0); // the whole pool spent
         expect(s.round).toBe(1);                      // still the same round
         expect(s.log.some(e => e.kind === 'turn-law-blocked')).toBe(false);
+    });
+
+    it('a third, fourth, ... startTurn call is equally refused (no farm, however long)', () => {
+        // Cloud Phase 26 pin (folded in at the merge): the refusal is not a
+        // one-shot — every subsequent illegal roll inside the phase no-ops.
+        let s = open();
+        const trayAfterFirstTurn = s.dice;
+        for (let i = 0; i < 10; i++) {
+            const attempt = startTurn(s, rng);
+            expect(attempt.events.every(e => e.kind === 'turn-law-blocked')).toBe(true);
+            s = attempt.state;
+        }
+        expect(s.dice).toEqual(trayAfterFirstTurn);
+    });
+
+    it('the live mobile map auto-runner never rolls more than one tray per resolved phase', () => {
+        // Cloud Phase 26 pin (folded in at the merge): the auto-runner that
+        // drives REAL map encounters obeys the law, not just the sim policies.
+        const result = runHazardCombatAutoEncounter(
+            makePlayer(LAW_DECK), makeEnemy(), { seed: 11, policy: 'status', maxTurns: 20 },
+        );
+        expect(result.phaseCount).toBeGreaterThan(1); // a multi-phase fight, not a one-shot
+
+        const trayRolls = result.state.log.filter(e => e.kind === 'turn-dice-rolled').length;
+        const resolvedPhases = result.state.phaseResults.length;
+        // At most one tray per resolved phase, plus (at most) one for whatever
+        // phase was still in progress when the encounter ended.
+        expect(trayRolls).toBeLessThanOrEqual(resolvedPhases + 1);
     });
 
     it('sim policies play legally: zero turn-law-blocked events across seeded runs', () => {
