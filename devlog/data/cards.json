@@ -39,16 +39,12 @@
    },
    {
     "k": "Source",
-    "v": "starter"
-   },
-   {
-    "k": "Preset",
-    "v": "Standstill"
+    "v": "reward"
    }
   ],
   "lines": [
-   "FREE (3 rounds) — Draw 1 card each time you deny an enemy turn.",
-   "PAID (rest of combat) — Draw 1 card each time you deny an enemy turn."
+   "FREE (3 rounds) — DRAW 1 card each time your STAGGER denies an enemy turn.",
+   "PAID (rest of combat) — DRAW 1 card each time your STAGGER denies an enemy turn."
   ]
  },
  {
@@ -87,15 +83,11 @@
    },
    {
     "k": "Keywords",
-    "v": "ECHO · REPRISE · CONJURE · DRAW"
+    "v": "ECHO · RECALL · DRAW"
    },
    {
     "k": "Source",
-    "v": "starter"
-   },
-   {
-    "k": "Preset",
-    "v": "Refrain"
+    "v": "reward"
    }
   ],
   "lines": [
@@ -108,7 +100,7 @@
   "id": "against-my-judgment",
   "name": "Against My Judgment",
   "image": "./assets/catalog/cards/devil-book.webp",
-  "pricing": "draw 2 (4) − self-mark d2 credit (−0.75×1.5 ≈ −1.1) + FREE conviction 0.35 ≈ 3.3 → Doxa",
+  "pricing": null,
   "chips": [
    {
     "k": "Stance",
@@ -140,7 +132,7 @@
    },
    {
     "k": "Keywords",
-    "v": "RECOIL · FALLEN · MARK · HEAL · CLEANSE"
+    "v": "RECOIL · FALLEN · MARK · HEAL"
    },
    {
     "k": "Source",
@@ -152,7 +144,7 @@
    }
   ],
   "lines": [
-   "FREE — +1 Conviction",
+   "FREE — mark i1 d1 (self)",
    "Applies Mark ×1, 2t → self",
    "rider"
   ]
@@ -205,8 +197,8 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — Every kindled or floating die arrives with +1 pip.",
-   "PAID (rest of combat) — Every kindled or floating die arrives with +1 pip."
+   "FREE (3 rounds) — Every KINDLEd or FORGEd die arrives with +1 PIP.",
+   "PAID (rest of combat) — Every KINDLEd or FORGEd die arrives with +1 PIP."
   ]
  },
  {
@@ -253,11 +245,11 @@
    },
    {
     "k": "Preset",
-    "v": "Standstill"
+    "v": "Augury"
    }
   ],
   "lines": [
-   "FREE — Guard 2",
+   "FREE — reveal the next stance",
    "Applies Backfire ×1, 2t → enemy",
    "lock the enemy stance",
    "STAGGER 1"
@@ -299,7 +291,7 @@
    },
    {
     "k": "Keywords",
-    "v": "SOUL · REAP · MARK · TICK · RUPTURE"
+    "v": "SOUL · REAP · MARK · TICK"
    },
    {
     "k": "Source",
@@ -311,15 +303,15 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — Drain 1 HP from the enemy for every Soul you gain.",
-   "PAID (rest of combat) — Drain 1 HP from the enemy for every Soul you gain."
+   "FREE (3 rounds) — Drain 1 HP from the enemy for every SOUL you gain.",
+   "PAID (rest of combat) — Drain 1 HP from the enemy for every SOUL you gain."
   ]
  },
  {
   "id": "bootstrap-loop",
   "name": "Bootstrap Loop",
   "image": "./assets/catalog/cards/spark.webp",
-  "pricing": "TRANSMUTE dead X → WILD floating ((5+3+1)×0.7 + 1×0.3 = 6.6) + FREE",
+  "pricing": null,
   "chips": [
    {
     "k": "Stance",
@@ -363,7 +355,7 @@
    }
   ],
   "lines": [
-   "FREE — +1 Conviction",
+   "FREE — +1 pip to every Reserve die",
    "FORGE a dead X die into a WILD floating die (no X: +1 Conviction)",
    "Threshold: 2× mind die fires a rider"
   ]
@@ -372,7 +364,7 @@
   "id": "brace-for-impact",
   "name": "Brace for Impact",
   "image": "./assets/catalog/cards/guard-2.webp",
-  "pricing": "Guard 8 (2) + FREE guard 2 (0.5) + pip line (+2/pip, situational ≈ 0.8) ≈ 3.3 → Doxa (starter)",
+  "pricing": null,
   "chips": [
    {
     "k": "Stance",
@@ -404,7 +396,7 @@
    },
    {
     "k": "Keywords",
-    "v": "THORNS · RIPOSTE · GUARD · BARRIER · HEAL"
+    "v": "THORNS · RIPOSTE · GUARD · HEAL"
    },
    {
     "k": "Source",
@@ -412,11 +404,11 @@
    },
    {
     "k": "Preset",
-    "v": "Bastion"
+    "v": "Oratory"
    }
   ],
   "lines": [
-   "FREE — Guard 2",
+   "FREE — GUARD 2 (persists)",
    "Guard 8"
   ]
  },
@@ -456,7 +448,7 @@
    },
    {
     "k": "Keywords",
-    "v": "SOUL · REAP · MARK · TICK · RUPTURE"
+    "v": "SOUL · REAP · MARK · TICK"
    },
    {
     "k": "Source",
@@ -508,20 +500,16 @@
    },
    {
     "k": "Keywords",
-    "v": "PREMISE · PERORATION · DRAW · GUARD"
+    "v": "PREMISE · DRAW · GUARD"
    },
    {
     "k": "Source",
-    "v": "starter"
-   },
-   {
-    "k": "Preset",
-    "v": "Oratory"
+    "v": "reward"
    }
   ],
   "lines": [
-   "FREE (3 rounds) — While you hold 4+ Premises, the enemy stays marked.",
-   "PAID (rest of combat) — While you hold 4+ Premises, the enemy stays marked. (attaches to the enemy)"
+   "FREE (3 rounds) — While you hold 4+ PREMISEs, the enemy stays MARKed.",
+   "PAID (rest of combat) — While you hold 4+ PREMISEs, the enemy stays MARKed. (attaches to the enemy)"
   ]
  },
  {
@@ -568,11 +556,11 @@
    },
    {
     "k": "Preset",
-    "v": "Augury"
+    "v": "Standstill"
    }
   ],
   "lines": [
-   "FREE — draw 1",
+   "FREE — draw 1 · FORETELL 1",
    "Applies Poison ×1, 2t → enemy",
    "Applies Mark ×1, 2t → enemy",
    "OMEN — on hit: Guard 4"
@@ -582,7 +570,7 @@
   "id": "circular-reasoning",
   "name": "Circular Reasoning",
   "image": "./assets/catalog/cards/light-ring.webp",
-  "pricing": "REPRISE 1 + its FREE line fires now (2 + ~1.5) + FREE draw (0.7) + selection ≈ 9 → Theorem",
+  "pricing": null,
   "chips": [
    {
     "k": "Stance",
@@ -614,7 +602,7 @@
    },
    {
     "k": "Keywords",
-    "v": "ECHO · REPRISE · CONJURE · DRAW"
+    "v": "ECHO · RECALL · DRAW"
    },
    {
     "k": "Source",
@@ -622,19 +610,19 @@
    },
    {
     "k": "Preset",
-    "v": "Refrain"
+    "v": "Tithe"
    }
   ],
   "lines": [
-   "FREE — draw 1",
-   "REPRISE 1 — its FREE line fires now"
+   "FREE — mill 1 to discard",
+   "RECALL 1 — its FREE line fires now"
   ]
  },
  {
   "id": "common-ground",
   "name": "Common Ground",
   "image": "./assets/catalog/cards/bright-sphere-yellow.webp",
-  "pricing": "SWAY 2 (1.6) + rapport i1 d2 (1.5) + FREE draw (0.7) + threshold(SWAY 2 ×0.5 = 0.8) + tempo ≈ 7 → Thesis",
+  "pricing": null,
   "chips": [
    {
     "k": "Stance",
@@ -674,11 +662,11 @@
    },
    {
     "k": "Preset",
-    "v": "Grace"
+    "v": "Bastion"
    }
   ],
   "lines": [
-   "FREE — draw 1",
+   "FREE — draw 1 · rapport i1 d2",
    "Applies Rapport ×1, 2t → enemy",
    "SWAY 2",
    "Threshold: 3× heart die fires a rider"
@@ -720,7 +708,7 @@
    },
    {
     "k": "Keywords",
-    "v": "RECOIL · FALLEN · MARK · HEAL · CLEANSE"
+    "v": "RECOIL · FALLEN · MARK · HEAL"
    },
    {
     "k": "Source",
@@ -732,8 +720,8 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — While Fallen, your status applications land at +1 intensity.",
-   "PAID (rest of combat) — While Fallen, your status applications land at +1 intensity."
+   "FREE (3 rounds) — While FALLEN, your status applications land at +1 intensity.",
+   "PAID (rest of combat) — While FALLEN, your status applications land at +1 intensity."
   ]
  },
  {
@@ -772,7 +760,7 @@
    },
    {
     "k": "Keywords",
-    "v": "THORNS · RIPOSTE · GUARD · BARRIER · HEAL"
+    "v": "THORNS · RIPOSTE · GUARD · HEAL"
    },
    {
     "k": "Source",
@@ -780,19 +768,19 @@
    },
    {
     "k": "Preset",
-    "v": "Bastion"
+    "v": "Augury"
    }
   ],
   "lines": [
-   "FREE (3 rounds) — A fully-blocked attack costs the enemy a rung on its next telegraph.",
-   "PAID (rest of combat) — A fully-blocked attack costs the enemy a rung on its next telegraph. (attaches to the enemy)"
+   "FREE (3 rounds) — A fully-blocked (GUARD) attack STAGGERs the enemy a rung on its next telegraph.",
+   "PAID (rest of combat) — A fully-blocked (GUARD) attack STAGGERs the enemy a rung on its next telegraph. (attaches to the enemy)"
   ]
  },
  {
   "id": "currys-conversion",
   "name": "Curry's Conversion",
   "image": "./assets/catalog/cards/bleed.webp",
-  "pricing": "convert bleed↔poison +1 int ≈ 1.5/instance × ~2 + tempo value ≈ 6.5 + draw 2 ≈ 8.5 → Theorem",
+  "pricing": null,
   "chips": [
    {
     "k": "Stance",
@@ -824,7 +812,7 @@
    },
    {
     "k": "Keywords",
-    "v": "POISON · BLEED · MARK · TICK · RUPTURE · CLEANSE"
+    "v": "POISON · BLEED · MARK · TICK · RUPTURE"
    },
    {
     "k": "Source",
@@ -836,15 +824,15 @@
    }
   ],
   "lines": [
-   "FREE — draw 1",
-   "convert bleed↔poison, +1 intensity"
+   "FREE — draw 1 · mark i1 d1",
+   "REARGUE — convert bleed↔poison, +1 intensity"
   ]
  },
  {
   "id": "delphic-ambiguity",
   "name": "Delphic Ambiguity",
   "image": "./assets/catalog/cards/confuse.webp",
-  "pricing": "consume_affliction (Foretold Wound fuel, ~4-5) + 1 Soul (0.75) +",
+  "pricing": null,
   "chips": [
    {
     "k": "Stance",
@@ -884,12 +872,12 @@
    },
    {
     "k": "Preset",
-    "v": "Augury"
+    "v": "Penitent"
    }
   ],
   "lines": [
-   "FREE — tick",
-   "consume 1 affliction — its fuel ticks now, +1 Soul",
+   "FREE — FORETELL 1",
+   "RUPTURE 1 — its fuel ticks now, +1 Soul",
    "FORETELL 1",
    "Die bonus: powering die mind fires a rider"
   ]
@@ -938,7 +926,7 @@
    },
    {
     "k": "Preset",
-    "v": "Grace"
+    "v": "Tithe"
    }
   ],
   "lines": [
@@ -987,23 +975,19 @@
    },
    {
     "k": "Source",
-    "v": "starter"
-   },
-   {
-    "k": "Preset",
-    "v": "Foundry"
+    "v": "reward"
    }
   ],
   "lines": [
-   "FREE (3 rounds) — Every kindled or floating die you spend marks the enemy.",
-   "PAID (rest of combat) — Every kindled or floating die you spend marks the enemy. (attaches to the enemy)"
+   "FREE (3 rounds) — Every KINDLEd or FORGEd die you spend MARKs the enemy.",
+   "PAID (rest of combat) — Every KINDLEd or FORGEd die you spend MARKs the enemy. (attaches to the enemy)"
   ]
  },
  {
   "id": "ex-nihilo",
   "name": "Ex Nihilo",
   "image": "./assets/catalog/cards/bright-sphere-yellow.webp",
-  "pricing": "FORGE floating WILD (5) + BANK own powering die + threshold(mind×3,",
+  "pricing": null,
   "chips": [
    {
     "k": "Stance",
@@ -1047,10 +1031,9 @@
    }
   ],
   "lines": [
-   "FREE — +1 Conviction",
+   "FREE — +1 pip to every Reserve die",
    "FORGE a WILD floating die",
-   "the spent die BANKS to the Reserve",
-   "Threshold: 3× mind die fires a rider"
+   "the spent die BANKS to the Reserve"
   ]
  },
  {
@@ -1089,7 +1072,7 @@
    },
    {
     "k": "Keywords",
-    "v": "PREMISE · PERORATION · DRAW · GUARD"
+    "v": "PREMISE · DRAW · GUARD"
    },
    {
     "k": "Source",
@@ -1111,7 +1094,7 @@
   "id": "fallen-grace",
   "name": "Fallen Grace",
   "image": "./assets/catalog/cards/light-ring.webp",
-  "pricing": "bleed i2 d3 (~5) + draw 0.7 + FALLEN(heal 4 ≈ 1.3 ×0.5 = 0.7) + tempo ≈ 9 → Theorem",
+  "pricing": null,
   "chips": [
    {
     "k": "Stance",
@@ -1143,7 +1126,7 @@
    },
    {
     "k": "Keywords",
-    "v": "RECOIL · FALLEN · MARK · HEAL · CLEANSE"
+    "v": "RECOIL · FALLEN · MARK · HEAL"
    },
    {
     "k": "Source",
@@ -1151,11 +1134,11 @@
    },
    {
     "k": "Preset",
-    "v": "Penitent"
+    "v": "Standstill"
    }
   ],
   "lines": [
-   "FREE — draw 1",
+   "FREE — draw 1 · mark i1 d1 (self)",
    "Applies Bleed ×2, 3t → enemy",
    "Fallen: heal 4"
   ]
@@ -1200,23 +1183,19 @@
    },
    {
     "k": "Source",
-    "v": "starter"
-   },
-   {
-    "k": "Preset",
-    "v": "Augury"
+    "v": "reward"
    }
   ],
   "lines": [
-   "FREE (3 rounds) — Every omen that hits marks the foe.",
-   "PAID (rest of combat) — Every omen that hits marks the foe. (attaches to the enemy)"
+   "FREE (3 rounds) — Every OMEN that hits MARKs the foe.",
+   "PAID (rest of combat) — Every OMEN that hits MARKs the foe. (attaches to the enemy)"
   ]
  },
  {
   "id": "festering-argument",
   "name": "Festering Argument",
   "image": "./assets/catalog/cards/dream-flutter.webp",
-  "pricing": "+1 duration to ALL DoTs ≈ 1/dot × expected 2-3 live dots ≈ 5.5 + tick 0.6 ≈ 6.1 → Thesis",
+  "pricing": null,
   "chips": [
    {
     "k": "Stance",
@@ -1248,7 +1227,7 @@
    },
    {
     "k": "Keywords",
-    "v": "POISON · BLEED · MARK · TICK · RUPTURE · CLEANSE"
+    "v": "POISON · BLEED · MARK · TICK · RUPTURE"
    },
    {
     "k": "Source",
@@ -1260,8 +1239,8 @@
    }
   ],
   "lines": [
-   "FREE — tick",
-   "+1 duration to ALL your DoTs"
+   "FREE — mark i1 d1",
+   "PROLONG +1 duration to ALL your DoTs"
   ]
  },
  {
@@ -1322,7 +1301,7 @@
   "id": "half-step",
   "name": "Half-Step",
   "image": "./assets/catalog/cards/blue-light.webp",
-  "pricing": "Guard 5 (1.25) + 2 pips (3.0) + FREE guard 2 (0.5) = 4.75 -- verified",
+  "pricing": null,
   "chips": [
    {
     "k": "Stance",
@@ -1366,7 +1345,7 @@
    }
   ],
   "lines": [
-   "FREE — Guard 2",
+   "FREE — +1 pip to every Reserve die",
    "Guard 5",
    "+2 pip to every Reserve die"
   ]
@@ -1411,11 +1390,7 @@
    },
    {
     "k": "Source",
-    "v": "starter"
-   },
-   {
-    "k": "Preset",
-    "v": "Grace"
+    "v": "reward"
    }
   ],
   "lines": [
@@ -1462,7 +1437,7 @@
    },
    {
     "k": "Keywords",
-    "v": "THORNS · RIPOSTE · GUARD · BARRIER · HEAL"
+    "v": "THORNS · RIPOSTE · GUARD · HEAL"
    },
    {
     "k": "Source",
@@ -1470,7 +1445,7 @@
    },
    {
     "k": "Preset",
-    "v": "Bastion"
+    "v": "Standstill"
    }
   ],
   "lines": [
@@ -1534,7 +1509,7 @@
   "id": "measured-answer",
   "name": "Measured Answer",
   "image": "./assets/catalog/cards/guard-3.webp",
-  "pricing": "Guard 6 (1.5) + RIPOSTE 3/parry 2 (~4) + FREE guard 3 (0.75) + full-block gate + tempo ≈ 9 → Theorem",
+  "pricing": null,
   "chips": [
    {
     "k": "Stance",
@@ -1566,7 +1541,7 @@
    },
    {
     "k": "Keywords",
-    "v": "THORNS · RIPOSTE · GUARD · BARRIER · HEAL"
+    "v": "THORNS · RIPOSTE · GUARD · HEAL"
    },
    {
     "k": "Source",
@@ -1574,11 +1549,11 @@
    },
    {
     "k": "Preset",
-    "v": "Bastion"
+    "v": "Grace"
    }
   ],
   "lines": [
-   "FREE — Guard 3",
+   "FREE — GUARD 3 (persists)",
    "Guard 6",
    "RIPOSTE 3 (parry 2)"
   ]
@@ -1619,15 +1594,11 @@
    },
    {
     "k": "Keywords",
-    "v": "SOUL · REAP · MARK · TICK · RUPTURE"
+    "v": "SOUL · REAP · MARK · TICK"
    },
    {
     "k": "Source",
-    "v": "starter"
-   },
-   {
-    "k": "Preset",
-    "v": "Tithe"
+    "v": "reward"
    }
   ],
   "lines": [
@@ -1671,7 +1642,7 @@
    },
    {
     "k": "Keywords",
-    "v": "RECOIL · FALLEN · MARK · HEAL · CLEANSE"
+    "v": "RECOIL · FALLEN · MARK · HEAL"
    },
    {
     "k": "Source",
@@ -1683,8 +1654,8 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — Every self-debuff you take also lands one stack on the enemy.",
-   "PAID (rest of combat) — Every self-debuff you take also lands one stack on the enemy. (attaches to the enemy)"
+   "FREE (3 rounds) — Every self-debuff you take toward FALLEN also lands one stack on the enemy.",
+   "PAID (rest of combat) — Every self-debuff you take toward FALLEN also lands one stack on the enemy. (attaches to the enemy)"
   ]
  },
  {
@@ -1731,7 +1702,7 @@
    },
    {
     "k": "Preset",
-    "v": "Grace"
+    "v": "Foundry"
    }
   ],
   "lines": [
@@ -1775,7 +1746,7 @@
    },
    {
     "k": "Keywords",
-    "v": "PREMISE · PERORATION · DRAW · GUARD"
+    "v": "PREMISE · DRAW · GUARD"
    },
    {
     "k": "Source",
@@ -1798,7 +1769,7 @@
   "id": "nettle-cloak",
   "name": "Nettle Cloak",
   "image": "./assets/catalog/cards/yggdrasil.webp",
-  "pricing": "thorns i2 d2 (~3, reactive, unchanged) + NEW non-reactive Nettle",
+  "pricing": null,
   "chips": [
    {
     "k": "Stance",
@@ -1830,7 +1801,7 @@
    },
    {
     "k": "Keywords",
-    "v": "THORNS · RIPOSTE · GUARD · BARRIER · HEAL"
+    "v": "THORNS · RIPOSTE · GUARD · HEAL"
    },
    {
     "k": "Source",
@@ -1842,7 +1813,7 @@
    }
   ],
   "lines": [
-   "FREE — Guard 2",
+   "FREE — GUARD 2 (persists)",
    "Applies Thorns ×2, 2t → self",
    "Applies Nettle Sting ×1, 2t → enemy"
   ]
@@ -1883,7 +1854,7 @@
    },
    {
     "k": "Keywords",
-    "v": "PREMISE · PERORATION · DRAW · GUARD"
+    "v": "PREMISE · DRAW · GUARD"
    },
    {
     "k": "Source",
@@ -1891,7 +1862,7 @@
    },
    {
     "k": "Preset",
-    "v": "Oratory"
+    "v": "Erosion"
    }
   ],
   "lines": [
@@ -1905,7 +1876,7 @@
   "id": "ouroboros",
   "name": "Ouroboros",
   "image": "./assets/catalog/cards/blue-light.webp",
-  "pricing": "replay last spell PAID x2 (~10) + FREE draw (0.7) + PAID",
+  "pricing": null,
   "chips": [
    {
     "k": "Stance",
@@ -1937,7 +1908,7 @@
    },
    {
     "k": "Keywords",
-    "v": "ECHO · REPRISE · CONJURE · DRAW"
+    "v": "ECHO · RECALL · DRAW"
    },
    {
     "k": "Source",
@@ -1945,11 +1916,11 @@
    },
    {
     "k": "Preset",
-    "v": "Refrain"
+    "v": "Grace"
    }
   ],
   "lines": [
-   "FREE — draw 1",
+   "FREE — mill 1 to discard",
    "replay your last spell ×2",
    "rider"
   ]
@@ -1958,7 +1929,7 @@
   "id": "pact-of-akrasia",
   "name": "Pact of Akrasia",
   "image": "./assets/catalog/cards/devil-book.webp",
-  "pricing": "FORGE wild floating (6) + persistence − recoil 6 (−1.5) − self-bleed credit (−1.3) + wild premium ≈ 12.6 → Axiom",
+  "pricing": null,
   "chips": [
    {
     "k": "Stance",
@@ -1990,7 +1961,7 @@
    },
    {
     "k": "Keywords",
-    "v": "RECOIL · FALLEN · MARK · HEAL · CLEANSE"
+    "v": "RECOIL · FALLEN · MARK · HEAL"
    },
    {
     "k": "Source",
@@ -2002,7 +1973,7 @@
    }
   ],
   "lines": [
-   "FREE — Guard 2",
+   "FREE — Guard 2 · RECOIL 1",
    "Applies Bleed ×1, 2t → self",
    "FORGE a WILD floating die",
    "RECOIL 6"
@@ -2056,7 +2027,7 @@
    }
   ],
   "lines": [
-   "FREE — draw 1",
+   "FREE — reveal the next stance · draw 1",
    "Applies Backfire ×3, 3t → enemy",
    "STAGGER 2",
    "Die bonus: powering die mind fires a rider"
@@ -2066,7 +2037,7 @@
   "id": "peroratio-interrupta",
   "name": "Peroratio Interrupta",
   "image": "./assets/catalog/cards/light-ring.webp",
-  "pricing": "RUPTURE (verb 4 + expected fuel) -> ~12 Theorem. FREE tickOne is the",
+  "pricing": null,
   "chips": [
    {
     "k": "Stance",
@@ -2098,7 +2069,7 @@
    },
    {
     "k": "Keywords",
-    "v": "PREMISE · PERORATION · DRAW · GUARD"
+    "v": "PREMISE · DRAW · GUARD"
    },
    {
     "k": "Source",
@@ -2110,7 +2081,7 @@
    }
   ],
   "lines": [
-   "FREE — tick",
+   "FREE — +1 Premise",
    "RUPTURE"
   ]
  },
@@ -2150,20 +2121,16 @@
    },
    {
     "k": "Keywords",
-    "v": "PREMISE · PERORATION · DRAW · GUARD"
+    "v": "PREMISE · DRAW · GUARD"
    },
    {
     "k": "Source",
-    "v": "starter"
-   },
-   {
-    "k": "Preset",
-    "v": "Oratory"
+    "v": "reward"
    }
   ],
   "lines": [
-   "FREE (3 rounds) — +1 Premise on the first card you play each turn.",
-   "PAID (rest of combat) — +1 Premise on the first card you play each turn."
+   "FREE (3 rounds) — +1 PREMISE on the first card you play each turn.",
+   "PAID (rest of combat) — +1 PREMISE on the first card you play each turn."
   ]
  },
  {
@@ -2262,19 +2229,19 @@
    },
    {
     "k": "Preset",
-    "v": "Standstill"
+    "v": "Oratory"
    }
   ],
   "lines": [
-   "FREE (3 rounds) — Enemy telegraphs enter play one rung lower.",
-   "PAID (rest of combat) — Enemy telegraphs enter play one rung lower. (attaches to the enemy)"
+   "FREE (3 rounds) — Enemy telegraphs enter play one STAGGER rung lower.",
+   "PAID (rest of combat) — Enemy telegraphs enter play one STAGGER rung lower. (attaches to the enemy)"
   ]
  },
  {
   "id": "red-herring",
   "name": "Red Herring",
   "image": "./assets/catalog/cards/will-o-wisp.webp",
-  "pricing": "backfire i2 d2 (3) + FREE draw (0.7) + dieBonus(+1 dur ×0.6 = 0.6) ≈ 4.3 → Lemma",
+  "pricing": null,
   "chips": [
    {
     "k": "Stance",
@@ -2318,7 +2285,7 @@
    }
   ],
   "lines": [
-   "FREE — draw 1",
+   "FREE — reveal the next stance",
    "Applies Backfire ×2, 2t → enemy",
    "Die bonus: powering die mind fires a rider"
   ]
@@ -2359,7 +2326,7 @@
    },
    {
     "k": "Keywords",
-    "v": "ECHO · REPRISE · CONJURE · DRAW"
+    "v": "ECHO · RECALL · DRAW"
    },
    {
     "k": "Source",
@@ -2371,7 +2338,7 @@
    }
   ],
   "lines": [
-   "FREE — draw 1",
+   "FREE — mill 1 to discard",
    "Applies Mark ×1, 2t → enemy",
    "Applies Poison ×1, 1t → enemy",
    "ECHO"
@@ -2413,7 +2380,7 @@
    },
    {
     "k": "Keywords",
-    "v": "POISON · BLEED · MARK · TICK · RUPTURE · CLEANSE"
+    "v": "POISON · BLEED · MARK · TICK · RUPTURE"
    },
    {
     "k": "Source",
@@ -2425,10 +2392,10 @@
    }
   ],
   "lines": [
-   "FREE — tick",
+   "FREE — mark i1 d1",
    "RUPTURE",
-   "siphon 35%",
-   "REPRISE 2 — its FREE line fires now"
+   "SIPHON 35%",
+   "RECALL 2 — its FREE line fires now"
   ]
  },
  {
@@ -2467,7 +2434,7 @@
    },
    {
     "k": "Keywords",
-    "v": "ECHO · REPRISE · CONJURE · DRAW"
+    "v": "ECHO · RECALL · DRAW"
    },
    {
     "k": "Source",
@@ -2475,7 +2442,7 @@
    },
    {
     "k": "Preset",
-    "v": "Refrain"
+    "v": "Bastion"
    }
   ],
   "lines": [
@@ -2487,7 +2454,7 @@
   "id": "second-thoughts",
   "name": "Second Thoughts",
   "image": "./assets/catalog/cards/blue-light.webp",
-  "pricing": "REPRISE 1 (2) + FREE draw (0.7) + PAID ruptureMarks:1 (~1.5) +",
+  "pricing": null,
   "chips": [
    {
     "k": "Stance",
@@ -2519,7 +2486,7 @@
    },
    {
     "k": "Keywords",
-    "v": "ECHO · REPRISE · CONJURE · DRAW"
+    "v": "ECHO · RECALL · DRAW"
    },
    {
     "k": "Source",
@@ -2527,12 +2494,12 @@
    },
    {
     "k": "Preset",
-    "v": "Refrain"
+    "v": "Grace"
    }
   ],
   "lines": [
-   "FREE — draw 1",
-   "REPRISE 1",
+   "FREE — mill 1 to discard",
+   "RECALL 1",
    "rider"
   ]
  },
@@ -2572,7 +2539,7 @@
    },
    {
     "k": "Keywords",
-    "v": "RECOIL · FALLEN · MARK · HEAL · CLEANSE"
+    "v": "RECOIL · FALLEN · MARK · HEAL"
    },
    {
     "k": "Source",
@@ -2580,11 +2547,11 @@
    },
    {
     "k": "Preset",
-    "v": "Penitent"
+    "v": "Augury"
    }
   ],
   "lines": [
-   "FREE — tick",
+   "FREE — mark i1 d1 (self)",
    "RECOIL 5",
    "RUPTURE"
   ]
@@ -2633,7 +2600,7 @@
    },
    {
     "k": "Preset",
-    "v": "Augury"
+    "v": "Foundry"
    }
   ],
   "lines": [
@@ -2645,7 +2612,7 @@
   "id": "sketch-of-a-thought",
   "name": "Sketch of a Thought",
   "image": "./assets/catalog/cards/blue-light.webp",
-  "pricing": "KINDLE mind (2.5) + FREE draw 1 (2) + ember i1 d3 lifetime 3/3=1 +",
+  "pricing": null,
   "chips": [
    {
     "k": "Stance",
@@ -2685,11 +2652,11 @@
    },
    {
     "k": "Preset",
-    "v": "Foundry"
+    "v": "Bastion"
    }
   ],
   "lines": [
-   "FREE — draw 1",
+   "FREE — +1 pip to every Reserve die",
    "Applies Kindling Ember ×1, 3t → enemy",
    "KINDLE (mind)",
    "Die bonus: powering die mind fires a rider"
@@ -2731,7 +2698,7 @@
    },
    {
     "k": "Keywords",
-    "v": "POISON · BLEED · MARK · TICK · RUPTURE · CLEANSE"
+    "v": "POISON · BLEED · MARK · TICK · RUPTURE"
    },
    {
     "k": "Source",
@@ -2743,7 +2710,7 @@
    }
   ],
   "lines": [
-   "FREE — tick",
+   "FREE — mark i1 d1",
    "Applies Poison ×1 → enemy"
   ]
  },
@@ -2751,7 +2718,7 @@
   "id": "soft-word",
   "name": "Soft Word",
   "image": "./assets/catalog/cards/meat-pecker.webp",
-  "pricing": "SWAY 3 (2.4) + FREE heal 2 (0.65) + dieBonus(SWAY 1 ×0.6 = 0.5) ≈ 3.6 → Doxa",
+  "pricing": null,
   "chips": [
    {
     "k": "Stance",
@@ -2795,7 +2762,7 @@
    }
   ],
   "lines": [
-   "FREE — heal 2",
+   "FREE — rapport i1 d2",
    "SWAY 3",
    "Die bonus: powering die heart fires a rider"
   ]
@@ -2804,7 +2771,7 @@
   "id": "straw-mans-jab",
   "name": "Straw Man's Jab",
   "image": "./assets/catalog/cards/bleed.webp",
-  "pricing": "bleed i2 d2 lifetime ~10/3 ≈ 3.3 + tick 0.6 + dieBonus(+1 int ~1.5 ×0.6 = 0.9) ≈ 4.8 → Lemma",
+  "pricing": null,
   "chips": [
    {
     "k": "Stance",
@@ -2836,19 +2803,15 @@
    },
    {
     "k": "Keywords",
-    "v": "POISON · BLEED · MARK · TICK · RUPTURE · CLEANSE"
+    "v": "POISON · BLEED · MARK · TICK · RUPTURE"
    },
    {
     "k": "Source",
-    "v": "starter"
-   },
-   {
-    "k": "Preset",
-    "v": "Erosion"
+    "v": "reward"
    }
   ],
   "lines": [
-   "FREE — tick",
+   "FREE — mark i1 d1",
    "Applies Bleed ×2, 2t → enemy",
    "Die bonus: powering die body fires a rider"
   ]
@@ -2889,7 +2852,7 @@
    },
    {
     "k": "Keywords",
-    "v": "ECHO · REPRISE · CONJURE · DRAW"
+    "v": "ECHO · RECALL · DRAW"
    },
    {
     "k": "Source",
@@ -2897,7 +2860,7 @@
    },
    {
     "k": "Preset",
-    "v": "Refrain"
+    "v": "Tithe"
    }
   ],
   "lines": [
@@ -2941,7 +2904,7 @@
    },
    {
     "k": "Keywords",
-    "v": "POISON · BLEED · MARK · TICK · RUPTURE · CLEANSE"
+    "v": "POISON · BLEED · MARK · TICK · RUPTURE"
    },
    {
     "k": "Source",
@@ -2953,8 +2916,8 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — Doubles the total enemy damage-over-time each round.",
-   "PAID (rest of combat) — Doubles the total enemy damage-over-time each round. (attaches to the enemy)"
+   "FREE (3 rounds) — Doubles the total POISON and BLEED damage the enemy takes each round.",
+   "PAID (rest of combat) — Doubles the total POISON and BLEED damage the enemy takes each round. (attaches to the enemy)"
   ]
  },
  {
@@ -2993,7 +2956,7 @@
    },
    {
     "k": "Keywords",
-    "v": "RECOIL · FALLEN · MARK · HEAL · CLEANSE"
+    "v": "RECOIL · FALLEN · MARK · HEAL"
    },
    {
     "k": "Source",
@@ -3005,7 +2968,7 @@
    }
   ],
   "lines": [
-   "FREE — tick",
+   "FREE — mark i1 d1 (self)",
    "Applies Poison ×1 → enemy",
    "Applies Bleed ×1, 2t → self"
   ]
@@ -3014,7 +2977,7 @@
   "id": "the-adamant-wall",
   "name": "The Adamant Wall",
   "image": "./assets/catalog/cards/guard-1.webp",
-  "pricing": "BARRIER 10 (3.3) + RIPOSTE 4/parry 2 (~5) + FREE guard 3 (0.75) + persistence ≈ 13 → Axiom",
+  "pricing": null,
   "chips": [
    {
     "k": "Stance",
@@ -3046,7 +3009,7 @@
    },
    {
     "k": "Keywords",
-    "v": "THORNS · RIPOSTE · GUARD · BARRIER · HEAL"
+    "v": "THORNS · RIPOSTE · GUARD · HEAL"
    },
    {
     "k": "Source",
@@ -3058,8 +3021,8 @@
    }
   ],
   "lines": [
-   "FREE — Guard 3",
-   "Barrier 10",
+   "FREE — GUARD 3 (persists)",
+   "GUARD 10 (persists)",
    "RIPOSTE 4 (parry 2)"
   ]
  },
@@ -3099,7 +3062,7 @@
    },
    {
     "k": "Keywords",
-    "v": "PREMISE · PERORATION · DRAW · GUARD"
+    "v": "PREMISE · DRAW · GUARD"
    },
    {
     "k": "Source",
@@ -3151,7 +3114,7 @@
    },
    {
     "k": "Keywords",
-    "v": "SOUL · REAP · MARK · TICK · RUPTURE"
+    "v": "SOUL · REAP · MARK · TICK"
    },
    {
     "k": "Source",
@@ -3171,7 +3134,7 @@
   "id": "the-olive-branch",
   "name": "The Olive Branch",
   "image": "./assets/catalog/cards/yggdrasil.webp",
-  "pricing": "SWAY 3 (2.4) + cleanse (1.5) + heal 3 (1) + FREE guard (0.5) + tempo ≈ 9 → Theorem",
+  "pricing": null,
   "chips": [
    {
     "k": "Stance",
@@ -3215,7 +3178,7 @@
    }
   ],
   "lines": [
-   "FREE — Guard 2",
+   "FREE — rapport i1 d2",
    "SWAY 3",
    "rider"
   ]
@@ -3268,8 +3231,8 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — The next enemy stance is always revealed, and your omens hit harder.",
-   "PAID (rest of combat) — The next enemy stance is always revealed, and your omens hit harder."
+   "FREE (3 rounds) — The next enemy stance is always revealed (FORETELL), and your OMENs hit harder.",
+   "PAID (rest of combat) — The next enemy stance is always revealed (FORETELL), and your OMENs hit harder."
   ]
  },
  {
@@ -3320,7 +3283,7 @@
    }
   ],
   "lines": [
-   "FREE — Guard 2",
+   "FREE — mark i1 d1",
    "spend ALL pips (+1 Guard per pip)",
    "RUPTURE (+3.5 fuel per pip)",
    "refresh the spent die"
@@ -3330,7 +3293,7 @@
   "id": "the-reaping",
   "name": "The Reaping",
   "image": "./assets/catalog/cards/ice-sword.webp",
-  "pricing": "REAP ALL — 4 per Soul (burstPerSoul 2→4; caps at 80 dmg off a ~20-Soul",
+  "pricing": null,
   "chips": [
    {
     "k": "Stance",
@@ -3362,7 +3325,7 @@
    },
    {
     "k": "Keywords",
-    "v": "SOUL · REAP · MARK · TICK · RUPTURE"
+    "v": "SOUL · REAP · MARK · TICK"
    },
    {
     "k": "Source",
@@ -3374,9 +3337,9 @@
    }
   ],
   "lines": [
-   "FREE — tick",
+   "FREE — bleed i1 d1",
    "REAP all — 4 per Soul",
-   "siphon 40%"
+   "SIPHON 40%"
   ]
  },
  {
@@ -3415,27 +3378,23 @@
    },
    {
     "k": "Keywords",
-    "v": "SOUL · REAP · MARK · TICK · RUPTURE"
+    "v": "SOUL · REAP · MARK · TICK"
    },
    {
     "k": "Source",
-    "v": "starter"
-   },
-   {
-    "k": "Preset",
-    "v": "Tithe"
+    "v": "reward"
    }
   ],
   "lines": [
-   "FREE (3 rounds) — Enemy afflictions expire one turn sooner (faster Soul churn).",
-   "PAID (rest of combat) — Enemy afflictions expire one turn sooner (faster Soul churn). (attaches to the enemy)"
+   "FREE (3 rounds) — Enemy afflictions expire one turn sooner (faster SOUL churn).",
+   "PAID (rest of combat) — Enemy afflictions expire one turn sooner (faster SOUL churn). (attaches to the enemy)"
   ]
  },
  {
   "id": "tu-quoque",
   "name": "Tu Quoque",
   "image": "./assets/catalog/cards/yggdrasil.webp",
-  "pricing": "thorns i3 d2 (~4.5) + FREE guard 2 (0.5) + dieBonus(guard 2 ×0.6 = 0.3) + tempo ≈ 6.5 → Thesis",
+  "pricing": null,
   "chips": [
    {
     "k": "Stance",
@@ -3467,7 +3426,7 @@
    },
    {
     "k": "Keywords",
-    "v": "THORNS · RIPOSTE · GUARD · BARRIER · HEAL"
+    "v": "THORNS · RIPOSTE · GUARD · HEAL"
    },
    {
     "k": "Source",
@@ -3479,9 +3438,9 @@
    }
   ],
   "lines": [
-   "FREE — Guard 2",
+   "FREE — GUARD 2 (persists)",
    "Applies Thorns ×3, 2t → self",
-   "Die bonus: powering die body fires a rider"
+   "Die bonus: powering die heart fires a rider"
   ]
  },
  {
@@ -3528,11 +3487,11 @@
    },
    {
     "k": "Preset",
-    "v": "Standstill"
+    "v": "Penitent"
    }
   ],
   "lines": [
-   "FREE — Guard 2",
+   "FREE — reveal the next stance",
    "Applies Backfire ×2, 3t → enemy",
    "STAGGER 1",
    "Threshold: 3× mind die fires a rider"
@@ -3574,7 +3533,7 @@
    },
    {
     "k": "Keywords",
-    "v": "POISON · BLEED · MARK · TICK · RUPTURE · CLEANSE"
+    "v": "POISON · BLEED · MARK · TICK · RUPTURE"
    },
    {
     "k": "Source",
@@ -3586,15 +3545,15 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — Every bleed or poison you apply lands at +1 intensity.",
-   "PAID (rest of combat) — Every bleed or poison you apply lands at +1 intensity."
+   "FREE (3 rounds) — Every BLEED or POISON you apply lands at +1 intensity.",
+   "PAID (rest of combat) — Every BLEED or POISON you apply lands at +1 intensity."
   ]
  },
  {
   "id": "winnowing",
   "name": "Winnowing",
   "image": "./assets/catalog/cards/ice-sword.webp",
-  "pricing": "consume 1 affliction → fuel ticks NOW (~4-5) + 2 Souls (1.5) + FREE",
+  "pricing": null,
   "chips": [
    {
     "k": "Stance",
@@ -3626,7 +3585,7 @@
    },
    {
     "k": "Keywords",
-    "v": "SOUL · REAP · MARK · TICK · RUPTURE"
+    "v": "SOUL · REAP · MARK · TICK"
    },
    {
     "k": "Source",
@@ -3634,19 +3593,19 @@
    },
    {
     "k": "Preset",
-    "v": "Tithe"
+    "v": "Refrain"
    }
   ],
   "lines": [
-   "FREE — tick",
-   "consume 1 affliction — its fuel ticks now, +2 Soul"
+   "FREE — bleed i1 d1",
+   "RUPTURE 1 — its fuel ticks now, +2 Soul"
   ]
  },
  {
   "id": "zenos-half-step",
   "name": "Zeno's Half-Step",
   "image": "./assets/catalog/cards/confuse.webp",
-  "pricing": "STAGGER 1 (~half a phase-deny, 2) + FREE guard 2 (0.5) + tempo ≈ 3.5 → Doxa",
+  "pricing": null,
   "chips": [
    {
     "k": "Stance",
@@ -3690,7 +3649,7 @@
    }
   ],
   "lines": [
-   "FREE — Guard 2",
+   "FREE — reveal the next stance",
    "STAGGER 1"
   ]
  }
