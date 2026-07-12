@@ -260,7 +260,9 @@
       "addedIn": "2026-07-12",
       "tags": [
         "control",
-        "hard-control"
+        "hard-control",
+        "support",
+        "non-card"
       ]
     }
   ]
