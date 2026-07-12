@@ -44,7 +44,7 @@ import type {
     CombatViewModel, CombatCardVM, CombatDieVM,
     CombatSignatureVM, CombatEffectChipVM, CombatCardFaceVM, CombatPerorationVM,
 } from '@/state/presenters/combat-encounter.engine';
-import { armedReadValue, STANCE_COLORS } from '@/state/presenters/combat-encounter.engine';
+import { armedReadValue, dieCanPowerCardVM, STANCE_COLORS } from '@/state/presenters/combat-encounter.engine';
 import { wheelNext, type WheelStance } from '@/state/combat/momentum';
 import type { CombatReadResult } from '@mechanics';
 import { TrashGlyph, LedgerMark } from '@/components/hazard/glyphs';
@@ -83,6 +83,38 @@ function measureRect(ref: React.RefObject<View | null>): Promise<Rect | null> {
         if (!node) { resolve(null); return; }
         node.measureInWindow((x, y, width, height) => resolve({ x, y, width, height }));
     });
+}
+
+/**
+ * Pure die-drop targeting (unit-testable; `resolveDrop` feeds it the
+ * measurements). `hitUid` is the staged card the pointer released over (null =
+ * a loose drop); `inPlayArea` is whether the release landed inside the play
+ * region. Enforces THE COLOR LAW (see `dieCanPowerCardVM` — the engine's
+ * `playCombatCard` gate, combat.engine.ts ~:1339) at the drop itself:
+ *   · a direct hit on an ineligible card REJECTS (returns null — the die
+ *     snaps home, nothing is selected, no fizzle can ever reach the engine);
+ *   · the loose-drop forgiveness only ever lands on a color-legal card
+ *     (the single eligible card, else the first eligible one still without
+ *     its own die).
+ */
+export function resolveDieDropTarget(
+    die: { color: string; isX?: boolean },
+    hitUid: string | null,
+    inPlayArea: boolean,
+    stagedUids: string[],
+    stanceOf: (uid: string) => string | undefined,
+    pendingByUid: Record<string, string>,
+): string | null {
+    const legal = (uid: string) => {
+        const stance = stanceOf(uid);
+        return !!stance && dieCanPowerCardVM(die, stance);
+    };
+    if (hitUid) return legal(hitUid) ? hitUid : null;
+    if (!inPlayArea) return null;
+    const eligible = stagedUids.filter(legal);
+    if (eligible.length === 0) return null;
+    if (eligible.length === 1) return eligible[0];
+    return eligible.find((u) => !pendingByUid[u]) ?? eligible[0];
 }
 
 const READ_ACCENT: Record<string, string> = {
@@ -255,7 +287,7 @@ function DiceRow({
 
 const StagedCard = React.memo(function StagedCard({
     card, assignedDie, read, onApply, gesture, register, compact = false, popKey = 0, socketPulse = false,
-    chosenX = null, onChangeX,
+    dropIneligible = false, chosenX = null, onChangeX,
 }: {
     card: CombatCardVM;
     assignedDie: CombatDieVM | null;
@@ -278,6 +310,11 @@ const StagedCard = React.memo(function StagedCard({
      *  highlight, deliberately not an animation: N staged cards each running an
      *  infinite pulse measurably chugged die drags.) */
     socketPulse?: boolean;
+    /** THE COLOR LAW during a die drag (owner directive 2026-07-12): true while
+     *  the dragged die CANNOT power this card (off-color, non-wild) — the card
+     *  dims like every other disabled control and reads disabled to a11y; the
+     *  drop itself is rejected in `resolveDieDropTarget`. */
+    dropIneligible?: boolean;
 }) {
     const AXM = usePalette();
     const styles = useStyles();
@@ -314,7 +351,13 @@ const StagedCard = React.memo(function StagedCard({
                     testID={`combat-staged-${card.uid}`}
                     accessible
                     accessibilityRole="button"
-                    accessibilityLabel={`${card.name} staged — ${f.verbLine}. Tap to unstage.`}
+                    accessibilityState={{ disabled: dropIneligible }}
+                    accessibilityLabel={dropIneligible
+                        ? `${card.name} staged — only a ${card.stance.toUpperCase()} or WILD die can power this card.`
+                        : `${card.name} staged — ${f.verbLine}. Tap to unstage.`}
+                    // dim to the shared disabled treatment while an off-color die is
+                    // in flight (matches the sigRune/dieAssigned opacity language).
+                    style={dropIneligible ? { opacity: 0.4 } : undefined}
                 >
                   {/* inner wrapper carries the drop-pop scale so it never fights the
                       outer entering animation's transform. */}
@@ -554,10 +597,14 @@ export interface CombatBoardProps {
     /** phase 28 — REPRISE songbook choice. Called INSTEAD of `onApply` when the
      *  card being APPLYd carries a `reprise` mechanic and the discard pile is
      *  non-empty; the panel opens its picker and calls `onApply` itself once
-     *  the player chooses (or skips, which omits the choice — auto-pick). Not
-     *  consulted from the END PHASE auto-apply batch (never pop a picker
-     *  mid-batch — that path always auto-picks). */
-    onReprisalNeeded?: (uid: string, dieId: string | null, power: boolean) => void;
+     *  the player chooses (or skips, which omits the choice — auto-pick).
+     *  `chosenX` (WS7.2) rides along so a deferred X-card still resolves at
+     *  the stepper's pick, not the printed min. The deferral is a HELD play,
+     *  not a commit: the board keeps the card staged and its pending die /
+     *  chosen X untouched, so the panel's backdrop can CANCEL back to the
+     *  exact pre-APPLY staging. Not consulted from the END PHASE auto-apply
+     *  batch (never pop a picker mid-batch — that path always auto-picks). */
+    onReprisalNeeded?: (uid: string, dieId: string | null, power: boolean, chosenX?: number) => void;
 }
 
 export const CombatBoard = React.memo(function CombatBoard({
@@ -595,33 +642,58 @@ export const CombatBoard = React.memo(function CombatBoard({
     const stagedKey = stagedUids.join(',');
     // Clear pending selections when the turn's dice change…
     useEffect(() => { setPendingDieByUid({}); }, [vm.turnLabel]);
-    // …and drop entries for cards that are no longer staged.
+    // …and drop entries for cards that are no longer staged. Covers chosen X
+    // too: a REPRISE-deferred play skips handleApply's own cleanup (it must —
+    // the songbook can cancel back to the staging), so the unstage that
+    // follows its eventual commit is what prunes both maps.
     useEffect(() => {
         setPendingDieByUid((prev) => {
             const next: Record<string, string> = {};
             for (const uid of stagedUids) if (prev[uid]) next[uid] = prev[uid];
             return next;
         });
+        setChosenXByUid((prev) => {
+            const next: Record<string, number> = {};
+            for (const uid of stagedUids) if (prev[uid] !== undefined) next[uid] = prev[uid];
+            return next;
+        });
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [stagedKey]);
 
     const draftedDie = vm.dice.find((d) => d.drafted && !d.spent) ?? null;
+    // Card stance by uid — the COLOR LAW checks key off this (uid → stance is
+    // immutable for the life of the hand entry).
+    const stanceOfUid = (uid: string): string | undefined => vm.hand.find((c) => c.uid === uid)?.stance;
+    // THE COLOR LAW (engine: playCombatCard's gate, combat.engine.ts ~:1339;
+    // UI mirror: dieCanPowerCardVM): can the shared drafted die legally power
+    // the card at `uid`? Off-color routing would fizzle at resolution, so the
+    // board never arms — and never commits — an illegal pairing.
+    const draftedLegalFor = (uid: string): boolean => {
+        if (!draftedDie) return false;
+        const stance = stanceOfUid(uid);
+        return !!stance && dieCanPowerCardVM(draftedDie, stance);
+    };
     // The ONE staged card the shared drafted (combo) die visibly arms: the next card
-    // that will consume it — the first staged card without its own dropped die, else
-    // the first staged card. The die's COMMIT stays shared (handleApply powers
-    // whichever card APPLYs); only its DISPLAY is bound here so the combo die doesn't
-    // light up every staged card at once.
+    // that will consume it — the first color-legal staged card without its own
+    // dropped die, else the first color-legal staged card (an off-color card can
+    // never be the combo target). The die's COMMIT stays shared (handleApply powers
+    // whichever legal card APPLYs); only its DISPLAY is bound here so the combo die
+    // doesn't light up every staged card at once.
     const comboTargetUid = draftedDie
-        ? (stagedUids.find((u) => !pendingDieByUid[u]) ?? stagedUids[0] ?? null)
+        ? (stagedUids.find((u) => !pendingDieByUid[u] && draftedLegalFor(u))
+            ?? stagedUids.find((u) => draftedLegalFor(u))
+            ?? null)
         : null;
     // DISPLAY (decoupled from commit): resolve the per-card dropped die FIRST (only
-    // when still usable), then show the drafted/combo die on the single comboTargetUid,
-    // else null → the card reads as FREE (no die).
+    // when still usable AND color-legal — drops are already gated, this is the belt
+    // to the drop's braces), then show the drafted/combo die on the single
+    // comboTargetUid, else null → the card reads as FREE (no die).
     const assignedDieFor = (uid: string): CombatDieVM | null => {
         const pid = pendingDieByUid[uid];
         if (pid) {
             const d = vm.dice.find((x) => x.id === pid);
-            if (d && !d.spent && !d.isX && !d.drafted) return d;
+            const stance = stanceOfUid(uid);
+            if (d && !d.spent && !d.isX && !d.drafted && stance && dieCanPowerCardVM(d, stance)) return d;
         }
         if (draftedDie && uid === comboTargetUid) return draftedDie;
         return null;
@@ -639,7 +711,7 @@ export const CombatBoard = React.memo(function CombatBoard({
             // Per-card targeting: drop a die onto a SPECIFIC staged card to power it.
             // All staged rects are measured in ONE parallel round-trip — awaiting
             // them sequentially cost O(N) async hops per drop with N staged cards.
-            let target: string | null = null;
+            let hitUid: string | null = null;
             const measured = await Promise.all(stagedUids.map(async (uid) => {
                 const node = stagedRefs.current.get(uid);
                 if (!node) return null;
@@ -647,18 +719,17 @@ export const CombatBoard = React.memo(function CombatBoard({
                 return { uid, rect };
             }));
             for (const m of measured) {
-                if (m && rectContains(m.rect, x, y, 16)) { target = m.uid; break; }
+                if (m && rectContains(m.rect, x, y, 16)) { hitUid = m.uid; break; }
             }
-            // Forgiveness: a die dropped loosely in the play area lands on the one
-            // eligible card (the single staged card, else the first still without a die).
-            if (!target) {
-                const playRect = await measureRect(playAreaRef);
-                if (rectContains(playRect, x, y, 24) && stagedUids.length > 0) {
-                    target = stagedUids.length === 1
-                        ? stagedUids[0]
-                        : (stagedUids.find((u) => !pendingDieByUid[u]) ?? stagedUids[0]);
-                }
-            }
+            const playRect = hitUid ? null : await measureRect(playAreaRef);
+            const inPlayArea = hitUid ? true : rectContains(playRect, x, y, 24);
+            // THE COLOR LAW gate + loose-drop forgiveness live in the pure
+            // resolver: an off-color drop rejects (die snaps home, nothing is
+            // selected, no fizzle ever reaches the engine); a loose drop lands
+            // on a color-legal card only.
+            const target = resolveDieDropTarget(
+                payload.die, hitUid, inPlayArea, stagedUids, stanceOfUid, pendingDieByUid,
+            );
             if (target) {
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Rigid).catch(() => undefined);
                 const t = target;
@@ -801,20 +872,40 @@ export const CombatBoard = React.memo(function CombatBoard({
     handleApplyRef.current = (uid: string, autoResolve = false) => {
         // WS7.2 — forward the stepper's chosen X (absent = no X mechanic).
         const chosenX = chosenXRef.current[uid];
+        // THE COLOR LAW at commit (engine: playCombatCard's gate, ~:1339): an
+        // off-color die must never be routed at a card — the engine would
+        // fizzle the play. An off-color DRAFTED die falls through to the
+        // card's own dropped die (a Reserve/floating die is its own power
+        // source even while a draft is live; a fresh tray die can only power
+        // via draft-first, i.e. when nothing is drafted yet), else FREE.
+        const stance = stanceOfUid(uid);
+        const legalHere = (d: CombatDieVM | null): boolean =>
+            !!d && !!stance && dieCanPowerCardVM(d, stance);
+        const pid = pendingDieByUid[uid];
+        const pending = pid ? vm.dice.find((x) => x.id === pid) ?? null : null;
+        const pendingUsable = !!pending && !pending.spent && !pending.isX && !pending.drafted && legalHere(pending);
         let dieId: string | null = null;
         let power: boolean;
-        if (draftedDie) {
+        if (draftedDie && legalHere(draftedDie)) {
             dieId = null; power = true;
+        } else if (pendingUsable && pending && (pending.reserve || pending.floating || !draftedDie)) {
+            dieId = pending.id; power = true;
         } else {
-            const pid = pendingDieByUid[uid];
-            const pending = pid ? vm.dice.find((x) => x.id === pid) ?? null : null;
-            if (pending && !pending.spent && !pending.isX && !pending.drafted) { dieId = pending.id; power = true; }
-            else { dieId = null; power = false; }
+            dieId = null; power = false;
         }
         const card = handMapRef.current.get(uid);
         if (!autoResolve && power && card?.needsReprisalChoice && vm.discardCards.length > 0 && onReprisalNeeded) {
-            onReprisalNeeded(uid, dieId, power);
-        } else if (chosenX !== undefined) {
+            // DEFER, don't commit: the songbook backdrop may CANCEL this play,
+            // so return before the cleanup below — the staged card, its pending
+            // die, and its chosen X must all survive exactly as they were.
+            // `chosenX` rides the prompt so the eventual pick/skip re-enters
+            // `onApply` with it (the deferred play must not fall to min X);
+            // once that commit unstages the card, the stagedKey effects above
+            // prune the pending-die and chosen-X entries.
+            onReprisalNeeded(uid, dieId, power, chosenX);
+            return;
+        }
+        if (chosenX !== undefined) {
             // WS7.2 — arity preserved when no X was chosen (see the multistage pins).
             onApply(uid, dieId, power, { chosenX });
         } else {

@@ -461,10 +461,14 @@ async function interactiveHazardCombatLoop(
 
         const before = s;
 
-        // Start turn: roll dice.
-        const turned = startTurn(s);
-        s = turned.state;
-        logState('hazardCombat:start', before, s, { turn: s.turn, dice: s.dice.map(d => `${d.id}[${d.color}]`) });
+        // Start turn: roll dice — but only when this phase's ONE legal tray
+        // roll hasn't happened yet (rollEncounterDice already rolled phase 1's;
+        // an unguarded startTurn would log a false 'turn-law-blocked' event).
+        if (s.dice.length === 0 && s.draftedDieId === null && !s.turnTakenThisPhase) {
+            const turned = startTurn(s);
+            s = turned.state;
+            logState('hazardCombat:start', before, s, { turn: s.turn, dice: s.dice.map(d => `${d.id}[${d.color}]`) });
+        }
 
         // Draft phase.
         const dieId = await promptDraftChoice(s);

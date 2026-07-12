@@ -14,6 +14,10 @@
  *      `after.enemy.health === before.enemy.health`, no exceptions beyond the
  *      spec 32 §12 ratified list (currently empty). Allowed deltas remain
  *      status APPLICATION, reflect setup, alt-win progress, draws, guard.
+ *      Witness 1b extends the SAME sweep beyond the 70-pin to every playable
+ *      sub-universe: all sandbox-set cards + overrides (registered en masse,
+ *      derived from `SANDBOX_CARD_SETS`) and every Thoughtform
+ *      (`thoughtformLibrary`) — future sets are auto-swept.
  *   2. SIGNATURES — every entry in `SIGNATURE_SKILLS` is applied with its
  *      prerequisites synthesized (enemy stacks for Conclusion); only the
  *      ratified kinds (`conclude`, `mercy`) may change enemy HP.
@@ -63,13 +67,16 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-import { describe, it, expect, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll, afterEach, vi } from 'vitest';
 
 import { mockSequentialRng } from '../../test-utils/rng';
 import { buildFixtureState } from '../../test-utils/card-fixture';
 import { playCombatCard } from '../../Combat/combat.engine';
 import { SIGNATURE_SKILL_LIST, applySignatureSkill } from '../../Combat/combat.signature';
 import { cardLibrary } from '../cards.library';
+import { listSandboxSets, applySandboxSet } from '../cards.sandbox-sets';
+import { clearSandboxCards } from '../cards.sandbox';
+import { thoughtformLibrary } from '../cards.thoughtforms';
 
 afterEach(() => vi.restoreAllMocks());
 
@@ -96,8 +103,12 @@ const RATIFIED_HP_SIGNATURE_KINDS: ReadonlySet<string> = new Set(['conclude', 'm
 
 function playPaidClean(cardId: string) {
     mockSequentialRng(0.5); // neutral d20 (no fumble/crit)
+    const fixture = buildFixtureState({ clean: true });
     const before = {
-        ...buildFixtureState({ clean: true }),
+        ...fixture,
+        // Own the swept card (the fixture owns the 70 library ids; sandbox
+        // ids need adding — Thoughtforms pass the gate by tag either way).
+        player: { ...fixture.player, knownCards: [...fixture.player.knownCards, cardId] },
         hand: [{ uid: 'under-test', cardId }],
     };
     const { state: after } = playCombatCard(before, { uid: 'under-test' }, true);
@@ -137,6 +148,52 @@ describe('doctrine witness — no card PAID line chips a clean enemy', () => {
     it('every card is accounted for exactly once (clean cases + named exceptions == 70, no silent drops)', () => {
         expect(cleanCases.length + Object.keys(NAMED_EXCEPTIONS).length).toBe(cardLibrary.length);
     });
+});
+
+// ── Witness 1b: sandbox sets + Thoughtforms chip nothing on a clean board ────
+// The 70-pin above covers the LIBRARY sub-universe only, but every sandbox-set
+// card, every sandbox override of a library card, and every Thoughtform is
+// fully playable (getCardById's sandbox → thoughtform → library chain) and
+// reaches sims and reward drafts. Spec 32 §1 bans ANY card whose resolved
+// play chips enemy HP outside the legal sources, so these universes are swept
+// through the SAME clean-board PAID play as the 70. All three case lists are
+// DERIVED from their registries — a future set/Thoughtform is auto-swept the
+// moment it is registered, with no list to remember to update here.
+
+const sandboxCardCases = listSandboxSets().flatMap(set =>
+    set.cards.map(c => [`${set.id} · ${c.id}`, c.id] as const));
+const sandboxOverrideCases = listSandboxSets().flatMap(set =>
+    (set.overrides ?? []).map(o => [`${set.id} · ${o.cardId} (override)`, o.cardId] as const));
+const thoughtformCases = thoughtformLibrary.map(c => [`thoughtform · ${c.id}`, c.id] as const);
+
+describe('doctrine witness — no sandbox-set card or Thoughtform PAID line chips a clean enemy', () => {
+    beforeAll(() => {
+        // Register EVERY set at once so each card (and each override's merged
+        // form) resolves through getCardById exactly as a sim / reward-draft
+        // process running that set would see it.
+        clearSandboxCards();
+        for (const set of listSandboxSets()) applySandboxSet(set.id);
+    });
+    afterAll(() => clearSandboxCards());
+
+    it('the swept universes are non-empty (an emptied registry would silently shrink this sweep)', () => {
+        expect(sandboxCardCases.length, 'no sandbox-set cards found — registry wiring broke').toBeGreaterThan(0);
+        expect(sandboxOverrideCases.length, 'no sandbox overrides found — registry wiring broke').toBeGreaterThan(0);
+        expect(thoughtformCases.length, 'no Thoughtforms found — registry wiring broke').toBeGreaterThan(0);
+    });
+
+    it.each([...sandboxCardCases, ...sandboxOverrideCases, ...thoughtformCases])(
+        "'%s' PAID line leaves clean-enemy HP untouched (status/reflect/alt-win/draw/guard deltas are fine; HP is not)",
+        (_label, cardId) => {
+            const { before, after } = playPaidClean(cardId);
+            expect(
+                after.enemy.health,
+                `${cardId}: enemy HP moved ${before.enemy.health} -> ${after.enemy.health} on a ZERO-stack, `
+                + 'zero-soul, zero-pip board — that is direct damage, i.e. a strike in disguise (spec 32 v3 §1; '
+                + 'sandbox/Thoughtform cards have NO ratified §12 exceptions)',
+            ).toBe(before.enemy.health);
+        },
+    );
 });
 
 // ── Witness 2: only ratified signature kinds change enemy HP ─────────────────

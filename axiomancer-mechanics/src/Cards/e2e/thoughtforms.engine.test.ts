@@ -34,7 +34,7 @@ import { describe, it, expect, afterEach, beforeEach, vi } from 'vitest';
 
 import { mockSequentialRng } from '../../test-utils/rng';
 import { buildFixtureState } from '../../test-utils/card-fixture';
-import { playCombatCard, discardCombatCard } from '../../Combat/combat.engine';
+import { playCombatCard, discardCombatCard, resolveThreatPhase } from '../../Combat/combat.engine';
 import type { CombatEncounterState, CombatEvent } from '../../Combat/combat.encounter.types';
 import { COMBAT_REWARD_POOL } from '../../Combat/combat.rewards';
 import { COMBAT_STAGE_PROFILES, stageEligibleCardIds } from '../../Combat/combat.stage-profiles';
@@ -263,6 +263,19 @@ describe('conjured Thoughtforms — playable, one-use on play (both faces) and o
         expect(after.conviction).toBe(state.conviction + 1);
         expect(after.hand.some(h => h.uid === cjUid)).toBe(false);
         expect(after.discard).not.toContain('tf-cinder');
+        expect(after.conjuredUids ?? []).not.toContain(cjUid);
+    });
+
+    it('phase boundary: an UNPLAYED conjured token evaporates — never swept into the discard', () => {
+        // The third one-use path (2026-07-12 fix): holding the token through
+        // the fresh-hand redraw must not deposit it in the discard pile,
+        // where a reshuffle would resurrect it as a permanent deck card.
+        const { state, cjUid } = conjureCinder();
+        const { state: after } = resolveThreatPhase(state, () => 0.5);
+        expect(after.hand.some(h => h.uid === cjUid)).toBe(false);
+        expect(after.discard).not.toContain('tf-cinder');
+        expect(after.drawPile).not.toContain('tf-cinder');
+        // The stale uid is released from the one-use ledger too.
         expect(after.conjuredUids ?? []).not.toContain(cjUid);
     });
 

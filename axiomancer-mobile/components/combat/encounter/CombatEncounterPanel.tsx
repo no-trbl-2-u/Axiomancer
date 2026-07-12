@@ -269,7 +269,9 @@ export function CombatEncounterPanel({
     const [pilgrimOpen, setPilgrimOpen] = useState(false);
     // phase 28 — REPRISE songbook picker: set by CombatBoard's onReprisalNeeded
     // when a staged reprise-mechanic card is APPLYd with a non-empty discard.
-    const [reprisalPrompt, setReprisalPrompt] = useState<{ uid: string; dieId: string | null; power: boolean } | null>(null);
+    // The prompt HOLDS the deferred play (including the WS7.2 chosen X) — the
+    // board committed nothing yet, so dismissing the prompt is a clean cancel.
+    const [reprisalPrompt, setReprisalPrompt] = useState<{ uid: string; dieId: string | null; power: boolean; chosenX?: number } | null>(null);
     // Deckbuilder reward (Spec 26b §C) — rolled once on victory, claimed before the summary.
     const [rewardOffers, setRewardOffers] = useState<string[]>([]);
     const [rewardsClaimed, setRewardsClaimed] = useState(false);
@@ -436,17 +438,29 @@ export function CombatEncounterPanel({
         unstageUid(uid);
     }, [apply, unstageUid]);
     // phase 28 — opens the songbook picker instead of applying immediately.
-    const onReprisalNeeded = useCallback((uid: string, dieId: string | null, power: boolean) => {
-        setReprisalPrompt({ uid, dieId, power });
+    // `chosenX` (WS7.2) rides the prompt so the deferred play still resolves
+    // at the stepper's pick, not the printed min.
+    const onReprisalNeeded = useCallback((uid: string, dieId: string | null, power: boolean, chosenX?: number) => {
+        setReprisalPrompt({ uid, dieId, power, chosenX });
     }, []);
     // A tap on a discard entry commits that choice; `null` (the skip row)
     // omits it — falls back to the engine's highest-rank auto-pick.
     const onReprisalPick = useCallback((cardId: string | null) => {
         if (!reprisalPrompt) return;
-        const { uid, dieId, power } = reprisalPrompt;
+        const { uid, dieId, power, chosenX } = reprisalPrompt;
         setReprisalPrompt(null);
-        onApply(uid, dieId, power, cardId ? { reprisalCardId: cardId } : undefined);
+        const choices = {
+            ...(chosenX !== undefined ? { chosenX } : {}),
+            ...(cardId ? { reprisalCardId: cardId } : {}),
+        };
+        onApply(uid, dieId, power, chosenX !== undefined || cardId ? choices : undefined);
     }, [reprisalPrompt, onApply]);
+    // Backdrop tap = CANCEL, not commit (every other backdrop in this panel
+    // dismisses without action). The board held the play — nothing reached
+    // the engine — so dropping the prompt restores the exact pre-APPLY
+    // staging: card still staged, pending die and chosen X intact. Auto-pick
+    // stays available as the explicit skip row.
+    const onReprisalCancel = useCallback(() => setReprisalPrompt(null), []);
     const onDiscard = useCallback((uid: string) => { apply((s) => discardCombatCard(s, uid).state); unstageUid(uid); }, [apply, unstageUid]);
     const onSignature = useCallback((id: string) => apply((s) => playSignatureSkill(s, id).state), [apply]);
     const onEndPhase = useCallback(() => {
@@ -822,9 +836,17 @@ export function CombatEncounterPanel({
             )}
 
             {/* phase 28 — REPRISE songbook picker: choose which discarded card
-                returns to hand (the engine's default is the highest-rank one). */}
+                returns to hand (the engine's default is the highest-rank one).
+                Backdrop = cancel (the play is still held, staged, uncommitted);
+                the skip row is the explicit auto-pick. Rows/testIDs are keyed
+                by INDEX-qualified id — the discard pile can hold duplicates. */}
             {reprisalPrompt && (
-                <Pressable style={styles.backdrop} testID="combat-reprisal-picker" onPress={() => onReprisalPick(null)}>
+                <Pressable
+                    style={styles.backdrop}
+                    testID="combat-reprisal-picker"
+                    accessibilityLabel="Cancel — keep the card staged, decide later"
+                    onPress={onReprisalCancel}
+                >
                     <View style={[styles.tipPlaque, { borderColor: `${AXM.sulfur}66` }]} onStartShouldSetResponder={() => true}>
                         <View style={[styles.tipCorner, styles.tipCornerTl, { borderColor: AXM.sulfur }]} pointerEvents="none" />
                         <View style={[styles.tipCorner, styles.tipCornerTr, { borderColor: AXM.sulfur }]} pointerEvents="none" />
@@ -834,11 +856,11 @@ export function CombatEncounterPanel({
                         <Text style={[styles.tipName, { color: AXM.sulfur, textShadowColor: AXM.sulfur }]}>REPRISE — CHOOSE</Text>
                         <Text style={styles.tipGloss}>Return one discarded card to your hand.</Text>
                         <View style={styles.reprisalList}>
-                            {vm.discardCards.map((c) => (
+                            {vm.discardCards.map((c, i) => (
                                 <Pressable
-                                    key={c.id}
+                                    key={`${i}-${c.id}`}
                                     style={styles.reprisalRow}
-                                    testID={`combat-reprisal-option-${c.id}`}
+                                    testID={`combat-reprisal-option-${i}-${c.id}`}
                                     onPress={() => onReprisalPick(c.id)}
                                     accessibilityRole="button"
                                     accessibilityLabel={`Return ${c.name} to hand`}

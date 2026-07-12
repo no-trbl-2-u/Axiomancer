@@ -192,10 +192,17 @@ describe('greedy object reproduces the pinned decision sequences', () => {
     // floats, then the FREE-top drain) instead of farming endTurn→startTurn;
     // both pins re-measured with zero turn-law-blocked events.
     // pre-Phase-27 interim — re-derived in the honest re-baseline.
+    //
+    // Re-pinned 2026-07-12 (WS3.3 fresh-stack CAP): the card-played clock's
+    // eligibility gate became an intensity cap (a play's own fresh stacks
+    // merged onto an existing instance no longer tick on the play that
+    // applied them), and manual TICK paths now decay decaysPerTick DoTs —
+    // same seeds, same victories, same round counts, one more play each
+    // (the same-play tick income the old boolean gate leaked is gone).
     it('seed 11 vs LittleBelle: a two-round status victory', () => {
         const r = runOneEncounter(loadout(MIX), LittleBelle, 11, 'greedy');
         expect({ outcome: r.outcome, rounds: r.rounds, plays: r.plays, statusPlays: r.statusPlays })
-            .toEqual({ outcome: 'victory', rounds: 2, plays: 10, statusPlays: 7 });
+            .toEqual({ outcome: 'victory', rounds: 2, plays: 11, statusPlays: 8 });
         expect(r.cardUsage['slippery-slope']).toEqual({
             cardId: 'slippery-slope', plays: 3, bottomPlays: 3, topPlays: 0, statusLands: 3, discards: 0,
         });
@@ -207,9 +214,9 @@ describe('greedy object reproduces the pinned decision sequences', () => {
     it('seed 11 vs KingOfRevenge: a three-round status victory (Gate 0 law: one tray per phase)', () => {
         const r = runOneEncounter(loadout(MIX), KingOfRevenge, 11, 'greedy');
         expect({ outcome: r.outcome, rounds: r.rounds, plays: r.plays, statusPlays: r.statusPlays })
-            .toEqual({ outcome: 'victory', rounds: 3, plays: 14, statusPlays: 9 });
+            .toEqual({ outcome: 'victory', rounds: 3, plays: 15, statusPlays: 10 });
         expect(r.cardUsage['straw-mans-jab']).toEqual({
-            cardId: 'straw-mans-jab', plays: 5, bottomPlays: 4, topPlays: 1, statusLands: 4, discards: 0,
+            cardId: 'straw-mans-jab', plays: 6, bottomPlays: 5, topPlays: 1, statusLands: 5, discards: 0,
         });
         // card-retreat no longer exists — it can never appear in cardUsage.
     }, 30_000);

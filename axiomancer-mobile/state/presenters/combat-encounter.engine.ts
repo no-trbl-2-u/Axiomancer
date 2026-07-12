@@ -242,6 +242,30 @@ export interface CombatDieVM {
      *  without onEnd/onFinalize (the stuck-ghost / dead-drop bug). */
     draggable: boolean;
 }
+/**
+ * THE COLOR LAW, UI-side (owner directive 2026-07-12: the board must PREVENT
+ * illegal die placement, not let the play fizzle).
+ *
+ * Rule source — the ENGINE, not this file: `playCombatCard`'s COLOR LAW gate
+ * (axiomancer-mechanics src/Combat/combat.engine.ts ~:1339 — a die powers only
+ * a card of ITS color; WILD is the sole exception; a fate-X play acts wild but
+ * rides its own tap path, never a drag) and `combatDieCanPower`
+ * (src/Combat/combat.dice.ts), which additionally wants the die's live
+ * `state`. The board only holds VMs mid-drag, so this derives the SAME verdict
+ * from the VM's color fields; spent/drafted/X gating stays where it already
+ * lives (CombatDieVM.draggable + the board's pending-die checks). Reserve and
+ * floating dice obey the same law — the engine checks every power source
+ * alike.
+ */
+export function dieCanPowerCardVM(
+    die: Pick<CombatDieVM, 'color' | 'isX'>,
+    cardStance: string,
+): boolean {
+    if (die.isX || die.color === 'x') return false;
+    if (cardStance === 'wild') return true;   // parity with combatDieCanPower
+    return die.color === 'wild' || die.color === cardStance;
+}
+
 export type CombatCardKind =
     | 'dot' | 'stun' | 'regen' | 'guard' | 'weaken' | 'inert' | 'befriend'
     // ── mechanics 0.34.0 — newly REAL in the HP engine ──

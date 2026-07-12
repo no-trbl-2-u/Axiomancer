@@ -52,6 +52,15 @@ backfilled from citations already surfaced in
 remaining ungreceipted rows keep `—` rather than an invented analogue;
 a full Dawncaster pass per keyword is a follow-up, not fabricated here.
 
+**CONJURE gate credit (2026-07-11, banked for the row's return):** the
+row stays retired (its carriers — foundry-sprite, corollary, the
+tf-* Thoughtforms — are sandbox-only; the row-count gate holds), but
+the WS2.1 evidence pass EXERCISED it clean: all 3 clauses PASS
+(tf-cinder 411/411 and 304/304 bottom-line conversions, token fizzle
+0–2%, no dominance in 288 cells). Receipt:
+`plan/tuning/2026-07-11-honest-rebaseline-and-evidence.md` §2 WS2.1.
+If promotion ever restores the row, it starts at `+???`, not `????`.
+
 ## Utility (9)
 
 | keyword | semantics | Dawncaster analogues (receipts) | gate (E/P/D/T) | notes |
@@ -63,7 +72,7 @@ a full Dawncaster pass per keyword is a follow-up, not fabricated here.
 | MARK iN dM | +1 per stack to each DoT tick / payoff hit; counts as affliction; BATTLE-LONG (WS3.3 `calendarExpiry: false` — bounded by payoff consumption, not a calendar) | — | `????` T:n/a | WS3.3 (2026-07-11): printed durations on MARK applications are nominal; absorbed half of the foretold_wound fold (KW-1) |
 | CLEANSE N | remove N of your own afflictions | — | `????` T:n/a | |
 | HEAL N | restore N VITAE | — | `????` T:n/a | |
-| RUPTURE N | consume up to N enemy afflictions (ALL on a finisher): 1.5x remaining DoT fuel + 3/non-DoT stack | — | `!???` T:n/a | plan #2 landed (8d853dcb): cap now max(80, 0.25x enemy maxHP); erosion late 0.03->0.08 — decay wall (plan #3) is the remaining brake. phase 29: now also absorbs `consume_affliction` (was presented as a Soul-flavored verb; the Soul gain stays a printed rider) |
+| RUPTURE N | consume up to N enemy afflictions (ALL on a finisher): 1.5x remaining DoT fuel + 3/non-DoT stack | — | `!???` T:n/a | WS7.1 (2026-07-11): cap is now a pure fraction — round(0.60x enemy maxHP), flat floor retired (`RUPTURE_CAP_FRACTION`; supersedes plan #2's max(80, 0.25x)); erosion late 0.03->0.08 — decay wall (plan #3) is the remaining brake. phase 29: now also absorbs `consume_affliction` (was presented as a Soul-flavored verb; the Soul gain stays a printed rider) |
 | SIPHON N% | heal for N% of the HP this play deals to the enemy | — | `????` T:n/a | phase 29: promoted from raw unglossed card text (resonance-detonation, the-reaping) |
 
 ## Theme hallmarks (19 — Peroration keeps one, not two)
@@ -82,7 +91,7 @@ a full Dawncaster pass per keyword is a follow-up, not fabricated here.
 | Oracle | FORETELL N | see/reorder top N of deck + glimpse next telegraph | — | `+???` | round 2: Augury early 69→91 once omens landed as described |
 | Oracle | OMEN | declared prediction; rider fires free if true by next turn | — | `+??!` | round 2: mid only 8%, late 0% — prophecy payoffs do not out-scale boss HP (plan #2) |
 | Harvest | SOUL | gain 1 Soul when an enemy affliction expires or is consumed | Souls — kb:dawncaster/keywords/souls.okf.md: cited as a Dawncaster unique-resource-with-bank-rules analogue (`cross-prior-art.md` §2 Axis A); bank-rule frame transfers, resurrection-clause specifics do not | `+??!` | round 2: Tithe mid 15→23 with REAP cap lifted to 200 — full harvest needs more rebuild cycles than a fight lasts (plan #2, #3) |
-| Harvest | REAP N | spend N Souls to fire printed effect | Reaping — kb:dawncaster/keywords/reaping.okf.md: cited as the direct payoff-verb analogue (`cross-prior-art.md` §4.1); Dawncaster's Reaping keys off Souls the same way | `!???` | plan #2 landed: exception retired into max(200, 0.25x maxHP); tithe late still 0 — rebuild-cycle wall (plan #3) |
+| Harvest | REAP N | spend N Souls to fire printed effect | Reaping — kb:dawncaster/keywords/reaping.okf.md: cited as the direct payoff-verb analogue (`cross-prior-art.md` §4.1); Dawncaster's Reaping keys off Souls the same way | `!???` | WS7.1 (2026-07-11): the REAP-ALL cap was removed entirely — ALL-spenders are uncapped (`themed-decks.engine.test.ts` pins the 240-damage uncapped burst; supersedes plan #2's max(200, 0.25x maxHP)); tithe late still 0 — rebuild-cycle wall (plan #3) |
 | Charm | SWAY N | enemy stacks, decays 1/turn; CAPITULATE fires the moment SWAY reaches the enemy's resolve (35% of max HP, never below 10, or current HP if lower) | Charmed — kb:dawncaster/keywords/charmed.okf.md: cited as the direct analogue (`cross-prior-art.md` §2 Axis B, "equal amount of Charmed"); their built-in decay/hold tension matches ours | `+??!` | round 2: Grace late 0% — matching a boss FULL HP bar is unreachable; needed the Charmed-style resolve threshold, landed 2026-07-08 (this atlas row's semantics corrected by phase 29 to match — it had drifted stale) |
 | Charm | RAPPORT iN dM | enemy deals N less damage while active | — | `+???` | round 2: fine where SWAY is live; inherits the threshold fix (plan #1) |
 | Bulwark | THORNS iN dM | attacker takes N when it damages you | — | `+??!` | round 2: Bastion early 77→98, mid 14 — cannot kill non-attackers; boss 1.6x threat near-certain loss (plan #5 boss-tech) |

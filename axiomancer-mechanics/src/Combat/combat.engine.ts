@@ -32,7 +32,7 @@ import { getCardById } from '../Cards/cards.library';
 import { executeCard } from '../Cards/card.engine';
 import { checkStatePredicate } from '../Cards/synergy-predicates';
 import type { Card, CardRider, CardSpecialMechanic, CombatResources } from '../Cards/types';
-import type { CombatState, Stance } from './types';
+import type { CombatState, Combatant, Stance } from './types';
 import { applyDamage, heal, isDefeated } from './health';
 import {
     processRoundStartEffects, processRoundEndEffects, getActiveRollModifier,
@@ -675,6 +675,7 @@ export function tapFateDie(
     const events: CombatEvent[] = [];
     let enemy = state.enemy;
     let conviction = state.conviction;
+    let souls = state.souls ?? 0;
     if (choice === 'conviction') {
         conviction = Math.min(CONVICTION_CAP, conviction + FATE_TAP_CONVICTION);
         events.push({ kind: 'fate-tapped', dieId, choice, amount: FATE_TAP_CONVICTION });
@@ -690,9 +691,19 @@ export function tapFateDie(
         enemy = applyDamage(enemy, strongest.amount);
         events.push({ kind: 'fate-tapped', dieId, choice, amount: strongest.amount });
         events.push({ kind: 'dot-tick', effectId: strongest.effectId, label: strongest.label, amount: strongest.amount, target: 'enemy' });
+        // Same tick body as the clocks: a decaysPerTick DoT pays a stack for
+        // this manual tick, washes out at 0, and a soul-worthy washout still
+        // yields its expiry Soul.
+        const decayed = decayManuallyTickedDots(enemy, [strongest.effectId]);
+        enemy = decayed.bearer;
+        const washSouls = soulWorthyWashouts(decayed.washedOut);
+        if (washSouls > 0) {
+            souls += washSouls;
+            events.push({ kind: 'soul-gained', amount: washSouls, total: souls, reason: 'expiry' });
+        }
     }
     const next: CombatEncounterState = {
-        ...state, enemy, conviction,
+        ...state, enemy, conviction, souls,
         dice: state.dice.map(d => (d.id === dieId ? { ...d, state: 'spent' as const } : d)),
         fateTappedTurn: state.turn,
     };
@@ -852,6 +863,33 @@ function soulWorthyWashouts(washedOut: readonly ActiveEffect[]): number {
     }).length;
 }
 
+/** Manual TICK verbs (fate-tap 'dot-tick', the `tickOne` / `tickAllDots`
+ *  riders) share the clock-owned tick body's decay rule: a `decaysPerTick`
+ *  DoT loses 1 intensity each time it ticks and washes out at 0 — exactly
+ *  what `processDamageOverTime` / `fireDotTrigger` enforce. Front-loaded
+ *  fuel (BLEED) must pay its stacks on manual ticks too, and the washouts
+ *  are reported so the Soul economy sees expiry-by-decay on these paths. */
+function decayManuallyTickedDots<T extends Combatant>(
+    bearer: T,
+    tickedEffectIds: readonly string[],
+): { bearer: T; washedOut: ActiveEffect[] } {
+    if (tickedEffectIds.length === 0) return { bearer, washedOut: [] };
+    const washedOut: ActiveEffect[] = [];
+    let changed = false;
+    const effects = bearer.effects.reduce<ActiveEffect[]>((acc, ae) => {
+        const p = lookupEffectDef(ae.effectId)?.payload;
+        if (tickedEffectIds.includes(ae.effectId) && p?.dotModifiers?.decaysPerTick) {
+            changed = true;
+            if (ae.intensity > 1) acc.push({ ...ae, intensity: ae.intensity - 1 });
+            else washedOut.push(ae); // intensity 1 → the instance is spent
+        } else {
+            acc.push(ae);
+        }
+        return acc;
+    }, []);
+    return changed ? { bearer: { ...bearer, effects }, washedOut } : { bearer, washedOut };
+}
+
 /** SOUL gain (Harvest): bumps the bank; `bone-orchard` (E) drips 1 HP per Soul
  *  gained — a soul-gated payoff (spec 32 v3 §1 source 3). */
 function gainSouls(
@@ -1008,6 +1046,10 @@ function applyRiderToState(
     let directDamage = next.directDamageDealt;
     let conviction = next.conviction;
     let guard = next.guard ?? 0;
+    let souls = next.souls ?? 0;
+    // Manual-tick washouts (decaysPerTick instances spent by tickOne /
+    // tickAllDots) — soul-worthy ones yield their expiry Soul below.
+    const washedOutHere: ActiveEffect[] = [];
 
     if (r.guard) guard += r.guard;
     if (r.conviction) conviction = Math.min(CONVICTION_CAP, conviction + r.conviction);
@@ -1040,6 +1082,9 @@ function applyRiderToState(
             enemy = applyDamage(enemy, strongest.amount);
             directDamage += strongest.amount;
             events.push({ kind: 'dot-tick', effectId: strongest.effectId, label: strongest.label, amount: strongest.amount, target: 'enemy' });
+            const decayed = decayManuallyTickedDots(enemy, [strongest.effectId]);
+            enemy = decayed.bearer;
+            washedOutHere.push(...decayed.washedOut);
         }
     }
     if (r.tickAllDots) {
@@ -1050,6 +1095,9 @@ function applyRiderToState(
             for (const t of ticks.perEffect) {
                 events.push({ kind: 'dot-tick', effectId: t.effectId, label: t.label, amount: t.amount, target: 'enemy' });
             }
+            const decayed = decayManuallyTickedDots(enemy, ticks.perEffect.map(t => t.effectId));
+            enemy = decayed.bearer;
+            washedOutHere.push(...decayed.washedOut);
         }
     }
     if (r.ruptureMarks) {
@@ -1095,7 +1143,12 @@ function applyRiderToState(
         }
     }
 
-    next = { ...next, player, enemy, directDamageDealt: directDamage, conviction, guard };
+    const washSouls = soulWorthyWashouts(washedOutHere);
+    if (washSouls > 0) {
+        souls += washSouls;
+        events.push({ kind: 'soul-gained', amount: washSouls, total: souls, reason: 'expiry' });
+    }
+    next = { ...next, player, enemy, directDamageDealt: directDamage, conviction, guard, souls };
 
     if (r.foretell) next = applyForetell(next, r.foretell, events);
     if (r.drawCards) {
@@ -1586,12 +1639,22 @@ function playBottomAction(
     // 'payoff' fires inside the payoff verbs (rupture / consume_affliction /
     // reap_all). The tick is DoT-clock damage — direct-damage tally only,
     // never `mechanicDamage` (SIPHON heals off payoff bursts, not clocks).
-    // WS3.3 eligibility: only instances that existed BEFORE this play are on
+    // WS3.3 eligibility: only STACKS that existed BEFORE this play are on
     // the clock — a play's own fresh stacks never tick themselves (doctrine
-    // witness: a PAID line must not chip a clean enemy).
-    const preExisting = (ae: { effectId: string }): boolean => (before[ae.effectId] ?? 0) > 0;
+    // witness: a PAID line must not chip a clean enemy). With 'intensity'
+    // merge-stacking a re-application raises the ONE existing instance, so
+    // the gate is an intensity CAP (the pre-play stack count), not a boolean;
+    // the cap is re-clamped to the LIVE intensity before each clock fire so
+    // stacks consumed mid-play (RUPTURE / cleanse / decay) leave the clock
+    // and a consumed-then-reapplied instance counts as genuinely fresh.
+    const clockCap: Record<string, number> = { ...before };
     const fireClock = (trigger: 'card-played' | 'payoff'): void => {
-        const clock = fireDotTrigger(enemy, trigger, state.round, preExisting);
+        for (const id of Object.keys(clockCap)) {
+            const live = enemy.effects.find(e => e.effectId === id)?.intensity ?? 0;
+            clockCap[id] = Math.min(clockCap[id], live);
+        }
+        const clock = fireDotTrigger(enemy, trigger, state.round,
+            ae => Math.min(ae.intensity ?? 1, clockCap[ae.effectId] ?? 0));
         if (clock.damage <= 0) return;
         enemy = clock.target;
         directDamage += clock.damage;
@@ -1747,7 +1810,13 @@ function playBottomAction(
                 // RUPTURE v3 — consume ALL afflictions: 1.5x... no — burst =
                 // (pending DoT fuel + flat per non-DoT stack + pip/omen fuel),
                 // read + vulnerable scaled, capped. Consumed instances feed SOULS.
-                const pending = getPendingDotTotal(state.enemy, state.round).total;
+                // Fuel is priced off the LIVE enemy (same as WINNOWING's
+                // consumeOneAffliction), not the play-start snapshot — fuel
+                // that already ticked out or washed out earlier in this play
+                // (e.g. a stuck-in-their-head drip advancing the
+                // damage-instance clock, or the payoff tick above) was paid
+                // once and must not be re-paid by the burst.
+                const pending = getPendingDotTotal(enemy, state.round).total;
                 const consumedRes = consumeAfflictions(enemy);
                 enemy = consumedRes.combatant;
                 const fuel = pending
@@ -2164,12 +2233,12 @@ function playBottomAction(
     // WS3.3 — the same clock advances card-played-clocked DoTs the PLAYER
     // bears (enemy threat riders land `debuff_poison` on the player): the
     // clock is the player's own play, wherever the DoT sits. Same
-    // pre-existing gate (a self-applied fresh debuff never self-ticks), and
-    // player-borne washouts never earn Souls (SOUL counts ENEMY afflictions
-    // only).
-    const playerPreExisting = (ae: { effectId: string }): boolean =>
-        state.player.effects.some(p => p.effectId === ae.effectId);
-    const selfClock = fireDotTrigger(player, 'card-played', state.round, playerPreExisting);
+    // pre-existing STACK cap (a self-applied fresh debuff — or fresh stacks
+    // merged onto an existing one — never self-ticks), and player-borne
+    // washouts never earn Souls (SOUL counts ENEMY afflictions only).
+    const playerPrePlay = intensityMap(state.player.effects);
+    const selfClock = fireDotTrigger(player, 'card-played', state.round,
+        ae => Math.min(ae.intensity ?? 1, playerPrePlay[ae.effectId] ?? 0));
     if (selfClock.damage > 0) {
         player = selfClock.target as Character;
         for (const t of selfClock.perEffect) {
@@ -2202,6 +2271,9 @@ function playBottomAction(
                 for (const t of ticks.perEffect) {
                     events.push({ kind: 'dot-tick', effectId: t.effectId, label: t.label, amount: t.amount, target: 'enemy' });
                 }
+                const decayed = decayManuallyTickedDots(enemy, ticks.perEffect.map(t => t.effectId));
+                enemy = decayed.bearer;
+                gainSoulsLocal(soulWorthyWashouts(decayed.washedOut), 'expiry');
             }
         }
         if (r.tickOne) {
@@ -2214,6 +2286,9 @@ function playBottomAction(
                 directDamage += strongest.amount;
                 attribution = recordAttribution(attribution, card.id, card.name, null, strongest.amount, hpBefore);
                 events.push({ kind: 'dot-tick', effectId: strongest.effectId, label: strongest.label, amount: strongest.amount, target: 'enemy' });
+                const decayed = decayManuallyTickedDots(enemy, [strongest.effectId]);
+                enemy = decayed.bearer;
+                gainSoulsLocal(soulWorthyWashouts(decayed.washedOut), 'expiry');
             }
         }
         if (r.ruptureMarks) {
@@ -2958,7 +3033,7 @@ export function processBetweenPhases(
 
     // 3. Process a full round of effects on the player (DoT / regen / drain).
     const playerStart = processRoundStartEffects(state.player, state.round);
-    const playerEnd = processRoundEndEffects(playerStart.target, state.round);
+    const playerEnd = processRoundEndEffects(playerStart.target, state.round, 'player');
     let player = playerEnd.target as Character;
 
     for (const t of enemyDotTicks) events.push({ kind: 'dot-tick', effectId: t.effectId, label: t.label, amount: t.amount, target: 'enemy' });
@@ -3179,7 +3254,17 @@ export function processBetweenPhases(
 
     // 5. Draw a fresh hand (discard the old hand — Hazard's "draw fresh").
     //    `achilles-and-the-tortoise` adds +1 to the draw after a denied turn.
-    const discardedHand = omenState.hand.map(h => h.cardId);
+    //    WS2.1 one-use law: an unplayed CONJURED Thoughtform leaves the combat
+    //    ENTIRELY at the boundary — it never enters the discard pile (where a
+    //    reshuffle would resurrect it as a permanent deck card) and its uid is
+    //    released from the one-use ledger.
+    const conjuredLedger = omenState.conjuredUids ?? [];
+    const sweptConjuredUids = omenState.hand
+        .filter(h => conjuredLedger.includes(h.uid))
+        .map(h => h.uid);
+    const discardedHand = omenState.hand
+        .filter(h => !conjuredLedger.includes(h.uid))
+        .map(h => h.cardId);
     const draw = drawCombatCards(
         omenState.drawPile, [...omenState.discard, ...discardedHand], omenState.deck,
         COMBAT_HAND_SIZE + bonusDraw + omenBonusDraw, rng,
@@ -3220,6 +3305,7 @@ export function processBetweenPhases(
         drawPile: draw.drawPile,
         discard: draw.discard,
         hand,
+        conjuredUids: conjuredLedger.filter(u => !sweptConjuredUids.includes(u)),
         phase: 'phase-play',
         round: state.round + 1,
         tempZone: tickedTempZone,

@@ -570,12 +570,24 @@ export function updateEffectDuration<T extends Combatant>(target: T, effectId: s
  * expired effects (for UI announcements). WS3: effects that opted out of the
  * calendar (`dotModifiers.calendarExpiry === false`) never count down — they
  * expire only via their own decay (e.g. `decaysPerTick` washout) or combat end.
+ *
+ * BEARER ASYMMETRY (2026-07-12): the no-calendar law was ratified for ENEMY
+ * bearers, where payoff consumption (RUPTURE / consumeMarks / cleanse riders)
+ * bounds a permanent affliction. The player has no such consumer, so a
+ * player-borne no-calendar effect honors the opt-out only when it can wash
+ * itself out (`decaysPerTick`); otherwise (e.g. MARK) its printed duration
+ * applies again — enemy-applied marks on the player must not snowball forever.
  */
-export function tickAllEffects<T extends Combatant>(target: T): { target: T; expired: ActiveEffect[] } {
+export function tickAllEffects<T extends Combatant>(
+    target: T,
+    bearer: 'player' | 'enemy' = 'enemy',
+): { target: T; expired: ActiveEffect[] } {
     const expired: ActiveEffect[] = [];
     const remaining = target.effects.reduce<ActiveEffect[]>((acc, effect) => {
-        if (effect.remainingDuration === -1
-            || lookupEffect(effect.effectId)?.payload.dotModifiers?.calendarExpiry === false) {
+        const mods = lookupEffect(effect.effectId)?.payload.dotModifiers;
+        const noCalendar = mods?.calendarExpiry === false
+            && (bearer === 'enemy' || mods?.decaysPerTick === true);
+        if (effect.remainingDuration === -1 || noCalendar) {
             acc.push(effect);
             return acc;
         }
@@ -720,7 +732,11 @@ export function processRoundStartEffects<T extends Combatant>(target: T, current
  *   1. End-phase DoT (e.g. bleed)
  *   2. Tick / expire all effects (single decrement per round)
  */
-export function processRoundEndEffects<T extends Combatant>(target: T, currentRound?: number): {
+export function processRoundEndEffects<T extends Combatant>(
+    target: T,
+    currentRound?: number,
+    bearer: 'player' | 'enemy' = 'enemy',
+): {
     target: T;
     dotDamage: number;
     expired: ActiveEffect[];
@@ -728,7 +744,7 @@ export function processRoundEndEffects<T extends Combatant>(target: T, currentRo
     washedOut: ActiveEffect[];
 } {
     const dot   = processDamageOverTime(target, 'end', currentRound);
-    const ticked = tickAllEffects(dot.target);
+    const ticked = tickAllEffects(dot.target, bearer);
     return {
         target:    ticked.target,
         dotDamage: dot.damage,
@@ -762,29 +778,42 @@ export interface DotTriggerResult<T extends Combatant> {
  * (same object) when nothing matches.
  *
  * `eligible` (WS3.3) — optional per-instance gate: an instance for which it
- * returns false neither ticks nor decays on this trigger. The card-play
+ * returns false (or 0) neither ticks nor decays on this trigger. The card-play
  * resolver passes "existed BEFORE this play" so a play's own fresh stacks are
  * never on their own clock (doctrine witness: a PAID line must not chip a
- * clean enemy — the stacks start paying from the NEXT play).
+ * clean enemy — the stacks start paying from the NEXT play). A NUMBER return
+ * is a partial gate: the instance ticks as if its intensity were
+ * `min(intensity, n)` — with 'intensity' merge-stacking a re-application
+ * raises the ONE existing instance, so the resolver caps the tick at the
+ * pre-play intensity and only the pre-existing stacks pay this play.
  */
 export function fireDotTrigger<T extends Combatant>(
     target: T,
     trigger: DotEventTrigger,
     currentRound?: number,
-    eligible?: (ae: ActiveEffect) => boolean,
+    eligible?: (ae: ActiveEffect) => boolean | number,
 ): DotTriggerResult<T> {
     const dotAmp = getDotAmplificationByEffect(target.effects);
     const markBonus = getTickAmplifyFlat(target.effects);
     const perEffect: DotTriggerResult<T>['perEffect'] = [];
+    const onClock = (ae: ActiveEffect): boolean => {
+        if (!eligible) return true;
+        const gate = eligible(ae);
+        return gate !== false && gate !== 0;
+    };
     let damage = 0;
     for (const ae of target.effects) {
         const def = lookupEffect(ae.effectId);
         const dot = def?.payload.damageOverTime;
         if (!def || !dot || dot.trigger !== trigger) continue;
-        if (eligible && !eligible(ae)) continue;
+        const gate = eligible ? eligible(ae) : true;
+        if (gate === false || gate === 0) continue;
+        const clocked = typeof gate === 'number'
+            ? Math.max(0, Math.min(ae.intensity ?? 1, gate))
+            : (ae.intensity ?? 1);
         const multiplier = dotAmp.get(ae.effectId) ?? 1;
         const dpr = rampedDamagePerRound(ae, dot.damagePerRound, def.payload.dotModifiers, currentRound);
-        const amount = Math.floor(dpr * (ae.intensity ?? 1) * multiplier) + markBonus;
+        const amount = Math.floor(dpr * clocked * multiplier) + markBonus;
         perEffect.push({ effectId: ae.effectId, label: def.name, amount });
         damage += amount;
     }
@@ -796,7 +825,7 @@ export function fireDotTrigger<T extends Combatant>(
     const decayed = next.effects.reduce<ActiveEffect[]>((acc, ae) => {
         const p = lookupEffect(ae.effectId)?.payload;
         const tickedThisTrigger = p?.damageOverTime?.trigger === trigger
-            && (!eligible || eligible(ae));
+            && onClock(ae);
         if (tickedThisTrigger && p?.dotModifiers?.decaysPerTick) {
             if (ae.intensity > 1) acc.push({ ...ae, intensity: ae.intensity - 1 });
             else washedOut.push(ae); // intensity 1 → the instance is spent
