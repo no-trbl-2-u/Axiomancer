@@ -11,6 +11,7 @@
  */
 
 import { MAX_EFFECT_INTENSITY, FREE_ENCHANT_ROUNDS } from '../Game/game-mechanics.constants';
+import { CONCEDE_PREMISES_ELITE, CONCEDE_PREMISES_BOSS } from './effects';
 import type { Effect, ActiveEffect } from '../Effects/types';
 import type { Card, CardCombatEffects, CardRider, CardSpecialMechanic, SynergyStatePredicate } from '../Cards/types';
 import { rankToRarity, CARD_RANK_NAMES } from '../Cards/types';
@@ -254,16 +255,21 @@ export function mechanicText(m: CardSpecialMechanic): string | null {
         // its one carrier (the-adamant-wall) rather than a separate word.
         case 'barrier': return `GUARD ${m.amount} (persists)`;
         case 'riposte': return `RIPOSTE ${m.damage}${m.reduce ? ` (parry ${m.reduce})` : ''}`;
-        case 'rupture': return `RUPTURE${m.fuelPerPip ? ` (+${m.fuelPerPip} fuel per pip)` : ''}${m.fuelPerOmenHit ? ` (+${m.fuelPerOmenHit} fuel per omen hit)` : ''}`;
+        // Bare `rupture` resolves as consume-ALL in the engine — the face says
+        // so; the fuelPerPip carrier (the-overtake) also prints its 2-pip gate.
+        case 'rupture': return `RUPTURE ALL${m.fuelPerPip ? ` (+${m.fuelPerPip} fuel per pip; needs 2+ spent pips)` : ''}${m.fuelPerOmenHit ? ` (+${m.fuelPerOmenHit} fuel per omen hit)` : ''}`;
         case 'siphon': return `SIPHON ${Math.round(m.pct * 100)}%`;
         case 'forge_floating_die': return `FORGE a ${m.color === 'wild' ? 'WILD' : "the powering die's color"} floating die`;
         case 'float_x_die': return 'FORGE a dead X die into a WILD floating die (no X: +1 Conviction)';
         case 'stagger': return `STAGGER ${m.rungs}`;
-        case 'lock_stance': return 'lock the enemy stance';
+        case 'lock_stance': return "lock the enemy's next stance";
         case 'foretell': return `FORETELL ${m.count}`;
         case 'omen': return `OMEN — on hit: ${riderText(m.rider)}`;
         case 'premise': return `+${m.count} Premise${m.count === 1 ? '' : 's'}`;
-        case 'peroration': return `PERORATION at ${m.at}${m.concedeAt ? ` (CONCEDE at ${m.concedeAt})` : ''}`;
+        // The declared conclusion prints its full payload — the rider used to
+        // be dropped — and the CONCEDE bar names the elite/boss floors
+        // (`concedeFloorFor` raises the authored value against them).
+        case 'peroration': return `PERORATION at ${m.at} — ${riderText(m.rider)}${m.concedeAt ? ` (CONCEDE at ${m.concedeAt} · elite ${CONCEDE_PREMISES_ELITE} · boss ${CONCEDE_PREMISES_BOSS})` : ''}`;
         case 'spend_premises': return `spend ALL Premises — +1 mark per ${m.markPer}, draw 1 per ${m.drawPer}`;
         case 'spend_all_pips': return `spend ALL pips${m.guardPerPip ? ` (+${m.guardPerPip} Guard per pip)` : ''}${m.markPer ? ` (+1 MARK per ${m.markPer} spent, uncapped)` : ''}`;
         case 'recoil': return `RECOIL ${m.hp}`;

@@ -1263,6 +1263,20 @@ function buildDetailKeywords(card: CombatCard, c: CardCalc, sourceCard?: Card): 
     if (c.kind === 'riposte' && c.guardAmount) push(keywordForVerb('defend'), false);
     // A rider is "minor" only if the engine still doesn't read it (engineHonestKind null).
     for (const r of c.riders) push(keywordForEffect(r.effectId), engineHonestKind(r.effectId) === null);
+    // 2026-07-12 (owner directive: EVERY keyword a card prints must pop a
+    // definition) — sweep the whole printed surface, not just the headline:
+    // authored statuses, every special-mechanic kind, and any UPPERCASE
+    // registry word on the engine lines. The keyword panel IS the popup; a
+    // printed keyword without a chip is unexplained vocabulary.
+    for (const ce of sourceCard?.combatEffects ?? []) push(keywordForEffect(ce.effectId), false);
+    for (const m of sourceCard?.specialMechanics ?? []) {
+        push(keywordForMechanic(m.kind), false);
+        // PERORATION is card-local (demoted, phase 29): the PREMISE gloss
+        // explains its trigger; the word itself pops via the system glossary.
+        if (m.kind === 'peroration') push('Premise', false);
+    }
+    const printed = [card.topActionText, card.bottomActionText, ...(card.dieLines ?? [])].join(' ');
+    for (const kw of keywordsInPersistentText(printed)) push(kw, false);
     return out;
 }
 

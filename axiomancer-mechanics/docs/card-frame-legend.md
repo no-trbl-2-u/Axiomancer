@@ -27,7 +27,7 @@ Riders print after the PAID line, each led by a glyph naming its trigger:
 |-------|---------|---------|
 | `⬡ COLOR ×N spent` | **Threshold** — you have spent N dice of COLOR this turn (across all cards) | rider fires once the count is met |
 | `⬢ COLOR die` | **Powering-die bonus** — the die you commit to *this* card is COLOR | `MIND/WILD` = the card's own colour or a wild; `off-colour` = any other |
-| `✕ an X die may power this` | **Fate** — an X (wild) die may pay the die cost | rider fires; may cost `recoil N HP` |
+| `✕ an X die may power this` | **Fate** — an X (**dead**, normally unspendable) die may pay the die cost | rider fires; may cost `recoil N HP` |
 | `◆ <condition>` | **Synergy** — a combat-state condition holds | rider fires while true |
 
 The text after the colon is the rider's full payload, in the same units the
@@ -38,8 +38,13 @@ atlas uses (`SWAY 4`, `draw 1`, `+1 intensity · STAGGER 1`).
 - `name iN dM` — a status at **intensity N**, **duration M**.
 - `(K over its run)` — total damage a damage-over-time effect deals across its
   life.
-- `(K/play)` — POISON's bite **per card you play** (its clock); BLEED instead
-  ticks per damage instance. See the atlas rows for POISON / BLEED clocks.
+- `(K/play)` / `(K/hit)` / `(K/payoff)` — an event DoT's bite **per clock
+  event** at its printed intensity: POISON bites per **card you play**, BLEED
+  per **damage instance** (then decays 1 intensity per trigger), payoff-clock
+  DoTs per **payoff verb fired**. See the atlas rows for the clocks.
+- `RIPOSTE N (parry K)` — the counter deals N on a full block; the **parry**
+  additionally shaves K off the first incoming hit each phase (that shave
+  counts as prevented damage).
 
 ## Rank tag
 

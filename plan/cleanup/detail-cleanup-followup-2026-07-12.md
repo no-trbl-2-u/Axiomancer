@@ -1,5 +1,42 @@
 # Card-detail cleanup — follow-up plan (2026-07-12)
 
+> **RESOLVED 2026-07-12** (owner directive: "fix everything you find"). All 13
+> Bucket A fixes landed as planned. Bucket B rulings applied: #14 **(P)**
+> (the ramp-to-10 is printed), #15 **(P)**, #16 **(E)** — the enemy-inflicted
+> mirror hook was removed and the self-debuff mirror gated to afflictions
+> valid on an enemy (DoT / MARK), with a hermetic engine test — #17 **(P)**,
+> #18 **(P)** + REPRISE→RECALL. Two per-card corrections to this plan's own
+> rows, found while re-verifying engine truth:
+>
+> - **#18's suggested wording was wrong.** The drip is
+>   `clamp(markStacks, 2, 16)` — damage *equals* mark stacks (floor 2), not
+>   "2 + 1 per stack". The face prints the clamp. It also fires on
+>   `replay_last` (Ouroboros), which the row's trigger list had right but the
+>   old face didn't.
+> - **#16 undersold the card.** Mirror-of-guilt has a THIRD hook neither
+>   audit caught: 1 mirrored stack per 3 RECOIL HP paid in a play
+>   (`MIRROR_RECOIL_HP_PER_STACK`). Kept (it's the Penitent identity), now
+>   printed on the face.
+>
+> Fresh-audit extras fixed in the same pass (outside the 18):
+> `crumbling-resolve`'s face omitted its unconditional Wall Upkeep drip
+> (max(4, 20% of standing Guard) per phase — printed now); the frame legend
+> lacked the `(K/hit)` / `(K/payoff)` DoT glosses and the
+> `RIPOSTE N (parry K)` notation (added); the legend's fate row glossed the
+> X die as "(wild)" when the engine treats X as a dead, normally
+> unspendable face (corrected).
+>
+> **Round 2 (same day, owner directive: popups + word budget).** Two more
+> stale faces found and fixed: `crown-of-thorns` prints its depth scaling
+> (+1 per affliction beyond the first, max +4 — the face claimed flat +1)
+> and `venom-and-vein` prints its +1 duration (the 2026-07-08 Erosion
+> rebalance added it engine-side only). Popup coverage: the inspect panel
+> now chips EVERY keyword a card prints (whole printed surface swept —
+> statuses, mechanic kinds, uppercase registry words), PERORATION and
+> CONCEDE joined the system glossary, and a new face-honesty guard fails
+> any card printing a term with no popup (pre-wiring it flagged ~30 cards).
+> All faces then re-shaved to minimum wording that still resolves.
+
 ## Where this comes from
 
 The original audit (`detail-cleanup-2026-07-12.md`) found 36 cards whose

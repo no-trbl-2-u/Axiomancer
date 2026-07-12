@@ -334,6 +334,12 @@ export const SYSTEM_GLOSSARY: readonly { term: string; def: string }[] = [
     { term: 'FLOATING ✦', def: 'A forged die that plays alongside your drafted die, never rerolls, and is gone forever when spent.' },
     { term: 'RUNGS', def: "The steps of the enemy's telegraphed action — 2 on a normal action, 3 on a boss. Losing all of them denies the action." },
     { term: 'WILD / X', def: 'A WILD die counts as any color. A dead X die powers nothing, but can be Forged wild or fate-tapped.' },
+    // 2026-07-12 (owner directive: every printed term pops a definition) —
+    // the two card-local Peroration-payoff words. PERORATION was demoted from
+    // the keyword registry (phase 29) but still prints on the-closing-word;
+    // CONCEDE is the alt-win it can escalate to. Neither had a popup anywhere.
+    { term: 'PERORATION', def: 'A declared conclusion: when your Premise tally reaches the printed count, its payoff fires free and the tally resets.' },
+    { term: 'CONCEDE', def: 'An alternate win — reaching the printed Premise count in one Peroration ends the fight. Elites and bosses demand the higher printed count.' },
 ];
 
 /** How a card's PRINTED lines reference each system term. Matched against the
@@ -346,6 +352,8 @@ const SYSTEM_TERM_MATCH: Record<string, RegExp> = {
     'FLOATING ✦': /\bfloating\b/i,
     'RUNGS': /\brungs?\b/i,
     'WILD / X': /\bwild\b|\bX die\b/,
+    'PERORATION': /\bPERORATION\b/,
+    'CONCEDE': /\bCONCEDE\b/,
 };
 
 /** Keyword chips whose own gloss already explains a system term — when such a
