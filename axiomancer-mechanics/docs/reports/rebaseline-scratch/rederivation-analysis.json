@@ -17,16 +17,16 @@
     },
     "mid": {
      "cells": 40,
-     "winRate_all": 0.1029,
+     "winRate_all": 0.105,
      "winRate_blind": 0.0533,
      "winRate_greedy": 0.05,
-     "statusEngagement_all": 0.1684,
+     "statusEngagement_all": 0.1683,
      "statusEngagement_blind": 0.2023,
      "statusEngagement_greedy": 0.2041,
-     "dotHpFraction": 0.483,
-     "strikeFraction_sigProxy": 0.4654,
-     "mechanicBurstFraction": 0.0516,
-     "avgRounds": 4.22
+     "dotHpFraction": 0.4914,
+     "strikeFraction_sigProxy": 0.4779,
+     "mechanicBurstFraction": 0.0307,
+     "avgRounds": 4.24
     },
     "late": {
      "cells": 48,
@@ -36,10 +36,10 @@
      "statusEngagement_all": 0.1224,
      "statusEngagement_blind": 0.1309,
      "statusEngagement_greedy": 0.1304,
-     "dotHpFraction": 0.3977,
-     "strikeFraction_sigProxy": 0.4661,
-     "mechanicBurstFraction": 0.1361,
-     "avgRounds": 3.51
+     "dotHpFraction": 0.3978,
+     "strikeFraction_sigProxy": 0.466,
+     "mechanicBurstFraction": 0.1362,
+     "avgRounds": 3.52
     },
     "impossible": {
      "cells": 8,
@@ -52,15 +52,15 @@
      "dotHpFraction": 0.4005,
      "strikeFraction_sigProxy": 0.4644,
      "mechanicBurstFraction": 0.1351,
-     "avgRounds": 5.24
+     "avgRounds": 5.25
     }
    },
    "winPathTotals": {
-    "victory": 2671,
+    "victory": 2676,
     "mercy": 0,
     "capitulate": 30,
     "concede": 0,
-    "defeat": 5939,
+    "defeat": 5934,
     "retreat": 0
    },
    "deadCardRate_allPolicies": 0.2429,
@@ -159,10 +159,10 @@
    },
    "lineTelemetry": {
     "slippery-slope": {
-     "plays": 15195,
-     "freeShare": 0.568,
-     "hpF": 65469,
-     "hpP": 340615
+     "plays": 15219,
+     "freeShare": 0.5684,
+     "hpF": 66057,
+     "hpP": 345739
     },
     "straw-mans-jab": {
      "plays": 5588,
@@ -183,16 +183,16 @@
      "hpP": 1449
     },
     "exordium": {
-     "plays": 3596,
-     "freeShare": 0.5214,
+     "plays": 3621,
+     "freeShare": 0.5228,
      "hpF": 0,
-     "hpP": 47312
+     "hpP": 48576
     },
     "opening-statement": {
-     "plays": 7981,
-     "freeShare": 0.5813,
+     "plays": 8012,
+     "freeShare": 0.5833,
      "hpF": 0,
-     "hpP": 201166
+     "hpP": 205712
     },
     "mounting-case": {
      "plays": 0,
@@ -213,10 +213,10 @@
      "hpP": 26770
     },
     "half-step": {
-     "plays": 24140,
-     "freeShare": 0.6405,
+     "plays": 24169,
+     "freeShare": 0.6404,
      "hpF": 0,
-     "hpP": 44957
+     "hpP": 46159
     },
     "bootstrap-loop": {
      "plays": 0,
@@ -243,10 +243,10 @@
      "hpP": 58386
     },
     "self-flagellant": {
-     "plays": 927,
-     "freeShare": 0.8306,
-     "hpF": 2357,
-     "hpP": 5379
+     "plays": 923,
+     "freeShare": 0.8332,
+     "hpF": 2480,
+     "hpP": 8012
     },
     "fallen-grace": {
      "plays": 1750,
@@ -267,16 +267,16 @@
      "hpP": 10091
     },
     "undistributed-middle": {
-     "plays": 1910,
-     "freeShare": 0.6084,
+     "plays": 1962,
+     "freeShare": 0.6055,
      "hpF": 0,
-     "hpP": 6359
+     "hpP": 7990
     },
     "arrow-paradox": {
-     "plays": 2380,
-     "freeShare": 0.6155,
+     "plays": 2401,
+     "freeShare": 0.6147,
      "hpF": 0,
-     "hpP": 5980
+     "hpP": 6194
     },
     "glimpse": {
      "plays": 5600,
@@ -291,16 +291,16 @@
      "hpP": 8194
     },
     "cassandras-burden": {
-     "plays": 5520,
-     "freeShare": 0.5601,
+     "plays": 5543,
+     "freeShare": 0.562,
      "hpF": 0,
-     "hpP": 194048
+     "hpP": 199269
     },
     "delphic-ambiguity": {
-     "plays": 4411,
-     "freeShare": 0.8123,
-     "hpF": 13162,
-     "hpP": 45127
+     "plays": 4419,
+     "freeShare": 0.8063,
+     "hpF": 13497,
+     "hpP": 47243
     },
     "brief-candle": {
      "plays": 9509,
@@ -309,10 +309,10 @@
      "hpP": 211481
     },
     "memento-mori": {
-     "plays": 3789,
-     "freeShare": 0.4458,
+     "plays": 3816,
+     "freeShare": 0.4481,
      "hpF": 0,
-     "hpP": 15623
+     "hpP": 17077
     },
     "winnowing": {
      "plays": 4625,
@@ -333,16 +333,16 @@
      "hpP": 0
     },
     "disarming-smile": {
-     "plays": 6594,
-     "freeShare": 0.6049,
+     "plays": 6620,
+     "freeShare": 0.6035,
      "hpF": 0,
-     "hpP": 15225
+     "hpP": 16769
     },
     "common-ground": {
-     "plays": 4111,
-     "freeShare": 0.433,
+     "plays": 4116,
+     "freeShare": 0.4334,
      "hpF": 0,
-     "hpP": 24863
+     "hpP": 24908
     },
     "the-olive-branch": {
      "plays": 3049,
@@ -363,10 +363,10 @@
      "hpP": 0
     },
     "tu-quoque": {
-     "plays": 4428,
-     "freeShare": 0.6682,
+     "plays": 4450,
+     "freeShare": 0.6715,
      "hpF": 0,
-     "hpP": 11651
+     "hpP": 12247
     },
     "measured-answer": {
      "plays": 0,
@@ -393,10 +393,10 @@
      "hpP": 4156
     },
     "circular-reasoning": {
-     "plays": 6443,
-     "freeShare": 0.7838,
+     "plays": 6451,
+     "freeShare": 0.7847,
      "hpF": 0,
-     "hpP": 14202
+     "hpP": 15167
     }
    }
   },
@@ -580,10 +580,10 @@
    },
    "lineTelemetry": {
     "slippery-slope": {
-     "plays": 14969,
-     "freeShare": 0.5592,
-     "hpF": 76226,
-     "hpP": 277137
+     "plays": 14973,
+     "freeShare": 0.5591,
+     "hpF": 76252,
+     "hpP": 277237
     },
     "straw-mans-jab": {
      "plays": 15479,
@@ -592,10 +592,10 @@
      "hpP": 347378
     },
     "festering-argument": {
-     "plays": 9276,
+     "plays": 9282,
      "freeShare": 0.6746,
-     "hpF": 26673,
-     "hpP": 12446
+     "hpF": 26707,
+     "hpP": 12470
     },
     "currys-conversion": {
      "plays": 1257,
@@ -628,16 +628,16 @@
      "hpP": 45441
     },
     "sketch-of-a-thought": {
-     "plays": 13058,
-     "freeShare": 0.4854,
+     "plays": 13062,
+     "freeShare": 0.4855,
      "hpF": 0,
-     "hpP": 217582
+     "hpP": 217737
     },
     "half-step": {
-     "plays": 23586,
-     "freeShare": 0.6671,
+     "plays": 23592,
+     "freeShare": 0.667,
      "hpF": 0,
-     "hpP": 32580
+     "hpP": 32617
     },
     "bootstrap-loop": {
      "plays": 1027,
@@ -700,13 +700,13 @@
      "hpP": 268
     },
     "glimpse": {
-     "plays": 8337,
+     "plays": 8339,
      "freeShare": 0.6688,
      "hpF": 0,
-     "hpP": 123869
+     "hpP": 123933
     },
     "signs-and-portents": {
-     "plays": 18630,
+     "plays": 18633,
      "freeShare": 0.8074,
      "hpF": 0,
      "hpP": 8676
@@ -784,8 +784,8 @@
      "hpP": 5888
     },
     "tu-quoque": {
-     "plays": 3565,
-     "freeShare": 0.823,
+     "plays": 3574,
+     "freeShare": 0.8232,
      "hpF": 0,
      "hpP": 3242
     },
@@ -808,8 +808,8 @@
      "hpP": 3153
     },
     "ad-nauseam": {
-     "plays": 7010,
-     "freeShare": 0.5331,
+     "plays": 7014,
+     "freeShare": 0.5334,
      "hpF": 0,
      "hpP": 16110
     },
@@ -844,10 +844,10 @@
      "statusEngagement_all": 0.1611,
      "statusEngagement_blind": 0.205,
      "statusEngagement_greedy": 0.2021,
-     "dotHpFraction": 0.4332,
-     "strikeFraction_sigProxy": 0.5095,
-     "mechanicBurstFraction": 0.0573,
-     "avgRounds": 4.41
+     "dotHpFraction": 0.4338,
+     "strikeFraction_sigProxy": 0.5093,
+     "mechanicBurstFraction": 0.0568,
+     "avgRounds": 4.42
     },
     "late": {
      "cells": 48,
@@ -999,9 +999,9 @@
    },
    "lineTelemetry": {
     "slippery-slope": {
-     "plays": 13177,
-     "freeShare": 0.5626,
-     "hpF": 30681,
+     "plays": 13186,
+     "freeShare": 0.5629,
+     "hpF": 30714,
      "hpP": 248897
     },
     "straw-mans-jab": {
@@ -1053,22 +1053,22 @@
      "hpP": 131836
     },
     "half-step": {
-     "plays": 20056,
-     "freeShare": 0.7287,
+     "plays": 20070,
+     "freeShare": 0.7285,
      "hpF": 0,
-     "hpP": 10767
+     "hpP": 10808
     },
     "bootstrap-loop": {
-     "plays": 9607,
-     "freeShare": 0.794,
+     "plays": 9615,
+     "freeShare": 0.7941,
      "hpF": 0,
-     "hpP": 10073
+     "hpP": 10075
     },
     "ex-nihilo": {
-     "plays": 12649,
+     "plays": 12661,
      "freeShare": 0.7884,
      "hpF": 0,
-     "hpP": 15901
+     "hpP": 15925
     },
     "against-my-judgment": {
      "plays": 7985,
@@ -1137,9 +1137,9 @@
      "hpP": 151885
     },
     "delphic-ambiguity": {
-     "plays": 7900,
-     "freeShare": 0.8713,
-     "hpF": 37107,
+     "plays": 7912,
+     "freeShare": 0.8712,
+     "hpF": 37187,
      "hpP": 95638
     },
     "brief-candle": {
@@ -1173,10 +1173,10 @@
      "hpP": 4462
     },
     "disarming-smile": {
-     "plays": 12370,
-     "freeShare": 0.5325,
+     "plays": 12383,
+     "freeShare": 0.5323,
      "hpF": 0,
-     "hpP": 7971
+     "hpP": 8007
     },
     "common-ground": {
      "plays": 2895,
@@ -1203,16 +1203,16 @@
      "hpP": 13911
     },
     "tu-quoque": {
-     "plays": 2298,
-     "freeShare": 0.5918,
+     "plays": 2306,
+     "freeShare": 0.5924,
      "hpF": 0,
-     "hpP": 916
+     "hpP": 925
     },
     "measured-answer": {
-     "plays": 5308,
-     "freeShare": 0.6477,
+     "plays": 5319,
+     "freeShare": 0.6473,
      "hpF": 0,
-     "hpP": 2153
+     "hpP": 2199
     },
     "refrain": {
      "plays": 8566,
@@ -1221,8 +1221,8 @@
      "hpP": 378549
     },
     "second-thoughts": {
-     "plays": 6826,
-     "freeShare": 0.6874,
+     "plays": 6839,
+     "freeShare": 0.6877,
      "hpF": 0,
      "hpP": 456
     },

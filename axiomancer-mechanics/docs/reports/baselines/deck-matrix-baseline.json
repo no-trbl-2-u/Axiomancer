@@ -1,7 +1,7 @@
 {
  "meta": {
   "generatedAt": "2026-07-11",
-  "commit": "6ea123fce1646824fe13857e5541c4bbc17ddf66",
+  "commit": "e203fed9a21bc91ec62f21347b567ef62ead6b71",
   "command": "npm run combat-playtest -- --stage=all --policy=all --runs=60 --seed=1 --cards --json",
   "seeds": {
    "baseline": 1,
@@ -10,7 +10,7 @@
     3
    ]
   },
-  "note": "FIRST TURN-LAW-HONEST BASELINE — Phase 26 (one dice-turn per threat phase) landed at 6ea123fc; regenerated per Phase 27 §3 (plan/tuning/2026-07-10-turn-law-and-honest-baseline.md). Replaces the pre-Turn-Law provisional baseline of f196d219."
+  "note": "FIRST TURN-LAW-HONEST BASELINE at the reconciled tree — Phase 26 Turn Law (6ea123fc) + the cloud-phase reconciliation merge (e203fed9, includes the Phase 28 Overtake 2-pip gate, a Foundry-relevant behavior change). Regenerated per Phase 27 §3 (plan/tuning/2026-07-10-turn-law-and-honest-baseline.md); supersedes the 6ea123fc/70c64501 cut and replaces the pre-Turn-Law provisional baseline of f196d219."
  },
  "report": {
   "cells": [
@@ -9345,170 +9345,170 @@
     ],
     "stats": {
      "runs": 60,
-     "victories": 47,
+     "victories": 45,
      "mercies": 0,
-     "defeats": 13,
+     "defeats": 15,
      "retreats": 0,
-     "winRate": 0.7833333333333333,
+     "winRate": 0.75,
      "winPathCounts": {
-      "victory": 47,
+      "victory": 45,
       "mercy": 0,
       "capitulate": 0,
       "concede": 0,
-      "defeat": 13,
+      "defeat": 15,
       "retreat": 0
      },
-     "avgRounds": 5.6,
-     "statusEngagement": 0.37291280148423006,
-     "avgConvictionSpent": 1.5166666666666666,
-     "dotHpFraction": 0.4304323570432357,
-     "strikeFraction": 0.37375174337517436,
-     "mechanicBurstFraction": 0.19581589958158996,
-     "guardMitigatedFraction": 0.17981109799291617,
-     "avgActiveEffectsPerPhase": 2.7773972602739727,
+     "avgRounds": 5.616666666666666,
+     "statusEngagement": 0.3713625866050808,
+     "avgConvictionSpent": 1.2333333333333334,
+     "dotHpFraction": 0.4892468851678438,
+     "strikeFraction": 0.4209718805385816,
+     "mechanicBurstFraction": 0.08978123429357458,
+     "guardMitigatedFraction": 0.19623688336750694,
+     "avgActiveEffectsPerPhase": 3.0371621621621623,
      "deckUtilization": 1,
-     "usageEntropy": 0.9980948128300555,
+     "usageEntropy": 0.997360181547705,
      "dominantCardId": "cassandras-burden",
-     "dominantCardShare": 0.2913480885311871
+     "dominantCardShare": 0.34371947646024614
     },
     "cardUsage": {
      "undistributed-middle": {
       "cardId": "undistributed-middle",
-      "plays": 262,
-      "bottomPlays": 149,
-      "topPlays": 113,
-      "statusLands": 149,
+      "plays": 272,
+      "bottomPlays": 155,
+      "topPlays": 117,
+      "statusLands": 155,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
        "free": 0,
-       "paid": 1265
+       "paid": 1589
       },
       "unplayedAtPhaseEnd": 0
      },
      "memento-mori": {
       "cardId": "memento-mori",
-      "plays": 246,
-      "bottomPlays": 156,
-      "topPlays": 90,
-      "statusLands": 156,
+      "plays": 251,
+      "bottomPlays": 157,
+      "topPlays": 94,
+      "statusLands": 157,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
        "free": 0,
-       "paid": 1450
+       "paid": 1724
       },
       "unplayedAtPhaseEnd": 0
      },
      "opening-statement": {
       "cardId": "opening-statement",
-      "plays": 214,
-      "bottomPlays": 118,
-      "topPlays": 96,
-      "statusLands": 118,
+      "plays": 217,
+      "bottomPlays": 116,
+      "topPlays": 101,
+      "statusLands": 116,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
        "free": 0,
-       "paid": 8294
+       "paid": 9507
       },
       "unplayedAtPhaseEnd": 0
      },
      "half-step": {
       "cardId": "half-step",
-      "plays": 212,
-      "bottomPlays": 102,
+      "plays": 209,
+      "bottomPlays": 99,
       "topPlays": 110,
       "statusLands": 0,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
        "free": 0,
-       "paid": 1297
+       "paid": 1458
       },
       "unplayedAtPhaseEnd": 0
      },
      "tu-quoque": {
       "cardId": "tu-quoque",
-      "plays": 209,
-      "bottomPlays": 73,
-      "topPlays": 136,
+      "plays": 213,
+      "bottomPlays": 69,
+      "topPlays": 144,
       "statusLands": 0,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
        "free": 0,
-       "paid": 1180
+       "paid": 1271
       },
       "unplayedAtPhaseEnd": 0
      },
      "the-overtake": {
       "cardId": "the-overtake",
-      "plays": 209,
-      "bottomPlays": 55,
-      "topPlays": 154,
+      "plays": 194,
+      "bottomPlays": 16,
+      "topPlays": 178,
       "statusLands": 0,
       "discards": 0,
-      "fizzles": 0,
+      "fizzles": 28,
       "lineContribution": {
        "free": 0,
-       "paid": 5210
+       "paid": 1801
       },
       "unplayedAtPhaseEnd": 0
      },
      "cassandras-burden": {
       "cardId": "cassandras-burden",
-      "plays": 209,
-      "bottomPlays": 127,
-      "topPlays": 82,
-      "statusLands": 127,
+      "plays": 213,
+      "bottomPlays": 124,
+      "topPlays": 89,
+      "statusLands": 124,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
        "free": 0,
-       "paid": 9255
+       "paid": 10430
       },
       "unplayedAtPhaseEnd": 0
      },
      "circular-reasoning": {
       "cardId": "circular-reasoning",
-      "plays": 202,
-      "bottomPlays": 89,
-      "topPlays": 113,
+      "plays": 201,
+      "bottomPlays": 90,
+      "topPlays": 111,
       "statusLands": 0,
       "discards": 0,
-      "fizzles": 3,
+      "fizzles": 4,
       "lineContribution": {
        "free": 0,
-       "paid": 981
+       "paid": 1182
       },
       "unplayedAtPhaseEnd": 0
      },
      "disarming-smile": {
       "cardId": "disarming-smile",
-      "plays": 203,
-      "bottomPlays": 126,
-      "topPlays": 77,
-      "statusLands": 126,
+      "plays": 205,
+      "bottomPlays": 127,
+      "topPlays": 78,
+      "statusLands": 127,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
        "free": 0,
-       "paid": 1200
+       "paid": 1540
       },
       "unplayedAtPhaseEnd": 0
      },
      "slippery-slope": {
       "cardId": "slippery-slope",
       "plays": 190,
-      "bottomPlays": 128,
-      "topPlays": 62,
-      "statusLands": 128,
+      "bottomPlays": 125,
+      "topPlays": 65,
+      "statusLands": 125,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
-       "free": 665,
-       "paid": 6582
+       "free": 785,
+       "paid": 7244
       },
       "unplayedAtPhaseEnd": 0
      }
@@ -9539,51 +9539,51 @@
     ],
     "stats": {
      "runs": 60,
-     "victories": 10,
+     "victories": 8,
      "mercies": 0,
-     "defeats": 50,
+     "defeats": 52,
      "retreats": 0,
-     "winRate": 0.16666666666666666,
+     "winRate": 0.13333333333333333,
      "winPathCounts": {
-      "victory": 10,
+      "victory": 8,
       "mercy": 0,
       "capitulate": 0,
       "concede": 0,
-      "defeat": 50,
+      "defeat": 52,
       "retreat": 0
      },
-     "avgRounds": 4.95,
-     "statusEngagement": 0.1430622009569378,
+     "avgRounds": 4.983333333333333,
+     "statusEngagement": 0.14616840113528856,
      "avgConvictionSpent": 0.18333333333333332,
-     "dotHpFraction": 0.20782608695652174,
-     "strikeFraction": 0.49532608695652175,
-     "mechanicBurstFraction": 0.29684782608695653,
-     "guardMitigatedFraction": 0.12360057104215193,
-     "avgActiveEffectsPerPhase": 0.6411149825783972,
+     "dotHpFraction": 0.22710489365021583,
+     "strikeFraction": 0.5778251599147122,
+     "mechanicBurstFraction": 0.19506994643507203,
+     "guardMitigatedFraction": 0.12655586196616234,
+     "avgActiveEffectsPerPhase": 0.738831615120275,
      "deckUtilization": 1,
-     "usageEntropy": 0.9927053312404829,
+     "usageEntropy": 0.99315705162684,
      "dominantCardId": "delphic-ambiguity",
-     "dominantCardShare": 0.26491535318155285
+     "dominantCardShare": 0.3195413169405367
     },
     "cardUsage": {
      "exordium": {
       "cardId": "exordium",
-      "plays": 224,
-      "bottomPlays": 135,
-      "topPlays": 89,
-      "statusLands": 135,
+      "plays": 235,
+      "bottomPlays": 142,
+      "topPlays": 93,
+      "statusLands": 142,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
        "free": 0,
-       "paid": 4675
+       "paid": 5146
       },
       "unplayedAtPhaseEnd": 0
      },
      "practiced-cadence": {
       "cardId": "practiced-cadence",
-      "plays": 123,
-      "bottomPlays": 51,
+      "plays": 125,
+      "bottomPlays": 53,
       "topPlays": 72,
       "statusLands": 0,
       "discards": 0,
@@ -9596,9 +9596,9 @@
      },
      "hedgehogs-dilemma": {
       "cardId": "hedgehogs-dilemma",
-      "plays": 156,
-      "bottomPlays": 38,
-      "topPlays": 118,
+      "plays": 163,
+      "bottomPlays": 37,
+      "topPlays": 126,
       "statusLands": 0,
       "discards": 0,
       "fizzles": 0,
@@ -9610,99 +9610,99 @@
      },
      "self-flagellant": {
       "cardId": "self-flagellant",
-      "plays": 241,
-      "bottomPlays": 47,
+      "plays": 238,
+      "bottomPlays": 44,
       "topPlays": 194,
       "statusLands": 0,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
-       "free": 628,
-       "paid": 2433
+       "free": 686,
+       "paid": 3041
       },
       "unplayedAtPhaseEnd": 0
      },
      "delphic-ambiguity": {
       "cardId": "delphic-ambiguity",
-      "plays": 231,
-      "bottomPlays": 47,
-      "topPlays": 184,
+      "plays": 234,
+      "bottomPlays": 57,
+      "topPlays": 177,
       "statusLands": 0,
       "discards": 0,
-      "fizzles": 35,
+      "fizzles": 23,
       "lineContribution": {
-       "free": 549,
-       "paid": 4538
+       "free": 623,
+       "paid": 5406
       },
       "unplayedAtPhaseEnd": 0
      },
      "the-overtake": {
       "cardId": "the-overtake",
-      "plays": 235,
-      "bottomPlays": 41,
-      "topPlays": 194,
+      "plays": 223,
+      "bottomPlays": 5,
+      "topPlays": 218,
       "statusLands": 0,
       "discards": 0,
-      "fizzles": 0,
+      "fizzles": 30,
       "lineContribution": {
        "free": 0,
-       "paid": 2830
+       "paid": 655
       },
       "unplayedAtPhaseEnd": 0
      },
      "arrow-paradox": {
       "cardId": "arrow-paradox",
-      "plays": 225,
-      "bottomPlays": 35,
-      "topPlays": 190,
-      "statusLands": 35,
+      "plays": 232,
+      "bottomPlays": 38,
+      "topPlays": 194,
+      "statusLands": 38,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
        "free": 0,
-       "paid": 127
+       "paid": 173
       },
       "unplayedAtPhaseEnd": 0
      },
      "circular-reasoning": {
       "cardId": "circular-reasoning",
-      "plays": 212,
-      "bottomPlays": 63,
-      "topPlays": 149,
+      "plays": 210,
+      "bottomPlays": 60,
+      "topPlays": 150,
       "statusLands": 0,
       "discards": 0,
-      "fizzles": 29,
+      "fizzles": 23,
       "lineContribution": {
        "free": 0,
-       "paid": 305
+       "paid": 351
       },
       "unplayedAtPhaseEnd": 0
      },
      "half-step": {
       "cardId": "half-step",
-      "plays": 225,
-      "bottomPlays": 50,
-      "topPlays": 175,
+      "plays": 232,
+      "bottomPlays": 52,
+      "topPlays": 180,
       "statusLands": 0,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
        "free": 0,
-       "paid": 152
+       "paid": 226
       },
       "unplayedAtPhaseEnd": 0
      },
      "slippery-slope": {
       "cardId": "slippery-slope",
-      "plays": 218,
+      "plays": 222,
       "bottomPlays": 129,
-      "topPlays": 89,
+      "topPlays": 93,
       "statusLands": 129,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
-       "free": 359,
-       "paid": 3839
+       "free": 398,
+       "paid": 4012
       },
       "unplayedAtPhaseEnd": 0
      }
@@ -10897,170 +10897,170 @@
     ],
     "stats": {
      "runs": 60,
-     "victories": 20,
+     "victories": 23,
      "mercies": 0,
-     "defeats": 40,
+     "defeats": 37,
      "retreats": 0,
-     "winRate": 0.3333333333333333,
+     "winRate": 0.38333333333333336,
      "winPathCounts": {
-      "victory": 20,
+      "victory": 23,
       "mercy": 0,
       "capitulate": 0,
       "concede": 0,
-      "defeat": 40,
+      "defeat": 37,
       "retreat": 0
      },
-     "avgRounds": 4.4,
-     "statusEngagement": 0.37329545454545454,
-     "avgConvictionSpent": 0.7,
-     "dotHpFraction": 0.4445089501693275,
-     "strikeFraction": 0.39000161264312205,
-     "mechanicBurstFraction": 0.1654894371875504,
-     "guardMitigatedFraction": 0.11177452491011813,
-     "avgActiveEffectsPerPhase": 2.795918367346939,
+     "avgRounds": 4.466666666666667,
+     "statusEngagement": 0.3759820426487093,
+     "avgConvictionSpent": 0.8,
+     "dotHpFraction": 0.4950756083517682,
+     "strikeFraction": 0.43310403345555926,
+     "mechanicBurstFraction": 0.0718203581926725,
+     "guardMitigatedFraction": 0.12092267706302794,
+     "avgActiveEffectsPerPhase": 3.0602409638554215,
      "deckUtilization": 1,
-     "usageEntropy": 0.998025352440786,
+     "usageEntropy": 0.9973346038028467,
      "dominantCardId": "opening-statement",
-     "dominantCardShare": 0.3467048710601719
+     "dominantCardShare": 0.38809941987333013
     },
     "cardUsage": {
      "undistributed-middle": {
       "cardId": "undistributed-middle",
-      "plays": 210,
-      "bottomPlays": 118,
-      "topPlays": 92,
-      "statusLands": 118,
+      "plays": 220,
+      "bottomPlays": 123,
+      "topPlays": 97,
+      "statusLands": 123,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
        "free": 0,
-       "paid": 1097
+       "paid": 1406
       },
       "unplayedAtPhaseEnd": 0
      },
      "memento-mori": {
       "cardId": "memento-mori",
-      "plays": 201,
-      "bottomPlays": 134,
-      "topPlays": 67,
-      "statusLands": 134,
+      "plays": 209,
+      "bottomPlays": 138,
+      "topPlays": 71,
+      "statusLands": 138,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
        "free": 0,
-       "paid": 1528
+       "paid": 1840
       },
       "unplayedAtPhaseEnd": 0
      },
      "opening-statement": {
       "cardId": "opening-statement",
-      "plays": 176,
-      "bottomPlays": 104,
-      "topPlays": 72,
-      "statusLands": 104,
+      "plays": 180,
+      "bottomPlays": 103,
+      "topPlays": 77,
+      "statusLands": 103,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
        "free": 0,
-       "paid": 9284
+       "paid": 10049
       },
       "unplayedAtPhaseEnd": 0
      },
      "half-step": {
       "cardId": "half-step",
-      "plays": 172,
+      "plays": 171,
       "bottomPlays": 72,
-      "topPlays": 100,
+      "topPlays": 99,
       "statusLands": 0,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
        "free": 0,
-       "paid": 942
+       "paid": 1111
       },
       "unplayedAtPhaseEnd": 0
      },
      "tu-quoque": {
       "cardId": "tu-quoque",
-      "plays": 176,
-      "bottomPlays": 54,
+      "plays": 173,
+      "bottomPlays": 51,
       "topPlays": 122,
       "statusLands": 0,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
        "free": 0,
-       "paid": 898
+       "paid": 986
       },
       "unplayedAtPhaseEnd": 0
      },
      "the-overtake": {
       "cardId": "the-overtake",
-      "plays": 169,
-      "bottomPlays": 32,
-      "topPlays": 137,
+      "plays": 164,
+      "bottomPlays": 7,
+      "topPlays": 157,
       "statusLands": 0,
       "discards": 0,
-      "fizzles": 0,
+      "fizzles": 23,
       "lineContribution": {
        "free": 0,
-       "paid": 3656
+       "paid": 999
       },
       "unplayedAtPhaseEnd": 0
      },
      "cassandras-burden": {
       "cardId": "cassandras-burden",
-      "plays": 175,
-      "bottomPlays": 107,
-      "topPlays": 68,
-      "statusLands": 107,
+      "plays": 177,
+      "bottomPlays": 108,
+      "topPlays": 69,
+      "statusLands": 108,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
        "free": 0,
-       "paid": 9243
+       "paid": 10066
       },
       "unplayedAtPhaseEnd": 0
      },
      "circular-reasoning": {
       "cardId": "circular-reasoning",
-      "plays": 165,
-      "bottomPlays": 68,
-      "topPlays": 97,
+      "plays": 166,
+      "bottomPlays": 70,
+      "topPlays": 96,
       "statusLands": 0,
       "discards": 0,
       "fizzles": 1,
       "lineContribution": {
        "free": 0,
-       "paid": 787
+       "paid": 986
       },
       "unplayedAtPhaseEnd": 0
      },
      "disarming-smile": {
       "cardId": "disarming-smile",
-      "plays": 169,
-      "bottomPlays": 106,
+      "plays": 173,
+      "bottomPlays": 110,
       "topPlays": 63,
-      "statusLands": 106,
+      "statusLands": 110,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
        "free": 0,
-       "paid": 1151
+       "paid": 1429
       },
       "unplayedAtPhaseEnd": 0
      },
      "slippery-slope": {
       "cardId": "slippery-slope",
-      "plays": 147,
+      "plays": 149,
       "bottomPlays": 88,
-      "topPlays": 59,
+      "topPlays": 61,
       "statusLands": 88,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
-       "free": 923,
-       "paid": 4181
+       "free": 1007,
+       "paid": 4934
       },
       "unplayedAtPhaseEnd": 0
      }
@@ -11105,38 +11105,38 @@
       "retreat": 0
      },
      "avgRounds": 3.216666666666667,
-     "statusEngagement": 0.13184438040345822,
-     "avgConvictionSpent": 0.05,
-     "dotHpFraction": 0.23486730941258324,
-     "strikeFraction": 0.503528476294603,
-     "mechanicBurstFraction": 0.26160421429281383,
-     "guardMitigatedFraction": 0.06241872561768531,
-     "avgActiveEffectsPerPhase": 0.5729166666666666,
+     "statusEngagement": 0.13121845710165825,
+     "avgConvictionSpent": 0.06666666666666667,
+     "dotHpFraction": 0.25660149163475104,
+     "strikeFraction": 0.563092118524491,
+     "mechanicBurstFraction": 0.18030638984075792,
+     "guardMitigatedFraction": 0.06402175256457793,
+     "avgActiveEffectsPerPhase": 0.6302083333333334,
      "deckUtilization": 1,
-     "usageEntropy": 0.997107995470914,
-     "dominantCardId": "exordium",
-     "dominantCardShare": 0.2824836728725997
+     "usageEntropy": 0.9973077004691138,
+     "dominantCardId": "delphic-ambiguity",
+     "dominantCardShare": 0.3118096003213497
     },
     "cardUsage": {
      "exordium": {
       "cardId": "exordium",
-      "plays": 146,
+      "plays": 148,
       "bottomPlays": 92,
-      "topPlays": 54,
+      "topPlays": 56,
       "statusLands": 92,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
        "free": 0,
-       "paid": 3295
+       "paid": 3525
       },
       "unplayedAtPhaseEnd": 0
      },
      "practiced-cadence": {
       "cardId": "practiced-cadence",
-      "plays": 104,
+      "plays": 105,
       "bottomPlays": 43,
-      "topPlays": 61,
+      "topPlays": 62,
       "statusLands": 0,
       "discards": 0,
       "fizzles": 0,
@@ -11148,9 +11148,9 @@
      },
      "hedgehogs-dilemma": {
       "cardId": "hedgehogs-dilemma",
-      "plays": 122,
-      "bottomPlays": 34,
-      "topPlays": 88,
+      "plays": 124,
+      "bottomPlays": 32,
+      "topPlays": 92,
       "statusLands": 0,
       "discards": 0,
       "fizzles": 0,
@@ -11163,98 +11163,98 @@
      "self-flagellant": {
       "cardId": "self-flagellant",
       "plays": 152,
-      "bottomPlays": 25,
-      "topPlays": 127,
+      "bottomPlays": 24,
+      "topPlays": 128,
       "statusLands": 0,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
-       "free": 405,
-       "paid": 1124
+       "free": 425,
+       "paid": 1757
       },
       "unplayedAtPhaseEnd": 0
      },
      "delphic-ambiguity": {
       "cardId": "delphic-ambiguity",
       "plays": 150,
-      "bottomPlays": 25,
-      "topPlays": 125,
+      "bottomPlays": 29,
+      "topPlays": 121,
       "statusLands": 0,
       "discards": 0,
-      "fizzles": 17,
+      "fizzles": 13,
       "lineContribution": {
-       "free": 383,
-       "paid": 2737
+       "free": 419,
+       "paid": 3105
       },
       "unplayedAtPhaseEnd": 0
      },
      "the-overtake": {
       "cardId": "the-overtake",
-      "plays": 152,
-      "bottomPlays": 21,
-      "topPlays": 131,
+      "plays": 147,
+      "bottomPlays": 1,
+      "topPlays": 146,
       "statusLands": 0,
       "discards": 0,
-      "fizzles": 0,
+      "fizzles": 17,
       "lineContribution": {
        "free": 0,
-       "paid": 1500
+       "paid": 10
       },
       "unplayedAtPhaseEnd": 0
      },
      "arrow-paradox": {
       "cardId": "arrow-paradox",
       "plays": 152,
-      "bottomPlays": 16,
-      "topPlays": 136,
-      "statusLands": 16,
+      "bottomPlays": 17,
+      "topPlays": 135,
+      "statusLands": 17,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
        "free": 0,
-       "paid": 54
+       "paid": 62
       },
       "unplayedAtPhaseEnd": 0
      },
      "circular-reasoning": {
       "cardId": "circular-reasoning",
-      "plays": 142,
+      "plays": 141,
       "bottomPlays": 30,
-      "topPlays": 112,
+      "topPlays": 111,
       "statusLands": 0,
       "discards": 0,
-      "fizzles": 17,
+      "fizzles": 15,
       "lineContribution": {
        "free": 0,
-       "paid": 196
+       "paid": 204
       },
       "unplayedAtPhaseEnd": 0
      },
      "half-step": {
       "cardId": "half-step",
-      "plays": 144,
-      "bottomPlays": 24,
-      "topPlays": 120,
+      "plays": 145,
+      "bottomPlays": 26,
+      "topPlays": 119,
       "statusLands": 0,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
        "free": 0,
-       "paid": 96
+       "paid": 116
       },
       "unplayedAtPhaseEnd": 0
      },
      "slippery-slope": {
       "cardId": "slippery-slope",
-      "plays": 124,
-      "bottomPlays": 75,
-      "topPlays": 49,
-      "statusLands": 75,
+      "plays": 123,
+      "bottomPlays": 73,
+      "topPlays": 50,
+      "statusLands": 73,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
-       "free": 188,
-       "paid": 2367
+       "free": 196,
+       "paid": 2378
       },
       "unplayedAtPhaseEnd": 0
      }
@@ -12462,157 +12462,157 @@
       "defeat": 34,
       "retreat": 0
      },
-     "avgRounds": 5.25,
-     "statusEngagement": 0.3673860911270983,
-     "avgConvictionSpent": 1.7166666666666666,
-     "dotHpFraction": 0.44105586878523834,
-     "strikeFraction": 0.38743664217780055,
-     "mechanicBurstFraction": 0.1715074890369611,
-     "guardMitigatedFraction": 0.1290012033694344,
-     "avgActiveEffectsPerPhase": 2.865051903114187,
+     "avgRounds": 5.366666666666666,
+     "statusEngagement": 0.36496007515265383,
+     "avgConvictionSpent": 1.8666666666666667,
+     "dotHpFraction": 0.48130038324302893,
+     "strikeFraction": 0.4233646094885688,
+     "mechanicBurstFraction": 0.09533500726840227,
+     "guardMitigatedFraction": 0.14182379713914176,
+     "avgActiveEffectsPerPhase": 3.114864864864865,
      "deckUtilization": 1,
-     "usageEntropy": 0.9984628030692843,
+     "usageEntropy": 0.9982842691490129,
      "dominantCardId": "cassandras-burden",
-     "dominantCardShare": 0.35451068196660135
+     "dominantCardShare": 0.3900009812579727
     },
     "cardUsage": {
      "undistributed-middle": {
       "cardId": "undistributed-middle",
-      "plays": 244,
-      "bottomPlays": 143,
-      "topPlays": 101,
-      "statusLands": 143,
+      "plays": 255,
+      "bottomPlays": 147,
+      "topPlays": 108,
+      "statusLands": 147,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
        "free": 0,
-       "paid": 1161
+       "paid": 1474
       },
       "unplayedAtPhaseEnd": 0
      },
      "memento-mori": {
       "cardId": "memento-mori",
-      "plays": 234,
-      "bottomPlays": 146,
-      "topPlays": 88,
-      "statusLands": 146,
+      "plays": 235,
+      "bottomPlays": 145,
+      "topPlays": 90,
+      "statusLands": 145,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
        "free": 0,
-       "paid": 1384
+       "paid": 1644
       },
       "unplayedAtPhaseEnd": 0
      },
      "opening-statement": {
       "cardId": "opening-statement",
-      "plays": 207,
-      "bottomPlays": 113,
-      "topPlays": 94,
-      "statusLands": 113,
+      "plays": 212,
+      "bottomPlays": 110,
+      "topPlays": 102,
+      "statusLands": 110,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
        "free": 0,
-       "paid": 8990
+       "paid": 9539
       },
       "unplayedAtPhaseEnd": 0
      },
      "half-step": {
       "cardId": "half-step",
-      "plays": 206,
-      "bottomPlays": 90,
-      "topPlays": 116,
+      "plays": 210,
+      "bottomPlays": 92,
+      "topPlays": 118,
       "statusLands": 0,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
        "free": 0,
-       "paid": 1161
+       "paid": 1426
       },
       "unplayedAtPhaseEnd": 0
      },
      "tu-quoque": {
       "cardId": "tu-quoque",
-      "plays": 205,
-      "bottomPlays": 62,
-      "topPlays": 143,
+      "plays": 211,
+      "bottomPlays": 60,
+      "topPlays": 151,
       "statusLands": 0,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
        "free": 0,
-       "paid": 1056
+       "paid": 1150
       },
       "unplayedAtPhaseEnd": 0
      },
      "the-overtake": {
       "cardId": "the-overtake",
-      "plays": 201,
-      "bottomPlays": 42,
-      "topPlays": 159,
+      "plays": 198,
+      "bottomPlays": 15,
+      "topPlays": 183,
       "statusLands": 0,
       "discards": 0,
-      "fizzles": 0,
+      "fizzles": 26,
       "lineContribution": {
        "free": 0,
-       "paid": 4247
+       "paid": 1836
       },
       "unplayedAtPhaseEnd": 0
      },
      "cassandras-burden": {
       "cardId": "cassandras-burden",
-      "plays": 210,
+      "plays": 215,
       "bottomPlays": 131,
-      "topPlays": 79,
+      "topPlays": 84,
       "statusLands": 131,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
        "free": 0,
-       "paid": 11086
+       "paid": 11831
       },
       "unplayedAtPhaseEnd": 0
      },
      "circular-reasoning": {
       "cardId": "circular-reasoning",
-      "plays": 195,
-      "bottomPlays": 82,
-      "topPlays": 113,
+      "plays": 197,
+      "bottomPlays": 80,
+      "topPlays": 117,
       "statusLands": 0,
       "discards": 0,
-      "fizzles": 4,
+      "fizzles": 5,
       "lineContribution": {
        "free": 0,
-       "paid": 745
+       "paid": 881
       },
       "unplayedAtPhaseEnd": 0
      },
      "disarming-smile": {
       "cardId": "disarming-smile",
-      "plays": 205,
-      "bottomPlays": 124,
-      "topPlays": 81,
-      "statusLands": 124,
+      "plays": 213,
+      "bottomPlays": 130,
+      "topPlays": 83,
+      "statusLands": 130,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
        "free": 0,
-       "paid": 1415
+       "paid": 1757
       },
       "unplayedAtPhaseEnd": 0
      },
      "slippery-slope": {
       "cardId": "slippery-slope",
-      "plays": 178,
-      "bottomPlays": 109,
+      "plays": 183,
+      "bottomPlays": 114,
       "topPlays": 69,
-      "statusLands": 109,
+      "statusLands": 114,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
-       "free": 988,
-       "paid": 4637
+       "free": 1048,
+       "paid": 5769
       },
       "unplayedAtPhaseEnd": 0
      }
@@ -12656,38 +12656,38 @@
       "defeat": 58,
       "retreat": 0
      },
-     "avgRounds": 4,
-     "statusEngagement": 0.14376811594202898,
-     "avgConvictionSpent": 0.23333333333333334,
-     "dotHpFraction": 0.2669774340502172,
-     "strikeFraction": 0.5785570505350143,
-     "mechanicBurstFraction": 0.15446551541476852,
-     "guardMitigatedFraction": 0.07733824787731192,
-     "avgActiveEffectsPerPhase": 0.5462184873949579,
+     "avgRounds": 4.033333333333333,
+     "statusEngagement": 0.1421991940126655,
+     "avgConvictionSpent": 0.26666666666666666,
+     "dotHpFraction": 0.2787878787878788,
+     "strikeFraction": 0.6259595959595959,
+     "mechanicBurstFraction": 0.09525252525252526,
+     "guardMitigatedFraction": 0.07910564853556486,
+     "avgActiveEffectsPerPhase": 0.6041666666666666,
      "deckUtilization": 1,
-     "usageEntropy": 0.9955636535309522,
+     "usageEntropy": 0.9958426429120351,
      "dominantCardId": "exordium",
-     "dominantCardShare": 0.34683848421972263
+     "dominantCardShare": 0.3667804824319859
     },
     "cardUsage": {
      "exordium": {
       "cardId": "exordium",
-      "plays": 182,
+      "plays": 187,
       "bottomPlays": 118,
-      "topPlays": 64,
+      "topPlays": 69,
       "statusLands": 118,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
        "free": 0,
-       "paid": 3640
+       "paid": 3823
       },
       "unplayedAtPhaseEnd": 0
      },
      "practiced-cadence": {
       "cardId": "practiced-cadence",
-      "plays": 117,
-      "bottomPlays": 48,
+      "plays": 118,
+      "bottomPlays": 49,
       "topPlays": 69,
       "statusLands": 0,
       "discards": 0,
@@ -12700,9 +12700,9 @@
      },
      "hedgehogs-dilemma": {
       "cardId": "hedgehogs-dilemma",
-      "plays": 139,
-      "bottomPlays": 35,
-      "topPlays": 104,
+      "plays": 143,
+      "bottomPlays": 32,
+      "topPlays": 111,
       "statusLands": 0,
       "discards": 0,
       "fizzles": 0,
@@ -12721,50 +12721,50 @@
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
-       "free": 448,
-       "paid": 512
+       "free": 461,
+       "paid": 757
       },
       "unplayedAtPhaseEnd": 0
      },
      "delphic-ambiguity": {
       "cardId": "delphic-ambiguity",
       "plays": 187,
-      "bottomPlays": 37,
-      "topPlays": 150,
+      "bottomPlays": 42,
+      "topPlays": 145,
       "statusLands": 0,
       "discards": 0,
-      "fizzles": 27,
+      "fizzles": 19,
       "lineContribution": {
-       "free": 383,
-       "paid": 2997
+       "free": 423,
+       "paid": 3255
       },
       "unplayedAtPhaseEnd": 0
      },
      "the-overtake": {
       "cardId": "the-overtake",
-      "plays": 192,
-      "bottomPlays": 33,
-      "topPlays": 159,
+      "plays": 185,
+      "bottomPlays": 4,
+      "topPlays": 181,
       "statusLands": 0,
       "discards": 0,
-      "fizzles": 0,
+      "fizzles": 24,
       "lineContribution": {
        "free": 0,
-       "paid": 938
+       "paid": 169
       },
       "unplayedAtPhaseEnd": 0
      },
      "arrow-paradox": {
       "cardId": "arrow-paradox",
-      "plays": 188,
+      "plays": 192,
       "bottomPlays": 27,
-      "topPlays": 161,
+      "topPlays": 165,
       "statusLands": 27,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
        "free": 0,
-       "paid": 46
+       "paid": 82
       },
       "unplayedAtPhaseEnd": 0
      },
@@ -12775,38 +12775,38 @@
       "topPlays": 129,
       "statusLands": 0,
       "discards": 0,
-      "fizzles": 26,
+      "fizzles": 24,
       "lineContribution": {
        "free": 0,
-       "paid": 244
+       "paid": 262
       },
       "unplayedAtPhaseEnd": 0
      },
      "half-step": {
       "cardId": "half-step",
-      "plays": 176,
+      "plays": 180,
       "bottomPlays": 31,
-      "topPlays": 145,
+      "topPlays": 149,
       "statusLands": 0,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
        "free": 0,
-       "paid": 83
+       "paid": 96
       },
       "unplayedAtPhaseEnd": 0
      },
      "slippery-slope": {
       "cardId": "slippery-slope",
-      "plays": 174,
-      "bottomPlays": 103,
-      "topPlays": 71,
-      "statusLands": 103,
+      "plays": 175,
+      "bottomPlays": 102,
+      "topPlays": 73,
+      "statusLands": 102,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
-       "free": 252,
-       "paid": 1847
+       "free": 273,
+       "paid": 1913
       },
       "unplayedAtPhaseEnd": 0
      }
@@ -14001,170 +14001,170 @@
     ],
     "stats": {
      "runs": 60,
-     "victories": 29,
+     "victories": 36,
      "mercies": 0,
-     "defeats": 31,
+     "defeats": 24,
      "retreats": 0,
-     "winRate": 0.48333333333333334,
+     "winRate": 0.6,
      "winPathCounts": {
-      "victory": 29,
+      "victory": 36,
       "mercy": 0,
       "capitulate": 0,
       "concede": 0,
-      "defeat": 31,
+      "defeat": 24,
       "retreat": 0
      },
-     "avgRounds": 5.433333333333334,
-     "statusEngagement": 0.36666666666666664,
-     "avgConvictionSpent": 2.05,
-     "dotHpFraction": 0.440149495583085,
-     "strikeFraction": 0.3835920756886728,
-     "mechanicBurstFraction": 0.17625842872824213,
-     "guardMitigatedFraction": 0.11538461538461539,
-     "avgActiveEffectsPerPhase": 2.8484848484848486,
+     "avgRounds": 5.6,
+     "statusEngagement": 0.36575342465753424,
+     "avgConvictionSpent": 1.85,
+     "dotHpFraction": 0.4861751152073733,
+     "strikeFraction": 0.4215179159221292,
+     "mechanicBurstFraction": 0.09230696887049751,
+     "guardMitigatedFraction": 0.1294527815673791,
+     "avgActiveEffectsPerPhase": 3.1196013289036544,
      "deckUtilization": 1,
-     "usageEntropy": 0.9983897511868509,
+     "usageEntropy": 0.9979181937187288,
      "dominantCardId": "cassandras-burden",
-     "dominantCardShare": 0.33665803658588345
+     "dominantCardShare": 0.3805989812049886
     },
     "cardUsage": {
      "undistributed-middle": {
       "cardId": "undistributed-middle",
-      "plays": 253,
-      "bottomPlays": 147,
-      "topPlays": 106,
-      "statusLands": 147,
+      "plays": 265,
+      "bottomPlays": 153,
+      "topPlays": 112,
+      "statusLands": 153,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
        "free": 0,
-       "paid": 1300
+       "paid": 1776
       },
       "unplayedAtPhaseEnd": 0
      },
      "memento-mori": {
       "cardId": "memento-mori",
-      "plays": 245,
-      "bottomPlays": 152,
-      "topPlays": 93,
-      "statusLands": 152,
+      "plays": 248,
+      "bottomPlays": 154,
+      "topPlays": 94,
+      "statusLands": 154,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
        "free": 0,
-       "paid": 1611
+       "paid": 2024
       },
       "unplayedAtPhaseEnd": 0
      },
      "opening-statement": {
       "cardId": "opening-statement",
-      "plays": 214,
-      "bottomPlays": 114,
-      "topPlays": 100,
-      "statusLands": 114,
+      "plays": 219,
+      "bottomPlays": 112,
+      "topPlays": 107,
+      "statusLands": 112,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
        "free": 0,
-       "paid": 9776
+       "paid": 10868
       },
       "unplayedAtPhaseEnd": 0
      },
      "half-step": {
       "cardId": "half-step",
-      "plays": 212,
+      "plays": 213,
       "bottomPlays": 94,
-      "topPlays": 118,
+      "topPlays": 119,
       "statusLands": 0,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
        "free": 0,
-       "paid": 1329
+       "paid": 1533
       },
       "unplayedAtPhaseEnd": 0
      },
      "tu-quoque": {
       "cardId": "tu-quoque",
-      "plays": 214,
-      "bottomPlays": 67,
-      "topPlays": 147,
+      "plays": 216,
+      "bottomPlays": 65,
+      "topPlays": 151,
       "statusLands": 0,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
        "free": 0,
-       "paid": 1129
+       "paid": 1373
       },
       "unplayedAtPhaseEnd": 0
      },
      "the-overtake": {
       "cardId": "the-overtake",
-      "plays": 204,
-      "bottomPlays": 44,
-      "topPlays": 160,
+      "plays": 201,
+      "bottomPlays": 16,
+      "topPlays": 185,
       "statusLands": 0,
       "discards": 0,
-      "fizzles": 0,
+      "fizzles": 28,
       "lineContribution": {
        "free": 0,
-       "paid": 4872
+       "paid": 2137
       },
       "unplayedAtPhaseEnd": 0
      },
      "cassandras-burden": {
       "cardId": "cassandras-burden",
-      "plays": 218,
-      "bottomPlays": 132,
-      "topPlays": 86,
-      "statusLands": 132,
+      "plays": 222,
+      "bottomPlays": 131,
+      "topPlays": 91,
+      "statusLands": 131,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
        "free": 0,
-       "paid": 11377
+       "paid": 12947
       },
       "unplayedAtPhaseEnd": 0
      },
      "circular-reasoning": {
       "cardId": "circular-reasoning",
       "plays": 199,
-      "bottomPlays": 83,
-      "topPlays": 116,
+      "bottomPlays": 79,
+      "topPlays": 120,
       "statusLands": 0,
       "discards": 0,
-      "fizzles": 6,
+      "fizzles": 8,
       "lineContribution": {
        "free": 0,
-       "paid": 788
+       "paid": 955
       },
       "unplayedAtPhaseEnd": 0
      },
      "disarming-smile": {
       "cardId": "disarming-smile",
-      "plays": 214,
-      "bottomPlays": 130,
-      "topPlays": 84,
-      "statusLands": 130,
+      "plays": 219,
+      "bottomPlays": 134,
+      "topPlays": 85,
+      "statusLands": 134,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
        "free": 0,
-       "paid": 1534
+       "paid": 1952
       },
       "unplayedAtPhaseEnd": 0
      },
      "slippery-slope": {
       "cardId": "slippery-slope",
-      "plays": 187,
+      "plays": 188,
       "bottomPlays": 117,
-      "topPlays": 70,
+      "topPlays": 71,
       "statusLands": 117,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
-       "free": 1005,
-       "paid": 5393
+       "free": 1103,
+       "paid": 6463
       },
       "unplayedAtPhaseEnd": 0
      }
@@ -14208,38 +14208,38 @@
       "defeat": 57,
       "retreat": 0
      },
-     "avgRounds": 4.016666666666667,
-     "statusEngagement": 0.14351851851851852,
-     "avgConvictionSpent": 0.21666666666666667,
-     "dotHpFraction": 0.23882403804582794,
-     "strikeFraction": 0.5668828361435365,
-     "mechanicBurstFraction": 0.19429312581063554,
-     "guardMitigatedFraction": 0.07411073306526446,
-     "avgActiveEffectsPerPhase": 0.5630252100840336,
+     "avgRounds": 4.05,
+     "statusEngagement": 0.1425287356321839,
+     "avgConvictionSpent": 0.25,
+     "dotHpFraction": 0.2562080536912752,
+     "strikeFraction": 0.6151006711409396,
+     "mechanicBurstFraction": 0.12869127516778522,
+     "guardMitigatedFraction": 0.07631513954062731,
+     "avgActiveEffectsPerPhase": 0.6208333333333333,
      "deckUtilization": 1,
-     "usageEntropy": 0.9955993267959559,
-     "dominantCardId": "exordium",
-     "dominantCardShare": 0.3260793260793261
+     "usageEntropy": 0.9958918259781502,
+     "dominantCardId": "delphic-ambiguity",
+     "dominantCardShare": 0.356278904304518
     },
     "cardUsage": {
      "exordium": {
       "cardId": "exordium",
-      "plays": 184,
+      "plays": 189,
       "bottomPlays": 120,
-      "topPlays": 64,
+      "topPlays": 69,
       "statusLands": 120,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
        "free": 0,
-       "paid": 4228
+       "paid": 4449
       },
       "unplayedAtPhaseEnd": 0
      },
      "practiced-cadence": {
       "cardId": "practiced-cadence",
-      "plays": 117,
-      "bottomPlays": 47,
+      "plays": 118,
+      "bottomPlays": 48,
       "topPlays": 70,
       "statusLands": 0,
       "discards": 0,
@@ -14252,9 +14252,9 @@
      },
      "hedgehogs-dilemma": {
       "cardId": "hedgehogs-dilemma",
-      "plays": 140,
-      "bottomPlays": 36,
-      "topPlays": 104,
+      "plays": 145,
+      "bottomPlays": 33,
+      "topPlays": 112,
       "statusLands": 0,
       "discards": 0,
       "fizzles": 0,
@@ -14267,56 +14267,56 @@
      "self-flagellant": {
       "cardId": "self-flagellant",
       "plays": 195,
-      "bottomPlays": 29,
-      "topPlays": 166,
+      "bottomPlays": 30,
+      "topPlays": 165,
       "statusLands": 0,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
-       "free": 486,
-       "paid": 757
+       "free": 507,
+       "paid": 1195
       },
       "unplayedAtPhaseEnd": 0
      },
      "delphic-ambiguity": {
       "cardId": "delphic-ambiguity",
       "plays": 188,
-      "bottomPlays": 40,
-      "topPlays": 148,
+      "bottomPlays": 44,
+      "topPlays": 144,
       "statusLands": 0,
       "discards": 0,
-      "fizzles": 23,
+      "fizzles": 16,
       "lineContribution": {
-       "free": 404,
-       "paid": 3690
+       "free": 454,
+       "paid": 4006
       },
       "unplayedAtPhaseEnd": 0
      },
      "the-overtake": {
       "cardId": "the-overtake",
-      "plays": 190,
-      "bottomPlays": 34,
-      "topPlays": 156,
+      "plays": 184,
+      "bottomPlays": 6,
+      "topPlays": 178,
       "statusLands": 0,
       "discards": 0,
-      "fizzles": 0,
+      "fizzles": 23,
       "lineContribution": {
        "free": 0,
-       "paid": 1481
+       "paid": 321
       },
       "unplayedAtPhaseEnd": 0
      },
      "arrow-paradox": {
       "cardId": "arrow-paradox",
-      "plays": 189,
-      "bottomPlays": 26,
-      "topPlays": 163,
-      "statusLands": 26,
+      "plays": 192,
+      "bottomPlays": 27,
+      "topPlays": 165,
+      "statusLands": 27,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
        "free": 0,
-       "paid": 49
+       "paid": 90
       },
       "unplayedAtPhaseEnd": 0
      },
@@ -14327,38 +14327,38 @@
       "topPlays": 131,
       "statusLands": 0,
       "discards": 0,
-      "fizzles": 25,
+      "fizzles": 23,
       "lineContribution": {
        "free": 0,
-       "paid": 260
+       "paid": 280
       },
       "unplayedAtPhaseEnd": 0
      },
      "half-step": {
       "cardId": "half-step",
-      "plays": 177,
-      "bottomPlays": 33,
-      "topPlays": 144,
+      "plays": 181,
+      "bottomPlays": 34,
+      "topPlays": 147,
       "statusLands": 0,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
        "free": 0,
-       "paid": 82
+       "paid": 99
       },
       "unplayedAtPhaseEnd": 0
      },
      "slippery-slope": {
       "cardId": "slippery-slope",
       "plays": 173,
-      "bottomPlays": 102,
-      "topPlays": 71,
-      "statusLands": 102,
+      "bottomPlays": 101,
+      "topPlays": 72,
+      "statusLands": 101,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
-       "free": 281,
-       "paid": 2094
+       "free": 304,
+       "paid": 2199
       },
       "unplayedAtPhaseEnd": 0
      }
@@ -15553,170 +15553,170 @@
     ],
     "stats": {
      "runs": 60,
-     "victories": 7,
+     "victories": 6,
      "mercies": 0,
-     "defeats": 53,
+     "defeats": 54,
      "retreats": 0,
-     "winRate": 0.11666666666666667,
+     "winRate": 0.1,
      "winPathCounts": {
-      "victory": 7,
+      "victory": 6,
       "mercy": 0,
       "capitulate": 0,
       "concede": 0,
-      "defeat": 53,
+      "defeat": 54,
       "retreat": 0
      },
-     "avgRounds": 3.933333333333333,
-     "statusEngagement": 0.3492647058823529,
-     "avgConvictionSpent": 0.5833333333333334,
-     "dotHpFraction": 0.4441081158078416,
-     "strikeFraction": 0.3938606174993768,
-     "mechanicBurstFraction": 0.1620312666927816,
-     "guardMitigatedFraction": 0.09042424242424242,
-     "avgActiveEffectsPerPhase": 2.777292576419214,
+     "avgRounds": 4.05,
+     "statusEngagement": 0.34911242603550297,
+     "avgConvictionSpent": 0.6833333333333333,
+     "dotHpFraction": 0.4941035720389677,
+     "strikeFraction": 0.4370193129379593,
+     "mechanicBurstFraction": 0.06887711502307298,
+     "guardMitigatedFraction": 0.09834109082229384,
+     "avgActiveEffectsPerPhase": 3.0464135021097047,
      "deckUtilization": 1,
-     "usageEntropy": 0.9981664325689876,
+     "usageEntropy": 0.9982511414590973,
      "dominantCardId": "cassandras-burden",
-     "dominantCardShare": 0.3686566387341904
+     "dominantCardShare": 0.42310402775519057
     },
     "cardUsage": {
      "undistributed-middle": {
       "cardId": "undistributed-middle",
-      "plays": 188,
-      "bottomPlays": 102,
-      "topPlays": 86,
-      "statusLands": 102,
+      "plays": 197,
+      "bottomPlays": 107,
+      "topPlays": 90,
+      "statusLands": 107,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
        "free": 0,
-       "paid": 963
+       "paid": 1172
       },
       "unplayedAtPhaseEnd": 0
      },
      "memento-mori": {
       "cardId": "memento-mori",
-      "plays": 188,
-      "bottomPlays": 121,
-      "topPlays": 67,
-      "statusLands": 121,
+      "plays": 193,
+      "bottomPlays": 120,
+      "topPlays": 73,
+      "statusLands": 120,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
        "free": 0,
-       "paid": 1312
+       "paid": 1495
       },
       "unplayedAtPhaseEnd": 0
      },
      "opening-statement": {
       "cardId": "opening-statement",
-      "plays": 160,
-      "bottomPlays": 87,
-      "topPlays": 73,
-      "statusLands": 87,
+      "plays": 168,
+      "bottomPlays": 90,
+      "topPlays": 78,
+      "statusLands": 90,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
        "free": 0,
-       "paid": 7902
+       "paid": 8606
       },
       "unplayedAtPhaseEnd": 0
      },
      "half-step": {
       "cardId": "half-step",
-      "plays": 160,
-      "bottomPlays": 59,
-      "topPlays": 101,
+      "plays": 165,
+      "bottomPlays": 61,
+      "topPlays": 104,
       "statusLands": 0,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
        "free": 0,
-       "paid": 786
+       "paid": 971
       },
       "unplayedAtPhaseEnd": 0
      },
      "tu-quoque": {
       "cardId": "tu-quoque",
-      "plays": 164,
-      "bottomPlays": 46,
-      "topPlays": 118,
+      "plays": 170,
+      "bottomPlays": 48,
+      "topPlays": 122,
       "statusLands": 0,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
        "free": 0,
-       "paid": 875
+       "paid": 935
       },
       "unplayedAtPhaseEnd": 0
      },
      "the-overtake": {
       "cardId": "the-overtake",
-      "plays": 163,
-      "bottomPlays": 29,
-      "topPlays": 134,
+      "plays": 160,
+      "bottomPlays": 5,
+      "topPlays": 155,
       "statusLands": 0,
       "discards": 0,
-      "fizzles": 0,
+      "fizzles": 20,
       "lineContribution": {
        "free": 0,
-       "paid": 3409
+       "paid": 839
       },
       "unplayedAtPhaseEnd": 0
      },
      "cassandras-burden": {
       "cardId": "cassandras-burden",
-      "plays": 162,
-      "bottomPlays": 98,
-      "topPlays": 64,
-      "statusLands": 98,
+      "plays": 170,
+      "bottomPlays": 101,
+      "topPlays": 69,
+      "statusLands": 101,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
        "free": 0,
-       "paid": 9222
+       "paid": 10130
       },
       "unplayedAtPhaseEnd": 0
      },
      "circular-reasoning": {
       "cardId": "circular-reasoning",
-      "plays": 158,
-      "bottomPlays": 64,
-      "topPlays": 94,
+      "plays": 163,
+      "bottomPlays": 66,
+      "topPlays": 97,
       "statusLands": 0,
       "discards": 0,
       "fizzles": 3,
       "lineContribution": {
        "free": 0,
-       "paid": 782
+       "paid": 946
       },
       "unplayedAtPhaseEnd": 0
      },
      "disarming-smile": {
       "cardId": "disarming-smile",
-      "plays": 156,
-      "bottomPlays": 91,
-      "topPlays": 65,
-      "statusLands": 91,
+      "plays": 163,
+      "bottomPlays": 96,
+      "topPlays": 67,
+      "statusLands": 96,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
        "free": 0,
-       "paid": 992
+       "paid": 1158
       },
       "unplayedAtPhaseEnd": 0
      },
      "slippery-slope": {
       "cardId": "slippery-slope",
-      "plays": 133,
-      "bottomPlays": 71,
-      "topPlays": 62,
-      "statusLands": 71,
+      "plays": 141,
+      "bottomPlays": 76,
+      "topPlays": 65,
+      "statusLands": 76,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
-       "free": 1025,
-       "paid": 3486
+       "free": 1148,
+       "paid": 4428
       },
       "unplayedAtPhaseEnd": 0
      }
@@ -15761,38 +15761,38 @@
       "retreat": 0
      },
      "avgRounds": 3,
-     "statusEngagement": 0.12731481481481483,
-     "avgConvictionSpent": 0.03333333333333333,
-     "dotHpFraction": 0.2804285714285714,
-     "strikeFraction": 0.4574285714285714,
-     "mechanicBurstFraction": 0.2621428571428571,
-     "guardMitigatedFraction": 0.05618745726894151,
-     "avgActiveEffectsPerPhase": 0.5555555555555556,
+     "statusEngagement": 0.12586872586872586,
+     "avgConvictionSpent": 0.05,
+     "dotHpFraction": 0.2982555665862998,
+     "strikeFraction": 0.5136860019855339,
+     "mechanicBurstFraction": 0.18805843142816622,
+     "guardMitigatedFraction": 0.05800248138957816,
+     "avgActiveEffectsPerPhase": 0.6,
      "deckUtilization": 1,
-     "usageEntropy": 0.9971518100776819,
+     "usageEntropy": 0.9973179815508522,
      "dominantCardId": "exordium",
-     "dominantCardShare": 0.3630501822259602
+     "dominantCardShare": 0.38707841184004554
     },
     "cardUsage": {
      "exordium": {
       "cardId": "exordium",
-      "plays": 134,
+      "plays": 136,
       "bottomPlays": 85,
-      "topPlays": 49,
+      "topPlays": 51,
       "statusLands": 85,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
        "free": 0,
-       "paid": 2926
+       "paid": 3085
       },
       "unplayedAtPhaseEnd": 0
      },
      "practiced-cadence": {
       "cardId": "practiced-cadence",
-      "plays": 97,
+      "plays": 98,
       "bottomPlays": 41,
-      "topPlays": 56,
+      "topPlays": 57,
       "statusLands": 0,
       "discards": 0,
       "fizzles": 0,
@@ -15804,9 +15804,9 @@
      },
      "hedgehogs-dilemma": {
       "cardId": "hedgehogs-dilemma",
-      "plays": 118,
-      "bottomPlays": 32,
-      "topPlays": 86,
+      "plays": 119,
+      "bottomPlays": 29,
+      "topPlays": 90,
       "statusLands": 0,
       "discards": 0,
       "fizzles": 0,
@@ -15818,99 +15818,99 @@
      },
      "self-flagellant": {
       "cardId": "self-flagellant",
-      "plays": 144,
+      "plays": 143,
       "bottomPlays": 23,
-      "topPlays": 121,
+      "topPlays": 120,
       "statusLands": 0,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
-       "free": 390,
-       "paid": 553
+       "free": 401,
+       "paid": 1262
       },
       "unplayedAtPhaseEnd": 0
      },
      "delphic-ambiguity": {
       "cardId": "delphic-ambiguity",
-      "plays": 138,
-      "bottomPlays": 21,
-      "topPlays": 117,
+      "plays": 140,
+      "bottomPlays": 26,
+      "topPlays": 114,
       "statusLands": 0,
       "discards": 0,
-      "fizzles": 18,
+      "fizzles": 13,
       "lineContribution": {
-       "free": 369,
-       "paid": 1452
+       "free": 396,
+       "paid": 1758
       },
       "unplayedAtPhaseEnd": 0
      },
      "the-overtake": {
       "cardId": "the-overtake",
-      "plays": 144,
-      "bottomPlays": 20,
-      "topPlays": 124,
+      "plays": 138,
+      "bottomPlays": 1,
+      "topPlays": 137,
       "statusLands": 0,
       "discards": 0,
-      "fizzles": 0,
+      "fizzles": 16,
       "lineContribution": {
        "free": 0,
-       "paid": 1275
+       "paid": 53
       },
       "unplayedAtPhaseEnd": 0
      },
      "arrow-paradox": {
       "cardId": "arrow-paradox",
-      "plays": 141,
+      "plays": 142,
       "bottomPlays": 14,
-      "topPlays": 127,
+      "topPlays": 128,
       "statusLands": 14,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
        "free": 0,
-       "paid": 41
+       "paid": 49
       },
       "unplayedAtPhaseEnd": 0
      },
      "circular-reasoning": {
       "cardId": "circular-reasoning",
-      "plays": 131,
+      "plays": 130,
       "bottomPlays": 33,
-      "topPlays": 98,
+      "topPlays": 97,
       "statusLands": 0,
       "discards": 0,
-      "fizzles": 14,
+      "fizzles": 13,
       "lineContribution": {
        "free": 0,
-       "paid": 149
+       "paid": 155
       },
       "unplayedAtPhaseEnd": 0
      },
      "half-step": {
       "cardId": "half-step",
-      "plays": 135,
-      "bottomPlays": 20,
-      "topPlays": 115,
+      "plays": 136,
+      "bottomPlays": 22,
+      "topPlays": 114,
       "statusLands": 0,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
        "free": 0,
-       "paid": 64
+       "paid": 82
       },
       "unplayedAtPhaseEnd": 0
      },
      "slippery-slope": {
       "cardId": "slippery-slope",
-      "plays": 114,
-      "bottomPlays": 66,
-      "topPlays": 48,
-      "statusLands": 66,
+      "plays": 113,
+      "bottomPlays": 64,
+      "topPlays": 49,
+      "statusLands": 64,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
-       "free": 164,
-       "paid": 1501
+       "free": 170,
+       "paid": 1480
       },
       "unplayedAtPhaseEnd": 0
      }
@@ -17118,53 +17118,53 @@
       "defeat": 58,
       "retreat": 0
      },
-     "avgRounds": 5.333333333333333,
-     "statusEngagement": 0.3121907332433648,
+     "avgRounds": 5.383333333333334,
+     "statusEngagement": 0.3116651825467498,
      "avgConvictionSpent": 1.4,
-     "dotHpFraction": 0.4255192417257989,
-     "strikeFraction": 0.5470813694514943,
-     "mechanicBurstFraction": 0.027399388822706792,
-     "guardMitigatedFraction": 0.06233294130225596,
-     "avgActiveEffectsPerPhase": 3.19811320754717,
+     "dotHpFraction": 0.4269189520453501,
+     "strikeFraction": 0.5453756192227159,
+     "mechanicBurstFraction": 0.027705428731934018,
+     "guardMitigatedFraction": 0.06926898509581263,
+     "avgActiveEffectsPerPhase": 3.2118380062305296,
      "deckUtilization": 1,
-     "usageEntropy": 0.9971562324161556,
+     "usageEntropy": 0.9971285551744715,
      "dominantCardId": "opening-statement",
-     "dominantCardShare": 0.4175692592391009
+     "dominantCardShare": 0.415758955183439
     },
     "cardUsage": {
      "arrow-paradox": {
       "cardId": "arrow-paradox",
-      "plays": 260,
-      "bottomPlays": 144,
+      "plays": 263,
+      "bottomPlays": 147,
       "topPlays": 116,
-      "statusLands": 144,
+      "statusLands": 147,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
        "free": 0,
-       "paid": 1492
+       "paid": 1547
       },
       "unplayedAtPhaseEnd": 0
      },
      "memento-mori": {
       "cardId": "memento-mori",
-      "plays": 255,
-      "bottomPlays": 152,
-      "topPlays": 103,
-      "statusLands": 152,
+      "plays": 257,
+      "bottomPlays": 153,
+      "topPlays": 104,
+      "statusLands": 153,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
        "free": 0,
-       "paid": 1468
+       "paid": 1480
       },
       "unplayedAtPhaseEnd": 0
      },
      "opening-statement": {
       "cardId": "opening-statement",
-      "plays": 226,
+      "plays": 229,
       "bottomPlays": 141,
-      "topPlays": 85,
+      "topPlays": 88,
       "statusLands": 141,
       "discards": 0,
       "fizzles": 0,
@@ -17176,23 +17176,23 @@
      },
      "half-step": {
       "cardId": "half-step",
-      "plays": 226,
-      "bottomPlays": 120,
+      "plays": 229,
+      "bottomPlays": 123,
       "topPlays": 106,
       "statusLands": 0,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
        "free": 0,
-       "paid": 1680
+       "paid": 1756
       },
       "unplayedAtPhaseEnd": 0
      },
      "tu-quoque": {
       "cardId": "tu-quoque",
-      "plays": 228,
+      "plays": 231,
       "bottomPlays": 101,
-      "topPlays": 127,
+      "topPlays": 130,
       "statusLands": 0,
       "discards": 0,
       "fizzles": 0,
@@ -17204,8 +17204,8 @@
      },
      "anvil-of-form": {
       "cardId": "anvil-of-form",
-      "plays": 173,
-      "bottomPlays": 33,
+      "plays": 174,
+      "bottomPlays": 34,
       "topPlays": 140,
       "statusLands": 0,
       "discards": 0,
@@ -17218,26 +17218,26 @@
      },
      "delphic-ambiguity": {
       "cardId": "delphic-ambiguity",
-      "plays": 233,
+      "plays": 234,
       "bottomPlays": 54,
-      "topPlays": 179,
+      "topPlays": 180,
       "statusLands": 0,
       "discards": 0,
       "fizzles": 1,
       "lineContribution": {
-       "free": 2312,
+       "free": 2357,
        "paid": 6421
       },
       "unplayedAtPhaseEnd": 0
      },
      "circular-reasoning": {
       "cardId": "circular-reasoning",
-      "plays": 211,
+      "plays": 213,
       "bottomPlays": 48,
-      "topPlays": 163,
+      "topPlays": 165,
       "statusLands": 0,
       "discards": 0,
-      "fizzles": 7,
+      "fizzles": 8,
       "lineContribution": {
        "free": 0,
        "paid": 595
@@ -17246,9 +17246,9 @@
      },
      "common-ground": {
       "cardId": "common-ground",
-      "plays": 222,
+      "plays": 225,
       "bottomPlays": 138,
-      "topPlays": 84,
+      "topPlays": 87,
       "statusLands": 138,
       "discards": 0,
       "fizzles": 0,
@@ -17260,15 +17260,15 @@
      },
      "slippery-slope": {
       "cardId": "slippery-slope",
-      "plays": 189,
-      "bottomPlays": 119,
+      "plays": 191,
+      "bottomPlays": 121,
       "topPlays": 70,
-      "statusLands": 119,
+      "statusLands": 121,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
        "free": 597,
-       "paid": 5879
+       "paid": 6004
       },
       "unplayedAtPhaseEnd": 0
      }
@@ -17512,7 +17512,7 @@
      "dotHpFraction": 0.21597859327217125,
      "strikeFraction": 0.5814220183486238,
      "mechanicBurstFraction": 0.20259938837920488,
-     "guardMitigatedFraction": 0.03986633053878173,
+     "guardMitigatedFraction": 0.042448693211717244,
      "avgActiveEffectsPerPhase": 0.75,
      "deckUtilization": 1,
      "usageEntropy": 0.9986466853672281,
@@ -17900,7 +17900,7 @@
      "dotHpFraction": 0.1620734908136483,
      "strikeFraction": 0.6346456692913386,
      "mechanicBurstFraction": 0.2032808398950131,
-     "guardMitigatedFraction": 0.05030288632854258,
+     "guardMitigatedFraction": 0.05223526621605597,
      "avgActiveEffectsPerPhase": 1.209964412811388,
      "deckUtilization": 1,
      "usageEntropy": 0.9979967346696463,
@@ -18676,7 +18676,7 @@
      "dotHpFraction": 0.4384998688696564,
      "strikeFraction": 0.5230133752950433,
      "mechanicBurstFraction": 0.03848675583530029,
-     "guardMitigatedFraction": 0.0393573502243336,
+     "guardMitigatedFraction": 0.042868892910018094,
      "avgActiveEffectsPerPhase": 2.765957446808511,
      "deckUtilization": 1,
      "usageEntropy": 0.9972570808213909,
@@ -19064,7 +19064,7 @@
      "dotHpFraction": 0.19793536804308798,
      "strikeFraction": 0.5399461400359067,
      "mechanicBurstFraction": 0.2621184919210054,
-     "guardMitigatedFraction": 0.028145163644857085,
+     "guardMitigatedFraction": 0.029618400722968837,
      "avgActiveEffectsPerPhase": 0.6906077348066298,
      "deckUtilization": 1,
      "usageEntropy": 0.9980162707968178,
@@ -19452,7 +19452,7 @@
      "dotHpFraction": 0.11213786213786214,
      "strikeFraction": 0.6758241758241759,
      "mechanicBurstFraction": 0.21203796203796205,
-     "guardMitigatedFraction": 0.03443854731945852,
+     "guardMitigatedFraction": 0.035761076703191993,
      "avgActiveEffectsPerPhase": 0.9904306220095693,
      "deckUtilization": 1,
      "usageEntropy": 0.9981387193653236,
@@ -20222,39 +20222,39 @@
       "defeat": 60,
       "retreat": 0
      },
-     "avgRounds": 3.783333333333333,
-     "statusEngagement": 0.2988650693568726,
+     "avgRounds": 3.816666666666667,
+     "statusEngagement": 0.297314178638351,
      "avgConvictionSpent": 0.55,
-     "dotHpFraction": 0.4157701019252548,
-     "strikeFraction": 0.5379388448471121,
-     "mechanicBurstFraction": 0.04629105322763307,
-     "guardMitigatedFraction": 0.03967652261814506,
-     "avgActiveEffectsPerPhase": 2.7577092511013217,
+     "dotHpFraction": 0.41690574487439647,
+     "strikeFraction": 0.535861731159471,
+     "mechanicBurstFraction": 0.047232523966132534,
+     "guardMitigatedFraction": 0.04252876781364616,
+     "avgActiveEffectsPerPhase": 2.7641921397379914,
      "deckUtilization": 1,
-     "usageEntropy": 0.9976505898713861,
+     "usageEntropy": 0.9976741494115643,
      "dominantCardId": "opening-statement",
-     "dominantCardShare": 0.3894942721430567
+     "dominantCardShare": 0.3857221914775872
     },
     "cardUsage": {
      "arrow-paradox": {
       "cardId": "arrow-paradox",
-      "plays": 188,
-      "bottomPlays": 100,
-      "topPlays": 88,
-      "statusLands": 100,
+      "plays": 190,
+      "bottomPlays": 101,
+      "topPlays": 89,
+      "statusLands": 101,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
        "free": 0,
-       "paid": 495
+       "paid": 515
       },
       "unplayedAtPhaseEnd": 0
      },
      "memento-mori": {
       "cardId": "memento-mori",
-      "plays": 174,
+      "plays": 176,
       "bottomPlays": 101,
-      "topPlays": 73,
+      "topPlays": 75,
       "statusLands": 101,
       "discards": 0,
       "fizzles": 0,
@@ -20266,9 +20266,9 @@
      },
      "opening-statement": {
       "cardId": "opening-statement",
-      "plays": 162,
+      "plays": 163,
       "bottomPlays": 94,
-      "topPlays": 68,
+      "topPlays": 69,
       "statusLands": 94,
       "discards": 0,
       "fizzles": 0,
@@ -20280,9 +20280,9 @@
      },
      "half-step": {
       "cardId": "half-step",
-      "plays": 164,
+      "plays": 166,
       "bottomPlays": 85,
-      "topPlays": 79,
+      "topPlays": 81,
       "statusLands": 0,
       "discards": 0,
       "fizzles": 0,
@@ -20294,23 +20294,23 @@
      },
      "tu-quoque": {
       "cardId": "tu-quoque",
-      "plays": 161,
-      "bottomPlays": 60,
-      "topPlays": 101,
+      "plays": 163,
+      "bottomPlays": 61,
+      "topPlays": 102,
       "statusLands": 0,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
        "free": 0,
-       "paid": 555
+       "paid": 561
       },
       "unplayedAtPhaseEnd": 0
      },
      "anvil-of-form": {
       "cardId": "anvil-of-form",
-      "plays": 134,
+      "plays": 135,
       "bottomPlays": 28,
-      "topPlays": 106,
+      "topPlays": 107,
       "statusLands": 0,
       "discards": 0,
       "fizzles": 0,
@@ -20336,9 +20336,9 @@
      },
      "circular-reasoning": {
       "cardId": "circular-reasoning",
-      "plays": 149,
+      "plays": 151,
       "bottomPlays": 31,
-      "topPlays": 118,
+      "topPlays": 120,
       "statusLands": 0,
       "discards": 0,
       "fizzles": 5,
@@ -20350,9 +20350,9 @@
      },
      "common-ground": {
       "cardId": "common-ground",
-      "plays": 163,
+      "plays": 164,
       "bottomPlays": 98,
-      "topPlays": 65,
+      "topPlays": 66,
       "statusLands": 98,
       "discards": 0,
       "fizzles": 0,
@@ -20364,15 +20364,15 @@
      },
      "slippery-slope": {
       "cardId": "slippery-slope",
-      "plays": 130,
-      "bottomPlays": 81,
-      "topPlays": 49,
-      "statusLands": 81,
+      "plays": 132,
+      "bottomPlays": 82,
+      "topPlays": 50,
+      "statusLands": 82,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
-       "free": 248,
-       "paid": 2661
+       "free": 254,
+       "paid": 2757
       },
       "unplayedAtPhaseEnd": 0
      }
@@ -20616,7 +20616,7 @@
      "dotHpFraction": 0.20770392749244712,
      "strikeFraction": 0.5762839879154078,
      "mechanicBurstFraction": 0.21601208459214502,
-     "guardMitigatedFraction": 0.029799540673112364,
+     "guardMitigatedFraction": 0.03133757961783439,
      "avgActiveEffectsPerPhase": 0.6833333333333333,
      "deckUtilization": 1,
      "usageEntropy": 0.998394885360082,
@@ -21004,7 +21004,7 @@
      "dotHpFraction": 0.12752094322060192,
      "strikeFraction": 0.5802047781569966,
      "mechanicBurstFraction": 0.29227427862240146,
-     "guardMitigatedFraction": 0.037679944095038435,
+     "guardMitigatedFraction": 0.038862056450487174,
      "avgActiveEffectsPerPhase": 1.0436893203883495,
      "deckUtilization": 1,
      "usageEntropy": 0.9980066624923895,
@@ -21774,26 +21774,26 @@
       "defeat": 60,
       "retreat": 0
      },
-     "avgRounds": 3.75,
-     "statusEngagement": 0.29591836734693877,
+     "avgRounds": 3.7666666666666666,
+     "statusEngagement": 0.29669631512071154,
      "avgConvictionSpent": 0.16666666666666666,
-     "dotHpFraction": 0.4164285343170364,
-     "strikeFraction": 0.5555671013664467,
-     "mechanicBurstFraction": 0.028004364316516858,
-     "guardMitigatedFraction": 0.04111478143741381,
-     "avgActiveEffectsPerPhase": 2.8222222222222224,
+     "dotHpFraction": 0.41667960060013454,
+     "strikeFraction": 0.5552278959077035,
+     "mechanicBurstFraction": 0.028092503492162035,
+     "guardMitigatedFraction": 0.04439611054247697,
+     "avgActiveEffectsPerPhase": 2.827433628318584,
      "deckUtilization": 1,
-     "usageEntropy": 0.997508619581857,
+     "usageEntropy": 0.9975576636928754,
      "dominantCardId": "opening-statement",
-     "dominantCardShare": 0.4213960846351592
+     "dominantCardShare": 0.42371215100275267
     },
     "cardUsage": {
      "arrow-paradox": {
       "cardId": "arrow-paradox",
-      "plays": 186,
-      "bottomPlays": 91,
+      "plays": 187,
+      "bottomPlays": 92,
       "topPlays": 95,
-      "statusLands": 91,
+      "statusLands": 92,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
@@ -21818,15 +21818,15 @@
      },
      "opening-statement": {
       "cardId": "opening-statement",
-      "plays": 159,
-      "bottomPlays": 99,
+      "plays": 160,
+      "bottomPlays": 100,
       "topPlays": 60,
-      "statusLands": 99,
+      "statusLands": 100,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
        "free": 0,
-       "paid": 5270
+       "paid": 5331
       },
       "unplayedAtPhaseEnd": 0
      },
@@ -21846,23 +21846,23 @@
      },
      "tu-quoque": {
       "cardId": "tu-quoque",
-      "plays": 160,
-      "bottomPlays": 62,
+      "plays": 161,
+      "bottomPlays": 63,
       "topPlays": 98,
       "statusLands": 0,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
        "free": 0,
-       "paid": 738
+       "paid": 751
       },
       "unplayedAtPhaseEnd": 0
      },
      "anvil-of-form": {
       "cardId": "anvil-of-form",
-      "plays": 132,
+      "plays": 133,
       "bottomPlays": 27,
-      "topPlays": 105,
+      "topPlays": 106,
       "statusLands": 0,
       "discards": 0,
       "fizzles": 0,
@@ -21874,14 +21874,14 @@
      },
      "delphic-ambiguity": {
       "cardId": "delphic-ambiguity",
-      "plays": 161,
+      "plays": 162,
       "bottomPlays": 35,
-      "topPlays": 126,
+      "topPlays": 127,
       "statusLands": 0,
       "discards": 0,
       "fizzles": 1,
       "lineContribution": {
-       "free": 1215,
+       "free": 1228,
        "paid": 3496
       },
       "unplayedAtPhaseEnd": 0
@@ -21916,15 +21916,15 @@
      },
      "slippery-slope": {
       "cardId": "slippery-slope",
-      "plays": 127,
-      "bottomPlays": 74,
+      "plays": 128,
+      "bottomPlays": 75,
       "topPlays": 53,
-      "statusLands": 74,
+      "statusLands": 75,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
        "free": 421,
-       "paid": 3051
+       "paid": 3061
       },
       "unplayedAtPhaseEnd": 0
      }
@@ -22168,7 +22168,7 @@
      "dotHpFraction": 0.2376068376068376,
      "strikeFraction": 0.5116809116809117,
      "mechanicBurstFraction": 0.25071225071225073,
-     "guardMitigatedFraction": 0.030335316227174523,
+     "guardMitigatedFraction": 0.03205412272149842,
      "avgActiveEffectsPerPhase": 0.7166666666666667,
      "deckUtilization": 1,
      "usageEntropy": 0.9985504415218815,
@@ -22556,7 +22556,7 @@
      "dotHpFraction": 0.16702127659574467,
      "strikeFraction": 0.5987234042553191,
      "mechanicBurstFraction": 0.23425531914893616,
-     "guardMitigatedFraction": 0.03693350779112644,
+     "guardMitigatedFraction": 0.038306212139208935,
      "avgActiveEffectsPerPhase": 1.0628019323671498,
      "deckUtilization": 1,
      "usageEntropy": 0.998219370981946,
@@ -23332,7 +23332,7 @@
      "dotHpFraction": 0.4144647332617257,
      "strikeFraction": 0.5389187253848908,
      "mechanicBurstFraction": 0.04661654135338346,
-     "guardMitigatedFraction": 0.041619663955352375,
+     "guardMitigatedFraction": 0.04429705081132299,
      "avgActiveEffectsPerPhase": 2.756637168141593,
      "deckUtilization": 1,
      "usageEntropy": 0.997564514681235,
@@ -23720,7 +23720,7 @@
      "dotHpFraction": 0.20770392749244712,
      "strikeFraction": 0.5762839879154078,
      "mechanicBurstFraction": 0.21601208459214502,
-     "guardMitigatedFraction": 0.029799540673112364,
+     "guardMitigatedFraction": 0.03133757961783439,
      "avgActiveEffectsPerPhase": 0.6833333333333333,
      "deckUtilization": 1,
      "usageEntropy": 0.998394885360082,
@@ -24108,7 +24108,7 @@
      "dotHpFraction": 0.11985335589396504,
      "strikeFraction": 0.5865764241398759,
      "mechanicBurstFraction": 0.29357021996615906,
-     "guardMitigatedFraction": 0.03833793123062484,
+     "guardMitigatedFraction": 0.03953983809118023,
      "avgActiveEffectsPerPhase": 1.0436893203883495,
      "deckUtilization": 1,
      "usageEntropy": 0.9980066624923895,
@@ -24884,7 +24884,7 @@
      "dotHpFraction": 0.44244920002700333,
      "strikeFraction": 0.5189360696685344,
      "mechanicBurstFraction": 0.038614730304462296,
-     "guardMitigatedFraction": 0.03527183064710127,
+     "guardMitigatedFraction": 0.038350824587706146,
      "avgActiveEffectsPerPhase": 2.761904761904762,
      "deckUtilization": 1,
      "usageEntropy": 0.9972774324288798,
@@ -25272,7 +25272,7 @@
      "dotHpFraction": 0.1978683966635774,
      "strikeFraction": 0.5509731232622799,
      "mechanicBurstFraction": 0.2511584800741427,
-     "guardMitigatedFraction": 0.02711518280057861,
+     "guardMitigatedFraction": 0.02854796227590699,
      "avgActiveEffectsPerPhase": 0.6888888888888889,
      "deckUtilization": 1,
      "usageEntropy": 0.9979832598853501,
@@ -25660,7 +25660,7 @@
      "dotHpFraction": 0.11030595813204509,
      "strikeFraction": 0.677938808373591,
      "mechanicBurstFraction": 0.21175523349436393,
-     "guardMitigatedFraction": 0.03303681244815652,
+     "guardMitigatedFraction": 0.034307424229439824,
      "avgActiveEffectsPerPhase": 0.9904306220095693,
      "deckUtilization": 1,
      "usageEntropy": 0.9981387193653236,
@@ -26430,18 +26430,18 @@
       "defeat": 60,
       "retreat": 0
      },
-     "avgRounds": 5.883333333333334,
-     "statusEngagement": 0.3004448038819248,
-     "avgConvictionSpent": 1.9,
-     "dotHpFraction": 0.4323034080360695,
-     "strikeFraction": 0.5303275427662114,
-     "mechanicBurstFraction": 0.037369049197719134,
-     "guardMitigatedFraction": 0.054692775151924375,
-     "avgActiveEffectsPerPhase": 3.215297450424929,
+     "avgRounds": 5.9,
+     "statusEngagement": 0.3004032258064516,
+     "avgConvictionSpent": 1.8666666666666667,
+     "dotHpFraction": 0.4327176086727713,
+     "strikeFraction": 0.529970529417956,
+     "mechanicBurstFraction": 0.03731186190927271,
+     "guardMitigatedFraction": 0.05883524637103802,
+     "avgActiveEffectsPerPhase": 3.2175141242937855,
      "deckUtilization": 1,
-     "usageEntropy": 0.9969413554586257,
+     "usageEntropy": 0.9969086093652421,
      "dominantCardId": "opening-statement",
-     "dominantCardShare": 0.3610311600550619
+     "dominantCardShare": 0.3654778178203057
     },
     "cardUsage": {
      "arrow-paradox": {
@@ -26460,9 +26460,9 @@
      },
      "memento-mori": {
       "cardId": "memento-mori",
-      "plays": 279,
+      "plays": 280,
       "bottomPlays": 161,
-      "topPlays": 118,
+      "topPlays": 119,
       "statusLands": 161,
       "discards": 0,
       "fizzles": 0,
@@ -26474,23 +26474,23 @@
      },
      "opening-statement": {
       "cardId": "opening-statement",
-      "plays": 252,
-      "bottomPlays": 137,
+      "plays": 253,
+      "bottomPlays": 138,
       "topPlays": 115,
-      "statusLands": 137,
+      "statusLands": 138,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
        "free": 0,
-       "paid": 7391
+       "paid": 7553
       },
       "unplayedAtPhaseEnd": 0
      },
      "half-step": {
       "cardId": "half-step",
-      "plays": 254,
+      "plays": 255,
       "bottomPlays": 134,
-      "topPlays": 120,
+      "topPlays": 121,
       "statusLands": 0,
       "discards": 0,
       "fizzles": 0,
@@ -26502,9 +26502,9 @@
      },
      "tu-quoque": {
       "cardId": "tu-quoque",
-      "plays": 259,
+      "plays": 260,
       "bottomPlays": 100,
-      "topPlays": 159,
+      "topPlays": 160,
       "statusLands": 0,
       "discards": 0,
       "fizzles": 0,
@@ -26530,23 +26530,23 @@
      },
      "delphic-ambiguity": {
       "cardId": "delphic-ambiguity",
-      "plays": 252,
+      "plays": 253,
       "bottomPlays": 60,
-      "topPlays": 192,
+      "topPlays": 193,
       "statusLands": 0,
       "discards": 0,
       "fizzles": 1,
       "lineContribution": {
-       "free": 2285,
+       "free": 2335,
        "paid": 5638
       },
       "unplayedAtPhaseEnd": 0
      },
      "circular-reasoning": {
       "cardId": "circular-reasoning",
-      "plays": 243,
+      "plays": 244,
       "bottomPlays": 49,
-      "topPlays": 194,
+      "topPlays": 195,
       "statusLands": 0,
       "discards": 0,
       "fizzles": 9,
@@ -26558,15 +26558,15 @@
      },
      "common-ground": {
       "cardId": "common-ground",
-      "plays": 252,
-      "bottomPlays": 151,
+      "plays": 253,
+      "bottomPlays": 152,
       "topPlays": 101,
-      "statusLands": 151,
+      "statusLands": 152,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
        "free": 0,
-       "paid": 1292
+       "paid": 1337
       },
       "unplayedAtPhaseEnd": 0
      },
@@ -26824,7 +26824,7 @@
      "dotHpFraction": 0.20233085140822274,
      "strikeFraction": 0.5636128196827452,
      "mechanicBurstFraction": 0.23405632890903205,
-     "guardMitigatedFraction": 0.04876209626743748,
+     "guardMitigatedFraction": 0.05152753063832986,
      "avgActiveEffectsPerPhase": 0.93,
      "deckUtilization": 1,
      "usageEntropy": 0.9987722478122982,
@@ -27212,7 +27212,7 @@
      "dotHpFraction": 0.16500345815630865,
      "strikeFraction": 0.5796858017982413,
      "mechanicBurstFraction": 0.25531074004545007,
-     "guardMitigatedFraction": 0.05977426196338461,
+     "guardMitigatedFraction": 0.06137597040714512,
      "avgActiveEffectsPerPhase": 1.368421052631579,
      "deckUtilization": 1,
      "usageEntropy": 0.9970154893425681,
@@ -27387,20 +27387,20 @@
    {
     "stage": "mid",
     "cells": 40,
-    "winRate": 0.10291666666666667,
-    "statusEngagement": 0.1683507487457234,
-    "dotHpFraction": 0.48302809422545495,
-    "avgRounds": 4.220833333333333,
+    "winRate": 0.105,
+    "statusEngagement": 0.16825375670843448,
+    "dotHpFraction": 0.4913701247523788,
+    "avgRounds": 4.235416666666667,
     "winPathCounts": {
-     "victory": 244,
+     "victory": 249,
      "mercy": 0,
      "capitulate": 3,
      "concede": 0,
-     "defeat": 2153,
+     "defeat": 2148,
      "retreat": 0
     },
     "deckUtilization": 1,
-    "usageEntropy": 0.9953775615541066,
+    "usageEntropy": 0.9953625196291674,
     "dominantCardId": "cassandras-burden",
     "dominantCardShare": 0.7978093546477205
    },
@@ -27408,9 +27408,9 @@
     "stage": "late",
     "cells": 48,
     "winRate": 0.0006944444444444445,
-    "statusEngagement": 0.12239613441653795,
-    "dotHpFraction": 0.39774873027056723,
-    "avgRounds": 3.5149305555555554,
+    "statusEngagement": 0.12236908246567621,
+    "dotHpFraction": 0.39780678067789627,
+    "avgRounds": 3.517013888888889,
     "winPathCounts": {
      "victory": 2,
      "mercy": 0,
@@ -27420,7 +27420,7 @@
      "retreat": 0
     },
     "deckUtilization": 1,
-    "usageEntropy": 0.9974267585414012,
+    "usageEntropy": 0.9974276945082661,
     "dominantCardId": "opening-statement",
     "dominantCardShare": 0.4624326623192515
    },
@@ -27428,9 +27428,9 @@
     "stage": "impossible",
     "cells": 8,
     "winRate": 0,
-    "statusEngagement": 0.12961593929405169,
-    "dotHpFraction": 0.4004906669232819,
-    "avgRounds": 5.24375,
+    "statusEngagement": 0.12961074203461756,
+    "dotHpFraction": 0.40054244200286965,
+    "avgRounds": 5.245833333333334,
     "winPathCounts": {
      "victory": 0,
      "mercy": 0,
@@ -27440,7 +27440,7 @@
      "retreat": 0
     },
     "deckUtilization": 1,
-    "usageEntropy": 0.9943480020478062,
+    "usageEntropy": 0.9943439087861332,
     "dominantCardId": "brief-candle",
     "dominantCardShare": 0.48572448251249106
    }

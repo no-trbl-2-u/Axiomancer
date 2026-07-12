@@ -8,7 +8,7 @@
 [22m[39m[preset-spread] oratory: early=0.97 mid=0.05 late=0.00
 
 [90mstdout[2m | src/Combat/e2e/combat-playtest.balance-bands.sim.test.ts[2m > [22m[2mbalance bands (loose) — per-preset floors and dominance ceiling[2m > [22m[2mpreset 'foundry' respects the per-stage floors and ceiling
-[22m[39m[preset-spread] foundry: early=0.88 mid=0.02 late=0.00
+[22m[39m[preset-spread] foundry: early=0.90 mid=0.00 late=0.00
 
 [90mstdout[2m | src/Combat/e2e/combat-playtest.balance-bands.sim.test.ts[2m > [22m[2mbalance bands (loose) — per-preset floors and dominance ceiling[2m > [22m[2mpreset 'penitent' respects the per-stage floors and ceiling
 [22m[39m[preset-spread] penitent: early=0.97 mid=0.13 late=0.00
@@ -34,7 +34,7 @@
 [90mstdout[2m | src/Combat/e2e/combat-playtest.balance-bands.sim.test.ts[2m > [22m[2mwin-rate curve shape — starter presets must decay, not sit flat[2m > [22m[2mthe set of presets FAILING the starter curve is exactly the known offenders
 [22m[39m[curve] erosion: 1.00/0.38/0.00 move=-1.00 OK
 [curve] oratory: 0.97/0.05/0.00 move=-0.97 OK
-[curve] foundry: 0.88/0.02/0.00 move=-0.88 OK
+[curve] foundry: 0.90/0.00/0.00 move=-0.90 OK
 [curve] penitent: 0.97/0.13/0.00 move=-0.97 OK
 [curve] standstill: 1.00/0.07/0.00 move=-1.00 OK
 [curve] augury: 1.00/0.03/0.00 move=-1.00 OK
@@ -43,12 +43,12 @@
 [curve] bastion: 1.00/0.00/0.00 move=-1.00 OK
 [curve] refrain: 1.00/0.05/0.00 move=-1.00 OK
 
- [32m✓[39m src/Combat/e2e/combat-playtest.balance-bands.sim.test.ts [2m([22m[2m14 tests[22m[2m)[22m[33m 2862[2mms[22m[39m
-   [33m[2m✓[22m[39m balance bands (loose) — the matrix runs and accounts exactly[2m > [22mevery stage produces cells; every cell terminates all its runs [33m 353[2mms[22m[39m
-   [33m[2m✓[22m[39m win-rate curve shape — starter presets must decay, not sit flat[2m > [22mthe set of presets FAILING the starter curve is exactly the known offenders [33m 1269[2mms[22m[39m
+ [32m✓[39m src/Combat/e2e/combat-playtest.balance-bands.sim.test.ts [2m([22m[2m14 tests[22m[2m)[22m[33m 3275[2mms[22m[39m
+   [33m[2m✓[22m[39m balance bands (loose) — the matrix runs and accounts exactly[2m > [22mevery stage produces cells; every cell terminates all its runs [33m 365[2mms[22m[39m
+   [33m[2m✓[22m[39m win-rate curve shape — starter presets must decay, not sit flat[2m > [22mthe set of presets FAILING the starter curve is exactly the known offenders [33m 1646[2mms[22m[39m
 
 [2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
 [2m      Tests [22m [1m[32m14 passed[39m[22m[90m (14)[39m
-[2m   Start at [22m 14:36:13
-[2m   Duration [22m 3.70s[2m (transform 319ms, setup 0ms, collect 502ms, tests 2.86s, environment 0ms, prepare 137ms)[22m
+[2m   Start at [22m 23:34:28
+[2m   Duration [22m 4.20s[2m (transform 343ms, setup 0ms, collect 546ms, tests 3.28s, environment 0ms, prepare 147ms)[22m
 

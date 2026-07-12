@@ -1,6 +1,6 @@
 
 > axiomancer-mechanics@0.37.0 combat-playtest
-> ts-node src/CLI/combat-playtest.cli.ts --stage=early --policy=all --runs=60 --seed=1 --sandbox=conjure-exercise --cards
+> ts-node src/CLI/combat-playtest.cli.ts --stage=early --policy=all --runs=60 --seed=1 --cards --sandbox=conjure-exercise
 
 
 Hazard combat playtest — stages=[early] policies=[greedy, blind, dot-weaver, control-lock, aggro-brute, turtle, chaos, mercy-seeker] deck=policy-pick runs=60 seed=1

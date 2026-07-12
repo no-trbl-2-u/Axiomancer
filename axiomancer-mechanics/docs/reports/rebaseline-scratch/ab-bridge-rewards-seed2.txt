@@ -1,8 +1,4 @@
 
-> axiomancer-mechanics@0.37.0 combat-playtest
-> ts-node src/CLI/combat-playtest.cli.ts --stage=all --policy=all --runs=60 --seed=2 --cards --sandbox=bridge-rewards
-
-
 Hazard combat playtest — stages=[early, mid, late, impossible] policies=[greedy, blind, dot-weaver, control-lock, aggro-brute, turtle, chaos, mercy-seeker] deck=policy-pick runs=60 seed=2
 Sandbox set applied: bridge-rewards (6 cards, 0 overrides)
 

@@ -63,7 +63,7 @@ Hazard combat playtest matrix
   mid        tri-eyes                  greedy       policy-pick            10%  6/0/54/0       5.2       15%     54%    46%  100% 0.99   59%
   mid        tri-eyes                  blind        policy-pick            10%  6/0/54/0       5.1       15%     54%    46%  100% 0.99   59%
   mid        tri-eyes                  dot-weaver   policy-pick            92%  55/0/5/0       4.4       32%     54%    46%  100% 0.97   32%
-  mid        tri-eyes                  control-lock policy-pick            37%  15/7/38/0      5.8       30%     31%    23%  100% 1.00   61%
+  mid        tri-eyes                  control-lock policy-pick            38%  12/11/37/0     5.9       30%     42%    31%  100% 1.00   40%
   mid        tri-eyes                  aggro-brute  policy-pick             0%  0/0/60/0       5.0       13%     33%    24%  100% 1.00   44%
   mid        tri-eyes                  turtle       policy-pick             0%  0/0/60/0       5.1        2%     47%    52%  100% 1.00   45%
   mid        tri-eyes                  chaos        policy-pick             0%  0/0/60/0       5.2        6%     54%    46%  100% 1.00   73%
@@ -71,7 +71,7 @@ Hazard combat playtest matrix
   mid        mirac                     greedy       policy-pick             0%  0/0/60/0       3.6       13%     53%    47%  100% 1.00   61%
   mid        mirac                     blind        policy-pick             0%  0/0/60/0       3.6       13%     53%    47%  100% 1.00   62%
   mid        mirac                     dot-weaver   policy-pick             0%  0/0/60/0       3.0       29%     53%    47%  100% 0.98   33%
-  mid        mirac                     control-lock policy-pick             2%  1/0/59/0       3.8       27%     25%    20%  100% 1.00   70%
+  mid        mirac                     control-lock policy-pick             0%  0/0/60/0       3.9       27%     35%    27%  100% 1.00   53%
   mid        mirac                     aggro-brute  policy-pick             0%  0/0/60/0       3.1       11%     32%    23%  100% 1.00   46%
   mid        mirac                     turtle       policy-pick             2%  1/0/59/0       3.8        2%     38%    62%  100% 1.00   39%
   mid        mirac                     chaos        policy-pick             0%  0/0/60/0       3.4        5%     53%    47%  100% 1.00   78%
@@ -79,7 +79,7 @@ Hazard combat playtest matrix
   mid        hasshaku-sama             greedy       policy-pick             0%  0/0/60/0       4.1       14%     54%    46%  100% 1.00   67%
   mid        hasshaku-sama             blind        policy-pick             0%  0/0/60/0       4.2       14%     54%    46%  100% 1.00   67%
   mid        hasshaku-sama             dot-weaver   policy-pick            45%  27/0/33/0      4.0       31%     53%    47%  100% 0.97   38%
-  mid        hasshaku-sama             control-lock policy-pick             2%  1/0/59/0       5.0       28%     31%    23%  100% 1.00   66%
+  mid        hasshaku-sama             control-lock policy-pick             7%  4/0/56/0       5.0       28%     42%    31%  100% 1.00   49%
   mid        hasshaku-sama             aggro-brute  policy-pick             0%  0/0/60/0       4.0       12%     41%    30%  100% 1.00   42%
   mid        hasshaku-sama             turtle       policy-pick             0%  0/0/60/0       4.0        2%     44%    56%  100% 1.00   35%
   mid        hasshaku-sama             chaos        policy-pick             0%  0/0/60/0       4.0        6%     54%    46%  100% 1.00   77%
@@ -87,7 +87,7 @@ Hazard combat playtest matrix
   mid        jeweled-tree              greedy       policy-pick             0%  0/0/60/0       4.3       14%     54%    46%  100% 1.00   66%
   mid        jeweled-tree              blind        policy-pick             0%  0/0/60/0       4.3       14%     54%    46%  100% 1.00   66%
   mid        jeweled-tree              dot-weaver   policy-pick            40%  24/0/36/0      4.0       30%     54%    46%  100% 0.97   37%
-  mid        jeweled-tree              control-lock policy-pick             7%  2/2/56/0       5.2       28%     33%    24%  100% 1.00   64%
+  mid        jeweled-tree              control-lock policy-pick             8%  4/1/55/0       5.1       28%     42%    31%  100% 1.00   46%
   mid        jeweled-tree              aggro-brute  policy-pick             0%  0/0/60/0       4.0       13%     39%    28%  100% 1.00   39%
   mid        jeweled-tree              turtle       policy-pick             0%  0/0/60/0       4.0        2%     43%    56%  100% 1.00   35%
   mid        jeweled-tree              chaos        policy-pick             0%  0/0/60/0       4.0        6%     54%    46%  100% 1.00   76%
@@ -95,7 +95,7 @@ Hazard combat playtest matrix
   mid        rawhead-rex               greedy       policy-pick             0%  0/0/60/0       3.0       13%     53%    47%  100% 1.00   67%
   mid        rawhead-rex               blind        policy-pick             0%  0/0/60/0       3.0       13%     53%    47%  100% 1.00   67%
   mid        rawhead-rex               dot-weaver   policy-pick             0%  0/0/60/0       3.0       29%     53%    47%  100% 0.98   33%
-  mid        rawhead-rex               control-lock policy-pick             0%  0/0/60/0       3.3       26%     22%    18%  100% 1.00   72%
+  mid        rawhead-rex               control-lock policy-pick             0%  0/0/60/0       3.3       27%     35%    27%  100% 1.00   49%
   mid        rawhead-rex               aggro-brute  policy-pick             0%  0/0/60/0       3.0       11%     34%    23%  100% 1.00   38%
   mid        rawhead-rex               turtle       policy-pick             0%  0/0/60/0       3.0        2%     47%    53%  100% 1.00   58%
   mid        rawhead-rex               chaos        policy-pick             0%  0/0/60/0       3.0        5%     54%    46%  100% 1.00   68%
@@ -209,7 +209,7 @@ Win-path mix (per cell — victory/mercy/capitulate/concede/defeat):
   mid        tri-eyes                  greedy       policy-pick           vic=  6 mer=  0 cap=  0 con=  0 def= 54
   mid        tri-eyes                  blind        policy-pick           vic=  6 mer=  0 cap=  0 con=  0 def= 54
   mid        tri-eyes                  dot-weaver   policy-pick           vic= 55 mer=  0 cap=  0 con=  0 def=  5
-  mid        tri-eyes                  control-lock policy-pick           vic= 15 mer=  0 cap=  7 con=  0 def= 38
+  mid        tri-eyes                  control-lock policy-pick           vic= 12 mer=  0 cap= 11 con=  0 def= 37
   mid        tri-eyes                  aggro-brute  policy-pick           vic=  0 mer=  0 cap=  0 con=  0 def= 60
   mid        tri-eyes                  turtle       policy-pick           vic=  0 mer=  0 cap=  0 con=  0 def= 60
   mid        tri-eyes                  chaos        policy-pick           vic=  0 mer=  0 cap=  0 con=  0 def= 60
@@ -217,7 +217,7 @@ Win-path mix (per cell — victory/mercy/capitulate/concede/defeat):
   mid        mirac                     greedy       policy-pick           vic=  0 mer=  0 cap=  0 con=  0 def= 60
   mid        mirac                     blind        policy-pick           vic=  0 mer=  0 cap=  0 con=  0 def= 60
   mid        mirac                     dot-weaver   policy-pick           vic=  0 mer=  0 cap=  0 con=  0 def= 60
-  mid        mirac                     control-lock policy-pick           vic=  1 mer=  0 cap=  0 con=  0 def= 59
+  mid        mirac                     control-lock policy-pick           vic=  0 mer=  0 cap=  0 con=  0 def= 60
   mid        mirac                     aggro-brute  policy-pick           vic=  0 mer=  0 cap=  0 con=  0 def= 60
   mid        mirac                     turtle       policy-pick           vic=  1 mer=  0 cap=  0 con=  0 def= 59
   mid        mirac                     chaos        policy-pick           vic=  0 mer=  0 cap=  0 con=  0 def= 60
@@ -225,7 +225,7 @@ Win-path mix (per cell — victory/mercy/capitulate/concede/defeat):
   mid        hasshaku-sama             greedy       policy-pick           vic=  0 mer=  0 cap=  0 con=  0 def= 60
   mid        hasshaku-sama             blind        policy-pick           vic=  0 mer=  0 cap=  0 con=  0 def= 60
   mid        hasshaku-sama             dot-weaver   policy-pick           vic= 27 mer=  0 cap=  0 con=  0 def= 33
-  mid        hasshaku-sama             control-lock policy-pick           vic=  1 mer=  0 cap=  0 con=  0 def= 59
+  mid        hasshaku-sama             control-lock policy-pick           vic=  4 mer=  0 cap=  0 con=  0 def= 56
   mid        hasshaku-sama             aggro-brute  policy-pick           vic=  0 mer=  0 cap=  0 con=  0 def= 60
   mid        hasshaku-sama             turtle       policy-pick           vic=  0 mer=  0 cap=  0 con=  0 def= 60
   mid        hasshaku-sama             chaos        policy-pick           vic=  0 mer=  0 cap=  0 con=  0 def= 60
@@ -233,7 +233,7 @@ Win-path mix (per cell — victory/mercy/capitulate/concede/defeat):
   mid        jeweled-tree              greedy       policy-pick           vic=  0 mer=  0 cap=  0 con=  0 def= 60
   mid        jeweled-tree              blind        policy-pick           vic=  0 mer=  0 cap=  0 con=  0 def= 60
   mid        jeweled-tree              dot-weaver   policy-pick           vic= 24 mer=  0 cap=  0 con=  0 def= 36
-  mid        jeweled-tree              control-lock policy-pick           vic=  2 mer=  0 cap=  2 con=  0 def= 56
+  mid        jeweled-tree              control-lock policy-pick           vic=  4 mer=  0 cap=  1 con=  0 def= 55
   mid        jeweled-tree              aggro-brute  policy-pick           vic=  0 mer=  0 cap=  0 con=  0 def= 60
   mid        jeweled-tree              turtle       policy-pick           vic=  0 mer=  0 cap=  0 con=  0 def= 60
   mid        jeweled-tree              chaos        policy-pick           vic=  0 mer=  0 cap=  0 con=  0 def= 60
@@ -306,8 +306,8 @@ Win-path mix (per cell — victory/mercy/capitulate/concede/defeat):
 Stage summaries (runs-weighted):
   early      cells=48  win= 73%  statusEng= 26%  dotFrac= 58%  rounds=3.5  util=100%  H=0.97  dom= 77%(straw-mans-jab)
              win-path: vic=2106 mer=0 cap=3 con=0 def=771
-  mid        cells=40  win=  7%  statusEng= 14%  dotFrac= 46%  rounds=4.1  util=100%  H=0.99  dom= 78%(in-medias-res)
-             win-path: vic=152 mer=0 cap=9 con=0 def=2239
+  mid        cells=40  win=  7%  statusEng= 14%  dotFrac= 47%  rounds=4.1  util=100%  H=0.99  dom= 78%(in-medias-res)
+             win-path: vic=153 mer=0 cap=12 con=0 def=2235
   late       cells=48  win=  0%  statusEng= 16%  dotFrac= 34%  rounds=3.4  util=100%  H=1.00  dom= 59%(prophecy-fulfilled)
              win-path: vic=1 mer=0 cap=0 con=0 def=2879
   impossible cells=8   win=  0%  statusEng= 17%  dotFrac= 34%  rounds=5.1  util=100%  H=0.99  dom= 57%(prophecy-fulfilled)
@@ -321,15 +321,15 @@ Per-card usage (all cells):
  unpl% = hand entries discarded un-played at phase end / (plays+unplayed);
  hpF/hpP = HP swing (immediate + projected DoT) attributed to the FREE/PAID line)
   card                         plays bottom   top statusLands discards  free%  paid%  fizz%  unpl%     hpF     hpP
-  half-step                    21436   6630 14806           0        0    69%    31%     0%     0%       0   24643
-  slippery-slope               15111   6808  8303        6808        0    55%    45%     0%     0%   76886  303890
-  festering-argument           12545   3466  9079           0        0    72%    28%     0%     0%   39352   20944
+  half-step                    21431   6629 14802           0        0    69%    31%     0%     0%       0   25632
+  slippery-slope               15110   6808  8302        6808        0    55%    45%     0%     0%   77226  305720
+  festering-argument           12535   3459  9076           0        0    72%    28%     0%     0%   40542   21245
   refrain                      11309   2871  8438        2871        0    75%    25%     0%     0%       0  392549
   zenos-half-step               9788   3639  6149           0        0    63%    37%     0%     0%       0   15016
   captatio-benevolentiae        9516   3835  5681           0        0    60%    40%     0%     0%       0    6995
   straw-mans-jab                9283   2677  6606        2677        0    71%    29%     0%     0%   40393  232083
   brief-candle                  8234   2154  6080        2154        0    74%    26%     0%     0%       0  178159
-  memento-mori                  7546   4024  3522        4024        0    47%    53%     0%     0%       0    6922
+  memento-mori                  7555   4024  3531        4024        0    47%    53%     0%     0%       0    7847
   in-medias-res                 6790   3215  3575        3215        0    53%    47%     0%     0%       0  189767
   second-thoughts               6075   1170  4905           0        0    81%    19%     7%     0%       0    5684
   signs-and-portents            5973   1205  4768           0        0    80%    20%     0%     0%       0    5937
@@ -355,22 +355,22 @@ Per-card usage (all cells):
   bootstrap-loop                1872    285  1587           0        0    85%    15%     0%     0%       0    1253
   irresistible-grace            1716    484  1232           0        0    72%    28%     0%     0%       0       0
   crumbling-resolve             1704    137  1567           0        0    92%     8%     0%     0%       0       0
-  nettle-cloak                  1702    975   727         975        0    43%    57%     0%     0%       0   14702
+  nettle-cloak                  1703    980   723         980        0    42%    58%     0%     0%       0   17765
   sweet-poison                  1167    693   474         693        0    41%    59%     0%     0%    4005   26448
   arrow-paradox                 1126    627   499         627        0    44%    56%     0%     0%       0    2800
   currys-conversion             1056    255   801           0        0    76%    24%     2%     0%       0     418
-  undistributed-middle          1053    683   370         683        0    35%    65%     0%     0%       0    1308
+  undistributed-middle          1056    676   380         676        0    36%    64%     0%     0%       0    2255
   opening-statement             1011    377   634         377        0    63%    37%     0%     0%       0    9744
   anvil-of-form                  979    165   814           0        0    83%    17%     0%     0%       0       0
   peroratio-interrupta           976    257   719           0        0    74%    26%     0%     0%    4257   32852
-  the-overtake                   915    282   633           0        0    69%    31%     0%     0%       0   26027
-  coda                           908    283   625         283        0    69%    31%    23%     0%       0     486
+  coda                           910    286   624         286        0    69%    31%    23%     0%       0     972
   wages-of-weakness              895    487   408         487        0    46%    54%     0%     0%       0   24198
-  against-my-judgment            880    272   608           0        0    69%    31%     0%     0%       0     894
+  the-overtake                   893    122   771           0        0    86%    14%    14%     0%       0   13973
+  against-my-judgment            891    270   621           0        0    70%    30%     0%     0%       0    1310
   stuck-in-their-head            782    229   553           0        0    71%    29%     0%     0%       0       0
   crown-of-thorns                768    116   652           0        0    85%    15%     0%     0%       0       0
   self-flagellant                722    172   550           0        0    76%    24%     0%     0%    1152    7499
-  mirror-of-longing              702    175   527           0        0    75%    25%     0%     0%       0       0
+  mirror-of-longing              698    178   520           0        0    74%    26%     0%     0%       0       0
   achilles-and-the-tortoise      560    190   370           0        0    66%    34%     0%     0%       0       0
   answered-in-kind               512    196   316         196        0    62%    38%     0%     0%       0   21313
   soft-word                      481     27   454           0        0    94%     6%     0%     0%       0     201

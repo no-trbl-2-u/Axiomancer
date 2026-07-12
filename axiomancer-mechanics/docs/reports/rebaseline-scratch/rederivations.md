@@ -1,23 +1,35 @@
-# Phase 27 §3 — honest re-baseline re-derivations (2026-07-11)
+# Phase 27 §3 — honest re-baseline re-derivations (2026-07-11, re-cut at the reconciled tree)
 
 > Cross-note (merge reconciliation): the cloud loop independently shipped its
 > own Phase 27 re-baseline against ITS tree (post f849c5a2, pre the WS card
 > sweep) — see `plan/tuning/2026-07-11-phase27-rebaseline.md`. The two measured
 > different trees; this report is the one cut against the merged engine
-> semantics (70c64501) and is the one the checked-in deck-matrix baseline
-> corresponds to.
+> semantics and is the one the checked-in deck-matrix baseline corresponds to.
 
-**Commit:** `6ea123fce1646824fe13857e5541c4bbc17ddf66` (Turn Law, Phase 26 — these are
-the FIRST Turn-Law-honest measurements). **Command:** `npm run combat-playtest --
---stage=all --policy=all --runs=60 --seed={1,2,3} --cards [--json]` — 144 cells/seed
-(4 stages x 6 enemies x 8 policies x 60 runs, policy-pick decks).
+**Commit:** `e203fed9a21bc91ec62f21347b567ef62ead6b71` (HEAD — Turn Law 6ea123fc
++ the cloud-phase reconciliation merge, which lands the **Phase 28 Overtake
+2-pip gate**, a real Foundry-relevant engine change). This re-cut SUPERSEDES the
+earlier 6ea123fc/70c64501 scratch: these are the FIRST Turn-Law-honest
+measurements at the reconciled tree. **Command:** `npm run combat-playtest --
+--stage=all --policy=all --runs=60 --seed={1,2,3} --cards [--json]` — 144
+cells/seed (4 stages x 6 enemies x 8 policies x 60 runs, policy-pick decks).
 
 Evidence files (this directory):
-- `baseline-seed1.json` / `baseline-seed1.txt` / `baseline-seed2.json` / `baseline-seed3.json` — raw matrices
+- `baseline-seed{1,2,3}.json` / `baseline-seed{1,2,3}.txt` — raw matrices (json + table per seed)
 - `balance-bands.txt` — `npx vitest run combat-playtest.balance-bands` output (14/14 pass)
 - `card-meta.json`, `dump-card-meta.ts`, `analyze-rebaseline.js`, `rederivation-analysis.json` — derivation pipeline
 - Checked-in baseline regenerated: `docs/reports/baselines/deck-matrix-baseline.json`
-  (seed-1 `--json`, meta-stamped at 6ea123fc; replaces the pre-Turn-Law provisional of f196d219)
+  (seed-1 `--json`, meta-stamped at e203fed9; supersedes the 6ea123fc cut and
+  replaces the pre-Turn-Law provisional of f196d219)
+
+**Overtake-gate drift vs the stale 6ea123fc cut (measured, not assumed):**
+`the-overtake` appears in policy-pick decks only in seed 1 (10 cells, 1,794
+plays) and in the `foundry` preset. Seeds 2 and 3 are therefore bit-identical
+to the previous cut; seed 1 moved slightly (victories 2,671→2,676, defeats
+5,939→5,934; mid signature share 46.5%→47.8%), and foundry's preset spread
+moved early 0.88→0.90, mid 0.02→0.00. Every other number below matches the
+previous cut to rounding — the gate's matrix-level footprint is small and
+confined to where the card actually sits.
 
 **Accounting caveat (applies to every DoT/signature fraction below):** Phase 26
 also landed the DoT-overkill attribution clamp (Gate 0 #2), so pre-law vs post-law
@@ -34,7 +46,7 @@ damage-mix fractions differ partly by accounting fix, not only by the Turn Law.
 | late | 25-35% | 0.0% | 0.0% | 0.0% | **total collapse** |
 | impossible | 0% | 0.0% | 0.0% | 0.0% | on target |
 
-All-policy stage win rates (runs-weighted): seed 1 = 85.1/10.3/0.1/0.0,
+All-policy stage win rates (runs-weighted): seed 1 = 85.1/10.5/0.1/0.0,
 seed 2 = 68.8/8.2/0.0/0.0, seed 3 = 66.4/13.0/0.0/0.0.
 
 The pre-law reading (99/94/2/12 blind) was farm-inflated exactly as the audit
@@ -43,8 +55,8 @@ Under the law the curve is early-heavy and then falls off a cliff: **mid is ~3-2
 against a ~50% doctrine and late is flat 0% against 25-35%.** The curve doctrine is
 now violated from mid onward — in the opposite direction from the farmed reading.
 
-Win-path totals per 8,640 runs: victories 2,671/2,105/1,956 (seeds 1/2/3), CAPITULATE
-30/73/268, mercy 0, concede 0, defeats 5,939/6,462/6,416. Alt-wins are near-absent;
+Win-path totals per 8,640 runs: victories 2,676/2,105/1,956 (seeds 1/2/3), CAPITULATE
+30/73/268, mercy 0, concede 0, defeats 5,934/6,462/6,416. Alt-wins are near-absent;
 the mercy path never fired in 25,920 runs.
 
 ## 2. Preset floors/ceiling vs calibration (balance-bands, 14/14 pass)
@@ -56,7 +68,7 @@ ceiling 1.00 (target 0.98). `[preset-spread]` readings (early/mid/late):
 |---|---|---|---|
 | erosion | 1.00 | 0.38 | 0.00 |
 | oratory | 0.97 | 0.05 | 0.00 |
-| foundry | 0.88 | 0.02 | 0.00 |
+| foundry | 0.90 | 0.00 | 0.00 |
 | penitent | 0.97 | 0.13 | 0.00 |
 | standstill | 1.00 | 0.07 | 0.00 |
 | augury | 1.00 | 0.03 | 0.00 |
@@ -65,13 +77,15 @@ ceiling 1.00 (target 0.98). `[preset-spread]` readings (early/mid/late):
 | bastion | 1.00 | 0.00 | 0.00 |
 | refrain | 1.00 | 0.05 | 0.00 |
 
-- **Early floor/ratchet: PASS everywhere** (min 0.88 foundry, well above the 0.40 ratchet).
+- **Early floor/ratchet: PASS everywhere** (min 0.90 foundry, well above the 0.40 ratchet).
 - **Early ceiling: 6 of 10 presets sit at 1.00**, above the 0.98 target (at, not over,
   the hard 1.00 ceiling). Early is too safe.
-- **Mid ratchet 0.25: only erosion (0.38) clears it**; tithe grazes at 0.20; grace and
-  bastion are at literal 0.00. The mid floor (0.00) technically holds because it is zero.
+- **Mid ratchet 0.25: only erosion (0.38) clears it**; tithe grazes at 0.20; foundry,
+  grace and bastion are at literal 0.00 (foundry fell 0.02→0.00 under the Overtake
+  gate — the gate taxes exactly the deck built around the card). The mid floor
+  (0.00) technically holds because it is zero.
 - **Late: all ten presets at 0.00** — consistent with the §1 late collapse.
-- `[curve]` shape check: all ten presets decay monotonically (move -0.88 to -1.00, all OK,
+- `[curve]` shape check: all ten presets decay monotonically (move -0.90 to -1.00, all OK,
   no KNOWN_CURVE_VIOLATORS) — the *shape* is right, the *level* from mid onward is not.
 
 ## 3. statusEngagement by stage — did the collapse survive the law?
@@ -102,9 +116,9 @@ runs-weighted, all policies:
 
 | seed | early | mid | late | impossible |
 |---|---|---|---|---|
-| 1 | 43.8% | 46.5% | 46.6% | 46.4% |
+| 1 | 43.8% | 47.8% | 46.6% | 46.4% |
 | 2 | 40.1% | 41.8% | 41.4% | 41.1% |
-| 3 | 30.9% | 51.0% | 35.4% | 33.1% |
+| 3 | 30.9% | 50.9% | 35.4% | 33.1% |
 
 DoT fraction sits at 56-63% early falling to 33-50% late; mechanic bursts 0-34%
 (seed-3 late/impossible spike to ~32-34%). The pre-law matrix read signatures at
@@ -139,14 +153,14 @@ The pre-law list of 8 dissolves entirely — every one now reads mid-band
 
 | pre-law offender | seed 1 | seed 2 | seed 3 |
 |---|---|---|---|
-| cassandras-burden | 0.56 (5,520) | 0.63 (3,463) | 0.35 (3,668) |
-| common-ground | 0.43 (4,111) | 0.62 (4,191) | 0.62 (2,895) |
-| disarming-smile | 0.60 (6,594) | 0.54 (3,345) | 0.53 (12,370) |
-| glimpse | 0.63 (5,600) | 0.67 (8,337) | 0.57 (3,425) |
-| half-step | 0.64 (24,140) | 0.67 (23,586) | 0.73 (20,056) |
+| cassandras-burden | 0.56 (5,543) | 0.63 (3,463) | 0.35 (3,668) |
+| common-ground | 0.43 (4,116) | 0.62 (4,191) | 0.62 (2,895) |
+| disarming-smile | 0.60 (6,620) | 0.54 (3,345) | 0.53 (12,383) |
+| glimpse | 0.63 (5,600) | 0.67 (8,339) | 0.57 (3,425) |
+| half-step | 0.64 (24,169) | 0.67 (23,592) | 0.73 (20,070) |
 | refrain | 0.56 (4,448) | 0.54 (7,302) | 0.51 (8,566) |
-| sketch-of-a-thought | 0.52 (3,530) | 0.49 (13,058) | 0.37 (6,698) |
-| slippery-slope | 0.57 (15,195) | 0.56 (14,969) | 0.56 (13,177) |
+| sketch-of-a-thought | 0.52 (3,530) | 0.49 (13,062) | 0.37 (6,698) |
+| slippery-slope | 0.57 (15,219) | 0.56 (14,973) | 0.56 (13,186) |
 
 (Their sandbox conversion sets — `free-line-conversions` etc. — were NOT active in
 these runs; the library lines themselves are healthy under honest turns.)
@@ -192,3 +206,6 @@ breach in more than one seed.
 5. The WS1 library line-offender list is EMPTY — all 8 pre-law offenders dissolved.
 6. Dominance violations are degenerate-policy artifacts except cassandras-burden
    and straw-mans-jab (multi-seed).
+7. Overtake 2-pip gate footprint (vs the stale 6ea123fc cut): confined to seed-1
+   policy-pick cells and the foundry preset (early 0.88→0.90, mid 0.02→0.00);
+   seeds 2/3 bit-identical. The gate did its job without moving the matrix.

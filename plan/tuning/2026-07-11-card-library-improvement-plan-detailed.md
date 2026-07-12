@@ -1111,25 +1111,71 @@ kill decisions wait for Turn-Law-honest telemetry.
 - [x] WS1 telemetry counters + soft lint + (provisional) offender list
   — shipped 2026-07-11: counters/report columns/soft lint in tree;
   PROVISIONAL pre-Phase-26 list cut (8 dead-FREE-line cards; see
-  "WS1.5 provisional offender list" under WS1). Remaining: re-cut
-  after Phase 26/27
+  "WS1.5 provisional offender list" under WS1). Re-cut done at
+  e203fed9: the honest offender list is **EMPTY** — all 8 dissolved
+  (`plan/tuning/2026-07-11-honest-rebaseline-and-evidence.md` §1.5
+  supersedes the provisional list)
 - [x] WS6.1 reward-draft harness (free, unblocks WS5/WS6 evidence) —
   shipped 2026-07-11: `combat.reward-draft.sim.ts` (`runRewardDraftSim`)
   + telemetry test. Follow-up noted: sandbox-card injection hook needed
   before WS5.4/WS6.3 can measure sandbox cards
 - [x] WS8.1 control-surface audit table (free) — shipped 2026-07-11
   (table under WS8.1 above; cross-referenced from `cross-keywords.md`)
-- [ ] Owner ratification batch (agenda above)
-- [ ] WS0.2/0.3 post-ratification cuts
-- [ ] WS2.1 CONJURE exercise (Thoughtform registry + 2 cards)
-- [ ] WS2.2 FREE-line conversion passes (Phase 30 shape)
-- [ ] WS3 schema/engine PR + data-sweep PR (with WS10.1/Phase 29 KW-1)
-- [ ] WS4 theme passes: forge · bulwark · charm (verify need) · harvest
-- [ ] WS5 microset + sequencing test (+ ledgers after ratification)
-- [ ] WS6 bridges through the harness
-- [ ] WS7 cap sweep + The Open Vein/chooseX
-- [ ] WS8.2/8.4 re-payloads + test; WS8.3 meter change
-- [ ] WS9 branch prototype (Phase 33 slice)
+- [x] Owner ratification batch — ratified 2026-07-11 in spec 32 §12
+  (44b07c85)
+- [x] WS0.2/0.3 post-ratification cuts — shipped 2026-07-11: dead strike
+  vocabulary cut + legacy die-cost classifier deprecated (44b07c85)
+- [x] WS2.1 CONJURE exercise (Thoughtform registry + 2 cards) — cards +
+  registry shipped (3cecd275); Turn-Law-honest A/B **PASS all 3 clauses**
+  (`plan/tuning/2026-07-11-honest-rebaseline-and-evidence.md` §2; token
+  conversion 92–100%, no kill, no dominance). Promotion = follow-up
+  /deck-tuning PR (Corollary clean; Sprite flagged: 1 win over 2 seeds)
+- [x] WS2.2 FREE-line conversion passes (Phase 30 shape) — sandbox
+  conversions shipped (3cecd275); A/B **PASS all 3 clauses** with a stale
+  premise (the library lines already read mid-band under honest turns —
+  evidence report §1.5/§2). Promotion to library NOT yet done (Phase 30
+  down-payment, must satisfy the Phase 30 lint when it lands)
+- [x] WS3 schema/engine PR + data-sweep PR (with WS10.1/Phase 29 KW-1)
+  — engine substrate 85acd441, data sweep + Doom card + KW-1 fold
+  3cecd275. Gate: erosion/tithe late ≥15% **FAIL** (late 0.00 globally —
+  stage-curve failure, not clock failure; kill condition NOT triggered);
+  WS3.4 debt-of-days **INCONCLUSIVE** (draft-fragile) — evidence report §2
+- [x] WS4 theme passes: forge · bulwark · charm · harvest — cards shipped
+  (3cecd275), all four A/B'd at e203fed9 (evidence report §2): slag-runoff
+  alive; **ingot-of-ruin killed as written** (0/432 drafts; scorer fix
+  before deletion); bulwark gate FAIL (1 win / 2 seeds); charm PASS-leaning
+  (seed-fragile); harvest FAIL on presence + the-long-ledger 23–26% fizzle
+  finding. Follow-ups queue behind the draft-scorer fix
+- [x] WS5 microset + sequencing test (+ ledgers) — ledgers 85acd441,
+  microset 3cecd275; WS5.3 test 24/24 PASS; WS5.4 draft appeal **4/6
+  PASS** (wages-of-weakness + answered-in-kind fail single-class; floor
+  recalibrated 5%→2.5% with justification) — evidence report §2
+- [x] WS6 bridges through the harness — cards 3cecd275; WS6.3 verdicts:
+  **1 PASS (the-poured-rampart, promotion candidate) / 4 KILLED
+  (barbed-compliment, interest-on-the-flesh, entered-into-evidence,
+  unbroken-countenance) / 1 marginal (stolen-cadence, one more batch)** —
+  evidence report §2
+- [x] WS7 cap sweep + The Open Vein/chooseX — engine 85acd441; sweep
+  winner **F=0.60** applied to `RUPTURE_CAP_FRACTION` (monotone Foundry
+  lift, dominance F-invariant, seed-2 confirmed); chooseX mechanism PASS
+  (modal X 30/3/18), the-open-vein presence FAIL (draft appeal) —
+  evidence report §2
+- [x] WS8.2/8.4 re-payloads + test; WS8.3 meter change — shipped in the
+  engine-substrate PR (85acd441: `control-surfaces.sim.test.ts` + payload
+  data + meter read); matrix-level effect folded into the honest baseline
+  (balance-bands 14/14)
+- [x] WS9 branch prototype (Phase 33 slice) — substrate + determinism
+  test 85acd441 (`threat-branches.engine.test.ts`); in-band check PASS
+  (balance-bands 14/14 over the branch-live tree). Behavioral evidence
+  (prototype enemies) rides Phase 33
 - [ ] WS10.2/10.3 atlas policy + orphan drilling — WS10.2 policy note
-  shipped 2026-07-11 (`docs/keyword-atlas.md`); WS10.3 waits on
-  WS4/WS6 drilling
+  shipped 2026-07-11 (`docs/keyword-atlas.md`); WS10.3 residue waits on
+  WS4/WS6 drilling (KINDLE drilled by slag-runoff only at seed 1;
+  promotions pending)
+- [ ] Promotions from the evidence report §3 queue (poured-rampart,
+  corollary, WS2.2 conversions, 3 microset passers; each a /deck-tuning
+  PR) + the draft-scorer starvation fix that unblocks the six pending
+  verdicts
+- [ ] Deferred conditionals unchanged: Steadfast Regard / Crescendo of
+  Affection (charm late hole still real — late 0.00 everywhere), WS4.2
+  consume_defense (not built, spec 32 §12 item 4)

@@ -1,8 +1,4 @@
 
-> axiomancer-mechanics@0.37.0 combat-playtest
-> ts-node src/CLI/combat-playtest.cli.ts --stage=all --policy=all --runs=60 --seed=1 --sandbox=roles-charm --cards
-
-
 Hazard combat playtest — stages=[early, mid, late, impossible] policies=[greedy, blind, dot-weaver, control-lock, aggro-brute, turtle, chaos, mercy-seeker] deck=policy-pick runs=60 seed=1
 Sandbox set applied: roles-charm (1 cards, 0 overrides)
 
@@ -104,7 +100,7 @@ Hazard combat playtest matrix
   late       fire-giant                blind        policy-pick             0%  0/0/60/0       4.6       20%     55%    45%  100% 0.99   49%
   late       fire-giant                dot-weaver   policy-pick             0%  0/0/60/0       4.3       22%     52%    47%  100% 1.00   28%
   late       fire-giant                control-lock policy-pick             0%  0/0/60/0       5.1       12%     50%    46%  100% 1.00   81%
-  late       fire-giant                aggro-brute  policy-pick             0%  0/0/60/0       4.2       19%     21%    17%  100% 0.99   47%
+  late       fire-giant                aggro-brute  policy-pick             0%  0/0/60/0       4.3       19%     30%    25%  100% 0.99   54%
   late       fire-giant                turtle       policy-pick             0%  0/0/60/0       4.0        2%     22%    58%  100% 1.00   34%
   late       fire-giant                chaos        policy-pick             0%  0/0/60/0       4.4        8%     55%    45%  100% 1.00   62%
   late       fire-giant                mercy-seeker policy-pick             0%  0/0/60/0       4.7        4%     16%    63%  100% 1.00   32%
@@ -112,7 +108,7 @@ Hazard combat playtest matrix
   late       rangda                    blind        policy-pick             0%  0/0/60/0       3.4       20%     55%    45%  100% 1.00   58%
   late       rangda                    dot-weaver   policy-pick             0%  0/0/60/0       3.2       22%     50%    46%  100% 1.00   32%
   late       rangda                    control-lock policy-pick             0%  0/0/60/0       3.8       12%     50%    47%  100% 1.00   77%
-  late       rangda                    aggro-brute  policy-pick             0%  0/0/60/0       3.2       18%     20%    16%  100% 1.00   43%
+  late       rangda                    aggro-brute  policy-pick             0%  0/0/60/0       3.3       18%     30%    24%  100% 1.00   49%
   late       rangda                    turtle       policy-pick             0%  0/0/60/0       3.0        2%     20%    54%  100% 1.00   29%
   late       rangda                    chaos        policy-pick             0%  0/0/60/0       3.5        7%     55%    45%  100% 1.00   59%
   late       rangda                    mercy-seeker policy-pick             0%  0/0/60/0       3.5        4%     11%    68%  100% 1.00   32%
@@ -120,7 +116,7 @@ Hazard combat playtest matrix
   late       tezcatlipoca              blind        policy-pick             0%  0/0/60/0       3.4       19%     55%    45%  100% 1.00   53%
   late       tezcatlipoca              dot-weaver   policy-pick             0%  0/0/60/0       3.2       21%     51%    47%  100% 1.00   28%
   late       tezcatlipoca              control-lock policy-pick             0%  0/0/60/0       3.7       12%     48%    46%  100% 1.00   75%
-  late       tezcatlipoca              aggro-brute  policy-pick             0%  0/0/60/0       3.1       18%     19%    15%  100% 1.00   43%
+  late       tezcatlipoca              aggro-brute  policy-pick             0%  0/0/60/0       3.2       18%     30%    25%  100% 1.00   51%
   late       tezcatlipoca              turtle       policy-pick             0%  0/0/60/0       3.0        2%     21%    58%  100% 1.00   35%
   late       tezcatlipoca              chaos        policy-pick             0%  0/0/60/0       3.3        7%     56%    44%  100% 1.00   45%
   late       tezcatlipoca              mercy-seeker policy-pick             0%  0/0/60/0       3.4        4%     13%    58%  100% 1.00   29%
@@ -128,7 +124,7 @@ Hazard combat playtest matrix
   late       arch-demon                blind        policy-pick             0%  0/0/60/0       3.3       19%     55%    45%  100% 1.00   50%
   late       arch-demon                dot-weaver   policy-pick             0%  0/0/60/0       3.2       21%     51%    47%  100% 1.00   26%
   late       arch-demon                control-lock policy-pick             0%  0/0/60/0       3.5       11%     48%    46%  100% 1.00   73%
-  late       arch-demon                aggro-brute  policy-pick             0%  0/0/60/0       3.1       18%     16%    13%  100% 1.00   43%
+  late       arch-demon                aggro-brute  policy-pick             0%  0/0/60/0       3.2       18%     25%    20%  100% 1.00   50%
   late       arch-demon                turtle       policy-pick             0%  0/0/60/0       3.0        2%     24%    51%  100% 1.00   41%
   late       arch-demon                chaos        policy-pick             0%  0/0/60/0       3.1        6%     55%    45%  100% 1.00   45%
   late       arch-demon                mercy-seeker policy-pick             0%  0/0/60/0       3.5        4%     17%    60%  100% 1.00   35%
@@ -136,7 +132,7 @@ Hazard combat playtest matrix
   late       death                     blind        policy-pick             0%  0/0/60/0       3.4       19%     55%    45%  100% 1.00   53%
   late       death                     dot-weaver   policy-pick             0%  0/0/60/0       3.2       21%     51%    47%  100% 1.00   28%
   late       death                     control-lock policy-pick             0%  0/0/60/0       3.6       12%     47%    45%  100% 1.00   75%
-  late       death                     aggro-brute  policy-pick             0%  0/0/60/0       3.1       18%     19%    15%  100% 1.00   43%
+  late       death                     aggro-brute  policy-pick             0%  0/0/60/0       3.2       18%     30%    24%  100% 1.00   51%
   late       death                     turtle       policy-pick             0%  0/0/60/0       3.0        2%     21%    58%  100% 1.00   35%
   late       death                     chaos        policy-pick             0%  0/0/60/0       3.3        7%     56%    44%  100% 1.00   42%
   late       death                     mercy-seeker policy-pick             0%  0/0/60/0       3.4        4%     12%    59%  100% 1.00   31%
@@ -144,7 +140,7 @@ Hazard combat playtest matrix
   late       the-abortive              blind        policy-pick             0%  0/0/60/0       3.3       20%     55%    45%  100% 1.00   57%
   late       the-abortive              dot-weaver   policy-pick             0%  0/0/60/0       3.1       21%     51%    46%  100% 1.00   31%
   late       the-abortive              control-lock policy-pick             0%  0/0/60/0       3.5       12%     50%    46%  100% 1.00   78%
-  late       the-abortive              aggro-brute  policy-pick             0%  0/0/60/0       3.1       18%     19%    16%  100% 1.00   42%
+  late       the-abortive              aggro-brute  policy-pick             0%  0/0/60/0       3.1       18%     29%    24%  100% 1.00   49%
   late       the-abortive              turtle       policy-pick             0%  0/0/60/0       3.0        2%     20%    55%  100% 1.00   28%
   late       the-abortive              chaos        policy-pick             0%  0/0/60/0       3.2        7%     55%    45%  100% 1.00   52%
   late       the-abortive              mercy-seeker policy-pick             0%  0/0/60/0       3.5        4%     11%    68%  100% 1.00   32%
@@ -152,7 +148,7 @@ Hazard combat playtest matrix
   impossible the-incompleteness        blind        policy-pick             0%  0/0/60/0       5.0       20%     55%    45%  100% 0.99   50%
   impossible the-incompleteness        dot-weaver   policy-pick             0%  0/0/60/0       4.9       21%     53%    46%  100% 1.00   26%
   impossible the-incompleteness        control-lock policy-pick             0%  0/0/60/0       5.0       12%     49%    46%  100% 1.00   79%
-  impossible the-incompleteness        aggro-brute  policy-pick             0%  0/0/60/0       5.1       21%     16%    13%  100% 0.99   35%
+  impossible the-incompleteness        aggro-brute  policy-pick             0%  0/0/60/0       5.1       21%     27%    23%  100% 0.99   42%
   impossible the-incompleteness        turtle       policy-pick             0%  0/0/60/0       5.0        2%     20%    56%  100% 1.00   33%
   impossible the-incompleteness        chaos        policy-pick             0%  0/0/60/0       5.1        9%     55%    45%  100% 0.99   61%
   impossible the-incompleteness        mercy-seeker policy-pick             0%  0/0/60/0       5.7        4%     17%    58%  100% 1.00   33%
@@ -308,9 +304,9 @@ Stage summaries (runs-weighted):
              win-path: vic=2425 mer=0 cap=27 con=0 def=428
   mid        cells=40  win= 11%  statusEng= 16%  dotFrac= 48%  rounds=4.0  util=100%  H=1.00  dom= 69%(refrain)
              win-path: vic=214 mer=0 cap=38 con=0 def=2148
-  late       cells=48  win=  0%  statusEng= 13%  dotFrac= 40%  rounds=3.5  util=100%  H=1.00  dom= 81%(mounting-case)
+  late       cells=48  win=  0%  statusEng= 13%  dotFrac= 41%  rounds=3.5  util=100%  H=1.00  dom= 81%(mounting-case)
              win-path: vic=0 mer=0 cap=0 con=0 def=2880
-  impossible cells=8   win=  0%  statusEng= 14%  dotFrac= 40%  rounds=5.1  util=100%  H=1.00  dom= 79%(mounting-case)
+  impossible cells=8   win=  0%  statusEng= 14%  dotFrac= 41%  rounds=5.1  util=100%  H=1.00  dom= 79%(mounting-case)
              win-path: vic=0 mer=0 cap=0 con=0 def=480
 
 Card coverage: 55/71 eligible cards exercised (dead-card rate  23%)
@@ -321,22 +317,22 @@ Per-card usage (all cells):
  unpl% = hand entries discarded un-played at phase end / (plays+unplayed);
  hpF/hpP = HP swing (immediate + projected DoT) attributed to the FREE/PAID line)
   card                         plays bottom   top statusLands discards  free%  paid%  fizz%  unpl%     hpF     hpP
-  half-step                    24457   8000 16457           0        0    67%    33%     0%     0%       0   34682
-  slippery-slope               13518   5718  7800        5718        0    58%    42%     0%     0%   62610  353264
+  half-step                    24472   8013 16459           0        0    67%    33%     0%     0%       0   36428
+  slippery-slope               13535   5721  7814        5721        0    58%    42%     0%     0%   62973  355320
   brief-candle                 11920   5101  6819        5101        0    57%    43%     0%     0%       0  291440
   refrain                      11036   5240  5796        5240        0    53%    47%     0%     0%       0  717248
   second-thoughts               8619   1903  6716           0        0    78%    22%     8%     0%       0   14539
   captive-audience              6947   1837  5110           0        0    74%    26%     0%     0%       0       0
   opening-statement             6878   2373  4505        2373        0    65%    35%     0%     0%       0  142703
   the-olive-branch              6501   2447  4054           0        0    62%    38%     0%     0%       0   29647
-  glimpse                       6200   2584  3616        2584        0    58%    42%     0%     0%       0  147690
+  glimpse                       6232   2597  3635        2597        0    58%    42%     0%     0%       0  156600
   signs-and-portents            5878   1387  4491           0        0    76%    24%     0%     0%       0   12344
   zenos-half-step               5710   2160  3550           0        0    62%    38%     0%     0%       0   18941
   disarming-smile               5647   2028  3619        2028        0    64%    36%     0%     0%       0    8933
   straw-mans-jab                5588   1850  3738        1850        0    67%    33%     0%     0%   22783  141624
   ex-nihilo                     4775    682  4093           0        0    86%    14%     1%     0%       0     398
   delphic-ambiguity             4591    588  4003           0        0    87%    13%     8%     0%    5260    8937
-  resonant-chamber              4413   1118  3295           0        0    75%    25%     0%     0%       0       0
+  resonant-chamber              4409   1120  3289           0        0    75%    25%     0%     0%       0       0
   winnowing                     4398    604  3794           0        0    86%    14%     6%     0%    4438   22481
   suppurating-curse             4196   1408  2788           0        0    66%    34%     0%     0%       0       0
   red-herring                   3824   1926  1898        1926        0    50%    50%     0%     0%       0   10091
@@ -345,11 +341,11 @@ Per-card usage (all cells):
   sketch-of-a-thought           3530   1680  1850        1680        0    52%    48%     0%     0%       0   26770
   currys-conversion             3282    440  2842           0        0    87%    13%     9%     0%       0    1107
   ouroboros                     3261    734  2527         334        0    77%    23%     4%     0%       0   62892
-  resonance-detonation          3204    506  2698          11        0    84%    16%     5%     0%    8069   53588
+  resonance-detonation          3219    506  2713          11        0    84%    16%     5%     0%   11272   63560
   brace-for-impact              3000    976  2024           0        0    67%    33%     0%     0%       0    1401
   crumbling-resolve             2910    243  2667           0        0    92%     8%     0%     0%       0       0
   circular-reasoning            2744    338  2406           0        0    88%    12%     9%     0%       0    4544
-  the-oracles-eye               2501    477  2024           0        0    81%    19%     0%     0%       0       0
+  the-oracles-eye               2510    478  2032           0        0    81%    19%     0%     0%       0       0
   sweet-poison                  2282   1146  1136        1146        0    50%    50%     0%     0%   15740   56442
   a-sweeter-poison              2191   1161  1030           0        0    47%    53%     0%     0%       0   13755
   tu-quoque                     2157    653  1504           0        0    70%    30%     1%     0%       0     304
@@ -359,14 +355,14 @@ Per-card usage (all cells):
   stuck-in-their-head           1898    507  1391           0        0    73%    27%     0%     0%       0       0
   arrow-paradox                 1884    622  1262         622        0    67%    33%     0%     0%       0    1909
   crown-of-thorns               1834    335  1499           0        0    82%    18%     1%     0%       0       0
-  hedgehogs-dilemma             1447    434  1013           0        0    70%    30%     0%     0%       0       0
-  fallen-grace                  1296    699   597         699        0    46%    54%     0%     0%       0  115305
+  hedgehogs-dilemma             1448    436  1012           0        0    70%    30%     0%     0%       0       0
+  fallen-grace                  1312    703   609         703        0    46%    54%     0%     0%       0  126886
   paralysis-of-analysis         1271    187  1084         187        0    85%    15%     0%     0%       0    1312
   memento-mori                  1248    566   682         566        0    55%    45%     0%     0%       0    3027
   undistributed-middle          1184    682   502         682        0    42%    58%     0%     0%       0    7198
-  the-overtake                  1124    281   843           0        0    75%    25%     0%     0%       0   69437
+  the-overtake                  1128     41  1087           0        0    96%     4%    18%     0%       0   16808
+  the-closing-word              1099    249   850           0        0    77%    23%     0%     0%       0    2097
   common-ground                 1085    584   501         584        0    46%    54%     0%     0%       0    6819
-  the-closing-word              1078    243   835           0        0    77%    23%     0%     0%       0    1473
   mounting-case                 1076    469   607         469        0    56%    44%     0%     0%       0   22350
   the-reaping                   1055     42  1013           0        0    96%     4%     0%     0%    3949     189
   the-gleaners-due              1012    144   868           0        0    86%    14%    17%     0%       0    3423

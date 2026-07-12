@@ -73,9 +73,9 @@ Hazard combat playtest matrix
   mid        mirac                     dot-weaver   policy-pick             0%  0/0/60/0       3.0       24%     53%    47%  100% 1.00   34%
   mid        mirac                     control-lock policy-pick            10%  4/2/54/0       4.2       28%     34%    62%  100% 1.00   33%
   mid        mirac                     aggro-brute  policy-pick             8%  5/0/55/0       3.5       27%     55%    45%  100% 1.00   42%
-  mid        mirac                     turtle       policy-pick             0%  0/0/60/0       3.1        3%     28%    53%  100% 1.00   55%
+  mid        mirac                     turtle       policy-pick             0%  0/0/60/0       3.1        3%     28%    52%  100% 1.00   55%
   mid        mirac                     chaos        policy-pick             0%  0/0/60/0       3.7        4%     55%    45%  100% 1.00   47%
-  mid        mirac                     mercy-seeker policy-pick             0%  0/0/60/0       3.4        9%     21%    71%  100% 1.00   47%
+  mid        mirac                     mercy-seeker policy-pick             0%  0/0/60/0       3.5        9%     21%    72%  100% 1.00   45%
   mid        hasshaku-sama             greedy       policy-pick             0%  0/0/60/0       4.0       13%     55%    45%  100% 0.99   57%
   mid        hasshaku-sama             blind        policy-pick             0%  0/0/60/0       4.0       13%     55%    44%  100% 1.00   59%
   mid        hasshaku-sama             dot-weaver   policy-pick             0%  0/0/60/0       4.0       24%     53%    47%  100% 1.00   31%
@@ -321,8 +321,8 @@ Per-card usage (all cells):
  unpl% = hand entries discarded un-played at phase end / (plays+unplayed);
  hpF/hpP = HP swing (immediate + projected DoT) attributed to the FREE/PAID line)
   card                         plays bottom   top statusLands discards  free%  paid%  fizz%  unpl%     hpF     hpP
-  half-step                    24235   7929 16306           0        0    67%    33%     0%     0%       0   34456
-  slippery-slope               14499   6621  7878        6621        0    54%    46%     0%     0%   66140  326987
+  half-step                    24238   7931 16307           0        0    67%    33%     0%     0%       0   34456
+  slippery-slope               14504   6624  7880        6624        0    54%    46%     0%     0%   66140  327059
   second-thoughts              13828   3049 10779           0        0    78%    22%     8%     0%       0   47250
   brief-candle                 11517   4685  6832        4685        0    59%    41%     0%     0%       0  286975
   zenos-half-step              10284   3661  6623           0        0    64%    36%     0%     0%       0   16273
@@ -331,24 +331,24 @@ Per-card usage (all cells):
   opening-statement             6672   3039  3633        3039        0    54%    46%     0%     0%       0  183217
   captive-audience              6221   1601  4620           0        0    74%    26%     0%     0%       0       0
   straw-mans-jab                5588   1850  3738        1850        0    67%    33%     0%     0%   22783  141624
-  red-herring                   5558   2550  3008        2550        0    54%    46%     1%     0%       0   10322
+  red-herring                   5561   2552  3009        2552        0    54%    46%     1%     0%       0   10322
   stuck-in-their-head           5551   1589  3962           0        0    71%    29%     0%     0%       0       0
   signs-and-portents            5328   1154  4174           0        0    78%    22%     0%     0%       0    5175
   memento-mori                  5244   1905  3339        1905        0    64%    36%     0%     0%       0   14181
-  delphic-ambiguity             5163    925  4238           0        0    82%    18%    12%     0%    7939   29329
+  delphic-ambiguity             5165    925  4240           0        0    82%    18%    12%     0%    7939   29329
   sketch-of-a-thought           4630   2324  2306        2324        0    50%    50%     0%     0%       0   50900
   refrain                       4448   1953  2495        1953        0    56%    44%     0%     0%       0  146698
   suppurating-curse             4357   1632  2725           0        0    63%    37%     0%     0%       0       0
-  ex-nihilo                     4232   1126  3106           0        0    73%    27%     1%     0%       0     573
-  the-long-ledger               4149    182  3967           0        0    96%     4%    19%     0%       0    2643
+  ex-nihilo                     4234   1126  3108           0        0    73%    27%     1%     0%       0     573
+  the-long-ledger               4152    183  3969           0        0    96%     4%    19%     0%       0    2703
   glimpse                       3771   1072  2699        1072        0    72%    28%     0%     0%       0   50521
   exordium                      3698   1620  2078        1620        0    56%    44%     0%     0%       0   58351
   heart-of-the-matter           3663   1048  2615           0        0    71%    29%     0%     0%       0   11372
   common-ground                 3349   1942  1407        1942        0    42%    58%     0%     0%       0   19547
   venom-and-vein                3133    369  2764           0        0    88%    12%     1%     0%       0       0
-  ad-nauseam                    2838    689  2149           0        0    76%    24%     2%     0%       0    5745
-  winnowing                     2809    558  2251           0        0    80%    20%     4%     0%    6194   24350
-  currys-conversion             2808    687  2121           0        0    76%    24%    15%     0%       0    3782
+  ad-nauseam                    2842    691  2151           0        0    76%    24%     2%     0%       0    5752
+  winnowing                     2813    559  2254           0        0    80%    20%     4%     0%    6227   24350
+  currys-conversion             2812    689  2123           0        0    75%    25%    15%     0%       0    3782
   the-olive-branch              2730    834  1896           0        0    69%    31%     0%     0%       0    3792
   resonant-chamber              2692    547  2145           0        0    80%    20%     0%     0%       0       0
   seedcorn-sacrifice            2483    328  2155           0        0    87%    13%     9%     0%       0    7499
@@ -357,7 +357,7 @@ Per-card usage (all cells):
   measured-answer               2314    902  1412           0        0    61%    39%     0%     0%       0     485
   circular-reasoning            2173    519  1654           0        0    76%    24%    13%     0%       0     603
   against-my-judgment           2086    754  1332           0        0    64%    36%     0%     0%       0    2164
-  tu-quoque                     1784    682  1102           0        0    62%    38%     1%     0%       0     432
+  tu-quoque                     1788    685  1103           0        0    62%    38%     1%     0%       0     432
   anvil-of-form                 1772    409  1363           0        0    77%    23%     0%     0%       0       0
   crumbling-resolve             1563    246  1317           0        0    84%    16%     0%     0%       0       0
   the-adamant-wall              1545    830   715           0        0    46%    54%     0%     0%       0    9870

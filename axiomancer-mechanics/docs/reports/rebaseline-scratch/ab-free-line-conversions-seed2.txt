@@ -73,9 +73,9 @@ Hazard combat playtest matrix
   mid        mirac                     dot-weaver   policy-pick             0%  0/0/60/0       3.6       30%     54%    46%  100% 0.99   41%
   mid        mirac                     control-lock policy-pick             5%  2/1/57/0       4.5       21%     38%    56%  100% 1.00   63%
   mid        mirac                     aggro-brute  policy-pick             0%  0/0/60/0       3.8       10%     25%    23%  100% 1.00   36%
-  mid        mirac                     turtle       policy-pick             0%  0/0/60/0       3.1        3%     44%    37%  100% 0.98   50%
+  mid        mirac                     turtle       policy-pick             0%  0/0/60/0       3.1        3%     45%    38%  100% 0.98   50%
   mid        mirac                     chaos        policy-pick             0%  0/0/60/0       3.0       10%     63%    37%  100% 1.00   44%
-  mid        mirac                     mercy-seeker policy-pick             0%  0/0/60/0       3.3       17%     53%    45%  100% 0.98   43%
+  mid        mirac                     mercy-seeker policy-pick             0%  0/0/60/0       3.3       17%     53%    45%  100% 0.98   42%
   mid        hasshaku-sama             greedy       policy-pick             0%  0/0/60/0       4.0       21%     59%    41%  100% 1.00   44%
   mid        hasshaku-sama             blind        policy-pick             0%  0/0/60/0       4.0       20%     59%    41%  100% 1.00   42%
   mid        hasshaku-sama             dot-weaver   policy-pick             3%  1/1/58/0       4.0       30%     54%    46%  100% 0.99   43%
@@ -321,15 +321,15 @@ Per-card usage (all cells):
  unpl% = hand entries discarded un-played at phase end / (plays+unplayed);
  hpF/hpP = HP swing (immediate + projected DoT) attributed to the FREE/PAID line)
   card                         plays bottom   top statusLands discards  free%  paid%  fizz%  unpl%     hpF     hpP
-  half-step                    22890   7834 15056           6        0    66%    34%     0%     0%       0   35025
-  signs-and-portents           17060   3552 13508           0        0    79%    21%     0%     0%       0   10065
-  slippery-slope               14463   6487  7976        6487        0    55%    45%     0%     0%       0  276662
+  half-step                    22892   7836 15056           6        0    66%    34%     0%     0%       0   35033
+  signs-and-portents           17062   3552 13510           0        0    79%    21%     0%     0%       0   10065
+  slippery-slope               14465   6488  7977        6488        0    55%    45%     0%     0%       0  276692
   straw-mans-jab               13956   4876  9080        4876        0    65%    35%     0%     0%   31649  360895
-  sketch-of-a-thought          12384   6451  5933        6451        0    48%    52%     0%     0%       0  211268
-  festering-argument            9107   2957  6150           0        0    68%    32%     0%     0%   27944   13917
-  glimpse                       8049   2877  5172        2877        0    64%    36%     0%     0%       0  120235
+  sketch-of-a-thought          12386   6451  5935        6451        0    48%    52%     0%     0%       0  211268
+  festering-argument            9108   2957  6151           0        0    68%    32%     0%     0%   27956   13917
+  glimpse                       8050   2877  5173        2877        0    64%    36%     0%     0%       0  120235
   brace-for-impact              7602   2635  4967           0        0    65%    35%     0%     0%       0    3802
-  ad-nauseam                    7098   3179  3919           0        0    55%    45%     0%     0%       0   15673
+  ad-nauseam                    7099   3180  3919           0        0    55%    45%     0%     0%       0   15681
   refrain                       6995   3177  3818        3177        0    55%    45%     0%     0%       0  376972
   irresistible-grace            5602    854  4748           0        0    85%    15%     0%     0%       0       0
   the-olive-branch              5483   2111  3372         109        0    61%    39%     0%     0%       0   14069
@@ -341,7 +341,7 @@ Per-card usage (all cells):
   common-ground                 4420   1587  2833        1587        0    64%    36%     0%     0%       0    9167
   nettle-cloak                  4097    428  3669         428        0    90%    10%     0%     0%       0    4788
   mirror-of-longing             3968   1479  2489           0        0    63%    37%     0%     0%       0       0
-  tu-quoque                     3501    613  2888           0        0    82%    18%     0%     0%       0    3190
+  tu-quoque                     3504    613  2891           0        0    83%    17%     0%     0%       0    3190
   cassandras-burden             3483   1169  2314        1169        0    66%    34%     0%     0%       0   61609
   disarming-smile               3291   1560  1731        1560        0    53%    47%     0%     0%       0    3497
   the-closing-word              3095    330  2765           0        0    89%    11%     0%     0%       0    1574
@@ -354,7 +354,7 @@ Per-card usage (all cells):
   circular-reasoning            2109    324  1785           7        0    85%    15%     6%     0%       0    2579
   mounting-case                 1823   1052   771        1052        0    42%    58%     0%     0%       0  127665
   against-my-judgment           1662    393  1269           0        0    76%    24%     0%     0%       0    4725
-  fallen-grace                  1652    381  1271         381        0    77%    23%     0%     0%       0   25150
+  fallen-grace                  1654    381  1273         381        0    77%    23%     0%     0%       0   25150
   paralysis-of-analysis         1439    469   970         469        0    67%    33%     0%     0%       0    2090
   ex-nihilo                     1313    266  1047           0        0    80%    20%     0%     0%       0    2798
   currys-conversion             1177    273   904          12        0    77%    23%     8%     0%       0     884

@@ -1,8 +1,4 @@
 
-> axiomancer-mechanics@0.37.0 combat-playtest
-> ts-node src/CLI/combat-playtest.cli.ts --stage=all --policy=all --runs=60 --seed=2 --cards
-
-
 Hazard combat playtest — stages=[early, mid, late, impossible] policies=[greedy, blind, dot-weaver, control-lock, aggro-brute, turtle, chaos, mercy-seeker] deck=policy-pick runs=60 seed=2
 
 Hazard combat playtest matrix
@@ -72,9 +68,9 @@ Hazard combat playtest matrix
   mid        mirac                     dot-weaver   policy-pick             2%  1/0/59/0       3.2       26%     53%    47%  100% 0.99   41%
   mid        mirac                     control-lock policy-pick            10%  4/2/54/0       4.4       21%     36%    59%  100% 1.00   59%
   mid        mirac                     aggro-brute  policy-pick             0%  0/0/60/0       3.2       10%     23%    21%  100% 1.00   37%
-  mid        mirac                     turtle       policy-pick             0%  0/0/60/0       3.1        4%     47%    40%  100% 0.98   68%
+  mid        mirac                     turtle       policy-pick             0%  0/0/60/0       3.2        4%     47%    40%  100% 0.98   69%
   mid        mirac                     chaos        policy-pick             0%  0/0/60/0       3.0       10%     59%    41%  100% 1.00   48%
-  mid        mirac                     mercy-seeker policy-pick             2%  1/0/59/0       3.3       17%     52%    46%  100% 0.98   36%
+  mid        mirac                     mercy-seeker policy-pick             2%  1/0/59/0       3.4       17%     52%    46%  100% 0.98   36%
   mid        hasshaku-sama             greedy       policy-pick             0%  0/0/60/0       4.0       22%     58%    42%  100% 1.00   41%
   mid        hasshaku-sama             blind        policy-pick             0%  0/0/60/0       4.0       22%     58%    42%  100% 1.00   42%
   mid        hasshaku-sama             dot-weaver   policy-pick            10%  6/0/54/0       4.0       29%     54%    46%  100% 0.99   43%
@@ -90,7 +86,7 @@ Hazard combat playtest matrix
   mid        jeweled-tree              aggro-brute  policy-pick             0%  0/0/60/0       4.0       11%     24%    22%  100% 1.00   35%
   mid        jeweled-tree              turtle       policy-pick             0%  0/0/60/0       4.0        4%     50%    41%  100% 0.98   67%
   mid        jeweled-tree              chaos        policy-pick             0%  0/0/60/0       4.0       11%     58%    42%  100% 1.00   52%
-  mid        jeweled-tree              mercy-seeker policy-pick             7%  4/0/56/0       4.2       17%     53%    45%  100% 0.98   41%
+  mid        jeweled-tree              mercy-seeker policy-pick             7%  4/0/56/0       4.3       17%     53%    45%  100% 0.98   41%
   mid        rawhead-rex               greedy       policy-pick             0%  0/0/60/0       3.0       19%     62%    38%  100% 1.00   63%
   mid        rawhead-rex               blind        policy-pick             0%  0/0/60/0       3.0       19%     62%    38%  100% 1.00   61%
   mid        rawhead-rex               dot-weaver   policy-pick             0%  0/0/60/0       3.0       26%     53%    47%  100% 0.99   45%
@@ -305,7 +301,7 @@ Win-path mix (per cell — victory/mercy/capitulate/concede/defeat):
 Stage summaries (runs-weighted):
   early      cells=48  win= 69%  statusEng= 26%  dotFrac= 59%  rounds=3.8  util=100%  H=0.98  dom= 98%(straw-mans-jab)
              win-path: vic=1956 mer=0 cap=24 con=0 def=900
-  mid        cells=40  win=  8%  statusEng= 17%  dotFrac= 49%  rounds=4.0  util=100%  H=0.99  dom= 68%(slippery-slope)
+  mid        cells=40  win=  8%  statusEng= 17%  dotFrac= 49%  rounds=4.0  util=100%  H=0.99  dom= 69%(slippery-slope)
              win-path: vic=148 mer=0 cap=49 con=0 def=2203
   late       cells=48  win=  0%  statusEng= 14%  dotFrac= 50%  rounds=3.4  util=100%  H=0.99  dom= 92%(cassandras-burden)
              win-path: vic=1 mer=0 cap=0 con=0 def=2879
@@ -320,16 +316,16 @@ Per-card usage (all cells):
  unpl% = hand entries discarded un-played at phase end / (plays+unplayed);
  hpF/hpP = HP swing (immediate + projected DoT) attributed to the FREE/PAID line)
   card                         plays bottom   top statusLands discards  free%  paid%  fizz%  unpl%     hpF     hpP
-  half-step                    23586   7851 15735           9        0    67%    33%     0%     0%       0   32580
-  signs-and-portents           18630   3589 15041           0        0    81%    19%     0%     0%       0    8676
+  half-step                    23592   7855 15737           9        0    67%    33%     0%     0%       0   32617
+  signs-and-portents           18633   3589 15044           0        0    81%    19%     0%     0%       0    8676
   straw-mans-jab               15479   4819 10660        4819        0    69%    31%     0%     0%   32873  347378
-  slippery-slope               14969   6599  8370        6599        0    56%    44%     0%     0%   76226  277137
-  sketch-of-a-thought          13058   6719  6339        6719        0    49%    51%     0%     0%       0  217582
-  festering-argument            9276   3018  6258           0        0    67%    33%     0%     0%   26673   12446
+  slippery-slope               14973   6601  8372        6601        0    56%    44%     0%     0%   76252  277237
+  sketch-of-a-thought          13062   6721  6341        6721        0    49%    51%     0%     0%       0  217737
+  festering-argument            9282   3020  6262           0        0    67%    33%     0%     0%   26707   12470
   brace-for-impact              8624   2743  5881           0        0    68%    32%     0%     0%       0    4536
-  glimpse                       8337   2761  5576        2761        0    67%    33%     0%     0%       0  123869
+  glimpse                       8339   2762  5577        2762        0    67%    33%     0%     0%       0  123933
   refrain                       7302   3391  3911        3391        0    54%    46%     0%     0%       0  400296
-  ad-nauseam                    7010   3273  3737           0        0    53%    47%     0%     0%       0   16110
+  ad-nauseam                    7014   3273  3741           0        0    53%    47%     0%     0%       0   16110
   irresistible-grace            5860    748  5112           0        0    87%    13%     0%     0%       0       0
   the-olive-branch              5747   2154  3593         113        0    63%    37%     0%     0%       0   12852
   red-herring                   5405   2621  2784        2621        0    52%    48%     0%     0%       0   17009
@@ -340,7 +336,7 @@ Per-card usage (all cells):
   nettle-cloak                  4337    475  3862         475        0    89%    11%     0%     0%       0    5888
   common-ground                 4191   1583  2608        1583        0    62%    38%     0%     0%       0    8981
   mirror-of-longing             4063   1470  2593           0        0    64%    36%     0%     0%       0       0
-  tu-quoque                     3565    631  2934           0        0    82%    18%     0%     0%       0    3242
+  tu-quoque                     3574    632  2942           0        0    82%    18%     0%     0%       0    3242
   cassandras-burden             3463   1294  2169        1294        0    63%    37%     0%     0%       0   59415
   disarming-smile               3345   1527  1818        1527        0    54%    46%     0%     0%       0    3323
   the-closing-word              3099    367  2732           0        0    88%    12%     0%     0%       0    1384

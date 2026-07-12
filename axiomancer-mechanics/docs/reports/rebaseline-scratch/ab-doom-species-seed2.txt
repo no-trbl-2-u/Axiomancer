@@ -1,8 +1,4 @@
 
-> axiomancer-mechanics@0.37.0 combat-playtest
-> ts-node src/CLI/combat-playtest.cli.ts --stage=all --policy=all --runs=60 --seed=2 --cards --sandbox=doom-species
-
-
 Hazard combat playtest — stages=[early, mid, late, impossible] policies=[greedy, blind, dot-weaver, control-lock, aggro-brute, turtle, chaos, mercy-seeker] deck=policy-pick runs=60 seed=2
 Sandbox set applied: doom-species (1 cards, 0 overrides)
 
@@ -73,9 +69,9 @@ Hazard combat playtest matrix
   mid        mirac                     dot-weaver   policy-pick             0%  0/0/60/0       3.0       36%     53%    46%  100% 0.99   26%
   mid        mirac                     control-lock policy-pick             5%  0/3/57/0       4.6       22%     49%    44%  100% 1.00   62%
   mid        mirac                     aggro-brute  policy-pick             0%  0/0/60/0       3.9       21%     19%    16%  100% 1.00   46%
-  mid        mirac                     turtle       policy-pick             0%  0/0/60/0       3.7        2%     42%    53%  100% 1.00   31%
+  mid        mirac                     turtle       policy-pick             0%  0/0/60/0       3.8        2%     42%    52%  100% 1.00   31%
   mid        mirac                     chaos        policy-pick             0%  0/0/60/0       4.0       12%     56%    44%  100% 0.99   46%
-  mid        mirac                     mercy-seeker policy-pick             2%  1/0/59/0       3.9        8%     42%    57%  100% 1.00   46%
+  mid        mirac                     mercy-seeker policy-pick             2%  1/0/59/0       3.9        8%     42%    57%  100% 1.00   45%
   mid        hasshaku-sama             greedy       policy-pick             2%  0/1/59/0       5.0       23%     55%    45%  100% 0.98   43%
   mid        hasshaku-sama             blind        policy-pick             2%  0/1/59/0       5.0       23%     55%    45%  100% 0.98   42%
   mid        hasshaku-sama             dot-weaver   policy-pick             8%  4/1/55/0       4.0       38%     54%    45%  100% 0.99   25%
@@ -321,24 +317,24 @@ Per-card usage (all cells):
  unpl% = hand entries discarded un-played at phase end / (plays+unplayed);
  hpF/hpP = HP swing (immediate + projected DoT) attributed to the FREE/PAID line)
   card                         plays bottom   top statusLands discards  free%  paid%  fizz%  unpl%     hpF     hpP
-  signs-and-portents           18866   3983 14883           0        0    79%    21%     0%     0%       0    8702
-  sketch-of-a-thought          18205   9022  9183        9022        0    50%    50%     0%     0%       0  335043
-  half-step                    17964   5165 12799          16        0    71%    29%     0%     0%       0   10522
-  slippery-slope               17868   7579 10289        7579        0    58%    42%     0%     0%   85492  335092
+  signs-and-portents           18870   3984 14886           0        0    79%    21%     0%     0%       0    8702
+  sketch-of-a-thought          18208   9023  9185        9023        0    50%    50%     0%     0%       0  335077
+  half-step                    17968   5169 12799          16        0    71%    29%     0%     0%       0   10552
+  slippery-slope               17872   7579 10293        7579        0    58%    42%     0%     0%   85537  335092
   brace-for-impact             17781   5883 11898           0        0    67%    33%     0%     0%       0   38342
   straw-mans-jab               17042   5323 11719        5323        0    69%    31%     0%     0%   46674  407564
-  festering-argument           13264   3995  9269          10        0    70%    30%     0%     0%   53647   25293
-  circular-reasoning           13079   3848  9231           0        0    71%    29%     7%     0%       0   56808
+  festering-argument           13269   3995  9274          10        0    70%    30%     0%     0%   53725   25293
+  circular-reasoning           13083   3850  9233           0        0    71%    29%     7%     0%       0   56838
   practiced-cadence             9849   1715  8134           0        0    83%    17%     2%     0%       0       0
   cassandras-burden             7056   2722  4334        2722        0    61%    39%     0%     0%       0  201161
   mirror-of-longing             6923   2018  4905           0        0    71%    29%     3%     0%       0       0
   crown-of-thorns               6680   1128  5552           0        0    83%    17%     0%     0%       0       0
   the-olive-branch              6504   2510  3994          62        0    61%    39%     0%     0%       0    8366
-  measured-answer               6466   2356  4110           0        0    64%    36%     0%     0%       0     828
+  measured-answer               6473   2360  4113           0        0    64%    36%     0%     0%       0     858
   nettle-cloak                  6099   1327  4772        1327        0    78%    22%     0%     0%       0   24182
   second-thoughts               5224   1473  3751           5        0    72%    28%     9%     0%       0    3183
   glimpse                       4615   1940  2675        1940        0    58%    42%     0%     0%       0  127193
-  delphic-ambiguity             4224    375  3849           0        0    91%     9%    11%     0%    4993   11965
+  delphic-ambiguity             4228    376  3852           0        0    91%     9%    11%     0%    5032   12094
   quagmire-of-doubt             4210   1928  2282           0        0    54%    46%     1%     0%       0       0
   undistributed-middle          3809   1694  2115        1694        0    56%    44%     0%     0%       0    5716
   red-herring                   3616   2136  1480        2136        0    41%    59%     0%     0%       0   10410
@@ -352,8 +348,8 @@ Per-card usage (all cells):
   ad-nauseam                    2128    657  1471           0        0    69%    31%     0%     0%       0     775
   self-flagellant               2117    513  1604           0        0    76%    24%     0%     0%    2223   29112
   pact-of-akrasia               2085     59  2026           0        0    97%     3%     0%     0%       0      86
-  tu-quoque                     2055    290  1765           0        0    86%    14%     0%     0%       0     217
-  fallen-grace                  1981    360  1621         360        0    82%    18%     0%     0%       0   19408
+  tu-quoque                     2059    291  1768           0        0    86%    14%     0%     0%       0     217
+  fallen-grace                  1985    361  1624         361        0    82%    18%     0%     0%       0   19444
   disarming-smile               1861   1102   759        1102        0    41%    59%     0%     0%       0    1601
   mounting-case                 1809    993   816         993        0    45%    55%     0%     0%       0  109229
   sweet-poison                  1641    907   734         907        0    45%    55%     0%     0%   12092   55372

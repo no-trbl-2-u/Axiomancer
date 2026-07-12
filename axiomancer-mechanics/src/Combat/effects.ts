@@ -70,12 +70,19 @@ export const RESOLUTE_MIN_MULT = 0.5;
  *  RUPTURE keeps a cap because it consumes enemy-side state the player seeded
  *  cheaply; ALL-spenders (REAP-ALL, spend-all-pips payoffs) are UNCAPPED —
  *  emptying the whole bank IS the price.
- *  // PLAYTEST-CALIBRATION: 0.35 is the initial sweep candidate; the ratified
- *  //  sweep set is F ∈ {0.25, 0.35, 0.45, 0.60}. Removing the old 80-HP floor
- *  //  LOWERS early caps (the floor WAS early behavior: F × ~100-HP early
- *  //  enemies sits under 80), so F must rise as the floor falls — the
- *  //  supervised sweep picks the final value. */
-export const RUPTURE_CAP_FRACTION = 0.35;
+ *  // PLAYTEST-CALIBRATION (swept 2026-07-12, spec 32 §12 item 5): the ratified
+ *  //  sweep F ∈ {0.25, 0.35, 0.45, 0.60} ran the full matrix + Foundry/Tithe
+ *  //  preset probes at seeds 1-2 (docs/reports/rebaseline-scratch/sweep-F*).
+ *  //  0.60 WON: Foundry (the RUPTURE preset) lifts monotonically with F
+ *  //  (greedy early 57.8→64.8%, mid 0→1.4%) while the policy-pick matrix is
+ *  //  F-invariant (early 85.1% at every F — in band) and dominance never
+ *  //  moves (Foundry's dominant card is sketch-of-a-thought at every F; the
+ *  //  Overtake payoff grows with F without taking over). Tithe is flat across
+ *  //  F — its REAP-ALL is uncapped, so it serves as the control. Removing the
+ *  //  old 80-HP floor LOWERED early caps (the floor WAS early behavior), so F
+ *  //  rose as the floor fell: 0.60 × ~100-HP early enemies = 60, still under
+ *  //  the retired floor — a mild early nerf, honest to the thesis. */
+export const RUPTURE_CAP_FRACTION = 0.60;
 /** RUPTURE cap for a given enemy: round(fraction × enemy max HP) — no floor. */
 export function ruptureBurstCap(enemyMaxHealth: number): number {
     return Math.round(RUPTURE_CAP_FRACTION * enemyMaxHealth);

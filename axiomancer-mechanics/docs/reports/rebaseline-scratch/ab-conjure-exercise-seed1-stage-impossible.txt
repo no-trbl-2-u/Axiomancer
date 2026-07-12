@@ -1,6 +1,6 @@
 
 > axiomancer-mechanics@0.37.0 combat-playtest
-> ts-node src/CLI/combat-playtest.cli.ts --stage=impossible --policy=all --runs=60 --seed=1 --sandbox=conjure-exercise --cards
+> ts-node src/CLI/combat-playtest.cli.ts --stage=impossible --policy=all --runs=60 --seed=1 --cards --sandbox=conjure-exercise
 
 
 Hazard combat playtest — stages=[impossible] policies=[greedy, blind, dot-weaver, control-lock, aggro-brute, turtle, chaos, mercy-seeker] deck=policy-pick runs=60 seed=1
@@ -16,7 +16,7 @@ Hazard combat playtest matrix
   impossible the-incompleteness        blind        policy-pick             0%  0/0/60/0       5.0       17%     52%    48%  100% 0.99   52%
   impossible the-incompleteness        dot-weaver   policy-pick             0%  0/0/60/0       5.0       25%     56%    44%  100% 0.99   44%
   impossible the-incompleteness        control-lock policy-pick             8%  5/0/55/0       7.1       27%     41%    33%  100% 0.99   40%
-  impossible the-incompleteness        aggro-brute  policy-pick             0%  0/0/60/0       5.0       16%     19%    17%  100% 0.99   45%
+  impossible the-incompleteness        aggro-brute  policy-pick             0%  0/0/60/0       5.0       16%     25%    22%  100% 0.99   29%
   impossible the-incompleteness        turtle       policy-pick             0%  0/0/60/0       5.0        2%     52%    39%  100% 0.98   76%
   impossible the-incompleteness        chaos        policy-pick             0%  0/0/60/0       5.0        9%     51%    49%  100% 0.99   46%
   impossible the-incompleteness        mercy-seeker policy-pick             0%  0/0/60/0       5.2        8%     38%    31%  100% 0.98   47%
@@ -32,7 +32,7 @@ Win-path mix (per cell — victory/mercy/capitulate/concede/defeat):
   impossible the-incompleteness        mercy-seeker policy-pick           vic=  0 mer=  0 cap=  0 con=  0 def= 60
 
 Stage summaries (runs-weighted):
-  impossible cells=8   win=  1%  statusEng= 15%  dotFrac= 45%  rounds=5.3  util=100%  H=0.99  dom= 76%(slippery-slope)
+  impossible cells=8   win=  1%  statusEng= 15%  dotFrac= 46%  rounds=5.3  util=100%  H=0.99  dom= 76%(slippery-slope)
              win-path: vic=5 mer=0 cap=0 con=0 def=475
 
 Card coverage: 39/72 eligible cards exercised (dead-card rate  46%)
@@ -43,15 +43,15 @@ Per-card usage (all cells):
  unpl% = hand entries discarded un-played at phase end / (plays+unplayed);
  hpF/hpP = HP swing (immediate + projected DoT) attributed to the FREE/PAID line)
   card                         plays bottom   top statusLands discards  free%  paid%  fizz%  unpl%     hpF     hpP
-  slippery-slope                1762    773   989         773        0    56%    44%     0%     0%   10228   48019
-  half-step                     1682    498  1184           0        0    70%    30%     0%     0%       0    3319
+  slippery-slope                1765    775   990         775        0    56%    44%     0%     0%   10286   48547
+  half-step                     1683    500  1183           0        0    70%    30%     0%     0%       0    3504
   cassandras-burden              936    460   476         460        0    51%    49%     0%     0%       0   32338
   prophecy-fulfilled             823    102   721           0        0    88%    12%     3%     0%       0   17594
   memento-mori                   797    277   520         277        0    65%    35%     0%     0%       0    2754
   zenos-half-step                757    249   508           0        0    67%    33%     0%     0%       0    2911
   heart-of-the-matter            748    223   525           0        0    70%    30%     0%     0%       0    3051
   second-thoughts                662    127   535           0        0    81%    19%     8%     0%       0    2565
-  stuck-in-their-head            620    172   448           0        0    72%    28%     0%     0%       0       0
+  stuck-in-their-head            621    171   450           0        0    72%    28%     0%     0%       0       0
   captive-audience               503    131   372           0        0    74%    26%     0%     0%       0       0
   measured-answer                473    235   238           0        0    50%    50%     0%     0%       0     282
   foundry-sprite                 470     85   385           0        0    82%    18%     2%     0%       0     176
@@ -72,14 +72,14 @@ Per-card usage (all cells):
   currys-conversion              236    132   104           0        0    44%    56%     3%     0%       0    1439
   sketch-of-a-thought            235    135   100         135        0    43%    57%     0%     0%       0    7120
   anvil-of-form                  223     36   187           0        0    84%    16%     0%     0%       0       0
-  pact-of-akrasia                221     57   164           0        0    74%    26%     0%     0%       0     457
-  glimpse                        211    174    37         174        0    18%    82%     0%     0%       0    7370
+  pact-of-akrasia                223     58   165           0        0    74%    26%     0%     0%       0     572
+  glimpse                        215    175    40         175        0    19%    81%     0%     0%       0    8466
   mirror-of-guilt                204     36   168           0        0    82%    18%     0%     0%       0       0
-  resonance-detonation           203     38   165           0        0    81%    19%     8%     0%    1166    6142
-  the-overtake                   201     47   154           0        0    77%    23%     0%     0%       0   13599
-  the-closing-word               200     53   147           0        0    74%    27%     0%     0%       0     325
+  resonance-detonation           203     42   161           0        0    79%    21%     7%     0%    1322    7879
+  the-closing-word               203     54   149           0        0    73%    27%     0%     0%       0     449
+  the-overtake                   199     17   182           0        0    91%     9%    15%     0%       0    7504
   crumbling-resolve              180     32   148           0        0    82%    18%     0%     0%       0       0
-  the-oracles-eye                146     39   107           0        0    73%    27%     0%     0%       0       0
+  the-oracles-eye                147     39   108           0        0    73%    27%     0%     0%       0       0
   hedgehogs-dilemma              142     39   103           0        0    73%    27%     0%     0%       0       0
   achilles-and-the-tortoise      140     47    93           0        0    66%    34%     0%     0%       0       0
   tf-cinder                       85     11    74          11        0    87%    13%     1%     0%     183     326
