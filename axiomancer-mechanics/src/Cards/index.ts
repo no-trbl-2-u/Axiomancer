@@ -13,19 +13,23 @@ export type {
     CombatResources,
     CardCombatEffects, CardSpecialMechanic,
     CardSynergy, SynergyPredicate,
+    // WS4.2 — combat-state synergy predicate (spec 32 §12 item 4)
+    SynergyStatePredicate,
 } from './types';
 
 // Phase 142 — Extended synergy predicate types
-export type { ExtendedSynergyPredicate } from './synergy-predicates';
+export type { ExtendedSynergyPredicate, SynergyLedgerView } from './synergy-predicates';
 
 // Phase 142 — Extended synergy predicate functionality
+// (+ WS4.2 checkStatePredicate — the combat-ledger gate evaluator)
 export {
     evaluateExtendedSynergyPredicate,
     checkSinglePredicate,
     checkAnyCountPredicate,
     checkAllRequiredPredicate,
     checkBuffDebuffCombo,
-    checkTotalIntensityPredicate
+    checkTotalIntensityPredicate,
+    checkStatePredicate,
 } from './synergy-predicates';
 
 export {
@@ -42,6 +46,13 @@ export type {
 export {
     cardLibrary, getCardById,
 } from './cards.library';
+
+// WS2.1 — the Thoughtform registry: the cards CONJURE creates. Real `Card`
+// records outside the pinned 70-card library (correction C-11); resolved by
+// `getCardById` via the sandbox → thoughtform → library chain.
+export {
+    thoughtformLibrary, getThoughtformById,
+} from './cards.thoughtforms';
 
 // Spec 32 v3 — rank ladder + card types (§4) and the pricing table (ledger #2).
 export type { CardRank, CardRarity, CardType, CardRider } from './types';

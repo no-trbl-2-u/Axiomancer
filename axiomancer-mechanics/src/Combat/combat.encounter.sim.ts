@@ -23,13 +23,13 @@ import {
     initializeCombatEncounter, rollEncounterDice, playCombatCard,
     resolveThreatPhase, startTurn, draftStanceDie, endTurn, chooseDraft, revealedCurrentStance,
     playSignatureSkill, getDraftedDie, handCards, selectMercyChoice, getSignatureSkill,
-    tapFateDie,
+    tapFateDie, recoilXRange,
 } from './combat.engine';
 import { RESERVE_MAX } from './combat.dice';
 import { getPendingDotTotal } from './effects';
 import { getRng } from '../Utils/rng';
 import type {
-    CombatAttributionRow, CombatCard, CombatEncounterState, CombatOutcome,
+    CombatAttributionRow, CombatCard, CombatEncounterState, CombatEvent, CombatOutcome,
 } from './combat.encounter.types';
 import { COMBAT_SIM_POLICIES, type CombatSimPolicy, type CombatSimPolicyId } from './combat.sim-policies';
 
@@ -105,7 +105,13 @@ export interface CombatSimStats {
 
 /** Per-card telemetry for one run (or aggregated over many), keyed by the
  *  card/card id — NOT the hand-entry uid. `statusLands` counts powered plays
- *  that landed at least one status on the enemy (the doctrine witness). */
+ *  that landed at least one status on the enemy (the doctrine witness).
+ *
+ *  WS1.1 line telemetry — the OPTIONAL fields below are populated only on
+ *  AGGREGATED rows (`simulateHazardPatternCombatDetailed` / the playtest
+ *  report); per-run rows from `runOneEncounter` omit them so the pinned
+ *  per-run row shapes stay stable (the numbers ride the parallel
+ *  `cardLineTelemetry` record instead). */
 export interface CombatCardUsage {
     cardId: string;
     plays: number;
@@ -113,6 +119,34 @@ export interface CombatCardUsage {
     topPlays: number;
     statusLands: number;
     discards: number;
+    /** Attempted plays (either line) that emitted an `effect-fizzled` event
+     *  for this card. A fizzled PAID attempt that the policy drains via the
+     *  FREE line counts one fizzle AND one top play. */
+    fizzles?: number;
+    /** HP-swing attributed per line: immediate enemy-HP loss during the play
+     *  plus the projected DoT of effects it landed (`damagePerRound ×
+     *  intensity × remainingDuration` — the `recordAttribution` formula).
+     *  `free` = top-line plays, `paid` = powered bottom-line plays. */
+    lineContribution?: { free: number; paid: number };
+    /** Hand entries discarded un-played at phase end (the engine's draw-fresh
+     *  discard site) — the dead-in-hand denominator. */
+    unplayedAtPhaseEnd?: number;
+}
+
+/** WS1.1 — per-run FREE/PAID line telemetry, kept SEPARATE from the per-run
+ *  `CombatCardUsage` rows (whose exact shape is pinned by the sim-policy
+ *  decision-sequence e2e). Aggregators fold these into the optional
+ *  `CombatCardUsage` fields. */
+export interface CombatCardLineTelemetry {
+    cardId: string;
+    /** Attempted plays that emitted `effect-fizzled` for this card. */
+    fizzles: number;
+    /** HP swing (immediate + projected DoT) from FREE (top) plays. */
+    freeHpSwing: number;
+    /** HP swing (immediate + projected DoT) from PAID (bottom) plays. */
+    paidHpSwing: number;
+    /** Hand entries discarded un-played at phase end. */
+    unplayedAtPhaseEnd: number;
 }
 
 /** Optional per-run knobs threaded through `runOneEncounter`. */
@@ -179,6 +213,43 @@ function bestSignature(s: CombatEncounterState, policy: CombatSimPolicy, rng: ()
     return best;
 }
 
+/** The card's line-telemetry row, created zeroed on first touch. */
+function lineRow(
+    lines: Record<string, CombatCardLineTelemetry>,
+    cardId: string,
+): CombatCardLineTelemetry {
+    return lines[cardId] ?? (lines[cardId] = {
+        cardId, fizzles: 0, freeHpSwing: 0, paidHpSwing: 0, unplayedAtPhaseEnd: 0,
+    });
+}
+
+/**
+ * WS1.1 — the HP swing one play produced, measured sim-side so it needs no
+ * engine tag: the enemy HP the play removed RIGHT NOW (payoff bursts, TICK
+ * advances, reflect) plus the projected DoT of every enemy-side effect it
+ * landed — the same `damagePerRound × max(1,intensity) ×
+ * max(1,remainingDuration)` projection `recordAttribution` uses, read off the
+ * post-play active effect (falling back to the landed intensity × 1 when the
+ * active row is gone, e.g. instantly consumed).
+ */
+function playHpSwing(
+    before: CombatEncounterState,
+    after: CombatEncounterState,
+    events: readonly CombatEvent[],
+): number {
+    let swing = Math.max(0, before.enemy.health - after.enemy.health);
+    for (const ev of events) {
+        if (ev.kind !== 'effect-landed' || ev.target !== 'enemy') continue;
+        const dot = ev.effect.payload.damageOverTime;
+        if (!dot) continue;
+        const active = after.enemy.effects.find(ae => ae.effectId === ev.effectId);
+        swing += dot.damagePerRound
+            * Math.max(1, active?.intensity ?? ev.intensity)
+            * Math.max(1, active?.remainingDuration ?? 1);
+    }
+    return swing;
+}
+
 /** Records one play against the card's usage row (keyed by card/card id). */
 function bumpUsage(
     usage: Record<string, CombatCardUsage>,
@@ -196,12 +267,21 @@ function bumpUsage(
     if (landedStatus) row.statusLands++;
 }
 
-/** Plays a single threat phase to a stop (enemy dead, mercy opened, or hand/dice out). */
+/**
+ * Plays a single threat phase to a stop under the ROUND-TURN LAW (Gate 0,
+ * 2026-07-10): ONE tray roll (`startTurn`) per phase. The turn's powered plays
+ * run off the drafted die (riding the combo refresh), then the Reserve, then
+ * the floating pool — the law caps TRAY ROLLS, not card plays — after which
+ * the policy drains the leftover hand through the FREE tops and ends the turn.
+ * The guard counters are kept but never bind on legal play: the old
+ * `endTurn → startTurn` Conviction farm is gone.
+ */
 function policyPlayPhase(
     state: CombatEncounterState,
     policy: CombatSimPolicy,
     rng: () => number,
     usage: Record<string, CombatCardUsage>,
+    lines: Record<string, CombatCardLineTelemetry>,
     focusIds?: ReadonlySet<string>,
 ): { state: CombatEncounterState; plays: number; statusPlays: number } {
     let working = state;
@@ -210,6 +290,61 @@ function policyPlayPhase(
     let guard = 0;
     const fizzledUids = new Set<string>();
 
+    // WS7.2 chosen X-costs — the policy's temperament picks X inside the
+    // engine's own clamp range; policies without a `chooseX` play the printed
+    // minimum. Undefined for cards without a chosen-X mechanic.
+    const chosenXFor = (card: CombatCard): { chosenX: number } | undefined => {
+        const range = recoilXRange(working, card);
+        if (!range) return undefined;
+        const x = policy.chooseX ? policy.chooseX(working, card, range, rng) : range.min;
+        return { chosenX: x };
+    };
+
+    // WS1.1 — plays the FREE (top) line and records its line telemetry. A top
+    // play can itself fizzle (e.g. a free enchant whose permanent is already
+    // standing); it still counts a play, exactly as before the telemetry.
+    const playFreeTop = (uid: string, card: CombatCard): void => {
+        const resT = playCombatCard(working, { uid }, false);
+        const row = lineRow(lines, card.id);
+        row.freeHpSwing += playHpSwing(working, resT.state, resT.events);
+        if (resT.events.some(e => e.kind === 'effect-fizzled')) row.fizzles++;
+        working = resT.state;
+        plays++;
+        bumpUsage(usage, card, 'top');
+    };
+
+    // ── The ONE legal tray roll + stance draft for this phase ────────────────
+    if (working.dice.length === 0 && working.draftedDieId === null && !working.turnTakenThisPhase) {
+        working = startTurn(working).state;
+        if (working.phase !== 'phase-play') return { state: working, plays, statusPlays };
+    }
+    if (working.draftedDieId === null && working.dice.some(d => !d.floating)) {
+        const want = selectCard(working, policy, rng, fizzledUids, focusIds);
+        // Blind play drafts off only what the player can see: the stance is
+        // `null` until revealed (via the read or a Scout), so chooseDraft can't
+        // pre-seek advantage — it color-matches like a real player on turn one.
+        const enemyStance = policy.blind ? revealedCurrentStance(working) : currentPhase(working).enemyStance;
+        const pick = chooseDraft(working.dice, want?.card.stance ?? 'wild', enemyStance);
+        if (pick) {
+            // Fate Engine P1 — BANK the unpicked die when the Reserve has room
+            // and Conviction isn't starved (pips beat a flat +1◆).
+            const bankUnpicked = (working.reserve ?? []).length < RESERVE_MAX && working.conviction >= 2;
+            working = draftStanceDie(working, pick, { bankUnpicked }).state;
+        }
+        // Fate Engine P1 — the universal FATE TAP: a dead X die in the tray
+        // advances the strongest enemy DoT (or banks +1 Conviction).
+        const xDie = working.dice.find(d => d.color === 'x' && d.state !== 'spent' && d.id !== working.draftedDieId);
+        if (xDie && working.fateTappedTurn !== working.turn) {
+            const choice = getPendingDotTotal(working.enemy, working.round).total > 0 ? 'dot-tick' as const : 'conviction' as const;
+            working = tapFateDie(working, xDie.id, choice).state;
+        }
+    }
+
+    // ── Powered plays WITHIN the one turn ────────────────────────────────────
+    // Power sources in order: the drafted die while it lives (the combo
+    // refresh keeps it alive across NEW statuses), then the Reserve (oldest =
+    // ripest first), then the floating pool (the multi-float turn: ALL floats
+    // are spendable in this one round).
     while (working.phase === 'phase-play' && guard < 60) {
         guard++;
         if (working.finalOutcome || working.mercyChoiceActive) break;
@@ -223,114 +358,54 @@ function policyPlayPhase(
             }
         }
 
-        // Ensure a usable drafted die for this turn.
-        let drafted = getDraftedDie(working);
-        if (!drafted || drafted.state !== 'available' || drafted.color === 'x') {
-            // Fate Engine P1 — the RESERVE is a second power source: spend the
-            // oldest (ripest) banked die before rolling the next turn.
-            const banked = (working.reserve ?? [])[0];
-            if (banked) {
-                const wantR = selectCard(working, policy, rng, fizzledUids, focusIds, banked.color);
-                if (wantR) {
-                    const resR = playCombatCard(working, { uid: wantR.uid }, true, banked.id);
-                    if (!resR.events.some(e => e.kind === 'effect-fizzled')) {
-                        working = resR.state;
-                        plays++;
-                        const landedR = resR.events.some(e => e.kind === 'effect-landed' && e.target === 'enemy');
-                        if (landedR) statusPlays++;
-                        bumpUsage(usage, wantR.card, 'bottom', landedR);
-                        if (working.finalOutcome || working.mercyChoiceActive) break;
-                        continue;
-                    }
-                    fizzledUids.add(wantR.uid);
-                }
-            }
-            if (working.draftedDieId !== null) working = endTurn(working).state;
-            if (working.dice.length === 0) {
-                // Phase 26 (the Turn Law) — one dice-turn per threat phase;
-                // once already taken (and Reserve above is spent too), no
-                // more BOTTOM plays are legal this phase (was the
-                // endTurn/startTurn Conviction-farm exploit the audit
-                // flagged). FREE (dieless) top plays stay legal all turn
-                // long, though — spend down the rest of the hand via its
-                // free line instead of just giving up on the phase.
-                if (working.turnTakenThisPhase) {
-                    const top = handCards(working)[0];
-                    if (!top) break;
-                    working = playCombatCard(working, { uid: top.uid }, false).state;
-                    plays++;
-                    bumpUsage(usage, top.card, 'top');
-                    if (working.finalOutcome || working.mercyChoiceActive) break;
-                    continue;
-                }
-                working = startTurn(working).state;
-                if (working.phase !== 'phase-play') break;
-            }
-            const want = selectCard(working, policy, rng, fizzledUids, focusIds);
-            // Blind play drafts off only what the player can see: the stance is
-            // `null` until revealed (via the read or a Scout), so chooseDraft can't
-            // pre-seek advantage — it color-matches like a real player on turn one.
-            const enemyStance = policy.blind ? revealedCurrentStance(working) : currentPhase(working).enemyStance;
-            const pick = chooseDraft(working.dice, want?.card.stance ?? 'wild', enemyStance);
-            if (!pick) break;
-            // Fate Engine P1 — BANK the unpicked die when the Reserve has room
-            // and Conviction isn't starved (pips beat a flat +1◆).
-            const bankUnpicked = (working.reserve ?? []).length < RESERVE_MAX && working.conviction >= 2;
-            working = draftStanceDie(working, pick, { bankUnpicked }).state;
-            // Fate Engine P1 — the universal FATE TAP: a dead X die in the tray
-            // advances the strongest enemy DoT (or banks +1 Conviction).
-            const xDie = working.dice.find(d => d.color === 'x' && d.state !== 'spent' && d.id !== working.draftedDieId);
-            if (xDie && working.fateTappedTurn !== working.turn) {
-                const choice = getPendingDotTotal(working.enemy, working.round).total > 0 ? 'dot-tick' as const : 'conviction' as const;
-                working = tapFateDie(working, xDie.id, choice).state;
-                if (working.finalOutcome) break;
-            }
-            drafted = getDraftedDie(working);
-            if (!drafted || drafted.state !== 'available' || drafted.color === 'x') {
-                // Forced X — chip with a free top, then end the turn.
-                const top = handCards(working)[0];
-                if (top) {
-                    working = playCombatCard(working, { uid: top.uid }, false).state;
-                    plays++;
-                    bumpUsage(usage, top.card, 'top');
-                }
-                working = endTurn(working).state;
-                if (handCards(working).length === 0 && working.dice.length === 0) break;
-                continue;
-            }
+        const drafted = getDraftedDie(working);
+        const sources: { dieId?: string; color: string }[] = [];
+        if (drafted && drafted.state === 'available' && drafted.color !== 'x') {
+            sources.push({ color: drafted.color });
         }
-
-        const want = selectCard(working, policy, rng, fizzledUids, focusIds, drafted.color);
-        if (!want) {
-            const top = handCards(working)[0];
-            if (top) {
-                working = playCombatCard(working, { uid: top.uid }, false).state;
-                plays++;
-                bumpUsage(usage, top.card, 'top');
-            }
-            working = endTurn(working).state;
-            if (handCards(working).length === 0 && working.dice.length === 0) break;
-            continue;
+        for (const banked of working.reserve ?? []) sources.push({ dieId: banked.id, color: banked.color });
+        for (const f of working.dice) {
+            if (f.floating && f.state === 'available') sources.push({ dieId: f.id, color: f.color });
         }
+        if (sources.length === 0) break; // powered plays exhausted — wind down
 
-        const res = playCombatCard(working, { uid: want.uid }, true);
-        if (res.events.some(e => e.kind === 'effect-fizzled')) {
-            // Token-gated with no banked token — drain via the free top and skip it.
-            fizzledUids.add(want.uid);
-            working = playCombatCard(working, { uid: want.uid }, false).state;
+        let attempted = false;
+        for (const src of sources) {
+            const want = selectCard(working, policy, rng, fizzledUids, focusIds, src.color);
+            if (!want) continue;
+            attempted = true;
+            const res = playCombatCard(working, { uid: want.uid }, true, src.dieId, undefined, chosenXFor(want.card));
+            if (res.events.some(e => e.kind === 'effect-fizzled')) {
+                // Token-gated with no banked token — skip it (the wind-down
+                // drain below still gets its free top).
+                lineRow(lines, want.card.id).fizzles++;
+                fizzledUids.add(want.uid);
+                break; // re-enter the loop with the fizzle excluded
+            }
+            lineRow(lines, want.card.id).paidHpSwing += playHpSwing(working, res.state, res.events);
+            working = res.state;
             plays++;
-            bumpUsage(usage, want.card, 'top');
-            continue;
+            const landed = res.events.some(e => e.kind === 'effect-landed' && e.target === 'enemy');
+            if (landed) statusPlays++;
+            bumpUsage(usage, want.card, 'bottom', landed);
+            break;
         }
-        working = res.state;
-        plays++;
-        const landed = res.events.some(e => e.kind === 'effect-landed' && e.target === 'enemy');
-        if (landed) statusPlays++;
-        bumpUsage(usage, want.card, 'bottom', landed);
-        if (working.finalOutcome || working.mercyChoiceActive) break;
+        if (!attempted) break; // no card matches any live die color — wind down
+    }
 
-        const after = getDraftedDie(working);
-        if (!after || after.state !== 'available') working = endTurn(working).state;
+    // ── Wind-down: the turn's dice are exhausted or colorless — drain the
+    // leftover hand through the FREE tops (legal, dieless; retreat stays in
+    // hand), then end the turn. The engine's draw-fresh site discards what
+    // remains at the phase boundary.
+    let drain = 0;
+    while (working.phase === 'phase-play' && !working.finalOutcome && !working.mercyChoiceActive && drain < 30) {
+        drain++;
+        const top = handCards(working).find(c => c.card.verbClass !== 'retreat');
+        if (!top) break;
+        playFreeTop(top.uid, top.card);
+    }
+    if (working.phase === 'phase-play' && !working.finalOutcome && working.draftedDieId !== null) {
+        working = endTurn(working).state;
     }
 
     return { state: working, plays, statusPlays };
@@ -347,8 +422,16 @@ export function runOneEncounter(
     outcome: CombatOutcome; rounds: number; plays: number; statusPlays: number; convictionSpent: number;
     dotHpDamage: number; mechanicBurstDamage: number; directHpDamage: number;
     guardOnAttack: number; playerHpTaken: number;
+    /** Gate 0 (round-turn law) — `turn-law-blocked` events in the run's
+     *  transcript. A legal policy NEVER trips the law: pinned 0 by the
+     *  turn-law e2e. */
+    turnLawBlocked: number;
     activeEffectSamples: number[];
     cardUsage: Record<string, CombatCardUsage>;
+    /** WS1.1 — per-card FREE/PAID line telemetry (fizzles, per-line HP swing,
+     *  unplayed-at-phase-end), parallel to `cardUsage` so the pinned per-run
+     *  usage-row shape stays untouched. */
+    cardLineTelemetry: Record<string, CombatCardLineTelemetry>;
     /** The final per-card HP-damage ledger (already accumulated by the engine —
      *  surfaced, not recomputed) so the detailed sim can aggregate the
      *  dominant-card share across runs. */
@@ -373,6 +456,7 @@ export function runOneEncounter(
     let playerHpTaken = 0;
     const activeEffectSamples: number[] = [];
     const cardUsage: Record<string, CombatCardUsage> = {};
+    const cardLineTelemetry: Record<string, CombatCardLineTelemetry> = {};
 
     while (state.phase !== 'complete' && loopGuard < 200) {
         loopGuard++;
@@ -382,7 +466,7 @@ export function runOneEncounter(
             continue;
         }
         if (state.phase === 'phase-play') {
-            const r = policyPlayPhase(state, policyObj, rng, cardUsage, focusIds);
+            const r = policyPlayPhase(state, policyObj, rng, cardUsage, cardLineTelemetry, focusIds);
             state = r.state;
             plays += r.plays;
             statusPlays += r.statusPlays;
@@ -393,6 +477,12 @@ export function runOneEncounter(
                 continue;
             }
             if (state.phase === 'phase-play') {
+                // WS1.1 — every hand entry still here is about to be discarded
+                // un-played by the engine's draw-fresh site in
+                // `resolveThreatPhase` (the phase-end discard).
+                for (const h of handCards(state)) {
+                    lineRow(cardLineTelemetry, h.card.id).unplayedAtPhaseEnd++;
+                }
                 // Sample active effects and guard BEFORE the threat resolves.
                 activeEffectSamples.push(state.enemy.effects.length);
                 const guardBefore = state.guard ?? 0;
@@ -436,6 +526,7 @@ export function runOneEncounter(
         plays,
         statusPlays,
         convictionSpent,
+        turnLawBlocked: state.log.filter(ev => ev.kind === 'turn-law-blocked').length,
         dotHpDamage,
         mechanicBurstDamage,
         directHpDamage,
@@ -443,6 +534,7 @@ export function runOneEncounter(
         playerHpTaken,
         activeEffectSamples,
         cardUsage,
+        cardLineTelemetry,
         attribution: state.attribution,
     };
 }
@@ -461,6 +553,15 @@ export interface CombatSimDetailedOptions {
     deck?: readonly string[];
     /** Cards boosted to the front of ranking in every run (coverage harness). */
     focusCardIds?: readonly string[];
+}
+
+/** The AGGREGATED usage row for a card, created zeroed (WS1.1 line-telemetry
+ *  fields included — aggregated rows always carry them) on first touch. */
+function aggUsageRow(cardUsage: Record<string, CombatCardUsage>, cardId: string): CombatCardUsage {
+    return cardUsage[cardId] ?? (cardUsage[cardId] = {
+        cardId, plays: 0, bottomPlays: 0, topPlays: 0, statusLands: 0, discards: 0,
+        fizzles: 0, lineContribution: { free: 0, paid: 0 }, unplayedAtPhaseEnd: 0,
+    });
 }
 
 /** A zeroed win-path tally with every `CombatOutcome` key present. */
@@ -548,14 +649,22 @@ export function simulateHazardPatternCombatDetailed(
         for (const s of r.activeEffectSamples) totalActiveEffectSamples += s;
         totalPhaseSamples += r.activeEffectSamples.length;
         for (const row of Object.values(r.cardUsage)) {
-            const agg = cardUsage[row.cardId] ?? (cardUsage[row.cardId] = {
-                cardId: row.cardId, plays: 0, bottomPlays: 0, topPlays: 0, statusLands: 0, discards: 0,
-            });
+            const agg = aggUsageRow(cardUsage, row.cardId);
             agg.plays += row.plays;
             agg.bottomPlays += row.bottomPlays;
             agg.topPlays += row.topPlays;
             agg.statusLands += row.statusLands;
             agg.discards += row.discards;
+        }
+        // WS1.1 — fold the per-run line telemetry into the aggregated rows
+        // (per-run usage rows deliberately omit these fields; see the type).
+        for (const row of Object.values(r.cardLineTelemetry)) {
+            const agg = aggUsageRow(cardUsage, row.cardId);
+            agg.fizzles = (agg.fizzles ?? 0) + row.fizzles;
+            agg.unplayedAtPhaseEnd = (agg.unplayedAtPhaseEnd ?? 0) + row.unplayedAtPhaseEnd;
+            const lc = agg.lineContribution ?? (agg.lineContribution = { free: 0, paid: 0 });
+            lc.free += row.freeHpSwing;
+            lc.paid += row.paidHpSwing;
         }
     }
 

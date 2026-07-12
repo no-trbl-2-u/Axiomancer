@@ -2,12 +2,14 @@
  * Spec 25 — Hazard-Pattern Combat: the engine (§4, §9).
  *
  * `resolveCombatPhase` drives the HP-model combat: the enemy's SOLE bar is HP,
- * and the player drops it to 0. Every verb is a combat card (projected from a learned card); the player rolls
- * stance dice and plays cards, where STATUS effects are the efficient damage
- * (DoT erodes HP; control hinders the enemy's turn) and a raw strike is the weak
- * baseline. The legacy resolver, the effects engine, the card engine, and all
- * effects are UNCHANGED — this engine *drives* `executeCard` / `applyEffect`
- * differently.
+ * and the player drops it to 0. Every verb is a combat card (projected from a
+ * learned card); the player rolls stance dice and plays cards. Combat is
+ * STATUS-FIRST — the strike is dead (spec 32 §12): every point of enemy HP
+ * falls through a printed status or its payoff (DoT ticks, affliction bursts
+ * like RUPTURE/REAP, ratified enchant-gated drips, reflect), never because a
+ * spell "hit". Control hinders the enemy's turn instead. The legacy resolver,
+ * the effects engine, the card engine, and all effects are UNCHANGED — this
+ * engine *drives* `executeCard` / `applyEffect` differently.
  *
  * Card bottom actions execute through the unchanged `executeCard`: the drafted
  * stance die is the card's whole cost — combat cards carry no resource cost.
@@ -28,18 +30,21 @@ import type { Character } from '../Character/types';
 import type { Enemy } from '../Enemy/types';
 import { getCardById } from '../Cards/cards.library';
 import { executeCard } from '../Cards/card.engine';
+import { checkStatePredicate } from '../Cards/synergy-predicates';
 import type { Card, CardRider, CardSpecialMechanic, CombatResources } from '../Cards/types';
-import type { CombatState, Stance } from './types';
+import type { CombatState, Combatant, Stance } from './types';
 import { applyDamage, heal, isDefeated } from './health';
 import {
     processRoundStartEffects, processRoundEndEffects, getActiveRollModifier,
     getThornsReflect, getDamageTakenMultiplier, getPendingDotTotal,
     getDistinctDebuffCount, getDistinctControlCount,
-    getHealingReceivedMult, getOutgoingDamageMult, decayDotsOnHeal, consumeEffect,
+    getHealingReceivedMult, getOutgoingDamageMult, getOutgoingThreatDamageMult, decayDotsOnHeal, consumeEffect,
     hasPayloadFlag, getStanceVulnMult, computeRoundsToKill,
+    fireDotTrigger, growPerEnemyActionDots,
     consumeAfflictions, consumeOneAffliction, getBackfirePerRung, consumeMarks, getMarkStacks,
+    applyCleanse,
     RUPTURE_PER_AFFLICTION_STACK, DISRUPT_DENY_AT,
-    ruptureBurstCap, reapAllBurstCap,
+    ruptureBurstCap,
     THREAT_RUNGS, THREAT_RUNGS_BOSS, BOSS_RUNG_REGROWTH, bossRungGrowthCap,
     CONCEDE_PREMISES_BASE, CONCEDE_PREMISES_ELITE, CONCEDE_PREMISES_BOSS,
     capitulateThreshold,
@@ -54,11 +59,11 @@ import {
     COMBAT_HAND_SIZE, buildCombatDeck, drawCombatCards, shuffleCombatDeck,
 } from './combat.deck';
 import {
-    toCombatCard, cardStanceColor, effectImpact, riderText,
+    toCombatCard, cardStanceColor, effectImpact, riderText, statePredicateText,
 } from './combat.cards';
 import { recordAttribution } from './combat.attribution';
-import { canAct, getActiveEffectModifiers, getActiveDotTotal } from './effect-modifiers';
-import { getThreatSequence } from './combat.threat';
+import { canAct, getActiveEffectModifiers, getActiveDotTotal, dotRoundClockPhase } from './effect-modifiers';
+import { getThreatSequence, commitThreatBranch } from './combat.threat';
 import { getSignatureSkill, applySignatureSkill, playerArchetype } from './combat.signature';
 import { getSignaturesForLoadout } from '../Items/relic.library';
 import type {
@@ -72,10 +77,14 @@ import type {
 /** Safety cap on total phases processed — prevents a degenerate stalemate loop. */
 const MAX_PHASES = 60;
 
-// ── Read & color-match tuning (now scale the strike's HP damage) ─────────────
+// ── Read & color-match tuning (scales STATUS payoffs, guard, and riposte) ────
+// Status-first combat (spec 32 §12): these knobs never price a raw hit — the
+// read multiplier scales the printed status payoffs (RUPTURE fuel, REAP bursts)
+// and the defensive setups (guard/barrier/riposte magnitudes).
 
-/** Strike-damage multipliers by stance-read result (drafted die vs hidden enemy
- *  stance). Winning the read hits harder; losing it glances. */
+/** Read multipliers by stance-read result (drafted die vs hidden enemy
+ *  stance). Winning the read makes payoffs/setups bite harder; losing it
+ *  glances. */
 export const READ_DAMAGE_MULT: Record<CombatReadResult, number> = {
     advantage: 1.5, neutral: 1.0, disadvantage: 0.5, none: 1.0,
 };
@@ -214,7 +223,7 @@ export function getCard(cardId: string): CombatCard | null {
     return toCombatCard(cardId, lookupCard, lookupEffectDef);
 }
 
-// ── RPS advantage — per-phase die-cost scaling (§4.8) ────────────────────────
+// ── RPS advantage — legacy die-cost classifier + the live read (§4.8) ────────
 
 /** Heart > Body > Mind > Heart. True if stance `a` beats stance `b`. */
 export function stanceBeats(a: Stance, b: Stance): boolean {
@@ -229,9 +238,17 @@ export interface CardDieCost {
 }
 
 /**
- * Resolves the die cost of a card's bottom action against the current enemy
- * phase stance (§4.8). Advantage → free (0 dice). Neutral → 1 die. Disadvantage
- * → 2 dice. Wild cards are always neutral.
+ * LEGACY die-cost classifier (spec 25 §4.8 — RPS advantage). Maps a card color
+ * against the enemy's phase stance onto the historical 0/1/2-die price
+ * (advantage → 0, neutral → 1, disadvantage → 2; Wild/X → neutral). NO play
+ * path charges this price any more: play legality and the actual die COST are
+ * owned by THE COLOR LAW inside `playCombatCard` (~:1150 — a die powers only a
+ * card of its color; WILD is the sole exception), and the read's power scaling
+ * lives in `READ_DAMAGE_MULT`. This function survives ONLY as the
+ * advantage-read classifier behind `cardDieCostPreview` (the UI/CLI RPS
+ * indicator): consumers should read `advantage` and ignore `cost`.
+ * Deprecated on the public barrels (`src/Combat/index.ts`, `src/index.ts`);
+ * kept because barrel removal is a semver-major phase.
  */
 export function resolveCardDieCost(cardColor: CombatDieColor, enemyPhaseStance: Stance): CardDieCost {
     if (cardColor === 'wild' || cardColor === 'x') return { cost: 1, advantage: 'neutral' };
@@ -315,7 +332,12 @@ export function initializeCombatEncounter(
     const clonedEnemy = deepClone(enemy);
     const deck = playerDeck && playerDeck.length > 0 ? playerDeck.slice() : buildCombatDeck(clonedPlayer);
 
-    const threatPhases = getThreatSequence(clonedEnemy);
+    let threatPhases = getThreatSequence(clonedEnemy);
+    // WS9 (spec 32 §12 #7) — a branch on the OPENING phase commits at combat
+    // start (its phase START); no threat has resolved yet, so the full-block
+    // ledger reads false.
+    const openingBranch = commitThreatBranch(threatPhases, 0, clonedEnemy, false);
+    if (openingBranch) threatPhases = openingBranch.phases;
 
     // Draw the opening hand (5) from a shuffled deck.
     const shuffled = shuffleCombatDeck(deck);
@@ -335,6 +357,8 @@ export function initializeCombatEncounter(
         dice: [],
         draftedDieId: null,
         turn: 0,
+        // Gate 0 (round-turn law) — no tray rolled yet this phase.
+        turnTakenThisPhase: false,
         conviction: 0,
         revealedStances: [],
         lastRead: 'none',
@@ -365,6 +389,11 @@ export function initializeCombatEncounter(
         pendingOmens: [],
         spellsPlayedThisTurn: 0,
         lastSpellCardId: null,
+        // Spec 32 §12 #4 — the combat ledgers start empty.
+        recoilPaidThisTurn: 0,
+        enemyDamageThisTurn: 0,
+        enemyDamageLastRound: 0,
+        lastThreatFullyBlocked: false,
         conjuredUids: [],
         threatPhases,
         threatMarks: threatPhases.map(() => 'pending'),
@@ -414,12 +443,18 @@ export function startTurn(
 ): CombatTransition {
     if (state.phase !== 'phase-play') return { state, events: [] };
     if (state.draftedDieId !== null) return { state, events: [] }; // already drafted this turn
-    // Phase 26 (the Turn Law) — one dice-turn per threat phase, an engine
-    // invariant. A second startTurn call within the same phase is refused;
-    // it does not touch card plays — floating/Reserve dice remain a
-    // separate power source within the one turn already taken.
+    // Gate 0 (2026-07-10) — the ROUND-TURN LAW: ONE tray roll per threat
+    // phase. A second roll in the same phase is refused outright (state
+    // untouched) with a `turn-law-blocked` event so callers and telemetry can
+    // see the attempt. The law caps TRAY ROLLS, not card plays — Reserve dice
+    // and floating dice still power extra plays WITHIN the one turn (the
+    // multi-float turn is owner-locked: ALL floats may be spent in one round).
     if (state.turnTakenThisPhase) {
-        const blocked: CombatEvent[] = [{ kind: 'turn-law-blocked', phaseIndex: state.currentPhaseIndex }];
+        const blocked: CombatEvent[] = [
+            { kind: 'turn-law-blocked', turn: state.turn, phaseIndex: state.currentPhaseIndex },
+        ];
+        // The tray/draft/turn are untouched — only the log records the attempt
+        // (auditor transcripts must show illegal rolls being refused).
         return { state: withLog(state, blocked), events: blocked };
     }
     const turn = state.turn + 1;
@@ -456,7 +491,11 @@ export function startTurn(
     }
     const next: CombatEncounterState = {
         ...state, player, dice, draftedDieId: null, turn, lastRead: 'none', carriedDie,
-        spellsPlayedThisTurn: 0, echoNextSpell: false, turnTakenThisPhase: true,
+        spellsPlayedThisTurn: 0, echoNextSpell: false,
+        // Spec 32 §12 #4 — the per-turn RECOIL ledger resets with the turn.
+        recoilPaidThisTurn: 0,
+        // Gate 0 — this phase's one legal tray roll is now taken.
+        turnTakenThisPhase: true,
     };
     const events: CombatEvent[] = [
         { kind: 'turn-dice-rolled', turn, dice },
@@ -636,6 +675,7 @@ export function tapFateDie(
     const events: CombatEvent[] = [];
     let enemy = state.enemy;
     let conviction = state.conviction;
+    let souls = state.souls ?? 0;
     if (choice === 'conviction') {
         conviction = Math.min(CONVICTION_CAP, conviction + FATE_TAP_CONVICTION);
         events.push({ kind: 'fate-tapped', dieId, choice, amount: FATE_TAP_CONVICTION });
@@ -651,9 +691,19 @@ export function tapFateDie(
         enemy = applyDamage(enemy, strongest.amount);
         events.push({ kind: 'fate-tapped', dieId, choice, amount: strongest.amount });
         events.push({ kind: 'dot-tick', effectId: strongest.effectId, label: strongest.label, amount: strongest.amount, target: 'enemy' });
+        // Same tick body as the clocks: a decaysPerTick DoT pays a stack for
+        // this manual tick, washes out at 0, and a soul-worthy washout still
+        // yields its expiry Soul.
+        const decayed = decayManuallyTickedDots(enemy, [strongest.effectId]);
+        enemy = decayed.bearer;
+        const washSouls = soulWorthyWashouts(decayed.washedOut);
+        if (washSouls > 0) {
+            souls += washSouls;
+            events.push({ kind: 'soul-gained', amount: washSouls, total: souls, reason: 'expiry' });
+        }
     }
     const next: CombatEncounterState = {
-        ...state, enemy, conviction,
+        ...state, enemy, conviction, souls,
         dice: state.dice.map(d => (d.id === dieId ? { ...d, state: 'spent' as const } : d)),
         fateTappedTurn: state.turn,
     };
@@ -676,6 +726,10 @@ function withLog(state: CombatEncounterState, events: CombatEvent[]): CombatEnco
  * Plays one card from hand. `useBottom` powers the full effect (costs dice via
  * RPS scaling, executes the card, drives impact + the die-refresh loop); the
  * free top action contributes a weak flat impact with no die.
+ *
+ * `play.chosenX` (WS7.2, spec 32 §12 item 5) — the player-chosen X for a
+ * chosen-X mechanic (`recoil_x`); the engine clamps it to [min, affordable].
+ * Absent, the mechanic resolves at its printed minimum.
  */
 export function playCombatCard(
     state: CombatEncounterState,
@@ -683,9 +737,11 @@ export function playCombatCard(
     useBottom: boolean,
     dieId?: string,
     rng: () => number = defaultRng,
-    /** REPRISE songbook choice (phase 28) — see `playBottomAction`. Optional
-     *  and additive; omitted callers keep the pre-existing auto-pick. */
-    reprisalCardId?: string,
+    /** Per-play choices. `chosenX` — WS7.2 chosen-X recoil. `reprisalCardId`
+     *  — REPRISE songbook choice (phase 28), see `playBottomAction`. Both
+     *  optional and additive; omitted callers keep the pre-existing
+     *  defaults. */
+    play?: { chosenX?: number; reprisalCardId?: string },
 ): CombatTransition {
     if (state.phase !== 'phase-play') return { state, events: [] };
 
@@ -698,7 +754,7 @@ export function playCombatCard(
     if (!card) return { state, events: [] };
 
     return useBottom
-        ? playBottomAction(state, entry.uid, card, dieId, rng, reprisalCardId)
+        ? playBottomAction(state, entry.uid, card, dieId, rng, play?.chosenX, play?.reprisalCardId)
         : playTopAction(state, entry.uid, card, rng);
 }
 
@@ -711,10 +767,17 @@ export function discardCombatCard(state: CombatEncounterState, uid: string): Com
     const entry = state.hand.find(h => h.uid === uid);
     if (!entry) return { state, events: [] };
     const conviction = Math.min(CONVICTION_CAP, state.conviction + 1);
+    // WS2.1: scrapping a conjured Thoughtform still pays its +1 Conviction,
+    // but the one-use token leaves the combat — it never joins the discard
+    // cycle (where a reshuffle would resurrect it as a permanent deck card).
+    const conjured = (state.conjuredUids ?? []).includes(uid);
     const next: CombatEncounterState = {
         ...state,
         hand: state.hand.filter(h => h.uid !== uid),
-        discard: [...state.discard, entry.cardId],
+        discard: conjured ? state.discard : [...state.discard, entry.cardId],
+        conjuredUids: conjured
+            ? (state.conjuredUids ?? []).filter(u => u !== uid)
+            : state.conjuredUids,
         conviction,
     };
     const events: CombatEvent[] = [{ kind: 'conviction-gained', amount: 1, total: conviction, reason: 'effect' }];
@@ -729,6 +792,21 @@ function discardEntry(state: CombatEncounterState, uid: string): CombatEncounter
         ...state,
         hand: state.hand.filter(h => h.uid !== uid),
         discard: [...state.discard, entry.cardId],
+    };
+}
+
+/**
+ * Removes a played hand entry honoring the CONJURE one-use law (spec 32 v3,
+ * WS2.1): a conjured Thoughtform leaves the combat ENTIRELY — it never enters
+ * the discard pile, so it can never reshuffle back into the deck cycle.
+ * Anything else discards normally.
+ */
+function removePlayedEntry(state: CombatEncounterState, uid: string): CombatEncounterState {
+    if (!(state.conjuredUids ?? []).includes(uid)) return discardEntry(state, uid);
+    return {
+        ...state,
+        hand: state.hand.filter(h => h.uid !== uid),
+        conjuredUids: (state.conjuredUids ?? []).filter(u => u !== uid),
     };
 }
 
@@ -748,6 +826,70 @@ function zoneHas(state: CombatEncounterState, cardId: string): boolean {
         || (state.enemyTempAttachments ?? []).some(t => t.cardId === cardId);
 }
 
+/** WS3.2 'damage-instance' clock — the shared enemy-damage funnel: applies the
+ *  hit, then advances every damage-instance-clocked DoT on the enemy (BLEED's
+ *  ratified shape). DoT-clock ticks themselves never route through here
+ *  (clocks must not cascade), and the trigger's own tick damage lands via the
+ *  plain `applyDamage` inside `fireDotTrigger`, so a damage-instance DoT can
+ *  never re-trigger itself. Emits the clock's `dot-tick` events; callers fold
+ *  `clockDamage` into their direct-damage tally and — where a Soul channel is
+ *  in scope — count `washedOut` via `soulWorthyWashouts`. */
+function applyEnemyDamage(
+    enemy: Enemy,
+    amount: number,
+    round: number,
+    events: CombatEvent[],
+): { enemy: Enemy; clockDamage: number; washedOut: ActiveEffect[] } {
+    if (amount <= 0) return { enemy, clockDamage: 0, washedOut: [] };
+    let next = applyDamage(enemy, amount);
+    const clock = fireDotTrigger(next, 'damage-instance', round);
+    if (clock.damage > 0) {
+        next = clock.target;
+        for (const t of clock.perEffect) {
+            events.push({ kind: 'dot-tick', effectId: t.effectId, label: t.label, amount: t.amount, target: 'enemy' });
+        }
+    }
+    return { enemy: next, clockDamage: clock.damage, washedOut: clock.washedOut };
+}
+
+/** WS3.2 Soul economy — decay-consumed instances of NO-CALENDAR debuffs
+ *  (`calendarExpiry === false`) expire BY decay: they owe the same Soul a
+ *  calendar expiry would (Harvest must not starve when calendars disappear).
+ *  Legacy calendar-carrying effects keep today's behavior (washout ≠ expiry). */
+function soulWorthyWashouts(washedOut: readonly ActiveEffect[]): number {
+    return washedOut.filter(ae => {
+        const def = lookupEffectDef(ae.effectId);
+        return def?.type === 'debuff' && def.payload.dotModifiers?.calendarExpiry === false;
+    }).length;
+}
+
+/** Manual TICK verbs (fate-tap 'dot-tick', the `tickOne` / `tickAllDots`
+ *  riders) share the clock-owned tick body's decay rule: a `decaysPerTick`
+ *  DoT loses 1 intensity each time it ticks and washes out at 0 — exactly
+ *  what `processDamageOverTime` / `fireDotTrigger` enforce. Front-loaded
+ *  fuel (BLEED) must pay its stacks on manual ticks too, and the washouts
+ *  are reported so the Soul economy sees expiry-by-decay on these paths. */
+function decayManuallyTickedDots<T extends Combatant>(
+    bearer: T,
+    tickedEffectIds: readonly string[],
+): { bearer: T; washedOut: ActiveEffect[] } {
+    if (tickedEffectIds.length === 0) return { bearer, washedOut: [] };
+    const washedOut: ActiveEffect[] = [];
+    let changed = false;
+    const effects = bearer.effects.reduce<ActiveEffect[]>((acc, ae) => {
+        const p = lookupEffectDef(ae.effectId)?.payload;
+        if (tickedEffectIds.includes(ae.effectId) && p?.dotModifiers?.decaysPerTick) {
+            changed = true;
+            if (ae.intensity > 1) acc.push({ ...ae, intensity: ae.intensity - 1 });
+            else washedOut.push(ae); // intensity 1 → the instance is spent
+        } else {
+            acc.push(ae);
+        }
+        return acc;
+    }, []);
+    return changed ? { bearer: { ...bearer, effects }, washedOut } : { bearer, washedOut };
+}
+
 /** SOUL gain (Harvest): bumps the bank; `bone-orchard` (E) drips 1 HP per Soul
  *  gained — a soul-gated payoff (spec 32 v3 §1 source 3). */
 function gainSouls(
@@ -762,8 +904,11 @@ function gainSouls(
     let directDamage = state.directDamageDealt;
     events.push({ kind: 'soul-gained', amount, total: souls, reason });
     if (zoneHas(state, 'bone-orchard') && !isDefeated(enemy)) {
-        enemy = applyDamage(enemy, amount);
-        directDamage += amount;
+        // Damage-instance clock advances on the drip; its washouts yield no
+        // Soul HERE (granting inside gainSouls would recurse the drip).
+        const hit = applyEnemyDamage(enemy, amount, state.round, events);
+        enemy = hit.enemy;
+        directDamage += amount + hit.clockDamage;
         events.push({ kind: 'damage-dealt', cardId: 'bone-orchard', target: 'enemy', amount });
     }
     return { ...state, souls, enemy, directDamageDealt: directDamage };
@@ -884,7 +1029,9 @@ function applyForetell(
  * conclusions. Every field is a real engine unit. (Play-scoped fields —
  * bonusIntensity / bonusDuration / refreshDie / intensityPerPip — are handled
  * inside `playBottomAction`, which owns the powering die and the landed-status
- * delta; they no-op here.)
+ * delta; they no-op here. `pips` — the RIPEN rider — is board-scoped and IS
+ * handled here since WS2.2: the Phase 30 forge conversions put it on FREE
+ * lines, which resolve through this executor.)
  */
 function applyRiderToState(
     state: CombatEncounterState,
@@ -899,6 +1046,10 @@ function applyRiderToState(
     let directDamage = next.directDamageDealt;
     let conviction = next.conviction;
     let guard = next.guard ?? 0;
+    let souls = next.souls ?? 0;
+    // Manual-tick washouts (decaysPerTick instances spent by tickOne /
+    // tickAllDots) — soul-worthy ones yield their expiry Soul below.
+    const washedOutHere: ActiveEffect[] = [];
 
     if (r.guard) guard += r.guard;
     let barrier = next.barrier ?? 0;
@@ -938,6 +1089,9 @@ function applyRiderToState(
             enemy = applyDamage(enemy, strongest.amount);
             directDamage += strongest.amount;
             events.push({ kind: 'dot-tick', effectId: strongest.effectId, label: strongest.label, amount: strongest.amount, target: 'enemy' });
+            const decayed = decayManuallyTickedDots(enemy, [strongest.effectId]);
+            enemy = decayed.bearer;
+            washedOutHere.push(...decayed.washedOut);
         }
     }
     if (r.tickAllDots) {
@@ -948,6 +1102,9 @@ function applyRiderToState(
             for (const t of ticks.perEffect) {
                 events.push({ kind: 'dot-tick', effectId: t.effectId, label: t.label, amount: t.amount, target: 'enemy' });
             }
+            const decayed = decayManuallyTickedDots(enemy, ticks.perEffect.map(t => t.effectId));
+            enemy = decayed.bearer;
+            washedOutHere.push(...decayed.washedOut);
         }
     }
     if (r.ruptureMarks) {
@@ -956,8 +1113,9 @@ function applyRiderToState(
         if (consumed.stacks > 0) {
             enemy = consumed.combatant;
             const burst = Math.min(ruptureBurstCap(enemy.maxHealth), r.ruptureMarks * consumed.stacks);
-            enemy = applyDamage(enemy, burst);
-            directDamage += burst;
+            const hit = applyEnemyDamage(enemy, burst, next.round, events);
+            enemy = hit.enemy;
+            directDamage += burst + hit.clockDamage;
             events.push({ kind: 'damage-dealt', cardId, target: 'enemy', amount: burst });
         }
     }
@@ -992,7 +1150,12 @@ function applyRiderToState(
         }
     }
 
-    next = { ...next, player, enemy, directDamageDealt: directDamage, conviction, guard, barrier };
+    const washSouls = soulWorthyWashouts(washedOutHere);
+    if (washSouls > 0) {
+        souls += washSouls;
+        events.push({ kind: 'soul-gained', amount: washSouls, total: souls, reason: 'expiry' });
+    }
+    next = { ...next, player, enemy, directDamageDealt: directDamage, conviction, guard, barrier, souls };
 
     if (r.foretell) next = applyForetell(next, r.foretell, events);
     if (r.drawCards) {
@@ -1027,16 +1190,21 @@ function applyRiderToState(
         next = { ...next, staggerRungs: total };
         events.push({ kind: 'staggered', rungs: r.stagger, total });
     }
-    if (r.pips && (next.reserve ?? []).length > 0) {
+    if (r.pips) {
+        // RIPEN — +1 pip per point to every Reserve die (WS2.2: the forge
+        // FREE-line currency; same walk as the PAID-path rider at
+        // `playBottomAction` §4).
         let reserve = next.reserve ?? [];
-        for (let i = 0; i < r.pips; i++) {
-            const rp = ripenReserve(reserve);
-            reserve = rp.reserve;
-            for (const id of rp.ripenedIds) {
-                events.push({ kind: 'die-ripened', dieId: id, pips: reserve.find(d => d.id === id)?.pips ?? 0 });
+        if (reserve.length > 0) {
+            for (let i = 0; i < r.pips; i++) {
+                const rp = ripenReserve(reserve);
+                reserve = rp.reserve;
+                for (const id of rp.ripenedIds) {
+                    events.push({ kind: 'die-ripened', dieId: id, pips: reserve.find(d => d.id === id)?.pips ?? 0 });
+                }
             }
+            next = { ...next, reserve };
         }
-        next = { ...next, reserve };
     }
     return next;
 }
@@ -1110,7 +1278,9 @@ function playTopAction(
     ];
     // Discard the played card BEFORE the free rider fires so a printed
     // "draw N" is never blocked by the card's own hand slot (P0-truth).
-    let next = discardEntry(state, uid);
+    // WS2.1: a conjured Thoughtform is one-use on EITHER face — a FREE play
+    // removes it from the combat instead of feeding the discard cycle.
+    let next = removePlayedEntry(state, uid);
     if (sourceCard?.free) {
         next = applyRiderToState(next, card.id, sourceCard.free, events, rng);
     }
@@ -1134,6 +1304,7 @@ function playBottomAction(
     card: CombatCard,
     dieId: string | undefined,
     _rng: () => number,
+    chosenX?: number,
     /** REPRISE songbook choice (phase 28) — the FIRST card a `reprise`
      *  mechanic returns, when given and still present in `state.discard`.
      *  Any additional returns (a `count > 1` reprise) still auto-pick by
@@ -1367,6 +1538,18 @@ function playBottomAction(
         firedRiders.push(sourceCard.fallen.rider);
         events.push({ kind: 'die-bonus-fired', cardId: card.id, riderText: `FALLEN: ${riderText(sourceCard.fallen.rider)}` });
     }
+    // WS4.2 (spec 32 §12 item 4) — CardSynergy combat-STATE predicate: reads
+    // the ratified encounter ledgers (enemyDamageLastRound et al.) at play
+    // time; when it holds, the synergy rider fires FREE — same firedRiders
+    // path as threshold/dieBonus/fate/fallen (ONE conditional gate, extended).
+    if (sourceCard.synergy?.statePredicate && sourceCard.synergy.rider
+        && checkStatePredicate(sourceCard.synergy.statePredicate, state)) {
+        firedRiders.push(sourceCard.synergy.rider);
+        events.push({
+            kind: 'die-bonus-fired', cardId: card.id,
+            riderText: `${statePredicateText(sourceCard.synergy.statePredicate)}: ${riderText(sourceCard.synergy.rider)}`,
+        });
+    }
     // Landed-status adjustments in one pass, all REAL units: rider intensity /
     // duration bonuses, RIPENED pips (+1 intensity per pip on a non-defend play,
     // R2), the color-match +1 duration on status cards (R7), and the persistent
@@ -1459,11 +1642,44 @@ function playBottomAction(
         souls += n;
         events.push({ kind: 'soul-gained', amount: n, total: souls, reason });
         if (zoneHas(state, 'bone-orchard')) {
-            enemy = applyDamage(enemy, n);
+            // Damage-instance clock advances on the drip; its washouts yield
+            // no Soul HERE (a self-grant would recurse this drip).
+            const hit = applyEnemyDamage(enemy, n, state.round, events);
+            enemy = hit.enemy;
             mechanicDamage += n;
-            directDamage += n;
+            directDamage += n + hit.clockDamage;
             events.push({ kind: 'damage-dealt', cardId: 'bone-orchard', target: 'enemy', amount: n });
         }
+    };
+
+    // WS3.2 event clocks (spec 32 §12 #3): 'card-played' fires once per
+    // PLAYER-side card play (ratified — enemy actions never advance it);
+    // 'payoff' fires inside the payoff verbs (rupture / consume_affliction /
+    // reap_all). The tick is DoT-clock damage — direct-damage tally only,
+    // never `mechanicDamage` (SIPHON heals off payoff bursts, not clocks).
+    // WS3.3 eligibility: only STACKS that existed BEFORE this play are on
+    // the clock — a play's own fresh stacks never tick themselves (doctrine
+    // witness: a PAID line must not chip a clean enemy). With 'intensity'
+    // merge-stacking a re-application raises the ONE existing instance, so
+    // the gate is an intensity CAP (the pre-play stack count), not a boolean;
+    // the cap is re-clamped to the LIVE intensity before each clock fire so
+    // stacks consumed mid-play (RUPTURE / cleanse / decay) leave the clock
+    // and a consumed-then-reapplied instance counts as genuinely fresh.
+    const clockCap: Record<string, number> = { ...before };
+    const fireClock = (trigger: 'card-played' | 'payoff'): void => {
+        for (const id of Object.keys(clockCap)) {
+            const live = enemy.effects.find(e => e.effectId === id)?.intensity ?? 0;
+            clockCap[id] = Math.min(clockCap[id], live);
+        }
+        const clock = fireDotTrigger(enemy, trigger, state.round,
+            ae => Math.min(ae.intensity ?? 1, clockCap[ae.effectId] ?? 0));
+        if (clock.damage <= 0) return;
+        enemy = clock.target;
+        directDamage += clock.damage;
+        for (const t of clock.perEffect) {
+            events.push({ kind: 'dot-tick', effectId: t.effectId, label: t.label, amount: t.amount, target: 'enemy' });
+        }
+        gainSoulsLocal(soulWorthyWashouts(clock.washedOut), 'expiry');
     };
 
     // `stuck-in-their-head` (D): every ECHO / REPRISE drips damage, engine-
@@ -1475,9 +1691,11 @@ function playBottomAction(
     const stuckDrip = (): void => {
         if (!zoneHas(state, 'stuck-in-their-head')) return;
         const drip = Math.max(2, Math.min(16, getMarkStacks(enemy)));
-        enemy = applyDamage(enemy, drip);
+        const hit = applyEnemyDamage(enemy, drip, state.round, events);
+        enemy = hit.enemy;
         mechanicDamage += drip;
-        directDamage += drip;
+        directDamage += drip + hit.clockDamage;
+        gainSoulsLocal(soulWorthyWashouts(hit.washedOut), 'expiry');
         events.push({ kind: 'damage-dealt', cardId: 'stuck-in-their-head', target: 'enemy', amount: drip });
     };
     if (echoed) stuckDrip();
@@ -1494,6 +1712,32 @@ function playBottomAction(
                 player = applyDamage(player, mech.hp);
                 recoilTaken += mech.hp;
                 events.push({ kind: 'recoil-paid', cardId: card.id, amount: mech.hp });
+                break;
+            }
+            case 'recoil_x': {
+                // RECOIL X (WS7.2, spec 32 §12 item 5 — the first chosen
+                // X-cost): pay X VITAE of the player's choosing, clamped to
+                // [min, affordable] (affordable = live HP − 1: the printed
+                // minimum is the floor even at death's door, matching plain
+                // RECOIL's unpreventable printed price), then land POISON at
+                // ceil(X × poisonPerX) intensity — the same blood-price +
+                // affliction pattern as `recoil` + a landed DoT application.
+                const affordable = Math.max(mech.min, player.health - 1);
+                const x = Math.min(Math.max(chosenX ?? mech.min, mech.min), affordable);
+                player = applyDamage(player, x);
+                recoilTaken += x;
+                events.push({ kind: 'recoil-paid', cardId: card.id, amount: x });
+                const stacks = Math.ceil(x * mech.poisonPerX);
+                const def = lookupEffectDef('debuff_poison');
+                if (def && stacks > 0) {
+                    const applied = applyEffect(enemy.effects, def, state.round, { intensityDelta: stacks, sourceId: card.id });
+                    enemy = { ...enemy, effects: applied.activeEffects };
+                    events.push({
+                        kind: 'effect-landed', cardId: card.id, effectId: def.id, target: 'enemy',
+                        effectKind: 'dot',
+                        intensity: applied.result.activeEffect?.intensity ?? stacks, effect: def,
+                    });
+                }
                 break;
             }
             case 'stagger': {
@@ -1548,6 +1792,18 @@ function playBottomAction(
                     pipGuardExtra += pips * mech.guardPerPip;
                     events.push({ kind: 'pips-cashed', cardId: card.id, pips, bonus: 'guard', amount: pips * mech.guardPerPip });
                 }
+                // WS4.1 (Ingot of Ruin class) — +1 MARK stack per `markPer`
+                // pips spent, UNCAPPED (spec 32 §12 item 5: the ALL-spender's
+                // price is emptying the bank, not a ceiling).
+                if (pips > 0 && mech.markPer) {
+                    const markStacks = Math.floor(pips / mech.markPer);
+                    const markDef = markStacks > 0 ? lookupEffectDef('debuff_mark') : undefined;
+                    if (markDef) {
+                        const applied = applyEffect(enemy.effects, markDef, state.round, { intensityDelta: markStacks, sourceId: card.id });
+                        enemy = { ...enemy, effects: applied.activeEffects };
+                        events.push({ kind: 'pips-cashed', cardId: card.id, pips, bonus: 'mark', amount: markStacks });
+                    }
+                }
                 pipsSpentThisPlay += pips;
                 break;
             }
@@ -1566,10 +1822,19 @@ function playBottomAction(
                     events.push({ kind: 'effect-fizzled', cardId: card.id, effectId: '', message: 'needs 2+ spent pips to detonate' });
                     break;
                 }
+                // WS3.2 'payoff' clock — payoff-clocked DoTs tick as the verb
+                // fires, BEFORE the consume strips them.
+                fireClock('payoff');
                 // RUPTURE v3 — consume ALL afflictions: 1.5x... no — burst =
                 // (pending DoT fuel + flat per non-DoT stack + pip/omen fuel),
                 // read + vulnerable scaled, capped. Consumed instances feed SOULS.
-                const pending = getPendingDotTotal(state.enemy, state.round).total;
+                // Fuel is priced off the LIVE enemy (same as WINNOWING's
+                // consumeOneAffliction), not the play-start snapshot — fuel
+                // that already ticked out or washed out earlier in this play
+                // (e.g. a stuck-in-their-head drip advancing the
+                // damage-instance clock, or the payoff tick above) was paid
+                // once and must not be re-paid by the burst.
+                const pending = getPendingDotTotal(enemy, state.round).total;
                 const consumedRes = consumeAfflictions(enemy);
                 enemy = consumedRes.combatant;
                 const fuel = pending
@@ -1581,28 +1846,34 @@ function playBottomAction(
                     Math.round(fuel * mult * (1 + (mech.bonusPct ?? 0)) * vulnMult),
                 );
                 if (burst > 0) {
-                    const beforeHp = enemy.health;
-                    enemy = applyDamage(enemy, burst);
+                    const hpBefore = enemy.health;
+                    const hit = applyEnemyDamage(enemy, burst, state.round, events);
+                    enemy = hit.enemy;
                     mechanicDamage += burst;
-                    directDamage += burst;
-                    attribution = recordAttribution(attribution, card.id, card.name, null, burst, beforeHp);
+                    directDamage += burst + hit.clockDamage;
+                    gainSoulsLocal(soulWorthyWashouts(hit.washedOut), 'expiry');
+                    attribution = recordAttribution(attribution, card.id, card.name, null, burst, hpBefore);
                 }
                 events.push({ kind: 'rupture-detonated', amount: burst, consumed: consumedRes.consumed });
                 gainSoulsLocal(consumedRes.consumed.length, 'consumed');
                 break;
             }
             case 'consume_affliction': {
+                // WS3.2 'payoff' clock — ticks before the scythe consumes.
+                fireClock('payoff');
                 // WINNOWING — the scythe: one affliction's remaining fuel ticks NOW.
                 const res2 = consumeOneAffliction(enemy, state.round);
                 if (res2.consumed) {
                     enemy = res2.combatant;
                     if (res2.fuel > 0) {
                         const dmg = Math.round(res2.fuel * vulnMult);
-                        const beforeHp = enemy.health;
-                        enemy = applyDamage(enemy, dmg);
+                        const hpBefore = enemy.health;
+                        const hit = applyEnemyDamage(enemy, dmg, state.round, events);
+                        enemy = hit.enemy;
                         mechanicDamage += dmg;
-                        directDamage += dmg;
-                        attribution = recordAttribution(attribution, card.id, card.name, null, dmg, beforeHp);
+                        directDamage += dmg + hit.clockDamage;
+                        gainSoulsLocal(soulWorthyWashouts(hit.washedOut), 'expiry');
+                        attribution = recordAttribution(attribution, card.id, card.name, null, dmg, hpBefore);
                     }
                     events.push({ kind: 'affliction-consumed', effectId: res2.consumed, fuel: res2.fuel });
                     gainSoulsLocal(mech.souls, 'consumed');
@@ -1637,18 +1908,22 @@ function playBottomAction(
                 break;
             }
             case 'reap_all': {
-                // THE REAPING — spend every Soul: a payoff burst per Soul. Uses
-                // the higher REAP_ALL_BURST_CAP (not the shared RUPTURE cap) so a
-                // full Soul bank actually pays off ("every soul, swung at once").
+                // WS3.2 'payoff' clock — the capstone is a payoff verb too.
+                fireClock('payoff');
+                // THE REAPING — spend every Soul: a payoff burst per Soul.
+                // UNCAPPED (spec 32 §12 item 5): an ALL-spender's input
+                // opportunity cost — emptying the whole bank — IS its price.
                 const spent = souls;
-                const burst = Math.min(reapAllBurstCap(enemy.maxHealth), Math.round(mech.burstPerSoul * spent * mult * vulnMult));
+                const burst = Math.round(mech.burstPerSoul * spent * mult * vulnMult);
                 souls = 0;
                 if (burst > 0) {
-                    const beforeHp = enemy.health;
-                    enemy = applyDamage(enemy, burst);
+                    const hpBefore = enemy.health;
+                    const hit = applyEnemyDamage(enemy, burst, state.round, events);
+                    enemy = hit.enemy;
                     mechanicDamage += burst;
-                    directDamage += burst;
-                    attribution = recordAttribution(attribution, card.id, card.name, null, burst, beforeHp);
+                    directDamage += burst + hit.clockDamage;
+                    gainSoulsLocal(soulWorthyWashouts(hit.washedOut), 'expiry');
+                    attribution = recordAttribution(attribution, card.id, card.name, null, burst, hpBefore);
                 }
                 events.push({ kind: 'reaped', cardId: card.id, soulsSpent: spent, amount: burst });
                 break;
@@ -1830,13 +2105,31 @@ function playBottomAction(
                 break;
             }
             case 'grant_pip': {
-                if (reserve.length === 0) break;
-                for (let i = 0; i < mech.count; i++) {
-                    const r = ripenReserve(reserve);
-                    reserve = r.reserve;
-                    for (const id of r.ripenedIds) {
-                        events.push({ kind: 'die-ripened', dieId: id, pips: reserve.find(d => d.id === id)?.pips ?? 0 });
+                // WS4.1 — pip OVERFLOW (Slag Runoff class): each granted pip
+                // that finds no room (Reserve empty, or a die already at
+                // RESERVE_PIP_CAP when its wave arrives) fires the printed
+                // overflow rider once instead of vanishing. Without an
+                // `overflow` rider the wasted pips are simply lost (legacy).
+                let overflowPips = 0;
+                if (reserve.length === 0) {
+                    // No die to hold ANY wave: the full grant overflows.
+                    overflowPips = mech.count;
+                } else {
+                    for (let i = 0; i < mech.count; i++) {
+                        const r = ripenReserve(reserve);
+                        reserve = r.reserve;
+                        overflowPips += reserve.length - r.ripenedIds.length;
+                        for (const id of r.ripenedIds) {
+                            events.push({ kind: 'die-ripened', dieId: id, pips: reserve.find(d => d.id === id)?.pips ?? 0 });
+                        }
                     }
+                }
+                if (overflowPips > 0 && mech.overflow) {
+                    for (let i = 0; i < overflowPips; i++) firedRiders.push(mech.overflow);
+                    events.push({
+                        kind: 'pips-overflowed', cardId: card.id,
+                        pips: overflowPips, riderText: riderText(mech.overflow),
+                    });
                 }
                 break;
             }
@@ -1948,6 +2241,29 @@ function playBottomAction(
         }
     }
 
+    // WS3.2 'card-played' clock (spec 32 §12 #3) — a PLAYER-side card play
+    // advances every card-played-clocked DoT on the enemy. Enemy actions
+    // never fire this (ratified: player plays only), and — WS3.3 — this
+    // play's own fresh stacks are NOT on the clock (`preExisting` gate): they
+    // start paying from the NEXT play (doctrine witness).
+    fireClock('card-played');
+
+    // WS3.3 — the same clock advances card-played-clocked DoTs the PLAYER
+    // bears (enemy threat riders land `debuff_poison` on the player): the
+    // clock is the player's own play, wherever the DoT sits. Same
+    // pre-existing STACK cap (a self-applied fresh debuff — or fresh stacks
+    // merged onto an existing one — never self-ticks), and player-borne
+    // washouts never earn Souls (SOUL counts ENEMY afflictions only).
+    const playerPrePlay = intensityMap(state.player.effects);
+    const selfClock = fireDotTrigger(player, 'card-played', state.round,
+        ae => Math.min(ae.intensity ?? 1, playerPrePlay[ae.effectId] ?? 0));
+    if (selfClock.damage > 0) {
+        player = selfClock.target as Character;
+        for (const t of selfClock.perEffect) {
+            events.push({ kind: 'dot-tick', effectId: t.effectId, label: t.label, amount: t.amount, target: 'self' });
+        }
+    }
+
     // ── Rider payloads (threshold / dieBonus / fate / fallen / reap), exact units ──
     let revealedStances = state.revealedStances;
     let riderGuard = 0;
@@ -1966,13 +2282,16 @@ function playBottomAction(
         if (r.tickAllDots) {
             const ticks = getActiveDotTotal(enemy.effects, state.round);
             if (ticks.total > 0) {
-                const beforeHp = enemy.health;
+                const hpBefore = enemy.health;
                 enemy = applyDamage(enemy, ticks.total);
                 directDamage += ticks.total;
-                attribution = recordAttribution(attribution, card.id, card.name, null, ticks.total, beforeHp);
+                attribution = recordAttribution(attribution, card.id, card.name, null, ticks.total, hpBefore);
                 for (const t of ticks.perEffect) {
                     events.push({ kind: 'dot-tick', effectId: t.effectId, label: t.label, amount: t.amount, target: 'enemy' });
                 }
+                const decayed = decayManuallyTickedDots(enemy, ticks.perEffect.map(t => t.effectId));
+                enemy = decayed.bearer;
+                gainSoulsLocal(soulWorthyWashouts(decayed.washedOut), 'expiry');
             }
         }
         if (r.tickOne) {
@@ -1980,23 +2299,30 @@ function playBottomAction(
             const strongest = ticks.reduce<typeof ticks[number] | null>(
                 (best, t) => (best === null || t.amount > best.amount ? t : best), null);
             if (strongest) {
-                const beforeHp = enemy.health;
+                const hpBefore = enemy.health;
                 enemy = applyDamage(enemy, strongest.amount);
                 directDamage += strongest.amount;
-                attribution = recordAttribution(attribution, card.id, card.name, null, strongest.amount, beforeHp);
+                attribution = recordAttribution(attribution, card.id, card.name, null, strongest.amount, hpBefore);
                 events.push({ kind: 'dot-tick', effectId: strongest.effectId, label: strongest.label, amount: strongest.amount, target: 'enemy' });
+                const decayed = decayManuallyTickedDots(enemy, [strongest.effectId]);
+                enemy = decayed.bearer;
+                gainSoulsLocal(soulWorthyWashouts(decayed.washedOut), 'expiry');
             }
         }
         if (r.ruptureMarks) {
+            // WS3.2 — the mark-conclusion is a payoff verb (rider-carried).
+            fireClock('payoff');
             const consumed = consumeMarks(enemy);
             if (consumed.stacks > 0) {
                 enemy = consumed.combatant;
                 const burst = Math.min(ruptureBurstCap(enemy.maxHealth), Math.round(r.ruptureMarks * consumed.stacks * vulnMult));
-                const beforeHp = enemy.health;
-                enemy = applyDamage(enemy, burst);
+                const hpBefore = enemy.health;
+                const hit = applyEnemyDamage(enemy, burst, state.round, events);
+                enemy = hit.enemy;
                 mechanicDamage += burst;
-                directDamage += burst;
-                attribution = recordAttribution(attribution, card.id, card.name, null, burst, beforeHp);
+                directDamage += burst + hit.clockDamage;
+                gainSoulsLocal(soulWorthyWashouts(hit.washedOut), 'expiry');
+                attribution = recordAttribution(attribution, card.id, card.name, null, burst, hpBefore);
                 events.push({ kind: 'damage-dealt', cardId: card.id, target: 'enemy', amount: burst });
             }
         }
@@ -2198,6 +2524,9 @@ function playBottomAction(
         conjuredUids,
         spellsPlayedThisTurn: (state.spellsPlayedThisTurn ?? 0) + 1,
         lastSpellCardId: sourceCard.id,
+        // Spec 32 §12 #4 — both blood-price sites (the `recoil` mech case and
+        // the fate-recoil pay) accumulate into `recoilTaken` above.
+        recoilPaidThisTurn: (state.recoilPaidThisTurn ?? 0) + recoilTaken,
     };
     // Discard the played card — a CONJURED Thoughtform is one-use: it leaves
     // the combat entirely instead of entering the discard pile.
@@ -2358,11 +2687,18 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
     // telegraphed hit; OVEREXTENDED halves its next fired phase outright, then is
     // consumed (interim rung of the P2 threat-downgrade ladder).
     const enemyOutgoingMult = getOutgoingDamageMult(state.enemy);
+    // WS8.2 telegraph-DAMAGE surface (spec 32 §12 #6): EXHAUSTION's
+    // `outgoingThreatDamageMulPct` softens the budgeted hit for its duration.
+    const enemyThreatMult = getOutgoingThreatDamageMult(state.enemy);
     const overextendedId = hasPayloadFlag(state.enemy, 'forcesWeakTierNextPlay');
     // DOUBT on the enemy (P0-truth `restrictsSurgeAccess` re-spec): its next fired
     // threat loses its RIDERS (status application + self-heal), then the doubt is
     // consumed — prevention the player can schedule.
     const doubtId = hasPayloadFlag(state.enemy, 'restrictsSurgeAccess');
+    // WS8.2 RIDER surface: BLIND's `suppressesThreatRiders` erases the phase's
+    // `threatEffectId` for as long as it holds (damage + self-heal still land —
+    // narrower than DOUBT, but persistent rather than consumed).
+    const riderSuppressId = hasPayloadFlag(state.enemy, 'suppressesThreatRiders');
     const hindered = !act.canAct || denied;
     if (disruptDenied) events.push({ kind: 'disrupt-denied', pips: controlPips });
 
@@ -2378,6 +2714,9 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
     let attacksLanded = 0;
     let attacksFullyBlocked = 0;
     let damagePrevented = 0;
+    // Spec 32 §12 #4 — post-soak HP the enemy's threat lands on the player
+    // this phase (the `enemyDamageThisTurn` ledger's write site).
+    let enemyDamageDealt = 0;
     let directDamage = state.directDamageDealt;
     const penaltiesApplied: CombatThreatEffect[] = [];
 
@@ -2388,8 +2727,9 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
     const rungsForBackfire = hindered ? rungsTotal : rungsLost;
     if (backfirePer > 0 && rungsForBackfire > 0) {
         const drip = backfirePer * rungsForBackfire;
-        enemy = applyDamage(enemy, drip);
-        directDamage += drip;
+        const hit = applyEnemyDamage(enemy, drip, state.round, events);
+        enemy = hit.enemy;
+        directDamage += drip + hit.clockDamage;
         events.push({ kind: 'backfired', amount: drip, rungs: rungsForBackfire });
     }
 
@@ -2402,7 +2742,8 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
                 // weakenMult folds soft-control AND partial rung loss.
                 let dmg = Math.round(
                     eff.damage * THREAT_DAMAGE_SCALE * weakenMult * escalation
-                    * enemyOutgoingMult * (overextendedId ? 0.5 : 1) * playerTakenMult,
+                    * enemyOutgoingMult * enemyThreatMult
+                    * (overextendedId ? 0.5 : 1) * playerTakenMult,
                 );
                 // RIPOSTE parry reduces the incoming hit once this phase.
                 if (riposte && !riposteFired && riposte.reduce > 0) {
@@ -2423,10 +2764,34 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
                     damagePrevented += barrierAbsorbed;
                     events.push({ kind: 'barrier-absorbed', amount: barrierAbsorbed });
                 }
-                if (dmg > 0) player = applyDamage(player, dmg);
+                if (dmg > 0) {
+                    player = applyDamage(player, dmg);
+                    enemyDamageDealt += dmg;
+                    // WS3.3 'damage-instance' clock, player bearer — a threat
+                    // hit that LANDS advances every damage-instance-clocked
+                    // DoT the player carries (enemy threat riders land
+                    // `debuff_bleed` on the player). Self-costs (RECOIL)
+                    // deliberately never advance it — the blood price must
+                    // not self-combo with enemy-applied BLEED.
+                    const selfClock = fireDotTrigger(player, 'damage-instance', state.round);
+                    if (selfClock.damage > 0) {
+                        player = selfClock.target;
+                        for (const t of selfClock.perEffect) {
+                            events.push({ kind: 'dot-tick', effectId: t.effectId, label: t.label, amount: t.amount, target: 'self' });
+                        }
+                    }
+                }
                 else attacksFullyBlocked += 1;
             }
-            if (eff.effectId && !doubtId) {
+            if (eff.effectId && !doubtId && riderSuppressId) {
+                // WS8.2: the rider is ERASED, honestly logged — the phase still
+                // fired, but its `threatEffectId` cannot land while BLIND holds.
+                events.push({
+                    kind: 'effect-fizzled', cardId: riderSuppressId, effectId: eff.effectId,
+                    message: 'threat rider suppressed — information erased',
+                });
+            }
+            if (eff.effectId && !doubtId && !riderSuppressId) {
                 const def = lookupEffectDef(eff.effectId);
                 if (def) {
                     const res = applyEffect(player.effects, def, state.round, {
@@ -2450,6 +2815,22 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
                     enemy = decayDotsOnHeal(heal(enemy, healAmt)).combatant;
                 }
             }
+            if (eff.enemyCleanse && eff.enemyCleanse > 0 && !doubtId) {
+                // WS9 reactive cleanse — spec 29 guardrail: telegraphed, and it
+                // sheds a FRACTION, never the last affliction. `applyCleanse`
+                // names the cleansable set; only the first `enemyCleanse` of it
+                // (minus the guaranteed survivor) actually leave the bearer.
+                const cleansable = applyCleanse(enemy, 3).removed;
+                const strip = Math.min(eff.enemyCleanse, Math.max(0, cleansable.length - 1));
+                if (strip > 0) {
+                    const gone = new Set(cleansable.slice(0, strip));
+                    enemy = { ...enemy, effects: enemy.effects.filter(ae => !gone.has(ae)) };
+                    events.push({
+                        kind: 'threat-cleansed', phaseIndex: phase.index,
+                        effectIds: cleansable.slice(0, strip).map(ae => ae.effectId),
+                    });
+                }
+            }
             penaltiesApplied.push(eff);
         }
         // A fired DOUBT / OVEREXTENDED is spent on the phase it bent (consumedOnUse).
@@ -2460,8 +2841,9 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
         if (riposte && attacksLanded > 0 && attacksFullyBlocked > 0) {
             const counter = Math.round(riposte.damage * getDamageTakenMultiplier(enemy));
             if (counter > 0) {
-                enemy = applyDamage(enemy, counter);
-                directDamage += counter;
+                const hit = applyEnemyDamage(enemy, counter, state.round, events);
+                enemy = hit.enemy;
+                directDamage += counter + hit.clockDamage;
                 events.push({ kind: 'riposte-fired', amount: counter });
             }
         }
@@ -2469,8 +2851,9 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
         const reflect = getThornsReflect(state.player);
         if (reflect > 0 && attacksLanded > 0) {
             const amount = Math.round(reflect * getDamageTakenMultiplier(enemy));
-            enemy = applyDamage(enemy, amount);
-            directDamage += amount;
+            const hit = applyEnemyDamage(enemy, amount, state.round, events);
+            enemy = hit.enemy;
+            directDamage += amount + hit.clockDamage;
             events.push({ kind: 'thorns-reflected', amount, target: 'enemy' });
             // `hedgehogs-dilemma` (E): every THORNS trigger also marks the enemy.
             if (zoneHas(state, 'hedgehogs-dilemma')) {
@@ -2482,6 +2865,14 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
             }
         }
         events.push({ kind: 'threat-fired', phaseIndex: phase.index, description: phase.threatAction.description, effects: phase.threatAction.effects });
+        // WS3.2 Doom growth (spec 32 §12 #3, card-local species): enemy-borne
+        // `growth: 'per-enemy-action'` DoTs deepen by 1 each time the enemy
+        // actually acts — a hindered (denied) turn never feeds the Doom.
+        const doomGrowth = growPerEnemyActionDots(enemy);
+        if (doomGrowth.grown.length > 0) {
+            enemy = doomGrowth.combatant;
+            events.push({ kind: 'dots-boosted', intensity: 1, affected: doomGrowth.grown });
+        }
     }
 
     // Mark: enemy hindered (control worked) → 'clear'; enemy acted → 'overwhelmed'.
@@ -2520,8 +2911,9 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
     // soak pool was built, whether or not the enemy ever swung into it.
     if (zoneHas(state, 'crumbling-resolve') && guard + barrier > 0 && !isDefeated(enemy)) {
         const upkeepDrip = Math.max(4, Math.round(0.2 * (guard + barrier)));
-        enemy = applyDamage(enemy, upkeepDrip);
-        directDamage += upkeepDrip;
+        const hit = applyEnemyDamage(enemy, upkeepDrip, state.round, events);
+        enemy = hit.enemy;
+        directDamage += upkeepDrip + hit.clockDamage;
         events.push({ kind: 'dot-tick', effectId: 'crumbling-resolve', label: 'Wall Upkeep', amount: upkeepDrip, target: 'enemy' });
     }
     // `achilles-and-the-tortoise` (E): a denied turn feeds your next draw.
@@ -2550,6 +2942,11 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
         riposte: undefined,             // cleared each phase (like guard)
         staggerRungs: crumbleRungs,     // consumed this phase; crumbling-resolve seeds the next
         bossRungGrowth: nextBossRungGrowth,
+        // Spec 32 §12 #4 — the enemy-damage ledger (rolled over between phases)
+        // and the full-block verdict (persists until the NEXT threat resolves;
+        // a hindered/denied threat was never blocked).
+        enemyDamageThisTurn: (state.enemyDamageThisTurn ?? 0) + enemyDamageDealt,
+        lastThreatFullyBlocked: !hindered && attacksLanded > 0 && attacksFullyBlocked === attacksLanded,
         phase: 'phase-resolve',
         threatMarks,
         phaseResults: [...state.phaseResults, result],
@@ -2601,7 +2998,11 @@ export function processBetweenPhases(
     if (zoneHas(state, 'the-tithe')) {
         const remaining: ActiveEffect[] = [];
         for (const ae of tithedTarget.effects) {
-            if (ae.remainingDuration === -1 || lookupEffectDef(ae.effectId)?.type !== 'debuff') {
+            const def = lookupEffectDef(ae.effectId);
+            // WS3: no-calendar effects (`calendarExpiry === false`) have no
+            // countdown for the tithe to hasten — same skip as tickAllEffects.
+            if (ae.remainingDuration === -1 || def?.type !== 'debuff'
+                || def.payload.dotModifiers?.calendarExpiry === false) {
                 remaining.push(ae);
                 continue;
             }
@@ -2616,8 +3017,11 @@ export function processBetweenPhases(
 
     // SOUL economy (spec 32 v3 T7): every enemy affliction instance that
     // EXPIRES yields 1 Soul (consumption-side Souls are granted at the verbs).
+    // WS3.2: decay-consumed instances of NO-CALENDAR effects expire BY decay —
+    // they owe the same Soul, so Harvest never starves when calendars go.
     const expiredAfflictions = [...enemyEnd.expired, ...tithedExpired]
-        .filter(ae => lookupEffectDef(ae.effectId)?.type === 'debuff').length;
+        .filter(ae => lookupEffectDef(ae.effectId)?.type === 'debuff').length
+        + soulWorthyWashouts([...enemyStart.dotWashedOut, ...enemyEnd.washedOut]);
 
     // `suppurating-curse` (D): the enemy takes bonus HP loss equal to the
     // REAL DAMAGE its DoTs ticked for this round (Erosion late-stage
@@ -2647,7 +3051,7 @@ export function processBetweenPhases(
 
     // 3. Process a full round of effects on the player (DoT / regen / drain).
     const playerStart = processRoundStartEffects(state.player, state.round);
-    const playerEnd = processRoundEndEffects(playerStart.target, state.round);
+    const playerEnd = processRoundEndEffects(playerStart.target, state.round, 'player');
     let player = playerEnd.target as Character;
 
     for (const t of enemyDotTicks) events.push({ kind: 'dot-tick', effectId: t.effectId, label: t.label, amount: t.amount, target: 'enemy' });
@@ -2700,9 +3104,30 @@ export function processBetweenPhases(
 
     // ARROW PARADOX (spec 32 v3 T5, `lock_stance`) — the next phase keeps the
     // CURRENT stance: motion frozen mid-flight. The lock is revealed and spent.
+    // WS8.2 STANCE surface (spec 32 §12 #6): ROOT's `lockedStance` payload is
+    // the status twin — while the enemy carries it, every phase advance keeps
+    // the current (revealed) stance. Read off the PRE-tick enemy: the lock
+    // held when this phase resolved, so it still binds this advance.
+    const statusLockId = hasPayloadFlag(state.enemy, 'lockedStance');
     let threatPhases = state.threatPhases;
     let revealedStances = state.revealedStances;
-    if (state.stanceLockedNext && nextIndex !== state.currentPhaseIndex) {
+    // WS9 (spec 32 §12 #7) — a branch phase commits its fork at phase START,
+    // read from LIVE state (the post-tick enemy + the full-block ledger just
+    // written by `resolveThreatPhase`), so the telegraph shows the taken fork
+    // alongside the condition. Zero RNG. A looping final phase re-evaluates on
+    // every re-entry; the stance-lock / forced-omen overrides below still win
+    // over the committed stance.
+    const branchCommit = commitThreatBranch(
+        threatPhases, nextIndex, enemy, state.lastThreatFullyBlocked ?? false,
+    );
+    if (branchCommit) {
+        threatPhases = branchCommit.phases;
+        events.push({
+            kind: 'threat-branch', phaseIndex: nextIndex,
+            conditionText: branchCommit.conditionText, taken: branchCommit.taken,
+        });
+    }
+    if ((state.stanceLockedNext || statusLockId !== null) && nextIndex !== state.currentPhaseIndex) {
         const lockedStance = currentPhaseStance(state);
         threatPhases = threatPhases.map((p, i) => (i === nextIndex ? { ...p, enemyStance: lockedStance } : p));
         if (!revealedStances.includes(nextIndex)) revealedStances = [...revealedStances, nextIndex];
@@ -2847,7 +3272,17 @@ export function processBetweenPhases(
 
     // 5. Draw a fresh hand (discard the old hand — Hazard's "draw fresh").
     //    `achilles-and-the-tortoise` adds +1 to the draw after a denied turn.
-    const discardedHand = omenState.hand.map(h => h.cardId);
+    //    WS2.1 one-use law: an unplayed CONJURED Thoughtform leaves the combat
+    //    ENTIRELY at the boundary — it never enters the discard pile (where a
+    //    reshuffle would resurrect it as a permanent deck card) and its uid is
+    //    released from the one-use ledger.
+    const conjuredLedger = omenState.conjuredUids ?? [];
+    const sweptConjuredUids = omenState.hand
+        .filter(h => conjuredLedger.includes(h.uid))
+        .map(h => h.uid);
+    const discardedHand = omenState.hand
+        .filter(h => !conjuredLedger.includes(h.uid))
+        .map(h => h.cardId);
     const draw = drawCombatCards(
         omenState.drawPile, [...omenState.discard, ...discardedHand], omenState.deck,
         COMBAT_HAND_SIZE + bonusDraw + omenBonusDraw, rng,
@@ -2888,16 +3323,22 @@ export function processBetweenPhases(
         drawPile: draw.drawPile,
         discard: draw.discard,
         hand,
+        conjuredUids: conjuredLedger.filter(u => !sweptConjuredUids.includes(u)),
         phase: 'phase-play',
         round: state.round + 1,
         tempZone: tickedTempZone,
         enemyTempAttachments: tickedEnemyTemp,
+        // Spec 32 §12 #4 — the enemy-damage ledger rolls over at the turn
+        // boundary: this turn's value becomes last-round's, then resets.
+        enemyDamageLastRound: omenState.enemyDamageThisTurn ?? 0,
+        enemyDamageThisTurn: 0,
         // New phase → fresh turn; clear the draft so the next startTurn rolls.
         dice: [],
         draftedDieId: null,
         lastRead: 'none',
         carriedDie: null,
-        // Phase 26 (the Turn Law) — a new phase opens a fresh allowance.
+        // Gate 0 (round-turn law) — the phase boundary re-arms the one legal
+        // tray roll for the incoming phase.
         turnTakenThisPhase: false,
     };
     next = withLog(next, events);
@@ -2922,9 +3363,16 @@ interface DotTick { effectId: string; label: string; amount: number; }
  * tick. Byte-identical for un-amplified integer DoTs (floor(x×1) === x).
  */
 function dotTickBreakdown(effects: readonly ActiveEffect[], currentRound?: number): DotTick[] {
-    return getActiveDotTotal(effects as ActiveEffect[], currentRound).perEffect.map(
-        e => ({ effectId: e.effectId, label: e.label, amount: e.amount }),
-    );
+    // WS3: event-clocked DoTs never tick at the round boundary — drop their
+    // ENTRIES (after the full-array amp/MARK pass, matching the aggregator's
+    // math exactly) so the emitted round `dot-tick` events sum to the HP that
+    // actually left the bar (projection-truth law).
+    return getActiveDotTotal(effects as ActiveEffect[], currentRound).perEffect
+        .filter(e => {
+            const dot = lookupEffectDef(e.effectId)?.payload.damageOverTime;
+            return !dot || dotRoundClockPhase(dot) !== null;
+        })
+        .map(e => ({ effectId: e.effectId, label: e.label, amount: e.amount }));
 }
 
 // ── Batch entry point (§9 resolveCombatPhase) ────────────────────────────────
@@ -2969,14 +3417,22 @@ function ensureDraftForCard(
     if (cur && cur.state === 'available' && cur.color !== 'x') return { state, events: [] };
     let working = state;
     const events: CombatEvent[] = [];
-    if (working.draftedDieId !== null) working = endTurn(working).state;
-    const started = startTurn(working, rng);
-    working = started.state; events.push(...started.events);
-    const enemyStance = currentPhaseStance(working);
-    const pick = chooseDraft(working.dice, cardStance, enemyStance);
-    if (pick) {
-        const drafted = draftStanceDie(working, pick);
-        working = drafted.state; events.push(...drafted.events);
+    // Gate 0 (round-turn law) — roll the phase's ONE tray only if it hasn't
+    // been rolled yet. Once it has, keep the live tray as-is: a re-roll is
+    // illegal, and ending the turn here would wipe floating dice mid-turn
+    // (the caller falls back to Reserve/floating power instead).
+    if (!working.turnTakenThisPhase) {
+        if (working.draftedDieId !== null) working = endTurn(working).state;
+        const started = startTurn(working, rng);
+        working = started.state; events.push(...started.events);
+    }
+    if (working.draftedDieId === null) {
+        const enemyStance = currentPhaseStance(working);
+        const pick = chooseDraft(working.dice, cardStance, enemyStance);
+        if (pick) {
+            const drafted = draftStanceDie(working, pick);
+            working = drafted.state; events.push(...drafted.events);
+        }
     }
     return { state: working, events };
 }
@@ -2999,12 +3455,33 @@ export function resolveCombatPhase(
     const allEvents: CombatEvent[] = [];
     for (const play of cardsPlayed) {
         if (working.phase !== 'phase-play') break;
+        let dieId = play.dieId;
         if (play.useBottom) {
             const card = getCard(play.cardId);
             const drafted = ensureDraftForCard(working, card?.stance ?? 'wild', rng);
             working = drafted.state; allEvents.push(...drafted.events);
+            // Gate 0 (round-turn law) — the phase's one tray roll may already
+            // be spent; a fresh draft cannot be conjured. Fall back to a
+            // color-legal Reserve or FLOATING die (legal extra power WITHIN
+            // the turn — the law caps tray rolls, not card plays).
+            if (dieId === undefined) {
+                const cur = getDraftedDie(working);
+                const stance = card?.stance ?? 'wild';
+                const curUsable = cur && cur.state === 'available' && cur.color !== 'x'
+                    && (cur.color === 'wild' || cur.color === stance);
+                if (!curUsable) {
+                    const alt = [
+                        ...(working.reserve ?? []),
+                        ...working.dice.filter(d => d.floating && d.state === 'available'),
+                    ].find(d => d.color === 'wild' || d.color === stance);
+                    if (alt) dieId = alt.id;
+                }
+            }
         }
-        const res = playCombatCard(working, { uid: play.uid, cardId: play.cardId }, play.useBottom, play.dieId, rng);
+        const res = playCombatCard(
+            working, { uid: play.uid, cardId: play.cardId }, play.useBottom, dieId, rng,
+            play.chosenX !== undefined ? { chosenX: play.chosenX } : undefined,
+        );
         working = res.state;
         allEvents.push(...res.events);
         if (working.finalOutcome) return { state: working, events: allEvents };
@@ -3097,7 +3574,15 @@ export function handCards(state: CombatEncounterState): Array<{ uid: string; car
         .filter((x): x is { uid: string; card: CombatCard } => x.card !== null);
 }
 
-/** Die-cost preview for a card against the current phase (RPS indicator, §7.3). */
+/**
+ * Advantage-read preview for a card against the current phase (RPS indicator,
+ * spec 25 §4.8 / §7.3) — the state-curried wrapper over the legacy classifier
+ * `resolveCardDieCost`. It owns the READ surface only: the `advantage` label
+ * for a hand renderer (today's sole consumer is the mechanics CLI). The `cost`
+ * field is historical — play legality and the real die COST are owned by
+ * THE COLOR LAW inside `playCombatCard`. Deprecated on the public barrels
+ * alongside `resolveCardDieCost`.
+ */
 export function cardDieCostPreview(state: CombatEncounterState, card: CombatCard): CardDieCost {
     return resolveCardDieCost(card.stance, currentPhaseStance(state));
 }
@@ -3114,10 +3599,24 @@ export function getDraftedDie(state: CombatEncounterState): CombatManaDie | null
     return draftedDie(state);
 }
 
+/**
+ * WS8.2 STANCE surface (spec 32 §12 #6) — true while the PLAYER carries a
+ * `blursStanceHints` effect (enemy-inflicted CONFUSION): stance certainty is
+ * fogged, so every revealed stance reads as hidden again for the blur's
+ * duration (the underlying `revealedStances` knowledge survives and returns
+ * when it expires). The readout layer consumes this directly — mobile should
+ * render the stance panel / threat tells blurred while it is true.
+ */
+export function isStanceReadoutBlurred(state: CombatEncounterState): boolean {
+    return hasPayloadFlag(state.player, 'blursStanceHints') !== null;
+}
+
 /** True when the player has revealed a given phase's hidden enemy stance (§2).
  *  A MARKED foe (`revealsStance` payload — Fate Engine P1) is public on EVERY
- *  phase while the mark holds. */
+ *  phase while the mark holds. WS8.2: a stance BLUR on the player fogs every
+ *  reveal (including the mark's) while it lasts. */
 export function isPhaseStanceRevealed(state: CombatEncounterState, phaseIndex: number): boolean {
+    if (isStanceReadoutBlurred(state)) return false;
     return state.revealedStances.includes(phaseIndex)
         || hasPayloadFlag(state.enemy, 'revealsStance') !== null
         // `the-oracles-eye` (E): the enemy's next stance is ALWAYS revealed.
@@ -3212,6 +3711,24 @@ export function projectRupture(state: CombatEncounterState): number {
 }
 
 /**
+ * Chosen-X range for a card carrying a `recoil_x` mechanic (WS7.2): the engine
+ * owns the clamp rule — X ∈ [min, affordable] where affordable = the player's
+ * live HP − 1, floored at min (the printed minimum is unavoidable, like plain
+ * RECOIL). Null when the card carries no chosen-X mechanic. Presenters and sim
+ * policies read this instead of hard-coding the rule.
+ */
+export function recoilXRange(
+    state: CombatEncounterState,
+    card: Pick<CombatCard, 'id'>,
+): { min: number; max: number } | null {
+    const sourceCard = lookupCard(card.id);
+    const mech = (sourceCard?.specialMechanics ?? []).find(m => m.kind === 'recoil_x') as
+        Extract<CardSpecialMechanic, { kind: 'recoil_x' }> | undefined;
+    if (!mech) return null;
+    return { min: mech.min, max: Math.max(mech.min, state.player.health - 1) };
+}
+
+/**
  * Per-card RUPTURE projection (phase 28) — `projectRupture` above uses
  * `bonusPct 0` (the per-card bonus is applied separately in
  * `playBottomAction`), which undershoots any card with its own `bonusPct` or
@@ -3262,10 +3779,8 @@ export function projectReapAll(state: CombatEncounterState, card: CombatCard): {
     if (!mech) return { ready: false, amount: 0 };
     const d = draftedDie(state);
     const read: CombatReadResult = d ? state.lastRead : 'neutral';
-    const amount = Math.min(
-        reapAllBurstCap(state.enemy.maxHealth),
-        Math.round(mech.burstPerSoul * (state.souls ?? 0) * READ_DAMAGE_MULT[read] * getDamageTakenMultiplier(state.enemy)),
-    );
+    // UNCAPPED (spec 32 §12 item 5) — the ALL-spender's price is its emptied bank.
+    const amount = Math.round(mech.burstPerSoul * (state.souls ?? 0) * READ_DAMAGE_MULT[read] * getDamageTakenMultiplier(state.enemy));
     return { ready: amount > 0, amount };
 }
 

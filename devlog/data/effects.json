@@ -1255,37 +1255,6 @@
   ]
  },
  {
-  "id": "debuff_backfire_acute",
-  "name": "Acute Backfire",
-  "type": "debuff",
-  "glyph": "⛓",
-  "color": "#a86bdc",
-  "kind": "control",
-  "chips": [
-   {
-    "k": "Type",
-    "v": "debuff"
-   },
-   {
-    "k": "Category",
-    "v": "control"
-   },
-   {
-    "k": "Tier",
-    "v": "3"
-   },
-   {
-    "k": "Duration",
-    "v": "3 rounds"
-   },
-   {
-    "k": "Stacking",
-    "v": "intensity"
-   }
-  ],
-  "lines": []
- },
- {
   "id": "debuff_affirming_consequent",
   "name": "Affirming the Consequent",
   "type": "debuff",
@@ -1349,39 +1318,6 @@
   ],
   "lines": [
    "DoT 2/round × intensity (heart, ticks start)"
-  ]
- },
- {
-  "id": "debuff_argument_wound",
-  "name": "Argument Wound",
-  "type": "debuff",
-  "glyph": "🔥",
-  "color": "#e2543b",
-  "kind": "dot",
-  "chips": [
-   {
-    "k": "Type",
-    "v": "debuff"
-   },
-   {
-    "k": "Category",
-    "v": "damage"
-   },
-   {
-    "k": "Tier",
-    "v": "1"
-   },
-   {
-    "k": "Duration",
-    "v": "3 rounds"
-   },
-   {
-    "k": "Stacking",
-    "v": "intensity"
-   }
-  ],
-  "lines": [
-   "DoT 2/round × intensity (heart, ticks end)"
   ]
  },
  {
@@ -1479,7 +1415,7 @@
    }
   ],
   "lines": [
-   "DoT 3/round × intensity (physicalAttack, ticks end)"
+   "DoT 3/round × intensity (physicalAttack, ticks start)"
   ]
  },
  {
@@ -1546,7 +1482,6 @@
    }
   ],
   "lines": [
-   "Roll -2",
    "Defense -2"
   ]
  },
@@ -1684,10 +1619,10 @@
   ]
  },
  {
-  "id": "debuff_echo_sting",
-  "name": "Echo Sting",
+  "id": "debuff_creeping_doom",
+  "name": "Creeping Doom",
   "type": "debuff",
-  "glyph": "🔥",
+  "glyph": "🕸",
   "color": "#e2543b",
   "kind": "dot",
   "chips": [
@@ -1701,11 +1636,11 @@
    },
    {
     "k": "Tier",
-    "v": "1"
+    "v": "2"
    },
    {
     "k": "Duration",
-    "v": "2 rounds"
+    "v": "3 rounds"
    },
    {
     "k": "Stacking",
@@ -1713,40 +1648,7 @@
    }
   ],
   "lines": [
-   "DoT 1/round × intensity (mind, ticks end)"
-  ]
- },
- {
-  "id": "debuff_foretold_wound",
-  "name": "Foretold Wound",
-  "type": "debuff",
-  "glyph": "🔥",
-  "color": "#e2543b",
-  "kind": "dot",
-  "chips": [
-   {
-    "k": "Type",
-    "v": "debuff"
-   },
-   {
-    "k": "Category",
-    "v": "damage"
-   },
-   {
-    "k": "Tier",
-    "v": "1"
-   },
-   {
-    "k": "Duration",
-    "v": "2 rounds"
-   },
-   {
-    "k": "Stacking",
-    "v": "intensity"
-   }
-  ],
-  "lines": [
-   "DoT 1/round × intensity (mind, ticks start)"
+   "DoT 1/round × intensity (mentalAttack, ticks start)"
   ]
  },
  {
@@ -1988,8 +1890,7 @@
   "lines": [
    "body -2",
    "mind -2",
-   "heart -2",
-   "Roll -2"
+   "heart -2"
   ]
  },
  {
@@ -2190,41 +2091,6 @@
   ]
  },
  {
-  "id": "debuff_fatigue",
-  "name": "Preface Exhaustion",
-  "type": "debuff",
-  "glyph": "😩",
-  "color": "#e08a3c",
-  "kind": "statdown",
-  "chips": [
-   {
-    "k": "Type",
-    "v": "debuff"
-   },
-   {
-    "k": "Category",
-    "v": "stat"
-   },
-   {
-    "k": "Tier",
-    "v": "2"
-   },
-   {
-    "k": "Duration",
-    "v": "4 rounds"
-   },
-   {
-    "k": "Stacking",
-    "v": "intensity"
-   }
-  ],
-  "lines": [
-   "body -1",
-   "mind -1",
-   "Roll -1"
-  ]
- },
- {
   "id": "debuff_blind",
   "name": "Quantum Erasure",
   "type": "debuff",
@@ -2254,7 +2120,6 @@
    }
   ],
   "lines": [
-   "Roll -5",
    "Disadvantage: body, mind"
   ]
  },
@@ -2359,41 +2224,6 @@
   ]
  },
  {
-  "id": "debuff_daze",
-  "name": "Simpson's Confusion",
-  "type": "debuff",
-  "glyph": "✦",
-  "color": "#a86bdc",
-  "kind": "control",
-  "chips": [
-   {
-    "k": "Type",
-    "v": "debuff"
-   },
-   {
-    "k": "Category",
-    "v": "control"
-   },
-   {
-    "k": "Tier",
-    "v": "2"
-   },
-   {
-    "k": "Duration",
-    "v": "2 rounds"
-   },
-   {
-    "k": "Stacking",
-    "v": "duration"
-   }
-  ],
-  "lines": [
-   "mind -2",
-   "mentalDefense -1",
-   "Roll -3"
-  ]
- },
- {
   "id": "debuff_sleep",
   "name": "Sleeping Beauty's Rest",
   "type": "debuff",
@@ -2490,7 +2320,6 @@
    }
   ],
   "lines": [
-   "Roll -5",
    "Disadvantage: body, mind, heart"
   ]
  },

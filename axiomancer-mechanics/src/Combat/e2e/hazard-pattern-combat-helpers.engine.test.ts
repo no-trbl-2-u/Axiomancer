@@ -476,6 +476,16 @@ describe('Spec 25 §4.5 — resolveThreatPhase', () => {
             type: 'debuff', category: 'control', duration: 3, stacking: 'intensity', tier: 2,
             payload: { rollModifier: -4 },
         },
+        {
+            id: 'test_ctrl_knockdown', name: 'test knockdown', description: 'test control -3',
+            type: 'debuff', category: 'control', duration: 3, stacking: 'intensity', tier: 2,
+            payload: { rollModifier: -3 },
+        },
+        {
+            id: 'test_ctrl_slow', name: 'test slow', description: 'test control -2',
+            type: 'debuff', category: 'control', duration: 3, stacking: 'intensity', tier: 2,
+            payload: { rollModifier: -2 },
+        },
     ];
     beforeAll(() => { for (const e of THREAT_FIXTURES) effectsLibrary.registry.set(e.id, e); });
     afterAll(() => { for (const e of THREAT_FIXTURES) effectsLibrary.registry.delete(e.id); });
@@ -512,10 +522,14 @@ describe('Spec 25 §4.5 — resolveThreatPhase', () => {
     });
 
     it('weakens (but does not deny) the threat when rollPenalty < THREAT_DENY_AT', () => {
-        const confusionEffect = lookupEffect('test_ctrl_confusion')!;
+        // WS8.2 (spec 32 §12 #6): confusion moved off the roll surface — FEAR
+        // (-4) is the heavy roll carrier that weakens without denying. The
+        // library's control vocabulary was deleted with the zero-producer
+        // sweep, so the shape is a test-only fixture.
+        const fearEffect = lookupEffect('test_ctrl_fear')!;
         const player = makePlayer([DOT_BODY]);
         const enemy = makeEnemy(100, 'heart');
-        const { activeEffects: enemyEffects } = applyEffect(enemy.effects, confusionEffect, 1);
+        const { activeEffects: enemyEffects } = applyEffect(enemy.effects, fearEffect, 1);
 
         let baseState = initializeCombatEncounter(player, makeEnemy(100, 'heart'), undefined, SEED);
         baseState = rollEncounterDice(baseState).state;
@@ -533,12 +547,19 @@ describe('Spec 25 §4.5 — resolveThreatPhase', () => {
     });
 
     it('denies the threat via soft-control when rollPenalty >= THREAT_DENY_AT', () => {
-        const confusionEffect = lookupEffect('test_ctrl_confusion')!;
+        // WS8.2: the cumulative roll-deny witness stacks the roll-surface
+        // carriers (fear -4 + knockdown -3 + slow -2 = 9 ≥ 8). All three share
+        // ONE DISRUPT surface, so this is the legacy penalty path, not the
+        // distinct-surface deny. Test-only fixtures — the library shapes were
+        // deleted with the zero-producer sweep.
         const fearEffect = lookupEffect('test_ctrl_fear')!;
+        const knockdownEffect = lookupEffect('test_ctrl_knockdown')!;
+        const slowEffect = lookupEffect('test_ctrl_slow')!;
         const player = makePlayer([DOT_BODY]);
         const enemy = makeEnemy(100, 'heart');
-        const { activeEffects: withConfusion } = applyEffect(enemy.effects, confusionEffect, 1);
-        const { activeEffects: enemyEffects } = applyEffect(withConfusion, fearEffect, 1);
+        const { activeEffects: withFear } = applyEffect(enemy.effects, fearEffect, 1);
+        const { activeEffects: withKnockdown } = applyEffect(withFear, knockdownEffect, 1);
+        const { activeEffects: enemyEffects } = applyEffect(withKnockdown, slowEffect, 1);
 
         let state = initializeCombatEncounter(player, { ...enemy, effects: enemyEffects }, undefined, SEED);
         state = rollEncounterDice(state).state;
@@ -576,7 +597,7 @@ describe('Soft-control threat tunables — contract values', () => {
 
 describe('Spec 25 §7.7 — recordAttribution field shape', () => {
     it('creates a new CombatAttributionRow with all required fields', () => {
-        const ledger = recordAttribution({}, 'slippery-slope', 'Slippery Slope', null, 10, Number.MAX_SAFE_INTEGER);
+        const ledger = recordAttribution({}, 'slippery-slope', 'Slippery Slope', null, 10);
         const row: CombatAttributionRow = ledger['slippery-slope'];
         expect(row.cardId).toBe('slippery-slope');
         expect(row.name).toBe('Slippery Slope');
@@ -586,61 +607,63 @@ describe('Spec 25 §7.7 — recordAttribution field shape', () => {
     });
 
     it('accumulates damageDealt and phases across multiple calls for the same card', () => {
-        let ledger = recordAttribution({}, 'slippery-slope', 'Slippery Slope', null, 5, Number.MAX_SAFE_INTEGER);
-        ledger = recordAttribution(ledger, 'slippery-slope', 'Slippery Slope', null, 8, Number.MAX_SAFE_INTEGER);
+        let ledger = recordAttribution({}, 'slippery-slope', 'Slippery Slope', null, 5);
+        ledger = recordAttribution(ledger, 'slippery-slope', 'Slippery Slope', null, 8);
         const row = ledger['slippery-slope'];
         expect(row.damageDealt).toBe(13);
         expect(row.phases).toBe(2);
     });
 
     it('tracks separate rows for different cards in the same ledger', () => {
-        let ledger = recordAttribution({}, 'slippery-slope', 'Slippery Slope', null, 5, Number.MAX_SAFE_INTEGER);
-        ledger = recordAttribution(ledger, 'achilles-gambit', 'Achilles Gambit', null, 12, Number.MAX_SAFE_INTEGER);
+        let ledger = recordAttribution({}, 'slippery-slope', 'Slippery Slope', null, 5);
+        ledger = recordAttribution(ledger, 'achilles-gambit', 'Achilles Gambit', null, 12);
         expect(Object.keys(ledger)).toHaveLength(2);
         expect(ledger['slippery-slope'].damageDealt).toBe(5);
         expect(ledger['achilles-gambit'].damageDealt).toBe(12);
     });
 });
 
-// ── Attribution overkill clamp (phase 26 — turn-law-and-honest-baseline audit) ──
-// A long DoT chain (or a big direct/mechanic burst) can no longer log more
-// damage than the enemy actually had left at the moment of the hit/land.
+// ── Overkill clamp (Gate 0 §2, 2026-07-10) — attribution honesty ─────────────
+// The audit found 740 projected DoT attributed against a 40-max-HP enemy: the
+// ledger claimed damage the fight could never contain. With `targetHpBefore`
+// given, a record is clamped at damage actually applicable.
 
-describe('Phase 26 — recordAttribution clamps overkill to enemyHealthRemaining', () => {
-    it('a DoT projection far exceeding a low-HP enemy is clamped to that HP, not the raw forecast', () => {
-        const poison = lookupEffect('debuff_poison')!;
-        expect(poison.payload.damageOverTime?.damagePerRound).toBe(2);
-        const landed: LandedEffect = {
-            effectId: poison.id,
-            effect: poison,
-            active: { effectId: poison.id, intensity: 20, remainingDuration: 20, appliedAt: 1, tier: 2 },
-            target: 'enemy',
-        };
-        // raw projection: 2 * 20 * 20 = 800 — comfortably over a 40-HP enemy.
-        const ledger = recordAttribution({}, 'slippery-slope', 'Slippery Slope', landed, 0, 40);
-        expect(ledger['slippery-slope'].dotDamage).toBe(40);
+describe('Gate 0 §2 — recordAttribution overkill clamp', () => {
+    /** A real landed poison, intensity/duration forced to the projection we need. */
+    const poisonLanded = (intensity: number, remainingDuration: number): LandedEffect => {
+        const def = lookupEffect('debuff_poison')!;
+        const applied = applyEffect([], def, 1, { intensityDelta: intensity });
+        const active = { ...applied.activeEffects[0]!, intensity, remainingDuration };
+        return { effectId: def.id, effect: def, active, target: 'enemy' };
+    };
+
+    it('clamps direct damage at the HP the target had left', () => {
+        const ledger = recordAttribution({}, 'qa-card', 'QA Card', null, 100, 40);
+        expect(ledger['qa-card'].damageDealt).toBe(40);
     });
 
-    it('a direct/mechanic burst exceeding the enemy remaining HP is clamped to that HP', () => {
-        const ledger = recordAttribution({}, 'rupture-card', 'Rupture Card', null, 90, 25);
-        expect(ledger['rupture-card'].damageDealt).toBe(25);
+    it('clamps the projected DoT at the HP the target had left (740 projected vs 40 HP → 40)', () => {
+        // debuff_poison: 2 dmg/round × intensity 5 × 74 rounds = 740 projected.
+        const ledger = recordAttribution({}, 'qa-card', 'QA Card', poisonLanded(5, 74), 0, 40);
+        expect(ledger['qa-card'].dotDamage).toBe(40);
     });
 
-    it('an unclamped case (enemy comfortably above the hit) is byte-identical to the unclamped ledger', () => {
-        const poison = lookupEffect('debuff_poison')!;
-        const landed: LandedEffect = {
-            effectId: poison.id,
-            effect: poison,
-            active: { effectId: poison.id, intensity: 2, remainingDuration: 3, appliedAt: 1, tier: 2 },
-            target: 'enemy',
-        };
-        // raw projection: 2 * 2 * 3 = 12, enemy has 500 HP — the clamp must
-        // never LOWER a ledger entry when there's no overkill.
-        const dotLedger = recordAttribution({}, 'slippery-slope', 'Slippery Slope', landed, 0, 500);
-        expect(dotLedger['slippery-slope'].dotDamage).toBe(12);
+    it('the strike claims HP first; the DoT projection gets only what remains', () => {
+        const ledger = recordAttribution({}, 'qa-card', 'QA Card', poisonLanded(5, 74), 30, 40);
+        expect(ledger['qa-card'].damageDealt).toBe(30);
+        expect(ledger['qa-card'].dotDamage).toBe(10);
+    });
 
-        const directLedger = recordAttribution({}, 'strike-card', 'Strike Card', null, 30, 500);
-        expect(directLedger['strike-card'].damageDealt).toBe(30);
+    it('attributes nothing against an already-dead target (cap 0)', () => {
+        const ledger = recordAttribution({}, 'qa-card', 'QA Card', poisonLanded(3, 3), 12, 0);
+        expect(ledger['qa-card'].damageDealt).toBe(0);
+        expect(ledger['qa-card'].dotDamage).toBe(0);
+        expect(ledger['qa-card'].phases).toBe(1);
+    });
+
+    it('keeps the unclamped legacy projection when no cap is given', () => {
+        const ledger = recordAttribution({}, 'qa-card', 'QA Card', poisonLanded(5, 74), 0);
+        expect(ledger['qa-card'].dotDamage).toBe(740);
     });
 });
 
@@ -654,7 +677,7 @@ describe('Spec 25 §7.7 — buildCombatSummary field shape', () => {
             phase: 'complete' as const,
             finalOutcome: 'victory' as const,
             directDamageDealt: 30,
-            attribution: recordAttribution({}, DOT_BODY, 'Slippery Slope', null, 20, Number.MAX_SAFE_INTEGER),
+            attribution: recordAttribution({}, DOT_BODY, 'Slippery Slope', null, 20),
         };
         const summary = buildCombatSummary(complete);
         expect(summary.outcome).toBe('victory');
@@ -663,7 +686,7 @@ describe('Spec 25 §7.7 — buildCombatSummary field shape', () => {
     });
 
     it('rows carry all CombatAttributionRow fields (cardId, name, dotDamage, damageDealt, phases)', () => {
-        const ledger = recordAttribution({}, DOT_BODY, 'Slippery Slope', null, 15, Number.MAX_SAFE_INTEGER);
+        const ledger = recordAttribution({}, DOT_BODY, 'Slippery Slope', null, 15);
         const state = initializeCombatEncounter(makePlayer([DOT_BODY]), makeEnemy(100), undefined, SEED);
         const complete = {
             ...state,
@@ -683,8 +706,8 @@ describe('Spec 25 §7.7 — buildCombatSummary field shape', () => {
     });
 
     it('rows are sorted descending by damageDealt and bestCard names the top contributor', () => {
-        let ledger = recordAttribution({}, DOT_BODY, 'Slippery Slope', null, 5, Number.MAX_SAFE_INTEGER);
-        ledger = recordAttribution(ledger, DAMAGE_BODY, 'Achilles Gambit', null, 20, Number.MAX_SAFE_INTEGER);
+        let ledger = recordAttribution({}, DOT_BODY, 'Slippery Slope', null, 5);
+        ledger = recordAttribution(ledger, DAMAGE_BODY, 'Achilles Gambit', null, 20);
         const state = initializeCombatEncounter(makePlayer([DOT_BODY, DAMAGE_BODY]), makeEnemy(100), undefined, SEED);
         const complete = {
             ...state,

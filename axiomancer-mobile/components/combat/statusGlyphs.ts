@@ -69,6 +69,7 @@ const EFFECT_GLYPHS: Record<string, string> = {
     debuff_poison: '☠',
     debuff_strong_poison: '☣',
     debuff_bleed: '🩸',
+    debuff_creeping_doom: '🕸',
     debuff_burn: '🔥',
     debuff_frostbite: '❄',
     debuff_shock: '⚡',
@@ -81,7 +82,6 @@ const EFFECT_GLYPHS: Record<string, string> = {
     // ── Control ──
     debuff_stun: '💫',
     debuff_sleep: '💤',
-    debuff_daze: '✦',
     debuff_petrify: '🗿',
     debuff_fear: '👁',
     debuff_charm: '💗',
@@ -105,7 +105,6 @@ const EFFECT_GLYPHS: Record<string, string> = {
     debuff_curse: '🧿',
     debuff_wound: '🩹',
     debuff_berserk: '💢',
-    debuff_fatigue: '😩',
     debuff_exhaustion: '😮‍💨',
     debuff_vulnerability_body: '🛡',
     debuff_vulnerability_mind: '🧠',

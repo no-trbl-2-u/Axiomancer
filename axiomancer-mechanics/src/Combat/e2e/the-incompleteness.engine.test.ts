@@ -24,12 +24,13 @@ import type { Character } from '../../Character/types';
 import { ENEMY_REGISTRY, EnemiesByMap, TheIncompleteness } from '../../Enemy/enemy.library';
 import { deepClone } from '../../Utils';
 import { runOneEncounter } from '../combat.encounter.sim';
-import { getThreatSequence } from '../combat.threat';
+import { getThreatSequence, flattenAuthoredSteps } from '../combat.threat';
 import { AUTHORED_THREAT_SEQUENCES } from '../combat.threat-sequences';
 
 afterEach(() => vi.restoreAllMocks());
 
-const SEQUENCE = AUTHORED_THREAT_SEQUENCES['enemy-the-incompleteness'];
+// Flattened (WS9): the sequence is linear, so this is the steps themselves.
+const SEQUENCE = flattenAuthoredSteps(AUTHORED_THREAT_SEQUENCES['enemy-the-incompleteness']);
 
 describe('The Incompleteness — registry wiring', () => {
     it('is registered under the the-incompleteness slug with the unique shape', () => {

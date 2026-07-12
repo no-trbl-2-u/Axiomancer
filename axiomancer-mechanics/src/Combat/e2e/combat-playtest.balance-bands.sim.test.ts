@@ -101,6 +101,12 @@ describe('balance bands (loose) — doctrine witnesses', () => {
 //
 // PLAYTEST-CALIBRATION — current values are the loosest that pass on main;
 // /deck-tuning ratchets them toward the targets as forge items land.
+//
+// recipe 5/5/5 re-pin 2026-07-12: re-validated under the preset color law
+// (spec 32 §12 item 9 — every recipe now 5 body / 5 mind / 5 heart). All
+// floors, the ceiling, and the empty curve-violator set HOLD unchanged; the
+// law moved several presets UP at mid (oratory 0.05→0.40, penitent
+// 0.13→0.42, refrain 0.05→0.45 — fewer stranded dice), none below a floor.
 const GRADED_STAGES = ['early', 'mid'] as const; // floors enforced here
 const SPREAD_STAGES = ['early', 'mid', 'late'] as const; // late = telemetry
 const PRESET_FLOORS: Readonly<Record<(typeof GRADED_STAGES)[number], number>> = {
@@ -183,23 +189,12 @@ const CURVE_STAGES: readonly CombatStageId[] = ['early', 'mid', 'late'];
 // loadout (+5 maxHp from the armor relic improves survival), which nudges
 // 'grace' back over the late floor — it rejoins the offender set. All three are
 // findings for /deck-tuning, not fixes made by this pass.
-// Re-derived 2026-07-11 (phase 26, the Turn Law): 'greedy' could no longer
-// farm endTurn/startTurn cycles for extra Conviction within one threat phase
-// (plan/tuning/2026-07-10-turn-law-and-honest-baseline.md §1). The farm was
-// propping up mid/late-stage win rates specifically (more phases survived ->
-// more farmed turns -> more banked Conviction/Signature casts) — with it gone,
-// all three previously-listed offenders now decay honestly and pass the
-// curve.
-// Confirmed 2026-07-11 (Phase 27, full-matrix re-baseline,
-// plan/tuning/2026-07-11-phase27-rebaseline.md §3): zero offenders holds at
-// the full 18-enemy matrix, not just this file's 2-enemies-per-stage slice.
-// Read this pass carefully though — it is a pass for the wrong reason: 9/10
-// presets hit literal 0.00 at mid and all 10 hit <=0.02 at late, so
-// "monotone decay" is trivially satisfied by a cliff, not a graceful curve.
-// The mid floor below is still pinned at the loose value (0); do not read
-// this empty violator list as "the curve is healthy" — it means "nothing is
-// FLAT," which is a much weaker claim. Phase 31/32 own ratcheting the mid
-// floor toward its 0.25 target.
+// Re-derived 2026-07-11 (Gate 0 round-turn law): the farm-inflated flat 1.00
+// early/mid/late shapes were an artifact of illegal endTurn→startTurn tray
+// re-rolls; under one-tray-per-phase play every preset decays and the offender
+// set is EMPTY. pre-Phase-27 interim — re-derived in the honest re-baseline.
+// recipe 5/5/5 re-pin 2026-07-12: re-derived under the preset color law —
+// every preset still decays monotonically (all move ≤ −0.88); set stays EMPTY.
 const KNOWN_CURVE_VIOLATORS: readonly string[] = [];
 
 let cachedCurve: PlaytestReport | null = null;

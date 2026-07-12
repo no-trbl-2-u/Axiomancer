@@ -44,7 +44,7 @@ afterEach(() => {
 const bodyAttackOverride: CombatEffectTrigger[] = [
     { stance: 'body', action: 'attack', tier: 1, effectId: 'debuff_mark', target: 'opponent', baseChance: 0.10, fumbleEffectId: 'debuff_curse' },
     { stance: 'body', action: 'attack', tier: 2, effectId: 'debuff_bleed', target: 'opponent', baseChance: 0.18 },
-    { stance: 'body', action: 'attack', tier: 3, effectId: 'debuff_backfire_acute', target: 'opponent', baseChance: 0.06 },
+    { stance: 'body', action: 'attack', tier: 3, effectId: 'debuff_backfire', target: 'opponent', baseChance: 0.06 },
 ];
 
 describe('proc table coverage', () => {

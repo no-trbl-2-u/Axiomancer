@@ -28,6 +28,7 @@
 
 import { Card } from './types';
 import { bindSandboxLibraryGuard, getSandboxCard } from './cards.sandbox';
+import { getThoughtformById } from './cards.thoughtforms';
 
 // ─── T1 — AFFLICTION (bleed + poison: stack, extend, convert, detonate) ──────
 
@@ -42,9 +43,11 @@ const slipperySlope: Card = {
         'inevitable. The ground tilts, and they slide the whole way down.',
     tier: 2, rank: 1, cardType: 'spell',
     targetType: 'enemy',
-    // pts (phase 30, FREE-currency law): poison i1 d4 ramp lifetime 10/3 ≈ 3.3 +
-    // FREE MARK seed i1 d1 (0.6, plants the universal affliction-glue currency
-    // instead of TICK, which is retired registry-wide) = 3.9 → Doxa (starter)
+    // pts (WS3.5 clock re-price, 2026-07-11; phase 30 FREE-currency law):
+    // poison i1 d4 on the card-played clock — ramp 2,2,3,3 × 2 expected
+    // ticks/round = 20 HP ÷ 3 ≈ 6.67 + FREE MARK seed i1 d1 (0.6, plants the
+    // universal affliction-glue currency instead of TICK, which is retired
+    // registry-wide) = 7.27 → top of the Doxa band (starter)
     free: { applyEffect: { effectId: 'debuff_mark', intensity: 1, duration: 1 } },
     combatEffects: [{ effectId: 'debuff_poison', appliedTo: 'opponent', intensity: 1 }],
     addedIn: '2026-07-08',
@@ -125,8 +128,9 @@ const resonanceDetonation: Card = {
     targetType: 'enemy',
     // pts (DRASTIC late-stage rework, 2026-07-08 — deliberately overrides the
     // normal pricing curve per directive): RUPTURE alone caps at
-    // RUPTURE_BURST_CAP (80 HP) per cast, a hard global engine constant this
-    // card cannot raise. Even fully fueled, one 80-cap burst cannot close a
+    // ruptureBurstCap() per cast (WS7.1: a pure fraction of enemy max HP), a
+    // hard global engine rule this card cannot raise. Even fully fueled, one
+    // capped burst cannot close a
     // 1080-1500 HP late pool — the deck's real problem was never a single
     // cast's magnitude, it was ACCESS (only one copy) + TIMING (rupture wipes
     // your own DoT board, so rebuilding fuel for cast #2 was pure redraw luck
@@ -139,7 +143,7 @@ const resonanceDetonation: Card = {
     // instead of waiting on a natural redraw — this is the deck's real
     // second access route to its own payoff, without a second printed copy.
     // bonusPct 0.5 makes the FIRST detonation of a long fight (thinnest
-    // fuel) land closer to the 80 cap instead of undershooting it.
+    // fuel) land closer to the fraction cap instead of undershooting it.
     // This card is tier 3, and combat.stage-profiles.ts caps MID at
     // maxCardTier:2, so this rework is structurally late-stage-only — it
     // cannot leak into the mid-stage roster.
@@ -208,9 +212,11 @@ const exordium: Card = {
         'breath, the wound is already open.',
     tier: 1, rank: 1, cardType: 'spell',
     targetType: 'enemy',
-    // pts: argument-wound i1 d2 (1.33) + 1 Premise (0.8) + draw rider (2) + FREE premise (0.8) = 4.93 → Doxa
+    // pts (WS10.1 KW-1 fold, 2026-07-11 — argument-wound folded into POISON):
+    // poison i1 d2 card-played clock (lifetime 2×(2+2)=8 → 2.67) + 1 Premise
+    // (0.8) + draw rider (2) + FREE premise (0.8) = 6.27 → Doxa
     free: { premises: 1 },
-    combatEffects: [{ effectId: 'debuff_argument_wound', appliedTo: 'opponent', duration: 2 }],
+    combatEffects: [{ effectId: 'debuff_poison', appliedTo: 'opponent', duration: 2 }],
     specialMechanics: [{ kind: 'premise', count: 1 }, { kind: 'rider', rider: { drawCards: 1 } }],
     addedIn: '2026-07-08',
     tags: ['peroration', 'exposure'],
@@ -228,11 +234,13 @@ const openingStatement: Card = {
         'named, start to bleed.',
     tier: 1, rank: 2, cardType: 'spell',
     targetType: 'enemy',
-    // pts: mark d2 (1.5) + argument-wound i1 d3 (2.33) + 2 Premises (1.6) + FREE premise (0.8) = 6.23 → Lemma
+    // pts (WS10.1 KW-1 fold, 2026-07-11 — argument-wound folded into POISON,
+    // duration tuned 3 → 2 for the card-played clock): mark d2 (1.5) + poison
+    // i1 d2 (8 → 2.67) + 2 Premises (1.6) + FREE premise (0.8) = 6.57 → Lemma
     free: { premises: 1 },
     combatEffects: [
         { effectId: 'debuff_mark', appliedTo: 'opponent', duration: 2 },
-        { effectId: 'debuff_argument_wound', appliedTo: 'opponent', duration: 3 },
+        { effectId: 'debuff_poison', appliedTo: 'opponent', duration: 2 },
     ],
     specialMechanics: [{ kind: 'premise', count: 2 }],
     addedIn: '2026-07-08',
@@ -250,12 +258,14 @@ const mountingCase: Card = {
         'weight is the argument — and the weight is starting to cut.',
     tier: 2, rank: 3, cardType: 'spell',
     targetType: 'enemy',
-    // pts: mark d3 (2.25) + argument-wound i2 d4 (6.67) + 2 Premises (1.6) + FREE premise (0.8)
-    //      + threshold(+1 premise x 0.5 = 0.4) = 11.72 -> Thesis
+    // pts (WS10.1 KW-1 fold, 2026-07-11 — argument-wound folded into POISON,
+    // intensity tuned 2 → 1 for the card-played clock): mark d3 (2.25) +
+    // poison i1 d4 (2×(2+2+3+3)=20 → 6.67) + 2 Premises (1.6) + FREE premise
+    // (0.8) + threshold(+1 premise x 0.5 = 0.4) = 11.72 -> Thesis
     free: { premises: 1 },
     combatEffects: [
         { effectId: 'debuff_mark', appliedTo: 'opponent', duration: 3 },
-        { effectId: 'debuff_argument_wound', appliedTo: 'opponent', duration: 4, intensity: 2 },
+        { effectId: 'debuff_poison', appliedTo: 'opponent', duration: 4, intensity: 1 },
     ],
     specialMechanics: [{ kind: 'premise', count: 2 }],
     threshold: { color: 'heart', count: 2, rider: { premises: 1 } },
@@ -450,7 +460,8 @@ const theOvertake: Card = {
     // the RUPTURE deliberately ALSO consumes every enemy affliction (its whole
     // DoT board tears loose into the burst), so the finisher must land big to
     // be worth cashing your own DoTs; fuelPerPip 3.5 + bonusPct 0.5 push a
-    // fully-charged forge turn to the RUPTURE_BURST_CAP. + REFRESH own powering
+    // fully-charged forge turn to the ruptureBurstCap() fraction cap (WS7.1:
+    // a pure fraction of enemy max HP). + REFRESH own powering
     // die -- top of the rank-5 Axiom band; a full FREE PIP (1.5) tips it over,
     // so FREE deposits a MARK seed i1 d1 (0.6, the universal glue currency)
     // instead — still a real theme-currency deposit under the FREE-currency
@@ -538,12 +549,15 @@ const sweetPoison: Card = {
         'but you did drink.',
     tier: 2, rank: 2, cardType: 'spell',
     targetType: 'enemy',
-    // pts (phase 30): poison i2 d4 (~6.7) − self-bleed i1 d2 credit (−0.75×1.7
-    // ≈ −1.3) + FREE self-MARK seed i1 d1 (0.6, replaces TICK) ≈ 6.0 → Lemma
-    // (deliberately rich — the akratic bargain)
+    // pts (WS3.5 clock re-price, 2026-07-11 — intensity tuned 2 → 1: i1 on
+    // the card-played clock prints the SAME 20 HP lifetime the old i2 round
+    // clock did; phase 30: FREE self-MARK seed i1 d1 replaces the retired
+    // TICK): poison i1 d4 (20 → 6.67) − self-bleed i1 d2 credit
+    // (−0.75×1 = −0.75) + FREE self-mark 0.6 = 6.52 → Lemma (deliberately
+    // rich — the akratic bargain)
     free: { applyEffect: { effectId: 'debuff_mark', intensity: 1, duration: 1, to: 'self' } },
     combatEffects: [
-        { effectId: 'debuff_poison', appliedTo: 'opponent', intensity: 2 },
+        { effectId: 'debuff_poison', appliedTo: 'opponent', intensity: 1 },
         { effectId: 'debuff_bleed', appliedTo: 'self', intensity: 1, duration: 2 },
     ],
     addedIn: '2026-07-08',
@@ -759,17 +773,17 @@ const paralysisOfAnalysis: Card = {
         'turns inward and more of them spills out.',
     tier: 3, rank: 5, cardType: 'spell',
     targetType: 'enemy',
-    // pts (phase 30): STAGGER 2 (4, full deny alone) + NEW debuff_backfire_acute
-    // i3 d3 (6.75) on its OWN effectId -- stacks independently ON TOP of the
-    // shared 'debuff_backfire' track, doubling the deck's intensity ceiling
-    // (10+10) -- + FREE reveal the next stance (1.5, weak-ish deposit) +
+    // pts (WS10.1 KW-1 fold, 2026-07-11 — backfire_acute folded into BACKFIRE
+    // at i3; the acute's separate 3-per-rung track retires with the clone id):
+    // STAGGER 2 (4, full deny alone) + backfire i3 d3 (6.75) + FREE reveal
+    // the next stance (1.5, weak-ish deposit, phase 30 FREE-currency law) +
     // DRAW 1 kicker (2, legal alongside it) + dieBonus(mind: bonusIntensity 2
     // + bonusDuration 1, rider=4 x0.6 = 2.4) total = 16.65, in-band for rare
-    // [7,18]. (STAGGER deliberately kept OFF this FREE line — a second
+    // [7,19]. (STAGGER deliberately kept OFF this FREE line — a second
     // stagger source here, on top of the PAID STAGGER 2, is what broke the
     // standstill preset's win-rate curve flat during phase 30 balance-check.)
     free: { revealStance: true, drawCards: 1 },
-    combatEffects: [{ effectId: 'debuff_backfire_acute', appliedTo: 'opponent', intensity: 3, duration: 3 }],
+    combatEffects: [{ effectId: 'debuff_backfire', appliedTo: 'opponent', intensity: 3, duration: 3 }],
     specialMechanics: [{ kind: 'stagger', rungs: 2 }],
     dieBonus: { onColor: 'mind', rider: { bonusIntensity: 2, bonusDuration: 1 } },
     addedIn: '2026-07-08',
@@ -824,10 +838,14 @@ const glimpse: Card = {
         'blow that causes it.',
     tier: 1, rank: 1, cardType: 'spell',
     targetType: 'enemy',
-    // pts: FORETELL 2 (2) + Foretold Wound d2 (now real DoT, ~2.0) + FREE
-    // foretell (0.35) ≈ 4.35 → Doxa
+    // pts (WS10.1 KW-1, 2026-07-11 — foretold-wound replaced by its parts:
+    // POISON + MARK double-apply): poison i1 d1 (4 → 1.33) + mark i1 d2 (1.5)
+    // + FORETELL 2 (2) + FREE foretell (1) = 5.83 → Doxa
     free: { foretell: 1 },
-    combatEffects: [{ effectId: 'debuff_foretold_wound', appliedTo: 'opponent', duration: 2 }],
+    combatEffects: [
+        { effectId: 'debuff_poison', appliedTo: 'opponent', duration: 1 },
+        { effectId: 'debuff_mark', appliedTo: 'opponent', duration: 2 },
+    ],
     specialMechanics: [{ kind: 'foretell', count: 2 }],
     addedIn: '2026-07-08',
     tags: ['oracle', 'exposure'],
@@ -862,14 +880,19 @@ const cassandrasBurden: Card = {
         'named the exact place it would land. It is already starting to hurt.',
     tier: 2, rank: 3, cardType: 'spell',
     targetType: 'enemy',
-    // pts (phase 30): immediate Foretold Wound i2 d2 (~3.2) + OMEN(Guard 4,
-    // ×0.6 = 0.6) + FREE FORETELL 1 (1, oracle's currency, weak deposit) +
-    // DRAW 1 kicker (2, legal alongside the weak deposit) ≈ 6.8 → Thesis.
-    // The WOUND lands on cast ("already starting to hurt"); the BRACE
-    // (guard 4) is the prophecy payoff, realized only when the prediction
-    // proves true.
+    // pts (WS10.1 KW-1, 2026-07-11 — foretold-wound replaced by its parts:
+    // POISON + MARK double-apply, intensity tuned 2 → 1 for the card-played
+    // clock; phase 30 FREE-currency law): poison i1 d2 (8 → 2.67) + mark i1
+    // d2 (1.5) + OMEN(Guard 4 ×0.6 + info 1 = 1.6) + FREE FORETELL 1 (1,
+    // oracle's currency, weak deposit) + DRAW 1 kicker (2, legal alongside
+    // the weak deposit) = 8.77 → Thesis. The WOUND lands on cast ("already
+    // starting to hurt"); the BRACE (guard 4) is the prophecy payoff,
+    // realized only when the prediction proves true.
     free: { foretell: 1, drawCards: 1 },
-    combatEffects: [{ effectId: 'debuff_foretold_wound', appliedTo: 'opponent', intensity: 2, duration: 2 }],
+    combatEffects: [
+        { effectId: 'debuff_poison', appliedTo: 'opponent', intensity: 1, duration: 2 },
+        { effectId: 'debuff_mark', appliedTo: 'opponent', intensity: 1, duration: 2 },
+    ],
     specialMechanics: [{
         kind: 'omen',
         rider: { guard: 4 },
@@ -968,8 +991,10 @@ const briefCandle: Card = {
         'behind is yours to gather — some of it before it even finishes burning.',
     tier: 1, rank: 1, cardType: 'spell',
     targetType: 'enemy',
-    // pts: bleed i2 d1 (~2) + fast expiry→Soul (0.75) + FREE souls 1 (0.75) ≈ 3.5 →
-    // Doxa, in-budget.
+    // pts (WS3.5 clock re-price, 2026-07-11): bleed i2 d1 on the
+    // damage-instance clock — 2 expected ticks land BOTH stacks in the round
+    // (6+3 = 9 HP → 3) + FREE souls 1 (0.75) = 3.75 → Doxa, in-budget; the
+    // fast washout is the Soul engine's fuel.
     free: { souls: 1 },
     combatEffects: [{ effectId: 'debuff_bleed', appliedTo: 'opponent', intensity: 2, duration: 1 }],
     addedIn: '2026-07-08',
@@ -1405,15 +1430,18 @@ const refrain: Card = {
         'starts to sound like the truth — and the truth leaves a mark.',
     tier: 1, rank: 1, cardType: 'spell',
     targetType: 'enemy',
-    // pts (phase 30): [mark d2 (1.5) + echo_sting d2 (1.5)] × ECHO(x2
-    // applications) ≈ 6 + FREE MILL 1 (1, echo's "advance the loop" currency
-    // — feeds RECALL without drawing, replaces the bare draw) ≈ 7 →
-    // Thesis-adjacent (deliberately above stock T1 budget -- Early's legal
+    // pts (WS10.1 KW-1 fold, 2026-07-11 — echo_sting folded into POISON,
+    // duration tuned 2 → 1: the ECHO already re-applies it, and the
+    // card-played clock makes each application tick twice a round; phase 30
+    // FREE-currency law): [mark d2 (1.5) + poison i1 d1 (2×2=4 → 1.33)] ×
+    // ECHO(1.8) = 5.1 + FREE MILL 1 (1, echo's "advance the loop" currency —
+    // feeds RECALL without drawing, replaces the bare draw) = 6.1 → top of
+    // the Doxa band (deliberately above stock T1 budget -- Early's legal
     // pool is ONLY this + second-thoughts).
     free: { millCards: 1 },
     combatEffects: [
         { effectId: 'debuff_mark', appliedTo: 'opponent', duration: 2 },
-        { effectId: 'debuff_echo_sting', appliedTo: 'opponent', duration: 2 },
+        { effectId: 'debuff_poison', appliedTo: 'opponent', duration: 1 },
     ],
     specialMechanics: [{ kind: 'echo' }],
     addedIn: '2026-07-08',
@@ -1585,7 +1613,10 @@ const registry = new Map<string, Card>(cardLibrary.map(card => [card.id, card]))
 // take precedence over the curated library at lookup time.
 bindSandboxLibraryGuard(id => registry.get(id));
 
-/** O(1) lookup by card id; sandbox-aware. */
+/** O(1) lookup by card id; sandbox-aware. Chain (WS2.1): sandbox first (so
+ *  experiments can shadow anything), then the Thoughtform registry (CONJURE
+ *  targets — real cards, deliberately outside the pinned 70), then the
+ *  curated library. */
 export function getCardById(id: string): Card | undefined {
-    return getSandboxCard(id) ?? registry.get(id);
+    return getSandboxCard(id) ?? getThoughtformById(id) ?? registry.get(id);
 }

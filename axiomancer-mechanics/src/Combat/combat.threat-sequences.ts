@@ -18,9 +18,14 @@
  * level + difficulty, so the whole roster retunes from a few constants.
  */
 
-import type { AuthoredThreatPhase } from './combat.threat';
+import type { AuthoredThreatStep } from './combat.threat';
 
-export const AUTHORED_THREAT_SEQUENCES: Record<string, AuthoredThreatPhase[]> = {
+/**
+ * WS9 (spec 32 §12 item 7) — a step may also be a BRANCH node: a closed
+ * condition plus two fully-authored forks, committed from live state at phase
+ * START (`combat.threat.ts`). Both forks stay visible on the telegraph.
+ */
+export const AUTHORED_THREAT_SEQUENCES: Record<string, AuthoredThreatStep[]> = {
     // ══ FISHING VILLAGE — early (L1-8) ══════════════════════════════════════════
 
     // Mindless burial-grub — pure forward appetite; the ramp is it committing.
@@ -149,9 +154,17 @@ export const AUTHORED_THREAT_SEQUENCES: Record<string, AuthoredThreatPhase[]> = 
         { enemyStance: 'body', damageWeight: 1.35, actionText: "It throws everything it became at you, all at once", stanceHint: "No flight, so it makes the leap the hard way — through you." },
     ],
     // Befriendable triple watcher — methodical scrutiny; Control-weak, erosion-resistant tallying.
+    // WS9 prototype (mid normal): stacked with 3+ afflictions it BALANCES THE
+    // BOOKS — sheds one (spec-29 reactive cleanse) and swaps stance.
     'enemy-tri-eyes': [
         { enemyStance: 'mind', damageWeight: 0.85, actionText: "Tri-Eyes marks a fresh error against your name", stanceHint: "It never raises its voice; it simply notes the discrepancy and waits." },
-        { enemyStance: 'heart', threatEffectId: 'debuff_mark', actionText: "It recounts your every misstep until your hand falters", stanceHint: "There is something almost pleading in how badly it wants the tally to balance." },
+        {
+            branch: {
+                condition: { kind: 'bearer-afflictions-gte', n: 3 },
+                then: { enemyStance: 'mind', damageWeight: 0.7, actionText: "It strikes the deepest entry from the ledger of itself and turns a corrected eye on you", stanceHint: "Written on past legibility, it stops pleading and coldly reconciles the account." },
+                else: { enemyStance: 'heart', threatEffectId: 'debuff_mark', actionText: "It recounts your every misstep until your hand falters", stanceHint: "There is something almost pleading in how badly it wants the tally to balance." },
+            },
+        },
         { enemyStance: 'mind', damageWeight: 1.25, threatEffectId: 'debuff_poison', threatIntensity: 2, actionText: "The third eye renders its final count on the ledger of you", stanceHint: "Every error reconciled, it closes the book with the patience of arithmetic." },
     ],
     // Patient green duelist — the cane keeps time you have not learned yet.
@@ -332,10 +345,19 @@ export const AUTHORED_THREAT_SEQUENCES: Record<string, AuthoredThreatPhase[]> = 
         { enemyStance: 'body', damageWeight: 1.45, threatEffectId: 'debuff_poison', threatIntensity: 3, actionText: "The oldest fire in the world burns, once, entirely", stanceHint: "Whiteness is what flame becomes when it stops needing to prove anything." },
     ],
     // The smoking mirror — it shows you the you that already lost.
+    // WS9 prototype (late boss): a FULLY BLOCKED prior threat turns the next
+    // action rider-heavy (the smoke pours around the wall) instead of
+    // damage-heavy.
     'enemy-tezcatlipoca': [
         { enemyStance: 'mind', damageWeight: 0.85, threatEffectId: 'debuff_mark', threatIntensity: 2, actionText: "The mirror shows you mid-mistake, slightly before you make it", stanceHint: "It calculates in reflections; the smoke is where the discarded versions go." },
         { enemyStance: 'heart', damageWeight: 0.95, threatEffectId: 'debuff_mark', threatIntensity: 2, actionText: "It shows you the version of you that already lost, at leisure", stanceHint: "There is grief in the glass — every reflection it keeps was somebody's best attempt." },
-        { enemyStance: 'mind', damageWeight: 1.2, threatEffectId: 'debuff_mark', threatIntensity: 2, actionText: "The mirror angles, and your certainty falls out of frame", stanceHint: "It edits with the courtesy of a god who has already seen the final cut." },
+        {
+            branch: {
+                condition: { kind: 'prior-threat-fully-blocked' },
+                then: { enemyStance: 'heart', damageWeight: 0.5, threatEffectId: 'debuff_poison', threatIntensity: 3, actionText: "Denied the blow, the smoke pours through the seams of your guard", stanceHint: "Your wall was a reflection too; what it cannot strike, it keeps." },
+                else: { enemyStance: 'mind', damageWeight: 1.2, threatEffectId: 'debuff_mark', threatIntensity: 2, actionText: "The mirror angles, and your certainty falls out of frame", stanceHint: "It edits with the courtesy of a god who has already seen the final cut." },
+            },
+        },
         { enemyStance: 'mind', damageWeight: 1.45, threatEffectId: 'debuff_poison', threatIntensity: 3, actionText: "The smoking mirror waits, courteously, for you to agree with it", stanceHint: "The reflection reaches the glass from the inside. The glass does not object." },
     ],
     // The promoted appetite — administrative violence at scale.

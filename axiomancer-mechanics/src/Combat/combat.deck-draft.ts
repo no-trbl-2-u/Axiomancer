@@ -29,9 +29,9 @@ import type { CombatStageProfile } from './combat.stage-profiles';
 import { stageEligibleCardIds } from './combat.stage-profiles';
 
 /** Weight multiplier applied to cards whose verb class fits the draft focus. */
-const FOCUS_WEIGHT = 4;
+export const FOCUS_WEIGHT = 4;
 /** Weight for off-focus cards (every card keeps a chance to appear). */
-const OFF_FOCUS_WEIGHT = 1;
+export const OFF_FOCUS_WEIGHT = 1;
 /** Default deck size (excludes the auto-appended Retreat). */
 const DEFAULT_DRAFT_SIZE = 10;
 /** Default max copies of any single card in a draft. */
@@ -60,8 +60,10 @@ export interface DeckDraftOptions {
     extraCards?: readonly Card[];
 }
 
-/** Verb-class fit per focus: which classes get the FOCUS_WEIGHT multiplier. */
-function focusWeight(focus: CombatDeckFocus, verbClass: CombatVerbClass): number {
+/** Verb-class fit per focus: which classes get the FOCUS_WEIGHT multiplier.
+ *  Module-level export (not in the locked barrel) — the reward-draft harness
+ *  (`combat.reward-draft.sim.ts`) ranks reward offers with the same mapping. */
+export function focusWeight(focus: CombatDeckFocus, verbClass: CombatVerbClass): number {
     switch (focus) {
         case 'dot':      return verbClass === 'direct-dot' ? FOCUS_WEIGHT : OFF_FOCUS_WEIGHT;
         case 'control':  return verbClass === 'direct-control' || verbClass === 'stat-debuff'

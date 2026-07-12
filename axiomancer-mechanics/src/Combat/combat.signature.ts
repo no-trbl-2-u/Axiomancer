@@ -89,9 +89,6 @@ export function getSignatureSkill(id: string): SignatureSkill | undefined {
 /** Heal granted by Second Wind = a fraction of the player's max HP. */
 const SECOND_WIND_HEAL_FRAC = 0.12;
 
-/** Direct HP a strike-class signature deals on top of its DoT (× magnitude). */
-const STRIKE_DAMAGE_MULT = 3;
-
 /** Damage dealt per stack of any active effect on the enemy (Conclusion finisher). */
 export const CONCLUDE_DMG_PER_STACK = 2;
 
@@ -155,9 +152,8 @@ export function applySignatureSkill(
             // Then refreshes the drafted die so the BODY archetype keeps swinging.
             const totalStacks = state.enemy.effects.reduce((sum, ae) => sum + ae.intensity, 0);
             const dmg = Math.max(1, Math.round(CONCLUDE_DMG_PER_STACK * totalStacks));
-            const beforeHp = state.enemy.health;
             const enemy = applyDamage(state.enemy, dmg) as Enemy;
-            const attribution = recordAttribution(state.attribution, skill.id, skill.name, null, dmg, beforeHp);
+            const attribution = recordAttribution(state.attribution, skill.id, skill.name, null, dmg, state.enemy.health);
             events.push({ kind: 'conclude-hit', amount: dmg, totalStacks });
             events.push({ kind: 'damage-dealt', cardId: skill.id, target: 'enemy', amount: dmg });
             next = refreshDraftedDie({ ...state, enemy, attribution });
@@ -165,11 +161,11 @@ export function applySignatureSkill(
         }
         case 'control':
         case 'dot':
-        case 'mercy':
-        case 'strike': {
+        case 'mercy': {
             // Apply the named effect to the enemy at boosted intensity (guaranteed
             // — no caster roll, so it never fizzles). DoT will tick HP; control
-            // hinders the enemy's turn (canAct). 'strike'/'mercy' also hit HP now.
+            // hinders the enemy's turn (canAct). 'mercy' also chips HP (the
+            // signature-only flat-magnitude exception, spec 32 §12).
             let enemy = state.enemy;
             let attribution = state.attribution;
             const def = skill.effectId ? lookupEffect(skill.effectId) : undefined;
@@ -186,17 +182,16 @@ export function applySignatureSkill(
                     events.push({ kind: 'effect-landed', cardId: skill.id, effectId: def.id, target: 'enemy', effectKind: cls, intensity: active.intensity, effect: def });
                 }
             }
-            // strike = a heavy bleeding blow; mercy = a disarming hit. Both chip HP.
-            if (skill.kind === 'strike' || skill.kind === 'mercy') {
-                const dmg = skill.kind === 'strike' ? skill.magnitude * STRIKE_DAMAGE_MULT : skill.magnitude;
-                const beforeHp = enemy.health;
+            // mercy = a disarming hit: a flat-magnitude chip that softens the
+            // foe toward the mercy screen (Disarming Plea's ratified exception).
+            if (skill.kind === 'mercy') {
+                const dmg = skill.magnitude;
+                const hpBefore = enemy.health;
                 enemy = applyDamage(enemy, dmg) as Enemy;
-                attribution = recordAttribution(attribution, skill.id, skill.name, null, dmg, beforeHp);
+                attribution = recordAttribution(attribution, skill.id, skill.name, null, dmg, hpBefore);
                 events.push({ kind: 'damage-dealt', cardId: skill.id, target: 'enemy', amount: dmg });
             }
             next = { ...state, enemy, attribution };
-            // BODY strike — refresh the drafted die so the player keeps swinging.
-            if (skill.kind === 'strike') next = refreshDraftedDie(next);
             break;
         }
         case 'draw': {
@@ -213,7 +208,7 @@ export function applySignatureSkill(
     return { state: next, events };
 }
 
-/** Refreshes the currently drafted die back to `available` (for strike/draw). */
+/** Refreshes the currently drafted die back to `available` (for conclude/draw). */
 function refreshDraftedDie(state: CombatEncounterState): CombatEncounterState {
     if (!state.draftedDieId) return state;
     return {

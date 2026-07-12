@@ -31,7 +31,7 @@ import {
 } from '../combat.engine';
 import { classifyVerbClass, toCombatCard } from '../combat.cards';
 import { getActiveDotTotal, getActiveDotAmplifications } from '../effect-modifiers';
-import { RUPTURE_BURST_CAP, ruptureBurstCap } from '../effects';
+import { RUPTURE_CAP_FRACTION, ruptureBurstCap } from '../effects';
 import { COMBAT_REWARD_POOL } from '../combat.rewards';
 import type { CombatDieColor, CombatEncounterState, CombatEvent } from '../combat.encounter.types';
 
@@ -65,10 +65,17 @@ const ae = (effectId: string, intensity = 1, remainingDuration = 4, tier: 1 | 2 
 // control fixtures registered into the shared registry (the same lookup the
 // engine's roll-penalty / distinct-control readers consult). Never touches the
 // library JSON.
+// Post-Phase-30 merge 2026-07-12: the zero-producer sweep deleted the legacy
+// control vocabulary (knockdown/root/blind/slow/straw-man-echo), so the WS8
+// surface shapes live on as test-only fixtures — one per DISRUPT surface
+// (roll / stance-lock / rider-suppress) plus the roll-shred fillers.
 const CONTROL_FIXTURES: Effect[] = [
     { id: 'test_ctrl_daze', name: 'test daze', description: 'control -3', type: 'debuff', category: 'control', duration: 4, stacking: 'intensity', tier: 2, payload: { rollModifier: -3 } },
+    { id: 'test_ctrl_knockdown', name: 'test knockdown', description: 'control roll -3', type: 'debuff', category: 'control', duration: 4, stacking: 'intensity', tier: 2, payload: { rollModifier: -3 } },
     { id: 'test_ctrl_slow', name: 'test slow', description: 'control -2', type: 'debuff', category: 'control', duration: 4, stacking: 'intensity', tier: 2, payload: { rollModifier: -2 } },
-    { id: 'test_ctrl_root', name: 'test root', description: 'control -2', type: 'debuff', category: 'control', duration: 4, stacking: 'intensity', tier: 2, payload: { rollModifier: -2 } },
+    { id: 'test_ctrl_echo', name: 'test echo shred', description: 'control -1', type: 'debuff', category: 'control', duration: 4, stacking: 'intensity', tier: 2, payload: { rollModifier: -1 } },
+    { id: 'test_ctrl_root', name: 'test root', description: 'control stance-lock', type: 'debuff', category: 'control', duration: 4, stacking: 'intensity', tier: 2, payload: { defenseModifier: -2, lockedStance: true } },
+    { id: 'test_ctrl_blind', name: 'test blind', description: 'control rider-suppress', type: 'debuff', category: 'control', duration: 4, stacking: 'intensity', tier: 2, payload: { suppressesThreatRiders: true } },
 ];
 beforeAll(() => { for (const e of CONTROL_FIXTURES) effectsLibrary.registry.set(e.id, e); });
 afterAll(() => { for (const e of CONTROL_FIXTURES) effectsLibrary.registry.delete(e.id); });
@@ -115,15 +122,19 @@ const enemyDotSum = (events: readonly CombatEvent[]): number =>
 // ── AMPLIFICATION surface (Hemorrhage) ───────────────────────────────────────
 
 describe('AMPLIFICATION — the combo registry is surfaced honestly', () => {
-    it('poison+bleed dot-ticks SUM to the real HP lost and report the Hemorrhage combo', () => {
+    it('poison+bleed surface the Hemorrhage combo; event clocks never round-tick', () => {
         const base = initializeCombatEncounter(makePlayer([]), makeEnemy(300, 'mind'), undefined, 7);
         const enemyEffects = [ae('debuff_poison', 2), ae('debuff_bleed', 1)];
         const res = processBetweenPhases({ ...base, enemy: { ...base.enemy, effects: enemyEffects } });
         const lost = 300 - res.state.enemy.health;
-        // v3: poison start floor(2×2×1.5)=6 (Hemorrhage) + bleed end floor(3×1)=3.
-        expect(lost).toBe(9);
-        expect(enemyDotSum(res.events)).toBe(lost);  // honesty: emitted == landed
+        // WS3.3: poison (card-played clock) and bleed (damage-instance clock)
+        // no longer tick at the round boundary — the boundary leaves them
+        // untouched, honestly (emitted == landed == 0).
+        expect(lost).toBe(0);
+        expect(enemyDotSum(res.events)).toBe(0);
 
+        // The per-tick amplification surface is clock-agnostic:
+        // poison floor(2×2×1.5)=6 (Hemorrhage) + bleed floor(3×1)=3.
         expect(getActiveDotTotal(enemyEffects).total).toBe(9);
         const amps = getActiveDotAmplifications(enemyEffects);
         expect(amps).toHaveLength(1);
@@ -152,9 +163,10 @@ describe('RUPTURE — detonate the foe afflictions for the pending total', () =>
         // MIND die on the mind card (color law) vs a mind foe → neutral read ×1.
         const state = openAndDraft(makePlayer([RUP]), makeEnemy(300, 'mind', enemyEffects), [RUP, RUP, RUP], 'mind');
         const projected = projectRupture(state); // neutral read (mind die vs mind) → ×1
-        // v3 poison RAMPS + Hemorrhage: ticks 6,6,9,9 = 30; bleed i1 DECAYS —
-        // exactly one tick of 3. pending = 33.
-        expect(projected).toBe(33);
+        // WS3.3 clock fuel: poison RAMPS + Hemorrhage on the card-played
+        // clock (2 expected ticks/round): per-round dprs 6,6,9,9 × 2 = 60;
+        // bleed i1 DECAYS — exactly one tick of 3. pending = 63.
+        expect(projected).toBe(63);
 
         const hpBefore = state.enemy.health;
         const res = playCombatCard(state, { uid: state.hand.find(h => h.cardId === RUP)!.uid }, true);
@@ -179,40 +191,50 @@ describe('RUPTURE — detonate the foe afflictions for the pending total', () =>
         expect(det!.amount).toBe(9);
     });
 
-    it('respects the SCALING burst cap on a huge DoT stack (big enemy → cap grows)', () => {
-        // Plan item 2: the cap scales with enemy max HP so a full detonation
-        // stays relevant against boss pools — max(flat floor, fraction × maxHP).
+    it('respects the PURE-FRACTION burst cap on a huge DoT stack (big enemy → cap grows)', () => {
+        // WS7.1 (spec 32 §12 item 5): the cap is a pure fraction of enemy max
+        // HP — round(F × maxHp), no flat floor.
         mockSequentialRng(0.05);
         const enemyEffects = [ae('debuff_poison', 10, 10)];
         const state = openAndDraft(makePlayer([RUP]), makeEnemy(900, 'mind', enemyEffects), [RUP, RUP, RUP], 'mind');
         const res = playCombatCard(state, { uid: state.hand.find(h => h.cardId === RUP)!.uid }, true);
         const det = res.events.find(e => e.kind === 'rupture-detonated') as { amount: number } | undefined;
-        expect(ruptureBurstCap(900)).toBeGreaterThan(RUPTURE_BURST_CAP); // 900 HP: the fraction term wins
+        expect(ruptureBurstCap(900)).toBe(Math.round(RUPTURE_CAP_FRACTION * 900));
         expect(det!.amount).toBe(ruptureBurstCap(900));
     });
 
-    it('keeps the flat floor on a small enemy (early/mid behavior unchanged)', () => {
+    it('the cap is a pure fraction on a small enemy too — the flat floor is retired (WS7.1)', () => {
         mockSequentialRng(0.05);
         const enemyEffects = [ae('debuff_poison', 10, 10)];
         const state = openAndDraft(makePlayer([RUP]), makeEnemy(300, 'mind', enemyEffects), [RUP, RUP, RUP], 'mind');
         const res = playCombatCard(state, { uid: state.hand.find(h => h.cardId === RUP)!.uid }, true);
         const det = res.events.find(e => e.kind === 'rupture-detonated') as { amount: number } | undefined;
-        expect(ruptureBurstCap(300)).toBe(RUPTURE_BURST_CAP); // fraction term below the floor
-        expect(det!.amount).toBe(RUPTURE_BURST_CAP);
+        // No floor term: round(F × 300), full stop. Against truly small pools
+        // (~100 HP) the fraction lands BELOW the retired 80-HP floor — that
+        // early-cap drop is the ratified trade; the sweep raises F, never
+        // re-adds a floor.
+        expect(ruptureBurstCap(300)).toBe(Math.round(RUPTURE_CAP_FRACTION * 300));
+        expect(ruptureBurstCap(100)).toBeLessThan(80); // the retired floor no longer props tiny pools
+        expect(det!.amount).toBe(ruptureBurstCap(300));
     });
 });
 
 // ── DISRUPT — distinct-control deny meter ────────────────────────────────────
 
-describe('DISRUPT — a variety of controls denies the telegraphed turn', () => {
+describe('DISRUPT — a variety of control SURFACES denies the telegraphed turn (WS8.3)', () => {
     // Support-tagged (non-card) controls carried by enemy threats / legacy
-    // sources — each a distinct negative-roll control, none a DoT.
-    const twoControls = () => [ae('test_ctrl_daze', 1), ae('test_ctrl_slow', 1)];
-    const threeControls = () => [...twoControls(), ae('test_ctrl_root', 1)];
+    // sources — each on a DIFFERENT surface (spec 32 §12 #6):
+    //   knockdown → roll (-3), root → stance (lockedStance),
+    //   blind → rider-suppress (suppressesThreatRiders).
+    // (daze folded into confusion, WS8.1 KW-2 — knockdown is the -3 roll
+    // carrier now; all shapes are test-only fixtures post the zero-producer
+    // sweep.)
+    const twoSurfaces = () => [ae('test_ctrl_knockdown', 1), ae('test_ctrl_root', 1)];
+    const threeSurfaces = () => [...twoSurfaces(), ae('test_ctrl_blind', 1)];
 
-    it('does NOT deny at 2 distinct controls (roll penalty 5 < 8)', () => {
+    it('does NOT deny at 2 distinct surfaces (roll penalty 3 < 8)', () => {
         mockSequentialRng(0.05);
-        const base = initializeCombatEncounter(makePlayer([]), makeEnemy(300, 'mind', twoControls()), undefined, 7);
+        const base = initializeCombatEncounter(makePlayer([]), makeEnemy(300, 'mind', twoSurfaces()), undefined, 7);
         const state = rollEncounterDice(base).state;
         const meter = getDisruptMeter(state);
         expect(meter.pips).toBe(2);
@@ -222,13 +244,27 @@ describe('DISRUPT — a variety of controls denies the telegraphed turn', () => 
         expect(res.events.some(e => e.kind === 'threat-fired')).toBe(true);
     });
 
-    it('DENIES at exactly 3 distinct controls (the additive path, roll penalty 7 < 8)', () => {
+    it('does NOT deny at 3 controls of the SAME grip (three roll shreds = 1 pip)', () => {
         mockSequentialRng(0.05);
-        const base = initializeCombatEncounter(makePlayer([]), makeEnemy(300, 'mind', threeControls()), undefined, 7);
+        // knockdown -3 + slow -2 + echo shred -1 = penalty 6 < 8, all 'roll'.
+        const sameGrip = [ae('test_ctrl_knockdown', 1), ae('test_ctrl_slow', 1), ae('test_ctrl_echo', 1)];
+        const base = initializeCombatEncounter(makePlayer([]), makeEnemy(300, 'mind', sameGrip), undefined, 7);
+        const state = rollEncounterDice(base).state;
+        const meter = getDisruptMeter(state);
+        expect(meter.pips).toBe(1);
+        expect(meter.willDeny).toBe(false);
+        const res = resolveThreatPhase(state);
+        expect(res.events.some(e => e.kind === 'disrupt-denied')).toBe(false);
+        expect(res.events.some(e => e.kind === 'threat-fired')).toBe(true);
+    });
+
+    it('DENIES at exactly 3 distinct surfaces (the additive path, roll penalty 3 < 8)', () => {
+        mockSequentialRng(0.05);
+        const base = initializeCombatEncounter(makePlayer([]), makeEnemy(300, 'mind', threeSurfaces()), undefined, 7);
         const state = rollEncounterDice(base).state;
         const meter = getDisruptMeter(state);
         expect(meter.pips).toBe(3);
-        expect(meter.rollPenalty).toBe(7); // < THREAT_DENY_AT(8): legacy path would NOT deny
+        expect(meter.rollPenalty).toBe(3); // < THREAT_DENY_AT(8): legacy path would NOT deny
         expect(meter.willDeny).toBe(true);
         const res = resolveThreatPhase(state);
         const denied = res.events.find(e => e.kind === 'disrupt-denied') as { pips: number } | undefined;
@@ -365,16 +401,19 @@ describe('INVARIANT — no new behavior fires without its marker', () => {
 
     it('a plain enemy + plain player emit ZERO new-kind events and un-amplified DoT', () => {
         mockSequentialRng(0.05);
-        // One control (roll -3) → below every deny threshold; one poison DoT, no combo.
-        const enemyEffects = [ae('test_ctrl_daze', 1), ae('debuff_poison', 2)];
+        // One control (roll -3) → below every deny threshold; one ROUND-CLOCKED
+        // DoT, no combo. (WS3.3: poison moved to the card-played clock — it no
+        // longer ticks at the round boundary, so the round-tick witness here is
+        // nettle_sting, the bulwark card-local species: dpr 2, round-end.)
+        const enemyEffects = [ae('test_ctrl_knockdown', 1), ae('debuff_nettle_sting', 2)];
         const base = initializeCombatEncounter(makePlayer([]), makeEnemy(300, 'mind', enemyEffects), undefined, 7);
         const state = rollEncounterDice(base).state;
         const res = resolveThreatPhase(state); // fires threat + processBetweenPhases
 
         for (const ev of res.events) expect(NEW_KINDS.has(ev.kind), ev.kind).toBe(false);
         expect(res.events.some(e => e.kind === 'dot-tick' && e.effectId === 'vulnerable-surcharge')).toBe(false);
-        // v3 poison i2, round 1, no combo → floor(2×2)=4 exactly.
-        const tick = res.events.find(e => e.kind === 'dot-tick' && e.effectId === 'debuff_poison') as { amount: number } | undefined;
+        // nettle_sting i2, round 1, no combo → floor(2×2)=4 exactly.
+        const tick = res.events.find(e => e.kind === 'dot-tick' && e.effectId === 'debuff_nettle_sting') as { amount: number } | undefined;
         expect(tick!.amount).toBe(4);
         expect(res.events.some(e => e.kind === 'threat-fired')).toBe(true); // enemy still acts
     });

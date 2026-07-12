@@ -1,5 +1,13 @@
 # Phase 27 — the honest baseline (2026-07-11)
 
+> Cross-note (merge reconciliation): a second, independent Phase 27
+> re-baseline was cut the same day against the local session's tree (Turn Law
+> 6ea123fc + the 11-workstream card sweep, tip 70c64501) — see
+> `axiomancer-mechanics/docs/reports/rebaseline-scratch/rederivations.md`.
+> That one measured the engine semantics that survived the merge and stamps
+> the checked-in `deck-matrix-baseline.json`; this report measured cloud main
+> (post f849c5a2) and its absolute numbers carry that asterisk.
+
 > **Status: every pre-2026-07-10 plan/tuning win-rate/engagement number is
 > now superseded by this report.** Re-run post Phase 26 (the Turn Law:
 > `startTurn` refuses a second dice tray within one threat phase;

@@ -143,10 +143,36 @@ describe('sandbox registry — library-card overrides', () => {
 
 // ── Set registry (post-v3 reset) ─────────────────────────────────────────────
 
-describe('sandbox sets — the post-v3 empty registry', () => {
-    it('ships EMPTY: the pre-v3 experiment sets retired with the keyword reset', () => {
-        expect(SANDBOX_CARD_SETS).toEqual({});
-        expect(listSandboxSets()).toEqual([]);
+describe('sandbox sets — the registry after the post-v3 reset', () => {
+    it('carries the WS7.2 chooseX + WS3.4 doom + WS2.1 conjure + WS4 theme-role + WS5.2 sequencing + WS6.2 bridge sets (pre-v3 experiment sets stayed retired; WS2.2 free-line-conversions retired 2026-07-12, superseded by the Phase 30 full library pass)', () => {
+        const expected = [
+            'chooseX-vein', 'doom-species', 'conjure-exercise',
+            'roles-forge', 'roles-bulwark', 'roles-charm', 'roles-harvest',
+            'sequencing-microset', 'bridge-rewards',
+        ];
+        expect(Object.keys(SANDBOX_CARD_SETS)).toEqual(expected);
+        expect(listSandboxSets().map(s => s.id)).toEqual(expected);
+        expect(SANDBOX_CARD_SETS['chooseX-vein'].cards.map(c => c.id)).toEqual(['the-open-vein']);
+        expect(SANDBOX_CARD_SETS['doom-species'].cards.map(c => c.id)).toEqual(['debt-of-days']);
+        expect(SANDBOX_CARD_SETS['conjure-exercise'].cards.map(c => c.id)).toEqual(['foundry-sprite', 'corollary']);
+        // WS4.1-4.4 — the theme-role passes (deep coverage in
+        // roles-themes.engine.test.ts).
+        expect(SANDBOX_CARD_SETS['roles-forge'].cards.map(c => c.id)).toEqual(['slag-runoff', 'ingot-of-ruin']);
+        expect(SANDBOX_CARD_SETS['roles-bulwark'].cards.map(c => c.id)).toEqual(['grit-between-stones', 'the-unmoved-mover']);
+        expect(SANDBOX_CARD_SETS['roles-charm'].cards.map(c => c.id)).toEqual(['a-sweeter-poison']);
+        expect(SANDBOX_CARD_SETS['roles-harvest'].cards.map(c => c.id)).toEqual(['the-long-ledger', 'seedcorn-sacrifice']);
+        // WS5.2 — the sequencing-grammar microset (deep coverage in
+        // sequencing-grammar.engine.test.ts).
+        expect(SANDBOX_CARD_SETS['sequencing-microset'].cards.map(c => c.id)).toEqual([
+            'captatio-benevolentiae', 'in-medias-res', 'coda',
+            'dying-echo', 'wages-of-weakness', 'answered-in-kind',
+        ]);
+        // WS6.2 — the cross-theme bridge rewards (deep coverage in
+        // bridge-rewards.engine.test.ts).
+        expect(SANDBOX_CARD_SETS['bridge-rewards'].cards.map(c => c.id)).toEqual([
+            'barbed-compliment', 'the-poured-rampart', 'interest-on-the-flesh',
+            'entered-into-evidence', 'stolen-cadence', 'unbroken-countenance',
+        ]);
     });
 
     it('applySandboxSet returns undefined for an unknown id and registers nothing', () => {

@@ -159,7 +159,7 @@ describe('REPRISE songbook choice (phase 28)', () => {
         // A low-rank and a high-rank card in discard — argmax would pick the high-rank one.
         state = { ...state, discard: ['straw-mans-jab', 'the-overtake'] };
         const uid = state.hand.find(h => h.cardId === REPRISE_CARD)!.uid;
-        const res = playCombatCard(state, { uid }, true, undefined, undefined, 'straw-mans-jab');
+        const res = playCombatCard(state, { uid }, true, undefined, undefined, { reprisalCardId: 'straw-mans-jab' });
         const reprised = res.events.find(e => e.kind === 'reprised') as { returned: string[] } | undefined;
         expect(reprised).toBeDefined();
         expect(reprised!.returned).toEqual(['straw-mans-jab']);
@@ -181,7 +181,7 @@ describe('REPRISE songbook choice (phase 28)', () => {
         let state = openAndDraft(makePlayer([REPRISE_CARD]), makeEnemy(300, 'mind', []), [REPRISE_CARD], 'mind');
         state = { ...state, discard: ['straw-mans-jab', 'the-overtake'] };
         const uid = state.hand.find(h => h.cardId === REPRISE_CARD)!.uid;
-        const res = playCombatCard(state, { uid }, true, undefined, undefined, 'not-in-discard');
+        const res = playCombatCard(state, { uid }, true, undefined, undefined, { reprisalCardId: 'not-in-discard' });
         const reprised = res.events.find(e => e.kind === 'reprised') as { returned: string[] } | undefined;
         expect(reprised!.returned).toEqual(['the-overtake']);
     });

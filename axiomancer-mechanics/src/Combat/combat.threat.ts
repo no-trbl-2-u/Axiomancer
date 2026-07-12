@@ -14,11 +14,15 @@
  */
 
 import type { Enemy } from '../Enemy/types';
+import { lookupEffect } from '../Effects/effects.library';
 import type { Stance } from './types';
 import type {
-    CombatIntentType, CombatThreatAction, CombatThreatEffect, CombatThreatPhase,
+    CombatIntentType, CombatThreatAction, CombatThreatBranchOutcome, CombatThreatEffect,
+    CombatThreatPhase, ThreatBranchCondition,
 } from './combat.encounter.types';
 import { AUTHORED_THREAT_SEQUENCES } from './combat.threat-sequences';
+
+export type { ThreatBranchCondition } from './combat.encounter.types';
 
 /**
  * Authored phase template — DESIGN INTENT. The resolver (`resolveAuthored`)
@@ -46,6 +50,95 @@ export interface AuthoredThreatPhase {
      *  reaches it (see `CombatThreatPhase.unlockAfterRound`). Undefined on
      *  every authored sequence today — none is gated yet. */
     unlockAfterRound?: number;
+}
+
+// ── WS9 (spec 32 §12 item 7, Ratified 2026-07-11) — conditional threat branches ──
+
+/**
+ * A BRANCH step: one authored phase slot holding a condition and two fully
+ * authored forks. `AuthoredThreatPhase` itself is UNCHANGED (ratified) — the
+ * branch is a parallel wrapper. Closed condition union, authored data only,
+ * zero RNG: the fork commits from observable state at phase START.
+ */
+export interface AuthoredThreatBranch {
+    branch: {
+        condition: ThreatBranchCondition;
+        then: AuthoredThreatPhase;
+        else: AuthoredThreatPhase;
+    };
+}
+
+/** One slot of an authored sequence: a linear phase or a branch node. */
+export type AuthoredThreatStep = AuthoredThreatPhase | AuthoredThreatBranch;
+
+/** Narrows an authored step to the branch wrapper. */
+export function isBranchStep(step: AuthoredThreatStep): step is AuthoredThreatBranch {
+    return 'branch' in step;
+}
+
+/** Flattens steps to plain phases (branch steps contribute BOTH forks) — the
+ *  lens the roster-validation e2es read authored intent through. */
+export function flattenAuthoredSteps(steps: readonly AuthoredThreatStep[]): AuthoredThreatPhase[] {
+    return steps.flatMap(s => (isBranchStep(s) ? [s.branch.then, s.branch.else] : [s]));
+}
+
+/** Human text for a branch condition (the telegraph's "why"). */
+export function describeThreatBranchCondition(condition: ThreatBranchCondition): string {
+    switch (condition.kind) {
+        case 'bearer-afflictions-gte': return `if it carries ${condition.n}+ afflictions`;
+        case 'prior-threat-fully-blocked': return 'if its last threat was fully blocked';
+    }
+}
+
+/**
+ * Evaluates a branch condition against phase-START state. Pure and RNG-free:
+ * affliction count is the enemy's live debuff instances; the full-block read
+ * is the `lastThreatFullyBlocked` combat ledger (spec 32 §12 item 4).
+ */
+export function evaluateThreatBranchCondition(
+    condition: ThreatBranchCondition,
+    enemy: Enemy,
+    lastThreatFullyBlocked: boolean,
+): boolean {
+    switch (condition.kind) {
+        case 'bearer-afflictions-gte':
+            return enemy.effects.filter(ae => lookupEffect(ae.effectId)?.type === 'debuff').length >= condition.n;
+        case 'prior-threat-fully-blocked':
+            return lastThreatFullyBlocked;
+    }
+}
+
+/**
+ * Commits a branch phase's fork at phase START: evaluates the condition on
+ * live state, copies the taken fork onto the phase's face and stamps
+ * `branch.taken` (the telegraph then shows the taken fork AND the condition).
+ * Returns null when `phases[index]` carries no branch. Re-entering a branch
+ * phase (a looping final phase) re-evaluates — each entry is a fresh START.
+ */
+export function commitThreatBranch(
+    phases: readonly CombatThreatPhase[],
+    index: number,
+    enemy: Enemy,
+    lastThreatFullyBlocked: boolean,
+): { phases: CombatThreatPhase[]; taken: 'then' | 'else'; conditionText: string } | null {
+    const phase = phases[index];
+    if (!phase?.branch) return null;
+    const taken: 'then' | 'else' =
+        evaluateThreatBranchCondition(phase.branch.condition, enemy, lastThreatFullyBlocked) ? 'then' : 'else';
+    const outcome = taken === 'then' ? phase.branch.then : phase.branch.else;
+    const committed: CombatThreatPhase = {
+        ...phase,
+        enemyStance: outcome.enemyStance,
+        threatAction: outcome.threatAction,
+        intentType: outcome.intentType,
+        stanceHint: outcome.stanceHint,
+        branch: { ...phase.branch, taken },
+    };
+    return {
+        phases: phases.map((p, i) => (i === index ? committed : p)),
+        taken,
+        conditionText: phase.branch.conditionText,
+    };
 }
 
 /**
@@ -78,7 +171,8 @@ function effectIsDebuff(eff: CombatThreatEffect): boolean {
 export function deriveIntentType(effects: readonly CombatThreatEffect[]): CombatIntentType {
     const hasDamage = effects.some(e => (e.damage ?? 0) > 0);
     const hasDebuff = effects.some(effectIsDebuff);
-    const hasBuff = effects.some(e => (e.enemyHeal ?? 0) > 0);
+    // The WS9 reactive self-cleanse reads as a self-serving (buff) intent.
+    const hasBuff = effects.some(e => (e.enemyHeal ?? 0) > 0 || (e.enemyCleanse ?? 0) > 0);
     const active = [hasDamage, hasDebuff, hasBuff].filter(Boolean).length;
     if (active === 0) return 'pass';
     if (active >= 2) return 'combo';
@@ -141,14 +235,19 @@ function effectLabel(effectId: string): string {
 /** Builds a `CombatThreatAction` from authored intent + the computed damage. */
 function buildThreatAction(
     actionText: string, damage: number, effectId?: string, intensity?: number, enemyHeal?: number,
+    enemyCleanse?: number,
 ): CombatThreatAction {
     const effects: CombatThreatEffect[] = [];
     if (damage > 0) effects.push({ damage });
     if (effectId) effects.push({ effectId, intensity: intensity ?? 1 });
     if (enemyHeal && enemyHeal > 0) effects.push({ enemyHeal });
+    if (enemyCleanse && enemyCleanse > 0) effects.push({ enemyCleanse });
     const parts = [`+${damage} damage`];
     if (effectId) parts.push(effectLabel(effectId));
     if (enemyHeal && enemyHeal > 0) parts.push(`heals ${enemyHeal}`);
+    if (enemyCleanse && enemyCleanse > 0) {
+        parts.push(`sheds ${enemyCleanse} affliction${enemyCleanse === 1 ? '' : 's'}`);
+    }
     return { description: `${actionText} (${parts.join(', ')}).`, effects };
 }
 
@@ -167,10 +266,52 @@ function enemyStanceHint(enemy: Enemy): string | undefined {
     return (enemy as Enemy & { stanceHint?: string }).stanceHint;
 }
 
-function resolveAuthored(enemy: Enemy, authored: AuthoredThreatPhase[]): CombatThreatPhase[] {
+/** Resolves one authored fork into a branch outcome (level/difficulty scaled). */
+function resolveBranchOutcome(
+    enemy: Enemy, p: AuthoredThreatPhase, phaseIndex: number, level: number, dMult: number,
+    enemyCleanse?: number,
+): CombatThreatBranchOutcome {
+    const damage = threatDamageBudget(level, dMult, phaseIndex, p.damageWeight ?? 1);
+    const threatAction = buildThreatAction(
+        p.actionText, damage, p.threatEffectId, p.threatIntensity, p.enemyHeal, enemyCleanse,
+    );
+    return {
+        enemyStance: p.enemyStance,
+        threatAction,
+        intentType: deriveIntentType(threatAction.effects),
+        stanceHint: p.stanceHint ?? enemyStanceHint(enemy) ?? DEFAULT_STANCE_HINTS[p.enemyStance],
+    };
+}
+
+function resolveAuthored(enemy: Enemy, authored: AuthoredThreatStep[]): CombatThreatPhase[] {
     const level = Math.max(1, enemy.level);
     const dMult = difficultyMult(enemy);
-    return authored.map((p, i) => {
+    return authored.map((step, i) => {
+        if (isBranchStep(step)) {
+            const { condition } = step.branch;
+            // Phase 33's first reactive verb: the THEN fork of an
+            // affliction-count branch carries the spec-29 cleanse — the enemy
+            // answers being stacked by shedding ONE affliction (a fraction,
+            // never a wipe; enforced again at resolution in the engine).
+            const reactiveCleanse = condition.kind === 'bearer-afflictions-gte' ? 1 : undefined;
+            const thenOutcome = resolveBranchOutcome(enemy, step.branch.then, i, level, dMult, reactiveCleanse);
+            const elseOutcome = resolveBranchOutcome(enemy, step.branch.else, i, level, dMult);
+            // Pending face = the ELSE (baseline) fork; `commitThreatBranch`
+            // swaps the taken fork in at phase START.
+            return {
+                index: i + 1,
+                ...elseOutcome,
+                isFinalPhase: step.branch.else.isFinalPhase ?? i === authored.length - 1,
+                unlockAfterRound: step.branch.else.unlockAfterRound,
+                branch: {
+                    condition,
+                    conditionText: describeThreatBranchCondition(condition),
+                    then: thenOutcome,
+                    else: elseOutcome,
+                },
+            };
+        }
+        const p = step;
         const damage = threatDamageBudget(level, dMult, i, p.damageWeight ?? 1);
         return withIntent({
             index: i + 1,

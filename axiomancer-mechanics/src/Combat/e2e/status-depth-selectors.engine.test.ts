@@ -63,6 +63,16 @@ const SELECTOR_FIXTURES: Effect[] = [
     { id: 'test_ctrl_confusion', name: 'test confusion', description: 'control -5', type: 'debuff', category: 'control', duration: 4, stacking: 'intensity', tier: 2, payload: { rollModifier: -5 } },
     { id: 'test_charm', name: 'test charm', description: 'forcedStance heart', type: 'debuff', category: 'control', duration: 4, stacking: 'none', tier: 2, payload: { actionRestriction: { forcedStance: 'heart' } } },
     { id: 'test_silence', name: 'test silence', description: 'blockedStances heart', type: 'debuff', category: 'control', duration: 4, stacking: 'none', tier: 2, payload: { actionRestriction: { blockedStances: ['heart'] } } },
+    // Post-Phase-30 merge 2026-07-12: the zero-producer sweep deleted the
+    // legacy control vocabulary — the WS8.2 surface shapes live on as
+    // test-only fixtures, one per DISRUPT surface.
+    { id: 'test_ctrl_fear', name: 'test fear', description: 'control roll -4', type: 'debuff', category: 'control', duration: 4, stacking: 'intensity', tier: 2, payload: { rollModifier: -4 } },
+    { id: 'test_ctrl_knockdown', name: 'test knockdown', description: 'control roll -3', type: 'debuff', category: 'control', duration: 4, stacking: 'intensity', tier: 2, payload: { rollModifier: -3 } },
+    { id: 'test_ctrl_slow', name: 'test slow', description: 'control roll -2', type: 'debuff', category: 'control', duration: 4, stacking: 'intensity', tier: 2, payload: { rollModifier: -2 } },
+    { id: 'test_root', name: 'test root', description: 'stance lock', type: 'debuff', category: 'control', duration: 4, stacking: 'none', tier: 2, payload: { defenseModifier: -2, lockedStance: true } },
+    { id: 'test_blind', name: 'test blind', description: 'rider suppress', type: 'debuff', category: 'control', duration: 4, stacking: 'none', tier: 2, payload: { suppressesThreatRiders: true } },
+    { id: 'test_confusion_blur', name: 'test stance blur', description: 'blursStanceHints', type: 'debuff', category: 'control', duration: 4, stacking: 'none', tier: 2, payload: { blursStanceHints: true } },
+    { id: 'test_exhaustion', name: 'test exhaustion', description: 'threat-damage -25%', type: 'debuff', category: 'stat', duration: 4, stacking: 'intensity', tier: 2, payload: { outgoingThreatDamageMulPct: -25 } },
 ];
 beforeAll(() => { for (const e of SELECTOR_FIXTURES) effectsLibrary.registry.set(e.id, e); });
 afterAll(() => { for (const e of SELECTOR_FIXTURES) effectsLibrary.registry.delete(e.id); });
@@ -94,34 +104,39 @@ describe('getStanceVulnMult — stance-keyed vulnerability (Fate Engine P1 #17)'
 
 describe('getPendingDotTotal / consumeDotEffects (RUPTURE fuel)', () => {
     it('sums each DoT over its remaining lifetime (amplification- and decay-aware)', () => {
-        // v3 poison i2, 4 ticks, NO round threaded → flat floor(2×2)×4 = 16.
+        // WS3.3: poison rides the card-played clock — 2 expected ticks/round.
+        // i2, 4 rounds, NO round threaded → flat floor(2×2) × 8 ticks = 32.
         const only = getPendingDotTotal(combatant([ae('debuff_poison', 2, 4)]));
-        expect(only.total).toBe(16);
+        expect(only.total).toBe(32);
         expect(only.perEffect).toHaveLength(1);
 
         // poison i2 + bleed i1 → Hemorrhage ×1.5 on poison:
-        //   poison floor(2×2×1.5)=6 over 4 → 24; bleed decays per tick — i1 lasts
-        //   exactly ONE tick: floor(3×1)=3. total 27.
+        //   poison floor(2×2×1.5)=6 × 8 ticks → 48; bleed decays per tick —
+        //   i1 lasts exactly ONE tick: floor(3×1)=3. total 51.
         const combo = getPendingDotTotal(combatant([ae('debuff_poison', 2, 4), ae('debuff_bleed', 1, 4)]));
-        expect(combo.total).toBe(27);
+        expect(combo.total).toBe(51);
     });
 
     it('bleed pending fuel models the per-tick intensity decay (spec 32 v3)', () => {
-        // bleed i3 d4: ticks 9, 6, 3, then washed out → 18 (NOT 9×4=36).
+        // WS3.3: bleed rides the damage-instance clock (2 expected/round) but
+        // stays decay-LIMITED: i3 ticks 9, 6, 3, then washes out → 18 on any
+        // clock (NOT 9 × ticks).
         expect(getPendingDotTotal(combatant([ae('debuff_bleed', 3, 4)])).total).toBe(18);
-        // duration shorter than intensity: i3 d2 → 9 + 6 = 15.
-        expect(getPendingDotTotal(combatant([ae('debuff_bleed', 3, 2)])).total).toBe(15);
+        // i3 d2: 2 ticks/round fit all three ticks inside the window → 18 too.
+        expect(getPendingDotTotal(combatant([ae('debuff_bleed', 3, 2)])).total).toBe(18);
     });
 
     it('poison ramps its future ticks when a round is threaded', () => {
-        // appliedAt 1, currentRound 1 → future dprs 2,2,3,3 × i2 = 4,4,6,6 = 20.
-        expect(getPendingDotTotal(combatant([ae('debuff_poison', 2, 4)]), 1).total).toBe(20);
+        // appliedAt 1, currentRound 1 → future dprs 2,2,3,3 × i2 × 2 ticks/round
+        // = (4+4+6+6) × 2 = 40.
+        expect(getPendingDotTotal(combatant([ae('debuff_poison', 2, 4)]), 1).total).toBe(40);
     });
 
-    it('ignores non-DoT effects and treats permanent DoT as one tick', () => {
-        expect(getPendingDotTotal(combatant([ae('debuff_curse', 1)])).total).toBe(0);
-        // remainingDuration -1 (permanent) → max(1, -1) = 1 tick.
-        expect(getPendingDotTotal(combatant([ae('debuff_poison', 1, -1)])).total).toBe(2);
+    it('ignores non-DoT effects and treats permanent DoT as one round of expected ticks', () => {
+        expect(getPendingDotTotal(combatant([ae('test_ctrl_confusion', 1)])).total).toBe(0);
+        // remainingDuration -1 (permanent) → max(1, -1) = 1 round → 2 expected
+        // card-played ticks × floor(2×1) = 4.
+        expect(getPendingDotTotal(combatant([ae('debuff_poison', 1, -1)])).total).toBe(4);
     });
 
     it('consumeDotEffects strips ONLY DoT effects and reports the ids', () => {
@@ -160,16 +175,37 @@ describe('getDistinctDebuffCount (FALLEN / variety payoffs)', () => {
     });
 });
 
-describe('getDistinctControlCount (DISRUPT meter)', () => {
-    it('counts action-restriction AND negative-roll controls; excludes pure DoT / exposure', () => {
+describe('getDistinctControlCount (DISRUPT meter — WS8.3 counts SURFACES, not ids)', () => {
+    it('counts distinct control SURFACES; same-surface ids collapse to one pip', () => {
+        // Five control ids on THREE surfaces: charm + silence share 'action',
+        // knockdown + slow share 'roll', root owns 'stance' (WS8.2
+        // lockedStance). (daze folded into confusion, WS8.1 KW-2.)
         expect(getDistinctControlCount(combatant([
-            ae('test_ctrl_confusion', 1),         // roll -5 (test fixture)
-            ae('test_charm', 1),                  // forcedStance (test fixture)
-            ae('test_silence', 1),                // blockedStances (test fixture)
+            ae('test_charm', 1),                  // forcedStance    → action
+            ae('test_silence', 1),                // blockedStances  → action
+            ae('test_ctrl_knockdown', 1),         // roll -3         → roll
+            ae('test_ctrl_slow', 1),              // roll -2         → roll
+            ae('test_root', 1),                   // lockedStance    → stance
             ae('debuff_poison', 1),               // DoT — NOT control
             ae('debuff_mark', 1),                 // exposure — NOT control
         ]))).toBe(3);
+        // Three ids of the SAME grip are ONE pip (the WS8.3 design intent).
+        expect(getDistinctControlCount(combatant([
+            ae('test_ctrl_fear', 1), ae('test_ctrl_slow', 1), ae('test_ctrl_knockdown', 1),
+        ]))).toBe(1);
         expect(getDistinctControlCount(combatant([]))).toBe(0);
+    });
+
+    it('classifies the WS8.2 re-payloaded surfaces (threat-damage / rider-suppress / stance)', () => {
+        expect(getDistinctControlCount(combatant([
+            ae('test_exhaustion', 1),             // outgoingThreatDamageMulPct → threat-damage
+            ae('test_blind', 1),                  // suppressesThreatRiders     → rider-suppress
+            ae('test_confusion_blur', 1),         // blursStanceHints           → stance
+        ]))).toBe(3);
+        // ROOT (lock) and CONFUSION (blur) are the same stance surface.
+        expect(getDistinctControlCount(combatant([
+            ae('test_root', 1), ae('test_confusion_blur', 1),
+        ]))).toBe(1);
     });
 });
 

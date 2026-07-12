@@ -143,7 +143,7 @@ Clamped to [0, 1].
 |-----------------|----------------|------------------|------------------|----------------|
 | Body / Attack | `debuff_post_hoc_tremor` (opponent, 10%) | `debuff_bleed` (opponent, 18%) | `debuff_petrify` (opponent, 6%) | `debuff_post_hoc_tremor` |
 | Body / Defend | `buff_ad_hoc_patch` (self, 10%) | `buff_resistance_body` (self, 15%) | `buff_invincibility` (self, 5%) | `debuff_post_hoc_tremor` |
-| Mind / Attack | `debuff_affirming_consequent` (opponent, 10%) | `debuff_daze` (opponent, 18%) | `debuff_petrify` (opponent, 6%) | `debuff_affirming_consequent` |
+| Mind / Attack | `debuff_affirming_consequent` (opponent, 10%) | `debuff_confusion` (opponent, 18%) | `debuff_petrify` (opponent, 6%) | `debuff_affirming_consequent` |
 | Mind / Defend | `buff_gettiters_flicker` (self, 10%) | `buff_resistance_mind` (self, 15%) | `buff_haste` (self, 5%) | `debuff_affirming_consequent` |
 | Heart / Attack | `debuff_straw_man_echo` (opponent, 10%) | `debuff_fear` (opponent, 18%) | `debuff_petrify` (opponent, 6%) | `debuff_straw_man_echo` |
 | Heart / Defend | `buff_petitio_pulse` (self, 10%) | `buff_resistance_heart` (self, 15%) | `buff_invincibility` (self, 5%) | `debuff_straw_man_echo` |
@@ -689,7 +689,7 @@ EXECUTE, VULNERABLE, SIPHON) and by mobile for hit-preview rendering.
 | `getDistinctDebuffCount(target)` | Counts the number of distinct active debuff effect types on the target. Drives COMPOUND damage scaling (capped at `COMPOUND_COUNT_CAP`). |
 | `getDistinctControlCount(target)` | Counts the number of distinct active control effects. Drives DISRUPT — when ≥ `DISRUPT_DENY_AT` the target's next action is denied. |
 | `VULNERABLE_MAX_MULT` | Maximum incoming-damage multiplier cap when Vulnerable is active. |
-| `RUPTURE_BURST_CAP` | Maximum HP burst from a single RUPTURE consume. |
+| `RUPTURE_CAP_FRACTION` / `ruptureBurstCap(maxHp)` | RUPTURE burst cap: `round(fraction × enemy max HP)` — a pure fraction, no flat floor (spec 32 §12 item 5). ALL-spenders (REAP-ALL, spend-all-pips payoffs) are uncapped. |
 | `COMPOUND_COUNT_CAP` | Maximum distinct debuff count credited by COMPOUND. |
 | `DISRUPT_DENY_AT` | Distinct-control-effect threshold at which DISRUPT denies the next enemy action. |
 | `EXECUTE_DAMAGE_FRACTION` | Fraction of enemy max HP dealt by EXECUTE when the threshold is met. |

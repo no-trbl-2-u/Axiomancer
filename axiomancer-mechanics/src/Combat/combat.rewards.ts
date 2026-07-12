@@ -47,9 +47,20 @@ export const STARTING_CARD_IDS: readonly string[] = Object.freeze([
  *  back-compat; prefer `STARTING_CARD_IDS` (which also grants a defense card). */
 export const STARTING_CARD_ID = 'slippery-slope';
 
-/** A valid reward-pool entry must resolve to a real card. */
-function validPool(): string[] {
-    return COMBAT_REWARD_POOL.filter(id => !!getCardById(id));
+/**
+ * A valid reward-pool entry must resolve to a real card. `extraPool` (WS6.2 —
+ * the sandbox-injection hook) appends extra candidate ids to the library pool:
+ * sandbox cards must be REGISTERED (`applySandboxSet` / `registerSandboxCards`)
+ * before rolling, or the resolve filter silently drops them — the same law the
+ * base pool lives under. Duplicates of library ids are ignored (the pool stays
+ * distinct).
+ */
+function validPool(extraPool: readonly string[] = []): string[] {
+    const merged = [...COMBAT_REWARD_POOL];
+    for (const id of extraPool) {
+        if (!merged.includes(id)) merged.push(id);
+    }
+    return merged.filter(id => !!getCardById(id));
 }
 
 const ASPECT_OF = (id: string): PlayerArchetype | null => {
@@ -61,14 +72,20 @@ const ASPECT_OF = (id: string): PlayerArchetype | null => {
  * Rolls `count` distinct card-reward offers after a won combat. Biased toward the
  * player's archetype (≈2× weight) so rewards tend to reinforce a build, while
  * still offering cross-aspect variety. Pure (seeded by `rng`).
+ *
+ * `extraPool` (WS6.2) injects extra candidate ids — the sandbox measurement
+ * hook: registered sandbox cards can compete at the reward screen without
+ * touching the pinned 70-card `COMBAT_REWARD_POOL`. Unregistered ids are
+ * dropped by the resolve filter, never offered.
  */
 export function rollCombatCardRewards(
     player: Character,
     rng: () => number,
     count = 3,
+    extraPool: readonly string[] = [],
 ): string[] {
     const archetype = playerArchetype(player);
-    const pool = validPool();
+    const pool = validPool(extraPool);
     const offers: string[] = [];
     const remaining = pool.slice();
     while (offers.length < count && remaining.length > 0) {

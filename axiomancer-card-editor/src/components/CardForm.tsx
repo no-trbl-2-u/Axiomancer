@@ -200,6 +200,8 @@ function defaultMechanic(kind: SpecialMechanicKind): CardSpecialMechanic {
             return { kind };
         case 'recoil':
             return { kind, hp: 4 };
+        case 'recoil_x':
+            return { kind, min: 3, poisonPerX: 1 / 3 };
         case 'extend_dots':
             return { kind, turns: 1 };
         case 'convert_dots':
@@ -631,6 +633,21 @@ function MechanicFields({ mechanic, patch }: { mechanic: CardSpecialMechanic; pa
             return numRow('GUARD / PIP', 'optional', mechanic.guardPerPip ?? 0, 'guardPerPip', 0, 10);
         case 'recoil':
             return numRow('RECOIL', 'VITAE paid (unpreventable)', mechanic.hp, 'hp', 1, 20);
+        case 'recoil_x':
+            return (
+                <>
+                    {numRow('MIN X', 'chosen X-cost floor (player picks X ≥ this)', mechanic.min, 'min', 1, 10)}
+                    <div>
+                        <FieldLabel hint="POISON per N paid (intensity = ceil(X / N))">POISON PER</FieldLabel>
+                        <Stepper
+                            value={Math.max(1, Math.round(1 / (mechanic.poisonPerX || 1)))}
+                            onChange={(v) => patch({ poisonPerX: 1 / Math.max(1, v) })}
+                            min={1}
+                            max={10}
+                        />
+                    </div>
+                </>
+            );
         case 'extend_dots':
             return numRow('TURNS', '+N duration to ALL your DoTs', mechanic.turns, 'turns', 1, 5);
         case 'convert_dots':
@@ -649,7 +666,7 @@ function MechanicFields({ mechanic, patch }: { mechanic: CardSpecialMechanic; pa
                 </>
             );
         case 'reap_all':
-            return numRow('BURST / SOUL', 'HP per Soul spent (cap kept)', mechanic.burstPerSoul, 'burstPerSoul', 1, 10);
+            return numRow('BURST / SOUL', 'HP per Soul spent (uncapped — the emptied bank is the price)', mechanic.burstPerSoul, 'burstPerSoul', 1, 10);
         case 'sway':
             return numRow('SWAY', 'decays 1/turn · ≥ enemy VITAE = capitulate', mechanic.amount, 'amount', 1, 12);
         case 'reprise':

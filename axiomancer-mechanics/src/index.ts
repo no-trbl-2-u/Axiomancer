@@ -65,7 +65,7 @@ export {
     // 0.34.0 status-depth epic — HP-model selectors + tunable scalars
     getDamageTakenMultiplier, getPendingDotTotal, consumeDotEffects,
     getDistinctDebuffCount, getDistinctControlCount,
-    VULNERABLE_MAX_MULT, RESOLUTE_MIN_MULT, RUPTURE_BURST_CAP,
+    VULNERABLE_MAX_MULT, RESOLUTE_MIN_MULT, RUPTURE_CAP_FRACTION, ruptureBurstCap,
     RUPTURE_PER_AFFLICTION_STACK, DISRUPT_DENY_AT, THREAT_RUNGS, THREAT_RUNGS_BOSS,
     CONCEDE_PREMISES_BASE, CONCEDE_PREMISES_ELITE, CONCEDE_PREMISES_BOSS,
     // Spec 32 v3 — themed-deck selectors
@@ -74,6 +74,8 @@ export {
     // P0-truth — formerly-inert payload channels, now real + presenter-readable
     getHealingReceivedMult, getOutgoingDamageMult, decayDotsOnHeal, consumeEffect,
     hasPayloadFlag,
+    // WS8.2 — telegraph-damage control surface (spec 32 §12 #6)
+    getOutgoingThreatDamageMult,
     getDotAmplificationByEffect, getActiveDotTotal, getActiveDotAmplifications,
     resolveEffectApplication,
     calculateDamageResistance,
@@ -99,12 +101,13 @@ export type {
 export {
     initializeCombatEncounter, rollEncounterDice, playCombatCard,
     resolveCombatPhase, resolveThreatPhase, processBetweenPhases,
-    selectEncounterMercyChoice, resolveCardDieCost, getCard,
-    handCards, cardDieCostPreview, availableDice, buildCombatSummary,
+    selectEncounterMercyChoice, getCard,
+    handCards, availableDice, buildCombatSummary,
     COMBAT_DICE_COUNT, COMBAT_HAND_SIZE, COMBAT_DIE_FACES,
     rollCombatDice, combatDieCanPower, refreshOneDie,
     toCombatCard, projectDeck, classifyVerbClass, buildCombatDeck,
-    COMBAT_DECK_PRESETS, COMBAT_DECK_PRESET_ORDER, listDeckPresets, getDeckPreset, buildPresetDeck,
+    COMBAT_DECK_PRESETS, COMBAT_DECK_PRESET_ORDER, PRESET_COLOR_BORROWS,
+    listDeckPresets, getDeckPreset, buildPresetDeck,
     getThreatSequence, generateDefaultThreatSequence,
     AUTHORED_THREAT_ENEMY_IDS,
     RAGE_UNLOCK_ROUND, RAGE_DAMAGE_WEIGHT, RAGE_HEAL_FRACTION,
@@ -114,6 +117,8 @@ export {
     TURN_DICE_COUNT, rollTurnDice, dieHasStance,
     startTurn, draftStanceDie, endTurn, resolveRead, chooseDraft, discardCombatCard,
     playSignatureSkill, getDraftedDie, isPhaseStanceRevealed, revealedCurrentStance,
+    // WS8.2 — stance-blur readout flag (mobile renders the stance panel fogged)
+    isStanceReadoutBlurred,
     cardReadPreview, projectCardImpact, getSignatureSkill, SIGNATURE_SKILLS, SIGNATURE_SKILL_LIST,
     READ_DAMAGE_MULT, CONVICTION_PER_UNPICKED_DIE, CONVICTION_PER_UNPICKED_WILD, CONVICTION_READ_WIN_BONUS,
     COLOR_MATCH_DAMAGE_BONUS, deriveIntentType,
@@ -122,6 +127,8 @@ export {
     projectRupture, projectRuptureBurst, projectSiphonHeal, projectReapAll,
     // phase 28 — legibility sweep
     projectIncomingThreat,
+    // WS7.2 — chosen X-cost clamp range (`recoil_x`), engine-owned
+    recoilXRange,
     // Phase 2 — projected-lethality readout (spec 30)
     computeRoundsToKill, projectCombatOutcome,
     // Spec 32 v3 — floating dice save-back + sway decay knob
@@ -148,6 +155,15 @@ export {
     tapFateDie, riderText, RESERVE_MAX, RESERVE_PIP_CAP, ripenReserve,
     PIP_INTENSITY_BONUS, PIP_GUARD_BONUS, COLOR_MATCH_STATUS_DURATION_BONUS, FATE_TAP_CONVICTION,
 } from './Combat';
+/**
+ * @deprecated Superseded by the COLOR LAW for die COST / play legality
+ * (`playCombatCard`'s color-match gate); retained only as the legacy 0/1/2
+ * advantage-READ classifier (spec 25 §4.8). No `axiomancer-mobile` consumers
+ * as of 2026-07-11 (grep-verified) — the mechanics CLI hand renderer is the
+ * sole caller; any future mobile adopter migrates next minor. Removal is a
+ * semver-major phase (locked-barrel rule), so the exports stay.
+ */
+export { resolveCardDieCost, cardDieCostPreview } from './Combat';
 export type {
     CombatEncounterState, CombatEncounterPhase, CombatTransition,
     CombatManaDie, CombatDieColor, CombatDieState,
@@ -155,6 +171,9 @@ export type {
     CombatThreatPhase, CombatThreatAction, CombatThreatEffect,
     CombatThreatMark, CombatPhaseResult, CombatOutcome, CombatEvent,
     CombatSummary, CombatAttributionRow, LandedEffect,
+    // WS9 (spec 32 §12 #7) — legible conditional threat branches
+    ThreatBranchCondition, CombatThreatBranch, CombatThreatBranchOutcome,
+    AuthoredThreatPhase, AuthoredThreatBranch, AuthoredThreatStep,
     CombatSimStats, CombatSimPolicyId,
     HazardAutoPolicyId, HazardCombatAutoOptions, HazardCombatAutoResult,
     CombatIntentType, CombatReadResult,
@@ -257,6 +276,8 @@ export type {
     CardRank, CardRarity, CardType, CardRider,
     // Phase 142 — Extended synergy predicates
     ExtendedSynergyPredicate,
+    // WS4.2 — combat-state synergy predicate + its ledger view (spec 32 §12 #4)
+    SynergyStatePredicate, SynergyLedgerView,
 } from './Cards';
 export {
     generateBasicActionResources, generatePhilosophicalResource,
@@ -265,9 +286,13 @@ export {
     CARD_RANK_NAMES, rankToRarity,
     getAvailableCards, learnCard,
     cardLibrary, getCardById,
+    // WS2.1 — the Thoughtform registry (CONJURE targets; outside the pinned 70)
+    thoughtformLibrary, getThoughtformById,
     // Phase 142 — Extended synergy predicate functionality
     evaluateExtendedSynergyPredicate, checkSinglePredicate, checkAnyCountPredicate,
     checkAllRequiredPredicate, checkBuffDebuffCombo, checkTotalIntensityPredicate,
+    // WS4.2 — the combat-ledger gate evaluator
+    checkStatePredicate,
     // Spec 32 §3/§6 — card themes + keyword families (phase 29 parity lint)
     CARD_THEMES, THEME_KEYWORDS, keywordsForTheme, isCardTheme,
 } from './Cards';

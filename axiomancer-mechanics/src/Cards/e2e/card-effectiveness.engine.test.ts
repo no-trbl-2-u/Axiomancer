@@ -49,15 +49,11 @@
 import { describe, it, expect, afterEach, vi } from 'vitest';
 
 import type { ActiveEffect } from '../../Effects/types';
-import { Player } from '../../Character/characters.mock';
-import type { Character } from '../../Character/types';
-import { GraveLarva } from '../../Enemy/enemy.library';
-import type { Enemy } from '../../Enemy/types';
-import { deepClone } from '../../Utils';
 import { mockSequentialRng } from '../../test-utils/rng';
-import { initializeCombatEncounter, playCombatCard } from '../../Combat/combat.engine';
+import { buildFixtureState } from '../../test-utils/card-fixture';
+import { playCombatCard } from '../../Combat/combat.engine';
 import type {
-    CombatEncounterState, CombatEvent, CombatManaDie,
+    CombatEncounterState, CombatEvent,
 } from '../../Combat/combat.encounter.types';
 import { cardLibrary, getCardById } from '../cards.library';
 import type { Card, CardSpecialMechanic, CardRider } from '../types';
@@ -115,84 +111,9 @@ function findEvent<K extends CombatEvent['kind']>(
 }
 
 // ── The shared rich precondition fixture ──────────────────────────────────────
-
-/** Filler deck/draw-pile content: a real, always-playable spell, so `drawCards`
- *  riders never starve regardless of how many cards a given test draws. */
-const FIXTURE_FILLER = Array<string>(12).fill('slippery-slope');
-const FIXTURE_SEED = 20260708;
-
-function buildFixtureState(): CombatEncounterState {
-    const player: Character = deepClone(Player);
-    player.baseStats = { heart: 10, body: 10, mind: 10 };
-    player.level = 20;
-    // executeCard's ownership gate requires the played card in knownCards
-    // (or combatRewardCards) — own the whole library so any card id is legal.
-    player.knownCards = cardLibrary.map(c => c.id);
-    player.maxHealth = 300;
-    player.health = 150; // pre-damaged so `healHp` riders are observable, not capped
-    // Two DISTINCT self-debuffs -> FALLEN active (getDistinctDebuffCount >= 2);
-    // also gives `cleanse` riders something real to remove.
-    player.effects = [
-        { effectId: 'debuff_mark', remainingDuration: 2, intensity: 2, appliedAt: 0, tier: 1 },
-        { effectId: 'debuff_bleed', remainingDuration: 3, intensity: 2, appliedAt: 0, tier: 2 },
-    ];
-
-    const enemy: Enemy = deepClone(GraveLarva);
-    enemy.id = 'fixture-enemy';
-    enemy.maxHealth = 1000;
-    enemy.health = 1000;
-    enemy.baseStats = { heart: 4, body: 4, mind: 4 };
-    // Two DoTs with real remaining fuel (RUPTURE/consume_affliction fodder) +
-    // MARK stacks (ruptureMarks fodder). `debuff_poison`/`debuff_bleed`/
-    // `debuff_mark` all stack by `intensity` (debuffs.library.json), so any
-    // card that re-applies one of these three deepens the existing stack
-    // rather than colliding with a `stacking: 'none'` no-op.
-    enemy.effects = [
-        { effectId: 'debuff_poison', remainingDuration: 4, intensity: 3, appliedAt: 0, tier: 2 },
-        { effectId: 'debuff_bleed', remainingDuration: 3, intensity: 3, appliedAt: 0, tier: 2 },
-        { effectId: 'debuff_mark', remainingDuration: 2, intensity: 3, appliedAt: 0, tier: 1 },
-    ];
-
-    const base = initializeCombatEncounter(player, enemy, FIXTURE_FILLER, FIXTURE_SEED);
-
-    // A single WILD powering die: payable regardless of a card's own stance
-    // color, so no card is starved of a legal play by die-color mismatch.
-    const wildDie: CombatManaDie = { id: 'fx-die', color: 'wild', state: 'available', temporary: false };
-
-    return {
-        ...base,
-        phase: 'phase-play',
-        turn: 1,
-        dice: [wildDie],
-        draftedDieId: wildDie.id,
-        lastRead: 'neutral',
-        // 1 of RESERVE_MAX(2) slots used, with 1 pip (<RESERVE_PIP_CAP(2)) —
-        // room for create_temporary_die/reap-kindle/bank_spent_die to add one
-        // more, and for grant_pip to ripen further.
-        reserve: [{ id: 'fx-reserve-0', color: 'heart', state: 'available', temporary: false, pips: 1 }],
-        // 1 of FLOATING_DICE_CAP(3) slots used — room for forge_floating_die.
-        floatingDice: [{ id: 'fx-float-0', color: 'wild', state: 'available', temporary: false, floating: true, pips: 0 }],
-        guard: 4,
-        barrier: 4,
-        souls: 12,
-        premises: 3,
-        peroration: null, // tallied but undeclared — a 'premise' gain never trips CONCEDE mid-assertion
-        sway: 0,
-        staggerRungs: 0,
-        revealedStances: [],
-        pendingOmens: [],
-        omenHits: 0,
-        echoNextSpell: false,
-        spellsPlayedThisTurn: 0,
-        lastSpellCardId: 'slippery-slope', // a real, different, replayable spell (ouroboros fodder)
-        persistentZone: [],
-        enemyAttachments: [],
-        discard: ['slippery-slope', 'straw-mans-jab', 'festering-argument'], // reprise fodder
-        drawPile: FIXTURE_FILLER.slice(),
-        deck: FIXTURE_FILLER.slice(),
-        hand: [],
-    };
-}
+// Extracted to `src/test-utils/card-fixture.ts` (WS0.4) so the doctrine
+// witness (`doctrine-strike-dead.engine.test.ts`) can build the same player /
+// die tray with a CLEAN enemy. This suite always uses the RICH default.
 
 interface PlayResult {
     events: CombatEvent[];
@@ -444,6 +365,14 @@ function assertMechanic(
         case 'recoil':
             expect(after.player.health, label).toBeLessThan(before.player.health);
             return;
+        case 'recoil_x': {
+            // Chosen X-cost (WS7.2): the harness plays without a chosenX, so
+            // the printed minimum is paid and POISON lands at ceil(min × perX).
+            expect(before.player.health - after.player.health, label).toBeGreaterThanOrEqual(mech.min);
+            const poison = after.enemy.effects.find(e => e.effectId === 'debuff_poison');
+            expect(poison, label).toBeDefined();
+            return;
+        }
         case 'extend_dots': {
             const ev = findEvent(events, 'dots-extended');
             expect(ev, label).toBeDefined();

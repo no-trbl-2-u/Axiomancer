@@ -38,7 +38,7 @@ export {
     // 0.34.0 status-depth epic — HP-model selectors + tunable scalars
     getDamageTakenMultiplier, getPendingDotTotal, consumeDotEffects, computeRoundsToKill,
     getDistinctDebuffCount, getDistinctControlCount,
-    VULNERABLE_MAX_MULT, RESOLUTE_MIN_MULT, RUPTURE_BURST_CAP,
+    VULNERABLE_MAX_MULT, RESOLUTE_MIN_MULT, RUPTURE_CAP_FRACTION, ruptureBurstCap,
     RUPTURE_PER_AFFLICTION_STACK, DISRUPT_DENY_AT, THREAT_RUNGS, THREAT_RUNGS_BOSS,
     CONCEDE_PREMISES_BASE, CONCEDE_PREMISES_ELITE, CONCEDE_PREMISES_BOSS,
     // Spec 32 v3 — themed-deck selectors
@@ -48,16 +48,23 @@ export {
     // the live multipliers off these instead of hard-coding.
     getHealingReceivedMult, getOutgoingDamageMult, decayDotsOnHeal, consumeEffect,
     hasPayloadFlag,
+    // WS3.2 — trigger-clock DoT substrate (spec 32 §12 #3)
+    fireDotTrigger, growPerEnemyActionDots, EXPECTED_TRIGGERS_PER_ROUND,
+    // WS8.2 — telegraph-damage control surface (spec 32 §12 #6)
+    getOutgoingThreatDamageMult,
 } from './effects';
-export type { PendingDotEntry } from './effects';
+export type { PendingDotEntry, DotTriggerResult } from './effects';
 export {
     getActiveEffectModifiers, getEffectiveStats, canAct,
     // 0.34.0 — surfaced DoT amplification (Hemorrhage / Dissolution / Corrosive Fire)
     getDotAmplificationByEffect, getActiveDotTotal, getActiveDotAmplifications,
+    // WS3 — DoT clock classification (round clocks vs event clocks)
+    dotRoundClockPhase, dotEventTrigger,
 } from './effect-modifiers';
 export type {
     AggregatedEffectModifiers, EffectiveStats,
     ActiveDotEntry, ActiveDotAmplification,
+    DotEventTrigger,
 } from './effect-modifiers';
 export { resolveEffectApplication } from './resist';
 export { calculateDamageResistance } from './damage-resist';
@@ -146,15 +153,19 @@ export type {
     // Spec 26 / 26b additions
     CombatIntentType, CombatReadResult,
     SignatureSkill, SignatureSkillId, SignatureSkillKind,
+    // WS9 (spec 32 §12 #7) — legible conditional threat branches
+    ThreatBranchCondition, CombatThreatBranch, CombatThreatBranchOutcome,
 } from './combat.encounter.types';
 export {
     initializeCombatEncounter, rollEncounterDice, playCombatCard,
     resolveCombatPhase, resolveThreatPhase, processBetweenPhases,
-    selectMercyChoice as selectEncounterMercyChoice, resolveCardDieCost, getCard,
-    handCards, cardDieCostPreview, availableDice, buildCombatSummary,
+    selectMercyChoice as selectEncounterMercyChoice, getCard,
+    handCards, availableDice, buildCombatSummary,
     // Spec 26b — turn lifecycle + read + Conviction + Signature Skills
     startTurn, draftStanceDie, endTurn, resolveRead, chooseDraft, discardCombatCard,
     playSignatureSkill, getDraftedDie, isPhaseStanceRevealed, revealedCurrentStance,
+    // WS8.2 — stance-blur readout flag (mobile renders the stance panel fogged)
+    isStanceReadoutBlurred,
     cardReadPreview, projectCardImpact, getSignatureSkill, SIGNATURE_SKILLS, SIGNATURE_SKILL_LIST,
     READ_DAMAGE_MULT, CONVICTION_PER_UNPICKED_DIE, CONVICTION_PER_UNPICKED_WILD, CONVICTION_READ_WIN_BONUS,
     COLOR_MATCH_DAMAGE_BONUS,
@@ -171,11 +182,22 @@ export {
     projectRupture, projectRuptureBurst, projectSiphonHeal, projectReapAll,
     // phase 28 — legibility sweep
     projectIncomingThreat,
+    // WS7.2 — chosen X-cost clamp range (`recoil_x`), engine-owned
+    recoilXRange,
     // Phase 2 — projected-lethality readout (spec 30)
     projectCombatOutcome,
     // Spec 32 v3 — floating dice save-back + sway decay knob
     getFloatingDiceColors, SWAY_DECAY_PER_TURN,
 } from './combat.engine';
+/**
+ * @deprecated Superseded by the COLOR LAW for die COST / play legality
+ * (`playCombatCard`'s color-match gate); retained only as the legacy 0/1/2
+ * advantage-READ classifier (spec 25 §4.8). No `axiomancer-mobile` consumers
+ * as of 2026-07-11 (grep-verified) — the mechanics CLI hand renderer is the
+ * sole caller; any future mobile adopter migrates next minor. Removal is a
+ * semver-major phase (locked-barrel rule), so the exports stay.
+ */
+export { resolveCardDieCost, cardDieCostPreview } from './combat.engine';
 export type { CardDieCost, FinisherProjection, CombatOutcomeProjection } from './combat.engine';
 export {
     COMBAT_DICE_COUNT, TURN_DICE_COUNT, COMBAT_DIE_FACES, rollCombatDice, rollTurnDice,
@@ -189,6 +211,8 @@ export {
 export { COMBAT_HAND_SIZE, buildCombatDeck, drawCombatCards, shuffleCombatDeck } from './combat.deck';
 export {
     COMBAT_DECK_PRESETS, COMBAT_DECK_PRESET_ORDER,
+    // 5/5/5 recipe color law (spec 32 §12 item 9) — the documented borrow map
+    PRESET_COLOR_BORROWS,
     listDeckPresets, getDeckPreset, buildPresetDeck,
 } from './combat.deck-presets';
 export type { CombatDeckPreset, CombatDeckFocus } from './combat.deck-presets';
@@ -196,13 +220,19 @@ export {
     toCombatCard, projectDeck, classifyVerbClass,
 
     mechanicText,
+    // WS4.2 — printed text for a combat-state synergy condition (P0-truth)
+    statePredicateText,
     isCombatSynergySatisfied,
 } from './combat.cards';
 export {
     getThreatSequence, generateDefaultThreatSequence,
     deriveIntentType, AUTHORED_THREAT_ENEMY_IDS,
     RAGE_UNLOCK_ROUND, RAGE_DAMAGE_WEIGHT, RAGE_HEAL_FRACTION,
+    // WS9 — branch-node authoring + phase-START commit
+    isBranchStep, flattenAuthoredSteps,
+    describeThreatBranchCondition, evaluateThreatBranchCondition, commitThreatBranch,
 } from './combat.threat';
+export type { AuthoredThreatPhase, AuthoredThreatBranch, AuthoredThreatStep } from './combat.threat';
 export {
     simulateHazardPatternCombat, simulateHazardPatternCombatDetailed, runOneEncounter,
 } from './combat.encounter.sim';

@@ -17,7 +17,7 @@ import { withAllProviders } from '@/test-utils/withAllProviders';
 
 const baseIntent: CombatIntentVM = {
     type: 'damage', icon: '⚔', label: 'ATTACKS', color: '#e2543b',
-    description: 'A telegraphed strike.', damage: 10, debuffs: false, next: null,
+    description: 'A telegraphed strike.', damage: 10, debuffs: false, branch: null, next: null,
     wallMath: { projectedDamage: 10, netDamage: 10, willDeny: false, guard: 0, barrier: 0 },
 };
 

@@ -116,7 +116,7 @@ describe('policy roster — every id resolves', () => {
     it('greedy/blind keep the exact legacy witness configuration', () => {
         for (const id of ['greedy', 'blind'] as const) {
             const policy = COMBAT_SIM_POLICIES[id];
-            expect(policy.signatureKinds).toEqual(['dot', 'strike', 'control', 'mercy', 'conclude']);
+            expect(policy.signatureKinds).toEqual(['dot', 'control', 'mercy', 'conclude']);
             expect(policy.convictionThreshold).toBe(7);
             expect(policy.mercyChoice).toBe('spare');
             expect(policy.rankSignature).toBeUndefined();
@@ -182,20 +182,29 @@ describe('greedy object reproduces the pinned decision sequences', () => {
     // match, per-die token accrual — every seed-derived roll and greedy
     // decision shifted; both pins re-measured against the current engine.
     //
-    // Re-pinned 2026-07-11 (phase 26, the Turn Law): a fresh dice tray can no
-    // longer be farmed a second time within the same threat phase, so both
-    // fights now take one more round of honest, un-farmed play (outcome
-    // stays victory either way — plan/tuning/2026-07-10-turn-law-and-honest-
-    // baseline.md; every pre-2026-07-10 number carries an asterisk until
-    // Phase 27's re-baseline lands).
-    // Re-pinned 2026-07-11 (phase 30, the FREE-currency law): slippery-slope
-    // and straw-mans-jab's FREE lines moved from TICK (retired) to a MARK
-    // seed, shifting greedy's per-play scoring enough to trade one PAID
-    // straw-mans-jab play for an extra status play overall.
-    it('seed 11 vs LittleBelle: a three-round status victory', () => {
+    // Re-pinned 2026-07-11 (WS3.3 DoT-clock data sweep): poison rides the
+    // card-played clock (each subsequent play ticks it) and bleed the
+    // damage-instance clock — kills land earlier on the same seeds; both
+    // pins re-measured against the current engine.
+    //
+    // Re-pinned 2026-07-11 (Gate 0 round-turn law): ONE tray roll per threat
+    // phase — greedy now plays the whole legal turn (drafted die + Reserve +
+    // floats, then the FREE-top drain) instead of farming endTurn→startTurn;
+    // both pins re-measured with zero turn-law-blocked events.
+    //
+    // Re-pinned 2026-07-12 (WS3.3 fresh-stack CAP): the card-played clock's
+    // eligibility gate became an intensity cap (a play's own fresh stacks
+    // merged onto an existing instance no longer tick on the play that
+    // applied them), and manual TICK paths now decay decaysPerTick DoTs.
+    //
+    // post-Phase-30 merge re-pin 2026-07-12: slippery-slope and
+    // straw-mans-jab's FREE lines moved from TICK (retired registry-wide) to
+    // a MARK seed under the FREE-currency law, shifting greedy's per-play
+    // scoring on the merged tree.
+    it('seed 11 vs LittleBelle: a two-round status victory', () => {
         const r = runOneEncounter(loadout(MIX), LittleBelle, 11, 'greedy');
         expect({ outcome: r.outcome, rounds: r.rounds, plays: r.plays, statusPlays: r.statusPlays })
-            .toEqual({ outcome: 'victory', rounds: 3, plays: 12, statusPlays: 9 });
+            .toEqual({ outcome: 'victory', rounds: 2, plays: 11, statusPlays: 9 });
         expect(r.cardUsage['slippery-slope']).toEqual({
             cardId: 'slippery-slope', plays: 3, bottomPlays: 3, topPlays: 0, statusLands: 3, discards: 0,
         });
@@ -208,16 +217,15 @@ describe('greedy object reproduces the pinned decision sequences', () => {
     // line moved from a double-stagger stack (which flattened the standstill
     // preset's win-rate curve to 100% at every stage — a real balance
     // regression caught by combat-playtest.balance-bands.sim.test.ts) to a
-    // reveal-stance deposit. Weaker against this synthetic 4-card MIX
-    // loadout — the outcome flips to a defeat. This is a narrow fidelity pin
-    // on `greedy`'s decision sequence, not a balance gate (that's the
-    // win-rate-curve suite, re-verified healthy after this same fix).
-    it('seed 11 vs KingOfRevenge: a four-round status defeat', () => {
+    // reveal-stance deposit. This is a narrow fidelity pin on `greedy`'s
+    // decision sequence, not a balance gate (that's the win-rate-curve
+    // suite). post-Phase-30 merge re-pin 2026-07-12 against the merged tree.
+    it('seed 11 vs KingOfRevenge: a four-round status victory (Gate 0 law: one tray per phase)', () => {
         const r = runOneEncounter(loadout(MIX), KingOfRevenge, 11, 'greedy');
         expect({ outcome: r.outcome, rounds: r.rounds, plays: r.plays, statusPlays: r.statusPlays })
-            .toEqual({ outcome: 'defeat', rounds: 4, plays: 24, statusPlays: 15 });
+            .toEqual({ outcome: 'victory', rounds: 4, plays: 19, statusPlays: 12 });
         expect(r.cardUsage['straw-mans-jab']).toEqual({
-            cardId: 'straw-mans-jab', plays: 7, bottomPlays: 7, topPlays: 0, statusLands: 7, discards: 0,
+            cardId: 'straw-mans-jab', plays: 6, bottomPlays: 6, topPlays: 0, statusLands: 6, discards: 0,
         });
         // card-retreat no longer exists — it can never appear in cardUsage.
     }, 30_000);

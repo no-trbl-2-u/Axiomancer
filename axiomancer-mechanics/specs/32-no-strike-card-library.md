@@ -394,7 +394,11 @@ Kept-and-recut from v2's unshipped catalogue where names match.
 ## 8. The ten preset decks
 
 Recipe (all decks): C1 ×4, C2 ×4, U1 ×2, U2 ×2, R-spell, R-enchant,
-R-disenchant = **15 cards** + synthetic Retreat.
+R-disenchant = **15 cards** + synthetic Retreat. Ratified 2026-07-12
+(§12 item 9): every recipe carries exactly **5 body / 5 mind / 5
+heart** by `philosophicalAspect` (partition 4+1 / 4+1 / 2+2+1),
+borrowing cross-theme utility cards where the theme's own colors
+cannot cover it.
 
 | preset id | name | theme |
 |---|---|---|
@@ -498,3 +502,83 @@ contract).
 - **A5** — engine-gated drips (§1 source 3) as a sanctioned HP class:
   BACKFIRE, bone-orchard, stuck-in-their-head. They are the Control /
   Harvest / Echo win routes; without them those decks cannot close.
+
+### Ratified 2026-07-11 — card-library improvement plan owner batch
+
+Provenance: decisions adopted via the owner's full-plan implementation
+directive (2026-07-11 session); each item adopts the documented
+recommendation of the card-library improvement plan
+(`plan/tuning/2026-07-11-card-library-improvement-plan-detailed.md`).
+
+1. **WS0.2 direct-HP exceptions** — classes (a) status-gated payoffs,
+   (b) A5 enchant-gated drips, and reflect (THORNS/RIPOSTE) are legal
+   because their prerequisite is printed. Class (c) mercy-exploit is
+   the alternate-outcome consequence — legal only from the mercy
+   screen. Signatures: Conclusion fires only per status stack (kind
+   `conclude`); Disarming Plea's flat-magnitude chip (kind `mercy`) is
+   KEPT as a signature-only ratified exception. The `strike` signature
+   kind and `STRIKE_DAMAGE_MULT` are dead vocabulary — deleted. (yes)
+2. **WS0.3 die-cost laws** — deprecate-in-place (recommendation i).
+   The Color Law owns play legality/die COST; `resolveCardDieCost` is
+   retained as the advantage-read classifier; `@deprecated` on the
+   barrel export; mobile migration filed as follow-up; no removal
+   (locked-barrel rule). (yes)
+3. **WS3.0 DoT clocks** — schema ratified: `DamageOverTime` gains
+   `trigger?: 'round-start' | 'round-end' | 'card-played' |
+   'damage-instance' | 'payoff'` (absent = legacy `tickPhase`), and
+   `dotModifiers` gains `calendarExpiry?: false` and
+   `growth?: 'per-enemy-action'`. Calendar-expiry removal for clocked
+   effects (bounded windows bound the PAYOFF instead). Doom-shaped
+   species (grows when the enemy acts) ratified as a card-local
+   effect, explicitly NOT keyword #31. Trigger definition:
+   'per-card-played' counts PLAYER-side cards only. (yes)
+4. **WS4 bulwark/charm + combat ledgers** — Phase 32's ratified
+   "RIPOSTE reflects the prevented blow" WINS over the
+   consume-all-defense alternative — Rampart Reckoning's
+   `consume_defense` mechanic kind is NOT added; bulwark theme work
+   uses the ratified RIPOSTE direction plus Grit Between Stones and
+   The Unmoved Mover. Combat ledgers ratified as one schema item:
+   `recoilPaidThisTurn`, `enemyDamageThisTurn`, `enemyDamageLastRound`
+   (plus `lastThreatFullyBlocked` for WS9). Charm decay-pause
+   (Steadfast Regard) and SWAY-on-SWAY scaling (Crescendo of
+   Affection) stay CONDITIONAL — build only if post-re-baseline
+   (Phase 26/27) telemetry still shows the charm late hole. (yes)
+5. **WS7 payoff caps + chooseX** — ALL-spenders (REAP-ALL,
+   spend-all-pips) become uncapped — input opportunity cost is the
+   balance lever; RUPTURE keeps a pure-fraction cap with the fraction
+   chosen by the supervised sweep over F ∈ {0.25, 0.35, 0.45, 0.60}
+   (floor removal lowers early caps, so F must rise as the floor
+   falls). chooseX plumbing ratified, bounded to `recoil_x` as the
+   first chooseX; first card The Open Vein (sandbox-first). (yes)
+6. **WS8.3 DISRUPT meter** — the meter counts distinct control
+   SURFACES (actionRestriction / roll / threat-damage /
+   rider-suppress / stance), not distinct effect ids;
+   `DISRUPT_DENY_AT = 3` means three different kinds of grip. (yes)
+7. **WS9.1 threat branch nodes** — ratified:
+   `AuthoredThreatStep = AuthoredThreatPhase | { branch: { condition;
+   then; else } }` with the closed condition union
+   `{ kind: 'bearer-afflictions-gte'; n } |
+   { kind: 'prior-threat-fully-blocked' }`; zero RNG; branch resolves
+   at phase START; the mobile telegraph must show condition + both
+   outcomes before commit. (yes)
+8. **WS10 atlas** — TICK's death leaves the atlas at 29 rows —
+   accepted, no replacement ratified. BARRIER/GUARD merge is deferred
+   to KW-2 pending the WS4/WS6 orphan-drilling outcome (whatever still
+   sits at one card after those passes goes to the KW-2 merge/retire
+   list). (yes)
+9. **(2026-07-12) Preset color law — 5/5/5 by aspect** — every 15-card
+   preset recipe MUST carry exactly 5 body / 5 mind / 5 heart cards by
+   `philosophicalAspect` (`cardStanceColor`). All three die colors are
+   always possible in the tray, and the Color Law otherwise strands
+   off-color dice: the owner playtest found foundry / standstill /
+   tithe at ZERO heart — every purple die dead for card play. Under
+   the fixed 4/4/2/2/1/1/1 recipe the only legal partition of 15 into
+   5/5/5 is 4+1 / 4+1 / 2+2+1: the two commons in two DIFFERENT
+   colors, both uncommons in the THIRD color, and the three rares one
+   of each color. Where a theme's own 7 cards cannot satisfy the
+   partition, the preset borrows utility-leaning cards of the missing
+   color from the library (same rarity slot, same cardType slot) —
+   color playability outranks strict theme purity in preset
+   composition; the theme's hallmark engine cards stay. The UI
+   hard-blocks illegal die drops (Color Law, unchanged). Provenance:
+   owner playtest directive, 2026-07-12. (yes)

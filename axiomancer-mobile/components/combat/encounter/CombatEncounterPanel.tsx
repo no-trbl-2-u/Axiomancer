@@ -27,7 +27,7 @@ import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanima
 import Svg, { Circle, Defs, Line, Polygon, RadialGradient, Stop } from 'react-native-svg';
 import {
     initializeCombatEncounter, rollEncounterDice, playCombatCard, resolveThreatPhase,
-    startTurn, draftStanceDie, discardCombatCard, playSignatureSkill,
+    startTurn, endTurn, draftStanceDie, discardCombatCard, playSignatureSkill,
     tapFateDie, getPendingDotTotal, getFloatingDiceColors,
     selectEncounterMercyChoice, buildCombatSummary, rollCombatCardRewards, addRewardCard,
     rollLoot, addItem,
@@ -36,9 +36,8 @@ import {
 } from '@mechanics';
 
 import { advanceWheel, isMomentumDieId, isWheelStance, momentumDieId, type WheelStance } from '@/state/combat/momentum';
-import { SYSTEM_GLOSSARY } from '@/state/combat/keywords';
 
-import { CombatBoard, CombatCardFace, HAND_CARD_W, HAND_CARD_H, type DragController, type DragPayload } from '@/components/combat/encounter/CombatBoard';
+import { CombatBoard, CombatCardFace, HAND_CARD_W, HAND_CARD_H, type DragController, type DragPayload, type Rect } from '@/components/combat/encounter/CombatBoard';
 import { type CombatFx } from '@/components/combat/encounter/CombatCombatantPane';
 import { CombatDie } from '@/components/combat/encounter/CombatDie';
 import { CombatSummaryModal } from '@/components/combat/encounter/CombatSummaryModal';
@@ -56,6 +55,10 @@ import { FONTS } from '@/theme/axm';
 import { makeStyles, usePalette } from '@/theme/runtime';
 
 type DropResolver = (payload: DragPayload, x: number, y: number) => void | Promise<void>;
+
+/** Rendered size of the dragged-die ghost chip — the die ghost anchors on HALF
+ *  of this so it tracks the pointer (see dieGhostStyle). */
+const DIE_GHOST_SIZE = 56;
 
 export interface CombatEncounterPanelProps {
     /** The foe to fight (live: the real map encounter enemy; dev: a mock). */
@@ -143,6 +146,9 @@ function applyHazardOutcome(
 
 // Per-keyword type tag for the inspect-modal definition panels. The PRIMARY keyword
 // (index 0) maps to the card's face kind; riders read as a generic EFFECT.
+// 2026-07-12 (owner directive) — the panel carries PAYLOAD keywords only, so
+// a persistent card's first chip is its passive's keyword: it tags EFFECT,
+// never the type word (ENCHANT/CURSE read on the card frame's type strip).
 function keywordTypeTag(kind: string, index: number): string {
     if (index > 0) return 'EFFECT';
     switch (kind) {
@@ -152,8 +158,6 @@ function keywordTypeTag(kind: string, index: number): string {
         case 'guard': return 'GUARD';
         case 'regen': return 'REGEN';
         case 'befriend': return 'MERCY';
-        case 'enchant': return 'ENCHANT';
-        case 'disenchant': return 'CURSE';
         case 'forge': return 'DICE';
         default: return 'EFFECT';
     }
@@ -266,7 +270,9 @@ export function CombatEncounterPanel({
     const [pilgrimOpen, setPilgrimOpen] = useState(false);
     // phase 28 — REPRISE songbook picker: set by CombatBoard's onReprisalNeeded
     // when a staged reprise-mechanic card is APPLYd with a non-empty discard.
-    const [reprisalPrompt, setReprisalPrompt] = useState<{ uid: string; dieId: string | null; power: boolean } | null>(null);
+    // The prompt HOLDS the deferred play (including the WS7.2 chosen X) — the
+    // board committed nothing yet, so dismissing the prompt is a clean cancel.
+    const [reprisalPrompt, setReprisalPrompt] = useState<{ uid: string; dieId: string | null; power: boolean; chosenX?: number } | null>(null);
     // Deckbuilder reward (Spec 26b §C) — rolled once on victory, claimed before the summary.
     const [rewardOffers, setRewardOffers] = useState<string[]>([]);
     const [rewardsClaimed, setRewardsClaimed] = useState(false);
@@ -316,6 +322,10 @@ export function CombatEncounterPanel({
     const dragX = useSharedValue(0);
     const dragY = useSharedValue(0);
     const dragShown = useSharedValue(0);
+    // Drop-INELIGIBLE staged-card rects for the die drag in flight (measured
+    // once by the board at drag begin) — drives the ghost's ✕ cue per frame
+    // on the UI thread, no JS round-trips.
+    const badRects = useSharedValue<Rect[]>([]);
     const begin = useCallback((payload: DragPayload, x: number, y: number) => {
         // NOTE: dragShown is NOT set here. The ghost keeps the PREVIOUS drag's
         // payload until React commits `dragActive`, so showing it synchronously
@@ -327,7 +337,7 @@ export function CombatEncounterPanel({
     useEffect(() => {
         if (dragActive) dragShown.value = 1;
     }, [dragActive, dragShown]);
-    const drag: DragController = useMemo(() => ({ begin, end: () => undefined, active: dragActive, x: dragX, y: dragY }), [begin, dragActive, dragX, dragY]);
+    const drag: DragController = useMemo(() => ({ begin, end: () => undefined, active: dragActive, x: dragX, y: dragY, badRects }), [begin, dragActive, dragX, dragY, badRects]);
     const end = useCallback((x: number, y: number) => {
         const payload = dragRef.current; dragRef.current = null; dragShown.value = 0; setDragActive(null);
         if (!payload) return;
@@ -337,7 +347,23 @@ export function CombatEncounterPanel({
     drag.end = end;
     // Centre the hand-card face under the finger (half of HAND_CARD_W/H)
     // and lift it above the fingertip so the card stays readable mid-drag.
-    const ghostStyle = useAnimatedStyle(() => ({ opacity: dragShown.value, transform: [{ translateX: dragX.value - HAND_CARD_W / 2 }, { translateY: dragY.value - HAND_CARD_H / 2 - 24 }, { scale: 1.1 }] }));
+    const cardGhostStyle = useAnimatedStyle(() => ({ opacity: dragShown.value, transform: [{ translateX: dragX.value - HAND_CARD_W / 2 }, { translateY: dragY.value - HAND_CARD_H / 2 - 24 }, { scale: 1.1 }] }));
+    // The DIE ghost is a small chip, not a card: it must anchor at ITS OWN
+    // half-size so the die stays centred under the pointer for the whole drag.
+    // CONSTRAINT: never reuse the card's half-W/H anchor for the die — that was
+    // the "die renders up-and-left of the finger" bug (playtest, 2026-07-11).
+    const dieGhostStyle = useAnimatedStyle(() => ({ opacity: dragShown.value, transform: [{ translateX: dragX.value - DIE_GHOST_SIZE / 2 }, { translateY: dragY.value - DIE_GHOST_SIZE / 2 }, { scale: 1.1 }] }));
+    // Ineligible-target cue (owner directive 2026-07-12): while the pointer is
+    // over ANY illegal drop target (an off-color or already-armed staged card,
+    // rects measured by the board at drag begin), the ghost carries an ✕ —
+    // "this die can't land here", said before the drop.
+    const dieGhostXStyle = useAnimatedStyle(() => {
+        const x = dragX.value;
+        const y = dragY.value;
+        const over = badRects.value.some((r) =>
+            x >= r.x - 16 && x <= r.x + r.width + 16 && y >= r.y - 16 && y <= r.y + r.height + 16);
+        return { opacity: dragShown.value > 0 && over ? 1 : 0 };
+    });
 
     // ── engine wiring ──
     const apply = useCallback((fn: (s: CombatEncounterState) => CombatEncounterState) => {
@@ -370,10 +396,11 @@ export function CombatEncounterPanel({
         });
         setFxSeq((n) => n + 1);
     }, [apply]);
-    // phase 28 — REPRISE songbook choice: the player's discard-pile pick,
-    // threaded to `playCombatCard`. Omitted (or the picker was skipped) falls
-    // back to the engine's pre-existing highest-rank auto-pick.
-    const onApply = useCallback((uid: string, dieId: string | null, power: boolean, reprisalCardId?: string) => {
+    // Per-play choices threaded to `playCombatCard`: WS7.2 `chosenX` (the
+    // X-cost stepper's pick) and phase 28 `reprisalCardId` (the REPRISE
+    // songbook discard-pile pick — omitted/skipped falls back to the engine's
+    // pre-existing highest-rank auto-pick).
+    const onApply = useCallback((uid: string, dieId: string | null, power: boolean, choices?: { chosenX?: number; reprisalCardId?: string }) => {
         // Momentum: advance the wheel with this card's stance (looked up BEFORE the
         // play removes it from the hand). A completed cycle forges a wild momentum
         // die into the tray; while that die is live, plays don't advance the wheel.
@@ -401,7 +428,15 @@ export function CombatEncounterPanel({
             if (power && routing.draftFirst && dieId) {
                 ns = draftStanceDie(ns, dieId, { bankUnpicked: bankSpareRef.current }).state;
             }
-            const t = playCombatCard(ns, { uid }, power, routing.explicitDieId, undefined, reprisalCardId);
+            // WS7.2 chosenX + phase 28 reprisalCardId ride through to the
+            // engine (which clamps X to [min, affordable] and validates the
+            // reprisal pick against the live discard pile).
+            const t = playCombatCard(
+                ns, { uid }, power, routing.explicitDieId, undefined,
+                choices && (choices.chosenX !== undefined || choices.reprisalCardId !== undefined)
+                    ? choices
+                    : undefined,
+            );
             fxRef.current = t.events;
             ns = t.state;
             // TODO(engine): momentum belongs in axiomancer-mechanics as a first-class
@@ -419,23 +454,43 @@ export function CombatEncounterPanel({
         unstageUid(uid);
     }, [apply, unstageUid]);
     // phase 28 — opens the songbook picker instead of applying immediately.
-    const onReprisalNeeded = useCallback((uid: string, dieId: string | null, power: boolean) => {
-        setReprisalPrompt({ uid, dieId, power });
+    // `chosenX` (WS7.2) rides the prompt so the deferred play still resolves
+    // at the stepper's pick, not the printed min.
+    const onReprisalNeeded = useCallback((uid: string, dieId: string | null, power: boolean, chosenX?: number) => {
+        setReprisalPrompt({ uid, dieId, power, chosenX });
     }, []);
     // A tap on a discard entry commits that choice; `null` (the skip row)
     // omits it — falls back to the engine's highest-rank auto-pick.
     const onReprisalPick = useCallback((cardId: string | null) => {
         if (!reprisalPrompt) return;
-        const { uid, dieId, power } = reprisalPrompt;
+        const { uid, dieId, power, chosenX } = reprisalPrompt;
         setReprisalPrompt(null);
-        onApply(uid, dieId, power, cardId ?? undefined);
+        const choices = {
+            ...(chosenX !== undefined ? { chosenX } : {}),
+            ...(cardId ? { reprisalCardId: cardId } : {}),
+        };
+        onApply(uid, dieId, power, chosenX !== undefined || cardId ? choices : undefined);
     }, [reprisalPrompt, onApply]);
+    // Backdrop tap = CANCEL, not commit (every other backdrop in this panel
+    // dismisses without action). The board held the play — nothing reached
+    // the engine — so dropping the prompt restores the exact pre-APPLY
+    // staging: card still staged, pending die and chosen X intact. Auto-pick
+    // stays available as the explicit skip row.
+    const onReprisalCancel = useCallback(() => setReprisalPrompt(null), []);
     const onDiscard = useCallback((uid: string) => { apply((s) => discardCombatCard(s, uid).state); unstageUid(uid); }, [apply, unstageUid]);
     const onSignature = useCallback((id: string) => apply((s) => playSignatureSkill(s, id).state), [apply]);
     const onEndPhase = useCallback(() => {
         apply((s) => {
-            const t = resolveThreatPhase(s);
-            fxRef.current = t.events;
+            // Fate Engine P1 R2 — close the turn BEFORE the phase resolves: an
+            // unspent (still-available, non-X) drafted die BANKS to the Reserve
+            // when a slot is free, else burns for Conviction (`endTurn`,
+            // combat.engine.ts). The panel used to skip straight to
+            // `resolveThreatPhase`, whose boundary just WIPES the tray — the
+            // sim path (`ensureDraftForCard`) always ran `endTurn`, so mobile
+            // silently lost the banked die the engine's R2 promises.
+            const ended = endTurn(s);
+            const t = resolveThreatPhase(ended.state);
+            fxRef.current = [...ended.events, ...t.events];
             let ns = t.state;
             if (ns.phase === 'phase-play' && ns.dice.length === 0) ns = startTurn(ns).state;
             return ns;
@@ -559,7 +614,21 @@ export function CombatEncounterPanel({
                                     <Text style={[styles.revealPhaseIcon, { color: meta.color }]}>{meta.icon}</Text>
                                     <View style={{ flex: 1 }}>
                                         <Text style={styles.revealPhaseLabel}>PHASE {p.index} · {meta.label}</Text>
-                                        <Text style={styles.revealPhaseText} numberOfLines={2}>{p.threatAction.description}</Text>
+                                        {p.branch ? (
+                                            /* WS9 — a branch phase telegraphs its condition + BOTH
+                                               outcomes before commit; the taken fork is marked after. */
+                                            <View>
+                                                <Text style={styles.revealBranchCond}>⑂ {p.branch.conditionText}</Text>
+                                                <Text style={[styles.revealPhaseText, p.branch.taken === 'then' ? styles.revealBranchTaken : null]} numberOfLines={2}>
+                                                    {p.branch.taken === 'then' ? '▶ ' : ''}then: {p.branch.then.threatAction.description}
+                                                </Text>
+                                                <Text style={[styles.revealPhaseText, p.branch.taken === 'else' ? styles.revealBranchTaken : null]} numberOfLines={2}>
+                                                    {p.branch.taken === 'else' ? '▶ ' : ''}otherwise: {p.branch.else.threatAction.description}
+                                                </Text>
+                                            </View>
+                                        ) : (
+                                            <Text style={styles.revealPhaseText} numberOfLines={2}>{p.threatAction.description}</Text>
+                                        )}
                                         {p.stanceHint ? <Text style={styles.revealPhaseTell}>🜲 stance hidden — {p.stanceHint}</Text> : null}
                                     </View>
                                 </View>
@@ -650,19 +719,23 @@ export function CombatEncounterPanel({
                             {/* the colour law — ONE global legend (was boilerplated onto every card) */}
                             <Text style={styles.detailColorMatch}>{detailCard.detail.colorMatchHint}</Text>
 
-                            {/* KW-7 (phase 29) — the systems glossary: engine tokens the player
-                                reads on cards (Conviction, Resonance, Reserve/Pips, Floating,
-                                rungs, WILD/X) but that spec 32 §3 explicitly keeps OUT of the
-                                card-keyword registry. Same anchor point as the colour-law legend
-                                above — the overlay is where mid-fight questions get answered. */}
-                            <View style={styles.systemsGlossary}>
-                                {SYSTEM_GLOSSARY.map(s => (
-                                    <Text key={s.term} style={styles.systemsGlossaryLine}>
-                                        <Text style={styles.systemsGlossaryTerm}>{s.term}</Text>
-                                        {' — ' + s.def}
-                                    </Text>
-                                ))}
-                            </View>
+                            {/* KW-7 (phase 29, re-scoped 2026-07-12) — system-term definitions
+                                (Conviction, Resonance, Reserve/Pips, Floating, rungs, WILD/X):
+                                ONLY the entries THIS card's printed lines reference, derived
+                                per-card by the presenter (systemTermsForCard). The wholesale
+                                six-entry dump made every inspect a scrolling wall (owner
+                                playtest) — a card's inspect explains only what the card
+                                actually uses, each term at most once. */}
+                            {detailCard.detail.systemTerms.length > 0 && (
+                                <View style={styles.systemsGlossary}>
+                                    {detailCard.detail.systemTerms.map(s => (
+                                        <Text key={s.term} style={styles.systemsGlossaryLine}>
+                                            <Text style={styles.systemsGlossaryTerm}>{s.term}</Text>
+                                            {' — ' + s.def}
+                                        </Text>
+                                    ))}
+                                </View>
+                            )}
 
                             {/* (4) FLAVOR — authored prose, overlay BOTTOM only (owner
                                 directive 2026-07-09: the face stays purely functional). */}
@@ -787,9 +860,17 @@ export function CombatEncounterPanel({
             )}
 
             {/* phase 28 — REPRISE songbook picker: choose which discarded card
-                returns to hand (the engine's default is the highest-rank one). */}
+                returns to hand (the engine's default is the highest-rank one).
+                Backdrop = cancel (the play is still held, staged, uncommitted);
+                the skip row is the explicit auto-pick. Rows/testIDs are keyed
+                by INDEX-qualified id — the discard pile can hold duplicates. */}
             {reprisalPrompt && (
-                <Pressable style={styles.backdrop} testID="combat-reprisal-picker" onPress={() => onReprisalPick(null)}>
+                <Pressable
+                    style={styles.backdrop}
+                    testID="combat-reprisal-picker"
+                    accessibilityLabel="Cancel — keep the card staged, decide later"
+                    onPress={onReprisalCancel}
+                >
                     <View style={[styles.tipPlaque, { borderColor: `${AXM.sulfur}66` }]} onStartShouldSetResponder={() => true}>
                         <View style={[styles.tipCorner, styles.tipCornerTl, { borderColor: AXM.sulfur }]} pointerEvents="none" />
                         <View style={[styles.tipCorner, styles.tipCornerTr, { borderColor: AXM.sulfur }]} pointerEvents="none" />
@@ -799,11 +880,11 @@ export function CombatEncounterPanel({
                         <Text style={[styles.tipName, { color: AXM.sulfur, textShadowColor: AXM.sulfur }]}>REPRISE — CHOOSE</Text>
                         <Text style={styles.tipGloss}>Return one discarded card to your hand.</Text>
                         <View style={styles.reprisalList}>
-                            {vm.discardCards.map((c) => (
+                            {vm.discardCards.map((c, i) => (
                                 <Pressable
-                                    key={c.id}
+                                    key={`${i}-${c.id}`}
                                     style={styles.reprisalRow}
-                                    testID={`combat-reprisal-option-${c.id}`}
+                                    testID={`combat-reprisal-option-${i}-${c.id}`}
                                     onPress={() => onReprisalPick(c.id)}
                                     accessibilityRole="button"
                                     accessibilityLabel={`Return ${c.name} to hand`}
@@ -924,13 +1005,19 @@ export function CombatEncounterPanel({
             {/* drag ghost — persistently mounted after the first drag; dragShown
                 gates visibility so a finished drag leaves it hidden, not unmounted */}
             {ghostPayload && (
-                <Animated.View pointerEvents="none" style={[styles.ghost, ghostStyle]}>
+                <Animated.View pointerEvents="none" style={[styles.ghost, ghostPayload.type === 'card' ? cardGhostStyle : dieGhostStyle]}>
                     {ghostPayload.type === 'card' ? (
                         // The dragged card keeps its real face (was a stripped name-only box
                         // that looked like a different, "old" card mid-drag).
                         <CombatCardFace card={ghostPayload.card} width={HAND_CARD_W} height={HAND_CARD_H} />
                     ) : (
-                        <CombatDie die={ghostPayload.die} size={56} />
+                        <>
+                            <CombatDie die={ghostPayload.die} size={DIE_GHOST_SIZE} />
+                            {/* ✕ ineligible cue — lights while hovering an illegal target */}
+                            <Animated.View style={[styles.ghostXBadge, dieGhostXStyle]} testID="combat-die-ghost-x">
+                                <Text style={styles.ghostXGlyph} allowFontScaling={false}>✕</Text>
+                            </Animated.View>
+                        </>
                     )}
                 </Animated.View>
             )}
@@ -1070,8 +1157,18 @@ const useStyles = makeStyles((AXM) => ({
     revealPhaseLabel: { fontFamily: FONTS.sans, fontSize: 11, letterSpacing: 0.6, color: AXM.parchment },
     revealPhaseText: { fontFamily: FONTS.serif, fontSize: 12, color: AXM.bone, marginTop: 2, lineHeight: 15 },
     revealPhaseTell: { fontFamily: FONTS.serifItalic, fontStyle: 'italic', fontSize: 10, color: AXM.ash, marginTop: 3, lineHeight: 13 },
+    // WS9 — branch fork rows in the threat sequence
+    revealBranchCond: { fontFamily: FONTS.sans, fontSize: 10, letterSpacing: 0.6, color: AXM.sulfur, marginTop: 2 },
+    revealBranchTaken: { color: AXM.parchment },
     revealBtn: { borderWidth: 2, paddingHorizontal: 30, paddingVertical: 12, marginTop: 22, backgroundColor: 'rgba(212,192,38,0.12)' },
     revealBtnText: { fontFamily: FONTS.gothic, fontSize: 18, letterSpacing: 1 },
 
     ghost: { position: 'absolute', top: 0, left: 0, zIndex: 999 },
+    // ✕ badge riding the die ghost while it hovers an illegal target.
+    ghostXBadge: {
+        position: 'absolute', top: -10, right: -10, width: 24, height: 24, borderRadius: 12,
+        borderWidth: 1.5, borderColor: AXM.blood, backgroundColor: 'rgba(10,4,4,0.92)',
+        alignItems: 'center', justifyContent: 'center',
+    },
+    ghostXGlyph: { fontFamily: FONTS.sans, fontSize: 13, lineHeight: 15, color: AXM.blood },
 }));

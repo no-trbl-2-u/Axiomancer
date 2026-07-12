@@ -11,6 +11,166 @@
 
 ## Pending
 
+### [MED] ratified-exception HP arms bypass the damage-instance clock funnel
+- pass: review-closeout 2026-07-12 (commit 4680e5e2, branch
+  claude/axiomancer-dawncaster-comparison-cz6008)
+- viewport: n/a
+- category: design
+- observation: the three spec 32 §12 ratified direct-HP exceptions — the
+  `conclude` signature arm (Conclusion, per-stack), the `mercy` signature
+  arm (Disarming Plea, flat magnitude; both `combat.signature.ts`, plain
+  `applyDamage`), and the mercy-exploit strike
+  (`selectEncounterMercyChoice` exploit branch, `combat.engine.ts`) —
+  apply damage OUTSIDE the `applyEnemyDamage` funnel. Every status-gated
+  payoff burst advances BLEED's WS3.2 damage-instance clock; these three
+  hits do not, so a Conclusion cast or a mercy-exploit strike lands on a
+  bleeding enemy without the bleed paying out. Ratified exceptions ARE
+  allowed to differ from the funnel — whether they SHOULD feed the clock
+  is a design call, not a bug fix, hence filed instead of changed.
+- evidence: `combat.engine.ts` `applyEnemyDamage` doc comment ("the
+  shared enemy-damage funnel"); `combat.signature.ts` conclude/mercy arms
+  call `applyDamage` directly; the mercy-exploit branch likewise. The
+  doctrine witness (`doctrine-strike-dead.engine.test.ts`) ratifies the
+  three arms' RIGHT to chip HP (spec 32 §12) but nothing rules on their
+  clock semantics.
+- suggested fix: owner call under the spec 32 §12 framing — either (a)
+  ratify "exception damage is clock-silent" as spec text (one sentence in
+  §12, plus a witness pinning it), or (b) route the three arms through
+  `applyEnemyDamage` so BLEED treats every enemy-HP hit uniformly. Do NOT
+  change behavior without the ratification; (b) also changes Conclusion's
+  effective damage against bleeds and needs a balance glance.
+- source: adversarial code review (2026-07-12)
+
+### [MED] WS9 reactive cleanse strips a whole merged instance — tension with the enemy-cleanse mitigation
+- pass: review-closeout 2026-07-12 (commit 4680e5e2, branch
+  claude/axiomancer-dawncaster-comparison-cz6008)
+- viewport: n/a
+- category: design
+- observation: the WS9 reactive cleanse (`enemyCleanse` threat-branch
+  payload, `combat.engine.ts`; prototype carrier Tri-Eyes,
+  `combat.threat-sequences.ts`) removes one whole merged `ActiveEffect`
+  instance in application order. Because same-id afflictions
+  intensity-stack into ONE instance, a single cleanse can erase an
+  arbitrarily tall stack — e.g. a poison the player spent three cards
+  deepening — which sits in tension with the standing "enemy cleanse <
+  cheapest DoT output" mitigation (the cleanse should never out-tempo the
+  cheapest re-application). The guardrails are real (never the last
+  affliction, telegraphed branch, at most once per sequence pass) but
+  none of them bound the VALUE removed, only the count.
+- evidence: `combat.encounter.types.ts` `enemyCleanse` doc; the
+  `applyCleanse`-based shed in `combat.engine.ts` (WS9 reactive cleanse
+  block); witness `threat-branches.engine.test.ts` ("cleanses exactly one
+  affliction... never the last") asserts instance count, not intensity.
+- suggested fix: propose intensity-SHAVING as the follow-up — the cleanse
+  removes N intensity from the chosen affliction (washing it out only at
+  0) instead of the whole instance, so the shed price stays comparable to
+  one cheap DoT application regardless of stack height. Needs a design
+  pass on N (flat 1? per-branch payload?) and a re-run of the WS9 branch
+  witnesses; until ratified, the current whole-instance shed stands.
+- source: adversarial code review (2026-07-12)
+
+### [HIGH] tuning harness — policy-pick draft scorer starves new/sandbox cards
+- pass: session-closeout 2026-07-12 (commit ffadca96, branch claude/axiomancer-dawncaster-comparison-cz6008)
+- viewport: n/a
+- category: tuning-harness
+- observation: the policy-pick draft scorer never surfaces new or
+  sandbox cards — five sets (doom-species, chooseX-vein, roles-charm,
+  roles-harvest, roles-forge's ingot) had ZERO drafts at one or more
+  seeds, and three independent A/Bs (conjure-exercise, roles-bulwark,
+  roles-harvest) show the IDENTICAL +10.8pp seed-2 mid-stage delta —
+  a pool-shuffle artifact, not a card signal. Matrix-level stage
+  deltas in sandbox A/Bs are not attributable to the cards under test.
+- evidence: `plan/tuning/2026-07-11-honest-rebaseline-and-evidence.md`
+  §2 cross-cutting findings 1-2; direct-draft probe
+  (`probe-ingot-draftability.ts`) shows ingot-of-ruin IS structurally
+  draftable — the scorer and the lottery disagree.
+- suggested fix: one scorer fix (draft-weight/offer-rate handling of
+  pool newcomers) unblocks SIX pending gate verdicts; do it before the
+  next sandbox A/B cycle so evidence stops being lottery-shaped.
+- source: session closeout (evidence pass, 2026-07-11)
+
+### [HIGH] late-stage global collapse — all 10 presets 0.00 late
+- pass: session-closeout 2026-07-12 (commit ffadca96)
+- viewport: n/a
+- category: design
+- observation: every one of the 10 starter presets reads 0.00 win rate
+  at the late stage, and the mid-stage ratchet clears only via erosion.
+  The WS3/WS4 late gates FAILED on this global condition, not on their
+  own cards — late-stage failure is currently unattributable to any
+  individual card or theme.
+- evidence: `plan/tuning/2026-07-11-honest-rebaseline-and-evidence.md`
+  (honest re-baseline matrix). Doctrine curve target is late ~25-35%
+  for starter presets (`axiomancer-mechanics/CLAUDE.md`).
+- suggested fix: a dedicated late-stage tuning phase (global
+  condition: enemy HP/threat scaling vs win-path throughput), not
+  per-card forging; candidates via /expand.
+- source: session closeout (evidence pass, 2026-07-11)
+
+### [MED] control-lock sim policy is threat-blind — WS8 surface variety unexploited
+- pass: session-closeout 2026-07-12 (commit ffadca96)
+- viewport: n/a
+- category: tuning-harness
+- observation: `rankCard` in the sim policies never reads
+  `threatPhases`, so no sim policy can exploit WS8's control-surface
+  variety (the data exists; no decision layer uses it). Pinned as a
+  known gap via `it.fails` in
+  `axiomancer-mechanics/src/Combat/e2e/control-surfaces.sim.test.ts`.
+- evidence: the `it.fails` pin; WS8 payload data in
+  `combat.threat-sequences.ts`.
+- suggested fix: teach the control policy to read the CURRENT threat
+  phase (rungs, intent type) when ranking STAGGER/BACKFIRE plays; flip
+  the `it.fails` pin to a passing assertion in the same change.
+- source: session closeout
+
+### [MED] engine hooks missing for two ratified-adjacent bridge shapes
+- pass: session-closeout 2026-07-12 (commit ffadca96)
+- viewport: n/a
+- category: engine-gap
+- observation: two ratified-adjacent bridge shapes have no engine hook:
+  (1) player-side affliction-expiry → Soul (the Soul economy counts
+  ENEMY afflictions only), and (2) a rungs-denied ledger for
+  STAGGER → REPRISE causality. Both bridge cards were shipped
+  nearest-buildable instead; the killed bridges barbed-compliment and
+  interest-on-the-flesh point at the re-homes.
+- evidence: session A/B report + card notes in
+  `plan/tuning/2026-07-11-honest-rebaseline-and-evidence.md`.
+- suggested fix: add the two hooks as small engine substrate items in
+  the next engine phase, then revisit the killed bridge designs.
+- source: session closeout
+
+### [MED] UI-communication testing gap — sim evidence is text-blind
+- pass: session-closeout 2026-07-12 (commit ffadca96)
+- viewport: mobile
+- category: process
+- observation: the sim/evidence loop cannot see player-facing WORDING.
+  The user caught a three-surface contradiction (keyword gloss vs
+  detail modal vs card face) that no agent test covered — fixed in
+  8c25374e, and this closeout fixed another (stale RUPTURE cap gloss
+  in `axiomancer-mobile/state/combat/keywords.ts`), but the class is
+  ungated.
+- evidence: fix commit 8c25374e; the card-face-honesty guard test
+  covers face formatting, not cross-surface numeric consistency.
+- suggested fix: run a /deep-playtest pass post-merge focused on
+  copy consistency, and add the WS9.3 "why did the enemy change
+  plan?" question to the next /combat-playtest brief. Consider a
+  guard test that derives every printed cap/constant gloss from the
+  engine constants.
+- source: user + session closeout
+
+### [LOW] card-editor cannot edit the three new mechanic fields
+- pass: session-closeout 2026-07-12 (commit ffadca96)
+- viewport: desktop
+- category: tooling
+- observation: the card-editor UI has no inputs for the three mechanic
+  fields added this session: `grant_pip.overflow`,
+  `spend_all_pips.markPer`, and `synergy.statePredicate`. Cards using
+  them can only be authored by hand-editing JSON/TS.
+- evidence: `axiomancer-card-editor` form components lack the fields;
+  the mechanics exist in `axiomancer-mechanics/src/Cards/types.ts`.
+- suggested fix: add the three fields to the editor's mechanic form
+  (enum/number/checkbox as appropriate).
+- source: session closeout
+
 ### [HIGH] persistent header — MORALE meter renders literal "v of x" placeholder
 - pass: 12 (commit 3dc27d24)
 - viewport: mobile

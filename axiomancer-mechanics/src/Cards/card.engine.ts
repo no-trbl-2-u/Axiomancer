@@ -255,7 +255,13 @@ export function executeCard(
         // knownCards-only check wrongly rejected legitimately-dealt reward cards
         // and crashed combat when one was played.
         const playerCaster = caster as Character;
-        const owned = playerCaster.knownCards.includes(cardId)
+        // WS2.1 (spec 32 v3 CONJURE): a Thoughtform is never learned and never
+        // a reward — it can only reach a hand through a `conjure_card` play, so
+        // the conjuring play IS its ownership provenance. The tag lives on the
+        // registry record (`cards.thoughtforms.ts`), not on player state.
+        const thoughtform = (lookupCard(cardId)?.tags ?? []).includes('thoughtform');
+        const owned = thoughtform
+            || playerCaster.knownCards.includes(cardId)
             || (playerCaster.combatRewardCards ?? []).includes(cardId);
         if (!owned) {
             throw new Error(`Card '${cardId}' is not known.`);
@@ -290,7 +296,10 @@ export function executeCard(
     // both sides / apply effect on fire). Per D7, this happens before
     // the card's own `combatEffects` apply.
     let synergyForceResources: CombatResources | null = null;
-    if (card.synergy) {
+    // WS4.2 — a synergy clause carrying a combat-STATE predicate is
+    // Hazard-Pattern-combat vocabulary (its ledger doesn't exist here): the
+    // card engine no-ops it, mirroring how it no-ops `specialMechanics`.
+    if (card.synergy && !card.synergy.statePredicate) {
         const syn = card.synergy;
         const pool = syn.predicate?.on === 'caster' ? workingCaster.effects : workingTarget.effects;
         const matched = syn.predicate

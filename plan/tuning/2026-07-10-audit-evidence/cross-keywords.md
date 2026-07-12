@@ -347,3 +347,16 @@ every word be earned and true.
    29 empty analogue cells from `kb/` (receipts required), or remove the column.
    A cache with one entry is worse than no cache — it teaches agents the discipline
    is optional.
+
+---
+
+## 10. Cross-reference (added 2026-07-11) — control-surface audit map
+
+The WS8.1 control-surface audit table — all 13 Roll-penalty carriers
+mapped to ONE primary threat surface each (telegraph damage / rider /
+stance certainty / rung strength / escalation / roll), with the KW-2
+fold-in duplicates `debuff_fatigue` → `debuff_exhaustion` and
+`debuff_daze` → `debuff_confusion` marked — lives in
+`plan/tuning/2026-07-11-card-library-improvement-plan-detailed.md`,
+WS8.1. Those two fold-in pairs join §2's near-synonym list and §9
+item 2's merge/retire pass for execution under Phase 29 KW-2.

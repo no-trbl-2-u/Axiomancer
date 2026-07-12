@@ -18,7 +18,7 @@ import {
     revealedCurrentStance, resolveRead, getSignatureSkill,
     lookupEffect, READ_DAMAGE_MULT, COLOR_MATCH_DAMAGE_BONUS,
     READ_ADVANTAGE_INTENSITY_BONUS, READ_DISADVANTAGE_DURATION_PENALTY, RESERVE_MAX,
-    RUPTURE_BURST_CAP, riderText,
+    RUPTURE_CAP_FRACTION, recoilXRange, riderText,
     VULNERABLE_MAX_MULT, DISRUPT_DENY_AT,
     // phase 28 — legibility sweep
     projectRuptureBurst, projectIncomingThreat,
@@ -32,7 +32,7 @@ import {
 /** The barrel doesn't re-export the union, so derive it from Card. */
 type CardSpecialMechanic = NonNullable<Card['specialMechanics']>[number];
 import { effectGlyph, GLYPH_COLORS, type StatusGlyph } from '@/components/combat/statusGlyphs';
-import { keywordForEffect, keywordForVerb, keywordForMechanic, keywordGloss } from '@/state/combat/keywords';
+import { keywordForEffect, keywordForVerb, keywordForMechanic, keywordGloss, keywordsInPersistentText, persistentVerbKeyword, systemTermsForCard } from '@/state/combat/keywords';
 
 // ── Stance palette (Heart/Body/Mind/Wild/X) ──────────────────────────────────
 
@@ -60,11 +60,43 @@ const BEFRIEND_COLOR = '#5bbf6a';
 const INERT_COLOR = '#6b6257';
 const ENCHANT_COLOR = '#7fb3a6';
 
+/** Spec 32 v4 §2.1 — a persistent (enchant/disenchant) card's FREE line is a
+ *  TIMED instance of its passive; the engine prints it on `topActionText` as
+ *  'FREE (3 rounds) — <passive> (Rank)'. Reuse THAT line (strip the FREE head,
+ *  the rank tag, and the trailing stop) so the presenter can never contradict
+ *  the engine — the old hardcoded 'PAID only' label was exactly such a lie. */
+function persistentFreeText(card: CombatCard): string {
+    return card.topActionText
+        .replace(/^FREE\s*/, '')
+        .replace(/\s*\((?:Doxa|Lemma|Thesis|Theorem|Axiom|Aporia)\)\s*$/, '')
+        .replace(/\.\s*$/, '');
+}
+
+/** The terse timed-instance chip for the face's ◇ FREE rail — the '(3 rounds)'
+ *  the engine printed, without re-authoring the number mobile-side. */
+function persistentFreeRounds(card: CombatCard): string {
+    const m = card.topActionText.match(/^FREE\s*\(([^)]+)\)/);
+    return m ? m[1] : 'timed';
+}
+
+/** The persistent card's PAYLOAD keyword for the face's ◆ verb slot (owner
+ *  directive 2026-07-12: the face leads with what the passive DOES — MARK,
+ *  POISON — never the bare type word). An authored effect id wins; else the
+ *  verb is recovered from the persistentEffect summary. */
+function persistentPayloadKeyword(sourceCard?: Card): string | null {
+    for (const ce of sourceCard?.combatEffects ?? []) {
+        const kw = keywordForEffect(ce.effectId);
+        if (kw) return kw;
+    }
+    return persistentVerbKeyword(sourceCard?.persistentEffect);
+}
+
 /** The authored FREE (no-die) line in real engine units — riderText over the
- *  card's `free` rider; persistent (enchant/disenchant) cards are PAID-only.
+ *  card's `free` rider; a persistent (enchant/disenchant) card's FREE line is
+ *  its engine-printed timed instance (spec 32 v4: 3 rounds of the passive).
  *  Never a fabricated number. */
 function freeLineText(card: CombatCard, sourceCard?: Card): string {
-    if (card.cardType === 'enchantment' || card.cardType === 'disenchant') return 'PAID only';
+    if (card.cardType === 'enchantment' || card.cardType === 'disenchant') return persistentFreeText(card);
     return sourceCard?.free ? riderText(sourceCard.free) : 'no effect';
 }
 
@@ -113,7 +145,9 @@ function riderPairs(r: CardRider): [string, string][] {
 
 function freeRail(card: CombatCard, sourceCard?: Card): { freeKeyword: string | null; freeValue: string | null } {
     if (card.cardType === 'enchantment' || card.cardType === 'disenchant') {
-        return { freeKeyword: null, freeValue: 'PAID only' };
+        // Spec 32 v4 — the FREE play is a real, timed instance of the passive
+        // (never 'PAID only'): the rail prints the engine's own round count.
+        return { freeKeyword: null, freeValue: persistentFreeRounds(card) };
     }
     const r: CardRider | undefined = sourceCard?.free;
     if (!r) return { freeKeyword: null, freeValue: null };
@@ -149,6 +183,16 @@ export interface CombatEffectChipVM {
     /** General keyword definition for the on-board status tooltip (null if unmapped). */
     gloss: string | null;
 }
+/** WS9 (spec 32 §12 #7) — the fork telegraph of a BRANCH phase: the condition
+ *  plus BOTH outcomes stay visible; `taken` is stamped once the phase starts. */
+export interface CombatIntentBranchVM {
+    /** Human condition text, e.g. "if it carries 3+ afflictions". */
+    condition: string;
+    thenText: string;
+    elseText: string;
+    /** The committed fork — null while the phase is still upcoming. */
+    taken: 'then' | 'else' | null;
+}
 export interface CombatIntentVM {
     type: CombatIntentType; icon: string; label: string; color: string; description: string;
     /** Total HP damage this phase's threat action deals if NOT cleared (0 if none).
@@ -156,7 +200,9 @@ export interface CombatIntentVM {
     damage: number;
     /** True if the threat action also applies a debuff to the player. */
     debuffs: boolean;
-    next: { type: CombatIntentType; icon: string; label: string } | null;
+    /** WS9 — fork info for the CURRENT phase (null on linear phases). */
+    branch: CombatIntentBranchVM | null;
+    next: { type: CombatIntentType; icon: string; label: string; branch: CombatIntentBranchVM | null } | null;
     /** phase 28 — the wall-math readout (`projectIncomingThreat`): what this
      *  telegraphed hit actually deals right now, netted against live guard/
      *  barrier and denial state — the number `damage` above can't show. */
@@ -194,12 +240,41 @@ export interface CombatDieVM {
     /** Spec 32 v3 §5 — a FLOATING die: always spendable (bypasses the one-die
      *  draft), consumed forever when spent, persists across combats. */
     floating?: boolean;
+    /** 2026-07-12 (stale-powered fix) — the drafted die already powered a play
+     *  this turn and a landed status handed it back (the combo refresh). It is
+     *  draggable again, but it never auto-arms another staged card: powering a
+     *  second card takes an explicit re-drop. */
+    refreshed?: boolean;
     /** The board may attach a drag gesture to this die. Computed HERE (not in
      *  the render) so it can never depend on transient drag state — flipping
      *  it mid-drag unmounts the GestureDetector, which on web kills the pan
      *  without onEnd/onFinalize (the stuck-ghost / dead-drop bug). */
     draggable: boolean;
 }
+/**
+ * THE COLOR LAW, UI-side (owner directive 2026-07-12: the board must PREVENT
+ * illegal die placement, not let the play fizzle).
+ *
+ * Rule source — the ENGINE, not this file: `playCombatCard`'s COLOR LAW gate
+ * (axiomancer-mechanics src/Combat/combat.engine.ts ~:1339 — a die powers only
+ * a card of ITS color; WILD is the sole exception; a fate-X play acts wild but
+ * rides its own tap path, never a drag) and `combatDieCanPower`
+ * (src/Combat/combat.dice.ts), which additionally wants the die's live
+ * `state`. The board only holds VMs mid-drag, so this derives the SAME verdict
+ * from the VM's color fields; spent/drafted/X gating stays where it already
+ * lives (CombatDieVM.draggable + the board's pending-die checks). Reserve and
+ * floating dice obey the same law — the engine checks every power source
+ * alike.
+ */
+export function dieCanPowerCardVM(
+    die: { color: string; isX?: boolean },
+    cardStance: string,
+): boolean {
+    if (die.isX || die.color === 'x') return false;
+    if (cardStance === 'wild') return true;   // parity with combatDieCanPower
+    return die.color === 'wild' || die.color === cardStance;
+}
+
 export type CombatCardKind =
     | 'dot' | 'stun' | 'regen' | 'guard' | 'weaken' | 'inert' | 'befriend'
     // ── mechanics 0.34.0 — newly REAL in the HP engine ──
@@ -244,8 +319,8 @@ export interface CombatCardFaceVM {
     freeHeroSub: string | null;
     /** Option A split rail (owner-picked 2026-07-09) — the FREE column's
      *  KEYWORD · value projection of the authored free rider (e.g. TICK · 1).
-     *  null keyword = no free effect / PAID only; the overlay's freePill keeps
-     *  the full riderText prose. */
+     *  null keyword = no free effect (or, on a persistent card, the timed
+     *  '3 rounds' instance); the overlay's freePill keeps the full prose. */
     freeKeyword: string | null;
     freeValue: string | null;
     /** Option A type strip at the card foot — 'BODY · SPELL' (CURSE for
@@ -285,10 +360,15 @@ export interface CombatCardDetailVM {
     diePill: string;
     /** The colour-match rule — rendered ONCE per modal (not per powerLine). */
     colorMatchHint: string;
+    /** 2026-07-12 (owner playtest) — the per-card slice of the systems
+     *  glossary: ONLY the system terms this card's printed lines reference
+     *  (and that no keyword chip already explains). Replaces the KW-7 dump of
+     *  all six entries on every inspect. */
+    systemTerms: { term: string; def: string }[];
 }
 
 /** detailStats' switch builds everything BUT the pill fields; the wrapper appends them. */
-type DetailCore = Omit<CombatCardDetailVM, 'freePill' | 'diePillKeyword' | 'diePill' | 'colorMatchHint'>;
+type DetailCore = Omit<CombatCardDetailVM, 'freePill' | 'diePillKeyword' | 'diePill' | 'colorMatchHint' | 'systemTerms'>;
 
 export interface CombatCardVM {
     uid: string; cardId: string; name: string; stance: string; stanceColor: string;
@@ -315,6 +395,11 @@ export interface CombatCardVM {
     /** Authored flavor prose (`Card.description`) — overlay BOTTOM only, never
      *  on the face (owner directive 2026-07-09: the face is purely functional). */
     flavor: string | null;
+    /** WS7.2 chosen X-cost (`recoil_x`): the ENGINE's live clamp range
+     *  (`recoilXRange` — min = printed floor, max = affordable). Non-null only
+     *  when the card carries an X mechanic; the board shows the stepper off
+     *  this and passes the pick through the play call as `chosenX`. */
+    chooseX: { min: number; max: number } | null;
     /** phase 28 — true for a `reprise`-mechanic card: APPLYing it should prompt
      *  the discard-pile songbook picker instead of going straight to the
      *  engine's default highest-rank auto-pick. */
@@ -390,13 +475,25 @@ function chips(effects: { effectId: string; intensity: number; remainingDuration
     });
 }
 
+/** WS9 — maps a phase's branch payload to the fork telegraph (null if linear). */
+function branchVM(phase: CombatThreatPhase | undefined): CombatIntentBranchVM | null {
+    const b = phase?.branch;
+    if (!b) return null;
+    return {
+        condition: b.conditionText,
+        thenText: b.then.threatAction.description,
+        elseText: b.else.threatAction.description,
+        taken: b.taken ?? null,
+    };
+}
+
 function intentVM(state: CombatEncounterState): CombatIntentVM {
     const cur = currentPhase(state);
     const type = (cur?.intentType ?? 'pass') as CombatIntentType;
     const meta = INTENT_ICONS[type];
     const nextPhase = state.threatPhases[state.currentPhaseIndex + 1];
     const next = nextPhase && !cur?.isFinalPhase
-        ? (() => { const t = (nextPhase.intentType ?? 'pass') as CombatIntentType; const m = INTENT_ICONS[t]; return { type: t, icon: m.icon, label: m.label }; })()
+        ? (() => { const t = (nextPhase.intentType ?? 'pass') as CombatIntentType; const m = INTENT_ICONS[t]; return { type: t, icon: m.icon, label: m.label, branch: branchVM(nextPhase) }; })()
         : null;
     const effects = cur?.threatAction.effects ?? [];
     const damage = effects.reduce((s, e) => s + (e.damage ?? 0), 0);
@@ -404,7 +501,8 @@ function intentVM(state: CombatEncounterState): CombatIntentVM {
     const threat = projectIncomingThreat(state);
     return {
         type, icon: meta.icon, label: cur?.intentLabel ?? meta.label, color: meta.color,
-        description: cur?.threatAction.description ?? '', damage, debuffs, next,
+        description: cur?.threatAction.description ?? '', damage, debuffs,
+        branch: branchVM(cur), next,
         wallMath: {
             projectedDamage: threat.projectedDamage, netDamage: threat.netDamage,
             willDeny: threat.willDeny, guard: threat.guard, barrier: threat.barrier,
@@ -448,6 +546,12 @@ function playerPane(state: CombatEncounterState): CombatPlayerPaneVM {
 function diceVM(state: CombatEncounterState): CombatDieVM[] {
     const drafted = getDraftedDie(state);
     const hasDraft = !!state.draftedDieId;
+    // 2026-07-12 (owner playtest, the stale-powered bug) — a REFRESHED combo
+    // die: the drafted die already powered a play this turn (a landed status
+    // handed it back, still available). It no longer auto-arms the next
+    // staged card — the player re-drags it — so the board needs to tell a
+    // refreshed die from a fresh draft.
+    const alreadyPlayed = (state.spellsPlayedThisTurn ?? 0) > 0;
     // Per-die read pip — only once the phase stance is known (revealed/scouted).
     const stance = revealedCurrentStance(state) as Stance | null;
     const tray: CombatDieVM[] = state.dice.map((d: CombatManaDie) => {
@@ -455,6 +559,7 @@ function diceVM(state: CombatEncounterState): CombatDieVM[] {
         const spent = d.state === 'spent';
         const isX = d.color === 'x';
         const floating = d.floating === true;
+        const refreshed = isDrafted && !spent && !isX && alreadyPlayed;
         return {
             id: d.id, color: d.color, colorHex: STANCE_COLORS[d.color] ?? '#888',
             glyph: DIE_GLYPHS[d.color] ?? '?', stanceLabel: STANCE_LABELS[d.color] ?? '?',
@@ -465,10 +570,12 @@ function diceVM(state: CombatEncounterState): CombatDieVM[] {
             // Spec 32 v3 §5 — the board must know a floating die from a turn die:
             // floats stay draggable after the draft (they bypass the one-die law).
             floating: floating || undefined,
-            // A float drags whenever unspent (post-draft too); a turn die only
-            // before the draft. NEVER a function of live drag state (see the
-            // CombatDieVM.draggable doc note).
-            draggable: floating ? !spent : !hasDraft && !isX && !isDrafted && !spent,
+            refreshed: refreshed || undefined,
+            // A float drags whenever unspent (post-draft too); a REFRESHED
+            // combo die drags again (the re-arm is an explicit drop, never an
+            // auto-attach); a turn die only before the draft. NEVER a function
+            // of live drag state (see the CombatDieVM.draggable doc note).
+            draggable: floating ? !spent : refreshed ? true : !hasDraft && !isX && !isDrafted && !spent,
         };
     });
     // R2 — the Reserve renders in the same tray as a second power source.
@@ -912,10 +1019,18 @@ function cardCalc(card: CombatCard, sourceCard: Card | undefined): CardCalc {
             out.glyph = '⚒'; out.categoryColor = PAYOFF_COLOR;
             break;
         }
+        // 2026-07-12 (owner directive) — the persistent card's verb slot leads
+        // with its PAYLOAD keyword (what the passive DOES: Entropy Tax leads
+        // MARK); the type word stays on the type strip / type chip. An
+        // authored effect id wins; else the verb is recovered from the
+        // persistentEffect summary; the bare type word is the no-payload
+        // fallback only.
         case 'enchant':
-            out.keyword = 'Enchantment'; out.glyph = '◈'; out.categoryColor = ENCHANT_COLOR; break;
+            out.keyword = persistentPayloadKeyword(sourceCard) ?? 'Enchantment';
+            out.glyph = '◈'; out.categoryColor = ENCHANT_COLOR; break;
         case 'disenchant':
-            out.keyword = 'Disenchant'; out.glyph = '⛓'; out.categoryColor = GLYPH_COLORS.control; break;
+            out.keyword = persistentPayloadKeyword(sourceCard) ?? 'Disenchant';
+            out.glyph = '⛓'; out.categoryColor = GLYPH_COLORS.control; break;
         case 'guard':
             out.keyword = 'Guard'; out.glyph = '🛡'; out.categoryColor = GUARD_COLOR; break;
         case 'befriend':
@@ -1013,6 +1128,10 @@ function mechanicHeadline(mech: CardSpecialMechanic | null): MechHeadline | null
             return { keyword: kw ?? null, heroText: `×${mech.times}`, heroSub: 'your last spell', verbLine: 'your last spell resolves again' };
         case 'recoil':
             return { keyword: kw ?? 'Recoil', heroText: `${mech.hp}`, heroSub: 'VITAE cost', verbLine: 'pay VITAE as an unpreventable cost' };
+        case 'recoil_x': {
+            const per = Math.max(1, Math.round(1 / mech.poisonPerX));
+            return { keyword: kw ?? 'Recoil', heroText: `X (min ${mech.min})`, heroSub: `VITAE · POISON per ${per}`, verbLine: `pay X VITAE of your choosing — POISON the foe 1 per ${per} paid` };
+        }
         case 'extend_dots':
             return { keyword: kw ?? 'Prolong', heroText: `+${mech.turns}`, heroSub: 'turns · all your DoTs', verbLine: 'extend every damage-over-time you hold on the foe' };
         case 'boost_all_dots':
@@ -1039,8 +1158,11 @@ function mechanicHeadline(mech: CardSpecialMechanic | null): MechHeadline | null
 const MECH_HEADLINE_PRIORITY: readonly string[] = [
     'peroration', 'sway', 'stagger', 'lock_stance', 'reprise', 'replay_last',
     'omen', 'consume_affliction', 'soul_gain', 'spend_premises', 'premise',
-    'foretell', 'extend_dots', 'convert_dots', 'boost_all_dots', 'recoil',
-    'strip_random_buff', 'echo', 'echo_next_spell', 'rider',
+    // (`conjure_card` stays: cloud phase 29 retired CONJURE off zero library
+    // carriers, but this session's WS2.1 Thoughtform work ships live sandbox
+    // conjure cards — the mechanic is card-local vocabulary, not a ghost.)
+    'foretell', 'extend_dots', 'convert_dots', 'boost_all_dots', 'recoil_x', 'recoil',
+    'conjure_card', 'strip_random_buff', 'echo', 'echo_next_spell', 'rider',
 ];
 
 /** The single mechanic a card should headline (highest-priority headline-able
@@ -1053,7 +1175,7 @@ function headlineMechanic(mechs: readonly CardSpecialMechanic[]): CardSpecialMec
     return null;
 }
 
-function buildDetailKeywords(card: CombatCard, c: CardCalc): { name: string; def: string; minor: boolean }[] {
+function buildDetailKeywords(card: CombatCard, c: CardCalc, sourceCard?: Card): { name: string; def: string; minor: boolean }[] {
     const out: { name: string; def: string; minor: boolean }[] = [];
     const seen = new Set<string>();
     const push = (kw: string | null, minor: boolean) => {
@@ -1064,7 +1186,21 @@ function buildDetailKeywords(card: CombatCard, c: CardCalc): { name: string; def
         out.push({ name: up, def: keywordGloss(kw) ?? '', minor });
     };
     if (c.kind === 'guard') push(keywordForVerb(card.verbClass), false);
-    else push(c.keyword, c.kind === 'inert');
+    // 2026-07-12 (owner playtest, REVERSING the 07-11 type-chip-first order) —
+    // Enchantment/Curse/Disenchant are card TYPES, not payload keywords: the
+    // type already reads on the card frame's type strip, so the inspect panel
+    // carries PAYLOAD keywords ONLY (the face's verb-slot keyword, then any
+    // authored effect ids, then the rest of the persistentEffect summary's
+    // keywords). A persistent card whose passive resolves nothing renders an
+    // empty panel rather than restating its type (KW-5 guarantees every
+    // library card resolves at least one).
+    else if (c.kind === 'enchant' || c.kind === 'disenchant') {
+        // (c.keyword falls back to the bare type word on a payload-less card —
+        // that fallback belongs to the FACE verb slot, never to this panel.)
+        if (c.keyword !== 'Enchantment' && c.keyword !== 'Disenchant') push(c.keyword, false);
+        for (const ce of sourceCard?.combatEffects ?? []) push(keywordForEffect(ce.effectId), false);
+        for (const kw of keywordsInPersistentText(sourceCard?.persistentEffect)) push(kw, false);
+    } else push(c.keyword, c.kind === 'inert');
     // A riposte card also grants Guard — surface it as a secondary keyword.
     if (c.kind === 'riposte' && c.guardAmount) push(keywordForVerb('defend'), false);
     // A rider is "minor" only if the engine still doesn't read it (engineHonestKind null).
@@ -1109,8 +1245,11 @@ export function faceStats(card: CombatCard, sourceCard?: Card): CombatCardFaceVM
         case 'rupture': return { ...base, kind: 'rupture', keyword: 'RUPTURE', heroText: 'detonate', heroSub: 'all afflictions', freeHeroText: free, freeHeroSub: null, verbLine: "consume the foe's afflictions and detonate them", powerRail: c.keyword ?? 'Rupture', readDependent: false, inert: false, guardBase: null };
         case 'reap': return { ...base, kind: 'reap', keyword: 'REAP', heroText: c.reapCost > 0 ? `${c.reapCost} Souls` : 'all Souls', heroSub: c.reapPerSoul > 0 ? `${c.reapPerSoul} per Soul` : 'spend the bank', freeHeroText: free, freeHeroSub: null, verbLine: 'spend Souls for the printed payoff', powerRail: c.keyword ?? 'Reap', readDependent: false, inert: false, guardBase: null };
         case 'forge': { const clause = forgeClause(c.mech) ?? 'shape your dice'; return { ...base, kind: 'forge', keyword: kw, heroText: '', heroSub: clause, freeHeroText: free, freeHeroSub: null, verbLine: clause, powerRail: c.keyword ?? 'Forge', readDependent: false, inert: false, guardBase: null }; }
-        case 'enchant': return { ...base, kind: 'enchant', keyword: 'ENCHANTMENT', heroText: '', heroSub: 'rest of combat', freeHeroText: free, freeHeroSub: null, verbLine: 'a persistent passive on your side', powerRail: c.keyword ?? 'Enchantment', readDependent: false, inert: false, guardBase: null };
-        case 'disenchant': return { ...base, kind: 'disenchant', keyword: 'DISENCHANT', heroText: '', heroSub: 'curse · rest of combat', freeHeroText: free, freeHeroSub: null, verbLine: 'a standing curse attached to the enemy', powerRail: c.keyword ?? 'Disenchant', readDependent: false, inert: false, guardBase: null };
+        // 2026-07-12 — the verb slot is the PAYLOAD keyword (cardCalc), never
+        // the bare type word unless no payload resolves; the type stays on the
+        // type strip (ENCHANTMENT / CURSE) and the type chip.
+        case 'enchant': return { ...base, kind: 'enchant', keyword: kw ?? 'ENCHANTMENT', heroText: '', heroSub: 'rest of combat', freeHeroText: free, freeHeroSub: null, verbLine: 'a persistent passive on your side', powerRail: c.keyword ?? 'Enchantment', readDependent: false, inert: false, guardBase: null };
+        case 'disenchant': return { ...base, kind: 'disenchant', keyword: kw ?? 'DISENCHANT', heroText: '', heroSub: 'curse · rest of combat', freeHeroText: free, freeHeroSub: null, verbLine: 'a standing curse attached to the enemy', powerRail: c.keyword ?? 'Disenchant', readDependent: false, inert: false, guardBase: null };
         case 'mechanic': { const h = mechanicHeadline(c.mech); return { ...base, kind: 'mechanic', keyword: kw, heroText: h?.heroText ?? '', heroSub: h?.heroSub ?? null, freeHeroText: free, freeHeroSub: null, verbLine: h?.verbLine ?? '', powerRail: c.keyword ?? '—', readDependent: false, inert: false, guardBase: null }; }
         case 'inert':
         default: return { ...base, kind: 'inert', keyword: kw ?? 'DEBUFF', heroText: '', heroSub: card.verbClass === 'buff-self' ? 'buff yourself' : 'weakens the foe', freeHeroText: free, freeHeroSub: null, verbLine: card.verbClass === 'buff-self' ? 'buff yourself' : 'weakens the foe', powerRail: c.keyword ?? '—', readDependent: false, inert: true, guardBase: null };
@@ -1136,7 +1275,7 @@ function detailCore(card: CombatCard, sourceCard?: Card): DetailCore {
         ...(typeLabel ? [typeLabel] : []),
         card.effectKind === 'dot' ? 'DOT' : card.effectKind === 'control' ? 'CONTROL' : card.verbClass.toUpperCase(),
     ].join(' · ');
-    const keywords = buildDetailKeywords(card, c);
+    const keywords = buildDetailKeywords(card, c, sourceCard);
     // The authored FREE line (engine riderText) — the strike/chip is dead.
     const free = freeLineText(card, sourceCard);
     const freeLine = `◇ FREE (no die): ${free}.`;
@@ -1162,12 +1301,15 @@ function detailCore(card: CombatCard, sourceCard?: Card): DetailCore {
         case 'barrier': { const b = c.barrierAmt; const adv = Math.max(1, Math.round(b * READ_DAMAGE_MULT.advantage)); const dis = Math.max(1, Math.round(b * READ_DAMAGE_MULT.disadvantage)); return { subtitle: 'Barrier — a stacking shield that soaks damage.', metaChip, outcomeLine: `Gain ${Title} ${b}.`, outcomeStats: [{ label: 'SOAK', value: `${b} (▲${adv} · —${b} · ▼${dis})` }], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: gain Barrier ${b}; ▲ read raises it to ${adv}, ▼ drops it to ${dis}; +${COLOR_MATCH_DAMAGE_BONUS} on a ${STANCE} match.`, readNote: `The read scales the Barrier granted: ▲ ×${READ_DAMAGE_MULT.advantage}, ▼ ×${READ_DAMAGE_MULT.disadvantage}.`, mathLine: `Soak ${b} base × read + ${COLOR_MATCH_DAMAGE_BONUS} on a colour match; barriers stack.`, keywords }; }
         case 'riposte': { const guardLine = c.guardAmount ? ` · Guard ${c.guardAmount}` : ''; const stats = [{ label: 'COUNTER', value: `${c.riposteDmg}` }, { label: 'REDUCE', value: `-${c.riposteReduce}` }]; if (c.guardAmount) stats.push({ label: 'GUARD', value: `${c.guardAmount}` }); return { subtitle: 'Riposte — counter the next hit and blunt it.', metaChip, outcomeLine: `Arm ${Title} — Counter ${c.riposteDmg} · Cut ${c.riposteReduce}${guardLine}.`, outcomeStats: stats, stacksText: null, freeLine, powerLine: `◆ WITH A DIE: arm Riposte — counter ${c.riposteDmg}, reduce ${c.riposteReduce}${c.guardAmount ? `, +Guard ${c.guardAmount}` : ''}; the read scales it.`, readNote: 'The read scales both the counter damage and the reduction.', mathLine: `Counter ${c.riposteDmg} & reduce ${c.riposteReduce}, each × read (+${COLOR_MATCH_DAMAGE_BONUS} counter on a colour match).`, keywords }; }
         case 'siphon': return { subtitle: 'Siphon — heal for part of the harm you cash in.', metaChip, outcomeLine: `${Title} ${c.siphonPct}%.`, outcomeStats: [{ label: 'LIFESTEAL', value: `${c.siphonPct}%` }], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: heal ${c.siphonPct}% of the HP this card's payoff erodes.`, readNote: `The burst is live; the ${c.siphonPct}% rate is exact.`, mathLine: `Heal = ${c.siphonPct}% × (the payoff burst) — the burst is live, so no fixed heal number.`, keywords };
-        case 'rupture': return { subtitle: "Rupture — consume the foe's afflictions and detonate them.", metaChip, outcomeLine: `${Title} · max ${RUPTURE_BURST_CAP}.`, outcomeStats: [{ label: 'BURST', value: 'live total' }, { label: 'CAP', value: `${RUPTURE_BURST_CAP}` }], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: consume ALL the foe's afflictions — burst = their remaining harm (up to ${RUPTURE_BURST_CAP}).`, readNote: 'Stack afflictions first — the burst equals what they still owed, so it has no fixed number until you fire it.', mathLine: `Burst = remaining affliction fuel (capped ${RUPTURE_BURST_CAP}) — live, so no fixed number (real-units-or-no-number).`, keywords };
-        case 'reap': return { subtitle: 'Reap — spend Souls for the printed payoff.', metaChip, outcomeLine: c.reapCost > 0 ? `${Title} ${c.reapCost} Souls.` : `${Title} ALL Souls${c.reapPerSoul > 0 ? ` — ${c.reapPerSoul} per Soul` : ''}.`, outcomeStats: c.reapPerSoul > 0 ? [{ label: 'PER SOUL', value: `${c.reapPerSoul}` }, { label: 'CAP', value: `${RUPTURE_BURST_CAP}` }] : [{ label: 'COST', value: `${c.reapCost} Souls` }], stacksText: null, freeLine, powerLine: c.reapPerSoul > 0 ? `◆ WITH A DIE: spend EVERY Soul — burst ${c.reapPerSoul} per Soul spent (up to ${RUPTURE_BURST_CAP}).` : `◆ WITH A DIE: spend ${c.reapCost} Souls to fire the printed effect (fizzles when underfunded).`, readNote: 'Souls come from expiring or consumed enemy afflictions — fill the bank first.', mathLine: c.reapPerSoul > 0 ? `Burst = ${c.reapPerSoul} × Souls spent (live, capped ${RUPTURE_BURST_CAP}).` : `Costs ${c.reapCost} Souls — the payoff is the printed line, in real units.`, keywords };
+        case 'rupture': { const capPct = Math.round(RUPTURE_CAP_FRACTION * 100); return { subtitle: "Rupture — consume the foe's afflictions and detonate them.", metaChip, outcomeLine: `${Title} · max ${capPct}% of the foe's max HP.`, outcomeStats: [{ label: 'BURST', value: 'live total' }, { label: 'CAP', value: `${capPct}% max HP` }], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: consume ALL the foe's afflictions — burst = their remaining harm (up to ${capPct}% of the foe's max HP).`, readNote: 'Stack afflictions first — the burst equals what they still owed, so it has no fixed number until you fire it.', mathLine: `Burst = remaining affliction fuel (capped at ${capPct}% of the foe's max HP) — live, so no fixed number (real-units-or-no-number).`, keywords }; }
+        case 'reap': return { subtitle: 'Reap — spend Souls for the printed payoff.', metaChip, outcomeLine: c.reapCost > 0 ? `${Title} ${c.reapCost} Souls.` : `${Title} ALL Souls${c.reapPerSoul > 0 ? ` — ${c.reapPerSoul} per Soul` : ''}.`, outcomeStats: c.reapPerSoul > 0 ? [{ label: 'PER SOUL', value: `${c.reapPerSoul}` }, { label: 'CAP', value: 'none' }] : [{ label: 'COST', value: `${c.reapCost} Souls` }], stacksText: null, freeLine, powerLine: c.reapPerSoul > 0 ? `◆ WITH A DIE: spend EVERY Soul — burst ${c.reapPerSoul} per Soul spent, uncapped.` : `◆ WITH A DIE: spend ${c.reapCost} Souls to fire the printed effect (fizzles when underfunded).`, readNote: 'Souls come from expiring or consumed enemy afflictions — fill the bank first.', mathLine: c.reapPerSoul > 0 ? `Burst = ${c.reapPerSoul} × Souls spent (live, UNCAPPED — the emptied bank is the price).` : `Costs ${c.reapCost} Souls — the payoff is the printed line, in real units.`, keywords };
         case 'forge': { const clause = forgeClause(c.mech) ?? 'shape your dice'; return { subtitle: `${Title} — dice are the resource.`, metaChip, outcomeLine: `${clause.charAt(0).toUpperCase()}${clause.slice(1)}.`, outcomeStats: [], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: ${card.bottomActionText}`, readNote: 'Die-forging takes no read — the printed line is exact.', mathLine: 'A die-economy verb — the printed line is the applied effect.', keywords };
         }
-        case 'enchant': return { subtitle: 'Enchantment — a persistent passive, rest of combat.', metaChip, outcomeLine: 'In play for the rest of the combat.', outcomeStats: [], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: ${card.bottomActionText}`, readNote: 'PAID only — the die is the commitment. It leaves the deck cycle once played.', mathLine: 'A standing rule, not a number — its text is the engine text.', keywords };
-        case 'disenchant': return { subtitle: 'Disenchant — a standing curse on the enemy.', metaChip, outcomeLine: 'Attaches to the enemy for the rest of the combat.', outcomeStats: [], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: ${card.bottomActionText}`, readNote: 'PAID only — the die is the commitment. It leaves the deck cycle once played.', mathLine: 'A standing rule, not a number — its text is the engine text.', keywords };
+        // Spec 32 v4 — persistent cards carry BOTH lines: the FREE play is a
+        // timed instance of the passive; the PAID play makes it permanent,
+        // unique in play, and pulls the card out of the deck cycle.
+        case 'enchant': return { subtitle: 'Enchantment — a persistent passive on your side.', metaChip, outcomeLine: `FREE: yours for ${persistentFreeRounds(card)}. PAID: rest of combat.`, outcomeStats: [], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: ${card.bottomActionText}`, readNote: `Played FREE it runs ${persistentFreeRounds(card)} and ticks out; paid with a die it is permanent — unique in play, and it leaves the deck cycle.`, mathLine: 'A standing rule, not a number — its text is the engine text.', keywords };
+        case 'disenchant': return { subtitle: 'Disenchant — a standing curse on the enemy.', metaChip, outcomeLine: `FREE: on the enemy for ${persistentFreeRounds(card)}. PAID: rest of combat.`, outcomeStats: [], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: ${card.bottomActionText}`, readNote: `Played FREE it holds ${persistentFreeRounds(card)} and ticks out; paid with a die it is permanent — unique in play, and it leaves the deck cycle.`, mathLine: 'A standing rule, not a number — its text is the engine text.', keywords };
         case 'mechanic': { const h = mechanicHeadline(c.mech); const val = [h?.heroText, h?.heroSub].filter(Boolean).join(' '); return { subtitle: `${Title} — ${h?.verbLine ?? 'a special mechanic'}.`, metaChip, outcomeLine: val ? `${Title} ${val}.` : `${Title}.`, outcomeStats: h?.heroText ? [{ label: Title.toUpperCase(), value: h.heroText }] : [], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: ${card.bottomActionText}`, readNote: `${Title} takes no read — the printed line is the applied effect.`, mathLine: `${Title}: ${h?.verbLine ?? card.bottomActionText}.`, keywords }; }
         case 'inert':
         default: return { subtitle: `${Title || 'Effect'} — minor right now.`, metaChip, outcomeLine: `${Title || 'This effect'} — minor for now.`, outcomeStats: [], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: ${card.bottomActionText}`, readNote: 'The engine text above is the whole truth for this card.', mathLine: `${Title || 'This effect'} carries no headline number — the printed line is the applied effect.`, keywords };
@@ -1208,7 +1350,14 @@ export function detailStats(card: CombatCard, sourceCard?: Card): CombatCardDeta
     }
     // The colour law (dice-law rework 2026-07-09) — rendered ONCE per modal.
     const colorMatchHint = `Only a ${STANCE} or WILD die can power this card.`;
-    return { ...core, freePill, diePillKeyword, diePill, colorMatchHint };
+    // 2026-07-12 — the per-card systems-glossary slice: scan the card's OWN
+    // printed lines (colorMatchHint excluded — its WILD is the global colour
+    // law, not a card reference) and drop terms a keyword chip already covers.
+    const systemTerms = systemTermsForCard(
+        [card.topActionText, card.bottomActionText, ...(card.dieLines ?? [])].join(' '),
+        core.keywords.map(k => k.name),
+    );
+    return { ...core, freePill, diePillKeyword, diePill, colorMatchHint, systemTerms };
 }
 
 /** Read-scaled hero value at the moment of commit (read known) — StagedCard only.
@@ -1285,6 +1434,8 @@ function handVM(state: CombatEncounterState): CombatCardVM[] {
             detail: detailStats(card, sourceCard),
             read: preview?.read ?? null, colorMatch: preview?.colorMatch ?? false,
             flavor: sourceCard?.description ?? null,
+            // WS7.2 — the engine's live chosen-X clamp range (null = no X mechanic).
+            chooseX: recoilXRange(state, card),
             needsReprisalChoice,
         };
     });

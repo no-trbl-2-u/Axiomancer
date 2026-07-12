@@ -29,10 +29,11 @@ import type { ActiveEffect } from '../../Effects/types';
 import {
     initializeCombatEncounter, rollEncounterDice, playCombatCard, resolveCombatPhase,
     resolveThreatPhase, processBetweenPhases, draftStanceDie, startTurn, endTurn,
-    discardCombatCard, handCards, getFloatingDiceColors, getDraftedDie,
+    discardCombatCard, getFloatingDiceColors, getDraftedDie,
 } from '../combat.engine';
 import { FLOATING_DICE_CAP } from '../combat.dice';
-import { REAP_ALL_BURST_CAP, THREAT_RUNGS } from '../effects';
+import { runHazardCombatAutoEncounter } from '../combat.autoplay';
+import { THREAT_RUNGS } from '../effects';
 import { buildPresetDeck, COMBAT_DECK_PRESET_ORDER } from '../combat.deck-presets';
 import type {
     CombatDieColor, CombatEncounterState, CombatEvent, CombatManaDie, CombatThreatPhase,
@@ -110,14 +111,11 @@ describe('FLOATING DICE — forge, spend-forever, cap, exemptions', () => {
         expect(res.state.dice.some(d => d.id === floated!.dieId && d.floating)).toBe(true);
         expect(res.state.floatingDice?.map(d => d.id)).toEqual([floated!.dieId]);
 
-        // It survives the PHASE boundary with a STABLE id (never rerolled).
-        // Phase 26 (the Turn Law) — a second startTurn within the same phase
-        // is refused, so "the next turn" is reached via a real phase
-        // transition (resolveThreatPhase -> processBetweenPhases), then the
-        // next phase's own startTurn — not a same-phase endTurn/startTurn cycle.
+        // It survives the turn boundary with a STABLE id (never rerolled).
+        // Gate 0 (round-turn law): the next legal tray arrives only after the
+        // threat phase resolves, so cross the boundary the legal way.
         state = endTurn(res.state).state;
         state = resolveThreatPhase(state).state;
-        expect(state.phase).toBe('phase-play');
         state = startTurn(state).state;
         expect(state.dice.some(d => d.id === floated!.dieId && d.floating && d.state === 'available')).toBe(true);
 
@@ -221,40 +219,32 @@ describe('STAGGER rungs — full removal denies the turn; BACKFIRE drips per run
     const ZENO = 'zenos-half-step'; // STAGGER 1
 
     it('stripping every rung DENIES the telegraph and BACKFIRE drips per denied rung', () => {
-        // Phase 26 (the Turn Law) — one dice-turn per threat phase, so two
-        // STAGGER plays inside ONE phase can no longer come from two
-        // farmed endTurn/startTurn cycles (`resolveCombatPhase`'s
-        // `ensureDraftForCard` used to force exactly that). The LEGAL way
-        // to power two bottom plays within one turn is the "bigger turn"
-        // mechanic: draft one die, BANK a second unpicked die into Reserve,
-        // then power the second play off the banked die — both dice come
-        // from the SAME single dice-turn.
+        // 0.2 rolls BODY dice — zeno's-half-step is a body spell and the color
+        // law (2026-07-09) demands a matching (or wild) powering die. No seed:
+        // a seed installs its own rng stream and the mock would never apply.
+        mockSequentialRng(0.2);
         const enemy = makeEnemy(300, 'mind', [ae('debuff_backfire', 1, 3)]);
-        const initial = initializeCombatEncounter(makePlayer([ZENO]), enemy, [ZENO, ZENO, ZENO, ZENO, ZENO]);
-        let state = rollEncounterDice(initial).state;
-        state = setDice(state, ['body', 'body', 'x']);
-        state = draftStanceDie(state, state.dice[0].id, { bankUnpicked: true }).state;
-        expect(state.reserve?.length).toBe(1);
-
-        const hand1 = state.hand.find(h => h.cardId === ZENO)!;
-        const play1 = playCombatCard(state, { uid: hand1.uid }, true);
-        state = play1.state;
-
-        const banked = state.reserve![0];
-        const hand2 = state.hand.find(h => h.cardId === ZENO && h.uid !== hand1.uid)!;
-        const play2 = playCombatCard(state, { uid: hand2.uid }, true, banked.id);
-        state = play2.state;
-
-        const resolved = resolveThreatPhase(state);
-        const allEvents = [...play1.events, ...play2.events, ...resolved.events];
-        const staggers = allEvents.filter(e => e.kind === 'staggered');
+        let opened = rollEncounterDice(
+            initializeCombatEncounter(makePlayer([ZENO]), enemy, [ZENO, ZENO, ZENO, ZENO, ZENO]),
+        ).state;
+        // Gate 0 (round-turn law): the second ZENO can no longer ride a free
+        // tray re-roll — arm a FLOATING body die so both plays are legal
+        // inside the phase's ONE turn (the multi-source turn is the intent).
+        const float: CombatManaDie = { id: 'float-qa-stagger', color: 'body', state: 'available', temporary: false, floating: true };
+        opened = { ...opened, dice: [...opened.dice, float], floatingDice: [...(opened.floatingDice ?? []), float] };
+        // Two STAGGER 1 plays = THREAT_RUNGS (2) → the action is denied.
+        const res = resolveCombatPhase(opened, [
+            { cardId: ZENO, useBottom: true },
+            { cardId: ZENO, useBottom: true },
+        ]);
+        const staggers = res.events.filter(e => e.kind === 'staggered');
         expect(staggers.length).toBe(2);
-        expect(allEvents.some(e => e.kind === 'threat-fired')).toBe(false);
-        const resolvedPhase = allEvents.find(e => e.kind === 'phase-resolved') as { mark: string };
-        expect(resolvedPhase.mark).toBe('clear');
-        expect(resolved.state.player.health).toBe(200); // the denied blow never landed
+        expect(res.events.some(e => e.kind === 'threat-fired')).toBe(false);
+        const resolved = res.events.find(e => e.kind === 'phase-resolved') as { mark: string };
+        expect(resolved.mark).toBe('clear');
+        expect(res.state.player.health).toBe(200); // the denied blow never landed
         // BACKFIRE i1 × THREAT_RUNGS(2) denied rungs = 2 HP inward.
-        const backfired = allEvents.find(e => e.kind === 'backfired') as { amount: number; rungs: number } | undefined;
+        const backfired = res.events.find(e => e.kind === 'backfired') as { amount: number; rungs: number } | undefined;
         expect(backfired).toBeDefined();
         expect(backfired!.rungs).toBe(THREAT_RUNGS);
         expect(backfired!.amount).toBe(THREAT_RUNGS);
@@ -348,8 +338,11 @@ describe('OMEN — declare with the powering die; resolve at the phase boundary'
 
 describe('SOULS — expiry yields, REAP spends, REAP-all bursts under the cap', () => {
     it('an enemy affliction instance EXPIRING yields exactly 1 Soul', () => {
+        // WS3.3: MARK is battle-long now (`calendarExpiry: false`) — the
+        // calendar-expiry witness is BLEED, whose calendar still counts down
+        // (only its TICK moved to the damage-instance clock).
         const base = initializeCombatEncounter(makePlayer([]), makeEnemy(300, 'mind'), undefined, 7);
-        const seeded = { ...base, enemy: { ...base.enemy, effects: [ae('debuff_mark', 2, 1)] } };
+        const seeded = { ...base, enemy: { ...base.enemy, effects: [ae('debuff_bleed', 2, 1)] } };
         const res = processBetweenPhases(seeded);
         const gained = res.events.find(e => e.kind === 'soul-gained') as
             { amount: number; total: number; reason: string } | undefined;
@@ -357,6 +350,15 @@ describe('SOULS — expiry yields, REAP spends, REAP-all bursts under the cap', 
         expect(gained!.reason).toBe('expiry');
         expect(gained!.amount).toBe(1); // per INSTANCE, not per stack
         expect(res.state.souls).toBe(1);
+    });
+
+    it('a battle-long MARK never expires at the boundary — no calendar Soul from it (WS3.3)', () => {
+        const base = initializeCombatEncounter(makePlayer([]), makeEnemy(300, 'mind'), undefined, 7);
+        const seeded = { ...base, enemy: { ...base.enemy, effects: [ae('debuff_mark', 2, 1)] } };
+        const res = processBetweenPhases(seeded);
+        expect(res.events.some(e => e.kind === 'soul-gained')).toBe(false);
+        const mark = res.state.enemy.effects.find(e => e.effectId === 'debuff_mark');
+        expect(mark).toMatchObject({ intensity: 2, remainingDuration: 1 }); // held, not counted down
     });
 
     it('REAP fizzles underfunded; funded, it spends the Souls and fires (draw + KINDLE)', () => {
@@ -382,7 +384,7 @@ describe('SOULS — expiry yields, REAP spends, REAP-all bursts under the cap', 
         expect(drawn!.cards.length).toBe(2);
     });
 
-    it('REAP-all spends EVERY Soul and the burst respects REAP_ALL_BURST_CAP', () => {
+    it('REAP-all spends EVERY Soul and the burst is UNCAPPED (WS7.1, spec 32 §12 item 5)', () => {
         mockSequentialRng(0.05);
         const REAP = 'the-reaping'; // REAP all: 4 per Soul (v3 rework)
         let state = openAndDraft(makePlayer([REAP]), makeEnemy(600, 'body'), [REAP, REAP, REAP], 'body');
@@ -391,9 +393,12 @@ describe('SOULS — expiry yields, REAP spends, REAP-all bursts under the cap', 
         const res = playFromHand(state, REAP);
         const reaped = res.events.find(e => e.kind === 'reaped') as { soulsSpent: number; amount: number };
         expect(reaped.soulsSpent).toBe(60);
-        expect(reaped.amount).toBe(REAP_ALL_BURST_CAP); // 4×60 = 240 → capped at 200
+        // 4 × 60 = 240 lands whole (neutral read: body die vs body foe) — the
+        // ALL-spender's price is the emptied bank, not a cap (the old 200 flat
+        // cap would have swallowed 40 of it).
+        expect(reaped.amount).toBe(240);
         expect(res.state.souls).toBe(0);
-        expect(hpBefore - res.state.enemy.health).toBe(REAP_ALL_BURST_CAP);
+        expect(hpBefore - res.state.enemy.health).toBe(240);
     });
 });
 
@@ -656,39 +661,48 @@ describe('persistent hooks — venom-and-vein, mirror-of-guilt, crumbling-resolv
 
 // ── BLEED decay + MARK amplification (T1 / A3) ───────────────────────────────
 
-describe('BLEED — front-loaded, decays 1 intensity per tick (engine round)', () => {
-    it('one between-phases round: full tick, then the intensity falls', () => {
+describe('BLEED — damage-instance clocked (WS3.3), decays 1 intensity per tick', () => {
+    it('the round boundary leaves it alone: no tick, no decay, only the calendar counts', () => {
         const base = initializeCombatEncounter(makePlayer([]), makeEnemy(300, 'mind'), undefined, 7);
         const seeded = { ...base, enemy: { ...base.enemy, effects: [ae('debuff_bleed', 2, 3)] } };
         const res = processBetweenPhases(seeded);
-        expect(300 - res.state.enemy.health).toBe(6); // floor(3 × 2), the front-loaded tick
+        expect(300 - res.state.enemy.health).toBe(0); // event clock — no boundary tick
         const bleed = res.state.enemy.effects.find(e => e.effectId === 'debuff_bleed');
-        expect(bleed?.intensity).toBe(1);             // decayed 1 per tick
-        expect(bleed?.remainingDuration).toBe(2);
+        expect(bleed?.intensity).toBe(2);             // no tick → no decay
+        expect(bleed?.remainingDuration).toBe(2);     // the calendar still counts down
     });
 
-    it('the instance washes out entirely once the intensity is spent', () => {
+    it('a real damage instance (THORNS reflect) ticks it, then the intensity falls', () => {
+        mockSequentialRng(0.5);
         const base = initializeCombatEncounter(makePlayer([]), makeEnemy(300, 'mind'), undefined, 7);
-        const seeded = { ...base, enemy: { ...base.enemy, effects: [ae('debuff_bleed', 1, 4)] } };
-        const res = processBetweenPhases(seeded);
-        expect(300 - res.state.enemy.health).toBe(3);
-        expect(res.state.enemy.effects.some(e => e.effectId === 'debuff_bleed')).toBe(false);
+        const seeded = {
+            ...base,
+            enemy: { ...base.enemy, effects: [ae('debuff_bleed', 2, 3)] },
+            player: { ...base.player, effects: [ae('buff_thorns', 2, 3)] }, // reflect 1 × 2
+        };
+        const res = resolveThreatPhase(seeded);
+        const tick = res.events.find(e => e.kind === 'dot-tick' && e.effectId === 'debuff_bleed') as { amount: number } | undefined;
+        expect(tick?.amount).toBe(6); // floor(3 × 2), the front-loaded tick
+        const bleed = res.state.enemy.effects.find(e => e.effectId === 'debuff_bleed');
+        expect(bleed?.intensity).toBe(1); // decayed 1 per tick
     });
 });
 
 describe('MARK — +1 per stack on EVERY DoT tick on the bearer (ratified A3)', () => {
-    it('a marked foe bleeds harder from the same poison', () => {
+    it('a marked foe bleeds harder from the same round-clocked DoT', () => {
+        // WS3.3: poison left the round clocks — kindling ember (round-start,
+        // dpr 1) is the boundary witness; MARK amplifies its tick the same.
         const base = initializeCombatEncounter(makePlayer([]), makeEnemy(300, 'mind'), undefined, 7);
-        const plain = processBetweenPhases({ ...base, enemy: { ...base.enemy, effects: [ae('debuff_poison', 1, 4)] } });
-        expect(300 - plain.state.enemy.health).toBe(2); // v3 poison i1 → 2
+        const plain = processBetweenPhases({ ...base, enemy: { ...base.enemy, effects: [ae('debuff_kindling_ember', 1, 4)] } });
+        expect(300 - plain.state.enemy.health).toBe(1); // ember i1 → 1
 
         const marked = processBetweenPhases({
             ...base,
-            enemy: { ...base.enemy, effects: [ae('debuff_poison', 1, 4), ae('debuff_mark', 2, 3)] },
+            enemy: { ...base.enemy, effects: [ae('debuff_kindling_ember', 1, 4), ae('debuff_mark', 2, 3)] },
         });
-        expect(300 - marked.state.enemy.health).toBe(4); // 2 + 2 mark stacks
-        const tick = marked.events.find(e => e.kind === 'dot-tick' && e.effectId === 'debuff_poison') as { amount: number };
-        expect(tick.amount).toBe(4); // the emitted tick is the real amplified number
+        expect(300 - marked.state.enemy.health).toBe(3); // 1 + 2 mark stacks
+        const tick = marked.events.find(e => e.kind === 'dot-tick' && e.effectId === 'debuff_kindling_ember') as { amount: number };
+        expect(tick.amount).toBe(3); // the emitted tick is the real amplified number
     });
 });
 
@@ -710,6 +724,11 @@ describe('preset ignition — every themed deck reaches its engine within a few 
         refrain: e => e.kind === 'echoed' || e.kind === 'reprised',
     };
 
+    // Gate 0 (2026-07-11 round-turn law) — the old harness fed every hand card
+    // to `resolveCombatPhase`, which quietly re-rolled a tray per card (an
+    // illegal farm). The smoke now drives the LEGAL auto player (one tray per
+    // phase, paid plays + FREE-top drain) over an 8-phase window.
+    // pre-Phase-27 interim — re-derived in the honest re-baseline.
     it.each(COMBAT_DECK_PRESET_ORDER.map(id => [id] as const))(
         "preset '%s' ignites its theme engine in a seeded auto-encounter",
         (presetId) => {
@@ -718,35 +737,18 @@ describe('preset ignition — every themed deck reaches its engine within a few 
             const enemy = deepClone(LittleBelle);
             // Enough HP that slower engines (Souls-from-expiry) get their runway.
             enemy.health = 150; enemy.maxHealth = 150;
-            let state = initializeCombatEncounter(player, enemy, deck, 21);
-            state = rollEncounterDice(state).state;
-
-            let phases = 0;
-            // Phase 26 (the Turn Law) — one legal dice-turn per phase means
-            // `resolveCombatPhase`'s whole-hand play batch now only reliably
-            // lands its FIRST card each phase (the rest have no die left to
-            // power a bottom play); the theme signal needs more phases to
-            // surface than the old multi-turn-per-phase farm allowed. Budget
-            // widened to match the encounter's own round<=10 health bound.
-            while (state.phase === 'phase-play' && !state.finalOutcome && phases < 10) {
-                phases++;
-                const plays = handCards(state)
-                    .filter(c => c.card.verbClass !== 'retreat')
-                    .map(c => ({ uid: c.uid, cardId: c.card.id, useBottom: true }));
-                state = resolveCombatPhase(state, plays).state;
-                if (state.mercyChoiceActive) break;
-            }
+            const r = runHazardCombatAutoEncounter(player, enemy, {
+                seed: 21, policy: 'status', maxTurns: 8,
+            });
 
             const signal = SIGNALS[presetId];
             expect(signal, `no signal registered for preset '${presetId}'`).toBeDefined();
             expect(
-                state.log.some(signal),
-                `preset '${presetId}' never ignited its theme engine within ${phases} phases`,
+                r.state.log.some(signal),
+                `preset '${presetId}' never ignited its theme engine within ${r.phaseCount} phases`,
             ).toBe(true);
-            // And the encounter stayed healthy (no stalemate runaway) — one
-            // round per resolved phase, so the bound tracks the loop's own
-            // phase budget above (10) plus the opening round.
-            expect(state.round).toBeLessThanOrEqual(11);
+            // And the encounter stayed healthy (no stalemate runaway).
+            expect(r.state.round).toBeLessThanOrEqual(10);
         },
         30_000,
     );

@@ -52,15 +52,17 @@ describe('projectCombatOutcome — the consolidated status kill-path readout', (
     });
 
     it('a decaying bleed that outpaces a low-HP foe is lethal in N rounds', () => {
-        // v3 bleed: 3/round, decays 1 intensity per tick. i3 → ticks 9, 6, 3.
+        // v3 bleed: 3/stack, decays 1 intensity per tick; WS3.3 puts it on
+        // the damage-instance clock (2 expected ticks/round). i3 → ticks
+        // 9, 6, 3 — all pending, decay-aware (NOT 9 × ticks).
         const enemy = makeEnemy(15, [ae('debuff_bleed', 3, 5)]);
         const state = initializeCombatEncounter(makePlayer([]), enemy, undefined, 7);
         const projection = projectCombatOutcome(state);
 
         expect(projection.pendingDot).toBe(getPendingDotTotal(state.enemy, state.round).total);
-        expect(projection.pendingDot).toBe(18); // 9 + 6 + 3 (decay-aware, NOT 9×5)
-        // cumulative: 9, 15 >= 15 -> lethal on round 2
-        expect(projection.roundsToKill).toBe(2);
+        expect(projection.pendingDot).toBe(18); // 9 + 6 + 3
+        // 2 expected ticks in round 1: 9 + 6 = 15 >= 15 -> lethal on round 1.
+        expect(projection.roundsToKill).toBe(1);
         expect(projection.isLethalInFlight).toBe(true);
     });
 
@@ -81,12 +83,14 @@ describe('projectCombatOutcome — the consolidated status kill-path readout', (
         const state = initializeCombatEncounter(makePlayer([]), enemy, undefined, 7);
         const projection = projectCombatOutcome(state);
 
-        // Same fixture as the RUPTURE e2e suite: poison ramps + Hemorrhage —
-        // 6,6,9,9 = 30; bleed i1 decays after one tick of 3. pending = 33.
-        expect(projection.pendingDot).toBe(33);
+        // Same fixture as the RUPTURE e2e suite (WS3.3 clock fuel): poison
+        // ramps + Hemorrhage on the card-played clock — per-round dprs
+        // 6,6,9,9 × 2 expected ticks = 60; bleed i1 decays after one tick of
+        // 3. pending = 63.
+        expect(projection.pendingDot).toBe(63);
         expect(projection.pendingDot).toBe(getPendingDotTotal(state.enemy, state.round).total);
-        // cumulative per round: 9, 15, 24, 33 — crosses 25 on round 4.
-        expect(projection.roundsToKill).toBe(4);
+        // cumulative per round: 15, 27, ... — crosses 25 on round 2.
+        expect(projection.roundsToKill).toBe(2);
         expect(projection.isLethalInFlight).toBe(true);
     });
 
@@ -108,7 +112,7 @@ describe('projectCombatOutcome — the consolidated status kill-path readout', (
         expect(rupture.cardId).toBe(RUPTURE_CARD);
         expect(rupture.ready).toBe(true);
         expect(rupture.amount).toBe(projectRupture(state));
-        expect(rupture.amount).toBe(33);
+        expect(rupture.amount).toBe(63); // WS3.3 clock fuel — see the RUPTURE e2e pin
 
         const reapCard = handCards(state).find(h => h.card.id === REAP_CARD)!.card;
         const reap = projection.finishers.find(f => f.mechanic === 'reap')!;

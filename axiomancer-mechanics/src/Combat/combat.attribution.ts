@@ -18,12 +18,11 @@ import type {
  * life (damagePerRound × intensity × remainingDuration); `damage` is the HP the
  * play dealt right now (the strike). Either can be 0.
  *
- * Phase 26 (turn-law-and-honest-baseline audit) — `enemyHealthRemaining` is
- * the enemy's HP immediately BEFORE this damage instance (or before this DoT
- * lands, for the projected case). Both the forecast and the direct hit are
- * clamped to it, since neither can ever cost the enemy more HP than it had
- * left at that moment — without this a long DoT chain could log e.g. 740
- * projected damage against a 40-max-HP enemy.
+ * Overkill clamp (Gate 0 §2, 2026-07-10): when `targetHpBefore` — the target's
+ * HP at the moment of the record, BEFORE this record's damage — is given, the
+ * record is clamped at damage actually applicable: the strike claims at most
+ * that HP, and the DoT projection at most what remains after the strike. The
+ * pre-clamp ledger attributed 740 projected DoT against a 40-max-HP enemy.
  */
 export function recordAttribution(
     attribution: Record<string, CombatAttributionRow>,
@@ -31,22 +30,22 @@ export function recordAttribution(
     cardName: string,
     landed: LandedEffect | null,
     damage: number,
-    enemyHealthRemaining: number,
+    targetHpBefore?: number,
 ): Record<string, CombatAttributionRow> {
     const prev = attribution[cardId] ?? { cardId, name: cardName, dotDamage: 0, damageDealt: 0, phases: 0 };
     const dot = landed?.effect.payload.damageOverTime;
-    const rawProjected = dot
+    const projectedRaw = dot
         ? dot.damagePerRound * Math.max(1, landed!.active.intensity) * Math.max(1, landed!.active.remainingDuration)
         : 0;
-    const ceiling = Math.max(0, enemyHealthRemaining);
-    const projected = Math.min(rawProjected, ceiling);
-    const clampedDamage = Math.min(Math.max(0, damage), ceiling);
+    const cap = targetHpBefore !== undefined ? Math.max(0, targetHpBefore) : undefined;
+    const applied = cap !== undefined ? Math.min(damage, cap) : damage;
+    const projected = cap !== undefined ? Math.min(projectedRaw, cap - applied) : projectedRaw;
     return {
         ...attribution,
         [cardId]: {
             ...prev,
             dotDamage: prev.dotDamage + projected,
-            damageDealt: prev.damageDealt + clampedDamage,
+            damageDealt: prev.damageDealt + applied,
             phases: prev.phases + 1,
         },
     };

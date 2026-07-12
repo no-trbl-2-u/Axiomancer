@@ -154,6 +154,9 @@ export interface CardPlay {
     useBottom: boolean;
     /** Die spent to power the bottom action (ignored for top actions). */
     dieId?: string;
+    /** Chosen X for a chosen-X mechanic (`recoil_x`, WS7.2); the engine clamps
+     *  it to [min, affordable]. Absent → the printed minimum. */
+    chosenX?: number;
 }
 
 // ---------------------------------------------------------------------------
@@ -172,7 +175,6 @@ export type SignatureSkillKind =
     | 'control'        // apply a control debuff to the enemy (hinders its turn)
     | 'dot'            // guaranteed DoT application at boosted intensity
     | 'mercy'          // disarming hit that softens a low-HP foe toward mercy (heart)
-    | 'strike'         // big DoT + refreshes the drafted die for a chain (body)
     | 'conclude'       // finisher: damage = sum of (intensity × per-stack weight) across all enemy effects (body)
     | 'draw';          // draw cards + refund Conviction (mind economy)
 
@@ -225,6 +227,10 @@ export interface CombatThreatEffect {
     duration?: number;
     /** Self-heal the enemy performs (escalation). */
     enemyHeal?: number;
+    /** WS9 (spec 32 §12 #7) — the enemy sheds up to this many of its OWN
+     *  afflictions when the action fires (spec 29 guardrail: a fraction,
+     *  never the last one). Written only by the threat-branch resolver. */
+    enemyCleanse?: number;
 }
 
 export interface CombatThreatAction {
@@ -246,6 +252,41 @@ export type CombatIntentType =
     | 'block'      // a defensive / damage-reduction effect on the enemy
     | 'pass'       // no effects (damage 0, no effectId)
     | 'combo';     // multiple types at once
+
+/**
+ * WS9 (spec 32 §12 item 7, Ratified 2026-07-11) — a threat branch's authored
+ * condition. CLOSED union, authored data only, zero RNG: the fork commits from
+ * observable state at phase START, so the telegraph can show both outcomes AND
+ * the reason the taken one was taken.
+ */
+export type ThreatBranchCondition =
+    | { kind: 'bearer-afflictions-gte'; n: number }   // the ENEMY carries >= n afflictions
+    | { kind: 'prior-threat-fully-blocked' };         // `lastThreatFullyBlocked` ledger
+
+/** One fully-resolved fork of a branch phase (the telegraph shows both). */
+export interface CombatThreatBranchOutcome {
+    enemyStance: Stance;
+    threatAction: CombatThreatAction;
+    intentType?: CombatIntentType;
+    stanceHint?: string;
+}
+
+/**
+ * WS9 — the branch payload carried on a resolved `CombatThreatPhase`. While the
+ * phase is upcoming (`taken` undefined) the phase's top-level face is the ELSE
+ * (baseline) fork and the telegraph surfaces `conditionText` + both outcomes;
+ * at phase START the engine evaluates the condition, copies the taken fork
+ * onto the face, and stamps `taken`.
+ */
+export interface CombatThreatBranch {
+    condition: ThreatBranchCondition;
+    /** Human condition text, e.g. "if it carries 3+ afflictions". */
+    conditionText: string;
+    then: CombatThreatBranchOutcome;
+    else: CombatThreatBranchOutcome;
+    /** The fork committed at phase START (undefined while still upcoming). */
+    taken?: 'then' | 'else';
+}
 
 export interface CombatThreatPhase {
     index: number;                            // 1-indexed for display
@@ -270,6 +311,11 @@ export interface CombatThreatPhase {
      *  advancing into this one. Undefined = never locked (every phase
      *  authored before this epic behaves exactly as before). */
     unlockAfterRound?: number;
+
+    /** WS9 (spec 32 §12 #7) — conditional fork: condition + BOTH outcomes,
+     *  committed at phase START (`commitThreatBranch`). Undefined on every
+     *  linear phase — byte-identical to before. */
+    branch?: CombatThreatBranch;
 }
 
 export type CombatThreatMark = 'clear' | 'overwhelmed' | 'pending';
@@ -340,6 +386,9 @@ export type CombatEncounterPhase =
 export type CombatEvent =
     | { kind: 'dice-rolled'; dice: CombatManaDie[] }
     | { kind: 'turn-dice-rolled'; turn: number; dice: CombatManaDie[] }
+    // Gate 0 (2026-07-10 round-turn law) — a second `startTurn` inside one
+    // threat phase was refused (the state is untouched; the tray stays as-is).
+    | { kind: 'turn-law-blocked'; turn: number; phaseIndex: number }
     | { kind: 'die-drafted'; dieId: string; color: CombatDieColor; read: CombatReadResult }
     | { kind: 'conviction-gained'; amount: number; total: number; reason: 'unpicked-die' | 'read-win' | 'effect' }
     | { kind: 'stance-revealed'; phaseIndex: number; stance: Stance }
@@ -381,7 +430,11 @@ export type CombatEvent =
     | { kind: 'threshold-fired'; cardId: string; color: 'heart' | 'body' | 'mind'; count: number; riderText: string }
     | { kind: 'die-bonus-fired'; cardId: string; riderText: string }
     | { kind: 'fate-powered'; cardId: string; dieId: string; recoil: number; riderText: string }
-    | { kind: 'pips-cashed'; cardId: string; pips: number; bonus: 'intensity' | 'guard'; amount: number }
+    // WS4.1 — `bonus: 'mark'` = spend_all_pips `markPer` (amount = MARK stacks
+    // landed); `pips-overflowed` = grant_pip pips that found no room and fired
+    // the printed overflow rider instead (Slag Runoff class).
+    | { kind: 'pips-cashed'; cardId: string; pips: number; bonus: 'intensity' | 'guard' | 'mark'; amount: number }
+    | { kind: 'pips-overflowed'; cardId: string; pips: number; riderText: string }
     | { kind: 'react-detonated'; cardId: string; amount: number; consumed: string[] }
     | { kind: 'die-forged'; dieId: string; color: CombatDieColor; destination: 'reserve' | 'conviction' }
     | { kind: 'die-converted'; dieId: string; color: CombatDieColor }
@@ -420,6 +473,10 @@ export type CombatEvent =
     | { kind: 'recoil-paid'; cardId: string; amount: number }
     | { kind: 'phase-resolved'; phaseIndex: number; mark: 'clear' | 'overwhelmed' }
     | { kind: 'threat-fired'; phaseIndex: number; description: string; effects: CombatThreatEffect[] }
+    // WS9 (spec 32 §12 #7) — a branch phase committed its fork at phase START.
+    | { kind: 'threat-branch'; phaseIndex: number; conditionText: string; taken: 'then' | 'else' }
+    // WS9 — the enemy's reactive cleanse shed some of its own afflictions.
+    | { kind: 'threat-cleansed'; phaseIndex: number; effectIds: string[] }
     | { kind: 'hand-drawn'; cards: string[] }
     | { kind: 'cards-milled'; cards: string[] }
     | { kind: 'mercy-opened'; message: string }
@@ -427,8 +484,6 @@ export type CombatEvent =
     // THREAT_ENCHANT_CURSE_EVERY_ROUNDS the enemy grows a new passive
     // strength or lays a fresh curse on the player.
     | { kind: 'threat-clock-enchant'; target: 'enemy' | 'player'; effectId: string; round: number }
-    // Phase 26 (the Turn Law) — startTurn refused a second dice tray this phase.
-    | { kind: 'turn-law-blocked'; phaseIndex: number }
     | { kind: 'combat-ended'; outcome: CombatOutcome };
 
 // ---------------------------------------------------------------------------
@@ -444,16 +499,17 @@ export interface CombatEncounterState {
     dice: CombatManaDie[];
     /** The drafted stance die id for this turn (null before draft / between turns). */
     draftedDieId: string | null;
-    /** The Turn Law (phase 26) — true once `startTurn` has produced a dice
-     *  tray for the CURRENT threat phase; blocks a second `startTurn` call
-     *  until `processBetweenPhases` opens the next phase and clears it. Does
-     *  NOT gate card plays — floating dice and Reserve dice remain a
-     *  separate, legal power source within the one drafted turn. Optional
-     *  for back-compat with state literals (absent = false = pre-law
-     *  behavior). */
-    turnTakenThisPhase?: boolean;
     /** Turn counter within the encounter (drives die ids + display). */
     turn: number;
+    /** Gate 0 (2026-07-10 round-turn law) — true once this threat phase's ONE
+     *  legal tray roll has happened (`startTurn` stamps it; the phase
+     *  boundary in `resolveThreatPhase`/`processBetweenPhases` re-arms it).
+     *  A second `startTurn` in the same phase is refused with a
+     *  `turn-law-blocked` event. The law caps TRAY ROLLS, not card plays —
+     *  Reserve and floating dice still power extra plays within the turn.
+     *  Optional for back-compat with state literals (absent = false — the
+     *  migration default). */
+    turnTakenThisPhase?: boolean;
     /** Conviction (◆) bank — funds Signature Skills (Spec 26b §4). */
     conviction: number;
     /** Hazard GUARD — a transient shield (HP) granted by defense cards that
@@ -568,6 +624,19 @@ export interface CombatEncounterState {
     spellsPlayedThisTurn?: number;
     /** Spec 32 v3 T10 — the last PAID spell resolved this combat (ouroboros). */
     lastSpellCardId?: string | null;
+    /** Spec 32 §12 #4 (combat ledgers) — RECOIL HP paid this turn (`recoil`
+     *  mechanic + fate recoil). Reset with `spellsPlayedThisTurn` at turn start. */
+    recoilPaidThisTurn?: number;
+    /** Spec 32 §12 #4 — HP the enemy's threat dealt the player this turn
+     *  (post-soak budget); rolls into `enemyDamageLastRound` between phases. */
+    enemyDamageThisTurn?: number;
+    /** Spec 32 §12 #4 — the prior round's `enemyDamageThisTurn`. The enemy hits
+     *  BETWEEN player turns, so this is the value a card played this turn reads. */
+    enemyDamageLastRound?: number;
+    /** Spec 32 §12 #4 — the prior threat's damage was FULLY prevented (every
+     *  budgeted hit soaked to 0 by riposte/guard/barrier). Persists until the
+     *  next threat resolves (WS9 `prior-threat-fully-blocked` branch fuel). */
+    lastThreatFullyBlocked?: boolean;
     /** Spec 32 v3 — uids of CONJURED one-use Thoughtforms (removed on play). */
     conjuredUids?: string[];
     threatPhases: CombatThreatPhase[];     // enemy's authored / generated threat sequence

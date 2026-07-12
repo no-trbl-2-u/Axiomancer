@@ -383,23 +383,45 @@ export function formatPlaytestReport(report: PlaytestReport, opts?: { perCard?: 
             for (const usage of Object.values(cell.cardUsage)) {
                 const agg = totals.get(usage.cardId) ?? {
                     cardId: usage.cardId, plays: 0, bottomPlays: 0, topPlays: 0, statusLands: 0, discards: 0,
+                    fizzles: 0, lineContribution: { free: 0, paid: 0 }, unplayedAtPhaseEnd: 0,
                 };
                 agg.plays += usage.plays;
                 agg.bottomPlays += usage.bottomPlays;
                 agg.topPlays += usage.topPlays;
                 agg.statusLands += usage.statusLands;
                 agg.discards += usage.discards;
+                // WS1.1 line telemetry — optional on the row type, always
+                // present on these aggregates (?? 0 tolerates older shapes).
+                agg.fizzles = (agg.fizzles ?? 0) + (usage.fizzles ?? 0);
+                agg.unplayedAtPhaseEnd = (agg.unplayedAtPhaseEnd ?? 0) + (usage.unplayedAtPhaseEnd ?? 0);
+                agg.lineContribution!.free += usage.lineContribution?.free ?? 0;
+                agg.lineContribution!.paid += usage.lineContribution?.paid ?? 0;
                 totals.set(usage.cardId, agg);
             }
         }
         const rows = [...totals.values()].sort((a, b) => b.plays - a.plays || a.cardId.localeCompare(b.cardId));
         lines.push('');
         lines.push('Per-card usage (all cells):');
-        lines.push(`  ${'card'.padEnd(28)}${'plays'.padStart(6)}${'bottom'.padStart(7)}${'top'.padStart(6)}${'statusLands'.padStart(12)}${'discards'.padStart(9)}`);
+        lines.push('(free%/paid% = share of plays per line; fizz% = fizzled attempts / (plays+fizzles);');
+        lines.push(' unpl% = hand entries discarded un-played at phase end / (plays+unplayed);');
+        lines.push(' hpF/hpP = HP swing (immediate + projected DoT) attributed to the FREE/PAID line)');
+        lines.push(
+            `  ${'card'.padEnd(28)}${'plays'.padStart(6)}${'bottom'.padStart(7)}${'top'.padStart(6)}${'statusLands'.padStart(12)}${'discards'.padStart(9)}`
+            + `${'free%'.padStart(7)}${'paid%'.padStart(7)}${'fizz%'.padStart(7)}${'unpl%'.padStart(7)}${'hpF'.padStart(8)}${'hpP'.padStart(8)}`,
+        );
         for (const row of rows) {
+            const fizzles = row.fizzles ?? 0;
+            const unplayed = row.unplayedAtPhaseEnd ?? 0;
+            const freePct = row.plays > 0 ? row.topPlays / row.plays : 0;
+            const paidPct = row.plays > 0 ? row.bottomPlays / row.plays : 0;
+            const fizzPct = row.plays + fizzles > 0 ? fizzles / (row.plays + fizzles) : 0;
+            const unplPct = row.plays + unplayed > 0 ? unplayed / (row.plays + unplayed) : 0;
             lines.push(
                 `  ${row.cardId.padEnd(28)}${String(row.plays).padStart(6)}${String(row.bottomPlays).padStart(7)}`
-                + `${String(row.topPlays).padStart(6)}${String(row.statusLands).padStart(12)}${String(row.discards).padStart(9)}`,
+                + `${String(row.topPlays).padStart(6)}${String(row.statusLands).padStart(12)}${String(row.discards).padStart(9)}`
+                + `${pct(freePct).padStart(7)}${pct(paidPct).padStart(7)}${pct(fizzPct).padStart(7)}${pct(unplPct).padStart(7)}`
+                + `${String(Math.round(row.lineContribution?.free ?? 0)).padStart(8)}`
+                + `${String(Math.round(row.lineContribution?.paid ?? 0)).padStart(8)}`,
             );
         }
     }

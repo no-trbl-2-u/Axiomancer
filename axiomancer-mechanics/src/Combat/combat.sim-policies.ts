@@ -23,6 +23,7 @@
  */
 
 import { getCardById } from '../Cards/cards.library';
+import { MAX_EFFECT_INTENSITY } from '../Game/game-mechanics.constants';
 import type {
     CombatCard, CombatEncounterState, SignatureSkill, SignatureSkillKind,
 } from './combat.encounter.types';
@@ -64,6 +65,12 @@ export interface CombatSimPolicy {
      * behavior `greedy`/`blind` rely on. Only `chaos` uses this (random pick).
      */
     rankSignature?(state: CombatEncounterState, signature: SignatureSkill, rng: () => number): number;
+    /**
+     * OPTIONAL (WS7.2 chosen X-costs): pick the X for a chosen-X mechanic
+     * (`recoil_x`), given the engine's own clamp range (`recoilXRange`). When
+     * absent the sim plays the printed minimum. Only `chaos` consumes `rng`.
+     */
+    chooseX?(state: CombatEncounterState, card: CombatCard, range: { min: number; max: number }, rng: () => number): number;
 }
 
 // ─── Score bands ─────────────────────────────────────────────────────────────
@@ -135,12 +142,26 @@ function greedyRankCard(s: CombatEncounterState, card: CombatCard): number {
     return score;
 }
 
+/**
+ * WS7.2 — greedy's chosen X: the max AFFORDABLE-USEFUL X. Affordable is the
+ * engine's clamp (the passed range); useful stops where extra X buys nothing
+ * (poison intensity is capped at MAX_EFFECT_INTENSITY).
+ */
+function greedyChooseX(card: CombatCard, range: { min: number; max: number }): number {
+    const sourceCard = getCardById(card.id);
+    const mech = (sourceCard?.specialMechanics ?? []).find(m => m.kind === 'recoil_x') as
+        { kind: 'recoil_x'; min: number; poisonPerX: number } | undefined;
+    if (!mech || mech.poisonPerX <= 0) return range.max;
+    const usefulMax = Math.ceil(MAX_EFFECT_INTENSITY / mech.poisonPerX);
+    return Math.max(range.min, Math.min(range.max, usefulMax));
+}
+
 /** The legacy signature preference list (order-insensitive membership check). */
 const LEGACY_SIGNATURE_KINDS: readonly SignatureSkillKind[] =
-    Object.freeze(['dot', 'strike', 'control', 'mercy', 'conclude']);
+    Object.freeze(['dot', 'control', 'mercy', 'conclude']);
 
 const ALL_SIGNATURE_KINDS: readonly SignatureSkillKind[] = Object.freeze([
-    'scout', 'reroll', 'sustain', 'control', 'dot', 'mercy', 'strike', 'conclude', 'draw',
+    'scout', 'reroll', 'sustain', 'control', 'dot', 'mercy', 'conclude', 'draw',
 ]);
 
 /** The scripted witness roster. */
@@ -155,6 +176,7 @@ export const COMBAT_SIM_POLICIES: Record<CombatSimPolicyId, CombatSimPolicy> = {
         signatureKinds: LEGACY_SIGNATURE_KINDS,
         convictionThreshold: 7,
         mercyChoice: 'spare',
+        chooseX: (_s, card, range) => greedyChooseX(card, range),
     },
     blind: {
         id: 'blind',
@@ -166,6 +188,7 @@ export const COMBAT_SIM_POLICIES: Record<CombatSimPolicyId, CombatSimPolicy> = {
         signatureKinds: LEGACY_SIGNATURE_KINDS,
         convictionThreshold: 7,
         mercyChoice: 'spare',
+        chooseX: (_s, card, range) => greedyChooseX(card, range),
     },
     'dot-weaver': {
         id: 'dot-weaver',
@@ -186,7 +209,7 @@ export const COMBAT_SIM_POLICIES: Record<CombatSimPolicyId, CombatSimPolicy> = {
             if (card.effectKind !== 'none') return BAND_EFFECT + card.bottomDamagePreview;
             return 100 + card.bottomDamagePreview;
         },
-        signatureKinds: ['dot', 'strike', 'conclude'],
+        signatureKinds: ['dot', 'conclude'],
         convictionThreshold: 7,
         mercyChoice: 'exploit',
     },
@@ -215,7 +238,7 @@ export const COMBAT_SIM_POLICIES: Record<CombatSimPolicyId, CombatSimPolicy> = {
         blind: false,
         preferredFocus: 'damage',
         rankCard: (_s, card) => card.bottomDamagePreview,
-        signatureKinds: ['strike', 'conclude'],
+        signatureKinds: ['conclude'],
         convictionThreshold: 7,
         mercyChoice: 'exploit',
     },
@@ -237,6 +260,8 @@ export const COMBAT_SIM_POLICIES: Record<CombatSimPolicyId, CombatSimPolicy> = {
         signatureKinds: ['sustain', 'dot', 'control'],
         convictionThreshold: 9,
         mercyChoice: 'spare',
+        // The outlast temperament commits the least blood the card allows.
+        chooseX: (_s, _card, range) => range.min,
     },
     chaos: {
         id: 'chaos',
@@ -249,6 +274,8 @@ export const COMBAT_SIM_POLICIES: Record<CombatSimPolicyId, CombatSimPolicy> = {
         convictionThreshold: 7,
         mercyChoice: 'exploit',
         rankSignature: (_s, _sig, rng) => rng(),
+        // Seeded-uniform X across the whole legal range (inclusive).
+        chooseX: (_s, _card, range, rng) => range.min + Math.floor(rng() * (range.max - range.min + 1)),
     },
     'mercy-seeker': {
         id: 'mercy-seeker',

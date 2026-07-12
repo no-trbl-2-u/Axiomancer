@@ -12,8 +12,11 @@ import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react-native';
 import { afterEach, describe, expect, it, jest } from '@jest/globals';
 
-import { initializeCombatEncounter, rollEncounterDice, draftStanceDie } from '@mechanics';
-import type { CombatEncounterState, CombatDieColor } from '@mechanics';
+import {
+    initializeCombatEncounter, rollEncounterDice, draftStanceDie,
+    registerSandboxCards, clearSandboxCards,
+} from '@mechanics';
+import type { Card, CombatEncounterState, CombatDieColor } from '@mechanics';
 import { CombatBoard, type DragController } from '@/components/combat/encounter/CombatBoard';
 import { buildCombatViewModel } from '@/state/presenters/combat-encounter.engine';
 import { createMockEncounterEnemy } from '@/state/mocks/combat.mock';
@@ -70,8 +73,87 @@ describe('CombatBoard — REPRISE songbook interception', () => {
         fireEvent.press(screen.getByTestId(`combat-apply-${uid}`));
 
         expect(cbs.onReprisalNeeded).toHaveBeenCalledTimes(1);
-        expect(cbs.onReprisalNeeded).toHaveBeenCalledWith(uid, null, true);
+        expect(cbs.onReprisalNeeded).toHaveBeenCalledWith(uid, null, true, undefined);
         expect(cbs.onApply).not.toHaveBeenCalled();
+    });
+
+    it('holds the deferred play (nothing consumed): a second APPLY re-defers with identical args, so a panel cancel restores the pre-play state', () => {
+        const { store } = withAllProviders(<></>);
+        const player = buildPlayer(store);
+        let s = openAndDraft(player, CARDS, 'mind');
+        s = { ...s, discard: ['straw-mans-jab'] };
+        const vm = buildCombatViewModel(s);
+        const uid = vm.hand.find(c => c.cardId === 'second-thoughts')!.uid;
+
+        const cbs = boardCallbacks();
+        const { tree } = withAllProviders(
+            <CombatBoard vm={vm} drag={noopDrag()} stagedUids={[uid]} {...cbs} />,
+            { store },
+        );
+        render(tree);
+
+        // First APPLY defers; the board must NOT clear its staging bookkeeping
+        // (the panel's backdrop can cancel). A second APPLY therefore defers
+        // again, byte-identical — proof the play was held, not half-committed.
+        fireEvent.press(screen.getByTestId(`combat-apply-${uid}`));
+        fireEvent.press(screen.getByTestId(`combat-apply-${uid}`));
+
+        expect(cbs.onReprisalNeeded).toHaveBeenCalledTimes(2);
+        expect(cbs.onReprisalNeeded).toHaveBeenNthCalledWith(1, uid, null, true, undefined);
+        expect(cbs.onReprisalNeeded).toHaveBeenNthCalledWith(2, uid, null, true, undefined);
+        expect(cbs.onApply).not.toHaveBeenCalled();
+    });
+
+    it('threads the chosen X through the deferral (a deferred X-card must not fall back to min X)', () => {
+        // No library card carries both `reprise` and `recoil_x` today — author
+        // a sandbox one so the combination stays covered as sets grow.
+        const xReprise: Card = {
+            id: 'test-x-reprise',
+            theme: 'echo',
+            name: 'Test X Reprise',
+            category: 'paradox',
+            philosophicalAspect: 'mind',
+            description: 'Board-test fixture: REPRISE + chosen-X on one card.',
+            tier: 1, rank: 2, cardType: 'spell',
+            targetType: 'enemy',
+            free: {},
+            specialMechanics: [
+                { kind: 'reprise', count: 1 },
+                { kind: 'recoil_x', min: 3, poisonPerX: 1 / 3 },
+            ],
+            addedIn: '2026-07-12',
+            tags: ['test'],
+        };
+        clearSandboxCards();
+        registerSandboxCards([xReprise]);
+        try {
+            const { store } = withAllProviders(<></>);
+            const player = { ...buildPlayer(store), knownCards: [...CARDS, xReprise.id] };
+            let s = openAndDraft(player, [xReprise.id, 'slippery-slope'], 'mind');
+            s = { ...s, discard: ['straw-mans-jab'] };
+            const vm = buildCombatViewModel(s);
+            const card = vm.hand.find(c => c.cardId === xReprise.id)!;
+            expect(card.chooseX).not.toBeNull(); // the stepper is live
+            const uid = card.uid;
+
+            const cbs = boardCallbacks();
+            const { tree } = withAllProviders(
+                <CombatBoard vm={vm} drag={noopDrag()} stagedUids={[uid]} {...cbs} />,
+                { store },
+            );
+            render(tree);
+
+            // Step X up from the printed min, then APPLY: the deferral must
+            // carry the stepped X, not silently drop it to the min.
+            fireEvent.press(screen.getByTestId(`combat-choose-x-plus-${uid}`));
+            fireEvent.press(screen.getByTestId(`combat-apply-${uid}`));
+
+            expect(cbs.onReprisalNeeded).toHaveBeenCalledTimes(1);
+            expect(cbs.onReprisalNeeded).toHaveBeenCalledWith(uid, null, true, card.chooseX!.min + 1);
+            expect(cbs.onApply).not.toHaveBeenCalled();
+        } finally {
+            clearSandboxCards();
+        }
     });
 
     it('applies directly when the discard pile is empty (nothing to choose)', () => {
@@ -97,7 +179,10 @@ describe('CombatBoard — REPRISE songbook interception', () => {
     it('applies directly for a non-reprise card even with a non-empty discard', () => {
         const { store } = withAllProviders(<></>);
         const player = buildPlayer(store);
-        let s = openAndDraft(player, CARDS, 'mind');
+        // slippery-slope is philosophicalAspect 'body' — the drafted die must
+        // match it: THE COLOR LAW gate (2026-07-12) demotes an off-color
+        // drafted die to the FREE action instead of routing a fizzle.
+        let s = openAndDraft(player, CARDS, 'body');
         s = { ...s, discard: ['straw-mans-jab'] };
         const vm = buildCombatViewModel(s);
         const uid = vm.hand.find(c => c.cardId === 'slippery-slope')!.uid;

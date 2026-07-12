@@ -67,14 +67,35 @@ const bestAutoSignature = (s: CombatEncounterState): string | null => {
     for (const id of s.signatures) {
         const sig = getSignatureSkill(id);
         if (!sig || s.conviction < sig.cost) continue;
-        if (['dot', 'strike', 'control'].includes(sig.kind)) return id;
+        if (['dot', 'control'].includes(sig.kind)) return id;
     }
     return null;
 };
 
+/**
+ * Plays one threat phase under the ROUND-TURN LAW (Gate 0, 2026-07-10): ONE
+ * tray roll per phase — draft once, ride the drafted die's combo refresh for
+ * the paid plays, drain the leftover hand through the FREE tops, then end the
+ * turn. The safety counter is kept but never binds on legal play (the old
+ * `endTurn → startTurn` loop is gone).
+ */
 const playAutoPhase = (state: CombatEncounterState, policy: HazardAutoPolicyId, phaseTurnLimit: number): CombatEncounterState => {
     let s = state;
     let safety = 0;
+
+    // The ONE legal tray roll + stance draft for this phase.
+    if (s.dice.length === 0 && s.draftedDieId === null && !s.turnTakenThisPhase) {
+        s = startTurn(s).state;
+        if (s.phase !== 'phase-play') return s;
+    }
+    if (s.draftedDieId === null && s.dice.length > 0) {
+        const want = bestAutoCard(s, policy);
+        const enemyStance = revealedCurrentStance(s);
+        const pick = chooseDraft(s.dice, want?.card.stance ?? 'wild', enemyStance);
+        if (pick) s = draftStanceDie(s, pick).state;
+    }
+
+    // Paid plays off the drafted die while the combo refresh keeps it alive.
     while (s.phase === 'phase-play' && !s.finalOutcome && !s.mercyChoiceActive && safety < phaseTurnLimit * 6) {
         safety++;
         if (s.conviction >= 6) {
@@ -84,56 +105,27 @@ const playAutoPhase = (state: CombatEncounterState, policy: HazardAutoPolicyId, 
                 if (cast.state !== s) { s = cast.state; if (s.finalOutcome) break; continue; }
             }
         }
-        let drafted = getDraftedDie(s);
-        if (!drafted || drafted.state !== 'available' || drafted.color === 'x') {
-            if (s.draftedDieId !== null) s = endTurn(s).state;
-            if (s.dice.length === 0) {
-                // Phase 26 (the Turn Law) — one dice-turn per threat phase.
-                // This is the live mobile map auto-runner, so this fix
-                // applies to real encounters too. Once already taken, no
-                // more BOTTOM plays are legal this phase, but FREE (dieless)
-                // top plays stay legal all turn — spend down the rest of the
-                // hand via its free line instead of giving up on the phase.
-                if (s.turnTakenThisPhase) {
-                    const topCard = handCards(s)[0];
-                    if (!topCard) break;
-                    s = playCombatCard(s, { uid: topCard.uid }, false).state;
-                    if (s.finalOutcome || s.mercyChoiceActive) break;
-                    continue;
-                }
-                s = startTurn(s).state;
-                if (s.phase !== 'phase-play') break;
-            }
-            const want = bestAutoCard(s, policy);
-            const enemyStance = revealedCurrentStance(s);
-            const pick = chooseDraft(s.dice, want?.card.stance ?? 'wild', enemyStance);
-            if (!pick) break;
-            s = draftStanceDie(s, pick).state;
-            drafted = getDraftedDie(s);
-            if (!drafted || drafted.state !== 'available' || drafted.color === 'x') {
-                const topCard = handCards(s)[0];
-                if (topCard) s = playCombatCard(s, { uid: topCard.uid }, false).state;
-                s = endTurn(s).state;
-                continue;
-            }
-        }
+        const drafted = getDraftedDie(s);
+        if (!drafted || drafted.state !== 'available' || drafted.color === 'x') break;
         const want = bestAutoCard(s, policy, drafted.color);
-        if (!want) {
-            const topCard = handCards(s)[0];
-            if (topCard) s = playCombatCard(s, { uid: topCard.uid }, false).state;
-            s = endTurn(s).state;
-            continue;
-        }
+        if (!want) break;
         const res = playCombatCard(s, { uid: want.uid }, true);
         if (res.events.some(e => e.kind === 'effect-fizzled')) {
             s = playCombatCard(s, { uid: want.uid }, false).state;
             continue;
         }
         s = res.state;
-        if (s.finalOutcome || s.mercyChoiceActive) break;
-        const after = getDraftedDie(s);
-        if (!after || after.state !== 'available') s = endTurn(s).state;
     }
+
+    // Wind-down: drain the leftover hand via the FREE tops, then end the turn.
+    let drain = 0;
+    while (s.phase === 'phase-play' && !s.finalOutcome && !s.mercyChoiceActive && drain < 30) {
+        drain++;
+        const topCard = handCards(s).find(c => c.card.verbClass !== 'retreat');
+        if (!topCard) break;
+        s = playCombatCard(s, { uid: topCard.uid }, false).state;
+    }
+    if (s.phase === 'phase-play' && !s.finalOutcome && s.draftedDieId !== null) s = endTurn(s).state;
     return s;
 };
 

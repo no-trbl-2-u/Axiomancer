@@ -9,6 +9,7 @@ import { ActiveEffect, Effect } from '../Effects/types';
 import { effectsLibrary } from '../Effects/effects.library';
 import {
     getActiveEffectModifiers,
+    getActiveDotTotal,
     getEffectiveStats,
     canAct,
 } from './effect-modifiers';
@@ -110,28 +111,34 @@ describe('getActiveEffectModifiers', () => {
         expect(mods.statMultBonus.get('body')).toBeCloseTo(0.75, 4);
     });
 
-    it('aggregates DoT damage by tick phase (Q4)', () => {
-        // spec 32 v3: poison ticks at start, bleed ticks at end. Intensity 1 each
-        // keeps combined intensity (2) below the Hemorrhage combo's gate (3), so
-        // this isolates the phase-split aggregation from live combo amplification.
+    it('aggregates ROUND-CLOCK DoT damage by tick phase (Q4) — event clocks stay off the boundary', () => {
+        // WS3.3: poison/bleed moved to event clocks — the round aggregator
+        // must carry ZERO for them. The round-clocked card-local species
+        // (kindling ember: start; nettle sting: end) keep the phase split.
         const mods = getActiveEffectModifiers([
-            ae('debuff_poison', 1),  // v3 poison: 2 × 1 = 2 at start
-            ae('debuff_bleed',  1),  // v3 bleed: 3 × 1 = 3 at end
+            ae('debuff_kindling_ember', 2),  // 1 × 2 = 2 at start
+            ae('debuff_nettle_sting',   1),  // 2 × 1 = 2 at end
+            ae('debuff_poison', 1),          // card-played clock → 0 here
+            ae('debuff_bleed',  1),          // damage-instance clock → 0 here
         ]);
         expect(mods.dotStart).toBe(2);
-        expect(mods.dotEnd).toBe(3);
+        expect(mods.dotEnd).toBe(2);
     });
 
     it('amplifies DoT live when an amplify_damage combo is present (Phase 156)', () => {
         // poison (int 2) + bleed (int 1): combined intensity 3 ≥ 3 → Hemorrhage
-        // fires, ×1.5 on poison's start DoT: floor(2 × 2 × 1.5) = 6. Bleed
-        // (end phase, no combo target) stays at v3's 3 × 1 = 3.
-        const mods = getActiveEffectModifiers([
+        // fires, ×1.5 on poison. WS3.3: both ride EVENT clocks now, so the
+        // amplified figure surfaces via `getActiveDotTotal` (the per-tick
+        // surface) — the round-boundary aggregate stays 0 for both phases.
+        const effects = [
             ae('debuff_poison', 2),
             ae('debuff_bleed',  1),
-        ]);
-        expect(mods.dotStart).toBe(6);
-        expect(mods.dotEnd).toBe(3);
+        ];
+        const mods = getActiveEffectModifiers(effects);
+        expect(mods.dotStart).toBe(0);
+        expect(mods.dotEnd).toBe(0);
+        // floor(2 × 2 × 1.5) = 6 (poison, Hemorrhage) + 3 × 1 = 3 (bleed).
+        expect(getActiveDotTotal(effects).total).toBe(9);
     });
 
     it('separates regen from drain (Q6)', () => {
@@ -257,20 +264,26 @@ describe('stat lookup helpers honor effective stats and defenseDelta', () => {
 
 describe('DoT and drain HP changes', () => {
     it('processDamageOverTime applies start-phase damage only', () => {
-        const t = fixture([ae('debuff_poison', 2)]);
+        // WS3.3: poison left the round clocks — the round-clocked witness is
+        // kindling ember (dpr 1, start phase).
+        const t = fixture([ae('debuff_kindling_ember', 2)]);
         const before = t.health;
         const r = processDamageOverTime(t, 'start');
-        expect(r.damage).toBe(4); // canonical poison: 2 × 2 = 4 (patient ramp identity)
-        expect(r.target.health).toBe(before - 4);
+        expect(r.damage).toBe(2); // ember: 1 × 2 = 2
+        expect(r.target.health).toBe(before - 2);
     });
 
-    it('processDamageOverTime separates start from end phases', () => {
-        const t = fixture([ae('debuff_poison'), ae('debuff_bleed')]);
-        // v3 canonical set: poison starts (2), bleed ends (3 — the burst window)
+    it('processDamageOverTime separates start from end phases (event clocks excluded)', () => {
+        // Round-clocked species: ember starts (1), nettle ends (2). The
+        // event-clocked poison/bleed never tick at either boundary (WS3.3).
+        const t = fixture([
+            ae('debuff_kindling_ember'), ae('debuff_nettle_sting'),
+            ae('debuff_poison'), ae('debuff_bleed'),
+        ]);
         const startTick = processDamageOverTime(t, 'start');
-        expect(startTick.damage).toBe(2);
+        expect(startTick.damage).toBe(1);
         const endTick = processDamageOverTime(startTick.target, 'end');
-        expect(endTick.damage).toBe(3);
+        expect(endTick.damage).toBe(2);
     });
 
     it('applyDrain damages bearer based on negative regen', () => {
@@ -293,8 +306,10 @@ describe('DoT and drain HP changes', () => {
 
 describe('processRoundStartEffects orchestrator', () => {
     it('applies regen, drain and start-DoT in one call', () => {
-        // canonical poison (DoT 2 start) + test_disease (DoT 2 start, drain 1)
-        const t = { ...fixture([ae('debuff_poison'), ae('test_disease')]), health: 30 };
+        // kindling ember (DoT 1 start, ×2) + test_disease (DoT 2 start,
+        // drain 1 — the retired disease shape as a fixture). WS3.3: poison is
+        // event-clocked and would carry 0 at the round boundary.
+        const t = { ...fixture([ae('debuff_kindling_ember', 2), ae('test_disease')]), health: 30 };
         const r = processRoundStartEffects(t);
         // start-DoT total: 2 + 2 = 4; drain: 1
         expect(r.dotDamage).toBe(4);
@@ -304,14 +319,21 @@ describe('processRoundStartEffects orchestrator', () => {
 });
 
 describe('processRoundEndEffects orchestrator', () => {
-    it('applies end-DoT then ticks duration (v3 bleed decays 1 intensity per tick)', () => {
-        const t = { ...fixture([ae('debuff_bleed', 2, 2)]), health: 20 };
+    it('applies end-DoT then ticks duration; event-clocked BLEED stays off the boundary (WS3.3)', () => {
+        // nettle sting is the round-end witness (dpr 2). BLEED rides the
+        // damage-instance clock now: it neither ticks nor decays at round end
+        // (its per-tick decay is exercised via `fireDotTrigger`); its
+        // CALENDAR still counts down.
+        const t = { ...fixture([ae('debuff_nettle_sting', 2, 2), ae('debuff_bleed', 2, 2)]), health: 20 };
         const r = processRoundEndEffects(t);
-        expect(r.dotDamage).toBe(6); // v3 bleed: floor(3 × 2) = 6 front-loaded
-        expect(r.target.health).toBe(14); // 20 - 6
-        // Intensity decayed 2 → 1 (spec 32 v3 BLEED), duration ticked 2 → 1
-        expect(r.target.effects[0].intensity).toBe(1);
-        expect(r.target.effects[0].remainingDuration).toBe(1);
+        expect(r.dotDamage).toBe(4); // nettle: floor(2 × 2) = 4; bleed: 0
+        expect(r.target.health).toBe(16); // 20 - 4
+        const nettle = r.target.effects.find(e => e.effectId === 'debuff_nettle_sting')!;
+        expect(nettle.intensity).toBe(2); // decaysPerTick: false
+        expect(nettle.remainingDuration).toBe(1);
+        const bleed = r.target.effects.find(e => e.effectId === 'debuff_bleed')!;
+        expect(bleed.intensity).toBe(2); // no round-end tick → no decay
+        expect(bleed.remainingDuration).toBe(1); // calendar unchanged by WS3.3
     });
 });
 
@@ -319,18 +341,18 @@ describe('applyCleanse / applyDispel (Q10)', () => {
     it('Tier 2 cleanse strips Tier 1 + 2 debuffs', () => {
         const t = fixture([
             { effectId: 'debuff_poison', intensity: 1, remainingDuration: 3, appliedAt: 1, tier: 2 },
-            { effectId: 'debuff_backfire_acute', intensity: 1, remainingDuration: 2, appliedAt: 1, tier: 3 },
+            { effectId: 'debuff_backfire', intensity: 1, remainingDuration: 2, appliedAt: 1, tier: 3 },
         ]);
         const r = applyCleanse(t, 2);
         expect(r.removed.map(e => e.effectId)).toEqual(['debuff_poison']);
         // Tier 3 survives
-        expect(r.target.effects.some(e => e.effectId === 'debuff_backfire_acute')).toBe(true);
+        expect(r.target.effects.some(e => e.effectId === 'debuff_backfire')).toBe(true);
     });
 
     it('Tier 3 cleanse strips everything', () => {
         const t = fixture([
             { effectId: 'debuff_poison',  intensity: 1, remainingDuration: 3, appliedAt: 1, tier: 2 },
-            { effectId: 'debuff_backfire_acute', intensity: 1, remainingDuration: 2, appliedAt: 1, tier: 3 },
+            { effectId: 'debuff_backfire', intensity: 1, remainingDuration: 2, appliedAt: 1, tier: 3 },
         ]);
         const r = applyCleanse(t, 3);
         expect(r.removed).toHaveLength(2);

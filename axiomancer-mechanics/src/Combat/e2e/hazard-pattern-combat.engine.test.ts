@@ -332,11 +332,14 @@ describe('Spec 26b §1 — status-combo loop', () => {
 describe('Spec 25 §4.5 — between-phases processing', () => {
     it('fires enemy DoT ticks (erodes HP), ticks effect durations, draws a fresh hand', () => {
         mockSequentialRng(0.05);
-        let state = initializeCombatEncounter(makePlayer([DOT_BODY]), makeEnemy(80, 'mind'), [DOT_BODY], 5);
+        // WS3.3: poison/bleed ride EVENT clocks now — the round-boundary
+        // witness here is Nettle Cloak's Nettle Sting (round-end round clock).
+        const NETTLE = 'nettle-cloak';
+        let state = initializeCombatEncounter(makePlayer([NETTLE]), makeEnemy(80, 'mind'), [NETTLE], 5);
         state = rollEncounterDice(state).state;
         state = setDice(state, ['body', 'heart']);
-        state = draftAndPlay(state, DOT_BODY).state;
-        const dotBefore = state.enemy.effects.find(e => e.effectId === 'debuff_poison');
+        state = draftAndPlay(state, NETTLE).state;
+        const dotBefore = state.enemy.effects.find(e => e.effectId === 'debuff_nettle_sting');
         expect(dotBefore).toBeDefined();
         const hpBefore = state.enemy.health;
         const durBefore = dotBefore!.remainingDuration;
@@ -345,7 +348,7 @@ describe('Spec 25 §4.5 — between-phases processing', () => {
         const after = bp.state;
         expect(after.enemy.health).toBeLessThan(hpBefore);
         expect(bp.events.some(e => e.kind === 'dot-tick' && e.target === 'enemy')).toBe(true);
-        const dotAfter = after.enemy.effects.find(e => e.effectId === 'debuff_poison');
+        const dotAfter = after.enemy.effects.find(e => e.effectId === 'debuff_nettle_sting');
         if (dotAfter) expect(dotAfter.remainingDuration).toBeLessThan(durBefore);
         expect(after.hand.length).toBe(COMBAT_HAND_SIZE);
         // A new phase resets the draft so the next turn rolls fresh.
@@ -739,6 +742,21 @@ describe('0.33.0 — soft control weakens & denies the enemy threat', () => {
             type: 'debuff', category: 'control', duration: 3, stacking: 'intensity', tier: 2,
             payload: { rollModifier: -4 },
         },
+        {
+            id: 'test_ctrl_knockdown', name: 'test knockdown', description: 'test control -3',
+            type: 'debuff', category: 'control', duration: 3, stacking: 'intensity', tier: 2,
+            payload: { rollModifier: -3 },
+        },
+        {
+            id: 'test_ctrl_slow', name: 'test slow', description: 'test control -2',
+            type: 'debuff', category: 'control', duration: 3, stacking: 'intensity', tier: 2,
+            payload: { rollModifier: -2 },
+        },
+        {
+            id: 'test_exhaustion', name: 'test exhaustion', description: 'test threat-damage -25%',
+            type: 'debuff', category: 'stat', duration: 3, stacking: 'intensity', tier: 2,
+            payload: { outgoingThreatDamageMulPct: -25 },
+        },
     ];
     beforeAll(() => { for (const e of CONTROL_FIXTURES) effectsLibrary.registry.set(e.id, e); });
     afterAll(() => { for (const e of CONTROL_FIXTURES) effectsLibrary.registry.delete(e.id); });
@@ -765,15 +783,30 @@ describe('0.33.0 — soft control weakens & denies the enemy threat', () => {
         expect(hpLoss([])).toBeGreaterThan(0);
     });
 
-    it('one soft-control (Confusion, roll -5) WEAKENS the hit but does not deny it', () => {
+    // WS8.2 (spec 32 §12 #6): confusion/blind moved OFF the roll surface —
+    // FEAR (-4) is the heavy roll hammer now; knockdown (-3) + slow (-2) fill
+    // the cumulative-deny witness. All three share the 'roll' surface, so the
+    // deny below is the LEGACY cumulative path, not the DISRUPT variety path.
+    it('one soft-control (Fear, roll -4) WEAKENS the hit but does not deny it', () => {
         const clean = hpLoss([]);
-        const weakened = hpLoss([ae('test_ctrl_confusion')]);
+        const weakened = hpLoss([ae('test_ctrl_fear')]);
         expect(weakened).toBeGreaterThan(0);   // a single soft-control only reduces
-        expect(weakened).toBeLessThan(clean);  // ~30% weaker telegraphed hit
+        expect(weakened).toBeLessThan(clean);  // ~24% weaker telegraphed hit
+    });
+
+    it('a heavy roll-shred pile (Fear -4 + Knockdown -3 + Slow -2 = 9 ≥ deny) denies the turn', () => {
+        expect(hpLoss([ae('test_ctrl_fear'), ae('test_ctrl_knockdown'), ae('test_ctrl_slow')])).toBe(0);
     });
 
     it('a VARIETY of soft-controls (Confusion -5 + Fear -4 = 9 ≥ deny) denies the turn', () => {
         expect(hpLoss([ae('test_ctrl_confusion'), ae('test_ctrl_fear')])).toBe(0);
+    });
+
+    it('WS8.2 — Exhaustion softens the telegraphed hit on the threat-damage surface', () => {
+        const clean = hpLoss([]);
+        const softened = hpLoss([ae('test_exhaustion')]);
+        expect(softened).toBeGreaterThan(0);   // -25% softens, never denies alone
+        expect(softened).toBeLessThan(clean);
     });
 });
 
