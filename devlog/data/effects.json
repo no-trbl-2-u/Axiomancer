@@ -696,6 +696,39 @@
   ]
  },
  {
+  "id": "debuff_petrify",
+  "name": "Petrify",
+  "type": "debuff",
+  "glyph": "🗿",
+  "color": "#a86bdc",
+  "kind": "control",
+  "chips": [
+   {
+    "k": "Type",
+    "v": "debuff"
+   },
+   {
+    "k": "Category",
+    "v": "control"
+   },
+   {
+    "k": "Tier",
+    "v": "3"
+   },
+   {
+    "k": "Duration",
+    "v": "1 rounds"
+   },
+   {
+    "k": "Stacking",
+    "v": "none"
+   }
+  ],
+  "lines": [
+   "Skips turn"
+  ]
+ },
+ {
   "id": "debuff_poison",
   "name": "Poison",
   "type": "debuff",

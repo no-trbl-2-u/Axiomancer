@@ -303,8 +303,8 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — Drain 1 HP from the enemy for every SOUL you gain.",
-   "PAID (rest of combat) — Drain 1 HP from the enemy for every SOUL you gain."
+   "FREE (3 rounds) — Drain 1 VITAE from the enemy for every SOUL you gain.",
+   "PAID (rest of combat) — Drain 1 VITAE from the enemy for every SOUL you gain."
   ]
  },
  {
