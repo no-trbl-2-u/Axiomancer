@@ -55,7 +55,9 @@ describe('faceStats — honest real-unit faces', () => {
         expect(f.verbLine).toBe('foe loses VITAE each card you play');
         expect(f.verbLine).not.toMatch(/\bHP\b/);
         // phase 30: TICK retired registry-wide — FREE deposits a MARK seed instead.
-        expect(f.freeHeroText).toBe('mark i1 d1');
+        // 2026-07-12 (card-wording audit): the 'i1 d1' shorthand de-abbreviates
+        // at render — 8 of 10 playtest decks could not decode it.
+        expect(f.freeHeroText).toBe('mark ×1 · 1 turn');
         expect(f.readDependent).toBe(true);
         expect(f.statusBase).toBe(2);             // the per-tick base (▲ raises it, ▼ leaves it)
         expect(f.statusAdv).toBe(4);              // won read: +1 intensity → 4/tick
@@ -99,7 +101,7 @@ describe('faceStats — honest real-unit faces', () => {
         expect(f.kind).toBe('rupture');
         expect(f.heroText).toBe('detonate');  // live burst → qualitative word only
         // phase 30: TICK retired registry-wide — FREE deposits a MARK seed instead.
-        expect(f.freeHeroText).toBe('mark i1 d1');
+        expect(f.freeHeroText).toBe('mark ×1 · 1 turn');
     });
     it('The Reaping (REAP all) → spends the Soul bank, burst stays live', () => {
         const { card, sourceCard } = cardOf('the-reaping');
@@ -156,12 +158,13 @@ describe('faceStats — honest real-unit faces', () => {
 });
 
 describe('Option A split rail — freeKeyword/freeValue + typeStrip (owner-picked 2026-07-09)', () => {
-    it('Slippery Slope → ◇ MARK · i1 d1 | BODY · SPELL foot strip', () => {
+    it('Slippery Slope → ◇ MARK · ×1 · 1t | BODY · SPELL foot strip', () => {
         const { card, sourceCard } = cardOf('slippery-slope');
         const f = faceStats(card, sourceCard);
         // phase 30: TICK retired registry-wide — FREE deposits a MARK seed instead.
+        // 2026-07-12 (card-wording audit): '×1 · 1t', never the 'i1 d1' code.
         expect(f.freeKeyword).toBe('MARK');
-        expect(f.freeValue).toBe('i1 d1');
+        expect(f.freeValue).toBe('×1 · 1t');
         expect(f.typeStrip).toBe('BODY · SPELL');
     });
     it('Brace for Impact → ◇ GUARD · 2 (the authored free rider, never halved)', () => {
@@ -215,11 +218,15 @@ describe('detailStats — same numbers as the face', () => {
         expect(d.outcomeStats.find(st => st.label === 'TRIGGER')?.value).toBe('per card played');
         expect(d.outcomeStats.find(st => st.label === 'DURATION')?.value).toBe('4t');
         expect(d.stacksText).toBe('Stacks by intensity.');
-        // §C: the +DIE read triplet scales the per-tick base (2 → ▲4 / ▼2).
-        expect(d.diePill).toBe('▲4 · —2 · ▼2');
-        // The FREE pill is the authored free line. Phase 30: TICK retired
-        // registry-wide — FREE deposits a MARK seed instead.
-        expect(d.freePill).toBe('mark i1 d1');
+        // §C: the +DIE read triplet scales the per-tick base (2 → ▲4 / ▼2),
+        // and the one global legend decodes the columns (audit 2026-07-12).
+        expect(d.dieTriplet).toBe('▲4 · —2 · ▼2');
+        expect(d.readLegend).toContain('▲ won read');
+        // The FREE pill is the authored free line, de-abbreviated. Phase 30:
+        // TICK retired registry-wide — FREE deposits a MARK seed instead.
+        expect(d.freePill).toBe('mark ×1 · 1 turn');
+        // D-fix: the FREE-line MARK rider now renders its keyword panel.
+        expect(d.keywords.map(k => k.name)).toContain('MARK');
         // The meta chip surfaces the rank name + card type (where gold used to sit).
         expect(d.metaChip).toContain('DOXA');
         expect(d.metaChip).toContain('SPELL');
@@ -262,10 +269,11 @@ describe('detailStats — same numbers as the face', () => {
         expect(vk.every(k => k.def.length > 0)).toBe(true);  // every chip carries its gloss
     });
     it('systemTerms is the PER-CARD glossary slice, not the KW-7 dump (owner, 2026-07-12)', () => {
-        // entropy-tax's printed lines reference no dice-system token → NO
-        // systems glossary at all (the old dump rendered all six on every card).
+        // entropy-tax's printed lines reference no dice-system token → only the
+        // audit's two vocabulary entries (its passive prints the intensity
+        // shorthand; every overlay prints the ◇ FREE line) — never the dump.
         const tax = cardOf('entropy-tax');
-        expect(detailStats(tax.card, tax.sourceCard).systemTerms).toEqual([]);
+        expect(detailStats(tax.card, tax.sourceCard).systemTerms.map(s => s.term)).toEqual(['INTENSITY', 'FREE']);
         // bootstrap-loop prints '+1 Conviction' and a '⬡ MIND ×2 spent'
         // threshold line → CONVICTION and RESONANCE render; FLOATING/WILD are
         // already explained by its FORGE keyword chip → deduped away.
@@ -277,6 +285,53 @@ describe('detailStats — same numbers as the face', () => {
         expect(terms).not.toContain('WILD / X');
         expect(terms).not.toContain('RUNGS');
         expect(d.keywords.map(k => k.name)).toContain('FORGE');
+    });
+});
+
+describe('card-wording audit (2026-07-12) — the +DIE row carries only what the face cannot', () => {
+    it('Resonance Detonation enumerates its FULL paid line (the pill used to hide SIPHON/RECALL)', () => {
+        const { card, sourceCard } = cardOf('resonance-detonation');
+        const d = detailStats(card, sourceCard);
+        expect(d.diePaidLine).toContain('RUPTURE');
+        expect(d.diePaidLine).toContain('SIPHON 35%');
+        expect(d.diePaidLine).toContain('RECALL 2');
+        // Not read-scaled → no triplet, no legend.
+        expect(d.dieTriplet).toBeNull();
+        expect(d.readLegend).toBeNull();
+    });
+    it('a single-effect, non-read card renders NO +DIE row at all (pure face duplicate)', () => {
+        // memento-mori: MARK is the whole paid line and takes no read triplet.
+        const { card, sourceCard } = cardOf('memento-mori');
+        const d = detailStats(card, sourceCard);
+        expect(d.diePaidLine).toBeNull();
+        expect(d.dieTriplet).toBeNull();
+    });
+    it('The Reaping surfaces its riding SIPHON on the paid line', () => {
+        const { card, sourceCard } = cardOf('the-reaping');
+        const d = detailStats(card, sourceCard);
+        expect(d.diePaidLine).toContain('REAP');
+        expect(d.diePaidLine).toContain('SIPHON 40%');
+    });
+    it('a read-scaled single-effect card keeps ONLY the triplet (Guard)', () => {
+        const { card, sourceCard } = cardOf('brace-for-impact');
+        const d = detailStats(card, sourceCard);
+        expect(d.diePaidLine).toBeNull();
+        expect(d.dieTriplet).toMatch(/^▲\d+ · —8 · ▼\d+$/);
+        expect(d.readLegend).toContain("your die's stance");
+    });
+    it('persistent cards carry the duration footer (the 6-deck free-vs-paid confusion)', () => {
+        const venom = cardOf('venom-and-vein');
+        expect(detailStats(venom.card, venom.sourceCard).durationFooter).toBe('3 rounds free · permanent with a die');
+        const spell = cardOf('slippery-slope');
+        expect(detailStats(spell.card, spell.sourceCard).durationFooter).toBeNull();
+    });
+    it('INTENSITY and FREE now resolve as system terms on cards that print them', () => {
+        // slippery-slope: 'Stacks by intensity.' + a de-abbreviated '×1' free
+        // line + the overlay FREE line → both entries render.
+        const { card, sourceCard } = cardOf('slippery-slope');
+        const terms = detailStats(card, sourceCard).systemTerms.map(s => s.term);
+        expect(terms).toContain('INTENSITY');
+        expect(terms).toContain('FREE');
     });
 });
 

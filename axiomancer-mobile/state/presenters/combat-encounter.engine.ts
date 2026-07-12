@@ -92,13 +92,24 @@ function persistentPayloadKeyword(sourceCard?: Card): string | null {
     return persistentVerbKeyword(sourceCard?.persistentEffect);
 }
 
+/** 2026-07-12 (card-wording audit) — 8 of 10 playtest decks could not decode
+ *  the rider shorthand ('mark i1 d2'). De-abbreviate at render: intensity →
+ *  '×N', duration → 'N turns'. Presentation-only — the engine text stays the
+ *  truth; this is its spelling (ADR-0001/0003). */
+function deabbreviateShorthand(text: string): string {
+    return text
+        .replace(/\bi(\d+) d(\d+)\b/g, (_, i: string, d: string) => `×${i} · ${d} turn${d === '1' ? '' : 's'}`)
+        .replace(/\bi(\d+)\b/g, '×$1')
+        .replace(/\bd(\d+)\b/g, (_, d: string) => `${d} turn${d === '1' ? '' : 's'}`);
+}
+
 /** The authored FREE (no-die) line in real engine units — riderText over the
  *  card's `free` rider; a persistent (enchant/disenchant) card's FREE line is
  *  its engine-printed timed instance (spec 32 v4: 3 rounds of the passive).
  *  Never a fabricated number. */
 function freeLineText(card: CombatCard, sourceCard?: Card): string {
     if (card.cardType === 'enchantment' || card.cardType === 'disenchant') return persistentFreeText(card);
-    return sourceCard?.free ? riderText(sourceCard.free) : 'no effect';
+    return sourceCard?.free ? deabbreviateShorthand(riderText(sourceCard.free)) : 'no effect';
 }
 
 /** The barrel doesn't export CardRider — derive it from Card. */
@@ -131,7 +142,8 @@ function riderPairs(r: CardRider): [string, string][] {
             ?? r.applyEffect.effectId.replace(/^(debuff|buff)_/, '');
         const i = r.applyEffect.intensity ?? 1;
         const d = r.applyEffect.duration;
-        pairs.push([kw.toUpperCase(), `i${i}${d ? ` d${d}` : ''}`]);
+        // De-abbreviated (audit 2026-07-12): '×1 · 1t', never the 'i1 d1' code.
+        pairs.push([kw.toUpperCase(), `×${i}${d ? ` · ${d}t` : ''}`]);
     }
     if (r.ruptureMarks) pairs.push(['RUPTURE', `${r.ruptureMarks}/stack`]);
     if (r.intensityPerPip) pairs.push(['PIP', `+${r.intensityPerPip} int`]);
@@ -183,6 +195,11 @@ export interface CombatEffectChipVM {
     effectId: string; glyph: StatusGlyph; intensity: number; duration: number; isMax: boolean;
     /** General keyword definition for the on-board status tooltip (null if unmapped). */
     gloss: string | null;
+    /** 2026-07-12 (card-wording audit) — a STANDING enchant/curse chip
+     *  synthesized from the persistent zones (no effect id ever backs the
+     *  passive, so `effectId` holds the CARD id). duration 0 = permanent;
+     *  intensity is meaningless and its badge is hidden. */
+    standing?: boolean;
 }
 /** WS9 (spec 32 §12 #7) — the fork telegraph of a BRANCH phase: the condition
  *  plus BOTH outcomes stay visible; `taken` is stamped once the phase starts. */
@@ -360,13 +377,25 @@ export interface CombatCardDetailVM {
     readNote: string;
     mathLine: string;
     keywords: { name: string; def: string; minor: boolean }[];
-    // ── Compact NO-DIE / +DIE pill table (replaces the prose FREE/POWER fork) ──
-    /** The no-die (free) value, e.g. '2 HP' / 'Guard 6' / '24 (4/turn · 6 turns)'. */
+    // ── The +DIE row (card-wording audit 2026-07-12: the NO-DIE pill was a
+    //    pure duplicate of the face's ◇ rail and is no longer rendered; this
+    //    row keeps only what the face cannot carry) ──
+    /** The no-die (free) value — the full-truth authored line (the face's ◇
+     *  rail is its terse projection). Kept as a presenter truth surface. */
     freePill: string;
-    /** The +DIE pill keyword, e.g. 'BLEED' / 'GUARD'. */
-    diePillKeyword: string;
-    /** The +DIE powered value; read-dependent kinds carry the ▲/▼ triplet. */
-    diePill: string;
+    /** The FULL authored paid line — every effect a die-powered play fires,
+     *  headline first ('RUPTURE all afflictions + SIPHON 35% + RECALL 2').
+     *  null when the face's single ◆ keyword·value already says all of it. */
+    diePaidLine: string | null;
+    /** The exact ▲/—/▼ read triplet for read-scaled kinds (guard/barrier/
+     *  dot/vulnerable); null otherwise. */
+    dieTriplet: string | null;
+    /** One global legend decoding ▲/—/▼ — non-null exactly when `dieTriplet`
+     *  renders (the most-cited undefined notation of the 10-deck playtest). */
+    readLegend: string | null;
+    /** Persistent cards: the free-vs-paid duration fact as one footer line
+     *  ('3 rounds free · permanent with a die'); null on spells. */
+    durationFooter: string | null;
     /** The colour-match rule — rendered ONCE per modal (not per powerLine). */
     colorMatchHint: string;
     /** 2026-07-12 (owner playtest) — the per-card slice of the systems
@@ -377,7 +406,8 @@ export interface CombatCardDetailVM {
 }
 
 /** detailStats' switch builds everything BUT the pill fields; the wrapper appends them. */
-type DetailCore = Omit<CombatCardDetailVM, 'freePill' | 'diePillKeyword' | 'diePill' | 'colorMatchHint' | 'systemTerms'>;
+type DetailCore = Omit<CombatCardDetailVM,
+    'freePill' | 'diePaidLine' | 'dieTriplet' | 'readLegend' | 'durationFooter' | 'colorMatchHint' | 'systemTerms'>;
 
 export interface CombatCardVM {
     uid: string; cardId: string; name: string; stance: string; stanceColor: string;
@@ -484,6 +514,35 @@ function chips(effects: { effectId: string; intensity: number; remainingDuration
     });
 }
 
+/** E-fix (card-wording audit 2026-07-12) — the sweep's single most
+ *  consequential legibility gap: a persistent card's standing passive is gated
+ *  by CARD ID at its engine trigger sites (`zoneHas`), never by an applied
+ *  effect id, so the board showed NOTHING while an enchantment or curse was
+ *  attached. Synthesize a standing chip per zone entry — ❖ enchantment, ☒
+ *  curse — labelled from the card, glossed from its authored passive summary
+ *  (`Card.persistentEffect`). Presentation-only (ADR-0001/0003). */
+function standingChips(
+    permanent: readonly string[],
+    timed: readonly { cardId: string; roundsLeft: number }[],
+    kind: 'enchant' | 'curse',
+): CombatEffectChipVM[] {
+    const entries = [
+        ...permanent.map(id => ({ id, rounds: 0 })),
+        ...timed.map(t => ({ id: t.cardId, rounds: t.roundsLeft })),
+    ];
+    return entries.flatMap(({ id, rounds }) => {
+        const src = getCardById(id);
+        if (!src) return [];
+        return [{
+            effectId: id, intensity: 1, duration: rounds, isMax: false, standing: true,
+            glyph: kind === 'enchant'
+                ? { glyph: '❖', color: ENCHANT_COLOR, kind: 'statup' as const, label: src.name }
+                : { glyph: '☒', color: GLYPH_COLORS.control, kind: 'statdown' as const, label: src.name },
+            gloss: src.persistentEffect ?? null,
+        }];
+    });
+}
+
 /** WS9 — maps a phase's branch payload to the fork telegraph (null if linear). */
 function branchVM(phase: CombatThreatPhase | undefined): CombatIntentBranchVM | null {
     const b = phase?.branch;
@@ -551,7 +610,13 @@ function enemyPane(state: CombatEncounterState): CombatEnemyPaneVM {
         isBoss,
         hp: Math.max(0, e.health), maxHp: e.maxHealth,
         hpPct: e.maxHealth > 0 ? Math.max(0, e.health) / e.maxHealth : 0,
-        effects: chips(e.effects),
+        // Standing attachments render beside the live effects: player-cast
+        // curses (permanent + timed) as ☒, the foe's own enchantments as ❖.
+        effects: [
+            ...chips(e.effects),
+            ...standingChips(state.enemyAttachments ?? [], state.enemyTempAttachments ?? [], 'curse'),
+            ...standingChips(state.enemyEnchantments ?? [], [], 'enchant'),
+        ],
         intent: intentVM(state),
         revealedStance: stance,
         stanceColor: stance ? STANCE_COLORS[stance] : '#6b6257',
@@ -573,7 +638,11 @@ function playerPane(state: CombatEncounterState): CombatPlayerPaneVM {
         name: p.name ?? 'You', hp: Math.max(0, p.health), maxHp: p.maxHealth,
         hpPct: p.maxHealth > 0 ? Math.max(0, p.health) / p.maxHealth : 0,
         guard: state.guard ?? 0,
-        effects: chips(p.effects),
+        // Your standing enchantments (permanent zone + timed FREE instances).
+        effects: [
+            ...chips(p.effects),
+            ...standingChips(state.persistentZone ?? [], state.tempZone ?? [], 'enchant'),
+        ],
     };
 }
 
@@ -1275,8 +1344,18 @@ function buildDetailKeywords(card: CombatCard, c: CardCalc, sourceCard?: Card): 
         // explains its trigger; the word itself pops via the system glossary.
         if (m.kind === 'peroration') push('Premise', false);
     }
-    const printed = [card.topActionText, card.bottomActionText, ...(card.dieLines ?? [])].join(' ');
+    const printed = [card.topActionText, card.bottomActionText, ...(card.dieLines ?? []), freeLineText(card, sourceCard)].join(' ');
     for (const kw of keywordsInPersistentText(printed)) push(kw, false);
+    // D-fix (card-wording audit 2026-07-12): a FREE-line rider is applied by
+    // the rider path, not a combatEffect, and prints in lowercase — neither
+    // sweep above sees it, so MARK printed on a no-die line rendered no panel
+    // on five decks. Sweep the authored free rider's own keyword pairs.
+    if (sourceCard?.free) {
+        for (const [kw] of riderPairs(sourceCard.free)) {
+            const title = kw.charAt(0) + kw.slice(1).toLowerCase();
+            if (keywordGloss(title)) push(title, false);
+        }
+    }
     return out;
 }
 
@@ -1427,26 +1506,99 @@ function detailCore(card: CombatCard, sourceCard?: Card, enemyDifficulty?: Enemy
     }
 }
 
-/** Honest card DETAIL view-model (inspect modal) — the CORE plus the compact
- *  NO-DIE / +DIE pill table that replaces the old prose FREE/POWER fork. Same
- *  numbers as the face; read-scaling math is pulled into the +DIE pill (the prose
- *  is flattened, NOT the math). */
+/** A non-headline mechanic's terse `KEYWORD · value` contribution to the paid
+ *  line. The face kinds (guard/rupture/siphon/reap/forge…) have no
+ *  `mechanicHeadline` entry — they normally ARE the headline — so they get
+ *  explicit spellings here for when they ride shotgun on a multi-effect card. */
+function mechPaidPart(m: CardSpecialMechanic, enemyDifficulty?: EnemyDifficulty): { kw: string; val: string | null } | null {
+    switch (m.kind) {
+        case 'guard': return { kw: 'Guard', val: `${m.amount}` };
+        case 'barrier': return { kw: 'Guard', val: `${m.amount} (persists)` };
+        case 'riposte': return { kw: 'Riposte', val: `CTR ${m.damage} · CUT ${m.reduce}` };
+        case 'rupture': return { kw: 'Rupture', val: 'all afflictions' };
+        case 'siphon': return { kw: 'Siphon', val: `${Math.round(m.pct * 100)}%` };
+        case 'reap': return { kw: 'Reap', val: null };
+        case 'reap_all': return { kw: 'Reap', val: 'all Souls' };
+        case 'forge_floating_die': case 'float_x_die': return { kw: 'Forge', val: null };
+        case 'create_temporary_die': return { kw: 'Kindle', val: m.color };
+        case 'grant_pip': return { kw: 'Pip', val: `+${m.count}` };
+        case 'spend_all_pips': return { kw: 'Pip', val: 'spend all' };
+        // Pure die plumbing — never a player-facing paid-line row.
+        case 'refresh_die': case 'convert_die_color': case 'bank_spent_die': case 'reroll_spent':
+            return null;
+        default: {
+            const h = mechanicHeadline(m, enemyDifficulty);
+            if (!h?.keyword) return null;
+            return { kw: h.keyword, val: h.heroText || null };
+        }
+    }
+}
+
+/** 2026-07-12 (card-wording audit) — the FULL authored PAID line. The old +DIE
+ *  pill collapsed a multi-effect paid line to ONE headline keyword, so the
+ *  real extra effects (SIPHON, RECALL, POISON…) surfaced only as keyword
+ *  panels and read as orphans the card never printed. Enumerate every paid
+ *  component, headline first; null when the face's single ◆ keyword·value
+ *  already says all of it (the single-effect card — no duplication). */
+function paidLine(c: CardCalc, face: CombatCardFaceVM, sourceCard?: Card, enemyDifficulty?: EnemyDifficulty): string | null {
+    // Persistent cards: the paid play is the same passive made permanent — the
+    // face + durationFooter carry it; an enumeration would restate the passive.
+    if (c.kind === 'enchant' || c.kind === 'disenchant') return null;
+    const parts: string[] = [];
+    const seen = new Set<string>();
+    const add = (kw: string | null | undefined, val?: string | null) => {
+        if (!kw) return;
+        const up = kw.toUpperCase();
+        if (seen.has(up)) return;
+        seen.add(up);
+        parts.push(val ? `${up} ${val}` : up);
+    };
+    // 1. the face headline, exactly as the ◆ rail words it. A heroText that
+    //    already leads with the keyword word ('Guard 8') isn't double-prefixed.
+    const headKw = face.keyword ?? c.keyword;
+    const heroVal = face.heroText && face.heroSub
+        ? `${face.heroText} · ${face.heroSub}`
+        : face.heroText || face.heroSub || '';
+    if (headKw && heroVal.toUpperCase().startsWith(headKw.toUpperCase())) {
+        add(headKw, heroVal.slice(headKw.length).trim() || null);
+    } else {
+        add(headKw, heroVal || null);
+    }
+    // 2. every other authored status effect (opponent riders + self costs).
+    for (const ce of sourceCard?.combatEffects ?? []) {
+        if (ce === c.ce) continue;
+        const i = ce.intensity ?? 1;
+        const d = ce.duration;
+        add(keywordForEffect(ce.effectId),
+            `×${i}${d ? ` · ${d}t` : ''}${ce.appliedTo === 'self' ? ' (self)' : ''}`);
+    }
+    // 3. every other special mechanic.
+    for (const m of sourceCard?.specialMechanics ?? []) {
+        if (m === c.mech) continue;
+        const part = mechPaidPart(m, enemyDifficulty);
+        if (part) add(part.kw, part.val);
+    }
+    return parts.length > 1 ? parts.join('  +  ') : null;
+}
+
+/** Honest card DETAIL view-model (inspect modal) — the CORE plus the +DIE row
+ *  fields. 2026-07-12 (card-wording audit): the NO-DIE pill (a pure duplicate
+ *  of the face's ◇ rail) is gone; the +DIE row carries only what the face
+ *  can't — the FULL paid line and the exact read triplet. */
 export function detailStats(card: CombatCard, sourceCard?: Card, enemyDifficulty?: EnemyDifficulty): CombatCardDetailVM {
     const core = detailCore(card, sourceCard, enemyDifficulty);
     const c = cardCalc(card, sourceCard);
     const face = faceStats(card, sourceCard, enemyDifficulty);
     const STANCE = STANCE_LABELS[card.stance] ?? card.stance.toUpperCase();
-    // NO-DIE pill: the free (die-optional) value.
+    // The free (die-optional) value — the full-truth authored line.
     const freePill = face.freeHeroText + (face.freeHeroSub ? ` (${face.freeHeroSub})` : '');
-    // +DIE pill: keyword + powered value. Read-dependent kinds (guard/barrier) carry
-    // the ▲adv · —base · ▼dis triplet pulled from the live read scaling.
-    const diePillKeyword = face.keyword ?? core.keywords[0]?.name ?? 'EFFECT';
-    let diePill: string;
+    // The exact ▲/—/▼ read triplet for the read-scaled kinds.
+    let dieTriplet: string | null = null;
     if (c.kind === 'guard' || c.kind === 'barrier') {
         const b = c.kind === 'guard' ? (c.guardAmount ?? 0) : c.barrierAmt;
         const adv = Math.max(1, Math.round(b * READ_DAMAGE_MULT.advantage));
         const dis = Math.max(1, Math.round(b * READ_DAMAGE_MULT.disadvantage));
-        diePill = `▲${adv} · —${b} · ▼${dis}`;
+        dieTriplet = `▲${adv} · —${b} · ▼${dis}`;
     } else if (c.kind === 'dot') {
         // P0-truth: the exact deterministic triplet (▲ +1 intensity / ▼ −1 turn).
         // WI-2 — an event DoT (poison/bleed) reads PER TICK, not as a round-clock
@@ -1454,29 +1606,36 @@ export function detailStats(card: CombatCard, sourceCard?: Card, enemyDifficulty
         // shortens the window, per-tick unchanged).
         if (c.dotTrigger) {
             const perTickAdv = Math.floor(c.dpr * (c.intensity + READ_ADVANTAGE_INTENSITY_BONUS));
-            diePill = `▲${perTickAdv} · —${c.perTurn} · ▼${c.perTurn}`;
+            dieTriplet = `▲${perTickAdv} · —${c.perTurn} · ▼${c.perTurn}`;
         } else {
-            diePill = `▲${c.totalAdv} · —${c.total} · ▼${c.totalDis}`;
+            dieTriplet = `▲${c.totalAdv} · —${c.total} · ▼${c.totalDis}`;
         }
     } else if (c.kind === 'vulnerable') {
-        diePill = `▲+${c.vulnPctAdv}% · —+${c.vulnPct}% · ▼−1 turn`;
-    } else if (face.heroText && face.heroSub) {
-        diePill = `${face.heroText} · ${face.heroSub}`;
-    } else if (face.heroText) {
-        diePill = face.heroText;
-    } else {
-        diePill = face.heroSub ?? face.keyword ?? '';
+        dieTriplet = `▲+${c.vulnPctAdv}% · —+${c.vulnPct}% · ▼−1 turn`;
     }
+    // The ▲/—/▼ legend — the single most-cited undefined notation of the
+    // 10-deck playtest. ONE global line, rendered only when a triplet is. The
+    // read is the die's STANCE against the foe's stance — never the roll.
+    const readLegend = dieTriplet
+        ? "▲ won read · — even · ▼ lost read — your die's stance against the foe's picks the column."
+        : null;
+    const diePaidLine = paidLine(c, face, sourceCard, enemyDifficulty);
+    // Spec 32 v4 persistent fork, restated as ONE footer line (the audit's
+    // 6-deck "3 rounds vs rest of combat" confusion) — never a stacked panel.
+    const durationFooter = c.kind === 'enchant' || c.kind === 'disenchant'
+        ? `${persistentFreeRounds(card)} free · permanent with a die`
+        : null;
     // The colour law (dice-law rework 2026-07-09) — rendered ONCE per modal.
     const colorMatchHint = `Only a ${STANCE} or WILD die can power this card.`;
     // 2026-07-12 — the per-card systems-glossary slice: scan the card's OWN
-    // printed lines (colorMatchHint excluded — its WILD is the global colour
-    // law, not a card reference) and drop terms a keyword chip already covers.
+    // printed lines plus its overlay free/stacks lines (colorMatchHint excluded
+    // — its WILD is the global colour law, not a card reference) and drop
+    // terms a keyword chip already covers.
     const systemTerms = systemTermsForCard(
-        [card.topActionText, card.bottomActionText, ...(card.dieLines ?? [])].join(' '),
+        [card.topActionText, card.bottomActionText, ...(card.dieLines ?? []), core.freeLine, core.stacksText ?? ''].join(' '),
         core.keywords.map(k => k.name),
     );
-    return { ...core, freePill, diePillKeyword, diePill, colorMatchHint, systemTerms };
+    return { ...core, freePill, diePaidLine, dieTriplet, readLegend, durationFooter, colorMatchHint, systemTerms };
 }
 
 /** Read-scaled hero value at the moment of commit (read known) — StagedCard only.

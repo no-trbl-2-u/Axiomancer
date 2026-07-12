@@ -36,6 +36,19 @@ describe('statusGlyphs — resolution', () => {
         expect(effectGlyph({ id: 'debuff_stun', type: 'debuff', category: 'control', payload: { actionRestriction: { skipTurn: true } } }).glyph).toBe('💫');
     });
 
+    it('curates the three core keyword afflictions + the DoT-species split (card-wording audit 2026-07-12)', () => {
+        // Mark/Backfire/Rapport ARE the keyword system — no generic category icons.
+        expect(effectGlyph({ id: 'debuff_mark', type: 'debuff' }).glyph).toBe('◉');
+        expect(effectGlyph({ id: 'debuff_backfire', type: 'debuff' }).glyph).toBe('⟲');
+        expect(effectGlyph({ id: 'debuff_rapport', type: 'debuff' }).glyph).toBe('☙');
+        // The two live DoT species no longer share one 🔥.
+        const ember = effectGlyph({ id: 'debuff_kindling_ember', type: 'debuff', payload: { damageOverTime: {} } }).glyph;
+        const nettle = effectGlyph({ id: 'debuff_nettle_sting', type: 'debuff', payload: { damageOverTime: {} } }).glyph;
+        expect(ember).toBe('🔥');
+        expect(nettle).toBe('🌿');
+        expect(ember).not.toBe(nettle);
+    });
+
     it('falls back to a category glyph for unnamed effects, with a colour and label', () => {
         const g = effectGlyph({ id: 'debuff_unknown_thing', type: 'debuff', category: 'control', payload: { actionRestriction: { skipTurn: true } } });
         expect(g.glyph).toBe('⛓');               // control fallback

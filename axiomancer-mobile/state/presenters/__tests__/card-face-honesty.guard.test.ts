@@ -94,9 +94,12 @@ describe('card-face honesty guard', () => {
                 if (seen.has(n)) offenders.push(`${id} → '${n}' explained twice`);
                 seen.add(n);
             }
-            const printed = [card.topActionText, card.bottomActionText, ...(card.dieLines ?? [])].join(' ');
+            // 2026-07-12 (card-wording audit) — the presenter scans the printed
+            // lines PLUS the overlay's own free/stacks lines (INTENSITY/FREE
+            // live there); this reference check mirrors that scan basis.
+            const printed = [card.topActionText, card.bottomActionText, ...(card.dieLines ?? []), d.freeLine, d.stacksText ?? ''].join(' ');
             if (d.systemTerms.length === SYSTEM_GLOSSARY.length) offenders.push(`${id} → full systems dump rendered`);
-            if (d.systemTerms.length > 0 && !/conviction|⬡|resonance|reserve|pip|floating|rung|wild|X die|peroration|concede/i.test(printed)) {
+            if (d.systemTerms.length > 0 && !/conviction|⬡|resonance|reserve|pip|floating|rung|wild|X die|peroration|concede|free|intensit|×\d|\bi\d\b/i.test(printed)) {
                 offenders.push(`${id} → systems entries without any printed reference`);
             }
         }

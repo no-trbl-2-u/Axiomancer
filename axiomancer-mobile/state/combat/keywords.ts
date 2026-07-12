@@ -154,8 +154,8 @@ const KEYWORD_GLOSS: Record<string, string> = {
     // ── Utility (9) ──
     Draw: 'Draw that many cards from your deck, up to your hand limit.',
     Forge:
-        'Forges a FLOATING die — or turns a dead X die WILD — that plays alongside your drafted die and is gone forever when spent. '
-        + 'At the cap of 3, it grants +1 Conviction instead.',
+        'Forges a FLOATING die (or revives a dead X die as WILD) that plays beside your drafted die and is spent for good; '
+        + 'at 3 dice it grants +1 Conviction instead.',
     Guard:
         'Blocks that much incoming attack damage during the next threat phase. '
         + 'Unused Guard is lost unless the card prints "persists".',
@@ -166,23 +166,20 @@ const KEYWORD_GLOSS: Record<string, string> = {
     Cleanse: 'Removes up to that many afflictions from you.',
     Heal: 'Restores that much VITAE, up to your maximum.',
     Rupture:
-        'Consumes afflictions on the enemy and detonates their remaining harm as one burst. '
-        + "The burst is capped at 60% of the enemy's max VITAE.",
+        "Consumes the enemy's afflictions and deals their remaining damage all at once — up to 60% of its max VITAE.",
     Siphon: 'Heals you for the printed percentage of the damage this play deals.',
     // ── Affliction (T1) ──
     Prolong: 'Adds that many turns to every damage-over-time effect you have on the enemy.',
     Reargue: "Flips the enemy's Bleed into Poison and its Poison into Bleed, each landing that much harder.",
     Poison:
-        'Deals 2 VITAE per stack each time a card is played, growing by 1 every 2 rounds it holds. '
-        + 'Applying poison again resets the growth.',
+        'Each time a card is played, the enemy loses 2 VITAE per Poison stack — and the longer it holds, the harder it bites.',
     Bleed: 'Each hit the bearer takes deals 3 more VITAE per Bleed stack, then removes a stack.',
     Doom:
         'Deals 1 VITAE per stack at the start of each round and grows a stack every time the enemy acts. '
         + 'It ends only when consumed.',
     // ── Peroration (T2) ──
     Premise:
-        'A persistent tally your cards build toward the conclusion printed on its carrier. '
-        + 'At the printed count the conclusion fires free and the tally resets.',
+        'A running tally. When it reaches the count printed on the card that spends it, that payoff fires free and the tally resets.',
     // ── Forge (T3) ──
     Kindle:
         'Creates a temporary die of the printed color in your Reserve. '
@@ -194,9 +191,12 @@ const KEYWORD_GLOSS: Record<string, string> = {
     Recoil: 'Pay the printed VITAE as a cost when the card is played — no defense can prevent it.',
     Fallen: "A state: you carry 2 or more different afflictions. A card's FALLEN line fires free while you are Fallen.",
     // ── Control (T5) ──
+    // 2026-07-12 (card-wording audit) — the old "2 rungs / 3 on a boss" clause
+    // stated how many rungs an action HAS (the RUNGS system term), not how many
+    // Stagger removes, and so contradicted every `STAGGER 1` face.
     Stagger:
-        "Removes that many rungs from the enemy's next telegraphed action — 2 rungs on a normal action, 3 on a boss. "
-        + 'Removing every rung denies the action outright.',
+        "Removes that many rungs (the steps of the enemy's telegraph) from its next action. "
+        + 'Strip them all and the action is denied.',
     Backfire:
         'The enemy takes 1 VITAE per Backfire stack for each rung its telegraphed action loses. '
         + 'A denied action counts all of its rungs.',
@@ -208,17 +208,21 @@ const KEYWORD_GLOSS: Record<string, string> = {
     Reap: 'Spends the printed number of Souls to fire the printed effect — with fewer Souls, it fizzles.',
     // ── Charm (T8) ──
     Sway:
-        'Builds on the enemy and decays 1 at the end of each round. '
-        + 'The enemy capitulates when Sway reaches its resolve — roughly 35% of its max VITAE.',
+        'Builds on the enemy and decays 1 each round; at their resolve (~35% of max VITAE) they capitulate.',
     Rapport: "The enemy's attacks deal 10% less damage per Rapport stack.",
     // ── Bulwark (T9) ──
     Thorns: 'The enemy takes 1 VITAE per Thorns stack each threat phase it attacks you — even through a full block.',
     Riposte:
-        'Armed for one threat phase: the first incoming attack is reduced by the printed parry amount. '
-        + 'If your Guard fully blocks an attack, the enemy takes the printed counter damage.',
+        'Armed for one threat phase: reduces the first incoming attack by its parry (CUT) value. '
+        + 'If your Guard fully blocks it, the enemy takes its counter (CTR) damage.',
     // ── Echo (T10) ──
     Echo: "The card's PAID line fires twice. FREE lines never echo.",
     Recall: 'Returns that many cards from your discard pile to your hand — highest rank first.',
+    // 2026-07-12 (card-wording audit) — MILL was printed on three echo cards
+    // ('mill 1 to discard') with no gloss, no glyph, and no registry row: the
+    // only fully unglossed mechanic word in the sweep. Three carriers clears
+    // the card-keyword doctrine's registry bar.
+    Mill: 'Sends that many cards from your deck to your discard pile.',
     // ── Card types (labels, not keywords — never rendered in the inspect
     // keyword panel since 2026-07-12; kept for help surfaces + the KW lints) ──
     Enchantment: 'A passive on your side: 3 rounds when played free, permanent when paid with a die.',
@@ -340,6 +344,11 @@ export const SYSTEM_GLOSSARY: readonly { term: string; def: string }[] = [
     // CONCEDE is the alt-win it can escalate to. Neither had a popup anywhere.
     { term: 'PERORATION', def: 'A declared conclusion: when your Premise tally reaches the printed count, its payoff fires free and the tally resets.' },
     { term: 'CONCEDE', def: 'An alternate win — reaching the printed Premise count in one Peroration ends the fight. Elites and bosses demand the higher printed count.' },
+    // 2026-07-12 (card-wording audit) — the two most-flagged undefined words of
+    // the 10-deck playtest: INTENSITY (the noun every stack is measured in — 8
+    // decks) and FREE (the no-die line's cost label — 7 decks).
+    { term: 'INTENSITY', def: 'The size of a stack — +1 intensity makes each stack hit one harder.' },
+    { term: 'FREE', def: 'The no-die line — it plays without spending a die.' },
 ];
 
 /** How a card's PRINTED lines reference each system term. Matched against the
@@ -354,6 +363,10 @@ const SYSTEM_TERM_MATCH: Record<string, RegExp> = {
     'WILD / X': /\bwild\b|\bX die\b/,
     'PERORATION': /\bPERORATION\b/,
     'CONCEDE': /\bCONCEDE\b/,
+    // INTENSITY: the word itself, the legacy 'i1' shorthand, or its
+    // de-abbreviated '×1' render. FREE: the bare cost label the cards print.
+    'INTENSITY': /intensit|\bi\d\b|×\d/i,
+    'FREE': /\bFREE\b/,
 };
 
 /** Keyword chips whose own gloss already explains a system term — when such a
