@@ -42,7 +42,7 @@ export function CombatRewardsOverlay({ offers, onPick }: { offers: CombatRewardO
                                 <Text style={styles.offerMeta}>{o.stance.toUpperCase()} · T{o.tier}</Text>
                                 {/* P0-truth: real units or no number — the preview is the DoT's
                                     lifetime HP; control cards state their behavior in `text`. */}
-                                {o.preview > 0 ? <Text style={styles.offerPrev}>{o.preview} HP over its run</Text> : null}
+                                {o.preview > 0 ? <Text style={styles.offerPrev}>{o.preview} VITAE over its run</Text> : null}
                             </Pressable>
                         );
                     })}

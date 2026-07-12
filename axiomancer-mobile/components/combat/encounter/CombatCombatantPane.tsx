@@ -188,6 +188,15 @@ export function EffectChips({ effects, onChip, align = 'flex-start' }: {
                 >
                     <View style={[StyleSheet.absoluteFill, { backgroundColor: e.glyph.color, opacity: 0.16 }]} />
                     <Text style={[styles.chipGlyph, { color: e.glyph.color, textShadowColor: e.glyph.color }]}>{e.glyph.glyph}</Text>
+                    {/* P2 — the badge NUMBER is stacks (intensity); the remaining
+                        DURATION rides a distinct top-left tag so "🩸 3" is no longer
+                        an ambiguous bare number. Hidden for no-calendar effects
+                        (duration ≤ 0). Full breakdown lives in the chip inspect. */}
+                    {e.duration > 0 ? (
+                        <View style={styles.chipDur}>
+                            <Text style={styles.chipDurText} allowFontScaling={false}>{e.duration}t</Text>
+                        </View>
+                    ) : null}
                     <View style={styles.chipBadge}>
                         <Text style={styles.chipBadgeText} allowFontScaling={false}>{e.isMax ? '✶' : e.intensity}</Text>
                     </View>
@@ -653,6 +662,13 @@ const useStyles = makeStyles((AXM) => ({
         alignItems: 'center', justifyContent: 'center',
     },
     chipBadgeText: { fontFamily: FONTS.sans, fontSize: 9, lineHeight: 11, color: '#fff' },
+    // P2 — remaining-duration tag (top-left), distinct from the stacks badge.
+    chipDur: {
+        position: 'absolute', left: -4, top: -6, minWidth: 14, height: 13, borderRadius: 7,
+        paddingHorizontal: 2, backgroundColor: 'rgba(0,0,0,0.85)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.22)',
+        alignItems: 'center', justifyContent: 'center',
+    },
+    chipDurText: { fontFamily: FONTS.mono, fontSize: 8, lineHeight: 10, color: 'rgba(255,255,255,0.82)' },
 
     // Floats.
     enemyFloatLayer: { position: 'absolute', top: 116, left: 0, right: 0, alignItems: 'center', zIndex: 20 },

@@ -623,13 +623,14 @@ describe('Spec 25 §7.7 — recordAttribution field shape', () => {
     });
 });
 
-// ── Overkill clamp (Gate 0 §2, 2026-07-10) — attribution honesty ─────────────
-// The audit found 740 projected DoT attributed against a 40-max-HP enemy: the
-// ledger claimed damage the fight could never contain. With `targetHpBefore`
-// given, a record is clamped at damage actually applicable.
+// ── Attribution honesty — direct-damage clamp + WI-9 DoT provenance ──────────
+// The audit found 740 PROJECTED DoT attributed against a 40-max-HP enemy: the
+// ledger claimed damage the fight could never contain. WI-9 retired projection
+// entirely — a card records only its DoT PROVENANCE and its actual DIRECT
+// damage (overkill-clamped); DoT is summed from emitted ticks at summary time.
 
-describe('Gate 0 §2 — recordAttribution overkill clamp', () => {
-    /** A real landed poison, intensity/duration forced to the projection we need. */
+describe('recordAttribution — direct-damage clamp + DoT provenance (WI-9)', () => {
+    /** A real landed poison at a given intensity/duration. */
     const poisonLanded = (intensity: number, remainingDuration: number): LandedEffect => {
         const def = lookupEffect('debuff_poison')!;
         const applied = applyEffect([], def, 1, { intensityDelta: intensity });
@@ -642,28 +643,72 @@ describe('Gate 0 §2 — recordAttribution overkill clamp', () => {
         expect(ledger['qa-card'].damageDealt).toBe(40);
     });
 
-    it('clamps the projected DoT at the HP the target had left (740 projected vs 40 HP → 40)', () => {
-        // debuff_poison: 2 dmg/round × intensity 5 × 74 rounds = 740 projected.
+    it('records DoT PROVENANCE (effectIds), never a projection — dotDamage stays 0 at apply time', () => {
+        // The old ledger projected 2×5×74 = 740 here; that fiction is gone.
         const ledger = recordAttribution({}, 'qa-card', 'QA Card', poisonLanded(5, 74), 0, 40);
-        expect(ledger['qa-card'].dotDamage).toBe(40);
+        expect(ledger['qa-card'].dotDamage).toBe(0);
+        expect(ledger['qa-card'].effectIds).toContain('debuff_poison');
     });
 
-    it('the strike claims HP first; the DoT projection gets only what remains', () => {
+    it('the strike still claims HP (direct clamp); the DoT is no longer projected', () => {
         const ledger = recordAttribution({}, 'qa-card', 'QA Card', poisonLanded(5, 74), 30, 40);
         expect(ledger['qa-card'].damageDealt).toBe(30);
-        expect(ledger['qa-card'].dotDamage).toBe(10);
+        expect(ledger['qa-card'].dotDamage).toBe(0);
+        expect(ledger['qa-card'].effectIds).toContain('debuff_poison');
     });
 
-    it('attributes nothing against an already-dead target (cap 0)', () => {
+    it('attributes no direct damage against an already-dead target (cap 0), still logs the phase', () => {
         const ledger = recordAttribution({}, 'qa-card', 'QA Card', poisonLanded(3, 3), 12, 0);
         expect(ledger['qa-card'].damageDealt).toBe(0);
         expect(ledger['qa-card'].dotDamage).toBe(0);
         expect(ledger['qa-card'].phases).toBe(1);
     });
+});
 
-    it('keeps the unclamped legacy projection when no cap is given', () => {
-        const ledger = recordAttribution({}, 'qa-card', 'QA Card', poisonLanded(5, 74), 0);
-        expect(ledger['qa-card'].dotDamage).toBe(740);
+// WI-9 — buildCombatSummary sums the enemy's ACTUAL emitted dot-tick events,
+// attributed to the card that applied each effect; it never projects. This is
+// the fix for "Straw Man's Jab — 27 dmg" printed while the bar read 90/90.
+describe('buildCombatSummary — DoT is summed from emitted ticks, not projected (WI-9)', () => {
+    const dotTick = (effectId: string, amount: number): CombatEvent =>
+        ({ kind: 'dot-tick', effectId, label: effectId, amount, target: 'enemy' });
+
+    function completeWith(attribution: Record<string, CombatAttributionRow>, log: CombatEvent[], enemyHp = 100) {
+        const base = initializeCombatEncounter(makePlayer([DOT_BODY]), makeEnemy(enemyHp), undefined, SEED);
+        return {
+            ...base, phase: 'complete' as const, finalOutcome: 'victory' as const,
+            attribution, log,
+        };
+    }
+
+    it('attributes real ticks to the applying card (via effect provenance)', () => {
+        // The card applied poison (provenance) and the log shows 3 real ticks (4+4+6).
+        const ledger = recordAttribution({}, DOT_BODY, 'Slippery Slope', {
+            effectId: 'debuff_poison', effect: lookupEffect('debuff_poison')!,
+            active: { effectId: 'debuff_poison', intensity: 1, remainingDuration: 4, appliedAt: 1, tier: 2 },
+            target: 'enemy',
+        }, 0);
+        const log = [dotTick('debuff_poison', 4), dotTick('debuff_poison', 4), dotTick('debuff_poison', 6)];
+        const summary = buildCombatSummary(completeWith(ledger, log));
+        expect(summary.totalDotDamage).toBe(14);
+        expect(summary.rows.find(r => r.cardId === DOT_BODY)?.dotDamage).toBe(14);
+    });
+
+    it('the old fiction is dead: a card that applied a DoT that NEVER ticked scores 0 DoT', () => {
+        const ledger = recordAttribution({}, DOT_BODY, 'Slippery Slope', {
+            effectId: 'debuff_poison', effect: lookupEffect('debuff_poison')!,
+            active: { effectId: 'debuff_poison', intensity: 5, remainingDuration: 74, appliedAt: 1, tier: 2 },
+            target: 'enemy',
+        }, 0);
+        const summary = buildCombatSummary(completeWith(ledger, [])); // no ticks emitted
+        expect(summary.totalDotDamage).toBe(0);
+        expect(summary.rows.find(r => r.cardId === DOT_BODY)?.dotDamage).toBe(0);
+    });
+
+    it('ticks with no card provenance (engine drips) fall into a Lingering afflictions row', () => {
+        const log = [dotTick('suppurating-curse', 8), dotTick('vulnerable-surcharge', 2)];
+        const summary = buildCombatSummary(completeWith({}, log));
+        expect(summary.totalDotDamage).toBe(10);
+        expect(summary.rows.find(r => r.name === 'Lingering afflictions')?.dotDamage).toBe(10);
     });
 });
 

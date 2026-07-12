@@ -147,6 +147,27 @@ describe('card-face honesty guard', () => {
         expect(offenders).toEqual([]);
     });
 
+    it('P2 HP→VITAE sweep — no card face or detail string says "HP" (player-facing term is VITAE)', () => {
+        const offenders: string[] = [];
+        const hp = /\bHP\b/;
+        for (const { id } of cardLibrary) {
+            const card = getCard(id);
+            const src = getCardById(id);
+            if (!card || !src) continue;
+            const f = faceStats(card, src);
+            const d = detailStats(card, src);
+            const faceStrings = [f.heroText, f.heroSub ?? '', f.verbLine, f.powerRail, f.freeHeroText];
+            const detailStrings = [
+                d.subtitle, d.outcomeLine, d.powerLine, d.readNote, d.mathLine, d.freeLine,
+                ...d.outcomeStats.map(s => `${s.label} ${s.value}`),
+            ];
+            for (const s of [...faceStrings, ...detailStrings]) {
+                if (hp.test(s)) { offenders.push(`${id}: "${s}"`); break; }
+            }
+        }
+        expect(offenders).toEqual([]);
+    });
+
     it('every headlined PAID keyword has a glossary definition (the "description above the card")', () => {
         const missing: string[] = [];
         for (const { id } of cardLibrary) {

@@ -337,12 +337,19 @@ export interface CombatPhaseResult {
 export interface CombatAttributionRow {
     cardId: string;
     name: string;
-    /** Total DoT damage projected/dealt by this card's effects. */
+    /** ACTUAL DoT damage the enemy took from ticks of THIS card's effects, summed
+     *  from emitted `dot-tick` events at summary time (WI-9). No longer a
+     *  projection of the DoT's whole life — post trigger-migration a poison/bleed
+     *  can sit for its whole duration and never tick. */
     dotDamage: number;
-    /** Total HP damage this card dealt the enemy (strike + DoT, attributed). */
+    /** Total DIRECT HP damage this card dealt the enemy now (strikes + payoff
+     *  bursts), overkill-clamped to HP actually applicable. */
     damageDealt: number;
     /** Phases across which the card's effects were active. */
     phases: number;
+    /** WI-9 — the DoT effect ids this card applied, so the summary can attribute
+     *  their ACTUAL emitted ticks back to this card. Optional (absent = none). */
+    effectIds?: string[];
 }
 
 export interface CombatSummary {
@@ -390,7 +397,7 @@ export type CombatEvent =
     // threat phase was refused (the state is untouched; the tray stays as-is).
     | { kind: 'turn-law-blocked'; turn: number; phaseIndex: number }
     | { kind: 'die-drafted'; dieId: string; color: CombatDieColor; read: CombatReadResult }
-    | { kind: 'conviction-gained'; amount: number; total: number; reason: 'unpicked-die' | 'read-win' | 'effect' }
+    | { kind: 'conviction-gained'; amount: number; total: number; reason: 'unpicked-die' | 'read-win' | 'effect' | 'scrap' }
     | { kind: 'stance-revealed'; phaseIndex: number; stance: Stance }
     | { kind: 'read-result'; stance: CombatDieColor; enemyStance: Stance; result: CombatReadResult }
     | { kind: 'signature-cast'; signatureId: SignatureSkillId; name: string; cost: number }
@@ -633,6 +640,12 @@ export interface CombatEncounterState {
     /** Spec 32 §12 #4 — the prior round's `enemyDamageThisTurn`. The enemy hits
      *  BETWEEN player turns, so this is the value a card played this turn reads. */
     enemyDamageLastRound?: number;
+    /** WI-10 (2026-07-12) — scraps taken THIS turn. Scrapping a hand card pays
+     *  +1 Conviction only for the first {@link SCRAP_CONVICTION_CAP_PER_TURN}
+     *  scraps per turn; further scraps still cycle the card but pay nothing, so
+     *  "scrap the whole hand for +6◆/turn" against a 12 cap is closed. Reset each
+     *  turn in `startTurn`. Optional for back-compat (absent = 0). */
+    scrapsThisTurn?: number;
     /** WI-1 (2026-07-12) — the REAL DoT damage the enemy has taken from
      *  event-triggered ticks so far THIS round (poison `card-played`, bleed
      *  `damage-instance`, fate-tap, TICK riders). Folded in `withLog` at every

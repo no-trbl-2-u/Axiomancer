@@ -161,23 +161,23 @@ const KEYWORD_GLOSS: Record<string, string> = {
         + 'Unused Guard is lost unless the card prints "persists".',
     Tick: 'Your strongest damage-over-time effect on the enemy ticks again, immediately.',
     Mark:
-        'Every damage-over-time tick on the bearer deals +1 HP per Mark stack. '
+        'Every damage-over-time tick on the bearer deals +1 VITAE per Mark stack. '
         + 'Marks hold until consumed.',
     Cleanse: 'Removes up to that many afflictions from you.',
     Heal: 'Restores that much VITAE, up to your maximum.',
     Rupture:
         'Consumes afflictions on the enemy and detonates their remaining harm as one burst. '
-        + "The burst is capped at 60% of the enemy's max HP.",
+        + "The burst is capped at 60% of the enemy's max VITAE.",
     Siphon: 'Heals you for the printed percentage of the damage this play deals.',
     // ── Affliction (T1) ──
     Prolong: 'Adds that many turns to every damage-over-time effect you have on the enemy.',
     Reargue: "Flips the enemy's Bleed into Poison and its Poison into Bleed, each landing that much harder.",
     Poison:
-        'Deals 2 HP per stack each time a card is played, growing by 1 every 2 rounds it holds. '
+        'Deals 2 VITAE per stack each time a card is played, growing by 1 every 2 rounds it holds. '
         + 'Applying poison again resets the growth.',
-    Bleed: 'Each hit the bearer takes deals 3 more HP per Bleed stack, then removes a stack.',
+    Bleed: 'Each hit the bearer takes deals 3 more VITAE per Bleed stack, then removes a stack.',
     Doom:
-        'Deals 1 HP per stack at the start of each round and grows a stack every time the enemy acts. '
+        'Deals 1 VITAE per stack at the start of each round and grows a stack every time the enemy acts. '
         + 'It ends only when consumed.',
     // ── Peroration (T2) ──
     Premise:
@@ -198,7 +198,7 @@ const KEYWORD_GLOSS: Record<string, string> = {
         "Removes that many rungs from the enemy's next telegraphed action — 2 rungs on a normal action, 3 on a boss. "
         + 'Removing every rung denies the action outright.',
     Backfire:
-        'The enemy takes 1 HP per Backfire stack for each rung its telegraphed action loses. '
+        'The enemy takes 1 VITAE per Backfire stack for each rung its telegraphed action loses. '
         + 'A denied action counts all of its rungs.',
     // ── Oracle (T6) ──
     Foretell: "Reveals the enemy's next stance and looks at that many cards of your deck, moving the best to the top.",
@@ -209,10 +209,10 @@ const KEYWORD_GLOSS: Record<string, string> = {
     // ── Charm (T8) ──
     Sway:
         'Builds on the enemy and decays 1 at the end of each round. '
-        + 'The enemy capitulates when Sway reaches its resolve — roughly 35% of its max HP.',
+        + 'The enemy capitulates when Sway reaches its resolve — roughly 35% of its max VITAE.',
     Rapport: "The enemy's attacks deal 10% less damage per Rapport stack.",
     // ── Bulwark (T9) ──
-    Thorns: 'The enemy takes 1 HP per Thorns stack each threat phase it attacks you — even through a full block.',
+    Thorns: 'The enemy takes 1 VITAE per Thorns stack each threat phase it attacks you — even through a full block.',
     Riposte:
         'Armed for one threat phase: the first incoming attack is reduced by the printed parry amount. '
         + 'If your Guard fully blocks an attack, the enemy takes the printed counter damage.',
@@ -329,7 +329,7 @@ export function allRegistryKeywords(): readonly string[] {
  */
 export const SYSTEM_GLOSSARY: readonly { term: string; def: string }[] = [
     { term: 'CONVICTION ◆', def: 'A spend-anytime resource banked from unspent dice and overflow. It never decays.' },
-    { term: 'RESONANCE ⬡', def: 'A per-round tally of dice spent by color. Threshold lines fire once the tally is reached that round.' },
+    { term: 'RESONANCE ⬡', def: 'A running tally, for the whole combat, of dice you spend by color. A ⬡ threshold line fires once you have spent that many dice of its color this combat.' },
     { term: 'RESERVE & PIPS', def: 'Up to 2 dice held between phases instead of played. Each gains +1 pip per phase it survives, spent for extra intensity or Guard.' },
     { term: 'FLOATING ✦', def: 'A forged die that plays alongside your drafted die, never rerolls, and is gone forever when spent.' },
     { term: 'RUNGS', def: "The steps of the enemy's telegraphed action — 2 on a normal action, 3 on a boss. Losing all of them denies the action." },

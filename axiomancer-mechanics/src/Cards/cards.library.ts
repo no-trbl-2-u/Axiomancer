@@ -1085,7 +1085,7 @@ const theReaping: Card = {
 const boneOrchard: Card = {
     id: 'bone-orchard',
     theme: 'harvest',
-    persistentEffect: 'Drain 1 HP from the enemy for every SOUL you gain.',
+    persistentEffect: 'Drain 1 VITAE from the enemy for every SOUL you gain.',
     name: 'Bone Orchard',
     category: 'fallacy',
     philosophicalAspect: 'mind',

@@ -122,6 +122,11 @@ export const THREAT_DENY_AT = 8;
 export const THREAT_WEAKEN_FLOOR = 0.4;
 /** Conviction is capped so a long grind can't bank a Signature spam. */
 export const CONVICTION_CAP = 12;
+/** WI-10 — how many scraps per turn PAY +1 Conviction. The hand refills to 6, so
+ *  an ungated scrap paid +6◆/turn against the 12 cap (scrap-the-hand). Beyond
+ *  this many, a scrap still cycles the dead card but pays nothing. Tunable under
+ *  EA-2's baseline. */
+export const SCRAP_CONVICTION_CAP_PER_TURN = 2;
 // Spec 32 v3 §1 — DIRECT_DAMAGE_WEIGHT is DEAD: the strike was purged from the
 // schema (`basePower` no longer exists), so there is no immediate-strike path
 // to weight. Every HP source is DoT ticks, status payoffs, engine-gated drips,
@@ -497,6 +502,8 @@ export function startTurn(
         // WI-1 — the enemy-DoT accumulator is per-round; a fresh turn zeroes it
         // so `suppurating-curse` only doubles THIS round's real DoT total.
         enemyDotDamageThisRound: 0,
+        // WI-10 — the per-turn scrap-pay counter resets with the turn.
+        scrapsThisTurn: 0,
         // Gate 0 — this phase's one legal tray roll is now taken.
         turnTakenThisPhase: true,
     };
@@ -775,15 +782,23 @@ export function playCombatCard(
 /**
  * Spec 26b — scrap a hand card for +1 Conviction. Turns a dead draw into resolve
  * toward a Signature Skill (the agency lever through a bad hand). Phase-play only.
+ *
+ * WI-10 (2026-07-12): only the first {@link SCRAP_CONVICTION_CAP_PER_TURN} scraps
+ * per turn PAY. The hand refills to 6, so an ungated scrap-the-hand banked
+ * +6◆/turn against the 12 cap; beyond the cap a scrap still cycles the dead card
+ * (agency preserved) but pays nothing. The `conviction-gained` event carries
+ * `reason: 'scrap'` so the gate is testable and telemetry can see it.
  */
 export function discardCombatCard(state: CombatEncounterState, uid: string): CombatTransition {
     if (state.phase !== 'phase-play') return { state, events: [] };
     const entry = state.hand.find(h => h.uid === uid);
     if (!entry) return { state, events: [] };
-    const conviction = Math.min(CONVICTION_CAP, state.conviction + 1);
-    // WS2.1: scrapping a conjured Thoughtform still pays its +1 Conviction,
-    // but the one-use token leaves the combat — it never joins the discard
-    // cycle (where a reshuffle would resurrect it as a permanent deck card).
+    const scrapsThisTurn = state.scrapsThisTurn ?? 0;
+    const pays = scrapsThisTurn < SCRAP_CONVICTION_CAP_PER_TURN;
+    const conviction = pays ? Math.min(CONVICTION_CAP, state.conviction + 1) : state.conviction;
+    // WS2.1: scrapping a conjured Thoughtform (when it pays) still earns its +1
+    // Conviction, but the one-use token leaves the combat — it never joins the
+    // discard cycle (where a reshuffle would resurrect it as a permanent card).
     const conjured = (state.conjuredUids ?? []).includes(uid);
     const next: CombatEncounterState = {
         ...state,
@@ -793,8 +808,11 @@ export function discardCombatCard(state: CombatEncounterState, uid: string): Com
             ? (state.conjuredUids ?? []).filter(u => u !== uid)
             : state.conjuredUids,
         conviction,
+        scrapsThisTurn: scrapsThisTurn + 1,
     };
-    const events: CombatEvent[] = [{ kind: 'conviction-gained', amount: 1, total: conviction, reason: 'effect' }];
+    const events: CombatEvent[] = pays
+        ? [{ kind: 'conviction-gained', amount: 1, total: conviction, reason: 'scrap' }]
+        : [];
     return { state: withLog(next, events), events };
 }
 

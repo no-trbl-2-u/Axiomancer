@@ -258,7 +258,9 @@ function DiceRow({
                                 {die.readPip === 'advantage' ? '▲ ADV' : die.readPip === 'disadvantage' ? '▼ DIS' : '— EVEN'}
                             </Text>
                         ) : null}
-                        {!die.reserve && !die.floating && vm.hasDraft && !die.drafted && <Text style={styles.dieConv}>→ +1 ◆</Text>}
+                        {/* P2 — the spare was already converted at draft; the old
+                            future-tense "→ +1 ◆" lied. State it in the past. */}
+                        {!die.reserve && !die.floating && vm.hasDraft && !die.drafted && <Text style={styles.dieConv}>burned +1 ◆</Text>}
                         {/* A REFRESHED combo die is live again — it reads as a
                             re-draggable die, not as the locked STANCE draft
                             (stale-powered fix, 2026-07-12). */}
@@ -375,6 +377,16 @@ const StagedCard = React.memo(function StagedCard({
     const readPip = armed && f.readDependent
         ? (read === 'advantage' ? '▲' : read === 'disadvantage' ? '▼' : '—')
         : null;
+    // P2 — spell out the APPLY suffix instead of a bare glyph. A read-dependent
+    // powered play names the read (WON / LOST / EVEN); a plain powered play names
+    // the die color; the dieless out reads FREE.
+    const applyLabel = !armed
+        ? 'APPLY · FREE'
+        : f.readDependent
+            ? `APPLY · ${read === 'advantage' ? '▲ WON READ' : read === 'disadvantage' ? '▼ LOST READ' : '— EVEN READ'}`
+            : assignedDie?.color
+                ? `APPLY · ${assignedDie.color.toUpperCase()} DIE`
+                : 'APPLY · POWERED';
     return (
         <View style={styles.stagedCol}>
             <GestureDetector gesture={gesture}>
@@ -468,7 +480,7 @@ const StagedCard = React.memo(function StagedCard({
                 ]}
             >
                 <Text style={[styles.applyText, { color: armed ? readColor : freeProminent ? AXM.sulfur : AXM.parchment }, compact && { fontSize: 10 }]} numberOfLines={1} adjustsFontSizeToFit>
-                    {armed ? `APPLY ${readPip ?? '◆'}` : 'APPLY · FREE'}
+                    {applyLabel}
                 </Text>
             </Pressable>
         </View>

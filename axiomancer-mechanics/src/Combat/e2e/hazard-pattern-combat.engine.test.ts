@@ -31,6 +31,7 @@ import {
     resolveCardDieCost, resolveRead, getCard, buildCombatSummary,
     draftStanceDie, getDraftedDie, isPhaseStanceRevealed,
     playSignatureSkill, discardCombatCard, projectCardImpact, endTurn,
+    startTurn, SCRAP_CONVICTION_CAP_PER_TURN,
 } from '../combat.engine';
 import { CONCLUDE_DMG_PER_STACK } from '../combat.signature';
 import { getSignaturesForLoadout, getRelicById } from '../../Items/relic.library';
@@ -391,7 +392,42 @@ describe('Spec 26b §4 — Signature Skills (Conviction-funded)', () => {
         const before = state.conviction;
         const r = discardCombatCard(state, uid);
         expect(r.state.conviction).toBe(before + 1);
+        expect(r.events.some(e => e.kind === 'conviction-gained'
+            && (e as { reason: string }).reason === 'scrap')).toBe(true);
         expect(r.state.hand.find(h => h.uid === uid)).toBeUndefined();
+    });
+
+    it('scrap PAYS only the first N per turn, then cycles the card for free (WI-10)', () => {
+        mockSequentialRng(0.5);
+        const deck = Array.from({ length: 6 }, () => DOT_BODY);
+        let state = initializeCombatEncounter(makePlayer([DOT_BODY]), makeEnemy(200), deck, 6);
+        state = rollEncounterDice(state).state;
+        state = { ...state, conviction: 0 };
+        const uids = state.hand.map(h => h.uid);
+        expect(uids.length).toBeGreaterThan(SCRAP_CONVICTION_CAP_PER_TURN);
+
+        // The first N scraps each pay +1◆ (reason 'scrap').
+        let r = discardCombatCard(state, uids[0]);
+        for (let i = 1; i < SCRAP_CONVICTION_CAP_PER_TURN; i++) r = discardCombatCard(r.state, uids[i]);
+        expect(r.state.conviction).toBe(SCRAP_CONVICTION_CAP_PER_TURN);
+
+        // The next scrap still removes the dead card (agency preserved) but pays nothing.
+        const capUid = uids[SCRAP_CONVICTION_CAP_PER_TURN];
+        const capped = discardCombatCard(r.state, capUid);
+        expect(capped.state.conviction).toBe(SCRAP_CONVICTION_CAP_PER_TURN); // no more pay
+        expect(capped.events.some(e => e.kind === 'conviction-gained')).toBe(false);
+        expect(capped.state.hand.find(h => h.uid === capUid)).toBeUndefined(); // still cycled
+        expect(capped.state.scrapsThisTurn).toBe(SCRAP_CONVICTION_CAP_PER_TURN + 1);
+    });
+
+    it('the scrap-pay cap resets each turn — startTurn zeroes scrapsThisTurn (WI-10)', () => {
+        mockSequentialRng(0.5);
+        let state = initializeCombatEncounter(makePlayer([DOT_BODY]), makeEnemy(200), [DOT_BODY], 6);
+        state = rollEncounterDice(state).state;
+        // Simulate a turn that already spent its scrap budget, then re-arm the roll.
+        state = { ...state, scrapsThisTurn: SCRAP_CONVICTION_CAP_PER_TURN, draftedDieId: null, turnTakenThisPhase: false };
+        const next = startTurn(state).state;
+        expect(next.scrapsThisTurn).toBe(0);
     });
 
     it('Overwhelming Argument PETRIFIES a normal foe — real hard control, not the old inert BACKFIRE (WI-8)', () => {

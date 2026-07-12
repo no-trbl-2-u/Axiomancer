@@ -26,12 +26,23 @@ export const CombatDie = React.memo(function CombatDie({ die, size = 54, dimmed 
     const glow = !die.isX && !dimmed;
     const glowSize = size * 1.6;
     const gradId = `axmDieGlow-${die.color}`;
+    // P2 — the a11y state must not lie. A spare die once a draft exists is no
+    // longer draggable: it was already burned for Conviction at draft, so the old
+    // flat ", available to draft" was stale. Surface Reserve / floating / spent
+    // states screen readers had no way to hear.
+    const statePhrase =
+        die.drafted ? (die.spent ? ', spent as your stance' : ', drafted as your stance')
+            : die.isX ? ', blocked'
+                : die.reserve ? ', banked in the Reserve'
+                    : die.floating ? ', floating — a second power source'
+                        : die.draggable === false ? ', spent — burned for Conviction'
+                            : ', available to draft';
     return (
         <View
             testID={`combat-die-${die.id}`}
             accessible
             accessibilityRole="button"
-            accessibilityLabel={`${die.stanceLabel} stance die${die.drafted ? ', drafted as your stance' : die.isX ? ', blocked' : ', available to draft'}`}
+            accessibilityLabel={`${die.stanceLabel} stance die${statePhrase}`}
             style={{ width: size, height: size, alignItems: 'center', justifyContent: 'center', opacity: dimmed && !die.drafted ? 0.45 : 1 }}
         >
             {glow && (
