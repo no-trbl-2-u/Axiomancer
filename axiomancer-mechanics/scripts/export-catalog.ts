@@ -31,10 +31,9 @@ import { join } from 'node:path';
 
 import { cardLibrary } from '../src/Cards/cards.library';
 import { CARD_RANK_NAMES, rankToRarity } from '../src/Cards/types';
-import { FREE_ENCHANT_ROUNDS } from '../src/Game/game-mechanics.constants';
 import { cardOrigin } from '../src/Combat/combat.deck-presets';
 import { THEME_KEYWORDS, type CardTheme } from '../src/Cards/card-themes';
-import { mechanicText, riderText } from '../src/Combat/combat.cards';
+import { toCombatCard } from '../src/Combat/combat.cards';
 import { EnemyLibrary } from '../src/Enemy/enemy.library';
 import { effectsLibrary, lookupEffect } from '../src/Effects/effects.library';
 // Pure, dependency-free presentation mapping (effect → glyph + colour).
@@ -139,10 +138,21 @@ type Chip = { k: string; v: string };
 const signed = (n: number) => (n >= 0 ? `+${n}` : `${n}`);
 const pct = (n: number) => `${n > 0 ? '+' : ''}${Math.round((n - 1) * 100)}%`;
 
-/** A card's special-mechanic entry → one short label (spec 32 v3 vocabulary). */
-function specialMechanicLabel(sm: any): string {
-    const amt = sm.amount ?? sm.count ?? sm.rungs;
-    return mechanicText(sm) ?? (amt != null ? `${sm.kind} ${amt}` : String(sm.kind));
+/**
+ * The catalog face reuses the game's own card renderer (`toCombatCard`) so it
+ * shows exactly what a player sees in combat — expanded die-line riders,
+ * effect-default durations, DoT lifetime previews — instead of a lossy
+ * re-derivation. Shared frame boilerplate ("Costs 1 die", the rank tag) is
+ * stripped here because `docs/card-frame-legend.md` states it once for the
+ * whole library (keep the card face terse; the legend carries the frame).
+ */
+const lookupCard = (id: string) => cardLibrary.find((c) => c.id === id) ?? null;
+const RANK_TAG = new RegExp(`\\s*\\((?:${Object.values(CARD_RANK_NAMES).join('|')})\\)\\.?$`);
+function faceLines(c: any): string[] {
+    const cc: any = toCombatCard(c.id, lookupCard as any, lookupEffect);
+    if (!cc) return [];
+    const strip = (s: string) => s.replace(' Costs 1 die.', '').replace(RANK_TAG, '').trim();
+    return [strip(cc.topActionText), strip(cc.bottomActionText)].filter(Boolean);
 }
 
 function cardStats(c: any): { chips: Chip[]; lines: string[] } {
@@ -163,29 +173,7 @@ function cardStats(c: any): { chips: Chip[]; lines: string[] } {
     chips.push({ k: 'Source', v: origin.source });
     if (origin.presetDeck) chips.push({ k: 'Preset', v: origin.presetDeck });
 
-    const lines: string[] = [];
-    // Spec 32 v4 — enchant/disenchant passives live in engine hooks; their authored
-    // `persistentEffect` summary is the only card-facing description. Render it on
-    // both lines: FREE grants it timed (a few rounds), PAID makes it permanent.
-    if ((c.cardType === 'enchantment' || c.cardType === 'disenchant') && c.persistentEffect) {
-        const target = c.cardType === 'disenchant' ? ' (attaches to the enemy)' : '';
-        lines.push(`FREE (${FREE_ENCHANT_ROUNDS} rounds) — ${c.persistentEffect}`);
-        lines.push(`PAID (rest of combat) — ${c.persistentEffect}${target}`);
-    }
-    if (c.free) lines.push(`FREE — ${riderText(c.free)}`);
-    for (const ce of c.combatEffects ?? []) {
-        const nm = lookupEffect(ce.effectId)?.name ?? ce.effectId;
-        const who = ce.appliedTo === 'self' ? 'self' : 'enemy';
-        const dur = ce.duration ? `, ${ce.duration}t` : '';
-        lines.push(`Applies ${nm} ×${ce.intensity ?? 1}${dur} → ${who}`);
-    }
-    for (const sm of c.specialMechanics ?? []) lines.push(specialMechanicLabel(sm));
-    if (c.threshold) lines.push(`Threshold: ${c.threshold.count}× ${c.threshold.color} die fires a rider`);
-    if (c.dieBonus) lines.push(`Die bonus: powering die ${c.dieBonus.onColor} fires a rider`);
-    if (c.fate) lines.push(`Fate: playable by an X die${c.fate.recoilHp ? ` (recoil ${c.fate.recoilHp} HP)` : ''}`);
-    if (c.fallen) lines.push(`Fallen: ${riderText(c.fallen.rider)}`);
-    if (c.synergy) lines.push('Synergy clause (stance-switch payoff)');
-    return { chips, lines };
+    return { chips, lines: faceLines(c) };
 }
 
 /** An effect's payload → short mechanical stat lines. */
