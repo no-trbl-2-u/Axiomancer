@@ -269,7 +269,7 @@ export function mechanicText(m: CardSpecialMechanic): string | null {
         // The declared conclusion prints its full payload — the rider used to
         // be dropped — and the CONCEDE bar names the elite/boss floors
         // (`concedeFloorFor` raises the authored value against them).
-        case 'peroration': return `PERORATION at ${m.at} — ${riderText(m.rider)}${m.concedeAt ? ` (CONCEDE at ${m.concedeAt}; ${CONCEDE_PREMISES_ELITE} vs elites, ${CONCEDE_PREMISES_BOSS} vs bosses)` : ''}`;
+        case 'peroration': return `PERORATION at ${m.at} — ${riderText(m.rider)}${m.concedeAt ? ` (CONCEDE at ${m.concedeAt} · elite ${CONCEDE_PREMISES_ELITE} · boss ${CONCEDE_PREMISES_BOSS})` : ''}`;
         case 'spend_premises': return `spend ALL Premises — +1 mark per ${m.markPer}, draw 1 per ${m.drawPer}`;
         case 'spend_all_pips': return `spend ALL pips${m.guardPerPip ? ` (+${m.guardPerPip} Guard per pip)` : ''}${m.markPer ? ` (+1 MARK per ${m.markPer} spent, uncapped)` : ''}`;
         case 'recoil': return `RECOIL ${m.hp}`;

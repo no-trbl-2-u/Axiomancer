@@ -163,7 +163,7 @@ const resonanceDetonation: Card = {
 const venomAndVein: Card = {
     id: 'venom-and-vein',
     theme: 'affliction',
-    persistentEffect: 'Every BLEED or POISON you apply lands at +1 intensity.',
+    persistentEffect: 'Your BLEED and POISON land +1 intensity and +1 duration.',
     name: 'Venom and Vein',
     category: 'fallacy',
     philosophicalAspect: 'body',
@@ -180,7 +180,7 @@ const venomAndVein: Card = {
 const suppuratingCurse: Card = {
     id: 'suppurating-curse',
     theme: 'affliction',
-    persistentEffect: 'At round end, the enemy takes its total POISON and BLEED tick damage from this round again.',
+    persistentEffect: "At round end, the enemy takes this round's POISON and BLEED damage again.",
     name: 'Suppurating Curse',
     category: 'fallacy',
     philosophicalAspect: 'mind',
@@ -319,7 +319,7 @@ const theClosingWord: Card = {
 const practicedCadence: Card = {
     id: 'practiced-cadence',
     theme: 'peroration',
-    persistentEffect: '+1 PREMISE on the first card you play each turn.',
+    persistentEffect: '+1 PREMISE on your first card each turn.',
     name: 'Practiced Cadence',
     category: 'fallacy',
     philosophicalAspect: 'heart',
@@ -336,7 +336,7 @@ const practicedCadence: Card = {
 const captiveAudience: Card = {
     id: 'captive-audience',
     theme: 'peroration',
-    persistentEffect: 'While you hold 4+ PREMISEs, MARK the enemy +1 stack each turn (to 10).',
+    persistentEffect: 'Hold 4+ PREMISEs: MARK the enemy +1 each turn (to 10).',
     name: 'Captive Audience',
     category: 'fallacy',
     philosophicalAspect: 'heart',
@@ -500,7 +500,7 @@ const anvilOfForm: Card = {
 const entropyTax: Card = {
     id: 'entropy-tax',
     theme: 'forge',
-    persistentEffect: 'When a KINDLEd or FORGEd die powers a card, MARK the enemy (mark i1; once per play).',
+    persistentEffect: 'A KINDLEd or FORGEd die powering a card MARKs the enemy (i1, once per play).',
     name: 'Entropy Tax',
     category: 'paradox',
     philosophicalAspect: 'mind',
@@ -638,7 +638,7 @@ const pactOfAkrasia: Card = {
 const crownOfThorns: Card = {
     id: 'crown-of-thorns',
     theme: 'akrasia',
-    persistentEffect: 'While FALLEN, your status applications land at +1 intensity.',
+    persistentEffect: 'While FALLEN, your statuses land +1 intensity per affliction you carry beyond the first (max +4).',
     name: 'Crown of Thorns',
     category: 'paradox',
     philosophicalAspect: 'heart',
@@ -655,7 +655,7 @@ const crownOfThorns: Card = {
 const mirrorOfGuilt: Card = {
     id: 'mirror-of-guilt',
     theme: 'akrasia',
-    persistentEffect: 'Every self-debuff your own cards land also lands 1 stack of it on the enemy; every 3 RECOIL paid in a play mirrors 1 more stack.',
+    persistentEffect: 'Your self-debuffs land 1 stack on the enemy too; +1 stack per 3 RECOIL paid.',
     name: 'Mirror of Guilt',
     category: 'paradox',
     philosophicalAspect: 'mind',
@@ -793,7 +793,7 @@ const paralysisOfAnalysis: Card = {
 const achillesAndTheTortoise: Card = {
     id: 'achilles-and-the-tortoise',
     theme: 'control',
-    persistentEffect: 'DRAW 1 card each time your STAGGER denies an enemy turn.',
+    persistentEffect: 'DRAW 1 whenever your STAGGER denies an enemy turn.',
     name: 'Achilles and the Tortoise',
     category: 'paradox',
     philosophicalAspect: 'mind',
@@ -947,7 +947,7 @@ const prophecyFulfilled: Card = {
 const theOraclesEye: Card = {
     id: 'the-oracles-eye',
     theme: 'oracle',
-    persistentEffect: 'The next enemy stance is always revealed (FORETELL); OMEN rider payoffs land ×1.5 (round up).',
+    persistentEffect: 'The next stance stays revealed (FORETELL); OMEN payoffs land ×1.5 (round up).',
     name: "The Oracle's Eye",
     category: 'paradox',
     philosophicalAspect: 'heart',
@@ -964,7 +964,7 @@ const theOraclesEye: Card = {
 const fatedCourse: Card = {
     id: 'fated-course',
     theme: 'oracle',
-    persistentEffect: 'Every OMEN that hits MARKs the foe (mark i1).',
+    persistentEffect: 'Every OMEN that hits MARKs the foe (i1).',
     name: 'Fated Course',
     category: 'paradox',
     philosophicalAspect: 'mind',
@@ -1085,7 +1085,7 @@ const theReaping: Card = {
 const boneOrchard: Card = {
     id: 'bone-orchard',
     theme: 'harvest',
-    persistentEffect: 'Every SOUL you gain deals 1 damage to the enemy.',
+    persistentEffect: 'Each SOUL you gain deals 1 to the enemy.',
     name: 'Bone Orchard',
     category: 'fallacy',
     philosophicalAspect: 'mind',
@@ -1232,7 +1232,7 @@ const heartOfTheMatter: Card = {
 const irresistibleGrace: Card = {
     id: 'irresistible-grace',
     theme: 'charm',
-    persistentEffect: 'Your SWAY stops decaying; SWAY gains land +12% per turn held (caps at +108%).',
+    persistentEffect: 'SWAY never decays; each gain lands +12% per turn held (max +108%).',
     name: 'Irresistible Grace',
     category: 'paradox',
     philosophicalAspect: 'heart',
@@ -1252,7 +1252,7 @@ const irresistibleGrace: Card = {
 const mirrorOfLonging: Card = {
     id: 'mirror-of-longing',
     theme: 'charm',
-    persistentEffect: 'Damage your GUARD or parry prevents converts to SWAY, 1 per point.',
+    persistentEffect: 'Damage your GUARD or parry prevents becomes SWAY, 1:1.',
     name: 'Mirror of Longing',
     category: 'paradox',
     philosophicalAspect: 'heart',
@@ -1380,7 +1380,7 @@ const theAdamantWall: Card = {
 const hedgehogsDilemma: Card = {
     id: 'hedgehogs-dilemma',
     theme: 'bulwark',
-    persistentEffect: 'Every THORNS reflection also MARKs the enemy (mark i1).',
+    persistentEffect: 'Every THORNS reflection also MARKs the enemy (i1).',
     name: "Hedgehog's Dilemma",
     category: 'paradox',
     philosophicalAspect: 'body',
@@ -1397,7 +1397,7 @@ const hedgehogsDilemma: Card = {
 const crumblingResolve: Card = {
     id: 'crumbling-resolve',
     theme: 'bulwark',
-    persistentEffect: 'A fully-blocked (GUARD) attack STAGGERs the enemy a rung on its next telegraph; each phase, standing GUARD drips 20% of itself (min 4) to the enemy.',
+    persistentEffect: 'Each phase, standing GUARD deals 20% of itself (min 4); a fully-blocked attack STAGGERs the next telegraph.',
     name: 'Crumbling Resolve',
     category: 'fallacy',
     philosophicalAspect: 'body',
@@ -1541,7 +1541,7 @@ const ouroboros: Card = {
 const resonantChamber: Card = {
     id: 'resonant-chamber',
     theme: 'echo',
-    persistentEffect: 'The first spell you cast each turn gains ECHO (fires twice).',
+    persistentEffect: 'Your first spell each turn gains ECHO.',
     name: 'Resonant Chamber',
     category: 'paradox',
     philosophicalAspect: 'mind',
@@ -1558,7 +1558,7 @@ const resonantChamber: Card = {
 const stuckInTheirHead: Card = {
     id: 'stuck-in-their-head',
     theme: 'echo',
-    persistentEffect: "Every ECHO, RECALL, or replay drips damage equal to the enemy's MARK stacks (min 2, max 16).",
+    persistentEffect: "Each ECHO, RECALL, or replay deals the foe's MARK stacks as damage (min 2, max 16).",
     name: 'Stuck in Their Head',
     category: 'fallacy',
     philosophicalAspect: 'heart',

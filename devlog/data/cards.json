@@ -43,8 +43,8 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — DRAW 1 card each time your STAGGER denies an enemy turn.",
-   "PAID (rest of combat) — DRAW 1 card each time your STAGGER denies an enemy turn."
+   "FREE (3 rounds) — DRAW 1 whenever your STAGGER denies an enemy turn.",
+   "PAID (rest of combat) — DRAW 1 whenever your STAGGER denies an enemy turn."
   ]
  },
  {
@@ -299,8 +299,8 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — Every SOUL you gain deals 1 damage to the enemy.",
-   "PAID (rest of combat) — Every SOUL you gain deals 1 damage to the enemy."
+   "FREE (3 rounds) — Each SOUL you gain deals 1 to the enemy.",
+   "PAID (rest of combat) — Each SOUL you gain deals 1 to the enemy."
   ]
  },
  {
@@ -503,8 +503,8 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — While you hold 4+ PREMISEs, MARK the enemy +1 stack each turn (to 10).",
-   "PAID (rest of combat) — While you hold 4+ PREMISEs, MARK the enemy +1 stack each turn (to 10). Attaches to the enemy."
+   "FREE (3 rounds) — Hold 4+ PREMISEs: MARK the enemy +1 each turn (to 10).",
+   "PAID (rest of combat) — Hold 4+ PREMISEs: MARK the enemy +1 each turn (to 10). Attaches to the enemy."
   ]
  },
  {
@@ -711,8 +711,8 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — While FALLEN, your status applications land at +1 intensity.",
-   "PAID (rest of combat) — While FALLEN, your status applications land at +1 intensity."
+   "FREE (3 rounds) — While FALLEN, your statuses land +1 intensity per affliction you carry beyond the first (max +4).",
+   "PAID (rest of combat) — While FALLEN, your statuses land +1 intensity per affliction you carry beyond the first (max +4)."
   ]
  },
  {
@@ -763,8 +763,8 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — A fully-blocked (GUARD) attack STAGGERs the enemy a rung on its next telegraph; each phase, standing GUARD drips 20% of itself (min 4) to the enemy.",
-   "PAID (rest of combat) — A fully-blocked (GUARD) attack STAGGERs the enemy a rung on its next telegraph; each phase, standing GUARD drips 20% of itself (min 4) to the enemy. Attaches to the enemy."
+   "FREE (3 rounds) — Each phase, standing GUARD deals 20% of itself (min 4); a fully-blocked attack STAGGERs the next telegraph.",
+   "PAID (rest of combat) — Each phase, standing GUARD deals 20% of itself (min 4); a fully-blocked attack STAGGERs the next telegraph. Attaches to the enemy."
   ]
  },
  {
@@ -967,8 +967,8 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — When a KINDLEd or FORGEd die powers a card, MARK the enemy (mark i1; once per play).",
-   "PAID (rest of combat) — When a KINDLEd or FORGEd die powers a card, MARK the enemy (mark i1; once per play). Attaches to the enemy."
+   "FREE (3 rounds) — A KINDLEd or FORGEd die powering a card MARKs the enemy (i1, once per play).",
+   "PAID (rest of combat) — A KINDLEd or FORGEd die powering a card MARKs the enemy (i1, once per play). Attaches to the enemy."
   ]
  },
  {
@@ -1171,8 +1171,8 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — Every OMEN that hits MARKs the foe (mark i1).",
-   "PAID (rest of combat) — Every OMEN that hits MARKs the foe (mark i1). Attaches to the enemy."
+   "FREE (3 rounds) — Every OMEN that hits MARKs the foe (i1).",
+   "PAID (rest of combat) — Every OMEN that hits MARKs the foe (i1). Attaches to the enemy."
   ]
  },
  {
@@ -1427,8 +1427,8 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — Every THORNS reflection also MARKs the enemy (mark i1).",
-   "PAID (rest of combat) — Every THORNS reflection also MARKs the enemy (mark i1)."
+   "FREE (3 rounds) — Every THORNS reflection also MARKs the enemy (i1).",
+   "PAID (rest of combat) — Every THORNS reflection also MARKs the enemy (i1)."
   ]
  },
  {
@@ -1479,8 +1479,8 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — Your SWAY stops decaying; SWAY gains land +12% per turn held (caps at +108%).",
-   "PAID (rest of combat) — Your SWAY stops decaying; SWAY gains land +12% per turn held (caps at +108%)."
+   "FREE (3 rounds) — SWAY never decays; each gain lands +12% per turn held (max +108%).",
+   "PAID (rest of combat) — SWAY never decays; each gain lands +12% per turn held (max +108%)."
   ]
  },
  {
@@ -1631,8 +1631,8 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — Every self-debuff your own cards land also lands 1 stack of it on the enemy; every 3 RECOIL paid in a play mirrors 1 more stack.",
-   "PAID (rest of combat) — Every self-debuff your own cards land also lands 1 stack of it on the enemy; every 3 RECOIL paid in a play mirrors 1 more stack. Attaches to the enemy."
+   "FREE (3 rounds) — Your self-debuffs land 1 stack on the enemy too; +1 stack per 3 RECOIL paid.",
+   "PAID (rest of combat) — Your self-debuffs land 1 stack on the enemy too; +1 stack per 3 RECOIL paid. Attaches to the enemy."
   ]
  },
  {
@@ -1683,8 +1683,8 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — Damage your GUARD or parry prevents converts to SWAY, 1 per point.",
-   "PAID (rest of combat) — Damage your GUARD or parry prevents converts to SWAY, 1 per point. Attaches to the enemy."
+   "FREE (3 rounds) — Damage your GUARD or parry prevents becomes SWAY, 1:1.",
+   "PAID (rest of combat) — Damage your GUARD or parry prevents becomes SWAY, 1:1. Attaches to the enemy."
   ]
  },
  {
@@ -2095,8 +2095,8 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — +1 PREMISE on the first card you play each turn.",
-   "PAID (rest of combat) — +1 PREMISE on the first card you play each turn."
+   "FREE (3 rounds) — +1 PREMISE on your first card each turn.",
+   "PAID (rest of combat) — +1 PREMISE on your first card each turn."
   ]
  },
  {
@@ -2407,8 +2407,8 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — The first spell you cast each turn gains ECHO (fires twice).",
-   "PAID (rest of combat) — The first spell you cast each turn gains ECHO (fires twice)."
+   "FREE (3 rounds) — Your first spell each turn gains ECHO.",
+   "PAID (rest of combat) — Your first spell each turn gains ECHO."
   ]
  },
  {
@@ -2819,8 +2819,8 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — Every ECHO, RECALL, or replay drips damage equal to the enemy's MARK stacks (min 2, max 16).",
-   "PAID (rest of combat) — Every ECHO, RECALL, or replay drips damage equal to the enemy's MARK stacks (min 2, max 16). Attaches to the enemy."
+   "FREE (3 rounds) — Each ECHO, RECALL, or replay deals the foe's MARK stacks as damage (min 2, max 16).",
+   "PAID (rest of combat) — Each ECHO, RECALL, or replay deals the foe's MARK stacks as damage (min 2, max 16). Attaches to the enemy."
   ]
  },
  {
@@ -2871,8 +2871,8 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — At round end, the enemy takes its total POISON and BLEED tick damage from this round again.",
-   "PAID (rest of combat) — At round end, the enemy takes its total POISON and BLEED tick damage from this round again. Attaches to the enemy."
+   "FREE (3 rounds) — At round end, the enemy takes this round's POISON and BLEED damage again.",
+   "PAID (rest of combat) — At round end, the enemy takes this round's POISON and BLEED damage again. Attaches to the enemy."
   ]
  },
  {
@@ -3028,7 +3028,7 @@
   ],
   "lines": [
    "FREE — +1 Premise.",
-   "PAID — PERORATION at 6 — +2 Conviction · draw 2 · consume all marks — 3 per stack (CONCEDE at 8; 10 vs elites, 12 vs bosses)."
+   "PAID — PERORATION at 6 — +2 Conviction · draw 2 · consume all marks — 3 per stack (CONCEDE at 8 · elite 10 · boss 12)."
   ]
  },
  {
@@ -3183,8 +3183,8 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — The next enemy stance is always revealed (FORETELL); OMEN rider payoffs land ×1.5 (round up).",
-   "PAID (rest of combat) — The next enemy stance is always revealed (FORETELL); OMEN rider payoffs land ×1.5 (round up)."
+   "FREE (3 rounds) — The next stance stays revealed (FORETELL); OMEN payoffs land ×1.5 (round up).",
+   "PAID (rest of combat) — The next stance stays revealed (FORETELL); OMEN payoffs land ×1.5 (round up)."
   ]
  },
  {
@@ -3491,8 +3491,8 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — Every BLEED or POISON you apply lands at +1 intensity.",
-   "PAID (rest of combat) — Every BLEED or POISON you apply lands at +1 intensity."
+   "FREE (3 rounds) — Your BLEED and POISON land +1 intensity and +1 duration.",
+   "PAID (rest of combat) — Your BLEED and POISON land +1 intensity and +1 duration."
   ]
  },
  {

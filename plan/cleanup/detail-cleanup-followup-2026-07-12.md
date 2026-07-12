@@ -25,6 +25,17 @@
 > `RIPOSTE N (parry K)` notation (added); the legend's fate row glossed the
 > X die as "(wild)" when the engine treats X as a dead, normally
 > unspendable face (corrected).
+>
+> **Round 2 (same day, owner directive: popups + word budget).** Two more
+> stale faces found and fixed: `crown-of-thorns` prints its depth scaling
+> (+1 per affliction beyond the first, max +4 — the face claimed flat +1)
+> and `venom-and-vein` prints its +1 duration (the 2026-07-08 Erosion
+> rebalance added it engine-side only). Popup coverage: the inspect panel
+> now chips EVERY keyword a card prints (whole printed surface swept —
+> statuses, mechanic kinds, uppercase registry words), PERORATION and
+> CONCEDE joined the system glossary, and a new face-honesty guard fails
+> any card printing a term with no popup (pre-wiring it flagged ~30 cards).
+> All faces then re-shaved to minimum wording that still resolves.
 
 ## Where this comes from
 

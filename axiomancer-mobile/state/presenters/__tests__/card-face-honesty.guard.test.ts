@@ -17,6 +17,7 @@
 import { describe, it, expect } from '@jest/globals';
 import { getCard, getCardById, cardLibrary, lookupEffect } from '@mechanics';
 import { faceStats, detailStats } from '@/state/presenters/combat-encounter.engine';
+import { keywordsInPersistentText, keywordForEffect, SYSTEM_GLOSSARY } from '@/state/combat/keywords';
 
 describe('card-face honesty guard', () => {
     it('no library card renders the ambiguous PAID fallback', () => {
@@ -94,8 +95,8 @@ describe('card-face honesty guard', () => {
                 seen.add(n);
             }
             const printed = [card.topActionText, card.bottomActionText, ...(card.dieLines ?? [])].join(' ');
-            if (d.systemTerms.length === 6) offenders.push(`${id} → full systems dump rendered`);
-            if (d.systemTerms.length > 0 && !/conviction|⬡|resonance|reserve|pip|floating|rung|wild|X die/i.test(printed)) {
+            if (d.systemTerms.length === SYSTEM_GLOSSARY.length) offenders.push(`${id} → full systems dump rendered`);
+            if (d.systemTerms.length > 0 && !/conviction|⬡|resonance|reserve|pip|floating|rung|wild|X die|peroration|concede/i.test(printed)) {
                 offenders.push(`${id} → systems entries without any printed reference`);
             }
         }
@@ -164,6 +165,34 @@ describe('card-face honesty guard', () => {
             for (const s of [...faceStrings, ...detailStrings]) {
                 if (hp.test(s)) { offenders.push(`${id}: "${s}"`); break; }
             }
+        }
+        expect(offenders).toEqual([]);
+    });
+
+    it('every keyword/effect a card prints has a popup (keyword chip or system entry) — nothing unexplained', () => {
+        // 2026-07-12 (owner directive): the inspect overlay is the popup layer.
+        // Every UPPERCASE registry word on the printed lines must render a
+        // keyword chip WITH a gloss; every authored status effect must resolve
+        // its keyword chip; the card-local Peroration words (PERORATION /
+        // CONCEDE) must surface their system-glossary entry.
+        const offenders: string[] = [];
+        for (const { id } of cardLibrary) {
+            const card = getCard(id);
+            const src = getCardById(id);
+            if (!card || !src) continue;
+            const d = detailStats(card, src);
+            const chips = new Set(d.keywords.filter(k => k.def).map(k => k.name));
+            const sys = new Set(d.systemTerms.map(s => s.term));
+            const printed = [card.topActionText, card.bottomActionText, ...(card.dieLines ?? [])].join(' ');
+            for (const kw of keywordsInPersistentText(printed)) {
+                if (!chips.has(kw.toUpperCase())) offenders.push(`${id} → prints ${kw.toUpperCase()} but renders no defined chip`);
+            }
+            for (const ce of src.combatEffects ?? []) {
+                const kw = keywordForEffect(ce.effectId);
+                if (kw && !chips.has(kw.toUpperCase())) offenders.push(`${id} → applies ${ce.effectId} but renders no ${kw.toUpperCase()} chip`);
+            }
+            if (/\bPERORATION\b/.test(printed) && !sys.has('PERORATION')) offenders.push(`${id} → prints PERORATION with no popup`);
+            if (/\bCONCEDE\b/.test(printed) && !sys.has('CONCEDE')) offenders.push(`${id} → prints CONCEDE with no popup`);
         }
         expect(offenders).toEqual([]);
     });
