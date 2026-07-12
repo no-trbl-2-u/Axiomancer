@@ -209,15 +209,18 @@ describe('detailStats — same numbers as the face', () => {
         expect(d.freePill).toContain('3 rounds');
         expect(d.freeLine).toContain('3 rounds');
     });
-    it('persistent keyword chips lead with the TYPE, then the PAYLOAD keywords with glosses', () => {
-        // suppurating-curse's passive doubles POISON and BLEED damage — the
-        // explainer slot must surface those, not just the card-type label.
+    it('persistent keyword chips are PAYLOAD-only — the type never enters the panel (owner, 2026-07-12)', () => {
+        // Enchantment/Curse/Disenchant are card TYPES: they read on the frame's
+        // type strip, so the inspect panel carries only what the passive DOES.
+        // suppurating-curse doubles POISON and BLEED damage — those lead.
         const curse = cardOf('suppurating-curse');
         const names = detailStats(curse.card, curse.sourceCard).keywords.map(k => k.name);
-        expect(names[0]).toBe('DISENCHANT');                  // the type, clearly first
+        expect(names).not.toContain('DISENCHANT');
+        expect(names).not.toContain('ENCHANTMENT');
         expect(names).toEqual(expect.arrayContaining(['POISON', 'BLEED']));
         const venom = cardOf('venom-and-vein');
         const vk = detailStats(venom.card, venom.sourceCard).keywords;
+        expect(vk.map(k => k.name)).not.toContain('ENCHANTMENT');
         expect(vk.map(k => k.name)).toEqual(expect.arrayContaining(['BLEED', 'POISON']));
         expect(vk.every(k => k.def.length > 0)).toBe(true);  // every chip carries its gloss
     });

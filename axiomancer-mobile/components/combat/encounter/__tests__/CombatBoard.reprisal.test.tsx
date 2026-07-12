@@ -179,7 +179,10 @@ describe('CombatBoard — REPRISE songbook interception', () => {
     it('applies directly for a non-reprise card even with a non-empty discard', () => {
         const { store } = withAllProviders(<></>);
         const player = buildPlayer(store);
-        let s = openAndDraft(player, CARDS, 'mind');
+        // slippery-slope is philosophicalAspect 'body' — the drafted die must
+        // match it: THE COLOR LAW gate (2026-07-12) demotes an off-color
+        // drafted die to the FREE action instead of routing a fizzle.
+        let s = openAndDraft(player, CARDS, 'body');
         s = { ...s, discard: ['straw-mans-jab'] };
         const vm = buildCombatViewModel(s);
         const uid = vm.hand.find(c => c.cardId === 'slippery-slope')!.uid;

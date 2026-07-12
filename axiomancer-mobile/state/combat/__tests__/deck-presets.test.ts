@@ -1,5 +1,5 @@
 import { describe, expect, it } from '@jest/globals';
-import { COMBAT_REWARD_POOL, STARTING_CARD_IDS, getCard, listDeckPresets } from '@mechanics';
+import { COMBAT_REWARD_POOL, PRESET_COLOR_BORROWS, STARTING_CARD_IDS, getCard, listDeckPresets } from '@mechanics';
 
 import {
     applyCombatDeckPresetAction,
@@ -89,17 +89,36 @@ describe('Combat deck presets', () => {
         expect(result.cardIds).toContain('brace-for-impact');
     });
 
-    it('themed decks are strictly self-contained — zero cross-deck card overlap', () => {
+    it('cross-deck overlap exists only through the documented 5/5/5 color-law borrows', () => {
+        // Spec 32 §12 item 9 (ratified 2026-07-12): every recipe is exactly
+        // 5 body / 5 mind / 5 heart, so presets borrow cross-theme cards of a
+        // missing color. The engine pins the borrow map (PRESET_COLOR_BORROWS);
+        // any other overlap is still a bug.
+        const borrowable = new Set(Object.values(PRESET_COLOR_BORROWS).flat());
         const seen = new Map<string, string>();
         for (const preset of COMBAT_DECK_PRESETS) {
             if (preset.id === 'starter-baseline') continue;
             for (const id of new Set(preset.cardIds)) {
-                // The starters (slippery-slope / brace-for-impact) live inside
-                // their home themes (Erosion / Bastion) — still one deck each.
                 const owner = seen.get(id);
-                expect(owner === undefined || owner === preset.id).toBe(true);
+                expect(owner === undefined || owner === preset.id || borrowable.has(id)).toBe(true);
                 seen.set(id, preset.id);
             }
+        }
+    });
+
+    it('every themed deck carries exactly 5 body / 5 mind / 5 heart cards (the recipe color law)', () => {
+        const engine = Object.fromEntries(listDeckPresets().map((p) => [p.id, p]));
+        for (const preset of COMBAT_DECK_PRESETS) {
+            if (preset.id === 'starter-baseline') continue;
+            expect(engine[preset.id]).toBeDefined();
+            const counts = { body: 0, mind: 0, heart: 0 };
+            for (const id of preset.cardIds) {
+                const card = getCard(id);
+                expect(card).toBeTruthy();
+                // `stance` is the projected cardStanceColor = philosophicalAspect.
+                counts[card!.stance as 'body' | 'mind' | 'heart'] += 1;
+            }
+            expect(counts).toEqual({ body: 5, mind: 5, heart: 5 });
         }
     });
 

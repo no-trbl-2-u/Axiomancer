@@ -211,6 +211,8 @@ export {
 export { COMBAT_HAND_SIZE, buildCombatDeck, drawCombatCards, shuffleCombatDeck } from './combat.deck';
 export {
     COMBAT_DECK_PRESETS, COMBAT_DECK_PRESET_ORDER,
+    // 5/5/5 recipe color law (spec 32 §12 item 9) — the documented borrow map
+    PRESET_COLOR_BORROWS,
     listDeckPresets, getDeckPreset, buildPresetDeck,
 } from './combat.deck-presets';
 export type { CombatDeckPreset, CombatDeckFocus } from './combat.deck-presets';

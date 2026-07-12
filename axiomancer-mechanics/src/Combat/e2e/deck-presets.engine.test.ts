@@ -3,21 +3,22 @@
  *
  * Verifies every preset is well-formed against the owner recipe (4 copies × 2
  * unique commons, 2 copies × 2 unique uncommons, 1 copy × 3 unique rares —
- * rare spell + enchantment + disenchant = 15 cards), themes are strictly
- * self-contained (zero cross-preset card overlap), each deck leans on the
- * lever it advertises, the builder appends no escape-hatch card (no
- * in-combat retreat exists), and a preset deck drives a real encounter end
- * to end.
+ * rare spell + enchantment + disenchant = 15 cards), the 5/5/5 color law
+ * (spec 32 §12 item 9: exactly 5 body / 5 mind / 5 heart per recipe), that
+ * cross-preset overlap and off-theme cards are exactly the documented
+ * color-law borrows, each deck leans on the lever it advertises, the builder
+ * appends no escape-hatch card (no in-combat retreat exists), and a preset
+ * deck drives a real encounter end to end.
  */
 
 import { describe, it, expect } from 'vitest';
 
 import {
-    COMBAT_DECK_PRESETS, COMBAT_DECK_PRESET_ORDER,
+    COMBAT_DECK_PRESETS, COMBAT_DECK_PRESET_ORDER, PRESET_COLOR_BORROWS,
     listDeckPresets, getDeckPreset, buildPresetDeck,
 } from '../combat.deck-presets';
 import { classifyVerbClass } from '../combat.cards';
-import { getCardById } from '../../Cards/cards.library';
+import { cardLibrary, getCardById } from '../../Cards/cards.library';
 import { rankToRarity } from '../../Cards/types';
 import { lookupEffect } from '../../Effects';
 import { initializeCombatEncounter, rollEncounterDice } from '../combat.engine';
@@ -88,16 +89,68 @@ describe('preset combat decks (spec 32 v3 §8)', () => {
         }
     });
 
-    it('themes are strictly self-contained — zero cross-preset card overlap', () => {
-        const seen = new Map<string, string>();
+    // ── THE 5/5/5 COLOR LAW (owner directive 2026-07-12; spec 32 §12 item 9) ──
+
+    it('every preset carries exactly 5 body / 5 mind / 5 heart cards', () => {
+        for (const preset of listDeckPresets()) {
+            const counts = { body: 0, mind: 0, heart: 0 };
+            for (const id of preset.cardIds) {
+                counts[getCardById(id)!.philosophicalAspect] += 1;
+            }
+            expect(counts, `${preset.id} must be 5/5/5 by philosophicalAspect`)
+                .toEqual({ body: 5, mind: 5, heart: 5 });
+        }
+    });
+
+    it('off-theme cards in a preset are exactly its documented color-law borrows', () => {
+        for (const preset of listDeckPresets()) {
+            const offTheme = [...new Set(preset.cardIds)]
+                .filter(id => getCardById(id)!.theme !== preset.theme)
+                .sort();
+            const documented = [...(PRESET_COLOR_BORROWS[preset.id] ?? [])].sort();
+            expect(offTheme, `${preset.id} off-theme cards must match PRESET_COLOR_BORROWS`)
+                .toEqual(documented);
+        }
+    });
+
+    it('cross-preset overlap exists only through documented borrows; every other card sits in one preset', () => {
+        const seats = new Map<string, string[]>();
         for (const preset of listDeckPresets()) {
             for (const id of new Set(preset.cardIds)) {
-                expect(seen.has(id), `${id} appears in both ${seen.get(id)} and ${preset.id}`).toBe(false);
-                seen.set(id, preset.id);
+                seats.set(id, [...(seats.get(id) ?? []), preset.id]);
             }
         }
-        // 10 presets × 7 uniques = the whole 70-card library.
-        expect(seen.size).toBe(70);
+        const allBorrows = new Set(Object.values(PRESET_COLOR_BORROWS).flat());
+        for (const [id, presetIds] of seats) {
+            if (presetIds.length > 1) {
+                expect(allBorrows.has(id), `${id} overlaps (${presetIds.join(', ')}) without being a documented borrow`).toBe(true);
+            }
+        }
+    });
+
+    it('the color law squeezes exactly the documented ten cards out of the starter pool (reward-only)', () => {
+        // These 10 cards lost every recipe seat to the 5/5/5 partition (each
+        // theme's colors cannot all fit; the borrows displace the weakest
+        // standalone cards). They REMAIN in the 70-card reward pool — this is
+        // the pinned, intentional consequence, not an accident.
+        const REWARD_ONLY = [
+            'achilles-and-the-tortoise', // control m-ench — rainbow law forces it out of standstill (rs is mind)
+            'ad-nauseam',                // echo m-unc — refrain's uncommons must go body
+            'captive-audience',          // peroration h-dis — premise-gated, no premise deck has a heart dis slot
+            'entropy-tax',               // forge m-dis — foundry's mind slots are full (anvil keeps the ench seat)
+            'fated-course',              // oracle m-dis — augury's rainbow needs a body dis
+            'heart-of-the-matter',       // charm h-rs — grace keeps soft-word + irresistible on the heart budget
+            'memento-mori',              // harvest m-common — tithe's commons must go body+heart
+            'practiced-cadence',         // peroration h-ench — oratory's rainbow needs a body ench
+            'straw-mans-jab',            // affliction b-common — 8 body commons, 7 seats; erosion's heart slot displaced it
+            'the-tithe',                 // harvest m-dis — tithe's rainbow needs a heart dis
+        ];
+        const seated = new Set<string>();
+        for (const preset of listDeckPresets()) for (const id of preset.cardIds) seated.add(id);
+        const actual = cardLibrary.map(c => c.id).filter(id => !seated.has(id)).sort();
+        expect(actual).toEqual([...REWARD_ONLY].sort());
+        // And the seated set + reward-only set is the whole library.
+        expect(seated.size + actual.length).toBe(70);
     });
 
     it('a focused preset carries at least a full common playset on the lever it advertises', () => {

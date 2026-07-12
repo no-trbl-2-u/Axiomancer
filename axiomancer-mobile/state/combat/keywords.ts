@@ -189,109 +189,86 @@ const MECHANIC_KEYWORD: Record<string, string> = {
  * numbers live on the face/preview; this explains the keyword. The 30
  * keywords of spec 32 §3 (amended by phase 29) plus the two card-type
  * labels. TICK/KINDLE are unchanged this phase (see the module doc above).
+ *
+ * 2026-07-12 (owner playtest) — TERSE GLOSSES: every gloss is ONE short
+ * sentence in the Dawncaster register ("Cards with Lifedrain restore health
+ * equal to the damage they deal."), with a second short sentence only where
+ * a rule genuinely needs it. Load-bearing numbers stay; edge-case prose,
+ * parentheticals, and cross-references go. Shorter must never become wrong.
  */
 const KEYWORD_GLOSS: Record<string, string> = {
     // ── Utility (9) ──
-    Draw: 'Immediately draw that many cards from your deck, up to your hand limit.',
+    Draw: 'Draw that many cards from your deck, up to your hand limit.',
     Forge:
-        'Creates a FLOATING die — or converts a dead X die in your tray into a floating WILD die. '
-        + 'Floating dice join the tray now, play in addition to your drafted die, never reroll, '
-        + 'carry across combats, and are gone forever when spent; at the cap of 3, Forge grants +1 Conviction instead.',
+        'Forges a FLOATING die — or turns a dead X die WILD — that plays alongside your drafted die and is gone forever when spent. '
+        + 'At the cap of 3, it grants +1 Conviction instead.',
     Guard:
-        'Absorbs incoming attack damage during the next threat phase, up to its amount. '
-        + 'One-shot: whatever Guard the phase does not use is lost when the phase ends — unless the card prints '
-        + '"persists", in which case it carries over untouched until it is spent.',
-    Tick:
-        'Your strongest damage-over-time effect on the enemy deals its per-round damage again, immediately. '
-        + 'Its duration and stacks are unchanged.',
+        'Blocks that much incoming attack damage during the next threat phase. '
+        + 'Unused Guard is lost unless the card prints "persists".',
+    Tick: 'Your strongest damage-over-time effect on the enemy ticks again, immediately.',
     Mark:
-        'Every damage-over-time effect on the bearer deals +1 HP per Mark stack, each time it ticks. '
-        + 'Marks do not expire on their own — they hold until consumed or the combat ends. '
-        + 'Counts as an affliction: RUPTURE and conclusion payoffs consume Marks for their printed burst.',
-    Cleanse: 'Removes up to that many afflictions (debuffs) from you.',
-    Heal: 'Restores that much VITAE (HP), up to your maximum.',
+        'Every damage-over-time tick on the bearer deals +1 HP per Mark stack. '
+        + 'Marks hold until consumed.',
+    Cleanse: 'Removes up to that many afflictions from you.',
+    Heal: 'Restores that much VITAE, up to your maximum.',
     Rupture:
-        'Consumes afflictions on the enemy — the printed number, or EVERY affliction on a finisher: their remaining '
-        + 'damage-over-time detonates as one immediate burst, plus 3 HP per stack of the consumed non-damage afflictions '
-        + '(consuming a single affliction this way also yields a Soul, on the cards that print it). '
+        'Consumes afflictions on the enemy and detonates their remaining harm as one burst. '
         + "The burst is capped at 60% of the enemy's max HP.",
-    Siphon: 'Heals you for the printed percentage of the HP this play deals to the enemy.',
+    Siphon: 'Heals you for the printed percentage of the damage this play deals.',
     // ── Affliction (T1) ──
-    Prolong:
-        'Adds that many turns of duration to EVERY damage-over-time effect you '
-        + 'have on the enemy — the wounds you have already opened simply run longer.',
-    Reargue:
-        'Converts the enemy’s Bleed into Poison and its Poison into Bleed, '
-        + 'and adds that much intensity to each as it flips — the same wound, re-argued.',
+    Prolong: 'Adds that many turns to every damage-over-time effect you have on the enemy.',
+    Reargue: "Flips the enemy's Bleed into Poison and its Poison into Bleed, each landing that much harder.",
     Poison:
-        'Deals 2 HP per stack each time a card is played, and that 2 grows by +1 for every 2 full rounds the poison has held. '
+        'Deals 2 HP per stack each time a card is played, growing by 1 every 2 rounds it holds. '
         + 'Applying poison again resets the growth.',
-    Bleed:
-        'Each time the bearer takes a hit of damage, the Bleed deals 3 more HP per stack, then loses 1 stack; it ends at 0 stacks.',
+    Bleed: 'Each hit the bearer takes deals 3 more HP per Bleed stack, then removes a stack.',
     Doom:
-        'Deals 1 HP per stack at the start of each round, and GROWS +1 stack every time the enemy acts. '
-        + 'It never runs out on its own — it ends only when consumed or the combat ends.',
+        'Deals 1 HP per stack at the start of each round and grows a stack every time the enemy acts. '
+        + 'It ends only when consumed.',
     // ── Peroration (T2) ──
     Premise:
-        'A persistent tally your cards add to. '
-        + 'When it reaches a declared conclusion (a Peroration) — printed on the card that carries it — the '
-        + 'conclusion fires FREE and the tally resets to 0. A concede-line conclusion instead ends the fight outright '
-        + '— at 8 Premises against normal enemies, 10 against elites, 12 against bosses.',
+        'A persistent tally your cards build toward the conclusion printed on its carrier. '
+        + 'At the printed count the conclusion fires free and the tally resets.',
     // ── Forge (T3) ──
     Kindle:
-        'Creates a temporary die of the printed color (this combat only); it joins your Reserve with 0 pips. '
-        + 'If the Reserve (2 slots) is full, it becomes +1 Conviction instead.',
+        'Creates a temporary die of the printed color in your Reserve. '
+        + 'If the Reserve is full, it grants +1 Conviction instead.',
     Pip:
-        'A charge on a Reserve die: each die ripens +1 pip per threat phase it survives, to a max of 2. '
-        + 'When the die is spent, each pip adds +1 intensity to the statuses that play lands — or +2 Guard on a defend card.',
+        'A charge a Reserve die gains each threat phase it survives, to a max of 2. '
+        + 'Each pip spent adds +1 intensity — or +2 Guard on a defend card.',
     // ── Akrasia (T4) ──
-    Recoil: 'Pay the printed HP (VITAE) as a cost when the card is played. Guard and other defenses cannot prevent it.',
-    Fallen:
-        'A state: you carry 2 or more DIFFERENT afflictions of your own. '
-        + "A card's FALLEN line fires free if you are Fallen at the moment you play it.",
+    Recoil: 'Pay the printed VITAE as a cost when the card is played — no defense can prevent it.',
+    Fallen: "A state: you carry 2 or more different afflictions. A card's FALLEN line fires free while you are Fallen.",
     // ── Control (T5) ──
     Stagger:
-        "Removes that many rungs from the enemy's next telegraphed action — normal actions carry 2 rungs, boss actions 3, and each rung lost weakens the hit proportionally. "
-        + 'Removing every rung denies the action outright; all accumulated Stagger is spent when that action resolves.',
+        "Removes that many rungs from the enemy's next telegraphed action — 2 rungs on a normal action, 3 on a boss. "
+        + 'Removing every rung denies the action outright.',
     Backfire:
-        'While it holds, the enemy takes 1 HP per Backfire stack for EACH rung its telegraphed action loses. '
-        + 'A fully denied action counts all of its rungs.',
+        'The enemy takes 1 HP per Backfire stack for each rung its telegraphed action loses. '
+        + 'A denied action counts all of its rungs.',
     // ── Oracle (T6) ──
-    Foretell:
-        "Reveals the enemy's next telegraphed stance, and looks at that many cards from the top of your deck, "
-        + 'moving the highest-rank one to the top.',
-    Omen:
-        "A prediction: the color of the die that paid this card (WILD predicts the card's own stance) is cast against the enemy's next stance. "
-        + 'If the next telegraph matches, the printed payoff fires free at the phase boundary; otherwise the omen misses.',
+    Foretell: "Reveals the enemy's next stance and looks at that many cards of your deck, moving the best to the top.",
+    Omen: "Casts the paying die's color against the enemy's next stance — a match fires the printed payoff free.",
     // ── Harvest (T7) ──
-    Soul: 'You gain 1 Soul each time an affliction on the enemy expires or is consumed. Souls persist until spent by REAP.',
-    Reap:
-        'Spends the printed number of Souls to fire the printed effect; with fewer Souls, the card fizzles. '
-        + 'The capstone instead spends your entire Soul bank at once.',
+    Soul: 'You gain 1 Soul each time an affliction on the enemy expires or is consumed.',
+    Reap: 'Spends the printed number of Souls to fire the printed effect — with fewer Souls, it fizzles.',
     // ── Charm (T8) ──
     Sway:
         'Builds on the enemy and decays 1 at the end of each round. '
-        + "The enemy CAPITULATES the moment your Sway reaches its resolve: 35% of its max HP (never below 10), or its current HP if that is lower.",
-    Rapport: "The enemy's attacks deal 10% less damage per Rapport stack while it holds.",
+        + 'The enemy capitulates when Sway reaches its resolve — roughly 35% of its max HP.',
+    Rapport: "The enemy's attacks deal 10% less damage per Rapport stack.",
     // ── Bulwark (T9) ──
-    Thorns:
-        'Each threat phase in which the enemy attacks you, it takes 1 HP per Thorns stack — even if the attack was fully blocked.',
+    Thorns: 'The enemy takes 1 HP per Thorns stack each threat phase it attacks you — even through a full block.',
     Riposte:
-        'Armed for one threat phase: the first incoming attack is reduced by the printed parry amount, '
-        + 'and if your Guard FULLY blocks an attack this phase, the enemy takes the printed counter damage. '
-        + 'Cleared when the phase ends.',
+        'Armed for one threat phase: the first incoming attack is reduced by the printed parry amount. '
+        + 'If your Guard fully blocks an attack, the enemy takes the printed counter damage.',
     // ── Echo (T10) ──
-    Echo:
-        "The card's PAID line fires twice: its statuses apply a second time, and its Premise, Sway, Soul, and Recall amounts are doubled. "
-        + 'FREE lines never echo.',
-    Recall: 'Returns that many cards from your discard pile to your hand — the highest-rank cards are chosen.',
-    // ── Card types (labels, not keywords) ──
-    Enchantment:
-        'A passive on your side. Played FREE (no die) it lasts 3 rounds; '
-        + 'paid with a die it becomes permanent for the rest of the combat, is unique in play, and leaves the deck cycle.',
-    Disenchant:
-        'A standing curse attached to the ENEMY. Played FREE (no die) it lasts 3 rounds; '
-        + 'paid with a die it becomes permanent for the rest of the combat, is unique in play, and leaves the deck cycle.',
+    Echo: "The card's PAID line fires twice. FREE lines never echo.",
+    Recall: 'Returns that many cards from your discard pile to your hand — highest rank first.',
+    // ── Card types (labels, not keywords — never rendered in the inspect
+    // keyword panel since 2026-07-12; kept for help surfaces + the KW lints) ──
+    Enchantment: 'A passive on your side: 3 rounds when played free, permanent when paid with a die.',
+    Disenchant: 'A standing curse on the enemy: 3 rounds when played free, permanent when paid with a die.',
 };
 
 /**
@@ -397,12 +374,12 @@ export function allRegistryKeywords(): readonly string[] {
  * dedicated help/glossary surface.
  */
 export const SYSTEM_GLOSSARY: readonly { term: string; def: string }[] = [
-    { term: 'CONVICTION ◆', def: 'A spend-anytime resource banked from overflow (Forge at cap, Overtake, signature costs). Never decays.' },
-    { term: 'RESONANCE ⬡', def: 'A per-round tally of dice spent by color. Threshold lines ("⬡ MIND ×3 spent") fire once the tally is reached that round.' },
-    { term: 'RESERVE & PIPS', def: 'Up to 2 dice held between phases instead of played. Each Reserve die ripens +1 pip per phase it survives (cap 2); pips add intensity or Guard when the die is finally spent.' },
-    { term: 'FLOATING ✦', def: 'A die forged into the tray permanently: plays alongside your drafted die, never rerolls, carries across combats, gone forever when spent.' },
-    { term: 'RUNGS', def: "The enemy's telegraphed action's steps of magnitude. STAGGER removes rungs; losing all of them denies the action outright." },
-    { term: 'WILD / X', def: 'A WILD die counts as any color for dieBonus and card requirements. A dead X die rolled no pips this round and can be Forged into a WILD floating die instead.' },
+    { term: 'CONVICTION ◆', def: 'A spend-anytime resource banked from unspent dice and overflow. It never decays.' },
+    { term: 'RESONANCE ⬡', def: 'A per-round tally of dice spent by color. Threshold lines fire once the tally is reached that round.' },
+    { term: 'RESERVE & PIPS', def: 'Up to 2 dice held between phases instead of played. Each gains +1 pip per phase it survives, spent for extra intensity or Guard.' },
+    { term: 'FLOATING ✦', def: 'A forged die that plays alongside your drafted die, never rerolls, and is gone forever when spent.' },
+    { term: 'RUNGS', def: "The steps of the enemy's telegraphed action — 2 on a normal action, 3 on a boss. Losing all of them denies the action." },
+    { term: 'WILD / X', def: 'A WILD die counts as any color. A dead X die powers nothing, but can be Forged wild or fate-tapped.' },
 ];
 
 /** How a card's PRINTED lines reference each system term. Matched against the

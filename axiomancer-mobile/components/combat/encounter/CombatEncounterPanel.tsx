@@ -27,7 +27,7 @@ import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanima
 import Svg, { Circle, Defs, Line, Polygon, RadialGradient, Stop } from 'react-native-svg';
 import {
     initializeCombatEncounter, rollEncounterDice, playCombatCard, resolveThreatPhase,
-    startTurn, draftStanceDie, discardCombatCard, playSignatureSkill,
+    startTurn, endTurn, draftStanceDie, discardCombatCard, playSignatureSkill,
     tapFateDie, getPendingDotTotal, getFloatingDiceColors,
     selectEncounterMercyChoice, buildCombatSummary, rollCombatCardRewards, addRewardCard,
     rollLoot, addItem,
@@ -37,7 +37,7 @@ import {
 
 import { advanceWheel, isMomentumDieId, isWheelStance, momentumDieId, type WheelStance } from '@/state/combat/momentum';
 
-import { CombatBoard, CombatCardFace, HAND_CARD_W, HAND_CARD_H, type DragController, type DragPayload } from '@/components/combat/encounter/CombatBoard';
+import { CombatBoard, CombatCardFace, HAND_CARD_W, HAND_CARD_H, type DragController, type DragPayload, type Rect } from '@/components/combat/encounter/CombatBoard';
 import { type CombatFx } from '@/components/combat/encounter/CombatCombatantPane';
 import { CombatDie } from '@/components/combat/encounter/CombatDie';
 import { CombatSummaryModal } from '@/components/combat/encounter/CombatSummaryModal';
@@ -146,6 +146,9 @@ function applyHazardOutcome(
 
 // Per-keyword type tag for the inspect-modal definition panels. The PRIMARY keyword
 // (index 0) maps to the card's face kind; riders read as a generic EFFECT.
+// 2026-07-12 (owner directive) — the panel carries PAYLOAD keywords only, so
+// a persistent card's first chip is its passive's keyword: it tags EFFECT,
+// never the type word (ENCHANT/CURSE read on the card frame's type strip).
 function keywordTypeTag(kind: string, index: number): string {
     if (index > 0) return 'EFFECT';
     switch (kind) {
@@ -155,8 +158,6 @@ function keywordTypeTag(kind: string, index: number): string {
         case 'guard': return 'GUARD';
         case 'regen': return 'REGEN';
         case 'befriend': return 'MERCY';
-        case 'enchant': return 'ENCHANT';
-        case 'disenchant': return 'CURSE';
         case 'forge': return 'DICE';
         default: return 'EFFECT';
     }
@@ -321,6 +322,10 @@ export function CombatEncounterPanel({
     const dragX = useSharedValue(0);
     const dragY = useSharedValue(0);
     const dragShown = useSharedValue(0);
+    // Drop-INELIGIBLE staged-card rects for the die drag in flight (measured
+    // once by the board at drag begin) — drives the ghost's ✕ cue per frame
+    // on the UI thread, no JS round-trips.
+    const badRects = useSharedValue<Rect[]>([]);
     const begin = useCallback((payload: DragPayload, x: number, y: number) => {
         // NOTE: dragShown is NOT set here. The ghost keeps the PREVIOUS drag's
         // payload until React commits `dragActive`, so showing it synchronously
@@ -332,7 +337,7 @@ export function CombatEncounterPanel({
     useEffect(() => {
         if (dragActive) dragShown.value = 1;
     }, [dragActive, dragShown]);
-    const drag: DragController = useMemo(() => ({ begin, end: () => undefined, active: dragActive, x: dragX, y: dragY }), [begin, dragActive, dragX, dragY]);
+    const drag: DragController = useMemo(() => ({ begin, end: () => undefined, active: dragActive, x: dragX, y: dragY, badRects }), [begin, dragActive, dragX, dragY, badRects]);
     const end = useCallback((x: number, y: number) => {
         const payload = dragRef.current; dragRef.current = null; dragShown.value = 0; setDragActive(null);
         if (!payload) return;
@@ -348,6 +353,17 @@ export function CombatEncounterPanel({
     // CONSTRAINT: never reuse the card's half-W/H anchor for the die — that was
     // the "die renders up-and-left of the finger" bug (playtest, 2026-07-11).
     const dieGhostStyle = useAnimatedStyle(() => ({ opacity: dragShown.value, transform: [{ translateX: dragX.value - DIE_GHOST_SIZE / 2 }, { translateY: dragY.value - DIE_GHOST_SIZE / 2 }, { scale: 1.1 }] }));
+    // Ineligible-target cue (owner directive 2026-07-12): while the pointer is
+    // over ANY illegal drop target (an off-color or already-armed staged card,
+    // rects measured by the board at drag begin), the ghost carries an ✕ —
+    // "this die can't land here", said before the drop.
+    const dieGhostXStyle = useAnimatedStyle(() => {
+        const x = dragX.value;
+        const y = dragY.value;
+        const over = badRects.value.some((r) =>
+            x >= r.x - 16 && x <= r.x + r.width + 16 && y >= r.y - 16 && y <= r.y + r.height + 16);
+        return { opacity: dragShown.value > 0 && over ? 1 : 0 };
+    });
 
     // ── engine wiring ──
     const apply = useCallback((fn: (s: CombatEncounterState) => CombatEncounterState) => {
@@ -465,8 +481,16 @@ export function CombatEncounterPanel({
     const onSignature = useCallback((id: string) => apply((s) => playSignatureSkill(s, id).state), [apply]);
     const onEndPhase = useCallback(() => {
         apply((s) => {
-            const t = resolveThreatPhase(s);
-            fxRef.current = t.events;
+            // Fate Engine P1 R2 — close the turn BEFORE the phase resolves: an
+            // unspent (still-available, non-X) drafted die BANKS to the Reserve
+            // when a slot is free, else burns for Conviction (`endTurn`,
+            // combat.engine.ts). The panel used to skip straight to
+            // `resolveThreatPhase`, whose boundary just WIPES the tray — the
+            // sim path (`ensureDraftForCard`) always ran `endTurn`, so mobile
+            // silently lost the banked die the engine's R2 promises.
+            const ended = endTurn(s);
+            const t = resolveThreatPhase(ended.state);
+            fxRef.current = [...ended.events, ...t.events];
             let ns = t.state;
             if (ns.phase === 'phase-play' && ns.dice.length === 0) ns = startTurn(ns).state;
             return ns;
@@ -987,7 +1011,13 @@ export function CombatEncounterPanel({
                         // that looked like a different, "old" card mid-drag).
                         <CombatCardFace card={ghostPayload.card} width={HAND_CARD_W} height={HAND_CARD_H} />
                     ) : (
-                        <CombatDie die={ghostPayload.die} size={DIE_GHOST_SIZE} />
+                        <>
+                            <CombatDie die={ghostPayload.die} size={DIE_GHOST_SIZE} />
+                            {/* ✕ ineligible cue — lights while hovering an illegal target */}
+                            <Animated.View style={[styles.ghostXBadge, dieGhostXStyle]} testID="combat-die-ghost-x">
+                                <Text style={styles.ghostXGlyph} allowFontScaling={false}>✕</Text>
+                            </Animated.View>
+                        </>
                     )}
                 </Animated.View>
             )}
@@ -1134,4 +1164,11 @@ const useStyles = makeStyles((AXM) => ({
     revealBtnText: { fontFamily: FONTS.gothic, fontSize: 18, letterSpacing: 1 },
 
     ghost: { position: 'absolute', top: 0, left: 0, zIndex: 999 },
+    // ✕ badge riding the die ghost while it hovers an illegal target.
+    ghostXBadge: {
+        position: 'absolute', top: -10, right: -10, width: 24, height: 24, borderRadius: 12,
+        borderWidth: 1.5, borderColor: AXM.blood, backgroundColor: 'rgba(10,4,4,0.92)',
+        alignItems: 'center', justifyContent: 'center',
+    },
+    ghostXGlyph: { fontFamily: FONTS.sans, fontSize: 13, lineHeight: 15, color: AXM.blood },
 }));

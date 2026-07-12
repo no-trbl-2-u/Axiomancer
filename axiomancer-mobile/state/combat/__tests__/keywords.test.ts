@@ -11,6 +11,7 @@ import { cardLibrary, THEME_KEYWORDS } from '@mechanics';
 
 import {
     allRegistryKeywords, keywordForEffect, keywordForMechanic, keywordGloss,
+    SYSTEM_GLOSSARY,
 } from '@/state/combat/keywords';
 
 describe('keyword registry — KW-1 (no unmapped effect id renders a blank face)', () => {
@@ -52,6 +53,35 @@ describe('keyword registry — KW-2/KW-3 (count pinned, no dead references)', ()
         const stillPresent = ['Barrier', 'Conjure', 'Peroration', 'Fester', 'Transmute', 'Reprise']
             .filter(retired => keywordGloss(retired) !== null);
         expect(stillPresent).toEqual([]);
+    });
+});
+
+describe('keyword registry — terse glosses (owner directive 2026-07-12)', () => {
+    // The Dawncaster register: ONE short sentence per gloss ("Cards with
+    // Lifedrain restore health equal to the damage they deal."), with a second
+    // short one only where a rule genuinely needs it. This lint pins the cut —
+    // a third sentence or a prose wall is a regression, not a style choice.
+    const sentenceCount = (s: string) => s.split(/[.!?](?:\s+|$)/).filter(t => t.trim().length > 0).length;
+
+    it('every keyword gloss is at most two short sentences', () => {
+        const offenders: string[] = [];
+        for (const kw of allRegistryKeywords()) {
+            const gloss = keywordGloss(kw) ?? '';
+            if (sentenceCount(gloss) > 2 || gloss.length > 190) {
+                offenders.push(`${kw}: ${sentenceCount(gloss)} sentences / ${gloss.length} chars`);
+            }
+        }
+        expect(offenders).toEqual([]);
+    });
+
+    it('every systems-glossary def is at most two short sentences', () => {
+        const offenders: string[] = [];
+        for (const { term, def } of SYSTEM_GLOSSARY) {
+            if (sentenceCount(def) > 2 || def.length > 160) {
+                offenders.push(`${term}: ${sentenceCount(def)} sentences / ${def.length} chars`);
+            }
+        }
+        expect(offenders).toEqual([]);
     });
 });
 

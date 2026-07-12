@@ -47,10 +47,12 @@ describe('Starter bundles — the pre-run deck picker (spec 32 v3 themed decks)'
             byId[id]!.cardIds.some((c) => { const card = getCard(c); return !!card && pred(card); });
         const effect = (needle: string) =>
             (c: NonNullable<ReturnType<typeof getCard>>) => (c.primaryEffectId ?? '').includes(needle);
-        // Erosion stacks DoTs; Grace never strikes (control texture); Bastion
-        // braces; every theme ships its enchantment + disenchant rares.
+        // Erosion stacks DoTs (poison-led since the 5/5/5 recipe color law
+        // moved its bleed common to Oratory's body slot pool); Tithe plants
+        // the fast bleed; Bastion still fields defense (the-adamant-wall);
+        // every theme ships an enchantment + disenchant rare.
         expect(has('erosion', effect('poison'))).toBe(true);
-        expect(has('erosion', effect('bleed'))).toBe(true);
+        expect(has('tithe', effect('bleed'))).toBe(true);
         expect(has('bastion', (c) => c.verbClass === 'defend')).toBe(true);
         for (const b of STARTER_BUNDLES) {
             expect(has(b.id, (c) => c.cardType === 'enchantment')).toBe(true);

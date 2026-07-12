@@ -17,7 +17,7 @@ import { cardLibrary, getCardById } from '../cards.library';
 import { rankToRarity, CARD_RANK_NAMES } from '../types';
 import type { Card } from '../types';
 import { COMBAT_REWARD_POOL, STARTING_CARD_IDS } from '../../Combat/combat.rewards';
-import { listDeckPresets, cardOrigin } from '../../Combat/combat.deck-presets';
+import { listDeckPresets, cardOrigin, PRESET_COLOR_BORROWS } from '../../Combat/combat.deck-presets';
 
 /** The ten theme tags (spec §6) — every card carries exactly one. */
 const THEMES = [
@@ -119,20 +119,31 @@ describe('themed library — FREE/PAID anatomy (spec §2)', () => {
         }
     });
 
-    it("a starter card's `theme` matches its preset deck's theme", () => {
+    it("a starter card's `theme` matches its preset deck's theme, or it is a documented color-law borrow", () => {
+        // 5/5/5 recipe color law (spec 32 §12 item 9, ratified 2026-07-12):
+        // presets may borrow cross-theme cards of a missing color; the borrow
+        // map is pinned in PRESET_COLOR_BORROWS and asserted exactly by
+        // src/Combat/e2e/deck-presets.engine.test.ts.
         for (const preset of listDeckPresets()) {
+            const borrows = PRESET_COLOR_BORROWS[preset.id] ?? [];
             for (const id of new Set(preset.cardIds)) {
+                if (borrows.includes(id)) continue;
                 expect(getCardById(id)?.theme, `${id} in preset ${preset.id}`).toBe(preset.theme);
             }
         }
     });
 
-    it('cardOrigin tags every current library card as a starter of its preset deck', () => {
+    it('cardOrigin tags every library card as a starter, except the ten documented reward-only cards', () => {
+        // The 5/5/5 color law squeezes exactly 10 cards out of every recipe
+        // (pinned by id in deck-presets.engine.test.ts); they remain in the
+        // reward pool and surface through drafts instead.
+        const rewardOnly: string[] = [];
         for (const card of cardLibrary) {
             const origin = cardOrigin(card.id);
-            expect(origin.source, `${card.id} source`).toBe('starter');
+            if (origin.source === 'reward') { rewardOnly.push(card.id); continue; }
             expect(origin.presetDeck, `${card.id} presetDeck`).toBeTruthy();
         }
+        expect(rewardOnly.length, `reward-only starters: ${rewardOnly.join(', ')}`).toBe(10);
     });
 
     it('cardOrigin tags a non-preset id as a reward', () => {

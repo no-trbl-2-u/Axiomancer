@@ -59,11 +59,16 @@ describe('card-face honesty guard', () => {
             if (!rounds || !f.freeHeroText.includes(rounds) || f.freeValue !== rounds) {
                 offenders.push(`${id} → FREE surface missing the engine's timed '${rounds ?? '(n rounds)'}' truth`);
             }
+            // 2026-07-12 (owner directive, REVERSING the earlier type-chip-first
+            // order) — the inspect panel is PAYLOAD keywords ONLY: the type
+            // already reads on the frame's type strip, so a type chip in the
+            // panel is the regression this guard now blocks.
+            const typeChips = d.keywords.filter(k => k.name === 'ENCHANTMENT' || k.name === 'DISENCHANT');
+            if (typeChips.length > 0) offenders.push(`${id} → type chip '${typeChips[0].name}' rendered in the keyword panel`);
             const payload = d.keywords.filter(k => k.name !== 'ENCHANTMENT' && k.name !== 'DISENCHANT');
             if (payload.length === 0) offenders.push(`${id} → no payload keyword chip resolved from its passive`);
-            // 2026-07-12 (owner directive) — the face's verb slot must lead
-            // with a PAYLOAD keyword (what the card DOES), never the bare type
-            // word, whenever a payload resolves.
+            // The face's verb slot must lead with a PAYLOAD keyword (what the
+            // card DOES), never the bare type word, whenever a payload resolves.
             if (payload.length > 0 && (f.keyword === 'ENCHANTMENT' || f.keyword === 'DISENCHANT')) {
                 offenders.push(`${id} → verb slot shows the bare type word despite payload '${payload[0].name}'`);
             }

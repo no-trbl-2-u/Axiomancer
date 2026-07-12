@@ -101,6 +101,12 @@ describe('balance bands (loose) — doctrine witnesses', () => {
 //
 // PLAYTEST-CALIBRATION — current values are the loosest that pass on main;
 // /deck-tuning ratchets them toward the targets as forge items land.
+//
+// recipe 5/5/5 re-pin 2026-07-12: re-validated under the preset color law
+// (spec 32 §12 item 9 — every recipe now 5 body / 5 mind / 5 heart). All
+// floors, the ceiling, and the empty curve-violator set HOLD unchanged; the
+// law moved several presets UP at mid (oratory 0.05→0.40, penitent
+// 0.13→0.42, refrain 0.05→0.45 — fewer stranded dice), none below a floor.
 const GRADED_STAGES = ['early', 'mid'] as const; // floors enforced here
 const SPREAD_STAGES = ['early', 'mid', 'late'] as const; // late = telemetry
 const PRESET_FLOORS: Readonly<Record<(typeof GRADED_STAGES)[number], number>> = {
@@ -187,6 +193,8 @@ const CURVE_STAGES: readonly CombatStageId[] = ['early', 'mid', 'late'];
 // early/mid/late shapes were an artifact of illegal endTurn→startTurn tray
 // re-rolls; under one-tray-per-phase play every preset decays and the offender
 // set is EMPTY. pre-Phase-27 interim — re-derived in the honest re-baseline.
+// recipe 5/5/5 re-pin 2026-07-12: re-derived under the preset color law —
+// every preset still decays monotonically (all move ≤ −0.88); set stays EMPTY.
 const KNOWN_CURVE_VIOLATORS: readonly string[] = [];
 
 let cachedCurve: PlaytestReport | null = null;

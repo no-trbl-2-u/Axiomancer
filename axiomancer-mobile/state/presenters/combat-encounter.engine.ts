@@ -236,6 +236,11 @@ export interface CombatDieVM {
     /** Spec 32 v3 §5 — a FLOATING die: always spendable (bypasses the one-die
      *  draft), consumed forever when spent, persists across combats. */
     floating?: boolean;
+    /** 2026-07-12 (stale-powered fix) — the drafted die already powered a play
+     *  this turn and a landed status handed it back (the combo refresh). It is
+     *  draggable again, but it never auto-arms another staged card: powering a
+     *  second card takes an explicit re-drop. */
+    refreshed?: boolean;
     /** The board may attach a drag gesture to this die. Computed HERE (not in
      *  the render) so it can never depend on transient drag state — flipping
      *  it mid-drag unmounts the GestureDetector, which on web kills the pan
@@ -258,7 +263,7 @@ export interface CombatDieVM {
  * alike.
  */
 export function dieCanPowerCardVM(
-    die: Pick<CombatDieVM, 'color' | 'isX'>,
+    die: { color: string; isX?: boolean },
     cardStance: string,
 ): boolean {
     if (die.isX || die.color === 'x') return false;
@@ -537,6 +542,12 @@ function playerPane(state: CombatEncounterState): CombatPlayerPaneVM {
 function diceVM(state: CombatEncounterState): CombatDieVM[] {
     const drafted = getDraftedDie(state);
     const hasDraft = !!state.draftedDieId;
+    // 2026-07-12 (owner playtest, the stale-powered bug) — a REFRESHED combo
+    // die: the drafted die already powered a play this turn (a landed status
+    // handed it back, still available). It no longer auto-arms the next
+    // staged card — the player re-drags it — so the board needs to tell a
+    // refreshed die from a fresh draft.
+    const alreadyPlayed = (state.spellsPlayedThisTurn ?? 0) > 0;
     // Per-die read pip — only once the phase stance is known (revealed/scouted).
     const stance = revealedCurrentStance(state) as Stance | null;
     const tray: CombatDieVM[] = state.dice.map((d: CombatManaDie) => {
@@ -544,6 +555,7 @@ function diceVM(state: CombatEncounterState): CombatDieVM[] {
         const spent = d.state === 'spent';
         const isX = d.color === 'x';
         const floating = d.floating === true;
+        const refreshed = isDrafted && !spent && !isX && alreadyPlayed;
         return {
             id: d.id, color: d.color, colorHex: STANCE_COLORS[d.color] ?? '#888',
             glyph: DIE_GLYPHS[d.color] ?? '?', stanceLabel: STANCE_LABELS[d.color] ?? '?',
@@ -554,10 +566,12 @@ function diceVM(state: CombatEncounterState): CombatDieVM[] {
             // Spec 32 v3 §5 — the board must know a floating die from a turn die:
             // floats stay draggable after the draft (they bypass the one-die law).
             floating: floating || undefined,
-            // A float drags whenever unspent (post-draft too); a turn die only
-            // before the draft. NEVER a function of live drag state (see the
-            // CombatDieVM.draggable doc note).
-            draggable: floating ? !spent : !hasDraft && !isX && !isDrafted && !spent,
+            refreshed: refreshed || undefined,
+            // A float drags whenever unspent (post-draft too); a REFRESHED
+            // combo die drags again (the re-arm is an explicit drop, never an
+            // auto-attach); a turn die only before the draft. NEVER a function
+            // of live drag state (see the CombatDieVM.draggable doc note).
+            draggable: floating ? !spent : refreshed ? true : !hasDraft && !isX && !isDrafted && !spent,
         };
     });
     // R2 — the Reserve renders in the same tray as a second power source.
@@ -1168,17 +1182,18 @@ function buildDetailKeywords(card: CombatCard, c: CardCalc, sourceCard?: Card): 
         out.push({ name: up, def: keywordGloss(kw) ?? '', minor });
     };
     if (c.kind === 'guard') push(keywordForVerb(card.verbClass), false);
-    // 2026-07-11/12 card-face-truth fix — a persistent card's chips: the type
-    // label (ENCHANTMENT/DISENCHANT) stays FIRST — index 0 renders the
-    // ENCHANT/CURSE type tag, clearly a type — then the passive's ACTUAL
-    // keywords (e.g. a poison curse's POISON) with their glosses: the face's
-    // verb-slot keyword, then any authored effect ids, then the rest of the
-    // persistentEffect summary's keywords. Falls back to the type-only chip
-    // when no payload resolves. (c.keyword is the PAYLOAD verb here, so the
-    // type chip must come from the verb class, not from c.keyword.)
+    // 2026-07-12 (owner playtest, REVERSING the 07-11 type-chip-first order) —
+    // Enchantment/Curse/Disenchant are card TYPES, not payload keywords: the
+    // type already reads on the card frame's type strip, so the inspect panel
+    // carries PAYLOAD keywords ONLY (the face's verb-slot keyword, then any
+    // authored effect ids, then the rest of the persistentEffect summary's
+    // keywords). A persistent card whose passive resolves nothing renders an
+    // empty panel rather than restating its type (KW-5 guarantees every
+    // library card resolves at least one).
     else if (c.kind === 'enchant' || c.kind === 'disenchant') {
-        push(keywordForVerb(card.verbClass), false);
-        push(c.keyword, false);
+        // (c.keyword falls back to the bare type word on a payload-less card —
+        // that fallback belongs to the FACE verb slot, never to this panel.)
+        if (c.keyword !== 'Enchantment' && c.keyword !== 'Disenchant') push(c.keyword, false);
         for (const ce of sourceCard?.combatEffects ?? []) push(keywordForEffect(ce.effectId), false);
         for (const kw of keywordsInPersistentText(sourceCard?.persistentEffect)) push(kw, false);
     } else push(c.keyword, c.kind === 'inert');

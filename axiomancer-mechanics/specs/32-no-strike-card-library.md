@@ -394,7 +394,11 @@ Kept-and-recut from v2's unshipped catalogue where names match.
 ## 8. The ten preset decks
 
 Recipe (all decks): C1 ×4, C2 ×4, U1 ×2, U2 ×2, R-spell, R-enchant,
-R-disenchant = **15 cards** + synthetic Retreat.
+R-disenchant = **15 cards** + synthetic Retreat. Ratified 2026-07-12
+(§12 item 9): every recipe carries exactly **5 body / 5 mind / 5
+heart** by `philosophicalAspect` (partition 4+1 / 4+1 / 2+2+1),
+borrowing cross-theme utility cards where the theme's own colors
+cannot cover it.
 
 | preset id | name | theme |
 |---|---|---|
@@ -562,3 +566,19 @@ recommendation of the card-library improvement plan
    to KW-2 pending the WS4/WS6 orphan-drilling outcome (whatever still
    sits at one card after those passes goes to the KW-2 merge/retire
    list). (yes)
+9. **(2026-07-12) Preset color law — 5/5/5 by aspect** — every 15-card
+   preset recipe MUST carry exactly 5 body / 5 mind / 5 heart cards by
+   `philosophicalAspect` (`cardStanceColor`). All three die colors are
+   always possible in the tray, and the Color Law otherwise strands
+   off-color dice: the owner playtest found foundry / standstill /
+   tithe at ZERO heart — every purple die dead for card play. Under
+   the fixed 4/4/2/2/1/1/1 recipe the only legal partition of 15 into
+   5/5/5 is 4+1 / 4+1 / 2+2+1: the two commons in two DIFFERENT
+   colors, both uncommons in the THIRD color, and the three rares one
+   of each color. Where a theme's own 7 cards cannot satisfy the
+   partition, the preset borrows utility-leaning cards of the missing
+   color from the library (same rarity slot, same cardType slot) —
+   color playability outranks strict theme purity in preset
+   composition; the theme's hallmark engine cards stay. The UI
+   hard-blocks illegal die drops (Color Law, unchanged). Provenance:
+   owner playtest directive, 2026-07-12. (yes)
