@@ -25,6 +25,10 @@ Axiomancer/
   .claude/                # loop + domain commands, agents, design skills
 ```
 
+## Architecture boundaries
+
+See [`docs/external-architecture.md`](./docs/external-architecture.md) for the authoritative map of systems outside this monorepo: the game knowledge-base repository, KB and Axiomancer MCP servers, SomberSoft doctrine and decisions, GitHub/Claude automation, Expo EAS, and the private Cloudflare R2 artifact vault. External services may support research, automation, previews, or evidence storage; none owns game-rules truth.
+
 ## History
 
 Assembled from two previously-separate repos via `git subtree`, preserving each package's mainline commit history:

@@ -91,6 +91,8 @@ the commands are fully self-contained.
 
 ## Game knowledge base (`kb/`)
 
+The complete external-system register, including ownership, authority, credentials, fallbacks, and recovery procedures, lives at [`docs/external-architecture.md`](docs/external-architecture.md). Update that document whenever Axiomancer gains a hosted service, sibling repository, MCP server, external datastore, or required agent runtime.
+
 `no-trbl-2-u/game-knowledge-base` is the OKF corpus of board-game rules
 and reception research (source-backed claims, per-claim confidence).
 `node scripts/kb-sync.mjs` shallow-clones/refreshes it into `kb/`
