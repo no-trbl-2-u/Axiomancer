@@ -648,6 +648,26 @@ describe('persistent hooks — venom-and-vein, mirror-of-guilt, crumbling-resolv
         expect(mirrored!.intensity).toBe(1);
     });
 
+    it('mirror-of-guilt (D): an ENEMY-inflicted debuff does NOT reflect (owner ruling 2026-07-12, Bucket B #16)', () => {
+        // The face is the contract: "every self-debuff your OWN cards land".
+        // The old resolveThreatPhase hook mirrored enemy-inflicted debuffs
+        // back at the enemy with no target-validity check — removed.
+        mockSequentialRng(0.05);
+        let state = initializeCombatEncounter(makePlayer([]), makeEnemy(300, 'mind'), undefined, 7);
+        state = rollEncounterDice(state).state;
+        state = {
+            ...state,
+            enemyAttachments: ['mirror-of-guilt'],
+            threatPhases: [{
+                index: 1, enemyStance: 'mind' as const, isFinalPhase: true,
+                threatAction: { description: 'hex probe', effects: [{ effectId: 'debuff_poison', intensity: 1, duration: 2 }] },
+            }],
+        };
+        const res = resolveThreatPhase(state);
+        expect(res.state.player.effects.some(e => e.effectId === 'debuff_poison')).toBe(true);  // the hex landed on YOU
+        expect(res.state.enemy.effects.some(e => e.effectId === 'debuff_poison')).toBe(false);  // and did NOT reflect
+    });
+
     it('crumbling-resolve (D): a fully blocked attack costs the enemy a rung on the NEXT telegraph', () => {
         mockSequentialRng(0.05);
         let state = initializeCombatEncounter(makePlayer([]), makeEnemy(300, 'mind'), undefined, 7);

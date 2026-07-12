@@ -248,7 +248,7 @@
   ],
   "lines": [
    "FREE — reveal the next stance.",
-   "PAID — backfire i1 d2 + lock the enemy stance + STAGGER 1."
+   "PAID — backfire i1 d2 + lock the enemy's next stance + STAGGER 1."
   ]
  },
  {
@@ -299,8 +299,8 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — Drain 1 VITAE from the enemy for every SOUL you gain.",
-   "PAID (rest of combat) — Drain 1 VITAE from the enemy for every SOUL you gain."
+   "FREE (3 rounds) — Every SOUL you gain deals 1 damage to the enemy.",
+   "PAID (rest of combat) — Every SOUL you gain deals 1 damage to the enemy."
   ]
  },
  {
@@ -503,8 +503,8 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — While you hold 4+ PREMISEs, the enemy stays MARKed.",
-   "PAID (rest of combat) — While you hold 4+ PREMISEs, the enemy stays MARKed. Attaches to the enemy."
+   "FREE (3 rounds) — While you hold 4+ PREMISEs, MARK the enemy +1 stack each turn (to 10).",
+   "PAID (rest of combat) — While you hold 4+ PREMISEs, MARK the enemy +1 stack each turn (to 10). Attaches to the enemy."
   ]
  },
  {
@@ -763,8 +763,8 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — A fully-blocked (GUARD) attack STAGGERs the enemy a rung on its next telegraph.",
-   "PAID (rest of combat) — A fully-blocked (GUARD) attack STAGGERs the enemy a rung on its next telegraph. Attaches to the enemy."
+   "FREE (3 rounds) — A fully-blocked (GUARD) attack STAGGERs the enemy a rung on its next telegraph; each phase, standing GUARD drips 20% of itself (min 4) to the enemy.",
+   "PAID (rest of combat) — A fully-blocked (GUARD) attack STAGGERs the enemy a rung on its next telegraph; each phase, standing GUARD drips 20% of itself (min 4) to the enemy. Attaches to the enemy."
   ]
  },
  {
@@ -967,8 +967,8 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — Every KINDLEd or FORGEd die you spend MARKs the enemy.",
-   "PAID (rest of combat) — Every KINDLEd or FORGEd die you spend MARKs the enemy. Attaches to the enemy."
+   "FREE (3 rounds) — When a KINDLEd or FORGEd die powers a card, MARK the enemy (mark i1; once per play).",
+   "PAID (rest of combat) — When a KINDLEd or FORGEd die powers a card, MARK the enemy (mark i1; once per play). Attaches to the enemy."
   ]
  },
  {
@@ -1171,8 +1171,8 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — Every OMEN that hits MARKs the foe.",
-   "PAID (rest of combat) — Every OMEN that hits MARKs the foe. Attaches to the enemy."
+   "FREE (3 rounds) — Every OMEN that hits MARKs the foe (mark i1).",
+   "PAID (rest of combat) — Every OMEN that hits MARKs the foe (mark i1). Attaches to the enemy."
   ]
  },
  {
@@ -1427,8 +1427,8 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — Every THORNS reflection also marks the enemy.",
-   "PAID (rest of combat) — Every THORNS reflection also marks the enemy."
+   "FREE (3 rounds) — Every THORNS reflection also MARKs the enemy (mark i1).",
+   "PAID (rest of combat) — Every THORNS reflection also MARKs the enemy (mark i1)."
   ]
  },
  {
@@ -1479,8 +1479,8 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — Your SWAY stops decaying, and each new gesture of it lands harder.",
-   "PAID (rest of combat) — Your SWAY stops decaying, and each new gesture of it lands harder."
+   "FREE (3 rounds) — Your SWAY stops decaying; SWAY gains land +12% per turn held (caps at +108%).",
+   "PAID (rest of combat) — Your SWAY stops decaying; SWAY gains land +12% per turn held (caps at +108%)."
   ]
  },
  {
@@ -1631,8 +1631,8 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — Every self-debuff you take toward FALLEN also lands one stack on the enemy.",
-   "PAID (rest of combat) — Every self-debuff you take toward FALLEN also lands one stack on the enemy. Attaches to the enemy."
+   "FREE (3 rounds) — Every self-debuff your own cards land also lands 1 stack of it on the enemy; every 3 RECOIL paid in a play mirrors 1 more stack.",
+   "PAID (rest of combat) — Every self-debuff your own cards land also lands 1 stack of it on the enemy; every 3 RECOIL paid in a play mirrors 1 more stack. Attaches to the enemy."
   ]
  },
  {
@@ -1683,8 +1683,8 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — Damage your defenses prevent is converted into SWAY.",
-   "PAID (rest of combat) — Damage your defenses prevent is converted into SWAY. Attaches to the enemy."
+   "FREE (3 rounds) — Damage your GUARD or parry prevents converts to SWAY, 1 per point.",
+   "PAID (rest of combat) — Damage your GUARD or parry prevents converts to SWAY, 1 per point. Attaches to the enemy."
   ]
  },
  {
@@ -2048,7 +2048,7 @@
   ],
   "lines": [
    "FREE — +1 Premise.",
-   "PAID — RUPTURE."
+   "PAID — RUPTURE ALL."
   ]
  },
  {
@@ -2148,7 +2148,7 @@
   ],
   "lines": [
    "FREE — FORETELL 1.",
-   "PAID — RUPTURE (+3 fuel per omen hit)."
+   "PAID — RUPTURE ALL (+3 fuel per omen hit)."
   ]
  },
  {
@@ -2356,7 +2356,7 @@
   ],
   "lines": [
    "FREE — mark i1 d1.",
-   "PAID — RUPTURE + SIPHON 35% + RECALL 2 — its FREE line fires now."
+   "PAID — RUPTURE ALL + SIPHON 35% + RECALL 2 — its FREE line fires now."
   ]
  },
  {
@@ -2512,7 +2512,7 @@
   ],
   "lines": [
    "FREE — mark i1 d1 (self).",
-   "PAID — RECOIL 5 + RUPTURE."
+   "PAID — RECOIL 5 + RUPTURE ALL."
   ]
  },
  {
@@ -2819,8 +2819,8 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — Every ECHO or REPRISE drips 2 damage to the enemy.",
-   "PAID (rest of combat) — Every ECHO or REPRISE drips 2 damage to the enemy. Attaches to the enemy."
+   "FREE (3 rounds) — Every ECHO, RECALL, or replay drips damage equal to the enemy's MARK stacks (min 2, max 16).",
+   "PAID (rest of combat) — Every ECHO, RECALL, or replay drips damage equal to the enemy's MARK stacks (min 2, max 16). Attaches to the enemy."
   ]
  },
  {
@@ -2871,8 +2871,8 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — Doubles the total POISON and BLEED damage the enemy takes each round.",
-   "PAID (rest of combat) — Doubles the total POISON and BLEED damage the enemy takes each round. Attaches to the enemy."
+   "FREE (3 rounds) — At round end, the enemy takes its total POISON and BLEED tick damage from this round again.",
+   "PAID (rest of combat) — At round end, the enemy takes its total POISON and BLEED tick damage from this round again. Attaches to the enemy."
   ]
  },
  {
@@ -3028,7 +3028,7 @@
   ],
   "lines": [
    "FREE — +1 Premise.",
-   "PAID — PERORATION at 6 (CONCEDE at 8)."
+   "PAID — PERORATION at 6 — +2 Conviction · draw 2 · consume all marks — 3 per stack (CONCEDE at 8; 10 vs elites, 12 vs bosses)."
   ]
  },
  {
@@ -3183,8 +3183,8 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — The next enemy stance is always revealed (FORETELL), and your OMENs hit harder.",
-   "PAID (rest of combat) — The next enemy stance is always revealed (FORETELL), and your OMENs hit harder."
+   "FREE (3 rounds) — The next enemy stance is always revealed (FORETELL); OMEN rider payoffs land ×1.5 (round up).",
+   "PAID (rest of combat) — The next enemy stance is always revealed (FORETELL); OMEN rider payoffs land ×1.5 (round up)."
   ]
  },
  {
@@ -3236,7 +3236,7 @@
   ],
   "lines": [
    "FREE — mark i1 d1.",
-   "PAID — spend ALL pips (+1 Guard per pip) + RUPTURE (+3.5 fuel per pip) + refresh the spent die."
+   "PAID — spend ALL pips (+1 Guard per pip) + RUPTURE ALL (+3.5 fuel per pip; needs 2+ spent pips) + refresh the spent die."
   ]
  },
  {

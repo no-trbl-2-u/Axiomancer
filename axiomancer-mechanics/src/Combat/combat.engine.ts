@@ -1710,7 +1710,7 @@ function playBottomAction(
         gainSoulsLocal(soulWorthyWashouts(clock.washedOut), 'expiry');
     };
 
-    // `stuck-in-their-head` (D): every ECHO / REPRISE drips damage, engine-
+    // `stuck-in-their-head` (D): every ECHO / RECALL / replay drips damage, engine-
     // gated. Refrain rebalance (2026-07-08): the flat 2 HP was a rounding
     // error against late-stage HP pools no matter how many times the deck
     // echoed Mark onto the enemy — it now scales with getMarkStacks(enemy),
@@ -2228,12 +2228,19 @@ function playBottomAction(
             mercyOpened = true;
         }
     }
-    // `mirror-of-guilt` (D): every self-debuff the player takes lands 1 stack of
-    // the same affliction on the enemy — the debt argues for you (spec 32 v3 T4).
+    // `mirror-of-guilt` (D): every self-debuff the player's OWN cards land
+    // mirrors 1 stack of the same affliction onto the enemy — the debt argues
+    // for you (spec 32 v3 T4). Owner ruling (2026-07-12, detail-cleanup
+    // follow-up Bucket B #16, option E): the mirror is gated to afflictions
+    // with enemy-side meaning (a DoT or a MARK) — a self-debuff whose payload
+    // does nothing on an enemy no longer ghost-lands, and enemy-INFLICTED
+    // debuffs no longer reflect (that hook is gone from resolveThreatPhase).
+    const mirrorableOnEnemy = (def: Effect): boolean =>
+        !!def.payload.damageOverTime || (def.payload.tickAmplifyFlat ?? 0) > 0;
     if (zoneHas(state, 'mirror-of-guilt')) {
         for (const sd of selfDebuffsLanded) {
             const def = lookupEffectDef(sd.effectId);
-            if (!def) continue;
+            if (!def || !mirrorableOnEnemy(def)) continue;
             const applied = applyEffect(enemy.effects, def, state.round, { intensityDelta: 1, sourceId: 'mirror-of-guilt' });
             enemy = { ...enemy, effects: applied.activeEffects };
             events.push({
@@ -2257,7 +2264,7 @@ function playBottomAction(
                 ? selfDebuffsLanded[selfDebuffsLanded.length - 1].effectId
                 : 'debuff_mark';
             const def = lookupEffectDef(mirrorEffectId);
-            if (def) {
+            if (def && mirrorableOnEnemy(def)) {
                 const applied = applyEffect(enemy.effects, def, state.round, { intensityDelta: recoilStacks, sourceId: 'mirror-of-guilt-recoil' });
                 enemy = { ...enemy, effects: applied.activeEffects };
                 events.push({
@@ -2829,12 +2836,10 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
                         sourceId: enemy.id,
                     });
                     player = { ...player, effects: res.activeEffects };
-                    // `mirror-of-guilt` (D): an enemy-inflicted debuff reflects
-                    // 1 stack of itself back onto the enemy.
-                    if (zoneHas(state, 'mirror-of-guilt') && def.type === 'debuff') {
-                        const mirrored = applyEffect(enemy.effects, def, state.round, { intensityDelta: 1, sourceId: 'mirror-of-guilt' });
-                        enemy = { ...enemy, effects: mirrored.activeEffects };
-                    }
+                    // `mirror-of-guilt` deliberately does NOT reflect here:
+                    // enemy-inflicted debuffs are not "self-debuffs your own
+                    // cards land" (owner ruling 2026-07-12, detail-cleanup
+                    // follow-up Bucket B #16 — the face is the contract).
                 }
             }
             if (eff.enemyHeal && eff.enemyHeal > 0 && !doubtId) {
