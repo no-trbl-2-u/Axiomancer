@@ -168,7 +168,7 @@ describe('sequencing-microset — registry shape and rank-band honesty', () => {
         expect(scoreCard(byId('coda'))).toBeCloseTo(8.0, 2);
         expect(scoreCard(byId('dying-echo'))).toBeCloseTo(6.417, 2);
         expect(scoreCard(byId('wages-of-weakness'))).toBeCloseTo(9.0, 2);
-        expect(scoreCard(byId('answered-in-kind'))).toBeCloseTo(6.5, 2);
+        expect(scoreCard(byId('answered-in-kind'))).toBeCloseTo(6.25, 2); // post-Phase-30: FREE self-mark seed + heal kicker
     });
 
     it('face-term budget: OPENING is the one shared term; the rest are lowercase glosses', () => {

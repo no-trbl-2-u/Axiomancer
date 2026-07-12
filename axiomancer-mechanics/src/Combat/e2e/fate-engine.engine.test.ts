@@ -49,7 +49,7 @@ registerSandboxCards([
         id: 'qa-fate-card', name: 'QA Fate Card', category: 'paradox',
         philosophicalAspect: 'mind', description: 'fate fixture', tier: 1,
         targetType: 'enemy', rank: 1, cardType: 'spell',
-        combatEffects: [{ effectId: 'debuff_confusion', appliedTo: 'opponent', duration: 2 }],
+        combatEffects: [{ effectId: 'debuff_curse', appliedTo: 'opponent', duration: 2 }],
         fate: { rider: { bonusDuration: 2 }, recoilHp: 3 },
     },
     {
@@ -194,7 +194,7 @@ describe('R4 FATE — X dice are never dead', () => {
         const playerHp = s.player.health;
         const res = playCombatCard(s, { uid: entry.uid }, true, xDie.id);
         expect(res.events.some(e => e.kind === 'fate-powered')).toBe(true);
-        const confusion = res.state.enemy.effects.find(e => e.effectId === 'debuff_confusion')!;
+        const confusion = res.state.enemy.effects.find(e => e.effectId === 'debuff_curse')!;
         // authored d2 + rider bonusDuration 2 (no read/match adjustments on a none-read X play)
         expect(confusion.remainingDuration).toBe(2 + 2);
         expect(playerHp - res.state.player.health).toBe(3);  // printed recoil, exact

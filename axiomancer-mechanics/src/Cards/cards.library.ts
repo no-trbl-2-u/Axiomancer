@@ -43,10 +43,12 @@ const slipperySlope: Card = {
         'inevitable. The ground tilts, and they slide the whole way down.',
     tier: 2, rank: 1, cardType: 'spell',
     targetType: 'enemy',
-    // pts (WS3.5 clock re-price, 2026-07-11): poison i1 d4 on the card-played
-    // clock — ramp 2,2,3,3 × 2 expected ticks/round = 20 HP ÷ 3 ≈ 6.67 +
-    // FREE tick 0.6 = 7.27 → top of the Doxa band (starter)
-    free: { tickOne: true },
+    // pts (WS3.5 clock re-price, 2026-07-11; phase 30 FREE-currency law):
+    // poison i1 d4 on the card-played clock — ramp 2,2,3,3 × 2 expected
+    // ticks/round = 20 HP ÷ 3 ≈ 6.67 + FREE MARK seed i1 d1 (0.6, plants the
+    // universal affliction-glue currency instead of TICK, which is retired
+    // registry-wide) = 7.27 → top of the Doxa band (starter)
+    free: { applyEffect: { effectId: 'debuff_mark', intensity: 1, duration: 1 } },
     combatEffects: [{ effectId: 'debuff_poison', appliedTo: 'opponent', intensity: 1 }],
     addedIn: '2026-07-08',
     tags: ['affliction', 'dot', 'starter'],
@@ -63,8 +65,9 @@ const strawMansJab: Card = {
         'the same — wounds do not check citations.',
     tier: 1, rank: 2, cardType: 'spell',
     targetType: 'enemy',
-    // pts: bleed i2 d2 lifetime ~10/3 ≈ 3.3 + tick 0.6 + dieBonus(+1 int ~1.5 ×0.6 = 0.9) ≈ 4.8 → Lemma
-    free: { tickOne: true },
+    // pts (phase 30): bleed i2 d2 lifetime ~10/3 ≈ 3.3 + FREE MARK seed i1 d1
+    // (0.6) + dieBonus(+1 int ~1.5 ×0.6 = 0.9) ≈ 4.8 → Lemma
+    free: { applyEffect: { effectId: 'debuff_mark', intensity: 1, duration: 1 } },
     combatEffects: [{ effectId: 'debuff_bleed', appliedTo: 'opponent', intensity: 2, duration: 2 }],
     dieBonus: { onColor: 'body', rider: { bonusIntensity: 1 } },
     addedIn: '2026-07-08',
@@ -82,8 +85,9 @@ const festeringArgument: Card = {
         'to answer it. Everything they carry runs a little longer.',
     tier: 2, rank: 3, cardType: 'spell',
     targetType: 'enemy',
-    // pts: +1 duration to ALL DoTs ≈ 1/dot × expected 2-3 live dots ≈ 5.5 + tick 0.6 ≈ 6.1 → Thesis
-    free: { tickOne: true },
+    // pts (phase 30): +1 duration to ALL DoTs ≈ 1/dot × expected 2-3 live dots
+    // ≈ 5.5 + FREE MARK seed i1 d1 (0.6) ≈ 6.1 → Thesis
+    free: { applyEffect: { effectId: 'debuff_mark', intensity: 1, duration: 1 } },
     specialMechanics: [{ kind: 'extend_dots', turns: 1 }],
     addedIn: '2026-07-08',
     tags: ['affliction', 'glue'],
@@ -100,8 +104,10 @@ const currysConversion: Card = {
         'vacuously true. The wound becomes the argument.',
     tier: 2, rank: 4, cardType: 'spell',
     targetType: 'enemy',
-    // pts: convert bleed↔poison +1 int ≈ 1.5/instance × ~2 + tempo value ≈ 6.5 + draw 2 ≈ 8.5 → Theorem
-    free: { drawCards: 1 },
+    // pts (phase 30): convert bleed↔poison +1 int ≈ 1.5/instance × ~2 + tempo
+    // value ≈ 6.5 + FREE MARK seed i1 d1 (0.6, weak deposit) + DRAW 1 kicker
+    // (2, legal alongside a weak-enough deposit) ≈ 9.1 → Theorem
+    free: { applyEffect: { effectId: 'debuff_mark', intensity: 1, duration: 1 }, drawCards: 1 },
     specialMechanics: [{ kind: 'convert_dots', bonusIntensity: 1 }],
     addedIn: '2026-07-08',
     tags: ['affliction', 'glue'],
@@ -141,7 +147,10 @@ const resonanceDetonation: Card = {
     // This card is tier 3, and combat.stage-profiles.ts caps MID at
     // maxCardTier:2, so this rework is structurally late-stage-only — it
     // cannot leak into the mid-stage roster.
-    free: { tickOne: true },
+    // phase 30: FREE TICK (the exact "weak chip on a one-copy finisher" trap
+    // the owner flagged) replaced with a MARK seed — plants glue currency
+    // instead of chipping for ~0 value on an empty board.
+    free: { applyEffect: { effectId: 'debuff_mark', intensity: 1, duration: 1 } },
     specialMechanics: [
         { kind: 'rupture', bonusPct: 0.5 },
         { kind: 'siphon', pct: 0.35 },
@@ -276,11 +285,10 @@ const peroratioInterrupta: Card = {
         'spend today cannot be refuted tomorrow.',
     tier: 2, rank: 4, cardType: 'spell',
     targetType: 'enemy',
-    // pts: RUPTURE (verb 4 + expected fuel) -> ~12 Theorem. FREE tickOne is the
-    // dieless top action (every spell authors a FREE rider; the v3 curated-library
-    // contract enforces it — the rework dropped this line by accident). tickOne
-    // (0.6) keeps the card in the uncommon band; a draw rider tips it over.
-    free: { tickOne: true },
+    // pts (phase 30): RUPTURE (verb 4 + expected fuel) -> ~12 Theorem. FREE
+    // deposits +1 Premise (0.8, matches its peroration siblings) instead of
+    // the retired TICK — keeps the card in the uncommon band.
+    free: { premises: 1 },
     specialMechanics: [{ kind: 'rupture' }],
     addedIn: '2026-07-08',
     tags: ['peroration', 'payoff'],
@@ -355,10 +363,10 @@ const sketchOfAThought: Card = {
         'and a spark leaps off the sketch and catches on them before they notice.',
     tier: 1, rank: 1, cardType: 'spell',
     targetType: 'enemy',
-    // pts: KINDLE mind (2.5) + FREE draw 1 (2) + ember i1 d3 lifetime 3/3=1 +
-    // dieBonus(bonusIntensity 1 × 1.5 × 0.6 = 0.9) = 6.4 -- verified against
-    // scoreCard(), fits the 1.5-7.5 Doxa/Lemma band for rank 1.
-    free: { drawCards: 1 },
+    // pts (phase 30): KINDLE mind (2.5) + FREE PIP 1 (1.5, forge's currency)
+    // + ember i1 d3 lifetime 3/3=1 + dieBonus(bonusIntensity 1 × 1.5 × 0.6 =
+    // 0.9) = 5.9 -- fits the 1.5-7.5 Doxa/Lemma band for rank 1.
+    free: { pips: 1 },
     combatEffects: [{ effectId: 'debuff_kindling_ember', appliedTo: 'opponent', intensity: 1, duration: 3 }],
     dieBonus: { onColor: 'mind', rider: { bonusIntensity: 1 } },
     specialMechanics: [{ kind: 'create_temporary_die', color: 'mind' }],
@@ -377,9 +385,10 @@ const halfStep: Card = {
         'waits behind the guard ripens twice as fast when you learn to be patient about it.',
     tier: 1, rank: 2, cardType: 'spell',
     targetType: 'self',
-    // pts: Guard 5 (1.25) + 2 pips (3.0) + FREE guard 2 (0.5) = 4.75 -- verified
-    // against scoreCard(), fits the 1.5-7.5 Doxa/Lemma band for rank 2.
-    free: { guard: 2 },
+    // pts (phase 30): Guard 5 (1.25) + 2 pips (3.0) + FREE PIP 1 (1.5, forge's
+    // real currency, replaces the chip guard 2) = 5.75 -- fits the 1.5-7.5
+    // Doxa/Lemma band for rank 2.
+    free: { pips: 1 },
     specialMechanics: [{ kind: 'guard', amount: 5 }, { kind: 'grant_pip', count: 2 }],
     addedIn: '2026-07-08',
     tags: ['forge', 'defense'],
@@ -396,11 +405,12 @@ const bootstrapLoop: Card = {
         'premise funds its own cause.',
     tier: 2, rank: 3, cardType: 'spell',
     targetType: 'self',
-    // pts: TRANSMUTE dead X → WILD floating ((5+3+1)×0.7 + 1×0.3 = 6.6) + FREE
-    // conviction (1×0.35) + threshold(pip 1.5 ×0.5 = 0.75) ≈ 7.7 — fits the
-    // 4.5-13 uncommon band for rank 3. (Dice-law rework 2026-07-09: KINDLE wild
-    // swapped for float_x_die — the card-effect path that softens dead X faces.)
-    free: { conviction: 1 },
+    // pts (phase 30): TRANSMUTE dead X → WILD floating ((5+3+1)×0.7 + 1×0.3 =
+    // 6.6) + FREE PIP 1 (1.5, forge's currency, replaces conviction — which
+    // is a system token, not a registry keyword) + threshold(pip 1.5 ×0.5 =
+    // 0.75) ≈ 8.85 — fits the 4.5-13 uncommon band for rank 3. (Dice-law
+    // rework 2026-07-09: KINDLE wild swapped for float_x_die.)
+    free: { pips: 1 },
     specialMechanics: [{ kind: 'float_x_die' }],
     threshold: { color: 'mind', count: 2, rider: { pips: 1 } },
     addedIn: '2026-07-08',
@@ -419,17 +429,16 @@ const exNihilo: Card = {
         'goes back in the tray, unspent.',
     tier: 2, rank: 4, cardType: 'spell',
     targetType: 'self',
-    // pts: FORGE floating WILD (5) + BANK own powering die + threshold(mind×3,
-    // rider pips:1 -> 1.5×0.5 = 0.75) + FREE conviction (1) -- fits the 4.5-13
-    // Thesis/Theorem band for rank 4. (FREE line was dropped by the rework; the
-    // v3 curated-library contract requires every spell to author one — restored;
-    // a draw rider tips it over the band, so it authors conviction instead.)
-    free: { conviction: 1 },
+    // pts (phase 30): FORGE floating WILD (5 + persistence 3 + wild bonus 1 =
+    // 9) + BANK own powering die (2) + FREE PIP 1 (1.5, forge's currency,
+    // replaces conviction) = 12.5 -- fits the 4.5-13 Thesis/Theorem band for
+    // rank 4. The threshold's conditional +1 pip is dropped as redundant now
+    // that the FREE line guarantees one unconditionally every play.
+    free: { pips: 1 },
     specialMechanics: [
         { kind: 'forge_floating_die', color: 'wild' },
         { kind: 'bank_spent_die' },
     ],
-    threshold: { color: 'mind', count: 3, rider: { pips: 1 } },
     addedIn: '2026-07-08',
     tags: ['forge', 'dice', 'floating'],
 };
@@ -451,13 +460,17 @@ const theOvertake: Card = {
     // the RUPTURE deliberately ALSO consumes every enemy affliction (its whole
     // DoT board tears loose into the burst), so the finisher must land big to
     // be worth cashing your own DoTs; fuelPerPip 3.5 + bonusPct 0.5 push a
-    // fully-charged forge turn to the ruptureBurstCap() fraction cap. + REFRESH own powering
-    // die + FREE guard 2 -- top of the rank-5 Axiom band.
+    // fully-charged forge turn to the ruptureBurstCap() fraction cap (WS7.1:
+    // a pure fraction of enemy max HP). + REFRESH own powering
+    // die -- top of the rank-5 Axiom band; a full FREE PIP (1.5) tips it over,
+    // so FREE deposits a MARK seed i1 d1 (0.6, the universal glue currency)
+    // instead — still a real theme-currency deposit under the FREE-currency
+    // law, just not forge-specific on this particular finisher.
     //
     // CAVEAT (verified in combat.engine.ts): a FLOATING die is spent-and-gone-
     // forever by design -- refresh_die only returns the powering die to the
     // pool when Overtake is powered by a RESERVE die.
-    free: { guard: 2 },
+    free: { applyEffect: { effectId: 'debuff_mark', intensity: 1, duration: 1 } },
     specialMechanics: [
         { kind: 'spend_all_pips', guardPerPip: 1 },
         { kind: 'rupture', fuelPerPip: 3.5, bonusPct: 0.5 },
@@ -514,8 +527,11 @@ const againstMyJudgment: Card = {
         'two cards too late to stop you.',
     tier: 1, rank: 1, cardType: 'spell',
     targetType: 'self',
-    // pts: draw 2 (4) − self-mark d2 credit (−0.75×1.5 ≈ −1.1) + FREE conviction 0.35 ≈ 3.3 → Doxa
-    free: { conviction: 1 },
+    // pts (phase 30): draw 2 (4) − self-mark d2 credit (−0.75×1.5 ≈ −1.1) +
+    // FREE self-MARK seed i1 d1 (0.6, akrasia's currency — self-afflictions
+    // toward FALLEN, replaces conviction which is a system token not a
+    // registry keyword) ≈ 3.5 → Doxa
+    free: { applyEffect: { effectId: 'debuff_mark', intensity: 1, duration: 1, to: 'self' } },
     combatEffects: [{ effectId: 'debuff_mark', appliedTo: 'self', duration: 2 }],
     specialMechanics: [{ kind: 'rider', rider: { drawCards: 2 } }],
     addedIn: '2026-07-08',
@@ -535,10 +551,11 @@ const sweetPoison: Card = {
     targetType: 'enemy',
     // pts (WS3.5 clock re-price, 2026-07-11 — intensity tuned 2 → 1: i1 on
     // the card-played clock prints the SAME 20 HP lifetime the old i2 round
-    // clock did): poison i1 d4 (20 → 6.67) − self-bleed i1 d2 credit
-    // (−0.75×1 = −0.75) + FREE tick 0.6 = 6.52 → Lemma (deliberately rich —
-    // the akratic bargain)
-    free: { tickOne: true },
+    // clock did; phase 30: FREE self-MARK seed i1 d1 replaces the retired
+    // TICK): poison i1 d4 (20 → 6.67) − self-bleed i1 d2 credit
+    // (−0.75×1 = −0.75) + FREE self-mark 0.6 = 6.52 → Lemma (deliberately
+    // rich — the akratic bargain)
+    free: { applyEffect: { effectId: 'debuff_mark', intensity: 1, duration: 1, to: 'self' } },
     combatEffects: [
         { effectId: 'debuff_poison', appliedTo: 'opponent', intensity: 1 },
         { effectId: 'debuff_bleed', appliedTo: 'self', intensity: 1, duration: 2 },
@@ -565,7 +582,8 @@ const selfFlagellant: Card = {
     // is now a repeatable detonator. RUPTURE consumes every affliction on the
     // enemy and converts their full remaining lifetime into ONE burst now,
     // capped at 80.
-    free: { tickOne: true },
+    // phase 30: FREE self-MARK seed i1 d1 (0.6) replaces TICK.
+    free: { applyEffect: { effectId: 'debuff_mark', intensity: 1, duration: 1, to: 'self' } },
     specialMechanics: [
         { kind: 'recoil', hp: 5 },
         { kind: 'rupture', bonusPct: 0.1 },
@@ -585,8 +603,10 @@ const fallenGrace: Card = {
         'pays better there.',
     tier: 2, rank: 4, cardType: 'spell',
     targetType: 'enemy',
-    // pts: bleed i2 d3 (~5) + draw 0.7 + FALLEN(heal 4 ≈ 1.3 ×0.5 = 0.7) + tempo ≈ 9 → Theorem
-    free: { drawCards: 1 },
+    // pts (phase 30): bleed i2 d3 (~5) + FREE self-MARK seed i1 d1 (0.6, weak
+    // deposit) + DRAW 1 kicker (2, legal alongside the weak deposit) +
+    // FALLEN(heal 4 ≈ 1.3 ×0.5 = 0.7) + tempo ≈ 8.9 → Theorem
+    free: { applyEffect: { effectId: 'debuff_mark', intensity: 1, duration: 1, to: 'self' }, drawCards: 1 },
     combatEffects: [{ effectId: 'debuff_bleed', appliedTo: 'opponent', intensity: 2, duration: 3 }],
     fallen: { rider: { healHp: 4 } },
     addedIn: '2026-07-08',
@@ -604,8 +624,11 @@ const pactOfAkrasia: Card = {
         'blood, and you sign it smiling.',
     tier: 3, rank: 5, cardType: 'spell',
     targetType: 'self',
-    // pts: FORGE wild floating (6) + persistence − recoil 6 (−1.5) − self-bleed credit (−1.3) + wild premium ≈ 12.6 → Axiom
-    free: { guard: 2 },
+    // pts (phase 30): FORGE wild floating (6) + persistence − recoil 6 (−1.5)
+    // − self-bleed credit (−1.3) + wild premium + FREE RECOIL 1 → GUARD 2
+    // (akrasia's "sin as currency": pay 1 HP for 2 Guard, replaces the bare
+    // chip guard) ≈ 13.1 → Axiom
+    free: { recoil: 1, guard: 2 },
     combatEffects: [{ effectId: 'debuff_bleed', appliedTo: 'self', intensity: 1, duration: 2 }],
     specialMechanics: [{ kind: 'forge_floating_die', color: 'wild' }, { kind: 'recoil', hp: 6 }],
     addedIn: '2026-07-08',
@@ -659,8 +682,12 @@ const zenosHalfStep: Card = {
         'the halves coming.',
     tier: 1, rank: 1, cardType: 'spell',
     targetType: 'enemy',
-    // pts: STAGGER 1 (~half a phase-deny, 2) + FREE guard 2 (0.5) + tempo ≈ 3.5 → Doxa
-    free: { guard: 2 },
+    // pts (phase 30): STAGGER 1 (~half a phase-deny, 2) + FREE reveal the
+    // next stance (1.5, control's currency — "information as theme
+    // currency": expose the telegraph before spending a die to strip it —
+    // replaces the chip guard 2, and deliberately does NOT compound with
+    // the PAID stagger the way a second FREE stagger would) ≈ 3.5 → Doxa
+    free: { revealStance: true },
     specialMechanics: [{ kind: 'stagger', rungs: 1 }],
     addedIn: '2026-07-08',
     tags: ['control'],
@@ -677,8 +704,10 @@ const redHerring: Card = {
         'and every lunge you deny becomes the wound.',
     tier: 1, rank: 2, cardType: 'spell',
     targetType: 'enemy',
-    // pts: backfire i2 d2 (3) + FREE draw (0.7) + dieBonus(+1 dur ×0.6 = 0.6) ≈ 4.3 → Lemma
-    free: { drawCards: 1 },
+    // pts (phase 30): backfire i2 d2 (3) + FREE reveal the next stance (1.5,
+    // control's currency, replaces the bare draw) + dieBonus(+1 dur ×0.6 =
+    // 0.6) ≈ 5.1 → Lemma
+    free: { revealStance: true },
     combatEffects: [{ effectId: 'debuff_backfire', appliedTo: 'opponent', intensity: 2, duration: 2 }],
     dieBonus: { onColor: 'mind', rider: { bonusDuration: 1 } },
     addedIn: '2026-07-08',
@@ -696,13 +725,12 @@ const undistributedMiddle: Card = {
         'Somewhere between premise and blow, the force goes missing.',
     tier: 2, rank: 3, cardType: 'spell',
     targetType: 'enemy',
-    // pts (retuned 2026-07-08, mid/late engagement pass): STAGGER 1 (2) + backfire
-    // i2 d3 (0.75x2x3=4.5, up from i1/d2=1.5) + FREE guard 2 (0.5) + threshold(mind
-    // x3 -> stagger+1 AND bonusIntensity+1, rider=2+1.5=3.5 x0.5 discount = 1.75)
-    // total ~= 8.75, in-band for uncommon [4.5,13]. (FREE line was debuff_mark,
-    // which is INERT in a mono-control deck — Mark amplifies DoT ticks, but this
-    // deck deals BACKFIRE, not DoT; swapped to a useful in-theme guard.)
-    free: { guard: 2 },
+    // pts (phase 30): STAGGER 1 (2) + backfire i2 d3 (0.75x2x3=4.5, up from
+    // i1/d2=1.5) + FREE reveal the next stance (1.5, control's currency,
+    // replaces guard) + threshold(mind x3 -> stagger+1 AND bonusIntensity+1,
+    // rider=2+1.5=3.5 x0.5 discount = 1.75) total ~= 9.75, in-band for
+    // uncommon [4.5,13].
+    free: { revealStance: true },
     combatEffects: [{ effectId: 'debuff_backfire', appliedTo: 'opponent', intensity: 2, duration: 3 }],
     specialMechanics: [{ kind: 'stagger', rungs: 1 }],
     threshold: { color: 'mind', count: 3, rider: { stagger: 1, bonusIntensity: 1 } },
@@ -722,10 +750,11 @@ const arrowParadox: Card = {
         'a wound.',
     tier: 2, rank: 4, cardType: 'spell',
     targetType: 'enemy',
-    // pts (reworked 2026-07-08): lock_stance (2.5) + STAGGER 1 (2) + backfire
-    // i1 d2 on the shared 'debuff_backfire' stack (1.5, NEW) + FREE guard 2 (0.5)
-    // = 6.5, in-band for Theorem [4.5,13].
-    free: { guard: 2 },
+    // pts (phase 30): lock_stance (2.5) + STAGGER 1 (2) + backfire i1 d2 on
+    // the shared 'debuff_backfire' stack (1.5) + FREE reveal the next stance
+    // (1.5, control's currency, replaces guard) = 7.5, in-band for Theorem
+    // [4.5,13].
+    free: { revealStance: true },
     specialMechanics: [{ kind: 'lock_stance' }, { kind: 'stagger', rungs: 1 }],
     combatEffects: [{ effectId: 'debuff_backfire', appliedTo: 'opponent', intensity: 1, duration: 2 }],
     addedIn: '2026-07-08',
@@ -746,10 +775,14 @@ const paralysisOfAnalysis: Card = {
     targetType: 'enemy',
     // pts (WS10.1 KW-1 fold, 2026-07-11 — backfire_acute folded into BACKFIRE
     // at i3; the acute's separate 3-per-rung track retires with the clone id):
-    // STAGGER 2 (4, full deny alone) + backfire i3 d3 (6.75) + FREE draw (2)
-    // + dieBonus(mind: bonusIntensity 2 + bonusDuration 1, rider=4 x0.6 = 2.4)
-    // total = 15.15, in-band for rare [7,19].
-    free: { drawCards: 1 },
+    // STAGGER 2 (4, full deny alone) + backfire i3 d3 (6.75) + FREE reveal
+    // the next stance (1.5, weak-ish deposit, phase 30 FREE-currency law) +
+    // DRAW 1 kicker (2, legal alongside it) + dieBonus(mind: bonusIntensity 2
+    // + bonusDuration 1, rider=4 x0.6 = 2.4) total = 16.65, in-band for rare
+    // [7,19]. (STAGGER deliberately kept OFF this FREE line — a second
+    // stagger source here, on top of the PAID STAGGER 2, is what broke the
+    // standstill preset's win-rate curve flat during phase 30 balance-check.)
+    free: { revealStance: true, drawCards: 1 },
     combatEffects: [{ effectId: 'debuff_backfire', appliedTo: 'opponent', intensity: 3, duration: 3 }],
     specialMechanics: [{ kind: 'stagger', rungs: 2 }],
     dieBonus: { onColor: 'mind', rider: { bonusIntensity: 2, bonusDuration: 1 } },
@@ -849,11 +882,13 @@ const cassandrasBurden: Card = {
     targetType: 'enemy',
     // pts (WS10.1 KW-1, 2026-07-11 — foretold-wound replaced by its parts:
     // POISON + MARK double-apply, intensity tuned 2 → 1 for the card-played
-    // clock): poison i1 d2 (8 → 2.67) + mark i1 d2 (1.5) + OMEN(Guard 4 ×0.6
-    // + info 1 = 1.6) + FREE draw (2) = 7.77 → Thesis. The WOUND lands on
-    // cast ("already starting to hurt"); the BRACE (guard 4) is the prophecy
-    // payoff, realized only when the prediction proves true.
-    free: { drawCards: 1 },
+    // clock; phase 30 FREE-currency law): poison i1 d2 (8 → 2.67) + mark i1
+    // d2 (1.5) + OMEN(Guard 4 ×0.6 + info 1 = 1.6) + FREE FORETELL 1 (1,
+    // oracle's currency, weak deposit) + DRAW 1 kicker (2, legal alongside
+    // the weak deposit) = 8.77 → Thesis. The WOUND lands on cast ("already
+    // starting to hurt"); the BRACE (guard 4) is the prophecy payoff,
+    // realized only when the prediction proves true.
+    free: { foretell: 1, drawCards: 1 },
     combatEffects: [
         { effectId: 'debuff_poison', appliedTo: 'opponent', intensity: 1, duration: 2 },
         { effectId: 'debuff_mark', appliedTo: 'opponent', intensity: 1, duration: 2 },
@@ -878,10 +913,10 @@ const delphicAmbiguity: Card = {
         'landed on them.',
     tier: 2, rank: 4, cardType: 'spell',
     targetType: 'enemy',
-    // pts: consume_affliction (Foretold Wound fuel, ~4-5) + 1 Soul (0.75) +
-    // foretell 1 (1.5) + dieBonus mind pips (0.9) + FREE tickOne (0.6) ≈ 8.75 →
-    // Theorem
-    free: { tickOne: true },
+    // pts (phase 30): consume_affliction/RUPTURE 1 (Foretold Wound fuel,
+    // ~4-5) + 1 Soul (0.75) + foretell 1 (1.5) + dieBonus mind pips (0.9) +
+    // FREE FORETELL 1 (1, replaces TICK) ≈ 9.15 → Theorem
+    free: { foretell: 1 },
     specialMechanics: [
         { kind: 'consume_affliction', souls: 1 },
         { kind: 'foretell', count: 1 },
@@ -996,9 +1031,12 @@ const winnowing: Card = {
         'cut and threshed and pocketed now — and the thresher keeps more of the grain than it used to.',
     tier: 2, rank: 3, cardType: 'spell',
     targetType: 'enemy',
-    // pts: consume 1 affliction → fuel ticks NOW (~4-5) + 2 Souls (1.5) + FREE
-    // tick 0.6 ≈ 7.5-8.5 → Thesis-tier.
-    free: { tickOne: true },
+    // pts (phase 30): consume 1 affliction → fuel ticks NOW (~4-5) + 2 Souls
+    // (1.5) + FREE short-fuse BLEED seed i1 d1 (~1, plants an affliction that
+    // expires next round and yields its own Soul via the SOUL-on-expiry hook
+    // — harvest's currency, never minting a Soul directly on FREE) ≈ 7.9-8.9
+    // → Thesis-tier.
+    free: { applyEffect: { effectId: 'debuff_bleed', intensity: 1, duration: 1 } },
     specialMechanics: [{ kind: 'consume_affliction', souls: 2 }],
     addedIn: '2026-07-08',
     tags: ['harvest', 'payoff'],
@@ -1035,9 +1073,10 @@ const theReaping: Card = {
         'comes back to you. The harvest was never for keeping. It was for this, and for what comes after.',
     tier: 3, rank: 5, cardType: 'spell',
     targetType: 'enemy',
-    // pts: REAP ALL — 4 per Soul (burstPerSoul 2→4; caps at 80 dmg off a ~20-Soul
-    // bank) + SIPHON 40% of the burst back as healing + FREE tick 0.6 ≈ 17-19.
-    free: { tickOne: true },
+    // pts (phase 30): REAP ALL — 4 per Soul (burstPerSoul 2→4; caps at 80 dmg
+    // off a ~20-Soul bank) + SIPHON 40% of the burst back as healing + FREE
+    // short-fuse BLEED seed i1 d1 (~1, replaces TICK) ≈ 17.4-19.4.
+    free: { applyEffect: { effectId: 'debuff_bleed', intensity: 1, duration: 1 } },
     specialMechanics: [{ kind: 'reap_all', burstPerSoul: 4 }, { kind: 'siphon', pct: 0.4 }],
     addedIn: '2026-07-08',
     tags: ['harvest', 'payoff'],
@@ -1090,8 +1129,10 @@ const softWord: Card = {
         'over-dressed for the occasion.',
     tier: 1, rank: 1, cardType: 'spell',
     targetType: 'enemy',
-    // pts: SWAY 3 (2.4) + FREE heal 2 (0.65) + dieBonus(SWAY 1 ×0.6 = 0.5) ≈ 3.6 → Doxa
-    free: { healHp: 2 },
+    // pts (phase 30): SWAY 3 (2.4) + FREE RAPPORT i1 d2 seed (1.5, charm's
+    // rapport-building currency, replaces the bare heal) + dieBonus(SWAY 1
+    // ×0.6 = 0.5) ≈ 4.4 → Doxa
+    free: { applyEffect: { effectId: 'debuff_rapport', intensity: 1, duration: 2 } },
     specialMechanics: [{ kind: 'sway', amount: 3 }],
     dieBonus: { onColor: 'heart', rider: { sway: 1 } },
     addedIn: '2026-07-08',
@@ -1128,8 +1169,10 @@ const commonGround: Card = {
         'It is very hard to duel on shared ground.',
     tier: 2, rank: 3, cardType: 'spell',
     targetType: 'enemy',
-    // pts: SWAY 2 (1.6) + rapport i1 d2 (1.5) + FREE draw (0.7) + threshold(SWAY 2 ×0.5 = 0.8) + tempo ≈ 7 → Thesis
-    free: { drawCards: 1 },
+    // pts (phase 30): SWAY 2 (1.6) + rapport i1 d2 (1.5) + FREE RAPPORT i1 d2
+    // seed (1.5, weak-ish deposit) + DRAW 1 kicker (0.7, legal alongside it)
+    // + threshold(SWAY 2 ×0.5 = 0.8) + tempo ≈ 8.5 → Thesis
+    free: { applyEffect: { effectId: 'debuff_rapport', intensity: 1, duration: 2 }, drawCards: 1 },
     combatEffects: [{ effectId: 'debuff_rapport', appliedTo: 'opponent', intensity: 1, duration: 2 }],
     specialMechanics: [{ kind: 'sway', amount: 2 }],
     threshold: { color: 'heart', count: 3, rider: { sway: 2 } },
@@ -1148,8 +1191,9 @@ const theOliveBranch: Card = {
         'from a guard position carries further.',
     tier: 2, rank: 4, cardType: 'spell',
     targetType: 'enemy',
-    // pts: SWAY 3 (2.4) + cleanse (1.5) + heal 3 (1) + FREE guard (0.5) + tempo ≈ 9 → Theorem
-    free: { guard: 2 },
+    // pts (phase 30): SWAY 3 (2.4) + cleanse (1.5) + heal 3 (1) + FREE
+    // RAPPORT i1 d2 seed (1.5, replaces the chip guard) + tempo ≈ 9.4 → Theorem
+    free: { applyEffect: { effectId: 'debuff_rapport', intensity: 1, duration: 2 } },
     specialMechanics: [
         { kind: 'sway', amount: 3 },
         { kind: 'rider', rider: { cleanse: 1, healHp: 3 } },
@@ -1236,8 +1280,10 @@ const braceForImpact: Card = {
         'braced for cannot break you.',
     tier: 1, rank: 1, cardType: 'spell',
     targetType: 'self',
-    // pts: Guard 8 (2) + FREE guard 2 (0.5) + pip line (+2/pip, situational ≈ 0.8) ≈ 3.3 → Doxa (starter)
-    free: { guard: 2 },
+    // pts (phase 30): Guard 8 (2) + FREE persistent GUARD 2 (0.67, bulwark's
+    // "lay a brick" currency, replaces the fading chip) + pip line (+2/pip,
+    // situational ≈ 0.8) ≈ 3.47 → Doxa (starter)
+    free: { barrier: 2 },
     specialMechanics: [{ kind: 'guard', amount: 8 }],
     addedIn: '2026-07-08',
     tags: ['bulwark', 'defense', 'starter'],
@@ -1255,10 +1301,11 @@ const nettleCloak: Card = {
         'or simply, eventually, with their skin.',
     tier: 1, rank: 2, cardType: 'spell',
     targetType: 'self',
-    // pts: thorns i2 d2 (~3, reactive, unchanged) + NEW non-reactive Nettle
-    // Sting i1 d2 applied directly to the enemy on cast (~1.5, fires even if
-    // they never swing) + FREE guard 2 (0.5) + reflect synergy ≈ 5.8 → Lemma
-    free: { guard: 2 },
+    // pts (phase 30): thorns i2 d2 (~3, reactive, unchanged) + NEW
+    // non-reactive Nettle Sting i1 d2 applied directly to the enemy on cast
+    // (~1.5, fires even if they never swing) + FREE persistent GUARD 2
+    // (0.67, replaces the fading chip) + reflect synergy ≈ 5.97 → Lemma
+    free: { barrier: 2 },
     combatEffects: [
         { effectId: 'buff_thorns', appliedTo: 'self', intensity: 2, duration: 2 },
         { effectId: 'debuff_nettle_sting', appliedTo: 'opponent', intensity: 1, duration: 2 },
@@ -1278,8 +1325,10 @@ const tuQuoque: Card = {
         'you becomes, instantly, about them.',
     tier: 2, rank: 3, cardType: 'spell',
     targetType: 'self',
-    // pts: thorns i3 d2 (~4.5) + FREE guard 2 (0.5) + dieBonus(guard 2 ×0.6 = 0.3) + tempo ≈ 6.5 → Thesis
-    free: { guard: 2 },
+    // pts (phase 30): thorns i3 d2 (~4.5) + FREE persistent GUARD 2 (0.67,
+    // replaces the fading chip) + dieBonus(guard 2 ×0.6 = 0.3) + tempo ≈ 6.67
+    // → Thesis
+    free: { barrier: 2 },
     combatEffects: [{ effectId: 'buff_thorns', appliedTo: 'self', intensity: 3, duration: 2 }],
     // phase 28: recolored 'body' -> 'heart' — the card is philosophicalAspect
     // 'heart', so the old onColor:'body' bonus was dead text on a heart card.
@@ -1299,8 +1348,10 @@ const measuredAnswer: Card = {
         'entire, and reply in kind — once, precisely.',
     tier: 2, rank: 4, cardType: 'spell',
     targetType: 'self',
-    // pts: Guard 6 (1.5) + RIPOSTE 3/parry 2 (~4) + FREE guard 3 (0.75) + full-block gate + tempo ≈ 9 → Theorem
-    free: { guard: 3 },
+    // pts (phase 30): Guard 6 (1.5) + RIPOSTE 3/parry 2 (~4) + FREE persistent
+    // GUARD 3 (1, replaces the fading chip) + full-block gate + tempo ≈ 9.25
+    // → Theorem
+    free: { barrier: 3 },
     specialMechanics: [{ kind: 'guard', amount: 6 }, { kind: 'riposte', damage: 3, reduce: 2 }],
     addedIn: '2026-07-08',
     tags: ['bulwark', 'reflect'],
@@ -1317,8 +1368,10 @@ const theAdamantWall: Card = {
         'against it answers for the attempt.',
     tier: 3, rank: 5, cardType: 'spell',
     targetType: 'self',
-    // pts: BARRIER 10 (3.3) + RIPOSTE 4/parry 2 (~5) + FREE guard 3 (0.75) + persistence ≈ 13 → Axiom
-    free: { guard: 3 },
+    // pts (phase 30): persistent GUARD 10 (3.3) + RIPOSTE 4/parry 2 (~5) +
+    // FREE persistent GUARD 3 (1, replaces the fading chip) + persistence ≈
+    // 13.3 → Axiom
+    free: { barrier: 3 },
     specialMechanics: [{ kind: 'barrier', amount: 10 }, { kind: 'riposte', damage: 4, reduce: 2 }],
     addedIn: '2026-07-08',
     tags: ['bulwark', 'reflect', 'payoff'],
@@ -1379,11 +1432,13 @@ const refrain: Card = {
     targetType: 'enemy',
     // pts (WS10.1 KW-1 fold, 2026-07-11 — echo_sting folded into POISON,
     // duration tuned 2 → 1: the ECHO already re-applies it, and the
-    // card-played clock makes each application tick twice a round):
-    // [mark d2 (1.5) + poison i1 d1 (2×2=4 → 1.33)] × ECHO(1.8) = 5.1 +
-    // FREE draw (2) = 7.1 → top of the Doxa band (deliberately above stock T1
-    // budget -- Early's legal pool is ONLY this + second-thoughts).
-    free: { drawCards: 1 },
+    // card-played clock makes each application tick twice a round; phase 30
+    // FREE-currency law): [mark d2 (1.5) + poison i1 d1 (2×2=4 → 1.33)] ×
+    // ECHO(1.8) = 5.1 + FREE MILL 1 (1, echo's "advance the loop" currency —
+    // feeds RECALL without drawing, replaces the bare draw) = 6.1 → top of
+    // the Doxa band (deliberately above stock T1 budget -- Early's legal
+    // pool is ONLY this + second-thoughts).
+    free: { millCards: 1 },
     combatEffects: [
         { effectId: 'debuff_mark', appliedTo: 'opponent', duration: 2 },
         { effectId: 'debuff_poison', appliedTo: 'opponent', duration: 1 },
@@ -1404,11 +1459,12 @@ const secondThoughts: Card = {
         'into the pile, take it again, and cash in what it already cost them.',
     tier: 1, rank: 2, cardType: 'spell',
     targetType: 'self',
-    // pts: REPRISE 1 (2) + FREE draw (0.7) + PAID ruptureMarks:1 (~1.5) +
-    // selection value ≈ 5.2 → Lemma. ruptureMarks rides the PAID face (a `rider`
-    // specialMechanic) so it detonates WITH the reprise — "cash in what it
-    // already cost them" — instead of only on the dieless top play.
-    free: { drawCards: 1 },
+    // pts (phase 30): RECALL 1 (2) + FREE MILL 1 (1, replaces the bare draw)
+    // + PAID ruptureMarks:1 (~1.5) + selection value ≈ 5.5 → Lemma.
+    // ruptureMarks rides the PAID face (a `rider` specialMechanic) so it
+    // detonates WITH the reprise — "cash in what it already cost them" —
+    // instead of only on the dieless top play.
+    free: { millCards: 1 },
     specialMechanics: [
         { kind: 'reprise', count: 1 },
         { kind: 'rider', rider: { ruptureMarks: 1 } },
@@ -1447,8 +1503,9 @@ const circularReasoning: Card = {
         'ever leaves the loop — including your best card.',
     tier: 2, rank: 4, cardType: 'spell',
     targetType: 'self',
-    // pts: REPRISE 1 + its FREE line fires now (2 + ~1.5) + FREE draw (0.7) + selection ≈ 9 → Theorem
-    free: { drawCards: 1 },
+    // pts (phase 30): RECALL 1 + its FREE line fires now (2 + ~1.5) + FREE
+    // MILL 1 (1, replaces the bare draw) + selection ≈ 9.3 → Theorem
+    free: { millCards: 1 },
     specialMechanics: [{ kind: 'reprise', count: 1, fireFree: true }],
     addedIn: '2026-07-08',
     tags: ['echo', 'recursion'],
@@ -1465,13 +1522,14 @@ const ouroboros: Card = {
         'said last, the serpent says again — and everything it has already said, it says for damage, all at once.',
     tier: 3, rank: 5, cardType: 'spell',
     targetType: 'enemy',
-    // pts: replay last spell PAID x2 (~10) + FREE draw (0.7) + PAID
-    // ruptureMarks:3 (consumes ALL current Mark stacks, 3 dmg/stack) ≈ 22-33 →
-    // Axiom+ (deliberately pushed above the old budget: this is now the deck's
-    // actual finisher). ruptureMarks rides the PAID face (a `rider` mechanic) so
-    // the detonation fires WITH the replay — "everything it says for damage, all
-    // at once" — instead of only on the dieless top play (where it did nothing).
-    free: { drawCards: 1 },
+    // pts (phase 30): replay last spell PAID x2 (~10) + FREE MILL 1 (1,
+    // replaces the bare draw) + PAID ruptureMarks:3 (consumes ALL current
+    // Mark stacks, 3 dmg/stack) ≈ 22.3-33.3 → Axiom+ (deliberately pushed
+    // above the old budget: this is now the deck's actual finisher).
+    // ruptureMarks rides the PAID face (a `rider` mechanic) so the detonation
+    // fires WITH the replay — "everything it says for damage, all at once" —
+    // instead of only on the dieless top play (where it did nothing).
+    free: { millCards: 1 },
     specialMechanics: [
         { kind: 'replay_last', times: 2 },
         { kind: 'rider', rider: { ruptureMarks: 3 } },

@@ -144,11 +144,11 @@ describe('sandbox registry — library-card overrides', () => {
 // ── Set registry (post-v3 reset) ─────────────────────────────────────────────
 
 describe('sandbox sets — the registry after the post-v3 reset', () => {
-    it('carries the WS7.2 chooseX + WS3.4 doom + WS2.1 conjure + WS4 theme-role + WS5.2 sequencing + WS6.2 bridge + WS2.2 free-line sets (pre-v3 experiment sets stayed retired)', () => {
+    it('carries the WS7.2 chooseX + WS3.4 doom + WS2.1 conjure + WS4 theme-role + WS5.2 sequencing + WS6.2 bridge sets (pre-v3 experiment sets stayed retired; WS2.2 free-line-conversions retired 2026-07-12, superseded by the Phase 30 full library pass)', () => {
         const expected = [
             'chooseX-vein', 'doom-species', 'conjure-exercise',
             'roles-forge', 'roles-bulwark', 'roles-charm', 'roles-harvest',
-            'sequencing-microset', 'bridge-rewards', 'free-line-conversions',
+            'sequencing-microset', 'bridge-rewards',
         ];
         expect(Object.keys(SANDBOX_CARD_SETS)).toEqual(expected);
         expect(listSandboxSets().map(s => s.id)).toEqual(expected);
@@ -173,9 +173,6 @@ describe('sandbox sets — the registry after the post-v3 reset', () => {
             'barbed-compliment', 'the-poured-rampart', 'interest-on-the-flesh',
             'entered-into-evidence', 'stolen-cadence', 'unbroken-countenance',
         ]);
-        // WS2.2: overrides only — the FREE-line conversions mint no new cards.
-        expect(SANDBOX_CARD_SETS['free-line-conversions'].cards).toHaveLength(0);
-        expect((SANDBOX_CARD_SETS['free-line-conversions'].overrides ?? []).length).toBe(8);
     });
 
     it('applySandboxSet returns undefined for an unknown id and registers nothing', () => {

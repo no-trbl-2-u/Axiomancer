@@ -43,23 +43,26 @@ describe('engineHonestKind — the honesty gate', () => {
 });
 
 describe('faceStats — honest real-unit faces', () => {
-    it('Slippery Slope (ramping Poison) → 10 lifetime (2,2,3,3) · 4 turns · FREE tick', () => {
+    it('Slippery Slope (ramping Poison) → 10 lifetime (2,2,3,3) · 4 turns · FREE MARK seed', () => {
         const { card, sourceCard } = cardOf('slippery-slope');
         const f = faceStats(card, sourceCard);
         expect(f.kind).toBe('dot');
         expect(f.heroText).toBe('10');        // ramp-aware: 2+2+3+3 (rampFactor 0.5)
         expect(f.heroSub).toBe('over 4 turns');
-        expect(f.freeHeroText).toBe('tick');  // the AUTHORED free rider, verbatim
+        // phase 30: TICK retired registry-wide — FREE deposits a MARK seed instead.
+        expect(f.freeHeroText).toBe('mark i1 d1');
         expect(f.readDependent).toBe(true);
         expect(f.statusBase).toBe(10);
         expect(f.inert).toBe(false);
     });
-    it('Brace for Impact (Guard) → Guard 8 · the authored FREE Guard 2', () => {
+    it('Brace for Impact (Guard) → Guard 8 · the authored FREE persistent Guard 2', () => {
         const { card, sourceCard } = cardOf('brace-for-impact');
         const f = faceStats(card, sourceCard);
         expect(f.kind).toBe('guard');
         expect(f.heroText).toBe('Guard 8');
-        expect(f.freeHeroText).toBe('Guard 2');   // sourceCard.free.guard — never a halved fabrication
+        // phase 30: BARRIER merged into GUARD — bulwark's FREE line lays a
+        // persistent brick, not a fading chip.
+        expect(f.freeHeroText).toBe('GUARD 2 (persists)');
         expect(f.readDependent).toBe(true);
         expect(f.guardBase).toBe(8);
     });
@@ -68,7 +71,8 @@ describe('faceStats — honest real-unit faces', () => {
         const f = faceStats(card, sourceCard);
         expect(f.kind).toBe('rupture');
         expect(f.heroText).toBe('detonate');  // live burst → qualitative word only
-        expect(f.freeHeroText).toBe('tick');
+        // phase 30: TICK retired registry-wide — FREE deposits a MARK seed instead.
+        expect(f.freeHeroText).toBe('mark i1 d1');
     });
     it('The Reaping (REAP all) → spends the Soul bank, burst stays live', () => {
         const { card, sourceCard } = cardOf('the-reaping');
@@ -125,11 +129,12 @@ describe('faceStats — honest real-unit faces', () => {
 });
 
 describe('Option A split rail — freeKeyword/freeValue + typeStrip (owner-picked 2026-07-09)', () => {
-    it('Slippery Slope → ◇ TICK · 1 | BODY · SPELL foot strip', () => {
+    it('Slippery Slope → ◇ MARK · i1 d1 | BODY · SPELL foot strip', () => {
         const { card, sourceCard } = cardOf('slippery-slope');
         const f = faceStats(card, sourceCard);
-        expect(f.freeKeyword).toBe('TICK');
-        expect(f.freeValue).toBe('1');
+        // phase 30: TICK retired registry-wide — FREE deposits a MARK seed instead.
+        expect(f.freeKeyword).toBe('MARK');
+        expect(f.freeValue).toBe('i1 d1');
         expect(f.typeStrip).toBe('BODY · SPELL');
     });
     it('Brace for Impact → ◇ GUARD · 2 (the authored free rider, never halved)', () => {
@@ -181,8 +186,9 @@ describe('detailStats — same numbers as the face', () => {
         expect(d.stacksText).toBe('Stacks up to 10×.');
         // §C: the +DIE read triplet is the deterministic rule, base = 10.
         expect(d.diePill).toMatch(/^▲\d+ · —10 · ▼\d+$/);
-        // The FREE pill is the authored free line.
-        expect(d.freePill).toBe('tick');
+        // The FREE pill is the authored free line. Phase 30: TICK retired
+        // registry-wide — FREE deposits a MARK seed instead.
+        expect(d.freePill).toBe('mark i1 d1');
         // The meta chip surfaces the rank name + card type (where gold used to sit).
         expect(d.metaChip).toContain('DOXA');
         expect(d.metaChip).toContain('SPELL');

@@ -56,39 +56,6 @@ function combatantWithEffects(effects: ActiveEffect[]): Combatant {
 // support-tagged non-card effects (items / Cards system).
 const statBandCases = [
     {
-        effectId: 'buff_resistance_body',
-        label: 'buff_resistance_body: body +3, physicalDefense +4, physicalSave +3',
-        assertions: (eff: ReturnType<typeof getEffectiveStats>) => {
-            expect(eff.baseStats.body).toBe(8);
-            // physicalDefense re-derives (8×3=24) then flat +4 = 28
-            expect(eff.derivedStats.physicalDefense).toBe(28);
-            // physicalSave: base (8×2=16) + flat 3 = 19
-            expect(eff.nonCombatStats!.physicalSave).toBe(19);
-        },
-    },
-    {
-        effectId: 'buff_resistance_mind',
-        label: 'buff_resistance_mind: mind +3, mentalDefense +4, mentalSave +3',
-        assertions: (eff: ReturnType<typeof getEffectiveStats>) => {
-            expect(eff.baseStats.mind).toBe(8);
-            // mentalDefense re-derives (8×3=24) then flat +4 = 28
-            expect(eff.derivedStats.mentalDefense).toBe(28);
-            // mentalSave: base (8×2=16) + flat 3 = 19
-            expect(eff.nonCombatStats!.mentalSave).toBe(19);
-        },
-    },
-    {
-        effectId: 'buff_resistance_heart',
-        label: 'buff_resistance_heart: heart +3, emotionalDefense +4, emotionalSave +3',
-        assertions: (eff: ReturnType<typeof getEffectiveStats>) => {
-            expect(eff.baseStats.heart).toBe(8);
-            // emotionalDefense re-derives (8×3=24) then flat +4 = 28
-            expect(eff.derivedStats.emotionalDefense).toBe(28);
-            // emotionalSave: base (8×2=16) + flat 3 = 19
-            expect(eff.nonCombatStats!.emotionalSave).toBe(19);
-        },
-    },
-    {
         effectId: 'buff_all_stats_up',
         label: 'buff_all_stats_up: body/mind/heart +2, luck +1',
         assertions: (eff: ReturnType<typeof getEffectiveStats>) => {
@@ -121,7 +88,6 @@ describe('Phase 88 — Stat-band buffs: stat deltas via getEffectiveStats', () =
 
 const noStatCases = [
     { effectId: 'buff_cleanse', label: 'buff_cleanse (empty payload)' },
-    { effectId: 'buff_buff_duration_up', label: 'buff_buff_duration_up (rollModifier only)' },
     { effectId: 'buff_status_chance_up', label: 'buff_status_chance_up (rollModifier only)' },
 ];
 

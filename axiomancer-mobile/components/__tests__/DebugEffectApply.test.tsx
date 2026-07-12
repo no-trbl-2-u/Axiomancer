@@ -3,7 +3,7 @@
  *
  * Pins:
  *   - DEV gate (true / simulated-false)
- *   - BUFF · ME applies buff_defend_up to player.effects
+ *   - BUFF · ME applies buff_regeneration to player.effects
  *
  * The legacy `BLEED · FOE` button targeted the removed turn-based
  * `state.combat.enemy` slice (mechanics 0.37.0) and was dropped along
@@ -68,7 +68,7 @@ describe('DebugEffectApply: buff routing', () => {
         const after = store.getState().player.effects ?? [];
         expect(after.length).toBeGreaterThan(before);
         // The effect's effectId on the ActiveEffect points back to the registry entry.
-        expect(after.some((e) => e.effectId === 'buff_defend_up')).toBe(true);
+        expect(after.some((e) => e.effectId === 'buff_regeneration')).toBe(true);
     });
 });
 

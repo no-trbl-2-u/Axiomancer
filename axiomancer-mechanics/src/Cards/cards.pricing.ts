@@ -133,6 +133,9 @@ export const VERB_POINTS = Object.freeze({
     spendAllPips: 1,
     /** RUPTURE MARKS (peroration rider): per printed HP-per-stack, expected 2 stacks ÷ 3. */
     ruptureMarksPerHp: 2 / 3,
+    /** MILL, per card moved deck→discard (phase 30 FREE-currency rider —
+     *  Echo's "advance the loop"; weaker than draw, no card-advantage). */
+    millPerCard: 1,
 });
 
 /** Conditional discounts (spec 32 v3 §4): the rider prices at a fraction. */
@@ -246,6 +249,11 @@ export function scoreRider(rider: CardRider | undefined): number {
     pts += (rider.intensityPerPip ?? 0) * VERB_POINTS.pip;
     pts += (rider.pips ?? 0) * VERB_POINTS.pip;
     pts += (rider.stagger ?? 0) * VERB_POINTS.staggerPerRung;
+    // phase 30 — FREE-currency riders (bulwark's persistent GUARD, akrasia's
+    // blood-priced cost, echo's loop-advance).
+    pts += (rider.barrier ?? 0) * VERB_POINTS.barrierPerHp;
+    if (rider.recoil) pts += -(rider.recoil * VERB_POINTS.healPerHp) * SELF_COST_CREDIT;
+    pts += (rider.millCards ?? 0) * VERB_POINTS.millPerCard;
     return pts;
 }
 

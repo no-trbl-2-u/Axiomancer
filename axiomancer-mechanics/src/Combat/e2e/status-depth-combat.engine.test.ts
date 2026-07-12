@@ -10,7 +10,7 @@
  * and the card-projection / reward-pool contract for the v3 library.
  */
 
-import { describe, it, expect, afterEach, vi } from 'vitest';
+import { describe, it, expect, afterEach, afterAll, beforeAll, vi } from 'vitest';
 
 import { Player } from '../../Character/characters.mock';
 import type { Character } from '../../Character/types';
@@ -21,7 +21,8 @@ import { mockSequentialRng } from '../../test-utils/rng';
 import { getCardById } from '../../Cards/cards.library';
 import { registerSandboxCards } from '../../Cards/cards.sandbox';
 import { lookupEffect } from '../../Effects';
-import type { ActiveEffect } from '../../Effects/types';
+import { effectsLibrary } from '../../Effects/effects.library';
+import type { ActiveEffect, Effect } from '../../Effects/types';
 import {
     initializeCombatEncounter, rollEncounterDice, draftStanceDie, playCombatCard,
     resolveThreatPhase, processBetweenPhases,
@@ -57,6 +58,27 @@ registerSandboxCards([
 
 const ae = (effectId: string, intensity = 1, remainingDuration = 4, tier: 1 | 2 | 3 = 2): ActiveEffect =>
     ({ effectId, intensity, remainingDuration, appliedAt: 1, tier });
+
+// The spec 32 v3 keyword reset deleted the negative-rollModifier control debuffs
+// (Daze -3, Slow -2, Root -2). No surviving library effect carries a roll
+// penalty, so the DISRUPT distinct-control machinery is driven by test-only
+// control fixtures registered into the shared registry (the same lookup the
+// engine's roll-penalty / distinct-control readers consult). Never touches the
+// library JSON.
+// Post-Phase-30 merge 2026-07-12: the zero-producer sweep deleted the legacy
+// control vocabulary (knockdown/root/blind/slow/straw-man-echo), so the WS8
+// surface shapes live on as test-only fixtures — one per DISRUPT surface
+// (roll / stance-lock / rider-suppress) plus the roll-shred fillers.
+const CONTROL_FIXTURES: Effect[] = [
+    { id: 'test_ctrl_daze', name: 'test daze', description: 'control -3', type: 'debuff', category: 'control', duration: 4, stacking: 'intensity', tier: 2, payload: { rollModifier: -3 } },
+    { id: 'test_ctrl_knockdown', name: 'test knockdown', description: 'control roll -3', type: 'debuff', category: 'control', duration: 4, stacking: 'intensity', tier: 2, payload: { rollModifier: -3 } },
+    { id: 'test_ctrl_slow', name: 'test slow', description: 'control -2', type: 'debuff', category: 'control', duration: 4, stacking: 'intensity', tier: 2, payload: { rollModifier: -2 } },
+    { id: 'test_ctrl_echo', name: 'test echo shred', description: 'control -1', type: 'debuff', category: 'control', duration: 4, stacking: 'intensity', tier: 2, payload: { rollModifier: -1 } },
+    { id: 'test_ctrl_root', name: 'test root', description: 'control stance-lock', type: 'debuff', category: 'control', duration: 4, stacking: 'intensity', tier: 2, payload: { defenseModifier: -2, lockedStance: true } },
+    { id: 'test_ctrl_blind', name: 'test blind', description: 'control rider-suppress', type: 'debuff', category: 'control', duration: 4, stacking: 'intensity', tier: 2, payload: { suppressesThreatRiders: true } },
+];
+beforeAll(() => { for (const e of CONTROL_FIXTURES) effectsLibrary.registry.set(e.id, e); });
+afterAll(() => { for (const e of CONTROL_FIXTURES) effectsLibrary.registry.delete(e.id); });
 
 function makePlayer(cards: string[], effects: ActiveEffect[] = []): Character {
     const p = deepClone(Player);
@@ -205,9 +227,10 @@ describe('DISRUPT — a variety of control SURFACES denies the telegraphed turn 
     //   knockdown → roll (-3), root → stance (lockedStance),
     //   blind → rider-suppress (suppressesThreatRiders).
     // (daze folded into confusion, WS8.1 KW-2 — knockdown is the -3 roll
-    // carrier now.)
-    const twoSurfaces = () => [ae('debuff_knockdown', 1), ae('debuff_root', 1)];
-    const threeSurfaces = () => [...twoSurfaces(), ae('debuff_blind', 1)];
+    // carrier now; all shapes are test-only fixtures post the zero-producer
+    // sweep.)
+    const twoSurfaces = () => [ae('test_ctrl_knockdown', 1), ae('test_ctrl_root', 1)];
+    const threeSurfaces = () => [...twoSurfaces(), ae('test_ctrl_blind', 1)];
 
     it('does NOT deny at 2 distinct surfaces (roll penalty 3 < 8)', () => {
         mockSequentialRng(0.05);
@@ -223,8 +246,8 @@ describe('DISRUPT — a variety of control SURFACES denies the telegraphed turn 
 
     it('does NOT deny at 3 controls of the SAME grip (three roll shreds = 1 pip)', () => {
         mockSequentialRng(0.05);
-        // knockdown -3 + slow -2 + straw_man_echo -1 = penalty 6 < 8, all 'roll'.
-        const sameGrip = [ae('debuff_knockdown', 1), ae('debuff_slow', 1), ae('debuff_straw_man_echo', 1)];
+        // knockdown -3 + slow -2 + echo shred -1 = penalty 6 < 8, all 'roll'.
+        const sameGrip = [ae('test_ctrl_knockdown', 1), ae('test_ctrl_slow', 1), ae('test_ctrl_echo', 1)];
         const base = initializeCombatEncounter(makePlayer([]), makeEnemy(300, 'mind', sameGrip), undefined, 7);
         const state = rollEncounterDice(base).state;
         const meter = getDisruptMeter(state);
@@ -258,16 +281,16 @@ describe('DISRUPT — a variety of control SURFACES denies the telegraphed turn 
 describe('THORNS — the foe telegraphed hit rebounds onto it', () => {
     it('reflects reflectDamage back at the enemy when it attacks', () => {
         mockSequentialRng(0.05);
-        const player = makePlayer([], [ae('buff_brazen_thorns', 1)]); // reflectDamage 2
+        const player = makePlayer([], [ae('buff_thorns', 1)]); // reflectDamage 1
         const base = initializeCombatEncounter(player, makeEnemy(300, 'mind'), undefined, 7);
         const state = rollEncounterDice(base).state;
         const hpBefore = state.enemy.health;
         const res = resolveThreatPhase(state);
         const reflected = res.events.find(e => e.kind === 'thorns-reflected') as { amount: number; target: string } | undefined;
         expect(reflected).toBeDefined();
-        expect(reflected!.amount).toBe(2);
+        expect(reflected!.amount).toBe(1);
         expect(reflected!.target).toBe('enemy');
-        expect(hpBefore - res.state.enemy.health).toBe(2); // enemy has no DoT — only the reflect
+        expect(hpBefore - res.state.enemy.health).toBe(1); // enemy has no DoT — only the reflect
     });
 
     it('the v3 buff_thorns card effect reflects 1 per intensity', () => {
@@ -382,7 +405,7 @@ describe('INVARIANT — no new behavior fires without its marker', () => {
         // DoT, no combo. (WS3.3: poison moved to the card-played clock — it no
         // longer ticks at the round boundary, so the round-tick witness here is
         // nettle_sting, the bulwark card-local species: dpr 2, round-end.)
-        const enemyEffects = [ae('debuff_knockdown', 1), ae('debuff_nettle_sting', 2)];
+        const enemyEffects = [ae('test_ctrl_knockdown', 1), ae('debuff_nettle_sting', 2)];
         const base = initializeCombatEncounter(makePlayer([]), makeEnemy(300, 'mind', enemyEffects), undefined, 7);
         const state = rollEncounterDice(base).state;
         const res = resolveThreatPhase(state); // fires threat + processBetweenPhases

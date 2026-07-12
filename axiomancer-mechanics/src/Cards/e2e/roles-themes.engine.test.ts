@@ -190,8 +190,8 @@ describe('roles-* theme sets — registry shape and rank-band honesty', () => {
             ALL_ROLE_SETS.flatMap(s => s.cards).find(c => c.id === id)!;
         expect(scoreCard(byId('slag-runoff'))).toBeCloseTo(5.5, 2);
         expect(scoreCard(byId('ingot-of-ruin'))).toBeCloseTo(7.5, 2);
-        expect(scoreCard(byId('grit-between-stones'))).toBeCloseTo(7.33, 2);
-        expect(scoreCard(byId('the-unmoved-mover'))).toBeCloseTo(5.17, 2);
+        expect(scoreCard(byId('grit-between-stones'))).toBeCloseTo(7.5, 2); // post-Phase-30: FREE barrier 2
+        expect(scoreCard(byId('the-unmoved-mover'))).toBeCloseTo(5.33, 2); // post-Phase-30: FREE barrier 2
         expect(scoreCard(byId('a-sweeter-poison'))).toBeCloseTo(9.0, 2);
         expect(scoreCard(byId('the-long-ledger'))).toBeCloseTo(12.75, 2);
         expect(scoreCard(byId('seedcorn-sacrifice'))).toBeCloseTo(8.625, 2);
@@ -362,10 +362,10 @@ describe('grit-between-stones (WS4.2) — Nettle Sting + Guard + mark detonation
         expect(hpBefore - after.enemy.health).toBeGreaterThanOrEqual(6);
     });
 
-    it('FREE: the theme deposit — Guard 2, nothing touches the enemy', () => {
+    it('FREE: the theme deposit — Barrier 2 (post-Phase-30 brick), nothing touches the enemy', () => {
         const before = fixtureWith('grit-between-stones');
         const { after } = play(before, false);
-        expect(after.guard).toBe((before.guard ?? 0) + 2);
+        expect(after.barrier ?? 0).toBe((before.barrier ?? 0) + 2);
         expect(enemyEffect(after, 'debuff_nettle_sting')).toBeUndefined();
     });
 });
@@ -414,10 +414,10 @@ describe('the-unmoved-mover (WS4.2) — the combat-ledger state predicate', () =
         )).toBeUndefined();
     });
 
-    it('FREE: Guard 2, no condition evaluation on the dieless face', () => {
+    it('FREE: Barrier 2 (post-Phase-30 brick), no condition evaluation on the dieless face', () => {
         const before = fixtureWith('the-unmoved-mover');
         const { after } = play(before, false);
-        expect(after.guard).toBe((before.guard ?? 0) + 2);
+        expect(after.barrier ?? 0).toBe((before.barrier ?? 0) + 2);
         expect(playerEffect(after, 'buff_thorns')).toBeUndefined();
     });
 });

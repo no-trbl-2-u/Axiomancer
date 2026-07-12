@@ -1133,8 +1133,16 @@ kill decisions wait for Turn-Law-honest telemetry.
 - [x] WS2.2 FREE-line conversion passes (Phase 30 shape) — sandbox
   conversions shipped (3cecd275); A/B **PASS all 3 clauses** with a stale
   premise (the library lines already read mid-band under honest turns —
-  evidence report §1.5/§2). Promotion to library NOT yet done (Phase 30
-  down-payment, must satisfy the Phase 30 lint when it lands)
+  evidence report §1.5/§2). **SUPERSEDED 2026-07-12**: Phase 30's full
+  70-card FREE-currency pass (5e723df3) rewrote every library FREE line
+  under the ratified Option A law — the down-payment's job is done by the
+  full pass, and the offender list it targeted was already EMPTY at the
+  honest re-baseline (§1.5). The `free-line-conversions` sandbox set and
+  its e2e suite were RETIRED in the reconciliation merge (no promotion
+  ever happened from it; the library literals came straight from Phase
+  30). The three remaining sandbox/thoughtform TICK lines (the-open-vein,
+  debt-of-days, tf-cinder) were converted to theme currency in the same
+  merge to satisfy the Phase 30 lint.
 - [x] WS3 schema/engine PR + data-sweep PR (with WS10.1/Phase 29 KW-1)
   — engine substrate 85acd441, data sweep + Doom card + KW-1 fold
   3cecd275. Gate: erosion/tithe late ≥15% **FAIL** (late 0.00 globally —

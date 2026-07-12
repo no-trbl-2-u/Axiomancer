@@ -23,7 +23,7 @@
  *     never reads the threat phases, so its pick is threat-blind.
  */
 
-import { describe, it, expect, afterEach, vi } from 'vitest';
+import { describe, it, expect, afterEach, afterAll, beforeAll, vi } from 'vitest';
 
 import { Player } from '../../Character/characters.mock';
 import type { Character } from '../../Character/types';
@@ -33,7 +33,8 @@ import { deepClone } from '../../Utils';
 import { mockSequentialRng } from '../../test-utils/rng';
 import { getCardById } from '../../Cards/cards.library';
 import { lookupEffect } from '../../Effects';
-import type { ActiveEffect } from '../../Effects/types';
+import { effectsLibrary } from '../../Effects/effects.library';
+import type { ActiveEffect, Effect } from '../../Effects/types';
 import {
     initializeCombatEncounter, rollEncounterDice, resolveThreatPhase,
     isPhaseStanceRevealed, revealedCurrentStance, isStanceReadoutBlurred,
@@ -46,6 +47,19 @@ import type {
 } from '../combat.encounter.types';
 
 afterEach(() => { vi.restoreAllMocks(); });
+
+// Post-Phase-30 merge 2026-07-12: the zero-producer sweep deleted the WS8.2
+// re-payloaded control vocabulary (exhaustion/blind/root/confusion) — the
+// surface shapes live on as test-only fixtures registered into the shared
+// registry (the same lookup the threat engine reads).
+const SURFACE_FIXTURES: Effect[] = [
+    { id: 'test_exhaustion', name: 'test exhaustion', description: 'threat-damage -25%/stack', type: 'debuff', category: 'stat', duration: 3, stacking: 'intensity', tier: 2, payload: { outgoingThreatDamageMulPct: -25 } },
+    { id: 'test_blind', name: 'test blind', description: 'rider suppress', type: 'debuff', category: 'control', duration: 2, stacking: 'none', tier: 2, payload: { suppressesThreatRiders: true } },
+    { id: 'test_root', name: 'test root', description: 'stance lock', type: 'debuff', category: 'control', duration: 2, stacking: 'none', tier: 2, payload: { defenseModifier: -2, lockedStance: true } },
+    { id: 'test_confusion_blur', name: 'test stance blur', description: 'blursStanceHints', type: 'debuff', category: 'control', duration: 3, stacking: 'none', tier: 2, payload: { blursStanceHints: true, advantageModifier: { grantDisadvantage: ['body', 'mind', 'heart'] } } },
+];
+beforeAll(() => { for (const e of SURFACE_FIXTURES) effectsLibrary.registry.set(e.id, e); });
+afterAll(() => { for (const e of SURFACE_FIXTURES) effectsLibrary.registry.delete(e.id); });
 
 const ae = (effectId: string, intensity = 1, remainingDuration = 4, tier: 1 | 2 | 3 = 2): ActiveEffect =>
     ({ effectId, intensity, remainingDuration, appliedAt: 1, tier });
@@ -92,10 +106,10 @@ describe('WS8.2 — EXHAUSTION owns the telegraph-DAMAGE surface', () => {
     it('getOutgoingThreatDamageMult reads -25%/stack, clamped, exactly 1 unmarked', () => {
         const bearer = (fx: ActiveEffect[]) => ({ ...deepClone(GraveLarva), effects: fx });
         expect(getOutgoingThreatDamageMult(bearer([]))).toBe(1);
-        expect(getOutgoingThreatDamageMult(bearer([ae('debuff_exhaustion', 1)]))).toBe(0.75);
-        expect(getOutgoingThreatDamageMult(bearer([ae('debuff_exhaustion', 2)]))).toBe(0.5);
+        expect(getOutgoingThreatDamageMult(bearer([ae('test_exhaustion', 1)]))).toBe(0.75);
+        expect(getOutgoingThreatDamageMult(bearer([ae('test_exhaustion', 2)]))).toBe(0.5);
         // clamp floor 0.1 — even absurd stacks never fully zero the telegraph.
-        expect(getOutgoingThreatDamageMult(bearer([ae('debuff_exhaustion', 8)]))).toBe(0.1);
+        expect(getOutgoingThreatDamageMult(bearer([ae('test_exhaustion', 8)]))).toBe(0.1);
     });
 
     it('softens the landed telegraph hit without denying the turn', () => {
@@ -111,7 +125,7 @@ describe('WS8.2 — EXHAUSTION owns the telegraph-DAMAGE surface', () => {
             };
         };
         const clean = hpLoss([]);
-        const softened = hpLoss([ae('debuff_exhaustion', 1)]);
+        const softened = hpLoss([ae('test_exhaustion', 1)]);
         expect(clean.fired).toBe(true);
         expect(softened.fired).toBe(true);       // softer, never a deny by itself
         expect(softened.loss).toBeGreaterThan(0);
@@ -125,7 +139,7 @@ describe('WS8.2 — BLIND owns the RIDER surface (the phase rider cannot land)',
     it('suppresses the telegraphed threatEffectId while active; damage still lands', () => {
         mockSequentialRng(0.05);
         const base = initializeCombatEncounter(
-            makePlayer([]), makeEnemy(300, seq, [ae('debuff_blind', 1, 2)]), undefined, 7);
+            makePlayer([]), makeEnemy(300, seq, [ae('test_blind', 1, 2)]), undefined, 7);
         const state = rollEncounterDice(base).state;
         const res = resolveThreatPhase(state);
         expect(res.events.some(e => e.kind === 'threat-fired')).toBe(true);
@@ -134,7 +148,7 @@ describe('WS8.2 — BLIND owns the RIDER surface (the phase rider cannot land)',
         const fizzled = res.events.find(e => e.kind === 'effect-fizzled') as
             { cardId: string; effectId: string } | undefined;
         expect(fizzled).toBeDefined();                                // honestly logged
-        expect(fizzled!.cardId).toBe('debuff_blind');
+        expect(fizzled!.cardId).toBe('test_blind');
         expect(fizzled!.effectId).toBe('debuff_poison');
     });
 
@@ -155,7 +169,7 @@ describe('WS8.2 — ROOT owns the STANCE surface (LOCK: the next phase keeps thi
     it('locks the phase advance to the current stance and reveals it', () => {
         mockSequentialRng(0.05);
         const base = initializeCombatEncounter(
-            makePlayer([]), makeEnemy(300, seq, [ae('debuff_root', 1, 2)]), undefined, 7);
+            makePlayer([]), makeEnemy(300, seq, [ae('test_root', 1, 2)]), undefined, 7);
         const state = rollEncounterDice(base).state;
         const res = resolveThreatPhase(state);
         expect(res.events.some(e => e.kind === 'stance-locked')).toBe(true);
@@ -183,7 +197,7 @@ describe('WS8.2 — CONFUSION owns the STANCE surface (BLUR: player-borne fog)',
 
         const blurred: CombatEncounterState = {
             ...revealed,
-            player: { ...revealed.player, effects: [ae('debuff_confusion', 1, 3)] },
+            player: { ...revealed.player, effects: [ae('test_confusion_blur', 1, 3)] },
         };
         expect(isStanceReadoutBlurred(blurred)).toBe(true);           // mobile readout flag
         expect(isPhaseStanceRevealed(blurred, idx)).toBe(false);      // the fog wins…

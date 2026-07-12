@@ -128,10 +128,13 @@ describe('pricing table — pinned anchors from the spec §4 arithmetic (WS3.5 c
 
     it('the starter pair prices at its authored comments (regression anchors)', () => {
         const slipperySlope = spells.find(s => s.id === 'slippery-slope')!;
-        // poison lifetime 20/3 (card-played clock) + FREE tick 0.6 = 7.27
-        expect(scoreCard(slipperySlope)).toBeCloseTo(20 / 3 + 0.6, 2);
+        // poison lifetime 20/3 (card-played clock) + FREE MARK seed i1 d1
+        // (0.75) = 7.42 (phase 30: TICK retired registry-wide, replaced with
+        // the affliction glue seed; WS3.5: poison prices its card-played clock)
+        expect(scoreCard(slipperySlope)).toBeCloseTo(20 / 3 + 0.75, 2);
         const brace = spells.find(s => s.id === 'brace-for-impact')!;
-        // Guard 8/4 + FREE guard 2/4 = 2.5
-        expect(scoreCard(brace)).toBeCloseTo(2.5, 2);
+        // Guard 8/4 + FREE persistent GUARD 2/3 = 2.67 (phase 30: BARRIER
+        // merged into GUARD — bulwark's FREE line lays a brick, not a chip)
+        expect(scoreCard(brace)).toBeCloseTo(2 + 2 / 3, 2);
     });
 });

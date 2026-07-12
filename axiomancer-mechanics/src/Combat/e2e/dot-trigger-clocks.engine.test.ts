@@ -85,6 +85,12 @@ const SYNTHETICS: readonly Effect[] = [
     // The Doom species shape (WS3.4): grows per enemy action, no calendar.
     syntheticDot('ws3x_doom', { damagePerRound: 1, damageType: 'body' },
         { growth: 'per-enemy-action', calendarExpiry: false }),
+    // A skipTurn control (the deleted debuff_stun shape) for the deny witness.
+    {
+        id: 'ws3x_stun', name: 'ws3x_stun', description: 'WS3 synthetic skipTurn control',
+        type: 'debuff', category: 'control', duration: 2, stacking: 'none', tier: 2,
+        payload: { actionRestriction: { skipTurn: true } },
+    },
     // Legacy parity twin of ws3x_card_played — identical numbers, NO trigger.
     syntheticDot('ws3x_legacy', { damagePerRound: 3, damageType: 'body' }),
 ];
@@ -330,7 +336,7 @@ describe("growth: 'per-enemy-action' — Doom deepens when the enemy acts", () =
         mockSequentialRng(0.5);
         const before = stateWithEnemyEffects([
             ae('ws3x_doom', 1, 5),
-            ae('debuff_stun', 1, 2), // skipTurn — hard denial
+            ae('ws3x_stun', 1, 2), // skipTurn — hard denial
         ]);
         const { state: after, events } = resolveThreatPhase(before);
         expect(after.enemy.effects.find(e => e.effectId === 'ws3x_doom')?.intensity).toBe(1);

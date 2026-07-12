@@ -478,6 +478,7 @@ export type CombatEvent =
     // WS9 — the enemy's reactive cleanse shed some of its own afflictions.
     | { kind: 'threat-cleansed'; phaseIndex: number; effectIds: string[] }
     | { kind: 'hand-drawn'; cards: string[] }
+    | { kind: 'cards-milled'; cards: string[] }
     | { kind: 'mercy-opened'; message: string }
     // THE CLOCK, discrete tier (combat-depth-epic): every
     // THREAT_ENCHANT_CURSE_EVERY_ROUNDS the enemy grows a new passive

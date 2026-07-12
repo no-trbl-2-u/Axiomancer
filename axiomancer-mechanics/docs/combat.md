@@ -108,6 +108,15 @@ These are live engine helpers in `src/Combat/effects.ts` (no CLI inline math —
 
 ## Spec 03 — Tier 2 / Tier 3 Effect Procs
 
+> **Legacy subsystem.** This basic-attack/defend proc engine is not wired into
+> live Hazard-Pattern combat (`combat.engine.ts` does not read it). Its runtime
+> functions have no live callers, and most of the effects the matrix below named
+> were retired with the 2026-07 unused-effect cleanup, so `combat-effects.library.json`
+> was reduced to the few triggers whose effects still resolve. The `ProcUnlocks` /
+> `ProcOverrides` / `CombatEffectTrigger` *types* survive because `Character` /
+> `Enemy` still carry the fields. Kept as design history; the matrix below is the
+> pre-cleanup shape.
+
 Every basic `attack` or `defend` that lands a hit also rolls for effect procs from `combat-effects.library.json`. The proc table is organised as Stance × action × tier triples. Basic actors only roll the tier-1 entries; tier-2 and tier-3 procs are gated by per-cell unlocks on the actor (`procUnlocks` field on Character / Enemy).
 
 **Trigger gate** — procs only fire on a successful hit (i.e. inside `resolveAttackHit`). The attacker rolls procs from their `attack` table; the defender, when they actively defended, additionally rolls procs from their `defend` table.

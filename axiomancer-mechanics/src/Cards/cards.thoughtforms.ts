@@ -58,11 +58,13 @@ const cinder: Card = {
         'thrown once — and it does not come back.',
     tier: 1, rank: 1, cardType: 'spell',
     targetType: 'enemy',
-    // pts: ember i3 d3 (lifetime 3×3 = 9 HP ÷ 3 = 3) + FREE tickOne 0.6
-    // = 3.6 → Doxa band 1.5-7.5. Verified against scoreCard() in
+    // pts (post-Phase-30 merge re-pin 2026-07-12 — TICK is dead
+    // registry-wide, FREE deposits forge's currency, a PIP, instead):
+    // ember i3 d3 (lifetime 3×3 = 9 HP ÷ 3 = 3) + FREE pip 1 (1.5)
+    // = 4.5 → Doxa band 1.5-7.5. Verified against scoreCard() in
     // thoughtforms.engine.test.ts (the pricing lint pins only the 50
     // library spells; the thoughtform suite carries the band check).
-    free: { tickOne: true },
+    free: { pips: 1 },
     combatEffects: [{ effectId: 'debuff_kindling_ember', appliedTo: 'opponent', intensity: 3, duration: 3 }],
     addedIn: '2026-07-11',
     tags: ['thoughtform', 'forge', 'dot'],

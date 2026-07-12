@@ -136,6 +136,10 @@ function riderPairs(r: CardRider): [string, string][] {
     if (r.intensityPerPip) pairs.push(['PIP', `+${r.intensityPerPip} int`]);
     if (r.pips) pairs.push(['PIP', `+${r.pips}`]);
     if (r.stagger) pairs.push(['STAGGER', `${r.stagger}`]);
+    // phase 30 — FREE-currency riders.
+    if (r.barrier) pairs.push(['GUARD', `${r.barrier}`]);
+    if (r.recoil) pairs.push(['RECOIL', `${r.recoil}`]);
+    if (r.millCards) pairs.push(['MILL', `${r.millCards}`]);
     return pairs;
 }
 

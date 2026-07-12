@@ -178,7 +178,10 @@ describe('doctrine witness — no sandbox-set card or Thoughtform PAID line chip
 
     it('the swept universes are non-empty (an emptied registry would silently shrink this sweep)', () => {
         expect(sandboxCardCases.length, 'no sandbox-set cards found — registry wiring broke').toBeGreaterThan(0);
-        expect(sandboxOverrideCases.length, 'no sandbox overrides found — registry wiring broke').toBeGreaterThan(0);
+        // post-Phase-30 merge 2026-07-12: the free-line-conversions override
+        // set retired (superseded by the Phase 30 full library pass) — no
+        // registered set carries overrides today, so the override sweep is
+        // allowed to be empty until a new override set ships.
         expect(thoughtformCases.length, 'no Thoughtforms found — registry wiring broke').toBeGreaterThan(0);
     });
 

@@ -1,7 +1,7 @@
 /**
  * Dev-only active-effect apply affordance (Phase 61e).
  *
- *   - `BUFF · ME` applies `buff_defend_up` to `player.effects`
+ *   - `BUFF · ME` applies `buff_regeneration` to `player.effects`
  *     via the engine's `applyEffect` helper. Visible on the SELF tab's
  *     effects section.
  *
@@ -22,7 +22,7 @@ import { useGameStore } from '@/state/GameStoreProvider';
 import { FONTS } from '@/theme/axm';
 import { makeStyles } from '@/theme/runtime';
 
-const PLAYER_BUFF_ID = 'buff_defend_up';
+const PLAYER_BUFF_ID = 'buff_regeneration';
 
 export function DebugEffectApply() {
     const styles = useStyles();
@@ -56,7 +56,7 @@ export function DebugEffectApply() {
                     style={styles.button}
                     onPress={onBuffPlayer}
                     accessibilityRole="button"
-                    accessibilityLabel="Apply a defense buff to the player"
+                    accessibilityLabel="Apply a buff to the player"
                     testID="debug-effect-buff-player"
                 >
                     <Text style={styles.buttonLabel}>BUFF · ME</Text>

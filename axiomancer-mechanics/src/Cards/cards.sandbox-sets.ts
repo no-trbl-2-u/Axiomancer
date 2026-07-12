@@ -52,12 +52,15 @@ const theOpenVein: Card = {
         'exactly that much more venomous.',
     tier: 2, rank: 4, cardType: 'spell',
     targetType: 'enemy',
-    // pts (re-based 2026-07-11, WS3.5 clock pricing): expected X ≈ 6
+    // pts (re-based 2026-07-11, WS3.5 clock pricing; post-Phase-30 merge
+    // re-pin 2026-07-12 — TICK is dead registry-wide, FREE deposits akrasia's
+    // currency, a self-MARK seed, instead): expected X ≈ 6
     // (VERB_POINTS.expectedChosenX) → POISON ceil(6/3)=i2 d4 on the
     // card-played clock, lifetime 2×(2+2+3+3)×2 = 40 HP ÷ 3 ≈ 13.33, − recoil
     // credit 6 × healPerHp(1/3) × SELF_COST_CREDIT 0.75 = −1.5, + FREE
-    // tickOne 0.6 ≈ 12.43 → uncommon band 4.5-13 (Theorem, ceiling-adjacent).
-    free: { tickOne: true },
+    // self-mark i1 d1 0.75 ≈ 12.58 → uncommon band 4.5-13 (Theorem,
+    // ceiling-adjacent).
+    free: { applyEffect: { effectId: 'debuff_mark', intensity: 1, duration: 1, to: 'self' } },
     specialMechanics: [{ kind: 'recoil_x', min: 3, poisonPerX: 1 / 3 }],
     addedIn: '2026-07-11',
     tags: ['akrasia', 'dot', 'chooseX'],
@@ -87,10 +90,12 @@ const debtOfDays: Card = {
         'principal is never forgiven, only harvested.',
     tier: 2, rank: 3, cardType: 'spell',
     targetType: 'enemy',
-    // pts: DOOM (creeping_doom i2, growth +1/enemy action, no calendar —
+    // pts (post-Phase-30 merge re-pin 2026-07-12 — TICK is dead
+    // registry-wide, FREE deposits harvest's currency, a Soul, instead):
+    // DOOM (creeping_doom i2, growth +1/enemy action, no calendar —
     // 4-round pricing horizon: 1×(2+3+4+5) = 14 HP ÷ 3 ≈ 4.67) + SOUL 1
-    // (0.75) + FREE tickOne 0.6 = 6.02 → uncommon band 4.5-13 (Thesis).
-    free: { tickOne: true },
+    // (0.75) + FREE soul 0.75 = 6.17 → uncommon band 4.5-13 (Thesis).
+    free: { souls: 1 },
     combatEffects: [{ effectId: 'debuff_creeping_doom', appliedTo: 'opponent', intensity: 2, duration: 3 }],
     specialMechanics: [{ kind: 'soul_gain', count: 1 }],
     addedIn: '2026-07-11',
@@ -122,8 +127,8 @@ const foundrySprite: Card = {
     targetType: 'self',
     // pts: CONJURE (2) + PIP 1 (1.5) + FREE pips 1 (1.5) = 5.0 by scoreCard
     // → uncommon band 4.5-13 (Thesis). Design EV: the conjured Cinder plays
-    // at ~3.6 (ember i3 d3 + tickOne, see cards.thoughtforms.ts), so the
-    // effective two-play value ≈ 8.6 — the gap between 5.0 and 8.6 is the
+    // at ~4.5 (ember i3 d3 + FREE pip, see cards.thoughtforms.ts), so the
+    // effective two-play value ≈ 9.5 — the gap between 5.0 and 9.5 is the
     // second die the Cinder play costs.
     free: { pips: 1 },
     specialMechanics: [
@@ -259,10 +264,12 @@ const gritBetweenStones: Card = {
         'still in it, edge out — and today the mortar gives it all back.',
     tier: 2, rank: 4, cardType: 'spell',
     targetType: 'enemy',
-    // pts: nettle sting i2 d3 (2 dpr × i2 × 3 rounds = 12 HP ÷ 3 = 4.0) +
+    // pts (post-Phase-30 merge re-pin 2026-07-12 — FREE lays bulwark's
+    // currency, a persistent BARRIER brick, instead of the fading chip
+    // guard): nettle sting i2 d3 (2 dpr × i2 × 3 rounds = 12 HP ÷ 3 = 4.0) +
     // Guard 6 (1.5) + payoff-class closer ruptureMarks 2 (2 × 2/3 = 1.33) +
-    // FREE guard 2 (0.5) = 7.33 → uncommon band 4.5-13 (Theorem).
-    free: { guard: 2 },
+    // FREE barrier 2 (0.67) = 7.5 → uncommon band 4.5-13 (Theorem).
+    free: { barrier: 2 },
     combatEffects: [
         { effectId: 'debuff_nettle_sting', appliedTo: 'opponent', intensity: 2, duration: 3 },
     ],
@@ -293,10 +300,12 @@ const theUnmovedMover: Card = {
         'and the stillness itself starts pushing back.',
     tier: 2, rank: 3, cardType: 'spell',
     targetType: 'self',
-    // pts: BARRIER 8 (8 ÷ 3 = 2.67) + UNMOVED condition rider [thorns i2 d2
-    // self (0.75 × 2 × 2 = 3.0) + guard 4 (1.0)] × threshold 0.5 = 2.0 +
-    // FREE guard 2 (0.5) = 5.17 → uncommon band 4.5-13 (Thesis).
-    free: { guard: 2 },
+    // pts (post-Phase-30 merge re-pin 2026-07-12 — FREE lays bulwark's
+    // currency, a persistent BARRIER brick, instead of the fading chip
+    // guard): BARRIER 8 (8 ÷ 3 = 2.67) + UNMOVED condition rider [thorns i2
+    // d2 self (0.75 × 2 × 2 = 3.0) + guard 4 (1.0)] × threshold 0.5 = 2.0 +
+    // FREE barrier 2 (0.67) = 5.33 → uncommon band 4.5-13 (Thesis).
+    free: { barrier: 2 },
     specialMechanics: [{ kind: 'barrier', amount: 8 }],
     synergy: {
         statePredicate: { kind: 'enemy-dealt-no-damage-last-round' },
@@ -635,11 +644,14 @@ const answeredInKind: Card = {
         + 'in blood is returned in blood, at the prevailing rate.',
     tier: 1, rank: 2, cardType: 'spell',
     targetType: 'enemy',
-    // pts: PAID bleed i2 d1 (9 HP ÷ 3 = 3.0) + drew-blood rider [mark i2 d2
-    // (3.0) + heal 2 (0.67)] × threshold 0.5 = 1.83 + FREE [heal 2 (0.67) +
-    // conviction 1 (1.0)] = 1.67 → 6.5 → common band 1.5-7.5 (Lemma).
-    // FREE share 1.67/6.5 = 25.6% ✓ window.
-    free: { healHp: 2, conviction: 1 },
+    // pts (post-Phase-30 merge re-pin 2026-07-12 — FREE deposits akrasia's
+    // currency, a self-MARK seed toward FALLEN, replacing conviction, which
+    // is a system token not a registry keyword; heal 2 stays as the weak-
+    // deposit utility kicker): PAID bleed i2 d1 (9 HP ÷ 3 = 3.0) +
+    // drew-blood rider [mark i2 d2 (3.0) + heal 2 (0.67)] × threshold 0.5 =
+    // 1.83 + FREE [self-mark i1 d1 (0.75) + heal 2 (0.67)] = 1.42 → 6.25 →
+    // common band 1.5-7.5 (Lemma). FREE share 1.42/6.25 = 22.7%.
+    free: { applyEffect: { effectId: 'debuff_mark', intensity: 1, duration: 1, to: 'self' }, healHp: 2 },
     combatEffects: [
         { effectId: 'debuff_bleed', appliedTo: 'opponent', intensity: 2, duration: 1 },
     ],
@@ -653,99 +665,6 @@ const answeredInKind: Card = {
     addedIn: '2026-07-11',
     tags: ['akrasia', 'sequencing', 'condition'],
 };
-
-// ── WS2.2 — FREE-line conversions (the Phase 30 down-payment) ────────────────
-// The WS1.5 offender list: eight cards whose FREE line is DEAD (<15% of plays
-// across all three seeds). Conversion shape is the RATIFIED Phase 30 law
-// (plan/tuning/2026-07-10-turn-texture.md §1, owner decision 2026-07-10):
-// Option A — the FREE line deposits the theme's NAMED currency that the PAID
-// line or the theme payoff reads — plus the weak-deposit amendment (a deposit
-// weak enough may ALSO carry a `DRAW 1`-class utility kicker; generic draw
-// ALONE stays banned; TICK is dead registry-wide).
-//
-// Budget law (types.ts `Card.free`): FREE ≈ 25-35% of the card's total points.
-// Each override below carries the post-conversion // pts: arithmetic; the
-// library literals stay untouched — promotion is gated on post-Phase-26 A/B.
-const FREE_LINE_CONVERSIONS: ReadonlyArray<{ cardId: string; patch: SandboxCardPatch }> = [
-    {
-        // AFFLICTION — plant a 1-round MARK seed (the amp state every DoT tick
-        // and every rupture payoff reads) + DRAW 1 kicker (deposit 0.75 < the
-        // 2.0 draw-class floor). Replaces FREE tickOne (TICK is dead).
-        // pts: PAID poison i1 d4 card-played clock (20/3 = 6.67) + FREE [mark
-        // d1 0.75 + draw 2] = 9.42; FREE share 2.75/9.42 = 29.2% ✓ window.
-        // PROMOTION NOTE: 9.42 exceeds the common ceiling 7.5 — the PAID line
-        // alone (6.67) nearly fills the band, so ANY in-window FREE overflows
-        // it. Phase 30's full pass must re-cut the PAID (or re-rank) before
-        // this literal can promote at rank 1.
-        cardId: 'slippery-slope',
-        patch: { free: { applyEffect: { effectId: 'debuff_mark', duration: 1 }, drawCards: 1 } },
-    },
-    {
-        // FORGE — the FREE line ripens the Reserve (theme doc: "every FREE
-        // line makes/charges dice material"). Replaces generic FREE draw 1.
-        // pts: PAID kindle 2.5 + ember i1 d3 (3/3 = 1) + dieBonus 0.9 = 4.4 +
-        // FREE pips 1 (1.5) = 5.9; share 1.5/5.9 = 25.4% ✓ window, ≤7.5 band ✓.
-        cardId: 'sketch-of-a-thought',
-        patch: { free: { pips: 1 } },
-    },
-    {
-        // FORGE — same conversion; replaces the off-theme FREE guard 2.
-        // pts: PAID guard 5 (1.25) + 2 pips (3.0) = 4.25 + FREE pips 1 (1.5)
-        // = 5.75; share 1.5/5.75 = 26.1% ✓ window, ≤7.5 band ✓.
-        cardId: 'half-step',
-        patch: { free: { pips: 1 } },
-    },
-    {
-        // ORACLE — PORTENT: deepen the peek to FORETELL 2 (the marker the
-        // PAID foretell/omen economy cashes). Old FREE foretell 1 was an
-        // in-currency but under-window deposit (17.2%).
-        // pts: PAID poison i1 d1 (4/3 = 1.33) + mark d2 (1.5) + foretell 2
-        // (2) = 4.83 + FREE foretell 2 (2) = 6.83; share 2/6.83 = 29.3% ✓
-        // window, ≤7.5 band ✓. (Designed against the CURRENT tree: the WS10.1
-        // POISON+MARK double-apply replaced foretold-wound.)
-        cardId: 'glimpse',
-        patch: { free: { foretell: 2 } },
-    },
-    {
-        // ORACLE — replace generic FREE draw 1 with FORETELL 2: the omen
-        // rider (guard-on-hit) is exactly what a deeper peek feeds.
-        // pts: PAID poison i1 d2 (8/3 = 2.67) + mark i1 d2 (1.5) + OMEN(guard
-        // 4×0.25×0.6 + info 1 = 1.6) = 5.77 + FREE foretell 2 (2) = 7.77;
-        // share 2/7.77 = 25.7% ✓ window, 4.5-13 band ✓. (Designed against the
-        // CURRENT tree: WS10.1 double-apply + intensity 2→1 re-point.)
-        cardId: 'cassandras-burden',
-        patch: { free: { foretell: 2 } },
-    },
-    {
-        // ECHO — lay a 1-round MARK seed (the ad-nauseam precedent: the state
-        // refrain's own echoed poison ticks amplify and ruptureMarks payoffs
-        // consume) + a Conviction-1 kicker (deposit 0.75 < the draw-class
-        // floor; DRAW 1 itself would breach the 35% ceiling at 35.03%).
-        // pts: PAID [mark d2 1.5 + poison i1 d1 1.33] × ECHO 1.8 = 5.1 +
-        // FREE [mark d1 0.75 + conviction 1] = 6.85; share 1.75/6.85 = 25.5%
-        // ✓ window, ≤7.5 band ✓ (the old FREE draw put it at 7.1).
-        cardId: 'refrain',
-        patch: { free: { applyEffect: { effectId: 'debuff_mark', duration: 1 }, conviction: 1 } },
-    },
-    {
-        // CHARM — deepen the deposit: SWAY 2 straight onto the CAPITULATE
-        // track (the old FREE sway 1 was in-currency but under-window, 17.9%).
-        // pts: PAID rapport i2 d2 (3) + heal 2 (0.67) = 3.67 + FREE sway 2
-        // (1.6) = 5.27; share 1.6/5.27 = 30.4% ✓ window, ≤7.5 band ✓.
-        cardId: 'disarming-smile',
-        patch: { free: { sway: 2 } },
-    },
-    {
-        // CHARM — "find shared ground": lay a 1-round RAPPORT foundation (the
-        // state the PAID line deepens) + a SWAY-1 deposit toward CAPITULATE.
-        // Both verbs are theme currency — no utility kicker needed.
-        // pts: PAID sway 2 (1.6) + rapport i1 d2 (1.5) + threshold sway 2
-        // (1.6×0.5 = 0.8) = 3.9 + FREE [rapport i1 d1 0.75 + sway 1 0.8]
-        // = 5.45; share 1.55/5.45 = 28.4% ✓ window, 4.5-13 band ✓.
-        cardId: 'common-ground',
-        patch: { free: { applyEffect: { effectId: 'debuff_rapport', intensity: 1, duration: 1 }, sway: 1 } },
-    },
-];
 
 // ── WS6.2 — cross-theme bridge rewards (`bridge-rewards`) ────────────────────
 // Six reward-screen splash cards, ONE per ratified pairing, each speaking the
@@ -1086,19 +1005,6 @@ export const SANDBOX_CARD_SETS: Record<string, SandboxCardSet> = {
             barbedCompliment, thePouredRampart, interestOnTheFlesh,
             enteredIntoEvidence, stolenCadence, unbrokenCountenance,
         ],
-    },
-    'free-line-conversions': {
-        id: 'free-line-conversions',
-        name: 'FREE-line conversions: the WS1.5 dead-FREE offenders',
-        description:
-            'WS2.2 — Phase 30 down-payment on the 8 dead-FREE-line offenders '
-            + '(FREE <15% of plays, all seeds). Each FREE line now deposits its '
-            + 'theme\'s named currency per the ratified Option A law (+ the '
-            + 'weak-deposit kicker amendment). Gate: converted lines move '
-            + 'inside the 85/15 band on the post-Phase-26 A/B without '
-            + 'collapsing win rate or statusEngagement.',
-        cards: [],
-        overrides: FREE_LINE_CONVERSIONS,
     },
 };
 

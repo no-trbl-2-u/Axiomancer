@@ -227,7 +227,7 @@ function threatDamageBudget(level: number, dMult: number, phaseIndex: number, we
     ));
 }
 
-/** A short human label for a telegraphed debuff id (e.g. `debuff_fear` → "Fear"). */
+/** A short human label for a telegraphed debuff id (e.g. `debuff_bleed` → "Bleed"). */
 function effectLabel(effectId: string): string {
     return effectId.replace(/^debuff_/, '').replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
 }

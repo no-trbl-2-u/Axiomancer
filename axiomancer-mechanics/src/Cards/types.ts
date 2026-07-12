@@ -310,6 +310,17 @@ export interface CardRider {
     pips?: number;
     /** STAGGER N — remove N rungs from the enemy's next telegraphed action. */
     stagger?: number;
+    // ── Phase 30 (FREE-currency law) — theme-verb riders unlocked for FREE lines ──
+    /** +N persistent Guard (the merged BARRIER sense — phase 29): does not fade
+     *  at round end, only when consumed. Bulwark's FREE-line currency. */
+    barrier?: number;
+    /** Pay N VITAE (unpreventable — Guard/Barrier/defenses cannot stop it) as a
+     *  printed cost. Akrasia's "FREE priced in blood" verb. */
+    recoil?: number;
+    /** Move N cards from the top of the deck (draw pile, reshuffling from the
+     *  deck if it runs dry) directly to the discard pile — never to hand.
+     *  Echo's "advance the loop" verb: feeds RECALL without drawing. */
+    millCards?: number;
 }
 
 /**

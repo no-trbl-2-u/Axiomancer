@@ -26,25 +26,6 @@ const ae = (effectId: string, intensity = 1): ActiveEffect => ({
 // ─── Buff effects with advantageModifier ──────────────────────────────────────
 
 describe('Phase 88 — Advantage buffs: advantageGrants via getActiveEffectModifiers', () => {
-    it('buff_advantage_mind grants advantage on mind', () => {
-        const mods = getActiveEffectModifiers([ae('buff_advantage_mind')]);
-        expect(mods.advantageGrants.has('mind')).toBe(true);
-        // Also has a stat bump: mind +1
-        expect(mods.statFlat.get('mind')).toBe(1);
-    });
-
-    it('buff_evasion_up grants disadvantage on all stances (to attackers) + defense', () => {
-        const mods = getActiveEffectModifiers([ae('buff_evasion_up')]);
-        expect(mods.advantageDenies.has('body')).toBe(true);
-        expect(mods.advantageDenies.has('mind')).toBe(true);
-        expect(mods.advantageDenies.has('heart')).toBe(true);
-        expect(mods.defenseDelta).toBe(3);
-        // stat bumps: physicalDefense +2, mentalDefense +2, emotionalDefense +2
-        expect(mods.statFlat.get('physicalDefense')).toBe(2);
-        expect(mods.statFlat.get('mentalDefense')).toBe(2);
-        expect(mods.statFlat.get('emotionalDefense')).toBe(2);
-    });
-
     it('buff_accuracy_up has rollModifier and no advantageModifier', () => {
         const effect = lookupEffect('buff_accuracy_up');
         expect(effect).toBeDefined();
@@ -65,31 +46,6 @@ describe('Phase 88 — Advantage buffs: advantageGrants via getActiveEffectModif
         const mods = getActiveEffectModifiers([ae('buff_invincibility')]);
         expect(mods.defenseDelta).toBe(99);
     });
-
-    it('buff_taunt has defenseModifier 2 + body +1', () => {
-        const mods = getActiveEffectModifiers([ae('buff_taunt')]);
-        expect(mods.defenseDelta).toBe(2);
-        expect(mods.statFlat.get('body')).toBe(1);
-    });
-
-    it('buff_stealth grants advantage on all stances + defenseModifier 6', () => {
-        const mods = getActiveEffectModifiers([ae('buff_stealth')]);
-        expect(mods.advantageGrants.has('body')).toBe(true);
-        expect(mods.advantageGrants.has('mind')).toBe(true);
-        expect(mods.advantageGrants.has('heart')).toBe(true);
-        expect(mods.defenseDelta).toBe(6);
-    });
-
-    it('buff_counter grants advantage on body + rollModifier', () => {
-        const mods = getActiveEffectModifiers([ae('buff_counter')]);
-        expect(mods.advantageGrants.has('body')).toBe(true);
-        expect(mods.advantageGrants.has('mind')).toBe(false);
-    });
-
-    it('buff_life_steal has regen healthPerRound 2', () => {
-        const mods = getActiveEffectModifiers([ae('buff_life_steal')]);
-        expect(mods.healthRegen).toBe(2);
-    });
 });
 
 // ─── Debuff effects in the advantage category ─────────────────────────────────
@@ -102,13 +58,12 @@ describe('Phase 88 — Advantage buffs: advantageGrants via getActiveEffectModif
 // ─── Application sanity ───────────────────────────────────────────────────────
 
 describe('Phase 88 — Advantage effects: all apply without error', () => {
-    // Retired ids (buff_advantage_heart, debuff_evasion_down,
+    // Retired ids (buff_advantage_*, buff_evasion_up, buff_taunt,
+    // buff_stealth, buff_counter, buff_life_steal, debuff_evasion_down,
     // debuff_accuracy_down, debuff_defense_down) left with the v3 reset;
     // the survivors below are support-tagged non-card effects.
     const allIds = [
-        'buff_advantage_mind', 'buff_evasion_up',
         'buff_accuracy_up', 'buff_damage_reduction', 'buff_invincibility',
-        'buff_taunt', 'buff_stealth', 'buff_counter', 'buff_life_steal',
     ];
 
     it.each(allIds)('%s applies cleanly via applyEffect', (effectId) => {

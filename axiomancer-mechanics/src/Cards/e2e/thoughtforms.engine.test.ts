@@ -246,11 +246,16 @@ describe('conjured Thoughtforms — playable, one-use on play (both faces) and o
     });
 
     it('FREE face: the dieless line fires and the token still leaves the combat', () => {
-        const { state, cjUid } = conjureCinder();
+        const { state: conjured, cjUid } = conjureCinder();
+        // Cinder's FREE line is PIP 1 (post-Phase-30 merge: TICK is dead —
+        // forge's currency ripens the Reserve). Park a Reserve die so the
+        // deposit has material; a ripen event must fire.
+        const state: CombatEncounterState = {
+            ...conjured,
+            reserve: [{ id: 'fx-res-1', color: 'mind', state: 'available', temporary: false, pips: 0 }],
+        };
         const { state: after, events } = playCombatCard(state, { uid: cjUid }, false);
-        // Cinder's FREE line is tickOne — the rich fixture's enemy DoTs give
-        // it real fuel, so a tick event must fire.
-        expect(events.some(e => e.kind === 'dot-tick' && e.target === 'enemy'), 'FREE tickOne').toBe(true);
+        expect(events.some(e => e.kind === 'die-ripened'), 'FREE pip').toBe(true);
         expect(after.hand.some(h => h.uid === cjUid)).toBe(false);
         expect(after.discard).not.toContain('tf-cinder');
         expect(after.conjuredUids ?? []).not.toContain(cjUid);
@@ -329,8 +334,8 @@ describe('pricing — thoughtforms and conjure-exercise cards land in their rank
     });
 
     it('the authored // pts: comments are the executable arithmetic (regression anchors)', () => {
-        // tf-cinder: ember i3 d3 (9 ÷ 3 = 3) + FREE tickOne 0.6 = 3.6
-        expect(scoreCard(getThoughtformById('tf-cinder')!)).toBeCloseTo(3.6, 2);
+        // tf-cinder: ember i3 d3 (9 ÷ 3 = 3) + FREE pip 1.5 = 4.5 (post-Phase-30)
+        expect(scoreCard(getThoughtformById('tf-cinder')!)).toBeCloseTo(4.5, 2);
         // tf-minor-premise: premise 0.8 + FREE premise 0.8 = 1.6
         expect(scoreCard(getThoughtformById('tf-minor-premise')!)).toBeCloseTo(1.6, 2);
         const byId = new Map(CONJURE_SET.cards.map(c => [c.id, c]));

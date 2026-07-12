@@ -191,32 +191,41 @@ describe('greedy object reproduces the pinned decision sequences', () => {
     // phase — greedy now plays the whole legal turn (drafted die + Reserve +
     // floats, then the FREE-top drain) instead of farming endTurn→startTurn;
     // both pins re-measured with zero turn-law-blocked events.
-    // pre-Phase-27 interim — re-derived in the honest re-baseline.
     //
     // Re-pinned 2026-07-12 (WS3.3 fresh-stack CAP): the card-played clock's
     // eligibility gate became an intensity cap (a play's own fresh stacks
     // merged onto an existing instance no longer tick on the play that
-    // applied them), and manual TICK paths now decay decaysPerTick DoTs —
-    // same seeds, same victories, same round counts, one more play each
-    // (the same-play tick income the old boolean gate leaked is gone).
+    // applied them), and manual TICK paths now decay decaysPerTick DoTs.
+    //
+    // post-Phase-30 merge re-pin 2026-07-12: slippery-slope and
+    // straw-mans-jab's FREE lines moved from TICK (retired registry-wide) to
+    // a MARK seed under the FREE-currency law, shifting greedy's per-play
+    // scoring on the merged tree.
     it('seed 11 vs LittleBelle: a two-round status victory', () => {
         const r = runOneEncounter(loadout(MIX), LittleBelle, 11, 'greedy');
         expect({ outcome: r.outcome, rounds: r.rounds, plays: r.plays, statusPlays: r.statusPlays })
-            .toEqual({ outcome: 'victory', rounds: 2, plays: 11, statusPlays: 8 });
+            .toEqual({ outcome: 'victory', rounds: 2, plays: 11, statusPlays: 9 });
         expect(r.cardUsage['slippery-slope']).toEqual({
             cardId: 'slippery-slope', plays: 3, bottomPlays: 3, topPlays: 0, statusLands: 3, discards: 0,
         });
         expect(r.cardUsage['straw-mans-jab']).toEqual({
-            cardId: 'straw-mans-jab', plays: 4, bottomPlays: 3, topPlays: 1, statusLands: 3, discards: 0,
+            cardId: 'straw-mans-jab', plays: 3, bottomPlays: 3, topPlays: 0, statusLands: 3, discards: 0,
         });
     });
 
-    it('seed 11 vs KingOfRevenge: a three-round status victory (Gate 0 law: one tray per phase)', () => {
+    // Re-pinned 2026-07-11 (phase 30 control-theme fix): red-herring's FREE
+    // line moved from a double-stagger stack (which flattened the standstill
+    // preset's win-rate curve to 100% at every stage — a real balance
+    // regression caught by combat-playtest.balance-bands.sim.test.ts) to a
+    // reveal-stance deposit. This is a narrow fidelity pin on `greedy`'s
+    // decision sequence, not a balance gate (that's the win-rate-curve
+    // suite). post-Phase-30 merge re-pin 2026-07-12 against the merged tree.
+    it('seed 11 vs KingOfRevenge: a four-round status victory (Gate 0 law: one tray per phase)', () => {
         const r = runOneEncounter(loadout(MIX), KingOfRevenge, 11, 'greedy');
         expect({ outcome: r.outcome, rounds: r.rounds, plays: r.plays, statusPlays: r.statusPlays })
-            .toEqual({ outcome: 'victory', rounds: 3, plays: 15, statusPlays: 10 });
+            .toEqual({ outcome: 'victory', rounds: 4, plays: 19, statusPlays: 12 });
         expect(r.cardUsage['straw-mans-jab']).toEqual({
-            cardId: 'straw-mans-jab', plays: 6, bottomPlays: 5, topPlays: 1, statusLands: 5, discards: 0,
+            cardId: 'straw-mans-jab', plays: 6, bottomPlays: 6, topPlays: 0, statusLands: 6, discards: 0,
         });
         // card-retreat no longer exists — it can never appear in cardUsage.
     }, 30_000);
