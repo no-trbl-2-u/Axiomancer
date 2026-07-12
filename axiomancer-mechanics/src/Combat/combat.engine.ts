@@ -494,6 +494,9 @@ export function startTurn(
         spellsPlayedThisTurn: 0, echoNextSpell: false,
         // Spec 32 §12 #4 — the per-turn RECOIL ledger resets with the turn.
         recoilPaidThisTurn: 0,
+        // WI-1 — the enemy-DoT accumulator is per-round; a fresh turn zeroes it
+        // so `suppurating-curse` only doubles THIS round's real DoT total.
+        enemyDotDamageThisRound: 0,
         // Gate 0 — this phase's one legal tray roll is now taken.
         turnTakenThisPhase: true,
     };
@@ -717,7 +720,18 @@ function draftedDie(state: CombatEncounterState): CombatManaDie | null {
 }
 
 function withLog(state: CombatEncounterState, events: CombatEvent[]): CombatEncounterState {
-    return events.length ? { ...state, log: [...state.log, ...events] } : state;
+    if (!events.length) return state;
+    // WI-1 — accumulate the REAL DoT damage the enemy takes this round as its
+    // ticks are logged. `withLog` is the single choke point every emission site
+    // routes through, so folding here catches all enemy `dot-tick` families
+    // (card-played / damage-instance / fate-tap / TICK) without threading an
+    // accumulator through each. Reset at `startTurn`; consumed by
+    // `suppurating-curse` in `processBetweenPhases`.
+    let enemyDot = state.enemyDotDamageThisRound ?? 0;
+    for (const e of events) {
+        if (e.kind === 'dot-tick' && e.target === 'enemy') enemyDot += e.amount;
+    }
+    return { ...state, log: [...state.log, ...events], enemyDotDamageThisRound: enemyDot };
 }
 
 // ── Card play (§9 playCombatCard) ────────────────────────────────────────────
@@ -3023,17 +3037,22 @@ export function processBetweenPhases(
         .filter(ae => lookupEffectDef(ae.effectId)?.type === 'debuff').length
         + soulWorthyWashouts([...enemyStart.dotWashedOut, ...enemyEnd.washedOut]);
 
-    // `suppurating-curse` (D): the enemy takes bonus HP loss equal to the
-    // REAL DAMAGE its DoTs ticked for this round (Erosion late-stage
-    // rebalance, 2026-07-08 — was a flat +1 HP per distinct tick regardless
-    // of that tick's size, which undersold the printed text "every tick...
-    // costs one more" against four-digit late-stage HP pools; now it
-    // genuinely doubles the deck's total DoT throughput for the rest of
-    // combat, matching a tick-DAMAGE reading instead of a tick-COUNT one).
-    if (zoneHas(state, 'suppurating-curse') && enemyDotTicks.length > 0 && !isDefeated(enemy)) {
-        const drip = enemyDotTicks.reduce((sum, t) => sum + t.amount, 0);
-        enemy = applyDamage(enemy, drip);
-        events.push({ kind: 'dot-tick', effectId: 'suppurating-curse', label: 'Suppuration', amount: drip, target: 'enemy' });
+    // `suppurating-curse` (D): the enemy takes bonus HP loss equal to the REAL
+    // DAMAGE its DoTs ticked for this round — doubling the deck's total DoT
+    // throughput (Erosion late-stage rebalance, 2026-07-08).
+    //
+    // WI-1 (2026-07-12): post trigger-migration the round-clock pool
+    // (`enemyDotTicks`) is empty for POISON (`card-played`) and BLEED
+    // (`damage-instance`) — the exact families the curse names — so the old
+    // `enemyDotTicks.length > 0` gate made it structurally inert in its own
+    // EROSION deck. It now rides the event ticks accumulated across the turn
+    // (`enemyDotDamageThisRound`, folded in `withLog`) PLUS any round-clock
+    // ticks this round, so the drip equals the round's true DoT total.
+    const roundDotTotal = (state.enemyDotDamageThisRound ?? 0)
+        + enemyDotTicks.reduce((sum, t) => sum + t.amount, 0);
+    if (zoneHas(state, 'suppurating-curse') && roundDotTotal > 0 && !isDefeated(enemy)) {
+        enemy = applyDamage(enemy, roundDotTotal);
+        events.push({ kind: 'dot-tick', effectId: 'suppurating-curse', label: 'Suppuration', amount: roundDotTotal, target: 'enemy' });
     }
 
     // VULNERABLE DoT surcharge: the natural tick above lands at ×1 (already
@@ -3342,6 +3361,11 @@ export function processBetweenPhases(
         turnTakenThisPhase: false,
     };
     next = withLog(next, events);
+    // WI-1 — the round is closed: zero the enemy-DoT accumulator AFTER logging
+    // (so this round's round-clock/suppuration ticks don't leak into the next
+    // round's suppuration read). `startTurn` also resets it in the live game;
+    // this covers back-to-back `processBetweenPhases` calls in tests.
+    next = { ...next, enemyDotDamageThisRound: 0 };
 
     // 6. Outcome checks after ticks (HP + capitulation).
     if (swayCapitulates(next)) return endCombat(next, 'capitulate', [...priorEvents, ...events]);

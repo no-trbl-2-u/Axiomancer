@@ -633,6 +633,15 @@ export interface CombatEncounterState {
     /** Spec 32 §12 #4 — the prior round's `enemyDamageThisTurn`. The enemy hits
      *  BETWEEN player turns, so this is the value a card played this turn reads. */
     enemyDamageLastRound?: number;
+    /** WI-1 (2026-07-12) — the REAL DoT damage the enemy has taken from
+     *  event-triggered ticks so far THIS round (poison `card-played`, bleed
+     *  `damage-instance`, fate-tap, TICK riders). Folded in `withLog` at every
+     *  enemy `dot-tick` emission, reset each turn in `startTurn`, and consumed
+     *  by `suppurating-curse` in `processBetweenPhases` (which adds the
+     *  round-clock ticks on top) so the curse can double the round's true DoT
+     *  total instead of the structurally-empty round-clock pool. Optional for
+     *  back-compat with state literals (treated as 0 when absent). */
+    enemyDotDamageThisRound?: number;
     /** Spec 32 §12 #4 — the prior threat's damage was FULLY prevented (every
      *  budgeted hit soaked to 0 by riposte/guard/barrier). Persists until the
      *  next threat resolves (WS9 `prior-threat-fully-blocked` branch fuel). */

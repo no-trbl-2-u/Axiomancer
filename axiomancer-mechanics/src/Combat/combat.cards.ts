@@ -150,6 +150,29 @@ export function bottomDamagePreview(card: Card, lookupEffect: EffectLookup): num
     return total;
 }
 
+/**
+ * WI-2 — the enemy DoT's FACE descriptor. Event-triggered DoTs (poison =
+ * `card-played`, bleed = `damage-instance`, `payoff`) tick on a game event, not
+ * at the round boundary, so a round-clock "N over its run" lifetime is a lie for
+ * them (passive play deals zero). Returns a per-event string ("2/play", "3/hit",
+ * "2/payoff") for the first event DoT, or null when the card's DoT is round-clock
+ * (the lifetime total stands) or it has no enemy DoT.
+ */
+export function bottomDotFacePreview(card: Card, lookupEffect: EffectLookup): string | null {
+    for (const ce of enemyEffects(card)) {
+        const def = lookupEffect(ce.effectId);
+        const dot = def?.payload.damageOverTime;
+        if (!def || !dot) continue;
+        const trig = dot.trigger;
+        if (trig !== 'card-played' && trig !== 'damage-instance' && trig !== 'payoff') return null;
+        const intensity = Math.min(ce.intensity ?? 1, MAX_EFFECT_INTENSITY);
+        const perTick = Math.floor(dot.damagePerRound * intensity);
+        const unit = trig === 'card-played' ? 'play' : trig === 'damage-instance' ? 'hit' : 'payoff';
+        return `${perTick}/${unit}`;
+    }
+    return null;
+}
+
 /** The primary enemy effect id a card applies (first that contributes impact). */
 export function primaryEnemyEffectId(card: Card, lookupEffect: EffectLookup): string | null {
     for (const ce of enemyEffects(card)) {
@@ -323,9 +346,14 @@ export function toCombatCard(cardId: string, lookupCard: CardLookup, lookupEffec
             ? `FREE — ${riderText(card.free)}. (${rankLabel(card)})`
             : `FREE — no effect. (${rankLabel(card)})`;
 
+    // WI-2 — an event DoT (poison/bleed) prints its per-event bite ("2/play"),
+    // never a round-clock lifetime; only a true round-clock DoT keeps "N over
+    // its run".
+    const dotFace = bottomDotFacePreview(card, lookupEffect);
+    const dotSuffix = dotFace ? ` (${dotFace})` : preview > 0 ? ` (${preview} over its run)` : '';
     const bottomActionText = persistent
         ? `PAID (rest of combat) — ${passive} Costs 1 die.${card.cardType === 'disenchant' ? ' Attaches to the enemy.' : ''}`
-        : `PAID — ${paid}${preview > 0 ? ` (${preview} HP over its run)` : ''}. Costs 1 die.`;
+        : `PAID — ${paid}${dotSuffix}. Costs 1 die.`;
 
     // Printed DIE LINES, generated from the riders in real units.
     const dieLines: string[] = [];

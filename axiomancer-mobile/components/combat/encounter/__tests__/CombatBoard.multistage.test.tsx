@@ -88,6 +88,34 @@ describe('CombatBoard — multi-card staging', () => {
         expect(cbs.onEndPhase).toHaveBeenCalledTimes(1);
     });
 
+    // WI-3 — a threat phase resolving must lock the END button: a touch
+    // double-tap used to machine-gun `onEndPhase`, resolving several phases with
+    // zero player turns between them (2026-07-12 playtest). The board renders the
+    // button disabled and its handler no-ops while `resolving`.
+    it('END PHASE is disabled + press-inert while a phase is resolving', () => {
+        const { store } = withAllProviders(<></>);
+        const base = store.getState().player;
+        const player = { ...base, knownCards: CARDS, baseStats: { heart: 8, body: 8, mind: 8 }, health: 200, maxHealth: 200 };
+
+        let s = initializeCombatEncounter(player, createMockEncounterEnemy(), undefined, 16);
+        s = rollEncounterDice(s).state;
+        const vm = buildCombatViewModel(s);
+        const uids = [vm.hand[0].uid, vm.hand[1].uid];
+        const cbs = boardCallbacks();
+        const { tree } = withAllProviders(
+            <CombatBoard vm={vm} drag={noopDrag()} stagedUids={uids} {...cbs} resolving />,
+            { store },
+        );
+        render(tree);
+
+        const btn = screen.getByTestId('combat-end-phase');
+        expect(btn.props.accessibilityState?.disabled).toBe(true);
+        fireEvent.press(btn);
+        // Neither the resolve nor the auto-apply of staged cards fires again.
+        expect(cbs.onEndPhase).not.toHaveBeenCalled();
+        expect(cbs.onApply).not.toHaveBeenCalled();
+    });
+
     it('renders the empty play area (no staged cards) when stagedUids is empty', () => {
         const { store } = withAllProviders(<></>);
         const base = store.getState().player;
@@ -136,9 +164,11 @@ describe('CombatBoard — die-attribution + DoT-notation invariants', () => {
         expect(screen.getAllByTestId('combat-staged-die')).toHaveLength(1);
     });
 
-    // (c) The DoT face VM is legible: TOTAL headline + 'over N turns' subtext — never
-    // the user-rejected 'n/t·t' / bare-slash form.
-    it('the DoT VM yields total + "over N turns", never the rejected n/t·t form', () => {
+    // (c) The DoT face VM is legible — never the user-rejected 'n/t·t' bare-slash
+    // per-turn form. WI-2: an event DoT (poison=card-played / bleed=damage-instance)
+    // reads its real trigger ("2/play", "per card you play · Nt"); a round-clock DoT
+    // still reads "N over M turns". Both are legible; the rejected "N/t" is not.
+    it('the DoT VM reads its real trigger (event) or lifetime (round-clock), never n/t·t', () => {
         const { store } = withAllProviders(<></>);
         const base = store.getState().player;
         const player = { ...base, knownCards: CARDS, baseStats: { heart: 8, body: 8, mind: 8 }, health: 200, maxHealth: 200 };
@@ -148,9 +178,15 @@ describe('CombatBoard — die-attribution + DoT-notation invariants', () => {
         const vm = buildCombatViewModel(s);
         const dot = vm.hand.find((c) => c.face.kind === 'dot');
         expect(dot).toBeTruthy();
-        expect(dot!.face.heroText).toMatch(/^\d+$/);              // pure integer TOTAL
-        expect(dot!.face.heroSub).toMatch(/^over \d+ turns$/);    // legible duration subtext
-        expect(dot!.face.heroText).not.toMatch(/\/t/);            // never the rejected per-turn slash
-        expect(`${dot!.face.heroSub}`).not.toMatch(/\d+\/t/);
+        // Event face ("2/play") OR round-clock face (pure integer total).
+        expect(dot!.face.heroText).toMatch(/^\d+(\/(play|hit|payoff))?$/);
+        expect(dot!.face.heroSub).toMatch(
+            /^(over \d+ turns|per card you play · \d+t|per hit taken · \d+ stacks?|per payoff you detonate · \d+t)$/,
+        );
+        // Never the rejected per-turn bare-slash notation.
+        expect(dot!.face.heroText).not.toMatch(/\d+\/t\b/);
+        expect(`${dot!.face.heroSub}`).not.toMatch(/\d+\/t\b/);
+        // HP→VITAE: the verb line never says HP.
+        expect(dot!.face.verbLine).not.toMatch(/\bHP\b/);
     });
 });

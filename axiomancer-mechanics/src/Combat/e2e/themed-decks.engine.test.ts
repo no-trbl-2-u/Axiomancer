@@ -659,6 +659,67 @@ describe('persistent hooks — venom-and-vein, mirror-of-guilt, crumbling-resolv
     });
 });
 
+// ── WI-1 — suppurating-curse rides the EVENT ticks, not the empty round-clock ─
+
+describe('WI-1 — suppurating-curse doubles the round\'s REAL DoT total', () => {
+    const CURSE = 'suppurating-curse';
+
+    it('drips the event-tick total accumulated this round (POISON/BLEED never touch the round-clock)', () => {
+        // Simulate a turn that ticked the enemy for 10 via event clocks
+        // (card-played poison / damage-instance bleed) — the accumulator the
+        // engine folds in `withLog`. The enemy carries NO round-clock DoT, so
+        // the OLD gate (`enemyDotTicks.length > 0`) would have dripped zero.
+        const base = initializeCombatEncounter(makePlayer([]), makeEnemy(300, 'mind'), undefined, 7);
+        const seeded: CombatEncounterState = {
+            ...base,
+            enemy: { ...base.enemy, effects: [ae('debuff_poison', 2, 4)] }, // card-played → round-clock empty
+            enemyAttachments: [CURSE],
+            enemyDotDamageThisRound: 10,
+        };
+        const res = processBetweenPhases(seeded);
+        const supp = res.events.find(e => e.kind === 'dot-tick'
+            && (e as { effectId: string }).effectId === CURSE) as { amount: number } | undefined;
+        expect(supp?.amount).toBe(10);                         // doubles the round's real DoT
+        expect(300 - res.state.enemy.health).toBe(10);         // only the suppuration drip hit HP
+        expect(res.state.enemyDotDamageThisRound).toBe(0);     // accumulator reset for next round
+    });
+
+    it('is inert with no real ticks this round (no phantom drip off a standing poison)', () => {
+        const base = initializeCombatEncounter(makePlayer([]), makeEnemy(300, 'mind'), undefined, 7);
+        const seeded: CombatEncounterState = {
+            ...base,
+            enemy: { ...base.enemy, effects: [ae('debuff_poison', 2, 4)] },
+            enemyAttachments: [CURSE],
+            enemyDotDamageThisRound: 0,
+        };
+        const res = processBetweenPhases(seeded);
+        expect(res.events.some(e => e.kind === 'dot-tick'
+            && (e as { effectId: string }).effectId === CURSE)).toBe(false);
+        expect(300 - res.state.enemy.health).toBe(0);
+    });
+
+    it('LIVE: an EROSION opener ticks poison per card played, then the curse exacts it again', () => {
+        mockSequentialRng(0.05);
+        // Enemy already bears poison i2 (a prior turn's application); this turn's
+        // card play advances the card-played clock on those pre-existing stacks.
+        const enemy = makeEnemy(300, 'heart', [ae('debuff_poison', 2, 4)]);
+        let state = openAndDraft(makePlayer(['exordium']), enemy, ['exordium', 'exordium', 'exordium'], 'heart');
+        state = { ...state, enemyAttachments: [CURSE] };
+        const afterPlay = playFromHand(state, 'exordium').state;
+        const ticked = afterPlay.enemyDotDamageThisRound ?? 0;
+        expect(ticked).toBeGreaterThan(0); // the card-played poison clock really fired
+
+        const hpBeforeBetween = afterPlay.enemy.health;
+        const btw = processBetweenPhases(afterPlay);
+        const supp = btw.events.find(e => e.kind === 'dot-tick'
+            && (e as { effectId: string }).effectId === CURSE) as { amount: number } | undefined;
+        expect(supp?.amount).toBe(ticked);                              // drip == the round's real DoT
+        // Poison is card-played (never round-clock), so the ONLY HP loss in
+        // between-phases is the suppuration drip.
+        expect(hpBeforeBetween - btw.state.enemy.health).toBe(ticked);
+    });
+});
+
 // ── BLEED decay + MARK amplification (T1 / A3) ───────────────────────────────
 
 describe('BLEED — damage-instance clocked (WS3.3), decays 1 intensity per tick', () => {

@@ -555,12 +555,14 @@ function PerorationTrack({ peroration }: { peroration: CombatPerorationVM }) {
 
 // ── END PHASE medallion ──────────────────────────────────────────────────────
 
-function EndPhaseMedallion({ onPress, consequence = null }: {
+function EndPhaseMedallion({ onPress, consequence = null, disabled = false }: {
     onPress: () => void;
     /** Owner directive 2026-07-12 (no-softlock telegraph): the honest one-line
      *  consequence of ending now (verified engine behavior, never invented) —
      *  rendered under the medallion and folded into the a11y label. */
     consequence?: string | null;
+    /** WI-3 — dimmed + press-inert while a phase is resolving (double-tap guard). */
+    disabled?: boolean;
 }) {
     const AXM = usePalette();
     const styles = useStyles();
@@ -585,11 +587,13 @@ function EndPhaseMedallion({ onPress, consequence = null }: {
                 </Svg>
             </Animated.View>
             <Pressable
-                onPress={onPress}
+                onPress={disabled ? undefined : onPress}
+                disabled={disabled}
                 testID="combat-end-phase"
                 accessibilityRole="button"
+                accessibilityState={{ disabled }}
                 accessibilityLabel={`End phase — the enemy acts, then the next phase begins.${consequence ? ` ${consequence}.` : ''}`}
-                style={[styles.endBtn, { borderColor: AXM.sulfur }]}
+                style={[styles.endBtn, { borderColor: AXM.sulfur }, disabled && styles.endBtnDisabled]}
             >
                 <View style={[styles.endBtnInnerRim]} pointerEvents="none" />
                 <Text style={[styles.endGlyph, { color: AXM.sulfur }]} allowFontScaling={false}>⧗</Text>
@@ -623,6 +627,10 @@ export interface CombatBoardProps {
     onDiscard: (uid: string) => void;
     onSignature: (id: string) => void;
     onEndPhase: () => void;
+    /** WI-3 — true while a threat phase is resolving (and its fx timeline plays).
+     *  The END button renders disabled + dimmed and the auto-apply/end-phase
+     *  handler no-ops, so a touch double-tap can't machine-gun several phases. */
+    resolving?: boolean;
     onInspect: (card: CombatCardVM) => void;
     onChip?: (e: CombatEffectChipVM) => void;
     /** Long-press (or tap while unaffordable) on a signature rune → info popup. */
@@ -656,7 +664,7 @@ export interface CombatBoardProps {
 }
 
 export const CombatBoard = React.memo(function CombatBoard({
-    vm, drag, stagedUids, onApply, onStage, onUnstage, onDiscard, onSignature, onEndPhase, onInspect, onChip, onSignatureInfo, onPlayerInspect, momentum, onMomentumInfo, fx,
+    vm, drag, stagedUids, onApply, onStage, onUnstage, onDiscard, onSignature, onEndPhase, resolving = false, onInspect, onChip, onSignatureInfo, onPlayerInspect, momentum, onMomentumInfo, fx,
     onFateTap, bankSpare, onToggleBankSpare, onReprisalNeeded,
 }: CombatBoardProps) {
     const AXM = usePalette();
@@ -1057,6 +1065,7 @@ export const CombatBoard = React.memo(function CombatBoard({
     // applies and the resolve all compose through the panel's functional setState, so
     // cards land before the enemy acts.
     const handleEndPhase = () => {
+        if (resolving) return; // WI-3 — a phase is already resolving; ignore the tap
         for (const uid of stagedUids) handleApplyRef.current(uid, true);
         onEndPhase();
     };
@@ -1254,7 +1263,7 @@ export const CombatBoard = React.memo(function CombatBoard({
             {/* corner medallion — END PHASE. (The dice-reroll disc is deliberately
                 gone: dice are the turn's hand, you play what you rolled.) */}
             <View style={[styles.cornerStack, { bottom: railH + 6 }]} pointerEvents="box-none">
-                <EndPhaseMedallion onPress={handleEndPhase} consequence={endConsequence} />
+                <EndPhaseMedallion onPress={handleEndPhase} consequence={endConsequence} disabled={resolving} />
             </View>
         </View>
     );
@@ -1567,6 +1576,9 @@ const useStyles = makeStyles((AXM) => ({
         width: 80, height: 80, borderRadius: 40, borderWidth: 3, backgroundColor: '#0c0a06',
         alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
     },
+    // WI-3 — dimmed while a phase resolves (double-tap guard); every other
+    // disabled control in this board uses the same ~0.4 opacity treatment.
+    endBtnDisabled: { opacity: 0.4 },
     endBtnInnerRim: {
         ...StyleSheet.absoluteFillObject, margin: 4, borderRadius: 36, borderWidth: 1,
         borderColor: 'rgba(255,255,255,0.3)', backgroundColor: 'rgba(212,192,38,0.10)',

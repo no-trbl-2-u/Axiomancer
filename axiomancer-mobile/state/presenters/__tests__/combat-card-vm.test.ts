@@ -43,17 +43,34 @@ describe('engineHonestKind — the honesty gate', () => {
 });
 
 describe('faceStats — honest real-unit faces', () => {
-    it('Slippery Slope (ramping Poison) → 10 lifetime (2,2,3,3) · 4 turns · FREE MARK seed', () => {
+    it('Slippery Slope (card-played Poison) → 2/play, never a round-clock lifetime (WI-2)', () => {
+        // Poison is a card-played DoT: passive round-clock play deals 0, so the
+        // old "10 over 4 turns" face was fiction. The honest face is the per-tick
+        // bite and its real trigger.
         const { card, sourceCard } = cardOf('slippery-slope');
         const f = faceStats(card, sourceCard);
         expect(f.kind).toBe('dot');
-        expect(f.heroText).toBe('10');        // ramp-aware: 2+2+3+3 (rampFactor 0.5)
-        expect(f.heroSub).toBe('over 4 turns');
+        expect(f.heroText).toBe('2/play');        // dpr 2 × i1, per card played
+        expect(f.heroSub).toBe('per card you play · 4t');
+        expect(f.verbLine).toBe('foe loses VITAE each card you play');
+        expect(f.verbLine).not.toMatch(/\bHP\b/);
         // phase 30: TICK retired registry-wide — FREE deposits a MARK seed instead.
         expect(f.freeHeroText).toBe('mark i1 d1');
         expect(f.readDependent).toBe(true);
-        expect(f.statusBase).toBe(10);
+        expect(f.statusBase).toBe(2);             // the per-tick base (▲ raises it, ▼ leaves it)
+        expect(f.statusAdv).toBe(4);              // won read: +1 intensity → 4/tick
         expect(f.inert).toBe(false);
+    });
+    it('Sketch of a Thought (round-clock ember) keeps the honest "N over M turns" lifetime', () => {
+        // A genuine round-clock DoT (kindling ember dpr 1 · i1 · 3t) still ticks
+        // at the boundary, so its lifetime face stands — proving WI-2 only
+        // retires the fiction for EVENT DoTs.
+        const { card, sourceCard } = cardOf('sketch-of-a-thought');
+        const f = faceStats(card, sourceCard);
+        expect(f.kind).toBe('dot');
+        expect(f.heroText).toBe('3');             // 1 × 3 turns, no ramp
+        expect(f.heroSub).toBe('over 3 turns');
+        expect(f.verbLine).toBe('foe loses VITAE each turn');
     });
     it('Brace for Impact (Guard) → Guard 8 · the authored FREE persistent Guard 2', () => {
         const { card, sourceCard } = cardOf('brace-for-impact');
@@ -179,13 +196,17 @@ describe('rank / rarity projection (spec 32 v3 §4)', () => {
 });
 
 describe('detailStats — same numbers as the face', () => {
-    it('Slippery Slope outcome + stats + pill all agree on the ramp-aware 10', () => {
+    it('Slippery Slope detail + pill agree on the per-tick bite, not a round-clock total (WI-2)', () => {
         const { card, sourceCard } = cardOf('slippery-slope');
         const d = detailStats(card, sourceCard);
-        expect(d.outcomeStats.find(st => st.label === 'TOTAL')?.value).toBe('10');
-        expect(d.stacksText).toBe('Stacks up to 10×.');
-        // §C: the +DIE read triplet is the deterministic rule, base = 10.
-        expect(d.diePill).toMatch(/^▲\d+ · —10 · ▼\d+$/);
+        // No round-clock TOTAL/TURNS table for an event DoT — PER TICK / TRIGGER / DURATION.
+        expect(d.outcomeStats.find(st => st.label === 'TOTAL')).toBeUndefined();
+        expect(d.outcomeStats.find(st => st.label === 'PER TICK')?.value).toBe('2');
+        expect(d.outcomeStats.find(st => st.label === 'TRIGGER')?.value).toBe('per card played');
+        expect(d.outcomeStats.find(st => st.label === 'DURATION')?.value).toBe('4t');
+        expect(d.stacksText).toBe('Stacks by intensity.');
+        // §C: the +DIE read triplet scales the per-tick base (2 → ▲4 / ▼2).
+        expect(d.diePill).toBe('▲4 · —2 · ▼2');
         // The FREE pill is the authored free line. Phase 30: TICK retired
         // registry-wide — FREE deposits a MARK seed instead.
         expect(d.freePill).toBe('mark i1 d1');
@@ -267,12 +288,21 @@ describe('resolvePrimary + armedReadValue', () => {
         expect(armedReadValue(guard, 'disadvantage', false)).toBe(dis);
         expect(armedReadValue(guard, 'neutral', true)).toBe(8 + COLOR_MATCH_DAMAGE_BONUS);
     });
-    it('armedReadValue follows the P0-truth deterministic read rule for DoT (exact, ramp-aware)', () => {
-        // Slippery Slope: canonical poison dpr 2, ramp 0.5, i1, 4 turns.
+    it('armedReadValue reads an EVENT DoT per-tick (poison ticks per card, not per turn) — WI-2', () => {
+        // Slippery Slope: canonical poison dpr 2, i1, card-played. The read
+        // scales the PER-TICK bite (▲ +1 intensity → 4/tick; ▼ shortens the
+        // window, per-tick unchanged), never a round-clock lifetime.
         const dot = faceStats(getCard('slippery-slope')!, getCardById('slippery-slope'));
-        expect(armedReadValue(dot, 'neutral', false)).toBe(10);         // 2+2+3+3, printed exactly
-        expect(armedReadValue(dot, 'advantage', false)).toBe(20);       // +1 intensity: 4+4+6+6
-        expect(armedReadValue(dot, 'disadvantage', false)).toBe(7);     // −1 turn: 2+2+3
-        expect(armedReadValue(dot, 'advantage', true)).toBe(20);        // no colour-match bonus on status
+        expect(armedReadValue(dot, 'neutral', false)).toBe(2);          // 2/tick
+        expect(armedReadValue(dot, 'advantage', false)).toBe(4);        // +1 intensity → 4/tick
+        expect(armedReadValue(dot, 'disadvantage', false)).toBe(2);     // per-tick unchanged by −1 turn
+        expect(armedReadValue(dot, 'advantage', true)).toBe(4);         // no colour-match bonus on status
+    });
+    it('armedReadValue reads a ROUND-CLOCK DoT as its ramp-aware lifetime (exact)', () => {
+        // Sketch of a Thought: kindling ember dpr 1, i1, 3 turns, no ramp → 3.
+        const dot = faceStats(getCard('sketch-of-a-thought')!, getCardById('sketch-of-a-thought'));
+        expect(armedReadValue(dot, 'neutral', false)).toBe(3);          // 1+1+1
+        expect(armedReadValue(dot, 'advantage', false)).toBe(6);        // +1 intensity: 2+2+2
+        expect(armedReadValue(dot, 'disadvantage', false)).toBe(2);     // −1 turn: 1+1
     });
 });

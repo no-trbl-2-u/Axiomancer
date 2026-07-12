@@ -60,6 +60,13 @@ type DropResolver = (payload: DragPayload, x: number, y: number) => void | Promi
  *  of this so it tracks the pointer (see dieGhostStyle). */
 const DIE_GHOST_SIZE = 56;
 
+/** WI-3 — how long an END-phase press locks the button + staging while the
+ *  threat resolves and its fx timeline plays out (IMPACT 100ms + the longest
+ *  resolution animation ~880ms in CombatCombatantPane, with headroom). The lock
+ *  exists only to swallow machine-gun double-taps; a legitimately new end-phase
+ *  after the state has fully advanced is always ~1s away. */
+const RESOLVE_LOCK_MS = 1100;
+
 export interface CombatEncounterPanelProps {
     /** The foe to fight (live: the real map encounter enemy; dev: a mock). */
     enemy: Enemy;
@@ -283,6 +290,19 @@ export function CombatEncounterPanel({
     // to the board via a bumped seq, so the pane animates exactly once per resolve.
     const fxRef = useRef<CombatEvent[]>([]);
     const [fxSeq, setFxSeq] = useState(0);
+    // WI-3 — END-phase in-flight guard. `resolvingRef` is the synchronous gate
+    // (checked before any dispatch, so machine-gun taps in the same frame are
+    // dropped); `resolving` is the render-visible mirror that dims/disables the
+    // button and suppresses staging/apply until the resolution + its fx timeline
+    // settle.
+    const resolvingRef = useRef(false);
+    const [resolving, setResolving] = useState(false);
+    const resolveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const endResolving = useCallback(() => {
+        resolvingRef.current = false;
+        setResolving(false);
+    }, []);
+    useEffect(() => () => { if (resolveTimer.current) clearTimeout(resolveTimer.current); }, []);
 
     // Bootstrap the encounter ONCE — combat must not restart when the store
     // player mutates (e.g. our own write-back) or props re-identify.
@@ -372,7 +392,10 @@ export function CombatEncounterPanel({
 
     const unstageUid = useCallback((uid: string) => setStagedUids((prev) => prev.filter((u) => u !== uid)), []);
     const onEnter = useCallback(() => apply((s) => rollEncounterDice(s).state), [apply]);
-    const onStage = useCallback((uid: string) => setStagedUids((prev) => (prev.includes(uid) ? prev : [...prev, uid])), []);
+    const onStage = useCallback((uid: string) => {
+        if (resolvingRef.current) return; // WI-3 — no staging mid-resolution
+        setStagedUids((prev) => (prev.includes(uid) ? prev : [...prev, uid]));
+    }, []);
     const onUnstage = useCallback((uid: string) => unstageUid(uid), [unstageUid]);
     // APPLY one staged card (hazard model — the die is OPTIONAL). `power` true →
     // draft the dragged die (unless one is already drafted, the combo case) + power
@@ -401,6 +424,7 @@ export function CombatEncounterPanel({
     // songbook discard-pile pick — omitted/skipped falls back to the engine's
     // pre-existing highest-rank auto-pick).
     const onApply = useCallback((uid: string, dieId: string | null, power: boolean, choices?: { chosenX?: number; reprisalCardId?: string }) => {
+        if (resolvingRef.current) return; // WI-3 — a drag must not land mid-resolution
         // Momentum: advance the wheel with this card's stance (looked up BEFORE the
         // play removes it from the hand). A completed cycle forges a wild momentum
         // die into the tray; while that die is live, plays don't advance the wheel.
@@ -445,7 +469,16 @@ export function CombatEncounterPanel({
             // wild die (draft/play/spend all handled by the engine). Id-guarded so a
             // double-invoked updater can't duplicate it.
             if (grantId && !ns.dice.some((d) => d.id === grantId)) {
-                const die: CombatManaDie = { id: grantId, color: 'wild', state: 'available', temporary: true };
+                // WI-4 — grant it FLOATING, not a plain tray die. Spec 32 v3 §5:
+                // a floating die is a second power source that bypasses the
+                // 1-die draft, stays DRAGGABLE once a draft exists (plain tray
+                // dice do not — `die.draggable` is presenter-computed from
+                // `floating`/`reserve`), routes as its own explicit power
+                // (`resolveApplyRouting`), and never banks. `temporary: true`
+                // keeps it combat-local — momentum must not carry across combats
+                // the way Forge floats do (the real engine port is EA-6; this is
+                // the minimal host-side correction).
+                const die: CombatManaDie = { id: grantId, color: 'wild', state: 'available', temporary: true, floating: true };
                 ns = { ...ns, dice: [...ns.dice, die] };
             }
             return ns;
@@ -480,6 +513,12 @@ export function CombatEncounterPanel({
     const onDiscard = useCallback((uid: string) => { apply((s) => discardCombatCard(s, uid).state); unstageUid(uid); }, [apply, unstageUid]);
     const onSignature = useCallback((id: string) => apply((s) => playSignatureSkill(s, id).state), [apply]);
     const onEndPhase = useCallback(() => {
+        // WI-3 — the synchronous gate: a second tap in the same frame (touch
+        // double-tap) finds the lock already held and is dropped, so exactly one
+        // threat phase resolves per intent.
+        if (resolvingRef.current) return;
+        resolvingRef.current = true;
+        setResolving(true);
         apply((s) => {
             // Fate Engine P1 R2 — close the turn BEFORE the phase resolves: an
             // unspent (still-available, non-X) drafted die BANKS to the Reserve
@@ -497,7 +536,10 @@ export function CombatEncounterPanel({
         });
         setFxSeq((n) => n + 1);
         setStagedUids([]);
-    }, [apply]);
+        // Release the lock once the resolution + its fx timeline have played out.
+        if (resolveTimer.current) clearTimeout(resolveTimer.current);
+        resolveTimer.current = setTimeout(endResolving, RESOLVE_LOCK_MS);
+    }, [apply, endResolving]);
     const onMercy = useCallback((choice: 'spare' | 'exploit') => apply((s) => selectEncounterMercyChoice(s, choice).state), [apply]);
     // Stable resolution-feedback payload — recomputed only when a new resolve bumps
     // the seq (captures the events stashed in fxRef just before).
@@ -575,6 +617,7 @@ export function CombatEncounterPanel({
                     onDiscard={onDiscard}
                     onSignature={onSignature}
                     onEndPhase={onEndPhase}
+                    resolving={resolving}
                     onInspect={onInspect}
                     onChip={setTipEffect}
                     onSignatureInfo={setSigInfo}

@@ -15,7 +15,7 @@
  */
 
 import { describe, it, expect } from '@jest/globals';
-import { getCard, getCardById, cardLibrary } from '@mechanics';
+import { getCard, getCardById, cardLibrary, lookupEffect } from '@mechanics';
 import { faceStats, detailStats } from '@/state/presenters/combat-encounter.engine';
 
 describe('card-face honesty guard', () => {
@@ -98,6 +98,51 @@ describe('card-face honesty guard', () => {
             if (d.systemTerms.length > 0 && !/conviction|⬡|resonance|reserve|pip|floating|rung|wild|X die/i.test(printed)) {
                 offenders.push(`${id} → systems entries without any printed reference`);
             }
+        }
+        expect(offenders).toEqual([]);
+    });
+
+    it('WI-2 — every event-triggered DoT face names its trigger, never the round-clock lifetime', () => {
+        // Post trigger-migration, poison ticks per card-played and bleed per
+        // damage-instance — passive round-clock play deals literally 0. A face
+        // that still prints "◆ POISON 10 over 4t" is the exact lie that shipped
+        // the migration half-done (the old guard checked keyword glosses, not
+        // the math line). This sweep fails any event DoT whose face still prints
+        // a round-clock lifetime OR fails to name its real trigger.
+        const offenders: string[] = [];
+        for (const { id } of cardLibrary) {
+            const card = getCard(id);
+            const src = getCardById(id);
+            if (!card || !src) continue;
+            const f = faceStats(card, src);
+            if (f.kind !== 'dot') continue;
+            const dotCe = (src.combatEffects ?? []).find(
+                ce => ce.appliedTo === 'opponent'
+                    && (lookupEffect(ce.effectId)?.payload as { damageOverTime?: unknown } | undefined)?.damageOverTime,
+            );
+            const trigger = dotCe
+                ? (lookupEffect(dotCe.effectId)?.payload as { damageOverTime?: { trigger?: string } } | undefined)?.damageOverTime?.trigger
+                : undefined;
+            const isEvent = trigger === 'card-played' || trigger === 'damage-instance' || trigger === 'payoff';
+            if (!isEvent) continue;
+
+            const d = detailStats(card, src);
+            const faceText = `${f.heroText} ${f.heroSub ?? ''} ${f.verbLine}`;
+            // 1. No round-clock "over Nt / over N turns" lifetime on the face.
+            if (/over\s+\d+\s*(t\b|turns?)/i.test(faceText)) {
+                offenders.push(`${id} face still prints round-clock 'over Nt' (trigger=${trigger})`);
+            }
+            // 2. The detail table must not headline a round-clock TOTAL/TURNS.
+            const detailLabels = d.outcomeStats.map(s => s.label);
+            if (detailLabels.includes('TOTAL') || detailLabels.includes('TURNS') || /over\s+\d+\s+turns/i.test(d.outcomeLine)) {
+                offenders.push(`${id} detail still headlines round-clock TOTAL/TURNS (trigger=${trigger})`);
+            }
+            // 3. The face DOES name the real trigger.
+            if (!/each card you play|each time it is struck|each payoff|per card|per hit|per payoff/i.test(faceText)) {
+                offenders.push(`${id} face does not name the '${trigger}' trigger`);
+            }
+            // 4. HP→VITAE: no stray 'HP' copy on the DoT face.
+            if (/\bHP\b/.test(faceText)) offenders.push(`${id} face still says HP (use VITAE)`);
         }
         expect(offenders).toEqual([]);
     });

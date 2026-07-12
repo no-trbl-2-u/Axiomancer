@@ -7,7 +7,7 @@
 import { describe, expect, it } from '@jest/globals';
 
 import {
-    advanceWheel, isMomentumDieId, isWheelStance, momentumDieId, nextWheelStance, wheelNext,
+    advanceWheel, isMomentumDieId, isWheelStance, momentumDieId, nextWheelStance, wheelNext, WHEEL_ORDER,
 } from '@/state/combat/momentum';
 
 describe('momentum wheel', () => {
@@ -42,6 +42,27 @@ describe('momentum wheel', () => {
         expect(wheelNext([])).toBeNull();
         expect(wheelNext(['heart'])).toBe('body');
         expect(wheelNext(['mind', 'heart'])).toBe('body');
+    });
+
+    // WI-4 (2026-07-12 playtest) — the wheel aria reported the WRONG next stance
+    // and a stale lit count (♥ lit → "next MIND", played MIND → still "1 of 3").
+    // The hint MUST be the deterministic successor of the last lit node, and the
+    // count MUST grow by exactly one on every accepted advance. This exhaustively
+    // pins the next-hint the aria derives from so it can never drift again.
+    it('the next-hint is exactly the wheel successor of the last lit node (every state)', () => {
+        for (const s of WHEEL_ORDER) {
+            expect(wheelNext([s])).toBe(nextWheelStance(s));           // ♥→body, body→mind, mind→heart
+        }
+        // The hint the aria shows is derived from the SAME lit the advance returns.
+        for (const start of WHEEL_ORDER) {
+            const first = advanceWheel([], start);
+            expect(first.lit).toEqual([start]);                        // count 1
+            const nxt = nextWheelStance(start);                        // = wheelNext(first.lit)
+            expect(wheelNext(first.lit)).toBe(nxt);
+            const second = advanceWheel(first.lit, nxt);               // play the hinted stance
+            expect(second.lit).toEqual([start, nxt]);                  // count grows to 2 (not stuck at 1)
+            expect(wheelNext(second.lit)).toBe(nextWheelStance(nxt));  // and the hint advances
+        }
     });
 
     it('momentum die ids round-trip and non-wheel stances are rejected', () => {

@@ -593,7 +593,7 @@ function diceVM(state: CombatEncounterState): CombatDieVM[] {
 // ── Honest card view-models (face + detail) ──────────────────────────────────
 
 type EffectPayloadLike = {
-    damageOverTime?: { damagePerRound: number };
+    damageOverTime?: { damagePerRound: number; trigger?: string };
     actionRestriction?: { skipTurn?: boolean };
     regeneration?: { healthPerRound?: number };
     rollModifier?: number;
@@ -777,6 +777,11 @@ interface CardCalc extends PrimaryResolution {
     freePerTurn: number; freeTurns: number; freeTotal: number;
     skips: number;
     dpr: number; intensity: number; stacks: boolean;
+    // WI-2 — the DoT's trigger FAMILY (post trigger-migration): 'card-played'
+    // (poison), 'damage-instance' (bleed), 'payoff', or null for a round-clock
+    // DoT. Event-triggered DoTs tick per game event, NOT per turn, so their
+    // face/detail must not print the round-clock "total over Nt" fiction.
+    dotTrigger: 'card-played' | 'damage-instance' | 'payoff' | null;
     // ── 0.34.0 authored statics (real units; live swings stay live) ──
     vulnPct: number;       // +N% damage taken (from damageTakenMult)
     reflectN: number;      // thorns reflect per hit (reflectDamage × intensity)
@@ -805,7 +810,7 @@ function cardCalc(card: CombatCard, sourceCard: Card | undefined): CardCalc {
     const out: CardCalc = {
         ...pr, keyword: null, glyph: '◆', categoryColor: PAYOFF_COLOR,
         perTurn: 0, turns: 0, total: 0, freePerTurn: 0, freeTurns: 0, freeTotal: 0,
-        skips: 0, dpr: 0, intensity: 1, stacks: false,
+        skips: 0, dpr: 0, intensity: 1, stacks: false, dotTrigger: null,
         vulnPct: 0, reflectN: 0, barrierAmt: 0, siphonPct: 0,
         riposteDmg: 0, riposteReduce: 0, reapCost: 0, reapPerSoul: 0,
         markAmp: 0, backfireN: 0,
@@ -820,6 +825,11 @@ function cardCalc(card: CombatCard, sourceCard: Card | undefined): CardCalc {
             out.turns = pr.ce?.duration ?? eff?.duration ?? 0;
             out.dpr = p.damageOverTime?.damagePerRound ?? 0;
             out.perTurn = Math.floor(out.dpr * out.intensity);
+            // WI-2 — classify the trigger family so the face/detail describe how
+            // the DoT actually ticks (per card / per hit) instead of assuming a
+            // round clock. `undefined`/`round-start`/`round-end` = round-clock.
+            const trig = p.damageOverTime?.trigger;
+            out.dotTrigger = trig === 'card-played' || trig === 'damage-instance' || trig === 'payoff' ? trig : null;
             // Fate Engine P1 — RAMP-AWARE lifetime totals (canonical poison /
             // unraveling escalate): mirror the engine's exact tick math so the
             // face equals `bottomDamagePreview` (printed == applied).
@@ -1221,7 +1231,24 @@ export function faceStats(card: CombatCard, sourceCard?: Card): CombatCardFaceVM
         ...freeRail(card, sourceCard), typeStrip: typeStripText(card),
     };
     switch (c.kind) {
-        case 'dot': return { ...base, kind: 'dot', keyword: kw, heroText: `${c.total}`, heroSub: `over ${c.turns} turns`, freeHeroText: free, freeHeroSub: null, verbLine: 'foe loses HP each turn', powerRail: c.keyword ?? 'DoT', readDependent: true, inert: false, guardBase: null, statusBase: c.total, statusAdv: c.totalAdv, statusDis: c.totalDis };
+        case 'dot': {
+            // WI-2 — trigger-aware face. Event DoTs (poison/bleed) tick per game
+            // event, never at the round boundary, so the round-clock "total over
+            // Nt" face was a lie for them (passive play deals literally 0). The
+            // read triplet still applies to the PER-TICK swing (▲ +1 intensity
+            // hits harder; ▼ −1 turn shortens the window, per-tick unchanged).
+            const perTickAdv = Math.floor(c.dpr * (c.intensity + READ_ADVANTAGE_INTENSITY_BONUS));
+            const evt = c.dotTrigger === 'card-played'
+                ? { hero: `${c.perTurn}/play`, sub: `per card you play · ${c.turns}t`, verb: 'foe loses VITAE each card you play' }
+                : c.dotTrigger === 'damage-instance'
+                    ? { hero: `${c.perTurn}/hit`, sub: `per hit taken · ${c.intensity} stack${c.intensity === 1 ? '' : 's'}`, verb: 'foe loses VITAE each time it is struck' }
+                    : c.dotTrigger === 'payoff'
+                        ? { hero: `${c.perTurn}/payoff`, sub: `per payoff you detonate · ${c.turns}t`, verb: 'foe loses VITAE each payoff you detonate' }
+                        : null;
+            if (evt) return { ...base, kind: 'dot', keyword: kw, heroText: evt.hero, heroSub: evt.sub, freeHeroText: free, freeHeroSub: null, verbLine: evt.verb, powerRail: c.keyword ?? 'DoT', readDependent: true, inert: false, guardBase: null, statusBase: c.perTurn, statusAdv: perTickAdv, statusDis: c.perTurn };
+            // Round-clock DoT: the honest "total over N turns" face stands.
+            return { ...base, kind: 'dot', keyword: kw, heroText: `${c.total}`, heroSub: `over ${c.turns} turns`, freeHeroText: free, freeHeroSub: null, verbLine: 'foe loses VITAE each turn', powerRail: c.keyword ?? 'DoT', readDependent: true, inert: false, guardBase: null, statusBase: c.total, statusAdv: c.totalAdv, statusDis: c.totalDis };
+        }
         case 'stun': return { ...base, kind: 'stun', keyword: kw, heroText: `skip ${c.skips} turns`, heroSub: null, freeHeroText: free, freeHeroSub: null, verbLine: "the foe can't act", powerRail: c.keyword ?? 'Stun', readDependent: false, inert: false, guardBase: null };
         case 'weaken': return { ...base, kind: 'weaken', keyword: kw, heroText: '', heroSub: c.turns > 0 ? `hits softer · ${c.turns} turns` : 'weakens its hits', freeHeroText: free, freeHeroSub: null, verbLine: "weakens the foe's hits", powerRail: c.keyword ?? 'Weaken', readDependent: false, inert: false, guardBase: null };
         case 'mark': return { ...base, kind: 'mark', keyword: kw, heroText: `+${c.markAmp}/tick`, heroSub: `${c.turns} turns`, freeHeroText: free, freeHeroSub: null, verbLine: 'every DoT tick on the foe bites harder', powerRail: c.keyword ?? 'Mark', readDependent: false, inert: false, guardBase: null };
@@ -1280,7 +1307,29 @@ function detailCore(card: CombatCard, sourceCard?: Card): DetailCore {
     const free = freeLineText(card, sourceCard);
     const freeLine = `◇ FREE (no die): ${free}.`;
     switch (c.kind) {
-        case 'dot': return { subtitle: `${Title} the enemy — damage over time.`, metaChip, outcomeLine: `Apply ${Title} ${c.total} over ${c.turns} turns.`, outcomeStats: [{ label: 'PER TURN', value: `${c.perTurn}` }, { label: 'TURNS', value: `${c.turns}` }, { label: 'TOTAL', value: `${c.total}` }], stacksText: c.stacks ? 'Stacks up to 10×.' : null, freeLine, powerLine: `◆ WITH A DIE: apply ${Title} — ${c.perTurn} HP/turn for ${c.turns} turns (${c.total} total), plus a small hit.`, readNote: `The read is exact: ▲ won read lands +${READ_ADVANTAGE_INTENSITY_BONUS} intensity (${c.totalAdv} total), ▼ lost read −${READ_DISADVANTAGE_DURATION_PENALTY} turn (${c.totalDis} total); ${c.total} on an even read.`, mathLine: `${c.perTurn}/turn = ${c.dpr} base × ${c.intensity} intensity · ${c.turns} turns · ${c.total} HP total on an even read${c.stacks ? ' · stacks to 10×' : ''}.`, keywords };
+        case 'dot': {
+            // WI-2 — event DoTs (poison=card-played, bleed=damage-instance) tick
+            // on a game event, never at the round boundary; the "PER TURN / TURNS
+            // / TOTAL" table is a lie for them. Print "PER TICK / TRIGGER /
+            // DURATION" and describe the real trigger instead.
+            if (c.dotTrigger) {
+                const perTickAdv = Math.floor(c.dpr * (c.intensity + READ_ADVANTAGE_INTENSITY_BONUS));
+                const evt = c.dotTrigger === 'card-played' ? { noun: 'card you play', trig: 'per card played', dur: { label: 'DURATION', value: `${c.turns}t` } }
+                    : c.dotTrigger === 'damage-instance' ? { noun: 'time it is struck', trig: 'per hit taken', dur: { label: 'STACKS', value: `${c.intensity}` } }
+                        : { noun: 'payoff you detonate', trig: 'per payoff', dur: { label: 'DURATION', value: `${c.turns}t` } };
+                return {
+                    subtitle: `${Title} the enemy — ticks ${evt.trig}.`, metaChip,
+                    outcomeLine: `Apply ${Title} — ${c.perTurn} VITAE each ${evt.noun}.`,
+                    outcomeStats: [{ label: 'PER TICK', value: `${c.perTurn}` }, { label: 'TRIGGER', value: evt.trig }, evt.dur],
+                    stacksText: c.stacks ? 'Stacks by intensity.' : null, freeLine,
+                    powerLine: `◆ WITH A DIE: apply ${Title} — ${c.perTurn} VITAE each ${evt.noun} while it holds, plus a small hit.`,
+                    readNote: `The read scales the PER-TICK bite: ▲ won read lands +${READ_ADVANTAGE_INTENSITY_BONUS} intensity (${perTickAdv}/tick), ▼ lost read −${READ_DISADVANTAGE_DURATION_PENALTY} turn of duration.`,
+                    mathLine: `${c.perTurn}/tick = ${c.dpr} base × ${c.intensity} intensity, ${evt.trig}${c.stacks ? ' · stacks by intensity' : ''}.`,
+                    keywords,
+                };
+            }
+            return { subtitle: `${Title} the enemy — damage over time.`, metaChip, outcomeLine: `Apply ${Title} ${c.total} over ${c.turns} turns.`, outcomeStats: [{ label: 'PER TURN', value: `${c.perTurn}` }, { label: 'TURNS', value: `${c.turns}` }, { label: 'TOTAL', value: `${c.total}` }], stacksText: c.stacks ? 'Stacks up to 10×.' : null, freeLine, powerLine: `◆ WITH A DIE: apply ${Title} — ${c.perTurn} VITAE/turn for ${c.turns} turns (${c.total} total), plus a small hit.`, readNote: `The read is exact: ▲ won read lands +${READ_ADVANTAGE_INTENSITY_BONUS} intensity (${c.totalAdv} total), ▼ lost read −${READ_DISADVANTAGE_DURATION_PENALTY} turn (${c.totalDis} total); ${c.total} on an even read.`, mathLine: `${c.perTurn}/turn = ${c.dpr} base × ${c.intensity} intensity · ${c.turns} turns · ${c.total} VITAE total on an even read${c.stacks ? ' · stacks to 10×' : ''}.`, keywords };
+        }
         case 'stun': return { subtitle: `${Title} the enemy — it loses its turns.`, metaChip, outcomeLine: `Apply ${Title} ${c.skips} turn${c.skips === 1 ? '' : 's'}.`, outcomeStats: [{ label: 'SKIPS', value: `${c.skips} turns` }], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: ${Title} — the foe skips its next ${c.skips} actions, plus a small hit.`, readNote: `The read is exact: ▲ won read changes nothing (skips are duration-driven), ▼ lost read shortens the skip by ${READ_DISADVANTAGE_DURATION_PENALTY} turn (floor 1).`, mathLine: `skip ${c.skips}t = ${Title.toLowerCase()} duration ${c.skips} (each turn it would act is cancelled).`, keywords };
         case 'weaken': return { subtitle: `${Title} the enemy — its attacks hit softer.`, metaChip, outcomeLine: c.turns > 0 ? `Apply ${Title} · ${c.turns} turns.` : `Apply ${Title}.`, outcomeStats: c.turns > 0 ? [{ label: 'TURNS', value: `${c.turns}` }] : [], stacksText: c.stacks ? 'Stacks by intensity.' : null, freeLine, powerLine: `◆ WITH A DIE: apply ${Title} — the foe's hits land softer while it holds.`, readNote: `${Title} weakens the enemy's blows; pile on STAGGER to deny the turn outright.`, mathLine: `${Title} reduces the enemy's outgoing damage while active (real engine units).`, keywords };
         case 'mark': return { subtitle: `${Title} the enemy — the flaw is named.`, metaChip, outcomeLine: `Apply ${Title} +${c.markAmp}/tick · ${c.turns} turns.`, outcomeStats: [{ label: 'PER TICK', value: `+${c.markAmp}` }, { label: 'TURNS', value: `${c.turns}` }], stacksText: c.stacks ? 'Stacks by intensity.' : null, freeLine, powerLine: `◆ WITH A DIE: apply ${Title} — every DoT tick and payoff hit on the foe deals +${c.markAmp} while it holds.`, readNote: `${Title} counts as an affliction — RUPTURE, SOUL, and REAP all feed on it.`, mathLine: `+${c.markAmp}/tick = tickAmplifyFlat × intensity, for ${c.turns} turns.`, keywords };
@@ -1338,7 +1387,15 @@ export function detailStats(card: CombatCard, sourceCard?: Card): CombatCardDeta
         diePill = `▲${adv} · —${b} · ▼${dis}`;
     } else if (c.kind === 'dot') {
         // P0-truth: the exact deterministic triplet (▲ +1 intensity / ▼ −1 turn).
-        diePill = `▲${c.totalAdv} · —${c.total} · ▼${c.totalDis}`;
+        // WI-2 — an event DoT (poison/bleed) reads PER TICK, not as a round-clock
+        // lifetime; the read scales the per-tick bite (▲ +1 intensity; ▼ −1 turn
+        // shortens the window, per-tick unchanged).
+        if (c.dotTrigger) {
+            const perTickAdv = Math.floor(c.dpr * (c.intensity + READ_ADVANTAGE_INTENSITY_BONUS));
+            diePill = `▲${perTickAdv} · —${c.perTurn} · ▼${c.perTurn}`;
+        } else {
+            diePill = `▲${c.totalAdv} · —${c.total} · ▼${c.totalDis}`;
+        }
     } else if (c.kind === 'vulnerable') {
         diePill = `▲+${c.vulnPctAdv}% · —+${c.vulnPct}% · ▼−1 turn`;
     } else if (face.heroText && face.heroSub) {
