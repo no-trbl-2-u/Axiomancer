@@ -80,6 +80,15 @@ const WHEEL_DECK = ['qa-wheel-heart', 'qa-wheel-heart', 'qa-wheel-body', 'qa-whe
 function open(): CombatEncounterState {
     let s = initializeCombatEncounter(makePlayer(WHEEL_DECK), makeEnemy(), WHEEL_DECK, 7);
     s = rollEncounterDice(s, rng).state;
+    // Keep-hand rule: the opening hand is 5 cards, one short of the 6-card
+    // fixture deck — pin the hand so every wheel scenario (two hearts, one of
+    // each stance) is present regardless of which card the shuffle leaves out.
+    const pinned = ['qa-wheel-heart', 'qa-wheel-heart', 'qa-wheel-body', 'qa-wheel-mind', 'qa-wheel-body'];
+    s = {
+        ...s,
+        hand: pinned.map((cardId, i) => ({ uid: `w${i}`, cardId })),
+        drawPile: ['qa-wheel-mind'],
+    };
     return s;
 }
 

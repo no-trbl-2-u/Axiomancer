@@ -21,11 +21,13 @@ import { getRng } from '../Utils/rng';
 import type { Character } from '../Character/types';
 import { getCombatLoadout } from './combat.loadout';
 
-/** Cards drawn at the start of every threat phase. Spec 26b hazard-combat tuning:
- *  raised 5→6 so a phase (fought with ONE hand) can assemble a genuine multi-card
- *  solution instead of being decided by raw draw luck — directly serves the
- *  anti-single-card-spam / "assembled solution" doctrine. */
-export const COMBAT_HAND_SIZE = 6;
+/** Hand-size target. The opening hand draws this many; every round boundary
+ *  REFILLS the hand up to this target (keep-hand rule, 2026-07-13): unplayed
+ *  cards stay in hand and occupy draw room, so holding a card is a real cost —
+ *  a dead card clogs the hand until it is played or scrapped, instead of being
+ *  silently recycled by a full redraw. (Replaces the spec 26b "draw 6 fresh"
+ *  rule.) */
+export const COMBAT_HAND_SIZE = 5;
 
 const defaultRng = (): number => getRng().random();
 
