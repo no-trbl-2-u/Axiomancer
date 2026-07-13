@@ -351,6 +351,35 @@ describe('RIPOSTE — counters only when Guard/Barrier fully blocked the attack'
         expect(res.state.riposte).toBeUndefined();      // cleared each phase
     });
 
+    it('phase 32 part 2: scales the counter to the prevented blow when it exceeds the printed floor', () => {
+        mockSequentialRng(0.05);
+        const base = initializeCombatEncounter(makePlayer([]), makeEnemy(300, 'mind'), undefined, 7);
+        const armed = {
+            ...rollEncounterDice(deepClone(base)).state,
+            guard: 100,                              // over-guards the telegraphed hit
+            riposte: { damage: 1, reduce: 0 },        // floor far below the real blow
+        };
+        const hpBefore = armed.enemy.health;
+        const res = resolveThreatPhase(armed);
+        const fired = res.events.find(e => e.kind === 'riposte-fired') as { amount: number } | undefined;
+        expect(fired).toBeDefined();
+        expect(fired!.amount).toBeGreaterThan(1);       // scaled past the printed floor
+        expect(hpBefore - res.state.enemy.health).toBe(fired!.amount);
+    });
+
+    it('phase 32 part 2: floors at the printed damage when the prevented blow is smaller', () => {
+        mockSequentialRng(0.05);
+        const base = initializeCombatEncounter(makePlayer([]), makeEnemy(300, 'mind'), undefined, 7);
+        const armed = {
+            ...rollEncounterDice(deepClone(base)).state,
+            guard: 100,
+            riposte: { damage: 500, reduce: 0 },       // floor far above the real blow
+        };
+        const res = resolveThreatPhase(armed);
+        const fired = res.events.find(e => e.kind === 'riposte-fired') as { amount: number } | undefined;
+        expect(fired!.amount).toBe(500);
+    });
+
     it('does NOT fire when the hit lands (no full block)', () => {
         mockSequentialRng(0.05);
         const base = initializeCombatEncounter(makePlayer([]), makeEnemy(300, 'mind'), undefined, 7);

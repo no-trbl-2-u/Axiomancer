@@ -26,7 +26,7 @@ next one.
       (WS3 shipped in `85acd441` / `3cecd275`; lethal receipt and summary
       reconciliation closed in the combat-truth follow-up)
 - [ ] Part 1b — Harvest: Souls persist across combats (deferred, see below)
-- [ ] Part 2 — Bulwark: RIPOSTE reflects the prevented blow
+- [x] Part 2 — Bulwark: RIPOSTE reflects the prevented blow (this tick)
 - [ ] Part 3 — Akrasia: DEBT ledger
 - [ ] Part 4 — remaining per-theme M items (oratory milestone drip,
       forge OVERHEAT, control TURNABOUT, oracle OMEN v2, charm resolve
@@ -234,6 +234,116 @@ Decisions:
   replacement — see brief §Part 1 Decisions.
 - Souls cross-combat persistence split to Part 1b (P-NEXT tagged in
   source doc, orthogonal save-schema scope).
+```
+
+## Part 2 — Bulwark: RIPOSTE reflects the prevented blow
+
+### Design intent (source: 2026-07-10-theme-identity.md §2, bulwark/bastion)
+
+> RIPOSTE reflects the prevented blow [CONFIRMED · M]: reflect scales with
+> what the wall actually stopped, not a flat 3 — the wall IS the weapon, and
+> bigger threats become bigger paydays (doctrine-clean: reflect class).
+
+### Current state (verified in code, before this tick)
+
+RIPOSTE arms with two printed fields — `damage` (flat counter) and `reduce`
+(one-shot parry, reduces the first incoming hit this phase). It fires a
+FLAT `riposte.damage` counter whenever the phase's attack was fully blocked
+(soaked to 0 by parry + GUARD + BARRIER combined), regardless of how big the
+blocked blow actually was — `combat.engine.ts` `resolveThreatPhase`, the
+`riposte-fired` branch. Two library carriers: `measured-answer` (GUARD 6 +
+RIPOSTE 3/parry 2) and `the-adamant-wall` (BARRIER 10 + RIPOSTE 4/parry 2).
+
+### Decision made upfront — DO NOT ASK
+
+- **Floor, not replacement.** The counter becomes
+  `max(printed damage, prevented-blow size)` rather than a pure swap to the
+  prevented-blow size. A pure swap risks a card countering for LESS than
+  today whenever the blocked attack happens to be small (e.g., a weakened or
+  soft-controlled enemy telegraph) — a balance regression with no evidence
+  budget for a re-tune this tick, same reasoning as Part 1's additive
+  erosion call. The floor guarantees the printed number never gets worse
+  while still literally shipping "bigger threats become bigger paydays."
+- **"Prevented blow" = the pre-soak size of the specific attack(s) that
+  ended up fully blocked**, summed across the phase if more than one threat
+  effect carries damage (rare today, but the loop already iterates
+  `phase.threatAction.effects`). Captured as `preSoakDmg` before parry/
+  GUARD/BARRIER subtract from it, accumulated into `blockedBlowTotal` only
+  on the branch that already increments `attacksFullyBlocked`. A partially
+  blocked attack (some damage still lands) does not contribute — the design
+  language is "the prevented BLOW," not "prevented damage in general."
+  Scaled by the same `getDamageTakenMultiplier(enemy)` the flat path
+  already applied.
+- **No field/schema change.** `riposte.damage` keeps its name and meaning
+  (a floor, now, instead of the whole story) — no `CombatSpecialMechanic`
+  shape change, no card data migration. Matches Part 1's "erosion is a
+  property of the verb, not a per-card rider" framing: the scaling is
+  engine behavior, not something a card author opts into per-card.
+- **Pricing untouched.** `riposteFactor` prices `(damage + reduce)` as
+  before — the scaling upside is unscored bonus riding an already-paid
+  effect, identical in spirit to Part 1's erosion bonus. Comment updated
+  in `cards.pricing.ts` and both cards' `// pts:` lines to note the floor
+  framing (prose only, no numeric change).
+- **Keyword copy updated** (`axiomancer-mobile/state/combat/keywords.ts`)
+  so the RIPOSTE gloss stops implying a fixed counter — "or more, if the
+  blow you stopped was bigger." Avoids adding another lying-copy finding
+  to the pattern already flagged elsewhere in `plan/CRITIQUE.md`.
+
+### Outputs
+
+- `combat.engine.ts` `resolveThreatPhase`: new `blockedBlowTotal`
+  accumulator; `preSoakDmg` captured before RIPOSTE-parry/GUARD/BARRIER
+  reduce `dmg`; counter computed as
+  `Math.round(Math.max(riposte.damage, blockedBlowTotal) * getDamageTakenMultiplier(enemy))`
+  instead of `Math.round(riposte.damage * ...)`. `riposte-fired` event
+  shape unchanged (`{ kind, amount }`) — `amount` now honestly reports the
+  live counter.
+- `cards.pricing.ts`: `riposteFactor` doc comment notes the floor framing.
+- `cards.library.ts`: `measured-answer` / `the-adamant-wall` `// pts:`
+  comments note the floor framing.
+- `axiomancer-mobile/state/combat/keywords.ts`: RIPOSTE gloss updated.
+
+### Tests
+
+- `status-depth-combat.engine.test.ts` RIPOSTE describe block: two new
+  cases — counter scales past the printed floor when the blocked blow is
+  bigger (floor set to 1, asserts `amount > 1` and enemy HP loss equals the
+  event amount); counter stays at the printed floor when the blocked blow
+  is smaller (floor set to 500, asserts `amount === 500`). Existing three
+  RIPOSTE cases (flat-8 full-block, no-fire-on-landed-hit, Measured Answer
+  arming) re-verified green unmodified — the flat-8 case's real attack
+  magnitude is below 8, so the floor path (not the scaling path) fires,
+  proving backward compatibility.
+
+### Verify gate
+
+```bash
+npm run verify --workspace axiomancer-mechanics
+```
+
+Mobile-visible: only the keyword gloss string changed (no type/contract
+change) — `axiomancer-mobile` verify is a courtesy check, not gating.
+
+### Deploy gate
+
+```bash
+npm run deploy:check
+```
+
+### Commit body template
+
+```
+feat(mechanics): RIPOSTE reflects the prevented blow — phase 32 part 2
+
+- blockedBlowTotal tracking + scaled counter in resolveThreatPhase
+- printed riposte.damage becomes a floor, not the whole story
+- pricing/card comments + keyword copy updated to match
+- tests: scales past the floor, holds at the floor, existing 3 green
+
+Decisions:
+- Floor (max(printed, prevented-blow)) over pure replacement — see brief
+  §Part 2 Decisions; avoids a counter-strength regression with no
+  evidence budget for a re-tune this tick.
 ```
 
 ## Follow-ups (out of scope this part)

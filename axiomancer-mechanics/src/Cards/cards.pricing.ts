@@ -117,7 +117,10 @@ export const VERB_POINTS = Object.freeze({
     statusPerIntensityTurn: 0.75,
     /** DoT application: printed lifetime HP ÷ this (with ramp/decay honoured). */
     dotLifetimeDivisor: 3,
-    /** RIPOSTE: (damage + parry-reduce) × this (gated on a full block). */
+    /** RIPOSTE: (damage + parry-reduce) × this (gated on a full block). Printed
+     * `damage` prices the FLOOR — spec 32 §2 PA-3, the live counter scales up
+     * to the actual prevented blow's size when it exceeds the floor; that
+     * upside is unscored, matching Phase 32 Part 1's erosion precedent. */
     riposteFactor: 0.8,
     /** EXTEND DOTS: +1 turn across the expected live DoTs, per turn extended. */
     extendDotsPerTurn: 5.5,
