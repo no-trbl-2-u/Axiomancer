@@ -697,8 +697,12 @@ export function processDamageOverTime<T extends Combatant>(
     currentRound?: number,
 ): { target: T; damage: number; washedOut: ActiveEffect[] } {
     const mods = getActiveEffectModifiers(target.effects, currentRound);
-    const damage = phase === 'start' ? mods.dotStart : mods.dotEnd;
-    if (damage <= 0) return { target, damage: 0, washedOut: [] };
+    const projectedDamage = phase === 'start' ? mods.dotStart : mods.dotEnd;
+    if (projectedDamage <= 0) return { target, damage: 0, washedOut: [] };
+    // A receipt names HP that actually left the bar, never theoretical overkill.
+    // `applyDamage` already clamps the resulting health; clamp the returned
+    // amount to the same truth or attribution can exceed total VITAE lost.
+    const damage = Math.min(projectedDamage, Math.max(0, target.health));
     let next: T = applyDamage(target, damage);
     // BLEED (spec 32 v3, `dotModifiers.decaysPerTick`): a front-loaded DoT loses
     // 1 intensity each time it ticks; the instance washes out at 0. Only effects
@@ -842,7 +846,17 @@ export function fireDotTrigger<T extends Combatant>(
         damage += amount;
     }
     if (damage <= 0) return { target, damage: 0, perEffect: [], washedOut: [] };
-    let next: T = applyDamage(target, damage);
+    // Clamp the labeled breakdown in deterministic effect order. The event
+    // stream is an accounting ledger: once VITAE reaches zero, later theoretical
+    // ticks cannot claim damage that never occurred.
+    let hpRemaining = Math.max(0, target.health);
+    const actualPerEffect = perEffect.flatMap(tick => {
+        const amount = Math.min(tick.amount, hpRemaining);
+        hpRemaining -= amount;
+        return amount > 0 ? [{ ...tick, amount }] : [];
+    });
+    const actualDamage = actualPerEffect.reduce((sum, tick) => sum + tick.amount, 0);
+    let next: T = applyDamage(target, actualDamage);
     // Same decay rule as the round clocks: only effects that ticked THIS
     // trigger decay; the instance washes out at intensity 0.
     const washedOut: ActiveEffect[] = [];
@@ -862,7 +876,7 @@ export function fireDotTrigger<T extends Combatant>(
         || decayed.some((ae, i) => ae !== next.effects[i])) {
         next = { ...next, effects: decayed };
     }
-    return { target: next, damage, perEffect, washedOut };
+    return { target: next, damage: actualDamage, perEffect: actualPerEffect, washedOut };
 }
 
 /**

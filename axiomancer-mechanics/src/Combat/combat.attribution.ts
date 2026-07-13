@@ -108,6 +108,13 @@ export function buildCombatSummary(state: CombatEncounterState): CombatSummary {
 
     reconcileAttribution(state, totalDotDamage);
 
+    let enemyHealed = 0;
+    for (const ev of state.log) {
+        if (ev.kind === 'damage-dealt' && ev.target === 'enemy' && ev.amount < 0) enemyHealed += -ev.amount;
+    }
+    const hpLost = Math.max(0, state.enemy.maxHealth - state.enemy.health) + enemyHealed;
+    const directDamage = Math.max(0, hpLost - totalDotDamage);
+
     const sorted = rows.slice().sort((a, b) => b.damageDealt - a.damageDealt);
     const best = rows.slice().sort((a, b) => (b.dotDamage + b.damageDealt) - (a.dotDamage + a.damageDealt))[0];
     return {
@@ -115,7 +122,7 @@ export function buildCombatSummary(state: CombatEncounterState): CombatSummary {
         headline: HEADLINES[outcome],
         rows: sorted,
         totalDotDamage,
-        directDamage: state.directDamageDealt,
+        directDamage,
         bestCard: best?.name ?? '',
     };
 }
@@ -141,7 +148,6 @@ function reconcileAttribution(
     }
     const hpLostCeiling = Math.max(0, state.enemy.maxHealth - state.enemy.health) + enemyHealed;
     if (totalDotDamage > hpLostCeiling + 0.5) {
-        // eslint-disable-next-line no-console
         console.warn(
             `[attribution] DoT total ${totalDotDamage} exceeds enemy HP lost ${hpLostCeiling} — ledger over-counting (WI-9 regression).`,
         );

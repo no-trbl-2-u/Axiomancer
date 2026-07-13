@@ -674,9 +674,15 @@ describe('buildCombatSummary — DoT is summed from emitted ticks, not projected
 
     function completeWith(attribution: Record<string, CombatAttributionRow>, log: CombatEvent[], enemyHp = 100) {
         const base = initializeCombatEncounter(makePlayer([DOT_BODY]), makeEnemy(enemyHp), undefined, SEED);
+        const emittedDot = log.reduce((sum, event) =>
+            sum + (event.kind === 'dot-tick' && event.target === 'enemy' ? event.amount : 0), 0);
         return {
-            ...base, phase: 'complete' as const, finalOutcome: 'victory' as const,
-            attribution, log,
+            ...base,
+            enemy: { ...base.enemy, health: Math.max(0, base.enemy.health - emittedDot) },
+            phase: 'complete' as const,
+            finalOutcome: 'victory' as const,
+            attribution,
+            log,
         };
     }
 
@@ -721,6 +727,7 @@ describe('Spec 25 §7.7 — buildCombatSummary field shape', () => {
             ...state,
             phase: 'complete' as const,
             finalOutcome: 'victory' as const,
+            enemy: { ...state.enemy, health: 70 },
             directDamageDealt: 30,
             attribution: recordAttribution({}, DOT_BODY, 'Slippery Slope', null, 20),
         };

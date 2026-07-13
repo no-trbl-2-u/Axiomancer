@@ -101,7 +101,7 @@ export type {
 export {
     initializeCombatEncounter, rollEncounterDice, playCombatCard,
     resolveCombatPhase, resolveThreatPhase, processBetweenPhases,
-    selectEncounterMercyChoice, getCard,
+    selectEncounterMercyChoice, selectCapitulationChoice, getCard,
     handCards, availableDice, buildCombatSummary,
     COMBAT_DICE_COUNT, COMBAT_HAND_SIZE, COMBAT_DIE_FACES,
     rollCombatDice, combatDieCanPower, refreshOneDie,

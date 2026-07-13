@@ -341,7 +341,10 @@ order, intra-batch gates noted per phase):**
       travelling Souls), bulwark (RIPOSTE reflects the prevented
       blow), akrasia (DEBT ledger), then remaining per-theme M items.
       Register -> A/B -> promote; re-run the ten-theme matrix after.
-      DoT-clock direction ratified 2026-07-10 (distinct triggers);
+      DoT-clock direction ratified 2026-07-10 (distinct triggers) and
+      shipped through WS3; combat-truth follow-up clamps every receipt and
+      summary to actual VITAE loss. SWAY threshold crossing now opens an
+      explicit player-authored capitulation choice rather than ending combat;
       partially gated on Phase 30's FREE verbs (mechanics;
       parallelizable per theme) — source:
       `plan/tuning/2026-07-10-theme-identity.md` §2

@@ -64,6 +64,7 @@ import {
     buildCombatSummary,
     getSignatureSkill,
     selectMercyChoice,
+    selectCapitulationChoice,
     cardDieCostPreview,
     isMomentumDieId,
 } from '../Combat/combat.engine';
@@ -443,6 +444,26 @@ async function promptSignatureChoice(state: CombatEncounterState): Promise<strin
     return choice === '__skip__' ? null : choice;
 }
 
+async function resolveCliCapitulationChoice(
+    state: CombatEncounterState,
+    auto: boolean,
+): Promise<CombatEncounterState> {
+    if (!state.capitulationChoiceActive) return state;
+    const choice: 'accept' | 'continue' = auto
+        ? 'accept'
+        : (await prompt<{ choice: 'accept' | 'continue' }>([{
+            type: 'rawlist', name: 'choice', message: `${state.enemy.name} yields:`,
+            choices: [
+                { name: 'accept the capitulation', value: 'accept' },
+                { name: 'refuse and continue', value: 'continue' },
+            ],
+        }])).choice;
+    const result = selectCapitulationChoice(state, choice);
+    logState('hazardCombat:capitulation', state, result.state, { choice });
+    emit({ type: 'hazardCombat:capitulation', payload: { choice, events: result.events } });
+    return result.state;
+}
+
 async function interactiveHazardCombatLoop(
     initial: CombatEncounterState,
     flags: CombatCliFlags,
@@ -451,6 +472,8 @@ async function interactiveHazardCombatLoop(
     let phaseCount = 0;
 
     while (s.phase !== 'complete' && !s.finalOutcome && phaseCount < flags.maxTurns) {
+        s = await resolveCliCapitulationChoice(s, false);
+        if (s.finalOutcome) break;
         phaseCount++;
         const phase = s.threatPhases[Math.min(s.currentPhaseIndex, s.threatPhases.length - 1)];
         const revealed = revealedCurrentStance(s);
@@ -520,6 +543,9 @@ async function interactiveHazardCombatLoop(
 
         if (s.finalOutcome) break;
 
+        s = await resolveCliCapitulationChoice(s, false);
+        if (s.finalOutcome) break;
+
         // Mercy choice.
         if (s.mercyChoiceActive) {
             const { choice } = await prompt<{ choice: 'spare' | 'exploit' }>([{
@@ -561,6 +587,8 @@ async function autoHazardCombatLoop(
 
     let phaseCount = 0;
     while (s.phase !== 'complete' && !s.finalOutcome && phaseCount < flags.maxTurns) {
+        s = await resolveCliCapitulationChoice(s, true);
+        if (s.finalOutcome) break;
         phaseCount++;
         const before = s;
 
@@ -574,6 +602,8 @@ async function autoHazardCombatLoop(
             payload: { phaseCount, enemyHealth: s.enemy.health, playerHealth: s.player.health },
         });
 
+        if (s.finalOutcome) break;
+        s = await resolveCliCapitulationChoice(s, true);
         if (s.finalOutcome) break;
         if (s.mercyChoiceActive) {
             const beforeMercy = s;

@@ -29,7 +29,7 @@ import {
     initializeCombatEncounter, rollEncounterDice, playCombatCard, resolveThreatPhase,
     startTurn, endTurn, draftStanceDie, discardCombatCard, playSignatureSkill,
     tapFateDie, getPendingDotTotal, getFloatingDiceColors, placeStake,
-    selectEncounterMercyChoice, buildCombatSummary, rollCombatCardRewards, addRewardCard,
+    selectEncounterMercyChoice, selectCapitulationChoice, buildCombatSummary, rollCombatCardRewards, addRewardCard,
     rollLoot, addItem,
     type CombatEncounterState, type CombatOutcome, type Character, type Enemy, type CombatEvent,
     type WheelStance,
@@ -526,6 +526,7 @@ export function CombatEncounterPanel({
         resolveTimer.current = setTimeout(endResolving, RESOLVE_LOCK_MS);
     }, [apply, endResolving]);
     const onMercy = useCallback((choice: 'spare' | 'exploit') => apply((s) => selectEncounterMercyChoice(s, choice).state), [apply]);
+    const onCapitulation = useCallback((choice: 'accept' | 'continue') => apply((s) => selectCapitulationChoice(s, choice).state), [apply]);
     // Stable resolution-feedback payload — recomputed only when a new resolve bumps
     // the seq (captures the events stashed in fxRef just before).
     const fx = useMemo<CombatFx>(() => ({ seq: fxSeq, events: fxRef.current }), [fxSeq]);
@@ -586,7 +587,8 @@ export function CombatEncounterPanel({
     }
 
     const summary = live.finalOutcome ? buildCombatSummary(live) : null;
-    const mercy = live.phase === 'mercy-choice' && !live.finalOutcome;
+    const capitulation = live.phase === 'mercy-choice' && !!live.capitulationChoiceActive && !live.finalOutcome;
+    const mercy = live.phase === 'mercy-choice' && !live.capitulationChoiceActive && !live.finalOutcome;
     const showReveal = live.phase === 'reveal';
 
     return (
@@ -667,6 +669,20 @@ export function CombatEncounterPanel({
                             <Text style={[styles.revealBtnText, { color: AXM.sulfur }]}>ENTER COMBAT ›</Text>
                         </Pressable>
                     </ScrollView>
+                </View>
+            )}
+
+            {/* SWAY opens a yield; the player, not the threshold, authors the outcome. */}
+            {capitulation && (
+                <View style={styles.backdrop} testID="combat-capitulation">
+                    <View style={[styles.modal, { borderColor: AXM.sulfur }]}>
+                        <Text style={styles.modalTitle}>{live.enemy.name} yields.</Text>
+                        <Text style={styles.modalSub}>Accept their capitulation, or continue the fight.</Text>
+                        <View style={styles.modalBtns}>
+                            <Pressable onPress={() => onCapitulation('accept')} testID="combat-capitulation-accept" accessibilityRole="button" accessibilityLabel="Accept capitulation" style={[styles.modalBtn, { borderColor: '#5bbf6a' }]}><Text style={[styles.modalBtnText, { color: '#5bbf6a' }]}>ACCEPT</Text></Pressable>
+                            <Pressable onPress={() => onCapitulation('continue')} testID="combat-capitulation-continue" accessibilityRole="button" accessibilityLabel="Continue fighting" style={[styles.modalBtn, { borderColor: AXM.blood }]}><Text style={[styles.modalBtnText, { color: AXM.blood }]}>CONTINUE</Text></Pressable>
+                        </View>
+                    </View>
                 </View>
             )}
 

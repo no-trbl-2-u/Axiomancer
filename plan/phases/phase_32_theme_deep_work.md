@@ -21,6 +21,10 @@ next one.
 
 **Status:**
 - [x] Part 1 — Harvest: REAP attacks MAXIMUM HP (this tick)
+- [x] Part 1a — DoT clocks: distinct trigger substrate, Suppuration's
+      cross-clock accumulator, and actual-VITAE receipt/attribution honesty
+      (WS3 shipped in `85acd441` / `3cecd275`; lethal receipt and summary
+      reconciliation closed in the combat-truth follow-up)
 - [ ] Part 1b — Harvest: Souls persist across combats (deferred, see below)
 - [ ] Part 2 — Bulwark: RIPOSTE reflects the prevented blow
 - [ ] Part 3 — Akrasia: DEBT ledger
@@ -67,7 +71,7 @@ persistence) is a follow-up, not blocking this tick.
 - `maxHealth` is load-bearing elsewhere and will react to a shrinking
   ceiling automatically: `ruptureBurstCap(enemy.maxHealth)` (Affliction's
   RUPTURE cap, `effects.ts:87`), `capitulateThreshold` (Charm's SWAY
-  alt-win threshold, `effects.ts:128-129`), `combat.sim-policies.ts:119`
+  capitulation-offer threshold, `effects.ts:128-129`), `combat.sim-policies.ts:119`
   (`LOW_HP_FRACTION` AI heuristic), `combat.attribution.ts:142`
   (`hpLostCeiling` used in damage-share normalization). These are
   cross-theme synergies (a shrunk ceiling lowers other themes' burst
@@ -255,5 +259,8 @@ Decisions:
 ## DoD
 
 Do **NOT** flip Phase 32 `[ ]` → `[x]` in `plan/steps/01_build_plan.md`
-yet — Parts 1b-4 remain. A future tick that ships the last remaining
+yet — Parts 1b-4 remain. The DoT-clock slice is complete only because
+its trigger, Suppuration, lethal-receipt, attribution, and player-facing
+outcome witnesses are all present; do not regress it while tuning. A
+future tick that ships the last remaining
 part ticks the row then.

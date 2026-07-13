@@ -168,12 +168,16 @@ economy pays pocket change before the fight ends.
   optional].
 
 ### Charm / grace — capitulation must be EARNED and legible
-The one unique axis in the roster, currently won ambiently (poison lowers
-current-HP clamp onto a static SWAY pile).
+The one unique axis in the roster. SWAY reaching the live threshold now
+opens a capitulation offer; it never authors the outcome. The player must
+explicitly ACCEPT the yield or CONTINUE fighting. Poison can still lower
+the current-VITAE-derived offer threshold, so Grace must be tuned against
+offers and accepted outcomes separately rather than treating threshold
+crossing as an automatic win.
 - Resolve milestones [CONFIRMED · M]: Wavering/Faltering thresholds on
   the SWAY track with small riders — the track gets rungs and a face.
   Couples with the 2026-07-08 resolve-threshold item (Charmed-style
-  `SWAY ≥ resolve`, resolve < maxHP, decays as HP falls).
+  `SWAY ≥ resolve` opens the offer, resolve < maxHP, decays as HP falls).
 - Damaging plays strip SWAY [CONFIRMED · S] (prior-art PA-6, Dawncaster
   Charmed rule): hurt them and the charm slips — pure-charm play becomes
   a real commitment. (Note: SWAY's passive 1/turn decay is

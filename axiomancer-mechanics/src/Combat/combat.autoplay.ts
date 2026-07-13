@@ -16,6 +16,7 @@ import {
     buildCombatSummary,
     getSignatureSkill,
     selectMercyChoice,
+    selectCapitulationChoice,
 } from './combat.engine';
 import type { CombatCard, CombatEncounterState, CombatOutcome } from './combat.encounter.types';
 
@@ -142,6 +143,10 @@ export function runHazardCombatAutoEncounter(
         phaseCount++;
         state = playAutoPhase(state, policy, maxTurns);
         if (state.finalOutcome) break;
+        if (state.capitulationChoiceActive) {
+            state = selectCapitulationChoice(state, 'accept').state;
+            break;
+        }
         if (state.mercyChoiceActive) {
             state = selectMercyChoice(state, 'spare').state;
             break;

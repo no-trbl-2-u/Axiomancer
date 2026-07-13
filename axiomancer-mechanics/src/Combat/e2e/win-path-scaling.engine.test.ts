@@ -27,7 +27,7 @@ import { deepClone } from '../../Utils';
 import { mockSequentialRng } from '../../test-utils/rng';
 import {
     initializeCombatEncounter, rollEncounterDice, playCombatCard,
-    resolveThreatPhase, draftStanceDie,
+    resolveThreatPhase, draftStanceDie, selectCapitulationChoice,
 } from '../combat.engine';
 import {
     CONCEDE_PREMISES_BASE, CONCEDE_PREMISES_ELITE, CONCEDE_PREMISES_BOSS,
@@ -192,7 +192,10 @@ describe('CAPITULATE resolve threshold (item 1a) — capitulateThreshold formula
         expect(below.state.finalOutcome).not.toBe('capitulate');
 
         const at = resolveThreatPhase({ ...state, sway: 350 });
-        expect(at.state.finalOutcome).toBe('capitulate');
+        expect(at.state.finalOutcome).toBeNull();
+        expect(at.state.capitulationChoiceActive).toBe(true);
+        const accepted = selectCapitulationChoice(at.state, 'accept');
+        expect(accepted.state.finalOutcome).toBe('capitulate');
         expect(at.state.enemy.health).toBe(1000); // won without touching HP
     });
 
@@ -206,7 +209,9 @@ describe('CAPITULATE resolve threshold (item 1a) — capitulateThreshold formula
         expect(below.state.finalOutcome).not.toBe('capitulate');
 
         const at = resolveThreatPhase({ ...state, sway: 50 });
-        expect(at.state.finalOutcome).toBe('capitulate');
+        expect(at.state.finalOutcome).toBeNull();
+        expect(at.state.capitulationChoiceActive).toBe(true);
+        expect(selectCapitulationChoice(at.state, 'accept').state.finalOutcome).toBe('capitulate');
     });
 });
 

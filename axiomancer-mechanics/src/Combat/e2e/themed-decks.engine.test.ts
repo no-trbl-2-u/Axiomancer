@@ -29,7 +29,7 @@ import type { ActiveEffect } from '../../Effects/types';
 import {
     initializeCombatEncounter, rollEncounterDice, playCombatCard, resolveCombatPhase,
     resolveThreatPhase, processBetweenPhases, draftStanceDie, startTurn, endTurn,
-    discardCombatCard, getFloatingDiceColors, getDraftedDie,
+    discardCombatCard, getFloatingDiceColors, getDraftedDie, selectCapitulationChoice,
 } from '../combat.engine';
 import { FLOATING_DICE_CAP } from '../combat.dice';
 import { runHazardCombatAutoEncounter } from '../combat.autoplay';
@@ -417,13 +417,31 @@ describe('SWAY — gain, per-turn decay, CAPITULATE, irresistible-grace', () => 
         expect(after.events.some(e => e.kind === 'sway-decayed')).toBe(true);
     });
 
-    it('SWAY >= enemy current HP → CAPITULATE (the enemy yields, HP untouched)', () => {
+    it('SWAY >= enemy current HP opens a player-authored capitulation choice', () => {
         mockSequentialRng(0.05);
         const state = openAndDraft(makePlayer([SOFT]), makeEnemy(4, 'heart'), [SOFT, SOFT, SOFT, SOFT, SOFT], 'heart');
         const res = playFromHand(state, SOFT); // sway 4 >= 4 HP
-        expect(res.state.finalOutcome).toBe('capitulate');
-        expect(res.state.phase).toBe('complete');
-        expect(res.state.enemy.health).toBe(4); // won without touching HP
+        expect(res.state.finalOutcome).toBeNull();
+        expect(res.state.phase).toBe('mercy-choice');
+        expect(res.state.capitulationChoiceActive).toBe(true);
+        expect(res.state.enemy.health).toBe(4);
+
+        const accepted = selectCapitulationChoice(res.state, 'accept');
+        expect(accepted.state.finalOutcome).toBe('capitulate');
+        expect(accepted.state.phase).toBe('complete');
+        expect(accepted.state.enemy.health).toBe(4); // won without touching VITAE
+    });
+
+    it('the player may reject capitulation and continue without a repeated forced offer', () => {
+        mockSequentialRng(0.05);
+        const state = openAndDraft(makePlayer([SOFT]), makeEnemy(4, 'heart'), [SOFT, SOFT, SOFT, SOFT, SOFT], 'heart');
+        const offered = playFromHand(state, SOFT);
+        const continued = selectCapitulationChoice(offered.state, 'continue');
+        expect(continued.state.finalOutcome).toBeNull();
+        expect(continued.state.phase).toBe('phase-play');
+        expect(continued.state.capitulationChoiceActive).toBe(false);
+        expect(continued.state.capitulationDeclined).toBe(true);
+        expect(continued.events).toContainEqual({ kind: 'capitulation-declined' });
     });
 
     it('a DEFEATED enemy cannot capitulate — HP 0 resolves as victory even with SWAY up', () => {

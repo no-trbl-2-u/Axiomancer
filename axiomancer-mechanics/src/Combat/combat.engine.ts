@@ -1087,12 +1087,28 @@ function gainSway(
     return { ...state, sway };
 }
 
-function swayCapitulates(state: CombatEncounterState): boolean {
-    // A DEFEATED enemy cannot capitulate — HP 0 is a victory, not a yield
-    // (otherwise any 1 SWAY would relabel every DoT kill 'capitulate').
-    return (state.sway ?? 0) > 0
+function swayOffersCapitulation(state: CombatEncounterState): boolean {
+    // A DEFEATED enemy cannot yield — HP 0 is victory. A rejected yield is a
+    // permanent player decision for this encounter; do not ambush them with the
+    // same modal after every later play.
+    return !state.capitulationDeclined
+        && !state.capitulationChoiceActive
+        && (state.sway ?? 0) > 0
         && !isDefeated(state.enemy)
         && (state.sway ?? 0) >= capitulateThreshold(state.enemy);
+}
+
+function offerCapitulation(state: CombatEncounterState, events: CombatEvent[]): CombatTransition {
+    const offered: CombatEvent = {
+        kind: 'capitulation-offered',
+        threshold: capitulateThreshold(state.enemy),
+    };
+    const choosing: CombatEncounterState = {
+        ...state,
+        phase: 'mercy-choice',
+        capitulationChoiceActive: true,
+    };
+    return { state: withLog(choosing, [offered]), events: [...events, offered] };
 }
 
 /** PREMISE gain + the PERORATION trigger (spec 32 v3 T2). When the declared
@@ -1429,7 +1445,7 @@ function playTopAction(
         return endCombat({ ...withLog(next, events), phase: 'phase-play', finalOutcome: null }, 'concede', events);
     }
     next = withLog(next, events);
-    if (swayCapitulates(next)) return endCombat(next, 'capitulate', events);
+    if (swayOffersCapitulation(next)) return offerCapitulation(next, events);
     return checkImmediateOutcome(next, events);
 }
 
@@ -2743,7 +2759,7 @@ function playBottomAction(
         events.push({ kind: 'mercy-opened', message: `${enemy.name} falters — spare or exploit?` });
     }
     next = withLog(next, events);
-    if (swayCapitulates(next)) return endCombat(next, 'capitulate', events);
+    if (swayOffersCapitulation(next)) return offerCapitulation(next, events);
     return checkImmediateOutcome(next, events);
 }
 
@@ -3170,7 +3186,7 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
     next = withLog(next, events);
 
     // Outcome checks after the threat action (HP + capitulation).
-    if (swayCapitulates(next)) return endCombat(next, 'capitulate', events);
+    if (swayOffersCapitulation(next)) return offerCapitulation(next, events);
     const outcome = pendingOutcome(next);
     if (outcome) return endCombat(next, outcome, events);
 
@@ -3200,8 +3216,8 @@ export function processBetweenPhases(
 
     // 1. Per-effect DoT ticks (labeled, §7.5) — computed before processing.
     //    Round-threaded so escalating DoTs (POISON ramp) tick their real value.
-    const enemyDotTicks = dotTickBreakdown(state.enemy.effects, state.round);
-    const playerDotTicks = dotTickBreakdown(state.player.effects, state.round);
+    const projectedEnemyDotTicks = dotTickBreakdown(state.enemy.effects, state.round);
+    const projectedPlayerDotTicks = dotTickBreakdown(state.player.effects, state.round);
 
     // 2. Process a full round of effects on the enemy — DoT ERODES real enemy HP
     //    (the status damage engine; no track, the HP loss is the win progress).
@@ -3230,6 +3246,10 @@ export function processBetweenPhases(
     }
     const enemyEnd = processRoundEndEffects(tithedTarget, state.round);
     let enemy = enemyEnd.target as Enemy;
+    const enemyDotTicks = clampDotTickBreakdown(
+        projectedEnemyDotTicks,
+        enemyStart.dotDamage + enemyEnd.dotDamage,
+    );
 
     // SOUL economy (spec 32 v3 T7): every enemy affliction instance that
     // EXPIRES yields 1 Soul (consumption-side Souls are granted at the verbs).
@@ -3253,8 +3273,9 @@ export function processBetweenPhases(
     const roundDotTotal = (state.enemyDotDamageThisRound ?? 0)
         + enemyDotTicks.reduce((sum, t) => sum + t.amount, 0);
     if (zoneHas(state, 'suppurating-curse') && roundDotTotal > 0 && !isDefeated(enemy)) {
-        enemy = applyDamage(enemy, roundDotTotal);
-        events.push({ kind: 'dot-tick', effectId: 'suppurating-curse', label: 'Suppuration', amount: roundDotTotal, target: 'enemy' });
+        const suppurationDamage = Math.min(roundDotTotal, enemy.health);
+        enemy = applyDamage(enemy, suppurationDamage);
+        events.push({ kind: 'dot-tick', effectId: 'suppurating-curse', label: 'Suppuration', amount: suppurationDamage, target: 'enemy' });
     }
 
     // VULNERABLE DoT surcharge: the natural tick above lands at ×1 (already
@@ -3266,7 +3287,10 @@ export function processBetweenPhases(
     if (enemyVulnMult > 1) {
         const mods = getActiveEffectModifiers(state.enemy.effects, state.round);
         const naturalDot = mods.dotStart + mods.dotEnd;
-        vulnSurcharge = Math.round(naturalDot * (enemyVulnMult - 1));
+        vulnSurcharge = Math.min(
+            Math.round(naturalDot * (enemyVulnMult - 1)),
+            enemy.health,
+        );
         if (vulnSurcharge > 0) enemy = applyDamage(enemy, vulnSurcharge);
     }
 
@@ -3274,6 +3298,10 @@ export function processBetweenPhases(
     const playerStart = processRoundStartEffects(state.player, state.round);
     const playerEnd = processRoundEndEffects(playerStart.target, state.round, 'player');
     let player = playerEnd.target as Character;
+    const playerDotTicks = clampDotTickBreakdown(
+        projectedPlayerDotTicks,
+        playerStart.dotDamage + playerEnd.dotDamage,
+    );
 
     for (const t of enemyDotTicks) events.push({ kind: 'dot-tick', effectId: t.effectId, label: t.label, amount: t.amount, target: 'enemy' });
     if (vulnSurcharge > 0) events.push({ kind: 'dot-tick', effectId: 'vulnerable-surcharge', label: 'Vulnerable', amount: vulnSurcharge, target: 'enemy' });
@@ -3570,7 +3598,7 @@ export function processBetweenPhases(
     next = { ...next, enemyDotDamageThisRound: 0 };
 
     // 6. Outcome checks after ticks (HP + capitulation).
-    if (swayCapitulates(next)) return endCombat(next, 'capitulate', [...priorEvents, ...events]);
+    if (swayOffersCapitulation(next)) return offerCapitulation(next, [...priorEvents, ...events]);
     const outcome = pendingOutcome(next);
     if (outcome) return endCombat(next, outcome, [...priorEvents, ...events]);
 
@@ -3599,6 +3627,16 @@ function dotTickBreakdown(effects: readonly ActiveEffect[], currentRound?: numbe
             return !dot || dotRoundClockPhase(dot) !== null;
         })
         .map(e => ({ effectId: e.effectId, label: e.label, amount: e.amount }));
+}
+
+/** Allocate actual HP loss across labeled receipts in stable effect order. */
+function clampDotTickBreakdown(ticks: readonly DotTick[], actualDamage: number): DotTick[] {
+    let remaining = Math.max(0, actualDamage);
+    return ticks.flatMap(tick => {
+        const amount = Math.min(tick.amount, remaining);
+        remaining -= amount;
+        return amount > 0 ? [{ ...tick, amount }] : [];
+    });
 }
 
 // ── Batch entry point (§9 resolveCombatPhase) ────────────────────────────────
@@ -3715,6 +3753,26 @@ export function resolveCombatPhase(
     if (working.phase !== 'phase-play') return { state: working, events: allEvents };
     const resolved = resolveThreatPhase(working, rng);
     return { state: resolved.state, events: [...allEvents, ...resolved.events] };
+}
+
+// ── Capitulation + mercy choices ──────────────────────────────────────────────
+
+/** SWAY makes the foe's yield available; only the player can author the end. */
+export function selectCapitulationChoice(
+    state: CombatEncounterState,
+    choice: 'accept' | 'continue',
+): CombatTransition {
+    if (!state.capitulationChoiceActive) return { state, events: [] };
+    const resumed: CombatEncounterState = {
+        ...state,
+        phase: 'phase-play',
+        capitulationChoiceActive: false,
+    };
+    if (choice === 'accept') return endCombat(resumed, 'capitulate', []);
+
+    const declined: CombatEncounterState = { ...resumed, capitulationDeclined: true };
+    const event: CombatEvent = { kind: 'capitulation-declined' };
+    return { state: withLog(declined, [event]), events: [event] };
 }
 
 // ── Mercy choice (Phase 112 / §3) ────────────────────────────────────────────

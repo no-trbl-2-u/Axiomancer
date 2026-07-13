@@ -116,6 +116,20 @@ function findEvents<K extends CombatEvent['kind']>(events: CombatEvent[], kind: 
 // ── 1. fireDotTrigger unit semantics ─────────────────────────────────────────
 
 describe('fireDotTrigger — per-clock tick semantics', () => {
+    it('clamps lethal ticks and receipts to the VITAE actually removed', () => {
+        const base = stateWithEnemyEffects([
+            ae('ws3x_card_played', 2, 4),
+            ae('ws3x_ramp', 2, 4),
+        ]).enemy;
+        const enemy = { ...base, health: 5, maxHealth: 5 };
+
+        const result = fireDotTrigger(enemy, 'card-played', 1);
+
+        expect(result.target.health).toBe(0);
+        expect(result.damage).toBe(5);
+        expect(result.perEffect.reduce((sum, tick) => sum + tick.amount, 0)).toBe(5);
+    });
+
     it('ticks exactly the effects whose trigger matches, leaving the rest untouched', () => {
         const enemy = stateWithEnemyEffects([
             ae('ws3x_card_played', 2, 4),

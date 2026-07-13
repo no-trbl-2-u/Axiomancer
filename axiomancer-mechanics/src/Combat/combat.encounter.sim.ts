@@ -22,7 +22,7 @@ import type { Enemy } from '../Enemy/types';
 import {
     initializeCombatEncounter, rollEncounterDice, playCombatCard,
     resolveThreatPhase, startTurn, draftStanceDie, endTurn, chooseDraft, revealedCurrentStance,
-    playSignatureSkill, getDraftedDie, handCards, selectMercyChoice, getSignatureSkill,
+    playSignatureSkill, getDraftedDie, handCards, selectMercyChoice, selectCapitulationChoice, getSignatureSkill,
     tapFateDie, recoilXRange, placeStake,
 } from './combat.engine';
 import { RESERVE_MAX } from './combat.dice';
@@ -488,6 +488,10 @@ export function runOneEncounter(
 
     while (state.phase !== 'complete' && loopGuard < 200) {
         loopGuard++;
+        if (state.capitulationChoiceActive) {
+            state = selectCapitulationChoice(state, 'accept').state;
+            break;
+        }
         if (state.mercyChoiceActive) {
             state = selectMercyChoice(state, policyObj.mercyChoice).state;
             if (state.phase === 'complete' || state.finalOutcome) break;
@@ -499,6 +503,10 @@ export function runOneEncounter(
             plays += r.plays;
             statusPlays += r.statusPlays;
             if (state.finalOutcome) break;
+            if (state.capitulationChoiceActive) {
+                state = selectCapitulationChoice(state, 'accept').state;
+                break;
+            }
             if (state.mercyChoiceActive) {
                 state = selectMercyChoice(state, policyObj.mercyChoice).state;
                 if (state.phase === 'complete' || state.finalOutcome) break;

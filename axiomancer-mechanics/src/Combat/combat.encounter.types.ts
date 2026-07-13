@@ -482,6 +482,8 @@ export type CombatEvent =
     | { kind: 'max-hp-eroded'; cardId: string; amount: number; newMax: number }
     | { kind: 'sway-gained'; amount: number; total: number }
     | { kind: 'sway-decayed'; total: number }
+    | { kind: 'capitulation-offered'; threshold: number }
+    | { kind: 'capitulation-declined' }
     | { kind: 'echoed'; cardId: string }
     | { kind: 'reprised'; cardId: string; returned: string[] }
     | { kind: 'dots-extended'; turns: number; affected: string[] }
@@ -669,6 +671,11 @@ export interface CombatEncounterState {
     /** Spec 32 v3 T8 — SWAY on the enemy (decays 1/turn; ≥ enemy HP at a turn
      *  boundary → CAPITULATE). Optional. */
     sway?: number;
+    /** SWAY has broken the foe's will; the player must accept the yield or
+     * continue fighting. Never resolves combat on threshold alone. */
+    capitulationChoiceActive?: boolean;
+    /** The player rejected this foe's yield; do not reopen the same offer. */
+    capitulationDeclined?: boolean;
     /** Spec 32 v3 T10 — the next spell played this turn gains ECHO. */
     echoNextSpell?: boolean;
     /** Spec 32 v3 T10 — spells played this turn (resonant-chamber's gate). */
