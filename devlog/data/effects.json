@@ -469,7 +469,7 @@
   "id": "debuff_backfire",
   "name": "Backfire",
   "type": "debuff",
-  "glyph": "⛓",
+  "glyph": "⟲",
   "color": "#a86bdc",
   "kind": "control",
   "chips": [
@@ -635,7 +635,7 @@
   "id": "debuff_mark",
   "name": "Mark",
   "type": "debuff",
-  "glyph": "◎",
+  "glyph": "◉",
   "color": "#d9c66a",
   "kind": "mark",
   "chips": [
@@ -666,7 +666,7 @@
   "id": "debuff_nettle_sting",
   "name": "Nettle Sting",
   "type": "debuff",
-  "glyph": "🔥",
+  "glyph": "🌿",
   "color": "#e2543b",
   "kind": "dot",
   "chips": [
@@ -765,7 +765,7 @@
   "id": "debuff_rapport",
   "name": "Rapport",
   "type": "debuff",
-  "glyph": "▼",
+  "glyph": "☙",
   "color": "#e08a3c",
   "kind": "statdown",
   "chips": [

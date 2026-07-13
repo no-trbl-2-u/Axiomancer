@@ -91,7 +91,7 @@
    }
   ],
   "lines": [
-   "FREE — mark i1 d1.",
+   "FREE — mark i1 d1 (enemy).",
    "PAID — your next spell gains ECHO. ⬢ MIND die: draw 1"
   ]
  },
@@ -143,8 +143,8 @@
    }
   ],
   "lines": [
-   "FREE — mark i1 d1 (self).",
-   "PAID — mark i1 d2 (self)."
+   "FREE — mark i1 d1.",
+   "PAID — mark i1 d2."
   ]
  },
  {
@@ -868,7 +868,7 @@
   ],
   "lines": [
    "FREE — FORETELL 1.",
-   "PAID — RUPTURE 1 — its fuel ticks now, +1 Soul + FORETELL 1. ⬢ MIND die: +1 pip to every Reserve die"
+   "PAID — RUPTURE 1 — its remaining damage lands now, +1 Soul + FORETELL 1. ⬢ MIND die: +1 pip to every Reserve die"
   ]
  },
  {
@@ -1328,7 +1328,7 @@
   ],
   "lines": [
    "FREE — +1 pip to every Reserve die.",
-   "PAID — Guard 5 + +2 pip to every Reserve die."
+   "PAID — Guard 5 + +2 pips to every Reserve die."
   ]
  },
  {
@@ -1479,8 +1479,8 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — SWAY never decays; each gain lands +12% per turn held (max +108%).",
-   "PAID (rest of combat) — SWAY never decays; each gain lands +12% per turn held (max +108%)."
+   "FREE (3 rounds) — SWAY never decays; each turn this holds, your SWAY gains grow +12% (max +108%).",
+   "PAID (rest of combat) — SWAY never decays; each turn this holds, your SWAY gains grow +12% (max +108%)."
   ]
  },
  {
@@ -1631,8 +1631,8 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — Your self-debuffs land 1 stack on the enemy too; +1 stack per 3 RECOIL paid.",
-   "PAID (rest of combat) — Your self-debuffs land 1 stack on the enemy too; +1 stack per 3 RECOIL paid. Attaches to the enemy."
+   "FREE (3 rounds) — Each self-debuff you land also lands 1 stack of itself on the enemy; every 3 RECOIL paid lands 1 more.",
+   "PAID (rest of combat) — Each self-debuff you land also lands 1 stack of itself on the enemy; every 3 RECOIL paid lands 1 more. Attaches to the enemy."
   ]
  },
  {
@@ -1683,8 +1683,8 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — Damage your GUARD or parry prevents becomes SWAY, 1:1.",
-   "PAID (rest of combat) — Damage your GUARD or parry prevents becomes SWAY, 1:1. Attaches to the enemy."
+   "FREE (3 rounds) — Damage your GUARD or RIPOSTE prevents becomes SWAY, 1:1.",
+   "PAID (rest of combat) — Damage your GUARD or RIPOSTE prevents becomes SWAY, 1:1. Attaches to the enemy."
   ]
  },
  {
@@ -1788,7 +1788,7 @@
   ],
   "lines": [
    "FREE — GUARD 2 (persists).",
-   "PAID — thorns i2 d2 (self) + nettle sting i1 d2 (4 over its run)."
+   "PAID — thorns i2 d2 + nettle sting i1 d2 (DoT: 2/turn, enemy)."
   ]
  },
  {
@@ -1944,7 +1944,7 @@
   ],
   "lines": [
    "FREE — Guard 2 · RECOIL 1.",
-   "PAID — bleed i1 d2 (self) + FORGE a WILD floating die + RECOIL 6."
+   "PAID — bleed i1 d2 + FORGE a WILD floating die + RECOIL 6."
   ]
  },
  {
@@ -1996,7 +1996,7 @@
   ],
   "lines": [
    "FREE — reveal the next stance · draw 1.",
-   "PAID — backfire i3 d3 + STAGGER 2. ⬢ MIND die: +2 intensity · +1 turn"
+   "PAID — backfire i3 d3 + STAGGER 2. ⬢ MIND die: +2 intensity · +1 turn to this card's statuses"
   ]
  },
  {
@@ -2148,7 +2148,7 @@
   ],
   "lines": [
    "FREE — FORETELL 1.",
-   "PAID — RUPTURE ALL (+3 fuel per omen hit)."
+   "PAID — RUPTURE ALL (+3 damage per omen hit)."
   ]
  },
  {
@@ -2252,7 +2252,7 @@
   ],
   "lines": [
    "FREE — reveal the next stance.",
-   "PAID — backfire i2 d2. ⬢ MIND die: +1 turn"
+   "PAID — backfire i2 d2. ⬢ MIND die: +1 turn to this card's statuses"
   ]
  },
  {
@@ -2356,7 +2356,7 @@
   ],
   "lines": [
    "FREE — mark i1 d1.",
-   "PAID — RUPTURE ALL + SIPHON 35% + RECALL 2 — its FREE line fires now."
+   "PAID — RUPTURE ALL + SIPHON 35% + RECALL 2 — their FREE lines fire now."
   ]
  },
  {
@@ -2616,7 +2616,7 @@
   ],
   "lines": [
    "FREE — +1 pip to every Reserve die.",
-   "PAID — kindling ember i1 d3 + KINDLE (mind) (3 over its run). ⬢ MIND die: +1 intensity"
+   "PAID — kindling ember i1 d3 (DoT: 1/turn) + KINDLE (mind). ⬢ MIND die: +1 intensity to this card's statuses"
   ]
  },
  {
@@ -2768,7 +2768,7 @@
   ],
   "lines": [
    "FREE — mark i1 d1.",
-   "PAID — bleed i2 d2 (6/hit). ⬢ BODY die: +1 intensity"
+   "PAID — bleed i2 d2 (6/hit). ⬢ BODY die: +1 intensity to this card's statuses"
   ]
  },
  {
@@ -3028,7 +3028,7 @@
   ],
   "lines": [
    "FREE — +1 Premise.",
-   "PAID — PERORATION at 6 — +2 Conviction · draw 2 · consume all marks — 3 per stack (CONCEDE at 8 · elite 10 · boss 12)."
+   "PAID — PERORATION at 6 — +2 Conviction · draw 2 · consume all marks — 3 damage per stack (CONCEDE at 8 — you win; elite 10 · boss 12)."
   ]
  },
  {
@@ -3236,7 +3236,7 @@
   ],
   "lines": [
    "FREE — mark i1 d1.",
-   "PAID — spend ALL pips (+1 Guard per pip) + RUPTURE ALL (+3.5 fuel per pip; needs 2+ spent pips) + refresh the spent die."
+   "PAID — spend ALL pips (+1 Guard per pip) + RUPTURE ALL (+3.5 damage per spent pip; needs 2+ pips) + refresh the spent die."
   ]
  },
  {
@@ -3288,7 +3288,7 @@
   ],
   "lines": [
    "FREE — bleed i1 d1.",
-   "PAID — REAP all — 4 per Soul + SIPHON 40%."
+   "PAID — REAP ALL — 4 damage per Soul + SIPHON 40%."
   ]
  },
  {
@@ -3388,7 +3388,7 @@
   ],
   "lines": [
    "FREE — GUARD 2 (persists).",
-   "PAID — thorns i3 d2 (self). ⬢ HEART die: Guard 2"
+   "PAID — thorns i3 d2. ⬢ HEART die: Guard 2"
   ]
  },
  {
@@ -3440,7 +3440,7 @@
   ],
   "lines": [
    "FREE — reveal the next stance.",
-   "PAID — backfire i2 d3 + STAGGER 1. ⬡ MIND ×3 spent: +1 intensity · STAGGER 1"
+   "PAID — backfire i2 d3 + STAGGER 1. ⬡ MIND ×3 spent: +1 intensity to this card's statuses · STAGGER 1"
   ]
  },
  {
@@ -3544,7 +3544,7 @@
   ],
   "lines": [
    "FREE — bleed i1 d1.",
-   "PAID — RUPTURE 1 — its fuel ticks now, +2 Soul."
+   "PAID — RUPTURE 1 — its remaining damage lands now, +2 Souls."
   ]
  },
  {

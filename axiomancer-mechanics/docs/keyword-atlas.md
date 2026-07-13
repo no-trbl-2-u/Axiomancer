@@ -61,7 +61,7 @@ the WS2.1 evidence pass EXERCISED it clean: all 3 clauses PASS
 `plan/tuning/2026-07-11-honest-rebaseline-and-evidence.md` §2 WS2.1.
 If promotion ever restores the row, it starts at `+???`, not `????`.
 
-## Utility (9)
+## Utility (10)
 
 | keyword | semantics | Dawncaster analogues (receipts) | gate (E/P/D/T) | notes |
 |---|---|---|---|---|
@@ -72,8 +72,9 @@ If promotion ever restores the row, it starts at `+???`, not `????`.
 | MARK iN dM | +1 per stack to each DoT tick / payoff hit; counts as affliction; BATTLE-LONG (WS3.3 `calendarExpiry: false` — bounded by payoff consumption, not a calendar) | — | `????` T:n/a | WS3.3 (2026-07-11): printed durations on MARK applications are nominal; absorbed half of the foretold_wound fold (KW-1) |
 | CLEANSE N | remove N of your own afflictions | — | `????` T:n/a | |
 | HEAL N | restore N VITAE | — | `????` T:n/a | |
-| RUPTURE N | consume up to N enemy afflictions (ALL on a finisher): 1.5x remaining DoT fuel + 3/non-DoT stack | — | `!???` T:n/a | WS7.1 (2026-07-11): cap is now a pure fraction — round(0.60x enemy maxHP), flat floor retired (`RUPTURE_CAP_FRACTION`; supersedes plan #2's max(80, 0.25x)); erosion late 0.03->0.08 — decay wall (plan #3) is the remaining brake. phase 29: now also absorbs `consume_affliction` (was presented as a Soul-flavored verb; the Soul gain stays a printed rider) |
+| RUPTURE N | consume up to N enemy afflictions (ALL on a finisher); burst damage = 1.5x their remaining DoT damage + 3 per non-DoT stack | — | `!???` T:n/a | WS7.1 (2026-07-11): cap is now a pure fraction — round(0.60x enemy maxHP), flat floor retired (`RUPTURE_CAP_FRACTION`; supersedes plan #2's max(80, 0.25x)); erosion late 0.03->0.08 — decay wall (plan #3) is the remaining brake. phase 29: now also absorbs `consume_affliction` (was presented as a Soul-flavored verb; the Soul gain stays a printed rider) |
 | SIPHON N% | heal for N% of the HP this play deals to the enemy | — | `????` T:n/a | phase 29: promoted from raw unglossed card text (resonance-detonation, the-reaping) |
+| MILL N | send the top N cards of your deck to your discard pile | — | `????` T:n/a | promoted 2026-07-12 in the mobile registry (card-wording audit — 3 echo carriers clear the ~3-card bar); atlas row backfilled 2026-07-13 to end the registry drift |
 
 ## Theme hallmarks (19 — Peroration keeps one, not two)
 
@@ -95,7 +96,7 @@ If promotion ever restores the row, it starts at `+???`, not `????`.
 | Charm | SWAY N | enemy stacks, decays 1/turn; CAPITULATE fires the moment SWAY reaches the enemy's resolve (35% of max HP, never below 10, or current HP if lower) | Charmed — kb:dawncaster/keywords/charmed.okf.md: cited as the direct analogue (`cross-prior-art.md` §2 Axis B, "equal amount of Charmed"); their built-in decay/hold tension matches ours | `+??!` | round 2: Grace late 0% — matching a boss FULL HP bar is unreachable; needed the Charmed-style resolve threshold, landed 2026-07-08 (this atlas row's semantics corrected by phase 29 to match — it had drifted stale) |
 | Charm | RAPPORT iN dM | enemy deals N less damage while active | — | `+???` | round 2: fine where SWAY is live; inherits the threshold fix (plan #1) |
 | Bulwark | THORNS iN dM | attacker takes N when it damages you | — | `+??!` | round 2: Bastion early 77→98, mid 14 — cannot kill non-attackers; boss 1.6x threat near-certain loss (plan #5 boss-tech) |
-| Bulwark | RIPOSTE iN dM | full block by Guard = enemy takes N | — | `+??!` | round 2: as THORNS — wall holds, kill-path missing late (plan #5) |
+| Bulwark | RIPOSTE iN dM | armed one threat phase: the printed parry blunts the first hit by that much; an attack fully blocked = enemy takes N | — | `+??!` | round 2: as THORNS — wall holds, kill-path missing late (plan #5). 2026-07-13 card-clarity audit: semantics cell now defines the parry half ("parry 2" printed on measured-answer / the-adamant-wall had no definition anywhere in the atlas) |
 | Echo | ECHO | the printed line fires twice | Rebound — kb:dawncaster/keywords/rebound.okf.md: cited as the "fires again a number of times" analogue (`cross-prior-art.md` §4.2); their counter-based repeat vs our flat double, mechanism differs | `++??` | round 2 PROVEN: Ouroboros paid-face fix took Refrain late 3→37% — biggest real gain of the cohort (plan #6 lint guards the class) |
 | Echo | RECALL N | return N cards from discard to hand | — | `++??` | round 2 PROVEN: mid 90→99 with ECHO (Refrain). phase 29: renamed from REPRISE — same gate history, no mechanic change |
 

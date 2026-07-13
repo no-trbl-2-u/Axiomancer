@@ -188,11 +188,21 @@ export function primaryEnemyEffectId(card: Card, lookupEffect: EffectLookup): st
 /**
  * Human text for a `CardRider` — every clause a real engine unit (the P0-truth
  * law: generated action text IS the applied number).
+ *
+ * `opts.selfTargetCard` marks riders printed on a self-target card: an effect
+ * rider then names its side only when it crosses the card's printed target
+ * (an unmarked clause always lands on the card's target).
  */
-export function riderText(r: CardRider): string {
+export function riderText(r: CardRider, opts?: { selfTargetCard?: boolean }): string {
     const parts: string[] = [];
-    if (r.bonusIntensity) parts.push(`+${r.bonusIntensity} intensity`);
-    if (r.bonusDuration) parts.push(`+${r.bonusDuration} turn${r.bonusDuration === 1 ? '' : 's'}`);
+    // The intensity/duration boosts apply to the statuses THIS play lands —
+    // one shared suffix names that target (card-wording audit 2026-07-13).
+    if (r.bonusIntensity || r.bonusDuration) {
+        const boost: string[] = [];
+        if (r.bonusIntensity) boost.push(`+${r.bonusIntensity} intensity`);
+        if (r.bonusDuration) boost.push(`+${r.bonusDuration} turn${r.bonusDuration === 1 ? '' : 's'}`);
+        parts.push(`${boost.join(' · ')} to this card's statuses`);
+    }
     if (r.guard) parts.push(`Guard ${r.guard}`);
     if (r.conviction) parts.push(`+${r.conviction} Conviction`);
     if (r.refreshDie) parts.push('refresh the die');
@@ -210,11 +220,13 @@ export function riderText(r: CardRider): string {
         const label = r.applyEffect.effectId.replace(/^(debuff|buff)_/, '');
         const i = r.applyEffect.intensity ?? 1;
         const d = r.applyEffect.duration;
-        parts.push(`${label} i${i}${d ? ` d${d}` : ''}${r.applyEffect.to === 'self' ? ' (self)' : ''}`);
+        const toSelf = r.applyEffect.to === 'self';
+        const side = toSelf === !!opts?.selfTargetCard ? '' : toSelf ? ' (self)' : ' (enemy)';
+        parts.push(`${label} i${i}${d ? ` d${d}` : ''}${side}`);
     }
-    if (r.ruptureMarks) parts.push(`consume all marks — ${r.ruptureMarks} per stack`);
+    if (r.ruptureMarks) parts.push(`consume all marks — ${r.ruptureMarks} damage per stack`);
     if (r.intensityPerPip) parts.push(`+${r.intensityPerPip} intensity to one DoT per pip`);
-    if (r.pips) parts.push(`+${r.pips} pip to every Reserve die`);
+    if (r.pips) parts.push(`+${r.pips} pip${r.pips === 1 ? '' : 's'} to every Reserve die`);
     if (r.stagger) parts.push(`STAGGER ${r.stagger}`);
     if (r.barrier) parts.push(`GUARD ${r.barrier} (persists)`);
     if (r.recoil) parts.push(`RECOIL ${r.recoil}`);
@@ -257,7 +269,9 @@ export function mechanicText(m: CardSpecialMechanic): string | null {
         case 'riposte': return `RIPOSTE ${m.damage}${m.reduce ? ` (parry ${m.reduce})` : ''}`;
         // Bare `rupture` resolves as consume-ALL in the engine — the face says
         // so; the fuelPerPip carrier (the-overtake) also prints its 2-pip gate.
-        case 'rupture': return `RUPTURE ALL${m.fuelPerPip ? ` (+${m.fuelPerPip} fuel per pip; needs 2+ spent pips)` : ''}${m.fuelPerOmenHit ? ` (+${m.fuelPerOmenHit} fuel per omen hit)` : ''}`;
+        // "damage", not "fuel" — the pip/omen bonus feeds the burst's damage
+        // and no player surface defines "fuel" (card-wording audit 2026-07-13).
+        case 'rupture': return `RUPTURE ALL${m.fuelPerPip ? ` (+${m.fuelPerPip} damage per spent pip; needs 2+ pips)` : ''}${m.fuelPerOmenHit ? ` (+${m.fuelPerOmenHit} damage per omen hit)` : ''}`;
         case 'siphon': return `SIPHON ${Math.round(m.pct * 100)}%`;
         case 'forge_floating_die': return `FORGE a ${m.color === 'wild' ? 'WILD' : "the powering die's color"} floating die`;
         case 'float_x_die': return 'FORGE a dead X die into a WILD floating die (no X: +1 Conviction)';
@@ -269,7 +283,7 @@ export function mechanicText(m: CardSpecialMechanic): string | null {
         // The declared conclusion prints its full payload — the rider used to
         // be dropped — and the CONCEDE bar names the elite/boss floors
         // (`concedeFloorFor` raises the authored value against them).
-        case 'peroration': return `PERORATION at ${m.at} — ${riderText(m.rider)}${m.concedeAt ? ` (CONCEDE at ${m.concedeAt} · elite ${CONCEDE_PREMISES_ELITE} · boss ${CONCEDE_PREMISES_BOSS})` : ''}`;
+        case 'peroration': return `PERORATION at ${m.at} — ${riderText(m.rider)}${m.concedeAt ? ` (CONCEDE at ${m.concedeAt} — you win; elite ${CONCEDE_PREMISES_ELITE} · boss ${CONCEDE_PREMISES_BOSS})` : ''}`;
         case 'spend_premises': return `spend ALL Premises — +1 mark per ${m.markPer}, draw 1 per ${m.drawPer}`;
         case 'spend_all_pips': return `spend ALL pips${m.guardPerPip ? ` (+${m.guardPerPip} Guard per pip)` : ''}${m.markPer ? ` (+1 MARK per ${m.markPer} spent, uncapped)` : ''}`;
         case 'recoil': return `RECOIL ${m.hp}`;
@@ -282,20 +296,20 @@ export function mechanicText(m: CardSpecialMechanic): string | null {
         // KW-2 (phase 29): re-mapped Soul→Rupture — extends RUPTURE's
         // printed sense ("consume N afflictions") instead of a redundant
         // CONSUME word.
-        case 'consume_affliction': return `RUPTURE 1 — its fuel ticks now, +${m.souls} Soul`;
+        case 'consume_affliction': return `RUPTURE 1 — its remaining damage lands now, +${m.souls} Soul${m.souls === 1 ? '' : 's'}`;
         case 'reap': return `REAP ${m.cost}${m.kindle ? ` — KINDLE (${m.kindle})` : ''}${m.rider ? ` — ${riderText(m.rider)}` : ''}`;
-        case 'reap_all': return `REAP all — ${m.burstPerSoul} per Soul`;
+        case 'reap_all': return `REAP ALL — ${m.burstPerSoul} damage per Soul`;
         case 'sway': return `SWAY ${m.amount}`;
         case 'echo': return 'ECHO';
         case 'echo_next_spell': return 'your next spell gains ECHO';
         // KW-3 (phase 29): REPRISE→RECALL (rename; frees REPRISE — see the
         // audit's near-synonym-pair finding against ECHO/replay_last).
-        case 'reprise': return `RECALL ${m.count}${m.fireFree ? ' — its FREE line fires now' : ''}`;
+        case 'reprise': return `RECALL ${m.count}${m.fireFree ? (m.count === 1 ? ' — its FREE line fires now' : ' — their FREE lines fire now') : ''}`;
         // KW-2 (phase 29): no keyword badge — ouroboros (this mechanic's
         // sole, 1-of-rare carrier) speaks card-local rules text only.
         case 'replay_last': return `replay your last spell ×${m.times}`;
         case 'create_temporary_die': return `KINDLE (${m.color})`;
-        case 'grant_pip': return `+${m.count} pip to every Reserve die${m.overflow ? ` — each pip with no room: ${riderText(m.overflow)}` : ''}`;
+        case 'grant_pip': return `+${m.count} pip${m.count === 1 ? '' : 's'} to every Reserve die${m.overflow ? ` — each pip with no room: ${riderText(m.overflow)}` : ''}`;
         case 'bank_spent_die': return 'the spent die BANKS to the Reserve';
         case 'convert_die_color': return 'the spent die returns as WILD';
         case 'refresh_die': return 'refresh the spent die';
@@ -306,7 +320,14 @@ export function mechanicText(m: CardSpecialMechanic): string | null {
     }
 }
 
-/** Human text for a card's PAID payload: statuses + mechanics, real units. */
+/** Registry DoT species — their keyword definition already says how they tick.
+ *  Any OTHER DoT effect is card-local vocabulary and prints its per-turn bite
+ *  inline (card-wording audit 2026-07-13: nettle sting / kindling ember were
+ *  the two undefined species). */
+const REGISTRY_DOT_IDS: ReadonlySet<string> = new Set(['debuff_poison', 'debuff_bleed']);
+
+/** Human text for a card's PAID payload: statuses + mechanics, real units.
+ *  An effect names its side only when it crosses the card's printed target. */
 function paidText(card: Card, lookupEffect: EffectLookup): string {
     const parts: string[] = [];
     for (const ce of card.combatEffects ?? []) {
@@ -315,7 +336,14 @@ function paidText(card: Card, lookupEffect: EffectLookup): string {
         const label = def.name.toLowerCase();
         const i = ce.intensity ?? 1;
         const d = ce.duration ?? def.duration;
-        parts.push(`${label} i${i} d${d}${ce.appliedTo === 'self' ? ' (self)' : ''}`);
+        const notes: string[] = [];
+        const dot = def.payload.damageOverTime;
+        if (dot && !REGISTRY_DOT_IDS.has(def.id)) {
+            notes.push(`DoT: ${Math.floor(dot.damagePerRound * Math.min(i, MAX_EFFECT_INTENSITY))}/turn`);
+        }
+        const toSelf = ce.appliedTo === 'self';
+        if (toSelf !== (card.targetType === 'self')) notes.push(toSelf ? 'self' : 'enemy');
+        parts.push(`${label} i${i} d${d}${notes.length ? ` (${notes.join(', ')})` : ''}`);
     }
     for (const m of card.specialMechanics ?? []) {
         const t = mechanicText(m);
@@ -346,17 +374,23 @@ export function toCombatCard(cardId: string, lookupCard: CardLookup, lookupEffec
     // FREE line — the authored dieless rider (spells only). Spec 32 v4: persistent
     // cards get a dieless FREE line that grants a TIMED (FREE_ENCHANT_ROUNDS-round)
     // instance of the same passive; the PAID line makes it permanent.
+    const riderOpts = { selfTargetCard: card.targetType === 'self' };
     const topActionText = persistent
         ? `FREE (${FREE_ENCHANT_ROUNDS} rounds) — ${passive} (${rankLabel(card)})`
         : card.free
-            ? `FREE — ${riderText(card.free)}. (${rankLabel(card)})`
+            ? `FREE — ${riderText(card.free, riderOpts)}. (${rankLabel(card)})`
             : `FREE — no effect. (${rankLabel(card)})`;
 
     // WI-2 — an event DoT (poison/bleed) prints its per-event bite ("2/play"),
     // never a round-clock lifetime; only a true round-clock DoT keeps "N over
-    // its run".
+    // its run" — and only when no per-turn species gloss already spelled it
+    // out (the lifetime is per-tick × duration, both printed).
     const dotFace = bottomDotFacePreview(card, lookupEffect);
-    const dotSuffix = dotFace ? ` (${dotFace})` : preview > 0 ? ` (${preview} over its run)` : '';
+    const speciesGlossed = enemyEffects(card).some(ce => {
+        const def = lookupEffect(ce.effectId);
+        return !!def?.payload.damageOverTime && !REGISTRY_DOT_IDS.has(def.id);
+    });
+    const dotSuffix = dotFace ? ` (${dotFace})` : preview > 0 && !speciesGlossed ? ` (${preview} over its run)` : '';
     const bottomActionText = persistent
         ? `PAID (rest of combat) — ${passive} Costs 1 die.${card.cardType === 'disenchant' ? ' Attaches to the enemy.' : ''}`
         : `PAID — ${paid}${dotSuffix}. Costs 1 die.`;
@@ -364,7 +398,7 @@ export function toCombatCard(cardId: string, lookupCard: CardLookup, lookupEffec
     // Printed DIE LINES, generated from the riders in real units.
     const dieLines: string[] = [];
     if (card.threshold) {
-        dieLines.push(`⬡ ${card.threshold.color.toUpperCase()} ×${card.threshold.count} spent: ${riderText(card.threshold.rider)}`);
+        dieLines.push(`⬡ ${card.threshold.color.toUpperCase()} ×${card.threshold.count} spent: ${riderText(card.threshold.rider, riderOpts)}`);
     }
     if (card.dieBonus) {
         const on = card.dieBonus.onColor === 'match'
@@ -372,16 +406,16 @@ export function toCombatCard(cardId: string, lookupCard: CardLookup, lookupEffec
             : card.dieBonus.onColor === 'off'
                 ? 'off-color die'
                 : `${card.dieBonus.onColor.toUpperCase()} die`;
-        dieLines.push(`⬢ ${on}: ${riderText(card.dieBonus.rider)}`);
+        dieLines.push(`⬢ ${on}: ${riderText(card.dieBonus.rider, riderOpts)}`);
     }
     if (card.fate) {
         const recoil = card.fate.recoilHp ? ` (recoil ${card.fate.recoilHp} HP)` : '';
-        dieLines.push(`✕ an X die may power this: +${riderText(card.fate.rider)}${recoil}`);
+        dieLines.push(`✕ an X die may power this: +${riderText(card.fate.rider, riderOpts)}${recoil}`);
     }
     // WS4.2 — combat-state synergy condition (dieless, ledger-read): printed
     // exactly as evaluated (P0-truth).
     if (card.synergy?.statePredicate && card.synergy.rider) {
-        dieLines.push(`◆ ${statePredicateText(card.synergy.statePredicate)}: ${riderText(card.synergy.rider)}`);
+        dieLines.push(`◆ ${statePredicateText(card.synergy.statePredicate)}: ${riderText(card.synergy.rider, riderOpts)}`);
     }
 
     return {
