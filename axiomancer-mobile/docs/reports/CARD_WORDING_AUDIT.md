@@ -4,7 +4,13 @@
 > Commit: cf6c37c
 > Build: expo-web export (`.smoke-dist`), driven headless
 > Scope: all 10 starter preset decks · 70 card-overlay captures (60 unique cards)
-> Status: **PROPOSALS ONLY — no code or game data changed by this pass.**
+> Status: **IMPLEMENTED 2026-07-12** — fix groups A–E shipped (with three
+> grounding corrections: the OMEN gloss stays as-is because the engine fires
+> the omen mechanic's own rider, not the paid line; the read legend names the
+> die's STANCE, not its roll; curses live in `enemyAttachments`, not
+> `enemyEnchantments`). Deferred ledger extras: the Soul board counter, the
+> ◆→⊕ +DIE marker swap, the Bleed face re-format, the VITAE help note, and
+> the engine-owned 'RUPTURE 0 now' rider text.
 
 This audit answers five owner questions about the combat **card detail overlay**
 (the `combat-card-detail` inspect modal):

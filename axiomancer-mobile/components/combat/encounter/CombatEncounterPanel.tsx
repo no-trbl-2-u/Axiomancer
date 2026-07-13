@@ -759,22 +759,38 @@ export function CombatEncounterPanel({
                             </View>
                             {detailCard.detail.stacksText ? <Text style={styles.detailStacks}>{detailCard.detail.stacksText}</Text> : null}
 
-                            {/* (3) the die-optional choice as a compact two-row pill table. The +DIE
-                                pill carries the real read-scaling math (guard ▲/▼ triplet, etc.) —
-                                the prose is flattened, NOT the math. */}
-                            <View style={styles.detailPills}>
-                                <View style={styles.detailPillRow}>
-                                    <Text style={styles.detailPillTag}>◇ NO DIE</Text>
-                                    <Text style={styles.detailPillVal} numberOfLines={2}>{detailCard.detail.freePill}</Text>
+                            {/* (3) the +DIE row — card-wording audit 2026-07-12: the NO-DIE pill
+                                (a pure duplicate of the face's ◇ rail) is gone; this row keeps
+                                only what the face can't carry — the FULL authored paid line (a
+                                multi-effect card's SIPHON/RECALL/… used to hide behind one
+                                headline keyword) and the exact ▲/—/▼ read triplet. Hidden when
+                                the face already says everything. */}
+                            {detailCard.detail.diePaidLine || detailCard.detail.dieTriplet ? (
+                                <View style={styles.detailPills}>
+                                    <View style={[styles.detailPillRow, styles.detailPillRowPaid, { borderLeftColor: detailCard.face.categoryColor, backgroundColor: `${detailCard.face.categoryColor}14` }]}>
+                                        <Text style={[styles.detailPillTag, { color: detailCard.face.categoryColor }]}>◆ +DIE</Text>
+                                        <View style={styles.detailPillBody}>
+                                            {detailCard.detail.diePaidLine ? (
+                                                <Text style={styles.detailPillVal} numberOfLines={3}>{detailCard.detail.diePaidLine}</Text>
+                                            ) : null}
+                                            {detailCard.detail.dieTriplet ? (
+                                                <Text style={[styles.detailPillKw, { color: detailCard.face.categoryColor }]} numberOfLines={1}>{detailCard.detail.dieTriplet}</Text>
+                                            ) : null}
+                                        </View>
+                                    </View>
                                 </View>
-                                <View style={[styles.detailPillRow, styles.detailPillRowPaid, { borderLeftColor: detailCard.face.categoryColor, backgroundColor: `${detailCard.face.categoryColor}14` }]}>
-                                    <Text style={[styles.detailPillTag, { color: detailCard.face.categoryColor }]}>◆ +DIE</Text>
-                                    <Text style={[styles.detailPillKw, { color: detailCard.face.categoryColor }]} numberOfLines={1}>{detailCard.detail.diePillKeyword}</Text>
-                                    <Text style={styles.detailPillVal} numberOfLines={2}>{detailCard.detail.diePill}</Text>
-                                </View>
-                            </View>
+                            ) : null}
+                            {/* the ▲/—/▼ legend — ONE global line, only when a triplet renders */}
+                            {detailCard.detail.readLegend ? (
+                                <Text style={styles.detailColorMatch}>{detailCard.detail.readLegend}</Text>
+                            ) : null}
                             {/* the colour law — ONE global legend (was boilerplated onto every card) */}
                             <Text style={styles.detailColorMatch}>{detailCard.detail.colorMatchHint}</Text>
+                            {/* persistent cards: the free-vs-paid duration fact as one footer
+                                line (the audit's 6-deck "3 rounds vs rest of combat" confusion) */}
+                            {detailCard.detail.durationFooter ? (
+                                <Text style={styles.detailColorMatch}>◇ {detailCard.detail.durationFooter}</Text>
+                            ) : null}
 
                             {/* KW-7 (phase 29, re-scoped 2026-07-12) — system-term definitions
                                 (Conviction, Resonance, Reserve/Pips, Floating, rungs, WILD/X):
@@ -836,7 +852,13 @@ export function CombatEncounterPanel({
                                 {tipEffect.glyph.label.toUpperCase()}
                             </Text>
                             {tipEffect.gloss && <Text style={styles.tipGloss}>{tipEffect.gloss}</Text>}
-                            <Text style={styles.tipMeta}>intensity {tipEffect.intensity}{tipEffect.isMax ? ' (MAX)' : ''} · {tipEffect.duration} turns left</Text>
+                            {/* A standing enchant/curse chip has no intensity — it shows its
+                                clock (or permanence) instead (card-wording audit 2026-07-12). */}
+                            <Text style={styles.tipMeta}>
+                                {tipEffect.standing
+                                    ? (tipEffect.duration > 0 ? `${tipEffect.duration} rounds left` : 'rest of combat')
+                                    : `intensity ${tipEffect.intensity}${tipEffect.isMax ? ' (MAX)' : ''} · ${tipEffect.duration} turns left`}
+                            </Text>
                             <View style={styles.tipBadgeWrap} pointerEvents="none">
                                 <Svg width={128} height={30} viewBox="0 0 128 30">
                                     <Polygon
@@ -1134,9 +1156,10 @@ const useStyles = makeStyles((AXM) => ({
     detailPills: { alignSelf: 'stretch', gap: 7, marginBottom: 10, marginTop: 4 },
     detailPillRow: { flexDirection: 'row', alignItems: 'center', gap: 8, borderWidth: 1, borderColor: 'rgba(255,255,255,0.12)', borderRadius: 6, paddingHorizontal: 10, paddingVertical: 9, backgroundColor: 'rgba(0,0,0,0.6)' },
     detailPillRowPaid: { borderLeftWidth: 3 },
+    detailPillBody: { flex: 1, gap: 3 },
     detailPillTag: { fontFamily: FONTS.sans, fontSize: 11, letterSpacing: 1.5, color: AXM.bone, minWidth: 58 },
     detailPillKw: { fontFamily: FONTS.gothic, fontSize: 13, letterSpacing: 0.5 },
-    detailPillVal: { flex: 1, fontFamily: FONTS.mono, fontSize: 12.5, color: AXM.parchment, letterSpacing: 0.2 },
+    detailPillVal: { fontFamily: FONTS.mono, fontSize: 12.5, color: AXM.parchment, letterSpacing: 0.2 },
     detailColorMatch: { alignSelf: 'stretch', fontFamily: FONTS.sans, fontSize: 9, letterSpacing: 1.6, color: AXM.bone, opacity: 0.6, lineHeight: 14, marginBottom: 4, textAlign: 'center' },
     // KW-7 (phase 29) — systems glossary (Conviction/Resonance/Reserve+Pips/Floating/rungs/WILD-X).
     systemsGlossary: { alignSelf: 'stretch', marginTop: 6, marginBottom: 4, paddingTop: 6, borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.08)' },

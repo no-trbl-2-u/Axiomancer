@@ -27,12 +27,14 @@ describe('keyword registry — KW-1 (no unmapped effect id renders a blank face)
 });
 
 describe('keyword registry — KW-2/KW-3 (count pinned, no dead references)', () => {
-    it('the glossary holds exactly 33 entries (30 keywords + 2 card-type labels + 1 card-local species)', () => {
+    it('the glossary holds exactly 34 entries (31 keywords + 2 card-type labels + 1 card-local species)', () => {
         // Pins the count so a future add/retire is a deliberate, visible diff —
         // see the module doc in keywords.ts for the phase-29 ledger. The 33rd
         // entry is DOOM (WS3.4): a ratified CARD-LOCAL species gloss, not a
         // registry row — it still needs a glossary definition for its face.
-        expect(allRegistryKeywords().length).toBe(33);
+        // The 34th is MILL (card-wording audit 2026-07-12): printed on three
+        // echo cards with no gloss anywhere — three carriers clears the bar.
+        expect(allRegistryKeywords().length).toBe(34);
     });
 
     it('every mechanic-kind mapping resolves to a glossed keyword', () => {

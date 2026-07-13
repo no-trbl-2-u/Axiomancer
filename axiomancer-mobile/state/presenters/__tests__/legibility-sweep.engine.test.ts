@@ -138,3 +138,43 @@ describe('CombatIntentVM.wallMath — the telegraph readout (phase 28)', () => {
         expect(vm.enemy.intent.wallMath.netDamage).toBeLessThanOrEqual(vm.enemy.intent.wallMath.projectedDamage);
     });
 });
+
+// Card-wording audit (2026-07-12) — a persistent card's standing passive is
+// gated by card id at its engine trigger sites, never an applied effect id, so
+// the board used to show NOTHING while an enchantment/curse was attached.
+describe('standing enchant/curse chips (card-wording audit 2026-07-12)', () => {
+    it('a permanent player enchantment renders a ❖ chip with the passive gloss', () => {
+        const s = { ...openState(), persistentZone: ['venom-and-vein'] };
+        const vm = buildCombatViewModel(s);
+        const chip = vm.player.effects.find(e => e.effectId === 'venom-and-vein');
+        expect(chip).toBeDefined();
+        expect(chip!.standing).toBe(true);
+        expect(chip!.glyph.glyph).toBe('❖');
+        expect(chip!.glyph.label).toBe('Venom and Vein');
+        expect(chip!.duration).toBe(0);              // permanent → no countdown tag
+        expect(chip!.gloss).toBeTruthy();            // Card.persistentEffect
+    });
+
+    it('a timed FREE instance carries its rounds-left clock', () => {
+        const s = { ...openState(), tempZone: [{ cardId: 'venom-and-vein', roundsLeft: 2 }] };
+        const vm = buildCombatViewModel(s);
+        const chip = vm.player.effects.find(e => e.effectId === 'venom-and-vein');
+        expect(chip?.standing).toBe(true);
+        expect(chip?.duration).toBe(2);
+    });
+
+    it('a curse attached to the enemy renders a ☒ chip on the enemy pane', () => {
+        const s = { ...openState(), enemyAttachments: ['suppurating-curse'] };
+        const vm = buildCombatViewModel(s);
+        const chip = vm.enemy.effects.find(e => e.effectId === 'suppurating-curse');
+        expect(chip).toBeDefined();
+        expect(chip!.standing).toBe(true);
+        expect(chip!.glyph.glyph).toBe('☒');
+    });
+
+    it('no zones → no standing chips (and never a crash on missing ids)', () => {
+        const vm = buildCombatViewModel({ ...openState(), enemyAttachments: ['not-a-card'] });
+        expect(vm.player.effects.every(e => !e.standing)).toBe(true);
+        expect(vm.enemy.effects.find(e => e.effectId === 'not-a-card')).toBeUndefined();
+    });
+});

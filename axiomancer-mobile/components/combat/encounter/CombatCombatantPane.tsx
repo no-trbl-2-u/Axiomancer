@@ -184,7 +184,9 @@ export function EffectChips({ effects, onChip, align = 'flex-start' }: {
                     style={[styles.chip, { borderColor: e.isMax ? AXM.sulfur : e.glyph.color }]}
                     testID={`combat-effect-${e.effectId}`}
                     accessibilityRole="button"
-                    accessibilityLabel={`${e.glyph.label}, intensity ${e.intensity}, ${e.duration} turns left${e.isMax ? ', maxed' : ''}`}
+                    accessibilityLabel={e.standing
+                        ? `${e.glyph.label}, ${e.duration > 0 ? `${e.duration} rounds left` : 'rest of combat'}`
+                        : `${e.glyph.label}, intensity ${e.intensity}, ${e.duration} turns left${e.isMax ? ', maxed' : ''}`}
                 >
                     <View style={[StyleSheet.absoluteFill, { backgroundColor: e.glyph.color, opacity: 0.16 }]} />
                     <Text style={[styles.chipGlyph, { color: e.glyph.color, textShadowColor: e.glyph.color }]}>{e.glyph.glyph}</Text>
@@ -197,9 +199,13 @@ export function EffectChips({ effects, onChip, align = 'flex-start' }: {
                             <Text style={styles.chipDurText} allowFontScaling={false}>{e.duration}t</Text>
                         </View>
                     ) : null}
-                    <View style={styles.chipBadge}>
-                        <Text style={styles.chipBadgeText} allowFontScaling={false}>{e.isMax ? '✶' : e.intensity}</Text>
-                    </View>
+                    {/* A standing enchant/curse chip (card-wording audit 2026-07-12)
+                        has no stack count — no badge. */}
+                    {!e.standing ? (
+                        <View style={styles.chipBadge}>
+                            <Text style={styles.chipBadgeText} allowFontScaling={false}>{e.isMax ? '✶' : e.intensity}</Text>
+                        </View>
+                    ) : null}
                 </Pressable>
             ))}
         </View>

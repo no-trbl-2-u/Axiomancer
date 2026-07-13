@@ -70,6 +70,11 @@ const EFFECT_GLYPHS: Record<string, string> = {
     debuff_strong_poison: '☣',
     debuff_bleed: '🩸',
     debuff_creeping_doom: '🕸',
+    // 2026-07-12 (card-wording audit) — the two live DoT species both fell
+    // through to the shared 🔥 and were indistinguishable on the board: EMBER
+    // keeps the curated flame, NETTLE gets its own leaf.
+    debuff_kindling_ember: '🔥',
+    debuff_nettle_sting: '🌿',
     debuff_burn: '🔥',
     debuff_frostbite: '❄',
     debuff_shock: '⚡',
@@ -100,6 +105,13 @@ const EFFECT_GLYPHS: Record<string, string> = {
     debuff_minotaur_maze: '🌀',
     buff_taunt: '🎯',
     // ── Stat-down / marks ──
+    // 2026-07-12 (card-wording audit) — the three CORE keyword afflictions
+    // (Mark / Backfire / Rapport ARE the keyword system) had no curated glyph
+    // and rendered generic category icons while ~40 curated rows below point
+    // at legacy ids that no longer exist in the live library.
+    debuff_mark: '◉',
+    debuff_backfire: '⟲',
+    debuff_rapport: '☙',
     tier1_mind_mark: '◎',
     debuff_all_stats_down: '▽',
     debuff_curse: '🧿',
