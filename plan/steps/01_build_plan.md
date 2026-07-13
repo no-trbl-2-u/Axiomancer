@@ -298,7 +298,7 @@ order, intra-batch gates noted per phase):**
       source: `plan/tuning/2026-07-10-turn-texture.md` §4 +
       `plan/tuning/2026-07-10-theme-identity.md` (per-theme S-tier UX)
       — `feat: show the engine — legibility sweep across 9 surfaces — phase 28` (60af3044)
-- [ ] Phase 29 — The Language (keyword registry). KW-1/KW-3 (fold 6
+- [x] Phase 29 — The Language (keyword registry). KW-1/KW-3 (fold 6
       unmapped debuff ids, rename pass) ungated; KW-2/KW-6
       (merge/retire + single-source registry with parity lints) and
       KW-5/KW-7 (persistent-card keyword-reach lint, systems glossary)
@@ -306,10 +306,15 @@ order, intra-batch gates noted per phase):**
       rides Phase 30 (mechanics + mobile) — source:
       `plan/tuning/2026-07-10-keyword-registry.md` — brief:
       `plan/phases/phase_29_keyword_registry.md`
-      — PARTIAL: KW-1/KW-3 shipped (cloud `feat: keyword-language
+      — shipped in full: KW-1/KW-3 (cloud `feat: keyword-language
       honesty pass — phase 29` cc39fb5f + the WS10.1/KW-1 debuff fold in
-      3cecd275, reconciled at e203fed9); KW-2/KW-5/KW-6/KW-7 remain, so
-      the phase stays open (KW-4 shipped riding Phase 30)
+      3cecd275, reconciled at e203fed9); KW-2/KW-5/KW-6/KW-7/KW-8 and the
+      spec-32 §3 correction landed in the same reconciled tree (verified
+      2026-07-13: `keywords.test.ts`'s 8 KW-1/2/3/5/6 assertions green,
+      `keyword-atlas.md` carries the 31-row re-baseline + 9 KW-8 receipts,
+      spec 32 §3 already amended) — KW-4 shipped riding Phase 30. Remaining
+      un-receipted atlas rows are an explicitly-deferred KB follow-up, not
+      phase-29 scope (`keyword-atlas.md` "no receipt, no entry" rule)
 - [x] Phase 30 — FREE Lines (70-card content pass). Rewrite every
       FREE line to theme-currency verbs + FREE-currency lint +
       pricing re-arithmetic. Shape ratified 2026-07-10: Option A
