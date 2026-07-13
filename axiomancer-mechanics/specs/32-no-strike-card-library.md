@@ -181,7 +181,7 @@ ids, only presentation-layer keyword labels.
 | Oracle | **OMEN** | declare the printed prediction; if it comes true by your next turn, the rider fires free |
 | Harvest | **SOUL** | gain 1 Soul whenever an enemy affliction stack expires or is consumed |
 | Harvest | **REAP N** | spend N Souls to fire the printed effect |
-| Charm | **SWAY N** | stacks on the enemy; decays 1/turn; CAPITULATE (§9) fires the moment SWAY reaches the enemy's resolve — 35% of its max HP (never below 10), or its current HP if that is lower |
+| Charm | **SWAY N** | stacks on the enemy; decays 1/turn; reaching resolve — 35% of max HP (never below 10), or current HP if lower — opens an explicit ACCEPT / CONTINUE capitulation choice (§9) |
 | Charm | **RAPPORT iN dM** | the enemy deals N less damage while active |
 | Bulwark | **THORNS iN dM** | attacker takes N whenever it damages you |
 | Bulwark | **RIPOSTE iN dM** | when your Guard fully blocks an attack, the enemy takes N |

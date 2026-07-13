@@ -109,7 +109,7 @@ export const KEYWORDS = {
     mark: { label: 'MARK', family: 'dot', unit: '×', blurb: 'Universal exposure: every DoT tick on the bearer deals +1 per stack.' },
     stagger: { label: 'STAGGER', family: 'control', unit: '', blurb: "Remove rungs from the enemy's next telegraphed action; at 0 it is denied." },
     backfire: { label: 'BACKFIRE', family: 'control', unit: '×', blurb: 'While active the enemy takes N per rung its actions lose.' },
-    sway: { label: 'SWAY', family: 'special', unit: '', blurb: 'Stacks on the enemy, decays 1/turn; SWAY >= its VITAE = CAPITULATE.' },
+    sway: { label: 'SWAY', family: 'special', unit: '', blurb: 'Stacks on the enemy, decays 1/turn; reaching its resolve opens ACCEPT / CONTINUE.' },
     reap: { label: 'REAP', family: 'special', unit: '', blurb: 'Spend Souls to fire the printed payoff.' },
     soul: { label: 'SOUL', family: 'special', unit: '', blurb: 'Gained when an enemy affliction expires or is consumed; spent by REAP.' },
     foretell: { label: 'FORETELL', family: 'special', unit: '', blurb: "Peek + reorder your deck top and glimpse the enemy's next telegraph." },

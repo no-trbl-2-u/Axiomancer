@@ -375,7 +375,7 @@ export interface CombatSummary {
 export type CombatOutcome =
     | 'victory'    // enemy HP → 0 (DoT erosion + status payoffs)
     | 'mercy'      // spared a low-HP foe via Befriend (the friendship path)
-    | 'capitulate' // spec 32 v3 §9 — SWAY ≥ enemy HP: the enemy yields (merciful)
+    | 'capitulate' // SWAY reached live resolve and the player explicitly accepted the yield
     | 'concede'    // spec 32 v3 §9 — an 8-Premise Peroration wins the argument
     | 'defeat'     // player HP → 0
     | 'retreat';   // dead — no in-combat retreat exists; combat resolves only

@@ -1059,11 +1059,11 @@ function gainSouls(
     return { ...state, souls, enemy, directDamageDealt: directDamage };
 }
 
-/** SWAY gain + the CAPITULATE check (spec 32 v3 §9, reworked by plan/tuning/
+/** SWAY gain (spec 32 v3 §9, reworked by plan/tuning/
  *  2026-07-08-win-path-scaling.md item 1a to a Dawncaster Charmed-style
  *  `resolve` threshold — see `capitulateThreshold`): SWAY ≥ the enemy's
- *  resolve → the enemy yields. Checked eagerly on every gain and at turn
- *  boundaries. */
+ *  resolve opens an explicit ACCEPT / CONTINUE choice. It never resolves the
+ *  outcome by itself. Eligibility is checked after gains and at boundaries. */
 function gainSway(
     state: CombatEncounterState,
     amount: number,
