@@ -87,6 +87,19 @@ export const RUPTURE_CAP_FRACTION = 0.60;
 export function ruptureBurstCap(enemyMaxHealth: number): number {
     return Math.round(RUPTURE_CAP_FRACTION * enemyMaxHealth);
 }
+/** REAP (single, `the-gleaners-due`) maxHealth erosion rate — phase 32 part 1
+ *  (Harvest — REAP attacks MAXIMUM HP, plan/phases/phase_32_theme_deep_work.md
+ *  §Part 1): the small utility REAP has no current-HP burst of its own, but
+ *  every REAP that spends Souls now also erodes the enemy's ceiling a little,
+ *  so the mechanic reads consistently across both Harvest REAP cards — the
+ *  capstone (`the-reaping`, `reap_all`) shrinks it by a lot via
+ *  `burstPerSoul`, this one shrinks it a little via `cost`. Erosion =
+ *  round(cost × REAP_EROSION_PER_SOUL); sized at the same per-Soul rate as
+ *  the capstone's burst conversion so both cards speak one formula. A cost-2
+ *  REAP erodes 4 max HP — roughly a tenth of the capstone's smallest
+ *  realistic burst, keeping the utility card's erosion clearly secondary.
+ *  Tunable. */
+export const REAP_EROSION_PER_SOUL = 2;
 /** CONCEDE Premises required (plan/tuning/2026-07-08-win-path-scaling.md item
  *  1a): `the-closing-word`'s flat 8-Premise `concedeAt` let Oratory land its
  *  alt-win identically against a 100 HP early wolf and a 1,500+ HP late boss

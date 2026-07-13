@@ -474,6 +474,12 @@ export type CombatEvent =
     | { kind: 'omen-missed'; cardId: string; phaseIndex: number }
     | { kind: 'soul-gained'; amount: number; total: number; reason: 'expiry' | 'consumed' | 'granted' }
     | { kind: 'reaped'; cardId: string; soulsSpent: number; amount: number }
+    // Phase 32 part 1 (Harvest — REAP attacks MAXIMUM HP): fires alongside
+    // 'reaped' whenever a REAP verb (single or ALL) permanently lowers the
+    // enemy's ceiling. Own event rather than a field on 'reaped' so existing
+    // 'reaped' consumers are unaffected and the erosion gets its own legible
+    // telemetry hook (e.g. a future mobile toast).
+    | { kind: 'max-hp-eroded'; cardId: string; amount: number; newMax: number }
     | { kind: 'sway-gained'; amount: number; total: number }
     | { kind: 'sway-decayed'; total: number }
     | { kind: 'echoed'; cardId: string }

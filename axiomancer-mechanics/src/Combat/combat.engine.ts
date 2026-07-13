@@ -33,7 +33,7 @@ import { executeCard } from '../Cards/card.engine';
 import { checkStatePredicate } from '../Cards/synergy-predicates';
 import type { Card, CardRider, CardSpecialMechanic, CombatResources } from '../Cards/types';
 import type { CombatState, Combatant, Stance } from './types';
-import { applyDamage, heal, isDefeated } from './health';
+import { applyDamage, heal, isDefeated, erodeMaxHealth } from './health';
 import {
     processRoundStartEffects, processRoundEndEffects, getActiveRollModifier,
     getThornsReflect, getDamageTakenMultiplier, getPendingDotTotal,
@@ -45,6 +45,7 @@ import {
     applyCleanse,
     RUPTURE_PER_AFFLICTION_STACK, DISRUPT_DENY_AT,
     ruptureBurstCap,
+    REAP_EROSION_PER_SOUL,
     THREAT_RUNGS, THREAT_RUNGS_BOSS, BOSS_RUNG_REGROWTH, bossRungGrowthCap,
     concedeFloorFor,
     capitulateThreshold,
@@ -969,15 +970,23 @@ function zoneHas(state: CombatEncounterState, cardId: string): boolean {
  *  plain `applyDamage` inside `fireDotTrigger`, so a damage-instance DoT can
  *  never re-trigger itself. Emits the clock's `dot-tick` events; callers fold
  *  `clockDamage` into their direct-damage tally and — where a Soul channel is
- *  in scope — count `washedOut` via `soulWorthyWashouts`. */
+ *  in scope — count `washedOut` via `soulWorthyWashouts`.
+ *
+ *  `erode` (phase 32 part 1 — Harvest REAP attacks MAXIMUM HP): when true,
+ *  the initial hit is applied via `erodeMaxHealth` instead of `applyDamage`
+ *  — same current-HP subtraction, plus an identical `maxHealth` reduction in
+ *  the SAME call, so the damage-instance clock still fires exactly once,
+ *  sourced off the already-eroded enemy (no double subtraction, no second
+ *  damage instance). */
 function applyEnemyDamage(
     enemy: Enemy,
     amount: number,
     round: number,
     events: CombatEvent[],
+    erode = false,
 ): { enemy: Enemy; clockDamage: number; washedOut: ActiveEffect[] } {
     if (amount <= 0) return { enemy, clockDamage: 0, washedOut: [] };
-    let next = applyDamage(enemy, amount);
+    let next = erode ? erodeMaxHealth(enemy, amount) : applyDamage(enemy, amount);
     const clock = fireDotTrigger(next, 'damage-instance', round);
     if (clock.damage > 0) {
         next = clock.target;
@@ -2021,6 +2030,16 @@ function playBottomAction(
                     break;
                 }
                 souls -= mech.cost;
+                // Phase 32 part 1 (Harvest — REAP attacks MAXIMUM HP): every
+                // REAP that spends Souls also erodes the enemy's ceiling a
+                // little, before the existing kindle/rider logic. This card
+                // deals no current-HP damage otherwise — the erosion is a
+                // NEW effect, not a modification of an existing burst.
+                const erosion = Math.round(mech.cost * REAP_EROSION_PER_SOUL);
+                if (erosion > 0) {
+                    enemy = erodeMaxHealth(enemy, erosion);
+                    events.push({ kind: 'max-hp-eroded', cardId: card.id, amount: erosion, newMax: enemy.maxHealth });
+                }
                 if (mech.rider) firedRiders.push(mech.rider);
                 if (mech.kindle) {
                     const forged: CombatManaDie = {
@@ -2050,12 +2069,18 @@ function playBottomAction(
                 souls = 0;
                 if (burst > 0) {
                     const hpBefore = enemy.health;
-                    const hit = applyEnemyDamage(enemy, burst, state.round, events);
+                    // Phase 32 part 1: erode == true sources the SAME
+                    // current-HP subtraction (unchanged output) through
+                    // erodeMaxHealth instead of applyDamage, so `maxHealth`
+                    // drops by the identical `burst` amount in this ONE
+                    // call — no second damage instance, clock unmoved.
+                    const hit = applyEnemyDamage(enemy, burst, state.round, events, true);
                     enemy = hit.enemy;
                     mechanicDamage += burst;
                     directDamage += burst + hit.clockDamage;
                     gainSoulsLocal(soulWorthyWashouts(hit.washedOut), 'expiry');
                     attribution = recordAttribution(attribution, card.id, card.name, null, burst, hpBefore);
+                    events.push({ kind: 'max-hp-eroded', cardId: card.id, amount: burst, newMax: enemy.maxHealth });
                 }
                 events.push({ kind: 'reaped', cardId: card.id, soulsSpent: spent, amount: burst });
                 break;

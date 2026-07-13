@@ -13,6 +13,26 @@ export function applyDamage<T extends Combatant>(combatant: T, damage: number): 
     return { ...combatant, health: Math.max(0, combatant.health - damage) };
 }
 
+/**
+ * Phase 32 part 1 (Harvest — REAP attacks MAXIMUM HP): subtracts `amount`
+ * from BOTH `health` and `maxHealth`, each floored independently at 0. An
+ * invariant-preserving subtraction, not a clamp-after-the-fact — because
+ * both fields start from the same pre-erosion state and drop by the same
+ * amount, `health <= maxHealth` holds automatically with no extra
+ * enforcement code. Callers that also need the shared damage-instance clock
+ * (BLEED's `applyEnemyDamage` funnel) should NOT call this in addition to
+ * that path — see `applyEnemyDamage`'s `erode` parameter in
+ * `combat.engine.ts`, which sources the clock off this same subtraction
+ * rather than double-applying it.
+ */
+export function erodeMaxHealth<T extends Combatant>(combatant: T, amount: number): T {
+    return {
+        ...combatant,
+        maxHealth: Math.max(0, combatant.maxHealth - amount),
+        health: Math.max(0, combatant.health - amount),
+    };
+}
+
 /** Returns a copy of the combatant with `amount` healed (clamped at maxHealth). */
 export function heal<T extends Combatant>(combatant: T, amount: number): T {
     return { ...combatant, health: Math.min(combatant.maxHealth, combatant.health + amount) };

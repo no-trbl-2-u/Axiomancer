@@ -1056,6 +1056,10 @@ const theGleanersDue: Card = {
     // pts: REAP 2 → KINDLE (2.5) + draw 2 (4) − soul cost 2 + rider soul 1 + FREE
     // draw 0.7 + FREE soul 0.75 ≈ 6.45 → Theorem-tier. The PAID reap returns 1
     // Soul ("a coin pressed back into your palm on the way out"), net drain 1.
+    // Phase 32 part 1 (unscored, engine-verb behavior): every REAP that spends
+    // Souls now also erodes the enemy's maxHealth by round(cost × 2) — a
+    // small permanent ceiling bite riding this paid effect for free, matching
+    // how bone-orchard's enchant text documents non-scored engine behavior.
     free: { drawCards: 1, souls: 1 },
     specialMechanics: [{ kind: 'reap', cost: 2, rider: { drawCards: 2, souls: 1 }, kindle: 'mind' }],
     addedIn: '2026-07-08',
@@ -1076,6 +1080,11 @@ const theReaping: Card = {
     // pts (phase 30): REAP ALL — 4 per Soul (burstPerSoul 2→4; caps at 80 dmg
     // off a ~20-Soul bank) + SIPHON 40% of the burst back as healing + FREE
     // short-fuse BLEED seed i1 d1 (~1, replaces TICK) ≈ 17.4-19.4.
+    // Phase 32 part 1 (unscored, engine-verb behavior): the same burst that
+    // hits current HP now ALSO permanently erodes the enemy's maxHealth by
+    // the identical amount — additive, not a replacement, so this card's
+    // current-HP output and its priced total are unchanged; the erosion is
+    // "REAP attacks MAXIMUM HP" riding the existing paid burst for free.
     free: { applyEffect: { effectId: 'debuff_bleed', intensity: 1, duration: 1 } },
     specialMechanics: [{ kind: 'reap_all', burstPerSoul: 4 }, { kind: 'siphon', pct: 0.4 }],
     addedIn: '2026-07-08',
