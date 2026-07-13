@@ -32,10 +32,7 @@ import {
     selectEncounterMercyChoice, buildCombatSummary, rollCombatCardRewards, addRewardCard,
     rollLoot, addItem,
     type CombatEncounterState, type CombatOutcome, type Character, type Enemy, type CombatEvent,
-    type CombatManaDie,
 } from '@mechanics';
-
-import { advanceWheel, isMomentumDieId, isWheelStance, momentumDieId, type WheelStance } from '@/state/combat/momentum';
 
 import { CombatBoard, CombatCardFace, HAND_CARD_W, HAND_CARD_H, type DragController, type DragPayload, type Rect } from '@/components/combat/encounter/CombatBoard';
 import { useDragInterruptRecovery } from '@/components/combat/encounter/useDragInterruptRecovery';
@@ -328,19 +325,11 @@ export function CombatEncounterPanel({
 
     const live = state ?? initial;
     const vm = useMemo(() => buildCombatViewModel(live), [live]);
-    const vmRef = useRef(vm);
-    vmRef.current = vm;
 
-    // ── momentum wheel (see state/combat/momentum.ts) ──
-    // `lit` is panel-owned UI state; `charged` is DERIVED from the engine state:
-    // a live wild momentum die in the tray IS the charge.
-    const [wheelLit, setWheelLit] = useState<WheelStance[]>([]);
-    const wheelLitRef = useRef<WheelStance[]>([]);
-    const momentumCounter = useRef(0);
+    // ── momentum wheel (Phase 31 — engine-native; see combat.engine.ts's
+    // `advanceMomentumWheel`) — `vm.momentum` is read straight off engine
+    // state, no panel-owned wheel state or grant logic left here. ──
     const [momentumInfoOpen, setMomentumInfoOpen] = useState(false);
-    const momentumCharged = vm.dice.some((d) => isMomentumDieId(d.id) && !d.spent && !d.isX);
-    const chargedRef = useRef(momentumCharged);
-    chargedRef.current = momentumCharged;
 
     // ── screen-level drag controller (cards + dice) ──
     // dragX/dragY are written straight from the board's gesture worklets every
@@ -439,21 +428,6 @@ export function CombatEncounterPanel({
     // pre-existing highest-rank auto-pick).
     const onApply = useCallback((uid: string, dieId: string | null, power: boolean, choices?: { chosenX?: number; reprisalCardId?: string }) => {
         if (resolvingRef.current) return; // WI-3 — a drag must not land mid-resolution
-        // Momentum: advance the wheel with this card's stance (looked up BEFORE the
-        // play removes it from the hand). A completed cycle forges a wild momentum
-        // die into the tray; while that die is live, plays don't advance the wheel.
-        let grantId: string | null = null;
-        const stance = vmRef.current.hand.find((c) => c.uid === uid)?.stance;
-        if (!chargedRef.current && isWheelStance(stance)) {
-            const r = advanceWheel(wheelLitRef.current, stance);
-            wheelLitRef.current = r.lit;
-            setWheelLit(r.lit);
-            if (r.completed) {
-                momentumCounter.current += 1;
-                grantId = momentumDieId(momentumCounter.current);
-                chargedRef.current = true;   // block re-advance within this apply batch
-            }
-        }
         apply((s) => {
             let ns = s;
             // Fate Engine P1 R8 — the dragged die is HONORED: a banked Reserve die
@@ -468,7 +442,9 @@ export function CombatEncounterPanel({
             }
             // WS7.2 chosenX + phase 28 reprisalCardId ride through to the
             // engine (which clamps X to [min, affordable] and validates the
-            // reprisal pick against the live discard pile).
+            // reprisal pick against the live discard pile). Phase 31 — the
+            // engine's `playCombatCard` also advances the momentum wheel and
+            // grants its die internally now; the panel no longer does either.
             const t = playCombatCard(
                 ns, { uid }, power, routing.explicitDieId, undefined,
                 choices && (choices.chosenX !== undefined || choices.reprisalCardId !== undefined)
@@ -477,24 +453,6 @@ export function CombatEncounterPanel({
             );
             fxRef.current = t.events;
             ns = t.state;
-            // TODO(engine): momentum belongs in axiomancer-mechanics as a first-class
-            // rule. Until then the grant is a minimal host-side state write — the
-            // same precedent as this panel's economy write-back — of an engine-native
-            // wild die (draft/play/spend all handled by the engine). Id-guarded so a
-            // double-invoked updater can't duplicate it.
-            if (grantId && !ns.dice.some((d) => d.id === grantId)) {
-                // WI-4 — grant it FLOATING, not a plain tray die. Spec 32 v3 §5:
-                // a floating die is a second power source that bypasses the
-                // 1-die draft, stays DRAGGABLE once a draft exists (plain tray
-                // dice do not — `die.draggable` is presenter-computed from
-                // `floating`/`reserve`), routes as its own explicit power
-                // (`resolveApplyRouting`), and never banks. `temporary: true`
-                // keeps it combat-local — momentum must not carry across combats
-                // the way Forge floats do (the real engine port is EA-6; this is
-                // the minimal host-side correction).
-                const die: CombatManaDie = { id: grantId, color: 'wild', state: 'available', temporary: true, floating: true };
-                ns = { ...ns, dice: [...ns.dice, die] };
-            }
             return ns;
         });
         setFxSeq((n) => n + 1);
@@ -601,7 +559,7 @@ export function CombatEncounterPanel({
     const onInspect = useCallback((c: CombatCardVM) => { detailOpenedAt.current = Date.now(); setDetailCard(c); }, []);
     const onPlayerInspect = useCallback(() => setPilgrimOpen(true), []);
     const onMomentumInfo = useCallback(() => setMomentumInfoOpen(true), []);
-    const momentum = useMemo(() => ({ lit: wheelLit, charged: momentumCharged }), [wheelLit, momentumCharged]);
+    const momentum = vm.momentum;
 
     // Ghost stays MOUNTED once the first drag begins (opacity-gated by dragShown):
     // remounting the face + image on every drag begin cost a mount + decode while

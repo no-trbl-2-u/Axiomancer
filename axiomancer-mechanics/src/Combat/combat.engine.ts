@@ -69,7 +69,7 @@ import { getSignaturesForLoadout } from '../Items/relic.library';
 import type {
     CombatCard, CombatDieColor, CombatEncounterState, CombatEvent, CardPlay,
     CombatManaDie, CombatPhaseResult, CombatTransition, LandedEffect, CombatReadResult,
-    CombatThreatEffect,
+    CombatThreatEffect, WheelStance,
 } from './combat.encounter.types';
 
 // ── Tunable constants (HP model) ─────────────────────────────────────────────
@@ -214,6 +214,79 @@ export const PIP_GUARD_BONUS = 2;
 export const COLOR_MATCH_STATUS_DURATION_BONUS = 1;
 /** R4 — the universal once-per-turn FATE TAP's Conviction payout. */
 export const FATE_TAP_CONVICTION = 1;
+
+// ── Phase 31 (EA-6) — the combat MOMENTUM wheel ──────────────────────────────
+
+/** Wheel succession order — ported 1:1 from the mobile host's pre-existing
+ *  truth table (`axiomancer-mobile/state/combat/momentum.ts`). */
+const WHEEL_ORDER: readonly WheelStance[] = ['heart', 'body', 'mind'];
+
+function nextWheelStance(s: WheelStance): WheelStance {
+    return WHEEL_ORDER[(WHEEL_ORDER.indexOf(s) + 1) % WHEEL_ORDER.length];
+}
+
+function isWheelStance(s: CombatDieColor): s is WheelStance {
+    return s === 'heart' || s === 'body' || s === 'mind';
+}
+
+/** Momentum wheel step: a right stance (the wheel-successor of the last lit
+ *  node) lights the next node; a wrong OR repeated stance resets the wheel to
+ *  just that stance. Lighting the third node completes the cycle and empties
+ *  the wheel in the same call. */
+function advanceWheel(lit: readonly WheelStance[], played: WheelStance): { lit: WheelStance[]; completed: boolean } {
+    const last = lit[lit.length - 1];
+    const next = last === undefined || played !== nextWheelStance(last) ? [played] : [...lit, played];
+    if (next.length >= WHEEL_ORDER.length) return { lit: [], completed: true };
+    return { lit: next, completed: false };
+}
+
+/** The engine-native wheel-granted die's id prefix — used to identify it at
+ *  the "charged" gate and to exclude it from cross-combat float persistence
+ *  (see {@link getFloatingDiceColors}). */
+const MOMENTUM_DIE_PREFIX = 'momentum-';
+
+export function isMomentumDieId(id: string): boolean {
+    return id.startsWith(MOMENTUM_DIE_PREFIX);
+}
+
+/**
+ * Advances the momentum wheel after a card play that actually LANDED (a
+ * `card-played` event fired — a fizzled attempt never reaches here, which
+ * corrects the mobile host's pre-port behavior where the wheel advanced
+ * before the engine confirmed the play landed). Both FREE (top) and PAID
+ * (bottom) plays advance the wheel — the wheel tracks the card's printed
+ * stance, not its power source. `preState` is the state BEFORE this play
+ * dispatched — the "charged" gate reads it, not the post-play state, so the
+ * very play that SPENDS the momentum die (drafted while charged) still
+ * counts as "was charged" and doesn't also advance the wheel (mirrors the
+ * host's `chargedRef`, which reflects the pre-play render). No-op for
+ * non-wheel stances (wild/x FREE-line synthetics).
+ */
+function advanceMomentumWheel(
+    preState: CombatEncounterState,
+    transition: CombatTransition,
+    stance: CombatDieColor,
+): CombatTransition {
+    if (!isWheelStance(stance)) return transition;
+    if (!transition.events.some(e => e.kind === 'card-played')) return transition;
+    const state = transition.state;
+    if (state.phase === 'complete') return transition;
+    if ((preState.floatingDice ?? []).some(d => isMomentumDieId(d.id))) return transition;
+
+    const result = advanceWheel(state.momentumWheel ?? [], stance);
+    const wheelEvents: CombatEvent[] = [{ kind: 'wheel-lit', lit: result.lit }];
+    let dice = state.dice;
+    let floatingDice = state.floatingDice ?? [];
+    if (result.completed) {
+        const dieId = `${MOMENTUM_DIE_PREFIX}${state.turn}-${state.log.length}`;
+        const die: CombatManaDie = { id: dieId, color: 'wild', state: 'available', temporary: true, floating: true };
+        dice = [...dice, die];
+        floatingDice = [...floatingDice, die];
+        wheelEvents.push({ kind: 'wheel-completed', dieId });
+    }
+    const nextState = withLog({ ...state, momentumWheel: result.lit, dice, floatingDice }, wheelEvents);
+    return { state: nextState, events: [...transition.events, ...wheelEvents] };
+}
 
 const EMPTY_RESOURCES: CombatResources = { heart: 0, body: 0, mind: 0, fallacy: 0, paradox: 0 };
 const defaultRng = (): number => getRng().random();
@@ -774,9 +847,10 @@ export function playCombatCard(
     const card = getCard(entry.cardId);
     if (!card) return { state, events: [] };
 
-    return useBottom
+    const transition = useBottom
         ? playBottomAction(state, entry.uid, card, dieId, rng, play?.chosenX, play?.reprisalCardId)
         : playTopAction(state, entry.uid, card, rng);
+    return advanceMomentumWheel(state, transition, card.stance);
 }
 
 /**
@@ -3699,12 +3773,15 @@ export function projectCardImpact(
 
 /**
  * Spec 32 v3 §5 — the floating-die colors to WRITE BACK to the character save
- * at combat end (they persist across combats until spent).
+ * at combat end (they persist across combats until spent). Phase 31 —
+ * excludes `temporary` floats (the momentum wheel's granted die): momentum
+ * never survives past the fight it was earned in, owner-ratified 2026-07-10.
  */
 export function getFloatingDiceColors(
     state: CombatEncounterState,
 ): ('heart' | 'body' | 'mind' | 'wild')[] {
     return (state.floatingDice ?? [])
+        .filter(d => !d.temporary)
         .map(d => d.color)
         .filter((c): c is 'heart' | 'body' | 'mind' | 'wild' => c !== 'x');
 }

@@ -26,7 +26,7 @@ import { deepClone } from '../../Utils';
 import { registerSandboxCards } from '../../Cards/cards.sandbox';
 import {
     initializeCombatEncounter, rollEncounterDice, playCombatCard,
-    draftStanceDie, startTurn, endTurn, resolveThreatPhase,
+    draftStanceDie, startTurn, endTurn, resolveThreatPhase, isMomentumDieId,
 } from '../combat.engine';
 import { runHazardCombatAutoEncounter } from '../combat.autoplay';
 import { runOneEncounter } from '../combat.encounter.sim';
@@ -159,7 +159,13 @@ describe('Gate 0 — the round-turn law (one tray roll per threat phase)', () =>
             floatsSpent++;
         }
         expect(floatsSpent).toBe(3);
-        expect(s.floatingDice ?? []).toHaveLength(0); // the whole pool spent
+        // Phase 31 — the original 3 forged floats are all spent; the sequence
+        // (heart -> body -> mind, in wheel order) also legitimately completes
+        // the engine-native momentum wheel, minting ONE new momentum-prefixed
+        // float that this test never spends. Assert the ORIGINAL pool is
+        // empty, not the whole array (the momentum grant is a real, separate
+        // mechanic this test doesn't exercise further).
+        expect((s.floatingDice ?? []).filter(d => !isMomentumDieId(d.id))).toHaveLength(0);
         expect(s.round).toBe(1);                      // still the same round
         expect(s.log.some(e => e.kind === 'turn-law-blocked')).toBe(false);
     });

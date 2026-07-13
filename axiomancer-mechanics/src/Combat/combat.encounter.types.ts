@@ -33,6 +33,11 @@ import type { Stance } from './types';
  */
 export type CombatDieColor = 'heart' | 'body' | 'mind' | 'wild' | 'x';
 
+/** Phase 31 — the three stance colors the combat MOMENTUM wheel and THE
+ *  STAKE both key off (a strict subset of {@link CombatDieColor}: wild/x
+ *  never participate in either mechanic). */
+export type WheelStance = 'heart' | 'body' | 'mind';
+
 /**
  * Die lifecycle. `available` → `spent` on power; `spent` → `available` again
  * via the self-reinforcing status loop (§4.7), RPS advantage (§4.8 waives the
@@ -491,6 +496,14 @@ export type CombatEvent =
     // THREAT_ENCHANT_CURSE_EVERY_ROUNDS the enemy grows a new passive
     // strength or lays a fresh curse on the player.
     | { kind: 'threat-clock-enchant'; target: 'enemy' | 'player'; effectId: string; round: number }
+    // Phase 31 — the engine-native momentum wheel (ported from the mobile
+    // host-side write; see `momentumWheel` on state).
+    | { kind: 'wheel-lit'; lit: WheelStance[] }
+    | { kind: 'wheel-completed'; dieId: string }
+    // Phase 31 — THE STAKE: a pre-play Conviction wager on the hidden stance.
+    | { kind: 'stake-placed'; color: WheelStance; amount: 2 | 4 | 6 }
+    | { kind: 'stake-won'; color: WheelStance; payout: 'colored' | 'colored-pip' | 'wild' }
+    | { kind: 'stake-lost'; amount: 2 | 4 | 6 }
     | { kind: 'combat-ended'; outcome: CombatOutcome };
 
 // ---------------------------------------------------------------------------
@@ -599,6 +612,25 @@ export interface CombatEncounterState {
     /** Spec 32 v3 §5 — the FLOATING die pool (live tray): merged into every
      *  turn's dice, exempt from rerolls, persists across combats. Optional. */
     floatingDice?: CombatManaDie[];
+    /** Phase 31 (EA-6) — the combat MOMENTUM wheel, engine-native (kills the
+     *  mobile host-side write). Lights heart -> body -> mind on every LANDED
+     *  card play in that stance (top or bottom — the wheel tracks the card's
+     *  printed stance, not its power source); a wrong or repeated stance
+     *  resets the wheel to just that stance. Lighting the third node mints a
+     *  one-shot wild floating die (id-prefixed `momentum-`, always
+     *  `temporary: true` so `getFloatingDiceColors` excludes it from the
+     *  cross-combat character save — momentum never persists past this fight,
+     *  owner-ratified 2026-07-10) and empties the wheel. While a
+     *  `momentum-`-prefixed die is still unspent in {@link floatingDice}, the
+     *  wheel does not advance on further plays. Optional for back-compat
+     *  (absent = empty wheel). */
+    momentumWheel?: WheelStance[];
+    /** Phase 31 (EA-7) — THE STAKE: an optional pre-play wager placed after
+     *  drafting this turn's stance die (`placeStake`), settled at the top of
+     *  `resolveThreatPhase` against the phase's hidden `enemyStance`. Cleared
+     *  on settlement regardless of outcome; at most one stake live at a time.
+     *  Optional (absent = no stake placed this phase). */
+    stake?: { color: WheelStance; amount: 2 | 4 | 6 };
     /** Spec 32 v3 T2 — the PREMISE tally (Peroration theme). Optional. */
     premises?: number;
     /** Spec 32 v3 T2 — the declared PERORATION (one in play at a time). */

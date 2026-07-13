@@ -65,6 +65,7 @@ import {
     getSignatureSkill,
     selectMercyChoice,
     cardDieCostPreview,
+    isMomentumDieId,
 } from '../Combat/combat.engine';
 import type {
     CombatEncounterState,
@@ -458,6 +459,9 @@ async function interactiveHazardCombatLoop(
         log(`  Player HP ${s.player.health}/${s.player.maxHealth}  Conviction ${s.conviction}◆`);
         log(`  Enemy intent: ${phase?.intentType ?? 'unknown'}  stance: ${revealed ?? '?'}  guard: ${s.guard ?? 0}`);
         log(`  Threat: ${phase?.threatAction.description ?? '?'}`);
+        const charged = (s.floatingDice ?? []).some(d => isMomentumDieId(d.id));
+        const wheel = s.momentumWheel ?? [];
+        log(`  Wheel: [${wheel.join(',') || '—'}]${charged ? ' charged ✦' : ''}${s.stake ? `  Stake: ${s.stake.amount}◆ on ${s.stake.color}` : ''}`);
 
         const before = s;
 

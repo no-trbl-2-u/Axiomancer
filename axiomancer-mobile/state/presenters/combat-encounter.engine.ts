@@ -28,6 +28,7 @@ import {
     type CombatThreatPhase, type CombatIntentType, type CombatReadResult,
     type CombatSummary, type SignatureSkill, type Stance,
     type Card, type CardCombatEffects, type EnemyDifficulty,
+    isMomentumDieId, type WheelStance,
 } from '@mechanics';
 
 /** The barrel doesn't re-export the union, so derive it from Card. */
@@ -495,6 +496,10 @@ export interface CombatViewModel {
     discardCards: { id: string; name: string }[];
     /** phase 28 — the Premise track + CONCEDE beat. */
     peroration: CombatPerorationVM;
+    /** Phase 31 — the engine-native momentum wheel's lit nodes (empty = no
+     *  cycle in progress). `charged` mirrors the panel's old derivation: a
+     *  live, unspent `momentum-`-prefixed die in {@link dice} IS the charge. */
+    momentum: { lit: WheelStance[]; charged: boolean };
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -1815,11 +1820,16 @@ export function buildCombatViewModel(state: CombatEncounterState): CombatViewMod
     const idx = Math.min(state.currentPhaseIndex, total - 1);
     const draftedDie = getDraftedDie(state);
     const usableDraft = !!draftedDie && draftedDie.state === 'available' && draftedDie.color !== 'x';
+    const dice = diceVM(state);
     return {
         phase: state.phase,
         enemy: enemyPane(state),
         player: playerPane(state),
-        dice: diceVM(state),
+        dice,
+        momentum: {
+            lit: state.momentumWheel ?? [],
+            charged: dice.some((d) => isMomentumDieId(d.id) && !d.spent && !d.isX),
+        },
         reserveRoom: (state.reserve ?? []).length < RESERVE_MAX,
         resonance: { heart: 0, body: 0, mind: 0, ...(state.resonance ?? {}) },
         drafted: usableDraft,

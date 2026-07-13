@@ -161,6 +161,8 @@ export type {
     SignatureSkill, SignatureSkillId, SignatureSkillKind,
     // WS9 (spec 32 §12 #7) — legible conditional threat branches
     ThreatBranchCondition, CombatThreatBranch, CombatThreatBranchOutcome,
+    // Phase 31 — the momentum wheel / THE STAKE shared stance subset
+    WheelStance,
 } from './combat.encounter.types';
 export {
     initializeCombatEncounter, rollEncounterDice, playCombatCard,
@@ -194,6 +196,8 @@ export {
     projectCombatOutcome,
     // Spec 32 v3 — floating dice save-back + sway decay knob
     getFloatingDiceColors, SWAY_DECAY_PER_TURN,
+    // Phase 31 — the engine-native momentum wheel
+    isMomentumDieId,
 } from './combat.engine';
 /**
  * @deprecated Superseded by the COLOR LAW for die COST / play legality
