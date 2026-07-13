@@ -346,7 +346,9 @@ order, intra-batch gates noted per phase):**
       summary to actual VITAE loss. SWAY threshold crossing now opens an
       explicit player-authored capitulation choice rather than ending combat;
       partially gated on Phase 30's FREE verbs (mechanics;
-      parallelizable per theme) — source:
+      parallelizable per theme). Part 1 (REAP attacks maximum HP) shipped
+      `7392573c`; Part 2 (RIPOSTE reflects the prevented blow, floored at
+      the printed value) shipped `a6888a84`. Parts 1b/3/4 remain — source:
       `plan/tuning/2026-07-10-theme-identity.md` §2
 - [ ] Phase 33 — Enemy Answers (specs 29/30 slice + enemy
       counterplay). One reactive verb engine-wide, lethality readout,
