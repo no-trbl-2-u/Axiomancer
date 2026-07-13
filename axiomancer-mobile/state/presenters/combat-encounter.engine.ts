@@ -500,6 +500,12 @@ export interface CombatViewModel {
      *  cycle in progress). `charged` mirrors the panel's old derivation: a
      *  live, unspent `momentum-`-prefixed die in {@link dice} IS the charge. */
     momentum: { lit: WheelStance[]; charged: boolean };
+    /** Phase 31 (EA-7) — THE STAKE: the live wager this phase, or null. */
+    stake: { color: WheelStance; amount: 2 | 4 | 6 } | null;
+    /** True when the wager chip is legal to open right now: a die has been
+     *  drafted this turn, no stake is already placed, and Conviction covers
+     *  at least the cheapest tier (2◆). */
+    canStake: boolean;
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -1830,6 +1836,8 @@ export function buildCombatViewModel(state: CombatEncounterState): CombatViewMod
             lit: state.momentumWheel ?? [],
             charged: dice.some((d) => isMomentumDieId(d.id) && !d.spent && !d.isX),
         },
+        stake: state.stake ?? null,
+        canStake: !state.stake && state.draftedDieId !== null && state.conviction >= 2,
         reserveRoom: (state.reserve ?? []).length < RESERVE_MAX,
         resonance: { heart: 0, body: 0, mind: 0, ...(state.resonance ?? {}) },
         drafted: usableDraft,

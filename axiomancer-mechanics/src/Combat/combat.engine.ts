@@ -69,7 +69,7 @@ import { getSignaturesForLoadout } from '../Items/relic.library';
 import type {
     CombatCard, CombatDieColor, CombatEncounterState, CombatEvent, CardPlay,
     CombatManaDie, CombatPhaseResult, CombatTransition, LandedEffect, CombatReadResult,
-    CombatThreatEffect, WheelStance,
+    CombatThreatEffect, CombatThreatPhase, WheelStance,
 } from './combat.encounter.types';
 
 // ── Tunable constants (HP model) ─────────────────────────────────────────────
@@ -736,6 +736,36 @@ export function endTurn(state: CombatEncounterState): CombatTransition {
     const next: CombatEncounterState = {
         ...state, dice: [], reserve, conviction, draftedDieId: null, lastRead: 'none', carriedDie: null,
     };
+    return { state: withLog(next, events), events };
+}
+
+/**
+ * Phase 31 (EA-7) — THE STAKE: places a pre-play wager on the enemy's hidden
+ * stance for the CURRENT threat phase. Settles at the top of
+ * `resolveThreatPhase` (see `settleStake`) against the phase's actual
+ * `enemyStance` — win pays out a floating die (2◆ colored, 4◆ colored +1
+ * pip, 6◆ wild); loss burns the wager and adds a round-equivalent to the
+ * escalation clock. Post-draft only (WI-3's fuller spec, chosen over the
+ * looser "before the draft" summary-doc phrasing — see the phase 31 brief's
+ * scoping note): the player has already committed this turn's stance die
+ * before staking. A no-op (state unchanged, mirrors `startTurn`'s silent-
+ * guard convention) when a stake is already live, the phase isn't
+ * phase-play, no die has been drafted yet, or Conviction can't cover the
+ * amount — the mobile UI only offers the stake chip when the wager is legal.
+ */
+export function placeStake(
+    state: CombatEncounterState,
+    color: WheelStance,
+    amount: 2 | 4 | 6,
+): CombatTransition {
+    if (state.phase !== 'phase-play') return { state, events: [] };
+    if (state.stake) return { state, events: [] };
+    if (state.draftedDieId === null) return { state, events: [] };
+    if (state.conviction < amount) return { state, events: [] };
+
+    const conviction = state.conviction - amount;
+    const events: CombatEvent[] = [{ kind: 'stake-placed', color, amount }];
+    const next: CombatEncounterState = { ...state, conviction, stake: { color, amount } };
     return { state: withLog(next, events), events };
 }
 
@@ -2734,6 +2764,49 @@ function computeRungDenial(state: CombatEncounterState): {
 }
 
 /**
+ * Phase 31 (EA-7) — THE STAKE settlement. Called at the top of
+ * `resolveThreatPhase`, before the escalation clock reads its round basis (a
+ * LOST stake raises the basis THIS same phase, not just future ones). A
+ * no-op when no stake is placed. Win payouts route through the same
+ * `forge_floating_die` mint shape and `FLOATING_DICE_CAP` overflow ->
+ * +1 Conviction fallback every other float mint uses.
+ */
+function settleStake(
+    state: CombatEncounterState,
+    phase: CombatThreatPhase,
+    events: CombatEvent[],
+): { conviction: number; floatingDice: CombatManaDie[]; stakeEscalationBonus: number } {
+    const conviction = state.conviction;
+    const floatingDice = state.floatingDice ?? [];
+    const bonus = state.stakeEscalationBonus ?? 0;
+    if (!state.stake) return { conviction, floatingDice, stakeEscalationBonus: bonus };
+    const { color, amount } = state.stake;
+
+    if (color !== phase.enemyStance) {
+        events.push({ kind: 'stake-lost', amount });
+        return { conviction, floatingDice, stakeEscalationBonus: bonus + 1 };
+    }
+
+    const payout: 'colored' | 'colored-pip' | 'wild' = amount === 6 ? 'wild' : amount === 4 ? 'colored-pip' : 'colored';
+    if (floatingDice.length >= FLOATING_DICE_CAP) {
+        const nextConviction = Math.min(CONVICTION_CAP, conviction + 1);
+        events.push({ kind: 'conviction-gained', amount: 1, total: nextConviction, reason: 'effect' });
+        events.push({ kind: 'stake-won', color, payout });
+        return { conviction: nextConviction, floatingDice, stakeEscalationBonus: bonus };
+    }
+    const dieColor: CombatDieColor = amount === 6 ? 'wild' : color;
+    const die: CombatManaDie = {
+        id: `stake-${state.turn}-${state.log.length}`,
+        color: dieColor, state: 'available', temporary: false, floating: true,
+        pips: amount === 4 ? 1 : 0,
+    };
+    const nextFloating = [...floatingDice, die];
+    events.push({ kind: 'die-floated', dieId: die.id, color: dieColor, poolSize: nextFloating.length });
+    events.push({ kind: 'stake-won', color, payout });
+    return { conviction, floatingDice: nextFloating, stakeEscalationBonus: bonus };
+}
+
+/**
  * Resolves the current threat phase (HP model): the enemy executes its
  * telegraphed threat action on the player UNLESS a control status hinders it
  * (`canAct` → skipTurn). This is how control "hinders the enemy" — it loses its
@@ -2745,6 +2818,11 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
     const idx = Math.min(state.currentPhaseIndex, state.threatPhases.length - 1);
     const phase = state.threatPhases[idx];
     const events: CombatEvent[] = [];
+
+    // Phase 31 (EA-7) — THE STAKE settles here, before the escalation clock
+    // reads its round basis below, so a LOST stake's +1 round-equivalent
+    // already bites THIS phase's incoming hit, not just future ones.
+    const stakeResult = settleStake(state, phase, events);
 
     // Control on the enemy hinders its turn. HARD control (skipTurn) denies it
     // outright via canAct; SOFT control (confusion/fear/daze/slow/blind/accuracy-
@@ -2785,7 +2863,7 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
         ? 1
         : Math.min(
             THREAT_ESCALATION_MAX,
-            1 + escalationRate * Math.max(0, state.round - THREAT_ESCALATION_GRACE),
+            1 + escalationRate * Math.max(0, state.round - THREAT_ESCALATION_GRACE + stakeResult.stakeEscalationBonus),
         );
     // Same clock, applied to STATUS intensity instead of raw damage: the
     // longer the fight drags, the harder the enemy's telegraphed status lands
@@ -3057,6 +3135,12 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
         phase: 'phase-resolve',
         threatMarks,
         phaseResults: [...state.phaseResults, result],
+        // Phase 31 (EA-7) — THE STAKE settlement's payout/penalty + the
+        // wager itself clears regardless of outcome.
+        conviction: stakeResult.conviction,
+        floatingDice: stakeResult.floatingDice,
+        stake: undefined,
+        stakeEscalationBonus: stakeResult.stakeEscalationBonus,
     };
     next = withLog(next, events);
 

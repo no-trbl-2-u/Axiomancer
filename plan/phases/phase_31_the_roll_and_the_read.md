@@ -194,9 +194,6 @@ Shipping combined, one PR, three focused commits.
   omniscience — `blind`'s witness must stay uninformed); `blind` never
   stakes (matches the doc's acceptance criterion 2: the greedy-vs-blind
   gap must become measurably nonzero).
-- `cards.library.ts`: one new uncommon Oracle card, "While your Stake is
-  placed, OMEN riders fire at ×1.5" (reuses `the-oracles-eye`'s existing
-  multiplier hook — grep it before wiring, don't reinvent).
 - Mobile: one stake chip near the Conviction counter (3 stance icons ×
   3 amounts), a resolution toast at threat-phase reveal. Zero new drag
   surface (matches the doc's own "no new drag-and-drop grammar needed").
@@ -212,8 +209,13 @@ Shipping combined, one PR, three focused commits.
   inventing a new punishment currency.
 - **One stake per phase**, cleared on settlement regardless of outcome
   — no carrying a stake across phases, no stacking multiple stakes.
-- **The Oracle card ships as one card, not a mini-set** — matches the
-  doc's own scope ("one uncommon").
+- **The Oracle card is DEFERRED, not shipped this phase** — discovered
+  during implementation: `cards.library.ts` is doctrine-locked at exactly
+  70 cards / 7 per theme (verified by count); adding an 8th Oracle card
+  breaks that invariant. `CLAUDE.md` is explicit that the card POOL is
+  `/deck-tuning`'s domain (sandbox-first A/B, promote-or-swap), not
+  ship-a-phase's. Moved to Follow-ups — the STAKE mechanic itself ships
+  complete and playable without this flavor card.
 
 ## Part 3 — Reprice the signature economy
 
@@ -364,5 +366,10 @@ Iterate to green per the skill failure-mode rules.
 - THE COVETED DIE, GLYPHS, and the rest of the Gate-4 out-of-flow batch
   — explicitly staged after THE STAKE in
   `2026-07-10-out-of-flow-mechanics.md`, not this phase.
+- The "Wagered Sight" Oracle uncommon (omen riders ×1.5 while a Stake
+  settled this phase) — route through `/deck-tuning` as a card-pool
+  swap-or-add candidate (the theme is at its 7-card cap; shipping it
+  means retiring an underperforming Oracle card, a balance call
+  `/deck-tuning` owns, not ship-a-phase).
 - Theme-flavored signature variants (Gate 0 §4 lever 2) — coupled to
   Gate 2 theme work (Phase 32), not this phase's repricing pass.

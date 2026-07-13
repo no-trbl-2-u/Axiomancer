@@ -23,7 +23,7 @@ import {
     initializeCombatEncounter, rollEncounterDice, playCombatCard,
     resolveThreatPhase, startTurn, draftStanceDie, endTurn, chooseDraft, revealedCurrentStance,
     playSignatureSkill, getDraftedDie, handCards, selectMercyChoice, getSignatureSkill,
-    tapFateDie, recoilXRange,
+    tapFateDie, recoilXRange, placeStake,
 } from './combat.engine';
 import { RESERVE_MAX } from './combat.dice';
 import { getPendingDotTotal } from './effects';
@@ -164,6 +164,10 @@ const currentPhase = (s: CombatEncounterState) =>
 
 /** Dominates every policy score band so a focused card always ranks first. */
 const FOCUS_CARD_BOOST = 1e18;
+
+/** Phase 31 (EA-7) — the wager size an informed sim policy risks per stake;
+ *  the cheapest tier (a colored float, no pip bonus). */
+const STAKE_SIM_AMOUNT = 2;
 
 /**
  * The best card in hand to POWER now, per the active policy's `rankCard`
@@ -340,6 +344,19 @@ function policyPlayPhase(
         }
     }
 
+    // Phase 31 (EA-7) — THE STAKE: an informed witness (never omniscient —
+    // only when the CURRENT phase's stance is already REVEALED) risks a
+    // small wager once it has Conviction to spare above its signature
+    // threshold, so an informed read pays without starving the signature
+    // economy. `blind` never carries `stakesWhenInformed` — that's the
+    // measured gap THE STAKE is meant to open.
+    if (policy.stakesWhenInformed && !working.stake) {
+        const known = revealedCurrentStance(working);
+        if (known && working.conviction >= policy.convictionThreshold + STAKE_SIM_AMOUNT) {
+            working = placeStake(working, known, STAKE_SIM_AMOUNT).state;
+        }
+    }
+
     // ── Powered plays WITHIN the one turn ────────────────────────────────────
     // Power sources in order: the drafted die while it lives (the combo
     // refresh keeps it alive across NEW statuses), then the Reserve (oldest =
@@ -426,6 +443,12 @@ export function runOneEncounter(
      *  transcript. A legal policy NEVER trips the law: pinned 0 by the
      *  turn-law e2e. */
     turnLawBlocked: number;
+    /** Phase 31 (EA-7) — THE STAKE: how many times this run wagered and how
+     *  many of those wagers won. Zero for every policy without
+     *  `stakesWhenInformed` (the `blind` baseline THE STAKE's win-rate gap is
+     *  measured against). */
+    stakesPlaced: number;
+    stakesWon: number;
     activeEffectSamples: number[];
     cardUsage: Record<string, CombatCardUsage>;
     /** WS1.1 — per-card FREE/PAID line telemetry (fizzles, per-line HP swing,
@@ -527,6 +550,8 @@ export function runOneEncounter(
         statusPlays,
         convictionSpent,
         turnLawBlocked: state.log.filter(ev => ev.kind === 'turn-law-blocked').length,
+        stakesPlaced: state.log.filter(ev => ev.kind === 'stake-placed').length,
+        stakesWon: state.log.filter(ev => ev.kind === 'stake-won').length,
         dotHpDamage,
         mechanicBurstDamage,
         directHpDamage,

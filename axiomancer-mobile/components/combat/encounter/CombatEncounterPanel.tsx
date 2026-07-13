@@ -28,10 +28,11 @@ import Svg, { Circle, Defs, Line, Polygon, RadialGradient, Stop } from 'react-na
 import {
     initializeCombatEncounter, rollEncounterDice, playCombatCard, resolveThreatPhase,
     startTurn, endTurn, draftStanceDie, discardCombatCard, playSignatureSkill,
-    tapFateDie, getPendingDotTotal, getFloatingDiceColors,
+    tapFateDie, getPendingDotTotal, getFloatingDiceColors, placeStake,
     selectEncounterMercyChoice, buildCombatSummary, rollCombatCardRewards, addRewardCard,
     rollLoot, addItem,
     type CombatEncounterState, type CombatOutcome, type Character, type Enemy, type CombatEvent,
+    type WheelStance,
 } from '@mechanics';
 
 import { CombatBoard, CombatCardFace, HAND_CARD_W, HAND_CARD_H, type DragController, type DragPayload, type Rect } from '@/components/combat/encounter/CombatBoard';
@@ -422,6 +423,18 @@ export function CombatEncounterPanel({
         });
         setFxSeq((n) => n + 1);
     }, [apply]);
+    // Phase 31 (EA-7) — THE STAKE: a pre-play wager on the enemy's hidden
+    // stance this phase. `placeStake` is a no-op (silent guard, matching
+    // `startTurn`'s convention) if the wager isn't legal right now — the
+    // board only offers the chip when `vm.canStake` is true.
+    const onStake = useCallback((color: WheelStance, amount: 2 | 4 | 6) => {
+        apply((s) => {
+            const t = placeStake(s, color, amount);
+            fxRef.current = t.events;
+            return t.state;
+        });
+        setFxSeq((n) => n + 1);
+    }, [apply]);
     // Per-play choices threaded to `playCombatCard`: WS7.2 `chosenX` (the
     // X-cost stepper's pick) and phase 28 `reprisalCardId` (the REPRISE
     // songbook discard-pile pick — omitted/skipped falls back to the engine's
@@ -596,6 +609,7 @@ export function CombatEncounterPanel({
                     onPlayerInspect={onPlayerInspect}
                     momentum={momentum}
                     onMomentumInfo={onMomentumInfo}
+                    onStake={onStake}
                     fx={fx}
                     onFateTap={onFateTap}
                     bankSpare={bankSpare}

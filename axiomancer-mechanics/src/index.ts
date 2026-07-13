@@ -158,8 +158,8 @@ export {
     // Fate Engine P1 (spec 31) — the dice get a second read
     tapFateDie, riderText, RESERVE_MAX, RESERVE_PIP_CAP, ripenReserve,
     PIP_INTENSITY_BONUS, PIP_GUARD_BONUS, COLOR_MATCH_STATUS_DURATION_BONUS, FATE_TAP_CONVICTION,
-    // Phase 31 — the engine-native momentum wheel
-    isMomentumDieId,
+    // Phase 31 — the engine-native momentum wheel + THE STAKE
+    isMomentumDieId, placeStake,
 } from './Combat';
 /**
  * @deprecated Superseded by the COLOR LAW for die COST / play legality

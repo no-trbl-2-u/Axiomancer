@@ -631,6 +631,12 @@ export interface CombatEncounterState {
      *  on settlement regardless of outcome; at most one stake live at a time.
      *  Optional (absent = no stake placed this phase). */
     stake?: { color: WheelStance; amount: 2 | 4 | 6 };
+    /** Phase 31 (EA-7) — extra "round-equivalents" folded into THE CLOCK's
+     *  escalation basis (`resolveThreatPhase`'s `state.round - GRACE` term)
+     *  every time a placed stake is LOST — a wasted read costs time the same
+     *  way a slow round does. Monotonic (never decreases). Optional (absent
+     *  = 0, the pre-STAKE behavior). */
+    stakeEscalationBonus?: number;
     /** Spec 32 v3 T2 — the PREMISE tally (Peroration theme). Optional. */
     premises?: number;
     /** Spec 32 v3 T2 — the declared PERORATION (one in play at a time). */

@@ -196,8 +196,8 @@ export {
     projectCombatOutcome,
     // Spec 32 v3 — floating dice save-back + sway decay knob
     getFloatingDiceColors, SWAY_DECAY_PER_TURN,
-    // Phase 31 — the engine-native momentum wheel
-    isMomentumDieId,
+    // Phase 31 — the engine-native momentum wheel + THE STAKE
+    isMomentumDieId, placeStake,
 } from './combat.engine';
 /**
  * @deprecated Superseded by the COLOR LAW for die COST / play legality

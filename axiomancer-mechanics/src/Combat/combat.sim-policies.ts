@@ -14,12 +14,15 @@
  * underperformance IS the design), and `greedy`/`blind` remain the tuned
  * balance witnesses with bit-identical behavior to the pre-roster sim.
  *
- * Behavior guarantee: `greedy` and `blind` encode EXACTLY the legacy
- * `bestCard`/`bestSignature` ordering as a per-card score (payoff cards at
+ * Behavior guarantee: `greedy` and `blind`'s `rankCard`/`bestSignature`
+ * ordering encodes EXACTLY the legacy per-card score (payoff cards at
  * DoT/debuff thresholds, Befriend-at-lowHp, new-status-first,
- * status-over-strike, damage preview) — the balance-sim oracle
- * (`hazard-pattern-combat.balance.sim.test.ts`) passes unmodified. Their
- * `rankCard` never consumes rng, so the seeded engine stream is untouched.
+ * status-over-strike, damage preview) — never consumes rng, so the seeded
+ * engine stream is untouched there. Phase 31 (EA-7) adds one NEW, orthogonal
+ * decision seam on top — `stakesWhenInformed` (THE STAKE) — which
+ * deliberately makes `greedy`'s and `blind`'s outputs diverge (that
+ * divergence is the acceptance criterion: an informed read must out-earn a
+ * blind one). It never touches `rankCard`/`bestSignature`.
  */
 
 import { getCardById } from '../Cards/cards.library';
@@ -71,6 +74,15 @@ export interface CombatSimPolicy {
      * absent the sim plays the printed minimum. Only `chaos` consumes `rng`.
      */
     chooseX?(state: CombatEncounterState, card: CombatCard, range: { min: number; max: number }, rng: () => number): number;
+    /**
+     * OPTIONAL (Phase 31/EA-7 THE STAKE): true if this witness ever wagers a
+     * pre-play stake. The sim only stakes when the CURRENT phase's stance is
+     * already REVEALED — never omniscient, even for `greedy`: a stake is a
+     * bet on information the player actually has, not a peek at the engine's
+     * hidden state. Absent/false = never stakes (the `blind` baseline this
+     * witness's win-rate gap is measured against).
+     */
+    stakesWhenInformed?: boolean;
 }
 
 // ─── Score bands ─────────────────────────────────────────────────────────────
@@ -177,6 +189,10 @@ export const COMBAT_SIM_POLICIES: Record<CombatSimPolicyId, CombatSimPolicy> = {
         convictionThreshold: 7,
         mercyChoice: 'spare',
         chooseX: (_s, card, range) => greedyChooseX(card, range),
+        // Phase 31 (EA-7) — the informed read finally has a payday: greedy
+        // stakes when it actually knows the phase's stance (via the draft
+        // reveal or a scout), same as a well-played human would.
+        stakesWhenInformed: true,
     },
     blind: {
         id: 'blind',

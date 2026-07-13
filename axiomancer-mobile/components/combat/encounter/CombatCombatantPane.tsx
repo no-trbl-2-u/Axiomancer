@@ -277,6 +277,10 @@ export const PlayerMedallion = React.memo(function PlayerMedallion({
                 statuses.push({ text: kw, color });
             } else if (e.kind === 'buff-stripped' && e.target === 'self') {
                 statuses.push({ text: e.effectName ? `STRIP ${e.effectName.toUpperCase()}` : 'STRIP', color: '#a86bdc' });
+            } else if (e.kind === 'stake-won') {
+                statuses.push({ text: 'STAKE WON', color: '#d4af37' });
+            } else if (e.kind === 'stake-lost') {
+                statuses.push({ text: 'STAKE LOST', color: '#e2543b' });
             }
         }
         const IMPACT = 100;
