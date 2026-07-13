@@ -1196,7 +1196,7 @@ const theOliveBranch: Card = {
     category: 'paradox',
     philosophicalAspect: 'body',
     description:
-        'Extended with a steady hand, from inside their reach. Mercy offered ' +
+        'Extended with a steady hand, from inside their reach. A truce offered ' +
         'from a guard position carries further.',
     tier: 2, rank: 4, cardType: 'spell',
     targetType: 'enemy',
@@ -1241,7 +1241,7 @@ const heartOfTheMatter: Card = {
 const irresistibleGrace: Card = {
     id: 'irresistible-grace',
     theme: 'charm',
-    persistentEffect: 'SWAY never decays; each turn this holds, your SWAY gains grow +12% (max +108%).',
+    persistentEffect: 'SWAY does not decay. At the end of each turn, future SWAY gains increase by 12% (maximum +108%).',
     name: 'Irresistible Grace',
     category: 'paradox',
     philosophicalAspect: 'heart',
@@ -1408,7 +1408,7 @@ const hedgehogsDilemma: Card = {
 const crumblingResolve: Card = {
     id: 'crumbling-resolve',
     theme: 'bulwark',
-    persistentEffect: 'Each phase, standing GUARD deals 20% of itself (min 4); a fully-blocked attack STAGGERs the next telegraph.',
+    persistentEffect: 'After each threat phase, deal 20% of your remaining GUARD (minimum 4). Fully blocking an attack STAGGERs the next telegraph by 1.',
     name: 'Crumbling Resolve',
     category: 'fallacy',
     philosophicalAspect: 'body',
@@ -1530,7 +1530,8 @@ const ouroboros: Card = {
     philosophicalAspect: 'mind',
     description:
         'The argument eats its own tail and grows fat on it. Whatever you ' +
-        'said last, the serpent says again — and everything it has already said, it says for damage, all at once.',
+        'said last, the serpent says twice more — then every MARK it left ' +
+        'behind breaks open at once.',
     tier: 3, rank: 5, cardType: 'spell',
     targetType: 'enemy',
     // pts (phase 30): replay last spell PAID x2 (~10) + FREE MILL 1 (1,

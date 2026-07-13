@@ -305,6 +305,10 @@ export function mechanicText(m: CardSpecialMechanic): string | null {
         // KW-3 (phase 29): REPRISE→RECALL (rename; frees REPRISE — see the
         // audit's near-synonym-pair finding against ECHO/replay_last).
         case 'reprise': return `RECALL ${m.count}${m.fireFree ? (m.count === 1 ? ' — its FREE line fires now' : ' — their FREE lines fire now') : ''}`;
+        // A generic rider is still part of the PAID face. Omitting it hid real
+        // costs and payoffs on cards such as The Olive Branch, Second Thoughts,
+        // and Ouroboros.
+        case 'rider': return riderText(m.rider);
         // KW-2 (phase 29): no keyword badge — ouroboros (this mechanic's
         // sole, 1-of-rare carrier) speaks card-local rules text only.
         case 'replay_last': return `replay your last spell ×${m.times}`;
