@@ -2942,6 +2942,11 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
     let attacksLanded = 0;
     let attacksFullyBlocked = 0;
     let damagePrevented = 0;
+    // Spec 32 §2 PA-3 — the raw (pre-soak) size of every attack the wall
+    // (parry + guard + barrier, combined) brought all the way to 0 this
+    // phase. RIPOSTE's counter scales off this, not a flat printed number —
+    // "the wall IS the weapon."
+    let blockedBlowTotal = 0;
     // Spec 32 §12 #4 — post-soak HP the enemy's threat lands on the player
     // this phase (the `enemyDamageThisTurn` ledger's write site).
     let enemyDamageDealt = 0;
@@ -2973,6 +2978,7 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
                     * enemyOutgoingMult * enemyThreatMult
                     * (overextendedId ? 0.5 : 1) * playerTakenMult,
                 );
+                const preSoakDmg = dmg;
                 // RIPOSTE parry reduces the incoming hit once this phase.
                 if (riposte && !riposteFired && riposte.reduce > 0) {
                     const parried = Math.min(dmg, riposte.reduce);
@@ -3009,7 +3015,10 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
                         }
                     }
                 }
-                else attacksFullyBlocked += 1;
+                else {
+                    attacksFullyBlocked += 1;
+                    blockedBlowTotal += preSoakDmg;
+                }
             }
             if (eff.effectId && !doubtId && riderSuppressId) {
                 // WS8.2: the rider is ERASED, honestly logged — the phase still
@@ -3063,9 +3072,13 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
         if (doubtId) enemy = consumeEffect(enemy, doubtId);
         if (overextendedId) enemy = consumeEffect(enemy, overextendedId);
         // RIPOSTE counter — spec 32 v3: fires only when your Guard/Barrier FULLY
-        // blocked an attack this phase (reflect class, §1 source 4).
+        // blocked an attack this phase (reflect class, §1 source 4). Spec 32
+        // §2 PA-3: the counter reflects the prevented blow's actual size, not
+        // a flat printed number — floored at the card's printed `damage` so a
+        // card never counters for less than it did before this rework (the
+        // wall IS the weapon; bigger threats become bigger paydays).
         if (riposte && attacksLanded > 0 && attacksFullyBlocked > 0) {
-            const counter = Math.round(riposte.damage * getDamageTakenMultiplier(enemy));
+            const counter = Math.round(Math.max(riposte.damage, blockedBlowTotal) * getDamageTakenMultiplier(enemy));
             if (counter > 0) {
                 const hit = applyEnemyDamage(enemy, counter, state.round, events);
                 enemy = hit.enemy;

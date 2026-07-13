@@ -1359,7 +1359,8 @@ const measuredAnswer: Card = {
     targetType: 'self',
     // pts (phase 30): Guard 6 (1.5) + RIPOSTE 3/parry 2 (~4) + FREE persistent
     // GUARD 3 (1, replaces the fading chip) + full-block gate + tempo ≈ 9.25
-    // → Theorem
+    // → Theorem. Phase 32 part 2: RIPOSTE's 3 is now a floor — it counters
+    // for the full prevented blow when that exceeds 3 (unscored upside).
     free: { barrier: 3 },
     specialMechanics: [{ kind: 'guard', amount: 6 }, { kind: 'riposte', damage: 3, reduce: 2 }],
     addedIn: '2026-07-08',
@@ -1379,7 +1380,8 @@ const theAdamantWall: Card = {
     targetType: 'self',
     // pts (phase 30): persistent GUARD 10 (3.3) + RIPOSTE 4/parry 2 (~5) +
     // FREE persistent GUARD 3 (1, replaces the fading chip) + persistence ≈
-    // 13.3 → Axiom
+    // 13.3 → Axiom. Phase 32 part 2: RIPOSTE's 4 is now a floor — it counters
+    // for the full prevented blow when that exceeds 4 (unscored upside).
     free: { barrier: 3 },
     specialMechanics: [{ kind: 'barrier', amount: 10 }, { kind: 'riposte', damage: 4, reduce: 2 }],
     addedIn: '2026-07-08',
