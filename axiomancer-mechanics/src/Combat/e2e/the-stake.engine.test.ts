@@ -48,7 +48,7 @@ registerSandboxCards([
 const rng = (): number => 0.5;
 const STAKE_DECK = ['qa-stake-heart', 'qa-stake-heart', 'qa-stake-heart', 'qa-stake-heart', 'qa-stake-heart', 'qa-stake-heart'];
 
-function makePlayer(conviction = 0, floating: ('heart' | 'body' | 'mind' | 'wild')[] = []): Character {
+function makePlayer(floating: ('heart' | 'body' | 'mind' | 'wild')[] = []): Character {
     const p = deepClone(Player);
     p.knownCards = STAKE_DECK.slice();
     p.baseStats = { heart: 8, body: 8, mind: 8 };
@@ -71,7 +71,7 @@ function makeEnemy(): Enemy {
  *  Conviction (dice-law 2026-07-09), so setting it beforehand wouldn't
  *  survive the draft's own token income. */
 function openDrafted(conviction = 10, floating: ('heart' | 'body' | 'mind' | 'wild')[] = []): CombatEncounterState {
-    let s = initializeCombatEncounter(makePlayer(0, floating), makeEnemy(), STAKE_DECK, 7);
+    let s = initializeCombatEncounter(makePlayer(floating), makeEnemy(), STAKE_DECK, 7);
     s = rollEncounterDice(s, rng).state;
     const die = s.dice.find(d => d.state === 'available' && !d.floating && d.color !== 'x');
     expect(die).toBeDefined();
@@ -89,7 +89,7 @@ function stances(s: CombatEncounterState): { right: WheelStance; wrong: WheelSta
 
 describe('Phase 31 — THE STAKE', () => {
     it('rejects a wager before a die is drafted this turn', () => {
-        let s = initializeCombatEncounter(makePlayer(10), makeEnemy(), STAKE_DECK, 7);
+        let s = initializeCombatEncounter(makePlayer(), makeEnemy(), STAKE_DECK, 7);
         s = { ...s, conviction: 10 };
         s = rollEncounterDice(s, rng).state; // dice rolled, nothing drafted yet
         const res = placeStake(s, 'heart', 2);
