@@ -2,14 +2,10 @@ name: preview-build
 
 # Manually-triggered EAS build of the mobile app. Runs the verify gate, then
 # (optionally) the visual smoke screens, then an EAS build from the mobile
-# package directory (where eas.json + app config live).
+# package directory (where eas.json + app config live). Automatic scheduling
+# was removed 2026-07-13; preview builds run only by attended dispatch.
 
 on:
-  schedule:
-    # GitHub Actions cron uses UTC. Fixed EST time: 09:15 EST -> 14:15 UTC.
-    # Throttled from 2x/day to 1x/day to cut Actions minutes (2026-07-08
-    # usage review) — each run is a full EAS build (~22 min avg).
-    - cron: '15 14 * * *'
   workflow_dispatch:
     inputs:
       platform:
