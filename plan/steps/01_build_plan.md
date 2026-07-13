@@ -324,7 +324,7 @@ order, intra-batch gates noted per phase):**
       `plan/tuning/2026-07-10-turn-texture.md` §1 — brief:
       `plan/phases/phase_30_free_lines.md`
       — `feat: FREE-currency law — 70-card content pass — phase 30` (5e723df3)
-- [ ] Phase 31 — The Roll and the Read. Momentum wheel engine-native
+- [x] Phase 31 — The Roll and the Read. Momentum wheel engine-native
       (kills the host-side write; sims learn it), THE STAKE (pre-draft
       Conviction wager on the hidden stance, paid in floats), signature
       economy repriced against Phase 27 income. Momentum scope/naming
@@ -332,7 +332,10 @@ order, intra-batch gates noted per phase):**
       + grace buff rename); repricing gated on Phase 27 (mechanics) —
       source: `plan/tuning/2026-07-10-momentum-scoping.md` +
       `plan/tuning/2026-07-10-out-of-flow-mechanics.md` §1 +
-      turn-law doc §4
+      turn-law doc §4 — brief: `plan/phases/phase_31_the_roll_and_the_read.md`
+      — `feat(mechanics,mobile): momentum wheel engine-native — phase 31 part 1` (380e3849),
+      `feat(mechanics,mobile): THE STAKE — phase 31 part 2` (48c89f34),
+      `feat(mechanics): reprice sig-conviction-strike — phase 31 part 3` (040202fd)
 - [ ] Phase 32 — Theme Deep Work (sandbox-first, `/deck-tuning` owns).
       One sub-phase per rework: harvest (REAP attacks max HP +
       travelling Souls), bulwark (RIPOSTE reflects the prevented
