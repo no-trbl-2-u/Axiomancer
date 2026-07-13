@@ -3216,8 +3216,9 @@ function pendingOutcome(state: CombatEncounterState): CombatEncounterState['fina
 
 /**
  * Between-phases processing (§4.5): DoT ticks erode HP (start+end phase) on both
- * sides, effect durations tick, and a fresh hand of 5 is drawn. Advances the
- * phase pointer (looping the final phase so the enemy keeps attacking).
+ * sides, effect durations tick, and the hand refills up to COMBAT_HAND_SIZE
+ * (unplayed cards are KEPT — keep-hand rule). Advances the phase pointer
+ * (looping the final phase so the enemy keeps attacking).
  */
 export function processBetweenPhases(
     state: CombatEncounterState,
@@ -3403,8 +3404,9 @@ export function processBetweenPhases(
     let omenState: CombatEncounterState = {
         ...state, player, enemy, threatPhases, revealedStances,
     };
-    // Cards an omen rider draws must survive the fresh-hand redraw below —
-    // fold them into the draw count instead of drawing into the doomed hand.
+    // Cards an omen rider draws are folded into the boundary refill below —
+    // they raise the refill target, so an omen hit nets EXTRA cards on top of
+    // the kept hand instead of being capped by pre-refill hand room.
     let omenBonusDraw = 0;
     const pendingOmens = state.pendingOmens ?? [];
     if (pendingOmens.length > 0) {
@@ -3453,8 +3455,9 @@ export function processBetweenPhases(
                             : undefined,
                     };
                     events.push({ kind: 'omen-hit', cardId: omen.cardId, phaseIndex: nextIndex, riderText: riderText(rider) });
-                    // drawCards rides the fresh hand (drawn below) — drawing
-                    // into the current hand would be wiped by the redraw.
+                    // drawCards rides the boundary refill (below) — raising
+                    // the refill target guarantees the omen's cards land on
+                    // top of the kept hand, uncapped by hand room.
                     omenBonusDraw += rider.drawCards ?? 0;
                     omenState = applyRiderToState(
                         omenState, omen.cardId, { ...rider, drawCards: undefined }, events, rng,
@@ -3532,25 +3535,28 @@ export function processBetweenPhases(
         }
     }
 
-    // 5. Draw a fresh hand (discard the old hand — Hazard's "draw fresh").
-    //    `achilles-and-the-tortoise` adds +1 to the draw after a denied turn.
-    //    WS2.1 one-use law: an unplayed CONJURED Thoughtform leaves the combat
-    //    ENTIRELY at the boundary — it never enters the discard pile (where a
-    //    reshuffle would resurrect it as a permanent deck card) and its uid is
-    //    released from the one-use ledger.
+    // 5. Refill the hand up to COMBAT_HAND_SIZE (keep-hand rule, 2026-07-13):
+    //    unplayed cards STAY in hand and occupy draw room, so holding a card
+    //    is a real cost — a dead card clogs the hand until it is played or
+    //    scrapped. `achilles-and-the-tortoise` raises the refill target by 1
+    //    after a denied turn; omen-hit draws raise it too (see omenBonusDraw).
+    //    WS2.1 one-use law still holds: an unplayed CONJURED Thoughtform
+    //    leaves the combat ENTIRELY at the boundary — it never enters the
+    //    hand-carryover (or the discard pile, where a reshuffle would
+    //    resurrect it as a permanent deck card) and its uid is released from
+    //    the one-use ledger.
     const conjuredLedger = omenState.conjuredUids ?? [];
     const sweptConjuredUids = omenState.hand
         .filter(h => conjuredLedger.includes(h.uid))
         .map(h => h.uid);
-    const discardedHand = omenState.hand
-        .filter(h => !conjuredLedger.includes(h.uid))
-        .map(h => h.cardId);
+    const keptHand = omenState.hand.filter(h => !conjuredLedger.includes(h.uid));
+    const refillTarget = COMBAT_HAND_SIZE + bonusDraw + omenBonusDraw;
     const draw = drawCombatCards(
-        omenState.drawPile, [...omenState.discard, ...discardedHand], omenState.deck,
-        COMBAT_HAND_SIZE + bonusDraw + omenBonusDraw, rng,
+        omenState.drawPile, omenState.discard, omenState.deck,
+        Math.max(0, refillTarget - keptHand.length), rng,
     );
     let uid = state.round * 100;
-    const hand = draw.drawn.map(cardId => ({ uid: `c${++uid}`, cardId }));
+    const hand = [...keptHand, ...draw.drawn.map(cardId => ({ uid: `c${++uid}`, cardId }))];
     events.push({ kind: 'hand-drawn', cards: draw.drawn });
 
     // Spec 32 v4 §2.1 — tick the FREE-line TIMED enchant/disenchant zones. Each

@@ -201,15 +201,20 @@ describe('greedy object reproduces the pinned decision sequences', () => {
     // straw-mans-jab's FREE lines moved from TICK (retired registry-wide) to
     // a MARK seed under the FREE-currency law, shifting greedy's per-play
     // scoring on the merged tree.
+    //
+    // Re-pinned 2026-07-13 (keep-hand rule): COMBAT_HAND_SIZE 6→5 and the
+    // round boundary now REFILLS the kept hand instead of redrawing it —
+    // fewer cards per round means fewer plays on the same seeds. Outcomes
+    // and round counts are unchanged on both pins.
     it('seed 11 vs LittleBelle: a two-round status victory', () => {
         const r = runOneEncounter(loadout(MIX), LittleBelle, 11, 'greedy');
         expect({ outcome: r.outcome, rounds: r.rounds, plays: r.plays, statusPlays: r.statusPlays })
-            .toEqual({ outcome: 'victory', rounds: 2, plays: 11, statusPlays: 9 });
+            .toEqual({ outcome: 'victory', rounds: 2, plays: 9, statusPlays: 8 });
         expect(r.cardUsage['slippery-slope']).toEqual({
             cardId: 'slippery-slope', plays: 3, bottomPlays: 3, topPlays: 0, statusLands: 3, discards: 0,
         });
         expect(r.cardUsage['straw-mans-jab']).toEqual({
-            cardId: 'straw-mans-jab', plays: 3, bottomPlays: 3, topPlays: 0, statusLands: 3, discards: 0,
+            cardId: 'straw-mans-jab', plays: 2, bottomPlays: 2, topPlays: 0, statusLands: 2, discards: 0,
         });
     });
 
@@ -220,12 +225,13 @@ describe('greedy object reproduces the pinned decision sequences', () => {
     // reveal-stance deposit. This is a narrow fidelity pin on `greedy`'s
     // decision sequence, not a balance gate (that's the win-rate-curve
     // suite). post-Phase-30 merge re-pin 2026-07-12 against the merged tree.
+    // Re-pinned 2026-07-13 (keep-hand rule, see the LittleBelle pin above).
     it('seed 11 vs KingOfRevenge: a four-round status victory (Gate 0 law: one tray per phase)', () => {
         const r = runOneEncounter(loadout(MIX), KingOfRevenge, 11, 'greedy');
         expect({ outcome: r.outcome, rounds: r.rounds, plays: r.plays, statusPlays: r.statusPlays })
-            .toEqual({ outcome: 'victory', rounds: 4, plays: 19, statusPlays: 12 });
+            .toEqual({ outcome: 'victory', rounds: 4, plays: 15, statusPlays: 10 });
         expect(r.cardUsage['straw-mans-jab']).toEqual({
-            cardId: 'straw-mans-jab', plays: 6, bottomPlays: 6, topPlays: 0, statusLands: 6, discards: 0,
+            cardId: 'straw-mans-jab', plays: 4, bottomPlays: 4, topPlays: 0, statusLands: 4, discards: 0,
         });
         // card-retreat no longer exists — it can never appear in cardUsage.
     }, 30_000);

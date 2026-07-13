@@ -328,10 +328,10 @@ describe('Spec 26b §1 — status-combo loop', () => {
     });
 });
 
-// ── Between-phases: DoT ticks + duration tick + fresh hand (§4.5) ─────────────
+// ── Between-phases: DoT ticks + duration tick + hand refill (§4.5) ────────────
 
 describe('Spec 25 §4.5 — between-phases processing', () => {
-    it('fires enemy DoT ticks (erodes HP), ticks effect durations, draws a fresh hand', () => {
+    it('fires enemy DoT ticks (erodes HP), ticks effect durations, refills the hand', () => {
         mockSequentialRng(0.05);
         // WS3.3: poison/bleed ride EVENT clocks now — the round-boundary
         // witness here is Nettle Cloak's Nettle Sting (round-end round clock).
@@ -355,6 +355,32 @@ describe('Spec 25 §4.5 — between-phases processing', () => {
         // A new phase resets the draft so the next turn rolls fresh.
         expect(after.draftedDieId).toBeNull();
         expect(after.dice.length).toBe(0);
+    });
+
+    it('keep-hand rule: unplayed cards survive the boundary (same uids) and the refill draws only the difference', () => {
+        mockSequentialRng(0.05);
+        let state = initializeCombatEncounter(
+            makePlayer([DOT_BODY, CONTROL_CARD]), makeEnemy(200, 'mind'),
+            [DOT_BODY, DOT_BODY, DOT_BODY, CONTROL_CARD, CONTROL_CARD, CONTROL_CARD, DOT_BODY, CONTROL_CARD], 5);
+        state = rollEncounterDice(state).state;
+        expect(state.hand.length).toBe(COMBAT_HAND_SIZE);
+        state = setDice(state, ['body', 'heart']);
+        // Play ONE card; the other four stay in hand across the boundary.
+        state = draftAndPlay(state, DOT_BODY).state;
+        const heldUids = state.hand.map(h => h.uid);
+        expect(heldUids.length).toBe(COMBAT_HAND_SIZE - 1);
+
+        const bp = processBetweenPhases(state);
+        const after = bp.state;
+        // All four held cards survive with their uids intact…
+        for (const uid of heldUids) {
+            expect(after.hand.some(h => h.uid === uid)).toBe(true);
+        }
+        // …and exactly ONE card was drawn to refill back to the target.
+        const drawnEvent = bp.events.find(e => e.kind === 'hand-drawn') as { cards: string[] } | undefined;
+        expect(drawnEvent).toBeDefined();
+        expect(drawnEvent!.cards.length).toBe(1);
+        expect(after.hand.length).toBe(COMBAT_HAND_SIZE);
     });
 });
 

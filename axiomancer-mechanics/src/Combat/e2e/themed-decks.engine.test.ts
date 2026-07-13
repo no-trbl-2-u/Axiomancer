@@ -289,7 +289,7 @@ describe('OMEN — declare with the powering die; resolve at the phase boundary'
         };
     }
 
-    it('a HIT fires the rider free (+2 cards ride the fresh hand) and counts an omen hit', () => {
+    it('a HIT fires the rider free (+2 cards ride the boundary refill) and counts an omen hit', () => {
         mockSequentialRng(0.05);
         let state = initializeCombatEncounter(
             makePlayer([OMEN_CARD]), makeEnemy(300, 'mind'),
@@ -309,8 +309,8 @@ describe('OMEN — declare with the powering die; resolve at the phase boundary'
         expect(res.events.some(e => e.kind === 'omen-hit')).toBe(true);
         expect(res.state.omenHits).toBe(1);
         expect(res.state.pendingOmens).toEqual([]);
-        // The drawn 2 survive the between-phases redraw: hand = 6 + 2.
-        expect(res.state.hand.length).toBe(8);
+        // The drawn 2 raise the boundary refill target: 4 kept + refill to 5+2.
+        expect(res.state.hand.length).toBe(7);
     });
 
     it('a MISS fires no rider and counts nothing', () => {
@@ -330,7 +330,7 @@ describe('OMEN — declare with the powering die; resolve at the phase boundary'
         expect(res.events.some(e => e.kind === 'omen-missed')).toBe(true);
         expect(res.events.some(e => e.kind === 'omen-hit')).toBe(false);
         expect(res.state.omenHits).toBe(0);
-        expect(res.state.hand.length).toBe(6); // just the plain fresh hand
+        expect(res.state.hand.length).toBe(5); // just the plain refill to COMBAT_HAND_SIZE
     });
 });
 
