@@ -144,11 +144,15 @@ These experiments were run and reverted. Do not repeat them without new evidence
 
 ### Task 3A: Audit Grace card wording
 
-**Objective:** Ensure every unique card in the Grace preset states its complete FREE and PAID payload using defined vocabulary.
+**Objective:** Ensure every unique card in the Grace preset and every Charm-library card states its complete FREE and PAID payload using defined vocabulary.
 
 **Result:** Complete on the current working tree.
 
 - `soft-word` — clear; no rewrite needed.
+- `disarming-smile` — its HEAL rider was hidden; projection fixed.
+- `common-ground` — clear once its draw, RAPPORT, and SWAY clauses are projected together.
+- `heart-of-the-matter` — its non-ECHOed HEAL rider was hidden; projection fixed and distinguished from the ECHOed SWAY.
+- `mirror-of-longing` — grammar now says damage *prevented by* GUARD or RIPOSTE becomes SWAY.
 - `second-thoughts` — its PAID MARK-consumption rider was mechanically real but absent from projected card text; projection fixed.
 - `the-olive-branch` — its PAID CLEANSE/HEAL rider was hidden; projection fixed. Flavor now says “truce” rather than the separate Mercy/Befriend concept.
 - `measured-answer` — clear under the registered GUARD/RIPOSTE definitions; no rewrite needed.
@@ -156,7 +160,7 @@ These experiments were run and reverted. Do not repeat them without new evidence
 - `ouroboros` — its PAID MARK-consumption rider was hidden; projection fixed. Flavor now matches “last spell twice” rather than implying the entire spell history repeats.
 - `crumbling-resolve` — now names the threat-phase clock, remaining-GUARD basis, minimum damage, and STAGGER 1 amount.
 
-**Witness:** `src/Combat/e2e/grace-card-wording.engine.test.ts` projects all seven unique cards through `toCombatCard` and pins every material clause.
+**Witness:** `src/Combat/e2e/grace-card-wording.engine.test.ts` projects all eleven unique preset-or-Charm-library cards through `toCombatCard` and pins every material clause.
 
 ### Task 4: Run one bounded perturbation
 

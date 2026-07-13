@@ -1261,7 +1261,7 @@ const irresistibleGrace: Card = {
 const mirrorOfLonging: Card = {
     id: 'mirror-of-longing',
     theme: 'charm',
-    persistentEffect: 'Damage your GUARD or RIPOSTE prevents becomes SWAY, 1:1.',
+    persistentEffect: 'Damage prevented by your GUARD or RIPOSTE becomes SWAY, 1:1.',
     name: 'Mirror of Longing',
     category: 'paradox',
     philosophicalAspect: 'heart',
