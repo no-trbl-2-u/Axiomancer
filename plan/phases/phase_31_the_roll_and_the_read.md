@@ -273,16 +273,66 @@ under farmed income. **This phase re-measures before repricing**
   and still respects the locked 80/50/25-35/0 doctrine
   (`CLAUDE.md` "Load-bearing doctrine (set 2026-07-08)").
 
+### Measured (2026-07-13, post Parts 1-2)
+
+`buildCombatSummary`/`recordAttribution` never attributes signature-applied
+DoT ticks to the casting signature (they land in the "lingering
+afflictions" bucket) — literal damage-share isn't available from existing
+tooling without building new attribution plumbing, which is out of this
+phase's scope. Used **cast-share** as the available, honestly-labeled
+proxy instead: a 540-run stage-matrix (`COMBAT_STAGE_ORDER` × every stage
+enemy × 30 seeds, `greedy` policy, policy-pick decks — mirroring
+`runPlaytestCell`'s own deck-building) via a new `signatureCastsByKind`
+field added to `runOneEncounter`'s return (mirrors the existing
+`turnLawBlocked`/`stakesPlaced` counters). Result: only 2 of 8 signatures
+ever fired at all (`sig-conviction-strike`, `sig-overwhelming-argument` —
+`mercy`/`conclude`/utility kinds never reached `bestSignature`'s
+affordability+kind filter under `greedy`'s funded kinds + these decks), and
+of the 67 total casts across 540 runs, `sig-conviction-strike` took 56
+(83.6%) — the dominance survives Parts 1-2's independent Conviction-sink
+corrections, confirming Gate 0's own suspicion that the old 90-95%
+damage-share figure understated a *structural* mechanism, not just a farmed
+one.
+
+**Root cause, not just correlation**: `sig-conviction-strike` cost 7◆,
+`sig-overwhelming-argument` cost 8◆, and `greedy`'s `convictionThreshold`
+sits at 7 — so any run that banked exactly 7 (not yet 8) Conviction could
+*only* ever afford the DoT signature; `bestSignature` (`combat.encounter.sim.ts:206-218`)
+already filters by `conviction >= cost`, so control never got a look in
+that 1◆ window. Combined with `sig-conviction-strike` being the
+guaranteed-never-fizzles pick, it held a double edge (cheaper AND safer).
+
 ### Decisions made upfront — DO NOT ASK
 
-- **Measure-first, change-only-if-warranted.** This phase does not
-  assume the pre-law 90-95% figure still holds — it's explicitly
-  flagged as stale in both source docs. The commit body must show the
-  actual re-measured number next to any cost change.
+- **Measure-first, change-only-if-warranted** — done above; the
+  dominance survived, so lever 1 fires.
+- **The fix is price parity, not a magnitude nerf**: raise
+  `sig-conviction-strike` 7◆ → 8◆ to match `sig-overwhelming-argument`.
+  This removes the structural "only-affordable-at-7" edge without
+  touching either signature's actual payload — both compete on merits
+  once a policy holds 8◆, instead of dot auto-winning the 7-7 gap.
+- **No `convictionThreshold` changes needed.** `bestSignature` already
+  gates per-signature by `conviction >= cost` (not by the coarser
+  `convictionThreshold` policy gate, which only decides whether to
+  *attempt* a cast at all) — raising the cost alone makes both
+  signatures equally unaffordable until 8◆, with zero risk of stranding
+  a policy or breaking the `convictionThreshold === 7` pins in
+  `combat-sim-policies.engine.test.ts`.
+- **`combat.autoplay.ts:101`'s hardcoded `conviction >= 6` pre-filter is
+  left unchanged.** It's a cheap pre-check before `bestAutoSignature`,
+  which does its own real `conviction < sig.cost` filter
+  (`combat.autoplay.ts:66-73`) — so no fizzle risk from the repricing;
+  the outer 6 just occasionally triggers one extra no-op lookup in the
+  6-7 Conviction band, unchanged behavior otherwise. Touching it is
+  unrelated scope.
+- **`combat-playtest.balance-bands.sim.test.ts` needed no pin changes**
+  — re-ran clean; the win-rate curve is driven by card play, not
+  signature spam (signatures average 0.12 casts/run even before this
+  change), so a 1◆ signature-cost shift doesn't move the doctrine bands.
 - **Repricing lever order follows Gate 0 §4 verbatim**: (1) cost/effect
-  tuning first, (2) theme-flavoring is Gate 2 scope (not this phase),
-  (3) Conviction sinks-as-decisions is THE STAKE (Part 2, same phase).
-  This phase only exercises lever 1.
+  tuning first (done), (2) theme-flavoring is Gate 2 scope (not this
+  phase), (3) Conviction sinks-as-decisions is THE STAKE (Part 2, same
+  phase, already shipped). This phase only exercises lever 1.
 
 ## Tests
 

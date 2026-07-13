@@ -379,7 +379,7 @@ describe('Spec 26b §4 — Signature Skills (Conviction-funded)', () => {
         state = rollEncounterDice(state).state;
         state = { ...state, conviction: 9 };
         const r = playSignatureSkill(state, 'sig-conviction-strike');
-        expect(r.state.conviction).toBe(2); // cost 7
+        expect(r.state.conviction).toBe(1); // cost 8 (Phase 31 repricing)
         // The poison DoT lands on the enemy (it will tick HP each phase).
         expect(r.state.enemy.effects.some(e => e.effectId === 'debuff_poison')).toBe(true);
     });

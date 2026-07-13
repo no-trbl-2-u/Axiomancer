@@ -51,8 +51,19 @@ export const SIGNATURE_SKILLS: Record<SignatureSkillId, SignatureSkill> = {
         magnitude: 1, effectKind: 'control', effectId: 'debuff_petrify',
         description: 'Petrify the foe — it turns to stone and loses its next turn. A boss is too willful to freeze: it is STAGGERED instead.',
     },
+    // Phase 31 (EA-8, Gate 0 §4 lever 1, re-measured 2026-07-13): cost
+    // raised 7 -> 8 to match `sig-overwhelming-argument`. At 7, this was
+    // BOTH the cheaper AND the more reliable (never-fizzles) of the two
+    // `greedy`-funded signatures — any run that saved exactly 7-but-not-8
+    // Conviction could only ever afford this one, structurally starving
+    // control of its turn. A 540-run stage-matrix re-measurement (post
+    // Phase 26 Turn Law + this phase's THE STAKE, both already-shipped
+    // Conviction-sink corrections) still showed it at 83.6% of all
+    // signature casts (56/67) — the dominance survived those fixes, so
+    // this lever fires. Price parity lets both compete once a policy
+    // actually holds 8◆, instead of dot auto-winning the 7-7 window.
     'sig-conviction-strike': {
-        id: 'sig-conviction-strike', name: 'Conviction Strike', kind: 'dot', cost: 7,
+        id: 'sig-conviction-strike', name: 'Conviction Strike', kind: 'dot', cost: 8,
         magnitude: 3, effectKind: 'dot', effectId: 'debuff_poison',
         description: 'A guaranteed venom at boosted intensity — DoT that cannot fizzle.',
     },

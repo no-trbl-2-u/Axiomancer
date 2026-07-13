@@ -449,6 +449,11 @@ export function runOneEncounter(
      *  measured against). */
     stakesPlaced: number;
     stakesWon: number;
+    /** Phase 31 (EA-8/Gate 0 §4) — signature-cast counts by id, for the
+     *  repricing pass's dominance measurement (signature damage isn't
+     *  attributed per-card the way `attribution` is — cast-share is the
+     *  available proxy). */
+    signatureCastsByKind: Record<string, number>;
     activeEffectSamples: number[];
     cardUsage: Record<string, CombatCardUsage>;
     /** WS1.1 — per-card FREE/PAID line telemetry (fizzles, per-line HP swing,
@@ -552,6 +557,10 @@ export function runOneEncounter(
         turnLawBlocked: state.log.filter(ev => ev.kind === 'turn-law-blocked').length,
         stakesPlaced: state.log.filter(ev => ev.kind === 'stake-placed').length,
         stakesWon: state.log.filter(ev => ev.kind === 'stake-won').length,
+        signatureCastsByKind: state.log.reduce<Record<string, number>>((acc, ev) => {
+            if (ev.kind === 'signature-cast') acc[ev.signatureId] = (acc[ev.signatureId] ?? 0) + 1;
+            return acc;
+        }, {}),
         dotHpDamage,
         mechanicBurstDamage,
         directHpDamage,
