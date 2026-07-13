@@ -213,9 +213,8 @@ const KEYWORD_GLOSS: Record<string, string> = {
     // ── Bulwark (T9) ──
     Thorns: 'The enemy takes 1 VITAE per Thorns stack each threat phase it attacks you — even through a full block.',
     Riposte:
-        'Armed for one threat phase: reduces the first incoming attack by its parry (CUT) value. '
-        + 'If your Guard fully blocks it, the enemy takes its counter (CTR) damage — '
-        + 'or more, if the blow you stopped was bigger.',
+        'Armed for one threat phase: reduces the first attack by its parry (CUT) value. '
+        + 'If Guard fully blocks it, the enemy takes CTR damage — or more if the blow was bigger.',
     // ── Echo (T10) ──
     Echo: "The card's PAID line fires twice. FREE lines never echo.",
     Recall: 'Returns that many cards from your discard pile to your hand — highest rank first.',
