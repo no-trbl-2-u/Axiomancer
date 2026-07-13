@@ -109,7 +109,11 @@ function deabbreviateShorthand(text: string): string {
  *  Never a fabricated number. */
 function freeLineText(card: CombatCard, sourceCard?: Card): string {
     if (card.cardType === 'enchantment' || card.cardType === 'disenchant') return persistentFreeText(card);
-    return sourceCard?.free ? deabbreviateShorthand(riderText(sourceCard.free)) : 'no effect';
+    // selfTargetCard: a rider crossing the card's printed target names its side
+    // ('mark ×1 (enemy)' on the self-target ad-nauseam — card-clarity audit).
+    return sourceCard?.free
+        ? deabbreviateShorthand(riderText(sourceCard.free, { selfTargetCard: sourceCard.targetType === 'self' }))
+        : 'no effect';
 }
 
 /** The barrel doesn't export CardRider — derive it from Card. */

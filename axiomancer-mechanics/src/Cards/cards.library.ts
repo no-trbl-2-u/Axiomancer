@@ -655,7 +655,7 @@ const crownOfThorns: Card = {
 const mirrorOfGuilt: Card = {
     id: 'mirror-of-guilt',
     theme: 'akrasia',
-    persistentEffect: 'Your self-debuffs land 1 stack on the enemy too; +1 stack per 3 RECOIL paid.',
+    persistentEffect: 'Each self-debuff you land also lands 1 stack of itself on the enemy; every 3 RECOIL paid lands 1 more.',
     name: 'Mirror of Guilt',
     category: 'paradox',
     philosophicalAspect: 'mind',
@@ -1232,7 +1232,7 @@ const heartOfTheMatter: Card = {
 const irresistibleGrace: Card = {
     id: 'irresistible-grace',
     theme: 'charm',
-    persistentEffect: 'SWAY never decays; each gain lands +12% per turn held (max +108%).',
+    persistentEffect: 'SWAY never decays; each turn this holds, your SWAY gains grow +12% (max +108%).',
     name: 'Irresistible Grace',
     category: 'paradox',
     philosophicalAspect: 'heart',
@@ -1252,7 +1252,7 @@ const irresistibleGrace: Card = {
 const mirrorOfLonging: Card = {
     id: 'mirror-of-longing',
     theme: 'charm',
-    persistentEffect: 'Damage your GUARD or parry prevents becomes SWAY, 1:1.',
+    persistentEffect: 'Damage your GUARD or RIPOSTE prevents becomes SWAY, 1:1.',
     name: 'Mirror of Longing',
     category: 'paradox',
     philosophicalAspect: 'heart',
