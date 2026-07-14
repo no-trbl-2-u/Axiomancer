@@ -461,6 +461,13 @@ export type CombatEvent =
     // Spec 32 v4 — a FREE-line temporary enchant/disenchant ticked out of its zone.
     | { kind: 'enchant-expired'; cardId: string; name: string; side: 'player' | 'enemy' }
     | { kind: 'premise-gained'; amount: number; total: number }
+    // Phase 32 part 4b (Oratory — milestone drip): fires alongside
+    // 'premise-gained' whenever a NEW lifetime Premise milestone is crossed —
+    // own event (not a field on 'premise-gained') so existing consumers are
+    // unaffected, matching 'debt-tier-payoff's precedent from Part 3.
+    // 'total' is the lifetime `premiseMilestoneTotal`, not the (resettable)
+    // spendable Premise tally 'premise-gained' reports.
+    | { kind: 'premise-milestone'; tiersCrossed: number; rungs: number; total: number }
     | { kind: 'peroration-declared'; cardId: string; at: number }
     | { kind: 'peroration-fired'; cardId: string; premisesSpent: number }
     | { kind: 'premises-spent'; spent: number; marks: number; drawn: number }
@@ -659,6 +666,14 @@ export interface CombatEncounterState {
     stakeEscalationBonus?: number;
     /** Spec 32 v3 T2 — the PREMISE tally (Peroration theme). Optional. */
     premises?: number;
+    /** Phase 32 part 4b (Oratory — milestone drip): cumulative Premises EVER
+     *  gained THIS COMBAT — every source that feeds `gainPremises`. Per-combat,
+     *  like `souls`/`akrasiaDebt` — reset to 0 in `initializeCombatEncounter`
+     *  only. UNLIKE the spendable `premises` tally above, this does NOT reset
+     *  when a Peroration pays off or CONCEDE fires, so a milestone already
+     *  crossed stays crossed. Optional (absent = 0, back-compat with existing
+     *  state literals). */
+    premiseMilestoneTotal?: number;
     /** Spec 32 v3 T2 — the declared PERORATION (one in play at a time). */
     peroration?: { cardId: string; at: number; concedeAt?: number } | null;
     /** Spec 32 v3 T5 — STAGGER rungs accumulated against the enemy's NEXT

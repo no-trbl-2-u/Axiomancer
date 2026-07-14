@@ -30,9 +30,10 @@ next one.
 - [x] Part 3 — Akrasia: DEBT ledger (this tick; Absolution fork / Last Word /
       Sin-priced FREE lines deferred, see below)
 - [x] Part 4a — Control: TURNABOUT (this tick)
-- [ ] Part 4 (remaining) — oratory milestone drip, forge OVERHEAT, oracle
-      OMEN v2, charm resolve milestones, echo — per §2 of the source doc
-      (4b/4c/4d/4e/4f, picked up one theme per future tick)
+- [x] Part 4b — Oratory: milestone drip (this tick)
+- [ ] Part 4 (remaining) — forge OVERHEAT, oracle OMEN v2, charm resolve
+      milestones, echo — per §2 of the source doc (4c/4d/4e/4f, picked up
+      one theme per future tick)
 
 ## Part 1 — Harvest: REAP attacks MAXIMUM HP
 
@@ -681,6 +682,175 @@ Decisions:
   (not per-rank pairing) are what the shape contract actually pins.
 - Display badge "BACKFIRE ALL," not a new keyword — one-card mechanics stay
   card-local per the keyword-atlas row policy; 30-keyword gate untouched.
+```
+
+## Part 4b — Oratory: milestone drip
+
+### Design intent (source: 2026-07-10-theme-identity.md §2, Peroration / oratory section)
+
+> Milestone drip every 3rd Premise [CONFIRMED · M]: the build pays small
+> dividends DURING construction — the arc gets rungs.
+
+Context quote from the same doc: "Highest distinctiveness on paper (Premises
+are a real unique resource); zero visibility (Premises have no combat-UI
+rendering at all) and a dead build (CONCEDE arrives unannounced)." The other
+three oratory items (fix-the-closing-word, show-the-case UI, OBJECTION
+enemies) are explicit follow-ups, not this part's scope — same split
+discipline as Parts 1/3's CONFIRMED-only cut.
+
+### Current state (verified in code, before this tick)
+
+- Every Premise source funnels through one function, `gainPremises`
+  (`combat.engine.ts`): the `premise` specialMechanics kind (`exordium`,
+  `mounting-case`), `CardRider.premises` (FREE lines and omen riders alike),
+  and `mounting-case`'s `heart×2` threshold rider. A single insertion point,
+  unlike the DEBT ledger's two independent RECOIL call sites.
+  `CombatEncounterState.premises` is the SPENDABLE tally: it resets to 0 the
+  moment a Peroration pays off (`decl.at`) OR CONCEDE fires
+  (`decl.concedeAt`) — there was no separate lifetime counter, so nothing
+  could track "how many Premises has the player EVER banked this combat"
+  across a payoff/CONCEDE boundary.
+- "Rungs" = STAGGER currency (`CombatEncounterState.staggerRungs`,
+  `THREAT_RUNGS`/`THREAT_RUNGS_BOSS` = 2/3 per telegraphed phase). An
+  existing `stagger` specialMechanics kind already increments
+  `staggerRungs` directly and pushes a `staggered` event — the exact verb
+  this drip reuses, no new engine primitive required.
+- Precedent for an un-authored, engine-side "passive dividend riding an
+  existing ledger": the Akrasia DEBT ledger's tier-GUARD payoff
+  (`AKRASIA_DEBT_TIER_GUARD`, Part 3) — a free-standing `effects.ts`
+  constant, not a `VERB_POINTS` entry, because the dividend isn't authored
+  on any single card.
+
+### Decisions made upfront — DO NOT ASK
+
+- **New lifetime counter, not a reuse of the spendable `premises` tally.**
+  `CombatEncounterState.premiseMilestoneTotal` accrues by the SAME `amount`
+  every `gainPremises` call adds to `premises`, but — unlike `premises` —
+  is NEVER reset by a Peroration payoff or CONCEDE. Reusing the resettable
+  tally for milestone math would "un-cross" a milestone already paid the
+  instant the build cashes out, which contradicts "the build pays small
+  dividends DURING construction" (the dividends are a record of effort
+  spent, not a live balance). Same per-combat, never-resets-except-by-a-
+  named-consumer shape as `akrasiaDebt` (Part 3) — except nothing consumes
+  this one; it only ever grows, all combat, like `souls`.
+- **Every {@link PREMISE_MILESTONE_EVERY} (3) Premises grants
+  {@link PREMISE_MILESTONE_RUNGS} (1) STAGGER rung, engine-side and
+  unconditional** — no FALLEN-style state gate. The source doc's own
+  framing ("every 3rd Premise") is a flat cadence, not a conditional
+  payoff, so accrual funnels through the milestone check unconditionally,
+  matching TURNABOUT's `rungsDeniedTotal` accrual (Part 4a) more than the
+  DEBT ledger's FALLEN-gated payoff (Part 3).
+- **Universal across every Premise SOURCE**, not scoped to Oratory-authored
+  cards only. A future cross-theme Premise grant (e.g. an omen rider) would
+  count toward the same milestone counter — matches "erosion is a property
+  of the verb, not a per-card rider" (Part 1's framing) applied to
+  `gainPremises` itself rather than to a single specialMechanics kind. Flagged
+  as the one place this differs from a strictly theme-local reading of the
+  source doc's one-liner; the alternative (theme/source-scoped accrual) would
+  need new attribution plumbing `gainPremises` doesn't have today, same
+  "out of scope for an M-sized additive part" reasoning Part 3 used to
+  exclude self-DoT ticks from the DEBT ledger.
+- **No new `VERB_POINTS` entry, no card pricing change.** Same precedent as
+  `AKRASIA_DEBT_TIER_GUARD`: the dividend rides EVERY Premise source already
+  priced at `V.premise` (0.8/tally point) — it is a property of the ledger,
+  not an authored verb any single card opts into, so the per-rank pricing
+  lint never sees it and no card's `// pts:` comment needs updating.
+- **Own event kind, not an overload.** `{ kind: 'premise-milestone';
+  tiersCrossed; rungs; total }` fires ALONGSIDE the existing `premise-gained`
+  event (never replacing it) — identical convention to `debt-tier-payoff`
+  (Part 3) and `max-hp-eroded` (Part 1): existing `premise-gained` consumers
+  stay byte-identical.
+- **No card text/data changes.** Like the DEBT ledger, this is a pure
+  engine-side dividend with no `specialMechanics` field and no card literal
+  touched — `exordium`/`mounting-case`/`the-closing-word` etc. are unchanged.
+- **No new keyword-atlas row.** Row policy: one-card/engine-wide-drip
+  mechanics stay card-local or ride an existing row as a note (TURNABOUT
+  rode BACKFIRE's row in Part 4a). This drip rides the PREMISE row's own
+  notes cell (its accrual side) and gets a one-line cross-reference on the
+  STAGGER row (its payoff side, a cross-theme synergy) — no 31st keyword,
+  the 30-cap proving gate is untouched.
+
+### Outputs
+
+- `src/Combat/effects.ts`: `PREMISE_MILESTONE_EVERY` (3),
+  `PREMISE_MILESTONE_RUNGS` (1) constants + pure
+  `premiseMilestonesCrossed(before, after)` helper — identical shape to
+  `akrasiaDebtTiersCrossed`, parameterized by the Premise tier size.
+- `src/Combat/combat.encounter.types.ts`: `premiseMilestoneTotal?: number`
+  on `CombatEncounterState`; new `CombatEvent` variant `{ kind:
+  'premise-milestone'; tiersCrossed: number; rungs: number; total: number }`.
+- `src/Combat/combat.engine.ts`: `initializeCombatEncounter` resets
+  `premiseMilestoneTotal` to 0; `gainPremises` accrues it alongside
+  `premises` (before either the Peroration-payoff or CONCEDE reset paths
+  touch `premises`), computes `premiseMilestonesCrossed`, and — when
+  positive — adds `tiersCrossed * PREMISE_MILESTONE_RUNGS` to
+  `staggerRungs` and pushes `premise-milestone`.
+- `docs/keyword-atlas.md`: PREMISE row's notes cell gets the milestone-drip
+  note; STAGGER row's notes cell gets a one-line cross-theme
+  cross-reference (mirrors the BACKFIRE/TURNABOUT precedent's two-sided
+  documentation).
+- No cross-package changes required — no new `specialMechanics` kind, no
+  card field, and `premise-milestone`/`premise-gained` are not consumed by
+  any mobile presenter or the card editor today (same "internal ledger
+  event, no UI consumer yet" status as `debt-tier-payoff`/`turnabout-fired`).
+  Mobile verify + card-editor type-check run anyway per the blast-radius
+  rule (`src/Combat/**` touched) — both green.
+
+### Tests
+
+New engine e2e (`src/Combat/e2e/premise-milestone-drip.engine.test.ts`):
+pure tier-crossing arithmetic (no crossing within a tier, exactly one
+crossing, multiple tiers in one grant, never negative); a FREE-line
+`exordium` play below the first tier accrues the lifetime counter but pays
+no dividend; crossing the first tier via the FREE line grants the printed
+STAGGER rungs and fires `premise-milestone` alongside `premise-gained`; the
+SAME accrual fires on the PAID-line `premise` specialMechanics path; the
+lifetime counter survives a Peroration payoff that resets the spendable
+`premises` tally (a milestone banked before the payoff stays banked, and the
+very play that pays off the Peroration can also cross a new tier); per-combat
+scope (starts at 0 fresh); a full `COMBAT_SIM_POLICY_ORDER` × seed sweep on
+the Oratory preset deck runs without crashing. 11/11 new tests green.
+Re-ran `combat-playtest.balance-bands.sim.test.ts` and
+`combat-playtest.card-coverage.sim.test.ts` cold — zero pin drift (oratory
+early=1.00 mid=0.57 late=0.43, curve `move=-0.57 OK`), confirming the
+additive/universal design needs no re-tune.
+
+### Verify gate
+
+```bash
+npm run verify --workspace axiomancer-mechanics
+```
+
+167 files / 2588 tests green. Cross-package (touches
+`src/Combat/**`): `axiomancer-mobile` verify (2554 tests) and
+`axiomancer-card-editor` type-check both mandatory per the blast-radius
+rule — both green.
+
+### Commit body template
+
+```
+feat(mechanics): Oratory milestone drip — phase 32 part 4b
+
+- premiseMilestoneTotal per-combat lifetime ledger (never resets, unlike
+  the spendable premises tally it rides alongside)
+- premiseMilestonesCrossed tier-crossing helper (akrasiaDebtTiersCrossed
+  shape, parameterized by PREMISE_MILESTONE_EVERY)
+- gainPremises grants PREMISE_MILESTONE_RUNGS STAGGER rungs per milestone,
+  unconditional, universal across every Premise source
+- premise-milestone event fires alongside premise-gained
+- keyword-atlas: PREMISE row (accrual) + STAGGER row (cross-theme payoff)
+- tests: tier arithmetic, FREE/PAID accrual parity, survives a Peroration
+  payoff reset, per-combat scope, sim sweep
+
+Decisions:
+- Separate never-resetting lifetime counter, not the spendable premises
+  tally — a milestone already paid must stay paid across a Peroration
+  payoff/CONCEDE reset. See brief §Part 4b Decisions.
+- Unconditional + universal across every Premise source (no FALLEN-style
+  gate, no theme-authored scoping) — matches the source doc's flat "every
+  3rd Premise" cadence.
+- No VERB_POINTS entry / card pricing change — an un-authored ledger
+  dividend, same precedent as AKRASIA_DEBT_TIER_GUARD.
 ```
 
 ## Follow-ups (out of scope this part)

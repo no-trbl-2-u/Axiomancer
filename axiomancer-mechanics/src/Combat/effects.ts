@@ -128,6 +128,28 @@ export function akrasiaDebtTiersCrossed(before: number, after: number): number {
     const a = Math.max(0, Math.floor(after / AKRASIA_DEBT_TIER_HP));
     return Math.max(0, a - b);
 }
+/** Phase 32 part 4b (Oratory — milestone drip, plan/phases/phase_32_theme_deep_work.md
+ *  §Part 4b): every {@link PREMISE_MILESTONE_EVERY}rd Premise the player has EVER
+ *  gained this combat (tracked by `CombatEncounterState.premiseMilestoneTotal`, a
+ *  lifetime counter that — unlike the spendable `premises` tally it rides alongside
+ *  — never resets on a Peroration payoff or CONCEDE) pays a small STAGGER dividend.
+ *  "The build pays small dividends DURING construction — the arc gets rungs"
+ *  (source doc). Sized at the theme's own smallest Premise grant (1) so a single
+ *  Exordium doesn't itself cross a tier, but three plays (or one `mounting-case`)
+ *  reliably does. Tunable. */
+export const PREMISE_MILESTONE_EVERY = 3;
+/** STAGGER rungs granted per Premise milestone crossed — a PASSIVE dividend riding
+ *  every Premise source (own-card, borrowed FREE rider, or a future cross-theme
+ *  omen grant alike), same "modest ledger bonus, not a new dominant engine" idiom
+ *  as {@link AKRASIA_DEBT_TIER_GUARD}. Tunable. */
+export const PREMISE_MILESTONE_RUNGS = 1;
+/** Pure tier-crossing arithmetic — identical shape to {@link akrasiaDebtTiersCrossed},
+ *  parameterized by {@link PREMISE_MILESTONE_EVERY} instead of a fixed HP tier. */
+export function premiseMilestonesCrossed(before: number, after: number): number {
+    const b = Math.max(0, Math.floor(before / PREMISE_MILESTONE_EVERY));
+    const a = Math.max(0, Math.floor(after / PREMISE_MILESTONE_EVERY));
+    return Math.max(0, a - b);
+}
 /** CONCEDE Premises required (plan/tuning/2026-07-08-win-path-scaling.md item
  *  1a): `the-closing-word`'s flat 8-Premise `concedeAt` let Oratory land its
  *  alt-win identically against a 100 HP early wolf and a 1,500+ HP late boss

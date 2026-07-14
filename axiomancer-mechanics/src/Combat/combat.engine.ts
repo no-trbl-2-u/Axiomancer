@@ -47,6 +47,7 @@ import {
     ruptureBurstCap,
     REAP_EROSION_PER_SOUL,
     AKRASIA_DEBT_TIER_GUARD, akrasiaDebtTiersCrossed,
+    PREMISE_MILESTONE_RUNGS, premiseMilestonesCrossed,
     THREAT_RUNGS, THREAT_RUNGS_BOSS, BOSS_RUNG_REGROWTH, bossRungGrowthCap,
     concedeFloorFor,
     capitulateThreshold,
@@ -462,6 +463,10 @@ export function initializeCombatEncounter(
         playerAttachments: [],
         floatingDice,
         premises: 0,
+        // Phase 32 part 4b (Oratory — milestone drip): per-COMBAT lifetime
+        // Premise total, like `souls`/`akrasiaDebt` — never resets when
+        // `premises` itself resets on a Peroration payoff or CONCEDE.
+        premiseMilestoneTotal: 0,
         peroration: null,
         souls: 0,
         sway: 0,
@@ -1145,8 +1150,28 @@ function gainPremises(
     rng: () => number,
 ): { state: CombatEncounterState; concede: boolean } {
     if (amount <= 0) return { state, concede: false };
-    let next: CombatEncounterState = { ...state, premises: (state.premises ?? 0) + amount };
+    const milestoneBefore = state.premiseMilestoneTotal ?? 0;
+    const milestoneAfter = milestoneBefore + amount;
+    let next: CombatEncounterState = {
+        ...state,
+        premises: (state.premises ?? 0) + amount,
+        premiseMilestoneTotal: milestoneAfter,
+    };
     events.push({ kind: 'premise-gained', amount, total: next.premises ?? 0 });
+    // Phase 32 part 4b (Oratory — milestone drip): the lifetime counter never
+    // resets, so a milestone already paid stays paid even after a Peroration
+    // zeroes the spendable `premises` tally below.
+    const milestoneTiersCrossed = premiseMilestonesCrossed(milestoneBefore, milestoneAfter);
+    if (milestoneTiersCrossed > 0) {
+        const milestoneRungs = milestoneTiersCrossed * PREMISE_MILESTONE_RUNGS;
+        next = { ...next, staggerRungs: (next.staggerRungs ?? 0) + milestoneRungs };
+        events.push({
+            kind: 'premise-milestone',
+            tiersCrossed: milestoneTiersCrossed,
+            rungs: milestoneRungs,
+            total: milestoneAfter,
+        });
+    }
     const decl = next.peroration;
     if (!decl) return { state: next, concede: false };
     const total = next.premises ?? 0;
