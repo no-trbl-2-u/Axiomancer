@@ -318,6 +318,13 @@ function assertMechanic(
             if (mech.kindle) expect(events.some(e => e.kind === 'die-forged'), label).toBe(true);
             return;
         }
+        case 'turnabout': {
+            const ev = findEvent(events, 'turnabout-fired');
+            expect(ev, label).toBeDefined();
+            expect(ev!.amount, label).toBeGreaterThan(0);
+            expect(after.rungsDeniedTotal ?? 0, label).toBe(0);
+            return;
+        }
         case 'consume_affliction': {
             const ev = findEvent(events, 'affliction-consumed');
             expect(ev, label).toBeDefined();

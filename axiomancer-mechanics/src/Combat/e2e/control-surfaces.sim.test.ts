@@ -218,7 +218,11 @@ const CONTROL_CANDIDATES = [
     'red-herring',              // BACKFIRE — deny-punish drip
     'undistributed-middle',     // STAGGER + BACKFIRE
     'arrow-paradox',            // lock_stance + STAGGER — stance certainty
-    'paralysis-of-analysis',    // STAGGER 2 + acute BACKFIRE — the payoff wall
+    // phase 32 part 4a: paralysis-of-analysis (STAGGER 2 + acute BACKFIRE)
+    // was replaced by turnabout (a banked-denial finisher, not a rung/drip
+    // control surface) — no substitute added here; the remaining four
+    // candidates still exercise the falsifiable rung-strength / drip /
+    // stance-certainty surfaces this probe targets.
 ];
 
 /** Damage-heavy: big clean hits, no riders — deny/soften is worth the most. */

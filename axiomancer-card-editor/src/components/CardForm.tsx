@@ -216,6 +216,8 @@ function defaultMechanic(kind: SpecialMechanicKind): CardSpecialMechanic {
             return { kind, cost: 3 };
         case 'reap_all':
             return { kind, burstPerSoul: 2 };
+        case 'turnabout':
+            return { kind, burstPerRung: 1.5 };
         case 'sway':
             return { kind, amount: 3 };
         case 'echo':
@@ -667,6 +669,8 @@ function MechanicFields({ mechanic, patch }: { mechanic: CardSpecialMechanic; pa
             );
         case 'reap_all':
             return numRow('BURST / SOUL', 'HP per Soul spent (uncapped — the emptied bank is the price)', mechanic.burstPerSoul, 'burstPerSoul', 1, 10);
+        case 'turnabout':
+            return numRow('BURST / RUNG', 'HP per rung banked in rungsDeniedTotal, then the ledger resets', mechanic.burstPerRung, 'burstPerRung', 1, 10);
         case 'sway':
             return numRow('SWAY', 'decays 1/turn · ≥ enemy VITAE = capitulate', mechanic.amount, 'amount', 1, 12);
         case 'reprise':

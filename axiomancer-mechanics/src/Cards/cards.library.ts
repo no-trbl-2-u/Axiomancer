@@ -769,31 +769,54 @@ const arrowParadox: Card = {
     tags: ['control'],
 };
 
-const paralysisOfAnalysis: Card = {
-    id: 'paralysis-of-analysis',
+// Phase 32 part 4a (Control — TURNABOUT, 2026-07-10-theme-identity.md §2):
+// replaces `paralysisOfAnalysis` in this exact library slot (id, rank-6
+// rare-spell recipe seat, 'mind' philosophicalAspect) — the 70-card / 7-per-
+// theme / 5-5-5 color-law invariants (curated-library.engine.test.ts,
+// deck-presets.engine.test.ts) are pinned counts, so a genuinely NEW card
+// must occupy an existing seat rather than grow the library past 70. The
+// swapped-out card's STAGGER+BACKFIRE payoff role is superseded by this
+// capstone, which finally banks what the theme's denial already does; its
+// flavor voice (the doorway/half-step/herring imagery) lives on in the prose
+// below. rank 6 (not 5, unlike every other themed rare spell): the FIRST
+// spell-type Aporia card in the library — a deliberate deviation, not a typo
+// (every other rank-6 card is a disenchant; nothing in the shape contract
+// requires that pairing, only that a theme carries 2 common/2 uncommon/3
+// rare and exactly 1 enchantment + 1 disenchant, both satisfied here).
+const turnabout: Card = {
+    id: 'turnabout',
     theme: 'control',
-    name: 'Paralysis of Analysis',
-    category: 'fallacy',
+    name: 'Turnabout',
+    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
-        'You hand them every option at once. They stand in the doorway of ' +
-        'the decision -- and every turn they cannot move, the paralysis ' +
-        'turns inward and more of them spills out.',
-    tier: 3, rank: 5, cardType: 'spell',
+        'Nothing you denied them was ever gone. It queued behind the ' +
+        'half-step, behind the doorway, behind the herring -- and now the ' +
+        'whole withheld argument lands at once.',
+    tier: 3, rank: 6, cardType: 'spell',
     targetType: 'enemy',
-    // pts (WS10.1 KW-1 fold, 2026-07-11 — backfire_acute folded into BACKFIRE
-    // at i3; the acute's separate 3-per-rung track retires with the clone id):
-    // STAGGER 2 (4, full deny alone) + backfire i3 d3 (6.75) + FREE reveal
-    // the next stance (1.5, weak-ish deposit, phase 30 FREE-currency law) +
-    // DRAW 1 kicker (2, legal alongside it) + dieBonus(mind: bonusIntensity 2
-    // + bonusDuration 1, rider=4 x0.6 = 2.4) total = 16.65, in-band for rare
-    // [7,19]. (STAGGER deliberately kept OFF this FREE line — a second
-    // stagger source here, on top of the PAID STAGGER 2, is what broke the
-    // standstill preset's win-rate curve flat during phase 30 balance-check.)
-    free: { revealStance: true, drawCards: 1 },
-    combatEffects: [{ effectId: 'debuff_backfire', appliedTo: 'opponent', intensity: 3, duration: 3 }],
-    specialMechanics: [{ kind: 'stagger', rungs: 2 }],
-    dieBonus: { onColor: 'mind', rider: { bonusIntensity: 2, bonusDuration: 1 } },
+    // pts (phase 32 part 4a): TURNABOUT — the verb (5, same base as REAP ALL
+    // — the same "ALL-spender capstone" archetype: consume the whole bank)
+    // + 1.5 burst per rung banked in `rungsDeniedTotal` x an expected ~20-rung
+    // bank (~2-4 rungs/phase x ~6-8 phases, 2026-07-10-theme-identity.md §2)
+    // / 3 (dotLifetimeDivisor) = 5 + 1.5x20/3 = 15 + FREE reveal the next
+    // stance (1.5, control's currency) = 16.5, in-band for rare [7,19].
+    // Realistic burst at that ~20-rung bank = round(1.5 x 20) = 30 HP,
+    // comparable to the-reaping's realistic burst range (burstPerSoul 4 x a
+    // ~5-10 Soul bank = 20-40) per the brief's sizing instruction. Prior art:
+    // kb:dawncaster/keywords/momentum.okf.md (src-001, community, medium) —
+    // the closest Dawncaster analogue to a banked-counter capstone ("whenever
+    // you have 5+ Momentum, remove all stacks and draw a card"), though
+    // theirs auto-fires at a threshold and pays a card-draw dividend, not a
+    // player-spent burst — the magnitude doesn't transfer, only the "a
+    // passive tally becomes a real payoff" shape does. TURNABOUT is NOT
+    // authored as a 31st registry keyword: its mechanic is a new
+    // specialMechanics kind (card-local vocabulary, like REAP ALL / RUPTURE
+    // ALL are to REAP / RUPTURE), but its display badge stays "BACKFIRE ALL"
+    // — the cash-out variant of the existing BACKFIRE hallmark, not a new
+    // keyword word (keeps the 30-keyword proving gate untouched).
+    free: { revealStance: true },
+    specialMechanics: [{ kind: 'turnabout', burstPerRung: 1.5 }],
     addedIn: '2026-07-08',
     tags: ['control', 'payoff'],
 };
@@ -1609,7 +1632,7 @@ export const cardLibrary: Card[] = [
     pactOfAkrasia, crownOfThorns, mirrorOfGuilt,
     // T5 Control
     zenosHalfStep, redHerring, undistributedMiddle, arrowParadox,
-    paralysisOfAnalysis, achillesAndTheTortoise, quagmireOfDoubt,
+    turnabout, achillesAndTheTortoise, quagmireOfDoubt,
     // T6 Oracle
     glimpse, signsAndPortents, cassandrasBurden, delphicAmbiguity,
     prophecyFulfilled, theOraclesEye, fatedCourse,

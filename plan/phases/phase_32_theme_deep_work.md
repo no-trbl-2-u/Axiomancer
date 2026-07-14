@@ -29,9 +29,10 @@ next one.
 - [x] Part 2 — Bulwark: RIPOSTE reflects the prevented blow (this tick)
 - [x] Part 3 — Akrasia: DEBT ledger (this tick; Absolution fork / Last Word /
       Sin-priced FREE lines deferred, see below)
-- [ ] Part 4 — remaining per-theme M items (oratory milestone drip,
-      forge OVERHEAT, control TURNABOUT, oracle OMEN v2, charm resolve
-      milestones, echo — per §2 of the source doc)
+- [x] Part 4a — Control: TURNABOUT (this tick)
+- [ ] Part 4 (remaining) — oratory milestone drip, forge OVERHEAT, oracle
+      OMEN v2, charm resolve milestones, echo — per §2 of the source doc
+      (4b/4c/4d/4e/4f, picked up one theme per future tick)
 
 ## Part 1 — Harvest: REAP attacks MAXIMUM HP
 
@@ -467,6 +468,219 @@ Decisions:
   crown-of-thorns or preempt the deferred Absolution cash-out design.
 - Cash-out/tier-reset semantics explicitly deferred to the Absolution-fork
   follow-up, not resolved here.
+```
+
+## Part 4a — Control: TURNABOUT
+
+### Design intent (source: 2026-07-10-theme-identity.md §2, Control / standstill section)
+
+> TURNABOUT [CONFIRMED · M]: a finisher that CONSUMES accumulated denial
+> (`rungsDeniedTotal`) — the theme finally banks what it does.
+
+Context quote from the same doc: "Control / standstill — denial must be
+sized, timed, and spent. Flat 2-rung telegraphs + abundant stagger = denial
+is automatic; BACKFIRE is a de facto DoT." The theme converted denial into
+BACKFIRE drip only; there was no capstone letting the player cash out
+everything the deck had denied over the fight. TURNABOUT is that capstone,
+matching the shape of Harvest's `reap_all` (Part 1) and the Akrasia DEBT
+ledger (Part 3): a per-combat running counter fed by an existing mechanic,
+read (and here, CONSUMED) by a new payoff.
+
+### Current state (verified in code, before this tick)
+
+- `resolveThreatPhase` (`combat.engine.ts`) already computes, every phase,
+  `rungsTotal`/`rungsLost`/`rungDenied` via `computeRungDenial(state)` and
+  `rungsForBackfire = hindered ? rungsTotal : rungsLost` — "rungs actually
+  denied this phase," the exact quantity BACKFIRE's per-phase drip already
+  spends. Nothing banked it across phases; a denied phase's rungs were
+  spent (on the BACKFIRE drip, if any) and then forgotten.
+- Control (`src/Cards/cards.library.ts`) held 7 cards: 2 commons
+  (`zenos-half-step` STAGGER 1, `red-herring` BACKFIRE i2d2), 2 uncommons
+  (`undistributed-middle`, `arrow-paradox`), and 3 rares —
+  `paralysis-of-analysis` (tier 3 rank 5, the rare SPELL: STAGGER 2 +
+  BACKFIRE i3d3, the theme's existing "payoff wall"), `achilles-and-the-
+  tortoise` (rank 5 enchantment, reward-only — squeezed out of every
+  preset's 5/5/5 color law), and `quagmire-of-doubt` (rank 6 disenchant).
+  The `standstill` preset's recipe seated `paralysis-of-analysis` as its
+  rare-spell slot (`combat.deck-presets.ts`).
+- The library, presets, and pricing lint are pinned at EXACT counts
+  (`curated-library.engine.test.ts` "is exactly 70 unique cards" / "each
+  theme owns exactly 7 cards"; `deck-presets.engine.test.ts`'s 5/5/5 color
+  law; `pricing.engine.test.ts`'s "covers all 50 spells") — spec 32's own
+  title ("10 themes, 70 cards, 30 keywords") bakes the card count in at the
+  same weight as the keyword cap. A genuinely NEW card therefore has to
+  occupy an EXISTING seat, not grow the library past 70.
+
+### Decisions made upfront — DO NOT ASK
+
+- **New `specialMechanics` kind `'turnabout'`** with a `burstPerRung: number`
+  field on `CardSpecialMechanic` — mirrors `reap_all`'s `burstPerSoul` shape
+  exactly (compute a burst from the live bank, apply as direct damage), with
+  ONE structural difference: it CONSUMES (zeroes) `rungsDeniedTotal` in the
+  same call, rather than reading a still-growing counter the way REAP-ALL
+  reads Souls or the DEBT ledger reads cumulative RECOIL. Burst computed
+  BEFORE the zero, in one call — no double-count, no stale read.
+- **`turnabout` REPLACES `paralysis-of-analysis` in its exact library seat**
+  (same id-slot position in `cards.library.ts`, same rank-6-rare-spell
+  recipe seat in the `standstill` preset, same `'mind'` `philosophicalAspect`
+  for the 5/5/5 color law) — this is the one place this part deviates from
+  the "add a new card" framing in the source doc's one-liner: the 70-card /
+  7-per-theme / 5-5-5 invariants are pinned counts (see Current state), so a
+  brand-new card must occupy an existing seat. `paralysis-of-analysis`'s
+  STAGGER+BACKFIRE payoff role is superseded by this capstone; its flavor
+  imagery (the half-step, the doorway, the herring) lives on in TURNABOUT's
+  prose. **rank 6, not 5** (unlike `the-reaping`'s rank-5 rare-spell
+  precedent) — the first SPELL-type Aporia card in the library (every other
+  rank-6 card is a disenchant); nothing in the shape contract requires that
+  pairing, only theme-level counts (2 common/2 uncommon/3 rare, exactly 1
+  enchantment + 1 disenchant), both of which stay intact.
+- **`burstPerRung: 1.5`**, sized backward from a target burst: a mid-fight
+  Standstill deck denying ~2-4 rungs/phase across ~6-8 phases banks
+  roughly 15-25 rungs by the time a rank-6 card is drawn; a ~20-rung bank at
+  1.5/rung bursts `round(1.5 x 20) = 30` HP, inside the-reaping's realistic
+  burst range (burstPerSoul 4 x a ~5-10 Soul bank = 20-40). Priced via new
+  `VERB_POINTS.turnabout` (5, same base as `reapAll` — the same "ALL-
+  spender capstone" archetype) and `VERB_POINTS.expectedRungsDenied` (20,
+  the same brief arithmetic): `scoreMechanic` = 5 + 1.5x20/3 = 15; + FREE
+  reveal-the-next-stance (1.5, control's currency) = 16.5, in-band for rare
+  [7,19].
+- **Ledger accrues unconditionally, every phase, regardless of gating** —
+  `rungsDeniedTotal += rungsForBackfire` (the SAME expression BACKFIRE
+  reads) fires whether or not BACKFIRE itself is live this combat; a phase
+  that denied nothing contributes 0, so plain accumulation needs no extra
+  gate (matches the DEBT ledger's "accrues unconditionally, only the payoff
+  is gated" shape, except TURNABOUT's "payoff" IS the whole mechanic, so
+  there is no separate gate to speak of).
+- **Per-combat scope, reset to 0 in `initializeCombatEncounter`** — like
+  `souls`/`akrasiaDebt`. UNLIKE those two, `rungsDeniedTotal` is CONSUMED
+  (zeroed) by `turnabout`'s own play, not merely read — the design brief's
+  own wording ("a finisher that CONSUMES accumulated denial") is explicit
+  that this differs from the Souls/DEBT precedent, which only ever grow.
+- **Attribution**: `recordAttribution`/`directDamage` count the burst the
+  same way `reap_all`'s burst is counted (direct damage, not double-
+  counted) — identical code path, no new attribution surface.
+- **New event, not an overloaded one**: `{ kind: 'turnabout-fired'; cardId:
+  string; rungsSpent: number; amount: number }` — mirrors `reaped`'s shape,
+  own event so nothing about `reaped`'s existing consumers changes.
+- **Display badge: "BACKFIRE ALL," not a new keyword.** TURNABOUT is a
+  one-card mechanic (`docs/keyword-atlas.md`'s row policy: "one-card
+  mechanics stay card-local... gets NO atlas row"), and its fantasy — cash
+  the whole denial ledger BACKFIRE already meters — is BACKFIRE's own
+  finisher variant, the same relationship REAP ALL / RUPTURE ALL have to
+  REAP / RUPTURE. Printed as `BACKFIRE ALL — 1.5 damage per rung ever
+  denied` (`combat.cards.ts` `mechanicText`) and keyed to the existing
+  `Backfire` keyword badge on mobile (`keywordForMechanic`), not a 31st
+  registry keyword — the 30-keyword proving gate is untouched. Prior art:
+  kb:dawncaster/keywords/momentum.okf.md (src-001, community, medium) — the
+  closest Dawncaster analogue (a banked counter cashed at a point), though
+  theirs auto-fires at a threshold for a card-draw dividend rather than
+  being spent by the player for an HP burst; only the "a passive tally
+  becomes a real payoff" shape transfers, not the magnitude.
+
+### Outputs
+
+- `src/Combat/combat.encounter.types.ts`: `rungsDeniedTotal?: number` on
+  `CombatEncounterState`; new `CombatEvent` variant `{ kind:
+  'turnabout-fired'; cardId: string; rungsSpent: number; amount: number }`.
+- `src/Combat/combat.engine.ts`: `resolveThreatPhase` accrues
+  `rungsDeniedTotal` at the same site `rungsForBackfire` is computed (before
+  the BACKFIRE drip block); `initializeCombatEncounter` resets it to 0; a
+  new `'turnabout'` case in `playBottomAction`'s specialMechanics switch
+  computes the burst from the live ledger, applies it via the same
+  direct-damage path `reap_all` uses, zeroes the ledger, and pushes
+  `turnabout-fired`.
+- `src/Cards/types.ts`: `CardSpecialMechanic` gains the `'turnabout'`
+  variant (`{ kind: 'turnabout'; burstPerRung: number }`).
+- `src/Cards/cards.pricing.ts`: `VERB_POINTS.turnabout` (5) and
+  `VERB_POINTS.expectedRungsDenied` (20); `scoreMechanic`'s `'turnabout'`
+  case.
+- `src/Cards/cards.library.ts`: `turnabout` (tier 3, rank 6, control,
+  `'mind'` aspect) replaces `paralysisOfAnalysis` in its exact library slot,
+  with a `// pts:` comment showing the arithmetic + the seat-replacement
+  rationale + the KB citation.
+- `src/Combat/combat.deck-presets.ts`: `standstill`'s recipe rare-spell
+  argument becomes `'turnabout'` (was `'paralysis-of-analysis'`).
+- `src/Combat/combat.cards.ts`: `'turnabout'` added to `PAYOFF_KINDS`
+  (classifies as `direct-damage`, matching `reap_all`/`rupture`); a
+  `mechanicText` case printing `BACKFIRE ALL — <N> damage per rung ever
+  denied`.
+- `src/test-utils/card-fixture.ts`: `rungsDeniedTotal: clean ? 0 : 20` on
+  the shared RICH/CLEAN fixture (mirrors `souls`'s precondition-buffet
+  precedent) so the effectiveness lint and the doctrine witness both have a
+  legal ledger to consume / a zeroed one to prove against.
+- `src/Cards/e2e/card-effectiveness.engine.test.ts`: `'turnabout'` case in
+  the exhaustive `assertMechanic` switch.
+- `src/Combat/e2e/control-surfaces.sim.test.ts`,
+  `src/Combat/e2e/status-depth-combat.engine.test.ts`: the two id-list
+  sweeps referencing `paralysis-of-analysis` updated for its retirement
+  (dropped / swapped to `turnabout`'s own `direct-damage`/`none`
+  classification).
+- Courtesy cross-package updates (new `specialMechanics` kind — mandatory
+  per the blast-radius rule): `axiomancer-mobile/state/combat/keywords.ts`
+  (`turnabout: 'Backfire'` in `MECHANIC_KEYWORD`),
+  `axiomancer-mobile/state/presenters/combat-encounter.engine.ts`
+  (`'turnabout'` in `MECH_HEADLINE_PRIORITY` + a `mechanicHeadline` case —
+  required by `card-face-honesty.guard.test.ts`'s "no library card renders
+  the ambiguous PAID fallback" sweep),
+  `axiomancer-mobile/assets/images/cards/index.ts` (art-mapping key
+  renamed), `axiomancer-card-editor/src/data/mechanics.ts`
+  (`SPECIAL_MECHANIC_KINDS` gains `'turnabout'` — `mechanics.contract.ts`'s
+  compile-time union check fails without it) and
+  `axiomancer-card-editor/src/components/CardForm.tsx` (default + numeric
+  row for `burstPerRung`).
+- `docs/keyword-atlas.md`: BACKFIRE row's notes cell updated with the
+  TURNABOUT finisher note + the Momentum receipt (no new row — one-card
+  mechanics stay card-local per the row policy).
+
+### Tests
+
+- New engine e2e (`src/Combat/e2e/turnabout-ledger.engine.test.ts`): a
+  fully denied threat phase accrues `rungsTotal` (`THREAT_RUNGS`) rungs; a
+  non-denied phase accrues 0 (ledger stays flat); a partial rung loss
+  accrues only the rungs actually lost; accrual is additive across phases;
+  the `turnabout` card banks the full ledger as burst then resets it to 0 in
+  the same play; a second `turnabout` play after the reset is a legal no-op
+  (banks 0, never fizzles — mirrors `reap_all`'s "always fires" precedent);
+  the ledger starts at 0 for a fresh combat; a full
+  `COMBAT_SIM_POLICY_ORDER` x seed sweep on the `standstill` preset runs
+  without crashing.
+- Re-ran `combat-playtest.balance-bands.sim.test.ts` and
+  `combat-playtest.card-coverage.sim.test.ts` cold before AND after — zero
+  pin drift (numbers in the commit body / final report).
+
+### Verify gate
+
+```bash
+npm run verify --workspace axiomancer-mechanics
+```
+
+Cross-package: touches `src/Cards/**` (new `specialMechanics` union member)
+and `src/Combat/**` (new `CombatEncounterState` field + `CombatEvent`
+variant) — `axiomancer-mobile` verify and `axiomancer-card-editor`
+type-check are BOTH mandatory per the blast-radius rule (witness:
+`grant_permanent_wild_die`), not merely a courtesy this time.
+
+### Commit body template
+
+```
+feat(mechanics): Control TURNABOUT — cash the denial ledger — phase 32 part 4a
+
+- rungsDeniedTotal per-combat ledger, accrued at BACKFIRE's own rungsForBackfire site
+- new 'turnabout' specialMechanics kind + engine case (consumes, doesn't just read)
+- turnabout-fired event; BACKFIRE ALL display badge (no new keyword)
+- turnabout card replaces paralysis-of-analysis's exact library/preset seat
+- cross-package: mobile presenter/keyword wiring + card-editor union update
+- tests: ledger accrual (denied/non-denied/partial/additive), cash-out +
+  no-op replay, per-combat scope, sim sweep
+
+Decisions:
+- New card occupies an EXISTING seat (paralysis-of-analysis's) rather than
+  growing the pinned 70-card / 7-per-theme library — see brief §Part 4a
+  Decisions.
+- rank 6 (not 5) — the first spell-type Aporia card; theme-level counts
+  (not per-rank pairing) are what the shape contract actually pins.
+- Display badge "BACKFIRE ALL," not a new keyword — one-card mechanics stay
+  card-local per the keyword-atlas row policy; 30-keyword gate untouched.
 ```
 
 ## Follow-ups (out of scope this part)

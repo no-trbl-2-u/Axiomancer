@@ -90,7 +90,7 @@ export function cardStanceColor(card: Card): CombatDieColor {
 }
 
 /** Payoff mechanics that read as the "closer" class (status-payoff bursts). */
-const PAYOFF_KINDS: ReadonlySet<string> = new Set(['rupture', 'reap_all', 'reap']);
+const PAYOFF_KINDS: ReadonlySet<string> = new Set(['rupture', 'reap_all', 'reap', 'turnabout']);
 
 /**
  * Classifies a card into a verb class + the effect kind its PAID action
@@ -299,6 +299,10 @@ export function mechanicText(m: CardSpecialMechanic): string | null {
         case 'consume_affliction': return `RUPTURE 1 — its remaining damage lands now, +${m.souls} Soul${m.souls === 1 ? '' : 's'}`;
         case 'reap': return `REAP ${m.cost}${m.kindle ? ` — KINDLE (${m.kindle})` : ''}${m.rider ? ` — ${riderText(m.rider)}` : ''}`;
         case 'reap_all': return `REAP ALL — ${m.burstPerSoul} damage per Soul`;
+        // Phase 32 part 4a — cashes the whole STAGGER/BACKFIRE denial ledger;
+        // badged as BACKFIRE's own "ALL" variant (REAP ALL / RUPTURE ALL
+        // precedent), not a new registry keyword.
+        case 'turnabout': return `BACKFIRE ALL — ${m.burstPerRung} damage per rung ever denied`;
         case 'sway': return `SWAY ${m.amount}`;
         case 'echo': return 'ECHO';
         case 'echo_next_spell': return 'your next spell gains ECHO';

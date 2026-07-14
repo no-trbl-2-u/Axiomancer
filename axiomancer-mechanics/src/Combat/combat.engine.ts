@@ -476,6 +476,10 @@ export function initializeCombatEncounter(
         // Phase 32 part 3 (Akrasia — DEBT ledger): per-COMBAT, like `souls` —
         // does NOT reset at `startTurn` (unlike `recoilPaidThisTurn` above).
         akrasiaDebt: 0,
+        // Phase 32 part 4a (Control — TURNABOUT ledger): per-COMBAT, like
+        // `souls`/`akrasiaDebt` — accrues every threat phase regardless of
+        // FALLEN/etc gating, consumed (zeroed) only by a `turnabout` play.
+        rungsDeniedTotal: 0,
         lastThreatFullyBlocked: false,
         conjuredUids: [],
         threatPhases,
@@ -1808,6 +1812,10 @@ function playBottomAction(
     let reserve = reserveIn;
     let floatingDice = (state.floatingDice ?? []).slice();
     let souls = state.souls ?? 0;
+    // Phase 32 part 4a (Control — TURNABOUT ledger): read here so a
+    // `turnabout` play can CONSUME (zero) it in this same execution — the
+    // ledger itself is accrued in `resolveThreatPhase`, not here.
+    let rungsDeniedTotal = state.rungsDeniedTotal ?? 0;
     let staggerRungs = state.staggerRungs ?? 0;
     let stanceLockedNext = state.stanceLockedNext ?? false;
     let pendingOmens = (state.pendingOmens ?? []).slice();
@@ -2137,6 +2145,32 @@ function playBottomAction(
                     events.push({ kind: 'max-hp-eroded', cardId: card.id, amount: burst, newMax: enemy.maxHealth });
                 }
                 events.push({ kind: 'reaped', cardId: card.id, soulsSpent: spent, amount: burst });
+                break;
+            }
+            case 'turnabout': {
+                // TURNABOUT (Control capstone) — cash the WHOLE denial ledger:
+                // burstPerRung HP per rung STAGGER/BACKFIRE have EVER denied
+                // this combat. Mirrors reap_all's shape (compute from the
+                // live bank, apply as direct damage, zero the bank) but
+                // CONSUMES rather than reads a still-growing counter — the
+                // burst is computed BEFORE the ledger resets, in this one
+                // call, so there is no double-count / stale-read risk.
+                const rungsSpent = rungsDeniedTotal;
+                const burst = Math.round(mech.burstPerRung * rungsSpent * mult * vulnMult);
+                rungsDeniedTotal = 0;
+                if (burst > 0) {
+                    const hpBefore = enemy.health;
+                    const hit = applyEnemyDamage(enemy, burst, state.round, events);
+                    enemy = hit.enemy;
+                    mechanicDamage += burst;
+                    directDamage += burst + hit.clockDamage;
+                    gainSoulsLocal(soulWorthyWashouts(hit.washedOut), 'expiry');
+                    attribution = recordAttribution(attribution, card.id, card.name, null, burst, hpBefore);
+                }
+                // Always fires (mirrors reap_all): a 0-rung bank is a legal,
+                // non-fizzling play that simply banks nothing — matches
+                // reap_all's "amount: burst" (0 allowed) precedent exactly.
+                events.push({ kind: 'turnabout-fired', cardId: card.id, rungsSpent, amount: burst });
                 break;
             }
             case 'sway': swayGained += mech.amount * echoFactor; break;
@@ -2747,6 +2781,10 @@ function playBottomAction(
         guard: (state.guard ?? 0) + guardGain + tierGuardBonus,
         barrier: (state.barrier ?? 0) + barrierGain,
         akrasiaDebt,
+        // Phase 32 part 4a (Control — TURNABOUT ledger): rolls forward
+        // unchanged from every OTHER mechanic's play; a `turnabout` case
+        // above already zeroed the local var before this assembly reads it.
+        rungsDeniedTotal,
         riposte: riposteArmed,
         directDamageDealt: directDamage,
         permanentWildDice,
@@ -3015,6 +3053,12 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
     // denied action counts every rung).
     const backfirePer = getBackfirePerRung(state.enemy);
     const rungsForBackfire = hindered ? rungsTotal : rungsLost;
+    // Phase 32 part 4a (Control — TURNABOUT ledger): accrue the SAME
+    // rungs-denied-this-phase quantity BACKFIRE reads above, whether or not
+    // BACKFIRE itself is live this combat (a phase with nothing denied
+    // contributes 0, so plain accumulation is safe with no extra gating).
+    // `turnabout` consumes this later; it only ever grows here.
+    const rungsDeniedTotal = (state.rungsDeniedTotal ?? 0) + rungsForBackfire;
     if (backfirePer > 0 && rungsForBackfire > 0) {
         const drip = backfirePer * rungsForBackfire;
         const hit = applyEnemyDamage(enemy, drip, state.round, events);
@@ -3252,6 +3296,9 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
         riposte: undefined,             // cleared each phase (like guard)
         staggerRungs: crumbleRungs,     // consumed this phase; crumbling-resolve seeds the next
         bossRungGrowth: nextBossRungGrowth,
+        // Phase 32 part 4a (Control — TURNABOUT ledger): rolled forward every
+        // phase; a `turnabout` play zeroes it in the SAME call it reads it.
+        rungsDeniedTotal,
         // Spec 32 §12 #4 — the enemy-damage ledger (rolled over between phases)
         // and the full-block verdict (persists until the NEXT threat resolves;
         // a hindered/denied threat was never blocked).

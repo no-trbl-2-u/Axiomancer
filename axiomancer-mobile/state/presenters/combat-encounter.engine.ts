@@ -1289,6 +1289,12 @@ function mechanicHeadline(mech: CardSpecialMechanic | null, enemyDifficulty?: En
             const title = rk.charAt(0) + rk.slice(1).toLowerCase();
             return { keyword: title, heroText: rv, heroSub: pairs.length > 1 ? 'and more' : null, verbLine: 'the printed rider' };
         }
+        // Phase 32 part 4a — TURNABOUT cashes the whole STAGGER/BACKFIRE
+        // denial ledger banked THIS combat (`rungsDeniedTotal`, live-only —
+        // never headlined as a fabricated number here, same convention as
+        // REAP's live Soul-spend).
+        case 'turnabout':
+            return { keyword: kw ?? 'Backfire', heroText: `${mech.burstPerRung}×`, heroSub: 'per rung ever denied', verbLine: 'cash the whole denial ledger — then it resets' };
         default:
             return null;
     }
@@ -1298,7 +1304,7 @@ function mechanicHeadline(mech: CardSpecialMechanic | null, enemyDifficulty?: En
  *  identity/payoff verb wins over its modifiers (ECHO doubles SWAY → headline
  *  SWAY), and a plain `rider` verb is the last resort. */
 const MECH_HEADLINE_PRIORITY: readonly string[] = [
-    'peroration', 'sway', 'stagger', 'lock_stance', 'reprise', 'replay_last',
+    'peroration', 'sway', 'turnabout', 'stagger', 'lock_stance', 'reprise', 'replay_last',
     'omen', 'consume_affliction', 'soul_gain', 'spend_premises', 'premise',
     // (`conjure_card` stays: cloud phase 29 retired CONJURE off zero library
     // carriers, but this session's WS2.1 Thoughtform work ships live sandbox

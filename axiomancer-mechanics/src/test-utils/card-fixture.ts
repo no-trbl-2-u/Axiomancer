@@ -8,18 +8,20 @@
  *   - RICH (default, `{ clean: false }`) — the effectiveness lint's
  *     precondition buffet: enemy afflictions with DoT fuel + MARK stacks,
  *     Souls, Premises, discard fodder, reserve/floating dice with pip
- *     headroom, a pre-damaged Fallen player. Every one of the 70 cards'
- *     PAID-face preconditions is satisfiable here.
+ *     headroom, a pre-damaged Fallen player, a banked TURNABOUT denial
+ *     ledger. Every one of the 70 cards' PAID-face preconditions is
+ *     satisfiable here.
  *   - CLEAN (`{ clean: true }`) — the doctrine witness's null board: the
  *     SAME player and die tray, but the enemy carries NO pre-applied
  *     effects (no DoT fuel, no marks), guard/barrier 0, Souls 0, reserve
- *     pips 0, full enemy HP. Every printed payoff prerequisite is zeroed
- *     — stacks, souls, AND banked pips (FORGE's `rupture.fuelPerPip`
- *     legally converts pips to burst fuel, so a leftover pip would let
- *     e.g. the-overtake chip 5 HP legitimately) — so every doctrinally
- *     legal payoff (RUPTURE fuel 0, REAP 0 souls, tick nothing) must chip
- *     NOTHING and any enemy-HP delta is direct damage, i.e. a strike in
- *     disguise.
+ *     pips 0, full enemy HP, zero denial banked. Every printed payoff
+ *     prerequisite is zeroed — stacks, souls, banked pips (FORGE's
+ *     `rupture.fuelPerPip` legally converts pips to burst fuel, so a
+ *     leftover pip would let e.g. the-overtake chip 5 HP legitimately), AND
+ *     the TURNABOUT ledger (a leftover bank would let it legitimately chip)
+ *     — so every doctrinally legal payoff (RUPTURE fuel 0, REAP 0 souls,
+ *     TURNABOUT 0 rungs, tick nothing) must chip NOTHING and any enemy-HP
+ *     delta is direct damage, i.e. a strike in disguise.
  *
  * Excluded from the published build via `tsconfig.json` `exclude`
  * (`src/test-utils`); must not be imported from production code.
@@ -98,6 +100,9 @@ export function buildFixtureState(options: { clean?: boolean } = {}): CombatEnco
         guard: clean ? 0 : 4,
         barrier: clean ? 0 : 4,
         souls: clean ? 0 : 12, // clean: REAP must have zero souls to consume
+        // Phase 32 part 4a (Control — TURNABOUT ledger): clean: TURNABOUT
+        // must have zero rungs banked to consume (same doctrine as souls).
+        rungsDeniedTotal: clean ? 0 : 20,
         premises: 3,
         peroration: null, // tallied but undeclared — a 'premise' gain never trips CONCEDE mid-assertion
         sway: 0,

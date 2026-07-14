@@ -499,6 +499,10 @@ export type CombatEvent =
     // The tiered payoff: fires only when a NEW debt tier is crossed WHILE
     // FALLEN — 'tiersCrossed' lets a single big RECOIL cross more than one.
     | { kind: 'debt-tier-payoff'; tiersCrossed: number; guard: number; total: number }
+    // Phase 32 part 4a (Control — TURNABOUT): the ledger cashed out — every
+    // rung STAGGER/BACKFIRE ever denied this combat converts to one burst,
+    // then `rungsDeniedTotal` resets to 0 in the SAME call (no stale read).
+    | { kind: 'turnabout-fired'; cardId: string; rungsSpent: number; amount: number }
     | { kind: 'phase-resolved'; phaseIndex: number; mark: 'clear' | 'overwhelmed' }
     | { kind: 'threat-fired'; phaseIndex: number; description: string; effects: CombatThreatEffect[] }
     // WS9 (spec 32 §12 #7) — a branch phase committed its fork at phase START.
@@ -700,6 +704,16 @@ export interface CombatEncounterState {
      *  path exists yet (Absolution-fork follow-up); it only ever grows this
      *  combat. Optional (absent = 0, back-compat with existing state literals). */
     akrasiaDebt?: number;
+    /** Phase 32 part 4a (Control — TURNABOUT ledger): cumulative STAGGER/
+     *  BACKFIRE rung-denial THIS COMBAT — every phase's `rungsForBackfire`
+     *  (the same quantity BACKFIRE's per-phase drip already reads), whether or
+     *  not BACKFIRE itself is live. Per-combat, like `souls`/`akrasiaDebt` —
+     *  reset to 0 in `initializeCombatEncounter` only. UNLIKE those two, this
+     *  ledger is CONSUMED (zeroed) the moment a `turnabout` mechanic cashes it
+     *  — the one place this differs structurally from the Souls/DEBT
+     *  precedent. Optional (absent = 0, back-compat with existing state
+     *  literals). */
+    rungsDeniedTotal?: number;
     /** Spec 32 §12 #4 — HP the enemy's threat dealt the player this turn
      *  (post-soak budget); rolls into `enemyDamageLastRound` between phases. */
     enemyDamageThisTurn?: number;

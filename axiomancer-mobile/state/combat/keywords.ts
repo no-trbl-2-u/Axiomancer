@@ -111,6 +111,10 @@ const MECHANIC_KEYWORD: Record<string, string> = {
     // ── Control ──
     stagger: 'Stagger',
     lock_stance: 'Stagger',
+    // TURNABOUT (phase 32 part 4a) — cashes the whole STAGGER/BACKFIRE
+    // denial ledger; badged as BACKFIRE's own "ALL" variant (REAP ALL /
+    // RUPTURE ALL precedent), not a new registry keyword.
+    turnabout: 'Backfire',
     // ── Oracle ──
     foretell: 'Foretell',
     omen: 'Omen',

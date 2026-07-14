@@ -458,7 +458,7 @@ describe('card projection — the v3 library classifies + advertises sensibly', 
         ['slippery-slope', 'direct-dot', 'dot'],
         ['sweet-poison', 'direct-dot', 'dot'],
         ['zenos-half-step', 'direct-control', 'control'],    // STAGGER
-        ['paralysis-of-analysis', 'direct-control', 'control'],
+        ['turnabout', 'direct-damage', 'none'],              // TURNABOUT — banked-denial finisher (phase 32 part 4a)
         ['soft-word', 'direct-control', 'control'],          // SWAY
         ['brace-for-impact', 'defend', 'none'],
         ['the-adamant-wall', 'defend', 'none'],

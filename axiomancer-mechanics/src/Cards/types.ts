@@ -238,6 +238,12 @@ export type CardSpecialMechanic =
      *  (mechanic-damage path, UNCAPPED — spec 32 §12 item 5: emptying the
      *  whole bank is the ALL-spender's price). */
     | { kind: 'reap_all'; burstPerSoul: number }
+    /** TURNABOUT (phase 32 part 4a — Control capstone): CONSUME the whole
+     *  `rungsDeniedTotal` ledger (every rung STAGGER/BACKFIRE has denied this
+     *  combat) for a burst of `burstPerRung` HP per rung banked, then zero the
+     *  ledger. Mirrors `reap_all`'s shape exactly, but CONSUMES rather than
+     *  reads a still-growing counter — the theme finally banks what it does. */
+    | { kind: 'turnabout'; burstPerRung: number }
     /** SWAY — add `amount` SWAY to the enemy. SWAY decays 1/turn; if SWAY ≥ the
      *  enemy's current HP at a turn boundary, it CAPITULATES (alt-win). */
     | { kind: 'sway'; amount: number }

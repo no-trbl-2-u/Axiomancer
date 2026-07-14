@@ -153,16 +153,19 @@ export const COMBAT_DECK_PRESETS: Record<string, CombatDeckPreset> = {
         focus: 'control',
         description: 'Strip the rungs from every telegraphed blow; what cannot land, lands inward.',
         // Colors 5/5/5: body = zeno×4 + hedgehog | mind = red-herring×4 +
-        // paralysis | heart = cassandra×2 + fallen-grace×2 + mirror.
+        // turnabout | heart = cassandra×2 + fallen-grace×2 + mirror.
         // Borrows: cassandras-burden (oracle, heart — OMEN guard + chip),
         // fallen-grace (akrasia, heart — bleed chip + draw), hedgehogs-
         // dilemma (bulwark, body ench), mirror-of-longing (charm, heart dis
         // — the deck's heavy guard converts to SWAY). STAGGER/BACKFIRE core
-        // (zeno, red-herring, paralysis) stays home.
+        // (zeno, red-herring) stays home; the rare-spell seat is TURNABOUT
+        // (phase 32 part 4a) — the capstone that cashes the whole denial
+        // ledger those two build, superseding paralysis-of-analysis's old
+        // STAGGER+BACKFIRE seat (same id slot, same 'mind' color).
         cardIds: recipe(
             'zenos-half-step', 'red-herring',
             'cassandras-burden', 'fallen-grace',
-            'paralysis-of-analysis', 'hedgehogs-dilemma', 'mirror-of-longing',
+            'turnabout', 'hedgehogs-dilemma', 'mirror-of-longing',
         ),
     },
     augury: {

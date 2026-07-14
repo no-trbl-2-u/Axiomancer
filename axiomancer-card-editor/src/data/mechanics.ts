@@ -172,6 +172,7 @@ export const SPECIAL_MECHANIC_KINDS = [
     'consume_affliction',
     'reap',
     'reap_all',
+    'turnabout',
     'sway',
     'echo',
     'echo_next_spell',

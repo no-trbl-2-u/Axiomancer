@@ -70,7 +70,7 @@ const CARD_ART_BY_ID: Record<string, number> = {
     'red-herring': willOWisp,
     'undistributed-middle': confuseRings,
     'arrow-paradox': freezeCrystal,
-    'paralysis-of-analysis': confuseRings,
+    'turnabout': confuseRings, // phase 32 part 4a: replaces paralysis-of-analysis in this slot
     'achilles-and-the-tortoise': freezeCrystal,
     'quagmire-of-doubt': confuseRings,
     // ── T6 Oracle — the divine stag (seeing truly) ──

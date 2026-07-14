@@ -66,6 +66,14 @@ export const VERB_POINTS = Object.freeze({
     reapAll: 5,
     /** Expected Souls banked when a Harvest payoff fires. */
     expectedSouls: 4,
+    /** TURNABOUT (phase 32 part 4a) — the verb: same base as REAP ALL, the
+     *  same "ALL-spender capstone" archetype (spend/consume the whole bank). */
+    turnabout: 5,
+    /** Expected rungs banked in `rungsDeniedTotal` when a Control capstone
+     *  fires: a mid-fight Standstill deck denies ~2-4 rungs/phase across
+     *  ~6-8 phases by the time a rank-6 card is drawn — a realistic ~20-rung
+     *  bank (2026-07-10-theme-identity.md §2 arithmetic). */
+    expectedRungsDenied: 20,
     /** Expected pips banked when a Forge payoff fires. */
     expectedPips: 2,
     /** Expected pips that OVERFLOW a `grant_pip` (no Reserve room) per cast —
@@ -328,6 +336,8 @@ export function scoreMechanic(mechanic: CardSpecialMechanic): number {
                 - mechanic.cost * V.soul * SELF_COST_CREDIT;
         case 'reap_all':
             return V.reapAll + mechanic.burstPerSoul * V.expectedSouls / V.dotLifetimeDivisor;
+        case 'turnabout':
+            return V.turnabout + mechanic.burstPerRung * V.expectedRungsDenied / V.dotLifetimeDivisor;
         case 'sway': return mechanic.amount * V.swayPerStack;
         case 'echo': return 0; // card-level multiplier (scoreCard)
         case 'echo_next_spell': return V.echoNextSpell;
