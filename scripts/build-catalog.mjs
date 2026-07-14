@@ -42,6 +42,75 @@ const CATALOG_EXTRA_STYLE = `
 .catalog-section { margin: 34px 0 52px; scroll-margin-top: 110px; }
 .catalog-section > h2 { font-size: 24px; margin: 0 0 6px; }
 .catalog-section .intro { color: var(--muted); margin: 0 0 14px; }
+
+/* ── Card FACE — a faithful CSS port of the in-combat CombatCardFace (large,
+      Option A layout). The stance/keyword/orb hues arrive as inline --vars per
+      card; everything else is fixed frame chrome so the catalog reads as the
+      game does. ─────────────────────────────────────────────────────────── */
+.grid-cards { grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr)); align-items: start; }
+.gcard.is-face { background: none; border: 0; border-radius: 0; overflow: visible; }
+.cardface {
+  position: relative; aspect-ratio: 132 / 194; border-radius: 8px;
+  border: 2px solid rgba(0,0,0,0.9); background: #14110e;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.5); overflow: hidden;
+}
+.cardface.inert { filter: saturate(0.72) brightness(0.94); }
+.cf-inner {
+  position: absolute; inset: 0; border: 1.5px solid var(--border); border-radius: 6px;
+  overflow: hidden; display: flex; flex-direction: column; background: #14110e;
+}
+.cf-art { position: relative; height: 48%; background: #0c0a08; }
+.cf-art img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+.cf-tint { position: absolute; inset: 0; background: var(--stance); opacity: 0.14; }
+.cf-tint-low {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 55%;
+  background: linear-gradient(to bottom, transparent, var(--stance)); opacity: 0.5;
+}
+.cf-orb {
+  position: absolute; z-index: 3; top: 8px; left: 8px; width: 44px; height: 44px;
+  border-radius: 50%; background: var(--orb); border: 1.5px solid rgba(0,0,0,0.65);
+  box-shadow: 0 2px 3px rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center;
+}
+.cf-shine { position: absolute; top: 4px; left: 6px; width: 40%; height: 30%; border-radius: 50%; background: rgba(255,255,255,0.32); }
+.cf-glyph { color: #fff; font-size: 22px; line-height: 1; text-shadow: 0 1px 2px rgba(0,0,0,0.8); }
+.cf-lower { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+.cf-nameband {
+  position: relative; background: var(--stance); padding: 4px 6px; text-align: center;
+  border-top: 1px solid rgba(255,255,255,0.28); border-bottom: 1px solid rgba(0,0,0,0.45);
+}
+.cf-nameband::before { content: ""; position: absolute; inset: 0; background: rgba(0,0,0,0.30); }
+.cf-name {
+  position: relative; font-family: Georgia, "Times New Roman", serif; font-weight: 700;
+  font-size: 17px; line-height: 1.15; color: #f3e9d2; letter-spacing: 0.3px;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.6);
+  /* The game shrinks the name to one line; on the web we let a long name wrap
+     rather than clip it — a catalog must never hide a card's name. */
+  display: block; text-wrap: balance;
+}
+.cf-rail { flex: 1; display: flex; align-items: stretch; background: rgba(10,8,6,0.62); min-height: 0; }
+.cf-half {
+  flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center;
+  justify-content: center; text-align: center; padding: 4px 4px; gap: 2px;
+}
+.cf-div { width: 1px; background: rgba(255,255,255,0.18); margin: 4px 0; }
+.cf-head { font-size: 12px; letter-spacing: 1.2px; font-weight: 700; line-height: 1.1; }
+.cf-free-head { color: #9c937f; }
+.cf-paid-head { color: var(--kw); }
+.cf-val {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 15px; line-height: 1.2;
+}
+.cf-free-val { color: #f1e7d0; }
+.cf-paid-val { color: var(--kw); }
+.cf-dieline {
+  align-self: center; margin: 0 0 3px; padding: 0 5px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 9px; line-height: 1.3; color: #d4c026; letter-spacing: 0.2px; text-align: center;
+}
+.cf-typestrip {
+  border-top: 1px solid rgba(255,255,255,0.12); background: rgba(0,0,0,0.55);
+  text-align: center; padding: 3px 2px; font-size: 9px; letter-spacing: 1.6px; color: #9c937f;
+}
 `;
 
 // A live client-side filter box shared by the cards/enemies sections. It is
@@ -108,27 +177,66 @@ function searchText(name, chips, lines) {
 }
 
 // ---------------------------------------------------------------------------
-// Cards — name · image · card text
+// Cards — the exact 5-zone combat FACE (art · stance orb · name band · ◇FREE /
+// ◆PAID split rail · die line · type strip). The face record is produced by the
+// game's own `faceStats` presenter (see scripts/export-catalog.ts) so the
+// catalog card can never drift from what the player sees in combat.
 // ---------------------------------------------------------------------------
+function faceHtml(c) {
+  const f = c.face;
+  // Back-compat: a JSON without the face falls back to the old art + stats view.
+  if (!f) {
+    return (
+      artOrPlaceholder(c.image, "art", "🂠", c.name) +
+      `<div class="body"><div class="name">${inline(c.name)}</div>` +
+      chipsHtml(c.chips) +
+      linesHtml(c.lines) +
+      `</div>`
+    );
+  }
+
+  const art = c.image
+    ? `<img loading="lazy" src="${escapeHtml(c.image)}" alt="${escapeHtml(c.name)}">`
+    : "";
+  const dieLine = f.dieLine
+    ? `<div class="cf-dieline">${escapeHtml(f.dieLine)}</div>`
+    : "";
+  const vars =
+    `--stance:${escapeHtml(f.stanceColor)};--kw:${escapeHtml(f.kwColor)};` +
+    `--border:${escapeHtml(f.borderColor)};--orb:${escapeHtml(f.orbColor)}`;
+
+  return (
+    `<div class="cardface${f.inert ? " inert" : ""}" style="${vars}">` +
+    `<div class="cf-inner">` +
+    `<div class="cf-art">${art}<div class="cf-tint"></div><div class="cf-tint-low"></div></div>` +
+    `<div class="cf-orb"><span class="cf-shine"></span><span class="cf-glyph">${escapeHtml(f.glyph)}</span></div>` +
+    `<div class="cf-lower">` +
+    `<div class="cf-nameband"><span class="cf-name">${inline(c.name)}</span></div>` +
+    `<div class="cf-rail">` +
+    `<div class="cf-half"><div class="cf-head cf-free-head">◇ ${escapeHtml(f.freeKeyword)}</div>` +
+    `<div class="cf-val cf-free-val">${escapeHtml(f.freeValue)}</div></div>` +
+    `<div class="cf-div"></div>` +
+    `<div class="cf-half"><div class="cf-head cf-paid-head">◆ ${escapeHtml(f.paidKeyword)}</div>` +
+    `<div class="cf-val cf-paid-val">${escapeHtml(f.paidValue)}</div></div>` +
+    `</div>` +
+    dieLine +
+    `<div class="cf-typestrip">${escapeHtml(f.typeStrip)}</div>` +
+    `</div></div></div>`
+  );
+}
+
 function renderCards(cards) {
   const grid = cards
     .map((c) => {
       const search = searchText(c.name, c.chips, c.lines);
-      const art = artOrPlaceholder(c.image, "art", "🂠", c.name);
-      return (
-        `  <article class="gcard" data-search="${search}">${art}` +
-        `<div class="body"><div class="name">${inline(c.name)}</div>` +
-        chipsHtml(c.chips) +
-        linesHtml(c.lines) +
-        `</div></article>`
-      );
+      return `  <article class="gcard is-face" data-search="${search}">${faceHtml(c)}</article>`;
     })
     .join("\n");
 
   return (
     `<section id="cards" class="catalog-section">\n` +
     `<h2>Cards</h2>\n` +
-    `<p class="intro">Name, art, stance, tier, target, rank, learn level, and rules text.</p>\n` +
+    `<p class="intro">Every card drawn as its in-combat face — art, stance orb, name band, the ◇ free / ◆ die split, and the type strip.</p>\n` +
     searchbar("cards-grid", "Filter cards by name or text…", cards.length, "cards") +
     `\n<div class="grid-cards" id="cards-grid">\n${grid}\n</div>\n` +
     `</section>`

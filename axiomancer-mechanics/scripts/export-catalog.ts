@@ -19,6 +19,10 @@
  * devlog/ so the served site is self-contained.
  */
 
+// MUST stay first — registers the mobile `@/` + `@mechanics` path aliases so the
+// game's own card-face presenter (imported below) resolves under ts-node.
+import './catalog-paths';
+
 import {
     readFileSync,
     writeFileSync,
@@ -38,6 +42,10 @@ import { EnemyLibrary } from '../src/Enemy/enemy.library';
 import { effectsLibrary, lookupEffect } from '../src/Effects/effects.library';
 // Pure, dependency-free presentation mapping (effect → glyph + colour).
 import { effectGlyph } from '../../axiomancer-mobile/components/combat/statusGlyphs';
+// The game's OWN card-face presenter — the exact 5-zone face a player sees in
+// combat (orb glyph, stance colours, ◇FREE / ◆PAID split rail, type strip). We
+// reuse it verbatim so the catalog face can never drift from the live face.
+import { faceStats, type CombatCardFaceVM } from '../../axiomancer-mobile/state/presenters/combat-encounter.engine';
 
 const MECH = join(__dirname, '..');
 const ROOT = join(MECH, '..');
@@ -148,14 +156,74 @@ const pct = (n: number) => `${n > 0 ? '+' : ''}${Math.round((n - 1) * 100)}%`;
  */
 const lookupCard = (id: string) => cardLibrary.find((c) => c.id === id) ?? null;
 const RANK_TAG = new RegExp(`\\s*\\((?:${Object.values(CARD_RANK_NAMES).join('|')})\\)\\.?$`);
-function faceLines(c: any): string[] {
-    const cc: any = toCombatCard(c.id, lookupCard as any, lookupEffect);
+function faceLines(cc: any): string[] {
     if (!cc) return [];
     const strip = (s: string) => s.replace(' Costs 1 die.', '').replace(RANK_TAG, '').trim();
     return [strip(cc.topActionText), strip(cc.bottomActionText)].filter(Boolean);
 }
 
-function cardStats(c: any): { chips: Chip[]; lines: string[] } {
+// ---------------------------------------------------------------------------
+// Card FACE — the render-ready 5-zone face the catalog draws to look exactly
+// like the in-combat card. `faceStats` (the game's own presenter) is the single
+// source of truth; the helpers below mirror `CombatCardFace`'s tiny display
+// rules (the ◆ PAID value derivation, the ◇/◆ keyword defaults) so the static
+// HTML never re-derives them wrongly.
+// ---------------------------------------------------------------------------
+// Ashen-Gold (default theme) `ash` — the greyed tint for an inert face's orb +
+// paid keyword (mirrors `AXM.ash`; see axiomancer-mobile/theme/palette.ts).
+const ASH = '#46403a';
+
+/** Fallback word for a face with no honest number — mirrors CombatBoard heroFace. */
+function heroFace(f: CombatCardFaceVM): string {
+    if (f.heroText) return f.heroText;
+    switch (f.kind) {
+        case 'befriend': return 'SPARE';
+        case 'weaken': return 'softens';
+        default: return 'minor';
+    }
+}
+/** "over N turns" → "over Nt" — mirrors CombatBoard compactSub. */
+function compactSub(s: string): string {
+    return s.replace(/(\d+)\s*turns?\b/g, '$1t');
+}
+/** Strip a leading keyword word so the ◆ value doesn't double the head. */
+function paidValueText(f: CombatCardFaceVM): string {
+    const base = f.heroText || heroFace(f);
+    if (f.keyword) {
+        const stripped = base.replace(new RegExp('^' + f.keyword + '\\s*', 'i'), '');
+        return stripped || base;
+    }
+    return base;
+}
+/** The ◆ PAID column value exactly as CombatCardFace computes it. */
+function paidValue(f: CombatCardFaceVM): string {
+    const numberless = !f.heroText;
+    return numberless
+        ? (f.heroSub ? compactSub(f.heroSub) : heroFace(f))
+        : `${paidValueText(f)}${f.heroSub ? ` ${compactSub(f.heroSub)}` : ''}`;
+}
+
+/** Flatten the game's face VM into the render-ready record the catalog draws. */
+function cardFace(sourceCard: any, cc: any) {
+    const f = faceStats(cc, sourceCard);
+    return {
+        glyph: f.glyph,
+        stanceColor: f.stanceColor,      // orb + name band + art tint
+        borderColor: f.categoryColor,    // card frame (always the raw category hue)
+        orbColor: f.inert ? ASH : f.stanceColor,
+        kwColor: f.inert ? ASH : f.categoryColor,   // ◆ PAID keyword + value colour
+        freeKeyword: f.freeKeyword ?? 'FREE',
+        freeValue: f.freeValue ?? f.freeHeroText ?? '',
+        paidKeyword: f.keyword ?? 'DIE',
+        paidValue: paidValue(f),
+        typeStrip: f.typeStrip,
+        dieLine: (cc.dieLines ?? []).join(' · '),
+        inert: f.inert,
+    };
+}
+
+function cardStats(c: any): { chips: Chip[]; lines: string[]; face: ReturnType<typeof cardFace> | null } {
+    const cc: any = toCombatCard(c.id, lookupCard as any, lookupEffect);
     const chips: Chip[] = [
         { k: 'Stance', v: c.philosophicalAspect },
         { k: 'Type', v: c.category },
@@ -173,7 +241,7 @@ function cardStats(c: any): { chips: Chip[]; lines: string[] } {
     chips.push({ k: 'Source', v: origin.source });
     if (origin.presetDeck) chips.push({ k: 'Preset', v: origin.presetDeck });
 
-    return { chips, lines: faceLines(c) };
+    return { chips, lines: faceLines(cc), face: cc ? cardFace(c, cc) : null };
 }
 
 /** An effect's payload → short mechanical stat lines. */
