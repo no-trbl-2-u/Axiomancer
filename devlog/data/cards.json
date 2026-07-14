@@ -144,7 +144,7 @@
   ],
   "lines": [
    "FREE — mark i1 d1.",
-   "PAID — mark i1 d2."
+   "PAID — mark i1 d2 + draw 2."
   ]
  },
  {
@@ -763,8 +763,8 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — Each phase, standing GUARD deals 20% of itself (min 4); a fully-blocked attack STAGGERs the next telegraph.",
-   "PAID (rest of combat) — Each phase, standing GUARD deals 20% of itself (min 4); a fully-blocked attack STAGGERs the next telegraph. Attaches to the enemy."
+   "FREE (3 rounds) — After each threat phase, deal 20% of your remaining GUARD (minimum 4). Fully blocking an attack STAGGERs the next telegraph by 1.",
+   "PAID (rest of combat) — After each threat phase, deal 20% of your remaining GUARD (minimum 4). Fully blocking an attack STAGGERs the next telegraph by 1. Attaches to the enemy."
   ]
  },
  {
@@ -920,7 +920,7 @@
   ],
   "lines": [
    "FREE — SWAY 1.",
-   "PAID — rapport i2 d2."
+   "PAID — rapport i2 d2 + heal 2."
   ]
  },
  {
@@ -1072,7 +1072,7 @@
   ],
   "lines": [
    "FREE — +1 Premise.",
-   "PAID — poison i1 d2 + +1 Premise (2/play)."
+   "PAID — poison i1 d2 + +1 Premise + draw 1 (2/play)."
   ]
  },
  {
@@ -1376,7 +1376,7 @@
   ],
   "lines": [
    "FREE — SWAY 1.",
-   "PAID — SWAY 6 + ECHO. ⬡ HEART ×5 spent: SWAY 4"
+   "PAID — SWAY 6 + ECHO + heal 4. ⬡ HEART ×5 spent: SWAY 4"
   ]
  },
  {
@@ -1479,8 +1479,8 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — SWAY never decays; each turn this holds, your SWAY gains grow +12% (max +108%).",
-   "PAID (rest of combat) — SWAY never decays; each turn this holds, your SWAY gains grow +12% (max +108%)."
+   "FREE (3 rounds) — SWAY does not decay. At the end of each turn, future SWAY gains increase by 12% (maximum +108%).",
+   "PAID (rest of combat) — SWAY does not decay. At the end of each turn, future SWAY gains increase by 12% (maximum +108%)."
   ]
  },
  {
@@ -1683,8 +1683,8 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — Damage your GUARD or RIPOSTE prevents becomes SWAY, 1:1.",
-   "PAID (rest of combat) — Damage your GUARD or RIPOSTE prevents becomes SWAY, 1:1. Attaches to the enemy."
+   "FREE (3 rounds) — Damage prevented by your GUARD or RIPOSTE becomes SWAY, 1:1.",
+   "PAID (rest of combat) — Damage prevented by your GUARD or RIPOSTE becomes SWAY, 1:1. Attaches to the enemy."
   ]
  },
  {
@@ -1892,7 +1892,7 @@
   ],
   "lines": [
    "FREE — mill 1 to discard.",
-   "PAID — replay your last spell ×2."
+   "PAID — replay your last spell ×2 + consume all marks — 3 damage per stack."
   ]
  },
  {
@@ -2460,7 +2460,7 @@
   ],
   "lines": [
    "FREE — mill 1 to discard.",
-   "PAID — RECALL 1."
+   "PAID — RECALL 1 + consume all marks — 1 damage per stack."
   ]
  },
  {
@@ -3132,7 +3132,7 @@
   ],
   "lines": [
    "FREE — rapport i1 d2.",
-   "PAID — SWAY 3."
+   "PAID — SWAY 3 + cleanse 1 · heal 3."
   ]
  },
  {

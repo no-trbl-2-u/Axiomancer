@@ -118,6 +118,35 @@
   before removal.
 - next: /iterate
 
+### [2.4] Phase-mirror issue close is unreliable — 9 shipped phases still show open, and even a present trailer once failed
+- category: gap
+- impact: 4
+- ease: 5
+- detail: `skills/ship-a-phase.md` Step 10 says the shipping commit
+  should add a `Closes #<phase-issue-number>` trailer so GitHub
+  auto-closes the phase mirror opened in Step 2.5. Checked every
+  `plan: phase N shipped` commit for single-part phases 1, 3, 5, 12,
+  16, 22, 24, 26, 30 (`4b9e30f3`, `f2d59a13`, `b1cd4278`, `b778a0c3`,
+  `8f49f612`, `9e7d17c6`, `06c54466`, `83fec94f`, `bf48c6c8`) — none
+  contain a `Closes` trailer, and issues #22, #25, #36, #47, #54,
+  #52, #65, #69, #74 are still open on GitHub, ~21 other phases'
+  mirrors (2, 4, 6, 7, 8, 9, 10, 11, 14, 15, 17-21, 23, 25, 27-29, 31)
+  closed cleanly, so this isn't a universal failure — it's roughly a
+  coin flip across the project's history, not obviously correlated
+  with phase order or single- vs multi-part. Odder still: Phase 32
+  Part 1's commit (`7392573c`) DOES contain `Closes #83`, yet issue
+  #83's GitHub timeline shows zero close/comment events since
+  creation (2026-07-13T15:26) — the trailer was present and still
+  didn't fire, which contradicts a "missing trailer" theory as the
+  sole cause. Net effect: the phase-mirror issue list silently
+  degrades from "what's in flight" to "some unpredictable mix of
+  in-flight and long-done," which is exactly the signal `/digest`'s
+  pulse gather and `/oversight` read.
+- next: /iterate (root-cause why the `Closes #N` keyword sometimes
+  no-ops on a direct push to `main` — compare a known-good case
+  like #82/Phase 31 against #83/Phase 32 part 1 commit-by-commit;
+  once understood, sweep-close the 9 confirmed-stale issues by hand)
+
 ## Done
 
 ### fishing-village CLI + spec08 e2e drive legacy combat
