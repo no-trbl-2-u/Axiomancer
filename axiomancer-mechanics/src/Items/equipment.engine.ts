@@ -15,7 +15,7 @@
 
 import { Consumable } from './types';
 import { Effect } from '../Effects/types';
-import { applyEffect } from '../Effects';
+import { applyEffect, removeEffectsByType } from '../Effects';
 import { heal } from '../Combat/health';
 import { CombatResources } from '../Cards/types';
 import { Character } from '../Character/types';
@@ -99,6 +99,17 @@ export function useConsumableEffect(
     };
 
     const runEffect = (effect: Effect): void => {
+        // CLEANSE consumables (antidote / clarity-serum → `buff_cleanse`) carry a
+        // payload-less instant whose job is to STRIP debuffs, not to persist.
+        // Route it to `removeEffectsByType` scoped by the effect's tier (a tier-2
+        // cleanse sheds tier 1+2 debuffs) instead of adding an inert instance —
+        // otherwise the item advertises "purges venoms" and does nothing.
+        if (effect.payload.cleanse) {
+            const { activeEffects } = removeEffectsByType(next.effects, 'debuff', effect.tier);
+            next = { ...next, effects: activeEffects };
+            applied = effect;
+            return;
+        }
         const { activeEffects } = applyEffect(next.effects, effect, round, buildApplyOptions());
         next = { ...next, effects: activeEffects };
         applied = effect;

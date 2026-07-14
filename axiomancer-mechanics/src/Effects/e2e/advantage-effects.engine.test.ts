@@ -26,16 +26,24 @@ const ae = (effectId: string, intensity = 1): ActiveEffect => ({
 // ─── Buff effects with advantageModifier ──────────────────────────────────────
 
 describe('Phase 88 — Advantage buffs: advantageGrants via getActiveEffectModifiers', () => {
-    it('buff_accuracy_up has rollModifier and no advantageModifier', () => {
-        const effect = lookupEffect('buff_accuracy_up');
-        expect(effect).toBeDefined();
-        const { activeEffects } = applyEffect([], effect!, 1);
-        const mods = getActiveEffectModifiers(activeEffects);
-        // No advantageModifier in the payload — just the roll bonus
-        expect(mods.advantageGrants.size).toBe(0);
-        expect(effect!.payload.rollModifier).toBe(3);
-        expect(effect!.payload.statModifiers ?? []).toEqual([]);
-    });
+    // The precision/crit buffs were re-themed onto `advantageModifier`
+    // (2026-07-14): under "THE STRIKE IS DEAD" the player has no roll/crit/stat
+    // surface, so a flat rollModifier or stat multiplier was inert. Granting
+    // advantage on the drafted stance is the one player-offense surface the
+    // stance-read model reads (see `clampPlayerRead` in combat.engine.ts).
+    it.each(['buff_accuracy_up', 'buff_critical_rate_up', 'buff_critical_damage_up'])(
+        '%s grants advantage on all stances (re-themed from inert roll/stat payloads)',
+        (effectId) => {
+            const effect = lookupEffect(effectId);
+            expect(effect).toBeDefined();
+            const { activeEffects } = applyEffect([], effect!, 1);
+            const mods = getActiveEffectModifiers(activeEffects);
+            expect(mods.advantageGrants).toEqual(new Set(['body', 'mind', 'heart']));
+            // The dead surfaces are gone — no lingering inert roll/stat payload.
+            expect(effect!.payload.rollModifier ?? 0).toBe(0);
+            expect(effect!.payload.statModifiers ?? []).toEqual([]);
+        },
+    );
 
     it('buff_damage_reduction has defenseModifier 5', () => {
         const mods = getActiveEffectModifiers([ae('buff_damage_reduction')]);

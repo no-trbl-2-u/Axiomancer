@@ -598,9 +598,25 @@ export function startTurn(
  * cannot benefit from a won read — advantage clamps to neutral. Losing reads
  * still hurt (the null blinds, it does not protect).
  */
-function clampPlayerRead(player: Character, read: CombatReadResult): CombatReadResult {
-    if (read !== 'advantage') return read;
-    return hasPayloadFlag(player, 'blocksAdvantage') ? 'neutral' : read;
+function clampPlayerRead(
+    player: Character,
+    read: CombatReadResult,
+    dieColor: CombatDieColor,
+): CombatReadResult {
+    let effective = read;
+    // buff_haste (and the re-themed precision buffs buff_accuracy_up /
+    // buff_critical_rate_up / buff_critical_damage_up) grant GUARANTEED advantage
+    // on the drafted stance via `advantageModifier.grantAdvantage`. This is the
+    // one player-offense surface the stance-read model can read, so it is where
+    // those consumable buffs finally bite. A Wild/X die has no stance ('none'
+    // read) and never benefits.
+    if (effective !== 'none' && dieHasStance(dieColor)) {
+        const grants = getActiveEffectModifiers(player.effects as ActiveEffect[]).advantageGrants;
+        if (grants.has(dieColor as Stance)) effective = 'advantage';
+    }
+    // blocksAdvantage (anti-control) still cancels a granted OR matchup advantage.
+    if (effective === 'advantage' && hasPayloadFlag(player, 'blocksAdvantage')) return 'neutral';
+    return effective;
 }
 
 /**
@@ -627,7 +643,7 @@ export function draftStanceDie(
 
     const events: CombatEvent[] = [];
     const enemyStance = currentPhaseStance(state);
-    const read = clampPlayerRead(state.player, resolveRead(drafted.color, enemyStance));
+    const read = clampPlayerRead(state.player, resolveRead(drafted.color, enemyStance), drafted.color);
 
     // Floating dice are exempt from the draft economy entirely: they are not
     // omens, cannot be banked/burned, feed no draft-time resonance.
@@ -1083,7 +1099,7 @@ function gainSway(
     let scaledAmount = amount;
     if (momentum) {
         const momentumDef = lookupEffectDef('buff_grace_momentum');
-        const pct = (momentumDef?.payload as { outgoingSwayGainMulPct?: number } | undefined)?.outgoingSwayGainMulPct ?? 0;
+        const pct = momentumDef?.payload.outgoingSwayGainMulPct ?? 0;
         scaledAmount = Math.round(amount * (1 + (pct / 100) * momentum.intensity));
     }
     const sway = (state.sway ?? 0) + scaledAmount;
@@ -1552,7 +1568,7 @@ function playBottomAction(
     const read: CombatReadResult = poweringSource === 'fate-x'
         ? 'none'
         : powering.color === 'wild'
-            ? clampPlayerRead(state.player, resolveRead(card.stance as CombatDieColor, enemyStance))
+            ? clampPlayerRead(state.player, resolveRead(card.stance as CombatDieColor, enemyStance), card.stance as CombatDieColor)
             : state.lastRead;
     const mult = READ_DAMAGE_MULT[read];
     const colorMatch = powering.color === 'wild' || powering.color === card.stance;
@@ -3007,7 +3023,18 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
         events.push({ kind: 'backfired', amount: drip, rungs: rungsForBackfire });
     }
 
-    if (!hindered) {
+    // ARMOR (defenseModifier) — flat per-hit reduction of the incoming telegraph,
+    // the live home for buff_damage_reduction (Iron Skin), buff_invincibility
+    // (Revive Crystal) and buff_phoenix_vigor's guard. Inert until now under the
+    // HP model (the aggregator computed `defenseDelta` but no combat path read
+    // it). Player-only and clamped ≥0, so no enemy-borne or negative payload can
+    // amplify the hit. Applied before parry/guard/barrier soak, like armor.
+    const playerArmor = Math.max(0, getActiveEffectModifiers(state.player.effects as ActiveEffect[]).defenseDelta);
+
+    // A lethal BACKFIRE drip (above) can drop the enemy to 0 before it swings —
+    // guard the telegraph so an already-defeated enemy does not still hit the
+    // player this phase (the victory check runs after this block).
+    if (!hindered && !isDefeated(enemy)) {
         // The enemy attacks: its telegraphed threat action fires on the player.
         const playerTakenMult = getDamageTakenMultiplier(state.player);
         for (const eff of phase.threatAction.effects) {
@@ -3019,6 +3046,9 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
                     * enemyOutgoingMult * enemyThreatMult
                     * (overextendedId ? 0.5 : 1) * playerTakenMult,
                 );
+                // Flat armor soak (defenseModifier). buff_invincibility's 99 zeroes
+                // any realistic hit; Iron Skin's 5 / phoenix's 1 shave it.
+                dmg = Math.max(0, dmg - playerArmor);
                 const preSoakDmg = dmg;
                 // RIPOSTE parry reduces the incoming hit once this phase.
                 if (riposte && !riposteFired && riposte.reduce > 0) {

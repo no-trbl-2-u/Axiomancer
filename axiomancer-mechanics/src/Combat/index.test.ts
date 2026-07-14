@@ -295,10 +295,12 @@ describe('getActiveRollModifier', () => {
   });
 
   it('sums flat rollModifier contributions across multiple effects', () => {
-    // debuff_curse rollModifier -2 + buff_accuracy_up rollModifier +3 = +1
+    // debuff_curse rollModifier -2 + buff_status_chance_up rollModifier +3 = +1
+    // (buff_accuracy_up was re-themed off rollModifier onto advantageModifier;
+    // buff_status_chance_up still carries the +3 flat roll payload.)
     const curse: ActiveEffect = { effectId: 'debuff_curse', remainingDuration: 3, intensity: 1, appliedAt: 0, tier: 2 };
-    const accuracy: ActiveEffect = { effectId: 'buff_accuracy_up', remainingDuration: 2, intensity: 1, appliedAt: 0, tier: 2 };
-    const p = { ...makePlayer(), effects: [curse, accuracy] };
+    const statusChance: ActiveEffect = { effectId: 'buff_status_chance_up', remainingDuration: 2, intensity: 1, appliedAt: 0, tier: 2 };
+    const p = { ...makePlayer(), effects: [curse, statusChance] };
     expect(getActiveRollModifier(p)).toBe(1);
   });
 });

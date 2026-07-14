@@ -29,7 +29,13 @@
       "resistedBy": "heart",
       "resistDR": 13,
       "payload": {
-        "rollModifier": 3
+        "advantageModifier": {
+          "grantAdvantage": [
+            "body",
+            "mind",
+            "heart"
+          ]
+        }
       },
       "tier": 2,
       "tags": [
@@ -48,14 +54,13 @@
       "resistedBy": "heart",
       "resistDR": 12,
       "payload": {
-        "rollModifier": 2,
-        "statModifiers": [
-          {
-            "stat": "luck",
-            "value": 2,
-            "isMultiplier": false
-          }
-        ]
+        "advantageModifier": {
+          "grantAdvantage": [
+            "body",
+            "mind",
+            "heart"
+          ]
+        }
       },
       "tier": 2,
       "tags": [
@@ -74,23 +79,13 @@
       "resistedBy": "mind",
       "resistDR": 14,
       "payload": {
-        "statModifiers": [
-          {
-            "stat": "body",
-            "value": 1.5,
-            "isMultiplier": true
-          },
-          {
-            "stat": "mind",
-            "value": 1.5,
-            "isMultiplier": true
-          },
-          {
-            "stat": "heart",
-            "value": 1.5,
-            "isMultiplier": true
-          }
-        ]
+        "advantageModifier": {
+          "grantAdvantage": [
+            "body",
+            "mind",
+            "heart"
+          ]
+        }
       },
       "tier": 2,
       "tags": [
@@ -234,7 +229,9 @@
       "stacking": "none",
       "resistedBy": "heart",
       "resistDR": 12,
-      "payload": {},
+      "payload": {
+        "cleanse": true
+      },
       "tier": 2,
       "tags": [
         "support",
@@ -314,8 +311,7 @@
       "duration": 99,
       "stacking": "intensity",
       "payload": {
-        "outgoingSwayGainMulPct": 12,
-        "intensityCapPct": 100
+        "outgoingSwayGainMulPct": 12
       },
       "tier": 3,
       "tags": [
