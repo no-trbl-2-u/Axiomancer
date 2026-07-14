@@ -34,17 +34,6 @@
   nightly breadth signal is dead.
 - next: /iterate
 
-### [3.2] `CardSpecialMechanic` deprecated-name not exported
-- category: contract
-- impact: 4
-- ease: 8
-- detail: the `src/index.ts` barrel's `@deprecated` JSDoc names
-  `CardSpecialMechanic` as the preferred import, but only the
-  deprecated alias `SkillSpecialMechanic` is actually exported —
-  a consumer following the migration note gets an undefined
-  import. (Verify still live before fixing.)
-- next: /iterate
-
 ### [1.2] Skipped enemy stat-budget test (content decision — RESOLVED via oversight 2026-07-08)
 - category: content
 - impact: 4
@@ -148,6 +137,13 @@
   once understood, sweep-close the 9 confirmed-stale issues by hand)
 
 ## Done
+
+### [x] [3.2] `CardSpecialMechanic` deprecated-name not exported — stale/resolved
+- drained 2026-07-14 via scheduled oversight: current `main` exports
+  `CardSpecialMechanic` from both `axiomancer-mechanics/src/Cards/index.ts`
+  and the package barrel `axiomancer-mechanics/src/index.ts`. The root
+  three-workspace `npm run verify` gate passed at `96421aa8`, confirming
+  the preferred import is live for package consumers.
 
 ### fishing-village CLI + spec08 e2e drive legacy combat
 - drained 2026-07-03 (monorepo cleanup): stale — the legacy
