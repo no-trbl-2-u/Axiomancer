@@ -378,6 +378,30 @@ order, intra-batch gates noted per phase):**
       unaffected — this only covers the unattended-loop path
       (harness; `skills/critique.md` + a new script under `scripts/`)
 
+**Loop infra (promoted via issue-triage 2026-07-14):**
+
+- [ ] Phase 35 — Reliable phase-issue auto-close. Phase-tracking
+      issues rely on a `Closes #N` trailer in the phase commit, but
+      those commits are authored on cross-session `claude/*` branches
+      that reach `main` via merge reconciliation — GitHub only honors
+      commit-message closing keywords for commits pushed *directly* to
+      the default branch, so the trailer is inert on this route. Nine
+      shipped phases (issues #22/#25/#36/#47/#52/#54/#65/#69/#74)
+      leaked open before the 2026-07-14 triage closed them by hand;
+      #74's trailer was even on `main`'s first-parent history yet still
+      never fired, while #73 from the same merge commit closed via its
+      PR path — proof the commit-message route is unreliable here. The
+      exact gap: `skills/ship-a-phase.md` Step 12.5 runs
+      `scripts/loop-issue.mjs phase-close`, which only posts a deploy
+      comment and *assumes* Step 10's `Closes #N` trailer already
+      closed the issue on push — true only when the loop pushes straight
+      to `main`, not for cross-session branch reconciliations. Fix:
+      make `phase-close` idempotently close the issue via the GitHub API
+      (state=closed, state_reason=completed) rather than trusting the
+      trailer; keep the trailer as a belt-and-suspenders. Harness/skill
+      + script only; no engine change — source: issue-triage 2026-07-14
+      findings.
+
 > **After the queue drains:** `/march` transitions to `/iterate`
 > — draining `plan/AUDIT.md` + `plan/CRITIQUE.md`, doc-drift,
 > `as any` clusters, hex-literal -> AXM migration, a11y, and
