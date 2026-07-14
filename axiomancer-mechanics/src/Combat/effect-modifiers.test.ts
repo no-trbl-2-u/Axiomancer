@@ -57,6 +57,16 @@ const TEST_EFFECTS: Effect[] = [
     mk('test_mult125', 'buff', {
         statModifiers: [{ stat: 'body', value: 1.25, isMultiplier: true }],
     }),
+    // ×1.5 on body/mind/heart — the retired crit-damage shape, kept synthetic
+    // so the additive-composition assertion no longer depends on a library
+    // effect's payload (buff_critical_damage_up was re-themed to advantage).
+    mk('test_mult15', 'buff', {
+        statModifiers: [
+            { stat: 'body', value: 1.5, isMultiplier: true },
+            { stat: 'mind', value: 1.5, isMultiplier: true },
+            { stat: 'heart', value: 1.5, isMultiplier: true },
+        ],
+    }),
     // Negative-regen drain shapes.
     mk('test_drain1', 'debuff', { regeneration: { healthPerRound: -1 } }),
     mk('test_drain2', 'debuff', { regeneration: { healthPerRound: -2 } }),
@@ -101,12 +111,12 @@ describe('getActiveEffectModifiers', () => {
     });
 
     it('composes multipliers additively (Q3)', () => {
-        // buff_critical_damage_up has ×1.5 on body, mind, heart at intensity 1
+        // test_mult15 has ×1.5 on body, mind, heart at intensity 1
         // test_mult125 has ×1.25 on body
         // Combined on body: (1.5 - 1) + (1.25 - 1) = 0.75 (additive composition)
         const mods = getActiveEffectModifiers([
-            ae('buff_critical_damage_up', 1, 3),
-            ae('test_mult125',            1, 5),
+            ae('test_mult15',  1, 3),
+            ae('test_mult125', 1, 5),
         ]);
         expect(mods.statMultBonus.get('body')).toBeCloseTo(0.75, 4);
     });

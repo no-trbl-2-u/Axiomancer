@@ -261,6 +261,23 @@ export interface EffectPayload {
     /** Forces the bearer's next die of `colorChoice` to count as Wild for
      *  card-powering purposes (pairs with `consumedOnUse`). */
     forceWildOnNextDie?: boolean;
+    /**
+     * CLEANSE marker (Barber's Paradox / antidote / clarity-serum). An instant
+     * (`duration: 0`) whose only job is to strip debuffs from the bearer — it
+     * carries no persistent modifier. Appliers honor it by routing to
+     * `removeEffectsByType(effects, 'debuff', effect.tier)` INSTEAD of adding
+     * the (payload-less) instance. Read in `useConsumableEffect`
+     * (`src/Items/equipment.engine.ts`) so cleanse consumables actually cleanse.
+     */
+    cleanse?: boolean;
+    /**
+     * Grace Momentum (spec, 2026-07-08 Grace rebalance) — every SWAY the bearer
+     * gains is multiplied by `1 + (outgoingSwayGainMulPct/100) × intensity`.
+     * Read in `gainSway` (`src/Combat/combat.engine.ts`). Declared here so the
+     * field is discoverable from the payload shape rather than only via a local
+     * cast at the read site.
+     */
+    outgoingSwayGainMulPct?: number;
     /** Die color this buff's `forceWildOnNextDie` applies to. Inlined as a
      *  literal union (rather than importing `CombatDieColor`) to avoid a
      *  Combat → Effects → Combat import cycle. */

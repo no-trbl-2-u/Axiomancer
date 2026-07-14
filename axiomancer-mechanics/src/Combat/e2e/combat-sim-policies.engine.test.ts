@@ -226,10 +226,14 @@ describe('greedy object reproduces the pinned decision sequences', () => {
     // decision sequence, not a balance gate (that's the win-rate-curve
     // suite). post-Phase-30 merge re-pin 2026-07-12 against the merged tree.
     // Re-pinned 2026-07-13 (keep-hand rule, see the LittleBelle pin above).
+    // Re-pinned 2026-07-14: POISON ramp now resets on reapplication (spec 32 v3
+    // — `applyEffect` re-stamps `appliedAt` for `escalatesPerTurn` DoTs), so a
+    // reapplied poison ticks slightly less and the greedy line spends one more
+    // play (15→16) to reach the same four-round status victory.
     it('seed 11 vs KingOfRevenge: a four-round status victory (Gate 0 law: one tray per phase)', () => {
         const r = runOneEncounter(loadout(MIX), KingOfRevenge, 11, 'greedy');
         expect({ outcome: r.outcome, rounds: r.rounds, plays: r.plays, statusPlays: r.statusPlays })
-            .toEqual({ outcome: 'victory', rounds: 4, plays: 15, statusPlays: 10 });
+            .toEqual({ outcome: 'victory', rounds: 4, plays: 16, statusPlays: 11 });
         expect(r.cardUsage['straw-mans-jab']).toEqual({
             cardId: 'straw-mans-jab', plays: 4, bottomPlays: 4, topPlays: 0, statusLands: 4, discards: 0,
         });

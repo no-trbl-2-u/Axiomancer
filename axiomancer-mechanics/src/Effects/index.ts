@@ -105,10 +105,17 @@ export function applyEffect(
                 ? Math.min(existing.remainingDuration + durationDelta, MAX_EFFECT_DURATION)
                 : Math.min(effect.duration, MAX_EFFECT_DURATION);
 
+            // POISON ramp reset (spec 32 v3): an `escalatesPerTurn` DoT restarts
+            // its ramp clock on reapplication — `rampedDamagePerRound` measures
+            // `round − appliedAt`, so re-stamping `appliedAt` sends the ramp back
+            // to turn 0 while the intensity climbs. Non-escalating effects keep
+            // their original `appliedAt` (age is irrelevant to their tick).
+            const resetsRamp = effect.payload.dotModifiers?.escalatesPerTurn === true;
             const stacked: ActiveEffect = {
                 ...existing,
                 intensity:         newIntensity,
                 remainingDuration: newDuration,
+                appliedAt:         resetsRamp ? round : existing.appliedAt,
                 sourceId:          options?.sourceId ?? existing.sourceId,
             };
             return {

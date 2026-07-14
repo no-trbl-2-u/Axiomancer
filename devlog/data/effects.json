@@ -3,9 +3,9 @@
   "id": "buff_critical_damage_up",
   "name": "Banach-Tarski Strike",
   "type": "buff",
-  "glyph": "▲",
-  "color": "#5bbf6a",
-  "kind": "statup",
+  "glyph": "◆",
+  "color": "#4f9ddb",
+  "kind": "advantage",
   "chips": [
    {
     "k": "Type",
@@ -29,9 +29,7 @@
    }
   ],
   "lines": [
-   "body ×1.5",
-   "mind ×1.5",
-   "heart ×1.5"
+   "Advantage: body, mind, heart"
   ]
  },
  {
@@ -69,9 +67,9 @@
   "id": "buff_accuracy_up",
   "name": "Bertrand's Precision",
   "type": "buff",
-  "glyph": "▲",
-  "color": "#5bbf6a",
-  "kind": "statup",
+  "glyph": "◆",
+  "color": "#4f9ddb",
+  "kind": "advantage",
   "chips": [
    {
     "k": "Type",
@@ -95,7 +93,7 @@
    }
   ],
   "lines": [
-   "Roll +3"
+   "Advantage: body, mind, heart"
   ]
  },
  {
@@ -233,8 +231,8 @@
   "name": "Observer's Collapse",
   "type": "buff",
   "glyph": "✷",
-  "color": "#5bbf6a",
-  "kind": "statup",
+  "color": "#4f9ddb",
+  "kind": "advantage",
   "chips": [
    {
     "k": "Type",
@@ -258,8 +256,7 @@
    }
   ],
   "lines": [
-   "luck +2",
-   "Roll +2"
+   "Advantage: body, mind, heart"
   ]
  },
  {
