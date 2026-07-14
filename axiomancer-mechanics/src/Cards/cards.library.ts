@@ -583,6 +583,11 @@ const selfFlagellant: Card = {
     // enemy and converts their full remaining lifetime into ONE burst now,
     // capped at 80.
     // phase 30: FREE self-MARK seed i1 d1 (0.6) replaces TICK.
+    // phase 32 part 3 (prose only, no numeric change): this RECOIL 5 also
+    // posts to the per-combat DEBT ledger (crosses close to one tier on its
+    // own — see AKRASIA_DEBT_TIER_HP in combat/effects.ts); an unscored bonus
+    // riding the already-priced recoil credit above, same framing as Part 1's
+    // REAP erosion.
     free: { applyEffect: { effectId: 'debuff_mark', intensity: 1, duration: 1, to: 'self' } },
     specialMechanics: [
         { kind: 'recoil', hp: 5 },
@@ -628,6 +633,9 @@ const pactOfAkrasia: Card = {
     // − self-bleed credit (−1.3) + wild premium + FREE RECOIL 1 → GUARD 2
     // (akrasia's "sin as currency": pay 1 HP for 2 Guard, replaces the bare
     // chip guard) ≈ 13.1 → Axiom
+    // phase 32 part 3 (prose only, no numeric change): the FREE line's RECOIL 1
+    // also posts to the per-combat DEBT ledger alongside its already-priced 2
+    // Guard — several plays bank one ledger tier (see AKRASIA_DEBT_TIER_HP).
     free: { recoil: 1, guard: 2 },
     combatEffects: [{ effectId: 'debuff_bleed', appliedTo: 'self', intensity: 1, duration: 2 }],
     specialMechanics: [{ kind: 'forge_floating_die', color: 'wild' }, { kind: 'recoil', hp: 6 }],

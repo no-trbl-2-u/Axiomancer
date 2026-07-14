@@ -27,7 +27,8 @@ next one.
       reconciliation closed in the combat-truth follow-up)
 - [ ] Part 1b — Harvest: Souls persist across combats (deferred, see below)
 - [x] Part 2 — Bulwark: RIPOSTE reflects the prevented blow (this tick)
-- [ ] Part 3 — Akrasia: DEBT ledger
+- [x] Part 3 — Akrasia: DEBT ledger (this tick; Absolution fork / Last Word /
+      Sin-priced FREE lines deferred, see below)
 - [ ] Part 4 — remaining per-theme M items (oratory milestone drip,
       forge OVERHEAT, control TURNABOUT, oracle OMEN v2, charm resolve
       milestones, echo — per §2 of the source doc)
@@ -346,8 +347,141 @@ Decisions:
   evidence budget for a re-tune this tick.
 ```
 
+## Part 3 — Akrasia: DEBT ledger
+
+### Design intent (source: 2026-07-10-theme-identity.md §"Akrasia / penitent")
+
+> FALLEN (>=2 self-afflictions) flickers on trivially; blood costs read as
+> cosmetic surcharges. DEBT ledger [CONFIRMED, M]: count blood paid, tier the
+> payoffs — resolve the cash-out semantics (does absolution reset a tier?).
+
+The source doc bundles four akrasia items under one section (DEBT ledger,
+Absolution fork, Last Word, Sin-priced FREE lines). **Split here**, same as
+Part 1: this part ships only the CONFIRMED-M DEBT ledger core. Absolution
+fork, Last Word, and Sin-priced FREE lines are follow-ups, not blocking this
+tick.
+
+### Current state (verified in code, before this tick)
+
+FALLEN check: `getDistinctDebuffCount(state.player) >= 2`
+(`combat.engine.ts:1693`). `crown-of-thorns` already scales a persistent
+intensity bonus with debuff depth while FALLEN, but nothing counted
+cumulative blood PAID — akrasia's RECOIL cost (`self-flagellant` 5,
+`pact-of-akrasia`'s FREE-line 1, `fate.recoilHp`) was spent and forgotten each
+play, no running total, no payoff for sustained sin. `souls` (Harvest theme
+currency) was the existing precedent for a per-combat running counter
+threaded through `CombatEncounterState`.
+
+### Decisions made upfront — DO NOT ASK
+
+- **"Blood paid" = RECOIL only** (the `recoil`/`recoil_x` mechanics,
+  `CardRider.recoil` on both FREE and PAID lines, `fate.recoilHp`).
+  Self-inflicted DoT ticks (sweet-poison's/pact-of-akrasia's self-bleed) are
+  excluded: they ride the SAME shared damage-instance clock any
+  enemy-inflicted BLEED would use, and `dot-tick` events carry no
+  `sourceId` — crediting HP loss by origin at tick time needs new
+  attribution plumbing, out of scope for an M-sized additive part, and
+  exactly the double-crediting risk this doc flags. Self-MARK is excluded on
+  the numbers, not by policy: MARK's payload carries no `damageOverTime`, so
+  it never causes HP loss to credit. RECOIL is also the theme's own existing
+  "blood price" idiom on every akrasia card — a clean, unambiguous signal.
+- **Tier size 6 HP, payoff 1 GUARD per tier crossed while FALLEN.**
+  `AKRASIA_DEBT_TIER_HP = 6` (close to `self-flagellant`'s printed RECOIL 5,
+  so one big blood price crosses roughly one tier; `pact-of-akrasia`'s
+  smaller incidental 1 HP needs several plays — rewards sustained sin, not a
+  spike). `AKRASIA_DEBT_TIER_GUARD = 1` — the same "blood buys armor" idiom
+  `pact-of-akrasia` already prints (1 HP -> 2 Guard) but at roughly a third
+  of that rate, since this is a passive dividend riding EVERY akrasia RECOIL
+  source rather than a single authored per-card trade. The ledger itself
+  always accrues regardless of FALLEN; only the GUARD payoff is gated (same
+  pre-play FALLEN check other FALLEN riders use). Deliberately GUARD- (not
+  heal/cleanse-) flavored so it doesn't preempt the deferred Absolution
+  fork's heal+cleanse cash-out design space, and doesn't touch
+  `crown-of-thorns`'s existing formula at all.
+- **Cash-out semantics explicitly NOT resolved this part.** The ledger has
+  no reset/cash-out path; it only ever grows this combat. Whether a future
+  Absolution cash-out zeroes `akrasiaDebt` back to 0 (forfeiting banked
+  tiers for the heal+cleanse spike) or leaves it untouched is punted to that
+  follow-up by design.
+- **Per-combat reset**, confirmed — `akrasiaDebt` initializes to 0 in
+  `initializeCombatEncounter` only (never reset at `startTurn`, unlike
+  `recoilPaidThisTurn`), same lifecycle as `souls`. No save-schema/cross-run
+  persistence, matching how Part 1b split cross-run Soul persistence into
+  its own future part.
+
+### Outputs
+
+- `src/Combat/effects.ts`: `AKRASIA_DEBT_TIER_HP`, `AKRASIA_DEBT_TIER_GUARD`
+  constants + pure `akrasiaDebtTiersCrossed(before, after)` helper.
+- `src/Combat/combat.encounter.types.ts`: `akrasiaDebt?: number` on
+  `CombatEncounterState`; new `CombatEvent` variants `{ kind: 'debt-paid';
+  amount; total }` and `{ kind: 'debt-tier-payoff'; tiersCrossed; guard;
+  total }`.
+- `src/Combat/combat.engine.ts`: ledger accrual + FALLEN-gated tier-GUARD
+  payoff wired into both blood-price call sites — `applyRiderToState`'s
+  `r.recoil` branch (FREE line, e.g. `pact-of-akrasia`) and
+  `playBottomAction`'s existing `recoilTaken` fold (PAID `recoil`/`recoil_x`
+  mechanics + `fate.recoilHp`, e.g. `self-flagellant`).
+- `src/Cards/cards.library.ts`: prose-only `// pts:` comment updates on
+  `self-flagellant` and `pact-of-akrasia` (no numeric change).
+
+### Tests
+
+- New engine e2e (`src/Combat/e2e/akrasia-debt-ledger.engine.test.ts`): pure
+  tier-crossing arithmetic; RECOIL-mechanic accrual without crossing a tier;
+  crossing a tier WHILE FALLEN grants the GUARD payoff; crossing a tier NOT
+  FALLEN still accrues the ledger but grants no GUARD; the FREE-line
+  `CardRider.recoil` path posts to the same ledger; per-combat scope (starts
+  at 0 fresh); a full `COMBAT_SIM_POLICY_ORDER` x seed sweep on the Penitent
+  preset deck runs without crashing.
+- Re-ran `combat-playtest.balance-bands.sim.test.ts` and
+  `combat-playtest.card-coverage.sim.test.ts` cold — zero pin changes
+  (penitent early=0.98 mid=0.30 late=0.00, curve `move=-0.98 OK`,
+  `KNOWN_CURVE_VIOLATORS` stays empty) — confirmed additive, no re-tune
+  needed.
+
+### Verify gate
+
+```bash
+npm run verify --workspace axiomancer-mechanics
+```
+
+163 files / 2555 tests green. Courtesy cross-package checks (touched
+`src/Combat/**` type unions): `axiomancer-mobile` verify green,
+`axiomancer-card-editor` type-check green.
+
+### Commit body template
+
+```
+feat(mechanics): Akrasia DEBT ledger — phase 32 part 3
+
+- akrasiaDebt per-combat ledger + tier-crossing helper
+- FALLEN-gated GUARD payoff wired into both RECOIL call sites
+- debt-paid / debt-tier-payoff events
+- tests: tier math, FALLEN-gated payoff, FREE-line path, sim sweep
+
+Decisions:
+- Blood paid = RECOIL only, not self-DoT ticks or self-MARK — see brief
+  §Part 3 Decisions.
+- Tier 6 HP / payoff 1 GUARD while FALLEN — additive, doesn't touch
+  crown-of-thorns or preempt the deferred Absolution cash-out design.
+- Cash-out/tier-reset semantics explicitly deferred to the Absolution-fork
+  follow-up, not resolved here.
+```
+
 ## Follow-ups (out of scope this part)
 
+- **Absolution fork on fallen-grace** (heal+cleanse cash-out vs. keep
+  riding the debt) — needs the cash-out/tier-reset question resolved as
+  part of its own design.
+- **Last Word** (mutual-kill clemency while FALLEN).
+- **Sin-priced FREE lines** (FREE pays RECOIL as a cost for theme currency,
+  no TICK damage on FREE).
+- **Self-inflicted DoT ticks counting toward the ledger** — would require
+  new per-effect-instance source attribution plumbing (a `sourceId`-aware
+  tick breakdown) to distinguish self-authored BLEED from any
+  enemy-inflicted BLEED riding the same damage-instance clock; not
+  attempted this part.
 - **Part 1b — Souls persist across combats with milestone riders**
   ("the jar travels"): needs a persistent-currency slot on the
   character save (`src/Game/game.migrate.ts` gets a new migration),
@@ -361,15 +495,14 @@ Decisions:
   present." Deferred until `/deck-tuning` has A/B evidence to retune
   `burstPerSoul` against a design where reap sometimes deals zero
   current-HP damage by construction.
-- Parts 2-4 (bulwark RIPOSTE, akrasia DEBT ledger, remaining per-theme
-  M items) — see Scope; each is its own future `/ship-a-phase` tick
-  against this same brief (extended with its own Part section when
-  picked up).
+- Part 4 (remaining per-theme M items) — see Scope; its own future
+  `/ship-a-phase` tick against this same brief (extended with its own
+  Part section when picked up).
 
 ## DoD
 
 Do **NOT** flip Phase 32 `[ ]` → `[x]` in `plan/steps/01_build_plan.md`
-yet — Parts 1b-4 remain. The DoT-clock slice is complete only because
+yet — Parts 1b and 4 remain. The DoT-clock slice is complete only because
 its trigger, Suppuration, lethal-receipt, attribution, and player-facing
 outcome witnesses are all present; do not regress it while tuning. A
 future tick that ships the last remaining

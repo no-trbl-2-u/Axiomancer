@@ -46,6 +46,7 @@ import {
     RUPTURE_PER_AFFLICTION_STACK, DISRUPT_DENY_AT,
     ruptureBurstCap,
     REAP_EROSION_PER_SOUL,
+    AKRASIA_DEBT_TIER_GUARD, akrasiaDebtTiersCrossed,
     THREAT_RUNGS, THREAT_RUNGS_BOSS, BOSS_RUNG_REGROWTH, bossRungGrowthCap,
     concedeFloorFor,
     capitulateThreshold,
@@ -472,6 +473,9 @@ export function initializeCombatEncounter(
         recoilPaidThisTurn: 0,
         enemyDamageThisTurn: 0,
         enemyDamageLastRound: 0,
+        // Phase 32 part 3 (Akrasia — DEBT ledger): per-COMBAT, like `souls` —
+        // does NOT reset at `startTurn` (unlike `recoilPaidThisTurn` above).
+        akrasiaDebt: 0,
         lastThreatFullyBlocked: false,
         conjuredUids: [],
         threatPhases,
@@ -1204,6 +1208,9 @@ function applyRiderToState(
     let conviction = next.conviction;
     let guard = next.guard ?? 0;
     let souls = next.souls ?? 0;
+    // Phase 32 part 3 (Akrasia — DEBT ledger): per-combat running total; see
+    // the `r.recoil` block below for the accrual + tiered payoff.
+    let akrasiaDebt = next.akrasiaDebt ?? 0;
     // Manual-tick washouts (decaysPerTick instances spent by tickOne /
     // tickAllDots) — soul-worthy ones yield their expiry Soul below.
     const washedOutHere: ActiveEffect[] = [];
@@ -1223,6 +1230,21 @@ function applyRiderToState(
         // AKRASIA — the printed blood price (unpreventable, mirrors the PAID 'recoil' mechanic).
         player = applyDamage(player, r.recoil);
         events.push({ kind: 'recoil-paid', cardId, amount: r.recoil });
+        // Phase 32 part 3 — this blood price posts to the per-combat DEBT
+        // ledger (covers the FREE-line recoil, e.g. `pact-of-akrasia`, and any
+        // fired rider carrying `recoil`). Tiers pay GUARD only while FALLEN —
+        // gated on the player's debuffs BEFORE this rider's own effects (none
+        // of `r`'s other fields land a debuff), matching the FALLEN check
+        // `playBottomAction` already uses for `sourceCard.fallen`.
+        const debtBefore = akrasiaDebt;
+        akrasiaDebt += r.recoil;
+        events.push({ kind: 'debt-paid', amount: r.recoil, total: akrasiaDebt });
+        const tiersCrossed = akrasiaDebtTiersCrossed(debtBefore, akrasiaDebt);
+        if (tiersCrossed > 0 && getDistinctDebuffCount(player) >= 2) {
+            const tierGuard = tiersCrossed * AKRASIA_DEBT_TIER_GUARD;
+            guard += tierGuard;
+            events.push({ kind: 'debt-tier-payoff', tiersCrossed, guard: tierGuard, total: akrasiaDebt });
+        }
     }
     if (r.cleanse) {
         let remaining = r.cleanse;
@@ -1312,7 +1334,7 @@ function applyRiderToState(
         souls += washSouls;
         events.push({ kind: 'soul-gained', amount: washSouls, total: souls, reason: 'expiry' });
     }
-    next = { ...next, player, enemy, directDamageDealt: directDamage, conviction, guard, barrier, souls };
+    next = { ...next, player, enemy, directDamageDealt: directDamage, conviction, guard, barrier, souls, akrasiaDebt };
 
     if (r.foretell) next = applyForetell(next, r.foretell, events);
     if (r.drawCards) {
@@ -2684,12 +2706,31 @@ function playBottomAction(
           }
         : state.riposte;
 
+    // Phase 32 part 3 (Akrasia — DEBT ledger): `recoilTaken` already sums this
+    // play's PAID-line blood price (the `recoil`/`recoil_x` mechanics and
+    // `fate.recoilHp` — see its declaration above); post it to the per-combat
+    // ledger the same way `recoilPaidThisTurn` folds it in below. The FREE-line
+    // `CardRider.recoil` path (`pact-of-akrasia`) posts separately inside
+    // `applyRiderToState`, so this is additive, not a duplicate of that site.
+    const akrasiaDebtBefore = state.akrasiaDebt ?? 0;
+    const akrasiaDebt = akrasiaDebtBefore + recoilTaken;
+    let tierGuardBonus = 0;
+    if (recoilTaken > 0) {
+        events.push({ kind: 'debt-paid', amount: recoilTaken, total: akrasiaDebt });
+        const tiersCrossed = akrasiaDebtTiersCrossed(akrasiaDebtBefore, akrasiaDebt);
+        if (tiersCrossed > 0 && wasFallen) {
+            tierGuardBonus = tiersCrossed * AKRASIA_DEBT_TIER_GUARD;
+            events.push({ kind: 'debt-tier-payoff', tiersCrossed, guard: tierGuardBonus, total: akrasiaDebt });
+        }
+    }
+
     let next: CombatEncounterState = {
         ...state, player, enemy, dice, reserve, resonance, conviction,
         revealedStances, hand, drawPile, discard, combatResources, attribution,
         chainEffectIds: [...chainBefore, ...newChainIds],
-        guard: (state.guard ?? 0) + guardGain,
+        guard: (state.guard ?? 0) + guardGain + tierGuardBonus,
         barrier: (state.barrier ?? 0) + barrierGain,
+        akrasiaDebt,
         riposte: riposteArmed,
         directDamageDealt: directDamage,
         permanentWildDice,

@@ -491,6 +491,14 @@ export type CombatEvent =
     | { kind: 'dots-boosted'; intensity: number; affected: string[] }
     | { kind: 'affliction-consumed'; effectId: string; fuel: number }
     | { kind: 'recoil-paid'; cardId: string; amount: number }
+    // Phase 32 part 3 (Akrasia — DEBT ledger): fires alongside 'recoil-paid'
+    // whenever RECOIL HP posts to the per-combat ledger — own event (not a
+    // field on 'recoil-paid') so existing 'recoil-paid' consumers are
+    // unaffected, matching 'max-hp-eroded's precedent from Part 1.
+    | { kind: 'debt-paid'; amount: number; total: number }
+    // The tiered payoff: fires only when a NEW debt tier is crossed WHILE
+    // FALLEN — 'tiersCrossed' lets a single big RECOIL cross more than one.
+    | { kind: 'debt-tier-payoff'; tiersCrossed: number; guard: number; total: number }
     | { kind: 'phase-resolved'; phaseIndex: number; mark: 'clear' | 'overwhelmed' }
     | { kind: 'threat-fired'; phaseIndex: number; description: string; effects: CombatThreatEffect[] }
     // WS9 (spec 32 §12 #7) — a branch phase committed its fork at phase START.
@@ -685,6 +693,13 @@ export interface CombatEncounterState {
     /** Spec 32 §12 #4 (combat ledgers) — RECOIL HP paid this turn (`recoil`
      *  mechanic + fate recoil). Reset with `spellsPlayedThisTurn` at turn start. */
     recoilPaidThisTurn?: number;
+    /** Phase 32 part 3 (Akrasia — DEBT ledger): cumulative RECOIL HP paid THIS
+     *  COMBAT — every `recoil`/`recoil_x` mechanic, `CardRider.recoil` (FREE or
+     *  PAID line), and `fate.recoilHp`. Per-combat, like `souls` — unlike
+     *  `recoilPaidThisTurn` this does NOT reset at `startTurn`. No cash-out
+     *  path exists yet (Absolution-fork follow-up); it only ever grows this
+     *  combat. Optional (absent = 0, back-compat with existing state literals). */
+    akrasiaDebt?: number;
     /** Spec 32 §12 #4 — HP the enemy's threat dealt the player this turn
      *  (post-soak budget); rolls into `enemyDamageLastRound` between phases. */
     enemyDamageThisTurn?: number;

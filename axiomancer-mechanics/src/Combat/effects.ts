@@ -100,6 +100,34 @@ export function ruptureBurstCap(enemyMaxHealth: number): number {
  *  realistic burst, keeping the utility card's erosion clearly secondary.
  *  Tunable. */
 export const REAP_EROSION_PER_SOUL = 2;
+/** Phase 32 part 3 (Akrasia — DEBT ledger, plan/phases/phase_32_theme_deep_work.md
+ *  §Part 3): every RECOIL HP the player pays THIS COMBAT (the `recoil` /
+ *  `recoil_x` mechanics, the printed `CardRider.recoil` field on both the FREE
+ *  and PAID lines, and `fate.recoilHp`) accrues into `CombatEncounterState.
+ *  akrasiaDebt`. Every {@link AKRASIA_DEBT_TIER_HP} HP paid crosses one ledger
+ *  TIER. Sized close to `self-flagellant`'s printed RECOIL (5) so a single big
+ *  blood price crosses roughly one tier on its own, while `pact-of-akrasia`'s
+ *  smaller incidental FREE-line recoil (1 HP) needs several plays to bank one
+ *  — the ledger rewards sustained sin, not a single spike. Tunable. */
+export const AKRASIA_DEBT_TIER_HP = 6;
+/** GUARD granted per DEBT tier crossed while FALLEN (spec 32 v3 T4 — the
+ *  theme-state condition line). Same "blood buys armor" idiom
+ *  `pact-of-akrasia` already prints on its own FREE line (1 HP → 2 Guard),
+ *  but at roughly a third of that rate: this is a PASSIVE dividend riding
+ *  EVERY akrasia RECOIL source (not a single authored trade the player
+ *  opts into per-card), so it must stay a modest ledger bonus rather than a
+ *  new dominant Guard engine. Tunable. */
+export const AKRASIA_DEBT_TIER_GUARD = 1;
+/** Pure tier-crossing arithmetic: how many NEW {@link AKRASIA_DEBT_TIER_HP}
+ *  boundaries `after` clears that `before` had not already crossed. Both
+ *  floored at 0 (a ledger never goes negative, and a same-or-shrinking total
+ *  crosses nothing new — the ledger has no cash-out path yet, see the
+ *  Absolution-fork follow-up). */
+export function akrasiaDebtTiersCrossed(before: number, after: number): number {
+    const b = Math.max(0, Math.floor(before / AKRASIA_DEBT_TIER_HP));
+    const a = Math.max(0, Math.floor(after / AKRASIA_DEBT_TIER_HP));
+    return Math.max(0, a - b);
+}
 /** CONCEDE Premises required (plan/tuning/2026-07-08-win-path-scaling.md item
  *  1a): `the-closing-word`'s flat 8-Premise `concedeAt` let Oratory land its
  *  alt-win identically against a 100 HP early wolf and a 1,500+ HP late boss
