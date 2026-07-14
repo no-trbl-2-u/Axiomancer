@@ -349,8 +349,11 @@ order, intra-batch gates noted per phase):**
       parallelizable per theme). Part 1 (REAP attacks maximum HP) shipped
       `7392573c`; Part 2 (RIPOSTE reflects the prevented blow, floored at
       the printed value) shipped `a6888a84`; Part 3 (akrasia DEBT ledger,
-      tiered GUARD payoff while FALLEN) shipped `37fbd895`. Parts 1b/4
-      remain — source: `plan/tuning/2026-07-10-theme-identity.md` §2
+      tiered GUARD payoff while FALLEN) shipped `37fbd895`; Part 4a (control
+      TURNABOUT, cashes the rungsDeniedTotal ledger) shipped `ab6aae15`;
+      Part 4b (oratory milestone drip, every 3rd Premise pays a STAGGER
+      rung) shipped `f4dd16bb`. Parts 1b/4c/4d/4e/4f remain — source:
+      `plan/tuning/2026-07-10-theme-identity.md` §2
 - [ ] Phase 33 — Enemy Answers (specs 29/30 slice + enemy
       counterplay). One reactive verb engine-wide, lethality readout,
       variable-rung telegraphs, CAUTERIZE/Premise-shed/SWAY-cleanse
