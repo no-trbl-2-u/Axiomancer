@@ -696,7 +696,7 @@
   ],
   "lines": [
    "FREE — draw 1 · FORETELL 1.",
-   "PAID — poison i1 d2 + mark i1 d2 + OMEN — on hit: Guard 4 (2/play)."
+   "PAID — poison i1 d2 + mark i1 d2 + OMEN — stake claim (window 1-2, ante 2◆ at window 1): on hit, Guard 4 (2/play)."
   ],
   "face": {
    "glyph": "☠",
@@ -1678,7 +1678,7 @@
   ],
   "lines": [
    "FREE — +1 pip to every Reserve die.",
-   "PAID — Guard 5 + +2 pips to every Reserve die."
+   "PAID — Guard 5 + +2 pips to every Reserve die + PIP 1 past the cap (35% bust: halves the die)."
   ],
   "face": {
    "glyph": "🛡",
@@ -2480,72 +2480,6 @@
   }
  },
  {
-  "id": "paralysis-of-analysis",
-  "name": "Paralysis of Analysis",
-  "image": "./assets/catalog/cards/confuse.webp",
-  "pricing": null,
-  "chips": [
-   {
-    "k": "Stance",
-    "v": "mind"
-   },
-   {
-    "k": "Type",
-    "v": "fallacy"
-   },
-   {
-    "k": "Tier",
-    "v": "3"
-   },
-   {
-    "k": "Target",
-    "v": "enemy"
-   },
-   {
-    "k": "Rank",
-    "v": "Axiom (rare)"
-   },
-   {
-    "k": "Kind",
-    "v": "spell"
-   },
-   {
-    "k": "Theme",
-    "v": "control"
-   },
-   {
-    "k": "Keywords",
-    "v": "STAGGER · BACKFIRE · FORETELL · DRAW"
-   },
-   {
-    "k": "Source",
-    "v": "starter"
-   },
-   {
-    "k": "Preset",
-    "v": "Standstill"
-   }
-  ],
-  "lines": [
-   "FREE — reveal the next stance · draw 1.",
-   "PAID — backfire i3 d3 + STAGGER 2. ⬢ MIND die: +2 intensity · +1 turn to this card's statuses"
-  ],
-  "face": {
-   "glyph": "⟲",
-   "stanceColor": "#4f7fd6",
-   "borderColor": "#a86bdc",
-   "orbColor": "#4f7fd6",
-   "kwColor": "#a86bdc",
-   "freeKeyword": "REVEAL",
-   "freeValue": "stance +",
-   "paidKeyword": "BACKFIRE",
-   "paidValue": "3/rung 3t",
-   "typeStrip": "MIND · SPELL",
-   "dieLine": "⬢ MIND die: +2 intensity · +1 turn to this card's statuses",
-   "inert": false
-  }
- },
- {
   "id": "peroratio-interrupta",
   "name": "Peroratio Interrupta",
   "image": "./assets/catalog/cards/light-ring.webp",
@@ -3205,7 +3139,7 @@
   "id": "signs-and-portents",
   "name": "Signs and Portents",
   "image": "./assets/catalog/cards/will-o-wisp.webp",
-  "pricing": "OMEN(draw 2 = 4 ×0.6 omen-odds = 2.4) + FREE foretell (0.35) + info value ≈ 4.4 → Lemma",
+  "pricing": null,
   "chips": [
    {
     "k": "Stance",
@@ -3250,7 +3184,7 @@
   ],
   "lines": [
    "FREE — FORETELL 1.",
-   "PAID — OMEN — on hit: draw 2."
+   "PAID — OMEN — stake claim (window 1-2, ante 2◆ at window 1): on hit, draw 2."
   ],
   "face": {
    "glyph": "✦",
@@ -3261,7 +3195,7 @@
    "freeKeyword": "FORETELL",
    "freeValue": "1",
    "paidKeyword": "OMEN",
-   "paidValue": "fires free if the read matches",
+   "paidValue": "ante 2◆ at window 1",
    "typeStrip": "HEART · SPELL",
    "dieLine": "",
    "inert": false
@@ -4312,6 +4246,72 @@
    "paidValue": "Reflect 3 2t",
    "typeStrip": "HEART · SPELL",
    "dieLine": "⬢ HEART die: Guard 2",
+   "inert": false
+  }
+ },
+ {
+  "id": "turnabout",
+  "name": "Turnabout",
+  "image": "./assets/catalog/cards/confuse.webp",
+  "pricing": null,
+  "chips": [
+   {
+    "k": "Stance",
+    "v": "mind"
+   },
+   {
+    "k": "Type",
+    "v": "paradox"
+   },
+   {
+    "k": "Tier",
+    "v": "3"
+   },
+   {
+    "k": "Target",
+    "v": "enemy"
+   },
+   {
+    "k": "Rank",
+    "v": "Aporia (rare)"
+   },
+   {
+    "k": "Kind",
+    "v": "spell"
+   },
+   {
+    "k": "Theme",
+    "v": "control"
+   },
+   {
+    "k": "Keywords",
+    "v": "STAGGER · BACKFIRE · FORETELL · DRAW"
+   },
+   {
+    "k": "Source",
+    "v": "starter"
+   },
+   {
+    "k": "Preset",
+    "v": "Standstill"
+   }
+  ],
+  "lines": [
+   "FREE — reveal the next stance.",
+   "PAID — BACKFIRE ALL — 1.5 damage per rung ever denied."
+  ],
+  "face": {
+   "glyph": "◆",
+   "stanceColor": "#4f7fd6",
+   "borderColor": "#c2a14e",
+   "orbColor": "#4f7fd6",
+   "kwColor": "#c2a14e",
+   "freeKeyword": "REVEAL",
+   "freeValue": "stance",
+   "paidKeyword": "BACKFIRE",
+   "paidValue": "1.5× per rung ever denied",
+   "typeStrip": "MIND · SPELL",
+   "dieLine": "",
    "inert": false
   }
  },
