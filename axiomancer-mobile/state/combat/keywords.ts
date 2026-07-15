@@ -207,7 +207,9 @@ const KEYWORD_GLOSS: Record<string, string> = {
         + 'A denied action counts all of its rungs.',
     // ── Oracle (T6) ──
     Foretell: "Reveals the enemy's next stance and looks at that many cards of your deck, moving the best to the top.",
-    Omen: "Casts the paying die's color against the enemy's next stance — a match fires the printed payoff free.",
+    // Phase 32 part 4d — OMEN v2: a stance/window claim staked at cast (not
+    // derived from the die), with a Conviction ante paid up front.
+    Omen: 'Stake a stance and how many phases it must land within — a wider claim is safer but pays less, and a hit fires the payoff free; a miss keeps the ante.',
     // ── Harvest (T7) ──
     Soul: 'You gain 1 Soul each time an affliction on the enemy expires or is consumed.',
     Reap: 'Spends the printed number of Souls to fire the printed effect — with fewer Souls, it fizzles.',

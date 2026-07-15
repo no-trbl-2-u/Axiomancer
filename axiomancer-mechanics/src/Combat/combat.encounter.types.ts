@@ -485,9 +485,17 @@ export type CombatEvent =
     | { kind: 'rung-regrown'; rungs: number; total: number }
     | { kind: 'stance-locked'; phaseIndex: number; stance: Stance }
     | { kind: 'foretold'; count: number; topCardId: string | null }
-    | { kind: 'omen-declared'; cardId: string; stance: CombatDieColor; phaseIndex: number }
+    // Phase 32 part 4d (Oracle — OMEN v2): `window` and `ante` are the
+    // player's resolved CLAIM (window clamped to the card's printed
+    // `maxWindow`; ante already deducted from Conviction in this same play,
+    // clamped to what was affordable — see `omenClaim` on `playCombatCard`).
+    | { kind: 'omen-declared'; cardId: string; stance: CombatDieColor; phaseIndex: number; window: number; ante: number }
     | { kind: 'omen-hit'; cardId: string; phaseIndex: number; riderText: string }
-    | { kind: 'omen-missed'; cardId: string; phaseIndex: number }
+    // `expired: true` — the window is now exhausted (0 tries left); the
+    // pending claim is gone for good, its ante already sunk. `expired: false`
+    // — a wider claim missed THIS boundary but still has tries left and
+    // stays in `pendingOmens`.
+    | { kind: 'omen-missed'; cardId: string; phaseIndex: number; expired: boolean }
     | { kind: 'soul-gained'; amount: number; total: number; reason: 'expiry' | 'consumed' | 'granted' }
     | { kind: 'reaped'; cardId: string; soulsSpent: number; amount: number }
     // Phase 32 part 1 (Harvest — REAP attacks MAXIMUM HP): fires alongside
@@ -698,8 +706,16 @@ export interface CombatEncounterState {
     bossRungGrowth?: number;
     /** Spec 32 v3 T5 — arrow-paradox: the NEXT phase keeps the current stance. */
     stanceLockedNext?: boolean;
-    /** Spec 32 v3 T6 — pending OMENS awaiting the next phase boundary. */
-    pendingOmens?: { cardId: string; stance: 'heart' | 'body' | 'mind'; phaseIndex: number }[];
+    /** Phase 32 part 4d (Oracle — OMEN v2 rework, spec 32 v3 T6): pending
+     *  OMEN claims awaiting resolution. `windowRemaining` counts down by 1
+     *  every phase boundary (`resolveThreatPhase`) until it either matches
+     *  the incoming stance (a HIT — the entry is removed) or reaches 0
+     *  without matching (a MISS — also removed; the ante was already spent
+     *  at cast). `claimScale` (fixed at cast time, independent of the
+     *  countdown) is the 1/window payoff multiplier applied to the card's
+     *  printed rider on a hit. No more absolute `phaseIndex` — a wider claim
+     *  is checked at EVERY boundary while pending, not just one. */
+    pendingOmens?: { cardId: string; stance: 'heart' | 'body' | 'mind'; windowRemaining: number; claimScale: number }[];
     /** Spec 32 v3 T6 — omens that CAME TRUE this combat (Oracle payoff fuel). */
     omenHits?: number;
     /** Spec 32 v3 T7 — the SOUL bank (Harvest currency). Optional. */

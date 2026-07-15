@@ -1248,8 +1248,12 @@ function mechanicHeadline(mech: CardSpecialMechanic | null, enemyDifficulty?: En
             return { keyword: kw ?? 'Premise', heroText: '', heroSub: 'spend the tally', verbLine: 'spend your whole Premise tally' };
         case 'foretell':
             return { keyword: kw ?? 'Foretell', heroText: `${mech.count}`, heroSub: 'look ahead', verbLine: "reveal the foe's next stance and reorder your deck" };
+        // Phase 32 part 4d — OMEN v2: a staked stance/window claim, not a
+        // silent die-derived guess. No picker UI yet (follow-up), so no
+        // live claim number to headline here — same "no live number, static
+        // copy" shape enchant/disenchant already use.
         case 'omen':
-            return { keyword: kw ?? 'Omen', heroText: '', heroSub: 'fires free if the read matches', verbLine: "a prediction cast against the foe's next stance" };
+            return { keyword: kw ?? 'Omen', heroText: '', heroSub: `ante ${mech.anteConviction}◆ at window 1`, verbLine: 'stake a stance/window claim — a hit fires the payoff free, a miss keeps the ante' };
         case 'soul_gain':
             return { keyword: kw ?? 'Soul', heroText: `+${mech.count}`, heroSub: `Soul${mech.count === 1 ? '' : 's'}`, verbLine: 'gain Souls' };
         case 'consume_affliction':

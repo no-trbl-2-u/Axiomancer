@@ -319,7 +319,19 @@ export function scoreMechanic(mechanic: CardSpecialMechanic): number {
         case 'stagger': return mechanic.rungs * V.staggerPerRung;
         case 'lock_stance': return V.lockStance;
         case 'foretell': return mechanic.count * V.foretellPerCard;
-        case 'omen': return scoreRider(mechanic.rider) * CONDITION_DISCOUNTS.dieBonus + V.omenInfo;
+        case 'omen':
+            // Phase 32 part 4d — OMEN v2: priced at the boldest (window 1)
+            // claim, same "single representative value" convention as
+            // `recoil_x`'s `expectedChosenX` — the rider/dieBonus/info terms
+            // are UNCHANGED from the pre-v2 formula, plus the new printed
+            // `anteConviction` wager credits at the standard −0.75× self-cost
+            // rate (same convention as `recoil`/`fate.recoilHp`). A wider
+            // hedge scales BOTH the ante and the rider down together (1/window)
+            // — a real player lever, not separately priced (same "coarse
+            // table, /deck-tuning is the empirical court" spirit as every
+            // other conditional-choice verb).
+            return scoreRider(mechanic.rider) * CONDITION_DISCOUNTS.dieBonus + V.omenInfo
+                - mechanic.anteConviction * V.conviction * SELF_COST_CREDIT;
         case 'premise': return mechanic.count * V.premise;
         case 'peroration': return scoreRider(mechanic.rider);
         case 'spend_premises': return V.spendPremises;
