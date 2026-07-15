@@ -189,8 +189,9 @@ const KEYWORD_GLOSS: Record<string, string> = {
         'Creates a temporary die of the printed color in your Reserve. '
         + 'If the Reserve is full, it grants +1 Conviction instead.',
     Pip:
-        'A charge a Reserve die gains each threat phase it survives, to a max of 2. '
-        + 'Each pip spent adds +1 intensity — or +2 Guard on a defend card.',
+        'A charge a Reserve die gains each threat phase it survives, capped at 2 '
+        + '— some cards can push past that cap and risk a bust. '
+        + 'Each pip spent adds +1 intensity, or +2 Guard on a defend card.',
     // ── Akrasia (T4) ──
     Recoil: 'Pay the printed VITAE as a cost when the card is played — no defense can prevent it.',
     Fallen: "A state: you carry 2 or more different afflictions. A card's FALLEN line fires free while you are Fallen.",

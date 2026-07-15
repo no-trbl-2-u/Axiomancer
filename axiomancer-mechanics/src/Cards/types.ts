@@ -169,6 +169,15 @@ export type CardSpecialMechanic =
      *  printed overflow rider once instead of vanishing (Slag Runoff: the slag
      *  that misses the mold becomes a Kindling Ember on the foe). */
     | { kind: 'grant_pip'; count: number; overflow?: CardRider }
+    /** OVERHEAT (phase 32 part 4c) — the press-your-luck knob: push `pips`
+     *  pips onto the Reserve, allowing dice already AT `RESERVE_PIP_CAP` to
+     *  go further (up to `OVERHEAT_PIP_CEILING`) instead of wasting the pip.
+     *  Each pip pushed past the safe cap risks `OVERHEAT_BUST_CHANCE` of
+     *  busting — the targeted die's pips are halved (floored), not zeroed
+     *  (a partial setback, not a wipeout). A die still below the cap ripens
+     *  for free, no risk. Combat-engine owned (`combat.dice.ts`
+     *  `overheatReserve`). */
+    | { kind: 'overheat'; pips: number }
     /** BANK_SPENT_DIE — instead of being spent, the powering die goes to the
      *  Reserve at 0 pips (if a slot is free; otherwise it is spent normally). */
     | { kind: 'bank_spent_die' }

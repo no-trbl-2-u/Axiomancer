@@ -31,9 +31,10 @@ next one.
       Sin-priced FREE lines deferred, see below)
 - [x] Part 4a — Control: TURNABOUT (this tick)
 - [x] Part 4b — Oratory: milestone drip (this tick)
-- [ ] Part 4 (remaining) — forge OVERHEAT, oracle OMEN v2, charm resolve
-      milestones, echo — per §2 of the source doc (4c/4d/4e/4f, picked up
-      one theme per future tick)
+- [x] Part 4c — Forge: OVERHEAT (this tick)
+- [ ] Part 4 (remaining) — oracle OMEN v2, charm resolve milestones, echo —
+      per §2 of the source doc (4d/4e/4f, picked up one theme per future
+      tick)
 
 ## Part 1 — Harvest: REAP attacks MAXIMUM HP
 
@@ -853,6 +854,249 @@ Decisions:
   dividend, same precedent as AKRASIA_DEBT_TIER_GUARD.
 ```
 
+## Part 4c — Forge: OVERHEAT
+
+### Design intent (source: 2026-07-10-theme-identity.md §2, Forge / foundry section)
+
+> OVERHEAT [CONFIRMED · M]: pips past the cap allowed behind a bust condition
+> — the press-your-luck knob the theme is begging for (KB receipt: Quacks of
+> Quedlinburg).
+
+Context quote from the same doc: "Forge / foundry — press-your-luck, not a
+token battery. Everything overflows into +1 Conviction; The Overtake fires
+for 18 on turn 1 because nothing marks a CHARGED Overtake." The other four
+forge bullets (FREE lines forge, Overtake legibility, manufactured spends
+feed EMBER not MARK, ex-nihilo's wild/colored choice) are explicit
+follow-ups, not this part's scope — same split discipline Parts 1/3/4b
+already used (cut to the one CONFIRMED-M item).
+
+### Current state (verified in code, before this tick)
+
+- Pips are a `CombatManaDie.pips?: number` field (`combat.encounter.types.ts`).
+  The Reserve (`CombatEncounterState.reserve`, max `RESERVE_MAX` = 2 dice)
+  ripens +1 pip per threat phase survived via `ripenReserve`
+  (`combat.dice.ts`), hard-capped at `RESERVE_PIP_CAP` = 2 — a die already at
+  the cap simply stops accepting pips, silently, with no event and no
+  alternative. `grant_pip` (the PAID pip-granting `specialMechanics` kind)
+  calls the same `ripenReserve` per count and only recently (WS4.1, sandboxed
+  `slag-runoff`) gained an OPTIONAL `overflow` rider that converts a wasted
+  pip into a printed effect instead of dropping it — a deterministic
+  conversion, not a risk.
+- Nothing downstream re-clamps `pips` at `RESERVE_PIP_CAP`: `poweringPips`
+  (the powering die's pip count) feeds `PIP_INTENSITY_BONUS`/defend-card pip
+  Guard uncapped, and `spend_all_pips` sums every Reserve/floating pip
+  uncapped (spec 32 §12 item 5 — ALL-spenders are uncapped by design). The
+  cap lives ONLY inside `ripenReserve`'s own gate — the one place a die is
+  ever prevented from holding more pips.
+- Forge's 7-card roster (`src/Cards/cards.library.ts`): 2 commons
+  (`sketch-of-a-thought` KINDLE, `half-step` GUARD 5 + `grant_pip` 2), 2
+  uncommons (`bootstrap-loop`, `ex-nihilo`), 3 rares (`the-overtake` the
+  `spend_all_pips` + RUPTURE finisher, `anvil-of-form` enchant, `entropy-tax`
+  disenchant). `half-step` is the theme's most-played card by a wide margin
+  (`cards.thoughtforms.ts`'s own comment cites 25,958 aggregate plays across
+  the matrix) and the ONLY forge card carrying `grant_pip` — the sole
+  existing carrier of "the cap" this part's mechanic answers.
+- The library, presets, and pricing lint are pinned at EXACT counts (same
+  invariant Part 4a's "Current state" documents in full) — a genuinely NEW
+  card would have to occupy an existing seat, not grow the library past 70.
+
+### Decisions made upfront — DO NOT ASK
+
+- **Additive retrofit onto `half-step`, not a new card occupying a seat.**
+  Unlike TURNABOUT (Part 4a), OVERHEAT does not need a brand-new capstone
+  verb — it is a natural THIRD `specialMechanics` entry riding
+  `half-step`'s EXISTING `grant_pip` (which safely fills a Reserve die to
+  `RESERVE_PIP_CAP`) with a new `{ kind: 'overheat'; pips: 1 }` leg that
+  offers to push the SAME die further. `guard`/`grant_pip` are UNCHANGED
+  (additive, not replacement — Parts 1/2's "floor, not swap" reasoning): a
+  Half-Step play still safely ripens to the cap exactly as before, and only
+  THEN risks the extra pip. This avoids the 70-card/7-per-theme/5-5-5
+  seat-replacement machinery entirely (no preset recipe edit, no id
+  retirement, no rank/aspect renegotiation) — a materially smaller, safer
+  diff than Part 4a's capstone-replacement shape for an M-sized item.
+- **New `specialMechanics` kind `'overheat'`, `{ pips: number }`** — a
+  count of waves to attempt, mirroring `grant_pip`'s `count` shape. Engine-
+  owned pure helper `overheatReserve` (`combat.dice.ts`, sibling to
+  `ripenReserve`): a die already BELOW `RESERVE_PIP_CAP` ripens for free, no
+  risk (OVERHEAT only prices the overage `ripenReserve` already refuses); a
+  die AT or ABOVE the cap (and below the new `OVERHEAT_PIP_CEILING` = 4 hard
+  bookkeeping ceiling) rolls `OVERHEAT_BUST_CHANCE` (35%) per pip attempted.
+- **A bust HALVES (floors) the targeted die's pips — it does NOT zero them.**
+  This is the one place this part deviates from "wipe it" as the obvious
+  bust shape: the KB receipt itself (Quacks of Quedlinburg — see below) costs
+  a bust PARTIALLY ("must choose points or coins, not both"), never the
+  whole pot. Zeroing a die that took 2+ threat phases to ripen would make a
+  single Half-Step play capable of erasing several turns of patient banking
+  in one unlucky roll — a downside disproportionate to the M-sized item's
+  evidence budget (no A/B this tick to retune `half-step`'s printed
+  guard/pips against a harsher bust). Halving is a real, felt setback (the
+  die's future intensity/Guard cash-out drops by half) without being a trap.
+- **Pricing is a genuine EV calculation, not a free pip.** `VERB_POINTS`
+  gains no new named constant (the formula reuses the existing `V.pip` and
+  `V.expectedPips` table entries plus the imported `OVERHEAT_BUST_CHANCE`
+  probability): per attempted pip, `(1 − bustChance) × V.pip − bustChance ×
+  0.5 × V.expectedPips × V.pip` = `0.65×1.5 − 0.35×0.5×2×1.5` = **+0.45**.
+  `half-step`'s total moves from 5.75 to **6.2**, still inside the common
+  [1.5, 7.5] band (rank 2, Doxa/Lemma) with real headroom. Unlike Part 4b's
+  un-authored engine-wide dividend, OVERHEAT IS an authored verb on one
+  specific card (a new `specialMechanics` entry), so it gets scored — the
+  wiring checklist's "any new authored verb needs a VERB_POINTS entry" rule,
+  not the "un-authored ledger dividend" exemption.
+- **No new keyword-atlas row.** OVERHEAT rides the existing Forge/PIP row
+  (`docs/keyword-atlas.md`) exactly as TURNABOUT rode BACKFIRE's row (Part
+  4a) and the milestone drip rode PREMISE's row (Part 4b) — the PIP row's
+  own semantics ("+1 pip to a held die") already IS what OVERHEAT extends;
+  the card face prints `PIP N past the cap (35% bust: halves the die)`, no
+  new bare capitalized term. The 30-keyword proving gate is untouched.
+  KB receipt (board-game corpus, not Dawncaster — cited exactly as the
+  source doc did): kb:boardgames/the-quacks-of-quedlinburg/rules/overview.okf.md
+  (src-003, secondary, high) — white chips accumulate toward a bust
+  threshold (sum of white-chip values > 7) and busting costs a real but
+  PARTIAL penalty ("players whose pots have exploded must choose points or
+  coins — not both"), never a full wipeout; only that partial-loss SHAPE
+  transfers to OVERHEAT's halve-not-zero bust, not Dawncaster vocabulary or
+  magnitudes (this KB corpus is the board-game reception/rules side, not the
+  Dawncaster card corpus the other Part 4 receipts cite).
+- **New event, not an overloaded one.** `{ kind: 'overheat-bust'; dieId;
+  cardId; pips }` fires ALONGSIDE the existing `die-ripened` event on a
+  SUCCESSFUL push (a successful overheat push is mechanically just a ripen
+  past the cap, so it reuses `die-ripened` unchanged) — `overheat-bust` only
+  fires on the bust half of the gamble, so `die-ripened`'s existing
+  consumers are unaffected, matching `debt-tier-payoff`/`max-hp-eroded`
+  precedent.
+- **No mobile presenter wiring required (verified, not assumed).**
+  `half-step`'s `verbClass` is `'defend'` (from its `guard` mechanic), and
+  mobile's `resolvePrimary` short-circuits the `'defend'` branch to `kind:
+  'guard'` BEFORE ever consulting `grant_pip`/`overheat` — the card's
+  headline stays "GUARD" regardless of the new third mechanic, unlike
+  TURNABOUT (Part 4a), whose `'direct-damage'` verb class routed through the
+  generic mechanic-headline path and REQUIRED `MECH_HEADLINE_PRIORITY`
+  wiring. The printed "PIP N past the cap" text still earns a bonus "Pip"
+  chip in the inspect overlay via `buildDetailKeywords`'s generic
+  printed-surface sweep (`keywordsInPersistentText` — any capitalized run
+  that resolves to an existing `KEYWORD_GLOSS` entry auto-chips, no
+  `MECHANIC_KEYWORD` entry needed, matching the existing "FORGE die-verb
+  cluster... intentionally absent" exemption `grant_pip` already enjoys).
+  Confirmed by running the full `axiomancer-mobile` suite (green) rather
+  than asserted from the code read alone.
+
+### Outputs
+
+- `src/Combat/combat.dice.ts`: `OVERHEAT_PIP_CEILING` (4), `OVERHEAT_BUST_CHANCE`
+  (0.35) constants + pure `overheatReserve(reserve, rng)` helper (sibling
+  shape to `ripenReserve`, returns `{ reserve, ripenedIds, bustedIds }`).
+- `src/Cards/types.ts`: `CardSpecialMechanic` gains `{ kind: 'overheat';
+  pips: number }`.
+- `src/Combat/combat.engine.ts`: new `'overheat'` case in `playBottomAction`'s
+  mechanics switch — loops `mech.pips` waves through `overheatReserve`,
+  pushing `die-ripened` on success and `overheat-bust` on a bust.
+- `src/Combat/combat.encounter.types.ts`: new `CombatEvent` variant `{ kind:
+  'overheat-bust'; dieId: string; cardId: string; pips: number }`.
+- `src/Cards/cards.pricing.ts`: `'overheat'` case in `scoreMechanic` (the EV
+  formula above); no new `VERB_POINTS` constant (reuses `pip`/`expectedPips`).
+- `src/Combat/combat.cards.ts`: `'overheat'` case in `mechanicText` — `PIP N
+  past the cap (35% bust: halves the die)`.
+- `src/Cards/cards.library.ts`: `half-step` gains a third `specialMechanics`
+  entry (`{ kind: 'overheat', pips: 1 }`), an updated `// pts:` comment, and
+  a one-clause flavor addendum ("push it further and the kiln might just
+  boil over"). No other card, seat, or preset recipe changes.
+- `src/Cards/e2e/card-effectiveness.engine.test.ts`: `'overheat'` case in the
+  exhaustive `assertMechanic` switch (a die ends up holding more than
+  `RESERVE_PIP_CAP` pips on the shared RICH fixture's neutral RNG).
+- Courtesy cross-package updates (new `specialMechanics` kind — mandatory
+  per the blast-radius rule, VERIFIED not just wired):
+  `axiomancer-mobile/state/combat/keywords.ts` (Pip gloss trimmed to note
+  the overcap/bust exception, kept under the terse-gloss length lint),
+  `axiomancer-card-editor/src/data/mechanics.ts` (`SPECIAL_MECHANIC_KINDS`
+  gains `'overheat'` — `mechanics.contract.ts`'s compile-time union check
+  fails without it) and `axiomancer-card-editor/src/components/CardForm.tsx`
+  (default factory + numeric row for `pips`). No `MECH_HEADLINE_PRIORITY` /
+  `MECHANIC_KEYWORD` entry needed — see Decisions.
+- `docs/keyword-atlas.md`: PIP row's notes cell gets the OVERHEAT note + the
+  Quacks-of-Quedlinburg receipt (no new row — one-card mechanics ride an
+  existing row per policy).
+
+### Tests
+
+- New engine e2e (`src/Combat/e2e/forge-overheat.engine.test.ts`, 10 tests):
+  `overheatReserve` pure-function coverage (a below-cap die ripens with NO
+  risk regardless of the roll; an at-cap die busts — halves, floored — on a
+  low roll; the same die pushes past the cap on a high roll; a die at
+  `OVERHEAT_PIP_CEILING` takes no further push; multiple dice resolve
+  independently in one call; repeated successful pushes climb toward but
+  never past the ceiling); `half-step` card-level coverage (an empty Reserve
+  is a legal no-op — no fizzle, no reserve dice created; a Reserve die
+  already at the cap pushes past it on a neutral non-bust roll; the same die
+  busts and fires `overheat-bust` on a low roll); a full
+  `COMBAT_SIM_POLICY_ORDER` × seed sweep on the `foundry` preset deck
+  (half-step ×4) runs without crashing. 10/10 new tests green.
+- Re-ran `combat-playtest.balance-bands.sim.test.ts` and
+  `combat-playtest.card-coverage.sim.test.ts` cold BEFORE and AFTER (stashed
+  the diff to get a true baseline, then restored it): every preset except
+  `foundry` is byte-identical before/after. `foundry`'s own spread moved
+  early **0.85 → 0.95** (mid/late unchanged at 0.00/0.00; curve stays
+  `move=-0.95 OK`) — a real, expected, small POSITIVE drift, not zero. This
+  is the direct consequence of the deliberate pricing call above: OVERHEAT's
+  EV is genuinely positive (+0.45/pip, halve-not-zero bust), so `half-step`
+  — the deck's most-played card, seated ×4 — got modestly stronger in
+  expectation, and Foundry's early-stage win rate (previously the roster's
+  laggard at 0.85 against peers at 0.93–1.00) moved toward the pack. Both
+  the loose per-preset floor/ceiling band and the win-rate-curve-shape
+  assertion (`move=-0.95 OK`, still a `KNOWN_CURVE_VIOLATORS`-clean pass)
+  hold at both the before and after numbers — no re-tune needed, no card
+  moved dead or dominant, and the direction of the drift argues FOR the
+  change (closes a gap flagged in the same source doc's verdict table
+  rather than opening one).
+
+### Verify gate
+
+```bash
+npm run verify --workspace axiomancer-mechanics
+```
+
+168 files / 2598 tests green (mechanics). Cross-package: touches
+`src/Cards/**` (new `specialMechanics` union member) and `src/Combat/**`
+(new `CombatEvent` variant) — `axiomancer-mobile` verify (lint clean except
+16 PRE-EXISTING unrelated warnings, typecheck clean, 248 suites / 2554 tests
+green) and `axiomancer-card-editor` type-check + lint (both clean) are
+mandatory per the blast-radius rule, not merely a courtesy — both run and
+green.
+
+### Commit body template
+
+```
+feat(mechanics): Forge OVERHEAT — phase 32 part 4c
+
+- overheatReserve pure helper (combat.dice.ts): pips past RESERVE_PIP_CAP
+  allowed up to OVERHEAT_PIP_CEILING, per-pip OVERHEAT_BUST_CHANCE risk,
+  a bust HALVES (not zeroes) the targeted die's pips
+- new 'overheat' specialMechanics kind + engine case; overheat-bust event
+  fires alongside die-ripened only on the bust half of the gamble
+- half-step (forge common) gains a third specialMechanics entry riding its
+  existing guard/grant_pip, unchanged — additive, not a seat replacement
+- pricing: genuine EV formula (V.pip/V.expectedPips + OVERHEAT_BUST_CHANCE),
+  no free-pip credit; half-step 5.75 -> 6.2, still common-band
+- docs/keyword-atlas.md: PIP row rides the mechanic (no new row) + the
+  Quacks of Quedlinburg receipt (board-game corpus, not Dawncaster)
+- cross-package: card-editor SPECIAL_MECHANIC_KINDS/CardForm; mobile Pip
+  gloss trimmed for the terse-gloss length lint; no headline-priority wiring
+  needed (half-step's 'defend' verb class short-circuits before it)
+- tests: overheatReserve pure-fn coverage, half-step no-op/push/bust cases,
+  Foundry sim sweep; card-effectiveness lint's 'overheat' case
+
+Decisions:
+- Additive retrofit onto half-step's existing grant_pip, not a new capstone
+  card occupying a seat — smaller, safer diff than Part 4a's shape for an
+  M-sized item. See brief §Part 4c Decisions.
+- Bust HALVES, not zeroes, the targeted die — matches the KB receipt's own
+  partial-loss bust shape (Quacks: "choose points or coins, not both"), not
+  a full wipeout; avoids erasing several turns of patient ripening on one
+  unlucky roll with no A/B evidence budget to retune around a harsher bust.
+- Foundry's early win rate moved 0.85 -> 0.95 (expected, positive-EV pricing
+  on the deck's most-played card) — both bands hold before and after; no
+  re-tune performed or needed.
+```
+
 ## Follow-ups (out of scope this part)
 
 - **Absolution fork on fallen-grace** (heal+cleanse cash-out vs. keep
@@ -879,6 +1123,12 @@ Decisions:
   present." Deferred until `/deck-tuning` has A/B evidence to retune
   `burstPerSoul` against a design where reap sometimes deals zero
   current-HP damage by construction.
+- **Forge S-items** (2026-07-10-theme-identity.md §2, "Forge / foundry" —
+  not this part's CONFIRMED-M scope): FREE lines forge (every FREE line
+  makes/charges dice material), Overtake legibility (2-pip gate + a live
+  burst preview), manufactured spends feed EMBER not MARK
+  (`entropy-tax`'s zone hook), and ex-nihilo's wild+0-pips vs colored+1-pip
+  choice (PLAUSIBLE, not CONFIRMED).
 - Part 4 (remaining per-theme M items) — see Scope; its own future
   `/ship-a-phase` tick against this same brief (extended with its own
   Part section when picked up).

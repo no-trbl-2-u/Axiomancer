@@ -151,6 +151,7 @@ export const SPECIAL_MECHANIC_KINDS = [
     'convert_die_color',
     'create_temporary_die',
     'grant_pip',
+    'overheat',
     'bank_spent_die',
     // Spec 32 v3 — the themed-deck verb set
     'forge_floating_die',
