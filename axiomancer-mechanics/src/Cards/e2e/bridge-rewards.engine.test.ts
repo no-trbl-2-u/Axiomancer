@@ -157,7 +157,10 @@ describe('bridge-rewards — registry shape and rank-band honesty', () => {
         expect(scoreCard(byId('barbed-compliment'))).toBeCloseTo(6.15, 2);
         expect(scoreCard(byId('the-poured-rampart'))).toBeCloseTo(6.0, 2);
         expect(scoreCard(byId('interest-on-the-flesh'))).toBeCloseTo(6.25, 2);
-        expect(scoreCard(byId('entered-into-evidence'))).toBeCloseTo(5.76, 2);
+        // phase 32 part 4d (OMEN v2): anteConviction 1 credits at −0.75×
+        // (−0.75) against the pre-v2 5.76 baseline — see the card's own
+        // // pts comment in cards.sandbox-sets.ts.
+        expect(scoreCard(byId('entered-into-evidence'))).toBeCloseTo(5.01, 2);
         expect(scoreCard(byId('stolen-cadence'))).toBeCloseTo(5.75, 2);
         expect(scoreCard(byId('unbroken-countenance'))).toBeCloseTo(7.63, 2);
     });

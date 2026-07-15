@@ -902,9 +902,17 @@ const signsAndPortents: Card = {
         'does not, the future owes you.',
     tier: 1, rank: 2, cardType: 'spell',
     targetType: 'self',
-    // pts: OMEN(draw 2 = 4 ×0.6 omen-odds = 2.4) + FREE foretell (0.35) + info value ≈ 4.4 → Lemma
+    // pts (phase 32 part 4d — OMEN v2): the printed rider/dieBonus/info
+    // arithmetic is UNCHANGED — OMEN(draw 2 = 4 ×0.6 omen-odds = 2.4) +
+    // omenInfo 1 = 3.4 — but the claim now carries a REAL up-front wager:
+    // anteConviction 2 credits at −0.75× (same self-cost-credit convention
+    // as RECOIL) = −1.5, netting 1.9. + FREE foretell (1) = 2.9 → Lemma
+    // (was 4.4; the ante is a genuine new cost, not a re-tune of the rider —
+    // see phase_32_theme_deep_work.md §Part 4d Decisions). At the printed
+    // window-1 claim the rider is untouched (draw 2, unscaled); a window-2
+    // hedge halves both the ante (1◆) and the rider (draw 1).
     free: { foretell: 1 },
-    specialMechanics: [{ kind: 'omen', rider: { drawCards: 2 } }],
+    specialMechanics: [{ kind: 'omen', maxWindow: 2, anteConviction: 2, rider: { drawCards: 2 } }],
     addedIn: '2026-07-08',
     tags: ['oracle'],
 };
@@ -928,6 +936,12 @@ const cassandrasBurden: Card = {
     // the weak deposit) = 8.77 → Thesis. The WOUND lands on cast ("already
     // starting to hurt"); the BRACE (guard 4) is the prophecy payoff,
     // realized only when the prediction proves true.
+    // phase 32 part 4d (OMEN v2): the OMEN term above is unchanged at the
+    // printed window-1 claim (its own −0.75× ante credit now folds in
+    // separately) — anteConviction 2 credits at −0.75× = −1.5, netting
+    // 8.77 − 1.5 = 7.27 → still Thesis/Theorem-band honest. A window-2
+    // hedge halves both the ante (1◆) and the Guard payoff (2) in exchange
+    // for a second try at the phase boundary.
     free: { foretell: 1, drawCards: 1 },
     combatEffects: [
         { effectId: 'debuff_poison', appliedTo: 'opponent', intensity: 1, duration: 2 },
@@ -935,6 +949,8 @@ const cassandrasBurden: Card = {
     ],
     specialMechanics: [{
         kind: 'omen',
+        maxWindow: 2,
+        anteConviction: 2,
         rider: { guard: 4 },
     }],
     addedIn: '2026-07-08',

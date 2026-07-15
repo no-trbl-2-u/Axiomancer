@@ -885,6 +885,11 @@ function withLog(state: CombatEncounterState, events: CombatEvent[]): CombatEnco
  * `play.chosenX` (WS7.2, spec 32 §12 item 5) — the player-chosen X for a
  * chosen-X mechanic (`recoil_x`); the engine clamps it to [min, affordable].
  * Absent, the mechanic resolves at its printed minimum.
+ *
+ * `play.omenClaim` (phase 32 part 4d — OMEN v2) — the player-chosen
+ * stance/window claim for an `omen` mechanic; the engine clamps `window` to
+ * [1, the card's printed `maxWindow`]. Absent, the mechanic falls back to
+ * `window: 1` and the pre-v2 die-derived stance (see `playBottomAction`).
  */
 export function playCombatCard(
     state: CombatEncounterState,
@@ -893,10 +898,11 @@ export function playCombatCard(
     dieId?: string,
     rng: () => number = defaultRng,
     /** Per-play choices. `chosenX` — WS7.2 chosen-X recoil. `reprisalCardId`
-     *  — REPRISE songbook choice (phase 28), see `playBottomAction`. Both
+     *  — REPRISE songbook choice (phase 28), see `playBottomAction`.
+     *  `omenClaim` — phase 32 part 4d OMEN v2 stance/window claim. All
      *  optional and additive; omitted callers keep the pre-existing
      *  defaults. */
-    play?: { chosenX?: number; reprisalCardId?: string },
+    play?: { chosenX?: number; reprisalCardId?: string; omenClaim?: { stance: Stance; window: number } },
 ): CombatTransition {
     if (state.phase !== 'phase-play') return { state, events: [] };
 
@@ -909,7 +915,7 @@ export function playCombatCard(
     if (!card) return { state, events: [] };
 
     const transition = useBottom
-        ? playBottomAction(state, entry.uid, card, dieId, rng, play?.chosenX, play?.reprisalCardId)
+        ? playBottomAction(state, entry.uid, card, dieId, rng, play?.chosenX, play?.reprisalCardId, play?.omenClaim)
         : playTopAction(state, entry.uid, card, rng);
     return advanceMomentumWheel(state, transition, card.stance);
 }
@@ -1537,6 +1543,11 @@ function playBottomAction(
      *  (`second-thoughts`). Omitted/invalid falls back to the pre-existing
      *  highest-rank auto-pick, so every non-mobile caller is unaffected. */
     reprisalCardId?: string,
+    /** Phase 32 part 4d (Oracle — OMEN v2) — the player's chosen stance/
+     *  window claim for an `omen` mechanic. Absent (or an invalid stance)
+     *  falls back to `window: 1` and the pre-v2 die-derived stance — see the
+     *  `'omen'` case below. */
+    omenClaim?: { stance: Stance; window: number },
 ): CombatTransition {
     const sourceCard = lookupCard(card.id);
     if (!sourceCard) return { state, events: [] };
@@ -1982,12 +1993,33 @@ function playBottomAction(
             }
             case 'foretell': foretellCount += mech.count; break;
             case 'omen': {
-                const stance: 'heart' | 'body' | 'mind' = dieHasStance(powering.color)
-                    ? (powering.color as 'heart' | 'body' | 'mind')
-                    : dieHasStance(card.stance) ? (card.stance as 'heart' | 'body' | 'mind') : 'heart';
+                // Phase 32 part 4d — OMEN v2: the player STAKES a claim
+                // instead of the engine silently deriving one. `omenClaim`
+                // absent (no mobile picker yet, or a caller that hasn't
+                // opted in) falls back to the pre-v2 die-derived stance at
+                // `window: 1` — byte-compatible with every pre-existing
+                // caller/test that never supplies the new option.
+                const maxWindow = Math.max(1, mech.maxWindow);
+                const legacyStance: Stance = dieHasStance(powering.color)
+                    ? (powering.color as Stance)
+                    : dieHasStance(card.stance) ? (card.stance as Stance) : 'heart';
+                const stance: Stance = omenClaim && dieHasStance(omenClaim.stance)
+                    ? omenClaim.stance
+                    : legacyStance;
+                const window = Math.min(Math.max(1, Math.round(omenClaim?.window ?? 1)), maxWindow);
+                // Bigger (bolder) claims narrow the window and pay MORE: the
+                // claimScale is 1/window — window 1 (the boldest, single-
+                // boundary bet) pays the full printed rider; a wider hedge
+                // pays (and costs) a fraction of it, in exchange for more
+                // tries at the phase boundary. `Math.ceil` on the ante keeps
+                // even a maximally-hedged claim a real (nonzero) wager.
+                const claimScale = 1 / window;
+                const rawAnte = mech.anteConviction * claimScale;
+                const ante = Math.max(0, Math.min(Math.ceil(rawAnte), conviction));
+                conviction -= ante;
                 const nIdx = Math.min(state.currentPhaseIndex + 1, state.threatPhases.length - 1);
-                pendingOmens.push({ cardId: card.id, stance, phaseIndex: nIdx });
-                events.push({ kind: 'omen-declared', cardId: card.id, stance, phaseIndex: nIdx });
+                pendingOmens.push({ cardId: card.id, stance, windowRemaining: window, claimScale });
+                events.push({ kind: 'omen-declared', cardId: card.id, stance, phaseIndex: nIdx, window, ante });
                 break;
             }
             case 'premise': premisesGained += mech.count * echoFactor; break;
@@ -3559,9 +3591,15 @@ export function processBetweenPhases(
         events.push({ kind: 'stance-locked', phaseIndex: nextIndex, stance: lockedStance });
     }
 
-    // OMENS resolve at the phase boundary (spec 32 v3 T6): a prediction that
-    // matches the INCOMING phase's stance HITS — its rider fires free
-    // (`the-oracles-eye` amplifies; `fated-course` marks the foe on a hit).
+    // OMENS resolve at the phase boundary (spec 32 v3 T6, phase 32 part 4d
+    // — OMEN v2): a claim that matches the INCOMING phase's stance HITS —
+    // its rider fires free, scaled by the claim's `claimScale`
+    // (`the-oracles-eye` amplifies further; `fated-course` marks the foe on
+    // a hit). A wider claim (`windowRemaining` > 1) that does NOT match is
+    // still pending — it stays in `pendingOmens` with one fewer try, and
+    // gets re-checked at every subsequent boundary until it hits or the
+    // window reaches 0 (a final MISS — its ante was already spent at cast,
+    // never refunded).
     let omenHits = state.omenHits ?? 0;
     let omenState: CombatEncounterState = {
         ...state, player, enemy, threatPhases, revealedStances,
@@ -3573,12 +3611,15 @@ export function processBetweenPhases(
     const pendingOmens = state.pendingOmens ?? [];
     if (pendingOmens.length > 0) {
         // `fated-course` (D): a "curse of inevitability" — while it is attached,
-        // the enemy's next telegraph is FORCED to the stance a pending omen named
-        // for that phase, so the prophecy cannot miss (its mark is guaranteed and
-        // the named future is the only one left to them).
+        // the enemy's next telegraph is FORCED to the stance a pending omen named,
+        // so the prophecy cannot miss (its mark is guaranteed and the named future
+        // is the only one left to them). OMEN v2 has no single absolute phase
+        // index anymore (every pending claim is checked every boundary) — forcing
+        // binds the FIRST pending claim, deterministic and no-op when only one
+        // omen is live (the common case).
         let phasesForOmen = threatPhases;
         if (zoneHas(state, 'fated-course')) {
-            const forcing = pendingOmens.find(o => o.phaseIndex === nextIndex);
+            const forcing = pendingOmens[0];
             if (forcing && phasesForOmen[nextIndex]) {
                 phasesForOmen = phasesForOmen.map((p, i) =>
                     i === nextIndex ? { ...p, enemyStance: forcing.stance } : p);
@@ -3588,22 +3629,22 @@ export function processBetweenPhases(
         const incomingStance = phasesForOmen[nextIndex]?.enemyStance;
         const remaining: typeof pendingOmens = [];
         for (const omen of pendingOmens) {
-            if (omen.phaseIndex !== nextIndex) {
-                // A stale omen (phase looped past it) simply misses.
-                events.push({ kind: 'omen-missed', cardId: omen.cardId, phaseIndex: omen.phaseIndex });
-                continue;
-            }
-            if (omen.stance === incomingStance) {
+            if (incomingStance !== undefined && omen.stance === incomingStance) {
                 omenHits += 1;
                 const omenCard = lookupCard(omen.cardId);
                 const omenMech = (omenCard?.specialMechanics ?? []).find(m => m.kind === 'omen') as
                     Extract<CardSpecialMechanic, { kind: 'omen' }> | undefined;
                 if (omenMech) {
                     // `the-oracles-eye` (E): omen riders land +50% (rounded up)
-                    // on their numeric fields.
+                    // on top of the claim's own `claimScale` (narrower/bolder
+                    // claims already pay more; the eye compounds on top).
                     const eye = zoneHas(state, 'the-oracles-eye');
+                    const scale = omen.claimScale * (eye ? 1.5 : 1);
+                    // A scaled-down hedge rider never rounds all the way to 0
+                    // on a REAL hit — the smallest legal payoff is 1 of
+                    // whatever unit it prints.
                     const amp = (n: number | undefined): number | undefined =>
-                        n === undefined ? undefined : (eye ? Math.ceil(n * 1.5) : n);
+                        n === undefined ? undefined : Math.max(1, Math.ceil(n * scale));
                     const rider: CardRider = {
                         ...omenMech.rider,
                         guard: amp(omenMech.rider.guard),
@@ -3633,7 +3674,9 @@ export function processBetweenPhases(
                     }
                 }
             } else {
-                events.push({ kind: 'omen-missed', cardId: omen.cardId, phaseIndex: nextIndex });
+                const windowRemaining = omen.windowRemaining - 1;
+                events.push({ kind: 'omen-missed', cardId: omen.cardId, phaseIndex: nextIndex, expired: windowRemaining <= 0 });
+                if (windowRemaining > 0) remaining.push({ ...omen, windowRemaining });
             }
         }
         omenState = { ...omenState, pendingOmens: remaining };

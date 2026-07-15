@@ -353,8 +353,10 @@ order, intra-batch gates noted per phase):**
       TURNABOUT, cashes the rungsDeniedTotal ledger) shipped `ab6aae15`;
       Part 4b (oratory milestone drip, every 3rd Premise pays a STAGGER
       rung) shipped `f4dd16bb`; Part 4c (forge OVERHEAT, half-step's
-      grant_pip can push past the cap at a bust risk) shipped `543c090d`.
-      Parts 1b/4d/4e/4f remain — source:
+      grant_pip can push past the cap at a bust risk) shipped `543c090d`;
+      Part 4d (oracle OMEN v2, the player stakes a stance/window claim
+      instead of a silent die-derived guess) shipped `8a78cb24`.
+      Parts 1b/4e/4f remain — source:
       `plan/tuning/2026-07-10-theme-identity.md` §2
 - [ ] Phase 33 — Enemy Answers (specs 29/30 slice + enemy
       counterplay). One reactive verb engine-wide, lethality readout,

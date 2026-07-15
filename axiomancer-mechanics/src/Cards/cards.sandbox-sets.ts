@@ -805,12 +805,19 @@ const enteredIntoEvidence: Card = {
     targetType: 'self',
     // pts: FORETELL 2 (2.0) + OMEN rider [premises 2 (1.6)] × dieBonus 0.6 +
     // omen info 1 (= 1.96) = 3.96 + FREE [premises 1 (0.8) + foretell 1
-    // (1.0)] = 1.8 → 5.76 → uncommon band 4.5-13 (Thesis). FREE share
-    // 1.8/5.76 = 31.3% ✓ window.
+    // (1.0)] = 1.8 → 5.76 (pre phase 32 part 4d).
+    // phase 32 part 4d (OMEN v2): anteConviction 1 / maxWindow 2 (this
+    // bridge card's smaller premises-2 rider takes a smaller ante than the
+    // two rank-2/3 LIBRARY omen carriers' anteConviction 2 — proportioned
+    // to its own rider the same way, see cards.library.ts) credits at
+    // −0.75× = −0.75, netting mechanic sum 3.96 − 0.75 = 3.21 + FREE 1.8 =
+    // 5.01 → still uncommon band 4.5-13 (Thesis). This IS checked by
+    // bridge-rewards.engine.test.ts's own band + regression-anchor lints
+    // (not exempt just for being a sandbox card).
     free: { premises: 1, foretell: 1 },
     specialMechanics: [
         { kind: 'foretell', count: 2 },
-        { kind: 'omen', rider: { premises: 2 } },
+        { kind: 'omen', maxWindow: 2, anteConviction: 1, rider: { premises: 2 } },
     ],
     addedIn: '2026-07-11',
     tags: ['bridge', 'oracle', 'peroration'],

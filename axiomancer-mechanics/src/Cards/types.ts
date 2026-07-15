@@ -201,10 +201,23 @@ export type CardSpecialMechanic =
      *  deterministically floats the highest-rank card to the top) and glimpse
      *  the enemy's next telegraph. */
     | { kind: 'foretell'; count: number }
-    /** OMEN — cast the powering die as the prognostication: if the enemy's NEXT
-     *  phase stance matches the powering die's stance (wild = this card's
-     *  stance), the omen HITS at the next phase boundary and `rider` fires free. */
-    | { kind: 'omen'; rider: CardRider }
+    /** OMEN (phase 32 part 4d — OMEN v2 rework, spec 32 v3 T6): the player
+     *  STAKES a claim on a future phase's stance instead of the engine
+     *  silently deriving it from the powering die (the pre-v2 "always
+     *  predicts HEART" complaint — 2026-07-10-theme-identity.md §"Oracle /
+     *  augury"). `maxWindow` prints how many phases wide the claim may run:
+     *  1 is the boldest single-boundary bet (checked exactly once, at full
+     *  printed value); a wider claim (up to `maxWindow`) gets re-checked at
+     *  every phase boundary until it hits or the window elapses, but both
+     *  the `anteConviction` wager and the `rider` payoff scale down by
+     *  1/window — a hedge costs less and pays less, in exchange for more
+     *  tries. `anteConviction` is paid UP FRONT at cast (clamped to what the
+     *  player can afford, never refunded on a miss — the felt cost a lookup
+     *  never had). The player's claim arrives via `playCombatCard`'s
+     *  `play.omenClaim`; absent, the engine falls back to `window: 1` and
+     *  the pre-v2 die-derived stance (byte-compatible default until a
+     *  mobile picker ships — see the phase 32 part 4d brief's Follow-ups). */
+    | { kind: 'omen'; maxWindow: number; anteConviction: number; rider: CardRider }
     /** PREMISE — add `count` Premises to the running tally (Peroration theme). */
     | { kind: 'premise'; count: number }
     /** PERORATION — declare the conclusion (one in play at a time): when the

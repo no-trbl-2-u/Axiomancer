@@ -32,9 +32,11 @@ next one.
 - [x] Part 4a — Control: TURNABOUT (this tick)
 - [x] Part 4b — Oratory: milestone drip (this tick)
 - [x] Part 4c — Forge: OVERHEAT (this tick)
-- [ ] Part 4 (remaining) — oracle OMEN v2, charm resolve milestones, echo —
-      per §2 of the source doc (4d/4e/4f, picked up one theme per future
-      tick)
+- [x] Part 4d — Oracle: OMEN v2 (this tick; recolor cassandras-burden /
+      gate prophecy-fulfilled / PORTENT / foretell picker UI deferred, see
+      below)
+- [ ] Part 4 (remaining) — charm resolve milestones, echo — per §2 of the
+      source doc (4e/4f, picked up one theme per future tick)
 
 ## Part 1 — Harvest: REAP attacks MAXIMUM HP
 
@@ -1097,8 +1099,390 @@ Decisions:
   re-tune performed or needed.
 ```
 
+## Part 4d — Oracle: OMEN v2
+
+### Design intent (source: 2026-07-10-theme-identity.md §2, "Oracle / augury")
+
+> The omen game runs on rails (always predicts HEART, cantrip-sized rewards,
+> self-fulfilling after fated-course). OMEN v2 [CONFIRMED · M]: player CHOOSES
+> the predicted window/range; bigger claims pay bigger; misses cost. A bet,
+> not a lookup.
+
+The source doc bundles five oracle items under one section (OMEN v2, recolor
+cassandras-burden to mind, gate prophecy-fulfilled on omen hits, PORTENT FREE
+line, foretell picker + omen telegraph UI). **Split here**, same discipline as
+Parts 1/3/4a-4c: this part ships ONLY the CONFIRMED-M OMEN v2 item — even
+though "gate prophecy-fulfilled on omen hits" is also printed CONFIRMED·M in
+the source doc, the task scoping this tick names OMEN v2 as the single target
+(mirrors how Part 4c cut Forge to its one CONFIRMED-M item out of five listed
+bullets). The recolor, the prophecy-fulfilled gate, PORTENT, and the picker UI
+are follow-ups, not blocking this tick.
+
+### Current state (verified in code, before this tick)
+
+- OMEN (`'omen'` `specialMechanics` kind) predicted a STANCE derived silently
+  from whichever die powered the play — `dieHasStance(powering.color) ?
+  powering.color : dieHasStance(card.stance) ? card.stance : 'heart'`
+  (`combat.engine.ts`, the mechanics switch) — never a player choice, and
+  defaulting to `'heart'` whenever neither the die nor the card carried a
+  stance color. This is the "runs on rails / always predicts HEART" complaint
+  verbatim.
+- Every declared omen pushed to `CombatEncounterState.pendingOmens`, always
+  targeting `nIdx = min(currentPhaseIndex + 1, threatPhases.length - 1)` — the
+  very next threat phase, with no "window/range" concept: a single absolute
+  phase index, checked exactly once at the following phase boundary
+  (`resolveThreatPhase`'s OMENS block). A stale omen (the phase looped past
+  its target index) auto-missed with no further chance.
+- Resolution: `omen.stance === incomingStance` → HIT — the card's printed
+  `rider` fired free (optionally amplified ×1.5, rounded up, by
+  `the-oracles-eye`'s zone effect; `fated-course`'s zone effect additionally
+  forced the enemy's next telegraph to the omen's named stance, guaranteeing a
+  hit and landing a MARK stack). A MISS pushed an `omen-missed` event and did
+  literally nothing else — no cost, no downside, matching "misses cost" being
+  wholly unaddressed.
+- Oracle's 7-card roster (`cards.library.ts`, T6 — ORACLE): `glimpse` (rank 1
+  common), `signs-and-portents` (rank 2 common, `{ kind: 'omen', rider: {
+  drawCards: 2 } }`, heart aspect), `cassandras-burden` (rank 3 uncommon,
+  `{ kind: 'omen', rider: { guard: 4 } }`, heart aspect — flagged separately
+  for the recolor-to-mind follow-up; its `philosophicalAspect` is untouched
+  this part, only its `specialMechanics` shape changes to satisfy the
+  reworked type), `delphic-ambiguity` (rank 4 uncommon), `prophecy-fulfilled`
+  (rank 5 rare, RUPTURE + `fuelPerOmenHit` — reads the cumulative `omenHits`
+  counter, untouched this part per the scope cut above), `the-oracles-eye`
+  (rank 5 enchant, the ×1.5 amplifier), `fated-course` (rank 6 disenchant,
+  the guaranteed-hit forcer). Only `signs-and-portents` and `cassandras-burden`
+  carry the `'omen'` mechanic; both needed their `specialMechanics` literal
+  updated to satisfy the reworked type (a structural change, not a numeric
+  re-tune) — no library seat was added, removed, or re-ranked.
+- Domestic prior art for "player-chosen stakes, bigger bets pay bigger, a
+  loss burns the wager": `placeStake`/`settleStake` (phase 31 EA-7, "THE
+  STAKE") — a pre-play Conviction wager (2/4/6◆) on the CURRENT threat
+  phase's hidden stance, settled at the phase boundary: a win pays a bigger
+  floating die the bigger the stake (colored/colored-pip/wild), a loss burns
+  the wager AND raises the escalation clock's round-equivalent basis. This is
+  the actual mechanical template OMEN v2 generalizes (bet on the CURRENT
+  phase → bet on a claimed WINDOW of upcoming phases), not a KB import — see
+  the KB search below.
+- KB search (Dawncaster + board-game corpus) for "player-chosen stakes on a
+  future prediction": Dawncaster's own Foretell keyword
+  (`kb:dawncaster/keywords/foretell.okf.md`, community, medium — "look at the
+  top X cards of your deck, put 1 on top, the rest to the bottom") is a PURE
+  LOOKUP with no stakes/range dimension at all — confirming the genre's
+  nearest analogue does not already solve "a bet, not a lookup." No
+  wager/bidding mechanic turned up in the board-game corpus's OKF records
+  either (`kb/KnowledgeBase/BoardGames/games/` — 8 games, none tagged
+  bid/wager/prediction). No fabricated receipt; the domestic THE STAKE
+  precedent above is cited instead, per doctrine ("don't fabricate one if you
+  don't [find one]").
+
+### Decisions made upfront — DO NOT ASK
+
+- **Extend the existing `'omen'` kind, don't add a new one.** This is a
+  REWORK of the theme's own hallmark keyword, not a new one-card widget —
+  `{ kind: 'omen'; maxWindow: number; anteConviction: number; rider: CardRider
+  }` (was `{ kind: 'omen'; rider: CardRider }`). `maxWindow` prints the
+  card's claim ceiling (both current carriers print 2 — a bold single-
+  boundary bet or a two-boundary hedge); `anteConviction` prints the
+  Conviction wager at the boldest (`window: 1`) claim.
+- **Both the STANCE and the WINDOW are real cast-time choices**, not one or
+  the other — the source doc's own framing names "always predicts HEART" as
+  the headline complaint, so leaving the stance derivation in place while
+  only adding a window choice would not actually fix it. `playCombatCard`
+  gains `play.omenClaim?: { stance: Stance; window: number }` (same
+  established shape as `play.chosenX`/`play.reprisalCardId` — an optional,
+  additive per-play choice object); `playBottomAction` threads it to a new
+  `omenClaim` parameter consumed only by the `'omen'` case.
+- **Absent `omenClaim` falls back to `window: 1` and the pre-v2 die-derived
+  stance** — deliberately, for two reasons. First, byte-compatibility: every
+  pre-existing caller/test that never supplies the new option (mobile has no
+  picker yet — the source doc's own separately-listed "foretell picker + omen
+  telegraph UI" follow-up) keeps its exact prior stance/timing behavior,
+  needing zero test rewrites for the two pre-existing `themed-decks.engine.
+  test.ts` OMEN cases or the `bridge-rewards.engine.test.ts` sandbox card.
+  Second, `window: 1` reproduces today's single-boundary-check shape exactly
+  (the pre-v2 mechanic was ALREADY, structurally, a `window: 1` claim — it
+  just never let the player size it any other way), so the default is not a
+  compromise value, it is the literal pre-v2 behavior wearing the v2 plumbing.
+- **Claim size is the WINDOW axis, and narrower pays MORE.** `claimScale =
+  1 / window`: `window: 1` (the boldest, hardest-to-land single-boundary bet)
+  fires the FULL printed rider and pays the FULL printed ante — unchanged
+  from the printed numbers today. A wider claim (checked at every phase
+  boundary while pending, up to `maxWindow` tries) is a hedge: both the ante
+  and the rider scale down by the same fraction, `Math.ceil`'d so a hedge
+  never rounds a real cost/reward to zero. This reads "bigger claims pay
+  bigger" as "a bolder (narrower, riskier) claim pays more than a hedge,"
+  which is the literal high-stakes/low-stakes bet framing THE STAKE's own
+  2/4/6◆ tiers already established, generalized to a window instead of a
+  flat wager size.
+- **The ante is paid UP FRONT at cast, clamped to what the player can
+  afford, and NEVER refunded on a miss** — the felt cost a lookup never had.
+  Clamping (not fizzling) mirrors `recoil_x`'s "clamped to what the player
+  can survive" precedent: a broke player still gets to make the bet, just
+  for free (a graceful degradation, not a wall). This bounds the downside by
+  construction — the worst a miss can cost is the printed ante (small,
+  Conviction-denominated, never HP), which cannot spiral into a run-ending
+  trap the way an escalating debuff or an HP-scaled penalty could; same
+  "avoid a disproportionate downside" reasoning Part 4c's halve-not-zero
+  OVERHEAT bust used. `recoilTaken`/RECOIL vocabulary was deliberately NOT
+  reused for the ante (Conviction, not VITAE) — RECOIL is Akrasia's own
+  blood-price idiom (`RECOIL N [hallmark/Akrasia]`), and Oracle borrowing it
+  would violate "a new card must speak its theme's vocabulary, not a
+  neighbor's." Conviction is the shared utility currency every theme already
+  taxes/spends, so an ante in Conviction stays theme-neutral.
+- **`pendingOmens` becomes a countdown, not a one-shot absolute-index
+  check.** `{ cardId; stance; windowRemaining: number; claimScale: number }`
+  (was `{ cardId; stance; phaseIndex: number }`) — every pending claim is
+  re-checked at EVERY phase boundary while `windowRemaining > 0`: a match
+  HITS (removed, rider fires at `claimScale`); a non-match decrements
+  `windowRemaining` (still pending if > 0 after the decrement, a final MISS
+  — ante already sunk, nothing further happens — once it reaches 0). This
+  also cleanly resolves the "claim outstanding past the encounter's last
+  distinct phase" edge case with no special-case clamping code: a terminal
+  looping phase (spec 32's existing "final phase re-evaluates on every
+  re-entry" behavior) just keeps offering fresh boundary checks against the
+  same stance until the claim hits or its window runs out.
+- **`fated-course`'s forcing loses its `phaseIndex` lookup** — there is no
+  longer a single absolute index to match against (every pending claim is
+  live at every boundary). It now forces the CURRENT boundary's telegraph to
+  the FIRST pending claim's stance (`pendingOmens[0]`) — a no-op change for
+  the common one-omen-live case, deterministic when more than one is
+  concurrently pending. `the-oracles-eye`'s ×1.5 still compounds on top of
+  the claim's own `claimScale` (`scale = claimScale * (eye ? 1.5 : 1)`), so a
+  hedge claim under the eye still nets a meaningful payoff instead of
+  rounding away.
+- **Pricing**: `scoreMechanic('omen')` keeps its exact pre-v2 rider/dieBonus/
+  info terms (priced at the boldest `window: 1` claim, the same "one
+  representative value" convention `recoil_x` already uses for its chosen-X
+  range) and adds `− anteConviction * V.conviction * SELF_COST_CREDIT` — the
+  standard −0.75× printed-cost credit, identical convention to `recoil`/
+  `fate.recoilHp`. No new `VERB_POINTS` constant needed (reuses the existing
+  `V.conviction`). Both current carriers print `anteConviction: 2` — this IS
+  a net price reduction from the pre-v2 numbers (a genuine new liability, not
+  a re-tune of either card's rider), confirmed to stay inside each card's
+  rank band: `signs-and-portents` 4.4 → 2.9 (Lemma, band [1.5, 7.5]);
+  `cassandras-burden` 8.77 → 7.27 (Thesis, band [4.5, 13]). The sandbox bridge
+  card `entered-into-evidence` (oracle↔peroration pairing,
+  `cards.sandbox-sets.ts`) is ALSO covered by its own rank-band lint
+  (`bridge-rewards.engine.test.ts`) — its smaller `premises: 2` rider takes a
+  smaller `anteConviction: 1` (proportioned to its own rider, not copied from
+  the two library cards), landing 5.76 → 5.01, still inside its Thesis band;
+  the test's regression-anchor number is updated in the same commit.
+  `entered-into-evidence` is not exempt from the band lint just for being a
+  sandbox card — the first pass at `anteConviction: 2` for it failed the
+  lint for real, which is exactly what the lint is for.
+- **No new keyword-atlas row.** OMEN is already a Theme hallmark row — this
+  IS that row's own rework, not a new one-card mechanic riding an unrelated
+  row (unlike TURNABOUT riding BACKFIRE's row or OVERHEAT riding PIP's row in
+  Parts 4a/4c). The row's semantics cell and notes cell are both updated in
+  this same PR with the THE STAKE precedent and the Dawncaster Foretell
+  negative-receipt.
+- **Sim policies do not exercise `omenClaim` this tick.** No
+  `CombatSimPolicy` gained a `chooseOmen` hook — every simulated card play
+  goes through the engine's own backward-compatible default (`window: 1`,
+  legacy die-derived stance). This is a deliberate scope cut: teaching a
+  witness to peek at an unrevealed future phase's stance would either cheat
+  (an omniscient guess trivializes the bet, the same risk THE STAKE's own
+  `stakesWhenInformed` gate was built to avoid) or need new "informed, not
+  omniscient" plumbing keyed off `revealedStances` that is its own separable
+  unit of work — out of scope for an M-sized item with no evidence budget to
+  design and tune a new AI decision seam this tick. The player-facing choice
+  API is proven by the dedicated hermetic engine tests below, not by the
+  aggregate policy sweep; the sweep's job here is strictly "does not crash."
+
+### Outputs
+
+- `src/Cards/types.ts`: `CardSpecialMechanic`'s `'omen'` member gains
+  `maxWindow: number` and `anteConviction: number` (rider unchanged).
+- `src/Combat/combat.encounter.types.ts`: `pendingOmens` entries become
+  `{ cardId; stance; windowRemaining: number; claimScale: number }` (was
+  `{ cardId; stance; phaseIndex: number }`); `'omen-declared'` gains
+  `window: number` and `ante: number`; `'omen-missed'` gains
+  `expired: boolean`.
+- `src/Combat/combat.engine.ts`: `playCombatCard`'s `play` param gains
+  `omenClaim?: { stance: Stance; window: number }`, threaded to
+  `playBottomAction`'s new trailing `omenClaim` parameter; the `'omen'` case
+  in the mechanics switch computes `window`/`stance`/`claimScale`/`ante`
+  (clamped to `maxWindow` / available Conviction) and pushes the countdown
+  entry; `resolveThreatPhase`'s OMENS block rewritten to the countdown model
+  (checks every pending claim every boundary, decrements on a miss, removes
+  on a hit or an exhausted window) with the `the-oracles-eye`/`fated-course`
+  interactions updated to match (see Decisions).
+- `src/Cards/cards.pricing.ts`: `scoreMechanic`'s `'omen'` case adds the
+  `anteConviction` self-cost credit term.
+- `src/Cards/cards.library.ts`: `signs-and-portents` and `cassandras-burden`
+  gain `maxWindow: 2, anteConviction: 2` on their `'omen'` mechanic, with
+  updated `// pts:` comments showing the credited arithmetic.
+- `src/Cards/cards.sandbox-sets.ts`: `entered-into-evidence`'s `'omen'`
+  mechanic gains `maxWindow: 2, anteConviction: 1` (a smaller ante,
+  proportioned to its smaller rider — see Decisions), with an updated
+  `// pts:` comment.
+- `src/Cards/e2e/bridge-rewards.engine.test.ts`: the
+  `entered-into-evidence` regression-anchor number updated 5.76 → 5.01.
+- `src/Combat/combat.cards.ts`: `mechanicText`'s `'omen'` case reprints the
+  claim/ante framing (`OMEN — stake claim (window 1-N, ante K◆ at window 1):
+  on hit, ...`).
+- `docs/keyword-atlas.md`: the OMEN row's semantics/Dawncaster-analogues/
+  notes cells rewritten for v2 (THE STAKE domestic precedent + the Foretell
+  negative-receipt) — no new row (see Decisions).
+- Courtesy cross-package updates (`'omen'`'s field shape changed, not a new
+  union member, but the wiring checklist's blast-radius rule still applies —
+  verified, not assumed):
+  `axiomancer-mobile/state/combat/keywords.ts` (the OMEN gloss rewritten —
+  it described the pre-v2 die-derived mechanic, a lying-copy risk the same
+  class as RIPOSTE's Part 2 fix); `axiomancer-mobile/state/presenters/
+  combat-encounter.engine.ts` (`mechanicHeadline`'s `'omen'` case reprints
+  the ante framing — `signs-and-portents` routes through this generic path,
+  same "check first" methodology Part 4c used, confirmed by running the
+  mobile suite rather than asserted); `axiomancer-card-editor/src/components/
+  CardForm.tsx` (default factory gains `maxWindow: 2, anteConviction: 2`;
+  the mechanic-fields row renderer gains `MAX WINDOW`/`ANTE CONVICTION`
+  steppers). No `SPECIAL_MECHANIC_KINDS` change (`axiomancer-card-editor/
+  src/data/mechanics.ts`) — the kind itself (`'omen'`) is unchanged, only its
+  field shape, so the compile-time union check in `mechanics.contract.ts`
+  needed no edit; confirmed by the card-editor's own green type-check.
+
+### Tests
+
+- New engine e2e (`src/Combat/e2e/oracle-omen-v2.engine.test.ts`, 13 tests):
+  cast-time claim (absent `omenClaim` falls back to `window: 1` + the
+  pre-v2 die-derived stance; an explicit claim overrides the stance against
+  BOTH the powering die's color and the card's own stance; a requested
+  window beyond the printed `maxWindow` clamps down; the ante clamps to
+  available Conviction — never negative, never blocks the play; a wider
+  claim halves the ante); HIT scaling by claim size (`cassandras-burden`'s
+  Guard rider: window 1 fires the full printed 4, window 2 fires exactly
+  half); MISS behavior (a window-2 claim missing the first boundary stays
+  pending — `expired: false` — and is re-checked at the next boundary; only
+  exhausting the window is a final miss — `expired: true`; a claim that
+  misses boundary 1 but hits boundary 2 still pays the scaled, not the
+  full, reward); the edge case of a claim outstanding past the encounter's
+  last distinct phase (a looping terminal phase) resolving without
+  crashing; `fated-course` forcing a guaranteed hit (binds the first
+  pending claim) and still landing MARK; `the-oracles-eye`'s ×1.5
+  compounding on top of the claim's own scale; a full
+  `COMBAT_SIM_POLICY_ORDER` × seed sweep on the `augury` preset deck. 13/13
+  green.
+- `themed-decks.engine.test.ts`'s two pre-existing OMEN cases (HIT / MISS,
+  neither passing `omenClaim`) re-verified green UNMODIFIED — proof the
+  byte-compatible default holds.
+- `bridge-rewards.engine.test.ts`'s `entered-into-evidence` cases (PAID
+  declare / CONFIRM hit / MISS / FREE) re-verified green unmodified except
+  the one regression-anchor number (see Outputs); its rank-band lint now
+  passes at the new `anteConviction: 1`.
+- `card-effectiveness.engine.test.ts`'s `'omen'` case (pendingOmens length
+  grows) re-verified green unmodified.
+- Re-ran `combat-playtest.balance-bands.sim.test.ts` and
+  `combat-playtest.card-coverage.sim.test.ts` cold BEFORE (stashed the diff)
+  and AFTER (restored it) — zero pin drift: every preset's floor/ceiling
+  bands and the win-rate-curve-shape assertion hold at both readings,
+  `KNOWN_CURVE_VIOLATORS` stays empty. `augury`'s own numbers (below) move
+  by low single points, not enough to touch any pinned band.
+
+Evidence (seed 1, `greedy` policy, `preset:augury`, `signs-and-portents` —
+the only `'omen'`-carrying card this preset/policy combo actually plays;
+`cassandras-burden` is a pre-existing dead card in this cell, unrelated to
+this part):
+
+| stage | policy | seed | winRate | Δ | statusEng | Δ | card plays (signs-and-portents) | Δ |
+|---|---|---|---|---|---|---|---|---|
+| early | greedy | 1 | 0.69 → 0.68 | −0.01 | 0.28 → 0.28 | 0.00 | 1469 → 1486 | +17 |
+| mid | greedy | 1 | 0.01 → 0.01 | 0.00 | 0.25 → 0.25 | 0.00 | 1759 → 1742 | −17 |
+| late | greedy | 1 | 0.00 → 0.00 | 0.00 | 0.26 → 0.26 | 0.00 | 1772 → 1754 | −18 |
+
+Invocations: `npm run combat-playtest -- --stage=<s> --policy=greedy --deck=preset:augury --seed=1 --cards`
+run cold on the pre-4d tree (`git stash`, control) and again on the same
+tree with this part's diff restored (`git stash pop`, treatment) — not a
+sandbox toggle, since this part lands directly (structural engine change,
+same precedent as Parts 4a-4c). The tiny drift (≤1pp win rate, ≤18 plays
+out of ~1500-1800) is the expected, small EV tax of the new ante at the
+pre-v2 default claim (`window: 1`, no `chooseOmen` policy hook exercising
+the hedge) — no other preset's pinned band moved (confirmed by the full
+`npm run verify` gate staying green with zero other test edits).
+
+### Verify gate
+
+```bash
+npm run verify --workspace axiomancer-mechanics
+```
+
+169 files / 2611 tests green. Cross-package (touches `src/Cards/**` — the
+`'omen'` mechanic's field shape — and `src/Combat/**` — `CombatEvent`/
+`CombatEncounterState` field changes): `axiomancer-mobile` verify (typecheck
+clean, lint clean except the same 16 pre-existing unrelated warnings Part 4c
+documented, 248 suites / 2554 tests green) and `axiomancer-card-editor`
+type-check + lint + build (all clean) are mandatory per the blast-radius
+rule, not merely a courtesy — both run and green.
+
+### Commit body template
+
+```
+feat(mechanics): Oracle OMEN v2 — phase 32 part 4d
+
+- 'omen' mechanic gains maxWindow/anteConviction: the player STAKES a
+  stance + window claim (play.omenClaim) instead of a silent die-derived
+  guess — the "always predicts HEART" complaint, fixed at the API level
+- pendingOmens becomes a countdown (windowRemaining/claimScale), checked
+  every phase boundary while pending, not a one-shot absolute-phase-index
+  match; claimScale = 1/window — a bolder (narrower) claim pays (and
+  costs) more, a hedge pays (and costs) less across more tries
+- anteConviction paid up front at cast, clamped to affordable Conviction,
+  never refunded on a miss — the felt cost a lookup never had, bounded by
+  construction (Conviction-denominated, never HP, never spirals)
+- fated-course forces the first pending claim's stance (no more absolute
+  phaseIndex to bind); the-oracles-eye's ×1.5 compounds on claimScale
+- pricing: anteConviction credits at the standard −0.75× self-cost rate;
+  signs-and-portents/cassandras-burden/entered-into-evidence re-priced,
+  all still rank-band honest (arithmetic in each card's // pts: comment)
+- docs/keyword-atlas.md: OMEN row rewritten for v2 (THE STAKE domestic
+  precedent + the Dawncaster Foretell negative-receipt — no new row)
+- cross-package: mobile OMEN gloss + mechanic-headline copy rewritten;
+  card-editor CardForm gains maxWindow/anteConviction fields (no
+  SPECIAL_MECHANIC_KINDS change — same kind, new field shape)
+- tests: 13 new oracle-omen-v2 cases (cast-time claim, HIT scaling, MISS/
+  countdown, edge cases, fated-course + the-oracles-eye synergy, sim
+  sweep); 2 pre-existing themed-decks OMEN cases + bridge-rewards'
+  entered-into-evidence cases green unmodified (one regression-anchor
+  number updated); augury evidence table attached
+
+Decisions:
+- Extends the existing 'omen' kind (a hallmark rework, not a new one-card
+  mechanic) — no new keyword-atlas row. See brief §Part 4d Decisions.
+- Absent omenClaim falls back to window 1 + the pre-v2 die-derived stance
+  — byte-compatible default until the (separately follow-up'd) mobile
+  picker ships; every pre-existing OMEN test needed zero rewrites.
+- Sim policies do not exercise omenClaim this tick (no chooseOmen hook) —
+  avoids teaching a witness to peek at an unrevealed future stance
+  (the same risk THE STAKE's stakesWhenInformed gate exists to avoid);
+  the player-facing choice API is proven by hermetic tests, not the sweep.
+- Ante is Conviction, not RECOIL/VITAE — Oracle borrowing Akrasia's blood-
+  price idiom would violate theme vocabulary separation; Conviction is
+  the shared utility currency every theme already taxes.
+```
+
 ## Follow-ups (out of scope this part)
 
+- **Gate `prophecy-fulfilled` on omen hits** (2026-07-10-theme-identity.md
+  §2, "Oracle / augury," also printed CONFIRMED·M — deferred alongside OMEN
+  v2's own scope cut, not silently dropped): the finisher should require the
+  theme to have actually HAPPENED this combat, not just fire whenever RUPTURE
+  finds fuel.
+- **Recolor `cassandras-burden` to mind** (CONFIRMED·S) — breaks the heart
+  monoculture that makes the Oracle draft solved (today: `signs-and-portents`
+  heart, `cassandras-burden` heart, `the-oracles-eye` heart, vs.
+  `delphic-ambiguity`/`prophecy-fulfilled`/`fated-course` mind, 0 body).
+  Explicitly NOT touched this part — only `cassandras-burden`'s
+  `specialMechanics` shape changed (to satisfy the reworked `'omen'` type),
+  its `philosophicalAspect` is untouched.
+- **PORTENT FREE line** (PLAUSIBLE·M) — FREE peeks + places a marker PAID
+  lines cash (Gate 1 gap: today's FREE lines don't feed OMEN at all).
+- **Foretell picker + omen telegraph UI** (CONFIRMED·S) — the engine can now
+  accept a real `play.omenClaim` choice, but nothing player-facing offers it
+  yet; the source doc's own comment ("the engine literally has a comment
+  admitting the player never sees what foretell saw") is the UI-legibility
+  half of this same complaint, unaddressed by this part's engine-only scope.
+  Until this ships, every real (mobile) player's OMEN plays use the
+  byte-compatible `window: 1` / die-derived-stance default — see brief §Part
+  4d Decisions.
 - **Absolution fork on fallen-grace** (heal+cleanse cash-out vs. keep
   riding the debt) — needs the cash-out/tier-reset question resolved as
   part of its own design.

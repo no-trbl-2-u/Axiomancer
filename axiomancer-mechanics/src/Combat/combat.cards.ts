@@ -279,7 +279,9 @@ export function mechanicText(m: CardSpecialMechanic): string | null {
         case 'stagger': return `STAGGER ${m.rungs}`;
         case 'lock_stance': return "lock the enemy's next stance";
         case 'foretell': return `FORETELL ${m.count}`;
-        case 'omen': return `OMEN — on hit: ${riderText(m.rider)}`;
+        // Phase 32 part 4d — OMEN v2: claim a window (1-N phases, ante +
+        // rider both scale 1/window) instead of a silent die-derived guess.
+        case 'omen': return `OMEN — stake claim (window 1-${m.maxWindow}, ante ${m.anteConviction}◆ at window 1): on hit, ${riderText(m.rider)}`;
         case 'premise': return `+${m.count} Premise${m.count === 1 ? '' : 's'}`;
         // The declared conclusion prints its full payload — the rider used to
         // be dropped — and the CONCEDE bar names the elite/boss floors

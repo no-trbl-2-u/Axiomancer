@@ -191,7 +191,9 @@ function defaultMechanic(kind: SpecialMechanicKind): CardSpecialMechanic {
         case 'foretell':
             return { kind, count: 1 };
         case 'omen':
-            return { kind, rider: {} };
+            // Phase 32 part 4d — OMEN v2: the player stakes a stance/window
+            // claim at cast; maxWindow/anteConviction are the printed caps.
+            return { kind, maxWindow: 2, anteConviction: 2, rider: {} };
         case 'premise':
             return { kind, count: 1 };
         case 'peroration':
@@ -614,7 +616,13 @@ function MechanicFields({ mechanic, patch }: { mechanic: CardSpecialMechanic; pa
         case 'foretell':
             return numRow('COUNT', 'top cards seen + reordered', mechanic.count, 'count', 1, 5);
         case 'omen':
-            return riderNote;
+            return (
+                <>
+                    {numRow('MAX WINDOW', 'phases the claim may span; player picks at cast (1 = boldest)', mechanic.maxWindow, 'maxWindow', 1, 4)}
+                    {numRow('ANTE CONVICTION', 'paid up front at window 1; scales down 1/window, never refunded on a miss', mechanic.anteConviction, 'anteConviction', 0, 6)}
+                    {riderNote}
+                </>
+            );
         case 'premise':
             return numRow('PREMISES', 'added to the tally', mechanic.count, 'count', 1, 5);
         case 'peroration':
