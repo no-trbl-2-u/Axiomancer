@@ -192,6 +192,57 @@ export function capitulateThreshold(enemy: Pick<Enemy, 'health' | 'maxHealth'>):
     const resolve = Math.max(CAPITULATE_MIN, Math.round(CAPITULATE_RESOLVE_FRACTION * enemy.maxHealth));
     return Math.min(resolve, enemy.health);
 }
+/** Phase 32 part 4e (Charm — Resolve milestones, plan/phases/
+ *  phase_32_theme_deep_work.md §Part 4e, plan/tuning/2026-07-10-theme-
+ *  identity.md "Charm / grace" — "Resolve milestones… the track gets rungs
+ *  and a face"): SWAY crossing a named fractional waypoint of the enemy's
+ *  LIVE `capitulateThreshold` ("resolve") pays a small one-time dividend.
+ *  Fractions of the LIVE resolve — NOT a fixed absolute SWAY number, and NOT
+ *  a fraction of maxHealth — so the waypoints track `capitulateThreshold`'s
+ *  own live shrink (it falls with the enemy's current health, per
+ *  `CAPITULATE_RESOLVE_FRACTION`'s own doc comment) exactly the way the
+ *  capitulation offer itself does. Named for the emotional arc the source
+ *  doc asks for: Wavering, then Faltering, then — at the full resolve — the
+ *  yield offer itself. Each milestone fires AT MOST ONCE per combat (see
+ *  `CombatEncounterState.swayMilestoneWaveringFired` /
+ *  `swayMilestoneFalteringFired`): a milestone already paid stays paid even
+ *  if the live resolve later shrinks back below the threshold that was
+ *  crossed — the Souls/DEBT-ledger "never claw back a dividend" precedent
+ *  (Parts 1/3/4a), applied to a boolean flag instead of a monotonic counter
+ *  because these waypoints are fractions of a value that can itself shrink.
+ *  Tunable. */
+export const SWAY_WAVERING_FRACTION = 0.45;
+export const SWAY_FALTERING_FRACTION = 0.8;
+/** Wavering dividend — one stack of RAPPORT on the enemy (Charm's own
+ *  rapport-building idiom: the exact payload `soft-word` / `disarming-smile`
+ *  / `common-ground` / `the-olive-branch` already print). The foe's
+ *  resistance visibly softens as their will starts to waver — this is the
+ *  "small dividend" speaking Charm's OWN vocabulary, not a borrowed one. */
+export const SWAY_WAVERING_RAPPORT = 1;
+/** Faltering dividend — a small BONUS SWAY nudge (unscaled by
+ *  `buff_grace_momentum`: a flat ledger dividend, not a re-scaled gain, same
+ *  "modest ledger bonus" idiom as `AKRASIA_DEBT_TIER_GUARD`/
+ *  `PREMISE_MILESTONE_RUNGS`). Commitment breeds more commitment as their
+ *  will visibly breaks — the two-stage arc escalates from softening THEM
+ *  (Wavering/RAPPORT) to accelerating YOUR OWN climb (Faltering/SWAY).
+ *  Deliberately NOT a GUARD payoff: `gainSway` is called from inside
+ *  `resolveThreatPhase` (the `mirror-of-longing` SWAY-conversion site, see
+ *  that call site's own comment) where GUARD is unconditionally reset to 0
+ *  the SAME phase — a GUARD dividend paid there would evaporate before it
+ *  could ever matter. SWAY is never reset mid-function at any `gainSway`
+ *  call site, so it is the one payoff type safe everywhere `gainSway` fires
+ *  from. Tunable. */
+export const SWAY_FALTERING_BONUS = 2;
+/** Resolve-milestone thresholds for a given LIVE resolve value (see
+ *  `capitulateThreshold`). Floored at 1 so even the tiny early-game
+ *  `CAPITULATE_MIN` (10) resolve floor still prints two distinct, reachable
+ *  waypoints rather than rounding one away to 0. Pure. */
+export function swayResolveMilestoneThresholds(resolve: number): { wavering: number; faltering: number } {
+    return {
+        wavering: Math.max(1, Math.round(SWAY_WAVERING_FRACTION * resolve)),
+        faltering: Math.max(1, Math.round(SWAY_FALTERING_FRACTION * resolve)),
+    };
+}
 /** RUPTURE — flat burst per NON-DoT affliction stack consumed (marks, backfire,
  *  rapport). Spec 32 v3 §3. Tunable. */
 export const RUPTURE_PER_AFFLICTION_STACK = 3;

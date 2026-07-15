@@ -505,6 +505,17 @@ export type CombatEvent =
     // telemetry hook (e.g. a future mobile toast).
     | { kind: 'max-hp-eroded'; cardId: string; amount: number; newMax: number }
     | { kind: 'sway-gained'; amount: number; total: number }
+    // Phase 32 part 4e (Charm — Resolve milestones): fires alongside
+    // 'sway-gained' whenever SWAY crosses a NEW named fractional waypoint of
+    // the enemy's live `capitulateThreshold` — own event (not a field on
+    // 'sway-gained') so existing 'sway-gained' consumers are unaffected,
+    // matching 'premise-milestone'/'debt-tier-payoff' precedent. 'threshold'
+    // is the live waypoint value crossed (see `swayResolveMilestoneThresholds`);
+    // 'total' is the SWAY total AFTER this milestone's own dividend (the
+    // Faltering bonus SWAY included). Discriminated by 'milestone' so each
+    // variant's own payoff field is real, not a shared/optional guess.
+    | { kind: 'sway-milestone'; milestone: 'wavering'; threshold: number; total: number; effectId: string; intensity: number }
+    | { kind: 'sway-milestone'; milestone: 'faltering'; threshold: number; total: number; bonus: number }
     | { kind: 'sway-decayed'; total: number }
     | { kind: 'capitulation-offered'; threshold: number }
     | { kind: 'capitulation-declined' }
@@ -723,6 +734,21 @@ export interface CombatEncounterState {
     /** Spec 32 v3 T8 — SWAY on the enemy (decays 1/turn; ≥ enemy HP at a turn
      *  boundary → CAPITULATE). Optional. */
     sway?: number;
+    /** Phase 32 part 4e (Charm — Resolve milestones): has the Wavering
+     *  waypoint (SWAY ≥ {@link swayResolveMilestoneThresholds}'s `wavering`,
+     *  a fraction of the LIVE `capitulateThreshold`) already paid its
+     *  one-time RAPPORT dividend THIS COMBAT? Per-combat, like `souls`/
+     *  `akrasiaDebt` — reset to `false` in `initializeCombatEncounter` only.
+     *  Once true, NEVER reset back to false even if the live resolve later
+     *  shrinks below the threshold that was crossed (a milestone already
+     *  paid stays paid). Optional (absent = false, back-compat with
+     *  existing state literals). */
+    swayMilestoneWaveringFired?: boolean;
+    /** Phase 32 part 4e (Charm — Resolve milestones): the Faltering waypoint
+     *  sibling of {@link swayMilestoneWaveringFired} (pays a bonus-SWAY
+     *  dividend instead of RAPPORT). Same per-combat, never-claws-back
+     *  lifecycle. Optional (absent = false). */
+    swayMilestoneFalteringFired?: boolean;
     /** SWAY has broken the foe's will; the player must accept the yield or
      * continue fighting. Never resolves combat on threshold alone. */
     capitulationChoiceActive?: boolean;
