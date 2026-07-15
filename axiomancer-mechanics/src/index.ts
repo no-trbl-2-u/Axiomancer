@@ -163,6 +163,11 @@ export {
     // Phase 31 — the engine-native momentum wheel + THE STAKE
     isMomentumDieId, placeStake,
 } from './Combat';
+// ─── CO-02 — Combat Command Facade ────────────────────────────────────────────
+// The single typed dispatcher over the player-facing transitions above; eventual
+// `@mechanics` consumers adopt this instead of hand-sequencing transitions.
+export { dispatchCombatCommand } from './Combat';
+export type { CombatCommand, CombatCommandRejectionReason, CombatCommandResult } from './Combat';
 /**
  * @deprecated Superseded by the COLOR LAW for die COST / play legality
  * (`playCombatCard`'s color-match gate); retained only as the legacy 0/1/2

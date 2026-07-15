@@ -287,3 +287,11 @@ export {
     COMBAT_LOADOUT_FLAG_PREFIX, COMBAT_LOADOUT_MAX,
     decodeCombatLoadout, getCombatLoadout, addToLoadout, removeFromLoadout,
 } from './combat.loadout';
+
+// ─── CO-02 — Combat Command Facade ────────────────────────────────────────────
+// One typed dispatcher over the existing player-facing transitions. Every
+// accepted command delegates to exactly one (two for `resolve-threat`) existing
+// transition, forwarding the injected RNG; rejections leave state/events
+// untouched. The direct transition APIs above are unchanged.
+export { dispatchCombatCommand } from './combat.commands';
+export type { CombatCommand, CombatCommandRejectionReason, CombatCommandResult } from './combat.commands';
