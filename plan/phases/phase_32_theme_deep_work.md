@@ -35,8 +35,9 @@ next one.
 - [x] Part 4d — Oracle: OMEN v2 (this tick; recolor cassandras-burden /
       gate prophecy-fulfilled / PORTENT / foretell picker UI deferred, see
       below)
-- [ ] Part 4 (remaining) — charm resolve milestones, echo — per §2 of the
-      source doc (4e/4f, picked up one theme per future tick)
+- [x] Part 4e — Charm: Resolve milestones (this tick)
+- [ ] Part 4f — Echo (remaining) — per §2 of the source doc, picked up in
+      a future tick
 
 ## Part 1 — Harvest: REAP attacks MAXIMUM HP
 
@@ -1459,8 +1460,311 @@ Decisions:
   the shared utility currency every theme already taxes.
 ```
 
+## Part 4e — Charm: Resolve milestones
+
+### Design intent (source: 2026-07-10-theme-identity.md §2, "Charm / grace")
+
+> Resolve milestones [CONFIRMED · M]: Wavering/Faltering thresholds on the SWAY
+> track with small riders — the track gets rungs and a face. Couples with the
+> 2026-07-08 resolve-threshold item (Charmed-style `SWAY ≥ resolve` opens the
+> offer, resolve < maxHP, decays as HP falls).
+
+Context quote from the same doc: "Charm / grace — capitulation must be EARNED
+and legible. The one unique axis in the roster. SWAY reaching the live
+threshold now opens a capitulation offer; it never authors the outcome...
+Poison can still lower the current-VITAE-derived offer threshold, so Grace
+must be tuned against offers and accepted outcomes separately rather than
+treating threshold crossing as an automatic win." The other three charm items
+(damaging plays strip SWAY, mirror-of-longing retarget, FREE lines build
+rapport foundation) are explicit follow-ups, not this part's scope — same
+split discipline Parts 1/3/4a-4d already used (cut to the one CONFIRMED-M
+item).
+
+### Current state (verified in code, before this tick)
+
+- `capitulateThreshold(enemy)` (`src/Combat/effects.ts`, landed
+  2026-07-08 per `plan/tuning/2026-07-08-win-path-scaling.md` item 1a) is the
+  enemy's "resolve": `max(CAPITULATE_MIN(10), round(CAPITULATE_RESOLVE_FRACTION(0.35)
+  × maxHealth))`, clamped to never exceed the enemy's CURRENT health. It is
+  LIVE — it shrinks as the enemy's HP falls, exactly the "resolve < maxHP,
+  decays as HP falls" framing in the source quote.
+- Every SWAY source in the library funnels through ONE function,
+  `gainSway` (`combat.engine.ts`) — the theme's exact analogue to Part 4b's
+  `gainPremises` single insertion point: the `sway` `specialMechanics` kind
+  (`soft-word`, `common-ground`, `the-olive-branch`, `heart-of-the-matter`),
+  `CardRider.sway` (FREE lines and `dieBonus`/`threshold` riders alike), and
+  `mirror-of-longing`'s "damage your defenses prevented converts to SWAY"
+  zone conversion (inside `resolveThreatPhase`). `gainSway` already scales
+  every gain by `buff_grace_momentum`'s per-stack multiplier
+  (`irresistible-grace`'s "future SWAY gains increase" persistent effect) and
+  pushes a `sway-gained` event; nothing else about the SWAY track has any
+  waypoint, rung, or face today — the number climbs silently until it clears
+  the whole `capitulateThreshold` and the mercy choice opens, cold.
+- Charm's own printed vocabulary: SWAY itself, RAPPORT (`debuff_rapport` —
+  softens the enemy's outgoing damage; the FREE/PAID payload on `soft-word`,
+  `disarming-smile`, `common-ground`, and `the-olive-branch` already), GUARD,
+  and small heals. `irresistible-grace`'s zone effect holds SWAY from its
+  1/turn passive decay (`SWAY_DECAY_PER_TURN`) — untouched by this part.
+- Precedent for an un-authored, engine-side "passive dividend riding an
+  existing ledger, fires alongside the existing gain event": Part 4b's
+  Oratory milestone drip (`premiseMilestoneTotal`, `PREMISE_MILESTONE_EVERY`,
+  `premiseMilestonesCrossed`) is the closest shape match — a tier-crossing
+  helper parameterized by a fixed step size. This part's waypoints are
+  FRACTIONS OF A LIVE, SHRINKING VALUE (`capitulateThreshold`) rather than
+  fixed steps of a monotonic counter, so the crossing state has to be tracked
+  as latching booleans, not a re-derivable tier count (see Decisions).
+
+### Decisions made upfront — DO NOT ASK
+
+- **Two named fractions of the LIVE resolve, not fixed absolute SWAY numbers
+  and not fractions of maxHealth.** `SWAY_WAVERING_FRACTION = 0.45`,
+  `SWAY_FALTERING_FRACTION = 0.8` of `capitulateThreshold(enemy)`, recomputed
+  at every `gainSway` call (the same live value the capitulation offer itself
+  reads) via the new pure helper `swayResolveMilestoneThresholds(resolve)`.
+  Fractions of maxHealth were rejected: the whole point of the 2026-07-08
+  Charmed-style rework was decoupling the offer from a value that never
+  moves — waypoints that track the SAME live, HP-driven resolve the offer
+  itself uses keep the "wavering → faltering → yields" arc emotionally
+  synced with the fight's actual trajectory (a boss taking damage genuinely
+  softens faster), matching the source quote's own explicit coupling to the
+  2026-07-08 item.
+- **Each milestone fires AT MOST ONCE per combat, tracked as a LATCHING
+  BOOLEAN, not a re-derivable tier count.** `CombatEncounterState` gains
+  `swayMilestoneWaveringFired?: boolean` / `swayMilestoneFalteringFired?:
+  boolean`, reset to `false` in `initializeCombatEncounter` only — same
+  per-combat lifecycle as `souls`/`akrasiaDebt`/`premiseMilestoneTotal`. This
+  is a STRUCTURAL departure from those three ledgers (which are monotonic
+  counters whose crossing state can be re-derived from `before`/`after` via
+  a pure `xTiersCrossed` helper): because the threshold itself
+  (`capitulateThreshold`) can SHRINK as the enemy's HP falls, re-deriving
+  "was this crossed" from a live recomputation would let a shrinking resolve
+  ERASE a milestone already paid (the enemy "un-wavers" the moment its HP
+  drops enough to shrink the threshold below the SWAY total that originally
+  cleared it) — the exact clawback the brief's decision points forbid. A
+  latching boolean can only ever flip `false → true`, so a milestone already
+  paid stays paid regardless of which direction the live resolve moves
+  afterward — the Souls/DEBT "never claw back a dividend" precedent, applied
+  to a boolean because the underlying denominator (not just the numerator)
+  is now allowed to shrink.
+- **Wavering pays RAPPORT; Faltering pays bonus SWAY — an escalating,
+  two-stage arc that speaks ONLY Charm's own vocabulary.** Wavering
+  (`SWAY_WAVERING_RAPPORT = 1`) lands one stack of `debuff_rapport` on the
+  enemy via the SAME `applyEffect` call shape `soft-word`/`disarming-smile`/
+  `common-ground`/`the-olive-branch` already print (`sourceId:
+  'sway-resolve-milestone'`) — the foe's resistance visibly softens as their
+  will starts to waver. Faltering (`SWAY_FALTERING_BONUS = 2`) grants a
+  small BONUS SWAY nudge, added directly to the running total in the SAME
+  `gainSway` call (NOT re-routed through a second `gainSway` invocation —
+  avoids any recursive-milestone-check complexity) and deliberately
+  UNSCALED by `buff_grace_momentum` (a flat ledger dividend, not a re-scaled
+  gain, matching `AKRASIA_DEBT_TIER_GUARD`/`PREMISE_MILESTONE_RUNGS`'s own
+  "modest ledger bonus" idiom). The arc reads: first the enemy's own
+  resistance softens (RAPPORT, external), then your own case gains
+  momentum as their will visibly breaks (bonus SWAY, self-reinforcing) —
+  "the track gets rungs and a face" in the source doc's own words. A GUARD
+  or heal payoff for Faltering was explicitly REJECTED: `gainSway` is called
+  from THREE sites, one of which (`mirror-of-longing`'s SWAY-conversion
+  inside `resolveThreatPhase`) sits just a few lines before that SAME
+  function's own hardcoded `guard: 0` phase-reset — a GUARD dividend paid at
+  that call site would evaporate before it could ever matter, and this
+  part has no evidence budget to re-architect `resolveThreatPhase`'s guard
+  lifecycle just to make a milestone-flavor choice safe. SWAY is never reset
+  mid-function at ANY `gainSway` call site, so it is the one payoff type
+  correctness-safe everywhere the function fires from.
+- **Fixing a latent bug at the one fragile call site, in the same commit.**
+  `resolveThreatPhase`'s `mirror-of-longing` conversion previously called
+  `gainSway({ ...state, player, sway }, damagePrevented, events).sway ??
+  sway` — extracting ONLY `.sway` from the result and silently discarding
+  every other field the function returns. This was harmless before this part
+  (the function returned nothing else worth keeping), but would have SILENTLY
+  DROPPED the new Wavering RAPPORT stack and both milestone-fired flags at
+  this one call site the moment `gainSway` started returning them. Fixed to
+  capture the full returned state (`enemy`, both fired flags) and thread it
+  into that function's own final `next` object construction, alongside the
+  pre-existing `sway` extraction — `guard` is deliberately NOT threaded back
+  from `gainSway`'s result (see the point above: this function resets GUARD
+  to 0 a few lines later regardless, and the Faltering payoff is SWAY, not
+  GUARD, precisely so this fragile site never needs to care).
+- **No new `VERB_POINTS` entry, no card pricing change.** Same precedent as
+  `AKRASIA_DEBT_TIER_GUARD`/`PREMISE_MILESTONE_RUNGS`: the dividend rides
+  EVERY SWAY source already priced at `V.sway` — it is a property of the
+  `gainSway` ledger, not an authored verb any single card opts into (every
+  Charm card that has EVER printed `sway` benefits automatically, with zero
+  card literal changes), so the per-rank pricing lint never sees it and no
+  `// pts:` comment needs updating.
+- **New event, discriminated by `milestone`, not an overload.** `{ kind:
+  'sway-milestone'; milestone: 'wavering'; threshold; total; effectId;
+  intensity }` / `{ kind: 'sway-milestone'; milestone: 'faltering';
+  threshold; total; bonus }` fire ALONGSIDE the existing `sway-gained` event
+  (never replacing it) — identical convention to `premise-milestone`/
+  `debt-tier-payoff`. The two `milestone` variants carry genuinely different
+  payoff fields (an effect id + landed intensity vs. a bonus SWAY number)
+  rather than a shared, partly-optional shape guessing at which fields
+  apply.
+- **No card text/data changes.** Like the Oratory milestone drip, this is a
+  pure engine-side dividend with no `specialMechanics` field and no card
+  literal touched — `soft-word`/`disarming-smile`/`common-ground`/
+  `the-olive-branch`/`heart-of-the-matter`/`mirror-of-longing` are all
+  byte-identical in `cards.library.ts`.
+- **No new keyword-atlas row.** Row policy: one-card/engine-wide-drip
+  mechanics stay card-local or ride an existing row as a note (TURNABOUT
+  rode BACKFIRE's row in Part 4a, the milestone drip rode PREMISE's/
+  STAGGER's rows in Part 4b). This drip rides the SWAY row's own notes cell
+  (its accrual side, the two waypoints + the arc) and gets a one-line
+  cross-reference on the RAPPORT row (its Wavering payoff side, a
+  same-theme — not cross-theme — synergy) — no 31st keyword, the 30-cap
+  proving gate is untouched.
+
+### Outputs
+
+- `src/Combat/effects.ts`: `SWAY_WAVERING_FRACTION` (0.45),
+  `SWAY_FALTERING_FRACTION` (0.8), `SWAY_WAVERING_RAPPORT` (1),
+  `SWAY_FALTERING_BONUS` (2) constants + pure
+  `swayResolveMilestoneThresholds(resolve)` helper (floors both waypoints at
+  1, unlike `akrasiaDebtTiersCrossed`/`premiseMilestonesCrossed` this is NOT
+  a before/after tier-crossing count — the latching-boolean state it feeds
+  lives on `CombatEncounterState` instead, per the Decisions above).
+- `src/Combat/combat.encounter.types.ts`: `swayMilestoneWaveringFired?:
+  boolean` / `swayMilestoneFalteringFired?: boolean` on
+  `CombatEncounterState`; new `CombatEvent` variants `{ kind:
+  'sway-milestone'; milestone: 'wavering'; threshold; total; effectId;
+  intensity }` and `{ kind: 'sway-milestone'; milestone: 'faltering';
+  threshold; total; bonus }`.
+- `src/Combat/combat.engine.ts`: `initializeCombatEncounter` resets both
+  flags to `false`; `gainSway` computes the live `capitulateThreshold` +
+  waypoints on every call, lands the Wavering RAPPORT stack and/or the
+  Faltering bonus SWAY (independently gated, so both CAN fire in one call
+  when a single gain clears both waypoints at once) and returns the updated
+  `enemy`/`sway`/both flags; the `resolveThreatPhase` `mirror-of-longing`
+  call site is fixed to capture the FULL `gainSway` result (see Decisions'
+  latent-bug point) instead of discarding everything but `.sway`.
+- `docs/keyword-atlas.md`: SWAY row's notes cell gets the milestone-drip
+  note (mirrors the arc, both fractions, both payoffs); RAPPORT row's notes
+  cell gets a one-line cross-reference to the Wavering payoff.
+- No cross-package changes required — no new `specialMechanics` kind, no
+  card field, and `sway-milestone` is not consumed by any mobile presenter
+  or the card editor today (same "internal ledger event, no UI consumer yet"
+  status as `debt-tier-payoff`/`premise-milestone`/`turnabout-fired`).
+  Mobile verify + card-editor type-check run anyway per the blast-radius
+  rule (`src/Combat/**` touched) — both green.
+
+### Tests
+
+New engine e2e (`src/Combat/e2e/charm-resolve-milestones.engine.test.ts`, 8
+tests): pure threshold arithmetic (`swayResolveMilestoneThresholds` — a
+worked resolve-14 example matching the exact wavering-6/faltering-11 numbers,
+Wavering always strictly below Faltering which is always ≤ resolve across a
+spread of resolves, floors at 1); crossing Wavering only (a gain that clears
+the wavering waypoint but stays under faltering lands exactly one RAPPORT
+stack and fires exactly one `sway-milestone` event); crossing BOTH Wavering
+and Faltering in one `gainSway` call (a single played card's self-echoed sway
+pushes the running total past both waypoints at once — both events fire, one
+RAPPORT stack lands, the bonus SWAY is included in the reported total, and
+the numbers are chosen to stay just under the live resolve so this case
+doesn't also trip the pre-existing capitulation-offer check); a shrinking
+live resolve after Wavering already fired does NOT re-fire it or claw back
+the RAPPORT stack already landed (the enemy's HP pool is slashed well below
+the original crossed threshold between two plays; the second play's events
+carry zero `wavering` milestones, the flag stays `true`, the RAPPORT stack
+is unchanged); per-combat/per-enemy reset (`initializeCombatEncounter` starts
+both flags `false`); a full `COMBAT_SIM_POLICY_ORDER` × seed sweep on the
+`grace` (Charm) preset deck runs without crashing. 8/8 new tests green.
+Re-ran `combat-playtest.balance-bands.sim.test.ts` and
+`combat-playtest.card-coverage.sim.test.ts` cold BEFORE (stashed the diff)
+and AFTER (restored it) — `grace` itself shows ZERO drift at every stage
+(early/mid/late 1.00/0.00/0.00, byte-identical before and after — the two
+milestones are additive dividends riding an already-winning curve, not a
+new source of wins). Two OTHER, mechanically untouched presets show a
+hairline (1pp) shift attributable to the matrix's single shared,
+sequentially-advancing seeded RNG stream (`foundry` early 0.90→0.92,
+`bastion` mid 0.07→0.08 — both stable/reproducible across repeat runs of
+the SAME diff, confirming genuine determinism, not flakiness): Grace's
+`gainSway` now does slightly more work per call (an extra `applyEffect`
+call on a Wavering cross), which shifts how many RNG draws its own
+simulated encounters consume, which — because the matrix seeds one RNG
+stream across the WHOLE cell enumeration rather than per-preset — shifts
+the starting RNG state for whichever cells are enumerated after it, even
+though `foundry`/`bastion`'s own cards and mechanics are byte-identical.
+Both the loose per-preset floor/ceiling bands and the win-rate-curve-shape
+assertion (`move=...  OK`) hold at both readings; `KNOWN_CURVE_VIOLATORS`
+stays empty — no re-tune needed or performed.
+
+### Verify gate
+
+```bash
+npm run verify --workspace axiomancer-mechanics
+```
+
+170 files / 2619 tests green. Cross-package (touches `src/Combat/**` —
+`CombatEncounterState`/`CombatEvent` field changes, no `src/Cards/**` touch
+at all since no card data or `specialMechanics` field changed):
+`axiomancer-mobile` verify (248 suites / 2554 tests green) and
+`axiomancer-card-editor` type-check (clean) are mandatory per the
+blast-radius rule, not merely a courtesy — both run and green, with zero
+code changes needed in either package (no new union member, no new card
+field — confirmed, not assumed).
+
+### Commit body template
+
+```
+feat(mechanics): Charm resolve milestones — phase 32 part 4e
+
+- swayResolveMilestoneThresholds pure helper (effects.ts): Wavering (45%)
+  and Faltering (80%) fractions of the enemy's LIVE capitulateThreshold,
+  recomputed every gainSway call, not fixed absolute SWAY numbers
+- gainSway (the theme's single SWAY insertion point, like Part 4b's
+  gainPremises) lands each milestone's dividend at most once per combat via
+  latching booleans (swayMilestoneWaveringFired/FalteringFired) — a
+  shrinking live resolve can never re-fire or claw back an already-paid
+  milestone, only ever prevent a NEW one from firing early
+- Wavering pays one RAPPORT stack on the enemy; Faltering pays a small
+  bonus SWAY nudge (unscaled by buff_grace_momentum) — an escalating,
+  Charm-only-vocabulary two-stage arc, no borrowed idiom
+- fixed a latent bug at the mirror-of-longing gainSway call site
+  (resolveThreatPhase): it discarded everything but gainSway's returned
+  `.sway`, which would have silently dropped the new RAPPORT stack + both
+  fired-flags at that one site
+- sway-milestone event (discriminated by `milestone`) fires alongside
+  sway-gained; docs/keyword-atlas.md: SWAY row (accrual + arc) + RAPPORT
+  row (cross-reference) updated, no new row
+- tests: pure threshold arithmetic, Wavering-only, both-in-one-gain,
+  shrinking-resolve non-clawback, per-combat reset, grace preset sim sweep
+
+Decisions:
+- Latching booleans, not a re-derivable tier count — the live resolve
+  denominator can itself shrink, so "was this crossed" cannot be
+  re-derived from a before/after comparison the way Souls/DEBT/PREMISE
+  ledgers do. See brief §Part 4e Decisions.
+- Faltering pays SWAY, not GUARD/heal — one gainSway call site
+  (mirror-of-longing, inside resolveThreatPhase) resets GUARD to 0 a few
+  lines after it fires; SWAY is the one payoff type safe at every call
+  site without a resolveThreatPhase guard-lifecycle rework.
+- No VERB_POINTS entry / card pricing change — an un-authored ledger
+  dividend riding every SWAY source, same precedent as Part 4b's
+  AKRASIA_DEBT_TIER_GUARD / PREMISE_MILESTONE_RUNGS.
+- foundry/bastion's hairline sim drift is shared-RNG-stream entanglement
+  (stable/reproducible, cards/mechanics byte-identical), not a balance
+  change — grace itself shows zero drift; both loose bands hold before
+  and after.
+```
+
 ## Follow-ups (out of scope this part)
 
+- **Damaging plays strip SWAY** (2026-07-10-theme-identity.md §2, "Charm /
+  grace," CONFIRMED·S, prior-art PA-6/Dawncaster Charmed rule) — hurt them
+  and the charm slips; pure-charm play becomes a real commitment. Note from
+  the source doc: SWAY's passive 1/turn decay (`SWAY_DECAY_PER_TURN`) is
+  owner-ratified and untouched; this item ADDS a strip, it does not touch
+  decay. Not attempted this part (Part 4e's scope is the two milestone
+  waypoints only).
+- **Mirror-of-longing retarget** (CONFIRMED·S) — RAPPORT-prevented damage
+  converts to SWAY instead of raw damage-prevented; defense feeds the win
+  condition more directly in-theme. `mirror-of-longing`'s existing
+  damage-prevented→SWAY conversion (the one non-card-mechanic `gainSway`
+  call site fixed in this part for the latching-flag propagation bug) is
+  otherwise untouched.
+- **FREE lines build rapport foundation** (PLAUSIBLE·M, Gate 1) — not
+  attempted this part.
 - **Gate `prophecy-fulfilled` on omen hits** (2026-07-10-theme-identity.md
   §2, "Oracle / augury," also printed CONFIRMED·M — deferred alongside OMEN
   v2's own scope cut, not silently dropped): the finisher should require the

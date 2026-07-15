@@ -51,6 +51,7 @@ import {
     THREAT_RUNGS, THREAT_RUNGS_BOSS, BOSS_RUNG_REGROWTH, bossRungGrowthCap,
     concedeFloorFor,
     capitulateThreshold,
+    SWAY_WAVERING_RAPPORT, SWAY_FALTERING_BONUS, swayResolveMilestoneThresholds,
 } from './effects';
 import {
     TURN_DICE_COUNT, rollTurnDice, dieHasStance,
@@ -471,6 +472,11 @@ export function initializeCombatEncounter(
         peroration: null,
         souls: 0,
         sway: 0,
+        // Phase 32 part 4e (Charm — Resolve milestones): per-COMBAT, like
+        // `souls`/`akrasiaDebt` — a milestone already paid never un-fires,
+        // even if the enemy's live resolve later shrinks below it.
+        swayMilestoneWaveringFired: false,
+        swayMilestoneFalteringFired: false,
         omenHits: 0,
         pendingOmens: [],
         spellsPlayedThisTurn: 0,
@@ -1099,7 +1105,15 @@ function gainSouls(
  *  2026-07-08-win-path-scaling.md item 1a to a Dawncaster Charmed-style
  *  `resolve` threshold — see `capitulateThreshold`): SWAY ≥ the enemy's
  *  resolve opens an explicit ACCEPT / CONTINUE choice. It never resolves the
- *  outcome by itself. Eligibility is checked after gains and at boundaries. */
+ *  outcome by itself. Eligibility is checked after gains and at boundaries.
+ *
+ *  Phase 32 part 4e (Charm — Resolve milestones): the SINGLE insertion point
+ *  every SWAY source funnels through (mirrors `gainPremises` being Oratory's
+ *  one insertion point in Part 4b) — so the Wavering/Faltering dividends
+ *  below are universal across every SWAY source, not scoped to a single
+ *  card. Checked AFTER the scaled gain lands, against the LIVE
+ *  `capitulateThreshold` (resolve can itself shrink as the enemy's HP
+ *  falls) — see `swayResolveMilestoneThresholds`. */
 function gainSway(
     state: CombatEncounterState,
     amount: number,
@@ -1118,9 +1132,54 @@ function gainSway(
         const pct = momentumDef?.payload.outgoingSwayGainMulPct ?? 0;
         scaledAmount = Math.round(amount * (1 + (pct / 100) * momentum.intensity));
     }
-    const sway = (state.sway ?? 0) + scaledAmount;
+    let sway = (state.sway ?? 0) + scaledAmount;
     events.push({ kind: 'sway-gained', amount: scaledAmount, total: sway });
-    return { ...state, sway };
+
+    // Resolve milestones: each waypoint fires AT MOST ONCE this combat — a
+    // milestone already paid stays paid even if a later call's LIVE resolve
+    // (recomputed every time, since the enemy's HP can fall between gains)
+    // shrinks back below the threshold that was crossed.
+    let enemy = state.enemy;
+    let waveringFired = state.swayMilestoneWaveringFired ?? false;
+    let falteringFired = state.swayMilestoneFalteringFired ?? false;
+    const resolve = capitulateThreshold(state.enemy);
+    const { wavering, faltering } = swayResolveMilestoneThresholds(resolve);
+    if (!waveringFired && sway >= wavering) {
+        waveringFired = true;
+        // Wavering — one stack of RAPPORT on the enemy, Charm's own
+        // rapport-building idiom (soft-word / disarming-smile /
+        // common-ground / the-olive-branch's exact payload).
+        const def = lookupEffectDef('debuff_rapport');
+        let landedIntensity = SWAY_WAVERING_RAPPORT;
+        if (def) {
+            const applied = applyEffect(enemy.effects, def, state.round, {
+                intensityDelta: SWAY_WAVERING_RAPPORT,
+                sourceId: 'sway-resolve-milestone',
+            });
+            enemy = { ...enemy, effects: applied.activeEffects };
+            landedIntensity = applied.result.activeEffect?.intensity ?? SWAY_WAVERING_RAPPORT;
+        }
+        events.push({
+            kind: 'sway-milestone', milestone: 'wavering', threshold: wavering, total: sway,
+            effectId: 'debuff_rapport', intensity: landedIntensity,
+        });
+    }
+    if (!falteringFired && sway >= faltering) {
+        falteringFired = true;
+        // Faltering — a small bonus SWAY nudge (unscaled by momentum; see
+        // SWAY_FALTERING_BONUS's own doc comment for why GUARD/heal were
+        // rejected in favor of SWAY at this call site).
+        sway += SWAY_FALTERING_BONUS;
+        events.push({ kind: 'sway-milestone', milestone: 'faltering', threshold: faltering, total: sway, bonus: SWAY_FALTERING_BONUS });
+    }
+
+    return {
+        ...state,
+        sway,
+        enemy,
+        swayMilestoneWaveringFired: waveringFired,
+        swayMilestoneFalteringFired: falteringFired,
+    };
 }
 
 function swayOffersCapitulation(state: CombatEncounterState): boolean {
@@ -3322,11 +3381,24 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
     // `mirror-of-longing` (D): the damage your defenses prevented converts to
     // SWAY — their aggression argues your case (spec 32 v3 T8).
     let sway = state.sway ?? 0;
+    let swayMilestoneWaveringFired = state.swayMilestoneWaveringFired;
+    let swayMilestoneFalteringFired = state.swayMilestoneFalteringFired;
     if (zoneHas(state, 'mirror-of-longing') && damagePrevented > 0) {
         // Routed through gainSway (not a bare `sway += amount`) so
         // buff_grace_momentum's per-stack multiplier applies here too, not
         // just to card-driven SWAY gains (2026-07-08 Grace rebalance).
-        sway = gainSway({ ...state, player, sway }, damagePrevented, events).sway ?? sway;
+        // Phase 32 part 4e — gainSway can also land a Wavering RAPPORT stack
+        // on `enemy` and flip the milestone-fired flags; the FULL returned
+        // state is captured here (not just `.sway`) so that dividend isn't
+        // silently dropped at this one call site. `guard` is deliberately
+        // NOT read back from gainSway's result even though the Faltering
+        // payoff is SWAY (not GUARD) precisely so this fragile site — GUARD
+        // resets to 0 a few lines below regardless — never needs to care.
+        const swayResult = gainSway({ ...state, player, enemy, sway }, damagePrevented, events);
+        sway = swayResult.sway ?? sway;
+        enemy = swayResult.enemy;
+        swayMilestoneWaveringFired = swayResult.swayMilestoneWaveringFired;
+        swayMilestoneFalteringFired = swayResult.swayMilestoneFalteringFired;
     }
     // `crumbling-resolve` (D): an attack that failed to break your Guard costs
     // the enemy a rung on its NEXT telegraph.
@@ -3366,6 +3438,8 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
         player,
         enemy,
         sway,
+        swayMilestoneWaveringFired,
+        swayMilestoneFalteringFired,
         directDamageDealt: directDamage,
         guard: 0,                       // brace is spent on this phase's threat; resets each phase
         barrier,                        // persistent soak — carries the unspent remainder across phases
