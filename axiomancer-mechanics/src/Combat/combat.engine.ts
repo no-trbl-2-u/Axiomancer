@@ -57,6 +57,7 @@ import {
     combatDieCanPower, availableDiceFor, spendDice, availableDieCount,
     hasRerollableDice, rerollSpentDice, rollPermanentBonusDice,
     RESERVE_MAX, ripenReserve, FLOATING_DICE_CAP, materializeFloatingDice,
+    overheatReserve,
 } from './combat.dice';
 import {
     COMBAT_HAND_SIZE, buildCombatDeck, drawCombatCards, shuffleCombatDeck,
@@ -2400,6 +2401,24 @@ function playBottomAction(
                         kind: 'pips-overflowed', cardId: card.id,
                         pips: overflowPips, riderText: riderText(mech.overflow),
                     });
+                }
+                break;
+            }
+            case 'overheat': {
+                // Phase 32 part 4c — the press-your-luck knob: push past
+                // RESERVE_PIP_CAP, one wave per printed pip, each wave risking
+                // OVERHEAT_BUST_CHANCE per die already at/above the cap. A die
+                // still below the cap ripens for free (no risk) exactly like
+                // `ripenReserve` — OVERHEAT only prices the overage.
+                for (let i = 0; i < mech.pips; i++) {
+                    const r = overheatReserve(reserve, _rng);
+                    reserve = r.reserve;
+                    for (const id of r.ripenedIds) {
+                        events.push({ kind: 'die-ripened', dieId: id, pips: reserve.find(d => d.id === id)?.pips ?? 0 });
+                    }
+                    for (const id of r.bustedIds) {
+                        events.push({ kind: 'overheat-bust', dieId: id, cardId: card.id, pips: reserve.find(d => d.id === id)?.pips ?? 0 });
+                    }
                 }
                 break;
             }

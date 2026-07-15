@@ -117,6 +117,62 @@ export function ripenReserve(reserve: readonly CombatManaDie[]): { reserve: Comb
     return { reserve: next, ripenedIds };
 }
 
+// ---------------------------------------------------------------------------
+// Phase 32 part 4c — Forge OVERHEAT: pips past RESERVE_PIP_CAP, at a risk
+// ---------------------------------------------------------------------------
+
+/** Hard ceiling on an overheated die's pips — even a die that keeps surviving
+ *  the gamble stops accepting further pushes here (a finite bookkeeping
+ *  bound, mirroring `FLOATING_DICE_CAP`/`MAX_PERMANENT_WILD_DICE`). */
+export const OVERHEAT_PIP_CEILING = 4;
+
+/** Probability a pip pushed past `RESERVE_PIP_CAP` busts the targeted die,
+ *  per pip attempted (press-your-luck: pushing further compounds the risk —
+ *  KB receipt: The Quacks of Quedlinburg's white-chip pot, where drawing one
+ *  more chip is always a live choice and the risk is cumulative and legible,
+ *  chip by chip — kb:boardgames/the-quacks-of-quedlinburg/rules/overview.okf.md,
+ *  src-003, secondary, high). A bust HALVES (floored) the die's pre-push
+ *  pips rather than zeroing them — Quacks' own bust cost is partial too
+ *  ("must choose points or coins, not both", not a total wipeout of the
+ *  pot). */
+export const OVERHEAT_BUST_CHANCE = 0.35;
+
+/**
+ * The press-your-luck knob the Forge theme was missing (2026-07-10-theme-
+ * identity.md §2): a die already AT `RESERVE_PIP_CAP` (safely ripened) can
+ * be pushed FURTHER, up to `OVERHEAT_PIP_CEILING`, in exchange for a
+ * `OVERHEAT_BUST_CHANCE` risk PER PIP pushed. A die still below the safe cap
+ * ripens normally with NO risk — OVERHEAT only prices the overage, never the
+ * safe portion `ripenReserve` already grants for free. Downstream pip-cash
+ * paths (`PIP_INTENSITY_BONUS`, defend-card pip Guard, `spend_all_pips`) read
+ * `die.pips` with no ceiling check today, so a successfully overheated die's
+ * extra pips cash exactly like any other pip — no engine change needed there.
+ * Pure; RNG is the caller's seeded singleton (same convention as
+ * `rerollSpentDice`).
+ */
+export function overheatReserve(
+    reserve: readonly CombatManaDie[],
+    rng: () => number = defaultRng,
+): { reserve: CombatManaDie[]; ripenedIds: string[]; bustedIds: string[] } {
+    const ripenedIds: string[] = [];
+    const bustedIds: string[] = [];
+    const next = reserve.map(d => {
+        const pips = d.pips ?? 0;
+        if (pips < RESERVE_PIP_CAP) {
+            ripenedIds.push(d.id);
+            return { ...d, pips: pips + 1 };
+        }
+        if (pips >= OVERHEAT_PIP_CEILING) return d;
+        if (rng() < OVERHEAT_BUST_CHANCE) {
+            bustedIds.push(d.id);
+            return { ...d, pips: Math.floor(pips / 2) };
+        }
+        ripenedIds.push(d.id);
+        return { ...d, pips: pips + 1 };
+    });
+    return { reserve: next, ripenedIds, bustedIds };
+}
+
 /**
  * A die Press Fate (the `reroll` signature) re-rolls: one you have USED this turn
  * (`spent`/`exhausted`) or a dead `x` face that can't power anything. A still-

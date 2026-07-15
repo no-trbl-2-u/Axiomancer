@@ -177,6 +177,8 @@ function defaultMechanic(kind: SpecialMechanicKind): CardSpecialMechanic {
             return { kind, color: 'wild' };
         case 'grant_pip':
             return { kind, count: 1 };
+        case 'overheat':
+            return { kind, pips: 1 };
         // Spec 32 v3 — the themed-deck verb set
         case 'forge_floating_die':
             return { kind, color: 'powering' };
@@ -594,6 +596,8 @@ function MechanicFields({ mechanic, patch }: { mechanic: CardSpecialMechanic; pa
             );
         case 'grant_pip':
             return numRow('PIPS', '+N to every Reserve die', mechanic.count, 'count', 0, 10);
+        case 'overheat':
+            return numRow('OVERHEAT PIPS', 'pushed past RESERVE_PIP_CAP; each risks a bust that halves the die', mechanic.pips, 'pips', 1, 5);
         case 'forge_floating_die':
             return (
                 <div>

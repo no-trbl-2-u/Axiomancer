@@ -17,6 +17,7 @@ import type { Card, CardRider, CardSpecialMechanic } from './types';
 import { lookupEffect } from '../Effects/effects.library';
 import { dotEventTrigger } from '../Combat/effect-modifiers';
 import { EXPECTED_TRIGGERS_PER_ROUND } from '../Combat/effects';
+import { OVERHEAT_BUST_CHANCE } from '../Combat/combat.dice';
 
 // ─── The point table (spec 32 v3 §4) ─────────────────────────────────────────
 
@@ -295,6 +296,17 @@ export function scoreMechanic(mechanic: CardSpecialMechanic): number {
             // expected wasted pips (the conversion is opportunistic, not free).
             return mechanic.count * V.pip
                 + (mechanic.overflow ? scoreRider(mechanic.overflow) * V.expectedOverflowPips : 0);
+        case 'overheat': {
+            // Phase 32 part 4c — a genuinely risk-priced verb, not a free pip.
+            // Per attempted pip: (1 − bustChance) grants +1 pip (V.pip) against
+            // bustChance HALVING the targeted die's pre-push bank (assumed at
+            // the typical Forge bank, V.expectedPips) at V.pip each — mirrors
+            // the engine's actual `overheatReserve` cost (a partial setback,
+            // not a full wipe).
+            const gain = (1 - OVERHEAT_BUST_CHANCE) * V.pip;
+            const loss = OVERHEAT_BUST_CHANCE * 0.5 * V.expectedPips * V.pip;
+            return mechanic.pips * (gain - loss);
+        }
         case 'bank_spent_die': return V.bankSpentDie;
         case 'forge_floating_die':
             return V.forgeFloating + V.forgePersistence

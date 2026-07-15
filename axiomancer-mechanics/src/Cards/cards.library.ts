@@ -382,14 +382,23 @@ const halfStep: Card = {
     philosophicalAspect: 'body',
     description:
         'Zeno was half right: you can always take half a step back. What ' +
-        'waits behind the guard ripens twice as fast when you learn to be patient about it.',
+        'waits behind the guard ripens twice as fast when you learn to be patient about it ' +
+        '— push it further and the kiln might just boil over.',
     tier: 1, rank: 2, cardType: 'spell',
     targetType: 'self',
     // pts (phase 30): Guard 5 (1.25) + 2 pips (3.0) + FREE PIP 1 (1.5, forge's
-    // real currency, replaces the chip guard 2) = 5.75 -- fits the 1.5-7.5
+    // real currency, replaces the chip guard 2) = 5.75. Phase 32 part 4c —
+    // OVERHEAT 1 pip past the safe RESERVE_PIP_CAP: EV = (1-0.35)x1.5 -
+    // 0.35x0.5x2x1.5 = 0.45 (a genuine gamble, not a free pip: a bust HALVES
+    // the targeted die's bank instead of wiping it, matching Quacks of
+    // Quedlinburg's "choose points or coins, not both" partial-loss shape,
+    // not a total-loss explosion) = 6.2 total -- fits the 1.5-7.5
     // Doxa/Lemma band for rank 2.
     free: { pips: 1 },
-    specialMechanics: [{ kind: 'guard', amount: 5 }, { kind: 'grant_pip', count: 2 }],
+    specialMechanics: [
+        { kind: 'guard', amount: 5 }, { kind: 'grant_pip', count: 2 },
+        { kind: 'overheat', pips: 1 },
+    ],
     addedIn: '2026-07-08',
     tags: ['forge', 'defense'],
 };

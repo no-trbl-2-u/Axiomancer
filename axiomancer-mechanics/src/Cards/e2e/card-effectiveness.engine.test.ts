@@ -57,6 +57,7 @@ import type {
 } from '../../Combat/combat.encounter.types';
 import { cardLibrary, getCardById } from '../cards.library';
 import type { Card, CardSpecialMechanic, CardRider } from '../types';
+import { RESERVE_PIP_CAP } from '../../Combat/combat.dice';
 
 afterEach(() => vi.restoreAllMocks());
 
@@ -445,6 +446,16 @@ function assertMechanic(
         case 'grant_pip': {
             const sum = (s: CombatEncounterState) => (s.reserve ?? []).reduce((n, d) => n + (d.pips ?? 0), 0);
             expect(sum(after), label).toBeGreaterThan(sum(before));
+            return;
+        }
+        case 'overheat': {
+            // OVERHEAT's specific promise (distinct from grant_pip's plain sum
+            // growth): a die can end up holding MORE than the safe
+            // RESERVE_PIP_CAP. The fixture's grant_pip ripens the shared
+            // Reserve die to the cap first; a neutral (non-fumble) RNG then
+            // lets this play's overheat push it past that cap.
+            const maxPips = Math.max(0, ...(after.reserve ?? []).map(d => d.pips ?? 0));
+            expect(maxPips, label).toBeGreaterThan(RESERVE_PIP_CAP);
             return;
         }
         case 'bank_spent_die':

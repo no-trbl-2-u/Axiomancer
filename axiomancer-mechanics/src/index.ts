@@ -158,6 +158,8 @@ export {
     // Fate Engine P1 (spec 31) — the dice get a second read
     tapFateDie, riderText, RESERVE_MAX, RESERVE_PIP_CAP, ripenReserve,
     PIP_INTENSITY_BONUS, PIP_GUARD_BONUS, COLOR_MATCH_STATUS_DURATION_BONUS, FATE_TAP_CONVICTION,
+    // Phase 32 part 4c — Forge OVERHEAT
+    OVERHEAT_PIP_CEILING, OVERHEAT_BUST_CHANCE, overheatReserve,
     // Phase 31 — the engine-native momentum wheel + THE STAKE
     isMomentumDieId, placeStake,
 } from './Combat';

@@ -217,6 +217,8 @@ export {
     // Master Spec §4 — wild-die permanent-growth mechanic
     MAX_PERMANENT_WILD_DICE, rollPermanentBonusDice,
     RESERVE_MAX, RESERVE_PIP_CAP, ripenReserve,
+    // Phase 32 part 4c — Forge OVERHEAT (the press-your-luck pip push)
+    OVERHEAT_PIP_CEILING, OVERHEAT_BUST_CHANCE, overheatReserve,
 } from './combat.dice';
 export { COMBAT_HAND_SIZE, buildCombatDeck, drawCombatCards, shuffleCombatDeck } from './combat.deck';
 export {

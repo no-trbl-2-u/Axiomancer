@@ -436,6 +436,15 @@ export type CombatEvent =
     // ── Fate Engine P1 (spec 31 §1) — dice-layer events ──────────────────────
     | { kind: 'die-banked'; dieId: string; color: CombatDieColor; pips: number }
     | { kind: 'die-ripened'; dieId: string; pips: number }
+    // Phase 32 part 4c (Forge — OVERHEAT): a pip pushed past `RESERVE_PIP_CAP`
+    // busted — the targeted die's pips are HALVED (floored), not zeroed (a
+    // partial setback, not a wipeout — Quacks' own bust cost is "choose
+    // points or coins, not both," never total loss). A SUCCESSFUL overheat
+    // push still reuses 'die-ripened' (the pip count simply now exceeds the
+    // safe cap); this event exists only for the bust half of the gamble, own
+    // event so 'die-ripened' consumers are unaffected, matching
+    // 'debt-tier-payoff'/'max-hp-eroded' precedent.
+    | { kind: 'overheat-bust'; dieId: string; cardId: string; pips: number }
     | { kind: 'omen-revealed'; dieColor: CombatDieColor; phaseIndex: number; stance: Stance }
     | { kind: 'fate-tapped'; dieId: string; choice: 'dot-tick' | 'conviction'; amount: number }
     | { kind: 'resonance-gained'; color: 'heart' | 'body' | 'mind'; total: number }

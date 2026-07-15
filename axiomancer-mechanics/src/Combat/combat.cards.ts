@@ -19,6 +19,7 @@ import type {
     CombatCard, CombatDieColor, CombatVerbClass, CardEffectKind,
 } from './combat.encounter.types';
 import { getCardById } from '../Cards/cards.library';
+import { OVERHEAT_BUST_CHANCE } from './combat.dice';
 
 export type EffectLookup = (effectId: string) => Effect | undefined;
 export type CardLookup = (cardId: string) => Card | undefined;
@@ -318,6 +319,10 @@ export function mechanicText(m: CardSpecialMechanic): string | null {
         case 'replay_last': return `replay your last spell ×${m.times}`;
         case 'create_temporary_die': return `KINDLE (${m.color})`;
         case 'grant_pip': return `+${m.count} pip${m.count === 1 ? '' : 's'} to every Reserve die${m.overflow ? ` — each pip with no room: ${riderText(m.overflow)}` : ''}`;
+        // Phase 32 part 4c — rides the existing PIP vocabulary (no new
+        // keyword): a die already at the safe cap can take MORE pips, at a
+        // per-pip bust risk (a busted die's pips are halved, not zeroed).
+        case 'overheat': return `PIP ${m.pips} past the cap (${Math.round(OVERHEAT_BUST_CHANCE * 100)}% bust: halves the die)`;
         case 'bank_spent_die': return 'the spent die BANKS to the Reserve';
         case 'convert_die_color': return 'the spent die returns as WILD';
         case 'refresh_die': return 'refresh the spent die';
