@@ -1598,9 +1598,11 @@ function playBottomAction(
     /** REPRISE songbook choice (phase 28) — the FIRST card a `reprise`
      *  mechanic returns, when given and still present in `state.discard`.
      *  Any additional returns (a `count > 1` reprise) still auto-pick by
-     *  rank — mobile ships the picker for the count-1 canonical case
-     *  (`second-thoughts`). Omitted/invalid falls back to the pre-existing
-     *  highest-rank auto-pick, so every non-mobile caller is unaffected. */
+     *  rank — mobile ships the picker for every `reprise` card (both
+     *  `second-thoughts` and `circular-reasoning`), gated on
+     *  `needsReprisalChoice`, not hardcoded to one card id. Omitted/invalid
+     *  falls back to the pre-existing highest-rank auto-pick, so every
+     *  non-mobile caller is unaffected. */
     reprisalCardId?: string,
     /** Phase 32 part 4d (Oracle — OMEN v2) — the player's chosen stance/
      *  window claim for an `omen` mechanic. Absent (or an invalid stance)
@@ -2375,8 +2377,10 @@ function playBottomAction(
                 break;
             }
             case 'replay_last': {
-                // OUROBOROS — the argument repeats: the last spell's statuses land
-                // again, `times` times. Never chains into another replay.
+                // OUROBOROS — the argument repeats: the last spell that LANDED A
+                // STATUS on the enemy (phase 32 part 4f — `lastSpellCardId` skips
+                // over any no-status play in between) says itself again, `times`
+                // times. Never chains into another replay.
                 const lastId = state.lastSpellCardId;
                 const lastCard = lastId && lastId !== sourceCard.id ? lookupCard(lastId) : undefined;
                 const replayable = lastCard
@@ -2933,7 +2937,14 @@ function playBottomAction(
         echoNextSpell,
         conjuredUids,
         spellsPlayedThisTurn: (state.spellsPlayedThisTurn ?? 0) + 1,
-        lastSpellCardId: sourceCard.id,
+        // Phase 32 part 4f — only a spell that actually landed/deepened a
+        // status on the enemy (`landedOnEnemy`, computed above from the
+        // merged `allCardEvents`, which already includes any replay's own
+        // events) becomes ouroboros's replay target. A no-status play
+        // (fizzle, pure-mechanic burst like TURNABOUT/RUPTURE, a dieless
+        // no-op) leaves the prior status-landing spell in place instead of
+        // overwriting it with a card that has nothing to re-land.
+        lastSpellCardId: landedOnEnemy ? sourceCard.id : state.lastSpellCardId,
         // Spec 32 §12 #4 — both blood-price sites (the `recoil` mech case and
         // the fate-recoil pay) accumulate into `recoilTaken` above.
         recoilPaidThisTurn: (state.recoilPaidThisTurn ?? 0) + recoilTaken,

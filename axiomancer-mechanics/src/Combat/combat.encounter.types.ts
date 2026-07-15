@@ -758,7 +758,12 @@ export interface CombatEncounterState {
     echoNextSpell?: boolean;
     /** Spec 32 v3 T10 — spells played this turn (resonant-chamber's gate). */
     spellsPlayedThisTurn?: number;
-    /** Spec 32 v3 T10 — the last PAID spell resolved this combat (ouroboros). */
+    /** Spec 32 v3 T10 — the last PAID spell that LANDED A STATUS this combat
+     *  (ouroboros's replay target). Phase 32 part 4f: a PAID spell that
+     *  resolves without increasing any effect intensity on the enemy (a
+     *  fizzle, a pure-mechanic burst, a dieless/no-op play) does NOT
+     *  overwrite this — it stays pinned to the most recent status-landing
+     *  spell so an intervening no-status play can never "steal" the echo. */
     lastSpellCardId?: string | null;
     /** Spec 32 §12 #4 (combat ledgers) — RECOIL HP paid this turn (`recoil`
      *  mechanic + fate recoil). Reset with `spellsPlayedThisTurn` at turn start. */

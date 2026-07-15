@@ -36,8 +36,9 @@ next one.
       gate prophecy-fulfilled / PORTENT / foretell picker UI deferred, see
       below)
 - [x] Part 4e — Charm: Resolve milestones (this tick)
-- [ ] Part 4f — Echo (remaining) — per §2 of the source doc, picked up in
-      a future tick
+- [x] Part 4f — Echo: Ouroboros targets the last spell that LANDED A STATUS
+      (this tick; second-thoughts partial detonate and CRESCENDO overflow
+      deferred, see below)
 
 ## Part 1 — Harvest: REAP attacks MAXIMUM HP
 
@@ -1748,8 +1749,193 @@ Decisions:
   and after.
 ```
 
+## Part 4f — Echo: Ouroboros targets the last spell that LANDED A STATUS
+
+### Design intent (source: 2026-07-10-theme-identity.md §2, "Echo / refrain")
+
+> REPRISE becomes a player choice [CONFIRMED · S]: show the songbook (discard
+> picker). The single cheapest agency win in the roster.
+> Ouroboros replays the last spell that LANDED A STATUS, with a face preview
+> [CONFIRMED · S].
+> Second-thoughts partial detonate [CONFIRMED · S]: consume ≤2 marks so the
+> detonate/keep fork is real.
+
+Echo has no CONFIRMED-M item (unlike every other theme this phase touched) —
+its three CONFIRMED items are all S-tier. Audited all three before picking
+scope (see Current state): the first is ALREADY fully shipped from phase 28;
+the other two are genuinely unstarted. Picked the Ouroboros retarget as this
+part's scope — a pure engine-side correctness fix with an existing signal to
+reuse and zero new player-facing choice required, matching this phase's
+established "engine-only, mobile gets verify not new UI" pattern (Parts
+4a/4b/4c/4e). Second-thoughts partial detonate needs a genuine new choice
+mechanism (which stacks to keep) and CRESCENDO overflow is explicitly gated
+on "only if the cheap items above don't lift the ceiling" — both deferred,
+see Follow-ups.
+
+### Current state (verified in code, before this tick)
+
+- **REPRISE choice — audited, already shipped, doc-comment was stale.**
+  `playBottomAction`'s `reprisalCardId` param (phase 28) honors the player's
+  songbook pick for the first return of ANY `reprise` mechanic card.
+  Mobile's `needsReprisalChoice` (`combat-encounter.engine.ts`) gates on
+  `specialMechanics.some(m => m.kind === 'reprise')` — not hardcoded to one
+  card id — so both `second-thoughts` and `circular-reasoning` (the two
+  `reprise`-carrying Echo cards) already get the picker. Only the in-code
+  comment claiming "mobile ships the picker for the count-1 canonical case
+  (second-thoughts)" was stale/misleading; fixed this tick, no behavior
+  change needed.
+- **Ouroboros retarget — not started.** `lastSpellCardId`
+  (`combat.engine.ts`, `playBottomAction`) was set to `sourceCard.id`
+  UNCONDITIONALLY after every PAID spell play, regardless of whether that
+  play landed anything. `replay_last` (Ouroboros's mechanic) reads this
+  field verbatim with no filter beyond "is a spell, isn't itself a
+  `replay_last` card" — so a no-status play sandwiched between a real
+  status-landing spell and Ouroboros (a fizzle, a pure-mechanic burst like
+  TURNABOUT's ledger cash-out which has zero `combatEffects`, a dieless
+  no-op) silently stole the echo away from the spell the flavor text
+  describes ("whatever you said last, the serpent says twice more").
+- **The exact signal already exists, zero new plumbing.** `landedOnEnemy`
+  (a `let` local in the SAME function, `playBottomAction`) is already
+  computed from `allCardEvents` — which already includes any nested
+  `replay_last` call's own events (the mechanics loop resolving
+  `replay_last` runs strictly BEFORE the effect-landing attribution loop
+  that sets `landedOnEnemy`, confirmed by reading the function's control
+  flow) — for the pre-existing die-refresh combo-chain rule ("a status new
+  to this chain refreshes the die"). It means precisely "did this play
+  increase an effect's intensity on the enemy," the exact predicate the
+  source doc's "LANDED A STATUS" wants.
+- **No face-preview UI exists.** Neither the engine nor
+  `axiomancer-mobile` carries any concept of previewing what Ouroboros's
+  replay will land before it's played (`state.lastSpellCardId` has zero
+  mobile references). Deferred — see Follow-ups, same discipline as Part
+  4d's foretell-picker UI deferral.
+
+### Decisions made upfront — DO NOT ASK
+
+- **Gate the existing `lastSpellCardId` assignment on `landedOnEnemy`,
+  don't add a second field.** A no-status play leaves the PRIOR
+  status-landing spell's id in place (`landedOnEnemy ? sourceCard.id :
+  state.lastSpellCardId`) instead of clearing to `null` — clearing would
+  make Ouroboros whiff entirely the moment ANY no-status card is played in
+  between, which is a strictly worse player experience than "skip past it
+  to the last spell that actually did something," and doesn't match the
+  source doc's own framing (it wants the REPLAY TARGET corrected, not the
+  replay opportunity destroyed).
+- **`landedOnEnemy` only, not a broader "landed anything including
+  self-buffs" predicate.** The source quote's own framing ("whatever you
+  said last" replaying against the ENEMY) and the existing variable's
+  established meaning (already gates the die-refresh combo-chain rule) both
+  point at enemy-facing status landings specifically. Reusing the existing
+  semantic keeps this a one-line change instead of introducing a second,
+  subtly-different "landed something" concept.
+- **No face-preview UI this part.** The engine-side retarget is the
+  CONFIRMED item's substance (a wrong replay target is a correctness bug;
+  not previewing a correct one is a legibility nice-to-have). Building a
+  preview needs a mobile-side concept of "what will Ouroboros replay" that
+  doesn't exist anywhere in the presenter layer today — sized like its own
+  small UI slice, not a one-line engine gate. Deferred, matching Part 4d's
+  foretell-picker precedent exactly.
+- **Second-thoughts partial detonate and CRESCENDO overflow are NOT this
+  part's scope.** Partial detonate needs a genuine new choice primitive
+  (which stacks to keep, not just a hardcoded cap) since `ruptureMarks` is
+  a SHARED verb across multiple non-Echo cards (`the-closing-word`,
+  `ouroboros` itself, several sandbox cards) — capping it globally would be
+  a balance change reaching far beyond Echo, and a new card-scoped rider
+  field is its own design pass, not a slot-in for this tick. CRESCENDO
+  overflow is explicitly gated in the source doc on "only if the cheap
+  items above don't lift the ceiling" — premature before a re-run of the
+  ten-theme matrix.
+
+### Outputs
+
+- `src/Combat/combat.engine.ts`: `playBottomAction`'s `next.lastSpellCardId`
+  assignment gated on `landedOnEnemy`; two stale/misleading doc-comments
+  fixed (the `reprisalCardId` param doc, the `replay_last` case comment).
+- `src/Combat/combat.encounter.types.ts`: `lastSpellCardId`'s doc-comment
+  updated to describe the "last status-landing spell" semantics.
+- No `CombatEvent` variant, no card field, no `specialMechanics` kind, no
+  keyword-atlas row — a pure semantic tightening of an existing internal
+  field with a single consumer (`replay_last`/Ouroboros). No cross-package
+  surface changed (no new union member, no card literal touched); mobile
+  verify + card-editor type-check still run per the blast-radius rule
+  (`src/Combat/**` touched).
+
+### Tests
+
+New engine e2e
+(`src/Combat/e2e/ouroboros-status-target.engine.test.ts`, 4 tests): a
+no-status play (`turnabout`, zero `combatEffects`) never overwrites
+`lastSpellCardId` after a status-landing play (`refrain`); a SECOND
+status-landing play still updates it to itself (regression guard — the
+common case is unchanged); end-to-end `refrain -> turnabout -> ouroboros`
+proves the replay lands `refrain`'s own effects (`debuff_mark`,
+`debuff_poison`), not nothing, across the intervening no-status play; fresh
+combat still starts `lastSpellCardId: null`. Verified the tests are
+load-bearing, not just green: reverted the one-line gate locally, confirmed
+the no-status-overwrite and end-to-end tests both fail against the
+pre-fix behavior (`turnabout` won the slot instead of `refrain`), then
+restored the fix and re-ran to green. 4/4 new tests green.
+
+### Verify gate
+
+```bash
+npm run verify --workspace axiomancer-mechanics
+```
+
+Cross-package (touches `src/Combat/combat.engine.ts` — no `CombatEvent`
+variant, no card field, no `specialMechanics` kind changed):
+`axiomancer-mobile` verify and `axiomancer-card-editor` type-check are
+mandatory per the blast-radius rule, both run and green with zero code
+changes needed in either package.
+
+### Commit body template
+
+```
+feat(mechanics): Ouroboros targets the last status-landing spell — phase 32 part 4f
+
+- lastSpellCardId (ouroboros's replay_last target) now only updates on a
+  PAID spell play that actually landed/deepened a status on the enemy
+  (landedOnEnemy, an existing local already computed from allCardEvents,
+  which already includes a nested replay's own events) — a no-status play
+  (fizzle, TURNABOUT's ledger-only burst, a dieless no-op) no longer steals
+  the echo away from the last spell that actually did something
+- audited REPRISE-becomes-a-player-choice (the other CONFIRMED item in
+  scope for this theme): already fully shipped from phase 28 for both
+  reprise cards (second-thoughts, circular-reasoning); only a stale
+  misleading doc-comment needed fixing, no behavior change
+- tests: no-status play never overwrites the replay target, a second
+  status-landing play still updates it (regression guard), end-to-end
+  refrain -> turnabout -> ouroboros proves the correct target, fresh-combat
+  null default; verified load-bearing by reverting the fix locally and
+  confirming 2 of 4 tests fail against the old behavior
+
+Decisions:
+- Gate the existing field on landedOnEnemy rather than clearing to null on
+  a no-status play or adding a second field — Ouroboros skips past a dead
+  play to the last spell that actually landed something, it doesn't whiff
+  entirely the moment any no-status card intervenes.
+- Face-preview UI, second-thoughts partial detonate, and CRESCENDO overflow
+  deferred — see brief §Part 4f Decisions / Follow-ups.
+```
+
 ## Follow-ups (out of scope this part)
 
+- **Ouroboros face-preview UI** (2026-07-10-theme-identity.md §2, "Echo /
+  refrain," CONFIRMED·S, the other half of the retarget item) — nothing
+  player-facing shows what Ouroboros will replay before it's played. The
+  engine now tracks the correct target (`lastSpellCardId`); a mobile
+  surface to preview it is its own small UI slice, not attempted this
+  part.
+- **Second-thoughts partial detonate** (CONFIRMED·S) — consume ≤2 marks
+  instead of `ruptureMarks`' current all-or-nothing `consumeMarks`, so the
+  detonate/keep fork is real. Needs a new card-scoped choice primitive
+  (which stacks survive) since `ruptureMarks` is a shared verb across
+  non-Echo cards too; not attempted this part.
+- **CRESCENDO overflow** (PLAUSIBLE·L) — ECHO past the intensity cap
+  converts to something else. Explicitly gated in the source doc on "only
+  if the cheap items above don't lift the ceiling"; premature before a
+  re-run of the ten-theme matrix. (The PA-2 song-tally rework was REFUTED
+  on misread evidence — do not resurrect without fresh transcripts.)
 - **Damaging plays strip SWAY** (2026-07-10-theme-identity.md §2, "Charm /
   grace," CONFIRMED·S, prior-art PA-6/Dawncaster Charmed rule) — hurt them
   and the charm slips; pure-charm play becomes a real commitment. Note from
@@ -1824,8 +2010,15 @@ Decisions:
 ## DoD
 
 Do **NOT** flip Phase 32 `[ ]` → `[x]` in `plan/steps/01_build_plan.md`
-yet — Parts 1b and 4 remain. The DoT-clock slice is complete only because
-its trigger, Suppuration, lethal-receipt, attribution, and player-facing
-outcome witnesses are all present; do not regress it while tuning. A
-future tick that ships the last remaining
-part ticks the row then.
+yet — Part 1b remains. Every theme's headline CONFIRMED item (Part 4's
+"remaining per-theme M items," Scope's own phrasing) is now shipped across
+all ten themes as of Part 4f — Echo had no CONFIRMED-M item, so its best
+CONFIRMED-S item (the Ouroboros retarget) stood in, same as every other
+part's one-item-per-theme cut. Only Part 1b (Harvest — Souls persist across
+combats, "the jar travels") remains: genuine cross-run save-schema work
+(a new persistent-currency slot on the character save, a migration, a
+mobile carried-bank surface, milestone-rider design), P-NEXT tagged in the
+source doc, deliberately NOT bundled into any prior part. The DoT-clock
+slice is complete only because its trigger, Suppuration, lethal-receipt,
+attribution, and player-facing outcome witnesses are all present; do not
+regress it while tuning. A future tick that ships Part 1b ticks the row.
