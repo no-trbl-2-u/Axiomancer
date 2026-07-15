@@ -3,7 +3,7 @@
  *
  * Drives `dispatchCombatCommand` through the package's public Combat barrel and
  * proves:
- *   - direct-delegation equality for every command family (incl. RNG forwarding);
+ *   - direct-delegation structural equality for every command family (incl. RNG forwarding);
  *   - the composite `resolve-threat` equals endTurn + resolveThreatPhase;
  *   - a deterministic witness + precedence for every rejection reason;
  *   - rejections preserve state identity, command identity, and empty events;
@@ -28,7 +28,7 @@ import {
 } from '../index';
 import type {
     CombatCommand, CombatCommandRejectionReason,
-    CombatEncounterState, CombatEvent, CombatManaDie,
+    CombatEncounterState, CombatEvent, CombatManaDie, CombatTransition,
 } from '../index';
 
 // A distinctive constant RNG. Every rng-consuming transition is called with it
@@ -184,6 +184,106 @@ describe('CO-02 — direct-delegation equality', () => {
     });
 });
 
+interface DirectDelegationCase {
+    name: string;
+    state: () => CombatEncounterState;
+    command: CombatCommand;
+    direct: (state: CombatEncounterState) => CombatTransition;
+}
+
+const directDelegationCases: DirectDelegationCase[] = [
+    {
+        name: 'open-encounter',
+        state: () => ({
+            ...buildFixtureState({ clean: true }),
+            phase: 'reveal', dice: [], draftedDieId: null, turnTakenThisPhase: false, turn: 0,
+        }),
+        command: { kind: 'open-encounter' },
+        direct: state => rollEncounterDice(state, RNG),
+    },
+    {
+        name: 'start-turn',
+        state: () => ({ ...buildFixtureState({ clean: true }), dice: [], draftedDieId: null, turnTakenThisPhase: false }),
+        command: { kind: 'start-turn' },
+        direct: state => startTurn(state, RNG),
+    },
+    {
+        name: 'draft-die',
+        state: () => playState({ dice: [die('d0', 'body'), die('d1', 'heart')], draftedDieId: null, reserve: [] }),
+        command: { kind: 'draft-die', dieId: 'd0', bankUnpicked: true },
+        direct: state => draftStanceDie(state, 'd0', { bankUnpicked: true }),
+    },
+    {
+        name: 'play-card',
+        state: () => playState({ hand: [{ uid: 'h', cardId: 'slippery-slope' }] }),
+        command: { kind: 'play-card', card: { uid: 'h' }, useBottom: false },
+        direct: state => playCombatCard(state, { uid: 'h' }, false, undefined, RNG),
+    },
+    {
+        name: 'discard-card',
+        state: () => playState({ hand: [{ uid: 'h', cardId: 'slippery-slope' }] }),
+        command: { kind: 'discard-card', uid: 'h' },
+        direct: state => discardCombatCard(state, 'h'),
+    },
+    {
+        name: 'play-signature',
+        state: () => playState({
+            conviction: 8,
+            signatures: ['sig-press-the-point'],
+            dice: [die('keep', 'heart'), die('reroll', 'body', 'spent')],
+        }),
+        command: { kind: 'play-signature', signatureId: 'sig-press-the-point' },
+        direct: state => playSignatureSkill(state, 'sig-press-the-point', RNG),
+    },
+    {
+        name: 'place-stake',
+        state: () => playState({ conviction: 10 }),
+        command: { kind: 'place-stake', color: 'heart', amount: 4 },
+        direct: state => placeStake(state, 'heart', 4),
+    },
+    {
+        name: 'tap-fate',
+        state: () => playState({ dice: [die('x0', 'x', 'locked')], draftedDieId: null, conviction: 0 }),
+        command: { kind: 'tap-fate', dieId: 'x0', choice: 'conviction' },
+        direct: state => tapFateDie(state, 'x0', 'conviction'),
+    },
+    {
+        name: 'resolve-threat',
+        state: () => playState(),
+        command: { kind: 'resolve-threat' },
+        direct: state => {
+            const ended = endTurn(state);
+            const resolved = resolveThreatPhase(ended.state, RNG);
+            return { state: resolved.state, events: [...ended.events, ...resolved.events] };
+        },
+    },
+    {
+        name: 'choose-mercy',
+        state: () => playState({ mercyChoiceActive: true }),
+        command: { kind: 'choose-mercy', choice: 'spare' },
+        direct: state => selectEncounterMercyChoice(state, 'spare'),
+    },
+    {
+        name: 'choose-capitulation',
+        state: () => playState({ capitulationChoiceActive: true }),
+        command: { kind: 'choose-capitulation', choice: 'continue' },
+        direct: state => selectCapitulationChoice(state, 'continue'),
+    },
+];
+
+describe('CO-02 — table-driven direct-delegation family matrix', () => {
+    it.each(directDelegationCases)('$name matches its direct transition', ({ state, command, direct }) => {
+        stub();
+        const base = state();
+        const expected = direct(deepClone(base));
+        const actual = dispatchCombatCommand(deepClone(base), command, RNG);
+        expect(actual.accepted).toBe(true);
+        expect(actual.command).toBe(command);
+        expect(actual.state).toEqual(expected.state);
+        expect(actual.events).toEqual(expected.events);
+    });
+});
+
 // ─────────────────────────────────────────────────────────────────────────────
 // 2. play-card families — every live per-play choice is forwarded verbatim
 // ─────────────────────────────────────────────────────────────────────────────
@@ -217,6 +317,22 @@ describe('CO-02 — play-card delegation across families', () => {
         const base = playState({ hand: [{ uid: 'h', cardId: 'slippery-slope' }] });
         equalsDirect(base, { uid: 'h' }, true, undefined, {},
             { kind: 'play-card', card: { uid: 'h' }, useBottom: true });
+    });
+
+    it('drafted powered play (ordinary color-matched die)', () => {
+        stub();
+        const base = playState({
+            hand: [{ uid: 'h', cardId: 'slippery-slope' }],
+            dice: [die('body-die', 'body')],
+            draftedDieId: 'body-die',
+        });
+        const direct = equalsDirect(base, { uid: 'h' }, true, undefined, {},
+            { kind: 'play-card', card: { uid: 'h' }, useBottom: true });
+        expect(direct.events).toContainEqual(expect.objectContaining({
+            kind: 'card-played',
+            cardId: 'slippery-slope',
+            dieId: 'body-die',
+        }));
     });
 
     it('explicit Reserve die power source', () => {
@@ -315,6 +431,36 @@ describe('CO-02 — resolve-threat composite', () => {
         const threatIdx = viaFacade.events.findIndex(e => e.kind === 'threat-fired');
         expect(bankIdx).toBeGreaterThanOrEqual(0);
         expect(threatIdx).toBeGreaterThan(bankIdx);
+    });
+
+    it('burns an available drafted die for Conviction when Reserve is full, before threat events', () => {
+        stub();
+        const base = playState({
+            conviction: 0,
+            reserve: [
+                die('reserve-0', 'heart', 'available', { pips: 0 }),
+                die('reserve-1', 'mind', 'available', { pips: 0 }),
+            ],
+        });
+        const ended = endTurn(deepClone(base));
+        const resolved = resolveThreatPhase(deepClone(ended.state), RNG);
+        const expectedEvents = [...ended.events, ...resolved.events];
+
+        const command = { kind: 'resolve-threat' } as const;
+        const viaFacade = dispatchCombatCommand(deepClone(base), command, RNG);
+        expect(viaFacade.accepted).toBe(true);
+        expect(viaFacade.command).toBe(command);
+        expect(viaFacade.state).toEqual(resolved.state);
+        expect(viaFacade.events).toEqual(expectedEvents);
+
+        const convictionIdx = viaFacade.events.findIndex(e => e.kind === 'conviction-gained');
+        const threatIdx = viaFacade.events.findIndex(e => e.kind === 'threat-fired');
+        expect(convictionIdx).toBeGreaterThanOrEqual(0);
+        expect(viaFacade.events[convictionIdx]).toMatchObject({
+            kind: 'conviction-gained',
+            reason: 'unpicked-die',
+        });
+        expect(threatIdx).toBeGreaterThan(convictionIdx);
     });
 });
 
@@ -480,7 +626,7 @@ describe('CO-02 — choice windows', () => {
 // ─────────────────────────────────────────────────────────────────────────────
 
 describe('CO-02 — order-sensitive status doctrine via the facade', () => {
-    it('setup-before-payoff through the facade equals the direct transition sequence', () => {
+    it('makes setup-before-payoff stronger than reverse order through the facade', () => {
         stub();
         const initial = playState({
             hand: [
@@ -491,23 +637,50 @@ describe('CO-02 — order-sensitive status doctrine via the facade', () => {
             draftedDieId: 'fx-die',
         });
 
-        // Direct sequence.
+        // Direct sequence remains the compatibility oracle.
         const dSetup = playCombatCard(deepClone(initial), { uid: 'setup' }, false, undefined, RNG);
         const dPayoff = playCombatCard(deepClone(dSetup.state), { uid: 'payoff' }, true, 'fx-die', RNG);
 
-        // Facade sequence.
+        // Facade setup -> payoff sequence.
         const fSetup = dispatchCombatCommand(deepClone(initial), { kind: 'play-card', card: { uid: 'setup' }, useBottom: false }, RNG);
         expect(fSetup.accepted).toBe(true);
         const fPayoff = dispatchCombatCommand(deepClone(fSetup.state), { kind: 'play-card', card: { uid: 'payoff' }, useBottom: true, dieId: 'fx-die' }, RNG);
         expect(fPayoff.accepted).toBe(true);
 
+        // Same initial state, reverse order through the facade.
+        const rPayoff = dispatchCombatCommand(deepClone(initial), { kind: 'play-card', card: { uid: 'payoff' }, useBottom: true, dieId: 'fx-die' }, RNG);
+        expect(rPayoff.accepted).toBe(true);
+        const rSetup = dispatchCombatCommand(deepClone(rPayoff.state), { kind: 'play-card', card: { uid: 'setup' }, useBottom: false }, RNG);
+        expect(rSetup.accepted).toBe(true);
+
         expect(fSetup.state).toEqual(dSetup.state);
         expect(fPayoff.state).toEqual(dPayoff.state);
         expect([...fSetup.events, ...fPayoff.events]).toEqual([...dSetup.events, ...dPayoff.events]);
-        const played = [...fSetup.events, ...fPayoff.events]
+        expect([...fSetup.events, ...fPayoff.events]
             .filter((e): e is Extract<CombatEvent, { kind: 'card-played' }> => e.kind === 'card-played')
-            .map(e => e.cardId);
-        expect(played).toEqual(['slippery-slope', 'second-thoughts']);
+            .map(e => e.cardId)).toEqual(['slippery-slope', 'second-thoughts']);
+        expect([...rPayoff.events, ...rSetup.events]
+            .filter((e): e is Extract<CombatEvent, { kind: 'card-played' }> => e.kind === 'card-played')
+            .map(e => e.cardId)).toEqual(['second-thoughts', 'slippery-slope']);
+
+        const cardDamage = (events: CombatEvent[], cardId: string) => events
+            .filter((event): event is Extract<CombatEvent, { kind: 'damage-dealt' }> => (
+                event.kind === 'damage-dealt' && event.cardId === cardId
+            ))
+            .reduce((total, event) => total + event.amount, 0);
+        const setupFirstDamage = cardDamage(fPayoff.events, 'second-thoughts');
+        const reverseDamage = cardDamage(rPayoff.events, 'second-thoughts');
+        expect({
+            setupFirstDamage,
+            setupFirstHealth: fPayoff.state.enemy.health,
+            reverseDamage,
+            reverseHealth: rSetup.state.enemy.health,
+        }).toEqual({
+            setupFirstDamage: 1,
+            setupFirstHealth: 999,
+            reverseDamage: 0,
+            reverseHealth: 1000,
+        });
     });
 });
 
