@@ -355,8 +355,14 @@ order, intra-batch gates noted per phase):**
       rung) shipped `f4dd16bb`; Part 4c (forge OVERHEAT, half-step's
       grant_pip can push past the cap at a bust risk) shipped `543c090d`;
       Part 4d (oracle OMEN v2, the player stakes a stance/window claim
-      instead of a silent die-derived guess) shipped `8a78cb24`.
-      Parts 1b/4e/4f remain — source:
+      instead of a silent die-derived guess) shipped `8a78cb24`; Part 4e
+      (charm resolve milestones, Wavering/Faltering SWAY waypoints pay
+      RAPPORT/bonus SWAY) shipped `974e15e3`; Part 4f (echo — ouroboros
+      now targets the last spell that landed a status, gated on the
+      existing `landedOnEnemy` signal instead of unconditionally overwriting
+      the replay target) shipped `09d92fe7`. Every theme's headline
+      CONFIRMED item is now shipped; only Part 1b (harvest — Souls persist
+      across combats, cross-run save-schema work) remains — source:
       `plan/tuning/2026-07-10-theme-identity.md` §2
 - [ ] Phase 33 — Enemy Answers (specs 29/30 slice + enemy
       counterplay). One reactive verb engine-wide, lethality readout,
