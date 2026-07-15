@@ -14,7 +14,7 @@ import { buildFixtureState } from '../../test-utils/card-fixture';
 import { mockSequentialRng, restoreOriginalRng } from '../../test-utils/rng';
 import { deepClone } from '../../Utils';
 import { runOneEncounter } from '../combat.encounter.sim';
-import { draftStanceDie, playCombatCard } from '../combat.engine';
+import { draftStanceDie, playCombatCard, resolveThreatPhase } from '../combat.engine';
 import type { CombatEncounterState, CombatEvent, CombatManaDie } from '../combat.encounter.types';
 
 const CARD_ID = 'slippery-slope';
@@ -240,6 +240,127 @@ describe('combat-overhaul doctrine — status causality baseline', () => {
                 dotHpDamage: 40,
                 playerHpTaken: -187,
             },
+        });
+    });
+});
+
+describe('combat-overhaul doctrine — order-sensitive card puzzle', () => {
+    const fixedRng = () => 0.5;
+    const effectIntensity = (state: CombatEncounterState, effectId: string) => (
+        state.enemy.effects.find(effect => effect.effectId === effectId)?.intensity ?? 0
+    );
+    const playedCards = (events: CombatEvent[]) => events
+        .filter((event): event is Extract<CombatEvent, { kind: 'card-played' }> => event.kind === 'card-played')
+        .map(event => event.cardId);
+    const cardDamage = (events: CombatEvent[], cardId: string) => events
+        .filter((event): event is Extract<CombatEvent, { kind: 'damage-dealt' }> => (
+            event.kind === 'damage-dealt' && event.cardId === cardId
+        ))
+        .reduce((total, event) => total + event.amount, 0);
+
+    it('makes setup before payoff stronger than the reverse order from the same state', () => {
+        mockSequentialRng(0.5);
+        const initial = {
+            ...buildFixtureState({ clean: true }),
+            hand: [
+                { uid: 'setup', cardId: 'slippery-slope' },
+                { uid: 'payoff', cardId: 'second-thoughts' },
+            ],
+        };
+        const setup = playCombatCard(initial, { uid: 'setup' }, false);
+        const setupPayoff = playCombatCard(setup.state, { uid: 'payoff' }, true, 'fx-die');
+        const payoff = playCombatCard(initial, { uid: 'payoff' }, true, 'fx-die');
+        const payoffSetup = playCombatCard(payoff.state, { uid: 'setup' }, false);
+
+        expect({
+            enemyHealth: setupPayoff.state.enemy.health,
+            mark: effectIntensity(setupPayoff.state, 'debuff_mark'),
+            payoffDamage: cardDamage(setupPayoff.events, 'second-thoughts'),
+        }).toEqual({ enemyHealth: 999, mark: 0, payoffDamage: 1 });
+        expect({
+            enemyHealth: payoffSetup.state.enemy.health,
+            mark: effectIntensity(payoffSetup.state, 'debuff_mark'),
+            payoffDamage: cardDamage(payoff.events, 'second-thoughts'),
+        }).toEqual({ enemyHealth: 1000, mark: 1, payoffDamage: 0 });
+        expect(playedCards([...setup.events, ...setupPayoff.events])).toEqual(['slippery-slope', 'second-thoughts']);
+        expect(playedCards([...payoff.events, ...payoffSetup.events])).toEqual(['second-thoughts', 'slippery-slope']);
+        expect([...setup.events, ...setupPayoff.events, ...payoff.events, ...payoffSetup.events]
+            .some(event => event.kind === 'effect-fizzled')).toBe(false);
+    });
+
+    it('only absorbs the first threat when defense is played before it resolves', () => {
+        const base = buildFixtureState({ clean: true });
+        const initial = {
+            ...base,
+            player: { ...base.player, health: 100, effects: [] },
+            hand: [{ uid: 'brace', cardId: 'brace-for-impact' }],
+        };
+        const defend = playCombatCard(initial, { uid: 'brace' }, false);
+        const defendThreat = resolveThreatPhase(defend.state, fixedRng);
+        const threat = resolveThreatPhase(initial, fixedRng);
+        const threatDefend = playCombatCard(threat.state, { uid: 'brace' }, false);
+
+        expect({
+            playerHealth: defendThreat.state.player.health,
+            barrier: defendThreat.state.barrier,
+            absorbed: defendThreat.events
+                .filter(event => event.kind === 'barrier-absorbed')
+                .reduce((total, event) => total + event.amount, 0),
+        }).toEqual({ playerHealth: 97, barrier: 0, absorbed: 2 });
+        expect({
+            playerHealth: threatDefend.state.player.health,
+            barrier: threatDefend.state.barrier,
+            absorbed: threat.events
+                .filter(event => event.kind === 'barrier-absorbed')
+                .reduce((total, event) => total + event.amount, 0),
+        }).toEqual({ playerHealth: 95, barrier: 2, absorbed: 0 });
+        expect(defend.events.some(event => event.kind === 'card-played' && event.cardId === 'brace-for-impact')).toBe(true);
+        expect(threatDefend.events.some(event => event.kind === 'card-played' && event.cardId === 'brace-for-impact')).toBe(true);
+        expect(defendThreat.events.some(event => event.kind === 'threat-fired')).toBe(true);
+        expect(threat.events.some(event => event.kind === 'threat-fired')).toBe(true);
+        expect([defend.state.guard, initial.guard, threat.state.guard]).toEqual([0, 0, 0]);
+    });
+
+    it('preserves a die through status refresh only when the status card is played first', () => {
+        mockSequentialRng(0.5);
+        const initial = {
+            ...buildFixtureState({ clean: true }),
+            hand: [
+                { uid: 'status', cardId: 'slippery-slope' },
+                { uid: 'brace', cardId: 'brace-for-impact' },
+            ],
+        };
+        const status = playCombatCard(initial, { uid: 'status' }, true, 'fx-die');
+        const statusBrace = playCombatCard(status.state, { uid: 'brace' }, true, 'fx-die');
+        const brace = playCombatCard(initial, { uid: 'brace' }, true, 'fx-die');
+        const braceStatus = playCombatCard(brace.state, { uid: 'status' }, true, 'fx-die');
+
+        expect({
+            played: playedCards([...status.events, ...statusBrace.events]),
+            enemyHealth: statusBrace.state.enemy.health,
+            poison: effectIntensity(statusBrace.state, 'debuff_poison'),
+            guard: statusBrace.state.guard,
+            dieResolution: [...status.events, ...statusBrace.events]
+                .filter(event => event.kind === 'die-refreshed' || event.kind === 'die-spent')
+                .map(event => event.kind),
+        }).toEqual({
+            played: ['slippery-slope', 'brace-for-impact'],
+            enemyHealth: 998,
+            poison: 1,
+            guard: 11,
+            dieResolution: ['die-refreshed', 'die-spent'],
+        });
+        expect({
+            played: playedCards([...brace.events, ...braceStatus.events]),
+            enemyHealth: braceStatus.state.enemy.health,
+            poison: effectIntensity(braceStatus.state, 'debuff_poison'),
+            guard: braceStatus.state.guard,
+        }).toEqual({ played: ['brace-for-impact'], enemyHealth: 1000, poison: 0, guard: 11 });
+        expect(braceStatus.events).toContainEqual({
+            kind: 'effect-fizzled',
+            cardId: 'slippery-slope',
+            effectId: '',
+            message: 'the drafted die is spent or blocked — end the turn',
         });
     });
 });
