@@ -34,6 +34,34 @@
   nightly breadth signal is dead.
 - next: /iterate
 
+### Phase 32 Part 1b stalls: two consecutive `/march` ticks spawn a background Explore agent, then end the turn "waiting" on it — zero commits, zero carried research
+- category: gap
+- impact: 6
+- ease: 6
+- detail: the 2026-07-16 03:44 and 08:37 UTC `march` runs (both
+  `conclusion: success`) both dispatched to Phase 32 Part 1b
+  (Harvest — Souls persist across combats), both spawned an
+  `Explore` sub-agent to map the save-schema migration pattern,
+  and both ended their turn with `result: "I'll wait for the
+  research agent's findings before proceeding with
+  implementation."` / "...Waiting on that research before writing
+  the implementation plan and code." Each run is a fresh
+  `claude-code-action` invocation with its own session id
+  (`010ab1fe…`, `1ffc277b…`); when the job's turn ends the runner
+  tears down, so the spawned Explore's findings are discarded —
+  the next tick starts the same research from scratch. Two ticks,
+  ~$4 combined (`total_cost_usd` 1.84 + 2.20), zero diff. This is
+  the same class of mistake `/digest` itself is explicitly warned
+  against (§3.6/§4.7 of `skills/digest.md`: never end a turn with
+  work pending on a backgrounded call this invocation can't resume
+  into) — but nothing in `skills/ship-a-phase.md` (or `march.md`'s
+  dispatch to it) carries the same rule yet, and Phase 32 will
+  never converge on Part 1b via automatic ticks until it does.
+- next: /iterate (teach `ship-a-phase`/`march` to run this class
+  of research agent in the foreground and synthesize before ending
+  the turn, or to persist findings somewhere a fresh tick can pick
+  up cheaply, e.g. a scratch note under `plan/`)
+
 ### [1.2] Skipped enemy stat-budget test (content decision — RESOLVED via oversight 2026-07-08)
 - category: content
 - impact: 4
