@@ -25,7 +25,9 @@ next one.
       cross-clock accumulator, and actual-VITAE receipt/attribution honesty
       (WS3 shipped in `85acd441` / `3cecd275`; lethal receipt and summary
       reconciliation closed in the combat-truth follow-up)
-- [ ] Part 1b — Harvest: Souls persist across combats (deferred, see below)
+- [x] Part 1b — Harvest: Souls persist across combats (`player.bankedSouls`,
+      write-back + a Memoir REMAINS read-back; milestone-rider design further
+      split to Part 1c, see below)
 - [x] Part 2 — Bulwark: RIPOSTE reflects the prevented blow (this tick)
 - [x] Part 3 — Akrasia: DEBT ledger (this tick; Absolution fork / Last Word /
       Sin-priced FREE lines deferred, see below)
@@ -242,6 +244,155 @@ Decisions:
   replacement — see brief §Part 1 Decisions.
 - Souls cross-combat persistence split to Part 1b (P-NEXT tagged in
   source doc, orthogonal save-schema scope).
+```
+
+## Part 1b — Harvest: Souls persist across combats
+
+### Design intent (source: 2026-07-10-theme-identity.md §2, PA-1, P-NEXT half)
+
+> Souls persist across combats with milestone riders (P-NEXT: the jar
+> travels).
+
+Per Part 1's own scope note, this P-NEXT half bundles FOUR things: (1) a
+persistent-currency slot on the character save, (2) a migration, (3) a
+mobile surface to show the carried bank, (4) milestone-rider design (what a
+running Soul total unlocks). **Split again, same discipline as Part 1 and
+Part 3's DEBT-ledger cut**: this part ships (1)-(3) — the persistence
+mechanism itself and its read-back surface. (4) is genuine forward-looking
+economy/content design (what does a lifetime Soul total unlock — a shop
+good? a milestone rider on a specific card? there is no shop system live
+yet, per `Character.currency`'s own "shops have not landed" doc comment) and
+needs its own design pass, not a decision buried in a wiring tick. Deferred
+to a new Follow-up, Part 1c.
+
+### Current state (verified in code, before this tick)
+
+- `CombatEncounterState.souls` (Part 1's precedent field) is strictly
+  per-combat: initialized to 0 in `initializeCombatEncounter`, spent by
+  `reap`/`reap_all`, and simply discarded — nothing read it back at combat
+  end. Every unspent Soul a Harvest deck ended a fight holding evaporated.
+- `Character` already has exactly this shape of precedent:
+  `floatingDice?: ('heart'|'body'|'mind'|'wild')[]` (Spec 32 v3 §5) — an
+  optional, sparse, combat-state-derived field written back at combat end by
+  `CombatEncounterPanel.applyHazardOutcome` (mobile), on **every** outcome
+  (victory, defeat, mercy, capitulate, concede, flee alike — "persists
+  regardless of how the fight ended"). No `GAME_STATE_VERSION` bump was
+  needed to add it — optional fields on an already-permissive save shape
+  don't require a migration hop, only ones that change the MEANING or
+  requiredness of an existing field do (see `game.migrate.ts`'s v11→v12/
+  v12→v13/v13→v14 hops, all of which restructure or backfill existing
+  required shapes, never merely add an optional one).
+- `applyHazardOutcome` already writes `floatingDice` back unconditionally in
+  the same `store.setState` call that handles the outcome-conditional HP/XP/
+  loot branches — the exact call site a second unconditional write-back
+  slots into.
+- The Memoir screen's REMAINS section (Phase 6) is the established home for
+  "durable records read back outside their own outcome screen" — death
+  tombstones (`hazardDeathCount`) and Rest/LootCache keepsakes both live
+  there, both narrated via a singular/plural/zero line function
+  (`buildDeathLine`) per Hard Rule #8 (no display literals in the screen).
+
+### Decisions made upfront — DO NOT ASK
+
+- **Field name `Character.bankedSouls`, optional + sparse, NO migration** —
+  mirrors `floatingDice` exactly rather than introducing a new
+  `GAME_STATE_VERSION` hop. A migration is for restructuring/backfilling an
+  EXISTING required shape; a brand-new optional field needs none (precedent:
+  `floatingDice` itself shipped with no version bump). This directly
+  contradicts the brief's original one-liner ("a migration") — the
+  correction is that `floatingDice` already proved the simpler path works
+  and is the closer precedent than a hypothetical new migration hop.
+- **Write-back is unconditional, every outcome** — `bankedSouls` accumulates
+  `finalState.souls ?? 0` in the SAME `store.setState` call `floatingDice`
+  already writes in, regardless of victory/defeat/mercy/capitulate/concede.
+  Matches `floatingDice`'s own "the jar travels" framing (this Part's own
+  design-intent quote uses that exact phrase) — a defeat shouldn't erase
+  Souls a Harvest deck had already banked into the running total, any more
+  than it erases forged floating dice.
+- **Accumulates, never spent by anything yet.** No consumer exists this
+  part — `bankedSouls` only grows. This is intentional: (4) milestone-rider
+  design (what spends or unlocks off this total) is the explicitly deferred
+  Part 1c. Shipping a bank with no spender is the same shape Part 3's DEBT
+  ledger and Part 4a's `rungsDeniedTotal` shipped in isolation before their
+  payoffs landed — the ledger is real and observable (Memoir reads it)
+  before anything consumes it.
+- **Mobile surface: Memoir REMAINS, not a HUD meter.** The brief's own
+  wording is "a mobile surface to show the carried bank" — a between-fights
+  read-back, not a live in-combat meter (in-combat Souls already have their
+  own economy via existing card text/events; this is the OUT-of-combat
+  lifetime tally). REMAINS is the established home for exactly this kind of
+  durable, outside-its-own-screen record (death tally, keepsakes) — adding a
+  third row there is more consistent than inventing a new screen or bolting
+  a meter onto the persistent header (which is combat/village chrome, not a
+  journal).
+- **Narrative line, not a raw number, per Hard Rule #8** — `soulsLine`
+  ('the jar is empty.' / 'the jar holds a single soul.' / 'the jar holds N
+  souls.') mirrors `buildDeathLine`'s singular/plural/zero handling exactly,
+  keeping the screen literal-free.
+
+### Outputs
+
+- `src/Character/types.ts`: `Character.bankedSouls?: number` — optional +
+  sparse, doc comment cross-references `floatingDice` and this brief.
+- `axiomancer-mobile/components/combat/encounter/CombatEncounterPanel.tsx`:
+  `applyHazardOutcome` (now exported for direct unit testing) computes
+  `soulsRemaining = finalState.souls ?? 0` and folds it into
+  `player.bankedSouls` in the same unconditional `store.setState` write that
+  already handles `floatingDice`.
+- `axiomancer-mobile/state/presenters/memoir.engine.ts`:
+  `MemoirRemainsViewModel` gains `bankedSouls: number` + `soulsLine: string`;
+  `buildRemains` takes a second `rawBankedSouls` argument (defensively
+  coerced: non-finite/missing → 0); new `buildSoulsLine` narrative helper.
+- `axiomancer-mobile/app/(tabs)/memoir/index.tsx`: a third REMAINS row
+  (`testID="memoir-souls-line"`) rendering `vm.remains.soulsLine`, reusing
+  the existing `remainsLine` style — no new style needed.
+
+### Tests
+
+- `axiomancer-mobile/components/combat/encounter/__tests__/CombatEncounterPanel.souls-bank.test.ts`
+  (new): banks unspent souls onto a fresh character; accumulates across
+  repeated combats rather than overwriting; banks on a DEFEAT outcome too
+  (not just victory); a combat that never generated souls contributes 0.
+- `axiomancer-mobile/state/e2e/memoir.engine.test.ts`: REMAINS describe
+  block extended — defaults to an empty jar; reads `player.bankedSouls` and
+  pluralizes the line; floors a missing/non-finite value to 0 defensively.
+- Full mechanics (171 files / 2623 tests), mobile (249 files / 2561 tests),
+  and card-editor verify gates re-ran green with this change — a
+  new-optional-field-only mechanics change with no engine logic, so no
+  balance-sim re-run is implicated.
+
+### Verify gate
+
+```bash
+npm run verify --workspace axiomancer-mechanics
+npm run verify --workspace axiomancer-mobile
+npm run verify --workspace axiomancer-card-editor
+```
+
+Mechanics change is a type-only addition (no engine logic, no migration) —
+mobile is the actual behavior change and is mandatory, not a courtesy.
+Card-editor re-ran as a courtesy (touches `Character`, not
+`CardSpecialMechanic`, so no compile surface there) — green.
+
+### Commit body template
+
+```
+feat(mechanics,mobile): Harvest Souls persist across combats — phase 32 part 1b
+
+- Character.bankedSouls (optional + sparse, no migration — floatingDice
+  precedent)
+- applyHazardOutcome write-back on every outcome, same call site as
+  floatingDice
+- Memoir REMAINS section: third row, soulsLine narrative helper
+- tests: write-back accumulation/defeat-still-banks/zero-souls, memoir
+  read-back + defensive coercion
+
+Decisions:
+- No new migration hop — an optional field needs none; floatingDice is the
+  closer, already-shipped precedent over the brief's original "a migration"
+  framing. See brief §Part 1b Decisions.
+- Milestone-rider design (what a running Soul total unlocks) further split
+  to Part 1c — genuine content/economy design, not wiring. See Follow-ups.
 ```
 
 ## Part 2 — Bulwark: RIPOSTE reflects the prevented blow
@@ -1984,13 +2135,17 @@ Decisions:
   tick breakdown) to distinguish self-authored BLEED from any
   enemy-inflicted BLEED riding the same damage-instance clock; not
   attempted this part.
-- **Part 1b — Souls persist across combats with milestone riders**
-  ("the jar travels"): needs a persistent-currency slot on the
-  character save (`src/Game/game.migrate.ts` gets a new migration),
-  a mobile surface to show the carried bank between fights, and
-  milestone-rider design (what a running Soul total unlocks). Genuine
-  cross-run save-schema work, P-NEXT tagged in the source doc — not
-  required for this pass's graded properties (P-IDENT/P-ARC).
+- **Part 1c — milestone riders for the carried Soul bank** (the last
+  quarter of the P-NEXT item; Part 1b shipped persistence + migration-free
+  schema + the Memoir read-back). What does a running `bankedSouls` total
+  actually unlock? Candidates needing their own design pass, not a wiring
+  decision: a village-shop good once shops land (`Character.currency`'s own
+  doc comment: "shops have not landed yet"), a milestone-gated card rider
+  (a Harvest card that reads stronger once lifetime Souls cross a
+  threshold), or a cosmetic/narrative unlock (a Memoir line, a title). Needs
+  a design pass (candidate for `/brainstorm-mechanics` or a `/expand`
+  candidate) before any of these gets picked — not required for this pass's
+  graded properties (P-IDENT/P-ARC).
 - **Pure alt-win erosion** (kill via emptied `maxHealth` ceiling
   regardless of current HP, no additive current-HP component) — a
   stronger, more literal reading of "erosion of the possible, not the
@@ -2010,15 +2165,18 @@ Decisions:
 ## DoD
 
 Do **NOT** flip Phase 32 `[ ]` → `[x]` in `plan/steps/01_build_plan.md`
-yet — Part 1b remains. Every theme's headline CONFIRMED item (Part 4's
+yet — Part 1c remains. Every theme's headline CONFIRMED item (Part 4's
 "remaining per-theme M items," Scope's own phrasing) is now shipped across
 all ten themes as of Part 4f — Echo had no CONFIRMED-M item, so its best
 CONFIRMED-S item (the Ouroboros retarget) stood in, same as every other
-part's one-item-per-theme cut. Only Part 1b (Harvest — Souls persist across
-combats, "the jar travels") remains: genuine cross-run save-schema work
-(a new persistent-currency slot on the character save, a migration, a
-mobile carried-bank surface, milestone-rider design), P-NEXT tagged in the
-source doc, deliberately NOT bundled into any prior part. The DoT-clock
+part's one-item-per-theme cut. Part 1b (Harvest — Souls persist across
+combats, "the jar travels") shipped the persistence mechanism itself:
+`Character.bankedSouls` (optional + sparse, no migration needed — the
+`floatingDice` precedent), the `applyHazardOutcome` write-back on every
+outcome, and a Memoir REMAINS read-back. Only Part 1c (milestone-rider
+design — what a running Soul total actually unlocks) remains, and it is
+genuine forward-looking content/economy design punted to its own design
+pass, not a wiring decision this tick could safely make. The DoT-clock
 slice is complete only because its trigger, Suppuration, lethal-receipt,
 attribution, and player-facing outcome witnesses are all present; do not
-regress it while tuning. A future tick that ships Part 1b ticks the row.
+regress it while tuning. A future tick that ships Part 1c ticks the row.

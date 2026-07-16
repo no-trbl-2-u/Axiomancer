@@ -135,6 +135,11 @@ export interface PhilosophicalAlignment {
  * unconsumed since Phase 130) and Rest/LootCache keepsake labels
  * (banked as flags, never read back outside their own outcome
  * screens). See `extractKeepsakes` / `buildDeathLine` below.
+ *
+ * Phase 32 part 1b adds a third read-back: `player.bankedSouls`, the
+ * Harvest theme's persistent Soul jar (unspent `souls` write back here
+ * at combat end — see `CombatEncounterPanel.applyHazardOutcome`). See
+ * `buildSoulsLine` below.
  */
 export interface MemoirRemainsViewModel {
     /** Raw tally from `hazardDeathCount(state.flags)`. */
@@ -146,6 +151,11 @@ export interface MemoirRemainsViewModel {
      *  `cache-keepsake:`), reverse-chronological — most recently
      *  banked first, matching the chronicle section's ordering. */
     keepsakes: readonly string[];
+    /** Raw tally from `player.bankedSouls` (Phase 32 part 1b). */
+    bankedSouls: number;
+    /** Narrative line — singular/plural/zero handled here, same
+     *  convention as `deathLine`. */
+    soulsLine: string;
 }
 
 export interface MemoirViewModel {
@@ -450,6 +460,8 @@ const DEFAULT_REMAINS: MemoirRemainsViewModel = Object.freeze({
     deathCount: 0,
     deathLine: 'you have not yet fallen.',
     keepsakes: Object.freeze([]) as readonly string[],
+    bankedSouls: 0,
+    soulsLine: 'the jar is empty.',
 }) as MemoirRemainsViewModel;
 
 const FALLBACK_VM: MemoirViewModel = Object.freeze({
@@ -604,6 +616,17 @@ function buildDeathLine(count: number): string {
 }
 
 /**
+ * Narrative Soul-jar line (Phase 32 part 1b). Singular/plural/zero
+ * handled here so the screen carries no numeric-copy literal (Hard
+ * Rule #8), same convention as `buildDeathLine`.
+ */
+function buildSoulsLine(count: number): string {
+    if (count === 0) return DEFAULT_REMAINS.soulsLine;
+    if (count === 1) return 'the jar holds a single soul.';
+    return `the jar holds ${count} souls.`;
+}
+
+/**
  * Merge Rest (`night-keepsake:`) and LootCache (`cache-keepsake:`)
  * flags into one reverse-chronological, de-duplicated label list
  * (Phase 6). `state.flags` is append-order (oldest first); reversing
@@ -635,16 +658,24 @@ function extractKeepsakes(flags: unknown): ReadonlyArray<string> {
     return Object.freeze(deduped) as readonly string[];
 }
 
-/** Composes the REMAINS section VM (Phase 6) from raw `state.flags`. */
-function buildRemains(flags: unknown): MemoirRemainsViewModel {
+/**
+ * Composes the REMAINS section VM from raw `state.flags` (Phase 6) plus
+ * `player.bankedSouls` (Phase 32 part 1b).
+ */
+function buildRemains(flags: unknown, rawBankedSouls: unknown): MemoirRemainsViewModel {
     const safeFlags: readonly string[] = Array.isArray(flags)
         ? (flags.filter((f): f is string => typeof f === 'string') as readonly string[])
         : [];
     const deathCount = hazardDeathCount(safeFlags);
+    const bankedSouls = typeof rawBankedSouls === 'number' && Number.isFinite(rawBankedSouls)
+        ? Math.max(0, rawBankedSouls)
+        : 0;
     return Object.freeze({
         deathCount,
         deathLine: buildDeathLine(deathCount),
         keepsakes: extractKeepsakes(flags),
+        bankedSouls,
+        soulsLine: buildSoulsLine(bankedSouls),
     }) as MemoirRemainsViewModel;
 }
 
@@ -686,11 +717,13 @@ function buildRemains(flags: unknown): MemoirRemainsViewModel {
  * - **Philosopher quote** — currently always `null`. A follow-up
  *   phase wires the lookup once exact alignments + a quote inventory
  *   are defined.
- * - **Remains** (Phase 6) — reads `state.flags` (engine
+ * - **Remains** (Phase 6; Phase 32 part 1b) — reads `state.flags` (engine
  *   `GameState.flags`). Death tally via the previously-unconsumed
  *   `hazardDeathCount`; keepsakes merge Rest's `night-keepsake:` and
  *   LootCache's `cache-keepsake:` flags into one reverse-chronological,
- *   de-duplicated list via `extractKeepsakes`.
+ *   de-duplicated list via `extractKeepsakes`. `bankedSouls` reads
+ *   `state.player.bankedSouls` (Harvest's persistent Soul jar, written
+ *   back by `CombatEncounterPanel.applyHazardOutcome` at combat end).
  *
  * The view-model shape is pinned by `state/e2e/memoir.engine.test.ts`;
  * extensions to any section must keep the contract stable.
@@ -726,7 +759,7 @@ export function selectMemoirViewModel(state: MemoirStateInput): MemoirViewModel 
     const moralAlignment = buildMoralAlignment(state.moralMeter);
     const philosophicalAlignment = buildPhilosophicalAlignment(player?.baseStats);
     const chronicle = buildChronicle(state._recentEvents);
-    const remains = buildRemains(state.flags);
+    const remains = buildRemains(state.flags, player?.bankedSouls);
     return freezeViewModel({
         ...FALLBACK_VM,
         headerSubline: subline,

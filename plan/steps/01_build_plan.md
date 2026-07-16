@@ -360,9 +360,13 @@ order, intra-batch gates noted per phase):**
       RAPPORT/bonus SWAY) shipped `974e15e3`; Part 4f (echo — ouroboros
       now targets the last spell that landed a status, gated on the
       existing `landedOnEnemy` signal instead of unconditionally overwriting
-      the replay target) shipped `09d92fe7`. Every theme's headline
-      CONFIRMED item is now shipped; only Part 1b (harvest — Souls persist
-      across combats, cross-run save-schema work) remains — source:
+      the replay target) shipped `09d92fe7`; Part 1b (harvest — Souls
+      persist across combats via `Character.bankedSouls`, write-back on
+      every combat outcome + a Memoir REMAINS read-back; no migration
+      needed, mirrors the `floatingDice` precedent) shipped (this tick).
+      Every theme's headline CONFIRMED item is now shipped; only Part 1c
+      (milestone-rider design — what a running Soul total unlocks, split
+      further out of the original Part 1b scope) remains — source:
       `plan/tuning/2026-07-10-theme-identity.md` §2
 - [ ] Phase 33 — Enemy Answers (specs 29/30 slice + enemy
       counterplay). One reactive verb engine-wide, lethality readout,

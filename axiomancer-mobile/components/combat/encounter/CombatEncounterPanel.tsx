@@ -109,10 +109,13 @@ function isMercifulWin(outcome: CombatOutcome): boolean {
  * grant XP (+ cascade level-ups); victory also rolls item loot. Final HP
  * persists for every outcome except defeat (the host's run-reset full-heals
  * there). The FLOATING-die pool (spec 32 v3 §5) writes back to the character
- * on every outcome — forged dice persist across combats until spent. The
- * deckbuilder card is handled separately (claimed mid-flow via `addRewardCard`).
+ * on every outcome — forged dice persist across combats until spent. Phase 32
+ * part 1b: unspent Harvest Souls write back the same way — `player.bankedSouls`
+ * accumulates `finalState.souls`, "the jar travels" regardless of how the
+ * fight ended. The deckbuilder card is handled separately (claimed mid-flow
+ * via `addRewardCard`).
  */
-function applyHazardOutcome(
+export function applyHazardOutcome(
     store: StoreLike,
     outcome: CombatOutcome,
     finalState: CombatEncounterState,
@@ -122,9 +125,16 @@ function applyHazardOutcome(
     // Spec 32 v3 §5 — the surviving floating dice, in engine truth (spent dice
     // are gone forever; unspent ones arrive in the next battle's opening tray).
     const floatingDice = getFloatingDiceColors(finalState);
+    // Phase 32 part 1b — whatever Souls the fight ended with, unspent, banks
+    // permanently; a combat that never generated Souls contributes 0.
+    const soulsRemaining = finalState.souls ?? 0;
     store.setState((s) => {
         if (!s.player) return {};
-        let player: Character = { ...s.player, floatingDice };
+        let player: Character = {
+            ...s.player,
+            floatingDice,
+            bankedSouls: (s.player.bankedSouls ?? 0) + soulsRemaining,
+        };
         if (outcome !== 'defeat') {
             player = { ...player, health: Math.max(0, Math.min(finalHp, player.maxHealth)) };
         }

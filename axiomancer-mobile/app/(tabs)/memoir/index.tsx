@@ -260,6 +260,9 @@ export default function MemoirScreen() {
                     <Text style={styles.remainsLine} testID="memoir-death-line">
                         {vm.remains.deathLine}
                     </Text>
+                    <Text style={styles.remainsLine} testID="memoir-souls-line">
+                        {vm.remains.soulsLine}
+                    </Text>
                     <View style={styles.questGroup}>
                         <SectionLabel size={9} color={AXM.bone}>
                             {vm.remainsKeepsakesEyebrow}

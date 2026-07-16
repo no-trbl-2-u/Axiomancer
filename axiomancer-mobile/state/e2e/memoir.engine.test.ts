@@ -637,4 +637,37 @@ describe('selectMemoirViewModel: remains (Phase 6)', () => {
         expect(Object.isFrozen(vm.remains)).toBe(true);
         expect(Object.isFrozen(vm.remains.keepsakes)).toBe(true);
     });
+
+    // Phase 32 part 1b — Harvest's persistent Soul jar read-back.
+    function setBankedSouls(store: ReturnType<typeof createGameStore>, bankedSouls: number): void {
+        const player = store.getState().player;
+        store.setState({ player: { ...player, bankedSouls } } as Partial<AppStoreState>);
+    }
+
+    it('defaults to an empty jar for a fresh game', () => {
+        const store = createGameStore(createMemoryAdapter());
+        const vm = selectMemoirViewModel(store.getState());
+        expect(vm.remains.bankedSouls).toBe(0);
+        expect(vm.remains.soulsLine).toBe('the jar is empty.');
+    });
+
+    it('reads player.bankedSouls and pluralizes the line', () => {
+        const store = createGameStore(createMemoryAdapter());
+        setBankedSouls(store, 1);
+        expect(selectMemoirViewModel(store.getState()).remains.soulsLine).toBe(
+            'the jar holds a single soul.',
+        );
+
+        setBankedSouls(store, 7);
+        const vm = selectMemoirViewModel(store.getState());
+        expect(vm.remains.bankedSouls).toBe(7);
+        expect(vm.remains.soulsLine).toBe('the jar holds 7 souls.');
+    });
+
+    it('floors a missing/non-finite bankedSouls to 0 defensively', () => {
+        const store = createGameStore(createMemoryAdapter());
+        const player = store.getState().player;
+        store.setState({ player: { ...player, bankedSouls: Number.NaN } } as Partial<AppStoreState>);
+        expect(selectMemoirViewModel(store.getState()).remains.bankedSouls).toBe(0);
+    });
 });
