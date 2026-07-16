@@ -670,4 +670,37 @@ describe('selectMemoirViewModel: remains (Phase 6)', () => {
         store.setState({ player: { ...player, bankedSouls: Number.NaN } } as Partial<AppStoreState>);
         expect(selectMemoirViewModel(store.getState()).remains.bankedSouls).toBe(0);
     });
+
+    // Phase 32 part 1c — milestone epithet layered onto the same line.
+    it('stays plain below the lowest milestone tier', () => {
+        const store = createGameStore(createMemoryAdapter());
+        setBankedSouls(store, 9);
+        expect(selectMemoirViewModel(store.getState()).remains.soulsLine).toBe(
+            'the jar holds 9 souls.',
+        );
+    });
+
+    it('appends the tier-10 epithet at the boundary', () => {
+        const store = createGameStore(createMemoryAdapter());
+        setBankedSouls(store, 10);
+        expect(selectMemoirViewModel(store.getState()).remains.soulsLine).toBe(
+            'the jar holds 10 souls. the harvest deepens.',
+        );
+    });
+
+    it('appends the tier-25 epithet, superseding tier-10', () => {
+        const store = createGameStore(createMemoryAdapter());
+        setBankedSouls(store, 25);
+        expect(selectMemoirViewModel(store.getState()).remains.soulsLine).toBe(
+            'the jar holds 25 souls. the reaping is remembered.',
+        );
+    });
+
+    it('appends the tier-50 epithet, superseding lower tiers', () => {
+        const store = createGameStore(createMemoryAdapter());
+        setBankedSouls(store, 50);
+        expect(selectMemoirViewModel(store.getState()).remains.soulsLine).toBe(
+            'the jar holds 50 souls. the harvest is legend.',
+        );
+    });
 });

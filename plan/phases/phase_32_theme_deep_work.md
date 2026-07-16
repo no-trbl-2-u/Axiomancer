@@ -41,6 +41,8 @@ next one.
 - [x] Part 4f — Echo: Ouroboros targets the last spell that LANDED A STATUS
       (this tick; second-thoughts partial detonate and CRESCENDO overflow
       deferred, see below)
+- [x] Part 1c — Harvest: milestone epithet on the carried Soul bank
+      (this tick; resolves the last quarter of the P-NEXT item — see below)
 
 ## Part 1 — Harvest: REAP attacks MAXIMUM HP
 
@@ -2069,6 +2071,112 @@ Decisions:
   deferred — see brief §Part 4f Decisions / Follow-ups.
 ```
 
+## Part 1c — Harvest: milestone epithet on the carried Soul bank
+
+### Design intent (source: 2026-07-10-theme-identity.md §2, PA-1, P-NEXT
+final quarter)
+
+> Souls persist across combats with milestone riders (P-NEXT: the jar
+> travels).
+
+Part 1b shipped the persistence mechanism ((1)-(3) of the P-NEXT bundle:
+`Character.bankedSouls`, the `applyHazardOutcome` write-back, the Memoir
+REMAINS read-back). This part ships (4), the last quarter: "milestone
+riders — what a running Soul total unlocks."
+
+### Current state (verified in code, before this tick)
+
+`buildSoulsLine` (`memoir.engine.ts`) narrates `player.bankedSouls` with a
+flat singular/plural/zero split — "the jar is empty." / "the jar holds a
+single soul." / "the jar holds N souls." — and nothing else. The bank only
+ever grows (no spender exists); no threshold in the running total changes
+anything the player sees.
+
+### Decision made upfront — DO NOT ASK
+
+The brief's own Follow-up note (previous version of this file) listed three
+candidates and left the pick open: a village-shop good, a milestone-gated
+card rider, or a cosmetic/narrative unlock. Picking now, under the
+`ship-a-phase` autonomy contract:
+
+- **Cosmetic/narrative unlock — a milestone epithet on `soulsLine`.**
+  Rejected the other two: a shop good is blocked outright (`Character.currency`'s
+  own doc comment: "shops have not landed yet" — there is nowhere to spend
+  it); a milestone-gated card rider is real economy/balance design (which
+  Harvest card, what threshold, what power delta, re-run against the
+  ten-theme matrix) with no evidence budget for a fresh re-tune this tick —
+  the same reasoning Part 1 (additive erosion), Part 2 (floor not
+  replacement), and Part 3 (no cash-out) already used to defer anything
+  requiring a balance pass. The narrative unlock is genuinely payoff-free:
+  no new state, no new event, no pricing surface, no sim re-run — it reads
+  `bankedSouls`, already persisted, and derives a display string.
+- **Tiers at 10 / 25 / 50, highest-qualifying-tier wins, epithet appended
+  as a second clause** — not a replacement of the existing count clause
+  (so `vm.remains.bankedSouls` and the leading "N souls" text stay exactly
+  as Part 1b shipped them; only players who cross a threshold see anything
+  new). Tier spacing is loosely logarithmic (10, 2.5x, 2x) so early
+  milestones come within a realistic multi-combat Harvest run and later
+  ones stay a longer-run flex, mirroring how `AKRASIA_DEBT_TIER_HP`/other
+  Phase 32 tier constants pick round, easy-to-eyeball thresholds rather than
+  tuned-to-the-decimal values.
+- **No new state, no new event, no schema change.** The epithet is a pure
+  function of the already-persisted `bankedSouls` tally — computed at
+  render time in `buildSoulsLine`, the same function Part 1b already owns,
+  not stored anywhere. This keeps the change entirely inside
+  `memoir.engine.ts` (+ its test file); no `CombatEncounterState`,
+  `Character`, or `CombatEvent` shape changes.
+- **No mechanics-package change at all.** Unlike Part 1b (which needed a
+  `Character.bankedSouls` field), this part reads a field Part 1b already
+  added — `axiomancer-mechanics` and `axiomancer-card-editor` are untouched
+  and their verify gates are not re-run for this part.
+
+### Outputs
+
+- `axiomancer-mobile/state/presenters/memoir.engine.ts`: new
+  `SOULS_MILESTONE_TIERS` constant (`{ min: 50 | 25 | 10, epithet }`,
+  highest-first so `.find` returns the highest qualifying tier);
+  `buildSoulsLine` appends the matching epithet as a second clause when
+  `count` clears the lowest tier. Doc comments on
+  `MemoirRemainsViewModel.soulsLine` and the interface's leading comment
+  updated to note the part 1c epithet layer.
+
+### Tests
+
+- `axiomancer-mobile/state/e2e/memoir.engine.test.ts`: four new cases —
+  stays plain below tier 10 (count 9); appends the tier-10 epithet at the
+  boundary (count 10); appends tier-25, superseding tier-10 (count 25);
+  appends tier-50, superseding lower tiers (count 50). Existing cases
+  (count 0, 1, 7) re-verified green unmodified — all below the lowest
+  tier, proving backward compatibility.
+
+### Verify gate
+
+```bash
+npm run verify --workspace axiomancer-mobile
+```
+
+Mobile-only — no mechanics or card-editor surface touched (the field this
+part reads was already added by Part 1b). 249 files / 2565 tests green.
+
+### Commit body template
+
+```
+feat(mobile): Harvest Soul-bank milestone epithets — phase 32 part 1c
+
+- SOULS_MILESTONE_TIERS (10 / 25 / 50) + buildSoulsLine epithet clause
+- doc comments updated on MemoirRemainsViewModel.soulsLine
+- tests: below-tier / tier-10 / tier-25 / tier-50 boundaries
+
+Decisions:
+- Cosmetic/narrative unlock over a shop good (blocked — no shop system
+  live) or a card-rider threshold (real balance design, no evidence
+  budget this tick) — see brief §Part 1c Decisions.
+- Tiers 10/25/50, epithet appended not replacing the existing count
+  clause — no new state/event/schema, mobile-only change.
+
+Closes #<phase-issue-number>
+```
+
 ## Follow-ups (out of scope this part)
 
 - **Ouroboros face-preview UI** (2026-07-10-theme-identity.md §2, "Echo /
@@ -2135,17 +2243,15 @@ Decisions:
   tick breakdown) to distinguish self-authored BLEED from any
   enemy-inflicted BLEED riding the same damage-instance clock; not
   attempted this part.
-- **Part 1c — milestone riders for the carried Soul bank** (the last
-  quarter of the P-NEXT item; Part 1b shipped persistence + migration-free
-  schema + the Memoir read-back). What does a running `bankedSouls` total
-  actually unlock? Candidates needing their own design pass, not a wiring
-  decision: a village-shop good once shops land (`Character.currency`'s own
-  doc comment: "shops have not landed yet"), a milestone-gated card rider
-  (a Harvest card that reads stronger once lifetime Souls cross a
-  threshold), or a cosmetic/narrative unlock (a Memoir line, a title). Needs
-  a design pass (candidate for `/brainstorm-mechanics` or a `/expand`
-  candidate) before any of these gets picked — not required for this pass's
-  graded properties (P-IDENT/P-ARC).
+- **Milestone-gated Harvest card rider / village-shop Soul spend** — the
+  two candidates Part 1c did NOT pick (see brief §Part 1c Decisions): a
+  Harvest card that reads stronger once lifetime Souls cross a threshold,
+  or a village-shop good once a shop system lands
+  (`Character.currency`'s own doc comment: "shops have not landed yet").
+  Both are real economy/balance design needing their own pass (candidate
+  for `/brainstorm-mechanics` or a `/expand` candidate), not attempted
+  this part — Part 1c shipped the lower-risk cosmetic/narrative epithet
+  instead.
 - **Pure alt-win erosion** (kill via emptied `maxHealth` ceiling
   regardless of current HP, no additive current-HP component) — a
   stronger, more literal reading of "erosion of the possible, not the
@@ -2158,25 +2264,28 @@ Decisions:
   burst preview), manufactured spends feed EMBER not MARK
   (`entropy-tax`'s zone hook), and ex-nihilo's wild+0-pips vs colored+1-pip
   choice (PLAUSIBLE, not CONFIRMED).
-- Part 4 (remaining per-theme M items) — see Scope; its own future
-  `/ship-a-phase` tick against this same brief (extended with its own
-  Part section when picked up).
 
 ## DoD
 
-Do **NOT** flip Phase 32 `[ ]` → `[x]` in `plan/steps/01_build_plan.md`
-yet — Part 1c remains. Every theme's headline CONFIRMED item (Part 4's
-"remaining per-theme M items," Scope's own phrasing) is now shipped across
-all ten themes as of Part 4f — Echo had no CONFIRMED-M item, so its best
+Phase 32 `[ ]` → `[x]` in `plan/steps/01_build_plan.md` flips **this
+tick**. Every theme's headline CONFIRMED item (Part 4's "remaining
+per-theme M items," Scope's own phrasing) is shipped across all ten
+themes as of Part 4f — Echo had no CONFIRMED-M item, so its best
 CONFIRMED-S item (the Ouroboros retarget) stood in, same as every other
 part's one-item-per-theme cut. Part 1b (Harvest — Souls persist across
 combats, "the jar travels") shipped the persistence mechanism itself:
 `Character.bankedSouls` (optional + sparse, no migration needed — the
 `floatingDice` precedent), the `applyHazardOutcome` write-back on every
-outcome, and a Memoir REMAINS read-back. Only Part 1c (milestone-rider
-design — what a running Soul total actually unlocks) remains, and it is
-genuine forward-looking content/economy design punted to its own design
-pass, not a wiring decision this tick could safely make. The DoT-clock
-slice is complete only because its trigger, Suppuration, lethal-receipt,
-attribution, and player-facing outcome witnesses are all present; do not
-regress it while tuning. A future tick that ships Part 1c ticks the row.
+outcome, and a Memoir REMAINS read-back. Part 1c (this tick) closes the
+last quarter of the P-NEXT item — a milestone epithet layered onto
+`soulsLine` at 10/25/50 banked Souls — resolving "what a running Soul
+total unlocks" as a cosmetic/narrative recognition tier rather than a
+shop good (blocked, no shop system live) or a card-rider threshold
+(real balance design, no evidence budget this tick); both remain
+Follow-ups for their own design pass. The DoT-clock slice remains
+complete because its trigger, Suppuration, lethal-receipt, attribution,
+and player-facing outcome witnesses are all present; do not regress it
+while tuning. Every part of this brief (1, 1a, 1b, 1c, 2, 3, 4a-4f) has
+now shipped — remaining items listed under Follow-ups are genuine
+forward-looking design/content work, not wiring this brief's scope
+covers, and belong to their own future phase or `/expand` candidate.

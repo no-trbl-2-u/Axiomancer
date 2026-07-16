@@ -138,8 +138,9 @@ export interface PhilosophicalAlignment {
  *
  * Phase 32 part 1b adds a third read-back: `player.bankedSouls`, the
  * Harvest theme's persistent Soul jar (unspent `souls` write back here
- * at combat end — see `CombatEncounterPanel.applyHazardOutcome`). See
- * `buildSoulsLine` below.
+ * at combat end — see `CombatEncounterPanel.applyHazardOutcome`). Part
+ * 1c layers a milestone epithet onto the same line once the bank
+ * crosses a recognition tier. See `buildSoulsLine` below.
  */
 export interface MemoirRemainsViewModel {
     /** Raw tally from `hazardDeathCount(state.flags)`. */
@@ -154,7 +155,8 @@ export interface MemoirRemainsViewModel {
     /** Raw tally from `player.bankedSouls` (Phase 32 part 1b). */
     bankedSouls: number;
     /** Narrative line — singular/plural/zero handled here, same
-     *  convention as `deathLine`. */
+     *  convention as `deathLine`; gains a milestone epithet past a
+     *  recognition tier (Phase 32 part 1c). */
     soulsLine: string;
 }
 
@@ -616,14 +618,34 @@ function buildDeathLine(count: number): string {
 }
 
 /**
- * Narrative Soul-jar line (Phase 32 part 1b). Singular/plural/zero
- * handled here so the screen carries no numeric-copy literal (Hard
- * Rule #8), same convention as `buildDeathLine`.
+ * Milestone thresholds for the carried Soul bank (Phase 32 part 1c —
+ * the deferred "what does a running Soul total unlock" question).
+ * Resolved as a cosmetic/narrative recognition tier, not a spend or a
+ * shop good (neither exists yet — `Character.currency`'s own doc
+ * comment: "shops have not landed"): crossing a tier appends a fixed
+ * epithet to `soulsLine`, read back from the same `bankedSouls` tally
+ * Part 1b already persists. No new state, no new event, no economy
+ * change — the epithet is derived, not stored.
+ */
+const SOULS_MILESTONE_TIERS: ReadonlyArray<{ min: number; epithet: string }> = Object.freeze([
+    { min: 50, epithet: 'the harvest is legend.' },
+    { min: 25, epithet: 'the reaping is remembered.' },
+    { min: 10, epithet: 'the harvest deepens.' },
+]);
+
+/**
+ * Narrative Soul-jar line (Phase 32 part 1b, milestone epithet added
+ * part 1c). Singular/plural/zero handled here so the screen carries
+ * no numeric-copy literal (Hard Rule #8), same convention as
+ * `buildDeathLine`; the milestone epithet is a second clause appended
+ * once the bank crosses the lowest qualifying tier in
+ * `SOULS_MILESTONE_TIERS`.
  */
 function buildSoulsLine(count: number): string {
     if (count === 0) return DEFAULT_REMAINS.soulsLine;
-    if (count === 1) return 'the jar holds a single soul.';
-    return `the jar holds ${count} souls.`;
+    const base = count === 1 ? 'the jar holds a single soul.' : `the jar holds ${count} souls.`;
+    const tier = SOULS_MILESTONE_TIERS.find((t) => count >= t.min);
+    return tier === undefined ? base : `${base} ${tier.epithet}`;
 }
 
 /**
