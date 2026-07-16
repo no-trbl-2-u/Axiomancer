@@ -4,6 +4,11 @@
   "name": "Achilles and the Tortoise",
   "image": "./assets/catalog/cards/freeze.webp",
   "pricing": "persistent draw 1 per denied enemy turn ≈ 2 × ~5 denies gated, min-4 ≈ 12 → Axiom",
+  "face": {
+   "freeGlyph": "❖",
+   "freeVal": "3r",
+   "paid": "DRAW 1 card each time your STAGGER denies an enemy turn."
+  },
   "chips": [
    {
     "k": "Stance",
@@ -43,29 +48,20 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — DRAW 1 whenever your STAGGER denies an enemy turn.",
-   "PAID (rest of combat) — DRAW 1 whenever your STAGGER denies an enemy turn."
-  ],
-  "face": {
-   "glyph": "◈",
-   "stanceColor": "#4f7fd6",
-   "borderColor": "#7fb3a6",
-   "orbColor": "#4f7fd6",
-   "kwColor": "#7fb3a6",
-   "freeKeyword": "FREE",
-   "freeValue": "3 rounds",
-   "paidKeyword": "DRAW",
-   "paidValue": "rest of combat",
-   "typeStrip": "MIND · ENCHANTMENT",
-   "dieLine": "",
-   "inert": false
-  }
+   "FREE (3 rounds) — DRAW 1 card each time your STAGGER denies an enemy turn.",
+   "PAID (rest of combat) — DRAW 1 card each time your STAGGER denies an enemy turn."
+  ]
  },
  {
   "id": "ad-nauseam",
   "name": "Ad Nauseam",
   "image": "./assets/catalog/cards/confuse.webp",
   "pricing": "next spell gains ECHO (≈ ×0.8 of an avg spell ≈ 5) + FREE mark (0.5) + dieBonus(draw ×0.6 = 1.2) ≈ 6.7 → Thesis",
+  "face": {
+   "freeGlyph": "◎",
+   "freeVal": "1",
+   "paid": "your next spell gains ECHO."
+  },
   "chips": [
    {
     "k": "Stance",
@@ -105,29 +101,21 @@
    }
   ],
   "lines": [
-   "FREE — mark i1 d1 (enemy).",
-   "PAID — your next spell gains ECHO. ⬢ MIND die: draw 1"
-  ],
-  "face": {
-   "glyph": "◆",
-   "stanceColor": "#4f7fd6",
-   "borderColor": "#c2a14e",
-   "orbColor": "#4f7fd6",
-   "kwColor": "#c2a14e",
-   "freeKeyword": "MARK",
-   "freeValue": "×1 · 1t",
-   "paidKeyword": "ECHO",
-   "paidValue": "your next spell",
-   "typeStrip": "MIND · SPELL",
-   "dieLine": "⬢ MIND die: draw 1",
-   "inert": false
-  }
+   "FREE — mark i1 d1",
+   "your next spell gains ECHO",
+   "Die bonus: powering die mind fires a rider"
+  ]
  },
  {
   "id": "against-my-judgment",
   "name": "Against My Judgment",
   "image": "./assets/catalog/cards/devil-book.webp",
   "pricing": null,
+  "face": {
+   "freeGlyph": "◎",
+   "freeVal": "1",
+   "paid": "mark i1 d2 (self)."
+  },
   "chips": [
    {
     "k": "Stance",
@@ -171,29 +159,21 @@
    }
   ],
   "lines": [
-   "FREE — mark i1 d1.",
-   "PAID — mark i1 d2 + draw 2."
-  ],
-  "face": {
-   "glyph": "◆",
-   "stanceColor": "#9a5fd0",
-   "borderColor": "#c2a14e",
-   "orbColor": "#9a5fd0",
-   "kwColor": "#c2a14e",
-   "freeKeyword": "MARK",
-   "freeValue": "×1 · 1t",
-   "paidKeyword": "DRAW",
-   "paidValue": "2",
-   "typeStrip": "HEART · SPELL",
-   "dieLine": "",
-   "inert": false
-  }
+   "FREE — mark i1 d1 (self)",
+   "Applies Mark ×1, 2t → self",
+   "rider"
+  ]
  },
  {
   "id": "anvil-of-form",
   "name": "Anvil of Form",
   "image": "./assets/catalog/cards/guard-1.webp",
   "pricing": "persistent +1 pip on every kindled/floating die ≈ 1.5 × ~6 forges, min-4 ≈ 12 → Axiom",
+  "face": {
+   "freeGlyph": "❖",
+   "freeVal": "3r",
+   "paid": "Every KINDLEd or FORGEd die arrives with +1 PIP."
+  },
   "chips": [
    {
     "k": "Stance",
@@ -239,27 +219,18 @@
   "lines": [
    "FREE (3 rounds) — Every KINDLEd or FORGEd die arrives with +1 PIP.",
    "PAID (rest of combat) — Every KINDLEd or FORGEd die arrives with +1 PIP."
-  ],
-  "face": {
-   "glyph": "◈",
-   "stanceColor": "#4f7fd6",
-   "borderColor": "#7fb3a6",
-   "orbColor": "#4f7fd6",
-   "kwColor": "#7fb3a6",
-   "freeKeyword": "FREE",
-   "freeValue": "3 rounds",
-   "paidKeyword": "PIP",
-   "paidValue": "rest of combat",
-   "typeStrip": "MIND · ENCHANTMENT",
-   "dieLine": "",
-   "inert": false
-  }
+  ]
  },
  {
   "id": "arrow-paradox",
   "name": "Arrow Paradox",
   "image": "./assets/catalog/cards/freeze.webp",
   "pricing": null,
+  "face": {
+   "freeGlyph": "◆",
+   "freeVal": null,
+   "paid": "backfire i1 d2 + lock the enemy stance + STAGGER 1."
+  },
   "chips": [
    {
     "k": "Stance",
@@ -303,29 +274,22 @@
    }
   ],
   "lines": [
-   "FREE — reveal the next stance.",
-   "PAID — backfire i1 d2 + lock the enemy's next stance + STAGGER 1."
-  ],
-  "face": {
-   "glyph": "⟲",
-   "stanceColor": "#d6543f",
-   "borderColor": "#a86bdc",
-   "orbColor": "#d6543f",
-   "kwColor": "#a86bdc",
-   "freeKeyword": "REVEAL",
-   "freeValue": "stance",
-   "paidKeyword": "BACKFIRE",
-   "paidValue": "1/rung 2t",
-   "typeStrip": "BODY · SPELL",
-   "dieLine": "",
-   "inert": false
-  }
+   "FREE — reveal the next stance",
+   "Applies Backfire ×1, 2t → enemy",
+   "lock the enemy stance",
+   "STAGGER 1"
+  ]
  },
  {
   "id": "bone-orchard",
   "name": "Bone Orchard",
   "image": "./assets/catalog/cards/yggdrasil.webp",
   "pricing": "persistent 1 HP per Soul gained (soul-gated drip) ≈ 1 × ~12 souls, min-4 ≈ 12 → Axiom",
+  "face": {
+   "freeGlyph": "❖",
+   "freeVal": "3r",
+   "paid": "Drain 1 VITAE from the enemy for every SOUL you gain."
+  },
   "chips": [
    {
     "k": "Stance",
@@ -369,29 +333,20 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — Each SOUL you gain deals 1 to the enemy.",
-   "PAID (rest of combat) — Each SOUL you gain deals 1 to the enemy."
-  ],
-  "face": {
-   "glyph": "◈",
-   "stanceColor": "#4f7fd6",
-   "borderColor": "#7fb3a6",
-   "orbColor": "#4f7fd6",
-   "kwColor": "#7fb3a6",
-   "freeKeyword": "FREE",
-   "freeValue": "3 rounds",
-   "paidKeyword": "SOUL",
-   "paidValue": "rest of combat",
-   "typeStrip": "MIND · ENCHANTMENT",
-   "dieLine": "",
-   "inert": false
-  }
+   "FREE (3 rounds) — Drain 1 VITAE from the enemy for every SOUL you gain.",
+   "PAID (rest of combat) — Drain 1 VITAE from the enemy for every SOUL you gain."
+  ]
  },
  {
   "id": "bootstrap-loop",
   "name": "Bootstrap Loop",
   "image": "./assets/catalog/cards/spark.webp",
   "pricing": null,
+  "face": {
+   "freeGlyph": "⬡",
+   "freeVal": "1",
+   "paid": "FORGE a dead X die into a WILD floating die (no X: +1 Conviction)."
+  },
   "chips": [
    {
     "k": "Stance",
@@ -435,29 +390,21 @@
    }
   ],
   "lines": [
-   "FREE — +1 pip to every Reserve die.",
-   "PAID — FORGE a dead X die into a WILD floating die (no X: +1 Conviction). ⬡ MIND ×2 spent: +1 pip to every Reserve die"
-  ],
-  "face": {
-   "glyph": "⚒",
-   "stanceColor": "#4f7fd6",
-   "borderColor": "#c2a14e",
-   "orbColor": "#4f7fd6",
-   "kwColor": "#c2a14e",
-   "freeKeyword": "PIP",
-   "freeValue": "+1",
-   "paidKeyword": "FORGE",
-   "paidValue": "dead X die → WILD FLOATING die (no X: +1 ◆)",
-   "typeStrip": "MIND · SPELL",
-   "dieLine": "⬡ MIND ×2 spent: +1 pip to every Reserve die",
-   "inert": false
-  }
+   "FREE — +1 pip to every Reserve die",
+   "FORGE a dead X die into a WILD floating die (no X: +1 Conviction)",
+   "Threshold: 2× mind die fires a rider"
+  ]
  },
  {
   "id": "brace-for-impact",
   "name": "Brace for Impact",
   "image": "./assets/catalog/cards/guard-2.webp",
   "pricing": null,
+  "face": {
+   "freeGlyph": "❖",
+   "freeVal": "2",
+   "paid": "Guard 8."
+  },
   "chips": [
    {
     "k": "Stance",
@@ -501,29 +448,20 @@
    }
   ],
   "lines": [
-   "FREE — GUARD 2 (persists).",
-   "PAID — Guard 8."
-  ],
-  "face": {
-   "glyph": "🛡",
-   "stanceColor": "#d6543f",
-   "borderColor": "#9aa0a6",
-   "orbColor": "#d6543f",
-   "kwColor": "#9aa0a6",
-   "freeKeyword": "GUARD",
-   "freeValue": "2",
-   "paidKeyword": "GUARD",
-   "paidValue": "8",
-   "typeStrip": "BODY · SPELL",
-   "dieLine": "",
-   "inert": false
-  }
+   "FREE — GUARD 2 (persists)",
+   "Guard 8"
+  ]
  },
  {
   "id": "brief-candle",
   "name": "Brief Candle",
   "image": "./assets/catalog/cards/burn.webp",
   "pricing": null,
+  "face": {
+   "freeGlyph": "✦",
+   "freeVal": "1",
+   "paid": "bleed i2 d1 (6/hit)."
+  },
   "chips": [
    {
     "k": "Stance",
@@ -567,29 +505,20 @@
    }
   ],
   "lines": [
-   "FREE — +1 Soul.",
-   "PAID — bleed i2 d1 (6/hit)."
-  ],
-  "face": {
-   "glyph": "🩸",
-   "stanceColor": "#d6543f",
-   "borderColor": "#e2543b",
-   "orbColor": "#d6543f",
-   "kwColor": "#e2543b",
-   "freeKeyword": "SOUL",
-   "freeValue": "+1",
-   "paidKeyword": "BLEED",
-   "paidValue": "6/hit per hit taken · 2 stacks",
-   "typeStrip": "BODY · SPELL",
-   "dieLine": "",
-   "inert": false
-  }
+   "FREE — +1 Soul",
+   "Applies Bleed ×2, 1t → enemy"
+  ]
  },
  {
   "id": "captive-audience",
   "name": "Captive Audience",
   "image": "./assets/catalog/cards/will-o-wisp.webp",
   "pricing": "engine text — while you hold 4+ Premises the enemy stays marked (Aporia)",
+  "face": {
+   "freeGlyph": "☠",
+   "freeVal": "3r",
+   "paid": "While you hold 4+ PREMISEs, the enemy stays MARKed. Costs 1 die. Attaches to the enemy."
+  },
   "chips": [
    {
     "k": "Stance",
@@ -629,29 +558,20 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — Hold 4+ PREMISEs: MARK the enemy +1 each turn (to 10).",
-   "PAID (rest of combat) — Hold 4+ PREMISEs: MARK the enemy +1 each turn (to 10). Attaches to the enemy."
-  ],
-  "face": {
-   "glyph": "⛓",
-   "stanceColor": "#9a5fd0",
-   "borderColor": "#a86bdc",
-   "orbColor": "#9a5fd0",
-   "kwColor": "#a86bdc",
-   "freeKeyword": "FREE",
-   "freeValue": "3 rounds",
-   "paidKeyword": "MARK",
-   "paidValue": "curse · rest of combat",
-   "typeStrip": "HEART · CURSE",
-   "dieLine": "",
-   "inert": false
-  }
+   "FREE (3 rounds) — While you hold 4+ PREMISEs, the enemy stays MARKed.",
+   "PAID (rest of combat) — While you hold 4+ PREMISEs, the enemy stays MARKed. (attaches to the enemy)"
+  ]
  },
  {
   "id": "cassandras-burden",
   "name": "Cassandra's Burden",
   "image": "./assets/catalog/cards/god-eye-silver.webp",
   "pricing": null,
+  "face": {
+   "freeGlyph": "⚑",
+   "freeVal": "1",
+   "paid": "poison i1 d2 + mark i1 d2 + OMEN — on hit: Guard 4 (2/play)."
+  },
   "chips": [
    {
     "k": "Stance",
@@ -695,29 +615,22 @@
    }
   ],
   "lines": [
-   "FREE — draw 1 · FORETELL 1.",
-   "PAID — poison i1 d2 + mark i1 d2 + OMEN — stake claim (window 1-2, ante 2◆ at window 1): on hit, Guard 4 (2/play)."
-  ],
-  "face": {
-   "glyph": "☠",
-   "stanceColor": "#9a5fd0",
-   "borderColor": "#e2543b",
-   "orbColor": "#9a5fd0",
-   "kwColor": "#e2543b",
-   "freeKeyword": "DRAW",
-   "freeValue": "1 +",
-   "paidKeyword": "POISON",
-   "paidValue": "2/play per card you play · 2t",
-   "typeStrip": "HEART · SPELL",
-   "dieLine": "",
-   "inert": false
-  }
+   "FREE — draw 1 · FORETELL 1",
+   "Applies Poison ×1, 2t → enemy",
+   "Applies Mark ×1, 2t → enemy",
+   "OMEN — on hit: Guard 4"
+  ]
  },
  {
   "id": "circular-reasoning",
   "name": "Circular Reasoning",
   "image": "./assets/catalog/cards/light-ring.webp",
   "pricing": null,
+  "face": {
+   "freeGlyph": "⁇",
+   "freeVal": "1",
+   "paid": "RECALL 1 — its FREE line fires now."
+  },
   "chips": [
    {
     "k": "Stance",
@@ -761,29 +674,20 @@
    }
   ],
   "lines": [
-   "FREE — mill 1 to discard.",
-   "PAID — RECALL 1 — its FREE line fires now."
-  ],
-  "face": {
-   "glyph": "◆",
-   "stanceColor": "#4f7fd6",
-   "borderColor": "#c2a14e",
-   "orbColor": "#4f7fd6",
-   "kwColor": "#c2a14e",
-   "freeKeyword": "MILL",
-   "freeValue": "1",
-   "paidKeyword": "RECALL",
-   "paidValue": "1 from discard · fires free",
-   "typeStrip": "MIND · SPELL",
-   "dieLine": "",
-   "inert": false
-  }
+   "FREE — mill 1 to discard",
+   "RECALL 1 — its FREE line fires now"
+  ]
  },
  {
   "id": "common-ground",
   "name": "Common Ground",
   "image": "./assets/catalog/cards/bright-sphere-yellow.webp",
   "pricing": null,
+  "face": {
+   "freeGlyph": "▼",
+   "freeVal": "1",
+   "paid": "rapport i1 d2 + SWAY 2."
+  },
   "chips": [
    {
     "k": "Stance",
@@ -827,29 +731,22 @@
    }
   ],
   "lines": [
-   "FREE — draw 1 · rapport i1 d2.",
-   "PAID — rapport i1 d2 + SWAY 2. ⬡ HEART ×3 spent: SWAY 2"
-  ],
-  "face": {
-   "glyph": "☙",
-   "stanceColor": "#9a5fd0",
-   "borderColor": "#a86bdc",
-   "orbColor": "#9a5fd0",
-   "kwColor": "#a86bdc",
-   "freeKeyword": "DRAW",
-   "freeValue": "1 +",
-   "paidKeyword": "RAPPORT",
-   "paidValue": "hits softer · 2t",
-   "typeStrip": "HEART · SPELL",
-   "dieLine": "⬡ HEART ×3 spent: SWAY 2",
-   "inert": false
-  }
+   "FREE — draw 1 · rapport i1 d2",
+   "Applies Rapport ×1, 2t → enemy",
+   "SWAY 2",
+   "Threshold: 3× heart die fires a rider"
+  ]
  },
  {
   "id": "crown-of-thorns",
   "name": "Crown of Thorns",
   "image": "./assets/catalog/cards/yggdrasil.webp",
   "pricing": "persistent +1 intensity on applications while FALLEN ≈ 1.5 × ~7 gated ×0.5 ≈ 11 → Axiom",
+  "face": {
+   "freeGlyph": "❖",
+   "freeVal": "3r",
+   "paid": "While FALLEN, your status applications land at +1 intensity."
+  },
   "chips": [
    {
     "k": "Stance",
@@ -893,29 +790,20 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — While FALLEN, your statuses land +1 intensity per affliction you carry beyond the first (max +4).",
-   "PAID (rest of combat) — While FALLEN, your statuses land +1 intensity per affliction you carry beyond the first (max +4)."
-  ],
-  "face": {
-   "glyph": "◈",
-   "stanceColor": "#9a5fd0",
-   "borderColor": "#7fb3a6",
-   "orbColor": "#9a5fd0",
-   "kwColor": "#7fb3a6",
-   "freeKeyword": "FREE",
-   "freeValue": "3 rounds",
-   "paidKeyword": "FALLEN",
-   "paidValue": "rest of combat",
-   "typeStrip": "HEART · ENCHANTMENT",
-   "dieLine": "",
-   "inert": false
-  }
+   "FREE (3 rounds) — While FALLEN, your status applications land at +1 intensity.",
+   "PAID (rest of combat) — While FALLEN, your status applications land at +1 intensity."
+  ]
  },
  {
   "id": "crumbling-resolve",
   "name": "Crumbling Resolve",
   "image": "./assets/catalog/cards/guard-2.webp",
   "pricing": "engine text (Aporia). RETAINS the old clause (a fully-blocked attack",
+  "face": {
+   "freeGlyph": "☠",
+   "freeVal": "3r",
+   "paid": "A fully-blocked (GUARD) attack STAGGERs the enemy a rung on its next telegraph. Costs 1 die. Attaches to the enemy."
+  },
   "chips": [
    {
     "k": "Stance",
@@ -959,29 +847,20 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — After each threat phase, deal 20% of your remaining GUARD (minimum 4). Fully blocking an attack STAGGERs the next telegraph by 1.",
-   "PAID (rest of combat) — After each threat phase, deal 20% of your remaining GUARD (minimum 4). Fully blocking an attack STAGGERs the next telegraph by 1. Attaches to the enemy."
-  ],
-  "face": {
-   "glyph": "⛓",
-   "stanceColor": "#d6543f",
-   "borderColor": "#a86bdc",
-   "orbColor": "#d6543f",
-   "kwColor": "#a86bdc",
-   "freeKeyword": "FREE",
-   "freeValue": "3 rounds",
-   "paidKeyword": "STAGGER",
-   "paidValue": "curse · rest of combat",
-   "typeStrip": "BODY · CURSE",
-   "dieLine": "",
-   "inert": false
-  }
+   "FREE (3 rounds) — A fully-blocked (GUARD) attack STAGGERs the enemy a rung on its next telegraph.",
+   "PAID (rest of combat) — A fully-blocked (GUARD) attack STAGGERs the enemy a rung on its next telegraph. (attaches to the enemy)"
+  ]
  },
  {
   "id": "currys-conversion",
   "name": "Curry's Conversion",
   "image": "./assets/catalog/cards/bleed.webp",
   "pricing": null,
+  "face": {
+   "freeGlyph": "◎",
+   "freeVal": "1",
+   "paid": "REARGUE — convert bleed↔poison, +1 intensity."
+  },
   "chips": [
    {
     "k": "Stance",
@@ -1025,29 +904,20 @@
    }
   ],
   "lines": [
-   "FREE — draw 1 · mark i1 d1.",
-   "PAID — REARGUE — convert bleed↔poison, +1 intensity."
-  ],
-  "face": {
-   "glyph": "☠",
-   "stanceColor": "#4f7fd6",
-   "borderColor": "#e2543b",
-   "orbColor": "#4f7fd6",
-   "kwColor": "#e2543b",
-   "freeKeyword": "DRAW",
-   "freeValue": "1 +",
-   "paidKeyword": "REARGUE",
-   "paidValue": "+1 intensity · bleed ↔ poison",
-   "typeStrip": "MIND · SPELL",
-   "dieLine": "",
-   "inert": false
-  }
+   "FREE — draw 1 · mark i1 d1",
+   "REARGUE — convert bleed↔poison, +1 intensity"
+  ]
  },
  {
   "id": "delphic-ambiguity",
   "name": "Delphic Ambiguity",
   "image": "./assets/catalog/cards/confuse.webp",
   "pricing": null,
+  "face": {
+   "freeGlyph": "◉",
+   "freeVal": "1",
+   "paid": "RUPTURE 1 — its fuel ticks now, +1 Soul + FORETELL 1."
+  },
   "chips": [
    {
     "k": "Stance",
@@ -1091,29 +961,22 @@
    }
   ],
   "lines": [
-   "FREE — FORETELL 1.",
-   "PAID — RUPTURE 1 — its remaining damage lands now, +1 Soul + FORETELL 1. ⬢ MIND die: +1 pip to every Reserve die"
-  ],
-  "face": {
-   "glyph": "☠",
-   "stanceColor": "#4f7fd6",
-   "borderColor": "#e2543b",
-   "orbColor": "#4f7fd6",
-   "kwColor": "#e2543b",
-   "freeKeyword": "FORETELL",
-   "freeValue": "1",
-   "paidKeyword": "RUPTURE",
-   "paidValue": "+1 Soul · consume 1 affliction",
-   "typeStrip": "MIND · SPELL",
-   "dieLine": "⬢ MIND die: +1 pip to every Reserve die",
-   "inert": false
-  }
+   "FREE — FORETELL 1",
+   "RUPTURE 1 — its fuel ticks now, +1 Soul",
+   "FORETELL 1",
+   "Die bonus: powering die mind fires a rider"
+  ]
  },
  {
   "id": "disarming-smile",
   "name": "Disarming Smile",
   "image": "./assets/catalog/cards/light-ring.webp",
   "pricing": "rapport i2 d2 (3) + heal 2 (0.65) + FREE sway 1 (0.3) ≈ 4.5 → Lemma",
+  "face": {
+   "freeGlyph": "∿",
+   "freeVal": "1",
+   "paid": "rapport i2 d2."
+  },
   "chips": [
    {
     "k": "Stance",
@@ -1157,29 +1020,21 @@
    }
   ],
   "lines": [
-   "FREE — SWAY 1.",
-   "PAID — rapport i2 d2 + heal 2."
-  ],
-  "face": {
-   "glyph": "☙",
-   "stanceColor": "#9a5fd0",
-   "borderColor": "#a86bdc",
-   "orbColor": "#9a5fd0",
-   "kwColor": "#a86bdc",
-   "freeKeyword": "SWAY",
-   "freeValue": "1",
-   "paidKeyword": "RAPPORT",
-   "paidValue": "hits softer · 2t",
-   "typeStrip": "HEART · SPELL",
-   "dieLine": "",
-   "inert": false
-  }
+   "FREE — SWAY 1",
+   "Applies Rapport ×2, 2t → enemy",
+   "rider"
+  ]
  },
  {
   "id": "entropy-tax",
   "name": "Entropy Tax",
   "image": "./assets/catalog/cards/devil-book.webp",
   "pricing": "engine text — every kindled/floating spend marks the enemy (Aporia)",
+  "face": {
+   "freeGlyph": "☠",
+   "freeVal": "3r",
+   "paid": "Every KINDLEd or FORGEd die you spend MARKs the enemy. Costs 1 die. Attaches to the enemy."
+  },
   "chips": [
    {
     "k": "Stance",
@@ -1219,29 +1074,20 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — A KINDLEd or FORGEd die powering a card MARKs the enemy (i1, once per play).",
-   "PAID (rest of combat) — A KINDLEd or FORGEd die powering a card MARKs the enemy (i1, once per play). Attaches to the enemy."
-  ],
-  "face": {
-   "glyph": "⛓",
-   "stanceColor": "#4f7fd6",
-   "borderColor": "#a86bdc",
-   "orbColor": "#4f7fd6",
-   "kwColor": "#a86bdc",
-   "freeKeyword": "FREE",
-   "freeValue": "3 rounds",
-   "paidKeyword": "MARK",
-   "paidValue": "curse · rest of combat",
-   "typeStrip": "MIND · CURSE",
-   "dieLine": "",
-   "inert": false
-  }
+   "FREE (3 rounds) — Every KINDLEd or FORGEd die you spend MARKs the enemy.",
+   "PAID (rest of combat) — Every KINDLEd or FORGEd die you spend MARKs the enemy. (attaches to the enemy)"
+  ]
  },
  {
   "id": "ex-nihilo",
   "name": "Ex Nihilo",
   "image": "./assets/catalog/cards/bright-sphere-yellow.webp",
   "pricing": null,
+  "face": {
+   "freeGlyph": "⬡",
+   "freeVal": "1",
+   "paid": "FORGE a WILD floating die + the spent die BANKS to the Reserve."
+  },
   "chips": [
    {
     "k": "Stance",
@@ -1285,29 +1131,21 @@
    }
   ],
   "lines": [
-   "FREE — +1 pip to every Reserve die.",
-   "PAID — FORGE a WILD floating die + the spent die BANKS to the Reserve."
-  ],
-  "face": {
-   "glyph": "⚒",
-   "stanceColor": "#4f7fd6",
-   "borderColor": "#c2a14e",
-   "orbColor": "#4f7fd6",
-   "kwColor": "#c2a14e",
-   "freeKeyword": "PIP",
-   "freeValue": "+1",
-   "paidKeyword": "FORGE",
-   "paidValue": "forge a WILD FLOATING die",
-   "typeStrip": "MIND · SPELL",
-   "dieLine": "",
-   "inert": false
-  }
+   "FREE — +1 pip to every Reserve die",
+   "FORGE a WILD floating die",
+   "the spent die BANKS to the Reserve"
+  ]
  },
  {
   "id": "exordium",
   "name": "Exordium",
   "image": "./assets/catalog/cards/light-ring.webp",
   "pricing": null,
+  "face": {
+   "freeGlyph": "❡",
+   "freeVal": "1",
+   "paid": "poison i1 d2 + +1 Premise (2/play)."
+  },
   "chips": [
    {
     "k": "Stance",
@@ -1351,29 +1189,22 @@
    }
   ],
   "lines": [
-   "FREE — +1 Premise.",
-   "PAID — poison i1 d2 + +1 Premise + draw 1 (2/play)."
-  ],
-  "face": {
-   "glyph": "☠",
-   "stanceColor": "#9a5fd0",
-   "borderColor": "#e2543b",
-   "orbColor": "#9a5fd0",
-   "kwColor": "#e2543b",
-   "freeKeyword": "PREMISE",
-   "freeValue": "+1",
-   "paidKeyword": "POISON",
-   "paidValue": "2/play per card you play · 2t",
-   "typeStrip": "HEART · SPELL",
-   "dieLine": "",
-   "inert": false
-  }
+   "FREE — +1 Premise",
+   "Applies Poison ×1, 2t → enemy",
+   "+1 Premise",
+   "rider"
+  ]
  },
  {
   "id": "fallen-grace",
   "name": "Fallen Grace",
   "image": "./assets/catalog/cards/light-ring.webp",
   "pricing": null,
+  "face": {
+   "freeGlyph": "◎",
+   "freeVal": "1",
+   "paid": "bleed i2 d3 (6/hit)."
+  },
   "chips": [
    {
     "k": "Stance",
@@ -1417,29 +1248,21 @@
    }
   ],
   "lines": [
-   "FREE — draw 1 · mark i1 d1 (self).",
-   "PAID — bleed i2 d3 (6/hit)."
-  ],
-  "face": {
-   "glyph": "🩸",
-   "stanceColor": "#9a5fd0",
-   "borderColor": "#e2543b",
-   "orbColor": "#9a5fd0",
-   "kwColor": "#e2543b",
-   "freeKeyword": "DRAW",
-   "freeValue": "1 +",
-   "paidKeyword": "BLEED",
-   "paidValue": "6/hit per hit taken · 2 stacks",
-   "typeStrip": "HEART · SPELL",
-   "dieLine": "",
-   "inert": false
-  }
+   "FREE — draw 1 · mark i1 d1 (self)",
+   "Applies Bleed ×2, 3t → enemy",
+   "Fallen: heal 4"
+  ]
  },
  {
   "id": "fated-course",
   "name": "Fated Course",
   "image": "./assets/catalog/cards/freeze.webp",
   "pricing": "engine text — every hit omen marks the foe, rest of combat (Aporia)",
+  "face": {
+   "freeGlyph": "☠",
+   "freeVal": "3r",
+   "paid": "Every OMEN that hits MARKs the foe. Costs 1 die. Attaches to the enemy."
+  },
   "chips": [
    {
     "k": "Stance",
@@ -1479,29 +1302,20 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — Every OMEN that hits MARKs the foe (i1).",
-   "PAID (rest of combat) — Every OMEN that hits MARKs the foe (i1). Attaches to the enemy."
-  ],
-  "face": {
-   "glyph": "⛓",
-   "stanceColor": "#4f7fd6",
-   "borderColor": "#a86bdc",
-   "orbColor": "#4f7fd6",
-   "kwColor": "#a86bdc",
-   "freeKeyword": "FREE",
-   "freeValue": "3 rounds",
-   "paidKeyword": "MARK",
-   "paidValue": "curse · rest of combat",
-   "typeStrip": "MIND · CURSE",
-   "dieLine": "",
-   "inert": false
-  }
+   "FREE (3 rounds) — Every OMEN that hits MARKs the foe.",
+   "PAID (rest of combat) — Every OMEN that hits MARKs the foe. (attaches to the enemy)"
+  ]
  },
  {
   "id": "festering-argument",
   "name": "Festering Argument",
   "image": "./assets/catalog/cards/dream-flutter.webp",
   "pricing": null,
+  "face": {
+   "freeGlyph": "◎",
+   "freeVal": "1",
+   "paid": "PROLONG +1 duration to ALL your DoTs."
+  },
   "chips": [
    {
     "k": "Stance",
@@ -1545,29 +1359,20 @@
    }
   ],
   "lines": [
-   "FREE — mark i1 d1.",
-   "PAID — PROLONG +1 duration to ALL your DoTs."
-  ],
-  "face": {
-   "glyph": "☠",
-   "stanceColor": "#4f7fd6",
-   "borderColor": "#e2543b",
-   "orbColor": "#4f7fd6",
-   "kwColor": "#e2543b",
-   "freeKeyword": "MARK",
-   "freeValue": "×1 · 1t",
-   "paidKeyword": "PROLONG",
-   "paidValue": "+1 turns · all your DoTs",
-   "typeStrip": "MIND · SPELL",
-   "dieLine": "",
-   "inert": false
-  }
+   "FREE — mark i1 d1",
+   "PROLONG +1 duration to ALL your DoTs"
+  ]
  },
  {
   "id": "glimpse",
   "name": "Glimpse",
   "image": "./assets/catalog/cards/god-eye-silver.webp",
   "pricing": null,
+  "face": {
+   "freeGlyph": "◉",
+   "freeVal": "1",
+   "paid": "poison i1 d1 + mark i1 d2 + FORETELL 2 (2/play)."
+  },
   "chips": [
    {
     "k": "Stance",
@@ -1611,29 +1416,22 @@
    }
   ],
   "lines": [
-   "FREE — FORETELL 1.",
-   "PAID — poison i1 d1 + mark i1 d2 + FORETELL 2 (2/play)."
-  ],
-  "face": {
-   "glyph": "☠",
-   "stanceColor": "#4f7fd6",
-   "borderColor": "#e2543b",
-   "orbColor": "#4f7fd6",
-   "kwColor": "#e2543b",
-   "freeKeyword": "FORETELL",
-   "freeValue": "1",
-   "paidKeyword": "POISON",
-   "paidValue": "2/play per card you play · 1t",
-   "typeStrip": "MIND · SPELL",
-   "dieLine": "",
-   "inert": false
-  }
+   "FREE — FORETELL 1",
+   "Applies Poison ×1, 1t → enemy",
+   "Applies Mark ×1, 2t → enemy",
+   "FORETELL 2"
+  ]
  },
  {
   "id": "half-step",
   "name": "Half-Step",
   "image": "./assets/catalog/cards/blue-light.webp",
   "pricing": null,
+  "face": {
+   "freeGlyph": "⬡",
+   "freeVal": "1",
+   "paid": "Guard 5 + +2 pip to every Reserve die."
+  },
   "chips": [
    {
     "k": "Stance",
@@ -1677,29 +1475,21 @@
    }
   ],
   "lines": [
-   "FREE — +1 pip to every Reserve die.",
-   "PAID — Guard 5 + +2 pips to every Reserve die + PIP 1 past the cap (35% bust: halves the die)."
-  ],
-  "face": {
-   "glyph": "🛡",
-   "stanceColor": "#d6543f",
-   "borderColor": "#9aa0a6",
-   "orbColor": "#d6543f",
-   "kwColor": "#9aa0a6",
-   "freeKeyword": "PIP",
-   "freeValue": "+1",
-   "paidKeyword": "GUARD",
-   "paidValue": "5",
-   "typeStrip": "BODY · SPELL",
-   "dieLine": "",
-   "inert": false
-  }
+   "FREE — +1 pip to every Reserve die",
+   "Guard 5",
+   "+2 pip to every Reserve die"
+  ]
  },
  {
   "id": "heart-of-the-matter",
   "name": "Heart of the Matter",
   "image": "./assets/catalog/cards/bright-sphere-yellow.webp",
   "pricing": "SWAY 6 x ECHO (engine echoFactor) + heal-4 rider (NOT echoed) + FREE",
+  "face": {
+   "freeGlyph": "∿",
+   "freeVal": "1",
+   "paid": "SWAY 6 + ECHO."
+  },
   "chips": [
    {
     "k": "Stance",
@@ -1739,29 +1529,23 @@
    }
   ],
   "lines": [
-   "FREE — SWAY 1.",
-   "PAID — SWAY 6 + ECHO + heal 4. ⬡ HEART ×5 spent: SWAY 4"
-  ],
-  "face": {
-   "glyph": "✦",
-   "stanceColor": "#9a5fd0",
-   "borderColor": "#a86bdc",
-   "orbColor": "#9a5fd0",
-   "kwColor": "#a86bdc",
-   "freeKeyword": "SWAY",
-   "freeValue": "1",
-   "paidKeyword": "SWAY",
-   "paidValue": "+6 toward capitulation",
-   "typeStrip": "HEART · SPELL",
-   "dieLine": "⬡ HEART ×5 spent: SWAY 4",
-   "inert": false
-  }
+   "FREE — SWAY 1",
+   "SWAY 6",
+   "ECHO",
+   "rider",
+   "Threshold: 5× heart die fires a rider"
+  ]
  },
  {
   "id": "hedgehogs-dilemma",
   "name": "Hedgehog's Dilemma",
   "image": "./assets/catalog/cards/guard-3.webp",
   "pricing": "persistent — every THORNS trigger also marks the enemy ≈ 1 × ~8 triggers, min-4 ≈ 12 → Axiom",
+  "face": {
+   "freeGlyph": "❖",
+   "freeVal": "3r",
+   "paid": "Every THORNS reflection also marks the enemy."
+  },
   "chips": [
    {
     "k": "Stance",
@@ -1805,29 +1589,20 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — Every THORNS reflection also MARKs the enemy (i1).",
-   "PAID (rest of combat) — Every THORNS reflection also MARKs the enemy (i1)."
-  ],
-  "face": {
-   "glyph": "◈",
-   "stanceColor": "#d6543f",
-   "borderColor": "#7fb3a6",
-   "orbColor": "#d6543f",
-   "kwColor": "#7fb3a6",
-   "freeKeyword": "FREE",
-   "freeValue": "3 rounds",
-   "paidKeyword": "MARK",
-   "paidValue": "rest of combat",
-   "typeStrip": "BODY · ENCHANTMENT",
-   "dieLine": "",
-   "inert": false
-  }
+   "FREE (3 rounds) — Every THORNS reflection also marks the enemy.",
+   "PAID (rest of combat) — Every THORNS reflection also marks the enemy."
+  ]
  },
  {
   "id": "irresistible-grace",
   "name": "Irresistible Grace",
   "image": "./assets/catalog/cards/light-ring.webp",
   "pricing": "persistent — SWAY no longer decays (≈ +1/turn saved) AND stacks",
+  "face": {
+   "freeGlyph": "❖",
+   "freeVal": "3r",
+   "paid": "Your SWAY stops decaying, and each new gesture of it lands harder."
+  },
   "chips": [
    {
     "k": "Stance",
@@ -1871,29 +1646,20 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — SWAY does not decay. At the end of each turn, future SWAY gains increase by 12% (maximum +108%).",
-   "PAID (rest of combat) — SWAY does not decay. At the end of each turn, future SWAY gains increase by 12% (maximum +108%)."
-  ],
-  "face": {
-   "glyph": "◈",
-   "stanceColor": "#9a5fd0",
-   "borderColor": "#7fb3a6",
-   "orbColor": "#9a5fd0",
-   "kwColor": "#7fb3a6",
-   "freeKeyword": "FREE",
-   "freeValue": "3 rounds",
-   "paidKeyword": "SWAY",
-   "paidValue": "rest of combat",
-   "typeStrip": "HEART · ENCHANTMENT",
-   "dieLine": "",
-   "inert": false
-  }
+   "FREE (3 rounds) — Your SWAY stops decaying, and each new gesture of it lands harder.",
+   "PAID (rest of combat) — Your SWAY stops decaying, and each new gesture of it lands harder."
+  ]
  },
  {
   "id": "measured-answer",
   "name": "Measured Answer",
   "image": "./assets/catalog/cards/guard-3.webp",
   "pricing": null,
+  "face": {
+   "freeGlyph": "❖",
+   "freeVal": "3",
+   "paid": "Guard 6 + RIPOSTE 3 (parry 2)."
+  },
   "chips": [
    {
     "k": "Stance",
@@ -1937,29 +1703,21 @@
    }
   ],
   "lines": [
-   "FREE — GUARD 3 (persists).",
-   "PAID — Guard 6 + RIPOSTE 3 (parry 2)."
-  ],
-  "face": {
-   "glyph": "⚔",
-   "stanceColor": "#d6543f",
-   "borderColor": "#9aa0a6",
-   "orbColor": "#d6543f",
-   "kwColor": "#9aa0a6",
-   "freeKeyword": "GUARD",
-   "freeValue": "3",
-   "paidKeyword": "RIPOSTE",
-   "paidValue": "CTR 3 · CUT 2 counter · reduce",
-   "typeStrip": "BODY · SPELL",
-   "dieLine": "",
-   "inert": false
-  }
+   "FREE — GUARD 3 (persists)",
+   "Guard 6",
+   "RIPOSTE 3 (parry 2)"
+  ]
  },
  {
   "id": "memento-mori",
   "name": "Memento Mori",
   "image": "./assets/catalog/cards/meat-pecker.webp",
   "pricing": "mark i2 d1 (2, unresisted) + its expiry Soul (0.75) + FREE souls 2",
+  "face": {
+   "freeGlyph": "✦",
+   "freeVal": "2",
+   "paid": "mark i2 d1."
+  },
   "chips": [
    {
     "k": "Stance",
@@ -1999,29 +1757,20 @@
    }
   ],
   "lines": [
-   "FREE — +2 Souls.",
-   "PAID — mark i2 d1."
-  ],
-  "face": {
-   "glyph": "◉",
-   "stanceColor": "#4f7fd6",
-   "borderColor": "#d9c66a",
-   "orbColor": "#4f7fd6",
-   "kwColor": "#d9c66a",
-   "freeKeyword": "SOUL",
-   "freeValue": "+2",
-   "paidKeyword": "MARK",
-   "paidValue": "+2/tick 1t",
-   "typeStrip": "MIND · SPELL",
-   "dieLine": "",
-   "inert": false
-  }
+   "FREE — +2 Souls",
+   "Applies Mark ×2, 1t → enemy"
+  ]
  },
  {
   "id": "mirror-of-guilt",
   "name": "Mirror of Guilt",
   "image": "./assets/catalog/cards/god-eye-silver.webp",
   "pricing": "engine text — every self-debuff you gain lands 1 stack on the enemy (Aporia)",
+  "face": {
+   "freeGlyph": "☠",
+   "freeVal": "3r",
+   "paid": "Every self-debuff you take toward FALLEN also lands one stack on the enemy. Costs 1 die. Attaches to the enemy."
+  },
   "chips": [
    {
     "k": "Stance",
@@ -2065,29 +1814,20 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — Each self-debuff you land also lands 1 stack of itself on the enemy; every 3 RECOIL paid lands 1 more.",
-   "PAID (rest of combat) — Each self-debuff you land also lands 1 stack of itself on the enemy; every 3 RECOIL paid lands 1 more. Attaches to the enemy."
-  ],
-  "face": {
-   "glyph": "⛓",
-   "stanceColor": "#4f7fd6",
-   "borderColor": "#a86bdc",
-   "orbColor": "#4f7fd6",
-   "kwColor": "#a86bdc",
-   "freeKeyword": "FREE",
-   "freeValue": "3 rounds",
-   "paidKeyword": "RECOIL",
-   "paidValue": "curse · rest of combat",
-   "typeStrip": "MIND · CURSE",
-   "dieLine": "",
-   "inert": false
-  }
+   "FREE (3 rounds) — Every self-debuff you take toward FALLEN also lands one stack on the enemy.",
+   "PAID (rest of combat) — Every self-debuff you take toward FALLEN also lands one stack on the enemy. (attaches to the enemy)"
+  ]
  },
  {
   "id": "mirror-of-longing",
   "name": "Mirror of Longing",
   "image": "./assets/catalog/cards/god-eye-silver.webp",
   "pricing": "engine text — damage your defenses prevent becomes SWAY (Aporia)",
+  "face": {
+   "freeGlyph": "☠",
+   "freeVal": "3r",
+   "paid": "Damage your defenses prevent is converted into SWAY. Costs 1 die. Attaches to the enemy."
+  },
   "chips": [
    {
     "k": "Stance",
@@ -2131,29 +1871,20 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — Damage prevented by your GUARD or RIPOSTE becomes SWAY, 1:1.",
-   "PAID (rest of combat) — Damage prevented by your GUARD or RIPOSTE becomes SWAY, 1:1. Attaches to the enemy."
-  ],
-  "face": {
-   "glyph": "⛓",
-   "stanceColor": "#9a5fd0",
-   "borderColor": "#a86bdc",
-   "orbColor": "#9a5fd0",
-   "kwColor": "#a86bdc",
-   "freeKeyword": "FREE",
-   "freeValue": "3 rounds",
-   "paidKeyword": "SWAY",
-   "paidValue": "curse · rest of combat",
-   "typeStrip": "HEART · CURSE",
-   "dieLine": "",
-   "inert": false
-  }
+   "FREE (3 rounds) — Damage your defenses prevent is converted into SWAY.",
+   "PAID (rest of combat) — Damage your defenses prevent is converted into SWAY. (attaches to the enemy)"
+  ]
  },
  {
   "id": "mounting-case",
   "name": "Mounting Case",
   "image": "./assets/catalog/cards/bright-sphere-yellow.webp",
   "pricing": null,
+  "face": {
+   "freeGlyph": "❡",
+   "freeVal": "1",
+   "paid": "mark i1 d3 + poison i1 d4 + +2 Premises (2/play)."
+  },
   "chips": [
    {
     "k": "Stance",
@@ -2197,29 +1928,23 @@
    }
   ],
   "lines": [
-   "FREE — +1 Premise.",
-   "PAID — mark i1 d3 + poison i1 d4 + +2 Premises (2/play). ⬡ HEART ×2 spent: +1 Premise"
-  ],
-  "face": {
-   "glyph": "◉",
-   "stanceColor": "#4f7fd6",
-   "borderColor": "#d9c66a",
-   "orbColor": "#4f7fd6",
-   "kwColor": "#d9c66a",
-   "freeKeyword": "PREMISE",
-   "freeValue": "+1",
-   "paidKeyword": "MARK",
-   "paidValue": "+1/tick 3t",
-   "typeStrip": "MIND · SPELL",
-   "dieLine": "⬡ HEART ×2 spent: +1 Premise",
-   "inert": false
-  }
+   "FREE — +1 Premise",
+   "Applies Mark ×1, 3t → enemy",
+   "Applies Poison ×1, 4t → enemy",
+   "+2 Premises",
+   "Threshold: 2× heart die fires a rider"
+  ]
  },
  {
   "id": "nettle-cloak",
   "name": "Nettle Cloak",
   "image": "./assets/catalog/cards/yggdrasil.webp",
   "pricing": null,
+  "face": {
+   "freeGlyph": "❖",
+   "freeVal": "2",
+   "paid": "thorns i2 d2 (self) + nettle sting i1 d2 (4 over its run)."
+  },
   "chips": [
    {
     "k": "Stance",
@@ -2263,29 +1988,21 @@
    }
   ],
   "lines": [
-   "FREE — GUARD 2 (persists).",
-   "PAID — thorns i2 d2 + nettle sting i1 d2 (DoT: 2/turn, enemy)."
-  ],
-  "face": {
-   "glyph": "🌿",
-   "stanceColor": "#d6543f",
-   "borderColor": "#e2543b",
-   "orbColor": "#d6543f",
-   "kwColor": "#e2543b",
-   "freeKeyword": "GUARD",
-   "freeValue": "2",
-   "paidKeyword": "BLEED",
-   "paidValue": "4 over 2t",
-   "typeStrip": "BODY · SPELL",
-   "dieLine": "",
-   "inert": false
-  }
+   "FREE — GUARD 2 (persists)",
+   "Applies Thorns ×2, 2t → self",
+   "Applies Nettle Sting ×1, 2t → enemy"
+  ]
  },
  {
   "id": "opening-statement",
   "name": "Opening Statement",
   "image": "./assets/catalog/cards/light-ring.webp",
   "pricing": null,
+  "face": {
+   "freeGlyph": "❡",
+   "freeVal": "1",
+   "paid": "mark i1 d2 + poison i1 d2 + +2 Premises (2/play)."
+  },
   "chips": [
    {
     "k": "Stance",
@@ -2329,29 +2046,22 @@
    }
   ],
   "lines": [
-   "FREE — +1 Premise.",
-   "PAID — mark i1 d2 + poison i1 d2 + +2 Premises (2/play)."
-  ],
-  "face": {
-   "glyph": "◉",
-   "stanceColor": "#9a5fd0",
-   "borderColor": "#d9c66a",
-   "orbColor": "#9a5fd0",
-   "kwColor": "#d9c66a",
-   "freeKeyword": "PREMISE",
-   "freeValue": "+1",
-   "paidKeyword": "MARK",
-   "paidValue": "+1/tick 2t",
-   "typeStrip": "HEART · SPELL",
-   "dieLine": "",
-   "inert": false
-  }
+   "FREE — +1 Premise",
+   "Applies Mark ×1, 2t → enemy",
+   "Applies Poison ×1, 2t → enemy",
+   "+2 Premises"
+  ]
  },
  {
   "id": "ouroboros",
   "name": "Ouroboros",
   "image": "./assets/catalog/cards/blue-light.webp",
   "pricing": null,
+  "face": {
+   "freeGlyph": "⁇",
+   "freeVal": "1",
+   "paid": "replay your last spell ×2."
+  },
   "chips": [
    {
     "k": "Stance",
@@ -2395,29 +2105,21 @@
    }
   ],
   "lines": [
-   "FREE — mill 1 to discard.",
-   "PAID — replay your last spell ×2 + consume all marks — 3 damage per stack."
-  ],
-  "face": {
-   "glyph": "◆",
-   "stanceColor": "#4f7fd6",
-   "borderColor": "#c2a14e",
-   "orbColor": "#4f7fd6",
-   "kwColor": "#c2a14e",
-   "freeKeyword": "MILL",
-   "freeValue": "1",
-   "paidKeyword": "DIE",
-   "paidValue": "×2 your last spell",
-   "typeStrip": "MIND · SPELL",
-   "dieLine": "",
-   "inert": false
-  }
+   "FREE — mill 1 to discard",
+   "replay your last spell ×2",
+   "rider"
+  ]
  },
  {
   "id": "pact-of-akrasia",
   "name": "Pact of Akrasia",
   "image": "./assets/catalog/cards/devil-book.webp",
   "pricing": null,
+  "face": {
+   "freeGlyph": "❖",
+   "freeVal": "2",
+   "paid": "bleed i1 d2 (self) + FORGE a WILD floating die + RECOIL 6."
+  },
   "chips": [
    {
     "k": "Stance",
@@ -2461,29 +2163,81 @@
    }
   ],
   "lines": [
-   "FREE — Guard 2 · RECOIL 1.",
-   "PAID — bleed i1 d2 + FORGE a WILD floating die + RECOIL 6."
-  ],
+   "FREE — Guard 2 · RECOIL 1",
+   "Applies Bleed ×1, 2t → self",
+   "FORGE a WILD floating die",
+   "RECOIL 6"
+  ]
+ },
+ {
+  "id": "paralysis-of-analysis",
+  "name": "Paralysis of Analysis",
+  "image": "./assets/catalog/cards/confuse.webp",
+  "pricing": null,
   "face": {
-   "glyph": "⚒",
-   "stanceColor": "#d6543f",
-   "borderColor": "#c2a14e",
-   "orbColor": "#d6543f",
-   "kwColor": "#c2a14e",
-   "freeKeyword": "GUARD",
-   "freeValue": "2 +",
-   "paidKeyword": "FORGE",
-   "paidValue": "forge a WILD FLOATING die",
-   "typeStrip": "BODY · SPELL",
-   "dieLine": "",
-   "inert": false
-  }
+   "freeGlyph": "⚑",
+   "freeVal": "1",
+   "paid": "backfire i3 d3 + STAGGER 2."
+  },
+  "chips": [
+   {
+    "k": "Stance",
+    "v": "mind"
+   },
+   {
+    "k": "Type",
+    "v": "fallacy"
+   },
+   {
+    "k": "Tier",
+    "v": "3"
+   },
+   {
+    "k": "Target",
+    "v": "enemy"
+   },
+   {
+    "k": "Rank",
+    "v": "Axiom (rare)"
+   },
+   {
+    "k": "Kind",
+    "v": "spell"
+   },
+   {
+    "k": "Theme",
+    "v": "control"
+   },
+   {
+    "k": "Keywords",
+    "v": "STAGGER · BACKFIRE · FORETELL · DRAW"
+   },
+   {
+    "k": "Source",
+    "v": "starter"
+   },
+   {
+    "k": "Preset",
+    "v": "Standstill"
+   }
+  ],
+  "lines": [
+   "FREE — reveal the next stance · draw 1",
+   "Applies Backfire ×3, 3t → enemy",
+   "STAGGER 2",
+   "Die bonus: powering die mind fires a rider"
+  ]
  },
  {
   "id": "peroratio-interrupta",
   "name": "Peroratio Interrupta",
   "image": "./assets/catalog/cards/light-ring.webp",
   "pricing": null,
+  "face": {
+   "freeGlyph": "❡",
+   "freeVal": "1",
+   "paid": "RUPTURE."
+  },
   "chips": [
    {
     "k": "Stance",
@@ -2527,29 +2281,20 @@
    }
   ],
   "lines": [
-   "FREE — +1 Premise.",
-   "PAID — RUPTURE ALL."
-  ],
-  "face": {
-   "glyph": "✸",
-   "stanceColor": "#4f7fd6",
-   "borderColor": "#e2543b",
-   "orbColor": "#4f7fd6",
-   "kwColor": "#e2543b",
-   "freeKeyword": "PREMISE",
-   "freeValue": "+1",
-   "paidKeyword": "RUPTURE",
-   "paidValue": "detonate all afflictions",
-   "typeStrip": "MIND · SPELL",
-   "dieLine": "",
-   "inert": false
-  }
+   "FREE — +1 Premise",
+   "RUPTURE"
+  ]
  },
  {
   "id": "practiced-cadence",
   "name": "Practiced Cadence",
   "image": "./assets/catalog/cards/light-ring.webp",
   "pricing": "persistent +1 Premise on the first card each turn ≈ 0.8 × ~10 turns, min-4 law ≈ 12 → Axiom",
+  "face": {
+   "freeGlyph": "❖",
+   "freeVal": "3r",
+   "paid": "+1 PREMISE on the first card you play each turn."
+  },
   "chips": [
    {
     "k": "Stance",
@@ -2589,29 +2334,20 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — +1 PREMISE on your first card each turn.",
-   "PAID (rest of combat) — +1 PREMISE on your first card each turn."
-  ],
-  "face": {
-   "glyph": "◈",
-   "stanceColor": "#9a5fd0",
-   "borderColor": "#7fb3a6",
-   "orbColor": "#9a5fd0",
-   "kwColor": "#7fb3a6",
-   "freeKeyword": "FREE",
-   "freeValue": "3 rounds",
-   "paidKeyword": "PREMISE",
-   "paidValue": "rest of combat",
-   "typeStrip": "HEART · ENCHANTMENT",
-   "dieLine": "",
-   "inert": false
-  }
+   "FREE (3 rounds) — +1 PREMISE on the first card you play each turn.",
+   "PAID (rest of combat) — +1 PREMISE on the first card you play each turn."
+  ]
  },
  {
   "id": "prophecy-fulfilled",
   "name": "Prophecy Fulfilled",
   "image": "./assets/catalog/cards/god-eye-silver.webp",
   "pricing": "RUPTURE (4 + fuel) + 3 fuel per omen hit ≈ 13 with a played oracle engine → Axiom",
+  "face": {
+   "freeGlyph": "◉",
+   "freeVal": "1",
+   "paid": "RUPTURE (+3 fuel per omen hit)."
+  },
   "chips": [
    {
     "k": "Stance",
@@ -2655,29 +2391,20 @@
    }
   ],
   "lines": [
-   "FREE — FORETELL 1.",
-   "PAID — RUPTURE ALL (+3 damage per omen hit)."
-  ],
-  "face": {
-   "glyph": "✸",
-   "stanceColor": "#4f7fd6",
-   "borderColor": "#e2543b",
-   "orbColor": "#4f7fd6",
-   "kwColor": "#e2543b",
-   "freeKeyword": "FORETELL",
-   "freeValue": "1",
-   "paidKeyword": "RUPTURE",
-   "paidValue": "detonate all afflictions",
-   "typeStrip": "MIND · SPELL",
-   "dieLine": "",
-   "inert": false
-  }
+   "FREE — FORETELL 1",
+   "RUPTURE (+3 fuel per omen hit)"
+  ]
  },
  {
   "id": "quagmire-of-doubt",
   "name": "Quagmire of Doubt",
   "image": "./assets/catalog/cards/confuse.webp",
   "pricing": "engine text — telegraphs enter play 1 rung lower, rest of combat (Aporia)",
+  "face": {
+   "freeGlyph": "☠",
+   "freeVal": "3r",
+   "paid": "Enemy telegraphs enter play one STAGGER rung lower. Costs 1 die. Attaches to the enemy."
+  },
   "chips": [
    {
     "k": "Stance",
@@ -2722,28 +2449,19 @@
   ],
   "lines": [
    "FREE (3 rounds) — Enemy telegraphs enter play one STAGGER rung lower.",
-   "PAID (rest of combat) — Enemy telegraphs enter play one STAGGER rung lower. Attaches to the enemy."
-  ],
-  "face": {
-   "glyph": "⛓",
-   "stanceColor": "#4f7fd6",
-   "borderColor": "#a86bdc",
-   "orbColor": "#4f7fd6",
-   "kwColor": "#a86bdc",
-   "freeKeyword": "FREE",
-   "freeValue": "3 rounds",
-   "paidKeyword": "STAGGER",
-   "paidValue": "curse · rest of combat",
-   "typeStrip": "MIND · CURSE",
-   "dieLine": "",
-   "inert": false
-  }
+   "PAID (rest of combat) — Enemy telegraphs enter play one STAGGER rung lower. (attaches to the enemy)"
+  ]
  },
  {
   "id": "red-herring",
   "name": "Red Herring",
   "image": "./assets/catalog/cards/will-o-wisp.webp",
   "pricing": null,
+  "face": {
+   "freeGlyph": "◆",
+   "freeVal": null,
+   "paid": "backfire i2 d2."
+  },
   "chips": [
    {
     "k": "Stance",
@@ -2787,29 +2505,21 @@
    }
   ],
   "lines": [
-   "FREE — reveal the next stance.",
-   "PAID — backfire i2 d2. ⬢ MIND die: +1 turn to this card's statuses"
-  ],
-  "face": {
-   "glyph": "⟲",
-   "stanceColor": "#4f7fd6",
-   "borderColor": "#a86bdc",
-   "orbColor": "#4f7fd6",
-   "kwColor": "#a86bdc",
-   "freeKeyword": "REVEAL",
-   "freeValue": "stance",
-   "paidKeyword": "BACKFIRE",
-   "paidValue": "2/rung 2t",
-   "typeStrip": "MIND · SPELL",
-   "dieLine": "⬢ MIND die: +1 turn to this card's statuses",
-   "inert": false
-  }
+   "FREE — reveal the next stance",
+   "Applies Backfire ×2, 2t → enemy",
+   "Die bonus: powering die mind fires a rider"
+  ]
  },
  {
   "id": "refrain",
   "name": "Refrain",
   "image": "./assets/catalog/cards/will-o-wisp.webp",
   "pricing": null,
+  "face": {
+   "freeGlyph": "⁇",
+   "freeVal": "1",
+   "paid": "mark i1 d2 + poison i1 d1 + ECHO (2/play)."
+  },
   "chips": [
    {
     "k": "Stance",
@@ -2853,29 +2563,22 @@
    }
   ],
   "lines": [
-   "FREE — mill 1 to discard.",
-   "PAID — mark i1 d2 + poison i1 d1 + ECHO (2/play)."
-  ],
-  "face": {
-   "glyph": "◉",
-   "stanceColor": "#4f7fd6",
-   "borderColor": "#d9c66a",
-   "orbColor": "#4f7fd6",
-   "kwColor": "#d9c66a",
-   "freeKeyword": "MILL",
-   "freeValue": "1",
-   "paidKeyword": "MARK",
-   "paidValue": "+1/tick 2t",
-   "typeStrip": "MIND · SPELL",
-   "dieLine": "",
-   "inert": false
-  }
+   "FREE — mill 1 to discard",
+   "Applies Mark ×1, 2t → enemy",
+   "Applies Poison ×1, 1t → enemy",
+   "ECHO"
+  ]
  },
  {
   "id": "resonance-detonation",
   "name": "Resonance Detonation",
   "image": "./assets/catalog/cards/spark.webp",
   "pricing": null,
+  "face": {
+   "freeGlyph": "◎",
+   "freeVal": "1",
+   "paid": "RUPTURE + SIPHON 35% + RECALL 2 — its FREE line fires now."
+  },
   "chips": [
    {
     "k": "Stance",
@@ -2919,29 +2622,22 @@
    }
   ],
   "lines": [
-   "FREE — mark i1 d1.",
-   "PAID — RUPTURE ALL + SIPHON 35% + RECALL 2 — their FREE lines fire now."
-  ],
-  "face": {
-   "glyph": "✸",
-   "stanceColor": "#9a5fd0",
-   "borderColor": "#e2543b",
-   "orbColor": "#9a5fd0",
-   "kwColor": "#e2543b",
-   "freeKeyword": "MARK",
-   "freeValue": "×1 · 1t",
-   "paidKeyword": "RUPTURE",
-   "paidValue": "detonate all afflictions",
-   "typeStrip": "HEART · SPELL",
-   "dieLine": "",
-   "inert": false
-  }
+   "FREE — mark i1 d1",
+   "RUPTURE",
+   "SIPHON 35%",
+   "RECALL 2 — its FREE line fires now"
+  ]
  },
  {
   "id": "resonant-chamber",
   "name": "Resonant Chamber",
   "image": "./assets/catalog/cards/spark.webp",
   "pricing": "persistent — the first spell each turn gains ECHO ≈ ×0.8 spell/turn × rest, min-4 ≈ 12 → Axiom",
+  "face": {
+   "freeGlyph": "❖",
+   "freeVal": "3r",
+   "paid": "The first spell you cast each turn gains ECHO (fires twice)."
+  },
   "chips": [
    {
     "k": "Stance",
@@ -2985,29 +2681,20 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — Your first spell each turn gains ECHO.",
-   "PAID (rest of combat) — Your first spell each turn gains ECHO."
-  ],
-  "face": {
-   "glyph": "◈",
-   "stanceColor": "#4f7fd6",
-   "borderColor": "#7fb3a6",
-   "orbColor": "#4f7fd6",
-   "kwColor": "#7fb3a6",
-   "freeKeyword": "FREE",
-   "freeValue": "3 rounds",
-   "paidKeyword": "ECHO",
-   "paidValue": "rest of combat",
-   "typeStrip": "MIND · ENCHANTMENT",
-   "dieLine": "",
-   "inert": false
-  }
+   "FREE (3 rounds) — The first spell you cast each turn gains ECHO (fires twice).",
+   "PAID (rest of combat) — The first spell you cast each turn gains ECHO (fires twice)."
+  ]
  },
  {
   "id": "second-thoughts",
   "name": "Second Thoughts",
   "image": "./assets/catalog/cards/blue-light.webp",
   "pricing": null,
+  "face": {
+   "freeGlyph": "⁇",
+   "freeVal": "1",
+   "paid": "RECALL 1."
+  },
   "chips": [
    {
     "k": "Stance",
@@ -3051,29 +2738,21 @@
    }
   ],
   "lines": [
-   "FREE — mill 1 to discard.",
-   "PAID — RECALL 1 + consume all marks — 1 damage per stack."
-  ],
-  "face": {
-   "glyph": "◆",
-   "stanceColor": "#4f7fd6",
-   "borderColor": "#c2a14e",
-   "orbColor": "#4f7fd6",
-   "kwColor": "#c2a14e",
-   "freeKeyword": "MILL",
-   "freeValue": "1",
-   "paidKeyword": "RECALL",
-   "paidValue": "1 from discard",
-   "typeStrip": "MIND · SPELL",
-   "dieLine": "",
-   "inert": false
-  }
+   "FREE — mill 1 to discard",
+   "RECALL 1",
+   "rider"
+  ]
  },
  {
   "id": "self-flagellant",
   "name": "Self-Flagellant",
   "image": "./assets/catalog/cards/burn.webp",
   "pricing": "RUPTURE (4 + fuel 8, bonusPct 0.10 ≈ +0.004) − recoil 5 credit",
+  "face": {
+   "freeGlyph": "◎",
+   "freeVal": "1",
+   "paid": "RECOIL 5 + RUPTURE."
+  },
   "chips": [
    {
     "k": "Stance",
@@ -3117,29 +2796,21 @@
    }
   ],
   "lines": [
-   "FREE — mark i1 d1 (self).",
-   "PAID — RECOIL 5 + RUPTURE ALL."
-  ],
-  "face": {
-   "glyph": "✸",
-   "stanceColor": "#d6543f",
-   "borderColor": "#e2543b",
-   "orbColor": "#d6543f",
-   "kwColor": "#e2543b",
-   "freeKeyword": "MARK",
-   "freeValue": "×1 · 1t",
-   "paidKeyword": "RUPTURE",
-   "paidValue": "detonate all afflictions",
-   "typeStrip": "BODY · SPELL",
-   "dieLine": "",
-   "inert": false
-  }
+   "FREE — mark i1 d1 (self)",
+   "RECOIL 5",
+   "RUPTURE"
+  ]
  },
  {
   "id": "signs-and-portents",
   "name": "Signs and Portents",
   "image": "./assets/catalog/cards/will-o-wisp.webp",
-  "pricing": null,
+  "pricing": "OMEN(draw 2 = 4 ×0.6 omen-odds = 2.4) + FREE foretell (0.35) + info value ≈ 4.4 → Lemma",
+  "face": {
+   "freeGlyph": "◉",
+   "freeVal": "1",
+   "paid": "OMEN — on hit: draw 2."
+  },
   "chips": [
    {
     "k": "Stance",
@@ -3183,29 +2854,20 @@
    }
   ],
   "lines": [
-   "FREE — FORETELL 1.",
-   "PAID — OMEN — stake claim (window 1-2, ante 2◆ at window 1): on hit, draw 2."
-  ],
-  "face": {
-   "glyph": "✦",
-   "stanceColor": "#9a5fd0",
-   "borderColor": "#a86bdc",
-   "orbColor": "#9a5fd0",
-   "kwColor": "#a86bdc",
-   "freeKeyword": "FORETELL",
-   "freeValue": "1",
-   "paidKeyword": "OMEN",
-   "paidValue": "ante 2◆ at window 1",
-   "typeStrip": "HEART · SPELL",
-   "dieLine": "",
-   "inert": false
-  }
+   "FREE — FORETELL 1",
+   "OMEN — on hit: draw 2"
+  ]
  },
  {
   "id": "sketch-of-a-thought",
   "name": "Sketch of a Thought",
   "image": "./assets/catalog/cards/blue-light.webp",
   "pricing": null,
+  "face": {
+   "freeGlyph": "⬡",
+   "freeVal": "1",
+   "paid": "kindling ember i1 d3 + KINDLE (mind) (3 over its run)."
+  },
   "chips": [
    {
     "k": "Stance",
@@ -3249,29 +2911,22 @@
    }
   ],
   "lines": [
-   "FREE — +1 pip to every Reserve die.",
-   "PAID — kindling ember i1 d3 (DoT: 1/turn) + KINDLE (mind). ⬢ MIND die: +1 intensity to this card's statuses"
-  ],
-  "face": {
-   "glyph": "🔥",
-   "stanceColor": "#4f7fd6",
-   "borderColor": "#e2543b",
-   "orbColor": "#4f7fd6",
-   "kwColor": "#e2543b",
-   "freeKeyword": "PIP",
-   "freeValue": "+1",
-   "paidKeyword": "BLEED",
-   "paidValue": "3 over 3t",
-   "typeStrip": "MIND · SPELL",
-   "dieLine": "⬢ MIND die: +1 intensity to this card's statuses",
-   "inert": false
-  }
+   "FREE — +1 pip to every Reserve die",
+   "Applies Kindling Ember ×1, 3t → enemy",
+   "KINDLE (mind)",
+   "Die bonus: powering die mind fires a rider"
+  ]
  },
  {
   "id": "slippery-slope",
   "name": "Slippery Slope",
   "image": "./assets/catalog/cards/dream-flutter.webp",
   "pricing": null,
+  "face": {
+   "freeGlyph": "◎",
+   "freeVal": "1",
+   "paid": "poison i1 d4 (2/play)."
+  },
   "chips": [
    {
     "k": "Stance",
@@ -3315,29 +2970,20 @@
    }
   ],
   "lines": [
-   "FREE — mark i1 d1.",
-   "PAID — poison i1 d4 (2/play)."
-  ],
-  "face": {
-   "glyph": "☠",
-   "stanceColor": "#d6543f",
-   "borderColor": "#e2543b",
-   "orbColor": "#d6543f",
-   "kwColor": "#e2543b",
-   "freeKeyword": "MARK",
-   "freeValue": "×1 · 1t",
-   "paidKeyword": "POISON",
-   "paidValue": "2/play per card you play · 4t",
-   "typeStrip": "BODY · SPELL",
-   "dieLine": "",
-   "inert": false
-  }
+   "FREE — mark i1 d1",
+   "Applies Poison ×1 → enemy"
+  ]
  },
  {
   "id": "soft-word",
   "name": "Soft Word",
   "image": "./assets/catalog/cards/meat-pecker.webp",
   "pricing": null,
+  "face": {
+   "freeGlyph": "▼",
+   "freeVal": "1",
+   "paid": "SWAY 3."
+  },
   "chips": [
    {
     "k": "Stance",
@@ -3381,29 +3027,21 @@
    }
   ],
   "lines": [
-   "FREE — rapport i1 d2.",
-   "PAID — SWAY 3. ⬢ HEART die: SWAY 1"
-  ],
-  "face": {
-   "glyph": "✦",
-   "stanceColor": "#9a5fd0",
-   "borderColor": "#a86bdc",
-   "orbColor": "#9a5fd0",
-   "kwColor": "#a86bdc",
-   "freeKeyword": "RAPPORT",
-   "freeValue": "×1 · 2t",
-   "paidKeyword": "SWAY",
-   "paidValue": "+3 toward capitulation",
-   "typeStrip": "HEART · SPELL",
-   "dieLine": "⬢ HEART die: SWAY 1",
-   "inert": false
-  }
+   "FREE — rapport i1 d2",
+   "SWAY 3",
+   "Die bonus: powering die heart fires a rider"
+  ]
  },
  {
   "id": "straw-mans-jab",
   "name": "Straw Man's Jab",
   "image": "./assets/catalog/cards/bleed.webp",
   "pricing": null,
+  "face": {
+   "freeGlyph": "◎",
+   "freeVal": "1",
+   "paid": "bleed i2 d2 (6/hit)."
+  },
   "chips": [
    {
     "k": "Stance",
@@ -3443,29 +3081,21 @@
    }
   ],
   "lines": [
-   "FREE — mark i1 d1.",
-   "PAID — bleed i2 d2 (6/hit). ⬢ BODY die: +1 intensity to this card's statuses"
-  ],
-  "face": {
-   "glyph": "🩸",
-   "stanceColor": "#d6543f",
-   "borderColor": "#e2543b",
-   "orbColor": "#d6543f",
-   "kwColor": "#e2543b",
-   "freeKeyword": "MARK",
-   "freeValue": "×1 · 1t",
-   "paidKeyword": "BLEED",
-   "paidValue": "6/hit per hit taken · 2 stacks",
-   "typeStrip": "BODY · SPELL",
-   "dieLine": "⬢ BODY die: +1 intensity to this card's statuses",
-   "inert": false
-  }
+   "FREE — mark i1 d1",
+   "Applies Bleed ×2, 2t → enemy",
+   "Die bonus: powering die body fires a rider"
+  ]
  },
  {
   "id": "stuck-in-their-head",
   "name": "Stuck in Their Head",
   "image": "./assets/catalog/cards/will-o-wisp.webp",
   "pricing": "engine text — every ECHO / REPRISE drips 2 (echo-gated, §1 source 3) (Aporia)",
+  "face": {
+   "freeGlyph": "☠",
+   "freeVal": "3r",
+   "paid": "Every ECHO or REPRISE drips 2 damage to the enemy. Costs 1 die. Attaches to the enemy."
+  },
   "chips": [
    {
     "k": "Stance",
@@ -3509,29 +3139,20 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — Each ECHO, RECALL, or replay deals the foe's MARK stacks as damage (min 2, max 16).",
-   "PAID (rest of combat) — Each ECHO, RECALL, or replay deals the foe's MARK stacks as damage (min 2, max 16). Attaches to the enemy."
-  ],
-  "face": {
-   "glyph": "⛓",
-   "stanceColor": "#9a5fd0",
-   "borderColor": "#a86bdc",
-   "orbColor": "#9a5fd0",
-   "kwColor": "#a86bdc",
-   "freeKeyword": "FREE",
-   "freeValue": "3 rounds",
-   "paidKeyword": "MARK",
-   "paidValue": "curse · rest of combat",
-   "typeStrip": "HEART · CURSE",
-   "dieLine": "",
-   "inert": false
-  }
+   "FREE (3 rounds) — Every ECHO or REPRISE drips 2 damage to the enemy.",
+   "PAID (rest of combat) — Every ECHO or REPRISE drips 2 damage to the enemy. (attaches to the enemy)"
+  ]
  },
  {
   "id": "suppurating-curse",
   "name": "Suppurating Curse",
   "image": "./assets/catalog/cards/devil-book.webp",
   "pricing": "engine text — DOUBLES the enemy's total DoT damage each round (a",
+  "face": {
+   "freeGlyph": "☠",
+   "freeVal": "3r",
+   "paid": "Doubles the total POISON and BLEED damage the enemy takes each round. Costs 1 die. Attaches to the enemy."
+  },
   "chips": [
    {
     "k": "Stance",
@@ -3575,29 +3196,20 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — At round end, the enemy takes this round's POISON and BLEED damage again.",
-   "PAID (rest of combat) — At round end, the enemy takes this round's POISON and BLEED damage again. Attaches to the enemy."
-  ],
-  "face": {
-   "glyph": "⛓",
-   "stanceColor": "#4f7fd6",
-   "borderColor": "#a86bdc",
-   "orbColor": "#4f7fd6",
-   "kwColor": "#a86bdc",
-   "freeKeyword": "FREE",
-   "freeValue": "3 rounds",
-   "paidKeyword": "BLEED",
-   "paidValue": "curse · rest of combat",
-   "typeStrip": "MIND · CURSE",
-   "dieLine": "",
-   "inert": false
-  }
+   "FREE (3 rounds) — Doubles the total POISON and BLEED damage the enemy takes each round.",
+   "PAID (rest of combat) — Doubles the total POISON and BLEED damage the enemy takes each round. (attaches to the enemy)"
+  ]
  },
  {
   "id": "sweet-poison",
   "name": "Sweet Poison",
   "image": "./assets/catalog/cards/dream-flutter.webp",
   "pricing": null,
+  "face": {
+   "freeGlyph": "◎",
+   "freeVal": "1",
+   "paid": "poison i1 d4 + bleed i1 d2 (self) (2/play)."
+  },
   "chips": [
    {
     "k": "Stance",
@@ -3641,29 +3253,21 @@
    }
   ],
   "lines": [
-   "FREE — mark i1 d1 (self).",
-   "PAID — poison i1 d4 + bleed i1 d2 (self) (2/play)."
-  ],
-  "face": {
-   "glyph": "☠",
-   "stanceColor": "#d6543f",
-   "borderColor": "#e2543b",
-   "orbColor": "#d6543f",
-   "kwColor": "#e2543b",
-   "freeKeyword": "MARK",
-   "freeValue": "×1 · 1t",
-   "paidKeyword": "POISON",
-   "paidValue": "2/play per card you play · 4t",
-   "typeStrip": "BODY · SPELL",
-   "dieLine": "",
-   "inert": false
-  }
+   "FREE — mark i1 d1 (self)",
+   "Applies Poison ×1 → enemy",
+   "Applies Bleed ×1, 2t → self"
+  ]
  },
  {
   "id": "the-adamant-wall",
   "name": "The Adamant Wall",
   "image": "./assets/catalog/cards/guard-1.webp",
   "pricing": null,
+  "face": {
+   "freeGlyph": "❖",
+   "freeVal": "3",
+   "paid": "GUARD 10 (persists) + RIPOSTE 4 (parry 2)."
+  },
   "chips": [
    {
     "k": "Stance",
@@ -3707,29 +3311,21 @@
    }
   ],
   "lines": [
-   "FREE — GUARD 3 (persists).",
-   "PAID — GUARD 10 (persists) + RIPOSTE 4 (parry 2)."
-  ],
-  "face": {
-   "glyph": "⬡",
-   "stanceColor": "#d6543f",
-   "borderColor": "#9aa0a6",
-   "orbColor": "#d6543f",
-   "kwColor": "#9aa0a6",
-   "freeKeyword": "GUARD",
-   "freeValue": "3",
-   "paidKeyword": "GUARD",
-   "paidValue": "10 persists",
-   "typeStrip": "BODY · SPELL",
-   "dieLine": "",
-   "inert": false
-  }
+   "FREE — GUARD 3 (persists)",
+   "GUARD 10 (persists)",
+   "RIPOSTE 4 (parry 2)"
+  ]
  },
  {
   "id": "the-closing-word",
   "name": "The Closing Word",
   "image": "./assets/catalog/cards/bright-sphere-yellow.webp",
   "pricing": "PERORATION at 6 → consume marks 3/stack + draw 2 + 2 Conviction ≈ 13 (CONCEDE at 8 — alt-win, §9) → Axiom",
+  "face": {
+   "freeGlyph": "❡",
+   "freeVal": "1",
+   "paid": "PERORATION at 6 (CONCEDE at 8)."
+  },
   "chips": [
    {
     "k": "Stance",
@@ -3773,29 +3369,20 @@
    }
   ],
   "lines": [
-   "FREE — +1 Premise.",
-   "PAID — PERORATION at 6 — +2 Conviction · draw 2 · consume all marks — 3 damage per stack (CONCEDE at 8 — you win; elite 10 · boss 12)."
-  ],
-  "face": {
-   "glyph": "✦",
-   "stanceColor": "#9a5fd0",
-   "borderColor": "#a86bdc",
-   "orbColor": "#9a5fd0",
-   "kwColor": "#a86bdc",
-   "freeKeyword": "PREMISE",
-   "freeValue": "+1",
-   "paidKeyword": "PREMISE",
-   "paidValue": "at 6 concede 8/10 elite/12 boss",
-   "typeStrip": "HEART · SPELL",
-   "dieLine": "",
-   "inert": false
-  }
+   "FREE — +1 Premise",
+   "PERORATION at 6 (CONCEDE at 8)"
+  ]
  },
  {
   "id": "the-gleaners-due",
   "name": "The Gleaner's Due",
   "image": "./assets/catalog/cards/meat-pecker.webp",
   "pricing": "REAP 2 → KINDLE (2.5) + draw 2 (4) − soul cost 2 + rider soul 1 + FREE",
+  "face": {
+   "freeGlyph": "⚑",
+   "freeVal": "1",
+   "paid": "REAP 2 — KINDLE (mind) — draw 2 · +1 Soul."
+  },
   "chips": [
    {
     "k": "Stance",
@@ -3839,29 +3426,20 @@
    }
   ],
   "lines": [
-   "FREE — draw 1 · +1 Soul.",
-   "PAID — REAP 2 — KINDLE (mind) — draw 2 · +1 Soul."
-  ],
-  "face": {
-   "glyph": "☠",
-   "stanceColor": "#4f7fd6",
-   "borderColor": "#e2543b",
-   "orbColor": "#4f7fd6",
-   "kwColor": "#e2543b",
-   "freeKeyword": "DRAW",
-   "freeValue": "1 +",
-   "paidKeyword": "REAP",
-   "paidValue": "2 Souls spend the bank",
-   "typeStrip": "MIND · SPELL",
-   "dieLine": "",
-   "inert": false
-  }
+   "FREE — draw 1 · +1 Soul",
+   "REAP 2 — KINDLE (mind) — draw 2 · +1 Soul"
+  ]
  },
  {
   "id": "the-olive-branch",
   "name": "The Olive Branch",
   "image": "./assets/catalog/cards/yggdrasil.webp",
   "pricing": null,
+  "face": {
+   "freeGlyph": "▼",
+   "freeVal": "1",
+   "paid": "SWAY 3."
+  },
   "chips": [
    {
     "k": "Stance",
@@ -3905,29 +3483,21 @@
    }
   ],
   "lines": [
-   "FREE — rapport i1 d2.",
-   "PAID — SWAY 3 + cleanse 1 · heal 3."
-  ],
-  "face": {
-   "glyph": "✦",
-   "stanceColor": "#d6543f",
-   "borderColor": "#a86bdc",
-   "orbColor": "#d6543f",
-   "kwColor": "#a86bdc",
-   "freeKeyword": "RAPPORT",
-   "freeValue": "×1 · 2t",
-   "paidKeyword": "SWAY",
-   "paidValue": "+3 toward capitulation",
-   "typeStrip": "BODY · SPELL",
-   "dieLine": "",
-   "inert": false
-  }
+   "FREE — rapport i1 d2",
+   "SWAY 3",
+   "rider"
+  ]
  },
  {
   "id": "the-oracles-eye",
   "name": "The Oracle's Eye",
   "image": "./assets/catalog/cards/god-eye-silver.webp",
   "pricing": "persistent always-revealed next stance + omen riders ×1.5 ≈ 12 (min-4 law) → Axiom",
+  "face": {
+   "freeGlyph": "❖",
+   "freeVal": "3r",
+   "paid": "The next enemy stance is always revealed (FORETELL), and your OMENs hit harder."
+  },
   "chips": [
    {
     "k": "Stance",
@@ -3971,29 +3541,20 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — The next stance stays revealed (FORETELL); OMEN payoffs land ×1.5 (round up).",
-   "PAID (rest of combat) — The next stance stays revealed (FORETELL); OMEN payoffs land ×1.5 (round up)."
-  ],
-  "face": {
-   "glyph": "◈",
-   "stanceColor": "#9a5fd0",
-   "borderColor": "#7fb3a6",
-   "orbColor": "#9a5fd0",
-   "kwColor": "#7fb3a6",
-   "freeKeyword": "FREE",
-   "freeValue": "3 rounds",
-   "paidKeyword": "OMEN",
-   "paidValue": "rest of combat",
-   "typeStrip": "HEART · ENCHANTMENT",
-   "dieLine": "",
-   "inert": false
-  }
+   "FREE (3 rounds) — The next enemy stance is always revealed (FORETELL), and your OMENs hit harder.",
+   "PAID (rest of combat) — The next enemy stance is always revealed (FORETELL), and your OMENs hit harder."
+  ]
  },
  {
   "id": "the-overtake",
   "name": "The Overtake",
   "image": "./assets/catalog/cards/ice-sword.webp",
   "pricing": "spend ALL pips (+1 Guard per) + RUPTURE (3.5 fuel/pip, +50% burst) —",
+  "face": {
+   "freeGlyph": "◎",
+   "freeVal": "1",
+   "paid": "spend ALL pips (+1 Guard per pip) + RUPTURE (+3.5 fuel per pip) + refresh the spent die."
+  },
   "chips": [
    {
     "k": "Stance",
@@ -4037,29 +3598,22 @@
    }
   ],
   "lines": [
-   "FREE — mark i1 d1.",
-   "PAID — spend ALL pips (+1 Guard per pip) + RUPTURE ALL (+3.5 damage per spent pip; needs 2+ pips) + refresh the spent die."
-  ],
-  "face": {
-   "glyph": "✸",
-   "stanceColor": "#d6543f",
-   "borderColor": "#e2543b",
-   "orbColor": "#d6543f",
-   "kwColor": "#e2543b",
-   "freeKeyword": "MARK",
-   "freeValue": "×1 · 1t",
-   "paidKeyword": "RUPTURE",
-   "paidValue": "detonate all afflictions",
-   "typeStrip": "BODY · SPELL",
-   "dieLine": "",
-   "inert": false
-  }
+   "FREE — mark i1 d1",
+   "spend ALL pips (+1 Guard per pip)",
+   "RUPTURE (+3.5 fuel per pip)",
+   "refresh the spent die"
+  ]
  },
  {
   "id": "the-reaping",
   "name": "The Reaping",
   "image": "./assets/catalog/cards/ice-sword.webp",
   "pricing": null,
+  "face": {
+   "freeGlyph": "🩸",
+   "freeVal": "1",
+   "paid": "REAP all — 4 per Soul + SIPHON 40%."
+  },
   "chips": [
    {
     "k": "Stance",
@@ -4103,29 +3657,21 @@
    }
   ],
   "lines": [
-   "FREE — bleed i1 d1.",
-   "PAID — REAP ALL — 4 damage per Soul + SIPHON 40%."
-  ],
-  "face": {
-   "glyph": "☠",
-   "stanceColor": "#d6543f",
-   "borderColor": "#e2543b",
-   "orbColor": "#d6543f",
-   "kwColor": "#e2543b",
-   "freeKeyword": "BLEED",
-   "freeValue": "×1 · 1t",
-   "paidKeyword": "REAP",
-   "paidValue": "all Souls 4 per Soul",
-   "typeStrip": "BODY · SPELL",
-   "dieLine": "",
-   "inert": false
-  }
+   "FREE — bleed i1 d1",
+   "REAP all — 4 per Soul",
+   "SIPHON 40%"
+  ]
  },
  {
   "id": "the-tithe",
   "name": "The Tithe",
   "image": "./assets/catalog/cards/devil-book.webp",
   "pricing": "engine text — enemy afflictions expire 1 turn sooner (faster Soul churn) (Aporia)",
+  "face": {
+   "freeGlyph": "☠",
+   "freeVal": "3r",
+   "paid": "Enemy afflictions expire one turn sooner (faster SOUL churn). Costs 1 die. Attaches to the enemy."
+  },
   "chips": [
    {
     "k": "Stance",
@@ -4166,28 +3712,19 @@
   ],
   "lines": [
    "FREE (3 rounds) — Enemy afflictions expire one turn sooner (faster SOUL churn).",
-   "PAID (rest of combat) — Enemy afflictions expire one turn sooner (faster SOUL churn). Attaches to the enemy."
-  ],
-  "face": {
-   "glyph": "⛓",
-   "stanceColor": "#4f7fd6",
-   "borderColor": "#a86bdc",
-   "orbColor": "#4f7fd6",
-   "kwColor": "#a86bdc",
-   "freeKeyword": "FREE",
-   "freeValue": "3 rounds",
-   "paidKeyword": "SOUL",
-   "paidValue": "curse · rest of combat",
-   "typeStrip": "MIND · CURSE",
-   "dieLine": "",
-   "inert": false
-  }
+   "PAID (rest of combat) — Enemy afflictions expire one turn sooner (faster SOUL churn). (attaches to the enemy)"
+  ]
  },
  {
   "id": "tu-quoque",
   "name": "Tu Quoque",
   "image": "./assets/catalog/cards/yggdrasil.webp",
   "pricing": null,
+  "face": {
+   "freeGlyph": "❖",
+   "freeVal": "2",
+   "paid": "thorns i3 d2 (self)."
+  },
   "chips": [
    {
     "k": "Stance",
@@ -4231,95 +3768,21 @@
    }
   ],
   "lines": [
-   "FREE — GUARD 2 (persists).",
-   "PAID — thorns i3 d2. ⬢ HEART die: Guard 2"
-  ],
-  "face": {
-   "glyph": "✸",
-   "stanceColor": "#9a5fd0",
-   "borderColor": "#9aa0a6",
-   "orbColor": "#9a5fd0",
-   "kwColor": "#9aa0a6",
-   "freeKeyword": "GUARD",
-   "freeValue": "2",
-   "paidKeyword": "THORNS",
-   "paidValue": "Reflect 3 2t",
-   "typeStrip": "HEART · SPELL",
-   "dieLine": "⬢ HEART die: Guard 2",
-   "inert": false
-  }
- },
- {
-  "id": "turnabout",
-  "name": "Turnabout",
-  "image": "./assets/catalog/cards/confuse.webp",
-  "pricing": null,
-  "chips": [
-   {
-    "k": "Stance",
-    "v": "mind"
-   },
-   {
-    "k": "Type",
-    "v": "paradox"
-   },
-   {
-    "k": "Tier",
-    "v": "3"
-   },
-   {
-    "k": "Target",
-    "v": "enemy"
-   },
-   {
-    "k": "Rank",
-    "v": "Aporia (rare)"
-   },
-   {
-    "k": "Kind",
-    "v": "spell"
-   },
-   {
-    "k": "Theme",
-    "v": "control"
-   },
-   {
-    "k": "Keywords",
-    "v": "STAGGER · BACKFIRE · FORETELL · DRAW"
-   },
-   {
-    "k": "Source",
-    "v": "starter"
-   },
-   {
-    "k": "Preset",
-    "v": "Standstill"
-   }
-  ],
-  "lines": [
-   "FREE — reveal the next stance.",
-   "PAID — BACKFIRE ALL — 1.5 damage per rung ever denied."
-  ],
-  "face": {
-   "glyph": "◆",
-   "stanceColor": "#4f7fd6",
-   "borderColor": "#c2a14e",
-   "orbColor": "#4f7fd6",
-   "kwColor": "#c2a14e",
-   "freeKeyword": "REVEAL",
-   "freeValue": "stance",
-   "paidKeyword": "BACKFIRE",
-   "paidValue": "1.5× per rung ever denied",
-   "typeStrip": "MIND · SPELL",
-   "dieLine": "",
-   "inert": false
-  }
+   "FREE — GUARD 2 (persists)",
+   "Applies Thorns ×3, 2t → self",
+   "Die bonus: powering die heart fires a rider"
+  ]
  },
  {
   "id": "undistributed-middle",
   "name": "Undistributed Middle",
   "image": "./assets/catalog/cards/confuse.webp",
   "pricing": null,
+  "face": {
+   "freeGlyph": "◆",
+   "freeVal": null,
+   "paid": "backfire i2 d3 + STAGGER 1."
+  },
   "chips": [
    {
     "k": "Stance",
@@ -4363,29 +3826,22 @@
    }
   ],
   "lines": [
-   "FREE — reveal the next stance.",
-   "PAID — backfire i2 d3 + STAGGER 1. ⬡ MIND ×3 spent: +1 intensity to this card's statuses · STAGGER 1"
-  ],
-  "face": {
-   "glyph": "⟲",
-   "stanceColor": "#4f7fd6",
-   "borderColor": "#a86bdc",
-   "orbColor": "#4f7fd6",
-   "kwColor": "#a86bdc",
-   "freeKeyword": "REVEAL",
-   "freeValue": "stance",
-   "paidKeyword": "BACKFIRE",
-   "paidValue": "2/rung 3t",
-   "typeStrip": "MIND · SPELL",
-   "dieLine": "⬡ MIND ×3 spent: +1 intensity to this card's statuses · STAGGER 1",
-   "inert": false
-  }
+   "FREE — reveal the next stance",
+   "Applies Backfire ×2, 3t → enemy",
+   "STAGGER 1",
+   "Threshold: 3× mind die fires a rider"
+  ]
  },
  {
   "id": "venom-and-vein",
   "name": "Venom and Vein",
   "image": "./assets/catalog/cards/dream-flutter.webp",
   "pricing": "persistent +1 intensity on every bleed/poison application ≈ 1.5 × ~8 triggers × min-4 law ≈ 12 → Axiom",
+  "face": {
+   "freeGlyph": "❖",
+   "freeVal": "3r",
+   "paid": "Every BLEED or POISON you apply lands at +1 intensity."
+  },
   "chips": [
    {
     "k": "Stance",
@@ -4429,29 +3885,20 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — Your BLEED and POISON land +1 intensity and +1 duration.",
-   "PAID (rest of combat) — Your BLEED and POISON land +1 intensity and +1 duration."
-  ],
-  "face": {
-   "glyph": "◈",
-   "stanceColor": "#d6543f",
-   "borderColor": "#7fb3a6",
-   "orbColor": "#d6543f",
-   "kwColor": "#7fb3a6",
-   "freeKeyword": "FREE",
-   "freeValue": "3 rounds",
-   "paidKeyword": "POISON",
-   "paidValue": "rest of combat",
-   "typeStrip": "BODY · ENCHANTMENT",
-   "dieLine": "",
-   "inert": false
-  }
+   "FREE (3 rounds) — Every BLEED or POISON you apply lands at +1 intensity.",
+   "PAID (rest of combat) — Every BLEED or POISON you apply lands at +1 intensity."
+  ]
  },
  {
   "id": "winnowing",
   "name": "Winnowing",
   "image": "./assets/catalog/cards/ice-sword.webp",
   "pricing": null,
+  "face": {
+   "freeGlyph": "🩸",
+   "freeVal": "1",
+   "paid": "RUPTURE 1 — its fuel ticks now, +2 Soul."
+  },
   "chips": [
    {
     "k": "Stance",
@@ -4495,29 +3942,20 @@
    }
   ],
   "lines": [
-   "FREE — bleed i1 d1.",
-   "PAID — RUPTURE 1 — its remaining damage lands now, +2 Souls."
-  ],
-  "face": {
-   "glyph": "☠",
-   "stanceColor": "#d6543f",
-   "borderColor": "#e2543b",
-   "orbColor": "#d6543f",
-   "kwColor": "#e2543b",
-   "freeKeyword": "BLEED",
-   "freeValue": "×1 · 1t",
-   "paidKeyword": "RUPTURE",
-   "paidValue": "+2 Souls · consume 1 affliction",
-   "typeStrip": "BODY · SPELL",
-   "dieLine": "",
-   "inert": false
-  }
+   "FREE — bleed i1 d1",
+   "RUPTURE 1 — its fuel ticks now, +2 Soul"
+  ]
  },
  {
   "id": "zenos-half-step",
   "name": "Zeno's Half-Step",
   "image": "./assets/catalog/cards/confuse.webp",
   "pricing": null,
+  "face": {
+   "freeGlyph": "◆",
+   "freeVal": null,
+   "paid": "STAGGER 1."
+  },
   "chips": [
    {
     "k": "Stance",
@@ -4561,22 +3999,8 @@
    }
   ],
   "lines": [
-   "FREE — reveal the next stance.",
-   "PAID — STAGGER 1."
-  ],
-  "face": {
-   "glyph": "✦",
-   "stanceColor": "#d6543f",
-   "borderColor": "#a86bdc",
-   "orbColor": "#d6543f",
-   "kwColor": "#a86bdc",
-   "freeKeyword": "REVEAL",
-   "freeValue": "stance",
-   "paidKeyword": "STAGGER",
-   "paidValue": "−1 rung · next action",
-   "typeStrip": "BODY · SPELL",
-   "dieLine": "",
-   "inert": false
-  }
+   "FREE — reveal the next stance",
+   "STAGGER 1"
+  ]
  }
 ]

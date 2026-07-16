@@ -7,6 +7,13 @@
       "runtimeArgs": ["expo", "start", "--web", "--port", "8081"],
       "cwd": "axiomancer-mobile",
       "port": 8081
+    },
+    {
+      "name": "card-editor",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "cwd": "axiomancer-card-editor",
+      "port": 5174
     }
   ]
 }

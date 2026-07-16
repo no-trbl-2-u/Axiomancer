@@ -43,75 +43,155 @@ const CATALOG_EXTRA_STYLE = `
 .catalog-section > h2 { font-size: 24px; margin: 0 0 6px; }
 .catalog-section .intro { color: var(--muted); margin: 0 0 14px; }
 
-/* ── Card FACE — a faithful CSS port of the in-combat CombatCardFace (large,
-      Option A layout). The stance/keyword/orb hues arrive as inline --vars per
-      card; everything else is fixed frame chrome so the catalog reads as the
-      game does. ─────────────────────────────────────────────────────────── */
-.grid-cards { grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr)); align-items: start; }
-.gcard.is-face { background: none; border: 0; border-radius: 0; overflow: visible; }
-.cardface {
-  position: relative; aspect-ratio: 132 / 194; border-radius: 8px;
-  border: 2px solid rgba(0,0,0,0.9); background: #14110e;
-  box-shadow: 0 3px 6px rgba(0,0,0,0.5); overflow: hidden;
+/* ── Card FACE — the #5 SIDE RAIL design (die/stance-coloured spine) ──────── */
+.gcard { position: relative; }
+.cface {
+  position: relative; aspect-ratio: 5 / 7; overflow: hidden; background: #0c0a08;
+  font-family: "IM Fell English", Georgia, "Times New Roman", serif;
 }
-.cardface.inert { filter: saturate(0.72) brightness(0.94); }
-.cf-inner {
-  position: absolute; inset: 0; border: 1.5px solid var(--border); border-radius: 6px;
-  overflow: hidden; display: flex; flex-direction: column; background: #14110e;
+.cface .cart { position: absolute; inset: 0; }
+.cface .cart img { width: 100%; height: 100%; object-fit: cover; object-position: top center; display: block; }
+.cface .cart.none { display: flex; align-items: center; justify-content: center; color: rgba(232,223,200,.35); font-size: 44px; }
+.cface .ctint { position: absolute; inset: 0; background: var(--rc); mix-blend-mode: soft-light; opacity: .17; }
+.cface .cscrim {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 80%; pointer-events: none;
+  background: linear-gradient(to top, #06050a 20%, color-mix(in srgb, #06050a 82%, var(--rc)) 46%, rgba(6,5,4,.5) 66%, transparent);
 }
-.cf-art { position: relative; height: 48%; background: #0c0a08; }
-.cf-art img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
-.cf-tint { position: absolute; inset: 0; background: var(--stance); opacity: 0.14; }
-.cf-tint-low {
-  position: absolute; left: 0; right: 0; bottom: 0; height: 55%;
-  background: linear-gradient(to bottom, transparent, var(--stance)); opacity: 0.5;
+.cface .crail {
+  position: absolute; left: 0; top: 0; bottom: 0; width: 26px; z-index: 2;
+  background: linear-gradient(var(--rc), color-mix(in srgb, var(--rc) 45%, #000));
+  border-right: 1px solid rgba(0,0,0,.5);
+  display: flex; flex-direction: column; align-items: center; justify-content: flex-end; padding-bottom: 11px;
 }
-.cf-orb {
-  position: absolute; z-index: 3; top: 8px; left: 8px; width: 44px; height: 44px;
-  border-radius: 50%; background: var(--orb); border: 1.5px solid rgba(0,0,0,0.65);
-  box-shadow: 0 2px 3px rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center;
+.cface .crail .cvert {
+  writing-mode: vertical-rl; transform: rotate(180deg);
+  font-family: "Bebas Neue", "Arial Narrow", system-ui, sans-serif;
+  font-size: 11px; letter-spacing: 2px; color: rgba(255,255,255,.9); white-space: nowrap;
 }
-.cf-shine { position: absolute; top: 4px; left: 6px; width: 40%; height: 30%; border-radius: 50%; background: rgba(255,255,255,0.32); }
-.cf-glyph { color: #fff; font-size: 22px; line-height: 1; text-shadow: 0 1px 2px rgba(0,0,0,0.8); }
-.cf-lower { flex: 1; display: flex; flex-direction: column; min-height: 0; }
-.cf-nameband {
-  position: relative; background: var(--stance); padding: 4px 6px; text-align: center;
-  border-top: 1px solid rgba(255,255,255,0.28); border-bottom: 1px solid rgba(0,0,0,0.45);
+/* ① the GIANT free-effect glyph with its intensity centred INSIDE it. */
+.cface .cfree {
+  position: absolute; left: 4px; top: 4px; z-index: 3; width: 46px; height: 46px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 42px; line-height: 1; color: var(--rc); text-shadow: 0 2px 5px rgba(0,0,0,.85);
+  background: radial-gradient(circle at 48% 46%, rgba(6,5,10,.82) 40%, rgba(6,5,10,0) 72%);
 }
-.cf-nameband::before { content: ""; position: absolute; inset: 0; background: rgba(0,0,0,0.30); }
-.cf-name {
-  position: relative; font-family: Georgia, "Times New Roman", serif; font-weight: 700;
-  font-size: 17px; line-height: 1.15; color: #f3e9d2; letter-spacing: 0.3px;
-  text-shadow: 0 1px 3px rgba(0,0,0,0.6);
-  /* The game shrinks the name to one line; on the web we let a long name wrap
-     rather than clip it — a catalog must never hide a card's name. */
-  display: block; text-wrap: balance;
+.cface .cfree .cfreeval {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  font-size: 15px; font-weight: 600; color: #fff;
+  font-family: "JetBrains Mono", ui-monospace, monospace; text-shadow: 0 1px 3px rgba(0,0,0,.95);
 }
-.cf-rail { flex: 1; display: flex; align-items: stretch; background: rgba(10,8,6,0.62); min-height: 0; }
-.cf-half {
-  flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center;
-  justify-content: center; text-align: center; padding: 4px 4px; gap: 2px;
+.cface .crarity {
+  position: absolute; top: 7px; right: 7px; z-index: 2; background: rgba(8,7,6,.7);
+  font-family: "Bebas Neue", "Arial Narrow", system-ui, sans-serif;
+  font-size: 10px; letter-spacing: 1px; padding: 1px 6px; border: 1px solid;
 }
-.cf-div { width: 1px; background: rgba(255,255,255,0.18); margin: 4px 0; }
-.cf-head { font-size: 12px; letter-spacing: 1.2px; font-weight: 700; line-height: 1.1; }
-.cf-free-head { color: #9c937f; }
-.cf-paid-head { color: var(--kw); }
-.cf-val {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 15px; line-height: 1.2;
+.cface .cbtm { position: absolute; left: 38px; right: 12px; bottom: 12px; z-index: 2; }
+.cface .cbtm .cname {
+  font-family: "Pirata One", "IM Fell English", Georgia, serif; font-size: 23px; line-height: 1.02;
+  color: #e8dfc8; text-shadow: 0 2px 6px #000;
 }
-.cf-free-val { color: #f1e7d0; }
-.cf-paid-val { color: var(--kw); }
-.cf-dieline {
-  align-self: center; margin: 0 0 3px; padding: 0 5px;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 9px; line-height: 1.3; color: #d4c026; letter-spacing: 0.2px; text-align: center;
+.cface .cbtm .crule { height: 1px; background: rgba(232,223,200,.22); margin: 8px 0; }
+.cface .cbtm .cpaid {
+  display: flex; gap: 7px; align-items: flex-start;
+  font-family: "IM Fell English", Georgia, serif; font-size: 13.5px; line-height: 1.35; color: #e8dfc8;
 }
-.cf-typestrip {
-  border-top: 1px solid rgba(255,255,255,0.12); background: rgba(0,0,0,0.55);
-  text-align: center; padding: 3px 2px; font-size: 9px; letter-spacing: 1.6px; color: #9c937f;
+.cface .cbtm .cpaid .ccube { flex-shrink: 0; margin-top: 2px; }
+.cface .cbtm .cpaid b {
+  font-family: "Bebas Neue", "Arial Narrow", system-ui, sans-serif; font-weight: 700;
+  letter-spacing: .5px; text-transform: uppercase; color: var(--rc);
 }
 `;
+
+// Stance → rail colour (mirrors the app's DIE palette) and rarity frame.
+const STANCE_COLOR = { body: "#d6543f", mind: "#4f7fd6", heart: "#9a5fd0", wild: "#d9b44a" };
+const RARITY_META = {
+  common: { label: "COMMON", color: "#8a8273", glow: 0 },
+  uncommon: { label: "UNCOMMON", color: "#6b8eb0", glow: 0 },
+  rare: { label: "RARE", color: "#9a6ad6", glow: 12 },
+};
+// Keyword vocabulary bolded inside the PAID sentence (the card overlay defines
+// them; the face just flags that they ARE keywords). Longest-first so multi-word
+// keywords win the match.
+const KEYWORD_WORDS = [
+  "STRIP BUFF", "HEAL SELF", "DAMAGE", "POISON", "BLEED", "BURN", "MARK", "GUARD",
+  "BARRIER", "RIPOSTE", "STUN", "SLOW", "CONFUSION", "SILENCE", "STAGGER", "BACKFIRE",
+  "SWAY", "REAP", "SOUL", "SOULS", "FORETELL", "PREMISE", "ECHO", "FORGE", "DRAW",
+  "REGEN", "SIPHON", "EXECUTE", "RUPTURE", "COMPOUND", "ENCHANT", "DISENCHANT",
+  "PROLONG", "RECALL", "PERORATION", "CONCEDE", "CAPITULATE", "VULNERABLE", "THORNS",
+  "TICK", "DOT", "CLEANSE", "PERORATE", "REPRISE", "PIP", "PIPS",
+].sort((a, b) => b.length - a.length);
+
+function boldKeywords(text) {
+  if (!text) return "";
+  const esc = KEYWORD_WORDS.map((w) => w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
+  const re = new RegExp(`\\b(${esc.join("|")})\\b`, "gi");
+  // Split into keyword / non-keyword runs and escape each part before joining.
+  const out = [];
+  let last = 0;
+  let m;
+  while ((m = re.exec(text)) !== null) {
+    if (m.index > last) out.push(escapeHtml(text.slice(last, m.index)));
+    out.push(`<b>${escapeHtml(m[0])}</b>`);
+    last = m.index + m[0].length;
+  }
+  if (last < text.length) out.push(escapeHtml(text.slice(last)));
+  return out.join("");
+}
+
+function chipVal(chips, key) {
+  const c = (chips || []).find((x) => x.k === key);
+  return c ? c.v : "";
+}
+
+// A tiny isometric die (matches the app's stance cube) tinted the rail colour.
+function cubeSvg(color) {
+  return (
+    `<svg class="ccube" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">` +
+    `<path d="M12 3 L21 8 L12 13 L3 8Z" fill="${color}"/>` +
+    `<path d="M3 8 L12 13 L12 21 L3 16Z" fill="color-mix(in srgb, ${color} 68%, #000)"/>` +
+    `<path d="M21 8 L12 13 L12 21 L21 16Z" fill="color-mix(in srgb, ${color} 42%, #000)"/>` +
+    `</svg>`
+  );
+}
+
+// The #5 rail card FACE — ① giant FREE glyph + intensity, ② PAID sentence
+// (keywords bolded), stance rail + vertical type label, name, rarity tag.
+function cardFaceHtml(c) {
+  const stance = (chipVal(c.chips, "Stance") || "body").toLowerCase();
+  const rc = STANCE_COLOR[stance] || "#8a8273";
+  const kind = (chipVal(c.chips, "Kind") || "spell").toLowerCase();
+  const kindLabel = kind === "disenchant" ? "CURSE" : kind.toUpperCase();
+  const typeLabel = `${stance.toUpperCase()} · ${kindLabel}`;
+  const rarKey = (chipVal(c.chips, "Rank").match(/\((\w+)\)/)?.[1] || "common").toLowerCase();
+  const rar = RARITY_META[rarKey] || RARITY_META.common;
+  const face = c.face || {};
+
+  const art = c.image
+    ? `<div class="cart"><img loading="lazy" src="${escapeHtml(c.image)}" alt="${escapeHtml(c.name)}"></div>`
+    : `<div class="cart none" role="img" aria-label="${escapeHtml(c.name)} (no art)">🂠</div>`;
+  const fv = face.freeVal;
+  const fvText = fv ? (/^\d+$/.test(fv) ? "+" + fv : fv) : "";
+  const freeGlyph = face.freeGlyph
+    ? `<div class="cfree">${escapeHtml(face.freeGlyph)}` +
+      (fvText ? `<span class="cfreeval">${escapeHtml(fvText)}</span>` : "") +
+      `</div>`
+    : "";
+  const paidLine = face.paid
+    ? `<div class="cpaid">${cubeSvg(rc)}<span>${boldKeywords(face.paid)}</span></div>`
+    : "";
+
+  return (
+    `<div class="cface" style="--rc:${rc}">` +
+    art +
+    `<div class="ctint"></div><div class="cscrim"></div>` +
+    `<div class="crail"><div class="cvert">${escapeHtml(typeLabel)}</div></div>` +
+    freeGlyph +
+    `<div class="crarity" style="color:${rar.color};border-color:${rar.color}88">${rar.label}</div>` +
+    `<div class="cbtm"><div class="cname">${inline(c.name)}</div>` +
+    `<div class="crule"></div>${paidLine}</div>` +
+    `</div>`
+  );
+}
 
 // A live client-side filter box shared by the cards/enemies sections. It is
 // scoped by data-target so the single catalog page never reuses duplicate IDs.
@@ -177,66 +257,32 @@ function searchText(name, chips, lines) {
 }
 
 // ---------------------------------------------------------------------------
-// Cards — the exact 5-zone combat FACE (art · stance orb · name band · ◇FREE /
-// ◆PAID split rail · die line · type strip). The face record is produced by the
-// game's own `faceStats` presenter (see scripts/export-catalog.ts) so the
-// catalog card can never drift from what the player sees in combat.
+// Cards — name · image · card text
 // ---------------------------------------------------------------------------
-function faceHtml(c) {
-  const f = c.face;
-  // Back-compat: a JSON without the face falls back to the old art + stats view.
-  if (!f) {
-    return (
-      artOrPlaceholder(c.image, "art", "🂠", c.name) +
-      `<div class="body"><div class="name">${inline(c.name)}</div>` +
-      chipsHtml(c.chips) +
-      linesHtml(c.lines) +
-      `</div>`
-    );
-  }
-
-  const art = c.image
-    ? `<img loading="lazy" src="${escapeHtml(c.image)}" alt="${escapeHtml(c.name)}">`
-    : "";
-  const dieLine = f.dieLine
-    ? `<div class="cf-dieline">${escapeHtml(f.dieLine)}</div>`
-    : "";
-  const vars =
-    `--stance:${escapeHtml(f.stanceColor)};--kw:${escapeHtml(f.kwColor)};` +
-    `--border:${escapeHtml(f.borderColor)};--orb:${escapeHtml(f.orbColor)}`;
-
-  return (
-    `<div class="cardface${f.inert ? " inert" : ""}" style="${vars}">` +
-    `<div class="cf-inner">` +
-    `<div class="cf-art">${art}<div class="cf-tint"></div><div class="cf-tint-low"></div></div>` +
-    `<div class="cf-orb"><span class="cf-shine"></span><span class="cf-glyph">${escapeHtml(f.glyph)}</span></div>` +
-    `<div class="cf-lower">` +
-    `<div class="cf-nameband"><span class="cf-name">${inline(c.name)}</span></div>` +
-    `<div class="cf-rail">` +
-    `<div class="cf-half"><div class="cf-head cf-free-head">◇ ${escapeHtml(f.freeKeyword)}</div>` +
-    `<div class="cf-val cf-free-val">${escapeHtml(f.freeValue)}</div></div>` +
-    `<div class="cf-div"></div>` +
-    `<div class="cf-half"><div class="cf-head cf-paid-head">◆ ${escapeHtml(f.paidKeyword)}</div>` +
-    `<div class="cf-val cf-paid-val">${escapeHtml(f.paidValue)}</div></div>` +
-    `</div>` +
-    dieLine +
-    `<div class="cf-typestrip">${escapeHtml(f.typeStrip)}</div>` +
-    `</div></div></div>`
-  );
-}
-
 function renderCards(cards) {
   const grid = cards
     .map((c) => {
       const search = searchText(c.name, c.chips, c.lines);
-      return `  <article class="gcard is-face" data-search="${search}">${faceHtml(c)}</article>`;
+      const rarKey = (chipVal(c.chips, "Rank").match(/\((\w+)\)/)?.[1] || "common").toLowerCase();
+      const rar = RARITY_META[rarKey] || RARITY_META.common;
+      const frame =
+        `border-color:${rar.color}` +
+        (rar.glow ? `;box-shadow:0 0 ${rar.glow}px ${rar.color}55` : "");
+      return (
+        `  <article class="gcard" style="${frame}" data-search="${search}">` +
+        cardFaceHtml(c) +
+        `<div class="body">` +
+        chipsHtml(c.chips) +
+        linesHtml(c.lines) +
+        `</div></article>`
+      );
     })
     .join("\n");
 
   return (
     `<section id="cards" class="catalog-section">\n` +
     `<h2>Cards</h2>\n` +
-    `<p class="intro">Every card drawn as its in-combat face — art, stance orb, name band, the ◇ free / ◆ die split, and the type strip.</p>\n` +
+    `<p class="intro">Name, art, stance, tier, target, rank, learn level, and rules text.</p>\n` +
     searchbar("cards-grid", "Filter cards by name or text…", cards.length, "cards") +
     `\n<div class="grid-cards" id="cards-grid">\n${grid}\n</div>\n` +
     `</section>`

@@ -38,7 +38,7 @@ import Animated, {
     useAnimatedStyle, useSharedValue, withRepeat, withSequence, withTiming,
     type SharedValue,
 } from 'react-native-reanimated';
-import Svg, { Circle, Defs, RadialGradient, Stop } from 'react-native-svg';
+import Svg, { Circle, Defs, LinearGradient as SvgLinearGradient, Path, RadialGradient, Rect as SvgRect, Stop } from 'react-native-svg';
 
 import { FONTS } from '@/theme/axm';
 import { makeStyles, usePalette } from '@/theme/runtime';
@@ -130,13 +130,13 @@ const READ_ACCENT: Record<string, string> = {
 
 // Render a sentence with each keyword name BOLDED (Sanguine-Step style). Shared by
 // the large inspect card FACE (here) and the inspect modal (CombatEncounterPanel).
-export function OutcomeText({ text, names, base, bold }: { text: string; names: string[]; base: StyleProp<TextStyle>; bold: StyleProp<TextStyle> }) {
+export function OutcomeText({ text, names, base, bold, numberOfLines }: { text: string; names: string[]; base: StyleProp<TextStyle>; bold: StyleProp<TextStyle>; numberOfLines?: number }) {
     const escaped = names.map((n) => n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).filter(Boolean);
-    if (escaped.length === 0) return <Text style={base}>{text}</Text>;
+    if (escaped.length === 0) return <Text style={base} numberOfLines={numberOfLines}>{text}</Text>;
     const upper = new Set(names.map((n) => n.toUpperCase()));
     const parts = text.split(new RegExp(`(${escaped.join('|')})`, 'gi'));
     return (
-        <Text style={base}>
+        <Text style={base} numberOfLines={numberOfLines}>
             {parts.map((p, i) => (upper.has(p.toUpperCase()) ? <Text key={i} style={bold}>{p}</Text> : <Text key={i}>{p}</Text>))}
         </Text>
     );
@@ -1387,27 +1387,6 @@ export const CombatBoard = React.memo(function CombatBoard({
 
 // ── A small fanned hand card ─────────────────────────────────────────────────
 
-// Fallback word for a face that has no honest number (heroText === '').
-function heroFace(f: CombatCardFaceVM): string {
-    if (f.heroText) return f.heroText;
-    switch (f.kind) {
-        case 'befriend': return 'SPARE';
-        case 'weaken': return 'softens';
-        default: return 'minor';   // inert
-    }
-}
-
-// The keyword line reads "KEYWORD value"; strip a leading keyword word from the
-// hero string so it doesn't double (keyword GUARD + "Guard 12" → "12").
-function paidValueText(f: CombatCardFaceVM, hero?: string): string {
-    const base = hero ?? (f.heroText || heroFace(f));
-    if (f.keyword) {
-        const stripped = base.replace(new RegExp('^' + f.keyword + '\\s*', 'i'), '');
-        return stripped || base;
-    }
-    return base;
-}
-
 // Deterministic per-card art variation (the temp art pool is smaller than the
 // card pool, so paintings are shared): mirror for ~half the cards, keyed off id.
 function artMirrored(cardId: string): boolean {
@@ -1416,9 +1395,74 @@ function artMirrored(cardId: string): boolean {
     return (h & 1) === 1;
 }
 
-// Option A rail values are terse: "over N turns" → "over Nt" etc.
-function compactSub(s: string): string {
-    return s.replace(/(\d+)\s*turns?\b/g, '$1t');
+// Compact the FREE value to what sits INSIDE the glyph — its intensity (the
+// effect owns the duration): "i1 d1" → "+1", "3 rounds" → "3r", "2" → "+2".
+function compactFree(v: string | null): string {
+    if (!v) return '';
+    const im = v.match(/i(\d+)/i);
+    if (im) return `+${im[1]}`;
+    const rm = v.match(/^(\d+)\s*rounds?$/i);
+    if (rm) return `${rm[1]}r`;
+    const nm = v.match(/^\+?(\d+)/);
+    if (nm) return `+${nm[1]}`;
+    return v.length <= 3 ? v : v.slice(0, 3);
+}
+
+// Darken a #rrggbb by a factor (0..1) — the stance cube's shaded faces.
+function darkenHex(hex: string, f: number): string {
+    const m = /^#?([0-9a-f]{6})$/i.exec(hex);
+    if (!m) return hex;
+    const n = parseInt(m[1], 16);
+    const r = Math.round(((n >> 16) & 255) * f);
+    const g = Math.round(((n >> 8) & 255) * f);
+    const b = Math.round((n & 255) * f);
+    return `rgb(${r},${g},${b})`;
+}
+
+// The stance cube — a small isometric die that flags "this line costs a die",
+// tinted the card's stance colour (matches the #5 rail design).
+function StanceCube({ color, size }: { color: string; size: number }) {
+    return (
+        <Svg width={size} height={size} viewBox="0 0 24 24">
+            <Path d="M12 3 L21 8 L12 13 L3 8Z" fill={color} />
+            <Path d="M3 8 L12 13 L12 21 L3 16Z" fill={darkenHex(color, 0.68)} />
+            <Path d="M21 8 L12 13 L12 21 L21 16Z" fill={darkenHex(color, 0.42)} />
+        </Svg>
+    );
+}
+
+// The bottom scrim — a vertical gradient (deep→transparent) that keeps the
+// bottom-anchored name + paid sentence legible over the full-bleed art. A
+// per-card gradient id avoids react-native-svg's cross-instance id collisions.
+function FaceScrim({ w, h, uid, tint }: { w: number; h: number; uid: string; tint: string }) {
+    const id = `sc_${uid}`;
+    return (
+        <Svg width={w} height={h} style={StyleSheet.absoluteFill} pointerEvents="none">
+            <Defs>
+                <SvgLinearGradient id={id} x1="0" y1="1" x2="0" y2="0">
+                    <Stop offset="0" stopColor="#06050a" stopOpacity="1" />
+                    <Stop offset="0.30" stopColor={darkenHex(tint, 0.35)} stopOpacity="0.86" />
+                    <Stop offset="0.58" stopColor="#06050a" stopOpacity="0.42" />
+                    <Stop offset="0.82" stopColor="#06050a" stopOpacity="0" />
+                </SvgLinearGradient>
+            </Defs>
+            <SvgRect x="0" y="0" width={w} height={h} fill={`url(#${id})`} />
+        </Svg>
+    );
+}
+
+// The PAID sentence for the bottom of the face — the authored bottomActionText,
+// stripped of its "PAID — …" scaffold + "Costs 1 die." (redundant with the die
+// cube) + the die-line suffix (printed separately below).
+function cleanPaidSentence(vm: CombatCardVM): string {
+    let s = vm.bottomActionText || '';
+    if (vm.dieLines?.length) {
+        const suffix = ' ' + vm.dieLines.join(' · ');
+        if (s.endsWith(suffix)) s = s.slice(0, -suffix.length);
+    }
+    s = s.replace(/^PAID(\s*\([^)]*\))?\s*—\s*/i, '');
+    s = s.replace(/\s*Costs\s+1\s+die\.?\s*$/i, '');
+    return s.trim();
 }
 
 /**
@@ -1453,91 +1497,100 @@ export const CombatCardFace = React.memo(function CombatCardFace({
     const AXM = usePalette();
     const styles = useStyles();
     const f = card.face;
-    // STANCE rides the name band + orb + art tint; CATEGORY rides the frame (border)
-    // + keyword colour — two orthogonal identity axes until per-card art ships.
-    // Gold-rarity cards render with the NORMAL frame: no gold border/glow/star.
+    // #5 SIDE RAIL: STANCE colours the rail + the die cube + the art wash;
+    // CATEGORY colours the frame (border) + the bolded keyword in the paid line.
     const band = f.stanceColor;
     const baseKw = f.inert ? AXM.ash : f.categoryColor;
     const kwColor = accent ?? baseKw;
     const borderColor = accent ?? f.categoryColor;
-    // ◆ PAID column value: the powered number (+ compact sub), or the exact
-    // clause/word for numberless kinds — never a fabricated value.
-    const numberless = !f.heroText && !heroOverride;
-    const paidValue = numberless
-        ? (f.heroSub ? compactSub(f.heroSub) : heroFace(f))
-        : `${paidValueText(f, heroOverride)}${f.heroSub ? ` ${compactSub(f.heroSub)}` : ''}`;
-    const freeValue = f.freeValue ?? f.freeHeroText;
-    const orbR = large ? 22 : 13;
+    // ② PAID effect = the authored sentence (keywords bolded), the die cube its
+    // "costs a die" mark. ① FREE effect = the giant glyph + its intensity.
+    const paidSentence = cleanPaidSentence(card);
+    const boldNames = card.detail.keywords.map((k) => k.name);
+    const freeInner = compactFree(f.freeValue ?? (f.freeHeroText || null));
+    const hasFree = !!f.freeGlyph;
+    const railW = large ? 34 : 24;
+    const glyphSize = large ? 62 : 40;
+    const rarity = card.rarity ?? 'common';
+    const rarColor = rarity === 'rare' ? '#9a6ad6' : rarity === 'uncommon' ? '#6b8eb0' : '#8a8273';
     return (
         <View style={[styles.faceOuter, { width, height }]}>
             <View style={[styles.faceCard, { borderColor }]}>
-                {/* ART window — top region behind a bottom-up stance gradient */}
-                <View style={[styles.faceArt, large && { height: '48%' }]} pointerEvents="none">
+                {/* ① FULL-BLEED ART — fills the whole face, anchored to the top */}
+                <View style={styles.faceArtFull} pointerEvents="none">
                     <Image
                         source={getCardArt(card.cardId)}
                         style={[StyleSheet.absoluteFill, artMirrored(card.cardId) && { transform: [{ scaleX: -1 }] }]}
                         contentFit="cover"
                         transition={0}
                     />
-                    {/* stance wash, heavier toward the name band so the art melts into it */}
                     <View style={[styles.faceArtTint, { backgroundColor: f.stanceColor }]} />
-                    <View style={[styles.faceArtTintLow, { backgroundColor: f.stanceColor }]} />
                 </View>
-                {/* glossy stance orb carrying the category glyph */}
-                <View
-                    style={[styles.orb, {
-                        width: orbR * 2, height: orbR * 2, borderRadius: orbR,
-                        top: large ? 8 : 4, left: large ? 8 : 4,
-                        backgroundColor: f.inert ? AXM.ash : f.stanceColor,
-                    }]}
-                    pointerEvents="none"
-                >
-                    <View style={[styles.orbShine, { width: orbR * 0.9, height: orbR * 0.7, borderRadius: orbR * 0.5 }]} />
-                    <Text style={[styles.orbGlyph, { fontSize: large ? 22 : 13 }]} allowFontScaling={false}>{f.glyph}</Text>
+                {/* SCRIM — deep→transparent so the bottom text stays legible */}
+                <FaceScrim w={width} h={height} uid={card.uid} tint={band} />
+                {/* LEFT RAIL — stance spine carrying the vertical identity label */}
+                <View style={[styles.faceRail, { width: railW, backgroundColor: band }]} pointerEvents="none">
+                    <View style={[styles.faceRailShade, { width: railW }]} />
+                    <View style={styles.faceRailLabelWrap}>
+                        <Text style={[styles.faceRailLabel, large && styles.faceRailLabelLarge]} numberOfLines={1} allowFontScaling={false}>
+                            {f.typeStrip}
+                        </Text>
+                    </View>
                 </View>
-                {children}
-                <View style={styles.faceLower}>
-                    <View style={[styles.nameBand, { backgroundColor: band }]}>
-                        <View style={styles.nameBandShade} pointerEvents="none" />
-                        <Text style={[styles.nameText, large && styles.nameTextLarge]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>{card.name}</Text>
+                {/* ① FREE effect — the giant glyph (what the card does for free) +
+                    its intensity, top-left just past the rail. */}
+                {hasFree ? (
+                    <View style={[styles.freeBadge, { left: large ? 5 : 3, top: large ? 5 : 3, width: glyphSize, height: glyphSize, zIndex: 3 }]} pointerEvents="none">
+                        <Svg width={glyphSize} height={glyphSize} style={StyleSheet.absoluteFill}>
+                            <Defs>
+                                <RadialGradient id={`fh_${card.uid}`} cx="48%" cy="46%" r="54%">
+                                    <Stop offset="0" stopColor="#06050a" stopOpacity="0.82" />
+                                    <Stop offset="0.6" stopColor="#06050a" stopOpacity="0.5" />
+                                    <Stop offset="1" stopColor="#06050a" stopOpacity="0" />
+                                </RadialGradient>
+                            </Defs>
+                            <SvgRect x="0" y="0" width={glyphSize} height={glyphSize} fill={`url(#fh_${card.uid})`} />
+                        </Svg>
+                        <Text style={[styles.freeGlyph, { fontSize: glyphSize, lineHeight: glyphSize, color: baseKw }]} allowFontScaling={false}>{f.freeGlyph}</Text>
+                        {freeInner ? (
+                            <View style={[StyleSheet.absoluteFill, { alignItems: 'center', justifyContent: 'center' }]} pointerEvents="none">
+                                <Text style={[styles.freeInner, large && styles.freeInnerLarge]} allowFontScaling={false}>{freeInner}</Text>
+                            </View>
+                        ) : null}
                     </View>
-                    {/* Option A bottom rail — IDENTICAL wording at BOTH sizes:
-                        ◇ FREE keyword·value | divider | ◆ PAID keyword·value.
-                        Definitions/pills live OUTSIDE the face in the inspect
-                        overlay; the face itself may never drift between the hand
-                        and the modal. */}
-                    <View style={styles.railSplit}>
-                        <View style={styles.railHalf}>
-                            <Text style={[styles.railHead, large && styles.railHeadLarge, { color: AXM.bone }]} numberOfLines={1} adjustsFontSizeToFit>
-                                ◇ {f.freeKeyword ?? 'FREE'}
-                            </Text>
-                            <Text style={[styles.railValue, large && styles.railValueLarge, { color: AXM.parchment }]} numberOfLines={large ? 3 : 2} adjustsFontSizeToFit>
-                                {freeValue}
-                            </Text>
-                        </View>
-                        <View style={styles.railDivider} pointerEvents="none" />
-                        <View style={styles.railHalf}>
-                            <Text style={[styles.railHead, large && styles.railHeadLarge, { color: kwColor }]} numberOfLines={1} adjustsFontSizeToFit>
-                                ◆ {f.keyword ?? 'DIE'}{readPip ? ` ${readPip}` : ''}
-                            </Text>
-                            <Text style={[styles.railValue, large && styles.railValueLarge, { color: kwColor }]} numberOfLines={large ? 3 : 2} adjustsFontSizeToFit>
-                                {paidValue}
-                            </Text>
+                ) : null}
+                {/* ④ rarity tag, top-right corner (kept per owner call) */}
+                <View style={[styles.faceRarity, { borderColor: rarColor + '88' }]} pointerEvents="none">
+                    <Text style={[styles.faceRarityText, large && styles.faceRarityTextLarge, { color: rarColor }]} allowFontScaling={false}>
+                        {rarity.toUpperCase()}
+                    </Text>
+                </View>
+                {/* ③ + ② BOTTOM — name, then the paid sentence (die cube + text) */}
+                <View style={[styles.faceBtm, { left: railW + (large ? 12 : 8) }]}>
+                    <Text style={[styles.faceName, large && styles.faceNameLarge]} numberOfLines={large ? 2 : 1} adjustsFontSizeToFit minimumFontScale={0.7}>
+                        {card.name}
+                    </Text>
+                    <View style={styles.faceRule} />
+                    <View style={styles.paidRow}>
+                        <StanceCube color={band} size={large ? 22 : 15} />
+                        {readPip ? <Text style={[styles.paidRead, { color: kwColor }]} allowFontScaling={false}>{readPip}</Text> : null}
+                        <View style={styles.paidTextWrap}>
+                            <OutcomeText
+                                text={paidSentence}
+                                names={boldNames}
+                                base={[styles.paidText, large && styles.paidTextLarge]}
+                                bold={[styles.paidText, large && styles.paidTextLarge, styles.paidBold, { color: kwColor }]}
+                                numberOfLines={large ? 5 : 3}
+                            />
                         </View>
                     </View>
-                    {/* Fate Engine P1 — printed DIE LINES: one small line under the
-                        split (Option A gives them no rail slot). */}
                     {card.dieLines?.length ? (
-                        <Text style={[styles.faceDieLine, styles.railDieLine, !large && styles.faceDieLineSmall]} numberOfLines={1} adjustsFontSizeToFit>
+                        <Text style={[styles.faceDieLine, !large && styles.faceDieLineSmall]} numberOfLines={large ? 2 : 1} adjustsFontSizeToFit>
                             {card.dieLines.join(' · ')}
                         </Text>
                     ) : null}
-                    {/* TYPE STRIP at the very foot — printed identity, both sizes
-                        (SPELL / ENCHANTMENT / CURSE; stance first). */}
-                    <View style={styles.typeStrip}>
-                        <Text style={[styles.typeStripText, large && styles.typeStripTextLarge]} numberOfLines={1} adjustsFontSizeToFit>{f.typeStrip}</Text>
-                    </View>
                 </View>
+                {children}
             </View>
         </View>
     );
@@ -1739,55 +1792,51 @@ const useStyles = makeStyles((AXM) => ({
         shadowColor: '#000', shadowOpacity: 0.5, shadowRadius: 6, shadowOffset: { width: 0, height: 3 }, elevation: 6,
     },
     faceCard: { flex: 1, borderWidth: 1.5, borderRadius: 6, backgroundColor: '#14110e', overflow: 'hidden' },
-    // Option A: art fills the top region — the name band anchors mid-card
-    // beneath it, the split rail + type strip fill the remainder.
-    faceArt: { width: '100%', height: '46%', backgroundColor: '#0c0a08' },
-    faceArtTint: { ...StyleSheet.absoluteFillObject, opacity: 0.14 },
-    faceArtTintLow: { position: 'absolute', left: 0, right: 0, bottom: 0, height: '40%', opacity: 0.22 },
-    faceLower: { flex: 1 },
-    // Glossy stance orb (category glyph in the stance colour).
-    orb: {
-        position: 'absolute', zIndex: 3, alignItems: 'center', justifyContent: 'center',
-        borderWidth: 1.5, borderColor: 'rgba(0,0,0,0.65)',
-        shadowColor: '#000', shadowOpacity: 0.6, shadowRadius: 3, shadowOffset: { width: 0, height: 2 }, elevation: 4,
+    // #5 SIDE RAIL — art is full-bleed behind everything; rail, glyph, name, and
+    // paid sentence are absolutely placed over it.
+    faceArtFull: { ...StyleSheet.absoluteFillObject, backgroundColor: '#0c0a08' },
+    faceArtTint: { ...StyleSheet.absoluteFillObject, opacity: 0.17 },
+    // Left stance spine + a bottom darken so the vertical label stays legible.
+    faceRail: {
+        position: 'absolute', left: 0, top: 0, bottom: 0,
+        borderRightWidth: 1, borderRightColor: 'rgba(0,0,0,0.5)',
     },
-    orbShine: { position: 'absolute', top: 2, left: 3, backgroundColor: 'rgba(255,255,255,0.32)' },
-    orbGlyph: { color: '#fff', textShadowColor: 'rgba(0,0,0,0.8)', textShadowRadius: 2, textShadowOffset: { width: 0, height: 1 } },
-    // Bevelled name banner — 1px top highlight + 1px bottom shadow reads as raised metal/wood.
-    nameBand: {
-        paddingVertical: 3, paddingHorizontal: 6, alignItems: 'center', justifyContent: 'center',
-        borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.28)', borderBottomWidth: 1, borderBottomColor: 'rgba(0,0,0,0.45)',
+    faceRailShade: { position: 'absolute', left: 0, bottom: 0, height: '55%', backgroundColor: 'rgba(0,0,0,0.28)' },
+    faceRailLabelWrap: { position: 'absolute', bottom: 16, left: 0, right: 0, alignItems: 'center', justifyContent: 'center' },
+    faceRailLabel: {
+        width: 74, textAlign: 'center', transform: [{ rotate: '-90deg' }],
+        fontFamily: FONTS.sans, fontSize: 8, letterSpacing: 2, color: 'rgba(255,255,255,0.92)',
+        textShadowColor: 'rgba(0,0,0,0.6)', textShadowRadius: 2,
     },
-    nameBandShade: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.30)' },
-    nameText: {
-        fontFamily: FONTS.sans, fontSize: 12, lineHeight: 15, color: '#f1e7d0', letterSpacing: 0.5,
-        textShadowColor: 'rgba(0,0,0,0.8)', textShadowRadius: 2, textShadowOffset: { width: 0, height: 1 },
+    faceRailLabelLarge: { width: 118, fontSize: 11, letterSpacing: 3 },
+    // ① the giant FREE-effect glyph with its intensity centred INSIDE it.
+    freeBadge: { position: 'absolute', alignItems: 'center', justifyContent: 'center' },
+    freeGlyph: { textAlign: 'center', textShadowColor: 'rgba(0,0,0,0.9)', textShadowRadius: 4, textShadowOffset: { width: 0, height: 1 } },
+    freeInner: {
+        fontFamily: FONTS.mono, fontSize: 12, fontWeight: '700', color: '#fff',
+        textShadowColor: 'rgba(0,0,0,0.95)', textShadowRadius: 3, textShadowOffset: { width: 0, height: 1 },
     },
-    nameTextLarge: { fontFamily: FONTS.gothic, fontSize: 22, lineHeight: 26, color: '#f3e9d2', textShadowColor: 'rgba(0,0,0,0.6)', textShadowRadius: 3, textShadowOffset: { width: 0, height: 1 } },
-    // Option A bottom rail — 50/50 FREE | PAID split with a visible divider.
-    railSplit: {
-        flex: 1, flexDirection: 'row', alignItems: 'stretch',
-        backgroundColor: 'rgba(10,8,6,0.62)',
+    freeInnerLarge: { fontSize: 18 },
+    // ④ rarity tag, top-right.
+    faceRarity: { position: 'absolute', top: 6, right: 6, backgroundColor: 'rgba(8,7,6,0.7)', borderWidth: 1, paddingHorizontal: 5, paddingVertical: 1 },
+    faceRarityText: { fontFamily: FONTS.sans, fontSize: 8, letterSpacing: 1 },
+    faceRarityTextLarge: { fontSize: 10, letterSpacing: 1.4 },
+    // ③ + ② bottom-anchored name + paid sentence.
+    faceBtm: { position: 'absolute', right: 10, bottom: 10 },
+    faceName: {
+        fontFamily: FONTS.gothic, fontSize: 15, lineHeight: 17, color: '#e8dfc8',
+        textShadowColor: '#000', textShadowRadius: 6, textShadowOffset: { width: 0, height: 2 },
     },
-    railHalf: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 3, paddingVertical: 3, gap: 1 },
-    railDivider: { width: 1, backgroundColor: 'rgba(255,255,255,0.18)', marginVertical: 4 },
-    railHead: { fontFamily: FONTS.sans, fontSize: 9, letterSpacing: 0.8 },
-    railValue: { fontFamily: FONTS.mono, fontSize: 12, lineHeight: 14, textAlign: 'center' },
-    // large-face scale-ups of the SAME rail (identical wording law).
-    railHeadLarge: { fontSize: 15, letterSpacing: 1.4 },
-    railValueLarge: { fontSize: 20, lineHeight: 23, marginTop: 2 },
-    railDieLine: { alignSelf: 'center', marginTop: 0, marginBottom: 2, paddingHorizontal: 4 },
-    faceDieLineSmall: { fontSize: 7, marginTop: 1 },
-    // Option A type strip — full-width foot bar (printed identity).
-    typeStrip: {
-        borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.12)',
-        backgroundColor: 'rgba(0,0,0,0.55)', alignItems: 'center', paddingVertical: 2,
+    faceNameLarge: { fontSize: 25, lineHeight: 27 },
+    faceRule: { height: 1, backgroundColor: 'rgba(232,223,200,0.22)', marginVertical: 6 },
+    paidRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 6 },
+    paidRead: { fontFamily: FONTS.mono, fontSize: 11, marginTop: 1 },
+    paidTextWrap: { flex: 1 },
+    paidText: {
+        fontFamily: FONTS.serif, fontSize: 10.5, lineHeight: 14, color: AXM.parchment,
+        textShadowColor: 'rgba(0,0,0,0.85)', textShadowRadius: 3,
     },
-    typeStripText: { fontFamily: FONTS.sans, fontSize: 7, letterSpacing: 1.2, color: AXM.bone },
-    typeStripTextLarge: { fontSize: 10, letterSpacing: 1.8, paddingVertical: 2 },
-    // large-only effect body (Sanguine-Step shape) — fills the space under the name band.
-    // Warm parchment-tone panel behind the effect text anchors it like a scroll.
-    faceBody: { flex: 1, justifyContent: 'center', paddingHorizontal: 12, paddingVertical: 8, backgroundColor: 'rgba(38,30,20,0.6)' },
-    faceEffect: { fontFamily: FONTS.serif, fontSize: 14, lineHeight: 20, color: AXM.parchment, textAlign: 'center' },
-    faceEffectBold: { fontFamily: FONTS.gothic, color: AXM.sulfur },
+    paidTextLarge: { fontSize: 14.5, lineHeight: 19 },
+    paidBold: { fontFamily: FONTS.sans, letterSpacing: 0.5, textTransform: 'uppercase' },
+    faceDieLineSmall: { fontSize: 7, marginTop: 2 },
 }));

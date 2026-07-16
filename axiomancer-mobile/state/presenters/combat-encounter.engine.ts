@@ -175,6 +175,24 @@ function freeRail(card: CombatCard, sourceCard?: Card): { freeKeyword: string | 
     return { freeKeyword: kw, freeValue: pairs.length > 1 ? `${val} +` : val };
 }
 
+// FREE-effect glyph — the hero mark for the dieless play. Affliction riders use
+// their effect's board glyph; currency riders (guard/draw/premise…) map to a
+// terse rune. '' when the card has no free line.
+const FREE_KW_GLYPH: Record<string, string> = {
+    GUARD: '❖', HEAL: '✚', DRAW: '⚑', PREMISE: '❡', SWAY: '∿', SOUL: '✦',
+    FORETELL: '◉', TICK: '❋', CLEANSE: '✦', PIP: '⬡', STAGGER: '⚔',
+    RECOIL: '▽', MILL: '⁇', RUPTURE: '❋',
+};
+function freeGlyphFor(card: CombatCard, sourceCard?: Card): string {
+    if (card.cardType === 'enchantment') return '❖';
+    if (card.cardType === 'disenchant') return '☠';
+    const r: CardRider | undefined = sourceCard?.free;
+    if (!r) return '';
+    if (r.applyEffect?.effectId) return glyphFor(r.applyEffect.effectId);
+    const kw = riderPairs(r)[0]?.[0];
+    return kw ? (FREE_KW_GLYPH[kw] ?? '◆') : '';
+}
+
 /** Option A type strip — stance + player-facing card type (CURSE for disenchant). */
 function typeStripText(card: CombatCard): string {
     const typeLabel = card.cardType === 'enchantment' ? 'ENCHANTMENT'
@@ -342,6 +360,10 @@ export interface CombatCardFaceVM {
     kind: CombatCardKind;
     keyword: string | null;        // UPPERCASE keyword for the face (e.g. 'BLEED')
     glyph: string;                 // sourced from statusGlyphs → matches the board chip
+    /** The FREE effect's glyph — the hero mark for the dieless play (top-left of
+     *  the rail face). Derived from the free rider's effect / keyword; '' when
+     *  the card has no free line. */
+    freeGlyph: string;
     categoryColor: string;
     stanceColor: string;
     heroText: string;              // POWER value in real units; '' = no honest number
@@ -1394,7 +1416,8 @@ export function faceStats(card: CombatCard, sourceCard?: Card, enemyDifficulty?:
     const base = {
         glyph: c.glyph, categoryColor: c.categoryColor, stanceColor,
         statusBase: null, statusAdv: null, statusDis: null,
-        ...freeRail(card, sourceCard), typeStrip: typeStripText(card),
+        ...freeRail(card, sourceCard), freeGlyph: freeGlyphFor(card, sourceCard),
+        typeStrip: typeStripText(card),
     };
     switch (c.kind) {
         case 'dot': {

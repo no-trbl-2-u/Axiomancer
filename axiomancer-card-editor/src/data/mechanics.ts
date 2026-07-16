@@ -15,6 +15,7 @@
 import { cardLibrary, getCardById } from '@mechanics/Cards/cards.library';
 import { effectsLibrary, lookupEffect } from '@mechanics/Effects/effects.library';
 import { rankToRarity, CARD_RANK_NAMES } from '@mechanics/Cards/types';
+import { toCombatCard } from '@mechanics/Combat/combat.cards';
 
 // ── Types (erased at runtime; here for full-fidelity editing) ────────────────
 import type {
@@ -36,7 +37,7 @@ import type {
 } from '@mechanics/Combat/combat.encounter.types';
 
 // ── Re-exported live data + lookups ──────────────────────────────────────────
-export { cardLibrary, getCardById, effectsLibrary, lookupEffect, rankToRarity, CARD_RANK_NAMES };
+export { cardLibrary, getCardById, effectsLibrary, lookupEffect, rankToRarity, CARD_RANK_NAMES, toCombatCard };
 export type { Card, CardRank, CardRarity, CardType };
 
 /** Rarity band for a card (spec 32 v3 §4): derived from its rank ladder. */

@@ -12,9 +12,10 @@
  * specialMechanics / combatEffects → display keywords). This is the editor's
  * analogue of `toCombatCard` in `combat.cards.ts`.
  */
-import type { CSSProperties } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 import type { CardDraft } from '../types';
-import { rankToRarity, lookupEffect } from '../data/mechanics';
+import { fromDraft } from '../types';
+import { rankToRarity, lookupEffect, getCardById, toCombatCard } from '../data/mechanics';
 import {
     WX,
     DIE,
@@ -23,7 +24,6 @@ import {
     ART_STRIPES,
     KEYWORDS,
     fmtVal,
-    kwLine,
     type DieKey,
     type RarityKey,
     type KeywordId,
@@ -334,7 +334,62 @@ export function DiePip({ die, size = 16 }: { die: DieKey; size?: number }) {
     );
 }
 
-// ── The card FACE ────────────────────────────────────────────────────────────
+// ── PAID sentence — the authored bottom-line effect, composed through the real
+// engine (toCombatCard) so the editor face never invents wording. ─────────────
+function paidSentence(card: CardDraft): string {
+    const id = card.id?.trim() || '__preview__';
+    try {
+        const real = { ...fromDraft(card), id };
+        const cc = toCombatCard(id, (q) => (q === id ? real : getCardById(q)), lookupEffect);
+        if (!cc) return '';
+        let s = cc.bottomActionText || '';
+        if (cc.dieLines?.length) {
+            const suffix = ' ' + cc.dieLines.join(' · ');
+            if (s.endsWith(suffix)) s = s.slice(0, -suffix.length);
+        }
+        return s
+            .replace(/^PAID(\s*\([^)]*\))?\s*—\s*/i, '')
+            .replace(/\s*Costs\s+1\s+die\.?\s*$/i, '')
+            .trim();
+    } catch {
+        return '';
+    }
+}
+
+// Render a sentence with every keyword LABEL bolded + coloured (mirrors the
+// mobile OutcomeText). Keywords read as caps in the composed text.
+const KW_LABELS = Object.values(KEYWORDS).map((k) => k.label);
+function BoldKeywords({ text, color }: { text: string; color: string }): ReactNode {
+    const escaped = KW_LABELS.map((n) => n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+    const upper = new Set(KW_LABELS.map((n) => n.toUpperCase()));
+    const parts = text.split(new RegExp(`(${escaped.join('|')})`, 'gi'));
+    return (
+        <>
+            {parts.map((p, i) =>
+                upper.has(p.toUpperCase()) ? (
+                    <b key={i} style={{ fontFamily: WX.sans, fontWeight: 700, letterSpacing: 0.5, textTransform: 'uppercase', color }}>{p}</b>
+                ) : (
+                    <span key={i}>{p}</span>
+                ),
+            )}
+        </>
+    );
+}
+
+// ── Stance cube — small isometric die that flags "this line costs one die" ────
+export function StanceCube({ color, size = 22 }: { color: string; size?: number }) {
+    const mid = `color-mix(in srgb, ${color} 68%, #000)`;
+    const dark = `color-mix(in srgb, ${color} 42%, #000)`;
+    return (
+        <svg viewBox="0 0 24 24" width={size} height={size} style={{ flexShrink: 0, marginTop: 1 }}>
+            <path d="M12 3 L21 8 L12 13 L3 8Z" fill={color} />
+            <path d="M3 8 L12 13 L12 21 L3 16Z" fill={mid} />
+            <path d="M21 8 L12 13 L12 21 L21 16Z" fill={dark} />
+        </svg>
+    );
+}
+
+// ── The card FACE — #5 SIDE RAIL layout ──────────────────────────────────────
 export function CardFace({
     card,
     width = 200,
@@ -353,6 +408,20 @@ export function CardFace({
     const scale = width / 200;
     const px = (n: number) => Math.round(n * scale * 10) / 10;
 
+    // The stance SPINE carries only the vertical identity; the FREE effect is the
+    // GIANT top-left glyph, the PAID effect the authored sentence at the foot.
+    const railW = px(26);
+    const railDark = `color-mix(in srgb, ${band} 45%, #000)`;
+    // Persistent cards (enchant / disenchant) have no dieless FREE line to badge.
+    const persistent = card.cardType === 'enchantment' || card.cardType === 'disenchant';
+    const typeLabel =
+        card.philosophicalAspect.toUpperCase() +
+        (card.cardType ? ` · ${card.cardType === 'disenchant' ? 'CURSE' : card.cardType.toUpperCase()}` : '');
+    // ② PAID = the composed sentence; fall back to the terse keyword+value line.
+    const paid = paidSentence(card);
+    const paidFallback = `${KEYWORDS[face.paidKw] ? KEYWORDS[face.paidKw].label : 'DIE'} ${fmtVal(face.paidKw, face.paidVal)}`.trim();
+    const glyphSize = px(56);
+
     return (
         <div
             style={{
@@ -360,91 +429,166 @@ export function CardFace({
                 height,
                 borderRadius: px(7),
                 background: WX.panel,
-                backgroundImage: WX_NOISE,
                 border: `${rar.border}px solid ${rar.color}`,
                 boxShadow: rar.glow
                     ? `0 0 ${rar.glow}px ${rar.color}66, 0 6px 18px rgba(0,0,0,0.6)`
                     : '0 6px 18px rgba(0,0,0,0.55)',
                 overflow: 'hidden',
                 position: 'relative',
-                display: 'flex',
-                flexDirection: 'column',
                 fontFamily: WX.serif,
             }}
         >
-            {/* ART WINDOW */}
+            {/* FULL-BLEED ART — fills the whole face, anchored to the top */}
             <div
                 onClick={onArtPick || undefined}
                 style={{
-                    height: '58%',
-                    position: 'relative',
+                    position: 'absolute',
+                    inset: 0,
                     background: '#0c0a08',
-                    backgroundImage: face.img ? `url(${face.img})` : ART_STRIPES,
+                    backgroundImage: face.img ? `url(${face.img})` : `${WX_NOISE}, ${ART_STRIPES}`,
                     backgroundSize: face.img ? 'cover' : 'auto',
-                    backgroundPosition: 'center',
+                    backgroundPosition: 'top center',
                     cursor: onArtPick ? 'pointer' : 'default',
                 }}
             >
-                {/* die tint overlay */}
-                <div style={{ position: 'absolute', inset: 0, background: die.color, opacity: 0.16, mixBlendMode: 'soft-light' }} />
-                {/* category glyph, top-left */}
-                <div style={{ position: 'absolute', top: px(6), left: px(7), filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.9))' }}>
-                    <KwGlyph id={face.glyphKw} size={px(20)} color={face.die === 'wild' ? '#d9b44a' : die.color} />
-                </div>
-                {/* rarity tag, top-right */}
+                {/* die tint wash over the art */}
+                <div style={{ position: 'absolute', inset: 0, background: die.color, opacity: 0.17, mixBlendMode: 'soft-light' }} />
+            </div>
+
+            {/* SCRIM — dark gradient rising from the bottom so text stays legible */}
+            <div
+                style={{
+                    position: 'absolute',
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    height: '78%',
+                    background: `linear-gradient(to top, #06050a 22%, color-mix(in srgb, #06050a 82%, ${band}) 48%, rgba(6,5,4,0.55) 68%, transparent)`,
+                    pointerEvents: 'none',
+                }}
+            />
+
+            {/* placeholder caption when no art */}
+            {!face.img && (
                 <div
                     style={{
                         position: 'absolute',
-                        top: px(6),
-                        right: px(6),
-                        fontFamily: WX.sans,
-                        fontSize: px(9),
+                        top: '40%',
+                        left: railW,
+                        right: 0,
+                        textAlign: 'center',
+                        fontFamily: WX.mono,
+                        fontSize: px(10),
                         letterSpacing: 1,
-                        color: rar.color,
-                        background: 'rgba(8,7,6,0.7)',
-                        padding: `${px(1)}px ${px(5)}px`,
-                        border: `1px solid ${rar.color}88`,
+                        color: 'rgba(232,223,200,0.4)',
+                        pointerEvents: 'none',
                     }}
                 >
-                    {rar.label}
+                    {onArtPick ? '+ card art' : 'card art'}
                 </div>
-                {/* placeholder caption when no art */}
-                {!face.img && (
-                    <div
-                        style={{
-                            position: 'absolute',
-                            inset: 0,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            fontFamily: WX.mono,
-                            fontSize: px(10),
-                            letterSpacing: 1,
-                            color: 'rgba(232,223,200,0.4)',
-                            textAlign: 'center',
-                        }}
-                    >
-                        {onArtPick ? '+ card art' : 'card art'}
-                    </div>
-                )}
-            </div>
+            )}
 
-            {/* NAME band */}
+            {/* ④ LEFT RAIL — stance spine carrying only the vertical identity. */}
             <div
                 style={{
-                    background: band,
-                    padding: `${px(3)}px ${px(5)}px`,
-                    textAlign: 'center',
-                    borderTop: '1px solid rgba(255,255,255,0.28)',
-                    borderBottom: '1px solid rgba(0,0,0,0.45)',
+                    position: 'absolute',
+                    left: 0,
+                    top: 0,
+                    bottom: 0,
+                    width: railW,
+                    background: `linear-gradient(${band}, ${railDark})`,
+                    borderRight: '1px solid rgba(0,0,0,0.5)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'flex-end',
+                    paddingBottom: px(10),
+                    zIndex: 2,
                 }}
             >
                 <div
                     style={{
+                        writingMode: 'vertical-rl',
+                        transform: 'rotate(180deg)',
+                        fontFamily: WX.sans,
+                        fontSize: px(9),
+                        letterSpacing: px(2),
+                        color: 'rgba(255,255,255,0.9)',
+                        whiteSpace: 'nowrap',
+                    }}
+                >
+                    {typeLabel}
+                </div>
+            </div>
+
+            {/* ① FREE effect — the GIANT glyph (what the card does for free) + its
+                intensity, top-left just past the rail. */}
+            {!persistent && card.free && (
+                <div
+                    style={{
+                        position: 'absolute',
+                        left: px(5),
+                        top: px(5),
+                        width: glyphSize,
+                        height: glyphSize,
+                        zIndex: 3,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        backgroundImage: 'radial-gradient(circle at 48% 46%, rgba(6,5,10,0.82) 40%, rgba(6,5,10,0) 72%)',
+                        filter: 'drop-shadow(0 2px 5px rgba(0,0,0,0.85))',
+                    }}
+                >
+                    <KwGlyph id={face.freeKw} size={glyphSize} color={band} />
+                    {face.freeVal ? (
+                        <span
+                            style={{
+                                position: 'absolute',
+                                inset: 0,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                fontFamily: WX.mono,
+                                fontSize: px(14),
+                                fontWeight: 700,
+                                color: '#fff',
+                                textShadow: '0 1px 3px rgba(0,0,0,0.95), 0 0 2px rgba(0,0,0,0.9)',
+                            }}
+                        >
+                            +{face.freeVal}
+                        </span>
+                    ) : null}
+                </div>
+            )}
+
+            {/* rarity tag, top-right corner (kept per owner call) */}
+            <div
+                style={{
+                    position: 'absolute',
+                    top: px(6),
+                    right: px(6),
+                    zIndex: 2,
+                    fontFamily: WX.sans,
+                    fontSize: px(9),
+                    letterSpacing: 1,
+                    color: rar.color,
+                    background: 'rgba(8,7,6,0.7)',
+                    padding: `${px(1)}px ${px(5)}px`,
+                    border: `1px solid ${rar.color}88`,
+                }}
+            >
+                {rar.label}
+            </div>
+
+            {/* BOTTOM-ANCHORED content — right of the rail; rises as text grows */}
+            <div style={{ position: 'absolute', left: railW + px(10), right: px(12), bottom: px(12), zIndex: 2 }}>
+                <div
+                    style={{
                         fontFamily: WX.gothic,
-                        fontSize: px(18),
-                        lineHeight: 1.05,
-                        color: '#100d0a',
+                        fontSize: px(24),
+                        lineHeight: 1.02,
+                        color: WX.parchment,
+                        textShadow: '0 2px 6px #000',
                         whiteSpace: 'nowrap',
                         overflow: 'hidden',
                         textOverflow: 'ellipsis',
@@ -453,51 +597,14 @@ export function CardFace({
                     {rar.star ? '★ ' : ''}
                     {face.name || 'Untitled'}
                 </div>
-            </div>
-
-            {/* FREE | PAID footer */}
-            <div style={{ flex: 1, display: 'flex', background: 'rgba(10,8,6,0.62)' }}>
-                {/* FREE col */}
-                <div style={{ flex: 1, padding: `${px(6)}px ${px(7)}px`, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: px(2) }}>
-                    <div style={{ fontFamily: WX.sans, fontSize: px(9), letterSpacing: 1, color: WX.bone }}>◇ FREE</div>
-                    <div style={{ fontFamily: WX.mono, fontSize: px(12), lineHeight: 1.15, color: WX.parchment }}>
-                        {kwLine(face.freeKw, face.freeVal)}
+                <div style={{ height: 1, background: 'rgba(232,223,200,0.22)', margin: `${px(9)}px 0` }} />
+                {/* ② PAID effect — the die cube + the authored sentence, keyword bold. */}
+                <div style={{ display: 'flex', gap: px(8), alignItems: 'flex-start' }}>
+                    <StanceCube color={band} size={px(20)} />
+                    <div style={{ fontFamily: WX.serif, fontSize: px(13), lineHeight: 1.35, color: WX.parchment }}>
+                        <BoldKeywords text={paid || paidFallback} color={band} />
                     </div>
                 </div>
-                <div style={{ width: 1, background: 'rgba(255,255,255,0.14)', margin: `${px(6)}px 0` }} />
-                {/* PAID col */}
-                <div style={{ flex: 1, padding: `${px(6)}px ${px(7)}px`, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: px(2) }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: px(4) }}>
-                        <DiePip die={face.die} size={px(13)} />
-                        <span style={{ fontFamily: WX.sans, fontSize: px(10), letterSpacing: 0.6, color: band }}>
-                            ◆ {KEYWORDS[face.paidKw] ? KEYWORDS[face.paidKw].label : 'DIE'}
-                        </span>
-                    </div>
-                    <div style={{ fontFamily: WX.mono, fontSize: px(15), lineHeight: 1.1, color: band }}>
-                        {fmtVal(face.paidKw, face.paidVal) || '—'}
-                    </div>
-                </div>
-            </div>
-
-            {/* TYPE STRIP at the very foot (Option A, 2026-07-09) — printed
-                identity, mirrors the mobile face: 'BODY · SPELL', CURSE for
-                disenchant (the engine term never prints). */}
-            <div
-                style={{
-                    borderTop: '1px solid rgba(255,255,255,0.12)',
-                    background: 'rgba(0,0,0,0.55)',
-                    textAlign: 'center',
-                    padding: `${px(2)}px 0`,
-                    fontFamily: WX.sans,
-                    fontSize: px(8),
-                    letterSpacing: 1.5,
-                    color: WX.bone,
-                }}
-            >
-                {card.philosophicalAspect.toUpperCase()}
-                {card.cardType
-                    ? ` · ${card.cardType === 'disenchant' ? 'CURSE' : card.cardType.toUpperCase()}`
-                    : ''}
             </div>
         </div>
     );

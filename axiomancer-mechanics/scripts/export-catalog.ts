@@ -19,10 +19,6 @@
  * devlog/ so the served site is self-contained.
  */
 
-// MUST stay first — registers the mobile `@/` + `@mechanics` path aliases so the
-// game's own card-face presenter (imported below) resolves under ts-node.
-import './catalog-paths';
-
 import {
     readFileSync,
     writeFileSync,
@@ -33,19 +29,17 @@ import {
 } from 'node:fs';
 import { join } from 'node:path';
 
-import { cardLibrary } from '../src/Cards/cards.library';
+import { cardLibrary, getCardById } from '../src/Cards/cards.library';
+import { toCombatCard } from '../src/Combat/combat.cards';
 import { CARD_RANK_NAMES, rankToRarity } from '../src/Cards/types';
+import { FREE_ENCHANT_ROUNDS } from '../src/Game/game-mechanics.constants';
 import { cardOrigin } from '../src/Combat/combat.deck-presets';
 import { THEME_KEYWORDS, type CardTheme } from '../src/Cards/card-themes';
-import { toCombatCard } from '../src/Combat/combat.cards';
+import { mechanicText, riderText } from '../src/Combat/combat.cards';
 import { EnemyLibrary } from '../src/Enemy/enemy.library';
 import { effectsLibrary, lookupEffect } from '../src/Effects/effects.library';
 // Pure, dependency-free presentation mapping (effect → glyph + colour).
 import { effectGlyph } from '../../axiomancer-mobile/components/combat/statusGlyphs';
-// The game's OWN card-face presenter — the exact 5-zone face a player sees in
-// combat (orb glyph, stance colours, ◇FREE / ◆PAID split rail, type strip). We
-// reuse it verbatim so the catalog face can never drift from the live face.
-import { faceStats, type CombatCardFaceVM } from '../../axiomancer-mobile/state/presenters/combat-encounter.engine';
 
 const MECH = join(__dirname, '..');
 const ROOT = join(MECH, '..');
@@ -146,84 +140,56 @@ type Chip = { k: string; v: string };
 const signed = (n: number) => (n >= 0 ? `+${n}` : `${n}`);
 const pct = (n: number) => `${n > 0 ? '+' : ''}${Math.round((n - 1) * 100)}%`;
 
-/**
- * The catalog face reuses the game's own card renderer (`toCombatCard`) so it
- * shows exactly what a player sees in combat — expanded die-line riders,
- * effect-default durations, DoT lifetime previews — instead of a lossy
- * re-derivation. Shared frame boilerplate ("Costs 1 die", the rank tag) is
- * stripped here because `docs/card-frame-legend.md` states it once for the
- * whole library (keep the card face terse; the legend carries the frame).
- */
-const lookupCard = (id: string) => cardLibrary.find((c) => c.id === id) ?? null;
-const RANK_TAG = new RegExp(`\\s*\\((?:${Object.values(CARD_RANK_NAMES).join('|')})\\)\\.?$`);
-function faceLines(cc: any): string[] {
-    if (!cc) return [];
-    const strip = (s: string) => s.replace(' Costs 1 die.', '').replace(RANK_TAG, '').trim();
-    return [strip(cc.topActionText), strip(cc.bottomActionText)].filter(Boolean);
+/** A card's special-mechanic entry → one short label (spec 32 v3 vocabulary). */
+function specialMechanicLabel(sm: any): string {
+    const amt = sm.amount ?? sm.count ?? sm.rungs;
+    return mechanicText(sm) ?? (amt != null ? `${sm.kind} ${amt}` : String(sm.kind));
 }
 
-// ---------------------------------------------------------------------------
-// Card FACE — the render-ready 5-zone face the catalog draws to look exactly
-// like the in-combat card. `faceStats` (the game's own presenter) is the single
-// source of truth; the helpers below mirror `CombatCardFace`'s tiny display
-// rules (the ◆ PAID value derivation, the ◇/◆ keyword defaults) so the static
-// HTML never re-derives them wrongly.
-// ---------------------------------------------------------------------------
-// Ashen-Gold (default theme) `ash` — the greyed tint for an inert face's orb +
-// paid keyword (mirrors `AXM.ash`; see axiomancer-mobile/theme/palette.ts).
-const ASH = '#46403a';
+// Non-effect FREE riders (guard / draw / premise …) → a terse rune for the
+// giant free-glyph; affliction riders use their own effect glyph instead.
+const FREE_TXT_GLYPH: Record<string, string> = {
+    guard: '❖', barrier: '❖', healHp: '✚', drawCards: '⚑', premises: '❡',
+    sway: '∿', souls: '✦', foretell: '◉', pips: '⬡', stagger: '⚔',
+    tickOne: '❋', tickAllDots: '❋', cleanse: '✦', recoil: '▽', millCards: '⁇',
+};
 
-/** Fallback word for a face with no honest number — mirrors CombatBoard heroFace. */
-function heroFace(f: CombatCardFaceVM): string {
-    if (f.heroText) return f.heroText;
-    switch (f.kind) {
-        case 'befriend': return 'SPARE';
-        case 'weaken': return 'softens';
-        default: return 'minor';
+// The #5 rail FACE fields — ① the giant FREE glyph + intensity, ② the authored
+// PAID sentence (composed through the real engine, keywords bolded downstream).
+function cardFace(c: any): { freeGlyph: string; freeVal: string | null; paid: string } {
+    const persistent = c.cardType === 'enchantment' || c.cardType === 'disenchant';
+    let freeGlyph = '';
+    let freeVal: string | null = null;
+    if (persistent) {
+        freeGlyph = c.cardType === 'disenchant' ? '☠' : '❖';
+        freeVal = `${FREE_ENCHANT_ROUNDS}r`;
+    } else if (c.free?.applyEffect?.effectId) {
+        const eff = lookupEffect(c.free.applyEffect.effectId);
+        if (eff) {
+            freeGlyph = effectGlyph({ id: eff.id, name: eff.name, type: eff.type, category: eff.category, payload: eff.payload }).glyph;
+        }
+        freeVal = `${c.free.applyEffect.intensity ?? 1}`;
+    } else if (c.free) {
+        const key = Object.keys(FREE_TXT_GLYPH).find((k) => c.free[k] != null);
+        freeGlyph = key ? FREE_TXT_GLYPH[key] : '◆';
+        const num = riderText(c.free).match(/\d+/);
+        freeVal = num ? num[0] : null;
     }
-}
-/** "over N turns" → "over Nt" — mirrors CombatBoard compactSub. */
-function compactSub(s: string): string {
-    return s.replace(/(\d+)\s*turns?\b/g, '$1t');
-}
-/** Strip a leading keyword word so the ◆ value doesn't double the head. */
-function paidValueText(f: CombatCardFaceVM): string {
-    const base = f.heroText || heroFace(f);
-    if (f.keyword) {
-        const stripped = base.replace(new RegExp('^' + f.keyword + '\\s*', 'i'), '');
-        return stripped || base;
+
+    let paid = '';
+    const cc = toCombatCard(c.id, getCardById, lookupEffect);
+    if (cc) {
+        let s = cc.bottomActionText || '';
+        if (cc.dieLines?.length) {
+            const suffix = ' ' + cc.dieLines.join(' · ');
+            if (s.endsWith(suffix)) s = s.slice(0, -suffix.length);
+        }
+        paid = s.replace(/^PAID(\s*\([^)]*\))?\s*—\s*/i, '').replace(/\s*Costs\s+1\s+die\.?\s*$/i, '').trim();
     }
-    return base;
-}
-/** The ◆ PAID column value exactly as CombatCardFace computes it. */
-function paidValue(f: CombatCardFaceVM): string {
-    const numberless = !f.heroText;
-    return numberless
-        ? (f.heroSub ? compactSub(f.heroSub) : heroFace(f))
-        : `${paidValueText(f)}${f.heroSub ? ` ${compactSub(f.heroSub)}` : ''}`;
+    return { freeGlyph, freeVal, paid };
 }
 
-/** Flatten the game's face VM into the render-ready record the catalog draws. */
-function cardFace(sourceCard: any, cc: any) {
-    const f = faceStats(cc, sourceCard);
-    return {
-        glyph: f.glyph,
-        stanceColor: f.stanceColor,      // orb + name band + art tint
-        borderColor: f.categoryColor,    // card frame (always the raw category hue)
-        orbColor: f.inert ? ASH : f.stanceColor,
-        kwColor: f.inert ? ASH : f.categoryColor,   // ◆ PAID keyword + value colour
-        freeKeyword: f.freeKeyword ?? 'FREE',
-        freeValue: f.freeValue ?? f.freeHeroText ?? '',
-        paidKeyword: f.keyword ?? 'DIE',
-        paidValue: paidValue(f),
-        typeStrip: f.typeStrip,
-        dieLine: (cc.dieLines ?? []).join(' · '),
-        inert: f.inert,
-    };
-}
-
-function cardStats(c: any): { chips: Chip[]; lines: string[]; face: ReturnType<typeof cardFace> | null } {
-    const cc: any = toCombatCard(c.id, lookupCard as any, lookupEffect);
+function cardStats(c: any): { chips: Chip[]; lines: string[] } {
     const chips: Chip[] = [
         { k: 'Stance', v: c.philosophicalAspect },
         { k: 'Type', v: c.category },
@@ -241,7 +207,29 @@ function cardStats(c: any): { chips: Chip[]; lines: string[]; face: ReturnType<t
     chips.push({ k: 'Source', v: origin.source });
     if (origin.presetDeck) chips.push({ k: 'Preset', v: origin.presetDeck });
 
-    return { chips, lines: faceLines(cc), face: cc ? cardFace(c, cc) : null };
+    const lines: string[] = [];
+    // Spec 32 v4 — enchant/disenchant passives live in engine hooks; their authored
+    // `persistentEffect` summary is the only card-facing description. Render it on
+    // both lines: FREE grants it timed (a few rounds), PAID makes it permanent.
+    if ((c.cardType === 'enchantment' || c.cardType === 'disenchant') && c.persistentEffect) {
+        const target = c.cardType === 'disenchant' ? ' (attaches to the enemy)' : '';
+        lines.push(`FREE (${FREE_ENCHANT_ROUNDS} rounds) — ${c.persistentEffect}`);
+        lines.push(`PAID (rest of combat) — ${c.persistentEffect}${target}`);
+    }
+    if (c.free) lines.push(`FREE — ${riderText(c.free)}`);
+    for (const ce of c.combatEffects ?? []) {
+        const nm = lookupEffect(ce.effectId)?.name ?? ce.effectId;
+        const who = ce.appliedTo === 'self' ? 'self' : 'enemy';
+        const dur = ce.duration ? `, ${ce.duration}t` : '';
+        lines.push(`Applies ${nm} ×${ce.intensity ?? 1}${dur} → ${who}`);
+    }
+    for (const sm of c.specialMechanics ?? []) lines.push(specialMechanicLabel(sm));
+    if (c.threshold) lines.push(`Threshold: ${c.threshold.count}× ${c.threshold.color} die fires a rider`);
+    if (c.dieBonus) lines.push(`Die bonus: powering die ${c.dieBonus.onColor} fires a rider`);
+    if (c.fate) lines.push(`Fate: playable by an X die${c.fate.recoilHp ? ` (recoil ${c.fate.recoilHp} HP)` : ''}`);
+    if (c.fallen) lines.push(`Fallen: ${riderText(c.fallen.rider)}`);
+    if (c.synergy) lines.push('Synergy clause (stance-switch payoff)');
+    return { chips, lines };
 }
 
 /** An effect's payload → short mechanical stat lines. */
@@ -300,7 +288,7 @@ function buildCards() {
         .map((c) => {
             const file = byId[c.id] ?? fallback;
             const image = copyArt(CARD_ART_DIR, file, 'cards');
-            return { id: c.id, name: c.name, image, pricing: pricing[c.id] ?? null, ...cardStats(c) };
+            return { id: c.id, name: c.name, image, pricing: pricing[c.id] ?? null, face: cardFace(c), ...cardStats(c) };
         })
         .sort((a, b) => a.name.localeCompare(b.name));
 }
