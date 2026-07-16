@@ -336,7 +336,7 @@ order, intra-batch gates noted per phase):**
       — `feat(mechanics,mobile): momentum wheel engine-native — phase 31 part 1` (380e3849),
       `feat(mechanics,mobile): THE STAKE — phase 31 part 2` (48c89f34),
       `feat(mechanics): reprice sig-conviction-strike — phase 31 part 3` (040202fd)
-- [ ] Phase 32 — Theme Deep Work (sandbox-first, `/deck-tuning` owns).
+- [x] Phase 32 — Theme Deep Work (sandbox-first, `/deck-tuning` owns).
       One sub-phase per rework: harvest (REAP attacks max HP +
       travelling Souls), bulwark (RIPOSTE reflects the prevented
       blow), akrasia (DEBT ledger), then remaining per-theme M items.
@@ -363,11 +363,12 @@ order, intra-batch gates noted per phase):**
       the replay target) shipped `09d92fe7`; Part 1b (harvest — Souls
       persist across combats via `Character.bankedSouls`, write-back on
       every combat outcome + a Memoir REMAINS read-back; no migration
-      needed, mirrors the `floatingDice` precedent) shipped (this tick).
-      Every theme's headline CONFIRMED item is now shipped; only Part 1c
-      (milestone-rider design — what a running Soul total unlocks, split
-      further out of the original Part 1b scope) remains — source:
-      `plan/tuning/2026-07-10-theme-identity.md` §2
+      needed, mirrors the `floatingDice` precedent) shipped `801e2d26`;
+      Part 1c (harvest — milestone epithet layered onto `soulsLine` at
+      10/25/50 banked Souls, resolving "what a running Soul total unlocks"
+      as a cosmetic/narrative tier rather than a shop good or card-rider
+      threshold) shipped (this tick). Every part of this brief has now
+      shipped — source: `plan/tuning/2026-07-10-theme-identity.md` §2
 - [ ] Phase 33 — Enemy Answers (specs 29/30 slice + enemy
       counterplay). One reactive verb engine-wide, lethality readout,
       variable-rung telegraphs, CAUTERIZE/Premise-shed/SWAY-cleanse
