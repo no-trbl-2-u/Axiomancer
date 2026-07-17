@@ -14,3 +14,6 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-07-17T14:11:32Z | subagent | Explore | claude-sonnet-5 | main | Explore enemy archetype + rung telegraph plumbing |
 | 2026-07-17T15:38:17Z | slash-prompt | /march | unknown | user/ci | /march Implement phase 36a |
 | 2026-07-17T15:44:22Z | subagent | mechanics-expert | claude-opus-4-8 | main | Design opinion on alt-win-aware pricing |
+| 2026-07-17T17:19:56Z | subagent | Explore | unknown | main | Map current combat dice system |
+| 2026-07-17T17:22:15Z | subagent | mechanics-expert | claude-fable-5 | main | Analyze upgradeable-dice combat proposal |
+| 2026-07-17T17:37:13Z | subagent | mechanics-expert | claude-fable-5 | main | Design stance alternatives sans RPS |
