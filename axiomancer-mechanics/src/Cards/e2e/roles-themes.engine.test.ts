@@ -192,7 +192,8 @@ describe('roles-* theme sets — registry shape and rank-band honesty', () => {
         expect(scoreCard(byId('ingot-of-ruin'))).toBeCloseTo(7.5, 2);
         expect(scoreCard(byId('grit-between-stones'))).toBeCloseTo(7.5, 2); // post-Phase-30: FREE barrier 2
         expect(scoreCard(byId('the-unmoved-mover'))).toBeCloseTo(5.33, 2); // post-Phase-30: FREE barrier 2
-        expect(scoreCard(byId('a-sweeter-poison'))).toBeCloseTo(9.0, 2);
+        expect(scoreCard(byId('a-sweeter-poison'))).toBeCloseTo(9.5, 2); // phase 36a: SWAY 5 total × 0.9
+
         expect(scoreCard(byId('the-long-ledger'))).toBeCloseTo(12.75, 2);
         expect(scoreCard(byId('seedcorn-sacrifice'))).toBeCloseTo(8.625, 2);
     });

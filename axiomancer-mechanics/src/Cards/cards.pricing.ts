@@ -33,14 +33,34 @@ export const VERB_POINTS = Object.freeze({
     healPerHp: 1 / 3,
     /** CLEANSE, per affliction removed. */
     cleanse: 1.5,
-    /** SWAY, per stack (the CAPITULATE currency). */
-    swayPerStack: 0.8,
+    /** SWAY, per stack (the CAPITULATE currency). Phase 36a: 0.8 → 0.9. The
+     *  CAPITULATE win costs `0.35 × maxHealth` stacks (Combat/effects.ts
+     *  `capitulateThreshold`), so per-stack win-parity = (maxHealth ÷ 3) ÷
+     *  (0.35 × maxHealth) = 0.95 — enemy-INDEPENDENT (the HP cancels). Take a
+     *  ~5% haircut for SWAY's 1/turn decay waste (worst early, where the
+     *  floor-10 / current-HP cap bites) → 0.9. A build currency that also
+     *  wins, priced honestly against HP-damage parity. */
+    swayPerStack: 0.9,
     /** STAGGER, per rung removed (a full 2-rung deny = 4). */
     staggerPerRung: 2,
     /** FORETELL, per card seen. */
     foretellPerCard: 1,
-    /** PREMISE, per tally point. */
+    /** PREMISE, per tally point. A BUILD currency (like `soul`), NOT a win
+     *  currency: unlike SWAY, the CONCEDE win costs a FLAT tally
+     *  (`CONCEDE_PREMISES_BASE = 8`), so per-tally win-value = (maxHealth ÷ 3)
+     *  ÷ 8 = maxHealth ÷ 24 — enemy-DEPENDENT, and most Premises cash to the
+     *  smaller peroration riders anyway. So the concede win-value is NOT
+     *  smeared across this currency; it rides the declaring card as
+     *  `concedeCapstone` (phase 36a). */
     premise: 0.8,
+    /** CONCEDE capstone (phase 36a): the flat lump a Peroration's `concedeAt`
+     *  alt-win is worth on its DECLARING card. Priced at the
+     *  `forgePersistence` / `echoNextSpell` "decisive persistent state-change"
+     *  tier — a literal, NOT scaled to `concedeFloorFor`'s elite/boss floors
+     *  (that inflation is enemy-dependent → phase 36b). Before 36a the concede
+     *  win priced at exactly 0 (the `peroration` case scored only its
+     *  `at`-payoff rider). */
+    concedeCapstone: 3,
     /** SOUL, per soul granted (grant or expiry-yield). */
     soul: 0.75,
     /** Conviction, per point. */
@@ -333,7 +353,13 @@ export function scoreMechanic(mechanic: CardSpecialMechanic): number {
             return scoreRider(mechanic.rider) * CONDITION_DISCOUNTS.dieBonus + V.omenInfo
                 - mechanic.anteConviction * V.conviction * SELF_COST_CREDIT;
         case 'premise': return mechanic.count * V.premise;
-        case 'peroration': return scoreRider(mechanic.rider);
+        case 'peroration':
+            // Phase 36a — the `at`-payoff rider PLUS the flat CONCEDE capstone
+            // when this declaration can win the argument outright (`concedeAt`
+            // set). The capstone is a literal (enemy-independent); scaling it
+            // to the elite/boss concede floor is enemy-aware → phase 36b.
+            return scoreRider(mechanic.rider)
+                + (mechanic.concedeAt !== undefined ? V.concedeCapstone : 0);
         case 'spend_premises': return V.spendPremises;
         case 'spend_all_pips':
             // WS4.1 — `markPer` prices the MARK stacks landed at the expected

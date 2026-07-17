@@ -154,7 +154,7 @@ describe('bridge-rewards — registry shape and rank-band honesty', () => {
 
     it('the authored // pts arithmetic matches scoreCard (regression anchors)', () => {
         const byId = (id: string) => BRIDGE_SET.cards.find(c => c.id === id)!;
-        expect(scoreCard(byId('barbed-compliment'))).toBeCloseTo(6.15, 2);
+        expect(scoreCard(byId('barbed-compliment'))).toBeCloseTo(6.45, 2); // phase 36a: SWAY 3 total × 0.9
         expect(scoreCard(byId('the-poured-rampart'))).toBeCloseTo(6.0, 2);
         expect(scoreCard(byId('interest-on-the-flesh'))).toBeCloseTo(6.25, 2);
         // phase 32 part 4d (OMEN v2): anteConviction 1 credits at −0.75×
@@ -162,7 +162,7 @@ describe('bridge-rewards — registry shape and rank-band honesty', () => {
         // // pts comment in cards.sandbox-sets.ts.
         expect(scoreCard(byId('entered-into-evidence'))).toBeCloseTo(5.01, 2);
         expect(scoreCard(byId('stolen-cadence'))).toBeCloseTo(5.75, 2);
-        expect(scoreCard(byId('unbroken-countenance'))).toBeCloseTo(7.63, 2);
+        expect(scoreCard(byId('unbroken-countenance'))).toBeCloseTo(8.23, 2); // phase 36a: SWAY (2+2 flat, 4 synergy×0.5) × 0.9
     });
 
     it('no TICK vocabulary anywhere in the set (TICK is ratified dead)', () => {

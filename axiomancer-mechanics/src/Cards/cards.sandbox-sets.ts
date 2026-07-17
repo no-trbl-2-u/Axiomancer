@@ -349,9 +349,10 @@ const aSweeterPoison: Card = {
         'going down, and already naming the next two.',
     tier: 2, rank: 4, cardType: 'spell',
     targetType: 'enemy',
-    // pts: SWAY 3 (2.4) + closer ruptureMarks 2 (2 × 2/3 = 1.33) + MARK ×2
-    // (mark i2 d2 = 3.0) + FREE [sway 2 (1.6) + heal 2 (0.67)] = 9.0 →
-    // uncommon band 4.5-13 (Theorem). FREE share 2.27/9.0 = 25.2% ✓ window.
+    // pts (phase 36a: SWAY 0.8→0.9): SWAY 3 (2.7) + closer ruptureMarks 2
+    // (2 × 2/3 = 1.33) + MARK ×2 (mark i2 d2 = 3.0) + FREE [sway 2 (1.8) +
+    // heal 2 (0.67)] = 9.5 → uncommon band 4.5-13 (Theorem). FREE share
+    // 2.47/9.5 = 26.0% ✓ window.
     free: { sway: 2, healHp: 2 },
     specialMechanics: [
         { kind: 'sway', amount: 3 },
@@ -705,9 +706,9 @@ const barbedCompliment: Card = {
         + 'in them starts wanting to agree with you.',
     tier: 1, rank: 2, cardType: 'spell',
     targetType: 'enemy',
-    // pts: MARK i2 d2 (0.75 × 2 × 2 = 3.0) + SWAY 2 (1.6) = 4.6 + FREE
-    // [mark i1 d1 (0.75) + sway 1 (0.8)] = 1.55 → 6.15 → common band 1.5-7.5
-    // (Lemma). FREE share 1.55/6.15 = 25.2% ✓ the 25-35% window.
+    // pts (phase 36a: SWAY 0.8→0.9): MARK i2 d2 (0.75 × 2 × 2 = 3.0) + SWAY 2
+    // (1.8) = 4.8 + FREE [mark i1 d1 (0.75) + sway 1 (0.9)] = 1.65 → 6.45 →
+    // common band 1.5-7.5 (Lemma). FREE share 1.65/6.45 = 25.6% ✓ the 25-35% window.
     free: { applyEffect: { effectId: 'debuff_mark', intensity: 1, duration: 1 }, sway: 1 },
     combatEffects: [
         { effectId: 'debuff_mark', appliedTo: 'opponent', intensity: 2, duration: 2 },
@@ -875,10 +876,10 @@ const unbrokenCountenance: Card = {
         + 'as weather, and begin to suspect you might simply be right.',
     tier: 2, rank: 4, cardType: 'spell',
     targetType: 'self',
-    // pts: GUARD 8 (8 ÷ 4 = 2.0) + SWAY 2 (1.6) = 3.6 + UNBROKEN condition
-    // rider [sway 4 (3.2) + heal 2 (0.67)] × threshold 0.5 = 1.93 + FREE
-    // [guard 2 (0.5) + sway 2 (1.6)] = 2.1 → 7.63 → uncommon band 4.5-13
-    // (Theorem). FREE share 2.1/7.63 = 27.5% ✓ window.
+    // pts (phase 36a: SWAY 0.8→0.9): GUARD 8 (8 ÷ 4 = 2.0) + SWAY 2 (1.8) =
+    // 3.8 + UNBROKEN condition rider [sway 4 (3.6) + heal 2 (0.67)] ×
+    // threshold 0.5 = 2.14 + FREE [guard 2 (0.5) + sway 2 (1.8)] = 2.3 →
+    // 8.23 → uncommon band 4.5-13 (Theorem). FREE share 2.3/8.23 = 27.9% ✓ window.
     free: { guard: 2, sway: 2 },
     specialMechanics: [
         { kind: 'guard', amount: 8 },

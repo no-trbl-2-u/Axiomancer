@@ -28,8 +28,10 @@ import {
  *   - Axiom (5):            7 – 19. Spec's sketch said 8, but shipped rank-5
  *     spells price honestly outside it under the table: at the FLOOR,
  *     `pact-of-akrasia` (7.25: the forge is cheap BECAUSE the blood credits
- *     bite) and `heart-of-the-matter` (7.33: SWAY at 0.8/stack undervalues
- *     CAPITULATE proximity); at the CEILING, two DELIBERATE big finishers —
+ *     bite) and `the-closing-word` (pre-36a 8.80: the CONCEDE alt-win priced
+ *     at 0 — 36a's +3 concede capstone lifts it to 11.80, more rank-honest for
+ *     a card that literally wins the game); at the CEILING, two DELIBERATE
+ *     big finishers —
  *     `resonance-detonation` (18.13) and `the-overtake` (18.35) — are authored
  *     over the sketch on purpose (owner directive: a payoff worth cashing your
  *     own board for). Band adjusted, not the cards (task rule); a rank-5
@@ -108,10 +110,11 @@ describe('pricing table — pinned anchors from the spec §4 arithmetic (WS3.5 c
         expect(VERB_POINTS.barrierPerHp).toBeCloseTo(1 / 3);
         expect(VERB_POINTS.healPerHp).toBeCloseTo(1 / 3);
         expect(VERB_POINTS.cleanse).toBe(1.5);
-        expect(VERB_POINTS.swayPerStack).toBe(0.8);
+        expect(VERB_POINTS.swayPerStack).toBe(0.9); // phase 36a: 0.8 → 0.9 (CAPITULATE parity)
         expect(VERB_POINTS.staggerPerRung).toBe(2); // full 2-rung deny = 4
         expect(VERB_POINTS.foretellPerCard).toBe(1);
-        expect(VERB_POINTS.premise).toBe(0.8);
+        expect(VERB_POINTS.premise).toBe(0.8); // phase 36a: build currency, deliberately NOT repriced
+        expect(VERB_POINTS.concedeCapstone).toBe(3); // phase 36a: the CONCEDE alt-win lump
         expect(VERB_POINTS.soul).toBe(0.75);
         expect(VERB_POINTS.kindle).toBe(2.5);
         expect(VERB_POINTS.pip).toBe(1.5);
@@ -136,5 +139,33 @@ describe('pricing table — pinned anchors from the spec §4 arithmetic (WS3.5 c
         // Guard 8/4 + FREE persistent GUARD 2/3 = 2.67 (phase 30: BARRIER
         // merged into GUARD — bulwark's FREE line lays a brick, not a chip)
         expect(scoreCard(brace)).toBeCloseTo(2 + 2 / 3, 2);
+    });
+
+    it('phase 36a — SWAY reprices at 0.9/stack (soft-word regression anchor)', () => {
+        // soft-word: SWAY 3 (3×0.9) + FREE RAPPORT i1 d2 seed (0.75×1×2)
+        // + dieBonus SWAY 1 (0.9 ×0.6). The SWAY currency carries the
+        // CAPITULATE-parity reprice; every other term is unchanged.
+        const softWord = spells.find(s => s.id === 'soft-word')!;
+        const expected =
+            3 * VERB_POINTS.swayPerStack
+            + statusPoints('debuff_rapport', 1, 2)
+            + 1 * VERB_POINTS.swayPerStack * CONDITION_DISCOUNTS.dieBonus;
+        expect(scoreCard(softWord)).toBeCloseTo(expected, 2); // 4.74
+    });
+
+    it('phase 36a — CONCEDE alt-win prices its +3 capstone (the-closing-word anchor)', () => {
+        // PERORATION at 6 rider (ruptureMarks 3 · draw 2 · +2 Conviction = 8)
+        // + the flat concede capstone (concedeAt set) + FREE 1 Premise. Before
+        // 36a the concedeAt win priced at 0, floating the card near the Axiom
+        // floor while it literally ends the game.
+        const closingWord = spells.find(s => s.id === 'the-closing-word')!;
+        const perorationRider =
+            3 * VERB_POINTS.ruptureMarksPerHp
+            + 2 * VERB_POINTS.draw
+            + 2 * VERB_POINTS.conviction;
+        const expected =
+            perorationRider + VERB_POINTS.concedeCapstone
+            + 1 * VERB_POINTS.premise;
+        expect(scoreCard(closingWord)).toBeCloseTo(expected, 2); // 11.80
     });
 });
