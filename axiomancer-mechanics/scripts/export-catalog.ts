@@ -28,6 +28,7 @@ import {
     rmSync,
 } from 'node:fs';
 import { join } from 'node:path';
+import { execSync } from 'node:child_process';
 
 import { cardLibrary, getCardById } from '../src/Cards/cards.library';
 import { toCombatCard } from '../src/Combat/combat.cards';
@@ -452,9 +453,19 @@ function main() {
     const enemies = buildEnemies();
     const effects = buildEffects();
 
+    // Freshness stamp (2026-07-17): the catalog is a derived view of the
+    // engine libraries — record WHICH tree it was derived from so a stale
+    // render is visible on the page itself instead of masquerading as truth.
+    let commit = 'unknown';
+    try {
+        commit = execSync('git rev-parse --short HEAD', { encoding: 'utf8' }).trim();
+    } catch { /* not a git checkout (e.g. exported tarball) — stamp stays 'unknown' */ }
+    const meta = { commit, generatedAt: new Date().toISOString().slice(0, 10) };
+
     writeFileSync(join(DATA, 'cards.json'), JSON.stringify(cards, null, 1) + '\n');
     writeFileSync(join(DATA, 'enemies.json'), JSON.stringify(enemies, null, 1) + '\n');
     writeFileSync(join(DATA, 'effects.json'), JSON.stringify(effects, null, 1) + '\n');
+    writeFileSync(join(DATA, 'meta.json'), JSON.stringify(meta, null, 1) + '\n');
 
     console.log(
         `catalog:export — ${cards.length} cards, ${enemies.length} enemies, ` +
