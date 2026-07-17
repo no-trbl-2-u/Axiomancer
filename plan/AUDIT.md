@@ -14,7 +14,37 @@
 
 ## Pending
 
-### [needs-user-call] Adopt a shared-queue convention for Hermes-routed work
+### Stale worktree copy at .claude/worktrees/card-text-paid-effects-3cd590/
+- category: debt
+- impact: 2
+- ease: 8
+- detail: a full stale copy of the repo's guide files (and more) lives
+  under `.claude/worktrees/card-text-paid-effects-3cd590/`, polluting
+  glob/grep results (it surfaced in the 2026-07-16 agent-guide audit).
+  It appears related to the card-text PAID-prose work that shipped
+  around ef6a0ca3/d4f3a4f9. CAUTION: another agent was actively working
+  in this area on 2026-07-16 — verify the worktree is abandoned
+  (`git worktree list`, no uncommitted work inside) before removing it
+  with `git worktree remove`; if it holds unmerged work, surface
+  instead of deleting.
+- next: /iterate
+
+### Metric v2 design session parked until fresh metrics land
+- category: gap
+- impact: 7
+- ease: 2
+- detail: statusEngagement is enemy-side-only, volume-based, and
+  arc-blind (2026-07-12 re-baseline: collapse + all-preset late 0.00),
+  and it is the objective function for /deck-tuning and
+  /combat-playtest. T agreed this is the highest-leverage fix but
+  parked the design conversation (2026-07-16): a second agent is
+  adding information to the metrics first, then T + Claude circle
+  back to design metric v2 (player-side engagement, per-turn arc
+  shape, win-path attribution). Loop guidance meanwhile: do not
+  build new tuning conclusions on statusEngagement alone; treat its
+  numbers as suspect per the known blind spots.
+- next: attended session (T-gated — not loop work; do not auto-ship
+  a metric rewrite)
 - category: divergence
 - impact: 6
 - ease: 8
