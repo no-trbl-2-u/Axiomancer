@@ -231,8 +231,8 @@
   "image": "./assets/catalog/cards/freeze.webp",
   "pricing": null,
   "face": {
-   "freeGlyph": "◆",
-   "freeKw": null,
+   "freeGlyph": "◉",
+   "freeKw": "REVEAL",
    "freeVal": null,
    "paid": "backfire i1 d2 + lock the enemy's next stance + STAGGER 1."
   },
@@ -2442,8 +2442,8 @@
   "image": "./assets/catalog/cards/will-o-wisp.webp",
   "pricing": null,
   "face": {
-   "freeGlyph": "◆",
-   "freeKw": null,
+   "freeGlyph": "◉",
+   "freeKw": "REVEAL",
    "freeVal": null,
    "paid": "backfire i2 d2."
   },
@@ -3786,8 +3786,8 @@
   "image": "./assets/catalog/cards/confuse.webp",
   "pricing": null,
   "face": {
-   "freeGlyph": "◆",
-   "freeKw": null,
+   "freeGlyph": "◉",
+   "freeKw": "REVEAL",
    "freeVal": null,
    "paid": "BACKFIRE ALL — 1.5 damage per rung ever denied."
   },
@@ -3844,8 +3844,8 @@
   "image": "./assets/catalog/cards/confuse.webp",
   "pricing": null,
   "face": {
-   "freeGlyph": "◆",
-   "freeKw": null,
+   "freeGlyph": "◉",
+   "freeKw": "REVEAL",
    "freeVal": null,
    "paid": "backfire i2 d3 + STAGGER 1."
   },
@@ -4020,8 +4020,8 @@
   "image": "./assets/catalog/cards/confuse.webp",
   "pricing": null,
   "face": {
-   "freeGlyph": "◆",
-   "freeKw": null,
+   "freeGlyph": "◉",
+   "freeKw": "REVEAL",
    "freeVal": null,
    "paid": "STAGGER 1."
   },

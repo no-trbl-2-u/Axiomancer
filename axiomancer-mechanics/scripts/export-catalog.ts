@@ -152,6 +152,8 @@ const FREE_TXT_GLYPH: Record<string, string> = {
     guard: '❖', barrier: '❖', healHp: '✚', drawCards: '⚑', premises: '❡',
     sway: '∿', souls: '✦', foretell: '◉', pips: '⬡', stagger: '⚔',
     tickOne: '❋', tickAllDots: '❋', cleanse: '✦', recoil: '▽', millCards: '⁇',
+    revealStance: '◉', conviction: '◆', refreshDie: '↻',
+    bonusIntensity: '▲', bonusDuration: '⌛', ruptureMarks: '❋', intensityPerPip: '⬡',
 };
 
 // Rider field → the UPPERCASE face keyword the silhouette table keys off
@@ -161,6 +163,9 @@ const FREE_RIDER_KW: Record<string, string> = {
     premises: 'PREMISE', sway: 'SWAY', souls: 'SOUL', foretell: 'FORETELL',
     pips: 'PIP', stagger: 'STAGGER', tickOne: 'TICK', tickAllDots: 'TICK',
     cleanse: 'CLEANSE', recoil: 'RECOIL', millCards: 'MILL',
+    revealStance: 'REVEAL', conviction: 'CONVICTION', refreshDie: 'REFRESH',
+    bonusIntensity: 'INTENSITY', bonusDuration: 'DURATION',
+    ruptureMarks: 'RUPTURE', intensityPerPip: 'PIP',
 };
 // Effect id → face keyword, mirroring the mobile keywords map for the handful
 // of ids whose keyword isn't just the stripped id.
