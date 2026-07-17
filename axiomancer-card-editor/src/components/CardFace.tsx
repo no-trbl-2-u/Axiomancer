@@ -507,7 +507,7 @@ function BoldKeywords({ text, color }: { text: string; color: string }): ReactNo
         <>
             {parts.map((p, i) =>
                 upper.has(p.toUpperCase()) ? (
-                    <b key={i} style={{ fontFamily: WX.sans, fontWeight: 700, letterSpacing: 0.5, textTransform: 'uppercase', color }}>{p}</b>
+                    <b key={i} style={{ fontFamily: WX.sans, fontWeight: 700, fontSize: '1.12em', letterSpacing: 0.5, textTransform: 'uppercase', color }}>{p}</b>
                 ) : (
                     <span key={i}>{p}</span>
                 ),
@@ -561,7 +561,8 @@ export function CardFace({
     // ② PAID = the composed sentence; fall back to the terse keyword+value line.
     const paid = paidSentence(card);
     const paidFallback = `${KEYWORDS[face.paidKw] ? KEYWORDS[face.paidKw].label : 'DIE'} ${fmtVal(face.paidKw, face.paidVal)}`.trim();
-    const glyphSize = px(56);
+    // Owner directive 2026-07-16 part 2: the FREE glyph reads BIGGER (~30%).
+    const glyphSize = px(72);
 
     return (
         <div

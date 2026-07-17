@@ -1514,7 +1514,9 @@ export const CombatCardFace = React.memo(function CombatCardFace({
     // keywords without a shape keep the text rune.
     const freeShape = glyphShapeFor(f.freeGlyphKey);
     const railW = large ? 24 : 17;
-    const glyphSize = large ? 62 : 40;
+    // Owner directive 2026-07-16 part 2: the FREE glyph reads BIGGER (~30%) —
+    // it is the fastest read of "what does this card do".
+    const glyphSize = large ? 80 : 52;
     const rarity = card.rarity ?? 'common';
     const rarColor = rarity === 'rare' ? '#9a6ad6' : rarity === 'uncommon' ? '#6b8eb0' : '#8a8273';
     return (
@@ -1596,7 +1598,7 @@ export const CombatCardFace = React.memo(function CombatCardFace({
                                 text={paidSentence}
                                 names={boldNames}
                                 base={[styles.paidText, large && styles.paidTextLarge]}
-                                bold={[styles.paidText, large && styles.paidTextLarge, styles.paidBold, { color: kwColor }]}
+                                bold={[styles.paidText, large && styles.paidTextLarge, styles.paidBold, large && styles.paidBoldLarge, { color: kwColor }]}
                                 numberOfLines={large ? 5 : 3}
                             />
                         </View>
@@ -1832,10 +1834,10 @@ const useStyles = makeStyles((AXM) => ({
     freeBadge: { position: 'absolute', alignItems: 'center', justifyContent: 'center' },
     freeGlyph: { textAlign: 'center', textShadowColor: 'rgba(0,0,0,0.9)', textShadowRadius: 4, textShadowOffset: { width: 0, height: 1 } },
     freeInner: {
-        fontFamily: FONTS.mono, fontSize: 12, fontWeight: '700', color: '#fff',
+        fontFamily: FONTS.mono, fontSize: 13, fontWeight: '700', color: '#fff',
         textShadowColor: 'rgba(0,0,0,0.95)', textShadowRadius: 3, textShadowOffset: { width: 0, height: 1 },
     },
-    freeInnerLarge: { fontSize: 18 },
+    freeInnerLarge: { fontSize: 20 },
     // ④ rarity tag, top-right.
     faceRarity: { position: 'absolute', top: 6, right: 6, backgroundColor: 'rgba(8,7,6,0.7)', borderWidth: 1, paddingHorizontal: 5, paddingVertical: 1 },
     faceRarityText: { fontFamily: FONTS.sans, fontSize: 8, letterSpacing: 1 },
@@ -1856,6 +1858,9 @@ const useStyles = makeStyles((AXM) => ({
         textShadowColor: 'rgba(0,0,0,0.85)', textShadowRadius: 3,
     },
     paidTextLarge: { fontSize: 14.5, lineHeight: 19 },
-    paidBold: { fontFamily: FONTS.sans, letterSpacing: 0.5, textTransform: 'uppercase' },
+    // Keywords read a step LARGER than the prose around them (owner directive
+    // 2026-07-16) so the eye catches them before reading the sentence.
+    paidBold: { fontFamily: FONTS.sans, fontSize: 11.5, letterSpacing: 0.5, textTransform: 'uppercase' },
+    paidBoldLarge: { fontSize: 16 },
     faceDieLineSmall: { fontSize: 7, marginTop: 2 },
 }));

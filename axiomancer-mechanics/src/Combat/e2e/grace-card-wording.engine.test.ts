@@ -41,22 +41,25 @@ describe('Grace preset card wording', () => {
         const text = face('second-thoughts');
         expect(text).toContain('mill 1 to discard');
         expect(text).toContain('RECALL 1');
-        expect(text).toContain('consume all marks — 1 damage per stack');
+        // 2026-07-16 — authored paidSummary (same real units, prose form).
+        expect(text).toContain("consume the foe's MARK stacks — 1 damage per stack");
     });
 
     it('The Olive Branch states every defensive and persuasion effect', () => {
         const text = face('the-olive-branch');
         expect(text).toContain('rapport i1 d2');
         expect(text).toContain('SWAY 3');
-        expect(text).toContain('cleanse 1');
-        expect(text).toContain('heal 3');
+        // 2026-07-16 — authored paidSummary (same real units, prose form).
+        expect(text).toContain('CLEANSE 1');
+        expect(text).toContain('HEAL 3');
     });
 
     it('Disarming Smile states its SWAY, RAPPORT, and healing', () => {
         const text = face('disarming-smile');
         expect(text).toContain('SWAY 1');
-        expect(text).toContain('rapport i2 d2');
-        expect(text).toContain('heal 2');
+        // 2026-07-16 — authored paidSummary (same real units, prose form).
+        expect(text).toContain('RAPPORT 2 for 2 turns');
+        expect(text).toContain('HEAL 2');
     });
 
     it('Common Ground states its draw, RAPPORT, and both SWAY gains', () => {
@@ -79,8 +82,9 @@ describe('Grace preset card wording', () => {
     it('Measured Answer states persistent GUARD and the complete RIPOSTE', () => {
         const text = face('measured-answer');
         expect(text).toContain('GUARD 3 (persists)');
-        expect(text).toContain('Guard 6');
-        expect(text).toContain('RIPOSTE 3 (parry 2)');
+        // 2026-07-16 — authored paidSummary (same real units, prose form).
+        expect(text).toContain('GUARD 6');
+        expect(text).toContain('RIPOSTE 3 with parry 2');
     });
 
     it('Irresistible Grace states duration, decay prevention, scaling, and cap', () => {
@@ -101,8 +105,9 @@ describe('Grace preset card wording', () => {
     it('Ouroboros states both the repeated spell and its MARK payoff', () => {
         const text = face('ouroboros');
         expect(text).toContain('mill 1 to discard');
-        expect(text).toContain('replay your last spell ×2');
-        expect(text).toContain('consume all marks — 3 damage per stack');
+        // 2026-07-16 — authored paidSummary (same real units, prose form).
+        expect(text).toContain('Replay your last spell ×2');
+        expect(text).toContain("consume the foe's MARK stacks — 3 damage per stack");
     });
 
     it('Crumbling Resolve names its clock, damage floor, and STAGGER amount', () => {
