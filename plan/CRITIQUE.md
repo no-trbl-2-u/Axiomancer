@@ -1,7 +1,7 @@
 # Critique log
 
-> Last pass: 2026-07-10 at commit 3dc27d24
-> Pass count: 12
+> Last pass: 2026-07-17 at commit b4870384
+> Pass count: 13
 
 > External-observer feedback for Axiomancer. Populated by
 > `/critique` (which drives the local expo-web build with the
@@ -11,22 +11,31 @@
 
 ## Pending
 
-> **[oversight 2026-07-16] STALE — pending re-validation.** These 25
-> findings were last drained 2026-07-10 and now predate the SIDE RAIL
-> card-face redesign (~25 commits on 2026-07-16). Before draining any
-> of them, the next loop action must RE-BASELINE, not blind-drain:
-> re-run `/critique` against current HEAD, drop findings the redesign
-> already fixed (check the card-face/copy items first — VITAE-vs-HP
-> copy, DoT card faces printing round-clock math, "the-closing-word"
-> threshold, card-editor cannot edit the three new mechanic fields),
-> and repopulate with fresh findings.
+> **[critique pass 13, 2026-07-17, commit b4870384] Re-baseline ran.**
+> Used the unattended `critique:drive` transport (§3.5) against the
+> cold-enterable screen set (title, onboarding/deck-picker,
+> combat-encounter preview, exploration hub) at mobile viewport.
+> Directly reconfirmed two of the STALE-flagged rows are still live
+> post-SIDE-RAIL: the header **MORALE "v of x"** placeholder (still
+> renders literally on the exploration-hub capture) and the **title
+> wordmark crop** (still bleeds off the top edge — "xiomance..." only).
+> Both stand as-is below, no longer unverified.
 >
-> **RE-BASELINE IS NOW UNBLOCKED (Phase 34 shipped 2026-07-16).**
-> Unattended `/critique` no longer needs the playtester's Playwright
-> MCP grants: run `npm run critique:drive` (see `skills/critique.md`
-> §3.5), then have the main agent read `.critique-artifacts/manifest.json`
-> + the screenshots/DOM and re-file against current HEAD. Until that
-> re-baseline runs, treat every row below as unverified.
+> The remaining STALE-flagged rows — VITAE-vs-HP copy and DoT
+> round-clock card-face math — need a **live in-combat** capture (card
+> hand + staged play) to confirm or drop; the cold-enterable screen set
+> stops at the pre-fight preview ("ENTER COMBAT" not yet pressed), so
+> this pass could not reach them. They stand as unverified-but-not-
+> disproven; a future interactive `/critique` (playtester + Playwright
+> MCP) or a deep-playtest pass should settle them. The card-editor
+> mechanic-fields gap is a desktop-tool row, out of reach of the mobile
+> web-viewport drive — also stands as unverified.
+>
+> "the-closing-word" threshold is already `[x]` RESOLVED below (PR
+> #91) — drop from the stale set.
+>
+> Zero new findings filed this pass (nothing observed outside the
+> existing rows).
 
 ### [MED] ratified-exception HP arms bypass the damage-instance clock funnel
 - pass: review-closeout 2026-07-12 (commit 4680e5e2, branch
