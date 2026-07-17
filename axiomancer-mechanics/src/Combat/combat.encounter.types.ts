@@ -69,6 +69,14 @@ export interface CombatManaDie {
      * defend card. Optional for back-compat with state literals (absent = 0).
      */
     pips?: number;
+    /**
+     * Spec 33 (Upgradeable Dice, flag-gated) — the FACE this fixed-color die
+     * rolled this round: `mana` powers a card of its color, `special` powers a
+     * card AND fires its gear payload (+◆) when USED, `miss` is dead (state
+     * `locked`). Absent on every legacy face-bag die — flag-off states never
+     * carry it.
+     */
+    face?: 'special' | 'mana' | 'miss';
 }
 
 // ---------------------------------------------------------------------------
@@ -345,6 +353,15 @@ export interface CombatThreatPhase {
      *  phase carries the enemy's natural (difficulty-derived) rung count —
      *  every phase authored before this epic behaves exactly as before. */
     rungs?: number;
+
+    /** Spec 33 §2 (Upgradeable Dice, flag-gated) — the phase's OPEN stance
+     *  check, resolved against the player's stance-from-cards at phase END
+     *  (`resolveThreatPhase`): ending in `punishes` lands the hit at
+     *  `READ_DAMAGE_MULT.advantage` (x1.5); ending in `yields` blunts it to
+     *  `READ_DAMAGE_MULT.disadvantage` (x0.5) and pays +1 Conviction. No
+     *  hidden information — the telegraph renders both fields. Undefined =
+     *  no check this phase (and always inert while the flag is off). */
+    stanceCheck?: { punishes?: Stance; yields?: Stance };
 }
 
 export type CombatThreatMark = 'clear' | 'overwhelmed' | 'pending';
@@ -588,6 +605,30 @@ export type CombatEvent =
     | { kind: 'stake-placed'; color: WheelStance; amount: 2 | 4 | 6 }
     | { kind: 'stake-won'; color: WheelStance; payout: 'colored' | 'colored-pip' | 'wild' }
     | { kind: 'stake-lost'; amount: 2 | 4 | 6 }
+    // ── Spec 33 (Upgradeable Dice, flag-gated) — none of these fire while the
+    //    flag is off. ─────────────────────────────────────────────────────────
+    // The player's stance shifted (stance = the last PAID card's stance).
+    | { kind: 'stance-shifted'; stance: WheelStance }
+    // Momentum chain advanced (length grew) or started (length 1).
+    | { kind: 'momentum-advanced'; color: WheelStance; length: number }
+    // A paid card of a non-successor color broke the chain to NULL (owner-locked
+    // D1 rule: the breaking card builds nothing).
+    | { kind: 'momentum-broken'; by: WheelStance }
+    // The 3-color chain completed: a temporary gold die (until spent, this
+    // combat) is granted and momentum resets to null.
+    | { kind: 'momentum-surged'; dieId: string }
+    // A SPECIAL face fired its gear payload because its die was USED to power a
+    // card (the provisional use-triggered rule).
+    | { kind: 'special-fired'; dieId: string; conviction: number; total: number }
+    // Press Fate (flag-on form): 1 Conviction rerolled ALL miss faces, honestly.
+    | { kind: 'press-fate-rerolled'; dieIds: string[]; cost: number }
+    // The phase's open stance check resolved at phase end.
+    | { kind: 'stance-check-resolved'; phaseIndex: number; outcome: 'punished' | 'yielded' | 'none'; stance: Stance | null }
+    // The 7-object table ceiling refused a die grant; it converted to +1◆.
+    | { kind: 'die-overflowed'; source: 'surge' | 'kindle' | 'materialize'; total: number }
+    // An OVERHEAT push armed a second play but cracked the die: all-miss next
+    // round, excluded from that round's Press Fate.
+    | { kind: 'die-cracked'; dieId: string; color: CombatDieColor }
     | { kind: 'combat-ended'; outcome: CombatOutcome };
 
 // ---------------------------------------------------------------------------
@@ -868,7 +909,49 @@ export interface CombatEncounterState {
     /** See `permanentWildDice`. Every permanent Wild die is paired with one
      *  permanent dead (locked `x`) die — the visible "fate pushes back" cost. */
     permanentDeadDice?: number;
+
+    // ── Spec 33 (Upgradeable Dice, flag-gated) — all optional; absent on every
+    //    flag-off state (byte-identical back-compat). ─────────────────────────
+    /** §2 — the player's stance: the stance of the last PAID card played.
+     *  Fights open stance-less (null/absent). FREE lines never change it. */
+    playerStance?: WheelStance | null;
+    /** §3 — the momentum chain: `{color, length}` of the live chain, or null.
+     *  Breaks reset to NULL (owner-locked D1); persists across rounds; surge
+     *  (length 3) grants the temp gold die and resets to null. */
+    momentumV2?: { color: WheelStance; length: number } | null;
+    /** §4 — the round Press Fate (flag-on form: 1◆ rerolls all miss faces) was
+     *  last used, gating it to once per round. Absent = never used. */
+    pressFateRound?: number;
+    /** §6 OVERHEAT — dice cracked by an overheat push: each entry forces that
+     *  color's NEXT roll to all-miss (`turn` = the turn the crack bites; under
+     *  the round-turn law one turn == one round) and excludes it from that
+     *  turn's Press Fate. Entries are consumed by the bitten turn's roll. */
+    crackedDice?: { color: 'heart' | 'body' | 'mind' | 'wild'; turn: number }[];
+    /** §6 — the die-gear loadout driving the four dice's face tables + special
+     *  payloads. ABSENT in D2 (the engine falls back to the hardcoded default
+     *  gear); D5 makes this a real persisted equipment rail. */
+    dieGear?: Partial<Record<'heart' | 'body' | 'mind' | 'wild', UpgradeableDieGear>>;
     seed?: number;                         // seed used to drive the encounter (sim/tests)
+}
+
+/**
+ * Spec 33 §6 (Upgradeable Dice) — one die's GEAR: the equipment piece that
+ * defines everything mutable about its die. The DICE are permanent immutable
+ * 6-siders; gear carries the face distribution and the special payload.
+ * Caps (enforced where gear is authored/upgraded, D5): colored dice keep
+ * >= 1 miss face and <= 2 special faces; the wild (gold) die keeps <= 1
+ * special face.
+ */
+export interface UpgradeableDieGear {
+    /** Which die this piece drives (stance-named; `wild` = the gold die). */
+    dieColor: 'heart' | 'body' | 'mind' | 'wild';
+    /** Number of special faces on the driven die (default 1). */
+    specialFaces: number;
+    /** Number of mana faces on the driven die (default 2; gold default 1). */
+    manaFaces: number;
+    /** The special payload: Conviction granted when a special-face die is USED
+     *  to power a card (default 2 — "powers this color AND grants 2◆"). */
+    specialConviction: number;
 }
 
 /** Return shape of every engine transition (mirrors `CardResolution`). */

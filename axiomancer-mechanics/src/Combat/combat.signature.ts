@@ -21,6 +21,9 @@ import type { Enemy } from '../Enemy/types';
 import { applyDamage, heal } from './health';
 import { drawCombatCards } from './combat.deck';
 import { rerollSpentDice } from './combat.dice';
+import {
+    isUpgradeableDiceEnabled, rerollMissFacesHonest, crackedColorsForTurn, PRESS_FATE_COST,
+} from './combat.upgradeable-dice';
 import { recordAttribution } from './combat.attribution';
 import { effectImpact } from './combat.cards';
 import type {
@@ -141,6 +144,19 @@ export function applySignatureSkill(
             break;
         }
         case 'reroll': {
+            // Spec 33 §4 (flag-gated) — Press Fate's HONEST form: reroll every
+            // MISS face from its gear table, once per round, no stance/mana
+            // guarantee (this explicitly supersedes `rerollSpentDice`'s
+            // stance-bearing conversion — a rig under the spec-33 law). Cracked
+            // dice are excluded. The engine wrapper charged PRESS_FATE_COST.
+            if (isUpgradeableDiceEnabled()) {
+                const cracked = crackedColorsForTurn(state, state.turn);
+                const honest = rerollMissFacesHonest(state.dice, state, cracked, rng);
+                next = { ...state, dice: honest.dice, pressFateRound: state.round };
+                events.push({ kind: 'press-fate-rerolled', dieIds: honest.rerolledIds, cost: PRESS_FATE_COST });
+                events.push({ kind: 'turn-dice-rolled', turn: state.turn, dice: honest.dice });
+                break;
+            }
             // Press Fate — bend fate on the BAD dice only: re-roll the dice you've
             // USED (spent/exhausted) or that show a dead X face, and KEEP every
             // still-usable die. The engine wrapper spends the Conviction; this is a

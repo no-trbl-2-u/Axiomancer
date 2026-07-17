@@ -163,6 +163,8 @@ export type {
     ThreatBranchCondition, CombatThreatBranch, CombatThreatBranchOutcome,
     // Phase 31 — the momentum wheel / THE STAKE shared stance subset
     WheelStance,
+    // Spec 33 (Phase D2) — the die-gear interface (D5 makes it a real rail)
+    UpgradeableDieGear,
 } from './combat.encounter.types';
 export {
     initializeCombatEncounter, rollEncounterDice, playCombatCard,
@@ -198,7 +200,22 @@ export {
     getFloatingDiceColors, SWAY_DECAY_PER_TURN,
     // Phase 31 — the engine-native momentum wheel + THE STAKE
     isMomentumDieId, placeStake,
+    // Spec 33 (Phase D2) — Upgradeable Dice: OVERHEAT's flag-on primitive
+    overheatSpentDie,
 } from './combat.engine';
+// Spec 33 (Phase D2, FLAGGED) — the Upgradeable-Dice model. Everything here is
+// inert until `setUpgradeableDice(true)`; the flag-off engine is byte-identical.
+export {
+    setUpgradeableDice, isUpgradeableDiceEnabled,
+    UPGRADEABLE_DIE_COLORS, UPGRADEABLE_TABLE_CEILING, KINDLE_CONCURRENT_CAP,
+    PRESS_FATE_COST, OVERHEAT_CRACK_CHANCE, SPECIAL_FIRES_ON_USE,
+    SPECIAL_CONVICTION_DEFAULT, MOMENTUM_CHAIN_ORDER, MOMENTUM_SURGE_LENGTH,
+    SURGE_DIE_PREFIX, DEFAULT_DIE_GEAR, activeDieGear,
+    rollUpgradeableFace, rollUpgradeableDice, rollGoldLeadPair,
+    advanceMomentumV2, rerollMissFacesHonest, resolveStanceCheck,
+    tableDieObjectCount, tableHasRoom, isChainStance,
+} from './combat.upgradeable-dice';
+export type { MomentumV2, UpgradeableDieFace } from './combat.upgradeable-dice';
 /**
  * @deprecated Superseded by the COLOR LAW for die COST / play legality
  * (`playCombatCard`'s color-match gate); retained only as the legacy 0/1/2

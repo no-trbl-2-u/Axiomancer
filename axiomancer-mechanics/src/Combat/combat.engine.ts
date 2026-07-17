@@ -61,6 +61,13 @@ import {
     overheatReserve,
 } from './combat.dice';
 import {
+    isUpgradeableDiceEnabled, rollUpgradeableDice, rollGoldLeadPair,
+    crackedColorsForTurn, expireCrackedDice, advanceMomentumV2, resolveStanceCheck,
+    isChainStance, activeDieGear, tableHasRoom, tableDieObjectCount,
+    UPGRADEABLE_TABLE_CEILING, KINDLE_CONCURRENT_CAP, PRESS_FATE_COST,
+    OVERHEAT_CRACK_CHANCE, SPECIAL_FIRES_ON_USE, SURGE_DIE_PREFIX,
+} from './combat.upgradeable-dice';
+import {
     COMBAT_HAND_SIZE, buildCombatDeck, drawCombatCards, shuffleCombatDeck,
 } from './combat.deck';
 import {
@@ -556,6 +563,56 @@ export function startTurn(
         // (auditor transcripts must show illegal rolls being refused).
         return { state: withLog(state, blocked), events: blocked };
     }
+    // ── Spec 33 (Upgradeable Dice, flag-gated) — the four-die roll law. Rolls
+    //    one die per fixed color from its gear's face table; no draft, no
+    //    face bag. OVERHEAT cracks bite here (all-miss, then consumed). The
+    //    gold+lead pair (flag-on reading of `permanentWildDice`, cap 1 pair)
+    //    and floating dice (surge) join; the 7-object table ceiling converts
+    //    the overflow to +1◆ by materialization priority (permanent pool →
+    //    Reserve → KINDLE → surge/floating).
+    if (isUpgradeableDiceEnabled()) {
+        const turn = state.turn + 1;
+        const cracked = crackedColorsForTurn(state, turn);
+        let dice = rollUpgradeableDice(turn, state, cracked, rng);
+        if ((state.permanentWildDice ?? 0) > 0) {
+            dice = [...dice, ...rollGoldLeadPair(turn, state, rng)];
+        }
+        if ((state.floatingDice ?? []).length > 0) {
+            dice = [...dice, ...(state.floatingDice ?? []).map(d => ({ ...d, state: 'available' as const }))];
+        }
+        const events: CombatEvent[] = [];
+        let conviction = state.conviction;
+        let reserve = state.reserve ?? [];
+        let floatingDice = state.floatingDice ?? [];
+        // Ceiling — refuse lowest-priority objects first: floating (surge),
+        // then kindled (temporary) Reserve dice, then the newest banked die.
+        while (dice.length + reserve.length > UPGRADEABLE_TABLE_CEILING) {
+            const floatIdx = [...dice].reverse().findIndex(d => d.floating);
+            if (floatIdx >= 0) {
+                const victim = dice[dice.length - 1 - floatIdx];
+                dice = dice.filter(d => d.id !== victim.id);
+                floatingDice = floatingDice.filter(d => d.id !== victim.id);
+            } else {
+                const kindled = [...reserve].reverse().find(d => d.temporary) ?? reserve[reserve.length - 1];
+                if (!kindled) break;
+                reserve = reserve.filter(d => d.id !== kindled.id);
+            }
+            conviction = Math.min(CONVICTION_CAP, conviction + 1);
+            events.push({ kind: 'die-overflowed', source: 'materialize', total: conviction });
+            events.push({ kind: 'conviction-gained', amount: 1, total: conviction, reason: 'effect' });
+        }
+        const next: CombatEncounterState = {
+            ...state, dice, reserve, floatingDice, conviction,
+            draftedDieId: null, turn, lastRead: 'none', carriedDie: null,
+            crackedDice: expireCrackedDice(state.crackedDice, turn),
+            spellsPlayedThisTurn: 0, echoNextSpell: false,
+            recoilPaidThisTurn: 0, enemyDotDamageThisRound: 0, scrapsThisTurn: 0,
+            turnTakenThisPhase: true,
+        };
+        events.push({ kind: 'turn-dice-rolled', turn, dice });
+        events.push({ kind: 'dice-rolled', dice });
+        return { state: withLog(next, events), events };
+    }
     const turn = state.turn + 1;
     let dice = rollTurnDice(turn, TURN_DICE_COUNT, rng);
     // CLARITY (P0-truth `forceWildOnNextDie` wiring): the bearer's next roll
@@ -649,6 +706,9 @@ export function draftStanceDie(
     dieId: string,
     opts: { bankUnpicked?: boolean } = {},
 ): CombatTransition {
+    // Spec 33 — the draft is retired under the flag: every usable die is a
+    // power source; stance comes from cards (§2), not a drafted die.
+    if (isUpgradeableDiceEnabled()) return { state, events: [] };
     if (state.phase !== 'phase-play') return { state, events: [] };
     if (state.draftedDieId !== null) return { state, events: [] };
     // Spec 32 v3 §5 — a FLOATING die cannot be drafted as the stance: it is an
@@ -756,6 +816,28 @@ export function draftStanceDie(
  *  `carriedDie`), else it burns for +1 Conviction. */
 export function endTurn(state: CombatEncounterState): CombatTransition {
     if (state.phase !== 'phase-play') return { state, events: [] };
+    // Spec 33 §6 (flag-gated) — the Reserve's flag-on form: at end of round,
+    // ONE unspent mana/special tray die banks (cap RESERVE_MAX), best face
+    // first (special > mana — a banked special still fires its payload when
+    // spent from the Reserve, use-triggered). Unbanked dice simply expire —
+    // misses were always worth 0◆ and unspent mana earns nothing (§1: income
+    // is specials + yield bonuses only, never leftovers).
+    if (isUpgradeableDiceEnabled()) {
+        const events: CombatEvent[] = [];
+        let reserve = state.reserve ?? [];
+        if (reserve.length < RESERVE_MAX) {
+            const candidates = state.dice.filter(d => !d.floating && d.state === 'available' && d.face !== 'miss');
+            const best = candidates.find(d => d.face === 'special') ?? candidates[0];
+            if (best) {
+                reserve = [...reserve, { ...best, pips: 0 }];
+                events.push({ kind: 'die-banked', dieId: best.id, color: best.color, pips: 0 });
+            }
+        }
+        const next: CombatEncounterState = {
+            ...state, dice: [], reserve, draftedDieId: null, lastRead: 'none', carriedDie: null,
+        };
+        return { state: withLog(next, events), events };
+    }
     const events: CombatEvent[] = [];
     const d = draftedDie(state);
     let reserve = state.reserve ?? [];
@@ -795,6 +877,10 @@ export function placeStake(
     color: WheelStance,
     amount: 2 | 4 | 6,
 ): CombatTransition {
+    // Spec 33 [owner-locked, D1] — STAKE is RETIRED under the flag (the wager
+    // retires with the read; not rewired onto stance checks). Silent no-op,
+    // mirroring this function's other guards.
+    if (isUpgradeableDiceEnabled()) return { state, events: [] };
     if (state.phase !== 'phase-play') return { state, events: [] };
     if (state.stake) return { state, events: [] };
     if (state.draftedDieId === null) return { state, events: [] };
@@ -860,6 +946,38 @@ export function tapFateDie(
     return checkImmediateOutcome(withLog(next, events), events);
 }
 
+/**
+ * Spec 33 §6 (flag-gated) — OVERHEAT, reinterpreted: push an already-SPENT
+ * tray die back to `available` so it can power a SECOND card this round. The
+ * push always succeeds; the RISK is the crack — `OVERHEAT_CRACK_CHANCE` that
+ * the die is all-miss NEXT round (and excluded from that round's Press Fate).
+ * The second play is a normal paid play: it moves stance and momentum. Any
+ * die may be overheated, gold included. Cards carry this verb from D4; the
+ * engine primitive ships here so D3's policies can exercise it.
+ */
+export function overheatSpentDie(
+    state: CombatEncounterState,
+    dieId: string,
+    rng: () => number = defaultRng,
+): CombatTransition {
+    if (!isUpgradeableDiceEnabled()) return { state, events: [] };
+    if (state.phase !== 'phase-play' || state.finalOutcome) return { state, events: [] };
+    const die = state.dice.find(d => d.id === dieId && !d.floating && d.state === 'spent');
+    if (!die || die.face === 'miss' || die.color === 'x') return { state, events: [] };
+
+    const events: CombatEvent[] = [{ kind: 'die-refreshed', dieId: die.id, color: die.color }];
+    let crackedDice = state.crackedDice ?? [];
+    if (rng() < OVERHEAT_CRACK_CHANCE) {
+        crackedDice = [...crackedDice, { color: die.color as 'heart' | 'body' | 'mind' | 'wild', turn: state.turn + 1 }];
+        events.push({ kind: 'die-cracked', dieId: die.id, color: die.color });
+    }
+    const next: CombatEncounterState = {
+        ...state, crackedDice,
+        dice: state.dice.map(d => (d.id === dieId ? { ...d, state: 'available' as const } : d)),
+    };
+    return { state: withLog(next, events), events };
+}
+
 /** The drafted stance die for this turn (or null). */
 function draftedDie(state: CombatEncounterState): CombatManaDie | null {
     if (!state.draftedDieId) return null;
@@ -923,7 +1041,83 @@ export function playCombatCard(
     const transition = useBottom
         ? playBottomAction(state, entry.uid, card, dieId, rng, play?.chosenX, play?.reprisalCardId, play?.omenClaim)
         : playTopAction(state, entry.uid, card, rng);
+    // Spec 33 (flag-gated) — stance-from-cards + the null-reset momentum chain
+    // replace the v1 wheel entirely; FREE plays never touch either (§3 rule 5).
+    if (isUpgradeableDiceEnabled()) return applyStanceAndMomentumV2(state, transition, card.stance, useBottom);
     return advanceMomentumWheel(state, transition, card.stance);
+}
+
+/**
+ * Spec 33 §2/§3 (flag-gated) — post-play bookkeeping for a LANDED PAID play:
+ * 1. SPECIAL payload (§1, provisional use-triggered rule): the powering die's
+ *    special face fires its gear payload (+◆) because it was USED.
+ * 2. Stance-from-cards: the player's stance becomes this card's stance.
+ * 3. Momentum: start / advance / break-to-NULL (owner-locked D1); a completed
+ *    3-chain SURGES — a temporary gold die (until spent, this combat) joins
+ *    the tray, ceiling permitting (overflow → +1◆) — then momentum resets.
+ * FREE (top) plays and fizzles return untouched.
+ */
+function applyStanceAndMomentumV2(
+    preState: CombatEncounterState,
+    transition: CombatTransition,
+    stance: CombatDieColor,
+    useBottom: boolean,
+): CombatTransition {
+    if (!useBottom) return transition;
+    const played = transition.events.find(e => e.kind === 'card-played');
+    if (!played || played.kind !== 'card-played') return transition;
+    let state = transition.state;
+    if (state.phase === 'complete') return transition;
+    const events: CombatEvent[] = [];
+
+    // 1. SPECIAL fires on USE (the single provisional switch).
+    if (SPECIAL_FIRES_ON_USE && played.dieId) {
+        const preDie = preState.dice.find(d => d.id === played.dieId)
+            ?? (preState.reserve ?? []).find(d => d.id === played.dieId);
+        if (preDie?.face === 'special' && preDie.color !== 'x') {
+            const gear = activeDieGear(preState, preDie.color as 'heart' | 'body' | 'mind' | 'wild');
+            const conviction = Math.min(CONVICTION_CAP, state.conviction + gear.specialConviction);
+            if (conviction > state.conviction) {
+                state = { ...state, conviction };
+                events.push({ kind: 'special-fired', dieId: preDie.id, conviction: gear.specialConviction, total: conviction });
+                events.push({ kind: 'conviction-gained', amount: conviction - transition.state.conviction, total: conviction, reason: 'effect' });
+            }
+        }
+    }
+
+    // 2 + 3. Stance + momentum — chain stances only (wild/x synthetics touch
+    // neither: "wilds don't shift it").
+    if (isChainStance(stance)) {
+        if (state.playerStance !== stance) {
+            state = { ...state, playerStance: stance };
+            events.push({ kind: 'stance-shifted', stance });
+        }
+        const result = advanceMomentumV2(state.momentumV2 ?? null, stance);
+        state = { ...state, momentumV2: result.momentum };
+        if (result.broke) {
+            events.push({ kind: 'momentum-broken', by: stance });
+        } else if (result.surged) {
+            if (tableHasRoom(state)) {
+                const dieId = `${SURGE_DIE_PREFIX}${state.turn}-${state.log.length}`;
+                const die: CombatManaDie = {
+                    id: dieId, color: 'wild', face: 'mana', state: 'available',
+                    temporary: true, floating: true,
+                };
+                state = { ...state, dice: [...state.dice, die], floatingDice: [...(state.floatingDice ?? []), die] };
+                events.push({ kind: 'momentum-surged', dieId });
+            } else {
+                const conviction = Math.min(CONVICTION_CAP, state.conviction + 1);
+                state = { ...state, conviction };
+                events.push({ kind: 'die-overflowed', source: 'surge', total: conviction });
+                events.push({ kind: 'conviction-gained', amount: 1, total: conviction, reason: 'effect' });
+            }
+        } else {
+            events.push({ kind: 'momentum-advanced', color: stance, length: result.momentum?.length ?? 1 });
+        }
+    }
+
+    if (events.length === 0) return transition;
+    return { state: withLog(state, events), events: [...transition.events, ...events] };
 }
 
 /**
@@ -1621,8 +1815,38 @@ function playBottomAction(
     const drafted = draftedDie(state);
     const reserveIn = state.reserve ?? [];
     let powering: CombatManaDie | null = null;
-    let poweringSource: 'drafted' | 'reserve' | 'floating' | 'fate-x' = 'drafted';
-    if (dieId === undefined || dieId === drafted?.id) {
+    let poweringSource: 'drafted' | 'reserve' | 'floating' | 'fate-x' | 'tray-v2' = 'drafted';
+    if (isUpgradeableDiceEnabled()) {
+        // Spec 33 §1 — no draft, no single-die law: ANY available die (tray
+        // mana/special face, Reserve, or floating) may power a paid line; the
+        // color law below still gates it. The dieId is REQUIRED — v2 has no
+        // implicit default die.
+        if (dieId === undefined) {
+            const events: CombatEvent[] = [{ kind: 'effect-fizzled', cardId: card.id, effectId: '', message: 'choose a die to power this card' }];
+            return { state: withLog(state, events), events };
+        }
+        const banked = reserveIn.find(d => d.id === dieId);
+        const floating = state.dice.find(d => d.id === dieId && d.floating && d.state === 'available');
+        const tray = state.dice.find(d => d.id === dieId && !d.floating);
+        if (banked) {
+            powering = banked;
+            poweringSource = 'reserve';
+        } else if (floating) {
+            powering = floating;
+            poweringSource = 'floating';
+        } else if (tray && tray.state === 'available') {
+            powering = tray;
+            poweringSource = 'tray-v2';
+        } else {
+            const events: CombatEvent[] = [{
+                kind: 'effect-fizzled', cardId: card.id, effectId: '',
+                message: tray?.face === 'miss'
+                    ? 'a miss face is dead — Press Fate or a card can revive it'
+                    : 'that die cannot power this card',
+            }];
+            return { state: withLog(state, events), events };
+        }
+    } else if (dieId === undefined || dieId === drafted?.id) {
         if (!drafted) {
             const events: CombatEvent[] = [{ kind: 'effect-fizzled', cardId: card.id, effectId: '', message: 'draft a stance die first' }];
             return { state: withLog(state, events), events };
@@ -1667,7 +1891,10 @@ function playBottomAction(
     //    (state.lastRead); a WILD powering die re-reads by adopting the card's
     //    stance; a fate-X play has no stance → none.
     const enemyStance = currentPhaseStance(state);
-    const read: CombatReadResult = poweringSource === 'fate-x'
+    // Spec 33 §2 — the hidden-stance read is RETIRED under the flag: every
+    // play lands printed (mult 1.0); the 1.5/0.5 rails now belong to the open
+    // stance checks at phase end (`resolveThreatPhase`).
+    const read: CombatReadResult = isUpgradeableDiceEnabled() || poweringSource === 'fate-x'
         ? 'none'
         : powering.color === 'wild'
             ? clampPlayerRead(state.player, resolveRead(card.stance as CombatDieColor, enemyStance), card.stance as CombatDieColor)
@@ -2456,16 +2683,24 @@ function playBottomAction(
             }
             case 'create_temporary_die': {
                 // KINDLE — a temporary die (this combat only) joins the Reserve.
+                // Spec 33 §1/§6 (flag-gated): cap ONE kindled die concurrent,
+                // and the 7-object table ceiling applies — either refusal
+                // converts the grant to +1◆ (nothing silently dropped).
                 const forged: CombatManaDie = {
                     id: `forge-${state.turn}-${state.log.length + events.length}`, color: mech.color,
                     state: 'available', temporary: true,
+                    ...(isUpgradeableDiceEnabled() ? { face: 'mana' as const } : {}),
                     pips: zoneHas(state, 'anvil-of-form') ? 1 : 0,
                 };
-                if (reserve.length < RESERVE_MAX) {
+                const kindleBlocked = isUpgradeableDiceEnabled()
+                    && (reserve.filter(d => d.temporary).length >= KINDLE_CONCURRENT_CAP
+                        || state.dice.length + reserve.length >= UPGRADEABLE_TABLE_CEILING);
+                if (!kindleBlocked && reserve.length < RESERVE_MAX) {
                     reserve = [...reserve, forged];
                     events.push({ kind: 'die-forged', dieId: forged.id, color: forged.color, destination: 'reserve' });
                 } else {
                     conviction = Math.min(CONVICTION_CAP, conviction + 1);
+                    if (kindleBlocked) events.push({ kind: 'die-overflowed', source: 'kindle', total: conviction });
                     events.push({ kind: 'die-forged', dieId: forged.id, color: forged.color, destination: 'conviction' });
                 }
                 break;
@@ -2809,7 +3044,13 @@ function playBottomAction(
     const landedNewDistinct = newChainIds.length > 0;
     const convertMech = mechs.some(m => m.kind === 'convert_die_color');
     const bankSpentMech = mechs.some(m => m.kind === 'bank_spent_die');
-    const refreshed = (landedOnEnemy && landedNewDistinct) || reactFired || riderRefresh
+    // Spec 33 (flag-gated): the VARIETY-CHAIN auto-refresh dies with the
+    // single-die law it compensated — under the four-die model every usable
+    // die already powers its own play, so a free refresh would inflate the
+    // action economy past the §1 baseline (~1.83 paid plays/round). Explicit
+    // refresh riders/mechanics (cards that PRINT the refresh) still work.
+    const chainRefresh = !isUpgradeableDiceEnabled() && landedOnEnemy && landedNewDistinct;
+    const refreshed = chainRefresh || reactFired || riderRefresh
         || mechs.some(m => m.kind === 'refresh_die') || convertMech;
     // TRANSMUTE — X dice consumed by `float_x_die` leave the tray (their wild
     // floating successors join it below via `forgedFloating`).
@@ -3113,7 +3354,26 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
     // Phase 31 (EA-7) — THE STAKE settles here, before the escalation clock
     // reads its round basis below, so a LOST stake's +1 round-equivalent
     // already bites THIS phase's incoming hit, not just future ones.
-    const stakeResult = settleStake(state, phase, events);
+    // Spec 33 [owner-locked, D1]: STAKE is retired under the flag — nothing to
+    // settle (placeStake refuses all flag-on wagers).
+    const stakeResult = isUpgradeableDiceEnabled()
+        ? { conviction: state.conviction, floatingDice: state.floatingDice ?? [], stakeEscalationBonus: state.stakeEscalationBonus ?? 0 }
+        : settleStake(state, phase, events);
+
+    // Spec 33 §2 (flag-gated) — the phase's OPEN stance check resolves against
+    // the player's stance-from-cards NOW (phase end): `punishes` lands the hit
+    // at the advantage rail (x1.5); `yields` blunts it to the disadvantage
+    // rail (x0.5) and pays +1◆ below. Stance-less players fire nothing.
+    const stanceCheck = isUpgradeableDiceEnabled()
+        ? resolveStanceCheck(phase.stanceCheck, state.playerStance ?? null,
+            READ_DAMAGE_MULT.advantage, READ_DAMAGE_MULT.disadvantage)
+        : { mult: 1, yielded: false, outcome: 'none' as const };
+    if (isUpgradeableDiceEnabled() && phase.stanceCheck) {
+        events.push({
+            kind: 'stance-check-resolved', phaseIndex: phase.index,
+            outcome: stanceCheck.outcome, stance: state.playerStance ?? null,
+        });
+    }
 
     // Control on the enemy hinders its turn. HARD control (skipTurn) denies it
     // outright via canAct; SOFT control (confusion/fear/daze/slow/blind/accuracy-
@@ -3251,7 +3511,10 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
                 let dmg = Math.round(
                     eff.damage * THREAT_DAMAGE_SCALE * weakenMult * escalation
                     * enemyOutgoingMult * enemyThreatMult
-                    * (overextendedId ? 0.5 : 1) * playerTakenMult,
+                    * (overextendedId ? 0.5 : 1) * playerTakenMult
+                    // Spec 33 §2 — the open stance check's rail (1 when flag-off,
+                    // no check authored, or the player is stance-less).
+                    * stanceCheck.mult,
                 );
                 // Flat armor soak (defenseModifier). buff_invincibility's 99 zeroes
                 // any realistic hit; Iron Skin's 5 / phoenix's 1 shave it.
@@ -3505,12 +3768,18 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
         threatMarks,
         phaseResults: [...state.phaseResults, result],
         // Phase 31 (EA-7) — THE STAKE settlement's payout/penalty + the
-        // wager itself clears regardless of outcome.
-        conviction: stakeResult.conviction,
+        // wager itself clears regardless of outcome. Spec 33 §2: answering a
+        // `yields` check pays +1◆ (the read-win bonus, reinterpreted).
+        conviction: stanceCheck.yielded
+            ? Math.min(CONVICTION_CAP, stakeResult.conviction + 1)
+            : stakeResult.conviction,
         floatingDice: stakeResult.floatingDice,
         stake: undefined,
         stakeEscalationBonus: stakeResult.stakeEscalationBonus,
     };
+    if (stanceCheck.yielded && next.conviction > stakeResult.conviction) {
+        events.push({ kind: 'conviction-gained', amount: 1, total: next.conviction, reason: 'effect' });
+    }
     next = withLog(next, events);
 
     // Outcome checks after the threat action (HP + capitulation).
@@ -4167,20 +4436,38 @@ export function playSignatureSkill(
     if (state.phase !== 'phase-play') return { state, events: [] };
     const skill = getSignatureSkill(signatureId);
     if (!skill) return { state, events: [] };
-    if (state.conviction < skill.cost) {
-        const events: CombatEvent[] = [{ kind: 'effect-fizzled', cardId: skill.id, effectId: '', message: `need ${skill.cost} ◆ Conviction (have ${state.conviction})` }];
+    // Spec 33 §4 [owner-locked] — Press Fate's flag-on price is spec-fixed at
+    // PRESS_FATE_COST (1◆): the recurring sink of the leaner economy. Every
+    // other signature keeps its data cost until D3 derives the new table.
+    const v2Reroll = isUpgradeableDiceEnabled() && skill.kind === 'reroll';
+    const cost = v2Reroll ? PRESS_FATE_COST : skill.cost;
+    if (state.conviction < cost) {
+        const events: CombatEvent[] = [{ kind: 'effect-fizzled', cardId: skill.id, effectId: '', message: `need ${cost} ◆ Conviction (have ${state.conviction})` }];
         return { state: withLog(state, events), events };
     }
+    if (v2Reroll) {
+        // Once per round (§4), and only when a live miss face exists to revive
+        // (cracked dice are excluded — their miss is a stated consequence).
+        if (state.pressFateRound === state.round) {
+            const events: CombatEvent[] = [{ kind: 'effect-fizzled', cardId: skill.id, effectId: '', message: 'fate already pressed this round' }];
+            return { state: withLog(state, events), events };
+        }
+        const cracked = crackedColorsForTurn(state, state.turn);
+        if (!state.dice.some(d => d.face === 'miss' && !d.floating && !cracked.has(d.color))) {
+            const events: CombatEvent[] = [{ kind: 'effect-fizzled', cardId: skill.id, effectId: '', message: 'no miss faces to re-roll' }];
+            return { state: withLog(state, events), events };
+        }
+    }
     // Press Fate with no used/blocked dice to re-roll is a no-op — don't burn ◆.
-    if (skill.kind === 'reroll' && !hasRerollableDice(state.dice)) {
+    if (!v2Reroll && skill.kind === 'reroll' && !hasRerollableDice(state.dice)) {
         const events: CombatEvent[] = [{ kind: 'effect-fizzled', cardId: skill.id, effectId: '', message: 'no spent or blocked (X) dice to re-roll' }];
         return { state: withLog(state, events), events };
     }
 
-    const spent: CombatEncounterState = { ...state, conviction: state.conviction - skill.cost };
+    const spent: CombatEncounterState = { ...state, conviction: state.conviction - cost };
     const applied = applySignatureSkill(spent, skill, rng);
     const events: CombatEvent[] = [
-        { kind: 'signature-cast', signatureId: skill.id, name: skill.name, cost: skill.cost },
+        { kind: 'signature-cast', signatureId: skill.id, name: skill.name, cost },
         ...applied.events,
     ];
     const next = withLog(applied.state, events);
