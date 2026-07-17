@@ -63,7 +63,7 @@ import {
 import {
     isUpgradeableDiceEnabled, rollUpgradeableDice, rollGoldLeadPair,
     crackedColorsForTurn, expireCrackedDice, advanceMomentumV2, resolveStanceCheck,
-    isChainStance, activeDieGear, tableHasRoom, tableDieObjectCount,
+    isChainStance, activeDieGear, tableHasRoom,
     UPGRADEABLE_TABLE_CEILING, KINDLE_CONCURRENT_CAP, PRESS_FATE_COST,
     OVERHEAT_CRACK_CHANCE, SPECIAL_FIRES_ON_USE, SURGE_DIE_PREFIX,
 } from './combat.upgradeable-dice';
