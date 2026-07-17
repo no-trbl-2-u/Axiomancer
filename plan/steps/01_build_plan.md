@@ -538,7 +538,7 @@ to run live); **D2+ touch the engine — pause the `/march` + night crons
 before starting them** (collision discipline). D1 also owns reconciling the
 supersession collisions before any engine work.
 
-- [ ] Phase D1 — Upgradeable-Dice spec review-and-land. Mechanics-expert
+- [x] Phase D1 — Upgradeable-Dice spec review-and-land. Mechanics-expert
       review of `axiomancer-mechanics/specs/33-upgradeable-dice.md` against
       doctrine (status-centrality, the 80/50/25-35/0 win curve,
       dice-honesty) before ANY engine work. Settle spec §9 open items
@@ -551,34 +551,65 @@ supersession collisions before any engine work.
       Brief: `plan/phases/phase_D1_upgradeable_dice_spec_review.md`.
       Prove: clean mechanics-expert verdict + every §9 item and every
       collision resolved in-brief (owner-call items surfaced, not guessed).
-- [ ] Phase D2 — Engine core, flagged. Per-die face tables + the momentum
-      machine + open stance checks behind a flag. `CombatManaDie` shape
-      change is public-barrel-breaking — migrate mobile + card-editor the
-      same phase and re-verify `npm run verify -w axiomancer-mobile`.
-      Prove: hermetic vitest (`mockSequentialRng`). Deps: D1.
-- [ ] Phase D3 — Sim harness. Autoplay policies + Monte-Carlo witness for
-      the spec §7 bands (E[usable]≈1.83, whiff≈8.3%, per-color ≥65%, ◆
-      income 1.2–1.6, surge rate). Prove: measured values in bands.
+      SHIPPED 2026-07-17 — PASS-WITH-EDITS applied; owner calls: die gear
+      (4 dedicated slots + blacksmith), STAKE retired, momentum
+      null-reset, surge until-spent —
+      `spec 33: land D1 review` (4adf7266)
+- [ ] Phase D2 — Engine core, flagged. The whole spec-33 model behind a
+      flag: 4 fixed dice with a die-gear interface (default gear
+      hardcoded), stance-from-cards + open stance checks, momentum with
+      **null-reset breaks** (D1 owner call — do NOT port the shipped
+      `advanceWheel` restart), surge die until-spent, honest Press Fate
+      (the shipped `rerollSpentDice` stance guarantee is a rig — delete),
+      ceiling + overflow→+1◆, subsystem ports per spec §6, and **STAKE
+      plumbing REMOVED** (owner call). `CombatManaDie` shape change is
+      public-barrel-breaking — migrate mobile + card-editor the same
+      phase and re-verify `npm run verify -w axiomancer-mobile`.
+      Brief: `plan/phases/phase_D2_engine_core_flagged.md`.
+      Prove: hermetic vitest (`mockSequentialRng`); flag-off suite
+      untouched-green. Deps: D1.
+- [ ] Phase D3 — Sim harness + economy derivation. Autoplay policies
+      learn the new action space; Monte-Carlo witness for the spec §7
+      **D3 gates** (E[usable]≈1.83, whiff≈8.3%, per-color ≥65%, ◆ income
+      1.2–1.6, surge rate, STAKE-retirement gap); DERIVE signature/ante
+      constants + `sig-read-opponent` cost for D7 ratification.
+      Brief: `plan/phases/phase_D3_sim_harness.md`.
+      Prove: measured values in bands, report + pinned sim tests.
       Deps: D2.
-- [ ] Phase D4 — Pricing re-derivation. Re-fit `cards.pricing.ts` to the
-      leaner ◆ economy; re-author Forge's 7 die-cards against the new
-      model; add ONE dice-interaction card per theme. Prove: effectiveness
-      lint + curated-library tests green. Deps: D3.
-- [ ] Phase D5 — Dice-face upgrade layer. Per-die mutable face
-      distributions (the four dice are permanent — NO inventory/loadout,
-      no equip/unequip; only faces mutate), FORGE face-swap + in-combat
-      FORGE upgrades, reward hooks, persistence via the Game module's
-      save/versioning machinery (`GAME_STATE_VERSION` in
-      `src/Game/game.migrate.ts`; the spec-05 equipment engine is NOT
-      involved). Prove:
-      migration tests. Deps: D2.
-- [ ] Phase D6 — Mobile UI. Dice-tray rework, payload-only face-inspection
-      panel (Dawncaster-terse; illegal actions prevented loudly),
-      momentum/stance chips, keyword glosses. Prove: Playwright e2e.
-      Deps: D2 (+ D5 for the upgrade surface).
-- [ ] Phase D7 — Tuning + honest re-baseline. Full `/combat-playtest`
-      matrix vs 80/50/25-35/0; statusEngagement re-baseline with its known
-      blind spots stated; playtester agents. Prove: bands + report.
+- [ ] Phase D4 — Pricing re-derivation + card re-authoring. Re-fit
+      `cards.pricing.ts` (incl. the card-played-clock DoT constants —
+      WS3.3's ~2 plays/round assumption dies); re-author Forge's 7
+      die-cards; author FORGE special-amplifier enchants (D1 owner call)
+      + ONE dice-interaction card per other theme; register
+      SPECIAL/HONE/TEMPER keyword rows.
+      Brief: `plan/phases/phase_D4_pricing_rederivation.md`.
+      Prove: effectiveness lint + curated-library tests green. Deps: D3.
+- [ ] Phase D5 — Die gear + blacksmith. The D1 owner-call model: dice are
+      immutable; ALL progression on four dedicated color-coded gear
+      slots (separate rail from the 5-piece wear model; pieces are
+      spec-05 equipment ITEMS — the dice are not). Gear defines special
+      payload (default +2◆) + face upgrades (HONE/TEMPER, caps at the
+      item); NEW blacksmith encounter sells upgrades; reward hooks;
+      `GAME_STATE_VERSION` migration (older saves get default gear).
+      Brief: `plan/phases/phase_D5_die_gear_blacksmith.md`.
+      Prove: migration + cap-enforcement + payload-timing tests.
+      Deps: D2.
+- [ ] Phase D6 — Mobile UI. Dice-tray rework, die-gear rail +
+      payload-only face-inspection panel (Dawncaster-terse; illegal
+      actions prevented loudly), Press Fate affordance, momentum/stance
+      chips (breaks are LOUD), open stance-check telegraphs, blacksmith
+      screen, keyword glosses. Flag-aware (flag-off renders old combat
+      untouched). Brief: `plan/phases/phase_D6_mobile_ui.md`.
+      Prove: Playwright e2e + presenter units + mobile verify.
+      Deps: D2 + D5.
+- [ ] Phase D7 — Tuning, ratification + honest re-baseline. Full
+      `/combat-playtest` matrix vs 80/50/25-35/0 (the spec §7 D7 gates);
+      ratify D3's economy (blacksmith placeholders die here);
+      statusEngagement re-baseline with its known blind spots stated;
+      playtester agents; PROVISIONAL special-on-use check-in; flag-flip
+      recommendation (flip itself = owner call).
+      Brief: `plan/phases/phase_D7_tuning_rebaseline.md`.
+      Prove: bands + ratified-constants report + re-baseline stamp.
       Deps: D4, D6.
 
 > **After the queue drains:** `/march` transitions to `/iterate`
@@ -628,3 +659,4 @@ phases with linked notes here.)
 - phase 9 — 7ea06a6e / 6fa7f090 — character/story/world specs (C-01 the Sophist, W-01 the Aporia, S-01 fishing-village dilemmas; already shipped pre-tracking, recorded this tick)
 - phase 13 — (port pre-tracking; mechanics `src/World/Hazard/` + `audit/` parity harness, mobile `state/hazard/store-actions.ts` consumer) — hazard v2 engine port verified already landed, mobile duplicate deleted, content parity confirmed; recorded this tick
 - phase 25 — f7868e2a — /consolidate janitor mandate (terminology-sweep step + AUDIT finding) + `verify-mechanics.yml` stale `src/Skills/` impact-path fix; Part A harness re-apply verified already present at HEAD, no re-derivation needed
+- phase D1 — 4adf7266 — spec 33 review landed (PASS-WITH-EDITS; die-gear expansion, STAKE retired, momentum null-reset, pool-law binding rule; supersession banners on HANDOFF-2026-07-09 + phase 31; 33c/33d re-scoped; Fate Engine P2 re-scoped, P3 retired)
