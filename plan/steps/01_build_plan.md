@@ -393,24 +393,26 @@ Phase 26 (numbers) but design-independent of the owner session
 
 **Critique infra (promoted via `/oversight` 2026-07-10):**
 
-- [ ] Phase 34 — Non-Playwright transport for unattended `/critique`.
-      NOTE (oversight 2026-07-16): this phase now ENABLES the critique
-      re-baseline the user asked for — the 25 stale CRITIQUE findings
-      can't be unattended-re-validated until this ships. Prioritize it
-      if the re-baseline isn't done attended first.
-      8 consecutive `/critique` passes (of 11 total) have returned
-      zero product findings because the `playtester` sub-agent's
-      Playwright MCP tool grants don't propagate into Agent-tool
-      sub-agent contexts in unattended runs (see `plan/CRITIQUE.md`
-      Done section, "Playwright MCP tools unavailable to sub-agents").
-      Decision via `/oversight` 2026-07-10: stop retrying the grant
-      mechanism; give `/critique` a headless transport for unattended
-      ticks that doesn't route through the Agent-tool sandbox (e.g. a
-      standalone script driving the expo-web build directly with
-      Playwright, invoked as a subprocess rather than an MCP-gated
-      sub-agent). `playtester`/interactive `/critique` usage is
-      unaffected — this only covers the unattended-loop path
-      (harness; `skills/critique.md` + a new script under `scripts/`)
+- [x] Phase 34 — Non-MCP transport for unattended `/critique` (shipped
+      2026-07-16, oversight-directed). RENAMED from "Non-Playwright
+      transport": the problem was never Playwright the engine — it was
+      the Playwright *MCP* grants failing to propagate into Agent-tool
+      sub-agent contexts on unattended runs (8 of 11 passes filed zero
+      findings; see `plan/CRITIQUE.md` Done, "Playwright MCP tools
+      unavailable to sub-agents"). The fix drops the *MCP + sub-agent*
+      hop, not Playwright: `axiomancer-mobile/scripts/critique-drive.mjs`
+      is a plain Node subprocess (`npm run critique:drive`) that imports
+      the Playwright *library*, exports + serves the web build
+      hermetically (same scaffolding as `combat-encounter-e2e.mjs`), and
+      DRIVES + CAPTURES the §3 screen set — screenshot + DOM innerText +
+      console/page errors per screen → `.critique-artifacts/<viewport>/`
+      + `manifest.json`. It does not judge: `/critique`'s main agent
+      (has vision, no grant problem) reads the artifacts and files the
+      fresh-eyes findings itself. A screen that redirects/blanks/throws
+      is captured as an observation, not a driver failure. Interactive
+      `/critique` (playtester + Playwright MCP) is unaffected — this is
+      the unattended-loop path only (harness; `skills/critique.md` §3.5
+      updated + new script + `critique:drive` npm scripts)
 
 **Loop infra (promoted via issue-triage 2026-07-14):**
 

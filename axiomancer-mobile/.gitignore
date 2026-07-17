@@ -42,6 +42,10 @@ walk-*.png
 screenshots/current/
 screenshots/diff/
 
+# /critique unattended transport (Phase 34) — export + captured artifacts
+.critique-dist/
+.critique-artifacts/
+
 # debug
 npm-debug.*
 yarn-debug.*

@@ -62,19 +62,47 @@ already covers every screen; critique is for *quality*.
 
 Skip screens that don't exist yet. Note in pass log.
 
-## 3.5 Known limitation (unattended ticks)
+## 3.5 Unattended ticks — use the non-MCP transport (Phase 34)
 
-The `playtester` sub-agent's Playwright MCP tool grants have not
-propagated into Agent-tool sub-agent contexts for 8 consecutive
-unattended passes (`plan/CRITIQUE.md` Done section — "Playwright MCP
-tools unavailable to sub-agents"). Decided via `/oversight`
-2026-07-10: build-plan **Phase 34** gives unattended `/critique`
-ticks a headless, non-Agent-tool transport instead of retrying the
-grant. Until Phase 34 ships, an unattended `/critique` invocation
-that gets the same "you haven't granted it yet" rejection on its
-first `playtester` call should log the occurrence in
-`plan/CRITIQUE.md` and exit — do not re-diagnose the grant mechanism
-again; that's closed.
+The `playtester` sub-agent's Playwright **MCP** tool grants do not
+propagate into Agent-tool sub-agent contexts on unattended runs (8 of
+11 passes filed zero findings — `plan/CRITIQUE.md` Done section,
+"Playwright MCP tools unavailable to sub-agents"). The fix (Phase 34,
+shipped 2026-07-16) is **not** to drop Playwright — it is to drop the
+MCP + sub-agent hop.
+
+**When there is no interactive user (loop / `/march` / cron):** do NOT
+spawn `playtester`. Instead:
+
+1. Run the transport as a plain subprocess:
+
+   ```bash
+   npm run critique:drive                    # mobile viewport (default)
+   CRITIQUE_VIEWPORT=both npm run critique:drive   # mobile + desktop
+   ```
+
+   It imports the Playwright *library* (no MCP), exports + serves the
+   web build hermetically, drives the §3 screen set, and writes
+   screenshots + DOM innerText + console/page errors per screen to
+   `axiomancer-mobile/.critique-artifacts/<viewport>/`, plus a
+   top-level `manifest.json`. Exit 0 = captured (even if some screens
+   errored — that's data); exit 3 = boot failure (export/server/browser
+   — if it complains the browser is missing, run
+   `npx playwright install chromium` once).
+
+2. **You** (the main critique agent, which has vision and no grant
+   problem) read `manifest.json`, then each screenshot + `.txt`, and
+   file findings per §6 — same self-assessment, same cap of 6, same
+   filing format. `navError`/`pageErrors`/`consoleErrors` on a manifest
+   entry are themselves candidate findings. This replaces the
+   `playtester` delegation for unattended passes only.
+
+**When a user IS present (interactive `/critique`):** keep delegating
+to `playtester` with the Playwright MCP tools (§4) — grants work live,
+and the fresh sub-agent context is the better first-time lens. The
+transport above is the unattended fallback, not a replacement.
+
+Do not re-diagnose the MCP-grant mechanism — that path is closed.
 
 ## 4. Delegate to `playtester`
 

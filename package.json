@@ -25,7 +25,8 @@
     "catalog": "npm run catalog:export && npm run catalog:build",
     "site:build": "npm run catalog && npm run devlog:build",
     "baseline:check": "node scripts/check-baseline-freshness.mjs",
-    "baseline:regen": "node scripts/regen-deck-matrix-baseline.mjs"
+    "baseline:regen": "node scripts/regen-deck-matrix-baseline.mjs",
+    "critique:drive": "npm --workspace axiomancer-mobile run critique:drive"
   },
   "overrides": {
     "react": "19.1.0",

@@ -21,12 +21,14 @@
 > threshold, card-editor cannot edit the three new mechanic fields),
 > and repopulate with fresh findings.
 >
-> **BLOCKER (surfaced at oversight):** unattended `/critique` returns
-> zero product findings until **Phase 34** ships (the playtester's
-> Playwright grants don't propagate into unattended Agent-tool
-> sub-agent contexts — see Done section). So this re-baseline needs
-> an **attended** `/critique` run, OR Phase 34 first. Until then,
-> treat every row below as unverified.
+> **RE-BASELINE IS NOW UNBLOCKED (Phase 34 shipped 2026-07-16).**
+> Unattended `/critique` no longer needs the playtester's Playwright
+> MCP grants: run `npm run critique:drive` (see `skills/critique.md`
+> §3.5), then have the main agent read `.critique-artifacts/manifest.json`
+> + the screenshots/DOM and re-file against current HEAD. Until that
+> re-baseline runs, treat every row below as unverified.
+
+### [MED] ratified-exception HP arms bypass the damage-instance clock funnel
 - pass: review-closeout 2026-07-12 (commit 4680e5e2, branch
   claude/axiomancer-dawncaster-comparison-cz6008)
 - viewport: n/a
