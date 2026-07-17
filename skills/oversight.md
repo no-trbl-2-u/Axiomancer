@@ -58,11 +58,22 @@ In parallel where independent:
 8. `axiomancer-mechanics/specs/` + `axiomancer-mechanics/braindump/`
    — has a new design input landed since the last sibling
    commit?
+9. **The needs-user-call sweep (standing).** Grep
+   `\[needs-user-call\]` across `plan/` (AUDIT, CRITIQUE,
+   PHASE_CANDIDATES, `plan/tuning/`). An item is **open** unless
+   its line/heading is marked resolved (`[x]`, "RESOLVED", or
+   moved to a resolved/rejected section). These are the decisions
+   the autonomous loop deliberately routed around — they only
+   drain here.
 
 ## 4. The briefing (~25 lines max)
 
 ```
 oversight — <ISO date>
+
+needs-user-call (standing — always first)
+- <count> open across plan/: <file>: "<one-liner>" (each)
+- (or "none open")
 
 shipping
 - last commit: <sha> "<subject>" (<relative time>)
@@ -88,10 +99,29 @@ Tight. Factual. The flags section drives the questionnaire.
 
 Generate 1–4 questions via `AskUserQuestion`. Rules:
 
+- **Standing question 0 (mandatory):** if the §3 sweep found any
+  open `[needs-user-call]` items, the FIRST question presents
+  them for decision — on top of (not counted against) the 1–4
+  computed questions. Skipped only when the sweep is clean.
 - **Computed from observed flags**, not pre-canned.
 - **Each question targets a specific observable.**
 - **Multiple choice with recommended option marked first.**
 - **Last question is free-form** if there's room.
+
+### Standing question 0 — needs-user-call drain
+
+> <N> `[needs-user-call]` items are open. Top: "<one-liner>"
+> (<file>). Decide now?
+>
+> - (recommended) Walk through them — show each item's context;
+>   I decide one by one.
+> - Decide top only — resolve the highest-impact item, defer
+>   the rest.
+> - Defer all — leave open; they resurface next oversight.
+>
+> Applying a decision = edit the item in place (mark `[x]` with
+> the decision + date, or promote it to a candidate/phase per
+> the answer), same as any other adjustment in Step 5.
 
 ### Question templates
 
@@ -174,8 +204,10 @@ Print synthesis per §4. **No questions yet.**
 
 ### Step 3 — Build questionnaire
 
-Compute 1–4 questions per §5. If zero warranted (project
-healthy, no flags), say so and exit at Step 7 with no commit.
+Compute 1–4 questions per §5, with standing question 0
+prepended whenever the needs-user-call sweep found open items.
+If zero warranted (project healthy, no flags, sweep clean), say
+so and exit at Step 7 with no commit.
 
 ### Step 4 — Ask
 
@@ -284,6 +316,7 @@ plan/CRITIQUE.md
 plan/phases/                       # last 3 modified
 axiomancer-mechanics/specs/        # for newer-than-sibling check
 axiomancer-mechanics/braindump/
+grep -rn "\[needs-user-call\]" plan/   # standing question 0 sweep
 
 # Tools
 AskUserQuestion                    # only place this is allowed
