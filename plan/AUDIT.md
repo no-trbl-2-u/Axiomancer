@@ -14,6 +14,52 @@
 
 ## Pending
 
+### Playtest harness has no victory-only rounds-to-victory metric
+- category: gap
+- impact: 4
+- ease: 7
+- detail: surfaced 2026-07-17 by the ultracode price-vs-win-rate
+  playtest. `CombatSimStats.avgRounds`
+  (src/Combat/combat.encounter.sim.ts) averages `state.round` over ALL
+  outcomes (defeats + retreats included), so there is no way to answer
+  "how many rounds to WIN" — the owner asked exactly that and it forced
+  a bespoke harness
+  (axiomancer-mechanics/scratch/price-experiment/price-winrate.harness.ts)
+  that re-derives it from per-run `runOneEncounter` returns. The raw
+  `rounds`+`outcome` already exist per run; they are just discarded at
+  aggregation. Add `avgRoundsToVictory` (victory-only, null when ~0
+  victories) to `CombatSimStats` + the stage summary so kill-speed is a
+  first-class witness for /deck-tuning.
+- next: /iterate (retain victory-only rounds in
+  simulateHazardPatternCombatDetailed; surface in PlaytestStageSummary +
+  the report formatter)
+
+### Measured: most starter presets underperform the mid win-rate doctrine when played straight
+- category: divergence
+- impact: 7
+- ease: 4
+- detail: surfaced 2026-07-17 by the ultracode price-vs-win-rate
+  playtest (evidence:
+  axiomancer-mechanics/scratch/price-experiment/report/FINDINGS.md +
+  summary.json + the committed data-viz devlog-price-winrate.html).
+  Playing each of the 10 authored presets STRAIGHT under the `blind`
+  scripted policy, 7 of 10 land well under the CLAUDE.md mid ~50%
+  doctrine: Foundry/Grace/Standstill 0%, Augury 1%, Bastion 11%, Tithe
+  16%, Penitent 17% (only Oratory 69%, Erosion/Refrain 44% are near it).
+  Sharper doctrine tension: Foundry and Grace post statusEngagement 0.00
+  AND dotHpFraction 0.00 at every stage — they apply no status and deal
+  no HP, winning early ONLY by CAPITULATE — which cuts against the
+  load-bearing "status is the MAIN fun / the efficient path" doctrine.
+  CAVEATS (why this is a signal, not a verdict): measured on FIXED
+  authored presets, not the policy-pick DRAFT the doctrine curve is
+  defined against, and at seeds=2 — so a straight-preset deck under a
+  scripted policy may simply be weaker than a drafted one. Confirm at
+  higher seeds and against policy-pick before retuning. Related: the two
+  pricing candidates (tempo-aware / alt-win-aware scoreCard) in
+  PHASE_CANDIDATES.md, and the [statusEngagement blind spots] history.
+- next: /deck-tuning (confirm-then-tune the underperforming presets;
+  start with the capitulate-only Foundry/Grace status-blindness)
+
 ### Combat deck-matrix baseline stale by 33 mechanics-source commits
 - category: gap
 - impact: 6
