@@ -572,7 +572,7 @@ supersession collisions before any engine work.
       verify green; variety-chain auto-refresh also retired in-flag
       (decision) —
       `feat(mechanics): Upgradeable-Dice engine core behind flag` (18cf5e3b)
-- [ ] Phase D3 — Sim harness + economy derivation. Autoplay policies
+- [x] Phase D3 — Sim harness + economy derivation. Autoplay policies
       learn the new action space; Monte-Carlo witness for the spec §7
       **D3 gates** (E[usable]≈1.83, whiff≈8.3%, per-color ≥65%, ◆ income
       1.2–1.6, surge rate, STAKE-retirement gap); DERIVE signature/ante
@@ -580,6 +580,14 @@ supersession collisions before any engine work.
       Brief: `plan/phases/phase_D3_sim_harness.md`.
       Prove: measured values in bands, report + pinned sim tests.
       Deps: D2.
+      SHIPPED 2026-07-17 — dice-math gates all PASS (face tables correct:
+      1.833 / 8.3% / 66.7% / gross 1.336◆); realized income 1.21◆ (PASS).
+      Flag-on driver branch + two-witness economy sim + `combat-dice-economy`
+      CLI + pinned flag-on test. Surfaced F2 (yield income dark — no enemy
+      authors a stanceCheck yet, needs-user-call) + F3 (Press Fate sink not
+      equipped) for D4. Derived signature-cost table (2/3/4◆) PROVISIONAL —
+      D7 ratifies —
+      `feat(mechanics): Upgradeable-Dice D3 sim harness + economy derivation` (61bbc8ca)
 - [ ] Phase D4 — Pricing re-derivation + card re-authoring. Re-fit
       `cards.pricing.ts` (incl. the card-played-clock DoT constants —
       WS3.3's ~2 plays/round assumption dies); re-author Forge's 7
