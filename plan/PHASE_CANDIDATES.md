@@ -127,6 +127,28 @@
   down-scaler clamp needs fixing before the sub-1x tiers mean anything.
 - promoted to build plan as **Phases 36a (alt-win) / 36b (tempo)**.
 
+### Enchant/disenchant pricing — `scoreCard` v2, part 3 (mechanics)
+- source: Phase 36a in-flight re-scope (2026-07-17). 36a's mandate bundled
+  "price enchant/disenchant persistent passives" with the SWAY/CONCEDE
+  currency reprice, but the mechanics-expert design pass found the two are
+  not one phase: enchantments/disenchants carry their effect as **free prose**
+  (`persistentEffect: string` — e.g. `irresistible-grace`'s "SWAY does not
+  decay…", `practiced-cadence`'s "+1 PREMISE on your first card each turn"),
+  NOT a scoreable payload. `scoreCard` returns 0 for every non-spell card and
+  the pricing lint asserts it. This is the LARGEST remaining alt-win
+  blindness (Grace's decay-kill engine, the Foundry forge enchants, the
+  peroration Premise-drip) — but pricing it requires structuring
+  `persistentEffect` into machine-readable mechanics (a schema change to
+  `Card`/types), then an executable pricer that reproduces the
+  "min-4-triggers" hand-priced card comments (`irresistible-grace` ≈ 12,
+  `practiced-cadence` ≈ 12, …), then dropping the lint's "=0" assertion.
+- decision: 36a shipped the enemy-independent currency half only and kept the
+  "=0" assertion honest; this is the deferred remainder. Promote to a build-
+  plan phase (**36c**) when the queue has room. Deps: 36a (shared `scoreCard`
+  surface). Evidence:
+  `axiomancer-mechanics/scratch/price-experiment/report/FINDINGS.md` rec #3;
+  brief `plan/phases/phase_36a_alt_win_pricing.md` § Follow-ups.
+
 
 
 ### EA-1..EA-8 — Engagement-overhaul roadmap

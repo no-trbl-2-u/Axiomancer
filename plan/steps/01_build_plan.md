@@ -459,7 +459,7 @@ Phase 26 (numbers) but design-independent of the owner session
 
 **Pricing model (promoted via chat session 2026-07-17, T direct):**
 
-- [ ] Phase 36a — Alt-win-aware card pricing (`scoreCard` v2, part 1).
+- [x] Phase 36a — Alt-win-aware card pricing (`scoreCard` v2, part 1).
       `scoreCard` (cards.pricing.ts) scores only spell HP/status/burst
       lines: enchant/disenchant cards price to 0 outright, and the
       non-HP win currencies (SWAY→CAPITULATE, Premise→CONCEDE,
@@ -475,7 +475,18 @@ Phase 26 (numbers) but design-independent of the owner session
       progress; re-band the pricing lint once. Structural — does not
       depend on enemy tuning. Evidence:
       `axiomancer-mechanics/scratch/price-experiment/report/FINDINGS.md`.
-      Deps: none.
+      Deps: none. **Re-scoped in-flight** (mechanics-expert design pass
+      + brief `plan/phases/phase_36a_alt_win_pricing.md`): the mandate
+      over-claimed — SWAY is NOT priced at ~0 (it's 0.8;
+      `heart-of-the-matter` scores 13.44). Shipped the enemy-INDEPENDENT
+      half: `swayPerStack` 0.8→0.9 (CAPITULATE parity 0.95 − decay
+      haircut) + a flat +3 CONCEDE capstone on the declaring peroration
+      card (was priced 0). Premise currency (build currency, enemy-
+      dependent win-value) left at 0.8; enchant/disenchant pricing needs
+      a schema change (prose `persistentEffect` field) → deferred to
+      **36c** (filed in PHASE_CANDIDATES). No re-band needed — the fix
+      was rank-honest within existing bands —
+      `feat(mechanics): alt-win-aware card pricing — phase 36a` (7d26bebd)
 - [ ] Phase 36b — Tempo-aware card pricing (`scoreCard` v2, part 2).
       `scoreCard` prices magnitude-per-die but is blind to WHEN the
       power arrives: a RUPTURE burst and a ~6-round ramping POISON can
