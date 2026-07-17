@@ -117,7 +117,7 @@
    "freeGlyph": "◉",
    "freeKw": "MARK",
    "freeVal": "1",
-   "paid": "mark i1 d2 + draw 2."
+   "paid": "MARK 1 for 2 turns on yourself, then DRAW 2."
   },
   "chips": [
    {
@@ -352,7 +352,7 @@
    "freeGlyph": "⬡",
    "freeKw": "PIP",
    "freeVal": "1",
-   "paid": "FORGE a dead X die into a WILD floating die (no X: +1 Conviction)."
+   "paid": "FORGE a dead X die into a WILD floating die. With no X to revive, gain +1 Conviction instead."
   },
   "chips": [
    {
@@ -411,7 +411,7 @@
    "freeGlyph": "❖",
    "freeKw": "GUARD",
    "freeVal": "2",
-   "paid": "Guard 8."
+   "paid": "GUARD 8."
   },
   "chips": [
    {
@@ -581,7 +581,7 @@
    "freeGlyph": "⚑",
    "freeKw": "DRAW",
    "freeVal": "1",
-   "paid": "poison i1 d2 + mark i1 d2 + OMEN — stake claim (window 1-2, ante 2◆ at window 1): on hit, Guard 4 (2/play)."
+   "paid": "POISON 1 and MARK 1 for 2 turns. OMEN — stake window 1-2 (ante 2 Conviction at window 1): on hit, GUARD 4."
   },
   "chips": [
    {
@@ -875,7 +875,7 @@
    "freeGlyph": "◉",
    "freeKw": "MARK",
    "freeVal": "1",
-   "paid": "REARGUE — convert bleed↔poison, +1 intensity."
+   "paid": "REARGUE — flip the foe's BLEED and POISON into each other, each landing +1 intensity."
   },
   "chips": [
    {
@@ -933,7 +933,7 @@
    "freeGlyph": "◉",
    "freeKw": "FORETELL",
    "freeVal": "1",
-   "paid": "RUPTURE 1 — its remaining damage lands now, +1 Soul + FORETELL 1."
+   "paid": "RUPTURE 1 affliction — its remaining damage lands now. Gain 1 SOUL, then FORETELL 1."
   },
   "chips": [
    {
@@ -1106,7 +1106,7 @@
    "freeGlyph": "⬡",
    "freeKw": "PIP",
    "freeVal": "1",
-   "paid": "FORGE a WILD floating die + the spent die BANKS to the Reserve."
+   "paid": "FORGE a WILD floating die. The die spent on this card banks to your Reserve at 0 PIPS if a slot is free."
   },
   "chips": [
    {
@@ -1165,7 +1165,7 @@
    "freeGlyph": "❡",
    "freeKw": "PREMISE",
    "freeVal": "1",
-   "paid": "poison i1 d2 + +1 Premise + draw 1 (2/play)."
+   "paid": "Afflict with POISON 1 for 2 turns. Gain 1 PREMISE and DRAW 1."
   },
   "chips": [
    {
@@ -1225,7 +1225,7 @@
    "freeGlyph": "◉",
    "freeKw": "MARK",
    "freeVal": "1",
-   "paid": "bleed i2 d3 (6/hit)."
+   "paid": "Afflict with BLEED 2 for 3 turns."
   },
   "chips": [
    {
@@ -1338,7 +1338,7 @@
    "freeGlyph": "◉",
    "freeKw": "MARK",
    "freeVal": "1",
-   "paid": "PROLONG +1 duration to ALL your DoTs."
+   "paid": "PROLONG every DoT you have on the foe by 1 turn."
   },
   "chips": [
    {
@@ -1456,7 +1456,7 @@
    "freeGlyph": "⬡",
    "freeKw": "PIP",
    "freeVal": "1",
-   "paid": "Guard 5 + +2 pips to every Reserve die + PIP 1 past the cap (35% bust: halves the die)."
+   "paid": "GUARD 5. +2 PIPS to every Reserve die, then PIP 1 past the cap (35% bust halves the die)."
   },
   "chips": [
    {
@@ -1918,7 +1918,7 @@
    "freeGlyph": "❡",
    "freeKw": "PREMISE",
    "freeVal": "1",
-   "paid": "mark i1 d3 + poison i1 d4 + +2 Premises (2/play)."
+   "paid": "Afflict with MARK 1 for 3 turns and POISON 1 for 4 turns. Gain 2 PREMISES."
   },
   "chips": [
    {
@@ -2038,7 +2038,7 @@
    "freeGlyph": "❡",
    "freeKw": "PREMISE",
    "freeVal": "1",
-   "paid": "mark i1 d2 + poison i1 d2 + +2 Premises (2/play)."
+   "paid": "MARK 1 for 2 turns. POISON 1 for 2 turns. Gain 2 PREMISES."
   },
   "chips": [
    {
@@ -2157,7 +2157,7 @@
    "freeGlyph": "❖",
    "freeKw": "GUARD",
    "freeVal": "2",
-   "paid": "bleed i1 d2 + FORGE a WILD floating die + RECOIL 6."
+   "paid": "BLEED 1 for 2 turns on yourself. FORGE a WILD floating die, then RECOIL 6."
   },
   "chips": [
    {
@@ -2217,7 +2217,7 @@
    "freeGlyph": "❡",
    "freeKw": "PREMISE",
    "freeVal": "1",
-   "paid": "RUPTURE ALL."
+   "paid": "RUPTURE ALL afflictions on the foe."
   },
   "chips": [
    {
@@ -2445,7 +2445,7 @@
    "freeGlyph": "◆",
    "freeKw": null,
    "freeVal": null,
-   "paid": "backfire i2 d2."
+   "paid": "Afflict with BACKFIRE 2 for 2 turns."
   },
   "chips": [
    {
@@ -2564,7 +2564,7 @@
    "freeGlyph": "◉",
    "freeKw": "MARK",
    "freeVal": "1",
-   "paid": "RUPTURE ALL + SIPHON 35% + RECALL 2 — their FREE lines fire now."
+   "paid": "RUPTURE ALL with 50% more force, SIPHON 35%, then RECALL 2 cards — their FREE lines fire now."
   },
   "chips": [
    {
@@ -2800,7 +2800,7 @@
    "freeGlyph": "◉",
    "freeKw": "FORETELL",
    "freeVal": "1",
-   "paid": "OMEN — stake claim (window 1-2, ante 2◆ at window 1): on hit, draw 2."
+   "paid": "OMEN — stake a claim in window 1-2, ante 2 Conviction at window 1. On a hit, DRAW 2."
   },
   "chips": [
    {
@@ -2918,7 +2918,7 @@
    "freeGlyph": "◉",
    "freeKw": "MARK",
    "freeVal": "1",
-   "paid": "poison i1 d4 (2/play)."
+   "paid": "Afflict with POISON 1 for 4 turns."
   },
   "chips": [
    {
@@ -3206,7 +3206,7 @@
    "freeGlyph": "◉",
    "freeKw": "MARK",
    "freeVal": "1",
-   "paid": "poison i1 d4 + bleed i1 d2 (self) (2/play)."
+   "paid": "Afflict with POISON 1 for 4 turns. BLEED 1 for 2 turns on yourself."
   },
   "chips": [
    {
@@ -3324,7 +3324,7 @@
    "freeGlyph": "❡",
    "freeKw": "PREMISE",
    "freeVal": "1",
-   "paid": "PERORATION at 6 — +2 Conviction · draw 2 · consume all marks — 3 damage per stack (CONCEDE at 8 — you win; elite 10 · boss 12)."
+   "paid": "PERORATION at 6 PREMISES: gain 2 Conviction, DRAW 2, and consume ALL MARK stacks for 3 damage each. At 8 PREMISES, CONCEDE — you win (elite 10, boss 12)."
   },
   "chips": [
    {
@@ -3557,7 +3557,7 @@
    "freeGlyph": "◉",
    "freeKw": "MARK",
    "freeVal": "1",
-   "paid": "spend ALL pips (+1 Guard per pip) + RUPTURE ALL (+3.5 damage per spent pip; needs 2+ pips) + refresh the spent die."
+   "paid": "Spend ALL your PIPS for GUARD 1 each, then RUPTURE ALL afflictions with +3.5 damage per pip spent (needs 2+ pips). Refresh the spent die."
   },
   "chips": [
    {
@@ -3789,7 +3789,7 @@
    "freeGlyph": "◆",
    "freeKw": null,
    "freeVal": null,
-   "paid": "BACKFIRE ALL — 1.5 damage per rung ever denied."
+   "paid": "BACKFIRE ALL — the enemy takes 1.5 damage for every rung you have ever denied this combat."
   },
   "chips": [
    {
@@ -3847,7 +3847,7 @@
    "freeGlyph": "◆",
    "freeKw": null,
    "freeVal": null,
-   "paid": "backfire i2 d3 + STAGGER 1."
+   "paid": "Afflict with BACKFIRE 2 for 3 turns, then STAGGER 1."
   },
   "chips": [
    {
@@ -4023,7 +4023,7 @@
    "freeGlyph": "◆",
    "freeKw": null,
    "freeVal": null,
-   "paid": "STAGGER 1."
+   "paid": "Apply STAGGER 1 to the enemy's next action."
   },
   "chips": [
    {

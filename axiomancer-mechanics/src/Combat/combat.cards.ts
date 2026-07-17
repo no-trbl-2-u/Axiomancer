@@ -342,8 +342,10 @@ export function mechanicText(m: CardSpecialMechanic): string | null {
 const REGISTRY_DOT_IDS: ReadonlySet<string> = new Set(['debuff_poison', 'debuff_bleed']);
 
 /** Human text for a card's PAID payload: statuses + mechanics, real units.
- *  An effect names its side only when it crosses the card's printed target. */
-function paidText(card: Card, lookupEffect: EffectLookup): string {
+ *  An effect names its side only when it crosses the card's printed target.
+ *  Exported for the paid-summary honesty guard (authored summaries must carry
+ *  every number this generator prints). */
+export function paidText(card: Card, lookupEffect: EffectLookup): string {
     const parts: string[] = [];
     for (const ce of card.combatEffects ?? []) {
         const def = lookupEffect(ce.effectId);
@@ -380,7 +382,12 @@ export function toCombatCard(cardId: string, lookupCard: CardLookup, lookupEffec
     const preview = bottomDamagePreview(card, lookupEffect);
     const persistent = card.cardType === 'enchantment' || card.cardType === 'disenchant';
 
-    const paid = paidText(card, lookupEffect);
+    // 2026-07-16 — an authored `paidSummary` (spells only) replaces the
+    // generated telegraphese wholesale; the honesty guard pins its numbers
+    // and keywords to the payload, so the authored sentence IS the truth
+    // surface (no auto dot-suffix gets appended on top of it).
+    const authored = !persistent ? card.paidSummary : undefined;
+    const paid = authored ?? paidText(card, lookupEffect);
     // Spec 32 v4 — an enchant/disenchant's passive lives in engine hooks, so its
     // authored one-line summary (`persistentEffect`) is what the card prints; fall
     // back to the effect-derived text only if a card is missing the summary.
@@ -405,10 +412,12 @@ export function toCombatCard(cardId: string, lookupCard: CardLookup, lookupEffec
         const def = lookupEffect(ce.effectId);
         return !!def?.payload.damageOverTime && !REGISTRY_DOT_IDS.has(def.id);
     });
-    const dotSuffix = dotFace ? ` (${dotFace})` : preview > 0 && !speciesGlossed ? ` (${preview} over its run)` : '';
+    const dotSuffix = authored ? '' : dotFace ? ` (${dotFace})` : preview > 0 && !speciesGlossed ? ` (${preview} over its run)` : '';
     const bottomActionText = persistent
         ? `PAID (rest of combat) — ${passive} Costs 1 die.${card.cardType === 'disenchant' ? ' Attaches to the enemy.' : ''}`
-        : `PAID — ${paid}${dotSuffix}. Costs 1 die.`;
+        : authored
+            ? `PAID — ${authored} Costs 1 die.`
+            : `PAID — ${paid}${dotSuffix}. Costs 1 die.`;
 
     // Printed DIE LINES, generated from the riders in real units.
     const dieLines: string[] = [];

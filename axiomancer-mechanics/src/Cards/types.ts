@@ -539,6 +539,19 @@ export interface Card {
      * ignored for spells.
      */
     persistentEffect?: string;
+    /**
+     * 2026-07-16 (SIDE RAIL follow-up) — the authored, human-readable PAID
+     * sentence for SPELLS. The face's paid line got room to breathe under the
+     * #5 rail design, so a card may print prose ("Apply POISON 2 for 3 turns,
+     * then PROLONG every DoT by 1.") instead of the generated telegraphese.
+     * The P0-truth law still holds: every number the engine applies must
+     * appear verbatim in this text, and every UPPERCASE token must be a real
+     * keyword — both enforced by `paid-summary-honesty.engine.test.ts`.
+     * Absent → the projection falls back to the generated `paidText`.
+     * Ignored for enchant/disenchant (their authored line is
+     * `persistentEffect`).
+     */
+    paidSummary?: string;
     combatEffects?: CardCombatEffects[];
     specialMechanics?: CardSpecialMechanic[];
     /**

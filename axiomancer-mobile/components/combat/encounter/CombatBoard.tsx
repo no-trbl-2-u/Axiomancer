@@ -1596,7 +1596,7 @@ export const CombatCardFace = React.memo(function CombatCardFace({
                                 text={paidSentence}
                                 names={boldNames}
                                 base={[styles.paidText, large && styles.paidTextLarge]}
-                                bold={[styles.paidText, large && styles.paidTextLarge, styles.paidBold, { color: kwColor }]}
+                                bold={[styles.paidText, large && styles.paidTextLarge, styles.paidBold, large && styles.paidBoldLarge, { color: kwColor }]}
                                 numberOfLines={large ? 5 : 3}
                             />
                         </View>
@@ -1856,6 +1856,9 @@ const useStyles = makeStyles((AXM) => ({
         textShadowColor: 'rgba(0,0,0,0.85)', textShadowRadius: 3,
     },
     paidTextLarge: { fontSize: 14.5, lineHeight: 19 },
-    paidBold: { fontFamily: FONTS.sans, letterSpacing: 0.5, textTransform: 'uppercase' },
+    // Keywords read a step LARGER than the prose around them (owner directive
+    // 2026-07-16) so the eye catches them before reading the sentence.
+    paidBold: { fontFamily: FONTS.sans, fontSize: 11.5, letterSpacing: 0.5, textTransform: 'uppercase' },
+    paidBoldLarge: { fontSize: 16 },
     faceDieLineSmall: { fontSize: 7, marginTop: 2 },
 }));

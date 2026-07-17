@@ -424,7 +424,7 @@ function BoldKeywords({ text, color }: { text: string; color: string }): ReactNo
         <>
             {parts.map((p, i) =>
                 upper.has(p.toUpperCase()) ? (
-                    <b key={i} style={{ fontFamily: WX.sans, fontWeight: 700, letterSpacing: 0.5, textTransform: 'uppercase', color }}>{p}</b>
+                    <b key={i} style={{ fontFamily: WX.sans, fontWeight: 700, fontSize: '1.12em', letterSpacing: 0.5, textTransform: 'uppercase', color }}>{p}</b>
                 ) : (
                     <span key={i}>{p}</span>
                 ),

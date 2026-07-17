@@ -99,7 +99,7 @@ const CATALOG_EXTRA_STYLE = `
 .cface .cbtm .cpaid .ccube { flex-shrink: 0; margin-top: 2px; }
 .cface .cbtm .cpaid b {
   font-family: "Bebas Neue", "Arial Narrow", system-ui, sans-serif; font-weight: 700;
-  letter-spacing: .5px; text-transform: uppercase; color: var(--rc);
+  font-size: 1.12em; letter-spacing: .5px; text-transform: uppercase; color: var(--rc);
 }
 `;
 
@@ -120,6 +120,8 @@ const KEYWORD_WORDS = [
   "REGEN", "SIPHON", "EXECUTE", "RUPTURE", "COMPOUND", "ENCHANT", "DISENCHANT",
   "PROLONG", "RECALL", "PERORATION", "CONCEDE", "CAPITULATE", "VULNERABLE", "THORNS",
   "TICK", "DOT", "CLEANSE", "PERORATE", "REPRISE", "PIP", "PIPS",
+  // 2026-07-16 (authored paid summaries) — registry words the list was missing.
+  "KINDLE", "RECOIL", "FALLEN", "OMEN", "RAPPORT", "MILL", "HEAL", "REARGUE", "PREMISES",
 ].sort((a, b) => b.length - a.length);
 
 function boldKeywords(text) {
