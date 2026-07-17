@@ -71,14 +71,14 @@ const CATALOG_EXTRA_STYLE = `
 }
 /* ① the GIANT free-effect glyph with its intensity centred INSIDE it. */
 .cface .cfree {
-  position: absolute; left: 4px; top: 4px; z-index: 3; width: 46px; height: 46px;
+  position: absolute; left: 4px; top: 4px; z-index: 3; width: 60px; height: 60px;
   display: flex; align-items: center; justify-content: center;
-  font-size: 42px; line-height: 1; color: var(--rc); text-shadow: 0 2px 5px rgba(0,0,0,.85);
+  font-size: 54px; line-height: 1; color: var(--rc); text-shadow: 0 2px 5px rgba(0,0,0,.85);
   background: radial-gradient(circle at 48% 46%, rgba(6,5,10,.82) 40%, rgba(6,5,10,0) 72%);
 }
 .cface .cfree .cfreeval {
   position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
-  font-size: 15px; font-weight: 600; color: #fff;
+  font-size: 17px; font-weight: 600; color: #fff;
   font-family: "JetBrains Mono", ui-monospace, monospace; text-shadow: 0 1px 3px rgba(0,0,0,.95);
 }
 .cface .crarity {
@@ -222,7 +222,7 @@ const GLYPH_SHAPES = {
   MILL: SHAPE_SPILL_CARDS,
 };
 
-function glyphShapeSvg(shape, { size = 36, fill = "var(--rc)" } = {}) {
+function glyphShapeSvg(shape, { size = 48, fill = "var(--rc)" } = {}) {
   return (
     `<svg viewBox="0 0 24 24" width="${size}" height="${size}" aria-hidden="true" style="opacity:.95">` +
     `<path d="${shape.d}" fill="${fill}"${shape.eo ? ' fill-rule="evenodd"' : ""}/>` +

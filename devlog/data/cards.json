@@ -234,7 +234,7 @@
    "freeGlyph": "◉",
    "freeKw": "REVEAL",
    "freeVal": null,
-   "paid": "backfire i1 d2 + lock the enemy's next stance + STAGGER 1."
+   "paid": "BACKFIRE 1 for 2 turns, lock the enemy's next stance, then STAGGER 1."
   },
   "chips": [
    {
@@ -469,7 +469,7 @@
    "freeGlyph": "✦",
    "freeKw": "SOUL",
    "freeVal": "1",
-   "paid": "bleed i2 d1 (6/hit)."
+   "paid": "Afflict with BLEED 2 for 1 turn."
   },
   "chips": [
    {
@@ -641,7 +641,7 @@
    "freeGlyph": "⁇",
    "freeKw": "MILL",
    "freeVal": "1",
-   "paid": "RECALL 1 — its FREE line fires now."
+   "paid": "RECALL 1 card — its FREE line fires now."
   },
   "chips": [
    {
@@ -699,7 +699,7 @@
    "freeGlyph": "☙",
    "freeKw": "RAPPORT",
    "freeVal": "1",
-   "paid": "rapport i1 d2 + SWAY 2."
+   "paid": "RAPPORT 1 for 2 turns, then SWAY 2."
   },
   "chips": [
    {
@@ -993,7 +993,7 @@
    "freeGlyph": "∿",
    "freeKw": "SWAY",
    "freeVal": "1",
-   "paid": "rapport i2 d2 + heal 2."
+   "paid": "Afflict with RAPPORT 2 for 2 turns, then HEAL 2."
   },
   "chips": [
    {
@@ -1396,7 +1396,7 @@
    "freeGlyph": "◉",
    "freeKw": "FORETELL",
    "freeVal": "1",
-   "paid": "poison i1 d1 + mark i1 d2 + FORETELL 2 (2/play)."
+   "paid": "POISON 1 for 1 turn. MARK 1 for 2 turns. FORETELL 2."
   },
   "chips": [
    {
@@ -1689,7 +1689,7 @@
    "freeGlyph": "❖",
    "freeKw": "GUARD",
    "freeVal": "3",
-   "paid": "Guard 6 + RIPOSTE 3 (parry 2)."
+   "paid": "GUARD 6, then arm RIPOSTE 3 with parry 2 for one threat phase."
   },
   "chips": [
    {
@@ -1979,7 +1979,7 @@
    "freeGlyph": "❖",
    "freeKw": "GUARD",
    "freeVal": "2",
-   "paid": "thorns i2 d2 + nettle sting i1 d2 (DoT: 2/turn, enemy)."
+   "paid": "THORNS 2 for 2 turns. Nettle Sting 1 on the foe for 2 turns — 2 damage at the end of each turn."
   },
   "chips": [
    {
@@ -2098,7 +2098,7 @@
    "freeGlyph": "⁇",
    "freeKw": "MILL",
    "freeVal": "1",
-   "paid": "replay your last spell ×2 + consume all marks — 3 damage per stack."
+   "paid": "Replay your last spell ×2, then consume the foe's MARK stacks — 3 damage per stack."
   },
   "chips": [
    {
@@ -2329,7 +2329,7 @@
    "freeGlyph": "◉",
    "freeKw": "FORETELL",
    "freeVal": "1",
-   "paid": "RUPTURE ALL (+3 damage per omen hit)."
+   "paid": "RUPTURE ALL — deal 3 extra damage for each OMEN hit this combat."
   },
   "chips": [
    {
@@ -2504,7 +2504,7 @@
    "freeGlyph": "⁇",
    "freeKw": "MILL",
    "freeVal": "1",
-   "paid": "mark i1 d2 + poison i1 d1 + ECHO (2/play)."
+   "paid": "MARK 1 for 2 turns. POISON 1 for 1 turn. ECHO."
   },
   "chips": [
    {
@@ -2682,7 +2682,7 @@
    "freeGlyph": "⁇",
    "freeKw": "MILL",
    "freeVal": "1",
-   "paid": "RECALL 1 + consume all marks — 1 damage per stack."
+   "paid": "RECALL 1, then consume the foe's MARK stacks — 1 damage per stack."
   },
   "chips": [
    {
@@ -2741,7 +2741,7 @@
    "freeGlyph": "◉",
    "freeKw": "MARK",
    "freeVal": "1",
-   "paid": "RECOIL 5 + RUPTURE ALL."
+   "paid": "RECOIL 5, then RUPTURE ALL with 10% more force."
   },
   "chips": [
    {
@@ -2858,7 +2858,7 @@
    "freeGlyph": "⬡",
    "freeKw": "PIP",
    "freeVal": "1",
-   "paid": "kindling ember i1 d3 (DoT: 1/turn) + KINDLE (mind)."
+   "paid": "Kindling Ember 1 on the enemy for 3 turns — 1 damage at the start of each turn — and KINDLE (mind)."
   },
   "chips": [
    {
@@ -3265,7 +3265,7 @@
    "freeGlyph": "❖",
    "freeKw": "GUARD",
    "freeVal": "3",
-   "paid": "GUARD 10 (persists) + RIPOSTE 4 (parry 2)."
+   "paid": "GUARD 10 that persists, then arm RIPOSTE 4 with a parry of 2."
   },
   "chips": [
    {
@@ -3382,7 +3382,7 @@
    "freeGlyph": "⚑",
    "freeKw": "DRAW",
    "freeVal": "1",
-   "paid": "REAP 2 — KINDLE (mind) — draw 2 · +1 Soul."
+   "paid": "REAP 2: KINDLE a mind die, DRAW 2, and gain 1 SOUL."
   },
   "chips": [
    {
@@ -3440,7 +3440,7 @@
    "freeGlyph": "☙",
    "freeKw": "RAPPORT",
    "freeVal": "1",
-   "paid": "SWAY 3 + cleanse 1 · heal 3."
+   "paid": "SWAY 3, then CLEANSE 1 and HEAL 3."
   },
   "chips": [
    {
@@ -3617,7 +3617,7 @@
    "freeGlyph": "🩸",
    "freeKw": "BLEED",
    "freeVal": "1",
-   "paid": "REAP ALL — 4 damage per Soul + SIPHON 40%."
+   "paid": "REAP ALL your SOULS — 4 damage each, then SIPHON 40%."
   },
   "chips": [
    {
@@ -3730,7 +3730,7 @@
    "freeGlyph": "❖",
    "freeKw": "GUARD",
    "freeVal": "2",
-   "paid": "thorns i3 d2."
+   "paid": "THORNS 3 for 2 turns."
   },
   "chips": [
    {
@@ -3965,7 +3965,7 @@
    "freeGlyph": "🩸",
    "freeKw": "BLEED",
    "freeVal": "1",
-   "paid": "RUPTURE 1 — its remaining damage lands now, +2 Souls."
+   "paid": "RUPTURE 1 affliction, then gain 2 SOULS."
   },
   "chips": [
    {

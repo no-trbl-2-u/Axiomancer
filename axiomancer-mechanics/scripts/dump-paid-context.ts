@@ -1,9 +1,10 @@
 /**
- * One-off dump for the paid-summary authoring pass (2026-07-16): for the five
- * chosen presets' SPELLS, emit each card's full payload + the engine-generated
- * face text, so authors work from ground truth. Safe to delete after the pass.
+ * Dump for the paid-summary authoring passes (2026-07-16): for the given
+ * presets' cards, emit each card's full payload + the engine-generated face
+ * text, so summary authors work from ground truth.
  *
- * Run: npx ts-node --transpile-only scripts/dump-paid-context.ts
+ * Run: npx ts-node --transpile-only scripts/dump-paid-context.ts [presetId ...]
+ * (no args = all presets, in display order)
  */
 
 import { writeFileSync } from 'node:fs';
@@ -11,9 +12,9 @@ import { join } from 'node:path';
 import { getCardById } from '../src/Cards/cards.library';
 import { lookupEffect } from '../src/Effects';
 import { toCombatCard, paidText } from '../src/Combat/combat.cards';
-import { COMBAT_DECK_PRESETS } from '../src/Combat/combat.deck-presets';
+import { COMBAT_DECK_PRESETS, COMBAT_DECK_PRESET_ORDER } from '../src/Combat/combat.deck-presets';
 
-const PRESETS = ['erosion', 'oratory', 'foundry', 'penitent', 'standstill'];
+const PRESETS = process.argv.length > 2 ? process.argv.slice(2) : [...COMBAT_DECK_PRESET_ORDER];
 
 const out: Record<string, unknown[]> = {};
 for (const pid of PRESETS) {
@@ -36,6 +37,7 @@ for (const pid of PRESETS) {
             aspect: card.philosophicalAspect, rank: card.rank, tier: card.tier,
             targetType: card.targetType,
             persistentEffect: card.persistentEffect ?? null,
+            paidSummary: card.paidSummary ?? null,
             free: card.free ?? null,
             combatEffects: effects,
             specialMechanics: card.specialMechanics ?? null,
