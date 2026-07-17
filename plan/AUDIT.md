@@ -14,6 +14,28 @@
 
 ## Pending
 
+### Retire two stale worktrees fully landed on `main` (dice + price-experiment)
+- category: debt
+- impact: 3
+- ease: 9
+- detail: filed 2026-07-17 (Upgradeable-Dice reframe chat close-out). Two
+  `.claude/worktrees/*` checkouts now have all their unique work on `main`,
+  so they only add clutter + collision-discipline confusion:
+  (1) `card-text-paid-effects-3cd590` on branch
+  `claude/combat-dice-mechanics-3e92fd` — the spec 33 Upgradeable-Dice
+  reframe + D1 promotion (`28707b87`) and the persistence-pointer fix
+  (`76275289`) are both on `main`, reconciled by merge `3e688ed2` (verified
+  dup-free: one Combat-rework section, one D1 row, 36b still `[x]`), so the
+  branch is fully represented and safe to retire. Note the worktree NAME
+  ("card-text-paid-effects") does not match its branch
+  (combat-dice-mechanics) — confirm no orphaned "card text paid effects"
+  scope was dropped before removing. (2)
+  `price-experiment-analysis-df8297` on branch
+  `claude/price-experiment-analysis-df8297` at `d8c04c71`, an ancestor of
+  `main` — nothing unique left. Fix: `git worktree remove` both, then
+  `git branch -d` the two branches once confirmed. Related: the TS5095
+  worktree-verify row below (fewer live worktrees shrinks that surface).
+
 ### Worktree sessions resolve the wrong TypeScript — mechanics verify gate fails with TS5095
 - category: debt
 - impact: 4
