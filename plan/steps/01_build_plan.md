@@ -588,7 +588,7 @@ supersession collisions before any engine work.
       equipped) for D4. Derived signature-cost table (2/3/4◆) PROVISIONAL —
       D7 ratifies —
       `feat(mechanics): Upgradeable-Dice D3 sim harness + economy derivation` (61bbc8ca)
-- [ ] Phase D4 — Pricing re-derivation + card re-authoring. Re-fit
+- [x] Phase D4 — Pricing re-derivation + card re-authoring. Re-fit
       `cards.pricing.ts` (incl. the card-played-clock DoT constants —
       WS3.3's ~2 plays/round assumption dies); re-author Forge's 7
       die-cards; author FORGE special-amplifier enchants (D1 owner call)
@@ -596,6 +596,14 @@ supersession collisions before any engine work.
       SPECIAL/HONE/TEMPER keyword rows.
       Brief: `plan/phases/phase_D4_pricing_rederivation.md`.
       Prove: effectiveness lint + curated-library tests green. Deps: D3.
+      SHIPPED 2026-07-17 — card-played DoT clock 2→1.83 (pricing-local;
+      engine forecast held at 2 for D7), poison-only blast radius; 3 Forge
+      cards re-worded + pact-of-akrasia re-authored; FORGE special-amplifier
+      enchant (forge-masters-stamp) wired + e2e; 9 per-theme dice valves
+      sandbox-staged (dice-valves-33); SPECIAL/HONE/TEMPER keywords
+      registered. mechanics+mobile verify green. Valve PROMOTION deferred to
+      D5 (5/5/5 locked); stance-check synergy priced but DARK (D3-F2) —
+      `feat(mechanics): Upgradeable-Dice D4 pricing re-derivation + card re-authoring` (0e3bd2bb)
 - [ ] Phase D5 — Die gear + blacksmith. The D1 owner-call model: dice are
       immutable; ALL progression on four dedicated color-coded gear
       slots (separate rail from the 5-piece wear model; pieces are
