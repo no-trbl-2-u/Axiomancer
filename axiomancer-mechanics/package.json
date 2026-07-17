@@ -30,6 +30,7 @@
     "labyrinth": "ts-node src/CLI/game.cli.ts labyrinth",
     "combat-sim": "ts-node src/CLI/combat-sim.cli.ts",
     "combat-playtest": "ts-node src/CLI/combat-playtest.cli.ts",
+    "combat-dice-economy": "ts-node src/CLI/combat-dice-economy.cli.ts",
     "agent-e2e": "node automation/agent-e2e.mjs",
     "catalog:export": "ts-node --transpile-only scripts/export-catalog.ts",
     "dev": "echo Please use check 'package.json' or README.md for available commands...\n ",

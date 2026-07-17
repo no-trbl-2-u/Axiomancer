@@ -26,6 +26,7 @@ import {
     tapFateDie, recoilXRange, placeStake,
 } from './combat.engine';
 import { RESERVE_MAX } from './combat.dice';
+import { isUpgradeableDiceEnabled, MOMENTUM_CHAIN_ORDER } from './combat.upgradeable-dice';
 import { getPendingDotTotal } from './effects';
 import { getRng } from '../Utils/rng';
 import type {
@@ -271,6 +272,141 @@ function bumpUsage(
     if (landedStatus) row.statusLands++;
 }
 
+/** §3 — the chain-successor color to build toward from the current momentum
+ *  (null when momentum is null — any color legally starts a fresh chain, so
+ *  there's no single "advance" target to steer for). */
+function momentumSuccessor(momentum: CombatEncounterState['momentumV2']): string | null {
+    if (!momentum) return null;
+    const i = MOMENTUM_CHAIN_ORDER.indexOf(momentum.color);
+    return i < 0 ? null : MOMENTUM_CHAIN_ORDER[(i + 1) % MOMENTUM_CHAIN_ORDER.length];
+}
+
+/** Momentum-steer ordering: a die that can produce the chain-successor stance
+ *  (its own color, or wild which powers any) sorts first, so the policy builds
+ *  toward a surge instead of breaking to null. No preference when `want` is
+ *  null (momentum null / off-chain). */
+function momentumSourceScore(color: string, want: string | null): number {
+    if (!want) return 0;
+    if (color === want) return 2;
+    if (color === 'wild') return 1;
+    return 0;
+}
+
+/**
+ * Spec 33 (Upgradeable Dice, flag-on) — the four-die play phase. No draft: the
+ * four fixed dice (+ Reserve + surge floats) each power one paid line of their
+ * color (gold = wild), momentum-steered toward the chain successor. A whiffed
+ * round Presses Fate (a `reroll`-kind signature, repriced to 1◆ flag-on) when
+ * it can afford it. FREE tops drain the leftover hand, then `endTurn` banks the
+ * best unspent die to Reserve. A pure measurement instrument — legible, not an
+ * AI: it reuses the policy's `rankCard`/`bestSignature`, adding only the
+ * momentum-steer ordering and the whiff-reroll, both spec-mandated levers.
+ */
+function upgradeablePlayPhase(
+    state: CombatEncounterState,
+    policy: CombatSimPolicy,
+    rng: () => number,
+    usage: Record<string, CombatCardUsage>,
+    lines: Record<string, CombatCardLineTelemetry>,
+    focusIds?: ReadonlySet<string>,
+): { state: CombatEncounterState; plays: number; statusPlays: number } {
+    let working = state;
+    let plays = 0;
+    let statusPlays = 0;
+    let guard = 0;
+    const fizzledUids = new Set<string>();
+
+    const chosenXFor = (card: CombatCard): { chosenX: number } | undefined => {
+        const range = recoilXRange(working, card);
+        if (!range) return undefined;
+        const x = policy.chooseX ? policy.chooseX(working, card, range, rng) : range.min;
+        return { chosenX: x };
+    };
+
+    // ── The ONE legal tray roll for this phase (rolls the four fixed dice). ───
+    if (working.dice.length === 0 && !working.turnTakenThisPhase) {
+        working = startTurn(working).state;
+        if (working.phase !== 'phase-play') return { state: working, plays, statusPlays };
+    }
+
+    // Press Fate (§4): a full-miss round rerolls its misses once for 1◆ — cast
+    // the player's `reroll` signature (repriced flag-on). Skipped silently when
+    // the loadout carries none (a starter-signature gap D4/D5 fills) or the
+    // player can't afford it.
+    const fixedUsable = () => working.dice.some(d => !d.floating && d.state === 'available' && (d.face === 'special' || d.face === 'mana'));
+    if (!fixedUsable() && working.conviction >= 1 && working.pressFateRound !== working.round) {
+        const rerollId = working.signatures.find(id => getSignatureSkill(id)?.kind === 'reroll');
+        if (rerollId) {
+            const cast = playSignatureSkill(working, rerollId);
+            if (cast.state !== working) working = cast.state;
+        }
+    }
+
+    // ── Powered plays: iterate the live dice, momentum-steered. ──────────────
+    while (working.phase === 'phase-play' && guard < 60) {
+        guard++;
+        if (working.finalOutcome || working.mercyChoiceActive) break;
+
+        if (working.conviction >= policy.convictionThreshold) {
+            const sigId = bestSignature(working, policy, rng);
+            if (sigId) {
+                const cast = playSignatureSkill(working, sigId);
+                if (cast.state !== working) { working = cast.state; if (working.finalOutcome) break; continue; }
+            }
+        }
+
+        const sources: { dieId: string; color: string }[] = [];
+        for (const d of working.dice) {
+            if (d.state !== 'available' || d.color === 'x') continue;
+            if (d.floating || d.face === 'special' || d.face === 'mana') sources.push({ dieId: d.id, color: d.color });
+        }
+        for (const banked of working.reserve ?? []) sources.push({ dieId: banked.id, color: banked.color });
+        if (sources.length === 0) break;
+        const want = momentumSuccessor(working.momentumV2);
+        sources.sort((a, b) => momentumSourceScore(b.color, want) - momentumSourceScore(a.color, want));
+
+        let attempted = false;
+        for (const src of sources) {
+            const card = selectCard(working, policy, rng, fizzledUids, focusIds, src.color);
+            if (!card) continue;
+            attempted = true;
+            const res = playCombatCard(working, { uid: card.uid }, true, src.dieId, undefined, chosenXFor(card.card));
+            if (res.events.some(e => e.kind === 'effect-fizzled')) {
+                lineRow(lines, card.card.id).fizzles++;
+                fizzledUids.add(card.uid);
+                break;
+            }
+            lineRow(lines, card.card.id).paidHpSwing += playHpSwing(working, res.state, res.events);
+            working = res.state;
+            plays++;
+            const landed = res.events.some(e => e.kind === 'effect-landed' && e.target === 'enemy');
+            if (landed) statusPlays++;
+            bumpUsage(usage, card.card, 'bottom', landed);
+            break;
+        }
+        if (!attempted) break;
+    }
+
+    // Wind-down: drain the leftover hand through the FREE tops, then end the turn.
+    let drain = 0;
+    while (working.phase === 'phase-play' && !working.finalOutcome && !working.mercyChoiceActive && drain < 30) {
+        drain++;
+        const resT = handCards(working).find(c => c.card.verbClass !== 'retreat');
+        if (!resT) break;
+        const play = playCombatCard(working, { uid: resT.uid }, false);
+        const row = lineRow(lines, resT.card.id);
+        row.freeHpSwing += playHpSwing(working, play.state, play.events);
+        if (play.events.some(e => e.kind === 'effect-fizzled')) row.fizzles++;
+        working = play.state;
+        plays++;
+        bumpUsage(usage, resT.card, 'top');
+    }
+    if (working.phase === 'phase-play' && !working.finalOutcome && working.turnTakenThisPhase) {
+        working = endTurn(working).state;
+    }
+    return { state: working, plays, statusPlays };
+}
+
 /**
  * Plays a single threat phase to a stop under the ROUND-TURN LAW (Gate 0,
  * 2026-07-10): ONE tray roll (`startTurn`) per phase. The turn's powered plays
@@ -279,6 +415,10 @@ function bumpUsage(
  * the policy drains the leftover hand through the FREE tops and ends the turn.
  * The guard counters are kept but never bind on legal play: the old
  * `endTurn → startTurn` Conviction farm is gone.
+ *
+ * Spec 33 (Upgradeable Dice): when the flag is on, delegates to
+ * `upgradeablePlayPhase` (no draft; four fixed dice). The flag-OFF body below is
+ * byte-identical to the pre-spec-33 driver — the pinned sim e2e depend on it.
  */
 function policyPlayPhase(
     state: CombatEncounterState,
@@ -288,6 +428,7 @@ function policyPlayPhase(
     lines: Record<string, CombatCardLineTelemetry>,
     focusIds?: ReadonlySet<string>,
 ): { state: CombatEncounterState; plays: number; statusPlays: number } {
+    if (isUpgradeableDiceEnabled()) return upgradeablePlayPhase(state, policy, rng, usage, lines, focusIds);
     let working = state;
     let plays = 0;
     let statusPlays = 0;
@@ -426,6 +567,24 @@ function policyPlayPhase(
     }
 
     return { state: working, plays, statusPlays };
+}
+
+/**
+ * Plays ONE threat phase for an external sim harness (the spec-33 D3 economy
+ * witness), routed through the same `policyPlayPhase` the matrix uses so the
+ * flag-on branch is exactly what gets measured. `usage`/`lines` collect
+ * telemetry the caller may discard.
+ */
+export function playSimPhase(
+    state: CombatEncounterState,
+    policyId: CombatSimPolicyId,
+    rng: () => number,
+    usage: Record<string, CombatCardUsage> = {},
+    lines: Record<string, CombatCardLineTelemetry> = {},
+): { state: CombatEncounterState; plays: number; statusPlays: number } {
+    const policy = COMBAT_SIM_POLICIES[policyId];
+    if (!policy) throw new Error(`Unknown combat sim policy '${String(policyId)}'`);
+    return policyPlayPhase(state, policy, rng, usage, lines);
 }
 
 /** Runs a single seeded encounter and returns its outcome (+ per-card telemetry). */
