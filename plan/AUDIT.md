@@ -14,7 +14,94 @@
 
 ## Pending
 
-### [needs-user-call] Adopt a shared-queue convention for Hermes-routed work
+### Combat deck-matrix baseline stale by 33 mechanics-source commits
+- category: gap
+- impact: 6
+- ease: 6
+- detail: surfaced 2026-07-17 by the new session-start hook — the
+  baseline was measured 2026-07-12 (merge f325c423 + 953de92e) and 33
+  mechanics-source commits have landed since (incl. the card PAID-prose
+  work). Any balance/engagement answer citing it describes a 5-day-old
+  engine. Note the interaction with the parked "Metric v2" row above:
+  regenerating restores freshness but the metric's known blind spots
+  still apply — regen is hygiene, not a green light for new tuning
+  conclusions.
+- next: /iterate (npm run baseline:regen, or the digest's reduced
+  nightly pass)
+
+### theme-switch-e2e.mjs uses URL.pathname — broken paths on Windows
+- category: debt
+- impact: 3
+- ease: 9
+- detail: axiomancer-mobile/scripts/theme-switch-e2e.mjs:13,20 builds
+  DIST and cwd via `new URL(..., import.meta.url).pathname`, which
+  yields `/C:/...` on Windows — fs/spawn calls get a bad path, so the
+  script only works in CI (Linux). Same bug class was found and fixed
+  2026-07-17 in both game-knowledge-base generators (their isMain
+  check silently never matched locally); fix is `fileURLToPath`.
+  Grep found no other live occurrences in this repo.
+- next: /iterate
+
+### Telemetry attribution is best-effort; CI logging path unverified
+- category: debt
+- impact: 3
+- ease: 4
+- detail: TELEMETRY.md (shipped 2026-07-17, commit 03969cea) scrapes
+  model and main-vs-subagent from the transcript tail because hooks
+  don't expose either directly — expect `unknown` cells and possible
+  misattribution near sidechain boundaries; a call racing a sidechain
+  boundary can be attributed to the wrong side. Also unverified: in
+  cloud ticks, skills arrive as '/command' prompts and should land as
+  slash-prompt rows via UserPromptSubmit — confirm rows appear (and
+  ride the tick's commit) after the first few cloud runs. If the
+  harness later exposes agent id / model in hook input, replace the
+  transcript-tail scrape in .claude/hooks/telemetry.mjs.
+- next: /iterate (verify after next cloud tick; upgrade when harness
+  allows)
+
+### kb-query MCP could surface kb/ sync age
+- category: gap
+- impact: 2
+- ease: 8
+- detail: kb-sync.mjs now stamps kb/.sync-meta.json (2026-07-17) and
+  the session-start hook reports age, but design sessions that go
+  straight to the kb-query MCP server / skill never see it. Adding the
+  stamp's age to kb_overview output (and a staleness warning >14d)
+  would put corpus freshness in front of the consumer that actually
+  cites it.
+- next: /iterate
+
+### Stale worktree copy at .claude/worktrees/card-text-paid-effects-3cd590/
+- category: debt
+- impact: 2
+- ease: 8
+- detail: a full stale copy of the repo's guide files (and more) lives
+  under `.claude/worktrees/card-text-paid-effects-3cd590/`, polluting
+  glob/grep results (it surfaced in the 2026-07-16 agent-guide audit).
+  It appears related to the card-text PAID-prose work that shipped
+  around ef6a0ca3/d4f3a4f9. CAUTION: another agent was actively working
+  in this area on 2026-07-16 — verify the worktree is abandoned
+  (`git worktree list`, no uncommitted work inside) before removing it
+  with `git worktree remove`; if it holds unmerged work, surface
+  instead of deleting.
+- next: /iterate
+
+### Metric v2 design session parked until fresh metrics land
+- category: gap
+- impact: 7
+- ease: 2
+- detail: statusEngagement is enemy-side-only, volume-based, and
+  arc-blind (2026-07-12 re-baseline: collapse + all-preset late 0.00),
+  and it is the objective function for /deck-tuning and
+  /combat-playtest. T agreed this is the highest-leverage fix but
+  parked the design conversation (2026-07-16): a second agent is
+  adding information to the metrics first, then T + Claude circle
+  back to design metric v2 (player-side engagement, per-turn arc
+  shape, win-path attribution). Loop guidance meanwhile: do not
+  build new tuning conclusions on statusEngagement alone; treat its
+  numbers as suspect per the known blind spots.
+- next: attended session (T-gated — not loop work; do not auto-ship
+  a metric rewrite)
 - category: divergence
 - impact: 6
 - ease: 8

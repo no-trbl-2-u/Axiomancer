@@ -236,6 +236,19 @@ export interface CombatThreatEffect {
      *  afflictions when the action fires (spec 29 guardrail: a fraction,
      *  never the last one). Written only by the threat-branch resolver. */
     enemyCleanse?: number;
+    /** Phase 33a — enemy counterplay against the player's SWAY
+     *  (charm/grace CAPITULATE) track: reduces the live `sway` value by
+     *  this flat amount, floored at 0. Never resets the milestone-fired
+     *  flags (`swayMilestoneWaveringFired`/`swayMilestoneFalteringFired`)
+     *  — only the raw counter moves. Authorable on any threat phase,
+     *  branch or linear. */
+    swayCleanse?: number;
+    /** Phase 33a — enemy counterplay against the player's Premise
+     *  (peroration/oratory CONCEDE) track: reduces the live, spendable
+     *  `premises` tally by this flat amount, floored at 0. Never touches
+     *  `premiseMilestoneTotal` (the lifetime milestone-drip counter).
+     *  Authorable on any threat phase, branch or linear. */
+    premiseShed?: number;
 }
 
 export interface CombatThreatAction {
@@ -544,6 +557,11 @@ export type CombatEvent =
     | { kind: 'threat-branch'; phaseIndex: number; conditionText: string; taken: 'then' | 'else' }
     // WS9 — the enemy's reactive cleanse shed some of its own afflictions.
     | { kind: 'threat-cleansed'; phaseIndex: number; effectIds: string[] }
+    // Phase 33a — the enemy's reactive counterplay shed the player's live
+    // SWAY / spendable Premise tally (never their milestone flags / the
+    // lifetime premiseMilestoneTotal counter).
+    | { kind: 'threat-sway-cleansed'; phaseIndex: number; amount: number }
+    | { kind: 'threat-premise-shed'; phaseIndex: number; amount: number }
     | { kind: 'hand-drawn'; cards: string[] }
     | { kind: 'cards-milled'; cards: string[] }
     | { kind: 'mercy-opened'; message: string }

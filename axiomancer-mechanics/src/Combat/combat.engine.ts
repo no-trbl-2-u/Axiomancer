@@ -3173,6 +3173,14 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
 
     let player = state.player;
     let enemy = state.enemy;
+    // Phase 33a — hoisted above the effect loop (was declared after it, for
+    // the unrelated mirror-of-longing SWAY-on-block interaction only) so the
+    // loop's swayCleanse hook can mutate the same locals `mirror-of-longing`
+    // reads/writes further down.
+    let sway = state.sway ?? 0;
+    let swayMilestoneWaveringFired = state.swayMilestoneWaveringFired;
+    let swayMilestoneFalteringFired = state.swayMilestoneFalteringFired;
+    let premises = state.premises ?? 0;
     // GUARD (one-shot, per-phase) absorbs first; BARRIER (persistent, stacking)
     // soaks the remainder; RIPOSTE parries and — spec 32 v3 — counters ONLY when
     // the attack was FULLY blocked (reflect class). All no-op when unset.
@@ -3327,6 +3335,24 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
                     });
                 }
             }
+            // Phase 33a — enemy counterplay against the two alt-win tracks.
+            // Flat amount, floored at 0 (never negative, never more-gone-
+            // than-exists); milestone flags / premiseMilestoneTotal untouched —
+            // only the live counters move.
+            if (eff.swayCleanse && eff.swayCleanse > 0 && !doubtId) {
+                const before = sway;
+                sway = Math.max(0, sway - eff.swayCleanse);
+                if (sway < before) {
+                    events.push({ kind: 'threat-sway-cleansed', phaseIndex: phase.index, amount: before - sway });
+                }
+            }
+            if (eff.premiseShed && eff.premiseShed > 0 && !doubtId) {
+                const before = premises;
+                premises = Math.max(0, premises - eff.premiseShed);
+                if (premises < before) {
+                    events.push({ kind: 'threat-premise-shed', phaseIndex: phase.index, amount: before - premises });
+                }
+            }
             penaltiesApplied.push(eff);
         }
         // A fired DOUBT / OVEREXTENDED is spent on the phase it bent (consumedOnUse).
@@ -3390,10 +3416,10 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
     if (idx < threatMarks.length) threatMarks[idx] = mark;
 
     // `mirror-of-longing` (D): the damage your defenses prevented converts to
-    // SWAY — their aggression argues your case (spec 32 v3 T8).
-    let sway = state.sway ?? 0;
-    let swayMilestoneWaveringFired = state.swayMilestoneWaveringFired;
-    let swayMilestoneFalteringFired = state.swayMilestoneFalteringFired;
+    // SWAY — their aggression argues your case (spec 32 v3 T8). `sway` /
+    // the milestone flags are hoisted above the effect loop now (Phase 33a)
+    // so this reads/writes the SAME locals the swayCleanse hook may have
+    // already moved this phase.
     if (zoneHas(state, 'mirror-of-longing') && damagePrevented > 0) {
         // Routed through gainSway (not a bare `sway += amount`) so
         // buff_grace_momentum's per-stack multiplier applies here too, not
@@ -3451,6 +3477,7 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
         sway,
         swayMilestoneWaveringFired,
         swayMilestoneFalteringFired,
+        premises,
         directDamageDealt: directDamage,
         guard: 0,                       // brace is spent on this phase's threat; resets each phase
         barrier,                        // persistent soak — carries the unspent remainder across phases

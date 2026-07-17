@@ -35,15 +35,15 @@ npm-workspaces monorepo. Three packages, flat at the root:
   presenters.
 - **Asking the user questions.** In attended sessions, every question
   to the user goes through the `AskUserQuestion` tool — never bare
-  prose. Follow the question-writing doctrine in `skills/oversight.md`
-  §5, which applies anywhere a question is asked, not just in
-  `/oversight`: questions computed from observed state (not
-  pre-canned), each targeting one specific decision, multiple-choice
-  with your recommended option listed first and marked, a free-form
-  slot when there's room. Autonomous loop skills never ask at all —
-  `AskUserQuestion` is reserved for `/oversight` there (standing rule
-  6 below); they decide, document the call, and log genuine user
-  decisions as `[needs-user-call]`.
+  prose — shaped per [`docs/asking-well.md`](docs/asking-well.md)
+  (the canonical question-writing doctrine; `skills/oversight.md` §5
+  is its worked example). The six rules in short: 1-4 questions per
+  batch; recommended option first and marked; descriptions name the
+  trade-off; lead with prose; every question states its defer path;
+  answers are policy — file them durably and never re-ask. Autonomous
+  loop skills never ask at all — `AskUserQuestion` is reserved for
+  `/oversight` there (standing rule 6 below); they decide, document
+  the call, and log genuine user decisions as `[needs-user-call]`.
 
 ### Cross-package impact checklist
 

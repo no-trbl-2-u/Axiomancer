@@ -62,6 +62,13 @@ function sync() {
   }
   const head = git(['-C', KB_DIR, 'rev-parse', '--short', 'HEAD']).trim()
   console.log(`kb-sync: at ${head}`)
+  // Sync stamp — read by guard.mjs session-start so every session opens
+  // knowing how old the design corpus is. Untracked inside the clone;
+  // reset --hard leaves it alone.
+  fs.writeFileSync(
+    path.join(KB_DIR, '.sync-meta.json'),
+    JSON.stringify({ head, syncedAt: new Date().toISOString() }, null, 2) + '\n',
+  )
 }
 
 function wish(entry) {

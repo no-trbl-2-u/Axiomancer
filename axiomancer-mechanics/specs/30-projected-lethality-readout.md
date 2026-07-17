@@ -1,6 +1,19 @@
 # Spec 30 — Projected Lethality: The Foreseeable Kill
 
-> **Status:** Draft — handoff. Answer §4, then `Spec 30 is ready, please implement.`
+> **Status:** Superseded (shipped) — 2026-07-17, restated by
+> `plan/phases/phase_2_projected_lethality_readout.md` (2026-07 Phase 2) and
+> `plan/phases/phase_28_show_the_engine.md` (Phase 28). This draft predates
+> the VITAE/HP-funnel architecture (its "Phase 125 `pendingDotDamage`" and
+> two-Pressure-Track model no longer exist). §4's recommended shape shipped
+> as `projectCombatOutcome(state)` (`combat.engine.ts`:
+> `pendingDot`/`roundsToKill`/`isLethalInFlight`, Q1/Q3/Q4) plus the
+> "wall-math" projected-threat-vs-guard readout (`projectedDamage`/
+> `willDeny`/`netDamage`, same file, Phase 28) — both render live in mobile
+> (`IntentIcon.tsx`). Q2 (a FINISH fast-forward affordance) and Q5 (Control-
+> track foresight) remain unshipped/out of scope per Phase 2's brief; Q6
+> (Catalyst) is moot — Spec 26 hasn't shipped. Do not re-implement from this
+> doc's §Proposed approach — read `combat.engine.ts`'s `projectCombatOutcome`
+> and the wall-math block (~line 4400) instead.
 > **Depends on:** Spec 25 (Hazard-Pattern Combat) · Phase 125 (DoT-erosion projection) · Spec 25 §7 (presentation).
 > **Theme inspiration:** Slay the Spire (you *see* poison tick the enemy down) + Into the Breach (full information: you can see you've already won). Hades' visible Doom counter.
 

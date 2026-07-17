@@ -379,11 +379,22 @@ tick. Shared sources: `plan/tuning/2026-07-10-turn-texture.md` §3 +
 Phase 26 (numbers) but design-independent of the owner session
 (mechanics).
 
-- [ ] Phase 33a — Reactive-verb core: one reactive verb engine-wide
-      + enemy-side lethality readout (the foundational engine hooks
-      the archetypes ride on). Deps: Phase 26. Refresh the brief with
-      `/plan-a-phase phase 33a` before pickup — design may have
-      drifted since 2026-07-10.
+- [x] Phase 33a — Reactive-verb core (shipped `69b2ccf1`, re-scoped).
+      The row's literal deliverables ("one reactive verb engine-wide"
+      + "enemy-side lethality readout") were already shipped by WS9
+      threat-branch (spec 32 §12 item 7) and Phase 2/28's
+      `projectCombatOutcome`/wall-math — confirmed via code read
+      (pressureTracks/dotThreshold, specs 29/30's premise, are gone
+      from the codebase entirely). Re-scoped to the real gap Phase
+      33b needs: `CombatThreatEffect.swayCleanse` /
+      `.premiseShed` — enemy counterplay hooks against the
+      SWAY→CAPITULATE and Premise→CONCEDE alt-win tracks (CAUTERIZE
+      already works via the existing `enemyCleanse`). Hook-only, no
+      bestiary authoring. Full re-scope rationale + guardrails:
+      `plan/phases/phase_33a_reactive_verb_core.md`.
+- [ ] Phase 33b — Enemy archetypes + variable-rung telegraphs:
+      CAUTERIZE / Premise-shed / SWAY-cleanse enemies with the
+      variable-rung telegraph presentation. Deps: 33a.
 - [ ] Phase 33b — Enemy archetypes + variable-rung telegraphs:
       CAUTERIZE / Premise-shed / SWAY-cleanse enemies with the
       variable-rung telegraph presentation. Deps: 33a.
@@ -408,8 +419,16 @@ Phase 26 (numbers) but design-independent of the owner session
       console/page errors per screen → `.critique-artifacts/<viewport>/`
       + `manifest.json`. It does not judge: `/critique`'s main agent
       (has vision, no grant problem) reads the artifacts and files the
-      fresh-eyes findings itself. A screen that redirects/blanks/throws
-      is captured as an observation, not a driver failure. Interactive
+      fresh-eyes findings itself. Screen set is restricted to
+      COLD-ENTERABLE routes (title/onboarding, combat self-bootstrap,
+      exploration hub); state-gated routes pushed by `<EventGate>`
+      (`/village`, `/cutscene`, `/dialogue`, `/event`) are excluded —
+      direct-nav just captures their `router.back()` bounce, which is a
+      transport artifact, not a finding (reaching them faithfully is
+      playtester/interactive territory). Verified end-to-end: the
+      exploration-hub capture independently re-surfaced the open
+      `[HIGH]` "MORALE meter renders literal 'v of x' placeholder"
+      finding, confirming the capture is real and useful. Interactive
       `/critique` (playtester + Playwright MCP) is unaffected — this is
       the unattended-loop path only (harness; `skills/critique.md` §3.5
       updated + new script + `critique:drive` npm scripts)

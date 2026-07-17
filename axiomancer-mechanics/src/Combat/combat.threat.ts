@@ -159,9 +159,11 @@ function difficultyMult(enemy: Enemy): number {
 
 // ── Spec 26 §2 — intent derivation (the telegraph; stance stays hidden) ──────
 
-/** True when a threat effect debuffs the player (any applied effectId does). */
+/** True when a threat effect debuffs the player (an applied effectId, or
+ *  Phase 33a's counterplay hooks stripping the player's SWAY/Premise
+ *  win-progress). */
 function effectIsDebuff(eff: CombatThreatEffect): boolean {
-    return !!eff.effectId;
+    return !!eff.effectId || (eff.swayCleanse ?? 0) > 0 || (eff.premiseShed ?? 0) > 0;
 }
 
 /**
@@ -170,9 +172,14 @@ function effectIsDebuff(eff: CombatThreatEffect): boolean {
  */
 export function deriveIntentType(effects: readonly CombatThreatEffect[]): CombatIntentType {
     const hasDamage = effects.some(e => (e.damage ?? 0) > 0);
-    const hasDebuff = effects.some(effectIsDebuff);
-    // The WS9 reactive self-cleanse reads as a self-serving (buff) intent.
-    const hasBuff = effects.some(e => (e.enemyHeal ?? 0) > 0 || (e.enemyCleanse ?? 0) > 0);
+    // Phase 33a correction: `enemyCleanse` used to read as self-serving
+    // (buff) below, but shedding its OWN afflictions erases the player's
+    // invested DoT work — that's counterplay against the player, not a
+    // benign self-buff, so it now counts toward `hasDebuff` alongside the
+    // two new hooks (`effectIsDebuff` already covers those). Only a bare
+    // self-heal still reads as `buff`.
+    const hasDebuff = effects.some(e => effectIsDebuff(e) || (e.enemyCleanse ?? 0) > 0);
+    const hasBuff = effects.some(e => (e.enemyHeal ?? 0) > 0);
     const active = [hasDamage, hasDebuff, hasBuff].filter(Boolean).length;
     if (active === 0) return 'pass';
     if (active >= 2) return 'combo';

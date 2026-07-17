@@ -3,6 +3,9 @@
 // standing rules in AGENTS.md. Wired via .claude/settings.json:
 //
 //   PreToolUse (matcher: Bash)  → node .claude/hooks/guard.mjs pre-bash
+//   PreToolUse (Write|Edit)     → node .claude/hooks/guard.mjs pre-write
+//   PostToolUse (Write|Edit)    → node .claude/hooks/guard.mjs post-write
+//   SessionStart                → node .claude/hooks/guard.mjs session-start
 //   Stop                        → node .claude/hooks/guard.mjs stop
 //
 // Exit-code contract (Claude Code hooks):
@@ -15,17 +18,24 @@
 // finding: record it in the commit body or plan/AUDIT.md.
 //
 // Modes:
-//   pre-bash    check a Bash tool call against the forbidden list
-//   stop        warn (or block, with NEXUS_STRICT_STOP=1) when a
-//               turn ends with a dirty tree / unpushed commits
-//   self-test   run canned commands through the matcher; exit 1
-//               on any mismatch (use in CI / after editing rules)
+//   pre-bash      check a Bash tool call against the forbidden list
+//   pre-write     block hand-edits to kb/ (gitignored sync of the
+//                 game-knowledge-base repo) and to measured baselines
+//   post-write    run the retired-terminology lint (check-lexicon) on
+//                 the .md file just written; findings feed back as
+//                 exit 2 so the agent fixes them before CI does
+//   session-start print measurement context (baseline freshness, kb/
+//                 sync age) to stdout for injection into the session
+//   stop          warn (or block, with NEXUS_STRICT_STOP=1) when a
+//                 turn ends with a dirty tree / unpushed commits
+//   self-test     run canned commands through the matcher; exit 1
+//                 on any mismatch (use in CI / after editing rules)
 //
 // Zero dependencies. Never throws: an unexpected error prints to
 // stderr and exits 0 (fail-open) so a guard bug can't wedge the
 // loop — the provider-level backstops still hold.
 
-import { execSync, spawn } from 'node:child_process'
+import { execSync, spawn, spawnSync } from 'node:child_process'
 import fs from 'node:fs'
 import path from 'node:path'
 
@@ -67,6 +77,15 @@ const RULES = [
       'guard: destructive resets are forbidden (AGENTS.md standing ' +
       'rule 3). Uncommitted work is either shipped (commit it) or a ' +
       'finding (write it to plan/AUDIT.md) — never discarded.',
+  },
+  {
+    name: 'commit-message-from-file',
+    test: (cmd) =>
+      /\bgit\b[^|;&]*\bcommit\b[^|;&]*(\s--file\b|\s-[a-zA-Z]*F\b)/.test(cmd),
+    message:
+      'guard: git commit -F/--file is forbidden — the guard lints commit ' +
+      'messages from the command string (AGENTS.md standing rule 2), and a ' +
+      'message file is invisible to it. Write the message inline with -m.',
   },
   {
     name: 'trailer-or-emoji-in-commit',
@@ -121,6 +140,110 @@ function preBash() {
       return 2
     }
   }
+  return 0
+}
+
+// --- write guards --------------------------------------------------------
+
+// Repo-relative forward-slash path, or null. Hooks run with cwd = repo root.
+function normalizeRel(p) {
+  if (!p) return null
+  let rel = String(p).replaceAll('\\', '/')
+  const root = process.cwd().replaceAll('\\', '/')
+  if (rel.startsWith(root)) rel = rel.slice(root.length).replace(/^\//, '')
+  return rel
+}
+
+// Files that must never be hand-edited. Same shape as the OKF repo's
+// GENERATED map: block + say where the truth actually lives.
+const WRITE_BLOCKS = [
+  {
+    name: 'kb-sync-dir',
+    test: (rel) => rel === 'kb' || rel.startsWith('kb/'),
+    message:
+      'guard: kb/ is a gitignored SYNC of the game-knowledge-base repo — ' +
+      'edits here are destroyed by the next `node scripts/kb-sync.mjs` run ' +
+      'and never reach the corpus. Make the change in the ' +
+      'game-knowledge-base repo itself, or file the need as a wishlist ' +
+      'entry: node scripts/kb-sync.mjs wish "<what you wanted>".',
+  },
+  {
+    name: 'measured-baseline',
+    test: (rel) => /\bdocs\/reports\/baselines\/[^/]+\.json$/.test(rel),
+    message:
+      'guard: baseline files are MEASURED truth — hand-editing one forges ' +
+      'a measurement (see AGENTS.md → "Measured truth"). Re-measure via ' +
+      'npm run baseline:regen instead.',
+  },
+]
+
+function preWrite() {
+  const input = readStdinJson()
+  const rel = normalizeRel(input?.tool_input?.file_path)
+  if (!rel) return 0
+  for (const b of WRITE_BLOCKS) {
+    if (b.test(rel)) {
+      process.stderr.write(b.message + '\n')
+      return 2
+    }
+  }
+  return 0
+}
+
+// After any .md write, run the retired-terminology lint on just that file
+// (same instant-feedback pattern as the OKF repo's post-write validator).
+// check-lexicon applies its own zone/banner/pragma exemptions, so zoned
+// files come back clean here without special-casing.
+function postWrite() {
+  const input = readStdinJson()
+  const rel = normalizeRel(input?.tool_input?.file_path)
+  if (!rel || !rel.endsWith('.md')) return 0
+  if (!fs.existsSync(rel) || !fs.existsSync('scripts/check-lexicon.mjs')) return 0
+  const res = spawnSync(process.execPath, ['scripts/check-lexicon.mjs', rel], {
+    encoding: 'utf-8',
+    timeout: 30_000,
+  })
+  if (res.error || res.status === null) return 0 // fail-open
+  if (res.status !== 0) {
+    process.stderr.write(
+      'guard: retired terminology in the file just written:\n' +
+      `${(res.stderr || res.stdout || '').trim()}\n`,
+    )
+    return 2
+  }
+  return 0
+}
+
+// --- session-start context ------------------------------------------------
+
+// stdout from a SessionStart hook is injected as context, so every session
+// opens knowing whether the combat baseline is fresh and how old the kb/
+// sync is — mechanizes the "cite the baseline's stamp" rule in CLAUDE.md.
+function sessionStart() {
+  const lines = []
+  try {
+    const res = spawnSync(process.execPath, ['scripts/check-baseline-freshness.mjs'], {
+      encoding: 'utf-8',
+      timeout: 20_000,
+    })
+    const out = (res.stdout || '').trim()
+    if (out) lines.push(...out.split(/\r?\n/).slice(0, 4))
+  } catch {
+    /* best-effort */
+  }
+  try {
+    const meta = JSON.parse(fs.readFileSync('kb/.sync-meta.json', 'utf-8'))
+    const ageDays = (Date.now() - Date.parse(meta.syncedAt)) / 86_400_000
+    lines.push(
+      `kb-sync: kb/ corpus at ${meta.head ?? '?'}, synced ${meta.syncedAt} ` +
+      `(${ageDays.toFixed(1)}d ago)${ageDays > 14 ? ' — STALE, run: node scripts/kb-sync.mjs' : ''}`,
+    )
+  } catch {
+    if (fs.existsSync('kb')) {
+      lines.push('kb-sync: kb/ exists but has no sync stamp — age unknown; node scripts/kb-sync.mjs refreshes it.')
+    }
+  }
+  if (lines.length) process.stdout.write(lines.join('\n') + '\n')
   return 0
 }
 
@@ -215,6 +338,9 @@ function selfTest() {
     ['git commit -m "x" --no-verify', 'no-verify'],
     ['git commit --no-verify -m "x"', 'no-verify'],
     ['git commit -n -m "x"', 'no-verify'],
+    ['git commit -F msg.txt', 'commit-message-from-file'],
+    ['git commit --file=msg.txt', 'commit-message-from-file'],
+    ['git commit -aF msg.txt', 'commit-message-from-file'],
     ['git push --force origin main', 'force-push'],
     ['git push -f', 'force-push'],
     ['git push --force-with-lease origin main', 'force-push'],
@@ -241,6 +367,23 @@ function selfTest() {
       `  ${ok ? 'ok  ' : 'FAIL'}  ${JSON.stringify(cmd).slice(0, 58).padEnd(60)} → ${hit ?? 'allowed'}\n`,
     )
   }
+  const writeCases = [
+    ['kb/KnowledgeBase/BoardGames/games/root/index.okf.md', 'kb-sync-dir'],
+    ['kb\\WISHLIST.md', 'kb-sync-dir'],
+    ['axiomancer-mechanics/docs/reports/baselines/deck-matrix-baseline.json', 'measured-baseline'],
+    ['axiomancer-mechanics/docs/reports/2026-07-10-combat-audit.md', null],
+    ['plan/AUDIT.md', null],
+    ['kbfoo/notes.md', null],
+  ]
+  for (const [p, expected] of writeCases) {
+    const rel = normalizeRel(p)
+    const hit = WRITE_BLOCKS.find((b) => b.test(rel))?.name ?? null
+    const ok = hit === expected
+    if (!ok) failed++
+    process.stdout.write(
+      `  ${ok ? 'ok  ' : 'FAIL'}  write ${JSON.stringify(p).slice(0, 52).padEnd(54)} → ${hit ?? 'allowed'}\n`,
+    )
+  }
   process.stdout.write(failed ? `\nself-test: ${failed} FAILED\n` : '\nself-test: green.\n')
   return failed ? 1 : 0
 }
@@ -251,6 +394,9 @@ try {
   const mode = process.argv[2]
   const code =
     mode === 'pre-bash' ? preBash()
+    : mode === 'pre-write' ? preWrite()
+    : mode === 'post-write' ? postWrite()
+    : mode === 'session-start' ? sessionStart()
     : mode === 'stop' ? stopCheck()
     : mode === 'self-test' ? selfTest()
     : (process.stderr.write(`guard: unknown mode "${mode}"\n`), 0)

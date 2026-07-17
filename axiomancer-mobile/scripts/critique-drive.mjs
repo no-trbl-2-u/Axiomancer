@@ -53,6 +53,19 @@ const VIEWPORTS = {
 // The critique screen set (skill §3). Each entry navigates a route and captures
 // what renders. `prepare` is a best-effort interaction to reach a downstream
 // state; if it throws, we capture whatever is on screen and move on.
+//
+// IMPORTANT — only COLD-ENTERABLE routes belong here. Many expo-router routes
+// in this app are STATE-GATED: `/village`, `/cutscene`, `/dialogue`, `/event`
+// are pushed by `<EventGate>` in response to a seeded game event, and their
+// screens `router.back()` out when there is no active event (e.g. `/village`
+// bounces on `!vm.active`). Navigating to them by URL just captures a blank
+// bounce — that is a TRANSPORT artifact, not a product finding, so they are
+// excluded. Reaching them faithfully needs game-flow seeding (a debug event
+// trigger); that is playthrough territory (interactive `/critique` + the
+// playtester), not this lightweight direct-nav capture. Entry points below are
+// all confirmed cold-enterable: `/` (title→onboarding), `/combat-encounter`
+// (self-bootstraps a demo deck), `/(tabs)/exploration` (the default landing
+// tab). If you add a route, verify it renders real content cold before adding.
 const SCREENS = [
     {
         name: 'title',
@@ -86,14 +99,9 @@ const SCREENS = [
         },
     },
     {
-        name: 'town-village',
-        path: '/village',
-        why: 'Navigation, voice, and orientation.',
-    },
-    {
         name: 'exploration-hub',
         path: '/(tabs)/exploration',
-        why: 'The exploration surface a cold player lands on.',
+        why: 'Town / exploration hub — navigation, voice, orientation, and the early-progression state a cold player lands on.',
     },
 ]
 

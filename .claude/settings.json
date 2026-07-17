@@ -87,9 +87,7 @@
       "Bash(git reset --hard:*)",
       "Bash(git clean -fd:*)",
       "Bash(git clean -f:*)",
-      "Bash(git branch -D:*)",
-      "Read(.env)",
-      "Read(.env.*)"
+      "Bash(git branch -D:*)"
     ]
   },
   "hooks": {
@@ -100,6 +98,55 @@
           {
             "type": "command",
             "command": "node .claude/hooks/guard.mjs pre-bash"
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/guard.mjs pre-write"
+          }
+        ]
+      },
+      {
+        "matcher": "Skill|SlashCommand|Task|Agent",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/telemetry.mjs tool"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/guard.mjs post-write"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/telemetry.mjs prompt"
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/guard.mjs session-start"
           }
         ]
       }

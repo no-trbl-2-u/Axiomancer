@@ -97,7 +97,9 @@ Tight. Factual. The flags section drives the questionnaire.
 
 ## 5. The questionnaire
 
-Generate 1–4 questions via `AskUserQuestion`. Rules:
+Generate 1–4 questions via `AskUserQuestion`, shaped per
+`docs/asking-well.md` (the canonical question-writing doctrine —
+defer paths named, answers filed as policy, never re-ask). Rules:
 
 - **Standing question 0 (mandatory):** if the §3 sweep found any
   open `[needs-user-call]` items, the FIRST question presents
