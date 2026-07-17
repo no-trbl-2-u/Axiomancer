@@ -41,6 +41,23 @@ export interface AuthoredThreatPhase {
     threatIntensity?: number;
     /** Optional enemy self-heal on Overwhelm (a regenerating phase). */
     enemyHeal?: number;
+    /** Phase 33b — enemy sheds up to this many of its OWN afflictions on
+     *  Overwhelm (the CAUTERIZE archetype: a fraction, never the last —
+     *  enforced again at resolution in the engine). Previously only
+     *  reachable via the WS9 `bearer-afflictions-gte` branch's implicit
+     *  reactive cleanse; now directly authorable on any phase, linear or
+     *  branch. An explicit value here wins over that implicit fallback. */
+    enemyCleanse?: number;
+    /** Phase 33a/33b — sheds this much of the player's live SWAY value on
+     *  Overwhelm (the SWAY-cleanse archetype: enemy counterplay against the
+     *  charm/grace CAPITULATE track). Flat amount, floored at 0; never
+     *  touches the one-way milestone-fired flags. */
+    swayCleanse?: number;
+    /** Phase 33a/33b — sheds this much of the player's spendable Premise
+     *  tally on Overwhelm (the Premise-shed archetype: enemy counterplay
+     *  against the oratory/peroration CONCEDE track). Flat amount, floored
+     *  at 0; never touches the lifetime `premisesThisCombat` counter. */
+    premiseShed?: number;
     /** Threat description WITHOUT the damage number — the resolver appends "(+N damage[, Effect])". */
     actionText: string;
     isFinalPhase?: boolean;
@@ -50,6 +67,10 @@ export interface AuthoredThreatPhase {
      *  reaches it (see `CombatThreatPhase.unlockAfterRound`). Undefined on
      *  every authored sequence today — none is gated yet. */
     unlockAfterRound?: number;
+    /** Phase 33b — variable-rung telegraph: this phase's authored STAGGER-rung
+     *  count (1-4). Undefined = the enemy's natural (difficulty-derived) flat
+     *  default (`THREAT_RUNGS`/`THREAT_RUNGS_BOSS`). */
+    rungs?: number;
 }
 
 // ── WS9 (spec 32 §12 item 7, Ratified 2026-07-11) — conditional threat branches ──
@@ -239,21 +260,36 @@ function effectLabel(effectId: string): string {
     return effectId.replace(/^debuff_/, '').replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
 }
 
+/** Phase 33b — the non-damage/non-debuff riders a threat action can carry. */
+interface ThreatActionRiders {
+    enemyHeal?: number;
+    enemyCleanse?: number;
+    swayCleanse?: number;
+    premiseShed?: number;
+}
+
 /** Builds a `CombatThreatAction` from authored intent + the computed damage. */
 function buildThreatAction(
-    actionText: string, damage: number, effectId?: string, intensity?: number, enemyHeal?: number,
-    enemyCleanse?: number,
+    actionText: string, damage: number, effectId?: string, intensity?: number,
+    riders?: ThreatActionRiders,
 ): CombatThreatAction {
+    const { enemyHeal, enemyCleanse, swayCleanse, premiseShed } = riders ?? {};
     const effects: CombatThreatEffect[] = [];
     if (damage > 0) effects.push({ damage });
     if (effectId) effects.push({ effectId, intensity: intensity ?? 1 });
     if (enemyHeal && enemyHeal > 0) effects.push({ enemyHeal });
     if (enemyCleanse && enemyCleanse > 0) effects.push({ enemyCleanse });
+    if (swayCleanse && swayCleanse > 0) effects.push({ swayCleanse });
+    if (premiseShed && premiseShed > 0) effects.push({ premiseShed });
     const parts = [`+${damage} damage`];
     if (effectId) parts.push(effectLabel(effectId));
     if (enemyHeal && enemyHeal > 0) parts.push(`heals ${enemyHeal}`);
     if (enemyCleanse && enemyCleanse > 0) {
         parts.push(`sheds ${enemyCleanse} affliction${enemyCleanse === 1 ? '' : 's'}`);
+    }
+    if (swayCleanse && swayCleanse > 0) parts.push(`steadies ${swayCleanse} resolve`);
+    if (premiseShed && premiseShed > 0) {
+        parts.push(`unravels ${premiseShed} premise${premiseShed === 1 ? '' : 's'}`);
     }
     return { description: `${actionText} (${parts.join(', ')}).`, effects };
 }
@@ -273,20 +309,26 @@ function enemyStanceHint(enemy: Enemy): string | undefined {
     return (enemy as Enemy & { stanceHint?: string }).stanceHint;
 }
 
-/** Resolves one authored fork into a branch outcome (level/difficulty scaled). */
+/** Resolves one authored fork into a branch outcome (level/difficulty scaled).
+ *  `implicitCleanse` is the WS9 afflictions-gte branch's legacy reactive
+ *  cleanse (`resolveAuthored` below) — an explicit `p.enemyCleanse` wins. */
 function resolveBranchOutcome(
     enemy: Enemy, p: AuthoredThreatPhase, phaseIndex: number, level: number, dMult: number,
-    enemyCleanse?: number,
+    implicitCleanse?: number,
 ): CombatThreatBranchOutcome {
     const damage = threatDamageBudget(level, dMult, phaseIndex, p.damageWeight ?? 1);
-    const threatAction = buildThreatAction(
-        p.actionText, damage, p.threatEffectId, p.threatIntensity, p.enemyHeal, enemyCleanse,
-    );
+    const threatAction = buildThreatAction(p.actionText, damage, p.threatEffectId, p.threatIntensity, {
+        enemyHeal: p.enemyHeal,
+        enemyCleanse: p.enemyCleanse ?? implicitCleanse,
+        swayCleanse: p.swayCleanse,
+        premiseShed: p.premiseShed,
+    });
     return {
         enemyStance: p.enemyStance,
         threatAction,
         intentType: deriveIntentType(threatAction.effects),
         stanceHint: p.stanceHint ?? enemyStanceHint(enemy) ?? DEFAULT_STANCE_HINTS[p.enemyStance],
+        rungs: p.rungs,
     };
 }
 
@@ -323,10 +365,14 @@ function resolveAuthored(enemy: Enemy, authored: AuthoredThreatStep[]): CombatTh
         return withIntent({
             index: i + 1,
             enemyStance: p.enemyStance,
-            threatAction: buildThreatAction(p.actionText, damage, p.threatEffectId, p.threatIntensity, p.enemyHeal),
+            threatAction: buildThreatAction(p.actionText, damage, p.threatEffectId, p.threatIntensity, {
+                enemyHeal: p.enemyHeal, enemyCleanse: p.enemyCleanse,
+                swayCleanse: p.swayCleanse, premiseShed: p.premiseShed,
+            }),
             isFinalPhase: p.isFinalPhase ?? i === authored.length - 1,
             stanceHint: p.stanceHint ?? enemyStanceHint(enemy) ?? DEFAULT_STANCE_HINTS[p.enemyStance],
             unlockAfterRound: p.unlockAfterRound,
+            rungs: p.rungs,
         });
     });
 }
@@ -367,7 +413,9 @@ export function generateDefaultThreatSequence(enemy: Enemy): CombatThreatPhase[]
     phases.push(withIntent({
         index: PHASES + 1,
         enemyStance: rageStance,
-        threatAction: buildThreatAction(`${enemy.name} loses patience and turns savage`, rageDamage, undefined, undefined, rageHeal),
+        threatAction: buildThreatAction(
+            `${enemy.name} loses patience and turns savage`, rageDamage, undefined, undefined, { enemyHeal: rageHeal },
+        ),
         isFinalPhase: true,
         unlockAfterRound: RAGE_UNLOCK_ROUND,
         stanceHint: enemyStanceHint(enemy) ?? DEFAULT_STANCE_HINTS[rageStance],

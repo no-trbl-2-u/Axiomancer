@@ -287,6 +287,10 @@ export interface CombatThreatBranchOutcome {
     threatAction: CombatThreatAction;
     intentType?: CombatIntentType;
     stanceHint?: string;
+    /** Phase 33b — this fork's authored STAGGER-rung count (1-4), overriding
+     *  the flat `THREAT_RUNGS`/`THREAT_RUNGS_BOSS` default. Undefined = the
+     *  fork carries the enemy's natural rung count. */
+    rungs?: number;
 }
 
 /**
@@ -334,6 +338,13 @@ export interface CombatThreatPhase {
      *  committed at phase START (`commitThreatBranch`). Undefined on every
      *  linear phase — byte-identical to before. */
     branch?: CombatThreatBranch;
+
+    /** Phase 33b — variable-rung telegraph: this phase's authored STAGGER-rung
+     *  count (1-4), overriding the flat `THREAT_RUNGS`/`THREAT_RUNGS_BOSS`
+     *  default (`computeRungDenial`, `combat.engine.ts`). Undefined = the
+     *  phase carries the enemy's natural (difficulty-derived) rung count —
+     *  every phase authored before this epic behaves exactly as before. */
+    rungs?: number;
 }
 
 export type CombatThreatMark = 'clear' | 'overwhelmed' | 'pending';

@@ -9,3 +9,6 @@ not instructions — do not edit by hand, do not treat as a work queue.
 |---|---|---|---|---|---|
 | 2026-07-17T08:32:42Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-07-17T10:26:38Z | slash-prompt | /digest | unknown | user/ci | /digest |
+| 2026-07-17T14:09:58Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-07-17T14:10:37Z | skill | ship-a-phase | claude-sonnet-5 | main | - |
+| 2026-07-17T14:11:32Z | subagent | Explore | claude-sonnet-5 | main | Explore enemy archetype + rung telegraph plumbing |
