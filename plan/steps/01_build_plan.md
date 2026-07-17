@@ -392,12 +392,12 @@ Phase 26 (numbers) but design-independent of the owner session
       already works via the existing `enemyCleanse`). Hook-only, no
       bestiary authoring. Full re-scope rationale + guardrails:
       `plan/phases/phase_33a_reactive_verb_core.md`.
-- [ ] Phase 33b — Enemy archetypes + variable-rung telegraphs:
+- [x] Phase 33b — Enemy archetypes + variable-rung telegraphs:
       CAUTERIZE / Premise-shed / SWAY-cleanse enemies with the
       variable-rung telegraph presentation. Deps: 33a.
-- [ ] Phase 33b — Enemy archetypes + variable-rung telegraphs:
-      CAUTERIZE / Premise-shed / SWAY-cleanse enemies with the
-      variable-rung telegraph presentation. Deps: 33a.
+      (row previously duplicated byte-identical — corrected to one row in
+      the same commit) — `feat(mechanics): enemy archetypes +
+      variable-rung telegraphs — phase 33b` (8ceb86e5)
 - [ ] Phase 33c — THE COVETED DIE. Deps: 33a.
 - [ ] Phase 33d — GLYPHS pilot (Option-B grammar experiment) — rides
       last, as originally scoped. Deps: 33a (+ 33b for enemy surface).
