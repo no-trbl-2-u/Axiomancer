@@ -164,9 +164,9 @@ describe('sequencing-microset — registry shape and rank-band honesty', () => {
     it('the authored // pts arithmetic matches scoreCard (regression anchors)', () => {
         const byId = (id: string) => SEQ_SET.cards.find(c => c.id === id)!;
         expect(scoreCard(byId('captatio-benevolentiae'))).toBeCloseTo(4.125, 2);
-        expect(scoreCard(byId('in-medias-res'))).toBeCloseTo(7.067, 2);
+        expect(scoreCard(byId('in-medias-res'))).toBeCloseTo(6.7333, 2); // phase 36b: poison i1 d2 tempo-discounted
         expect(scoreCard(byId('coda'))).toBeCloseTo(8.0, 2);
-        expect(scoreCard(byId('dying-echo'))).toBeCloseTo(6.417, 2);
+        expect(scoreCard(byId('dying-echo'))).toBeCloseTo(6.0833, 2); // phase 36b: poison i1 d2 tempo-discounted
         expect(scoreCard(byId('wages-of-weakness'))).toBeCloseTo(9.0, 2);
         expect(scoreCard(byId('answered-in-kind'))).toBeCloseTo(6.25, 2); // post-Phase-30: FREE self-mark seed + heal kicker
     });

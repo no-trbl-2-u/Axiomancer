@@ -44,11 +44,14 @@ const slipperySlope: Card = {
     tier: 2, rank: 1, cardType: 'spell',
     targetType: 'enemy',
     paidSummary: 'Afflict with POISON 1 for 4 turns.',
-    // pts (WS3.5 clock re-price, 2026-07-11; phase 30 FREE-currency law):
-    // poison i1 d4 on the card-played clock — ramp 2,2,3,3 × 2 expected
-    // ticks/round = 20 HP ÷ 3 ≈ 6.67 + FREE MARK seed i1 d1 (0.6, plants the
-    // universal affliction-glue currency instead of TICK, which is retired
-    // registry-wide) = 7.27 → top of the Doxa band (starter)
+    // pts (phase 36b tempo horizon; WS3.5 clock; phase 30 FREE-currency law):
+    // poison i1 d4 is a RAMP — per-round HP 4,4,6,6, the big ticks landing at
+    // rounds 3-4, PAST the ~4-round death clock — so the tempo weight discounts
+    // it: printed lifetime 20 → tempo-weighted 12.91 ÷ 3 ≈ 4.30 + FREE MARK seed
+    // i1 d1 (0.75, plants the universal affliction-glue currency instead of the
+    // retired TICK) = 5.05 → mid Doxa band. The reprice corrects an OVERPAY:
+    // the deck never collects a 6-round ramp before it dies
+    // (scratch/price-experiment rec #2, seeds-5 late win 3% flat across 4x price)
     free: { applyEffect: { effectId: 'debuff_mark', intensity: 1, duration: 1 } },
     combatEffects: [{ effectId: 'debuff_poison', appliedTo: 'opponent', intensity: 1 }],
     addedIn: '2026-07-08',

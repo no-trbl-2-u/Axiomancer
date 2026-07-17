@@ -60,8 +60,9 @@ const cinder: Card = {
     targetType: 'enemy',
     // pts (post-Phase-30 merge re-pin 2026-07-12 — TICK is dead
     // registry-wide, FREE deposits forge's currency, a PIP, instead):
-    // ember i3 d3 (lifetime 3×3 = 9 HP ÷ 3 = 3) + FREE pip 1 (1.5)
-    // = 4.5 → Doxa band 1.5-7.5. Verified against scoreCard() in
+    // ember i3 d3 (printed lifetime 9 → phase-36b tempo-weighted 6.94 ÷ 3 =
+    // 2.31; round-clocked ramp-free, so the horizon shaves the round-2/3 ticks)
+    // + FREE pip 1 (1.5) = 3.81 → Doxa band 1.5-7.5. Verified against scoreCard() in
     // thoughtforms.engine.test.ts (the pricing lint pins only the 50
     // library spells; the thoughtform suite carries the band check).
     free: { pips: 1 },
