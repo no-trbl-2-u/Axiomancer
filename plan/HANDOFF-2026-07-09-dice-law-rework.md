@@ -1,5 +1,12 @@
 # HANDOFF — dice-law rework + card wording (2026-07-09)
 
+> **SUPERSEDED (2026-07-17, Phase D1):** the dice law recorded here
+> (3 dice / draft 1 / shared face-bag / unpicked-die Conviction) is retired
+> by spec 33 (`axiomancer-mechanics/specs/33-upgradeable-dice.md` — four
+> fixed-color dice with gear-carried progression). Historical document.
+> Still in force from this session: **THE COLOR LAW** (ported into spec 33
+> §1) and the open card-audit items under "OPEN — case-by-case card audit."
+
 > **PICKED UP 2026-07-10** (branch `claude/pr57-handoff-testing-lkhn6v`, stacked
 > on PR #57): Option A card face SHIPPED at both sizes (+ card-editor type-strip
 > mirror); cross-combat float persistence + dieBonus color-law lint pinned in

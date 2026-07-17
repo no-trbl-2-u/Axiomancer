@@ -398,9 +398,19 @@ Phase 26 (numbers) but design-independent of the owner session
       (row previously duplicated byte-identical — corrected to one row in
       the same commit) — `feat(mechanics): enemy archetypes +
       variable-rung telegraphs — phase 33b` (8ceb86e5)
-- [ ] Phase 33c — THE COVETED DIE. Deps: 33a.
+- [ ] Phase 33c — THE COVETED DIE. RE-SCOPED at D1 (2026-07-17, spec 33):
+      the rationale (lootable enemy telegraphs; deny/block verbs earn a
+      payday) survives and strengthens under open stance checks, but its
+      read-era details are dead — steal conditions become STAGGER-to-0 /
+      full block / answering the phase's stance check; payout becomes a
+      temp gold die (spec 33 §1 ceiling applies, overflow → +1◆; the old
+      "floating die of that color, cap 3" is retired). Deps: **D2** (was
+      33a) — do not start before the D-batch engine lands.
 - [ ] Phase 33d — GLYPHS pilot (Option-B grammar experiment) — rides
-      last, as originally scoped. Deps: 33a (+ 33b for enemy surface).
+      last, as originally scoped. FREE-charge is compatible with spec 33
+      §3 rule 5 (FREE lines never touch momentum). RE-SEQUENCED at D1:
+      deps: 33a + **D4** (author pilot cards against the four-die card
+      model, not the one D4 is about to re-author).
 
 **Critique infra (promoted via `/oversight` 2026-07-10):**
 

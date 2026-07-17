@@ -107,3 +107,65 @@ doc, so a D2 worker never builds against a retired surface:
 - D2 engine core (flagged) — blocked on this brief's collision decisions.
 - The kb wishes for the five dice-builder games — re-cite when the scout
   lands them; not blocking D2.
+
+---
+
+## DECISION LOG — D1 landed 2026-07-17
+
+**Mechanics-expert verdict: PASS-WITH-EDITS** (all edits applied to spec
+33 in the same commit as this log). Per dimension: status-centrality PASS
+(strike dead at schema level — every paid play is a status/alt-win play;
+more paid access moves TOWARD doctrine); win curve PASS-WITH-EDITS (§7
+split: D3 gates dice math, D7 gates win-curve/statusEngagement — a pre-D4
+curve read is a false red/green); dice honesty PASS-WITH-EDITS (valves
+carry 8.3% whiff, residue ≈0.7%; shipped `rerollSpentDice` stance
+guarantee identified as a RIG — spec §4 now forbids porting it); pool law
+FAILED as written (exceptions stacked to 10 > 7) — fixed with the
+materialization-priority + overflow→+1◆ binding rule and KINDLE cap 1.
+
+**Owner calls made this session (all now [owner-locked] in spec 33):**
+
+1. **Momentum break = reset to NULL** (not reset-and-restart; supersedes
+   the shipped `advanceWheel` truth table — D2 must not port it).
+2. **Surge die persists until spent, this combat** (true port of shipped
+   wheel-reward lifetime; one-round evaporation rejected).
+3. **STAKE retired entirely** (not rewired onto stance checks). Plumbing
+   removed in D2; D3 measures the escalation + ◆-sink gap.
+4. **Die gear (major design expansion):** ALL die progression moves onto
+   four dedicated color-coded equipment slots (R/B/P/G), separate from
+   the 5-piece wear model. Gear defines the special payload (default:
+   power that color + 2◆) and carries face upgrades; upgraded at the new
+   **blacksmith encounter** (D5). Dice themselves are permanent immutable
+   6-siders. FORGE preset pivots to special-amplifier enchantments
+   (+N benefit on fired specials), replacing in-combat face upgrades.
+5. **PROVISIONAL (owner may flip after playthroughs):** special benefit
+   fires only when the die is USED to power a card — D2 keeps this one
+   switchable rule.
+
+**§9 items:** 1 momentum (above); 2 mapping confirmed = shipped
+`STANCE_COLORS`; 3 keywords HONE (add mana face) / TEMPER (mana→special),
+payload change = gear swap unkeyworded, SPECIAL rename deferred;
+4 ◆ ownership split D3/D4/D7; 5 prior-art still remembered (kb/ verified
+empty of the five games today — wishes open).
+
+**Collisions:** HANDOFF-2026-07-09 retired-as-historical (banner written;
+COLOR LAW + open card audits survive); Phase 31 split
+survive/rework/discard (banner written on its brief — read economy +
+STAKE out, landed-play gate + temp-die filter + 1.5/0.5 rails in);
+33c re-scoped onto stance checks, deps → D2 (row rewritten);
+33d re-sequenced, deps + D4 (row annotated); Fate Engine P2 re-scoped to
+non-dice remainder (row rewritten); **P3 RETIRED** (row struck;
+scripted-first-fight extracted as its own candidate).
+
+**Also reinterpreted:** `sig-read-opponent` → reveals next phase's stance
+check + reactive branch early (its hidden-stance object no longer
+exists). Null-stance rule pinned (no check fires while stance-less).
+CHARM `forcedStance` pinned enemy-side-only. OVERHEAT defined (second
+play is a paid play; cracked die excluded from Press Fate; gold
+overheatable). Reserve×special defined (banked special fires on spend —
+use-triggered).
+
+**DoD check:** verdict captured ✓; every §9 item resolved/deferred ✓;
+every collision decision written into brief + superseded doc ✓; no
+engine/app code touched (docs/spec/plan only) ✓; D1 flipped [x] in the
+build plan in the follow-up plan commit ✓.

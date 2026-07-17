@@ -66,20 +66,29 @@
 
 ### Fate Engine P2 — statuses rewrite the enemy's turn (spec 31 §3, §5 #13-18)
 - source: spec-31
-- Threat-Downgrade Ladder with struck-through telegraphs,
-  player-side control wiring (stagger = 1 fewer die; blocked
-  stances gate powering), combo-registry rebuild + REACT
-  detonations, status cap 5 + "The Inevitable" fast-forward
-  button. Finishes owner complaint #2 ("barely debuffs").
+- RE-SCOPED at Phase D1 (2026-07-17, spec 33) to the non-dice remainder:
+  Threat-Downgrade Ladder with struck-through telegraphs, combo-registry
+  rebuild + REACT detonations, status cap 5 + "The Inevitable"
+  fast-forward button. Finishes owner complaint #2 ("barely debuffs").
+  The dice-touching wiring is superseded: `blockedStances` ports unchanged
+  per spec 33 §6, and "stagger = 1 fewer die" has no referent in a fixed-4
+  pool — any stagger→dice effect is re-expressed in D2 vocabulary (e.g.
+  stagger forces one die to miss) inside the D-batch, not here.
 
-### Fate Engine P3 — the 88-card library rewrite (spec 31 §4, §5 #20-23)
+### ~~Fate Engine P3 — the 88-card library rewrite~~ RETIRED 2026-07-17 (Phase D1)
 - source: spec-31
-- Full card list re-authored with per-card dice text
-  (threshold/dieBonus/fate riders in real units), effect-library
-  canonicalization (7 distinct DoTs absorb 16 clones; deprecated
-  ids never renamed), preset re-cuts with identities, scripted
-  first fight, mobile UI for resonance/reserve/omen. L-sized
-  content pass; runs through /deck-tuning + /combat-playtest.
+- Superseded: the library rewrite was overtaken by spec 32 v3's shipped
+  70-card/10-theme library; per-card dice-text re-authoring is now
+  literally Phase D4's mandate; mobile UI for resonance/reserve is D6's;
+  OMEN v2 already shipped (phase 32 part 4d). Sole live remainder
+  extracted below.
+
+### Scripted first fight (content — extracted from retired Fate Engine P3)
+- source: spec-31 P3 remainder, extracted at Phase D1 (2026-07-17)
+- A hand-authored opening combat (fixed seed/deck/enemy script) that
+  teaches the dice→card→stance loop. Small content phase; re-scope onto
+  the spec 33 model when promoted — sequencing after D6 (needs the new
+  dice tray + stance chips to teach against).
 
 ### Enemy themed decks (mechanics — post spec-32 v3)
 - source: T direct decision 2026-07-07 (themed-deck-library session)

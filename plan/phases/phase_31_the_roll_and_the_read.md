@@ -1,5 +1,16 @@
 # Phase 31 — The Roll and the Read (momentum wheel, THE STAKE, signature repricing)
 
+> **PARTIALLY SUPERSEDED (2026-07-17, Phase D1 / spec 33):** the
+> hidden-stance read economy (Part 2's wager subject, `resolveRead`-as-draft,
+> read-win ◆, unpicked-die income) is retired by spec 33 §2. **THE STAKE is
+> retired ENTIRELY** (owner call at D1 — plumbing removed in D2, not
+> rewired). The momentum wheel (Part 1) is absorbed into spec 33 §3's stance
+> chain — its landed-play gate and temporary-die persistence filter survive,
+> but its truth table does NOT: chain breaks now reset to **null** (owner
+> call, supersedes restart-at-played-color) and FREE plays no longer advance
+> the chain (spec 33 §3 rule 5 reverses this brief's Decision (1)). Part 3's
+> `sig-conviction-strike` repricing stands pending D3's economy derivation.
+
 > Agent-facing brief. Concise, opinionated, decisive. Ship without
 > asking; document judgment calls in the commit body.
 
