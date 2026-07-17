@@ -183,14 +183,20 @@ const FREE_KW_GLYPH: Record<string, string> = {
     FORETELL: '◉', TICK: '❋', CLEANSE: '✦', PIP: '⬡', STAGGER: '⚔',
     RECOIL: '▽', MILL: '⁇', RUPTURE: '❋',
 };
-function freeGlyphFor(card: CombatCard, sourceCard?: Card): string {
-    if (card.cardType === 'enchantment') return '❖';
-    if (card.cardType === 'disenchant') return '☠';
+/** The FREE glyph plus the KEYWORD that drives it — the key lets the face swap
+ *  the text rune for the effect's SILHOUETTE (glyphShapes.ts) when one exists. */
+function freeGlyphMeta(card: CombatCard, sourceCard?: Card): { glyph: string; key: string | null } {
+    if (card.cardType === 'enchantment') return { glyph: '❖', key: 'ENCHANT' };
+    if (card.cardType === 'disenchant') return { glyph: '☠', key: 'CURSE' };
     const r: CardRider | undefined = sourceCard?.free;
-    if (!r) return '';
-    if (r.applyEffect?.effectId) return glyphFor(r.applyEffect.effectId);
+    if (!r) return { glyph: '', key: null };
+    if (r.applyEffect?.effectId) {
+        const kw = keywordForEffect(r.applyEffect.effectId)
+            ?? r.applyEffect.effectId.replace(/^(debuff|buff)_/, '');
+        return { glyph: glyphFor(r.applyEffect.effectId), key: kw.toUpperCase() };
+    }
     const kw = riderPairs(r)[0]?.[0];
-    return kw ? (FREE_KW_GLYPH[kw] ?? '◆') : '';
+    return kw ? { glyph: FREE_KW_GLYPH[kw] ?? '◆', key: kw } : { glyph: '', key: null };
 }
 
 /** Option A type strip — stance + player-facing card type (CURSE for disenchant). */
@@ -364,6 +370,10 @@ export interface CombatCardFaceVM {
      *  the rail face). Derived from the free rider's effect / keyword; '' when
      *  the card has no free line. */
     freeGlyph: string;
+    /** The keyword behind `freeGlyph` (e.g. 'BLEED', 'GUARD'); the face uses it
+     *  to draw the effect's SILHOUETTE (glyphShapes.ts) instead of the text
+     *  rune when a shape exists. null = no free line. */
+    freeGlyphKey: string | null;
     categoryColor: string;
     stanceColor: string;
     heroText: string;              // POWER value in real units; '' = no honest number
@@ -1413,10 +1423,11 @@ export function faceStats(card: CombatCard, sourceCard?: Card, enemyDifficulty?:
     const kw = c.keyword ? c.keyword.toUpperCase() : null;
     // The authored FREE line (engine riderText) — never a fabricated chip.
     const free = freeLineText(card, sourceCard);
+    const freeGlyph = freeGlyphMeta(card, sourceCard);
     const base = {
         glyph: c.glyph, categoryColor: c.categoryColor, stanceColor,
         statusBase: null, statusAdv: null, statusDis: null,
-        ...freeRail(card, sourceCard), freeGlyph: freeGlyphFor(card, sourceCard),
+        ...freeRail(card, sourceCard), freeGlyph: freeGlyph.glyph, freeGlyphKey: freeGlyph.key,
         typeStrip: typeStripText(card),
     };
     switch (c.kind) {

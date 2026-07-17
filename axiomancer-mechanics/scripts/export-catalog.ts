@@ -154,24 +154,50 @@ const FREE_TXT_GLYPH: Record<string, string> = {
     tickOne: '❋', tickAllDots: '❋', cleanse: '✦', recoil: '▽', millCards: '⁇',
 };
 
-// The #5 rail FACE fields — ① the giant FREE glyph + intensity, ② the authored
-// PAID sentence (composed through the real engine, keywords bolded downstream).
-function cardFace(c: any): { freeGlyph: string; freeVal: string | null; paid: string } {
+// Rider field → the UPPERCASE face keyword the silhouette table keys off
+// (build-catalog.mjs GLYPH_SHAPES — the copy of mobile glyphShapes.ts).
+const FREE_RIDER_KW: Record<string, string> = {
+    guard: 'GUARD', barrier: 'GUARD', healHp: 'HEAL', drawCards: 'DRAW',
+    premises: 'PREMISE', sway: 'SWAY', souls: 'SOUL', foretell: 'FORETELL',
+    pips: 'PIP', stagger: 'STAGGER', tickOne: 'TICK', tickAllDots: 'TICK',
+    cleanse: 'CLEANSE', recoil: 'RECOIL', millCards: 'MILL',
+};
+// Effect id → face keyword, mirroring the mobile keywords map for the handful
+// of ids whose keyword isn't just the stripped id.
+const EFFECT_KW_OVERRIDE: Record<string, string> = {
+    debuff_kindling_ember: 'BLEED', debuff_nettle_sting: 'BLEED',
+    debuff_creeping_doom: 'DOOM', debuff_curse: 'MARK',
+};
+function effectKw(effectId: string): string {
+    const o = EFFECT_KW_OVERRIDE[effectId];
+    if (o) return o;
+    if (/mark$/.test(effectId)) return 'MARK';
+    return effectId.replace(/^(debuff|buff|tier\d)_/, '').toUpperCase();
+}
+
+// The #5 rail FACE fields — ① the giant FREE glyph + intensity (freeKw picks
+// the effect-shaped silhouette downstream), ② the authored PAID sentence
+// (composed through the real engine, keywords bolded downstream).
+function cardFace(c: any): { freeGlyph: string; freeKw: string | null; freeVal: string | null; paid: string } {
     const persistent = c.cardType === 'enchantment' || c.cardType === 'disenchant';
     let freeGlyph = '';
+    let freeKw: string | null = null;
     let freeVal: string | null = null;
     if (persistent) {
         freeGlyph = c.cardType === 'disenchant' ? '☠' : '❖';
+        freeKw = c.cardType === 'disenchant' ? 'CURSE' : 'ENCHANT';
         freeVal = `${FREE_ENCHANT_ROUNDS}r`;
     } else if (c.free?.applyEffect?.effectId) {
         const eff = lookupEffect(c.free.applyEffect.effectId);
         if (eff) {
             freeGlyph = effectGlyph({ id: eff.id, name: eff.name, type: eff.type, category: eff.category, payload: eff.payload }).glyph;
         }
+        freeKw = effectKw(c.free.applyEffect.effectId);
         freeVal = `${c.free.applyEffect.intensity ?? 1}`;
     } else if (c.free) {
         const key = Object.keys(FREE_TXT_GLYPH).find((k) => c.free[k] != null);
         freeGlyph = key ? FREE_TXT_GLYPH[key] : '◆';
+        freeKw = key ? FREE_RIDER_KW[key] ?? null : null;
         const num = riderText(c.free).match(/\d+/);
         freeVal = num ? num[0] : null;
     }
@@ -186,7 +212,7 @@ function cardFace(c: any): { freeGlyph: string; freeVal: string | null; paid: st
         }
         paid = s.replace(/^PAID(\s*\([^)]*\))?\s*—\s*/i, '').replace(/\s*Costs\s+1\s+die\.?\s*$/i, '').trim();
     }
-    return { freeGlyph, freeVal, paid };
+    return { freeGlyph, freeKw, freeVal, paid };
 }
 
 function cardStats(c: any): { chips: Chip[]; lines: string[] } {

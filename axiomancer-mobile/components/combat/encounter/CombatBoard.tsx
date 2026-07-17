@@ -50,6 +50,7 @@ import { armedReadValue, dieCanPowerCardVM, STANCE_COLORS } from '@/state/presen
 import { wheelNext, type WheelStance } from '@/state/combat/momentum';
 import type { CombatReadResult } from '@mechanics';
 import { TrashGlyph, LedgerMark } from '@/components/hazard/glyphs';
+import { glyphShapeFor } from '@/components/combat/glyphShapes';
 import { CombatCombatantPane, EffectChips, PlayerMedallion, COMBAT_HUD_HEIGHT, type CombatFx } from './CombatCombatantPane';
 import { CombatDie } from './CombatDie';
 
@@ -1509,7 +1510,10 @@ export const CombatCardFace = React.memo(function CombatCardFace({
     const boldNames = card.detail.keywords.map((k) => k.name);
     const freeInner = compactFree(f.freeValue ?? (f.freeHeroText || null));
     const hasFree = !!f.freeGlyph;
-    const railW = large ? 34 : 24;
+    // Effect-shaped silhouette for the FREE glyph (owner directive 2026-07-16);
+    // keywords without a shape keep the text rune.
+    const freeShape = glyphShapeFor(f.freeGlyphKey);
+    const railW = large ? 24 : 17;
     const glyphSize = large ? 62 : 40;
     const rarity = card.rarity ?? 'common';
     const rarColor = rarity === 'rare' ? '#9a6ad6' : rarity === 'uncommon' ? '#6b8eb0' : '#8a8273';
@@ -1528,11 +1532,18 @@ export const CombatCardFace = React.memo(function CombatCardFace({
                 </View>
                 {/* SCRIM — deep→transparent so the bottom text stays legible */}
                 <FaceScrim w={width} h={height} uid={card.uid} tint={band} />
-                {/* LEFT RAIL — stance spine carrying the vertical identity label */}
+                {/* LEFT RAIL — stance spine carrying the vertical identity label
+                    (STANCE · TYPE), centred so the full label always fits. */}
                 <View style={[styles.faceRail, { width: railW, backgroundColor: band }]} pointerEvents="none">
                     <View style={[styles.faceRailShade, { width: railW }]} />
                     <View style={styles.faceRailLabelWrap}>
-                        <Text style={[styles.faceRailLabel, large && styles.faceRailLabelLarge]} numberOfLines={1} allowFontScaling={false}>
+                        <Text
+                            style={[styles.faceRailLabel, large && styles.faceRailLabelLarge, { width: height - 16 }]}
+                            numberOfLines={1}
+                            adjustsFontSizeToFit
+                            minimumFontScale={0.75}
+                            allowFontScaling={false}
+                        >
                             {f.typeStrip}
                         </Text>
                     </View>
@@ -1551,7 +1562,13 @@ export const CombatCardFace = React.memo(function CombatCardFace({
                             </Defs>
                             <SvgRect x="0" y="0" width={glyphSize} height={glyphSize} fill={`url(#fh_${card.uid})`} />
                         </Svg>
-                        <Text style={[styles.freeGlyph, { fontSize: glyphSize, lineHeight: glyphSize, color: baseKw }]} allowFontScaling={false}>{f.freeGlyph}</Text>
+                        {freeShape ? (
+                            <Svg width={glyphSize * 0.86} height={glyphSize * 0.86} viewBox="0 0 24 24">
+                                <Path d={freeShape.d} fill={baseKw} fillRule={freeShape.evenodd ? 'evenodd' : 'nonzero'} opacity={0.95} />
+                            </Svg>
+                        ) : (
+                            <Text style={[styles.freeGlyph, { fontSize: glyphSize, lineHeight: glyphSize, color: baseKw }]} allowFontScaling={false}>{f.freeGlyph}</Text>
+                        )}
                         {freeInner ? (
                             <View style={[StyleSheet.absoluteFill, { alignItems: 'center', justifyContent: 'center' }]} pointerEvents="none">
                                 <Text style={[styles.freeInner, large && styles.freeInnerLarge]} allowFontScaling={false}>{freeInner}</Text>
@@ -1802,13 +1819,15 @@ const useStyles = makeStyles((AXM) => ({
         borderRightWidth: 1, borderRightColor: 'rgba(0,0,0,0.5)',
     },
     faceRailShade: { position: 'absolute', left: 0, bottom: 0, height: '55%', backgroundColor: 'rgba(0,0,0,0.28)' },
-    faceRailLabelWrap: { position: 'absolute', bottom: 16, left: 0, right: 0, alignItems: 'center', justifyContent: 'center' },
+    // Full-rail centred wrap: the rotated label spans (height − 16), so the
+    // whole STANCE · TYPE strip renders un-truncated at every card size.
+    faceRailLabelWrap: { ...StyleSheet.absoluteFillObject, alignItems: 'center', justifyContent: 'center' },
     faceRailLabel: {
-        width: 74, textAlign: 'center', transform: [{ rotate: '-90deg' }],
+        textAlign: 'center', transform: [{ rotate: '-90deg' }],
         fontFamily: FONTS.sans, fontSize: 8, letterSpacing: 2, color: 'rgba(255,255,255,0.92)',
         textShadowColor: 'rgba(0,0,0,0.6)', textShadowRadius: 2,
     },
-    faceRailLabelLarge: { width: 118, fontSize: 11, letterSpacing: 3 },
+    faceRailLabelLarge: { fontSize: 11, letterSpacing: 3 },
     // ① the giant FREE-effect glyph with its intensity centred INSIDE it.
     freeBadge: { position: 'absolute', alignItems: 'center', justifyContent: 'center' },
     freeGlyph: { textAlign: 'center', textShadowColor: 'rgba(0,0,0,0.9)', textShadowRadius: 4, textShadowOffset: { width: 0, height: 1 } },

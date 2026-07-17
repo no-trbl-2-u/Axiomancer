@@ -274,6 +274,63 @@ export function KwGlyph({
                     <path d="M12 7 V12 L16 14" strokeLinecap="round" />
                 </svg>
             );
+        // ── Effect-silhouette set (2026-07-16) — keep in sync with the mobile
+        // glyphShapes.ts table and the catalog's copy in build-catalog.mjs. ──
+        case 'mark':
+            return (
+                <svg viewBox="0 0 24 24" style={s} fill={color} fillRule="evenodd">
+                    <path d="M12 2 A10 10 0 1 0 12 22 A10 10 0 1 0 12 2 Z M12 5 A7 7 0 1 0 12 19 A7 7 0 1 0 12 5 Z M12 8.5 A3.5 3.5 0 1 0 12 15.5 A3.5 3.5 0 1 0 12 8.5 Z" />
+                </svg>
+            );
+        case 'draw':
+            return (
+                <svg viewBox="0 0 24 24" style={s} fill={color} fillRule="evenodd">
+                    <path d="M7 2 H17 A1.5 1.5 0 0 1 18.5 3.5 V20.5 A1.5 1.5 0 0 1 17 22 H7 A1.5 1.5 0 0 1 5.5 20.5 V3.5 A1.5 1.5 0 0 1 7 2 Z M8 4.5 H16 V11 H8 Z" />
+                </svg>
+            );
+        case 'tick':
+            return (
+                <svg viewBox="0 0 24 24" style={s} fill={color}>
+                    <path d="M6 2 H18 V6 L13.5 12 L18 18 V22 H6 V18 L10.5 12 L6 6 Z" />
+                </svg>
+            );
+        case 'foretell':
+            return (
+                <svg viewBox="0 0 24 24" style={s} fill={color} fillRule="evenodd">
+                    <path d="M12 5.5 C6 5.5 2 12 2 12 C2 12 6 18.5 12 18.5 C18 18.5 22 12 22 12 C22 12 18 5.5 12 5.5 Z M12 8.5 A3.5 3.5 0 1 0 12 15.5 A3.5 3.5 0 1 0 12 8.5 Z" />
+                </svg>
+            );
+        case 'premise':
+            return (
+                <svg viewBox="0 0 24 24" style={s} fill={color}>
+                    <path d="M7 2 H17 V22 L12 17.5 L7 22 Z" />
+                </svg>
+            );
+        case 'soul':
+            return (
+                <svg viewBox="0 0 24 24" style={s} fill={color}>
+                    <path d="M12 2 L14.2 9.8 L22 12 L14.2 14.2 L12 22 L9.8 14.2 L2 12 L9.8 9.8 Z" />
+                </svg>
+            );
+        case 'sway':
+            return (
+                <svg viewBox="0 0 24 24" style={s} fill={color}>
+                    <path d="M2 9 C4.8 5.8 8 5.8 11 8.8 C13.7 11.5 16.3 11.5 19 8.8 L22 10.3 C18.4 14.2 14.3 14.3 11 11 C8.4 8.4 6 8.6 3.6 11.3 Z M2 15 C4.8 11.8 8 11.8 11 14.8 C13.7 17.5 16.3 17.5 19 14.8 L22 16.3 C18.4 20.2 14.3 20.3 11 17 C8.4 14.4 6 14.6 3.6 17.3 Z" />
+                </svg>
+            );
+        case 'forge':
+        case 'enchant':
+            return (
+                <svg viewBox="0 0 24 24" style={s} fill={color}>
+                    <path d="M12 1 L15 5.5 L12 10 L9 5.5 Z M12 14 L15 18.5 L12 23 L9 18.5 Z M5.5 7.5 L8.5 12 L5.5 16.5 L2.5 12 Z M18.5 7.5 L21.5 12 L18.5 16.5 L15.5 12 Z" />
+                </svg>
+            );
+        case 'disenchant':
+            return (
+                <svg viewBox="0 0 24 24" style={s} fill={color} fillRule="evenodd">
+                    <path d="M12 2 C7.3 2 4 5.4 4 9.4 C4 12.3 5.7 14.5 8 15.6 L8 20 H10.2 L10.2 17.2 H11.2 L11.2 20 H12.8 L12.8 17.2 H13.8 L13.8 20 H16 L16 15.6 C18.3 14.5 20 12.3 20 9.4 C20 5.4 16.7 2 12 2 Z M8.8 8 A2 2 0 1 0 8.8 12 A2 2 0 1 0 8.8 8 Z M15.2 8 A2 2 0 1 0 15.2 12 A2 2 0 1 0 15.2 8 Z" />
+                </svg>
+            );
         case 'compound':
         case 'strip_buff':
             return (
@@ -408,9 +465,10 @@ export function CardFace({
     const scale = width / 200;
     const px = (n: number) => Math.round(n * scale * 10) / 10;
 
-    // The stance SPINE carries only the vertical identity; the FREE effect is the
-    // GIANT top-left glyph, the PAID effect the authored sentence at the foot.
-    const railW = px(26);
+    // The stance SPINE carries only the vertical identity (STANCE · TYPE); the
+    // FREE effect is the GIANT top-left glyph, the PAID effect the authored
+    // sentence at the foot. Skinnier per owner directive 2026-07-16.
+    const railW = px(18);
     const railDark = `color-mix(in srgb, ${band} 45%, #000)`;
     // Persistent cards (enchant / disenchant) have no dieless FREE line to badge.
     const persistent = card.cardType === 'enchantment' || card.cardType === 'disenchant';
@@ -501,8 +559,7 @@ export function CardFace({
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
-                    justifyContent: 'flex-end',
-                    paddingBottom: px(10),
+                    justifyContent: 'center',
                     zIndex: 2,
                 }}
             >

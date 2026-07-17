@@ -6,6 +6,7 @@
   "pricing": "persistent draw 1 per denied enemy turn ≈ 2 × ~5 denies gated, min-4 ≈ 12 → Axiom",
   "face": {
    "freeGlyph": "❖",
+   "freeKw": "ENCHANT",
    "freeVal": "3r",
    "paid": "DRAW 1 card each time your STAGGER denies an enemy turn."
   },
@@ -59,6 +60,7 @@
   "pricing": "next spell gains ECHO (≈ ×0.8 of an avg spell ≈ 5) + FREE mark (0.5) + dieBonus(draw ×0.6 = 1.2) ≈ 6.7 → Thesis",
   "face": {
    "freeGlyph": "◎",
+   "freeKw": "MARK",
    "freeVal": "1",
    "paid": "your next spell gains ECHO."
   },
@@ -113,6 +115,7 @@
   "pricing": null,
   "face": {
    "freeGlyph": "◎",
+   "freeKw": "MARK",
    "freeVal": "1",
    "paid": "mark i1 d2 (self)."
   },
@@ -171,6 +174,7 @@
   "pricing": "persistent +1 pip on every kindled/floating die ≈ 1.5 × ~6 forges, min-4 ≈ 12 → Axiom",
   "face": {
    "freeGlyph": "❖",
+   "freeKw": "ENCHANT",
    "freeVal": "3r",
    "paid": "Every KINDLEd or FORGEd die arrives with +1 PIP."
   },
@@ -228,6 +232,7 @@
   "pricing": null,
   "face": {
    "freeGlyph": "◆",
+   "freeKw": null,
    "freeVal": null,
    "paid": "backfire i1 d2 + lock the enemy stance + STAGGER 1."
   },
@@ -287,6 +292,7 @@
   "pricing": "persistent 1 HP per Soul gained (soul-gated drip) ≈ 1 × ~12 souls, min-4 ≈ 12 → Axiom",
   "face": {
    "freeGlyph": "❖",
+   "freeKw": "ENCHANT",
    "freeVal": "3r",
    "paid": "Drain 1 VITAE from the enemy for every SOUL you gain."
   },
@@ -344,6 +350,7 @@
   "pricing": null,
   "face": {
    "freeGlyph": "⬡",
+   "freeKw": "PIP",
    "freeVal": "1",
    "paid": "FORGE a dead X die into a WILD floating die (no X: +1 Conviction)."
   },
@@ -402,6 +409,7 @@
   "pricing": null,
   "face": {
    "freeGlyph": "❖",
+   "freeKw": "GUARD",
    "freeVal": "2",
    "paid": "Guard 8."
   },
@@ -459,6 +467,7 @@
   "pricing": null,
   "face": {
    "freeGlyph": "✦",
+   "freeKw": "SOUL",
    "freeVal": "1",
    "paid": "bleed i2 d1 (6/hit)."
   },
@@ -516,6 +525,7 @@
   "pricing": "engine text — while you hold 4+ Premises the enemy stays marked (Aporia)",
   "face": {
    "freeGlyph": "☠",
+   "freeKw": "CURSE",
    "freeVal": "3r",
    "paid": "While you hold 4+ PREMISEs, the enemy stays MARKed. Costs 1 die. Attaches to the enemy."
   },
@@ -569,6 +579,7 @@
   "pricing": null,
   "face": {
    "freeGlyph": "⚑",
+   "freeKw": "DRAW",
    "freeVal": "1",
    "paid": "poison i1 d2 + mark i1 d2 + OMEN — on hit: Guard 4 (2/play)."
   },
@@ -628,6 +639,7 @@
   "pricing": null,
   "face": {
    "freeGlyph": "⁇",
+   "freeKw": "MILL",
    "freeVal": "1",
    "paid": "RECALL 1 — its FREE line fires now."
   },
@@ -685,6 +697,7 @@
   "pricing": null,
   "face": {
    "freeGlyph": "▼",
+   "freeKw": "RAPPORT",
    "freeVal": "1",
    "paid": "rapport i1 d2 + SWAY 2."
   },
@@ -744,6 +757,7 @@
   "pricing": "persistent +1 intensity on applications while FALLEN ≈ 1.5 × ~7 gated ×0.5 ≈ 11 → Axiom",
   "face": {
    "freeGlyph": "❖",
+   "freeKw": "ENCHANT",
    "freeVal": "3r",
    "paid": "While FALLEN, your status applications land at +1 intensity."
   },
@@ -801,6 +815,7 @@
   "pricing": "engine text (Aporia). RETAINS the old clause (a fully-blocked attack",
   "face": {
    "freeGlyph": "☠",
+   "freeKw": "CURSE",
    "freeVal": "3r",
    "paid": "A fully-blocked (GUARD) attack STAGGERs the enemy a rung on its next telegraph. Costs 1 die. Attaches to the enemy."
   },
@@ -858,6 +873,7 @@
   "pricing": null,
   "face": {
    "freeGlyph": "◎",
+   "freeKw": "MARK",
    "freeVal": "1",
    "paid": "REARGUE — convert bleed↔poison, +1 intensity."
   },
@@ -915,6 +931,7 @@
   "pricing": null,
   "face": {
    "freeGlyph": "◉",
+   "freeKw": "FORETELL",
    "freeVal": "1",
    "paid": "RUPTURE 1 — its fuel ticks now, +1 Soul + FORETELL 1."
   },
@@ -974,6 +991,7 @@
   "pricing": "rapport i2 d2 (3) + heal 2 (0.65) + FREE sway 1 (0.3) ≈ 4.5 → Lemma",
   "face": {
    "freeGlyph": "∿",
+   "freeKw": "SWAY",
    "freeVal": "1",
    "paid": "rapport i2 d2."
   },
@@ -1032,6 +1050,7 @@
   "pricing": "engine text — every kindled/floating spend marks the enemy (Aporia)",
   "face": {
    "freeGlyph": "☠",
+   "freeKw": "CURSE",
    "freeVal": "3r",
    "paid": "Every KINDLEd or FORGEd die you spend MARKs the enemy. Costs 1 die. Attaches to the enemy."
   },
@@ -1085,6 +1104,7 @@
   "pricing": null,
   "face": {
    "freeGlyph": "⬡",
+   "freeKw": "PIP",
    "freeVal": "1",
    "paid": "FORGE a WILD floating die + the spent die BANKS to the Reserve."
   },
@@ -1143,6 +1163,7 @@
   "pricing": null,
   "face": {
    "freeGlyph": "❡",
+   "freeKw": "PREMISE",
    "freeVal": "1",
    "paid": "poison i1 d2 + +1 Premise (2/play)."
   },
@@ -1202,6 +1223,7 @@
   "pricing": null,
   "face": {
    "freeGlyph": "◎",
+   "freeKw": "MARK",
    "freeVal": "1",
    "paid": "bleed i2 d3 (6/hit)."
   },
@@ -1260,6 +1282,7 @@
   "pricing": "engine text — every hit omen marks the foe, rest of combat (Aporia)",
   "face": {
    "freeGlyph": "☠",
+   "freeKw": "CURSE",
    "freeVal": "3r",
    "paid": "Every OMEN that hits MARKs the foe. Costs 1 die. Attaches to the enemy."
   },
@@ -1313,6 +1336,7 @@
   "pricing": null,
   "face": {
    "freeGlyph": "◎",
+   "freeKw": "MARK",
    "freeVal": "1",
    "paid": "PROLONG +1 duration to ALL your DoTs."
   },
@@ -1370,6 +1394,7 @@
   "pricing": null,
   "face": {
    "freeGlyph": "◉",
+   "freeKw": "FORETELL",
    "freeVal": "1",
    "paid": "poison i1 d1 + mark i1 d2 + FORETELL 2 (2/play)."
   },
@@ -1429,6 +1454,7 @@
   "pricing": null,
   "face": {
    "freeGlyph": "⬡",
+   "freeKw": "PIP",
    "freeVal": "1",
    "paid": "Guard 5 + +2 pip to every Reserve die."
   },
@@ -1487,6 +1513,7 @@
   "pricing": "SWAY 6 x ECHO (engine echoFactor) + heal-4 rider (NOT echoed) + FREE",
   "face": {
    "freeGlyph": "∿",
+   "freeKw": "SWAY",
    "freeVal": "1",
    "paid": "SWAY 6 + ECHO."
   },
@@ -1543,6 +1570,7 @@
   "pricing": "persistent — every THORNS trigger also marks the enemy ≈ 1 × ~8 triggers, min-4 ≈ 12 → Axiom",
   "face": {
    "freeGlyph": "❖",
+   "freeKw": "ENCHANT",
    "freeVal": "3r",
    "paid": "Every THORNS reflection also marks the enemy."
   },
@@ -1600,6 +1628,7 @@
   "pricing": "persistent — SWAY no longer decays (≈ +1/turn saved) AND stacks",
   "face": {
    "freeGlyph": "❖",
+   "freeKw": "ENCHANT",
    "freeVal": "3r",
    "paid": "Your SWAY stops decaying, and each new gesture of it lands harder."
   },
@@ -1657,6 +1686,7 @@
   "pricing": null,
   "face": {
    "freeGlyph": "❖",
+   "freeKw": "GUARD",
    "freeVal": "3",
    "paid": "Guard 6 + RIPOSTE 3 (parry 2)."
   },
@@ -1715,6 +1745,7 @@
   "pricing": "mark i2 d1 (2, unresisted) + its expiry Soul (0.75) + FREE souls 2",
   "face": {
    "freeGlyph": "✦",
+   "freeKw": "SOUL",
    "freeVal": "2",
    "paid": "mark i2 d1."
   },
@@ -1768,6 +1799,7 @@
   "pricing": "engine text — every self-debuff you gain lands 1 stack on the enemy (Aporia)",
   "face": {
    "freeGlyph": "☠",
+   "freeKw": "CURSE",
    "freeVal": "3r",
    "paid": "Every self-debuff you take toward FALLEN also lands one stack on the enemy. Costs 1 die. Attaches to the enemy."
   },
@@ -1825,6 +1857,7 @@
   "pricing": "engine text — damage your defenses prevent becomes SWAY (Aporia)",
   "face": {
    "freeGlyph": "☠",
+   "freeKw": "CURSE",
    "freeVal": "3r",
    "paid": "Damage your defenses prevent is converted into SWAY. Costs 1 die. Attaches to the enemy."
   },
@@ -1882,6 +1915,7 @@
   "pricing": null,
   "face": {
    "freeGlyph": "❡",
+   "freeKw": "PREMISE",
    "freeVal": "1",
    "paid": "mark i1 d3 + poison i1 d4 + +2 Premises (2/play)."
   },
@@ -1942,6 +1976,7 @@
   "pricing": null,
   "face": {
    "freeGlyph": "❖",
+   "freeKw": "GUARD",
    "freeVal": "2",
    "paid": "thorns i2 d2 (self) + nettle sting i1 d2 (4 over its run)."
   },
@@ -2000,6 +2035,7 @@
   "pricing": null,
   "face": {
    "freeGlyph": "❡",
+   "freeKw": "PREMISE",
    "freeVal": "1",
    "paid": "mark i1 d2 + poison i1 d2 + +2 Premises (2/play)."
   },
@@ -2059,6 +2095,7 @@
   "pricing": null,
   "face": {
    "freeGlyph": "⁇",
+   "freeKw": "MILL",
    "freeVal": "1",
    "paid": "replay your last spell ×2."
   },
@@ -2117,6 +2154,7 @@
   "pricing": null,
   "face": {
    "freeGlyph": "❖",
+   "freeKw": "GUARD",
    "freeVal": "2",
    "paid": "bleed i1 d2 (self) + FORGE a WILD floating die + RECOIL 6."
   },
@@ -2176,6 +2214,7 @@
   "pricing": null,
   "face": {
    "freeGlyph": "⚑",
+   "freeKw": "DRAW",
    "freeVal": "1",
    "paid": "backfire i3 d3 + STAGGER 2."
   },
@@ -2235,6 +2274,7 @@
   "pricing": null,
   "face": {
    "freeGlyph": "❡",
+   "freeKw": "PREMISE",
    "freeVal": "1",
    "paid": "RUPTURE."
   },
@@ -2292,6 +2332,7 @@
   "pricing": "persistent +1 Premise on the first card each turn ≈ 0.8 × ~10 turns, min-4 law ≈ 12 → Axiom",
   "face": {
    "freeGlyph": "❖",
+   "freeKw": "ENCHANT",
    "freeVal": "3r",
    "paid": "+1 PREMISE on the first card you play each turn."
   },
@@ -2345,6 +2386,7 @@
   "pricing": "RUPTURE (4 + fuel) + 3 fuel per omen hit ≈ 13 with a played oracle engine → Axiom",
   "face": {
    "freeGlyph": "◉",
+   "freeKw": "FORETELL",
    "freeVal": "1",
    "paid": "RUPTURE (+3 fuel per omen hit)."
   },
@@ -2402,6 +2444,7 @@
   "pricing": "engine text — telegraphs enter play 1 rung lower, rest of combat (Aporia)",
   "face": {
    "freeGlyph": "☠",
+   "freeKw": "CURSE",
    "freeVal": "3r",
    "paid": "Enemy telegraphs enter play one STAGGER rung lower. Costs 1 die. Attaches to the enemy."
   },
@@ -2459,6 +2502,7 @@
   "pricing": null,
   "face": {
    "freeGlyph": "◆",
+   "freeKw": null,
    "freeVal": null,
    "paid": "backfire i2 d2."
   },
@@ -2517,6 +2561,7 @@
   "pricing": null,
   "face": {
    "freeGlyph": "⁇",
+   "freeKw": "MILL",
    "freeVal": "1",
    "paid": "mark i1 d2 + poison i1 d1 + ECHO (2/play)."
   },
@@ -2576,6 +2621,7 @@
   "pricing": null,
   "face": {
    "freeGlyph": "◎",
+   "freeKw": "MARK",
    "freeVal": "1",
    "paid": "RUPTURE + SIPHON 35% + RECALL 2 — its FREE line fires now."
   },
@@ -2635,6 +2681,7 @@
   "pricing": "persistent — the first spell each turn gains ECHO ≈ ×0.8 spell/turn × rest, min-4 ≈ 12 → Axiom",
   "face": {
    "freeGlyph": "❖",
+   "freeKw": "ENCHANT",
    "freeVal": "3r",
    "paid": "The first spell you cast each turn gains ECHO (fires twice)."
   },
@@ -2692,6 +2739,7 @@
   "pricing": null,
   "face": {
    "freeGlyph": "⁇",
+   "freeKw": "MILL",
    "freeVal": "1",
    "paid": "RECALL 1."
   },
@@ -2750,6 +2798,7 @@
   "pricing": "RUPTURE (4 + fuel 8, bonusPct 0.10 ≈ +0.004) − recoil 5 credit",
   "face": {
    "freeGlyph": "◎",
+   "freeKw": "MARK",
    "freeVal": "1",
    "paid": "RECOIL 5 + RUPTURE."
   },
@@ -2808,6 +2857,7 @@
   "pricing": "OMEN(draw 2 = 4 ×0.6 omen-odds = 2.4) + FREE foretell (0.35) + info value ≈ 4.4 → Lemma",
   "face": {
    "freeGlyph": "◉",
+   "freeKw": "FORETELL",
    "freeVal": "1",
    "paid": "OMEN — on hit: draw 2."
   },
@@ -2865,6 +2915,7 @@
   "pricing": null,
   "face": {
    "freeGlyph": "⬡",
+   "freeKw": "PIP",
    "freeVal": "1",
    "paid": "kindling ember i1 d3 + KINDLE (mind) (3 over its run)."
   },
@@ -2924,6 +2975,7 @@
   "pricing": null,
   "face": {
    "freeGlyph": "◎",
+   "freeKw": "MARK",
    "freeVal": "1",
    "paid": "poison i1 d4 (2/play)."
   },
@@ -2981,6 +3033,7 @@
   "pricing": null,
   "face": {
    "freeGlyph": "▼",
+   "freeKw": "RAPPORT",
    "freeVal": "1",
    "paid": "SWAY 3."
   },
@@ -3039,6 +3092,7 @@
   "pricing": null,
   "face": {
    "freeGlyph": "◎",
+   "freeKw": "MARK",
    "freeVal": "1",
    "paid": "bleed i2 d2 (6/hit)."
   },
@@ -3093,6 +3147,7 @@
   "pricing": "engine text — every ECHO / REPRISE drips 2 (echo-gated, §1 source 3) (Aporia)",
   "face": {
    "freeGlyph": "☠",
+   "freeKw": "CURSE",
    "freeVal": "3r",
    "paid": "Every ECHO or REPRISE drips 2 damage to the enemy. Costs 1 die. Attaches to the enemy."
   },
@@ -3150,6 +3205,7 @@
   "pricing": "engine text — DOUBLES the enemy's total DoT damage each round (a",
   "face": {
    "freeGlyph": "☠",
+   "freeKw": "CURSE",
    "freeVal": "3r",
    "paid": "Doubles the total POISON and BLEED damage the enemy takes each round. Costs 1 die. Attaches to the enemy."
   },
@@ -3207,6 +3263,7 @@
   "pricing": null,
   "face": {
    "freeGlyph": "◎",
+   "freeKw": "MARK",
    "freeVal": "1",
    "paid": "poison i1 d4 + bleed i1 d2 (self) (2/play)."
   },
@@ -3265,6 +3322,7 @@
   "pricing": null,
   "face": {
    "freeGlyph": "❖",
+   "freeKw": "GUARD",
    "freeVal": "3",
    "paid": "GUARD 10 (persists) + RIPOSTE 4 (parry 2)."
   },
@@ -3323,6 +3381,7 @@
   "pricing": "PERORATION at 6 → consume marks 3/stack + draw 2 + 2 Conviction ≈ 13 (CONCEDE at 8 — alt-win, §9) → Axiom",
   "face": {
    "freeGlyph": "❡",
+   "freeKw": "PREMISE",
    "freeVal": "1",
    "paid": "PERORATION at 6 (CONCEDE at 8)."
   },
@@ -3380,6 +3439,7 @@
   "pricing": "REAP 2 → KINDLE (2.5) + draw 2 (4) − soul cost 2 + rider soul 1 + FREE",
   "face": {
    "freeGlyph": "⚑",
+   "freeKw": "DRAW",
    "freeVal": "1",
    "paid": "REAP 2 — KINDLE (mind) — draw 2 · +1 Soul."
   },
@@ -3437,6 +3497,7 @@
   "pricing": null,
   "face": {
    "freeGlyph": "▼",
+   "freeKw": "RAPPORT",
    "freeVal": "1",
    "paid": "SWAY 3."
   },
@@ -3495,6 +3556,7 @@
   "pricing": "persistent always-revealed next stance + omen riders ×1.5 ≈ 12 (min-4 law) → Axiom",
   "face": {
    "freeGlyph": "❖",
+   "freeKw": "ENCHANT",
    "freeVal": "3r",
    "paid": "The next enemy stance is always revealed (FORETELL), and your OMENs hit harder."
   },
@@ -3552,6 +3614,7 @@
   "pricing": "spend ALL pips (+1 Guard per) + RUPTURE (3.5 fuel/pip, +50% burst) —",
   "face": {
    "freeGlyph": "◎",
+   "freeKw": "MARK",
    "freeVal": "1",
    "paid": "spend ALL pips (+1 Guard per pip) + RUPTURE (+3.5 fuel per pip) + refresh the spent die."
   },
@@ -3611,6 +3674,7 @@
   "pricing": null,
   "face": {
    "freeGlyph": "🩸",
+   "freeKw": "BLEED",
    "freeVal": "1",
    "paid": "REAP all — 4 per Soul + SIPHON 40%."
   },
@@ -3669,6 +3733,7 @@
   "pricing": "engine text — enemy afflictions expire 1 turn sooner (faster Soul churn) (Aporia)",
   "face": {
    "freeGlyph": "☠",
+   "freeKw": "CURSE",
    "freeVal": "3r",
    "paid": "Enemy afflictions expire one turn sooner (faster SOUL churn). Costs 1 die. Attaches to the enemy."
   },
@@ -3722,6 +3787,7 @@
   "pricing": null,
   "face": {
    "freeGlyph": "❖",
+   "freeKw": "GUARD",
    "freeVal": "2",
    "paid": "thorns i3 d2 (self)."
   },
@@ -3780,6 +3846,7 @@
   "pricing": null,
   "face": {
    "freeGlyph": "◆",
+   "freeKw": null,
    "freeVal": null,
    "paid": "backfire i2 d3 + STAGGER 1."
   },
@@ -3839,6 +3906,7 @@
   "pricing": "persistent +1 intensity on every bleed/poison application ≈ 1.5 × ~8 triggers × min-4 law ≈ 12 → Axiom",
   "face": {
    "freeGlyph": "❖",
+   "freeKw": "ENCHANT",
    "freeVal": "3r",
    "paid": "Every BLEED or POISON you apply lands at +1 intensity."
   },
@@ -3896,6 +3964,7 @@
   "pricing": null,
   "face": {
    "freeGlyph": "🩸",
+   "freeKw": "BLEED",
    "freeVal": "1",
    "paid": "RUPTURE 1 — its fuel ticks now, +2 Soul."
   },
@@ -3953,6 +4022,7 @@
   "pricing": null,
   "face": {
    "freeGlyph": "◆",
+   "freeKw": null,
    "freeVal": null,
    "paid": "STAGGER 1."
   },
