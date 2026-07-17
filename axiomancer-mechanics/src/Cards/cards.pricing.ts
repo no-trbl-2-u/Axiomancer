@@ -73,9 +73,18 @@ export const VERB_POINTS = Object.freeze({
     kindleWildBonus: 0.5,
     /** PIP, per pip granted. */
     pip: 1.5,
-    /** FORGE — the floating-die verb itself (spec: 5). */
+    /** FORGE — the floating-die verb itself (spec: 5). Spec 33 §6 reinterprets
+     *  the FLOATING grant as a TEMPORARY GOLD die (surge-class): it still floats
+     *  within the fight (joins the tray, never rerolls, persists across rounds
+     *  until spent) but is gone at combat end — so it keeps the within-combat
+     *  float premium (5, above KINDLE's 2.5) and DROPS the cross-combat
+     *  `forgePersistence` credit (D4, 2026-07-17). */
     forgeFloating: 5,
-    /** FORGE cross-combat persistence value (save-persisted, reroll-exempt). */
+    /** FORGE cross-combat persistence value (save-persisted, reroll-exempt).
+     *  RETIRED from the floating verbs at D4 (spec 33 §6: floating → temp gold,
+     *  combat-only) — no longer added to `forge_floating_die` / `float_x_die`.
+     *  Kept as the anchor the `concedeCapstone` "decisive persistent
+     *  state-change" comment still references. */
     forgePersistence: 3,
     /** FORGE premium when the floating die is WILD. */
     forgeWildBonus: 1,
@@ -121,14 +130,35 @@ export const VERB_POINTS = Object.freeze({
     conjure: 2,
     /** OMEN — declaring the prognostication glimpses the telegraph (info). */
     omenInfo: 1,
-    /** Reveal the next threat phase's hidden stance. */
+    /** Reveal the next threat phase's STANCE CHECK + reactive branch early.
+     *  Spec 33 §2 retired the hidden `enemyStance` read; the info verb is
+     *  REINTERPRETED (D4, 2026-07-17): everything telegraphs openly now, so what
+     *  a card buys is the EARLY sight of the next phase's `punishes`/`yields`
+     *  check (and the spec-29 branch it will take). Same info value (1.5) —
+     *  reinterpreted, not repriced (spec 33 §6 "reinterpret, never cut"). */
     revealStance: 1.5,
     /** LOCK STANCE — the enemy's next phase keeps its current stance. */
     lockStance: 2.5,
-    /** Die-manipulation verbs (refresh / reroll / bank / convert). */
+    // ── Die-manipulation verbs, re-fit for the spec-33 four-die pool (D4,
+    //    2026-07-17). The old single-draft model made a die-fix pivotal (one
+    //    die WAS the turn); the four-die pool makes any single die 1/4 of the
+    //    action economy — LESS pivotal — but the pool is MISS-heavy (colored
+    //    3/6 usable, gold 2/6), which keeps a reroll/convert live. The two
+    //    forces roughly offset, so the point values HOLD from the pre-33 table;
+    //    the semantics are reinterpreted below. // PLAYTEST-CALIBRATION (D7
+    //    ratifies against the flag-on matrix; the exact re-fit is a hypothesis
+    //    until then). ─────────────────────────────────────────────────────────
+    /** REFRESH — the powering die returns to `available` (one extra colored
+     *  play from the same die). */
     refreshDie: 2,
+    /** REROLL — reroll this card's MISS faces (spec 33 §4 valve 3; the honest,
+     *  no-guarantee library sibling of Press Fate). ~2.17 misses/round at stock
+     *  gear reroll to ~1 extra usable die — held at 2. */
     rerollSpent: 2,
+    /** BANK — the powering die goes to the Reserve (ports unchanged, §6). */
     bankSpentDie: 2,
+    /** CONVERT — the die returns REFRESHED as WILD: a premium over refresh
+     *  because a wild die beats the miss-heavy pool's off-color hard-fizzle. */
     convertDieColor: 2.5,
     /** +1 intensity on the statuses THIS play lands. */
     bonusIntensity: 1.5,
@@ -181,6 +211,34 @@ export const CONDITION_DISCOUNTS = Object.freeze({
 
 /** Self-cost credit: a printed cost refunds −0.75 × its point value. */
 export const SELF_COST_CREDIT = 0.75;
+
+/**
+ * D4 (spec 33 §7 D4 note, 2026-07-17) — the PRICING view of the DoT event
+ * clocks, re-derived against the four-die cadence. The engine's own forecast
+ * (`EXPECTED_TRIGGERS_PER_ROUND`, `Combat/effects.ts`) still reads **2** plays
+ * per round for the `card-played` clock — that constant also drives the LIVE
+ * RUPTURE burst / `computeRoundsToKill`, so moving it is a balance change D7
+ * ratifies, NOT a pricing re-fit. This table is the PRICING-ONLY view:
+ *
+ * - `card-played` → **1.83** — D3's measured realized cadence
+ *   (`plan/tuning/2026-07-17-d3-dice-economy.md`: ~1.83 PAID plays/round at
+ *   stock gear; FREE lines never tick this clock — `combat.engine.ts`
+ *   `fireClock('card-played')` fires once per PAID play), down from the WS3.3
+ *   ~2-plays estimate baked into the old lifetime. A fractional rate is priced
+ *   as whole ticks + one fractional remainder tick (`walkDotHp`).
+ * - `damage-instance` / `payoff` — inherited from the engine forecast
+ *   unchanged (BLEED is decay-limited and clock-invariant; payoff fires ~once).
+ *
+ * DELIBERATE divergence, flagged for D7: pricing a `card-played` DoT at the
+ * realized 1.83 while the engine forecasts 2 means a poison card prices ~8.5%
+ * BELOW the fuel the live RUPTURE preview reads off it — the conservative
+ * direction (never over-priced). D7 re-derives the engine forecast against the
+ * same cadence and closes the gap. // PLAYTEST-CALIBRATION
+ */
+export const PRICING_TRIGGERS_PER_ROUND = Object.freeze({
+    ...EXPECTED_TRIGGERS_PER_ROUND,
+    'card-played': 1.83,
+});
 
 // ─── Status pricing ──────────────────────────────────────────────────────────
 
@@ -244,7 +302,13 @@ function walkDotHp(
     if (!def || !dot) return 0;
     const mods = def.payload.dotModifiers;
     const eventClock = dotEventTrigger(dot);
-    const ticksPerRound = eventClock ? EXPECTED_TRIGGERS_PER_ROUND[eventClock] : 1;
+    const ticksPerRound = eventClock ? PRICING_TRIGGERS_PER_ROUND[eventClock] : 1;
+    // D4 (spec 33) — a FRACTIONAL event rate (card-played = 1.83) prices as
+    // whole ticks + one remainder tick weighted by the fraction. Integer rates
+    // (damage-instance = 2, payoff/round-clock = 1) keep `fracTick = 0` and are
+    // byte-identical to the pre-33 walk.
+    const wholeTicks = Math.floor(ticksPerRound);
+    const fracTick = ticksPerRound - wholeTicks;
     const rounds = mods?.calendarExpiry === false
         ? Math.max(duration, NO_CALENDAR_PRICING_ROUNDS)
         : duration;
@@ -255,10 +319,16 @@ function walkDotHp(
             ? dot.damagePerRound + Math.floor((r - 1) * (mods.rampFactor ?? 0.5))
             : dot.damagePerRound;
         const grownIntensity = mods?.growth === 'per-enemy-action' ? intensity + (r - 1) : intensity;
-        for (let t = 0; t < ticksPerRound; t++, tickNo++) {
+        for (let t = 0; t < wholeTicks; t++, tickNo++) {
             const tickIntensity = mods?.decaysPerTick ? grownIntensity - tickNo : grownIntensity;
             if (tickIntensity <= 0) return total; // BLEED washout — the instance is spent
             total += Math.floor(dpr * tickIntensity) * weightFn(r);
+        }
+        if (fracTick > 0) {
+            const tickIntensity = mods?.decaysPerTick ? grownIntensity - tickNo : grownIntensity;
+            if (tickIntensity <= 0) return total;
+            total += Math.floor(dpr * tickIntensity) * fracTick * weightFn(r);
+            tickNo += 1;
         }
     }
     return total;
@@ -389,12 +459,17 @@ export function scoreMechanic(mechanic: CardSpecialMechanic): number {
         }
         case 'bank_spent_die': return V.bankSpentDie;
         case 'forge_floating_die':
-            return V.forgeFloating + V.forgePersistence
+            // Spec 33 §6 (D4) — the floating grant is now a TEMPORARY GOLD die
+            // (combat-only): the cross-combat `forgePersistence` credit is gone;
+            // the within-combat float premium (5) stays.
+            return V.forgeFloating
                 + (mechanic.color === 'wild' ? V.forgeWildBonus : 0);
         case 'float_x_die':
-            // TRANSMUTE — a full wild FORGE, discounted for needing a dead X in
-            // the tray (fate-conditional), floored by the +1 Conviction fallback.
-            return (V.forgeFloating + V.forgePersistence + V.forgeWildBonus) * CONDITION_DISCOUNTS.fate
+            // TRANSMUTE — a wild FORGE fed by a MISS die in the tray (spec 33:
+            // misses are the new dead faces), discounted for that fate
+            // condition, floored by the +1 Conviction fallback. Combat-only temp
+            // gold now, so no `forgePersistence` (D4, spec 33 §6).
+            return (V.forgeFloating + V.forgeWildBonus) * CONDITION_DISCOUNTS.fate
                 + V.conviction * (1 - CONDITION_DISCOUNTS.fate);
         case 'stagger': return mechanic.rungs * V.staggerPerRung;
         case 'lock_stance': return V.lockStance;
@@ -503,6 +578,19 @@ export function scoreCard(card: Card): number {
     if (card.fallen) pts += scoreRider(card.fallen.rider) * CONDITION_DISCOUNTS.fallen;
     // WS4.2 — a combat-state synergy condition (ledger-read gate) prices at
     // the threshold ×0.5 discount, per the ratified item-4 direction.
+    //
+    // D4 note (spec 33 §2, F2 caveat — 2026-07-17): a future STANCE-CHECK
+    // synergy (a rider gated on "you end this phase in the `yields` stance")
+    // prices through THIS same threshold ×0.5 gate — it is a state-read
+    // condition, not a new discount tier. But it is priced CONSERVATIVELY and
+    // NOT yet exercised: per D3 finding F2 no enemy authors a `stanceCheck`
+    // field, so yield income is DARK and stance-check-synergy pricing cannot be
+    // playtest-validated. When stance checks land (enemy content, out of D4
+    // scope) a `stance-check` `SynergyStatePredicate` kind slots in here at
+    // ×0.5. There are no MOMENTUM/SURGE card RIDERS to price today either —
+    // momentum/surge are engine state (spec 33 §3), advanced by any PAID play,
+    // with no card verb that grants or reads them; a card that reroll/convert/
+    // taps into them uses the die-manipulation verbs priced above.
     if (card.synergy?.statePredicate && card.synergy.rider) {
         pts += scoreRider(card.synergy.rider) * CONDITION_DISCOUNTS.threshold;
     }

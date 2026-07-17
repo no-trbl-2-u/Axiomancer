@@ -106,3 +106,32 @@ If promotion ever restores the row, it starts at `+???`, not `????`.
 |---|---|---|---|---|
 | PROLONG N | add N turns of duration to ALL your DoTs on the enemy | — | `????` T:n/a | phase 29: renamed from FESTER (name collided with "an infected wound" — read as another DoT species, not a duration extender); sole carrier festering-argument, orphan-tier support (1 card) |
 | REARGUE iN | convert the enemy's Bleed↔Poison, +N intensity as it flips | — | `????` T:n/a | phase 29: renamed from TRANSMUTE (the word was double-booked with the unrelated X→WILD die-conversion sense, which stays inside FORGE's gloss); sole carrier currys-conversion, orphan-tier support (1 card) |
+
+## Die gear (spec 33 §6 — 3, registered D4 2026-07-17)
+
+The Upgradeable-Dice progression vocabulary: the die-face payload and the
+two blacksmith upgrade verbs. Registered ahead of their carriers — the die
+gear + blacksmith surfaces land in D5, so all three are UNEXERCISED today
+(gate `????`; the mobile guard test pins their glosses so the first gear
+card face never falls through). Payload CHANGES are gear swaps, not
+keyworded services (owner-lock D1). Prior art: the corpus still lacks the
+five dice-builder games (Dice Forge / Dice Throne / etc. — wishes filed
+2026-07-17, D1 §9.5); face-upgrade analogues remain remembered-and-labeled
+`(memory)` until synced.
+
+| keyword | semantics | Dawncaster analogues (receipts) | gate (E/P/D/T) | notes |
+|---|---|---|---|---|
+| SPECIAL | a die's special face powers a card of its color AND grants Conviction; the equipped gear sets how much (default 2◆) | — (dice-builder resource faces — `(memory)`, wish-filed) | `????` T:n/a | spec 33 §1/§6. Fires on USE, not on roll (PROVISIONAL, owner D1). "SPECIAL" is the most generic name in the registry — rename opportunity noted D1, deferred. FORGE special-amplifier enchants (`dice-valves-33` sandbox) increase the fired payload, they do NOT change what a special does |
+| HONE | blacksmith upgrade: add a mana face to a die's gear | Quacks upgrade economy — kb:boardgames/the-quacks-of-quedlinburg/rules/overview.okf.md (src-003, secondary, high): buying better chips to improve your randomizer over runs is the closest "upgrade the bag/pool, not the play" analogue; face-swap specifics are dice-builder territory `(memory)` | `????` T:n/a | spec 33 §6. Cap unchanged: ≥1 miss per colored die — whiff is never HONE-able away |
+| TEMPER | blacksmith upgrade: turn a mana face into a special face | Quacks upgrade economy — same receipt as HONE (the "spend to strengthen the randomizer" frame); the special-face target has no Dawncaster template | `????` T:n/a | spec 33 §6. Caps: ≤2 special / ≥1 miss per colored die; Gold ≤1 special |
+
+## Spec 33 reinterpretations (D4 2026-07-17 — no new rows)
+
+- **FORGE / KINDLE** semantics ported but reframed: the FLOATING grant is now
+  a TEMPORARY GOLD die (surge-class, combat-only — spec 33 §6), so the die
+  verbs dropped the cross-combat `forgePersistence` credit (`cards.pricing.ts`);
+  the utility FORGE row's gloss re-word (floating→temp gold) is a D6 render task.
+- **revealStance** (the read rider on the oracle FREE lines) is REINTERPRETED,
+  not retired: the hidden `enemyStance` read is gone (§2), so it now reveals the
+  next phase's stance CHECK + reactive branch early. Same 1.5-pt info value —
+  no reprice, no card re-author.

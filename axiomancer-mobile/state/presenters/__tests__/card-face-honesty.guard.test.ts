@@ -17,7 +17,7 @@
 import { describe, it, expect } from '@jest/globals';
 import { getCard, getCardById, cardLibrary, lookupEffect } from '@mechanics';
 import { faceStats, detailStats } from '@/state/presenters/combat-encounter.engine';
-import { keywordsInPersistentText, keywordForEffect, SYSTEM_GLOSSARY } from '@/state/combat/keywords';
+import { keywordsInPersistentText, keywordForEffect, keywordGloss, SYSTEM_GLOSSARY } from '@/state/combat/keywords';
 import { glyphShapeFor } from '@/components/combat/glyphShapes';
 
 describe('card-face honesty guard', () => {
@@ -220,6 +220,16 @@ describe('card-face honesty guard', () => {
             }
         }
         expect(offenders).toEqual([]);
+    });
+
+    it('spec 33 die-gear keywords (SPECIAL/HONE/TEMPER) resolve a gloss — a gear card can never fall through', () => {
+        // D4 (spec 33 §6, 2026-07-17): the blacksmith/die-gear vocabulary is
+        // registered ahead of its card carriers (die gear + blacksmith land in
+        // D5). Pinning the glosses here means the first card face that prints
+        // SPECIAL, HONE, or TEMPER resolves a keyword chip instead of the
+        // ambiguous PAID fallback the rest of this file guards against.
+        const missing = ['Special', 'Hone', 'Temper'].filter(kw => !keywordGloss(kw));
+        expect(missing).toEqual([]);
     });
 
     it('every headlined PAID keyword has a glossary definition (the "description above the card")', () => {

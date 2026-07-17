@@ -80,10 +80,12 @@ describe('pricing lint — every spell lands in its rank band', () => {
 });
 
 describe('pricing table — pinned anchors from the spec §4 arithmetic (WS3.5 clock pricing)', () => {
-    it('poison i1 d4 prices its card-played clock: ramp 2,2,3,3 × 2 ticks/round = 20', () => {
-        // WS3.3 (spec 32 §12 #3): POISON ticks on the card-played clock —
-        // EXPECTED_TRIGGERS_PER_ROUND 2 — so the printed lifetime doubles.
-        expect(dotLifetimeHp('debuff_poison', 1, 4)).toBe(20);
+    it('poison i1 d4 prices its card-played clock at the D3 realized 1.83 cadence (spec 33 D4)', () => {
+        // D4 (spec 33 §7 D4 note): the card-played clock is re-derived from the
+        // WS3.3 ~2-plays estimate to D3's measured 1.83 PAID plays/round. Ramp
+        // per round 2,2,3,3 × 1.83 ticks = 18.3 (was 20). Pricing-local: the
+        // engine's own forecast (EXPECTED_TRIGGERS_PER_ROUND) still reads 2.
+        expect(dotLifetimeHp('debuff_poison', 1, 4)).toBeCloseTo((2 + 2 + 3 + 3) * 1.83, 4);
     });
 
     it('bleed decays 1 intensity per tick and washes out (i2 d2 = 6 + 3 = 9 on ANY clock)', () => {
@@ -104,13 +106,14 @@ describe('pricing table — pinned anchors from the spec §4 arithmetic (WS3.5 c
         expect(1 / (1 - DOT_TEMPO_SURVIVAL)).toBeCloseTo(4, 2);
     });
 
-    it('phase 36b — a RAMP (poison i1 d4) is discounted: printed 20 → weighted 12.91', () => {
-        // per-round HP 4,4,6,6 (ramp puts the big ticks LATE) × geometric
-        // weights 1, 0.75, 0.5625, 0.421875 = 4 + 3 + 3.375 + 2.531 = 12.91.
+    it('phase 36b — a RAMP (poison i1 d4) is discounted: printed 18.3 → weighted 11.81 (spec 33 D4)', () => {
+        // D4: per-round base 2,2,3,3 × the 1.83 card-played cadence, each round
+        // discounted by the geometric tempo weight 1, 0.75, 0.5625, 0.421875:
+        // 1.83 × (2 + 1.5 + 1.6875 + 1.265625) = 11.81.
         const p = DOT_TEMPO_SURVIVAL;
-        const expected = 4 * 1 + 4 * p + 6 * p ** 2 + 6 * p ** 3;
+        const expected = 1.83 * (2 * 1 + 2 * p + 3 * p ** 2 + 3 * p ** 3);
         expect(dotTempoWeightedHp('debuff_poison', 1, 4)).toBeCloseTo(expected, 4);
-        expect(dotTempoWeightedHp('debuff_poison', 1, 4)).toBeCloseTo(12.91, 2);
+        expect(dotTempoWeightedHp('debuff_poison', 1, 4)).toBeCloseTo(11.81, 2);
         // strictly below the printed lifetime — the reprice is a pure discount.
         expect(dotTempoWeightedHp('debuff_poison', 1, 4))
             .toBeLessThan(dotLifetimeHp('debuff_poison', 1, 4));
@@ -167,12 +170,12 @@ describe('pricing table — pinned anchors from the spec §4 arithmetic (WS3.5 c
 
     it('the starter pair prices at its authored comments (regression anchors)', () => {
         const slipperySlope = spells.find(s => s.id === 'slippery-slope')!;
-        // phase 36b: poison i1 d4 is a RAMP (big ticks at rounds 3-4) so the
-        // tempo horizon discounts it hard — printed lifetime 20 → tempo-weighted
-        // 12.91, ÷3 = 4.30 + FREE MARK seed i1 d1 (0.75) = 5.05. Was 7.42 at the
-        // printed lifetime; the reprice corrects an OVERPAY (the deck never
-        // collects a 6-round ramp before the ~4-round death clock) and moves the
-        // card DOWN from its old near-ceiling toward mid-band.
+        // phase 36b + spec 33 D4: poison i1 d4 is a RAMP (big ticks at rounds
+        // 3-4) so the tempo horizon discounts it hard, and D4 re-derives the
+        // card-played cadence to 1.83 — printed lifetime 18.3 → tempo-weighted
+        // 11.81, ÷3 = 3.94 + FREE MARK seed i1 d1 (0.75) = 4.69 (was 5.05 at the
+        // 2-play cadence). Still comfortably mid-band; the assertion tracks the
+        // live function, so this stays true through the re-derivation.
         expect(scoreCard(slipperySlope))
             .toBeCloseTo(dotTempoWeightedHp('debuff_poison', 1, 4) / 3 + 0.75, 2);
         const brace = spells.find(s => s.id === 'brace-for-impact')!;

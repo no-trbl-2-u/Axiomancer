@@ -146,12 +146,21 @@ describe('sandbox registry — library-card overrides', () => {
 describe('sandbox sets — the registry after the post-v3 reset', () => {
     it('carries the WS7.2 chooseX + WS3.4 doom + WS2.1 conjure + WS4 theme-role + WS5.2 sequencing + WS6.2 bridge sets (pre-v3 experiment sets stayed retired; WS2.2 free-line-conversions retired 2026-07-12, superseded by the Phase 30 full library pass)', () => {
         const expected = [
+            'dice-valves-33',
             'chooseX-vein', 'doom-species', 'conjure-exercise',
             'roles-forge', 'roles-bulwark', 'roles-charm', 'roles-harvest',
             'sequencing-microset', 'bridge-rewards',
         ];
         expect(Object.keys(SANDBOX_CARD_SETS)).toEqual(expected);
         expect(listSandboxSets().map(s => s.id)).toEqual(expected);
+        // Spec 33 §4 — one dice-interaction valve per non-Forge theme (9) + the
+        // FORGE special-amplifier enchant (deep coverage of the amplifier hook
+        // in upgradeable-dice.engine.test.ts).
+        expect(SANDBOX_CARD_SETS['dice-valves-33'].cards.map(c => c.id)).toEqual([
+            'recurring-symptom', 'break-the-tempo', 'second-take', 'bleed-for-it',
+            'bank-the-yield', 'hold-the-line', 'restate-the-point', 'second-sight',
+            'change-of-heart', 'forge-masters-stamp',
+        ]);
         expect(SANDBOX_CARD_SETS['chooseX-vein'].cards.map(c => c.id)).toEqual(['the-open-vein']);
         expect(SANDBOX_CARD_SETS['doom-species'].cards.map(c => c.id)).toEqual(['debt-of-days']);
         expect(SANDBOX_CARD_SETS['conjure-exercise'].cards.map(c => c.id)).toEqual(['foundry-sprite', 'corollary']);

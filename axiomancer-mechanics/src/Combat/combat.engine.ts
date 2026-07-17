@@ -1076,10 +1076,16 @@ function applyStanceAndMomentumV2(
             ?? (preState.reserve ?? []).find(d => d.id === played.dieId);
         if (preDie?.face === 'special' && preDie.color !== 'x') {
             const gear = activeDieGear(preState, preDie.color as 'heart' | 'body' | 'mind' | 'wild');
-            const conviction = Math.min(CONVICTION_CAP, state.conviction + gear.specialConviction);
+            // Spec 33 §6 (D4) — FORGE special-amplifier enchants raise the fired
+            // payload WITHOUT changing what the special does (owner-lock D1):
+            // each active amplifier adds +1◆ on top of the gear payload. Wired
+            // by card id, exactly like the anvil-of-form / entropy-tax passives.
+            const specialAmp = zoneHas(state, 'forge-masters-stamp') ? 1 : 0;
+            const granted = gear.specialConviction + specialAmp;
+            const conviction = Math.min(CONVICTION_CAP, state.conviction + granted);
             if (conviction > state.conviction) {
                 state = { ...state, conviction };
-                events.push({ kind: 'special-fired', dieId: preDie.id, conviction: gear.specialConviction, total: conviction });
+                events.push({ kind: 'special-fired', dieId: preDie.id, conviction: granted, total: conviction });
                 events.push({ kind: 'conviction-gained', amount: conviction - transition.state.conviction, total: conviction, reason: 'effect' });
             }
         }

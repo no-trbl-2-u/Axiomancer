@@ -34,8 +34,12 @@ import type {
 /** The baseline signature kit available to every player (Spec 26b §4). */
 export const SIGNATURE_SKILLS: Record<SignatureSkillId, SignatureSkill> = {
     'sig-read-opponent': {
+        // Spec 33 §6 (D4, 2026-07-17): the hidden-stance read is retired (§2 —
+        // everything telegraphs openly). Reinterpreted: buy the NEXT phase's
+        // stance check (punish/yield) and reactive branch EARLY, before you
+        // commit the play that sets your stance. Cost re-derived to 1◆ (D3).
         id: 'sig-read-opponent', name: 'Read the Opponent', kind: 'scout', cost: 1, magnitude: 0,
-        description: 'Reveal the current and next phase stance — buy certainty on your read. Cheap; cast it early.',
+        description: "Reveal the next phase's stance check and reactive branch early — see its punish/yield and how it answers your play before you commit. Cheap; cast it early.",
     },
     'sig-press-the-point': {
         id: 'sig-press-the-point', name: 'Press Fate', kind: 'reroll', cost: 4, magnitude: 0,

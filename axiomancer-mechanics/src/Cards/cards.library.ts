@@ -224,9 +224,10 @@ const exordium: Card = {
     tier: 1, rank: 1, cardType: 'spell',
     targetType: 'enemy',
     paidSummary: 'Afflict with POISON 1 for 2 turns. Gain 1 PREMISE and DRAW 1.',
-    // pts (WS10.1 KW-1 fold, 2026-07-11 — argument-wound folded into POISON):
-    // poison i1 d2 card-played clock (lifetime 2×(2+2)=8 → 2.67) + 1 Premise
-    // (0.8) + draw rider (2) + FREE premise (0.8) = 6.27 → Doxa
+    // pts (WS10.1 KW-1 fold, 2026-07-11 — argument-wound folded into POISON;
+    // spec 33 D4 re-derives the card-played cadence 2 → 1.83): poison i1 d2
+    // card-played clock (lifetime 1.83×(2+2)=7.3, tempo-weighted ÷3 ≈ 2.1) +
+    // 1 Premise (0.8) + draw rider (2) + FREE premise (0.8) ≈ 5.7 → Doxa
     free: { premises: 1 },
     combatEffects: [{ effectId: 'debuff_poison', appliedTo: 'opponent', duration: 2 }],
     specialMechanics: [{ kind: 'premise', count: 1 }, { kind: 'rider', rider: { drawCards: 1 } }],
@@ -248,8 +249,9 @@ const openingStatement: Card = {
     targetType: 'enemy',
     paidSummary: 'MARK 1 for 2 turns. POISON 1 for 2 turns. Gain 2 PREMISES.',
     // pts (WS10.1 KW-1 fold, 2026-07-11 — argument-wound folded into POISON,
-    // duration tuned 3 → 2 for the card-played clock): mark d2 (1.5) + poison
-    // i1 d2 (8 → 2.67) + 2 Premises (1.6) + FREE premise (0.8) = 6.57 → Lemma
+    // duration tuned 3 → 2 for the card-played clock; spec 33 D4: cadence
+    // 2 → 1.83): mark d2 (1.5) + poison i1 d2 (lifetime 7.3, tempo ÷3 ≈ 2.1)
+    // + 2 Premises (1.6) + FREE premise (0.8) ≈ 6.0 → Lemma
     free: { premises: 1 },
     combatEffects: [
         { effectId: 'debuff_mark', appliedTo: 'opponent', duration: 2 },
@@ -275,9 +277,10 @@ const mountingCase: Card = {
         'Afflict with MARK 1 for 3 turns and POISON 1 for 4 turns. Gain 2 ' +
         'PREMISES.',
     // pts (WS10.1 KW-1 fold, 2026-07-11 — argument-wound folded into POISON,
-    // intensity tuned 2 → 1 for the card-played clock): mark d3 (2.25) +
-    // poison i1 d4 (2×(2+2+3+3)=20 → 6.67) + 2 Premises (1.6) + FREE premise
-    // (0.8) + threshold(+1 premise x 0.5 = 0.4) = 11.72 -> Thesis
+    // intensity tuned 2 → 1 for the card-played clock; spec 33 D4: cadence
+    // 2 → 1.83): mark d3 (2.25) + poison i1 d4 (lifetime 1.83×10=18.3,
+    // tempo-weighted 11.8 ÷3 ≈ 3.9) + 2 Premises (1.6) + FREE premise (0.8) +
+    // threshold(+1 premise x 0.5 = 0.4) ≈ 9.0 -> Thesis
     free: { premises: 1 },
     combatEffects: [
         { effectId: 'debuff_mark', appliedTo: 'opponent', duration: 3 },
@@ -442,13 +445,15 @@ const bootstrapLoop: Card = {
     tier: 2, rank: 3, cardType: 'spell',
     targetType: 'self',
     paidSummary:
-        'FORGE a dead X die into a WILD floating die. With no X to revive, ' +
-        'gain +1 Conviction instead.',
-    // pts (phase 30): TRANSMUTE dead X → WILD floating ((5+3+1)×0.7 + 1×0.3 =
-    // 6.6) + FREE PIP 1 (1.5, forge's currency, replaces conviction — which
-    // is a system token, not a registry keyword) + threshold(pip 1.5 ×0.5 =
-    // 0.75) ≈ 8.85 — fits the 4.5-13 uncommon band for rank 3. (Dice-law
-    // rework 2026-07-09: KINDLE wild swapped for float_x_die.)
+        'FORGE a miss die into a temporary WILD gold die. With no miss to ' +
+        'revive, gain +1 Conviction instead.',
+    // pts (spec 33 D4 re-word — floating → temporary gold die, combat-only, so
+    // the cross-combat persistence credit is dropped): TRANSMUTE miss → WILD
+    // temp gold ((5+1)×0.7 + 1×0.3 = 4.5) + FREE PIP 1 (1.5, forge's currency,
+    // replaces conviction — which is a system token, not a registry keyword) +
+    // threshold(pip 1.5 ×0.5 = 0.75) ≈ 6.75 — fits the 4.5-13 uncommon band for
+    // rank 3. (Dice-law rework 2026-07-09: KINDLE wild swapped for float_x_die;
+    // 2026-07-17: dead X reframed as a miss die per spec 33 §6.)
     free: { pips: 1 },
     specialMechanics: [{ kind: 'float_x_die' }],
     threshold: { color: 'mind', count: 2, rider: { pips: 1 } },
@@ -469,13 +474,14 @@ const exNihilo: Card = {
     tier: 2, rank: 4, cardType: 'spell',
     targetType: 'self',
     paidSummary:
-        'FORGE a WILD floating die. The die spent on this card banks to your ' +
-        'Reserve at 0 PIPS if a slot is free.',
-    // pts (phase 30): FORGE floating WILD (5 + persistence 3 + wild bonus 1 =
-    // 9) + BANK own powering die (2) + FREE PIP 1 (1.5, forge's currency,
-    // replaces conviction) = 12.5 -- fits the 4.5-13 Thesis/Theorem band for
-    // rank 4. The threshold's conditional +1 pip is dropped as redundant now
-    // that the FREE line guarantees one unconditionally every play.
+        'FORGE a temporary WILD gold die. The die spent on this card banks to ' +
+        'your Reserve at 0 PIPS if a slot is free.',
+    // pts (spec 33 D4 re-word — floating → temporary gold die, combat-only, so
+    // the cross-combat persistence credit is dropped): FORGE temp gold WILD
+    // (5 + wild bonus 1 = 6) + BANK own powering die (2) + FREE PIP 1 (1.5,
+    // forge's currency, replaces conviction) = 9.5 -- fits the 4.5-13
+    // Thesis/Theorem band for rank 4. The threshold's conditional +1 pip is
+    // dropped as redundant now that the FREE line guarantees one every play.
     free: { pips: 1 },
     specialMechanics: [
         { kind: 'forge_floating_die', color: 'wild' },
@@ -513,9 +519,10 @@ const theOvertake: Card = {
     // instead — still a real theme-currency deposit under the FREE-currency
     // law, just not forge-specific on this particular finisher.
     //
-    // CAVEAT (verified in combat.engine.ts): a FLOATING die is spent-and-gone-
-    // forever by design -- refresh_die only returns the powering die to the
-    // pool when Overtake is powered by a RESERVE die.
+    // CAVEAT (verified in combat.engine.ts): a temporary gold die (spec 33 §6:
+    // the reinterpreted floating grant) is spent-and-gone-for-this-combat by
+    // design -- refresh_die only returns the powering die to the pool when
+    // Overtake is powered by a RESERVE die.
     free: { applyEffect: { effectId: 'debuff_mark', intensity: 1, duration: 1 } },
     specialMechanics: [
         { kind: 'spend_all_pips', guardPerPip: 1 },
@@ -597,12 +604,12 @@ const sweetPoison: Card = {
     tier: 2, rank: 2, cardType: 'spell',
     targetType: 'enemy',
     paidSummary: 'Afflict with POISON 1 for 4 turns. BLEED 1 for 2 turns on yourself.',
-    // pts (WS3.5 clock re-price, 2026-07-11 — intensity tuned 2 → 1: i1 on
-    // the card-played clock prints the SAME 20 HP lifetime the old i2 round
-    // clock did; phase 30: FREE self-MARK seed i1 d1 replaces the retired
-    // TICK): poison i1 d4 (20 → 6.67) − self-bleed i1 d2 credit
-    // (−0.75×1 = −0.75) + FREE self-mark 0.6 = 6.52 → Lemma (deliberately
-    // rich — the akratic bargain)
+    // pts (WS3.5 clock re-price, 2026-07-11 — intensity tuned 2 → 1; phase 30:
+    // FREE self-MARK seed i1 d1 replaces the retired TICK; spec 33 D4 re-derives
+    // the card-played cadence 2 → 1.83): poison i1 d4 (lifetime 18.3,
+    // tempo-weighted 11.8 ÷3 ≈ 3.9) − self-bleed i1 d2 credit (−0.75×1 = −0.75)
+    // + FREE self-mark 0.6 ≈ 3.8 → Lemma (deliberately rich — the akratic
+    // bargain)
     free: { applyEffect: { effectId: 'debuff_mark', intensity: 1, duration: 1, to: 'self' } },
     combatEffects: [
         { effectId: 'debuff_poison', appliedTo: 'opponent', intensity: 1 },
@@ -680,18 +687,27 @@ const pactOfAkrasia: Card = {
     tier: 3, rank: 5, cardType: 'spell',
     targetType: 'self',
     paidSummary:
-        'BLEED 1 for 2 turns on yourself. FORGE a WILD floating die, then ' +
-        'RECOIL 6.',
-    // pts (phase 30): FORGE wild floating (6) + persistence − recoil 6 (−1.5)
-    // − self-bleed credit (−1.3) + wild premium + FREE RECOIL 1 → GUARD 2
-    // (akrasia's "sin as currency": pay 1 HP for 2 Guard, replaces the bare
-    // chip guard) ≈ 13.1 → Axiom
-    // phase 32 part 3 (prose only, no numeric change): the FREE line's RECOIL 1
-    // also posts to the per-combat DEBT ledger alongside its already-priced 2
-    // Guard — several plays bank one ledger tier (see AKRASIA_DEBT_TIER_HP).
+        'BLEED 1 for 2 turns on yourself. FORGE a temporary WILD gold die and ' +
+        'bank the spent die, then RECOIL 6.',
+    // pts (spec 33 D4 re-author): the FORGE grant is now a temporary gold die
+    // (combat-only), so it lost the cross-combat persistence credit (9 → 6) —
+    // which alone dropped this floor-Axiom card below band. The lost value is
+    // restored IN-THEME (the die is weaker, so the card does more elsewhere):
+    // BANK the powering die (+2, "the cheapest forge keeps everything") and a
+    // FALLEN payoff, akrasia's own state gate. FORGE temp gold wild (6) + BANK
+    // (2) − RECOIL 6 (−1.5) − self-bleed i1 d2 credit (−0.75) = 5.75 + FREE
+    // [RECOIL 1 (−0.25) → GUARD 2 (0.5) = 0.25] + FALLEN[guard 6 (1.5) + heal 3
+    // (1.0) = 2.5] × 0.5 = 1.25 → 7.25 → Axiom (7-19), its pre-D4 value.
+    // phase 32 part 3 (prose only): the FREE line's RECOIL 1 also posts to the
+    // per-combat DEBT ledger alongside its Guard (see AKRASIA_DEBT_TIER_HP).
     free: { recoil: 1, guard: 2 },
+    fallen: { rider: { guard: 6, healHp: 3 } },
     combatEffects: [{ effectId: 'debuff_bleed', appliedTo: 'self', intensity: 1, duration: 2 }],
-    specialMechanics: [{ kind: 'forge_floating_die', color: 'wild' }, { kind: 'recoil', hp: 6 }],
+    specialMechanics: [
+        { kind: 'forge_floating_die', color: 'wild' },
+        { kind: 'bank_spent_die' },
+        { kind: 'recoil', hp: 6 },
+    ],
     addedIn: '2026-07-08',
     tags: ['akrasia', 'floating'],
 };
@@ -931,8 +947,9 @@ const glimpse: Card = {
     targetType: 'enemy',
     paidSummary: 'POISON 1 for 1 turn. MARK 1 for 2 turns. FORETELL 2.',
     // pts (WS10.1 KW-1, 2026-07-11 — foretold-wound replaced by its parts:
-    // POISON + MARK double-apply): poison i1 d1 (4 → 1.33) + mark i1 d2 (1.5)
-    // + FORETELL 2 (2) + FREE foretell (1) = 5.83 → Doxa
+    // POISON + MARK double-apply; spec 33 D4: cadence 2 → 1.83): poison i1 d1
+    // (lifetime 1.83×2=3.66, tempo ÷3 ≈ 1.22) + mark i1 d2 (1.5) + FORETELL 2
+    // (2) + FREE foretell (1) ≈ 5.7 → Doxa
     free: { foretell: 1 },
     combatEffects: [
         { effectId: 'debuff_poison', appliedTo: 'opponent', duration: 1 },
@@ -988,10 +1005,11 @@ const cassandrasBurden: Card = {
         'Conviction at window 1): on hit, GUARD 4.',
     // pts (WS10.1 KW-1, 2026-07-11 — foretold-wound replaced by its parts:
     // POISON + MARK double-apply, intensity tuned 2 → 1 for the card-played
-    // clock; phase 30 FREE-currency law): poison i1 d2 (8 → 2.67) + mark i1
-    // d2 (1.5) + OMEN(Guard 4 ×0.6 + info 1 = 1.6) + FREE FORETELL 1 (1,
-    // oracle's currency, weak deposit) + DRAW 1 kicker (2, legal alongside
-    // the weak deposit) = 8.77 → Thesis. The WOUND lands on cast ("already
+    // clock; phase 30 FREE-currency law; spec 33 D4: cadence 2 → 1.83): poison
+    // i1 d2 (lifetime 7.3, tempo ÷3 ≈ 2.1) + mark i1 d2 (1.5) + OMEN(Guard 4
+    // ×0.6 + info 1 = 1.6) + FREE FORETELL 1 (1, oracle's currency, weak
+    // deposit) + DRAW 1 kicker (2, legal alongside the weak deposit) ≈ 8.2 →
+    // Thesis. The WOUND lands on cast ("already
     // starting to hurt"); the BRACE (guard 4) is the prophecy payoff,
     // realized only when the prediction proves true.
     // phase 32 part 4d (OMEN v2): the OMEN term above is unchanged at the
@@ -1576,13 +1594,13 @@ const refrain: Card = {
     targetType: 'enemy',
     paidSummary: 'MARK 1 for 2 turns. POISON 1 for 1 turn. ECHO.',
     // pts (WS10.1 KW-1 fold, 2026-07-11 — echo_sting folded into POISON,
-    // duration tuned 2 → 1: the ECHO already re-applies it, and the
-    // card-played clock makes each application tick twice a round; phase 30
-    // FREE-currency law): [mark d2 (1.5) + poison i1 d1 (2×2=4 → 1.33)] ×
-    // ECHO(1.8) = 5.1 + FREE MILL 1 (1, echo's "advance the loop" currency —
-    // feeds RECALL without drawing, replaces the bare draw) = 6.1 → top of
-    // the Doxa band (deliberately above stock T1 budget -- Early's legal
-    // pool is ONLY this + second-thoughts).
+    // duration tuned 2 → 1: the ECHO already re-applies it; phase 30
+    // FREE-currency law; spec 33 D4: card-played cadence 2 → 1.83): [mark d2
+    // (1.5) + poison i1 d1 (lifetime 1.83×2=3.66, tempo ÷3 ≈ 1.22)] ×
+    // ECHO(1.8) ≈ 4.9 + FREE MILL 1 (1, echo's "advance the loop" currency —
+    // feeds RECALL without drawing, replaces the bare draw) ≈ 5.9 → upper
+    // Doxa band (deliberately rich -- Early's legal pool is ONLY this +
+    // second-thoughts).
     free: { millCards: 1 },
     combatEffects: [
         { effectId: 'debuff_mark', appliedTo: 'opponent', duration: 2 },

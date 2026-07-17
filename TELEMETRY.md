@@ -23,3 +23,5 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-07-17T22:07:21Z | slash-prompt | /loop | unknown | user/ci | /loop 1h /march |
 | 2026-07-17T22:08:20Z | skill | march | claude-opus-4-8 | main | - |
 | 2026-07-17T22:13:28Z | subagent | Explore | claude-opus-4-8 | main | Map dice sim/autoplay infra |
+| 2026-07-17T23:09:52Z | slash-prompt | /march | claude-opus-4-8 | user/ci | /march |
+| 2026-07-17T23:14:34Z | subagent | card-expert | claude-opus-4-8 | main | Implement Phase D4 card/pricing re-authoring |

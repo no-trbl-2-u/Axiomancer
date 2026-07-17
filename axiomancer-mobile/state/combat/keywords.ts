@@ -4,6 +4,8 @@
  *
  * 30 KEYWORDS (down from a drifted 32 — the "exactly 30" directive yields
  * to earned support: see `plan/tuning/2026-07-10-keyword-registry.md`).
+ * Spec 33 §6 (D4, 2026-07-17) registers three more die-gear rows: SPECIAL
+ * (the face payload) plus the blacksmith upgrade verbs HONE and TEMPER.
  * Phase 29 (`plan/phases/phase_29_keyword_registry.md`) folded six
  * previously-unmapped debuff ids into registry keywords, renamed three
  * colliding words (FESTER→PROLONG, TRANSMUTE→REARGUE, REPRISE→RECALL),
@@ -230,6 +232,12 @@ const KEYWORD_GLOSS: Record<string, string> = {
     // only fully unglossed mechanic word in the sweep. Three carriers clears
     // the card-keyword doctrine's registry bar.
     Mill: 'Sends that many cards from your deck to your discard pile.',
+    // ── Die gear (spec 33 Upgradeable Dice §6, registered D4 2026-07-17) —
+    // SPECIAL is the face payload; HONE/TEMPER are the blacksmith upgrade verbs.
+    // ("SPECIAL" is the most generic registry name — rename deferred, D1.) ──
+    Special: "A die's SPECIAL face powers a card of its color and grants Conviction — its equipped gear sets how much (2 by default).",
+    Hone: "A blacksmith upgrade: adds a mana face to a die's gear, so more of its rolls power a card.",
+    Temper: "A blacksmith upgrade: turns a mana face into a SPECIAL face. A colored die caps at 2 special and 1 miss; gold at 1.",
     // ── Card types (labels, not keywords — never rendered in the inspect
     // keyword panel since 2026-07-12; kept for help surfaces + the KW lints) ──
     Enchantment: 'A passive on your side: 3 rounds when played free, permanent when paid with a die.',

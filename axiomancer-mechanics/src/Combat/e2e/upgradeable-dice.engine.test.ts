@@ -216,6 +216,23 @@ describe('spec 33 §1/§6 — the SPECIAL payload (provisional use-triggered rul
         expect(events(res, 'special-fired')).toHaveLength(1);
         expect(res.state.conviction).toBe(Math.min(CONVICTION_CAP, before + SPECIAL_CONVICTION_DEFAULT));
     });
+
+    it("spec 33 §6 (D4) — a FORGE special-amplifier enchant adds +1◆ to the fired payload", () => {
+        // Master's Stamp (`forge-masters-stamp`, dice-valves-33 sandbox) is
+        // wired at the special-fired hook by card id — like anvil-of-form /
+        // entropy-tax. It amplifies the PAYLOAD, not the special's identity.
+        const base = open([SPECIAL, MANA, MANA, MANA]);
+        const before = base.conviction;
+        // Control (same seed/state, no enchant) — the gear default, +2◆.
+        const control = paid(base, 'ud-body-dot', trayDie(base, 'body').id);
+        expect(control.state.conviction).toBe(Math.min(CONVICTION_CAP, before + SPECIAL_CONVICTION_DEFAULT));
+        // Treatment — the enchant in the persistent zone lifts the fire to +3◆.
+        const enchanted = { ...base, persistentZone: [...base.persistentZone, 'forge-masters-stamp'] };
+        const treatment = paid(enchanted, 'ud-body-dot', trayDie(enchanted, 'body').id);
+        const fired = events(treatment, 'special-fired')[0];
+        expect(fired.kind === 'special-fired' && fired.conviction).toBe(SPECIAL_CONVICTION_DEFAULT + 1);
+        expect(treatment.state.conviction).toBe(Math.min(CONVICTION_CAP, before + SPECIAL_CONVICTION_DEFAULT + 1));
+    });
 });
 
 // ── §4 — Press Fate, honest ─────────────────────────────────────────────────
