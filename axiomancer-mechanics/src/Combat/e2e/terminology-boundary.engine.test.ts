@@ -34,7 +34,7 @@ const BANNED_PHRASES = [
 const GUARDED_SOURCE_FILES = [
     'src/Combat/combat.cards.ts',
     'src/Combat/combat.deck.ts',
-    'src/Combat/combat.deck-presets.ts',
+    'src/Combat/combat.starter-deck-presets.ts',
     'src/Combat/combat.engine.ts',
     'src/Combat/combat.encounter.types.ts',
     'src/Combat/combat.dice.ts',

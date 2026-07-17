@@ -16,7 +16,7 @@ import {
     type CombatDeckSelection, type DeckDraftOptions,
 } from '../combat.deck-draft';
 import { COMBAT_STAGE_PROFILES, stageEligibleCardIds, buildStagePlayer, rankMaturityLevel } from '../combat.stage-profiles';
-import { buildPresetDeck } from '../combat.deck-presets';
+import { buildPresetDeck } from '../combat.starter-deck-presets';
 import { classifyVerbClass } from '../combat.cards';
 import { getCardById } from '../../Cards/cards.library';
 import { lookupEffect } from '../../Effects';

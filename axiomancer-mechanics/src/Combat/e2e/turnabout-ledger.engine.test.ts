@@ -47,7 +47,7 @@ import {
 } from '../combat.engine';
 import { runOneEncounter } from '../combat.encounter.sim';
 import { COMBAT_SIM_POLICY_ORDER } from '../combat.sim-policies';
-import { buildPresetDeck } from '../combat.deck-presets';
+import { buildPresetDeck } from '../combat.starter-deck-presets';
 import { THREAT_RUNGS } from '../effects';
 import type { CombatEncounterState, CombatEvent, CombatThreatPhase } from '../combat.encounter.types';
 

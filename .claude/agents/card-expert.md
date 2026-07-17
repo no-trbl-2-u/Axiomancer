@@ -142,7 +142,7 @@ before opining or editing; spec answers outrank your judgment.
 - `src/Combat/combat.engine.ts` — the `switch (mech.kind)` (grep for
   it; line numbers rot) where keyword verbs actually resolve.
 - `src/Combat/combat.cards.ts` — mechanic display text + `PAYOFF_KINDS`.
-- `src/Combat/combat.deck-presets.ts` / `combat.deck-draft.ts` — the
+- `src/Combat/combat.starter-deck-presets.ts` / `combat.deck-draft.ts` — the
   4/4/2/2/1/1/1 preset recipe and draft weights.
 - Lints that will catch a bad change: `src/Cards/e2e/pricing.engine.test.ts`
   (rank-band honesty), `src/Effects/e2e/deprecated-effects.engine.test.ts`
@@ -275,7 +275,7 @@ and what does / does not transfer.
 - **Sandbox-first is law** (`/deck-tuning` autonomy contract; work from
   the freest tier inward):
   - FREE: `cards.sandbox-sets.ts` (new cards + numeric overrides of
-    library cards) and deck composition (`combat.deck-presets.ts`,
+    library cards) and deck composition (`combat.starter-deck-presets.ts`,
     `combat.deck-draft.ts`) with matrix evidence.
   - GUARDED: `cards.library.ts` literals — only after a sandbox
     override A/B of the exact same patch shows the intended effect.
@@ -291,7 +291,7 @@ and what does / does not transfer.
   card through `VERB_POINTS` and print the sum against the rank's band
   in the `// pts:` comment — the pricing lint will check you anyway.
 - **Preset honesty:** the 10 presets (`erosion` … `refrain` in
-  `combat.deck-presets.ts`) map 1:1 onto the themes; each must win
+  `combat.starter-deck-presets.ts`) map 1:1 onto the themes; each must win
   through its own hallmark keywords. A preset that only wins via the
   shared utility verbs is a dishonest archetype — that's a design
   finding, not a numbers problem. Don't "fix" intentional asymmetries

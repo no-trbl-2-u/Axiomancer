@@ -7,7 +7,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { runRewardDraftSim } from '../../../src/Combat/combat.reward-draft.sim';
-import { COMBAT_DECK_PRESET_ORDER } from '../../../src/Combat/combat.deck-presets';
+import { COMBAT_DECK_PRESET_ORDER } from '../../../src/Combat/combat.starter-deck-presets';
 
 const SCREENS = 200;
 const SEEDS = [1, 2, 3];

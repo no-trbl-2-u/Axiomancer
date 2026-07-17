@@ -45,7 +45,7 @@ import { buildFixtureState } from '../../test-utils/card-fixture';
 import { playCombatCard } from '../combat.engine';
 import { runOneEncounter } from '../combat.encounter.sim';
 import { COMBAT_SIM_POLICY_ORDER } from '../combat.sim-policies';
-import { buildPresetDeck } from '../combat.deck-presets';
+import { buildPresetDeck } from '../combat.starter-deck-presets';
 import { PREMISE_MILESTONE_EVERY, PREMISE_MILESTONE_RUNGS, premiseMilestonesCrossed } from '../effects';
 import type { CombatEncounterState, CombatEvent } from '../combat.encounter.types';
 

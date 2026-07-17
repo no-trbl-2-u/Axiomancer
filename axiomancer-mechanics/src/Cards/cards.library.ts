@@ -3,7 +3,7 @@
  *
  * 70 unique cards: 10 self-contained themes × 7 (2 common spells ×4 copies,
  * 2 uncommon spells ×2 copies, 1 rare spell + 1 enchantment + 1 disenchant ×1
- * in the preset recipe — see `combat.deck-presets.ts`). Exactly 30 keywords
+ * in the preset recipe — see `combat.starter-deck-presets.ts`). Exactly 30 keywords
  * (spec §3); THE STRIKE IS DEAD — no card touches HP outside DoT ticks,
  * affliction payoffs, engine-gated drips, and reflect.
  *

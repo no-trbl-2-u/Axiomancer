@@ -41,7 +41,7 @@ import {
 } from './combat.deck-draft';
 import {
     COMBAT_DECK_PRESET_ORDER, getDeckPreset, type CombatDeckFocus,
-} from './combat.deck-presets';
+} from './combat.starter-deck-presets';
 import { COMBAT_SIM_POLICIES, type CombatSimPolicy, type CombatSimPolicyId } from './combat.sim-policies';
 import {
     simulateHazardPatternCombatDetailed,

@@ -19,7 +19,7 @@
 import { describe, it, expect, afterEach, vi } from 'vitest';
 
 import { runPlaytestMatrix, formatPlaytestReport } from '../combat.playtest';
-import { COMBAT_DECK_PRESET_ORDER, getDeckPreset } from '../combat.deck-presets';
+import { COMBAT_DECK_PRESET_ORDER, getDeckPreset } from '../combat.starter-deck-presets';
 import type { CombatCardUsage } from '../combat.encounter.sim';
 import { getCardById } from '../../Cards/cards.library';
 import { rankToRarity } from '../../Cards/types';

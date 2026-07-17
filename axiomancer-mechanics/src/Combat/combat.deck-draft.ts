@@ -1,7 +1,7 @@
 /**
  * Seeded combat-deck drafting — weighted random decks with a design FOCUS.
  *
- * Where a preset (`combat.deck-presets.ts`) is a hand-authored list, a DRAFT
+ * Where a preset (`combat.starter-deck-presets.ts`) is a hand-authored list, a DRAFT
  * samples the eligible card pool with weights that favor the requested focus:
  * a 'dot' draft leans hard into damage-over-time cards, a 'control' draft into
  * control / stat-debuff locks, and so on. Drafting is how the playtest matrix
@@ -23,8 +23,8 @@ import { lookupEffect } from '../Effects';
 import { getRng } from '../Utils/rng';
 import type { CombatVerbClass } from './combat.encounter.types';
 import { toCombatCard } from './combat.cards';
-import type { CombatDeckFocus } from './combat.deck-presets';
-import { buildPresetDeck } from './combat.deck-presets';
+import type { CombatDeckFocus } from './combat.starter-deck-presets';
+import { buildPresetDeck } from './combat.starter-deck-presets';
 import type { CombatStageProfile } from './combat.stage-profiles';
 import { stageEligibleCardIds } from './combat.stage-profiles';
 
@@ -43,7 +43,7 @@ const STATUS_VERB_CLASSES: readonly CombatVerbClass[] = Object.freeze([
 ]);
 
 export interface DeckDraftOptions {
-    /** The lever the draft leans on (reused from `combat.deck-presets`). */
+    /** The lever the draft leans on (reused from `combat.starter-deck-presets`). */
     focus: CombatDeckFocus;
     /** Restricts the pool to `stageEligibleCardIds(stage)`; default: the full
      *  card library (plus `extraCards`). */
