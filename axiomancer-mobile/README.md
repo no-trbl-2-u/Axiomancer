@@ -256,8 +256,8 @@ Presenters are the hermetic-e2e contract — that's where the testing standard l
 This repo uses a structured spec-driven workflow optimised for AI-
 assisted development. Pick up the loop here:
 
-- **First time?** [`AGENTS.md`](./AGENTS.md) — orientation for
-  Cursor / Claude Code agents.
+- **First time?** [`AGENTS.md`](./AGENTS.md) — orientation for any
+  coding agent (Claude Code, Codex, or otherwise).
 - **Picking up work?** [`specs/README.md`](./specs/README.md) — the
   recommended order. **Spec 01 is a hard prerequisite** for every
   other spec.

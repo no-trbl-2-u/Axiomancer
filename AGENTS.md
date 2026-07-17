@@ -2,6 +2,16 @@
 
 <!-- lexicon-ok: pressure-tracks -->
 
+**Axiomancer** is a turn-based, single-player philosophy RPG for
+mobile: a deterministic TypeScript rules engine where the player's
+worldview is a mechanical input, not flavor. Status-effect combat is
+the core fun; morally charged choices carry lasting world consequences.
+Full product spec: `spec.md`.
+
+**Reading order:** loop/plan work → `plan/bearings.md` first; package
+work → that package's `AGENTS.md`; design/balance/content work →
+`axiomancer-mechanics/VISION.md` + `spec.md`.
+
 npm-workspaces monorepo. Three packages, flat at the root:
 
 | Package | Role |
@@ -23,7 +33,17 @@ npm-workspaces monorepo. Three packages, flat at the root:
   the dependent package.
 - Rules/state/RNG belong in `axiomancer-mechanics`, never duplicated in mobile
   presenters.
-- All questions should be asked using the `AskUserQuestion` tool and come with your recommended option.
+- **Asking the user questions.** In attended sessions, every question
+  to the user goes through the `AskUserQuestion` tool — never bare
+  prose. Follow the question-writing doctrine in `skills/oversight.md`
+  §5, which applies anywhere a question is asked, not just in
+  `/oversight`: questions computed from observed state (not
+  pre-canned), each targeting one specific decision, multiple-choice
+  with your recommended option listed first and marked, a free-form
+  slot when there's room. Autonomous loop skills never ask at all —
+  `AskUserQuestion` is reserved for `/oversight` there (standing rule
+  6 below); they decide, document the call, and log genuine user
+  decisions as `[needs-user-call]`.
 
 ### Cross-package impact checklist
 
@@ -49,10 +69,9 @@ If a diff matches any of the above, run
 imports the card/effect libraries, their type unions, and the combat card
 projections). A diff touching any of those must ALSO run
 `npm run type-check -w axiomancer-card-editor` and block on failure.
-Witness: the `grant_permanent_wild_die` variant added to `Cards/types.ts`
-(edba726) shipped with mechanics + mobile green but broke the editor's
-`SpecialMechanicKind` union, leaving `verify-card-editor` red on `main`
-for half a day until 3c9bbaf.
+Witness: edba726 shipped mechanics + mobile green but broke the
+editor's `SpecialMechanicKind` union, leaving `verify-card-editor` red
+on `main` for half a day.
 
 This checklist is also mechanized in CI: the `cross-package` job in
 `.github/workflows/verify-mechanics.yml` diffs the pushed range against
@@ -85,89 +104,42 @@ Live, at the repo root:
   agent behind `/deck-tuning`; grounded in the Dawncaster corpus — see
   "Game knowledge base" below).
 
-Commands write their reports to `<package>/docs/reports/` (created on demand).
-All `plan/…` / `/march`-era references were scrubbed at the post-merge cleanup;
-the commands are fully self-contained.
+Commands write their reports to `<package>/docs/reports/` (created on
+demand). Each domain command is self-contained — it does not read
+`plan/` loop state (the loop verbs in root `skills/` do; see "Nexus"
+below).
 
-## Game knowledge base (`kb/`)
+## Truth sources
 
-The complete external-system register, including ownership, authority, credentials, fallbacks, and recovery procedures, lives at [`docs/external-architecture.md`](docs/external-architecture.md). Update that document whenever Axiomancer gains a hosted service, sibling repository, MCP server, external datastore, or required agent runtime.
+Three kinds of truth answer game questions. For any non-deterministic
+question or open-ended task, reach for the two MCP servers below —
+any agent may use them, not just the design sub-agents. Both are
+accelerators, never dependencies: the Grep/Read path always works.
 
-`no-trbl-2-u/game-knowledge-base` is the OKF corpus of board-game rules
-and reception research (source-backed claims, per-claim confidence).
-`node scripts/kb-sync.mjs` shallow-clones/refreshes it into `kb/`
-(gitignored — never committed here). Consumers: the
-`brainstorm-mechanics` skill and the `mechanics-expert` and
-`card-expert` agents grep it for prior art and cite
-`kb:<game-slug>/<doc> (src-NNN)` instead of citing reception from
-memory (`card-expert` leans on the `DigitalCardGames/dawncaster`
-corpus — 1,692 card records, 141 keywords). Coverage misses are filed with
-`node scripts/kb-sync.mjs wish "..."` — the KB's daily scout consumes
-that wishlist.
+| Source | Answers | Freshness |
+|---|---|---|
+| **`axio-query` MCP** (`axio_overview` / `axio_cards` / `axio_effects` / `axio_keywords`) | The engine's OWN card/enemy/effect/keyword facts, generated from the live libraries | As current as the working tree — never stale |
+| **`kb-query` MCP** (`kb_overview` / `kb_find_games` / `kb_search` / `kb_read_doc` / `kb_cards` / `kb_keyword`) | External prior art: board-game rules + reception, Dawncaster corpus (1,692 cards / 141 keywords) — cite `kb:<game-slug>/<doc> (src-NNN)` | `node scripts/kb-sync.mjs` refreshes `kb/` (gitignored); CI ticks sync-then-grep |
+| **Measured baselines** (`deck-matrix-baseline.json`) | Win-rate curves, status engagement, preset spreads | Only as fresh as the last sim — run `npm run baseline:check` and NAME the stamp before citing numbers |
 
-Two consumption surfaces (both grep-first; see the `kb-query` design
-skill in `.claude/skills/kb-query/`):
-- **Direct**: Grep/Read `kb/` frontmatter + generated indexes (the
-  metadata firewall), then only the docs they point at.
-- **MCP**: the `kb-query` stdio server (`.mcp.json` →
-  `kb/scripts/kb-mcp-server.mjs`, spawned per session) exposes
-  `kb_overview` / `kb_find_games` / `kb_search` / `kb_read_doc` /
-  `kb_cards` / `kb_keyword`. It is an accelerator, never a dependency —
-  if `kb/` is unsynced its tools answer with the recovery command and
-  the grep path still works. The `mechanics-expert` and `card-expert`
-  sub-agents carry these tools in their frontmatter and prefer them
-  when present; CI runs don't sync `kb/`, so cloud ticks stay on the
-  sync-then-grep path.
+Measuring is not tuning: regenerating a baseline is briefing; acting
+on it belongs to `/deck-tuning`, and engine constants stay manual.
+Full protocols (consumption surfaces, wishlist, regen/confidence
+rules): [`docs/truth-sources.md`](docs/truth-sources.md). The complete
+external-system register (ownership, credentials, recovery):
+[`docs/external-architecture.md`](docs/external-architecture.md) —
+update it whenever Axiomancer gains a hosted service, sibling repo,
+MCP server, or external datastore.
 
-## Live engine data (`axio-query`)
+## Pull requests
 
-The engine's OWN generated truth (card/effect/keyword facts) is queryable
-the same way the external KB corpus is, via the sibling `axio-query` stdio
-server (`scripts/axio-mcp-server.mjs`, registered in `.mcp.json`): `axio_cards`
-/ `axio_effects` / `axio_keywords` / `axio_overview`. It reads
-`devlog/data/{cards,enemies,effects}.json` (regenerating via
-`npm run catalog:export` when stale) and
-`axiomancer-mechanics/docs/keyword-atlas.md` — always exactly as current as
-the working tree, never hand-written prose. Same accelerator-never-dependency
-posture as `kb-query`: Grep/Read the libraries directly (`src/Cards/cards.library.ts`,
-`src/Effects/effects.library.ts`) when the tools are absent. `axio-query` vs
-`kb-query`: ours is the repo's own card/effect/keyword facts (never stale,
-never a dependency); `kb-query` is the genre's external prior art (community
-sourced, cite with `src-NNN` receipts). The `card-expert` and
-`mechanics-expert` sub-agents carry both tool sets.
-
-## Measured truth (baselines) — freshness discipline
-
-Two kinds of truth answer game questions, and they go stale differently:
-
-- **Source-derived truth** (what a card does, how it prices, what a keyword
-  means) regenerates from the tree — the libraries, `axio-query`, and the
-  catalog are as fresh as their last export, and the guard tests pin every
-  player-facing surface to the payloads. The catalog page carries a stamp
-  (`from engine source <commit>`) so a stale render is visible on sight.
-- **Measured truth** (win-rate curves, status engagement, preset spreads)
-  is only as fresh as the last sim run. The canonical measurement is
-  `axiomancer-mechanics/docs/reports/baselines/deck-matrix-baseline.json`,
-  meta-stamped with the commit it measured.
-
-Rules when citing measured numbers:
-
-1. Run `npm run baseline:check` first (soft alarm: compares the baseline's
-   stamp against `axiomancer-mechanics/src` history). CI runs the same check
-   as a warning on mechanics pushes; the nightly digest re-measures with a
-   reduced pass when stale (`npm run baseline:regen -- --runs=30
-   --confidence=reduced-nightly`).
-2. Every balance claim NAMES its baseline stamp ("as of `<commit>`,
-   `<date>`"). A claim citing a stale baseline must say the tree has moved
-   since — mechanics changes after the stamp make the numbers historical,
-   not current.
-3. `npm run baseline:regen` (full: runs=60) re-measures and re-stamps. A
-   `confidence: reduced-nightly` baseline is directionally honest, never
-   confirmation-grade — close calls need the full multi-seed pass before
-   anyone acts on them.
-4. Measuring is not tuning: regenerating the baseline is briefing; reading
-   it into card/deck changes stays with `/deck-tuning`, and engine constants
-   stay manual.
+(Applies repo-wide — the tuning/report skills deliver via PR; the loop
+verbs push to `main` directly.) Open PRs ready for review, not drafts.
+Enable auto-merge (repository default merge method) so they land once
+CI passes: in CI use `mcp__github__enable_pr_auto_merge`; in a local
+session use `gh pr merge <number> --auto`. If the call reports
+auto-merge disabled for the repo, surface that to the user rather than
+silently skipping.
 
 ## Per-package guides
 

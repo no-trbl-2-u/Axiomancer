@@ -14,14 +14,12 @@ See [`README.md`](./README.md) for architecture docs.
 
 ## Load-bearing UI evidence doctrine
 
-- Canon combat terms are `VITAE` and `STANCE` / `CHOOSE A STANCE`; do not approve `HEALTH` / `GUARD` regressions.
-- `npm run verify:visual` exit 1 with clean export and zero console errors is a baseline-vs-regression judgment, not automatically a product failure. Missing baselines are baseline debt. Console/runtime errors are product failures and must be fixed or reproduced before baseline approval.
-- A `/combat` smoke screenshot that shows only `THE FIELD STIRS.` instead of the seeded active encounter is route/state initialization evidence. Do not approve it as a new baseline unless T/Judge explicitly decides the blank combat smoke state is intended.
-- If `verify:visual` is red only on `root` / `character` with clean export and zero console errors, inspect the screenshot diffs and decide approve-vs-regression; do not report it as a build/runtime failure.
-- Minigame e2e harnesses must follow current dev-control routing. Current route truth is SELF → `self-dev-tools-link` → `/dev`; failures waiting for retired `dev-menu-header` are harness drift, not proof that Hazard/Gathering product routes are absent.
-- If typecheck errors cite newly shipped engine fields, verify installed `axiomancer-mechanics` package truth with a fresh install before changing mobile tests.
-- Hazard-style combat evidence must use current HP-only board selectors and player-flow truth. An e2e harness waiting for removed `combat-pressure-tracks` is stale harness debt, not proof the screen is broken. Browser evidence that reaches the in-place board proves entry only; do not claim full combat resolution until card/die controls complete an outcome.
-- The HP-only combat model does not by itself repeal canon copy. Keep `VITAE` for player-facing combat copy unless T explicitly approves a narrower `Health`/`HP` exception for enemy or accessibility labels.
+- Canon combat terms are `VITAE` and `STANCE` / `CHOOSE A STANCE`; do not approve `HEALTH` / `GUARD` regressions. The HP-only combat model does not by itself repeal this — keep `VITAE` for player-facing combat copy unless T explicitly approves a narrower `Health`/`HP` exception for enemy or accessibility labels.
+- `npm run verify:visual` exit 1 with clean export and zero console errors is a baseline-vs-regression judgment, not automatically a product failure: inspect the screenshot diffs and decide approve-vs-regression. Missing baselines are baseline debt. Console/runtime errors ARE product failures — fix or reproduce before baseline approval.
+- A `/combat` smoke screenshot showing only the empty-field state instead of the seeded active encounter is route/state-initialization evidence; do not approve it as a new baseline unless T explicitly decides that state is intended.
+- E2e harness failures waiting on retired selectors are **harness drift, not product failure** — verify against current route truth (dev controls: SELF → `self-dev-tools-link` → `/dev`; combat: the current HP-only board selectors) before claiming a screen is broken.
+- Evidence that reaches a board in place proves **entry only**; do not claim full combat resolution until card/die controls complete an outcome.
+- If typecheck errors cite newly shipped engine fields, remember mechanics is consumed as **local source** via `@mechanics` (no installed package) — check the sibling working tree state before changing mobile tests.
 
 ## Key development commands
 

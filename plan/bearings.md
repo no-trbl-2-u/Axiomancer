@@ -229,19 +229,19 @@ here (extends the web-centric template set):
 
 ## Hard rules
 
-(Rules 1-5 mirror `AGENTS.md` § "Nexus standing rules" — update
-there first; rules 6-9 are project-specific additions that live
-here. Standing rule 7 there — **file the residue**: a session
-that produces direction beyond what it ships files it into the
-plan/ queues before ending — applies to every session here too.)
+Rules 1-5 are the nexus standing rules, **canonical in `AGENTS.md`
+§ "Nexus standing rules"** (which now numbers seven — including
+`AskUserQuestion` only in `/oversight`, and **file the residue**: a
+session that produces direction beyond what it ships files it into
+the plan/ queues before ending). Read them there; update them there
+first — this file no longer carries a copy. In short: atomic
+commit+push to `main`; no trailers/emojis; foreground verify gate,
+no `--no-verify`/force-push/destructive resets; tests alongside
+code; deploy gate after every push.
 
-1. **Commit and push as a single atomic act** to `main`.
-2. **No `Co-Authored-By:` trailers, no emojis** — anywhere.
-3. **No `--no-verify`, no force-push, no destructive resets.**
-4. **The verify gate is non-negotiable** — see below. Run it
-   **foreground**, never backgrounded.
-5. **Tests alongside code** — hermetic e2e at the highest public
-   entry point; never "add tests later".
+Rules 6-9 are project-specific additions that live here (numbering
+preserved — phase briefs cite them by number):
+
 6. **Rules/state/RNG live in mechanics, never in mobile
    presenters.**
 7. **The `/archive` harness is gone** (consumed + removed at

@@ -1,18 +1,32 @@
-# AGENTS.md
-
-## Cursor Cloud specific instructions
+# axiomancer-mechanics — agent guide
 
 ### Project overview
 
-Axiomancer Mechanics is a TypeScript TTRPG game engine (Node.js CLI). No databases, servers, or containers required. See `README.md` for architecture docs. Read `VISION.md` before major mechanics, combat, balance, friendship/mercy, or alignment work.
+Axiomancer Mechanics is a TypeScript TTRPG game engine (Node.js CLI).
+No databases, servers, or containers required. See `README.md` for
+architecture docs.
 
-**Load-bearing doctrine (2026-06):** Status effects are the MAIN fun and the most engaging aspect of combat encounters. Balance/tuning/content work optimises first for status-effect-centric play; treat low status-effect engagement as a balance failure even when win/loss rates look healthy. Canonical in `VISION.md`.
+**Game doctrine is canonical in `VISION.md`** (status effects are the
+main fun; the starter-preset win-rate curve early ~80% / mid ~50% /
+late ~25-35% / impossible 0%) and kept always-in-context in this
+package's `CLAUDE.md` — read both before any mechanics, combat,
+balance, content, mercy, or alignment work. It is deliberately NOT
+restated here.
 
-**Load-bearing doctrine (2026-07-08):** Starter preset decks must adhere to this win-rate curve (blind policy-pick): early ~80%, mid ~50%, late ~25-35%, impossible 0%. They are early/mid-game decks by design — the player trades into a new mid-game deck after the labyrinth — so a starter preset overperforming this curve at late/impossible is a dominance finding, not a success. Canonical in `VISION.md`; correction history in `plan/tuning/2026-07-08-win-path-scaling.md`.
+**Evidence doctrine (condensed):**
 
-**Scheduled evidence doctrine (2026-06; band corrected 2026-07-08):** Command-green playtests can still be design-red. Treat late-game/boss witnesses (with a **starter preset deck**) as failed evidence when they sit outside the 25–35% resolution-success band, record 0 player damage, never exercise Heart/Befriend/mercy attempts, or collapse into low-status Body/damage dominance. Capture generated playtest metrics in the dated report, then revert generated tracked reports unless the task explicitly updates those fixtures.
-
-**Hazard-style combat witness doctrine (2026-06):** A direct combat CLI run or passing combat tests prove the engine command path, not first-level route integration. When scheduled evidence claims route-level Hazard-style combat, the walkthrough must actually traverse an authored map encounter, enter the current HP-only/Hazard-style board, and record `hazardCombat:start`/resolution events. If a Fishing Village route now resolves loot/narration/quest instead of combat, repair or replace the route witness before claiming coverage.
+- Command-green playtests can still be design-red. A late-game/boss
+  witness with a starter preset deck is FAILED evidence when it sits
+  outside the 25-35% resolution-success band, records 0 player damage,
+  never exercises Befriend/mercy attempts, or collapses into
+  low-status damage dominance. Capture generated playtest metrics in
+  the dated report, then revert generated tracked reports unless the
+  task explicitly updates those fixtures.
+- A direct combat CLI run or passing combat tests prove the engine
+  command path, not route integration. A route-level combat claim
+  must traverse an authored map encounter, enter the HP-only board,
+  and record `hazardCombat:start` + resolution events — repair or
+  replace a drifted route witness before claiming coverage.
 
 ### Key commands
 
@@ -23,7 +37,7 @@ All commands are in `package.json`:
 | Build | `npm run build` |
 | Type-check | `npm run type-check` |
 | Type-check (tests) | `npm run type-check:tests` |
-| Type-check (CLI) | `npm run type-check:cli` — covers `src/CLI/**` (Phase 22; excluded from the two configs above) |
+| Type-check (CLI) | `npm run type-check:cli` — covers `src/CLI/**` (excluded from the two configs above) |
 | Test | `npm test` (vitest) |
 | Lint | `npm run lint` |
 | Lint + type-check | `npm run check` |
@@ -31,7 +45,7 @@ All commands are in `package.json`:
 | Verify gate | `npm run verify` (type-check + type-check:tests + type-check:cli + lint + test + build) |
 | Deploy gate | `npm run deploy:check` — lives at the monorepo ROOT, not in this package; run `npm run deploy:check` from the repo root |
 
-For automated / agent-driven CLI runs, the Phase 20 flags expose
+For automated / agent-driven CLI runs, the agent flags expose
 scripted and JSON-event modes:
 `npm run game -- --script <path>` / `--stdin` / `--json-events`. See
 `README.md` "Agent-driven CLI mode" for examples.
@@ -60,23 +74,20 @@ Never squash or amend after pushing unless explicitly asked.
 
 ### Caveats
 
-- **ESLint**: `npm run lint` is part of `npm run verify`. The flat config
-  registers `@typescript-eslint` correctly (Phase 13 fix). Warnings are
+- **ESLint**: `npm run lint` is part of `npm run verify`. Warnings are
   advisory; only errors fail the gate.
-- **Demo CLI is interactive**: `npm run game` uses `inquirer` prompts. For
-  hermetic automation, prefer the Phase 20 flags (`--script` / `--stdin` /
-  `--json-events`) over `pexpect` / tmux `send-keys`. The Python harness
-  was removed in Phase 17 — hermetic e2e tests are the durable path.
-- **Test runner**: `npm test` runs vitest. Use alongside `npm run type-check`,
-  `npm run type-check:tests`, `npm run type-check:cli`, `npm run lint`, and
-  `npm run build` (all six chained by `npm run verify`).
-- **CLI files are not exempt from type-check** (Phase 22): `tsconfig.json`
-  and `tsconfig.tests.json` both exclude `src/CLI` — that gap once let a
-  `TS2554` stale-call bug ship to `main` because `npm run type-check` and
-  `npm run type-check:tests` stayed green while `ts-node src/CLI/game.cli.ts`
-  failed at runtime. `npm run type-check:cli` (`tsconfig.cli.json`) closes
-  that gap and is wired into `npm run verify`. Any new file under `src/CLI`
-  is covered automatically — do not add another exclusion.
+- **Demo CLI is interactive**: `npm run game` uses `inquirer` prompts.
+  For hermetic automation, use the agent flags (`--script` / `--stdin` /
+  `--json-events`) — never `pexpect` / tmux `send-keys`.
+- **Test runner**: `npm test` runs vitest. `npm run verify` chains all
+  six legs (type-check + type-check:tests + type-check:cli + lint +
+  test + build).
+- **CLI files are not exempt from type-check**: `tsconfig.json` and
+  `tsconfig.tests.json` both exclude `src/CLI`; `npm run type-check:cli`
+  (`tsconfig.cli.json`) covers that gap and is wired into `verify` —
+  a stale-call bug once shipped to `main` through it. Any new file
+  under `src/CLI` is covered automatically; do not add another
+  exclusion.
 - **State file**: The Node persistence adapter writes `game-state.json` in
   the project root when used. This file is gitignored and ephemeral.
 - **Spec update**: If using a spec file to implement a change, update the
