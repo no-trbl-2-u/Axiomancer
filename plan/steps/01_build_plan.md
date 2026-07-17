@@ -408,8 +408,16 @@ Phase 26 (numbers) but design-independent of the owner session
       console/page errors per screen → `.critique-artifacts/<viewport>/`
       + `manifest.json`. It does not judge: `/critique`'s main agent
       (has vision, no grant problem) reads the artifacts and files the
-      fresh-eyes findings itself. A screen that redirects/blanks/throws
-      is captured as an observation, not a driver failure. Interactive
+      fresh-eyes findings itself. Screen set is restricted to
+      COLD-ENTERABLE routes (title/onboarding, combat self-bootstrap,
+      exploration hub); state-gated routes pushed by `<EventGate>`
+      (`/village`, `/cutscene`, `/dialogue`, `/event`) are excluded —
+      direct-nav just captures their `router.back()` bounce, which is a
+      transport artifact, not a finding (reaching them faithfully is
+      playtester/interactive territory). Verified end-to-end: the
+      exploration-hub capture independently re-surfaced the open
+      `[HIGH]` "MORALE meter renders literal 'v of x' placeholder"
+      finding, confirming the capture is real and useful. Interactive
       `/critique` (playtester + Playwright MCP) is unaffected — this is
       the unattended-loop path only (harness; `skills/critique.md` §3.5
       updated + new script + `critique:drive` npm scripts)
