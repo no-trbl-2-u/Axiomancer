@@ -1,8 +1,11 @@
 #!/usr/bin/env node
 // scripts/check-lexicon.mjs — retired-terminology lint. Zero dependencies.
 //
-//   node scripts/check-lexicon.mjs           # scan live prose surfaces
-//   node scripts/check-lexicon.mjs --list    # print the registry
+//   node scripts/check-lexicon.mjs             # scan live prose surfaces
+//   node scripts/check-lexicon.mjs <files...>   # scan just those files (the
+//                                               # post-write hook's mode; zone/
+//                                               # banner/pragma still apply)
+//   node scripts/check-lexicon.mjs --list      # print the registry
 //
 // Enforces axiomancer-mechanics/docs/lexicon.json (the single source for
 // retired game terminology; docs/LEXICON.md is the human guide) against
@@ -40,7 +43,7 @@ const ZONE_DIRS = [
   'node_modules/', '.git/', 'kb/', 'tmp-images/', '.claude/worktrees/',
   'devlog/', 'braindump/', 'docs/reports/', 'docs/adr/', 'automation/', 'specs/',
 ]
-const ZONE_BASENAMES = ['CHANGELOG.md', 'RELEASES.md', 'lexicon.json']
+const ZONE_BASENAMES = ['CHANGELOG.md', 'RELEASES.md', 'lexicon.json', 'TELEMETRY.md']
 const PLAN_LIVE = 'plan/bearings.md' // the only live plan/ surface
 
 const isZoned = (rel) => {
@@ -61,9 +64,16 @@ function* mdFiles(dir) {
   }
 }
 
+// Explicit file args (repo-relative or absolute) narrow the scan; zoning
+// still applies, so a zoned file passed explicitly exits clean.
+const fileArgs = process.argv.slice(2).filter((a) => !a.startsWith('--'))
+const targets = fileArgs.length
+  ? fileArgs.map((a) => path.resolve(ROOT, a)).filter((p) => p.endsWith('.md') && fs.existsSync(p))
+  : mdFiles(ROOT)
+
 const findings = []
 let scanned = 0
-for (const abs of mdFiles(ROOT)) {
+for (const abs of targets) {
   const rel = path.relative(ROOT, abs).replaceAll('\\', '/')
   if (isZoned(rel)) continue
   const text = fs.readFileSync(abs, 'utf-8')
