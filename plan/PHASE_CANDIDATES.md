@@ -105,6 +105,38 @@
   work (30 enemies) — promote to a build-plan phase when queue has
   room.
 
+### Preset deck-budget lint (mechanics — pricing)
+- source: T direct, 2026-07-17 chat session (price-experiment follow-up,
+  same evidence as Phases 36a/36b).
+- The pricing lint proves per-CARD rank honesty
+  (`src/Cards/e2e/pricing.engine.test.ts` bands: common 1.5-7.5 /
+  uncommon 4.5-13 / rare 7-19); nothing asserts a PRESET's total
+  budget. Once 36b (tempo term) and the 36c candidate (enchant
+  pricing) make cross-deck totals meaningful, add per-stage deck
+  budget bands — the 10 starters cluster ~71-105 total today — so
+  future mid/late preset libraries are designed to a measurable
+  budget target instead of an accident, and starters get a
+  "budget in the early band" assertion. Turns pricing from
+  honesty-lint into deck-design tooling. Deps: 36b (36c strengthens
+  it). NOT a rank/price-ceiling raise: the late library is
+  in-band, clean-replace per the 2026-07-08 deck-progression
+  decision, and the price experiment showed magnitude headroom
+  does not buy late wins (erosion late 0.04→0.12 at 4x).
+
+### Doctrine-curve check in the nightly baseline (harness promotion)
+- source: T direct, 2026-07-17 chat session (price-experiment follow-up).
+- The price-vs-winrate sweep lives in
+  `axiomancer-mechanics/scratch/price-experiment/` as a one-off
+  ultracode harness. Fold a per-preset doctrine-curve check (blind
+  policy vs the early ~80 / mid ~50 / late 25-35 / impossible 0
+  bands) — and optionally the price↔winrate correlation — into
+  `baseline:regen` / the reduced nightly pass, so curve violations
+  (e.g. the current mid-collapse quartet: foundry/standstill/grace/
+  augury ≈0% mid) and pricing drift surface automatically instead of
+  via one-off sessions. Scope: promote or absorb the scratch
+  harness's per-stage cells into the baseline metrics; keep scratch/
+  out of verify. Deps: none hard; most meaningful post-36b.
+
 ## Promoted
 
 ### Tempo-aware + alt-win-aware card pricing (mechanics — `scoreCard`)
