@@ -7,6 +7,16 @@
  * in-combat escape card is appended to any of them (no retreat exists once
  * combat is joined).
  *
+ * STARTER-DECK FRAMING (load-bearing doctrine 2026-07-08, canonical in
+ * VISION.md → Combat vision): these ten presets are the STARTER decks —
+ * early/mid-game by design, held to the blind-policy curve early ~80% /
+ * mid ~50% / late ~25-35% / impossible 0%. The player trades into a new
+ * mid-game deck after the labyrinth (draft-maturation), so a starter
+ * overperforming that curve late is a dominance finding, not a success;
+ * underperforming it at early/mid is a real balance failure. Late-game
+ * presets are a separate, future library (in-band, clean-replace — they
+ * stay inside the existing rank/price bands rather than raising them).
+ *
  * THE COLOR LAW OF RECIPES (ratified 2026-07-12, spec 32 §12 item 9): every
  * preset carries exactly 5 body / 5 mind / 5 heart cards by
  * `philosophicalAspect`. All three die colors are always possible in the
