@@ -162,7 +162,14 @@ export {
     OVERHEAT_PIP_CEILING, OVERHEAT_BUST_CHANCE, overheatReserve,
     // Phase 31 — the engine-native momentum wheel + THE STAKE
     isMomentumDieId, placeStake,
+    // Spec 33 (Phase D2, FLAGGED) — Upgradeable Dice: the flag + the surfaces
+    // the app/sim layers need. Inert until setUpgradeableDice(true).
+    setUpgradeableDice, isUpgradeableDiceEnabled, overheatSpentDie,
+    UPGRADEABLE_DIE_COLORS, UPGRADEABLE_TABLE_CEILING, PRESS_FATE_COST,
+    SPECIAL_CONVICTION_DEFAULT, MOMENTUM_CHAIN_ORDER, MOMENTUM_SURGE_LENGTH,
+    SURGE_DIE_PREFIX, DEFAULT_DIE_GEAR, activeDieGear,
 } from './Combat';
+export type { MomentumV2, UpgradeableDieFace, UpgradeableDieGear } from './Combat';
 /**
  * @deprecated Superseded by the COLOR LAW for die COST / play legality
  * (`playCombatCard`'s color-match gate); retained only as the legacy 0/1/2

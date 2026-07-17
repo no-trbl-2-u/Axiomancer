@@ -35,8 +35,13 @@ import { HazardGate } from '@/components/HazardGate';
 import { QuestGate } from '@/components/QuestGate';
 import { RestGate } from '@/components/RestGate';
 import { ToastHost } from '@/components/ToastHost';
+import { applyCombatFlagsFromEnv } from '@/state/combat/flags';
 
 SplashScreen.preventAutoHideAsync();
+
+// Spec 33 — build-time combat flags (Upgradeable Dice preview opt-in).
+// Applied at module load, before any store/provider touches the engine.
+applyCombatFlagsFromEnv();
 
 // Single app-wide persistence adapter. Created once at module load; the
 // `preload()` call below populates its in-memory cache from AsyncStorage
