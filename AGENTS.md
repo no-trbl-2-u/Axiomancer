@@ -251,3 +251,13 @@ them; update here first.
    decides, documents the call in the commit body, and ships. Genuine
    user decisions get logged to `plan/AUDIT.md` as `[needs-user-call]`
    and the loop continues with the most-defensible default.
+7. **File the residue.** Any session or tick tasked with substantial
+   work that produces direction beyond what it ships — decisions made,
+   work discovered, design conclusions, side-findings — files that
+   residue into the loop's queues before ending: buildable ideas to
+   `plan/PHASE_CANDIDATES.md`, findings and `[needs-user-call]`
+   decisions to `plan/AUDIT.md`, committed work as build-plan phase
+   rows, observable defects to `plan/CRITIQUE.md` (jot-row format).
+   Direction that lives only in a conversation is invisible to the
+   loop. File only unshipped direction — not routine work the tick
+   already committed, and not chit-chat.

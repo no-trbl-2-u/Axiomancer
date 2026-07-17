@@ -231,7 +231,9 @@ here (extends the web-centric template set):
 
 (Rules 1-5 mirror `AGENTS.md` § "Nexus standing rules" — update
 there first; rules 6-9 are project-specific additions that live
-here.)
+here. Standing rule 7 there — **file the residue**: a session
+that produces direction beyond what it ships files it into the
+plan/ queues before ending — applies to every session here too.)
 
 1. **Commit and push as a single atomic act** to `main`.
 2. **No `Co-Authored-By:` trailers, no emojis** — anywhere.
