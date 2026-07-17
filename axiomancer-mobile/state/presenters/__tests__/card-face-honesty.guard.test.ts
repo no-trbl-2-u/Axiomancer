@@ -18,6 +18,7 @@ import { describe, it, expect } from '@jest/globals';
 import { getCard, getCardById, cardLibrary, lookupEffect } from '@mechanics';
 import { faceStats, detailStats } from '@/state/presenters/combat-encounter.engine';
 import { keywordsInPersistentText, keywordForEffect, SYSTEM_GLOSSARY } from '@/state/combat/keywords';
+import { glyphShapeFor } from '@/components/combat/glyphShapes';
 
 describe('card-face honesty guard', () => {
     it('no library card renders the ambiguous PAID fallback', () => {
@@ -196,6 +197,27 @@ describe('card-face honesty guard', () => {
             }
             if (/\bPERORATION\b/.test(printed) && !sys.has('PERORATION')) offenders.push(`${id} → prints PERORATION with no popup`);
             if (/\bCONCEDE\b/.test(printed) && !sys.has('CONCEDE')) offenders.push(`${id} → prints CONCEDE with no popup`);
+        }
+        expect(offenders).toEqual([]);
+    });
+
+    it('every FREE effect draws its own silhouette — no text-rune fallback on a live card (owner 2026-07-16)', () => {
+        // The giant top-left glyph must be the SHAPE of the effect it causes
+        // (flame=burn, flask=poison, crosshair=mark, …). A card whose free
+        // rider resolves no shape falls back to an abstract text rune — the
+        // exact "generic concentric circles" read this guard exists to block.
+        // When it fires, add the keyword's silhouette to glyphShapes.ts (and
+        // the synced copies in the editor's KwGlyph + build-catalog.mjs).
+        const offenders: string[] = [];
+        for (const { id } of cardLibrary) {
+            const card = getCard(id);
+            const src = getCardById(id);
+            if (!card || !src) continue;
+            const f = faceStats(card, src);
+            if (!f.freeGlyph) continue; // no free line → no glyph at all
+            if (!glyphShapeFor(f.freeGlyphKey)) {
+                offenders.push(`${id} → freeGlyphKey=${f.freeGlyphKey ?? 'null'} (text rune '${f.freeGlyph}')`);
+            }
         }
         expect(offenders).toEqual([]);
     });

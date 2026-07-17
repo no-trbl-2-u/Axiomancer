@@ -38,8 +38,10 @@ import { THEME_KEYWORDS, type CardTheme } from '../src/Cards/card-themes';
 import { mechanicText, riderText } from '../src/Combat/combat.cards';
 import { EnemyLibrary } from '../src/Enemy/enemy.library';
 import { effectsLibrary, lookupEffect } from '../src/Effects/effects.library';
-// Pure, dependency-free presentation mapping (effect → glyph + colour).
+// Pure, dependency-free presentation mappings (effect → glyph + colour;
+// effect id → registry keyword — the same vocabulary the card faces speak).
 import { effectGlyph } from '../../axiomancer-mobile/components/combat/statusGlyphs';
+import { keywordForEffect } from '../../axiomancer-mobile/state/combat/keywords';
 
 const MECH = join(__dirname, '..');
 const ROOT = join(MECH, '..');
@@ -152,6 +154,8 @@ const FREE_TXT_GLYPH: Record<string, string> = {
     guard: '❖', barrier: '❖', healHp: '✚', drawCards: '⚑', premises: '❡',
     sway: '∿', souls: '✦', foretell: '◉', pips: '⬡', stagger: '⚔',
     tickOne: '❋', tickAllDots: '❋', cleanse: '✦', recoil: '▽', millCards: '⁇',
+    revealStance: '◉', conviction: '◆', refreshDie: '↻',
+    bonusIntensity: '▲', bonusDuration: '⌛', ruptureMarks: '❋', intensityPerPip: '⬡',
 };
 
 // Rider field → the UPPERCASE face keyword the silhouette table keys off
@@ -161,16 +165,16 @@ const FREE_RIDER_KW: Record<string, string> = {
     premises: 'PREMISE', sway: 'SWAY', souls: 'SOUL', foretell: 'FORETELL',
     pips: 'PIP', stagger: 'STAGGER', tickOne: 'TICK', tickAllDots: 'TICK',
     cleanse: 'CLEANSE', recoil: 'RECOIL', millCards: 'MILL',
+    revealStance: 'REVEAL', conviction: 'CONVICTION', refreshDie: 'REFRESH',
+    bonusIntensity: 'INTENSITY', bonusDuration: 'DURATION',
+    ruptureMarks: 'RUPTURE', intensityPerPip: 'PIP',
 };
-// Effect id → face keyword, mirroring the mobile keywords map for the handful
-// of ids whose keyword isn't just the stripped id.
-const EFFECT_KW_OVERRIDE: Record<string, string> = {
-    debuff_kindling_ember: 'BLEED', debuff_nettle_sting: 'BLEED',
-    debuff_creeping_doom: 'DOOM', debuff_curse: 'MARK',
-};
+// Effect id → UPPERCASE face keyword. The mobile registry (keywordForEffect —
+// the exact map the card faces speak) wins; ids outside the registry fall back
+// to the stripped id so a silhouette keyed on the raw name can still match.
 function effectKw(effectId: string): string {
-    const o = EFFECT_KW_OVERRIDE[effectId];
-    if (o) return o;
+    const kw = keywordForEffect(effectId);
+    if (kw) return kw.toUpperCase();
     if (/mark$/.test(effectId)) return 'MARK';
     return effectId.replace(/^(debuff|buff|tier\d)_/, '').toUpperCase();
 }
@@ -375,6 +379,9 @@ function buildEffects() {
                 name: e.name,
                 type: e.type as 'buff' | 'debuff',
                 glyph: g.glyph,
+                // Registry keyword → the renderer draws the effect's card-face
+                // SILHOUETTE where one exists (not every effect has a glyph).
+                kw: effectKw(e.id),
                 color: g.color,
                 kind: g.kind,
                 chips,

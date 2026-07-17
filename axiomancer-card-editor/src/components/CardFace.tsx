@@ -41,7 +41,10 @@ export interface FaceCard {
     img: string | null;
     /** Keyword that drives the top-left glyph. */
     glyphKw: KeywordId;
-    freeKw: KeywordId;
+    /** May exceed the KEYWORDS vocabulary — every unique FREE effect gets its
+     *  own silhouette (owner directive 2026-07-16), incl. rider verbs the paid
+     *  vocabulary never uses (reveal / pip / mill / conviction / …). */
+    freeKw: KeywordId | string;
     freeVal: number;
     paidKw: KeywordId;
     paidVal: number;
@@ -158,29 +161,47 @@ function primaryKeyword(card: CardDraft): { kw: KeywordId; val: number } {
     return { kw: 'control', val: 0 };
 }
 
-/** Face keyword + value for the authored FREE (dieless) rider. */
-function freeKeyword(card: CardDraft): { kw: KeywordId; val: number } {
+/** Face keyword + value for the authored FREE (dieless) rider. Every unique
+ *  free effect resolves to its own keyword so `KwGlyph` can draw its own
+ *  silhouette (owner directive 2026-07-16) — no generic clock fallbacks for
+ *  real riders. An applied effect wins first (mirrors the mobile
+ *  `freeGlyphMeta` priority). */
+function freeKeyword(card: CardDraft): { kw: KeywordId | string; val: number } {
     if (card.cardType === 'enchantment' || card.cardType === 'disenchant') {
         // PAID only — no free line exists on persistent cards.
         return { kw: card.cardType === 'enchantment' ? 'enchant' : 'disenchant', val: 0 };
     }
     const f = card.free;
     if (!f) return { kw: 'control', val: 0 };
+    if (f.applyEffect) {
+        const id = f.applyEffect.effectId;
+        const i = f.applyEffect.intensity ?? 1;
+        if (id.includes('mark')) return { kw: 'mark', val: i };
+        if (id.includes('bleed') || id.includes('poison')) return { kw: dotKeyword(id), val: i };
+        if (id.includes('fester') || id.includes('acid')) return { kw: 'poison', val: i };
+        if (id.includes('burn')) return { kw: 'dot', val: i };
+        if (id.includes('rapport')) return { kw: 'rapport', val: i };
+        if (id.includes('backfire')) return { kw: 'backfire', val: i };
+        if (id.includes('doom')) return { kw: 'doom', val: i };
+        return { kw: 'control', val: 0 };
+    }
     if (f.guard) return { kw: 'guard', val: f.guard };
+    if (f.barrier) return { kw: 'barrier', val: f.barrier };
     if (f.healHp) return { kw: 'heal_self', val: f.healHp };
     if (f.drawCards) return { kw: 'draw', val: f.drawCards };
     if (f.tickOne || f.tickAllDots) return { kw: 'tick', val: 0 };
+    if (f.cleanse) return { kw: 'cleanse', val: f.cleanse };
     if (f.premises) return { kw: 'premise', val: f.premises };
     if (f.sway) return { kw: 'sway', val: f.sway };
     if (f.souls) return { kw: 'soul', val: f.souls };
     if (f.foretell) return { kw: 'foretell', val: f.foretell };
-    if (f.conviction) return { kw: 'control', val: 0 };
-    if (f.applyEffect) {
-        const id = f.applyEffect.effectId;
-        if (id.includes('mark')) return { kw: 'mark', val: f.applyEffect.intensity ?? 1 };
-        if (id.includes('bleed') || id.includes('poison')) return { kw: dotKeyword(id), val: f.applyEffect.intensity ?? 1 };
-        return { kw: 'control', val: 0 };
-    }
+    if (f.revealStance) return { kw: 'reveal', val: 0 };
+    if (f.pips) return { kw: 'pip', val: f.pips };
+    if (f.millCards) return { kw: 'mill', val: f.millCards };
+    if (f.recoil) return { kw: 'recoil', val: f.recoil };
+    if (f.stagger) return { kw: 'stagger', val: f.stagger };
+    if (f.refreshDie) return { kw: 'refresh', val: 0 };
+    if (f.conviction) return { kw: 'conviction', val: f.conviction };
     return { kw: 'control', val: 0 };
 }
 
@@ -277,9 +298,70 @@ export function KwGlyph({
         // ── Effect-silhouette set (2026-07-16) — keep in sync with the mobile
         // glyphShapes.ts table and the catalog's copy in build-catalog.mjs. ──
         case 'mark':
+            // Crosshair — MARK must never read as generic rings (owner 2026-07-16).
             return (
                 <svg viewBox="0 0 24 24" style={s} fill={color} fillRule="evenodd">
-                    <path d="M12 2 A10 10 0 1 0 12 22 A10 10 0 1 0 12 2 Z M12 5 A7 7 0 1 0 12 19 A7 7 0 1 0 12 5 Z M12 8.5 A3.5 3.5 0 1 0 12 15.5 A3.5 3.5 0 1 0 12 8.5 Z" />
+                    <path d="M12 3.5 A8.5 8.5 0 1 0 12 20.5 A8.5 8.5 0 1 0 12 3.5 Z M12 6 A6 6 0 1 0 12 18 A6 6 0 1 0 12 6 Z M12 9.25 A2.75 2.75 0 1 0 12 14.75 A2.75 2.75 0 1 0 12 9.25 Z M11 0.5 H13 V3 H11 Z M11 21 H13 V23.5 H11 Z M0.5 11 H3 V13 H0.5 Z M21 11 H23.5 V13 H21 Z" />
+                </svg>
+            );
+        case 'reveal':
+            return (
+                <svg viewBox="0 0 24 24" style={s} fill={color} fillRule="evenodd">
+                    <path d="M2 8 C5 6.5 9 6.5 12 8 C15 6.5 19 6.5 22 8 C22 13 19 16.5 15.5 16.5 C13.8 16.5 12.8 15.4 12 14.2 C11.2 15.4 10.2 16.5 8.5 16.5 C5 16.5 2 13 2 8 Z M6.2 10 A1.8 1.8 0 1 0 6.2 13.6 A1.8 1.8 0 1 0 6.2 10 Z M17.8 10 A1.8 1.8 0 1 0 17.8 13.6 A1.8 1.8 0 1 0 17.8 10 Z" />
+                </svg>
+            );
+        case 'cleanse':
+            return (
+                <svg viewBox="0 0 24 24" style={s} fill={color}>
+                    <path d="M12 2 C17 9 19 12 19 15.5 A7 7 0 0 1 5 15.5 C5 12 7 9 12 2 Z" />
+                </svg>
+            );
+        case 'conviction':
+            return (
+                <svg viewBox="0 0 24 24" style={s} fill={color}>
+                    <path d="M12 2 L22 12 L12 22 L2 12 Z" />
+                </svg>
+            );
+        case 'pip':
+            return (
+                <svg viewBox="0 0 24 24" style={s} fill={color}>
+                    <path d="M12 2 L21 7 V17 L12 22 L3 17 V7 Z" />
+                </svg>
+            );
+        case 'mill':
+            return (
+                <svg viewBox="0 0 24 24" style={s} fill={color}>
+                    <path d="M3 6 L11 3 L14 12 L6 15 Z M10 9 H21 V21 H10 Z" />
+                </svg>
+            );
+        case 'recoil':
+            return (
+                <svg viewBox="0 0 24 24" style={s} fill={color}>
+                    <path d="M8 3 H16 V12 H21 L12 22 L3 12 H8 Z" />
+                </svg>
+            );
+        case 'stagger':
+            return (
+                <svg viewBox="0 0 24 24" style={s} fill={color}>
+                    <path d="M4 4 H16 V7 H4 Z M8 10.5 H20 V13.5 H8 Z M4 17 H16 V20 H4 Z" />
+                </svg>
+            );
+        case 'backfire':
+            return (
+                <svg viewBox="0 0 24 24" style={s} fill={color}>
+                    <path d="M14 3 A7 7 0 0 1 14 17 H11 V21 L4 15 L11 9 V13 H14 A3 3 0 0 0 14 7 H8 V3 Z" />
+                </svg>
+            );
+        case 'rapport':
+            return (
+                <svg viewBox="0 0 24 24" style={s} fill={color}>
+                    <path d="M3 4 H21 V16 H12 L7 21 V16 H3 Z" />
+                </svg>
+            );
+        case 'refresh':
+            return (
+                <svg viewBox="0 0 24 24" style={s} fill={color}>
+                    <path d="M12 3 A9 9 0 1 0 21 12 H18.5 A6.5 6.5 0 1 1 12 5.5 L12 9 L18 4.5 L12 0 Z" />
                 </svg>
             );
         case 'draw':
@@ -325,6 +407,7 @@ export function KwGlyph({
                     <path d="M12 1 L15 5.5 L12 10 L9 5.5 Z M12 14 L15 18.5 L12 23 L9 18.5 Z M5.5 7.5 L8.5 12 L5.5 16.5 L2.5 12 Z M18.5 7.5 L21.5 12 L18.5 16.5 L15.5 12 Z" />
                 </svg>
             );
+        case 'doom':
         case 'disenchant':
             return (
                 <svg viewBox="0 0 24 24" style={s} fill={color} fillRule="evenodd">

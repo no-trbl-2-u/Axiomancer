@@ -231,8 +231,8 @@
   "image": "./assets/catalog/cards/freeze.webp",
   "pricing": null,
   "face": {
-   "freeGlyph": "◆",
-   "freeKw": null,
+   "freeGlyph": "◉",
+   "freeKw": "REVEAL",
    "freeVal": null,
    "paid": "backfire i1 d2 + lock the enemy's next stance + STAGGER 1."
   },
@@ -2442,8 +2442,8 @@
   "image": "./assets/catalog/cards/will-o-wisp.webp",
   "pricing": null,
   "face": {
-   "freeGlyph": "◆",
-   "freeKw": null,
+   "freeGlyph": "◉",
+   "freeKw": "REVEAL",
    "freeVal": null,
    "paid": "Afflict with BACKFIRE 2 for 2 turns."
   },
@@ -3786,8 +3786,8 @@
   "image": "./assets/catalog/cards/confuse.webp",
   "pricing": null,
   "face": {
-   "freeGlyph": "◆",
-   "freeKw": null,
+   "freeGlyph": "◉",
+   "freeKw": "REVEAL",
    "freeVal": null,
    "paid": "BACKFIRE ALL — the enemy takes 1.5 damage for every rung you have ever denied this combat."
   },
@@ -3844,8 +3844,8 @@
   "image": "./assets/catalog/cards/confuse.webp",
   "pricing": null,
   "face": {
-   "freeGlyph": "◆",
-   "freeKw": null,
+   "freeGlyph": "◉",
+   "freeKw": "REVEAL",
    "freeVal": null,
    "paid": "Afflict with BACKFIRE 2 for 3 turns, then STAGGER 1."
   },
@@ -4020,8 +4020,8 @@
   "image": "./assets/catalog/cards/confuse.webp",
   "pricing": null,
   "face": {
-   "freeGlyph": "◆",
-   "freeKw": null,
+   "freeGlyph": "◉",
+   "freeKw": "REVEAL",
    "freeVal": null,
    "paid": "Apply STAGGER 1 to the enemy's next action."
   },
