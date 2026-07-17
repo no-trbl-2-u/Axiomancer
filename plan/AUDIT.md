@@ -14,6 +14,46 @@
 
 ## Pending
 
+### deploy-check reports a `cancelled` CI run as red — false-red during concurrent-push collisions
+- category: debt
+- impact: 5
+- ease: 6
+- detail: surfaced 2026-07-17 during the Phase 36a march tick. A
+  concurrent "file the residue" session pushed several commits onto
+  `main` while 36a's `verify-mobile` was mid-run; GitHub's concurrency
+  group cancelled each prior commit's long `e2e-minigames` playwright job
+  (`cancel-in-progress`). `scripts/deploy-check.mjs` maps that
+  `conclusion: cancelled` to **"DEPLOY FAILED (CI red)"** and exit 1,
+  identical to a real failure — even though every FAST job
+  (detect-scope, smoke-bundler, lint+typecheck+jest) succeeded and only
+  the superseded e2e was cut off. This produced two false-reds in one
+  tick and, under a stricter reading of ship-a-phase §10, could have
+  triggered a wrongful stop on green code. Fix: treat a `cancelled`
+  verify-* run distinctly from `failure` — when the cancel is a
+  concurrency supersession (a newer commit for the same ref exists),
+  re-poll the newer HEAD or report exit 2 (timeout/retry) rather than
+  exit 1 (red). Belt-and-suspenders: only count runs whose head_sha ==
+  the checked HEAD. Harness/script only.
+- next: /iterate (deploy-check.mjs: distinguish cancelled-by-supersession
+  from failed; prefer the newest same-ref run)
+
+### `circular-reasoning` sits at exactly the uncommon pricing-lint floor (4.50)
+- category: tests
+- impact: 2
+- ease: 8
+- detail: surfaced 2026-07-17 by the Phase 36a mechanics-expert pricing
+  pass. `circular-reasoning` scores exactly 4.50 — the uncommon band
+  floor in `pricing.engine.test.ts` (`RANK_BANDS.uncommon = [4.5, 13]`)
+  — so it is one rounding hair from a red lint. It was NOT a 36a mover
+  (its "premise" lives in flavor text, no scored mechanic), so 36a's
+  SWAY/concede changes did not touch it, but any future Premise-currency
+  reprice or rider tweak that shaves a fraction off it flips the lint red
+  with no real design change. Low-urgency tripwire: either give the card
+  a hair more printed value (design call → `/deck-tuning`) or widen the
+  uncommon floor a touch (lint call). Note for whoever next touches
+  Premise pricing.
+- next: /iterate or /deck-tuning (nudge the card value or the band floor)
+
 ### Playtest harness has no victory-only rounds-to-victory metric
 - category: gap
 - impact: 4
