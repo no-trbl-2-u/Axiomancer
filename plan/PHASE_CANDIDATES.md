@@ -135,6 +135,28 @@
   work (30 enemies) — promote to a build-plan phase when queue has
   room.
 
+### Mid-game preset deck library (mechanics — content; the deck-progression roadmap)
+- source: T direct, 2026-07-17 chat session (starter-deck-presets rename).
+- decision (T direct, same session): the preset roadmap is THREE
+  libraries — **starter** (the shipped ten, now
+  `combat.starter-deck-presets.ts`; early/mid by design, in-game),
+  **mid-game** (in-game: what the player trades into after the
+  labyrinth, per the draft-maturation progression model), and
+  **end-game** (NOT shipped in the game — a sim/tuning fixture only,
+  so build it as a sandbox/playtest set alongside
+  `cards.sandbox-sets.ts` rather than a `src/` library carrying
+  verify-gate weight). Two standing constraints ratified in-session:
+  (1) NO rank/price-ceiling raise — mid/late libraries stay in-band
+  (clean-replace, per the 2026-07-08 deck-progression decision; the
+  price experiment proved magnitude headroom does not buy late wins),
+  the winning axes are tempo/front-load + alt-win engines (now priced
+  by 36a/36b); (2) when the second library lands, extract the shared
+  recipe machinery (the 4/4/2/2/1/1/1 recipe, Color Law partition,
+  `PRESET_COLOR_BORROWS`, `CombatDeckFocus`) into a
+  `combat.deck-recipes.ts` core so the laws are not starter-named.
+  Deps: the deck-budget lint candidate below gives mid-game presets a
+  measurable per-stage budget target; sequence it first if possible.
+
 ### Preset deck-budget lint (mechanics — pricing)
 - source: T direct, 2026-07-17 chat session (price-experiment follow-up,
   same evidence as Phases 36a/36b).

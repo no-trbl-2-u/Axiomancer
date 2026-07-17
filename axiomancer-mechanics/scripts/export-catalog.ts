@@ -34,7 +34,7 @@ import { cardLibrary, getCardById } from '../src/Cards/cards.library';
 import { toCombatCard } from '../src/Combat/combat.cards';
 import { CARD_RANK_NAMES, rankToRarity } from '../src/Cards/types';
 import { FREE_ENCHANT_ROUNDS } from '../src/Game/game-mechanics.constants';
-import { cardOrigin } from '../src/Combat/combat.deck-presets';
+import { cardOrigin } from '../src/Combat/combat.starter-deck-presets';
 import { THEME_KEYWORDS, type CardTheme } from '../src/Cards/card-themes';
 import { mechanicText, riderText } from '../src/Combat/combat.cards';
 import { EnemyLibrary } from '../src/Enemy/enemy.library';

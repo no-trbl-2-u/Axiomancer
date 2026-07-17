@@ -17,7 +17,7 @@
 import { describe, it, expect, afterEach, vi } from 'vitest';
 
 import { runPlaytestMatrix, type PlaytestReport } from '../combat.playtest';
-import { COMBAT_DECK_PRESET_ORDER } from '../combat.deck-presets';
+import { COMBAT_DECK_PRESET_ORDER } from '../combat.starter-deck-presets';
 import { evaluateWinRateCurve, type WinRateCurvePoint } from '../combat.curve-shape';
 import type { CombatStageId } from '../combat.stage-profiles';
 

@@ -28,7 +28,7 @@ import { lookupEffect } from '../Effects';
 import { rollCombatCardRewards } from './combat.rewards';
 import { toCombatCard } from './combat.cards';
 import { focusWeight, OFF_FOCUS_WEIGHT } from './combat.deck-draft';
-import { getDeckPreset, type CombatDeckFocus, type CombatDeckPreset } from './combat.deck-presets';
+import { getDeckPreset, type CombatDeckFocus, type CombatDeckPreset } from './combat.starter-deck-presets';
 
 /** Offers rolled per reward screen (mirrors the aftermath's 1-of-3 pick). */
 const OFFERS_PER_SCREEN = 3;

@@ -58,7 +58,7 @@ One grammar shared by `npm run combat-playtest --deck=...`,
 
 | Form | Meaning |
 |---|---|
-| `preset:<id>` | A curated preset: `dot-erosion`, `control-lock`, `utility-bulwark`, `aggro-strike`, `balanced` (`src/Combat/combat.deck-presets.ts`) |
+| `preset:<id>` | A curated preset: `dot-erosion`, `control-lock`, `utility-bulwark`, `aggro-strike`, `balanced` (`src/Combat/combat.starter-deck-presets.ts`) |
 | `draft:<focus>` | Seeded weighted draft from the eligible pool: `dot`, `control`, `utility`, `damage`, `balanced` (focus-fitting verb classes at 4x weight; default size 10, max 2 copies; always >= 1 defend and >= 1 status card when the pool allows) |
 | `cards:a,b,c` | An explicit card-id list (invalid ids dropped) |
 | `policy-pick` | The harness drafts from the running policy's `preferredFocus` — the default |

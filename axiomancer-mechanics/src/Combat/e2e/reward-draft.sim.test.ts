@@ -13,7 +13,7 @@
 import { describe, it, expect, afterEach } from 'vitest';
 
 import { runRewardDraftSim } from '../combat.reward-draft.sim';
-import { COMBAT_DECK_PRESET_ORDER, getDeckPreset } from '../combat.deck-presets';
+import { COMBAT_DECK_PRESET_ORDER, getDeckPreset } from '../combat.starter-deck-presets';
 import { COMBAT_REWARD_POOL } from '../combat.rewards';
 import { getCardById } from '../../Cards/cards.library';
 import { SANDBOX_CARD_SETS } from '../../Cards/cards.sandbox-sets';

@@ -17,7 +17,7 @@ import { cardLibrary, getCardById } from '../cards.library';
 import { rankToRarity, CARD_RANK_NAMES } from '../types';
 import type { Card } from '../types';
 import { COMBAT_REWARD_POOL, STARTING_CARD_IDS } from '../../Combat/combat.rewards';
-import { listDeckPresets, cardOrigin, PRESET_COLOR_BORROWS } from '../../Combat/combat.deck-presets';
+import { listDeckPresets, cardOrigin, PRESET_COLOR_BORROWS } from '../../Combat/combat.starter-deck-presets';
 
 /** The ten theme tags (spec §6) — every card carries exactly one. */
 const THEMES = [

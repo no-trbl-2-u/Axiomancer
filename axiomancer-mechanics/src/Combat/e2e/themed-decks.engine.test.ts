@@ -34,7 +34,7 @@ import {
 import { FLOATING_DICE_CAP } from '../combat.dice';
 import { runHazardCombatAutoEncounter } from '../combat.autoplay';
 import { THREAT_RUNGS } from '../effects';
-import { buildPresetDeck, COMBAT_DECK_PRESET_ORDER } from '../combat.deck-presets';
+import { buildPresetDeck, COMBAT_DECK_PRESET_ORDER } from '../combat.starter-deck-presets';
 import type {
     CombatDieColor, CombatEncounterState, CombatEvent, CombatManaDie, CombatThreatPhase,
 } from '../combat.encounter.types';
