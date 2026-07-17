@@ -18,3 +18,4 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-07-17T17:22:15Z | subagent | mechanics-expert | claude-fable-5 | main | Analyze upgradeable-dice combat proposal |
 | 2026-07-17T17:37:13Z | subagent | mechanics-expert | claude-fable-5 | main | Design stance alternatives sans RPS |
 | 2026-07-17T19:25:17Z | subagent | mechanics-expert | claude-fable-5 | main | D1 mechanics-expert spec 33 review |
+| 2026-07-17T21:14:27Z | skill | ship-a-phase | claude-fable-5 | main | - |

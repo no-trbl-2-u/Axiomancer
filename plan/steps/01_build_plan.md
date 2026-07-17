@@ -555,7 +555,7 @@ supersession collisions before any engine work.
       (4 dedicated slots + blacksmith), STAKE retired, momentum
       null-reset, surge until-spent —
       `spec 33: land D1 review` (4adf7266)
-- [ ] Phase D2 — Engine core, flagged. The whole spec-33 model behind a
+- [x] Phase D2 — Engine core, flagged. The whole spec-33 model behind a
       flag: 4 fixed dice with a die-gear interface (default gear
       hardcoded), stance-from-cards + open stance checks, momentum with
       **null-reset breaks** (D1 owner call — do NOT port the shipped
@@ -568,6 +568,10 @@ supersession collisions before any engine work.
       Brief: `plan/phases/phase_D2_engine_core_flagged.md`.
       Prove: hermetic vitest (`mockSequentialRng`); flag-off suite
       untouched-green. Deps: D1.
+      SHIPPED 2026-07-17 — 24 hermetic e2e tests; mechanics + mobile
+      verify green; variety-chain auto-refresh also retired in-flag
+      (decision) —
+      `feat(mechanics): Upgradeable-Dice engine core behind flag` (18cf5e3b)
 - [ ] Phase D3 — Sim harness + economy derivation. Autoplay policies
       learn the new action space; Monte-Carlo witness for the spec §7
       **D3 gates** (E[usable]≈1.83, whiff≈8.3%, per-color ≥65%, ◆ income
@@ -660,3 +664,4 @@ phases with linked notes here.)
 - phase 13 — (port pre-tracking; mechanics `src/World/Hazard/` + `audit/` parity harness, mobile `state/hazard/store-actions.ts` consumer) — hazard v2 engine port verified already landed, mobile duplicate deleted, content parity confirmed; recorded this tick
 - phase 25 — f7868e2a — /consolidate janitor mandate (terminology-sweep step + AUDIT finding) + `verify-mechanics.yml` stale `src/Skills/` impact-path fix; Part A harness re-apply verified already present at HEAD, no re-derivation needed
 - phase D1 — 4adf7266 — spec 33 review landed (PASS-WITH-EDITS; die-gear expansion, STAKE retired, momentum null-reset, pool-law binding rule; supersession banners on HANDOFF-2026-07-09 + phase 31; 33c/33d re-scoped; Fate Engine P2 re-scoped, P3 retired)
+- phase D2 — 18cf5e3b — Upgradeable-Dice engine core behind flag (four-die roll law + die-gear interface, stance-from-cards + open stance checks, null-reset momentum + until-spent surge, honest 1◆ Press Fate, 7-object ceiling overflow→+1◆, OVERHEAT crack primitive; draft/STAKE/read/variety-refresh retired in-flag; 24 hermetic tests, flag-off byte-identical, mobile re-verified)
