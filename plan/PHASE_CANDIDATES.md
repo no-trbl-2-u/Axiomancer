@@ -81,6 +81,18 @@
 - only one board is authored; completion currently writes a flag
   nothing reads. Content + a consumer for the completion flag.
 
+### In-app finding capture — dev-menu button files a pre-filled GitHub issue (mobile)
+- source: T direct, 2026-07-16 workflow session ("file the residue")
+- T plays daily on preview builds; findings currently route through
+  chat (Hermes or Claude) and mostly never reach the loop's queues.
+  A dev-menu action in the preview build that opens a pre-filled
+  GitHub issue — current route, seed, run state, app version — makes
+  a finding cost one tap plus a sentence, and lands it where
+  `/march`'s triage gate already drains (`loop:do` = concierge lane).
+  Scope: mobile dev menu entry + issue-URL builder (GitHub new-issue
+  URL with query params; no token needed on-device). Keep it out of
+  production builds.
+
 ### Enemy stat rewrite to budget-curve compliance (content)
 - source: `plan/AUDIT.md` [1.2], decision via `/oversight` 2026-07-08
 - decision: the `enemyStatBudget` curve is canon, not the currently

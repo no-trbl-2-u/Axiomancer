@@ -14,6 +14,23 @@
 
 ## Pending
 
+### [needs-user-call] Adopt a shared-queue convention for Hermes-routed work
+- category: divergence
+- impact: 6
+- ease: 8
+- detail: T's daily-play findings route three ways — Hermes (co-founder
+  agent), direct chat with Claude, or manual fixes. Only work that
+  lands in `plan/` files or GitHub issues is visible to the `/march`
+  loop; Hermes-decided work that goes straight to code edits leaves no
+  trace in the loop's state, so the loop optimizes over a stale model
+  of what matters, and double-shipping risk rises (see the SIDE RAIL
+  vs cloud Option A reconcile, 2026-07-16). Proposed convention: any
+  Hermes-decided work item lands as a GitHub issue (or a build-plan
+  phase row) before or alongside the code change, so both brains
+  drain one queue via `/triage`. Requires T to adopt this on the
+  Hermes side — not something the loop can enforce alone.
+- next: /oversight (standing question 0 drains this)
+
 ### [3.2] Night workflow never installs Playwright's browser — breadth check silently would fail on every run
 - category: gap
 - impact: 4
