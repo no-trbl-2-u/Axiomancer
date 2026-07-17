@@ -1,6 +1,23 @@
 # Spec 29 — Reactive Enemies + Telegraphed Intent
 
-> **Status:** Draft — handoff. Answer §4, then `Spec 29 is ready, please implement.`
+> **Status:** Superseded (partially shipped) — 2026-07-17. This draft predates
+> the VITAE/HP-funnel architecture (it cites `CombatThreatPhase`'s old
+> `pressureTracks`/`dotThreshold` model, removed from the codebase entirely).
+> §4 Q1/Q3/Q4's recommended shape shipped under different names: the
+> **reactive verb** is WS9's `CombatThreatPhase.branch` (spec 32 §12 item 7,
+> ratified 2026-07-11) — a condition + fully-resolved `then`/`else` fork,
+> committed at phase START, zero RNG, telegraphed (both outcomes shown
+> pre-commit). Q4's guardrail (foreseeable, a fraction not all) is enforced by
+> the shipped `enemyCleanse` hook. Phase 33a
+> (`plan/phases/phase_33a_reactive_verb_core.md`) added two more counterplay
+> hooks in the same shape: `swayCleanse` / `premiseShed`. **Still open** from
+> §4's candidate set: Harden and Enrage abilities (Q1), Adapt-stance beyond
+> what an authored branch fork's `enemyStance` already does, and telegraph
+> presentation richer than the current condition+both-outcomes text (variable
+> magnitude / rung-count — tracked as Phase 33b "variable-rung telegraphs").
+> Do not re-implement the branch/cleanse mechanism from this doc's §Proposed
+> approach — read `combat.encounter.types.ts`'s `CombatThreatBranch`/
+> `CombatThreatEffect` and `combat.engine.ts`'s `resolveThreatPhase` instead.
 > **Depends on:** Spec 25 (Hazard-Pattern Combat) · Spec 07 (enemy content & AI).
 > **Theme inspiration:** Slay the Spire's *intents* (the enemy telegraphs its next move and you adapt) + Mage Knight creatures (resistances/fortifications you must answer). Into the Breach: a board-state dialogue, not a static puzzle.
 
