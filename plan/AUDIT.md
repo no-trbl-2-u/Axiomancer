@@ -14,6 +14,31 @@
 
 ## Pending
 
+### [3.5] `critique:drive` combat capture stops at the pre-fight preview — in-combat card-face rows can't be re-validated unattended
+- category: gap
+- impact: 5
+- ease: 7
+- detail: the Phase 34 transport
+  (`axiomancer-mobile/scripts/critique-drive.mjs`) navigates
+  `/combat-encounter` and dismisses the tutorial primer, but never
+  presses **ENTER COMBAT** (`combat-enter`), so it captures only the
+  pre-fight reveal/preview, not the live board with the card hand.
+  Critique pass 13 (2026-07-17, commit b4870384) hit exactly this
+  wall: it could reconfirm the exploration-hub findings (MORALE
+  "v of x", title wordmark crop) but **could not re-validate** the two
+  remaining STALE-flagged card-face rows — VITAE-vs-HP copy and DoT
+  round-clock math — because they only render once combat is entered
+  and cards are in hand. The fix is a known pattern: mirror
+  `combat-encounter-e2e.mjs` (`combat-enter` click → re-kill primer →
+  wait for `combat-board` → capture the board + hand) as an extra
+  captured state on the combat screen, so the unattended re-baseline
+  reaches in-combat surfaces. Secondary (lower value): state-gated
+  screens pushed by `<EventGate>` (`/village`, `/dialogue`,
+  `/cutscene`) are still uncapturable by direct nav — reaching them
+  needs a debug event-seed hook; leave to interactive/playtester
+  critique unless the card-face gap recurs for those surfaces too.
+- next: /iterate
+
 ### Combat deck-matrix baseline stale by 33 mechanics-source commits
 - category: gap
 - impact: 6
