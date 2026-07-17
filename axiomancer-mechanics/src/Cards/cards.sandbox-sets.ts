@@ -190,9 +190,9 @@ const slagRunoff: Card = {
     tier: 1, rank: 2, cardType: 'spell',
     targetType: 'self',
     // pts: PAID grant_pip 2 (2 × 1.5 = 3.0) + overflow→ember (kindling_ember
-    // i1 d3 = 3 HP ÷ 3 = 1.0 per overflowed pip × expectedOverflowPips 1 =
-    // 1.0) + FREE pips 1 (1.5) = 5.5 → common band 1.5-7.5 (Lemma).
-    // FREE share 1.5/5.5 = 27.3% ✓ the 25-35% window.
+    // i1 d3 printed 3 → phase-36b tempo-weighted 2.31 ÷ 3 = 0.77 per overflowed
+    // pip × expectedOverflowPips 1 = 0.77) + FREE pips 1 (1.5) = 5.27 → common
+    // band 1.5-7.5 (Lemma). FREE share 1.5/5.27 = 28.5% ✓ the 25-35% window.
     free: { pips: 1 },
     specialMechanics: [{
         kind: 'grant_pip', count: 2,
@@ -266,9 +266,9 @@ const gritBetweenStones: Card = {
     targetType: 'enemy',
     // pts (post-Phase-30 merge re-pin 2026-07-12 — FREE lays bulwark's
     // currency, a persistent BARRIER brick, instead of the fading chip
-    // guard): nettle sting i2 d3 (2 dpr × i2 × 3 rounds = 12 HP ÷ 3 = 4.0) +
-    // Guard 6 (1.5) + payoff-class closer ruptureMarks 2 (2 × 2/3 = 1.33) +
-    // FREE barrier 2 (0.67) = 7.5 → uncommon band 4.5-13 (Theorem).
+    // guard): nettle sting i2 d3 (printed 12 → phase-36b tempo-weighted 9.25
+    // ÷ 3 = 3.08) + Guard 6 (1.5) + payoff-class closer ruptureMarks 2 (2 × 2/3
+    // = 1.33) + FREE barrier 2 (0.67) = 6.58 → uncommon band 4.5-13 (Theorem).
     free: { barrier: 2 },
     combatEffects: [
         { effectId: 'debuff_nettle_sting', appliedTo: 'opponent', intensity: 2, duration: 3 },
@@ -507,11 +507,11 @@ const inMediasRes: Card = {
         + 'entered early runs deeper than one arrived at politely.',
     tier: 1, rank: 3, cardType: 'spell',
     targetType: 'enemy',
-    // pts: PAID [poison i1 d2 card-played clock (8 HP ÷ 3 = 2.67) + PREMISE 1
-    // (0.8)] = 3.47 + OPENING(≤1) rider [bonusIntensity 1 (1.5) + draw (2.0)]
-    // × threshold 0.5 = 1.75 + FREE [premises 2 (1.6) + guard 1 (0.25)] =
-    // 1.85 → 7.07 → uncommon band 4.5-13 (Thesis). FREE share 1.85/7.07 =
-    // 26.2% ✓ window.
+    // pts: PAID [poison i1 d2 (printed 8 → phase-36b tempo-weighted 7.0 ÷ 3 =
+    // 2.33) + PREMISE 1 (0.8)] = 3.13 + OPENING(≤1) rider [bonusIntensity 1
+    // (1.5) + draw (2.0)] × threshold 0.5 = 1.75 + FREE [premises 2 (1.6) +
+    // guard 1 (0.25)] = 1.85 → 6.73 → uncommon band 4.5-13 (Thesis). FREE
+    // share 1.85/6.73 = 27.5% ✓ window.
     free: { premises: 2, guard: 1 },
     combatEffects: [
         { effectId: 'debuff_poison', appliedTo: 'opponent', intensity: 1, duration: 2 },
@@ -575,10 +575,11 @@ const dyingEcho: Card = {
         + 'follows, and it never quite stops being said.',
     tier: 1, rank: 2, cardType: 'spell',
     targetType: 'enemy',
-    // pts: PAID poison i1 d2 (8 HP ÷ 3 = 2.67) + closing-play rider
-    // [bonusIntensity 2 (3.0) + bonusDuration 1 (1.0)] × threshold 0.5 = 2.0
-    // + FREE [mark i1 d1 (0.75) + conviction 1 (1.0)] = 1.75 → 6.42 →
-    // common band 1.5-7.5 (Lemma). FREE share 1.75/6.42 = 27.3% ✓ window.
+    // pts: PAID poison i1 d2 (printed 8 → phase-36b tempo-weighted 7.0 ÷ 3 =
+    // 2.33) + closing-play rider [bonusIntensity 2 (3.0) + bonusDuration 1
+    // (1.0)] × threshold 0.5 = 2.0 + FREE [mark i1 d1 (0.75) + conviction 1
+    // (1.0)] = 1.75 → 6.08 → common band 1.5-7.5 (Lemma). FREE share
+    // 1.75/6.08 = 28.8% ✓ window.
     free: { applyEffect: { effectId: 'debuff_mark', duration: 1 }, conviction: 1 },
     combatEffects: [
         { effectId: 'debuff_poison', appliedTo: 'opponent', intensity: 1, duration: 2 },

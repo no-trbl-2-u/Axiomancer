@@ -334,8 +334,9 @@ describe('pricing — thoughtforms and conjure-exercise cards land in their rank
     });
 
     it('the authored // pts: comments are the executable arithmetic (regression anchors)', () => {
-        // tf-cinder: ember i3 d3 (9 ÷ 3 = 3) + FREE pip 1.5 = 4.5 (post-Phase-30)
-        expect(scoreCard(getThoughtformById('tf-cinder')!)).toBeCloseTo(4.5, 2);
+        // tf-cinder: ember i3 d3 (printed 9 → phase-36b tempo-weighted 6.94) ÷ 3
+        // = 2.31 + FREE pip 1.5 = 3.81
+        expect(scoreCard(getThoughtformById('tf-cinder')!)).toBeCloseTo(3.8125, 2);
         // tf-minor-premise: premise 0.8 + FREE premise 0.8 = 1.6
         expect(scoreCard(getThoughtformById('tf-minor-premise')!)).toBeCloseTo(1.6, 2);
         const byId = new Map(CONJURE_SET.cards.map(c => [c.id, c]));
