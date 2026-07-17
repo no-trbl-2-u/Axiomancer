@@ -105,50 +105,29 @@
   work (30 enemies) — promote to a build-plan phase when queue has
   room.
 
-### Tempo-aware card pricing (mechanics — `scoreCard`)
+## Promoted
+
+### Tempo-aware + alt-win-aware card pricing (mechanics — `scoreCard`)
 - source: T direct, 2026-07-17 ultracode playtest ("does raising card
   price raise win-rate?"). Evidence:
   `axiomancer-mechanics/scratch/price-experiment/report/FINDINGS.md`
   (+ data-viz + `out/*.json`, 10 presets × 4 stages + 2 within-deck
-  price ladders, blind policy, seeds=2).
-- finding: `scoreCard` (cards.pricing.ts) prices magnitude-per-die but
-  is blind to TEMPO. Two cards can price identically yet one pays now
-  (RUPTURE burst) and one over ~6 ramping rounds — and where fights are
-  short/lethal the slow one is worth a fraction of its printed price.
-  The erosion price-ladder shows late win-rate crawls 4%→12% even at 4×
-  price (avg-spell 8→51) because the death clock is fixed by enemy
-  output; extra magnitude never gets to tick. Temp fix-cards that price
-  the tempo axis instead (front-loaded burst / short high-intensity DoT
-  / a sliver of GUARD-BARRIER-STAGGER survival —
-  `scratch/price-experiment/proposed/fix-cards.sandbox.ts`) converted
-  +12 pts mid and >2× late for only +0.5 avg-spell price.
-- scope: add a tempo/velocity term to `scoreCard` (credit
-  front-loaded/faster-maturing payoff; discount long-ramp DoTs by a
-  time-to-payoff factor) and re-band the pricing lint. Prove via the
-  scratch ladder harness re-run at higher seeds, then `/deck-tuning`.
-  Confirm the fine-grained trends at seeds ≥ 5 before acting — seeds=2
-  makes small movements noise-dominated.
+  price ladders, blind policy, seeds=2). Findings in brief: `scoreCard`
+  is blind to TEMPO (slow ramps price like front-loaded bursts, but the
+  late death clock is set by enemy output — erosion ladder late crawls
+  0.04→0.12 across 4x price, while tempo-axis fix-cards converted
+  +12 pts mid / >2x late for +0.5 avg-spell) and blind to ALT-WIN
+  engines (enchant/disenchant → 0; SWAY/Premise/Befriend only as minor
+  riders; Grace 5.46 beats Foundry 7.52 early — the model ranks alt-win
+  decks backwards).
+- decision (T direct, 2026-07-17 chat session): promote both, alt-win
+  first (structural, enemy-independent), tempo second with its proof
+  gate re-run ON TOP OF phase 33b's enemies at seeds ≥ 5 — the
+  experiment data predates 33b (sibling branches) and the ladder's
+  down-scaler clamp needs fixing before the sub-1x tiers mean anything.
+- promoted to build plan as **Phases 36a (alt-win) / 36b (tempo)**.
 
-### Alt-win-aware card pricing (mechanics — `scoreCard`)
-- source: T direct, 2026-07-17 ultracode playtest (same session/evidence
-  as the tempo-pricing candidate above).
-- finding: `scoreCard` scores only SPELL HP-damage/status/burst;
-  non-HP win currencies (SWAY→capitulate, Premise→concede,
-  Befriend→mercy) and enchant/disenchant engine text price at ~0, so
-  whole win engines are invisible and the model ranks alt-win decks
-  BACKWARDS. Cross-deck price does not predict win-rate (mid Pearson
-  ≈0.57, driven by a deck happening to be HP-damage): the cheapest deck
-  Grace (5.46) beats the pricier Foundry (7.52) early — both winning
-  purely by CAPITULATE at statusEngagement 0.00 — and the only preset
-  alive late (Oratory) is carried by CONCEDE, unpriced.
-- scope: extend `scoreCard` (or add a parallel win-path budget) so
-  SWAY/Premise/Befriend and enchant/disenchant persistent passives
-  carry point value, so a preset's total price becomes a meaningful
-  cross-deck strength signal rather than an HP-damage-only proxy.
-  Coordinate with the enchant/disenchant "min-4-triggers" hand-pricing
-  convention already noted in the card comments.
 
-## Promoted
 
 ### EA-1..EA-8 — Engagement-overhaul roadmap
 - source: `plan/tuning/2026-07-10-engagement-overhaul-roadmap.md`
