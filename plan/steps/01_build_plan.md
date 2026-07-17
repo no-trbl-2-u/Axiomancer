@@ -369,19 +369,35 @@ order, intra-batch gates noted per phase):**
       as a cosmetic/narrative tier rather than a shop good or card-rider
       threshold) shipped (this tick). Every part of this brief has now
       shipped — source: `plan/tuning/2026-07-10-theme-identity.md` §2
-- [ ] Phase 33 — Enemy Answers (specs 29/30 slice + enemy
-      counterplay). One reactive verb engine-wide, lethality readout,
-      variable-rung telegraphs, CAUTERIZE/Premise-shed/SWAY-cleanse
-      enemies, THE COVETED DIE; GLYPHS pilot rides at the end as the
-      Option-B grammar experiment. Largest phase; gated on Phase 26
-      (numbers) but design-independent of the owner session
-      (mechanics) — source: `plan/tuning/2026-07-10-turn-texture.md` §3
-      + `plan/tuning/2026-07-10-theme-identity.md` §1 +
-      `plan/tuning/2026-07-10-out-of-flow-mechanics.md` §2
+Phase 33 — Enemy Answers (specs 29/30 slice + enemy counterplay).
+SPLIT into shippable slices via oversight 2026-07-16 — the single
+mega-brief bundled ~6 verbs and carried the Phase 32 stall risk on
+oversized ticks. Each slice below must finish and commit on its own
+tick. Shared sources: `plan/tuning/2026-07-10-turn-texture.md` §3 +
+`plan/tuning/2026-07-10-theme-identity.md` §1 +
+`plan/tuning/2026-07-10-out-of-flow-mechanics.md` §2. All gated on
+Phase 26 (numbers) but design-independent of the owner session
+(mechanics).
+
+- [ ] Phase 33a — Reactive-verb core: one reactive verb engine-wide
+      + enemy-side lethality readout (the foundational engine hooks
+      the archetypes ride on). Deps: Phase 26. Refresh the brief with
+      `/plan-a-phase phase 33a` before pickup — design may have
+      drifted since 2026-07-10.
+- [ ] Phase 33b — Enemy archetypes + variable-rung telegraphs:
+      CAUTERIZE / Premise-shed / SWAY-cleanse enemies with the
+      variable-rung telegraph presentation. Deps: 33a.
+- [ ] Phase 33c — THE COVETED DIE. Deps: 33a.
+- [ ] Phase 33d — GLYPHS pilot (Option-B grammar experiment) — rides
+      last, as originally scoped. Deps: 33a (+ 33b for enemy surface).
 
 **Critique infra (promoted via `/oversight` 2026-07-10):**
 
 - [ ] Phase 34 — Non-Playwright transport for unattended `/critique`.
+      NOTE (oversight 2026-07-16): this phase now ENABLES the critique
+      re-baseline the user asked for — the 25 stale CRITIQUE findings
+      can't be unattended-re-validated until this ships. Prioritize it
+      if the re-baseline isn't done attended first.
       8 consecutive `/critique` passes (of 11 total) have returned
       zero product findings because the `playtester` sub-agent's
       Playwright MCP tool grants don't propagate into Agent-tool

@@ -11,7 +11,22 @@
 
 ## Pending
 
-### [MED] ratified-exception HP arms bypass the damage-instance clock funnel
+> **[oversight 2026-07-16] STALE — pending re-validation.** These 25
+> findings were last drained 2026-07-10 and now predate the SIDE RAIL
+> card-face redesign (~25 commits on 2026-07-16). Before draining any
+> of them, the next loop action must RE-BASELINE, not blind-drain:
+> re-run `/critique` against current HEAD, drop findings the redesign
+> already fixed (check the card-face/copy items first — VITAE-vs-HP
+> copy, DoT card faces printing round-clock math, "the-closing-word"
+> threshold, card-editor cannot edit the three new mechanic fields),
+> and repopulate with fresh findings.
+>
+> **BLOCKER (surfaced at oversight):** unattended `/critique` returns
+> zero product findings until **Phase 34** ships (the playtester's
+> Playwright grants don't propagate into unattended Agent-tool
+> sub-agent contexts — see Done section). So this re-baseline needs
+> an **attended** `/critique` run, OR Phase 34 first. Until then,
+> treat every row below as unverified.
 - pass: review-closeout 2026-07-12 (commit 4680e5e2, branch
   claude/axiomancer-dawncaster-comparison-cz6008)
 - viewport: n/a
