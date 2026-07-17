@@ -507,6 +507,54 @@ Phase 26 (numbers) but design-independent of the owner session
       Deps: 36a (shared `scoreCard` surface; land the lint re-band
       once).
 
+**Combat rework (promoted via chat session 2026-07-17, T direct — spec 33
+`33-upgradeable-dice.md`):** the four-die Upgradeable-Dice rework. Promote as
+a SEQUENCE with per-phase gates. D1 is a thinking/review gate (no code, safe
+to run live); **D2+ touch the engine — pause the `/march` + night crons
+before starting them** (collision discipline). D1 also owns reconciling the
+supersession collisions before any engine work.
+
+- [ ] Phase D1 — Upgradeable-Dice spec review-and-land. Mechanics-expert
+      review of `axiomancer-mechanics/specs/33-upgradeable-dice.md` against
+      doctrine (status-centrality, the 80/50/25-35/0 win curve,
+      dice-honesty) before ANY engine work. Settle spec §9 open items
+      (reset-and-restart momentum reading, color↔stance mapping,
+      HONE/TEMPER final keyword names, ◆-sink repricing ownership) AND
+      decide keep/retire/re-scope for each supersession collision: spec 33
+      §1 supersedes the 2026-07-09 dice-law + the shipped Phase 31
+      (roll/read/wheel), and overlaps pending Phase 33c (THE COVETED DIE)
+      + 33d + the Fate Engine P2/P3 candidates. Thinking phase; NO code.
+      Brief: `plan/phases/phase_D1_upgradeable_dice_spec_review.md`.
+      Prove: clean mechanics-expert verdict + every §9 item and every
+      collision resolved in-brief (owner-call items surfaced, not guessed).
+- [ ] Phase D2 — Engine core, flagged. Per-die face tables + the momentum
+      machine + open stance checks behind a flag. `CombatManaDie` shape
+      change is public-barrel-breaking — migrate mobile + card-editor the
+      same phase and re-verify `npm run verify -w axiomancer-mobile`.
+      Prove: hermetic vitest (`mockSequentialRng`). Deps: D1.
+- [ ] Phase D3 — Sim harness. Autoplay policies + Monte-Carlo witness for
+      the spec §7 bands (E[usable]≈1.83, whiff≈8.3%, per-color ≥65%, ◆
+      income 1.2–1.6, surge rate). Prove: measured values in bands.
+      Deps: D2.
+- [ ] Phase D4 — Pricing re-derivation. Re-fit `cards.pricing.ts` to the
+      leaner ◆ economy; re-author Forge's 7 die-cards against the new
+      model; add ONE dice-interaction card per theme. Prove: effectiveness
+      lint + curated-library tests green. Deps: D3.
+- [ ] Phase D5 — Dice-face upgrade layer. Per-die mutable face
+      distributions (the four dice are permanent — NO inventory/loadout,
+      no equip/unequip; only faces mutate), FORGE face-swap + in-combat
+      FORGE upgrades, reward hooks, persistence via the spec-05
+      save/versioning machinery, `GAME_STATE_VERSION` migration. Prove:
+      migration tests. Deps: D2.
+- [ ] Phase D6 — Mobile UI. Dice-tray rework, payload-only face-inspection
+      panel (Dawncaster-terse; illegal actions prevented loudly),
+      momentum/stance chips, keyword glosses. Prove: Playwright e2e.
+      Deps: D2 (+ D5 for the upgrade surface).
+- [ ] Phase D7 — Tuning + honest re-baseline. Full `/combat-playtest`
+      matrix vs 80/50/25-35/0; statusEngagement re-baseline with its known
+      blind spots stated; playtester agents. Prove: bands + report.
+      Deps: D4, D6.
+
 > **After the queue drains:** `/march` transitions to `/iterate`
 > — draining `plan/AUDIT.md` + `plan/CRITIQUE.md`, doc-drift,
 > `as any` clusters, hex-literal -> AXM migration, a11y, and

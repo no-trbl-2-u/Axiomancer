@@ -123,6 +123,52 @@
   decision, and the price experiment showed magnitude headroom
   does not buy late wins (erosion late 0.04→0.12 at 4x).
 
+### D1–D7 — Upgradeable-Dice combat rework (spec 33)
+- source: T direct, 2026-07-17 brainstorm session
+  (`axiomancer-mechanics/braindump/2026-07-17-upgradeable-dice-combat.md`;
+  two mechanics-expert passes). Design CDR:
+  `axiomancer-mechanics/specs/33-upgradeable-dice.md` — all constraining
+  questions owner-decided in-session (Gold=wild, tokens=Conviction,
+  subsystems reinterpret, stance-from-cards replaces the RPS read,
+  strict persistent momentum, fixed-4 pool law).
+- The rework replaces the 3-die shared-bag draft with 4 fixed colored d6
+  (R/B/P: 1 special/2 mana/3 miss; Gold wild: 1/1/4), four permanent dice
+  whose face distributions upgrade — NOT swappable equipment (FORGE =
+  between-fight face-swap economy), stance as an output
+  of paid card play checked against open enemy telegraphs, and the momentum
+  wheel absorbed into the stance chain. Large, multi-phase: promote as a
+  SEQUENCE with per-phase gates, not one blob.
+  - **D1 — spec 33 review-and-land**: mechanics-expert review vs doctrine
+    (status-centrality, win-curve, dice honesty); settle §9 open items.
+    Prove: clean review verdict.
+  - **D2 — engine core, flagged**: per-die face tables + momentum machine +
+    stance checks behind a flag. `CombatManaDie` shape change is
+    public-barrel-breaking — migrate mobile + card-editor same phase;
+    re-verify `npm run verify -w axiomancer-mobile`. Prove: hermetic vitest
+    (`mockSequentialRng`).
+  - **D3 — sim harness**: autoplay policies + Monte-Carlo witness for the
+    spec §7 bands (whiff, mana/round, ◆ income, surge rate). Prove:
+    measured values in bands.
+  - **D4 — pricing re-derivation**: re-fit `cards.pricing.ts`; re-author
+    Forge's 7 die-cards; add one dice-interaction card per theme. Prove:
+    effectiveness lint + curated-library tests green.
+  - **D5 — dice-face upgrade layer**: per-die mutable face distributions
+    (the 4 dice are permanent — NO inventory/loadout, no equip/unequip),
+    FORGE face-swap + in-combat FORGE upgrades, reward hooks, persistence
+    via the spec-05 save/versioning machinery, `GAME_STATE_VERSION`
+    migration. Prove: migration tests.
+  - **D6 — mobile UI**: dice tray rework, face-inspection panel
+    (payload-only, Dawncaster-terse; illegal actions prevented loudly),
+    momentum/stance chips, keyword glosses. Prove: Playwright e2e.
+  - **D7 — tuning + honest re-baseline**: full combat-playtest matrix vs
+    80/50/25-35/0; statusEngagement re-baseline (blind spots stated);
+    playtester agents.
+- Interactions to respect at promotion: supersedes parts of Fate Engine
+  P2/P3 above (the read/wheel/draft surfaces they touch — reconcile scopes
+  before promoting either); the 2026-07-09 dice-law rework is superseded by
+  spec 33 §1; EA-6 (wheel) and EA-7 (STAKE) surfaces are reinterpreted, not
+  duplicated.
+
 ### Doctrine-curve check in the nightly baseline (harness promotion)
 - source: T direct, 2026-07-17 chat session (price-experiment follow-up).
 - The price-vs-winrate sweep lives in
