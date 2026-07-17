@@ -443,7 +443,98 @@
   Phase 33's SWAY-cleanse enemy work.
 - source: playtester (owner-directed break-test session)
 
-### [LOW] "the-closing-word" card face states a threshold that doesn't match the live floor
+### [HIGH] phase 31-32's effect on the doctrine curve is unmeasured — full confirmation rebaseline needed
+- pass: session 2026-07-17 (card-text + measurement-freshness work,
+  branch claude/card-text-paid-effects-3cd590, PRs #91/#92)
+- viewport: n/a
+- category: measurement
+- observation: the checked-in deck-matrix baseline is stamped
+  2026-07-12 and `npm run baseline:check` reports it stale by 33
+  mechanics-source commits — including keep-hand, REAP-attacks-max-HP,
+  charm resolve milestones, Oratory milestone drip, TURNABOUT, OMEN
+  v2, and OVERHEAT, the changes aimed at the very findings the
+  baseline records (mid badly under ~50%, late 0.00 for all ten
+  presets). The fixes shipped; the validation did not.
+- evidence: `npm run baseline:check` output at a99d0f64;
+  `plan/tuning/2026-07-11-honest-rebaseline-and-evidence.md` §1.
+- suggested fix: run the FULL confirmation pass —
+  `npm run baseline:regen` at seeds 1/2/3 (or the manual harness per
+  the rebaseline doc) — and judge the new curve against the locked
+  80/50/25-35/0 doctrine. The nightly digest's reduced pass
+  (`--runs=30 --confidence=reduced-nightly`, live since #92) gives a
+  directional read automatically, but close calls need the full
+  multi-seed measurement before `/deck-tuning` acts.
+
+### [MED] four reward-pool spells still print generated telegraphese
+- pass: session 2026-07-17 (card-text work, PRs #91/#92)
+- viewport: n/a
+- category: content/copy
+- observation: all 46 preset-seated spells now carry authored
+  `paidSummary` prose, but the four reward/draft-only spells —
+  straw-mans-jab, memento-mori, heart-of-the-matter, ad-nauseam —
+  still render the generated "i2 d3"-style paid text, so a drafted
+  reward card reads worse than every starter card next to it.
+- evidence: `cards.library.ts` spells lacking `paidSummary`
+  (grep); the paid-summary honesty guard covers them the moment
+  text is added.
+- suggested fix: author the four summaries through the same
+  pipeline (payload dump via
+  `axiomancer-mechanics/scripts/dump-paid-context.ts`, honesty guard,
+  adversarial check). NOTE: heart-of-the-matter's wording is pinned
+  by `grace-card-wording.engine.test.ts` — update its pins in the
+  same commit.
+
+### [LOW] catalog keyword bolder still speaks dead vocabulary
+- pass: session 2026-07-17 (card-text work)
+- viewport: devlog/catalog.html
+- category: content/copy
+- observation: `scripts/build-catalog.mjs` KEYWORD_WORDS bolds words
+  the spec 32 v3 registry retired or never had — DAMAGE, STUN, SLOW,
+  BURN, CONFUSION, SILENCE, REGEN, EXECUTE, COMPOUND, VULNERABLE,
+  BARRIER, REPRISE — so prose like "3 damage each" renders "damage"
+  as a bold keyword-styled token, implying a keyword the overlay
+  cannot define. Mobile bolding is honest (chip-driven); only the
+  catalog over-bolds.
+- evidence: The Closing Word's catalog face renders "3 DAMAGE each"
+  bold; the mechanics guard allowlist
+  (`paid-summary-honesty.engine.test.ts`) is the current vocabulary.
+- suggested fix: prune KEYWORD_WORDS to the guard's registry +
+  structural allowlist.
+
+### [LOW] small hand-card face clips authored paid text at 3 lines
+- pass: session 2026-07-17 (card-text work)
+- viewport: mobile hand card (132×194)
+- category: ui
+- observation: authored paid sentences render up to 5 lines on the
+  large/inspect face (`numberOfLines large ? 5 : 3`) but ellipsize at
+  3 lines on the small hand card; longer rares (e.g. The Closing
+  Word) are unreadable until inspected. May be acceptable (the owner
+  doctrine says the overlay is the reading surface) — filed as an
+  owner call, not a defect.
+- evidence: `CombatBoard.tsx` OutcomeText numberOfLines.
+- suggested fix: owner call — bump small-face lines to 4-5 (layout
+  risk: name/glyph crowding) or keep 3 and accept the ellipsis.
+
+### [LOW] [needs-user-call] session doc-residue: three AGENTS/CLAUDE additions proposed, green-light pending
+- pass: session 2026-07-17 (measurement-freshness work)
+- viewport: n/a
+- category: docs
+- observation: three small doc additions were proposed to the owner
+  and awaited their call when this was filed: (1) AGENTS.md worktree
+  bootstrap note — fresh worktrees lack per-workspace node_modules,
+  so tsc resolves the hoisted TypeScript (5.9.3 vs the workspace's
+  6.0.3) and fails on tsconfig; "npm install at the worktree root
+  first" saves the detour. (2) Promote the PR auto-merge convention
+  from axiomancer-mobile/CLAUDE.md to root AGENTS.md (it applies
+  repo-wide). (3) Mechanics-side note on wording-pin discipline:
+  grace-card-wording + the paid-summary honesty guard pin AUTHORED
+  prose — reword a card and its pins in the same commit, never
+  silence a guard.
+- suggested fix: on green-light, land all three as one docs commit.
+
+## Done
+
+### [x] [LOW] "the-closing-word" card face states a threshold that doesn't match the live floor (RESOLVED 2026-07-17, PR #91)
 - pass: owner-playtest 2026-07-12
 - viewport: mobile (expo-web via Playwright)
 - category: content/copy
@@ -456,8 +547,10 @@
   "CONCEDE at the current floor") or print the correct per-stage
   numbers if the card's threshold is meant to scale with stage.
 - source: playtester (owner-directed break-test session)
-
-## Done
+- RESOLVED: the authored paidSummary (PR #91) prints the per-stage
+  truth — "At 8 PREMISES, CONCEDE — you win (elite 10, boss 12)" —
+  the entry's option (b), enforced by the paid-summary honesty guard
+  (the engine's elite/boss floor numbers must appear verbatim).
 
 ### [x] [HIGH] combat design — kill the "weak basic chip OR real status effect" fork (RESOLVED 2026-07-10, owner session)
 - The parked 2026-07-09 design signal got its session: the 2026-07-10
