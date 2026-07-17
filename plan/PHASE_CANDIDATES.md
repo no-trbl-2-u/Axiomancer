@@ -15,6 +15,36 @@
 > next-tier candidates awaiting `/oversight` promotion. Verify
 > "already shipped?" notes before promoting.
 
+### Re-tune the starter library against `scoreCard` v2 (`/deck-tuning`)
+- source: Phase 36a + 36b follow-through (2026-07-17). The pricing model is
+  now honest about two axes it was blind to when the shipped 70-card library /
+  10 presets were authored: **alt-win currencies** (36a — SWAY→CAPITULATE at
+  0.9/stack, a +3 CONCEDE capstone) and **tempo** (36b — DoTs priced at
+  tempo-weighted lifetime, so a slow ramp is no longer overpaid vs a
+  front-loaded burst). The seeds=5 proof-gate re-run
+  (`axiomancer-mechanics/scratch/price-experiment/report/FINDINGS-36b-seed5.md`)
+  shows the mismatches the honest budget now exposes: alt-win decks still rank
+  backwards in-play (cheap Grace ≈ pricier Foundry; Oratory alone alive late
+  via unpriced-until-36a CONCEDE), and the slow-ramp DoT decks (erosion,
+  penitent) crawl late because their ramp never collects before the ~4-round
+  death clock. 36a/36b changed the LINT (design pressure); the LIBRARY itself
+  was tuned under the old model and has not been re-examined against the new
+  one.
+- decision: NOT a build-plan phase — this is `/deck-tuning`'s empirical court
+  (sandbox-first card/deck A/Bs). Scope for that skill: (a) re-examine the
+  alt-win presets (charm/peroration/forge) now that their win engines price
+  honestly; (b) re-shape the slow-ramp DoT cards toward front-loaded / faster-
+  maturing payoff (the fix-card test converted +11 mid / >2× late for +0.54
+  avgSpell by doing exactly this); (c) confirm the tempo horizon constant
+  `DOT_TEMPO_SURVIVAL = 0.75` at higher seeds (FINDINGS rec #5 flags the
+  seeds=2 origin as noisy). Left here as a pointer so the follow-through isn't
+  lost in the phase briefs.
+- minor tripwire (same source): `creeping_doom` prices at −38% under the tempo
+  horizon (growth + no-calendar puts its biggest ticks latest). No card uses
+  it today, but any FUTURE no-calendar growth DoT must carry a front-loaded
+  kicker or it under-prices into the rank floor — a card-comment-convention
+  note for whoever authors one.
+
 ### Combat challenge-gradient retune (superseded 2026-07-08 — tracked live, not a phase)
 - source: spec-31 §9 (P1 + trim shipped 2026-07-05)
 - Status per `/oversight` 2026-07-08 review: this candidate predates
