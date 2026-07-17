@@ -49,7 +49,7 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — DRAW 1 whenever your STAGGER denies an enemy turn.",
+   "FREE — the printed passive for 3 rounds.",
    "PAID (rest of combat) — DRAW 1 whenever your STAGGER denies an enemy turn."
   ]
  },
@@ -103,7 +103,7 @@
    }
   ],
   "lines": [
-   "FREE — mark i1 d1",
+   "FREE — MARK 1 for 1 turn on the enemy.",
    "your next spell gains ECHO",
    "Die bonus: powering die mind fires a rider"
   ]
@@ -162,7 +162,7 @@
    }
   ],
   "lines": [
-   "FREE — mark i1 d1 (self)",
+   "FREE — MARK 1 for 1 turn.",
    "Applies Mark ×1, 2t → self",
    "draw 2"
   ]
@@ -221,7 +221,7 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — Every KINDLEd or FORGEd die arrives with +1 PIP.",
+   "FREE — the printed passive for 3 rounds.",
    "PAID (rest of combat) — Every KINDLEd or FORGEd die arrives with +1 PIP."
   ]
  },
@@ -279,7 +279,7 @@
    }
   ],
   "lines": [
-   "FREE — reveal the next stance",
+   "FREE — reveal the next stance.",
    "Applies Backfire ×1, 2t → enemy",
    "lock the enemy's next stance",
    "STAGGER 1"
@@ -339,7 +339,7 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — Each SOUL you gain deals 1 to the enemy.",
+   "FREE — the printed passive for 3 rounds.",
    "PAID (rest of combat) — Each SOUL you gain deals 1 to the enemy."
   ]
  },
@@ -397,7 +397,7 @@
    }
   ],
   "lines": [
-   "FREE — +1 pip to every Reserve die",
+   "FREE — +1 PIP to every Reserve die.",
    "FORGE a dead X die into a WILD floating die (no X: +1 Conviction)",
    "Threshold: 2× mind die fires a rider"
   ]
@@ -456,7 +456,7 @@
    }
   ],
   "lines": [
-   "FREE — GUARD 2 (persists)",
+   "FREE — GUARD 2 (persists).",
    "Guard 8"
   ]
  },
@@ -514,7 +514,7 @@
    }
   ],
   "lines": [
-   "FREE — +1 Soul",
+   "FREE — gain 1 SOUL.",
    "Applies Bleed ×2, 1t → enemy"
   ]
  },
@@ -568,7 +568,7 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — Hold 4+ PREMISEs: MARK the enemy +1 each turn (to 10).",
+   "FREE — the printed passive for 3 rounds.",
    "PAID (rest of combat) — Hold 4+ PREMISEs: MARK the enemy +1 each turn (to 10). (attaches to the enemy)"
   ]
  },
@@ -626,7 +626,7 @@
    }
   ],
   "lines": [
-   "FREE — draw 1 · FORETELL 1",
+   "FREE — DRAW 1, then FORETELL 1.",
    "Applies Poison ×1, 2t → enemy",
    "Applies Mark ×1, 2t → enemy",
    "OMEN — stake claim (window 1-2, ante 2◆ at window 1): on hit, Guard 4"
@@ -686,7 +686,7 @@
    }
   ],
   "lines": [
-   "FREE — mill 1 to discard",
+   "FREE — MILL 1.",
    "RECALL 1 — its FREE line fires now"
   ]
  },
@@ -744,7 +744,7 @@
    }
   ],
   "lines": [
-   "FREE — draw 1 · rapport i1 d2",
+   "FREE — RAPPORT 1 for 2 turns, then DRAW 1.",
    "Applies Rapport ×1, 2t → enemy",
    "SWAY 2",
    "Threshold: 3× heart die fires a rider"
@@ -804,7 +804,7 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — While FALLEN, your statuses land +1 intensity per affliction you carry beyond the first (max +4).",
+   "FREE — the printed passive for 3 rounds.",
    "PAID (rest of combat) — While FALLEN, your statuses land +1 intensity per affliction you carry beyond the first (max +4)."
   ]
  },
@@ -862,7 +862,7 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — After each threat phase, deal 20% of your remaining GUARD (minimum 4). Fully blocking an attack STAGGERs the next telegraph by 1.",
+   "FREE — the printed passive for 3 rounds.",
    "PAID (rest of combat) — After each threat phase, deal 20% of your remaining GUARD (minimum 4). Fully blocking an attack STAGGERs the next telegraph by 1. (attaches to the enemy)"
   ]
  },
@@ -920,7 +920,7 @@
    }
   ],
   "lines": [
-   "FREE — draw 1 · mark i1 d1",
+   "FREE — MARK 1 for 1 turn, then DRAW 1.",
    "REARGUE — convert bleed↔poison, +1 intensity"
   ]
  },
@@ -978,7 +978,7 @@
    }
   ],
   "lines": [
-   "FREE — FORETELL 1",
+   "FREE — FORETELL 1.",
    "RUPTURE 1 — its remaining damage lands now, +1 Soul",
    "FORETELL 1",
    "Die bonus: powering die mind fires a rider"
@@ -1038,7 +1038,7 @@
    }
   ],
   "lines": [
-   "FREE — SWAY 1",
+   "FREE — SWAY 1.",
    "Applies Rapport ×2, 2t → enemy",
    "heal 2"
   ]
@@ -1093,7 +1093,7 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — A KINDLEd or FORGEd die powering a card MARKs the enemy (i1, once per play).",
+   "FREE — the printed passive for 3 rounds.",
    "PAID (rest of combat) — A KINDLEd or FORGEd die powering a card MARKs the enemy (i1, once per play). (attaches to the enemy)"
   ]
  },
@@ -1151,7 +1151,7 @@
    }
   ],
   "lines": [
-   "FREE — +1 pip to every Reserve die",
+   "FREE — +1 PIP to every Reserve die.",
    "FORGE a WILD floating die",
    "the spent die BANKS to the Reserve"
   ]
@@ -1210,7 +1210,7 @@
    }
   ],
   "lines": [
-   "FREE — +1 Premise",
+   "FREE — gain 1 PREMISE.",
    "Applies Poison ×1, 2t → enemy",
    "+1 Premise",
    "draw 1"
@@ -1270,9 +1270,9 @@
    }
   ],
   "lines": [
-   "FREE — draw 1 · mark i1 d1 (self)",
+   "FREE — MARK 1 for 1 turn on yourself, then DRAW 1.",
    "Applies Bleed ×2, 3t → enemy",
-   "Fallen: heal 4"
+   "Fallen: HEAL 4"
   ]
  },
  {
@@ -1325,7 +1325,7 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — Every OMEN that hits MARKs the foe (i1).",
+   "FREE — the printed passive for 3 rounds.",
    "PAID (rest of combat) — Every OMEN that hits MARKs the foe (i1). (attaches to the enemy)"
   ]
  },
@@ -1383,7 +1383,7 @@
    }
   ],
   "lines": [
-   "FREE — mark i1 d1",
+   "FREE — MARK 1 for 1 turn.",
    "PROLONG +1 duration to ALL your DoTs"
   ]
  },
@@ -1441,7 +1441,7 @@
    }
   ],
   "lines": [
-   "FREE — FORETELL 1",
+   "FREE — FORETELL 1.",
    "Applies Poison ×1, 1t → enemy",
    "Applies Mark ×1, 2t → enemy",
    "FORETELL 2"
@@ -1501,7 +1501,7 @@
    }
   ],
   "lines": [
-   "FREE — +1 pip to every Reserve die",
+   "FREE — +1 PIP to every Reserve die.",
    "Guard 5",
    "+2 pips to every Reserve die",
    "PIP 1 past the cap (35% bust: halves the die)"
@@ -1557,7 +1557,7 @@
    }
   ],
   "lines": [
-   "FREE — SWAY 1",
+   "FREE — SWAY 1.",
    "SWAY 6",
    "ECHO",
    "heal 4",
@@ -1618,7 +1618,7 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — Every THORNS reflection also MARKs the enemy (i1).",
+   "FREE — the printed passive for 3 rounds.",
    "PAID (rest of combat) — Every THORNS reflection also MARKs the enemy (i1)."
   ]
  },
@@ -1676,7 +1676,7 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — SWAY does not decay. At the end of each turn, future SWAY gains increase by 12% (maximum +108%).",
+   "FREE — the printed passive for 3 rounds.",
    "PAID (rest of combat) — SWAY does not decay. At the end of each turn, future SWAY gains increase by 12% (maximum +108%)."
   ]
  },
@@ -1734,7 +1734,7 @@
    }
   ],
   "lines": [
-   "FREE — GUARD 3 (persists)",
+   "FREE — GUARD 3 (persists).",
    "Guard 6",
    "RIPOSTE 3 (parry 2)"
   ]
@@ -1789,7 +1789,7 @@
    }
   ],
   "lines": [
-   "FREE — +2 Souls",
+   "FREE — gain 2 SOULS.",
    "Applies Mark ×2, 1t → enemy"
   ]
  },
@@ -1847,7 +1847,7 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — Each self-debuff you land also lands 1 stack of itself on the enemy; every 3 RECOIL paid lands 1 more.",
+   "FREE — the printed passive for 3 rounds.",
    "PAID (rest of combat) — Each self-debuff you land also lands 1 stack of itself on the enemy; every 3 RECOIL paid lands 1 more. (attaches to the enemy)"
   ]
  },
@@ -1905,7 +1905,7 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — Damage prevented by your GUARD or RIPOSTE becomes SWAY, 1:1.",
+   "FREE — the printed passive for 3 rounds.",
    "PAID (rest of combat) — Damage prevented by your GUARD or RIPOSTE becomes SWAY, 1:1. (attaches to the enemy)"
   ]
  },
@@ -1963,7 +1963,7 @@
    }
   ],
   "lines": [
-   "FREE — +1 Premise",
+   "FREE — gain 1 PREMISE.",
    "Applies Mark ×1, 3t → enemy",
    "Applies Poison ×1, 4t → enemy",
    "+2 Premises",
@@ -2024,7 +2024,7 @@
    }
   ],
   "lines": [
-   "FREE — GUARD 2 (persists)",
+   "FREE — GUARD 2 (persists).",
    "Applies Thorns ×2, 2t → self",
    "Applies Nettle Sting ×1, 2t → enemy"
   ]
@@ -2083,7 +2083,7 @@
    }
   ],
   "lines": [
-   "FREE — +1 Premise",
+   "FREE — gain 1 PREMISE.",
    "Applies Mark ×1, 2t → enemy",
    "Applies Poison ×1, 2t → enemy",
    "+2 Premises"
@@ -2143,7 +2143,7 @@
    }
   ],
   "lines": [
-   "FREE — mill 1 to discard",
+   "FREE — MILL 1.",
    "replay your last spell ×2",
    "consume all marks — 3 damage per stack"
   ]
@@ -2202,7 +2202,7 @@
    }
   ],
   "lines": [
-   "FREE — Guard 2 · RECOIL 1",
+   "FREE — GUARD 2, then RECOIL 1.",
    "Applies Bleed ×1, 2t → self",
    "FORGE a WILD floating die",
    "RECOIL 6"
@@ -2262,7 +2262,7 @@
    }
   ],
   "lines": [
-   "FREE — +1 Premise",
+   "FREE — gain 1 PREMISE.",
    "RUPTURE ALL"
   ]
  },
@@ -2316,7 +2316,7 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — +1 PREMISE on your first card each turn.",
+   "FREE — the printed passive for 3 rounds.",
    "PAID (rest of combat) — +1 PREMISE on your first card each turn."
   ]
  },
@@ -2374,7 +2374,7 @@
    }
   ],
   "lines": [
-   "FREE — FORETELL 1",
+   "FREE — FORETELL 1.",
    "RUPTURE ALL (+3 damage per omen hit)"
   ]
  },
@@ -2432,7 +2432,7 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — Enemy telegraphs enter play one STAGGER rung lower.",
+   "FREE — the printed passive for 3 rounds.",
    "PAID (rest of combat) — Enemy telegraphs enter play one STAGGER rung lower. (attaches to the enemy)"
   ]
  },
@@ -2490,7 +2490,7 @@
    }
   ],
   "lines": [
-   "FREE — reveal the next stance",
+   "FREE — reveal the next stance.",
    "Applies Backfire ×2, 2t → enemy",
    "Die bonus: powering die mind fires a rider"
   ]
@@ -2549,7 +2549,7 @@
    }
   ],
   "lines": [
-   "FREE — mill 1 to discard",
+   "FREE — MILL 1.",
    "Applies Mark ×1, 2t → enemy",
    "Applies Poison ×1, 1t → enemy",
    "ECHO"
@@ -2609,7 +2609,7 @@
    }
   ],
   "lines": [
-   "FREE — mark i1 d1",
+   "FREE — MARK 1 for 1 turn.",
    "RUPTURE ALL",
    "SIPHON 35%",
    "RECALL 2 — their FREE lines fire now"
@@ -2669,7 +2669,7 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — Your first spell each turn gains ECHO.",
+   "FREE — the printed passive for 3 rounds.",
    "PAID (rest of combat) — Your first spell each turn gains ECHO."
   ]
  },
@@ -2727,7 +2727,7 @@
    }
   ],
   "lines": [
-   "FREE — mill 1 to discard",
+   "FREE — MILL 1.",
    "RECALL 1",
    "consume all marks — 1 damage per stack"
   ]
@@ -2786,7 +2786,7 @@
    }
   ],
   "lines": [
-   "FREE — mark i1 d1 (self)",
+   "FREE — MARK 1 for 1 turn on yourself.",
    "RECOIL 5",
    "RUPTURE ALL"
   ]
@@ -2845,7 +2845,7 @@
    }
   ],
   "lines": [
-   "FREE — FORETELL 1",
+   "FREE — FORETELL 1.",
    "OMEN — stake claim (window 1-2, ante 2◆ at window 1): on hit, draw 2"
   ]
  },
@@ -2903,7 +2903,7 @@
    }
   ],
   "lines": [
-   "FREE — +1 pip to every Reserve die",
+   "FREE — +1 PIP to every Reserve die.",
    "Applies Kindling Ember ×1, 3t → enemy",
    "KINDLE (mind)",
    "Die bonus: powering die mind fires a rider"
@@ -2963,7 +2963,7 @@
    }
   ],
   "lines": [
-   "FREE — mark i1 d1",
+   "FREE — MARK 1 for 1 turn.",
    "Applies Poison ×1 → enemy"
   ]
  },
@@ -3021,7 +3021,7 @@
    }
   ],
   "lines": [
-   "FREE — rapport i1 d2",
+   "FREE — RAPPORT 1 for 2 turns.",
    "SWAY 3",
    "Die bonus: powering die heart fires a rider"
   ]
@@ -3076,7 +3076,7 @@
    }
   ],
   "lines": [
-   "FREE — mark i1 d1",
+   "FREE — MARK 1 for 1 turn.",
    "Applies Bleed ×2, 2t → enemy",
    "Die bonus: powering die body fires a rider"
   ]
@@ -3135,7 +3135,7 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — Each ECHO, RECALL, or replay deals the foe's MARK stacks as damage (min 2, max 16).",
+   "FREE — the printed passive for 3 rounds.",
    "PAID (rest of combat) — Each ECHO, RECALL, or replay deals the foe's MARK stacks as damage (min 2, max 16). (attaches to the enemy)"
   ]
  },
@@ -3193,7 +3193,7 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — At round end, the enemy takes this round's POISON and BLEED damage again.",
+   "FREE — the printed passive for 3 rounds.",
    "PAID (rest of combat) — At round end, the enemy takes this round's POISON and BLEED damage again. (attaches to the enemy)"
   ]
  },
@@ -3251,7 +3251,7 @@
    }
   ],
   "lines": [
-   "FREE — mark i1 d1 (self)",
+   "FREE — MARK 1 for 1 turn on yourself.",
    "Applies Poison ×1 → enemy",
    "Applies Bleed ×1, 2t → self"
   ]
@@ -3310,7 +3310,7 @@
    }
   ],
   "lines": [
-   "FREE — GUARD 3 (persists)",
+   "FREE — GUARD 3 (persists).",
    "GUARD 10 (persists)",
    "RIPOSTE 4 (parry 2)"
   ]
@@ -3369,7 +3369,7 @@
    }
   ],
   "lines": [
-   "FREE — +1 Premise",
+   "FREE — gain 1 PREMISE.",
    "PERORATION at 6 — +2 Conviction · draw 2 · consume all marks — 3 damage per stack (CONCEDE at 8 — you win; elite 10 · boss 12)"
   ]
  },
@@ -3427,7 +3427,7 @@
    }
   ],
   "lines": [
-   "FREE — draw 1 · +1 Soul",
+   "FREE — DRAW 1, then gain 1 SOUL.",
    "REAP 2 — KINDLE (mind) — draw 2 · +1 Soul"
   ]
  },
@@ -3485,7 +3485,7 @@
    }
   ],
   "lines": [
-   "FREE — rapport i1 d2",
+   "FREE — RAPPORT 1 for 2 turns.",
    "SWAY 3",
    "cleanse 1 · heal 3"
   ]
@@ -3544,7 +3544,7 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — The next stance stays revealed (FORETELL); OMEN payoffs land ×1.5 (round up).",
+   "FREE — the printed passive for 3 rounds.",
    "PAID (rest of combat) — The next stance stays revealed (FORETELL); OMEN payoffs land ×1.5 (round up)."
   ]
  },
@@ -3602,7 +3602,7 @@
    }
   ],
   "lines": [
-   "FREE — mark i1 d1",
+   "FREE — MARK 1 for 1 turn.",
    "spend ALL pips (+1 Guard per pip)",
    "RUPTURE ALL (+3.5 damage per spent pip; needs 2+ pips)",
    "refresh the spent die"
@@ -3662,7 +3662,7 @@
    }
   ],
   "lines": [
-   "FREE — bleed i1 d1",
+   "FREE — BLEED 1 for 1 turn.",
    "REAP ALL — 4 damage per Soul",
    "SIPHON 40%"
   ]
@@ -3717,7 +3717,7 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — Enemy afflictions expire one turn sooner (faster SOUL churn).",
+   "FREE — the printed passive for 3 rounds.",
    "PAID (rest of combat) — Enemy afflictions expire one turn sooner (faster SOUL churn). (attaches to the enemy)"
   ]
  },
@@ -3775,7 +3775,7 @@
    }
   ],
   "lines": [
-   "FREE — GUARD 2 (persists)",
+   "FREE — GUARD 2 (persists).",
    "Applies Thorns ×3, 2t → self",
    "Die bonus: powering die heart fires a rider"
   ]
@@ -3834,7 +3834,7 @@
    }
   ],
   "lines": [
-   "FREE — reveal the next stance",
+   "FREE — reveal the next stance.",
    "BACKFIRE ALL — 1.5 damage per rung ever denied"
   ]
  },
@@ -3892,7 +3892,7 @@
    }
   ],
   "lines": [
-   "FREE — reveal the next stance",
+   "FREE — reveal the next stance.",
    "Applies Backfire ×2, 3t → enemy",
    "STAGGER 1",
    "Threshold: 3× mind die fires a rider"
@@ -3952,7 +3952,7 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — Your BLEED and POISON land +1 intensity and +1 duration.",
+   "FREE — the printed passive for 3 rounds.",
    "PAID (rest of combat) — Your BLEED and POISON land +1 intensity and +1 duration."
   ]
  },
@@ -4010,7 +4010,7 @@
    }
   ],
   "lines": [
-   "FREE — bleed i1 d1",
+   "FREE — BLEED 1 for 1 turn.",
    "RUPTURE 1 — its remaining damage lands now, +2 Souls"
   ]
  },
@@ -4068,7 +4068,7 @@
    }
   ],
   "lines": [
-   "FREE — reveal the next stance",
+   "FREE — reveal the next stance.",
    "STAGGER 1"
   ]
  }

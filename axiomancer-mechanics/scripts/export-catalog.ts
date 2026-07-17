@@ -219,6 +219,50 @@ function cardFace(c: any): { freeGlyph: string; freeKw: string | null; freeVal: 
     return { freeGlyph, freeKw, freeVal, paid };
 }
 
+/**
+ * The FREE rider in the authored-prose register (2026-07-16 part 2) — the
+ * catalog's FREE line must read like the glyph it annotates, not like
+ * `riderText`'s telegraphese ("mark i1 d1 (self)"). Clause order mirrors the
+ * glyph-priority order in `cardFace` (applyEffect first, then the
+ * FREE_TXT_GLYPH key order), so the line always LEADS with the keyword the
+ * giant glyph draws. Same rider data, no invented numbers.
+ */
+function riderProse(r: any, opts?: { selfTargetCard?: boolean }): string {
+    const parts: string[] = [];
+    const plural = (n: number, w: string) => `${n} ${w}${n === 1 ? '' : 's'}`;
+    if (r.applyEffect) {
+        const kw = effectKw(r.applyEffect.effectId);
+        const i = r.applyEffect.intensity ?? 1;
+        const d = r.applyEffect.duration;
+        const toSelf = (r.applyEffect.to ?? 'opponent') === 'self';
+        const side = toSelf === !!opts?.selfTargetCard ? '' : toSelf ? ' on yourself' : ' on the enemy';
+        parts.push(`${kw} ${i}${d ? ` for ${plural(d, 'turn')}` : ''}${side}`);
+    }
+    if (r.guard) parts.push(`GUARD ${r.guard}`);
+    if (r.barrier) parts.push(`GUARD ${r.barrier} (persists)`);
+    if (r.healHp) parts.push(`HEAL ${r.healHp}`);
+    if (r.drawCards) parts.push(`DRAW ${r.drawCards}`);
+    if (r.premises) parts.push(`gain ${plural(r.premises, 'PREMISE').replace(/PREMISEs/, 'PREMISES')}`);
+    if (r.sway) parts.push(`SWAY ${r.sway}`);
+    if (r.souls) parts.push(`gain ${plural(r.souls, 'SOUL').replace(/SOULs/, 'SOULS')}`);
+    if (r.foretell) parts.push(`FORETELL ${r.foretell}`);
+    if (r.pips) parts.push(`+${plural(r.pips, 'PIP').replace(/PIPs/, 'PIPS')} to every Reserve die`);
+    if (r.stagger) parts.push(`STAGGER ${r.stagger}`);
+    if (r.tickOne) parts.push('TICK');
+    if (r.tickAllDots) parts.push('TICK every DoT');
+    if (r.cleanse) parts.push(`CLEANSE ${r.cleanse}`);
+    if (r.recoil) parts.push(`RECOIL ${r.recoil}`);
+    if (r.millCards) parts.push(`MILL ${r.millCards}`);
+    if (r.revealStance) parts.push('reveal the next stance');
+    if (r.conviction) parts.push(`+${r.conviction} Conviction`);
+    if (r.refreshDie) parts.push('refresh the die');
+    if (r.bonusIntensity) parts.push(`+${r.bonusIntensity} intensity to this card's statuses`);
+    if (r.bonusDuration) parts.push(`+${plural(r.bonusDuration, 'turn')} to this card's statuses`);
+    if (r.ruptureMarks) parts.push(`consume all MARK stacks — ${r.ruptureMarks} damage per stack`);
+    if (r.intensityPerPip) parts.push(`+${r.intensityPerPip} intensity to one DoT per pip`);
+    return parts.join(', then ');
+}
+
 function cardStats(c: any): { chips: Chip[]; lines: string[] } {
     const chips: Chip[] = [
         { k: 'Stance', v: c.philosophicalAspect },
@@ -243,10 +287,12 @@ function cardStats(c: any): { chips: Chip[]; lines: string[] } {
     // both lines: FREE grants it timed (a few rounds), PAID makes it permanent.
     if ((c.cardType === 'enchantment' || c.cardType === 'disenchant') && c.persistentEffect) {
         const target = c.cardType === 'disenchant' ? ' (attaches to the enemy)' : '';
-        lines.push(`FREE (${FREE_ENCHANT_ROUNDS} rounds) — ${c.persistentEffect}`);
+        // The FREE line matches the glyph's "3r" badge (a timed run of the
+        // passive) instead of restating the card's printed text twice.
+        lines.push(`FREE — the printed passive for ${FREE_ENCHANT_ROUNDS} rounds.`);
         lines.push(`PAID (rest of combat) — ${c.persistentEffect}${target}`);
     }
-    if (c.free) lines.push(`FREE — ${riderText(c.free)}`);
+    if (c.free) lines.push(`FREE — ${riderProse(c.free, { selfTargetCard: c.targetType === 'self' })}.`);
     for (const ce of c.combatEffects ?? []) {
         const nm = lookupEffect(ce.effectId)?.name ?? ce.effectId;
         const who = ce.appliedTo === 'self' ? 'self' : 'enemy';
@@ -257,7 +303,7 @@ function cardStats(c: any): { chips: Chip[]; lines: string[] } {
     if (c.threshold) lines.push(`Threshold: ${c.threshold.count}× ${c.threshold.color} die fires a rider`);
     if (c.dieBonus) lines.push(`Die bonus: powering die ${c.dieBonus.onColor} fires a rider`);
     if (c.fate) lines.push(`Fate: playable by an X die${c.fate.recoilHp ? ` (recoil ${c.fate.recoilHp} HP)` : ''}`);
-    if (c.fallen) lines.push(`Fallen: ${riderText(c.fallen.rider)}`);
+    if (c.fallen) lines.push(`Fallen: ${riderProse(c.fallen.rider, { selfTargetCard: c.targetType === 'self' })}`);
     if (c.synergy) lines.push('Synergy clause (stance-switch payoff)');
     return { chips, lines };
 }
