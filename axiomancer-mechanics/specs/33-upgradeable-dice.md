@@ -180,9 +180,10 @@ equip/unequip, no die inventory, no loadout.** A player does not own a
 collection of dice to slot in and out; they own **four dice whose face
 distributions grow.** Upgrades mutate faces in place — permanently at
 forges/rewards, temporarily in combat — and the upgraded face-state
-**persists across combats.** That persistence reuses the spec-05
-save/versioning machinery as an *implementation detail only* — it is
-persistence, not gear (`GAME_STATE_VERSION` migration required). It does
+**persists across combats.** That persistence rides the Game module's
+save/versioning machinery (`GAME_STATE_VERSION` in
+`src/Game/game.migrate.ts`) as an *implementation detail only* — it is
+persistence, not gear; the spec-05 equipment engine is NOT involved. It does
 NOT make dice swappable: the only changes to the pool itself are the
 bounded §1 exceptions (KINDLE, surge, Reserve, the rare gold+lead pair).
 

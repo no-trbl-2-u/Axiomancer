@@ -543,8 +543,10 @@ supersession collisions before any engine work.
 - [ ] Phase D5 — Dice-face upgrade layer. Per-die mutable face
       distributions (the four dice are permanent — NO inventory/loadout,
       no equip/unequip; only faces mutate), FORGE face-swap + in-combat
-      FORGE upgrades, reward hooks, persistence via the spec-05
-      save/versioning machinery, `GAME_STATE_VERSION` migration. Prove:
+      FORGE upgrades, reward hooks, persistence via the Game module's
+      save/versioning machinery (`GAME_STATE_VERSION` in
+      `src/Game/game.migrate.ts`; the spec-05 equipment engine is NOT
+      involved). Prove:
       migration tests. Deps: D2.
 - [ ] Phase D6 — Mobile UI. Dice-tray rework, payload-only face-inspection
       panel (Dawncaster-terse; illegal actions prevented loudly),
