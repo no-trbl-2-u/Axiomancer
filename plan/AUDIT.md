@@ -29,36 +29,41 @@
   `rounds`+`outcome` already exist per run; they are just discarded at
   aggregation. Add `avgRoundsToVictory` (victory-only, null when ~0
   victories) to `CombatSimStats` + the stage summary so kill-speed is a
-  first-class witness for /deck-tuning.
+  first-class witness for /deck-tuning. Related: the "Doctrine-curve
+  check in the nightly baseline" candidate (PHASE_CANDIDATES.md) would
+  absorb this harness's per-stage cells — this is the engine-side metric
+  that check depends on. (The other residue of this session — the
+  mid-collapse quartet foundry/standstill/grace/augury ≈0% mid, and the
+  tempo/alt-win pricing conclusions — is already tracked there and in
+  Phases 36a/36b, so it is not re-filed here.)
 - next: /iterate (retain victory-only rounds in
   simulateHazardPatternCombatDetailed; surface in PlaytestStageSummary +
   the report formatter)
 
-### Measured: most starter presets underperform the mid win-rate doctrine when played straight
-- category: divergence
-- impact: 7
-- ease: 4
-- detail: surfaced 2026-07-17 by the ultracode price-vs-win-rate
-  playtest (evidence:
-  axiomancer-mechanics/scratch/price-experiment/report/FINDINGS.md +
-  summary.json + the committed data-viz devlog-price-winrate.html).
-  Playing each of the 10 authored presets STRAIGHT under the `blind`
-  scripted policy, 7 of 10 land well under the CLAUDE.md mid ~50%
-  doctrine: Foundry/Grace/Standstill 0%, Augury 1%, Bastion 11%, Tithe
-  16%, Penitent 17% (only Oratory 69%, Erosion/Refrain 44% are near it).
-  Sharper doctrine tension: Foundry and Grace post statusEngagement 0.00
-  AND dotHpFraction 0.00 at every stage — they apply no status and deal
-  no HP, winning early ONLY by CAPITULATE — which cuts against the
-  load-bearing "status is the MAIN fun / the efficient path" doctrine.
-  CAVEATS (why this is a signal, not a verdict): measured on FIXED
-  authored presets, not the policy-pick DRAFT the doctrine curve is
-  defined against, and at seeds=2 — so a straight-preset deck under a
-  scripted policy may simply be weaker than a drafted one. Confirm at
-  higher seeds and against policy-pick before retuning. Related: the two
-  pricing candidates (tempo-aware / alt-win-aware scoreCard) in
-  PHASE_CANDIDATES.md, and the [statusEngagement blind spots] history.
-- next: /deck-tuning (confirm-then-tune the underperforming presets;
-  start with the capitulate-only Foundry/Grace status-blindness)
+### [3.5] `critique:drive` combat capture stops at the pre-fight preview — in-combat card-face rows can't be re-validated unattended
+- category: gap
+- impact: 5
+- ease: 7
+- detail: the Phase 34 transport
+  (`axiomancer-mobile/scripts/critique-drive.mjs`) navigates
+  `/combat-encounter` and dismisses the tutorial primer, but never
+  presses **ENTER COMBAT** (`combat-enter`), so it captures only the
+  pre-fight reveal/preview, not the live board with the card hand.
+  Critique pass 13 (2026-07-17, commit b4870384) hit exactly this
+  wall: it could reconfirm the exploration-hub findings (MORALE
+  "v of x", title wordmark crop) but **could not re-validate** the two
+  remaining STALE-flagged card-face rows — VITAE-vs-HP copy and DoT
+  round-clock math — because they only render once combat is entered
+  and cards are in hand. The fix is a known pattern: mirror
+  `combat-encounter-e2e.mjs` (`combat-enter` click → re-kill primer →
+  wait for `combat-board` → capture the board + hand) as an extra
+  captured state on the combat screen, so the unattended re-baseline
+  reaches in-combat surfaces. Secondary (lower value): state-gated
+  screens pushed by `<EventGate>` (`/village`, `/dialogue`,
+  `/cutscene`) are still uncapturable by direct nav — reaching them
+  needs a debug event-seed hook; leave to interactive/playtester
+  critique unless the card-face gap recurs for those surfaces too.
+- next: /iterate
 
 ### Combat deck-matrix baseline stale by 33 mechanics-source commits
 - category: gap

@@ -267,16 +267,20 @@ export const AUTHORED_THREAT_SEQUENCES: Record<string, AuthoredThreatStep[]> = {
         { enemyStance: 'mind', damageWeight: 1.4, threatEffectId: 'debuff_poison', threatIntensity: 3, actionText: "The final decree is read, and it concerns your continued existence", stanceHint: "The bandages are signed; the last signature required is yours, posthumously." },
     ],
     // Befriendable courteous appetite — mercy reaches the hostess; the hunger resists erosion.
+    // Phase 33b — SWAY-cleanse archetype: her clinical reset shakes off the
+    // charm the player has been building toward CAPITULATE.
     'enemy-lady-gabriella': [
         { enemyStance: 'heart', damageWeight: 0.85, threatEffectId: 'debuff_mark', threatIntensity: 2, actionText: "The Lady offers you a seat you did not see her place", stanceHint: "Courtesy is the weapon; the feelings are real, which is the trap." },
-        { enemyStance: 'mind', damageWeight: 0.9, actionText: "She inquires after your health with clinical accuracy", stanceHint: "Between courses she appraises, cold as cellar stone, what is worth keeping." },
+        { enemyStance: 'mind', damageWeight: 0.9, swayCleanse: 2, actionText: "She inquires after your health with clinical accuracy", stanceHint: "Between courses she appraises, cold as cellar stone, what is worth keeping." },
         { enemyStance: 'heart', damageWeight: 1.2, threatEffectId: 'debuff_bleed', threatIntensity: 2, actionText: "Dinner is served the moment you stop being a guest", stanceHint: "The mouth she uses for meaning it has other uses." },
-        { enemyStance: 'heart', damageWeight: 1.4, actionText: "Four centuries of appetite arrive at the table at once", stanceHint: "The last human habit gives way, with sincere regret, to the older ones." },
+        { enemyStance: 'heart', damageWeight: 1.4, rungs: 3, actionText: "Four centuries of appetite arrive at the table at once", stanceHint: "The last human habit gives way, with sincere regret, to the older ones." },
     ],
     // Twin-voiced arguer — the disagreement is the mercy; beware the agreement.
+    // Phase 33b — Premise-shed archetype: "deemed redundant" strikes the
+    // player's spendable Premise tally, not just HP.
     'enemy-zoma': [
-        { enemyStance: 'mind', damageWeight: 0.85, threatEffectId: 'debuff_mark', actionText: "The left head rebuts a thing you had not said yet", stanceHint: "Two minds, one patient argument — you are the current topic." },
-        { enemyStance: 'mind', damageWeight: 0.95, threatEffectId: 'debuff_mark', actionText: "The right head answers the left, and your part of the conversation is deemed redundant", stanceHint: "They disagree only about which of them loves you less." },
+        { enemyStance: 'mind', damageWeight: 0.85, threatEffectId: 'debuff_mark', rungs: 1, actionText: "The left head rebuts a thing you had not said yet", stanceHint: "Two minds, one patient argument — you are the current topic." },
+        { enemyStance: 'mind', damageWeight: 0.95, threatEffectId: 'debuff_mark', premiseShed: 2, actionText: "The right head answers the left, and your part of the conversation is deemed redundant", stanceHint: "They disagree only about which of them loves you less." },
         { enemyStance: 'heart', damageWeight: 1.3, threatEffectId: 'debuff_mark', threatIntensity: 2, actionText: "Both heads turn to you at once, in perfect, terrible accord", stanceHint: "The arguing was the safety mechanism. It has been switched off." },
     ],
     // The undrowned duelist — the river taught him new beats.
@@ -310,11 +314,14 @@ export const AUTHORED_THREAT_SEQUENCES: Record<string, AuthoredThreatStep[]> = {
         { enemyStance: 'mind', damageWeight: 1.4, threatEffectId: 'debuff_poison', threatIntensity: 3, actionText: "It reaches for your name, having finished all of its own", stanceHint: "The collection is nearly complete; yours would round out the set." },
     ],
     // Furnace with a genealogy — hammer blows, escalating to the mountain's spine.
+    // Phase 33b — CAUTERIZE archetype: old fire seals its own wounds shut
+    // between hammer blows. Final phase bumped to rungs:3 — the mountain's
+    // full weight is a sized threat, not the elite flat default.
     'enemy-fire-giant': [
         { enemyStance: 'body', threatEffectId: 'debuff_poison', actionText: "The giant's blade sweeps a horizon of heat across you", stanceHint: "A furnace with a genealogy; everything he does is a hammer blow." },
         { enemyStance: 'body', damageWeight: 1.1, threatEffectId: 'debuff_mark', threatIntensity: 2, actionText: "He plants a foot and the ground concedes the point", stanceHint: "His footwork is geological; you are fighting terrain that moves." },
-        { enemyStance: 'mind', damageWeight: 0.95, actionText: "He appraises you down the length of the mountain's spine", stanceHint: "Old fire thinks slowly and exactly, like cooling stone." },
-        { enemyStance: 'body', damageWeight: 1.45, threatEffectId: 'debuff_poison', threatIntensity: 3, actionText: "The sword remembers being a mountain, and falls like one", stanceHint: "The genealogy arrives all at once, ancestor by burning ancestor." },
+        { enemyStance: 'mind', damageWeight: 0.95, enemyCleanse: 1, actionText: "He appraises you down the length of the mountain's spine, and the wounds close over like cooling rock", stanceHint: "Old fire thinks slowly and exactly, like cooling stone." },
+        { enemyStance: 'body', damageWeight: 1.45, threatEffectId: 'debuff_poison', threatIntensity: 3, rungs: 3, actionText: "The sword remembers being a mountain, and falls like one", stanceHint: "The genealogy arrives all at once, ancestor by burning ancestor." },
     ],
     // The office-holder — the contract is the cage; the flaw is you.
     'enemy-greater-devil': [
@@ -324,9 +331,11 @@ export const AUTHORED_THREAT_SEQUENCES: Record<string, AuthoredThreatStep[]> = {
         { enemyStance: 'mind', damageWeight: 1.4, threatEffectId: 'debuff_poison', threatIntensity: 3, actionText: "The Devil executes the agreement, and the agreement executes you", stanceHint: "The flaw in the paperwork was always going to be the counterparty." },
     ],
     // Befriendable widow-queen — mercy reaches the mourner; the sorcery resists erosion.
+    // Phase 33b — SWAY-cleanse archetype: the rehearsed coursework of
+    // accusation is inured to being charmed, and steadies her against it.
     'enemy-rangda': [
-        { enemyStance: 'heart', threatEffectId: 'debuff_mark', threatIntensity: 2, actionText: "Rangda keens, and the curse arrives still weeping", stanceHint: "Grief that learned sorcery; every hex is a lesson she passed alone." },
-        { enemyStance: 'mind', damageWeight: 0.9, threatEffectId: 'debuff_poison', threatIntensity: 2, actionText: "She recites the syllabus of four hundred years of accusation", stanceHint: "Each charge they invented, she studied; the coursework is in your blood now." },
+        { enemyStance: 'heart', threatEffectId: 'debuff_mark', threatIntensity: 2, rungs: 2, actionText: "Rangda keens, and the curse arrives still weeping", stanceHint: "Grief that learned sorcery; every hex is a lesson she passed alone." },
+        { enemyStance: 'mind', damageWeight: 0.9, threatEffectId: 'debuff_poison', threatIntensity: 2, swayCleanse: 3, actionText: "She recites the syllabus of four hundred years of accusation", stanceHint: "Each charge they invented, she studied; the coursework is in your blood now." },
         { enemyStance: 'heart', damageWeight: 1.2, threatEffectId: 'debuff_poison', threatIntensity: 2, actionText: "She shows you the widow under the mask, and the showing burns", stanceHint: "The monster was assigned; the mourning was hers." },
         { enemyStance: 'heart', damageWeight: 1.4, threatEffectId: 'debuff_mark', threatIntensity: 3, actionText: "Rangda lets the whole studied grief off its leash at once", stanceHint: "Love with nowhere to go, four centuries compounded, finds somewhere." },
     ],
@@ -338,11 +347,14 @@ export const AUTHORED_THREAT_SEQUENCES: Record<string, AuthoredThreatStep[]> = {
         { enemyStance: 'mind', damageWeight: 1.45, threatEffectId: 'debuff_poison', threatIntensity: 3, actionText: "The twin verdict lands as one sentence with no seam in it", stanceHint: "What the arguing held back, the agreement delivers entire." },
     ],
     // The white fire — it burns the way glaciers move: entirely.
+    // Phase 33b — CAUTERIZE archetype (the class's boss-tier escalation of
+    // Fire Giant's same answer). Final phase authored to the 1-4 ceiling —
+    // the boss finisher outright demands more STAGGER than the flat default.
     'enemy-elder-fire-giant': [
         { enemyStance: 'body', threatEffectId: 'debuff_mark', threatIntensity: 2, actionText: "The white heat settles over you like a season changing", stanceHint: "A fire gone pale with age; it burns the way glaciers move." },
-        { enemyStance: 'mind', damageWeight: 0.9, actionText: "The elder considers you with the patience of a thing that outlived its own eruption", stanceHint: "Old flame plans in centuries; you are a brief agenda item." },
+        { enemyStance: 'mind', damageWeight: 0.9, enemyCleanse: 1, actionText: "The elder considers you with the patience of a thing that outlived its own eruption, and its old scars close over", stanceHint: "Old flame plans in centuries; you are a brief agenda item." },
         { enemyStance: 'body', damageWeight: 1.2, threatEffectId: 'debuff_poison', threatIntensity: 2, actionText: "The pale blade falls with the weight of everything it has already burned", stanceHint: "The cloak of ash is a ledger; it adds you neatly." },
-        { enemyStance: 'body', damageWeight: 1.45, threatEffectId: 'debuff_poison', threatIntensity: 3, actionText: "The oldest fire in the world burns, once, entirely", stanceHint: "Whiteness is what flame becomes when it stops needing to prove anything." },
+        { enemyStance: 'body', damageWeight: 1.45, threatEffectId: 'debuff_poison', threatIntensity: 3, rungs: 4, actionText: "The oldest fire in the world burns, once, entirely", stanceHint: "Whiteness is what flame becomes when it stops needing to prove anything." },
     ],
     // The smoking mirror — it shows you the you that already lost.
     // WS9 prototype (late boss): a FULLY BLOCKED prior threat turns the next
@@ -406,10 +418,13 @@ export const AUTHORED_THREAT_SEQUENCES: Record<string, AuthoredThreatStep[]> = {
         { enemyStance: 'mind', damageWeight: 1.4, threatEffectId: 'debuff_poison', threatIntensity: 3, actionText: "It reads out every wrong entry ever filed about you, and the reading scalds", stanceHint: "The whole errata at once: a bonfire of corrections, and you are the margin they burn in." },
     ],
     // Act III finale: the narrator manifest — borrowed premises, returned with interest.
+    // Phase 33b — Premise-shed archetype (the class's flagship match: he
+    // literally strikes premises from the record). Opening phase softened to
+    // rungs:2 — the real answer arrives once he starts redacting.
     'enemy-the-sophist': [
-        { enemyStance: 'mind', threatEffectId: 'debuff_mark', threatIntensity: 2, actionText: "The Sophist restates your position, improved, and aims it back at you", stanceHint: "He fights with borrowed premises — yours, mostly, held at a more flattering angle." },
+        { enemyStance: 'mind', threatEffectId: 'debuff_mark', threatIntensity: 2, rungs: 2, actionText: "The Sophist restates your position, improved, and aims it back at you", stanceHint: "He fights with borrowed premises — yours, mostly, held at a more flattering angle." },
         { enemyStance: 'heart', damageWeight: 0.9, threatEffectId: 'debuff_mark', threatIntensity: 2, actionText: "He concedes a point you had not made yet, courteously, like a trap", stanceHint: "The etiquette is the blade; the house eats the courteous last." },
-        { enemyStance: 'mind', damageWeight: 1.2, threatEffectId: 'debuff_mark', threatIntensity: 2, actionText: "He strikes your best premise from the record and signs the deletion in thirds", stanceHint: "Centuries of clerkship: what he cannot win he redacts." },
+        { enemyStance: 'mind', damageWeight: 1.2, threatEffectId: 'debuff_mark', threatIntensity: 2, premiseShed: 3, actionText: "He strikes your best premise from the record and signs the deletion in thirds", stanceHint: "Centuries of clerkship: what he cannot win he redacts." },
         { enemyStance: 'mind', damageWeight: 1.45, threatEffectId: 'debuff_poison', threatIntensity: 3, actionText: "The Sophist closes the argument with your own opening move, perfected", stanceHint: "The narration stops being about you and starts happening to you." },
     ],
 

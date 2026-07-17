@@ -3036,7 +3036,16 @@ function computeRungDenial(state: CombatEncounterState): {
     rungsTotal: number; rungsLost: number; rungDenied: boolean; naturalRungsTotal: number; rungGrowth: number;
 } {
     const isBossTier = state.enemy.difficulty === 'boss' || state.enemy.difficulty === 'unique';
-    const naturalRungsTotal = isBossTier ? THREAT_RUNGS_BOSS : THREAT_RUNGS;
+    // Phase 33b — variable-rung telegraphs: the current phase may author its
+    // own rung count (1-4, `CombatThreatPhase.rungs`), overriding the flat
+    // difficulty-derived default so STAGGER reads as a sized answer to a
+    // sized threat. Unauthored phases fall back to the original flat
+    // behavior byte-identical.
+    const idx = Math.min(state.currentPhaseIndex, state.threatPhases.length - 1);
+    const authoredRungs = state.threatPhases[idx]?.rungs;
+    const naturalRungsTotal = authoredRungs !== undefined
+        ? Math.max(1, Math.min(4, authoredRungs))
+        : (isBossTier ? THREAT_RUNGS_BOSS : THREAT_RUNGS);
     const rungGrowth = isBossTier ? Math.min(state.bossRungGrowth ?? 0, bossRungGrowthCap(naturalRungsTotal)) : 0;
     const rungsTotal = naturalRungsTotal + rungGrowth;
     const quagmire = zoneHas(state, 'quagmire-of-doubt') ? 1 : 0;
@@ -4422,6 +4431,10 @@ export function projectReapAll(state: CombatEncounterState, card: CombatCard): {
  */
 export function projectIncomingThreat(state: CombatEncounterState): {
     rawDamage: number; projectedDamage: number; willDeny: boolean; guard: number; barrier: number; netDamage: number;
+    /** Phase 33b — the current phase's live STAGGER-rung total/lost, so the
+     *  presenter can show rung magnitude (1-4) instead of leaving it
+     *  invisible. `rungsTotal` reflects any authored `phase.rungs` override. */
+    rungsTotal: number; rungsLost: number;
 } {
     const idx = Math.min(state.currentPhaseIndex, state.threatPhases.length - 1);
     const phase = state.threatPhases[idx];
@@ -4460,7 +4473,7 @@ export function projectIncomingThreat(state: CombatEncounterState): {
     remaining = Math.max(0, remaining - guard);
     remaining = Math.max(0, remaining - barrier);
 
-    return { rawDamage, projectedDamage, willDeny, guard, barrier, netDamage: remaining };
+    return { rawDamage, projectedDamage, willDeny, guard, barrier, netDamage: remaining, rungsTotal, rungsLost };
 }
 
 /** One hand card's finisher (rupture / reap) readiness, for

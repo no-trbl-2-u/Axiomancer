@@ -392,12 +392,12 @@ Phase 26 (numbers) but design-independent of the owner session
       already works via the existing `enemyCleanse`). Hook-only, no
       bestiary authoring. Full re-scope rationale + guardrails:
       `plan/phases/phase_33a_reactive_verb_core.md`.
-- [ ] Phase 33b — Enemy archetypes + variable-rung telegraphs:
+- [x] Phase 33b — Enemy archetypes + variable-rung telegraphs:
       CAUTERIZE / Premise-shed / SWAY-cleanse enemies with the
       variable-rung telegraph presentation. Deps: 33a.
-- [ ] Phase 33b — Enemy archetypes + variable-rung telegraphs:
-      CAUTERIZE / Premise-shed / SWAY-cleanse enemies with the
-      variable-rung telegraph presentation. Deps: 33a.
+      (row previously duplicated byte-identical — corrected to one row in
+      the same commit) — `feat(mechanics): enemy archetypes +
+      variable-rung telegraphs — phase 33b` (8ceb86e5)
 - [ ] Phase 33c — THE COVETED DIE. Deps: 33a.
 - [ ] Phase 33d — GLYPHS pilot (Option-B grammar experiment) — rides
       last, as originally scoped. Deps: 33a (+ 33b for enemy surface).
@@ -456,6 +456,56 @@ Phase 26 (numbers) but design-independent of the owner session
       trailer; keep the trailer as a belt-and-suspenders. Harness/skill
       + script only; no engine change — source: issue-triage 2026-07-14
       findings.
+
+**Pricing model (promoted via chat session 2026-07-17, T direct):**
+
+- [x] Phase 36a — Alt-win-aware card pricing (`scoreCard` v2, part 1).
+      `scoreCard` (cards.pricing.ts) scores only spell HP/status/burst
+      lines: enchant/disenchant cards price to 0 outright, and the
+      non-HP win currencies (SWAY→CAPITULATE, Premise→CONCEDE,
+      Befriend→mercy) exist only as minor rider points (swayPerStack
+      0.8, premise 0.8) rather than win-condition progress — so whole
+      win engines are invisible and cross-deck price ranks alt-win
+      decks backwards (Grace 5.46 beats Foundry 7.52 early, both
+      winning purely by CAPITULATE at statusEngagement 0.00; Oratory,
+      the only preset alive late, is carried by unpriced CONCEDE).
+      Scope: price enchant/disenchant persistent passives (coordinate
+      with the "min-4-triggers" hand-pricing convention in the card
+      comments) and weight win-path currencies as win-condition
+      progress; re-band the pricing lint once. Structural — does not
+      depend on enemy tuning. Evidence:
+      `axiomancer-mechanics/scratch/price-experiment/report/FINDINGS.md`.
+      Deps: none. **Re-scoped in-flight** (mechanics-expert design pass
+      + brief `plan/phases/phase_36a_alt_win_pricing.md`): the mandate
+      over-claimed — SWAY is NOT priced at ~0 (it's 0.8;
+      `heart-of-the-matter` scores 13.44). Shipped the enemy-INDEPENDENT
+      half: `swayPerStack` 0.8→0.9 (CAPITULATE parity 0.95 − decay
+      haircut) + a flat +3 CONCEDE capstone on the declaring peroration
+      card (was priced 0). Premise currency (build currency, enemy-
+      dependent win-value) left at 0.8; enchant/disenchant pricing needs
+      a schema change (prose `persistentEffect` field) → deferred to
+      **36c** (filed in PHASE_CANDIDATES). No re-band needed — the fix
+      was rank-honest within existing bands —
+      `feat(mechanics): alt-win-aware card pricing — phase 36a` (7d26bebd)
+- [ ] Phase 36b — Tempo-aware card pricing (`scoreCard` v2, part 2).
+      `scoreCard` prices magnitude-per-die but is blind to WHEN the
+      power arrives: a RUPTURE burst and a ~6-round ramping POISON can
+      price identically while short lethal fights pay the slow one a
+      fraction of its printed value. The erosion price ladder shows
+      late win-rate crawling 0.04→0.12 across 4x price because the
+      death clock (avgRoundsAll ~4.1, set by enemy output) never
+      moves; the sandbox fix-cards that price the tempo axis instead
+      (front-load / tick-forcing / survival sliver) converted +12 pts
+      mid and >2x late for +0.5 avg-spell. Scope: add a
+      time-to-payoff term (credit front-loaded/faster-maturing
+      payoff; discount long-ramp DoTs by expected fight length per
+      stage). Proof gate: the scratch ladder + preset sweep + fix-test
+      re-run ON TOP OF 33b's enemies (the 2026-07-17 data predates
+      phase 33b — sibling branches) at seeds ≥ 5, with the ladder's
+      down-scaler clamp fixed first (x0.5/x0.75 tiers were near
+      no-ops: avgSpell 7.45/8.09 vs 8.09 at x1); then `/deck-tuning`.
+      Deps: 36a (shared `scoreCard` surface; land the lint re-band
+      once).
 
 > **After the queue drains:** `/march` transitions to `/iterate`
 > — draining `plan/AUDIT.md` + `plan/CRITIQUE.md`, doc-drift,

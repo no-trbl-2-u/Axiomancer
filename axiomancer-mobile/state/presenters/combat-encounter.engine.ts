@@ -252,8 +252,13 @@ export interface CombatIntentVM {
     next: { type: CombatIntentType; icon: string; label: string; branch: CombatIntentBranchVM | null } | null;
     /** phase 28 — the wall-math readout (`projectIncomingThreat`): what this
      *  telegraphed hit actually deals right now, netted against live guard/
-     *  barrier and denial state — the number `damage` above can't show. */
-    wallMath: { projectedDamage: number; netDamage: number; willDeny: boolean; guard: number; barrier: number };
+     *  barrier and denial state — the number `damage` above can't show.
+     *  Phase 33b adds `rungsTotal`/`rungsLost` — the phase's live STAGGER-rung
+     *  magnitude, previously invisible to the player entirely. */
+    wallMath: {
+        projectedDamage: number; netDamage: number; willDeny: boolean; guard: number; barrier: number;
+        rungsTotal: number; rungsLost: number;
+    };
 }
 export interface CombatEnemyPaneVM {
     name: string; artKey: string; isBoss: boolean;
@@ -621,6 +626,7 @@ function intentVM(state: CombatEncounterState): CombatIntentVM {
         wallMath: {
             projectedDamage: threat.projectedDamage, netDamage: threat.netDamage,
             willDeny: threat.willDeny, guard: threat.guard, barrier: threat.barrier,
+            rungsTotal: threat.rungsTotal, rungsLost: threat.rungsLost,
         },
     };
 }
