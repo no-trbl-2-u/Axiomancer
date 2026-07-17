@@ -70,6 +70,13 @@ jobs:
         with:
           fetch-depth: 0
 
+      # Soft measurement-freshness alarm: warns (never fails) when mechanics
+      # source has moved past the stamped deck-matrix baseline, so balance
+      # findings citing it are visibly dated. Zero-dep; needs the full
+      # history this job already fetches.
+      - name: Baseline freshness (soft warning)
+        run: node scripts/check-baseline-freshness.mjs
+
       - name: Detect impact-path changes
         id: impact
         shell: bash

@@ -52,6 +52,37 @@ its own cadence.
 
    Failures become HIGH `plan/AUDIT.md` rows — the digest
    files them; the next dispatcher tick fixes them.
+
+3b. **Measurement freshness** (the balance-truth leg,
+    2026-07-17):
+
+    ```bash
+    npm run baseline:check
+    ```
+
+    - **Fresh** → one line in the `While you were out` panel
+      ("deck-matrix baseline fresh at `<commit>`").
+    - **Stale** (mechanics source moved past the stamp) →
+      re-measure with the REDUCED nightly pass, then re-check:
+
+      ```bash
+      npm run baseline:regen -- --runs=30 --confidence=reduced-nightly
+      ```
+
+      Commit the regenerated
+      `deck-matrix-baseline.json` with the digest (a
+      measurement is briefing, not shipping). Then READ the
+      new numbers against the locked doctrine curve
+      (early ~80 / mid ~50 / late 25-35 / impossible 0,
+      blind policy-pick): each band that moved gets a line in
+      the `Tuning proposals` panel, and a doctrine violation
+      (a stage outside its band) gets a `plan/AUDIT.md` row.
+      **Measure and report only** — card/deck fixes stay with
+      `/deck-tuning`, engine constants stay manual (§4.2-4.3
+      rails apply). A reduced pass is directionally honest,
+      not confirmation-grade: never cite it for close calls
+      without the full 3-seed `npm run baseline:regen`.
+
 4. **Write today's DevLog entry** — create
    `devlog/entries/DIGEST_<YYYY-MM-DD>.md`. Never overwrite a
    past day; the DevLog is an accumulating ledger. The entry is
@@ -183,6 +214,8 @@ its own cadence.
 devlog/entries/DIGEST_<date>.md      # the deliverable (append, never overwrite)
 npm run devlog:shots -- <ref> <date> # collect UI before/after/diff (if screens changed)
 npm run site:build                   # catalog (export+render) + entry HTML + hub
+npm run baseline:check               # is the deck-matrix baseline stale?
+npm run baseline:regen -- --runs=30 --confidence=reduced-nightly  # the reduced re-measure
 plan/AUDIT.md                        # breadth failures land here
 plan/PHASE_CANDIDATES.md             # tuning proposals land here
 gh run list --workflow march -L 20   # the invisible no-ops

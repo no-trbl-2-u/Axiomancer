@@ -136,6 +136,39 @@ never a dependency); `kb-query` is the genre's external prior art (community
 sourced, cite with `src-NNN` receipts). The `card-expert` and
 `mechanics-expert` sub-agents carry both tool sets.
 
+## Measured truth (baselines) — freshness discipline
+
+Two kinds of truth answer game questions, and they go stale differently:
+
+- **Source-derived truth** (what a card does, how it prices, what a keyword
+  means) regenerates from the tree — the libraries, `axio-query`, and the
+  catalog are as fresh as their last export, and the guard tests pin every
+  player-facing surface to the payloads. The catalog page carries a stamp
+  (`from engine source <commit>`) so a stale render is visible on sight.
+- **Measured truth** (win-rate curves, status engagement, preset spreads)
+  is only as fresh as the last sim run. The canonical measurement is
+  `axiomancer-mechanics/docs/reports/baselines/deck-matrix-baseline.json`,
+  meta-stamped with the commit it measured.
+
+Rules when citing measured numbers:
+
+1. Run `npm run baseline:check` first (soft alarm: compares the baseline's
+   stamp against `axiomancer-mechanics/src` history). CI runs the same check
+   as a warning on mechanics pushes; the nightly digest re-measures with a
+   reduced pass when stale (`npm run baseline:regen -- --runs=30
+   --confidence=reduced-nightly`).
+2. Every balance claim NAMES its baseline stamp ("as of `<commit>`,
+   `<date>`"). A claim citing a stale baseline must say the tree has moved
+   since — mechanics changes after the stamp make the numbers historical,
+   not current.
+3. `npm run baseline:regen` (full: runs=60) re-measures and re-stamps. A
+   `confidence: reduced-nightly` baseline is directionally honest, never
+   confirmation-grade — close calls need the full multi-seed pass before
+   anyone acts on them.
+4. Measuring is not tuning: regenerating the baseline is briefing; reading
+   it into card/deck changes stays with `/deck-tuning`, and engine constants
+   stay manual.
+
 ## Per-package guides
 
 Each package keeps its own `AGENTS.md` / `CLAUDE.md` with domain specifics
