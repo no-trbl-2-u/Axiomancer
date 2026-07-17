@@ -4,6 +4,7 @@
   "name": "Banach-Tarski Strike",
   "type": "buff",
   "glyph": "◆",
+  "kw": "MARK",
   "color": "#4f9ddb",
   "kind": "advantage",
   "chips": [
@@ -37,6 +38,7 @@
   "name": "Barber's Paradox",
   "type": "buff",
   "glyph": "▲",
+  "kw": "CLEANSE",
   "color": "#5bbf6a",
   "kind": "statup",
   "chips": [
@@ -68,6 +70,7 @@
   "name": "Bertrand's Precision",
   "type": "buff",
   "glyph": "◆",
+  "kw": "FORETELL",
   "color": "#4f9ddb",
   "kind": "advantage",
   "chips": [
@@ -101,6 +104,7 @@
   "name": "Dichotomy Shield",
   "type": "buff",
   "glyph": "▲",
+  "kw": "GUARD",
   "color": "#5bbf6a",
   "kind": "statup",
   "chips": [
@@ -134,6 +138,7 @@
   "name": "EPR Entanglement",
   "type": "buff",
   "glyph": "▲",
+  "kw": "GUARD",
   "color": "#5bbf6a",
   "kind": "statup",
   "chips": [
@@ -167,6 +172,7 @@
   "name": "Grace Momentum",
   "type": "buff",
   "glyph": "▲",
+  "kw": "GRACE_MOMENTUM",
   "color": "#5bbf6a",
   "kind": "statup",
   "chips": [
@@ -198,6 +204,7 @@
   "name": "Monty's Advantage",
   "type": "buff",
   "glyph": "▲",
+  "kw": "MARK",
   "color": "#5bbf6a",
   "kind": "statup",
   "chips": [
@@ -231,6 +238,7 @@
   "name": "Observer's Collapse",
   "type": "buff",
   "glyph": "✷",
+  "kw": "MARK",
   "color": "#4f9ddb",
   "kind": "advantage",
   "chips": [
@@ -264,6 +272,7 @@
   "name": "Open-Minded",
   "type": "buff",
   "glyph": "▲",
+  "kw": "CLEANSE",
   "color": "#5bbf6a",
   "kind": "statup",
   "chips": [
@@ -295,6 +304,7 @@
   "name": "Phoenix Vigor",
   "type": "buff",
   "glyph": "✚",
+  "kw": "HEAL",
   "color": "#49b98a",
   "kind": "regen",
   "chips": [
@@ -330,6 +340,7 @@
   "name": "Sorites Ascension",
   "type": "buff",
   "glyph": "⬆",
+  "kw": "GUARD",
   "color": "#5bbf6a",
   "kind": "statup",
   "chips": [
@@ -367,6 +378,7 @@
   "name": "Thorns",
   "type": "buff",
   "glyph": "✸",
+  "kw": "THORNS",
   "color": "#9aa0a6",
   "kind": "thorns",
   "chips": [
@@ -400,6 +412,7 @@
   "name": "Tristram's Recovery",
   "type": "buff",
   "glyph": "✚",
+  "kw": "HEAL",
   "color": "#49b98a",
   "kind": "regen",
   "chips": [
@@ -433,6 +446,7 @@
   "name": "Twin's Dilation",
   "type": "buff",
   "glyph": "◆",
+  "kw": "DRAW",
   "color": "#4f9ddb",
   "kind": "advantage",
   "chips": [
@@ -467,6 +481,7 @@
   "name": "Backfire",
   "type": "debuff",
   "glyph": "⟲",
+  "kw": "BACKFIRE",
   "color": "#a86bdc",
   "kind": "control",
   "chips": [
@@ -498,6 +513,7 @@
   "name": "Bleed",
   "type": "debuff",
   "glyph": "🩸",
+  "kw": "BLEED",
   "color": "#e2543b",
   "kind": "dot",
   "chips": [
@@ -531,6 +547,7 @@
   "name": "Creeping Doom",
   "type": "debuff",
   "glyph": "🕸",
+  "kw": "DOOM",
   "color": "#e2543b",
   "kind": "dot",
   "chips": [
@@ -564,6 +581,7 @@
   "name": "Grelling's Malediction",
   "type": "debuff",
   "glyph": "🧿",
+  "kw": "MARK",
   "color": "#e08a3c",
   "kind": "statdown",
   "chips": [
@@ -600,6 +618,7 @@
   "name": "Kindling Ember",
   "type": "debuff",
   "glyph": "🔥",
+  "kw": "BLEED",
   "color": "#e2543b",
   "kind": "dot",
   "chips": [
@@ -633,6 +652,7 @@
   "name": "Mark",
   "type": "debuff",
   "glyph": "◉",
+  "kw": "MARK",
   "color": "#d9c66a",
   "kind": "mark",
   "chips": [
@@ -664,6 +684,7 @@
   "name": "Nettle Sting",
   "type": "debuff",
   "glyph": "🌿",
+  "kw": "BLEED",
   "color": "#e2543b",
   "kind": "dot",
   "chips": [
@@ -697,6 +718,7 @@
   "name": "Petrify",
   "type": "debuff",
   "glyph": "🗿",
+  "kw": "PETRIFY",
   "color": "#a86bdc",
   "kind": "control",
   "chips": [
@@ -730,6 +752,7 @@
   "name": "Poison",
   "type": "debuff",
   "glyph": "☠",
+  "kw": "POISON",
   "color": "#e2543b",
   "kind": "dot",
   "chips": [
@@ -763,6 +786,7 @@
   "name": "Rapport",
   "type": "debuff",
   "glyph": "☙",
+  "kw": "RAPPORT",
   "color": "#e08a3c",
   "kind": "statdown",
   "chips": [

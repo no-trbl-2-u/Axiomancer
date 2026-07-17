@@ -52,6 +52,8 @@ const RETURN_ARROW: GlyphShape = { d: 'M14 3 A7 7 0 0 1 14 17 H11 V21 L4 15 L11 
 const CYCLE_ARROW: GlyphShape = { d: 'M12 3 A9 9 0 1 0 21 12 H18.5 A6.5 6.5 0 1 1 12 5.5 L12 9 L18 4.5 L12 0 Z' };
 const STAGGERED_BARS: GlyphShape = { d: 'M4 4 H16 V7 H4 Z M8 10.5 H20 V13.5 H8 Z M4 17 H16 V20 H4 Z' };
 const CRYSTAL: GlyphShape = { d: 'M12 2 L21 12 L12 22 L3 12 Z M12 7 L16.5 12 L12 17 L7.5 12 Z', evenodd: true };
+const STONE: GlyphShape = { d: 'M8 2.5 H16 L21.5 9 L18.5 21.5 H5.5 L2.5 9 Z M12.2 4 L13.6 8 L10.8 12.2 L13.2 16.4 L11.4 20 L10.2 20 L11.8 16.5 L9.4 12.2 L12.2 8 L11 4 Z', evenodd: true };
+const CHEVRONS_RIGHT: GlyphShape = { d: 'M5 3 L14 12 L5 21 L2.8 18.8 L9.6 12 L2.8 5.2 Z M12 3 L21 12 L12 21 L9.8 18.8 L16.6 12 L9.8 5.2 Z' };
 
 /** UPPERCASE face keyword → silhouette. Aliases share one shape on purpose
  *  (GUARD/BARRIER are one mechanic family; HEAL/REGEN both read as the heart). */
@@ -63,6 +65,8 @@ export const GLYPH_SHAPES: Record<string, GlyphShape> = {
     FROSTBITE: CRYSTAL,
     DOOM: SKULL, CURSE: SKULL,
     SHOCK: BOLT,
+    PETRIFY: STONE,
+    GRACE_MOMENTUM: CHEVRONS_RIGHT,
     MARK: CROSSHAIR,
     BACKFIRE: RETURN_ARROW,
     RAPPORT: SPEECH,

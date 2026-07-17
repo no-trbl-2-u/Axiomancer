@@ -97,6 +97,15 @@ const CATALOG_EXTRA_STYLE = `
   font-family: "IM Fell English", Georgia, serif; font-size: 13.5px; line-height: 1.35; color: #e8dfc8;
 }
 .cface .cbtm .cpaid .ccube { flex-shrink: 0; margin-top: 2px; }
+/* ── Glyph legend — the silhouette sheet, generated from GLYPH_SHAPES ─────── */
+.glyph-grid { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 10px; }
+.glyph-tile {
+  width: 104px; padding: 10px 6px 8px; text-align: center;
+  background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+}
+.glyph-tile svg { display: block; margin: 0 auto 6px; }
+.glyph-kws { font-size: 11px; letter-spacing: .6px; color: var(--muted); font-weight: 700; line-height: 1.5; }
+
 .cface .cbtm .cpaid b {
   font-family: "Bebas Neue", "Arial Narrow", system-ui, sans-serif; font-weight: 700;
   letter-spacing: .5px; text-transform: uppercase; color: var(--rc);
@@ -176,6 +185,8 @@ const SHAPE_RETURN_ARROW = { d: "M14 3 A7 7 0 0 1 14 17 H11 V21 L4 15 L11 9 V13 
 const SHAPE_CYCLE_ARROW = { d: "M12 3 A9 9 0 1 0 21 12 H18.5 A6.5 6.5 0 1 1 12 5.5 L12 9 L18 4.5 L12 0 Z" };
 const SHAPE_STAGGERED_BARS = { d: "M4 4 H16 V7 H4 Z M8 10.5 H20 V13.5 H8 Z M4 17 H16 V20 H4 Z" };
 const SHAPE_CRYSTAL = { d: "M12 2 L21 12 L12 22 L3 12 Z M12 7 L16.5 12 L12 17 L7.5 12 Z", eo: true };
+const SHAPE_STONE = { d: "M8 2.5 H16 L21.5 9 L18.5 21.5 H5.5 L2.5 9 Z M12.2 4 L13.6 8 L10.8 12.2 L13.2 16.4 L11.4 20 L10.2 20 L11.8 16.5 L9.4 12.2 L12.2 8 L11 4 Z", eo: true };
+const SHAPE_CHEVRONS_RIGHT = { d: "M5 3 L14 12 L5 21 L2.8 18.8 L9.6 12 L2.8 5.2 Z M12 3 L21 12 L12 21 L9.8 18.8 L16.6 12 L9.8 5.2 Z" };
 const GLYPH_SHAPES = {
   BLEED: SHAPE_DROPS,
   POISON: SHAPE_FLASK, FESTER: SHAPE_FLASK, ACID: SHAPE_FLASK,
@@ -183,6 +194,8 @@ const GLYPH_SHAPES = {
   FROSTBITE: SHAPE_CRYSTAL,
   DOOM: SHAPE_SKULL, CURSE: SHAPE_SKULL,
   SHOCK: SHAPE_BOLT,
+  PETRIFY: SHAPE_STONE,
+  GRACE_MOMENTUM: SHAPE_CHEVRONS_RIGHT,
   MARK: SHAPE_CROSSHAIR,
   BACKFIRE: SHAPE_RETURN_ARROW,
   RAPPORT: SHAPE_SPEECH,
@@ -207,10 +220,10 @@ const GLYPH_SHAPES = {
   MILL: SHAPE_SPILL_CARDS,
 };
 
-function glyphShapeSvg(shape) {
+function glyphShapeSvg(shape, { size = 36, fill = "var(--rc)" } = {}) {
   return (
-    `<svg viewBox="0 0 24 24" width="36" height="36" aria-hidden="true" style="opacity:.95">` +
-    `<path d="${shape.d}" fill="var(--rc)"${shape.eo ? ' fill-rule="evenodd"' : ""}/>` +
+    `<svg viewBox="0 0 24 24" width="${size}" height="${size}" aria-hidden="true" style="opacity:.95">` +
+    `<path d="${shape.d}" fill="${fill}"${shape.eo ? ' fill-rule="evenodd"' : ""}/>` +
     `</svg>`
   );
 }
@@ -422,13 +435,22 @@ function renderEnemies(enemies) {
 // Effects — name · glyph · what it does (grouped buffs / debuffs)
 // ---------------------------------------------------------------------------
 function renderEffects(effects) {
-  const row = (e) =>
-    `  <div class="eff"><div class="glyph" style="--gc:${escapeHtml(e.color)}" role="img" ` +
-    `aria-label="${escapeHtml(e.name)} glyph">${escapeHtml(e.glyph)}</div>` +
-    `<div><div class="name">${inline(e.name)}</div>` +
-    chipsHtml(e.chips) +
-    linesHtml(e.lines) +
-    `</div></div>`;
+  // Card-face SILHOUETTE where the effect's registry keyword has one (drawn
+  // dark on the effect-coloured tile); the board's text glyph otherwise —
+  // not every effect has a shape, and the text rune is still the truth of
+  // how an unshaped effect reads on the combat board.
+  const row = (e) => {
+    const shape = e.kw ? GLYPH_SHAPES[e.kw] : null;
+    const inner = shape ? glyphShapeSvg(shape, { size: 30, fill: "#0b0d10" }) : escapeHtml(e.glyph);
+    return (
+      `  <div class="eff"><div class="glyph" style="--gc:${escapeHtml(e.color)}" role="img" ` +
+      `aria-label="${escapeHtml(e.name)} glyph">${inner}</div>` +
+      `<div><div class="name">${inline(e.name)}</div>` +
+      chipsHtml(e.chips) +
+      linesHtml(e.lines) +
+      `</div></div>`
+    );
+  };
 
   const section = (label, list) =>
     list.length
@@ -451,6 +473,35 @@ function renderEffects(effects) {
   );
 }
 
+// ---------------------------------------------------------------------------
+// Glyphs — the effect-silhouette legend, generated from the live GLYPH_SHAPES
+// table so the sheet can never drift from what the card faces draw. Aliases
+// that share one silhouette render as one tile listing every keyword.
+// ---------------------------------------------------------------------------
+function renderGlyphs() {
+  const byShape = new Map();
+  for (const [kw, shape] of Object.entries(GLYPH_SHAPES)) {
+    if (!byShape.has(shape)) byShape.set(shape, []);
+    byShape.get(shape).push(kw);
+  }
+  const tiles = [...byShape.entries()]
+    .sort((a, b) => a[1][0].localeCompare(b[1][0]))
+    .map(
+      ([shape, kws]) =>
+        `  <div class="glyph-tile" role="img" aria-label="${escapeHtml(kws.join(' / '))} silhouette">` +
+        glyphShapeSvg(shape, { size: 56 }) +
+        `<div class="glyph-kws">${kws.map(escapeHtml).join("<br>")}</div></div>`
+    )
+    .join("\n");
+  return (
+    `<section id="glyphs" class="catalog-section" style="--rc:#d9b44a">\n` +
+    `<h2>Glyphs</h2>\n` +
+    `<p class="intro">${Object.keys(GLYPH_SHAPES).length} keywords, ${byShape.size} silhouettes — the effect-shaped FREE glyphs the card faces draw ` +
+    `(shared table: mobile glyphShapes.ts · editor KwGlyph · this build script). Keywords stacked on one tile share a shape on purpose.</p>\n` +
+    `<div class="glyph-grid">\n${tiles}\n</div>\n</section>`
+  );
+}
+
 function buildCatalog() {
   const cards = load("cards");
   const enemies = load("enemies");
@@ -463,12 +514,15 @@ function buildCatalog() {
     `<a href="#cards">Cards (${cards.length})</a>` +
     `<a href="#enemies">Enemies (${enemies.length})</a>` +
     `<a href="#effects">Effects (${effects.length})</a>` +
+    `<a href="#glyphs">Glyphs (${Object.keys(GLYPH_SHAPES).length})</a>` +
     `</nav>\n` +
     renderCards(cards) +
     "\n" +
     renderEnemies(enemies) +
     "\n" +
     renderEffects(effects) +
+    "\n" +
+    renderGlyphs() +
     "\n" +
     CATALOG_JS;
 
