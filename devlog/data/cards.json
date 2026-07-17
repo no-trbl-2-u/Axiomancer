@@ -8,7 +8,7 @@
    "freeGlyph": "❖",
    "freeKw": "ENCHANT",
    "freeVal": "3r",
-   "paid": "DRAW 1 card each time your STAGGER denies an enemy turn."
+   "paid": "DRAW 1 whenever your STAGGER denies an enemy turn."
   },
   "chips": [
    {
@@ -49,8 +49,8 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — DRAW 1 card each time your STAGGER denies an enemy turn.",
-   "PAID (rest of combat) — DRAW 1 card each time your STAGGER denies an enemy turn."
+   "FREE (3 rounds) — DRAW 1 whenever your STAGGER denies an enemy turn.",
+   "PAID (rest of combat) — DRAW 1 whenever your STAGGER denies an enemy turn."
   ]
  },
  {
@@ -59,7 +59,7 @@
   "image": "./assets/catalog/cards/confuse.webp",
   "pricing": "next spell gains ECHO (≈ ×0.8 of an avg spell ≈ 5) + FREE mark (0.5) + dieBonus(draw ×0.6 = 1.2) ≈ 6.7 → Thesis",
   "face": {
-   "freeGlyph": "◎",
+   "freeGlyph": "◉",
    "freeKw": "MARK",
    "freeVal": "1",
    "paid": "your next spell gains ECHO."
@@ -114,10 +114,10 @@
   "image": "./assets/catalog/cards/devil-book.webp",
   "pricing": null,
   "face": {
-   "freeGlyph": "◎",
+   "freeGlyph": "◉",
    "freeKw": "MARK",
    "freeVal": "1",
-   "paid": "mark i1 d2 (self)."
+   "paid": "mark i1 d2 + draw 2."
   },
   "chips": [
    {
@@ -164,7 +164,7 @@
   "lines": [
    "FREE — mark i1 d1 (self)",
    "Applies Mark ×1, 2t → self",
-   "rider"
+   "draw 2"
   ]
  },
  {
@@ -234,7 +234,7 @@
    "freeGlyph": "◆",
    "freeKw": null,
    "freeVal": null,
-   "paid": "backfire i1 d2 + lock the enemy stance + STAGGER 1."
+   "paid": "backfire i1 d2 + lock the enemy's next stance + STAGGER 1."
   },
   "chips": [
    {
@@ -281,7 +281,7 @@
   "lines": [
    "FREE — reveal the next stance",
    "Applies Backfire ×1, 2t → enemy",
-   "lock the enemy stance",
+   "lock the enemy's next stance",
    "STAGGER 1"
   ]
  },
@@ -294,7 +294,7 @@
    "freeGlyph": "❖",
    "freeKw": "ENCHANT",
    "freeVal": "3r",
-   "paid": "Drain 1 VITAE from the enemy for every SOUL you gain."
+   "paid": "Each SOUL you gain deals 1 to the enemy."
   },
   "chips": [
    {
@@ -339,8 +339,8 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — Drain 1 VITAE from the enemy for every SOUL you gain.",
-   "PAID (rest of combat) — Drain 1 VITAE from the enemy for every SOUL you gain."
+   "FREE (3 rounds) — Each SOUL you gain deals 1 to the enemy.",
+   "PAID (rest of combat) — Each SOUL you gain deals 1 to the enemy."
   ]
  },
  {
@@ -527,7 +527,7 @@
    "freeGlyph": "☠",
    "freeKw": "CURSE",
    "freeVal": "3r",
-   "paid": "While you hold 4+ PREMISEs, the enemy stays MARKed. Costs 1 die. Attaches to the enemy."
+   "paid": "Hold 4+ PREMISEs: MARK the enemy +1 each turn (to 10). Costs 1 die. Attaches to the enemy."
   },
   "chips": [
    {
@@ -568,8 +568,8 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — While you hold 4+ PREMISEs, the enemy stays MARKed.",
-   "PAID (rest of combat) — While you hold 4+ PREMISEs, the enemy stays MARKed. (attaches to the enemy)"
+   "FREE (3 rounds) — Hold 4+ PREMISEs: MARK the enemy +1 each turn (to 10).",
+   "PAID (rest of combat) — Hold 4+ PREMISEs: MARK the enemy +1 each turn (to 10). (attaches to the enemy)"
   ]
  },
  {
@@ -581,7 +581,7 @@
    "freeGlyph": "⚑",
    "freeKw": "DRAW",
    "freeVal": "1",
-   "paid": "poison i1 d2 + mark i1 d2 + OMEN — on hit: Guard 4 (2/play)."
+   "paid": "poison i1 d2 + mark i1 d2 + OMEN — stake claim (window 1-2, ante 2◆ at window 1): on hit, Guard 4 (2/play)."
   },
   "chips": [
    {
@@ -629,7 +629,7 @@
    "FREE — draw 1 · FORETELL 1",
    "Applies Poison ×1, 2t → enemy",
    "Applies Mark ×1, 2t → enemy",
-   "OMEN — on hit: Guard 4"
+   "OMEN — stake claim (window 1-2, ante 2◆ at window 1): on hit, Guard 4"
   ]
  },
  {
@@ -696,7 +696,7 @@
   "image": "./assets/catalog/cards/bright-sphere-yellow.webp",
   "pricing": null,
   "face": {
-   "freeGlyph": "▼",
+   "freeGlyph": "☙",
    "freeKw": "RAPPORT",
    "freeVal": "1",
    "paid": "rapport i1 d2 + SWAY 2."
@@ -759,7 +759,7 @@
    "freeGlyph": "❖",
    "freeKw": "ENCHANT",
    "freeVal": "3r",
-   "paid": "While FALLEN, your status applications land at +1 intensity."
+   "paid": "While FALLEN, your statuses land +1 intensity per affliction you carry beyond the first (max +4)."
   },
   "chips": [
    {
@@ -804,8 +804,8 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — While FALLEN, your status applications land at +1 intensity.",
-   "PAID (rest of combat) — While FALLEN, your status applications land at +1 intensity."
+   "FREE (3 rounds) — While FALLEN, your statuses land +1 intensity per affliction you carry beyond the first (max +4).",
+   "PAID (rest of combat) — While FALLEN, your statuses land +1 intensity per affliction you carry beyond the first (max +4)."
   ]
  },
  {
@@ -817,7 +817,7 @@
    "freeGlyph": "☠",
    "freeKw": "CURSE",
    "freeVal": "3r",
-   "paid": "A fully-blocked (GUARD) attack STAGGERs the enemy a rung on its next telegraph. Costs 1 die. Attaches to the enemy."
+   "paid": "After each threat phase, deal 20% of your remaining GUARD (minimum 4). Fully blocking an attack STAGGERs the next telegraph by 1. Costs 1 die. Attaches to the enemy."
   },
   "chips": [
    {
@@ -862,8 +862,8 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — A fully-blocked (GUARD) attack STAGGERs the enemy a rung on its next telegraph.",
-   "PAID (rest of combat) — A fully-blocked (GUARD) attack STAGGERs the enemy a rung on its next telegraph. (attaches to the enemy)"
+   "FREE (3 rounds) — After each threat phase, deal 20% of your remaining GUARD (minimum 4). Fully blocking an attack STAGGERs the next telegraph by 1.",
+   "PAID (rest of combat) — After each threat phase, deal 20% of your remaining GUARD (minimum 4). Fully blocking an attack STAGGERs the next telegraph by 1. (attaches to the enemy)"
   ]
  },
  {
@@ -872,7 +872,7 @@
   "image": "./assets/catalog/cards/bleed.webp",
   "pricing": null,
   "face": {
-   "freeGlyph": "◎",
+   "freeGlyph": "◉",
    "freeKw": "MARK",
    "freeVal": "1",
    "paid": "REARGUE — convert bleed↔poison, +1 intensity."
@@ -933,7 +933,7 @@
    "freeGlyph": "◉",
    "freeKw": "FORETELL",
    "freeVal": "1",
-   "paid": "RUPTURE 1 — its fuel ticks now, +1 Soul + FORETELL 1."
+   "paid": "RUPTURE 1 — its remaining damage lands now, +1 Soul + FORETELL 1."
   },
   "chips": [
    {
@@ -979,7 +979,7 @@
   ],
   "lines": [
    "FREE — FORETELL 1",
-   "RUPTURE 1 — its fuel ticks now, +1 Soul",
+   "RUPTURE 1 — its remaining damage lands now, +1 Soul",
    "FORETELL 1",
    "Die bonus: powering die mind fires a rider"
   ]
@@ -993,7 +993,7 @@
    "freeGlyph": "∿",
    "freeKw": "SWAY",
    "freeVal": "1",
-   "paid": "rapport i2 d2."
+   "paid": "rapport i2 d2 + heal 2."
   },
   "chips": [
    {
@@ -1040,7 +1040,7 @@
   "lines": [
    "FREE — SWAY 1",
    "Applies Rapport ×2, 2t → enemy",
-   "rider"
+   "heal 2"
   ]
  },
  {
@@ -1052,7 +1052,7 @@
    "freeGlyph": "☠",
    "freeKw": "CURSE",
    "freeVal": "3r",
-   "paid": "Every KINDLEd or FORGEd die you spend MARKs the enemy. Costs 1 die. Attaches to the enemy."
+   "paid": "A KINDLEd or FORGEd die powering a card MARKs the enemy (i1, once per play). Costs 1 die. Attaches to the enemy."
   },
   "chips": [
    {
@@ -1093,8 +1093,8 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — Every KINDLEd or FORGEd die you spend MARKs the enemy.",
-   "PAID (rest of combat) — Every KINDLEd or FORGEd die you spend MARKs the enemy. (attaches to the enemy)"
+   "FREE (3 rounds) — A KINDLEd or FORGEd die powering a card MARKs the enemy (i1, once per play).",
+   "PAID (rest of combat) — A KINDLEd or FORGEd die powering a card MARKs the enemy (i1, once per play). (attaches to the enemy)"
   ]
  },
  {
@@ -1165,7 +1165,7 @@
    "freeGlyph": "❡",
    "freeKw": "PREMISE",
    "freeVal": "1",
-   "paid": "poison i1 d2 + +1 Premise (2/play)."
+   "paid": "poison i1 d2 + +1 Premise + draw 1 (2/play)."
   },
   "chips": [
    {
@@ -1213,7 +1213,7 @@
    "FREE — +1 Premise",
    "Applies Poison ×1, 2t → enemy",
    "+1 Premise",
-   "rider"
+   "draw 1"
   ]
  },
  {
@@ -1222,7 +1222,7 @@
   "image": "./assets/catalog/cards/light-ring.webp",
   "pricing": null,
   "face": {
-   "freeGlyph": "◎",
+   "freeGlyph": "◉",
    "freeKw": "MARK",
    "freeVal": "1",
    "paid": "bleed i2 d3 (6/hit)."
@@ -1284,7 +1284,7 @@
    "freeGlyph": "☠",
    "freeKw": "CURSE",
    "freeVal": "3r",
-   "paid": "Every OMEN that hits MARKs the foe. Costs 1 die. Attaches to the enemy."
+   "paid": "Every OMEN that hits MARKs the foe (i1). Costs 1 die. Attaches to the enemy."
   },
   "chips": [
    {
@@ -1325,8 +1325,8 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — Every OMEN that hits MARKs the foe.",
-   "PAID (rest of combat) — Every OMEN that hits MARKs the foe. (attaches to the enemy)"
+   "FREE (3 rounds) — Every OMEN that hits MARKs the foe (i1).",
+   "PAID (rest of combat) — Every OMEN that hits MARKs the foe (i1). (attaches to the enemy)"
   ]
  },
  {
@@ -1335,7 +1335,7 @@
   "image": "./assets/catalog/cards/dream-flutter.webp",
   "pricing": null,
   "face": {
-   "freeGlyph": "◎",
+   "freeGlyph": "◉",
    "freeKw": "MARK",
    "freeVal": "1",
    "paid": "PROLONG +1 duration to ALL your DoTs."
@@ -1456,7 +1456,7 @@
    "freeGlyph": "⬡",
    "freeKw": "PIP",
    "freeVal": "1",
-   "paid": "Guard 5 + +2 pip to every Reserve die."
+   "paid": "Guard 5 + +2 pips to every Reserve die + PIP 1 past the cap (35% bust: halves the die)."
   },
   "chips": [
    {
@@ -1503,7 +1503,8 @@
   "lines": [
    "FREE — +1 pip to every Reserve die",
    "Guard 5",
-   "+2 pip to every Reserve die"
+   "+2 pips to every Reserve die",
+   "PIP 1 past the cap (35% bust: halves the die)"
   ]
  },
  {
@@ -1515,7 +1516,7 @@
    "freeGlyph": "∿",
    "freeKw": "SWAY",
    "freeVal": "1",
-   "paid": "SWAY 6 + ECHO."
+   "paid": "SWAY 6 + ECHO + heal 4."
   },
   "chips": [
    {
@@ -1559,7 +1560,7 @@
    "FREE — SWAY 1",
    "SWAY 6",
    "ECHO",
-   "rider",
+   "heal 4",
    "Threshold: 5× heart die fires a rider"
   ]
  },
@@ -1572,7 +1573,7 @@
    "freeGlyph": "❖",
    "freeKw": "ENCHANT",
    "freeVal": "3r",
-   "paid": "Every THORNS reflection also marks the enemy."
+   "paid": "Every THORNS reflection also MARKs the enemy (i1)."
   },
   "chips": [
    {
@@ -1617,8 +1618,8 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — Every THORNS reflection also marks the enemy.",
-   "PAID (rest of combat) — Every THORNS reflection also marks the enemy."
+   "FREE (3 rounds) — Every THORNS reflection also MARKs the enemy (i1).",
+   "PAID (rest of combat) — Every THORNS reflection also MARKs the enemy (i1)."
   ]
  },
  {
@@ -1630,7 +1631,7 @@
    "freeGlyph": "❖",
    "freeKw": "ENCHANT",
    "freeVal": "3r",
-   "paid": "Your SWAY stops decaying, and each new gesture of it lands harder."
+   "paid": "SWAY does not decay. At the end of each turn, future SWAY gains increase by 12% (maximum +108%)."
   },
   "chips": [
    {
@@ -1675,8 +1676,8 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — Your SWAY stops decaying, and each new gesture of it lands harder.",
-   "PAID (rest of combat) — Your SWAY stops decaying, and each new gesture of it lands harder."
+   "FREE (3 rounds) — SWAY does not decay. At the end of each turn, future SWAY gains increase by 12% (maximum +108%).",
+   "PAID (rest of combat) — SWAY does not decay. At the end of each turn, future SWAY gains increase by 12% (maximum +108%)."
   ]
  },
  {
@@ -1801,7 +1802,7 @@
    "freeGlyph": "☠",
    "freeKw": "CURSE",
    "freeVal": "3r",
-   "paid": "Every self-debuff you take toward FALLEN also lands one stack on the enemy. Costs 1 die. Attaches to the enemy."
+   "paid": "Each self-debuff you land also lands 1 stack of itself on the enemy; every 3 RECOIL paid lands 1 more. Costs 1 die. Attaches to the enemy."
   },
   "chips": [
    {
@@ -1846,8 +1847,8 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — Every self-debuff you take toward FALLEN also lands one stack on the enemy.",
-   "PAID (rest of combat) — Every self-debuff you take toward FALLEN also lands one stack on the enemy. (attaches to the enemy)"
+   "FREE (3 rounds) — Each self-debuff you land also lands 1 stack of itself on the enemy; every 3 RECOIL paid lands 1 more.",
+   "PAID (rest of combat) — Each self-debuff you land also lands 1 stack of itself on the enemy; every 3 RECOIL paid lands 1 more. (attaches to the enemy)"
   ]
  },
  {
@@ -1859,7 +1860,7 @@
    "freeGlyph": "☠",
    "freeKw": "CURSE",
    "freeVal": "3r",
-   "paid": "Damage your defenses prevent is converted into SWAY. Costs 1 die. Attaches to the enemy."
+   "paid": "Damage prevented by your GUARD or RIPOSTE becomes SWAY, 1:1. Costs 1 die. Attaches to the enemy."
   },
   "chips": [
    {
@@ -1904,8 +1905,8 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — Damage your defenses prevent is converted into SWAY.",
-   "PAID (rest of combat) — Damage your defenses prevent is converted into SWAY. (attaches to the enemy)"
+   "FREE (3 rounds) — Damage prevented by your GUARD or RIPOSTE becomes SWAY, 1:1.",
+   "PAID (rest of combat) — Damage prevented by your GUARD or RIPOSTE becomes SWAY, 1:1. (attaches to the enemy)"
   ]
  },
  {
@@ -1978,7 +1979,7 @@
    "freeGlyph": "❖",
    "freeKw": "GUARD",
    "freeVal": "2",
-   "paid": "thorns i2 d2 (self) + nettle sting i1 d2 (4 over its run)."
+   "paid": "thorns i2 d2 + nettle sting i1 d2 (DoT: 2/turn, enemy)."
   },
   "chips": [
    {
@@ -2097,7 +2098,7 @@
    "freeGlyph": "⁇",
    "freeKw": "MILL",
    "freeVal": "1",
-   "paid": "replay your last spell ×2."
+   "paid": "replay your last spell ×2 + consume all marks — 3 damage per stack."
   },
   "chips": [
    {
@@ -2144,7 +2145,7 @@
   "lines": [
    "FREE — mill 1 to discard",
    "replay your last spell ×2",
-   "rider"
+   "consume all marks — 3 damage per stack"
   ]
  },
  {
@@ -2156,7 +2157,7 @@
    "freeGlyph": "❖",
    "freeKw": "GUARD",
    "freeVal": "2",
-   "paid": "bleed i1 d2 (self) + FORGE a WILD floating die + RECOIL 6."
+   "paid": "bleed i1 d2 + FORGE a WILD floating die + RECOIL 6."
   },
   "chips": [
    {
@@ -2208,66 +2209,6 @@
   ]
  },
  {
-  "id": "paralysis-of-analysis",
-  "name": "Paralysis of Analysis",
-  "image": "./assets/catalog/cards/confuse.webp",
-  "pricing": null,
-  "face": {
-   "freeGlyph": "⚑",
-   "freeKw": "DRAW",
-   "freeVal": "1",
-   "paid": "backfire i3 d3 + STAGGER 2."
-  },
-  "chips": [
-   {
-    "k": "Stance",
-    "v": "mind"
-   },
-   {
-    "k": "Type",
-    "v": "fallacy"
-   },
-   {
-    "k": "Tier",
-    "v": "3"
-   },
-   {
-    "k": "Target",
-    "v": "enemy"
-   },
-   {
-    "k": "Rank",
-    "v": "Axiom (rare)"
-   },
-   {
-    "k": "Kind",
-    "v": "spell"
-   },
-   {
-    "k": "Theme",
-    "v": "control"
-   },
-   {
-    "k": "Keywords",
-    "v": "STAGGER · BACKFIRE · FORETELL · DRAW"
-   },
-   {
-    "k": "Source",
-    "v": "starter"
-   },
-   {
-    "k": "Preset",
-    "v": "Standstill"
-   }
-  ],
-  "lines": [
-   "FREE — reveal the next stance · draw 1",
-   "Applies Backfire ×3, 3t → enemy",
-   "STAGGER 2",
-   "Die bonus: powering die mind fires a rider"
-  ]
- },
- {
   "id": "peroratio-interrupta",
   "name": "Peroratio Interrupta",
   "image": "./assets/catalog/cards/light-ring.webp",
@@ -2276,7 +2217,7 @@
    "freeGlyph": "❡",
    "freeKw": "PREMISE",
    "freeVal": "1",
-   "paid": "RUPTURE."
+   "paid": "RUPTURE ALL."
   },
   "chips": [
    {
@@ -2322,7 +2263,7 @@
   ],
   "lines": [
    "FREE — +1 Premise",
-   "RUPTURE"
+   "RUPTURE ALL"
   ]
  },
  {
@@ -2334,7 +2275,7 @@
    "freeGlyph": "❖",
    "freeKw": "ENCHANT",
    "freeVal": "3r",
-   "paid": "+1 PREMISE on the first card you play each turn."
+   "paid": "+1 PREMISE on your first card each turn."
   },
   "chips": [
    {
@@ -2375,8 +2316,8 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — +1 PREMISE on the first card you play each turn.",
-   "PAID (rest of combat) — +1 PREMISE on the first card you play each turn."
+   "FREE (3 rounds) — +1 PREMISE on your first card each turn.",
+   "PAID (rest of combat) — +1 PREMISE on your first card each turn."
   ]
  },
  {
@@ -2388,7 +2329,7 @@
    "freeGlyph": "◉",
    "freeKw": "FORETELL",
    "freeVal": "1",
-   "paid": "RUPTURE (+3 fuel per omen hit)."
+   "paid": "RUPTURE ALL (+3 damage per omen hit)."
   },
   "chips": [
    {
@@ -2434,7 +2375,7 @@
   ],
   "lines": [
    "FREE — FORETELL 1",
-   "RUPTURE (+3 fuel per omen hit)"
+   "RUPTURE ALL (+3 damage per omen hit)"
   ]
  },
  {
@@ -2620,10 +2561,10 @@
   "image": "./assets/catalog/cards/spark.webp",
   "pricing": null,
   "face": {
-   "freeGlyph": "◎",
+   "freeGlyph": "◉",
    "freeKw": "MARK",
    "freeVal": "1",
-   "paid": "RUPTURE + SIPHON 35% + RECALL 2 — its FREE line fires now."
+   "paid": "RUPTURE ALL + SIPHON 35% + RECALL 2 — their FREE lines fire now."
   },
   "chips": [
    {
@@ -2669,9 +2610,9 @@
   ],
   "lines": [
    "FREE — mark i1 d1",
-   "RUPTURE",
+   "RUPTURE ALL",
    "SIPHON 35%",
-   "RECALL 2 — its FREE line fires now"
+   "RECALL 2 — their FREE lines fire now"
   ]
  },
  {
@@ -2683,7 +2624,7 @@
    "freeGlyph": "❖",
    "freeKw": "ENCHANT",
    "freeVal": "3r",
-   "paid": "The first spell you cast each turn gains ECHO (fires twice)."
+   "paid": "Your first spell each turn gains ECHO."
   },
   "chips": [
    {
@@ -2728,8 +2669,8 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — The first spell you cast each turn gains ECHO (fires twice).",
-   "PAID (rest of combat) — The first spell you cast each turn gains ECHO (fires twice)."
+   "FREE (3 rounds) — Your first spell each turn gains ECHO.",
+   "PAID (rest of combat) — Your first spell each turn gains ECHO."
   ]
  },
  {
@@ -2741,7 +2682,7 @@
    "freeGlyph": "⁇",
    "freeKw": "MILL",
    "freeVal": "1",
-   "paid": "RECALL 1."
+   "paid": "RECALL 1 + consume all marks — 1 damage per stack."
   },
   "chips": [
    {
@@ -2788,7 +2729,7 @@
   "lines": [
    "FREE — mill 1 to discard",
    "RECALL 1",
-   "rider"
+   "consume all marks — 1 damage per stack"
   ]
  },
  {
@@ -2797,10 +2738,10 @@
   "image": "./assets/catalog/cards/burn.webp",
   "pricing": "RUPTURE (4 + fuel 8, bonusPct 0.10 ≈ +0.004) − recoil 5 credit",
   "face": {
-   "freeGlyph": "◎",
+   "freeGlyph": "◉",
    "freeKw": "MARK",
    "freeVal": "1",
-   "paid": "RECOIL 5 + RUPTURE."
+   "paid": "RECOIL 5 + RUPTURE ALL."
   },
   "chips": [
    {
@@ -2847,19 +2788,19 @@
   "lines": [
    "FREE — mark i1 d1 (self)",
    "RECOIL 5",
-   "RUPTURE"
+   "RUPTURE ALL"
   ]
  },
  {
   "id": "signs-and-portents",
   "name": "Signs and Portents",
   "image": "./assets/catalog/cards/will-o-wisp.webp",
-  "pricing": "OMEN(draw 2 = 4 ×0.6 omen-odds = 2.4) + FREE foretell (0.35) + info value ≈ 4.4 → Lemma",
+  "pricing": null,
   "face": {
    "freeGlyph": "◉",
    "freeKw": "FORETELL",
    "freeVal": "1",
-   "paid": "OMEN — on hit: draw 2."
+   "paid": "OMEN — stake claim (window 1-2, ante 2◆ at window 1): on hit, draw 2."
   },
   "chips": [
    {
@@ -2905,7 +2846,7 @@
   ],
   "lines": [
    "FREE — FORETELL 1",
-   "OMEN — on hit: draw 2"
+   "OMEN — stake claim (window 1-2, ante 2◆ at window 1): on hit, draw 2"
   ]
  },
  {
@@ -2917,7 +2858,7 @@
    "freeGlyph": "⬡",
    "freeKw": "PIP",
    "freeVal": "1",
-   "paid": "kindling ember i1 d3 + KINDLE (mind) (3 over its run)."
+   "paid": "kindling ember i1 d3 (DoT: 1/turn) + KINDLE (mind)."
   },
   "chips": [
    {
@@ -2974,7 +2915,7 @@
   "image": "./assets/catalog/cards/dream-flutter.webp",
   "pricing": null,
   "face": {
-   "freeGlyph": "◎",
+   "freeGlyph": "◉",
    "freeKw": "MARK",
    "freeVal": "1",
    "paid": "poison i1 d4 (2/play)."
@@ -3032,7 +2973,7 @@
   "image": "./assets/catalog/cards/meat-pecker.webp",
   "pricing": null,
   "face": {
-   "freeGlyph": "▼",
+   "freeGlyph": "☙",
    "freeKw": "RAPPORT",
    "freeVal": "1",
    "paid": "SWAY 3."
@@ -3091,7 +3032,7 @@
   "image": "./assets/catalog/cards/bleed.webp",
   "pricing": null,
   "face": {
-   "freeGlyph": "◎",
+   "freeGlyph": "◉",
    "freeKw": "MARK",
    "freeVal": "1",
    "paid": "bleed i2 d2 (6/hit)."
@@ -3149,7 +3090,7 @@
    "freeGlyph": "☠",
    "freeKw": "CURSE",
    "freeVal": "3r",
-   "paid": "Every ECHO or REPRISE drips 2 damage to the enemy. Costs 1 die. Attaches to the enemy."
+   "paid": "Each ECHO, RECALL, or replay deals the foe's MARK stacks as damage (min 2, max 16). Costs 1 die. Attaches to the enemy."
   },
   "chips": [
    {
@@ -3194,8 +3135,8 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — Every ECHO or REPRISE drips 2 damage to the enemy.",
-   "PAID (rest of combat) — Every ECHO or REPRISE drips 2 damage to the enemy. (attaches to the enemy)"
+   "FREE (3 rounds) — Each ECHO, RECALL, or replay deals the foe's MARK stacks as damage (min 2, max 16).",
+   "PAID (rest of combat) — Each ECHO, RECALL, or replay deals the foe's MARK stacks as damage (min 2, max 16). (attaches to the enemy)"
   ]
  },
  {
@@ -3207,7 +3148,7 @@
    "freeGlyph": "☠",
    "freeKw": "CURSE",
    "freeVal": "3r",
-   "paid": "Doubles the total POISON and BLEED damage the enemy takes each round. Costs 1 die. Attaches to the enemy."
+   "paid": "At round end, the enemy takes this round's POISON and BLEED damage again. Costs 1 die. Attaches to the enemy."
   },
   "chips": [
    {
@@ -3252,8 +3193,8 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — Doubles the total POISON and BLEED damage the enemy takes each round.",
-   "PAID (rest of combat) — Doubles the total POISON and BLEED damage the enemy takes each round. (attaches to the enemy)"
+   "FREE (3 rounds) — At round end, the enemy takes this round's POISON and BLEED damage again.",
+   "PAID (rest of combat) — At round end, the enemy takes this round's POISON and BLEED damage again. (attaches to the enemy)"
   ]
  },
  {
@@ -3262,7 +3203,7 @@
   "image": "./assets/catalog/cards/dream-flutter.webp",
   "pricing": null,
   "face": {
-   "freeGlyph": "◎",
+   "freeGlyph": "◉",
    "freeKw": "MARK",
    "freeVal": "1",
    "paid": "poison i1 d4 + bleed i1 d2 (self) (2/play)."
@@ -3383,7 +3324,7 @@
    "freeGlyph": "❡",
    "freeKw": "PREMISE",
    "freeVal": "1",
-   "paid": "PERORATION at 6 (CONCEDE at 8)."
+   "paid": "PERORATION at 6 — +2 Conviction · draw 2 · consume all marks — 3 damage per stack (CONCEDE at 8 — you win; elite 10 · boss 12)."
   },
   "chips": [
    {
@@ -3429,7 +3370,7 @@
   ],
   "lines": [
    "FREE — +1 Premise",
-   "PERORATION at 6 (CONCEDE at 8)"
+   "PERORATION at 6 — +2 Conviction · draw 2 · consume all marks — 3 damage per stack (CONCEDE at 8 — you win; elite 10 · boss 12)"
   ]
  },
  {
@@ -3496,10 +3437,10 @@
   "image": "./assets/catalog/cards/yggdrasil.webp",
   "pricing": null,
   "face": {
-   "freeGlyph": "▼",
+   "freeGlyph": "☙",
    "freeKw": "RAPPORT",
    "freeVal": "1",
-   "paid": "SWAY 3."
+   "paid": "SWAY 3 + cleanse 1 · heal 3."
   },
   "chips": [
    {
@@ -3546,7 +3487,7 @@
   "lines": [
    "FREE — rapport i1 d2",
    "SWAY 3",
-   "rider"
+   "cleanse 1 · heal 3"
   ]
  },
  {
@@ -3558,7 +3499,7 @@
    "freeGlyph": "❖",
    "freeKw": "ENCHANT",
    "freeVal": "3r",
-   "paid": "The next enemy stance is always revealed (FORETELL), and your OMENs hit harder."
+   "paid": "The next stance stays revealed (FORETELL); OMEN payoffs land ×1.5 (round up)."
   },
   "chips": [
    {
@@ -3603,8 +3544,8 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — The next enemy stance is always revealed (FORETELL), and your OMENs hit harder.",
-   "PAID (rest of combat) — The next enemy stance is always revealed (FORETELL), and your OMENs hit harder."
+   "FREE (3 rounds) — The next stance stays revealed (FORETELL); OMEN payoffs land ×1.5 (round up).",
+   "PAID (rest of combat) — The next stance stays revealed (FORETELL); OMEN payoffs land ×1.5 (round up)."
   ]
  },
  {
@@ -3613,10 +3554,10 @@
   "image": "./assets/catalog/cards/ice-sword.webp",
   "pricing": "spend ALL pips (+1 Guard per) + RUPTURE (3.5 fuel/pip, +50% burst) —",
   "face": {
-   "freeGlyph": "◎",
+   "freeGlyph": "◉",
    "freeKw": "MARK",
    "freeVal": "1",
-   "paid": "spend ALL pips (+1 Guard per pip) + RUPTURE (+3.5 fuel per pip) + refresh the spent die."
+   "paid": "spend ALL pips (+1 Guard per pip) + RUPTURE ALL (+3.5 damage per spent pip; needs 2+ pips) + refresh the spent die."
   },
   "chips": [
    {
@@ -3663,7 +3604,7 @@
   "lines": [
    "FREE — mark i1 d1",
    "spend ALL pips (+1 Guard per pip)",
-   "RUPTURE (+3.5 fuel per pip)",
+   "RUPTURE ALL (+3.5 damage per spent pip; needs 2+ pips)",
    "refresh the spent die"
   ]
  },
@@ -3676,7 +3617,7 @@
    "freeGlyph": "🩸",
    "freeKw": "BLEED",
    "freeVal": "1",
-   "paid": "REAP all — 4 per Soul + SIPHON 40%."
+   "paid": "REAP ALL — 4 damage per Soul + SIPHON 40%."
   },
   "chips": [
    {
@@ -3722,7 +3663,7 @@
   ],
   "lines": [
    "FREE — bleed i1 d1",
-   "REAP all — 4 per Soul",
+   "REAP ALL — 4 damage per Soul",
    "SIPHON 40%"
   ]
  },
@@ -3789,7 +3730,7 @@
    "freeGlyph": "❖",
    "freeKw": "GUARD",
    "freeVal": "2",
-   "paid": "thorns i3 d2 (self)."
+   "paid": "thorns i3 d2."
   },
   "chips": [
    {
@@ -3837,6 +3778,64 @@
    "FREE — GUARD 2 (persists)",
    "Applies Thorns ×3, 2t → self",
    "Die bonus: powering die heart fires a rider"
+  ]
+ },
+ {
+  "id": "turnabout",
+  "name": "Turnabout",
+  "image": "./assets/catalog/cards/confuse.webp",
+  "pricing": null,
+  "face": {
+   "freeGlyph": "◆",
+   "freeKw": null,
+   "freeVal": null,
+   "paid": "BACKFIRE ALL — 1.5 damage per rung ever denied."
+  },
+  "chips": [
+   {
+    "k": "Stance",
+    "v": "mind"
+   },
+   {
+    "k": "Type",
+    "v": "paradox"
+   },
+   {
+    "k": "Tier",
+    "v": "3"
+   },
+   {
+    "k": "Target",
+    "v": "enemy"
+   },
+   {
+    "k": "Rank",
+    "v": "Aporia (rare)"
+   },
+   {
+    "k": "Kind",
+    "v": "spell"
+   },
+   {
+    "k": "Theme",
+    "v": "control"
+   },
+   {
+    "k": "Keywords",
+    "v": "STAGGER · BACKFIRE · FORETELL · DRAW"
+   },
+   {
+    "k": "Source",
+    "v": "starter"
+   },
+   {
+    "k": "Preset",
+    "v": "Standstill"
+   }
+  ],
+  "lines": [
+   "FREE — reveal the next stance",
+   "BACKFIRE ALL — 1.5 damage per rung ever denied"
   ]
  },
  {
@@ -3908,7 +3907,7 @@
    "freeGlyph": "❖",
    "freeKw": "ENCHANT",
    "freeVal": "3r",
-   "paid": "Every BLEED or POISON you apply lands at +1 intensity."
+   "paid": "Your BLEED and POISON land +1 intensity and +1 duration."
   },
   "chips": [
    {
@@ -3953,8 +3952,8 @@
    }
   ],
   "lines": [
-   "FREE (3 rounds) — Every BLEED or POISON you apply lands at +1 intensity.",
-   "PAID (rest of combat) — Every BLEED or POISON you apply lands at +1 intensity."
+   "FREE (3 rounds) — Your BLEED and POISON land +1 intensity and +1 duration.",
+   "PAID (rest of combat) — Your BLEED and POISON land +1 intensity and +1 duration."
   ]
  },
  {
@@ -3966,7 +3965,7 @@
    "freeGlyph": "🩸",
    "freeKw": "BLEED",
    "freeVal": "1",
-   "paid": "RUPTURE 1 — its fuel ticks now, +2 Soul."
+   "paid": "RUPTURE 1 — its remaining damage lands now, +2 Souls."
   },
   "chips": [
    {
@@ -4012,7 +4011,7 @@
   ],
   "lines": [
    "FREE — bleed i1 d1",
-   "RUPTURE 1 — its fuel ticks now, +2 Soul"
+   "RUPTURE 1 — its remaining damage lands now, +2 Souls"
   ]
  },
  {
