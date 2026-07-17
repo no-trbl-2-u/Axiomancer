@@ -45,7 +45,7 @@ import { buildFixtureState } from '../../test-utils/card-fixture';
 import { playCombatCard } from '../combat.engine';
 import { runOneEncounter } from '../combat.encounter.sim';
 import { COMBAT_SIM_POLICY_ORDER } from '../combat.sim-policies';
-import { buildPresetDeck } from '../combat.deck-presets';
+import { buildPresetDeck } from '../combat.starter-deck-presets';
 import {
     RESERVE_PIP_CAP, OVERHEAT_PIP_CEILING, OVERHEAT_BUST_CHANCE, overheatReserve,
 } from '../combat.dice';

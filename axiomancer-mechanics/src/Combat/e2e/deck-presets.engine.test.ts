@@ -16,7 +16,7 @@ import { describe, it, expect } from 'vitest';
 import {
     COMBAT_DECK_PRESETS, COMBAT_DECK_PRESET_ORDER, PRESET_COLOR_BORROWS,
     listDeckPresets, getDeckPreset, buildPresetDeck,
-} from '../combat.deck-presets';
+} from '../combat.starter-deck-presets';
 import { classifyVerbClass } from '../combat.cards';
 import { cardLibrary, getCardById } from '../../Cards/cards.library';
 import { rankToRarity } from '../../Cards/types';

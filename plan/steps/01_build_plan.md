@@ -487,7 +487,7 @@ Phase 26 (numbers) but design-independent of the owner session
       **36c** (filed in PHASE_CANDIDATES). No re-band needed — the fix
       was rank-honest within existing bands —
       `feat(mechanics): alt-win-aware card pricing — phase 36a` (7d26bebd)
-- [ ] Phase 36b — Tempo-aware card pricing (`scoreCard` v2, part 2).
+- [x] Phase 36b — Tempo-aware card pricing (`scoreCard` v2, part 2).
       `scoreCard` prices magnitude-per-die but is blind to WHEN the
       power arrives: a RUPTURE burst and a ~6-round ramping POISON can
       price identically while short lethal fights pay the slow one a
@@ -505,7 +505,21 @@ Phase 26 (numbers) but design-independent of the owner session
       down-scaler clamp fixed first (x0.5/x0.75 tiers were near
       no-ops: avgSpell 7.45/8.09 vs 8.09 at x1); then `/deck-tuning`.
       Deps: 36a (shared `scoreCard` surface; land the lint re-band
-      once).
+      once). **Shipped** (brief `plan/phases/phase_36b_tempo_pricing.md`
+      + mechanics-expert design pass): `statusPoints` prices DoTs at
+      tempo-weighted lifetime — each tick in round r worth
+      `DOT_TEMPO_SURVIVAL^(r-1)` (0.75, a GLOBAL ~4-round death-clock
+      horizon; "per stage" reinterpreted as one global constant to
+      preserve `scoreCard` stage-independence per the 36a discipline).
+      `dotLifetimeHp` kept pure (engine-parity mirror); tempo weight in
+      `dotTempoWeightedHp`. Down-scaler clamp fixed; proof gate re-run at
+      seeds=5 on post-33b main confirms the hypothesis (erosion late 3%
+      flat across 5x price; fix-cards convert +11 mid / >2x late) —
+      `scratch/price-experiment/report/FINDINGS-36b-seed5.md`. A
+      model-FIDELITY change (does not climb the late wall; downstream
+      pressure for `/deck-tuning`). No re-band — all 50 spells stayed in
+      band —
+      `feat(mechanics): tempo-aware card pricing — phase 36b` (1927b15e)
 
 **Combat rework (promoted via chat session 2026-07-17, T direct — spec 33
 `33-upgradeable-dice.md`):** the four-die Upgradeable-Dice rework. Promote as

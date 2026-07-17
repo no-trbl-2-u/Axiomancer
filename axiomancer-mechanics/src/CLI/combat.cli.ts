@@ -83,7 +83,7 @@ import {
 import type { CombatStageId } from '../Combat/combat.stage-profiles';
 import { resolveDeckSelection } from '../Combat/combat.deck-draft';
 import type { CombatDeckSelection } from '../Combat/combat.deck-draft';
-import type { CombatDeckFocus } from '../Combat/combat.deck-presets';
+import type { CombatDeckFocus } from '../Combat/combat.starter-deck-presets';
 import { createDeckSelectionRng, grantDeckKnowledge, parseDeckSelectionArg } from '../Combat/combat.playtest';
 import { applySandboxSet, listSandboxSets } from '../Cards/cards.sandbox-sets';
 

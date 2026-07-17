@@ -194,19 +194,51 @@ export const SELF_COST_CREDIT = 0.75;
 export const NO_CALENDAR_PRICING_ROUNDS = 4;
 
 /**
- * Expected lifetime HP of a DoT application, priced BY ITS CLOCK (WS3.5,
- * spec 32 §12 #3): round-clocked (legacy) DoTs tick once per printed-duration
- * round; event-clocked DoTs tick `EXPECTED_TRIGGERS_PER_ROUND[trigger]` times
- * per round over the same horizon — the SAME constants the engine fuel math
- * (`getPendingDotTotal` / `computeRoundsToKill`) prices with, so the lint and
- * the RUPTURE preview never diverge. Honours the v3 modifiers with the
- * engine's own per-tick walk: POISON ramps per elapsed ROUND (`rampFactor`,
- * floored into the per-tick base), BLEED decays 1 intensity per TICK and
- * washes out at 0, Doom (`growth: 'per-enemy-action'`) gains +1 intensity per
- * round (~1 enemy action/round), and a no-calendar instance prices over
- * `NO_CALENDAR_PRICING_ROUNDS`. Returns 0 for non-DoT effects.
+ * Phase 36b — the TEMPO HORIZON. A DoT tick that lands in combat round `r` is
+ * worth `DOT_TEMPO_SURVIVAL ^ (r-1)` of its printed HP in the pricing budget:
+ * the probability the fight is still going when that tick would land. Geometric
+ * (memoryless) because the FINDINGS mechanism is a ~constant per-round death
+ * hazard — enemy output against fixed HP sets the death clock, so
+ * `avgRoundsAll` holds ~flat against card price. Mean fight length
+ * `1/(1-p) = 4.0` rounds, self-consistent with the measured `avgRoundsAll`
+ * ≈ 4.06 and with `NO_CALENDAR_PRICING_ROUNDS`. A pure DISCOUNT (weight ≤ 1,
+ * = 1 in round 1, never a >1 front-load bonus that could push a finisher
+ * through its rank ceiling): it stops OVERPAYING a slow ramp whose big ticks
+ * land after most fights end, while a front-loaded DoT (BLEED decays into
+ * rounds 1-2) keeps ~full printed value. Enemy/stage-INDEPENDENT — one global
+ * horizon, NOT a per-stage one (that would break scoreCard's stage-
+ * independence and re-litigate the late wall through the price lever the
+ * erosion ladder proves cannot climb it). Source:
+ * `scratch/price-experiment/report/FINDINGS.md` rec #2.
+ * // PLAYTEST-CALIBRATION (seeds=2 origin makes the exact p provisional —
+ * // /deck-tuning is the empirical court for a higher-seed confirmation)
  */
-export function dotLifetimeHp(effectId: string, intensity: number, duration: number): number {
+export const DOT_TEMPO_SURVIVAL = 0.75;
+
+/** Geometric survival weight for a tick landing in round `r` (1-indexed). */
+function tempoWeight(round: number): number {
+    return Math.pow(DOT_TEMPO_SURVIVAL, round - 1);
+}
+
+/**
+ * The per-tick DoT walk. `weightFn(round)` scales each tick's floored HP:
+ * identity (`() => 1`) yields the PRINTED lifetime (`dotLifetimeHp`), the
+ * tempo weight yields the horizon-discounted lifetime (`dotTempoWeightedHp`).
+ * Honours the v3 modifiers with the engine's own per-tick walk: POISON ramps
+ * per elapsed ROUND (`rampFactor`, floored into the per-tick base), BLEED
+ * decays 1 intensity per TICK and washes out at 0, Doom
+ * (`growth: 'per-enemy-action'`) gains +1 intensity per round (~1 enemy
+ * action/round), and a no-calendar instance prices over
+ * `NO_CALENDAR_PRICING_ROUNDS`. The weight multiplies the emitted HP ONLY,
+ * never the intensity — so a BLEED's washout round is identical either way.
+ * Returns 0 for non-DoT effects.
+ */
+function walkDotHp(
+    effectId: string,
+    intensity: number,
+    duration: number,
+    weightFn: (round: number) => number,
+): number {
     const def = lookupEffect(effectId);
     const dot = def?.payload.damageOverTime;
     if (!def || !dot) return 0;
@@ -226,17 +258,45 @@ export function dotLifetimeHp(effectId: string, intensity: number, duration: num
         for (let t = 0; t < ticksPerRound; t++, tickNo++) {
             const tickIntensity = mods?.decaysPerTick ? grownIntensity - tickNo : grownIntensity;
             if (tickIntensity <= 0) return total; // BLEED washout — the instance is spent
-            total += Math.floor(dpr * tickIntensity);
+            total += Math.floor(dpr * tickIntensity) * weightFn(r);
         }
     }
     return total;
 }
 
 /**
+ * PRINTED lifetime HP of a DoT application, priced BY ITS CLOCK (WS3.5,
+ * spec 32 §12 #3): round-clocked (legacy) DoTs tick once per printed-duration
+ * round; event-clocked DoTs tick `EXPECTED_TRIGGERS_PER_ROUND[trigger]` times
+ * per round over the same horizon — the SAME constants the engine fuel math
+ * (`getPendingDotTotal` / `computeRoundsToKill`) prices with, so the lint and
+ * the RUPTURE preview never diverge. Kept PURE (phase 36b): the tempo
+ * discount lives in `dotTempoWeightedHp`, NOT here, so these numbers stay the
+ * engine's printed lifetime. Returns 0 for non-DoT effects.
+ */
+export function dotLifetimeHp(effectId: string, intensity: number, duration: number): number {
+    return walkDotHp(effectId, intensity, duration, () => 1);
+}
+
+/**
+ * TEMPO-WEIGHTED lifetime HP (phase 36b) — the printed lifetime with every
+ * tick discounted by `tempoWeight(round)`. This is what `statusPoints` prices
+ * a DoT at: a slow ramp whose big ticks land past the ~4-round death clock is
+ * no longer OVERPAID at its printed lifetime, while a front-loaded DoT keeps
+ * ~full value. Enemy/stage-INDEPENDENT (one global horizon) — see
+ * `DOT_TEMPO_SURVIVAL`.
+ */
+export function dotTempoWeightedHp(effectId: string, intensity: number, duration: number): number {
+    return walkDotHp(effectId, intensity, duration, tempoWeight);
+}
+
+/**
  * Points for applying `effectId` at `intensity` × `duration`. DoTs price at
- * lifetime ÷ 3; every other status prices at 0.75 per intensity-turn
- * (checks: mark d2 = 1.5, backfire i2 d2 = 3, rapport i1 d2 = 1.5,
- * thorns i3 d2 = 4.5 — all match the spec table).
+ * TEMPO-WEIGHTED lifetime ÷ 3 (phase 36b — a slow ramp is no longer overpaid
+ * at its printed lifetime; a front-loaded DoT keeps ~full value); every other
+ * status prices at 0.75 per intensity-turn (checks: mark d2 = 1.5, backfire
+ * i2 d2 = 3, rapport i1 d2 = 1.5, thorns i3 d2 = 4.5 — all match the spec
+ * table, unaffected by tempo).
  */
 export function statusPoints(effectId: string, intensity?: number, duration?: number): number {
     const def = lookupEffect(effectId);
@@ -244,7 +304,7 @@ export function statusPoints(effectId: string, intensity?: number, duration?: nu
     const i = intensity ?? 1;
     const d = duration ?? def.duration;
     if (def.payload.damageOverTime) {
-        return dotLifetimeHp(effectId, i, d) / VERB_POINTS.dotLifetimeDivisor;
+        return dotTempoWeightedHp(effectId, i, d) / VERB_POINTS.dotLifetimeDivisor;
     }
     return VERB_POINTS.statusPerIntensityTurn * i * d;
 }

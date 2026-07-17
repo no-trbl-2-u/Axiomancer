@@ -188,9 +188,9 @@ describe('roles-* theme sets — registry shape and rank-band honesty', () => {
     it('the authored // pts arithmetic matches scoreCard (regression anchors)', () => {
         const byId = (id: string) =>
             ALL_ROLE_SETS.flatMap(s => s.cards).find(c => c.id === id)!;
-        expect(scoreCard(byId('slag-runoff'))).toBeCloseTo(5.5, 2);
+        expect(scoreCard(byId('slag-runoff'))).toBeCloseTo(5.2708, 2); // phase 36b: overflow-ember tempo-discounted
         expect(scoreCard(byId('ingot-of-ruin'))).toBeCloseTo(7.5, 2);
-        expect(scoreCard(byId('grit-between-stones'))).toBeCloseTo(7.5, 2); // post-Phase-30: FREE barrier 2
+        expect(scoreCard(byId('grit-between-stones'))).toBeCloseTo(6.5833, 2); // phase 36b: nettle-sting tempo-discounted
         expect(scoreCard(byId('the-unmoved-mover'))).toBeCloseTo(5.33, 2); // post-Phase-30: FREE barrier 2
         expect(scoreCard(byId('a-sweeter-poison'))).toBeCloseTo(9.5, 2); // phase 36a: SWAY 5 total × 0.9
 

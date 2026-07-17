@@ -16,8 +16,8 @@ import { describe, it, expect } from 'vitest';
 import { cardLibrary } from '../cards.library';
 import { rankToRarity } from '../types';
 import {
-    scoreCard, statusPoints, dotLifetimeHp,
-    VERB_POINTS, CONDITION_DISCOUNTS,
+    scoreCard, statusPoints, dotLifetimeHp, dotTempoWeightedHp,
+    VERB_POINTS, CONDITION_DISCOUNTS, DOT_TEMPO_SURVIVAL,
 } from '../cards.pricing';
 
 /**
@@ -97,6 +97,42 @@ describe('pricing table — pinned anchors from the spec §4 arithmetic (WS3.5 c
         expect(dotLifetimeHp('debuff_creeping_doom', 2, 3)).toBe(14);
     });
 
+    // ── Phase 36b — the tempo horizon (dotTempoWeightedHp) ────────────────────
+    it('phase 36b — DOT_TEMPO_SURVIVAL is the ~4-round global death-clock horizon', () => {
+        expect(DOT_TEMPO_SURVIVAL).toBe(0.75);
+        // mean fight length 1/(1-p) = 4.0 ≈ measured avgRoundsAll ≈ 4.06.
+        expect(1 / (1 - DOT_TEMPO_SURVIVAL)).toBeCloseTo(4, 2);
+    });
+
+    it('phase 36b — a RAMP (poison i1 d4) is discounted: printed 20 → weighted 12.91', () => {
+        // per-round HP 4,4,6,6 (ramp puts the big ticks LATE) × geometric
+        // weights 1, 0.75, 0.5625, 0.421875 = 4 + 3 + 3.375 + 2.531 = 12.91.
+        const p = DOT_TEMPO_SURVIVAL;
+        const expected = 4 * 1 + 4 * p + 6 * p ** 2 + 6 * p ** 3;
+        expect(dotTempoWeightedHp('debuff_poison', 1, 4)).toBeCloseTo(expected, 4);
+        expect(dotTempoWeightedHp('debuff_poison', 1, 4)).toBeCloseTo(12.91, 2);
+        // strictly below the printed lifetime — the reprice is a pure discount.
+        expect(dotTempoWeightedHp('debuff_poison', 1, 4))
+            .toBeLessThan(dotLifetimeHp('debuff_poison', 1, 4));
+    });
+
+    it('phase 36b — a FRONT-LOADED DoT (bleed) is tempo-immune (washes out in-horizon)', () => {
+        // BLEED decays per tick and washes out inside rounds 1-2, so every tick
+        // lands at weight ~1 — printed lifetime == tempo-weighted lifetime.
+        expect(dotTempoWeightedHp('debuff_bleed', 2, 2)).toBe(dotLifetimeHp('debuff_bleed', 2, 2)); // 9
+        // i3 spills ONE tick (3 HP) into round 2 → a 4% haircut, no more.
+        expect(dotTempoWeightedHp('debuff_bleed', 3, 2)).toBeCloseTo(15 + 3 * DOT_TEMPO_SURVIVAL, 2); // 17.25
+    });
+
+    it('phase 36b — growth+no-calendar doom is discounted HARDEST (biggest ticks latest)', () => {
+        // i2 grows 2,3,4,5 over the 4-round no-calendar horizon; the geometric
+        // weight bites the late big ticks: 2 + 2.25 + 2.25 + 2.109 = 8.61 (−38%).
+        const p = DOT_TEMPO_SURVIVAL;
+        expect(dotTempoWeightedHp('debuff_creeping_doom', 2, 3))
+            .toBeCloseTo(2 + 3 * p + 4 * p ** 2 + 5 * p ** 3, 4);
+        expect(dotTempoWeightedHp('debuff_creeping_doom', 2, 3)).toBeLessThan(14 * 0.7);
+    });
+
     it('non-DoT statuses price at 0.75 per intensity-turn', () => {
         expect(statusPoints('debuff_mark', 1, 2)).toBeCloseTo(1.5);      // MARK d2
         expect(statusPoints('debuff_backfire', 1, 2)).toBeCloseTo(1.5);  // BACKFIRE i1 d2
@@ -131,10 +167,14 @@ describe('pricing table — pinned anchors from the spec §4 arithmetic (WS3.5 c
 
     it('the starter pair prices at its authored comments (regression anchors)', () => {
         const slipperySlope = spells.find(s => s.id === 'slippery-slope')!;
-        // poison lifetime 20/3 (card-played clock) + FREE MARK seed i1 d1
-        // (0.75) = 7.42 (phase 30: TICK retired registry-wide, replaced with
-        // the affliction glue seed; WS3.5: poison prices its card-played clock)
-        expect(scoreCard(slipperySlope)).toBeCloseTo(20 / 3 + 0.75, 2);
+        // phase 36b: poison i1 d4 is a RAMP (big ticks at rounds 3-4) so the
+        // tempo horizon discounts it hard — printed lifetime 20 → tempo-weighted
+        // 12.91, ÷3 = 4.30 + FREE MARK seed i1 d1 (0.75) = 5.05. Was 7.42 at the
+        // printed lifetime; the reprice corrects an OVERPAY (the deck never
+        // collects a 6-round ramp before the ~4-round death clock) and moves the
+        // card DOWN from its old near-ceiling toward mid-band.
+        expect(scoreCard(slipperySlope))
+            .toBeCloseTo(dotTempoWeightedHp('debuff_poison', 1, 4) / 3 + 0.75, 2);
         const brace = spells.find(s => s.id === 'brace-for-impact')!;
         // Guard 8/4 + FREE persistent GUARD 2/3 = 2.67 (phase 30: BARRIER
         // merged into GUARD — bulwark's FREE line lays a brick, not a chip)

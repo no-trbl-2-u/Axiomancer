@@ -26,7 +26,7 @@
 
 import type { Card } from '../../../src/Cards/types';
 import { registerSandboxCards } from '../../../src/Cards/cards.sandbox';
-import { buildPresetDeck } from '../../../src/Combat/combat.deck-presets';
+import { buildPresetDeck } from '../../../src/Combat/combat.starter-deck-presets';
 
 export const label = 'tempo-wall-fixes (front-load / faster-payoff / survival)';
 

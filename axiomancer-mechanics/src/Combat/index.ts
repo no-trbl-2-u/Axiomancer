@@ -226,8 +226,8 @@ export {
     // 5/5/5 recipe color law (spec 32 §12 item 9) — the documented borrow map
     PRESET_COLOR_BORROWS,
     listDeckPresets, getDeckPreset, buildPresetDeck,
-} from './combat.deck-presets';
-export type { CombatDeckPreset, CombatDeckFocus } from './combat.deck-presets';
+} from './combat.starter-deck-presets';
+export type { CombatDeckPreset, CombatDeckFocus } from './combat.starter-deck-presets';
 export {
     toCombatCard, projectDeck, classifyVerbClass,
 

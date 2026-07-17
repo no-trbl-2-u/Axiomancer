@@ -12,7 +12,7 @@ import { join } from 'node:path';
 import { getCardById } from '../src/Cards/cards.library';
 import { lookupEffect } from '../src/Effects';
 import { toCombatCard, paidText } from '../src/Combat/combat.cards';
-import { COMBAT_DECK_PRESETS, COMBAT_DECK_PRESET_ORDER } from '../src/Combat/combat.deck-presets';
+import { COMBAT_DECK_PRESETS, COMBAT_DECK_PRESET_ORDER } from '../src/Combat/combat.starter-deck-presets';
 
 const PRESETS = process.argv.length > 2 ? process.argv.slice(2) : [...COMBAT_DECK_PRESET_ORDER];
 

@@ -30,7 +30,7 @@ import { MAX_EFFECT_INTENSITY } from '../Game/game-mechanics.constants';
 import type {
     CombatCard, CombatEncounterState, SignatureSkill, SignatureSkillKind,
 } from './combat.encounter.types';
-import type { CombatDeckFocus } from './combat.deck-presets';
+import type { CombatDeckFocus } from './combat.starter-deck-presets';
 import { getPendingDotTotal } from './effects';
 
 /** Every scripted witness the sim can drive. */

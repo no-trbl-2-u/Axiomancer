@@ -42,7 +42,7 @@ description: Card Forge balance loop for Hazard-Pattern Combat — sandbox-first
 | | `/deck-tuning` ← **this file** | engine-constant tuning (manual) | `/combat-playtest` |
 |---|---|---|---|
 | Surface | Card pool + deck economy: presets, draft weights, sandbox cards, library card numerics | Engine constants: threat damage, dice bag, Conviction/Signature economy (hand-tuned; the combat-tuning loop was trimmed at the monorepo merge) | None — evidence + report only |
-| Files it edits | `src/Cards/cards.sandbox-sets.ts` (free), `src/Combat/combat.deck-presets.ts`, `src/Combat/combat.deck-draft.ts`, `src/Cards/cards.library.ts` (guarded) | `src/Combat/combat.{threat,threat-sequences,engine,cards,dice,signature,deck}.ts` constants | `docs/reports/playtest-<ts>.md` only |
+| Files it edits | `src/Cards/cards.sandbox-sets.ts` (free), `src/Combat/combat.starter-deck-presets.ts`, `src/Combat/combat.deck-draft.ts`, `src/Cards/cards.library.ts` (guarded) | `src/Combat/combat.{threat,threat-sequences,engine,cards,dice,signature,deck}.ts` constants | `docs/reports/playtest-<ts>.md` only |
 | Witness | `npm run combat-playtest` matrix + per-card usage (`--cards`) | `simulateHazardPatternCombat` / `npm run combat-sim` | matrix + `playtester` agents |
 
 Do not cross-contaminate: if the fix for an off-band cell is a threat
@@ -120,7 +120,7 @@ The tunable surface is TIERED. Work from the freest tier inward:
   (`registerSandboxOverride`). Sandbox content never ships to players; it
   exists to generate A/B evidence. `forge-example` shows the shape.
 - **Free — deck composition.** Preset card lists in
-  `src/Combat/combat.deck-presets.ts` and the draft weights/defaults in
+  `src/Combat/combat.starter-deck-presets.ts` and the draft weights/defaults in
   `src/Combat/combat.deck-draft.ts` (focus weight 4x, size 10, max copies 2)
   are directly editable with before/after matrix evidence.
 - **Guarded — library card numerics.** `combatEffects` intensity/duration,
@@ -244,7 +244,7 @@ engine follow-up (propose-only — do not build it inside this loop).
 - If anything fails before you touch a file, stop and report.
 
 ### Step 1 — Read the forge surface
-- `src/Combat/combat.deck-presets.ts` — the ten theme presets
+- `src/Combat/combat.starter-deck-presets.ts` — the ten theme presets
   (`erosion`, `oratory`, `foundry`, `penitent`, `standstill`, `augury`,
   `tithe`, `grace`, `bastion`, `refrain` — 1:1 with the spec 32 themes)
   and their card lists.
@@ -374,7 +374,7 @@ headline status-engagement / band delta.
 | Tier | File | What |
 |---|---|---|
 | Free (sandbox) | `src/Cards/cards.sandbox-sets.ts` | named sets: new `Card` literals + `{ cardId, patch }` overrides; example set `forge-example` |
-| Free (composition) | `src/Combat/combat.deck-presets.ts` | the 10 theme preset card lists (`erosion`, `oratory`, `foundry`, `penitent`, `standstill`, `augury`, `tithe`, `grace`, `bastion`, `refrain`) |
+| Free (composition) | `src/Combat/combat.starter-deck-presets.ts` | the 10 theme preset card lists (`erosion`, `oratory`, `foundry`, `penitent`, `standstill`, `augury`, `tithe`, `grace`, `bastion`, `refrain`) |
 | Free (composition) | `src/Combat/combat.deck-draft.ts` | focus weights (4x), draft size (10), max copies (2), guarantees |
 | Guarded (A/B first) | `src/Cards/cards.library.ts` | effect intensity/duration, mechanic amounts, rider numerics + the `// pts:` comment (no damage fields exist — spec 32) |
 | Propose-only | — | new mechanics kinds, verb classes, `toCombatCard` / `effectImpact`, engine paths |
@@ -382,7 +382,7 @@ headline status-engagement / band delta.
 **Deck-selection grammar (shared by `npm run combat-playtest` and
 `npm run combat`):** `preset:<id>` | `draft:<focus>`
 (`dot|control|utility|damage|rush-execute|balanced` — the
-`CombatDeckFocus` union in `combat.deck-presets.ts` is authoritative)
+`CombatDeckFocus` union in `combat.starter-deck-presets.ts` is authoritative)
 | `cards:a,b,c` | `policy-pick` (drafts from the policy's preferred focus).
 
 **Evidence CLI:** `npm run combat-playtest` — flags `--stage=`, `--policy=`,

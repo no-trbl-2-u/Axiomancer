@@ -151,12 +151,21 @@ function measureDeckStage(deckIds: string[], stageId: CombatStageId): Cell {
 
 // ── ladder overrides: scale a preset's spell power to hit price tiers ────────
 /** Scale intensities of every combatEffect + free.applyEffect on the deck's
- *  SPELLS by `m` (min 1, rounded). Raises scoreCard → raises deck price, same
- *  cards, same colors, same 1-die cost. */
+ *  SPELLS by `m`. Raises (or lowers) scoreCard → moves deck price, same cards,
+ *  same colors, same 1-die cost.
+ *
+ *  Phase 36b — DOWN-SCALER FIX: the old `Math.round` made the sub-1x tiers
+ *  near-no-ops (round(0.75×2)=2, round(0.5×1)=1 → x0.75 was byte-identical to
+ *  x1: avgSpell 8.09 == 8.09). Down-tiers (m<1) now FLOOR, so they actually
+ *  shed intensity/duration (floor(0.75×4)=3, floor(0.5×2)=1) instead of
+ *  rounding back up; up-tiers keep round() so the published up-ladder is
+ *  unchanged. Still floored at 1 — an integer status can't drop below a single
+ *  stack/turn, so the down-ladder stays coarse by construction. */
 function applyPriceMultiplier(deckIds: string[], m: number): void {
     clearSandboxCards();
     if (m === 1) return; // baseline: no override
-    const scale = (v: number | undefined, dflt: number): number => Math.max(1, Math.round((v ?? dflt) * m));
+    const scale = (v: number | undefined, dflt: number): number =>
+        Math.max(1, (m < 1 ? Math.floor : Math.round)((v ?? dflt) * m));
     const uniqueSpellIds = [...new Set(deckIds)].filter(id => getCardById(id)?.cardType === 'spell');
     for (const id of uniqueSpellIds) {
         const base = getCardById(id)!;

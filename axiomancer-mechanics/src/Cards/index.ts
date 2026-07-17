@@ -58,8 +58,9 @@ export {
 export type { CardRank, CardRarity, CardType, CardRider } from './types';
 export { rankToRarity, CARD_RANK_NAMES } from './types';
 export {
-    VERB_POINTS, CONDITION_DISCOUNTS, SELF_COST_CREDIT,
-    scoreCard, scoreMechanic, scoreRider, statusPoints, dotLifetimeHp,
+    VERB_POINTS, CONDITION_DISCOUNTS, SELF_COST_CREDIT, DOT_TEMPO_SURVIVAL,
+    scoreCard, scoreMechanic, scoreRider, statusPoints,
+    dotLifetimeHp, dotTempoWeightedHp,
 } from './cards.pricing';
 
 // Card themes + their keyword families (spec 32 §3/§6) — the public shape
