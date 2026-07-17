@@ -87,9 +87,7 @@
       "Bash(git reset --hard:*)",
       "Bash(git clean -fd:*)",
       "Bash(git clean -f:*)",
-      "Bash(git branch -D:*)",
-      "Read(.env)",
-      "Read(.env.*)"
+      "Bash(git branch -D:*)"
     ]
   },
   "hooks": {
