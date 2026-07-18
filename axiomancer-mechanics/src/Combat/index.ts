@@ -286,11 +286,17 @@ export {
     COMBAT_SIM_POLICIES, COMBAT_SIM_POLICY_ORDER, getSimPolicy, listSimPolicies,
 } from './combat.sim-policies';
 export type { CombatSimPolicy } from './combat.sim-policies';
-export { runPlaytestCell, runPlaytestMatrix, formatPlaytestReport } from './combat.playtest';
+export {
+    runPlaytestCell, runPlaytestMatrix, formatPlaytestReport, PRESET_DOCTRINE_WIN_BANDS,
+} from './combat.playtest';
 export type {
     PlaytestCellSpec, PlaytestCellResult, PlaytestMatrixOptions,
     PlaytestStageSummary, PlaytestReport,
+    PlaytestPresetSummary, PlaytestPresetStageRow,
 } from './combat.playtest';
+// Metrics slate (2026-07-18) — static card/preset complexity instrument.
+export { cardComplexity, presetComplexity } from './combat.card-complexity';
+export type { CardComplexityRow, PresetComplexity } from './combat.card-complexity';
 export { runHazardCombatAutoEncounter } from './combat.autoplay';
 export type { HazardAutoPolicyId, HazardCombatAutoOptions, HazardCombatAutoResult } from './combat.autoplay';
 // Phase 19/23 — archetype→signature gating retired; playerArchetype kept for portrait.

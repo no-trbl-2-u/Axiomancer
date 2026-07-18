@@ -69,6 +69,10 @@ export interface CombatSimStats {
      *  each path visible. Sums to `runs`. */
     winPathCounts: WinPathCounts;
     avgRounds: number;
+    /** Population std-dev of rounds across the runs (metrics slate 2026-07-18):
+     *  the consistency witness — a high spread means the deck's clock depends
+     *  on drawing the right cards, the duplicate-more signal. */
+    roundsStdDev: number;
     /** Average share of plays that landed a status effect on the enemy (engagement witness). */
     statusEngagement: number;
     /** Average Conviction spent on Signature Skills per run. */
@@ -132,6 +136,18 @@ export interface CombatCardUsage {
     /** Hand entries discarded un-played at phase end (the engine's draw-fresh
      *  discard site) — the dead-in-hand denominator. */
     unplayedAtPhaseEnd?: number;
+    // ── Metrics slate (2026-07-18) — draw telemetry. AGGREGATED rows only,
+    //    like the WS1.1 fields above: per-run rows keep their pinned shape and
+    //    the numbers ride `runOneEncounter`'s `cardDrawCounts` instead. ──────
+    /** Hand entries of this card across the runs (opening hand + every
+     *  `hand-drawn` event) — the play-rate-when-drawn denominator. */
+    drawsSeen?: number;
+    /** Runs in which this card entered the hand at least once. */
+    runsDrawn?: number;
+    /** Of `runsDrawn`, runs that ended in a win (victory or any merciful
+     *  resolution). With the cell's total runs/wins this yields the
+     *  win-rate-when-drawn delta — the "does drawing this card help?" witness. */
+    winsWhenDrawn?: number;
 }
 
 /** WS1.1 — per-run FREE/PAID line telemetry, kept SEPARATE from the per-run
@@ -619,6 +635,11 @@ export function runOneEncounter(
      *  unplayed-at-phase-end), parallel to `cardUsage` so the pinned per-run
      *  usage-row shape stays untouched. */
     cardLineTelemetry: Record<string, CombatCardLineTelemetry>;
+    /** Metrics slate (2026-07-18) — hand entries per card id this run: the
+     *  opening hand plus every `hand-drawn` event in the transcript (the
+     *  opening deal emits no event, so it is counted from the initialized
+     *  hand). Parallel to `cardUsage` for the same pinned-shape reason. */
+    cardDrawCounts: Record<string, number>;
     /** The final per-card HP-damage ledger (already accumulated by the engine —
      *  surfaced, not recomputed) so the detailed sim can aggregate the
      *  dominant-card share across runs. */
@@ -629,6 +650,12 @@ export function runOneEncounter(
     const focusIds = options?.focusCardIds ? new Set(options.focusCardIds) : undefined;
     const deck = options?.deck ? [...options.deck] : undefined;
     let state = initializeCombatEncounter(player, enemy, deck, seed);
+    // Metrics slate — the opening deal emits no `hand-drawn` event; seed the
+    // draw ledger from the initialized hand before play begins.
+    const cardDrawCounts: Record<string, number> = {};
+    for (const entry of state.hand) {
+        cardDrawCounts[entry.cardId] = (cardDrawCounts[entry.cardId] ?? 0) + 1;
+    }
     state = rollEncounterDice(state).state;
     // Policy randomness (chaos ranking) rides the same seeded global stream the
     // engine uses — never Math.random. greedy/blind never consume it, keeping
@@ -697,6 +724,15 @@ export function runOneEncounter(
 
     const convictionSpent = Math.max(0, state.turn - state.conviction);
 
+    // Metrics slate — every draw after the opening deal rides a `hand-drawn`
+    // event in the transcript (draw riders, conjure, phase-boundary refills).
+    for (const ev of state.log) {
+        if (ev.kind !== 'hand-drawn') continue;
+        for (const cardId of ev.cards) {
+            cardDrawCounts[cardId] = (cardDrawCounts[cardId] ?? 0) + 1;
+        }
+    }
+
     // Derive HP-damage breakdown from the accumulated event log.
     let dotHpDamage = 0;
     let mechanicBurstDamage = 0;
@@ -736,6 +772,7 @@ export function runOneEncounter(
         activeEffectSamples,
         cardUsage,
         cardLineTelemetry,
+        cardDrawCounts,
         attribution: state.attribution,
     };
 }
@@ -762,6 +799,7 @@ function aggUsageRow(cardUsage: Record<string, CombatCardUsage>, cardId: string)
     return cardUsage[cardId] ?? (cardUsage[cardId] = {
         cardId, plays: 0, bottomPlays: 0, topPlays: 0, statusLands: 0, discards: 0,
         fizzles: 0, lineContribution: { free: 0, paid: 0 }, unplayedAtPhaseEnd: 0,
+        drawsSeen: 0, runsDrawn: 0, winsWhenDrawn: 0,
     });
 }
 
@@ -814,7 +852,7 @@ export function simulateHazardPatternCombatDetailed(
     const policy = options.policy ?? 'greedy';
 
     let victories = 0, mercies = 0, defeats = 0, retreats = 0;
-    let totalRounds = 0, totalPlays = 0, totalStatusPlays = 0, totalConviction = 0;
+    let totalRounds = 0, totalRoundsSq = 0, totalPlays = 0, totalStatusPlays = 0, totalConviction = 0;
     let totalDotHp = 0, totalMechanicBurst = 0, totalDirectHp = 0;
     let totalGuardOnAttack = 0, totalPlayerHpTaken = 0;
     let totalActiveEffectSamples = 0, totalPhaseSamples = 0;
@@ -835,10 +873,24 @@ export function simulateHazardPatternCombatDetailed(
         else if (r.outcome === 'mercy' || r.outcome === 'capitulate' || r.outcome === 'concede') mercies++;
         else if (r.outcome === 'retreat') retreats++;
         else defeats++;
+        const won = r.outcome === 'victory' || r.outcome === 'mercy'
+            || r.outcome === 'capitulate' || r.outcome === 'concede';
+        // Metrics slate — fold the run's draw ledger into the aggregated rows.
+        // With an explicit deck, restrict to its cards so a synthetic/conjured
+        // id can never violate the "usage ⊆ deck" matrix invariant.
+        const deckIds = options.deck ? new Set(options.deck) : null;
+        for (const [cardId, drawn] of Object.entries(r.cardDrawCounts)) {
+            if (drawn <= 0 || (deckIds && !deckIds.has(cardId))) continue;
+            const agg = aggUsageRow(cardUsage, cardId);
+            agg.drawsSeen = (agg.drawsSeen ?? 0) + drawn;
+            agg.runsDrawn = (agg.runsDrawn ?? 0) + 1;
+            if (won) agg.winsWhenDrawn = (agg.winsWhenDrawn ?? 0) + 1;
+        }
         for (const row of Object.values(r.attribution)) {
             damageByCard[row.cardId] = (damageByCard[row.cardId] ?? 0) + row.dotDamage + row.damageDealt;
         }
         totalRounds += r.rounds;
+        totalRoundsSq += r.rounds * r.rounds;
         totalPlays += r.plays;
         totalStatusPlays += r.statusPlays;
         totalConviction += r.convictionSpent;
@@ -893,6 +945,9 @@ export function simulateHazardPatternCombatDetailed(
         winRate: (victories + mercies) / count,
         winPathCounts,
         avgRounds: totalRounds / count,
+        // Population σ; the max(0, …) guards float error on a zero-variance set.
+        roundsStdDev: Math.sqrt(Math.max(0,
+            totalRoundsSq / count - (totalRounds / count) ** 2)),
         statusEngagement: totalPlays > 0 ? totalStatusPlays / totalPlays : 0,
         avgConvictionSpent: totalConviction / count,
         dotHpFraction: totalDotHp / totalEnemyHpLost,

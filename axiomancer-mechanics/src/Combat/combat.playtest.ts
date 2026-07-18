@@ -42,6 +42,7 @@ import {
 import {
     COMBAT_DECK_PRESET_ORDER, getDeckPreset, type CombatDeckFocus,
 } from './combat.starter-deck-presets';
+import { presetComplexity, type PresetComplexity } from './combat.card-complexity';
 import { COMBAT_SIM_POLICIES, type CombatSimPolicy, type CombatSimPolicyId } from './combat.sim-policies';
 import {
     simulateHazardPatternCombatDetailed,
@@ -98,6 +99,9 @@ export interface PlaytestStageSummary {
     statusEngagement: number;
     dotHpFraction: number;
     avgRounds: number;
+    /** Runs-weighted mean of the cells' per-cell rounds σ (a spread witness,
+     *  not a pooled σ across cells — enemy mix would dominate that). */
+    roundsStdDev: number;
     /** Summed win-path counts across the stage's cells (un-collapsed). */
     winPathCounts: WinPathCounts;
     /** Runs-weighted deck utilization (distinct-played / distinct-deck). */
@@ -110,10 +114,70 @@ export interface PlaytestStageSummary {
     dominantCardShare: number;
 }
 
+/**
+ * The starter-preset doctrine win-rate curve (load-bearing doctrine
+ * 2026-07-08, canonical in VISION.md → Combat vision) expressed as BANDS the
+ * instrument can measure against: early ~80%, mid ~50%, late 25-35%,
+ * impossible 0%. The ±5pt tolerance on early/mid is an instrument default
+ * reading of the doctrine's "~", not a doctrine change; late is the doctrine's
+ * own printed band.
+ */
+export const PRESET_DOCTRINE_WIN_BANDS: Readonly<Record<CombatStageId, readonly [number, number]>> =
+    Object.freeze({
+        early: [0.75, 0.85] as const,
+        mid: [0.45, 0.55] as const,
+        late: [0.25, 0.35] as const,
+        impossible: [0, 0.02] as const,
+    });
+
+/** One preset × stage rollup row (runs-weighted over the matching cells). */
+export interface PlaytestPresetStageRow {
+    stage: CombatStageId;
+    cells: number;
+    winRate: number;
+    statusEngagement: number;
+    avgRounds: number;
+    /** Runs-weighted mean of per-cell rounds σ (consistency witness). */
+    roundsStdDev: number;
+    deckUtilization: number;
+    usageEntropy: number;
+    winPathCounts: WinPathCounts;
+    /** Signed distance from the doctrine band: 0 inside the band, else the
+     *  gap to the nearest edge (negative = under-performing the band). */
+    doctrineDelta: number;
+    /** Runs-weighted win rate per policy that measured this preset+stage. */
+    policyWinRates: Record<string, number>;
+}
+
+/**
+ * Per-preset rollup across the matrix (metrics slate 2026-07-18) — the
+ * starter library finally measured as PRESETS, not drafts.
+ */
+export interface PlaytestPresetSummary {
+    presetId: string;
+    stages: PlaytestPresetStageRow[];
+    /** Mean |doctrineDelta| over the measured stages — one number for "how far
+     *  off the doctrine curve is this deck?" (0 = every stage in-band). */
+    curveDeviation: number;
+    /** DYNAMIC complexity (skill ceiling): best-policy minus worst-policy
+     *  runs-weighted win rate across the preset's cells. Null when fewer than
+     *  two policies measured it. Near-zero = the deck plays itself; pair with
+     *  the static `complexity` score to spot complicated-but-shallow decks. */
+    skillGap: number | null;
+    bestPolicyId: string;
+    worstPolicyId: string;
+    /** Static complexity (vocabulary/mechanics load) — null if the preset id
+     *  no longer resolves. */
+    complexity: PresetComplexity | null;
+}
+
 export interface PlaytestReport {
     cells: PlaytestCellResult[];
     /** Aggregated over cells, weighted by runs. */
     stageSummaries: PlaytestStageSummary[];
+    /** Per-preset rollups over every `preset`-deck cell in the matrix (empty
+     *  when the sweep ran no preset decks — e.g. the policy-pick baseline). */
+    presetSummaries: PlaytestPresetSummary[];
     /** Coverage vs the union of eligible pools (library + sandbox) of the
      *  stages run: which cards were ever played vs never touched. `deadCardRate`
      *  is `neverPlayed / (exercised + neverPlayed)` — the dead-card witness as a
@@ -200,7 +264,7 @@ export function runPlaytestCell(spec: PlaytestCellSpec): PlaytestCellResult {
 
 function summarizeStage(stage: CombatStageId, cells: readonly PlaytestCellResult[]): PlaytestStageSummary {
     const mine = cells.filter(c => c.spec.stage === stage);
-    let runs = 0, win = 0, engagement = 0, dot = 0, rounds = 0, util = 0, entropy = 0;
+    let runs = 0, win = 0, engagement = 0, dot = 0, rounds = 0, roundsSd = 0, util = 0, entropy = 0;
     const winPathCounts: WinPathCounts = {
         victory: 0, mercy: 0, capitulate: 0, concede: 0, defeat: 0, retreat: 0,
     };
@@ -215,6 +279,7 @@ function summarizeStage(stage: CombatStageId, cells: readonly PlaytestCellResult
         engagement += cell.stats.statusEngagement * weight;
         dot += cell.stats.dotHpFraction * weight;
         rounds += cell.stats.avgRounds * weight;
+        roundsSd += cell.stats.roundsStdDev * weight;
         util += cell.stats.deckUtilization * weight;
         entropy += cell.stats.usageEntropy * weight;
         for (const key of Object.keys(winPathCounts) as (keyof WinPathCounts)[]) {
@@ -233,12 +298,127 @@ function summarizeStage(stage: CombatStageId, cells: readonly PlaytestCellResult
         statusEngagement: engagement / denom,
         dotHpFraction: dot / denom,
         avgRounds: rounds / denom,
+        roundsStdDev: roundsSd / denom,
         winPathCounts,
         deckUtilization: util / denom,
         usageEntropy: entropy / denom,
         dominantCardId,
         dominantCardShare,
     };
+}
+
+/** Signed distance from a doctrine band: 0 inside, gap to the nearest edge
+ *  outside (negative = below the band). */
+function bandDelta(winRate: number, band: readonly [number, number]): number {
+    if (winRate < band[0]) return winRate - band[0];
+    if (winRate > band[1]) return winRate - band[1];
+    return 0;
+}
+
+/** Groups the matrix's `preset`-deck cells into per-preset × stage rollups
+ *  (metrics slate 2026-07-18). Cells with non-preset decks contribute nothing. */
+function summarizePresets(cells: readonly PlaytestCellResult[]): PlaytestPresetSummary[] {
+    const byPreset = new Map<string, PlaytestCellResult[]>();
+    for (const cell of cells) {
+        if (cell.spec.deck.kind !== 'preset') continue;
+        const id = cell.spec.deck.presetId;
+        const bucket = byPreset.get(id) ?? [];
+        bucket.push(cell);
+        byPreset.set(id, bucket);
+    }
+
+    const order = [
+        ...COMBAT_DECK_PRESET_ORDER.filter(id => byPreset.has(id)),
+        ...[...byPreset.keys()].filter(id => !COMBAT_DECK_PRESET_ORDER.includes(id)).sort(),
+    ];
+
+    const summaries: PlaytestPresetSummary[] = [];
+    for (const presetId of order) {
+        const mine = byPreset.get(presetId)!;
+
+        const stages: PlaytestPresetStageRow[] = [];
+        for (const stage of COMBAT_STAGE_ORDER) {
+            const stageCells = mine.filter(c => c.spec.stage === stage);
+            if (stageCells.length === 0) continue;
+            let runs = 0, win = 0, engagement = 0, rounds = 0, roundsSd = 0, util = 0, entropy = 0;
+            const winPathCounts: WinPathCounts = {
+                victory: 0, mercy: 0, capitulate: 0, concede: 0, defeat: 0, retreat: 0,
+            };
+            const policyRuns = new Map<string, number>();
+            const policyWins = new Map<string, number>();
+            for (const cell of stageCells) {
+                const weight = cell.stats.runs;
+                runs += weight;
+                win += cell.stats.winRate * weight;
+                engagement += cell.stats.statusEngagement * weight;
+                rounds += cell.stats.avgRounds * weight;
+                roundsSd += cell.stats.roundsStdDev * weight;
+                util += cell.stats.deckUtilization * weight;
+                entropy += cell.stats.usageEntropy * weight;
+                for (const key of Object.keys(winPathCounts) as (keyof WinPathCounts)[]) {
+                    winPathCounts[key] += cell.stats.winPathCounts[key];
+                }
+                policyRuns.set(cell.spec.policyId, (policyRuns.get(cell.spec.policyId) ?? 0) + weight);
+                policyWins.set(cell.spec.policyId,
+                    (policyWins.get(cell.spec.policyId) ?? 0) + cell.stats.winRate * weight);
+            }
+            const denom = Math.max(1, runs);
+            const winRate = win / denom;
+            const policyWinRates: Record<string, number> = {};
+            for (const [policyId, w] of policyRuns) {
+                policyWinRates[policyId] = (policyWins.get(policyId) ?? 0) / Math.max(1, w);
+            }
+            stages.push({
+                stage,
+                cells: stageCells.length,
+                winRate,
+                statusEngagement: engagement / denom,
+                avgRounds: rounds / denom,
+                roundsStdDev: roundsSd / denom,
+                deckUtilization: util / denom,
+                usageEntropy: entropy / denom,
+                winPathCounts,
+                doctrineDelta: bandDelta(winRate, PRESET_DOCTRINE_WIN_BANDS[stage]),
+                policyWinRates,
+            });
+        }
+
+        // Dynamic complexity (skill ceiling): per-policy runs-weighted win rate
+        // over ALL the preset's cells; the gap between the best and worst
+        // policy is how much play quality matters in this deck.
+        const overallPolicyRuns = new Map<string, number>();
+        const overallPolicyWins = new Map<string, number>();
+        for (const cell of mine) {
+            const weight = cell.stats.runs;
+            overallPolicyRuns.set(cell.spec.policyId,
+                (overallPolicyRuns.get(cell.spec.policyId) ?? 0) + weight);
+            overallPolicyWins.set(cell.spec.policyId,
+                (overallPolicyWins.get(cell.spec.policyId) ?? 0) + cell.stats.winRate * weight);
+        }
+        let bestPolicyId = '', worstPolicyId = '';
+        let bestWin = -Infinity, worstWin = Infinity;
+        for (const [policyId, w] of overallPolicyRuns) {
+            const rate = (overallPolicyWins.get(policyId) ?? 0) / Math.max(1, w);
+            if (rate > bestWin) { bestWin = rate; bestPolicyId = policyId; }
+            if (rate < worstWin) { worstWin = rate; worstPolicyId = policyId; }
+        }
+        const skillGap = overallPolicyRuns.size >= 2 ? bestWin - worstWin : null;
+
+        const curveDeviation = stages.length > 0
+            ? stages.reduce((s, row) => s + Math.abs(row.doctrineDelta), 0) / stages.length
+            : 0;
+
+        summaries.push({
+            presetId,
+            stages,
+            curveDeviation,
+            skillGap,
+            bestPolicyId,
+            worstPolicyId,
+            complexity: presetComplexity(presetId),
+        });
+    }
+    return summaries;
 }
 
 /**
@@ -291,7 +471,12 @@ export function runPlaytestMatrix(options: PlaytestMatrixOptions = {}): Playtest
     const poolSize = exercised.length + neverPlayed.length;
     const deadCardRate = poolSize > 0 ? neverPlayed.length / poolSize : 0;
 
-    return { cells, stageSummaries, cardCoverage: { exercised, neverPlayed, deadCardRate } };
+    return {
+        cells,
+        stageSummaries,
+        presetSummaries: summarizePresets(cells),
+        cardCoverage: { exercised, neverPlayed, deadCardRate },
+    };
 }
 
 function deckLabel(selection: CombatDeckSelection): string {
@@ -367,6 +552,38 @@ export function formatPlaytestReport(report: PlaytestReport, opts?: { perCard?: 
         );
     }
 
+    if (report.presetSummaries.length > 0) {
+        lines.push('');
+        lines.push('Preset summaries (doctrine bands: early 75-85% / mid 45-55% / late 25-35% / imp ~0;');
+        lines.push(' dev = signed gap to the band edge, 0% = in-band; curve-dev = mean |dev| over stages;');
+        lines.push(' skill-gap = best-policy minus worst-policy win rate (dynamic complexity);');
+        lines.push(' cx = static complexity score, kw = distinct keywords, orph = single-card keywords)');
+        for (const preset of report.presetSummaries) {
+            const cx = preset.complexity;
+            const cxNote = cx
+                ? `cx=${cx.score.toFixed(1)} (kw=${cx.distinctKeywords.length}, orph=${cx.orphanKeywords.length},`
+                    + ` heaviest=${cx.maxCardId} ${cx.maxCardScore})`
+                : 'cx=?';
+            const gapNote = preset.skillGap !== null
+                ? `skill-gap=${pct(preset.skillGap)} (${preset.bestPolicyId} > ${preset.worstPolicyId})`
+                : 'skill-gap=n/a (one policy)';
+            lines.push(`  ${preset.presetId.padEnd(11)}curve-dev=${pct(preset.curveDeviation)}  ${gapNote}  ${cxNote}`);
+            for (const row of preset.stages) {
+                const sign = row.doctrineDelta > 0 ? '+' : '';
+                lines.push(
+                    `    ${row.stage.padEnd(11)}cells=${String(row.cells).padEnd(4)}`
+                    + `win=${pct(row.winRate)} (dev ${sign}${pct(row.doctrineDelta)})`
+                    + `  statusEng=${pct(row.statusEngagement)}`
+                    + `  rounds=${row.avgRounds.toFixed(1)}±${row.roundsStdDev.toFixed(1)}`
+                    + `  util=${pct(row.deckUtilization)}  H=${row.usageEntropy.toFixed(2)}`,
+                );
+            }
+            if (cx && cx.orphanKeywords.length > 0) {
+                lines.push(`    orphan keywords: ${cx.orphanKeywords.join(', ')}`);
+            }
+        }
+    }
+
     const totalPool = report.cardCoverage.exercised.length + report.cardCoverage.neverPlayed.length;
     lines.push('');
     lines.push(
@@ -379,11 +596,23 @@ export function formatPlaytestReport(report: PlaytestReport, opts?: { perCard?: 
 
     if (opts?.perCard) {
         const totals = new Map<string, CombatCardUsage>();
+        // Metrics slate — the win-rate-when-drawn complement needs each card's
+        // IN-DECK exposure: total runs (and wins) of cells whose resolved deck
+        // carried the card, so "not drawn" never counts runs where the card
+        // could not possibly appear.
+        const inDeckRuns = new Map<string, number>();
+        const inDeckWins = new Map<string, number>();
         for (const cell of report.cells) {
+            const wins = cell.stats.victories + cell.stats.mercies;
+            for (const cardId of new Set(cell.deckCardIds)) {
+                inDeckRuns.set(cardId, (inDeckRuns.get(cardId) ?? 0) + cell.stats.runs);
+                inDeckWins.set(cardId, (inDeckWins.get(cardId) ?? 0) + wins);
+            }
             for (const usage of Object.values(cell.cardUsage)) {
                 const agg = totals.get(usage.cardId) ?? {
                     cardId: usage.cardId, plays: 0, bottomPlays: 0, topPlays: 0, statusLands: 0, discards: 0,
                     fizzles: 0, lineContribution: { free: 0, paid: 0 }, unplayedAtPhaseEnd: 0,
+                    drawsSeen: 0, runsDrawn: 0, winsWhenDrawn: 0,
                 };
                 agg.plays += usage.plays;
                 agg.bottomPlays += usage.bottomPlays;
@@ -396,6 +625,9 @@ export function formatPlaytestReport(report: PlaytestReport, opts?: { perCard?: 
                 agg.unplayedAtPhaseEnd = (agg.unplayedAtPhaseEnd ?? 0) + (usage.unplayedAtPhaseEnd ?? 0);
                 agg.lineContribution!.free += usage.lineContribution?.free ?? 0;
                 agg.lineContribution!.paid += usage.lineContribution?.paid ?? 0;
+                agg.drawsSeen = (agg.drawsSeen ?? 0) + (usage.drawsSeen ?? 0);
+                agg.runsDrawn = (agg.runsDrawn ?? 0) + (usage.runsDrawn ?? 0);
+                agg.winsWhenDrawn = (agg.winsWhenDrawn ?? 0) + (usage.winsWhenDrawn ?? 0);
                 totals.set(usage.cardId, agg);
             }
         }
@@ -404,10 +636,14 @@ export function formatPlaytestReport(report: PlaytestReport, opts?: { perCard?: 
         lines.push('Per-card usage (all cells):');
         lines.push('(free%/paid% = share of plays per line; fizz% = fizzled attempts / (plays+fizzles);');
         lines.push(' unpl% = hand entries discarded un-played at phase end / (plays+unplayed);');
-        lines.push(' hpF/hpP = HP swing (immediate + projected DoT) attributed to the FREE/PAID line)');
+        lines.push(' hpF/hpP = HP swing (immediate + projected DoT) attributed to the FREE/PAID line;');
+        lines.push(' draws = hand entries seen; opp% = plays/draws (opportunity play rate — low = cut signal);');
+        lines.push(' dWR = win rate in runs where the card was drawn minus runs (same decks) where it was not');
+        lines.push('       ("—" when either side has no runs; positive = drawing this card helps)');
         lines.push(
             `  ${'card'.padEnd(28)}${'plays'.padStart(6)}${'bottom'.padStart(7)}${'top'.padStart(6)}${'statusLands'.padStart(12)}${'discards'.padStart(9)}`
-            + `${'free%'.padStart(7)}${'paid%'.padStart(7)}${'fizz%'.padStart(7)}${'unpl%'.padStart(7)}${'hpF'.padStart(8)}${'hpP'.padStart(8)}`,
+            + `${'free%'.padStart(7)}${'paid%'.padStart(7)}${'fizz%'.padStart(7)}${'unpl%'.padStart(7)}${'hpF'.padStart(8)}${'hpP'.padStart(8)}`
+            + `${'draws'.padStart(7)}${'opp%'.padStart(6)}${'dWR'.padStart(7)}`,
         );
         for (const row of rows) {
             const fizzles = row.fizzles ?? 0;
@@ -416,12 +652,26 @@ export function formatPlaytestReport(report: PlaytestReport, opts?: { perCard?: 
             const paidPct = row.plays > 0 ? row.bottomPlays / row.plays : 0;
             const fizzPct = row.plays + fizzles > 0 ? fizzles / (row.plays + fizzles) : 0;
             const unplPct = row.plays + unplayed > 0 ? unplayed / (row.plays + unplayed) : 0;
+            const draws = row.drawsSeen ?? 0;
+            const oppPct = draws > 0 ? Math.min(1, row.plays / draws) : 0;
+            // Win-rate-when-drawn delta vs the same decks' not-drawn runs.
+            const runsDrawn = row.runsDrawn ?? 0;
+            const winsDrawn = row.winsWhenDrawn ?? 0;
+            const exposedRuns = inDeckRuns.get(row.cardId) ?? 0;
+            const exposedWins = inDeckWins.get(row.cardId) ?? 0;
+            const notDrawnRuns = exposedRuns - runsDrawn;
+            let dwr = '      —';
+            if (runsDrawn > 0 && notDrawnRuns > 0) {
+                const delta = winsDrawn / runsDrawn - (exposedWins - winsDrawn) / notDrawnRuns;
+                dwr = `${delta > 0 ? '+' : ''}${(delta * 100).toFixed(0)}%`.padStart(7);
+            }
             lines.push(
                 `  ${row.cardId.padEnd(28)}${String(row.plays).padStart(6)}${String(row.bottomPlays).padStart(7)}`
                 + `${String(row.topPlays).padStart(6)}${String(row.statusLands).padStart(12)}${String(row.discards).padStart(9)}`
                 + `${pct(freePct).padStart(7)}${pct(paidPct).padStart(7)}${pct(fizzPct).padStart(7)}${pct(unplPct).padStart(7)}`
                 + `${String(Math.round(row.lineContribution?.free ?? 0)).padStart(8)}`
-                + `${String(Math.round(row.lineContribution?.paid ?? 0)).padStart(8)}`,
+                + `${String(Math.round(row.lineContribution?.paid ?? 0)).padStart(8)}`
+                + `${String(draws).padStart(7)}${pct(oppPct).padStart(6)}${dwr}`,
             );
         }
     }
