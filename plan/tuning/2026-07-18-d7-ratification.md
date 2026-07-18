@@ -256,8 +256,9 @@ This flip is an **owner call** — I recommend against, with the evidence above.
 5. **Blacksmith prices held placeholder** (§3) — ratifying awaits a between-combat
    (souls) economy pass, not witnessed by the combat matrix. Owner call on
    whether to open that pass now or after the flag flip.
-6. **Dice-valve promotion into the 5/5/5 preset recipe** — deferred (§8);
-   structural, and the recipe is spec-locked. Owner call.
+6. **Dice-valve promotion into the 5/5/5 preset recipe** — deferred to D8
+   (§8); owner call resolved 2026-07-18: replace exactly one same-aspect card
+   instance per preset, never append.
 
 ---
 
@@ -274,18 +275,18 @@ omission, for three converging reasons:
    valve reaches the reroll/convert affordance D3-F3 flagged as absent." F3 is
    *still* absent (Press Fate 0.000), so the gate the promotion must clear is
    itself unmet — promoting now would be promoting past a red gate.
-3. **Slotting into the 5/5/5 recipe is a `[needs-user-call]`** (the recipe is
-   spec-locked; the sandbox file already flags this). Promotion-to-library and
-   promotion-to-presets are separable, but the valves only matter *in* presets
-   (draft/policy-pick reach is incidental), so library-only promotion would be
-   the half-promotion the mandate warns against.
+3. **Slotting into the 5/5/5 recipe was a `[needs-user-call]`; resolved
+   2026-07-18.** Each flag-on preset replaces exactly one same-aspect card
+   instance with a singleton valve. Decks remain 15 cards and 5/5/5;
+   flag-off remains byte-identical; the curated library remains 70 through a
+   ten-in/ten-out ledger. The bare-minimum fallback is FREE reroll one chosen
+   eligible die / PAID reroll all eligible dice, including the powering die.
 
-**Sequencing:** promote the dice-valves in the same pass that lands F3 (the
-reroll affordance) and re-tests the flag — that pass has the affordance the
-valves need, the passing gate, and the owner's recipe call. Until then they stay
-sandbox-staged and correct. Evidence they're *ready to promote when unblocked*:
-they compile, price cleanly (each carries scoreCard arithmetic), and register in
-the sandbox set today.
+**Sequencing:** Phase D8 promotes the dice-valves, lands the reroll fallback if
+any thematic valve fails its court, and re-tests the flag. Until D8 ships they
+stay sandbox-staged and correct. Evidence they're ready: they compile, price
+cleanly (each carries scoreCard arithmetic), and register in the sandbox set.
+Brief: `plan/phases/phase_D8_preset_dice_valves.md`.
 
 ---
 

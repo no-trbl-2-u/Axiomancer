@@ -797,6 +797,17 @@ supersession collisions before any engine work.
       hidden. `fix(mobile): flag-on paid-play UI commit` — D7's flag-flip is no
       longer gated on it.
 
+- [ ] Phase D8 — One dice valve in every starter preset. Under the
+      Upgradeable-Dice flag, replace exactly one same-aspect card instance in
+      each of the ten 15-card starter presets with one meaningful dice valve;
+      never append, preserve 5/5/5, keep flag-off recipes byte-identical, and
+      keep the curated library at 70 through a ten-in/ten-out promotion ledger.
+      Prefer D4's staged thematic valves; the owner-locked fallback floor is
+      FREE: reroll one chosen eligible die / PAID: reroll all eligible dice,
+      including the powering die. Prove each valve is reachable and fires,
+      then rerun D7's curve/economy witnesses. No flag flip. Deps: D7.
+      Brief: `plan/phases/phase_D8_preset_dice_valves.md`.
+
 **Post-D sequence (owner-deferred until every D phase ships, 2026-07-18):**
 
 - [ ] Phase 33c — THE COVETED DIE. RE-SCOPED at D1 (2026-07-17, spec 33):

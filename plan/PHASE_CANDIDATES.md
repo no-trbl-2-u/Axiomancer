@@ -278,6 +278,18 @@
 
 ## Promoted
 
+### D8 — one dice valve in every starter preset
+- source: T direct, 2026-07-18. Resolves D7's 5/5/5 owner blocker.
+- decision: under Upgradeable Dice, every one of the ten starter presets
+  replaces exactly one same-aspect card instance with one dice-interaction
+  valve; never append. Preserve 15 cards, 5/5/5, flag-off byte identity, and
+  the 70-card curated library through a ten-in/ten-out promotion ledger.
+  Prefer D4's staged thematic valves; bare-minimum fallback is FREE reroll one
+  chosen eligible die / PAID reroll all eligible dice, including the powering
+  die. No flag flip in this phase.
+- promoted to build plan as **Phase D8**. Brief:
+  `plan/phases/phase_D8_preset_dice_valves.md`.
+
 ### Tempo-aware + alt-win-aware card pricing (mechanics — `scoreCard`)
 - source: T direct, 2026-07-17 ultracode playtest ("does raising card
   price raise win-rate?"). Evidence:

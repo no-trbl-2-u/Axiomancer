@@ -174,6 +174,16 @@ valves:
    additionally **every theme/preset gains exactly ONE dice-interaction
    card** (reroll, convert, tap — far below Forge density).
 
+   **D8 owner amendment (2026-07-18):** this is a literal preset replacement,
+   not deck inflation. Under the Upgradeable-Dice flag, each 15-card starter
+   replaces exactly one same-aspect card instance with one singleton valve;
+   15 cards and 5/5/5 survive, while flag-off recipes remain byte-identical.
+   Prefer the staged thematic valves. If one fails its sandbox court, the
+   bare-minimum fallback is **FREE: choose one eligible die and reroll it;
+   PAID: reroll every eligible die on the table, including the powering die**.
+   Eligible means non-cracked; every result uses honest engine RNG and the
+   die gear's real face table. Promotion is Phase D8, not part of D7.
+
 Explicitly NOT adopted: the miss-face Fate Tap (tap a miss for +1◆/+1 DoT
 tick) — rejected by owner to keep misses worth 0◆ and the income legible.
 
