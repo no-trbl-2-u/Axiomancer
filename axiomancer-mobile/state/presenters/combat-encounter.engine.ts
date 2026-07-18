@@ -24,6 +24,9 @@ import {
     projectRuptureBurst, projectIncomingThreat,
     CONCEDE_PREMISES_BASE, CONCEDE_PREMISES_ELITE, CONCEDE_PREMISES_BOSS,
     capitulateThreshold, concedeFloorFor,
+    // Spec 33 (Phase D6a) — flag-on combat render core: the die-face axis, the
+    // OVERHEAT-crack read, and the Press Fate reroll price. Inert flag-off.
+    isUpgradeableDiceEnabled, PRESS_FATE_COST,
     type CombatEncounterState, type CombatCard, type CombatManaDie,
     type CombatThreatPhase, type CombatIntentType, type CombatReadResult,
     type CombatSummary, type SignatureSkill, type Stance,
@@ -310,6 +313,15 @@ export interface CombatDieVM {
      *  it mid-drag unmounts the GestureDetector, which on web kills the pan
      *  without onEnd/onFinalize (the stuck-ghost / dead-drop bug). */
     draggable: boolean;
+    /** Spec 33 (Phase D6a, FLAG-ON ONLY) — the rolled gear face: `mana` powers a
+     *  card of its color (the normal look), `special` also fires its +◆ payload
+     *  (the marked face), `miss` is DEAD (unpowerable). ABSENT flag-off — a die
+     *  is color-only there, so the whole VM stays byte-identical. */
+    face?: 'special' | 'mana' | 'miss';
+    /** Spec 33 §6 (Phase D6a, FLAG-ON ONLY) — an OVERHEAT crack forced this
+     *  die's color all-miss this round; it reads as a distinct struck-out state
+     *  and is excluded from Press Fate. ABSENT flag-off. */
+    cracked?: boolean;
 }
 /**
  * THE COLOR LAW, UI-side (owner directive 2026-07-12: the board must PREVENT
@@ -327,10 +339,14 @@ export interface CombatDieVM {
  * alike.
  */
 export function dieCanPowerCardVM(
-    die: { color: string; isX?: boolean },
+    die: { color: string; isX?: boolean; face?: 'special' | 'mana' | 'miss' },
     cardStance: string,
 ): boolean {
     if (die.isX || die.color === 'x') return false;
+    // Spec 33 (flag-on): a MISS face is dead — it powers nothing, so any drop
+    // is refused just like an off-color one. Flag-off dice carry no `.face`,
+    // so this check never fires and the verdict is byte-identical.
+    if (die.face === 'miss') return false;
     if (cardStance === 'wild') return true;   // parity with combatDieCanPower
     return die.color === 'wild' || die.color === cardStance;
 }
@@ -505,6 +521,23 @@ export interface CombatPerorationVM {
     concedeAt: number | null;
     cardName: string;
 }
+/**
+ * Spec 33 §4 (Phase D6a, FLAG-ON ONLY) — the Press Fate control: a 1◆ reroll of
+ * every live miss face, once per round (the flag-on `sig-press-the-point`
+ * reroll). Owner-UI doctrine: the control is never hidden — when it can't fire
+ * it renders DISABLED with the reason, so the illegal action is refused loudly.
+ * `null` flag-off, or when the loadout carries no reroll signature to cast.
+ */
+export interface CombatPressFateVM {
+    /** The reroll signature the board casts (via `playSignatureSkill`). */
+    signatureId: string;
+    /** The flag-on price (`PRESS_FATE_COST`, 1◆). */
+    cost: number;
+    /** True only when the reroll can actually fire right now. */
+    enabled: boolean;
+    /** The refusal reason to show when disabled; null when enabled. */
+    reason: string | null;
+}
 export interface CombatViewModel {
     phase: CombatEncounterState['phase'];
     enemy: CombatEnemyPaneVM;
@@ -543,6 +576,9 @@ export interface CombatViewModel {
      *  drafted this turn, no stake is already placed, and Conviction covers
      *  at least the cheapest tier (2◆). */
     canStake: boolean;
+    /** Spec 33 §4 (flag-on) — the Press Fate reroll affordance, or null (flag-off
+     *  / no reroll signature in the loadout). */
+    pressFate: CombatPressFateVM | null;
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -710,12 +746,26 @@ function diceVM(state: CombatEncounterState): CombatDieVM[] {
     const alreadyPlayed = (state.spellsPlayedThisTurn ?? 0) > 0;
     // Per-die read pip — only once the phase stance is known (revealed/scouted).
     const stance = revealedCurrentStance(state) as Stance | null;
+    // Spec 33 (Phase D6a) — the flag-on die-face axis. Flag-off `v2` is false,
+    // so `face`/`cracked` stay absent and `isMiss` false: every branch below
+    // reduces to its pre-spec-33 form and the tray VM is byte-identical.
+    const v2 = isUpgradeableDiceEnabled();
+    // §6 OVERHEAT — colors whose die was forced all-miss this round (`turn` is
+    // the crack's bite turn; round-turn law: one turn == one round). Derived
+    // inline so the mechanics barrel is untouched.
+    const crackedColors = v2
+        ? new Set<string>((state.crackedDice ?? []).filter(c => c.turn === state.turn).map(c => c.color))
+        : null;
     const tray: CombatDieVM[] = state.dice.map((d: CombatManaDie) => {
         const isDrafted = drafted?.id === d.id;
         const spent = d.state === 'spent';
         const isX = d.color === 'x';
         const floating = d.floating === true;
         const refreshed = isDrafted && !spent && !isX && alreadyPlayed;
+        // Flag-on face read: `mana`/`special` power a card, `miss` is DEAD.
+        const face = v2 ? d.face : undefined;
+        const isMiss = face === 'miss';
+        const cracked = v2 && !!crackedColors?.has(d.color);
         return {
             id: d.id, color: d.color, colorHex: STANCE_COLORS[d.color] ?? '#888',
             glyph: DIE_GLYPHS[d.color] ?? '?', stanceLabel: STANCE_LABELS[d.color] ?? '?',
@@ -731,7 +781,12 @@ function diceVM(state: CombatEncounterState): CombatDieVM[] {
             // combo die drags again (the re-arm is an explicit drop, never an
             // auto-attach); a turn die only before the draft. NEVER a function
             // of live drag state (see the CombatDieVM.draggable doc note).
-            draggable: floating ? !spent : refreshed ? true : !hasDraft && !isX && !isDrafted && !spent,
+            // Spec 33 (flag-on): a MISS face is DEAD — never draggable. Flag-off
+            // `isMiss` is false, so the expression is unchanged (byte-identical).
+            draggable: isMiss ? false : floating ? !spent : refreshed ? true : !hasDraft && !isX && !isDrafted && !spent,
+            // Absent flag-off (v2 false → face undefined, cracked false).
+            ...(face ? { face } : {}),
+            ...(cracked ? { cracked: true } : {}),
         };
     });
     // R2 — the Reserve renders in the same tray as a second power source.
@@ -1419,6 +1474,14 @@ function buildDetailKeywords(card: CombatCard, c: CardCalc, sourceCard?: Card): 
             if (keywordGloss(title)) push(title, false);
         }
     }
+    // Spec 33 (Phase D6a, flag-on) — SPECIAL is the die-face payload the player
+    // now powers this card with (the marked +◆ face → Conviction); surface its
+    // gloss in every flag-on combat inspect so the tray's special face is always
+    // explained. HONE/TEMPER (the blacksmith upgrade verbs, D6c) stay resolvable
+    // through the printed sweep above whenever a card's own lines name them. The
+    // `push` dedupes, so a card that already prints SPECIAL never doubles.
+    // Flag-off this is skipped entirely — the panel is byte-identical.
+    if (isUpgradeableDiceEnabled()) push('Special', false);
     return out;
 }
 
@@ -1869,6 +1932,29 @@ function perorationVM(state: CombatEncounterState): CombatPerorationVM {
     return { active: true, premises: state.premises ?? 0, at: decl.at, concedeAt, cardName: card?.name ?? '' };
 }
 
+// ── Spec 33 §4 — Press Fate (flag-on reroll affordance) ──────────────────────
+
+/**
+ * Mirrors `playSignatureSkill`'s flag-on reroll gate (combat.engine.ts) exactly
+ * so the control's enabled/disabled verdict — and its reason — can never lie
+ * about the live one: cost (1◆) first, then once-per-round, then "a live
+ * non-cracked miss face must exist to revive". Returns null flag-off, or when
+ * the loadout carries no reroll signature (nothing to cast).
+ */
+function pressFateVM(state: CombatEncounterState): CombatPressFateVM | null {
+    if (!isUpgradeableDiceEnabled()) return null;
+    const signatureId = (state.signatures ?? []).find(id => getSignatureSkill(id)?.kind === 'reroll');
+    if (!signatureId) return null;
+    const cost = PRESS_FATE_COST;
+    const cracked = new Set<string>((state.crackedDice ?? []).filter(c => c.turn === state.turn).map(c => c.color));
+    const hasLiveMiss = state.dice.some(d => d.face === 'miss' && !d.floating && !cracked.has(d.color));
+    let reason: string | null = null;
+    if (state.conviction < cost) reason = `Need ${cost} ◆ Conviction`;
+    else if (state.pressFateRound === state.round) reason = 'Already pressed this round';
+    else if (!hasLiveMiss) reason = 'No miss dice to re-roll';
+    return { signatureId, cost, enabled: reason === null, reason };
+}
+
 // ── Entry point ──────────────────────────────────────────────────────────────
 
 export function buildCombatViewModel(state: CombatEncounterState): CombatViewModel {
@@ -1906,5 +1992,6 @@ export function buildCombatViewModel(state: CombatEncounterState): CombatViewMod
         discardCount: state.discard.length,
         discardCards: state.discard.map((id) => ({ id, name: getCardById(id)?.name ?? id })),
         peroration: perorationVM(state),
+        pressFate: pressFateVM(state),
     };
 }

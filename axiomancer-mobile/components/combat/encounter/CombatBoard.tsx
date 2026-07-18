@@ -44,7 +44,7 @@ import { FONTS } from '@/theme/axm';
 import { makeStyles, usePalette } from '@/theme/runtime';
 import type {
     CombatViewModel, CombatCardVM, CombatDieVM,
-    CombatSignatureVM, CombatEffectChipVM, CombatPerorationVM,
+    CombatSignatureVM, CombatEffectChipVM, CombatPerorationVM, CombatPressFateVM,
 } from '@/state/presenters/combat-encounter.engine';
 import { armedReadValue, dieCanPowerCardVM, STANCE_COLORS } from '@/state/presenters/combat-encounter.engine';
 import { wheelNext, type WheelStance } from '@/state/combat/momentum';
@@ -264,8 +264,11 @@ function DiceRow({
                             </Text>
                         ) : null}
                         {/* P2 — the spare was already converted at draft; the old
-                            future-tense "→ +1 ◆" lied. State it in the past. */}
-                        {!die.reserve && !die.floating && vm.hasDraft && !die.drafted && <Text style={styles.dieConv}>burned +1 ◆</Text>}
+                            future-tense "→ +1 ◆" lied. State it in the past.
+                            Spec 33 (flag-on): a faced die (mana/special/miss) is
+                            not a draft-burned spare — the gem carries its face
+                            state, so this legacy spare label is suppressed. */}
+                        {!die.reserve && !die.floating && !die.face && vm.hasDraft && !die.drafted && <Text style={styles.dieConv}>burned +1 ◆</Text>}
                         {/* A REFRESHED combo die is live again — it reads as a
                             re-draggable die, not as the locked STANCE draft
                             (stale-powered fix, 2026-07-12). */}
@@ -301,6 +304,44 @@ function DiceRow({
                 </Pressable>
             ) : null}
         </View>
+    );
+}
+
+// ── Press Fate (spec 33 §4 — flag-on reroll of all miss faces) ───────────────
+
+/**
+ * The 1◆ Press Fate control: reroll every live miss face, once per round.
+ * Owner-UI doctrine — never hidden when it can't fire: the button renders
+ * DISABLED with the refusal reason (not enough ◆ / already pressed / no miss
+ * dice), so the illegal action is refused LOUDLY. Casts the reroll signature
+ * the presenter resolved (`pressFate.signatureId`).
+ */
+function PressFateControl({ pressFate, onCast }: { pressFate: CombatPressFateVM; onCast: (id: string) => void }) {
+    const AXM = usePalette();
+    const styles = useStyles();
+    const { enabled, reason, cost, signatureId } = pressFate;
+    return (
+        <Pressable
+            onPress={() => {
+                if (!enabled) return;
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => undefined);
+                onCast(signatureId);
+            }}
+            testID="combat-press-fate"
+            accessibilityRole="button"
+            accessibilityState={{ disabled: !enabled }}
+            accessibilityLabel={`Press Fate — re-roll all miss dice for ${cost} Conviction${enabled ? '' : `. ${reason}`}`}
+            style={[styles.pressFate, { borderColor: enabled ? AXM.sulfur : AXM.ash, opacity: enabled ? 1 : 0.55 }]}
+        >
+            <Text style={[styles.pressFateText, { color: enabled ? AXM.sulfur : AXM.bone }]} allowFontScaling={false}>
+                ◆{cost} PRESS FATE
+            </Text>
+            {!enabled && reason ? (
+                <Text style={[styles.pressFateReason, { color: AXM.ash }]} numberOfLines={1} testID="combat-press-fate-reason">{reason}</Text>
+            ) : (
+                <Text style={[styles.pressFateReason, { color: AXM.bone }]} numberOfLines={1}>re-roll all miss dice</Text>
+            )}
+        </Pressable>
     );
 }
 
@@ -1291,6 +1332,10 @@ export const CombatBoard = React.memo(function CombatBoard({
                     </Text>
                 ) : null}
                 <DiceRow vm={vm} dieGesture={dieGesture} draggingDieId={draggingDieId} assignedDieIds={assignedDieIds} onFateTap={onFateTap} bankSpare={bankSpare} onToggleBankSpare={onToggleBankSpare} />
+                {/* Spec 33 §4 (flag-on) — the Press Fate reroll control. Owner-UI
+                    doctrine: never hidden when it can't fire — it renders DISABLED
+                    with the refusal reason. Null flag-off / no reroll signature. */}
+                {vm.pressFate ? <PressFateControl pressFate={vm.pressFate} onCast={onSignature} /> : null}
 
                 {/* the hand dock — edge-to-edge fan, bottoms cropped off-screen */}
                 <View style={styles.dock}>
@@ -1726,6 +1771,10 @@ const useStyles = makeStyles((AXM) => ({
     faceDieLine: { fontFamily: FONTS.mono, fontSize: 9, color: '#d4c026', marginTop: 3, letterSpacing: 0.2 },
     bankChip: { borderWidth: 1, borderColor: '#3a3a3a', borderRadius: 10, paddingHorizontal: 8, paddingVertical: 4, alignSelf: 'center', backgroundColor: 'rgba(0,0,0,0.35)' },
     bankChipText: { fontFamily: FONTS.mono, fontSize: 9, color: '#8a8a7a', letterSpacing: 0.5 },
+    // Spec 33 §4 — Press Fate reroll control (flag-on).
+    pressFate: { borderWidth: 1, borderRadius: 10, paddingHorizontal: 12, paddingVertical: 4, alignSelf: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.4)', marginTop: 2 },
+    pressFateText: { fontFamily: FONTS.mono, fontSize: 11, letterSpacing: 1 },
+    pressFateReason: { fontFamily: FONTS.mono, fontSize: 8, letterSpacing: 0.3, marginTop: 1 },
     dieXGlyph: { fontFamily: FONTS.sans, fontSize: 12, color: '#8a8273' },
     dieConv: { fontFamily: FONTS.mono, fontSize: 9, color: AXM.bone, textAlign: 'center', marginTop: 2, letterSpacing: 0.5, textShadowColor: 'rgba(0,0,0,0.9)', textShadowRadius: 3 },
     diePip: { fontFamily: FONTS.sans, fontSize: 10, textAlign: 'center', marginTop: 2, letterSpacing: 0.6, textShadowColor: 'rgba(0,0,0,0.9)', textShadowRadius: 3 },

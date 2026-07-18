@@ -35,3 +35,4 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-07-18T03:09:52Z | slash-prompt | /march | claude-opus-4-8 | user/ci | /march |
 | 2026-07-18T04:09:51Z | slash-prompt | /march | claude-opus-4-8 | user/ci | /march |
 | 2026-07-18T05:09:52Z | slash-prompt | /march | claude-opus-4-8 | user/ci | /march |
+| 2026-07-18T05:13:52Z | subagent | general-purpose | claude-opus-4-8 | main | Implement Phase D6a flag-on render core |
