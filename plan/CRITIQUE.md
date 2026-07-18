@@ -11,6 +11,28 @@
 
 ## Pending
 
+> **[owner session, 2026-07-18 — THE FLIP residue] Upgradeable Dice is now ON
+> for every app build** (owner call, overriding D7's stays-OFF default): the
+> app root (`axiomancer-mobile/state/combat/flags.ts`) forces the spec-33
+> model on all surfaces; only the explicit `EXPO_PUBLIC_UPGRADEABLE_DICE=0` /
+> `__AXM_UPGRADEABLE_DICE__='0'` kill-switch keeps the legacy model. THE
+> STAKE's wager UI is retired on every surface (completing spec 33 §5).
+> Follow-ups this creates:
+> - **F3 is now LIVE-player-facing**: Press Fate never renders because no
+>   starter loadout equips a `reroll`-kind signature (`sig-press-the-point`) —
+>   the flag-on economy's only ◆ sink is dead and misses can't be rerolled.
+>   Was a D7 canary; now it's the owner's daily experience. Highest-priority
+>   fix (equip the signature on starter loadouts + D7 re-run).
+> - **D7's not-ready verdict now describes the shipped game**: early win
+>   61-66 vs the ~80 band, statusEngagement −9pts. The tuning debt (D3/D4
+>   sinks, signature repricing) is no longer flag-gated homework.
+> - **Engine stake plumbing** (`placeStake`/`settleStake`, `stake-won/lost`
+>   events, `CombatEncounterState.stake`) is now UI-orphaned on every surface —
+>   remove mechanics-side per spec 33 §5 "removed, not rewired".
+> - **Mechanics default stays OFF** (tests/sims toggle per-suite) — the
+>   app/engine defaults now disagree by design; revisit at the true D-series
+>   close-out.
+
 > **[iterate residue, 2026-07-18, after the D-series march loop] Open-HIGH
 > triage — no cheap autonomous win remains; next productive critique is
 > INTERACTIVE, not another cold drive.** The hourly `/march` loop that shipped
