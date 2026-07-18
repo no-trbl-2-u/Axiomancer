@@ -764,7 +764,7 @@ supersession collisions before any engine work.
       (2650 tests, +26); D6d e2e stays green. NEEDS-USER-CALL: ~0.87s ritual
       duration — feel-rank at D7 (knob isolated in dice-roll-ritual.timing.ts) —
       `feat(mobile): Upgradeable-Dice D6f — the roll ritual (dice tumble animation)` (10ffe174)
-- [ ] Phase D7 — Tuning, ratification + honest re-baseline. Full
+- [x] Phase D7 — Tuning, ratification + honest re-baseline. Full
       `/combat-playtest` matrix vs 80/50/25-35/0 (the spec §7 D7 gates);
       ratify D3's economy (blacksmith placeholders die here);
       statusEngagement re-baseline with its known blind spots stated;
@@ -777,6 +777,19 @@ supersession collisions before any engine work.
       Brief: `plan/phases/phase_D7_tuning_rebaseline.md`.
       Prove: bands + ratified-constants report + re-baseline stamp.
       Deps: D4, D6a, D6b, D6c, D6d, D6e, D6f.
+      SHIPPED 2026-07-18 (report; flag stays OFF) — added `--upgradeable-dice`
+      to `/combat-playtest`, ran the first flag-on win-curve matrix. HEADLINE:
+      the model is NOT flip-ready — early 61-66 vs ~80 (a −15 regression the
+      flag itself causes), statusEngagement −9pts, because the only ◆ sink
+      (Press Fate) fires 0×/round (D3-F3: not equipped on starter loadouts).
+      RECOMMEND DO NOT FLIP. Ratified: dice-math gates + realized ◆-income
+      envelope (→ hard tests + flag-not-ready canaries). Held: signature 2/3/4
+      (needs flag-gated cost machinery), blacksmith placeholders. Owner-locked
+      numbers untouched/not indicted; PROVISIONAL special-on-use → recommend
+      KEEP (97% spend-rate). Dice-valve promotion DEFERRED (gated on F3 + 5/5/5
+      owner call). Unblocker filed to PHASE_CANDIDATES. Report:
+      `plan/tuning/2026-07-18-d7-ratification.md` —
+      `feat(mechanics): Upgradeable-Dice D7 ratification — flag-on matrix + report` (pending)
       **BLOCKER RESOLVED (2026-07-18):** the flag-on paid-play UI commit bug
       (die not forwarded → engine fizzle → card bounce) is FIXED — a flag-on
       early return in `resolveApplyRouting` forwards the dropped die as the
