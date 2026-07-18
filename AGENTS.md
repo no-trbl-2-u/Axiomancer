@@ -202,6 +202,31 @@ Distinct from the domain **design** skills in `.claude/skills/`
 commands in `.claude/commands/` — the loop verbs are a separate layer.
 Do not merge the two.
 
+### Attended interaction contract
+
+The user talks to Axiomancer through the repo plan, not through mandatory
+GitHub ceremony:
+
+- **Normal conversation / brainstorming** — discuss freely; no slash command,
+  issue, commit, or queue mutation is implied.
+- **“File / queue / add / move / refine this”** — update the relevant repo-local
+  plan/spec/brief on `main` and push. Do **not** open a GitHub issue merely
+  because planning changed.
+- **`/oversight`** — inspect state, drain owner decisions, reorder/skip/refine
+  the queue, and commit the resulting plan adjustment.
+- **`/jot <observation>`** — append one quick defect/observation to
+  `plan/CRITIQUE.md`; no GitHub issue is required.
+- **`/ship-a-phase [phase N]`** — begin one implementation phase. This is when
+  the best-effort public phase-mirror issue may open; it closes after verified
+  shipping.
+- **`/march`** — execute one autonomous dispatcher tick.
+- **`/loop /march`** — continuous autonomy; use only when the user wants the
+  queue drained without attended steering.
+
+GitHub issues are optional user inbox items and autonomous shipping mirrors.
+They are not the phase queue, not the design source of truth, and not required
+for ordinary attended collaboration. `plan/` remains canonical.
+
 ## Nexus standing rules (canonical)
 
 These apply to every loop skill and session. `plan/bearings.md` echoes
