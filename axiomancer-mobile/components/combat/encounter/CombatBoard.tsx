@@ -26,7 +26,7 @@
  * The drag ghost renders at screen level in `CombatEncounterPanel`.
  */
 
-import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import type { StyleProp, TextStyle } from 'react-native';
 import { Image } from 'expo-image';
@@ -55,6 +55,13 @@ import { TrashGlyph, LedgerMark } from '@/components/hazard/glyphs';
 import { glyphShapeFor } from '@/components/combat/glyphShapes';
 import { CombatCombatantPane, EffectChips, PlayerMedallion, COMBAT_HUD_HEIGHT, type CombatFx } from './CombatCombatantPane';
 import { CombatDie } from './CombatDie';
+import { RollingDie } from './RollingDie';
+import { useReducedMotion } from '@/hooks/useReducedMotion';
+import {
+    planDiceRoll, rollSignatureMap, resolveRollMode, shouldInstantSettleDice,
+    type DieRollPlan,
+} from '@/state/combat/dice-roll-ritual';
+import { DICE_ROLL_TIMING } from '@/state/combat/dice-roll-ritual.timing';
 
 // Per-card art registry (temp art pass) — keyed by cardId, falls back to the
 // circe placeholder for unmapped ids. Stance tint + glyph still ride on top.
@@ -213,6 +220,39 @@ function DiceRow({
 }) {
     const AXM = usePalette();
     const styles = useStyles();
+
+    // ── Spec 33 (Phase D6f) — The Roll Ritual (flag-on only) ─────────────────
+    // The tumble choreographs the four dice onto the faces the engine ALREADY
+    // rolled — it never decides an outcome. Flag-off, `ritual` is false and this
+    // whole block collapses: the tray renders the untouched, byte-identical
+    // `CombatDie` path below.
+    const ritual = isUpgradeableDiceEnabled();
+    const reducedMotion = useReducedMotion();
+    const mode = resolveRollMode({ reducedMotion, instantSettle: shouldInstantSettleDice() });
+    // Previous roll's face signatures — diffed so a round-start roll re-tumbles
+    // everything while a Press-Fate reroll re-tumbles ONLY the rerolled dice.
+    const prevSigRef = useRef<Record<string, string> | null>(null);
+    const plansById = useMemo<Record<string, DieRollPlan>>(() => {
+        if (!ritual) return {};
+        const plans = planDiceRoll(vm.dice, prevSigRef.current, mode, DICE_ROLL_TIMING);
+        const byId: Record<string, DieRollPlan> = {};
+        for (const p of plans) byId[p.id] = p;
+        return byId;
+        // vm.dice is the roll identity; prevSigRef is read intentionally-stale.
+    }, [vm.dice, mode, ritual]);
+    useEffect(() => {
+        if (ritual) prevSigRef.current = rollSignatureMap(vm.dice);
+    }, [vm.dice, ritual]);
+    // Tap-to-skip + the tray overlay gate (only while a die is mid-tumble).
+    const [skipNonce, setSkipNonce] = useState(0);
+    const tumblingIds = useRef<Set<string>>(new Set());
+    const [anyTumbling, setAnyTumbling] = useState(false);
+    const onTumbleChange = useCallback((id: string, on: boolean) => {
+        const s = tumblingIds.current;
+        if (on) s.add(id); else s.delete(id);
+        setAnyTumbling(s.size > 0);
+    }, []);
+
     return (
         <View style={styles.diceRow} testID="combat-dice-tray" pointerEvents="box-none">
             {vm.dice.map((die) => {
@@ -247,9 +287,22 @@ function DiceRow({
                         </View>
                     );
                 }
+                const dieDimmed = (!die.reserve && !die.floating && vm.hasDraft && !die.drafted) || draggingDieId === die.id;
                 const node = (
                     <View style={isAssigned ? styles.dieAssigned : undefined}>
-                        <CombatDie die={die} size={54} dimmed={(!die.reserve && !die.floating && vm.hasDraft && !die.drafted) || draggingDieId === die.id} />
+                        {ritual && plansById[die.id] ? (
+                            <RollingDie
+                                die={die}
+                                size={54}
+                                dimmed={dieDimmed}
+                                mode={mode}
+                                plan={plansById[die.id]}
+                                skipNonce={skipNonce}
+                                onTumbleChange={onTumbleChange}
+                            />
+                        ) : (
+                            <CombatDie die={die} size={54} dimmed={dieDimmed} />
+                        )}
                         {die.reserve ? (
                             <Text style={[styles.dieConv, { color: AXM.sulfur }]} testID={`combat-reserve-${die.id}`}>
                                 ⏳{die.pips ? ` +${die.pips}✦` : ''} BANKED
@@ -304,6 +357,19 @@ function DiceRow({
                         {bankSpare ? 'spare → BANK ⏳' : 'spare → +1 ◆'}
                     </Text>
                 </Pressable>
+            ) : null}
+            {/* Spec 33 (Phase D6f) — tap-to-skip: while any die is mid-tumble a
+                transparent overlay catches a tap and snaps every die to its
+                settled (engine-rolled) face. Absent once settled, so it never
+                sits in front of the dice drags. */}
+            {ritual && anyTumbling ? (
+                <Pressable
+                    style={StyleSheet.absoluteFill}
+                    onPress={() => setSkipNonce((n) => n + 1)}
+                    testID="combat-dice-skip"
+                    accessibilityRole="button"
+                    accessibilityLabel="Skip the dice roll animation"
+                />
             ) : null}
         </View>
     );

@@ -597,6 +597,10 @@ async function main() {
             globalThis.__AXM_FORCE_DEV_TOOLS__ = true
             globalThis.__AXM_UPGRADEABLE_DICE__ = '1'
             globalThis.__AXM_COMBAT_SEED__ = s
+            // Phase D6f — the Roll Ritual instant-settle escape hatch (mirrors the
+            // D6a flag-hook global): the tumble snaps straight to the engine-rolled
+            // faces so this seeded harness never waits on (nor races) an animation.
+            globalThis.__AXM_DICE_INSTANT_SETTLE__ = '1'
         }, SEED)
 
         log(`=== spec 33 flag-ON combat e2e (seed ${SEED}, viewport ${VIEWPORT.width}×${VIEWPORT.height}) ===`)
