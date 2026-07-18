@@ -50,3 +50,5 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-07-18T10:04:38Z | slash-prompt | /digest | unknown | user/ci | /digest |
 | 2026-07-18T10:09:51Z | slash-prompt | /march | claude-opus-4-8 | user/ci | /march |
 | 2026-07-18T10:12:09Z | subagent | general-purpose | claude-opus-4-8 | main | Implement Phase D6f roll ritual |
+| 2026-07-18T11:09:52Z | slash-prompt | /march | claude-opus-4-8 | user/ci | /march |
+| 2026-07-18T11:14:12Z | subagent | general-purpose | claude-opus-4-8 | main | Run Phase D7 ratification + report |

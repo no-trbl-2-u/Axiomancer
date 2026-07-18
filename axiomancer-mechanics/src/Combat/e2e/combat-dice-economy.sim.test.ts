@@ -19,7 +19,14 @@
  * stanceCheck telegraphs, so realized yield income is now > 0 and this suite
  * asserts that instead.
  *
- * D7 flips the dice-math bands to hard ratified assertions.
+ * D7 RATIFICATION (2026-07-18, plan/tuning/2026-07-18-d7-ratification.md): the
+ * dice-math gates below are the ratified, stable numbers (the win-curve bands
+ * are NOT ratified — flag-on misses early ~80 by −15 and depresses
+ * statusEngagement ~9pts, so the flag stays OFF and no win-band is asserted).
+ * The `spec 33 D7` block ratifies the realized ◆-income ENVELOPE and pins the
+ * two flag-not-ready canaries — the inactive sink (F3) and the widened STAKE
+ * gap — so the suite goes red the moment the flag becomes flippable and D7 must
+ * be re-run.
  */
 
 import { describe, it, expect, afterEach } from 'vitest';
@@ -106,5 +113,43 @@ describe('spec 33 D3 — realized-play invariants (flag-on matrix)', () => {
     // ── CANARY (report F3) — flips when a starter loadout equips the reroll. ──
     it('CANARY F3: Press Fate is never cast until a starter loadout equips the reroll signature', () => {
         expect(p.pressFatePerRound).toBe(0);
+    });
+});
+
+describe('spec 33 D7 — ratified economy envelope + flag-not-ready canaries', () => {
+    // The D7 witness config: the full preset roster over the three graded
+    // stages, seeds 1-8 (enough that the F1 RNG-skew has converged — the
+    // realized income reads 1.15 at 5 seeds, 1.48 at 8, trending to the
+    // dice-math baseline). Kept to one shared run.
+    const result = simulateUpgradeableEconomy({ seeds: [1, 2, 3, 4, 5, 6, 7, 8] });
+    const p = result.pooled;
+
+    it('RATIFIED: realized ◆ income sits in the design band 1.2-1.6 at converged seeds', () => {
+        // D3/D7 income band. The lower edge is F1-sensitive (miss-heavy at small
+        // seed sets); at seeds 1-8 it reads ~1.48, comfortably in band.
+        expect(p.totalIncomePerRound).toBeGreaterThanOrEqual(1.2);
+        expect(p.totalIncomePerRound).toBeLessThanOrEqual(1.6);
+    });
+
+    it('RATIFIED: income is specials-driven with a yield contribution (D6e telegraphs)', () => {
+        expect(p.specialIncomePerRound).toBeGreaterThan(0.9);
+        expect(p.yieldIncomePerRound).toBeGreaterThan(0.15);
+    });
+
+    // ── FLAG-NOT-READY canaries (D7). These pin the reasons the flag stays OFF;
+    //    each flips loudly the moment the blocker is fixed, forcing a D7 re-run. ─
+    it('CANARY F3: the only ◆ sink (Press Fate) is inactive — nothing to spend on', () => {
+        expect(p.pressFatePerRound).toBe(0);
+    });
+
+    it('CANARY STAKE-gap: flag-on fights run LONGER than flag-off (no active sink)', () => {
+        // STAKE retired its sink + clock; Press Fate (F3) never replaces them, so
+        // flag-on fights lengthen. Measured +13.6% (5.48 vs 4.83). Flips when a
+        // real sink lands and the gap closes.
+        expect(result.stakeGap.flagOnAvgRounds).toBeGreaterThan(result.stakeGap.flagOffAvgRounds);
+    });
+
+    it('leaves the flag OFF (no leak; the flag is not flipped by D7)', () => {
+        expect(isUpgradeableDiceEnabled()).toBe(false);
     });
 });

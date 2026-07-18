@@ -355,6 +355,11 @@
   `World/Hazard/` and deletes its duplicate.
 - promoted to build plan as **Phase 13**.
 
+### Starter Press-Fate affordance + dice-valve promotion + flag re-test (spec 33 finale unblocker)
+- source: Phase D7 ratification (`plan/tuning/2026-07-18-d7-ratification.md`, §10 + `[needs-user-call]` 2). The flag-on Upgradeable-Dice model is NOT flip-ready: the win curve misses at every stage AND is worse than flag-off (early 61–66 vs ~80, a −15 regression the flag itself causes), and statusEngagement drops ~9pts — because the leaner economy's ONLY ◆ sink (Press Fate) fires 0.000×/round: `sig-press-the-point` isn't equipped on starter loadouts (D3-F3), so there is nothing to spend the specials on and the STAKE-retirement gap widened to +13.6%.
+- decision (needs-user-call — owner picks the mechanism): land the reroll sink on starter loadouts (grant `sig-press-the-point`, OR promote a dice-valve reroll card into the preset recipe — which also drains the deferred `dice-valves-33` promotion), then re-run the D7 flag-on matrix. Once the sink is active the D7 flag-not-ready canaries (in `combat-dice-economy.sim.test.ts`) flip red, forcing the re-test, and the flag becomes evaluable for flip. **This is THE unblocker for the whole spec-33 finale.** Also entangled: signature flag-gated cost machinery (to ratify D3's 2/3/4 table) + the between-combat souls economy pass (to de-placeholder blacksmith prices) — both owner/eng-backlog prerequisites for full economy ratification.
+- status: candidate — awaiting owner call on the sink mechanism (and whether to build the flag-gated cost machinery now or after the flip).
+
 ## Rejected
 
 (empty)

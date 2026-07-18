@@ -27,6 +27,8 @@
  *   --runs=N                                runs per cell (default 60)
  *   --seed=N                                base seed (default 1)
  *   --sandbox=<setId>                       apply a sandbox card set before running
+ *   --upgradeable-dice                      run the spec-33 Upgradeable-Dice model
+ *                                           flag-ON for this sweep (restored after)
  *   --cards                                 append the per-card usage table
  *   --json                                  print the PlaytestReport as JSON — and
  *                                           NOTHING else (agent consumption)
@@ -36,6 +38,7 @@
  */
 
 import { applySandboxSet, listSandboxSets } from '../Cards/cards.sandbox-sets';
+import { setUpgradeableDice, isUpgradeableDiceEnabled } from '../Combat/combat.upgradeable-dice';
 import { ENEMY_REGISTRY } from '../Enemy/enemy.library';
 import {
     COMBAT_STAGE_ORDER, COMBAT_STAGE_PROFILES, isCombatStageId,
@@ -117,14 +120,25 @@ function main(): void {
         sandboxNote = `Sandbox set applied: ${set.id} (${set.cards.length} cards, ${set.overrides?.length ?? 0} overrides)\n`;
     }
 
-    const report = runPlaytestMatrix({
-        stages,
-        policies,
-        decks: [deck],
-        runsPerCell: runs,
-        seed,
-        enemySlugs: enemySlug !== undefined ? [enemySlug] : undefined,
-    });
+    // Spec-33 Upgradeable-Dice flag-on capability (Phase D7 keystone). The flag
+    // is a module global; set it AROUND the sweep and restore it in `finally` so
+    // a flag-on run never leaks into any other suite sharing this process.
+    const upgradeableDice = has('upgradeable-dice');
+    const wasUpgradeable = isUpgradeableDiceEnabled();
+    if (upgradeableDice) setUpgradeableDice(true);
+    let report;
+    try {
+        report = runPlaytestMatrix({
+            stages,
+            policies,
+            decks: [deck],
+            runsPerCell: runs,
+            seed,
+            enemySlugs: enemySlug !== undefined ? [enemySlug] : undefined,
+        });
+    } finally {
+        if (upgradeableDice) setUpgradeableDice(wasUpgradeable);
+    }
 
     if (json) {
         // --json purity: the report object and nothing else on stdout.
@@ -137,6 +151,7 @@ function main(): void {
         + ` deck=${deckArg}${enemySlug !== undefined ? ` enemy=${enemySlug}` : ''} runs=${runs} seed=${seed}\n`,
     );
     if (sandboxNote) process.stdout.write(sandboxNote);
+    if (upgradeableDice) process.stdout.write('Upgradeable-Dice model: FLAG-ON (spec 33)\n');
     process.stdout.write('\n');
     process.stdout.write(formatPlaytestReport(report, { perCard }));
 }
