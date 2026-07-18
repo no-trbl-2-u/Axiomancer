@@ -28,6 +28,7 @@ import { CorruptSaveModal } from '@/components/CorruptSaveModal';
 import { DevAutoSeed } from '@/components/DevAutoSeed';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { HardwareBackHandler } from '@/components/HardwareBackHandler';
+import { BlacksmithGate } from '@/components/BlacksmithGate';
 import { CacheGate } from '@/components/CacheGate';
 import { EventGate } from '@/components/EventGate';
 import { GatheringGate } from '@/components/GatheringGate';
@@ -174,6 +175,7 @@ export default function RootLayout() {
             <QuestGate />
             <RestGate />
             <CacheGate />
+            <BlacksmithGate />
             <ToastHost />
             <DevAutoSeed />
             <Stack screenOptions={{ headerShown: false }}>
@@ -209,6 +211,10 @@ export default function RootLayout() {
               />
               <Stack.Screen
                 name="cache/index"
+                options={{ headerShown: false, presentation: 'fullScreenModal', gestureEnabled: false }}
+              />
+              <Stack.Screen
+                name="blacksmith/index"
                 options={{ headerShown: false, presentation: 'fullScreenModal', gestureEnabled: false }}
               />
               <Stack.Screen

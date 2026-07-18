@@ -15,7 +15,7 @@ import {
 
 import type { GatheringSessionState } from '@mechanics';
 import type { HazardSessionState } from '@mechanics';
-import type { Item, LootCacheSession, QuestBoardSession, RestSession } from '@mechanics';
+import type { BlacksmithSession, Item, LootCacheSession, QuestBoardSession, RestSession } from '@mechanics';
 import type { LabyrinthActId, WorldState } from '@mechanics';
 
 /**
@@ -138,6 +138,20 @@ export interface MobileCacheSlice {
 }
 
 /**
+ * Mobile-only Blacksmith encounter slice ("The Anvil", Spec 33 §6 /
+ * Phase D6c). Holds the active die-gear upgrade session (engine:
+ * World/Blacksmith) — `null` outside one. The engine NEVER reads
+ * `GameState`; the slice seeds it from `player.dieGear` + the player's
+ * spendable currency (the placeholder budget unit the host maps), and
+ * at claim writes `outcome.rail` to `Character.dieGear` and deducts
+ * `outcome.spent`. `tutorial` marks the guided first visit.
+ */
+export interface MobileBlacksmithSlice {
+    session: BlacksmithSession | null;
+    tutorial: boolean;
+}
+
+/**
  * Mobile-only Labyrinth (THE APORIA) session slice. Durable progress
  * lives on the ENGINE state (`GameState.labyrinth`, persisted with the
  * save); this slice holds only the transient visit: which act is open,
@@ -170,6 +184,7 @@ export type AppStoreState = GameStore & {
     quest: MobileQuestSlice;
     rest: MobileRestSlice;
     cache: MobileCacheSlice;
+    blacksmith: MobileBlacksmithSlice;
     labyrinthUi: MobileLabyrinthSlice;
     notifications: MobileNotificationsSlice;
     /** Phase 87 — dev-only overrides for testing empty-state branches. */
@@ -214,6 +229,11 @@ export const EMPTY_REST_SLICE: MobileRestSlice = Object.freeze({
 export const EMPTY_CACHE_SLICE: MobileCacheSlice = Object.freeze({
     session: null,
     stash: Object.freeze({}),
+    tutorial: false,
+});
+
+export const EMPTY_BLACKSMITH_SLICE: MobileBlacksmithSlice = Object.freeze({
+    session: null,
     tutorial: false,
 });
 
@@ -304,6 +324,7 @@ export function createAppStore(options: CreateAppStoreOptions = {}): AppStore {
         quest: EMPTY_QUEST_SLICE,
         rest: EMPTY_REST_SLICE,
         cache: EMPTY_CACHE_SLICE,
+        blacksmith: EMPTY_BLACKSMITH_SLICE,
         labyrinthUi: EMPTY_LABYRINTH_SLICE,
         notifications: DEFAULT_NOTIFICATIONS_SLICE,
         devOverrides: DEFAULT_DEV_OVERRIDES_SLICE,

@@ -32,6 +32,7 @@ const DebugHazardButton = lazy(() => import('@/components/DebugHazardButton').th
 const DebugHazardDeckRandomize = lazy(() => import('@/components/DebugHazardDeckRandomize').then(m => ({ default: m.DebugHazardDeckRandomize })));
 const DebugGatheringButton = lazy(() => import('@/components/DebugGatheringButton').then(m => ({ default: m.DebugGatheringButton })));
 const DebugRestButton = lazy(() => import('@/components/DebugRestButton').then(m => ({ default: m.DebugRestButton })));
+const DebugBlacksmithButton = lazy(() => import('@/components/DebugBlacksmithButton').then(m => ({ default: m.DebugBlacksmithButton })));
 const DebugEncounterButtons = lazy(() => import('@/components/DebugEncounterButtons').then(m => ({ default: m.DebugEncounterButtons })));
 const DebugAlignmentShift = lazy(() => import('@/components/DebugAlignmentShift').then(m => ({ default: m.DebugAlignmentShift })));
 const DebugCurrencyControl = lazy(() => import('@/components/DebugCurrencyControl').then(m => ({ default: m.DebugCurrencyControl })));
@@ -120,6 +121,10 @@ export function DevToolsSections() {
 
                 <DevSection label="REST SETUP" testID="dev-section-rest">
                     <DebugRestButton />
+                </DevSection>
+
+                <DevSection label="BLACKSMITH SETUP" testID="dev-section-blacksmith">
+                    <DebugBlacksmithButton />
                 </DevSection>
 
                 <DevSection label="COMBAT SETUP" testID="dev-section-combat">

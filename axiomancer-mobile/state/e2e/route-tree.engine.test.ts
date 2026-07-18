@@ -105,6 +105,7 @@ const EXPECTED_ROUTE_FILES: ReadonlySet<string> = new Set([
     './quest/index.tsx',
     './rest/index.tsx',
     './cache/index.tsx',
+    './blacksmith/index.tsx',
     './village/index.tsx',
     './dialogue/index.tsx',
     './cutscene/index.tsx',

@@ -162,7 +162,22 @@ import {
     type BeginLootCacheOptions,
     type ClaimLootCacheResult,
 } from './cache/store-actions';
-import type { CacheLootTier } from '@mechanics';
+import {
+    abandonBlacksmithAction,
+    beginBlacksmithAction,
+    claimBlacksmithOutcomeAction,
+    completeBlacksmithTutorialAction,
+    continueBlacksmithCardAction,
+    honeBlacksmithAction,
+    leaveBlacksmithAction,
+    startBlacksmithForgingAction,
+    swapBlacksmithAction,
+    temperBlacksmithAction,
+    BLACKSMITH_TUTORIAL_FLAG,
+    type BeginBlacksmithOptions,
+    type ClaimBlacksmithResult,
+} from './blacksmith/store-actions';
+import type { CacheLootTier, DieGearColor } from '@mechanics';
 import {
     applyPlayerTierPresetAction,
     type ApplyPlayerTierPresetResult,
@@ -635,6 +650,33 @@ export interface AppActions {
     completeLootCacheTutorial: (skipped: boolean) => void;
 
     // -----------------------------------------------------------------
+    // Blacksmith encounter ("The Anvil" — see state/blacksmith/). Phase
+    // order: intro → forging ⇄ card → outcome → done. Seeds from the
+    // player's rail + wallet; claim writes the rail and deducts the spend.
+    // -----------------------------------------------------------------
+
+    /** Start an anvil visit from the player's rail + wallet. False if one is open. */
+    beginBlacksmith: (options?: BeginBlacksmithOptions) => boolean;
+    /** The anvil acknowledged: intro → forging. */
+    startBlacksmithForging: () => void;
+    /** HONE a die (add a mana face): forging → card (success or loud refusal). */
+    honeBlacksmith: (color: DieGearColor) => void;
+    /** TEMPER a die (mana face → special face): forging → card. */
+    temperBlacksmith: (color: DieGearColor) => void;
+    /** SWAP an offered variant gear piece in for its die: forging → card. */
+    swapBlacksmith: (variantId: string) => void;
+    /** Acknowledge the open result/refusal flash: card → forging. */
+    continueBlacksmithCard: () => void;
+    /** Leave the anvil, sealing the ledger: forging → outcome. */
+    leaveBlacksmith: () => void;
+    /** Confirm the ledger; writes the rail, deducts the spend, persists. */
+    claimBlacksmithOutcome: () => ClaimBlacksmithResult;
+    /** Clear the anvil without applying anything (dev / escape hatch). */
+    abandonBlacksmith: () => void;
+    /** Mark the guided first visit done (completed or skipped) and persist. */
+    completeBlacksmithTutorial: (skipped: boolean) => void;
+
+    // -----------------------------------------------------------------
     // The Labyrinth — THE APORIA (W-01; see state/labyrinth/). Dev-menu
     // entry only. Durable progress lives on GameState.labyrinth; the
     // transient visit on the labyrinthUi slice. Arrival events resolve
@@ -1049,6 +1091,16 @@ export function createAppActions(store: AppStore): AppActions {
         claimLootCacheOutcome: () => claimLootCacheOutcomeAction(store),
         abandonLootCache: () => abandonLootCacheAction(store),
         completeLootCacheTutorial: (skipped) => completeLootCacheTutorialAction(store, skipped),
+        beginBlacksmith: (options) => beginBlacksmithAction(store, options),
+        startBlacksmithForging: () => startBlacksmithForgingAction(store),
+        honeBlacksmith: (color) => honeBlacksmithAction(store, color),
+        temperBlacksmith: (color) => temperBlacksmithAction(store, color),
+        swapBlacksmith: (variantId) => swapBlacksmithAction(store, variantId),
+        continueBlacksmithCard: () => continueBlacksmithCardAction(store),
+        leaveBlacksmith: () => leaveBlacksmithAction(store),
+        claimBlacksmithOutcome: () => claimBlacksmithOutcomeAction(store),
+        abandonBlacksmith: () => abandonBlacksmithAction(store),
+        completeBlacksmithTutorial: (skipped) => completeBlacksmithTutorialAction(store, skipped),
         buyVillageWare: (itemId) => buyVillageWareAction(store, itemId),
         sellVillageItem: (index) => sellVillageItemAction(store, index),
         getLearnableCardOffers: (count) => getLearnableCardOffersAction(store, count),
@@ -1698,6 +1750,31 @@ function resolveCurrentMapEventAction(store: AppStore, sourceNodeType?: string):
             } else {
                 beginLootCacheAction(store, { tutorial: true });
             }
+            return true;
+        }
+
+        // Blacksmith events launch "The Anvil" (Spec 33 §6 die-gear
+        // upgrades) instead of dropping a paced /event card. The engine
+        // handler touches no state (it only validates the offered variant
+        // gear), so there is nothing to restore — but we still clear the
+        // event slice and seed the session from the player's live rail +
+        // wallet. `<BlacksmithGate>` routes to /blacksmith when the slice
+        // fills. The authored payload `budget` is a PLACEHOLDER hint; the
+        // slice maps the spendable unit to the player's real currency, so
+        // it is intentionally not forwarded here.
+        if (result.event.kind === 'blacksmith') {
+            store.setState({
+                ...resolvedState,
+                event: EMPTY_EVENT_SLICE,
+            });
+            // The first-ever visit runs as the guided tutorial; the
+            // persistent flag set on completion/skip keeps every later
+            // visit organic.
+            const tutorialDone = (gameState.flags ?? []).includes(BLACKSMITH_TUTORIAL_FLAG);
+            beginBlacksmithAction(store, {
+                variants: result.event.variants,
+                tutorial: !tutorialDone,
+            });
             return true;
         }
 

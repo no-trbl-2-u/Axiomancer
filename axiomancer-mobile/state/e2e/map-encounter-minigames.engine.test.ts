@@ -132,5 +132,8 @@ describe('fishing-village gauntlet routing', () => {
         expect(count('hazard')).toBeGreaterThanOrEqual(1);
         expect(count('loot-cache')).toBeGreaterThanOrEqual(1);
         expect(count('narration')).toBe(1);
+        // Phase D6c — exactly one authored blacksmith node (owner-decided
+        // single placement, NOT a cadence).
+        expect(count('blacksmith')).toBe(1);
     });
 });
