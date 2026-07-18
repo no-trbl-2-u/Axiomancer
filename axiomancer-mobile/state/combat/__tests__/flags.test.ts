@@ -1,6 +1,7 @@
 /**
- * Spec 33 — build-time combat flags: the preview opt-in for Upgradeable Dice.
- * The env read is inlined by Expo on device; in Jest the real process.env is
+ * Spec 33 — combat flags after THE FLIP (owner call, 2026-07-18): every app
+ * build boots Upgradeable Dice ON; only the explicit `0` kill-switch (env or
+ * runtime global) keeps the legacy model. In Jest the real process.env is
  * read at call time, so the hook is pinned directly.
  */
 
@@ -20,29 +21,40 @@ describe('applyCombatFlagsFromEnv', () => {
         setUpgradeableDice(false);
     });
 
-    it('leaves the engine flag OFF when the env var is unset', () => {
+    it('flips the engine flag ON by default (env unset — the flip)', () => {
         delete process.env[KEY];
         applyCombatFlagsFromEnv();
-        expect(isUpgradeableDiceEnabled()).toBe(false);
+        expect(isUpgradeableDiceEnabled()).toBe(true);
     });
 
-    it('leaves the flag OFF for any value other than "1"', () => {
-        process.env[KEY] = '0';
-        applyCombatFlagsFromEnv();
-        expect(isUpgradeableDiceEnabled()).toBe(false);
-    });
-
-    it('flips the engine flag ON when the preview build sets "1"', () => {
+    it('stays ON for legacy opt-in values ("1" is now redundant, never harmful)', () => {
         process.env[KEY] = '1';
         applyCombatFlagsFromEnv();
         expect(isUpgradeableDiceEnabled()).toBe(true);
     });
 
-    // Spec 33 (Phase D6a) — the RUNTIME escape hatch a browser/e2e harness (D6d)
-    // uses to flip the flag per-run, which the bundle-time env can't provide.
-    it('flips the flag ON when the runtime global is set (true / 1 / "1")', () => {
+    it('honors the bundle-time kill-switch (env "0")', () => {
+        process.env[KEY] = '0';
+        applyCombatFlagsFromEnv();
+        expect(isUpgradeableDiceEnabled()).toBe(false);
+    });
+
+    // The runtime kill-switch: a legacy-flow e2e harness sets the global to
+    // '0' BEFORE the combat surface boots to keep exercising the pre-spec-33
+    // model while it still exists.
+    it('honors the runtime kill-switch (false / 0 / "0")', () => {
         delete process.env[KEY];
-        for (const v of [true, 1, '1']) {
+        for (const v of [false, 0, '0']) {
+            setUpgradeableDice(true);
+            (globalThis as Record<string, unknown>)[RUNTIME] = v;
+            applyCombatFlagsFromEnv();
+            expect(isUpgradeableDiceEnabled()).toBe(false);
+        }
+    });
+
+    it('stays ON for any non-kill-switch runtime-global value', () => {
+        delete process.env[KEY];
+        for (const v of [true, 1, '1', 'yes', undefined]) {
             setUpgradeableDice(false);
             (globalThis as Record<string, unknown>)[RUNTIME] = v;
             applyCombatFlagsFromEnv();
@@ -50,12 +62,12 @@ describe('applyCombatFlagsFromEnv', () => {
         }
     });
 
-    it('leaves the flag OFF for a falsy / other runtime-global value', () => {
+    it('re-resolves on a later call (harness flips the global mid-session)', () => {
         delete process.env[KEY];
-        for (const v of [false, 0, '0', 'yes']) {
-            (globalThis as Record<string, unknown>)[RUNTIME] = v;
-            applyCombatFlagsFromEnv();
-            expect(isUpgradeableDiceEnabled()).toBe(false);
-        }
+        applyCombatFlagsFromEnv();
+        expect(isUpgradeableDiceEnabled()).toBe(true);
+        (globalThis as Record<string, unknown>)[RUNTIME] = '0';
+        applyCombatFlagsFromEnv();
+        expect(isUpgradeableDiceEnabled()).toBe(false);
     });
 });

@@ -2,9 +2,6 @@
   "cli": { "version": ">= 16.0.0" },
   "build": {
     "preview": {
-      "env": {
-        "EXPO_PUBLIC_UPGRADEABLE_DICE": "1"
-      },
       "android": {
         "buildType": "apk",
         "distribution": "internal"

@@ -2,16 +2,20 @@
  * Spec 26b §1 + combat-screen-polish 2026-07 (recut 2026-07-18, owner
  * playtest) — a stance die, gem treatment.
  *
- * The 2-die-per-turn draft pool renders these: drag one onto a staged card to
- * power it (the other converts to Conviction).
+ * Renders the spec-33 four-die tray (the shipped default since THE FLIP,
+ * 2026-07-18): every usable face may power a card of its color this round.
+ * Under the legacy kill-switch (`EXPO_PUBLIC_UPGRADEABLE_DICE=0`) the same
+ * component renders the old 2-die draft pool — faceless dice, one draft.
  *
  * The face language (owner directive 2026-07-18): the die's COLOUR carries the
  * stance — no printed stance label, no per-stance glyph. Every face is a
  * circle:
  *   · hit (mana)  → a circle holding a small crystal — this face powers a card;
  *   · special     → a circle holding a SPARKLING crystal (the +◆ payload face);
- *   · miss        → an EMPTY circle — the face powers nothing;
- *   · cracked     → the empty circle struck through (an OVERHEAT crack, dead
+ *   · miss        → a GREYED-OUT empty circle — dead, powers nothing (owner
+ *                   directive, second pass same day: grey, not stance-coloured,
+ *                   so "red missed" reads at a glance);
+ *   · cracked     → the greyed circle struck through (an OVERHEAT crack, dead
  *                   this round); an X die reads the same dead way.
  * The body is a bevelled gem slab (gradient depth + edge highlights) rather
  * than the old flat wash. Colour is never the only a11y channel — the
@@ -35,15 +39,16 @@ export const CombatDie = React.memo(function CombatDie({ die, size = 54, dimmed 
     const special = die.face === 'special';
     const cracked = die.cracked === true;
     // A "dead" face powers nothing — the X die OR a flag-on miss/cracked face.
-    // A plain miss KEEPS its stance colour (the colour IS the stance identity;
-    // the empty circle alone says "powers nothing") — only a crack/X goes grey.
+    // EVERY dead face greys out (owner directive 2026-07-18): a miss must read
+    // as an undraggable dead die at a glance, so it drops its stance colour
+    // like a crack/X does — only the rim hue tells a crack from a plain miss.
     const dead = die.isX || die.face === 'miss' || cracked;
-    const greyed = die.isX || cracked;
-    const ring = die.drafted ? accent : cracked ? '#6b3030' : greyed ? '#3a3a3a' : dead ? `${accent}66` : special ? accent : `${accent}aa`;
+    const greyed = dead;
+    const ring = die.drafted ? accent : cracked ? '#6b3030' : greyed ? '#3a3a3a' : special ? accent : `${accent}aa`;
     const glow = !dead && !dimmed;
     const glowSize = size * 1.6;
     const gradId = `axmDieGlow-${die.color}`;
-    const bodyId = `axmDieBody-${die.color}-${greyed ? 'grey' : dead ? 'miss' : die.drafted ? 'drafted' : 'live'}`;
+    const bodyId = `axmDieBody-${die.color}-${greyed ? 'grey' : die.drafted ? 'drafted' : 'live'}`;
     const gemId = `axmDieGem-${die.color}`;
     // P2 — the a11y state must not lie. A spare die once a draft exists is no
     // longer draggable: it was already burned for Conviction at draft. Spec 33 —
@@ -88,8 +93,8 @@ export const CombatDie = React.memo(function CombatDie({ die, size = 54, dimmed 
                 <Defs>
                     {/* Gem-slab depth: a lit top-left falling to a dark lower edge. */}
                     <SvgLinearGradient id={bodyId} x1="0%" y1="0%" x2="80%" y2="100%">
-                        <Stop offset="0%" stopColor={accent} stopOpacity={greyed ? 0.1 : dead ? 0.28 : die.drafted ? 0.7 : 0.5} />
-                        <Stop offset="45%" stopColor={accent} stopOpacity={greyed ? 0.05 : dead ? 0.12 : 0.2} />
+                        <Stop offset="0%" stopColor={accent} stopOpacity={greyed ? 0.1 : die.drafted ? 0.7 : 0.5} />
+                        <Stop offset="45%" stopColor={accent} stopOpacity={greyed ? 0.05 : 0.2} />
                         <Stop offset="100%" stopColor="#000000" stopOpacity={0.55} />
                     </SvgLinearGradient>
                     {/* The crystal's own facet light — white cap into the stance colour. */}
@@ -107,11 +112,11 @@ export const CombatDie = React.memo(function CombatDie({ die, size = 54, dimmed 
                 <Path d="M 88 68 Q 88 88 68 88 L 34 88" stroke="rgba(0,0,0,0.5)" strokeWidth={4} fill="none" strokeLinecap="round" />
                 {/* rim */}
                 <Rect x={4} y={4} width={92} height={92} rx={22} fill="none" stroke={ring} strokeWidth={4.5} />
-                {/* the face circle — empty on a dead face (miss / X / cracked) */}
+                {/* the face circle — greyed + empty on a dead face (miss / X / cracked) */}
                 <Circle
                     cx={50} cy={50} r={26}
                     fill={dead ? 'none' : 'rgba(0,0,0,0.35)'}
-                    stroke={greyed ? '#6f6a5e' : dead ? `${accent}99` : 'rgba(255,255,255,0.7)'}
+                    stroke={greyed ? '#6f6a5e' : 'rgba(255,255,255,0.7)'}
                     strokeWidth={3.5}
                 />
                 {/* hit / special — the small crystal held in the circle */}

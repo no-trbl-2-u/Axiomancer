@@ -154,14 +154,11 @@ export function OutcomeText({ text, names, base, bold, numberOfLines }: { text: 
 
 // ── Signature rune column (left edge) ────────────────────────────────────────
 
-function SignatureColumn({ conviction, signatures, onCast, onInfo, stake, canStake, onStake }: {
+function SignatureColumn({ conviction, signatures, onCast, onInfo }: {
     conviction: number;
     signatures: CombatSignatureVM[];
     onCast: (id: string) => void;
     onInfo?: (s: CombatSignatureVM) => void;
-    stake?: { color: WheelStance; amount: 2 | 4 | 6 } | null;
-    canStake?: boolean;
-    onStake?: (color: WheelStance, amount: 2 | 4 | 6) => void;
 }) {
     const AXM = usePalette();
     const styles = useStyles();
@@ -176,7 +173,6 @@ function SignatureColumn({ conviction, signatures, onCast, onInfo, stake, canSta
             >
                 <Text style={[styles.convictionText, { color: AXM.sulfur }]} allowFontScaling={false}>◆ {conviction}</Text>
             </View>
-            <StakeChip stake={stake ?? null} canStake={!!canStake} onStake={onStake} />
             {signatures.map((s) => (
                 <Pressable
                     key={s.id}
@@ -718,105 +714,10 @@ function StanceChip({ vm }: { vm: CombatStanceChipVM }) {
     );
 }
 
-// ── THE STAKE (Phase 31/EA-7) — pre-play Conviction wager chip ───────────────
-
-/** Post-draft, pre-play wager on the enemy's hidden stance this threat
- *  phase. A live stake renders as a read-only badge (color + amount); an
- *  open slot renders a STAKE chip that opens a two-step picker (color, then
- *  amount) — zero new drag grammar, matching the doc's own scope. */
-function StakeChip({ stake, canStake, onStake }: {
-    stake: { color: WheelStance; amount: 2 | 4 | 6 } | null;
-    canStake: boolean;
-    onStake?: (color: WheelStance, amount: 2 | 4 | 6) => void;
-}) {
-    const AXM = usePalette();
-    const styles = useStyles();
-    const [open, setOpen] = useState(false);
-    const [picked, setPicked] = useState<WheelStance | null>(null);
-    const close = () => { setOpen(false); setPicked(null); };
-
-    // Spec 33 §5 (D2) — STAKE is RETIRED under the Upgradeable-Dice model
-    // (Conviction no longer wagers on a hidden enemy stance; the read is open).
-    // Hide the affordance entirely flag-on. Flag-off keeps every branch below
-    // byte-identical.
-    if (isUpgradeableDiceEnabled()) return null;
-
-    if (stake) {
-        const meta = WHEEL_META.find((m) => m.stance === stake.color);
-        return (
-            <View
-                style={styles.stakeChip}
-                testID="combat-stake-live"
-                accessible
-                accessibilityRole="text"
-                accessibilityLabel={`Staked ${stake.amount} conviction on ${stake.color}`}
-            >
-                <Text style={[styles.stakeChipText, { color: AXM.sulfur }]} allowFontScaling={false}>
-                    {meta?.glyph ?? '?'} {stake.amount}◆
-                </Text>
-            </View>
-        );
-    }
-    if (!onStake) return null;
-    return (
-        <>
-            <Pressable
-                testID="combat-stake-open"
-                onPress={() => { if (canStake) setOpen(true); }}
-                disabled={!canStake}
-                accessibilityRole="button"
-                accessibilityState={{ disabled: !canStake }}
-                accessibilityLabel="Wager Conviction on the enemy's hidden stance this phase"
-                style={[styles.stakeChip, { opacity: canStake ? 1 : 0.4 }]}
-            >
-                <Text style={[styles.stakeChipText, { color: AXM.sulfur }]} allowFontScaling={false}>STAKE</Text>
-            </Pressable>
-            {open && (
-                <Pressable style={styles.stakeBackdrop} testID="combat-stake-backdrop" onPress={close}>
-                    <Pressable style={styles.stakePicker} onPress={(e) => e.stopPropagation()}>
-                        {!picked ? (
-                            <>
-                                <Text style={styles.stakePickerTitle}>Wager on which stance?</Text>
-                                <View style={styles.stakePickerRow}>
-                                    {WHEEL_META.map((m) => (
-                                        <Pressable
-                                            key={m.stance}
-                                            testID={`combat-stake-color-${m.stance}`}
-                                            onPress={() => setPicked(m.stance)}
-                                            style={styles.stakePickerOption}
-                                            accessibilityRole="button"
-                                            accessibilityLabel={`Wager on ${m.stance}`}
-                                        >
-                                            <Text style={styles.stakePickerGlyph}>{m.glyph}</Text>
-                                        </Pressable>
-                                    ))}
-                                </View>
-                            </>
-                        ) : (
-                            <>
-                                <Text style={styles.stakePickerTitle}>Wager how much?</Text>
-                                <View style={styles.stakePickerRow}>
-                                    {([2, 4, 6] as const).map((amount) => (
-                                        <Pressable
-                                            key={amount}
-                                            testID={`combat-stake-amount-${amount}`}
-                                            onPress={() => { onStake(picked, amount); close(); }}
-                                            style={styles.stakePickerOption}
-                                            accessibilityRole="button"
-                                            accessibilityLabel={`Wager ${amount} conviction`}
-                                        >
-                                            <Text style={styles.stakePickerGlyph}>{amount}◆</Text>
-                                        </Pressable>
-                                    ))}
-                                </View>
-                            </>
-                        )}
-                    </Pressable>
-                </Pressable>
-            )}
-        </>
-    );
-}
+// THE STAKE (Phase 31/EA-7) is RETIRED EVERYWHERE (owner call 2026-07-18,
+// completing spec 33 §5's flag-on retirement): the pre-play wager UI is gone
+// on every surface, legacy kill-switch included. Engine plumbing
+// (`placeStake`/`settleStake`) awaits its own mechanics-side removal.
 
 // ── Premise track + CONCEDE beat (phase 28) ──────────────────────────────────
 
@@ -931,9 +832,6 @@ export interface CombatBoardProps {
     momentum?: { lit: WheelStance[]; charged: boolean };
     /** Tap the wheel → how-momentum-works popup. */
     onMomentumInfo?: () => void;
-    /** Phase 31 (EA-7) — place a pre-play wager on the hidden stance this
-     *  threat phase (color + amount, 2◆/4◆/6◆). */
-    onStake?: (color: WheelStance, amount: 2 | 4 | 6) => void;
     /** Latest resolved engine events (drives enemy/player resolution feedback). */
     fx?: CombatFx;
     // ── Fate Engine P1 ──
@@ -953,7 +851,7 @@ export interface CombatBoardProps {
 }
 
 export const CombatBoard = React.memo(function CombatBoard({
-    vm, drag, stagedUids, onApply, onStage, onUnstage, onDiscard, onSignature, onEndPhase, resolving = false, onInspect, onChip, onSignatureInfo, onPlayerInspect, momentum, onMomentumInfo, onStake, fx,
+    vm, drag, stagedUids, onApply, onStage, onUnstage, onDiscard, onSignature, onEndPhase, resolving = false, onInspect, onChip, onSignatureInfo, onPlayerInspect, momentum, onMomentumInfo, fx,
     onFateTap, onReprisalNeeded,
 }: CombatBoardProps) {
     const AXM = usePalette();
@@ -1546,7 +1444,6 @@ export const CombatBoard = React.memo(function CombatBoard({
             {/* signature rune column — left edge */}
             <SignatureColumn
                 conviction={vm.conviction} signatures={vm.signatures} onCast={onSignature} onInfo={onSignatureInfo}
-                stake={vm.stake} canStake={vm.canStake} onStake={onStake}
             />
 
             {/* SCRAP — only present while a card is being dragged (no permanent
@@ -1881,28 +1778,6 @@ const useStyles = makeStyles((AXM) => ({
         borderWidth: 1, borderColor: 'rgba(255,255,255,0.22)', paddingHorizontal: 3, paddingVertical: 0,
     },
     sigCostText: { fontFamily: FONTS.mono, fontSize: 9, lineHeight: 12 },
-
-    // ── THE STAKE (Phase 31/EA-7) — pre-play wager chip + picker ──
-    stakeChip: {
-        borderWidth: 1, borderColor: AXM.sulfur, borderRadius: 6, backgroundColor: 'rgba(0,0,0,0.6)',
-        paddingHorizontal: 7, paddingVertical: 3,
-    },
-    stakeChipText: { fontFamily: FONTS.mono, fontSize: 11, letterSpacing: 0.5 },
-    stakeBackdrop: {
-        position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
-        backgroundColor: 'rgba(0,0,0,0.6)', alignItems: 'center', justifyContent: 'center', zIndex: 90,
-    },
-    stakePicker: {
-        borderWidth: 1.5, borderColor: AXM.sulfur, borderRadius: 10, backgroundColor: 'rgba(20,16,10,0.96)',
-        paddingHorizontal: 18, paddingVertical: 16, alignItems: 'center', gap: 10,
-    },
-    stakePickerTitle: { fontFamily: FONTS.gothic, fontSize: 14, color: AXM.parchment, letterSpacing: 0.5 },
-    stakePickerRow: { flexDirection: 'row', gap: 12 },
-    stakePickerOption: {
-        width: 48, height: 48, borderRadius: 24, borderWidth: 1.5, borderColor: AXM.sulfur,
-        backgroundColor: 'rgba(0,0,0,0.5)', alignItems: 'center', justifyContent: 'center',
-    },
-    stakePickerGlyph: { fontFamily: FONTS.gothic, fontSize: 16, color: AXM.sulfur },
 
     // ── dice row ──
     // gap 26→14 + wrap (2026-07-18): four 54pt gems + the spare chip overflowed
