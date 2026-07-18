@@ -171,17 +171,16 @@ describe('Press Fate VM (flag-on reroll gate)', () => {
     });
 });
 
-describe('inspect modal — SPECIAL die-gear gloss (flag-on)', () => {
-    it('surfaces the SPECIAL keyword on flag-on card inspects, and not flag-off', () => {
+describe('inspect modal — SPECIAL die-gear gloss (owner playtest 2026-07-18)', () => {
+    it('never rides a card inspect unprompted — a die-face rule is not card vocabulary', () => {
+        // The D6a always-on SPECIAL push is retired: the gloss surfaces only
+        // when a card's OWN printed lines name it (via the printed sweep).
         const on = openEncounter();
         setUpgradeableDice(true);
         const onHand = buildCombatViewModel(on).hand;
         expect(onHand.length).toBeGreaterThan(0);
         for (const card of onHand) {
-            const names = card.detail.keywords.map(k => k.name);
-            expect(names).toContain('SPECIAL');
-            const special = card.detail.keywords.find(k => k.name === 'SPECIAL')!;
-            expect(special.def.length).toBeGreaterThan(0); // the D4 gloss is wired
+            expect(card.detail.keywords.map(k => k.name)).not.toContain('SPECIAL');
         }
 
         setUpgradeableDice(false);

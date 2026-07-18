@@ -269,11 +269,11 @@ describe('detailStats — same numbers as the face', () => {
         expect(vk.every(k => k.def.length > 0)).toBe(true);  // every chip carries its gloss
     });
     it('systemTerms is the PER-CARD glossary slice, not the KW-7 dump (owner, 2026-07-12)', () => {
-        // entropy-tax's printed lines reference no dice-system token → only the
-        // audit's two vocabulary entries (its passive prints the intensity
-        // shorthand; every overlay prints the ◇ FREE line) — never the dump.
+        // entropy-tax's printed lines reference no dice-system token → NO
+        // entries (INTENSITY/FREE retired from the glossary, owner 2026-07-18)
+        // — never the dump.
         const tax = cardOf('entropy-tax');
-        expect(detailStats(tax.card, tax.sourceCard).systemTerms.map(s => s.term)).toEqual(['INTENSITY', 'FREE']);
+        expect(detailStats(tax.card, tax.sourceCard).systemTerms.map(s => s.term)).toEqual([]);
         // bootstrap-loop prints '+1 Conviction' and a '⬡ MIND ×2 spent'
         // threshold line → CONVICTION and RESONANCE render; FLOATING/WILD are
         // already explained by its FORGE keyword chip → deduped away.
@@ -325,13 +325,12 @@ describe('card-wording audit (2026-07-12) — the +DIE row carries only what the
         const spell = cardOf('slippery-slope');
         expect(detailStats(spell.card, spell.sourceCard).durationFooter).toBeNull();
     });
-    it('INTENSITY and FREE now resolve as system terms on cards that print them', () => {
-        // slippery-slope: 'Stacks by intensity.' + a de-abbreviated '×1' free
-        // line + the overlay FREE line → both entries render.
+    it('INTENSITY and FREE never render as system terms (retired, owner 2026-07-18)', () => {
+        // Both read plainly enough in context; their rows padded every inspect.
         const { card, sourceCard } = cardOf('slippery-slope');
         const terms = detailStats(card, sourceCard).systemTerms.map(s => s.term);
-        expect(terms).toContain('INTENSITY');
-        expect(terms).toContain('FREE');
+        expect(terms).not.toContain('INTENSITY');
+        expect(terms).not.toContain('FREE');
     });
 });
 

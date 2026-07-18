@@ -45,7 +45,7 @@ import { makeStyles, usePalette } from '@/theme/runtime';
 import type {
     CombatViewModel, CombatCardVM, CombatDieVM,
     CombatSignatureVM, CombatEffectChipVM, CombatPerorationVM, CombatPressFateVM,
-    CombatMomentumV2VM, CombatStanceChipVM, CombatDieGearRailVM, CombatDieGearSlotVM,
+    CombatMomentumV2VM, CombatStanceChipVM,
 } from '@/state/presenters/combat-encounter.engine';
 import { armedReadValue, dieCanPowerCardVM, STANCE_COLORS } from '@/state/presenters/combat-encounter.engine';
 import { wheelNext, type WheelStance } from '@/state/combat/momentum';
@@ -208,15 +208,13 @@ function SignatureColumn({ conviction, signatures, onCast, onInfo, stake, canSta
 // ── Dice row (free-floating gems above the hand) ─────────────────────────────
 
 function DiceRow({
-    vm, dieGesture, draggingDieId, assignedDieIds, onFateTap, bankSpare, onToggleBankSpare,
+    vm, dieGesture, draggingDieId, assignedDieIds, onFateTap,
 }: {
     vm: CombatViewModel;
     dieGesture: (die: CombatDieVM) => ReturnType<typeof Gesture.Exclusive>;
     draggingDieId: string | null;
     assignedDieIds: Set<string>;
     onFateTap?: (dieId: string) => void;
-    bankSpare?: boolean;
-    onToggleBankSpare?: () => void;
 }) {
     const AXM = usePalette();
     const styles = useStyles();
@@ -344,20 +342,6 @@ function DiceRow({
                     <View key={die.id}>{node}</View>
                 );
             })}
-            {/* R3 — BANK-OR-BURN made visible: the spare (undrafted) die's two lives. */}
-            {!vm.hasDraft && vm.diceRolled && vm.reserveRoom && onToggleBankSpare ? (
-                <Pressable
-                    onPress={onToggleBankSpare}
-                    style={[styles.bankChip, bankSpare && { borderColor: AXM.sulfur }]}
-                    accessibilityRole="button"
-                    accessibilityLabel={bankSpare ? 'Spare die will be banked to the Reserve' : 'Spare die will burn for one Conviction'}
-                    testID="combat-bank-toggle"
-                >
-                    <Text style={[styles.bankChipText, bankSpare && { color: AXM.sulfur }]}>
-                        {bankSpare ? 'spare → BANK ⏳' : 'spare → +1 ◆'}
-                    </Text>
-                </Pressable>
-            ) : null}
             {/* Spec 33 (Phase D6f) — tap-to-skip: while any die is mid-tumble a
                 transparent overlay catches a tap and snaps every die to its
                 settled (engine-rolled) face. Absent once settled, so it never
@@ -734,37 +718,6 @@ function StanceChip({ vm }: { vm: CombatStanceChipVM }) {
     );
 }
 
-// ── Spec 33 §6 (Phase D6b, flag-on) — die-gear rail (4 slots) ────────────────
-
-/** Mirrors the dice-tray layout idiom: four slots (heart/body/mind/wild) each a
- *  tappable gear badge. A tap opens the payload-only inspection panel (owned by
- *  CombatEncounterPanel). Upgraded slots read with a ★ marker. */
-function DieGearRail({ rail, onInspect }: { rail: CombatDieGearRailVM; onInspect?: (slot: CombatDieGearSlotVM) => void }) {
-    const styles = useStyles();
-    return (
-        <View style={styles.gearRail} testID="combat-die-gear-rail">
-            {rail.slots.map((slot) => (
-                <Pressable
-                    key={slot.color}
-                    style={[styles.gearSlot, { borderColor: slot.colorHex }]}
-                    onPress={() => onInspect?.(slot)}
-                    testID={`combat-die-gear-${slot.color}`}
-                    accessibilityRole="button"
-                    accessibilityLabel={slot.a11y}
-                    accessibilityHint="Tap to inspect this die's faces and payload"
-                >
-                    <Text style={[styles.gearGlyph, { color: slot.colorHex, textShadowColor: slot.colorHex }]} allowFontScaling={false}>
-                        {slot.glyph}{slot.upgraded ? ' ★' : ''}
-                    </Text>
-                    <Text style={[styles.gearFaces, { color: slot.colorHex }]} allowFontScaling={false}>
-                        {slot.specialFaces}·{slot.manaFaces}·{slot.missFaces}
-                    </Text>
-                </Pressable>
-            ))}
-        </View>
-    );
-}
-
 // ── THE STAKE (Phase 31/EA-7) — pre-play Conviction wager chip ───────────────
 
 /** Post-draft, pre-play wager on the enemy's hidden stance this threat
@@ -978,8 +931,6 @@ export interface CombatBoardProps {
     momentum?: { lit: WheelStance[]; charged: boolean };
     /** Tap the wheel → how-momentum-works popup. */
     onMomentumInfo?: () => void;
-    /** Spec 33 §6 (flag-on) — tap a die-gear slot → payload-only inspection panel. */
-    onGearInspect?: (slot: CombatDieGearSlotVM) => void;
     /** Phase 31 (EA-7) — place a pre-play wager on the hidden stance this
      *  threat phase (color + amount, 2◆/4◆/6◆). */
     onStake?: (color: WheelStance, amount: 2 | 4 | 6) => void;
@@ -988,9 +939,6 @@ export interface CombatBoardProps {
     // ── Fate Engine P1 ──
     /** Tap a dead X die → the universal fate tap (once per turn). */
     onFateTap?: (dieId: string) => void;
-    /** Bank-or-burn choice for the spare die at draft (panel-owned). */
-    bankSpare?: boolean;
-    onToggleBankSpare?: () => void;
     /** phase 28 — REPRISE songbook choice. Called INSTEAD of `onApply` when the
      *  card being APPLYd carries a `reprise` mechanic and the discard pile is
      *  non-empty; the panel opens its picker and calls `onApply` itself once
@@ -1005,8 +953,8 @@ export interface CombatBoardProps {
 }
 
 export const CombatBoard = React.memo(function CombatBoard({
-    vm, drag, stagedUids, onApply, onStage, onUnstage, onDiscard, onSignature, onEndPhase, resolving = false, onInspect, onChip, onSignatureInfo, onPlayerInspect, momentum, onMomentumInfo, onGearInspect, onStake, fx,
-    onFateTap, bankSpare, onToggleBankSpare, onReprisalNeeded,
+    vm, drag, stagedUids, onApply, onStage, onUnstage, onDiscard, onSignature, onEndPhase, resolving = false, onInspect, onChip, onSignatureInfo, onPlayerInspect, momentum, onMomentumInfo, onStake, fx,
+    onFateTap, onReprisalNeeded,
 }: CombatBoardProps) {
     const AXM = usePalette();
     const styles = useStyles();
@@ -1503,18 +1451,17 @@ export const CombatBoard = React.memo(function CombatBoard({
                 {/* Spec 33 §2 (flag-on) — the player's current-stance chip. */}
                 {vm.playerStance ? <StanceChip vm={vm.playerStance} /> : null}
 
-                {/* Spec 33 §6 (flag-on) — the die-gear rail; tap a slot to inspect. */}
-                {vm.dieGear ? <DieGearRail rail={vm.dieGear} onInspect={onGearInspect} /> : null}
-
                 {/* Premise track + CONCEDE beat (phase 28) — the peroration theme's win condition */}
                 <PerorationTrack peroration={vm.peroration} />
 
                 {/* player status strip — IN FLOW (not floated over the fan, where the
-                    hand's gesture area swallowed the taps) so every tile stays tappable */}
+                    hand's gesture area swallowed the taps) so every tile stays tappable.
+                    RIGHT-aligned (owner playtest 2026-07-18): the left edge belongs to
+                    the signature-rune column, which was hiding these tiles. */}
                 {(vm.player.effects.length > 0 || vm.player.guard > 0) && (
                     <View style={styles.statusStrip} pointerEvents="box-none">
-                        <EffectChips effects={vm.player.effects} onChip={onChip} />
                         {vm.player.guard > 0 ? <Text style={styles.guardChip} testID="combat-guard">🛡 {vm.player.guard}</Text> : null}
+                        <EffectChips effects={vm.player.effects} onChip={onChip} align="flex-end" />
                     </View>
                 )}
 
@@ -1526,7 +1473,7 @@ export const CombatBoard = React.memo(function CombatBoard({
                         no die matches your hand — FREE plays still work · END rolls fresh dice
                     </Text>
                 ) : null}
-                <DiceRow vm={vm} dieGesture={dieGesture} draggingDieId={draggingDieId} assignedDieIds={assignedDieIds} onFateTap={onFateTap} bankSpare={bankSpare} onToggleBankSpare={onToggleBankSpare} />
+                <DiceRow vm={vm} dieGesture={dieGesture} draggingDieId={draggingDieId} assignedDieIds={assignedDieIds} onFateTap={onFateTap} />
                 {/* Spec 33 §4 (flag-on) — the Press Fate reroll control. Owner-UI
                     doctrine: never hidden when it can't fire — it renders DISABLED
                     with the refusal reason. Null flag-off / no reroll signature. */}
@@ -1958,14 +1905,14 @@ const useStyles = makeStyles((AXM) => ({
     stakePickerGlyph: { fontFamily: FONTS.gothic, fontSize: 16, color: AXM.sulfur },
 
     // ── dice row ──
-    diceRow: { flexDirection: 'row', gap: 26, justifyContent: 'center', alignItems: 'flex-start', minHeight: 74, paddingBottom: 2 },
+    // gap 26→14 + wrap (2026-07-18): four 54pt gems + the spare chip overflowed
+    // a 375pt viewport and clipped the first die off-screen.
+    diceRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 14, justifyContent: 'center', alignItems: 'flex-start', minHeight: 74, paddingBottom: 2 },
     dieAssigned: { opacity: 0.4 },
     // Drawn X/dud die — a small greyed pip, not a full slot.
     dieXPip: { width: 24, height: 24, borderRadius: 6, borderWidth: 1, borderColor: '#3a3a3a', backgroundColor: 'rgba(0,0,0,0.4)', alignItems: 'center', justifyContent: 'center', opacity: 0.6, alignSelf: 'center' },
     dieFateHint: { fontFamily: FONTS.mono, fontSize: 7, color: '#d4c026', marginTop: 1 },
     faceDieLine: { fontFamily: FONTS.mono, fontSize: 9, color: '#d4c026', marginTop: 3, letterSpacing: 0.2 },
-    bankChip: { borderWidth: 1, borderColor: '#3a3a3a', borderRadius: 10, paddingHorizontal: 8, paddingVertical: 4, alignSelf: 'center', backgroundColor: 'rgba(0,0,0,0.35)' },
-    bankChipText: { fontFamily: FONTS.mono, fontSize: 9, color: '#8a8a7a', letterSpacing: 0.5 },
     // Spec 33 §4 — Press Fate reroll control (flag-on).
     pressFate: { borderWidth: 1, borderRadius: 10, paddingHorizontal: 12, paddingVertical: 4, alignSelf: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.4)', marginTop: 2 },
     pressFateText: { fontFamily: FONTS.mono, fontSize: 11, letterSpacing: 1 },
@@ -1998,15 +1945,6 @@ const useStyles = makeStyles((AXM) => ({
     },
     stanceChipGlyph: { fontFamily: FONTS.sans, fontSize: 13, textShadowRadius: 5, textShadowOffset: { width: 0, height: 0 } },
     stanceChipLabel: { fontFamily: FONTS.mono, fontSize: 10, letterSpacing: 1 },
-    // ── Spec 33 §6 — die-gear rail ──
-    gearRail: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 3, marginBottom: 2 },
-    gearSlot: {
-        alignItems: 'center', justifyContent: 'center', minWidth: 46,
-        borderWidth: 1, borderRadius: 5, paddingHorizontal: 6, paddingVertical: 3,
-        backgroundColor: 'rgba(0,0,0,0.55)',
-    },
-    gearGlyph: { fontFamily: FONTS.sans, fontSize: 13, textShadowRadius: 5, textShadowOffset: { width: 0, height: 0 } },
-    gearFaces: { fontFamily: FONTS.mono, fontSize: 8, letterSpacing: 0.3, marginTop: 1 },
     fanGlow: { position: 'absolute', bottom: 0, left: 0 },
     fan: { ...StyleSheet.absoluteFillObject, flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'center', paddingHorizontal: 12, paddingBottom: 20 },
 
@@ -2031,8 +1969,9 @@ const useStyles = makeStyles((AXM) => ({
     },
     trashLabel: { fontFamily: FONTS.mono, fontSize: 9, letterSpacing: 1, color: AXM.bone, marginTop: 1 },
 
-    // ── player status strip (in-flow, above the dice) ──
-    statusStrip: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 12, paddingBottom: 6 },
+    // ── player status strip (in-flow, above the dice; RIGHT-aligned so the
+    //    left signature-rune column never covers it) ──
+    statusStrip: { flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', gap: 8, paddingHorizontal: 12, paddingBottom: 6 },
     guardChip: {
         fontFamily: FONTS.mono, fontSize: 11, color: '#6fb3e0', letterSpacing: 0.5,
         backgroundColor: 'rgba(0,0,0,0.7)', borderWidth: 1, borderColor: '#6fb3e055', borderRadius: 4,

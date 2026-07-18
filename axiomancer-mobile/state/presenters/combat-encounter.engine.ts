@@ -1618,14 +1618,10 @@ function buildDetailKeywords(card: CombatCard, c: CardCalc, sourceCard?: Card): 
             if (keywordGloss(title)) push(title, false);
         }
     }
-    // Spec 33 (Phase D6a, flag-on) — SPECIAL is the die-face payload the player
-    // now powers this card with (the marked +◆ face → Conviction); surface its
-    // gloss in every flag-on combat inspect so the tray's special face is always
-    // explained. HONE/TEMPER (the blacksmith upgrade verbs, D6c) stay resolvable
-    // through the printed sweep above whenever a card's own lines name them. The
-    // `push` dedupes, so a card that already prints SPECIAL never doubles.
-    // Flag-off this is skipped entirely — the panel is byte-identical.
-    if (isUpgradeableDiceEnabled()) push('Special', false);
+    // Owner playtest 2026-07-18 — the flag-on always-on SPECIAL gloss is GONE:
+    // a die-face rule is unrelated to the card being inspected, so it no longer
+    // rides every panel. SPECIAL/HONE/TEMPER still resolve through the printed
+    // sweep above whenever a card's OWN lines name them.
     return out;
 }
 
