@@ -14,6 +14,34 @@
 
 ## Pending
 
+### Gate the first-map blacksmith MapEvent node back to dev-only
+- category: content
+- impact: 4
+- ease: 7
+- detail: filed via /oversight 2026-07-18. Owner ruled the blacksmith is
+  NOT the confirmed dice-upgrade surface (see the resolved
+  `[needs-user-call]` row below): the screen stays dev-menu-only until
+  the re-home design thread (PHASE_CANDIDATES: "Re-home dice upgrades
+  off the blacksmith") lands. The D6c ship placed 1 MapEvent node on the
+  first map + a Dev-menu entry; the map node must come back out (or be
+  dev-flag-gated) so players don't meet a surface the design has
+  disowned. Engine (D5 economy) and the screen itself are untouched.
+- next: /iterate (remove or dev-gate the first-map blacksmith MapEvent
+  node; keep the Dev-menu entry)
+
+### Ratify `SPECIAL_FIRES_ON_USE` — drop the PROVISIONAL marker
+- category: docs
+- impact: 2
+- ease: 9
+- detail: filed via /oversight 2026-07-18. Owner confirmed KEEP
+  fires-on-use (D7 evidence: 97% spend-rate, within ~3% of
+  fires-on-roll's payout; use-trigger rewards deliberate play and keeps
+  a banked Reserve special meaningful). The PROVISIONAL wording on the
+  constant/comments in `combat.upgradeable-dice.ts` (and any spec 33 §6
+  PROVISIONAL marker) should now read ratified — comment/doc change
+  only, no behavior change.
+- next: /iterate
+
 ### Doctrine-curve confirmation (digest 2026-07-18, reduced-nightly): mid/late collapse persists unchanged despite two days of engine work
 - category: content
 - impact: 7
@@ -34,12 +62,20 @@
   ratification — this row is the evidence trail for that read, not a
   new ask.
 - next: /iterate to refresh the CRITIQUE.md HIGH row's wording (measured,
-  still failing — not unmeasured); D7 owns the actual fix.
+  still failing — not unmeasured). Owner call (/oversight 2026-07-18): no
+  dedicated collapse phase yet — let the spec-33 finale land first (Phase
+  D-FLIP + D8 put the F3 sink and valves in play), re-measure the curve,
+  and mint a dedicated phase only if the collapse survives a healthy
+  flag-on economy.
 
-### Authored per-phase / boss stance-check variety (thread `stanceCheck` through the threat-authoring pipeline)
+### [x] Authored per-phase / boss stance-check variety — PROMOTED to Phase D9 via /oversight 2026-07-18
 - category: mechanics
 - impact: 4
 - ease: 6
+- resolution: owner call 2026-07-18 — queued as build-plan Phase D9
+  (after D8): salvage PR #109's pipeline threading + 22 thematic checks
+  as an ADDITIVE layer over the D6e backfill (authored check wins,
+  absent → default). Detail below preserved as the phase's source.
 - detail: filed 2026-07-18 as D6e residue. The shipped D6e (`0b29ff42`)
   drains D3-F2 with a UNIFORM `defaultStanceCheck(enemyStance)` backfilled at
   `getThreatSequence` on every RESOLVED phase (punishes own stance / yields
@@ -78,10 +114,15 @@
 - next: /plan-a-phase 33d (or write a GLYPHS spec) at pickup — do not start
   33d engine work against a braindump alone
 
-### `[needs-user-call]` FORGE identity: amplifier enchants vs the braindump's "in-combat temporary face upgrades"
+### [x] `[needs-user-call]` FORGE identity — RESOLVED via /oversight 2026-07-18: amplifier enchants confirmed
 - category: design
 - impact: 4
 - ease: 2
+- resolution: owner's own words — "FORGE has enchantments that provide a
+  benefit to the 'special' effect" — which IS the shipped
+  amplifier-enchant model (spec 33 §6, `forge-masters-stamp`). The
+  braindump's "in-combat temporary face upgrades" wording is superseded;
+  no spec amendment, no card follow-up. Shipped identity stands.
 - detail: filed 2026-07-18 (owner drift-check session on the D-batch). The
   braindump (`braindump/2026-07-17-upgradeable-dice-combat.md` decision 7)
   records an owner addition: *"in-combat temporary face upgrades are part of
@@ -99,10 +140,19 @@
   in-combat temp face upgrades as a FORGE mechanic — which would be a spec 33
   §6 amendment + D4-era card follow-up, routed via /deck-tuning)
 
-### `[needs-user-call]` Blacksmith cadence + dice-upgrade-site identity (open design thread)
+### [x] `[needs-user-call]` Blacksmith cadence + dice-upgrade-site identity — RESOLVED via /oversight 2026-07-18: wrong surface, rethink
 - category: content
 - impact: 5
 - ease: 3
+- resolution: owner call 2026-07-18 — the blacksmith is NOT confirmed as
+  the dice-upgrade surface. Keep the D5 HONE/TEMPER economy (engine
+  untouched); the player-facing affordance gets re-homed (candidates:
+  rest site, relic, event — design thread filed to PHASE_CANDIDATES as
+  "Re-home dice upgrades off the blacksmith"). Meanwhile the blacksmith
+  screen is dev-menu-only: the first-map MapEvent node gets gated back
+  to dev (new AUDIT row below routes it to /iterate). Cadence question
+  dissolves into the re-home design session. Blacksmith prices stay
+  placeholder until the new surface + souls-economy pass.
 - detail: filed via /oversight 2026-07-18 alongside the D6c placement call.
   The owner green-lit shipping the blacksmith reachably — 1 MapEvent node on
   the first map + a Dev-menu entry (see Phase D6c row) — but explicitly kept
@@ -338,9 +388,17 @@
   numbers as suspect per the known blind spots.
 - next: attended session (T-gated — not loop work; do not auto-ship
   a metric rewrite)
+
+### [x] Hermes-decided work is invisible to the loop — RESOLVED via /oversight 2026-07-18: convention adopted
 - category: divergence
 - impact: 6
 - ease: 8
+- resolution: owner adopted the convention 2026-07-18 — every
+  Hermes-decided work item lands as a GitHub issue (or build-plan phase
+  row) before or alongside its code change, so both brains drain one
+  queue via `/triage`. Recorded in `plan/bearings.md` § "Decisions
+  standing for the autonomous loop". (Heading restored here — this row
+  had lost its `###` line in an earlier merge.)
 - detail: T's daily-play findings route three ways — Hermes (co-founder
   agent), direct chat with Claude, or manual fixes. Only work that
   lands in `plan/` files or GitHub issues is visible to the `/march`

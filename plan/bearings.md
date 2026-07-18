@@ -218,6 +218,12 @@ ambiguity.)
 - **Source-of-truth hierarchy:** T's latest explicit decision >
   ADRs/CDRs > build plan > candidates > critique/audit >
   historical reports. On contradiction, stop and surface drift.
+- **Hermes-decided work lands in the queue** (adopted via /oversight
+  2026-07-18): every work item decided on the Hermes side files a
+  GitHub issue (or a build-plan phase row) before or alongside its
+  code change, so both brains drain one queue via `/triage`. If the
+  loop finds shipped code with no queue trace, treat it as drift and
+  surface it rather than double-shipping.
 
 ## AUDIT category taxonomy (this project)
 
