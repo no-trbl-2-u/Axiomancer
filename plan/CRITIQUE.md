@@ -11,6 +11,26 @@
 
 ## Pending
 
+> **[iterate residue, 2026-07-18, after the D-series march loop] Open-HIGH
+> triage — no cheap autonomous win remains; next productive critique is
+> INTERACTIVE, not another cold drive.** The hourly `/march` loop that shipped
+> the whole spec-33 D-series drained four HIGHs as already-fixed-by-shipped-work
+> (D7-blocker→fix, MORALE→#117, END-phase→WI-3, momentum-wild-die→Phase 31); the
+> queue was pass-12/13 and predates the D-series + phases 31/32, so carried-forward
+> rows kept resolving stale on inspection. The **6 remaining open HIGHs** split
+> into three buckets, none a clean loop win:
+> - **owner/design-judgment** — title wordmark crop (baked-art reflow, visual-design
+>   call; pass-13 reconfirmed it's still live) · combat tutorial drag-to-play gesture (UX).
+> - **phase-coupled / expensive** — suppurating-curse-on-poison/bleed (Phase-32
+>   substrate) · late-stage global collapse (expensive balance, D7-confirmed pre-existing).
+> - **unverified — need an IN-COMBAT capture** — tuning-harness policy-pick starves
+>   sandbox cards · phase-31/32 doctrine-curve rebaseline. The cold-enterable
+>   `critique:drive` stops at the pre-fight preview, so these can't be settled by
+>   another cold pass.
+> Next productive critique action = an **interactive `/critique`** (playtester +
+> Playwright MCP reaching card-hand + staged play), not a cold drive; the loop
+> reached its plateau on this queue.
+
 > **[critique pass 13, 2026-07-17, commit b4870384] Re-baseline ran.**
 > Used the unattended `critique:drive` transport (§3.5) against the
 > cold-enterable screen set (title, onboarding/deck-picker,
