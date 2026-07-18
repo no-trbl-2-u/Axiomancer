@@ -640,7 +640,7 @@ supersession collisions before any engine work.
 > NOT mobile: enemy stanceCheck content (yield-lever), draining D3-F2.
 > Parallel-safe with D6a–d, hard dep of D7. Listed after D6d below.
 
-- [ ] Phase D6a — Flag-on combat render core. The runtime flag hook
+- [x] Phase D6a — Flag-on combat render core. The runtime flag hook
       (`globalThis.__AXM_UPGRADEABLE_DICE__` test/dev escape hatch honored by
       `applyCombatFlagsFromEnv` — the e2e enabler the bundle-time flag can't
       give) + dice-tray/face rework (`CombatDieVM` gains a special/mana/miss
@@ -648,9 +648,18 @@ supersession collisions before any engine work.
       under the color law with off-color drops refused LOUDLY) + Press Fate
       affordance (1◆ once/round, disabled-at-0◆ with reason) + keyword glosses
       (SPECIAL/HONE/TEMPER rendered in the combat inspect modal — data landed
-      D4). Brief: generate at pickup (parent D6 §Scope items 1-2, 6-7).
+      D4). Brief: `plan/phases/phase_D6a_flag_on_render_core.md`.
       Prove: presenter units for the face/press-fate VMs + mobile verify.
       Deps: D2 + D5.
+      SHIPPED 2026-07-18 — runtime flag hook + CombatDieVM face axis
+      (special=marked+◆ / mana=powered / miss=DEAD non-draggable / cracked=
+      struck-out) extending the gem's color+glyph language; Press Fate control
+      (engine reroll-gate mirror, disabled-reason loud); SPECIAL inspect gloss.
+      Flag-off byte-identical (key-for-key tray VM test). Mobile verify green
+      (2587 tests, +18). Flag-on VISUAL screenshot deferred to D6d (pre-boot
+      global harness); combat sandbox boots clean. NEEDS-USER-CALL: small-screen
+      Press-Fate-row crowding (settle at D6b/D6d) —
+      `feat(mobile): Upgradeable-Dice D6a — flag-on combat render core` (311e2c3c)
 - [ ] Phase D6b — Momentum/stance chips + stance-check telegraph + gear rail.
       Momentum-V2 chip reshape ({color, length}, breaks LOUD, surge evented) +
       current-stance chip + open stance-check telegraph (`punishes X`/`yields X`
