@@ -704,15 +704,34 @@ supersession collisions before any engine work.
       Prove: enemy-content tests (a threat phase authors a stanceCheck;
       `resolveStanceCheck` fires the outcome) + a sim witness that realized
       yield income leaves 0.000. Deps: D2 + D4.
+- [ ] Phase D6f — The Roll Ritual (dice roll animation). Owner-added
+      2026-07-18 (renumbered from D6e at merge — the /oversight session
+      minted D6e for stance telegraphs the same day). A 2.5D tumble
+      choreographed to land on the engine-rolled faces (engine RNG stays
+      the sole outcome authority — dice-honesty law; animation is
+      presentation only). Round-start roll + Press Fate re-tumble
+      (cracked dice sit out), tap-to-skip, reduced-motion honored,
+      instant-settle under the D6a flag hook for e2e. **Zero new
+      dependencies** (Reanimated 4 + rn-svg + expo-haptics, all in-tree;
+      Skia evaluated 2026-07-18 = the post-Expo-decouple upgrade path,
+      not now). Lands before D7 so the qualitative pass judges
+      whiff-feel WITH the ritual.
+      Brief: `plan/phases/phase_D6f_roll_ritual.md`.
+      Prove: roll-state-machine units (settled faces ≡ engine roll,
+      asserted); mobile verify green; flag-off byte-identical. Deps: D6a.
 - [ ] Phase D7 — Tuning, ratification + honest re-baseline. Full
       `/combat-playtest` matrix vs 80/50/25-35/0 (the spec §7 D7 gates);
       ratify D3's economy (blacksmith placeholders die here);
       statusEngagement re-baseline with its known blind spots stated;
       playtester agents; PROVISIONAL special-on-use check-in; flag-flip
-      recommendation (flip itself = owner call).
+      recommendation (flip itself = owner call); **dice-valve promotion**
+      (assigned 2026-07-18 drift check: the 9 per-theme dice-interaction
+      cards D4 sandbox-staged as `dice-valves-33` — spec 33 §4 valve 3 —
+      route through `/deck-tuning` sandbox-first promotion into the
+      library; deferred at D4 to D5, dropped at D5, owned HERE).
       Brief: `plan/phases/phase_D7_tuning_rebaseline.md`.
       Prove: bands + ratified-constants report + re-baseline stamp.
-      Deps: D4, D6a, D6b, D6c, D6d, D6e.
+      Deps: D4, D6a, D6b, D6c, D6d, D6e, D6f.
 
 > **After the queue drains:** `/march` transitions to `/iterate`
 > — draining `plan/AUDIT.md` + `plan/CRITIQUE.md`, doc-drift,
