@@ -152,3 +152,45 @@ verdict).
   the building layer will break.
 - kb wish filed: costing benchmarks (mana curve/goldfish, vanilla test, Big
   Money) with reception evidence.
+
+## Addendum (same day) — spec 33 Upgradeable Dice impact
+
+Read after `4adf7266` (D1 review landed) and `1927b15e` (phase 36b shipped
+Option A's mechanism: DOT_TEMPO_SURVIVAL^(r-1) = 0.75 discounting calibrated
+to the OLD dice model's ~4.06-round death clock).
+
+What survives: price ≠ dial; alt-win blindness; the three courts;
+price-per-die as unit (strengthened — the only invariant once face quality
+varies per player).
+
+What changes:
+1. All price-experiment numbers are historical — throughput ~1 → ~1.83 paid
+   plays/round + 8.3% whiff; fight-length distributions shift; 0.75 must be
+   re-derived at D3/D4 (spec §7/§8 already sequence this). Re-run the
+   experiment BEHIND D2/D3, never before.
+2. New unpriced axis: stance steering (punishes ×1.5 / yields ×0.5 +1◆).
+   Cards carry survivability value via printed color — the death clock is
+   now purchasable through play. Decide: priced like text, or positional
+   like MTG color (leaning positional; courts then need a color-fit column
+   to de-confound win-correlation).
+3. Momentum chain makes card value sequence-dependent (surge = temp gold
+   die); static price blind by design; usage metrics gain sequencing
+   artifacts; engagement gains an axis statusEngagement can't see.
+4. Die-spend court opportunity redefinition: condition on color-matched or
+   gold usable die present (~67% access); OVERHEAT + whiffs are confounds.
+5. Second economy: HONE/TEMPER face upgrades → win-curve doctrine and price
+   calibration conditional on assumed face-upgrade state per stage; courts
+   need stock vs upgraded cohorts. Phase-B envelope question expands to a
+   dice-face envelope.
+6. Policy validity upgrades to a BLOCKING gate: the bot must steer stances,
+   sequence momentum, judge OVERHEAT before post-D3 measurements are
+   trustable.
+7. Millstone/Hourglass probes need stance-check fields (incl. a no-check
+   control) or they test the retired model; leaner ◆ economy (≈1.33/round,
+   Press Fate 1◆ sink) forces re-audit of the sig-conviction-strike
+   dominance finding.
+
+Question-list deltas: #1 unchanged/more urgent (36b committed to calibrated
+lint → recalibration debt per substrate change); #2 gains "player-steering
+problem" as a third answer; #3 re-opens under 2x throughput; #6/#7 become
+gates; #8 becomes twin envelopes (deck + dice faces).

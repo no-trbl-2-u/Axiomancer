@@ -740,7 +740,7 @@ supersession collisions before any engine work.
       inert flag-off. Yield income 0.000→0.329◆ / total ◆ 1.117→1.451 (band
       PASS, mid-upper); F2 canary flipped; 2753 mechanics tests green —
       `feat(mechanics): Upgradeable-Dice D6e — enemy stanceCheck telegraphs` (0b29ff42)
-- [ ] Phase D6f — The Roll Ritual (dice roll animation). Owner-added
+- [x] Phase D6f — The Roll Ritual (dice roll animation). Owner-added
       2026-07-18 (renumbered from D6e at merge — the /oversight session
       minted D6e for stance telegraphs the same day). A 2.5D tumble
       choreographed to land on the engine-rolled faces (engine RNG stays
@@ -755,6 +755,15 @@ supersession collisions before any engine work.
       Brief: `plan/phases/phase_D6f_roll_ritual.md`.
       Prove: roll-state-machine units (settled faces ≡ engine roll,
       asserted); mobile verify green; flag-off byte-identical. Deps: D6a.
+      SHIPPED 2026-07-18 — hermetic roll-state machine (idle→tumbling→settled;
+      reroll re-tumbles only changed dice; X/cracked sit out) + 2.5D Reanimated
+      tumble over the SVG CombatDie; settledFace = die.face verbatim (dice-honesty
+      invariant asserted in animate + instant modes); tap-to-skip; reduced-motion;
+      `__AXM_DICE_INSTANT_SETTLE__` keeps the D6d e2e deterministic. ZERO new deps
+      (package.json unchanged); flag-off byte-identical. Mobile verify green
+      (2650 tests, +26); D6d e2e stays green. NEEDS-USER-CALL: ~0.87s ritual
+      duration — feel-rank at D7 (knob isolated in dice-roll-ritual.timing.ts) —
+      `feat(mobile): Upgradeable-Dice D6f — the roll ritual (dice tumble animation)` (10ffe174)
 - [ ] Phase D7 — Tuning, ratification + honest re-baseline. Full
       `/combat-playtest` matrix vs 80/50/25-35/0 (the spec §7 D7 gates);
       ratify D3's economy (blacksmith placeholders die here);
