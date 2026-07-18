@@ -22,7 +22,7 @@ jest.mock('expo-router', () => ({
     useLocalSearchParams: () => ({}),
 }));
 
-const CARDS = ['slippery-slope', 'straw-mans-jab', 'brace-for-impact', 'soft-word'];
+const CARDS = ['slippery-slope', 'recurring-symptom', 'brace-for-impact', 'soft-word'];
 
 beforeEach(() => {
     (globalThis as { __AXM_COMBAT_SEED__?: number }).__AXM_COMBAT_SEED__ = 16;

@@ -19,7 +19,7 @@ import { createMockEncounterEnemy } from '@/state/mocks/combat.mock';
 import { withAllProviders } from '@/test-utils/withAllProviders';
 
 // Spec 32 v3 fixtures: two Affliction DoTs, the Bulwark guard, a Charm sway.
-const CARDS = ['slippery-slope', 'straw-mans-jab', 'brace-for-impact', 'soft-word'];
+const CARDS = ['slippery-slope', 'recurring-symptom', 'brace-for-impact', 'soft-word'];
 
 const noopDrag = (): DragController =>
     ({ begin: () => undefined, move: () => undefined, end: () => undefined, active: null } as unknown as DragController);

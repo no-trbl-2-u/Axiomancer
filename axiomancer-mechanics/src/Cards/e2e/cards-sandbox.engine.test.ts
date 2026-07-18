@@ -115,29 +115,33 @@ describe('sandbox registry — collisions and validation', () => {
 // ── Overrides ────────────────────────────────────────────────────────────────
 
 describe('sandbox registry — library-card overrides', () => {
+    // (Override target was straw-mans-jab until its D8 retirement — re-targeted
+    //  to slippery-slope, a surviving library card with a combatEffects payload.)
     it('a shallow patch is merged over the library card and visible via getCardById', () => {
-        const base = getCardById('straw-mans-jab');
-        expect(base?.combatEffects?.[0]?.intensity).toBe(2); // library literal (spec 32 v3)
+        const base = getCardById('slippery-slope');
+        expect(base?.combatEffects?.[0]?.intensity).toBe(1); // library literal (spec 32 v3)
 
-        registerSandboxOverride('straw-mans-jab', {
+        registerSandboxOverride('slippery-slope', {
             combatEffects: [{ effectId: 'debuff_bleed', appliedTo: 'opponent', intensity: 3, duration: 2 }],
         });
-        const merged = getCardById('straw-mans-jab');
+        const merged = getCardById('slippery-slope');
         expect(merged?.combatEffects?.[0]?.intensity).toBe(3);
         // Untouched fields survive the merge; the id is immutable.
-        expect(merged?.id).toBe('straw-mans-jab');
+        expect(merged?.id).toBe('slippery-slope');
         expect(merged?.name).toBe(base?.name);
         expect(merged?.dieBonus).toEqual(base?.dieBonus);
         expect(merged?.rank).toBe(base?.rank);
     });
 
     it('repeated overrides of the same card accumulate (shallow-merge order)', () => {
-        registerSandboxOverride('straw-mans-jab', { rank: 3 });
-        registerSandboxOverride('straw-mans-jab', { tier: 2 });
-        const merged = getCardById('straw-mans-jab');
+        // slippery-slope's library literals are rank 1 / tier 2 — both patches
+        // must move the merged value away from the base.
+        registerSandboxOverride('slippery-slope', { rank: 3 });
+        registerSandboxOverride('slippery-slope', { tier: 3 });
+        const merged = getCardById('slippery-slope');
         expect(merged?.rank).toBe(3);
-        expect(merged?.tier).toBe(2);
-        expect(listSandboxCards().map(c => c.id)).toEqual(['straw-mans-jab']);
+        expect(merged?.tier).toBe(3);
+        expect(listSandboxCards().map(c => c.id)).toEqual(['slippery-slope']);
     });
 });
 
@@ -145,22 +149,16 @@ describe('sandbox registry — library-card overrides', () => {
 
 describe('sandbox sets — the registry after the post-v3 reset', () => {
     it('carries the WS7.2 chooseX + WS3.4 doom + WS2.1 conjure + WS4 theme-role + WS5.2 sequencing + WS6.2 bridge sets (pre-v3 experiment sets stayed retired; WS2.2 free-line-conversions retired 2026-07-12, superseded by the Phase 30 full library pass)', () => {
+        // (The spec 33 `dice-valves-33` set was promoted into the curated
+        //  library in Phase D8, 2026-07-18 — ten-in/ten-out ledger in
+        //  plan/tuning/2026-07-18-d8-preset-dice-valves.md.)
         const expected = [
-            'dice-valves-33',
             'chooseX-vein', 'doom-species', 'conjure-exercise',
             'roles-forge', 'roles-bulwark', 'roles-charm', 'roles-harvest',
             'sequencing-microset', 'bridge-rewards',
         ];
         expect(Object.keys(SANDBOX_CARD_SETS)).toEqual(expected);
         expect(listSandboxSets().map(s => s.id)).toEqual(expected);
-        // Spec 33 §4 — one dice-interaction valve per non-Forge theme (9) + the
-        // FORGE special-amplifier enchant (deep coverage of the amplifier hook
-        // in upgradeable-dice.engine.test.ts).
-        expect(SANDBOX_CARD_SETS['dice-valves-33'].cards.map(c => c.id)).toEqual([
-            'recurring-symptom', 'break-the-tempo', 'second-take', 'bleed-for-it',
-            'bank-the-yield', 'hold-the-line', 'restate-the-point', 'second-sight',
-            'change-of-heart', 'forge-masters-stamp',
-        ]);
         expect(SANDBOX_CARD_SETS['chooseX-vein'].cards.map(c => c.id)).toEqual(['the-open-vein']);
         expect(SANDBOX_CARD_SETS['doom-species'].cards.map(c => c.id)).toEqual(['debt-of-days']);
         expect(SANDBOX_CARD_SETS['conjure-exercise'].cards.map(c => c.id)).toEqual(['foundry-sprite', 'corollary']);

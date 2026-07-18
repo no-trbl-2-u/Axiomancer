@@ -2,20 +2,17 @@ import { describe, expect, it } from 'vitest';
 import { getCardById } from '../../Cards/cards.library';
 import { lookupEffect } from '../../Effects';
 import { toCombatCard } from '../combat.cards';
+import { buildPresetDeck } from '../combat.starter-deck-presets';
 
-const GRACE_CARD_IDS = [
-    'soft-word',
-    'disarming-smile',
-    'common-ground',
-    'second-thoughts',
-    'the-olive-branch',
-    'measured-answer',
-    'heart-of-the-matter',
-    'irresistible-grace',
-    'mirror-of-longing',
-    'ouroboros',
-    'crumbling-resolve',
-] as const;
+/** Unique card ids of the LIVE Grace preset deck, derived from the preset
+ *  source itself rather than a hand-copied list (the old literal list had
+ *  drifted — it carried heart-of-the-matter, which grace's preset never
+ *  contained and which was retired in D8, see
+ *  plan/tuning/2026-07-18-d8-preset-dice-valves.md). `buildPresetDeck` is
+ *  flag-aware: under Upgradeable Dice (forced ON since THE FLIP) the deck
+ *  carries change-of-heart in the valve seat, so its projection is covered
+ *  here too. */
+const GRACE_CARD_IDS = [...new Set(buildPresetDeck('grace'))];
 
 function face(cardId: string): string {
     const card = toCombatCard(cardId, getCardById, lookupEffect);
@@ -25,6 +22,7 @@ function face(cardId: string): string {
 
 describe('Grace preset card wording', () => {
     it('projects every unique Grace card', () => {
+        expect(GRACE_CARD_IDS.length).toBeGreaterThan(0);
         for (const cardId of GRACE_CARD_IDS) {
             expect(toCombatCard(cardId, getCardById, lookupEffect), cardId).not.toBeNull();
         }
@@ -69,14 +67,11 @@ describe('Grace preset card wording', () => {
         expect(text).toContain('HEART ×3 spent: SWAY 2');
     });
 
-    it('Heart of the Matter states ECHO, healing, and its threshold', () => {
-        const text = face('heart-of-the-matter');
-        expect(text).toContain('SWAY 1');
-        expect(text).toContain('SWAY 6');
-        expect(text).toContain('ECHO');
-        expect(text).toContain('heal 4');
-        expect(text).toContain('HEART ×5 spent: SWAY 4');
-    });
+    // (The "Heart of the Matter states ECHO, healing, and its threshold"
+    //  wording test was deleted when the card was retired in Phase D8 —
+    //  ten-in/ten-out ledger in plan/tuning/2026-07-18-d8-preset-dice-valves.md.
+    //  change-of-heart, the charm valve that replaced it in the flag-on grace
+    //  deck, is projection-covered by "projects every unique Grace card" above.)
 
     it('Measured Answer states persistent GUARD and the complete RIPOSTE', () => {
         const text = face('measured-answer');

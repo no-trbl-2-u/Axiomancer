@@ -59,7 +59,7 @@ describe('CombatBoard — REPRISE songbook interception', () => {
         const { store } = withAllProviders(<></>);
         const player = buildPlayer(store);
         let s = openAndDraft(player, CARDS, 'mind'); // second-thoughts is philosophicalAspect 'mind'
-        s = { ...s, discard: ['straw-mans-jab'] };
+        s = { ...s, discard: ['recurring-symptom'] };
         const vm = buildCombatViewModel(s);
         const uid = vm.hand.find(c => c.cardId === 'second-thoughts')!.uid;
 
@@ -81,7 +81,7 @@ describe('CombatBoard — REPRISE songbook interception', () => {
         const { store } = withAllProviders(<></>);
         const player = buildPlayer(store);
         let s = openAndDraft(player, CARDS, 'mind');
-        s = { ...s, discard: ['straw-mans-jab'] };
+        s = { ...s, discard: ['recurring-symptom'] };
         const vm = buildCombatViewModel(s);
         const uid = vm.hand.find(c => c.cardId === 'second-thoughts')!.uid;
 
@@ -130,7 +130,7 @@ describe('CombatBoard — REPRISE songbook interception', () => {
             const { store } = withAllProviders(<></>);
             const player = { ...buildPlayer(store), knownCards: [...CARDS, xReprise.id] };
             let s = openAndDraft(player, [xReprise.id, 'slippery-slope'], 'mind');
-            s = { ...s, discard: ['straw-mans-jab'] };
+            s = { ...s, discard: ['recurring-symptom'] };
             const vm = buildCombatViewModel(s);
             const card = vm.hand.find(c => c.cardId === xReprise.id)!;
             expect(card.chooseX).not.toBeNull(); // the stepper is live
@@ -183,7 +183,7 @@ describe('CombatBoard — REPRISE songbook interception', () => {
         // match it: THE COLOR LAW gate (2026-07-12) demotes an off-color
         // drafted die to the FREE action instead of routing a fizzle.
         let s = openAndDraft(player, CARDS, 'body');
-        s = { ...s, discard: ['straw-mans-jab'] };
+        s = { ...s, discard: ['recurring-symptom'] };
         const vm = buildCombatViewModel(s);
         const uid = vm.hand.find(c => c.cardId === 'slippery-slope')!.uid;
 

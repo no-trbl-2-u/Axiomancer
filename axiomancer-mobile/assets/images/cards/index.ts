@@ -35,7 +35,7 @@ export const FALLBACK_CARD_ART = require('./circe-placeholder.jpg');
 const CARD_ART_BY_ID: Record<string, number> = {
     // ── T1 Affliction — the toxic moth + the dark blade ──
     'slippery-slope': dreamFlutter,
-    'straw-mans-jab': bleedBlade,
+    'recurring-symptom': bleedBlade, // D8 valve (affliction)
     'festering-argument': dreamFlutter,
     'currys-conversion': bleedBlade,
     'resonance-detonation': spark,
@@ -47,8 +47,8 @@ const CARD_ART_BY_ID: Record<string, number> = {
     'mounting-case': brightSphere,
     'peroratio-interrupta': lightRing,
     'the-closing-word': brightSphere,
-    'practiced-cadence': lightRing,
-    'captive-audience': willOWisp,
+    'restate-the-point': lightRing, // D8 valve (peroration)
+    'second-take': confuseRings, // D8 valve (echo)
     // ── T3 Forge — sparks and shifting orbs (dice from nothing) ──
     'sketch-of-a-thought': blueLight,
     'half-step': blueLight,
@@ -56,7 +56,7 @@ const CARD_ART_BY_ID: Record<string, number> = {
     'ex-nihilo': brightSphere,
     'the-overtake': iceSword,
     'anvil-of-form': guardTorso,
-    'entropy-tax': devilBook,
+    'forge-masters-stamp': devilBook, // D8 valve (forge)
     // ── T4 Akrasia — the sinister tome + the burning blade (the debt) ──
     'against-my-judgment': devilBook,
     'sweet-poison': dreamFlutter,
@@ -71,7 +71,7 @@ const CARD_ART_BY_ID: Record<string, number> = {
     'undistributed-middle': confuseRings,
     'arrow-paradox': freezeCrystal,
     'turnabout': confuseRings, // phase 32 part 4a: replaces paralysis-of-analysis in this slot
-    'achilles-and-the-tortoise': freezeCrystal,
+    'break-the-tempo': freezeCrystal, // D8 valve (control)
     'quagmire-of-doubt': confuseRings,
     // ── T6 Oracle — the divine stag (seeing truly) ──
     'glimpse': godEye,
@@ -80,21 +80,21 @@ const CARD_ART_BY_ID: Record<string, number> = {
     'delphic-ambiguity': confuseRings,
     'prophecy-fulfilled': godEye,
     'the-oracles-eye': godEye,
-    'fated-course': freezeCrystal,
+    'second-sight': godEye, // D8 valve (oracle)
     // ── T7 Harvest — the hummingbird + blades (the gleaning) ──
     'brief-candle': burnBlade,
-    'memento-mori': meatPecker,
+    'bank-the-yield': meatPecker, // D8 valve (harvest)
     'winnowing': iceSword,
     'the-gleaners-due': meatPecker,
     'the-reaping': iceSword,
     'bone-orchard': yggdrasil,
-    'the-tithe': devilBook,
+    'bleed-for-it': dreamFlutter, // D8 valve (akrasia)
     // ── T8 Charm — the radiant ring + the hummingbird (mercy) ──
     'soft-word': meatPecker,
     'disarming-smile': lightRing,
     'common-ground': brightSphere,
     'the-olive-branch': yggdrasil,
-    'heart-of-the-matter': brightSphere,
+    'change-of-heart': brightSphere, // D8 valve (charm)
     'irresistible-grace': lightRing,
     'mirror-of-longing': godEye,
     // ── T9 Bulwark — the armor set (the wall) ──
@@ -108,7 +108,7 @@ const CARD_ART_BY_ID: Record<string, number> = {
     // ── T10 Echo — the misleading light + shifting orbs (the refrain) ──
     'refrain': willOWisp,
     'second-thoughts': blueLight,
-    'ad-nauseam': confuseRings,
+    'hold-the-line': guardTorso, // D8 valve (bulwark)
     'circular-reasoning': lightRing,
     'ouroboros': blueLight,
     'resonant-chamber': spark,

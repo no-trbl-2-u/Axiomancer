@@ -47,6 +47,7 @@
  */
 
 import { getCardById } from '../Cards/cards.library';
+import { isUpgradeableDiceEnabled } from './combat.upgradeable-dice';
 
 /**
  * The design lever a preset leans on. Kept coarse for the draft/sim-policy
@@ -367,13 +368,92 @@ export function cardOrigin(cardId: string): CardOrigin {
     return { source: 'reward' };
 }
 
+// ── PHASE D8 — the flag-on dice-valve seats (spec 33 §4 valve 3) ────────────
+// Under Upgradeable Dice every preset's BUILT deck is "14 inherited cards +
+// one singleton valve": exactly one same-aspect card INSTANCE of `replacesId`
+// is replaced by the theme's dice-interaction card. `cardIds` above stays the
+// flag-off truth, byte-identical to pre-D8. Seats were ratified by the D8
+// promotion court (plan/tuning/2026-07-18-d8-preset-dice-valves.md): per-seat
+// A/B at early stage, blind+greedy, seeds 1-5, flag-on.
+
+/** One preset's valve seat: the valve card and the flag-off source it replaces. */
+export interface PresetDiceValveSeat {
+    /** The promoted dice-interaction card (tagged `dice` + `valve`). */
+    valveId: string;
+    /** The flag-off card whose ONE instance the valve replaces (same aspect). */
+    replacesId: string;
+}
+
+/** The ratified valve seat per preset (D8 court, 2026-07-18). */
+export const PRESET_DICE_VALVES: Readonly<Record<string, PresetDiceValveSeat>> = Object.freeze({
+    erosion: { valveId: 'recurring-symptom', replacesId: 'slippery-slope' },
+    oratory: { valveId: 'restate-the-point', replacesId: 'exordium' },
+    foundry: { valveId: 'forge-masters-stamp', replacesId: 'anvil-of-form' },
+    penitent: { valveId: 'bleed-for-it', replacesId: 'pact-of-akrasia' },
+    standstill: { valveId: 'break-the-tempo', replacesId: 'red-herring' },
+    augury: { valveId: 'second-sight', replacesId: 'prophecy-fulfilled' },
+    tithe: { valveId: 'bank-the-yield', replacesId: 'stuck-in-their-head' },
+    grace: { valveId: 'change-of-heart', replacesId: 'soft-word' },
+    bastion: { valveId: 'hold-the-line', replacesId: 'the-adamant-wall' },
+    refrain: { valveId: 'second-take', replacesId: 'ouroboros' },
+});
+
+/** True when a card is a dice valve (tagged `dice` + `valve`). */
+function isDiceValveCard(id: string): boolean {
+    const tags = getCardById(id)?.tags ?? [];
+    return tags.includes('dice') && tags.includes('valve');
+}
+
+/**
+ * Derives a preset's Upgradeable-Dice deck: the flag-off recipe with exactly
+ * one instance of the seat's `replacesId` swapped for its valve. Fails LOUDLY
+ * (throws) on any structural-law violation — a silent fallback here would ship
+ * a 14-card or valveless deck into live combat. Returns `[]` only for an
+ * unknown preset id (mirroring {@link buildPresetDeck}).
+ */
+export function buildUpgradeableDicePresetDeck(
+    presetId: string,
+    seats: Readonly<Record<string, PresetDiceValveSeat>> = PRESET_DICE_VALVES,
+): string[] {
+    const preset = getDeckPreset(presetId);
+    if (!preset) return [];
+    const seat = seats[presetId];
+    if (!seat) throw new Error(`D8 valve law: preset '${presetId}' has no valve seat.`);
+    const valve = getCardById(seat.valveId);
+    if (!valve) throw new Error(`D8 valve law: valve '${seat.valveId}' (${presetId}) is not a library card.`);
+    const source = getCardById(seat.replacesId);
+    if (!source) throw new Error(`D8 valve law: source '${seat.replacesId}' (${presetId}) is not a library card.`);
+    if (valve.philosophicalAspect !== source.philosophicalAspect) {
+        throw new Error(
+            `D8 valve law: '${seat.valveId}' (${valve.philosophicalAspect}) must match `
+            + `'${seat.replacesId}' (${source.philosophicalAspect}) — the 5/5/5 law would break.`,
+        );
+    }
+    const idx = preset.cardIds.indexOf(seat.replacesId);
+    if (idx < 0) throw new Error(`D8 valve law: '${seat.replacesId}' is not in preset '${presetId}'.`);
+    if (preset.cardIds.some(isDiceValveCard)) {
+        throw new Error(`D8 valve law: preset '${presetId}' flag-off recipe already carries a valve.`);
+    }
+    const deck = [...preset.cardIds];
+    deck[idx] = seat.valveId;
+    if (deck.length !== 15) {
+        throw new Error(`D8 valve law: preset '${presetId}' derived deck is ${deck.length} cards, not 15.`);
+    }
+    return deck.filter(isValidPresetCard);
+}
+
 /**
  * Builds a ready-to-play deck from a preset: the curated cards (invalid ids
  * dropped). There is no escape-hatch card appended — once combat is joined it
  * resolves only by winning or losing (no in-combat retreat exists). Returns an
  * empty array for an unknown preset id (callers can fall back to `buildCombatDeck`).
+ *
+ * Flag-aware since Phase D8: under Upgradeable Dice the deck is derived by
+ * {@link buildUpgradeableDicePresetDeck} (one same-aspect instance swapped for
+ * the theme's dice valve); flag-off it is the byte-identical curated recipe.
  */
 export function buildPresetDeck(presetId: string): string[] {
+    if (isUpgradeableDiceEnabled()) return buildUpgradeableDicePresetDeck(presetId);
     const preset = getDeckPreset(presetId);
     if (!preset) return [];
     return preset.cardIds.filter(isValidPresetCard);

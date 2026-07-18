@@ -58,25 +58,6 @@ const slipperySlope: Card = {
     tags: ['affliction', 'dot', 'starter'],
 };
 
-const strawMansJab: Card = {
-    id: 'straw-mans-jab',
-    theme: 'affliction',
-    name: "Straw Man's Jab",
-    category: 'fallacy',
-    philosophicalAspect: 'body',
-    description:
-        'You hit the version of them that is easiest to hit. It bleeds all ' +
-        'the same — wounds do not check citations.',
-    tier: 1, rank: 2, cardType: 'spell',
-    targetType: 'enemy',
-    // pts (phase 30): bleed i2 d2 lifetime ~10/3 ≈ 3.3 + FREE MARK seed i1 d1
-    // (0.6) ≈ 3.9 → Lemma
-    free: { applyEffect: { effectId: 'debuff_mark', intensity: 1, duration: 1 } },
-    combatEffects: [{ effectId: 'debuff_bleed', appliedTo: 'opponent', intensity: 2, duration: 2 }],
-    addedIn: '2026-07-08',
-    tags: ['affliction', 'dot'],
-};
-
 const festeringArgument: Card = {
     id: 'festering-argument',
     theme: 'affliction',
@@ -339,40 +320,6 @@ const theClosingWord: Card = {
     tags: ['peroration', 'payoff', 'alt-win'],
 };
 
-const practicedCadence: Card = {
-    id: 'practiced-cadence',
-    theme: 'peroration',
-    persistentEffect: '+1 PREMISE on your first card each turn.',
-    name: 'Practiced Cadence',
-    category: 'fallacy',
-    philosophicalAspect: 'heart',
-    description:
-        'The rhythm carries the argument when the content flags. From here ' +
-        'on, every opening remark counts toward the close.',
-    tier: 2, rank: 5, cardType: 'enchantment',
-    targetType: 'self',
-    // pts: persistent +1 Premise on the first card each turn ≈ 0.8 × ~10 turns, min-4 law ≈ 12 → Axiom
-    addedIn: '2026-07-08',
-    tags: ['peroration', 'enchantment'],
-};
-
-const captiveAudience: Card = {
-    id: 'captive-audience',
-    theme: 'peroration',
-    persistentEffect: 'Hold 4+ PREMISEs: MARK the enemy +1 each turn (to 10).',
-    name: 'Captive Audience',
-    category: 'fallacy',
-    philosophicalAspect: 'heart',
-    description:
-        'While the case is building they cannot look away — and what cannot ' +
-        'look away stands exposed.',
-    tier: 2, rank: 6, cardType: 'disenchant',
-    targetType: 'enemy',
-    // pts: engine text — while you hold 4+ Premises the enemy stays marked (Aporia)
-    addedIn: '2026-07-08',
-    tags: ['peroration', 'disenchant'],
-};
-
 // ─── T3 — FORGE (dice from nothing: kindle, ripen, float, overtake) ──────────
 
 const sketchOfAThought: Card = {
@@ -546,23 +493,6 @@ const anvilOfForm: Card = {
     // pts: persistent +1 pip on every kindled/floating die ≈ 1.5 × ~6 forges, min-4 ≈ 12 → Axiom
     addedIn: '2026-07-08',
     tags: ['forge', 'enchantment'],
-};
-
-const entropyTax: Card = {
-    id: 'entropy-tax',
-    theme: 'forge',
-    persistentEffect: 'A KINDLEd or FORGEd die powering a card MARKs the enemy (i1, once per play).',
-    name: 'Entropy Tax',
-    category: 'paradox',
-    philosophicalAspect: 'mind',
-    description:
-        'Nothing is created free. Every manufactured die you spend, the ' +
-        'universe bills to them.',
-    tier: 2, rank: 6, cardType: 'disenchant',
-    targetType: 'enemy',
-    // pts: engine text — every kindled/floating spend marks the enemy (Aporia)
-    addedIn: '2026-07-08',
-    tags: ['forge', 'disenchant'],
 };
 
 // ─── T4 — AKRASIA (acting against your own judgment; the debt pays) ──────────
@@ -893,23 +823,6 @@ const turnabout: Card = {
     tags: ['control', 'payoff'],
 };
 
-const achillesAndTheTortoise: Card = {
-    id: 'achilles-and-the-tortoise',
-    theme: 'control',
-    persistentEffect: 'DRAW 1 whenever your STAGGER denies an enemy turn.',
-    name: 'Achilles and the Tortoise',
-    category: 'paradox',
-    philosophicalAspect: 'mind',
-    description:
-        'While they chase the conclusion they can never reach, you read. ' +
-        'Every denied turn is a page.',
-    tier: 2, rank: 5, cardType: 'enchantment',
-    targetType: 'self',
-    // pts: persistent draw 1 per denied enemy turn ≈ 2 × ~5 denies gated, min-4 ≈ 12 → Axiom
-    addedIn: '2026-07-08',
-    tags: ['control', 'enchantment'],
-};
-
 const quagmireOfDoubt: Card = {
     id: 'quagmire-of-doubt',
     theme: 'control',
@@ -1092,23 +1005,6 @@ const theOraclesEye: Card = {
     tags: ['oracle', 'enchantment'],
 };
 
-const fatedCourse: Card = {
-    id: 'fated-course',
-    theme: 'oracle',
-    persistentEffect: 'Every OMEN that hits MARKs the foe (i1).',
-    name: 'Fated Course',
-    category: 'paradox',
-    philosophicalAspect: 'mind',
-    description:
-        'A curse of inevitability: the future you named is the only one left ' +
-        'to them, and walking into it leaves a mark.',
-    tier: 2, rank: 6, cardType: 'disenchant',
-    targetType: 'enemy',
-    // pts: engine text — every hit omen marks the foe, rest of combat (Aporia)
-    addedIn: '2026-07-08',
-    tags: ['oracle', 'disenchant'],
-};
-
 // ─── T7 — HARVEST (short afflictions churn into Souls; Souls into the scythe) ─
 
 const briefCandle: Card = {
@@ -1131,25 +1027,6 @@ const briefCandle: Card = {
     combatEffects: [{ effectId: 'debuff_bleed', appliedTo: 'opponent', intensity: 2, duration: 1 }],
     addedIn: '2026-07-08',
     tags: ['harvest', 'dot'],
-};
-
-const mementoMori: Card = {
-    id: 'memento-mori',
-    theme: 'harvest',
-    name: 'Memento Mori',
-    category: 'paradox',
-    philosophicalAspect: 'mind',
-    description:
-        'Remember that they die. You remember it AT them, and the ' +
-        'remembering leaves more of a residue than it used to.',
-    tier: 1, rank: 2, cardType: 'spell',
-    targetType: 'enemy',
-    // pts: mark i2 d1 (2, unresisted) + its expiry Soul (0.75) + FREE souls 2
-    // (1.5) ≈ 4.25 — matches Lemma-tier budget.
-    free: { souls: 2 },
-    combatEffects: [{ effectId: 'debuff_mark', appliedTo: 'opponent', intensity: 2, duration: 1 }],
-    addedIn: '2026-07-08',
-    tags: ['harvest', 'exposure'],
 };
 
 const winnowing: Card = {
@@ -1243,23 +1120,6 @@ const boneOrchard: Card = {
     tags: ['harvest', 'enchantment'],
 };
 
-const theTithe: Card = {
-    id: 'the-tithe',
-    theme: 'harvest',
-    persistentEffect: 'Enemy afflictions expire one turn sooner (faster SOUL churn).',
-    name: 'The Tithe',
-    category: 'fallacy',
-    philosophicalAspect: 'mind',
-    description:
-        'A tenth of everything, taken early. Their afflictions ripen a turn ' +
-        'sooner, and the collection plate is yours.',
-    tier: 2, rank: 6, cardType: 'disenchant',
-    targetType: 'enemy',
-    // pts: engine text — enemy afflictions expire 1 turn sooner (faster Soul churn) (Aporia)
-    addedIn: '2026-07-08',
-    tags: ['harvest', 'disenchant'],
-};
-
 // ─── T8 — CHARM (SWAY toward CAPITULATION — the deck that never strikes) ─────
 
 const softWord: Card = {
@@ -1346,33 +1206,6 @@ const theOliveBranch: Card = {
     ],
     addedIn: '2026-07-08',
     tags: ['charm', 'defense'],
-};
-
-const heartOfTheMatter: Card = {
-    id: 'heart-of-the-matter',
-    theme: 'charm',
-    name: 'Heart of the Matter',
-    category: 'fallacy',
-    philosophicalAspect: 'heart',
-    description:
-        'You say the thing they have been not-saying their whole life. Said ' +
-        'once, it is heard; said again, in the same breath, it is believed. ' +
-        'The fight goes out of a person who feels seen, seen twice over.',
-    tier: 3, rank: 5, cardType: 'spell',
-    targetType: 'enemy',
-    // pts: SWAY 6 x ECHO (engine echoFactor) + heal-4 rider (NOT echoed) + FREE
-    // sway 1 + threshold(SWAY +4) -- this IS the Late-stage finisher burst
-    // (rebalance 2026-07-08, Late SWAY ceiling pass). Self-ECHO only doubles the
-    // specialMechanics 'sway' entry; free/threshold sway riders add flat.
-    free: { sway: 1 },
-    specialMechanics: [
-        { kind: 'sway', amount: 6 },
-        { kind: 'echo' },
-        { kind: 'rider', rider: { healHp: 4 } },
-    ],
-    threshold: { color: 'heart', count: 5, rider: { sway: 4 } },
-    addedIn: '2026-07-08',
-    tags: ['charm', 'alt-win'],
 };
 
 const irresistibleGrace: Card = {
@@ -1626,24 +1459,6 @@ const secondThoughts: Card = {
     tags: ['echo', 'recursion'],
 };
 
-const adNauseam: Card = {
-    id: 'ad-nauseam',
-    theme: 'echo',
-    name: 'Ad Nauseam',
-    category: 'fallacy',
-    philosophicalAspect: 'mind',
-    description:
-        'Repetition is not proof — but somewhere around the tenth hearing, ' +
-        'the difference stops mattering. Whatever you say next, says itself twice.',
-    tier: 2, rank: 3, cardType: 'spell',
-    targetType: 'self',
-    // pts: next spell gains ECHO (≈ ×0.8 of an avg spell ≈ 5) + FREE mark (0.5) ≈ 5.5 → Thesis
-    free: { applyEffect: { effectId: 'debuff_mark', duration: 1 } },
-    specialMechanics: [{ kind: 'echo_next_spell' }],
-    addedIn: '2026-07-08',
-    tags: ['echo', 'recursion'],
-};
-
 const circularReasoning: Card = {
     id: 'circular-reasoning',
     theme: 'echo',
@@ -1731,37 +1546,297 @@ const stuckInTheirHead: Card = {
 
 // ─── Library assembly ────────────────────────────────────────────────────────
 
+// Spec 33 dice-interaction valves -- promoted from sandbox set
+// `dice-valves-33` in Phase D8 (2026-07-18) after the per-preset A/B court;
+// each replaces one same-aspect preset seat under the Upgradeable-Dice flag.
+
+/** Recurring Symptom — affliction, the REROLL valve: shake off the misses and
+ *  let the venom settle in deeper. */
+const recurringSymptom: Card = {
+    id: 'recurring-symptom',
+    theme: 'affliction',
+    name: 'Recurring Symptom',
+    category: 'fallacy',
+    philosophicalAspect: 'body',
+    description:
+        'It never fully clears. Roll the dice of the day however they fall — '
+        + 'the fever was always going to come back around, and it comes back worse.',
+    tier: 2, rank: 3, cardType: 'spell',
+    targetType: 'enemy',
+    // pts (spec 33 D4): REROLL this card's miss faces (2.0) + poison i1 d2
+    // (card-played clock, 1.83 cadence: tempo-weighted 6.4 ÷3 = 2.14) = 4.14 +
+    // FREE mark i1 d2 (0.75×1×2 = 1.5) = 5.64 → uncommon band 4.5-13 (Thesis).
+    // FREE share 1.5/5.64 = 26.6% ✓.
+    free: { applyEffect: { effectId: 'debuff_mark', intensity: 1, duration: 2 } },
+    combatEffects: [{ effectId: 'debuff_poison', appliedTo: 'opponent', intensity: 1, duration: 2 }],
+    specialMechanics: [{ kind: 'reroll_spent' }],
+    addedIn: '2026-07-17',
+    tags: ['affliction', 'dice', 'valve', 'dot'],
+};
+
+/** Break the Tempo — control, the CONVERT valve: turn a die WILD so the denial
+ *  always lands on the color it needs. */
+const breakTheTempo: Card = {
+    id: 'break-the-tempo',
+    theme: 'control',
+    name: 'Break the Tempo',
+    category: 'fallacy',
+    philosophicalAspect: 'mind',
+    description:
+        'Their whole argument keeps one rhythm. Recolor your answer to match '
+        + 'whatever they lean on, and the beat they were counting on drops out.',
+    tier: 2, rank: 3, cardType: 'spell',
+    targetType: 'enemy',
+    // pts (spec 33 D4): CONVERT the powering die to WILD (2.5) + STAGGER 1
+    // (2.0) = 4.5 + FREE [mark i1 d1 (0.75) + conviction 1 (1.0)] = 1.75 →
+    // 6.25 → uncommon band 4.5-13 (Thesis). FREE share 1.75/6.25 = 28% ✓.
+    free: { applyEffect: { effectId: 'debuff_mark', intensity: 1, duration: 1 }, conviction: 1 },
+    specialMechanics: [
+        { kind: 'convert_die_color' },
+        { kind: 'stagger', rungs: 1 },
+    ],
+    addedIn: '2026-07-17',
+    tags: ['control', 'dice', 'valve'],
+};
+
+/** Second Take — echo, the REFRESH valve: the die comes back for one more line,
+ *  the way the refrain comes back for one more bar. */
+const secondTake: Card = {
+    id: 'second-take',
+    theme: 'echo',
+    name: 'Second Take',
+    category: 'paradox',
+    philosophicalAspect: 'mind',
+    description:
+        'Play it, then play it again from the top — the same die, the same '
+        + 'breath, one more pass through the phrase before it is spent.',
+    tier: 1, rank: 2, cardType: 'spell',
+    targetType: 'enemy',
+    // pts (spec 33 D4): REFRESH the powering die back to available (2.0) +
+    // mark i1 d2 (1.5) = 3.5 + FREE MILL 1 (echo's loop currency, 1.0) = 4.5
+    // → common band 1.5-7.5 (Lemma). FREE share 1.0/4.5 = 22%.
+    free: { millCards: 1 },
+    combatEffects: [{ effectId: 'debuff_mark', appliedTo: 'opponent', intensity: 1, duration: 2 }],
+    specialMechanics: [{ kind: 'refresh_die' }],
+    addedIn: '2026-07-17',
+    tags: ['echo', 'dice', 'valve'],
+};
+
+/** Bleed for It — akrasia, the REROLL valve priced in blood: pay to re-roll the
+ *  misses, and the spilled blood sharpens the wound. */
+const bleedForIt: Card = {
+    id: 'bleed-for-it',
+    theme: 'akrasia',
+    name: 'Bleed for It',
+    category: 'paradox',
+    philosophicalAspect: 'body',
+    description:
+        'A bad roll is not fate — it is a price you have not paid yet. Open a '
+        + 'vein, force the dice over, and let the argument taste what it cost you.',
+    tier: 2, rank: 3, cardType: 'spell',
+    targetType: 'enemy',
+    // pts (spec 33 D4): REROLL miss faces (2.0) + bleed i2 d2 (damage-instance,
+    // decay-limited 9 ÷3 = 3.0) + RECOIL 3 (−3 × 1/3 × 0.75 = −0.75) = 4.25 +
+    // FREE [self-mark i1 d1 seed toward FALLEN (0.75) + heal 2 (0.67)] = 1.42
+    // → 5.67 → uncommon band 4.5-13 (Thesis). FREE share 25%.
+    free: { applyEffect: { effectId: 'debuff_mark', intensity: 1, duration: 1, to: 'self' }, healHp: 2 },
+    combatEffects: [{ effectId: 'debuff_bleed', appliedTo: 'opponent', intensity: 2, duration: 2 }],
+    specialMechanics: [
+        { kind: 'reroll_spent' },
+        { kind: 'recoil', hp: 3 },
+    ],
+    addedIn: '2026-07-17',
+    tags: ['akrasia', 'dice', 'valve', 'dot'],
+};
+
+/** Bank the Yield — harvest, the BANK valve: hold the die over to next phase the
+ *  way you hold a soul for the reaping. */
+const bankTheYield: Card = {
+    id: 'bank-the-yield',
+    theme: 'harvest',
+    name: 'Bank the Yield',
+    category: 'fallacy',
+    philosophicalAspect: 'heart',
+    description:
+        'Do not spend what will be worth more next season. Set the die aside '
+        + 'to ripen in the Reserve, and book the souls it was owed today.',
+    tier: 2, rank: 3, cardType: 'spell',
+    targetType: 'enemy',
+    // pts (spec 33 D4): BANK the powering die to the Reserve (2.0) + SOUL 3
+    // (3 × 0.75 = 2.25) = 4.25 + FREE [souls 1 (0.75) + heal 2 (0.67)] = 1.42
+    // → 5.67 → uncommon band 4.5-13 (Thesis). FREE share 25%.
+    free: { souls: 1, healHp: 2 },
+    specialMechanics: [
+        { kind: 'bank_spent_die' },
+        { kind: 'soul_gain', count: 3 },
+    ],
+    addedIn: '2026-07-17',
+    tags: ['harvest', 'dice', 'valve'],
+};
+
+/** Hold the Line — bulwark, the BANK valve: keep the die in Reserve like a stone
+ *  kept in the wall, and pour a footing while you wait. */
+const holdTheLine: Card = {
+    id: 'hold-the-line',
+    theme: 'bulwark',
+    name: 'Hold the Line',
+    category: 'paradox',
+    philosophicalAspect: 'body',
+    description:
+        'Not every die is thrown. Some are set into the wall and left there, '
+        + 'load-bearing — the argument holds because you refused to spend them.',
+    tier: 1, rank: 2, cardType: 'spell',
+    targetType: 'self',
+    // pts (spec 33 D4): BANK the powering die to the Reserve (2.0) + BARRIER 5
+    // (5 ÷ 3 = 1.67) = 3.67 + FREE barrier 3 (3 ÷ 3 = 1.0) = 4.67 → common band
+    // 1.5-7.5 (Lemma). FREE share 1.0/4.67 = 21%.
+    free: { barrier: 3 },
+    specialMechanics: [
+        { kind: 'bank_spent_die' },
+        { kind: 'barrier', amount: 5 },
+    ],
+    addedIn: '2026-07-17',
+    tags: ['bulwark', 'dice', 'valve', 'defense'],
+};
+
+/** Restate the Point — peroration, the REFRESH valve: the die comes back so the
+ *  argument keeps building without a break. */
+const restateThePoint: Card = {
+    id: 'restate-the-point',
+    theme: 'peroration',
+    name: 'Restate the Point',
+    category: 'fallacy',
+    philosophicalAspect: 'heart',
+    description:
+        'Say it once more, plainly, and the die you argued it with is yours '
+        + 'again — the case does not pause to reload; it accrues.',
+    tier: 2, rank: 3, cardType: 'spell',
+    targetType: 'self',
+    // pts (spec 33 D4): REFRESH the powering die (2.0) + PREMISE 3 (3 × 0.8 =
+    // 2.4) = 4.4 + FREE [premises 2 (1.6) + guard 1 (0.25)] = 1.85 → 6.25 →
+    // uncommon band 4.5-13 (Thesis). FREE share 1.85/6.25 = 30% ✓.
+    free: { premises: 2, guard: 1 },
+    specialMechanics: [
+        { kind: 'refresh_die' },
+        { kind: 'premise', count: 3 },
+    ],
+    addedIn: '2026-07-17',
+    tags: ['peroration', 'dice', 'valve'],
+};
+
+/** Second Sight — oracle, the CONVERT valve: recolor the die WILD to read
+ *  whatever the future needs read. */
+const secondSight: Card = {
+    id: 'second-sight',
+    theme: 'oracle',
+    name: 'Second Sight',
+    category: 'paradox',
+    philosophicalAspect: 'mind',
+    description:
+        'The first sight shows you the die you were given; the second lets you '
+        + 'choose what it means. Recolor it to any omen and read ahead.',
+    tier: 2, rank: 3, cardType: 'spell',
+    targetType: 'self',
+    // pts (spec 33 D4): CONVERT the powering die to WILD (2.5) + FORETELL 2
+    // (2.0) = 4.5 + FREE [foretell 1 (1.0) + conviction 1 (1.0)] = 2.0 → 6.5 →
+    // uncommon band 4.5-13 (Thesis). FREE share 2.0/6.5 = 31% ✓.
+    free: { foretell: 1, conviction: 1 },
+    specialMechanics: [
+        { kind: 'convert_die_color' },
+        { kind: 'foretell', count: 2 },
+    ],
+    addedIn: '2026-07-17',
+    tags: ['oracle', 'dice', 'valve'],
+};
+
+/** Change of Heart — charm, the REROLL valve: talk the dice around the way you
+ *  talk the foe around. */
+const changeOfHeart: Card = {
+    id: 'change-of-heart',
+    theme: 'charm',
+    name: 'Change of Heart',
+    category: 'fallacy',
+    philosophicalAspect: 'heart',
+    description:
+        'Even the dice can be persuaded. Coax the misses into reconsidering, '
+        + 'and while they soften, so does the one across from you.',
+    tier: 2, rank: 3, cardType: 'spell',
+    targetType: 'enemy',
+    // pts (spec 33 D4): REROLL miss faces (2.0) + SWAY 3 (3 × 0.9 = 2.7) = 4.7
+    // + FREE sway 2 (1.8) = 6.5 → uncommon band 4.5-13 (Thesis). FREE share
+    // 1.8/6.5 = 28% ✓.
+    free: { sway: 2 },
+    specialMechanics: [
+        { kind: 'reroll_spent' },
+        { kind: 'sway', amount: 3 },
+    ],
+    addedIn: '2026-07-17',
+    tags: ['charm', 'dice', 'valve', 'alt-win'],
+};
+
+/**
+ * Master's Stamp — forge, the special-amplifier enchantment (spec 33 §6). It
+ * raises the FIRED special payload (+1◆ per fired special) without changing what
+ * a special does (owner-lock D1) — wired by card id at combat.engine.ts's
+ * `special-fired` hook (mirrors anvil-of-form / entropy-tax). Engine text, so it
+ * scores 0 (priced by hand, min-4-triggers): at ~0.67 specials/round (D3), a
+ * full fight fires ~3-4 specials → ~3-4◆ over its life — an Axiom-tier
+ * persistent economy lift, same tier as anvil-of-form's +1-pip passive.
+ */
+const mastersStamp: Card = {
+    id: 'forge-masters-stamp',
+    theme: 'forge',
+    persistentEffect: 'Every SPECIAL die you fire grants +1 Conviction.',
+    name: "Master's Stamp",
+    category: 'paradox',
+    philosophicalAspect: 'mind',
+    description:
+        'Struck once into the die-steel, the maker\'s mark never wears off. '
+        + 'Everything that die pays out, it pays out with interest owed to you.',
+    tier: 2, rank: 5, cardType: 'enchantment',
+    targetType: 'self',
+    // pts: engine text — amplifies the fired SPECIAL payload (+1◆), min-4 ≈ 4
+    // over a fight → Axiom. Amplifies the PAYLOAD, never the special's identity.
+    addedIn: '2026-07-17',
+    tags: ['forge', 'enchantment', 'special', 'dice', 'valve'],
+};
+
 export const cardLibrary: Card[] = [
     // T1 Affliction
-    slipperySlope, strawMansJab, festeringArgument, currysConversion,
+    slipperySlope, festeringArgument, currysConversion,
     resonanceDetonation, venomAndVein, suppuratingCurse,
     // T2 Peroration
     exordium, openingStatement, mountingCase, peroratioInterrupta,
-    theClosingWord, practicedCadence, captiveAudience,
+    theClosingWord, 
     // T3 Forge
     sketchOfAThought, halfStep, bootstrapLoop, exNihilo,
-    theOvertake, anvilOfForm, entropyTax,
+    theOvertake, anvilOfForm, 
     // T4 Akrasia
     againstMyJudgment, sweetPoison, selfFlagellant, fallenGrace,
     pactOfAkrasia, crownOfThorns, mirrorOfGuilt,
     // T5 Control
     zenosHalfStep, redHerring, undistributedMiddle, arrowParadox,
-    turnabout, achillesAndTheTortoise, quagmireOfDoubt,
+    turnabout, quagmireOfDoubt,
     // T6 Oracle
     glimpse, signsAndPortents, cassandrasBurden, delphicAmbiguity,
-    prophecyFulfilled, theOraclesEye, fatedCourse,
+    prophecyFulfilled, theOraclesEye, 
     // T7 Harvest
-    briefCandle, mementoMori, winnowing, theGleanersDue,
-    theReaping, boneOrchard, theTithe,
+    briefCandle, winnowing, theGleanersDue,
+    theReaping, boneOrchard, 
     // T8 Charm
     softWord, disarmingSmile, commonGround, theOliveBranch,
-    heartOfTheMatter, irresistibleGrace, mirrorOfLonging,
+    irresistibleGrace, mirrorOfLonging,
     // T9 Bulwark
     braceForImpact, nettleCloak, tuQuoque, measuredAnswer,
     theAdamantWall, hedgehogsDilemma, crumblingResolve,
     // T10 Echo
-    refrain, secondThoughts, adNauseam, circularReasoning,
+    refrain, secondThoughts, circularReasoning,
     ouroboros, resonantChamber, stuckInTheirHead,
+    // Spec 33 dice-interaction valves (promoted in Phase D8, 2026-07-18)
+    // after the per-preset A/B court; each is seated flag-on only, replacing
+    // one same-aspect instance in its theme preset.
+    recurringSymptom, restateThePoint, mastersStamp, bleedForIt, breakTheTempo,
+    secondSight, bankTheYield, changeOfHeart, holdTheLine, secondTake,
 ];
 
 const registry = new Map<string, Card>(cardLibrary.map(card => [card.id, card]));

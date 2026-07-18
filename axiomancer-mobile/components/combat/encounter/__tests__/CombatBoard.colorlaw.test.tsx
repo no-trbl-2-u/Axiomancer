@@ -29,7 +29,7 @@ import { withAllProviders } from '@/test-utils/withAllProviders';
 
 // Spec 32 v3 fixtures (same as the multistage suite): two Affliction DoTs,
 // the Bulwark guard, a Charm sway — a hand guaranteed to span stances.
-const CARDS = ['slippery-slope', 'straw-mans-jab', 'brace-for-impact', 'soft-word'];
+const CARDS = ['slippery-slope', 'recurring-symptom', 'brace-for-impact', 'soft-word'];
 const STANCES = ['heart', 'body', 'mind'] as const;
 
 const noopDrag = (): DragController =>

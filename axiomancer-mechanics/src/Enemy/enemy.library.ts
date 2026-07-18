@@ -542,7 +542,7 @@ export const KingOfRevenge = createEnemy({
         drop('heart-draught', 20),
     ],
     philosophicalAlignment: { epistemology: -67, outlook: -67, scope: -67 },
-    cards: [card('straw-mans-jab'), card('brief-candle'), card('red-herring')],
+    cards: [card('half-step'), card('brief-candle'), card('red-herring')],
     befriendabilityConfig: {
         hpGate: { belowPct: 0.7 },
         roundsThreshold: 1,
@@ -838,7 +838,7 @@ export const Mabadi = createEnemy({
     },
     loot: [none(40), drop('body-elixir', 30), drop('whetstone-oil', 20), drop('healing-potion', 10)],
     philosophicalAlignment: { epistemology: 67, outlook: 0, scope: -67 },
-    cards: [card('straw-mans-jab')],
+    cards: [card('half-step')],
     addedIn: ADDED,
     tags: ['mid-game', 'elite', 'enemy'],
 });
@@ -974,7 +974,7 @@ export const CursedPaladin = createEnemy({
     },
     loot: [none(35), drop('iron-skin-draught', 25), drop('body-elixir', 25), drop('healing-potion', 15)],
     philosophicalAlignment: { epistemology: -67, outlook: -67, scope: 0 },
-    cards: [card('straw-mans-jab'), card('soft-word')],
+    cards: [card('half-step'), card('soft-word')],
     addedIn: ADDED,
     tags: ['mid-game', 'elite', 'enemy'],
 });
@@ -1123,7 +1123,7 @@ export const Sidelle = createEnemy({
     },
     loot: [none(35), drop('whetstone-oil', 25), drop('body-elixir', 25), drop('greater-healing-potion', 15)],
     philosophicalAlignment: { epistemology: 0, outlook: -67, scope: -67 },
-    cards: [card('straw-mans-jab')],
+    cards: [card('half-step')],
     addedIn: ADDED,
     tags: ['mid-game', 'elite', 'enemy'],
 });
@@ -1151,7 +1151,7 @@ export const RawheadRex = createEnemy({
         drop('revive-crystal', 15),
     ],
     philosophicalAlignment: { epistemology: 0, outlook: -67, scope: -67 },
-    cards: [card('sweet-poison'), card('straw-mans-jab'), card('brief-candle')],
+    cards: [card('sweet-poison'), card('half-step'), card('brief-candle')],
     finalBlowLines: {
         brutal: 'The bloody bones come apart into their two advertised components.',
         quiet:  'It backs down the cellar stairs one last time, and the dark closes politely behind it.',
@@ -1260,7 +1260,7 @@ export const AshenBoneDrake = createEnemy({
     },
     loot: [none(30), drop('iron-skin-draught', 25), drop('greater-healing-potion', 25), drop('war-horn-draught', 20)],
     philosophicalAlignment: { epistemology: 0, outlook: -67, scope: 0 },
-    cards: [card('straw-mans-jab'), card('glimpse')],
+    cards: [card('half-step'), card('glimpse')],
     addedIn: ADDED,
     tags: ['mid-game', 'elite', 'enemy'],
 });
@@ -1407,7 +1407,7 @@ export const MabadiUndrowned = createEnemy({
     },
     loot: [none(30), drop('body-elixir', 25), drop('whetstone-oil', 25), drop('supreme-healing-potion', 20)],
     philosophicalAlignment: { epistemology: 67, outlook: -67, scope: -67 },
-    cards: [card('straw-mans-jab'), card('slippery-slope')],
+    cards: [card('half-step'), card('slippery-slope')],
     addedIn: ADDED,
     tags: ['mid-game', 'elite', 'enemy'],
 });
@@ -1455,7 +1455,7 @@ export const BlackDeath = createEnemy({
     },
     loot: [none(25), drop('antidote', 30), drop('supreme-healing-potion', 25), drop('phoenix-tear', 20)],
     philosophicalAlignment: { epistemology: 0, outlook: -67, scope: 67 },
-    cards: [card('sweet-poison'), card('straw-mans-jab')],
+    cards: [card('sweet-poison'), card('half-step')],
     addedIn: ADDED,
     tags: ['late-game', 'elite', 'enemy'],
 });
@@ -1499,7 +1499,7 @@ export const FireGiant = createEnemy({
     },
     loot: [none(25), drop('war-horn-draught', 30), drop('supreme-healing-potion', 25), drop('iron-skin-draught', 20)],
     philosophicalAlignment: { epistemology: 0, outlook: 0, scope: -67 },
-    cards: [card('sweet-poison'), card('straw-mans-jab')],
+    cards: [card('sweet-poison'), card('half-step')],
     addedIn: ADDED,
     tags: ['late-game', 'elite', 'enemy'],
 });
@@ -1666,7 +1666,7 @@ export const ElderFireGiant = createEnemy({
         drop('revive-crystal', 15),
     ],
     philosophicalAlignment: { epistemology: 0, outlook: -67, scope: 67 },
-    cards: [card('sweet-poison'), card('straw-mans-jab'), card('brief-candle')],
+    cards: [card('sweet-poison'), card('half-step'), card('brief-candle')],
     finalBlowLines: {
         brutal: 'The white fire goes out all at once, and the cold that follows has a genealogy too.',
         quiet:  'The elder banks his own coals, unhurried to the end.',
@@ -1742,7 +1742,7 @@ export const ArchDemon = createEnemy({
         drop('revive-crystal', 20),
     ],
     philosophicalAlignment: { epistemology: 0, outlook: -67, scope: -67 },
-    cards: [card('sweet-poison'), card('straw-mans-jab'), card('bootstrap-loop')],
+    cards: [card('sweet-poison'), card('half-step'), card('bootstrap-loop')],
     finalBlowLines: {
         brutal: 'The promotion is rescinded from above, violently, with prejudice.',
         quiet:  'The appetite completes. There was, in the end, exactly one thing it had not eaten.',
@@ -1931,7 +1931,7 @@ export const TheDoorwarden = createEnemy({
         drop('resonance-crystal', 15),
     ],
     philosophicalAlignment: { epistemology: 67, outlook: 0, scope: -67 },
-    cards: [card('red-herring'), card('undistributed-middle'), card('straw-mans-jab')],
+    cards: [card('red-herring'), card('undistributed-middle'), card('half-step')],
     finalBlowLines: {
         brutal: 'The hinge-priest comes apart at every joint at once. Ten thousand doors, unheld, swing open somewhere.',
         quiet:  'He folds shut along his own seams, the way a door closes on an empty room, and stays closed.',

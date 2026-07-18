@@ -9,7 +9,7 @@
  *   npm run combat-sim                              # omniscient ('greedy') witness
  *   npm run combat-sim -- --blind                  # realistic-player witness (no hidden-stance peek)
  *   npm run combat-sim -- --enemy=KingOfRevenge    # one enemy only
- *   npm run combat-sim -- --loadout=slippery-slope,straw-mans-jab,soft-word
+ *   npm run combat-sim -- --loadout=slippery-slope,festering-argument,soft-word
  *   npm run combat-sim -- --runs=300 --seed=1 --blind
  *
  * `--blind`: the bot drafts using ONLY information a real player can currently see

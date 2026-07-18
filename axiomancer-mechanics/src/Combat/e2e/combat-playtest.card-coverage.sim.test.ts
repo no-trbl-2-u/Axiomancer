@@ -38,7 +38,7 @@ const SEED_OFFSETS = [0, 1000, 2000] as const;
 
 /** Known-good support kit rounding out every coverage deck (defend + DoT +
  *  bleed keep the encounter honest while the focused card takes the lead). */
-const SUPPORT_KIT = ['brace-for-impact', 'slippery-slope', 'straw-mans-jab'] as const;
+const SUPPORT_KIT = ['brace-for-impact', 'slippery-slope', 'festering-argument'] as const;
 
 const WEAK_ENEMY: Enemy = deepClone(
     (ENEMY_REGISTRY as Record<string, Enemy>)['grave-larva'],

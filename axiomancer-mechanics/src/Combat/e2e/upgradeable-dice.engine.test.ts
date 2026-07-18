@@ -218,9 +218,9 @@ describe('spec 33 §1/§6 — the SPECIAL payload (provisional use-triggered rul
     });
 
     it("spec 33 §6 (D4) — a FORGE special-amplifier enchant adds +1◆ to the fired payload", () => {
-        // Master's Stamp (`forge-masters-stamp`, dice-valves-33 sandbox) is
-        // wired at the special-fired hook by card id — like anvil-of-form /
-        // entropy-tax. It amplifies the PAYLOAD, not the special's identity.
+        // Master's Stamp (`forge-masters-stamp`, a library card since Phase
+        // D8) is wired at the special-fired hook by card id — like
+        // anvil-of-form. It amplifies the PAYLOAD, not the special's identity.
         const base = open([SPECIAL, MANA, MANA, MANA]);
         const before = base.conviction;
         // Control (same seed/state, no enchant) — the gear default, +2◆.

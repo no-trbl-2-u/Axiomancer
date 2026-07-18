@@ -49,34 +49,48 @@ describe('themed library — shape contract (spec 32 v3 §6-7)', () => {
         }
     });
 
-    it('each theme owns exactly 7 cards (10 × 7 = 70)', () => {
-        for (const theme of THEMES) {
-            expect(byTheme.get(theme)!.length, `theme ${theme}`).toBe(7);
-        }
-    });
-
-    it('each theme rides the rank recipe: 2 common (1-2), 2 uncommon (3-4), 3 rare (5-6)', () => {
+    // ── Phase D8 (2026-07-18): the ten-in/ten-out valve promotion broke the
+    // spec-32 per-theme symmetry (7 cards / 2C 2U 3R / 1 ench + 1 dis per
+    // theme). The retirement ledger was FORCED — only the reward-only ten
+    // were unreferenced by presets, and they measured zero plays in 345,600
+    // encounters (plan/tuning/2026-07-18-d8-preset-dice-valves.md). The
+    // post-D8 shape is pinned EXACTLY below so drift is still caught;
+    // restoring per-theme symmetry (authoring replacement ench/dis cards) is
+    // the next library phase's work, not an accident to lint away.
+    it('each theme matches the pinned post-D8 shape (cards / rarities / types)', () => {
+        const POST_D8_SHAPE: Record<string, {
+            n: number; common: number; uncommon: number; rare: number;
+            enchantment: number; disenchant: number;
+        }> = {
+            affliction: { n: 7, common: 1, uncommon: 3, rare: 3, enchantment: 1, disenchant: 1 },
+            peroration: { n: 6, common: 2, uncommon: 3, rare: 1, enchantment: 0, disenchant: 0 },
+            forge:      { n: 7, common: 2, uncommon: 2, rare: 3, enchantment: 2, disenchant: 0 },
+            akrasia:    { n: 8, common: 2, uncommon: 3, rare: 3, enchantment: 1, disenchant: 1 },
+            control:    { n: 7, common: 2, uncommon: 3, rare: 2, enchantment: 0, disenchant: 1 },
+            oracle:     { n: 7, common: 2, uncommon: 3, rare: 2, enchantment: 1, disenchant: 0 },
+            harvest:    { n: 6, common: 1, uncommon: 3, rare: 2, enchantment: 1, disenchant: 0 },
+            charm:      { n: 7, common: 2, uncommon: 3, rare: 2, enchantment: 1, disenchant: 1 },
+            bulwark:    { n: 8, common: 3, uncommon: 2, rare: 3, enchantment: 1, disenchant: 1 },
+            echo:       { n: 7, common: 3, uncommon: 1, rare: 3, enchantment: 1, disenchant: 1 },
+        };
         for (const theme of THEMES) {
             const cards = byTheme.get(theme)!;
-            const commons = cards.filter(c => rankToRarity(c.rank) === 'common');
-            const uncommons = cards.filter(c => rankToRarity(c.rank) === 'uncommon');
-            const rares = cards.filter(c => rankToRarity(c.rank) === 'rare');
-            expect(commons.length, `${theme} commons`).toBe(2);
-            expect(uncommons.length, `${theme} uncommons`).toBe(2);
-            expect(rares.length, `${theme} rares`).toBe(3);
+            const pin = POST_D8_SHAPE[theme];
+            expect(pin, `theme ${theme} needs a shape pin`).toBeDefined();
+            expect(cards.length, `theme ${theme} cards`).toBe(pin.n);
+            expect(cards.filter(c => rankToRarity(c.rank) === 'common').length, `${theme} commons`).toBe(pin.common);
+            expect(cards.filter(c => rankToRarity(c.rank) === 'uncommon').length, `${theme} uncommons`).toBe(pin.uncommon);
+            expect(cards.filter(c => rankToRarity(c.rank) === 'rare').length, `${theme} rares`).toBe(pin.rare);
+            expect(cards.filter(c => c.cardType === 'enchantment').length, `${theme} enchantments`).toBe(pin.enchantment);
+            expect(cards.filter(c => c.cardType === 'disenchant').length, `${theme} disenchants`).toBe(pin.disenchant);
+            // Every ench/dis that exists is still rare (the rank law survives
+            // on the survivors even where a theme lost its pair).
+            for (const c of cards.filter(x => x.cardType !== 'spell')) {
+                expect(rankToRarity(c.rank), `${theme} ${c.id}`).toBe('rare');
+            }
         }
-    });
-
-    it('each theme carries exactly 1 enchantment and 1 disenchant (both rare)', () => {
-        for (const theme of THEMES) {
-            const cards = byTheme.get(theme)!;
-            const enchantments = cards.filter(c => c.cardType === 'enchantment');
-            const disenchants = cards.filter(c => c.cardType === 'disenchant');
-            expect(enchantments.length, `${theme} enchantments`).toBe(1);
-            expect(disenchants.length, `${theme} disenchants`).toBe(1);
-            expect(rankToRarity(enchantments[0].rank)).toBe('rare');
-            expect(rankToRarity(disenchants[0].rank)).toBe('rare');
-        }
+        // The raggedness sums back to the 70-card law.
+        expect(Object.values(POST_D8_SHAPE).reduce((s, p) => s + p.n, 0)).toBe(70);
     });
 
     it('every rank is a named rung on the ladder', () => {
@@ -238,7 +252,9 @@ describe('themed library — id hygiene and provenance', () => {
             expect(['self', 'enemy']).toContain(card.targetType);
             expect(['body', 'mind', 'heart']).toContain(card.philosophicalAspect);
             expect(['fallacy', 'paradox']).toContain(card.category);
-            expect(card.addedIn).toBe('2026-07-08');
+            // 2026-07-08 = the v3 wholesale replacement; 2026-07-17 = the D4
+            // dice valves (promoted into the library in Phase D8).
+            expect(['2026-07-08', '2026-07-17']).toContain(card.addedIn);
         }
     });
 

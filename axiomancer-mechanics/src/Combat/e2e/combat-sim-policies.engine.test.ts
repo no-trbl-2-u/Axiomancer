@@ -76,8 +76,13 @@ function loadout(cards: string[]): Character {
     return p;
 }
 
-// A cross-theme starter mix: ramping poison, decaying bleed, control, guard.
-const MIX = ['slippery-slope', 'straw-mans-jab', 'red-herring', 'brace-for-impact'];
+// A cross-theme starter mix: ramping poison, second poison DoT, control, guard.
+// (straw-mans-jab held the second seat until its D8 retirement. Its default
+//  replacement festering-argument — and half-step — turned the pinned
+//  KingOfRevenge fight below into a defeat, so the seat went to
+//  recurring-symptom: the same theme (affliction), same aspect (body), and a
+//  real DoT, under which BOTH pinned fights stay status victories.)
+const MIX = ['slippery-slope', 'recurring-symptom', 'red-herring', 'brace-for-impact'];
 
 function card(id: string): CombatCard {
     const projected = toCombatCard(id, getCardById, lookupEffect);
@@ -197,24 +202,30 @@ describe('greedy object reproduces the pinned decision sequences', () => {
     // merged onto an existing instance no longer tick on the play that
     // applied them), and manual TICK paths now decay decaysPerTick DoTs.
     //
-    // post-Phase-30 merge re-pin 2026-07-12: slippery-slope and
-    // straw-mans-jab's FREE lines moved from TICK (retired registry-wide) to
-    // a MARK seed under the FREE-currency law, shifting greedy's per-play
-    // scoring on the merged tree.
+    // post-Phase-30 merge re-pin 2026-07-12: slippery-slope's and (the since-
+    // retired) straw-mans-jab's FREE lines moved from TICK (retired
+    // registry-wide) to a MARK seed under the FREE-currency law, shifting
+    // greedy's per-play scoring on the merged tree.
     //
     // Re-pinned 2026-07-13 (keep-hand rule): COMBAT_HAND_SIZE 6→5 and the
     // round boundary now REFILLS the kept hand instead of redrawing it —
     // fewer cards per round means fewer plays on the same seeds. Outcomes
     // and round counts are unchanged on both pins.
+    //
+    // Re-pinned 2026-07-18 (Phase D8 ten-in/ten-out): straw-mans-jab left the
+    // library and MIX's second seat went to recurring-symptom (see the MIX
+    // comment above) — every seed-derived draw and greedy decision shifted;
+    // both pins re-measured against the current engine. Both fights remain
+    // status victories at the same round counts as before the swap.
     it('seed 11 vs LittleBelle: a two-round status victory', () => {
         const r = runOneEncounter(loadout(MIX), LittleBelle, 11, 'greedy');
         expect({ outcome: r.outcome, rounds: r.rounds, plays: r.plays, statusPlays: r.statusPlays })
-            .toEqual({ outcome: 'victory', rounds: 2, plays: 9, statusPlays: 8 });
+            .toEqual({ outcome: 'victory', rounds: 2, plays: 9, statusPlays: 6 });
         expect(r.cardUsage['slippery-slope']).toEqual({
-            cardId: 'slippery-slope', plays: 3, bottomPlays: 3, topPlays: 0, statusLands: 3, discards: 0,
+            cardId: 'slippery-slope', plays: 2, bottomPlays: 2, topPlays: 0, statusLands: 2, discards: 0,
         });
-        expect(r.cardUsage['straw-mans-jab']).toEqual({
-            cardId: 'straw-mans-jab', plays: 2, bottomPlays: 2, topPlays: 0, statusLands: 2, discards: 0,
+        expect(r.cardUsage['recurring-symptom']).toEqual({
+            cardId: 'recurring-symptom', plays: 2, bottomPlays: 2, topPlays: 0, statusLands: 2, discards: 0,
         });
     });
 
@@ -228,19 +239,21 @@ describe('greedy object reproduces the pinned decision sequences', () => {
     // Re-pinned 2026-07-13 (keep-hand rule, see the LittleBelle pin above).
     // Re-pinned 2026-07-14: POISON ramp now resets on reapplication (spec 32 v3
     // — `applyEffect` re-stamps `appliedAt` for `escalatesPerTurn` DoTs), so a
-    // reapplied poison ticks slightly less and the greedy line spends one more
+    // reapplied poison ticks slightly less and the greedy line spent one more
     // play (15→16) to reach the same four-round status victory.
-    // Re-pinned 2026-07-18 (color-match rider removal): straw-mans-jab lost its
-    // color-match +1-intensity dieBonus (a matching-color die is now the only
-    // way to pay, so the rider was never conditional). Its bleed lands one
-    // point weaker, so the greedy line spends one more play (16→17, statusPlays
-    // 11→12) to reach the same four-round status victory.
+    // Re-pinned 2026-07-18 (color-match rider removal): straw-mans-jab (then
+    // still in the library) lost its color-match +1-intensity dieBonus, its
+    // bleed landed one point weaker, and the greedy line spent one more play
+    // (16→17, statusPlays 11→12) for the same four-round status victory.
+    // Re-pinned 2026-07-18 (Phase D8, see the LittleBelle pin above):
+    // recurring-symptom now holds the second MIX seat — still a four-round
+    // status victory (plays 17→18, statusPlays 12→11).
     it('seed 11 vs KingOfRevenge: a four-round status victory (Gate 0 law: one tray per phase)', () => {
         const r = runOneEncounter(loadout(MIX), KingOfRevenge, 11, 'greedy');
         expect({ outcome: r.outcome, rounds: r.rounds, plays: r.plays, statusPlays: r.statusPlays })
-            .toEqual({ outcome: 'victory', rounds: 4, plays: 17, statusPlays: 12 });
-        expect(r.cardUsage['straw-mans-jab']).toEqual({
-            cardId: 'straw-mans-jab', plays: 4, bottomPlays: 4, topPlays: 0, statusLands: 4, discards: 0,
+            .toEqual({ outcome: 'victory', rounds: 4, plays: 18, statusPlays: 11 });
+        expect(r.cardUsage['recurring-symptom']).toEqual({
+            cardId: 'recurring-symptom', plays: 4, bottomPlays: 3, topPlays: 1, statusLands: 3, discards: 0,
         });
         // card-retreat no longer exists — it can never appear in cardUsage.
     }, 30_000);

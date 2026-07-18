@@ -166,7 +166,8 @@ describe('thoughtform registry — excluded from every library-derived pool', ()
             expect(libraryIds.has(id), `${id} must not be a library card (C-11)`).toBe(false);
         }
         expect(cardLibrary.length).toBe(70);
-        expect(cardLibrary.filter(c => c.cardType === 'spell').length).toBe(50);
+        // 50→55 spells via the Phase D8 valve ledger (ten-in/ten-out).
+        expect(cardLibrary.filter(c => c.cardType === 'spell').length).toBe(55);
     });
 
     it('never appears in COMBAT_REWARD_POOL', () => {
