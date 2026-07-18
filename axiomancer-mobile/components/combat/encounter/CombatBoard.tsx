@@ -50,6 +50,7 @@ import type {
 import { armedReadValue, dieCanPowerCardVM, STANCE_COLORS } from '@/state/presenters/combat-encounter.engine';
 import { wheelNext, type WheelStance } from '@/state/combat/momentum';
 import type { CombatReadResult } from '@mechanics';
+import { isUpgradeableDiceEnabled } from '@mechanics';
 import { TrashGlyph, LedgerMark } from '@/components/hazard/glyphs';
 import { glyphShapeFor } from '@/components/combat/glyphShapes';
 import { CombatCombatantPane, EffectChips, PlayerMedallion, COMBAT_HUD_HEIGHT, type CombatFx } from './CombatCombatantPane';
@@ -714,6 +715,12 @@ function StakeChip({ stake, canStake, onStake }: {
     const [open, setOpen] = useState(false);
     const [picked, setPicked] = useState<WheelStance | null>(null);
     const close = () => { setOpen(false); setPicked(null); };
+
+    // Spec 33 §5 (D2) — STAKE is RETIRED under the Upgradeable-Dice model
+    // (Conviction no longer wagers on a hidden enemy stance; the read is open).
+    // Hide the affordance entirely flag-on. Flag-off keeps every branch below
+    // byte-identical.
+    if (isUpgradeableDiceEnabled()) return null;
 
     if (stake) {
         const meta = WHEEL_META.find((m) => m.stance === stake.color);

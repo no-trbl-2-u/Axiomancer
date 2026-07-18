@@ -1939,6 +1939,18 @@ export function resolveApplyRouting(
     state: CombatEncounterState,
     dieId: string | null,
 ): { draftFirst: boolean; explicitDieId: string | undefined } {
+    // Spec 33 (flag-on): the DRAFT is retired — there is no single-die law and
+    // no `draftedDieId`. Every dropped die (fresh tray face, Reserve, or
+    // floating) is its OWN power source: it MUST be forwarded to
+    // `playCombatCard` as the explicit `dieId` (the engine's flag-on
+    // `playBottomAction` REQUIRES an explicit die — `dieId === undefined`
+    // fizzles "choose a die to power this card"). Draft-first would call
+    // `draftStanceDie`, a flag-on no-op, leaving `explicitDieId` undefined and
+    // fizzling the play while spending nothing — the D6d "die spent, SWAY 0,
+    // card bounces" bug. Flag-off keeps the draft-model routing byte-identical.
+    if (isUpgradeableDiceEnabled()) {
+        return { draftFirst: false, explicitDieId: dieId ?? undefined };
+    }
     const isReserveDie = !!dieId && (state.reserve ?? []).some((d) => d.id === dieId);
     const isFateX = !!dieId && state.dice.some((d) => d.id === dieId && d.color === 'x');
     const isFloating = !!dieId && state.dice.some((d) => d.id === dieId && d.floating === true);

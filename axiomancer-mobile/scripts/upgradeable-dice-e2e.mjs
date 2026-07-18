@@ -216,6 +216,18 @@ async function heartGearFaces(page) {
     return { special: Number(m[1]), mana: Number(m[2]), miss: Number(m[3]) }
 }
 
+/** Read the enemy SWAY meter's current value (the `combat-sway-meter` a11y
+ *  label reads "SWAY <value> of <target>"). Returns null when the meter is
+ *  absent. The demo deck feeds SWAY, so the meter renders from 0 — a clean
+ *  before/after read for the paid-commit guard. */
+async function swayValue(page) {
+    const meter = page.getByTestId('combat-sway-meter')
+    if (!(await has(meter))) return null
+    const label = (await meter.getAttribute('aria-label').catch(() => '')) || ''
+    const m = label.match(/SWAY\s+(\d+)/i)
+    return m ? Number(m[1]) : null
+}
+
 // ── Flow ────────────────────────────────────────────────────────────────────
 
 /** Steps 1-6 + step-8 screenshots on the flag-on board. Returns the baseline
@@ -280,6 +292,15 @@ async function assertFlagOnBoard(page, { capture }) {
             + 'and the combat sandbox equips no relics; step 5 (enabled/disabled/reroll) is unreachable here without a relic-equip test seam')
     }
 
+    // ── STEP 2·SWAY (D6d REGRESSION GUARD, required): a heart tray die powers
+    //    Soft Word and the paid play COMMITS — the SWAY meter increments AND the
+    //    card leaves hand. This is the guard the flag-on drop→commit bug slipped
+    //    (die spent, SWAY stayed 0/31, card bounced): the presenter routed a
+    //    fresh tray die draft-first (a flag-on no-op) so the engine saw no die
+    //    and fizzled. Runs FIRST, on the fresh opening roll (seed 8 deals Soft
+    //    Word + a usable heart die). ──
+    await assertSwayCommit(page)
+
     // ── STEP 2 + 3: stage a card, power it, then an OFF-COLOR refusal ──
     await drivePowerAndMomentum(page, { capture })
 
@@ -300,6 +321,71 @@ async function assertFlagOnBoard(page, { capture }) {
         await shot(page, '02-momentum-chip')
     }
     return baseline
+}
+
+/** STEP 2·SWAY (D6d regression guard) — power Soft Word with a heart tray die,
+ *  APPLY, and assert the paid play COMMITTED: SWAY rose AND the card left hand.
+ *  A HARD assertion (seed 8 deterministically deals Soft Word + a heart die);
+ *  drag flake is absorbed by the same retry cadence the other steps use. */
+async function assertSwayCommit(page) {
+    const playArea = page.getByTestId('combat-play-area')
+
+    // The sandbox's only heart card is Soft Word (a SWAY/Befriend play).
+    const hand = await page.locator('[data-testid^="combat-hand-"]').evaluateAll((ns) => ns.map((n) => {
+        const id = (n.getAttribute('data-testid') ?? '').replace('combat-hand-', '')
+        const label = n.getAttribute('aria-label') ?? ''
+        const m = label.match(/,\s*(heart|body|mind)\s+card/i)
+        return { uid: id, stance: m ? m[1].toLowerCase() : null }
+    }))
+    const soft = hand.find((c) => c.stance === 'heart')
+    if (!soft) fail('SWAY-commit guard: no heart card (Soft Word) in the opening hand this seed')
+
+    // A usable heart die (or a wild, which powers any color) in the tray.
+    const dice = await trayDice(page).evaluateAll((ns) => ns.map((n) => {
+        const id = (n.getAttribute('data-testid') ?? '').replace('combat-die-', '')
+        const label = (n.getAttribute('aria-label') ?? '')
+        const color = (label.match(/^(\w+)\s+stance die/i)?.[1] ?? '').toLowerCase()
+        const usable = /available|drafted|floating|banked|SPECIAL face/i.test(label)
+            && !/a miss|blocked|spent|cracked/i.test(label)
+        return { id, color, usable }
+    }))
+    const die = dice.find((d) => d.usable && d.color === 'heart') ?? dice.find((d) => d.usable && d.color === 'wild')
+    if (!die) fail('SWAY-commit guard: no usable heart/wild die in the opening tray this seed')
+
+    // Stage Soft Word (retry — the fan re-lays out as cards fade in).
+    for (let a = 0; a < 4 && !(await has(page.getByTestId(`combat-staged-${soft.uid}`))); a++) {
+        await dragTo(page, page.getByTestId(`combat-hand-${soft.uid}`), await centerOf(playArea))
+    }
+    if (!(await has(page.getByTestId(`combat-staged-${soft.uid}`)))) fail('SWAY-commit guard: could not stage Soft Word')
+
+    // Drop the heart die on the staged card (retry — the socket animates in).
+    for (let a = 0; a < 4 && !(await has(page.getByTestId('combat-staged-die'))); a++) {
+        await page.waitForTimeout(150)
+        await dragTo(page, page.getByTestId(`combat-die-${die.id}`), await centerOf(page.getByTestId(`combat-staged-${soft.uid}`)))
+    }
+    if (!(await has(page.getByTestId('combat-staged-die')))) fail('SWAY-commit guard: heart die did not arm Soft Word\'s socket')
+
+    const swayBefore = await swayValue(page)
+    log(`step 2·SWAY: armed Soft Word with a ${die.color} die (SWAY before = ${swayBefore ?? 'n/a'})`)
+
+    // APPLY the paid play.
+    if (!(await has(page.getByTestId(`combat-apply-${soft.uid}`)))) fail('SWAY-commit guard: no APPLY control on staged Soft Word')
+    await page.getByTestId(`combat-apply-${soft.uid}`).click({ force: true }).catch(() => {})
+    await page.waitForTimeout(400)
+
+    // ASSERT the commit landed: SWAY rose AND the card left hand (no bounce).
+    const swayAfter = await swayValue(page)
+    if (swayAfter === null) fail('SWAY-commit guard: SWAY meter vanished after APPLY')
+    if (!(swayAfter > (swayBefore ?? 0))) {
+        fail(`SWAY-commit guard: paid Soft Word did NOT commit — SWAY ${swayBefore ?? 0} → ${swayAfter} `
+            + '(the D6d flag-on drop→commit bug: die spent, effect not applied, card bounced)')
+    }
+    const stillStaged = await has(page.getByTestId(`combat-staged-${soft.uid}`))
+    const bouncedToHand = await has(page.getByTestId(`combat-hand-${soft.uid}`))
+    if (stillStaged || bouncedToHand) {
+        fail(`SWAY-commit guard: Soft Word did not leave play after commit (staged=${stillStaged}, in-hand=${bouncedToHand})`)
+    }
+    log(`step 2·SWAY: paid Soft Word COMMITTED — SWAY ${swayBefore ?? 0} → ${swayAfter}, card left hand ✓`)
 }
 
 /** Steps 2-4: stage cards, power with a legal die, refuse an off-color drop,
@@ -396,7 +482,7 @@ async function drivePowerAndMomentum(page, { capture }) {
             log(`step 3: momentum chip advanced ("${momoBefore.replace(/\n/g, ' ')}" → "${momoAfter.replace(/\n/g, ' ')}") on a ${poweredColor}-die play`)
         } else if (/no momentum/i.test(momoAfter)) {
             note(`momentum chip did not advance after the reachable paid play (powered with a ${poweredColor} die; chip="${momoAfter.replace(/\n/g, ' ')}"). `
-                + 'Two factors: (1) momentum advances by the DIE color and only for a chain stance — a WILD die "does not shift it" (combat.engine.ts:1100). (2) The one cleanly-stageable colored play this seed is Soft Word, a heart SWAY card — and a probe found its paid APPLY CONSUMES the powering die yet leaves the enemy SWAY meter at 0/31 and bounces the card back to hand (the play does not commit). That looks like a real product-code issue, reported as a FINDING for the orchestrator (NOT papered over here); driving a clean colored-damage play to observe the chip advance is a card-pool + fan-occlusion limit of the sandbox, left to D7\'s qualitative flag-on pass.')
+                + 'Momentum advances by the DIE color and only for a chain stance — a WILD die "does not shift it" (combat.engine.ts:1100), and a heart SWAY play (Soft Word) is a Befriend line that does not shift the chain. Driving a clean colored-DAMAGE play to observe the chip advance is a card-pool + fan-occlusion limit of the sandbox, left to D7\'s qualitative flag-on pass. (The Soft Word paid-commit itself is now hard-asserted by the STEP 2·SWAY guard above.)')
         } else {
             log(`step 3: momentum chip reads "${momoAfter.replace(/\n/g, ' ')}"`)
         }

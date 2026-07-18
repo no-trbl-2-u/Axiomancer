@@ -37,7 +37,22 @@
 > Zero new findings filed this pass (nothing observed outside the
 > existing rows).
 
-### [HIGH] D7-BLOCKER — flag-on paid plays don't commit through the mobile UI
+### [x] [HIGH] D7-BLOCKER — flag-on paid plays don't commit through the mobile UI (RESOLVED 2026-07-18)
+
+**RESOLVED 2026-07-18.** Root cause (deeper than first classified but same
+lane): `handleApply` resolved correctly, but `onApply → resolveApplyRouting`
+(`state/presenters/combat-encounter.engine.ts`) was draft-model-shaped — a fresh
+tray die (not reserve/floating/fate-X) returned `{draftFirst:true,
+explicitDieId:undefined}`; then `draftStanceDie` is a flag-on no-op, so
+`playCombatCard` got NO die and the flag-on engine fizzled ("choose a die"),
+bouncing the card (the "die spent" was only the drop's UI dim). Fix: a flag-on
+early return in `resolveApplyRouting` forwards every dropped die as the explicit
+`dieId` (`draftFirst:false`). Regression guards: a deterministic unit test
+(`floating-die-apply.engine.test.ts` — flag-on tray-die routes explicit + Soft
+Word commits SWAY>0, both fail pre-fix) + the D6d e2e `assertSwayCommit` (SWAY
+0→4, card leaves hand). Stale flag-on STAKE affordance hidden in the same fix.
+Mobile verify green (2624). `fix(mobile): flag-on paid-play UI commit + STAKE
+hide`.
 
 Surfaced by the D6d flag-on e2e (2026-07-18). Powering a card with a legal
 die and pressing APPLY under the spec-33 flag **spends the die but the play

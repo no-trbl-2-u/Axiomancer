@@ -768,12 +768,12 @@ supersession collisions before any engine work.
       Brief: `plan/phases/phase_D7_tuning_rebaseline.md`.
       Prove: bands + ratified-constants report + re-baseline stamp.
       Deps: D4, D6a, D6b, D6c, D6d, D6e, D6f.
-      **BLOCKER (2026-07-18, from D6d e2e):** flag-on paid plays don't commit
-      through the mobile UI (die spent, effect not applied, card bounces) — the
-      engine is correct; the bug is `CombatBoard.tsx` `handleApply` still routing
-      the commit through the retired draft model. D7's flag-flip cannot ship over
-      it. See `plan/CRITIQUE.md` [HIGH] "D7-BLOCKER — flag-on paid plays don't
-      commit". Fix (a D6-band mobile bugfix) before D7.
+      **BLOCKER RESOLVED (2026-07-18):** the flag-on paid-play UI commit bug
+      (die not forwarded → engine fizzle → card bounce) is FIXED — a flag-on
+      early return in `resolveApplyRouting` forwards the dropped die as the
+      explicit `dieId`; unit + e2e regression guards added; stale flag-on STAKE
+      hidden. `fix(mobile): flag-on paid-play UI commit` — D7's flag-flip is no
+      longer gated on it.
 
 **Post-D sequence (owner-deferred until every D phase ships, 2026-07-18):**
 

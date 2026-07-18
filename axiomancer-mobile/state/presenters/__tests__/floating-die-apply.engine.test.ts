@@ -17,8 +17,9 @@
 
 import {
     createCharacter, initializeCombatEncounter, rollEncounterDice, playCombatCard, draftStanceDie,
+    setUpgradeableDice,
 } from '@mechanics';
-import type { CombatEncounterState } from '@mechanics';
+import type { CombatEncounterState, CombatManaDie } from '@mechanics';
 
 import { resolveApplyRouting, buildCombatViewModel } from '../combat-encounter.engine';
 import { createMockEncounterEnemy } from '../../mocks/combat.mock';
@@ -111,6 +112,53 @@ describe('floating-die APPLY routing (the snap-back bug)', () => {
     // GestureDetector mid-gesture — on web the pan died without onEnd, so the
     // drop never resolved. `draggable` is now presenter-owned and depends only
     // on engine state, never on live drag state.
+    // ── Flag-ON regression (D6d, the "die spent, SWAY 0, card bounces" bug) ──
+    // Under the Upgradeable-Dice model the DRAFT is retired: `draftStanceDie` is
+    // a no-op and the engine's flag-on `playBottomAction` REQUIRES an explicit
+    // `dieId` (undefined fizzles "choose a die"). The presenter used to route a
+    // fresh tray die draft-first (draftFirst=true, explicitDieId=undefined) — so
+    // the commit reached the engine with no die and fizzled while the tray die
+    // read spent + the card bounced. The fix: flag-on, ANY dropped die is an
+    // explicit power source.
+    describe('flag-ON tray-die APPLY routing (D6d SWAY-commit bug)', () => {
+        afterEach(() => setUpgradeableDice(false));
+
+        function openHeartEncounter(): CombatEncounterState {
+            const deck = ['soft-word', 'soft-word', 'straw-mans-jab', 'straw-mans-jab', 'sketch-of-a-thought', 'sketch-of-a-thought'];
+            const player = createCharacter({ name: 'Hero', level: 3, baseStats: { heart: 8, body: 8, mind: 8 } });
+            player.knownCards = Array.from(new Set([...(player.knownCards ?? []), ...deck]));
+            const state = initializeCombatEncounter(player, createMockEncounterEnemy(), deck, 7);
+            return rollEncounterDice(state).state;
+        }
+        const heartMana = (): CombatManaDie => ({ id: 'u-heart', color: 'heart', face: 'mana', state: 'available', temporary: false });
+
+        it('routes a fresh tray die as an EXPLICIT power source (never draft-first)', () => {
+            setUpgradeableDice(true);
+            const s = openHeartEncounter();
+            s.dice = [heartMana()];
+            const routing = resolveApplyRouting(s, 'u-heart');
+            expect(routing.draftFirst).toBe(false);
+            expect(routing.explicitDieId).toBe('u-heart');
+        });
+
+        it('a heart tray die COMMITS Soft Word paid — SWAY rises, die spends, card leaves hand, no fizzle', () => {
+            setUpgradeableDice(true);
+            const s = openHeartEncounter();
+            s.dice = [heartMana()];
+            const uid = findHand(s, 'soft-word');
+            const routing = resolveApplyRouting(s, 'u-heart');
+            const res = playCombatCard(s, { uid }, true, routing.explicitDieId);
+            // card-played:1, fizzled:0 (the hermetic probe's exact signature).
+            expect(res.events.some(e => e.kind === 'card-played')).toBe(true);
+            expect(res.events.some(e => e.kind === 'effect-fizzled')).toBe(false);
+            // SWAY 0 → >0 (the meter that stayed 0/31 in the bug).
+            expect(res.state.sway ?? 0).toBeGreaterThan(0);
+            // Die spent (gone/locked from the tray) and the card left hand.
+            expect(res.state.dice.find(d => d.id === 'u-heart')?.state).not.toBe('available');
+            expect(res.state.hand.some(h => h.uid === uid)).toBe(false);
+        });
+    });
+
     it('draggable is presenter-computed: floats stay draggable AFTER the draft; turn dice do not', () => {
         let s = openEncounter(['wild']);
         const preDraft = buildCombatViewModel(s);
