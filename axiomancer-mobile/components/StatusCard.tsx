@@ -71,7 +71,7 @@ export function StatusCard(props: StatusCardProps = {}) {
               <Text style={styles.moraleGloss}>· RESOLVE TO WALK</Text>
             </View>
             <Text style={styles.moraleValue}>
-              {['', 'i', 'ii', 'iii', 'iv', 'v', 'vi', 'vii', 'viii', 'ix', 'x'][moraleDisplay] || 'x'}<Text style={styles.moraleMax}> of x</Text>
+              {moraleDisplay}<Text style={styles.moraleMax}> / {moraleMax}</Text>
             </Text>
           </View>
           <View style={styles.moraleTrack}>

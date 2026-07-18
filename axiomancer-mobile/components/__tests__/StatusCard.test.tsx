@@ -58,6 +58,17 @@ describe('StatusCard: store-driven defaults (no props)', () => {
         expect(rendered.queryByText('VITAE')).not.toBeNull();
         expect(rendered.queryByText(`${hp}/${hpMax}`)).not.toBeNull();
     });
+
+    it('renders MORALE as an arabic value, not the old roman "v of x" (#117)', () => {
+        // The header MORALE reads arabic ("N / 10"), matching VITAE (same card)
+        // and the POOLS panel. The prior roman rendering ("v of x") read as an
+        // unresolved template placeholder to players (critique pass 12).
+        const { tree } = withAllProviders(<StatusCard />);
+        const rendered = render(tree);
+        expect(rendered.queryByText('MORALE')).not.toBeNull();
+        expect(rendered.queryByText(/of x/)).toBeNull();
+        expect(rendered.queryByText(/\/ 10/)).not.toBeNull();
+    });
 });
 
 describe('StatusCard: explicit prop overrides', () => {
