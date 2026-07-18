@@ -23,6 +23,9 @@
  *   --policy=<id|all>                       sim policy roster (default greedy)
  *   --deck=preset:<id>|draft:<focus>|cards:a,b,c|policy-pick
  *                                           deck selection (default policy-pick)
+ *   --deck=preset:all                       sweep ALL TEN presets in one matrix and
+ *                                           print the per-preset x stage rollups
+ *                                           (doctrine-band fit, skill gap, complexity)
  *   --enemy=<slug>                          restrict rosters to one enemy
  *   --runs=N                                runs per cell (default 60)
  *   --seed=N                                base seed (default 1)
@@ -48,6 +51,7 @@ import {
     COMBAT_SIM_POLICY_ORDER, getSimPolicy,
     type CombatSimPolicyId,
 } from '../Combat/combat.sim-policies';
+import { COMBAT_DECK_PRESET_ORDER } from '../Combat/combat.starter-deck-presets';
 import type { CombatDeckSelection } from '../Combat/combat.deck-draft';
 import {
     formatPlaytestReport, parseDeckSelectionArg, runPlaytestMatrix,
@@ -92,7 +96,11 @@ function main(): void {
     let stages = parseStages(flag('stage') ?? 'all');
     const policies = parsePolicies(flag('policy') ?? 'greedy');
     const deckArg = flag('deck') ?? 'policy-pick';
-    const deck = parseDeck(deckArg);
+    // Metrics slate (2026-07-18) — 'preset:all' sweeps the whole starter
+    // library in one matrix, feeding the per-preset x stage rollups.
+    const decks: CombatDeckSelection[] = deckArg === 'preset:all'
+        ? COMBAT_DECK_PRESET_ORDER.map(presetId => ({ kind: 'preset', presetId }))
+        : [parseDeck(deckArg)];
 
     const runs = Number(flag('runs') ?? '60');
     if (!Number.isInteger(runs) || runs < 1) fail('--runs must be a positive integer.');
@@ -131,7 +139,7 @@ function main(): void {
         report = runPlaytestMatrix({
             stages,
             policies,
-            decks: [deck],
+            decks,
             runsPerCell: runs,
             seed,
             enemySlugs: enemySlug !== undefined ? [enemySlug] : undefined,
