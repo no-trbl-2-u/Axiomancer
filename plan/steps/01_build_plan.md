@@ -862,6 +862,36 @@ supersession collisions before any engine work.
       Author pilot cards against the ratified four-die model. Deps: 33a +
       D4 + D7.
 
+**Legacy-combat cleanup (owner-directed 2026-07-18, chat — ships on its own
+branch, parallel to the D-sequence; does NOT preempt the D-sequence march
+order):**
+
+- [ ] Phase 37 — Retire the fallacy/paradox card category + the dead
+      `combatResources` token pool. The `Card.category` field
+      (`CardCategory = 'fallacy' | 'paradox'`) is a pre-Hazard-Pattern
+      vestige: it drives only `generatePhilosophicalResource`, which banks
+      `+1 fallacy/paradox` into `combatResources` — a **write-only pool that
+      nothing reads or spends** (the live stance economy is `resonance`
+      {heart/body/mind}; the sole reader, mobile `combat-hud`, is null-guarded
+      dead code; `scoreCard` is category-blind). Owner call (chat 2026-07-18)
+      chose the fuller cut: remove `category`/`CardCategory` AND fully tear
+      down the orphaned `combatResources` pool + its dead synergy machinery
+      (`consumeAllResources`/`resourceTokenDamageMul`/`consumedTokens` — zero
+      live card data uses them) + `generateBasicActionResources`/
+      `generatePhilosophicalResource`/`philosophicalCategoryFor` + the
+      `philosophical-generated` event, the editor CATEGORY picker +
+      `CATEGORIES`/`RESOURCE_KEYS` + codegen line, and the two cosmetic mobile
+      badges (character screen, LearnCard modal). The real card types
+      (**spell / enchantment / disenchant**) live under a DIFFERENT key
+      (`Card.cardType`) and are UNTOUCHED. Barrel-breaking (`CardCategory`,
+      `CombatResources`, the three generator fns are public exports) → all
+      three gates. No save migration (`combatResources` is transient combat
+      state, not persisted). Explicitly OUT of scope: the hazard/gathering
+      "paradox-token" reward flags (a separate reward system) and the
+      `docs/references/all-{paradoxes,fallacies}-reference.md` lore docs.
+      Deps: none (independent of the D-sequence). Brief:
+      `plan/phases/phase_37_retire_fallacy_paradox_category.md`.
+
 > **After the queue drains:** `/march` transitions to `/iterate`
 > — draining `plan/AUDIT.md` + `plan/CRITIQUE.md`, doc-drift,
 > `as any` clusters, hex-literal -> AXM migration, a11y, and
