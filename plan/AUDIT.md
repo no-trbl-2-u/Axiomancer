@@ -14,6 +14,29 @@
 
 ## Pending
 
+### hazard/gathering "paradox-token" reward vocabulary outlives the card category
+- category: divergence
+- impact: 2
+- ease: 4
+- detail: filed 2026-07-18 (phase 37 planning residue). Phase 37 retires
+  the `fallacy`/`paradox` card **category** + the dead `combatResources`
+  token pool, but deliberately leaves the separate hazard/gathering
+  **reward** system that still speaks "paradox": `HAZARD_TOKEN_FLAG_PREFIX`
+  = `'hazard-token-banked:'` + the `token` reward doc'd as banking a
+  "paradox-token flag" (`axiomancer-mobile/state/hazard/store-actions.ts`
+  ~L76-77/L484, `state/gathering/store-actions.ts` ~L64/L269), and the
+  reward-blurb strings "+N paradox token(s)"
+  (`state/presenters/hazard.engine.ts` ~L369, `gathering.engine.ts` ~L241,
+  `components/hazard/glyphs.tsx` case `'paradox'`). These are a live reward
+  token, NOT the removed card category — but once phase 37 lands, "paradox"
+  survives ONLY as this reward vocabulary, which will read as an orphaned
+  reference to a concept the game no longer has. needs-user-call: rename the
+  reward token (to what?) vs. remove it vs. leave it. Do NOT bundle into
+  phase 37 (owner scoped it out). Re-grep before acting; distinguish from the
+  `arrow-paradox` card id (unrelated) and `Item.category` (unrelated).
+- next: /oversight (owner call on rename-vs-remove-vs-keep) → then /iterate
+  or a small phase to execute the chosen verb
+
 ### `deploy:check` is unusable from remote web sessions — 401 "Token rejected"
 - category: debt
 - impact: 4
