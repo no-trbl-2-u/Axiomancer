@@ -833,6 +833,68 @@ supersession collisions before any engine work.
       valves ARE the F3 sink, no starter Press Fate grant unless the
       re-test shows the valves under-sink). Deps: D-FLIP, D7.
       Brief: `plan/phases/phase_D8_preset_dice_valves.md`.
+
+**Dice-flag teardown (owner-directed 2026-07-18, chat — "go all in on the
+dice mechanics, remove the feature flag"). A three-phase teardown of the
+`isUpgradeableDiceEnabled()` flag and the legacy pre-spec-33 dice model.
+SUPERSEDES Phase D-FLIP (which only flipped the default and kept the
+off-switch) — recommend /oversight `[skipped]` D-FLIP, since D10 removes the
+flag from the engine entirely, absorbing the flip permanently. Ships as a
+SEQUENCE after D8; D10 touches `combat.engine.ts` and so cannot ship
+concurrently with the in-flight D8 (collision discipline) — it ships only
+once D8 has merged to main, then collapses D8's flag branches rather than
+reverting them. Teardown precedes D9 so D9's authoring rebases onto a
+flag-free engine.**
+
+- [ ] Phase D10 — Dice-flag teardown (1/3): mechanics engine collapse. Make the
+      flag-ON (spec-33) model UNCONDITIONAL: `isUpgradeableDiceEnabled()` becomes
+      an internal `true`-returning shim and `setUpgradeableDice()` a no-op (both
+      kept in the barrel so mobile/card-editor still compile — barrel removal is
+      D12), and every `isUpgradeableDiceEnabled()` branch across
+      `combat.engine.ts`, `combat.signature.ts`, `combat.encounter.sim.ts`,
+      `combat.upgradeable-economy.sim.ts`, and `combat-playtest.cli.ts` collapses
+      to its flag-on side. DELETE the now-unreachable legacy bodies: the pre-spec
+      momentum wheel (`advanceWheel`/`advanceMomentumWheel`), `settleStake`, the
+      variety-chain refresh (`chainRefresh`), the legacy roll block + legacy
+      draft/normal-play `resolveRead` path, and the legacy `policyPlayPhase`
+      body. `draftStanceDie`/`placeStake` reduce to no-op shims (bodies gone,
+      symbols kept for their sim/CLI/autoplay/barrel callers until D12).
+      **SHARED — do NOT delete:** `resolveRead`/`CombatReadResult` (survives for
+      `fate-x`), the Reserve/floating/spend/overheat helpers in `combat.dice.ts`,
+      and `rerollSpentDice` at `combat.engine.ts:2769` (confirm live-path before
+      touching — full prune is D12). Delete legacy-only tests
+      (`the-stake`, `momentum-wheel`, draft suites) and REWRITE the flag-agnostic
+      tests that baked in draft/read/stake/wheel (`hazard-pattern-combat*`,
+      economy canaries in `combat-dice-economy.sim.test.ts`, etc.) to the
+      unconditional model. Collapse D8's flag-gated preset construction in
+      `combat.starter-deck-presets.ts` to the sole recipe. Mechanics verify +
+      mobile smoke. **Heaviest teardown phase — carries an authorized split seam
+      (see brief §0, ship-a-phase §10.8 precedent from D6).** Deps: D8 merged.
+      Brief: `plan/phases/phase_D10_flag_teardown_mechanics.md`.
+- [ ] Phase D11 — Dice-flag teardown (2/3): mobile. Collapse every
+      `isUpgradeableDiceEnabled()` branch in
+      `state/presenters/combat-encounter.engine.ts` + `CombatBoard.tsx` to the
+      flag-ON path (the "spread so the key is absent flag-off" idioms become
+      unconditional; `resolveApplyRouting` keeps its already-fixed flag-on
+      routing), delete `state/combat/flags.ts` + the env/runtime kill-switch +
+      `flags.test.ts`, and delete/rewrite the legacy flag-off e2e harnesses
+      (`upgradeable-dice-e2e.mjs` keeps only the flag-on path). The shim from
+      D10 keeps `@mechanics` importable until D12. Mobile verify + flag-on e2e.
+      Deps: D10. Brief generates on pickup.
+- [ ] Phase D12 — Dice-flag teardown (3/3): barrel + flag-module + dead-symbol
+      removal. Delete the `setUpgradeableDice`/`isUpgradeableDiceEnabled` shim and
+      the flag section of `combat.upgradeable-dice.ts`; delete the D10 no-op
+      shims and their remaining callers (`draftStanceDie`/`chooseDraft`/
+      `placeStake`, rewiring residual sim/CLI/autoplay drivers to the flag-on
+      flow) and fully prune `rerollSpentDice` (after the `combat.engine.ts:2769`
+      confirmation from D10); prune the flag symbols and the legacy Phase-31
+      barrel exports (`placeStake`, `isMomentumDieId`) from both barrels
+      (`src/index.ts`, `src/Combat/index.ts`); normalize the now-unconditional
+      module naming (`combat.upgradeable-dice.ts` folds into the canonical
+      `combat.dice.ts`). Breaking public-surface change — full three-workspace
+      verify + a repo-wide grep sanity for the removed symbols. Deps: D11.
+      Brief generates on pickup.
+
 - [ ] Phase D9 — Authored stance-check variety (salvage PR #109).
       Promoted from AUDIT via /oversight 2026-07-18. D6e's uniform
       `defaultStanceCheck` backfill stays; this phase threads
