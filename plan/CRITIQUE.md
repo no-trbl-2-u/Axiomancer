@@ -483,7 +483,8 @@ one level down, in the routing helper `onApply` calls next).
   handler) for the duration of phase resolution.
 - source: playtester (owner-directed break-test session)
 
-### [HIGH] momentum wheel's forged wild die cannot be spent — silently burns as a spare
+### [x] [HIGH] momentum wheel's forged wild die cannot be spent — silently burns as a spare (RESOLVED — Phase 31 + dice-law rework)
+- RESOLVED 2026-07-18 (verified stale; no new code). Phase 31 ("The Roll and the Read — momentum wheel engine-native", shipped `[x]`) is exactly what this 2026-07-12 critique said should absorb the die-routing bug, and the dice-law/drag rework closed it: the UI drop-eligibility `dieCanPowerCardVM` (`combat-encounter.engine.ts:383`) returns true for `die.color === 'wild'` on ANY card stance, so a floating/forged wild die is droppable everywhere; `state/presenters/__tests__/floating-die-apply.engine.test.ts` guards floating dice (incl. wild floats — "wild floats power any") applying end-to-end through the real engine and leaving `floatingDice` when spent. The auto-convert to +1◆ now only fires for a genuinely UNSPENT die at turn end (correct), not a can-never-be-spent one. Queue was overstating open HIGH bugs; corrected.
 - pass: owner-playtest 2026-07-12
 - viewport: mobile (expo-web via Playwright)
 - category: functional
