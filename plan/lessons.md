@@ -12,8 +12,14 @@
 
 ## Deploy
 
-1. <ISO> — <one-line lesson, ≤500 bytes>. Source:
-   <commit or issue reference>.
+1. 2026-07-18 — Background march/night loops share the ONE working
+   tree. A live loop swept an uncommitted local edit into its own
+   commit, entangled with its half-done feature (+ a type error), and
+   my new branch inherited it. Pause the loop before local phase work;
+   if you can't, ship clean via an isolated `git worktree add --detach
+   <tmp> origin/main`, `git checkout <sha> -- <only-your-files>`,
+   commit there, and push by SHA — never the shared tree. Source: PR
+   #120 (color-match rider removal).
 
 <!-- @domain:data -->
 
