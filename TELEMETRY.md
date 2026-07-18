@@ -59,3 +59,4 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-07-18T15:17:02Z | skill | jot | claude-fable-5 | main | args: Owner directive (2026-07-18, combat UI polish session): color-match die riders must  |
 | 2026-07-18T17:47:28Z | slash-prompt | /oversight | unknown | user/ci | /oversight |
 | 2026-07-18T19:11:03Z | skill | dataviz | claude-fable-5 | main | - |
+| 2026-07-18T19:32:59Z | skill | ship-a-phase | claude-fable-5 | main | args: Phase D8 — preset dice valves (plan/phases/phase_D8_preset_dice_valves.md). Owner-st |
