@@ -352,7 +352,7 @@
    "freeGlyph": "⬡",
    "freeKw": "PIP",
    "freeVal": "1",
-   "paid": "FORGE a dead X die into a WILD floating die. With no X to revive, gain +1 Conviction instead."
+   "paid": "FORGE a miss die into a temporary WILD gold die. With no miss to revive, gain +1 Conviction instead."
   },
   "chips": [
    {
@@ -1106,7 +1106,7 @@
    "freeGlyph": "⬡",
    "freeKw": "PIP",
    "freeVal": "1",
-   "paid": "FORGE a WILD floating die. The die spent on this card banks to your Reserve at 0 PIPS if a slot is free."
+   "paid": "FORGE a temporary WILD gold die. The die spent on this card banks to your Reserve at 0 PIPS if a slot is free."
   },
   "chips": [
    {
@@ -2157,7 +2157,7 @@
    "freeGlyph": "❖",
    "freeKw": "GUARD",
    "freeVal": "2",
-   "paid": "BLEED 1 for 2 turns on yourself. FORGE a WILD floating die, then RECOIL 6."
+   "paid": "BLEED 1 for 2 turns on yourself. FORGE a temporary WILD gold die and bank the spent die, then RECOIL 6."
   },
   "chips": [
    {
@@ -2205,7 +2205,9 @@
    "FREE — GUARD 2, then RECOIL 1.",
    "Applies Bleed ×1, 2t → self",
    "FORGE a WILD floating die",
-   "RECOIL 6"
+   "the spent die BANKS to the Reserve",
+   "RECOIL 6",
+   "Fallen: GUARD 6, then HEAL 3"
   ]
  },
  {
