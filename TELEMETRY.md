@@ -59,3 +59,5 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-07-18T15:17:02Z | skill | jot | claude-fable-5 | main | args: Owner directive (2026-07-18, combat UI polish session): color-match die riders must  |
 | 2026-07-18T17:47:28Z | slash-prompt | /oversight | unknown | user/ci | /oversight |
 | 2026-07-18T19:11:03Z | skill | dataviz | claude-fable-5 | main | - |
+| 2026-07-18T20:10:59Z | slash-prompt | /plan-a-phase | unknown | user/ci | /plan-a-phase In the card-editor I see something from the legacy combat a card type focuse |
+| 2026-07-18T20:12:10Z | subagent | Explore | claude-opus-4-8 | main | Map category/fallacy/paradox consumers |
