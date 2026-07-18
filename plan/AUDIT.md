@@ -14,6 +14,48 @@
 
 ## Pending
 
+### Authored per-phase / boss stance-check variety (thread `stanceCheck` through the threat-authoring pipeline)
+- category: mechanics
+- impact: 4
+- ease: 6
+- detail: filed 2026-07-18 as D6e residue. The shipped D6e (`0b29ff42`)
+  drains D3-F2 with a UNIFORM `defaultStanceCheck(enemyStance)` backfilled at
+  `getThreatSequence` on every RESOLVED phase (punishes own stance / yields
+  chain-successor) — good coverage, yield 0.329◆/round. But it backfills at the
+  resolved-phase level and does NOT thread a hand-authored `stanceCheck` from
+  `AuthoredThreatPhase` through `resolveAuthored` — so per-phase or per-boss
+  authored checks can't stick, and the spec 33 §2 authoring law's "bosses may
+  check two stances / not-X" variety is unreachable. The shipped D6e commit
+  flags this itself as a §2 follow-up. A reference implementation already
+  exists on the closed PR #109 branch
+  (`origin/claude/march-push-main-tcjk0j`): `stanceCheck?` threaded onto
+  `AuthoredThreatPhase` + `CombatThreatBranchOutcome`, copied through
+  `resolveAuthored` / `resolveBranchOutcome` / `commitThreatBranch`, plus 22
+  hand-authored thematic checks across 14 enemies (bosses naming two stances)
+  and an e2e guard. Rework it as an ADDITIVE layer OVER the backfill (authored
+  check wins; absent → default), NOT a replacement. D7 tunes yield density/
+  payout — land this before or alongside D7 so boss variety is in the ratified
+  read, or explicitly after if D7 prefers the uniform baseline.
+- next: /oversight or a dedicated follow-up phase (salvage PR #109's pipeline
+  threading + thematic content as an additive layer over the D6e backfill)
+
+### GLYPHS (Phase 33d) has no formal spec — design lives only in a braindump
+- category: docs
+- impact: 3
+- ease: 5
+- detail: filed 2026-07-18 during the queue audit. 33d (GLYPHS pilot,
+  "Option-B grammar experiment") is the only queued phase not governed by a
+  formal spec: its design lives in braindump
+  `axiomancer-mechanics/braindump/2026-07-13-enchant-curse-spell-grammar.md`,
+  and it only borrows spec 33 §3 rule 5 (FREE-charge / momentum) for
+  compatibility. Every other pending phase (33c + the D-batch) is under spec
+  33. 33d is now confirmed LAST in the queue, so this is not urgent — but a
+  pilot that graduates should be written up as a proper spec (or at minimum a
+  decisive 33d brief scoped from the braindump) BEFORE engine work, per the
+  plan-a-phase order-of-authority (spec > bearings > phase call).
+- next: /plan-a-phase 33d (or write a GLYPHS spec) at pickup — do not start
+  33d engine work against a braindump alone
+
 ### `[needs-user-call]` FORGE identity: amplifier enchants vs the braindump's "in-combat temporary face upgrades"
 - category: design
 - impact: 4
