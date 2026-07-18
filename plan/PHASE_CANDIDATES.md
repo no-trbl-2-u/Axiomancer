@@ -47,6 +47,38 @@
 > next-tier candidates awaiting `/oversight` promotion. Verify
 > "already shipped?" notes before promoting.
 
+### Starter-library trim + duplication pass (owner-led; metrics-slate powered)
+- source: owner session 2026-07-18 (metrics-slate chat; PR #119 + report
+  `axiomancer-mechanics/docs/reports/preset-sweep-2026-07-18.md`). Owner
+  intent, near-verbatim: TRIM cards first, then run DUPLICATES within each
+  preset and across presets — (1) fewer distinct cards = a tunable baseline
+  the library has never had, (2) shared cards = a more consistent experience
+  across presets.
+- evidence banked (first-ever per-preset doctrine measurement, blind,
+  30 runs/cell, seed 1, flag-off model): **mid-game cliff** — 7 of 10
+  presets at 0–17% vs the 45–55% band (foundry/standstill/grace/augury
+  ≈0%); late uniformly under-band (best 12%); early roughly honest.
+  Foundry plays ZERO statuses at every stage (real doctrine failure, not
+  the statusEngagement blind spot that explains grace's 0). 10 of 70
+  cards never played across the whole sweep (reward-pool-only:
+  achilles-and-the-tortoise, ad-nauseam, captive-audience, entropy-tax,
+  fated-course, heart-of-the-matter, memento-mori, practiced-cadence,
+  straw-mans-jab, the-tithe). Penitent carries 14 keywords, 12 of them
+  orphans (single-card vocabulary) — starter-deck cognitive-load outlier.
+- levers now measurable (PR #119): opp% (opportunity play rate — the cut
+  signal), dWR (win-rate-when-drawn delta), rounds ±σ (consistency — the
+  duplicate-more signal), orphan keywords (reinforce-or-cut), curve-dev,
+  skill-gap (complicated-but-shallow detector). Read dWR comparatively
+  (longer losing runs see more of the deck — negative bias on
+  situational cards).
+- decision shape: owner-led cuts/duplications (color-law fallout applies —
+  recolors or new cards are [needs-user-call]); execution via
+  `/deck-tuning`'s sandbox-first court. Interacts with: "Re-tune the
+  starter library against scoreCard v2" (below — same cards, pricing
+  axis), the mid-game preset library row (trim decisions shape what the
+  mid library must cover), and D-FLIP/D8 (re-measure under flag-on
+  before locking cuts that the new dice model might vindicate).
+
 ### Re-tune the starter library against `scoreCard` v2 (`/deck-tuning`)
 - source: Phase 36a + 36b follow-through (2026-07-17). The pricing model is
   now honest about two axes it was blind to when the shipped 70-card library /
@@ -293,6 +325,18 @@
   via one-off sessions. Scope: promote or absorb the scratch
   harness's per-stage cells into the baseline metrics; keep scratch/
   out of verify. Deps: none hard; most meaningful post-36b.
+- UPDATE 2026-07-18 (metrics-slate session, PR #119): the instrument
+  now exists IN-TREE — `npm run combat-playtest -- --deck=preset:all`
+  sweeps all ten presets and `PlaytestPresetSummary` carries the
+  doctrine-band fit (`PRESET_DOCTRINE_WIN_BANDS`), skill-gap, and
+  static complexity per preset. Scratch-harness absorption is
+  SUPERSEDED; remaining scope is just wiring: run the preset sweep in
+  `baseline:regen` / the reduced nightly pass and stamp a second
+  artifact next to `deck-matrix-baseline.json`, so preset drift is
+  watched instead of sampled. First measurement:
+  `axiomancer-mechanics/docs/reports/preset-sweep-2026-07-18.md`.
+  Sequencing note: re-stamp after D-FLIP/D8 land — the 07-18 report
+  measures the flag-off model.
 
 ## Promoted
 
