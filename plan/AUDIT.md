@@ -14,6 +14,27 @@
 
 ## Pending
 
+### Phase D-FLIP is superseded by the D10-D12 dice-flag teardown — `/oversight` skip it
+- category: divergence
+- impact: 5
+- ease: 8
+- detail: filed 2026-07-18 (plan-a-phase session residue). Owner directed a
+  full flag teardown ("go all in on the dice mechanics, remove the feature
+  flag") → new phases D10-D12 (`plan/steps/01_build_plan.md`;
+  `plan/phases/phase_D10_flag_teardown_mechanics.md`). D10 removes
+  `isUpgradeableDiceEnabled()` from the engine entirely, which ABSORBS
+  D-FLIP's reversible default-flip permanently — D-FLIP is now throwaway
+  work. But D-FLIP still sits `[ ]` and is positioned BEFORE D8 in the
+  status block, so `/march` would dispatch it next. Two coupled drifts to
+  resolve: (1) mark D-FLIP `[skipped]` (only `/oversight` may set that
+  status); (2) shipped-vs-queue mismatch — THE FLIP already made every app
+  build boot Upgradeable Dice ON (`axiomancer-mobile/state/combat/flags.ts`)
+  and memory records it, yet the mechanics-package default is still OFF and
+  no shipped row traces the app-level flip. Confirm the mobile flip is the
+  intended live state (it is, per D-FLIP's owner override) and record it so
+  the queue matches reality.
+- next: /oversight (skip D-FLIP; note the app-level flip as the live state)
+
 ### `deploy:check` is unusable from remote web sessions — 401 "Token rejected"
 - category: debt
 - impact: 4
