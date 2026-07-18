@@ -69,7 +69,7 @@ with their seed count.** A future RNG upgrade (a higher-quality PRNG) would let
 the realized reading converge faster, but is out of D3's scope and touches every
 seeded test — noted for the engine backlog, not actioned here.
 
-### F2 — The yield economy is un-witnessable until stance checks are authored `[needs-user-call]`
+### F2 — The yield economy is un-witnessable until stance checks are authored `[x]` RESOLVED via /oversight 2026-07-18
 
 Realized **yield income = 0.000** across all 900 encounters, because **no enemy
 authors a `stanceCheck` field** (`grep stanceCheck src/Enemy/` → 0 hits). Spec
@@ -86,6 +86,14 @@ still PASSES on specials alone (1.212), so the economy is not starved — but th
   on.
 - Dial options when it lands: check *density* (how many phases carry one),
   and the yield *payout* (spec-fixed at +1◆ today).
+
+**RESOLVED (owner call via /oversight 2026-07-18):** author a **dedicated
+content phase pre-D7** (NOT folded into D6b, NOT deferred past flag-flip).
+Filed as **Phase D6e — Enemy stanceCheck telegraphs (yield-lever content)**
+in `plan/steps/01_build_plan.md`: a first batch of open stance-check
+telegraphs on threat phases (density + payout per the dial options above),
+parallel-safe with the mobile D6a–d stretch and a hard dependency of D7, so
+D7's win-curve read exercises the steer-into-yields loop.
 
 ### F3 — Press Fate is the intended recurring sink but is not equipped by starter loadouts
 

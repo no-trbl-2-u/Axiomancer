@@ -526,7 +526,7 @@
 - suggested fix: owner call — bump small-face lines to 4-5 (layout
   risk: name/glyph crowding) or keep 3 and accept the ellipsis.
 
-### [LOW] [needs-user-call] session doc-residue: three AGENTS/CLAUDE additions proposed, green-light pending
+### [LOW] [green-lit 2026-07-18] session doc-residue: three AGENTS/CLAUDE additions approved — land via /iterate
 - pass: session 2026-07-17 (measurement-freshness work)
 - viewport: n/a
 - category: docs
@@ -542,6 +542,13 @@
   prose — reword a card and its pins in the same commit, never
   silence a guard.
 - suggested fix: on green-light, land all three as one docs commit.
+- RESOLVED (owner call via /oversight 2026-07-18): **green-light all
+  three.** Decision recorded here; the docs edit itself is a shipped-path
+  change, so oversight does not land it — routed to `/iterate` to commit
+  all three as one docs commit (AGENTS.md worktree-bootstrap note; promote
+  the PR auto-merge convention mobile CLAUDE.md → root AGENTS.md; mechanics
+  wording-pin discipline note).
+- next: /iterate (land the three approved doc additions as one docs commit)
 
 ## Done
 

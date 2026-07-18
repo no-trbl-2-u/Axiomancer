@@ -638,6 +638,10 @@ supersession collisions before any engine work.
 > stays the north star; each sub-phase renders spec-33 rules AS-IS by EXTENDING
 > the existing `STANCE_COLORS`/glyph/#5-SIDE-RAIL conventions (never forking),
 > flag-gated so flag-off stays byte-identical.
+>
+> **D6e added via /oversight 2026-07-18** — a fifth D6-band row that is
+> NOT mobile: enemy stanceCheck content (yield-lever), draining D3-F2.
+> Parallel-safe with D6a–d, hard dep of D7. Listed after D6d below.
 
 - [ ] Phase D6a — Flag-on combat render core. The runtime flag hook
       (`globalThis.__AXM_UPGRADEABLE_DICE__` test/dev escape hatch honored by
@@ -662,12 +666,37 @@ supersession collisions before any engine work.
       with prices, cap-refusals grayed + reasoned loudly, gear swap when
       variants exist). A self-contained encounter build (sibling: CacheGate /
       Reliquary). Deps: D5 + D6a.
+      **Placement (owner call via /oversight 2026-07-18):** author exactly
+      **1 blacksmith MapEvent node on the FIRST map** (D5's `'blacksmith'`
+      kind now has a real node) AND wire the encounter into the **Dev menu**
+      (a `dev*` route entry, like the other dev encounter shortcuts) so it is
+      reachable for testing before its map cadence is settled. STILL OPEN
+      (design thread, do NOT guess — filed to `plan/AUDIT.md`): *when* the
+      player first meets the blacksmith, and *whether the blacksmith is even
+      where dice upgrades happen* vs. some other surface — D6c ships the
+      reachable encounter; the cadence/identity call is deferred.
 - [ ] Phase D6d — Flag-on combat e2e. Seeded flag-on browser e2e (bespoke
       `scripts/*.mjs` harness + the D6a flag hook): roll → power a card →
       momentum advances → break resets to null loudly → Press Fate reroll →
       stance check resolves with feedback → blacksmith HONE applied → tray
       reflects the new face table; off-color drop refused loudly. Deps: D6a,
       D6b, D6c.
+- [ ] Phase D6e — Enemy stanceCheck telegraphs (yield-lever content).
+      The MECHANICS/enemy-content member of the D6 band (D6a–d are mobile;
+      this is enemy content — author, no engine change). Promoted via
+      /oversight 2026-07-18 to drain D3-F2: D2 shipped `resolveStanceCheck`
+      and D4 priced the stance-check synergy, but 0 enemies author a
+      `stanceCheck` field, so the `yields: X → +1◆` lever is dark (D3-F2:
+      realized yield income 0.000 across 900 encounters) and D7's win-curve
+      read cannot exercise the steer-into-yields loop the design leans on.
+      Author a first batch of open stance-check telegraphs onto threat phases
+      (check *density* + *payout* per D3-F2's dial options). Owner call: a
+      DEDICATED content phase pre-D7 (not folded into D6b, not deferred past
+      flag-flip). Parallel-safe with D6a–d; hard dep of D7. Brief generates
+      on pickup (source: `plan/tuning/2026-07-17-d3-dice-economy.md` §F2).
+      Prove: enemy-content tests (a threat phase authors a stanceCheck;
+      `resolveStanceCheck` fires the outcome) + a sim witness that realized
+      yield income leaves 0.000. Deps: D2 + D4.
 - [ ] Phase D7 — Tuning, ratification + honest re-baseline. Full
       `/combat-playtest` matrix vs 80/50/25-35/0 (the spec §7 D7 gates);
       ratify D3's economy (blacksmith placeholders die here);
@@ -676,7 +705,7 @@ supersession collisions before any engine work.
       recommendation (flip itself = owner call).
       Brief: `plan/phases/phase_D7_tuning_rebaseline.md`.
       Prove: bands + ratified-constants report + re-baseline stamp.
-      Deps: D4, D6a, D6b, D6c, D6d.
+      Deps: D4, D6a, D6b, D6c, D6d, D6e.
 
 > **After the queue drains:** `/march` transitions to `/iterate`
 > — draining `plan/AUDIT.md` + `plan/CRITIQUE.md`, doc-drift,
