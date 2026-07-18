@@ -604,7 +604,7 @@ supersession collisions before any engine work.
       registered. mechanics+mobile verify green. Valve PROMOTION deferred to
       D5 (5/5/5 locked); stance-check synergy priced but DARK (D3-F2) —
       `feat(mechanics): Upgradeable-Dice D4 pricing re-derivation + card re-authoring` (0e3bd2bb)
-- [ ] Phase D5 — Die gear + blacksmith. The D1 owner-call model: dice are
+- [x] Phase D5 — Die gear + blacksmith. The D1 owner-call model: dice are
       immutable; ALL progression on four dedicated color-coded gear
       slots (separate rail from the 5-piece wear model; pieces are
       spec-05 equipment ITEMS — the dice are not). Gear defines special
@@ -614,6 +614,16 @@ supersession collisions before any engine work.
       Brief: `plan/phases/phase_D5_die_gear_blacksmith.md`.
       Prove: migration + cap-enforcement + payload-timing tests.
       Deps: D2.
+      SHIPPED 2026-07-17 — dieGear rail on Character + pure dieGear.reducer
+      (single-authority cap enforcement: ≥1 miss floor, colored ≤2 / wild ≤1
+      special); blacksmith pure engine (copied from The Reliquary) with
+      HONE/TEMPER/SWAP + PLACEHOLDER pricing (2/3/4◆, D7 ratifies), registered
+      as a 'blacksmith' MapEvent kind; GAME_STATE_VERSION 14→15 migration
+      (backfills concrete default rail). Engine+content only — blacksmith
+      SCREEN + rail UI are D6 (mobile touched only to stay green). 37 hermetic
+      tests; mechanics+mobile verify green. NEEDS-USER-CALL: blacksmith map
+      placement/cadence (no node authored yet) —
+      `feat(mechanics): Upgradeable-Dice D5 die gear rail + blacksmith encounter` (a25373be)
 - [ ] Phase D6 — Mobile UI. Dice-tray rework, die-gear rail +
       payload-only face-inspection panel (Dawncaster-terse; illegal
       actions prevented loudly), Press Fate affordance, momentum/stance
