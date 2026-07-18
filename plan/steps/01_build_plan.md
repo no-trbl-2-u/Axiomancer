@@ -660,12 +660,21 @@ supersession collisions before any engine work.
       global harness); combat sandbox boots clean. NEEDS-USER-CALL: small-screen
       Press-Fate-row crowding (settle at D6b/D6d) —
       `feat(mobile): Upgradeable-Dice D6a — flag-on combat render core` (311e2c3c)
-- [ ] Phase D6b — Momentum/stance chips + stance-check telegraph + gear rail.
+- [x] Phase D6b — Momentum/stance chips + stance-check telegraph + gear rail.
       Momentum-V2 chip reshape ({color, length}, breaks LOUD, surge evented) +
       current-stance chip + open stance-check telegraph (`punishes X`/`yields X`
       in the threat readout with ×1.5/×0.5/+1◆ end-of-phase feedback) + the
       4-slot die-gear rail with a payload-only face-inspection panel
       (Dawncaster-terse). Deps: D6a.
+      Brief: `plan/phases/phase_D6b_chips_telegraph_rail.md`.
+      SHIPPED 2026-07-18 — momentumV2 chip (LOUD "✕ BROKEN" / gold "✦ SURGE",
+      transient recovered by bounded log scan) supersedes the wheel flag-on;
+      stance chip; stance-check telegraph in IntentIcon (D6e's punishes/yields
+      open + live preview + 3-outcome resolution); 4-slot dieGear rail +
+      payload-only inspection panel. Flag-off byte-identical (momentum keys stay
+      [charged,lit]). Mobile verify green (2604 tests, +17). NEEDS-USER-CALL:
+      small-screen crowding now compounds (D6a+D6b rows) — screenshot at D6d —
+      `feat(mobile): Upgradeable-Dice D6b — momentum/stance chips + telegraph + gear rail` (4cf7b752)
 - [ ] Phase D6c — Blacksmith screen. D5's encounter rendered: a
       `<BlacksmithGate>` + `state/blacksmith` slice + `resolveCurrentMapEventAction`
       interception + `app/blacksmith` route + the forge UI (HONE/TEMPER offers
