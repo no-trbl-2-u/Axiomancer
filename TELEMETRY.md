@@ -41,3 +41,4 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-07-18T07:09:52Z | slash-prompt | /march | claude-opus-4-8 | user/ci | /march |
 | 2026-07-18T07:12:29Z | subagent | general-purpose | claude-opus-4-8 | main | Implement Phase D6c blacksmith screen |
 | 2026-07-18T08:09:52Z | slash-prompt | /march | claude-opus-4-8 | user/ci | /march |
+| 2026-07-18T08:12:33Z | subagent | general-purpose | claude-opus-4-8 | main | Implement Phase D6d flag-on combat e2e |
