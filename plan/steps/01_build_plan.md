@@ -699,12 +699,24 @@ supersession collisions before any engine work.
       first-map node (fv-16 "The Anvil", pinned) + Dev-menu shortcut; cadence
       left owner-open. mechanics+mobile verify green (+18 tests) —
       `feat: Upgradeable-Dice D6c — blacksmith encounter screen` (7c315d5f)
-- [ ] Phase D6d — Flag-on combat e2e. Seeded flag-on browser e2e (bespoke
+- [x] Phase D6d — Flag-on combat e2e. Seeded flag-on browser e2e (bespoke
       `scripts/*.mjs` harness + the D6a flag hook): roll → power a card →
       momentum advances → break resets to null loudly → Press Fate reroll →
       stance check resolves with feedback → blacksmith HONE applied → tray
       reflects the new face table; off-color drop refused loudly. Deps: D6a,
       D6b, D6c.
+      Brief: `plan/phases/phase_D6d_flag_on_e2e.md`.
+      SHIPPED 2026-07-18 — `scripts/upgradeable-dice-e2e.mjs` (mirrors
+      combat-encounter-e2e.mjs) boots flag-on, asserts 4-faced-dice roll +
+      always-on surfaces + LOUD off-color refusal + stance-check telegraph +
+      the blacksmith HONE round-trip into the tray (1·2·3→1·3·2 ♥★); 5
+      screenshots @375×812. 3 NOTEd degradations (Press Fate relic-gated in
+      sandbox; momentum advance/break unreachable in demo pool). Mobile verify
+      green (infra only). SURFACED: [needs-investigation] suspected flag-on
+      paid-SWAY commit bug (die spent, SWAY stays 0, card bounces) — under
+      investigation; [needs-user-call] crowding confirmed dense @375×812; stale
+      STAKE button renders flag-on (D2 retired it) —
+      `test(mobile): Upgradeable-Dice D6d — flag-on combat e2e + visual proof` (7af8dbc8)
 - [x] Phase D6e — Enemy stanceCheck telegraphs (yield-lever content).
       The MECHANICS/enemy-content member of the D6 band (D6a–d are mobile;
       this is enemy content — author, no engine change). Promoted via
