@@ -688,7 +688,7 @@ supersession collisions before any engine work.
       stance check resolves with feedback → blacksmith HONE applied → tray
       reflects the new face table; off-color drop refused loudly. Deps: D6a,
       D6b, D6c.
-- [ ] Phase D6e — Enemy stanceCheck telegraphs (yield-lever content).
+- [x] Phase D6e — Enemy stanceCheck telegraphs (yield-lever content).
       The MECHANICS/enemy-content member of the D6 band (D6a–d are mobile;
       this is enemy content — author, no engine change). Promoted via
       /oversight 2026-07-18 to drain D3-F2: D2 shipped `resolveStanceCheck`
@@ -704,6 +704,12 @@ supersession collisions before any engine work.
       Prove: enemy-content tests (a threat phase authors a stanceCheck;
       `resolveStanceCheck` fires the outcome) + a sim witness that realized
       yield income leaves 0.000. Deps: D2 + D4.
+      SHIPPED: threaded `stanceCheck` through the threat-authoring pipeline
+      (it was silently dropped — the enabler F2 assumed already existed),
+      authored 22 checks across 14 enemies (all stances, bosses name two),
+      and flipped CANARY F2 (`yieldIncomePerRound > 0`, ~0.05/round). Brief:
+      `plan/phases/phase_D6e_stancecheck_telegraphs.md`.
+      — `feat(mechanics): enemy stanceCheck telegraphs — phase D6e` (114fbc59)
 - [ ] Phase D6f — The Roll Ritual (dice roll animation). Owner-added
       2026-07-18 (renumbered from D6e at merge — the /oversight session
       minted D6e for stance telegraphs the same day). A 2.5D tumble
