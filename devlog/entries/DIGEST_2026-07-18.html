@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Axiomancer digest — 2026-07-18</title>
+<style>
+:root {
+  color-scheme: light dark;
+  --bg: #0e1116; --fg: #d7dde5; --fg-strong: #f0f3f7; --muted: #6b7480;
+  --accent: #8ab4f8; --panel: #161b22; --card: #12171f; --border: #222833;
+  --row: #141a22; --code-bg: #1b212b; --th: #aeb7c2; --list-head: #9aa4b0;
+  --add: rgba(80,200,120,.16); --del: rgba(230,90,90,.16);
+}
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg: #f7f5ef; --fg: #33302a; --fg-strong: #1a160f; --muted: #6f6656;
+    --accent: #3a5db0; --panel: #efece3; --card: #fbfaf5; --border: #ddd7c9;
+    --row: #efece3; --code-bg: #e9e5d9; --th: #5c5344; --list-head: #6f6656;
+    --add: rgba(35,140,75,.16); --del: rgba(190,55,55,.16);
+  }
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--bg); color: var(--fg);
+  font: 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  -webkit-text-size-adjust: 100%;
+}
+.wrap { max-width: 46rem; margin: 0 auto; padding: 20px 18px 80px; }
+header.top {
+  position: sticky; top: 0; z-index: 5;
+  background: var(--bg); border-bottom: 1px solid var(--border); margin: 0 0 20px;
+}
+header.top .wrap { padding-top: 14px; padding-bottom: 14px; display: flex; align-items: baseline; gap: 14px; }
+header.top a.home, header.top .home { color: var(--accent); text-decoration: none; font-weight: 600; }
+header.top .crumb { color: var(--muted); font-size: 14px; font-variant-numeric: tabular-nums; }
+h1, h2, h3, h4 { line-height: 1.25; color: var(--fg-strong); }
+h1 { font-size: 26px; margin: 0 0 6px; }
+h2 { font-size: 19px; margin: 0; }
+a { color: var(--accent); }
+p { margin: 8px 0; }
+code { background: var(--code-bg); padding: 1px 6px; border-radius: 5px; font-size: 0.86em; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+pre { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; overflow-x: auto; }
+pre code { background: none; padding: 0; }
+.tablewrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+th { background: var(--panel); color: var(--th); font-weight: 600; white-space: nowrap; }
+tr:last-child td { border-bottom: none; }
+ul, ol { padding-left: 22px; }
+li { margin: 4px 0; }
+.muted { color: var(--muted); }
+
+.st { font-weight: 600; white-space: nowrap; }
+.st::before { content: ""; display: inline-block; width: .5em; height: .5em; border-radius: 50%; margin-right: .38em; background: currentColor; vertical-align: middle; }
+.st-ok { color: #4bb96a; }
+.st-neutral { color: var(--muted); }
+.st-warn { color: #d0a92b; }
+.st-bad { color: #e0574b; }
+
+.headline { font-size: 19px; color: var(--fg-strong); margin: 0 0 12px; }
+.counts { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 22px; }
+
+.chip {
+  display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: .04em;
+  text-transform: uppercase; padding: 2px 9px; border-radius: 999px;
+  color: #0b0d10; background: var(--cat, var(--accent)); white-space: nowrap;
+}
+.cat-mechanics { --cat: #d0a92b; }
+.cat-ui { --cat: #5aa9e6; }
+.cat-content { --cat: #7fc45a; }
+.cat-infra { --cat: #b08bf0; }
+.cat-balance { --cat: #e6864b; }
+
+.card {
+  background: var(--card); border: 1px solid var(--border);
+  border-left: 4px solid var(--cat, var(--accent));
+  border-radius: 10px; padding: 14px 18px; margin: 14px 0; scroll-margin-top: 72px;
+}
+.card-head { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.card-head h2 { font-size: 18px; }
+.field { margin: 6px 0; }
+.flabel {
+  display: inline-block; min-width: 3.2em; margin-right: 4px; color: var(--muted);
+  font-weight: 700; font-size: 12px; text-transform: uppercase; letter-spacing: .04em;
+}
+.commits { margin: 8px 0 2px; }
+.commit { font-size: 12px; }
+
+.panel { margin: 22px 0; scroll-margin-top: 72px; }
+.panel > h2 { padding-bottom: 6px; border-bottom: 1px solid var(--border); margin-bottom: 8px; }
+
+.diff {
+  border: 1px solid var(--border); border-radius: 8px; overflow-x: auto; margin: 12px 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; line-height: 1.5;
+  background: var(--bg);
+}
+.dl { padding: 0 12px; white-space: pre; }
+.dl.add { background: var(--add); }
+.dl.del { background: var(--del); }
+.dl.hunk { color: var(--accent); }
+.dl.meta { color: var(--muted); }
+
+figure.shotset { margin: 14px 0; }
+figure.shotset > figcaption { font-size: 14px; color: var(--fg); margin-bottom: 8px; }
+.shots { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+.shot { margin: 0; }
+.shot .role { font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); text-align: center; margin-bottom: 3px; }
+.shot img { width: 100%; height: auto; border: 1px solid var(--border); border-radius: 8px; display: block; }
+
+.entry-list { list-style: none; padding: 0; margin: 8px 0 0; }
+.entry-list li { margin: 0; border-bottom: 1px solid var(--border); }
+.entry-list a { display: block; padding: 14px 4px; text-decoration: none; color: var(--fg); }
+.entry-list a:hover { background: var(--row); }
+.entry-list .date { color: var(--accent); font-weight: 600; font-variant-numeric: tabular-nums; }
+.entry-list .head { color: var(--list-head); font-size: 14px; margin: 2px 0 6px; }
+footer.foot { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--border); color: var(--muted); font-size: 13px; }
+
+/* ── Hub (landing page) ──────────────────────────────────────────────── */
+.hub { display: grid; grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr)); gap: 14px; margin: 22px 0 0; }
+.hub a {
+  display: block; text-decoration: none; color: var(--fg);
+  background: var(--card); border: 1px solid var(--border);
+  border-left: 4px solid var(--hue, var(--accent));
+  border-radius: 12px; padding: 18px 20px; transition: background .12s, transform .12s;
+}
+.hub a:hover { background: var(--row); transform: translateY(-1px); }
+.hub .h-title { font-size: 19px; font-weight: 700; color: var(--fg-strong); margin: 0 0 4px; }
+.hub .h-sub { font-size: 14px; color: var(--muted); }
+.hub .h-glyph { font-size: 22px; line-height: 1; margin-bottom: 8px; display: block; }
+.hue-cards { --hue: #5aa9e6; }
+.hue-enemies { --hue: #e0574b; }
+.hue-effects { --hue: #b08bf0; }
+.hue-log { --hue: #d0a92b; }
+.hue-tuning { --hue: #3ec9b0; }
+
+/* ── Catalog: cards grid ─────────────────────────────────────────────── */
+.searchbar { margin: 14px 0 4px; }
+.searchbar input {
+  width: 100%; padding: 10px 14px; border-radius: 10px; font-size: 15px;
+  background: var(--card); color: var(--fg); border: 1px solid var(--border);
+}
+.count-note { color: var(--muted); font-size: 13px; margin: 6px 0 16px; }
+.grid-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr)); gap: 16px; }
+.gcard {
+  background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+  overflow: hidden; display: flex; flex-direction: column;
+}
+.gcard .art { aspect-ratio: 4 / 3; background: var(--panel); overflow: hidden; }
+.gcard .art img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.gcard .art.none { display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 26px; }
+.gcard .body { padding: 12px 14px 14px; }
+.gcard .name { font-weight: 700; color: var(--fg-strong); margin: 0 0 8px; }
+.gcard .statrow { margin: 0 0 8px; }
+
+/* ── Catalog: enemies ────────────────────────────────────────────────── */
+.grid-enemies { display: grid; grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr)); gap: 16px; }
+.ecard { background: var(--card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+/* Enemy paintings are alpha-matted (figures float on a keyed-out black), so a
+   solid black plate behind them reads as intended in both themes. */
+.ecard .portrait { aspect-ratio: 1 / 1; background: #000; overflow: hidden; }
+.ecard .portrait img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.ecard .portrait.none { display: flex; align-items: center; justify-content: center; color: #6b7480; font-size: 34px; }
+.ecard .body { padding: 12px 15px 15px; }
+.ecard .name { font-size: 18px; font-weight: 700; color: var(--fg-strong); margin: 0; }
+.ecard .sub { color: var(--muted); font-size: 13px; margin: 2px 0 10px; text-transform: capitalize; }
+.statrow { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 10px; }
+.stat { font-size: 12px; font-weight: 700; padding: 2px 9px; border-radius: 999px; background: var(--panel); border: 1px solid var(--border); color: var(--fg); white-space: nowrap; }
+.stat .k { color: var(--muted); font-weight: 600; margin-right: 3px; }
+.stat.hp { --sc: #e0574b; } .stat.body { --sc: #e6864b; } .stat.mind { --sc: #5aa9e6; } .stat.heart { --sc: #7fc45a; }
+.stat.hp, .stat.body, .stat.mind, .stat.heart { border-color: color-mix(in srgb, var(--sc) 55%, var(--border)); }
+.sec-label { font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 700; margin: 10px 0 5px; }
+.fights { font-size: 14px; margin: 0 0 4px; }
+.hint { font-size: 13px; color: var(--muted); font-style: italic; margin: 4px 0 0; }
+.skill { border-top: 1px solid var(--border); padding: 8px 0 0; margin: 8px 0 0; }
+.skill .sk-name { font-weight: 700; color: var(--fg-strong); font-size: 14px; }
+.skill .sk-text { font-size: 13px; color: var(--fg); margin: 2px 0 0; }
+.no-skills { font-size: 13px; color: var(--muted); }
+
+/* ── Catalog: effects ────────────────────────────────────────────────── */
+.eff-list { display: grid; gap: 10px; margin: 8px 0 0; }
+.eff {
+  display: grid; grid-template-columns: 3rem 1fr; gap: 14px; align-items: start;
+  background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px;
+}
+.eff .glyph {
+  width: 3rem; height: 3rem; border-radius: 10px; display: flex; align-items: center; justify-content: center;
+  font-size: 26px; line-height: 1; color: #0b0d10; font-weight: 700;
+  background: var(--gc, var(--accent)); box-shadow: inset 0 0 0 1px rgba(0,0,0,.15);
+}
+.eff .name { font-weight: 700; color: var(--fg-strong); margin: 0 0 6px; }
+.eff .statrow { margin: 0 0 6px; }
+
+/* ── Raw-stat mechanic lines (cards + effects) ───────────────────────── */
+.mods { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 3px; }
+.mods li {
+  margin: 0; font-size: 13px; line-height: 1.4; color: var(--fg);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  padding-left: 12px; position: relative;
+}
+.mods li::before { content: "›"; position: absolute; left: 0; color: var(--muted); }
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap"><a class="home" href="../log.html">← DevLog</a><span class="crumb">2026-07-18</span></div></header>
+<main class="wrap">
+<h1 id="headline">2026-07-18</h1>
+<p class="headline">A marathon single day: the whole Upgradeable-Dice rework (spec 33,</p>
+<div class="counts"><span class="chip cat-mechanics">3 mechanics</span><span class="chip cat-ui">1 UI</span><span class="chip cat-infra">1 infra</span><span class="chip cat-balance">2 balance</span></div>
+<section class="card cat-mechanics" id="upgradeable-dice-spec-lands-engine-core-economy-sim-d1-d3"><div class="card-head"><span class="chip cat-mechanics">mechanics</span><h2>Upgradeable-Dice spec lands + engine core + economy sim (D1-D3)</h2></div>
+<p class="field"><span class="flabel">What</span> the spec-33 dice-as-equipment rework got its pre-code review</p>
+<p class="field"><span class="flabel">Why</span> the shipped Phase 31 momentum wheel and 2026-07-09 dice law</p>
+<p class="commits"><code class="commit">4adf7266</code> <code class="commit">18cf5e3b</code> <code class="commit">61bbc8ca</code></p>
+<p>(die gear replaces face-swapping, STAKE retired, momentum null-reset, surge-until-spent), then shipped flagged: four fixed dice with a die-gear interface, stance-from-cards, honest Press Fate, and a Monte-Carlo sim harness that derived the D3 economy gates (E[usable]≈1.83, whiff≈8.3%, ◆ income 1.21 — all in band). were both slated for supersession by spec 33; D1 settled every open spec question before D2 wrote a line of engine code, so the whole D-series builds on ratified ground instead of guesses.</p></section>
+<section class="card cat-mechanics" id="die-gear-pricing-blacksmith-engine-d4-d5"><div class="card-head"><span class="chip cat-mechanics">mechanics</span><h2>Die gear pricing + blacksmith engine (D4-D5)</h2></div>
+<p class="field"><span class="flabel">What</span> re-fit <code>cards.pricing.ts</code> for the new dice model, re-authored</p>
+<p class="field"><span class="flabel">Why</span> D1's owner call put all dice progression on four dedicated</p>
+<p class="commits"><code class="commit">0e3bd2bb</code> <code class="commit">a25373be</code></p>
+<p>Forge's die-cards plus a special-amplifier enchant, then built the pure blacksmith engine (HONE/TEMPER/SWAP, cap enforcement, a <code>GAME_STATE_VERSION</code> 14→15 migration) as a new <code>blacksmith</code> MapEvent kind. gear slots instead of face-swapping; D4/D5 build the pricing and the selling surface that model needs before any UI can render it.</p></section>
+<section class="card cat-ui" id="upgradeable-dice-combat-ui-blacksmith-screen-d6a-d6c"><div class="card-head"><span class="chip cat-ui">UI</span><h2>Upgradeable-Dice combat UI + blacksmith screen (D6a-D6c)</h2></div>
+<p class="field"><span class="flabel">What</span> the flag-on combat render core (dice-tray face rework, Press</p>
+<p class="field"><span class="flabel">Why</span> D2/D5 built the engine and gear model with zero mobile</p>
+<p class="commits"><code class="commit">311e2c3c</code> <code class="commit">4cf7b752</code> <code class="commit">7c315d5f</code></p>
+<p>Fate control, keyword glosses), momentum/stance chips with a live stance-check telegraph, the 4-slot die-gear rail, and a full blacksmith encounter screen (gate, slice, route, forge UI) shipped back to back — flag-off stays byte-identical throughout. consumer; a scope scout confirmed the render was greenfield, so D6 was split into these three sub-phases rather than shipped as one unrealistic mega-phase.</p></section>
+<section class="panel" id="tests-d6d-flag-on-e2e-finds-and-same-day-fixes-a-d7-blocking-regression"><h2>[tests] D6d flag-on e2e finds — and same-day fixes — a D7-blocking regression</h2>
+<p><strong>What:</strong> the seeded flag-on browser e2e (mirroring the existing combat/hazard e2e harnesses) booted the spec-33 surface for real and caught a HIGH bug: powering a card with a legal die spent the die but never committed the play — the card bounced back to hand. A follow-up fix landed the same day. <strong>Why:</strong> <code>resolveApplyRouting</code> was still draft-model-shaped; a fresh tray die returned <code>draftFirst:true</code> and routed through <code>draftStanceDie</code>, a flag-on no-op, so <code>playCombatCard</code> got no die at all. This is a hard D7 blocker — D7 recommends the flag-flip, and a broken paid-play commit can't ship. Root-caused and fixed same session so the D-series finale stays unblocked; the fix also hid the stale flag-on STAKE affordance (retired in D2). <strong>Commits:</strong> 7af8dbc8, 04d38409</p>
+<div class="diff" role="img" aria-label="code diff"><div class="dl add">+    // Spec 33 (flag-on): the DRAFT is retired — every dropped die is its</div><div class="dl add">+    // OWN power source and MUST be forwarded as the explicit dieId.</div><div class="dl add">+    if (isUpgradeableDiceEnabled()) {</div><div class="dl add">+        return { draftFirst: false, explicitDieId: dieId ?? undefined };</div><div class="dl add">+    }</div></div></section>
+<section class="card cat-mechanics" id="enemy-stancecheck-telegraphs-light-the-dark-yield-lever-d6e"><div class="card-head"><span class="chip cat-mechanics">mechanics</span><h2>Enemy stanceCheck telegraphs light the dark yield lever (D6e)</h2></div>
+<p class="field"><span class="flabel">What</span> every threat phase now backfills a <code>defaultStanceCheck</code></p>
+<p class="field"><span class="flabel">Why</span> D2 shipped <code>resolveStanceCheck</code> and D4 priced the synergy,</p>
+<p class="commits"><code class="commit">0b29ff42</code></p>
+<p>(punishes the enemy's own stance ×1.5, yields to the momentum-chain successor ×0.5 +1◆) at the single <code>getThreatSequence</code> choke point, covering both generated and hand-authored sequences. but zero enemies authored the field — D3's sim caught realized yield income sitting at 0.000 across 900 encounters, meaning D7's win-curve read couldn't exercise the steer-into-yields loop the design leans on. Yield income moved 0.000 → 0.329◆ after this shipped.</p></section>
+<section class="card cat-balance" id="enemy-archetypes-variable-rung-telegraphs-phase-33b"><div class="card-head"><span class="chip cat-balance">balance</span><h2>Enemy archetypes + variable-rung telegraphs (Phase 33b)</h2></div>
+<p class="field"><span class="flabel">What</span> <code>AuthoredThreatPhase</code> now carries <code>enemyCleanse</code>/</p>
+<p class="field"><span class="flabel">Why</span> closes the authoring gap Phase 33a deliberately left open, so</p>
+<p class="commits"><code class="commit">8ceb86e5</code></p>
+<p><code>swayCleanse</code>/<code>premiseShed</code> directly (previously only one hardcoded branch case could ever set <code>enemyCleanse</code>), six mid/late enemies got CAUTERIZE / Premise-shed / SWAY-cleanse counterplay hooks, and threat phases can now override the flat rung default per-phase — with the rung count finally rendered in the mobile intent readout. STAGGER reads as a sized answer to a sized threat rather than a one-way dial, and the counterplay hooks aren't locked to one branch case anymore.</p></section>
+<section class="card cat-balance" id="alt-win-aware-tempo-aware-card-pricing-phases-36a-36b"><div class="card-head"><span class="chip cat-balance">balance</span><h2>Alt-win-aware + tempo-aware card pricing (Phases 36a/36b)</h2></div>
+<p class="field"><span class="flabel">What</span> <code>swayPerStack</code> 0.8→0.9 (derived from CAPITULATE's win-parity</p>
+<p class="field"><span class="flabel">Why</span> the price-experiment session found <code>scoreCard</code> ranking</p>
+<p class="commits"><code class="commit">7d26bebd</code> <code class="commit">1927b15e</code></p>
+<p>math) and a +3 CONCEDE capstone on peroration cards that declare a win condition (was priced at exactly 0), then a tempo-aware repricing pass against the DoT card-played clock. alt-win decks backwards (enchant/disenchant scored 0, SWAY/CONCEDE engines underpriced) and blind to tempo — both promoted the same day as structural fixes ahead of the larger enchant/disenchant pricing remainder (deferred as Phase 36c).</p></section>
+<section class="card cat-infra" id="phase-close-now-actively-closes-the-mirror-issue-via-the-github-api-phase-35"><div class="card-head"><span class="chip cat-infra">infra</span><h2>Phase-close now actively closes the mirror issue via the GitHub API (Phase 35)</h2></div>
+<p class="field"><span class="flabel">What</span> <code>scripts/loop-issue.mjs phase-close</code> now calls `gh issue</p>
+<p class="field"><span class="flabel">Why</span> GitHub only honors closing keywords for commits pushed</p>
+<p class="commits"><code class="commit">59cf9e6e</code></p>
+<p>close --reason completed<code> directly instead of relying solely on the commit's </code>Closes #N<code> trailer. directly to the default branch — phases shipped on cross-session branches reach </code>main` via merge reconciliation, where the trailer is inert. Nine phase mirrors had already leaked open from this gap.</p></section>
+<section class="panel" id="while-you-were-out"><h2>While you were out</h2>
+<div class="tablewrap"><table><thead><tr><th>Time (UTC)</th><th>Verb</th><th>Outcome</th></tr></thead><tbody><tr><td>07-17 11:39 → 13:37</td><td>human/owner session</td><td>Phases 36a/36b (alt-win + tempo pricing) <span class="st st-ok">shipped</span></td></tr><tr><td>07-17 14:32 → 14:42</td><td>march (scheduled)</td><td>tick succeeded — Phase 33b (enemy archetypes + rung telegraphs) <span class="st st-ok">shipped</span></td></tr><tr><td>07-17 14:54 → 22:17</td><td>human/owner session</td><td>Upgradeable-Dice D1-D5 <span class="st st-ok">shipped</span> back to back; Phase 35 (reliable phase-close) <span class="st st-ok">shipped</span></td></tr><tr><td>07-17 23:12 → 23:27</td><td>march (scheduled, PR #107)</td><td>tick succeeded — D6e (enemy stanceCheck telegraphs) <span class="st st-ok">shipped</span></td></tr><tr><td>07-18 02:38 → 05:09</td><td>oversight session</td><td>drained 3 <span class="st st-warn">needs-user</span>-call items; filed FORGE-identity + blacksmith-cadence + Expo-decouple residue</td></tr><tr><td>07-18 01:13 → 05:04</td><td>march (scheduled)</td><td>tick succeeded — D6a, D6b, D6c, D6d (partial) <span class="st st-ok">shipped</span> in sequence</td></tr><tr><td>07-18 05:24</td><td>fix session</td><td>HIGH D7-blocker (flag-on paid-play commit) root-caused and fixed</td></tr><tr><td>07-18 08:11 → 09:27</td><td>march (scheduled)</td><td>tick succeeded — D6d finished landing via a second branch, <span class="st st-ok">merged</span> <span class="st st-ok">clean</span></td></tr><tr><td>07-18 10:04 → now</td><td>digest (this run)</td><td>baseline was STALE by 12 commits → re-measured (reduced-nightly) → FRESH at <code>31f62c1e</code>; breadth check ALL PASS incl. new <code>upgradeable-dice-e2e</code> suite</td></tr></tbody></table></div>
+<p>56 commits landed since yesterday's digest (<code>df759d13</code>). Build-plan queue (<code>plan/steps/01_build_plan.md</code>): D1 through D6e all <code>[x]</code>; D6f (the roll-ritual animation) and D7 (tuning + ratification) remain queued, plus the pre-existing 33c/33d — none blocked. <code>plan/AUDIT.md</code>: 26 pending (was 25; filed one new row this run — see Tuning proposals). <code>plan/CRITIQUE.md</code>: 30 pending (one, the D7-blocker, is <code>[x]</code> RESOLVED today but not yet filed to Done — that's <code>/iterate</code>'s housekeeping). <code>plan/PHASE_CANDIDATES.md</code>: 18 pending, untouched this window. No open <code>triage:needs-user</code> or <code>loop:do</code> issues. Deploy gate: HEAD (<code>31f62c1e</code>) CI-green (<code>verify-mobile</code> success). Breadth check (<code>SMOKE_SAMPLE=full npm run e2e:minigames</code>, browser installed by hand again — <code>plan/AUDIT.md</code> <code>[3.2]</code> still open): hazard, combat, gathering, encounter-routing, exploration-roundtrip, and the new <strong>upgradeable-dice</strong> suite — ALL PASS, including a live regression check that the D7-blocker fix holds ("paid Soft Word COMMITTED — SWAY 0 → 4, card left hand").</p></section>
+<section class="panel" id="needs-you"><h2>Needs you</h2>
+<ul><li><strong>FORGE identity drift</strong> (<code>plan/AUDIT.md</code>, filed 2026-07-18): the</li></ul>
+<p>braindump records "in-combat temporary face upgrades" as part of FORGE's identity, but D1/D4 shipped special-amplifier enchantments instead. Owner-decided in spirit, but wants confirmation the shipped model matches intent before D7 ratifies the economy around it.</p>
+<ul><li><strong>Blacksmith cadence + identity</strong> (<code>plan/AUDIT.md</code>, filed 2026-07-18):</li></ul>
+<p>the blacksmith shipped reachable (1 first-map node + Dev-menu entry) but <em>when</em> the player first meets it, and <em>whether it's even the right surface for dice upgrades</em>, are both still open. Not blocking D6, but D7 tunes the die-gear economy against whatever cadence ships.</p>
+<ul><li><strong><code>[HIGH]</code> phase-mirror #83</strong> (Phase 32) is still open on GitHub — a</li></ul>
+<p>known pre-Phase-35 leak (<code>plan/AUDIT.md</code> <code>[2.4]</code>), not a new issue.</p></section>
+<section class="panel" id="tuning-proposals"><h2>Tuning proposals</h2>
+<p>Reduced-nightly re-measure (blind policy-pick, doctrine early ~80 / mid ~50 / late 25-35 / impossible 0), at <code>31f62c1e</code> vs. the last digest's <code>bf0d3712</code>:</p>
+<div class="tablewrap"><table><thead><tr><th>Stage</th><th>Today</th><th>Last digest</th><th>Band</th><th>Verdict</th></tr></thead><tbody><tr><td>early</td><td>84.4%</td><td>80.2%</td><td>~80%</td><td>in band</td></tr><tr><td>mid</td><td>7.3%</td><td>8.7%</td><td>~50%</td><td><strong>far under, unchanged</strong></td></tr><tr><td>late</td><td>0%</td><td>0.14%</td><td>25-35%</td><td><strong>far under, unchanged</strong></td></tr><tr><td>impossible</td><td>0%</td><td>0%</td><td>0%</td><td>in band</td></tr></tbody></table></div>
+<p>Two full days of engine and balance work (Phase 33b's enemy counterplay hooks, the whole D1-D6e Upgradeable-Dice rework, 36a/36b's alt-win/tempo pricing) landed on top of the last measurement and moved the mid/late bands by noise only — none of it targeted the collapse directly, so this is not a surprise, but it is now confirmed twice running. Filed as a new <code>plan/AUDIT.md</code> row (evidence trail, not a new ask) since the existing CRITIQUE.md HIGH row's "unmeasured" framing is stale — it's measured, repeatedly, and the answer is "no better." Phase D7 ("Tuning, ratification + honest re-baseline") is already queued and scoped to read this curve; nothing here changes that plan, it just sharpens the evidence D7 will act on.</p></section>
+<footer class="foot">Axiomancer DevLog &middot; generated by <code>scripts/build-devlog.mjs</code></footer>
+</main>
+</body>
+</html>

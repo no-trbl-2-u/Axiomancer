@@ -47,3 +47,4 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-07-18T08:15:30Z | subagent | general-purpose | claude-sonnet-5 | main | Survey D6a-c Upgradeable Dice testIDs and components |
 | 2026-07-18T09:09:51Z | slash-prompt | /march | claude-opus-4-8 | user/ci | /march |
 | 2026-07-18T09:13:05Z | subagent | general-purpose | claude-opus-4-8 | main | Fix flag-on paid-play commit D7-blocker |
+| 2026-07-18T10:04:38Z | slash-prompt | /digest | unknown | user/ci | /digest |
