@@ -185,15 +185,15 @@ describe('pricing table — pinned anchors from the spec §4 arithmetic (WS3.5 c
     });
 
     it('phase 36a — SWAY reprices at 0.9/stack (soft-word regression anchor)', () => {
-        // soft-word: SWAY 3 (3×0.9) + FREE RAPPORT i1 d2 seed (0.75×1×2)
-        // + dieBonus SWAY 1 (0.9 ×0.6). The SWAY currency carries the
-        // CAPITULATE-parity reprice; every other term is unchanged.
+        // soft-word: SWAY 3 (3×0.9) + FREE RAPPORT i1 d2 seed (0.75×1×2). The
+        // SWAY currency carries the CAPITULATE-parity reprice; every other term
+        // is unchanged. (The color-match dieBonus rider was removed — a matching
+        // die is now the only way to pay, so the rider was never conditional.)
         const softWord = spells.find(s => s.id === 'soft-word')!;
         const expected =
             3 * VERB_POINTS.swayPerStack
-            + statusPoints('debuff_rapport', 1, 2)
-            + 1 * VERB_POINTS.swayPerStack * CONDITION_DISCOUNTS.dieBonus;
-        expect(scoreCard(softWord)).toBeCloseTo(expected, 2); // 4.74
+            + statusPoints('debuff_rapport', 1, 2);
+        expect(scoreCard(softWord)).toBeCloseTo(expected, 2); // 4.20
     });
 
     it('phase 36a — CONCEDE alt-win prices its +3 capstone (the-closing-word anchor)', () => {

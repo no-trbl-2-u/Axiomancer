@@ -70,10 +70,9 @@ const strawMansJab: Card = {
     tier: 1, rank: 2, cardType: 'spell',
     targetType: 'enemy',
     // pts (phase 30): bleed i2 d2 lifetime ~10/3 ≈ 3.3 + FREE MARK seed i1 d1
-    // (0.6) + dieBonus(+1 int ~1.5 ×0.6 = 0.9) ≈ 4.8 → Lemma
+    // (0.6) ≈ 3.9 → Lemma
     free: { applyEffect: { effectId: 'debuff_mark', intensity: 1, duration: 1 } },
     combatEffects: [{ effectId: 'debuff_bleed', appliedTo: 'opponent', intensity: 2, duration: 2 }],
-    dieBonus: { onColor: 'body', rider: { bonusIntensity: 1 } },
     addedIn: '2026-07-08',
     tags: ['affliction', 'dot'],
 };
@@ -391,11 +390,10 @@ const sketchOfAThought: Card = {
         'Kindling Ember 1 on the enemy for 3 turns — 1 damage at the start of ' +
         'each turn — and KINDLE (mind).',
     // pts (phase 30): KINDLE mind (2.5) + FREE PIP 1 (1.5, forge's currency)
-    // + ember i1 d3 lifetime 3/3=1 + dieBonus(bonusIntensity 1 × 1.5 × 0.6 =
-    // 0.9) = 5.9 -- fits the 1.5-7.5 Doxa/Lemma band for rank 1.
+    // + ember i1 d3 lifetime 3/3=1 = 5.0 -- fits the 1.5-7.5 Doxa/Lemma band
+    // for rank 1.
     free: { pips: 1 },
     combatEffects: [{ effectId: 'debuff_kindling_ember', appliedTo: 'opponent', intensity: 1, duration: 3 }],
-    dieBonus: { onColor: 'mind', rider: { bonusIntensity: 1 } },
     specialMechanics: [{ kind: 'create_temporary_die', color: 'mind' }],
     addedIn: '2026-07-08',
     tags: ['forge', 'dice', 'dot'],
@@ -784,11 +782,9 @@ const redHerring: Card = {
     targetType: 'enemy',
     paidSummary: 'Afflict with BACKFIRE 2 for 2 turns.',
     // pts (phase 30): backfire i2 d2 (3) + FREE reveal the next stance (1.5,
-    // control's currency, replaces the bare draw) + dieBonus(+1 dur ×0.6 =
-    // 0.6) ≈ 5.1 → Lemma
+    // control's currency, replaces the bare draw) ≈ 4.5 → Lemma
     free: { revealStance: true },
     combatEffects: [{ effectId: 'debuff_backfire', appliedTo: 'opponent', intensity: 2, duration: 2 }],
-    dieBonus: { onColor: 'mind', rider: { bonusDuration: 1 } },
     addedIn: '2026-07-08',
     tags: ['control'],
 };
@@ -1049,14 +1045,13 @@ const delphicAmbiguity: Card = {
         'RUPTURE 1 affliction — its remaining damage lands now. Gain 1 SOUL, ' +
         'then FORETELL 1.',
     // pts (phase 30): consume_affliction/RUPTURE 1 (Foretold Wound fuel,
-    // ~4-5) + 1 Soul (0.75) + foretell 1 (1.5) + dieBonus mind pips (0.9) +
-    // FREE FORETELL 1 (1, replaces TICK) ≈ 9.15 → Theorem
+    // ~4-5) + 1 Soul (0.75) + foretell 1 (1.5) +
+    // FREE FORETELL 1 (1, replaces TICK) ≈ 8.25 → Theorem
     free: { foretell: 1 },
     specialMechanics: [
         { kind: 'consume_affliction', souls: 1 },
         { kind: 'foretell', count: 1 },
     ],
-    dieBonus: { onColor: 'mind', rider: { pips: 1 } },
     addedIn: '2026-07-08',
     tags: ['oracle', 'payoff'],
 };
@@ -1280,11 +1275,9 @@ const softWord: Card = {
     targetType: 'enemy',
     paidSummary: 'SWAY 3.',
     // pts (phase 30): SWAY 3 (2.4) + FREE RAPPORT i1 d2 seed (1.5, charm's
-    // rapport-building currency, replaces the bare heal) + dieBonus(SWAY 1
-    // ×0.6 = 0.5) ≈ 4.4 → Doxa
+    // rapport-building currency, replaces the bare heal) ≈ 3.9 → Doxa
     free: { applyEffect: { effectId: 'debuff_rapport', intensity: 1, duration: 2 } },
     specialMechanics: [{ kind: 'sway', amount: 3 }],
-    dieBonus: { onColor: 'heart', rider: { sway: 1 } },
     addedIn: '2026-07-08',
     tags: ['charm', 'alt-win'],
 };
@@ -1484,13 +1477,9 @@ const tuQuoque: Card = {
     targetType: 'self',
     paidSummary: 'THORNS 3 for 2 turns.',
     // pts (phase 30): thorns i3 d2 (~4.5) + FREE persistent GUARD 2 (0.67,
-    // replaces the fading chip) + dieBonus(guard 2 ×0.6 = 0.3) + tempo ≈ 6.67
-    // → Thesis
+    // replaces the fading chip) + tempo ≈ 6.37 → Thesis
     free: { barrier: 2 },
     combatEffects: [{ effectId: 'buff_thorns', appliedTo: 'self', intensity: 3, duration: 2 }],
-    // phase 28: recolored 'body' -> 'heart' — the card is philosophicalAspect
-    // 'heart', so the old onColor:'body' bonus was dead text on a heart card.
-    dieBonus: { onColor: 'heart', rider: { guard: 2 } },
     addedIn: '2026-07-08',
     tags: ['bulwark', 'reflect'],
 };
@@ -1648,10 +1637,9 @@ const adNauseam: Card = {
         'the difference stops mattering. Whatever you say next, says itself twice.',
     tier: 2, rank: 3, cardType: 'spell',
     targetType: 'self',
-    // pts: next spell gains ECHO (≈ ×0.8 of an avg spell ≈ 5) + FREE mark (0.5) + dieBonus(draw ×0.6 = 1.2) ≈ 6.7 → Thesis
+    // pts: next spell gains ECHO (≈ ×0.8 of an avg spell ≈ 5) + FREE mark (0.5) ≈ 5.5 → Thesis
     free: { applyEffect: { effectId: 'debuff_mark', duration: 1 } },
     specialMechanics: [{ kind: 'echo_next_spell' }],
-    dieBonus: { onColor: 'mind', rider: { drawCards: 1 } },
     addedIn: '2026-07-08',
     tags: ['echo', 'recursion'],
 };
