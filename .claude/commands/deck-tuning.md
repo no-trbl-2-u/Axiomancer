@@ -103,6 +103,7 @@ sim — those are the machinery. The skill is the forge + the delivery layer.
 /deck-tuning --focus="impossible"
 /deck-tuning --focus="dead cards in the tier-1 pool"
 /deck-tuning --focus="preset archetype honesty"
+/deck-tuning --focus="swap-measure the reward-pool cards"
 /loop 6h /deck-tuning              # periodic autonomous forging
 ```
 
@@ -123,6 +124,31 @@ The tunable surface is TIERED. Work from the freest tier inward:
   `src/Combat/combat.starter-deck-presets.ts` and the draft weights/defaults in
   `src/Combat/combat.deck-draft.ts` (focus weight 4x, size 10, max copies 2)
   are directly editable with before/after matrix evidence.
+- **Free — measurement seats (swap variants).** Owner ruling 2026-07-18:
+  to measure a card the preset recipes cannot reach (the 10
+  reward-pool-only cards post-5/5/5, or any swap-pool candidate), run
+  SWAP-VARIANT sweeps — temporarily swap the card into a preset's recipe
+  for the treatment arm of an A/B (same seeds, control = the shipped
+  recipe). Swap variants are EVIDENCE devices: they may break the color
+  law and never ship as-is. A shipping recipe change still needs the
+  color-law arithmetic, and a recolor stays the standing owner call.
+  Same ruling: TRIMS of the never-played 10 are PAUSED — swap telemetry
+  replaces the trim conversation until those cards have real numbers
+  (never-played in a preset-only sweep is a reachability fact, not a
+  quality verdict — see
+  `plan/tuning/2026-07-18-card-library-fanout-synthesis.md`).
+- **Free — the swap-pool candidate program (owner-approved 2026-07-18).**
+  Authoring up to ~10–15 candidate cards per theme is approved, with two
+  hard constraints: candidates compose the EXISTING 29 registry keywords
+  only (carrier-density doctrine — reinforce hallmarks toward ≥8 home
+  carriers, don't mint vocabulary), and they live in sandbox sets as
+  swap-pool candidates for preset refinement. They are NOT a player-facing
+  mid-library: Act 1 is the player cycling through the 10 presets to
+  learn the mechanics, Act 2 is picking one deck (where reward cards
+  unlock) — so the presets themselves are the product this pool serves.
+  A candidate enters `cards.library.ts` only via the normal promotion
+  path, and enters a RECIPE only by beating the incumbent seat in
+  swap-variant A/Bs across ≥ 2 stages and ≥ 2 policies.
 - **Guarded — library card numerics.** `combatEffects` intensity/duration,
   `specialMechanics` amounts, and rider numerics in
   `src/Cards/cards.library.ts` may be changed ONLY after a sandbox-override
@@ -195,7 +221,7 @@ Card-level targets on top of the bands:
 | Axis | Target |
 |---|---|
 | Single-card spam | no card id accounts for >70% of a typical win's impact (`buildCombatSummary`) |
-| Dead cards | every library card shows plays in the card-coverage e2e and non-trivial usage somewhere in the full `--cards` matrix |
+| Dead cards | every library card shows plays in the card-coverage e2e and non-trivial usage somewhere in the full `--cards` matrix — for the 10 reward-pool-only cards the preset matrix cannot reach, the witness is a SWAP-VARIANT sweep (§3 measurement seats), not the preset sweep; trims on preset-sweep silence alone are paused (owner 2026-07-18) |
 | FREE/PAID line balance | for every common/uncommon in its home preset, NEITHER printed line takes >85% or <15% of the card's plays (`free%`/`paid%` in the `--cards` table) — both tails mean one line is dead weight. Soft bands: the lint (`src/Combat/e2e/combat-playtest.line-telemetry.sim.test.ts`, thresholds `// PLAYTEST-CALIBRATION`) flags via `console.info`, never fails; cards tagged `intentionallyAsymmetric` (`Card`, `src/Cards/types.ts`) are exempt by design declaration |
 | Pool ratios (v3 — re-derive from the live library before relying on them) | direct damage = 0 by LAW (spec 32: THE STRIKE IS DEAD — a card printing raw HP damage is a spec violation, not a tuning finding); DoT >= 25%; control >= 15%; GUARD/BARRIER >= 1 per theme; Befriend >= 1; state-interactive >= 2 |
 | Per-stage pool health | each stage's eligible pool (`stageEligibleCardIds`) contains at least one live DoT, control, and defend line |
@@ -376,6 +402,7 @@ headline status-engagement / band delta.
 | Free (sandbox) | `src/Cards/cards.sandbox-sets.ts` | named sets: new `Card` literals + `{ cardId, patch }` overrides; example set `forge-example` |
 | Free (composition) | `src/Combat/combat.starter-deck-presets.ts` | the 10 theme preset card lists (`erosion`, `oratory`, `foundry`, `penitent`, `standstill`, `augury`, `tithe`, `grace`, `bastion`, `refrain`) |
 | Free (composition) | `src/Combat/combat.deck-draft.ts` | focus weights (4x), draft size (10), max copies (2), guarantees |
+| Free (measurement) | swap variants of preset recipes | temporary card swaps (treatment arm only) for telemetry on reward-pool / candidate cards; evidence device, never ships as-is |
 | Guarded (A/B first) | `src/Cards/cards.library.ts` | effect intensity/duration, mechanic amounts, rider numerics + the `// pts:` comment (no damage fields exist — spec 32) |
 | Propose-only | — | new mechanics kinds, verb classes, `toCombatCard` / `effectImpact`, engine paths |
 
