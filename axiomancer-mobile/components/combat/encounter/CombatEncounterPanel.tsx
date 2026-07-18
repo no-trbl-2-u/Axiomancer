@@ -46,7 +46,7 @@ import { CombatTutorialCoach } from '@/components/combat/encounter/CombatTutoria
 import { currentCombatTutorialStep } from '@/components/combat/encounter/combat-tutorial-steps';
 import { Image } from 'expo-image';
 import { getEncounterEnemyArt } from '@/assets/images/enemies';
-import { INTENT_ICONS, buildCombatViewModel, resolveApplyRouting, rewardOfferVMs, STANCE_COLORS, type CombatCardVM, type CombatEffectChipVM, type CombatSignatureVM } from '@/state/presenters/combat-encounter.engine';
+import { INTENT_ICONS, buildCombatViewModel, resolveApplyRouting, rewardOfferVMs, STANCE_COLORS, type CombatCardVM, type CombatEffectChipVM, type CombatSignatureVM, type CombatDieGearSlotVM } from '@/state/presenters/combat-encounter.engine';
 import { PlayerPortraitImage } from '@/components/art/PlayerPortraitImage';
 import { useGameState, useGameStore } from '@/state/GameStoreProvider';
 import { COMBAT_TUTORIAL_FLAG, completeCombatTutorialAction, runArchetype, skewRewardsByArchetype } from '@/state/combat/store-actions';
@@ -341,6 +341,8 @@ export function CombatEncounterPanel({
     // `advanceMomentumWheel`) — `vm.momentum` is read straight off engine
     // state, no panel-owned wheel state or grant logic left here. ──
     const [momentumInfoOpen, setMomentumInfoOpen] = useState(false);
+    // Spec 33 §6 (flag-on) — the payload-only die-gear inspection panel target.
+    const [gearInspect, setGearInspect] = useState<CombatDieGearSlotVM | null>(null);
 
     // ── screen-level drag controller (cards + dice) ──
     // dragX/dragY are written straight from the board's gesture worklets every
@@ -583,6 +585,7 @@ export function CombatEncounterPanel({
     const onInspect = useCallback((c: CombatCardVM) => { detailOpenedAt.current = Date.now(); setDetailCard(c); }, []);
     const onPlayerInspect = useCallback(() => setPilgrimOpen(true), []);
     const onMomentumInfo = useCallback(() => setMomentumInfoOpen(true), []);
+    const onGearInspect = useCallback((slot: CombatDieGearSlotVM) => setGearInspect(slot), []);
     const momentum = vm.momentum;
 
     // Ghost stays MOUNTED once the first drag begins (opacity-gated by dragShown):
@@ -621,6 +624,7 @@ export function CombatEncounterPanel({
                     onPlayerInspect={onPlayerInspect}
                     momentum={momentum}
                     onMomentumInfo={onMomentumInfo}
+                    onGearInspect={onGearInspect}
                     onStake={onStake}
                     fx={fx}
                     onFateTap={onFateTap}
@@ -904,6 +908,27 @@ export function CombatEncounterPanel({
                                 </View>
                             </View>
                         </View>
+                    </View>
+                </Pressable>
+            )}
+
+            {/* Spec 33 §6 (flag-on) — the payload-only die-gear inspection panel.
+                Dawncaster-terse: the face table, the +◆ payload, upgrade state.
+                No rules prose beyond what the gear does. */}
+            {gearInspect && (
+                <Pressable style={styles.backdrop} testID="combat-die-gear-inspect" onPress={() => setGearInspect(null)}>
+                    <View style={[styles.tipPlaque, { borderColor: `${gearInspect.colorHex}66` }]} onStartShouldSetResponder={() => true}>
+                        <View style={[styles.tipCorner, styles.tipCornerTl, { borderColor: gearInspect.colorHex }]} pointerEvents="none" />
+                        <View style={[styles.tipCorner, styles.tipCornerTr, { borderColor: gearInspect.colorHex }]} pointerEvents="none" />
+                        <View style={[styles.tipCorner, styles.tipCornerBl, { borderColor: gearInspect.colorHex }]} pointerEvents="none" />
+                        <View style={[styles.tipCorner, styles.tipCornerBr, { borderColor: gearInspect.colorHex }]} pointerEvents="none" />
+                        <GlyphBurst color={gearInspect.colorHex} glyph={gearInspect.glyph} />
+                        <Text style={[styles.tipName, { color: gearInspect.colorHex, textShadowColor: gearInspect.colorHex }]}>
+                            {gearInspect.label} DIE{gearInspect.upgraded ? ' ★' : ''}
+                        </Text>
+                        <Text style={styles.tipGloss}>{gearInspect.faceTable}</Text>
+                        <Text style={[styles.tipGloss, { color: gearInspect.colorHex }]}>SPECIAL payload · {gearInspect.payload}</Text>
+                        <Text style={styles.tipMeta}>{gearInspect.upgraded ? 'upgraded from stock' : 'stock gear'}</Text>
                     </View>
                 </Pressable>
             )}

@@ -27,12 +27,17 @@ import {
     // Spec 33 (Phase D6a) — flag-on combat render core: the die-face axis, the
     // OVERHEAT-crack read, and the Press Fate reroll price. Inert flag-off.
     isUpgradeableDiceEnabled, PRESS_FATE_COST,
+    // Spec 33 (Phase D6b) — the momentum-V2 chain, stance-check telegraph, and
+    // die-gear rail. All inert flag-off (the fields never reach the VM).
+    MOMENTUM_CHAIN_ORDER, MOMENTUM_SURGE_LENGTH, activeDieGear, DEFAULT_DIE_GEAR,
     type CombatEncounterState, type CombatCard, type CombatManaDie,
     type CombatThreatPhase, type CombatIntentType, type CombatReadResult,
     type CombatSummary, type SignatureSkill, type Stance,
     type Card, type CardCombatEffects, type EnemyDifficulty,
+    type UpgradeableDieGear,
     isMomentumDieId, type WheelStance,
 } from '@mechanics';
+import { momentumV2A11y } from '@/state/combat/momentum';
 
 /** The barrel doesn't re-export the union, so derive it from Card. */
 type CardSpecialMechanic = NonNullable<Card['specialMechanics']>[number];
@@ -262,6 +267,33 @@ export interface CombatIntentVM {
         projectedDamage: number; netDamage: number; willDeny: boolean; guard: number; barrier: number;
         rungsTotal: number; rungsLost: number;
     };
+    /** Spec 33 §5 (Phase D6b, FLAG-ON ONLY) — the OPEN stance-check telegraph for
+     *  this phase (D6e authored `punishes`/`yields` on every threat phase): what
+     *  this hit does to the player's current stance, plus the end-of-phase
+     *  resolution feedback. ABSENT flag-off (key-for-key byte-identical). */
+    stanceCheck?: CombatStanceCheckVM | null;
+}
+/**
+ * Spec 33 §5 (Phase D6b) — the open stance check on a threat phase. NO hidden
+ * information (owner-UI doctrine): both the punish and the yield stances are
+ * telegraphed with their multiplier, and once the phase resolves the outcome
+ * (×1.5 punished / ×0.5 yielded +1◆ / none) is shown plainly.
+ */
+export interface CombatStanceCheckVM {
+    /** The stance this hit PUNISHES (×1.5), or null. */
+    punishes: WheelStance | null;
+    /** The stance this hit YIELDS to (×0.5 + you gain 1◆), or null. */
+    yields: WheelStance | null;
+    /** Terse telegraph line, e.g. 'Punishes BODY ×1.5' — null when no punish. */
+    punishesText: string | null;
+    /** Terse telegraph line, e.g. 'Yields to MIND ×0.5 +1◆' — null when none. */
+    yieldsText: string | null;
+    /** Which telegraphed branch the player's CURRENT stance is walking into
+     *  right now (live preview before the hit lands): 'punished'/'yielded'/'none'. */
+    live: 'punished' | 'yielded' | 'none';
+    /** The last resolved outcome for this check (from the `stance-check-resolved`
+     *  event), or null before the phase has resolved. */
+    resolution: { outcome: 'punished' | 'yielded' | 'none'; stance: Stance | null; text: string } | null;
 }
 export interface CombatEnemyPaneVM {
     name: string; artKey: string; isBoss: boolean;
@@ -538,6 +570,64 @@ export interface CombatPressFateVM {
     /** The refusal reason to show when disabled; null when enabled. */
     reason: string | null;
 }
+/**
+ * Spec 33 §3 (Phase D6b, FLAG-ON ONLY) — the Momentum-V2 chain chip. Replaces
+ * the three-node wheel's `{ lit, charged }` read: spec-33 momentum is a single
+ * chain `{ color, length }`. A BREAK collapses it to null and the chip must
+ * teach that LOUDLY; a SURGE forges a temporary gold die and also resets. Both
+ * transient states are derived from the event log (the null value alone can't
+ * tell an empty chain from a just-broken one).
+ */
+export interface CombatMomentumV2VM {
+    /** The chain's live color (the last chained stance), or null when no chain. */
+    color: WheelStance | null;
+    /** The chain length (0 when null; 1..surgeAt-1 while building). */
+    length: number;
+    /** The chain length that surges (`MOMENTUM_SURGE_LENGTH`). */
+    surgeAt: number;
+    /** The stance that ADVANCES the chain next (null when no chain). */
+    next: WheelStance | null;
+    /** LOUD state — the chain just BROKE to null (owner-locked strict rule). */
+    broke: boolean;
+    /** Celebratory state — the chain just SURGED (gold die granted). */
+    surged: boolean;
+    /** The chain color's palette hex (neutral when null). */
+    colorHex: string;
+    a11y: string;
+}
+/**
+ * Spec 33 §2 (Phase D6b, FLAG-ON ONLY) — the player's CURRENT stance chip (the
+ * stance of the last PAID card). A clear "no stance" renders when null.
+ */
+export interface CombatStanceChipVM {
+    stance: WheelStance | null;
+    label: string;   // 'HEART' / 'NO STANCE'
+    glyph: string;   // the stance glyph / '—'
+    colorHex: string;
+    a11y: string;
+}
+/** Spec 33 §6 (Phase D6b) — one die's gear slot in the rail + inspection VM. */
+export interface CombatDieGearSlotVM {
+    color: 'heart' | 'body' | 'mind' | 'wild';
+    label: string;   // 'HEART' / 'WILD'
+    glyph: string;
+    colorHex: string;
+    specialFaces: number;
+    manaFaces: number;
+    missFaces: number;
+    specialConviction: number;
+    /** Terse face table, e.g. '1 special · 2 mana · 3 miss'. */
+    faceTable: string;
+    /** Payload text for the SPECIAL face, e.g. '+2 ◆'. */
+    payload: string;
+    /** True when this slot's gear differs from the stock default (upgraded). */
+    upgraded: boolean;
+    a11y: string;
+}
+/** Spec 33 §6 (Phase D6b, FLAG-ON ONLY) — the 4-slot die-gear rail. */
+export interface CombatDieGearRailVM {
+    slots: CombatDieGearSlotVM[];   // heart, body, mind, wild (rail order)
+}
 export interface CombatViewModel {
     phase: CombatEncounterState['phase'];
     enemy: CombatEnemyPaneVM;
@@ -579,6 +669,14 @@ export interface CombatViewModel {
     /** Spec 33 §4 (flag-on) — the Press Fate reroll affordance, or null (flag-off
      *  / no reroll signature in the loadout). */
     pressFate: CombatPressFateVM | null;
+    /** Spec 33 §3 (Phase D6b, flag-on) — the Momentum-V2 chain chip, or null
+     *  flag-off (the old three-node `momentum` wheel renders instead). */
+    momentumV2: CombatMomentumV2VM | null;
+    /** Spec 33 §2 (Phase D6b, flag-on) — the player's current-stance chip, or
+     *  null flag-off. */
+    playerStance: CombatStanceChipVM | null;
+    /** Spec 33 §6 (Phase D6b, flag-on) — the die-gear rail, or null flag-off. */
+    dieGear: CombatDieGearRailVM | null;
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -643,8 +741,50 @@ function branchVM(phase: CombatThreatPhase | undefined): CombatIntentBranchVM | 
     };
 }
 
+/** Spec 33 §5 (Phase D6b, flag-on) — the OPEN stance-check telegraph for a
+ *  phase. Reads D6e's authored `punishes`/`yields`, previews what the player's
+ *  CURRENT stance walks into, and surfaces the last resolved outcome from the
+ *  event log. Null when the flag is off or the phase carries no check. */
+function stanceCheckVM(
+    state: CombatEncounterState,
+    phase: CombatThreatPhase | undefined,
+    phaseIndex: number,
+): CombatStanceCheckVM | null {
+    if (!isUpgradeableDiceEnabled()) return null;
+    const check = phase?.stanceCheck;
+    if (!check || (!check.punishes && !check.yields)) return null;
+    const punishes = (check.punishes ?? null) as WheelStance | null;
+    const yields = (check.yields ?? null) as WheelStance | null;
+    const adv = READ_DAMAGE_MULT.advantage;      // ×1.5
+    const dis = READ_DAMAGE_MULT.disadvantage;   // ×0.5
+    const punishesText = punishes ? `Punishes ${STANCE_LABELS[punishes]} ×${adv}` : null;
+    const yieldsText = yields ? `Yields to ${STANCE_LABELS[yields]} ×${dis} +1◆` : null;
+    // Live preview — where the player's CURRENT stance stands vs this check.
+    const stance = state.playerStance ?? null;
+    const live: 'punished' | 'yielded' | 'none' =
+        stance && punishes === stance ? 'punished'
+            : stance && yields === stance ? 'yielded'
+                : 'none';
+    // Last resolved outcome for THIS phase (the engine logs it at phase end).
+    let resolution: CombatStanceCheckVM['resolution'] = null;
+    for (let i = state.log.length - 1; i >= 0; i--) {
+        const ev = state.log[i];
+        if (ev.kind === 'stance-check-resolved' && ev.phaseIndex === phaseIndex) {
+            resolution = {
+                outcome: ev.outcome, stance: ev.stance,
+                text: ev.outcome === 'punished' ? `Punished ×${adv}`
+                    : ev.outcome === 'yielded' ? `Yielded ×${dis} +1◆`
+                        : 'No stance check',
+            };
+            break;
+        }
+    }
+    return { punishes, yields, punishesText, yieldsText, live, resolution };
+}
+
 function intentVM(state: CombatEncounterState): CombatIntentVM {
     const cur = currentPhase(state);
+    const curIdx = Math.min(state.currentPhaseIndex, state.threatPhases.length - 1);
     const type = (cur?.intentType ?? 'pass') as CombatIntentType;
     const meta = INTENT_ICONS[type];
     const nextPhase = state.threatPhases[state.currentPhaseIndex + 1];
@@ -655,6 +795,9 @@ function intentVM(state: CombatEncounterState): CombatIntentVM {
     const damage = effects.reduce((s, e) => s + (e.damage ?? 0), 0);
     const debuffs = effects.some((e) => !!e.effectId);
     const threat = projectIncomingThreat(state);
+    // Spec 33 §5 (flag-on): the open stance-check telegraph. Spread so the key is
+    // ABSENT flag-off — the threat readout VM stays byte-identical.
+    const stanceCheck = stanceCheckVM(state, cur, curIdx);
     return {
         type, icon: meta.icon, label: cur?.intentLabel ?? meta.label, color: meta.color,
         description: cur?.threatAction.description ?? '', damage, debuffs,
@@ -664,6 +807,7 @@ function intentVM(state: CombatEncounterState): CombatIntentVM {
             willDeny: threat.willDeny, guard: threat.guard, barrier: threat.barrier,
             rungsTotal: threat.rungsTotal, rungsLost: threat.rungsLost,
         },
+        ...(isUpgradeableDiceEnabled() ? { stanceCheck } : {}),
     };
 }
 
@@ -1955,6 +2099,93 @@ function pressFateVM(state: CombatEncounterState): CombatPressFateVM | null {
     return { signatureId, cost, enabled: reason === null, reason };
 }
 
+// ── Spec 33 §3 — Momentum-V2 chain chip (flag-on) ────────────────────────────
+
+/** The stance that advances the chain next — the successor in chain order. */
+function nextChainColor(s: WheelStance): WheelStance {
+    return MOMENTUM_CHAIN_ORDER[(MOMENTUM_CHAIN_ORDER.indexOf(s) + 1) % MOMENTUM_CHAIN_ORDER.length];
+}
+
+/**
+ * Reshapes momentum to the spec-33 chain. Returns null flag-off (the old
+ * three-node `momentum` wheel renders instead). Flag-on, `state.momentumV2`
+ * ({color,length}|null) drives it; the transient BREAK / SURGE states — both of
+ * which leave momentum null — are recovered from the most-recent momentum event
+ * in the log so a just-broken chain reads LOUD, not merely empty.
+ */
+function momentumV2VM(state: CombatEncounterState): CombatMomentumV2VM | null {
+    if (!isUpgradeableDiceEnabled()) return null;
+    const m = state.momentumV2 ?? null;
+    const color = m?.color ?? null;
+    const length = m?.length ?? 0;
+    // Only when the chain sits at null can a break/surge be the live transient —
+    // any live chain already superseded them. Scan back for the last chain event.
+    let broke = false;
+    let surged = false;
+    if (m === null) {
+        for (let i = state.log.length - 1; i >= 0; i--) {
+            const ev = state.log[i];
+            if (ev.kind === 'momentum-broken') { broke = true; break; }
+            if (ev.kind === 'momentum-surged') { surged = true; break; }
+            if (ev.kind === 'momentum-advanced') break; // a live chain formed after
+        }
+    }
+    const next = color ? nextChainColor(color) : null;
+    const surgeAt = MOMENTUM_SURGE_LENGTH;
+    return {
+        color, length, surgeAt, next, broke, surged,
+        colorHex: color ? STANCE_COLORS[color] : '#6b6257',
+        a11y: momentumV2A11y({ color, length, next, surgeAt, broke, surged }),
+    };
+}
+
+// ── Spec 33 §2 — player current-stance chip (flag-on) ────────────────────────
+
+function playerStanceVM(state: CombatEncounterState): CombatStanceChipVM | null {
+    if (!isUpgradeableDiceEnabled()) return null;
+    const stance = state.playerStance ?? null;
+    if (!stance) {
+        return {
+            stance: null, label: 'NO STANCE', glyph: '—', colorHex: '#6b6257',
+            a11y: 'No stance yet — play a paid card to take its stance.',
+        };
+    }
+    return {
+        stance, label: STANCE_LABELS[stance], glyph: DIE_GLYPHS[stance] ?? '?',
+        colorHex: STANCE_COLORS[stance],
+        a11y: `Current stance: ${STANCE_LABELS[stance]} — from the last paid card.`,
+    };
+}
+
+// ── Spec 33 §6 — die-gear rail + payload-only inspection (flag-on) ────────────
+
+const GEAR_RAIL_ORDER: readonly ('heart' | 'body' | 'mind' | 'wild')[] = ['heart', 'body', 'mind', 'wild'];
+
+function gearSlotVM(state: CombatEncounterState, color: 'heart' | 'body' | 'mind' | 'wild'): CombatDieGearSlotVM {
+    // D5's rail if present; else the engine's stock default (activeDieGear resolves both).
+    const gear: UpgradeableDieGear = activeDieGear(state, color);
+    const missFaces = Math.max(0, 6 - gear.specialFaces - gear.manaFaces);
+    const stock = DEFAULT_DIE_GEAR[color];
+    const upgraded = gear.specialFaces !== stock.specialFaces
+        || gear.manaFaces !== stock.manaFaces
+        || gear.specialConviction !== stock.specialConviction;
+    const faceTable = `${gear.specialFaces} special · ${gear.manaFaces} mana · ${missFaces} miss`;
+    const payload = `+${gear.specialConviction} ◆`;
+    const label = STANCE_LABELS[color] ?? color.toUpperCase();
+    return {
+        color, label, glyph: DIE_GLYPHS[color] ?? '?', colorHex: STANCE_COLORS[color] ?? '#888',
+        specialFaces: gear.specialFaces, manaFaces: gear.manaFaces, missFaces,
+        specialConviction: gear.specialConviction, faceTable, payload, upgraded,
+        a11y: `${label} die gear — ${faceTable}. Special face grants ${payload}.`
+            + (upgraded ? ' Upgraded from stock.' : ' Stock.'),
+    };
+}
+
+function dieGearRailVM(state: CombatEncounterState): CombatDieGearRailVM | null {
+    if (!isUpgradeableDiceEnabled()) return null;
+    return { slots: GEAR_RAIL_ORDER.map((c) => gearSlotVM(state, c)) };
+}
+
 // ── Entry point ──────────────────────────────────────────────────────────────
 
 export function buildCombatViewModel(state: CombatEncounterState): CombatViewModel {
@@ -1993,5 +2224,8 @@ export function buildCombatViewModel(state: CombatEncounterState): CombatViewMod
         discardCards: state.discard.map((id) => ({ id, name: getCardById(id)?.name ?? id })),
         peroration: perorationVM(state),
         pressFate: pressFateVM(state),
+        momentumV2: momentumV2VM(state),
+        playerStance: playerStanceVM(state),
+        dieGear: dieGearRailVM(state),
     };
 }

@@ -45,6 +45,7 @@ import { makeStyles, usePalette } from '@/theme/runtime';
 import type {
     CombatViewModel, CombatCardVM, CombatDieVM,
     CombatSignatureVM, CombatEffectChipVM, CombatPerorationVM, CombatPressFateVM,
+    CombatMomentumV2VM, CombatStanceChipVM, CombatDieGearRailVM, CombatDieGearSlotVM,
 } from '@/state/presenters/combat-encounter.engine';
 import { armedReadValue, dieCanPowerCardVM, STANCE_COLORS } from '@/state/presenters/combat-encounter.engine';
 import { wheelNext, type WheelStance } from '@/state/combat/momentum';
@@ -587,6 +588,116 @@ function MomentumWheel({ lit, charged, onPress }: { lit: WheelStance[]; charged:
     );
 }
 
+// ── Spec 33 §3 (Phase D6b, flag-on) — Momentum-V2 chain chip ─────────────────
+
+const CHAIN_GLYPHS: Record<string, string> = { heart: '♥', body: '⚡', mind: '★' };
+
+/** The spec-33 momentum chain: a single color + length (heart→body→mind),
+ *  NOT the three-node wheel. A BREAK collapses it to null and reads LOUD
+ *  (owner-locked strict rule — the chip teaches it); a SURGE flashes gold. */
+function MomentumChainChip({ vm, onPress }: { vm: CombatMomentumV2VM; onPress?: () => void }) {
+    const AXM = usePalette();
+    const styles = useStyles();
+    const { color, length, surgeAt, next, broke, surged, colorHex, a11y } = vm;
+    return (
+        <Pressable
+            style={styles.wheelRow}
+            onPress={onPress}
+            testID="combat-momentum-v2"
+            accessibilityRole="button"
+            accessibilityLabel={a11y}
+            accessibilityHint="Tap for how momentum works"
+        >
+            {broke ? (
+                <Text style={[styles.chainBroke, { color: AXM.blood }]} allowFontScaling={false} testID="combat-momentum-broke">
+                    ✕ MOMENTUM BROKEN
+                </Text>
+            ) : surged ? (
+                <Text style={[styles.wheelCharged, { color: AXM.sulfur, textShadowColor: AXM.sulfur }]} allowFontScaling={false} testID="combat-momentum-surged">
+                    ✦ MOMENTUM SURGE
+                </Text>
+            ) : color === null || length === 0 ? (
+                <Text style={[styles.chainEmpty, { color: AXM.ash }]} allowFontScaling={false}>○ no momentum</Text>
+            ) : (
+                <>
+                    {Array.from({ length: surgeAt }, (_u, i) => {
+                        const filled = i < length;
+                        return (
+                            <View
+                                key={i}
+                                style={[
+                                    styles.chainNode,
+                                    { borderColor: filled ? colorHex : AXM.ash, backgroundColor: filled ? `${colorHex}30` : 'rgba(0,0,0,0.5)' },
+                                ]}
+                            >
+                                <Text style={[styles.wheelGlyph, { color: filled ? colorHex : AXM.ash, textShadowColor: filled ? colorHex : 'transparent' }]} allowFontScaling={false}>
+                                    {filled ? (CHAIN_GLYPHS[color] ?? '◆') : '·'}
+                                </Text>
+                            </View>
+                        );
+                    })}
+                    {next ? (
+                        <Text style={[styles.chainNext, { color: STANCE_COLORS[next] ?? AXM.bone }]} allowFontScaling={false}>
+                            → {CHAIN_GLYPHS[next] ?? ''}
+                        </Text>
+                    ) : null}
+                </>
+            )}
+        </Pressable>
+    );
+}
+
+// ── Spec 33 §2 (Phase D6b, flag-on) — player current-stance chip ─────────────
+
+function StanceChip({ vm }: { vm: CombatStanceChipVM }) {
+    const AXM = usePalette();
+    const styles = useStyles();
+    const active = vm.stance !== null;
+    return (
+        <View
+            style={[styles.stanceChip, { borderColor: active ? vm.colorHex : AXM.ash }]}
+            testID="combat-player-stance"
+            accessible
+            accessibilityRole="text"
+            accessibilityLabel={vm.a11y}
+        >
+            <Text style={[styles.stanceChipGlyph, { color: active ? vm.colorHex : AXM.ash }]} allowFontScaling={false}>{vm.glyph}</Text>
+            <Text style={[styles.stanceChipLabel, { color: active ? vm.colorHex : AXM.bone }]} allowFontScaling={false}>{vm.label}</Text>
+        </View>
+    );
+}
+
+// ── Spec 33 §6 (Phase D6b, flag-on) — die-gear rail (4 slots) ────────────────
+
+/** Mirrors the dice-tray layout idiom: four slots (heart/body/mind/wild) each a
+ *  tappable gear badge. A tap opens the payload-only inspection panel (owned by
+ *  CombatEncounterPanel). Upgraded slots read with a ★ marker. */
+function DieGearRail({ rail, onInspect }: { rail: CombatDieGearRailVM; onInspect?: (slot: CombatDieGearSlotVM) => void }) {
+    const styles = useStyles();
+    return (
+        <View style={styles.gearRail} testID="combat-die-gear-rail">
+            {rail.slots.map((slot) => (
+                <Pressable
+                    key={slot.color}
+                    style={[styles.gearSlot, { borderColor: slot.colorHex }]}
+                    onPress={() => onInspect?.(slot)}
+                    testID={`combat-die-gear-${slot.color}`}
+                    accessibilityRole="button"
+                    accessibilityLabel={slot.a11y}
+                    accessibilityHint="Tap to inspect this die's faces and payload"
+                >
+                    <Text style={[styles.gearGlyph, { color: slot.colorHex, textShadowColor: slot.colorHex }]} allowFontScaling={false}>
+                        {slot.glyph}{slot.upgraded ? ' ★' : ''}
+                    </Text>
+                    <Text style={[styles.gearFaces, { color: slot.colorHex }]} allowFontScaling={false}>
+                        {slot.specialFaces}·{slot.manaFaces}·{slot.missFaces}
+                    </Text>
+                </Pressable>
+            ))}
+        </View>
+    );
+}
+
 // ── THE STAKE (Phase 31/EA-7) — pre-play Conviction wager chip ───────────────
 
 /** Post-draft, pre-play wager on the enemy's hidden stance this threat
@@ -794,6 +905,8 @@ export interface CombatBoardProps {
     momentum?: { lit: WheelStance[]; charged: boolean };
     /** Tap the wheel → how-momentum-works popup. */
     onMomentumInfo?: () => void;
+    /** Spec 33 §6 (flag-on) — tap a die-gear slot → payload-only inspection panel. */
+    onGearInspect?: (slot: CombatDieGearSlotVM) => void;
     /** Phase 31 (EA-7) — place a pre-play wager on the hidden stance this
      *  threat phase (color + amount, 2◆/4◆/6◆). */
     onStake?: (color: WheelStance, amount: 2 | 4 | 6) => void;
@@ -819,7 +932,7 @@ export interface CombatBoardProps {
 }
 
 export const CombatBoard = React.memo(function CombatBoard({
-    vm, drag, stagedUids, onApply, onStage, onUnstage, onDiscard, onSignature, onEndPhase, resolving = false, onInspect, onChip, onSignatureInfo, onPlayerInspect, momentum, onMomentumInfo, onStake, fx,
+    vm, drag, stagedUids, onApply, onStage, onUnstage, onDiscard, onSignature, onEndPhase, resolving = false, onInspect, onChip, onSignatureInfo, onPlayerInspect, momentum, onMomentumInfo, onGearInspect, onStake, fx,
     onFateTap, bankSpare, onToggleBankSpare, onReprisalNeeded,
 }: CombatBoardProps) {
     const AXM = usePalette();
@@ -1306,10 +1419,19 @@ export const CombatBoard = React.memo(function CombatBoard({
                     </View>
                 </View>
 
-                {/* momentum wheel — stance-sequencing combo tracker (heart→body→mind) */}
-                {momentum ? (
+                {/* momentum — spec-33 chain chip (flag-on) supersedes the old
+                    three-node wheel; both stance-sequence combo trackers. */}
+                {vm.momentumV2 ? (
+                    <MomentumChainChip vm={vm.momentumV2} onPress={onMomentumInfo} />
+                ) : momentum ? (
                     <MomentumWheel lit={momentum.lit} charged={momentum.charged} onPress={onMomentumInfo} />
                 ) : null}
+
+                {/* Spec 33 §2 (flag-on) — the player's current-stance chip. */}
+                {vm.playerStance ? <StanceChip vm={vm.playerStance} /> : null}
+
+                {/* Spec 33 §6 (flag-on) — the die-gear rail; tap a slot to inspect. */}
+                {vm.dieGear ? <DieGearRail rail={vm.dieGear} onInspect={onGearInspect} /> : null}
 
                 {/* Premise track + CONCEDE beat (phase 28) — the peroration theme's win condition */}
                 <PerorationTrack peroration={vm.peroration} />
@@ -1790,6 +1912,28 @@ const useStyles = makeStyles((AXM) => ({
     wheelGlyph: { fontSize: 12, lineHeight: 15, textShadowRadius: 6, textShadowOffset: { width: 0, height: 0 } },
     wheelChevron: { fontFamily: FONTS.sans, fontSize: 13, color: '#5a5346', marginHorizontal: -1 },
     wheelCharged: { fontFamily: FONTS.sans, fontSize: 11, letterSpacing: 1.6, marginLeft: 7, textShadowRadius: 7, textShadowOffset: { width: 0, height: 0 } },
+    // ── Spec 33 §3 — momentum-V2 chain chip ──
+    chainNode: { width: 24, height: 24, borderRadius: 12, borderWidth: 2, alignItems: 'center', justifyContent: 'center' },
+    chainNext: { fontFamily: FONTS.sans, fontSize: 13, marginLeft: 4 },
+    chainEmpty: { fontFamily: FONTS.mono, fontSize: 11, letterSpacing: 0.5 },
+    chainBroke: { fontFamily: FONTS.sans, fontSize: 11, letterSpacing: 1.4, textShadowRadius: 6, textShadowOffset: { width: 0, height: 0 } },
+    // ── Spec 33 §2 — player current-stance chip ──
+    stanceChip: {
+        flexDirection: 'row', alignItems: 'center', gap: 4, alignSelf: 'center',
+        borderWidth: 1, borderRadius: 5, paddingHorizontal: 8, paddingVertical: 3, marginBottom: 2,
+        backgroundColor: 'rgba(0,0,0,0.55)',
+    },
+    stanceChipGlyph: { fontFamily: FONTS.sans, fontSize: 13, textShadowRadius: 5, textShadowOffset: { width: 0, height: 0 } },
+    stanceChipLabel: { fontFamily: FONTS.mono, fontSize: 10, letterSpacing: 1 },
+    // ── Spec 33 §6 — die-gear rail ──
+    gearRail: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 3, marginBottom: 2 },
+    gearSlot: {
+        alignItems: 'center', justifyContent: 'center', minWidth: 46,
+        borderWidth: 1, borderRadius: 5, paddingHorizontal: 6, paddingVertical: 3,
+        backgroundColor: 'rgba(0,0,0,0.55)',
+    },
+    gearGlyph: { fontFamily: FONTS.sans, fontSize: 13, textShadowRadius: 5, textShadowOffset: { width: 0, height: 0 } },
+    gearFaces: { fontFamily: FONTS.mono, fontSize: 8, letterSpacing: 0.3, marginTop: 1 },
     fanGlow: { position: 'absolute', bottom: 0, left: 0 },
     fan: { ...StyleSheet.absoluteFillObject, flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'center', paddingHorizontal: 12, paddingBottom: 20 },
 
