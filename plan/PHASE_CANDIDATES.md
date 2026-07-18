@@ -338,6 +338,23 @@
   Sequencing note: re-stamp after D-FLIP/D8 land — the 07-18 report
   measures the flag-off model.
 
+### Card evolution (`[needs-user-call]` — pointer restored 2026-07-18)
+- source: `plan/tuning/2026-07-11-card-library-improvement-plan.md` §2
+  ("Deliberately deferred / parked", GPT rec 3). That doc says the item
+  is "parked as a phase candidate," but no row existed here — the
+  oversight standing sweep only drains what's in this file, so the park
+  was invisible. Pointer restored as oversight-session residue
+  2026-07-18.
+- shape: doctrine-shaped card growth — a card's FREE-line evolution /
+  PAID specialization / cost-consequence fork; fits
+  rank-as-epistemic-maturity. Needs a card-INSTANCE state schema
+  (collection persistence, editor support, `GAME_STATE_VERSION`
+  migration) — a full phase, and per the source doc worthless until the
+  library/preset foundation settles (starter trim + scoreCard-v2 retune
+  + D-FLIP/D8 first).
+- status: parked, `[needs-user-call]` — owner decides at a future
+  oversight whether/when to design it; do not self-promote.
+
 ## Promoted
 
 ### D8 — one dice valve in every starter preset

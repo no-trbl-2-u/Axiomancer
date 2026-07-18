@@ -14,6 +14,41 @@
 
 ## Pending
 
+### `deploy:check` is unusable from remote web sessions — 401 "Token rejected"
+- category: debt
+- impact: 4
+- ease: 5
+- detail: filed 2026-07-18 (oversight session residue). Running
+  `npm run deploy:check` from a Claude Code web session fails with
+  `GitHub Actions API error: 401 Unauthorized / Token rejected` — the
+  script needs the repo-scoped `GH_TOKEN` from `.env`, which is
+  gitignored and absent in remote containers. The session fell back to
+  the GitHub MCP Actions API (which authenticates fine) to confirm
+  CI-green, but nothing records that fallback, so every skill step that
+  says "run `npm run deploy:check`" (oversight §7, ship-a-phase §10,
+  bearings' deploy gate) silently dead-ends in web sessions. Fix
+  options: teach `scripts/deploy-check.mjs` to fall back to a
+  `GITHUB_TOKEN`-style env var when `GH_TOKEN` is absent, and/or state
+  the MCP fallback in bearings' deploy-gate section so remote sessions
+  know the sanctioned path.
+- next: /iterate (deploy-check.mjs env fallback + a bearings note)
+
+### `skills/oversight.md` assumes direct push to `main` — web sessions must ship via branch + PR
+- category: docs
+- impact: 2
+- ease: 8
+- detail: filed 2026-07-18 (oversight session residue). §6 of the skill
+  commits and pushes `origin main`, but attended oversight from a
+  Claude Code web session runs under a mandated `claude/*` branch and
+  cannot push `main` directly — the 2026-07-18 session shipped its
+  adjustment set as PR #121, which the owner merged in-session
+  (rebase, commit landed verbatim). That worked, but the skill doesn't
+  describe it: add a short "remote-session delivery" note to §6 (branch
+  + ready-for-review PR + owner merge; rebase-merge preferred so the
+  audit-trail commit lands intact) so future web oversights don't stall
+  at the push step or improvise.
+- next: /iterate (doc-only edit to skills/oversight.md §6)
+
 ### Gate the first-map blacksmith MapEvent node back to dev-only
 - category: content
 - impact: 4
