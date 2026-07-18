@@ -715,7 +715,10 @@ supersession collisions before any engine work.
       green (infra only). SURFACED: [needs-investigation] suspected flag-on
       paid-SWAY commit bug (die spent, SWAY stays 0, card bounces) — under
       investigation; [needs-user-call] crowding confirmed dense @375×812; stale
-      STAKE button renders flag-on (D2 retired it) —
+      STAKE button renders flag-on (D2 retired it) — (both RESOLVED
+      2026-07-18: STAKE hidden by 04d38409; crowding actioned by the
+      owner's own playtest polish #118 / 486dbded — gear rail out, dice
+      row gap 26→14 + wrap for 375pt; confirmed via /oversight) —
       `test(mobile): Upgradeable-Dice D6d — flag-on combat e2e + visual proof` (7af8dbc8)
 - [x] Phase D6e — Enemy stanceCheck telegraphs (yield-lever content).
       The MECHANICS/enemy-content member of the D6 band (D6a–d are mobile;
@@ -762,7 +765,10 @@ supersession collisions before any engine work.
       `__AXM_DICE_INSTANT_SETTLE__` keeps the D6d e2e deterministic. ZERO new deps
       (package.json unchanged); flag-off byte-identical. Mobile verify green
       (2650 tests, +26); D6d e2e stays green. NEEDS-USER-CALL: ~0.87s ritual
-      duration — feel-rank at D7 (knob isolated in dice-roll-ritual.timing.ts) —
+      duration — feel-rank at D7 (knob isolated in dice-roll-ritual.timing.ts)
+      (RESOLVED via /oversight 2026-07-18: owner judges in-app — 0.87s
+      stands until it bothers them, verdict lands via /jot; the knob
+      location is the record) —
       `feat(mobile): Upgradeable-Dice D6f — the roll ritual (dice tumble animation)` (10ffe174)
 - [x] Phase D7 — Tuning, ratification + honest re-baseline. Full
       `/combat-playtest` matrix vs 80/50/25-35/0 (the spec §7 D7 gates);
@@ -797,6 +803,22 @@ supersession collisions before any engine work.
       hidden. `fix(mobile): flag-on paid-play UI commit` — D7's flag-flip is no
       longer gated on it.
 
+- [ ] Phase D-FLIP — Upgradeable-Dice flag ON by default. OWNER-DIRECTED
+      via /oversight 2026-07-18, explicitly overriding D7's DO-NOT-FLIP
+      recommendation: the owner accepts the measured regressions (early
+      −15, statusEngagement −9, breaks 2:1 over surges) as transitional
+      until D8 lands the ◆ sink, and wants flag-on as the live game NOW.
+      Ships FIRST, before D8. Scope: flip `isUpgradeableDiceEnabled()`
+      (mechanics `combat.upgradeable-dice.ts`) to default ON + the mobile
+      D6a flag hook's default; keep the off switch working (flag-off
+      tests/e2e must still be able to force OFF). The D7 flag-not-ready
+      canaries (`combat-dice-economy.sim.test.ts`) were built to go red
+      when the sink state changes — re-scope them to flag-state-aware
+      assertions rather than deleting the evidence; same for any
+      "flag-off byte-identical" guards, which invert to "flag-on
+      byte-identical" as the default path. Full three-workspace verify
+      (public-surface coupling). No tuning in this phase — numbers move
+      at D8's re-test. Deps: D7.
 - [ ] Phase D8 — One dice valve in every starter preset. Under the
       Upgradeable-Dice flag, replace exactly one same-aspect card instance in
       each of the ten 15-card starter presets with one meaningful dice valve;
@@ -805,8 +827,26 @@ supersession collisions before any engine work.
       Prefer D4's staged thematic valves; the owner-locked fallback floor is
       FREE: reroll one chosen eligible die / PAID: reroll all eligible dice,
       including the powering die. Prove each valve is reachable and fires,
-      then rerun D7's curve/economy witnesses. No flag flip. Deps: D7.
+      then rerun D7's curve/economy witnesses. No flag flip inside this
+      phase (the flip is owned by Phase D-FLIP, which precedes it — owner
+      call 2026-07-18; the sink-mechanism call is also resolved: D8's
+      valves ARE the F3 sink, no starter Press Fate grant unless the
+      re-test shows the valves under-sink). Deps: D-FLIP, D7.
       Brief: `plan/phases/phase_D8_preset_dice_valves.md`.
+- [ ] Phase D9 — Authored stance-check variety (salvage PR #109).
+      Promoted from AUDIT via /oversight 2026-07-18. D6e's uniform
+      `defaultStanceCheck` backfill stays; this phase threads
+      `stanceCheck?` through the authoring pipeline
+      (`AuthoredThreatPhase` + `CombatThreatBranchOutcome` →
+      `resolveAuthored` / `resolveBranchOutcome` / `commitThreatBranch`)
+      as an ADDITIVE layer — authored check wins, absent → default —
+      so the spec 33 §2 "bosses may check two stances / not-X" variety
+      becomes reachable. Reference implementation on closed PR #109's
+      branch (`origin/claude/march-push-main-tcjk0j`): pipeline threading
+      + 22 hand-authored thematic checks across 14 enemies (bosses naming
+      two stances) + e2e guard — rework over the backfill, do not revert
+      it. Prove: authored-check-wins unit + the D6e yield-band witness
+      stays in band. Deps: D6e, D8.
 
 **Post-D sequence (owner-deferred until every D phase ships, 2026-07-18):**
 

@@ -262,6 +262,24 @@
   spec 33 §1; EA-6 (wheel) and EA-7 (STAKE) surfaces are reinterpreted, not
   duplicated.
 
+### Re-home dice upgrades off the blacksmith (design thread)
+- source: /oversight 2026-07-18 — owner ruled "wrong surface — rethink"
+  on the standing blacksmith cadence/identity `[needs-user-call]`
+  (AUDIT, now resolved).
+- shape: the D5 HONE/TEMPER die-gear economy is KEPT (engine untouched,
+  prices placeholder), but the player-facing affordance moves off the
+  blacksmith to a surface still to be designed — candidates named at the
+  call: rest site, relic, event. The blacksmith screen stays
+  dev-menu-only meanwhile (AUDIT row gates the first-map MapEvent node
+  back to dev). Cadence (when/how often the player upgrades dice across
+  a run) is decided as part of the same design session, not separately.
+- needs: an attended design session (`/brainstorm-mechanics` or
+  `/world-spec`) with the owner BEFORE any engine/mobile work — this is
+  identity design, not implementation. Output: a spec or decisive brief,
+  then a phase row.
+- status: candidate — awaiting design session; do not promote to a
+  build-plan phase until the surface is chosen.
+
 ### Doctrine-curve check in the nightly baseline (harness promotion)
 - source: T direct, 2026-07-17 chat session (price-experiment follow-up).
 - The price-vs-winrate sweep lives in
@@ -370,7 +388,18 @@
 ### Starter Press-Fate affordance + dice-valve promotion + flag re-test (spec 33 finale unblocker)
 - source: Phase D7 ratification (`plan/tuning/2026-07-18-d7-ratification.md`, §10 + `[needs-user-call]` 2). The flag-on Upgradeable-Dice model is NOT flip-ready: the win curve misses at every stage AND is worse than flag-off (early 61–66 vs ~80, a −15 regression the flag itself causes), and statusEngagement drops ~9pts — because the leaner economy's ONLY ◆ sink (Press Fate) fires 0.000×/round: `sig-press-the-point` isn't equipped on starter loadouts (D3-F3), so there is nothing to spend the specials on and the STAKE-retirement gap widened to +13.6%.
 - decision (needs-user-call — owner picks the mechanism): land the reroll sink on starter loadouts (grant `sig-press-the-point`, OR promote a dice-valve reroll card into the preset recipe — which also drains the deferred `dice-valves-33` promotion), then re-run the D7 flag-on matrix. Once the sink is active the D7 flag-not-ready canaries (in `combat-dice-economy.sim.test.ts`) flip red, forcing the re-test, and the flag becomes evaluable for flip. **This is THE unblocker for the whole spec-33 finale.** Also entangled: signature flag-gated cost machinery (to ratify D3's 2/3/4 table) + the between-combat souls economy pass (to de-placeholder blacksmith prices) — both owner/eng-backlog prerequisites for full economy ratification.
-- status: candidate — awaiting owner call on the sink mechanism (and whether to build the flag-gated cost machinery now or after the flip).
+- status: RESOLVED via /oversight 2026-07-18 — owner calls: (1) sink
+  mechanism = **D8's per-preset dice valves only**, no starter
+  `sig-press-the-point` grant now (revisit only if the post-D8 re-test
+  shows the valves under-sink); (2) the flag flips **NOW** — owner
+  explicitly overrode D7's DO-NOT-FLIP recommendation, accepting the
+  regressions as transitional; queued as build-plan **Phase D-FLIP**
+  (before D8); (3) signature flag-gated cost machinery **deferred** —
+  not built now, D3's 2/3/4 table stays unratified until it exists;
+  (4) blacksmith prices stay placeholder — the blacksmith was ruled the
+  wrong dice-upgrade surface entirely (see "Re-home dice upgrades off
+  the blacksmith" below + AUDIT). The D7 matrix re-runs after D8 per
+  the D8 row.
 
 ## Rejected
 

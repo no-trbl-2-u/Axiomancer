@@ -342,3 +342,30 @@ npm run combat-dice-economy -- --seeds=1,2,3,4,5,6,7,8
 # ratified gates as hard tests
 npm test -- combat-dice-economy
 ```
+
+---
+
+## Addendum — /oversight resolutions (2026-07-18, same day)
+
+The §7 `[needs-user-call]` list was drained at the evening oversight
+session. For the sweep: every §6/§7 item above is now DECIDED — this
+report stays as the evidence record; the decisions live in the plan
+files.
+
+1. **Flag flip → FLIP NOW (owner override of §6's recommendation).**
+   The owner accepts the measured regressions as transitional until the
+   sink lands. Queued as build-plan **Phase D-FLIP**, first in queue.
+2. **F3 sink mechanism → D8's per-preset dice valves only.** No starter
+   Press Fate grant now; revisit only if the post-D8 re-test shows the
+   valves under-sink.
+3. **Signature flag-gated cost machinery → deferred.** Not built now;
+   the 2/3/4 table stays unratified until it exists.
+4. **`SPECIAL_FIRES_ON_USE` → KEEP, ratified** (drop PROVISIONAL —
+   AUDIT row routes the marker cleanup to /iterate).
+5. **Blacksmith prices → stay placeholder,** and bigger: the blacksmith
+   was ruled the WRONG surface for dice upgrades. The D5 economy is
+   kept; the affordance re-homes via a design thread
+   (PHASE_CANDIDATES: "Re-home dice upgrades off the blacksmith");
+   the first-map node gates back to dev-only.
+6. **Dice-valve promotion** — already resolved earlier the same day
+   (D8, replace-one-per-preset); unchanged.
