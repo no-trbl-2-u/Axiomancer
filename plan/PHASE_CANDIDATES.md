@@ -9,6 +9,42 @@
 
 ## Pending
 
+### Post-D8 flag-on curve repair — the bounded tuning phase D8 hands off
+- source: Phase D8 ship (10ec4fe8, 2026-07-18). The D8 brief's own law:
+  "a red curve becomes the next bounded tuning phase" — that phase is now
+  unblocked and MEASURABLE (every preset exposes a live valve; casts/run
+  0.76–1.75, zero dead valves).
+- the gap, measured on the final D8 tree (blind, flag-on, seeds 1–5:
+  `plan/tuning/2026-07-18-d8-preset-dice-valves.md` §gate rerun): early
+  in-band for erosion/oratory/refrain only (augury 40, penitent 51,
+  standstill/foundry 59); mid is a cliff for 8/10 (oratory 66 over-band,
+  refrain 18, rest ≤10); late/impossible ~0 everywhere except oratory
+  (23/19 — the dominance finding).
+- levers already ranked by the 07-18 metrics accumulation + Card Ledger
+  dashboard: duplicate proven staples into the failing decks (the
+  venom-and-vein pattern; 13 candidates charted), cut the remaining
+  flag-off-seated drags (crown-of-thorns −19 dWR, mirror-of-guilt −15,
+  self-flagellant −10 — untouchable in D8 by the byte-identity law),
+  retune the fizz gates (ouroboros 25%, second-thoughts 16%), and give
+  each deck an oratory-style mid-game second gear. Overlaps the standing
+  "Starter-library trim + duplication" and "scoreCard v2 re-tune"
+  candidates below — promote as ONE bounded phase, not three.
+
+### Library theme-symmetry restoration (post-D8 ragged shape)
+- source: Phase D8 ten-in/ten-out ledger (forced by the preset-reference
+  law; 10ec4fe8). The spec-32 §6-7 per-theme symmetry is broken and
+  pinned as-is in `curated-library.engine.test.ts` (POST_D8_SHAPE):
+  peroration and harvest at 6 cards, akrasia and bulwark at 8;
+  peroration lost BOTH its ench and dis; forge carries 2 ench / 0 dis;
+  control/oracle/harvest each miss one of the pair.
+- shape: author replacement rare ench/dis cards for the broken themes
+  (peroration ench+dis, forge dis, control ench, oracle dis, harvest
+  dis) and decide whether akrasia/bulwark keep their 8th card or trade
+  it — a /deck-tuning authoring pass with the sandbox-first court, ending
+  with the POST_D8_SHAPE pin restored to a symmetric law. Pairs
+  naturally with the curve-repair phase above (new cards can be the
+  mid-game second-gear payoffs the failing decks need).
+
 ### Expo decouple (CI/CD re-platform) — owner-declared, post-D-batch
 - source: owner design session 2026-07-18 (roll-ritual chat). Owner intent,
   verbatim scope: *"start decoupling from expo in a coming set of phases (not

@@ -97,13 +97,12 @@ describe('Phase 32 part 4e — pure resolve-milestone threshold arithmetic', () 
 
 describe('Crossing Wavering only', () => {
     it('a gain that clears Wavering but not Faltering lands one RAPPORT stack and fires exactly one milestone event', () => {
-        // heart-of-the-matter carries its OWN { kind: 'echo' } mechanic, which
-        // self-doubles its printed sway (6 -> 12, `echoFactor` in
-        // combat.engine.ts — see the card's own "// pts" comment). resolve =
-        // 35 (maxHealth 100) -> wavering 16 / faltering 28. Pre-seeded sway 5
-        // + the 12-point gain = 17: clears wavering (16), stays under
-        // faltering (28).
-        const before = stateFor('heart-of-the-matter', 5, {
+        // change-of-heart (the surviving charm SWAY carrier after heart-of-
+        // the-matter's D8 retirement) pays a flat SWAY 3 ({ kind: 'sway',
+        // amount: 3 }, no self-echo). resolve = 35 (maxHealth 100) ->
+        // wavering 16 / faltering 28. Pre-seeded sway 14 + the 3-point gain
+        // = 17: clears wavering (16), stays under faltering (28).
+        const before = stateFor('change-of-heart', 14, {
             enemy: { ...buildFixtureState({ clean: true }).enemy, maxHealth: 100, health: 100, effects: [] },
         });
         const resolve = capitulateThreshold(before.enemy);
@@ -115,11 +114,11 @@ describe('Crossing Wavering only', () => {
         const { events, after } = playPaid(before);
 
         const [gained] = findEvents(events, 'sway-gained');
-        expect(gained.amount).toBe(12); // self-echoed 6 -> 12
+        expect(gained.amount).toBe(3); // printed SWAY 3, no echo
         const milestones = findEvents(events, 'sway-milestone');
         expect(milestones).toHaveLength(1);
         expect(milestones[0]).toMatchObject({ milestone: 'wavering', threshold: wavering, effectId: 'debuff_rapport', intensity: 1 });
-        expect(after.sway).toBe(17); // 5 + 12, no Faltering bonus yet
+        expect(after.sway).toBe(17); // 14 + 3, no Faltering bonus yet
         expect(after.swayMilestoneWaveringFired).toBe(true);
         expect(after.swayMilestoneFalteringFired).toBeFalsy();
 
@@ -131,18 +130,17 @@ describe('Crossing Wavering only', () => {
 
 describe('Crossing BOTH Wavering and Faltering in one gain', () => {
     it('a single played card that jumps the running total past both waypoints fires both milestone events in one gainSway call', () => {
-        // resolve = 20 (maxHealth 57: round(0.35 x 57) = 20) -> wavering 9 /
-        // faltering 16. Pre-seeded sway 5 (below wavering) + heart-of-the-
-        // matter's self-echoed 12-point gain = 17: clears BOTH waypoints in
-        // this one gainSway call.
-        const before = stateFor('heart-of-the-matter', 5, {
-            enemy: { ...buildFixtureState({ clean: true }).enemy, maxHealth: 57, health: 57, effects: [] },
-        });
+        // resolve = 14 (the fixture's default maxHealth 40) -> wavering 6 /
+        // faltering 11. change-of-heart's flat SWAY 3 is echoed to 6 by a
+        // PENDING ECHO CHARGE (state.echoNextSpell, consumed by this play):
+        // pre-seeded sway 5 (below wavering) + the 6-point gain = 11: clears
+        // BOTH waypoints in this one gainSway call.
+        const before = stateFor('change-of-heart', 5, { echoNextSpell: true });
         const resolve = capitulateThreshold(before.enemy);
-        expect(resolve).toBe(20);
+        expect(resolve).toBe(14);
         const { wavering, faltering } = swayResolveMilestoneThresholds(resolve);
-        expect(wavering).toBe(9);
-        expect(faltering).toBe(16);
+        expect(wavering).toBe(6);
+        expect(faltering).toBe(11);
 
         const { events, after } = playPaid(before);
 
@@ -151,16 +149,16 @@ describe('Crossing BOTH Wavering and Faltering in one gain', () => {
         expect(milestones.map(m => m.milestone).sort()).toEqual(['faltering', 'wavering']);
 
         const waveringEvt = milestones.find(m => m.milestone === 'wavering')!;
-        expect(waveringEvt).toMatchObject({ threshold: 9, effectId: 'debuff_rapport', intensity: 1 });
+        expect(waveringEvt).toMatchObject({ threshold: 6, effectId: 'debuff_rapport', intensity: 1 });
 
         const falteringEvt = milestones.find(m => m.milestone === 'faltering')!;
-        expect(falteringEvt).toMatchObject({ threshold: 16, bonus: SWAY_FALTERING_BONUS });
+        expect(falteringEvt).toMatchObject({ threshold: 11, bonus: SWAY_FALTERING_BONUS });
 
-        // 5 (pre-seed) + 12 (self-echoed card) + 2 (Faltering bonus) = 19;
-        // still below the resolve (20), so this does NOT also trip the
+        // 5 (pre-seed) + 6 (echoed card) + 2 (Faltering bonus) = 13;
+        // still below the resolve (14), so this does NOT also trip the
         // capitulation offer — keeps the milestone assertions isolated from
         // that separate (pre-existing) check.
-        expect(after.sway).toBe(19);
+        expect(after.sway).toBe(13);
         expect(after.swayMilestoneWaveringFired).toBe(true);
         expect(after.swayMilestoneFalteringFired).toBe(true);
         expect(after.phase).not.toBe('mercy-choice');
@@ -175,8 +173,9 @@ describe('A shrinking live resolve never re-fires or claws back an already-cross
     it('Wavering stays fired (and its RAPPORT stack stays landed) even after the enemy\'s resolve later shrinks below the crossed threshold', () => {
         // First play crosses Wavering only (mirrors the "Wavering only" case
         // above): resolve 35 (maxHealth 100), wavering 16, faltering 28.
+        // change-of-heart's SWAY 3 on pre-seed 14 -> 17: past 16, under 28.
         const bigEnemy = { ...buildFixtureState({ clean: true }).enemy, maxHealth: 100, health: 100, effects: [] };
-        const first = stateFor('heart-of-the-matter', 13, { enemy: bigEnemy });
+        const first = stateFor('change-of-heart', 14, { enemy: bigEnemy });
         const firstResult = playPaid(first);
         expect(firstResult.after.swayMilestoneWaveringFired).toBe(true);
         expect(firstResult.after.swayMilestoneFalteringFired).toBeFalsy();

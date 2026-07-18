@@ -3108,20 +3108,8 @@ function playBottomAction(
     // FORGE (spec 32 v3 §5) — the forged floating die joins the tray NOW, so it
     // can power a play THIS turn (the "bigger turns" intent).
     if (forgedFloating.length > 0) dice = [...dice, ...forgedFloating];
-    // `entropy-tax` (D): spending a KINDLED (temporary) or FLOATING die marks
-    // the enemy — the manufactured resource has a price (spec 32 v3 T3).
-    if (zoneHas(state, 'entropy-tax')
-        && (poweringSource === 'floating' || (poweringSource === 'reserve' && powering.temporary))) {
-        const markDef = lookupEffectDef('debuff_mark');
-        if (markDef) {
-            const applied = applyEffect(enemy.effects, markDef, state.round, { intensityDelta: 1, sourceId: 'entropy-tax' });
-            enemy = { ...enemy, effects: applied.activeEffects };
-            events.push({
-                kind: 'effect-landed', cardId: 'entropy-tax', effectId: markDef.id, target: 'enemy',
-                effectKind: 'control', intensity: applied.result.activeEffect?.intensity ?? 1, effect: markDef,
-            });
-        }
-    }
+    // (`entropy-tax`'s kindled/floating-spend mark hook was retired with the
+    //  card in Phase D8's ten-in/ten-out promotion ledger.)
 
     // Defense card → GUARD (read-scaled + color-match + pips). Absorbed in
     // `resolveThreatPhase`.

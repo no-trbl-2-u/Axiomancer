@@ -33,7 +33,7 @@ function loadout(cards: string[]): Character {
     return p;
 }
 
-const DOT = ['slippery-slope', 'straw-mans-jab'];             // ramp poison + decaying bleed
+const DOT = ['slippery-slope', 'festering-argument'];         // ramp poison + DoT prolong (straw-mans-jab retired in D8)
 const CONTROL = ['red-herring', 'zenos-half-step'];           // BACKFIRE + STAGGER
 const CHARM = ['soft-word', 'disarming-smile', 'common-ground']; // SWAY toward capitulation
 const TURTLE = ['brace-for-impact', 'nettle-cloak', 'slippery-slope']; // wall + thorns + DoT

@@ -92,10 +92,10 @@ describe('WI-5 — SWAY / PREMISE alt-win meters', () => {
 describe('CombatViewModel.discardCards — the REPRISE picker data source (phase 28)', () => {
     it('resolves discard-pile ids to display names', () => {
         let s = openState();
-        s = { ...s, discard: ['straw-mans-jab', 'the-overtake'] };
+        s = { ...s, discard: ['festering-argument', 'the-overtake'] };
         const vm = buildCombatViewModel(s);
         expect(vm.discardCards).toEqual([
-            { id: 'straw-mans-jab', name: 'Straw Man\'s Jab' },
+            { id: 'festering-argument', name: 'Festering Argument' },
             { id: 'the-overtake', name: 'The Overtake' },
         ]);
     });

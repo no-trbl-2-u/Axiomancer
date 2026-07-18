@@ -28,9 +28,12 @@
  *      the window is a final miss (`expired: true`).
  *   5. Edge case: a claim outstanding past the encounter's last distinct
  *      phase (the terminal phase loops) resolves without crashing.
- *   6. `fated-course` still forces a guaranteed hit (binds the first
- *      pending claim) and `the-oracles-eye`'s ×1.5 compounds on top of the
- *      claim's own scale.
+ *   6. The `fated-course` ENGINE HOOK still forces a guaranteed hit (binds
+ *      the first pending claim) and `the-oracles-eye`'s ×1.5 compounds on
+ *      top of the claim's own scale. (The fated-course CARD was retired in
+ *      D8 — plan/tuning/2026-07-18-d8-preset-dice-valves.md — but the
+ *      engine's attachment hook keys on the id, not library membership, so
+ *      this test still witnesses the hook itself.)
  *   7. A full `COMBAT_SIM_POLICY_ORDER` × seed sweep on the `augury`
  *      preset deck runs without crashing.
  *
@@ -274,8 +277,8 @@ describe('OMEN v2 — edge cases', () => {
     });
 });
 
-describe('OMEN v2 — fated-course + the-oracles-eye synergy', () => {
-    it('fated-course forces the telegraph to match the pending claim (guaranteed hit) and still MARKs the foe', () => {
+describe('OMEN v2 — fated-course (retired-card engine hook) + the-oracles-eye synergy', () => {
+    it('the fated-course attachment hook forces the telegraph to match the pending claim (guaranteed hit) and still MARKs the foe', () => {
         mockSequentialRng(0.5);
         let state = build(CB, 'heart', 5);
         state = withPhases(state, ['mind', 'body']); // next phase would be BODY — a claimed miss...

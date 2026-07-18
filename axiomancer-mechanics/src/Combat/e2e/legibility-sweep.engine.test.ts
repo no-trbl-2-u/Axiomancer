@@ -157,29 +157,29 @@ describe('REPRISE songbook choice (phase 28)', () => {
         mockSequentialRng(0.05);
         let state = openAndDraft(makePlayer([REPRISE_CARD]), makeEnemy(300, 'mind', []), [REPRISE_CARD], 'mind');
         // A low-rank and a high-rank card in discard — argmax would pick the high-rank one.
-        state = { ...state, discard: ['straw-mans-jab', 'the-overtake'] };
+        state = { ...state, discard: ['festering-argument', 'the-overtake'] };
         const uid = state.hand.find(h => h.cardId === REPRISE_CARD)!.uid;
-        const res = playCombatCard(state, { uid }, true, undefined, undefined, { reprisalCardId: 'straw-mans-jab' });
+        const res = playCombatCard(state, { uid }, true, undefined, undefined, { reprisalCardId: 'festering-argument' });
         const reprised = res.events.find(e => e.kind === 'reprised') as { returned: string[] } | undefined;
         expect(reprised).toBeDefined();
-        expect(reprised!.returned).toEqual(['straw-mans-jab']);
+        expect(reprised!.returned).toEqual(['festering-argument']);
     });
 
     it('falls back to the highest-rank auto-pick when no choice is given', () => {
         mockSequentialRng(0.05);
         let state = openAndDraft(makePlayer([REPRISE_CARD]), makeEnemy(300, 'mind', []), [REPRISE_CARD], 'mind');
-        state = { ...state, discard: ['straw-mans-jab', 'the-overtake'] };
+        state = { ...state, discard: ['festering-argument', 'the-overtake'] };
         const uid = state.hand.find(h => h.cardId === REPRISE_CARD)!.uid;
         const res = playCombatCard(state, { uid }, true);
         const reprised = res.events.find(e => e.kind === 'reprised') as { returned: string[] } | undefined;
         expect(reprised).toBeDefined();
-        expect(reprised!.returned).toEqual(['the-overtake']); // higher rank (5 vs 1)
+        expect(reprised!.returned).toEqual(['the-overtake']); // higher rank (5 vs 3)
     });
 
     it('falls back to auto-pick when the chosen id is not in the discard pile', () => {
         mockSequentialRng(0.05);
         let state = openAndDraft(makePlayer([REPRISE_CARD]), makeEnemy(300, 'mind', []), [REPRISE_CARD], 'mind');
-        state = { ...state, discard: ['straw-mans-jab', 'the-overtake'] };
+        state = { ...state, discard: ['festering-argument', 'the-overtake'] };
         const uid = state.hand.find(h => h.cardId === REPRISE_CARD)!.uid;
         const res = playCombatCard(state, { uid }, true, undefined, undefined, { reprisalCardId: 'not-in-discard' });
         const reprised = res.events.find(e => e.kind === 'reprised') as { returned: string[] } | undefined;

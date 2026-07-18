@@ -184,6 +184,20 @@ valves:
    Eligible means non-cracked; every result uses honest engine RNG and the
    die gear's real face table. Promotion is Phase D8, not part of D7.
 
+   **D8 shipped (2026-07-18):** all ten themed valves passed the promotion
+   court (per-seat A/B, early stage, blind+greedy, seeds 1-5, flag-on; report:
+   `plan/tuning/2026-07-18-d8-preset-dice-valves.md`) — the fallback was never
+   needed. Ratified seats (`PRESET_DICE_VALVES` in
+   `combat.starter-deck-presets.ts`; valve <- displaced one-instance source):
+   erosion recurring-symptom <- slippery-slope; oratory restate-the-point <-
+   exordium; foundry forge-masters-stamp <- anvil-of-form; penitent
+   bleed-for-it <- pact-of-akrasia; standstill break-the-tempo <- red-herring;
+   augury second-sight <- prophecy-fulfilled; tithe bank-the-yield <-
+   stuck-in-their-head; grace change-of-heart <- soft-word; bastion
+   hold-the-line <- the-adamant-wall; refrain second-take <- ouroboros.
+   Library ten-in/ten-out: the valves entered the curated 70; the ten
+   reward-only cards (zero plays in 345,600 measured encounters) retired.
+
 Explicitly NOT adopted: the miss-face Fate Tap (tap a miss for +1◆/+1 DoT
 tick) — rejected by owner to keep misses worth 0◆ and the income legible.
 

@@ -42,11 +42,11 @@ describe('authored card rotations (art-driven roster)', () => {
         expect(Ghast.cards?.[0].id).toBe('red-herring');
     });
 
-    it('The King of Revenge carries the straw-mans-jab rotation (Easy anchor kit)', () => {
+    it('The King of Revenge carries the half-step rotation (Easy anchor kit; straw-mans-jab retired in D8)', () => {
         expect(KingOfRevenge.cards).toBeDefined();
         expect(KingOfRevenge.cards?.length).toBe(3);
         const cardIds = KingOfRevenge.cards?.map(s => s.id) || [];
-        expect(cardIds).toContain('straw-mans-jab');
+        expect(cardIds).toContain('half-step');
     });
 
     it('The Butcher carries the sweet-poison rotation', () => {
@@ -89,7 +89,7 @@ describe('stat law compliance for playtest balance anchors', () => {
         expect(KingOfRevenge.cards).toBeDefined();
         expect(KingOfRevenge.cards?.length).toBeGreaterThanOrEqual(3);
         const cardIds = KingOfRevenge.cards?.map(s => s.id) || [];
-        expect(cardIds).toContain('straw-mans-jab');
+        expect(cardIds).toContain('half-step');
     });
 
     it('Tri-Eyes level 15 has exactly 75 total stats (5 × level)', () => {

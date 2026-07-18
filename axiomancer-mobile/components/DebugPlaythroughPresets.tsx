@@ -76,7 +76,7 @@ export function DebugPlaythroughPresets() {
                     // Spec 32 v3 — a cross-theme endgame spread: commons,
                     // uncommons, and the rare finishers/persistents.
                     'slippery-slope',
-                    'straw-mans-jab',
+                    'festering-argument',
                     'festering-argument',
                     'currys-conversion',
                     'resonance-detonation',

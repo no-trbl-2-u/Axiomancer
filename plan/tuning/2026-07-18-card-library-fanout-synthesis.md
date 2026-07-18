@@ -14,6 +14,15 @@
 > docs/reports/preset-metrics/2026-07-18-*`). ANALYSIS + RULINGS ONLY — no
 > card/engine change ships here; the only tree changes in this session are
 > this file, the `/deck-tuning` reword (ruling R2), and the queue rows.
+>
+> **Reconciliation note (merge, same day):** Phase D8 (`10ec4fe8` — one
+> dice valve per preset, a ten-in/ten-out recipe swap) shipped on `main`
+> while this session ran. Every per-card/per-seat claim above is measured
+> on the PRE-D8 tree at `0f7f0500` — before acting on a seat list (dead
+> 10 membership, borrow seats, drag seating), re-derive it on the post-D8
+> tree, and read this file's "post-D8" parked items as UNBLOCKED. The
+> D8-filed "Post-D8 flag-on curve repair" candidate overlaps §C/§E of
+> this file — promote them together, not separately.
 
 ---
 

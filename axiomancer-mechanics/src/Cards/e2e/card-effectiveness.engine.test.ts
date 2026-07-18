@@ -526,11 +526,20 @@ describe('card effectiveness lint — every PAID face produces its promised obse
         expect(cardLibrary.length).toBe(70);
     });
 
-    it('GENERICALLY_ASSERTED kinds are not exercised by any current library card '
-        + '(confirms every one of the 70 cards below is STRICTLY, not generically, asserted)', () => {
+    it('GENERICALLY_ASSERTED kinds in the library are exactly the D8 valve die-verbs '
+        + '(their strict payloads still assert; the die-verb legitimately no-ops in this fixture)', () => {
+        // Pre-D8 the pin was "none". The Phase D8 valve promotion seated five
+        // library cards on `reroll_spent` / `convert_die_color` (recurring-
+        // symptom, bleed-for-it, change-of-heart / break-the-tempo,
+        // second-sight). Each of those cards ALSO carries a strictly-asserted
+        // payload (poison / bleed / sway / stagger / foretell), so no card is
+        // generically asserted end-to-end; the die-verb portion rides the
+        // documented fixture no-op. `strip_random_buff` / `befriend_attempt`
+        // stay unexercised.
         const usedKinds = new Set<string>();
         for (const c of cardLibrary) for (const m of c.specialMechanics ?? []) usedKinds.add(m.kind);
-        for (const generic of GENERICALLY_ASSERTED) expect(usedKinds.has(generic)).toBe(false);
+        const exercisedGenerics = GENERICALLY_ASSERTED.filter(k => usedKinds.has(k)).sort();
+        expect(exercisedGenerics).toEqual(['convert_die_color', 'reroll_spent']);
     });
 
     const strictCases = cardLibrary

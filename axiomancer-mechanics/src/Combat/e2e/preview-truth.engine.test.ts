@@ -101,8 +101,9 @@ describe('P0-truth — the card preview is the applied number', () => {
             const card = getCard(c.id);
             return card?.verbClass === 'direct-dot';
         });
-        // v3 library: slippery-slope, straw-mans-jab, sweet-poison,
-        // fallen-grace, brief-candle at minimum.
+        // Post-D8 library: slippery-slope, sweet-poison, fallen-grace,
+        // brief-candle, recurring-symptom at minimum (straw-mans-jab retired
+        // in D8).
         expect(dotCards.length).toBeGreaterThanOrEqual(5);
         for (const entry of dotCards) {
             const card = getCard(entry.id)!;
