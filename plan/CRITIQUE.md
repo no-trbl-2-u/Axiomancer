@@ -267,7 +267,8 @@ one level down, in the routing helper `onApply` calls next).
   (enum/number/checkbox as appropriate).
 - source: session closeout
 
-### [HIGH] persistent header — MORALE meter renders literal "v of x" placeholder
+### [x] [HIGH] persistent header — MORALE meter renders literal "v of x" placeholder (RESOLVED 2026-07-18)
+- RESOLVED 2026-07-18 (issue #117, `fix(mobile): MORALE header renders arabic value` 270e5f93). Not a literal placeholder — the value was roman ("v of x" = 5 of 10), which read as unresolved template vars and clashed with VITAE (same card) + the POOLS panel (both arabic). Switched the header to arabic "N / 10" using the moraleDisplay/moraleMax already computed; regression test added.
 - pass: 12 (commit 3dc27d24)
 - viewport: mobile
 - category: visual
