@@ -78,6 +78,97 @@
   axis), the mid-game preset library row (trim decisions shape what the
   mid library must cover), and D-FLIP/D8 (re-measure under flag-on
   before locking cuts that the new dice model might vindicate).
+- **status update 2026-07-18 (owner ruling R2, fan-out ballot — see
+  `plan/tuning/2026-07-18-card-library-fanout-synthesis.md` §A): TRIMS
+  PAUSED.** The full-matrix sweep proved all 10 never-played cards are
+  reward-pool-only — "never played" measures the instrument's reach, not
+  card quality, and every one prices in-band. `/deck-tuning` was reworded
+  the same day with a swap-variant measurement lane (temporary card swaps
+  into preset recipes, treatment-arm only) so the unreachable cards earn
+  real telemetry before any cut. The DUPLICATION half of the pass stays
+  open. Two of the 10 are identity casualties with fresh evidence
+  (entropy-tax = foundry's only status engine; heart-of-the-matter =
+  grace's SWAY finisher) — swap-measure first, recolor/reseat stays the
+  standing owner call.
+
+### Swap-pool candidate authoring — 10–15 cards/theme for preset refinement (owner-ruled 2026-07-18)
+- source: card-library fan-out ballot ruling R1
+  (`plan/tuning/2026-07-18-card-library-fanout-synthesis.md` §A) + the
+  Dawncaster carrier-density gap analysis (§D: corpus ≈ 11.2 cards/keyword
+  vs our 1.6–2.4; below ~8 home carriers a hallmark is a rider, not a
+  draftable identity).
+- decision (owner, near-verbatim): more cards could muddy the water — the
+  player only starts with the 15-card presets. **Act 1 = cycle through the
+  preset decks in order to learn the mechanics; Act 2 = pick ONE deck, and
+  THAT is where reward cards unlock.** Authoring 10–15 new cards per theme
+  is approved, **used only to swap in/out during tuning runs to refine the
+  preset decks** — not a player-facing mid-library.
+- constraints (from the same ballot): compose the EXISTING 29 registry
+  keywords only (mint carriers, not mechanics — push hallmarks toward ≥8
+  home carriers), weight commons (the current pyramid is inverted at 43%
+  rare), live in sandbox sets; a candidate enters a recipe only by beating
+  the incumbent seat in swap-variant A/Bs across ≥2 stages and ≥2 policies.
+- execution: `/deck-tuning` (the skill's swap-pool candidate program bullet,
+  added same day). Interacts with the trim/duplication row above (same
+  seats) and D8 (valves move the curve the candidates are judged against).
+
+### The Incompleteness premiseShed — close the CONCEDE hole at impossible (owner-ruled 2026-07-18)
+- source: fan-out ballot ruling R3. Evidence: oratory wins 18% flag-ON /
+  32% flag-OFF at the impossible stage (band ~0), almost purely CONCEDE
+  (flag-ON: 87 concede + 1 victory of 480) — The Incompleteness has no
+  premiseShed in its threat sequence, so a surviving deck beats the
+  unwinnable boss by tally. Pricing is NOT the problem (the-closing-word is
+  honest post-36a; the flat-8 floor bug was already fixed 2026-07-08).
+- decision: author a premise-eating action (shed 3–4) on The
+  Incompleteness's phase 3 — two lesser enemies already carry premiseShed
+  (`combat.threat-sequences.ts` ~283/~427) and the boss's flavor
+  ("incorporates your strongest argument as a new axiom") supports it.
+  Optional companion: raise the unique-tier concede floor 12 → 14. Do NOT
+  nerf the card — oratory is UNDER band late (14% vs 25–35 flag-ON).
+- scope note: enemy-content edit — outside `/deck-tuning`'s card surface;
+  ship as its own small item with the impossible-stage matrix cell as the
+  before/after witness.
+
+### Card-text grammar + full copy pass (owner-ruled 2026-07-18)
+- source: fan-out ballot ruling R4 + the wording audit (Dawncaster corpus,
+  1,592 faces). Diagnosis: mean face length is already genre-normal (12.8w
+  vs 12.9) — the failures are variance and dialect: four competing status
+  templates, em-dashes on 12/64 faces (corpus: 0/1,592), real costs hidden
+  in parentheses (cassandras-burden's "ante 2 Conviction"), FOUR faces
+  shipping generated machine text (straw-mans-jab renders raw "bleed i2
+  d2"), and a render that clips at ~130 chars while the honesty guard
+  allows 200 (the-closing-word at 153c likely clips today).
+- decision: ADOPT the templating grammar (seven clause templates; one
+  effect one sentence; gate/cost/condition before payoff; colon = trigger
+  label only; em-dash/semicolon banned from faces; parens carry numbers
+  only; bare keywords, panel is the gloss; "the foe" fixed vocabulary;
+  ≤16 words target / 130-char hard cap / lead clause ≤5 words) and run the
+  FULL copy pass: the 12 before→after rewrites, author the 4 machine-text
+  faces, 6 gloss rewrites (Pip, Omen, Riposte, Forge, Doom, Poison),
+  tighten the honesty-guard budget 200 → 130 chars + add an
+  em-dash/semicolon lint. Sub-calls approved in the same ruling: drop the
+  word PERORATION from the-closing-word's face (SYSTEM_GLOSSARY row
+  stays); reprice the-overtake's `fuelPerPip` 3.5 → integer via A/B so no
+  face carries a decimal.
+- witnesses: `paid-summary-honesty.engine.test.ts` (number parity + caps
+  discipline + tightened budget), the mobile keyword-scanner lints, one
+  emulator screenshot of the-closing-word's inspect face to confirm the
+  130c render cap before pinning it.
+
+### Choice-width instrument — playable-set width + forced-turn rate
+- source: mechanics-expert fan-out 2026-07-18. Greedy and blind policies
+  are EXACTLY equal in all 40 flag-ON preset×stage rows (86,400
+  encounters) — dice-gated turns look near-forced, which would make the
+  observed skill-gap compression an AGENCY loss, not a variance story.
+  These demand opposite responses, and the D8 valve phase could pass its
+  win-rate bands while leaving the agency problem intact.
+- decision shape: instrument-only — log per-turn playable-set size
+  distribution and a first-class forced-turn rate (turns with ≤1 playable
+  option), reported per arm. Cheap (no engine/content change); feeds the
+  D8 evaluation and the owner's standing dislike of stacked gamble
+  mechanics. Companion instrument notes from the same sweep: blind-only
+  doctrine flag (`--doctrine-policy=blind`), and a card-holding policy to
+  make opp% discriminating (currently saturated ≥90% everywhere).
 
 ### Re-tune the starter library against `scoreCard` v2 (`/deck-tuning`)
 - source: Phase 36a + 36b follow-through (2026-07-17). The pricing model is
