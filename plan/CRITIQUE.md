@@ -11,6 +11,16 @@
 
 ## Pending
 
+### [LOW] general — AccessoryKind union must open when accessory flavors grow
+- pass: user-jot (commit 4e045d05)
+- viewport: unspecified
+- auth_state: anonymous
+- category: content
+- observation: Equipment model confirmed with owner (2026-07-18): 5 worn slots (1 weapon / 1 armor / 3 accessories), accessories are flavor-free mechanically — but AccessoryKind in axiomancer-mechanics/src/Items/types.ts is a CLOSED union (`head|hands|feet|amulet|ring|charm`) that pure flavor must register in. Owner intent: accessories can be literally anything (a cape, etc.). When new accessory content lands, extending the union is a one-word additive change, no migration, nothing reads the kind. Not blocking anything today.
+- evidence: user-spotted at 2026-07-18T19:40:08Z
+- suggested fix: [user has not specified — iterate to determine]
+- source: user
+
 > **[owner session, 2026-07-18 — THE FLIP residue] Upgradeable Dice is now ON
 > for every app build** (owner call, overriding D7's stays-OFF default): the
 > app root (`axiomancer-mobile/state/combat/flags.ts`) forces the spec-33
