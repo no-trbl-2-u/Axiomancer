@@ -23,6 +23,14 @@
   blacksmith pricing (D5's placeholders die here); Press Fate 1◆ and
   payload 2◆ are owner-locked — if the data says they're wrong, that is
   a `[needs-user-call]`, not a tweak.
+- **Dice-valve promotion** (assigned 2026-07-18 drift check — this was
+  falling through the cracks): the 9 per-theme dice-interaction cards D4
+  sandbox-staged (`dice-valves-33`, `cards.sandbox-sets.ts`) fulfill
+  spec 33 §4 valve 3 ("every theme gains exactly ONE dice-interaction
+  card") only once promoted into the curated library. Route through
+  `/deck-tuning` sandbox-first conventions; promotion evidence goes in
+  this phase's report. D4 deferred this to D5; D5 shipped without it —
+  the deferral chain ends here.
 - **Qualitative pass**: playtester agents on seeded encounters — is
   momentum steering fun, does whiff feel survivable, do stance checks
   read, does the blacksmith fantasy land (visible miss-deletion is the
