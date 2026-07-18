@@ -32,3 +32,4 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-07-18T01:12:31Z | subagent | Explore | claude-opus-4-8 | main | Scope D6 mobile combat UI surface |
 | 2026-07-18T01:38:10Z | slash-prompt | /oversight | unknown | user/ci | /oversight |
 | 2026-07-18T02:09:51Z | slash-prompt | /march | claude-opus-4-8 | user/ci | /march |
+| 2026-07-18T03:09:52Z | slash-prompt | /march | claude-opus-4-8 | user/ci | /march |

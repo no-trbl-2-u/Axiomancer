@@ -13,11 +13,11 @@
  *      and the realized roll skews miss-heavier than the dice-math baseline
  *      (the small-sample RNG-correlation of the Park-Miller LCG, report F1).
  *
- * The two CANARY assertions (`yield == 0`, `pressFate == 0`) pin the report's
- * F2/F3 findings — no enemy authors a stanceCheck yet, and starter loadouts
- * don't equip the reroll signature. When D4 authors stance checks or grants the
- * Press Fate affordance, these flip and the test fails LOUDLY, which is the
- * intended signal to re-derive the economy.
+ * The `pressFate == 0` CANARY still pins report F3 (starter loadouts don't
+ * equip the reroll signature — flips loudly when the affordance lands). The F2
+ * yield canary FLIPPED as designed: Phase D6e (2026-07-18) authored the enemy
+ * stanceCheck telegraphs, so realized yield income is now > 0 and this suite
+ * asserts that instead.
  *
  * D7 flips the dice-math bands to hard ratified assertions.
  */
@@ -96,11 +96,14 @@ describe('spec 33 D3 — realized-play invariants (flag-on matrix)', () => {
         expect(p.usablePerRound).toBeLessThanOrEqual(result.diceMath.usablePerRound + 0.01);
     });
 
-    // ── CANARIES (report F2/F3) — flip these when D4 lands the content. ──────
-    it('CANARY F2: yield income is 0 until an enemy authors a stanceCheck', () => {
-        expect(p.yieldIncomePerRound).toBe(0);
+    // Phase D6e drained F2: enemy threat phases now carry open stance-check
+    // telegraphs, so ending a phase in the `yields` stance pays +1◆ and the
+    // realized yield income is positive (was pinned 0 as the F2 canary).
+    it('D6e: yield income is positive (enemy stanceCheck telegraphs authored)', () => {
+        expect(p.yieldIncomePerRound).toBeGreaterThan(0);
     });
 
+    // ── CANARY (report F3) — flips when a starter loadout equips the reroll. ──
     it('CANARY F3: Press Fate is never cast until a starter loadout equips the reroll signature', () => {
         expect(p.pressFatePerRound).toBe(0);
     });

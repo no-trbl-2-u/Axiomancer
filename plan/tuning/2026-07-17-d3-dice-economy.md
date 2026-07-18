@@ -95,6 +95,18 @@ telegraphs on threat phases (density + payout per the dial options above),
 parallel-safe with the mobile D6a–d stretch and a hard dependency of D7, so
 D7's win-curve read exercises the steer-into-yields loop.
 
+**SHIPPED (Phase D6e, 2026-07-18):** `getThreatSequence` now backfills an open
+stance check on every threat phase (`defaultStanceCheck`: punishes the enemy
+stance head-on ×1.5, yields to the momentum-chain successor ×0.5 +1◆ — the
+rotating enemy stance distributes yields across all three stances, §2). Re-run
+witness (`combat-dice-economy`, seeds 1–10): **yield income 0.000 → 0.329◆/round**
+and **total ◆ income 1.117 → 1.451** (still in the 1.2–1.6 band, now mid-upper as
+the spec intends — "specials + yield bonuses"). The measurement policy catches
+yields ~⅓ of phases by natural stance distribution (it does not yet deliberately
+steer into them — a policy refinement for D7's win-curve pass). Boss
+(`AUTHORED_THREAT_SEQUENCES`) per-phase "two-stance / not-X" checks remain a §2
+follow-up.
+
 ### F3 — Press Fate is the intended recurring sink but is not equipped by starter loadouts
 
 Realized **Press Fate casts = 0.000/round.** The signature exists

@@ -392,8 +392,27 @@ export const RAGE_UNLOCK_ROUND = 6;
 export const RAGE_DAMAGE_WEIGHT = 1.6;
 export const RAGE_HEAL_FRACTION = 0.5;
 
+/**
+ * Spec 33 §2 (Upgradeable Dice) — the first-batch open stance-check telegraph
+ * (Phase D6e, draining D3-F2). The enemy PUNISHES being met head-on in its own
+ * stance (the hit lands at ×1.5) and YIELDS to being answered from the momentum
+ * chain's SUCCESSOR color (heart→body→mind, via `rotateStance(s, 1)`; the hit is
+ * blunted ×0.5 and pays +1◆) — so the telegraph teaches the chain: don't mirror
+ * the enemy, flow past it. Because `enemyStance` rotates across the fight, all
+ * three stances appear as `yields` in turn, so a mono-color build faces 1–2
+ * off-color checks per fight (§2 authoring law). Wholly inert while the flag is
+ * off (`resolveThreatPhase` gates its resolution on `isUpgradeableDiceEnabled`).
+ * Density (every phase) + payout (+1◆) are D7 dials — this is the uniform first
+ * pass; authored boss sequences (`AUTHORED_THREAT_SEQUENCES`) carry no check yet
+ * and are a follow-up for per-boss "two stances / not-X" variety (§2).
+ */
+export function defaultStanceCheck(enemyStance: Stance): { punishes: Stance; yields: Stance } {
+    return { punishes: enemyStance, yields: rotateStance(enemyStance, 1) };
+}
+
 /** Generates a default escalating sequence for an unauthored enemy (§10),
- *  topped with a locked rage phase (Phase 3). */
+ *  topped with a locked rage phase (Phase 3). Each phase carries a spec-33 §2
+ *  open stance check (`defaultStanceCheck`) — inert unless the flag is on. */
 export function generateDefaultThreatSequence(enemy: Enemy): CombatThreatPhase[] {
     const base = dominantStance(enemy);
     const PHASES = 3;
@@ -405,6 +424,7 @@ export function generateDefaultThreatSequence(enemy: Enemy): CombatThreatPhase[]
             threatAction: defaultThreatAction(enemy, i),
             isFinalPhase: false, // the rage phase below is the true final phase
             stanceHint: enemyStanceHint(enemy) ?? DEFAULT_STANCE_HINTS[enemyStance],
+            stanceCheck: defaultStanceCheck(enemyStance),
         });
     });
     const rageStance = rotateStance(base, PHASES);
@@ -419,6 +439,7 @@ export function generateDefaultThreatSequence(enemy: Enemy): CombatThreatPhase[]
         isFinalPhase: true,
         unlockAfterRound: RAGE_UNLOCK_ROUND,
         stanceHint: enemyStanceHint(enemy) ?? DEFAULT_STANCE_HINTS[rageStance],
+        stanceCheck: defaultStanceCheck(rageStance),
     }));
     return phases;
 }
@@ -429,13 +450,21 @@ export function generateDefaultThreatSequence(enemy: Enemy): CombatThreatPhase[]
  */
 export function getThreatSequence(enemy: Enemy): CombatThreatPhase[] {
     const explicit = (enemy as Enemy & { threatSequence?: CombatThreatPhase[] }).threatSequence;
+    let seq: CombatThreatPhase[];
     if (explicit && explicit.length > 0) {
-        return explicit.map(p => withIntent({
+        seq = explicit.map(p => withIntent({
             ...p,
             stanceHint: p.stanceHint ?? enemyStanceHint(enemy) ?? DEFAULT_STANCE_HINTS[p.enemyStance],
         }));
+    } else {
+        const authored = AUTHORED_THREAT_SEQUENCES[enemy.id];
+        seq = authored ? resolveAuthored(enemy, authored) : generateDefaultThreatSequence(enemy);
     }
-    const authored = AUTHORED_THREAT_SEQUENCES[enemy.id];
-    if (authored) return resolveAuthored(enemy, authored);
-    return generateDefaultThreatSequence(enemy);
+    // Spec 33 §2 (Phase D6e) — backfill the open stance-check telegraph on any
+    // phase that authored none, at the single choke point every source funnels
+    // through (explicit `threatSequence`, `AUTHORED_THREAT_SEQUENCES`, and the
+    // default generator alike — the sim's witness enemies carry short explicit
+    // sequences the generator never touched). A hand-authored check is
+    // preserved; only absent ones are filled. Inert while the flag is off.
+    return seq.map(p => (p.stanceCheck ? p : { ...p, stanceCheck: defaultStanceCheck(p.enemyStance) }));
 }
