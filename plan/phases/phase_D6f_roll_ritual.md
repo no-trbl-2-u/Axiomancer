@@ -1,4 +1,9 @@
-# Phase D6e — The Roll Ritual (dice roll animation)
+# Phase D6f — The Roll Ritual (dice roll animation)
+
+> Renumbered from D6e at the 2026-07-18 merge: the same-day /oversight
+> session on main filed Phase D6e (enemy stanceCheck telegraphs — the
+> D3-F2 yield-lever drain). Both phases stand; this one took the next
+> letter.
 
 > Agent-facing brief. Give the four-die roll a physical moment: a 2.5D
 > tumble that settles on the engine-rolled faces. Presentation only — the
@@ -65,7 +70,7 @@
 - Settled faces ALWAYS equal the engine roll — asserted in tests.
 - Existing seeded e2e (D6d's, if landed) stay green via instant-settle;
   `npm run verify -w axiomancer-mobile` green; flag-off untouched.
-- Flip D6e `[x]` + Phase log + hash.
+- Flip D6f `[x]` + Phase log + hash.
 
 ## Follow-ups
 
