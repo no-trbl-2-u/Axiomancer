@@ -14,6 +14,27 @@
 
 ## Pending
 
+### `[needs-user-call]` FORGE identity: amplifier enchants vs the braindump's "in-combat temporary face upgrades"
+- category: design
+- impact: 4
+- ease: 2
+- detail: filed 2026-07-18 (owner drift-check session on the D-batch). The
+  braindump (`braindump/2026-07-17-upgradeable-dice-combat.md` decision 7)
+  records an owner addition: *"in-combat temporary face upgrades are part of
+  the FORGE preset's identity."* At D1 this became **special-amplifier
+  enchantments** instead (spec 33 §6, marked `[owner, D1]`; D4 shipped
+  `forge-masters-stamp` on that model) and the face-swap economy was retired
+  into die gear. So the change WAS owner-decided, but the braindump wording
+  and the shipped model diverge — if the owner's mental model is still "Forge
+  temporarily upgrades faces mid-combat," the shipped identity is "Forge
+  amplifies fired-special payloads." Surfaced in the 2026-07-18 drift check;
+  owner asked for it to be filed, has not yet confirmed either way. Wants an
+  answer BEFORE D7 ratifies the economy (amplifier enchant pricing + FORGE
+  preset identity are inputs to the win-curve read).
+- next: /oversight (owner confirms amplifier-enchant identity, or reopens
+  in-combat temp face upgrades as a FORGE mechanic — which would be a spec 33
+  §6 amendment + D4-era card follow-up, routed via /deck-tuning)
+
 ### `[needs-user-call]` Blacksmith cadence + dice-upgrade-site identity (open design thread)
 - category: content
 - impact: 5

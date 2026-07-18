@@ -9,6 +9,38 @@
 
 ## Pending
 
+### Expo decouple (CI/CD re-platform) — owner-declared, post-D-batch
+- source: owner design session 2026-07-18 (roll-ritual chat). Owner intent,
+  verbatim scope: *"start decoupling from expo in a coming set of phases (not
+  now) in order to change our CI/CD."* Filed here so the intent survives
+  until the owner promotes it via /oversight — do NOT self-promote; "not
+  now" is the standing instruction, and the D-batch (D6a–f, D7) drains
+  first.
+- decision inputs already banked (2026-07-18 session):
+  - The dependency graph is Expo-coupled at the app shell, NOT the
+    animation layer: `expo-router` (biggest — navigation), `expo-image`,
+    `expo-font` + `@expo-google-fonts/*`, `expo-haptics` (→
+    react-native-haptic-feedback or similar), `expo-constants`,
+    `expo-linking`, `expo-splash-screen`, `expo-status-bar`,
+    `expo-navigation-bar`. Reanimated 4 / gesture-handler / rn-svg /
+    screens / safe-area-context are bare-RN libraries and carry over.
+  - Post-decouple, RN↔native-lib version compatibility (Reanimated, etc.)
+    becomes manually managed — today Expo SDK 54 curates it.
+  - `@shopify/react-native-skia` was evaluated for the D6f roll ritual and
+    parked as the POST-decouple upgrade path (RN-coupled, not
+    Expo-coupled; needs react-native>=0.79 + react>=19 — satisfied; adds a
+    native binary + a CanvasKit-WASM web-loading step that should be wired
+    ONCE, into the kept pipeline). Re-evaluate here.
+  - Surfaces that assume Expo today: `expo start`-based dev/web scripts +
+    dev-server container, EAS deploy scripts (`deploy:preview`/
+    `deploy:production`), `jest-expo` preset, `expo lint` config, the
+    bundle-time combat-flag plumbing (D6a's runtime flag hook reduces
+    this), and the `/dep-upgrades` skill's locked-stack language (React
+    pin, Expo SDK) — the lock definition itself changes when Expo goes.
+- when promoted: scope as a multi-phase epic (inventory/spike → shell
+  swap (router/nav) → per-module expo-* replacements → CI/CD cutover →
+  Skia re-evaluation), each phase leaving main green + playable.
+
 > Seeded 2026-07-03 from the retired `/archive` phase history —
 > the strongest ideas already went straight into
 > `plan/steps/01_build_plan.md` (phases 1-12). These are the
