@@ -643,6 +643,16 @@ one level down, in the routing helper `onApply` calls next).
   wording-pin discipline note).
 - next: /iterate (land the three approved doc additions as one docs commit)
 
+### [MED] general — color-match die riders are a fake condition; remove
+- pass: user-jot (commit 486dbded)
+- viewport: unspecified
+- auth_state: anonymous
+- category: mechanics
+- observation: Owner directive (2026-07-18, combat UI polish session): color-match die riders must go. Under the color law (only same-stance or WILD powers a card), the 7 library cards with an on-color dieBonus (e.g. soft-word "HEART die: SWAY 1") have a fake condition — it fires on every paid play except WILD, and the printed line reads as a replacement not a bonus. Owner: "There should be no color match riders... ignoring gold since that's a big win anyway." Open sub-call: fold the rider into the paid effect (soft-word → SWAY 4; preserves colored-die behavior, tiny WILD buff — recommended) vs drop outright (small nerf). Related residue: the global colorMatch flag (combat.engine.ts:1915) counts WILD as a match so it is ALWAYS true — the +3 Guard/Barrier COLOR_MATCH_DAMAGE_BONUS and the status-duration bonus are flat bonuses wearing conditional copy; bake the constants into base math and delete the misleading "+3 on colour match" wording (zero gameplay change). Affected: 7 cards' dieBonus fields + pricing comments (dieBonus x0.6 weight), combat.engine.ts rider path, mobile presenter colorMatchHint/armedReadValue copy.
+- evidence: user-spotted at 2026-07-18T15:17:02Z
+- suggested fix: [user has not specified — iterate to determine]
+- source: user
+
 ## Done
 
 ### [x] [LOW] "the-closing-word" card face states a threshold that doesn't match the live floor (RESOLVED 2026-07-17, PR #91)
