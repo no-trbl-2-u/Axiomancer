@@ -21,9 +21,11 @@
 // given roll can't reach them — the roll is deterministic from the seed, and
 // per the D6d brief we assert the reachable subset rather than force a step):
 //   1. Roll — the flag-on tray renders 4 FACED dice (not the old 2-die
-//      draft), and the four flag-on-only surfaces render (momentum-v2 chain
-//      chip, player-stance chip, die-gear rail, Press-Fate control) — every
-//      one of these is null flag-OFF, so their presence proves the flag.
+//      draft), and the flag-on-only surfaces render (momentum-v2 chain
+//      chip, player-stance chip, Press-Fate control) — every one of these
+//      is null flag-OFF, so their presence proves the flag. (The die-gear
+//      rail left the combat board 2026-07-18 — face tables read at the
+//      blacksmith now.)
 //   2. Power a card — drag a usable die onto a color-matching staged card
 //      (armed socket); then an OFF-COLOR drop is refused LOUDLY (the
 //      combat-drop-reject line).
@@ -34,10 +36,9 @@
 //   6. Stance check — the open telegraph renders, and a resolved phase shows
 //      the ×0.5 +1◆ / ×1.5 outcome.
 //   7. Blacksmith HONE round-trip — via the Dev-menu shortcut (D6c): grant
-//      currency, HONE the heart die, claim; then re-enter combat and assert
-//      the die-gear rail's heart slot gained a mana face (more mana, fewer
-//      miss) — the persisted rail round-trips into the tray the combat reads.
-//   8. Screenshots — the flag-on tray, momentum chip, gear rail, and forge
+//      currency, HONE the heart die, claim (the blacksmith flow asserts the
+//      face change); then re-enter combat on the honed rail.
+//   8. Screenshots — the flag-on tray, momentum chip, and forge
 //      at 375×812 (the deferred visual proof + small-screen crowding evidence).
 //
 // Everything runs CLIENT-SIDE after a single document load: saves in this
@@ -202,18 +203,9 @@ async function enterCombat(page) {
     await page.waitForTimeout(300)
 }
 
-/** Dice within the tray (excludes the `combat-die-gear-*` rail slots, which
- *  share the `combat-die-` prefix but live outside the tray). */
+/** Dice within the tray. */
 function trayDice(page) {
     return page.getByTestId('combat-dice-tray').locator('[data-testid^="combat-die-"]')
-}
-
-/** Parse the heart die-gear slot's `special·mana·miss` face counts. */
-async function heartGearFaces(page) {
-    const t = await text(page.getByTestId('combat-die-gear-heart'))
-    const m = t.match(/(\d+)\s*·\s*(\d+)\s*·\s*(\d+)/)
-    if (!m) return null
-    return { special: Number(m[1]), mana: Number(m[2]), miss: Number(m[3]) }
 }
 
 /** Read the enemy SWAY meter's current value (the `combat-sway-meter` a11y
@@ -230,28 +222,24 @@ async function swayValue(page) {
 
 // ── Flow ────────────────────────────────────────────────────────────────────
 
-/** Steps 1-6 + step-8 screenshots on the flag-on board. Returns the baseline
- *  heart gear faces for the blacksmith round-trip comparison. */
+/** Steps 1-6 + step-8 screenshots on the flag-on board. */
 async function assertFlagOnBoard(page, { capture }) {
     // ── STEP 1: the flag-on tray renders faces + the flag-on-only surfaces ──
     const dieCount = await trayDice(page).count()
     if (dieCount < 4) fail(`flag-on tray must roll ≥4 faced dice (old model rolls 2); saw ${dieCount}`)
     log(`step 1: tray rolled ${dieCount} faced dice`)
 
-    // These three surfaces are null flag-OFF and ALWAYS present flag-on — their
-    // presence IS the flag proof. (Press Fate is a fourth flag-on surface, but
-    // it is additionally gated on the player carrying a reroll signature — the
+    // These surfaces are null flag-OFF and ALWAYS present flag-on — their
+    // presence IS the flag proof. (The die-gear rail was removed from the
+    // combat board on 2026-07-18 — face tables now live in the blacksmith
+    // flow only. Press Fate is another flag-on surface, but it is
+    // additionally gated on the player carrying a reroll signature — the
     // "Gambler's Knot" relic — which the combat sandbox does not equip; it is
     // handled adaptively in the Press-Fate block below, not asserted here.)
-    for (const id of ['combat-momentum-v2', 'combat-player-stance', 'combat-die-gear-rail']) {
+    for (const id of ['combat-momentum-v2', 'combat-player-stance']) {
         if (!(await has(page.getByTestId(id)))) fail(`flag-on surface missing: ${id} (is the flag actually on?)`)
     }
-    log('step 1: flag-on surfaces present — momentum-v2 · player-stance · die-gear-rail')
-
-    // The gear rail names each die's face table (special·mana·miss).
-    const baseline = await heartGearFaces(page)
-    if (!baseline) fail('die-gear rail heart slot did not render a face table')
-    log(`step 1: heart die-gear = ${baseline.special}·${baseline.mana}·${baseline.miss} (special·mana·miss)`)
+    log('step 1: flag-on surfaces present — momentum-v2 · player-stance')
 
     // Face states surface through a11y — at least a special or a miss face
     // should be readable somewhere on the four rolled dice.
@@ -262,7 +250,6 @@ async function assertFlagOnBoard(page, { capture }) {
 
     if (capture) {
         await shot(page, '01-flag-on-tray')
-        await shot(page, '03-die-gear-rail') // whole board shows the rail; a focused crop follows below
     }
 
     // ── STEP 6 (telegraph half): the open stance-check telegraph renders ──
@@ -320,7 +307,6 @@ async function assertFlagOnBoard(page, { capture }) {
         // Focused crops for the deferred visual proof + crowding evidence.
         await shot(page, '02-momentum-chip')
     }
-    return baseline
 }
 
 /** STEP 2·SWAY (D6d regression guard) — power Soft Word with a heart tray die,
@@ -613,10 +599,7 @@ async function main() {
 
         // ── Pass A: flag-on board — assert the stack + capture screenshots ──
         await enterCombat(page)
-        const baseline = await assertFlagOnBoard(page, { capture: true })
-        // Focused gear-rail crop (small-screen crowding evidence).
-        await page.getByTestId('combat-die-gear-rail').scrollIntoViewIfNeeded().catch(() => {})
-        await shot(page, '03-die-gear-rail')
+        await assertFlagOnBoard(page, { capture: true })
         // Return to /dev client-side (history back; no reload → store survives).
         await page.goBack({ waitUntil: 'commit' }).catch(() => {})
         await page.waitForURL((url) => url.pathname.endsWith('/dev'), { timeout: 10000 }).catch(() => {})
@@ -624,22 +607,17 @@ async function main() {
         // ── STEP 7: forge HONE round-trip ──
         const claimed = await honeHeartAtBlacksmith(page, { capture: true })
 
-        // ── Pass B: re-enter combat, assert the tray reflects the honed rail ──
+        // ── Pass B: re-enter combat after the HONE ──
+        // (2026-07-18 — the die-gear rail left the combat board, so the honed
+        // face table is no longer readable in combat; the blacksmith flow's own
+        // assertions in honeHeartAtBlacksmith carry the HONE proof. Re-entering
+        // still proves the honed rail loads a playable combat.)
         if (claimed) {
             await enterCombat(page)
-            const upgraded = await heartGearFaces(page)
-            if (!upgraded) fail('re-entered combat but the heart die-gear slot did not render')
-            log(`step 7: heart die-gear after HONE = ${upgraded.special}·${upgraded.mana}·${upgraded.miss} (was ${baseline.special}·${baseline.mana}·${baseline.miss})`)
-            if (upgraded.mana !== baseline.mana + 1) {
-                fail(`HONE did not round-trip into the combat tray: heart mana faces ${baseline.mana} → ${upgraded.mana} (expected +1)`)
-            }
-            if (upgraded.miss !== baseline.miss - 1) {
-                fail(`HONE mana gain should cost a miss face: heart miss ${baseline.miss} → ${upgraded.miss} (expected -1)`)
-            }
-            log('step 7: the persisted HONE round-trips into the flag-on combat tray (more mana, fewer miss)')
             await shot(page, '05-tray-after-hone')
+            log('step 7: combat re-entered cleanly on the honed rail (face table asserted at the blacksmith)')
         } else {
-            note('forge HONE not claimed — the tray-reflects-HONE assertion was skipped')
+            note('forge HONE not claimed — the post-HONE combat re-entry was skipped')
         }
 
         await context.close()

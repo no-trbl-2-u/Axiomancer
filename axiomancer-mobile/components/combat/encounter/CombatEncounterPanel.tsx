@@ -46,7 +46,7 @@ import { CombatTutorialCoach } from '@/components/combat/encounter/CombatTutoria
 import { currentCombatTutorialStep } from '@/components/combat/encounter/combat-tutorial-steps';
 import { Image } from 'expo-image';
 import { getEncounterEnemyArt } from '@/assets/images/enemies';
-import { INTENT_ICONS, buildCombatViewModel, resolveApplyRouting, rewardOfferVMs, STANCE_COLORS, type CombatCardVM, type CombatEffectChipVM, type CombatSignatureVM, type CombatDieGearSlotVM } from '@/state/presenters/combat-encounter.engine';
+import { INTENT_ICONS, buildCombatViewModel, resolveApplyRouting, rewardOfferVMs, STANCE_COLORS, type CombatCardVM, type CombatEffectChipVM, type CombatSignatureVM } from '@/state/presenters/combat-encounter.engine';
 import { PlayerPortraitImage } from '@/components/art/PlayerPortraitImage';
 import { useGameState, useGameStore } from '@/state/GameStoreProvider';
 import { COMBAT_TUTORIAL_FLAG, completeCombatTutorialAction, runArchetype, skewRewardsByArchetype } from '@/state/combat/store-actions';
@@ -341,8 +341,6 @@ export function CombatEncounterPanel({
     // `advanceMomentumWheel`) — `vm.momentum` is read straight off engine
     // state, no panel-owned wheel state or grant logic left here. ──
     const [momentumInfoOpen, setMomentumInfoOpen] = useState(false);
-    // Spec 33 §6 (flag-on) — the payload-only die-gear inspection panel target.
-    const [gearInspect, setGearInspect] = useState<CombatDieGearSlotVM | null>(null);
 
     // ── screen-level drag controller (cards + dice) ──
     // dragX/dragY are written straight from the board's gesture worklets every
@@ -417,13 +415,9 @@ export function CombatEncounterPanel({
     // draft the dragged die (unless one is already drafted, the combo case) + power
     // the card (bottom action); `power` false → the FREE base action (top action,
     // no die). One commit; the card leaves staging.
-    // Fate Engine P1 R3 — the spare (undrafted) die's two lives: burn +1◆ (default)
-    // or BANK to the Reserve where it ripens. Panel-owned so the choice is set
-    // BEFORE the draft commits.
-    const [bankSpare, setBankSpare] = useState(false);
-    const bankSpareRef = useRef(bankSpare);
-    bankSpareRef.current = bankSpare;
-    const onToggleBankSpare = useCallback(() => setBankSpare(v => !v), []);
+    // Fate Engine P1 R3, recut 2026-07-18 (owner) — the spare/bank toggle chip
+    // is GONE from the tray: the spare die always burns for +1◆ (the default).
+    // The Reserve still fills through cards (KINDLE / bank_spent_die).
     // R4 — the universal fate tap: advance the strongest enemy DoT when one is
     // ticking, else bank +1 Conviction. Once per turn (engine-gated).
     const onFateTap = useCallback((dieId: string) => {
@@ -463,7 +457,7 @@ export function CombatEncounterPanel({
             // first. Routing extracted to `resolveApplyRouting` (tested).
             const routing = resolveApplyRouting(s, dieId);
             if (power && routing.draftFirst && dieId) {
-                ns = draftStanceDie(ns, dieId, { bankUnpicked: bankSpareRef.current }).state;
+                ns = draftStanceDie(ns, dieId, { bankUnpicked: false }).state;
             }
             // WS7.2 chosenX + phase 28 reprisalCardId ride through to the
             // engine (which clamps X to [min, affordable] and validates the
@@ -585,7 +579,6 @@ export function CombatEncounterPanel({
     const onInspect = useCallback((c: CombatCardVM) => { detailOpenedAt.current = Date.now(); setDetailCard(c); }, []);
     const onPlayerInspect = useCallback(() => setPilgrimOpen(true), []);
     const onMomentumInfo = useCallback(() => setMomentumInfoOpen(true), []);
-    const onGearInspect = useCallback((slot: CombatDieGearSlotVM) => setGearInspect(slot), []);
     const momentum = vm.momentum;
 
     // Ghost stays MOUNTED once the first drag begins (opacity-gated by dragShown):
@@ -624,12 +617,9 @@ export function CombatEncounterPanel({
                     onPlayerInspect={onPlayerInspect}
                     momentum={momentum}
                     onMomentumInfo={onMomentumInfo}
-                    onGearInspect={onGearInspect}
                     onStake={onStake}
                     fx={fx}
                     onFateTap={onFateTap}
-                    bankSpare={bankSpare}
-                    onToggleBankSpare={onToggleBankSpare}
                     onReprisalNeeded={onReprisalNeeded}
                 />
             )}
@@ -725,13 +715,16 @@ export function CombatEncounterPanel({
                             style={styles.detailScroll}
                             contentContainerStyle={styles.detailStack}
                         >
-                            {/* (1) keyword DEFINITION panels at the top */}
+                            {/* (1) keyword DEFINITIONS at the top — ONE compact ledger
+                                (owner playtest 2026-07-18: five separate full-size boxes
+                                buried the card they were explaining). Hairline-separated
+                                rows, terse type. */}
                             {detailCard.detail.keywords.length > 0 && (
                                 <View style={styles.detailKeywords}>
                                     {detailCard.detail.keywords.map((k, i) => {
                                         const tag = keywordTypeTag(detailCard.face.kind, i);
                                         return (
-                                            <View key={k.name} style={styles.detailKeywordRow}>
+                                            <View key={k.name} style={[styles.detailKeywordRow, i > 0 ? styles.detailKeywordRowSep : null]}>
                                                 <View style={styles.detailKeywordHead}>
                                                     <Text style={[styles.detailKeywordName, k.minor ? { color: AXM.ash } : null]}>{k.name}</Text>
                                                     <Text style={[styles.detailKeywordTag, { color: TAG_COLORS[tag] ?? AXM.bone }]}>{tag}</Text>
@@ -908,27 +901,6 @@ export function CombatEncounterPanel({
                                 </View>
                             </View>
                         </View>
-                    </View>
-                </Pressable>
-            )}
-
-            {/* Spec 33 §6 (flag-on) — the payload-only die-gear inspection panel.
-                Dawncaster-terse: the face table, the +◆ payload, upgrade state.
-                No rules prose beyond what the gear does. */}
-            {gearInspect && (
-                <Pressable style={styles.backdrop} testID="combat-die-gear-inspect" onPress={() => setGearInspect(null)}>
-                    <View style={[styles.tipPlaque, { borderColor: `${gearInspect.colorHex}66` }]} onStartShouldSetResponder={() => true}>
-                        <View style={[styles.tipCorner, styles.tipCornerTl, { borderColor: gearInspect.colorHex }]} pointerEvents="none" />
-                        <View style={[styles.tipCorner, styles.tipCornerTr, { borderColor: gearInspect.colorHex }]} pointerEvents="none" />
-                        <View style={[styles.tipCorner, styles.tipCornerBl, { borderColor: gearInspect.colorHex }]} pointerEvents="none" />
-                        <View style={[styles.tipCorner, styles.tipCornerBr, { borderColor: gearInspect.colorHex }]} pointerEvents="none" />
-                        <GlyphBurst color={gearInspect.colorHex} glyph={gearInspect.glyph} />
-                        <Text style={[styles.tipName, { color: gearInspect.colorHex, textShadowColor: gearInspect.colorHex }]}>
-                            {gearInspect.label} DIE{gearInspect.upgraded ? ' ★' : ''}
-                        </Text>
-                        <Text style={styles.tipGloss}>{gearInspect.faceTable}</Text>
-                        <Text style={[styles.tipGloss, { color: gearInspect.colorHex }]}>SPECIAL payload · {gearInspect.payload}</Text>
-                        <Text style={styles.tipMeta}>{gearInspect.upgraded ? 'upgraded from stock' : 'stock gear'}</Text>
                     </View>
                 </Pressable>
             )}
@@ -1130,8 +1102,8 @@ const useStyles = makeStyles((AXM) => ({
     detailCardWrap: { marginTop: 2, marginBottom: 6, alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOpacity: 0.8, shadowRadius: 20, shadowOffset: { width: 0, height: 8 }, elevation: 10 },
     detailHalo: { position: 'absolute' },
     detailBold: { fontFamily: FONTS.gothic, color: AXM.parchment },
-    detailKeywordHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 3, gap: 8 },
-    detailKeywordTag: { fontFamily: FONTS.sans, fontSize: 10, letterSpacing: 1.5, flexShrink: 0 },
+    detailKeywordHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 2, gap: 8 },
+    detailKeywordTag: { fontFamily: FONTS.sans, fontSize: 8.5, letterSpacing: 1.2, flexShrink: 0 },
     // Close ✕ — bottom-right of the BACKDROP (never overlaps the keyword tags,
     // never falls below the fold).
     detailClose: { position: 'absolute', bottom: 26, right: 18, zIndex: 10, width: 50, height: 50, borderRadius: 25, borderWidth: 2, alignItems: 'center', justifyContent: 'center', backgroundColor: AXM.panelBg },
@@ -1154,11 +1126,13 @@ const useStyles = makeStyles((AXM) => ({
     detailFlavor: { alignSelf: 'stretch', fontFamily: FONTS.serifItalic, fontStyle: 'italic', fontSize: 12, color: AXM.bone, opacity: 0.75, lineHeight: 17, marginTop: 10, textAlign: 'center' },
     detailReadNote: { fontFamily: FONTS.serifItalic, fontStyle: 'italic', fontSize: 11, color: AXM.bone, lineHeight: 15 },
     detailLine: { fontFamily: FONTS.serif, fontSize: 13, color: AXM.parchment, lineHeight: 18 },
-    detailKeywords: { alignSelf: 'stretch', marginBottom: 10 },
+    // 2026-07-18 (owner playtest) — ONE compact ledger, not a box per keyword.
+    detailKeywords: { alignSelf: 'stretch', marginBottom: 8, borderWidth: 1, borderColor: 'rgba(255,255,255,0.12)', borderRadius: 6, backgroundColor: 'rgba(0,0,0,0.65)', overflow: 'hidden' },
     detailKeywordsHead: { fontFamily: FONTS.sans, fontSize: 10, letterSpacing: 1.5, color: AXM.bone, opacity: 0.7, marginBottom: 7 },
-    detailKeywordRow: { alignSelf: 'stretch', borderWidth: 1, borderColor: 'rgba(255,255,255,0.12)', borderRadius: 6, padding: 12, marginBottom: 7, backgroundColor: 'rgba(0,0,0,0.6)' },
-    detailKeywordName: { fontFamily: FONTS.sans, fontSize: 16, letterSpacing: 1.5, color: AXM.sulfur, flexShrink: 1 },
-    detailKeywordDef: { fontFamily: FONTS.serif, fontSize: 13.5, color: AXM.parchment, lineHeight: 19 },
+    detailKeywordRow: { alignSelf: 'stretch', paddingHorizontal: 10, paddingVertical: 6 },
+    detailKeywordRowSep: { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: 'rgba(255,255,255,0.14)' },
+    detailKeywordName: { fontFamily: FONTS.sans, fontSize: 12, letterSpacing: 1.2, color: AXM.sulfur, flexShrink: 1 },
+    detailKeywordDef: { fontFamily: FONTS.serif, fontSize: 11.5, color: AXM.parchment, lineHeight: 16 },
     detailMath: { alignSelf: 'stretch', fontFamily: FONTS.mono, fontSize: 10.5, color: AXM.bone, opacity: 0.85, lineHeight: 15, marginBottom: 8 },
     detailTipGloss: { fontFamily: FONTS.serif, fontSize: 12, color: AXM.parchment, textAlign: 'center', marginTop: 6, lineHeight: 16 },
     detailHint: { fontFamily: FONTS.serifItalic, fontStyle: 'italic', fontSize: 11, color: AXM.bone, marginTop: 4, textAlign: 'center' },

@@ -359,11 +359,9 @@ export const SYSTEM_GLOSSARY: readonly { term: string; def: string }[] = [
     // CONCEDE is the alt-win it can escalate to. Neither had a popup anywhere.
     { term: 'PERORATION', def: 'A declared conclusion: when your Premise tally reaches the printed count, its payoff fires free and the tally resets.' },
     { term: 'CONCEDE', def: 'An alternate win — reaching the printed Premise count in one Peroration ends the fight. Elites and bosses demand the higher printed count.' },
-    // 2026-07-12 (card-wording audit) — the two most-flagged undefined words of
-    // the 10-deck playtest: INTENSITY (the noun every stack is measured in — 8
-    // decks) and FREE (the no-die line's cost label — 7 decks).
-    { term: 'INTENSITY', def: 'The size of a stack — +1 intensity makes each stack hit one harder.' },
-    { term: 'FREE', def: 'The no-die line — it plays without spending a die.' },
+    // 2026-07-18 (owner playtest) — INTENSITY and FREE are RETIRED from the
+    // overlay glossary: both read plainly enough in context, and their rows
+    // padded every inspect (they were the 07-12 audit's additions).
 ];
 
 /** How a card's PRINTED lines reference each system term. Matched against the
@@ -378,10 +376,6 @@ const SYSTEM_TERM_MATCH: Record<string, RegExp> = {
     'WILD / X': /\bwild\b|\bX die\b/,
     'PERORATION': /\bPERORATION\b/,
     'CONCEDE': /\bCONCEDE\b/,
-    // INTENSITY: the word itself, the legacy 'i1' shorthand, or its
-    // de-abbreviated '×1' render. FREE: the bare cost label the cards print.
-    'INTENSITY': /intensit|\bi\d\b|×\d/i,
-    'FREE': /\bFREE\b/,
 };
 
 /** Keyword chips whose own gloss already explains a system term — when such a
