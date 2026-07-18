@@ -55,7 +55,7 @@ const TIER_1_CARDS = [
     'brief-candle',
     'red-herring',
     'soft-word',
-    'straw-mans-jab',
+    'currys-conversion', // straw-mans-jab retired in D8; festering-argument already rides in TIER_3
     'glimpse',
     'sketch-of-a-thought',
     'disarming-smile', // Charm opener (v3 — Befriend lives in signatures)
@@ -73,9 +73,10 @@ const TIER_3_CARDS = [
     'bootstrap-loop',
 ];
 
-// The synergy-payoff line. straw-mans-jab and sketch-of-a-thought (its
-// setup pieces) already ride in TIER_1_CARDS — knownCards is a set-like
-// catalogue, so the lists stay disjoint to avoid duplicate ids.
+// The synergy-payoff line. sketch-of-a-thought (a setup piece) already rides
+// in TIER_1_CARDS — knownCards is a set-like catalogue, so the lists stay
+// disjoint to avoid duplicate ids. (straw-mans-jab, the other historical
+// setup piece, was retired in D8.)
 const TIER_2_SYNERGY_CARDS = [
     'resonance-detonation',
 ];

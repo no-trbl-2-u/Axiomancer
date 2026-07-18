@@ -31,10 +31,10 @@ import { buildCombatViewModel } from '@/state/presenters/combat-encounter.engine
 import { createMockEncounterEnemy } from '@/state/mocks/combat.mock';
 import { withAllProviders } from '@/test-utils/withAllProviders';
 
-// slippery-slope and straw-mans-jab are BOTH body-stance Affliction DoTs —
+// slippery-slope and recurring-symptom are BOTH body-stance Affliction DoTs (the D8 valve replaced retired straw-mans-jab here) —
 // exactly the pairing where the old comboTarget re-attach showed: play A with
 // a body die (status lands → die refreshed), stage B (also body) → B lit up.
-const CARDS = ['slippery-slope', 'straw-mans-jab', 'brace-for-impact', 'soft-word'];
+const CARDS = ['slippery-slope', 'recurring-symptom', 'brace-for-impact', 'soft-word'];
 
 const noopDrag = (): DragController =>
     ({ begin: () => undefined, end: () => undefined, active: null, x: { value: 0 }, y: { value: 0 } } as unknown as DragController);
@@ -77,7 +77,7 @@ describe('CombatBoard — a refreshed combo die never re-attaches on its own', (
         const die = vm.dice.find(d => d.drafted && !d.spent);
         expect(die).toBeTruthy();
         expect(die!.refreshed).toBe(true);
-        const b = vm.hand.find(c => c.cardId === 'straw-mans-jab')!;
+        const b = vm.hand.find(c => c.cardId === 'recurring-symptom')!;
         expect(b.stance).toBe('body'); // same color — the old comboTarget re-attach case
 
         const cbs = boardCallbacks();
@@ -100,7 +100,7 @@ describe('CombatBoard — a refreshed combo die never re-attaches on its own', (
         const { store } = withAllProviders(<></>);
         const { s } = playAWithDie(store);
         const vm = buildCombatViewModel(s);
-        const b = vm.hand.find(c => c.cardId === 'straw-mans-jab')!;
+        const b = vm.hand.find(c => c.cardId === 'recurring-symptom')!;
 
         const cbs = boardCallbacks();
         const { tree } = withAllProviders(
@@ -135,7 +135,7 @@ describe('CombatBoard — a refreshed combo die never re-attaches on its own', (
         const player = { ...base, knownCards: CARDS, baseStats: { heart: 8, body: 8, mind: 8 }, health: 200, maxHealth: 200 };
         let s = initializeCombatEncounter(player, createMockEncounterEnemy(), undefined, 16);
         s = rollEncounterDice(s).state;
-        const b = s.hand.find(h => h.cardId === 'straw-mans-jab')!;
+        const b = s.hand.find(h => h.cardId === 'recurring-symptom')!;
         const first = s.dice.findIndex(d => d.state === 'available');
         const dice = s.dice.map((d, i) => (i === first ? { ...d, color: 'body' as const } : d));
         s = draftStanceDie({ ...s, dice }, dice[first].id).state; // drafted, NOTHING played

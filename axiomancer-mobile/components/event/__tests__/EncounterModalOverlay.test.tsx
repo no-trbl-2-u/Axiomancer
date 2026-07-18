@@ -801,7 +801,7 @@ describe('EncounterModalOverlay: in-place hazard combat (Phase 200)', () => {
                 ...p,
                 knownCards: Array.from(new Set([
                     ...(p.knownCards ?? []),
-                    'slippery-slope', 'straw-mans-jab', 'brace-for-impact',
+                    'slippery-slope', 'recurring-symptom', 'brace-for-impact',
                 ])),
             },
         });

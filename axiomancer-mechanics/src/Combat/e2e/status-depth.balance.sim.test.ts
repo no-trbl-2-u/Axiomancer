@@ -26,10 +26,12 @@ function loadout(cards: string[]): Character {
     return p;
 }
 
-const DOT = ['slippery-slope', 'straw-mans-jab'];
-const DOT_RUPTURE = ['slippery-slope', 'straw-mans-jab', 'resonance-detonation'];
+// (straw-mans-jab retired in D8 — festering-argument, the surviving t1
+//  affliction glue, PROLONGs slippery-slope's poison instead of adding bleed.)
+const DOT = ['slippery-slope', 'festering-argument'];
+const DOT_RUPTURE = ['slippery-slope', 'festering-argument', 'resonance-detonation'];
 const DOT_MARK = ['slippery-slope', 'opening-statement'];          // DoT + MARK exposure
-const FULL_KIT = ['slippery-slope', 'straw-mans-jab', 'opening-statement', 'resonance-detonation'];
+const FULL_KIT = ['slippery-slope', 'festering-argument', 'opening-statement', 'resonance-detonation'];
 
 describe('spec 32 v3 — the DoT baseline is alive (loose bands)', () => {
     it('the pure DoT loadout wins at least sometimes WITH real status engagement', () => {

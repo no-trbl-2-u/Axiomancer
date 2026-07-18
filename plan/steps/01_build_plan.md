@@ -819,7 +819,9 @@ supersession collisions before any engine work.
       byte-identical" as the default path. Full three-workspace verify
       (public-surface coupling). No tuning in this phase — numbers move
       at D8's re-test. Deps: D7.
-- [ ] Phase D8 — One dice valve in every starter preset. Under the
+- [x] Phase D8 — One dice valve in every starter preset. (shipped 10ec4fe8,
+      2026-07-18 — all ten themed valves passed the court, no fallback needed;
+      curve red at mid/late stays the next bounded tuning phase.) Under the
       Upgradeable-Dice flag, replace exactly one same-aspect card instance in
       each of the ten 15-card starter presets with one meaningful dice valve;
       never append, preserve 5/5/5, keep flag-off recipes byte-identical, and

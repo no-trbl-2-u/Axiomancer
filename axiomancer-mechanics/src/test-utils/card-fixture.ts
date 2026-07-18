@@ -115,7 +115,7 @@ export function buildFixtureState(options: { clean?: boolean } = {}): CombatEnco
         lastSpellCardId: 'slippery-slope', // a real, different, replayable spell (ouroboros fodder)
         persistentZone: [],
         enemyAttachments: [],
-        discard: ['slippery-slope', 'straw-mans-jab', 'festering-argument'], // reprise fodder
+        discard: ['slippery-slope', 'currys-conversion', 'festering-argument'], // reprise fodder (straw-mans-jab retired in D8)
         drawPile: FIXTURE_FILLER.slice(),
         deck: FIXTURE_FILLER.slice(),
         hand: [],

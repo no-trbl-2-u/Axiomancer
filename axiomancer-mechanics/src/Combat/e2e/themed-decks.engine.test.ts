@@ -493,23 +493,27 @@ describe('ECHO — the PAID payload fires twice; stuck-in-their-head drips per e
         expect(hpBefore - res.state.enemy.health).toBe(2); // marks deal nothing directly
     });
 
-    it('echo_next_spell charges the NEXT spell this turn, then is consumed', () => {
+    it('a pending echo_next_spell charge echoes the NEXT spell, then is consumed', () => {
         mockSequentialRng(0.05);
-        const CHARGE = 'ad-nauseam';
-        const BLEEDER = 'straw-mans-jab';
+        // ad-nauseam — the library's only echo_next_spell CARRIER — was
+        // retired in D8 (plan/tuning/2026-07-18-d8-preset-dice-valves.md).
+        // The engine mechanic itself is still live, so the charge is seeded
+        // directly on the state and the surviving bleeder bleed-for-it
+        // witnesses the doubled payload + charge consumption.
+        const BLEEDER = 'bleed-for-it';
         // Enemy stance BODY: the wild die re-reads as the bleeder's body stance,
         // so the read stays NEUTRAL and no read-intensity bonus muddies the echo.
         let state = openAndDraft(
-            makePlayer([CHARGE, BLEEDER]), makeEnemy(300, 'body'),
-            [CHARGE, BLEEDER, BLEEDER, BLEEDER, BLEEDER], 'mind');
-        // A banked Reserve die powers the second spell in the SAME turn.
-        // (WILD — the color law demands a matching die for the body spell, and
-        // wild is the exception; it does NOT trigger straw-mans-jab's body
-        // dieBonus (+1 intensity), so the echo stays isolated.)
-        state = { ...state, reserve: [{ id: 'bank-echo', color: 'wild', state: 'available', temporary: false, pips: 0 }] };
-        const charged = playFromHand(state, CHARGE);
-        expect(charged.state.echoNextSpell).toBe(true);
-        const res = playFromHand(charged.state, BLEEDER, true, 'bank-echo');
+            makePlayer([BLEEDER]), makeEnemy(300, 'body'),
+            [BLEEDER, BLEEDER, BLEEDER, BLEEDER], 'mind');
+        // A banked Reserve die powers the spell (WILD — the color law demands
+        // a matching die for the body spell, and wild is the exception).
+        state = {
+            ...state,
+            reserve: [{ id: 'bank-echo', color: 'wild', state: 'available', temporary: false, pips: 0 }],
+            echoNextSpell: true, // the pending charge under test
+        };
+        const res = playFromHand(state, BLEEDER, true, 'bank-echo');
         expect(res.events.some(e => e.kind === 'echoed')).toBe(true);
         const bleed = res.state.enemy.effects.find(e => e.effectId === 'debuff_bleed');
         expect(bleed?.intensity).toBe(4); // authored i2, applied twice

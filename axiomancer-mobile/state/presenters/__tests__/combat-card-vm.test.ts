@@ -10,7 +10,7 @@
  *   - the-reaping           REAP all (2/Soul)     → live burst, never headlined
  *   - venom-and-vein        enchantment           → FREE timed (3 rounds) / PAID permanent
  *   - suppurating-curse     disenchant            → standing curse, FREE timed / PAID permanent
- *   - memento-mori          MARK i2 d1            → +2 per DoT tick
+ *   - second-take           MARK i1 d2 (D8 valve) → +1 per DoT tick
  *   - red-herring           BACKFIRE i2 d2        → 2 per denied rung
  *
  * Core invariant under test: real-units-or-no-number (never a fabricated
@@ -130,22 +130,24 @@ describe('faceStats — honest real-unit faces', () => {
         expect(card.cardType).toBe('disenchant');
     });
     it('persistent verb slot leads with the PAYLOAD keyword, never the bare type word (owner, 2026-07-12)', () => {
-        // entropy-tax: 'Every KINDLEd or FORGEd die you spend MARKs the enemy.'
-        // — the outcome verb (MARK) wins, not the trigger (KINDLE/FORGE).
-        const tax = cardOf('entropy-tax');
-        expect(faceStats(tax.card, tax.sourceCard).keyword).toBe('MARK');
+        // hedgehogs-dilemma's standing spikes MARK on contact — the outcome
+        // verb (MARK) wins, not the trigger. (entropy-tax, the old specimen,
+        // retired in the D8 ledger.)
+        const spikes = cardOf('hedgehogs-dilemma');
+        expect(faceStats(spikes.card, spikes.sourceCard).keyword).toBe('MARK');
         // venom-and-vein boosts BLEED/POISON — a payload keyword, not ENCHANTMENT.
         const venom = cardOf('venom-and-vein');
         expect(faceStats(venom.card, venom.sourceCard).keyword).toBe('POISON');
-        // achilles-and-the-tortoise opens with its verb: 'DRAW 1 card each time…'
-        const draw = cardOf('achilles-and-the-tortoise');
-        expect(faceStats(draw.card, draw.sourceCard).keyword).toBe('DRAW');
+        // quagmire-of-doubt leads with its payload verb (STAGGER), not the
+        // 'disenchant' type word. (achilles-and-the-tortoise retired in D8.)
+        const bog = cardOf('quagmire-of-doubt');
+        expect(faceStats(bog.card, bog.sourceCard).keyword).toBe('STAGGER');
     });
-    it('Memento Mori (MARK i2 d1) → +2 per DoT tick, real units', () => {
-        const { card, sourceCard } = cardOf('memento-mori');
+    it('Second Take (MARK i1 d2) → +1 per DoT tick, real units (D8 valve; memento-mori retired)', () => {
+        const { card, sourceCard } = cardOf('second-take');
         const f = faceStats(card, sourceCard);
         expect(f.kind).toBe('mark');
-        expect(f.heroText).toBe('+2/tick');   // tickAmplifyFlat 1 × intensity 2
+        expect(f.heroText).toBe('+1/tick');   // tickAmplifyFlat 1 x intensity 1
         expect(f.inert).toBe(false);
     });
     it('Red Herring (BACKFIRE i2 d2) → 2 per denied rung, real units', () => {
@@ -269,11 +271,11 @@ describe('detailStats — same numbers as the face', () => {
         expect(vk.every(k => k.def.length > 0)).toBe(true);  // every chip carries its gloss
     });
     it('systemTerms is the PER-CARD glossary slice, not the KW-7 dump (owner, 2026-07-12)', () => {
-        // entropy-tax's printed lines reference no dice-system token → NO
-        // entries (INTENSITY/FREE retired from the glossary, owner 2026-07-18)
-        // — never the dump.
-        const tax = cardOf('entropy-tax');
-        expect(detailStats(tax.card, tax.sourceCard).systemTerms.map(s => s.term)).toEqual([]);
+        // hedgehogs-dilemma's printed lines reference no dice-system token →
+        // NO entries (INTENSITY/FREE retired from the glossary, owner
+        // 2026-07-18) — never the dump.
+        const spikes = cardOf('hedgehogs-dilemma');
+        expect(detailStats(spikes.card, spikes.sourceCard).systemTerms.map(s => s.term)).toEqual([]);
         // bootstrap-loop prints '+1 Conviction' and a '⬡ MIND ×2 spent'
         // threshold line → CONVICTION and RESONANCE render; FLOATING/WILD are
         // already explained by its FORGE keyword chip → deduped away.
@@ -300,8 +302,9 @@ describe('card-wording audit (2026-07-12) — the +DIE row carries only what the
         expect(d.readLegend).toBeNull();
     });
     it('a single-effect, non-read card renders NO +DIE row at all (pure face duplicate)', () => {
-        // memento-mori: MARK is the whole paid line and takes no read triplet.
-        const { card, sourceCard } = cardOf('memento-mori');
+        // second-take: MARK is the whole visible paid line and takes no read
+        // triplet (its REFRESH die-verb rides the keyword chips, not +DIE).
+        const { card, sourceCard } = cardOf('second-take');
         const d = detailStats(card, sourceCard);
         expect(d.diePaidLine).toBeNull();
         expect(d.dieTriplet).toBeNull();

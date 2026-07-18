@@ -84,7 +84,7 @@ describe('buildCombatDeck with curated loadout', () => {
         level: 1,
         baseStats: { heart: 5, body: 5, mind: 5 },
     });
-    const EXTRA = 'straw-mans-jab'; // a third real card only knownCards carries
+    const EXTRA = 'festering-argument'; // a third real card only knownCards carries
     const playerWithCards = { ...player, knownCards: [CARD_A, CARD_B, EXTRA] };
 
     it('uses the curated loadout when loadout flags are present', () => {
