@@ -14,6 +14,25 @@
 
 ## Pending
 
+### `[needs-user-call]` Blacksmith cadence + dice-upgrade-site identity (open design thread)
+- category: content
+- impact: 5
+- ease: 3
+- detail: filed via /oversight 2026-07-18 alongside the D6c placement call.
+  The owner green-lit shipping the blacksmith reachably — 1 MapEvent node on
+  the first map + a Dev-menu entry (see Phase D6c row) — but explicitly kept
+  TWO design questions OPEN: (1) *when* in the run the player first meets the
+  blacksmith (map cadence — one-and-done first-map node, recurring, gated on
+  progress?), and (2) *whether the blacksmith is even the right surface for
+  dice upgrades at all*, vs. some other affordance. D5's dieGear rail + HONE/
+  TEMPER economy are built and the D6c screen will render them, so this is
+  not blocking — but D7 tunes the die-gear economy against WHATEVER cadence
+  ships, so the cadence/identity call wants an owner answer before D7's
+  ratification, not after. Do NOT guess: this is map/design content the loop
+  routed around by owner instruction.
+- next: /oversight (owner decides cadence + whether blacksmith owns dice
+  upgrades; then fold into D6c/D7 scope or re-route to another surface)
+
 ### Retire two stale worktrees fully landed on `main` (dice + price-experiment)
 - category: debt
 - impact: 3
