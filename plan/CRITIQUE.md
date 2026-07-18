@@ -48,11 +48,14 @@
 > `__AXM_UPGRADEABLE_DICE__='0'` kill-switch keeps the legacy model. THE
 > STAKE's wager UI is retired on every surface (completing spec 33 §5).
 > Follow-ups this creates:
-> - **F3 is now LIVE-player-facing**: Press Fate never renders because no
->   starter loadout equips a `reroll`-kind signature (`sig-press-the-point`) —
->   the flag-on economy's only ◆ sink is dead and misses can't be rerolled.
->   Was a D7 canary; now it's the owner's daily experience. Highest-priority
->   fix (equip the signature on starter loadouts + D7 re-run).
+> - **F3 DRAINED same day (owner call)**: the Gambler's Knot is now
+>   default-worn (Venom Sigil benched), so every starter loadout — main game
+>   included — carries Press Fate beside Disarming Plea (Befriend) and
+>   Overwhelming Argument. Re-measured at seeds 1-8: 0.060 casts/round,
+>   income 1.533◆ (in band), stake-gap narrowed +13.6%→+11.5%. The economy
+>   canaries now pin the sink STAYING live. Remaining: the combat-sandbox
+>   e2e route still equips no relics, so the Press Fate control is only
+>   witnessable in the main game (e2e NOTE stands).
 > - **D7's not-ready verdict now describes the shipped game**: early win
 >   61-66 vs the ~80 band, statusEngagement −9pts. The tuning debt (D3/D4
 >   sinks, signature repricing) is no longer flag-gated homework.

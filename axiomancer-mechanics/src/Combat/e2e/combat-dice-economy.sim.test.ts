@@ -13,11 +13,11 @@
  *      and the realized roll skews miss-heavier than the dice-math baseline
  *      (the small-sample RNG-correlation of the Park-Miller LCG, report F1).
  *
- * The `pressFate == 0` CANARY still pins report F3 (starter loadouts don't
- * equip the reroll signature — flips loudly when the affordance lands). The F2
- * yield canary FLIPPED as designed: Phase D6e (2026-07-18) authored the enemy
- * stanceCheck telegraphs, so realized yield income is now > 0 and this suite
- * asserts that instead.
+ * The F2 yield canary FLIPPED as designed: Phase D6e (2026-07-18) authored the
+ * enemy stanceCheck telegraphs, so realized yield income is now > 0 and this
+ * suite asserts that instead. The F3 `pressFate == 0` canary FLIPPED the same
+ * day (owner call: the Gambler's Knot is default-worn — every starter loadout
+ * carries Press Fate), so the suite now pins the sink being ACTIVE.
  *
  * D7 RATIFICATION (2026-07-18, plan/tuning/2026-07-18-d7-ratification.md): the
  * dice-math gates below are the ratified, stable numbers (the win-curve bands
@@ -110,9 +110,12 @@ describe('spec 33 D3 — realized-play invariants (flag-on matrix)', () => {
         expect(p.yieldIncomePerRound).toBeGreaterThan(0);
     });
 
-    // ── CANARY (report F3) — flips when a starter loadout equips the reroll. ──
-    it('CANARY F3: Press Fate is never cast until a starter loadout equips the reroll signature', () => {
-        expect(p.pressFatePerRound).toBe(0);
+    // F3 DRAINED (owner call 2026-07-18): the Gambler's Knot is default-worn,
+    // so every starter loadout carries the reroll signature and the greedy
+    // policy actually casts it on whiff-heavy rounds. The old `=== 0` canary
+    // flipped exactly as designed; this now pins the sink STAYING live.
+    it('F3 drained: Press Fate is castable from the starter loadout (sink live)', () => {
+        expect(p.pressFatePerRound).toBeGreaterThan(0);
     });
 });
 
@@ -136,16 +139,20 @@ describe('spec 33 D7 — ratified economy envelope + flag-not-ready canaries', (
         expect(p.yieldIncomePerRound).toBeGreaterThan(0.15);
     });
 
-    // ── FLAG-NOT-READY canaries (D7). These pin the reasons the flag stays OFF;
-    //    each flips loudly the moment the blocker is fixed, forcing a D7 re-run. ─
-    it('CANARY F3: the only ◆ sink (Press Fate) is inactive — nothing to spend on', () => {
-        expect(p.pressFatePerRound).toBe(0);
+    // ── D7 canaries, post-flip status (2026-07-18, owner call): ──────────────
+    //    F3 flipped as designed — the Gambler's Knot is now default-worn, so the
+    //    Press Fate sink is LIVE (re-measured 0.060 casts/round at seeds 1-8;
+    //    realized income 1.533◆ stays in band). The re-run below ratifies the
+    //    sink's activity instead of its absence.
+    it('F3 drained: the ◆ sink (Press Fate) is ACTIVE from the starter loadout', () => {
+        expect(p.pressFatePerRound).toBeGreaterThan(0);
     });
 
-    it('CANARY STAKE-gap: flag-on fights run LONGER than flag-off (no active sink)', () => {
-        // STAKE retired its sink + clock; Press Fate (F3) never replaces them, so
-        // flag-on fights lengthen. Measured +13.6% (5.48 vs 4.83). Flips when a
-        // real sink lands and the gap closes.
+    it('STAKE-gap: flag-on fights still run longer than flag-off (sink active but small)', () => {
+        // STAKE retired its sink + clock. Press Fate now spends (F3 drained) but
+        // at 0.060 casts/round it does not yet close the clock gap — re-measured
+        // 5.38 vs 4.83 (+11.5%, was +13.6% with the sink inactive). Flips when a
+        // real escalation-pressure replacement lands.
         expect(result.stakeGap.flagOnAvgRounds).toBeGreaterThan(result.stakeGap.flagOffAvgRounds);
     });
 

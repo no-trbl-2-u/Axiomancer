@@ -189,6 +189,23 @@ function foldEvents(acc: EconomyAccumulator, events: readonly CombatEncounterSta
             if (fixed.some(d => (d.color === c || d.color === 'wild') && (d.face === 'special' || d.face === 'mana'))) acc.colorHits[c]++;
         }
     }
+    // Press Fate mints new faces MID-round (F3 drained 2026-07-18: the reroll
+    // rides every starter loadout). The fresh-roll gates above stay a
+    // round-START reading, but ◆ conservation must fold the specials the
+    // reroll minted into the gross — otherwise realized spend can exceed the
+    // rolled gross (the >100% spend-rate the invariant guards). The reroll
+    // emits its own `turn-dice-rolled` with the post-reroll tray; only the
+    // dice named by `press-fate-rerolled` are new mints (kept faces were
+    // already counted at round start).
+    const pressed = events.find(e => e.kind === 'press-fate-rerolled');
+    if (pressed && pressed.kind === 'press-fate-rerolled') {
+        const after = [...events].reverse().find(e => e.kind === 'turn-dice-rolled');
+        if (after && after.kind === 'turn-dice-rolled' && after !== roll) {
+            const rerolled = new Set(pressed.dieIds);
+            acc.grossSpecials += stockFixedDice(after.dice)
+                .filter(d => rerolled.has(d.id) && d.face === 'special').length;
+        }
+    }
     for (const ev of events) {
         if (ev.kind === 'special-fired') acc.specialIncome += ev.conviction;
         else if (ev.kind === 'momentum-surged') acc.surges++;

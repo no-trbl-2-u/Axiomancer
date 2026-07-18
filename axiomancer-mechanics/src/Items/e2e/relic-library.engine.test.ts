@@ -114,9 +114,11 @@ describe('getSignaturesForLoadout', () => {
             armor: worn.find(r => r.slot === 'armor')!,
             accessories: worn.filter(r => r.slot === 'accessory'),
         };
+        // Owner call 2026-07-18: Press Fate rides the default loadout (Gambler's
+        // Knot in, Venom Sigil benched) so every starter owns the whiff valve.
         expect(getSignaturesForLoadout(loadout)).toEqual([
             'sig-overwhelming-argument', 'sig-read-opponent',
-            'sig-conviction-strike', 'sig-clever-gambit', 'sig-disarming-plea',
+            'sig-clever-gambit', 'sig-disarming-plea', 'sig-press-the-point',
         ]);
     });
 
