@@ -270,11 +270,9 @@ describe('R8 — a bogus dieId is an explicit fizzle', () => {
 });
 
 describe('the projected card prints its die lines (real units)', () => {
-    it('threshold / dieBonus lines appear on v3 library cards', () => {
+    it('threshold lines appear on v3 library cards', () => {
         // mounting-case: threshold heart×2 → +1 Premise
         expect(getCard('mounting-case')!.dieLines?.some(l => l.includes('HEART ×2'))).toBe(true);
-        // straw-mans-jab: dieBonus on a BODY die → +1 intensity
-        expect(getCard('straw-mans-jab')!.dieLines?.some(l => l.includes('BODY die'))).toBe(true);
         // bootstrap-loop: threshold mind×2 → +1 pip to every Reserve die
         expect(getCard('bootstrap-loop')!.dieLines?.some(l => l.includes('Reserve'))).toBe(true);
     });

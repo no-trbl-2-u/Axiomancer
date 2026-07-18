@@ -69,6 +69,10 @@ export interface CombatSimStats {
      *  each path visible. Sums to `runs`. */
     winPathCounts: WinPathCounts;
     avgRounds: number;
+    /** Population std-dev of rounds across the runs (metrics slate 2026-07-18):
+     *  the consistency witness — a high spread means the deck's clock depends
+     *  on drawing the right cards, the duplicate-more signal. */
+    roundsStdDev: number;
     /** Average share of plays that landed a status effect on the enemy (engagement witness). */
     statusEngagement: number;
     /** Average Conviction spent on Signature Skills per run. */

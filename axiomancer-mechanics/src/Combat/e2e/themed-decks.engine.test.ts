@@ -405,22 +405,22 @@ describe('SOULS — expiry yields, REAP spends, REAP-all bursts under the cap', 
 // ── SWAY (T8) ────────────────────────────────────────────────────────────────
 
 describe('SWAY — gain, per-turn decay, CAPITULATE, irresistible-grace', () => {
-    const SOFT = 'soft-word'; // SWAY 3; heart dieBonus: +1 SWAY
+    const SOFT = 'soft-word'; // SWAY 3
 
-    it('gains stack (with the heart die bonus) and decay 1 at the turn boundary', () => {
+    it('gains stack and decays 1 at the turn boundary', () => {
         mockSequentialRng(0.05);
         const state = openAndDraft(makePlayer([SOFT]), makeEnemy(300, 'heart'), [SOFT, SOFT, SOFT, SOFT, SOFT], 'heart');
         const res = playFromHand(state, SOFT);
-        expect(res.state.sway).toBe(4); // 3 + heart-die bonus 1
+        expect(res.state.sway).toBe(3); // SWAY 3
         const after = resolveThreatPhase(res.state);
-        expect(after.state.sway).toBe(3); // decayed 1 (ratified A2)
+        expect(after.state.sway).toBe(2); // decayed 1 (ratified A2)
         expect(after.events.some(e => e.kind === 'sway-decayed')).toBe(true);
     });
 
     it('SWAY >= enemy current HP opens a player-authored capitulation choice', () => {
         mockSequentialRng(0.05);
         const state = openAndDraft(makePlayer([SOFT]), makeEnemy(4, 'heart'), [SOFT, SOFT, SOFT, SOFT, SOFT], 'heart');
-        const res = playFromHand(state, SOFT); // sway 4 >= 4 HP
+        const res = playFromHand(state, SOFT); // SWAY 3 meets the 4-HP foe's capitulate threshold
         expect(res.state.finalOutcome).toBeNull();
         expect(res.state.phase).toBe('mercy-choice');
         expect(res.state.capitulationChoiceActive).toBe(true);

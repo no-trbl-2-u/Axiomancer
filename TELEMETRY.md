@@ -55,3 +55,4 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-07-18T12:09:52Z | slash-prompt | /march | claude-opus-4-8 | user/ci | /march |
 | 2026-07-18T13:09:52Z | slash-prompt | /march | claude-opus-4-8 | user/ci | /march |
 | 2026-07-18T14:09:52Z | slash-prompt | /march | claude-opus-4-8 | user/ci | /march |
+| 2026-07-18T15:10:33Z | subagent | Explore | claude-fable-5 | main | Survey existing sim metrics |
