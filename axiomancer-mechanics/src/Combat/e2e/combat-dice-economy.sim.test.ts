@@ -13,11 +13,12 @@
  *      and the realized roll skews miss-heavier than the dice-math baseline
  *      (the small-sample RNG-correlation of the Park-Miller LCG, report F1).
  *
- * The two CANARY assertions (`yield == 0`, `pressFate == 0`) pin the report's
- * F2/F3 findings — no enemy authors a stanceCheck yet, and starter loadouts
- * don't equip the reroll signature. When D4 authors stance checks or grants the
- * Press Fate affordance, these flip and the test fails LOUDLY, which is the
- * intended signal to re-derive the economy.
+ * The CANARY assertions pin the report's F2/F3 findings. F2 (`yield == 0`) has
+ * FLIPPED at D6e: enemies now author open stance checks, so realized yield
+ * income is positive (`> 0`) — the steer-into-yields lever D7's win-curve read
+ * leans on is finally exercised. F3 (`pressFate == 0`) still holds — starter
+ * loadouts don't equip the reroll signature; when they do it flips and fails
+ * LOUDLY, the intended signal to re-derive the economy.
  *
  * D7 flips the dice-math bands to hard ratified assertions.
  */
@@ -96,9 +97,13 @@ describe('spec 33 D3 — realized-play invariants (flag-on matrix)', () => {
         expect(p.usablePerRound).toBeLessThanOrEqual(result.diceMath.usablePerRound + 0.01);
     });
 
-    // ── CANARIES (report F2/F3) — flip these when D4 lands the content. ──────
-    it('CANARY F2: yield income is 0 until an enemy authors a stanceCheck', () => {
-        expect(p.yieldIncomePerRound).toBe(0);
+    // ── CANARIES (report F2/F3). F2 FLIPPED at D6e — enemies now author open
+    //    stance checks (`combat.threat-sequences.ts`), so the yield lever is
+    //    live; the sim measures realized +1◆ yields when greedy play ends a
+    //    checked phase in the yielded stance. F3 still pends the Press Fate
+    //    affordance reaching a starter loadout. ─────────────────────────────
+    it('D6e (was CANARY F2): yield income is now positive — the stance-check lever is live', () => {
+        expect(p.yieldIncomePerRound).toBeGreaterThan(0);
     });
 
     it('CANARY F3: Press Fate is never cast until a starter loadout equips the reroll signature', () => {
