@@ -675,7 +675,7 @@ supersession collisions before any engine work.
       [charged,lit]). Mobile verify green (2604 tests, +17). NEEDS-USER-CALL:
       small-screen crowding now compounds (D6a+D6b rows) — screenshot at D6d —
       `feat(mobile): Upgradeable-Dice D6b — momentum/stance chips + telegraph + gear rail` (4cf7b752)
-- [ ] Phase D6c — Blacksmith screen. D5's encounter rendered: a
+- [x] Phase D6c — Blacksmith screen. D5's encounter rendered: a
       `<BlacksmithGate>` + `state/blacksmith` slice + `resolveCurrentMapEventAction`
       interception + `app/blacksmith` route + the forge UI (HONE/TEMPER offers
       with prices, cap-refusals grayed + reasoned loudly, gear swap when
@@ -690,6 +690,15 @@ supersession collisions before any engine work.
       player first meets the blacksmith, and *whether the blacksmith is even
       where dice upgrades happen* vs. some other surface — D6c ships the
       reachable encounter; the cadence/identity call is deferred.
+      Brief: `plan/phases/phase_D6c_blacksmith_screen.md`.
+      SHIPPED 2026-07-18 — BlacksmithGate + `state/blacksmith` slice +
+      resolveCurrentMapEventAction interception + `app/blacksmith` forge UI
+      (HONE/TEMPER at placeholder ◆, cap/afford refusals greyed + reasoned from
+      the same validateDieGear authority as the engine's refusal card, swap);
+      claim writes dieGear + deducts currency (visit budget = real wallet); ONE
+      first-map node (fv-16 "The Anvil", pinned) + Dev-menu shortcut; cadence
+      left owner-open. mechanics+mobile verify green (+18 tests) —
+      `feat: Upgradeable-Dice D6c — blacksmith encounter screen` (7c315d5f)
 - [ ] Phase D6d — Flag-on combat e2e. Seeded flag-on browser e2e (bespoke
       `scripts/*.mjs` harness + the D6a flag hook): roll → power a card →
       momentum advances → break resets to null loudly → Press Fate reroll →
