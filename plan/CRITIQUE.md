@@ -465,7 +465,8 @@ one level down, in the routing helper `onApply` calls next).
   exists, rather than patching copy ad hoc.
 - source: playtester (owner-directed break-test session)
 
-### [HIGH] combat END-phase button has no in-flight guard — rapid clicks skip player turns
+### [x] [HIGH] combat END-phase button has no in-flight guard — rapid clicks skip player turns (RESOLVED — already fixed by WI-3)
+- RESOLVED 2026-07-18 (verified stale; no new code). The WI-3 in-flight guard shipped AFTER this 2026-07-12 critique closes it: `CombatEncounterPanel.onEndPhase` holds a SYNCHRONOUS lock (`resolvingRef.current` — a same-frame second tap finds it held on line 516 and is dropped; released only after `RESOLVE_LOCK_MS`), and `CombatBoard` renders the END medallion `disabled={resolving}` with `handleEndPhase` no-opping while resolving. Regression-tested: `CombatBoard.multistage.test.tsx` "END PHASE is disabled + press-inert while a phase is resolving" (lines 91-117) reproduces the exact 2026-07-12 double-tap-machine-guns scenario and asserts neither `onEndPhase` nor the staged-card auto-apply fires again. The queue was overstating open HIGH bugs; corrected.
 - pass: owner-playtest 2026-07-12
 - viewport: mobile (expo-web via Playwright)
 - category: functional
