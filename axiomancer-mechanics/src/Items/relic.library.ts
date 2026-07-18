@@ -78,10 +78,15 @@ const RELIC_SPECS: readonly RelicSpec[] = [
     },
     // ── Accessories (4) — Mind ×2 + Heart ×2 ──────────────────────────────────
     {
+        // Benched by owner call 2026-07-18 (was default-worn): the Gambler's
+        // Knot takes this seat so every starter opens with Press Fate — the
+        // spec-33 whiff valve and the economy's only recurring ◆ sink. At 8◆,
+        // Conviction Strike was the least-castable signature under the leaner
+        // flag-on income; it waits in inventory.
         id: 'relic-conviction-strike', name: 'Venom Sigil',
         description: 'A venom that cannot fizzle. Grants Conviction Strike.',
         slot: 'accessory', accessoryKind: 'amulet', grantsSignature: 'sig-conviction-strike',
-        stat: 'mind', value: 2, defaultWorn: true,
+        stat: 'mind', value: 2, defaultWorn: false,
     },
     {
         id: 'relic-clever-gambit', name: 'Gambit Chit',
@@ -96,10 +101,13 @@ const RELIC_SPECS: readonly RelicSpec[] = [
         stat: 'heart', value: 2, defaultWorn: true,
     },
     {
+        // Default-worn by owner call 2026-07-18 (drains D7 report F3): Press
+        // Fate + Disarming Plea (Befriend) are the two must-have starters;
+        // Overwhelming Argument keeps the weapon seat.
         id: 'relic-press-the-point', name: "Gambler's Knot",
         description: 'Bend fate on the bad dice. Grants Press Fate.',
         slot: 'accessory', accessoryKind: 'charm', grantsSignature: 'sig-press-the-point',
-        stat: 'heart', value: 2, defaultWorn: false,
+        stat: 'heart', value: 2, defaultWorn: true,
     },
 ];
 
