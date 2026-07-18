@@ -51,8 +51,14 @@
 //               --commit <sha>
 //               --deploy-url <url>
 //
-//     Posts a "phase shipped" comment. The commit's `Closes #N`
-//     trailer auto-closes the issue. Best-effort.
+//     Posts a "phase shipped" comment AND actively closes the mirror via
+//     the API (state=closed, state_reason=completed). The commit's
+//     `Closes #N` trailer only fires for commits pushed DIRECTLY to the
+//     default branch — phases that reach `main` via cross-session
+//     `claude/*` branch merge reconciliation leave the mirror open (nine
+//     leaked before the 2026-07-14 triage), so the trailer is a
+//     belt-and-suspenders backup, not the load-bearing close. Idempotent
+//     (an already-closed mirror is a no-op). Best-effort.
 //
 // Required env (from .env or shell):
 //   GH_TOKEN    repo-scoped PAT
@@ -229,6 +235,21 @@ function findPhaseIssue(phaseId, repo) {
   const open = matches.find((row) => String(row.state).toUpperCase() === 'OPEN')
   if (open) return { number: open.number, state: 'OPEN' }
   return { number: matches[0].number, state: 'CLOSED' }
+}
+
+// Close a phase mirror via the API (state=closed, state_reason=completed).
+// This is the LOAD-BEARING close: the `Closes #N` commit trailer only fires
+// for commits pushed directly to the default branch, so phases that reach
+// `main` via cross-session `claude/*` branch merge reconciliation would leak
+// the mirror open without it. Idempotent — an already-closed issue is treated
+// as success (gh prints "already closed" and exits non-zero on some versions;
+// swallow only that case, mirroring `ensureLabel`).
+function closePhaseIssue(number, repo) {
+  const r = ghCall(['issue', 'close', String(number), '--repo', repo, '--reason', 'completed'])
+  if (r.status === 0) return { closed: true }
+  const out = `${r.stderr ?? ''}${r.stdout ?? ''}`
+  if (/already closed|is closed/i.test(out)) return { closed: false }
+  return { closed: false, error: out.trim() || `gh issue close exited ${r.status}` }
 }
 
 // --- subcommands ------------------------------------------------------
@@ -470,6 +491,7 @@ function cmdPhaseClose(flags) {
   }
 
   let target = number ? Number(number) : null
+  let knownState = null
   if (!target) {
     const found = findPhaseIssue(phaseId, repo)
     if (found && found.error) {
@@ -481,15 +503,26 @@ function cmdPhaseClose(flags) {
       return
     }
     target = found.number
+    knownState = found.state
   }
 
   const body = buildPhaseShippedCommentBody({ phaseId, commit, deployUrl })
   const r = ghCall(['issue', 'comment', String(target), '--repo', repo, '--body', body])
   if (r.status !== 0) {
+    // Non-fatal: the comment is a courtesy; the close below is load-bearing.
     process.stderr.write(
       `loop-issue: phase comment failed for #${target} (status ${r.status})\n${r.stderr}\n`,
     )
-    return
+  }
+
+  // Phase 35 — actively close the mirror via the API rather than trusting the
+  // `Closes #N` commit trailer (inert on cross-session branch merge routes; see
+  // the header). Skip the API call when we already know it's closed (idempotent
+  // + saves a round-trip); otherwise close with state_reason=completed.
+  if (knownState === 'CLOSED') return
+  const close = closePhaseIssue(target, repo)
+  if (close.error) {
+    process.stderr.write(`loop-issue: phase close failed for #${target}: ${close.error}\n`)
   }
 }
 
@@ -507,7 +540,7 @@ export function buildPhaseShippedCommentBody({ phaseId, commit, deployUrl }) {
     '',
     `Live at ${deployUrl} after deploy ready.`,
     '',
-    '_The autonomous loop closes this issue via the commit\'s `Closes #N` trailer; no manual close is required._',
+    '_Closed by the autonomous loop after a green deploy (via the GitHub API — reliable regardless of push route); the commit\'s `Closes #N` trailer is a belt-and-suspenders backup._',
   ].join('\n')
 }
 
@@ -558,7 +591,8 @@ Usage:
 
   node scripts/loop-issue.mjs phase-close --phase <id> \\
       --commit <sha> --deploy-url <url>
-      → posts a "phase shipped" comment; commit's Closes #N auto-closes
+      → posts a "phase shipped" comment AND closes the mirror via the API
+      (reliable on every push route; the Closes #N trailer is a backup).
       (alternatively pass --number <N> to skip the lookup)
 
 Env (from .env or shell):

@@ -309,7 +309,7 @@ Outcomes:
 - **Exit 3 (config)** — `GH_TOKEN` missing or
   unreachable. Stop per §10.
 
-### Step 12.5 — Phase mirror close-comment
+### Step 12.5 — Phase mirror close (comment + API close)
 
 If Step 2.5 captured `$PHASE_ISSUE` and Step 12 was green:
 
@@ -320,9 +320,15 @@ node scripts/loop-issue.mjs phase-close \
   --deploy-url <ci-run-url>
 ```
 
-The `Closes #<N>` trailer in Step 10's commit already auto-closed
-the issue on push; this comment confirms the deploy URL on the
-public timeline. Failures here are warnings, not blockers.
+`phase-close` posts the deploy-URL comment **and actively closes the
+mirror via the GitHub API** (`state=closed`, `state_reason=completed`).
+The `Closes #<N>` trailer in Step 10's commit is a belt-and-suspenders
+backup only — it fires reliably solely for commits pushed **directly**
+to the default branch, so phases that reach `main` via a cross-session
+`claude/*` branch merge reconciliation would leak the mirror open
+without the explicit API close (Phase 35 fix, 2026-07-17). The close is
+idempotent (an already-closed mirror is a no-op). Failures here are
+warnings, not blockers.
 
 ### Step 13 — Done
 
