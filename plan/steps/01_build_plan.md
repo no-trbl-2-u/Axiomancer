@@ -624,14 +624,50 @@ supersession collisions before any engine work.
       tests; mechanics+mobile verify green. NEEDS-USER-CALL: blacksmith map
       placement/cadence (no node authored yet) —
       `feat(mechanics): Upgradeable-Dice D5 die gear rail + blacksmith encounter` (a25373be)
-- [ ] Phase D6 — Mobile UI. Dice-tray rework, die-gear rail +
-      payload-only face-inspection panel (Dawncaster-terse; illegal
-      actions prevented loudly), Press Fate affordance, momentum/stance
-      chips (breaks are LOUD), open stance-check telegraphs, blacksmith
-      screen, keyword glosses. Flag-aware (flag-off renders old combat
-      untouched). Brief: `plan/phases/phase_D6_mobile_ui.md`.
-      Prove: Playwright e2e + presenter units + mobile verify.
+> **Phase D6 SPLIT into D6a–D6d (2026-07-17, ship-a-phase §10.8 decisive
+> re-scope).** A scope scout confirmed the flag-on mobile combat render is
+> GREENFIELD — zero mobile code reads any spec-33 state field
+> (`momentumV2`/`dieGear`/dice `.face`/the new events); the D2/D5 engine is
+> built and waiting. As one phase D6 is unrealistic: a type-level `CombatDieVM`
+> rewrite touching the app's most delicate interaction (the Reanimated
+> drag-to-power), a whole self-contained blacksmith screen (gate + slice +
+> interception + route + forge UI — sibling encounters were each their own
+> phase), a momentum-V2 chip reshape, and net-new e2e flag-hook plumbing (there
+> is no Playwright in mobile — the browser e2e are bespoke `scripts/*.mjs` and
+> the flag is bundle-time only). Parent brief `plan/phases/phase_D6_mobile_ui.md`
+> stays the north star; each sub-phase renders spec-33 rules AS-IS by EXTENDING
+> the existing `STANCE_COLORS`/glyph/#5-SIDE-RAIL conventions (never forking),
+> flag-gated so flag-off stays byte-identical.
+
+- [ ] Phase D6a — Flag-on combat render core. The runtime flag hook
+      (`globalThis.__AXM_UPGRADEABLE_DICE__` test/dev escape hatch honored by
+      `applyCombatFlagsFromEnv` — the e2e enabler the bundle-time flag can't
+      give) + dice-tray/face rework (`CombatDieVM` gains a special/mana/miss
+      face axis; the gem die renders faces + cracked-die state; drag-to-power
+      under the color law with off-color drops refused LOUDLY) + Press Fate
+      affordance (1◆ once/round, disabled-at-0◆ with reason) + keyword glosses
+      (SPECIAL/HONE/TEMPER rendered in the combat inspect modal — data landed
+      D4). Brief: generate at pickup (parent D6 §Scope items 1-2, 6-7).
+      Prove: presenter units for the face/press-fate VMs + mobile verify.
       Deps: D2 + D5.
+- [ ] Phase D6b — Momentum/stance chips + stance-check telegraph + gear rail.
+      Momentum-V2 chip reshape ({color, length}, breaks LOUD, surge evented) +
+      current-stance chip + open stance-check telegraph (`punishes X`/`yields X`
+      in the threat readout with ×1.5/×0.5/+1◆ end-of-phase feedback) + the
+      4-slot die-gear rail with a payload-only face-inspection panel
+      (Dawncaster-terse). Deps: D6a.
+- [ ] Phase D6c — Blacksmith screen. D5's encounter rendered: a
+      `<BlacksmithGate>` + `state/blacksmith` slice + `resolveCurrentMapEventAction`
+      interception + `app/blacksmith` route + the forge UI (HONE/TEMPER offers
+      with prices, cap-refusals grayed + reasoned loudly, gear swap when
+      variants exist). A self-contained encounter build (sibling: CacheGate /
+      Reliquary). Deps: D5 + D6a.
+- [ ] Phase D6d — Flag-on combat e2e. Seeded flag-on browser e2e (bespoke
+      `scripts/*.mjs` harness + the D6a flag hook): roll → power a card →
+      momentum advances → break resets to null loudly → Press Fate reroll →
+      stance check resolves with feedback → blacksmith HONE applied → tray
+      reflects the new face table; off-color drop refused loudly. Deps: D6a,
+      D6b, D6c.
 - [ ] Phase D7 — Tuning, ratification + honest re-baseline. Full
       `/combat-playtest` matrix vs 80/50/25-35/0 (the spec §7 D7 gates);
       ratify D3's economy (blacksmith placeholders die here);
@@ -640,7 +676,7 @@ supersession collisions before any engine work.
       recommendation (flip itself = owner call).
       Brief: `plan/phases/phase_D7_tuning_rebaseline.md`.
       Prove: bands + ratified-constants report + re-baseline stamp.
-      Deps: D4, D6.
+      Deps: D4, D6a, D6b, D6c, D6d.
 
 > **After the queue drains:** `/march` transitions to `/iterate`
 > — draining `plan/AUDIT.md` + `plan/CRITIQUE.md`, doc-drift,
