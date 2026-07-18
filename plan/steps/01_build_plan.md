@@ -445,7 +445,7 @@ Phase 26 (numbers) but design-independent of the owner session
 
 **Loop infra (promoted via issue-triage 2026-07-14):**
 
-- [ ] Phase 35 — Reliable phase-issue auto-close. Phase-tracking
+- [x] Phase 35 — Reliable phase-issue auto-close. Phase-tracking
       issues rely on a `Closes #N` trailer in the phase commit, but
       those commits are authored on cross-session `claude/*` branches
       that reach `main` via merge reconciliation — GitHub only honors
@@ -466,6 +466,13 @@ Phase 26 (numbers) but design-independent of the owner session
       trailer; keep the trailer as a belt-and-suspenders. Harness/skill
       + script only; no engine change — source: issue-triage 2026-07-14
       findings.
+      SHIPPED 2026-07-17 — `phase-close` now calls `gh issue close --reason
+      completed` (state=closed/state_reason=completed) after the deploy
+      comment, idempotent (skips when already CLOSED; swallows the gh
+      "already closed" case); trailer kept as backup; ship-a-phase.md §12.5
+      doc updated. Verified live on a throwaway issue (closed COMPLETED,
+      2nd run exit 0) —
+      `fix(loop): phase-close actively closes the mirror via API — phase 35` (59cf9e6e)
 
 **Pricing model (promoted via chat session 2026-07-17, T direct):**
 
