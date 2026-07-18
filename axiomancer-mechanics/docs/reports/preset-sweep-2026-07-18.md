@@ -97,3 +97,14 @@ dWR columns) reproduce deterministically from the command above.
 - Mid-game collapse: the trim/duplicate tuning pass this slate was built for
   (owner decision on what to cut / what to duplicate, using opp%, dWR, orphan
   keywords, and the curve-dev table above).
+
+## Addendum (same day, later session)
+
+Superseded in resolution by the full-matrix accumulation: all 8 policies ×
+runs=60 × both dice arms × two seeds (345,600 encounters), per-preset card
+telemetry, and a de-confounded per-cell dWR estimator. Data:
+`docs/reports/preset-metrics/2026-07-18-*.json` + `2026-07-18-analysis-tables.md`;
+reading: `plan/tuning/2026-07-18-card-library-metrics-accumulation.md`.
+Headlines survive at full resolution; new on top: the flag-ON (live, post-FLIP)
+arm sits 5–24 points below this sweep's flag-OFF numbers with statusEngagement
+down 5–9 points everywhere.
