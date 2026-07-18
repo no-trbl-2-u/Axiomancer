@@ -81,6 +81,32 @@ lacks — add it as the regression guard). Also seen in the same screenshot: a
 stale STAKE affordance renders flag-on though STAKE was retired in D2 §5 —
 fold that cleanup into the same fix.
 
+**Root-cause pinpoint (independent confirmation, D6d parallel run, 2026-07-18):**
+narrowed past "likely calling `onApply` with a wrong/absent `dieId` or
+`power`" above to the exact mechanism. `resolveApplyRouting`
+(`axiomancer-mobile/state/presenters/combat-encounter.engine.ts:1938-1949`)
+computes `draftFirst: !!dieId && !explicit && state.draftedDieId === null`
+with NO `isUpgradeableDiceEnabled()` gate (every sibling VM function in the
+same file gates on the flag; this one doesn't). For an ordinary tray die (not
+Reserve/floating/fate-X — every rolled die under the flag-on four-fixed-dice
+model) this evaluates `draftFirst = true`, so `CombatEncounterPanel.onApply`
+(`components/combat/encounter/CombatEncounterPanel.tsx:464-474`) calls
+`draftStanceDie(ns, dieId, ...)` before `playCombatCard`. But `draftStanceDie`
+(`axiomancer-mechanics/src/Combat/combat.engine.ts:715-717`) is an explicit
+no-op under the flag ("the draft is retired under the flag ... if
+(isUpgradeableDiceEnabled()) return { state, events: [] }"), so
+`state.draftedDieId` stays `null` forever and `routing.explicitDieId`
+resolves to `undefined` — `playCombatCard` is called with NO die id at all.
+Since the one function that would set `draftedDieId` always no-ops under the
+flag, this is permanent for the life of the combat, not an edge case. Suggested
+fix: gate `resolveApplyRouting`'s `draftFirst` on `!isUpgradeableDiceEnabled()`
+(flag-on: every non-Reserve/floating/fate-X tray die should also resolve
+`explicit = true` and pass straight through as `explicitDieId`, mirroring how
+Reserve/floating dice already route) — this one function is the fix, not
+`CombatBoard.tsx`'s `handleApply` (which already computes the right
+`dieId`/`power` and hands them to `onApply` correctly; the miscount happens
+one level down, in the routing helper `onApply` calls next).
+
 ### [MED] ratified-exception HP arms bypass the damage-instance clock funnel
 - pass: review-closeout 2026-07-12 (commit 4680e5e2, branch
   claude/axiomancer-dawncaster-comparison-cz6008)
