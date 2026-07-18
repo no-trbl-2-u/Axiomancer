@@ -518,6 +518,12 @@ export function initializeCombatEncounter(
         // for the rest of the encounter by `grant_permanent_wild_die` cards.
         permanentWildDice: 0,
         permanentDeadDice: 0,
+        // Spec 33 §6 (Phase D5) — the character's persisted die-gear rail drives
+        // the four dice's face tables + special payloads. Absent on a fresh/
+        // pre-D5 player → `activeDieGear` falls back to `DEFAULT_DIE_GEAR` per
+        // color. This is the SOLE engine wiring point for the rail; every roll
+        // and every fired special reads it via `activeDieGear`.
+        dieGear: clonedPlayer.dieGear,
         seed,
     };
 }

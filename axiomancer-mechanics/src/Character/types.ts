@@ -1,6 +1,7 @@
 import { Item, Equipment } from '../Items/types';
 import { ActiveEffect } from '../Effects/types';
 import { ProcUnlocks } from '../Combat/combat-effects';
+import type { UpgradeableDieGear } from '../Combat/combat.encounter.types';
 
 /**
  * A character's worn loadout (Phase 18). Exactly 5 worn pieces across 3 slot
@@ -152,6 +153,21 @@ export interface Character {
      * see `plan/phases/phase_32_theme_deep_work.md` Follow-ups.
      */
     bankedSouls?: number;
+    /**
+     * Spec 33 §6 (Upgradeable Dice, Phase D5) — the DIE-GEAR RAIL: one gear
+     * piece per die (heart/body/mind + wild gold), defining each die's face
+     * distribution and special payload. The four dice are permanent immutable
+     * 6-siders; ALL progression lives here. Deliberately SEPARATE from
+     * `EquipmentLoadout` (signet relics and die gear never compete for slots)
+     * — its own color-keyed record. Upgraded at the blacksmith (HONE / TEMPER)
+     * and by gear swaps. Absent on a fresh/pre-D5 save; the combat engine and
+     * the blacksmith fall back to the frozen `DEFAULT_DIE_GEAR` per color via
+     * the single `activeDieGear` seam. Once any upgrade lands (or a save is
+     * migrated to v15), this is a full concrete 4-color rail — a real
+     * per-save object, so upgrades never mutate the `Object.freeze`d default.
+     * Mirrors the sparse-optional precedent of `floatingDice` / `bankedSouls`.
+     */
+    dieGear?: Partial<Record<'heart' | 'body' | 'mind' | 'wild', UpgradeableDieGear>>;
 }
 
 /**

@@ -16,6 +16,10 @@ export {
     equipItem, unequipItem, getEquipmentModifiers, getEquippedItems,
     emptyLoadout,
     computeEquipDelta,
+    honeDieGear, temperDieGear, swapDieGear,
+    validateDieGear, concreteDefaultRail, characterDieGear,
+    dieSpecialCap, dieGearMissFaces,
+    DIE_GEAR_COLORS, DIE_GEAR_FACE_COUNT,
     characterPresets, getPresetById, buildCharacterFromPreset,
     levelLadderPresets, ladderL1Preset, ladderL15Preset, ladderL30Preset, ladderL50Preset,
 } from './Character';
@@ -26,6 +30,7 @@ export type {
     CharacterPreset, CharacterPresetEquipmentEntry,
     EquipDelta, EquipDeltaMode,
     StatDeltaEntry, SignatureDeltaEntry,
+    DieGearColor, DieGearRail, DieGearOutcome,
 } from './Character';
 
 // ─── Enemy ────────────────────────────────────────────────────────────────────
@@ -377,6 +382,9 @@ export * from './World/QuestBoard';
 // fates, one probe). RNG aliased `rest*` / `lootCache*`.
 export * from './World/Rest';
 export * from './World/LootCache';
+// Blacksmith encounter ("The Anvil" — Spec 33 §6 die-gear upgrades: HONE /
+// TEMPER / gear swap). RNG aliased `blacksmith*`.
+export * from './World/Blacksmith';
 export {
     changeMap, completeMap, unlockMap,
     completeNode, unlockNode, changeContinent, completeUniqueEvent,
@@ -401,7 +409,7 @@ export type {
     MapEventKind, MapEventPayload, MapEventPool, MapEventPoolEntry,
     EncounterPayload, InteractionPayload, GatheringPayload, RestPayload,
     VillagePayload, CutscenePayload, HazardPayload, LootCachePayload,
-    QuestEventPayload, NarrationPayload, ResolvedEvent, ResolveMapEventResult,
+    QuestEventPayload, NarrationPayload, BlacksmithPayload, ResolvedEvent, ResolveMapEventResult,
 } from './World';
 // W-01 — The Labyrinth (THE APORIA). Additive surface for the mobile
 // dev-menu entry + labyrinth presenters.

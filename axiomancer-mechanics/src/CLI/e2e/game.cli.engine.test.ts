@@ -73,7 +73,7 @@ describe('CLI Game Driver', () => {
         
         expect(store.getState().player.name).toBe('Player');
         expect(store.getState().player.level).toBe(1);
-        expect(store.getState().version).toBe(14);
+        expect(store.getState().version).toBe(15);
     });
 
     it('should bootstrap game store with node adapter for save/load', async () => {

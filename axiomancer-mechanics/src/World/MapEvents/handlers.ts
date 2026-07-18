@@ -25,10 +25,11 @@ import { generateEncounter, scaleEnemyToLevel } from '../encounter';
 import { getMapDefinition } from '../map.registry';
 import { ENEMY_REGISTRY, type EnemySlug } from '../../Enemy/enemy.library';
 import { getQuestBoardDef } from '../QuestBoard/quest-board.content';
+import { validateDieGear, type DieGearColor } from '../../Character/dieGear.reducer';
 import type {
     EncounterPayload, InteractionPayload, GatheringPayload, RestPayload,
     VillagePayload, CutscenePayload, HazardPayload, LootCachePayload,
-    QuestEventPayload, NarrationPayload, ResolveMapEventResult,
+    QuestEventPayload, NarrationPayload, BlacksmithPayload, ResolveMapEventResult,
 } from './types';
 
 function withPlayer(state: GameState, next: Character): GameState {
@@ -247,6 +248,36 @@ export function resolveNarration(
     };
 }
 
+// ─── blacksmith ───────────────────────────────────────────────────────────────
+
+/**
+ * Blacksmith events (Spec 33 §6 / Phase D5) hand the host the authored budget
+ * + variant-gear offers; the host launches a `World/Blacksmith` session and
+ * applies the upgraded rail to `Character.dieGear` at claim (the same sandboxed
+ * launch contract the hazard / quest minigames use). The handler touches no
+ * state — it only validates the offered variant gear against the die-gear caps,
+ * mirroring `resolveQuest`'s validate-and-pass shape.
+ */
+export function resolveBlacksmith(
+    state: GameState,
+    payload: BlacksmithPayload,
+): ResolveMapEventResult {
+    for (const v of payload.variants ?? []) {
+        const reason = validateDieGear(v.gear, v.gear.dieColor as DieGearColor);
+        if (reason) {
+            throw new Error(`MapEvents: illegal blacksmith variant '${v.id}': ${reason}`);
+        }
+    }
+    return {
+        state,
+        event: {
+            kind: 'blacksmith',
+            budget: payload.budget ?? 0,
+            variants: payload.variants ?? [],
+        },
+    };
+}
+
 // ─── dispatch table ───────────────────────────────────────────────────────────
 
 import type { MapEventPayload } from './types';
@@ -267,5 +298,6 @@ export function applyPayload(
         case 'loot-cache':  return resolveLootCache(state, payload);
         case 'quest':       return resolveQuest(state, payload);
         case 'narration':   return resolveNarration(state, payload);
+        case 'blacksmith':  return resolveBlacksmith(state, payload);
     }
 }

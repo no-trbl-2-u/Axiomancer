@@ -25,3 +25,6 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-07-17T22:13:28Z | subagent | Explore | claude-opus-4-8 | main | Map dice sim/autoplay infra |
 | 2026-07-17T23:09:52Z | slash-prompt | /march | claude-opus-4-8 | user/ci | /march |
 | 2026-07-17T23:14:34Z | subagent | card-expert | claude-opus-4-8 | main | Implement Phase D4 card/pricing re-authoring |
+| 2026-07-18T00:09:52Z | slash-prompt | /march | claude-opus-4-8 | user/ci | /march |
+| 2026-07-18T00:11:40Z | subagent | Explore | claude-opus-4-8 | main | Map D5 gear/migration/encounter surface |
+| 2026-07-18T00:16:00Z | subagent | general-purpose | claude-opus-4-8 | main | Implement Phase D5 die gear + blacksmith |

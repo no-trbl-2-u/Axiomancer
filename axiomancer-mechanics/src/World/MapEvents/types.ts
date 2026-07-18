@@ -15,6 +15,7 @@ import type { NPC, DialogueTree } from '../../NPCs/types';
 import type { EnemySlug } from '../../Enemy/enemy.library';
 import type { Encounter, NodeId } from '../types';
 import type { PhilosophicalAlignment } from '../../Philosophy/types';
+import type { BlacksmithVariantOffer } from '../Blacksmith/blacksmith.types';
 
 /**
  * The MapEvent kinds. 'quest' joined the original eight in Phase 137;
@@ -30,7 +31,8 @@ export type MapEventKind =
     | 'hazard'
     | 'loot-cache'
     | 'quest'
-    | 'narration';
+    | 'narration'
+    | 'blacksmith';
 
 // ─── Per-kind authoring payloads ──────────────────────────────────────────────
 
@@ -128,6 +130,28 @@ export interface NarrationPayload {
     description?: string;
 }
 
+/**
+ * Blacksmith node ("The Anvil", Spec 33 §6 / Phase D5). Hands the host an
+ * authored budget + variant-gear offers; the host launches a
+ * `World/Blacksmith` session from them (the sandboxed launch contract the
+ * hazard/quest minigames use). The handler touches no state — it only
+ * validates the offered gear against the die-gear caps.
+ *
+ * [needs-user-call] Map placement/cadence is deferred: the proposal is that
+ * the blacksmith is a NEW MapEvent KIND (registered here), placed via a node
+ * event pool exactly like rest / loot-cache — but no map content authors a
+ * `blacksmith` node yet. Owner sign-off is needed on WHERE it appears (a
+ * village-service tab vs a wilds node) and HOW OFTEN before map content lands.
+ */
+export interface BlacksmithPayload {
+    kind: 'blacksmith';
+    /** Spendable budget for this visit (PLACEHOLDER unit; host maps ◆/souls). */
+    budget?: number;
+    /** Variant gear pieces offered for swap this visit. */
+    variants?: readonly BlacksmithVariantOffer[];
+    description?: string;
+}
+
 /** Discriminated union of all authoring payloads. */
 export type MapEventPayload =
     | EncounterPayload
@@ -139,7 +163,8 @@ export type MapEventPayload =
     | HazardPayload
     | LootCachePayload
     | QuestEventPayload
-    | NarrationPayload;
+    | NarrationPayload
+    | BlacksmithPayload;
 
 // ─── Pools ────────────────────────────────────────────────────────────────────
 
@@ -176,6 +201,7 @@ export type ResolvedEvent =
     | { kind: 'loot-cache';  items: Item[]; currency: number }
     | { kind: 'quest';       boardId: string }
     | { kind: 'narration';   dialogue: DialogueTree }
+    | { kind: 'blacksmith';  budget: number; variants: readonly BlacksmithVariantOffer[] }
     | { kind: 'none' };
 
 export interface ResolveMapEventResult {

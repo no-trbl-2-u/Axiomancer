@@ -613,6 +613,12 @@ function composeNarrative(resolved: ResolvedEvent): Omit<EventViewModel, 'prelud
         case 'quest':
         case 'encounter':
         case 'narration':
+        // Spec 33 §6 / Phase D5 — 'blacksmith' is a dead-end kind here: its
+        // interceptor starts "The Anvil" die-gear session (D6 builds the
+        // screen, tray rework, and gear-inspection panel). It never reaches
+        // composeNarrative; falls to the empty VM defensively like the other
+        // minigame kinds.
+        case 'blacksmith':
         case 'none':
             return EMPTY_VM;
     }

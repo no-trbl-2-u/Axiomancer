@@ -54,6 +54,11 @@ export function selectEventArtSlug(event: ResolvedEvent): EventArtSlug {
         case 'hazard':
         case 'quest':
         case 'narration':
+        // Spec 33 §6 / Phase D5 — 'blacksmith' is a dead-end kind here: its
+        // interceptor starts "The Anvil" die-gear session (D6 owns that
+        // screen). Never reaches the event modal; generic fallback kept
+        // defensively, mirroring the other minigame kinds.
+        case 'blacksmith':
         case 'none':
             return 'interaction-generic';
     }
@@ -75,6 +80,10 @@ const DEFAULT_BODY_BY_KIND: Record<ResolvedEvent['kind'], string> = {
     'loot-cache': 'Forgotten goods.',
     quest: 'A plan, drawn as a game.',
     narration: 'A voice speaks, unbidden.',
+    // Spec 33 §6 / Phase D5 — 'blacksmith' launches "The Anvil" die-gear
+    // session via its interceptor (D6 owns the screen); never renders in the
+    // modal, but the exhaustive record needs the entry.
+    blacksmith: 'An anvil, and a waiting hammer.',
     none: '',
 };
 

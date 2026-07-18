@@ -6,10 +6,11 @@
  * preserve; a save at an unsupported version is rejected so the caller starts a
  * fresh game. The equipment-signature epic (phases 18-21) re-introduces a short
  * targeted chain: v11 → v12 (Phase 18, re-slot equipment to the 5-slot model),
- * v12 → v13 (Phase 19, seed the signet relics), and v13 → v14 (Phase 21, purge
- * non-relic equipment now that the procedural library is retired). The hops
- * chain, so a v11 save lands at v14 in one `migrate` call. Every other version
- * mismatch still rejects.
+ * v12 → v13 (Phase 19, seed the signet relics), v13 → v14 (Phase 21, purge
+ * non-relic equipment now that the procedural library is retired), and v14 →
+ * v15 (Phase D5, backfill the die-gear rail). The hops chain, so a v11 save
+ * lands at v15 in one `migrate` call. Every other version mismatch still
+ * rejects.
  */
 
 import { GameState } from './types';
@@ -20,6 +21,7 @@ import { getEquipmentModifiers, recomputeDerivedStats, getEquippedItems, wornMax
 import { cloneStartingRelics } from '../Items/relic.library';
 import { calculateMaxHealth } from '../Utils';
 import { reslotLegacyLoadout, reslotLegacyEquipment, type LegacySlot } from './legacy-slots';
+import { concreteDefaultRail } from '../Character/dieGear.reducer';
 import { GAME_STATE_VERSION } from './game.reducer';
 
 /**
@@ -167,6 +169,27 @@ function migrateV13ToV14(raw: Record<string, unknown>): Record<string, unknown> 
 }
 
 /**
+ * v14 → v15 (Phase D5, spec 33 §6): backfill the die-gear rail. A pre-D5 save
+ * has no `player.dieGear`; the combat engine already falls back to the frozen
+ * `DEFAULT_DIE_GEAR`, but a persisted default rail is the floor the blacksmith
+ * upgrades write into — so a loaded save carries a real per-save object rather
+ * than upgrading the frozen default. Only the rail is added; every other field
+ * passes through untouched. A save that somehow already carries a rail keeps
+ * it. Pure over a raw save payload.
+ */
+function migrateV14ToV15(raw: Record<string, unknown>): Record<string, unknown> {
+    const player = raw.player as (Partial<Character> & Record<string, unknown>) | undefined;
+    if (!player || typeof player !== 'object') {
+        return { ...raw, version: 15 };
+    }
+    return {
+        ...raw,
+        player: { ...player, dieGear: player.dieGear ?? concreteDefaultRail() },
+        version: 15,
+    };
+}
+
+/**
  * Narrow a raw save payload to the current `GameState`. Only the current
  * version is accepted; any other version throws (the caller resets to a new
  * game). The name/signature is kept so the persistence layer's call site is
@@ -204,6 +227,10 @@ export function migrate(
     if (version === 13 && toVersion >= 14) {
         working = migrateV13ToV14(working);
         version = 14;
+    }
+    if (version === 14 && toVersion >= 15) {
+        working = migrateV14ToV15(working);
+        version = 15;
     }
 
     if (version !== toVersion) {

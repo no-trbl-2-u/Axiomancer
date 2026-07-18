@@ -66,8 +66,12 @@ import { STARTING_CARD_IDS } from '../Combat/combat.rewards';
  *   purge every non-relic `Equipment` from the loadout + inventory (relics are
  *   the only equipment that survives); backfill any stripped loadout slot with
  *   the default relic (see `game.migrate.ts`).
+ * Phase D5 (spec 33 §6) — bumped 14 → 15: backfill the DIE-GEAR RAIL
+ *   (`player.dieGear`) with the concrete default 4-color loadout so upgrades
+ *   write to a real per-save object and never mutate the frozen
+ *   `DEFAULT_DIE_GEAR` (see `game.migrate.ts`).
  */
-export const GAME_STATE_VERSION = 14;
+export const GAME_STATE_VERSION = 15;
 
 /** Builds a brand-new GameState with default player and world. */
 export function createNewGameState(): GameState {

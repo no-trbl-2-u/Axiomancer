@@ -166,6 +166,10 @@ const KIND_TO_NODE_TYPE: Record<MapEventKind, NodeType> = {
     village: 'treasure',
     cutscene: 'quest',
     narration: 'quest',
+    // Spec 33 §6 / Phase D5 — the blacksmith ("The Anvil") die-gear upgrade
+    // node. No bespoke glyph yet (D6 owns the blacksmith UI); borrows the
+    // nearest utility/reward icon for now.
+    blacksmith: 'treasure',
 };
 
 /** Node display type, sourced from the engine's authored event pools. */

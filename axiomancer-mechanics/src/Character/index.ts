@@ -202,6 +202,13 @@ export type {
     StatDeltaEntry, SignatureDeltaEntry,
 } from './equip-delta';
 export {
+    honeDieGear, temperDieGear, swapDieGear,
+    validateDieGear, concreteDefaultRail, characterDieGear,
+    dieSpecialCap, dieGearMissFaces,
+    DIE_GEAR_COLORS, DIE_GEAR_FACE_COUNT,
+} from './dieGear.reducer';
+export type { DieGearColor, DieGearRail, DieGearOutcome } from './dieGear.reducer';
+export {
     characterPresets, apprenticePreset, wandererPreset, sagePreset,
     levelLadderPresets, ladderL1Preset, ladderL15Preset, ladderL30Preset, ladderL50Preset,
     getPresetById, buildCharacterFromPreset,

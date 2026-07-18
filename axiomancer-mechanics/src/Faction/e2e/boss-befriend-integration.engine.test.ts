@@ -106,7 +106,7 @@ describe('Boss befriend faction reputation integration', () => {
         // In a new game state, faction reputation should be initialized
         expect(state.factionReputations).toBeDefined();
         expect(typeof state.factionReputations).toBe('object');
-        expect(state.version).toBe(14); // Phase 21 bumped 13 → 14 (purge procedural equipment)
+        expect(state.version).toBe(15); // Phase D5 bumped 14 → 15 (backfill die-gear rail)
     });
 
     it('demonstrates boss befriend tradeoff pattern', () => {
