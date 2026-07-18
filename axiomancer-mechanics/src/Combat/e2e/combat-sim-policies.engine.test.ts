@@ -230,10 +230,15 @@ describe('greedy object reproduces the pinned decision sequences', () => {
     // — `applyEffect` re-stamps `appliedAt` for `escalatesPerTurn` DoTs), so a
     // reapplied poison ticks slightly less and the greedy line spends one more
     // play (15→16) to reach the same four-round status victory.
+    // Re-pinned 2026-07-18 (color-match rider removal): straw-mans-jab lost its
+    // color-match +1-intensity dieBonus (a matching-color die is now the only
+    // way to pay, so the rider was never conditional). Its bleed lands one
+    // point weaker, so the greedy line spends one more play (16→17, statusPlays
+    // 11→12) to reach the same four-round status victory.
     it('seed 11 vs KingOfRevenge: a four-round status victory (Gate 0 law: one tray per phase)', () => {
         const r = runOneEncounter(loadout(MIX), KingOfRevenge, 11, 'greedy');
         expect({ outcome: r.outcome, rounds: r.rounds, plays: r.plays, statusPlays: r.statusPlays })
-            .toEqual({ outcome: 'victory', rounds: 4, plays: 16, statusPlays: 11 });
+            .toEqual({ outcome: 'victory', rounds: 4, plays: 17, statusPlays: 12 });
         expect(r.cardUsage['straw-mans-jab']).toEqual({
             cardId: 'straw-mans-jab', plays: 4, bottomPlays: 4, topPlays: 0, statusLands: 4, discards: 0,
         });

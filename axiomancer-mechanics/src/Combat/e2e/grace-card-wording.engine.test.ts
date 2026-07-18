@@ -30,11 +30,10 @@ describe('Grace preset card wording', () => {
         }
     });
 
-    it('Soft Word states both SWAY gains and its RAPPORT duration', () => {
+    it('Soft Word states its SWAY gain and its RAPPORT duration', () => {
         const text = face('soft-word');
         expect(text).toContain('rapport i1 d2');
         expect(text).toContain('SWAY 3');
-        expect(text).toContain('HEART die: SWAY 1');
     });
 
     it('Second Thoughts states its discard, RECALL, and MARK payoff', () => {

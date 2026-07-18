@@ -218,19 +218,3 @@ describe('projectIncomingThreat — wall-math readout (phase 28)', () => {
         expect(projection.projectedDamage).toBeLessThan(baseline.projectedDamage); // …but the live projection isn't
     });
 });
-
-describe('tu-quoque color-match fix (phase 28)', () => {
-    it('the die-bonus rider fires on a heart-color powering die (was body)', () => {
-        mockSequentialRng(0.05);
-        const state = openAndDraft(makePlayer(['tu-quoque']), makeEnemy(300, 'mind', []), ['tu-quoque'], 'heart');
-        const res = playCombatCard(state, { uid: state.hand.find(h => h.cardId === 'tu-quoque')!.uid }, true);
-        expect(res.events.find(e => e.kind === 'die-bonus-fired')).toBeDefined();
-    });
-
-    it('does not fire on a body-color powering die (the old, dead color)', () => {
-        mockSequentialRng(0.05);
-        const state = openAndDraft(makePlayer(['tu-quoque']), makeEnemy(300, 'mind', []), ['tu-quoque'], 'body');
-        const res = playCombatCard(state, { uid: state.hand.find(h => h.cardId === 'tu-quoque')!.uid }, true);
-        expect(res.events.find(e => e.kind === 'die-bonus-fired')).toBeUndefined();
-    });
-});
