@@ -688,7 +688,7 @@ supersession collisions before any engine work.
       stance check resolves with feedback → blacksmith HONE applied → tray
       reflects the new face table; off-color drop refused loudly. Deps: D6a,
       D6b, D6c.
-- [ ] Phase D6e — Enemy stanceCheck telegraphs (yield-lever content).
+- [x] Phase D6e — Enemy stanceCheck telegraphs (yield-lever content).
       The MECHANICS/enemy-content member of the D6 band (D6a–d are mobile;
       this is enemy content — author, no engine change). Promoted via
       /oversight 2026-07-18 to drain D3-F2: D2 shipped `resolveStanceCheck`
@@ -704,7 +704,13 @@ supersession collisions before any engine work.
       Prove: enemy-content tests (a threat phase authors a stanceCheck;
       `resolveStanceCheck` fires the outcome) + a sim witness that realized
       yield income leaves 0.000. Deps: D2 + D4.
-- [ ] Phase D7 — Tuning, ratification + honest re-baseline. Full
+      SHIPPED 2026-07-18 — `getThreatSequence` backfills `defaultStanceCheck`
+      (punishes enemy stance ×1.5 / yields to chain-successor ×0.5 +1◆) on
+      every threat phase at the single choke point (covers the witness enemies'
+      explicit sequences the generator missed); hand-authored checks preserved;
+      inert flag-off. Yield income 0.000→0.329◆ / total ◆ 1.117→1.451 (band
+      PASS, mid-upper); F2 canary flipped; 2753 mechanics tests green —
+      `feat(mechanics): Upgradeable-Dice D6e — enemy stanceCheck telegraphs` (0b29ff42)
       `/combat-playtest` matrix vs 80/50/25-35/0 (the spec §7 D7 gates);
       ratify D3's economy (blacksmith placeholders die here);
       statusEngagement re-baseline with its known blind spots stated;
