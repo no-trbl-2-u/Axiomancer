@@ -37,47 +37,60 @@
 > Zero new findings filed this pass (nothing observed outside the
 > existing rows).
 
-### [HIGH] Upgradeable-Dice flag-on: drag-to-power never actually powers a card
-- pass: D6d flag-on combat e2e, 2026-07-18 (commit — see phase D6d)
-- viewport: mobile (375x812, Playwright against the real exported build)
-- category: mechanics
-- observation: under `__AXM_UPGRADEABLE_DICE__` (spec 33 flag-on), dragging a
-  live (non-miss) die onto a color-matching staged card and tapping APPLY
-  visually attaches the die and consumes the card from hand, but the play
-  lands as if it were FREE — no die is ever marked spent, `playerStance`
-  never updates, the momentum-V2 chain never advances, and a SPECIAL face's
-  +2◆ Conviction payout never fires. The player sees no error; the card just
-  quietly does nothing extra. Reproduced deterministically (seed 16 + a
-  pinned deck) via a real Playwright drag-and-drop against the exported web
-  build — not a mock/unit-level artifact.
-- evidence: `resolveApplyRouting` (`axiomancer-mobile/state/presenters/combat-encounter.engine.ts:1938-1949`)
-  computes `draftFirst: !!dieId && !explicit && state.draftedDieId === null`
-  with NO `isUpgradeableDiceEnabled()` gate (every sibling VM function in the
-  same file gates on the flag; this one doesn't). For an ordinary tray die
-  (not Reserve/floating/fate-X — i.e. every rolled die under the flag-on
-  four-fixed-dice model) this evaluates `draftFirst = true`, so
-  `CombatEncounterPanel.onApply` (`components/combat/encounter/CombatEncounterPanel.tsx:464-474`)
-  calls `draftStanceDie(ns, dieId, ...)` before `playCombatCard`. But
-  `draftStanceDie` (`axiomancer-mechanics/src/Combat/combat.engine.ts:715-717`)
-  is an explicit no-op under the flag ("the draft is retired under the flag
-  ... if (isUpgradeableDiceEnabled()) return { state, events: [] }"), so
-  `state.draftedDieId` stays `null` forever, and `routing.explicitDieId`
-  resolves to `undefined` — `playCombatCard` is then called with NO die id
-  at all. `state.draftedDieId` can never become non-null under the flag (the
-  one function that would set it always no-ops), so this breaks 100% of
-  ordinary drag-to-power plays, permanently, for the life of the combat —
-  not an edge case. Flag-off is unaffected (there, `draftFirst=true` is the
-  *correct* legacy two-die-draft behavior; the bug is specifically the
-  missing flag branch for the flag-on case this same function is also
-  unconditionally used for).
-- suggested fix: gate `resolveApplyRouting`'s `draftFirst` on
-  `!isUpgradeableDiceEnabled()` (flag-on: every non-Reserve/floating/fate-X
-  tray die should also resolve `explicit = true` / pass straight through as
-  `explicitDieId`, mirroring how Reserve/floating dice already route) —
-  mirror the flag check every sibling VM in the same file already uses.
-- source: D6d's `axiomancer-mobile/scripts/upgradeable-dice-e2e.mjs` (real
-  browser drag-and-drop against the exported build) — filed instead of
-  fixed per that phase's scope boundary (test-infra + screenshots only).
+### [HIGH] D7-BLOCKER — flag-on paid plays don't commit through the mobile UI
+
+Surfaced by the D6d flag-on e2e (2026-07-18). Powering a card with a legal
+die and pressing APPLY under the spec-33 flag **spends the die but the play
+never commits** — the effect doesn't apply and the card bounces back to hand
+(observed on Soft Word / SWAY: die consumed, SWAY meter stays 0/31).
+
+**Classified (do NOT re-litigate the engine):** the ENGINE is correct flag-on.
+A hermetic probe (`playCombatCard(state, {uid}, true, heartDieId)`, flag-on)
+plays Soft Word paid via a heart mana die → `card-played:1, fizzled:0,
+sway 0→4, die spent, left hand`. So the bug is **mobile-side**, in
+`axiomancer-mobile/components/combat/encounter/CombatBoard.tsx` — the
+`handleApply` / `assignedDieFor` / `comboTargetUid` commit path is built around
+the retired DRAFT model (`draftedDie = vm.dice.find(d => d.drafted)`, the combo
+refresh) which does not exist flag-on (no draft; four independent fixed dice).
+D6a extended the drop-based `pendingDieByUid` path for display/arming, but the
+COMMIT still routes through draft-model logic that mishandles the flag-on
+no-draft multi-die case (likely calling `onApply` with a wrong/absent `dieId`
+or `power`, so the engine fizzles-then-drains-free while the die still reads
+spent).
+
+**Why HIGH but not live:** the flag is OFF in production, so no user hits this
+— but it is a hard **D7 blocker**: D7 recommends the flag-flip, and a broken
+flag-on paid-play UI cannot ship. Fix before D7. Repro is cheap: the D6d e2e
+harness + a "successful paid SWAY commit" assertion (which the e2e currently
+lacks — add it as the regression guard). Also seen in the same screenshot: a
+stale STAKE affordance renders flag-on though STAKE was retired in D2 §5 —
+fold that cleanup into the same fix.
+
+**Root-cause pinpoint (independent confirmation, D6d parallel run, 2026-07-18):**
+narrowed past "likely calling `onApply` with a wrong/absent `dieId` or
+`power`" above to the exact mechanism. `resolveApplyRouting`
+(`axiomancer-mobile/state/presenters/combat-encounter.engine.ts:1938-1949`)
+computes `draftFirst: !!dieId && !explicit && state.draftedDieId === null`
+with NO `isUpgradeableDiceEnabled()` gate (every sibling VM function in the
+same file gates on the flag; this one doesn't). For an ordinary tray die (not
+Reserve/floating/fate-X — every rolled die under the flag-on four-fixed-dice
+model) this evaluates `draftFirst = true`, so `CombatEncounterPanel.onApply`
+(`components/combat/encounter/CombatEncounterPanel.tsx:464-474`) calls
+`draftStanceDie(ns, dieId, ...)` before `playCombatCard`. But `draftStanceDie`
+(`axiomancer-mechanics/src/Combat/combat.engine.ts:715-717`) is an explicit
+no-op under the flag ("the draft is retired under the flag ... if
+(isUpgradeableDiceEnabled()) return { state, events: [] }"), so
+`state.draftedDieId` stays `null` forever and `routing.explicitDieId`
+resolves to `undefined` — `playCombatCard` is called with NO die id at all.
+Since the one function that would set `draftedDieId` always no-ops under the
+flag, this is permanent for the life of the combat, not an edge case. Suggested
+fix: gate `resolveApplyRouting`'s `draftFirst` on `!isUpgradeableDiceEnabled()`
+(flag-on: every non-Reserve/floating/fate-X tray die should also resolve
+`explicit = true` and pass straight through as `explicitDieId`, mirroring how
+Reserve/floating dice already route) — this one function is the fix, not
+`CombatBoard.tsx`'s `handleApply` (which already computes the right
+`dieId`/`power` and hands them to `onApply` correctly; the miscount happens
+one level down, in the routing helper `onApply` calls next).
 
 ### [MED] ratified-exception HP arms bypass the damage-instance clock funnel
 - pass: review-closeout 2026-07-12 (commit 4680e5e2, branch

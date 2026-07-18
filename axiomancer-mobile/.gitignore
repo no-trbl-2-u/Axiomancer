@@ -69,7 +69,6 @@ app-example
 /ios
 /android
 screenshots/hazard-e2e/
-screenshots/upgradeable-dice-e2e/
 bun.lock
 
 # visual-audit artifacts
