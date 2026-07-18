@@ -37,6 +37,35 @@
 > Zero new findings filed this pass (nothing observed outside the
 > existing rows).
 
+### [HIGH] D7-BLOCKER — flag-on paid plays don't commit through the mobile UI
+
+Surfaced by the D6d flag-on e2e (2026-07-18). Powering a card with a legal
+die and pressing APPLY under the spec-33 flag **spends the die but the play
+never commits** — the effect doesn't apply and the card bounces back to hand
+(observed on Soft Word / SWAY: die consumed, SWAY meter stays 0/31).
+
+**Classified (do NOT re-litigate the engine):** the ENGINE is correct flag-on.
+A hermetic probe (`playCombatCard(state, {uid}, true, heartDieId)`, flag-on)
+plays Soft Word paid via a heart mana die → `card-played:1, fizzled:0,
+sway 0→4, die spent, left hand`. So the bug is **mobile-side**, in
+`axiomancer-mobile/components/combat/encounter/CombatBoard.tsx` — the
+`handleApply` / `assignedDieFor` / `comboTargetUid` commit path is built around
+the retired DRAFT model (`draftedDie = vm.dice.find(d => d.drafted)`, the combo
+refresh) which does not exist flag-on (no draft; four independent fixed dice).
+D6a extended the drop-based `pendingDieByUid` path for display/arming, but the
+COMMIT still routes through draft-model logic that mishandles the flag-on
+no-draft multi-die case (likely calling `onApply` with a wrong/absent `dieId`
+or `power`, so the engine fizzles-then-drains-free while the die still reads
+spent).
+
+**Why HIGH but not live:** the flag is OFF in production, so no user hits this
+— but it is a hard **D7 blocker**: D7 recommends the flag-flip, and a broken
+flag-on paid-play UI cannot ship. Fix before D7. Repro is cheap: the D6d e2e
+harness + a "successful paid SWAY commit" assertion (which the e2e currently
+lacks — add it as the regression guard). Also seen in the same screenshot: a
+stale STAKE affordance renders flag-on though STAKE was retired in D2 §5 —
+fold that cleanup into the same fix.
+
 ### [MED] ratified-exception HP arms bypass the damage-instance clock funnel
 - pass: review-closeout 2026-07-12 (commit 4680e5e2, branch
   claude/axiomancer-dawncaster-comparison-cz6008)
