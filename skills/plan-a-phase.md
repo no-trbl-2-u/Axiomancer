@@ -134,18 +134,35 @@ EOF
 git push origin main
 ```
 
-### Step 5.5 — No GitHub issue during planning
+### Step 5.5 — Mirror the phase to GitHub (best-effort)
 
-`/plan-a-phase` commits the queue/brief as repo-local planning truth. It does
-**not** open, reopen, close, label, or comment on a GitHub issue.
+Once the brief is committed, open (or reuse) the phase mirror
+issue so the public timeline reflects "next up" before shipping
+starts:
 
-The phase mirror begins when implementation begins: `/ship-a-phase` Step 2.5
-owns that public side effect. This keeps attended discussion, owner-call phase
-promotion, queue reordering, and brief refinement from publishing work merely
-because it was planned.
+```bash
+issue_body=$(mktemp)
+cat > "$issue_body" <<EOF
+**Goal:** <one-line outcome from the brief's "Outcome" section>
 
-Exception: open a GitHub issue only when the user separately asks for one. A
-direct request to add, move, queue, or refine a phase is not that permission.
+<2–4 line summary of what shipping this phase delivers>
+
+**Brief:** [\`plan/phases/phase_<N>_<topic>.md\`](https://github.com/no-trbl-2-u/Axiomancer/blob/main/plan/phases/phase_<N>_<topic>.md)
+
+---
+_Tracked by the autonomous loop. The phase commit will close this issue via a \`Closes #<this-issue>\` trailer; deploy URL is posted as a follow-up comment._
+EOF
+
+node scripts/loop-issue.mjs phase-open \
+    --phase "<N>" \
+    --title "Phase <N> — <topic>" \
+    --body-file "$issue_body"
+```
+
+The helper is **idempotent** — if `/ship-a-phase` already opened
+this phase's issue (or if a previous plan-a-phase tick did), the
+same number is reused. Failures here are warnings, not blockers
+(same contract as `/ship-a-phase` Step 2.5).
 
 ### Step 6 — Done
 

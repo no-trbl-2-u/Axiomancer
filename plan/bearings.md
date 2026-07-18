@@ -181,17 +181,6 @@ for `reader` to fetch.
 - **Mode: bold** (default) — `/expand` files candidates to
   `plan/PHASE_CANDIDATES.md`; `/oversight` promotes them.
 
-## Attended interaction contract
-
-- Conversation and brainstorming do not imply repo or GitHub side effects.
-- “File / queue / add / move / refine” means mutate the repo-local plan/spec/
-  brief on `main`; it does not authorize a public GitHub issue.
-- `/oversight` is the attended steering/control surface; `/jot` is quick defect
-  capture; `/ship-a-phase` begins one implementation; `/march` runs one
-  autonomous tick; `/loop /march` continuously drains the queue.
-- GitHub issues are optional user inbox items and best-effort shipping mirrors.
-  They are never the canonical phase queue. `plan/` is canonical.
-
 ## Decisions standing for the autonomous loop
 
 (So the loop never has to ask. Add to this list any recurring
