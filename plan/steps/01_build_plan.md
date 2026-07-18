@@ -789,7 +789,7 @@ supersession collisions before any engine work.
       KEEP (97% spend-rate). Dice-valve promotion DEFERRED (gated on F3 + 5/5/5
       owner call). Unblocker filed to PHASE_CANDIDATES. Report:
       `plan/tuning/2026-07-18-d7-ratification.md` —
-      `feat(mechanics): Upgradeable-Dice D7 ratification — flag-on matrix + report` (pending)
+      `feat(mechanics): Upgradeable-Dice D7 ratification — flag-on matrix + report` (701762bd)
       **BLOCKER RESOLVED (2026-07-18):** the flag-on paid-play UI commit bug
       (die not forwarded → engine fizzle → card bounce) is FIXED — a flag-on
       early return in `resolveApplyRouting` forwards the dropped die as the
