@@ -11,6 +11,36 @@
 
 ## Pending
 
+### [LOW] mobile — combat corner medallions occlude the fan-end hand cards' touch centers
+- pass: combat declutter residue (PR #135, 2026-07-19)
+- viewport: 375×812
+- auth_state: n/a
+- category: ux
+- observation: the player medallion (bottom-left) and END medallion (bottom-right) deliberately float ABOVE the fan ends (reference chrome) — but the LEFTMOST hand card's bounding-box center sits under the player medallion, so a drag started from its middle hits the medallion, not the card. Found while the upgradeable-dice e2e's SWAY guard failed staging the leftmost Soft Word; the harness now picks the rightmost copy, but a real player dragging the leftmost card from its lower half hits the same occlusion. Playable (the card's upper half drags fine) — just a friction spot on small screens.
+- evidence: PR #135 (elementFromPoint probe: combat-hand-c1 center → combat-player-medallion); scripts/upgradeable-dice-e2e.mjs SWAY-guard comment.
+- suggested fix: next combat-UX pass, either inset the fan band from the medallions or shrink the medallion hit-slop so the card wins the touch; verify with the same probe.
+- source: owner session 2026-07-19 (press-fate/momentum/dice PR)
+
+### [LOW] mobile — legacy flag-off combat render paths linger post-FLIP
+- pass: combat declutter residue (PR #135, 2026-07-19)
+- viewport: n/a
+- auth_state: n/a
+- category: engineering
+- observation: THE FLIP (2026-07-18) made Upgradeable Dice the shipped default, but the flag-off render stack survives whole under the legacy kill-switch: the three-node MomentumWheel component + `vm.momentum`, the faceless 2-die draft tray, and the reroll rune's printed legacy cost/description (kept byte-identical flag-off by design). Dead weight the moment the kill-switch retires.
+- evidence: CombatBoard.tsx MomentumWheel / `vm.momentumV2 ? chip : wheel` fork; presenter signaturesVM flag fork (PR #135).
+- suggested fix: when the owner retires `EXPO_PUBLIC_UPGRADEABLE_DICE=0`, delete the wheel component, the `momentum` VM surface, and the flag forks in one sweep (the flag-off byte-identical test suites go with it).
+- source: owner session 2026-07-19 (press-fate/momentum/dice PR)
+
+### [LOW] mobile — combat die/card-face components accrete hex literals against the AXM-token doctrine
+- pass: combat declutter residue (PR #135, 2026-07-19)
+- viewport: n/a
+- auth_state: n/a
+- category: engineering
+- observation: the package doctrine says "no hex literals (use AXM tokens)", but CombatDie's cube greys, the card face's scrim/rarity/glyph-pop colors, and HazardDie's palette all carry raw hex — the cube recut + glyph-pop pass (PR #135) extended an already-widespread pattern rather than fixing it.
+- evidence: CombatDie.tsx (cube greys, rim colors), CombatBoard.tsx (READ_ACCENT, rarity colors, lighten/darken helpers), components/hazard/palette.ts.
+- suggested fix: a token-hygiene pass folds the recurring combat/hazard colors into the AXM runtime palette; new code then has a token to reach for.
+- source: owner session 2026-07-19 (press-fate/momentum/dice PR)
+
 ### [LOW] mechanics — akrasia swap-pool cleanse-while-Fallen tension knob needs matrix eyes
 - pass: swap-pool fan-out residue (PR #130, 2026-07-18)
 - viewport: n/a

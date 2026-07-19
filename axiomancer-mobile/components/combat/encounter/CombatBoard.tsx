@@ -1653,17 +1653,20 @@ export const CombatCardFace = React.memo(function CombatCardFace({
                                Views (zIndex applies); a bare <Svg> may stay static. */
                             <View style={{ zIndex: 1 }}>
                                 <Svg width={glyphSize * 0.86} height={glyphSize * 0.86} viewBox="0 0 24 24">
+                                    {/* Lighten 0.3 → 0.12 (owner pass 4, same day): with the
+                                        z-order fixed the full 0.3 washed the hue out — keep
+                                        just a touch of lift over the raw category colour. */}
                                     <Path
                                         d={freeShape.d}
-                                        fill={f.inert ? baseKw : lightenHex(baseKw, 0.3)}
-                                        stroke={f.inert ? 'none' : 'rgba(255,255,255,0.45)'}
-                                        strokeWidth={0.7}
+                                        fill={f.inert ? baseKw : lightenHex(baseKw, 0.12)}
+                                        stroke={f.inert ? 'none' : 'rgba(255,255,255,0.3)'}
+                                        strokeWidth={0.6}
                                         fillRule={freeShape.evenodd ? 'evenodd' : 'nonzero'}
                                     />
                                 </Svg>
                             </View>
                         ) : (
-                            <Text style={[styles.freeGlyph, { fontSize: glyphSize, lineHeight: glyphSize, color: f.inert ? baseKw : lightenHex(baseKw, 0.3), zIndex: 1 }]} allowFontScaling={false}>{f.freeGlyph}</Text>
+                            <Text style={[styles.freeGlyph, { fontSize: glyphSize, lineHeight: glyphSize, color: f.inert ? baseKw : lightenHex(baseKw, 0.12), zIndex: 1 }]} allowFontScaling={false}>{f.freeGlyph}</Text>
                         )}
                         {freeInner ? (
                             <View style={[StyleSheet.absoluteFill, { alignItems: 'center', justifyContent: 'center', zIndex: 2 }]} pointerEvents="none">
