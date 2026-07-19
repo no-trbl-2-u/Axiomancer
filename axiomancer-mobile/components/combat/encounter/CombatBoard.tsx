@@ -1464,6 +1464,16 @@ function compactFree(v: string | null): string {
     return v.length <= 3 ? v : v.slice(0, 3);
 }
 
+// Lighten a #rrggbb toward white by t (0..1) — the FREE glyph's pop tint
+// (owner call 2026-07-19: the category colours read muddy over the art).
+function lightenHex(hex: string, t: number): string {
+    const m = /^#?([0-9a-f]{6})$/i.exec(hex);
+    if (!m) return hex;
+    const n = parseInt(m[1], 16);
+    const ch = (v: number) => Math.round(v + (255 - v) * t);
+    return `rgb(${ch((n >> 16) & 255)},${ch((n >> 8) & 255)},${ch(n & 255)})`;
+}
+
 // Darken a #rrggbb by a factor (0..1) — the stance cube's shaded faces.
 function darkenHex(hex: string, f: number): string {
     const m = /^#?([0-9a-f]{6})$/i.exec(hex);
@@ -1589,17 +1599,26 @@ export const CombatCardFace = React.memo(function CombatCardFace({
                 </View>
                 {/* SCRIM — deep→transparent so the bottom text stays legible */}
                 <FaceScrim w={width} h={height} uid={card.uid} tint={band} />
-                {/* LEFT RAIL — stance spine carrying the card NAME, centred on the
-                    rail (owner declutter pass 2026-07-19: the name moved here off
-                    the bottom block; the STANCE · TYPE strip took its old slot). */}
+                {/* LEFT RAIL — ONE stance-coloured container (the two-tone bottom
+                    shade is gone, owner call 2026-07-19) carrying the card NAME
+                    rotated -90° and centred. The label sits in an explicitly-sized
+                    rotated box (width = card height): rotating the bare Text let
+                    the layout clamp it to the rail's width and ellipsize the name
+                    after two letters (owner report, same day). */}
                 <View style={[styles.faceRail, { width: railW, backgroundColor: band }]} pointerEvents="none">
-                    <View style={[styles.faceRailShade, { width: railW }]} />
-                    <View style={styles.faceRailLabelWrap}>
+                    <View
+                        style={[styles.faceRailRotor, {
+                            left: (railW - height) / 2,
+                            top: (height - railW) / 2,
+                            width: height,
+                            height: railW,
+                        }]}
+                    >
                         <Text
-                            style={[styles.faceRailLabel, large && styles.faceRailLabelLarge, { width: height - 16 }]}
+                            style={[styles.faceRailLabel, large && styles.faceRailLabelLarge]}
                             numberOfLines={1}
                             adjustsFontSizeToFit
-                            minimumFontScale={0.75}
+                            minimumFontScale={0.6}
                             allowFontScaling={false}
                         >
                             {card.name.toUpperCase()}
@@ -1613,19 +1632,29 @@ export const CombatCardFace = React.memo(function CombatCardFace({
                         <Svg width={glyphSize} height={glyphSize} style={StyleSheet.absoluteFill}>
                             <Defs>
                                 <RadialGradient id={`fh_${card.uid}`} cx="48%" cy="46%" r="54%">
-                                    <Stop offset="0" stopColor="#06050a" stopOpacity="0.82" />
-                                    <Stop offset="0.6" stopColor="#06050a" stopOpacity="0.5" />
+                                    <Stop offset="0" stopColor="#06050a" stopOpacity="0.94" />
+                                    <Stop offset="0.6" stopColor="#06050a" stopOpacity="0.62" />
                                     <Stop offset="1" stopColor="#06050a" stopOpacity="0" />
                                 </RadialGradient>
                             </Defs>
                             <SvgRect x="0" y="0" width={glyphSize} height={glyphSize} fill={`url(#fh_${card.uid})`} />
                         </Svg>
+                        {/* POP tint (owner call 2026-07-19): the raw category colour
+                            read muddy over the art — the glyph brightens toward
+                            white and takes a light edge, on a harder backdrop.
+                            Inert stays honestly grey (engine doesn't read it). */}
                         {freeShape ? (
                             <Svg width={glyphSize * 0.86} height={glyphSize * 0.86} viewBox="0 0 24 24">
-                                <Path d={freeShape.d} fill={baseKw} fillRule={freeShape.evenodd ? 'evenodd' : 'nonzero'} opacity={0.95} />
+                                <Path
+                                    d={freeShape.d}
+                                    fill={f.inert ? baseKw : lightenHex(baseKw, 0.3)}
+                                    stroke={f.inert ? 'none' : 'rgba(255,255,255,0.45)'}
+                                    strokeWidth={0.7}
+                                    fillRule={freeShape.evenodd ? 'evenodd' : 'nonzero'}
+                                />
                             </Svg>
                         ) : (
-                            <Text style={[styles.freeGlyph, { fontSize: glyphSize, lineHeight: glyphSize, color: baseKw }]} allowFontScaling={false}>{f.freeGlyph}</Text>
+                            <Text style={[styles.freeGlyph, { fontSize: glyphSize, lineHeight: glyphSize, color: f.inert ? baseKw : lightenHex(baseKw, 0.3) }]} allowFontScaling={false}>{f.freeGlyph}</Text>
                         )}
                         {freeInner ? (
                             <View style={[StyleSheet.absoluteFill, { alignItems: 'center', justifyContent: 'center' }]} pointerEvents="none">
@@ -1870,12 +1899,12 @@ const useStyles = makeStyles((AXM) => ({
         position: 'absolute', left: 0, top: 0, bottom: 0,
         borderRightWidth: 1, borderRightColor: 'rgba(0,0,0,0.5)',
     },
-    faceRailShade: { position: 'absolute', left: 0, bottom: 0, height: '55%', backgroundColor: 'rgba(0,0,0,0.28)' },
-    // Full-rail centred wrap: the rotated label spans (height − 16), so the
-    // whole card name renders un-truncated at every card size.
-    faceRailLabelWrap: { ...StyleSheet.absoluteFillObject, alignItems: 'center', justifyContent: 'center' },
+    // The rotated label box: sized (card height × rail width) and spun -90° in
+    // place, so the name lays out at full card-height width — never clamped to
+    // the rail's own width — and centres along the rail.
+    faceRailRotor: { position: 'absolute', transform: [{ rotate: '-90deg' }], alignItems: 'center', justifyContent: 'center' },
     faceRailLabel: {
-        textAlign: 'center', transform: [{ rotate: '-90deg' }],
+        textAlign: 'center', maxWidth: '96%',
         fontFamily: FONTS.sans, fontSize: 9, letterSpacing: 1.6, color: 'rgba(255,255,255,0.95)',
         textShadowColor: 'rgba(0,0,0,0.7)', textShadowRadius: 2,
     },
