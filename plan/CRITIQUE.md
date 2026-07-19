@@ -11,6 +11,26 @@
 
 ## Pending
 
+### [LOW] mechanics — akrasia swap-pool cleanse-while-Fallen tension knob needs matrix eyes
+- pass: swap-pool fan-out residue (PR #130, 2026-07-18)
+- viewport: n/a
+- auth_state: n/a
+- category: content
+- observation: `absolution-on-account` and `the-wound-that-teaches` (swap-akrasia) deliberately CLEANSE while Fallen — the state is checked at play time, then walked back. A real tension knob per the designer, but it can read as anti-synergy confusion in play.
+- evidence: swap-pool fan-out report §needs-user-call; designer note in the akrasia pool file.
+- suggested fix: when the swap-pool measurement pass runs, watch these two cards' usage + FALLEN uptime; if the matrix shows confusion (played then immediately un-Fallen with no payoff), redesign toward pay-then-cash ordering.
+- source: /deck-tuning fan-out session
+
+### [LOW] mechanics — THEME_KEYWORDS.harvest still advertises TICK (owner-ratified dead 2026-07-10)
+- pass: swap-pool fan-out residue (PR #130, 2026-07-18)
+- viewport: n/a
+- auth_state: n/a
+- category: content
+- observation: `card-themes.ts` lists TICK in harvest's keyword family, but the atlas records TICK's owner-ratified death and no live card uses it — the catalog's family search advertises an empty set (the exact "family lie" class KW-2/KW-6 fixed in phase 29).
+- evidence: harvest swap-pool designer note; docs/keyword-atlas.md TICK row.
+- suggested fix: drop TICK from `THEME_KEYWORDS.harvest` (and any other family that lists it) in the next keyword hygiene pass.
+- source: /deck-tuning fan-out session
+
 ### [LOW] mechanics — fated-course engine hook survives its retired card as a test harness
 - pass: D8 ship residue (commit 10ec4fe8)
 - viewport: n/a

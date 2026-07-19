@@ -9,6 +9,50 @@
 
 ## Pending
 
+### Swap-pool measurement pass — /deck-tuning over the 300-card pool
+- source: owner-directed fan-out 2026-07-18 (PR #130, merged 4df9a366).
+  Ten `swap-<theme>` sandbox sets (30 spells each, 10/12/8) now stand as
+  measurement-seat candidates; the `+swap:` deck grammar and multi-set
+  `--sandbox` lists are live; contract pinned by
+  `swap-pool.engine.test.ts`. Full ledger:
+  `axiomancer-mechanics/docs/reports/swap-pool-fanout-2026-07-18.md`.
+- shape: a `/deck-tuning` pass swapping candidates into preset seats
+  (control = unswapped recipe, same seeds), leading with the estimator's
+  trial-first picks and the flagged spam-risk cards; delivers evidence
+  tables + proposed preset compositions on its own PR, never auto-merged.
+- **GATED: the owner asked to be checked in with BEFORE this runs**
+  (2026-07-18 session). Do not let a cron tick start it; the owner's go
+  is the trigger.
+- [needs-user-call] riders the pass should surface for ratification:
+  (a) forge — OVERHEAT ruled theme-engine manufacture, NOT a
+  die-interaction line for the one-line law (working ruling in the pool
+  header); (b) echo — `synergy` state predicates read as the same
+  condition-line class per spec 32 §2; (c) peroration — 7 off-seat reach
+  cards are unswappable without a coordinated multi-seat recolor.
+
+### Enchant/disenchant hooks are per-card engine code — generalize before those seats can grow
+- source: swap-pool fan-out 2026-07-18. The pool is spells-only because
+  every enchant/disenchant passive is a bespoke `combat.engine.ts` branch
+  keyed on the card id (`resonant-chamber`, `quagmire-of-doubt`) — a new
+  ench/dis cannot be sandbox DATA, so the recipe's two persistent seats
+  have zero swap candidates.
+- shape: a propose-first engine phase that makes persistent passives
+  data-driven (a small hook vocabulary on the card literal), then a
+  follow-up authoring pass. Directly unblocks the standing "Library
+  theme-symmetry restoration" candidate above (which needs ~6 new
+  ench/dis cards) AND future ench/dis swap pools.
+
+### Pricing-lint paper credit on no-calendar non-DoT effects
+- source: swap-pool review pass 2026-07-18 (affliction fixer; bulwark
+  shows the same drift). `statusPoints` (`cards.pricing.ts`) prices the
+  PRINTED duration of `calendarExpiry:false` non-DoT effects (e.g. MARK
+  d1/d2), but the engine never duration-decrements calendar opt-outs —
+  the printed duration is dead text and the points are paper credit.
+- shape: teach `statusPoints` the calendar law (price no-calendar
+  effects on the battle-long read or a pricing horizon), re-run the
+  pricing lint over library + swap pools, and fix the handful of cards
+  whose comments lean on the fiction.
+
 ### Post-D8 flag-on curve repair — the bounded tuning phase D8 hands off
 - source: Phase D8 ship (10ec4fe8, 2026-07-18). The D8 brief's own law:
   "a red curve becomes the next bounded tuning phase" — that phase is now
