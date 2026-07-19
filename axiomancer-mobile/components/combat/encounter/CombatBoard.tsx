@@ -1642,22 +1642,31 @@ export const CombatCardFace = React.memo(function CombatCardFace({
                         {/* POP tint (owner call 2026-07-19): the raw category colour
                             read muddy over the art — the glyph brightens toward
                             white and takes a light edge, on a harder backdrop.
-                            Inert stays honestly grey (engine doesn't read it). */}
+                            Inert stays honestly grey (engine doesn't read it).
+                            zIndex is EXPLICIT on every layer: on web the
+                            absolutely-positioned backdrop painted ABOVE the
+                            normal-flow glyph (positioned beats static regardless
+                            of child order), greying the glyph out — the owner's
+                            "backdrop is on top of the glyph" report, same day. */}
                         {freeShape ? (
-                            <Svg width={glyphSize * 0.86} height={glyphSize * 0.86} viewBox="0 0 24 24">
-                                <Path
-                                    d={freeShape.d}
-                                    fill={f.inert ? baseKw : lightenHex(baseKw, 0.3)}
-                                    stroke={f.inert ? 'none' : 'rgba(255,255,255,0.45)'}
-                                    strokeWidth={0.7}
-                                    fillRule={freeShape.evenodd ? 'evenodd' : 'nonzero'}
-                                />
-                            </Svg>
+                            /* View wrapper: RN-web guarantees position:relative on
+                               Views (zIndex applies); a bare <Svg> may stay static. */
+                            <View style={{ zIndex: 1 }}>
+                                <Svg width={glyphSize * 0.86} height={glyphSize * 0.86} viewBox="0 0 24 24">
+                                    <Path
+                                        d={freeShape.d}
+                                        fill={f.inert ? baseKw : lightenHex(baseKw, 0.3)}
+                                        stroke={f.inert ? 'none' : 'rgba(255,255,255,0.45)'}
+                                        strokeWidth={0.7}
+                                        fillRule={freeShape.evenodd ? 'evenodd' : 'nonzero'}
+                                    />
+                                </Svg>
+                            </View>
                         ) : (
-                            <Text style={[styles.freeGlyph, { fontSize: glyphSize, lineHeight: glyphSize, color: f.inert ? baseKw : lightenHex(baseKw, 0.3) }]} allowFontScaling={false}>{f.freeGlyph}</Text>
+                            <Text style={[styles.freeGlyph, { fontSize: glyphSize, lineHeight: glyphSize, color: f.inert ? baseKw : lightenHex(baseKw, 0.3), zIndex: 1 }]} allowFontScaling={false}>{f.freeGlyph}</Text>
                         )}
                         {freeInner ? (
-                            <View style={[StyleSheet.absoluteFill, { alignItems: 'center', justifyContent: 'center' }]} pointerEvents="none">
+                            <View style={[StyleSheet.absoluteFill, { alignItems: 'center', justifyContent: 'center', zIndex: 2 }]} pointerEvents="none">
                                 <Text style={[styles.freeInner, large && styles.freeInnerLarge]} allowFontScaling={false}>{freeInner}</Text>
                             </View>
                         ) : null}
