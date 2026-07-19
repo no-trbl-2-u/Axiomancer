@@ -104,8 +104,8 @@ If promotion ever restores the row, it starts at `+???`, not `????`.
 
 | keyword | semantics | Dawncaster analogues (receipts) | gate (E/P/D/T) | notes |
 |---|---|---|---|---|
-| PROLONG N | add N turns of duration to ALL your DoTs on the enemy | — | `????` T:n/a | phase 29: renamed from FESTER (name collided with "an infected wound" — read as another DoT species, not a duration extender); sole carrier festering-argument, orphan-tier support (1 card) |
-| REARGUE iN | convert the enemy's Bleed↔Poison, +N intensity as it flips | — | `????` T:n/a | phase 29: renamed from TRANSMUTE (the word was double-booked with the unrelated X→WILD die-conversion sense, which stays inside FORGE's gloss); sole carrier currys-conversion, orphan-tier support (1 card) |
+| PROLONG N | add N turns of duration to ALL your DoTs on the enemy | — | `????` T:n/a | phase 29: renamed from FESTER (name collided with "an infected wound" — read as another DoT species, not a duration extender); sole carrier festering-argument, orphan-tier support (1 card). 2026-07-18 swap-pool measurement pass: deposit-matched single-variable A/B (chronic-condition at the festering-argument x2 seat, `docs/reports/deck-tuning-2026-07-18.md` §1 e2) — exercised clean (3.2 plays/run mid, 5 fizzles/~2,070 plays), priced neutral (mid Δwin +0.007/+0.010 blind/greedy, sE +0.003/+0.005): playable but not differentiating at this seat |
+| REARGUE iN | convert the enemy's Bleed↔Poison, +N intensity as it flips | — | `????` T:n/a | phase 29: renamed from TRANSMUTE (the word was double-booked with the unrelated X→WILD die-conversion sense, which stays inside FORGE's gloss); sole carrier currys-conversion, orphan-tier support (1 card). 2026-07-18 swap-pool measurement pass: still unmeasured — reopen-the-question was not a trial-first pick; adjacent evidence only (recapitulatio's fizzle-death at the oratory u seat, `docs/reports/deck-tuning-2026-07-18.md` §2 o2, shows spend-preconditioned uncommons dying in spender decks) |
 
 ## Die gear (spec 33 §6 — 3, registered D4 2026-07-17)
 
