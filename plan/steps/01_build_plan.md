@@ -856,7 +856,8 @@ supersession collisions before any engine work.
       valves ARE the F3 sink, no starter Press Fate grant unless the
       re-test shows the valves under-sink). Deps: D-FLIP, D7.
       Brief: `plan/phases/phase_D8_preset_dice_valves.md`.
-- [ ] Phase D9 — Authored stance-check variety (salvage PR #109).
+- [x] Phase D9 — Authored stance-check variety (salvage PR #109).
+      Shipped `2848fb6a`.
       Promoted from AUDIT via /oversight 2026-07-18. D6e's uniform
       `defaultStanceCheck` backfill stays; this phase threads
       `stanceCheck?` through the authoring pipeline
