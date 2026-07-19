@@ -1,114 +1,5 @@
 [
  {
-  "id": "achilles-and-the-tortoise",
-  "name": "Achilles and the Tortoise",
-  "image": "./assets/catalog/cards/freeze.webp",
-  "pricing": "persistent draw 1 per denied enemy turn ≈ 2 × ~5 denies gated, min-4 ≈ 12 → Axiom",
-  "face": {
-   "freeGlyph": "❖",
-   "freeKw": "ENCHANT",
-   "freeVal": "3r",
-   "paid": "DRAW 1 whenever your STAGGER denies an enemy turn."
-  },
-  "chips": [
-   {
-    "k": "Stance",
-    "v": "mind"
-   },
-   {
-    "k": "Type",
-    "v": "paradox"
-   },
-   {
-    "k": "Tier",
-    "v": "2"
-   },
-   {
-    "k": "Target",
-    "v": "self"
-   },
-   {
-    "k": "Rank",
-    "v": "Axiom (rare)"
-   },
-   {
-    "k": "Kind",
-    "v": "enchantment"
-   },
-   {
-    "k": "Theme",
-    "v": "control"
-   },
-   {
-    "k": "Keywords",
-    "v": "STAGGER · BACKFIRE · FORETELL · DRAW"
-   },
-   {
-    "k": "Source",
-    "v": "reward"
-   }
-  ],
-  "lines": [
-   "FREE — the printed passive for 3 rounds.",
-   "PAID (rest of combat) — DRAW 1 whenever your STAGGER denies an enemy turn."
-  ]
- },
- {
-  "id": "ad-nauseam",
-  "name": "Ad Nauseam",
-  "image": "./assets/catalog/cards/confuse.webp",
-  "pricing": "next spell gains ECHO (≈ ×0.8 of an avg spell ≈ 5) + FREE mark (0.5) + dieBonus(draw ×0.6 = 1.2) ≈ 6.7 → Thesis",
-  "face": {
-   "freeGlyph": "◉",
-   "freeKw": "MARK",
-   "freeVal": "1",
-   "paid": "your next spell gains ECHO."
-  },
-  "chips": [
-   {
-    "k": "Stance",
-    "v": "mind"
-   },
-   {
-    "k": "Type",
-    "v": "fallacy"
-   },
-   {
-    "k": "Tier",
-    "v": "2"
-   },
-   {
-    "k": "Target",
-    "v": "self"
-   },
-   {
-    "k": "Rank",
-    "v": "Thesis (uncommon)"
-   },
-   {
-    "k": "Kind",
-    "v": "spell"
-   },
-   {
-    "k": "Theme",
-    "v": "echo"
-   },
-   {
-    "k": "Keywords",
-    "v": "ECHO · RECALL · DRAW"
-   },
-   {
-    "k": "Source",
-    "v": "reward"
-   }
-  ],
-  "lines": [
-   "FREE — MARK 1 for 1 turn on the enemy.",
-   "your next spell gains ECHO",
-   "Die bonus: powering die mind fires a rider"
-  ]
- },
- {
   "id": "against-my-judgment",
   "name": "Against My Judgment",
   "image": "./assets/catalog/cards/devil-book.webp",
@@ -283,6 +174,117 @@
    "Applies Backfire ×1, 2t → enemy",
    "lock the enemy's next stance",
    "STAGGER 1"
+  ]
+ },
+ {
+  "id": "bank-the-yield",
+  "name": "Bank the Yield",
+  "image": "./assets/catalog/cards/meat-pecker.webp",
+  "pricing": null,
+  "face": {
+   "freeGlyph": "✚",
+   "freeKw": "HEAL",
+   "freeVal": "2",
+   "paid": "the spent die BANKS to the Reserve + +3 Souls."
+  },
+  "chips": [
+   {
+    "k": "Stance",
+    "v": "heart"
+   },
+   {
+    "k": "Type",
+    "v": "fallacy"
+   },
+   {
+    "k": "Tier",
+    "v": "2"
+   },
+   {
+    "k": "Target",
+    "v": "enemy"
+   },
+   {
+    "k": "Rank",
+    "v": "Thesis (uncommon)"
+   },
+   {
+    "k": "Kind",
+    "v": "spell"
+   },
+   {
+    "k": "Theme",
+    "v": "harvest"
+   },
+   {
+    "k": "Keywords",
+    "v": "SOUL · REAP · MARK · TICK"
+   },
+   {
+    "k": "Source",
+    "v": "reward"
+   }
+  ],
+  "lines": [
+   "FREE — HEAL 2, then gain 1 SOUL.",
+   "the spent die BANKS to the Reserve",
+   "+3 Souls"
+  ]
+ },
+ {
+  "id": "bleed-for-it",
+  "name": "Bleed for It",
+  "image": "./assets/catalog/cards/dream-flutter.webp",
+  "pricing": null,
+  "face": {
+   "freeGlyph": "◉",
+   "freeKw": "MARK",
+   "freeVal": "1",
+   "paid": "bleed i2 d2 + re-roll every spent/dead die + RECOIL 3 (6/hit)."
+  },
+  "chips": [
+   {
+    "k": "Stance",
+    "v": "body"
+   },
+   {
+    "k": "Type",
+    "v": "paradox"
+   },
+   {
+    "k": "Tier",
+    "v": "2"
+   },
+   {
+    "k": "Target",
+    "v": "enemy"
+   },
+   {
+    "k": "Rank",
+    "v": "Thesis (uncommon)"
+   },
+   {
+    "k": "Kind",
+    "v": "spell"
+   },
+   {
+    "k": "Theme",
+    "v": "akrasia"
+   },
+   {
+    "k": "Keywords",
+    "v": "RECOIL · FALLEN · MARK · HEAL"
+   },
+   {
+    "k": "Source",
+    "v": "reward"
+   }
+  ],
+  "lines": [
+   "FREE — MARK 1 for 1 turn on yourself, then HEAL 2.",
+   "Applies Bleed ×2, 2t → enemy",
+   "re-roll every spent/dead die",
+   "RECOIL 3"
   ]
  },
  {
@@ -461,6 +463,61 @@
   ]
  },
  {
+  "id": "break-the-tempo",
+  "name": "Break the Tempo",
+  "image": "./assets/catalog/cards/freeze.webp",
+  "pricing": null,
+  "face": {
+   "freeGlyph": "◉",
+   "freeKw": "MARK",
+   "freeVal": "1",
+   "paid": "the spent die returns as WILD + STAGGER 1."
+  },
+  "chips": [
+   {
+    "k": "Stance",
+    "v": "mind"
+   },
+   {
+    "k": "Type",
+    "v": "fallacy"
+   },
+   {
+    "k": "Tier",
+    "v": "2"
+   },
+   {
+    "k": "Target",
+    "v": "enemy"
+   },
+   {
+    "k": "Rank",
+    "v": "Thesis (uncommon)"
+   },
+   {
+    "k": "Kind",
+    "v": "spell"
+   },
+   {
+    "k": "Theme",
+    "v": "control"
+   },
+   {
+    "k": "Keywords",
+    "v": "STAGGER · BACKFIRE · FORETELL · DRAW"
+   },
+   {
+    "k": "Source",
+    "v": "reward"
+   }
+  ],
+  "lines": [
+   "FREE — MARK 1 for 1 turn, then +1 Conviction.",
+   "the spent die returns as WILD",
+   "STAGGER 1"
+  ]
+ },
+ {
   "id": "brief-candle",
   "name": "Brief Candle",
   "image": "./assets/catalog/cards/burn.webp",
@@ -516,60 +573,6 @@
   "lines": [
    "FREE — gain 1 SOUL.",
    "Applies Bleed ×2, 1t → enemy"
-  ]
- },
- {
-  "id": "captive-audience",
-  "name": "Captive Audience",
-  "image": "./assets/catalog/cards/will-o-wisp.webp",
-  "pricing": "engine text — while you hold 4+ Premises the enemy stays marked (Aporia)",
-  "face": {
-   "freeGlyph": "☠",
-   "freeKw": "CURSE",
-   "freeVal": "3r",
-   "paid": "Hold 4+ PREMISEs: MARK the enemy +1 each turn (to 10). Costs 1 die. Attaches to the enemy."
-  },
-  "chips": [
-   {
-    "k": "Stance",
-    "v": "heart"
-   },
-   {
-    "k": "Type",
-    "v": "fallacy"
-   },
-   {
-    "k": "Tier",
-    "v": "2"
-   },
-   {
-    "k": "Target",
-    "v": "enemy"
-   },
-   {
-    "k": "Rank",
-    "v": "Aporia (rare)"
-   },
-   {
-    "k": "Kind",
-    "v": "disenchant"
-   },
-   {
-    "k": "Theme",
-    "v": "peroration"
-   },
-   {
-    "k": "Keywords",
-    "v": "PREMISE · DRAW · GUARD"
-   },
-   {
-    "k": "Source",
-    "v": "reward"
-   }
-  ],
-  "lines": [
-   "FREE — the printed passive for 3 rounds.",
-   "PAID (rest of combat) — Hold 4+ PREMISEs: MARK the enemy +1 each turn (to 10). (attaches to the enemy)"
   ]
  },
  {
@@ -630,6 +633,61 @@
    "Applies Poison ×1, 2t → enemy",
    "Applies Mark ×1, 2t → enemy",
    "OMEN — stake claim (window 1-2, ante 2◆ at window 1): on hit, Guard 4"
+  ]
+ },
+ {
+  "id": "change-of-heart",
+  "name": "Change of Heart",
+  "image": "./assets/catalog/cards/bright-sphere-yellow.webp",
+  "pricing": null,
+  "face": {
+   "freeGlyph": "∿",
+   "freeKw": "SWAY",
+   "freeVal": "2",
+   "paid": "re-roll every spent/dead die + SWAY 3."
+  },
+  "chips": [
+   {
+    "k": "Stance",
+    "v": "heart"
+   },
+   {
+    "k": "Type",
+    "v": "fallacy"
+   },
+   {
+    "k": "Tier",
+    "v": "2"
+   },
+   {
+    "k": "Target",
+    "v": "enemy"
+   },
+   {
+    "k": "Rank",
+    "v": "Thesis (uncommon)"
+   },
+   {
+    "k": "Kind",
+    "v": "spell"
+   },
+   {
+    "k": "Theme",
+    "v": "charm"
+   },
+   {
+    "k": "Keywords",
+    "v": "SWAY · RAPPORT · CLEANSE · HEAL"
+   },
+   {
+    "k": "Source",
+    "v": "reward"
+   }
+  ],
+  "lines": [
+   "FREE — SWAY 2.",
+   "re-roll every spent/dead die",
+   "SWAY 3"
   ]
  },
  {
@@ -980,8 +1038,7 @@
   "lines": [
    "FREE — FORETELL 1.",
    "RUPTURE 1 — its remaining damage lands now, +1 Soul",
-   "FORETELL 1",
-   "Die bonus: powering die mind fires a rider"
+   "FORETELL 1"
   ]
  },
  {
@@ -1041,60 +1098,6 @@
    "FREE — SWAY 1.",
    "Applies Rapport ×2, 2t → enemy",
    "heal 2"
-  ]
- },
- {
-  "id": "entropy-tax",
-  "name": "Entropy Tax",
-  "image": "./assets/catalog/cards/devil-book.webp",
-  "pricing": "engine text — every kindled/floating spend marks the enemy (Aporia)",
-  "face": {
-   "freeGlyph": "☠",
-   "freeKw": "CURSE",
-   "freeVal": "3r",
-   "paid": "A KINDLEd or FORGEd die powering a card MARKs the enemy (i1, once per play). Costs 1 die. Attaches to the enemy."
-  },
-  "chips": [
-   {
-    "k": "Stance",
-    "v": "mind"
-   },
-   {
-    "k": "Type",
-    "v": "paradox"
-   },
-   {
-    "k": "Tier",
-    "v": "2"
-   },
-   {
-    "k": "Target",
-    "v": "enemy"
-   },
-   {
-    "k": "Rank",
-    "v": "Aporia (rare)"
-   },
-   {
-    "k": "Kind",
-    "v": "disenchant"
-   },
-   {
-    "k": "Theme",
-    "v": "forge"
-   },
-   {
-    "k": "Keywords",
-    "v": "KINDLE · PIP · FORGE · DRAW"
-   },
-   {
-    "k": "Source",
-    "v": "reward"
-   }
-  ],
-  "lines": [
-   "FREE — the printed passive for 3 rounds.",
-   "PAID (rest of combat) — A KINDLEd or FORGEd die powering a card MARKs the enemy (i1, once per play). (attaches to the enemy)"
   ]
  },
  {
@@ -1276,60 +1279,6 @@
   ]
  },
  {
-  "id": "fated-course",
-  "name": "Fated Course",
-  "image": "./assets/catalog/cards/freeze.webp",
-  "pricing": "engine text — every hit omen marks the foe, rest of combat (Aporia)",
-  "face": {
-   "freeGlyph": "☠",
-   "freeKw": "CURSE",
-   "freeVal": "3r",
-   "paid": "Every OMEN that hits MARKs the foe (i1). Costs 1 die. Attaches to the enemy."
-  },
-  "chips": [
-   {
-    "k": "Stance",
-    "v": "mind"
-   },
-   {
-    "k": "Type",
-    "v": "paradox"
-   },
-   {
-    "k": "Tier",
-    "v": "2"
-   },
-   {
-    "k": "Target",
-    "v": "enemy"
-   },
-   {
-    "k": "Rank",
-    "v": "Aporia (rare)"
-   },
-   {
-    "k": "Kind",
-    "v": "disenchant"
-   },
-   {
-    "k": "Theme",
-    "v": "oracle"
-   },
-   {
-    "k": "Keywords",
-    "v": "FORETELL · OMEN · DRAW · RUPTURE"
-   },
-   {
-    "k": "Source",
-    "v": "reward"
-   }
-  ],
-  "lines": [
-   "FREE — the printed passive for 3 rounds.",
-   "PAID (rest of combat) — Every OMEN that hits MARKs the foe (i1). (attaches to the enemy)"
-  ]
- },
- {
   "id": "festering-argument",
   "name": "Festering Argument",
   "image": "./assets/catalog/cards/dream-flutter.webp",
@@ -1508,63 +1457,6 @@
   ]
  },
  {
-  "id": "heart-of-the-matter",
-  "name": "Heart of the Matter",
-  "image": "./assets/catalog/cards/bright-sphere-yellow.webp",
-  "pricing": "SWAY 6 x ECHO (engine echoFactor) + heal-4 rider (NOT echoed) + FREE",
-  "face": {
-   "freeGlyph": "∿",
-   "freeKw": "SWAY",
-   "freeVal": "1",
-   "paid": "SWAY 6 + ECHO + heal 4."
-  },
-  "chips": [
-   {
-    "k": "Stance",
-    "v": "heart"
-   },
-   {
-    "k": "Type",
-    "v": "fallacy"
-   },
-   {
-    "k": "Tier",
-    "v": "3"
-   },
-   {
-    "k": "Target",
-    "v": "enemy"
-   },
-   {
-    "k": "Rank",
-    "v": "Axiom (rare)"
-   },
-   {
-    "k": "Kind",
-    "v": "spell"
-   },
-   {
-    "k": "Theme",
-    "v": "charm"
-   },
-   {
-    "k": "Keywords",
-    "v": "SWAY · RAPPORT · CLEANSE · HEAL"
-   },
-   {
-    "k": "Source",
-    "v": "reward"
-   }
-  ],
-  "lines": [
-   "FREE — SWAY 1.",
-   "SWAY 6",
-   "ECHO",
-   "heal 4",
-   "Threshold: 5× heart die fires a rider"
-  ]
- },
- {
   "id": "hedgehogs-dilemma",
   "name": "Hedgehog's Dilemma",
   "image": "./assets/catalog/cards/guard-3.webp",
@@ -1620,6 +1512,61 @@
   "lines": [
    "FREE — the printed passive for 3 rounds.",
    "PAID (rest of combat) — Every THORNS reflection also MARKs the enemy (i1)."
+  ]
+ },
+ {
+  "id": "hold-the-line",
+  "name": "Hold the Line",
+  "image": "./assets/catalog/cards/guard-1.webp",
+  "pricing": null,
+  "face": {
+   "freeGlyph": "❖",
+   "freeKw": "GUARD",
+   "freeVal": "3",
+   "paid": "the spent die BANKS to the Reserve + GUARD 5 (persists)."
+  },
+  "chips": [
+   {
+    "k": "Stance",
+    "v": "body"
+   },
+   {
+    "k": "Type",
+    "v": "paradox"
+   },
+   {
+    "k": "Tier",
+    "v": "1"
+   },
+   {
+    "k": "Target",
+    "v": "self"
+   },
+   {
+    "k": "Rank",
+    "v": "Lemma (common)"
+   },
+   {
+    "k": "Kind",
+    "v": "spell"
+   },
+   {
+    "k": "Theme",
+    "v": "bulwark"
+   },
+   {
+    "k": "Keywords",
+    "v": "THORNS · RIPOSTE · GUARD · HEAL"
+   },
+   {
+    "k": "Source",
+    "v": "reward"
+   }
+  ],
+  "lines": [
+   "FREE — GUARD 3 (persists).",
+   "the spent die BANKS to the Reserve",
+   "GUARD 5 (persists)"
   ]
  },
  {
@@ -1681,6 +1628,60 @@
   ]
  },
  {
+  "id": "forge-masters-stamp",
+  "name": "Master's Stamp",
+  "image": "./assets/catalog/cards/devil-book.webp",
+  "pricing": "engine text — amplifies the fired SPECIAL payload (+1◆), min-4 ≈ 4",
+  "face": {
+   "freeGlyph": "❖",
+   "freeKw": "ENCHANT",
+   "freeVal": "3r",
+   "paid": "Every SPECIAL die you fire grants +1 Conviction."
+  },
+  "chips": [
+   {
+    "k": "Stance",
+    "v": "mind"
+   },
+   {
+    "k": "Type",
+    "v": "paradox"
+   },
+   {
+    "k": "Tier",
+    "v": "2"
+   },
+   {
+    "k": "Target",
+    "v": "self"
+   },
+   {
+    "k": "Rank",
+    "v": "Axiom (rare)"
+   },
+   {
+    "k": "Kind",
+    "v": "enchantment"
+   },
+   {
+    "k": "Theme",
+    "v": "forge"
+   },
+   {
+    "k": "Keywords",
+    "v": "KINDLE · PIP · FORGE · DRAW"
+   },
+   {
+    "k": "Source",
+    "v": "reward"
+   }
+  ],
+  "lines": [
+   "FREE — the printed passive for 3 rounds.",
+   "PAID (rest of combat) — Every SPECIAL die you fire grants +1 Conviction."
+  ]
+ },
+ {
   "id": "measured-answer",
   "name": "Measured Answer",
   "image": "./assets/catalog/cards/guard-3.webp",
@@ -1737,60 +1738,6 @@
    "FREE — GUARD 3 (persists).",
    "Guard 6",
    "RIPOSTE 3 (parry 2)"
-  ]
- },
- {
-  "id": "memento-mori",
-  "name": "Memento Mori",
-  "image": "./assets/catalog/cards/meat-pecker.webp",
-  "pricing": "mark i2 d1 (2, unresisted) + its expiry Soul (0.75) + FREE souls 2",
-  "face": {
-   "freeGlyph": "✦",
-   "freeKw": "SOUL",
-   "freeVal": "2",
-   "paid": "mark i2 d1."
-  },
-  "chips": [
-   {
-    "k": "Stance",
-    "v": "mind"
-   },
-   {
-    "k": "Type",
-    "v": "paradox"
-   },
-   {
-    "k": "Tier",
-    "v": "1"
-   },
-   {
-    "k": "Target",
-    "v": "enemy"
-   },
-   {
-    "k": "Rank",
-    "v": "Lemma (common)"
-   },
-   {
-    "k": "Kind",
-    "v": "spell"
-   },
-   {
-    "k": "Theme",
-    "v": "harvest"
-   },
-   {
-    "k": "Keywords",
-    "v": "SOUL · REAP · MARK · TICK"
-   },
-   {
-    "k": "Source",
-    "v": "reward"
-   }
-  ],
-  "lines": [
-   "FREE — gain 2 SOULS.",
-   "Applies Mark ×2, 1t → enemy"
   ]
  },
  {
@@ -2269,60 +2216,6 @@
   ]
  },
  {
-  "id": "practiced-cadence",
-  "name": "Practiced Cadence",
-  "image": "./assets/catalog/cards/light-ring.webp",
-  "pricing": "persistent +1 Premise on the first card each turn ≈ 0.8 × ~10 turns, min-4 law ≈ 12 → Axiom",
-  "face": {
-   "freeGlyph": "❖",
-   "freeKw": "ENCHANT",
-   "freeVal": "3r",
-   "paid": "+1 PREMISE on your first card each turn."
-  },
-  "chips": [
-   {
-    "k": "Stance",
-    "v": "heart"
-   },
-   {
-    "k": "Type",
-    "v": "fallacy"
-   },
-   {
-    "k": "Tier",
-    "v": "2"
-   },
-   {
-    "k": "Target",
-    "v": "self"
-   },
-   {
-    "k": "Rank",
-    "v": "Axiom (rare)"
-   },
-   {
-    "k": "Kind",
-    "v": "enchantment"
-   },
-   {
-    "k": "Theme",
-    "v": "peroration"
-   },
-   {
-    "k": "Keywords",
-    "v": "PREMISE · DRAW · GUARD"
-   },
-   {
-    "k": "Source",
-    "v": "reward"
-   }
-  ],
-  "lines": [
-   "FREE — the printed passive for 3 rounds.",
-   "PAID (rest of combat) — +1 PREMISE on your first card each turn."
-  ]
- },
- {
   "id": "prophecy-fulfilled",
   "name": "Prophecy Fulfilled",
   "image": "./assets/catalog/cards/god-eye-silver.webp",
@@ -2439,6 +2332,61 @@
   ]
  },
  {
+  "id": "recurring-symptom",
+  "name": "Recurring Symptom",
+  "image": "./assets/catalog/cards/bleed.webp",
+  "pricing": null,
+  "face": {
+   "freeGlyph": "◉",
+   "freeKw": "MARK",
+   "freeVal": "1",
+   "paid": "poison i1 d2 + re-roll every spent/dead die (2/play)."
+  },
+  "chips": [
+   {
+    "k": "Stance",
+    "v": "body"
+   },
+   {
+    "k": "Type",
+    "v": "fallacy"
+   },
+   {
+    "k": "Tier",
+    "v": "2"
+   },
+   {
+    "k": "Target",
+    "v": "enemy"
+   },
+   {
+    "k": "Rank",
+    "v": "Thesis (uncommon)"
+   },
+   {
+    "k": "Kind",
+    "v": "spell"
+   },
+   {
+    "k": "Theme",
+    "v": "affliction"
+   },
+   {
+    "k": "Keywords",
+    "v": "POISON · BLEED · MARK · TICK · RUPTURE"
+   },
+   {
+    "k": "Source",
+    "v": "reward"
+   }
+  ],
+  "lines": [
+   "FREE — MARK 1 for 2 turns.",
+   "Applies Poison ×1, 2t → enemy",
+   "re-roll every spent/dead die"
+  ]
+ },
+ {
   "id": "red-herring",
   "name": "Red Herring",
   "image": "./assets/catalog/cards/will-o-wisp.webp",
@@ -2493,8 +2441,7 @@
   ],
   "lines": [
    "FREE — reveal the next stance.",
-   "Applies Backfire ×2, 2t → enemy",
-   "Die bonus: powering die mind fires a rider"
+   "Applies Backfire ×2, 2t → enemy"
   ]
  },
  {
@@ -2673,6 +2620,171 @@
   "lines": [
    "FREE — the printed passive for 3 rounds.",
    "PAID (rest of combat) — Your first spell each turn gains ECHO."
+  ]
+ },
+ {
+  "id": "restate-the-point",
+  "name": "Restate the Point",
+  "image": "./assets/catalog/cards/light-ring.webp",
+  "pricing": null,
+  "face": {
+   "freeGlyph": "❖",
+   "freeKw": "GUARD",
+   "freeVal": "1",
+   "paid": "refresh the spent die + +3 Premises."
+  },
+  "chips": [
+   {
+    "k": "Stance",
+    "v": "heart"
+   },
+   {
+    "k": "Type",
+    "v": "fallacy"
+   },
+   {
+    "k": "Tier",
+    "v": "2"
+   },
+   {
+    "k": "Target",
+    "v": "self"
+   },
+   {
+    "k": "Rank",
+    "v": "Thesis (uncommon)"
+   },
+   {
+    "k": "Kind",
+    "v": "spell"
+   },
+   {
+    "k": "Theme",
+    "v": "peroration"
+   },
+   {
+    "k": "Keywords",
+    "v": "PREMISE · DRAW · GUARD"
+   },
+   {
+    "k": "Source",
+    "v": "reward"
+   }
+  ],
+  "lines": [
+   "FREE — GUARD 1, then gain 2 PREMISES.",
+   "refresh the spent die",
+   "+3 Premises"
+  ]
+ },
+ {
+  "id": "second-sight",
+  "name": "Second Sight",
+  "image": "./assets/catalog/cards/god-eye-silver.webp",
+  "pricing": null,
+  "face": {
+   "freeGlyph": "◉",
+   "freeKw": "FORETELL",
+   "freeVal": "1",
+   "paid": "the spent die returns as WILD + FORETELL 2."
+  },
+  "chips": [
+   {
+    "k": "Stance",
+    "v": "mind"
+   },
+   {
+    "k": "Type",
+    "v": "paradox"
+   },
+   {
+    "k": "Tier",
+    "v": "2"
+   },
+   {
+    "k": "Target",
+    "v": "self"
+   },
+   {
+    "k": "Rank",
+    "v": "Thesis (uncommon)"
+   },
+   {
+    "k": "Kind",
+    "v": "spell"
+   },
+   {
+    "k": "Theme",
+    "v": "oracle"
+   },
+   {
+    "k": "Keywords",
+    "v": "FORETELL · OMEN · DRAW · RUPTURE"
+   },
+   {
+    "k": "Source",
+    "v": "reward"
+   }
+  ],
+  "lines": [
+   "FREE — FORETELL 1, then +1 Conviction.",
+   "the spent die returns as WILD",
+   "FORETELL 2"
+  ]
+ },
+ {
+  "id": "second-take",
+  "name": "Second Take",
+  "image": "./assets/catalog/cards/confuse.webp",
+  "pricing": null,
+  "face": {
+   "freeGlyph": "⁇",
+   "freeKw": "MILL",
+   "freeVal": "1",
+   "paid": "mark i1 d2 + refresh the spent die."
+  },
+  "chips": [
+   {
+    "k": "Stance",
+    "v": "mind"
+   },
+   {
+    "k": "Type",
+    "v": "paradox"
+   },
+   {
+    "k": "Tier",
+    "v": "1"
+   },
+   {
+    "k": "Target",
+    "v": "enemy"
+   },
+   {
+    "k": "Rank",
+    "v": "Lemma (common)"
+   },
+   {
+    "k": "Kind",
+    "v": "spell"
+   },
+   {
+    "k": "Theme",
+    "v": "echo"
+   },
+   {
+    "k": "Keywords",
+    "v": "ECHO · RECALL · DRAW"
+   },
+   {
+    "k": "Source",
+    "v": "reward"
+   }
+  ],
+  "lines": [
+   "FREE — MILL 1.",
+   "Applies Mark ×1, 2t → enemy",
+   "refresh the spent die"
   ]
  },
  {
@@ -2907,8 +3019,7 @@
   "lines": [
    "FREE — +1 PIP to every Reserve die.",
    "Applies Kindling Ember ×1, 3t → enemy",
-   "KINDLE (mind)",
-   "Die bonus: powering die mind fires a rider"
+   "KINDLE (mind)"
   ]
  },
  {
@@ -3024,63 +3135,7 @@
   ],
   "lines": [
    "FREE — RAPPORT 1 for 2 turns.",
-   "SWAY 3",
-   "Die bonus: powering die heart fires a rider"
-  ]
- },
- {
-  "id": "straw-mans-jab",
-  "name": "Straw Man's Jab",
-  "image": "./assets/catalog/cards/bleed.webp",
-  "pricing": null,
-  "face": {
-   "freeGlyph": "◉",
-   "freeKw": "MARK",
-   "freeVal": "1",
-   "paid": "bleed i2 d2 (6/hit)."
-  },
-  "chips": [
-   {
-    "k": "Stance",
-    "v": "body"
-   },
-   {
-    "k": "Type",
-    "v": "fallacy"
-   },
-   {
-    "k": "Tier",
-    "v": "1"
-   },
-   {
-    "k": "Target",
-    "v": "enemy"
-   },
-   {
-    "k": "Rank",
-    "v": "Lemma (common)"
-   },
-   {
-    "k": "Kind",
-    "v": "spell"
-   },
-   {
-    "k": "Theme",
-    "v": "affliction"
-   },
-   {
-    "k": "Keywords",
-    "v": "POISON · BLEED · MARK · TICK · RUPTURE"
-   },
-   {
-    "k": "Source",
-    "v": "reward"
-   }
-  ],
-  "lines": [
-   "FREE — MARK 1 for 1 turn.",
-   "Applies Bleed ×2, 2t → enemy",
-   "Die bonus: powering die body fires a rider"
+   "SWAY 3"
   ]
  },
  {
@@ -3670,60 +3725,6 @@
   ]
  },
  {
-  "id": "the-tithe",
-  "name": "The Tithe",
-  "image": "./assets/catalog/cards/devil-book.webp",
-  "pricing": "engine text — enemy afflictions expire 1 turn sooner (faster Soul churn) (Aporia)",
-  "face": {
-   "freeGlyph": "☠",
-   "freeKw": "CURSE",
-   "freeVal": "3r",
-   "paid": "Enemy afflictions expire one turn sooner (faster SOUL churn). Costs 1 die. Attaches to the enemy."
-  },
-  "chips": [
-   {
-    "k": "Stance",
-    "v": "mind"
-   },
-   {
-    "k": "Type",
-    "v": "fallacy"
-   },
-   {
-    "k": "Tier",
-    "v": "2"
-   },
-   {
-    "k": "Target",
-    "v": "enemy"
-   },
-   {
-    "k": "Rank",
-    "v": "Aporia (rare)"
-   },
-   {
-    "k": "Kind",
-    "v": "disenchant"
-   },
-   {
-    "k": "Theme",
-    "v": "harvest"
-   },
-   {
-    "k": "Keywords",
-    "v": "SOUL · REAP · MARK · TICK"
-   },
-   {
-    "k": "Source",
-    "v": "reward"
-   }
-  ],
-  "lines": [
-   "FREE — the printed passive for 3 rounds.",
-   "PAID (rest of combat) — Enemy afflictions expire one turn sooner (faster SOUL churn). (attaches to the enemy)"
-  ]
- },
- {
   "id": "tu-quoque",
   "name": "Tu Quoque",
   "image": "./assets/catalog/cards/yggdrasil.webp",
@@ -3778,8 +3779,7 @@
   ],
   "lines": [
    "FREE — GUARD 2 (persists).",
-   "Applies Thorns ×3, 2t → self",
-   "Die bonus: powering die heart fires a rider"
+   "Applies Thorns ×3, 2t → self"
   ]
  },
  {

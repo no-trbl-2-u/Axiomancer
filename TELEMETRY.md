@@ -71,3 +71,5 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-07-19T06:12:19Z | slash-prompt | /triage | unknown | user/ci | /triage 132 |
 | 2026-07-19T06:12:21Z | skill | triage | unknown | main | args: 132 |
 | 2026-07-19T06:16:46Z | slash-prompt | /triage | unknown | user/ci | /triage 132 |
+| 2026-07-19T06:24:25Z | slash-prompt | /digest | unknown | user/ci | /digest |
+| 2026-07-19T06:24:27Z | skill | digest | unknown | main | - |
