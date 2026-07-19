@@ -803,7 +803,7 @@ supersession collisions before any engine work.
       hidden. `fix(mobile): flag-on paid-play UI commit` — D7's flag-flip is no
       longer gated on it.
 
-- [ ] Phase D-FLIP — Upgradeable-Dice flag ON by default. OWNER-DIRECTED
+- [blocked: superseded by unmerged D10-D12 full-flag-teardown decision — needs /oversight 2026-07-19] Phase D-FLIP — Upgradeable-Dice flag ON by default. OWNER-DIRECTED
       via /oversight 2026-07-18, explicitly overriding D7's DO-NOT-FLIP
       recommendation: the owner accepts the measured regressions (early
       −15, statusEngagement −9, breaks 2:1 over surges) as transitional
@@ -819,6 +819,27 @@ supersession collisions before any engine work.
       byte-identical" as the default path. Full three-workspace verify
       (public-surface coupling). No tuning in this phase — numbers move
       at D8's re-test. Deps: D7.
+      **BLOCKED 2026-07-19 (ship-a-phase, /march tick):** a prior session
+      (branch `origin/claude/dice-mechanics-flag-removal-cc7a6b`, commits
+      `49a3a372`/`bae870b4`/`cb267dc6`, 2026-07-18) already decided the
+      owner wants the full flag REMOVED, not just defaulted — new phases
+      D10 (mechanics engine collapse) / D11 (mobile) / D12 (barrel +
+      flag-module + dead-symbol removal), sequenced after D8, before D9 —
+      and filed an audit finding recommending `/oversight` mark D-FLIP
+      `[skipped]`. That branch never merged (and has since diverged too
+      far from `main` to cherry-pick safely — it predates the swap-pool
+      library work). D8 already shipped without D-FLIP preceding it, and
+      the app layer already boots flag-on for every real build
+      (`axiomancer-mobile/state/combat/flags.ts`, commit `ae51ab3d`,
+      2026-07-18) — only the mechanics-package default
+      (`isUpgradeableDiceEnabled()`) is still OFF, by deliberate design
+      (tests/sims toggle both models per-suite). Only `/oversight` may
+      set `[skipped]`; ship-a-phase does not have that authority, so this
+      row is `[blocked]` instead pending a human call: skip D-FLIP and
+      adopt the D10-D12 rows (re-authored fresh against current `main`,
+      not cherry-picked from the stale branch), or affirm D-FLIP's
+      original narrower scope still stands. See `plan/AUDIT.md` "Phase
+      D-FLIP is superseded by the D10-D12 dice-flag teardown".
 - [x] Phase D8 — One dice valve in every starter preset. (shipped 10ec4fe8,
       2026-07-18 — all ten themed valves passed the court, no fallback needed;
       curve red at mid/late stays the next bounded tuning phase.) Under the

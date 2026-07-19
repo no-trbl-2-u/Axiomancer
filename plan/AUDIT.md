@@ -14,6 +14,36 @@
 
 ## Pending
 
+### Phase D-FLIP is superseded by the D10-D12 dice-flag teardown — `/oversight` skip it
+- category: divergence
+- impact: 5
+- ease: 8
+- detail: filed 2026-07-19 (`/march` -> `/ship-a-phase` tick; recovered
+  from an unmerged branch's residue, `origin/claude/dice-mechanics-flag-
+  removal-cc7a6b`, commits `49a3a372`/`bae870b4`/`cb267dc6`, 2026-07-18).
+  A prior session decided the owner wants a full flag teardown ("go all
+  in on the dice mechanics, remove the feature flag") -> new phases
+  D10 (mechanics engine collapse) / D11 (mobile) / D12 (barrel + flag-
+  module + dead-symbol removal), sequenced after D8, before D9. D10
+  removes `isUpgradeableDiceEnabled()` from the engine entirely, which
+  ABSORBS D-FLIP's reversible default-flip permanently — D-FLIP's
+  original scope is throwaway work. That branch never merged and has
+  since diverged too far from `main` to cherry-pick safely (predates
+  the swap-pool card-library work), so the plan rows and brief exist
+  only on the stale branch, not on `main`. Two coupled drifts:
+  (1) `plan/steps/01_build_plan.md` Phase D-FLIP is now marked
+  `[blocked: ... needs /oversight 2026-07-19]` (ship-a-phase does not
+  have authority to set `[skipped]`); (2) shipped-vs-queue mismatch —
+  THE FLIP already made every real app build boot Upgradeable Dice ON
+  (`axiomancer-mobile/state/combat/flags.ts`, commit `ae51ab3d`,
+  2026-07-18) while the mechanics-package default stays OFF by design
+  (tests/sims toggle both models per-suite) and D8 already shipped on
+  top of that live state without D-FLIP formally preceding it.
+- next: /oversight — confirm skip D-FLIP + re-author D10-D12 fresh
+  against current `main` (do not cherry-pick the stale branch), or
+  affirm D-FLIP's original narrower scope (flip the mechanics-package
+  default only) still stands.
+
 ### [user-issue #129] [HIGH] Log T's provenance for every Hermes-originated queue change
 - category: external-issue
 - impact: 6
