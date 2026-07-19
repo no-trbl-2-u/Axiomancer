@@ -894,6 +894,33 @@ order):**
       Deps: none (independent of the D-sequence). Brief:
       `plan/phases/phase_37_retire_fallacy_paradox_category.md`.
 
+**Loop infra (promoted via issue-triage 2026-07-19, T-corrected — issue
+#132 originally read as a digest-entry ask; the body was edited same-day
+to clarify it's the build Action itself):**
+
+- [ ] Phase 38 — `devlog-build` GitHub Action (manual dispatch, no Claude
+      skill involved). New workflow (sibling to `.github/workflows/night.yml`
+      but plain `npm`, not `_claude-skill.yml`): `workflow_dispatch` trigger
+      only; Node 22 setup + `npm ci`; run `npm run site:build` (chains
+      `catalog` + `devlog:build`, confirmed present in root `package.json`);
+      validate the generated output exists (non-empty `devlog/` tree, e.g.
+      `index.html` present) before proceeding; `actions/upload-artifact` the
+      `devlog/` directory; commit + push any changed generated files to
+      `main` guarded by a `git status --porcelain` check so an unchanged
+      tree produces no commit (no existing scripted precedent for this
+      guard in-repo — `skills/digest.md`'s devlog commit is agent-decided,
+      not script-gated — so this is new, not a mirror).
+      `concurrency: group: nexus-loop` (same group as the rest of the loop)
+      so it can't race `night.yml`/`march.yml` pushes to `main`; the commit
+      step must NOT re-trigger itself (workflow is `workflow_dispatch`-only,
+      no `push:` trigger, so this is structural, not a guard to add).
+      Acceptance per issue #132: workflow visible in the Actions tab, a
+      manual run greens on `main`, both catalog + DevLog builders execute,
+      `devlog/` downloadable as an artifact, generated-file changes commit
+      cleanly with no recursive run. Harness-only; no engine/mechanics
+      change — source: issue #132 (re-triaged 2026-07-19 after the owner
+      corrected the issue body).
+
 > **After the queue drains:** `/march` transitions to `/iterate`
 > — draining `plan/AUDIT.md` + `plan/CRITIQUE.md`, doc-drift,
 > `as any` clusters, hex-literal -> AXM migration, a11y, and

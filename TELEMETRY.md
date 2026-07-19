@@ -70,3 +70,4 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-07-19T03:28:30Z | subagent | card-expert | claude-fable-5 | main | Run deck-tuning swap-pool measurement pass |
 | 2026-07-19T06:12:19Z | slash-prompt | /triage | unknown | user/ci | /triage 132 |
 | 2026-07-19T06:12:21Z | skill | triage | unknown | main | args: 132 |
+| 2026-07-19T06:16:46Z | slash-prompt | /triage | unknown | user/ci | /triage 132 |
