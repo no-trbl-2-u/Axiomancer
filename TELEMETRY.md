@@ -71,3 +71,5 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-07-19T06:12:19Z | slash-prompt | /triage | unknown | user/ci | /triage 132 |
 | 2026-07-19T06:12:21Z | skill | triage | unknown | main | args: 132 |
 | 2026-07-19T06:16:46Z | slash-prompt | /triage | unknown | user/ci | /triage 132 |
+| 2026-07-19T06:27:05Z | slash-prompt | /deck-tuning | unknown | user/ci | /deck-tuning --preset=erosion --runs=100 --cross-theme-swaps=false |
+| 2026-07-19T06:27:07Z | skill | deck-tuning | unknown | main | args: --preset=erosion --runs=100 --cross-theme-swaps=false |
