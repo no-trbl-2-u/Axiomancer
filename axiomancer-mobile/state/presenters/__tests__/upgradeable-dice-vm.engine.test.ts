@@ -171,6 +171,55 @@ describe('Press Fate VM (flag-on reroll gate)', () => {
     });
 });
 
+describe('Press Fate signature rune (flag-on reshape — owner call 2026-07-19)', () => {
+    // Press Fate is cast from the rune column like any signature; flag-on its
+    // rune must present the spec-33 truth (1◆, the FULL firing gate + reason),
+    // never the printed legacy cost the engine no longer charges.
+    function stateWithRune(): CombatEncounterState {
+        setUpgradeableDice(true);
+        const s = openEncounter();
+        s.dice = [facedDie('body', 'miss'), facedDie('mind', 'mana')];
+        s.signatures = ['sig-press-the-point'];
+        s.conviction = 3;
+        s.pressFateRound = undefined;
+        return s;
+    }
+
+    it('flag-on: the rune costs 1◆ and is castable when the full gate passes', () => {
+        const rune = buildCombatViewModel(stateWithRune()).signatures.find(x => x.id === 'sig-press-the-point')!;
+        expect(rune.cost).toBe(1);
+        expect(rune.affordable).toBe(true);
+        expect(rune.reason).toBeNull();
+        expect(rune.description).toMatch(/re-roll every miss/i);
+    });
+
+    it('flag-on: the rune refuses (with the reason) once pressed this round', () => {
+        const s = stateWithRune();
+        s.pressFateRound = s.round;
+        const rune = buildCombatViewModel(s).signatures.find(x => x.id === 'sig-press-the-point')!;
+        expect(rune.affordable).toBe(false);
+        expect(rune.reason).toMatch(/already pressed/i);
+    });
+
+    it('flag-on: the rune refuses (with the reason) when no live miss exists', () => {
+        const s = stateWithRune();
+        s.dice = [facedDie('body', 'mana')];
+        const rune = buildCombatViewModel(s).signatures.find(x => x.id === 'sig-press-the-point')!;
+        expect(rune.affordable).toBe(false);
+        expect(rune.reason).toMatch(/no miss/i);
+    });
+
+    it('flag-off: the rune keeps its printed cost + description', () => {
+        const s = openEncounter(); // flag stays OFF
+        s.signatures = ['sig-press-the-point'];
+        s.conviction = 4;
+        const rune = buildCombatViewModel(s).signatures.find(x => x.id === 'sig-press-the-point')!;
+        expect(rune.cost).toBe(4);
+        expect(rune.affordable).toBe(true);
+        expect(rune.description).toMatch(/spent and blocked/i);
+    });
+});
+
 describe('inspect modal — SPECIAL die-gear gloss (owner playtest 2026-07-18)', () => {
     it('never rides a card inspect unprompted — a die-face rule is not card vocabulary', () => {
         // The D6a always-on SPECIAL push is retired: the gloss surfaces only

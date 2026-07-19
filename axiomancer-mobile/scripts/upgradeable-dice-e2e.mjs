@@ -259,23 +259,22 @@ async function assertFlagOnBoard(page, { capture }) {
         note('stance-check telegraph (combat-intent-stance-check) not visible on the opening phase')
     }
 
-    // ── STEP 5: Press Fate renders its enabled/disabled + reason state ──
-    // Adaptive: the control is present only when the player carries a reroll
-    // signature (the "Gambler's Knot" relic). The combat sandbox does not equip
-    // it, so absence here is correct product gating, not a bug — NOTE + skip.
-    const pf = page.getByTestId('combat-press-fate')
+    // ── STEP 5: Press Fate's signature rune renders its enabled/disabled state ──
+    // Press Fate lives in the signature rune column (owner call 2026-07-19 — no
+    // separate board control). Adaptive: the rune is present only when the
+    // player carries the reroll signature (the "Gambler's Knot" relic). The
+    // combat sandbox does not equip it, so absence is product gating — NOTE + skip.
+    const pf = page.getByTestId('combat-signature-sig-press-the-point')
     const pfPresent = await has(pf)
     if (pfPresent) {
         const pfLabel = await pf.getAttribute('aria-label').catch(() => '')
         const pfDisabled = (await pf.getAttribute('aria-disabled').catch(() => null)) === 'true'
-        log(`step 5: Press Fate rendered — ${pfDisabled ? 'DISABLED' : 'ENABLED'} · "${(pfLabel || '').slice(0, 90)}"`)
-        if (pfDisabled) {
-            const reason = await text(page.getByTestId('combat-press-fate-reason'))
-            if (!reason) note('Press Fate is disabled but showed no reason line')
-            else log(`step 5: disabled reason surfaced loudly — "${reason}"`)
+        log(`step 5: Press Fate rune rendered — ${pfDisabled ? 'DISABLED' : 'ENABLED'} · "${(pfLabel || '').slice(0, 90)}"`)
+        if (pfDisabled && !/need|already pressed|no miss/i.test(pfLabel || '')) {
+            note('Press Fate rune is disabled but its a11y label carries no refusal reason')
         }
     } else {
-        note('Press Fate control not present — it is relic-gated (Gambler\'s Knot → sig-press-the-point) '
+        note('Press Fate rune not present — it is relic-gated (Gambler\'s Knot → sig-press-the-point) '
             + 'and the combat sandbox equips no relics; step 5 (enabled/disabled/reroll) is unreachable here without a relic-equip test seam')
     }
 
@@ -323,7 +322,11 @@ async function assertSwayCommit(page) {
         const m = label.match(/,\s*(heart|body|mind)\s+card/i)
         return { uid: id, stance: m ? m[1].toLowerCase() : null }
     }))
-    const soft = hand.find((c) => c.stance === 'heart')
+    // Prefer the LAST heart card in fan order: the rightmost copy sits on top
+    // of the fan z-order with its centre clear of the player medallion (the
+    // corner medallions deliberately float ABOVE the fan ends — a leftmost
+    // pick puts the pointer-down on the medallion and the pan never starts).
+    const soft = [...hand].reverse().find((c) => c.stance === 'heart')
     if (!soft) fail('SWAY-commit guard: no heart card (Soft Word) in the opening hand this seed')
 
     // A usable heart die (or a wild, which powers any color) in the tray.

@@ -44,7 +44,7 @@ import { FONTS } from '@/theme/axm';
 import { makeStyles, usePalette } from '@/theme/runtime';
 import type {
     CombatViewModel, CombatCardVM, CombatDieVM,
-    CombatSignatureVM, CombatEffectChipVM, CombatPerorationVM, CombatPressFateVM,
+    CombatSignatureVM, CombatEffectChipVM, CombatPerorationVM,
     CombatMomentumV2VM, CombatStanceChipVM,
 } from '@/state/presenters/combat-encounter.engine';
 import { armedReadValue, dieCanPowerCardVM, STANCE_COLORS } from '@/state/presenters/combat-encounter.engine';
@@ -187,7 +187,7 @@ function SignatureColumn({ conviction, signatures, onCast, onInfo }: {
                     testID={`combat-signature-${s.id}`}
                     accessibilityRole="button"
                     accessibilityState={{ disabled: !s.affordable }}
-                    accessibilityLabel={`${s.name}, costs ${s.cost} conviction. ${s.description}${s.affordable ? '' : ' — not enough conviction'}`}
+                    accessibilityLabel={`${s.name}, costs ${s.cost} conviction. ${s.description}${s.affordable ? '' : ` — ${s.reason ?? 'not enough conviction'}`}`}
                     accessibilityHint="Long press for details"
                     style={[styles.sigRune, { borderColor: s.affordable ? AXM.sulfur : AXM.ash, opacity: s.affordable ? 1 : 0.55 }]}
                 >
@@ -202,6 +202,9 @@ function SignatureColumn({ conviction, signatures, onCast, onInfo }: {
 }
 
 // ── Dice row (free-floating gems above the hand) ─────────────────────────────
+
+// Owner declutter pass 2026-07-19: the 54pt cube crowded the board — shave ~1/8.
+const TRAY_DIE_SIZE = 47;
 
 function DiceRow({
     vm, dieGesture, draggingDieId, assignedDieIds, onFateTap,
@@ -287,7 +290,7 @@ function DiceRow({
                         {ritual && plansById[die.id] ? (
                             <RollingDie
                                 die={die}
-                                size={54}
+                                size={TRAY_DIE_SIZE}
                                 dimmed={dieDimmed}
                                 mode={mode}
                                 plan={plansById[die.id]}
@@ -295,7 +298,7 @@ function DiceRow({
                                 onTumbleChange={onTumbleChange}
                             />
                         ) : (
-                            <CombatDie die={die} size={54} dimmed={dieDimmed} />
+                            <CombatDie die={die} size={TRAY_DIE_SIZE} dimmed={dieDimmed} />
                         )}
                         {die.reserve ? (
                             <Text style={[styles.dieConv, { color: AXM.sulfur }]} testID={`combat-reserve-${die.id}`}>
@@ -352,44 +355,6 @@ function DiceRow({
                 />
             ) : null}
         </View>
-    );
-}
-
-// ── Press Fate (spec 33 §4 — flag-on reroll of all miss faces) ───────────────
-
-/**
- * The 1◆ Press Fate control: reroll every live miss face, once per round.
- * Owner-UI doctrine — never hidden when it can't fire: the button renders
- * DISABLED with the refusal reason (not enough ◆ / already pressed / no miss
- * dice), so the illegal action is refused LOUDLY. Casts the reroll signature
- * the presenter resolved (`pressFate.signatureId`).
- */
-function PressFateControl({ pressFate, onCast }: { pressFate: CombatPressFateVM; onCast: (id: string) => void }) {
-    const AXM = usePalette();
-    const styles = useStyles();
-    const { enabled, reason, cost, signatureId } = pressFate;
-    return (
-        <Pressable
-            onPress={() => {
-                if (!enabled) return;
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => undefined);
-                onCast(signatureId);
-            }}
-            testID="combat-press-fate"
-            accessibilityRole="button"
-            accessibilityState={{ disabled: !enabled }}
-            accessibilityLabel={`Press Fate — re-roll all miss dice for ${cost} Conviction${enabled ? '' : `. ${reason}`}`}
-            style={[styles.pressFate, { borderColor: enabled ? AXM.sulfur : AXM.ash, opacity: enabled ? 1 : 0.55 }]}
-        >
-            <Text style={[styles.pressFateText, { color: enabled ? AXM.sulfur : AXM.bone }]} allowFontScaling={false}>
-                ◆{cost} PRESS FATE
-            </Text>
-            {!enabled && reason ? (
-                <Text style={[styles.pressFateReason, { color: AXM.ash }]} numberOfLines={1} testID="combat-press-fate-reason">{reason}</Text>
-            ) : (
-                <Text style={[styles.pressFateReason, { color: AXM.bone }]} numberOfLines={1}>re-roll all miss dice</Text>
-            )}
-        </Pressable>
     );
 }
 
@@ -456,9 +421,10 @@ const StagedCard = React.memo(function StagedCard({
     const popStyle = useAnimatedStyle(() => ({ transform: [{ scale: pop.value }, { translateX: shake.value }] }));
     const armed = assignedDie !== null;
     const readColor = armed ? (READ_ACCENT[read] ?? AXM.bone) : AXM.bone;
-    // Option A rail needs width: staged faces track the hand-card proportion.
-    const cardW = compact ? 100 : 122;
-    const cardH = compact ? 147 : 179;
+    // Option A rail needs width: staged faces track the hand-card proportion
+    // (shaved with it in the 2026-07-19 declutter pass).
+    const cardW = compact ? 92 : 112;
+    const cardH = compact ? 135 : 164;
     // The keyword line shows the POWER value; for read-dependent kinds (guard) it is
     // recomputed live at the known read so the staged number is exact at commit.
     let heroOverride: string | undefined;
@@ -645,7 +611,7 @@ const CHAIN_GLYPHS: Record<string, string> = { heart: '♥', body: '⚡', mind: 
 function MomentumChainChip({ vm, onPress }: { vm: CombatMomentumV2VM; onPress?: () => void }) {
     const AXM = usePalette();
     const styles = useStyles();
-    const { color, length, surgeAt, next, broke, surged, colorHex, a11y } = vm;
+    const { color, length, chain, surgeAt, next, broke, surged, a11y } = vm;
     return (
         <Pressable
             style={styles.wheelRow}
@@ -668,17 +634,22 @@ function MomentumChainChip({ vm, onPress }: { vm: CombatMomentumV2VM; onPress?: 
             ) : (
                 <>
                     {Array.from({ length: surgeAt }, (_u, i) => {
-                        const filled = i < length;
+                        // Each lit node keeps the stance that was ACTUALLY played
+                        // (vm.chain, play order) — a heart→body chain reads ♥ ⚡,
+                        // never two copies of the chain's current color.
+                        const link = chain[i];
+                        const filled = link !== undefined;
+                        const nodeHex = link ? STANCE_COLORS[link] : AXM.ash;
                         return (
                             <View
                                 key={i}
                                 style={[
                                     styles.chainNode,
-                                    { borderColor: filled ? colorHex : AXM.ash, backgroundColor: filled ? `${colorHex}30` : 'rgba(0,0,0,0.5)' },
+                                    { borderColor: filled ? nodeHex : AXM.ash, backgroundColor: filled ? `${nodeHex}30` : 'rgba(0,0,0,0.5)' },
                                 ]}
                             >
-                                <Text style={[styles.wheelGlyph, { color: filled ? colorHex : AXM.ash, textShadowColor: filled ? colorHex : 'transparent' }]} allowFontScaling={false}>
-                                    {filled ? (CHAIN_GLYPHS[color] ?? '◆') : '·'}
+                                <Text style={[styles.wheelGlyph, { color: filled ? nodeHex : AXM.ash, textShadowColor: filled ? nodeHex : 'transparent' }]} allowFontScaling={false}>
+                                    {link ? (CHAIN_GLYPHS[link] ?? '◆') : '·'}
                                 </Text>
                             </View>
                         );
@@ -1371,11 +1342,11 @@ export const CombatBoard = React.memo(function CombatBoard({
                         no die matches your hand — FREE plays still work · END rolls fresh dice
                     </Text>
                 ) : null}
+                {/* Spec 33 §4 — Press Fate has NO board control of its own (owner
+                    call 2026-07-19): it is a signature, cast from the rune column
+                    like every other. The presenter reshapes its rune flag-on
+                    (1◆ cost + the full firing gate + refusal reason). */}
                 <DiceRow vm={vm} dieGesture={dieGesture} draggingDieId={draggingDieId} assignedDieIds={assignedDieIds} onFateTap={onFateTap} />
-                {/* Spec 33 §4 (flag-on) — the Press Fate reroll control. Owner-UI
-                    doctrine: never hidden when it can't fire — it renders DISABLED
-                    with the refusal reason. Null flag-off / no reroll signature. */}
-                {vm.pressFate ? <PressFateControl pressFate={vm.pressFate} onCast={onSignature} /> : null}
 
                 {/* the hand dock — edge-to-edge fan, bottoms cropped off-screen */}
                 <View style={styles.dock}>
@@ -1493,6 +1464,16 @@ function compactFree(v: string | null): string {
     return v.length <= 3 ? v : v.slice(0, 3);
 }
 
+// Lighten a #rrggbb toward white by t (0..1) — the FREE glyph's pop tint
+// (owner call 2026-07-19: the category colours read muddy over the art).
+function lightenHex(hex: string, t: number): string {
+    const m = /^#?([0-9a-f]{6})$/i.exec(hex);
+    if (!m) return hex;
+    const n = parseInt(m[1], 16);
+    const ch = (v: number) => Math.round(v + (255 - v) * t);
+    return `rgb(${ch((n >> 16) & 255)},${ch((n >> 8) & 255)},${ch(n & 255)})`;
+}
+
 // Darken a #rrggbb by a factor (0..1) — the stance cube's shaded faces.
 function darkenHex(hex: string, f: number): string {
     const m = /^#?([0-9a-f]{6})$/i.exec(hex);
@@ -1551,16 +1532,16 @@ function cleanPaidSentence(vm: CombatCardVM): string {
 }
 
 /**
- * The shared card FACE — Option A layout (owner-picked 2026-07-09) — instanced
- * small in the hand and LARGE in the inspect modal so the two can never drift.
- *   · per-card ART (temp pool, keyword-matched) fills the top region behind a
+ * The shared card FACE — Option A layout (owner-picked 2026-07-09, declutter
+ * pass 2026-07-19) — instanced small in the hand and LARGE in the inspect
+ * modal so the two can never drift.
+ *   · per-card ART (temp pool, keyword-matched) fills the face behind a
  *     stance-tint gradient wash;
- *   · a glossy stance ORB (category glyph, stance colour) top-left;
- *   · the card NAME on a stance-coloured bevelled band, mid-card;
- *   · a bottom rail SPLIT 50/50: ◇ FREE (keyword · value) | ◆ PAID (keyword ·
- *     value, category colour), a visible divider between the halves;
- *   · printed die lines as ONE small line under the split (when present);
- *   · the TYPE STRIP at the very foot ("BODY · SPELL" — CURSE for disenchant).
+ *   · the LEFT RAIL (stance colour) carries the card NAME, centred vertically;
+ *   · the giant FREE glyph (+ intensity) top-left; rarity tag top-right;
+ *   · the bottom block: the TYPE STRIP ("BODY · SPELL" — CURSE for
+ *     disenchant), then the PAID sentence (die cube + keyword-bolded text),
+ *     then printed die lines (when present).
  * Identical wording at both sizes; definitions/pills/flavor live in the
  * inspect overlay, never on the face.
  */
@@ -1618,19 +1599,29 @@ export const CombatCardFace = React.memo(function CombatCardFace({
                 </View>
                 {/* SCRIM — deep→transparent so the bottom text stays legible */}
                 <FaceScrim w={width} h={height} uid={card.uid} tint={band} />
-                {/* LEFT RAIL — stance spine carrying the vertical identity label
-                    (STANCE · TYPE), centred so the full label always fits. */}
+                {/* LEFT RAIL — ONE stance-coloured container (the two-tone bottom
+                    shade is gone, owner call 2026-07-19) carrying the card NAME
+                    rotated -90° and centred. The label sits in an explicitly-sized
+                    rotated box (width = card height): rotating the bare Text let
+                    the layout clamp it to the rail's width and ellipsize the name
+                    after two letters (owner report, same day). */}
                 <View style={[styles.faceRail, { width: railW, backgroundColor: band }]} pointerEvents="none">
-                    <View style={[styles.faceRailShade, { width: railW }]} />
-                    <View style={styles.faceRailLabelWrap}>
+                    <View
+                        style={[styles.faceRailRotor, {
+                            left: (railW - height) / 2,
+                            top: (height - railW) / 2,
+                            width: height,
+                            height: railW,
+                        }]}
+                    >
                         <Text
-                            style={[styles.faceRailLabel, large && styles.faceRailLabelLarge, { width: height - 16 }]}
+                            style={[styles.faceRailLabel, large && styles.faceRailLabelLarge]}
                             numberOfLines={1}
                             adjustsFontSizeToFit
-                            minimumFontScale={0.75}
+                            minimumFontScale={0.6}
                             allowFontScaling={false}
                         >
-                            {f.typeStrip}
+                            {card.name.toUpperCase()}
                         </Text>
                     </View>
                 </View>
@@ -1641,22 +1632,44 @@ export const CombatCardFace = React.memo(function CombatCardFace({
                         <Svg width={glyphSize} height={glyphSize} style={StyleSheet.absoluteFill}>
                             <Defs>
                                 <RadialGradient id={`fh_${card.uid}`} cx="48%" cy="46%" r="54%">
-                                    <Stop offset="0" stopColor="#06050a" stopOpacity="0.82" />
-                                    <Stop offset="0.6" stopColor="#06050a" stopOpacity="0.5" />
+                                    <Stop offset="0" stopColor="#06050a" stopOpacity="0.94" />
+                                    <Stop offset="0.6" stopColor="#06050a" stopOpacity="0.62" />
                                     <Stop offset="1" stopColor="#06050a" stopOpacity="0" />
                                 </RadialGradient>
                             </Defs>
                             <SvgRect x="0" y="0" width={glyphSize} height={glyphSize} fill={`url(#fh_${card.uid})`} />
                         </Svg>
+                        {/* POP tint (owner call 2026-07-19): the raw category colour
+                            read muddy over the art — the glyph brightens toward
+                            white and takes a light edge, on a harder backdrop.
+                            Inert stays honestly grey (engine doesn't read it).
+                            zIndex is EXPLICIT on every layer: on web the
+                            absolutely-positioned backdrop painted ABOVE the
+                            normal-flow glyph (positioned beats static regardless
+                            of child order), greying the glyph out — the owner's
+                            "backdrop is on top of the glyph" report, same day. */}
                         {freeShape ? (
-                            <Svg width={glyphSize * 0.86} height={glyphSize * 0.86} viewBox="0 0 24 24">
-                                <Path d={freeShape.d} fill={baseKw} fillRule={freeShape.evenodd ? 'evenodd' : 'nonzero'} opacity={0.95} />
-                            </Svg>
+                            /* View wrapper: RN-web guarantees position:relative on
+                               Views (zIndex applies); a bare <Svg> may stay static. */
+                            <View style={{ zIndex: 1 }}>
+                                <Svg width={glyphSize * 0.86} height={glyphSize * 0.86} viewBox="0 0 24 24">
+                                    {/* Lighten 0.3 → 0.12 (owner pass 4, same day): with the
+                                        z-order fixed the full 0.3 washed the hue out — keep
+                                        just a touch of lift over the raw category colour. */}
+                                    <Path
+                                        d={freeShape.d}
+                                        fill={f.inert ? baseKw : lightenHex(baseKw, 0.12)}
+                                        stroke={f.inert ? 'none' : 'rgba(255,255,255,0.3)'}
+                                        strokeWidth={0.6}
+                                        fillRule={freeShape.evenodd ? 'evenodd' : 'nonzero'}
+                                    />
+                                </Svg>
+                            </View>
                         ) : (
-                            <Text style={[styles.freeGlyph, { fontSize: glyphSize, lineHeight: glyphSize, color: baseKw }]} allowFontScaling={false}>{f.freeGlyph}</Text>
+                            <Text style={[styles.freeGlyph, { fontSize: glyphSize, lineHeight: glyphSize, color: f.inert ? baseKw : lightenHex(baseKw, 0.12), zIndex: 1 }]} allowFontScaling={false}>{f.freeGlyph}</Text>
                         )}
                         {freeInner ? (
-                            <View style={[StyleSheet.absoluteFill, { alignItems: 'center', justifyContent: 'center' }]} pointerEvents="none">
+                            <View style={[StyleSheet.absoluteFill, { alignItems: 'center', justifyContent: 'center', zIndex: 2 }]} pointerEvents="none">
                                 <Text style={[styles.freeInner, large && styles.freeInnerLarge]} allowFontScaling={false}>{freeInner}</Text>
                             </View>
                         ) : null}
@@ -1668,12 +1681,12 @@ export const CombatCardFace = React.memo(function CombatCardFace({
                         {rarity.toUpperCase()}
                     </Text>
                 </View>
-                {/* ③ + ② BOTTOM — name, then the paid sentence (die cube + text) */}
+                {/* ③ + ② BOTTOM — the type strip (the name lives on the rail now),
+                    then the paid sentence (die cube + text) */}
                 <View style={[styles.faceBtm, { left: railW + (large ? 12 : 8) }]}>
-                    <Text style={[styles.faceName, large && styles.faceNameLarge]} numberOfLines={large ? 2 : 1} adjustsFontSizeToFit minimumFontScale={0.7}>
-                        {card.name}
+                    <Text style={[styles.faceType, large && styles.faceTypeLarge]} numberOfLines={1}>
+                        {f.typeStrip}
                     </Text>
-                    <View style={styles.faceRule} />
                     <View style={styles.paidRow}>
                         <StanceCube color={band} size={large ? 22 : 15} />
                         {readPip ? <Text style={[styles.paidRead, { color: kwColor }]} allowFontScaling={false}>{readPip}</Text> : null}
@@ -1702,9 +1715,10 @@ export const CombatCardFace = React.memo(function CombatCardFace({
 // The fanned hand card — a small instance of the shared face, art-forward at the
 // reference's ~1:1.5 proportion. The fan-overlap math (band fit) keys off these
 // same constants — keep them in sync. Option A: 108×158 → 132×194 (the split
-// rail needs the room; the old size was illegible). Exported for the drag ghost.
-export const HAND_CARD_W = 132;
-export const HAND_CARD_H = 194;
+// rail needs the room; the old size was illegible) → 120×176 (owner declutter
+// pass 2026-07-19: the board read too busy). Exported for the drag ghost.
+export const HAND_CARD_W = 120;
+export const HAND_CARD_H = 176;
 function HandCard({ card }: { card: CombatCardVM }) {
     return <CombatCardFace card={card} width={HAND_CARD_W} height={HAND_CARD_H} />;
 }
@@ -1789,9 +1803,6 @@ const useStyles = makeStyles((AXM) => ({
     dieFateHint: { fontFamily: FONTS.mono, fontSize: 7, color: '#d4c026', marginTop: 1 },
     faceDieLine: { fontFamily: FONTS.mono, fontSize: 9, color: '#d4c026', marginTop: 3, letterSpacing: 0.2 },
     // Spec 33 §4 — Press Fate reroll control (flag-on).
-    pressFate: { borderWidth: 1, borderRadius: 10, paddingHorizontal: 12, paddingVertical: 4, alignSelf: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.4)', marginTop: 2 },
-    pressFateText: { fontFamily: FONTS.mono, fontSize: 11, letterSpacing: 1 },
-    pressFateReason: { fontFamily: FONTS.mono, fontSize: 8, letterSpacing: 0.3, marginTop: 1 },
     dieXGlyph: { fontFamily: FONTS.sans, fontSize: 12, color: '#8a8273' },
     dieConv: { fontFamily: FONTS.mono, fontSize: 9, color: AXM.bone, textAlign: 'center', marginTop: 2, letterSpacing: 0.5, textShadowColor: 'rgba(0,0,0,0.9)', textShadowRadius: 3 },
     diePip: { fontFamily: FONTS.sans, fontSize: 10, textAlign: 'center', marginTop: 2, letterSpacing: 0.6, textShadowColor: 'rgba(0,0,0,0.9)', textShadowRadius: 3 },
@@ -1900,16 +1911,16 @@ const useStyles = makeStyles((AXM) => ({
         position: 'absolute', left: 0, top: 0, bottom: 0,
         borderRightWidth: 1, borderRightColor: 'rgba(0,0,0,0.5)',
     },
-    faceRailShade: { position: 'absolute', left: 0, bottom: 0, height: '55%', backgroundColor: 'rgba(0,0,0,0.28)' },
-    // Full-rail centred wrap: the rotated label spans (height − 16), so the
-    // whole STANCE · TYPE strip renders un-truncated at every card size.
-    faceRailLabelWrap: { ...StyleSheet.absoluteFillObject, alignItems: 'center', justifyContent: 'center' },
+    // The rotated label box: sized (card height × rail width) and spun -90° in
+    // place, so the name lays out at full card-height width — never clamped to
+    // the rail's own width — and centres along the rail.
+    faceRailRotor: { position: 'absolute', transform: [{ rotate: '-90deg' }], alignItems: 'center', justifyContent: 'center' },
     faceRailLabel: {
-        textAlign: 'center', transform: [{ rotate: '-90deg' }],
-        fontFamily: FONTS.sans, fontSize: 8, letterSpacing: 2, color: 'rgba(255,255,255,0.92)',
-        textShadowColor: 'rgba(0,0,0,0.6)', textShadowRadius: 2,
+        textAlign: 'center', maxWidth: '96%',
+        fontFamily: FONTS.sans, fontSize: 9, letterSpacing: 1.6, color: 'rgba(255,255,255,0.95)',
+        textShadowColor: 'rgba(0,0,0,0.7)', textShadowRadius: 2,
     },
-    faceRailLabelLarge: { fontSize: 11, letterSpacing: 3 },
+    faceRailLabelLarge: { fontSize: 12, letterSpacing: 2.4 },
     // ① the giant FREE-effect glyph with its intensity centred INSIDE it.
     freeBadge: { position: 'absolute', alignItems: 'center', justifyContent: 'center' },
     freeGlyph: { textAlign: 'center', textShadowColor: 'rgba(0,0,0,0.9)', textShadowRadius: 4, textShadowOffset: { width: 0, height: 1 } },
@@ -1922,14 +1933,13 @@ const useStyles = makeStyles((AXM) => ({
     faceRarity: { position: 'absolute', top: 6, right: 6, backgroundColor: 'rgba(8,7,6,0.7)', borderWidth: 1, paddingHorizontal: 5, paddingVertical: 1 },
     faceRarityText: { fontFamily: FONTS.sans, fontSize: 8, letterSpacing: 1 },
     faceRarityTextLarge: { fontSize: 10, letterSpacing: 1.4 },
-    // ③ + ② bottom-anchored name + paid sentence.
+    // ③ + ② bottom-anchored type strip + paid sentence (the name is on the rail).
     faceBtm: { position: 'absolute', right: 10, bottom: 10 },
-    faceName: {
-        fontFamily: FONTS.gothic, fontSize: 15, lineHeight: 17, color: '#e8dfc8',
-        textShadowColor: '#000', textShadowRadius: 6, textShadowOffset: { width: 0, height: 2 },
+    faceType: {
+        fontFamily: FONTS.sans, fontSize: 7, letterSpacing: 1.5, color: 'rgba(232,223,200,0.75)',
+        textShadowColor: '#000', textShadowRadius: 4, marginBottom: 4,
     },
-    faceNameLarge: { fontSize: 25, lineHeight: 27 },
-    faceRule: { height: 1, backgroundColor: 'rgba(232,223,200,0.22)', marginVertical: 6 },
+    faceTypeLarge: { fontSize: 9, letterSpacing: 2, marginBottom: 6 },
     paidRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 6 },
     paidRead: { fontFamily: FONTS.mono, fontSize: 11, marginTop: 1 },
     paidTextWrap: { flex: 1 },
