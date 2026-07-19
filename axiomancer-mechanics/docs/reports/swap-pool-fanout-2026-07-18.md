@@ -101,8 +101,24 @@ sandbox registry pin also cover all 300 automatically.
   Reaping's max-HP erosion matches REAP; Blood/Frenzy/Lifedrain ground
   akrasia's cost-carrier density.
 
+## The estimates ledger (post-merge addendum, same day)
+
+`swap-pool-estimates-2026-07-18.json` (this directory) carries the
+per-card DESIGN ESTIMATES a second card-expert pass produced after the
+merge: for each of the 300 cards — why it exists (<=12 words), expected
+effect on its preset if seated, the recipe seat it contends for,
+directional calls on statusEngagement / dotHpFraction / early win-rate,
+a spam-risk flag, plus per-theme outlooks with trial-first picks — and
+the verbatim printed FREE/PAID face text + flavor line for wording
+review. All pre-simulation; the measurement pass turns them into
+numbers and should LEAD with each theme's trial-first picks and the
+spam-risk highs. The owner-facing rendering of the same data is the
+"Swap-Pool Atlas" claude.ai artifact (id cb034e8d-e3d6-44dd-851d,
+private to the owner).
+
 ## Next
 
 A `/deck-tuning` pass (separate PR, review-only) swaps candidates into
 preset recipes seat by seat with the new grammar and delivers the evidence
-tables for the owner to arbitrate.
+tables for the owner to arbitrate. **Gated: the owner asked to be checked
+in with before it runs** (see the PHASE_CANDIDATES entry).

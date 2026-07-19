@@ -20,6 +20,12 @@
   (control = unswapped recipe, same seeds), leading with the estimator's
   trial-first picks and the flagged spam-risk cards; delivers evidence
   tables + proposed preset compositions on its own PR, never auto-merged.
+- estimates ledger: `axiomancer-mechanics/docs/reports/`
+  `swap-pool-estimates-2026-07-18.json` — per-card why / expected effect /
+  seat contender / metric-direction calls / spam risk + per-theme
+  trial-first picks (pre-simulation design estimates from the post-merge
+  card-expert pass). The pass should open with these, then let the matrix
+  arbitrate.
 - **GATED: the owner asked to be checked in with BEFORE this runs**
   (2026-07-18 session). Do not let a cron tick start it; the owner's go
   is the trigger.
