@@ -107,6 +107,7 @@ sim — those are the machinery. The skill is the forge + the delivery layer.
 /deck-tuning --focus="swap-sweep the erosion seats"
 /deck-tuning --preset=erosion                         # scope to ONE preset (the GitHub Action's dropdown)
 /deck-tuning --preset=all --runs=60                   # explicit full sweep (the Action's defaults)
+/deck-tuning --cross-theme-swaps=true                 # owner-authorized out-of-theme measurement arms
 /loop 6h /deck-tuning              # periodic autonomous forging
 ```
 
@@ -123,8 +124,16 @@ sim — those are the machinery. The skill is the forge + the delivery layer.
   when `--runs` ≠ 60 the drift diff is not flag-matched, so treat results
   as DIRECTIONAL: fine for exploratory arms, not for applying changes or
   re-stamping the baseline (re-measure the deciding A/B at 60 first).
+- `--cross-theme-swaps=<true|false>` (default false) lifts the in-theme
+  swap law (§3) for THIS run's measurement arms. Because dispatching with
+  the flag is the owner flipping a switch, it carries the owner's per-run
+  authorization to MEASURE out-of-theme swap-ins — it does NOT ratify
+  shipping one (see the §3 swap law for exactly what it unlocks). The
+  GitHub Action surfaces this as a checkbox, default off; scheduled runs
+  are always in-theme-only.
 
-Without any flag, run a full sweep across all stages and presets.
+Without any flag, run a full sweep across all stages and presets,
+in-theme swaps only.
 
 ## 3. Autonomy contract
 
@@ -158,9 +167,20 @@ The tunable surface is TIERED. Work from the freest tier inward:
   | The theme's swap-pool candidate set `swap-<theme>` (`src/Cards/swap-pool/<theme>.swap-pool.ts` — 30 spells each, 10/12/8 common/uncommon/rare; contract pinned by `src/Cards/e2e/swap-pool.engine.test.ts`) | yes — `--sandbox=swap-<theme>` | "does this candidate beat the incumbent seat?" |
 
   A cross-theme swap-in is a RECOLOR, not a measurement — standing owner
-  call, never done silently. Prefer rarity-legal seats (swap like rarity
-  for like); when a candidate has no rarity-legal seat in its home preset,
-  record that as a seat-grid finding rather than forcing an off-rarity arm.
+  call, never done silently. **Per-run exception:** a run dispatched with
+  `--cross-theme-swaps=true` (§2) carries the owner's authorization to RUN
+  out-of-theme measurement arms. Under the flag: any theme's swap-pool
+  candidates or unseated library cards are legal swap-ins for any preset
+  (apply the donor theme's set via `--sandbox=swap-<theme>`; comma-separate
+  sets when mixing); tag every such arm `[cross-theme]` in the report and
+  state which theme donated the card. The flag authorizes EVIDENCE only —
+  applying an out-of-theme card to a shipped recipe is still a recolor:
+  color-law arithmetic plus its own explicit owner call, never implied by
+  the flag. Flag off (the default, and always on scheduled runs), the
+  in-theme law above is absolute. In both modes prefer rarity-legal seats
+  (swap like rarity for like); when a candidate has no rarity-legal seat
+  in its target preset, record that as a seat-grid finding rather than
+  forcing an off-rarity arm.
   Swap variants are EVIDENCE devices: they may break the color law and
   never ship as-is. Before designing arms, read the per-card design
   estimates ledger (`docs/reports/swap-pool-estimates-2026-07-18.json`) and
@@ -464,9 +484,12 @@ and the headline status-engagement / band delta.
   is card DATA: sandbox sets, swap pools, presets, draft weights, and
   (guarded) library literals.
 - **Never edit library card literals without a sandbox A/B first.**
-- **Never swap in a card from another theme** — a cross-theme swap-in is a
-  recolor, a standing owner call (§3). Swap-ins come from the preset's own
-  theme: its unseated library cards or its `swap-<theme>` candidates.
+- **Never swap in a card from another theme without the flag** — a
+  cross-theme swap-in is a recolor, a standing owner call (§3). Swap-ins
+  come from the preset's own theme: its unseated library cards or its
+  `swap-<theme>` candidates. The ONLY exception is a run dispatched with
+  `--cross-theme-swaps=true`, which authorizes cross-theme MEASUREMENT
+  arms (tagged `[cross-theme]` in the report) — never a shipped recolor.
 - **Never invent new `specialMechanics` kinds, verb classes, or effect ids**
   — sandbox prototypes compose existing kinds only; new kinds are
   propose-only.
@@ -523,7 +546,7 @@ for swap sweeps):**
 | Free (sandbox) | `src/Cards/swap-pool/<theme>.swap-pool.ts` | the ten swap-pool candidate sets (30 spells each) — seat candidates, never player-facing |
 | Free (composition) | `src/Combat/combat.starter-deck-presets.ts` | the 10 theme preset card lists (color-law arithmetic applies to shipping changes) |
 | Free (composition) | `src/Combat/combat.deck-draft.ts` | focus weights (4x), draft size (10), max copies (2), guarantees |
-| Free (measurement) | `+swap:` variants of preset recipes | temporary in-theme seat swaps (treatment arm only) — evidence device, never ships as-is |
+| Free (measurement) | `+swap:` variants of preset recipes | temporary in-theme seat swaps (treatment arm only) — evidence device, never ships as-is; cross-theme arms only under `--cross-theme-swaps=true` (§3) |
 | Guarded (A/B first) | `src/Cards/cards.library.ts` | effect intensity/duration, mechanic amounts, rider numerics + the `// pts:` comment (no damage fields exist — spec 32) |
 | Propose-only | — | new mechanics kinds, verb classes, `toCombatCard` / `effectImpact`, engine paths, enchant/disenchant seat growth |
 

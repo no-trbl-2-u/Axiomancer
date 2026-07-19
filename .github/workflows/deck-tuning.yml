@@ -33,6 +33,10 @@ on:
         description: 'Playtest runs per matrix cell (60 = baseline-comparable; lower = faster but directional-only)'
         type: number
         default: 60
+      cross_theme_swaps:
+        description: 'Allow OUT-OF-THEME swap-ins in measurement arms (owner per-run authorization; evidence only — shipping a recolor stays gated on the color law)'
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -54,6 +58,7 @@ jobs:
         -p
         --dangerously-skip-permissions
       # Defaults cover the scheduled path (cron re-enable): a bare cron run
-      # gets preset=all, runs=60 — the same full sweep as before the inputs.
-      prompt: "/deck-tuning --preset=${{ inputs.preset || 'all' }} --runs=${{ inputs.runs || 60 }}"
+      # gets preset=all, runs=60, in-theme-only — the same full sweep as
+      # before the inputs existed.
+      prompt: "/deck-tuning --preset=${{ inputs.preset || 'all' }} --runs=${{ inputs.runs || 60 }} --cross-theme-swaps=${{ inputs.cross_theme_swaps || false }}"
       timeout_minutes: 90
