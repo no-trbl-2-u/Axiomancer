@@ -322,7 +322,11 @@ async function assertSwayCommit(page) {
         const m = label.match(/,\s*(heart|body|mind)\s+card/i)
         return { uid: id, stance: m ? m[1].toLowerCase() : null }
     }))
-    const soft = hand.find((c) => c.stance === 'heart')
+    // Prefer the LAST heart card in fan order: the rightmost copy sits on top
+    // of the fan z-order with its centre clear of the player medallion (the
+    // corner medallions deliberately float ABOVE the fan ends — a leftmost
+    // pick puts the pointer-down on the medallion and the pan never starts).
+    const soft = [...hand].reverse().find((c) => c.stance === 'heart')
     if (!soft) fail('SWAY-commit guard: no heart card (Soft Word) in the opening hand this seed')
 
     // A usable heart die (or a wild, which powers any color) in the tray.

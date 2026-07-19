@@ -203,6 +203,9 @@ function SignatureColumn({ conviction, signatures, onCast, onInfo }: {
 
 // ── Dice row (free-floating gems above the hand) ─────────────────────────────
 
+// Owner declutter pass 2026-07-19: the 54pt cube crowded the board — shave ~1/8.
+const TRAY_DIE_SIZE = 47;
+
 function DiceRow({
     vm, dieGesture, draggingDieId, assignedDieIds, onFateTap,
 }: {
@@ -287,7 +290,7 @@ function DiceRow({
                         {ritual && plansById[die.id] ? (
                             <RollingDie
                                 die={die}
-                                size={54}
+                                size={TRAY_DIE_SIZE}
                                 dimmed={dieDimmed}
                                 mode={mode}
                                 plan={plansById[die.id]}
@@ -295,7 +298,7 @@ function DiceRow({
                                 onTumbleChange={onTumbleChange}
                             />
                         ) : (
-                            <CombatDie die={die} size={54} dimmed={dieDimmed} />
+                            <CombatDie die={die} size={TRAY_DIE_SIZE} dimmed={dieDimmed} />
                         )}
                         {die.reserve ? (
                             <Text style={[styles.dieConv, { color: AXM.sulfur }]} testID={`combat-reserve-${die.id}`}>
@@ -418,9 +421,10 @@ const StagedCard = React.memo(function StagedCard({
     const popStyle = useAnimatedStyle(() => ({ transform: [{ scale: pop.value }, { translateX: shake.value }] }));
     const armed = assignedDie !== null;
     const readColor = armed ? (READ_ACCENT[read] ?? AXM.bone) : AXM.bone;
-    // Option A rail needs width: staged faces track the hand-card proportion.
-    const cardW = compact ? 100 : 122;
-    const cardH = compact ? 147 : 179;
+    // Option A rail needs width: staged faces track the hand-card proportion
+    // (shaved with it in the 2026-07-19 declutter pass).
+    const cardW = compact ? 92 : 112;
+    const cardH = compact ? 135 : 164;
     // The keyword line shows the POWER value; for read-dependent kinds (guard) it is
     // recomputed live at the known read so the staged number is exact at commit.
     let heroOverride: string | undefined;
@@ -1518,16 +1522,16 @@ function cleanPaidSentence(vm: CombatCardVM): string {
 }
 
 /**
- * The shared card FACE — Option A layout (owner-picked 2026-07-09) — instanced
- * small in the hand and LARGE in the inspect modal so the two can never drift.
- *   · per-card ART (temp pool, keyword-matched) fills the top region behind a
+ * The shared card FACE — Option A layout (owner-picked 2026-07-09, declutter
+ * pass 2026-07-19) — instanced small in the hand and LARGE in the inspect
+ * modal so the two can never drift.
+ *   · per-card ART (temp pool, keyword-matched) fills the face behind a
  *     stance-tint gradient wash;
- *   · a glossy stance ORB (category glyph, stance colour) top-left;
- *   · the card NAME on a stance-coloured bevelled band, mid-card;
- *   · a bottom rail SPLIT 50/50: ◇ FREE (keyword · value) | ◆ PAID (keyword ·
- *     value, category colour), a visible divider between the halves;
- *   · printed die lines as ONE small line under the split (when present);
- *   · the TYPE STRIP at the very foot ("BODY · SPELL" — CURSE for disenchant).
+ *   · the LEFT RAIL (stance colour) carries the card NAME, centred vertically;
+ *   · the giant FREE glyph (+ intensity) top-left; rarity tag top-right;
+ *   · the bottom block: the TYPE STRIP ("BODY · SPELL" — CURSE for
+ *     disenchant), then the PAID sentence (die cube + keyword-bolded text),
+ *     then printed die lines (when present).
  * Identical wording at both sizes; definitions/pills/flavor live in the
  * inspect overlay, never on the face.
  */
@@ -1585,8 +1589,9 @@ export const CombatCardFace = React.memo(function CombatCardFace({
                 </View>
                 {/* SCRIM — deep→transparent so the bottom text stays legible */}
                 <FaceScrim w={width} h={height} uid={card.uid} tint={band} />
-                {/* LEFT RAIL — stance spine carrying the vertical identity label
-                    (STANCE · TYPE), centred so the full label always fits. */}
+                {/* LEFT RAIL — stance spine carrying the card NAME, centred on the
+                    rail (owner declutter pass 2026-07-19: the name moved here off
+                    the bottom block; the STANCE · TYPE strip took its old slot). */}
                 <View style={[styles.faceRail, { width: railW, backgroundColor: band }]} pointerEvents="none">
                     <View style={[styles.faceRailShade, { width: railW }]} />
                     <View style={styles.faceRailLabelWrap}>
@@ -1597,7 +1602,7 @@ export const CombatCardFace = React.memo(function CombatCardFace({
                             minimumFontScale={0.75}
                             allowFontScaling={false}
                         >
-                            {f.typeStrip}
+                            {card.name.toUpperCase()}
                         </Text>
                     </View>
                 </View>
@@ -1635,12 +1640,12 @@ export const CombatCardFace = React.memo(function CombatCardFace({
                         {rarity.toUpperCase()}
                     </Text>
                 </View>
-                {/* ③ + ② BOTTOM — name, then the paid sentence (die cube + text) */}
+                {/* ③ + ② BOTTOM — the type strip (the name lives on the rail now),
+                    then the paid sentence (die cube + text) */}
                 <View style={[styles.faceBtm, { left: railW + (large ? 12 : 8) }]}>
-                    <Text style={[styles.faceName, large && styles.faceNameLarge]} numberOfLines={large ? 2 : 1} adjustsFontSizeToFit minimumFontScale={0.7}>
-                        {card.name}
+                    <Text style={[styles.faceType, large && styles.faceTypeLarge]} numberOfLines={1}>
+                        {f.typeStrip}
                     </Text>
-                    <View style={styles.faceRule} />
                     <View style={styles.paidRow}>
                         <StanceCube color={band} size={large ? 22 : 15} />
                         {readPip ? <Text style={[styles.paidRead, { color: kwColor }]} allowFontScaling={false}>{readPip}</Text> : null}
@@ -1669,9 +1674,10 @@ export const CombatCardFace = React.memo(function CombatCardFace({
 // The fanned hand card — a small instance of the shared face, art-forward at the
 // reference's ~1:1.5 proportion. The fan-overlap math (band fit) keys off these
 // same constants — keep them in sync. Option A: 108×158 → 132×194 (the split
-// rail needs the room; the old size was illegible). Exported for the drag ghost.
-export const HAND_CARD_W = 132;
-export const HAND_CARD_H = 194;
+// rail needs the room; the old size was illegible) → 120×176 (owner declutter
+// pass 2026-07-19: the board read too busy). Exported for the drag ghost.
+export const HAND_CARD_W = 120;
+export const HAND_CARD_H = 176;
 function HandCard({ card }: { card: CombatCardVM }) {
     return <CombatCardFace card={card} width={HAND_CARD_W} height={HAND_CARD_H} />;
 }
@@ -1866,14 +1872,14 @@ const useStyles = makeStyles((AXM) => ({
     },
     faceRailShade: { position: 'absolute', left: 0, bottom: 0, height: '55%', backgroundColor: 'rgba(0,0,0,0.28)' },
     // Full-rail centred wrap: the rotated label spans (height − 16), so the
-    // whole STANCE · TYPE strip renders un-truncated at every card size.
+    // whole card name renders un-truncated at every card size.
     faceRailLabelWrap: { ...StyleSheet.absoluteFillObject, alignItems: 'center', justifyContent: 'center' },
     faceRailLabel: {
         textAlign: 'center', transform: [{ rotate: '-90deg' }],
-        fontFamily: FONTS.sans, fontSize: 8, letterSpacing: 2, color: 'rgba(255,255,255,0.92)',
-        textShadowColor: 'rgba(0,0,0,0.6)', textShadowRadius: 2,
+        fontFamily: FONTS.sans, fontSize: 9, letterSpacing: 1.6, color: 'rgba(255,255,255,0.95)',
+        textShadowColor: 'rgba(0,0,0,0.7)', textShadowRadius: 2,
     },
-    faceRailLabelLarge: { fontSize: 11, letterSpacing: 3 },
+    faceRailLabelLarge: { fontSize: 12, letterSpacing: 2.4 },
     // ① the giant FREE-effect glyph with its intensity centred INSIDE it.
     freeBadge: { position: 'absolute', alignItems: 'center', justifyContent: 'center' },
     freeGlyph: { textAlign: 'center', textShadowColor: 'rgba(0,0,0,0.9)', textShadowRadius: 4, textShadowOffset: { width: 0, height: 1 } },
@@ -1886,14 +1892,13 @@ const useStyles = makeStyles((AXM) => ({
     faceRarity: { position: 'absolute', top: 6, right: 6, backgroundColor: 'rgba(8,7,6,0.7)', borderWidth: 1, paddingHorizontal: 5, paddingVertical: 1 },
     faceRarityText: { fontFamily: FONTS.sans, fontSize: 8, letterSpacing: 1 },
     faceRarityTextLarge: { fontSize: 10, letterSpacing: 1.4 },
-    // ③ + ② bottom-anchored name + paid sentence.
+    // ③ + ② bottom-anchored type strip + paid sentence (the name is on the rail).
     faceBtm: { position: 'absolute', right: 10, bottom: 10 },
-    faceName: {
-        fontFamily: FONTS.gothic, fontSize: 15, lineHeight: 17, color: '#e8dfc8',
-        textShadowColor: '#000', textShadowRadius: 6, textShadowOffset: { width: 0, height: 2 },
+    faceType: {
+        fontFamily: FONTS.sans, fontSize: 7, letterSpacing: 1.5, color: 'rgba(232,223,200,0.75)',
+        textShadowColor: '#000', textShadowRadius: 4, marginBottom: 4,
     },
-    faceNameLarge: { fontSize: 25, lineHeight: 27 },
-    faceRule: { height: 1, backgroundColor: 'rgba(232,223,200,0.22)', marginVertical: 6 },
+    faceTypeLarge: { fontSize: 9, letterSpacing: 2, marginBottom: 6 },
     paidRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 6 },
     paidRead: { fontFamily: FONTS.mono, fontSize: 11, marginTop: 1 },
     paidTextWrap: { flex: 1 },

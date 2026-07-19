@@ -57,7 +57,7 @@ type DropResolver = (payload: DragPayload, x: number, y: number) => void | Promi
 /** Rendered size of the dragged-die ghost chip — the die ghost anchors on HALF
  *  of its rendered FOOTPRINT (cube + shadow, not the bare size) so it tracks
  *  the pointer (see dieGhostStyle). */
-const DIE_GHOST_SIZE = 56;
+const DIE_GHOST_SIZE = 49;
 const DIE_GHOST_FOOT = combatDieFootprint(DIE_GHOST_SIZE);
 
 /** WI-3 — how long an END-phase press locks the button + staging while the
