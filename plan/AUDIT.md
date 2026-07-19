@@ -14,6 +14,20 @@
 
 ## Pending
 
+### [user-issue #132] [HIGH] Update DevLog for 2026-07-19
+- category: external-issue
+- impact: 6
+- ease: 8
+- detail: filed 2026-07-19 by T directly. Publish the next DevLog digest
+  covering work since the 2026-07-18 entry — gather the commit, workflow,
+  queue, audit, critique, phase-candidate, issue, deploy, and baseline
+  pulse per `skills/digest.md`; add `devlog/entries/DIGEST_2026-07-19.md`
+  without altering prior entries; regenerate the site/catalog via
+  `npm run site:build`; run `npm run verify`. This is a direct request for
+  the loop's routine `/digest` job, not a novel ask.
+- next: /iterate will pick up (or run `/digest` directly); reference #132
+  in the commit body.
+
 ### hazard/gathering "paradox-token" reward vocabulary outlives the card category
 - category: divergence
 - impact: 2
