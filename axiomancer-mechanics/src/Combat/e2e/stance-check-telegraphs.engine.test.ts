@@ -15,7 +15,7 @@
 
 import { describe, it, expect } from 'vitest';
 
-import { GraveLarva } from '../../Enemy/enemy.library';
+import { FloatEye, GraveLarva } from '../../Enemy/enemy.library';
 import type { Enemy } from '../../Enemy/types';
 import { deepClone } from '../../Utils';
 import { defaultStanceCheck, getThreatSequence } from '../combat.threat';
@@ -37,11 +37,13 @@ describe('spec 33 §2 D6e — defaultStanceCheck', () => {
 });
 
 describe('spec 33 §2 D6e — getThreatSequence backfill', () => {
-    it('every phase of a witness enemy carries an open stance check', () => {
-        // GraveLarva (an early-stage sim witness) carries a short explicit
-        // sequence the default generator never touches — the backfill must reach
-        // it. Pre-D6e these phases had no check (the F2 gap).
-        const seq = getThreatSequence(GraveLarva);
+    it('every phase of an unauthored-check witness enemy carries the uniform default', () => {
+        // FloatEye carries an AUTHORED_THREAT_SEQUENCES entry with no phase
+        // authoring a stanceCheck (Phase D9 left it untouched) — the backfill
+        // must reach every one of its phases. (GraveLarva now authors its own
+        // partial checks per D9 and is covered by phase-d9-stance-check-variety
+        // instead — it no longer exercises the pure-backfill path.)
+        const seq = getThreatSequence(FloatEye);
         expect(seq.length).toBeGreaterThan(0);
         for (const phase of seq) {
             expect(phase.stanceCheck).toBeDefined();

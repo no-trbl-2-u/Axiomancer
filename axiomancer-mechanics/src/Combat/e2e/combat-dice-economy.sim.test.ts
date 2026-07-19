@@ -136,7 +136,14 @@ describe('spec 33 D7 — ratified economy envelope + flag-not-ready canaries', (
 
     it('RATIFIED: income is specials-driven with a yield contribution (D6e telegraphs)', () => {
         expect(p.specialIncomePerRound).toBeGreaterThan(0.9);
-        expect(p.yieldIncomePerRound).toBeGreaterThan(0.15);
+        // Floor re-measured post-D9 (2026-07-19): D9 replaced 14 enemies' uniform
+        // two-sided default checks with hand-authored, often single-sided ones
+        // (a phase may name only a `punishes` or only a `yields`, per spec 33 §2's
+        // per-boss thematic variety) — fewer phases carry a yield side, so realized
+        // yield income drops from the pre-D9 measurement (~0.327) to ~0.141 at this
+        // seed set. Still solidly positive and specials-driven; floor lowered with
+        // margin rather than raised back by re-authoring content toward density.
+        expect(p.yieldIncomePerRound).toBeGreaterThan(0.12);
     });
 
     // ── D7 canaries, post-flip status (2026-07-18, owner call): ──────────────

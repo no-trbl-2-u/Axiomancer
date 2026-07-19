@@ -71,6 +71,16 @@ export interface AuthoredThreatPhase {
      *  count (1-4). Undefined = the enemy's natural (difficulty-derived) flat
      *  default (`THREAT_RUNGS`/`THREAT_RUNGS_BOSS`). */
     rungs?: number;
+    /** Phase D9 (spec 33 §2) — the open stance check this phase telegraphs.
+     *  `punishes: X` → ending the phase in stance X takes the hit at ×1.5;
+     *  `yields: X` → ending in X blunts it ×0.5 AND pays +1◆. Both optional and
+     *  independent (a boss may name one of each, across different phases, to
+     *  satisfy the §2 "two stances" boss law). Undefined = no authored check —
+     *  `getThreatSequence`'s backfill (`defaultStanceCheck`) fills the uniform
+     *  D6e default instead; an authored value here always wins. Only resolved
+     *  while the upgradeable-dice flag is on (`resolveStanceCheck`); inert
+     *  otherwise, so authoring it never disturbs the flag-off baseline. */
+    stanceCheck?: { punishes?: Stance; yields?: Stance };
 }
 
 // ── WS9 (spec 32 §12 item 7, Ratified 2026-07-11) — conditional threat branches ──
@@ -153,6 +163,7 @@ export function commitThreatBranch(
         threatAction: outcome.threatAction,
         intentType: outcome.intentType,
         stanceHint: outcome.stanceHint,
+        stanceCheck: outcome.stanceCheck,
         branch: { ...phase.branch, taken },
     };
     return {
@@ -329,6 +340,7 @@ function resolveBranchOutcome(
         intentType: deriveIntentType(threatAction.effects),
         stanceHint: p.stanceHint ?? enemyStanceHint(enemy) ?? DEFAULT_STANCE_HINTS[p.enemyStance],
         rungs: p.rungs,
+        stanceCheck: p.stanceCheck,
     };
 }
 
@@ -373,6 +385,7 @@ function resolveAuthored(enemy: Enemy, authored: AuthoredThreatStep[]): CombatTh
             stanceHint: p.stanceHint ?? enemyStanceHint(enemy) ?? DEFAULT_STANCE_HINTS[p.enemyStance],
             unlockAfterRound: p.unlockAfterRound,
             rungs: p.rungs,
+            stanceCheck: p.stanceCheck,
         });
     });
 }

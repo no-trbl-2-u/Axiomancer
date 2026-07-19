@@ -299,6 +299,11 @@ export interface CombatThreatBranchOutcome {
      *  the flat `THREAT_RUNGS`/`THREAT_RUNGS_BOSS` default. Undefined = the
      *  fork carries the enemy's natural rung count. */
     rungs?: number;
+    /** Phase D9 (spec 33 §2) — this fork's authored open stance check, if any.
+     *  Carried onto the committed phase by `commitThreatBranch`. Undefined =
+     *  no authored check on this fork (the `getThreatSequence` backfill fills
+     *  the uniform default). */
+    stanceCheck?: { punishes?: Stance; yields?: Stance };
 }
 
 /**
