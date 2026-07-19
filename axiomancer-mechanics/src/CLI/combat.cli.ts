@@ -25,10 +25,10 @@
  *                        given, scopes --deck drafting to the stage pool, and
  *                        defaults the enemy to the stage's roster when no
  *                        explicit --enemy is given (seed-deterministic pick)
- *   --deck <selection>   preset:<id> | draft:<focus> | cards:a,b,c | policy-pick
+ *   --deck <selection>   preset:<id>[+swap:<out>/<in>,...] | draft:<focus> | cards:a,b,c | policy-pick
  *                        (policy-pick drafts with the --policy's natural focus;
  *                        status → dot, because status play is the efficient path)
- *   --sandbox <setId>    apply a sandbox card set (cards.sandbox-sets) first
+ *   --sandbox <setId[,setId...]>  apply sandbox card set(s) (cards.sandbox-sets) first
  *   --script <path>      JSON answer array (shared io.ts layer). Play steps
  *                        answer the card prompt as `top:<uid>` or `bot:<uid>`;
  *                        a chosen-X card (WS7.2 `recoil_x`) takes an optional
@@ -157,7 +157,7 @@ const COMBAT_USAGE =
     '[--enemy <slug>] [--preset <id>] [--seed <n>] ' +
     '[--auto] [--policy naive|safe|aggressive|status] [--max-turns <n>] ' +
     '[--stage early|mid|late|impossible] ' +
-    '[--deck preset:<id>|draft:<focus>|cards:a,b,c|policy-pick] ' +
+    '[--deck preset:<id>[+swap:<out>/<in>,...]|draft:<focus>|cards:a,b,c|policy-pick] ' +
     '[--sandbox <setId>] ' +
     '[--script <path>] [--stdin] [--json-events] [--state-log <path>]';
 
@@ -750,13 +750,16 @@ export async function runCombatCli(rawArgs: string[]): Promise<void> {
         throw new Error(`Unknown enemy slug: '${flags.enemySlug}'. Valid: ${valid}`);
     }
 
-    // Sandbox set (if any) goes live BEFORE deck resolution so drafted /
-    // preset decks see the experimental cards and overrides.
+    // Sandbox set(s) go live BEFORE deck resolution so drafted / preset decks
+    // see the experimental cards and overrides. Comma-separated ids apply in
+    // order (distinct sets never share card ids; a collision throws loudly).
     if (flags.sandbox !== undefined) {
-        const set = applySandboxSet(flags.sandbox);
-        if (!set) {
-            const valid = listSandboxSets().map(s => s.id).join(', ');
-            throw new Error(`Unknown sandbox set: '${flags.sandbox}'. Valid: ${valid}`);
+        for (const oneId of flags.sandbox.split(',').map(s => s.trim()).filter(Boolean)) {
+            const set = applySandboxSet(oneId);
+            if (!set) {
+                const valid = listSandboxSets().map(s => s.id).join(', ');
+                throw new Error(`Unknown sandbox set: '${oneId}'. Valid: ${valid}`);
+            }
         }
     }
 

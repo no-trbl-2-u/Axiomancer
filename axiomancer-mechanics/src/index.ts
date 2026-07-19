@@ -211,7 +211,7 @@ export {
     simulateHazardPatternCombatDetailed, runOneEncounter,
     COMBAT_STAGE_ORDER, COMBAT_STAGE_PROFILES,
     getStageProfile, isCombatStageId, stageEligibleCardIds, buildStagePlayer,
-    draftCombatDeck, resolveDeckSelection,
+    draftCombatDeck, resolveDeckSelection, applyDeckSwaps,
     COMBAT_SIM_POLICIES, COMBAT_SIM_POLICY_ORDER, getSimPolicy, listSimPolicies,
     runPlaytestCell, runPlaytestMatrix, formatPlaytestReport,
     evaluateWinRateCurve, CURVE_SHAPE_TOLERANCES,
@@ -219,7 +219,7 @@ export {
 export type {
     CombatSimRunOptions, CombatSimDetailedOptions, CombatCardUsage, WinPathCounts,
     CombatStageId, CombatStageProfile,
-    DeckDraftOptions, CombatDeckSelection,
+    DeckDraftOptions, CombatDeckSelection, CombatDeckSwap,
     CombatSimPolicy,
     PlaytestCellSpec, PlaytestCellResult, PlaytestMatrixOptions,
     PlaytestStageSummary, PlaytestReport,

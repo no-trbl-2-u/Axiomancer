@@ -23,13 +23,17 @@
  *   --policy=<id|all>                       sim policy roster (default greedy)
  *   --deck=preset:<id>|draft:<focus>|cards:a,b,c|policy-pick
  *                                           deck selection (default policy-pick)
+ *   --deck=preset:<id>+swap:<out>/<in>,...  preset with measurement-seat swaps —
+ *                                           every copy of <out> replaced by <in>
+ *                                           (pair with --sandbox when <in> is a
+ *                                           sandbox swap-pool card)
  *   --deck=preset:all                       sweep ALL TEN presets in one matrix and
  *                                           print the per-preset x stage rollups
  *                                           (doctrine-band fit, skill gap, complexity)
  *   --enemy=<slug>                          restrict rosters to one enemy
  *   --runs=N                                runs per cell (default 60)
  *   --seed=N                                base seed (default 1)
- *   --sandbox=<setId>                       apply a sandbox card set before running
+ *   --sandbox=<setId[,setId...]>            apply sandbox card set(s) before running
  *   --upgradeable-dice                      run the spec-33 Upgradeable-Dice model
  *                                           flag-ON for this sweep (restored after)
  *   --cards                                 append the per-card usage table
@@ -118,14 +122,18 @@ function main(): void {
         }
     }
 
+    // Comma-separated: `--sandbox=swap-affliction,swap-echo` applies each set
+    // in order (distinct sets never share card ids; a collision throws loudly).
     const sandboxId = flag('sandbox');
     let sandboxNote = '';
     if (sandboxId !== undefined) {
-        const set = applySandboxSet(sandboxId);
-        if (!set) {
-            fail(`Unknown sandbox set '${sandboxId}'. Known sets: ${listSandboxSets().map(s => s.id).join(', ')}`);
+        for (const oneId of sandboxId.split(',').map(s => s.trim()).filter(Boolean)) {
+            const set = applySandboxSet(oneId);
+            if (!set) {
+                fail(`Unknown sandbox set '${oneId}'. Known sets: ${listSandboxSets().map(s => s.id).join(', ')}`);
+            }
+            sandboxNote += `Sandbox set applied: ${set.id} (${set.cards.length} cards, ${set.overrides?.length ?? 0} overrides)\n`;
         }
-        sandboxNote = `Sandbox set applied: ${set.id} (${set.cards.length} cards, ${set.overrides?.length ?? 0} overrides)\n`;
     }
 
     // Spec-33 Upgradeable-Dice flag-on capability (Phase D7 keystone). The flag

@@ -120,6 +120,14 @@ The tunable surface is TIERED. Work from the freest tier inward:
   (`registerSandboxCards`) and numeric OVERRIDES of library cards
   (`registerSandboxOverride`). Sandbox content never ships to players; it
   exists to generate A/B evidence. `forge-example` shows the shape.
+  **The standing swap pool (owner-ratified 2026-07-18):** ten per-theme
+  candidate sets `swap-<theme>` (`src/Cards/swap-pool/<theme>.swap-pool.ts`,
+  30 spells each, 10/12/8 common/uncommon/rare) exist specifically for
+  measurement-seat swaps into the preset recipes — exercise them with
+  `--sandbox=swap-<theme>` plus the
+  `--deck=preset:<id>+swap:<out>/<in>,...` grammar (every copy of `out`
+  replaced by `in`; control = same line without the swap). Their contract
+  is pinned by `src/Cards/e2e/swap-pool.engine.test.ts`.
 - **Free — deck composition.** Preset card lists in
   `src/Combat/combat.starter-deck-presets.ts` and the draft weights/defaults in
   `src/Combat/combat.deck-draft.ts` (focus weight 4x, size 10, max copies 2)
@@ -407,13 +415,17 @@ headline status-engagement / band delta.
 | Propose-only | — | new mechanics kinds, verb classes, `toCombatCard` / `effectImpact`, engine paths |
 
 **Deck-selection grammar (shared by `npm run combat-playtest` and
-`npm run combat`):** `preset:<id>` | `draft:<focus>`
+`npm run combat`):** `preset:<id>[+swap:<out>/<in>,...]` | `draft:<focus>`
 (`dot|control|utility|damage|rush-execute|balanced` — the
 `CombatDeckFocus` union in `combat.starter-deck-presets.ts` is authoritative)
 | `cards:a,b,c` | `policy-pick` (drafts from the policy's preferred focus).
+The `+swap:` suffix is the measurement-seat lever (every copy of `out`
+becomes `in`; loud-failure on a bad pair; sandbox swap-ins need their set
+applied via `--sandbox`).
 
 **Evidence CLI:** `npm run combat-playtest` — flags `--stage=`, `--policy=`,
-`--deck=`, `--enemy=`, `--runs=`, `--seed=`, `--sandbox=<setId>`, `--cards`
+`--deck=`, `--enemy=`, `--runs=`, `--seed=`, `--sandbox=<setId[,setId...]>`
+(comma-separated sets apply in order), `--cards`
 (per-card usage table), `--json`. Full cookbook: `docs/playtest.md`.
 
 **Machinery (read, don't edit):** `stageEligibleCardIds` / `buildStagePlayer`

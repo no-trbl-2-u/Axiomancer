@@ -280,8 +280,8 @@ export {
     getStageProfile, isCombatStageId, stageEligibleCardIds, buildStagePlayer,
 } from './combat.stage-profiles';
 export type { CombatStageId, CombatStageProfile } from './combat.stage-profiles';
-export { draftCombatDeck, resolveDeckSelection } from './combat.deck-draft';
-export type { DeckDraftOptions, CombatDeckSelection } from './combat.deck-draft';
+export { draftCombatDeck, resolveDeckSelection, applyDeckSwaps } from './combat.deck-draft';
+export type { DeckDraftOptions, CombatDeckSelection, CombatDeckSwap } from './combat.deck-draft';
 export {
     COMBAT_SIM_POLICIES, COMBAT_SIM_POLICY_ORDER, getSimPolicy, listSimPolicies,
 } from './combat.sim-policies';
