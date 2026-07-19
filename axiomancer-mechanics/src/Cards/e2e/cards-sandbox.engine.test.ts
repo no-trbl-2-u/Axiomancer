@@ -156,6 +156,12 @@ describe('sandbox sets — the registry after the post-v3 reset', () => {
             'chooseX-vein', 'doom-species', 'conjure-exercise',
             'roles-forge', 'roles-bulwark', 'roles-charm', 'roles-harvest',
             'sequencing-microset', 'bridge-rewards',
+            // The standing per-theme swap pools (owner-ratified fan-out
+            // 2026-07-18; 30 spells each — contract pinned in
+            // swap-pool.engine.test.ts).
+            'swap-affliction', 'swap-peroration', 'swap-forge', 'swap-akrasia',
+            'swap-control', 'swap-oracle', 'swap-harvest', 'swap-charm',
+            'swap-bulwark', 'swap-echo',
         ];
         expect(Object.keys(SANDBOX_CARD_SETS)).toEqual(expected);
         expect(listSandboxSets().map(s => s.id)).toEqual(expected);

@@ -58,7 +58,8 @@ One grammar shared by `npm run combat-playtest --deck=...`,
 
 | Form | Meaning |
 |---|---|
-| `preset:<id>` | A curated preset: `dot-erosion`, `control-lock`, `utility-bulwark`, `aggro-strike`, `balanced` (`src/Combat/combat.starter-deck-presets.ts`) |
+| `preset:<id>` | A curated preset: `erosion`, `oratory`, `foundry`, `penitent`, `standstill`, `augury`, `tithe`, `grace`, `bastion`, `refrain` (`src/Combat/combat.starter-deck-presets.ts`) |
+| `preset:<id>+swap:<out>/<in>,...` | The preset with measurement-seat swaps: every copy of `<out>` replaced by `<in>` (copy count = the seat). Loud-failure: `<out>` must be in the resolved deck and `<in>` must resolve — pair with `--sandbox=<setId>` when `<in>` is a sandbox swap-pool card |
 | `draft:<focus>` | Seeded weighted draft from the eligible pool: `dot`, `control`, `utility`, `damage`, `balanced` (focus-fitting verb classes at 4x weight; default size 10, max 2 copies; always >= 1 defend and >= 1 status card when the pool allows) |
 | `cards:a,b,c` | An explicit card-id list (invalid ids dropped) |
 | `policy-pick` | The harness drafts from the running policy's `preferredFocus` — the default |
@@ -111,6 +112,10 @@ npm run combat-playtest -- --stage=mid --enemy=audit-sentinel --deck=preset:dot-
 
 # Sandbox A/B treatment arm (run the same line without --sandbox for control)
 npm run combat-playtest -- --stage=mid --policy=dot-weaver --runs=60 --seed=1 --sandbox=forge-example
+
+# Measurement-seat swap: erosion preset with one seat's copies replaced by a
+# sandbox swap-pool candidate (control = the same line without +swap:.../--sandbox)
+npm run combat-playtest -- --stage=early --policy=blind --runs=60 --seed=1 --sandbox=swap-affliction "--deck=preset:erosion+swap:slippery-slope/<candidate-id>"
 
 # The ceiling probe: greedy should still lose to The Incompleteness
 npm run combat-playtest -- --stage=impossible --policy=greedy --runs=60 --seed=1

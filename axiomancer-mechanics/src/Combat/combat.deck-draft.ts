@@ -183,16 +183,56 @@ function ensureClassPresent(
     deck[replaceAt] = pick;
 }
 
+/** One measurement-seat substitution: every copy of `out` in the resolved
+ *  deck is replaced by `in` (copy count preserved). */
+export interface CombatDeckSwap {
+    out: string;
+    in: string;
+}
+
 /** How a playtest cell (or CLI invocation) names the deck it wants. */
 export type CombatDeckSelection =
-    | { kind: 'preset'; presetId: string }
+    | { kind: 'preset'; presetId: string; swaps?: readonly CombatDeckSwap[] }
     | { kind: 'draft'; focus: CombatDeckFocus; size?: number }
     | { kind: 'cards'; cardIds: readonly string[] }
     | { kind: 'policy-pick' };
 
 /**
+ * Applies measurement-seat swaps to a resolved deck list. Swaps apply in
+ * order (a later swap may target an id a prior swap introduced); each swap
+ * replaces EVERY copy of `out` — the preset recipe's copy count is the seat,
+ * not the card. Loud by design (the `/deck-tuning` A/B surface): a swap whose
+ * `out` is not in the deck, or whose `in` does not resolve to a library or
+ * REGISTERED sandbox card, throws instead of silently no-oping — a silent
+ * no-op would corrupt the experiment it was meant to run.
+ */
+export function applyDeckSwaps(
+    cardIds: readonly string[],
+    swaps: readonly CombatDeckSwap[],
+): string[] {
+    let deck = [...cardIds];
+    for (const swap of swaps) {
+        if (!deck.includes(swap.out)) {
+            throw new Error(
+                `Deck swap '${swap.out}'->'${swap.in}': '${swap.out}' is not in the resolved deck `
+                + `(${deck.join(', ')}).`,
+            );
+        }
+        if (!getCardById(swap.in)) {
+            throw new Error(
+                `Deck swap '${swap.out}'->'${swap.in}': '${swap.in}' is not a library card or a `
+                + `registered sandbox card — apply the sandbox set first (--sandbox=<setId>).`,
+            );
+        }
+        deck = deck.map(id => (id === swap.out ? swap.in : id));
+    }
+    return deck;
+}
+
+/**
  * Resolves a deck selection into a playable card-id list:
- * - 'preset' → `buildPresetDeck(presetId)` (empty for an unknown preset id).
+ * - 'preset' → `buildPresetDeck(presetId)` (empty for an unknown preset id),
+ *   then `applyDeckSwaps` when the selection carries measurement-seat swaps.
  * - 'draft'  → `draftCombatDeck` with the selection's focus/size, scoped to
  *   `stage` when given.
  * - 'cards'  → the trusted list with invalid ids dropped (exactly like
@@ -207,8 +247,11 @@ export function resolveDeckSelection(
     rng?: () => number,
 ): string[] {
     switch (selection.kind) {
-        case 'preset':
-            return buildPresetDeck(selection.presetId);
+        case 'preset': {
+            const deck = buildPresetDeck(selection.presetId);
+            if (!selection.swaps || selection.swaps.length === 0) return deck;
+            return applyDeckSwaps(deck, selection.swaps);
+        }
         case 'draft':
             return draftCombatDeck({ focus: selection.focus, size: selection.size, stage, rng });
         case 'cards':

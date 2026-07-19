@@ -23,6 +23,24 @@ import {
     type SandboxCardPatch,
 } from './cards.sandbox';
 import type { Card } from './types';
+// ── The per-theme swap pools (owner-ratified fan-out 2026-07-18) ─────────────
+// Ten standing candidate sets — 30 spells each, 10/12/8 common/uncommon/rare —
+// authored as /deck-tuning measurement-seat candidates for the preset recipes
+// (`--deck=preset:<id>+swap:<out>/<in>` + `--sandbox=swap-<theme>`). Never
+// player-facing; promotion into cards.library.ts is the only shipping path.
+// Contract pinned by src/Cards/e2e/swap-pool.engine.test.ts. NOTE: these are
+// deliberately TEN sets, not one umbrella — the doctrine sweep registers every
+// set at once, so a duplicate-cards umbrella would collide.
+import { SWAP_POOL_AFFLICTION } from './swap-pool/affliction.swap-pool';
+import { SWAP_POOL_AKRASIA } from './swap-pool/akrasia.swap-pool';
+import { SWAP_POOL_BULWARK } from './swap-pool/bulwark.swap-pool';
+import { SWAP_POOL_CHARM } from './swap-pool/charm.swap-pool';
+import { SWAP_POOL_CONTROL } from './swap-pool/control.swap-pool';
+import { SWAP_POOL_ECHO } from './swap-pool/echo.swap-pool';
+import { SWAP_POOL_FORGE } from './swap-pool/forge.swap-pool';
+import { SWAP_POOL_HARVEST } from './swap-pool/harvest.swap-pool';
+import { SWAP_POOL_ORACLE } from './swap-pool/oracle.swap-pool';
+import { SWAP_POOL_PERORATION } from './swap-pool/peroration.swap-pool';
 
 export interface SandboxCardSet {
     id: string;
@@ -1013,6 +1031,17 @@ export const SANDBOX_CARD_SETS: Record<string, SandboxCardSet> = {
             enteredIntoEvidence, stolenCadence, unbrokenCountenance,
         ],
     },
+    // ── The standing per-theme swap pools (2026-07-18 fan-out) ──────────────
+    'swap-affliction': SWAP_POOL_AFFLICTION,
+    'swap-peroration': SWAP_POOL_PERORATION,
+    'swap-forge': SWAP_POOL_FORGE,
+    'swap-akrasia': SWAP_POOL_AKRASIA,
+    'swap-control': SWAP_POOL_CONTROL,
+    'swap-oracle': SWAP_POOL_ORACLE,
+    'swap-harvest': SWAP_POOL_HARVEST,
+    'swap-charm': SWAP_POOL_CHARM,
+    'swap-bulwark': SWAP_POOL_BULWARK,
+    'swap-echo': SWAP_POOL_ECHO,
 };
 
 /** All registered sandbox sets, in declaration order. */

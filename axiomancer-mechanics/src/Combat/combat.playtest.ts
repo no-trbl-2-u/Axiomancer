@@ -481,7 +481,10 @@ export function runPlaytestMatrix(options: PlaytestMatrixOptions = {}): Playtest
 
 function deckLabel(selection: CombatDeckSelection): string {
     switch (selection.kind) {
-        case 'preset': return `preset:${selection.presetId}`;
+        case 'preset':
+            return selection.swaps && selection.swaps.length > 0
+                ? `preset:${selection.presetId}+${selection.swaps.length}sw`
+                : `preset:${selection.presetId}`;
         case 'draft': return `draft:${selection.focus}`;
         case 'cards': return `cards(${selection.cardIds.length})`;
         case 'policy-pick': return 'policy-pick';
@@ -683,9 +686,12 @@ export function formatPlaytestReport(report: PlaytestReport, opts?: { perCard?: 
 // ─── CLI-facing helpers (UI-free logic the CLIs delegate to) ─────────────────
 
 /** The deck-selection flag grammar shared by `npm run combat-playtest` and
- *  `npm run combat -- --deck`. */
+ *  `npm run combat -- --deck`. The `+swap:` suffix runs a preset with
+ *  measurement-seat substitutions (every copy of `out` replaced by `in`) —
+ *  the `/deck-tuning` A/B surface for swap-pool candidates; swap-ins that
+ *  live in a sandbox set need that set applied (`--sandbox=<setId>`). */
 export const DECK_SELECTION_GRAMMAR =
-    'preset:<id> | draft:<focus> | cards:<id,id,...> | policy-pick';
+    'preset:<id>[+swap:<out>/<in>,...] | draft:<focus> | cards:<id,id,...> | policy-pick';
 
 /** Every draftable focus (the `CombatDeckFocus` union, as data for parsing). */
 const DECK_DRAFT_FOCUSES: readonly CombatDeckFocus[] = Object.freeze([
@@ -702,13 +708,34 @@ export function parseDeckSelectionArg(raw: string): CombatDeckSelection {
     const value = raw.trim();
     if (value === 'policy-pick') return { kind: 'policy-pick' };
     if (value.startsWith('preset:')) {
-        const presetId = value.slice('preset:'.length).trim();
+        const rest = value.slice('preset:'.length).trim();
+        const swapMarker = '+swap:';
+        const markerAt = rest.indexOf(swapMarker);
+        const presetId = (markerAt === -1 ? rest : rest.slice(0, markerAt)).trim();
         if (!getDeckPreset(presetId)) {
             throw new Error(
                 `Unknown deck preset '${presetId}'. Known presets: ${COMBAT_DECK_PRESET_ORDER.join(', ')}`,
             );
         }
-        return { kind: 'preset', presetId };
+        if (markerAt === -1) return { kind: 'preset', presetId };
+        const swaps = rest.slice(markerAt + swapMarker.length)
+            .split(',').map(s => s.trim()).filter(Boolean)
+            .map(pair => {
+                const parts = pair.split('/').map(p => p.trim());
+                if (parts.length !== 2 || !parts[0] || !parts[1]) {
+                    throw new Error(
+                        `Bad swap pair '${pair}' — expected <out>/<in>. Grammar: ${DECK_SELECTION_GRAMMAR}`,
+                    );
+                }
+                return { out: parts[0], in: parts[1] };
+            });
+        if (swaps.length === 0) {
+            throw new Error(`'+swap:' needs at least one <out>/<in> pair. Grammar: ${DECK_SELECTION_GRAMMAR}`);
+        }
+        // Swap-in ids are validated at RESOLVE time (`applyDeckSwaps`), not
+        // here — a sandbox swap-in is only registered once the CLI applies
+        // its `--sandbox` set, which happens after flag parsing.
+        return { kind: 'preset', presetId, swaps };
     }
     if (value.startsWith('draft:')) {
         const focus = value.slice('draft:'.length).trim();
