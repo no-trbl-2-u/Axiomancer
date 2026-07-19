@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Axiomancer — AI Art Pipeline Architecture</title>
+<style>
+  :root{
+    --bg:#0b0d10; --panel:#12151a; --panel2:#171b22; --edge:#2a303b;
+    --ink:#d8dbe2; --dim:#8a91a0; --faint:#5a6172;
+    --ice:#8fd3e8; --bone:#e8e0cc; --ember:#e0a45c; --moss:#9ec98f;
+    --rune:#b48fe8; --blood:#d87878;
+    --mono:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    --serif:Georgia,"Times New Roman",serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font:15px/1.55 -apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;padding:28px 20px 80px}
+  .wrap{max-width:1180px;margin:0 auto}
+  header{margin-bottom:26px;border-bottom:1px solid var(--edge);padding-bottom:18px}
+  h1{font-family:var(--serif);font-weight:600;font-size:28px;letter-spacing:.5px;color:var(--bone)}
+  h1 .thin{color:var(--dim);font-weight:400}
+  .sub{color:var(--dim);margin-top:6px;font-size:14px}
+  .sub code{font-family:var(--mono);font-size:12.5px;color:var(--ice);background:var(--panel);padding:1px 6px;border-radius:4px;border:1px solid var(--edge)}
+
+  nav{display:flex;gap:8px;margin:22px 0 26px;flex-wrap:wrap}
+  nav button{background:var(--panel);border:1px solid var(--edge);color:var(--dim);padding:8px 16px;border-radius:8px;cursor:pointer;font-size:14px;transition:all .15s}
+  nav button:hover{color:var(--ink);border-color:var(--faint)}
+  nav button.on{background:var(--panel2);color:var(--bone);border-color:var(--ice);box-shadow:0 0 12px rgba(143,211,232,.12)}
+  section{display:none}
+  section.on{display:block;animation:fade .25s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+  /* ---------- pipeline flow ---------- */
+  .flow{display:flex;flex-direction:column;gap:0}
+  .lane{display:flex;gap:14px;align-items:stretch;flex-wrap:wrap}
+  .node{background:var(--panel);border:1px solid var(--edge);border-radius:10px;padding:13px 15px;flex:1 1 200px;min-width:200px;cursor:pointer;transition:all .15s;position:relative}
+  .node:hover{border-color:var(--faint);transform:translateY(-1px)}
+  .node.sel{border-color:var(--accent,var(--ice));box-shadow:0 0 16px rgba(143,211,232,.14)}
+  .node h3{font-size:14.5px;color:var(--bone);display:flex;align-items:center;gap:8px}
+  .node .tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.6px;color:var(--accent,var(--ice));border:1px solid currentColor;border-radius:4px;padding:1px 6px;opacity:.85}
+  .node p{color:var(--dim);font-size:12.8px;margin-top:6px}
+  .node code{font-family:var(--mono);font-size:11.5px;color:var(--ice)}
+  .node.src{--accent:var(--faint)} .node.src .tag{color:var(--dim)}
+  .node.style{--accent:var(--bone)} .node.style .tag{color:var(--bone)}
+  .node.gen{--accent:var(--ember)} .node.gen .tag{color:var(--ember)}
+  .node.qa{--accent:var(--rune)} .node.qa .tag{color:var(--rune)}
+  .node.post{--accent:var(--ice)}
+  .node.ingest{--accent:var(--moss)} .node.ingest .tag{color:var(--moss)}
+  .down{display:flex;justify-content:center;color:var(--faint);font-size:18px;padding:6px 0;user-select:none}
+  .down span{background:var(--bg);padding:0 10px}
+  .lanelabel{font-family:var(--mono);font-size:11px;letter-spacing:1.5px;color:var(--faint);text-transform:uppercase;margin:2px 0 8px}
+
+  /* detail drawer */
+  #detail{margin-top:22px;background:var(--panel2);border:1px solid var(--edge);border-left:3px solid var(--ice);border-radius:10px;padding:16px 18px;min-height:88px}
+  #detail h4{color:var(--bone);font-size:15px;margin-bottom:6px}
+  #detail p,#detail li{color:var(--dim);font-size:13.5px}
+  #detail ul{margin:6px 0 0 18px}
+  #detail code{font-family:var(--mono);font-size:12px;color:var(--ice)}
+  #detail .hint{color:var(--faint);font-style:italic}
+
+  /* ---------- backends ---------- */
+  .btoggle{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap}
+  .btoggle button{background:var(--panel);border:1px solid var(--edge);color:var(--dim);padding:9px 15px;border-radius:8px;cursor:pointer;font-size:13.5px}
+  .btoggle button.on{color:var(--bone);border-color:var(--ember);box-shadow:0 0 12px rgba(224,164,92,.14)}
+  .bcard{background:var(--panel);border:1px solid var(--edge);border-radius:12px;padding:20px 22px}
+  .bcard h3{color:var(--bone);font-size:18px;font-family:var(--serif)}
+  .bcard .role{color:var(--ember);font-family:var(--mono);font-size:12px;letter-spacing:.8px;margin-top:2px}
+  .badges{display:flex;gap:8px;margin:14px 0;flex-wrap:wrap}
+  .badge{font-size:12px;padding:4px 10px;border-radius:14px;border:1px solid var(--edge);color:var(--dim)}
+  .badge.good{color:var(--moss);border-color:rgba(158,201,143,.5)}
+  .badge.mid{color:var(--ember);border-color:rgba(224,164,92,.5)}
+  .badge.bad{color:var(--blood);border-color:rgba(216,120,120,.5)}
+  .bcols{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:10px}
+  .bcols h5{color:var(--ink);font-size:13px;margin-bottom:5px;text-transform:uppercase;letter-spacing:1px;font-family:var(--mono);font-weight:400}
+  .bcols ul{margin-left:17px}
+  .bcols li{color:var(--dim);font-size:13.3px;margin-bottom:3px}
+  .swapnote{margin-top:16px;padding:11px 14px;background:var(--bg);border:1px dashed var(--edge);border-radius:8px;color:var(--faint);font-size:12.8px}
+  .swapnote code{font-family:var(--mono);color:var(--ember);font-size:11.8px}
+  @media(max-width:760px){.bcols{grid-template-columns:1fr}}
+
+  /* ---------- roadmap ---------- */
+  .phases{display:flex;flex-direction:column;gap:0;margin-top:4px}
+  .phase{display:flex;gap:18px}
+  .rail{display:flex;flex-direction:column;align-items:center;width:34px;flex-shrink:0}
+  .dot{width:14px;height:14px;border-radius:50%;border:2px solid var(--ice);background:var(--bg);margin-top:6px;flex-shrink:0}
+  .phase.opt .dot{border-color:var(--faint);border-style:dashed}
+  .rail .line{width:1px;flex:1;background:var(--edge)}
+  .pbody{padding-bottom:26px;flex:1}
+  .pbody h3{color:var(--bone);font-size:15.5px}
+  .pbody h3 .est{color:var(--faint);font-weight:400;font-size:12.5px;font-family:var(--mono);margin-left:8px}
+  .pbody ul{margin:7px 0 0 18px}
+  .pbody li{color:var(--dim);font-size:13.4px;margin-bottom:3px}
+  .pbody .gate{margin-top:8px;display:inline-block;font-size:12.3px;color:var(--rune);border:1px solid rgba(180,143,232,.45);border-radius:6px;padding:3px 9px}
+  .pbody code{font-family:var(--mono);font-size:12px;color:var(--ice)}
+
+  /* ---------- matrix ---------- */
+  .mwrap{overflow-x:auto;border:1px solid var(--edge);border-radius:10px}
+  table{border-collapse:collapse;width:100%;min-width:720px;font-size:13.2px}
+  th,td{padding:9px 13px;border-bottom:1px solid var(--edge);text-align:left}
+  th{background:var(--panel2);color:var(--bone);font-weight:600;font-size:12.5px}
+  td:first-child{color:var(--ink);white-space:nowrap}
+  td{color:var(--dim)}
+  .y{color:var(--moss)} .n{color:var(--blood)} .m{color:var(--ember)}
+  .foot{color:var(--faint);font-size:12.3px;margin-top:14px}
+  .foot a{color:var(--ice)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>AI Art Pipeline <span class="thin">— proposed architecture</span></h1>
+    <div class="sub">Visual companion to <code>plan/ideas/AI_ART_PIPELINE_OPTIONS.md</code> · proposal only, nothing implemented · 2026-07-19</div>
+  </header>
+
+  <nav>
+    <button class="on" data-t="pipe">Pipeline</button>
+    <button data-t="back">Generator backends</button>
+    <button data-t="road">Roadmap</button>
+    <button data-t="matrix">Trade-off matrix</button>
+  </nav>
+
+  <!-- ============ PIPELINE ============ -->
+  <section id="pipe" class="on">
+    <div class="lanelabel">1 · Sources of truth (existing repo)</div>
+    <div class="lane">
+      <div class="node src" data-d="d-libs"><h3><span class="tag">MECHANICS</span> Content libraries</h3><p><code>enemy.library.ts</code> (~73) · <code>cards.library.ts</code> (~71) · equipment · world content</p></div>
+      <div class="node src" data-d="d-specs"><h3><span class="tag">SPECS</span> Character / story / world specs</h3><p><code>specs/characters/</code> · <code>specs/story/</code> · <code>specs/world/</code> — flavor &amp; description text</p></div>
+      <div class="node style" data-d="d-style"><h3><span class="tag">STYLE/V1</span> Style bible</h3><p><code>STYLE.md</code> + 8–12 canonical reference images — the cold-codex woodcut/ink look, frozen &amp; versioned</p></div>
+    </div>
+    <div class="down"><span>▼</span></div>
+
+    <div class="lanelabel">2 · Compile (deterministic, in-repo)</div>
+    <div class="lane">
+      <div class="node" data-d="d-manifest"><h3><span class="tag">ART:STATUS</span> <code>art.manifest.json</code></h3><p>Scraped registry of every art-bearing entity: slug, category, status (missing / temp / final). Makes the gap queryable.</p></div>
+      <div class="node" data-d="d-prompts"><h3><span class="tag">SOURCE CODE</span> Prompt files</h3><p><code>prompts/&lt;category&gt;/&lt;slug&gt;.md</code> — authored once per subject, reviewed &amp; diffable</p></div>
+      <div class="node" data-d="d-compiler"><h3><span class="tag">COMPILER</span> Prompt compiler</h3><p>style preamble + category template + entity description → final prompt</p></div>
+    </div>
+    <div class="down"><span>▼</span></div>
+
+    <div class="lanelabel">3 · Generate (the only swappable stage)</div>
+    <div class="lane">
+      <div class="node gen" data-d="d-adapter"><h3><span class="tag">ADAPTER</span> Generator interface</h3><p><code>generate(slug, prompt, refs, n) → candidates/</code> — one seam, four implementations: <code>openai</code> · <code>comfyui</code> · <code>scenario</code> · <code>recraft</code>. See “Generator backends” tab.</p></div>
+    </div>
+    <div class="down"><span>▼</span></div>
+
+    <div class="lanelabel">4 · Judge</div>
+    <div class="lane">
+      <div class="node qa" data-d="d-prescreen"><h3><span class="tag">CLAUDE</span> Vision pre-screen</h3><p>Grades candidates against <code>STYLE.md</code> — palette, composition, artifacts. Fails re-queue automatically.</p></div>
+      <div class="node qa" data-d="d-review"><h3><span class="tag">HUMAN</span> Contact-sheet review</h3><p><code>art:review</code> — static HTML grid, category neighbors alongside. Human picks winners; choices recorded.</p></div>
+    </div>
+    <div class="down"><span>▼</span></div>
+
+    <div class="lanelabel">5 · Post-process (automates today’s manual recipe)</div>
+    <div class="lane">
+      <div class="node post" data-d="d-post"><h3><span class="tag">SHARP</span> trim → alpha-matte → glow → resize → WebP</h3><p>Luminance-keyed alpha on black, graded glow edge, ≤512–640px, q≈80, &gt;150 KB warning. Deterministic, idempotent, fixture-tested.</p></div>
+    </div>
+    <div class="down"><span>▼</span></div>
+
+    <div class="lanelabel">6 · Ingest &amp; record (existing contract, now scripted)</div>
+    <div class="lane">
+      <div class="node ingest" data-d="d-assets"><h3><span class="tag">APP</span> <code>assets/images/&lt;cat&gt;/</code></h3><p>File landed + that directory’s <code>index.ts</code> slug registry updated</p></div>
+      <div class="node ingest" data-d="d-prov"><h3><span class="tag">LEDGER</span> <code>provenance.json</code></h3><p>Backend, model+version, prompt hash, style version, refs, seed/workflow hash, date, original archive path. Doubles as the AI-disclosure record.</p></div>
+      <div class="node ingest" data-d="d-verify"><h3><span class="tag">GATE</span> <code>verify:visual</code></h3><p>Existing mobile visual gate covers in-app rendering, as usual</p></div>
+    </div>
+
+    <div id="detail"><h4>Click any node</h4><p class="hint">Each box expands here with what it is, where it lives, and why it exists.</p></div>
+  </section>
+
+  <!-- ============ BACKENDS ============ -->
+  <section id="back">
+    <div class="btoggle">
+      <button class="on" data-b="openai">A · OpenAI gpt-image-2</button>
+      <button data-b="comfy">B · ComfyUI + FLUX.2 klein + LoRA</button>
+      <button data-b="scenario">C1 · Scenario</button>
+      <button data-b="recraft">C2 · Recraft (icons)</button>
+      <button data-b="mj">D · Midjourney</button>
+    </div>
+    <div class="bcard" id="bcard"></div>
+    <div class="swapnote">The pipeline never changes between these — only the adapter behind
+      <code>generate(slug, prompt, refs, n)</code> does. Recommended path: <strong>A now, B when style drift bites</strong>;
+      A’s curated output becomes B’s LoRA training corpus, so nothing is wasted.</div>
+  </section>
+
+  <!-- ============ ROADMAP ============ -->
+  <section id="road">
+    <div class="phases">
+      <div class="phase"><div class="rail"><div class="dot"></div><div class="line"></div></div>
+        <div class="pbody"><h3>art-1 · Foundation + style lock<span class="est">~2–4 evenings</span></h3>
+          <ul><li>Optional manual exploration session to nail the cold-codex look</li>
+              <li>Write <code>STYLE.md</code>, commit 8–12 reference images (<code>style/v1</code>)</li>
+              <li>Manifest scraper + <code>art:status</code> gap report</li></ul>
+          <span class="gate">GATE — 10-subject consistency test on gpt-image-2 decides A vs pulling B/C1 forward</span></div></div>
+      <div class="phase"><div class="rail"><div class="dot"></div><div class="line"></div></div>
+        <div class="pbody"><h3>art-2 · Pipeline build<span class="est">~1 week of evenings</span></h3>
+          <ul><li><code>tools/art-pipeline/</code>: compiler, openai adapter, sharp post-process, ingest + provenance + registry writer, contact-sheet tool</li>
+              <li>OpenAI API billing; keys in env; per-batch cost log</li></ul></div></div>
+      <div class="phase"><div class="rail"><div class="dot"></div><div class="line"></div></div>
+        <div class="pbody"><h3>art-3 · Backfill<span class="est">~2–3 weeks calendar · ≈$20–90 total</span></h3>
+          <ul><li>Batches of 10–15 subjects × 3 candidates: cards gap (~50) → enemies gap (~19) → worst temp art → portraits → backgrounds → treasure</li>
+              <li>Ingest <code>tmp-images/</code> walls/doors through the same post-process</li></ul></div></div>
+      <div class="phase opt"><div class="rail"><div class="dot"></div><div class="line"></div></div>
+        <div class="pbody"><h3>art-4 · Consistency upgrade (optional)<span class="est">when drift bites</span></h3>
+          <ul><li>Curate 20–50 best images → train <code>axiomancer-codex-v1</code> LoRA (FLUX.2 klein 4B, local or rented GPU)</li>
+              <li><code>comfyui</code> adapter with fixed seeds in provenance; re-run the art-1 test set; flip default backend if it wins</li></ul></div></div>
+      <div class="phase opt"><div class="rail"><div class="dot"></div></div>
+        <div class="pbody"><h3>art-5 · Icons + ship hygiene<span class="est">with UI icon work</span></h3>
+          <ul><li>Recraft custom style → burn down the <code>SVG_ASSET_SPEC.md</code> icon backlog (~$0.07/vector)</li>
+              <li>Pre-ship store-policy re-check; Steam disclosure (if ever) filled from <code>provenance.json</code></li></ul></div></div>
+    </div>
+  </section>
+
+  <!-- ============ MATRIX ============ -->
+  <section id="matrix">
+    <div class="mwrap"><table>
+      <tr><th></th><th>A · gpt-image-2</th><th>B · FLUX.2 klein + LoRA</th><th>C1 · Scenario</th><th>C2 · Recraft</th><th>D · Midjourney</th></tr>
+      <tr><td>Automatable</td><td class="y">✅ trivial</td><td class="y">✅ full</td><td class="y">✅</td><td class="y">✅</td><td class="n">❌ ToS</td></tr>
+      <tr><td>Style consistency</td><td class="m">◐ refs + prompt</td><td class="y">✅ trained LoRA</td><td class="y">✅ trained model</td><td class="m">◐ custom style</td><td class="y">✅ manual --sref</td></tr>
+      <tr><td>Reproducible (seed)</td><td class="n">❌</td><td class="y">✅</td><td class="m">◐</td><td class="m">◐</td><td class="n">❌</td></tr>
+      <tr><td>Marginal cost / image</td><td>~$0.04–0.21</td><td class="y">$0</td><td>subscription</td><td>~$0.035</td><td>subscription</td></tr>
+      <tr><td>Up-front effort</td><td class="y">days</td><td class="m">1–2 weeks</td><td>~week</td><td class="y">days</td><td class="y">evening</td></tr>
+      <tr><td>Hardware</td><td class="y">none</td><td class="m">~13 GB VRAM GPU</td><td class="y">none</td><td class="y">none</td><td class="y">none</td></tr>
+      <tr><td>Commercial license</td><td class="y">✅ user owns</td><td class="y">✅ Apache 2.0 (4B)</td><td class="y">✅</td><td class="y">✅</td><td class="y">✅ &lt;$1M tier</td></tr>
+      <tr><td>Platform risk</td><td class="m">model rotations</td><td class="y">none</td><td class="m">lock-in</td><td>low</td><td>n/a</td></tr>
+      <tr><td>Grimdark filters</td><td class="m">occasional</td><td class="y">none</td><td>some</td><td>some</td><td>some</td></tr>
+    </table></div>
+    <div class="foot">Figures are July-2026, medium-to-high confidence — provenance and caveats in
+      <code style="font-family:var(--mono)">AI_ART_PIPELINE_OPTIONS.md</code> §5 / §8. Recommendation: A-then-B (§6).</div>
+  </section>
+</div>
+
+<script>
+  // tabs
+  document.querySelectorAll('nav button').forEach(b=>b.addEventListener('click',()=>{
+    document.querySelectorAll('nav button').forEach(x=>x.classList.remove('on'));
+    document.querySelectorAll('section').forEach(x=>x.classList.remove('on'));
+    b.classList.add('on'); document.getElementById(b.dataset.t).classList.add('on');
+  }));
+
+  // pipeline node details
+  const D={
+    'd-libs':['Content libraries (existing)','The mechanics package is the source of truth for what needs art. The manifest scraper reads <code>enemy.library.ts</code> (~73 enemies, 54 have temp art), <code>cards.library.ts</code> (~71 cards, 21 have temp art), the equipment library and world content — no hand-maintained asset lists.'],
+    'd-specs':['Specs & flavor text (existing)','Character, story, and world specs carry the descriptive language the prompt files start from. Claude Code drafts each entity description from these; a human edits once, then it is frozen in the prompt file.'],
+    'd-style':['Style bible — the consistency anchor','<code>tools/art-pipeline/STYLE.md</code> + <code>style-refs/</code>: a prose spec of the cold-codex woodcut/ink look (palette from the <code>--axm-*</code> tokens, single-source lighting on black, per-category composition rules) plus 8–12 canonical reference images. Versioned as <code>style/v1</code> — every generated image records which style version produced it. Serves triple duty: reference-conditioning set (Option A), LoRA corpus seed (Option B), custom-model corpus (C1).'],
+    'd-manifest':['art.manifest.json + art:status','Generated, never hand-edited. Every art-bearing entity with slug, category, name, description, and asset status (missing / temp / final). <code>npm run art:status</code> prints the gap report — the art backlog becomes a queryable artifact instead of tribal knowledge.'],
+    'd-prompts':['Prompt files are source code','<code>prompts/&lt;category&gt;/&lt;slug&gt;.md</code> — one per subject, reviewed in PRs, diffable, blame-able. Regenerating an asset months later starts from the exact same text. This is the discipline that makes hosted generation (no seeds) survivable.'],
+    'd-compiler':['Prompt compiler','Pure function: frozen style preamble + category template (enemy = ¾ figure on void; card = centered emblem; portrait = bust) + the entity description → the final prompt string. Deterministic; unit-testable; the compiled prompt hash lands in provenance.'],
+    'd-adapter':['The swappable seam','One interface, four implementations. Config picks the backend; keys live in env. This seam is why the A-then-B migration is a config change, not a rebuild — see the “Generator backends” tab for what each backend trades away.'],
+    'd-prescreen':['Claude vision pre-screen','Claude Code grades every candidate against STYLE.md before a human sees it: palette adherence, composition rule for its category, obvious artifacts (extra limbs, mushy linework, wrong background). Failures are rejected or re-queued automatically — turns a 450-image curation slog into approving pre-filtered winners.'],
+    'd-review':['Human contact sheet','<code>npm run art:review</code> builds a static HTML grid: all candidates per subject with already-ingested neighbors from the same category alongside, so consistency is judged in context. Picks recorded to <code>picks.json</code>, which drives ingest. The human stays the taste authority.'],
+    'd-post':['Post-process — scripting the July temp-drop recipe','A <code>sharp</code> script automating what was done by hand for the 2026-07-06 temp drop: trim, luminance-keyed alpha-matte of the black background with a graded glow edge, resize to ≤512–640px, WebP q≈80, warn over 150 KB. Original uncompressed outputs archived so post-processing can be redone without regeneration. Open question §8: recover the exact matte recipe before scripting.'],
+    'd-assets':['Asset landing + registry write','The processed WebP lands in the right <code>assets/images/&lt;category&gt;/</code> directory and that directory’s <code>index.ts</code> (slug → require) is regenerated — the app’s existing typed-registry contract, now machine-written.'],
+    'd-prov':['Provenance ledger','Per-directory <code>provenance.json</code> (already exists, currently sparse) becomes complete: backend, model + snapshot, prompt file + hash, style version, reference images, seed/workflow hash (Option B), date, archive path. It is simultaneously the reproducibility record, the copyright-registration evidence of human contribution, and the store AI-disclosure answer.'],
+    'd-verify':['Existing gate, unchanged','<code>npm run verify:visual --workspace axiomancer-mobile</code> already covers in-app rendering. The pipeline changes nothing here — generated registries flow through the same gate as hand-written code.']
+  };
+  const detail=document.getElementById('detail');
+  document.querySelectorAll('.node').forEach(n=>n.addEventListener('click',()=>{
+    document.querySelectorAll('.node').forEach(x=>x.classList.remove('sel'));
+    n.classList.add('sel');
+    const [t,b]=D[n.dataset.d];
+    detail.innerHTML='<h4>'+t+'</h4><p>'+b+'</p>';
+  }));
+
+  // backends
+  const B={
+    openai:{t:'Option A — OpenAI gpt-image-2 (hosted API)',r:'RECOMMENDED START',
+      badges:[['Consistency: refs + prompt (◐)','mid'],['Reproducibility: none','bad'],['~$0.04–0.21 / image','mid'],['Setup: days','good'],['No hardware','good'],['Commercial: user owns outputs','good']],
+      pro:['Fastest path to shipped art; zero infrastructure','Best prompt adherence + instruction-following edits','3–5 reference images per call give a real (statistical) style lock','Full ~150-image backlog ≈ $20–90 with 3 candidates each'],
+      con:['Style locking is probabilistic — expect drift at the tails, plan 2–3× candidates per keep','No seeds: “regenerate like before” means re-run + re-curate','Model rotations (~yearly) — keep the adapter thin','Content filters occasionally balk at grimdark subjects']},
+    comfy:{t:'Option B — ComfyUI + FLUX.2 [klein] 4B + style LoRA (local)',r:'THE UPGRADE PATH',
+      badges:[['Consistency: trained LoRA (✅)','good'],['Reproducibility: full (seeds)','good'],['$0 marginal / image','good'],['Setup: 1–2 weeks','mid'],['~13 GB VRAM GPU (or rented)','mid'],['Apache 2.0 (klein 4B)','good']],
+      pro:['LoRA bakes the style into the weights — image #151 structurally matches image #3','Seed + workflow JSON + LoRA hash in provenance → byte-identical regeneration (matches the engine’s deterministic-RNG ethos)','Free experimentation; no content filters; weights are yours forever','ControlNet-style conditioning for tiles and frames'],
+      con:['ComfyUI learning curve + LoRA training craft + CUDA yak-shaving','Adds an ops surface (a GPU box) the repo doesn’t have today','4B raw quality < gpt-image-2 on open-ended prompts — LoRA closes it for the one style that matters','License is klein-4B-specific: dev / klein-9B tiers are non-commercial weights']},
+    scenario:{t:'Option C1 — Scenario (hosted custom-style training)',r:'MIDDLE PATH',
+      badges:[['Consistency: trained model (✅)','good'],['Reproducibility: partial','mid'],['~$15–200 / month','mid'],['Setup: ~week','mid'],['No hardware','good'],['Pricing: aggregator-sourced — verify','mid']],
+      pro:['Option B’s consistency mechanism without owning the training stack','Game-asset-focused product; API generation against your trained model'],
+      con:['Platform lock-in on the trained model (retrain elsewhere from your corpus if they reprice or fold)','Subscription drag vs A’s pennies; another billing surface','Tier details medium-confidence — verify the vendor page before committing']},
+    recraft:{t:'Option C2 — Recraft V4.1 (icon side-channel)',r:'ADDITIVE UNDER ANY OPTION',
+      badges:[['Custom uploaded styles','good'],['Vector / SVG output','good'],['~$0.035 raster · ~$0.07 vector','good'],['Setup: days','good'],['No hardware','good']],
+      pro:['The only backend that answers SVG_ASSET_SPEC.md — raster models make poor SVGs','Cheap per-image API; style-locked including custom styles'],
+      con:['Not the main-illustration play — icons and UI marks only','Phase art-5; adopt regardless of the A/B/C1 choice']},
+    mj:{t:'Option D — Midjourney V8.1 (manual only)',r:'NEVER THE PIPELINE',
+      badges:[['No public API','bad'],['Automation violates ToS — ban risk','bad'],['$10–30 / month','mid'],['Image quality: superb','good']],
+      pro:['--sref / moodboards are excellent for finding the cold-codex look','Legitimate role: one evening of style exploration; winners feed the style bible / LoRA corpus'],
+      con:['Enterprise API still in survey stage as of July 2026','Third-party API wrappers are ToS-violating; do not build on them']}
+  };
+  const bcard=document.getElementById('bcard');
+  function renderB(k){
+    const b=B[k];
+    bcard.innerHTML='<h3>'+b.t+'</h3><div class="role">'+b.r+'</div>'
+      +'<div class="badges">'+b.badges.map(x=>'<span class="badge '+x[1]+'">'+x[0]+'</span>').join('')+'</div>'
+      +'<div class="bcols"><div><h5>For</h5><ul>'+b.pro.map(x=>'<li>'+x+'</li>').join('')+'</ul></div>'
+      +'<div><h5>Against</h5><ul>'+b.con.map(x=>'<li>'+x+'</li>').join('')+'</ul></div></div>';
+  }
+  document.querySelectorAll('.btoggle button').forEach(b=>b.addEventListener('click',()=>{
+    document.querySelectorAll('.btoggle button').forEach(x=>x.classList.remove('on'));
+    b.classList.add('on'); renderB(b.dataset.b);
+  }));
+  renderB('openai');
+</script>
+</body>
+</html>
