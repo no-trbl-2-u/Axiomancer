@@ -6,6 +6,11 @@
  * a line of choreography — the owner feel-rank knob (ritual duration vs. combat
  * pace) lives in `tumbleDurationMs` + `staggerMs`.
  *
+ * The choreography is the HAZARD CAST (owner call 2026-07-19): the proven
+ * `TumblingDie` fall-in from `components/hazard/HazardOverlays.tsx` — each die
+ * drops from above the tray rotated hard, lands, and micro-bounces to rest.
+ * The drop geometry constants below mirror that overlay verbatim.
+ *
  * All values are FLAG-ON only (the ritual never runs flag-off). They describe
  * PRESENTATION; the engine RNG already decided every outcome — nothing here can
  * change what a settled die shows (dice-honesty law, 2026-07-09).
@@ -14,32 +19,34 @@
 export interface DiceRollTiming {
     /** Per-die start offset so the eye can track four dice landing in sequence. */
     readonly staggerMs: number;
-    /** How long a single die spends tumbling before its settle spring fires. */
+    /** How long a single die spends falling before its landing springs fire. */
     readonly tumbleDurationMs: number;
-    /** Decorative face-cycle cadence during the tumble (the glyph flicker). */
-    readonly faceCycleMs: number;
-    /** Whole 3D turns the die spins through while tumbling (feel only). */
-    readonly tumbleTurns: number;
-    /** Peak lift (px) at the top of the tumble arc. */
-    readonly liftPx: number;
-    /** Peak scale pop at the top of the tumble arc. */
-    readonly popScale: number;
-    /** Settle spring — the landing bounce onto the engine-rolled face. */
-    readonly settleSpring: { readonly damping: number; readonly stiffness: number; readonly mass: number };
+    /** Drop height (px) the die falls in from above the tray line. */
+    readonly dropPx: number;
+    /** Entry rotation (deg) the die carries at the top of the fall (unwinds to 0). */
+    readonly entryRotateDeg: number;
+    /** Peak micro-bounce lift (px) after the landing (the settle overshoot). */
+    readonly bounceLiftPx: number;
+    /** Peak micro-bounce wobble (deg) after the landing. */
+    readonly bounceRotateDeg: number;
+    /** Landing spring — the first bounce off the tray line. */
+    readonly landSpring: { readonly damping: number; readonly stiffness: number };
+    /** Settle spring — the final rest onto the engine-rolled face. */
+    readonly settleSpring: { readonly damping: number; readonly stiffness: number };
 }
 
 /**
- * Round-start / reroll ritual timing. A four-die stagger of ~90ms over a ~600ms
- * tumble lands the whole ritual in well under a second — a physical beat that
- * does not fight the combat pace (the D7 qualitative pass confirms the feel WITH
- * the ritual in place; this is the tunable starting point).
+ * Round-start / reroll ritual timing. A four-die stagger over a ~480ms fall
+ * lands the whole ritual in about a second — the same physical beat as the
+ * hazard minigame's dice-cast interstitial (fall + rotate + spring bounce).
  */
 export const DICE_ROLL_TIMING: DiceRollTiming = {
-    staggerMs: 90,
-    tumbleDurationMs: 600,
-    faceCycleMs: 70,
-    tumbleTurns: 3,
-    liftPx: 14,
-    popScale: 1.14,
-    settleSpring: { damping: 12, stiffness: 190, mass: 0.7 },
+    staggerMs: 130,
+    tumbleDurationMs: 480,
+    dropPx: 160,
+    entryRotateDeg: -40,
+    bounceLiftPx: 18,
+    bounceRotateDeg: 14,
+    landSpring: { damping: 6, stiffness: 220 },
+    settleSpring: { damping: 9, stiffness: 180 },
 };

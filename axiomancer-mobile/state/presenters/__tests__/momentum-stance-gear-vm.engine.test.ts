@@ -84,6 +84,34 @@ describe('Momentum-V2 chain chip (flag-on)', () => {
         expect(m.a11y).toMatch(/SURGED/);
     });
 
+    it('a break/surge transient DECAYS at the next turn roll — loud for its turn only', () => {
+        setUpgradeableDice(true);
+        const s = openEncounter();
+        s.momentumV2 = null;
+        s.log = [
+            ...s.log,
+            { kind: 'momentum-broken', by: 'body' },
+            { kind: 'turn-dice-rolled', turn: s.turn + 1, dice: [] },
+        ];
+        const m = buildCombatViewModel(s).momentumV2!;
+        expect(m.broke).toBe(false);
+        expect(m.surged).toBe(false);
+        expect(m.a11y).toMatch(/No momentum/);
+    });
+
+    it('derives the PLAYED sequence for the lit nodes (chain, play order)', () => {
+        setUpgradeableDice(true);
+        const s = openEncounter();
+        s.momentumV2 = { color: 'body', length: 2 };   // heart was played, then body
+        expect(buildCombatViewModel(s).momentumV2!.chain).toEqual(['heart', 'body']);
+        s.momentumV2 = { color: 'heart', length: 2 };  // cyclic entry: mind, then heart
+        expect(buildCombatViewModel(s).momentumV2!.chain).toEqual(['mind', 'heart']);
+        s.momentumV2 = { color: 'mind', length: 1 };
+        expect(buildCombatViewModel(s).momentumV2!.chain).toEqual(['mind']);
+        s.momentumV2 = null;
+        expect(buildCombatViewModel(s).momentumV2!.chain).toEqual([]);
+    });
+
     it('a live chain formed after an old break does NOT read broke', () => {
         setUpgradeableDice(true);
         const s = openEncounter();

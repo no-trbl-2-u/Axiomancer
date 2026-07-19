@@ -37,7 +37,7 @@ import {
 import { CombatBoard, CombatCardFace, HAND_CARD_W, HAND_CARD_H, type DragController, type DragPayload, type Rect } from '@/components/combat/encounter/CombatBoard';
 import { useDragInterruptRecovery } from '@/components/combat/encounter/useDragInterruptRecovery';
 import { type CombatFx } from '@/components/combat/encounter/CombatCombatantPane';
-import { CombatDie } from '@/components/combat/encounter/CombatDie';
+import { CombatDie, combatDieFootprint } from '@/components/combat/encounter/CombatDie';
 import { CombatSummaryModal } from '@/components/combat/encounter/CombatSummaryModal';
 import { CombatRewardsOverlay } from '@/components/combat/encounter/CombatRewardsOverlay';
 import { CombatTutorialPrimer } from '@/components/combat/encounter/CombatTutorialPrimer';
@@ -55,8 +55,10 @@ import { makeStyles, usePalette } from '@/theme/runtime';
 type DropResolver = (payload: DragPayload, x: number, y: number) => void | Promise<void>;
 
 /** Rendered size of the dragged-die ghost chip — the die ghost anchors on HALF
- *  of this so it tracks the pointer (see dieGhostStyle). */
+ *  of its rendered FOOTPRINT (cube + shadow, not the bare size) so it tracks
+ *  the pointer (see dieGhostStyle). */
 const DIE_GHOST_SIZE = 56;
+const DIE_GHOST_FOOT = combatDieFootprint(DIE_GHOST_SIZE);
 
 /** WI-3 — how long an END-phase press locks the button + staging while the
  *  threat resolves and its fx timeline plays out (IMPACT 100ms + the longest
@@ -385,7 +387,7 @@ export function CombatEncounterPanel({
     // half-size so the die stays centred under the pointer for the whole drag.
     // CONSTRAINT: never reuse the card's half-W/H anchor for the die — that was
     // the "die renders up-and-left of the finger" bug (playtest, 2026-07-11).
-    const dieGhostStyle = useAnimatedStyle(() => ({ opacity: dragShown.value, transform: [{ translateX: dragX.value - DIE_GHOST_SIZE / 2 }, { translateY: dragY.value - DIE_GHOST_SIZE / 2 }, { scale: 1.1 }] }));
+    const dieGhostStyle = useAnimatedStyle(() => ({ opacity: dragShown.value, transform: [{ translateX: dragX.value - DIE_GHOST_FOOT.width / 2 }, { translateY: dragY.value - DIE_GHOST_FOOT.height / 2 }, { scale: 1.1 }] }));
     // Ineligible-target cue (owner directive 2026-07-12): while the pointer is
     // over ANY illegal drop target (an off-color or already-armed staged card,
     // rects measured by the board at drag begin), the ghost carries an ✕ —
@@ -846,7 +848,7 @@ export function CombatEncounterPanel({
                         <Text style={[styles.tipName, { color: AXM.sulfur, textShadowColor: AXM.sulfur }]}>{sigInfo.name.toUpperCase()}</Text>
                         <Text style={styles.tipGloss}>{sigInfo.description}</Text>
                         <Text style={styles.tipMeta}>
-                            consumes ◆ {sigInfo.cost} conviction{sigInfo.affordable ? '' : ` — you have too little`}
+                            consumes ◆ {sigInfo.cost} conviction{sigInfo.affordable ? '' : ` — ${sigInfo.reason ?? 'you have too little'}`}
                         </Text>
                         <View style={styles.tipBadgeWrap} pointerEvents="none">
                             <Svg width={128} height={30} viewBox="0 0 128 30">

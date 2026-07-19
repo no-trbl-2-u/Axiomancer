@@ -44,7 +44,7 @@ import { FONTS } from '@/theme/axm';
 import { makeStyles, usePalette } from '@/theme/runtime';
 import type {
     CombatViewModel, CombatCardVM, CombatDieVM,
-    CombatSignatureVM, CombatEffectChipVM, CombatPerorationVM, CombatPressFateVM,
+    CombatSignatureVM, CombatEffectChipVM, CombatPerorationVM,
     CombatMomentumV2VM, CombatStanceChipVM,
 } from '@/state/presenters/combat-encounter.engine';
 import { armedReadValue, dieCanPowerCardVM, STANCE_COLORS } from '@/state/presenters/combat-encounter.engine';
@@ -187,7 +187,7 @@ function SignatureColumn({ conviction, signatures, onCast, onInfo }: {
                     testID={`combat-signature-${s.id}`}
                     accessibilityRole="button"
                     accessibilityState={{ disabled: !s.affordable }}
-                    accessibilityLabel={`${s.name}, costs ${s.cost} conviction. ${s.description}${s.affordable ? '' : ' — not enough conviction'}`}
+                    accessibilityLabel={`${s.name}, costs ${s.cost} conviction. ${s.description}${s.affordable ? '' : ` — ${s.reason ?? 'not enough conviction'}`}`}
                     accessibilityHint="Long press for details"
                     style={[styles.sigRune, { borderColor: s.affordable ? AXM.sulfur : AXM.ash, opacity: s.affordable ? 1 : 0.55 }]}
                 >
@@ -352,44 +352,6 @@ function DiceRow({
                 />
             ) : null}
         </View>
-    );
-}
-
-// ── Press Fate (spec 33 §4 — flag-on reroll of all miss faces) ───────────────
-
-/**
- * The 1◆ Press Fate control: reroll every live miss face, once per round.
- * Owner-UI doctrine — never hidden when it can't fire: the button renders
- * DISABLED with the refusal reason (not enough ◆ / already pressed / no miss
- * dice), so the illegal action is refused LOUDLY. Casts the reroll signature
- * the presenter resolved (`pressFate.signatureId`).
- */
-function PressFateControl({ pressFate, onCast }: { pressFate: CombatPressFateVM; onCast: (id: string) => void }) {
-    const AXM = usePalette();
-    const styles = useStyles();
-    const { enabled, reason, cost, signatureId } = pressFate;
-    return (
-        <Pressable
-            onPress={() => {
-                if (!enabled) return;
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => undefined);
-                onCast(signatureId);
-            }}
-            testID="combat-press-fate"
-            accessibilityRole="button"
-            accessibilityState={{ disabled: !enabled }}
-            accessibilityLabel={`Press Fate — re-roll all miss dice for ${cost} Conviction${enabled ? '' : `. ${reason}`}`}
-            style={[styles.pressFate, { borderColor: enabled ? AXM.sulfur : AXM.ash, opacity: enabled ? 1 : 0.55 }]}
-        >
-            <Text style={[styles.pressFateText, { color: enabled ? AXM.sulfur : AXM.bone }]} allowFontScaling={false}>
-                ◆{cost} PRESS FATE
-            </Text>
-            {!enabled && reason ? (
-                <Text style={[styles.pressFateReason, { color: AXM.ash }]} numberOfLines={1} testID="combat-press-fate-reason">{reason}</Text>
-            ) : (
-                <Text style={[styles.pressFateReason, { color: AXM.bone }]} numberOfLines={1}>re-roll all miss dice</Text>
-            )}
-        </Pressable>
     );
 }
 
@@ -645,7 +607,7 @@ const CHAIN_GLYPHS: Record<string, string> = { heart: '♥', body: '⚡', mind: 
 function MomentumChainChip({ vm, onPress }: { vm: CombatMomentumV2VM; onPress?: () => void }) {
     const AXM = usePalette();
     const styles = useStyles();
-    const { color, length, surgeAt, next, broke, surged, colorHex, a11y } = vm;
+    const { color, length, chain, surgeAt, next, broke, surged, a11y } = vm;
     return (
         <Pressable
             style={styles.wheelRow}
@@ -668,17 +630,22 @@ function MomentumChainChip({ vm, onPress }: { vm: CombatMomentumV2VM; onPress?: 
             ) : (
                 <>
                     {Array.from({ length: surgeAt }, (_u, i) => {
-                        const filled = i < length;
+                        // Each lit node keeps the stance that was ACTUALLY played
+                        // (vm.chain, play order) — a heart→body chain reads ♥ ⚡,
+                        // never two copies of the chain's current color.
+                        const link = chain[i];
+                        const filled = link !== undefined;
+                        const nodeHex = link ? STANCE_COLORS[link] : AXM.ash;
                         return (
                             <View
                                 key={i}
                                 style={[
                                     styles.chainNode,
-                                    { borderColor: filled ? colorHex : AXM.ash, backgroundColor: filled ? `${colorHex}30` : 'rgba(0,0,0,0.5)' },
+                                    { borderColor: filled ? nodeHex : AXM.ash, backgroundColor: filled ? `${nodeHex}30` : 'rgba(0,0,0,0.5)' },
                                 ]}
                             >
-                                <Text style={[styles.wheelGlyph, { color: filled ? colorHex : AXM.ash, textShadowColor: filled ? colorHex : 'transparent' }]} allowFontScaling={false}>
-                                    {filled ? (CHAIN_GLYPHS[color] ?? '◆') : '·'}
+                                <Text style={[styles.wheelGlyph, { color: filled ? nodeHex : AXM.ash, textShadowColor: filled ? nodeHex : 'transparent' }]} allowFontScaling={false}>
+                                    {link ? (CHAIN_GLYPHS[link] ?? '◆') : '·'}
                                 </Text>
                             </View>
                         );
@@ -1371,11 +1338,11 @@ export const CombatBoard = React.memo(function CombatBoard({
                         no die matches your hand — FREE plays still work · END rolls fresh dice
                     </Text>
                 ) : null}
+                {/* Spec 33 §4 — Press Fate has NO board control of its own (owner
+                    call 2026-07-19): it is a signature, cast from the rune column
+                    like every other. The presenter reshapes its rune flag-on
+                    (1◆ cost + the full firing gate + refusal reason). */}
                 <DiceRow vm={vm} dieGesture={dieGesture} draggingDieId={draggingDieId} assignedDieIds={assignedDieIds} onFateTap={onFateTap} />
-                {/* Spec 33 §4 (flag-on) — the Press Fate reroll control. Owner-UI
-                    doctrine: never hidden when it can't fire — it renders DISABLED
-                    with the refusal reason. Null flag-off / no reroll signature. */}
-                {vm.pressFate ? <PressFateControl pressFate={vm.pressFate} onCast={onSignature} /> : null}
 
                 {/* the hand dock — edge-to-edge fan, bottoms cropped off-screen */}
                 <View style={styles.dock}>
@@ -1789,9 +1756,6 @@ const useStyles = makeStyles((AXM) => ({
     dieFateHint: { fontFamily: FONTS.mono, fontSize: 7, color: '#d4c026', marginTop: 1 },
     faceDieLine: { fontFamily: FONTS.mono, fontSize: 9, color: '#d4c026', marginTop: 3, letterSpacing: 0.2 },
     // Spec 33 §4 — Press Fate reroll control (flag-on).
-    pressFate: { borderWidth: 1, borderRadius: 10, paddingHorizontal: 12, paddingVertical: 4, alignSelf: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.4)', marginTop: 2 },
-    pressFateText: { fontFamily: FONTS.mono, fontSize: 11, letterSpacing: 1 },
-    pressFateReason: { fontFamily: FONTS.mono, fontSize: 8, letterSpacing: 0.3, marginTop: 1 },
     dieXGlyph: { fontFamily: FONTS.sans, fontSize: 12, color: '#8a8273' },
     dieConv: { fontFamily: FONTS.mono, fontSize: 9, color: AXM.bone, textAlign: 'center', marginTop: 2, letterSpacing: 0.5, textShadowColor: 'rgba(0,0,0,0.9)', textShadowRadius: 3 },
     diePip: { fontFamily: FONTS.sans, fontSize: 10, textAlign: 'center', marginTop: 2, letterSpacing: 0.6, textShadowColor: 'rgba(0,0,0,0.9)', textShadowRadius: 3 },

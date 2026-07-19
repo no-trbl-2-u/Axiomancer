@@ -536,6 +536,10 @@ export interface CombatCardVM {
 }
 export interface CombatSignatureVM {
     id: string; name: string; description: string; cost: number; affordable: boolean; icon: string;
+    /** The refusal reason while the rune can't fire (null when castable). Only
+     *  the flag-on Press Fate rune carries reasons beyond affordability (once
+     *  per round / no miss dice) — see `signaturesVM`'s spec-33 reshape. */
+    reason?: string | null;
 }
 export interface CombatReadVM {
     active: boolean; result: CombatReadResult; dieStance: string; enemyStance: string | null;
@@ -583,6 +587,10 @@ export interface CombatMomentumV2VM {
     color: WheelStance | null;
     /** The chain length (0 when null; 1..surgeAt-1 while building). */
     length: number;
+    /** The filled links IN PLAY ORDER (derived from color+length via the chain
+     *  order) — e.g. heart→body reads ['heart','body'], so each lit node keeps
+     *  the stance that was actually played, not the chain's current color. */
+    chain: WheelStance[];
     /** The chain length that surges (`MOMENTUM_SURGE_LENGTH`). */
     surgeAt: number;
     /** The stance that ADVANCES the chain next (null when no chain). */
@@ -2002,14 +2010,35 @@ const SIG_ICON: Record<string, string> = {
 
 function signaturesVM(state: CombatEncounterState): CombatSignatureVM[] {
     // The player's per-archetype kit (Spec 26b §B), resolved on the encounter.
+    // Spec 33 §4 — Press Fate is a SIGNATURE, cast from this rune column like
+    // any other (owner call 2026-07-19: no separate board control). Flag-on,
+    // the reroll rune must present the spec-33 truth the engine enforces
+    // (`playSignatureSkill`'s v2Reroll branch): cost PRESS_FATE_COST (1◆, not
+    // the printed legacy 4), the honest reroll text, and the full firing gate
+    // (◆ / once per round / a live miss face) with its refusal reason.
+    const pf = pressFateVM(state);
     return state.signatures
         .map(id => getSignatureSkill(id))
         .filter((s): s is SignatureSkill => !!s)
-        .map((s: SignatureSkill) => ({
-            id: s.id, name: s.name, description: s.description, cost: s.cost,
-            affordable: state.conviction >= s.cost,
-            icon: SIG_ICON[s.kind] ?? '◆',
-        }));
+        .map((s: SignatureSkill) => {
+            if (pf && s.id === pf.signatureId) {
+                return {
+                    id: s.id, name: s.name,
+                    description: 'Bend fate — re-roll every miss die from its own faces. Once per round.',
+                    cost: pf.cost,
+                    affordable: pf.enabled,
+                    icon: SIG_ICON[s.kind] ?? '◆',
+                    reason: pf.reason,
+                };
+            }
+            const affordable = state.conviction >= s.cost;
+            return {
+                id: s.id, name: s.name, description: s.description, cost: s.cost,
+                affordable,
+                icon: SIG_ICON[s.kind] ?? '◆',
+                reason: affordable ? null : `Need ${s.cost} ◆ Conviction`,
+            };
+        });
 }
 
 const READ_TEXT: Record<CombatReadResult, string> = {
@@ -2121,21 +2150,32 @@ function momentumV2VM(state: CombatEncounterState): CombatMomentumV2VM | null {
     const color = m?.color ?? null;
     const length = m?.length ?? 0;
     // Only when the chain sits at null can a break/surge be the live transient —
-    // any live chain already superseded them. Scan back for the last chain event.
+    // any live chain already superseded them. Scan back for the last chain
+    // event, but STOP at the current turn's dice roll: a transient is loud for
+    // the turn it happened in, then decays to the plain empty chip. (Unbounded,
+    // a round-1 break yelled "MOMENTUM BROKEN" for the rest of the fight —
+    // owner report 2026-07-19.)
     let broke = false;
     let surged = false;
     if (m === null) {
         for (let i = state.log.length - 1; i >= 0; i--) {
             const ev = state.log[i];
+            if (ev.kind === 'turn-dice-rolled') break;   // turn boundary — transient expired
             if (ev.kind === 'momentum-broken') { broke = true; break; }
             if (ev.kind === 'momentum-surged') { surged = true; break; }
-            if (ev.kind === 'momentum-advanced') break; // a live chain formed after
+            if (ev.kind === 'momentum-advanced') break;  // a live chain formed after
         }
     }
     const next = color ? nextChainColor(color) : null;
     const surgeAt = MOMENTUM_SURGE_LENGTH;
+    // The played sequence, reconstructed backwards from the chain's end: link i
+    // sits (length-1-i) steps BEFORE `color` in the cyclic chain order.
+    const chain: WheelStance[] = color === null ? [] : Array.from({ length }, (_u, i) => {
+        const at = MOMENTUM_CHAIN_ORDER.indexOf(color) - (length - 1 - i);
+        return MOMENTUM_CHAIN_ORDER[((at % MOMENTUM_CHAIN_ORDER.length) + MOMENTUM_CHAIN_ORDER.length) % MOMENTUM_CHAIN_ORDER.length];
+    });
     return {
-        color, length, surgeAt, next, broke, surged,
+        color, length, chain, surgeAt, next, broke, surged,
         colorHex: color ? STANCE_COLORS[color] : '#6b6257',
         a11y: momentumV2A11y({ color, length, next, surgeAt, broke, surged }),
     };
