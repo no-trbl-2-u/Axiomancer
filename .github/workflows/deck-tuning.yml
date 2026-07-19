@@ -12,6 +12,31 @@ on:
   # schedule:
   #   - cron: "29 3 * * 1"
   workflow_dispatch:
+    inputs:
+      preset:
+        description: 'Preset to tune (all = full ten-preset sweep)'
+        type: choice
+        default: all
+        options:
+          - all
+          - erosion
+          - oratory
+          - foundry
+          - penitent
+          - standstill
+          - augury
+          - tithe
+          - grace
+          - bastion
+          - refrain
+      runs:
+        description: 'Playtest runs per matrix cell (60 = baseline-comparable; lower = faster but directional-only)'
+        type: number
+        default: 60
+      cross_theme_swaps:
+        description: 'Allow OUT-OF-THEME swap-ins in measurement arms (owner per-run authorization; evidence only — shipping a recolor stays gated on the color law)'
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -32,5 +57,8 @@ jobs:
       extra_claude_args: |
         -p
         --dangerously-skip-permissions
-      prompt: "/deck-tuning"
+      # Defaults cover the scheduled path (cron re-enable): a bare cron run
+      # gets preset=all, runs=60, in-theme-only — the same full sweep as
+      # before the inputs existed.
+      prompt: "/deck-tuning --preset=${{ inputs.preset || 'all' }} --runs=${{ inputs.runs || 60 }} --cross-theme-swaps=${{ inputs.cross_theme_swaps || false }}"
       timeout_minutes: 90
