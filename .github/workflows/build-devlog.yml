@@ -1,0 +1,69 @@
+name: build-devlog
+
+# Rebuild the committed private DevLog site on demand. The aggregate build
+# refreshes the live catalog data/HTML first, then renders the DevLog hub and
+# every structured digest entry. Generated changes are pushed to main so the
+# existing Cloudflare Pages integration can serve them.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: nexus-loop
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build DevLog site
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          token: ${{ secrets.GH_PAT || github.token }}
+
+      - name: Setup Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install workspace dependencies
+        run: npm ci
+
+      - name: Build catalog and DevLog
+        run: npm run site:build
+
+      - name: Validate generated site
+        run: |
+          git diff --check
+          test -s devlog/index.html
+          test -s devlog/catalog.html
+          test -s devlog/log.html
+
+      - name: Upload DevLog site
+        uses: actions/upload-artifact@v4
+        with:
+          name: axiomancer-devlog-${{ github.sha }}
+          path: devlog/
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Commit generated changes
+        run: |
+          git add devlog/
+          if git diff --cached --quiet; then
+            echo "DevLog is already current."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "docs(devlog): rebuild generated site"
+          git push origin HEAD:main
