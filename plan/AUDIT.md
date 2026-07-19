@@ -14,6 +14,26 @@
 
 ## Pending
 
+### [user-issue #129] [HIGH] Log T's provenance for every Hermes-originated queue change
+- category: external-issue
+- impact: 6
+- ease: 6
+- detail: filed 2026-07-19 by the owner via Hermes. T asked that any time
+  the plan queue changes, a log records that T asked for it and why (when
+  given). Requirement: an append-only "Queue change log" section in
+  `plan/steps/01_build_plan.md` (or another always-read planning surface,
+  linked from the build plan) recording, per Hermes-originated mutation of
+  the queue (add/remove/reorder/reprioritize/split/merge/skip/block/
+  unblock/material scope change): date, actor (`T via Hermes`), exact
+  action + affected phase IDs, that T requested it, T's stated reason (or
+  `reason not stated` — never invent one), and the resulting commit/issue/
+  phase brief when available. Repo-local planning/oversight instructions
+  (bearings.md and/or the relevant skill, e.g. oversight.md) must require
+  this entry land in the SAME commit as each Hermes-originated queue
+  mutation going forward. Do NOT rewrite existing queue history as
+  reconstruction — this is a forward-looking log, starting now.
+- next: /iterate will pick up; reference #129 in commit body.
+
 ### hazard/gathering "paradox-token" reward vocabulary outlives the card category
 - category: divergence
 - impact: 2
