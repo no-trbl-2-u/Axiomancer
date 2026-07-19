@@ -671,7 +671,7 @@ describe('Spec 26b §B/§C/§D — archetype kit, rewards, unlock, difficulty fl
         expect(s.signatures).toEqual(getSignaturesForLoadout(bodyPlayer.equipment));
         expect(s.signatures).toEqual([
             'sig-overwhelming-argument', 'sig-read-opponent',
-            'sig-conviction-strike', 'sig-clever-gambit', 'sig-disarming-plea',
+            'sig-clever-gambit', 'sig-disarming-plea', 'sig-press-the-point',
         ]);
         // Swapping the worn weapon relic changes which signature is available —
         // independent of base stats (the old archetype gate is gone).

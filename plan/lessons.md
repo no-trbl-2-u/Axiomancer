@@ -25,8 +25,13 @@
 
 ## Data
 
-1. <ISO> — <one-line lesson, ≤500 bytes>. Source:
-   <commit or issue reference>.
+1. 2026-07-18 — An A/B court that swaps cards must VALIDATE the
+   structural laws (5/5/5 color law, deck size) before measuring, or it
+   ratifies illegal seats: D8's court measured augury's valve in a
+   heart seat for a mind card (+3.3, best result) and only the
+   structural test caught it — the ratified number was for an
+   unshippable deck. Bake the law checks into the court harness, not
+   just the after-the-fact tests. Source: 10ec4fe8 (Phase D8).
 
 <!-- @domain:review -->
 

@@ -19,11 +19,13 @@ describe('createCharacter — seedStartingRelics', () => {
         // 3 benched.
         const relicIds = c.inventory.filter(i => i.id.startsWith('relic-')).map(i => i.id);
         expect(relicIds).toHaveLength(8);
+        // Owner call 2026-07-18: the Gambler's Knot (Press Fate) is default-worn;
+        // the Venom Sigil (Conviction Strike) is benched.
         expect(relicIds.slice(0, 5)).toEqual([
             'relic-overwhelming', 'relic-read',
-            'relic-conviction-strike', 'relic-clever-gambit', 'relic-disarming-plea',
+            'relic-clever-gambit', 'relic-disarming-plea', 'relic-press-the-point',
         ]);
-        expect(relicIds.slice(5).sort()).toEqual(['relic-conclusion', 'relic-press-the-point', 'relic-second-wind']);
+        expect(relicIds.slice(5).sort()).toEqual(['relic-conclusion', 'relic-conviction-strike', 'relic-second-wind']);
     });
 
     it('folds the worn armor relic +5 maxHp onto maxHealth (and starts at full health)', () => {
@@ -59,7 +61,7 @@ describe('createCharacter — seedStartingRelics', () => {
         const c = createCharacter({ name: 'T', level: 1, baseStats: { heart: 5, body: 5, mind: 5 }, seedStartingRelics: true });
         expect(getSignaturesForLoadout(c.equipment)).toEqual([
             'sig-overwhelming-argument', 'sig-read-opponent',
-            'sig-conviction-strike', 'sig-clever-gambit', 'sig-disarming-plea',
+            'sig-clever-gambit', 'sig-disarming-plea', 'sig-press-the-point',
         ]);
     });
 });
@@ -92,7 +94,7 @@ describe('equip reducers — maxHp fold', () => {
         const c = createCharacter({ name: 'T', level: 1, baseStats: { heart: 5, body: 5, mind: 5 }, seedStartingRelics: true });
         // Accessory row already full (3 default-worn accessory relics). Equipping
         // the 4th accessory relic is a guarded no-op (returns the same reference).
-        const after = equipItem(c, getRelicById('relic-press-the-point')!);
+        const after = equipItem(c, getRelicById('relic-conviction-strike')!);
         expect(after).toBe(c);
     });
 });

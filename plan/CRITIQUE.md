@@ -11,6 +11,26 @@
 
 ## Pending
 
+### [LOW] mechanics — fated-course engine hook survives its retired card as a test harness
+- pass: D8 ship residue (commit 10ec4fe8)
+- viewport: n/a
+- auth_state: n/a
+- category: engineering
+- observation: `combat.engine.ts` (~lines 4011/4059) still keys the telegraph-forcing hook on `fated-course`, retired from the library in D8's ten-in/ten-out ledger. Unreachable in live play (no preset/reward fields the card), but `oracle-omen-v2.engine.test.ts` depends on it as its deterministic telegraph harness — swapping the id would destroy the guaranteed-hit assertions.
+- evidence: fixture-sweep report, 2026-07-18; plan/tuning/2026-07-18-d8-preset-dice-valves.md §Residue
+- suggested fix: next oracle pass ports the harness onto a live card or a test-only hook id, then deletes the dead engine branch.
+- source: ship-a-phase D8
+
+### [LOW] data — Card Ledger dashboard + preset-metrics exports measure the PRE-D8 decks
+- pass: D8 ship residue (commit 10ec4fe8)
+- viewport: n/a
+- auth_state: n/a
+- category: data
+- observation: `docs/reports/preset-metrics/2026-07-18-*.json` and the Card Ledger dashboard were measured on the pre-valve flag-on decks (and a 70-card library that no longer exists — the dead ten are retired, ten valves are live). Their triage verdicts remain historically valid but the preset rollups no longer describe the shipped decks.
+- evidence: D8 gate rerun already shows different curves (standstill 50→59 blind-early).
+- suggested fix: re-run the accumulation (both arms, two seeds) + republish the dashboard after the post-D8 curve-repair phase lands, so the next triage reads the real game.
+- source: ship-a-phase D8
+
 ### [LOW] general — AccessoryKind union must open when accessory flavors grow
 - pass: user-jot (commit 4e045d05)
 - viewport: unspecified
@@ -28,11 +48,14 @@
 > `__AXM_UPGRADEABLE_DICE__='0'` kill-switch keeps the legacy model. THE
 > STAKE's wager UI is retired on every surface (completing spec 33 §5).
 > Follow-ups this creates:
-> - **F3 is now LIVE-player-facing**: Press Fate never renders because no
->   starter loadout equips a `reroll`-kind signature (`sig-press-the-point`) —
->   the flag-on economy's only ◆ sink is dead and misses can't be rerolled.
->   Was a D7 canary; now it's the owner's daily experience. Highest-priority
->   fix (equip the signature on starter loadouts + D7 re-run).
+> - **F3 DRAINED same day (owner call)**: the Gambler's Knot is now
+>   default-worn (Venom Sigil benched), so every starter loadout — main game
+>   included — carries Press Fate beside Disarming Plea (Befriend) and
+>   Overwhelming Argument. Re-measured at seeds 1-8: 0.060 casts/round,
+>   income 1.533◆ (in band), stake-gap narrowed +13.6%→+11.5%. The economy
+>   canaries now pin the sink STAYING live. Remaining: the combat-sandbox
+>   e2e route still equips no relics, so the Press Fate control is only
+>   witnessable in the main game (e2e NOTE stands).
 > - **D7's not-ready verdict now describes the shipped game**: early win
 >   61-66 vs the ~80 band, statusEngagement −9pts. The tuning debt (D3/D4
 >   sinks, signature repricing) is no longer flag-gated homework.

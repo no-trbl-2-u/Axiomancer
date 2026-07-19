@@ -53,7 +53,7 @@ describe('migrate v12 → v13 — seed the signet relics', () => {
         expect(invIds).toContain('old-sword'); // nothing lost at v13
         expect(invIds).toContain('relic-conclusion');
         expect(invIds).toContain('relic-second-wind');
-        expect(invIds).toContain('relic-press-the-point');
+        expect(invIds).toContain('relic-conviction-strike');
     });
 
     it('recomputes maxHealth to include the +5 worn armor relic and clamps health', () => {
@@ -69,7 +69,7 @@ describe('migrate v12 → v13 — seed the signet relics', () => {
         const migrated = migrate(v12Save(), 12, 13);
         expect(getSignaturesForLoadout(migrated.player.equipment)).toEqual([
             'sig-overwhelming-argument', 'sig-read-opponent',
-            'sig-conviction-strike', 'sig-clever-gambit', 'sig-disarming-plea',
+            'sig-clever-gambit', 'sig-disarming-plea', 'sig-press-the-point',
         ]);
     });
 
