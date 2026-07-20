@@ -874,13 +874,14 @@ supersession collisions before any engine work.
 
 **Post-D sequence (owner-deferred until every D phase ships, 2026-07-18):**
 
-- [ ] Phase 33c — THE COVETED DIE. RE-SCOPED at D1 (2026-07-17, spec 33):
+- [x] Phase 33c — THE COVETED DIE. RE-SCOPED at D1 (2026-07-17, spec 33):
       the rationale (lootable enemy telegraphs; deny/block verbs earn a
       payday) survives and strengthens under open stance checks, but its
       read-era details are dead — steal conditions become STAGGER-to-0 /
       full block / answering the phase's stance check; payout becomes a
       temp gold die (spec 33 §1 ceiling applies, overflow → +1◆; the old
       "floating die of that color, cap 3" is retired). Deps: D2 + D7.
+      — `feat(mechanics): THE COVETED DIE — phase 33c` (fc7fddbf)
 - [ ] Phase 33d — GLYPHS pilot (Option-B grammar experiment). FREE-charge
       is compatible with spec 33 §3 rule 5 (FREE lines never touch momentum).
       Author pilot cards against the ratified four-die model. Deps: 33a +
