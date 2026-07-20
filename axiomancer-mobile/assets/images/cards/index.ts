@@ -1,119 +1,100 @@
 /**
- * Per-card art registry — spec 32 v3 themed-deck pass (2026-07-08).
+ * Unique card-icon registry.
  *
- * The same 18 paintings back the 70-card themed library, reassigned by THEME
- * so each deck reads as a visual family (Affliction → the toxic moth,
- * Bulwark → the armor set, Oracle → the divine stag, …) with the rare cards
- * taking the strongest painting in the family. Unmapped ids (sandbox /
- * conjured Thoughtforms) fall back to the circe placeholder.
- *
- * Metro needs static require literals, so this map is the one place a card id
- * meets a file path; the mechanics package stays art-free.
+ * Every live library card owns one transparent SVG selected from the supplied
+ * `Potential Assets` Game Icons archive. Metro requires literal asset paths,
+ * so keep the static requires here and the source attribution in
+ * `icon-sources.json`.
  */
 
-const blueLight = require('./blue-light.webp');
-const brightSphere = require('./bright-sphere-yellow.webp');
-const devilBook = require('./devil-book.webp');
-const dreamFlutter = require('./dream-flutter.webp');
-const godEye = require('./god-eye-silver.webp');
-const iceSword = require('./ice-sword.webp');
-const lightRing = require('./light-ring.webp');
-const meatPecker = require('./meat-pecker.webp');
-const spark = require('./spark.webp');
-const willOWisp = require('./will-o-wisp.webp');
-const yggdrasil = require('./yggdrasil.webp');
-const bleedBlade = require('./bleed.webp');
-const burnBlade = require('./burn.webp');
-const confuseRings = require('./confuse.webp');
-const freezeCrystal = require('./freeze.webp');
-const guardTorso = require('./guard-1.webp');
-const guardArmor = require('./guard-2.webp');
-const guardShield = require('./guard-3.webp');
-
-export const FALLBACK_CARD_ART = require('./circe-placeholder.jpg');
+export const FALLBACK_CARD_ART = require('./icons/fallback.svg');
 
 const CARD_ART_BY_ID: Record<string, number> = {
-    // ── T1 Affliction — the toxic moth + the dark blade ──
-    'slippery-slope': dreamFlutter,
-    'recurring-symptom': bleedBlade, // D8 valve (affliction)
-    'festering-argument': dreamFlutter,
-    'currys-conversion': bleedBlade,
-    'resonance-detonation': spark,
-    'venom-and-vein': dreamFlutter,
-    'suppurating-curse': devilBook,
-    // ── T2 Peroration — the radiant ring (the case, built in circles) ──
-    'exordium': lightRing,
-    'opening-statement': lightRing,
-    'mounting-case': brightSphere,
-    'peroratio-interrupta': lightRing,
-    'the-closing-word': brightSphere,
-    'restate-the-point': lightRing, // D8 valve (peroration)
-    'second-take': confuseRings, // D8 valve (echo)
-    // ── T3 Forge — sparks and shifting orbs (dice from nothing) ──
-    'sketch-of-a-thought': blueLight,
-    'half-step': blueLight,
-    'bootstrap-loop': spark,
-    'ex-nihilo': brightSphere,
-    'the-overtake': iceSword,
-    'anvil-of-form': guardTorso,
-    'forge-masters-stamp': devilBook, // D8 valve (forge)
-    // ── T4 Akrasia — the sinister tome + the burning blade (the debt) ──
-    'against-my-judgment': devilBook,
-    'sweet-poison': dreamFlutter,
-    'self-flagellant': burnBlade,
-    'fallen-grace': lightRing,
-    'pact-of-akrasia': devilBook,
-    'crown-of-thorns': yggdrasil,
-    'mirror-of-guilt': godEye,
-    // ── T5 Control — the twin rings (the fettered mind) ──
-    'zenos-half-step': confuseRings,
-    'red-herring': willOWisp,
-    'undistributed-middle': confuseRings,
-    'arrow-paradox': freezeCrystal,
-    'turnabout': confuseRings, // phase 32 part 4a: replaces paralysis-of-analysis in this slot
-    'break-the-tempo': freezeCrystal, // D8 valve (control)
-    'quagmire-of-doubt': confuseRings,
-    // ── T6 Oracle — the divine stag (seeing truly) ──
-    'glimpse': godEye,
-    'signs-and-portents': willOWisp,
-    'cassandras-burden': godEye,
-    'delphic-ambiguity': confuseRings,
-    'prophecy-fulfilled': godEye,
-    'the-oracles-eye': godEye,
-    'second-sight': godEye, // D8 valve (oracle)
-    // ── T7 Harvest — the hummingbird + blades (the gleaning) ──
-    'brief-candle': burnBlade,
-    'bank-the-yield': meatPecker, // D8 valve (harvest)
-    'winnowing': iceSword,
-    'the-gleaners-due': meatPecker,
-    'the-reaping': iceSword,
-    'bone-orchard': yggdrasil,
-    'bleed-for-it': dreamFlutter, // D8 valve (akrasia)
-    // ── T8 Charm — the radiant ring + the hummingbird (mercy) ──
-    'soft-word': meatPecker,
-    'disarming-smile': lightRing,
-    'common-ground': brightSphere,
-    'the-olive-branch': yggdrasil,
-    'change-of-heart': brightSphere, // D8 valve (charm)
-    'irresistible-grace': lightRing,
-    'mirror-of-longing': godEye,
-    // ── T9 Bulwark — the armor set (the wall) ──
-    'brace-for-impact': guardArmor,
-    'nettle-cloak': yggdrasil,
-    'tu-quoque': yggdrasil,
-    'measured-answer': guardShield,
-    'the-adamant-wall': guardTorso,
-    'hedgehogs-dilemma': guardShield,
-    'crumbling-resolve': guardArmor,
-    // ── T10 Echo — the misleading light + shifting orbs (the refrain) ──
-    'refrain': willOWisp,
-    'second-thoughts': blueLight,
-    'hold-the-line': guardTorso, // D8 valve (bulwark)
-    'circular-reasoning': lightRing,
-    'ouroboros': blueLight,
-    'resonant-chamber': spark,
-    'stuck-in-their-head': willOWisp,
+    'against-my-judgment': require('./icons/against-my-judgment.svg'),
+    'anvil-of-form': require('./icons/anvil-of-form.svg'),
+    'arrow-paradox': require('./icons/arrow-paradox.svg'),
+    'bank-the-yield': require('./icons/bank-the-yield.svg'),
+    'bleed-for-it': require('./icons/bleed-for-it.svg'),
+    'bone-orchard': require('./icons/bone-orchard.svg'),
+    'bootstrap-loop': require('./icons/bootstrap-loop.svg'),
+    'brace-for-impact': require('./icons/brace-for-impact.svg'),
+    'break-the-tempo': require('./icons/break-the-tempo.svg'),
+    'brief-candle': require('./icons/brief-candle.svg'),
+    'cassandras-burden': require('./icons/cassandras-burden.svg'),
+    'change-of-heart': require('./icons/change-of-heart.svg'),
+    'circular-reasoning': require('./icons/circular-reasoning.svg'),
+    'common-ground': require('./icons/common-ground.svg'),
+    'crown-of-thorns': require('./icons/crown-of-thorns.svg'),
+    'crumbling-resolve': require('./icons/crumbling-resolve.svg'),
+    'currys-conversion': require('./icons/currys-conversion.svg'),
+    'delphic-ambiguity': require('./icons/delphic-ambiguity.svg'),
+    'disarming-smile': require('./icons/disarming-smile.svg'),
+    'ex-nihilo': require('./icons/ex-nihilo.svg'),
+    'exordium': require('./icons/exordium.svg'),
+    'fallen-grace': require('./icons/fallen-grace.svg'),
+    'festering-argument': require('./icons/festering-argument.svg'),
+    'forge-masters-stamp': require('./icons/forge-masters-stamp.svg'),
+    'glimpse': require('./icons/glimpse.svg'),
+    'grace-under-fire': require('./icons/grace-under-fire.svg'),
+    'half-spoken-prophecy': require('./icons/half-spoken-prophecy.svg'),
+    'half-step': require('./icons/half-step.svg'),
+    'hedgehogs-dilemma': require('./icons/hedgehogs-dilemma.svg'),
+    'hold-the-line': require('./icons/hold-the-line.svg'),
+    'irresistible-grace': require('./icons/irresistible-grace.svg'),
+    'measured-answer': require('./icons/measured-answer.svg'),
+    'mirror-of-guilt': require('./icons/mirror-of-guilt.svg'),
+    'mirror-of-longing': require('./icons/mirror-of-longing.svg'),
+    'mounting-case': require('./icons/mounting-case.svg'),
+    'nettle-cloak': require('./icons/nettle-cloak.svg'),
+    'opening-statement': require('./icons/opening-statement.svg'),
+    'ouroboros': require('./icons/ouroboros.svg'),
+    'pact-of-akrasia': require('./icons/pact-of-akrasia.svg'),
+    'pebble-in-the-boot': require('./icons/pebble-in-the-boot.svg'),
+    'peroratio-interrupta': require('./icons/peroratio-interrupta.svg'),
+    'poisoned-well': require('./icons/poisoned-well.svg'),
+    'prophecy-fulfilled': require('./icons/prophecy-fulfilled.svg'),
+    'quagmire-of-doubt': require('./icons/quagmire-of-doubt.svg'),
+    'quod-erat-demonstrandum': require('./icons/quod-erat-demonstrandum.svg'),
+    'recurring-symptom': require('./icons/recurring-symptom.svg'),
+    'red-herring': require('./icons/red-herring.svg'),
+    'refrain': require('./icons/refrain.svg'),
+    'resonance-detonation': require('./icons/resonance-detonation.svg'),
+    'resonant-chamber': require('./icons/resonant-chamber.svg'),
+    'restate-the-point': require('./icons/restate-the-point.svg'),
+    'second-sight': require('./icons/second-sight.svg'),
+    'second-take': require('./icons/second-take.svg'),
+    'second-thoughts': require('./icons/second-thoughts.svg'),
+    'self-flagellant': require('./icons/self-flagellant.svg'),
+    'signs-and-portents': require('./icons/signs-and-portents.svg'),
+    'sketch-of-a-thought': require('./icons/sketch-of-a-thought.svg'),
+    'slippery-slope': require('./icons/slippery-slope.svg'),
+    'soft-word': require('./icons/soft-word.svg'),
+    'stuck-in-their-head': require('./icons/stuck-in-their-head.svg'),
+    'suppurating-curse': require('./icons/suppurating-curse.svg'),
+    'sweet-poison': require('./icons/sweet-poison.svg'),
+    'tempered-edge': require('./icons/tempered-edge.svg'),
+    'the-adamant-wall': require('./icons/the-adamant-wall.svg'),
+    'the-anvil-speaks': require('./icons/the-anvil-speaks.svg'),
+    'the-burden-of-repetition': require('./icons/the-burden-of-repetition.svg'),
+    'the-closing-word': require('./icons/the-closing-word.svg'),
+    'the-gleaners-due': require('./icons/the-gleaners-due.svg'),
+    'the-olive-branch': require('./icons/the-olive-branch.svg'),
+    'the-oracles-eye': require('./icons/the-oracles-eye.svg'),
+    'the-overtake': require('./icons/the-overtake.svg'),
+    'the-reaping': require('./icons/the-reaping.svg'),
+    'tu-quoque': require('./icons/tu-quoque.svg'),
+    'turnabout': require('./icons/turnabout.svg'),
+    'undistributed-middle': require('./icons/undistributed-middle.svg'),
+    'venom-and-vein': require('./icons/venom-and-vein.svg'),
+    'videtur-quod': require('./icons/videtur-quod.svg'),
+    'winnowing': require('./icons/winnowing.svg'),
+    'zenos-half-step': require('./icons/zenos-half-step.svg'),
 };
+
+/** File names are exported for registry integrity tests and catalog tooling. */
+export const CARD_ART_FILE_BY_ID: Readonly<Record<string, string>> = Object.freeze(
+    Object.fromEntries(Object.keys(CARD_ART_BY_ID).map((cardId) => [cardId, `icons/${cardId}.svg`])),
+);
 
 export function getCardArt(cardId: string): number {
     return CARD_ART_BY_ID[cardId] ?? FALLBACK_CARD_ART;
