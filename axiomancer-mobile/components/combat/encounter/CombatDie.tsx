@@ -32,6 +32,7 @@ import { View } from 'react-native';
 import Svg, { Circle, Defs, G, LinearGradient as SvgLinearGradient, Path, Polygon, RadialGradient, Rect, Stop } from 'react-native-svg';
 
 import type { CombatDieVM } from '@/state/presenters/combat-encounter.engine';
+import { spentDieTreatment } from '@/lib/juice';
 
 /** A 4-point sparkle star path centred on (cx, cy) with radius r. */
 function sparklePath(cx: number, cy: number, r: number): string {
@@ -76,7 +77,11 @@ export const CombatDie = React.memo(function CombatDie({ die, size = 54, dimmed 
     // as an undraggable dead die at a glance, so it drops its stance colour
     // like a crack/X does — only the rim hue tells a crack from a plain miss.
     const dead = die.isX || die.face === 'miss' || cracked;
-    const greyed = dead;
+    // Owner jot (2026-07-20, routed to Phase 38): a used die reads as spent —
+    // greyed out, desaturated. A static state change (lib/juice `spentDie`),
+    // not an animated primitive.
+    const spentTreatment = spentDieTreatment({ drafted: die.drafted, spent: die.spent === true, dead });
+    const greyed = spentTreatment.greyed;
     const ring = die.drafted ? accent : cracked ? '#6b3030' : greyed ? '#3a3a3a' : special ? accent : `${accent}aa`;
     const glow = !dead && !dimmed;
     // Cube face colours — lit top, shaded right, dark front (the art surface).
@@ -110,7 +115,7 @@ export const CombatDie = React.memo(function CombatDie({ die, size = 54, dimmed 
             accessible
             accessibilityRole="button"
             accessibilityLabel={`${die.stanceLabel} stance die${statePhrase}`}
-            style={{ width: W, height: H + size * 0.18, opacity: dimmed && !die.drafted ? 0.45 : 1 }}
+            style={{ width: W, height: H + size * 0.18, opacity: dimmed && !die.drafted ? 0.45 : spentTreatment.opacity }}
         >
             {glow && (
                 <Svg

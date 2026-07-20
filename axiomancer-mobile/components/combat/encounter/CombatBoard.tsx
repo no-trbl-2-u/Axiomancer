@@ -62,6 +62,7 @@ import {
     type DieRollPlan,
 } from '@/state/combat/dice-roll-ritual';
 import { DICE_ROLL_TIMING } from '@/state/combat/dice-roll-ritual.timing';
+import { juiceHaptics, useJuicePulse, useJuiceShake } from '@/lib/juice';
 
 // Per-card art registry (temp art pass) — keyed by cardId, falls back to the
 // circe placeholder for unmapped ids. Stance tint + glyph still ride on top.
@@ -360,7 +361,7 @@ function DiceRow({
 
 // ── Staged card (die socket · fused APPLY ribbon) ────────────────────────────
 
-const StagedCard = React.memo(function StagedCard({
+export const StagedCard = React.memo(function StagedCard({
     card, assignedDie, read, onApply, gesture, register, compact = false, popKey = 0, socketPulse = false,
     dropIneligible = false, chosenX = null, onChangeX, rejectKey = 0, freeProminent = false,
 }: {
@@ -401,24 +402,12 @@ const StagedCard = React.memo(function StagedCard({
     const AXM = usePalette();
     const styles = useStyles();
     const f = card.face;
-    // Drop-confirmation pop (120ms up / 120ms back) on the card the die landed on.
-    const pop = useSharedValue(1);
-    useEffect(() => {
-        if (popKey > 0) pop.value = withSequence(withTiming(1.05, { duration: 120 }), withTiming(1, { duration: 120 }));
-    }, [popKey, pop]);
-    // Rejection SHAKE (loud rejection, owner directive 2026-07-12): a quick
-    // left-right shudder on the exact card that refused the drop.
-    const shake = useSharedValue(0);
-    useEffect(() => {
-        if (rejectKey > 0) {
-            shake.value = withSequence(
-                withTiming(-7, { duration: 45 }), withTiming(7, { duration: 60 }),
-                withTiming(-5, { duration: 55 }), withTiming(4, { duration: 55 }),
-                withTiming(0, { duration: 50 }),
-            );
-        }
-    }, [rejectKey, shake]);
-    const popStyle = useAnimatedStyle(() => ({ transform: [{ scale: pop.value }, { translateX: shake.value }] }));
+    // Drop-confirmation pop (a nudge, not the full status-proc "main event")
+    // and rejection SHAKE (loud rejection, owner directive 2026-07-12: a quick
+    // left-right shudder on the exact card that refused the drop) — lib/juice
+    // primitives (phase 38), reduced-motion + escape-hatch gated centrally.
+    const popStyle = useJuicePulse(popKey, 0.4);
+    const shakeStyle = useJuiceShake(rejectKey, 'low');
     const armed = assignedDie !== null;
     const readColor = armed ? (READ_ACCENT[read] ?? AXM.bone) : AXM.bone;
     // Option A rail needs width: staged faces track the hand-card proportion
@@ -461,10 +450,14 @@ const StagedCard = React.memo(function StagedCard({
                         ? `${card.name} staged — only a ${card.stance.toUpperCase()} or WILD die can power this card.`
                         : `${card.name} staged — ${f.verbLine}. Tap to unstage.`}
                 >
-                  {/* inner wrapper carries the drop-pop scale so it never fights the
-                      outer entering animation's transform — and the COLOR-LAW dim
-                      (an off-color die in flight can't land here; matches the
+                  {/* inner wrappers carry the drop-pop scale + reject shake so
+                      neither fights the outer entering animation's transform —
+                      nested so each juice primitive's own transform composes
+                      independently (RN style-array merge does not combine two
+                      `transform` arrays) — and the COLOR-LAW dim (an off-color
+                      die in flight can't land here; matches the
                       sigRune/dieAssigned disabled-opacity language). */}
+                  <Animated.View style={shakeStyle}>
                   <Animated.View style={[popStyle, dropIneligible ? { opacity: 0.4 } : null]}>
                     <CombatCardFace
                         card={card}
@@ -488,6 +481,7 @@ const StagedCard = React.memo(function StagedCard({
                             </View>
                         )}
                     </View>
+                  </Animated.View>
                   </Animated.View>
                 </Animated.View>
             </GestureDetector>
@@ -958,7 +952,7 @@ export const CombatBoard = React.memo(function CombatBoard({
                 payload.die, hitUid, inPlayArea, stagedUids, stanceOfUid, pendingDieByUid,
             );
             if (target) {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Rigid).catch(() => undefined);
+                juiceHaptics.impact(Haptics.ImpactFeedbackStyle.Rigid);
                 const t = target;
                 setPendingDieByUid((prev) => ({ ...prev, [t]: payload.dieId }));
                 setDropPop((prev) => ({ uid: t, n: prev.n + 1 }));   // confirm the drop landed HERE
@@ -973,7 +967,7 @@ export const CombatBoard = React.memo(function CombatBoard({
                         ? `${card.name} already holds a die — tap it to unstage first`
                         : `only a ${card.stance.toUpperCase()} or WILD die can power ${card.name}`)
                     : 'no staged card can take this die';
-                Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error).catch(() => undefined);
+                juiceHaptics.notify(Haptics.NotificationFeedbackType.Error);
                 setDropReject((prev) => ({ uid: hitUid ?? '', reason, n: prev.n + 1 }));
             }
             return;

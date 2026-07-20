@@ -41,6 +41,7 @@ import { getCardById, type CombatEvent } from '@mechanics';
 import { effectGlyph } from '@/components/combat/statusGlyphs';
 import { keywordForEffect } from '@/state/combat/keywords';
 import { IntentIcon } from './IntentIcon';
+import { useJuiceFlash, useJuiceNumberPop, useJuicePulse, useJuiceShake } from '@/lib/juice';
 
 /** Full-bleed battlefield backdrop — a storm-lit ruined city over a cracked
  *  stone floor. Sits behind the enemy figure; the SVG `CreatureScene` draws
@@ -148,18 +149,18 @@ function AltWinMeter({ glyph, label, value, target, color, testID }: {
  *  tick + BLOCKED) don't pile onto one pixel. */
 function FloatNum({ text, color, dx, onDone }: { text: string; color: string; dx: number; onDone: () => void }) {
     const styles = useStyles();
-    const ty = useSharedValue(0);
-    const op = useSharedValue(1);
-    useEffect(() => {
-        op.value = withDelay(120, withTiming(0, { duration: 760 }));
-        ty.value = withTiming(-34, { duration: 880 }, (fin) => { if (fin) runOnJS(onDone)(); });
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
-    const st = useAnimatedStyle(() => ({ opacity: op.value, transform: [{ translateX: dx }, { translateY: ty.value }] }));
+    // lib/juice number-pop primitive (phase 38) — the rise+fade math lives in
+    // the module now; this call site only supplies the horizontal jitter (a
+    // static per-instance offset, so it rides the OUTER plain View — a style
+    // array can't merge two `transform` arrays, so the animated translateY
+    // stays on its own nested Animated.View).
+    const popStyle = useJuiceNumberPop(onDone);
     return (
-        <Animated.View style={[styles.floatNum, st]} pointerEvents="none">
-            <Text style={[styles.floatNumText, { color }]}>{text}</Text>
-        </Animated.View>
+        <View style={[styles.floatNum, { transform: [{ translateX: dx }] }]} pointerEvents="none">
+            <Animated.View style={popStyle}>
+                <Text style={[styles.floatNumText, { color }]}>{text}</Text>
+            </Animated.View>
+        </View>
     );
 }
 
@@ -242,6 +243,11 @@ export const PlayerMedallion = React.memo(function PlayerMedallion({
     const squash = useSharedValue(1);
     const contact = useSharedValue(0);
     const impact = useSharedValue(0);
+    // Status-proc pulse (phase 38 brief — "a status landing should FEEL like
+    // the main event"): a distinct emphasis from the damage hit-reaction
+    // bundle above, so a status-only turn (no damage) is never a bare float.
+    const [statusPulseKey, setStatusPulseKey] = useState(0);
+    const statusPulseStyle = useJuicePulse(statusPulseKey, 1);
     const reduceMotion = useRef(false);
     useEffect(() => {
         let alive = true;
@@ -298,6 +304,7 @@ export const PlayerMedallion = React.memo(function PlayerMedallion({
         ticks.forEach((t, k) => push(`-${t}`, '#a86bdc', (k % 2 === 0 ? -1 : 1) * (20 + Math.floor(k / 2) * 16)));
         const hadFloat = dmg > 0 || ticks.length > 0;
         statuses.forEach((s, k) => { if (!hadFloat) push(s.text, s.color, (k % 2 === 0 ? 1 : -1) * 30); });
+        if (statuses.length > 0) setStatusPulseKey((k) => k + 1);
     }, [fx, player.maxHp, enemyIntentDamage, shift, flash, squash, contact, impact, landHit, push]);
 
     const anim = useAnimatedStyle(() => ({ transform: [{ translateX: shift.value }, { scale: squash.value }] }));
@@ -310,6 +317,10 @@ export const PlayerMedallion = React.memo(function PlayerMedallion({
 
     return (
         <View style={[styles.playerDock, { bottom: bottomInset + 34 }]} pointerEvents="box-none">
+            {/* status-proc pulse nests OUTSIDE the hit-reaction `anim` transform —
+                a style array can't merge two `transform` arrays, so each juice
+                primitive gets its own Animated.View and they compose via nesting. */}
+            <Animated.View style={statusPulseStyle}>
             <Animated.View style={anim}>
                 <Pressable
                     onPress={onPress}
@@ -341,6 +352,7 @@ export const PlayerMedallion = React.memo(function PlayerMedallion({
                         <Text style={styles.contactSlashText}>✦</Text>
                     </Animated.View>
                 </Pressable>
+            </Animated.View>
             </Animated.View>
             <View style={styles.playerFloatLayer} pointerEvents="none">
                 {floats.map((f) => <FloatNum key={f.id} text={f.text} color={f.color} dx={f.dx} onDone={() => drop(f.id)} />)}
@@ -374,9 +386,13 @@ export const CombatCombatantPane = React.memo(function CombatCombatantPane({
     // (recoil/flash/squash/slash/haptic) live in `PlayerMedallion`.
     const enemyShift = useSharedValue(0);
     const enemyScale = useSharedValue(1);
-    // Board-level feedback: a damage-scaled screen shake + a red vignette flash.
-    const shake = useSharedValue(0);
-    const vignette = useSharedValue(0);
+    // Board-level feedback: a damage-scaled screen shake + a red vignette
+    // flash — lib/juice primitives (phase 38), synced to the IMPACT beat
+    // below via each hook's own `delayMs` so they still land with the enemy
+    // lunge apex instead of firing on the trigger frame.
+    const [damageTick, setDamageTick] = useState({ key: 0, norm: 0 });
+    const shakeStyle = useJuiceShake(damageTick.key, damageTick.norm > 0.66 ? 'high' : damageTick.norm > 0.33 ? 'medium' : 'low', 100);
+    const flashStyle = useJuiceFlash(damageTick.key, damageTick.norm, 100);
     // Reduce-motion gate (recommended) — suppresses the shake + lunge
     // (the HP tween + floats still fire so the hit is never silent).
     const reduceMotion = useRef(false);
@@ -437,22 +453,23 @@ export const CombatCombatantPane = React.memo(function CombatCombatantPane({
             }
         }
         // (a) the player took damage → enemy ANTICIPATION (pull back) → scale-led
-        //     lunge; a damage-scaled board shake + red vignette at the impact apex.
-        //     The medallion-side beats (recoil/flash/squash/slash/float/haptic) fire
-        //     in `PlayerMedallion` off the same event stream.
-        const IMPACT = 100;
+        //     lunge; a damage-scaled board shake + red vignette at the impact apex
+        //     (100ms — the shared delay baked into the shake/flash hook calls
+        //     below). The medallion-side beats (recoil/flash/squash/slash/
+        //     float/haptic) fire in `PlayerMedallion` off the same event stream.
         if (playerDmg > 0) {
             // Normalise the hit to its share of max HP so a 4-dmg chip and a 40-dmg
             // crusher no longer feel identical — every beat scales off `norm`.
             const norm = Math.min(1, playerDmg / Math.max(1, player.maxHp));
             if (!reduceMotion.current) {
                 const lunge = 8 + norm * 10;        // 8–18px enemy lunge apex
-                const mag = 4 + norm * 4;           // 4–8px board shake
                 enemyScale.value = withSequence(withTiming(0.97, { duration: 90 }), withTiming(1 + norm * 0.08, { duration: 120 }), withTiming(1, { duration: 200 }));
                 enemyShift.value = withSequence(withTiming(-6, { duration: 90 }), withTiming(lunge, { duration: 120 }), withTiming(0, { duration: 220 }));
-                shake.value = withDelay(IMPACT, withSequence(withTiming(mag, { duration: 40 }), withTiming(-mag * 0.7, { duration: 40 }), withTiming(mag * 0.4, { duration: 40 }), withTiming(0, { duration: 50 })));
-                vignette.value = withDelay(IMPACT, withSequence(withTiming(Math.min(0.5, 0.18 + norm * 0.5), { duration: 80 }), withTiming(0, { duration: 360 })));
             }
+            // The screen shake + impact flash are lib/juice primitives — they
+            // gate their own reduced-motion internally, so this call is
+            // unconditional (the hook no-ops when appropriate).
+            setDamageTick((prev) => ({ key: prev.key + 1, norm }));
         } else if (denied || (threatFired && enemy.intent.damage > 0)) {
             // (b) the turn resolved with no damage to the player → DENIED flourish
             //     over the enemy (teaches "variety / guard denies the turn").
@@ -475,11 +492,9 @@ export const CombatCombatantPane = React.memo(function CombatCombatantPane({
         statusFloats.forEach((s, k) => {
             if (s.side === 'enemy' && !enemyHadFloat) pushEnemy(s.text, s.color, (k % 2 === 0 ? 1 : -1) * 30);
         });
-    }, [fx, enemy.intent.damage, player.maxHp, AXM.parchment, enemyScale, enemyShift, shake, vignette, pushEnemy]);
+    }, [fx, enemy.intent.damage, player.maxHp, AXM.parchment, enemyScale, enemyShift, pushEnemy]);
 
     const enemyAnim = useAnimatedStyle(() => ({ transform: [{ translateX: enemyShift.value }, { scale: enemyScale.value }] }));
-    const shakeStyle = useAnimatedStyle(() => ({ transform: [{ translateX: shake.value }] }));
-    const vignetteStyle = useAnimatedStyle(() => ({ opacity: vignette.value }));
 
     // Random painting per encounter (artNonce = encounter seed), stable for the
     // fight's duration — see assets/images/enemies.
@@ -557,7 +572,7 @@ export const CombatCombatantPane = React.memo(function CombatCombatantPane({
                 <Rect x="0" y="0" width="100%" height="100%" fill="url(#axmCombatDockScrim)" />
             </Svg>
             {/* damage-scaled red vignette flash (pointer-transparent; gated by reduce-motion) */}
-            <Animated.View pointerEvents="none" style={[styles.vignette, vignetteStyle]} />
+            <Animated.View pointerEvents="none" style={[styles.vignette, flashStyle]} />
 
             {/* ── layer 2: top HUD ── */}
             <View style={[styles.hud, { paddingTop: topInset + 8 }]} pointerEvents="box-none">

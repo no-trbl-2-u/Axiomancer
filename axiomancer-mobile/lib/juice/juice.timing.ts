@@ -1,0 +1,48 @@
+/**
+ * Phase 38 — the central juice/animation layer. Tunable timing/easing
+ * constants for every primitive, isolated D6f-style (`dice-roll-ritual.timing.ts`
+ * precedent): tune the feel HERE without touching a line of choreography.
+ */
+
+export type ShakeIntensity = 'low' | 'medium' | 'high';
+
+export interface JuiceTiming {
+    shake: {
+        /** Peak offset in px per intensity tier. */
+        amplitudePx: Record<ShakeIntensity, number>;
+        /** Duration of each alternating decay step. */
+        stepMs: number;
+        /** Number of alternating steps before the final settle-to-0 step. */
+        steps: number;
+    };
+    flash: {
+        inMs: number;
+        outMs: number;
+        /** Opacity at intensity 1. */
+        peakOpacity: number;
+    };
+    pulse: {
+        /** Scale at intensity 1. */
+        peakScale: number;
+        inMs: number;
+        outMs: number;
+    };
+    numberPop: {
+        riseDistancePx: number;
+        fadeDelayMs: number;
+        fadeDurationMs: number;
+        riseDurationMs: number;
+    };
+    transitions: {
+        enterMs: number;
+        exitMs: number;
+    };
+}
+
+export const JUICE_TIMING: JuiceTiming = {
+    shake: { amplitudePx: { low: 3, medium: 6, high: 10 }, stepMs: 45, steps: 4 },
+    flash: { inMs: 90, outMs: 260, peakOpacity: 0.4 },
+    pulse: { peakScale: 1.12, inMs: 90, outMs: 220 },
+    numberPop: { riseDistancePx: 34, fadeDelayMs: 120, fadeDurationMs: 760, riseDurationMs: 880 },
+    transitions: { enterMs: 180, exitMs: 140 },
+};

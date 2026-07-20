@@ -95,3 +95,5 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-07-20T14:03:26Z | slash-prompt | /jot | unknown | user/ci | /jot The dice, after they're used don't have a visual indicator that they're used. I would |
 | 2026-07-20T14:19:09Z | slash-prompt | /oversight | claude-opus-4-8 | user/ci | /oversight |
 | 2026-07-20T14:37:58Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-07-20T20:03:29Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-07-20T20:05:03Z | subagent | Explore | claude-sonnet-5 | main | Survey juice/animation call sites and precedents |
