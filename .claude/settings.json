@@ -37,7 +37,7 @@
       "mcp__axio-query__axio_keywords",
       "Bash(node scripts/notify.mjs:*)",
       "Bash(node scripts/loop-issue.mjs:*)",
-      "Bash(node .claude/hooks/guard.mjs:*)",
+      "Bash(node \"$CLAUDE_PROJECT_DIR/.claude/hooks/guard.mjs\":*)",
       "Bash(gh auth status:*)",
       "Bash(gh issue list:*)",
       "Bash(gh issue view:*)",
@@ -97,7 +97,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node .claude/hooks/guard.mjs pre-bash"
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/guard.mjs\" pre-bash"
           }
         ]
       },
@@ -106,7 +106,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node .claude/hooks/guard.mjs pre-write"
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/guard.mjs\" pre-write"
           }
         ]
       },
@@ -115,7 +115,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node .claude/hooks/telemetry.mjs tool"
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/telemetry.mjs\" tool"
           }
         ]
       }
@@ -126,7 +126,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node .claude/hooks/guard.mjs post-write"
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/guard.mjs\" post-write"
           }
         ]
       }
@@ -136,7 +136,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node .claude/hooks/telemetry.mjs prompt"
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/telemetry.mjs\" prompt"
           }
         ]
       }
@@ -146,7 +146,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node .claude/hooks/guard.mjs session-start"
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/guard.mjs\" session-start"
           }
         ]
       }
@@ -156,7 +156,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node .claude/hooks/guard.mjs stop"
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/guard.mjs\" stop"
           }
         ]
       }
