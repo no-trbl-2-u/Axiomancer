@@ -30,7 +30,6 @@ const lookup = (card: Card) => (id: string): Card | undefined =>
 const debuffCard: Card = {
     id: 'sk_doubt',
     name: 'Sow Doubt',
-    category: 'fallacy',
     philosophicalAspect: 'mind',
     description: 'Plants a seed of doubt.',
     tier: 1,
@@ -43,7 +42,6 @@ const debuffCard: Card = {
 const buffCard: Card = {
     id: 'sk_resolve',
     name: 'Self-Resolve',
-    category: 'paradox',
     philosophicalAspect: 'heart',
     description: 'A heartening certainty.',
     tier: 1,
@@ -81,7 +79,7 @@ describe('Phase 38 — player card applies debuff onto enemy', () => {
         const player = fixturePlayer();
         const enemy = fixtureEnemy();
         const base = initializeCombat(player, enemy);
-        const state = { ...base, combatResources: { heart: 0, body: 0, mind: 2, fallacy: 0, paradox: 0 } };
+        const state = base;
 
         const { state: next } = executeCard(state, debuffCard.id, lookup(debuffCard));
 
@@ -97,7 +95,7 @@ describe('Phase 38 — player card applies buff onto self', () => {
         const player = fixturePlayer();
         const enemy = fixtureEnemy();
         const base = initializeCombat(player, enemy);
-        const state = { ...base, combatResources: { heart: 1, body: 0, mind: 0, fallacy: 0, paradox: 0 } };
+        const state = base;
 
         const { state: next } = executeCard(state, buffCard.id, lookup(buffCard));
 
@@ -165,7 +163,7 @@ describe('Phase 38 — sourceId round-trips through JSON serialization (save/loa
         const player = fixturePlayer();
         const enemy = fixtureEnemy();
         const base = initializeCombat(player, enemy);
-        const state = { ...base, combatResources: { heart: 0, body: 0, mind: 2, fallacy: 0, paradox: 0 } };
+        const state = base;
         const { state: applied } = executeCard(state, debuffCard.id, lookup(debuffCard));
 
         const serialized = JSON.stringify(applied);

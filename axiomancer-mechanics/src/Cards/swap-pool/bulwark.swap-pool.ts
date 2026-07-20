@@ -47,7 +47,6 @@ const dryStoneCourse: Card = {
     id: 'dry-stone-course',
     theme: 'bulwark',
     name: 'Dry-Stone Course',
-    category: 'paradox',
     philosophicalAspect: 'body',
     description:
         'One course laid level, without haste and without mortar. Most of it '
@@ -80,7 +79,6 @@ const leanIntoTheShield: Card = {
     id: 'lean-into-the-shield',
     theme: 'bulwark',
     name: 'Lean Into the Shield',
-    category: 'paradox',
     philosophicalAspect: 'body',
     description:
         'The shield is not carried; it is inhabited. Set your whole weight '
@@ -103,7 +101,6 @@ const coldIronNail: Card = {
     id: 'cold-iron-nail',
     theme: 'bulwark',
     name: 'Cold Iron Nail',
-    category: 'fallacy',
     philosophicalAspect: 'body',
     description:
         'Driven once, it does its arguing every hour after. Iron is patient, '
@@ -127,7 +124,6 @@ const firstStoneSet: Card = {
     id: 'first-stone-set',
     theme: 'bulwark',
     name: 'First Stone Set',
-    category: 'paradox',
     philosophicalAspect: 'body',
     description:
         'Foundations do not apologize for coming first. Laid before anything '
@@ -160,7 +156,6 @@ const quickthornHedge: Card = {
     id: 'quickthorn-hedge',
     theme: 'bulwark',
     name: 'Quickthorn Hedge',
-    category: 'fallacy',
     philosophicalAspect: 'body',
     description:
         'Planted in a season, held for a generation. The hedge does not '
@@ -185,7 +180,6 @@ const patientMasonry: Card = {
     id: 'patient-masonry',
     theme: 'bulwark',
     name: 'Patient Masonry',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'Study the wall before you add to it. Each course teaches the shape '
@@ -210,7 +204,6 @@ const tollOfTheGate: Card = {
     id: 'toll-of-the-gate',
     theme: 'bulwark',
     name: 'Toll of the Gate',
-    category: 'fallacy',
     philosophicalAspect: 'heart',
     description:
         'Passage was never free. Name the price at the gate, in writing, and '
@@ -235,7 +228,6 @@ const tortoiseDoctrine: Card = {
     id: 'tortoise-doctrine',
     theme: 'bulwark',
     name: 'Tortoise Doctrine',
-    category: 'paradox',
     philosophicalAspect: 'body',
     description:
         'Outlive the argument. The shell is not a retreat — it is the whole '
@@ -260,7 +252,6 @@ const spitefulSplinters: Card = {
     id: 'spiteful-splinters',
     theme: 'bulwark',
     name: 'Spiteful Splinters',
-    category: 'fallacy',
     philosophicalAspect: 'body',
     description:
         'Old wood breaks mean. What comes off the palisade stays under their '
@@ -289,7 +280,6 @@ const bristlingParapet: Card = {
     id: 'bristling-parapet',
     theme: 'bulwark',
     name: 'Bristling Parapet',
-    category: 'fallacy',
     philosophicalAspect: 'body',
     description:
         'A wall grown its own opinions. Man it with nothing and it holds the '
@@ -324,7 +314,6 @@ const theWaitingAnswer: Card = {
     id: 'the-waiting-answer',
     theme: 'bulwark',
     name: 'The Waiting Answer',
-    category: 'paradox',
     philosophicalAspect: 'body',
     description:
         'You had the reply before they raised the question. Hold it, let the '
@@ -352,7 +341,6 @@ const stoneRemembers: Card = {
     id: 'stone-remembers',
     theme: 'bulwark',
     name: 'Stone Remembers',
-    category: 'paradox',
     philosophicalAspect: 'body',
     description:
         'Every blow the wall has taken is still in the wall. Strike it again '
@@ -384,7 +372,6 @@ const spikeTheBreach: Card = {
     id: 'spike-the-breach',
     theme: 'bulwark',
     name: 'Spike the Breach',
-    category: 'fallacy',
     philosophicalAspect: 'body',
     description:
         'Where they mean to come through, leave something waiting. The gap '
@@ -411,7 +398,6 @@ const theCounterweight: Card = {
     id: 'the-counterweight',
     theme: 'bulwark',
     name: 'The Counterweight',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'Set the impossible stone in the scale and the whole account tips. '
@@ -442,7 +428,6 @@ const writtenInScar: Card = {
     id: 'written-in-scar',
     theme: 'bulwark',
     name: 'Written in Scar',
-    category: 'fallacy',
     philosophicalAspect: 'heart',
     description:
         'The wall keeps minutes. Read the standing charges aloud, collect '
@@ -479,7 +464,6 @@ const masonsRhythm: Card = {
     id: 'masons-rhythm',
     theme: 'bulwark',
     name: "Mason's Rhythm",
-    category: 'paradox',
     philosophicalAspect: 'body',
     description:
         'Lay, tap, return the hand to the hod. The wall rises because '
@@ -508,7 +492,6 @@ const grudgeOfGranite: Card = {
     id: 'grudge-of-granite',
     theme: 'bulwark',
     name: 'Grudge of Granite',
-    category: 'fallacy',
     philosophicalAspect: 'body',
     description:
         'Granite forgives nothing and forgets less. The grievance is filed '
@@ -536,7 +519,6 @@ const hedgeOfSpears: Card = {
     id: 'hedge-of-spears',
     theme: 'bulwark',
     name: 'Hedge of Spears',
-    category: 'fallacy',
     philosophicalAspect: 'body',
     description:
         'Not a wall — a schedule of consequences, set at chest height. '
@@ -569,7 +551,6 @@ const shieldWallDiscipline: Card = {
     id: 'shield-wall-discipline',
     theme: 'bulwark',
     name: 'Shield-Wall Discipline',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'The drill is the argument: shields up, eyes open, learn what the '
@@ -600,7 +581,6 @@ const theSiegeOutlasted: Card = {
     id: 'the-siege-outlasted',
     theme: 'bulwark',
     name: 'The Siege Outlasted',
-    category: 'paradox',
     philosophicalAspect: 'heart',
     description:
         'Sieges are lost by the side that must eat first. Repair, breathe, '
@@ -636,7 +616,6 @@ const theRebukeInStone: Card = {
     id: 'the-rebuke-in-stone',
     theme: 'bulwark',
     name: 'The Rebuke in Stone',
-    category: 'fallacy',
     philosophicalAspect: 'body',
     description:
         'Let the whole offense arrive, wipe it off, and correct it. Stone '
@@ -666,7 +645,6 @@ const theMountainAnswers: Card = {
     id: 'the-mountain-answers',
     theme: 'bulwark',
     name: 'The Mountain Answers',
-    category: 'paradox',
     philosophicalAspect: 'body',
     description:
         'Ask the mountain anything you like. The reply is the mountain.',
@@ -694,7 +672,6 @@ const fieldOfCaltrops: Card = {
     id: 'field-of-caltrops',
     theme: 'bulwark',
     name: 'Field of Caltrops',
-    category: 'fallacy',
     philosophicalAspect: 'body',
     description:
         'Sow the ground itself with refusals. However they come on, they '
@@ -730,7 +707,6 @@ const theGrindingWall: Card = {
     id: 'the-grinding-wall',
     theme: 'bulwark',
     name: 'The Grinding Wall',
-    category: 'fallacy',
     philosophicalAspect: 'body',
     description:
         'The wall advances a finger-width a year and has never once '
@@ -771,7 +747,6 @@ const thePalisadeRepays: Card = {
     id: 'the-palisade-repays',
     theme: 'bulwark',
     name: 'The Palisade Repays',
-    category: 'fallacy',
     philosophicalAspect: 'body',
     description:
         'Debts to the wall accrue on contact and are settled the same '
@@ -798,7 +773,6 @@ const lastStoneStanding: Card = {
     id: 'last-stone-standing',
     theme: 'bulwark',
     name: 'Last Stone Standing',
-    category: 'paradox',
     philosophicalAspect: 'body',
     description:
         'When everything else has been spent, the stone is still there — and '
@@ -833,7 +807,6 @@ const oathOfTheKeep: Card = {
     id: 'oath-of-the-keep',
     theme: 'bulwark',
     name: 'Oath of the Keep',
-    category: 'paradox',
     philosophicalAspect: 'heart',
     description:
         'The keep swore to no one and outlived everyone who asked. Renew the '
@@ -868,7 +841,6 @@ const unbreachable: Card = {
     id: 'unbreachable',
     theme: 'bulwark',
     name: 'Unbreachable',
-    category: 'paradox',
     philosophicalAspect: 'body',
     description:
         'There is a ledger of what has passed this wall. It is very old, and '

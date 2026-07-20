@@ -17,7 +17,6 @@ import { Consumable } from './types';
 import { Effect } from '../Effects/types';
 import { applyEffect, removeEffectsByType } from '../Effects';
 import { heal } from '../Combat/health';
-import { CombatResources } from '../Cards/types';
 import { Character } from '../Character/types';
 
 /**
@@ -26,23 +25,14 @@ import { Character } from '../Character/types';
  * `useConsumable` inventory reducer; this engine call only handles the HP +
  * `effects` side of the transaction.
  *
- * `resourceGrant` is returned as a flat delta the caller folds into the
- * combat-side `combatResources` snapshot (see Spec 05b Q6 — the consumable
- * engine has no view of combat state itself, only the player Character).
- *
  * @property player         - The updated player snapshot (new HP / effects).
  * @property healed         - HP actually restored (after clamping to `maxHealth`).
  * @property applied        - The Effect that landed via `applyEffect`, if any.
- * @property resourceGrant  - The token delta from the consumable's
- *                            `resourceGrant`, with missing keys defaulted to
- *                            zero. Always present so the caller can fold it
- *                            unconditionally; an empty grant returns all zeros.
  */
 export interface ConsumableUseResult {
     player: Character;
     healed: number;
     applied: Effect | null;
-    resourceGrant: CombatResources;
 }
 
 /**
@@ -67,13 +57,6 @@ export function useConsumableEffect(
     let next: Character = player;
     let healed = 0;
     let applied: Effect | null = null;
-    const resourceGrant: CombatResources = { heart: 0, body: 0, mind: 0, fallacy: 0, paradox: 0 };
-    if (consumable.resourceGrant) {
-        for (const key of Object.keys(resourceGrant) as Array<keyof CombatResources>) {
-            const value = consumable.resourceGrant[key];
-            if (typeof value === 'number') resourceGrant[key] = value;
-        }
-    }
 
     if (typeof consumable.healAmount === 'number' && consumable.healAmount > 0) {
         const hpBefore = next.health;
@@ -123,5 +106,5 @@ export function useConsumableEffect(
         if (def) runEffect(def);
     }
 
-    return { player: next, healed, applied, resourceGrant };
+    return { player: next, healed, applied };
 }

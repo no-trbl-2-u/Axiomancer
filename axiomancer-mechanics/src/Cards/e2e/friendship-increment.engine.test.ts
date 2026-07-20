@@ -20,7 +20,6 @@ import { CombatState } from '../../Combat/types';
 const soothe: Card = {
     id: 'fix-soothe',
     name: 'Fixture Soothe',
-    category: 'fallacy',
     philosophicalAspect: 'heart',
     description: 'A kind word (fixture).',
     tier: 1,
@@ -33,7 +32,6 @@ const soothe: Card = {
 const empathize: Card = {
     id: 'fix-empathize',
     name: 'Fixture Empathize',
-    category: 'fallacy',
     philosophicalAspect: 'heart',
     description: 'Deep understanding (fixture).',
     tier: 2,
@@ -46,7 +44,6 @@ const empathize: Card = {
 const plain: Card = {
     id: 'fix-plain',
     name: 'Fixture Plain',
-    category: 'fallacy',
     philosophicalAspect: 'body',
     description: 'No friendship rider (fixture).',
     tier: 1,

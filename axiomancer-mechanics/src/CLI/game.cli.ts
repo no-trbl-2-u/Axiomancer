@@ -670,7 +670,7 @@ async function characterTab(store: GameStoreHandle): Promise<void> {
                 ? `${s.description.slice(0, 57)}…`
                 : s.description;
             return {
-                name: `${s.name}  (tier ${s.tier}, ${s.category})  — ${blurb}`,
+                name: `${s.name}  (tier ${s.tier})  — ${blurb}`,
                 value: s.id,
             };
         });

@@ -45,7 +45,6 @@ const sparkInTheTinder: Card = {
     id: 'spark-in-the-tinder',
     theme: 'forge',
     name: 'Spark in the Tinder',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'One spark leaves the wheel and does not come back. Somewhere in ' +
@@ -69,7 +68,6 @@ const firstHeat: Card = {
     id: 'first-heat',
     theme: 'forge',
     name: 'First Heat',
-    category: 'paradox',
     philosophicalAspect: 'body',
     description:
         'Cold iron argues back. Warm it once and it starts agreeing with ' +
@@ -95,7 +93,6 @@ const quench: Card = {
     id: 'quench',
     theme: 'forge',
     name: 'Quench',
-    category: 'paradox',
     philosophicalAspect: 'body',
     description:
         'The bath does not negotiate with the blade. It takes the whole ' +
@@ -121,7 +118,6 @@ const bellowsBreath: Card = {
     id: 'bellows-breath',
     theme: 'forge',
     name: 'Bellows-Breath',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'The fire eats air the way an argument eats silence. Feed it and it ' +
@@ -147,7 +143,6 @@ const cinderSpit: Card = {
     id: 'cinder-spit',
     theme: 'forge',
     name: 'Cinder-Spit',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'The crucible clears its throat and something small and orange ' +
@@ -176,7 +171,6 @@ const stokeTheCoals: Card = {
     id: 'stoke-the-coals',
     theme: 'forge',
     name: 'Stoke the Coals',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'Nothing new is made here. What is already burning is merely ' +
@@ -199,7 +193,6 @@ const hammerRhythm: Card = {
     id: 'hammer-rhythm',
     theme: 'forge',
     name: 'Hammer-Rhythm',
-    category: 'paradox',
     philosophicalAspect: 'body',
     description:
         'Strike, lift, strike. The third beat is silent and lands anyway. ' +
@@ -225,7 +218,6 @@ const scrapIron: Card = {
     id: 'scrap-iron',
     theme: 'forge',
     name: 'Scrap-Iron',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'Filings, burrs, the ends of old arguments. Swept into the crucible ' +
@@ -252,7 +244,6 @@ const ashLitany: Card = {
     id: 'ash-litany',
     theme: 'forge',
     name: 'Ash-Litany',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'Read the soot on the wall and you will find their name already ' +
@@ -286,7 +277,6 @@ const annealingRound: Card = {
     id: 'annealing-round',
     theme: 'forge',
     name: 'Annealing Round',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'Heat, hold, cool slowly. The metal forgets its grudges. It is the ' +
@@ -314,7 +304,6 @@ const doubleCast: Card = {
     id: 'double-cast',
     theme: 'forge',
     name: 'Double-Cast',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'One pour fills two molds. The foundry does not understand ' +
@@ -344,7 +333,6 @@ const feedTheFire: Card = {
     id: 'feed-the-fire',
     theme: 'forge',
     name: 'Feed the Fire',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'The fire is owed. It has always been owed. Pay it everything at ' +
@@ -381,7 +369,6 @@ const pastTheSafeHeat: Card = {
     id: 'past-the-safe-heat',
     theme: 'forge',
     name: 'Past the Safe Heat',
-    category: 'paradox',
     philosophicalAspect: 'body',
     description:
         'There is a line on the gauge and there is a line in the mind, and ' +
@@ -408,7 +395,6 @@ const recastInGold: Card = {
     id: 'recast-in-gold',
     theme: 'forge',
     name: 'Recast in Gold',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'Melt down the stubborn opinion and pour it again. Gold holds any ' +
@@ -439,7 +425,6 @@ const emberApprentice: Card = {
     id: 'ember-apprentice',
     theme: 'forge',
     name: 'Ember-Apprentice',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'It has no name and one lesson, learned twice. Each spark glows ' +
@@ -470,7 +455,6 @@ const firstLightOfTheForge: Card = {
     id: 'first-light-of-the-forge',
     theme: 'forge',
     name: 'First Light of the Forge',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'Whoever lights the furnace owns the morning. Everything said ' +
@@ -502,7 +486,6 @@ const crucibleDraw: Card = {
     id: 'crucible-draw',
     theme: 'forge',
     name: 'Crucible-Draw',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'Tip the crucible toward the light and read what floats. The dross ' +
@@ -530,7 +513,6 @@ const theSecondAnvil: Card = {
     id: 'the-second-anvil',
     theme: 'forge',
     name: 'The Second Anvil',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'The first anvil takes the work you planned. The second takes the ' +
@@ -555,7 +537,6 @@ const brandOfTheMaker: Card = {
     id: 'brand-of-the-maker',
     theme: 'forge',
     name: 'Brand of the Maker',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'Everything that leaves this shop is signed. From today they are ' +
@@ -583,7 +564,6 @@ const steamVeil: Card = {
     id: 'steam-veil',
     theme: 'forge',
     name: 'Steam-Veil',
-    category: 'paradox',
     philosophicalAspect: 'body',
     description:
         'Water remembers the iron fondly and rises to say so. Behind the ' +
@@ -612,7 +592,6 @@ const sprueAndRiser: Card = {
     id: 'sprue-and-riser',
     theme: 'forge',
     name: 'Sprue and Riser',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'A good mold plans for its own excess. What the casting cannot ' +
@@ -645,7 +624,6 @@ const theGreatBellows: Card = {
     id: 'the-great-bellows',
     theme: 'forge',
     name: 'The Great Bellows',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'Two lungs of oak and ox-hide, older than the town. When they ' +
@@ -674,7 +652,6 @@ const theFoundryAwakes: Card = {
     id: 'the-foundry-awakes',
     theme: 'forge',
     name: 'The Foundry Awakes',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'One by one the fires answer, as they answered a hundred years ago. ' +
@@ -705,7 +682,6 @@ const noWastedHeat: Card = {
     id: 'no-wasted-heat',
     theme: 'forge',
     name: 'No Wasted Heat',
-    category: 'paradox',
     philosophicalAspect: 'body',
     description:
         'The ledger of the forge has one rule, struck above the door: ' +
@@ -736,7 +712,6 @@ const theCrucibleEternal: Card = {
     id: 'the-crucible-eternal',
     theme: 'forge',
     name: 'The Crucible Eternal',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'It has never been allowed to cool. Grandmothers fed it; the fire ' +
@@ -764,7 +739,6 @@ const thePatternBook: Card = {
     id: 'the-pattern-book',
     theme: 'forge',
     name: 'The Pattern-Book',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'Every shape the shop has ever poured, indexed in a dead master\'s ' +
@@ -793,7 +767,6 @@ const goldFromLead: Card = {
     id: 'gold-from-lead',
     theme: 'forge',
     name: 'Gold from Lead',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'The old promise, kept at last — not by changing the lead, but by ' +
@@ -830,7 +803,6 @@ const theFullPour: Card = {
     id: 'the-full-pour',
     theme: 'forge',
     name: 'The Full Pour',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'Not a casting — a verdict. Everything the shop has saved goes into ' +
@@ -869,7 +841,6 @@ const theLastQuench: Card = {
     id: 'the-last-quench',
     theme: 'forge',
     name: 'The Last Quench',
-    category: 'paradox',
     philosophicalAspect: 'body',
     description:
         'At the end the whole day\'s heat goes into the water, and the ' +

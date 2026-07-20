@@ -6,7 +6,7 @@
  * engine state and writes the result back through the store.
  *
  * In-combat resource accounting is fully engine-owned by the
- * Hazard-Pattern combat driver (`CombatEncounterState.combatResources`,
+ * Hazard-Pattern combat driver (`CombatEncounterState.resonance`,
  * `dice`/`reserve`) — mobile keeps no parallel mana bookkeeping. The
  * legacy mobile-only `combatMana` slice (Phase 60d) was retired when
  * legacy turn-based combat was removed (mechanics 0.37.0).
@@ -809,7 +809,6 @@ export interface LearnableCardOffer {
     name: string;
     description: string;
     stance: 'body' | 'mind' | 'heart';
-    category: 'fallacy' | 'paradox';
     tier: number;
     /** Compact effect line — same format as the combat picker rows. */
     effectText: string;
@@ -825,7 +824,6 @@ function toLearnableOffer(store: AppStore, card: Card): LearnableCardOffer {
         name: card.name.toUpperCase(),
         description: card.description,
         stance: card.philosophicalAspect,
-        category: card.category,
         tier: card.tier,
         effectText: combatCard
             ? cardEffectText(combatCard, damage)
@@ -1477,9 +1475,8 @@ function debugSeedAction(store: AppStore): DebugSeedResult {
             }
         }
 
-        // 3. Two cards from the engine's library (covers both paradox +
-        //    fallacy categories). Phase 16 swapped the data source from
-        //    the local mock to `state/selectors/combat-cards`; engine
+        // 3. Two cards from the engine's library. Phase 16 swapped the
+        //    data source from the local mock to `state/selectors/combat-cards`; engine
         //    0.10.2 now re-exports `cardLibrary` at the top level.
         //    Push directly onto `player.knownCards` rather than via
         //    `engine.learnCard` — `learnCard` enforces level-/stat-

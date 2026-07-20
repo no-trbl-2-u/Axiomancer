@@ -126,7 +126,6 @@ describe('isCombatSynergySatisfied', () => {
     registerSandboxCards([{
         id: 'qa-target-synergy',
         name: 'QA Target Synergy (test fixture)',
-        category: 'fallacy',
         philosophicalAspect: 'body',
         description: 'Test-only: target-side synergy predicate on bleed.',
         tier: 2,
@@ -180,7 +179,6 @@ describe('isCombatSynergySatisfied', () => {
         registerSandboxCards([{
             id: 'qa-caster-synergy',
             name: 'QA Caster Synergy (test fixture)',
-            category: 'paradox',
             philosophicalAspect: 'mind',
             description: 'Test-only: caster-side synergy predicate.',
             tier: 2,

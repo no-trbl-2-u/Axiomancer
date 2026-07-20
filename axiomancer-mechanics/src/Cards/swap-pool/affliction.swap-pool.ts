@@ -36,7 +36,6 @@ const aThousandCuts: Card = {
     id: 'a-thousand-cuts',
     theme: 'affliction',
     name: 'A Thousand Cuts',
-    category: 'fallacy',
     philosophicalAspect: 'body',
     description:
         'No single objection matters. That was never the design. Count them ' +
@@ -59,7 +58,6 @@ const scarTissue: Card = {
     id: 'scar-tissue',
     theme: 'affliction',
     name: 'Scar Tissue',
-    category: 'fallacy',
     philosophicalAspect: 'body',
     description:
         'What healed wrong healed hard. The old arguments close over the new ' +
@@ -80,7 +78,6 @@ const theVeiledSting: Card = {
     id: 'the-veiled-sting',
     theme: 'affliction',
     name: 'The Veiled Sting',
-    category: 'fallacy',
     philosophicalAspect: 'heart',
     description:
         'A courtesy offered with the barb already seated. They accept both, ' +
@@ -104,7 +101,6 @@ const nameTheFlaw: Card = {
     id: 'name-the-flaw',
     theme: 'affliction',
     name: 'Name the Flaw',
-    category: 'fallacy',
     philosophicalAspect: 'mind',
     description:
         'Say it plainly, once, for the record. After that, every blow knows ' +
@@ -127,7 +123,6 @@ const nickTheVein: Card = {
     id: 'nick-the-vein',
     theme: 'affliction',
     name: 'Nick the Vein',
-    category: 'fallacy',
     philosophicalAspect: 'body',
     description: 'Small, precise, unremarkable. The artery disagrees.',
     tier: 2, rank: 2, cardType: 'spell',
@@ -148,7 +143,6 @@ const saltInTheWound: Card = {
     id: 'salt-in-the-wound',
     theme: 'affliction',
     name: 'Salt in the Wound',
-    category: 'fallacy',
     philosophicalAspect: 'heart',
     description: 'The wound was argument enough. The salt is for emphasis.',
     tier: 1, rank: 1, cardType: 'spell',
@@ -171,7 +165,6 @@ const coldComfort: Card = {
     id: 'cold-comfort',
     theme: 'affliction',
     name: 'Cold Comfort',
-    category: 'paradox',
     philosophicalAspect: 'heart',
     description:
         'No cure. Only the honest arithmetic of endurance: numb it, bind it, ' +
@@ -195,7 +188,6 @@ const catalogueOfIlls: Card = {
     id: 'catalogue-of-ills',
     theme: 'affliction',
     name: 'Catalogue of Ills',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'Every symptom filed, cross-referenced, and read aloud. The reading ' +
@@ -217,7 +209,6 @@ const firstSymptom: Card = {
     id: 'first-symptom',
     theme: 'affliction',
     name: 'First Symptom',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'It begins as almost nothing — a cough in the argument, a tremor in ' +
@@ -247,7 +238,6 @@ const theSecondInfection: Card = {
     id: 'the-second-infection',
     theme: 'affliction',
     name: 'The Second Infection',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'What ails them learns patience. Nothing on them ends when it ' +
@@ -276,7 +266,6 @@ const reopenTheQuestion: Card = {
     id: 'reopen-the-question',
     theme: 'affliction',
     name: 'Reopen the Question',
-    category: 'paradox',
     philosophicalAspect: 'body',
     description:
         'Settled matter, was it? The wound flips its own premise — no deeper, ' +
@@ -304,7 +293,6 @@ const aggravateTheCase: Card = {
     id: 'aggravate-the-case',
     theme: 'affliction',
     name: 'Aggravate the Case',
-    category: 'fallacy',
     philosophicalAspect: 'body',
     description:
         'Nothing new is argued. Everything already argued argues harder, and ' +
@@ -330,7 +318,6 @@ const theLastWordFesters: Card = {
     id: 'the-last-word-festers',
     theme: 'affliction',
     name: 'The Last Word Festers',
-    category: 'fallacy',
     philosophicalAspect: 'heart',
     description: 'Spoken as the door closes, it has the whole night to work.',
     tier: 2, rank: 4, cardType: 'spell',
@@ -362,7 +349,6 @@ const creepingContagion: Card = {
     id: 'creeping-contagion',
     theme: 'affliction',
     name: 'Creeping Contagion',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'It spreads by proximity of belief. The wrong die carries it just as ' +
@@ -389,7 +375,6 @@ const stanchAndAnswer: Card = {
     id: 'stanch-and-answer',
     theme: 'affliction',
     name: 'Stanch and Answer',
-    category: 'fallacy',
     philosophicalAspect: 'body',
     description:
         'Bind the arm. Scrape the rot from it. Answer the blow with a wound ' +
@@ -421,7 +406,6 @@ const chronicCondition: Card = {
     id: 'chronic-condition',
     theme: 'affliction',
     name: 'Chronic Condition',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description: 'Not fatal, they said. Merely permanent.',
     tier: 2, rank: 3, cardType: 'spell',
@@ -446,7 +430,6 @@ const theSlowKnife: Card = {
     id: 'the-slow-knife',
     theme: 'affliction',
     name: 'The Slow Knife',
-    category: 'fallacy',
     philosophicalAspect: 'body',
     description:
         'It is in no hurry. Neither is the hand that holds it, which never ' +
@@ -470,7 +453,6 @@ const venomedCourtesy: Card = {
     id: 'venomed-courtesy',
     theme: 'affliction',
     name: 'Venomed Courtesy',
-    category: 'fallacy',
     philosophicalAspect: 'heart',
     description:
         'Open with it — the pleasantry lands first, before any guard is ' +
@@ -497,7 +479,6 @@ const caseHistory: Card = {
     id: 'case-history',
     theme: 'affliction',
     name: 'Case History',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'Read enough ruined arguments and the next one drafts itself. The ' +
@@ -525,7 +506,6 @@ const woundForWound: Card = {
     id: 'wound-for-wound',
     theme: 'affliction',
     name: 'Wound for Wound',
-    category: 'fallacy',
     philosophicalAspect: 'body',
     description:
         'An old law, evenly applied. What they open on you is opened on ' +
@@ -553,7 +533,6 @@ const terminalDiagnosis: Card = {
     id: 'terminal-diagnosis',
     theme: 'affliction',
     name: 'Terminal Diagnosis',
-    category: 'paradox',
     philosophicalAspect: 'heart',
     description:
         'Strip the hopeful reading first. Then deliver the finding, which ' +
@@ -582,7 +561,6 @@ const theVerdictOfRot: Card = {
     id: 'the-verdict-of-rot',
     theme: 'affliction',
     name: 'The Verdict of Rot',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'Every affliction is called to testify at once. The verdict is ' +
@@ -607,7 +585,6 @@ const theDeepRot: Card = {
     id: 'the-deep-rot',
     theme: 'affliction',
     name: 'The Deep Rot',
-    category: 'fallacy',
     philosophicalAspect: 'body',
     description:
         'Past the skin of the claim, past its bones, into the part that ' +
@@ -631,7 +608,6 @@ const bledWhite: Card = {
     id: 'bled-white',
     theme: 'affliction',
     name: 'Bled White',
-    category: 'fallacy',
     philosophicalAspect: 'body',
     description:
         'Every wound widened, then the widest one opened again. What remains ' +
@@ -660,7 +636,6 @@ const rotTakesTheRoot: Card = {
     id: 'rot-takes-the-root',
     theme: 'affliction',
     name: 'Rot Takes the Root',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'Feed it, lengthen it, recolor the day to serve it. The garden was ' +
@@ -689,7 +664,6 @@ const theWoundRephrased: Card = {
     id: 'the-wound-rephrased',
     theme: 'affliction',
     name: 'The Wound, Rephrased',
-    category: 'paradox',
     philosophicalAspect: 'heart',
     description:
         'The same injury, stated more precisely. Precision, it turns out, is ' +
@@ -715,7 +689,6 @@ const theMercyOfRot: Card = {
     id: 'the-mercy-of-rot',
     theme: 'affliction',
     name: 'The Mercy of Rot',
-    category: 'fallacy',
     philosophicalAspect: 'heart',
     description:
         'Call it mercy if that helps: you are healed by exactly what devours ' +
@@ -750,7 +723,6 @@ const allWoundsAtOnce: Card = {
     id: 'all-wounds-at-once',
     theme: 'affliction',
     name: 'All Wounds at Once',
-    category: 'paradox',
     philosophicalAspect: 'heart',
     description:
         'The kindness of the ending is that it is an ending. Everything they ' +
@@ -781,7 +753,6 @@ const theAnnotatedPlague: Card = {
     id: 'the-annotated-plague',
     theme: 'affliction',
     name: 'The Annotated Plague',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'The disease, with commentary. Scholarship makes everything worse — ' +

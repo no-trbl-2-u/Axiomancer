@@ -37,7 +37,6 @@ const tallowAndWick: Card = {
     id: 'tallow-and-wick',
     theme: 'harvest',
     name: 'Tallow and Wick',
-    category: 'fallacy',
     philosophicalAspect: 'body',
     description:
         'The candle is not the point. The point is what drips off it while '
@@ -61,7 +60,6 @@ const chaffFire: Card = {
     id: 'chaff-fire',
     theme: 'harvest',
     name: 'Chaff Fire',
-    category: 'fallacy',
     philosophicalAspect: 'body',
     description:
         'Straw burns hot and is gone before the smoke settles. Nothing '
@@ -83,7 +81,6 @@ const gleaningHands: Card = {
     id: 'gleaning-hands',
     theme: 'harvest',
     name: 'Gleaning Hands',
-    category: 'fallacy',
     philosophicalAspect: 'mind',
     description:
         'After the reapers pass, the field still owes. Bare hands, bent '
@@ -107,7 +104,6 @@ const hedgeOfSheaves: Card = {
     id: 'hedge-of-sheaves',
     theme: 'harvest',
     name: 'Hedge of Sheaves',
-    category: 'fallacy',
     philosophicalAspect: 'body',
     description:
         'Stack the cut grain high enough and it stops arrows. The dead '
@@ -128,7 +124,6 @@ const threshingFloor: Card = {
     id: 'threshing-floor',
     theme: 'harvest',
     name: 'Threshing Floor',
-    category: 'fallacy',
     philosophicalAspect: 'body',
     description:
         'Everything that lands here gets beaten until the useful part '
@@ -151,7 +146,6 @@ const whatIsSpared: Card = {
     id: 'what-is-spared',
     theme: 'harvest',
     name: 'What Is Spared',
-    category: 'fallacy',
     philosophicalAspect: 'heart',
     description:
         'Be thankful for what is spared. The field is not: everything '
@@ -173,7 +167,6 @@ const whatTheMiceLeave: Card = {
     id: 'what-the-mice-leave',
     theme: 'harvest',
     name: 'What the Mice Leave',
-    category: 'fallacy',
     philosophicalAspect: 'mind',
     description:
         'Granary arithmetic: whatever is missing was eaten, and whatever '
@@ -195,7 +188,6 @@ const waxAndWane: Card = {
     id: 'wax-and-wane',
     theme: 'harvest',
     name: 'Wax and Wane',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'A moon that fills in an evening and is gone by the bell. Brief '
@@ -219,7 +211,6 @@ const widowsPortion: Card = {
     id: 'widows-portion',
     theme: 'harvest',
     name: "Widow's Portion",
-    category: 'fallacy',
     philosophicalAspect: 'heart',
     description:
         'The estate pays out smallest to those who need it most. Take the '
@@ -246,7 +237,6 @@ const rustOnTheScythe: Card = {
     id: 'rust-on-the-scythe',
     theme: 'harvest',
     name: 'Rust on the Scythe',
-    category: 'fallacy',
     philosophicalAspect: 'mind',
     description:
         'The blade dulls between seasons. It still owes a harvest, and '
@@ -272,7 +262,6 @@ const sickleTurn: Card = {
     id: 'sickle-turn',
     theme: 'harvest',
     name: 'Sickle Turn',
-    category: 'fallacy',
     philosophicalAspect: 'body',
     description:
         'One clean arc: what was ripening is suddenly ripe, and what was '
@@ -299,7 +288,6 @@ const titheLedger: Card = {
     id: 'tithe-ledger',
     theme: 'harvest',
     name: 'Tithe Ledger',
-    category: 'fallacy',
     philosophicalAspect: 'mind',
     description:
         'Every tenth sheaf, every tenth breath. The book does not care '
@@ -325,7 +313,6 @@ const cropRotation: Card = {
     id: 'crop-rotation',
     theme: 'harvest',
     name: 'Crop Rotation',
-    category: 'fallacy',
     philosophicalAspect: 'mind',
     description:
         'Change what grows in them and the same acres pay twice. Fields '
@@ -349,7 +336,6 @@ const seedInTheFurrow: Card = {
     id: 'seed-in-the-furrow',
     theme: 'harvest',
     name: 'Seed in the Furrow',
-    category: 'paradox',
     philosophicalAspect: 'body',
     description:
         'Buried now, collected later, with interest the soil never agreed '
@@ -374,7 +360,6 @@ const gravesideWatch: Card = {
     id: 'graveside-watch',
     theme: 'harvest',
     name: 'Graveside Watch',
-    category: 'fallacy',
     philosophicalAspect: 'body',
     description:
         'Sit with the dead long enough and the living learn to wait. '
@@ -402,7 +387,6 @@ const theLeanSeason: Card = {
     id: 'the-lean-season',
     theme: 'harvest',
     name: 'The Lean Season',
-    category: 'fallacy',
     philosophicalAspect: 'heart',
     description:
         'A thin year teaches exact bookkeeping. Every blow they landed is '
@@ -432,7 +416,6 @@ const walkTheRowsTwice: Card = {
     id: 'walk-the-rows-twice',
     theme: 'harvest',
     name: 'Walk the Rows Twice',
-    category: 'fallacy',
     philosophicalAspect: 'mind',
     description:
         'Walk the rows twice. The first pass takes what is offered; the '
@@ -459,7 +442,6 @@ const rotInTheGranary: Card = {
     id: 'rot-in-the-granary',
     theme: 'harvest',
     name: 'Rot in the Granary',
-    category: 'fallacy',
     philosophicalAspect: 'body',
     description:
         'One spoiled sack is never one spoiled sack. Open it, charge it to '
@@ -486,7 +468,6 @@ const barterOfBone: Card = {
     id: 'barter-of-bone',
     theme: 'harvest',
     name: 'Barter of Bone',
-    category: 'fallacy',
     philosophicalAspect: 'heart',
     description:
         'Everything sells, given the right market. Today the dead buy back '
@@ -513,7 +494,6 @@ const theQuietArithmetic: Card = {
     id: 'the-quiet-arithmetic',
     theme: 'harvest',
     name: 'The Quiet Arithmetic',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'No sermon, no scythe raised. Only a column of figures growing at '
@@ -538,7 +518,6 @@ const feastOfAshes: Card = {
     id: 'feast-of-ashes',
     theme: 'harvest',
     name: 'Feast of Ashes',
-    category: 'fallacy',
     philosophicalAspect: 'body',
     description:
         'What burned still feeds, if you are not particular. Serve them '
@@ -566,7 +545,6 @@ const countingTheSheaves: Card = {
     id: 'counting-the-sheaves',
     theme: 'harvest',
     name: 'Counting the Sheaves',
-    category: 'fallacy',
     philosophicalAspect: 'heart',
     description:
         'The tally happens at dusk, not at noon. Whoever counts last '
@@ -597,7 +575,6 @@ const theSecondScythe: Card = {
     id: 'the-second-scythe',
     theme: 'harvest',
     name: 'The Second Scythe',
-    category: 'fallacy',
     philosophicalAspect: 'body',
     description:
         'The first scythe takes the field. The second takes whatever '
@@ -633,7 +610,6 @@ const harvestHome: Card = {
     id: 'harvest-home',
     theme: 'harvest',
     name: 'Harvest Home',
-    category: 'fallacy',
     philosophicalAspect: 'mind',
     description:
         'The last wagon in under the last light, and the whole year '
@@ -661,7 +637,6 @@ const allFleshIsGrass: Card = {
     id: 'all-flesh-is-grass',
     theme: 'harvest',
     name: 'All Flesh Is Grass',
-    category: 'paradox',
     philosophicalAspect: 'body',
     description:
         'The field does not distinguish. Everything standing is a crop; '
@@ -689,7 +664,6 @@ const aTitheOfTeeth: Card = {
     id: 'a-tithe-of-teeth',
     theme: 'harvest',
     name: 'A Tithe of Teeth',
-    category: 'fallacy',
     philosophicalAspect: 'mind',
     description:
         'The church takes grain. The field takes bone. Neither issues '
@@ -715,7 +689,6 @@ const winterCount: Card = {
     id: 'winter-count',
     theme: 'harvest',
     name: 'Winter Count',
-    category: 'paradox',
     philosophicalAspect: 'heart',
     description:
         'The year is written on the hide in one spare line. What survived, '
@@ -749,7 +722,6 @@ const reliquaryOfTheSeason: Card = {
     id: 'reliquary-of-the-season',
     theme: 'harvest',
     name: 'Reliquary of the Season',
-    category: 'fallacy',
     philosophicalAspect: 'body',
     description:
         'Open the box once a year. What the season saved is spent in one '
@@ -780,7 +752,6 @@ const barTheGranaryDoor: Card = {
     id: 'bar-the-granary-door',
     theme: 'harvest',
     name: 'Bar the Granary Door',
-    category: 'fallacy',
     philosophicalAspect: 'body',
     description:
         'Winter is a siege that always comes. The door is oak, the bar is '
@@ -814,7 +785,6 @@ const deathAndTaxes: Card = {
     id: 'death-and-taxes',
     theme: 'harvest',
     name: 'Death and Taxes',
-    category: 'paradox',
     philosophicalAspect: 'heart',
     description:
         'Two collectors, one ledger. Neither is cruel; cruelty would '

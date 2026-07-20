@@ -19,7 +19,6 @@
 import type { Character } from '../Character/types';
 import type { Enemy } from '../Enemy/types';
 import type { Effect, ActiveEffect } from '../Effects/types';
-import type { CombatResources } from '../Cards/types';
 import type { Stance } from './types';
 
 // ---------------------------------------------------------------------------
@@ -132,8 +131,6 @@ export interface CombatCard {
     rank?: 1 | 2 | 3 | 4 | 5 | 6;
     /** Spec 32 v3 — card type (spell / enchantment / disenchant). */
     cardType?: 'spell' | 'enchantment' | 'disenchant';
-    /** Fallacy (⚖) or Paradox (∞) flavour — preserved token generation. */
-    category: 'fallacy' | 'paradox' | null;
     /** Human-readable description of the FREE top action. */
     topActionText: string;
     /** Human-readable description of the powered BOTTOM action. */
@@ -916,7 +913,6 @@ export interface CombatEncounterState {
     threatMarks: CombatThreatMark[];       // O / X ledger per phase (hindered / acted)
     currentPhaseIndex: number;             // 0-indexed into threatPhases
     phaseResults: CombatPhaseResult[];     // completed phase records
-    combatResources: CombatResources;      // Fallacy/Paradox bank (+ stance scratch)
     round: number;                         // total rounds elapsed
     /** Per-effect attribution accumulator keyed by the card that applied it. */
     attribution: Record<string, CombatAttributionRow>;

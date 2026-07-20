@@ -1,16 +1,15 @@
 /**
  * Cards module — types and runtime engine.
  *
- * Cards (fallacies and paradoxes) run on the five-resource resonance
- * economy described in `specs/04-cards-engine.md`. The engine functions
- * here are pure: callers thread state forward themselves.
+ * Cards run on the resonance economy described in `specs/04-cards-engine.md`.
+ * The engine functions here are pure: callers thread state forward
+ * themselves.
  *
  * Card content (the named library) lives in Spec 04b.
  */
 
 export type {
-    Card, CardCategory, StatType, CardTier, CardTarget,
-    CombatResources,
+    Card, StatType, CardTier, CardTarget,
     CardCombatEffects, CardSpecialMechanic,
     CardSynergy, SynergyPredicate,
     // WS4.2 — combat-state synergy predicate (spec 32 §12 item 4)
@@ -33,9 +32,7 @@ export {
 } from './synergy-predicates';
 
 export {
-    generateBasicActionResources, generatePhilosophicalResource,
     calculateCardDamage, executeCard,
-    philosophicalCategoryFor,
     getAvailableCards, learnCard,
 } from './card.engine';
 

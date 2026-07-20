@@ -17,7 +17,6 @@ const mockOffer: LearnableCardOffer = {
     id: 'test-card-id',
     name: 'Test Card',
     tier: 2,
-    category: 'fallacy',
     stance: 'mind',
     effectText: 'deals +2 damage',
     description: 'A test card for unit testing',
@@ -72,7 +71,7 @@ describe('LearnCardModal: mount contract', () => {
             />,
         );
         expect(tree.queryByText('Test Card')).not.toBeNull();
-        expect(tree.queryByText('T2 · FALLACY')).not.toBeNull();
+        expect(tree.queryByText('T2')).not.toBeNull();
         expect(tree.queryByText('deals +2 damage')).not.toBeNull();
         expect(tree.queryByText('A test card for unit testing')).not.toBeNull();
         expect(tree.queryByText('LEARN ›')).not.toBeNull();

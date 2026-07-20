@@ -151,7 +151,7 @@ describe('draftCombatDeck stage + extraCards pools', () => {
 
     it('extraCards join the pool under the stage gates (exhaustive draft proves membership)', () => {
         const extraDot: Card = {
-            id: 'draft-test-extra-dot', name: 'Draft Test Dot', category: 'fallacy',
+            id: 'draft-test-extra-dot', name: 'Draft Test Dot',
             philosophicalAspect: 'body', description: 'test-only DoT card', tier: 1,
             targetType: 'enemy', rank: 1, cardType: 'spell',
             combatEffects: [{ effectId: 'debuff_bleed', appliedTo: 'opponent', intensity: 2, duration: 3 }],

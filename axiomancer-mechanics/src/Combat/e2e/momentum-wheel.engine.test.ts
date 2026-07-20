@@ -37,19 +37,19 @@ afterEach(() => vi.restoreAllMocks());
 // isolate the wheel-advance reducer from every other play concern.
 registerSandboxCards([
     {
-        id: 'qa-wheel-heart', name: 'QA Wheel Heart', category: 'fallacy',
+        id: 'qa-wheel-heart', name: 'QA Wheel Heart',
         philosophicalAspect: 'heart', description: 'wheel-test heart fixture',
         tier: 1, targetType: 'enemy', rank: 1, cardType: 'spell',
         combatEffects: [{ effectId: 'debuff_bleed', appliedTo: 'opponent', intensity: 1, duration: 2 }],
     },
     {
-        id: 'qa-wheel-body', name: 'QA Wheel Body', category: 'fallacy',
+        id: 'qa-wheel-body', name: 'QA Wheel Body',
         philosophicalAspect: 'body', description: 'wheel-test body fixture',
         tier: 1, targetType: 'enemy', rank: 1, cardType: 'spell',
         combatEffects: [{ effectId: 'debuff_poison', appliedTo: 'opponent', intensity: 1, duration: 2 }],
     },
     {
-        id: 'qa-wheel-mind', name: 'QA Wheel Mind', category: 'paradox',
+        id: 'qa-wheel-mind', name: 'QA Wheel Mind',
         philosophicalAspect: 'mind', description: 'wheel-test mind fixture',
         tier: 1, targetType: 'enemy', rank: 1, cardType: 'spell',
         combatEffects: [{ effectId: 'debuff_confusion', appliedTo: 'opponent', duration: 2 }],

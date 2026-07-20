@@ -13,7 +13,6 @@
  */
 import type {
     Card,
-    CardCategory,
     StatType,
     CardTier,
     CardTarget,
@@ -33,7 +32,6 @@ import type {
 export interface CardDraft {
     id: string;
     name: string;
-    category: CardCategory;
     philosophicalAspect: StatType;
     description: string;
     tier: CardTier;
@@ -67,7 +65,6 @@ export function blankCard(): CardDraft {
     return {
         id: '',
         name: '',
-        category: 'fallacy',
         philosophicalAspect: 'body',
         description: '',
         tier: 1,
@@ -93,7 +90,6 @@ export function toDraft(card: Card): CardDraft {
     return {
         id: card.id,
         name: card.name,
-        category: card.category,
         philosophicalAspect: card.philosophicalAspect,
         description: card.description,
         tier: card.tier,
@@ -121,7 +117,6 @@ export function fromDraft(draft: CardDraft): Card {
     const card: Card = {
         id: draft.id.trim(),
         name: draft.name.trim(),
-        category: draft.category,
         philosophicalAspect: draft.philosophicalAspect,
         description: draft.description,
         tier: draft.tier,

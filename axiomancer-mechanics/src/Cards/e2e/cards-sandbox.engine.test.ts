@@ -40,7 +40,6 @@ function testDotCard(id = 'sandbox-test-rot'): Card {
     return {
         id,
         name: 'Test Rot',
-        category: 'fallacy',
         philosophicalAspect: 'body',
         description: 'A test argument that decays on contact.',
         tier: 1,

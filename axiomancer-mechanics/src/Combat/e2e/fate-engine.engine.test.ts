@@ -39,21 +39,21 @@ afterEach(() => vi.restoreAllMocks());
 // but a fixture pins the RULE, not any one card's tuning).
 registerSandboxCards([
     {
-        id: 'qa-threshold-dot', name: 'QA Threshold DoT', category: 'fallacy',
+        id: 'qa-threshold-dot', name: 'QA Threshold DoT',
         philosophicalAspect: 'body', description: 'threshold fixture', tier: 1,
         targetType: 'enemy', rank: 1, cardType: 'spell',
         combatEffects: [{ effectId: 'debuff_bleed', appliedTo: 'opponent', intensity: 1, duration: 2 }],
         threshold: { color: 'body', count: 1, rider: { conviction: 2, guard: 4 } },
     },
     {
-        id: 'qa-fate-card', name: 'QA Fate Card', category: 'paradox',
+        id: 'qa-fate-card', name: 'QA Fate Card',
         philosophicalAspect: 'mind', description: 'fate fixture', tier: 1,
         targetType: 'enemy', rank: 1, cardType: 'spell',
         combatEffects: [{ effectId: 'debuff_curse', appliedTo: 'opponent', duration: 2 }],
         fate: { rider: { bonusDuration: 2 }, recoilHp: 3 },
     },
     {
-        id: 'qa-guard-card', name: 'QA Guard Card', category: 'fallacy',
+        id: 'qa-guard-card', name: 'QA Guard Card',
         philosophicalAspect: 'heart', description: 'guard fixture', tier: 1,
         targetType: 'self', rank: 1, cardType: 'spell',
         specialMechanics: [{ kind: 'guard', amount: 10 }],

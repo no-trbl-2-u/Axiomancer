@@ -1,5 +1,5 @@
 import { clamp } from '@mechanics';
-import type { ActiveEffect, CombatResources } from '@mechanics';
+import type { ActiveEffect } from '@mechanics';
 
 import type { AppStoreState } from '@/state/store';
 
@@ -23,22 +23,6 @@ function toDisplay(e: ActiveEffect): ActiveEffectDisplay {
         intensity: e.intensity,
         remainingDuration: e.remainingDuration,
     };
-}
-
-/**
- * Calculate resource percentage from engine combat resources.
- * Uses estimated max based on typical combat starting values.
- * Formal follow-up: tracked in plan/PHASE_CANDIDATES.md as candidate.
- */
-function calculateResourcePercent(resources: CombatResources): number {
-    const totalCurrent = resources.heart + resources.body + resources.mind + 
-                        resources.fallacy + resources.paradox;
-    
-    // Estimate typical max total resources (can be refined based on testing)
-    // Starting values are typically around 3-5 per resource type
-    const estimatedMax = 20; 
-    
-    return totalCurrent > 0 ? clamp(totalCurrent / estimatedMax, 0, 1) : 0;
 }
 
 /**
@@ -76,10 +60,7 @@ export function selectCombatHudViewModel(state: AppStoreState): CombatHudViewMod
     // Hazard-Pattern panel shows live resources itself). The bar always
     // reads as full regardless of `hideMana` — kept as a no-op override
     // rather than removed, so existing dev-menu wiring stays intact.
-    const combatResources: CombatResources | null = null;
-    const manaPercent: number = combatResources === null
-        ? 1
-        : calculateResourcePercent(combatResources);
+    const manaPercent = 1;
 
     // Phase 87 — dev override can force effects empty for testing.
     const rawEffects = hudOverrides.hideEffects ? [] : player.effects;

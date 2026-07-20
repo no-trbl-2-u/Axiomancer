@@ -36,7 +36,6 @@ const slipperySlope: Card = {
     id: 'slippery-slope',
     theme: 'affliction',
     name: 'Slippery Slope',
-    category: 'fallacy',
     philosophicalAspect: 'body',
     description:
         'One concession, then the next, then the avalanche you promised was ' +
@@ -62,7 +61,6 @@ const festeringArgument: Card = {
     id: 'festering-argument',
     theme: 'affliction',
     name: 'Festering Argument',
-    category: 'fallacy',
     philosophicalAspect: 'mind',
     description:
         'Left unanswered, a wound of reasoning does not close. You decline ' +
@@ -82,7 +80,6 @@ const currysConversion: Card = {
     id: 'currys-conversion',
     theme: 'affliction',
     name: "Curry's Conversion",
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'If this wound harms you, then it spreads. The conditional is ' +
@@ -105,7 +102,6 @@ const resonanceDetonation: Card = {
     id: 'resonance-detonation',
     theme: 'affliction',
     name: 'Resonance Detonation',
-    category: 'paradox',
     philosophicalAspect: 'heart',
     description:
         'Every argument you have seeded rings at once, one frequency, one ' +
@@ -156,7 +152,6 @@ const venomAndVein: Card = {
     theme: 'affliction',
     persistentEffect: 'Your BLEED and POISON land +1 intensity and +1 duration.',
     name: 'Venom and Vein',
-    category: 'fallacy',
     philosophicalAspect: 'body',
     description:
         'The argument in the blood and the blood in the argument. From here ' +
@@ -173,7 +168,6 @@ const suppuratingCurse: Card = {
     theme: 'affliction',
     persistentEffect: "At round end, the enemy takes this round's POISON and BLEED damage again.",
     name: 'Suppurating Curse',
-    category: 'fallacy',
     philosophicalAspect: 'mind',
     description:
         'A standing verdict: nothing on them is allowed to close. Whatever ' +
@@ -195,7 +189,6 @@ const exordium: Card = {
     id: 'exordium',
     theme: 'peroration',
     name: 'Exordium',
-    category: 'fallacy',
     philosophicalAspect: 'heart',
     description:
         'Every case begins somewhere quiet. You clear your throat, and the ' +
@@ -219,7 +212,6 @@ const openingStatement: Card = {
     id: 'opening-statement',
     theme: 'peroration',
     name: 'Opening Statement',
-    category: 'fallacy',
     philosophicalAspect: 'heart',
     description:
         'You name what you intend to prove while pointing at the place it ' +
@@ -246,7 +238,6 @@ const mountingCase: Card = {
     id: 'mounting-case',
     theme: 'peroration',
     name: 'Mounting Case',
-    category: 'fallacy',
     philosophicalAspect: 'mind',
     description:
         'Premise stacked on premise, each one small, none deniable. The ' +
@@ -276,7 +267,6 @@ const peroratioInterrupta: Card = {
     id: 'peroratio-interrupta',
     theme: 'peroration',
     name: 'Peroratio Interrupta',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'You cash the argument early — ugly, effective. Every mark and ' +
@@ -298,7 +288,6 @@ const theClosingWord: Card = {
     id: 'the-closing-word',
     theme: 'peroration',
     name: 'The Closing Word',
-    category: 'fallacy',
     philosophicalAspect: 'heart',
     description:
         'The conclusion, declared before it is finished being true. At six ' +
@@ -326,7 +315,6 @@ const sketchOfAThought: Card = {
     id: 'sketch-of-a-thought',
     theme: 'forge',
     name: 'Sketch of a Thought',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'Not yet an idea — the shape where an idea will be. You rough it in, ' +
@@ -350,7 +338,6 @@ const halfStep: Card = {
     id: 'half-step',
     theme: 'forge',
     name: 'Half-Step',
-    category: 'paradox',
     philosophicalAspect: 'body',
     description:
         'Zeno was half right: you can always take half a step back. What ' +
@@ -382,7 +369,6 @@ const bootstrapLoop: Card = {
     id: 'bootstrap-loop',
     theme: 'forge',
     name: 'Bootstrap Loop',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'The proof assumes itself and, scandalously, works. Even a dead ' +
@@ -410,7 +396,6 @@ const exNihilo: Card = {
     id: 'ex-nihilo',
     theme: 'forge',
     name: 'Ex Nihilo',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'Something from nothing — and this time it comes out already flexible, ' +
@@ -440,7 +425,6 @@ const theOvertake: Card = {
     id: 'the-overtake',
     theme: 'forge',
     name: 'The Overtake',
-    category: 'paradox',
     philosophicalAspect: 'body',
     description:
         'Achilles does pass the tortoise — all at once, every saved step ' +
@@ -483,7 +467,6 @@ const anvilOfForm: Card = {
     theme: 'forge',
     persistentEffect: 'Every KINDLEd or FORGEd die arrives with +1 PIP.',
     name: 'Anvil of Form',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'Matter remembers the shape it was struck into. Everything you forge ' +
@@ -501,7 +484,6 @@ const againstMyJudgment: Card = {
     id: 'against-my-judgment',
     theme: 'akrasia',
     name: 'Against My Judgment',
-    category: 'paradox',
     philosophicalAspect: 'heart',
     description:
         'You know better. You do it anyway — and the knowing-better arrives ' +
@@ -524,7 +506,6 @@ const sweetPoison: Card = {
     id: 'sweet-poison',
     theme: 'akrasia',
     name: 'Sweet Poison',
-    category: 'fallacy',
     philosophicalAspect: 'body',
     description:
         'You taste it first, to prove the vintage. The enemy drinks deeper — ' +
@@ -551,7 +532,6 @@ const selfFlagellant: Card = {
     id: 'self-flagellant',
     theme: 'akrasia',
     name: 'Self-Flagellant',
-    category: 'fallacy',
     philosophicalAspect: 'body',
     description:
         'The lash falls on your own back, and every wound you have argued ' +
@@ -585,7 +565,6 @@ const fallenGrace: Card = {
     id: 'fallen-grace',
     theme: 'akrasia',
     name: 'Fallen Grace',
-    category: 'paradox',
     philosophicalAspect: 'heart',
     description:
         'Grace was never for the upright. It finds you face-down, and it ' +
@@ -607,7 +586,6 @@ const pactOfAkrasia: Card = {
     id: 'pact-of-akrasia',
     theme: 'akrasia',
     name: 'Pact of Akrasia',
-    category: 'paradox',
     philosophicalAspect: 'body',
     description:
         'The cheapest forge in the world. The bill is written in your own ' +
@@ -645,7 +623,6 @@ const crownOfThorns: Card = {
     theme: 'akrasia',
     persistentEffect: 'While FALLEN, your statuses land +1 intensity per affliction you carry beyond the first (max +4).',
     name: 'Crown of Thorns',
-    category: 'paradox',
     philosophicalAspect: 'heart',
     description:
         'Wear the damage as regalia. While you are Fallen, everything you ' +
@@ -662,7 +639,6 @@ const mirrorOfGuilt: Card = {
     theme: 'akrasia',
     persistentEffect: 'Each self-debuff you land also lands 1 stack of itself on the enemy; every 3 RECOIL paid lands 1 more.',
     name: 'Mirror of Guilt',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'A curse of perfect symmetry: whatever you suffer, they now suffer ' +
@@ -680,7 +656,6 @@ const zenosHalfStep: Card = {
     id: 'zenos-half-step',
     theme: 'control',
     name: "Zeno's Half-Step",
-    category: 'paradox',
     philosophicalAspect: 'body',
     description:
         'To reach you, the blow must first cross half the distance. You keep ' +
@@ -703,7 +678,6 @@ const redHerring: Card = {
     id: 'red-herring',
     theme: 'control',
     name: 'Red Herring',
-    category: 'fallacy',
     philosophicalAspect: 'mind',
     description:
         'Something glints in the corner of the argument. They lunge for it — ' +
@@ -723,7 +697,6 @@ const undistributedMiddle: Card = {
     id: 'undistributed-middle',
     theme: 'control',
     name: 'Undistributed Middle',
-    category: 'fallacy',
     philosophicalAspect: 'mind',
     description:
         'The middle term never quite connects, and neither does their swing. ' +
@@ -748,7 +721,6 @@ const arrowParadox: Card = {
     id: 'arrow-paradox',
     theme: 'control',
     name: 'Arrow Paradox',
-    category: 'paradox',
     philosophicalAspect: 'body',
     description:
         'At every instant the arrow is at rest. You choose the instant, and ' +
@@ -786,7 +758,6 @@ const turnabout: Card = {
     id: 'turnabout',
     theme: 'control',
     name: 'Turnabout',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'Nothing you denied them was ever gone. It queued behind the ' +
@@ -828,7 +799,6 @@ const quagmireOfDoubt: Card = {
     theme: 'control',
     persistentEffect: 'Enemy telegraphs enter play one STAGGER rung lower.',
     name: 'Quagmire of Doubt',
-    category: 'fallacy',
     philosophicalAspect: 'mind',
     description:
         'The ground under their certainty goes soft. Every action starts one ' +
@@ -846,7 +816,6 @@ const glimpse: Card = {
     id: 'glimpse',
     theme: 'oracle',
     name: 'Glimpse',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'A crack in the next moment, wide enough for one eye. You look, and ' +
@@ -873,7 +842,6 @@ const signsAndPortents: Card = {
     id: 'signs-and-portents',
     theme: 'oracle',
     name: 'Signs and Portents',
-    category: 'paradox',
     philosophicalAspect: 'heart',
     description:
         'You cast the die as augury and dare tomorrow to disagree. When it ' +
@@ -902,7 +870,6 @@ const cassandrasBurden: Card = {
     id: 'cassandras-burden',
     theme: 'oracle',
     name: "Cassandra's Burden",
-    category: 'paradox',
     philosophicalAspect: 'heart',
     description:
         'You saw it coming. No one believed you — so you braced alone, and ' +
@@ -946,7 +913,6 @@ const delphicAmbiguity: Card = {
     id: 'delphic-ambiguity',
     theme: 'oracle',
     name: 'Delphic Ambiguity',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'The oracle never lies, only arrives early. You read the sentence ' +
@@ -973,7 +939,6 @@ const prophecyFulfilled: Card = {
     id: 'prophecy-fulfilled',
     theme: 'oracle',
     name: 'Prophecy Fulfilled',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'Every omen that came true is a nail already driven. This is just ' +
@@ -993,7 +958,6 @@ const theOraclesEye: Card = {
     theme: 'oracle',
     persistentEffect: 'The next stance stays revealed (FORETELL); OMEN payoffs land ×1.5 (round up).',
     name: "The Oracle's Eye",
-    category: 'paradox',
     philosophicalAspect: 'heart',
     description:
         'The lid never closes again. The enemy stops having a next move you ' +
@@ -1011,7 +975,6 @@ const briefCandle: Card = {
     id: 'brief-candle',
     theme: 'harvest',
     name: 'Brief Candle',
-    category: 'fallacy',
     philosophicalAspect: 'body',
     description:
         'Out, out. It burns bright, it burns fast, and what it leaves ' +
@@ -1033,7 +996,6 @@ const winnowing: Card = {
     id: 'winnowing',
     theme: 'harvest',
     name: 'Winnowing',
-    category: 'fallacy',
     philosophicalAspect: 'body',
     description:
         'The scythe does not wait for the season. One standing affliction, ' +
@@ -1056,7 +1018,6 @@ const theGleanersDue: Card = {
     id: 'the-gleaners-due',
     theme: 'harvest',
     name: "The Gleaner's Due",
-    category: 'fallacy',
     philosophicalAspect: 'mind',
     description:
         'What the field owes the one who walks behind the reapers: a die ' +
@@ -1081,7 +1042,6 @@ const theReaping: Card = {
     id: 'the-reaping',
     theme: 'harvest',
     name: 'The Reaping',
-    category: 'fallacy',
     philosophicalAspect: 'body',
     description:
         'Every soul you gathered, swung at once — and some of what it costs them ' +
@@ -1108,7 +1068,6 @@ const boneOrchard: Card = {
     theme: 'harvest',
     persistentEffect: 'Each SOUL you gain deals 1 to the enemy.',
     name: 'Bone Orchard',
-    category: 'fallacy',
     philosophicalAspect: 'mind',
     description:
         'Plant what expires; the orchard does the rest. Every soul that ' +
@@ -1126,7 +1085,6 @@ const softWord: Card = {
     id: 'soft-word',
     theme: 'charm',
     name: 'Soft Word',
-    category: 'fallacy',
     philosophicalAspect: 'heart',
     description:
         'It turns away wrath — not by winning, but by making wrath feel ' +
@@ -1146,7 +1104,6 @@ const disarmingSmile: Card = {
     id: 'disarming-smile',
     theme: 'charm',
     name: 'Disarming Smile',
-    category: 'fallacy',
     philosophicalAspect: 'heart',
     description:
         'Hard to swing at someone who seems glad to see you. Their blows ' +
@@ -1166,7 +1123,6 @@ const commonGround: Card = {
     id: 'common-ground',
     theme: 'charm',
     name: 'Common Ground',
-    category: 'fallacy',
     philosophicalAspect: 'heart',
     description:
         'You find the one thing you both believe and stand on it together. ' +
@@ -1189,7 +1145,6 @@ const theOliveBranch: Card = {
     id: 'the-olive-branch',
     theme: 'charm',
     name: 'The Olive Branch',
-    category: 'paradox',
     philosophicalAspect: 'body',
     description:
         'Extended with a steady hand, from inside their reach. A truce offered ' +
@@ -1213,7 +1168,6 @@ const irresistibleGrace: Card = {
     theme: 'charm',
     persistentEffect: 'SWAY does not decay. At the end of each turn, future SWAY gains increase by 12% (maximum +108%).',
     name: 'Irresistible Grace',
-    category: 'paradox',
     philosophicalAspect: 'heart',
     description:
         'What has truly been offered cannot be taken back, and cannot wear ' +
@@ -1233,7 +1187,6 @@ const mirrorOfLonging: Card = {
     theme: 'charm',
     persistentEffect: 'Damage prevented by your GUARD or RIPOSTE becomes SWAY, 1:1.',
     name: 'Mirror of Longing',
-    category: 'paradox',
     philosophicalAspect: 'heart',
     description:
         'Every blow you turn aside shows them what they actually wanted. ' +
@@ -1252,7 +1205,6 @@ const braceForImpact: Card = {
     id: 'brace-for-impact',
     theme: 'bulwark',
     name: 'Brace for Impact',
-    category: 'paradox',
     philosophicalAspect: 'body',
     description:
         'You set your stance and meet the blow on your own terms — what is ' +
@@ -1273,7 +1225,6 @@ const nettleCloak: Card = {
     id: 'nettle-cloak',
     theme: 'bulwark',
     name: 'Nettle Cloak',
-    category: 'fallacy',
     philosophicalAspect: 'body',
     description:
         'Wear the argument that stings on contact — and stings just as well ' +
@@ -1301,7 +1252,6 @@ const tuQuoque: Card = {
     id: 'tu-quoque',
     theme: 'bulwark',
     name: 'Tu Quoque',
-    category: 'fallacy',
     philosophicalAspect: 'heart',
     description:
         '"You also." The oldest counter in the book — whatever they do to ' +
@@ -1321,7 +1271,6 @@ const measuredAnswer: Card = {
     id: 'measured-answer',
     theme: 'bulwark',
     name: 'Measured Answer',
-    category: 'paradox',
     philosophicalAspect: 'body',
     description:
         'You do not interrupt. You let the whole blow arrive, catch it ' +
@@ -1343,7 +1292,6 @@ const theAdamantWall: Card = {
     id: 'the-adamant-wall',
     theme: 'bulwark',
     name: 'The Adamant Wall',
-    category: 'paradox',
     philosophicalAspect: 'body',
     description:
         'Not a defense — a verdict about where the fight ends. What breaks ' +
@@ -1366,7 +1314,6 @@ const hedgehogsDilemma: Card = {
     theme: 'bulwark',
     persistentEffect: 'Every THORNS reflection also MARKs the enemy (i1).',
     name: "Hedgehog's Dilemma",
-    category: 'paradox',
     philosophicalAspect: 'body',
     description:
         'To reach you they must come close; to come close is to be pierced. ' +
@@ -1383,7 +1330,6 @@ const crumblingResolve: Card = {
     theme: 'bulwark',
     persistentEffect: 'After each threat phase, deal 20% of your remaining GUARD (minimum 4). Fully blocking an attack STAGGERs the next telegraph by 1.',
     name: 'Crumbling Resolve',
-    category: 'fallacy',
     philosophicalAspect: 'body',
     description:
         'A curse for the patient too: the wall does not need to be struck to ' +
@@ -1407,7 +1353,6 @@ const refrain: Card = {
     id: 'refrain',
     theme: 'echo',
     name: 'Refrain',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'Said once, it is a remark. Said twice, in the same breath, it ' +
@@ -1437,7 +1382,6 @@ const secondThoughts: Card = {
     id: 'second-thoughts',
     theme: 'echo',
     name: 'Second Thoughts',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'The discarded idea was not wrong — it was early. You reach back ' +
@@ -1463,7 +1407,6 @@ const circularReasoning: Card = {
     id: 'circular-reasoning',
     theme: 'echo',
     name: 'Circular Reasoning',
-    category: 'fallacy',
     philosophicalAspect: 'mind',
     description:
         'The conclusion proves the premise proves the conclusion. Nothing ' +
@@ -1483,7 +1426,6 @@ const ouroboros: Card = {
     id: 'ouroboros',
     theme: 'echo',
     name: 'Ouroboros',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'The argument eats its own tail and grows fat on it. Whatever you ' +
@@ -1515,7 +1457,6 @@ const resonantChamber: Card = {
     theme: 'echo',
     persistentEffect: 'Your first spell each turn gains ECHO.',
     name: 'Resonant Chamber',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'The room learns your voice. The first thing you say each turn ' +
@@ -1532,7 +1473,6 @@ const stuckInTheirHead: Card = {
     theme: 'echo',
     persistentEffect: "Each ECHO, RECALL, or replay deals the foe's MARK stacks as damage (min 2, max 16).",
     name: 'Stuck in Their Head',
-    category: 'fallacy',
     philosophicalAspect: 'heart',
     description:
         'The tune they cannot stop hearing is yours. Every repetition ' +
@@ -1556,7 +1496,6 @@ const recurringSymptom: Card = {
     id: 'recurring-symptom',
     theme: 'affliction',
     name: 'Recurring Symptom',
-    category: 'fallacy',
     philosophicalAspect: 'body',
     description:
         'It never fully clears. Roll the dice of the day however they fall — '
@@ -1580,7 +1519,6 @@ const breakTheTempo: Card = {
     id: 'break-the-tempo',
     theme: 'control',
     name: 'Break the Tempo',
-    category: 'fallacy',
     philosophicalAspect: 'mind',
     description:
         'Their whole argument keeps one rhythm. Recolor your answer to match '
@@ -1605,7 +1543,6 @@ const secondTake: Card = {
     id: 'second-take',
     theme: 'echo',
     name: 'Second Take',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'Play it, then play it again from the top — the same die, the same '
@@ -1628,7 +1565,6 @@ const bleedForIt: Card = {
     id: 'bleed-for-it',
     theme: 'akrasia',
     name: 'Bleed for It',
-    category: 'paradox',
     philosophicalAspect: 'body',
     description:
         'A bad roll is not fate — it is a price you have not paid yet. Open a '
@@ -1655,7 +1591,6 @@ const bankTheYield: Card = {
     id: 'bank-the-yield',
     theme: 'harvest',
     name: 'Bank the Yield',
-    category: 'fallacy',
     philosophicalAspect: 'heart',
     description:
         'Do not spend what will be worth more next season. Set the die aside '
@@ -1680,7 +1615,6 @@ const holdTheLine: Card = {
     id: 'hold-the-line',
     theme: 'bulwark',
     name: 'Hold the Line',
-    category: 'paradox',
     philosophicalAspect: 'body',
     description:
         'Not every die is thrown. Some are set into the wall and left there, '
@@ -1705,7 +1639,6 @@ const restateThePoint: Card = {
     id: 'restate-the-point',
     theme: 'peroration',
     name: 'Restate the Point',
-    category: 'fallacy',
     philosophicalAspect: 'heart',
     description:
         'Say it once more, plainly, and the die you argued it with is yours '
@@ -1730,7 +1663,6 @@ const secondSight: Card = {
     id: 'second-sight',
     theme: 'oracle',
     name: 'Second Sight',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'The first sight shows you the die you were given; the second lets you '
@@ -1755,7 +1687,6 @@ const changeOfHeart: Card = {
     id: 'change-of-heart',
     theme: 'charm',
     name: 'Change of Heart',
-    category: 'fallacy',
     philosophicalAspect: 'heart',
     description:
         'Even the dice can be persuaded. Coax the misses into reconsidering, '
@@ -1788,7 +1719,6 @@ const mastersStamp: Card = {
     theme: 'forge',
     persistentEffect: 'Every SPECIAL die you fire grants +1 Conviction.',
     name: "Master's Stamp",
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'Struck once into the die-steel, the maker\'s mark never wears off. '
@@ -1819,7 +1749,6 @@ const poisonedWell: Card = {
     id: 'poisoned-well',
     theme: 'affliction',
     name: 'The Poisoned Well',
-    category: 'fallacy',
     philosophicalAspect: 'body',
     description:
         'Argue from the source and the source obliges: everything they draw ' +
@@ -1843,7 +1772,6 @@ const videturQuod: Card = {
     id: 'videtur-quod',
     theme: 'peroration',
     name: 'Videtur Quod',
-    category: 'fallacy',
     philosophicalAspect: 'heart',
     description:
         'It seems that — and there the flaw is stated, fairly, precisely, ' +
@@ -1873,7 +1801,6 @@ const quodEratDemonstrandum: Card = {
     id: 'quod-erat-demonstrandum',
     theme: 'peroration',
     name: 'Quod Erat Demonstrandum',
-    category: 'fallacy',
     philosophicalAspect: 'heart',
     description:
         'Which was to be demonstrated. The proof closes early and closes ' +
@@ -1906,7 +1833,6 @@ const temperedEdge: Card = {
     id: 'tempered-edge',
     theme: 'forge',
     name: 'Tempered Edge',
-    category: 'paradox',
     philosophicalAspect: 'body',
     description:
         'Hardened twice, sharpened once. What tries the edge learns which ' +
@@ -1935,7 +1861,6 @@ const halfSpokenProphecy: Card = {
     id: 'half-spoken-prophecy',
     theme: 'oracle',
     name: 'Half-Spoken Prophecy',
-    category: 'paradox',
     philosophicalAspect: 'body',
     description:
         'Speak only the half already proven — it lands now, all at once. The ' +
@@ -1963,7 +1888,6 @@ const graceUnderFire: Card = {
     id: 'grace-under-fire',
     theme: 'charm',
     name: 'Grace Under Fire',
-    category: 'paradox',
     philosophicalAspect: 'body',
     description:
         'Let the blow land on composure itself. What they spend in fury, you '
@@ -1992,7 +1916,6 @@ const pebbleInTheBoot: Card = {
     id: 'pebble-in-the-boot',
     theme: 'bulwark',
     name: 'Pebble in the Boot',
-    category: 'fallacy',
     philosophicalAspect: 'body',
     description:
         'Too small to answer, too present to forget. Every step they take '
@@ -2020,7 +1943,6 @@ const theAnvilSpeaks: Card = {
     id: 'the-anvil-speaks',
     theme: 'bulwark',
     name: 'The Anvil Speaks',
-    category: 'paradox',
     philosophicalAspect: 'body',
     description:
         'Every hammer believes it is the argument, and every anvil knows '
@@ -2054,7 +1976,6 @@ const theBurdenOfRepetition: Card = {
     id: 'the-burden-of-repetition',
     theme: 'echo',
     name: 'The Burden of Repetition',
-    category: 'fallacy',
     philosophicalAspect: 'body',
     description:
         'Each repetition costs them a little dignity, and dignity is ' +

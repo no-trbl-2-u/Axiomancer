@@ -256,9 +256,8 @@ budget for enemy card rotations.
 
 The actual card execution runs through `executeSkill` with
 `casterSide: 'enemy'` — see `docs/cards.md` "Enemy caster path
-(Phase 49)" for the engine-side semantics, including D2 (enemies
-bypass the player's `combatResources` pool) and D3 (`card.targetType`
-is relative to the caster).
+(Phase 49)" for the engine-side semantics, including D3
+(`card.targetType` is relative to the caster).
 
 Calibration: the 0.35 fire rate is colocated with the Phase 45
 `ALIGNMENT_FLIP_CHANCE` in `src/Enemy/enemy.logic.ts`. Tune both

@@ -139,14 +139,8 @@ function synergyLines(s: NonNullable<CardDraft['synergy']>): string[] {
     if (s.intensityDamageMul != null) {
         lines.push(`${IND}${IND}intensityDamageMul: ${num(s.intensityDamageMul)},`);
     }
-    if (s.resourceTokenDamageMul != null) {
-        lines.push(`${IND}${IND}resourceTokenDamageMul: ${num(s.resourceTokenDamageMul)},`);
-    }
     if (s.consumeMatched != null) {
         lines.push(`${IND}${IND}consumeMatched: ${String(s.consumeMatched)},`);
-    }
-    if (s.consumeAllResources != null) {
-        lines.push(`${IND}${IND}consumeAllResources: ${String(s.consumeAllResources)},`);
     }
     if (s.clearAllEffectsBothSides != null) {
         lines.push(`${IND}${IND}clearAllEffectsBothSides: ${String(s.clearAllEffectsBothSides)},`);
@@ -204,7 +198,6 @@ export function serialize(draft: CardDraft, identOverride?: string): string {
     lines.push(`const ${ident}: Card = {`);
     lines.push(`${IND}id: ${str(draft.id.trim())},`);
     lines.push(`${IND}name: ${str(draft.name.trim())},`);
-    lines.push(`${IND}category: ${str(draft.category)},`);
     lines.push(`${IND}philosophicalAspect: ${str(draft.philosophicalAspect)},`);
     lines.push(...descriptionLines(draft.description));
     // Spec 32 v3 — tier/rank/cardType share a line, mirroring the library style.

@@ -46,7 +46,6 @@ const isosthenia: Card = {
     id: 'isosthenia',
     theme: 'control',
     name: 'Isosthenia',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'Set the counterweight and the scales refuse to tip. An argument ' +
@@ -69,7 +68,6 @@ const soritesHalt: Card = {
     id: 'sorites-halt',
     theme: 'control',
     name: 'Sorites Halt',
-    category: 'paradox',
     philosophicalAspect: 'body',
     description:
         'One grain is not a heap. Neither is the next. Somewhere in the ' +
@@ -93,7 +91,6 @@ const buridansAss: Card = {
     id: 'buridans-ass',
     theme: 'control',
     name: "Buridan's Ass",
-    category: 'paradox',
     philosophicalAspect: 'heart',
     description:
         'Offer two courses of exactly equal appeal. Perfect appetite, ' +
@@ -117,7 +114,6 @@ const theUnmovedGate: Card = {
     id: 'the-unmoved-gate',
     theme: 'control',
     name: 'The Unmoved Gate',
-    category: 'paradox',
     philosophicalAspect: 'body',
     description:
         'The gate does not argue. It is simply shut, and shut is a complete ' +
@@ -142,7 +138,6 @@ const akatalepsia: Card = {
     id: 'akatalepsia',
     theme: 'control',
     name: 'Akatalepsia',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'Nothing can be known for certain — their next blow included. You, ' +
@@ -171,7 +166,6 @@ const theInwardBlow: Card = {
     id: 'the-inward-blow',
     theme: 'control',
     name: 'The Inward Blow',
-    category: 'fallacy',
     philosophicalAspect: 'mind',
     description:
         'A blow denied its target does not vanish. It doubles back along ' +
@@ -196,7 +190,6 @@ const movingTheGoalposts: Card = {
     id: 'moving-the-goalposts',
     theme: 'control',
     name: 'Moving the Goalposts',
-    category: 'fallacy',
     philosophicalAspect: 'mind',
     description:
         'Every time they reach the standard, the standard has moved. The ' +
@@ -223,7 +216,6 @@ const epoche: Card = {
     id: 'epoche',
     theme: 'control',
     name: 'Epoche',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'Suspend judgment. In the stillness where a verdict would have ' +
@@ -245,7 +237,6 @@ const theTortoisesLead: Card = {
     id: 'the-tortoises-lead',
     theme: 'control',
     name: "The Tortoise's Lead",
-    category: 'paradox',
     philosophicalAspect: 'body',
     description:
         'A head start of one step, held forever. Let them halve the ' +
@@ -269,7 +260,6 @@ const thePatientNo: Card = {
     id: 'the-patient-no',
     theme: 'control',
     name: 'The Patient No',
-    category: 'fallacy',
     philosophicalAspect: 'heart',
     description:
         'Refusal, repeated calmly, outlasts insistence. Each insistence ' +
@@ -298,7 +288,6 @@ const infiniteRegress: Card = {
     id: 'infinite-regress',
     theme: 'control',
     name: 'Infinite Regress',
-    category: 'fallacy',
     philosophicalAspect: 'mind',
     description:
         'Every reason requires a prior reason. Send them down after the ' +
@@ -327,7 +316,6 @@ const diallelus: Card = {
     id: 'diallelus',
     theme: 'control',
     name: 'Diallelus',
-    category: 'fallacy',
     philosophicalAspect: 'mind',
     description:
         'The wheel of proof turns on itself. Let them ride it in a circle ' +
@@ -350,7 +338,6 @@ const theLockedPremise: Card = {
     id: 'the-locked-premise',
     theme: 'control',
     name: 'The Locked Premise',
-    category: 'fallacy',
     philosophicalAspect: 'body',
     description:
         'Fix the first premise in place and the whole posture must hold ' +
@@ -373,7 +360,6 @@ const agrippasTrilemma: Card = {
     id: 'agrippas-trilemma',
     theme: 'control',
     name: "Agrippa's Trilemma",
-    category: 'fallacy',
     philosophicalAspect: 'mind',
     description:
         'Regress, circle, or dogma: three exits, all shut. A round spent ' +
@@ -402,7 +388,6 @@ const petitioPrincipii: Card = {
     id: 'petitio-principii',
     theme: 'control',
     name: 'Petitio Principii',
-    category: 'fallacy',
     philosophicalAspect: 'heart',
     description:
         'Assume the conclusion, and the argument arrives already finished. ' +
@@ -431,7 +416,6 @@ const stadiumParadox: Card = {
     id: 'stadium-paradox',
     theme: 'control',
     name: 'Stadium Paradox',
-    category: 'paradox',
     philosophicalAspect: 'body',
     description:
         'Two rows pass each other and the count of moments will not agree. ' +
@@ -455,7 +439,6 @@ const theSeenBlow: Card = {
     id: 'the-seen-blow',
     theme: 'control',
     name: 'The Seen Blow',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'A blow read three moves early is not a blow. It is a diagram — ' +
@@ -481,7 +464,6 @@ const theNarrowingPath: Card = {
     id: 'the-narrowing-path',
     theme: 'control',
     name: 'The Narrowing Path',
-    category: 'fallacy',
     philosophicalAspect: 'mind',
     description:
         'Foreclose the side roads one by one until only your road remains. ' +
@@ -503,7 +485,6 @@ const theColdGallery: Card = {
     id: 'the-cold-gallery',
     theme: 'control',
     name: 'The Cold Gallery',
-    category: 'fallacy',
     philosophicalAspect: 'heart',
     description:
         'An audience that will not gasp. Perform to stone long enough and ' +
@@ -531,7 +512,6 @@ const quietism: Card = {
     id: 'quietism',
     theme: 'control',
     name: 'Quietism',
-    category: 'paradox',
     philosophicalAspect: 'heart',
     description:
         'Say less. Want less. The argument never offered cannot be seized, ' +
@@ -556,7 +536,6 @@ const theShutDoor: Card = {
     id: 'the-shut-door',
     theme: 'control',
     name: 'The Shut Door',
-    category: 'fallacy',
     philosophicalAspect: 'body',
     description:
         'Some questions end conversations. Shut the door mid-swing; ' +
@@ -584,7 +563,6 @@ const theForeclosedFuture: Card = {
     id: 'the-foreclosed-future',
     theme: 'control',
     name: 'The Foreclosed Future',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'What will be was decided before they drew breath to object. ' +
@@ -619,7 +597,6 @@ const theCollectedToll: Card = {
     id: 'the-collected-toll',
     theme: 'control',
     name: 'The Collected Toll',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'Collect most of the debt in one visit. A careful creditor leaves ' +
@@ -652,7 +629,6 @@ const theGreatStillness: Card = {
     id: 'the-great-stillness',
     theme: 'control',
     name: 'The Great Stillness',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'First the hands stop. Then the stance sets. What remains is a ' +
@@ -676,7 +652,6 @@ const everyDoorAWall: Card = {
     id: 'every-door-a-wall',
     theme: 'control',
     name: 'Every Door a Wall',
-    category: 'fallacy',
     philosophicalAspect: 'body',
     description:
         'They will try every exit in order, and the order is: wall, wall, ' +
@@ -706,7 +681,6 @@ const laplacesDemon: Card = {
     id: 'laplaces-demon',
     theme: 'control',
     name: "Laplace's Demon",
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'Grant an intellect the present entire, and the future is mere ' +
@@ -732,7 +706,6 @@ const theFinalRefusal: Card = {
     id: 'the-final-refusal',
     theme: 'control',
     name: 'The Final Refusal',
-    category: 'fallacy',
     philosophicalAspect: 'heart',
     description:
         'No — said once more, said last. It costs something to make a word ' +
@@ -758,7 +731,6 @@ const motionIsImpossible: Card = {
     id: 'motion-is-impossible',
     theme: 'control',
     name: 'Motion Is Impossible',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'Zeno was not warning you. He was instructing you. The distance ' +
@@ -784,7 +756,6 @@ const stalemate: Card = {
     id: 'stalemate',
     theme: 'control',
     name: 'Stalemate',
-    category: 'paradox',
     philosophicalAspect: 'body',
     description:
         'A position with no legal moves is not a pause — it is a verdict. ' +
@@ -813,7 +784,6 @@ const proofByExhaustion: Card = {
     id: 'proof-by-exhaustion',
     theme: 'control',
     name: 'Proof by Exhaustion',
-    category: 'fallacy',
     philosophicalAspect: 'heart',
     description:
         'Check every case. Deny every case. When the last case closes, what ' +

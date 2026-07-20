@@ -511,7 +511,6 @@ export interface CombatCardVM {
     /** Spec 32 v3 — spell / enchantment / disenchant. */
     cardType?: 'spell' | 'enchantment' | 'disenchant';
     tier: 1 | 2 | 3;
-    category: 'fallacy' | 'paradox' | null;
     topActionText: string; bottomActionText: string; bottomDamagePreview: number;
     /** Fate Engine P1 — the card's printed die lines (real units), if any. */
     dieLines?: string[];
@@ -1989,7 +1988,7 @@ function handVM(state: CombatEncounterState): CombatCardVM[] {
             rarity: card.rarity, rank: card.rank,
             rankName: card.rank ? RANK_NAMES[card.rank] : null,
             cardType: card.cardType,
-            tier: card.tier, category: card.category,
+            tier: card.tier,
             topActionText: card.topActionText, bottomActionText: card.bottomActionText,
             bottomDamagePreview: card.bottomDamagePreview,
             dieLines: card.dieLines,

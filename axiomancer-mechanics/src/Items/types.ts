@@ -16,7 +16,6 @@
 
 import { Effect, StatModifier } from '../Effects/types';
 import { Stance } from '../Combat/types';
-import { CombatResources } from '../Cards/types';
 import type { SignatureSkillId } from '../Combat/combat.encounter.types';
 
 /** Item categories */
@@ -105,22 +104,11 @@ export interface Equipment extends BaseItem {
  * `intensityOverride` / `durationOverride` retune the referenced or inline
  * effect on a per-instance basis.
  *
- * Per Spec 05b Q6 (option A) a consumable may additionally carry a
- * `resourceGrant: Partial<CombatResources>` payload which the combat resolver
- * adds to the active `combatResources` snapshot when the item is used via
- * the `'item'` action. Using the item still costs the player's turn, so the
- * grant is a strategic option rather than free tempo. Per Spec 05b Q3
- * philosophical tokens (`fallacy` / `paradox`) remain card-only — library
- * authors should restrict `resourceGrant` to `heart` / `body` / `mind` keys
- * even though the type permits the full union.
- *
  * @property category         - Always `'consumable'`.
  * @property quantity         - Number of this item in the stack.
  * @property effectId         - Optional effect-library lookup key applied on use.
  * @property inlineEffect     - Optional bespoke `Effect` applied on use.
  * @property healAmount       - Optional immediate flat HP heal applied on use.
- * @property resourceGrant    - Optional combat-resource token delta applied
- *                              when the item is used inside combat (Spec 05b Q6).
  * @property intensityOverride - Optional intensity override for the applied effect.
  * @property durationOverride  - Optional duration override for the applied effect.
  */
@@ -130,7 +118,6 @@ export interface Consumable extends BaseItem {
     effectId?: string;
     inlineEffect?: Effect;
     healAmount?: number;
-    resourceGrant?: Partial<CombatResources>;
     intensityOverride?: number;
     durationOverride?: number;
     /** Content-provenance metadata: `addedIn` is an ISO date / phase tag;

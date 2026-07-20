@@ -134,7 +134,6 @@ export interface CharacterCardRow {
      */
     id: string;
     name: string;
-    category: 'fallacy' | 'paradox';
     stanceKey: StanceKey;
 }
 

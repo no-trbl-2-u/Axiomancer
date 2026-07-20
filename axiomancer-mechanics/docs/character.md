@@ -50,9 +50,9 @@ these fields and fall back to their defense stats when a save is requested via
 maxHealth = level × average(body, heart) × HEALTH_PER_STAT (10)
 ```
 
-Health starts at max on character creation. Cards run on the per-combat
-five-resource economy described in `docs/cards.md`, tracked
-on `CombatState.combatResources` rather than the character itself.
+Health starts at max on character creation. Cards run on the resonance
+economy (`heart`/`body`/`mind`) described in `docs/cards.md`, tracked on
+`CombatEncounterState.resonance` rather than the character itself.
 
 ## Cards
 

@@ -45,7 +45,6 @@ registerSandboxCards([
     {
         id: 'qa-siphon-rupture',
         name: 'QA Siphon Rupture (test fixture)',
-        category: 'fallacy',
         philosophicalAspect: 'heart',
         description: 'Test-only fixture: RUPTURE paired with siphon 50%.',
         tier: 2,

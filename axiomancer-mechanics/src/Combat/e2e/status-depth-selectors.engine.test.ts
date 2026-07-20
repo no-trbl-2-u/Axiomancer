@@ -264,7 +264,7 @@ describe('card engine — every combat-engine-owned mechanic kind is a NO-OP thr
     for (const mech of ENGINE_OWNED_KINDS) {
         it(`'${mech.kind}' leaves caster/target HP + effects unchanged`, () => {
             const card: Card = {
-                id: 'test-mech-card', name: 'Test Mechanic', category: 'fallacy',
+                id: 'test-mech-card', name: 'Test Mechanic',
                 philosophicalAspect: 'body', description: 'x', tier: 1,
                 targetType: 'enemy', rank: 1, cardType: 'spell',
                 specialMechanics: [mech],
@@ -279,7 +279,6 @@ describe('card engine — every combat-engine-owned mechanic kind is a NO-OP thr
             const state: CombatState = {
                 active: true, phase: 'resolving', round: 1, friendshipCounter: 0,
                 player, enemy, playerChoice: {}, enemyChoice: {},
-                combatResources: { heart: 0, body: 5, mind: 0, fallacy: 0, paradox: 0 },
             };
             const res = executeCard(state, 'test-mech-card', id => id === 'test-mech-card' ? card : getCardById(id), 'player');
 

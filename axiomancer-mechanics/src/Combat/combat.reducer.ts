@@ -8,7 +8,7 @@
  * — plus:
  *   - `initializeCombat`: the canonical `CombatState` constructor. Used by the
  *     card / effects / equipment engines (and their tests) to build a fresh
- *     combat state with deep-cloned combatants and equipment-seeded resources.
+ *     combat state with deep-cloned combatants.
  *   - `incrementFriendship`: the friendship-counter bump `executeCard` applies
  *     on a successful Befriend.
  */
@@ -16,7 +16,6 @@
 import { Character } from '../Character/types';
 import { Enemy } from '../Enemy/types';
 import { deepClone } from '../Utils';
-import type { CombatResources } from '../Cards/types';
 import { CombatState } from './types';
 
 /**
@@ -29,8 +28,6 @@ import { CombatState } from './types';
  * `statModifiers` (folded into `derivedStats` at equip-time).
  */
 export function initializeCombat(player: Character, enemy: Enemy): CombatState {
-    const seeded: CombatResources = { heart: 0, body: 0, mind: 0, fallacy: 0, paradox: 0 };
-
     return {
         active: true,
         phase: 'choosing_stance',
@@ -40,7 +37,6 @@ export function initializeCombat(player: Character, enemy: Enemy): CombatState {
         enemy: deepClone(enemy),
         playerChoice: {},
         enemyChoice: {},
-        combatResources: seeded,
     };
 }
 

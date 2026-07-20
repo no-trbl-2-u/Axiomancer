@@ -42,14 +42,14 @@ afterEach(() => vi.restoreAllMocks());
 // recoil cards carry extra payoff mechanics; a fixture pins the LEDGER rule).
 registerSandboxCards([
     {
-        id: 'qa-ledger-recoil', name: 'QA Ledger Recoil', category: 'fallacy',
+        id: 'qa-ledger-recoil', name: 'QA Ledger Recoil',
         philosophicalAspect: 'body', description: 'recoil-mech ledger fixture',
         tier: 1, targetType: 'enemy', rank: 1, cardType: 'spell',
         combatEffects: [{ effectId: 'debuff_bleed', appliedTo: 'opponent', intensity: 1, duration: 2 }],
         specialMechanics: [{ kind: 'recoil', hp: 4 }],
     },
     {
-        id: 'qa-ledger-fate', name: 'QA Ledger Fate', category: 'paradox',
+        id: 'qa-ledger-fate', name: 'QA Ledger Fate',
         philosophicalAspect: 'mind', description: 'fate-recoil ledger fixture',
         tier: 1, targetType: 'enemy', rank: 1, cardType: 'spell',
         combatEffects: [{ effectId: 'debuff_confusion', appliedTo: 'opponent', duration: 2 }],

@@ -54,7 +54,6 @@ const toldTwice: Card = {
     id: 'told-twice',
     theme: 'echo',
     name: 'Told Twice',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'The first telling plants it. The second telling proves it was ' +
@@ -80,7 +79,6 @@ const theNamingRepeated: Card = {
     id: 'the-naming-repeated',
     theme: 'echo',
     name: 'The Naming, Repeated',
-    category: 'fallacy',
     philosophicalAspect: 'heart',
     description:
         'Name the flaw once and it is an accusation. Name it again, ' +
@@ -106,7 +104,6 @@ const murmurOfPages: Card = {
     id: 'murmur-of-pages',
     theme: 'echo',
     name: 'Murmur of Pages',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'What is read aloud is kept. What is set down is not lost — it is ' +
@@ -129,7 +126,6 @@ const aBreathKept: Card = {
     id: 'a-breath-kept',
     theme: 'echo',
     name: 'A Breath Kept',
-    category: 'paradox',
     philosophicalAspect: 'body',
     description:
         'Between the verse and its return there is a rest. Stand in it. ' +
@@ -158,7 +154,6 @@ const callAndResponse: Card = {
     id: 'call-and-response',
     theme: 'echo',
     name: 'Call and Response',
-    category: 'fallacy',
     philosophicalAspect: 'heart',
     description:
         'Say it to them. Let the room say it back. A claim with a chorus ' +
@@ -184,7 +179,6 @@ const theShieldRestated: Card = {
     id: 'the-shield-restated',
     theme: 'echo',
     name: 'The Shield, Restated',
-    category: 'paradox',
     philosophicalAspect: 'body',
     description:
         'A defense given once is a plea. Given twice, in the same words, ' +
@@ -210,7 +204,6 @@ const theLineThatLingers: Card = {
     id: 'the-line-that-lingers',
     theme: 'echo',
     name: 'The Line That Lingers',
-    category: 'fallacy',
     philosophicalAspect: 'mind',
     description:
         'Some sentences end and are gone. This one ends and stays in the ' +
@@ -236,7 +229,6 @@ const takenBackUp: Card = {
     id: 'taken-back-up',
     theme: 'echo',
     name: 'Taken Back Up',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'Nothing in the pile is finished. It was set down, not surrendered ' +
@@ -266,7 +258,6 @@ const thePointLands: Card = {
     id: 'the-point-lands',
     theme: 'echo',
     name: 'The Point Lands',
-    category: 'fallacy',
     philosophicalAspect: 'heart',
     description:
         'Repetition is patient work: each pass files the same groove ' +
@@ -293,7 +284,6 @@ const oneMoreBar: Card = {
     id: 'one-more-bar',
     theme: 'echo',
     name: 'One More Bar',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'The song was not done with that breath. Take the phrase again ' +
@@ -321,7 +311,6 @@ const inOtherWords: Card = {
     id: 'in-other-words',
     theme: 'echo',
     name: 'In Other Words',
-    category: 'fallacy',
     philosophicalAspect: 'mind',
     description:
         'Restatement is not repetition — so the restater insists. Whatever ' +
@@ -344,7 +333,6 @@ const theSecondTelling: Card = {
     id: 'the-second-telling',
     theme: 'echo',
     name: 'The Second Telling',
-    category: 'fallacy',
     philosophicalAspect: 'mind',
     description:
         'The first telling is contested. The second is corroborated — by ' +
@@ -374,7 +362,6 @@ const wordForWord: Card = {
     id: 'word-for-word',
     theme: 'echo',
     name: 'Word for Word',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'Quote it back exactly. Not the spirit of the thing — the letters ' +
@@ -405,7 +392,6 @@ const stanzaByStanza: Card = {
     id: 'stanza-by-stanza',
     theme: 'echo',
     name: 'Stanza by Stanza',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'An argument built like a ballad: each verse takes the last one up ' +
@@ -431,7 +417,6 @@ const theStandingAnswer: Card = {
     id: 'the-standing-answer',
     theme: 'echo',
     name: 'The Standing Answer',
-    category: 'paradox',
     philosophicalAspect: 'body',
     description:
         'Give the same answer every time and it stops being an answer. It ' +
@@ -459,7 +444,6 @@ const readingBackTheMinutes: Card = {
     id: 'reading-back-the-minutes',
     theme: 'echo',
     name: 'Reading Back the Minutes',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'The record does not care what was meant. It reads out what was ' +
@@ -491,7 +475,6 @@ const firstWordAgain: Card = {
     id: 'first-word-again',
     theme: 'echo',
     name: 'First Word, Again',
-    category: 'fallacy',
     philosophicalAspect: 'mind',
     description:
         'Open every exchange with the same sentence. They came prepared to ' +
@@ -522,7 +505,6 @@ const theSwollenSongbook: Card = {
     id: 'the-swollen-songbook',
     theme: 'echo',
     name: 'The Swollen Songbook',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'A discard pile is only a graveyard to people with no memory. To ' +
@@ -545,7 +527,6 @@ const eachTimeWorse: Card = {
     id: 'each-time-worse',
     theme: 'echo',
     name: 'Each Time Worse',
-    category: 'fallacy',
     philosophicalAspect: 'body',
     description:
         'The body keeps a tally the mind would rather not. Every ' +
@@ -575,7 +556,6 @@ const lastVerseLoudest: Card = {
     id: 'last-verse-loudest',
     theme: 'echo',
     name: 'Last Verse, Loudest',
-    category: 'paradox',
     philosophicalAspect: 'heart',
     description:
         'Anything sung enough times becomes an anthem, and every anthem ' +
@@ -607,7 +587,6 @@ const theDrumInsists: Card = {
     id: 'the-drum-insists',
     theme: 'echo',
     name: 'The Drum Insists',
-    category: 'fallacy',
     philosophicalAspect: 'body',
     description:
         'A drum has one argument and has never lost. Keep the beat and ' +
@@ -637,7 +616,6 @@ const theArgumentEternal: Card = {
     id: 'the-argument-eternal',
     theme: 'echo',
     name: 'The Argument Eternal',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'It was never about winning the point. It was about building a ' +
@@ -665,7 +643,6 @@ const chorusOfOne: Card = {
     id: 'chorus-of-one',
     theme: 'echo',
     name: 'Chorus of One',
-    category: 'paradox',
     philosophicalAspect: 'heart',
     description:
         'One voice, disciplined, is a crowd. It answers itself, agrees ' +
@@ -699,7 +676,6 @@ const theTruthByAttrition: Card = {
     id: 'the-truth-by-attrition',
     theme: 'echo',
     name: 'The Truth by Attrition',
-    category: 'fallacy',
     philosophicalAspect: 'mind',
     description:
         'Said often enough, a thing does not become true. It becomes ' +
@@ -734,7 +710,6 @@ const theRefrainThatRots: Card = {
     id: 'the-refrain-that-rots',
     theme: 'echo',
     name: 'The Refrain That Rots',
-    category: 'fallacy',
     philosophicalAspect: 'mind',
     description:
         'Hum it once and it is a tune. Hum it every hour and it is a ' +
@@ -762,7 +737,6 @@ const theCollectedWorks: Card = {
     id: 'the-collected-works',
     theme: 'echo',
     name: 'The Collected Works',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'Every discarded draft, bound in one volume. Read together, the ' +
@@ -790,7 +764,6 @@ const sayItUntilItHolds: Card = {
     id: 'say-it-until-it-holds',
     theme: 'echo',
     name: 'Say It Until It Holds',
-    category: 'paradox',
     philosophicalAspect: 'body',
     description:
         'Masons repeat themselves: course upon course, the same motion. ' +
@@ -818,7 +791,6 @@ const theUnfinishedArgument: Card = {
     id: 'the-unfinished-argument',
     theme: 'echo',
     name: 'The Unfinished Argument',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'It does not conclude. It adjourns, and reconvenes, and adjourns ' +
@@ -850,7 +822,6 @@ const theWheelTurnsAgain: Card = {
     id: 'the-wheel-turns-again',
     theme: 'echo',
     name: 'The Wheel Turns Again',
-    category: 'paradox',
     philosophicalAspect: 'heart',
     description:
         'They keep waiting for the argument to run down. But it was never ' +

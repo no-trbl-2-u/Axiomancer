@@ -20,7 +20,6 @@ import { toCombatCard } from '@mechanics/Combat/combat.cards';
 // ── Types (erased at runtime; here for full-fidelity editing) ────────────────
 import type {
     Card,
-    CardCategory,
     StatType,
     CardTier,
     CardTarget,
@@ -92,12 +91,6 @@ export interface Option<T extends string | number> {
     value: T;
     label: string;
 }
-
-/** Card category — drives the philosophical token generated on use. */
-export const CATEGORIES: Option<CardCategory>[] = [
-    { value: 'fallacy', label: 'FALLACY' },
-    { value: 'paradox', label: 'PARADOX' },
-];
 
 /** Philosophical aspect / stance color (heart / body / mind). */
 export const STANCES: Option<StatType>[] = [
@@ -210,10 +203,6 @@ export const VERB_CLASSES: CombatVerbClass[] = [
 
 /** Effect-kind a card's bottom action applies. */
 export const EFFECT_KINDS: CardEffectKind[] = ['dot', 'control', 'none'];
-
-/** The five-resource resonance economy keys (for resourceCost editing). */
-export const RESOURCE_KEYS = ['heart', 'body', 'mind', 'fallacy', 'paradox'] as const;
-export type ResourceKey = (typeof RESOURCE_KEYS)[number];
 
 /** Stance RPS domain (heart > body > mind > heart). */
 export const STANCE_VALUES: Stance[] = ['heart', 'body', 'mind'];

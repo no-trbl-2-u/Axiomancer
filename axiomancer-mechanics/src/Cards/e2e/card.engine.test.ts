@@ -5,21 +5,14 @@ import { createEnemy } from '../../Enemy';
 import { initializeCombat } from '../../Combat/combat.reducer';
 import { mockSequentialRng } from '../../test-utils';
 import { restoreOriginalRng } from '../../test-utils/rng';
-import {
-    calculateCardDamage,
-    executeCard,
-    generateBasicActionResources,
-    generatePhilosophicalResource,
-} from '../card.engine';
-import { CombatResources, Card } from '../types';
+import { calculateCardDamage, executeCard } from '../card.engine';
+import { Card } from '../types';
 import { CombatState } from '../../Combat/types';
 
 afterEach(() => {
     vi.restoreAllMocks();
     restoreOriginalRng();
 });
-
-const zero: CombatResources = { heart: 0, body: 0, mind: 0, fallacy: 0, paradox: 0 };
 
 /**
  * Spec 32 v3 fixtures — no card carries a damage magnitude (`basePower` was
@@ -29,7 +22,6 @@ const zero: CombatResources = { heart: 0, body: 0, mind: 0, fallacy: 0, paradox:
 const dotCard: Card = {
     id: 'sk_erode',
     name: 'Test Erosion',
-    category: 'fallacy',
     philosophicalAspect: 'body',
     description: 'A wound of reasoning.',
     tier: 1,
@@ -43,7 +35,6 @@ const dotCard: Card = {
 const buffCard: Card = {
     id: 'sk_resolve',
     name: 'Self-Resolve',
-    category: 'paradox',
     philosophicalAspect: 'heart',
     description: 'A heartening certainty.',
     tier: 1,
@@ -57,7 +48,6 @@ const buffCard: Card = {
 const debuffCard: Card = {
     id: 'sk_doubt',
     name: 'Sow Doubt',
-    category: 'fallacy',
     philosophicalAspect: 'mind',
     description: 'Plants a seed of doubt.',
     tier: 1,
@@ -82,48 +72,10 @@ const fixtureEnemy = () => createEnemy({
     mapName: 'northern-city', logic: 'random',
 });
 
-const fixtureState = (resources: Partial<CombatResources> = {}): CombatState => {
-    const state = initializeCombat(fixturePlayer(), fixtureEnemy());
-    return { ...state, combatResources: { ...zero, ...resources } };
-};
+const fixtureState = (): CombatState => initializeCombat(fixturePlayer(), fixtureEnemy());
 
 const lookup = (id: string): Card | undefined =>
     [dotCard, buffCard, debuffCard].find(s => s.id === id);
-
-describe('generateBasicActionResources', () => {
-    it('attack hit on body stance grants +3 body', () => {
-        expect(generateBasicActionResources(zero, 'body', 'hit'))
-            .toEqual({ ...zero, body: 3 });
-    });
-
-    it('attack miss on heart stance grants +1 heart', () => {
-        expect(generateBasicActionResources(zero, 'heart', 'miss'))
-            .toEqual({ ...zero, heart: 1 });
-    });
-
-    it('defend on mind stance grants +5 mind', () => {
-        expect(generateBasicActionResources(zero, 'mind', 'defend'))
-            .toEqual({ ...zero, mind: 5 });
-    });
-
-    it('does not mutate the input snapshot', () => {
-        const r = { ...zero };
-        generateBasicActionResources(r, 'body', 'hit');
-        expect(r).toEqual(zero);
-    });
-});
-
-describe('generatePhilosophicalResource', () => {
-    it('fallacy category adds +1 fallacy', () => {
-        expect(generatePhilosophicalResource(zero, 'fallacy'))
-            .toEqual({ ...zero, fallacy: 1 });
-    });
-
-    it('paradox category adds +1 paradox', () => {
-        expect(generatePhilosophicalResource(zero, 'paradox'))
-            .toEqual({ ...zero, paradox: 1 });
-    });
-});
 
 describe('calculateCardDamage — THE STRIKE IS DEAD (spec 32 v3 §1)', () => {
     it('returns 0 unconditionally: no card deals stat-scaled damage', () => {
@@ -135,9 +87,9 @@ describe('calculateCardDamage — THE STRIKE IS DEAD (spec 32 v3 §1)', () => {
 });
 
 describe('executeCard — no direct HP movement (spec 32 v3)', () => {
-    it('an enemy-target card leaves HP untouched and grants 1 fallacy token', () => {
+    it('an enemy-target card leaves HP untouched', () => {
         mockSequentialRng(0.05); // land the tiered resist roll
-        const state = fixtureState({ body: 3 });
+        const state = fixtureState();
         const enemyHpBefore = state.enemy.health;
         const { state: next, events } = executeCard(state, dotCard.id, lookup);
 
@@ -146,27 +98,18 @@ describe('executeCard — no direct HP movement (spec 32 v3)', () => {
         expect(events.find(e => e.kind === 'damage')).toBeUndefined();
         // But the affliction lands — the efficient path.
         expect(next.enemy.effects.some(e => e.effectId === 'debuff_bleed')).toBe(true);
-        // Cards carry no resource cost — the pool passes through, +1 fallacy generated.
-        expect(next.combatResources).toEqual({ ...zero, body: 3, fallacy: 1 });
-        expect(events.find(e => e.kind === 'philosophical-generated')).toMatchObject({
-            category: 'fallacy',
-        });
     });
 
-    it('a self-target card no longer heals from stats; it lands its buff + 1 paradox token', () => {
+    it('a self-target card no longer heals from stats; it lands its buff', () => {
         mockSequentialRng(0.5);
         const player = fixturePlayer();
-        const state = {
-            ...initializeCombat({ ...player, health: player.maxHealth - 10 }, fixtureEnemy()),
-            combatResources: { ...zero, heart: 3 },
-        };
+        const state = initializeCombat({ ...player, health: player.maxHealth - 10 }, fixtureEnemy());
         const hpBefore = state.player.health;
         const { state: next, events } = executeCard(state, buffCard.id, lookup);
 
         expect(next.player.health).toBe(hpBefore); // no stat-scaled self-heal
         expect(events.find(e => e.kind === 'heal')).toBeUndefined();
         expect(next.player.effects.some(e => e.effectId === 'buff_thorns')).toBe(true);
-        expect(next.combatResources).toEqual({ ...zero, heart: 3, paradox: 1 });
     });
 });
 
@@ -174,25 +117,24 @@ describe('executeCard — debuff (effect application)', () => {
     it('routes the effect through the resist pipeline and lands it on the enemy', () => {
         // Tier 2 debuff resist roll → land guaranteed by stubbing nat-2 (low resist roll).
         mockSequentialRng(0.05);
-        const state = fixtureState({ mind: 2, fallacy: 1 });
+        const state = fixtureState();
         const { state: next, events } = executeCard(state, debuffCard.id, lookup);
 
         expect(next.enemy.effects.some(e => e.effectId === 'debuff_poison')).toBe(true);
-        expect(next.combatResources).toEqual({ ...zero, mind: 2, fallacy: 2 });
         expect(events.find(e => e.kind === 'effect-applied')).toBeDefined();
     });
 });
 
 describe('executeCard — guards', () => {
     it('throws when card is not known', () => {
-        const state = fixtureState({ body: 3 });
+        const state = fixtureState();
         const player = { ...state.player, knownCards: [] };
         expect(() => executeCard({ ...state, player }, dotCard.id, lookup))
             .toThrow(/not known/);
     });
 
     it('throws when card id is unknown', () => {
-        const state = fixtureState({ body: 3 });
+        const state = fixtureState();
         const player = { ...state.player, knownCards: ['sk_unknown'] };
         expect(() => executeCard({ ...state, player }, 'sk_unknown', () => undefined))
             .toThrow(/not found/);
@@ -203,7 +145,7 @@ describe('executeCard — guards', () => {
         // bypass the learning gate). The player-caster guard must treat them as
         // owned — otherwise playing a dealt reward card crashes combat.
         mockSequentialRng(0.05);
-        const state = fixtureState({ body: 3 });
+        const state = fixtureState();
         const player = { ...state.player, knownCards: [], combatRewardCards: [dotCard.id] };
         expect(() => executeCard({ ...state, player }, dotCard.id, lookup))
             .not.toThrow();
@@ -214,11 +156,7 @@ describe('executeCard — Phase 49 casterSide=enemy', () => {
     it("routes an enemy-rotation card's status onto the player, HP untouched", () => {
         mockSequentialRng(0.05);
         const enemy = { ...fixtureEnemy(), cards: [dotCard] };
-        const state: CombatState = {
-            ...initializeCombat(fixturePlayer(), enemy),
-            // D2 sentinel — enemy bypasses resource costs.
-            combatResources: { heart: 999, body: 999, mind: 999, fallacy: 999, paradox: 999 },
-        };
+        const state: CombatState = initializeCombat(fixturePlayer(), enemy);
         const playerHpBefore = state.player.health;
 
         const { state: next, events } = executeCard(state, dotCard.id, lookup, 'enemy');
@@ -235,10 +173,7 @@ describe('executeCard — Phase 49 casterSide=enemy', () => {
         mockSequentialRng(0.5);
         const enemyLow = { ...fixtureEnemy(), cards: [buffCard] };
         enemyLow.health = Math.max(1, enemyLow.health - 10);
-        const state: CombatState = {
-            ...initializeCombat(fixturePlayer(), enemyLow),
-            combatResources: { heart: 999, body: 999, mind: 999, fallacy: 999, paradox: 999 },
-        };
+        const state: CombatState = initializeCombat(fixturePlayer(), enemyLow);
         const enemyHpBefore = state.enemy.health;
         const playerHpBefore = state.player.health;
 
@@ -254,10 +189,7 @@ describe('executeCard — Phase 49 casterSide=enemy', () => {
 
     it("throws when card is not in the enemy's rotation", () => {
         const enemy = { ...fixtureEnemy(), cards: [] as Card[] };
-        const state: CombatState = {
-            ...initializeCombat(fixturePlayer(), enemy),
-            combatResources: { heart: 999, body: 999, mind: 999, fallacy: 999, paradox: 999 },
-        };
+        const state: CombatState = initializeCombat(fixturePlayer(), enemy);
         expect(() => executeCard(state, dotCard.id, lookup, 'enemy'))
             .toThrow(/not in the enemy's rotation/);
     });
@@ -266,20 +198,11 @@ describe('executeCard — Phase 49 casterSide=enemy', () => {
         // Regression — pre-Phase-49 call sites omit the 4th arg and must
         // still get the player-cast pathway.
         mockSequentialRng(0.05);
-        const state = fixtureState({ body: 3 });
+        const state = fixtureState();
         const enemyHpBefore = state.enemy.health;
         const { state: next } = executeCard(state, dotCard.id, lookup);
 
         expect(next.enemy.health).toBe(enemyHpBefore);
         expect(next.enemy.effects.some(e => e.effectId === 'debuff_bleed')).toBe(true);
-        // Player's pool passes through (no cost) + 1 fallacy token generated.
-        expect(next.combatResources).toEqual({ ...zero, body: 3, fallacy: 1 });
-    });
-});
-
-describe('initializeCombat — resource initialization', () => {
-    it('initializes combatResources to zero', () => {
-        const state = initializeCombat(fixturePlayer(), fixtureEnemy());
-        expect(state.combatResources).toEqual(zero);
     });
 });

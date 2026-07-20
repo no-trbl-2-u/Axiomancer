@@ -3,7 +3,7 @@
  *
  * Pins the mapping contract from the engine's `Card` to the
  * mobile `CombatCardOption` row: shape coverage, name uppercased,
- * category + stance literal-union safety.
+ * stance literal-union safety.
  */
 
 import { describe, expect, it } from '@jest/globals';
@@ -31,13 +31,6 @@ describe('COMBAT_CARDS: library coverage', () => {
     it('every name is uppercase', () => {
         for (const card of COMBAT_CARDS) {
             expect(card.name).toBe(card.name.toUpperCase());
-        }
-    });
-
-    it('every category is a known CardCategoryKey literal', () => {
-        const known: ReadonlyArray<CombatCardOption['category']> = ['fallacy', 'paradox'];
-        for (const card of COMBAT_CARDS) {
-            expect(known).toContain(card.category);
         }
     });
 

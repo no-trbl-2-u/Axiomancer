@@ -51,7 +51,6 @@ const cinder: Card = {
     id: 'tf-cinder',
     theme: 'forge',
     name: 'Cinder',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'A thought struck off the forge, still glowing. It exists to be ' +
@@ -78,7 +77,6 @@ const minorPremise: Card = {
     id: 'tf-minor-premise',
     theme: 'peroration',
     name: 'Minor Premise',
-    category: 'fallacy',
     philosophicalAspect: 'heart',
     description:
         'Small, undeniable, already conceded. Say it once and it has done ' +

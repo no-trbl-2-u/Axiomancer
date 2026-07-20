@@ -39,7 +39,6 @@ registerSandboxCards([
     {
         id: QA_STATUSLESS,
         name: 'QA Statusless Utility (test fixture)',
-        category: 'paradox',
         philosophicalAspect: 'body',
         description: 'Test-only fixture: a card with no status payload, used to witness status-first ranking.',
         tier: 1,
@@ -50,7 +49,6 @@ registerSandboxCards([
     {
         id: QA_BEFRIEND,
         name: 'QA Befriend (test fixture)',
-        category: 'fallacy',
         philosophicalAspect: 'heart',
         description: 'Test-only fixture: the Befriend verb for the mercy-turn ranking law.',
         tier: 1,

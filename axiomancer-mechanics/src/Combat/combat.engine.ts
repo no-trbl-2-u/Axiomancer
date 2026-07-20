@@ -32,7 +32,7 @@ import type { Enemy } from '../Enemy/types';
 import { getCardById } from '../Cards/cards.library';
 import { executeCard } from '../Cards/card.engine';
 import { checkStatePredicate } from '../Cards/synergy-predicates';
-import type { Card, CardRider, CardSpecialMechanic, CombatResources } from '../Cards/types';
+import type { Card, CardRider, CardSpecialMechanic } from '../Cards/types';
 import type { CombatState, Combatant, Stance } from './types';
 import { applyDamage, heal, isDefeated, erodeMaxHealth } from './health';
 import {
@@ -301,7 +301,6 @@ function advanceMomentumWheel(
     return { state: nextState, events: [...transition.events, ...wheelEvents] };
 }
 
-const EMPTY_RESOURCES: CombatResources = { heart: 0, body: 0, mind: 0, fallacy: 0, paradox: 0 };
 const defaultRng = (): number => getRng().random();
 
 // ── Card / lookup adapters ──────────────────────────────────────────────────
@@ -381,7 +380,6 @@ function cardShim(enc: CombatEncounterState): CombatState {
         enemy: enc.enemy,
         playerChoice: {},
         enemyChoice: {},
-        combatResources: enc.combatResources,
     };
 }
 
@@ -506,7 +504,6 @@ export function initializeCombatEncounter(
         threatMarks: threatPhases.map(() => 'pending'),
         currentPhaseIndex: 0,
         phaseResults: [],
-        combatResources: { ...EMPTY_RESOURCES },
         round: 1,
         attribution: {},
         chainEffectIds: [],
@@ -1993,7 +1990,6 @@ function playBottomAction(
         shimState = {
             ...shimState,
             player: res.state.player, enemy: res.state.enemy,
-            combatResources: res.state.combatResources,
         };
         res = executeCard(shimState, sourceCard.id, lookupCard, 'player');
         allCardEvents = [...allCardEvents, ...res.events];
@@ -2028,7 +2024,6 @@ function playBottomAction(
             }),
         };
     }
-    const combatResources = res.state.combatResources;
     let attribution = state.attribution;
     let directDamage = state.directDamageDealt;
     let landedOnEnemy = false;
@@ -2634,7 +2629,7 @@ function playBottomAction(
                     && !(lastCard.specialMechanics ?? []).some(m2 => m2.kind === 'replay_last');
                 if (replayable && lastCard) {
                     for (let i = 0; i < mech.times; i++) {
-                        const shim2: CombatState = { ...cardShim(state), player, enemy, combatResources: res.state.combatResources };
+                        const shim2: CombatState = { ...cardShim(state), player, enemy };
                         try {
                             const replay = executeCard(shim2, lastCard.id, lookupCard, 'player');
                             player = replay.state.player as Character;
@@ -3163,7 +3158,7 @@ function playBottomAction(
 
     let next: CombatEncounterState = {
         ...state, player, enemy, dice, reserve, resonance, conviction,
-        revealedStances, hand, drawPile, discard, combatResources, attribution,
+        revealedStances, hand, drawPile, discard, attribution,
         chainEffectIds: [...chainBefore, ...newChainIds],
         guard: (state.guard ?? 0) + guardGain + tierGuardBonus,
         barrier: (state.barrier ?? 0) + barrierGain,

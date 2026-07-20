@@ -62,7 +62,6 @@ const theOpenVein: Card = {
     id: 'the-open-vein',
     theme: 'akrasia',
     name: 'The Open Vein',
-    category: 'paradox',
     philosophicalAspect: 'body',
     description:
         'How much will you bleed to make the point? The vein does not ' +
@@ -98,7 +97,6 @@ const debtOfDays: Card = {
     id: 'debt-of-days',
     theme: 'harvest',
     name: 'Debt of Days',
-    category: 'paradox',
     philosophicalAspect: 'heart',
     description:
         'It is not the argument that ruins them — it is every answer they ' +
@@ -133,7 +131,6 @@ const foundrySprite: Card = {
     id: 'foundry-sprite',
     theme: 'forge',
     name: 'Foundry Sprite',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'A leftover intention that never cooled. It ripens what waits in ' +
@@ -163,7 +160,6 @@ const corollary: Card = {
     id: 'corollary',
     theme: 'peroration',
     name: 'Corollary',
-    category: 'fallacy',
     philosophicalAspect: 'heart',
     description:
         'State the premise and its consequence arrives unbidden, already ' +
@@ -197,7 +193,6 @@ const slagRunoff: Card = {
     id: 'slag-runoff',
     theme: 'forge',
     name: 'Slag Runoff',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'What the mold cannot hold does not return to the crucible — it ' +
@@ -232,7 +227,6 @@ const ingotOfRuin: Card = {
     id: 'ingot-of-ruin',
     theme: 'forge',
     name: 'Ingot of Ruin',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'Every pip you hoarded was a syllable of their name. Pour the whole ' +
@@ -273,7 +267,6 @@ const gritBetweenStones: Card = {
     id: 'grit-between-stones',
     theme: 'bulwark',
     name: 'Grit Between Stones',
-    category: 'fallacy',
     philosophicalAspect: 'body',
     description:
         'The wall was never smooth. Everything they have thrown at it is ' +
@@ -308,7 +301,6 @@ const theUnmovedMover: Card = {
     id: 'the-unmoved-mover',
     theme: 'bulwark',
     name: 'The Unmoved Mover',
-    category: 'paradox',
     philosophicalAspect: 'body',
     description:
         'It moves everything and is moved by nothing. Prove it for one full ' +
@@ -357,7 +349,6 @@ const aSweeterPoison: Card = {
     id: 'a-sweeter-poison',
     theme: 'charm',
     name: 'A Sweeter Poison',
-    category: 'fallacy',
     philosophicalAspect: 'heart',
     description:
         'Flattery with the pit left in. They swallow the kindness whole, and ' +
@@ -399,7 +390,6 @@ const theLongLedger: Card = {
     id: 'the-long-ledger',
     theme: 'harvest',
     name: 'The Long Ledger',
-    category: 'fallacy',
     philosophicalAspect: 'mind',
     description:
         'Every wound is an entry, and entries accrue. Today the ledger calls ' +
@@ -438,7 +428,6 @@ const seedcornSacrifice: Card = {
     id: 'seedcorn-sacrifice',
     theme: 'harvest',
     name: 'Seedcorn Sacrifice',
-    category: 'fallacy',
     philosophicalAspect: 'body',
     description:
         'Eat the seed and there is no next year; sow the souls you meant to ' +
@@ -483,7 +472,6 @@ const captatioBenevolentiae: Card = {
     id: 'captatio-benevolentiae',
     theme: 'peroration',
     name: 'Captatio Benevolentiae',
-    category: 'fallacy',
     philosophicalAspect: 'heart',
     description:
         'Win the room before the argument starts. Spoken first, the courtesy '
@@ -516,7 +504,6 @@ const inMediasRes: Card = {
     id: 'in-medias-res',
     theme: 'peroration',
     name: 'In Medias Res',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'Skip the preamble — begin where the wound already is. An argument '
@@ -550,7 +537,6 @@ const coda: Card = {
     id: 'coda',
     theme: 'echo',
     name: 'Coda',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'The piece is not over when the notes run out — the ending is where '
@@ -584,7 +570,6 @@ const dyingEcho: Card = {
     id: 'dying-echo',
     theme: 'echo',
     name: 'Dying Echo',
-    category: 'fallacy',
     philosophicalAspect: 'mind',
     description:
         'Every hall answers the last word longest. Say it when nothing '
@@ -618,7 +603,6 @@ const wagesOfWeakness: Card = {
     id: 'wages-of-weakness',
     theme: 'akrasia',
     name: 'Wages of Weakness',
-    category: 'fallacy',
     philosophicalAspect: 'body',
     description:
         'You have already bled for this argument — so collect. Every drop '
@@ -655,7 +639,6 @@ const answeredInKind: Card = {
     id: 'answered-in-kind',
     theme: 'akrasia',
     name: 'Answered in Kind',
-    category: 'paradox',
     philosophicalAspect: 'heart',
     description:
         'They opened the wound; you only widened the custom. What was taken '
@@ -715,7 +698,6 @@ const barbedCompliment: Card = {
     id: 'barbed-compliment',
     theme: 'affliction',
     name: 'Barbed Compliment',
-    category: 'fallacy',
     philosophicalAspect: 'heart',
     description:
         'Praise with the hook left in. They wear the kind word like a medal, '
@@ -746,7 +728,6 @@ const thePouredRampart: Card = {
     id: 'the-poured-rampart',
     theme: 'forge',
     name: 'The Poured Rampart',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'Why hammer a blade when the argument only needs a wall? Tip the '
@@ -779,7 +760,6 @@ const interestOnTheFlesh: Card = {
     id: 'interest-on-the-flesh',
     theme: 'akrasia',
     name: 'Interest on the Flesh',
-    category: 'paradox',
     philosophicalAspect: 'body',
     description:
         'The granary does not ask whose blood watered the field. Open a vein, '
@@ -813,7 +793,6 @@ const enteredIntoEvidence: Card = {
     id: 'entered-into-evidence',
     theme: 'oracle',
     name: 'Entered into Evidence',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'State tomorrow under oath. When it arrives exactly as sworn, the '
@@ -852,7 +831,6 @@ const stolenCadence: Card = {
     id: 'stolen-cadence',
     theme: 'control',
     name: 'Stolen Cadence',
-    category: 'fallacy',
     philosophicalAspect: 'mind',
     description:
         'Every argument keeps time. Lift one beat from their downstroke and '
@@ -885,7 +863,6 @@ const unbrokenCountenance: Card = {
     id: 'unbroken-countenance',
     theme: 'charm',
     name: 'Unbroken Countenance',
-    category: 'fallacy',
     philosophicalAspect: 'heart',
     description:
         'Let the whole tirade land and change nothing in your face. There is '

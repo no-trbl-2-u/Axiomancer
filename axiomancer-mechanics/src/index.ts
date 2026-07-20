@@ -289,8 +289,7 @@ export type {
 
 // ─── Cards ───────────────────────────────────────────────────────────────────
 export type {
-    Card, CardCategory, StatType, CardTier, CardTarget,
-    CombatResources,
+    Card, StatType, CardTier, CardTarget,
     CardCombatEffects, CardSpecialMechanic,
     CardEvent, CardResolution, CardLookup,
     CardSynergy, SynergyPredicate,
@@ -302,7 +301,6 @@ export type {
     SynergyStatePredicate, SynergyLedgerView,
 } from './Cards';
 export {
-    generateBasicActionResources, generatePhilosophicalResource,
     calculateCardDamage, executeCard,
     // Spec 32 v3 — rank/rarity helpers (mobile renders rank names off these)
     CARD_RANK_NAMES, rankToRarity,

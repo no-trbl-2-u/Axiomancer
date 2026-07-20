@@ -452,7 +452,6 @@ export function toCombatCard(cardId: string, lookupCard: CardLookup, lookupEffec
         rank: card.rank,
         rarity: rankToRarity(card.rank),
         cardType: card.cardType,
-        category: card.category,
         topActionText,
         bottomActionText: dieLines.length ? `${bottomActionText} ${dieLines.join(' · ')}` : bottomActionText,
         bottomDamagePreview: preview,

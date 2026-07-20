@@ -53,7 +53,7 @@ export function LearnCardModal({ offers, picksRemaining, onPick, onSkip }: Learn
                             <View style={styles.offerText}>
                                 <View style={styles.offerHead}>
                                     <Text style={styles.offerName} numberOfLines={1}>{offer.name}</Text>
-                                    <Text style={styles.offerTier}>T{offer.tier} · {offer.category.toUpperCase()}</Text>
+                                    <Text style={styles.offerTier}>T{offer.tier}</Text>
                                 </View>
                                 <Text style={styles.offerEffect} numberOfLines={1}>{offer.effectText}</Text>
                                 <Text style={styles.offerDesc} numberOfLines={2}>{offer.description}</Text>

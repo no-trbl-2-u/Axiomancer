@@ -370,7 +370,7 @@ reality.
   members of a named `ItemSet` grants threshold-keyed `SetBonus`
   payloads on top of per-item `statModifiers` /
   `resourceInteraction` / `passiveEffects`. Set bonuses are computed
-  on-demand at `initializeCombat` + `generateBasicActionResources` —
+  on-demand at `initializeCombat` —
   no cached per-character state. Engine helpers + library:
   - `getActiveSetBonuses(equipment): SetBonus[]` — primary lookup
     against an equipped-slots snapshot.
@@ -394,11 +394,13 @@ reality.
 ### Cards
 
 - Card execution (`executeCard`, `canUseSkill`,
-  `generateBasicActionResources`, `generatePhilosophicalResource`,
   `calculateCardDamage`, `spendResources`) — Stable.
-- Card types (`Card`, `SkillCategory`, `SkillsStatType`,
-  `SkillTier`, `SkillTarget`, `ResourceCost`, `CombatResources`,
-  `SkillResolution`, etc.) — Stable.
+- Card types (`Card`, `SkillsStatType`,
+  `SkillTier`, `SkillTarget`, `ResourceCost`,
+  `SkillResolution`, etc.) — Stable. Phase 37 (2026-07-20) retired
+  `Card.category`/`CardCategory` and the `combatResources` pool
+  (`CombatResources`) — nothing read it; the live stance economy is
+  `resonance` on `CombatEncounterState`.
 - **Top-level card library (Phase 50):** `cardLibrary: Card[]` +
   `getCardById(id: string): Card | undefined` re-exported on the
   top-level barrel (Phase 50 unit 1 — `19f2015`, engine-handoff fix

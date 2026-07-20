@@ -13,7 +13,6 @@
  *   - `id` = engine `id` (e.g. `'slippery-slope'`)
  *   - `name` = engine `name`, uppercased for display
  *   - `description` = engine `description` verbatim
- *   - `category` = engine `category` ('fallacy' | 'paradox')
  *   - `stance` = engine `philosophicalAspect` ('body' | 'mind' | 'heart')
  */
 
@@ -34,8 +33,6 @@ import { keywordForEffect } from '@/state/combat/keywords';
  */
 export type StanceKey = 'heart' | 'body' | 'mind';
 
-export type CardCategoryKey = 'fallacy' | 'paradox';
-
 export interface CombatCardOption {
     /** Stable engine card id. */
     id: string;
@@ -43,8 +40,6 @@ export interface CombatCardOption {
     name: string;
     /** Display description. */
     description: string;
-    /** Card category — drives chip tint in the picker. */
-    category: CardCategoryKey;
     /** Stance the card is locked to. */
     stance: StanceKey;
     /** 'enemy' = damage; 'self' = heal. */
@@ -81,7 +76,6 @@ function toCombatCardOption(card: Card): CombatCardOption {
         id: card.id,
         name: card.name.toUpperCase(),
         description: card.description,
-        category: card.category,
         stance: card.philosophicalAspect,
         targetType: card.targetType,
         combatEffects: card.combatEffects ?? [],

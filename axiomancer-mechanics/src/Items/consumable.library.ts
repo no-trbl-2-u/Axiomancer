@@ -2,17 +2,8 @@
  * Consumable Library — Spec 05b content.
  *
  * Twenty-two consumables that exercise every leg of the Spec 05 consumable
- * pipeline: immediate `healAmount`, effect-library references via `effectId`,
- * and combat-resource grants via `resourceGrant`.
- *
- * Design notes (Spec 05b resolutions):
- *   - Q3 (B): philosophical tokens (`fallacy` / `paradox`) remain card-only.
- *     `philosopher-tea` and `void-essence` were rewritten to grant
- *     stance tokens (`heart` / `body` / `mind`) instead so the Tier-1 →
- *     Tier-3 generation chain isn't short-circuited by an item slot.
- *   - Q6 (A): consumable `resourceGrant` is applied in-combat when the player
- *     picks `action: 'item'`. Using an item spends the player's turn, so the
- *     grant is a tempo trade-off rather than free resources.
+ * pipeline: immediate `healAmount` and effect-library references via
+ * `effectId`.
  *
  * Effect IDs reference the global effects library (`src/Effects/buffs.library.json`,
  * `debuffs.library.json`); unknown IDs are silently skipped by `useConsumableEffect`,
@@ -64,7 +55,6 @@ export const consumableLibrary: Consumable[] = [
         name: 'Focus Vial',
         description: 'A vial of crystalline thought. Sharpens reasoning for a moment.',
         category: 'consumable',
-        resourceGrant: { mind: 3 },
         quantity: 1,
     },
     {
@@ -72,7 +62,6 @@ export const consumableLibrary: Consumable[] = [
         name: "Heart's Draught",
         description: 'A warm draught that quickens the wearer\'s convictions.',
         category: 'consumable',
-        resourceGrant: { heart: 3 },
         quantity: 1,
     },
     {
@@ -80,7 +69,6 @@ export const consumableLibrary: Consumable[] = [
         name: 'Body Elixir',
         description: 'A heavy elixir that locks the muscles into purpose.',
         category: 'consumable',
-        resourceGrant: { body: 3 },
         quantity: 1,
     },
     {
@@ -89,7 +77,6 @@ export const consumableLibrary: Consumable[] = [
         description: 'A bitter brown brew. Briefly grants haste and a surge of body resolve.',
         category: 'consumable',
         effectId: 'buff_haste',
-        resourceGrant: { body: 5 },
         quantity: 1,
     },
     {
@@ -102,7 +89,6 @@ export const consumableLibrary: Consumable[] = [
         // Spec 05b Q3 (B): consumables grant stance tokens only — philosophical
         // tokens stay card-only. The lore framing still hints at paradoxes.
         effectId: 'buff_critical_damage_up',
-        resourceGrant: { mind: 2 },
         quantity: 1,
     },
     {
@@ -110,7 +96,6 @@ export const consumableLibrary: Consumable[] = [
         name: 'Resonance Crystal',
         description: 'A three-faced crystal that resonates with body, mind, and heart in equal measure.',
         category: 'consumable',
-        resourceGrant: { body: 2, mind: 2, heart: 2 },
         quantity: 1,
     },
     {
@@ -135,7 +120,6 @@ export const consumableLibrary: Consumable[] = [
         // Spec 05b Q3 (B): no philosophical tokens. Heart aligns with the
         // void-essence flavor of staring back at the abyss.
         effectId: 'buff_critical_damage_up',
-        resourceGrant: { heart: 2 },
         quantity: 1,
     },
     // ── Content expansion pass 2026-06-07 ──
@@ -227,7 +211,6 @@ export const consumableLibrary: Consumable[] = [
         name: 'War Horn Draught',
         description: 'A roaring brew that floods the body with martial resolve.',
         category: 'consumable',
-        resourceGrant: { body: 6 },
         effectId: 'buff_haste',
         quantity: 1,
         addedIn: '2026-06-07',
@@ -238,7 +221,6 @@ export const consumableLibrary: Consumable[] = [
         name: 'Greater Resonance Crystal',
         description: 'A radiant crystal that floods body, mind, and heart at once.',
         category: 'consumable',
-        resourceGrant: { body: 4, mind: 4, heart: 4 },
         quantity: 1,
         addedIn: '2026-06-07',
         tags: ['consumable', 'resource', 'late-game'],

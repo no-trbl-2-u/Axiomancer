@@ -40,7 +40,7 @@ afterEach(() => vi.restoreAllMocks());
 // each play lands a status NEW to the chain, refreshing the die).
 registerSandboxCards([
     {
-        id: 'qa-branch-bleed', name: 'QA Branch Bleed', category: 'fallacy',
+        id: 'qa-branch-bleed', name: 'QA Branch Bleed',
         philosophicalAspect: 'mind', description: 'branch-divergence fixture',
         tier: 1, targetType: 'enemy', rank: 1, cardType: 'spell',
         // Intensity 2: bleed decaysPerTick — it must still be standing (at 1)
@@ -48,13 +48,13 @@ registerSandboxCards([
         combatEffects: [{ effectId: 'debuff_bleed', appliedTo: 'opponent', intensity: 2, duration: 3 }],
     },
     {
-        id: 'qa-branch-poison', name: 'QA Branch Poison', category: 'fallacy',
+        id: 'qa-branch-poison', name: 'QA Branch Poison',
         philosophicalAspect: 'mind', description: 'branch-divergence fixture',
         tier: 1, targetType: 'enemy', rank: 1, cardType: 'spell',
         combatEffects: [{ effectId: 'debuff_poison', appliedTo: 'opponent', intensity: 1, duration: 3 }],
     },
     {
-        id: 'qa-branch-mark', name: 'QA Branch Mark', category: 'fallacy',
+        id: 'qa-branch-mark', name: 'QA Branch Mark',
         philosophicalAspect: 'mind', description: 'branch-divergence fixture',
         tier: 1, targetType: 'enemy', rank: 1, cardType: 'spell',
         combatEffects: [{ effectId: 'debuff_mark', appliedTo: 'opponent', intensity: 1, duration: 3 }],

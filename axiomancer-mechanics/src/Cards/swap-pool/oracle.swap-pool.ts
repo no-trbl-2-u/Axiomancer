@@ -38,7 +38,6 @@ const omenOfRain: Card = {
     id: 'omen-of-rain',
     theme: 'oracle',
     name: 'Omen of Rain',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'The sky was already grieving when they woke. What falls on them now ' +
@@ -64,7 +63,6 @@ const readTheEntrails: Card = {
     id: 'read-the-entrails',
     theme: 'oracle',
     name: 'Read the Entrails',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'The old way. The opened bird does not lie, and what it says about ' +
@@ -88,7 +86,6 @@ const theBlowAlreadyRead: Card = {
     id: 'the-blow-already-read',
     theme: 'oracle',
     name: 'The Blow Already Read',
-    category: 'paradox',
     philosophicalAspect: 'heart',
     description:
         'It was described to you in full before they thought of it. Standing ' +
@@ -109,7 +106,6 @@ const eyeBeforeTheStorm: Card = {
     id: 'eye-before-the-storm',
     theme: 'oracle',
     name: 'Eye Before the Storm',
-    category: 'paradox',
     philosophicalAspect: 'heart',
     description:
         'Calm is not the absence of the storm. It is the reading of it, done ' +
@@ -135,7 +131,6 @@ const steadyAugur: Card = {
     id: 'steady-augur',
     theme: 'oracle',
     name: 'Steady Augur',
-    category: 'paradox',
     philosophicalAspect: 'heart',
     description:
         'No visions, no theatre. Read the next two cards of the world, file ' +
@@ -163,7 +158,6 @@ const smallWager: Card = {
     id: 'small-wager',
     theme: 'oracle',
     name: 'Small Wager',
-    category: 'paradox',
     philosophicalAspect: 'heart',
     description:
         'A copper coin on tomorrow. Not for the winnings — for the habit of ' +
@@ -188,7 +182,6 @@ const theCalledShot: Card = {
     id: 'the-called-shot',
     theme: 'oracle',
     name: 'The Called Shot',
-    category: 'paradox',
     philosophicalAspect: 'heart',
     description:
         'Point at the exact rib. Say when. Their pride will aim the blow for ' +
@@ -215,7 +208,6 @@ const scatteredAuspices: Card = {
     id: 'scattered-auspices',
     theme: 'oracle',
     name: 'Scattered Auspices',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'Birds, bones, spilled salt — the signs disagree on everything except ' +
@@ -240,7 +232,6 @@ const theUnreadCard: Card = {
     id: 'the-unread-card',
     theme: 'oracle',
     name: 'The Unread Card',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'Every deck holds one card no one has turned. The oracle reads its ' +
@@ -266,7 +257,6 @@ const convergingSigns: Card = {
     id: 'converging-signs',
     theme: 'oracle',
     name: 'Converging Signs',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'One omen is a mood. Three, agreeing, are a verdict — and the verdict ' +
@@ -298,7 +288,6 @@ const theDoomINamed: Card = {
     id: 'the-doom-i-named',
     theme: 'oracle',
     name: 'The Doom I Named',
-    category: 'paradox',
     philosophicalAspect: 'heart',
     description:
         'Naming it was not a warning. It was a summons — and having summoned ' +
@@ -326,7 +315,6 @@ const beforeTheFirstWord: Card = {
     id: 'before-the-first-word',
     theme: 'oracle',
     name: 'Before the First Word',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'An oracle who speaks second is a critic. Say it before anything else ' +
@@ -356,7 +344,6 @@ const theAvertedBlow: Card = {
     id: 'the-averted-blow',
     theme: 'oracle',
     name: 'The Averted Blow',
-    category: 'paradox',
     philosophicalAspect: 'heart',
     description:
         'The strike that did not land is still yours. You bought it early, at ' +
@@ -383,7 +370,6 @@ const recastTheLots: Card = {
     id: 'recast-the-lots',
     theme: 'oracle',
     name: 'Recast the Lots',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'A poor throw is only a poor question. Gather the lots, ask again ' +
@@ -408,7 +394,6 @@ const thePageTurnsBack: Card = {
     id: 'the-page-turns-back',
     theme: 'oracle',
     name: 'The Page Turns Back',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'Read three pages ahead, then return to the sentence you left. The ' +
@@ -435,7 +420,6 @@ const stakeTheFuture: Card = {
     id: 'stake-the-future',
     theme: 'oracle',
     name: 'Stake the Future',
-    category: 'paradox',
     philosophicalAspect: 'heart',
     description:
         'Put tomorrow itself on the table. If it arrives wearing the face you ' +
@@ -470,7 +454,6 @@ const slowWritDoom: Card = {
     id: 'slow-writ-doom',
     theme: 'oracle',
     name: 'Slow-Writ Doom',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'Some verdicts are stamped. This one is handwritten, letter by ' +
@@ -497,7 +480,6 @@ const venomInTheStars: Card = {
     id: 'venom-in-the-stars',
     theme: 'oracle',
     name: 'Venom in the Stars',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'Their birth chart was a diagnosis. You are merely the courier of a ' +
@@ -524,7 +506,6 @@ const theBraceForetold: Card = {
     id: 'the-brace-foretold',
     theme: 'oracle',
     name: 'The Brace Foretold',
-    category: 'paradox',
     philosophicalAspect: 'heart',
     description:
         'Set the bone before the fall. If the fall then comes as written, ' +
@@ -551,7 +532,6 @@ const readToTheEnd: Card = {
     id: 'read-to-the-end',
     theme: 'oracle',
     name: 'Read to the End',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'Amateurs stop at the omen that flatters them. Read past it, to the ' +
@@ -581,7 +561,6 @@ const theLengtheningShadow: Card = {
     id: 'the-lengthening-shadow',
     theme: 'oracle',
     name: 'The Lengthening Shadow',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'Measured at noon, it was nothing. But you cast the measurement ' +
@@ -612,7 +591,6 @@ const allOmensDue: Card = {
     id: 'all-omens-due',
     theme: 'oracle',
     name: 'All Omens Due',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'Prophecy is credit. Every reading extended them a little more ruin ' +
@@ -641,7 +619,6 @@ const theGrandPrognostication: Card = {
     id: 'the-grand-prognostication',
     theme: 'oracle',
     name: 'The Grand Prognostication',
-    category: 'paradox',
     philosophicalAspect: 'heart',
     description:
         'Not a guess. A schedule. The wound is entered first, the hour of ' +
@@ -672,7 +649,6 @@ const eyesOfTheAeon: Card = {
     id: 'eyes-of-the-aeon',
     theme: 'oracle',
     name: 'Eyes of the Aeon',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'Open the lid all the way, once. Five turnings of the world lie in ' +
@@ -700,7 +676,6 @@ const theInviolateHour: Card = {
     id: 'the-inviolate-hour',
     theme: 'oracle',
     name: 'The Inviolate Hour',
-    category: 'paradox',
     philosophicalAspect: 'heart',
     description:
         'There is one hour in every doom through which nothing passes. You ' +
@@ -730,7 +705,6 @@ const writOfRuin: Card = {
     id: 'writ-of-ruin',
     theme: 'oracle',
     name: 'Writ of Ruin',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'The full sentence, fair-copied and sealed. It does not need an ' +
@@ -764,7 +738,6 @@ const theReckoningReadAloud: Card = {
     id: 'the-reckoning-read-aloud',
     theme: 'oracle',
     name: 'The Reckoning, Read Aloud',
-    category: 'paradox',
     philosophicalAspect: 'heart',
     description:
         'Every mark you set on them was a line in a ledger kept out loud. ' +
@@ -793,7 +766,6 @@ const tomorrowInFull: Card = {
     id: 'tomorrow-in-full',
     theme: 'oracle',
     name: 'Tomorrow, in Full',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'Not a glimpse. The entire day, delivered early: its order, its ' +
@@ -821,7 +793,6 @@ const sentenceYetUnserved: Card = {
     id: 'sentence-yet-unserved',
     theme: 'oracle',
     name: 'Sentence Yet Unserved',
-    category: 'paradox',
     philosophicalAspect: 'heart',
     description:
         'Half the verdict is served today. The remainder is held in trust, ' +

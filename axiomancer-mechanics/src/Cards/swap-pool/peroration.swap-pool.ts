@@ -37,7 +37,6 @@ const narratio: Card = {
     id: 'narratio',
     theme: 'peroration',
     name: 'Narratio',
-    category: 'fallacy',
     philosophicalAspect: 'heart',
     description:
         'The facts, laid in order. Nothing asserted yet — and nothing ' +
@@ -66,7 +65,6 @@ const distinguo: Card = {
     id: 'distinguo',
     theme: 'peroration',
     name: 'Distinguo',
-    category: 'fallacy',
     philosophicalAspect: 'body',
     description:
         'I distinguish. The oldest shield in the schools: split their blow ' +
@@ -100,7 +98,6 @@ const adRem: Card = {
     id: 'ad-rem',
     theme: 'peroration',
     name: 'Ad Rem',
-    category: 'fallacy',
     philosophicalAspect: 'body',
     description:
         'To the point. No ornament, no digression — the finger set on the ' +
@@ -129,7 +126,6 @@ const sedContra: Card = {
     id: 'sed-contra',
     theme: 'peroration',
     name: 'Sed Contra',
-    category: 'fallacy',
     philosophicalAspect: 'body',
     description:
         'But against this stands the authority that outranks them. You ' +
@@ -158,7 +154,6 @@ const aFortiori: Card = {
     id: 'a-fortiori',
     theme: 'peroration',
     name: 'A Fortiori',
-    category: 'fallacy',
     philosophicalAspect: 'heart',
     description:
         'From the stronger, the weaker follows. Prove the mountain and the ' +
@@ -188,7 +183,6 @@ const obiterDictum: Card = {
     id: 'obiter-dictum',
     theme: 'peroration',
     name: 'Obiter Dictum',
-    category: 'fallacy',
     philosophicalAspect: 'heart',
     description:
         'A remark in passing — nothing that binds, everything that lingers. ' +
@@ -216,7 +210,6 @@ const resIpsaLoquitur: Card = {
     id: 'res-ipsa-loquitur',
     theme: 'peroration',
     name: 'Res Ipsa Loquitur',
-    category: 'paradox',
     philosophicalAspect: 'heart',
     description:
         'The thing speaks for itself. You need only stand aside, gesture ' +
@@ -245,7 +238,6 @@ const pointOfOrder: Card = {
     id: 'point-of-order',
     theme: 'peroration',
     name: 'Point of Order',
-    category: 'fallacy',
     philosophicalAspect: 'body',
     description:
         'Point of order: the proceedings halt, and the blow waits its ' +
@@ -272,7 +264,6 @@ const leadingQuestion: Card = {
     id: 'leading-question',
     theme: 'peroration',
     name: 'Leading Question',
-    category: 'fallacy',
     philosophicalAspect: 'heart',
     description:
         'A question shaped so that every answer wounds. Cruel, strictly ' +
@@ -302,7 +293,6 @@ const confirmatio: Card = {
     id: 'confirmatio',
     theme: 'peroration',
     name: 'Confirmatio',
-    category: 'fallacy',
     philosophicalAspect: 'mind',
     description:
         'The proof proper. Each premise set like a course of stone, and ' +
@@ -331,7 +321,6 @@ const refutatio: Card = {
     id: 'refutatio',
     theme: 'peroration',
     name: 'Refutatio',
-    category: 'fallacy',
     philosophicalAspect: 'mind',
     description:
         'Their case dismantled joint by joint — and the pieces stacked, ' +
@@ -365,7 +354,6 @@ const anaphora: Card = {
     id: 'anaphora',
     theme: 'peroration',
     name: 'Anaphora',
-    category: 'fallacy',
     philosophicalAspect: 'heart',
     description:
         'Say it again. And again. The same words on the same die, falling ' +
@@ -394,7 +382,6 @@ const hypophora: Card = {
     id: 'hypophora',
     theme: 'peroration',
     name: 'Hypophora',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'Ask the question they dread; answer it yourself before they can ' +
@@ -424,7 +411,6 @@ const onusProbandi: Card = {
     id: 'onus-probandi',
     theme: 'peroration',
     name: 'Onus Probandi',
-    category: 'fallacy',
     philosophicalAspect: 'body',
     description:
         'The burden of proof lies with them — and last round they failed ' +
@@ -458,7 +444,6 @@ const thePreparedRebuttal: Card = {
     id: 'the-prepared-rebuttal',
     theme: 'peroration',
     name: 'The Prepared Rebuttal',
-    category: 'fallacy',
     philosophicalAspect: 'body',
     description:
         'Every objection they might raise, already answered and filed. ' +
@@ -488,7 +473,6 @@ const elenchus: Card = {
     id: 'elenchus',
     theme: 'peroration',
     name: 'Elenchus',
-    category: 'fallacy',
     philosophicalAspect: 'mind',
     description:
         'Question after question, each answer narrowing the ground they ' +
@@ -519,7 +503,6 @@ const crossExamination: Card = {
     id: 'cross-examination',
     theme: 'peroration',
     name: 'Cross-Examination',
-    category: 'fallacy',
     philosophicalAspect: 'mind',
     description:
         'Under oath, under pressure, under the wrong die entirely — it ' +
@@ -550,7 +533,6 @@ const recapitulatio: Card = {
     id: 'recapitulatio',
     theme: 'peroration',
     name: 'Recapitulatio',
-    category: 'fallacy',
     philosophicalAspect: 'mind',
     description:
         'The summary, weaponized: everything already said, said once more ' +
@@ -580,7 +562,6 @@ const theHostileWitness: Card = {
     id: 'the-hostile-witness',
     theme: 'peroration',
     name: 'The Hostile Witness',
-    category: 'fallacy',
     philosophicalAspect: 'heart',
     description:
         'They struck you, and the strike is now yours: entered into the ' +
@@ -614,7 +595,6 @@ const tricolon: Card = {
     id: 'tricolon',
     theme: 'peroration',
     name: 'Tricolon',
-    category: 'fallacy',
     philosophicalAspect: 'heart',
     description:
         'Three beats, one breath. What is said three times acquires the ' +
@@ -648,7 +628,6 @@ const amicusCuriae: Card = {
     id: 'amicus-curiae',
     theme: 'peroration',
     name: 'Amicus Curiae',
-    category: 'fallacy',
     philosophicalAspect: 'mind',
     description:
         'A friend of the court, unasked and unpaid. Its counsel costs them ' +
@@ -697,7 +676,6 @@ const ratioDecidendi: Card = {
     id: 'ratio-decidendi',
     theme: 'peroration',
     name: 'Ratio Decidendi',
-    category: 'fallacy',
     philosophicalAspect: 'heart',
     description:
         'The reason for the decision, applied at every fourth premise: ' +
@@ -738,7 +716,6 @@ const reductioAdAbsurdum: Card = {
     id: 'reductio-ad-absurdum',
     theme: 'peroration',
     name: 'Reductio ad Absurdum',
-    category: 'paradox',
     philosophicalAspect: 'heart',
     description:
         'Grant them everything. Follow it faithfully, step by patient ' +
@@ -769,7 +746,6 @@ const theVerdictForegone: Card = {
     id: 'the-verdict-foregone',
     theme: 'peroration',
     name: 'The Verdict Foregone',
-    category: 'fallacy',
     philosophicalAspect: 'heart',
     description:
         'Marked, and marked, and marked again. By the time the verdict is ' +
@@ -800,7 +776,6 @@ const theUnanswerableQuestion: Card = {
     id: 'the-unanswerable-question',
     theme: 'peroration',
     name: 'The Unanswerable Question',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'There is a question with no safe answer. You ask it calmly, note ' +
@@ -830,7 +805,6 @@ const argumentumAdBaculum: Card = {
     id: 'argumentum-ad-baculum',
     theme: 'peroration',
     name: 'Argumentum ad Baculum',
-    category: 'fallacy',
     philosophicalAspect: 'body',
     description:
         'The appeal to the stick. It is beneath a philosopher, which is ' +
@@ -863,7 +837,6 @@ const theEighthPremise: Card = {
     id: 'the-eighth-premise',
     theme: 'peroration',
     name: 'The Eighth Premise',
-    category: 'paradox',
     philosophicalAspect: 'heart',
     description:
         'Premises enough, arriving in one breath. The argument does not ' +
@@ -894,7 +867,6 @@ const stareDecisis: Card = {
     id: 'stare-decisis',
     theme: 'peroration',
     name: 'Stare Decisis',
-    category: 'fallacy',
     philosophicalAspect: 'body',
     description:
         'The decision stands. What was ruled once is a wall forever; let ' +

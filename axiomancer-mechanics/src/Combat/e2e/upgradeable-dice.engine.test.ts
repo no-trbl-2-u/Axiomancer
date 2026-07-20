@@ -55,19 +55,19 @@ beforeEach(() => setUpgradeableDice(true));
 
 registerSandboxCards([
     {
-        id: 'ud-body-dot', name: 'UD Body DoT', category: 'fallacy',
+        id: 'ud-body-dot', name: 'UD Body DoT',
         philosophicalAspect: 'body', description: 'body fixture', tier: 1,
         targetType: 'enemy', rank: 1, cardType: 'spell',
         combatEffects: [{ effectId: 'debuff_bleed', appliedTo: 'opponent', intensity: 1, duration: 2 }],
     },
     {
-        id: 'ud-mind-dot', name: 'UD Mind DoT', category: 'paradox',
+        id: 'ud-mind-dot', name: 'UD Mind DoT',
         philosophicalAspect: 'mind', description: 'mind fixture', tier: 1,
         targetType: 'enemy', rank: 1, cardType: 'spell',
         combatEffects: [{ effectId: 'debuff_curse', appliedTo: 'opponent', intensity: 1, duration: 2 }],
     },
     {
-        id: 'ud-heart-dot', name: 'UD Heart DoT', category: 'fallacy',
+        id: 'ud-heart-dot', name: 'UD Heart DoT',
         philosophicalAspect: 'heart', description: 'heart fixture', tier: 1,
         targetType: 'enemy', rank: 1, cardType: 'spell',
         combatEffects: [{ effectId: 'debuff_poison', appliedTo: 'opponent', intensity: 1, duration: 2 }],

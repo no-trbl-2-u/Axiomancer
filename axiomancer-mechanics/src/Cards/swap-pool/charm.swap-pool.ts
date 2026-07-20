@@ -42,7 +42,6 @@ const aKindWord: Card = {
     id: 'a-kind-word',
     theme: 'charm',
     name: 'A Kind Word',
-    category: 'fallacy',
     philosophicalAspect: 'heart',
     description:
         'It costs nothing, and it is never forgotten. The soft place it '
@@ -65,7 +64,6 @@ const theTurnedCheek: Card = {
     id: 'the-turned-cheek',
     theme: 'charm',
     name: 'The Turned Cheek',
-    category: 'paradox',
     philosophicalAspect: 'body',
     description:
         'Offer the unstruck side as if settling an account. Violence against '
@@ -88,7 +86,6 @@ const aNameRemembered: Card = {
     id: 'a-name-remembered',
     theme: 'charm',
     name: 'A Name Remembered',
-    category: 'fallacy',
     philosophicalAspect: 'mind',
     description:
         'You greet them by the name their faults answer to. Every ill that '
@@ -113,7 +110,6 @@ const theFlawConfessed: Card = {
     id: 'the-flaw-confessed',
     theme: 'charm',
     name: 'The Flaw Confessed',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'Name the flaw they hid and forgive it in the same breath. What was '
@@ -138,7 +134,6 @@ const plainSpeech: Card = {
     id: 'plain-speech',
     theme: 'charm',
     name: 'Plain Speech',
-    category: 'fallacy',
     philosophicalAspect: 'heart',
     description:
         'Say it plainly and let plainness do the work. The undecorated '
@@ -163,7 +158,6 @@ const smallMercies: Card = {
     id: 'small-mercies',
     theme: 'charm',
     name: 'Small Mercies',
-    category: 'fallacy',
     philosophicalAspect: 'heart',
     description:
         'Forgive the small things aloud, and keep the ledger of it. Mercy at '
@@ -187,7 +181,6 @@ const anOpenDoor: Card = {
     id: 'an-open-door',
     theme: 'charm',
     name: 'An Open Door',
-    category: 'paradox',
     philosophicalAspect: 'heart',
     description:
         'Leave it open and watch what walks in: their patience, your '
@@ -212,7 +205,6 @@ const theGentledAnswer: Card = {
     id: 'the-gentled-answer',
     theme: 'charm',
     name: 'The Gentled Answer',
-    category: 'paradox',
     philosophicalAspect: 'body',
     description:
         'They strike; you lower your voice. Nothing unsettles an argument '
@@ -245,7 +237,6 @@ const swornGently: Card = {
     id: 'sworn-gently',
     theme: 'charm',
     name: 'Sworn Gently',
-    category: 'fallacy',
     philosophicalAspect: 'heart',
     description:
         'An oath taken quietly binds harder than one shouted. They lean in '
@@ -273,7 +264,6 @@ const waterTheStone: Card = {
     id: 'water-the-stone',
     theme: 'charm',
     name: 'Water the Stone',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'No blow, no haste — only the patient wearing-down that water '
@@ -300,7 +290,6 @@ const theLongListening: Card = {
     id: 'the-long-listening',
     theme: 'charm',
     name: 'The Long Listening',
-    category: 'fallacy',
     philosophicalAspect: 'heart',
     description:
         'Listen past the point of courtesy, past comfort, past defense. What '
@@ -330,7 +319,6 @@ const theHoneyedSyllogism: Card = {
     id: 'the-honeyed-syllogism',
     theme: 'charm',
     name: 'The Honeyed Syllogism',
-    category: 'fallacy',
     philosophicalAspect: 'mind',
     description:
         'Sound reasoning, sweetly phrased, with the conclusion left where '
@@ -359,7 +347,6 @@ const aSecondHearing: Card = {
     id: 'a-second-hearing',
     theme: 'charm',
     name: 'A Second Hearing',
-    category: 'paradox',
     philosophicalAspect: 'heart',
     description:
         'The case is heard again, and the die that argued it is returned to '
@@ -385,7 +372,6 @@ const theSoftConversion: Card = {
     id: 'the-soft-conversion',
     theme: 'charm',
     name: 'The Soft Conversion',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'Even the die can be brought around. It arrives set in its color and '
@@ -414,7 +400,6 @@ const balmAndBargain: Card = {
     id: 'balm-and-bargain',
     theme: 'charm',
     name: 'Balm and Bargain',
-    category: 'fallacy',
     philosophicalAspect: 'heart',
     description:
         'Every remedy has a price, and this one runs in your favor. Mend '
@@ -439,7 +424,6 @@ const heldInRegard: Card = {
     id: 'held-in-regard',
     theme: 'charm',
     name: 'Held in Regard',
-    category: 'fallacy',
     philosophicalAspect: 'heart',
     description:
         'Regard, sustained, is a hand on the sword arm. They cannot strike '
@@ -471,7 +455,6 @@ const theVeiledRebuke: Card = {
     id: 'the-veiled-rebuke',
     theme: 'charm',
     name: 'The Veiled Rebuke',
-    category: 'fallacy',
     philosophicalAspect: 'mind',
     description:
         'The correction arrives wrapped in courtesy, and every fault already '
@@ -501,7 +484,6 @@ const anArmisticeSigned: Card = {
     id: 'an-armistice-signed',
     theme: 'charm',
     name: 'An Armistice Signed',
-    category: 'paradox',
     philosophicalAspect: 'body',
     description:
         'Offered before the first blow, the truce reads as strength. Signed '
@@ -531,7 +513,6 @@ const theQuietLedger: Card = {
     id: 'the-quiet-ledger',
     theme: 'charm',
     name: 'The Quiet Ledger',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'Say little; record everything. When the hand runs empty the ledger '
@@ -561,7 +542,6 @@ const mercyBegetsMercy: Card = {
     id: 'mercy-begets-mercy',
     theme: 'charm',
     name: 'Mercy Begets Mercy',
-    category: 'fallacy',
     philosophicalAspect: 'heart',
     description:
         'Shown once, it obligates. Shown twice, it converts. The impossible '
@@ -587,7 +567,6 @@ const thePatientSiege: Card = {
     id: 'the-patient-siege',
     theme: 'charm',
     name: 'The Patient Siege',
-    category: 'fallacy',
     philosophicalAspect: 'heart',
     description:
         'No ladder, no ram — only the daily, courteous pressure of being '
@@ -613,7 +592,6 @@ const theUnrefusableOffer: Card = {
     id: 'the-unrefusable-offer',
     theme: 'charm',
     name: 'The Unrefusable Offer',
-    category: 'fallacy',
     philosophicalAspect: 'heart',
     description:
         'Everything they wanted, phrased as surrender — theirs. All it costs '
@@ -643,7 +621,6 @@ const theWhiteFlagWoven: Card = {
     id: 'the-white-flag-woven',
     theme: 'charm',
     name: 'The White Flag, Woven',
-    category: 'paradox',
     philosophicalAspect: 'body',
     description:
         'Woven, not waved: the surrender you dress the field in is theirs. A '
@@ -681,7 +658,6 @@ const theVerdictOfKindness: Card = {
     id: 'the-verdict-of-kindness',
     theme: 'charm',
     name: 'The Verdict of Kindness',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'Court is kind and the sentence is thorough. Every named fault is '
@@ -711,7 +687,6 @@ const almsForTheArgument: Card = {
     id: 'alms-for-the-argument',
     theme: 'charm',
     name: 'Alms for the Argument',
-    category: 'paradox',
     philosophicalAspect: 'heart',
     description:
         'Give away what the fight has cost you — the wounds, the grievances '
@@ -738,7 +713,6 @@ const letThemSpeakFirst: Card = {
     id: 'let-them-speak-first',
     theme: 'charm',
     name: 'Let Them Speak First',
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'Yield the floor. Whoever speaks first empties their hand, and '
@@ -767,7 +741,6 @@ const theHundredthHearing: Card = {
     id: 'the-hundredth-hearing',
     theme: 'charm',
     name: 'The Hundredth Hearing',
-    category: 'fallacy',
     philosophicalAspect: 'heart',
     description:
         'The same grace, offered the hundredth time, lands differently: not '
@@ -798,7 +771,6 @@ const theCrownConceded: Card = {
     id: 'the-crown-conceded',
     theme: 'charm',
     name: 'The Crown Conceded',
-    category: 'paradox',
     philosophicalAspect: 'heart',
     description:
         'No blade touched it. The crown is set down because keeping it '
@@ -822,7 +794,6 @@ const theDebtOfGrace: Card = {
     id: 'the-debt-of-grace',
     theme: 'charm',
     name: 'The Debt of Grace',
-    category: 'fallacy',
     philosophicalAspect: 'body',
     description:
         'Every blow you took without answer was a loan at interest. This is '

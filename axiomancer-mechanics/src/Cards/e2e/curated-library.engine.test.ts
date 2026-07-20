@@ -256,7 +256,6 @@ describe('themed library — id hygiene and provenance', () => {
             expect(['spell', 'enchantment', 'disenchant']).toContain(card.cardType);
             expect(['self', 'enemy']).toContain(card.targetType);
             expect(['body', 'mind', 'heart']).toContain(card.philosophicalAspect);
-            expect(['fallacy', 'paradox']).toContain(card.category);
             // 2026-07-08 = the v3 wholesale replacement; 2026-07-17 = the D4
             // dice valves (promoted into the library in Phase D8);
             // 2026-07-18 = the swap-pool authoring date of the nine cards

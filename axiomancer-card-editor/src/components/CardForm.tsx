@@ -18,7 +18,6 @@ import type {
 } from '@mechanics/Cards/types';
 import type { CardDraft } from '../types';
 import {
-    CATEGORIES,
     STANCES,
     TIERS,
     RANKS,
@@ -382,10 +381,6 @@ export function CardForm({ card, setCard }: { card: CardDraft; setCard: (c: Card
 
             {/* ════ CLASSIFICATION ════ */}
             <Section title="CLASSIFICATION" defaultOpen>
-                <div>
-                    <FieldLabel hint="⚖ fallacy · ∞ paradox">CATEGORY</FieldLabel>
-                    <Segmented options={CATEGORIES} value={card.category} onChange={(v) => set({ category: v })} />
-                </div>
                 <div>
                     <FieldLabel hint="stance / die colour">PHILOSOPHICAL ASPECT</FieldLabel>
                     <Segmented options={STANCES} value={card.philosophicalAspect} onChange={(v) => set({ philosophicalAspect: v })} colorFor={dieColor} />

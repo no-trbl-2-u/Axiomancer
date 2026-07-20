@@ -102,7 +102,7 @@ describe('stage-eligible card pools', () => {
     it('extraCards join the pool under the same gates (and may override by id)', () => {
         const early = COMBAT_STAGE_PROFILES.early;
         const fits: Card = {
-            id: 'stage-test-extra-fit', name: 'Stage Test Extra', category: 'fallacy',
+            id: 'stage-test-extra-fit', name: 'Stage Test Extra',
             philosophicalAspect: 'body', description: 'test-only card', tier: 1,
             targetType: 'enemy', rank: 1, cardType: 'spell',
         };

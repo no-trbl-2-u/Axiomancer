@@ -38,7 +38,7 @@ import type { CombatEncounterState, WheelStance } from '../combat.encounter.type
 
 registerSandboxCards([
     {
-        id: 'qa-stake-heart', name: 'QA Stake Heart', category: 'fallacy',
+        id: 'qa-stake-heart', name: 'QA Stake Heart',
         philosophicalAspect: 'heart', description: 'stake-test heart fixture',
         tier: 1, targetType: 'enemy', rank: 1, cardType: 'spell',
         combatEffects: [{ effectId: 'debuff_bleed', appliedTo: 'opponent', intensity: 1, duration: 2 }],

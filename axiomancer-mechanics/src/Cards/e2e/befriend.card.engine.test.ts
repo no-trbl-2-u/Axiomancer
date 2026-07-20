@@ -22,7 +22,6 @@ import { createEnemy } from '../../Enemy';
 const befriendCard: Card = {
     id: 'fix-befriend',
     name: 'Fixture Befriend',
-    category: 'fallacy',
     philosophicalAspect: 'heart',
     description: 'An open hand (fixture).',
     tier: 1,
@@ -76,7 +75,6 @@ describe('Befriend mechanic (Phase 108, re-pinned for spec 32 v3)', () => {
 
             const combatState = {
                 ...initializeCombat(fixtureCharacter(), enemy),
-                combatResources: { heart: 5, body: 0, mind: 0, fallacy: 0, paradox: 0 },
             };
 
             const resolution = executeCard(combatState, befriendCard.id, lookup);
@@ -97,7 +95,6 @@ describe('Befriend mechanic (Phase 108, re-pinned for spec 32 v3)', () => {
                 ...baseState,
                 enemy, // Use the modified enemy with low health
                 friendshipCounter: 15, // Above FRIENDSHIP_COUNTER_MAX to satisfy rounds threshold
-                combatResources: { heart: 5, body: 0, mind: 0, fallacy: 0, paradox: 0 },
             };
 
             const resolution = executeCard(combatState, befriendCard.id, lookup);
@@ -120,7 +117,6 @@ describe('Befriend mechanic (Phase 108, re-pinned for spec 32 v3)', () => {
                 ...baseState,
                 enemy,
                 friendshipCounter: 15,
-                combatResources: { heart: 5, body: 0, mind: 0, fallacy: 0, paradox: 0 },
             };
 
             const resolution = executeCard(combatState, befriendCard.id, lookup);

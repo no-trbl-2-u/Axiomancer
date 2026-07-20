@@ -1,6 +1,6 @@
 # ADR-0001 — Combat resources live on CombatState
 
-Status: Accepted  
+Status: Superseded (Phase 37, 2026-07-20 — `combatResources` fully retired, see below)  
 Date: 2026-06-01  
 Scope: axiomancer-mechanics
 
@@ -22,3 +22,7 @@ Skill availability and casting depend on per-combat resource generation. Stale d
 
 - Phase 98 — Items + skill-resource integration audit
 - Phase 99 — Unlocked skill access
+- Phase 37 (2026-07-20) — `combatResources` was a write-only pool nothing
+  read (the live stance economy is `resonance` on `CombatEncounterState`);
+  fully torn down along with `Card.category`/`CardCategory`. This ADR's
+  decision no longer describes the codebase; kept for history.

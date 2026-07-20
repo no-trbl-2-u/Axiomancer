@@ -54,7 +54,6 @@ import type { CombatManaDie, CombatEvent } from '../combat.encounter.types';
 registerSandboxCards([{
     id: 'qa-payoff-burst',
     name: 'QA Payoff Burst (test fixture)',
-    category: 'paradox',
     philosophicalAspect: 'body',
     description: 'Test-only fixture: a bare RUPTURE payoff with no status payload.',
     tier: 1,

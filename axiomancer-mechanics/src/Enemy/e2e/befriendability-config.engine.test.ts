@@ -50,7 +50,6 @@ function makeState(enemy: Enemy, overrides: Partial<CombatState> = {}): CombatSt
         friendshipCounter: 0,
         playerChoice: {},
         enemyChoice: {},
-        combatResources: { heart: 0, body: 0, mind: 0, fallacy: 0, paradox: 0 },
         player: {
             id: 'test-player',
             name: 'Player',

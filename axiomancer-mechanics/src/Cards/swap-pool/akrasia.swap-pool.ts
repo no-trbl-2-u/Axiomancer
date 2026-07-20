@@ -54,7 +54,6 @@ const smallVice: Card = {
     id: 'small-vice',
     theme: 'akrasia',
     name: 'Small Vice',
-    category: 'fallacy',
     philosophicalAspect: 'heart',
     description:
         'A modest cruelty, taken daily. The dose is nothing; the habit is ' +
@@ -78,7 +77,6 @@ const theFirstCut: Card = {
     id: 'the-first-cut',
     theme: 'akrasia',
     name: 'The First Cut',
-    category: 'fallacy',
     philosophicalAspect: 'body',
     description:
         'The first cut costs the least, which is how the second is agreed to.',
@@ -101,7 +99,6 @@ const beggarsBandage: Card = {
     id: 'beggars-bandage',
     theme: 'akrasia',
     name: "Beggar's Bandage",
-    category: 'paradox',
     philosophicalAspect: 'body',
     description:
         'Cloth over the wound, gratitude over the shame. It holds better ' +
@@ -128,7 +125,6 @@ const countTheCost: Card = {
     id: 'count-the-cost',
     theme: 'akrasia',
     name: 'Count the Cost',
-    category: 'paradox',
     philosophicalAspect: 'heart',
     description:
         'Tally what it will take before you pay it. You will pay it anyway ' +
@@ -157,7 +153,6 @@ const theOldHabit: Card = {
     id: 'the-old-habit',
     theme: 'akrasia',
     name: 'The Old Habit',
-    category: 'fallacy',
     philosophicalAspect: 'heart',
     description:
         'It knows the way to your hand, and it always takes a little skin. ' +
@@ -186,7 +181,6 @@ const saltTheWound: Card = {
     id: 'salt-the-wound',
     theme: 'akrasia',
     name: 'Salt the Wound',
-    category: 'fallacy',
     philosophicalAspect: 'body',
     description:
         'A thin cut, then salt in measures. The wound does the arguing ' +
@@ -213,7 +207,6 @@ const borrowedStrength: Card = {
     id: 'borrowed-strength',
     theme: 'akrasia',
     name: 'Borrowed Strength',
-    category: 'paradox',
     philosophicalAspect: 'heart',
     description:
         'Strength on loan against the body\'s estate. The collector is ' +
@@ -242,7 +235,6 @@ const venomOnCredit: Card = {
     id: 'venom-on-credit',
     theme: 'akrasia',
     name: 'Venom on Credit',
-    category: 'fallacy',
     philosophicalAspect: 'body',
     description:
         'The strong dose, the short clock. Take it now — the bill arrives ' +
@@ -271,7 +263,6 @@ const scourgeAndPsalm: Card = {
     id: 'scourge-and-psalm',
     theme: 'akrasia',
     name: 'Scourge and Psalm',
-    category: 'paradox',
     philosophicalAspect: 'heart',
     description:
         'Lash, then verse, then lash. The liturgy asks for your back, and ' +
@@ -301,7 +292,6 @@ const flinchAndSwing: Card = {
     id: 'flinch-and-swing',
     theme: 'akrasia',
     name: 'Flinch and Swing',
-    category: 'fallacy',
     philosophicalAspect: 'body',
     description:
         'The wrong hand, the wrong angle, thrown anyway. Conviction was ' +
@@ -330,7 +320,6 @@ const theHairShirt: Card = {
     id: 'the-hair-shirt',
     theme: 'akrasia',
     name: 'The Hair Shirt',
-    category: 'paradox',
     philosophicalAspect: 'heart',
     description:
         'Wear the discomfort next to the skin. It rubs the soul awake, and ' +
@@ -362,7 +351,6 @@ const goodBloodAfterBad: Card = {
     id: 'good-blood-after-bad',
     theme: 'akrasia',
     name: 'Good Blood After Bad',
-    category: 'fallacy',
     philosophicalAspect: 'body',
     description:
         'The first payment did not settle it, so you pay again. Ruin, at ' +
@@ -393,7 +381,6 @@ const mortifyTheFlesh: Card = {
     id: 'mortify-the-flesh',
     theme: 'akrasia',
     name: 'Mortify the Flesh',
-    category: 'paradox',
     philosophicalAspect: 'body',
     description:
         'The flesh voted against; overrule it. What the body forfeits, the ' +
@@ -424,7 +411,6 @@ const gildTheGuilt: Card = {
     id: 'gild-the-guilt',
     theme: 'akrasia',
     name: 'Gild the Guilt',
-    category: 'fallacy',
     philosophicalAspect: 'heart',
     description:
         'Polish the shame until it shines on them instead. Guilt, properly ' +
@@ -452,7 +438,6 @@ const theBodyRemembers: Card = {
     id: 'the-body-remembers',
     theme: 'akrasia',
     name: 'The Body Remembers',
-    category: 'paradox',
     philosophicalAspect: 'body',
     description:
         'Every payment leaves a groove. Set the spent die in the reserve — ' +
@@ -481,7 +466,6 @@ const relapse: Card = {
     id: 'relapse',
     theme: 'akrasia',
     name: 'Relapse',
-    category: 'paradox',
     philosophicalAspect: 'heart',
     description:
         'You swore off. The swearing lasted a season; the returning took an ' +
@@ -512,7 +496,6 @@ const theMorningsResolve: Card = {
     id: 'the-mornings-resolve',
     theme: 'akrasia',
     name: "The Morning's Resolve",
-    category: 'paradox',
     philosophicalAspect: 'heart',
     description:
         'The vow is strongest before it is tested. Say the first word of ' +
@@ -543,7 +526,6 @@ const theUsurersDue: Card = {
     id: 'the-usurers-due',
     theme: 'akrasia',
     name: "The Usurer's Due",
-    category: 'fallacy',
     philosophicalAspect: 'heart',
     description:
         'The debt matured while you were suffering. Collect it — the ' +
@@ -574,7 +556,6 @@ const drinkDeep: Card = {
     id: 'drink-deep',
     theme: 'akrasia',
     name: 'Drink Deep',
-    category: 'fallacy',
     philosophicalAspect: 'body',
     description:
         'They drew first. Drink to that — deeply, and from theirs.',
@@ -609,7 +590,6 @@ const theGladMartyr: Card = {
     id: 'the-glad-martyr',
     theme: 'akrasia',
     name: 'The Glad Martyr',
-    category: 'paradox',
     philosophicalAspect: 'heart',
     description:
         'The wound was accepted with thanks. Nothing unsettles an enemy ' +
@@ -641,7 +621,6 @@ const absolutionOnAccount: Card = {
     id: 'absolution-on-account',
     theme: 'akrasia',
     name: 'Absolution on Account',
-    category: 'paradox',
     philosophicalAspect: 'heart',
     description:
         'Forgiveness, financed. One sin struck from the record, the rest ' +
@@ -669,7 +648,6 @@ const noPriceTooDear: Card = {
     id: 'no-price-too-dear',
     theme: 'akrasia',
     name: 'No Price Too Dear',
-    category: 'fallacy',
     philosophicalAspect: 'body',
     description:
         'The die shows nothing usable. Use it anyway — the difference is ' +
@@ -705,7 +683,6 @@ const howMuchIsEnough: Card = {
     id: 'how-much-is-enough',
     theme: 'akrasia',
     name: 'How Much Is Enough',
-    category: 'paradox',
     philosophicalAspect: 'body',
     description:
         'Name the figure. The vein honors any sum; enough was never a ' +
@@ -737,7 +714,6 @@ const crownTheDebtor: Card = {
     id: 'crown-the-debtor',
     theme: 'akrasia',
     name: 'Crown the Debtor',
-    category: 'paradox',
     philosophicalAspect: 'heart',
     description:
         'Owing everything, he outranks the solvent. The crown fits only a ' +
@@ -772,7 +748,6 @@ const ledgerOfScars: Card = {
     id: 'ledger-of-scars',
     theme: 'akrasia',
     name: 'Ledger of Scars',
-    category: 'paradox',
     philosophicalAspect: 'body',
     description:
         'Each scar is an entry; each entry earns. An enemy that writes in ' +
@@ -811,7 +786,6 @@ const uncleanTender: Card = {
     id: 'unclean-tender',
     theme: 'akrasia',
     name: 'Unclean Tender',
-    category: 'fallacy',
     philosophicalAspect: 'body',
     description:
         'Coin with blood in the grain still spends. The die comes back ' +
@@ -845,7 +819,6 @@ const theMartyrsArithmetic: Card = {
     id: 'the-martyrs-arithmetic',
     theme: 'akrasia',
     name: "The Martyr's Arithmetic",
-    category: 'paradox',
     philosophicalAspect: 'mind',
     description:
         'Sum the sufferings, carry the remainder. In this arithmetic the ' +
@@ -885,7 +858,6 @@ const theLastRelapse: Card = {
     id: 'the-last-relapse',
     theme: 'akrasia',
     name: 'The Last Relapse',
-    category: 'fallacy',
     philosophicalAspect: 'body',
     description:
         'One more time, says the vice, and for once it is telling the ' +
@@ -921,7 +893,6 @@ const theWoundThatTeaches: Card = {
     id: 'the-wound-that-teaches',
     theme: 'akrasia',
     name: 'The Wound That Teaches',
-    category: 'paradox',
     philosophicalAspect: 'heart',
     description:
         'Pain is the one tutor that refunds nothing and is owed attendance ' +
@@ -957,7 +928,6 @@ const everyMarkComesDue: Card = {
     id: 'every-mark-comes-due',
     theme: 'akrasia',
     name: 'Every Mark Comes Due',
-    category: 'fallacy',
     philosophicalAspect: 'body',
     description:
         'The marks were never decoration. They were promissory — and today ' +

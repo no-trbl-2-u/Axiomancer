@@ -464,18 +464,12 @@ export default function CharacterScreen() {
                 <View
                   style={[
                     styles.cardTile,
-                    {
-                      borderColor: s.category === 'paradox' ? AXM.sulfur : AXM.parchment,
-                      borderStyle: s.category === 'paradox' ? 'solid' : 'dashed',
-                    },
+                    { borderColor: AXM.parchment, borderStyle: 'dashed' },
                   ]}
                 >
                   <StanceGlyph kind={s.stanceKey} size={16} color={AXM.bone} />
                   <View style={styles.flexOne}>
                     <Text style={styles.cardName}>{s.name}</Text>
-                    <Text style={[styles.cardCat, { color: s.category === 'paradox' ? AXM.sulfur : AXM.parchment }]}>
-                      {s.category.toUpperCase()}
-                    </Text>
                   </View>
                 </View>
               </TooltipTarget>
@@ -568,7 +562,6 @@ const useStyles = makeStyles((AXM) => ({
   marginTop8: { marginTop: 5 },
   cardTile: { width: '48%', borderWidth: 2, padding: 4, paddingHorizontal: 6, backgroundColor: AXM.bg, flexDirection: 'row', alignItems: 'center', gap: 6 },
   cardName: { fontFamily: FONTS.gothic, fontSize: 12, color: AXM.parchment, lineHeight: 14 },
-  cardCat: { fontFamily: FONTS.mono, fontSize: 8, letterSpacing: 1 },
   poolsCard: { marginTop: 3, backgroundColor: AXM.panelBg, borderWidth: 1, borderColor: AXM.ash, paddingVertical: 5, paddingHorizontal: 12, gap: 4 },
   poolRow: {},
   poolHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 2 },
