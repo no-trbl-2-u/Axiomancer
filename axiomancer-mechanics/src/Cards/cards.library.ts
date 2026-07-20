@@ -1801,6 +1801,287 @@ const mastersStamp: Card = {
     tags: ['forge', 'enchantment', 'special', 'dice', 'valve'],
 };
 
+// ─── 2026-07-19 swap-pool promotions (owner-ratified) ────────────────────────
+// Nine measured promote-candidates from the 2026-07-18 swap-pool measurement
+// pass (docs/reports/deck-tuning-2026-07-18.md) promoted into the library AND
+// their preset recipe seats. Each card's evidence lives in that report; the
+// combined-seat evidence lives in deck-tuning-2026-07-19-promotions.md.
+// Color-law breaks were resolved by RECOLORING the card to the evicted seat's
+// aspect (the-burden-of-repetition heart→body, half-spoken-prophecy
+// mind→body); recipe partitions untouched. Evicted incumbents remain library
+// cards (reward/unseated pool).
+
+/** The Poisoned Well — promoted from swap-affliction (arm e1): the
+ *  front-loaded i2d2 poison read that beat slippery-slope's i1d4 ramp at the
+ *  erosion x4 body common seat (mid blind 0.370→0.503). Also carries the
+ *  erosion D8 valve seat (recurring-symptom replaces one copy flag-on). */
+const poisonedWell: Card = {
+    id: 'poisoned-well',
+    theme: 'affliction',
+    name: 'The Poisoned Well',
+    category: 'fallacy',
+    philosophicalAspect: 'body',
+    description:
+        'Argue from the source and the source obliges: everything they draw ' +
+        'from it comes up tainted, and the first draught is the worst.',
+    tier: 1, rank: 1, cardType: 'spell',
+    targetType: 'enemy',
+    // pts: poison i2 d2 (card-played clock 1.83, tempo-weighted 12.81 ÷ 3 =
+    // 4.27) + FREE [mark i1 d1 (0.75) + conviction 1 (1.0)] = 1.75 → 6.02 →
+    // common band 1.5-7.5 (Doxa). FREE share 1.75/6.02 = 29.1% ✓.
+    free: { applyEffect: { effectId: 'debuff_mark', intensity: 1, duration: 1 }, conviction: 1 },
+    combatEffects: [{ effectId: 'debuff_poison', appliedTo: 'opponent', intensity: 2, duration: 2 }],
+    addedIn: '2026-07-18',
+    tags: ['affliction', 'dot'],
+};
+
+/** Videtur Quod — promoted from swap-peroration (arm o1): the longer-fuse
+ *  poison common (d3 vs exordium's d2) at the oratory x4 heart seat; the
+ *  run's cleanest commons engagement gain (mid sE 0.216→0.246). Also carries
+ *  the oratory D8 valve seat (restate-the-point replaces one copy flag-on). */
+const videturQuod: Card = {
+    id: 'videtur-quod',
+    theme: 'peroration',
+    name: 'Videtur Quod',
+    category: 'fallacy',
+    philosophicalAspect: 'heart',
+    description:
+        'It seems that — and there the flaw is stated, fairly, precisely, ' +
+        'in their own terms. An argument shown its own wound sickens as ' +
+        'it stands.',
+    tier: 1, rank: 2, cardType: 'spell',
+    targetType: 'enemy',
+    // pts: PAID [poison i1 d3 (card-played 1.83 cadence, tempo-weighted
+    // 9.49 ÷ 3 = 3.16) + PREMISE 1 (0.8)] = 3.96 + FREE [premises 2 (1.6)]
+    // → 5.56 → common band 1.5-7.5 (Lemma). FREE share 1.6/5.56 = 28.8%
+    // ✓ window.
+    free: { premises: 2 },
+    combatEffects: [
+        { effectId: 'debuff_poison', appliedTo: 'opponent', intensity: 1, duration: 3 },
+    ],
+    specialMechanics: [{ kind: 'premise', count: 1 }],
+    addedIn: '2026-07-18',
+    tags: ['peroration', 'exposure', 'dot'],
+};
+
+/** Quod Erat Demonstrandum — promoted from swap-peroration (arm o3): the
+ *  faster CONCEDE conclusion (declares at 5, concedes at 8) at oratory's rare
+ *  heart seat; the run's biggest curve repair (late blind 0.119→0.278, into
+ *  the doctrine band). Owner explicitly accepted the concede-centrality
+ *  consequence (CONCEDE ≈ 71% of late wins in the A/B). */
+const quodEratDemonstrandum: Card = {
+    id: 'quod-erat-demonstrandum',
+    theme: 'peroration',
+    name: 'Quod Erat Demonstrandum',
+    category: 'fallacy',
+    philosophicalAspect: 'heart',
+    description:
+        'Which was to be demonstrated. The proof closes early and closes ' +
+        'often — and a case carried far enough past its close does not ' +
+        'conclude. It simply ends.',
+    tier: 3, rank: 6, cardType: 'spell',
+    targetType: 'enemy',
+    // pts: PAID [PERORATION at 5: rider [ruptureMarks 2 (2 × ⅔ = 1.33) +
+    // draw 1 (2.0) + conviction 1 (1.0)] = 4.33 + CONCEDE capstone (3.0) +
+    // PREMISE 1 (0.8)] = 8.13 + threshold heart 3 [premises 2 (1.6)] × 0.5
+    // = 0.8 + FREE [premises 2 (1.6) + draw 1 (2.0)] = 3.6 → 12.53 → rare
+    // band 7-19 (Aporia). FREE share 3.6/12.53 = 28.7% ✓ window.
+    free: { premises: 2, drawCards: 1 },
+    specialMechanics: [
+        {
+            kind: 'peroration', at: 5, concedeAt: 8,
+            rider: { ruptureMarks: 2, drawCards: 1, conviction: 1 },
+        },
+        { kind: 'premise', count: 1 },
+    ],
+    threshold: { color: 'heart', count: 3, rider: { premises: 2 } },
+    addedIn: '2026-07-18',
+    tags: ['peroration', 'payoff', 'alt-win'],
+};
+
+/** Tempered Edge — promoted from swap-forge (arm f2): the wall that stings.
+ *  Gave foundry its first in-theme enemy-facing line at the x4 body common
+ *  seat (early 0.60→0.80, ON band; sE 0.00→0.21). */
+const temperedEdge: Card = {
+    id: 'tempered-edge',
+    theme: 'forge',
+    name: 'Tempered Edge',
+    category: 'paradox',
+    philosophicalAspect: 'body',
+    description:
+        'Hardened twice, sharpened once. What tries the edge learns which ' +
+        'of you was made more carefully.',
+    tier: 1, rank: 2, cardType: 'spell',
+    targetType: 'enemy',
+    // pts: Guard 5 (1.25) + ember i2 d2 (tempo 3.5 ÷ 3 = 1.17) = 2.42 +
+    // threshold body 2: Guard 4 (1.0 × 0.5 = 0.5) + FREE pips 1 (1.5) = 4.42
+    // → common band 1.5-7.5 (Lemma). FREE 1.5/4.42 = 34% ✓.
+    free: { pips: 1 },
+    combatEffects: [{ effectId: 'debuff_kindling_ember', appliedTo: 'opponent', intensity: 2, duration: 2 }],
+    specialMechanics: [{ kind: 'guard', amount: 5 }],
+    threshold: { color: 'body', count: 2, rider: { guard: 4 } },
+    addedIn: '2026-07-18',
+    tags: ['forge', 'defense', 'dot'],
+};
+
+/** Half-Spoken Prophecy — promoted from swap-oracle (arm a3), the one
+ *  needs-more-data-grade promotion explicitly ratified by the owner: the only
+ *  augury candidate that was BOTH win- and engagement-positive (mid +0.037,
+ *  dot 0.217→0.295); known caveat: 344 precondition fizzles at mid (the
+ *  RUPTURE needs a live affliction). RECOLORED mind→body for the evicted
+ *  self-flagellant seat (aspect field only; no die/threshold line depended on
+ *  the old color). Augury's mid ~0.00 breach remains structural regardless. */
+const halfSpokenProphecy: Card = {
+    id: 'half-spoken-prophecy',
+    theme: 'oracle',
+    name: 'Half-Spoken Prophecy',
+    category: 'paradox',
+    philosophicalAspect: 'body',
+    description:
+        'Speak only the half already proven — it lands now, all at once. The ' +
+        'unread half stays on the table as a stake, waiting to be made true.',
+    tier: 2, rank: 4, cardType: 'spell',
+    targetType: 'enemy',
+    // pts: RUPTURE 1 affliction / consume_affliction, no Soul (5.5) +
+    // OMEN(foretell 2 = 2.0 × 0.6 = 1.2 + omenInfo 1.0 − ante 1 × 0.75 =
+    // −0.75) = 1.45 → 6.95 + FREE [foretell 1 (1.0) + mark i1 d2 (1.5)] =
+    // 2.5 → 9.45 → uncommon band 4.5-13 (Theorem).
+    // FREE share 2.5/9.45 = 26.5% ✓.
+    free: { foretell: 1, applyEffect: { effectId: 'debuff_mark', intensity: 1, duration: 2, to: 'opponent' } },
+    specialMechanics: [
+        { kind: 'consume_affliction', souls: 0 },
+        { kind: 'omen', maxWindow: 2, anteConviction: 1, rider: { foretell: 2 } },
+    ],
+    addedIn: '2026-07-18',
+    tags: ['oracle', 'payoff', 'omen'],
+};
+
+/** Grace Under Fire — promoted from swap-charm (arm g2): in-theme survival
+ *  for the grace body uncommon seat (early 0.689→0.811, ON band; the
+ *  strongest legal grace result). Replaces the measured-answer borrow. */
+const graceUnderFire: Card = {
+    id: 'grace-under-fire',
+    theme: 'charm',
+    name: 'Grace Under Fire',
+    category: 'paradox',
+    philosophicalAspect: 'body',
+    description:
+        'Let the blow land on composure itself. What they spend in fury, you '
+        + 'bank in standing — unmoved, and owed.',
+    tier: 2, rank: 4, cardType: 'spell',
+    targetType: 'self',
+    // pts: GUARD 10 (2.5) + rapport i2 d2 (3.0) = 5.5 + drew-blood rider
+    // [sway 3 (2.7)] × threshold 0.5 = 1.35 + FREE [guard 2 (0.5) + sway 2
+    // (1.8)] = 2.3 → 9.15 → uncommon band 4.5-13 (Theorem). FREE share
+    // 2.3/9.15 = 25.1% ✓.
+    free: { guard: 2, sway: 2 },
+    combatEffects: [{ effectId: 'debuff_rapport', appliedTo: 'opponent', intensity: 2, duration: 2 }],
+    specialMechanics: [{ kind: 'guard', amount: 10 }],
+    synergy: {
+        statePredicate: { kind: 'enemy-drew-blood' },
+        rider: { sway: 3 },
+    },
+    addedIn: '2026-07-18',
+    tags: ['charm', 'defense', 'condition'],
+};
+
+/** Pebble in the Boot — promoted from swap-bulwark (arm b1): the commons'
+ *  live DoT line at bastion's x4 body common seat (mid blind 0.070→0.133 —
+ *  the right first seat of bastion's mid repair). */
+const pebbleInTheBoot: Card = {
+    id: 'pebble-in-the-boot',
+    theme: 'bulwark',
+    name: 'Pebble in the Boot',
+    category: 'fallacy',
+    philosophicalAspect: 'body',
+    description:
+        'Too small to answer, too present to forget. Every step they take '
+        + 'toward you argues your case.',
+    tier: 1, rank: 1, cardType: 'spell',
+    targetType: 'enemy',
+    // pts: nettle sting i1 d3 (printed 6 → tempo-weighted 4.63 ÷ 3 = 1.54) +
+    // MARK i1 d2 (0.75 × 1 × 2 = 1.5) = 3.04 + FREE [barrier 3 (1.0) + guard
+    // 1 (0.25)] = 1.25 → 4.29 → common band 1.5-7.5 (Doxa). FREE share
+    // 1.25/4.29 = 29.1% ✓ window.
+    free: { barrier: 3, guard: 1 },
+    combatEffects: [
+        { effectId: 'debuff_nettle_sting', appliedTo: 'opponent', intensity: 1, duration: 3 },
+        { effectId: 'debuff_mark', appliedTo: 'opponent', intensity: 1, duration: 2 },
+    ],
+    addedIn: '2026-07-18',
+    tags: ['bulwark', 'dot'],
+};
+
+/** The Anvil Speaks — promoted from swap-bulwark (arm b3): the long-clock
+ *  sting under a working guard at bastion's rare body spell seat (mid +0.030;
+ *  the answer to enemies that never swing). Also carries the bastion D8 valve
+ *  seat (hold-the-line replaces this copy flag-on). */
+const theAnvilSpeaks: Card = {
+    id: 'the-anvil-speaks',
+    theme: 'bulwark',
+    name: 'The Anvil Speaks',
+    category: 'paradox',
+    philosophicalAspect: 'body',
+    description:
+        'Every hammer believes it is the argument, and every anvil knows '
+        + 'better. What rings off you rings in them, hour after hour.',
+    tier: 2, rank: 5, cardType: 'spell',
+    targetType: 'enemy',
+    // pts: nettle sting i3 d4 (printed 24 → tempo-weighted 16.41 ÷ 3 = 5.47)
+    // + Guard 6 (1.5) = 6.97 + dieBonus body [+1 turn (1.0) + heal 3 (1.0)]
+    // × 0.6 = 1.2 + FREE [barrier 8 (2.67) + heal 2 (0.67)] = 3.33 → 11.5 →
+    // rare band 7-19 (Axiom). FREE share 3.33/11.5 = 29.0% ✓ window.
+    free: { barrier: 8, healHp: 2 },
+    combatEffects: [
+        { effectId: 'debuff_nettle_sting', appliedTo: 'opponent', intensity: 3, duration: 4 },
+    ],
+    specialMechanics: [{ kind: 'guard', amount: 6 }],
+    dieBonus: { onColor: 'body', rider: { bonusDuration: 1, healHp: 3 } },
+    addedIn: '2026-07-18',
+    tags: ['bulwark', 'dot', 'sustain'],
+};
+
+/** The Burden of Repetition — promoted from swap-echo (arm r1): the mid
+ *  detonator, the strongest result of the run (mid blind 0.420→0.583, sE
+ *  +0.068 — win AND engagement up at every measured cell; retires the
+ *  refrain deck's akrasia borrow). RECOLORED heart→body for the evicted
+ *  self-flagellant seat (aspect field only; note the `match` dieBonus now
+ *  keys to a BODY die — in the refrain recipe's body slot the conviction
+ *  kicker fires at least as often as the measured heart-colored A/B form).
+ *  Watch item carried into the promotion report: winnowing's dominant-card
+ *  share rose to ~0.90 behind burden in the A/B. */
+const theBurdenOfRepetition: Card = {
+    id: 'the-burden-of-repetition',
+    theme: 'echo',
+    name: 'The Burden of Repetition',
+    category: 'fallacy',
+    philosophicalAspect: 'body',
+    description:
+        'Each repetition costs them a little dignity, and dignity is ' +
+        'structural. Remove enough of it and the argument stands on nothing.',
+    tier: 2, rank: 4, cardType: 'spell',
+    targetType: 'enemy',
+    // pts: [poison i1 d1 (tempo-weighted 3.66 ÷ 3 = 1.22) + closer
+    // ruptureMarks 2 (1.33, pre-existing stacks — the plant trails) +
+    // trailing plant mark i1 d2 (1.5)] × ECHO 1.8 = 7.30 (scorer-exact: the
+    // multiplier covers the whole PAID line; the riders fire once at runtime
+    // — priced rich, never cheap) + dieBonus match [conviction 1 (1.0)] ×
+    // 0.6 = 0.6 + FREE [MILL 2 (2.0) + mark i1 d2 (1.5)] = 3.5 → 11.40 →
+    // uncommon band 4.5-13 (Theorem). FREE share 3.5/11.40 = 30.7%.
+    free: { millCards: 2, applyEffect: { effectId: 'debuff_mark', intensity: 1, duration: 2 } },
+    combatEffects: [
+        { effectId: 'debuff_poison', appliedTo: 'opponent', intensity: 1, duration: 1 },
+    ],
+    specialMechanics: [
+        { kind: 'echo' },
+        { kind: 'rider', rider: { ruptureMarks: 2 } },
+        { kind: 'rider', rider: { applyEffect: { effectId: 'debuff_mark', intensity: 1, duration: 2 } } },
+    ],
+    dieBonus: { onColor: 'match', rider: { conviction: 1 } },
+    addedIn: '2026-07-18',
+    tags: ['echo', 'payoff', 'dot'],
+};
+
 export const cardLibrary: Card[] = [
     // T1 Affliction
     slipperySlope, festeringArgument, currysConversion,
@@ -1837,6 +2118,11 @@ export const cardLibrary: Card[] = [
     // one same-aspect instance in its theme preset.
     recurringSymptom, restateThePoint, mastersStamp, bleedForIt, breakTheTempo,
     secondSight, bankTheYield, changeOfHeart, holdTheLine, secondTake,
+    // 2026-07-19 swap-pool promotions (owner-ratified; see the section above):
+    // nine measured promote-candidates seated into their preset recipes.
+    poisonedWell, videturQuod, quodEratDemonstrandum, temperedEdge,
+    halfSpokenProphecy, graceUnderFire, pebbleInTheBoot, theAnvilSpeaks,
+    theBurdenOfRepetition,
 ];
 
 const registry = new Map<string, Card>(cardLibrary.map(card => [card.id, card]));

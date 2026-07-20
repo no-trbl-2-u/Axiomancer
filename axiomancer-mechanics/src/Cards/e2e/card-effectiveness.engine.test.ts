@@ -91,6 +91,20 @@ const FIXTURE_OVERRIDES: Readonly<Record<string, (state: CombatEncounterState) =
         ...state,
         reserve: [{ id: 'fx-reserve-0', color: 'heart', state: 'available', temporary: false, pips: 2 }],
     }),
+    // the-burden-of-repetition (promoted 2026-07-19): its closer consumes the
+    // board's MARK stacks and its trailing rider re-plants MARK i1 d2. With
+    // the shared fixture's MARK at d2 the re-plant's before/after diff is
+    // invisible (i 3→1, d 2→2). Shorten the staged MARK to d1 so the re-plant
+    // proves itself via duration growth (d 1→2) — the rupture half still has
+    // its full i3 fuel.
+    'the-burden-of-repetition': (state) => ({
+        ...state,
+        enemy: {
+            ...state.enemy,
+            effects: state.enemy.effects.map(e =>
+                (e.effectId === 'debuff_mark' ? { ...e, remainingDuration: 1 } : e)),
+        },
+    }),
 };
 
 // ── Known, honest defects ─────────────────────────────────────────────────────
@@ -330,7 +344,15 @@ function assertMechanic(
             const ev = findEvent(events, 'affliction-consumed');
             expect(ev, label).toBeDefined();
             expect(ev!.fuel, label).toBeGreaterThan(0);
-            expect(after.souls ?? 0, label).toBeGreaterThan(before.souls ?? 0);
+            // Soul yield is authored per card: delphic-ambiguity banks a Soul
+            // (souls >= 1); half-spoken-prophecy (promoted 2026-07-19) prints
+            // `souls: 0` — the no-Soul trade IS its design, so the honest
+            // promise there is "souls unchanged", not growth.
+            if (mech.souls > 0) {
+                expect(after.souls ?? 0, label).toBeGreaterThan(before.souls ?? 0);
+            } else {
+                expect(after.souls ?? 0, label).toBe(before.souls ?? 0);
+            }
             return;
         }
         case 'soul_gain': {
@@ -522,8 +544,8 @@ function assertCardEffective(cardId: string): void {
 // ── Suite ──────────────────────────────────────────────────────────────────────
 
 describe('card effectiveness lint — every PAID face produces its promised observable delta', () => {
-    it('the coverage universe is the 70-card themed library (spec 32 v3 §7)', () => {
-        expect(cardLibrary.length).toBe(70);
+    it('the coverage universe is the 79-card themed library (spec 32 v3 §7 + the 2026-07-19 promotions)', () => {
+        expect(cardLibrary.length).toBe(79);
     });
 
     it('GENERICALLY_ASSERTED kinds in the library are exactly the D8 valve die-verbs '
@@ -551,7 +573,7 @@ describe('card effectiveness lint — every PAID face produces its promised obse
         (cardId) => { assertCardEffective(cardId); },
     );
 
-    it('every card is accounted for exactly once (strict + known-ineffective == 70, no silent drops)', () => {
+    it('every card is accounted for exactly once (strict + known-ineffective == 79, no silent drops)', () => {
         expect(strictCases.length + Object.keys(KNOWN_INEFFECTIVE).length).toBe(cardLibrary.length);
     });
 });

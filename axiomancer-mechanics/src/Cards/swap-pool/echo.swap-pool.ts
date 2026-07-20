@@ -477,43 +477,12 @@ const readingBackTheMinutes: Card = {
     tags: ['echo', 'swap-pool', 'draw'],
 };
 
-/** The Burden of Repetition — the mid detonator: a short poison said twice,
- *  the board's MARK ledger cashed, and the flaw re-filed for the next pass.
- *  ECHO doubles only the poison (the `refrain` d1 precedent — the echo IS
- *  the re-application); the closer consumes PRE-EXISTING marks and the
- *  re-plant rider trails it (a-sweeter-poison rider order), so same-play
- *  marks never feed their own detonation. */
-const theBurdenOfRepetition: Card = {
-    id: 'the-burden-of-repetition',
-    theme: 'echo',
-    name: 'The Burden of Repetition',
-    category: 'fallacy',
-    philosophicalAspect: 'heart',
-    description:
-        'Each repetition costs them a little dignity, and dignity is ' +
-        'structural. Remove enough of it and the argument stands on nothing.',
-    tier: 2, rank: 4, cardType: 'spell',
-    targetType: 'enemy',
-    // pts: [poison i1 d1 (tempo-weighted 3.66 ÷ 3 = 1.22) + closer
-    // ruptureMarks 2 (1.33, pre-existing stacks — the plant trails) +
-    // trailing plant mark i1 d2 (1.5)] × ECHO 1.8 = 7.30 (scorer-exact: the
-    // multiplier covers the whole PAID line; the riders fire once at runtime
-    // — priced rich, never cheap) + dieBonus match [conviction 1 (1.0)] ×
-    // 0.6 = 0.6 + FREE [MILL 2 (2.0) + mark i1 d2 (1.5)] = 3.5 → 11.40 →
-    // uncommon band 4.5-13 (Theorem). FREE share 3.5/11.40 = 30.7%.
-    free: { millCards: 2, applyEffect: { effectId: 'debuff_mark', intensity: 1, duration: 2 } },
-    combatEffects: [
-        { effectId: 'debuff_poison', appliedTo: 'opponent', intensity: 1, duration: 1 },
-    ],
-    specialMechanics: [
-        { kind: 'echo' },
-        { kind: 'rider', rider: { ruptureMarks: 2 } },
-        { kind: 'rider', rider: { applyEffect: { effectId: 'debuff_mark', intensity: 1, duration: 2 } } },
-    ],
-    dieBonus: { onColor: 'match', rider: { conviction: 1 } },
-    addedIn: '2026-07-18',
-    tags: ['echo', 'swap-pool', 'payoff', 'dot'],
-};
+// PROMOTED OUT 2026-07-19 (owner-ratified): `the-burden-of-repetition` moved
+// to `cards.library.ts` and the refrain body uncommon seat, RECOLORED
+// heart→body for the evicted self-flagellant seat (arm r1,
+// docs/reports/deck-tuning-2026-07-18.md — the strongest result of the run:
+// mid blind 0.420→0.583 with sE +0.068; winnowing dominance watch item rides
+// the promotion report).
 
 /** First Word, Again — the OPENING condition card: lead with it and the turn
  *  opens into card advantage. The sequencing-grammar shape (WS5.2) in echo's
@@ -925,9 +894,9 @@ export const SWAP_POOL_ECHO: SandboxCardSet = {
         toldTwice, theNamingRepeated, murmurOfPages, aBreathKept,
         callAndResponse, theShieldRestated, theLineThatLingers, takenBackUp,
         thePointLands, oneMoreBar,
-        // uncommons (12)
+        // uncommons (11; the-burden-of-repetition promoted out 2026-07-19)
         inOtherWords, theSecondTelling, wordForWord, stanzaByStanza,
-        theStandingAnswer, readingBackTheMinutes, theBurdenOfRepetition,
+        theStandingAnswer, readingBackTheMinutes,
         firstWordAgain, theSwollenSongbook, eachTimeWorse, lastVerseLoudest,
         theDrumInsists,
         // rares (8)

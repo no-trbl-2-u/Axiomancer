@@ -180,7 +180,9 @@ describe('premiseMilestoneTotal — per-combat scope', () => {
     it('sim policies never crash across every policy and seed with the counter live (Oratory deck)', () => {
         const oratoryDeck = buildPresetDeck('oratory');
         expect(oratoryDeck.length).toBeGreaterThan(0);
-        expect(oratoryDeck).toContain('exordium');
+        // 2026-07-19: videtur-quod (a PREMISE depositor like the exordium it
+        // evicted) keeps the milestone counter live in the seated deck.
+        expect(oratoryDeck).toContain('videtur-quod');
 
         function makeSimPlayer(): Character {
             const p = deepClone(Player);

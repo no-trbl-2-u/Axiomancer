@@ -78,8 +78,8 @@ function coveragePlays(cardId: string): { plays: number; seedsTried: number[] } 
 describe('card coverage — every library card is exercisable', () => {
     it('the coverage universe is the 70-card themed library (spec 32 v3 §7)', () => {
         // 10 themes × 7 uniques = 70; zero cross-theme overlap.
-        expect(cardLibrary.length).toBe(70);
-        expect(new Set(cardLibrary.map(c => c.id)).size).toBe(70);
+        expect(cardLibrary.length).toBe(79);
+        expect(new Set(cardLibrary.map(c => c.id)).size).toBe(79);
     });
 
     it.each(cardLibrary.map(c => [c.id] as const))(

@@ -92,13 +92,18 @@ export const COMBAT_DECK_PRESETS: Record<string, CombatDeckPreset> = {
         theme: 'affliction',
         focus: 'dot',
         description: 'Stack poison and bleed, stretch them, convert them — then detonate everything at once.',
-        // Colors 5/5/5: body = slippery×4 + venom | heart = opening×4 +
+        // Colors 5/5/5: body = poisoned-well×4 + venom | heart = opening×4 +
         // resonance | mind = festering×2 + currys×2 + curse.
         // Borrow: opening-statement (peroration, heart) replaces
         // straw-mans-jab — its mark+poison payload feeds the DoT/RUPTURE
         // engine directly (MARK amplifies every tick).
+        // 2026-07-19 promotion: poisoned-well (swap-pool arm e1) evicts
+        // slippery-slope from the x4 body common seat — the front-loaded
+        // i2d2 read landed mid ON the ~0.50 doctrine target (0.370→0.503
+        // blind). slippery-slope remains a library/reward card (and the
+        // starting-pair teaching card).
         cardIds: recipe(
-            'slippery-slope', 'opening-statement',
+            'poisoned-well', 'opening-statement',
             'festering-argument', 'currys-conversion',
             'resonance-detonation', 'venom-and-vein', 'suppurating-curse',
         ),
@@ -109,17 +114,22 @@ export const COMBAT_DECK_PRESETS: Record<string, CombatDeckPreset> = {
         theme: 'peroration',
         focus: 'balanced',
         description: 'Build the case premise by premise; the declared conclusion fires free — and at eight, they concede.',
-        // Colors 5/5/5: heart = exordium×4 + closing-word | body = brace×4 +
+        // Colors 5/5/5: heart = videtur-quod×4 + QED | body = brace×4 +
         // venom | mind = mounting×2 + peroratio×2 + quagmire.
         // Borrows: brace-for-impact (bulwark, body — GUARD utility keeps the
         // case-builder alive; also keeps the starter card seated),
         // venom-and-vein (affliction, body ench — +1 intensity on the deck's
         // own poison payloads), quagmire-of-doubt (control, mind dis —
         // universal telegraph softener).
+        // 2026-07-19 promotions: videtur-quod (arm o1) evicts exordium at
+        // the x4 heart common seat; quod-erat-demonstrandum (arm o3) evicts
+        // the-closing-word at the rare heart spell seat (late 0.119→0.278 —
+        // into band; owner accepted CONCEDE centrality). Both evicted cards
+        // remain library/reward cards.
         cardIds: recipe(
-            'exordium', 'brace-for-impact',
+            'videtur-quod', 'brace-for-impact',
             'mounting-case', 'peroratio-interrupta',
-            'the-closing-word', 'venom-and-vein', 'quagmire-of-doubt',
+            'quod-erat-demonstrandum', 'venom-and-vein', 'quagmire-of-doubt',
         ),
     },
     foundry: {
@@ -129,12 +139,17 @@ export const COMBAT_DECK_PRESETS: Record<string, CombatDeckPreset> = {
         focus: 'utility',
         description: 'Manufacture dice from nothing, ripen the pips, then spend every one in a single overwhelming stride.',
         // Colors 5/5/5: heart = signs×4 + mirror-of-longing | body =
-        // half-step×4 + overtake | mind = bootstrap×2 + ex-nihilo×2 + anvil.
+        // tempered-edge×4 + overtake | mind = bootstrap×2 + ex-nihilo×2 +
+        // anvil.
         // Borrows: signs-and-portents (oracle, heart — OMEN rides any
         // powering die, pure draw utility), mirror-of-longing (charm, heart
         // dis — half-step/overtake guard converts to SWAY).
+        // 2026-07-19 promotion: tempered-edge (arm f2) evicts half-step at
+        // the x4 body common seat — foundry's first in-theme enemy-facing
+        // line (early 0.60→0.80, ON band; sE 0.00→0.21). half-step remains a
+        // library/reward card.
         cardIds: recipe(
-            'signs-and-portents', 'half-step',
+            'signs-and-portents', 'tempered-edge',
             'bootstrap-loop', 'ex-nihilo',
             'the-overtake', 'anvil-of-form', 'mirror-of-longing',
         ),
@@ -186,13 +201,17 @@ export const COMBAT_DECK_PRESETS: Record<string, CombatDeckPreset> = {
         focus: 'balanced',
         description: 'See the next move, declare it aloud, and collect on every prophecy that comes true.',
         // Colors 5/5/5: mind = glimpse×4 + prophecy | heart = signs×4 + eye |
-        // body = arrow×2 + flagellant×2 + crumbling.
+        // body = arrow×2 + half-spoken×2 + crumbling.
         // Borrows: arrow-paradox (control, body — stagger/lock defense),
-        // self-flagellant (akrasia, body — RUPTURE detonates glimpse's
-        // poison+mark), crumbling-resolve (bulwark, body dis).
+        // crumbling-resolve (bulwark, body dis).
+        // 2026-07-19 promotion: half-spoken-prophecy (arm a3, RECOLORED
+        // mind→body) evicts the self-flagellant borrow at the body uncommon
+        // seat — the only augury candidate both win- and engagement-positive
+        // (dot 0.217→0.295); its RUPTURE detonates glimpse's poison+mark
+        // in-theme. Augury's mid ~0.00 breach remains structural.
         cardIds: recipe(
             'glimpse', 'signs-and-portents',
-            'arrow-paradox', 'self-flagellant',
+            'arrow-paradox', 'half-spoken-prophecy',
             'prophecy-fulfilled', 'the-oracles-eye', 'crumbling-resolve',
         ),
     },
@@ -224,17 +243,21 @@ export const COMBAT_DECK_PRESETS: Record<string, CombatDeckPreset> = {
         focus: 'control',
         description: 'The deck that never strikes: build SWAY past their resolve and win by capitulation — or mercy.',
         // Colors 5/5/5: heart = soft-word×4 + irresistible | mind =
-        // second-thoughts×4 + ouroboros | body = olive×2 + measured×2 +
-        // crumbling.
+        // second-thoughts×4 + ouroboros | body = olive×2 + grace-under-fire×2
+        // + crumbling.
         // Borrows: second-thoughts (echo, mind — zero-damage draw/reprise
-        // utility), measured-answer (bulwark, body — guard keeps the SWAY
-        // engine alive; its riposte is reactive-only), ouroboros (echo, mind
-        // — replays soft-word for double SWAY), crumbling-resolve (bulwark,
-        // body dis — NOTE: its standing-wall drip deals HP, a documented
-        // dent in grace's never-touches-HP purity, traded for survival).
+        // utility), ouroboros (echo, mind — replays soft-word for double
+        // SWAY), crumbling-resolve (bulwark, body dis — NOTE: its
+        // standing-wall drip deals HP, a documented dent in grace's
+        // never-touches-HP purity, traded for survival).
+        // 2026-07-19 promotion: grace-under-fire (arm g2) evicts the
+        // measured-answer borrow at the body uncommon seat — in-theme
+        // survival whose composure-under-fire converts to SWAY (early
+        // 0.689→0.811, ON band). measured-answer remains a library/reward
+        // card. The grace HP-purity direction ballot item stays open.
         cardIds: recipe(
             'soft-word', 'second-thoughts',
-            'the-olive-branch', 'measured-answer',
+            'the-olive-branch', 'grace-under-fire',
             'ouroboros', 'irresistible-grace', 'crumbling-resolve',
         ),
     },
@@ -249,8 +272,13 @@ export const COMBAT_DECK_PRESETS: Record<string, CombatDeckPreset> = {
         // seated in oratory); 'balanced' is the honest coarse label.
         focus: 'balanced',
         description: 'Thorns, riposte, and a stinging cloak — stand behind the wall and let their own aggression kill them.',
-        // Colors 5/5/5: body = nettle×4 + adamant-wall | mind = sketch×4 +
+        // Colors 5/5/5: body = pebble×4 + anvil-speaks | mind = sketch×4 +
         // resonant | heart = tu-quoque×2 + common-ground×2 + mirror.
+        // 2026-07-19 promotions: pebble-in-the-boot (arm b1) evicts
+        // nettle-cloak at the x4 body common seat (mid 0.070→0.133);
+        // the-anvil-speaks (arm b3) evicts the-adamant-wall at the rare body
+        // spell seat (the never-swings answer). Both evicted cards remain
+        // library/reward cards.
         // Borrows: sketch-of-a-thought (forge, mind — kindle + ember chip +
         // draw), common-ground (charm, heart — rapport softening),
         // resonant-chamber (echo, mind ench — first spell each turn echoes:
@@ -261,9 +289,9 @@ export const COMBAT_DECK_PRESETS: Record<string, CombatDeckPreset> = {
         // to oratory's body slot (guard is utility-10 anywhere).
         // Thorns/riposte core (nettle, tu-quoque, adamant) stays home.
         cardIds: recipe(
-            'nettle-cloak', 'sketch-of-a-thought',
+            'pebble-in-the-boot', 'sketch-of-a-thought',
             'tu-quoque', 'common-ground',
-            'the-adamant-wall', 'resonant-chamber', 'mirror-of-longing',
+            'the-anvil-speaks', 'resonant-chamber', 'mirror-of-longing',
         ),
     },
     refrain: {
@@ -273,16 +301,22 @@ export const COMBAT_DECK_PRESETS: Record<string, CombatDeckPreset> = {
         focus: 'balanced',
         description: 'Nothing is said once: echo, reprise, replay — the tune they cannot stop hearing is yours.',
         // Colors 5/5/5: mind = refrain×4 + ouroboros | heart = opening×4 +
-        // stuck | body = winnowing×2 + flagellant×2 + venom.
+        // stuck | body = winnowing×2 + burden×2 + venom.
         // Borrows: opening-statement (peroration, heart — mark+poison for
         // ECHO to double), winnowing (harvest, body — cashes the echoed
-        // DoTs), self-flagellant (akrasia, body — RUPTURE detonates the
-        // echoed marks), venom-and-vein (affliction, body ench — the echoed
+        // DoTs), venom-and-vein (affliction, body ench — the echoed
         // poison lands harder). ECHO core (refrain, ouroboros, stuck) stays
         // home.
+        // 2026-07-19 promotion: the-burden-of-repetition (arm r1, RECOLORED
+        // heart→body) evicts the self-flagellant borrow at the body uncommon
+        // seat — the strongest result of the measurement run (mid blind
+        // 0.420→0.583, sE +0.068; purity gain: the akrasia borrow retires).
+        // Watch item: winnowing's dominant-card share rose to ~0.90 behind
+        // burden in the A/B — measured again in the promotion report; a
+        // winnowing downtune is a separate A/B, not this change.
         cardIds: recipe(
             'refrain', 'opening-statement',
-            'winnowing', 'self-flagellant',
+            'winnowing', 'the-burden-of-repetition',
             'ouroboros', 'venom-and-vein', 'stuck-in-their-head',
         ),
     },
@@ -300,11 +334,14 @@ export const PRESET_COLOR_BORROWS: Readonly<Record<string, readonly string[]>> =
     foundry: ['signs-and-portents', 'mirror-of-longing'],
     penitent: ['undistributed-middle', 'delphic-ambiguity'],
     standstill: ['cassandras-burden', 'fallen-grace', 'hedgehogs-dilemma', 'mirror-of-longing'],
-    augury: ['arrow-paradox', 'self-flagellant', 'crumbling-resolve'],
+    // 2026-07-19 promotions: augury/grace/refrain each retired one borrow
+    // (self-flagellant ×2 seats, measured-answer) for an in-theme promoted
+    // card — the borrow maps shrink accordingly.
+    augury: ['arrow-paradox', 'crumbling-resolve'],
     tithe: ['disarming-smile', 'circular-reasoning', 'stuck-in-their-head'],
-    grace: ['second-thoughts', 'measured-answer', 'ouroboros', 'crumbling-resolve'],
+    grace: ['second-thoughts', 'ouroboros', 'crumbling-resolve'],
     bastion: ['sketch-of-a-thought', 'common-ground', 'resonant-chamber', 'mirror-of-longing'],
-    refrain: ['opening-statement', 'winnowing', 'self-flagellant', 'venom-and-vein'],
+    refrain: ['opening-statement', 'winnowing', 'venom-and-vein'],
 });
 
 /** Stable display order for the deck-picker (spec §8 table order). */
@@ -384,17 +421,26 @@ export interface PresetDiceValveSeat {
     replacesId: string;
 }
 
-/** The ratified valve seat per preset (D8 court, 2026-07-18). */
+/** The ratified valve seat per preset (D8 court, 2026-07-18).
+ *
+ * 2026-07-19 promotion re-seats (forced by the seat evictions — the valve
+ * law requires `replacesId` to be IN the flag-off recipe, same aspect):
+ * erosion slippery-slope→poisoned-well (body, the mandate's named rider),
+ * oratory exordium→videtur-quod (heart), bastion
+ * the-adamant-wall→the-anvil-speaks (body). All three are same-aspect
+ * like-for-like instance swaps, so the valve-law arithmetic (5/5/5, one
+ * displaced instance) holds; flag-on cells re-ratified in
+ * docs/reports/deck-tuning-2026-07-19-promotions.md. */
 export const PRESET_DICE_VALVES: Readonly<Record<string, PresetDiceValveSeat>> = Object.freeze({
-    erosion: { valveId: 'recurring-symptom', replacesId: 'slippery-slope' },
-    oratory: { valveId: 'restate-the-point', replacesId: 'exordium' },
+    erosion: { valveId: 'recurring-symptom', replacesId: 'poisoned-well' },
+    oratory: { valveId: 'restate-the-point', replacesId: 'videtur-quod' },
     foundry: { valveId: 'forge-masters-stamp', replacesId: 'anvil-of-form' },
     penitent: { valveId: 'bleed-for-it', replacesId: 'pact-of-akrasia' },
     standstill: { valveId: 'break-the-tempo', replacesId: 'red-herring' },
     augury: { valveId: 'second-sight', replacesId: 'prophecy-fulfilled' },
     tithe: { valveId: 'bank-the-yield', replacesId: 'stuck-in-their-head' },
     grace: { valveId: 'change-of-heart', replacesId: 'soft-word' },
-    bastion: { valveId: 'hold-the-line', replacesId: 'the-adamant-wall' },
+    bastion: { valveId: 'hold-the-line', replacesId: 'the-anvil-speaks' },
     refrain: { valveId: 'second-take', replacesId: 'ouroboros' },
 });
 

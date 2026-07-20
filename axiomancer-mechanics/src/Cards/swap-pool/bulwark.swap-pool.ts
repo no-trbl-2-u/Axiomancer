@@ -66,32 +66,9 @@ const dryStoneCourse: Card = {
     tags: ['bulwark', 'defense', 'swap-pool'],
 };
 
-/** Pebble in the Boot — the commons' live DoT line: the wall's slow argument
- *  (Nettle Sting) plus a MARK the theme's closers can later cash. Kills what
- *  never swings — the bastion mid-game hole (atlas THORNS/RIPOSTE rows). */
-const pebbleInTheBoot: Card = {
-    id: 'pebble-in-the-boot',
-    theme: 'bulwark',
-    name: 'Pebble in the Boot',
-    category: 'fallacy',
-    philosophicalAspect: 'body',
-    description:
-        'Too small to answer, too present to forget. Every step they take '
-        + 'toward you argues your case.',
-    tier: 1, rank: 1, cardType: 'spell',
-    targetType: 'enemy',
-    // pts: nettle sting i1 d3 (printed 6 → tempo-weighted 4.63 ÷ 3 = 1.54) +
-    // MARK i1 d2 (0.75 × 1 × 2 = 1.5) = 3.04 + FREE [barrier 3 (1.0) + guard
-    // 1 (0.25)] = 1.25 → 4.29 → common band 1.5-7.5 (Doxa). FREE share
-    // 1.25/4.29 = 29.1% ✓ window.
-    free: { barrier: 3, guard: 1 },
-    combatEffects: [
-        { effectId: 'debuff_nettle_sting', appliedTo: 'opponent', intensity: 1, duration: 3 },
-        { effectId: 'debuff_mark', appliedTo: 'opponent', intensity: 1, duration: 2 },
-    ],
-    addedIn: '2026-07-18',
-    tags: ['bulwark', 'dot', 'swap-pool'],
-};
+// PROMOTED OUT 2026-07-19 (owner-ratified): `pebble-in-the-boot` moved to
+// `cards.library.ts` and the bastion x4 body common seat (arm b1,
+// docs/reports/deck-tuning-2026-07-18.md — mid blind 0.070→0.133).
 
 /** Lean Into the Shield — the fading-block common with a die-color sweetener:
  *  two points of Brace for Impact's guard traded away for a matched-die surge
@@ -782,33 +759,10 @@ const theGrindingWall: Card = {
     tags: ['bulwark', 'payoff', 'swap-pool'],
 };
 
-/** The Anvil Speaks — the long-clock rare: the pool's longest sting under a
- *  working guard; the body-die line stretches it a turn and mends. Bastion's
- *  answer to enemies that simply never attack. */
-const theAnvilSpeaks: Card = {
-    id: 'the-anvil-speaks',
-    theme: 'bulwark',
-    name: 'The Anvil Speaks',
-    category: 'paradox',
-    philosophicalAspect: 'body',
-    description:
-        'Every hammer believes it is the argument, and every anvil knows '
-        + 'better. What rings off you rings in them, hour after hour.',
-    tier: 2, rank: 5, cardType: 'spell',
-    targetType: 'enemy',
-    // pts: nettle sting i3 d4 (printed 24 → tempo-weighted 16.41 ÷ 3 = 5.47)
-    // + Guard 6 (1.5) = 6.97 + dieBonus body [+1 turn (1.0) + heal 3 (1.0)]
-    // × 0.6 = 1.2 + FREE [barrier 8 (2.67) + heal 2 (0.67)] = 3.33 → 11.5 →
-    // rare band 7-19 (Axiom). FREE share 3.33/11.5 = 29.0% ✓ window.
-    free: { barrier: 8, healHp: 2 },
-    combatEffects: [
-        { effectId: 'debuff_nettle_sting', appliedTo: 'opponent', intensity: 3, duration: 4 },
-    ],
-    specialMechanics: [{ kind: 'guard', amount: 6 }],
-    dieBonus: { onColor: 'body', rider: { bonusDuration: 1, healHp: 3 } },
-    addedIn: '2026-07-18',
-    tags: ['bulwark', 'dot', 'sustain', 'swap-pool'],
-};
+// PROMOTED OUT 2026-07-19 (owner-ratified): `the-anvil-speaks` moved to
+// `cards.library.ts` and the bastion rare body spell seat (arm b3,
+// docs/reports/deck-tuning-2026-07-18.md — mid +0.030; also inherits the
+// bastion D8 valve seat from the-adamant-wall).
 
 /** The Palisade Repays — the hybrid reflect finisher: standing thorns AND an
  *  armed riposte in one play — contact costs, and a fully-blocked swing
@@ -951,16 +905,16 @@ export const SWAP_POOL_BULWARK: SandboxCardSet = {
         + 'mark payoffs, and finale walls. Every card composes existing '
         + 'registry vocabulary — no new keywords, no new mechanic kinds.',
     cards: [
-        // commons (10)
-        dryStoneCourse, pebbleInTheBoot, leanIntoTheShield, coldIronNail,
+        // commons (9; pebble-in-the-boot promoted out 2026-07-19)
+        dryStoneCourse, leanIntoTheShield, coldIronNail,
         firstStoneSet, quickthornHedge, patientMasonry, tollOfTheGate,
         tortoiseDoctrine, spitefulSplinters,
         // uncommons (12)
         bristlingParapet, theWaitingAnswer, stoneRemembers, spikeTheBreach,
         theCounterweight, writtenInScar, masonsRhythm, grudgeOfGranite,
         hedgeOfSpears, shieldWallDiscipline, theSiegeOutlasted, theRebukeInStone,
-        // rares (8)
-        theMountainAnswers, fieldOfCaltrops, theGrindingWall, theAnvilSpeaks,
+        // rares (7; the-anvil-speaks promoted out 2026-07-19)
+        theMountainAnswers, fieldOfCaltrops, theGrindingWall,
         thePalisadeRepays, lastStoneStanding, oathOfTheKeep, unbreachable,
     ],
 };

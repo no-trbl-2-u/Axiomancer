@@ -823,7 +823,11 @@ describe('preset ignition — every themed deck reaches its engine within a few 
         augury: e => e.kind === 'foretold' || e.kind === 'omen-declared',
         tithe: e => e.kind === 'soul-gained',
         grace: e => e.kind === 'sway-gained',
-        bastion: e => e.kind === 'effect-landed' && e.effectId === 'buff_thorns',
+        // 2026-07-19: pebble-in-the-boot/the-anvil-speaks carry the reflect
+        // theme's sting line into the seated deck (nettle-cloak, the thorns
+        // carrier, is unseated) — either engine ignition counts.
+        bastion: e => e.kind === 'effect-landed'
+            && (e.effectId === 'buff_thorns' || e.effectId === 'debuff_nettle_sting'),
         refrain: e => e.kind === 'echoed' || e.kind === 'reprised',
     };
 

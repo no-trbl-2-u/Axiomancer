@@ -166,7 +166,12 @@ describe("half-step's OVERHEAT leg", () => {
 
 describe('OVERHEAT — per-combat / sim sweep', () => {
     it('sim policies never crash across every policy and seed (Foundry deck, half-step live)', () => {
-        const foundryDeck = buildPresetDeck('foundry');
+        // 2026-07-19: half-step (the OVERHEAT carrier) was unseated from the
+        // foundry preset by tempered-edge; the sweep's whole point is
+        // OVERHEAT-live sims, so seat half-step back into its old x4 seat
+        // explicitly (it remains a library/reward card).
+        const foundryDeck = buildPresetDeck('foundry')
+            .map(id => (id === 'tempered-edge' ? 'half-step' : id));
         expect(foundryDeck.length).toBeGreaterThan(0);
         expect(foundryDeck).toContain('half-step');
 

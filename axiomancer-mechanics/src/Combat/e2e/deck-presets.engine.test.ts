@@ -130,13 +130,17 @@ describe('preset combat decks (spec 32 v3 §8)', () => {
         }
     });
 
-    it('exactly the ten dice valves sit outside the flag-off starter pool (flag-on-seated)', () => {
+    it('exactly the ten dice valves + the eight 2026-07-19-unseated incumbents sit outside the flag-off starter pool', () => {
         // Phase D8 ten-in/ten-out: the old reward-only ten (zero plays in
         // 345,600 measured encounters — see the 2026-07-18 metrics
         // accumulation) were retired from the library, and the ten promoted
         // dice valves took their place. Valves are seated ONLY in the flag-on
         // derived decks, so from the flag-off recipe truth they are the
         // library's unseated set — the pinned, intentional consequence.
+        // 2026-07-19: the nine owner-ratified swap-pool promotions evicted
+        // eight unique incumbents (self-flagellant lost BOTH its augury and
+        // refrain seats); they remain library cards in the reward/unseated
+        // pool — unseated, never deleted.
         const REWARD_ONLY = [
             'bank-the-yield',      // harvest h-unc — tithe's flag-on valve
             'bleed-for-it',        // akrasia b-unc — penitent's flag-on valve
@@ -148,13 +152,22 @@ describe('preset combat decks (spec 32 v3 §8)', () => {
             'restate-the-point',   // peroration h-unc — oratory's flag-on valve
             'second-sight',        // oracle m-unc — augury's flag-on valve
             'second-take',         // echo m-common — refrain's flag-on valve
+            // ── unseated by the 2026-07-19 promotions ──
+            'exordium',            // peroration h-common — evicted by videtur-quod
+            'half-step',           // forge b-common — evicted by tempered-edge
+            'measured-answer',     // bulwark b-unc — grace borrow evicted by grace-under-fire
+            'nettle-cloak',        // bulwark b-common — evicted by pebble-in-the-boot
+            'self-flagellant',     // akrasia b-unc — both borrow seats evicted (augury, refrain)
+            'slippery-slope',      // affliction b-common — evicted by poisoned-well (stays the starting-pair card)
+            'the-adamant-wall',    // bulwark b-rare — evicted by the-anvil-speaks
+            'the-closing-word',    // peroration h-rare — evicted by quod-erat-demonstrandum
         ];
         const seated = new Set<string>();
         for (const preset of listDeckPresets()) for (const id of preset.cardIds) seated.add(id);
         const actual = cardLibrary.map(c => c.id).filter(id => !seated.has(id)).sort();
         expect(actual).toEqual([...REWARD_ONLY].sort());
         // And the seated set + reward-only set is the whole library.
-        expect(seated.size + actual.length).toBe(70);
+        expect(seated.size + actual.length).toBe(79);
     });
 
     it('a focused preset carries at least a full common playset on the lever it advertises', () => {
@@ -190,23 +203,25 @@ describe('preset combat decks (spec 32 v3 §8)', () => {
     // to their pre-D8 snapshots (pinned below), and the curated library stays
     // exactly 70 through the ten-in/ten-out promotion ledger.
 
-    /** The pre-D8 flag-off recipes, pinned byte-for-byte. */
+    /** The flag-off recipes, pinned byte-for-byte (pre-D8 baseline, seven
+     * seats re-pinned by the owner-ratified 2026-07-19 swap-pool promotions:
+     * erosion/oratory/foundry/augury/grace/bastion/refrain). */
     const FLAG_OFF_SNAPSHOT: Record<string, string[]> = {
         erosion: [
-            'slippery-slope', 'slippery-slope', 'slippery-slope', 'slippery-slope',
+            'poisoned-well', 'poisoned-well', 'poisoned-well', 'poisoned-well',
             'opening-statement', 'opening-statement', 'opening-statement', 'opening-statement',
             'festering-argument', 'festering-argument', 'currys-conversion', 'currys-conversion',
             'resonance-detonation', 'venom-and-vein', 'suppurating-curse',
         ],
         oratory: [
-            'exordium', 'exordium', 'exordium', 'exordium',
+            'videtur-quod', 'videtur-quod', 'videtur-quod', 'videtur-quod',
             'brace-for-impact', 'brace-for-impact', 'brace-for-impact', 'brace-for-impact',
             'mounting-case', 'mounting-case', 'peroratio-interrupta', 'peroratio-interrupta',
-            'the-closing-word', 'venom-and-vein', 'quagmire-of-doubt',
+            'quod-erat-demonstrandum', 'venom-and-vein', 'quagmire-of-doubt',
         ],
         foundry: [
             'signs-and-portents', 'signs-and-portents', 'signs-and-portents', 'signs-and-portents',
-            'half-step', 'half-step', 'half-step', 'half-step',
+            'tempered-edge', 'tempered-edge', 'tempered-edge', 'tempered-edge',
             'bootstrap-loop', 'bootstrap-loop', 'ex-nihilo', 'ex-nihilo',
             'the-overtake', 'anvil-of-form', 'mirror-of-longing',
         ],
@@ -225,7 +240,7 @@ describe('preset combat decks (spec 32 v3 §8)', () => {
         augury: [
             'glimpse', 'glimpse', 'glimpse', 'glimpse',
             'signs-and-portents', 'signs-and-portents', 'signs-and-portents', 'signs-and-portents',
-            'arrow-paradox', 'arrow-paradox', 'self-flagellant', 'self-flagellant',
+            'arrow-paradox', 'arrow-paradox', 'half-spoken-prophecy', 'half-spoken-prophecy',
             'prophecy-fulfilled', 'the-oracles-eye', 'crumbling-resolve',
         ],
         tithe: [
@@ -237,19 +252,19 @@ describe('preset combat decks (spec 32 v3 §8)', () => {
         grace: [
             'soft-word', 'soft-word', 'soft-word', 'soft-word',
             'second-thoughts', 'second-thoughts', 'second-thoughts', 'second-thoughts',
-            'the-olive-branch', 'the-olive-branch', 'measured-answer', 'measured-answer',
+            'the-olive-branch', 'the-olive-branch', 'grace-under-fire', 'grace-under-fire',
             'ouroboros', 'irresistible-grace', 'crumbling-resolve',
         ],
         bastion: [
-            'nettle-cloak', 'nettle-cloak', 'nettle-cloak', 'nettle-cloak',
+            'pebble-in-the-boot', 'pebble-in-the-boot', 'pebble-in-the-boot', 'pebble-in-the-boot',
             'sketch-of-a-thought', 'sketch-of-a-thought', 'sketch-of-a-thought', 'sketch-of-a-thought',
             'tu-quoque', 'tu-quoque', 'common-ground', 'common-ground',
-            'the-adamant-wall', 'resonant-chamber', 'mirror-of-longing',
+            'the-anvil-speaks', 'resonant-chamber', 'mirror-of-longing',
         ],
         refrain: [
             'refrain', 'refrain', 'refrain', 'refrain',
             'opening-statement', 'opening-statement', 'opening-statement', 'opening-statement',
-            'winnowing', 'winnowing', 'self-flagellant', 'self-flagellant',
+            'winnowing', 'winnowing', 'the-burden-of-repetition', 'the-burden-of-repetition',
             'ouroboros', 'venom-and-vein', 'stuck-in-their-head',
         ],
     };
@@ -329,8 +344,8 @@ describe('preset combat decks (spec 32 v3 §8)', () => {
             expect(() => buildUpgradeableDicePresetDeck('erosion', {})).toThrow(); // seat missing
         });
 
-        it('the curated library stays exactly 70 through the ten-in/ten-out ledger', () => {
-            expect(cardLibrary.length).toBe(70);
+        it('the curated library is exactly 79 (70 post-D8 + the 9 promoted 2026-07-19)', () => {
+            expect(cardLibrary.length).toBe(79);
             // All ten promoted valves are library cards…
             for (const id of COMBAT_DECK_PRESET_ORDER) {
                 expect(getCardById(PRESET_DICE_VALVES[id].valveId)).toBeDefined();

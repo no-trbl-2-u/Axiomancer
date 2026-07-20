@@ -37,8 +37,8 @@ for (const card of cardLibrary) {
 }
 
 describe('themed library — shape contract (spec 32 v3 §6-7)', () => {
-    it('is exactly 70 unique cards', () => {
-        expect(cardLibrary.length).toBe(70);
+    it('is exactly 79 unique cards (70 post-D8 + the 9 owner-ratified 2026-07-19 swap-pool promotions)', () => {
+        expect(cardLibrary.length).toBe(79);
         const ids = cardLibrary.map(c => c.id);
         expect(new Set(ids).size).toBe(ids.length);
     });
@@ -57,21 +57,25 @@ describe('themed library — shape contract (spec 32 v3 §6-7)', () => {
     // post-D8 shape is pinned EXACTLY below so drift is still caught;
     // restoring per-theme symmetry (authoring replacement ench/dis cards) is
     // the next library phase's work, not an accident to lint away.
-    it('each theme matches the pinned post-D8 shape (cards / rarities / types)', () => {
+    // 2026-07-19: the nine owner-ratified swap-pool promotions (all spells)
+    // grew seven themes — affliction/forge +1 common, peroration +1 common
+    // +1 rare, oracle/charm/echo +1 uncommon, bulwark +1 common +1 rare.
+    // Ench/dis counts unchanged (no passive was promoted).
+    it('each theme matches the pinned post-promotion shape (cards / rarities / types)', () => {
         const POST_D8_SHAPE: Record<string, {
             n: number; common: number; uncommon: number; rare: number;
             enchantment: number; disenchant: number;
         }> = {
-            affliction: { n: 7, common: 1, uncommon: 3, rare: 3, enchantment: 1, disenchant: 1 },
-            peroration: { n: 6, common: 2, uncommon: 3, rare: 1, enchantment: 0, disenchant: 0 },
-            forge:      { n: 7, common: 2, uncommon: 2, rare: 3, enchantment: 2, disenchant: 0 },
+            affliction: { n: 8, common: 2, uncommon: 3, rare: 3, enchantment: 1, disenchant: 1 },
+            peroration: { n: 8, common: 3, uncommon: 3, rare: 2, enchantment: 0, disenchant: 0 },
+            forge:      { n: 8, common: 3, uncommon: 2, rare: 3, enchantment: 2, disenchant: 0 },
             akrasia:    { n: 8, common: 2, uncommon: 3, rare: 3, enchantment: 1, disenchant: 1 },
             control:    { n: 7, common: 2, uncommon: 3, rare: 2, enchantment: 0, disenchant: 1 },
-            oracle:     { n: 7, common: 2, uncommon: 3, rare: 2, enchantment: 1, disenchant: 0 },
+            oracle:     { n: 8, common: 2, uncommon: 4, rare: 2, enchantment: 1, disenchant: 0 },
             harvest:    { n: 6, common: 1, uncommon: 3, rare: 2, enchantment: 1, disenchant: 0 },
-            charm:      { n: 7, common: 2, uncommon: 3, rare: 2, enchantment: 1, disenchant: 1 },
-            bulwark:    { n: 8, common: 3, uncommon: 2, rare: 3, enchantment: 1, disenchant: 1 },
-            echo:       { n: 7, common: 3, uncommon: 1, rare: 3, enchantment: 1, disenchant: 1 },
+            charm:      { n: 8, common: 2, uncommon: 4, rare: 2, enchantment: 1, disenchant: 1 },
+            bulwark:    { n: 10, common: 4, uncommon: 2, rare: 4, enchantment: 1, disenchant: 1 },
+            echo:       { n: 8, common: 3, uncommon: 2, rare: 3, enchantment: 1, disenchant: 1 },
         };
         for (const theme of THEMES) {
             const cards = byTheme.get(theme)!;
@@ -89,8 +93,8 @@ describe('themed library — shape contract (spec 32 v3 §6-7)', () => {
                 expect(rankToRarity(c.rank), `${theme} ${c.id}`).toBe('rare');
             }
         }
-        // The raggedness sums back to the 70-card law.
-        expect(Object.values(POST_D8_SHAPE).reduce((s, p) => s + p.n, 0)).toBe(70);
+        // The raggedness sums back to the 79-card law.
+        expect(Object.values(POST_D8_SHAPE).reduce((s, p) => s + p.n, 0)).toBe(79);
     });
 
     it('every rank is a named rung on the ladder', () => {
@@ -147,17 +151,18 @@ describe('themed library — FREE/PAID anatomy (spec §2)', () => {
         }
     });
 
-    it('cardOrigin tags every library card as a starter, except the ten documented reward-only cards', () => {
-        // The 5/5/5 color law squeezes exactly 10 cards out of every recipe
-        // (pinned by id in deck-presets.engine.test.ts); they remain in the
-        // reward pool and surface through drafts instead.
+    it('cardOrigin tags every library card as a starter, except the eighteen documented reward-only cards', () => {
+        // The 5/5/5 color law squeezes 10 cards (the D8 valves, flag-on-only
+        // seats) out of every recipe, and the 2026-07-19 promotions unseated
+        // 8 incumbents (pinned by id in deck-presets.engine.test.ts); all 18
+        // remain in the reward pool and surface through drafts instead.
         const rewardOnly: string[] = [];
         for (const card of cardLibrary) {
             const origin = cardOrigin(card.id);
             if (origin.source === 'reward') { rewardOnly.push(card.id); continue; }
             expect(origin.presetDeck, `${card.id} presetDeck`).toBeTruthy();
         }
-        expect(rewardOnly.length, `reward-only starters: ${rewardOnly.join(', ')}`).toBe(10);
+        expect(rewardOnly.length, `reward-only starters: ${rewardOnly.join(', ')}`).toBe(18);
     });
 
     it('cardOrigin tags a non-preset id as a reward', () => {
@@ -253,8 +258,10 @@ describe('themed library — id hygiene and provenance', () => {
             expect(['body', 'mind', 'heart']).toContain(card.philosophicalAspect);
             expect(['fallacy', 'paradox']).toContain(card.category);
             // 2026-07-08 = the v3 wholesale replacement; 2026-07-17 = the D4
-            // dice valves (promoted into the library in Phase D8).
-            expect(['2026-07-08', '2026-07-17']).toContain(card.addedIn);
+            // dice valves (promoted into the library in Phase D8);
+            // 2026-07-18 = the swap-pool authoring date of the nine cards
+            // promoted 2026-07-19 (valve precedent: authoring date kept).
+            expect(['2026-07-08', '2026-07-17', '2026-07-18']).toContain(card.addedIn);
         }
     });
 
@@ -268,8 +275,8 @@ describe('themed library — id hygiene and provenance', () => {
         }
     });
 
-    it('the reward pool is the whole 70-card library and every id resolves', () => {
-        expect(COMBAT_REWARD_POOL.length).toBe(70);
+    it('the reward pool is the whole 79-card library and every id resolves', () => {
+        expect(COMBAT_REWARD_POOL.length).toBe(79);
         for (const id of COMBAT_REWARD_POOL) {
             expect(getCardById(id), `reward pool: ${id}`).toBeDefined();
         }

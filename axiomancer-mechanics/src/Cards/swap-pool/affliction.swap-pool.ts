@@ -25,32 +25,10 @@
 import type { Card } from '../types';
 import type { SandboxCardSet } from '../cards.sandbox-sets';
 
-// ─── Commons (10) — simple, reliable, x4-seat candidates ─────────────────────
-
-/** The x4-seat FRONT-LOADED poison read: i2 d2 lands its whole value inside
- *  rounds 1-2 — the opposite tempo hypothesis to slippery-slope's slow i1 d4
- *  ramp at the same seat. A distinct design, not a stat-shuffle: the library
- *  card banks on the ramp the death clock rarely pays; this one banks on
- *  intensity the clock always pays. */
-const poisonedWell: Card = {
-    id: 'poisoned-well',
-    theme: 'affliction',
-    name: 'The Poisoned Well',
-    category: 'fallacy',
-    philosophicalAspect: 'body',
-    description:
-        'Argue from the source and the source obliges: everything they draw ' +
-        'from it comes up tainted, and the first draught is the worst.',
-    tier: 1, rank: 1, cardType: 'spell',
-    targetType: 'enemy',
-    // pts: poison i2 d2 (card-played clock 1.83, tempo-weighted 12.81 ÷ 3 =
-    // 4.27) + FREE [mark i1 d1 (0.75) + conviction 1 (1.0)] = 1.75 → 6.02 →
-    // common band 1.5-7.5 (Doxa). FREE share 1.75/6.02 = 29.1% ✓.
-    free: { applyEffect: { effectId: 'debuff_mark', intensity: 1, duration: 1 }, conviction: 1 },
-    combatEffects: [{ effectId: 'debuff_poison', appliedTo: 'opponent', intensity: 2, duration: 2 }],
-    addedIn: '2026-07-18',
-    tags: ['affliction', 'swap-pool', 'dot'],
-};
+// ─── Commons (9) — simple, reliable, x4-seat candidates ──────────────────────
+// PROMOTED OUT 2026-07-19 (owner-ratified): `poisoned-well` moved to
+// `cards.library.ts` and the erosion x4 body common seat (arm e1,
+// docs/reports/deck-tuning-2026-07-18.md — mid blind 0.370→0.503).
 
 /** The x4-seat live BLEED line: front-loaded, decay-limited, lands its
  *  whole value inside the ~4-round clock. The decay mirror of poisoned-well. */
@@ -842,7 +820,7 @@ export const SWAP_POOL_AFFLICTION: SandboxCardSet = {
         'survival vs pure +75% burst), sustain-through-rot, and no-detonate ' +
         'board finishers. All MARK deposits print engine-honest d1.',
     cards: [
-        poisonedWell, aThousandCuts, scarTissue, theVeiledSting, nameTheFlaw,
+        aThousandCuts, scarTissue, theVeiledSting, nameTheFlaw,
         nickTheVein, saltInTheWound, coldComfort, catalogueOfIlls, firstSymptom,
         theSecondInfection, reopenTheQuestion, aggravateTheCase,
         theLastWordFesters, creepingContagion, stanchAndAnswer,
