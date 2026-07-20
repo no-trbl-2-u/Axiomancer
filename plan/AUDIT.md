@@ -14,6 +14,42 @@
 
 ## Pending
 
+### 2026-07-20 missing-layers survey — unpromoted findings (audio, settings, a11y, perf, flags, save export)
+- category: gap
+- impact: 5
+- ease: 3
+- detail: filed 2026-07-20 (owner missing-layers survey session; "file
+  the residue"). The session surveyed all cross-cutting infrastructure
+  layers; the owner promoted TWO (in-house crash capture → candidate;
+  central juice layer → Phase 38) and deliberately did NOT promote the
+  rest. Recording those findings here as signal, NOT as candidates —
+  the owner saw this list and chose; do not self-promote, let `/expand`
+  re-propose when context changes. The unpromoted findings:
+  (1) **Audio — fully absent.** No expo-av/expo-audio, no SFX/music/
+  volume anywhere; haptics (~20 call sites) are the entire sensory
+  layer. The biggest player-facing absence for a mobile game.
+  (2) **Settings screen — absent.** No settings route; theme switching
+  lives in the SELF tab (`components/ThemeSwitcher.tsx`); nowhere to
+  put audio volume, a11y toggles, or data management. Partially blocks
+  (1) and (3).
+  (3) **A11y depth.** Reduced-motion + a11y labels exist; font scaling
+  (`allowFontScaling` largely unused), color contrast, and screen-
+  reader flow validation do not (`specs/12-accessibility-and-theming.md`
+  is the spec surface).
+  (4) **Feature-flag registry.** Flags are scattered per-feature
+  env + `__AXM_*` global reads (`state/combat/flags.ts` the pattern);
+  fine at ~3 flags, painful at 10; no central registry.
+  (5) **Perf instrumentation.** One perf regression test + font-bundle
+  splitting exist; no frame-budget hooks, no bundle-size CI gate.
+  (6) **Save export/backup.** Single-slot save is mature (migrations,
+  corruption modal) but there is no manual export/backup/restore.
+  Deliberate non-goals confirmed same session (do not re-file): product
+  analytics, i18n (copy doctrine cuts against it), backend/auth/cloud
+  saves (offline by design, `plan/bearings.md` § Auth).
+- next: /expand — re-propose individual items as candidates when their
+  blockers move (a settings screen unlocks audio + a11y toggles; the
+  flag registry becomes worth it at the next 2-3 flags).
+
 ### `skills/digest.md` §3 cites breadth-check plumbing that doesn't exist in this repo
 - category: divergence
 - impact: 2

@@ -114,6 +114,21 @@ differentiating at that seat). REARGUE remains unmeasured.
 
 ## D. Handoffs + follow-up arms (no owner input needed, just work)
 
+**Unblocked by the /oversight 2026-07-20 ballot drain (§C) — `/deck-tuning`:**
+
+- **QED late-oratory win-path broadening.** Owner ruled 71% concede-share is
+  NOT the intended fantasy; confirmatio stays benched until fixed. Probe
+  repairs that keep the curve gain WITHOUT letting CONCEDE dominate late
+  (target: no single late win-path >~50%). Do not ship the concede-dominant
+  QED repair as final.
+- **turtle / mercy-seeker loadout-starvation investigation.** Owner ruled the
+  early collapse a regression, not by-design. Check whether the Press Fate
+  default-worn loadout (PR #125) unfairly starves the defensive policies;
+  distinguish loadout-starvation from genuine policy weakness.
+- **white-flag-woven disenchant recipe-slot ruling (mechanics rider).** g1 is
+  ratified (grace stays HP-pure), but white-flag-woven still breaks the
+  disenchant recipe slot — resolve the slot before it ships to a preset.
+
 - **Engine handoff (manual tuning, per doctrine):** foundry pip-cash-out vs
   boss HP; standstill rung-denial scaling (fallen-grace is 0.665 of its mid
   contribution — the borrow IS the deck); augury + grace mid floors.
