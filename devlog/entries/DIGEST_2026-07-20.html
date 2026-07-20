@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Axiomancer digest — 2026-07-20</title>
+<style>
+:root {
+  color-scheme: light dark;
+  --bg: #0e1116; --fg: #d7dde5; --fg-strong: #f0f3f7; --muted: #6b7480;
+  --accent: #8ab4f8; --panel: #161b22; --card: #12171f; --border: #222833;
+  --row: #141a22; --code-bg: #1b212b; --th: #aeb7c2; --list-head: #9aa4b0;
+  --add: rgba(80,200,120,.16); --del: rgba(230,90,90,.16);
+}
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg: #f7f5ef; --fg: #33302a; --fg-strong: #1a160f; --muted: #6f6656;
+    --accent: #3a5db0; --panel: #efece3; --card: #fbfaf5; --border: #ddd7c9;
+    --row: #efece3; --code-bg: #e9e5d9; --th: #5c5344; --list-head: #6f6656;
+    --add: rgba(35,140,75,.16); --del: rgba(190,55,55,.16);
+  }
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--bg); color: var(--fg);
+  font: 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  -webkit-text-size-adjust: 100%;
+}
+.wrap { max-width: 46rem; margin: 0 auto; padding: 20px 18px 80px; }
+header.top {
+  position: sticky; top: 0; z-index: 5;
+  background: var(--bg); border-bottom: 1px solid var(--border); margin: 0 0 20px;
+}
+header.top .wrap { padding-top: 14px; padding-bottom: 14px; display: flex; align-items: baseline; gap: 14px; }
+header.top a.home, header.top .home { color: var(--accent); text-decoration: none; font-weight: 600; }
+header.top .crumb { color: var(--muted); font-size: 14px; font-variant-numeric: tabular-nums; }
+h1, h2, h3, h4 { line-height: 1.25; color: var(--fg-strong); }
+h1 { font-size: 26px; margin: 0 0 6px; }
+h2 { font-size: 19px; margin: 0; }
+a { color: var(--accent); }
+p { margin: 8px 0; }
+code { background: var(--code-bg); padding: 1px 6px; border-radius: 5px; font-size: 0.86em; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+pre { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; overflow-x: auto; }
+pre code { background: none; padding: 0; }
+.tablewrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+th { background: var(--panel); color: var(--th); font-weight: 600; white-space: nowrap; }
+tr:last-child td { border-bottom: none; }
+ul, ol { padding-left: 22px; }
+li { margin: 4px 0; }
+.muted { color: var(--muted); }
+
+.st { font-weight: 600; white-space: nowrap; }
+.st::before { content: ""; display: inline-block; width: .5em; height: .5em; border-radius: 50%; margin-right: .38em; background: currentColor; vertical-align: middle; }
+.st-ok { color: #4bb96a; }
+.st-neutral { color: var(--muted); }
+.st-warn { color: #d0a92b; }
+.st-bad { color: #e0574b; }
+
+.headline { font-size: 19px; color: var(--fg-strong); margin: 0 0 12px; }
+.counts { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 22px; }
+
+.chip {
+  display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: .04em;
+  text-transform: uppercase; padding: 2px 9px; border-radius: 999px;
+  color: #0b0d10; background: var(--cat, var(--accent)); white-space: nowrap;
+}
+.cat-mechanics { --cat: #d0a92b; }
+.cat-ui { --cat: #5aa9e6; }
+.cat-content { --cat: #7fc45a; }
+.cat-infra { --cat: #b08bf0; }
+.cat-balance { --cat: #e6864b; }
+
+.card {
+  background: var(--card); border: 1px solid var(--border);
+  border-left: 4px solid var(--cat, var(--accent));
+  border-radius: 10px; padding: 14px 18px; margin: 14px 0; scroll-margin-top: 72px;
+}
+.card-head { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.card-head h2 { font-size: 18px; }
+.field { margin: 6px 0; }
+.flabel {
+  display: inline-block; min-width: 3.2em; margin-right: 4px; color: var(--muted);
+  font-weight: 700; font-size: 12px; text-transform: uppercase; letter-spacing: .04em;
+}
+.commits { margin: 8px 0 2px; }
+.commit { font-size: 12px; }
+
+.panel { margin: 22px 0; scroll-margin-top: 72px; }
+.panel > h2 { padding-bottom: 6px; border-bottom: 1px solid var(--border); margin-bottom: 8px; }
+
+.diff {
+  border: 1px solid var(--border); border-radius: 8px; overflow-x: auto; margin: 12px 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; line-height: 1.5;
+  background: var(--bg);
+}
+.dl { padding: 0 12px; white-space: pre; }
+.dl.add { background: var(--add); }
+.dl.del { background: var(--del); }
+.dl.hunk { color: var(--accent); }
+.dl.meta { color: var(--muted); }
+
+figure.shotset { margin: 14px 0; }
+figure.shotset > figcaption { font-size: 14px; color: var(--fg); margin-bottom: 8px; }
+.shots { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+.shot { margin: 0; }
+.shot .role { font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); text-align: center; margin-bottom: 3px; }
+.shot img { width: 100%; height: auto; border: 1px solid var(--border); border-radius: 8px; display: block; }
+
+.entry-list { list-style: none; padding: 0; margin: 8px 0 0; }
+.entry-list li { margin: 0; border-bottom: 1px solid var(--border); }
+.entry-list a { display: block; padding: 14px 4px; text-decoration: none; color: var(--fg); }
+.entry-list a:hover { background: var(--row); }
+.entry-list .date { color: var(--accent); font-weight: 600; font-variant-numeric: tabular-nums; }
+.entry-list .head { color: var(--list-head); font-size: 14px; margin: 2px 0 6px; }
+footer.foot { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--border); color: var(--muted); font-size: 13px; }
+
+/* ── Hub (landing page) ──────────────────────────────────────────────── */
+.hub { display: grid; grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr)); gap: 14px; margin: 22px 0 0; }
+.hub a {
+  display: block; text-decoration: none; color: var(--fg);
+  background: var(--card); border: 1px solid var(--border);
+  border-left: 4px solid var(--hue, var(--accent));
+  border-radius: 12px; padding: 18px 20px; transition: background .12s, transform .12s;
+}
+.hub a:hover { background: var(--row); transform: translateY(-1px); }
+.hub .h-title { font-size: 19px; font-weight: 700; color: var(--fg-strong); margin: 0 0 4px; }
+.hub .h-sub { font-size: 14px; color: var(--muted); }
+.hub .h-glyph { font-size: 22px; line-height: 1; margin-bottom: 8px; display: block; }
+.hue-cards { --hue: #5aa9e6; }
+.hue-enemies { --hue: #e0574b; }
+.hue-effects { --hue: #b08bf0; }
+.hue-log { --hue: #d0a92b; }
+.hue-tuning { --hue: #3ec9b0; }
+
+/* ── Catalog: cards grid ─────────────────────────────────────────────── */
+.searchbar { margin: 14px 0 4px; }
+.searchbar input {
+  width: 100%; padding: 10px 14px; border-radius: 10px; font-size: 15px;
+  background: var(--card); color: var(--fg); border: 1px solid var(--border);
+}
+.count-note { color: var(--muted); font-size: 13px; margin: 6px 0 16px; }
+.grid-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr)); gap: 16px; }
+.gcard {
+  background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+  overflow: hidden; display: flex; flex-direction: column;
+}
+.gcard .art { aspect-ratio: 4 / 3; background: var(--panel); overflow: hidden; }
+.gcard .art img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.gcard .art.none { display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 26px; }
+.gcard .body { padding: 12px 14px 14px; }
+.gcard .name { font-weight: 700; color: var(--fg-strong); margin: 0 0 8px; }
+.gcard .statrow { margin: 0 0 8px; }
+
+/* ── Catalog: enemies ────────────────────────────────────────────────── */
+.grid-enemies { display: grid; grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr)); gap: 16px; }
+.ecard { background: var(--card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+/* Enemy paintings are alpha-matted (figures float on a keyed-out black), so a
+   solid black plate behind them reads as intended in both themes. */
+.ecard .portrait { aspect-ratio: 1 / 1; background: #000; overflow: hidden; }
+.ecard .portrait img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.ecard .portrait.none { display: flex; align-items: center; justify-content: center; color: #6b7480; font-size: 34px; }
+.ecard .body { padding: 12px 15px 15px; }
+.ecard .name { font-size: 18px; font-weight: 700; color: var(--fg-strong); margin: 0; }
+.ecard .sub { color: var(--muted); font-size: 13px; margin: 2px 0 10px; text-transform: capitalize; }
+.statrow { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 10px; }
+.stat { font-size: 12px; font-weight: 700; padding: 2px 9px; border-radius: 999px; background: var(--panel); border: 1px solid var(--border); color: var(--fg); white-space: nowrap; }
+.stat .k { color: var(--muted); font-weight: 600; margin-right: 3px; }
+.stat.hp { --sc: #e0574b; } .stat.body { --sc: #e6864b; } .stat.mind { --sc: #5aa9e6; } .stat.heart { --sc: #7fc45a; }
+.stat.hp, .stat.body, .stat.mind, .stat.heart { border-color: color-mix(in srgb, var(--sc) 55%, var(--border)); }
+.sec-label { font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 700; margin: 10px 0 5px; }
+.fights { font-size: 14px; margin: 0 0 4px; }
+.hint { font-size: 13px; color: var(--muted); font-style: italic; margin: 4px 0 0; }
+.skill { border-top: 1px solid var(--border); padding: 8px 0 0; margin: 8px 0 0; }
+.skill .sk-name { font-weight: 700; color: var(--fg-strong); font-size: 14px; }
+.skill .sk-text { font-size: 13px; color: var(--fg); margin: 2px 0 0; }
+.no-skills { font-size: 13px; color: var(--muted); }
+
+/* ── Catalog: effects ────────────────────────────────────────────────── */
+.eff-list { display: grid; gap: 10px; margin: 8px 0 0; }
+.eff {
+  display: grid; grid-template-columns: 3rem 1fr; gap: 14px; align-items: start;
+  background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px;
+}
+.eff .glyph {
+  width: 3rem; height: 3rem; border-radius: 10px; display: flex; align-items: center; justify-content: center;
+  font-size: 26px; line-height: 1; color: #0b0d10; font-weight: 700;
+  background: var(--gc, var(--accent)); box-shadow: inset 0 0 0 1px rgba(0,0,0,.15);
+}
+.eff .name { font-weight: 700; color: var(--fg-strong); margin: 0 0 6px; }
+.eff .statrow { margin: 0 0 6px; }
+
+/* ── Raw-stat mechanic lines (cards + effects) ───────────────────────── */
+.mods { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 3px; }
+.mods li {
+  margin: 0; font-size: 13px; line-height: 1.4; color: var(--fg);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  padding-left: 12px; position: relative;
+}
+.mods li::before { content: "›"; position: absolute; left: 0; color: var(--muted); }
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap"><a class="home" href="../log.html">← DevLog</a><span class="crumb">2026-07-20</span></div></header>
+<main class="wrap">
+<h1 id="headline">2026-07-20</h1>
+<p class="headline">A quieter night than the last two — one boss mechanic, one</p>
+<div class="counts"><span class="chip cat-mechanics">2 mechanics</span><span class="chip cat-ui">1 UI</span><span class="chip cat-infra">2 infra</span><span class="chip cat-balance">1 balance</span></div>
+<section class="card cat-mechanics" id="the-coveted-die-phase-33c"><div class="card-head"><span class="chip cat-mechanics">mechanics</span><h2>THE COVETED DIE — phase 33c</h2></div>
+<p class="field"><span class="flabel">What</span> boss and unique threat phases can now carry a stake: a die</p>
+<p class="field"><span class="flabel">Why</span> closes #110 — gives named threats a mechanical "stakes"</p>
+<p class="commits"><code class="commit">fc7fddbf</code> <code class="commit">345cb0a6</code></p>
+<p>the boss steals on the 2nd step of all 18 authored boss/unique sequences (14 bosses + 4 uniques) unless the player answers the stance-check, blocks it, or staggers the phase to 0 first. The steal mirrors the momentum-surge temp-gold-die payout exactly (table-full overflow converts to +1 Conviction) and is capped once per phase index per combat so a repeating final phase can't be farmed. identity beyond damage numbers, reusing the existing payout/overflow plumbing rather than inventing a new one. Inert while the upgradeable-dice flag is off; no mobile UI yet (rides with a later follow-up).</p></section>
+<section class="card cat-infra" id="repo-wide-structured-logging-ships-engine-mobile-cli"><div class="card-head"><span class="chip cat-infra">infra</span><h2>Repo-wide structured logging ships — engine, mobile, CLI</h2></div>
+<p class="field"><span class="flabel">What</span> a new <code>src/Log</code> structured logger taps combat, the game</p>
+<p class="field"><span class="flabel">Why</span> owner-directed, direct-to-main (contract in</p>
+<p class="commits"><code class="commit">26a76560</code> <code class="commit">56b589d0</code> <code class="commit">4b5ae049</code> <code class="commit">fc427d86</code> <code class="commit">97d66cb7</code></p>
+<p>store, and RNG seeding in the mechanics engine; the mobile app gets an <code>__AXM_LOG__</code> bridge, a crash tail, a dev log viewer, and an error-screen log section; both the mechanics CLI and the playtest sweep CLI gained additive <code>--log-level</code>/<code>--log-file</code> flags, the latter with a per-cell replay index. <code>docs/logging.md</code>) — gives CLIs, the mobile app, and future drivers one shared log stream instead of scattered <code>console.log</code> calls. Three deferrals (engine-side minigame taps, Sentry-class crash reporting, native clipboard) are filed as a <code>plan/PHASE_CANDIDATES.md</code> entry rather than bundled in.</p></section>
+<section class="card cat-balance" id="9-swap-pool-candidates-promoted-into-preset-seats"><div class="card-head"><span class="chip cat-balance">balance</span><h2>9 swap-pool candidates promoted into preset seats</h2></div>
+<p class="field"><span class="flabel">What</span> nine measured candidates from the 2026-07-18 swap-pool pass</p>
+<p class="field"><span class="flabel">Why</span> owner-ratified 2026-07-19 off combined-matrix evidence; D8</p>
+<p class="commits"><code class="commit">fc98fb7a</code> <code class="commit">3188a154</code> <code class="commit">02d4d907</code> <code class="commit">(PR</code> <code class="commit">#138)</code></p>
+<p>move from sandbox into <code>cards.library.ts</code> (70 → 79 cards) and their preset recipes: poisoned-well (erosion), videtur-quod + quod-erat-demonstrandum (oratory), tempered-edge (foundry), half-spoken-prophecy (augury, recolored mind→body), grace-under-fire (grace), pebble-in-the-boot + the-anvil-speaks (bastion), and the-burden-of-repetition (refrain, recolored heart→body). valve seats were re-seated where the law required. Full ledger in <code>axiomancer-mechanics/docs/reports/deck-tuning-2026-07-19-promotions.md</code>.</p></section>
+<section class="card cat-mechanics" id="phase-d9-authored-stance-check-variety"><div class="card-head"><span class="chip cat-mechanics">mechanics</span><h2>Phase D9 — authored stance-check variety</h2></div>
+<p class="field"><span class="flabel">What</span> <code>stanceCheck?</code> now threads additively onto authored threat</p>
+<p class="field"><span class="flabel">Why</span> closes #137. The asymmetric authored checks carry less</p>
+<p class="commits"><code class="commit">a336fcba</code> <code class="commit">2848fb6a</code> <code class="commit">f8c902e4</code></p>
+<p>phases and branch outcomes; PR #109's 22-check content batch ports across 14 enemies, giving every boss ≥2 distinct named stances across its sequence per spec 33 §2. D6e's uniform default backfill is untouched — an authored value wins, an absent one still gets the default. aggregate yield exposure than the uniform two-sided default, so the D7-ratified yield-income floor was lowered (0.15 → 0.12) with margin rather than re-authoring content back toward uniform density.</p></section>
+<section class="card cat-ui" id="combat-declutter-pass-smaller-dice-cards-rail-names-glyph-pop"><div class="card-head"><span class="chip cat-ui">UI</span><h2>Combat declutter pass — smaller dice/cards, rail names, glyph pop</h2></div>
+<p class="field"><span class="flabel">What</span> four owner-playtest follow-up commits: tray dice and cards</p>
+<p class="field"><span class="flabel">Why</span> the owner flagged the combat screen as reading too busy;</p>
+<p class="commits"><code class="commit">d636f946</code> <code class="commit">5cb57a4e</code> <code class="commit">42d8837d</code> <code class="commit">249a9853</code> <code class="commit">(PR</code> <code class="commit">#135)</code></p>
+<p>both shrink (~1/8 and ~9%), the card name moves onto the stance rail as a centred rotated label (fixing a two-letter truncation bug along the way), FREE glyphs get an explicit z-order fix plus a dialed-in white-lift pop (0.3 → 0.12 after one overshoot), and the upgradeable-dice e2e's SWAY-commit guard was retargeted off the corner-medallion-occluded leftmost card. each commit is a same-day playtest-and-fix pass. Filed 3 LOW CRITIQUE residue items along the way (medallion occlusion, dead flag-off render paths, hex-literal accretion) rather than scope-creep fixing them inline.</p></section>
+<section class="card cat-infra" id="guard-telemetry-hooks-resolve-via-claude-project-dir"><div class="card-head"><span class="chip cat-infra">infra</span><h2>Guard/telemetry hooks resolve via CLAUDE_PROJECT_DIR</h2></div>
+<p class="field"><span class="flabel">What</span> the guard and telemetry hooks now resolve their paths off</p>
+<p class="field"><span class="flabel">Why</span> hooks were breaking when invoked from a subdirectory cwd —</p>
+<p class="commits"><code class="commit">a8b32ff7</code></p>
+<p><code>CLAUDE_PROJECT_DIR</code> instead of a relative/cwd-dependent lookup. this makes them cwd-independent.</p></section>
+<section class="panel" id="while-you-were-out"><h2>While you were out</h2>
+<div class="tablewrap"><table><thead><tr><th>Time (UTC)</th><th>Verb</th><th>Outcome</th></tr></thead><tbody><tr><td>07-19 13:56 → 14:04</td><td>march (scheduled)</td><td>combat declutter <span class="st st-ok">pass</span> residue (PR #135 merge, D-FLIP block note)</td></tr><tr><td>07-19 19:34 → 19:56</td><td>march (scheduled)</td><td>Phase D9 briefed and <span class="st st-ok">shipped</span> (authored stance-check variety)</td></tr><tr><td>07-20 04:07 → 04:30</td><td>march (scheduled)</td><td>repo-wide structured logging <span class="st st-ok">shipped</span> (engine + mobile bridge)</td></tr><tr><td>(gap, no march tick)</td><td>manual/direct session</td><td>hooks CLAUDE_PROJECT_DIR fix + playtest-sweep CLI log flags <span class="st st-ok">landed</span> between ticks</td></tr><tr><td>07-20 09:39 → 10:06</td><td>march (scheduled)</td><td>Phase 33c <span class="st st-ok">shipped</span> (THE COVETED DIE)</td></tr><tr><td>07-20 (this run)</td><td>digest</td><td>this entry — baseline re-measured (stale by 5 commits), breadth check re-run and unblocked by hand</td></tr></tbody></table></div>
+<p>25 commits landed since yesterday's digest (<code>80c75e7b</code>). Build-plan queue (<code>plan/steps/01_build_plan.md</code>): 53 <code>[x]</code>, 2 <code>[ ]</code> (Phase 33d — GLYPHS pilot; Phase 37 — retire fallacy/paradox category), 1 <code>[blocked:]</code> (Phase D-FLIP, superseded by the unmerged D10-D12 teardown decision, awaiting <code>/oversight</code>). <code>plan/AUDIT.md</code>: 36 pending (4 marked <code>[x]</code> resolved but not yet filed to Done; two new rows filed this run — a doctrine-curve reconfirmation and a skill/reality drift in <code>skills/digest.md</code> itself, both below). <code>plan/CRITIQUE.md</code>: 39 pending, last pass 2026-07-17 — three days stale now. <code>plan/PHASE_CANDIDATES.md</code>: 30 pending. No open <code>triage:needs-user</code> or <code>loop:do</code> issues. Deploy gate: HEAD (<code>345cb0a6</code>) is a plan-only tick, no gated <code>verify-*</code> workflow triggered yet (grace window) — nothing to check. Breadth check (<code>npm --workspace axiomancer-mobile run e2e:minigames</code> — the digest skill's own <code>SMOKE_SAMPLE=full npm run e2e</code> doesn't exist in this repo, filed below): Playwright's Chromium headless-shell binary was missing again (still-open AUDIT <code>[3.2]</code>, installed by hand a third time), then hazard, combat, gathering, encounter-routing, exploration-roundtrip, and upgradeable-dice all ALL PASS with no NOTEs.</p></section>
+<section class="panel" id="needs-you"><h2>Needs you</h2>
+<ul><li>**AUDIT <code>[3.2]</code> — Playwright's browser still isn't installed on the</li></ul>
+<p>night runner.** This is the third digest in a row that had to run <code>npx playwright install chromium-headless-shell</code> by hand before the breadth check would even start. The fix (<code>install_playwright: true</code> on <code>.github/workflows/night.yml</code>'s <code>_claude-skill.yml</code> call) is small and already scoped — worth promoting ahead of its current <code>/iterate</code> queue position since it's now silently costing every night run 1-2 minutes and a manual step.</p>
+<ul><li>**Late-game doctrine violation is now the sharper of the two</li></ul>
+<p>collapse threads.** Mid-game win rate has climbed two digests running (7.3% → 31.0% → 35.3%) without anyone targeting it directly — general engine/content work is closing that gap on its own. Late game has not moved at all (0% across six enemies, three measurements, three days) despite Phase D9 and Phase 33c both landing boss-facing mechanics in between. The standing "Post-D8 flag-on curve repair" phase candidate is the scoped fix; late-stage is the part of it that actually needs deliberate attention now.</p>
+<ul><li><strong><code>skills/digest.md</code> points at dead paths</strong> (<code>nexus/</code> doesn't exist</li></ul>
+<p>in this repo, root <code>npm run e2e</code> doesn't exist) — filed to AUDIT this run. Low urgency (the loop has been correctly working around it by precedent for at least three digests) but worth a cleanup pass so a fresh reader doesn't hit the same dead end without that context.</p>
+<ul><li><code>plan/CRITIQUE.md</code> is three days stale (last pass 2026-07-17, 39</li></ul>
+<p>pending) — no action taken here, just flagging the age.</p></section>
+<section class="panel" id="tuning-proposals"><h2>Tuning proposals</h2>
+<p>Baseline was STALE by 5 mechanics-source commits at open (<code>f8c902e4</code> → 5 commits ahead, including THE COVETED DIE and the swap-pool promotion). Re-measured reduced-nightly (30 runs/cell, seed 1, <code>345cb0a6</code>) — <strong>directionally honest, not confirmation-grade</strong>:</p>
+<div class="tablewrap"><table><thead><tr><th>Stage</th><th>This run</th><th>Prior (<code>f8c902e4</code>, full)</th><th>Doctrine band</th><th>Verdict</th></tr></thead><tbody><tr><td>early</td><td>86.1%</td><td>86.9%</td><td>~80%</td><td>in band, noise-level move</td></tr><tr><td>mid</td><td>35.3%</td><td>31.0%</td><td>~50%</td><td>still under band, but +4.3pt — second straight gain</td></tr><tr><td>late</td><td>0.0%</td><td>0.0%</td><td>25-35%</td><td><strong>doctrine violation, flat zero, three measurements running</strong></td></tr><tr><td>impossible</td><td>0.0%</td><td>0.0%</td><td>0%</td><td>in band, unchanged</td></tr></tbody></table></div>
+<p>Mid-game's two-digest climb (7.3% at the 2026-07-18 digest → 31.0% post-swap-pool-promotion → 35.3% tonight) looks like a real trend from general content/engine work, not noise. Late-game has not moved from 0% across the same window despite two boss-facing mechanics (D9's stance-check variety, 33c's coveted die) landing in between — neither targeted late-game difficulty directly, and neither moved it. Filed as an updated <code>plan/AUDIT.md</code> row (see above); no code/deck changes made here per the digest's own rails — the "Post-D8 flag-on curve repair" <code>plan/PHASE_CANDIDATES.md</code> entry is where this gets acted on.</p></section>
+<footer class="foot">Axiomancer DevLog &middot; generated by <code>scripts/build-devlog.mjs</code></footer>
+</main>
+</body>
+</html>

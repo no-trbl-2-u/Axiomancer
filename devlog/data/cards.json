@@ -1205,11 +1205,7 @@
    },
    {
     "k": "Source",
-    "v": "starter"
-   },
-   {
-    "k": "Preset",
-    "v": "Oratory"
+    "v": "reward"
    }
   ],
   "lines": [
@@ -1397,6 +1393,125 @@
   ]
  },
  {
+  "id": "grace-under-fire",
+  "name": "Grace Under Fire",
+  "image": "./assets/catalog/cards/circe-placeholder.jpg",
+  "pricing": "GUARD 10 (2.5) + rapport i2 d2 (3.0) = 5.5 + drew-blood rider",
+  "face": {
+   "freeGlyph": "❖",
+   "freeKw": "GUARD",
+   "freeVal": "2",
+   "paid": "rapport i2 d2 (enemy) + Guard 10."
+  },
+  "chips": [
+   {
+    "k": "Stance",
+    "v": "body"
+   },
+   {
+    "k": "Type",
+    "v": "paradox"
+   },
+   {
+    "k": "Tier",
+    "v": "2"
+   },
+   {
+    "k": "Target",
+    "v": "self"
+   },
+   {
+    "k": "Rank",
+    "v": "Theorem (uncommon)"
+   },
+   {
+    "k": "Kind",
+    "v": "spell"
+   },
+   {
+    "k": "Theme",
+    "v": "charm"
+   },
+   {
+    "k": "Keywords",
+    "v": "SWAY · RAPPORT · CLEANSE · HEAL"
+   },
+   {
+    "k": "Source",
+    "v": "starter"
+   },
+   {
+    "k": "Preset",
+    "v": "Grace"
+   }
+  ],
+  "lines": [
+   "FREE — GUARD 2, then SWAY 2.",
+   "Applies Rapport ×2, 2t → enemy",
+   "Guard 10",
+   "Synergy clause (stance-switch payoff)"
+  ]
+ },
+ {
+  "id": "half-spoken-prophecy",
+  "name": "Half-Spoken Prophecy",
+  "image": "./assets/catalog/cards/circe-placeholder.jpg",
+  "pricing": "RUPTURE 1 affliction / consume_affliction, no Soul (5.5) +",
+  "face": {
+   "freeGlyph": "◉",
+   "freeKw": "MARK",
+   "freeVal": "1",
+   "paid": "RUPTURE 1 — its remaining damage lands now, +0 Souls + OMEN — stake claim (window 1-2, ante 1◆ at window 1): on hit, FORETELL 2."
+  },
+  "chips": [
+   {
+    "k": "Stance",
+    "v": "body"
+   },
+   {
+    "k": "Type",
+    "v": "paradox"
+   },
+   {
+    "k": "Tier",
+    "v": "2"
+   },
+   {
+    "k": "Target",
+    "v": "enemy"
+   },
+   {
+    "k": "Rank",
+    "v": "Theorem (uncommon)"
+   },
+   {
+    "k": "Kind",
+    "v": "spell"
+   },
+   {
+    "k": "Theme",
+    "v": "oracle"
+   },
+   {
+    "k": "Keywords",
+    "v": "FORETELL · OMEN · DRAW · RUPTURE"
+   },
+   {
+    "k": "Source",
+    "v": "starter"
+   },
+   {
+    "k": "Preset",
+    "v": "Augury"
+   }
+  ],
+  "lines": [
+   "FREE — MARK 1 for 2 turns, then FORETELL 1.",
+   "RUPTURE 1 — its remaining damage lands now, +0 Souls",
+   "OMEN — stake claim (window 1-2, ante 1◆ at window 1): on hit, FORETELL 2"
+  ]
+ },
+ {
   "id": "half-step",
   "name": "Half-Step",
   "image": "./assets/catalog/cards/blue-light.webp",
@@ -1442,11 +1557,7 @@
    },
    {
     "k": "Source",
-    "v": "starter"
-   },
-   {
-    "k": "Preset",
-    "v": "Foundry"
+    "v": "reward"
    }
   ],
   "lines": [
@@ -1727,11 +1838,7 @@
    },
    {
     "k": "Source",
-    "v": "starter"
-   },
-   {
-    "k": "Preset",
-    "v": "Grace"
+    "v": "reward"
    }
   ],
   "lines": [
@@ -1963,11 +2070,7 @@
    },
    {
     "k": "Source",
-    "v": "starter"
-   },
-   {
-    "k": "Preset",
-    "v": "Bastion"
+    "v": "reward"
    }
   ],
   "lines": [
@@ -2158,6 +2261,65 @@
   ]
  },
  {
+  "id": "pebble-in-the-boot",
+  "name": "Pebble in the Boot",
+  "image": "./assets/catalog/cards/circe-placeholder.jpg",
+  "pricing": "nettle sting i1 d3 (printed 6 → tempo-weighted 4.63 ÷ 3 = 1.54) +",
+  "face": {
+   "freeGlyph": "❖",
+   "freeKw": "GUARD",
+   "freeVal": "1",
+   "paid": "nettle sting i1 d3 (DoT: 2/turn) + mark i1 d2."
+  },
+  "chips": [
+   {
+    "k": "Stance",
+    "v": "body"
+   },
+   {
+    "k": "Type",
+    "v": "fallacy"
+   },
+   {
+    "k": "Tier",
+    "v": "1"
+   },
+   {
+    "k": "Target",
+    "v": "enemy"
+   },
+   {
+    "k": "Rank",
+    "v": "Doxa (common)"
+   },
+   {
+    "k": "Kind",
+    "v": "spell"
+   },
+   {
+    "k": "Theme",
+    "v": "bulwark"
+   },
+   {
+    "k": "Keywords",
+    "v": "THORNS · RIPOSTE · GUARD · HEAL"
+   },
+   {
+    "k": "Source",
+    "v": "starter"
+   },
+   {
+    "k": "Preset",
+    "v": "Bastion"
+   }
+  ],
+  "lines": [
+   "FREE — GUARD 1, then GUARD 3 (persists).",
+   "Applies Nettle Sting ×1, 3t → enemy",
+   "Applies Mark ×1, 2t → enemy"
+  ]
+ },
+ {
   "id": "peroratio-interrupta",
   "name": "Peroratio Interrupta",
   "image": "./assets/catalog/cards/light-ring.webp",
@@ -2329,6 +2491,66 @@
   "lines": [
    "FREE — the printed passive for 3 rounds.",
    "PAID (rest of combat) — Enemy telegraphs enter play one STAGGER rung lower. (attaches to the enemy)"
+  ]
+ },
+ {
+  "id": "quod-erat-demonstrandum",
+  "name": "Quod Erat Demonstrandum",
+  "image": "./assets/catalog/cards/circe-placeholder.jpg",
+  "pricing": "PAID [PERORATION at 5: rider [ruptureMarks 2 (2 × ⅔ = 1.33) +",
+  "face": {
+   "freeGlyph": "⚑",
+   "freeKw": "DRAW",
+   "freeVal": "1",
+   "paid": "PERORATION at 5 — +1 Conviction · draw 1 · consume all marks — 2 damage per stack (CONCEDE at 8 — you win; elite 10 · boss 12) + +1 Premise."
+  },
+  "chips": [
+   {
+    "k": "Stance",
+    "v": "heart"
+   },
+   {
+    "k": "Type",
+    "v": "fallacy"
+   },
+   {
+    "k": "Tier",
+    "v": "3"
+   },
+   {
+    "k": "Target",
+    "v": "enemy"
+   },
+   {
+    "k": "Rank",
+    "v": "Aporia (rare)"
+   },
+   {
+    "k": "Kind",
+    "v": "spell"
+   },
+   {
+    "k": "Theme",
+    "v": "peroration"
+   },
+   {
+    "k": "Keywords",
+    "v": "PREMISE · DRAW · GUARD"
+   },
+   {
+    "k": "Source",
+    "v": "starter"
+   },
+   {
+    "k": "Preset",
+    "v": "Oratory"
+   }
+  ],
+  "lines": [
+   "FREE — DRAW 1, then gain 2 PREMISES.",
+   "PERORATION at 5 — +1 Conviction · draw 1 · consume all marks — 2 damage per stack (CONCEDE at 8 — you win; elite 10 · boss 12)",
+   "+1 Premise",
+   "Threshold: 3× heart die fires a rider"
   ]
  },
  {
@@ -2892,11 +3114,7 @@
    },
    {
     "k": "Source",
-    "v": "starter"
-   },
-   {
-    "k": "Preset",
-    "v": "Augury"
+    "v": "reward"
    }
   ],
   "lines": [
@@ -3068,11 +3286,7 @@
    },
    {
     "k": "Source",
-    "v": "starter"
-   },
-   {
-    "k": "Preset",
-    "v": "Erosion"
+    "v": "reward"
    }
   ],
   "lines": [
@@ -3314,6 +3528,66 @@
   ]
  },
  {
+  "id": "tempered-edge",
+  "name": "Tempered Edge",
+  "image": "./assets/catalog/cards/circe-placeholder.jpg",
+  "pricing": "Guard 5 (1.25) + ember i2 d2 (tempo 3.5 ÷ 3 = 1.17) = 2.42 +",
+  "face": {
+   "freeGlyph": "⬡",
+   "freeKw": "PIP",
+   "freeVal": "1",
+   "paid": "kindling ember i2 d2 (DoT: 2/turn) + Guard 5."
+  },
+  "chips": [
+   {
+    "k": "Stance",
+    "v": "body"
+   },
+   {
+    "k": "Type",
+    "v": "paradox"
+   },
+   {
+    "k": "Tier",
+    "v": "1"
+   },
+   {
+    "k": "Target",
+    "v": "enemy"
+   },
+   {
+    "k": "Rank",
+    "v": "Lemma (common)"
+   },
+   {
+    "k": "Kind",
+    "v": "spell"
+   },
+   {
+    "k": "Theme",
+    "v": "forge"
+   },
+   {
+    "k": "Keywords",
+    "v": "KINDLE · PIP · FORGE · DRAW"
+   },
+   {
+    "k": "Source",
+    "v": "starter"
+   },
+   {
+    "k": "Preset",
+    "v": "Foundry"
+   }
+  ],
+  "lines": [
+   "FREE — +1 PIP to every Reserve die.",
+   "Applies Kindling Ember ×2, 2t → enemy",
+   "Guard 5",
+   "Threshold: 2× body die fires a rider"
+  ]
+ },
+ {
   "id": "the-adamant-wall",
   "name": "The Adamant Wall",
   "image": "./assets/catalog/cards/guard-1.webp",
@@ -3359,6 +3633,61 @@
    },
    {
     "k": "Source",
+    "v": "reward"
+   }
+  ],
+  "lines": [
+   "FREE — GUARD 3 (persists).",
+   "GUARD 10 (persists)",
+   "RIPOSTE 4 (parry 2)"
+  ]
+ },
+ {
+  "id": "the-anvil-speaks",
+  "name": "The Anvil Speaks",
+  "image": "./assets/catalog/cards/circe-placeholder.jpg",
+  "pricing": "nettle sting i3 d4 (printed 24 → tempo-weighted 16.41 ÷ 3 = 5.47)",
+  "face": {
+   "freeGlyph": "❖",
+   "freeKw": "GUARD",
+   "freeVal": "2",
+   "paid": "nettle sting i3 d4 (DoT: 6/turn) + Guard 6."
+  },
+  "chips": [
+   {
+    "k": "Stance",
+    "v": "body"
+   },
+   {
+    "k": "Type",
+    "v": "paradox"
+   },
+   {
+    "k": "Tier",
+    "v": "2"
+   },
+   {
+    "k": "Target",
+    "v": "enemy"
+   },
+   {
+    "k": "Rank",
+    "v": "Axiom (rare)"
+   },
+   {
+    "k": "Kind",
+    "v": "spell"
+   },
+   {
+    "k": "Theme",
+    "v": "bulwark"
+   },
+   {
+    "k": "Keywords",
+    "v": "THORNS · RIPOSTE · GUARD · HEAL"
+   },
+   {
+    "k": "Source",
     "v": "starter"
    },
    {
@@ -3367,9 +3696,72 @@
    }
   ],
   "lines": [
-   "FREE — GUARD 3 (persists).",
-   "GUARD 10 (persists)",
-   "RIPOSTE 4 (parry 2)"
+   "FREE — GUARD 8 (persists), then HEAL 2.",
+   "Applies Nettle Sting ×3, 4t → enemy",
+   "Guard 6",
+   "Die bonus: powering die body fires a rider"
+  ]
+ },
+ {
+  "id": "the-burden-of-repetition",
+  "name": "The Burden of Repetition",
+  "image": "./assets/catalog/cards/circe-placeholder.jpg",
+  "pricing": "[poison i1 d1 (tempo-weighted 3.66 ÷ 3 = 1.22) + closer",
+  "face": {
+   "freeGlyph": "◉",
+   "freeKw": "MARK",
+   "freeVal": "1",
+   "paid": "poison i1 d1 + ECHO + consume all marks — 2 damage per stack + mark i1 d2 (2/play)."
+  },
+  "chips": [
+   {
+    "k": "Stance",
+    "v": "body"
+   },
+   {
+    "k": "Type",
+    "v": "fallacy"
+   },
+   {
+    "k": "Tier",
+    "v": "2"
+   },
+   {
+    "k": "Target",
+    "v": "enemy"
+   },
+   {
+    "k": "Rank",
+    "v": "Theorem (uncommon)"
+   },
+   {
+    "k": "Kind",
+    "v": "spell"
+   },
+   {
+    "k": "Theme",
+    "v": "echo"
+   },
+   {
+    "k": "Keywords",
+    "v": "ECHO · RECALL · DRAW"
+   },
+   {
+    "k": "Source",
+    "v": "starter"
+   },
+   {
+    "k": "Preset",
+    "v": "Refrain"
+   }
+  ],
+  "lines": [
+   "FREE — MARK 1 for 2 turns, then MILL 2.",
+   "Applies Poison ×1, 1t → enemy",
+   "ECHO",
+   "consume all marks — 2 damage per stack",
+   "mark i1 d2",
+   "Die bonus: powering die match fires a rider"
   ]
  },
  {
@@ -3418,11 +3810,7 @@
    },
    {
     "k": "Source",
-    "v": "starter"
-   },
-   {
-    "k": "Preset",
-    "v": "Oratory"
+    "v": "reward"
    }
   ],
   "lines": [
@@ -3663,6 +4051,64 @@
    "spend ALL pips (+1 Guard per pip)",
    "RUPTURE ALL (+3.5 damage per spent pip; needs 2+ pips)",
    "refresh the spent die"
+  ]
+ },
+ {
+  "id": "poisoned-well",
+  "name": "The Poisoned Well",
+  "image": "./assets/catalog/cards/circe-placeholder.jpg",
+  "pricing": "poison i2 d2 (card-played clock 1.83, tempo-weighted 12.81 ÷ 3 =",
+  "face": {
+   "freeGlyph": "◉",
+   "freeKw": "MARK",
+   "freeVal": "1",
+   "paid": "poison i2 d2 (4/play)."
+  },
+  "chips": [
+   {
+    "k": "Stance",
+    "v": "body"
+   },
+   {
+    "k": "Type",
+    "v": "fallacy"
+   },
+   {
+    "k": "Tier",
+    "v": "1"
+   },
+   {
+    "k": "Target",
+    "v": "enemy"
+   },
+   {
+    "k": "Rank",
+    "v": "Doxa (common)"
+   },
+   {
+    "k": "Kind",
+    "v": "spell"
+   },
+   {
+    "k": "Theme",
+    "v": "affliction"
+   },
+   {
+    "k": "Keywords",
+    "v": "POISON · BLEED · MARK · TICK · RUPTURE"
+   },
+   {
+    "k": "Source",
+    "v": "starter"
+   },
+   {
+    "k": "Preset",
+    "v": "Erosion"
+   }
+  ],
+  "lines": [
+   "FREE — MARK 1 for 1 turn, then +1 Conviction.",
+   "Applies Poison ×2, 2t → enemy"
   ]
  },
  {
@@ -3956,6 +4402,65 @@
   "lines": [
    "FREE — the printed passive for 3 rounds.",
    "PAID (rest of combat) — Your BLEED and POISON land +1 intensity and +1 duration."
+  ]
+ },
+ {
+  "id": "videtur-quod",
+  "name": "Videtur Quod",
+  "image": "./assets/catalog/cards/circe-placeholder.jpg",
+  "pricing": "PAID [poison i1 d3 (card-played 1.83 cadence, tempo-weighted",
+  "face": {
+   "freeGlyph": "❡",
+   "freeKw": "PREMISE",
+   "freeVal": "2",
+   "paid": "poison i1 d3 + +1 Premise (2/play)."
+  },
+  "chips": [
+   {
+    "k": "Stance",
+    "v": "heart"
+   },
+   {
+    "k": "Type",
+    "v": "fallacy"
+   },
+   {
+    "k": "Tier",
+    "v": "1"
+   },
+   {
+    "k": "Target",
+    "v": "enemy"
+   },
+   {
+    "k": "Rank",
+    "v": "Lemma (common)"
+   },
+   {
+    "k": "Kind",
+    "v": "spell"
+   },
+   {
+    "k": "Theme",
+    "v": "peroration"
+   },
+   {
+    "k": "Keywords",
+    "v": "PREMISE · DRAW · GUARD"
+   },
+   {
+    "k": "Source",
+    "v": "starter"
+   },
+   {
+    "k": "Preset",
+    "v": "Oratory"
+   }
+  ],
+  "lines": [
+   "FREE — gain 2 PREMISES.",
+   "Applies Poison ×1, 3t → enemy",
+   "+1 Premise"
   ]
  },
  {

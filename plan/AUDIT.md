@@ -14,6 +14,28 @@
 
 ## Pending
 
+### `skills/digest.md` §3 cites breadth-check plumbing that doesn't exist in this repo
+- category: divergence
+- impact: 2
+- ease: 6
+- detail: filed 2026-07-20 (digest run). The digest skill's breadth-check
+  step reads `SMOKE_SAMPLE=full npm run e2e` and points to
+  `nexus/customization/hermetic-e2e.md` for the per-project adaptation —
+  neither exists: there's no root `e2e` script (root `package.json` has
+  no `e2e` key) and no `nexus/` directory anywhere in the tree (also
+  referenced by §"Purpose" as `nexus/concepts/loop-shapes.md`). The
+  loop has clearly already adapted in practice — `plan/AUDIT.md`'s
+  `[3.2]` row and the last several digest entries both correctly use
+  `npm run e2e:minigames` in the `axiomancer-mobile` workspace — but
+  the skill file itself still points at dead paths, so a fresh reader
+  (or an agent without that precedent in context) would try a command
+  that fails outright.
+- next: /iterate — update `skills/digest.md` §3/§6 to cite the real
+  command (`npm --workspace axiomancer-mobile run e2e:minigames`) and
+  either drop the `nexus/` pointers or repoint them at wherever this
+  project's actual loop-shape/adaptation notes live (`plan/bearings.md`
+  § Surface looks like the closest fit).
+
 ### Phase D-FLIP is superseded by the D10-D12 dice-flag teardown — `/oversight` skip it
 - category: divergence
 - impact: 5
@@ -149,6 +171,29 @@
   PROVISIONAL marker) should now read ratified — comment/doc change
   only, no behavior change.
 - next: /iterate
+
+### Doctrine-curve confirmation (digest 2026-07-20, reduced-nightly): mid climbing, late still dead flat
+- category: content
+- impact: 6
+- ease: 3
+- detail: `/digest`'s reduced-nightly re-measure at `345cb0a6` (blind
+  policy-pick, doctrine early ~80 / mid ~50 / late 25-35 / impossible 0):
+  early 86.1% (in band, was 86.9% at the `f8c902e4` post-promotion
+  baseline, 2026-07-19), **mid 35.3%** (was 31.0% at `f8c902e4`, which
+  was itself up sharply from 7.3% at the 2026-07-18 digest's
+  `31f62c1e` measurement — still under ~50% but the trend across the
+  last two days is real, not noise), **late 0%** (unchanged from
+  `f8c902e4` and from 07-18's 0.14% — flat zero survives the swap-pool
+  promotions (`fc98fb7a`), Phase D9's stance-check variety (`2848fb6a`),
+  and Phase 33c's coveted die (`fc7fddbf`); none of these three targeted
+  late-stage difficulty), impossible 0% (in band, unchanged). Mid is
+  moving in the right direction under general engine/content work; late
+  is a flat doctrine violation that nothing shipped this window touched.
+- next: /iterate — the standing "Post-D8 flag-on curve repair" phase
+  candidate (`plan/PHASE_CANDIDATES.md`) is the scoped fix; late-stage
+  0% across six enemies (fire-giant, rangda, tezcatlipoca, arch-demon,
+  death, the-abortive) is the sharper target than the mid-game cliff now
+  that mid is self-correcting.
 
 ### Doctrine-curve confirmation (digest 2026-07-18, reduced-nightly): mid/late collapse persists unchanged despite two days of engine work
 - category: content
