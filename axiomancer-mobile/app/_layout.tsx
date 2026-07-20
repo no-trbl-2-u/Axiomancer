@@ -35,14 +35,21 @@ import { GatheringGate } from '@/components/GatheringGate';
 import { HazardGate } from '@/components/HazardGate';
 import { QuestGate } from '@/components/QuestGate';
 import { RestGate } from '@/components/RestGate';
+import { NavLogger } from '@/components/NavLogger';
 import { ToastHost } from '@/components/ToastHost';
 import { applyCombatFlagsFromEnv } from '@/state/combat/flags';
+import { getLogger } from '@mechanics';
+import { initAppLogging } from '@/state/logging';
 
 SplashScreen.preventAutoHideAsync();
 
 // Spec 33 — build-time combat flags (Upgradeable Dice preview opt-in).
 // Applied at module load, before any store/provider touches the engine.
 applyCombatFlagsFromEnv();
+
+// AXM Log (docs/logging.md) — enable the structured logger before any
+// store/provider touches the engine so boot-time events are captured.
+initAppLogging();
 
 // Single app-wide persistence adapter. Created once at module load; the
 // `preload()` call below populates its in-memory cache from AsyncStorage
@@ -76,6 +83,9 @@ export default function RootLayout() {
         if (__DEV__) {
           console.warn('[persistence] preload failed; surfacing modal', err);
         }
+        getLogger().warn('persistence', 'preload-failed', {
+          message: err instanceof Error ? err.message : String(err),
+        });
         if (!cancelled) setCorruptSave(true);
       })
       .finally(() => {
@@ -89,10 +99,14 @@ export default function RootLayout() {
   const onCorruptConfirm = useCallback(() => {
     // Clear the corrupt slot + drop the modal. The provider boots a fresh
     // `createNewGameState` because the persistence cache is now null.
+    getLogger().info('persistence', 'corrupt-save-cleared');
     persistenceAdapter.clear().catch((err: unknown) => {
       if (__DEV__) {
         console.warn('[persistence] clear failed after corrupt-save confirm', err);
       }
+      getLogger().error('persistence', 'corrupt-save-clear-failed', {
+        message: err instanceof Error ? err.message : String(err),
+      });
     });
     setCorruptSave(false);
   }, []);
@@ -169,6 +183,7 @@ export default function RootLayout() {
           <TooltipProvider>
             <StatusBar style="light" />
             <HardwareBackHandler />
+            <NavLogger />
             <EventGate />
             <HazardGate />
             <GatheringGate />

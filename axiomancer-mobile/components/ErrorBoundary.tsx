@@ -28,12 +28,17 @@
  * audience can scroll to them without breaking the in-world
  * register for non-debug users.
  *
- * COPY is UI-only by design: the bundle's prompt notes
- * "no need to wire — show the pressed state." A clipboard write
- * would require adding `expo-clipboard` as a native dep; the
- * pressed-state feedback alone meets the design intent. When
- * crash reporting (Sentry / similar) lands, the technical block
- * goes there automatically and COPY becomes redundant anyway.
+ * COPY does a best-effort `navigator.clipboard.writeText` (works
+ * on web; silently no-ops on native, where the pressed-state
+ * feedback plus the `selectable` technical text stand in — a real
+ * native write would require adding `expo-clipboard`). When crash
+ * reporting (Sentry / similar) lands, the technical block goes
+ * there automatically.
+ *
+ * AXM Log (docs/logging.md): the boundary logs the crash to the
+ * `error` domain, force-flushes the crash tail so the trace
+ * survives a restart, and renders the recent log tail as its own
+ * diagnostics section.
  */
 
 import React, { Component, type ErrorInfo, type ReactNode, useState } from 'react';
@@ -44,9 +49,12 @@ import {
     View,
 } from 'react-native';
 
+import { getLogger, type AxmLogEntry } from '@mechanics';
+
 import { FONTS } from '@/theme/axm';
 import { makeStyles } from '@/theme/runtime';
 import { useGameState } from '@/state/GameStoreProvider';
+import { flushLogTail } from '@/state/logging';
 
 interface ErrorBoundaryProps {
     children: ReactNode;
@@ -72,6 +80,16 @@ export class ErrorBoundary extends Component<
         if (__DEV__) {
             console.error('[ErrorBoundary] caught', error, info);
         }
+        // AXM Log: record the crash (every build) and force the crash
+        // tail to disk so the trace survives a restart.
+        try {
+            getLogger().error('error', 'react-boundary', {
+                message: error.message,
+                stack: error.stack,
+                componentStack: info.componentStack ?? null,
+            });
+            void flushLogTail();
+        } catch { /* the boundary must never crash itself */ }
         this.setState({ componentStack: info.componentStack ?? null });
     }
 
@@ -126,6 +144,29 @@ function ErrorScreen({ error, componentStack, onReset }: ErrorScreenProps) {
     const errorCode = deriveErrorCode(error);
     const technical = `${error.message || '(no message)'}${error.stack ? `\n${error.stack}` : ''}${componentStack !== null ? `\n\n— component stack —${componentStack}` : ''}`;
 
+    // Recent structured log tail (info+) — the "what led up to this"
+    // record. Guarded: the logger never throws, but stay paranoid at
+    // the crash surface.
+    let logTail: AxmLogEntry[] = [];
+    try {
+        logTail = getLogger().tail(30, { minLevel: 'info' });
+    } catch { /* render without the tail */ }
+    const logTailText = logTail.length
+        ? logTail
+              .map((e) => `${e.seq} ${e.level} ${e.domain}/${e.kind}${e.data !== undefined ? ` ${safeJson(e.data)}` : ''}`)
+              .join('\n')
+        : '(no recent log entries)';
+
+    const onCopy = () => {
+        setCopyPressed(true);
+        // Best-effort clipboard write — available on web; silently
+        // absent on native (the selectable text stands in there).
+        try {
+            const clip = (globalThis as GlobalWithClipboard).navigator?.clipboard;
+            void clip?.writeText?.(`${technical}\n\n— recent log —\n${logTailText}`);
+        } catch { /* pressed-state feedback only */ }
+    };
+
     // Read engine state for the debug snapshot. Guard against the
     // store throwing too (the provider may itself be where the
     // crash originated); fall back to a "store unavailable" line.
@@ -165,7 +206,7 @@ function ErrorScreen({ error, componentStack, onReset }: ErrorScreenProps) {
                         accessibilityRole="button"
                         accessibilityLabel="Copy"
                         testID="error-boundary-copy"
-                        onPress={() => setCopyPressed(true)}
+                        onPress={onCopy}
                         style={[
                             styles.copyButton,
                             copyPressed && styles.copyButtonPressed,
@@ -184,6 +225,7 @@ function ErrorScreen({ error, componentStack, onReset }: ErrorScreenProps) {
                         style={styles.technicalText}
                         numberOfLines={12}
                         testID="error-boundary-technical"
+                        selectable
                     >
                         {technical}
                     </Text>
@@ -196,6 +238,12 @@ function ErrorScreen({ error, componentStack, onReset }: ErrorScreenProps) {
 
                 <Section label="BUILD CONTEXT">
                     <Text style={styles.codeBlock}>{buildContext()}</Text>
+                </Section>
+
+                <Section label="RECENT LOG">
+                    <Text style={styles.codeBlock} selectable testID="error-boundary-log-tail">
+                        {logTailText}
+                    </Text>
                 </Section>
 
                 {/* Primary + ghost actions */}
@@ -284,6 +332,22 @@ function useStateSnapshot(): string {
  * pulling DOM-lib typings into a file that ships on both platforms.
  */
 type GlobalWithNavigator = { readonly navigator?: { readonly userAgent?: unknown } };
+
+/** Web-only clipboard narrow — same single-cast pattern as above. */
+type GlobalWithClipboard = {
+    readonly navigator?: {
+        readonly clipboard?: { readonly writeText?: (text: string) => Promise<void> };
+    };
+};
+
+function safeJson(data: unknown): string {
+    try {
+        const s = JSON.stringify(data);
+        return s === undefined ? '' : s.length > 160 ? `${s.slice(0, 160)}…` : s;
+    } catch {
+        return '(unserializable)';
+    }
+}
 
 function buildContext(): string {
     // Module-time captured at first render; effectively constant

@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getLogger } from '@mechanics';
 import type { GameState, PersistenceAdapter } from '@mechanics';
 
 import {
@@ -76,8 +77,13 @@ export function createAsyncStorageAdapter(
         pendingTimer = null;
         if (state === null) return;
         try {
-            await storage.setItem(SAVE_KEY, JSON.stringify(wrap(state)));
+            const payload = JSON.stringify(wrap(state));
+            await storage.setItem(SAVE_KEY, payload);
+            getLogger().debug('persistence', 'save-written', { bytes: payload.length });
         } catch (err) {
+            getLogger().error('persistence', 'save-failed', {
+                message: err instanceof Error ? err.message : String(err),
+            });
             onError(err);
         }
     };
@@ -87,6 +93,7 @@ export function createAsyncStorageAdapter(
             const raw = await storage.getItem(SAVE_KEY);
             if (raw === null) {
                 cache = null;
+                getLogger().info('persistence', 'preload', { found: false });
                 return;
             }
             // Corrupt / future / old-version saves throw here and surface to the
@@ -95,6 +102,10 @@ export function createAsyncStorageAdapter(
             // host prompts a fresh start.
             const envelope = JSON.parse(raw) as StoredEnvelope;
             cache = unwrap(envelope, migrations);
+            getLogger().info('persistence', 'preload', {
+                found: true,
+                schemaVersion: envelope.schemaVersion,
+            });
         },
         load() {
             return cache;
@@ -130,6 +141,7 @@ export function createAsyncStorageAdapter(
             pendingState = null;
             cache = null;
             await storage.removeItem(SAVE_KEY);
+            getLogger().info('persistence', 'slot-cleared');
         },
     };
 }

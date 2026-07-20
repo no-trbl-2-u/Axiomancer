@@ -30,7 +30,7 @@ import {
     startTurn, endTurn, draftStanceDie, discardCombatCard, playSignatureSkill,
     tapFateDie, getPendingDotTotal, getFloatingDiceColors,
     selectEncounterMercyChoice, selectCapitulationChoice, buildCombatSummary, rollCombatCardRewards, addRewardCard,
-    rollLoot, addItem,
+    rollLoot, addItem, getLogger,
     type CombatEncounterState, type CombatOutcome, type Character, type Enemy, type CombatEvent,
 } from '@mechanics';
 
@@ -329,7 +329,15 @@ export function CombatEncounterPanel({
     const initial = useMemo(
         () => {
             const s = initializeCombatEncounter(bootstrapPlayer, enemy, deck, seed);
-            return s.seed === undefined ? { ...s, seed: Math.floor(Math.random() * 0xffffffff) } : s;
+            const stamped = s.seed === undefined ? { ...s, seed: Math.floor(Math.random() * 0xffffffff) } : s;
+            // AXM Log: thin mount marker only — the engine's `withLog` tap
+            // already mirrors every CombatEvent this encounter produces.
+            try {
+                getLogger().info('combat', 'encounter-mounted', {
+                    enemy: enemy.name, seed: stamped.seed,
+                });
+            } catch { /* logging never breaks play */ }
+            return stamped;
         },
         // eslint-disable-next-line react-hooks/exhaustive-deps
         [],
@@ -531,6 +539,11 @@ export function CombatEncounterPanel({
     const handleExit = useCallback(() => {
         if (exitedRef.current) return;
         exitedRef.current = true;
+        try {
+            getLogger().info('combat', 'encounter-exited', {
+                outcome: live.finalOutcome ?? null,
+            });
+        } catch { /* logging never breaks play */ }
         onExit(live.finalOutcome ?? null);
     }, [onExit, live.finalOutcome]);
 

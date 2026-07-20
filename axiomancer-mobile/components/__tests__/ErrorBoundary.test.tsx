@@ -17,6 +17,8 @@ import { fireEvent, render } from '@testing-library/react-native';
 import React from 'react';
 import { Text } from 'react-native';
 
+import { configureLogging, getLogger, resetLoggingForTests } from '@mechanics';
+
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { withAllProviders } from '@/test-utils/withAllProviders';
 
@@ -165,6 +167,46 @@ describe('ErrorBoundary: error capture (Phase 70 Tick D — in-world chrome)', (
         );
         const rendered = render(tree);
         expect(rendered.queryByText('BUILD CONTEXT')).not.toBeNull();
+    });
+
+    it('renders the RECENT LOG section with buffered AXM Log entries', () => {
+        configureLogging({ enabled: true, level: 'debug' });
+        getLogger().clear();
+        getLogger().info('nav', 'route-changed', { pathname: '/memoir' });
+        try {
+            const { tree } = withAllProviders(
+                <ErrorBoundary>
+                    <Boom />
+                </ErrorBoundary>,
+            );
+            const rendered = render(tree);
+            expect(rendered.queryByText('RECENT LOG')).not.toBeNull();
+            const tail = rendered.queryByTestId('error-boundary-log-tail');
+            expect(tail).not.toBeNull();
+            expect(String(tail?.props.children)).toContain('nav/route-changed');
+        } finally {
+            resetLoggingForTests();
+        }
+    });
+
+    it('logs the crash to the error domain', () => {
+        configureLogging({ enabled: true, level: 'debug' });
+        getLogger().clear();
+        try {
+            const { tree } = withAllProviders(
+                <ErrorBoundary>
+                    <Boom message="boundary-witness" />
+                </ErrorBoundary>,
+            );
+            render(tree);
+            const errors = getLogger().entries({ domains: ['error'], kind: 'react-boundary' });
+            expect(errors.length).toBeGreaterThanOrEqual(1);
+            expect(
+                (errors[0].data as { message: string }).message,
+            ).toBe('boundary-witness');
+        } finally {
+            resetLoggingForTests();
+        }
     });
 });
 

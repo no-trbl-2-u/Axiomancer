@@ -212,6 +212,7 @@ import {
 } from './labyrinth/store-actions';
 import { getAporiaAct } from '@mechanics';
 import type { LabyrinthActId, LabyrinthBossOutcome } from '@mechanics';
+import { wrapActionsWithLogging } from './logging';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -892,7 +893,11 @@ export function withScaledEnemyHp(enemy: Enemy, mult: number): Enemy {
 // ---------------------------------------------------------------------------
 
 export function createAppActions(store: AppStore): AppActions {
-    return {
+    // AXM Log: every action funnels through this object, so wrapping the
+    // literal ONCE instruments the whole dispatch surface (name, duration,
+    // error capture-and-rethrow) while preserving the provider-stable
+    // AppActions reference contract.
+    const actions: AppActions = {
         startCombat: (enemy) => {
             // Starter cards must exist BEFORE the engine snapshots the
             // player — the picker and the engine both read the
@@ -1106,6 +1111,7 @@ export function createAppActions(store: AppStore): AppActions {
         getLearnableCardOffers: (count) => getLearnableCardOffersAction(store, count),
         learnCard: (cardId) => learnCardAction(store, cardId),
     };
+    return wrapActionsWithLogging(actions);
 }
 
 // ---------------------------------------------------------------------------

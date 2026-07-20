@@ -53,6 +53,7 @@ const DebugPlayerTierPresets = lazy(() => import('@/components/DebugPlayerTierPr
 const DebugSeedButton = lazy(() => import('@/components/DebugSeedButton').then(m => ({ default: m.DebugSeedButton })));
 const DebugXpGrant = lazy(() => import('@/components/DebugXpGrant').then(m => ({ default: m.DebugXpGrant })));
 const AestheticDevToggle = lazy(() => import('@/components/AestheticDevToggle').then(m => ({ default: m.AestheticDevToggle })));
+const DebugLogViewer = lazy(() => import('@/components/DebugLogViewer').then(m => ({ default: m.DebugLogViewer })));
 
 function LoadingFallback() {
     const AXM = usePalette();
@@ -151,6 +152,10 @@ export function DevToolsSections() {
                 <DevSection label="MISC & SYSTEM" testID="dev-section-system">
                     <AestheticDevToggle />
                     <DebugHudOverrides />
+                </DevSection>
+
+                <DevSection label="DIAGNOSTICS" testID="dev-section-diagnostics">
+                    <DebugLogViewer />
                 </DevSection>
             </Suspense>
         </View>
