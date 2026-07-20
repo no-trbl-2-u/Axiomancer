@@ -1,9 +1,13 @@
 {
-  "generated_by": "user-supplied",
-  "date": "2026-07-06",
-  "tool": "external-illustration",
-  "prompt": "Temp art drop (repo-root tmp_image, 2026-07-06) — painted figures/objects on black; batch-processed: resized to <=512-640px, converted to WebP, and (except card art) black backgrounds alpha-matted (border-connected keying with graded glow edges)",
-  "spec_section": "temp-art-pass",
-  "covers": "every .webp in this directory",
-  "used_by": ["assets/images/cards/index.ts (registry — see its header for surfaces)"]
+  "generated_by": "not generated",
+  "date": "2026-07-20",
+  "source": "workspace/Potential Assets/icons-TBR/ffffff/transparent/1x1",
+  "process": "Selected existing transparent Game Icons SVGs, copied them unchanged, and renamed the copies to stable card-id and keyword filenames.",
+  "covers": [
+    "icons/*.svg",
+    "glyphs/*.svg"
+  ],
+  "source_map": "icon-sources.json",
+  "license": "GAME-ICONS-LICENSE.txt",
+  "attribution": "ATTRIBUTION.md"
 }

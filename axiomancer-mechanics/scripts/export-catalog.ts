@@ -2,7 +2,7 @@
  * Export the game's canonical libraries into flat JSON the zero-dep DevLog
  * catalog build (`scripts/build-catalog.mjs`) renders into HTML pages. This is
  * the one place the art-free mechanics package meets the mobile art registries,
- * so the catalog can show real paintings next to real data.
+ * so the catalog can show the real shipped icons next to real data.
  *
  * Run it (repo root):  npm run catalog:export
  * Then render HTML:     npm run catalog:build
@@ -10,10 +10,10 @@
  *
  * It writes:
  *   devlog/data/{cards,enemies,effects}.json  — flat records for the renderer
- *   devlog/assets/catalog/cards/*             — copied card paintings
+ *   devlog/assets/catalog/cards/*             — copied card icons
  *   devlog/assets/catalog/enemies/*           — copied enemy portraits
  *
- * Card / enemy art lives in the mobile package as Metro `require('./x.webp')`
+ * Card / enemy art lives in the mobile package as static Metro `require(...)`
  * literals (not importable from Node), so the two art registries are parsed as
  * text to recover the id/key → filename mapping, then the files are copied into
  * devlog/ so the served site is self-contained.
@@ -27,7 +27,7 @@ import {
     existsSync,
     rmSync,
 } from 'node:fs';
-import { join } from 'node:path';
+import { basename, join } from 'node:path';
 import { execSync } from 'node:child_process';
 
 import { cardLibrary, getCardById } from '../src/Cards/cards.library';
@@ -70,9 +70,9 @@ function parseEnemyArt(): Record<string, string> {
 }
 
 /**
- * Card registry is two-level: `const varName = require('./file.webp')` then
- * `'card-id': varName,` inside CARD_ART_BY_ID. Resolve id → filename, with the
- * shared placeholder as the fallback for unmapped ids.
+ * Card entries may point straight at a static asset require or use the older
+ * two-level `const varName = require(...)` registry shape. Resolve either form
+ * to its file name, with the supplied fallback icon for unmapped ids.
  */
 function parseCardArt(): { byId: Record<string, string>; fallback: string } {
     const src = readFileSync(join(CARD_ART_DIR, 'index.ts'), 'utf8');
@@ -82,9 +82,12 @@ function parseCardArt(): { byId: Record<string, string>; fallback: string } {
     while ((m = varRe.exec(src)) !== null) varToFile[m[1]] = m[2];
 
     const fallbackMatch = src.match(/FALLBACK_CARD_ART\s*=\s*require\('\.\/([^']+)'\)/);
-    const fallback = fallbackMatch ? fallbackMatch[1] : 'circe-placeholder.jpg';
+    const fallback = fallbackMatch ? fallbackMatch[1] : 'icons/fallback.svg';
 
     const byId: Record<string, string> = {};
+    const directIdRe = /'([^']+)':\s*require\('\.\/([^']+)'\)\s*,/g;
+    while ((m = directIdRe.exec(src)) !== null) byId[m[1]] = m[2];
+
     const idRe = /'([^']+)':\s*(\w+)\s*,/g;
     while ((m = idRe.exec(src)) !== null) {
         const file = varToFile[m[2]];
@@ -93,14 +96,15 @@ function parseCardArt(): { byId: Record<string, string>; fallback: string } {
     return { byId, fallback };
 }
 
-/** Copy a source painting into devlog/ and return the site-relative path. */
+/** Copy a source art asset into devlog/ and return the site-relative path. */
 function copyArt(srcDir: string, file: string, subdir: string): string | null {
     const from = join(srcDir, file);
     if (!existsSync(from)) return null;
     const destDir = join(CATALOG_ASSETS, subdir);
     mkdirSync(destDir, { recursive: true });
-    copyFileSync(from, join(destDir, file));
-    return `./assets/catalog/${subdir}/${file}`;
+    const destFile = basename(file);
+    copyFileSync(from, join(destDir, destFile));
+    return `./assets/catalog/${subdir}/${destFile}`;
 }
 
 /**
@@ -445,7 +449,7 @@ function buildEffects() {
 // Write
 // ---------------------------------------------------------------------------
 function main() {
-    // Start the copied-art tree clean so renamed/removed paintings don't linger.
+    // Start the copied-art tree clean so renamed/removed assets don't linger.
     if (existsSync(CATALOG_ASSETS)) rmSync(CATALOG_ASSETS, { recursive: true, force: true });
     mkdirSync(DATA, { recursive: true });
 

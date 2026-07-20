@@ -63,9 +63,10 @@ import {
 } from '@/state/combat/dice-roll-ritual';
 import { DICE_ROLL_TIMING } from '@/state/combat/dice-roll-ritual.timing';
 
-// Per-card art registry (temp art pass) — keyed by cardId, falls back to the
-// circe placeholder for unmapped ids. Stance tint + glyph still ride on top.
+// Per-card and per-keyword icons selected from the supplied Potential Assets
+// archive. Every live card has its own main icon; keyword glyphs are shared.
 import { getCardArt } from '@/assets/images/cards';
+import { getCardGlyphArt } from '@/assets/images/cards/glyphs';
 
 // ── Drag plumbing (cards AND dice) ───────────────────────────────────────────
 
@@ -1443,14 +1444,6 @@ export const CombatBoard = React.memo(function CombatBoard({
 
 // ── A small fanned hand card ─────────────────────────────────────────────────
 
-// Deterministic per-card art variation (the temp art pool is smaller than the
-// card pool, so paintings are shared): mirror for ~half the cards, keyed off id.
-function artMirrored(cardId: string): boolean {
-    let h = 0;
-    for (let i = 0; i < cardId.length; i++) h = (h * 31 + cardId.charCodeAt(i)) | 0;
-    return (h & 1) === 1;
-}
-
 // Compact the FREE value to what sits INSIDE the glyph — its intensity (the
 // effect owns the duration): "i1 d1" → "+1", "3 rounds" → "3r", "2" → "+2".
 function compactFree(v: string | null): string {
@@ -1535,8 +1528,7 @@ function cleanPaidSentence(vm: CombatCardVM): string {
  * The shared card FACE — Option A layout (owner-picked 2026-07-09, declutter
  * pass 2026-07-19) — instanced small in the hand and LARGE in the inspect
  * modal so the two can never drift.
- *   · per-card ART (temp pool, keyword-matched) fills the face behind a
- *     stance-tint gradient wash;
+ *   · one unique per-card icon sits large behind a stance-tint wash;
  *   · the LEFT RAIL (stance colour) carries the card NAME, centred vertically;
  *   · the giant FREE glyph (+ intensity) top-left; rarity tag top-right;
  *   · the bottom block: the TYPE STRIP ("BODY · SPELL" — CURSE for
@@ -1578,6 +1570,7 @@ export const CombatCardFace = React.memo(function CombatCardFace({
     // Effect-shaped silhouette for the FREE glyph (owner directive 2026-07-16);
     // keywords without a shape keep the text rune.
     const freeShape = glyphShapeFor(f.freeGlyphKey);
+    const freeGlyphArt = getCardGlyphArt(f.freeGlyphKey);
     const railW = large ? 24 : 17;
     // Owner directive 2026-07-16 part 2: the FREE glyph reads BIGGER (~30%) —
     // it is the fastest read of "what does this card do".
@@ -1587,15 +1580,22 @@ export const CombatCardFace = React.memo(function CombatCardFace({
     return (
         <View style={[styles.faceOuter, { width, height }]}>
             <View style={[styles.faceCard, { borderColor }]}>
-                {/* ① FULL-BLEED ART — fills the whole face, anchored to the top */}
+                {/* ① MAIN ICON — a unique transparent Potential Assets icon. */}
                 <View style={styles.faceArtFull} pointerEvents="none">
+                    <View style={[styles.faceArtTint, { backgroundColor: f.stanceColor }]} />
                     <Image
                         source={getCardArt(card.cardId)}
-                        style={[StyleSheet.absoluteFill, artMirrored(card.cardId) && { transform: [{ scaleX: -1 }] }]}
-                        contentFit="cover"
+                        style={{
+                            position: 'absolute',
+                            left: railW + (large ? 24 : 16),
+                            right: large ? 24 : 16,
+                            top: large ? 54 : 36,
+                            bottom: large ? 112 : 76,
+                            opacity: f.inert ? 0.35 : 0.72,
+                        }}
+                        contentFit="contain"
                         transition={0}
                     />
-                    <View style={[styles.faceArtTint, { backgroundColor: f.stanceColor }]} />
                 </View>
                 {/* SCRIM — deep→transparent so the bottom text stays legible */}
                 <FaceScrim w={width} h={height} uid={card.uid} tint={band} />
@@ -1648,7 +1648,16 @@ export const CombatCardFace = React.memo(function CombatCardFace({
                             normal-flow glyph (positioned beats static regardless
                             of child order), greying the glyph out — the owner's
                             "backdrop is on top of the glyph" report, same day. */}
-                        {freeShape ? (
+                        {freeGlyphArt ? (
+                            <View style={{ zIndex: 1 }}>
+                                <Image
+                                    source={freeGlyphArt}
+                                    style={{ width: glyphSize * 0.86, height: glyphSize * 0.86, opacity: f.inert ? 0.55 : 1 }}
+                                    contentFit="contain"
+                                    transition={0}
+                                />
+                            </View>
+                        ) : freeShape ? (
                             /* View wrapper: RN-web guarantees position:relative on
                                Views (zIndex applies); a bare <Svg> may stay static. */
                             <View style={{ zIndex: 1 }}>
@@ -1902,8 +1911,8 @@ const useStyles = makeStyles((AXM) => ({
         shadowColor: '#000', shadowOpacity: 0.5, shadowRadius: 6, shadowOffset: { width: 0, height: 3 }, elevation: 6,
     },
     faceCard: { flex: 1, borderWidth: 1.5, borderRadius: 6, backgroundColor: '#14110e', overflow: 'hidden' },
-    // #5 SIDE RAIL — art is full-bleed behind everything; rail, glyph, name, and
-    // paid sentence are absolutely placed over it.
+    // #5 SIDE RAIL — the large transparent icon sits behind the rail, glyph,
+    // name, and paid sentence.
     faceArtFull: { ...StyleSheet.absoluteFillObject, backgroundColor: '#0c0a08' },
     faceArtTint: { ...StyleSheet.absoluteFillObject, opacity: 0.17 },
     // Left stance spine + a bottom darken so the vertical label stays legible.
