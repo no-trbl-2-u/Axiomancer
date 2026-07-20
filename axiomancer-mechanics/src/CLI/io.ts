@@ -15,6 +15,10 @@ import inquirer from 'inquirer';
 import readline from 'readline';
 import fs from 'fs';
 
+import {
+    AXM_LOG_LEVELS, AxmLogLevel, configureLogging, getLogger, isLoggingEnabled,
+} from '../Log';
+
 // ─── Flag parsing ─────────────────────────────────────────────────────────────
 
 export interface CliFlags {
@@ -56,6 +60,11 @@ export interface CliFlags {
      *  impossible-tier enemy) independent of card balance. */
     combatEnemy?: string;
     combatEnemyNode?: string;
+    /** AXM Log: enables the structured logger at this minimum level. */
+    logLevel?: string;
+    /** AXM Log: appends every accepted entry as JSONL to this path
+     *  (implies the logger is enabled; level defaults to `info`). */
+    logFile?: string;
 }
 
 export function parseArgv(args: string[]): CliFlags {
@@ -157,6 +166,22 @@ export function parseArgv(args: string[]): CliFlags {
             if (!next || next.startsWith('--')) throw new Error('--combat-enemy requires an enemy slug.');
             flags.combatEnemy = next;
             i += 2;
+        } else if (arg.startsWith('--log-level=')) {
+            flags.logLevel = arg.slice('--log-level='.length);
+            i++;
+        } else if (arg === '--log-level') {
+            const next = args[i + 1];
+            if (!next || next.startsWith('--')) throw new Error('--log-level requires a level (trace|debug|info|warn|error).');
+            flags.logLevel = next;
+            i += 2;
+        } else if (arg.startsWith('--log-file=')) {
+            flags.logFile = arg.slice('--log-file='.length);
+            i++;
+        } else if (arg === '--log-file') {
+            const next = args[i + 1];
+            if (!next || next.startsWith('--')) throw new Error('--log-file requires a file path argument.');
+            flags.logFile = next;
+            i += 2;
         } else if (arg.startsWith('--combat-enemy-node=')) {
             flags.combatEnemyNode = arg.slice('--combat-enemy-node='.length);
             i++;
@@ -168,7 +193,7 @@ export function parseArgv(args: string[]): CliFlags {
         } else {
             throw new Error(
                 `Unknown CLI flag: '${arg}'.\n` +
-                `Usage: npm run game -- [--script <path>] [--stdin] [--json-events] [--state-log <path>] [--save-file <path>] [--route <nodes>] [--resolve-start] [--route-audit <mapName>] [--auto-combat] [--combat-policy <policy>] [--combat-max-turns <n>] [--combat-seed <n>] [--combat-enemy <slug> --combat-enemy-node <id>]`,
+                `Usage: npm run game -- [--script <path>] [--stdin] [--json-events] [--state-log <path>] [--save-file <path>] [--route <nodes>] [--resolve-start] [--route-audit <mapName>] [--auto-combat] [--combat-policy <policy>] [--combat-max-turns <n>] [--combat-seed <n>] [--combat-enemy <slug> --combat-enemy-node <id>] [--log-level <trace|debug|info|warn|error>] [--log-file <path>]`,
             );
         }
     }
@@ -252,6 +277,9 @@ export async function prompt<T extends object>(
  * JSON mode prints `JSON.stringify(event)`.
  */
 export function emit(event: { type: string; payload?: unknown }): void {
+    // AXM Log tap: mirror the envelope stream into the structured logger
+    // (off by default; enabled by --log-level/--log-file via attachCliLogSinks).
+    if (isLoggingEnabled()) getLogger().debug('cli', event.type, event.payload);
     if (outputMode === 'json') {
         process.stdout.write(JSON.stringify(event) + '\n');
     } else {
@@ -317,4 +345,41 @@ export function logState(
 
 export function getStateLogPath(): string | null {
     return stateLogPath;
+}
+
+// ─── AXM Log sinks (docs/logging.md) ─────────────────────────────────────────
+
+/**
+ * Wire the structured logger from CLI flags. No flags → no-op (the logger
+ * stays disabled, so engine taps cost one boolean read — the sim default).
+ *
+ * `--log-file <path>`  — truncate-create `path` and append every accepted
+ *                        entry as one JSON line (same idiom as --state-log).
+ * `--log-level <lvl>`  — minimum captured level. Without --log-file the
+ *                        entries also pretty-print to STDERR: stdout must
+ *                        stay machine-clean for `--json-events` consumers.
+ */
+export function attachCliLogSinks(flags: Pick<CliFlags, 'logLevel' | 'logFile'>): void {
+    if (flags.logLevel === undefined && flags.logFile === undefined) return;
+    const level = (flags.logLevel ?? 'info') as AxmLogLevel;
+    if (!AXM_LOG_LEVELS.includes(level)) {
+        throw new Error(`--log-level must be one of ${AXM_LOG_LEVELS.join('|')}, got '${flags.logLevel}'.`);
+    }
+    configureLogging({ enabled: true, level });
+    if (flags.logFile !== undefined) {
+        const path = flags.logFile;
+        fs.writeFileSync(path, '', 'utf-8');
+        getLogger().addSink(entry => {
+            try {
+                fs.appendFileSync(path, JSON.stringify(entry) + '\n', 'utf-8');
+            } catch { /* a sink failure must never break the run */ }
+        });
+    } else {
+        getLogger().addSink(entry => {
+            try {
+                const data = entry.data !== undefined ? ` ${JSON.stringify(entry.data)}` : '';
+                process.stderr.write(`[axm] ${entry.level} ${entry.domain}/${entry.kind}${data}\n`);
+            } catch { /* never break the run */ }
+        });
+    }
 }

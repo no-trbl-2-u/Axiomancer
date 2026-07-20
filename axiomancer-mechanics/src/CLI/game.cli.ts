@@ -24,7 +24,7 @@
  */
 
 import fs from 'fs';
-import { parseArgv, prompt, emit, log, logState, setIoMode, setOutputMode, setStateLogPath, type CliFlags } from './io';
+import { parseArgv, prompt, emit, log, logState, setIoMode, setOutputMode, setStateLogPath, attachCliLogSinks, type CliFlags } from './io';
 
 import { createCharacter } from '../Character';
 import { ENEMY_REGISTRY, EnemyLibrary, type EnemySlug } from '../Enemy/enemy.library';
@@ -935,6 +935,7 @@ export async function runGameCli(rawArgs = process.argv.slice(2)): Promise<void>
 
     const flags = parseArgv(rawArgs);
     if (flags.jsonEvents) setOutputMode('json');
+    attachCliLogSinks(flags);
     if (flags.scriptPath) {
         const raw = fs.readFileSync(flags.scriptPath, 'utf-8');
         const answers = JSON.parse(raw);

@@ -22,8 +22,10 @@ import {
     parseArgv, setIoMode, setOutputMode,
     prompt, emit, log,
     setStateLogPath, logState, getStateLogPath,
+    attachCliLogSinks,
     type CliFlags,
 } from '../io';
+import { getLogger, resetLoggingForTests } from '../../Log';
 
 const tmpFiles: string[] = [];
 function tmpPath(): string {
@@ -37,6 +39,7 @@ afterEach(() => {
     setIoMode({ kind: 'tty' });
     setOutputMode('human');
     setStateLogPath(null);
+    resetLoggingForTests();
     while (tmpFiles.length > 0) {
         const p = tmpFiles.pop()!;
         try { fs.unlinkSync(p); } catch { /* ignore */ }
@@ -90,6 +93,75 @@ describe('parseArgv', () => {
     it('throws when --save-file has no value', () => {
         expect(() => parseArgv(['--save-file'])).toThrow(/requires a file path/);
         expect(() => parseArgv(['--save-file', '--stdin'])).toThrow(/requires a file path/);
+    });
+
+    it('parses --log-level and --log-file with separate value and = form', () => {
+        expect(parseArgv(['--log-level', 'debug'])).toMatchObject({ logLevel: 'debug' });
+        expect(parseArgv(['--log-level=warn'])).toMatchObject({ logLevel: 'warn' });
+        expect(parseArgv(['--log-file', 'axm.jsonl'])).toMatchObject({ logFile: 'axm.jsonl' });
+        expect(parseArgv(['--log-file=axm.jsonl'])).toMatchObject({ logFile: 'axm.jsonl' });
+    });
+
+    it('throws when --log-level or --log-file has no value', () => {
+        expect(() => parseArgv(['--log-level'])).toThrow(/requires a level/);
+        expect(() => parseArgv(['--log-level', '--stdin'])).toThrow(/requires a level/);
+        expect(() => parseArgv(['--log-file'])).toThrow(/requires a file path/);
+    });
+});
+
+describe('attachCliLogSinks (AXM Log)', () => {
+    it('is a no-op without log flags — the logger stays disabled', () => {
+        attachCliLogSinks({});
+        emit({ type: 'combat:started' });
+        expect(getLogger().entries()).toHaveLength(0);
+    });
+
+    it('rejects an unknown --log-level value', () => {
+        expect(() => attachCliLogSinks({ logLevel: 'loud' })).toThrow(/--log-level must be one of/);
+    });
+
+    it('writes accepted entries as JSONL to --log-file', () => {
+        const p = tmpPath();
+        attachCliLogSinks({ logFile: p, logLevel: 'debug' });
+        emit({ type: 'combat:started', payload: { enemy: 'float-eye' } });
+        getLogger().info('cli', 'witness', { ok: true });
+        const lines = fs.readFileSync(p, 'utf-8').trim().split('\n').filter(Boolean);
+        expect(lines).toHaveLength(2);
+        const first = JSON.parse(lines[0]!);
+        expect(first.domain).toBe('cli');
+        expect(first.kind).toBe('combat:started');
+        expect(first.data).toEqual({ enemy: 'float-eye' });
+        const last = JSON.parse(lines[1]!);
+        expect(last.kind).toBe('witness');
+        expect(last.seq).toBeGreaterThan(first.seq);
+    });
+
+    it('--log-file alone captures at info: the debug cli mirror is filtered', () => {
+        const p = tmpPath();
+        attachCliLogSinks({ logFile: p });
+        emit({ type: 'combat:started' });
+        expect(fs.readFileSync(p, 'utf-8').trim()).toBe('');
+        expect(getLogger().entries()).toHaveLength(0);
+    });
+
+    it('level-only mode mirrors to stderr and never writes stdout', () => {
+        setOutputMode('json');
+        const stdoutWrites: string[] = [];
+        const stderrWrites: string[] = [];
+        vi.spyOn(process.stdout, 'write').mockImplementation((chunk) => {
+            stdoutWrites.push(String(chunk));
+            return true;
+        });
+        vi.spyOn(process.stderr, 'write').mockImplementation((chunk) => {
+            stderrWrites.push(String(chunk));
+            return true;
+        });
+        attachCliLogSinks({ logLevel: 'debug' });
+        emit({ type: 'combat:started' });
+        // stdout got exactly the one --json-events envelope, nothing else.
+        expect(stdoutWrites).toEqual(['{"type":"combat:started"}\n']);
+        // stderr got the [axm] mirror of the cli-domain entry.
+        expect(stderrWrites.some(w => w.startsWith('[axm] debug cli/combat:started'))).toBe(true);
     });
 });
 

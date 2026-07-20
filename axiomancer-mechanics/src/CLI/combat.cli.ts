@@ -46,7 +46,7 @@
 
 import {
     prompt, emit, log, logState,
-    setIoMode, setOutputMode, setStateLogPath,
+    setIoMode, setOutputMode, setStateLogPath, attachCliLogSinks,
 } from './io';
 import {
     initializeCombatEncounter,
@@ -114,6 +114,9 @@ export interface CombatCliFlags {
     stdin: boolean;
     jsonEvents: boolean;
     stateLogPath?: string;
+    /** AXM Log flags (docs/logging.md), wired via `attachCliLogSinks`. */
+    logLevel?: string;
+    logFile?: string;
 }
 
 
@@ -159,7 +162,8 @@ const COMBAT_USAGE =
     '[--stage early|mid|late|impossible] ' +
     '[--deck preset:<id>[+swap:<out>/<in>,...]|draft:<focus>|cards:a,b,c|policy-pick] ' +
     '[--sandbox <setId>] ' +
-    '[--script <path>] [--stdin] [--json-events] [--state-log <path>]';
+    '[--script <path>] [--stdin] [--json-events] [--state-log <path>] ' +
+    '[--log-level <trace|debug|info|warn|error>] [--log-file <path>]';
 
 function takeValue(args: string[], i: number, flag: string): [string, number] {
     const arg = args[i]!;
@@ -216,6 +220,10 @@ export function parseCombatArgv(args: string[]): CombatCliFlags {
             const [v, ni] = takeValue(args, i, '--script'); flags.scriptPath = v; i = ni;
         } else if (arg.startsWith('--state-log')) {
             const [v, ni] = takeValue(args, i, '--state-log'); flags.stateLogPath = v; i = ni;
+        } else if (arg.startsWith('--log-level')) {
+            const [v, ni] = takeValue(args, i, '--log-level'); flags.logLevel = v; i = ni;
+        } else if (arg.startsWith('--log-file')) {
+            const [v, ni] = takeValue(args, i, '--log-file'); flags.logFile = v; i = ni;
         } else if (arg.startsWith('--stage')) {
             const [v, ni] = takeValue(args, i, '--stage');
             if (!isCombatStageId(v)) {
@@ -731,6 +739,7 @@ export async function runCombatCli(rawArgs: string[]): Promise<void> {
         setIoMode({ kind: 'stdin' });
     }
     if (flags.stateLogPath) setStateLogPath(flags.stateLogPath);
+    attachCliLogSinks(flags);
 
     // --stage without --enemy fights the STAGE'S roster, not the default
     // little-belle (Gate 0 §2, 2026-07-10 — a stage-scaled player against a
