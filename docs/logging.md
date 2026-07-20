@@ -98,7 +98,8 @@ section (its COPY button includes the tail on web).
 
 ## Reading it from the CLIs (agents)
 
-Additive flags on `npm run game` and `npm run combat`:
+Additive flags on `npm run game`, `npm run combat`, and
+`npm run combat-playtest`:
 
 ```bash
 # JSONL file, one envelope per line (level defaults to info; add --log-level debug
@@ -112,6 +113,21 @@ npm run game -- --route node-a,node-b --log-level info
 No log flags → the logger stays disabled (sim sweeps and vitest run at
 full speed). The older `--state-log` JSONL (`{tick, action, before,
 after}` snapshots) is unchanged and complementary.
+
+**Sweep replay index:** on `npm run combat-playtest`, `--log-file` at
+the default info level writes one `rng/seed-set` entry per simulated run
+plus one `cli/playtest-cell` summary per cell (stage, enemy, policy,
+deck, seed, winRate, statusEngagement, dotHpFraction, avgRounds):
+
+```bash
+npm run combat-playtest -- --stage=late --deck=preset:all --json --log-file scratch/sweep-index.jsonl
+```
+
+Find the anomalous cell in the index, take its seed, and zoom in with
+`npm run combat -- --seed <n> ... --log-level debug --log-file ...` for
+the full event stream. `--log-level=debug` on the sweep itself captures
+every encounter's combat events — large (~100 events x runs x cells);
+prefer the single-seed zoom.
 
 ## Replay recipe
 

@@ -39,6 +39,20 @@
  *   --cards                                 append the per-card usage table
  *   --json                                  print the PlaytestReport as JSON — and
  *                                           NOTHING else (agent consumption)
+ *   --log-level=<trace|debug|info|warn|error>
+ *   --log-file=<path>                       AXM Log (docs/logging.md): enable the
+ *                                           structured logger for the sweep. At the
+ *                                           --log-file default (info) the JSONL is a
+ *                                           REPLAY INDEX — one `rng/seed-set` per run
+ *                                           plus one `cli/playtest-cell` summary per
+ *                                           cell. --log-level=debug adds the full
+ *                                           per-encounter combat event stream (large:
+ *                                           ~100 events x runs x cells — zoom into a
+ *                                           single seed with `npm run combat` instead
+ *                                           when possible). No flags → logger off,
+ *                                           sweep runs at full speed. stdout purity
+ *                                           under --json is preserved (file/stderr
+ *                                           sinks only).
  *
  * UI only: parse flags → runPlaytestMatrix → print. All logic lives in
  * `src/Combat/combat.playtest.ts`.
@@ -60,6 +74,8 @@ import type { CombatDeckSelection } from '../Combat/combat.deck-draft';
 import {
     formatPlaytestReport, parseDeckSelectionArg, runPlaytestMatrix,
 } from '../Combat/combat.playtest';
+import { getLogger, isLoggingEnabled } from '../Log';
+import { attachCliLogSinks } from './io';
 
 const flag = (k: string): string | undefined => {
     const a = process.argv.find(x => x.startsWith(`--${k}=`));
@@ -96,6 +112,14 @@ function parseDeck(raw: string): CombatDeckSelection {
 function main(): void {
     const json = has('json');
     const perCard = has('cards');
+
+    // AXM Log (docs/logging.md) — opt-in; without the flags the logger stays
+    // disabled and the sweep pays one boolean read per event batch.
+    try {
+        attachCliLogSinks({ logLevel: flag('log-level'), logFile: flag('log-file') });
+    } catch (err) {
+        fail(err instanceof Error ? err.message : String(err));
+    }
 
     let stages = parseStages(flag('stage') ?? 'all');
     const policies = parsePolicies(flag('policy') ?? 'greedy');
@@ -154,6 +178,26 @@ function main(): void {
         });
     } finally {
         if (upgradeableDice) setUpgradeableDice(wasUpgradeable);
+    }
+
+    // Per-cell replay index: enough to re-run any cell (or a single seed via
+    // `npm run combat`) next to its headline witnesses. Info level, so it
+    // lands in the JSONL even without --log-level=debug.
+    if (isLoggingEnabled()) {
+        for (const cell of report.cells) {
+            getLogger().info('cli', 'playtest-cell', {
+                stage: cell.spec.stage,
+                enemy: cell.spec.enemySlug,
+                policy: cell.spec.policyId,
+                deck: cell.spec.deck,
+                runs: cell.spec.runs,
+                seed: cell.spec.seed,
+                winRate: cell.stats.winRate,
+                statusEngagement: cell.stats.statusEngagement,
+                dotHpFraction: cell.stats.dotHpFraction,
+                avgRounds: cell.stats.avgRounds,
+            });
+        }
     }
 
     if (json) {

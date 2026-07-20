@@ -64,6 +64,39 @@ describe('CLI process-level smoke (real ts-node startup)', () => {
         expect(actions).toContain('hazardCombat:end');
     }, 60_000);
 
+    it('runs the playtest sweep CLI with an AXM Log replay index', () => {
+        const logPath = tmpPath('playtest');
+
+        const stdout = execFileSync(
+            NPX,
+            [
+                'ts-node', 'src/CLI/combat-playtest.cli.ts',
+                '--stage=early', '--policy=greedy', '--runs=2', '--seed=7',
+                '--json', `--log-file=${logPath}`,
+            ],
+            SPAWN_OPTS,
+        ).toString();
+
+        // --json purity survives the log flags: stdout is the report and
+        // nothing else (file sink only; no [axm] lines on stdout).
+        const report = JSON.parse(stdout) as { cells: unknown[] };
+        expect(report.cells.length).toBeGreaterThan(0);
+
+        // The JSONL is a replay index: per-run seed-set entries plus one
+        // playtest-cell summary per cell, at the --log-file default (info).
+        const entries = readLog(logPath);
+        const kinds = entries.map(e => e.kind);
+        expect(kinds).toContain('seed-set');
+        expect(kinds.filter(k => k === 'playtest-cell')).toHaveLength(report.cells.length);
+        const cell = entries.find(e => e.kind === 'playtest-cell') as {
+            data: { stage: string; seed: number; runs: number; winRate: number };
+        };
+        expect(cell.data.stage).toBe('early');
+        expect(cell.data.seed).toBe(7);
+        expect(cell.data.runs).toBe(2);
+        expect(typeof cell.data.winRate).toBe('number');
+    }, 60_000);
+
     it('runs the route-to-Hazard game CLI as a real process', () => {
         const logPath = tmpPath('route');
 
