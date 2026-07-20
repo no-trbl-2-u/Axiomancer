@@ -89,6 +89,12 @@ export const MOMENTUM_SURGE_LENGTH = 3;
  *  the wheel-era `momentum-` prefix convention). */
 export const SURGE_DIE_PREFIX = 'surge-';
 
+/** Id prefix for the coveted-die payout (Phase 33c, spec 33 §1): a boss/unique
+ *  phase's `stake` claimed via STAGGER-to-0 / full block / stance-check yield.
+ *  Same shape as the surge die (temp gold, until spent), distinct prefix so
+ *  the two payout sources stay attributable in telemetry/tests. */
+export const COVETED_DIE_PREFIX = 'coveted-';
+
 // ---------------------------------------------------------------------------
 // Die gear (§6) — the D2 interface; D5 makes it a persisted rail
 // ---------------------------------------------------------------------------

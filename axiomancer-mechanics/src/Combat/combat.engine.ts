@@ -66,7 +66,7 @@ import {
     crackedColorsForTurn, expireCrackedDice, advanceMomentumV2, resolveStanceCheck,
     isChainStance, activeDieGear, tableHasRoom,
     UPGRADEABLE_TABLE_CEILING, KINDLE_CONCURRENT_CAP, PRESS_FATE_COST,
-    OVERHEAT_CRACK_CHANCE, SPECIAL_FIRES_ON_USE, SURGE_DIE_PREFIX,
+    OVERHEAT_CRACK_CHANCE, SPECIAL_FIRES_ON_USE, SURGE_DIE_PREFIX, COVETED_DIE_PREFIX,
 } from './combat.upgradeable-dice';
 import {
     COMBAT_HAND_SIZE, buildCombatDeck, drawCombatCards, shuffleCombatDeck,
@@ -526,6 +526,8 @@ export function initializeCombatEncounter(
         // and every fired special reads it via `activeDieGear`.
         dieGear: clonedPlayer.dieGear,
         seed,
+        // Phase 33c (spec 33 §1) — no coveted die claimed yet this combat.
+        covetedDiceClaimed: [],
     };
 }
 
@@ -3785,6 +3787,41 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
     if (stanceCheck.yielded && next.conviction > stakeResult.conviction) {
         events.push({ kind: 'conviction-gained', amount: 1, total: next.conviction, reason: 'effect' });
     }
+
+    // Phase 33c (spec 33 §1) — THE COVETED DIE: a boss/unique phase authored
+    // `stake: true` converts to a temp gold die the moment its telegraph is
+    // denied (STAGGER-to-0), fully blocked, or its open stance check is
+    // answered with a yield. Resolved AFTER `next` above so the yield's own
+    // +1◆ payout composes first. One-time per phase index this combat
+    // (`covetedDiceClaimed`) — a repeating/locked final phase can't be farmed
+    // on every loop. Priority when more than one condition holds: stagger >
+    // block > yield (a single event, never a double-payout for one phase).
+    if (isUpgradeableDiceEnabled() && phase.stake && !(state.covetedDiceClaimed ?? []).includes(phase.index)) {
+        const method: 'stagger' | 'block' | 'yield' | null =
+            rungDenied ? 'stagger'
+                : (attacksLanded > 0 && attacksFullyBlocked === attacksLanded) ? 'block'
+                    : stanceCheck.yielded ? 'yield'
+                        : null;
+        if (method) {
+            next = { ...next, covetedDiceClaimed: [...(next.covetedDiceClaimed ?? []), phase.index] };
+            if (tableHasRoom(next)) {
+                const dieId = `${COVETED_DIE_PREFIX}${next.turn}-${next.log.length}`;
+                const die: CombatManaDie = {
+                    id: dieId, color: 'wild', face: 'mana', state: 'available',
+                    temporary: true, floating: true,
+                };
+                next = { ...next, dice: [...next.dice, die], floatingDice: [...(next.floatingDice ?? []), die] };
+                events.push({ kind: 'coveted-die-stolen', phaseIndex: phase.index, method, dieId });
+            } else {
+                const conviction = Math.min(CONVICTION_CAP, next.conviction + 1);
+                next = { ...next, conviction };
+                events.push({ kind: 'die-overflowed', source: 'coveted', total: conviction });
+                events.push({ kind: 'conviction-gained', amount: 1, total: conviction, reason: 'effect' });
+                events.push({ kind: 'coveted-die-stolen', phaseIndex: phase.index, method });
+            }
+        }
+    }
+
     next = withLog(next, events);
 
     // Outcome checks after the threat action (HP + capitulation).

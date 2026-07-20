@@ -88,3 +88,4 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-07-20T03:47:02Z | subagent | Explore | claude-fable-5 | main | Explore mobile app logging surface |
 | 2026-07-20T03:47:09Z | subagent | Explore | claude-fable-5 | main | Explore agent tooling + conventions |
 | 2026-07-20T03:52:25Z | subagent | Plan | claude-fable-5 | main | Design repo-wide logging plan |
+| 2026-07-20T09:41:15Z | slash-prompt | /march | unknown | user/ci | /march |

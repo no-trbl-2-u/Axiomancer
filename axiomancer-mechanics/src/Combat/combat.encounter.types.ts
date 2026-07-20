@@ -304,6 +304,10 @@ export interface CombatThreatBranchOutcome {
      *  no authored check on this fork (the `getThreatSequence` backfill fills
      *  the uniform default). */
     stanceCheck?: { punishes?: Stance; yields?: Stance };
+    /** Phase 33c (spec 33 §1) — this fork carries THE COVETED DIE. Undefined =
+     *  no coveted die on this fork (the common case; no boss/unique fork is
+     *  authored with one — see `combat.threat-sequences.ts`). */
+    stake?: boolean;
 }
 
 /**
@@ -367,6 +371,16 @@ export interface CombatThreatPhase {
      *  hidden information — the telegraph renders both fields. Undefined =
      *  no check this phase (and always inert while the flag is off). */
     stanceCheck?: { punishes?: Stance; yields?: Stance };
+
+    /** Phase 33c (spec 33 §1) — this phase carries THE COVETED DIE: denying
+     *  its telegraph (STAGGER-to-0), fully blocking it, or answering its
+     *  `stanceCheck`'s `yields` converts it to a temp gold die
+     *  (`resolveThreatPhase`, ceiling-gated — overflow → +1◆). Authored ONLY
+     *  on one phase (the 2nd authored step) per BOSS/UNIQUE
+     *  `AUTHORED_THREAT_SEQUENCES` entry — never backfilled, never on
+     *  elite/normal/simple. Undefined = no coveted die this phase (the
+     *  common case). Inert while the flag is off. */
+    stake?: boolean;
 }
 
 export type CombatThreatMark = 'clear' | 'overwhelmed' | 'pending';
@@ -630,10 +644,15 @@ export type CombatEvent =
     // The phase's open stance check resolved at phase end.
     | { kind: 'stance-check-resolved'; phaseIndex: number; outcome: 'punished' | 'yielded' | 'none'; stance: Stance | null }
     // The 7-object table ceiling refused a die grant; it converted to +1◆.
-    | { kind: 'die-overflowed'; source: 'surge' | 'kindle' | 'materialize'; total: number }
+    | { kind: 'die-overflowed'; source: 'surge' | 'kindle' | 'materialize' | 'coveted'; total: number }
     // An OVERHEAT push armed a second play but cracked the die: all-miss next
     // round, excluded from that round's Press Fate.
     | { kind: 'die-cracked'; dieId: string; color: CombatDieColor }
+    // Phase 33c — a boss/unique phase's coveted die was claimed: its telegraph
+    // was denied (STAGGER-to-0), fully blocked, or its open stance check was
+    // answered with a yield. `dieId` is absent when the table was full and the
+    // payout converted to +1◆ instead (see the paired `die-overflowed` event).
+    | { kind: 'coveted-die-stolen'; phaseIndex: number; method: 'stagger' | 'block' | 'yield'; dieId?: string }
     | { kind: 'combat-ended'; outcome: CombatOutcome };
 
 // ---------------------------------------------------------------------------
@@ -761,6 +780,12 @@ export interface CombatEncounterState {
      *  on settlement regardless of outcome; at most one stake live at a time.
      *  Optional (absent = no stake placed this phase). */
     stake?: { color: WheelStance; amount: 2 | 4 | 6 };
+    /** Phase 33c (spec 33 §1) — phase INDICES whose coveted die has already
+     *  been claimed THIS COMBAT (one-time-per-phase steal, so a repeating/
+     *  locked final phase can't be farmed on every loop). Initialized `[]` in
+     *  `initializeCombatEncounter`. Optional for back-compat (absent = none
+     *  claimed yet). */
+    covetedDiceClaimed?: number[];
     /** Phase 31 (EA-7) — extra "round-equivalents" folded into THE CLOCK's
      *  escalation basis (`resolveThreatPhase`'s `state.round - GRACE` term)
      *  every time a placed stake is LOST — a wasted read costs time the same

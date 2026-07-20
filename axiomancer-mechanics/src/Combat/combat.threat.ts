@@ -81,6 +81,11 @@ export interface AuthoredThreatPhase {
      *  while the upgradeable-dice flag is on (`resolveStanceCheck`); inert
      *  otherwise, so authoring it never disturbs the flag-off baseline. */
     stanceCheck?: { punishes?: Stance; yields?: Stance };
+    /** Phase 33c (spec 33 §1) — THE COVETED DIE: authored on exactly one
+     *  phase (the 2nd authored step) of every BOSS/UNIQUE sequence, never on
+     *  elite/normal/simple, never via backfill. Undefined = no coveted die on
+     *  this phase (the common case). */
+    stake?: boolean;
 }
 
 // ── WS9 (spec 32 §12 item 7, Ratified 2026-07-11) — conditional threat branches ──
@@ -164,6 +169,7 @@ export function commitThreatBranch(
         intentType: outcome.intentType,
         stanceHint: outcome.stanceHint,
         stanceCheck: outcome.stanceCheck,
+        stake: outcome.stake,
         branch: { ...phase.branch, taken },
     };
     return {
@@ -341,6 +347,7 @@ function resolveBranchOutcome(
         stanceHint: p.stanceHint ?? enemyStanceHint(enemy) ?? DEFAULT_STANCE_HINTS[p.enemyStance],
         rungs: p.rungs,
         stanceCheck: p.stanceCheck,
+        stake: p.stake,
     };
 }
 
@@ -386,6 +393,7 @@ function resolveAuthored(enemy: Enemy, authored: AuthoredThreatStep[]): CombatTh
             unlockAfterRound: p.unlockAfterRound,
             rungs: p.rungs,
             stanceCheck: p.stanceCheck,
+            stake: p.stake,
         });
     });
 }

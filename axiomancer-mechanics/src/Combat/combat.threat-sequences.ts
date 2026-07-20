@@ -104,7 +104,7 @@ export const AUTHORED_THREAT_SEQUENCES: Record<string, AuthoredThreatStep[]> = {
     // dot-resistant, and most kingly when cornered. (The village climax boss.)
     'enemy-king-of-revenge': [
         { enemyStance: 'mind', threatEffectId: 'debuff_mark', stanceCheck: { punishes: 'heart' }, actionText: "The King pronounces sentence and the shore itself holds you for it", stanceHint: "He still speaks in the cadence of a court, weighing your crimes by a statute only he remembers." },
-        { enemyStance: 'heart', damageWeight: 0.85, threatEffectId: 'debuff_mark', actionText: "The King rages over the wrong no one living recalls", stanceHint: "Beneath the crown there is no head — only the grievance, holding the shape of one." },
+        { enemyStance: 'heart', damageWeight: 0.85, threatEffectId: 'debuff_mark', stake: true, actionText: "The King rages over the wrong no one living recalls", stanceHint: "Beneath the crown there is no head — only the grievance, holding the shape of one." },
         { enemyStance: 'body', damageWeight: 1.2, stanceCheck: { yields: 'mind' }, actionText: "The King brings down the whole weight of his century of court", stanceHint: "Words spent, the grievance becomes the storm, all verdict and breaking surf." },
         { enemyStance: 'mind', damageWeight: 1.4, threatEffectId: 'debuff_poison', threatIntensity: 3, actionText: "The King makes one last cold, kingly ruling upon you", stanceHint: "Cornered, the old grievance turns sly again, plotting the cruelest lawful ruin." },
     ],
@@ -120,7 +120,7 @@ export const AUTHORED_THREAT_SEQUENCES: Record<string, AuthoredThreatStep[]> = {
     // Unique prophecy-calf — cerebral and grieving; the calamity is the final phase.
     'enemy-kudan': [
         { enemyStance: 'mind', damageWeight: 0.9, threatEffectId: 'debuff_mark', actionText: "The Kudan opens its human mouth, and your reply refuses to form", stanceHint: "It knows one true thing, and the knowing crowds every other sentence out of the room." },
-        { enemyStance: 'heart', damageWeight: 0.95, threatEffectId: 'debuff_mark', threatIntensity: 2, actionText: "It weeps for you, specifically, with terrible accuracy", stanceHint: "The grief is not for itself — it has read the ending, and the ending has your gait." },
+        { enemyStance: 'heart', damageWeight: 0.95, threatEffectId: 'debuff_mark', threatIntensity: 2, stake: true, actionText: "It weeps for you, specifically, with terrible accuracy", stanceHint: "The grief is not for itself — it has read the ending, and the ending has your gait." },
         { enemyStance: 'mind', damageWeight: 1.3, threatEffectId: 'debuff_poison', threatIntensity: 2, actionText: "The Kudan begins to speak the calamity, and the first word is your name", stanceHint: "Cold and exact now — the prophecy was always going to be delivered; it only needed a listener." },
     ],
     // Lane bogey — the begging and the taking are one escalating motion.
@@ -194,7 +194,7 @@ export const AUTHORED_THREAT_SEQUENCES: Record<string, AuthoredThreatStep[]> = {
     // Heart-dominant verdict, NOT befriendable — dot-weak; control-resistant scales.
     'enemy-mirac': [
         { enemyStance: 'body', actionText: "The court brings the red orb crashing down", stanceHint: "It hears no argument; it only lets the weight fall where weight must fall." },
-        { enemyStance: 'mind', damageWeight: 0.85, threatEffectId: 'debuff_mark', threatIntensity: 2, stanceCheck: { punishes: 'heart' }, actionText: "Mirac measures your conviction and finds it wanting", stanceHint: "Cold and exact, it weighs feeling against feeling on a fulcrum of pure indifference." },
+        { enemyStance: 'mind', damageWeight: 0.85, threatEffectId: 'debuff_mark', threatIntensity: 2, stanceCheck: { punishes: 'heart' }, stake: true, actionText: "Mirac measures your conviction and finds it wanting", stanceHint: "Cold and exact, it weighs feeling against feeling on a fulcrum of pure indifference." },
         { enemyStance: 'heart', damageWeight: 1.2, threatEffectId: 'debuff_mark', threatIntensity: 2, actionText: "Mirac pronounces sentence, and the verdict settles into your bones", stanceHint: "At the last its impartiality burns like wrath — final, absolute, and personally aggrieved." },
         { enemyStance: 'heart', damageWeight: 1.4, threatEffectId: 'debuff_mark', threatIntensity: 3, actionText: "The hooded court rises as one, and the red verdict is executed", stanceHint: "Sentence first, crime later — and the sentence has waited long enough." },
     ],
@@ -241,14 +241,14 @@ export const AUTHORED_THREAT_SEQUENCES: Record<string, AuthoredThreatStep[]> = {
     // Cellar boss — the courtesy is over; pure escalating muscle.
     'enemy-rawhead-rex': [
         { enemyStance: 'body', threatEffectId: 'debuff_bleed', stanceCheck: { punishes: 'body' }, actionText: "Rawhead comes up the stairs it was never supposed to leave", stanceHint: "A cellar-thing of pure muscle; the dark it lived in comes along politely." },
-        { enemyStance: 'heart', damageWeight: 0.9, threatEffectId: 'debuff_mark', threatIntensity: 2, stanceCheck: { yields: 'heart' }, actionText: "It grins the grin from every story you were told too young", stanceHint: "It knows exactly which bedtime warning you are remembering, because it is the warning." },
+        { enemyStance: 'heart', damageWeight: 0.9, threatEffectId: 'debuff_mark', threatIntensity: 2, stanceCheck: { yields: 'heart' }, stake: true, actionText: "It grins the grin from every story you were told too young", stanceHint: "It knows exactly which bedtime warning you are remembering, because it is the warning." },
         { enemyStance: 'body', damageWeight: 1.2, threatEffectId: 'debuff_mark', threatIntensity: 2, actionText: "The bloody bones swing with the weight of every child's held breath", stanceHint: "The stories underdescribed it. Stories have editors; cellars do not." },
         { enemyStance: 'body', damageWeight: 1.4, threatEffectId: 'debuff_bleed', threatIntensity: 3, actionText: "Rawhead ends the courtesy it extended for a hundred years", stanceHint: "The stairs are behind it now; nothing about it is under anything anymore." },
     ],
     // Befriendable weaver — Control-weak (hand it a thread it didn't spin); erosion-resistant web.
     'enemy-fate-spinner': [
         { enemyStance: 'mind', damageWeight: 0.85, actionText: "The Spinner tightens a thread you did not know you were standing on", stanceHint: "Every move a reasoned counter; the web was drafted before you arrived." },
-        { enemyStance: 'heart', damageWeight: 0.85, threatEffectId: 'debuff_mark', actionText: "He shows you the tapestry with your next three mistakes already woven", stanceHint: "There is an old sorrow in the showing — he has never once been surprised." },
+        { enemyStance: 'heart', damageWeight: 0.85, threatEffectId: 'debuff_mark', stake: true, actionText: "He shows you the tapestry with your next three mistakes already woven", stanceHint: "There is an old sorrow in the showing — he has never once been surprised." },
         { enemyStance: 'mind', damageWeight: 1.2, threatEffectId: 'debuff_mark', threatIntensity: 2, actionText: "He spins your hesitation into the loom mid-thought", stanceHint: "Cold and certain: your pauses are his raw material." },
         { enemyStance: 'mind', damageWeight: 1.4, threatEffectId: 'debuff_poison', threatIntensity: 3, actionText: "The Spinner pulls the pattern taut, and your part in it concludes", stanceHint: "The final motif was always going to be a struggle, rendered beautifully." },
     ],
@@ -262,7 +262,7 @@ export const AUTHORED_THREAT_SEQUENCES: Record<string, AuthoredThreatStep[]> = {
     // Administrative mummy-king — decrees, countersigned, escalating.
     'enemy-ra-amin-ka': [
         { enemyStance: 'mind', threatEffectId: 'debuff_mark', threatIntensity: 2, actionText: "Ra-Amin-Ka issues a decree, and your tempo is annexed", stanceHint: "Cold administration; every strike is a signature, witnessed." },
-        { enemyStance: 'mind', damageWeight: 0.9, threatEffectId: 'debuff_mark', threatIntensity: 2, actionText: "He strikes your objection from the record of the living", stanceHint: "The court of dust has procedures older than your language." },
+        { enemyStance: 'mind', damageWeight: 0.9, threatEffectId: 'debuff_mark', threatIntensity: 2, stake: true, actionText: "He strikes your objection from the record of the living", stanceHint: "The court of dust has procedures older than your language." },
         { enemyStance: 'body', damageWeight: 1.2, threatEffectId: 'debuff_mark', threatIntensity: 2, actionText: "The bandaged hand closes, and the kingdom presumes your loyalty", stanceHint: "When paper fails, the king remembers that hands predate paper." },
         { enemyStance: 'mind', damageWeight: 1.4, threatEffectId: 'debuff_poison', threatIntensity: 3, actionText: "The final decree is read, and it concerns your continued existence", stanceHint: "The bandages are signed; the last signature required is yours, posthumously." },
     ],
@@ -335,14 +335,14 @@ export const AUTHORED_THREAT_SEQUENCES: Record<string, AuthoredThreatStep[]> = {
     // accusation is inured to being charmed, and steadies her against it.
     'enemy-rangda': [
         { enemyStance: 'heart', threatEffectId: 'debuff_mark', threatIntensity: 2, rungs: 2, actionText: "Rangda keens, and the curse arrives still weeping", stanceHint: "Grief that learned sorcery; every hex is a lesson she passed alone." },
-        { enemyStance: 'mind', damageWeight: 0.9, threatEffectId: 'debuff_poison', threatIntensity: 2, swayCleanse: 3, stanceCheck: { punishes: 'mind' }, actionText: "She recites the syllabus of four hundred years of accusation", stanceHint: "Each charge they invented, she studied; the coursework is in your blood now." },
+        { enemyStance: 'mind', damageWeight: 0.9, threatEffectId: 'debuff_poison', threatIntensity: 2, swayCleanse: 3, stanceCheck: { punishes: 'mind' }, stake: true, actionText: "She recites the syllabus of four hundred years of accusation", stanceHint: "Each charge they invented, she studied; the coursework is in your blood now." },
         { enemyStance: 'heart', damageWeight: 1.2, threatEffectId: 'debuff_poison', threatIntensity: 2, stanceCheck: { yields: 'heart' }, actionText: "She shows you the widow under the mask, and the showing burns", stanceHint: "The monster was assigned; the mourning was hers." },
         { enemyStance: 'heart', damageWeight: 1.4, threatEffectId: 'debuff_mark', threatIntensity: 3, actionText: "Rangda lets the whole studied grief off its leash at once", stanceHint: "Love with nowhere to go, four centuries compounded, finds somewhere." },
     ],
     // The agreed twins — consensus was the threat the arguing held back.
     'enemy-zoma-ascendant': [
         { enemyStance: 'mind', damageWeight: 0.9, threatEffectId: 'debuff_mark', threatIntensity: 2, actionText: "Both voices state the same premise, and it doubles in the air", stanceHint: "The two voices agree now; the argument was the safety mechanism." },
-        { enemyStance: 'heart', damageWeight: 0.95, threatEffectId: 'debuff_mark', threatIntensity: 2, actionText: "They invite you, warmly, in unison, to concur", stanceHint: "Agreement at this register is gravitational; dissent takes effort they no longer spend." },
+        { enemyStance: 'heart', damageWeight: 0.95, threatEffectId: 'debuff_mark', threatIntensity: 2, stake: true, actionText: "They invite you, warmly, in unison, to concur", stanceHint: "Agreement at this register is gravitational; dissent takes effort they no longer spend." },
         { enemyStance: 'mind', damageWeight: 1.2, threatEffectId: 'debuff_mark', threatIntensity: 2, actionText: "The consensus rules your objection out of order, permanently", stanceHint: "There is no gap between the voices left to argue through." },
         { enemyStance: 'mind', damageWeight: 1.45, threatEffectId: 'debuff_poison', threatIntensity: 3, actionText: "The twin verdict lands as one sentence with no seam in it", stanceHint: "What the arguing held back, the agreement delivers entire." },
     ],
@@ -352,7 +352,7 @@ export const AUTHORED_THREAT_SEQUENCES: Record<string, AuthoredThreatStep[]> = {
     // the boss finisher outright demands more STAGGER than the flat default.
     'enemy-elder-fire-giant': [
         { enemyStance: 'body', threatEffectId: 'debuff_mark', threatIntensity: 2, actionText: "The white heat settles over you like a season changing", stanceHint: "A fire gone pale with age; it burns the way glaciers move." },
-        { enemyStance: 'mind', damageWeight: 0.9, enemyCleanse: 1, actionText: "The elder considers you with the patience of a thing that outlived its own eruption, and its old scars close over", stanceHint: "Old flame plans in centuries; you are a brief agenda item." },
+        { enemyStance: 'mind', damageWeight: 0.9, enemyCleanse: 1, stake: true, actionText: "The elder considers you with the patience of a thing that outlived its own eruption, and its old scars close over", stanceHint: "Old flame plans in centuries; you are a brief agenda item." },
         { enemyStance: 'body', damageWeight: 1.2, threatEffectId: 'debuff_poison', threatIntensity: 2, actionText: "The pale blade falls with the weight of everything it has already burned", stanceHint: "The cloak of ash is a ledger; it adds you neatly." },
         { enemyStance: 'body', damageWeight: 1.45, threatEffectId: 'debuff_poison', threatIntensity: 3, rungs: 4, actionText: "The oldest fire in the world burns, once, entirely", stanceHint: "Whiteness is what flame becomes when it stops needing to prove anything." },
     ],
@@ -362,7 +362,7 @@ export const AUTHORED_THREAT_SEQUENCES: Record<string, AuthoredThreatStep[]> = {
     // damage-heavy.
     'enemy-tezcatlipoca': [
         { enemyStance: 'mind', damageWeight: 0.85, threatEffectId: 'debuff_mark', threatIntensity: 2, stanceCheck: { punishes: 'mind' }, actionText: "The mirror shows you mid-mistake, slightly before you make it", stanceHint: "It calculates in reflections; the smoke is where the discarded versions go." },
-        { enemyStance: 'heart', damageWeight: 0.95, threatEffectId: 'debuff_mark', threatIntensity: 2, stanceCheck: { yields: 'heart' }, actionText: "It shows you the version of you that already lost, at leisure", stanceHint: "There is grief in the glass — every reflection it keeps was somebody's best attempt." },
+        { enemyStance: 'heart', damageWeight: 0.95, threatEffectId: 'debuff_mark', threatIntensity: 2, stanceCheck: { yields: 'heart' }, stake: true, actionText: "It shows you the version of you that already lost, at leisure", stanceHint: "There is grief in the glass — every reflection it keeps was somebody's best attempt." },
         {
             branch: {
                 condition: { kind: 'prior-threat-fully-blocked' },
@@ -375,28 +375,28 @@ export const AUTHORED_THREAT_SEQUENCES: Record<string, AuthoredThreatStep[]> = {
     // The promoted appetite — administrative violence at scale.
     'enemy-arch-demon': [
         { enemyStance: 'body', threatEffectId: 'debuff_poison', threatIntensity: 2, actionText: "The Arch-Demon backhands a portion of the battlefield out of the ledger", stanceHint: "Appetite promoted past restraint; the violence is administrative." },
-        { enemyStance: 'mind', damageWeight: 0.9, threatEffectId: 'debuff_mark', threatIntensity: 2, actionText: "It reviews your file, aloud, with commentary", stanceHint: "Somewhere below, lesser devils are already processing the outcome." },
+        { enemyStance: 'mind', damageWeight: 0.9, threatEffectId: 'debuff_mark', threatIntensity: 2, stake: true, actionText: "It reviews your file, aloud, with commentary", stanceHint: "Somewhere below, lesser devils are already processing the outcome." },
         { enemyStance: 'body', damageWeight: 1.2, threatEffectId: 'debuff_mark', threatIntensity: 2, actionText: "It signs the intent to consume, in triplicate, on your guard", stanceHint: "Each blow is countersigned; the bureaucracy is load-bearing." },
         { enemyStance: 'body', damageWeight: 1.45, threatEffectId: 'debuff_poison', threatIntensity: 3, actionText: "The appetite executes its mandate in full", stanceHint: "The promotion came with discretionary powers, and this is the discretion." },
     ],
     // Lord of swarms — each fly a small opinion; together, policy.
     'enemy-beelzebub': [
         { enemyStance: 'mind', damageWeight: 0.85, threatEffectId: 'debuff_mark', threatIntensity: 2, actionText: "The swarm opens debate on the subject of your surfaces", stanceHint: "Each fly is a small opinion; the buzzing is deliberation." },
-        { enemyStance: 'heart', damageWeight: 0.95, threatEffectId: 'debuff_mark', threatIntensity: 2, actionText: "The swarm votes, and the air itself abstains from you", stanceHint: "Beneath the lord's stillness, ten million constituents reach alignment." },
+        { enemyStance: 'heart', damageWeight: 0.95, threatEffectId: 'debuff_mark', threatIntensity: 2, stake: true, actionText: "The swarm votes, and the air itself abstains from you", stanceHint: "Beneath the lord's stillness, ten million constituents reach alignment." },
         { enemyStance: 'body', damageWeight: 1.2, threatEffectId: 'debuff_poison', threatIntensity: 2, actionText: "Policy is enacted across every inch of you at once", stanceHint: "The swarm does nothing singly; enforcement is unanimous." },
         { enemyStance: 'mind', damageWeight: 1.45, threatEffectId: 'debuff_poison', threatIntensity: 3, actionText: "Beelzebub ratifies the final motion, and the swarm descends as one", stanceHint: "The lord of everything that swarms calls the question, and the question is you." },
     ],
     // Unique: the punctual end — courteous, scheduled, and compounding.
     'enemy-death': [
         { enemyStance: 'mind', damageWeight: 0.9, threatEffectId: 'debuff_mark', threatIntensity: 2, stanceCheck: { yields: 'mind' }, actionText: "Death consults the ledger, and your minutes begin reporting to it", stanceHint: "It is not cruel. It is punctual, and it has already read your schedule." },
-        { enemyStance: 'heart', damageWeight: 0.95, threatEffectId: 'debuff_mark', threatIntensity: 2, stanceCheck: { punishes: 'heart' }, actionText: "It offers its hand, the way one does to the late", stanceHint: "The courtesy is so old it reads as coldness; the appointment is genuine." },
+        { enemyStance: 'heart', damageWeight: 0.95, threatEffectId: 'debuff_mark', threatIntensity: 2, stanceCheck: { punishes: 'heart' }, stake: true, actionText: "It offers its hand, the way one does to the late", stanceHint: "The courtesy is so old it reads as coldness; the appointment is genuine." },
         { enemyStance: 'mind', damageWeight: 1.2, threatEffectId: 'debuff_poison', threatIntensity: 2, actionText: "It amortizes you, gently, against the remaining term", stanceHint: "The arithmetic of endings is its whole vocation, and it does not round in your favor." },
         { enemyStance: 'mind', damageWeight: 1.45, threatEffectId: 'debuff_poison', threatIntensity: 3, actionText: "Death keeps the appointment", stanceHint: "It has never once been early. That was the whole of its mercy, and it is spent." },
     ],
     // Unique: the never-begun god — patience predating existence; the world it was owed.
     'enemy-the-abortive': [
         { enemyStance: 'heart', damageWeight: 0.9, threatEffectId: 'debuff_mark', threatIntensity: 2, actionText: "The Abortive shows you the world it was meant to begin", stanceHint: "It feels everything it never got to be; the grief predates the griever." },
-        { enemyStance: 'mind', damageWeight: 0.95, threatEffectId: 'debuff_mark', threatIntensity: 2, actionText: "It unsays the part of the world that took its place", stanceHint: "Displacement is the only theology it was taught, and it studied." },
+        { enemyStance: 'mind', damageWeight: 0.95, threatEffectId: 'debuff_mark', threatIntensity: 2, stake: true, actionText: "It unsays the part of the world that took its place", stanceHint: "Displacement is the only theology it was taught, and it studied." },
         { enemyStance: 'heart', damageWeight: 1.2, threatEffectId: 'debuff_poison', threatIntensity: 2, actionText: "It reaches for you with a strength never spent on living", stanceHint: "Everything it would have poured into a cosmos, it pours into the reaching." },
         { enemyStance: 'heart', damageWeight: 1.45, threatEffectId: 'debuff_poison', threatIntensity: 3, actionText: "The unbegun god tries, one more time, to begin — through you", stanceHint: "Its patience predates its existence, and both predate your defenses." },
     ],
@@ -406,14 +406,14 @@ export const AUTHORED_THREAT_SEQUENCES: Record<string, AuthoredThreatStep[]> = {
     // Act I boss: the hinge-priest — control and stance-denial; the doors do the fighting.
     'enemy-the-doorwarden': [
         { enemyStance: 'body', threatEffectId: 'debuff_mark', threatIntensity: 2, actionText: "A threshold assembles itself under your feet and declines to be crossed", stanceHint: "He worships thresholds; where you would step, a doctrine has already been installed." },
-        { enemyStance: 'mind', damageWeight: 0.9, threatEffectId: 'debuff_mark', threatIntensity: 2, actionText: "He closes a door you were keeping open in your head", stanceHint: "Every door that ever shut is remembered in him, and he consults the memory alphabetically." },
+        { enemyStance: 'mind', damageWeight: 0.9, threatEffectId: 'debuff_mark', threatIntensity: 2, stake: true, actionText: "He closes a door you were keeping open in your head", stanceHint: "Every door that ever shut is remembered in him, and he consults the memory alphabetically." },
         { enemyStance: 'body', damageWeight: 1.2, threatEffectId: 'debuff_mark', threatIntensity: 2, actionText: "The bronze frame swings through you like a door through a draught", stanceHint: "Sermon concluded, the hinge-priest recalls that he is mostly hinge." },
         { enemyStance: 'body', damageWeight: 1.4, threatEffectId: 'debuff_mark', threatIntensity: 3, actionText: "Every door he remembers shuts at once, and you are the room", stanceHint: "The liturgy reaches its one commandment: what shuts, stays shut." },
     ],
     // Act II boss: the librarian-golem — misfiled truths as DoT; the paper does the cutting.
     'enemy-the-index': [
         { enemyStance: 'mind', threatEffectId: 'debuff_bleed', threatIntensity: 2, actionText: "A drawer opens at your name and issues the first thousand paper cuts", stanceHint: "It files before it strikes; the cuts arrive pre-catalogued." },
-        { enemyStance: 'mind', damageWeight: 0.9, threatEffectId: 'debuff_poison', threatIntensity: 2, actionText: "It misfiles you under KINDLING and shelves you beside the lamp oil", stanceHint: "The Archive's errata smoulder; a truth in the wrong place is an accelerant." },
+        { enemyStance: 'mind', damageWeight: 0.9, threatEffectId: 'debuff_poison', threatIntensity: 2, stake: true, actionText: "It misfiles you under KINDLING and shelves you beside the lamp oil", stanceHint: "The Archive's errata smoulder; a truth in the wrong place is an accelerant." },
         { enemyStance: 'body', damageWeight: 1.2, threatEffectId: 'debuff_bleed', threatIntensity: 3, actionText: "The card-drawer ribs slam open and closed on whatever of you is nearest", stanceHint: "Out of patience with citation, the golem remembers its shelving is oak and iron." },
         { enemyStance: 'mind', damageWeight: 1.4, threatEffectId: 'debuff_poison', threatIntensity: 3, actionText: "It reads out every wrong entry ever filed about you, and the reading scalds", stanceHint: "The whole errata at once: a bonfire of corrections, and you are the margin they burn in." },
     ],
@@ -423,7 +423,7 @@ export const AUTHORED_THREAT_SEQUENCES: Record<string, AuthoredThreatStep[]> = {
     // rungs:2 — the real answer arrives once he starts redacting.
     'enemy-the-sophist': [
         { enemyStance: 'mind', threatEffectId: 'debuff_mark', threatIntensity: 2, rungs: 2, actionText: "The Sophist restates your position, improved, and aims it back at you", stanceHint: "He fights with borrowed premises — yours, mostly, held at a more flattering angle." },
-        { enemyStance: 'heart', damageWeight: 0.9, threatEffectId: 'debuff_mark', threatIntensity: 2, actionText: "He concedes a point you had not made yet, courteously, like a trap", stanceHint: "The etiquette is the blade; the house eats the courteous last." },
+        { enemyStance: 'heart', damageWeight: 0.9, threatEffectId: 'debuff_mark', threatIntensity: 2, stake: true, actionText: "He concedes a point you had not made yet, courteously, like a trap", stanceHint: "The etiquette is the blade; the house eats the courteous last." },
         { enemyStance: 'mind', damageWeight: 1.2, threatEffectId: 'debuff_mark', threatIntensity: 2, premiseShed: 3, actionText: "He strikes your best premise from the record and signs the deletion in thirds", stanceHint: "Centuries of clerkship: what he cannot win he redacts." },
         { enemyStance: 'mind', damageWeight: 1.45, threatEffectId: 'debuff_poison', threatIntensity: 3, actionText: "The Sophist closes the argument with your own opening move, perfected", stanceHint: "The narration stops being about you and starts happening to you." },
     ],
@@ -440,7 +440,7 @@ export const AUTHORED_THREAT_SEQUENCES: Record<string, AuthoredThreatStep[]> = {
     // (most losses are the round cap, which is the theme).
     'enemy-the-incompleteness': [
         { enemyStance: 'mind', damageWeight: 0.21, threatEffectId: 'debuff_mark', threatIntensity: 2, actionText: "The Incompleteness states a truth your system cannot express, and your reply dies unprovable", stanceHint: "It begins from outside every axiom you brought; you cannot see the floor it stands on." },
-        { enemyStance: 'heart', damageWeight: 0.232, threatEffectId: 'debuff_mark', threatIntensity: 2, actionText: "The Incompleteness shows you the true sentence about yourself that you will never be able to prove", stanceHint: "For a moment it grieves for you, the way one grieves for a house that believes it is finished." },
+        { enemyStance: 'heart', damageWeight: 0.232, threatEffectId: 'debuff_mark', threatIntensity: 2, stake: true, actionText: "The Incompleteness shows you the true sentence about yourself that you will never be able to prove", stanceHint: "For a moment it grieves for you, the way one grieves for a house that believes it is finished." },
         { enemyStance: 'mind', damageWeight: 0.271, threatEffectId: 'debuff_mark', threatIntensity: 3, enemyHeal: 8, actionText: "The Incompleteness incorporates your strongest argument as a new axiom and grows truer", stanceHint: "Whatever you add to it, it contains; whatever wounds it becomes another thing it survives." },
         { enemyStance: 'mind', damageWeight: 0.326, threatEffectId: 'debuff_mark', threatIntensity: 3, isFinalPhase: true, actionText: "The Incompleteness proves, within you, the statement that you cannot go on — and you cannot refute it", stanceHint: "There is no triumph in it; the proof was never finishable, it only needed you to stop." },
     ],
