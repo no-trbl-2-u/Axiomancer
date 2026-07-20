@@ -24,7 +24,9 @@
   ErrorBoundary now logs `error/react-boundary` and flushes the crash
   tail; a Sentry-class SDK is a new external service + account, so it
   stays a deliberate owner decision; the insertion point is documented
-  in `ErrorBoundary.tsx`. (c) **`expo-clipboard`** for native COPY
+  in `ErrorBoundary.tsx`. RESOLVED 2026-07-20 (owner, layer-survey
+  session): in-house first — see the "In-house crash capture" row
+  below; Sentry stays a later opt-in bolt-on. (c) **`expo-clipboard`** for native COPY
   parity on the crash screen (web uses `navigator.clipboard` today;
   native falls back to selectable text) — a native dep, belongs in a
   dep-review pass, not a logging tick.
@@ -53,6 +55,48 @@
   header); (b) echo — `synergy` state predicates read as the same
   condition-line class per spec 32 §2; (c) peroration — 7 off-seat reach
   cards are unswappable without a coordinated multi-seat recolor.
+
+### In-house crash capture — global handlers + next-launch crash prompt (owner-ruled 2026-07-20)
+- source: owner session 2026-07-20 (missing-layers survey). The 2026-07-20
+  logging layer left crash capture half-done: only React RENDER errors
+  reach the crash tail (via `ErrorBoundary.tsx`); unhandled promise
+  rejections and non-render JS errors vanish, and nothing surfaces a
+  prior-session crash on next launch. The owner daily-drives EAS preview
+  APKs, so field crashes currently die silently on-device.
+- decision (owner, near-verbatim ruling "in-house first"): NO third-party
+  SDK now. Scope: (a) a global JS error handler (`ErrorUtils.setGlobalHandler`
+  on native, `window.onerror`/`unhandledrejection` on web) feeding the
+  existing `error` log domain + `flushLogTail()`; (b) an unhandled-promise-
+  rejection hook, same sink; (c) a next-launch check of the persisted crash
+  tail (`@axiomancer/logtail:v1`) that offers "previous session crashed —
+  view/copy report" reusing the ErrorBoundary's report rendering. $0, no
+  network touchpoint — consistent with the offline doctrine.
+- Sentry (symbolicated stacks for minified Hermes builds + native-crash
+  capture) is explicitly a LATER opt-in bolt-on, only if minified preview-
+  APK stacks actually bite; the insertion point stays documented in
+  `ErrorBoundary.tsx`. Do not add it in this phase.
+- small phase; mobile-only; pairs with the existing crash-tail e2e surface
+  for its witness.
+
+### Central juice/animation layer (mobile — owner-selected 2026-07-20)
+- source: owner session 2026-07-20 (missing-layers survey). Reanimated
+  animation logic is spread across ~33 component files (dice rolls, boards,
+  tutorial coaches, toasts, `RollingDie.tsx`, `MapCanvas.tsx`) with no
+  shared system — no common screen-shake, particle, hit-flash, or
+  transition manager. For a game whose core fun is status-effect combat,
+  feel/juice is uncoordinated per-component work today.
+- shape: a shared animation/juice module (mobile `lib/` or `components/`
+  core) offering the recurring primitives — screen shake, impact flash,
+  status-proc pulse, number pops, standard enter/exit transitions — all
+  gated through the existing `useReducedMotion` hook, with haptics
+  co-triggered where the ~20 existing `expo-haptics` call sites overlap.
+  Migration is incremental: new work uses the system; existing components
+  migrate opportunistically, combat surfaces first.
+- sequencing note: respect the parked "Expo decouple" candidate — build on
+  bare reanimated/worklets (which carry over), not Expo-coupled APIs
+  beyond the existing haptics usage.
+- promote as a bounded first phase (the module + combat-encounter adoption),
+  not a big-bang rewrite.
 
 ### Enchant/disenchant hooks are per-card engine code — generalize before those seats can grow
 - source: swap-pool fan-out 2026-07-18. The pool is spells-only because

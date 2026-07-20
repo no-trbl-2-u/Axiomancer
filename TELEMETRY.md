@@ -91,3 +91,4 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-07-20T09:41:15Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-07-20T11:29:52Z | slash-prompt | /digest | unknown | user/ci | /digest |
 | 2026-07-20T11:29:55Z | skill | digest | unknown | main | - |
+| 2026-07-20T13:42:12Z | subagent | Explore | unknown | main | Survey cross-cutting layers |
