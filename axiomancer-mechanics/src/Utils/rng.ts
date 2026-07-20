@@ -3,6 +3,8 @@
  * Uses a simple Linear Congruential Generator (LCG) for deterministic output.
  */
 
+import { getLogger, isLoggingEnabled } from '../Log';
+
 export interface Rng {
     /** Returns a floating-point value in [0, 1) */
     random(): number;
@@ -46,6 +48,7 @@ let globalRng: Rng = new SimpleRng();
 /** Set global RNG instance (for seeding or testing) */
 export function setRng(rng: Rng): void {
     globalRng = rng;
+    if (isLoggingEnabled()) getLogger().debug('rng', 'rng-replaced');
 }
 
 /** Get global RNG instance */
@@ -57,6 +60,9 @@ export function getRng(): Rng {
 export function setSeed(seed: string | number): void {
     const numericSeed = typeof seed === 'string' ? hashString(seed) : seed;
     globalRng = new SimpleRng(numericSeed);
+    // The replay key: with this entry an agent can reproduce the whole
+    // session deterministically. Never log inside random()/setState().
+    if (isLoggingEnabled()) getLogger().info('rng', 'seed-set', { seed, numericSeed });
 }
 
 /** Simple string hash for seed conversion */

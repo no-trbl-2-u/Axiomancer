@@ -83,3 +83,8 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-07-19T19:36:03Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-07-19T05:28:08Z | skill | artifact-design | claude-fable-5 | main | - |
 | 2026-07-20T00:55:03Z | subagent | card-expert | claude-fable-5 | main | Promote 8 swap-pool cards into presets |
+| 2026-07-20T03:29:54Z | skill | schedule | claude-fable-5 | main | args: list my scheduled routines |
+| 2026-07-20T03:46:56Z | subagent | Explore | claude-fable-5 | main | Map monorepo + existing logging |
+| 2026-07-20T03:47:02Z | subagent | Explore | claude-fable-5 | main | Explore mobile app logging surface |
+| 2026-07-20T03:47:09Z | subagent | Explore | claude-fable-5 | main | Explore agent tooling + conventions |
+| 2026-07-20T03:52:25Z | subagent | Plan | claude-fable-5 | main | Design repo-wide logging plan |

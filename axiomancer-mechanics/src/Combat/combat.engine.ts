@@ -23,6 +23,7 @@
 
 import { deepClone } from '../Utils';
 import { getRng, setSeed } from '../Utils/rng';
+import { isLoggingEnabled, forwardCombatEventsToLog } from '../Log';
 import { MAX_EFFECT_INTENSITY, FREE_ENCHANT_ROUNDS } from '../Game/game-mechanics.constants';
 import { lookupEffect, applyEffect } from '../Effects';
 import type { Effect, ActiveEffect } from '../Effects/types';
@@ -992,6 +993,10 @@ function draftedDie(state: CombatEncounterState): CombatManaDie | null {
 
 function withLog(state: CombatEncounterState, events: CombatEvent[]): CombatEncounterState {
     if (!events.length) return state;
+    // AXM Log tap: `withLog` is the single choke point every emission site
+    // routes through, so one guarded forward here mirrors the whole combat
+    // event stream. One boolean read when logging is off (the sim default).
+    if (isLoggingEnabled()) forwardCombatEventsToLog(events);
     // WI-1 — accumulate the REAL DoT damage the enemy takes this round as its
     // ticks are logged. `withLog` is the single choke point every emission site
     // routes through, so folding here catches all enemy `dot-tick` families

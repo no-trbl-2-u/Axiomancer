@@ -503,3 +503,14 @@ export {
     isLevelUpEvent, isInventoryChangedEvent,
     isDialogueAppliedEvent, isGameSavedEvent, isGameLoadedEvent,
 } from './Game/events.utils';
+
+// ── AXM Log (structured logging — docs/logging.md) ────────────────────────
+export {
+    createAxmLogger, getLogger, configureLogging, isLoggingEnabled,
+    resetLoggingForTests, forwardCombatEventsToLog,
+    AXM_LOG_LEVELS, AXM_LOG_DOMAINS, AXM_LOG_LEVEL_RANK,
+} from './Log';
+export type {
+    AxmLogger, AxmLogEntry, AxmLogLevel, AxmLogDomain, AxmLogSink,
+    AxmLogFilter, AxmLoggerStats, AxmLoggerConfig,
+} from './Log';

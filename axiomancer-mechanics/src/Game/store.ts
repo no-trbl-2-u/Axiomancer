@@ -50,6 +50,7 @@ import { GameEventEmitter, GameEvent, GameEventType } from './events';
 import { PersistenceAdapter } from './persistence/types';
 import { rollEncounterLoot, totalEncounterXp } from './combat-grants';
 import { getRng } from '../Utils/rng';
+import { getLogger, isLoggingEnabled } from '../Log';
 import { getAvailableCards } from '../Cards';
 import {
     addItem as addItemReducer,
@@ -270,6 +271,35 @@ function eventForAction(
 }
 
 /**
+ * AXM Log tap: forwards every emitted GameEvent as a SANITIZED log entry.
+ * The raw payload embeds the full `GameState` (`eventForAction` above) — a
+ * buffer of those would pin hundreds of state copies, so we log only the
+ * event type, the action type, and a few small derived scalars. Defensive
+ * throughout: unknown payload shapes degrade to `{ type }`, never throw.
+ */
+function logGameEventSanitized(event: GameEvent): void {
+    try {
+        const p = (event.payload ?? {}) as {
+            action?: { type?: string; payload?: { nodeId?: string } };
+            state?: { player?: { level?: number; health?: number } };
+            report?: { outcome?: string };
+            unlockedCards?: string[];
+            item?: { id?: string; name?: string };
+        };
+        const data: Record<string, unknown> = {};
+        if (p.action?.type) data.action = p.action.type;
+        if (p.action?.payload?.nodeId) data.nodeId = p.action.payload.nodeId;
+        if (p.report?.outcome) data.outcome = p.report.outcome;
+        if (p.unlockedCards?.length) data.unlockedCards = p.unlockedCards;
+        if (p.item) data.item = p.item.id ?? p.item.name;
+        if (event.type === 'character:levelup' && p.state?.player?.level !== undefined) {
+            data.level = p.state.player.level;
+        }
+        getLogger().info('game', event.type, data);
+    } catch { /* logging must never break the store */ }
+}
+
+/**
  * Constructs a Zustand vanilla store backed by `adapter`.
  *
  * @param adapter   - Persistence backend (Node fs, AsyncStorage, null for tests).
@@ -287,9 +317,21 @@ export function createGameStore(
     const base    = saved ?? createNewGameState();
     const initial: GameState = { ...base, ...overrides };
 
+    // AXM Log tap: one `onAny` subscription catches `eventForAction`
+    // emissions AND the direct inventory/save emits below, all through the
+    // sanitizer (raw payloads embed the full GameState — never buffer them).
+    // The flag is checked per-event, not at creation, so consumers may
+    // enable logging before OR after building the store.
+    if (emitter) {
+        emitter.onAny(e => { if (isLoggingEnabled()) logGameEventSanitized(e); });
+    }
+
     // Restore RNG state from loaded save
     if (saved?.rngState !== undefined) {
         getRng().setState(saved.rngState);
+        if (isLoggingEnabled()) {
+            getLogger().info('rng', 'rng-state-restored', { rngState: saved.rngState });
+        }
     }
 
     return createStore<GameStore>()((set, get) => {
@@ -298,6 +340,7 @@ export function createGameStore(
         // DURABLE_ACTIONS set; UI-tier actions never write through. The
         // direct `save()` verb below keeps its own unconditional write.
         function dispatch(action: GameAction, extra?: { report?: CombatEndReport }): GameState {
+            if (isLoggingEnabled()) getLogger().debug('game', `action:${action.type}`);
             const prev = get();
             const next = gameReducer(prev, action);
             set(next);
