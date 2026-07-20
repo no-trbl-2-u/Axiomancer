@@ -115,3 +115,7 @@ If you cannot, extract logic until you can — or document the
   from `src/test-utils/rng.ts`. Do not re-roll your own `vi.spyOn(Math, 'random')`.
 - **Verification:** `npm test` green twice + `npm run type-check` clean before
   declaring done.
+- **Observability:** the repo-wide structured logging contract (the `src/Log/`
+  module, its engine taps, and the `--log-level`/`--log-file` CLI flags) is
+  documented in [`../docs/logging.md`](../docs/logging.md). It is default-OFF —
+  sims and tests must leave it that way.

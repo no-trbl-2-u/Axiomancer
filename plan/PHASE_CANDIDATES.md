@@ -9,7 +9,25 @@
 
 ## Pending
 
-### Swap-pool measurement pass — /deck-tuning over the 300-card pool
+### AXM Log follow-ups — minigame engine taps, Sentry slot, native clipboard
+- source: repo-wide structured logging shipped 2026-07-20 (owner-directed,
+  direct-to-main; contract in `docs/logging.md`). V1 taps combat
+  (`withLog`), the game store emitter, RNG seeding, the CLI envelope
+  stream, and the mobile action/nav/persistence/error surfaces. Three
+  deliberate deferrals:
+- shape: (a) **engine-side minigame chokepoint taps** — the five
+  `World/{Hazard,Gathering,Rest,LootCache,QuestBoard}` engines return
+  `{ state, events }` but only reach the log via mobile's wrapped
+  actions; a `withLog`-style forward at each engine (guarded by
+  `isLoggingEnabled()`, sims stay silent) would give CLIs and future
+  drivers the same stream mobile gets. (b) **crash reporting** — the
+  ErrorBoundary now logs `error/react-boundary` and flushes the crash
+  tail; a Sentry-class SDK is a new external service + account, so it
+  stays a deliberate owner decision; the insertion point is documented
+  in `ErrorBoundary.tsx`. (c) **`expo-clipboard`** for native COPY
+  parity on the crash screen (web uses `navigator.clipboard` today;
+  native falls back to selectable text) — a native dep, belongs in a
+  dep-review pass, not a logging tick.
 - source: owner-directed fan-out 2026-07-18 (PR #130, merged 4df9a366).
   Ten `swap-<theme>` sandbox sets (30 spells each, 10/12/8) now stand as
   measurement-seat candidates; the `+swap:` deck grammar and multi-set

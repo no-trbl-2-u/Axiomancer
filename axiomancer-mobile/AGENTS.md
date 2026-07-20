@@ -52,3 +52,12 @@ See [`docs/testing.md`](./docs/testing.md) for the complete hermetic e2e
 testing standard. Every implementation requires hermetic test coverage
 at the presenter/engine level (`state/e2e/`) or component level
 (`components/__tests__/`).
+
+## Observability
+
+App-wide structured logging (AXM Log) is documented in
+[`../docs/logging.md`](../docs/logging.md): `state/logging.ts` boots it,
+agents read `globalThis.__AXM_LOG__` from Playwright, the crash tail
+lives under `@axiomancer/logtail:v1`, and the `/dev` route has a
+DIAGNOSTICS log viewer. Log through `getLogger()` from `@mechanics` —
+never raw `console.*` in shipped code.

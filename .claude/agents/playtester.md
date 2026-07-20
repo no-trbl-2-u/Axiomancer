@@ -106,6 +106,32 @@ Visit each tab and spend 30 seconds as a new player:
 - Navigate back and forth rapidly.
 - Look for dead-end states (nowhere to go, nothing to do).
 
+## The structured log bridge (AXM Log)
+
+The app exposes its structured log at `globalThis.__AXM_LOG__` in every
+build — read it with `browser_evaluate` (see `docs/logging.md` for the
+full contract). No dev-tools flag needed. Use it when the UI alone
+can't explain what happened:
+
+- **"A number changed and I don't know why"** is still a finding — but
+  now also pull `globalThis.__AXM_LOG__.tail(50)` and cite the
+  `combat`/`game` entries (by `seq`) around the moment, so the report
+  carries the engine's own account next to the player's confusion.
+- `__AXM_LOG__.stats()` — entry counts by level/domain; check it once
+  at session end for the Console & Network section.
+- `__AXM_LOG__.entries({ minLevel: 'warn' })` — every warning/error the
+  app logged, even ones that never hit the console.
+- `__AXM_LOG__.entries({ domains: ['combat'], sinceSeq: N })` — poll
+  incrementally during combat (static exports buffer info+ by default;
+  a harness can inject `__AXM_LOG_LEVEL__ = 'debug'` before boot for
+  the full stream).
+- `__AXM_LOG__.prevSession()` — the previous session's crash tail, if
+  the app died last time.
+
+The bridge is read-only observation, consistent with your hard rules.
+Cite log entries as evidence; do not treat reading them as a substitute
+for playing.
+
 ## Screenshot discipline
 
 Take a screenshot (`browser_take_screenshot`) at:
@@ -189,6 +215,7 @@ Include what you tapped, what happened, what you thought.>
 - Errors: <count> (<brief descriptions>)
 - Warnings: <count> (<brief if novel>)
 - Slow requests: <any >3s requests>
+- AXM Log: <__AXM_LOG__.stats() summary — total, byLevel, any warn/error kinds>
 ```
 
 ## Hard rules
