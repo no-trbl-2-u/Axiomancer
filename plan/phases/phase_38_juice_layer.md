@@ -22,6 +22,10 @@
    sites today).
 3. `hooks/useReducedMotion.ts` — the phase-10 gate every juice
    primitive must honor.
+6. **Owner jot (`/jot` 2026-07-20, folded in via /oversight):** used
+   dice have no spent-state visual indicator — a die that's been played
+   should read as spent (grey out / desaturate). This is a legibility
+   primitive, in-scope for the combat-first adoption below.
 4. D6f precedent (`phase_D6f_roll_ritual.md`): timing/easing constants
    isolated in one tunable module; instant-settle escape hatch for
    seeded e2e; presentation never decides outcomes.
@@ -40,6 +44,10 @@
     FEEL like the main event),
   - number pop (damage/heal/currency deltas),
   - standard enter/exit transitions (card/modal/chip),
+  - spent-state die treatment (a played/used die greys out /
+    desaturates so it reads as spent — owner jot 2026-07-20; a
+    static state change, reduced-motion is a no-op here, not a
+    subdued animation),
   - a haptics wrapper co-firing with the visual where the existing
     expo-haptics call sites overlap.
 - **Discipline built in**: every primitive checks `useReducedMotion`
@@ -49,8 +57,9 @@
   (global, D6a-hook style) so seeded e2e never wait on animation.
 - **Combat-first adoption**: the combat encounter surfaces migrate in
   this phase — status application, VITAE damage ticks, stance-check
-  resolution feedback, card play/refusal. Enough real call sites to
-  prove the API earns its keep.
+  resolution feedback, card play/refusal, and used-die spent-state
+  greying (owner jot). Enough real call sites to prove the API earns
+  its keep.
 - **Incremental migration doctrine** (write it into the module's
   header): new work uses the system; the other ~25 files migrate
   opportunistically in later ticks — this phase does NOT big-bang

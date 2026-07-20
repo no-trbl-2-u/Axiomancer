@@ -882,6 +882,12 @@ supersession collisions before any engine work.
       temp gold die (spec 33 §1 ceiling applies, overflow → +1◆; the old
       "floating die of that color, cap 3" is retired). Deps: D2 + D7.
       — `feat(mechanics): THE COVETED DIE — phase 33c` (fc7fddbf)
+> **March order (set via /oversight 2026-07-20):** of the three unchecked
+> phases, ship **Phase 37** (retire fallacy/paradox — independent, low-risk
+> teardown) NEXT. Then Phase 38 (juice layer, owner-selected — now also
+> carries the used-dice grey-out jot, see its brief). Phase 33d (GLYPHS
+> pilot) last of the three.
+
 - [ ] Phase 33d — GLYPHS pilot (Option-B grammar experiment). FREE-charge
       is compatible with spec 33 §3 rule 5 (FREE lines never touch momentum).
       Author pilot cards against the ratified four-die model. Deps: 33a +

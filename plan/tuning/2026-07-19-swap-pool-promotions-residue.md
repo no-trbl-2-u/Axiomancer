@@ -83,12 +83,16 @@ breach. Late blind 0.331 also sits at the very top of the 0.25–0.35 band.
    to backfill promoted-out seats to restore 30/theme or let the pool
    drain by design.
 
-## D. Still open from the morning ballot ([needs-user-call])
+## D. Morning-ballot residue — RESOLVED via /oversight 2026-07-20
 
-- **Grace HP-purity direction** (g1 white-flag-woven vs g3 mark pair —
-  opposite answers; white-flag-woven also needs a disenchant-slot ruling).
-- **turtle / mercy-seeker early collapse** under the Press Fate loadout
-  (policy-roster health, inherited from PR #125).
+- **Grace HP-purity direction → g1 (grace stays HP-pure).** white-flag-woven
+  ratified; g3 mark-pair rejected for shipping (off-doctrine HP kill line).
+  Rider: white-flag-woven still needs a disenchant recipe-slot ruling
+  (mechanics, `/deck-tuning`). See the measurement-residue §C for the full
+  drain.
+- **turtle / mercy-seeker early collapse → regression, investigate.** Flagged
+  as a roster regression (not accepted-by-design); `/deck-tuning` follow-up to
+  check whether the Press Fate loadout starves defensive policies (PR #125).
 
 ## E. Precedent
 

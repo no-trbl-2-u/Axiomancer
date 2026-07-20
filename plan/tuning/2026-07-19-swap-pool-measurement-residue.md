@@ -61,7 +61,36 @@ four, control's six, charm's two, harvest's finisher-outs.
 single-variable receipt (exercised, fizzle-free, priced neutral — not
 differentiating at that seat). REARGUE remains unmeasured.
 
-## C. Owner-call ballot queue ([needs-user-call] — ask per docs/asking-well.md)
+## C. Owner-call ballot queue — RESOLVED via /oversight 2026-07-20
+
+**All four drained (owner walk-through, /oversight 2026-07-20):**
+
+1. **Pool→library promotion gate → FORMALIZE A STANDING PATH.** Owner
+   ratified a repeatable promotion path (measured A/B ≥2 stages ×2 policies
+   at identical seeds → owner ballot → recolor-not-repartition →
+   combined-matrix re-verify → pins updated in the same PR — the §E precedent
+   from the promotions-residue is now the standing template). `/deck-tuning`
+   may propose promotions against this path without re-asking the policy.
+   Standing ruling R1 (pool cards are tuning devices) is SUPERSEDED for the
+   promotion question: promotion is now an allowed, gated outcome rather than
+   refused-by-default. Per-card riders (poisoned-well re-seat + flag-on A/B;
+   burden-of-repetition / half-spoken-prophecy recolors; white-flag-woven
+   disenchant-slot) remain mechanics work, ride the next `/deck-tuning` pass.
+2. **QED concede-centrality → NEEDS REPAIR (not the intended fantasy).**
+   71% concede-share of late wins is too dominant. confirmatio STAYS benched;
+   route a `/deck-tuning` follow-up to broaden late oratory win-paths before
+   any QED ratification. Do NOT ship the concede-dominant repair as final.
+3. **Grace HP-purity direction → g1 (grace stays HP-PURE).** Ratify
+   white-flag-woven: grace never touches HP, wins by pure capitulation. g3
+   (mark pair) is REJECTED for shipping despite its engagement lift — the
+   HP kill line is off-doctrine. Rider: white-flag-woven still needs a
+   disenchant recipe-slot ruling (mechanics, `/deck-tuning`).
+4. **Policy-roster health → REGRESSION, investigate.** turtle/mercy-seeker
+   early collapse under the Press Fate loadout is flagged as a roster
+   regression, not accepted-by-design; route a follow-up to check whether the
+   loadout unfairly starves defensive policies (inherited from PR #125).
+
+**Original ballot text (for context):**
 
 1. **Pool→library promotion gate (blocks all 8 candidates).** Standing
    ruling R1 (2026-07-18): pool cards are tuning devices, NOT player-facing.

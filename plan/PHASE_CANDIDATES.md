@@ -239,6 +239,14 @@
 - execution: `/deck-tuning` (the skill's swap-pool candidate program bullet,
   added same day). Interacts with the trim/duplication row above (same
   seats) and D8 (valves move the curve the candidates are judged against).
+- promotion path (owner-ratified /oversight 2026-07-20): ruling R1
+  (pool = tuning-only, refused-by-default) is SUPERSEDED for the promotion
+  question. Pool→library promotion is now an allowed, gated outcome via the
+  standing path: measured A/B (≥2 stages ×2 policies, identical seeds) →
+  owner ballot → recolor-not-repartition → combined-matrix re-verify → pins
+  in the same PR (template: `plan/tuning/2026-07-19-swap-pool-promotions-residue.md`
+  §E). `/deck-tuning` may propose promotions against this path without
+  re-asking the policy.
 
 ### The Incompleteness premiseShed — close the CONCEDE hole at impossible (owner-ruled 2026-07-18)
 - source: fan-out ballot ruling R3. Evidence: oratory wins 18% flag-ON /
