@@ -928,7 +928,7 @@ order):**
 **Mobile feel layer (promoted via chat session 2026-07-20, T direct —
 missing-layers survey):**
 
-- [ ] Phase 38 — Central juice/animation layer (combat-first). One shared
+- [x] Phase 38 — Central juice/animation layer (combat-first). One shared
       feel module (`lib/juice/`-style) owning the recurring primitives —
       screen shake, impact flash, status-proc pulse, number pops, standard
       enter/exit transitions — every primitive reduced-motion gated inside
@@ -942,6 +942,7 @@ missing-layers survey):**
       untouched. Zero new dependencies (bare Reanimated 4 + worklets +
       rn-svg + expo-haptics). (mobile) Deps: none hard. Brief:
       `plan/phases/phase_38_juice_layer.md`.
+      — `feat(mobile): central juice/animation layer — phase 38` (6f291ece)
 
 > **Note (issue-triage 2026-07-19):** issue #132 asked for a
 > `devlog-build` GitHub Action; re-triage found it re-classified as
