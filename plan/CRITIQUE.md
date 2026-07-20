@@ -21,6 +21,16 @@
 - suggested fix: next combat-UX pass, either inset the fan band from the medallions or shrink the medallion hit-slop so the card wins the touch; verify with the same probe.
 - source: owner session 2026-07-19 (press-fate/momentum/dice PR)
 
+### [MED] general — used dice have no spent-state visual indicator (grey them out)
+- pass: user-jot (commit 42ec22b0526a3922a6cfccab16663984eb249a2f)
+- viewport: unspecified
+- auth_state: anonymous
+- category: visual
+- observation: The dice, after they're used don't have a visual indicator that they're used. I would like for any used dice to become greyed out after usage
+- evidence: user-spotted at 2026-07-20T14:03:53Z
+- suggested fix: [user has not specified — iterate to determine]
+- source: user
+
 ### [LOW] mobile — legacy flag-off combat render paths linger post-FLIP
 - pass: combat declutter residue (PR #135, 2026-07-19)
 - viewport: n/a
