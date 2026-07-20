@@ -917,6 +917,24 @@ order):**
       Deps: none (independent of the D-sequence). Brief:
       `plan/phases/phase_37_retire_fallacy_paradox_category.md`.
 
+**Mobile feel layer (promoted via chat session 2026-07-20, T direct —
+missing-layers survey):**
+
+- [ ] Phase 38 — Central juice/animation layer (combat-first). One shared
+      feel module (`lib/juice/`-style) owning the recurring primitives —
+      screen shake, impact flash, status-proc pulse, number pops, standard
+      enter/exit transitions — every primitive reduced-motion gated inside
+      the module, haptics co-fired through a single wrapper (the future
+      Expo-decouple swap point), timing constants isolated D6f-style, and
+      a global instant/disable escape hatch so seeded e2e never wait on
+      animation. Combat encounter surfaces adopt in the same phase
+      (status application, VITAE ticks, stance-check feedback, card
+      play/refusal); the other ~25 Reanimated call sites migrate
+      opportunistically later — no big-bang rewrite, D6f's roll ritual
+      untouched. Zero new dependencies (bare Reanimated 4 + worklets +
+      rn-svg + expo-haptics). (mobile) Deps: none hard. Brief:
+      `plan/phases/phase_38_juice_layer.md`.
+
 > **Note (issue-triage 2026-07-19):** issue #132 asked for a
 > `devlog-build` GitHub Action; re-triage found it re-classified as
 > `enhancement` (was `docs`, stale after the owner corrected the issue

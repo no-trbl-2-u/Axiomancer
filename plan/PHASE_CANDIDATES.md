@@ -78,26 +78,6 @@
 - small phase; mobile-only; pairs with the existing crash-tail e2e surface
   for its witness.
 
-### Central juice/animation layer (mobile — owner-selected 2026-07-20)
-- source: owner session 2026-07-20 (missing-layers survey). Reanimated
-  animation logic is spread across ~33 component files (dice rolls, boards,
-  tutorial coaches, toasts, `RollingDie.tsx`, `MapCanvas.tsx`) with no
-  shared system — no common screen-shake, particle, hit-flash, or
-  transition manager. For a game whose core fun is status-effect combat,
-  feel/juice is uncoordinated per-component work today.
-- shape: a shared animation/juice module (mobile `lib/` or `components/`
-  core) offering the recurring primitives — screen shake, impact flash,
-  status-proc pulse, number pops, standard enter/exit transitions — all
-  gated through the existing `useReducedMotion` hook, with haptics
-  co-triggered where the ~20 existing `expo-haptics` call sites overlap.
-  Migration is incremental: new work uses the system; existing components
-  migrate opportunistically, combat surfaces first.
-- sequencing note: respect the parked "Expo decouple" candidate — build on
-  bare reanimated/worklets (which carry over), not Expo-coupled APIs
-  beyond the existing haptics usage.
-- promote as a bounded first phase (the module + combat-encounter adoption),
-  not a big-bang rewrite.
-
 ### Enchant/disenchant hooks are per-card engine code — generalize before those seats can grow
 - source: swap-pool fan-out 2026-07-18. The pool is spells-only because
   every enchant/disenchant passive is a bespoke `combat.engine.ts` branch
@@ -595,6 +575,17 @@
   oversight whether/when to design it; do not self-promote.
 
 ## Promoted
+
+### Central juice/animation layer (mobile — owner-selected 2026-07-20)
+- source: owner session 2026-07-20 (missing-layers survey). Reanimated
+  animation logic spread across ~33 component files with no shared
+  shake/particle/transition system; combat feel is uncoordinated
+  per-component work.
+- decision (T direct, 2026-07-20): promote as a bounded first phase —
+  shared juice module + combat-encounter adoption, incremental migration
+  after, zero new deps, reduced-motion gated, Expo-decouple respected.
+- promoted to build plan as **Phase 38**. Brief:
+  `plan/phases/phase_38_juice_layer.md`.
 
 ### D8 — one dice valve in every starter preset
 - source: T direct, 2026-07-18. Resolves D7's 5/5/5 owner blocker.
