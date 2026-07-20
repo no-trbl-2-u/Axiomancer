@@ -897,8 +897,10 @@ supersession collisions before any engine work.
 branch, parallel to the D-sequence; does NOT preempt the D-sequence march
 order):**
 
-- [ ] Phase 37 — Retire the fallacy/paradox card category + the dead
-      `combatResources` token pool. The `Card.category` field
+- [x] Phase 37 — Retire the fallacy/paradox card category + the dead
+      `combatResources` token pool — `refactor(mechanics,mobile,card-editor):
+      retire the fallacy/paradox card category — phase 37` (5137511c). The
+      `Card.category` field
       (`CardCategory = 'fallacy' | 'paradox'`) is a pre-Hazard-Pattern
       vestige: it drives only `generatePhilosophicalResource`, which banks
       `+1 fallacy/paradox` into `combatResources` — a **write-only pool that
