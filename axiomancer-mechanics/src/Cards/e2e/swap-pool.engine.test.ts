@@ -32,8 +32,35 @@ const RANK_BANDS: Record<'common' | 'uncommon' | 'rare', [number, number]> = {
     common: [1.5, 7.5], uncommon: [4.5, 13], rare: [7, 19],
 };
 
-/** The seat-coverage quota every theme pool ships with. */
+/** The seat-coverage quota every theme pool ships with (authored shape). */
 const QUOTA = { common: 10, uncommon: 12, rare: 8 } as const;
+
+/**
+ * 2026-07-19 owner-ratified promotions: nine measured candidates left their
+ * pools for `cards.library.ts` + preset seats (see
+ * docs/reports/deck-tuning-2026-07-19-promotions.md). Each row documents the
+ * pin change: the theme's residual rank quota is the authored 10/12/8 minus
+ * its promoted-out cards. Totals: 300 authored − 9 promoted = 291 in-pool.
+ */
+const PROMOTED_OUT: Readonly<Record<string, Partial<Record<'common' | 'uncommon' | 'rare', number>>>> = {
+    affliction: { common: 1 },              // poisoned-well
+    peroration: { common: 1, rare: 1 },     // videtur-quod, quod-erat-demonstrandum
+    forge: { common: 1 },                   // tempered-edge
+    oracle: { uncommon: 1 },                // half-spoken-prophecy
+    charm: { uncommon: 1 },                 // grace-under-fire
+    bulwark: { common: 1, rare: 1 },        // pebble-in-the-boot, the-anvil-speaks
+    echo: { uncommon: 1 },                  // the-burden-of-repetition
+};
+const PROMOTED_TOTAL = 9;
+
+function residualQuota(theme: string): { common: number; uncommon: number; rare: number } {
+    const out = PROMOTED_OUT[theme] ?? {};
+    return {
+        common: QUOTA.common - (out.common ?? 0),
+        uncommon: QUOTA.uncommon - (out.uncommon ?? 0),
+        rare: QUOTA.rare - (out.rare ?? 0),
+    };
+}
 
 /** Deep-collects every `effectId` string anywhere on a card literal. */
 function collectEffectIds(node: unknown, out: string[] = []): string[] {
@@ -62,7 +89,7 @@ describe('swap-pool sets — registry shape', () => {
             expect(set, `applySandboxSet('${id}') returned undefined`).toBeDefined();
             total += set!.cards.length;
         }
-        expect(total).toBe(300);
+        expect(total).toBe(300 - PROMOTED_TOTAL);
         clearSandboxCards();
     });
 });
@@ -72,9 +99,10 @@ describe.each(SWAP_SET_IDS.map(id => [id] as const))('swap-pool set %s', (setId)
     const set = SANDBOX_CARD_SETS[setId];
     const cards: readonly Card[] = set?.cards ?? [];
 
-    it('carries exactly 30 spells, all on-theme, all with a FREE line', () => {
+    it('carries its residual spell count, all on-theme, all with a FREE line', () => {
+        const q = residualQuota(theme);
         expect(set).toBeDefined();
-        expect(cards.length).toBe(30);
+        expect(cards.length).toBe(q.common + q.uncommon + q.rare);
         for (const c of cards) {
             expect(c.cardType, `${c.id} must be a spell (enchant/disenchant passives are engine hooks)`).toBe('spell');
             expect(c.theme, `${c.id} theme`).toBe(theme);
@@ -82,10 +110,10 @@ describe.each(SWAP_SET_IDS.map(id => [id] as const))('swap-pool set %s', (setId)
         }
     });
 
-    it('meets the 10/12/8 rank quota and the tier-3 late-gate cap', () => {
+    it('meets its residual rank quota (authored 10/12/8 minus promoted-out) and the tier-3 late-gate cap', () => {
         const counts = { common: 0, uncommon: 0, rare: 0 };
         for (const c of cards) counts[rankToRarity(c.rank)] += 1;
-        expect(counts).toEqual(QUOTA);
+        expect(counts).toEqual(residualQuota(theme));
         const tier3 = cards.filter(c => c.tier === 3).length;
         expect(tier3, 'tier 3 is late-stage-gated — keep the pool exercisable').toBeLessThanOrEqual(3);
     });

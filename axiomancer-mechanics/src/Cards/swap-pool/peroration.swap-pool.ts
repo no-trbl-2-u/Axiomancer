@@ -85,35 +85,10 @@ const distinguo: Card = {
     tags: ['peroration', 'swap-pool', 'defense'],
 };
 
-/**
- * Videtur Quod — peroration Lemma, C-seat live DoT line: the scholastic
- * opening "it seems that—". Probes a longer-fuse poison than exordium's
- * (d3 vs d2) in a ×4 seat.
- */
-const videturQuod: Card = {
-    id: 'videtur-quod',
-    theme: 'peroration',
-    name: 'Videtur Quod',
-    category: 'fallacy',
-    philosophicalAspect: 'heart',
-    description:
-        'It seems that — and there the flaw is stated, fairly, precisely, ' +
-        'in their own terms. An argument shown its own wound sickens as ' +
-        'it stands.',
-    tier: 1, rank: 2, cardType: 'spell',
-    targetType: 'enemy',
-    // pts: PAID [poison i1 d3 (card-played 1.83 cadence, tempo-weighted
-    // 9.49 ÷ 3 = 3.16) + PREMISE 1 (0.8)] = 3.96 + FREE [premises 2 (1.6)]
-    // → 5.56 → common band 1.5-7.5 (Lemma). FREE share 1.6/5.56 = 28.8%
-    // ✓ window.
-    free: { premises: 2 },
-    combatEffects: [
-        { effectId: 'debuff_poison', appliedTo: 'opponent', intensity: 1, duration: 3 },
-    ],
-    specialMechanics: [{ kind: 'premise', count: 1 }],
-    addedIn: '2026-07-18',
-    tags: ['peroration', 'swap-pool', 'exposure', 'dot'],
-};
+// PROMOTED OUT 2026-07-19 (owner-ratified): `videtur-quod` moved to
+// `cards.library.ts` and the oratory x4 heart common seat (arm o1,
+// docs/reports/deck-tuning-2026-07-18.md — the run's cleanest commons
+// engagement gain).
 
 /**
  * Ad Rem — peroration Lemma, C-seat MARK carrier: "to the point." Feeds the
@@ -694,42 +669,12 @@ const amicusCuriae: Card = {
     tags: ['peroration', 'swap-pool', 'engine'],
 };
 
-// ─── Rares (8 — rank 5-6, the ×1 seats: finishers and build-arounds) ─────────
+// ─── Rares (7 — rank 5-6, the ×1 seats: finishers and build-arounds) ─────────
 
-/**
- * Quod Erat Demonstrandum — peroration Aporia, the alternative CONCEDE
- * conclusion (competes for the-closing-word's R-spell seat): declares at 5
- * with a smaller rider, concedes at 8 — faster cycling, same alt-win.
- */
-const quodEratDemonstrandum: Card = {
-    id: 'quod-erat-demonstrandum',
-    theme: 'peroration',
-    name: 'Quod Erat Demonstrandum',
-    category: 'fallacy',
-    philosophicalAspect: 'heart',
-    description:
-        'Which was to be demonstrated. The proof closes early and closes ' +
-        'often — and a case carried far enough past its close does not ' +
-        'conclude. It simply ends.',
-    tier: 3, rank: 6, cardType: 'spell',
-    targetType: 'enemy',
-    // pts: PAID [PERORATION at 5: rider [ruptureMarks 2 (2 × ⅔ = 1.33) +
-    // draw 1 (2.0) + conviction 1 (1.0)] = 4.33 + CONCEDE capstone (3.0) +
-    // PREMISE 1 (0.8)] = 8.13 + threshold heart 3 [premises 2 (1.6)] × 0.5
-    // = 0.8 + FREE [premises 2 (1.6) + draw 1 (2.0)] = 3.6 → 12.53 → rare
-    // band 7-19 (Aporia). FREE share 3.6/12.53 = 28.7% ✓ window.
-    free: { premises: 2, drawCards: 1 },
-    specialMechanics: [
-        {
-            kind: 'peroration', at: 5, concedeAt: 8,
-            rider: { ruptureMarks: 2, drawCards: 1, conviction: 1 },
-        },
-        { kind: 'premise', count: 1 },
-    ],
-    threshold: { color: 'heart', count: 3, rider: { premises: 2 } },
-    addedIn: '2026-07-18',
-    tags: ['peroration', 'swap-pool', 'payoff', 'alt-win'],
-};
+// PROMOTED OUT 2026-07-19 (owner-ratified): `quod-erat-demonstrandum` moved
+// to `cards.library.ts` and the oratory rare heart spell seat (arm o3,
+// docs/reports/deck-tuning-2026-07-18.md — late blind 0.119→0.278; the owner
+// accepted the concede-centrality consequence).
 
 /**
  * Ratio Decidendi — peroration Axiom, the fast conclusion WITHOUT a concede
@@ -994,15 +939,15 @@ export const SWAP_POOL_PERORATION: SandboxCardSet = {
         'stare-decisis (body R) — are unswappable without a coordinated ' +
         'multi-seat recolor, which needs owner sign-off.',
     cards: [
-        // commons (10)
-        narratio, distinguo, videturQuod, adRem, sedContra,
+        // commons (9; videtur-quod promoted out 2026-07-19)
+        narratio, distinguo, adRem, sedContra,
         aFortiori, obiterDictum, resIpsaLoquitur, pointOfOrder, leadingQuestion,
         // uncommons (12)
         confirmatio, refutatio, anaphora, hypophora, onusProbandi,
         thePreparedRebuttal, elenchus, crossExamination, recapitulatio,
         theHostileWitness, tricolon, amicusCuriae,
-        // rares (8)
-        quodEratDemonstrandum, ratioDecidendi, reductioAdAbsurdum,
+        // rares (7; quod-erat-demonstrandum promoted out 2026-07-19)
+        ratioDecidendi, reductioAdAbsurdum,
         theVerdictForegone, theUnanswerableQuestion, argumentumAdBaculum,
         theEighthPremise, stareDecisis,
     ],

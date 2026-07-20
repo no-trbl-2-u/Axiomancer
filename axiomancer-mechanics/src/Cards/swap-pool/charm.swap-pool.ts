@@ -319,33 +319,10 @@ const theLongListening: Card = {
     tags: ['charm', 'swap-pool', 'alt-win', 'sustain'],
 };
 
-/** The engine defend: a real wall plus heavy RAPPORT, and composure under a
- *  landed blow converts to SWAY (drew-blood ledger, charm's reading). */
-const graceUnderFire: Card = {
-    id: 'grace-under-fire',
-    theme: 'charm',
-    name: 'Grace Under Fire',
-    category: 'paradox',
-    philosophicalAspect: 'body',
-    description:
-        'Let the blow land on composure itself. What they spend in fury, you '
-        + 'bank in standing — unmoved, and owed.',
-    tier: 2, rank: 4, cardType: 'spell',
-    targetType: 'self',
-    // pts: GUARD 10 (2.5) + rapport i2 d2 (3.0) = 5.5 + drew-blood rider
-    // [sway 3 (2.7)] × threshold 0.5 = 1.35 + FREE [guard 2 (0.5) + sway 2
-    // (1.8)] = 2.3 → 9.15 → uncommon band 4.5-13 (Theorem). FREE share
-    // 2.3/9.15 = 25.1% ✓.
-    free: { guard: 2, sway: 2 },
-    combatEffects: [{ effectId: 'debuff_rapport', appliedTo: 'opponent', intensity: 2, duration: 2 }],
-    specialMechanics: [{ kind: 'guard', amount: 10 }],
-    synergy: {
-        statePredicate: { kind: 'enemy-drew-blood' },
-        rider: { sway: 3 },
-    },
-    addedIn: '2026-07-18',
-    tags: ['charm', 'swap-pool', 'defense', 'condition'],
-};
+// PROMOTED OUT 2026-07-19 (owner-ratified): `grace-under-fire` moved to
+// `cards.library.ts` and the grace body uncommon seat (arm g2,
+// docs/reports/deck-tuning-2026-07-18.md — early 0.689→0.811, ON band; the
+// strongest legal grace result).
 
 /** MARK + SWAY braided (the barbed-compliment shape, mind-colored): fuel for
  *  the closers and progress on the bar in one breath. */
@@ -887,8 +864,8 @@ export const SWAP_POOL_CHARM: SandboxCardSet = {
         aKindWord, theTurnedCheek, aNameRemembered, theFlawConfessed,
         plainSpeech, smallMercies, anOpenDoor, theGentledAnswer,
         swornGently, waterTheStone,
-        // uncommons (12): 6 Thesis + 6 Theorem
-        theLongListening, graceUnderFire, theHoneyedSyllogism,
+        // uncommons (11): 5 Thesis + 6 Theorem (grace-under-fire promoted out 2026-07-19)
+        theLongListening, theHoneyedSyllogism,
         aSecondHearing, theSoftConversion, balmAndBargain, heldInRegard,
         theVeiledRebuke, anArmisticeSigned, theQuietLedger,
         mercyBegetsMercy, thePatientSiege,

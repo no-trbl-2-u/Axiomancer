@@ -457,36 +457,12 @@ const stakeTheFuture: Card = {
     tags: ['oracle', 'omen', 'exposure'],
 };
 
-/** The single-affliction RUPTURE engine — delphic-ambiguity's swap-side rival:
- *  the same detonation verb, but the Soul and the guaranteed FORETELL are
- *  traded away for a STAKED read (OMEN, ante 1: scry 2 only when the claim
- *  proves out). Probes RUPTURE-timing against delphic's soul economy at a
- *  comparable PAID budget (6.95 vs delphic's 7.25) — not a superset: no Soul,
- *  no unconditional scry, and the deep read can whiff. OMEN react slot. */
-const halfSpokenProphecy: Card = {
-    id: 'half-spoken-prophecy',
-    theme: 'oracle',
-    name: 'Half-Spoken Prophecy',
-    category: 'paradox',
-    philosophicalAspect: 'mind',
-    description:
-        'Speak only the half already proven — it lands now, all at once. The ' +
-        'unread half stays on the table as a stake, waiting to be made true.',
-    tier: 2, rank: 4, cardType: 'spell',
-    targetType: 'enemy',
-    // pts: RUPTURE 1 affliction / consume_affliction, no Soul (5.5) +
-    // OMEN(foretell 2 = 2.0 × 0.6 = 1.2 + omenInfo 1.0 − ante 1 × 0.75 =
-    // −0.75) = 1.45 → 6.95 + FREE [foretell 1 (1.0) + mark i1 d2 (1.5)] =
-    // 2.5 → 9.45 → uncommon band 4.5-13 (Theorem).
-    // FREE share 2.5/9.45 = 26.5% ✓.
-    free: { foretell: 1, applyEffect: { effectId: 'debuff_mark', intensity: 1, duration: 2, to: 'opponent' } },
-    specialMechanics: [
-        { kind: 'consume_affliction', souls: 0 },
-        { kind: 'omen', maxWindow: 2, anteConviction: 1, rider: { foretell: 2 } },
-    ],
-    addedIn: '2026-07-18',
-    tags: ['oracle', 'payoff', 'omen'],
-};
+// PROMOTED OUT 2026-07-19 (owner-ratified, the ballot's explicit
+// needs-more-data-grade pick): `half-spoken-prophecy` moved to
+// `cards.library.ts` and the augury body uncommon seat, RECOLORED mind→body
+// for the evicted self-flagellant seat (arm a3,
+// docs/reports/deck-tuning-2026-07-18.md — the only augury candidate both
+// win- and engagement-positive; 344 mid fizzles is the known caveat).
 
 /** The long-clock DoT — the doom written slowly, with a threshold clause that
  *  sharpens the ink. Threshold fills the react slot. */
@@ -894,9 +870,9 @@ export const SWAP_POOL_ORACLE: SandboxCardSet = {
         omenOfRain, readTheEntrails, theBlowAlreadyRead, eyeBeforeTheStorm,
         steadyAugur, smallWager, theCalledShot, scatteredAuspices,
         theUnreadCard, convergingSigns,
-        // uncommons (12)
+        // uncommons (11; half-spoken-prophecy promoted out 2026-07-19)
         theDoomINamed, beforeTheFirstWord, theAvertedBlow, recastTheLots,
-        thePageTurnsBack, stakeTheFuture, halfSpokenProphecy, slowWritDoom,
+        thePageTurnsBack, stakeTheFuture, slowWritDoom,
         venomInTheStars, theBraceForetold, readToTheEnd, theLengtheningShadow,
         // rares (8)
         allOmensDue, theGrandPrognostication, eyesOfTheAeon, theInviolateHour,

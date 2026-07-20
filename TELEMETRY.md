@@ -81,3 +81,5 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-07-19T17:06:53Z | subagent | Explore | unknown | main | Survey Axiomancer art surface |
 | 2026-07-19T17:07:03Z | subagent | scout | claude-fable-5 | main | Research AI art pipeline options |
 | 2026-07-19T19:36:03Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-07-19T05:28:08Z | skill | artifact-design | claude-fable-5 | main | - |
+| 2026-07-20T00:55:03Z | subagent | card-expert | claude-fable-5 | main | Promote 8 swap-pool cards into presets |

@@ -116,8 +116,8 @@ function playPaidClean(cardId: string) {
 }
 
 describe('doctrine witness — no card PAID line chips a clean enemy', () => {
-    it('the coverage universe is the 70-card themed library (spec 32 v3 §7)', () => {
-        expect(cardLibrary.length).toBe(70);
+    it('the coverage universe is the 79-card themed library (spec 32 v3 §7 + the 2026-07-19 promotions)', () => {
+        expect(cardLibrary.length).toBe(79);
     });
 
     it('NAMED_EXCEPTIONS is a subset of the ratified spec 32 §12 list (unratified exceptions fail loudly)', () => {
@@ -145,7 +145,7 @@ describe('doctrine witness — no card PAID line chips a clean enemy', () => {
         },
     );
 
-    it('every card is accounted for exactly once (clean cases + named exceptions == 70, no silent drops)', () => {
+    it('every card is accounted for exactly once (clean cases + named exceptions == 79, no silent drops)', () => {
         expect(cleanCases.length + Object.keys(NAMED_EXCEPTIONS).length).toBe(cardLibrary.length);
     });
 });

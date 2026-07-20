@@ -272,31 +272,9 @@ const ashLitany: Card = {
     tags: ['forge', 'dot', 'draw', 'swap-pool'],
 };
 
-/**
- * The threshold common (tier-1's single allowed die-interaction): a modest
- * wall that stings, with a bonus block once the body tally is warm.
- */
-const temperedEdge: Card = {
-    id: 'tempered-edge',
-    theme: 'forge',
-    name: 'Tempered Edge',
-    category: 'paradox',
-    philosophicalAspect: 'body',
-    description:
-        'Hardened twice, sharpened once. What tries the edge learns which ' +
-        'of you was made more carefully.',
-    tier: 1, rank: 2, cardType: 'spell',
-    targetType: 'enemy',
-    // pts: Guard 5 (1.25) + ember i2 d2 (tempo 3.5 ÷ 3 = 1.17) = 2.42 +
-    // threshold body 2: Guard 4 (1.0 × 0.5 = 0.5) + FREE pips 1 (1.5) = 4.42
-    // → common band 1.5-7.5 (Lemma). FREE 1.5/4.42 = 34% ✓.
-    free: { pips: 1 },
-    combatEffects: [{ effectId: 'debuff_kindling_ember', appliedTo: 'opponent', intensity: 2, duration: 2 }],
-    specialMechanics: [{ kind: 'guard', amount: 5 }],
-    threshold: { color: 'body', count: 2, rider: { guard: 4 } },
-    addedIn: '2026-07-18',
-    tags: ['forge', 'defense', 'dot', 'swap-pool'],
-};
+// PROMOTED OUT 2026-07-19 (owner-ratified): `tempered-edge` moved to
+// `cards.library.ts` and the foundry x4 body common seat (arm f2,
+// docs/reports/deck-tuning-2026-07-18.md — early 0.60→0.80, ON band).
 
 // ─── Uncommons (12) — the theme's engine, one die-interaction each ───────────
 
@@ -926,9 +904,9 @@ export const SWAP_POOL_FORGE: SandboxCardSet = {
         + 'which rare shape — swarm, cycle, or ALL-spender — the preset '
         + 'actually wants in its three rare seats.',
     cards: [
-        // commons (10): r1 ×5, r2 ×5
+        // commons (9): r1 ×5, r2 ×4 (tempered-edge promoted out 2026-07-19)
         sparkInTheTinder, firstHeat, quench, bellowsBreath, cinderSpit,
-        stokeTheCoals, hammerRhythm, scrapIron, ashLitany, temperedEdge,
+        stokeTheCoals, hammerRhythm, scrapIron, ashLitany,
         // uncommons (12): r3 ×5, r4 ×7 (ember-apprentice moved r3 → r4,
         // 2026-07-18 review — off foundry-sprite's rank-3 conjure seat)
         annealingRound, doubleCast, feedTheFire, pastTheSafeHeat,

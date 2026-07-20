@@ -127,12 +127,31 @@ describe('P0-truth — the card preview is the applied number', () => {
         }
     });
 
-    it('non-DoT cards print NO number (real-units-or-no-number; the strike is dead)', () => {
+    it('every card previews exactly its REAL enemy-DoT lifetime HP — 0 when it carries none (real-units-or-no-number; the strike is dead)', () => {
+        // Pin change 2026-07-19: pre-promotion, "verbClass !== direct-dot ⇒
+        // preview 0" held because no defend-class card carried an enemy DoT.
+        // The promoted hybrids (tempered-edge, the-anvil-speaks: GUARD mech ⇒
+        // classified 'defend', plus a real ember/sting DoT payload) print
+        // their DoT's true lifetime number. The invariant is restated in its
+        // honest general form: the preview EQUALS the card's real enemy-DoT
+        // lifetime on a neutral read — never a fake "impact" number, and 0
+        // whenever no enemy DoT exists.
         for (const entry of cardLibrary) {
             const card = getCard(entry.id)!;
-            if (card.verbClass !== 'direct-dot') {
-                expect(card.bottomDamagePreview, `${card.id} has no honest single number`).toBe(0);
+            let realLifetime = 0;
+            for (const ce of entry.combatEffects ?? []) {
+                if (ce.appliedTo !== 'opponent') continue;
+                const def = lookupEffect(ce.effectId);
+                const dot = def?.payload.damageOverTime;
+                if (!def || !dot) continue;
+                const intensity = ce.intensity ?? 1;
+                const duration = Math.max(1, ce.duration ?? def.duration);
+                const ramp = def.payload.dotModifiers?.escalatesPerTurn ? (def.payload.dotModifiers.rampFactor ?? 0) : 0;
+                for (let k = 0; k < duration; k++) {
+                    realLifetime += Math.floor((dot.damagePerRound + Math.floor(ramp * k)) * intensity);
+                }
             }
+            expect(card.bottomDamagePreview, `${card.id} preview must be its real DoT lifetime (or 0)`).toBe(realLifetime);
             expect(card.bottomActionText).not.toContain('impact ~');
         }
     });

@@ -47,10 +47,11 @@ const RANK_BANDS: Record<'common' | 'uncommon' | 'rare', [number, number]> = {
 const spells = cardLibrary.filter(c => c.cardType === 'spell');
 
 describe('pricing lint — every spell lands in its rank band', () => {
-    it('covers all 55 spells (the enchant/disenchant 15 are engine text; 50→55 via the D8 valve ledger)', () => {
+    it('covers all 64 spells (the enchant/disenchant 15 are engine text; 50→55 via the D8 valve ledger, 55→64 via the 2026-07-19 promotions)', () => {
         // Phase D8 ten-in/ten-out: 9 valve spells + 1 valve enchantment in,
         // 4 spells + 2 enchantments + 4 disenchants out (the reward-only ten).
-        expect(spells.length).toBe(55);
+        // 2026-07-19: nine promoted swap-pool spells in (no passives).
+        expect(spells.length).toBe(64);
     });
 
     it.each(spells.map(s => [s.id, s] as const))('%s scores within its band', (_id, card) => {
