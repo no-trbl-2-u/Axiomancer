@@ -1574,9 +1574,11 @@ export const CombatCardFace = React.memo(function CombatCardFace({
     return (
         <View style={[styles.faceOuter, { width, height }]}>
             <View style={[styles.faceCard, { borderColor }]}>
-                {/* ① MAIN ICON — a unique transparent Potential Assets icon. */}
+                {/* ① MAIN ICON — a unique transparent Potential Assets icon.
+                    The art wash is BLACK (owner call 2026-07-20) — the stance
+                    colour lives on the rail, not behind the icon. */}
                 <View style={styles.faceArtFull} pointerEvents="none">
-                    <View style={[styles.faceArtTint, { backgroundColor: f.stanceColor }]} />
+                    <View style={[styles.faceArtTint, { backgroundColor: AXM.deepBg }]} />
                     <Image
                         source={getCardArt(card.cardId)}
                         style={{
