@@ -555,31 +555,6 @@ one level down, in the routing helper `onApply` calls next).
   projected-lethality readout would close the gap (build-plan
   Phase 2).
 
-### [HIGH] suppurating-curse can never fire on poison or bleed
-- pass: owner-playtest 2026-07-12
-- viewport: n/a (engine truth-probe + expo-web via Playwright)
-- category: mechanics
-- observation: suppurating-curse's only hook reads the round-clock
-  tick pool (`dotTickBreakdown`), but poison fires on card-played and
-  bleed fires on damage-instance — both event-triggered, not
-  round-clock. The keyword can never observe either DoT ticking, so it
-  is permanently inert against the two DoTs a player is most likely to
-  pair it with. Directly relevant to Phase 32 / EA-7 (trigger-clock DoT
-  substrate, `plan/tuning/2026-07-10-theme-identity.md` §2): this is
-  the exact class of bug that phase is supposed to formalize away, and
-  should be treated as its starting state rather than rediscovered
-  mid-phase.
-- evidence: engine truth-probe against
-  `require('axiomancer-mechanics/dist/index.js')` with a mocked
-  poison/bleed-afflicted enemy — `dotTickBreakdown` never contains a
-  poison or bleed entry; live expo-web combat confirms the same via
-  Playwright drag-to-stage + `combat-apply-*`.
-- suggested fix: either re-hook suppurating-curse off the
-  event-triggered clocks directly (per-card-played / per-damage-instance)
-  or fold it into whatever unified trigger-clock substrate Phase 32
-  builds — do not ship Phase 32 without closing this specific keyword.
-- source: playtester (owner-directed break-test session)
-
 ### [MED] DoT card faces print round-clock math that contradicts their own keyword glosses
 - pass: owner-playtest 2026-07-12
 - viewport: mobile (expo-web via Playwright)
@@ -769,6 +744,33 @@ one level down, in the routing helper `onApply` calls next).
 - source: user
 
 ## Done
+
+### [x] [HIGH] suppurating-curse can never fire on poison or bleed (RESOLVED 2026-07-12, commit b097efec — row was stale, closed via issue #145)
+- pass: owner-playtest 2026-07-12
+- viewport: n/a (engine truth-probe + expo-web via Playwright)
+- category: mechanics
+- observation: suppurating-curse's only hook reads the round-clock
+  tick pool (`dotTickBreakdown`), but poison fires on card-played and
+  bleed fires on damage-instance — both event-triggered, not
+  round-clock. The keyword can never observe either DoT ticking, so it
+  is permanently inert against the two DoTs a player is most likely to
+  pair it with.
+- evidence: engine truth-probe against
+  `require('axiomancer-mechanics/dist/index.js')` with a mocked
+  poison/bleed-afflicted enemy — `dotTickBreakdown` never contains a
+  poison or bleed entry; live expo-web combat confirms the same via
+  Playwright drag-to-stage + `combat-apply-*`.
+- source: playtester (owner-directed break-test session)
+- RESOLVED: same-day commit `b097efec` ("Fixes from \"cleanup\"") already
+  landed the fix under the WI-1 label — `combat.engine.ts` now accumulates
+  real per-event DoT damage into `enemyDotDamageThisRound` (folded in
+  `withLog`), and `processBetweenPhases` drips suppurating-curse off that
+  accumulator plus any round-clock ticks. Verified 2026-07-21 (triage
+  #145): `themed-decks.engine.test.ts` `describe('WI-1 — suppurating-curse
+  doubles the round's REAL DoT total')` — 3/3 tests pass, including a live
+  scenario that plays a poison card and confirms the curse exacts the same
+  amount the card-played clock ticked. Pending row was stale; no code
+  change needed.
 
 ### [x] [LOW] "the-closing-word" card face states a threshold that doesn't match the live floor (RESOLVED 2026-07-17, PR #91)
 - pass: owner-playtest 2026-07-12
