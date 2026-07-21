@@ -29,6 +29,18 @@ describe('CombatDie — spent-state greying', () => {
         expect(el.props.style.opacity).toBeLessThan(1);
     });
 
+    it('THE FLIP model — a used tray die is spent WITHOUT drafted, and must still grey', () => {
+        // Under Upgradeable Dice (on for every build) a card is powered by a tray
+        // die directly — no draft step — so a used die is `spent` with `drafted`
+        // false. The old `drafted && spent` gate excluded exactly this, live case
+        // and used dice never greyed. This is the regression the owner reported.
+        const usedDie: CombatDieVM = { ...BASE_DIE, drafted: false, spent: true, face: 'mana' };
+        render(<CombatDie die={usedDie} />);
+        const el = screen.getByTestId(`combat-die-${usedDie.id}`);
+        expect(el.props.style.opacity).toBeLessThan(1);
+        expect(el.props.accessibilityLabel).toContain('spent');
+    });
+
     it('a dead (miss) face is unaffected by spent — it already reads dead', () => {
         const deadDie: CombatDieVM = { ...BASE_DIE, drafted: false, spent: false, face: 'miss' };
         render(<CombatDie die={deadDie} />);

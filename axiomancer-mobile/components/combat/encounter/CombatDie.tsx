@@ -80,7 +80,7 @@ export const CombatDie = React.memo(function CombatDie({ die, size = 54, dimmed 
     // Owner jot (2026-07-20, routed to Phase 38): a used die reads as spent —
     // greyed out, desaturated. A static state change (lib/juice `spentDie`),
     // not an animated primitive.
-    const spentTreatment = spentDieTreatment({ drafted: die.drafted, spent: die.spent === true, dead });
+    const spentTreatment = spentDieTreatment({ spent: die.spent === true, dead });
     const greyed = spentTreatment.greyed;
     const ring = die.drafted ? accent : cracked ? '#6b3030' : greyed ? '#3a3a3a' : special ? accent : `${accent}aa`;
     const glow = !dead && !dimmed;
