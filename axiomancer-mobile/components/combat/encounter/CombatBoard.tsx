@@ -1566,9 +1566,11 @@ export const CombatCardFace = React.memo(function CombatCardFace({
     const freeShape = glyphShapeFor(f.freeGlyphKey);
     const freeGlyphArt = getCardGlyphArt(f.freeGlyphKey);
     const railW = large ? 24 : 17;
-    // Owner directive 2026-07-16 part 2: the FREE glyph reads BIGGER (~30%) —
-    // it is the fastest read of "what does this card do".
-    const glyphSize = large ? 80 : 52;
+    // Keep the FREE glyph prominent, but pull the prior badge treatment down
+    // by 20% so it no longer crowds the top-left corner.
+    const glyphScale = 0.8;
+    const glyphSize = (large ? 80 : 52) * glyphScale;
+    const glyphValueFontSize = (large ? 20 : 13) * glyphScale;
     const rarity = card.rarity ?? 'common';
     const rarColor = rarity === 'rare' ? '#9a6ad6' : rarity === 'uncommon' ? '#6b8eb0' : '#8a8273';
     return (
@@ -1673,7 +1675,12 @@ export const CombatCardFace = React.memo(function CombatCardFace({
                         )}
                         {freeInner ? (
                             <View style={[StyleSheet.absoluteFill, { alignItems: 'center', justifyContent: 'center', zIndex: 2 }]} pointerEvents="none">
-                                <Text style={[styles.freeInner, large && styles.freeInnerLarge]} allowFontScaling={false}>{freeInner}</Text>
+                                <Text
+                                    style={[styles.freeInner, large && styles.freeInnerLarge, { fontSize: glyphValueFontSize }]}
+                                    allowFontScaling={false}
+                                >
+                                    {freeInner}
+                                </Text>
                             </View>
                         ) : null}
                     </View>
