@@ -208,6 +208,39 @@
   only, no behavior change.
 - next: /iterate
 
+### Doctrine-curve confirmation (digest 2026-07-21, reduced-nightly): mid's two-day climb reverses, late still dead flat
+- category: content
+- impact: 7
+- ease: 3
+- detail: `/digest`'s reduced-nightly re-measure at `c0562bb3` (blind
+  policy-pick, doctrine early ~80 / mid ~50 / late 25-35 / impossible 0,
+  via the engine's own `stageSummaries` aggregate — includes
+  capitulate/concede alt-wins, not HP-kill only): early 77.4% (was
+  86.1% at `345cb0a6` — down 8.7pts, still roughly in band but the
+  softest early read in the last three digests), **mid 22.9%** (was
+  35.3% — **down 12.4pts, reversing the two-day climb** 7.3% →
+  31.0% → 35.3% → 22.9%), **late 0%** (unchanged — fourth
+  measurement running at exactly zero), impossible 0% (in band,
+  unchanged). Only two mechanics-source commits landed between
+  baselines: Phase 33d (GLYPHS pilot — sandbox-only per its own brief,
+  no library/preset promotion, should be inert on the matrix) and
+  Phase 37 (retire the fallacy/paradox card category + the dead
+  `combatResources` pool — billed as pure dead-code teardown, nothing
+  live consumed it). Neither commit's stated scope should move a win
+  curve at all, let alone reverse a two-day upward trend by double
+  digits on both early and mid — worth a closer look at whether
+  Phase 37's teardown had a live side-effect the brief didn't
+  anticipate, rather than filing this as ordinary reduced-nightly
+  noise (30 runs/cell, single seed — noisy, but this repo's own past
+  swings of this size have tracked real content changes, not chance).
+- next: /iterate — confirm with a full 3-seed `baseline:regen` before
+  treating the mid/early drop as real; if it holds, bisect Phase 37's
+  diff for an unintended combat-path change (the `combatResources`
+  removal touched `scoreCard`-adjacent code per its own brief) before
+  blaming noise. Late-game 0% (fire-giant, rangda, tezcatlipoca,
+  arch-demon, death, the-abortive) remains the standing "Post-D8
+  flag-on curve repair" candidate's sharper target.
+
 ### Doctrine-curve confirmation (digest 2026-07-20, reduced-nightly): mid climbing, late still dead flat
 - category: content
 - impact: 6

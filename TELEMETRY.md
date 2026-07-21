@@ -102,3 +102,5 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-07-21T04:04:40Z | subagent | card-expert | claude-sonnet-5 | main | Implement GLYPHS pilot phase 33d |
 | 2026-07-21T09:08:25Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-07-21T09:09:22Z | skill | expand | claude-sonnet-5 | main | - |
+| 2026-07-21T10:51:11Z | slash-prompt | /digest | unknown | user/ci | /digest |
+| 2026-07-21T10:51:13Z | skill | digest | unknown | main | - |
