@@ -99,3 +99,4 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-07-20T20:05:03Z | subagent | Explore | claude-sonnet-5 | main | Survey juice/animation call sites and precedents |
 | 2026-07-21T03:54:07Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-07-21T03:55:12Z | subagent | Explore | claude-sonnet-5 | main | Research GLYPHS pilot phase 33d design context |
+| 2026-07-21T04:04:40Z | subagent | card-expert | claude-sonnet-5 | main | Implement GLYPHS pilot phase 33d |

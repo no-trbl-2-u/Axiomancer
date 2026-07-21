@@ -147,7 +147,7 @@ describe('sandbox registry — library-card overrides', () => {
 // ── Set registry (post-v3 reset) ─────────────────────────────────────────────
 
 describe('sandbox sets — the registry after the post-v3 reset', () => {
-    it('carries the WS7.2 chooseX + WS3.4 doom + WS2.1 conjure + WS4 theme-role + WS5.2 sequencing + WS6.2 bridge sets (pre-v3 experiment sets stayed retired; WS2.2 free-line-conversions retired 2026-07-12, superseded by the Phase 30 full library pass)', () => {
+    it('carries the WS7.2 chooseX + WS3.4 doom + WS2.1 conjure + WS4 theme-role + WS5.2 sequencing + WS6.2 bridge + phase 33d GLYPHS sets (pre-v3 experiment sets stayed retired; WS2.2 free-line-conversions retired 2026-07-12, superseded by the Phase 30 full library pass)', () => {
         // (The spec 33 `dice-valves-33` set was promoted into the curated
         //  library in Phase D8, 2026-07-18 — ten-in/ten-out ledger in
         //  plan/tuning/2026-07-18-d8-preset-dice-valves.md.)
@@ -155,6 +155,8 @@ describe('sandbox sets — the registry after the post-v3 reset', () => {
             'chooseX-vein', 'doom-species', 'conjure-exercise',
             'roles-forge', 'roles-bulwark', 'roles-charm', 'roles-harvest',
             'sequencing-microset', 'bridge-rewards',
+            // Phase 33d — the GLYPHS pilot (Option-B grammar experiment).
+            'glyphs-33d',
             // The standing per-theme swap pools (owner-ratified fan-out
             // 2026-07-18; 30 spells each — contract pinned in
             // swap-pool.engine.test.ts).
@@ -184,6 +186,11 @@ describe('sandbox sets — the registry after the post-v3 reset', () => {
         expect(SANDBOX_CARD_SETS['bridge-rewards'].cards.map(c => c.id)).toEqual([
             'barbed-compliment', 'the-poured-rampart', 'interest-on-the-flesh',
             'entered-into-evidence', 'stolen-cadence', 'unbroken-countenance',
+        ]);
+        // Phase 33d — the GLYPHS pilot (deep coverage in glyphs.engine.test.ts).
+        expect(SANDBOX_CARD_SETS['glyphs-33d'].cards.map(c => c.id)).toEqual([
+            'glyph-of-suppuration', 'ash-that-remembers',
+            'glyph-of-the-bulwark', 'ward-that-waits',
         ]);
     });
 

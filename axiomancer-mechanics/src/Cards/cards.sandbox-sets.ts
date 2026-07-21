@@ -887,6 +887,149 @@ const unbrokenCountenance: Card = {
     tags: ['bridge', 'bulwark', 'charm', 'condition', 'alt-win'],
 };
 
+// ── Phase 33d — GLYPHS pilot (`glyphs-33d`) ──────────────────────────────────
+// The Option-B grammar experiment: `plan/phases/phase_33d_glyphs_pilot.md`.
+// Two themes (affliction — the brief's informal "erosion"; bulwark — the
+// brief's informal "bastion"), one inscriber + one pump each. Sandbox-only —
+// no CardType edit (rides the existing `'spell'` type via `Card.glyph`), no
+// library/preset promotion this phase (Gate-4 scope-discipline note). Charge
+// cap 3 for both payloads (locked); PAID lines never chip a clean enemy
+// (glyph payloads only resolve on `crackGlyph`, a player action the doctrine
+// witness's clean-board PAID sweep never calls).
+//
+// FREE-line pricing note: `glyphCharge` prices as a flat small deposit
+// (`VERB_POINTS.glyphChargePerCharge = 0.4`) and `glyphChargeFallback` is
+// deliberately UNSCORED (`scoreRider` — exactly one of the two branches ever
+// fires per play). That keeps every FREE line here well under the usual
+// 25-35% share window, so all four cards are flagged `intentionallyAsymmetric`
+// (the-long-ledger precedent) — a deliberate consequence of the pilot's own
+// pricing spec, not an oversight.
+
+/**
+ * Glyph of Suppuration — affliction Thesis, the erosion INSCRIBER. PAID:
+ * inscribes the glyph (poison, base 1, dur 2, cap 3) and marks the foe now
+ * (tempo, so the card is never dead if the glyph is never cracked). FREE:
+ * +1 charge to your OWN Glyph of Suppuration if you control one (matched by
+ * this card's own `glyph.payload.kind`), else the plain MARK deposit that
+ * satisfies the FREE-currency law before any glyph exists.
+ */
+const glyphOfSuppuration: Card = {
+    id: 'glyph-of-suppuration',
+    theme: 'affliction',
+    name: 'Glyph of Suppuration',
+    philosophicalAspect: 'mind',
+    description:
+        'Cut the mark into them and leave it. A wound heals; a sign does ' +
+        'not — it only ripens, patient, on whatever schedule you return to it.',
+    tier: 2, rank: 3, cardType: 'spell',
+    targetType: 'enemy',
+    // pts: MARK i2 d2 (statusPoints 0.75×2×2 = 3.0) + glyph term
+    // [glyphExpectedValue(poison base1 dur2, cap3: statusPoints(poison,
+    // 1+1.5, 2) = 5.34) × GLYPH_CRACK_DISCOUNT 0.6 = 3.20] + FREE glyphCharge
+    // 1 (0.4) = 6.60 → uncommon band 4.5-13 (Thesis). FREE share 0.4/6.60 =
+    // 6.1% — well under the usual 25-35% window, `intentionallyAsymmetric`
+    // (see the section note above: glyphChargeFallback is deliberately
+    // unscored, one-of-two-branches).
+    free: { glyphCharge: 1, glyphChargeFallback: { applyEffect: { effectId: 'debuff_mark', intensity: 1, duration: 1 } } },
+    combatEffects: [
+        { effectId: 'debuff_mark', appliedTo: 'opponent', intensity: 2, duration: 2 },
+    ],
+    glyph: { payload: { kind: 'poison', baseIntensity: 1, duration: 2 }, cap: 3 },
+    intentionallyAsymmetric: true,
+    addedIn: '2026-07-21',
+    tags: ['affliction', 'glyph', 'dot'],
+};
+
+/**
+ * Ash that Remembers — affliction Lemma, the erosion PUMP. PAID: a normal
+ * standalone thematic POISON application (unrelated to glyphs — the card is
+ * never dead in a glyph-less deck). FREE: +1 charge to ANY glyph you
+ * control (no `glyph` field of its own — the pump reads the zone broadly),
+ * else the same MARK deposit fallback.
+ */
+const ashThatRemembers: Card = {
+    id: 'ash-that-remembers',
+    theme: 'affliction',
+    name: 'Ash that Remembers',
+    philosophicalAspect: 'mind',
+    description:
+        'Nothing here forgets a fire. Feed the old burn and it deepens on ' +
+        'command, wherever you last left your mark standing.',
+    tier: 1, rank: 2, cardType: 'spell',
+    targetType: 'enemy',
+    // pts: POISON i1 d2 (statusPoints via dotTempoWeightedHp ÷ 3 = 2.14) +
+    // FREE glyphCharge 1 (0.4) = 2.54 → common band 1.5-7.5 (Lemma). FREE
+    // share 0.4/2.54 = 15.7% — under window, `intentionallyAsymmetric` (same
+    // reason as glyph-of-suppuration).
+    free: { glyphCharge: 1, glyphChargeFallback: { applyEffect: { effectId: 'debuff_mark', intensity: 1, duration: 1 } } },
+    combatEffects: [
+        { effectId: 'debuff_poison', appliedTo: 'opponent', intensity: 1, duration: 2 },
+    ],
+    intentionallyAsymmetric: true,
+    addedIn: '2026-07-21',
+    tags: ['affliction', 'glyph', 'dot'],
+};
+
+/**
+ * Glyph of the Bulwark — bulwark Lemma, the bastion INSCRIBER. PAID:
+ * inscribes the glyph (barrier, base 2, cap 3) and raises Guard now (tempo).
+ * FREE: +1 charge to your OWN Glyph of the Bulwark if you control one, else
+ * a small BARRIER fallback. Ranked one band below Glyph of Suppuration
+ * (Lemma, not Thesis): BARRIER prices structurally cheaper than POISON under
+ * the existing verb table (`barrierPerHp` 1/3 flat vs. a DoT's tempo-weighted
+ * walk) — inflating the PAID Guard just to reach an uncommon floor would
+ * misrepresent "small immediate Guard" as the card's real point, so the rank
+ * follows the honest arithmetic instead (card-expert judgment call, per the
+ * phase 33d brief's "the arithmetic is not [locked]").
+ */
+const glyphOfTheBulwark: Card = {
+    id: 'glyph-of-the-bulwark',
+    theme: 'bulwark',
+    name: 'Glyph of the Bulwark',
+    philosophicalAspect: 'body',
+    description:
+        'Carve the ward into the stone before the blow arrives. It does ' +
+        'not flinch — it only grows heavier the longer it is left standing.',
+    tier: 1, rank: 2, cardType: 'spell',
+    targetType: 'self',
+    // pts: Guard 8 (8 × 0.25 = 2.0) + glyph term [glyphExpectedValue(barrier
+    // base2, cap3: (2+1.5) × barrierPerHp 1/3 = 1.17) × GLYPH_CRACK_DISCOUNT
+    // 0.6 = 0.70] + FREE glyphCharge 1 (0.4) = 3.10 → common band 1.5-7.5
+    // (Lemma). FREE share 0.4/3.10 = 12.9% — under window,
+    // `intentionallyAsymmetric` (same reason as the erosion pair).
+    free: { glyphCharge: 1, glyphChargeFallback: { barrier: 1 } },
+    specialMechanics: [{ kind: 'guard', amount: 8 }],
+    glyph: { payload: { kind: 'barrier', baseAmount: 2 }, cap: 3 },
+    intentionallyAsymmetric: true,
+    addedIn: '2026-07-21',
+    tags: ['bulwark', 'glyph', 'defense'],
+};
+
+/**
+ * Ward that Waits — bulwark Doxa, the bastion PUMP. PAID: a normal
+ * standalone thematic BARRIER application (unrelated to glyphs). FREE: +1
+ * charge to ANY glyph you control, else the same BARRIER fallback.
+ */
+const wardThatWaits: Card = {
+    id: 'ward-that-waits',
+    theme: 'bulwark',
+    name: 'Ward that Waits',
+    philosophicalAspect: 'body',
+    description:
+        'The wall remembers every stone it was ever given. Add one more, ' +
+        'wherever the mortar is already set, and wait.',
+    tier: 1, rank: 1, cardType: 'spell',
+    targetType: 'self',
+    // pts: BARRIER 5 (5 × 1/3 = 1.67) + FREE glyphCharge 1 (0.4) = 2.07 →
+    // common band 1.5-7.5 (Doxa). FREE share 0.4/2.07 = 19.3% — under window,
+    // `intentionallyAsymmetric` (same reason as the rest of the set).
+    free: { glyphCharge: 1, glyphChargeFallback: { barrier: 1 } },
+    specialMechanics: [{ kind: 'barrier', amount: 5 }],
+    intentionallyAsymmetric: true,
+    addedIn: '2026-07-21',
+    tags: ['bulwark', 'glyph', 'defense'],
+};
+
 /** The registry of named experiment sets (`/deck-tuning`
  *  repopulates it as A/B candidates are authored). */
 export const SANDBOX_CARD_SETS: Record<string, SandboxCardSet> = {
@@ -1006,6 +1149,25 @@ export const SANDBOX_CARD_SETS: Record<string, SandboxCardSet> = {
         cards: [
             barbedCompliment, thePouredRampart, interestOnTheFlesh,
             enteredIntoEvidence, stolenCadence, unbrokenCountenance,
+        ],
+    },
+    'glyphs-33d': {
+        id: 'glyphs-33d',
+        name: 'GLYPHS pilot (phase 33d)',
+        description:
+            'Phase 33d — the Option-B grammar experiment: a charging seal '
+            + 'zone (state.glyphs), player-cracked via the new dieless '
+            + 'crackGlyph action. Two themes (affliction, bulwark), one '
+            + 'inscriber + one pump each: Glyph of Suppuration / Ash that '
+            + 'Remembers (affliction, poison payload) and Glyph of the '
+            + 'Bulwark / Ward that Waits (bulwark, barrier payload). '
+            + 'Sandbox-only — no library/preset promotion this phase (Gate-4 '
+            + 'scope-discipline note); promotion is a later, separate '
+            + 'decision, gated on the sim/mobile follow-ups the phase 33d '
+            + 'brief lists.',
+        cards: [
+            glyphOfSuppuration, ashThatRemembers,
+            glyphOfTheBulwark, wardThatWaits,
         ],
     },
     // ── The standing per-theme swap pools (2026-07-18 fan-out) ──────────────

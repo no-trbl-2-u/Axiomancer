@@ -66,3 +66,11 @@ export type { CardTheme } from './card-themes';
 export {
     CARD_THEMES, THEME_KEYWORDS, keywordsForTheme, isCardTheme,
 } from './card-themes';
+
+// Phase 33d — GLYPHS pilot (sandbox-only): `Card.glyph` / `CardRider.glyphCharge`
+// reference the Combat-owned glyph zone; re-exported wholesale here (mirrors
+// how `CombatThreatEffect`/`CombatEvent` are already exported wholesale per
+// 33a's precedent) so a Cards-only consumer never needs a separate Combat
+// import for the types this module's own `Card`/`CardRider` fields carry.
+export { crackGlyph } from '../Combat/combat.engine';
+export type { GlyphInstance, GlyphPayload } from '../Combat/combat.encounter.types';

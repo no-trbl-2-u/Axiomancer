@@ -82,7 +82,7 @@ import { getSignaturesForLoadout } from '../Items/relic.library';
 import type {
     CombatCard, CombatDieColor, CombatEncounterState, CombatEvent, CardPlay,
     CombatManaDie, CombatPhaseResult, CombatTransition, LandedEffect, CombatReadResult,
-    CombatThreatEffect, CombatThreatPhase, WheelStance,
+    CombatThreatEffect, CombatThreatPhase, WheelStance, GlyphInstance, GlyphPayload,
 } from './combat.encounter.types';
 
 // ── Tunable constants (HP model) ─────────────────────────────────────────────
@@ -1215,6 +1215,13 @@ function zoneHas(state: CombatEncounterState, cardId: string): boolean {
         || (state.enemyTempAttachments ?? []).some(t => t.cardId === cardId);
 }
 
+/** Phase 33d (GLYPHS pilot) — the live glyphs of a given payload kind, array
+ *  order preserved (deterministic — `crackGlyph`/`glyphShatter` both pick a
+ *  target off this order rather than any RNG). */
+function glyphsOfKind(state: CombatEncounterState, kind: GlyphPayload['kind']): GlyphInstance[] {
+    return (state.glyphs ?? []).filter(g => g.payload.kind === kind);
+}
+
 /** WS3.2 'damage-instance' clock — the shared enemy-damage funnel: applies the
  *  hit, then advances every damage-instance-clocked DoT on the enemy (BLEED's
  *  ratified shape). DoT-clock ticks themselves never route through here
@@ -1704,6 +1711,30 @@ function applyRiderToState(
                 }
             }
             next = { ...next, reserve };
+        }
+    }
+    if (r.glyphCharge) {
+        // GLYPH CHARGE (Phase 33d pilot) — an inscriber card (carries its own
+        // `card.glyph`) charges only its own payload kind; a pump card (no
+        // `card.glyph` of its own) charges ANY glyph the player controls.
+        // First match in array order (deterministic — mirrors glyphShatter's
+        // own tie-break). No matching glyph → the printed fallback deposit,
+        // never a silent no-op (the FREE-currency lint law).
+        const sourceCard = lookupCard(cardId);
+        const matchKind = sourceCard?.glyph?.payload.kind;
+        const candidates = matchKind ? glyphsOfKind(next, matchKind) : (next.glyphs ?? []);
+        const target = candidates[0];
+        if (target) {
+            const charges = Math.min(target.cap, target.charges + r.glyphCharge);
+            next = {
+                ...next,
+                glyphs: (next.glyphs ?? []).map(g => (g.id === target.id ? { ...g, charges } : g)),
+            };
+            events.push({ kind: 'glyph-charged', glyphId: target.id, charges, cap: target.cap });
+        } else if (r.glyphChargeFallback) {
+            next = applyRiderToState(next, cardId, r.glyphChargeFallback, events, rng);
+        } else {
+            events.push({ kind: 'effect-fizzled', cardId, effectId: '', message: 'no glyph to charge' });
         }
     }
     return next;
@@ -3242,6 +3273,20 @@ function playBottomAction(
         next = { ...next, mercyChoiceActive: true };
         events.push({ kind: 'mercy-opened', message: `${enemy.name} falters — spare or exploit?` });
     }
+    // Phase 33d (GLYPHS pilot) — inscribing is a side effect appended AFTER
+    // the card's own combatEffects/paidSummary PAID line resolves (same play,
+    // same card) — the card is never dead if its glyph is never cracked.
+    if (sourceCard.glyph) {
+        const glyph: GlyphInstance = {
+            id: `${sourceCard.id}-${(next.glyphs ?? []).length}`,
+            cardId: sourceCard.id,
+            payload: sourceCard.glyph.payload,
+            charges: 0,
+            cap: sourceCard.glyph.cap,
+        };
+        next = { ...next, glyphs: [...(next.glyphs ?? []), glyph] };
+        events.push({ kind: 'glyph-inscribed', glyphId: glyph.id, cardId: sourceCard.id });
+    }
     next = withLog(next, events);
     if (swayOffersCapitulation(next)) return offerCapitulation(next, events);
     return checkImmediateOutcome(next, events);
@@ -3452,6 +3497,9 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
     let swayMilestoneWaveringFired = state.swayMilestoneWaveringFired;
     let swayMilestoneFalteringFired = state.swayMilestoneFalteringFired;
     let premises = state.premises ?? 0;
+    // Phase 33d (GLYPHS pilot) — hoisted the same way for the same reason:
+    // the loop's glyphShatter hook mutates this local.
+    let glyphs = state.glyphs ?? [];
     // GUARD (one-shot, per-phase) absorbs first; BARRIER (persistent, stacking)
     // soaks the remainder; RIPOSTE parries and — spec 32 v3 — counters ONLY when
     // the attack was FULLY blocked (reflect class). All no-op when unset.
@@ -3627,6 +3675,17 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
                     events.push({ kind: 'threat-premise-shed', phaseIndex: phase.index, amount: before - premises });
                 }
             }
+            // Phase 33d (GLYPHS pilot) — enemy counterplay against the
+            // GLYPHS zone: destroys the LOWEST-charge glyph (stable
+            // first-on-tie, no RNG), mirrors swayCleanse/premiseShed exactly.
+            if (eff.glyphShatter && !doubtId && glyphs.length > 0) {
+                let lowestIdx = 0;
+                for (let i = 1; i < glyphs.length; i++) {
+                    if (glyphs[i].charges < glyphs[lowestIdx].charges) lowestIdx = i;
+                }
+                glyphs = glyphs.filter((_, i) => i !== lowestIdx);
+                events.push({ kind: 'glyph-shattered', phaseIndex: phase.index });
+            }
             penaltiesApplied.push(eff);
         }
         // A fired DOUBT / OVEREXTENDED is spent on the phase it bent (consumedOnUse).
@@ -3752,6 +3811,7 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
         swayMilestoneWaveringFired,
         swayMilestoneFalteringFired,
         premises,
+        glyphs,
         directDamageDealt: directDamage,
         guard: 0,                       // brace is spent on this phase's threat; resets each phase
         barrier,                        // persistent soak — carries the unspent remainder across phases
@@ -4213,6 +4273,11 @@ export function processBetweenPhases(
     };
     const tickedTempZone = tickTimed(omenState.tempZone, 'player');
     const tickedEnemyTemp = tickTimed(omenState.enemyTempAttachments, 'enemy');
+    // Phase 33d (GLYPHS pilot) — every glyph charges +1/round, capped at its
+    // own `cap` (a glyph already at cap is a silent no-op — the `ripenReserve`
+    // grammar: no event per tick, only crack/shatter/charge-from-a-play log).
+    const tickedGlyphs = (omenState.glyphs ?? []).map(g =>
+        (g.charges < g.cap ? { ...g, charges: g.charges + 1 } : g));
 
     let next: CombatEncounterState = {
         ...omenState,
@@ -4228,6 +4293,7 @@ export function processBetweenPhases(
         round: state.round + 1,
         tempZone: tickedTempZone,
         enemyTempAttachments: tickedEnemyTemp,
+        glyphs: tickedGlyphs,
         // Spec 32 §12 #4 — the enemy-damage ledger rolls over at the turn
         // boundary: this turn's value becomes last-round's, then resets.
         enemyDamageLastRound: omenState.enemyDamageThisTurn ?? 0,
@@ -4508,6 +4574,64 @@ export function playSignatureSkill(
         ...applied.events,
     ];
     const next = withLog(applied.state, events);
+    return checkImmediateOutcome(next, events);
+}
+
+/**
+ * Phase 33d (GLYPHS pilot) — crack a live glyph: resolves its payload at its
+ * current `charges` (poison → `applyEffect`, the same executor
+ * `CardRider.applyEffect`/a card's `combatEffects` already call; barrier →
+ * the same direct `state.barrier` addition `CardRider.barrier`/the `barrier`
+ * mechanic already use — no new damage/status math), removes the glyph, and
+ * emits `glyph-cracked`. Dieless (the die was paid at inscription) — legal
+ * only in `phase-play`, mirroring `playSignatureSkill`'s guard shape. A
+ * nonexistent `glyphId`, or a call outside `phase-play`, is a silent no-op
+ * (no state change, no events) — the same no-op shape `playSignatureSkill`
+ * uses for an unrecognized signature id.
+ */
+export function crackGlyph(
+    state: CombatEncounterState,
+    glyphId: string,
+    _rng: () => number = defaultRng,
+): CombatTransition {
+    if (state.phase !== 'phase-play') return { state, events: [] };
+    const glyph = (state.glyphs ?? []).find(g => g.id === glyphId);
+    if (!glyph) return { state, events: [] };
+
+    const events: CombatEvent[] = [];
+    let enemy = state.enemy;
+    let barrier = state.barrier ?? 0;
+
+    if (glyph.payload.kind === 'poison') {
+        const def = lookupEffectDef('debuff_poison');
+        if (def) {
+            const intensity = glyph.payload.baseIntensity + glyph.charges;
+            const applied = applyEffect(enemy.effects, def, state.round, {
+                intensityDelta: intensity,
+                durationMode: 'additive',
+                durationDelta: glyph.payload.duration,
+                sourceId: glyph.cardId,
+            });
+            enemy = { ...enemy, effects: applied.activeEffects };
+            if (applied.result.activeEffect) {
+                events.push({
+                    kind: 'effect-landed', cardId: glyph.cardId, effectId: def.id, target: 'enemy',
+                    effectKind: 'dot', intensity: applied.result.activeEffect.intensity, effect: def,
+                });
+            }
+        }
+    } else {
+        barrier += glyph.payload.baseAmount + glyph.charges;
+    }
+
+    let next: CombatEncounterState = {
+        ...state,
+        enemy,
+        barrier,
+        glyphs: (state.glyphs ?? []).filter(g => g.id !== glyphId),
+    };
+    events.push({ kind: 'glyph-cracked', glyphId, cardId: glyph.cardId, charges: glyph.charges });
+    next = withLog(next, events);
     return checkImmediateOutcome(next, events);
 }
 

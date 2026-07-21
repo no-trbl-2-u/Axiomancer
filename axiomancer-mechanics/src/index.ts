@@ -122,6 +122,8 @@ export {
     TURN_DICE_COUNT, rollTurnDice, dieHasStance,
     startTurn, draftStanceDie, endTurn, resolveRead, chooseDraft, discardCombatCard,
     playSignatureSkill, getDraftedDie, isPhaseStanceRevealed, revealedCurrentStance,
+    // Phase 33d — GLYPHS pilot (sandbox-only): the dieless crack action
+    crackGlyph,
     // WS8.2 — stance-blur readout flag (mobile renders the stance panel fogged)
     isStanceReadoutBlurred,
     cardReadPreview, projectCardImpact, getSignatureSkill, SIGNATURE_SKILLS, SIGNATURE_SKILL_LIST,
@@ -202,6 +204,8 @@ export type {
     // Phase 31 — the momentum wheel / THE STAKE shared stance subset
     WheelStance,
     CardDieCost, FinisherProjection, CombatOutcomeProjection,
+    // Phase 33d — GLYPHS pilot (sandbox-only): the charge-and-crack seal zone
+    GlyphInstance, GlyphPayload,
 } from './Combat';
 
 // ─── Playtest supercharge — stage matrix, policy roster, deck drafting ────────

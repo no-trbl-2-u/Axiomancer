@@ -58,6 +58,11 @@ export interface AuthoredThreatPhase {
      *  against the oratory/peroration CONCEDE track). Flat amount, floored
      *  at 0; never touches the lifetime `premisesThisCombat` counter. */
     premiseShed?: number;
+    /** Phase 33d (GLYPHS pilot) — destroys the player's LOWEST-charge glyph
+     *  on Overwhelm (mirrors `swayCleanse`/`premiseShed`'s shape exactly): a
+     *  no-op when the player controls no glyph (a sandbox-only mechanic —
+     *  every non-glyph deck sees this field do nothing). */
+    glyphShatter?: boolean;
     /** Threat description WITHOUT the damage number — the resolver appends "(+N damage[, Effect])". */
     actionText: string;
     isFinalPhase?: boolean;
@@ -199,9 +204,10 @@ function difficultyMult(enemy: Enemy): number {
 
 /** True when a threat effect debuffs the player (an applied effectId, or
  *  Phase 33a's counterplay hooks stripping the player's SWAY/Premise
- *  win-progress). */
+ *  win-progress, or Phase 33d's GLYPHS-zone counterplay). */
 function effectIsDebuff(eff: CombatThreatEffect): boolean {
-    return !!eff.effectId || (eff.swayCleanse ?? 0) > 0 || (eff.premiseShed ?? 0) > 0;
+    return !!eff.effectId || (eff.swayCleanse ?? 0) > 0 || (eff.premiseShed ?? 0) > 0
+        || eff.glyphShatter === true;
 }
 
 /**
@@ -283,6 +289,8 @@ interface ThreatActionRiders {
     enemyCleanse?: number;
     swayCleanse?: number;
     premiseShed?: number;
+    /** Phase 33d (GLYPHS pilot) — see `AuthoredThreatPhase.glyphShatter`. */
+    glyphShatter?: boolean;
 }
 
 /** Builds a `CombatThreatAction` from authored intent + the computed damage. */
@@ -290,7 +298,7 @@ function buildThreatAction(
     actionText: string, damage: number, effectId?: string, intensity?: number,
     riders?: ThreatActionRiders,
 ): CombatThreatAction {
-    const { enemyHeal, enemyCleanse, swayCleanse, premiseShed } = riders ?? {};
+    const { enemyHeal, enemyCleanse, swayCleanse, premiseShed, glyphShatter } = riders ?? {};
     const effects: CombatThreatEffect[] = [];
     if (damage > 0) effects.push({ damage });
     if (effectId) effects.push({ effectId, intensity: intensity ?? 1 });
@@ -298,6 +306,7 @@ function buildThreatAction(
     if (enemyCleanse && enemyCleanse > 0) effects.push({ enemyCleanse });
     if (swayCleanse && swayCleanse > 0) effects.push({ swayCleanse });
     if (premiseShed && premiseShed > 0) effects.push({ premiseShed });
+    if (glyphShatter) effects.push({ glyphShatter });
     const parts = [`+${damage} damage`];
     if (effectId) parts.push(effectLabel(effectId));
     if (enemyHeal && enemyHeal > 0) parts.push(`heals ${enemyHeal}`);
@@ -308,6 +317,7 @@ function buildThreatAction(
     if (premiseShed && premiseShed > 0) {
         parts.push(`unravels ${premiseShed} premise${premiseShed === 1 ? '' : 's'}`);
     }
+    if (glyphShatter) parts.push('shatters a glyph');
     return { description: `${actionText} (${parts.join(', ')}).`, effects };
 }
 
@@ -339,6 +349,7 @@ function resolveBranchOutcome(
         enemyCleanse: p.enemyCleanse ?? implicitCleanse,
         swayCleanse: p.swayCleanse,
         premiseShed: p.premiseShed,
+        glyphShatter: p.glyphShatter,
     });
     return {
         enemyStance: p.enemyStance,
@@ -387,6 +398,7 @@ function resolveAuthored(enemy: Enemy, authored: AuthoredThreatStep[]): CombatTh
             threatAction: buildThreatAction(p.actionText, damage, p.threatEffectId, p.threatIntensity, {
                 enemyHeal: p.enemyHeal, enemyCleanse: p.enemyCleanse,
                 swayCleanse: p.swayCleanse, premiseShed: p.premiseShed,
+                glyphShatter: p.glyphShatter,
             }),
             isFinalPhase: p.isFinalPhase ?? i === authored.length - 1,
             stanceHint: p.stanceHint ?? enemyStanceHint(enemy) ?? DEFAULT_STANCE_HINTS[p.enemyStance],

@@ -404,17 +404,23 @@ export const AUTHORED_THREAT_SEQUENCES: Record<string, AuthoredThreatStep[]> = {
     // ══ THE APORIA — labyrinth act bosses (W-01; L8 / L12 / L16) ═══════════════
 
     // Act I boss: the hinge-priest — control and stance-denial; the doors do the fighting.
+    // Phase 33d — GLYPHS pilot glyphShatter: a door closing is a seal broken;
+    // the two highest-difficulty enemies without an existing enemyCleanse/
+    // swayCleanse/premiseShed field were picked so the new field reads as its
+    // own distinct threat (brief guidance).
     'enemy-the-doorwarden': [
         { enemyStance: 'body', threatEffectId: 'debuff_mark', threatIntensity: 2, actionText: "A threshold assembles itself under your feet and declines to be crossed", stanceHint: "He worships thresholds; where you would step, a doctrine has already been installed." },
         { enemyStance: 'mind', damageWeight: 0.9, threatEffectId: 'debuff_mark', threatIntensity: 2, stake: true, actionText: "He closes a door you were keeping open in your head", stanceHint: "Every door that ever shut is remembered in him, and he consults the memory alphabetically." },
-        { enemyStance: 'body', damageWeight: 1.2, threatEffectId: 'debuff_mark', threatIntensity: 2, actionText: "The bronze frame swings through you like a door through a draught", stanceHint: "Sermon concluded, the hinge-priest recalls that he is mostly hinge." },
+        { enemyStance: 'body', damageWeight: 1.2, threatEffectId: 'debuff_mark', threatIntensity: 2, glyphShatter: true, actionText: "The bronze frame swings through you like a door through a draught", stanceHint: "Sermon concluded, the hinge-priest recalls that he is mostly hinge." },
         { enemyStance: 'body', damageWeight: 1.4, threatEffectId: 'debuff_mark', threatIntensity: 3, actionText: "Every door he remembers shuts at once, and you are the room", stanceHint: "The liturgy reaches its one commandment: what shuts, stays shut." },
     ],
     // Act II boss: the librarian-golem — misfiled truths as DoT; the paper does the cutting.
+    // Phase 33d — GLYPHS pilot glyphShatter: the ribs slamming shut on
+    // whatever is nearest reads as a seal shattering.
     'enemy-the-index': [
         { enemyStance: 'mind', threatEffectId: 'debuff_bleed', threatIntensity: 2, actionText: "A drawer opens at your name and issues the first thousand paper cuts", stanceHint: "It files before it strikes; the cuts arrive pre-catalogued." },
         { enemyStance: 'mind', damageWeight: 0.9, threatEffectId: 'debuff_poison', threatIntensity: 2, stake: true, actionText: "It misfiles you under KINDLING and shelves you beside the lamp oil", stanceHint: "The Archive's errata smoulder; a truth in the wrong place is an accelerant." },
-        { enemyStance: 'body', damageWeight: 1.2, threatEffectId: 'debuff_bleed', threatIntensity: 3, actionText: "The card-drawer ribs slam open and closed on whatever of you is nearest", stanceHint: "Out of patience with citation, the golem remembers its shelving is oak and iron." },
+        { enemyStance: 'body', damageWeight: 1.2, threatEffectId: 'debuff_bleed', threatIntensity: 3, glyphShatter: true, actionText: "The card-drawer ribs slam open and closed on whatever of you is nearest", stanceHint: "Out of patience with citation, the golem remembers its shelving is oak and iron." },
         { enemyStance: 'mind', damageWeight: 1.4, threatEffectId: 'debuff_poison', threatIntensity: 3, actionText: "It reads out every wrong entry ever filed about you, and the reading scalds", stanceHint: "The whole errata at once: a bonfire of corrections, and you are the margin they burn in." },
     ],
     // Act III finale: the narrator manifest — borrowed premises, returned with interest.

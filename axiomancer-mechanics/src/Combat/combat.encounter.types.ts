@@ -254,6 +254,12 @@ export interface CombatThreatEffect {
      *  `premiseMilestoneTotal` (the lifetime milestone-drip counter).
      *  Authorable on any threat phase, branch or linear. */
     premiseShed?: number;
+    /** Phase 33d (GLYPHS pilot) — enemy counterplay against the player's
+     *  GLYPHS zone: mirrors `swayCleanse`/`premiseShed`'s shape exactly.
+     *  When true (and `!doubtId`, and the player controls >= 1 glyph),
+     *  destroys the LOWEST-charge glyph (stable first-on-tie, no RNG).
+     *  Authorable on any threat phase, branch or linear. */
+    glyphShatter?: boolean;
 }
 
 export interface CombatThreatAction {
@@ -606,6 +612,14 @@ export type CombatEvent =
     // lifetime premiseMilestoneTotal counter).
     | { kind: 'threat-sway-cleansed'; phaseIndex: number; amount: number }
     | { kind: 'threat-premise-shed'; phaseIndex: number; amount: number }
+    // Phase 33d (GLYPHS pilot) — the charge-and-crack seal zone. Inscribe
+    // (PAID line), charge (FREE line or the between-phases tick — the tick
+    // itself is silent, see `processBetweenPhases`), crack (`crackGlyph`),
+    // and the enemy counterplay hook (`glyphShatter`, mirrors the 33a pair).
+    | { kind: 'glyph-inscribed'; glyphId: string; cardId: string }
+    | { kind: 'glyph-charged'; glyphId: string; charges: number; cap: number }
+    | { kind: 'glyph-cracked'; glyphId: string; cardId: string; charges: number }
+    | { kind: 'glyph-shattered'; phaseIndex: number }
     | { kind: 'hand-drawn'; cards: string[] }
     | { kind: 'cards-milled'; cards: string[] }
     | { kind: 'mercy-opened'; message: string }
@@ -651,6 +665,34 @@ export type CombatEvent =
     // payout converted to +1◆ instead (see the paired `die-overflowed` event).
     | { kind: 'coveted-die-stolen'; phaseIndex: number; method: 'stagger' | 'block' | 'yield'; dieId?: string }
     | { kind: 'combat-ended'; outcome: CombatOutcome };
+
+// ---------------------------------------------------------------------------
+// GLYPHS (Phase 33d pilot) — sandbox-only charge-and-crack seals. See
+// `plan/phases/phase_33d_glyphs_pilot.md`. No new keyword: both payloads
+// speak existing status verbs (spec 32 v3 §3's 30-keyword cap untouched).
+// ---------------------------------------------------------------------------
+
+/** The closed set of payloads a glyph may carry — existing status verbs
+ *  only, no new effect types. `baseIntensity`/`baseAmount` is the FLAT term
+ *  printed on the inscribing card; `+ charges` (the accumulated charge
+ *  count at crack time) is applied by `crackGlyph`, not printed here. */
+export type GlyphPayload =
+    | { kind: 'poison'; baseIntensity: number; duration: number }
+    | { kind: 'barrier'; baseAmount: number };
+
+/** A charge-and-crack seal on the battlefield: inscribed by a card's PAID
+ *  line, charges +1/round (`processBetweenPhases`, capped at `cap`) or via a
+ *  FREE-line `CardRider.glyphCharge`, and is cracked (player-initiated, via
+ *  the exported `crackGlyph`) for its payload scaled by the accumulated
+ *  `charges` — then removed. `id` is `${cardId}-${index-at-inscription}`, so
+ *  it stays unique even if the same card is inscribed more than once. */
+export interface GlyphInstance {
+    id: string;
+    cardId: string;
+    payload: GlyphPayload;
+    charges: number;
+    cap: number;
+}
 
 // ---------------------------------------------------------------------------
 // Top-level encounter state (Spec 25 §4.1)
@@ -747,6 +789,12 @@ export interface CombatEncounterState {
      *  PAID play of the same card promotes it to the permanent `persistentZone`.
      *  Optional for back-compat (absent = none). */
     tempZone?: { cardId: string; roundsLeft: number }[];
+    /** Phase 33d (GLYPHS pilot) — the player's live charge-and-crack seals.
+     *  Optional, "absent = none" back-compat convention (same as `tempZone`).
+     *  Ticked +1 charge/round (capped) in `processBetweenPhases`; charged via
+     *  a FREE-line `CardRider.glyphCharge`; cracked via `crackGlyph`; culled
+     *  by the enemy counterplay hook `CombatThreatEffect.glyphShatter`. */
+    glyphs?: GlyphInstance[];
     /** Spec 32 v4 §2.1 — TEMPORARY enemy-attached disenchants from the FREE line;
      *  the timed mirror of `enemyAttachments`. Same tick/promote rules as
      *  {@link tempZone}. Optional (absent = none). */

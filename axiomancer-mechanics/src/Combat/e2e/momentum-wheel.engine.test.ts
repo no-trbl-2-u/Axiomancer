@@ -26,6 +26,7 @@ import {
     initializeCombatEncounter, rollEncounterDice, playCombatCard, draftStanceDie,
     isMomentumDieId, getFloatingDiceColors,
 } from '../combat.engine';
+import { setUpgradeableDice } from '../combat.upgradeable-dice';
 import { runOneEncounter } from '../combat.encounter.sim';
 import { COMBAT_SIM_POLICY_ORDER } from '../combat.sim-policies';
 import type { CombatEncounterState } from '../combat.encounter.types';
@@ -53,6 +54,18 @@ registerSandboxCards([
         philosophicalAspect: 'mind', description: 'wheel-test mind fixture',
         tier: 1, targetType: 'enemy', rank: 1, cardType: 'spell',
         combatEffects: [{ effectId: 'debuff_confusion', appliedTo: 'opponent', duration: 2 }],
+    },
+    // Phase 33d (GLYPHS pilot) — a FREE-line glyphCharge fixture for the
+    // spec 33 §3 rule 5 regression below ("FREE lines never touch momentum").
+    {
+        id: 'qa-wheel-glyph-charge', name: 'QA Wheel Glyph Charge',
+        philosophicalAspect: 'heart', description: 'wheel-test glyphCharge fixture',
+        tier: 1, targetType: 'enemy', rank: 1, cardType: 'spell',
+        combatEffects: [{ effectId: 'debuff_bleed', appliedTo: 'opponent', intensity: 1, duration: 2 }],
+        free: {
+            glyphCharge: 1,
+            glyphChargeFallback: { applyEffect: { effectId: 'debuff_mark', intensity: 1, duration: 1 } },
+        },
     },
 ]);
 
@@ -199,6 +212,29 @@ describe('Phase 31 — momentum wheel (engine-native)', () => {
         const res = playCombatCard(s, { uid: entry!.uid }, true, undefined, rng);
         expect(res.events.some(e => e.kind === 'card-played')).toBe(true);
         expect(res.state.momentumWheel).toEqual([stance]);
+    });
+
+    it('spec 33 §3 rule 5 regression (Phase 33d) — a FREE glyphCharge play never mutates momentumV2', () => {
+        // `applyStanceAndMomentumV2` (the spec 33 momentum chain, distinct from
+        // this file's v1 `momentumWheel`) is only invoked on `useBottom`
+        // (PAID) plays — a FREE-line `glyphCharge` rider is structurally
+        // momentum-safe already; this proves it rather than just asserting it.
+        setUpgradeableDice(true);
+        try {
+            let s = open();
+            s = {
+                ...s,
+                playerStance: 'heart',
+                momentumV2: { color: 'heart', length: 2 },
+                hand: [...s.hand, { uid: 'glyph-free', cardId: 'qa-wheel-glyph-charge' }],
+            };
+            const res = playCombatCard(s, { uid: 'glyph-free' }, false, undefined, rng);
+            expect(res.events.some(e => e.kind === 'card-played')).toBe(true);
+            expect(res.state.momentumV2).toEqual({ color: 'heart', length: 2 });
+            expect(res.state.playerStance).toBe('heart');
+        } finally {
+            setUpgradeableDice(false);
+        }
     });
 
     it('the momentum die never survives to the character save (getFloatingDiceColors excludes temporary floats)', () => {

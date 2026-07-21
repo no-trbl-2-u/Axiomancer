@@ -165,6 +165,8 @@ export type {
     WheelStance,
     // Spec 33 (Phase D2) — the die-gear interface (D5 makes it a real rail)
     UpgradeableDieGear,
+    // Phase 33d — GLYPHS pilot (sandbox-only): the charge-and-crack seal zone
+    GlyphInstance, GlyphPayload,
 } from './combat.encounter.types';
 export {
     initializeCombatEncounter, rollEncounterDice, playCombatCard,
@@ -174,6 +176,8 @@ export {
     // Spec 26b — turn lifecycle + read + Conviction + Signature Skills
     startTurn, draftStanceDie, endTurn, resolveRead, chooseDraft, discardCombatCard,
     playSignatureSkill, getDraftedDie, isPhaseStanceRevealed, revealedCurrentStance,
+    // Phase 33d — GLYPHS pilot: the dieless crack action
+    crackGlyph,
     // WS8.2 — stance-blur readout flag (mobile renders the stance panel fogged)
     isStanceReadoutBlurred,
     cardReadPreview, projectCardImpact, getSignatureSkill, SIGNATURE_SKILLS, SIGNATURE_SKILL_LIST,
