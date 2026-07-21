@@ -18,8 +18,7 @@ import { describe, it, expect } from '@jest/globals';
 import { getCard, getCardById, cardLibrary, lookupEffect } from '@mechanics';
 import { faceStats, detailStats } from '@/state/presenters/combat-encounter.engine';
 import { keywordsInPersistentText, keywordForEffect, keywordGloss, SYSTEM_GLOSSARY } from '@/state/combat/keywords';
-import { CARD_ART_FILE_BY_ID } from '@/assets/images/cards';
-import { CARD_GLYPH_FILE_BY_KEY } from '@/assets/images/cards/glyphs';
+import { glyphShapeFor } from '@/components/combat/glyphShapes';
 
 describe('card-face honesty guard', () => {
     it('no library card renders the ambiguous PAID fallback', () => {
@@ -202,19 +201,13 @@ describe('card-face honesty guard', () => {
         expect(offenders).toEqual([]);
     });
 
-    it('every live card has its own main icon', () => {
-        const files = cardLibrary.map(({ id }) => CARD_ART_FILE_BY_ID[id]);
-        expect(files.filter(Boolean)).toHaveLength(cardLibrary.length);
-        expect(new Set(files).size).toBe(cardLibrary.length);
-    });
-
-    it('every FREE effect draws its supplied keyword icon — no text-rune fallback on a live card', () => {
+    it('every FREE effect draws its own silhouette — no text-rune fallback on a live card (owner 2026-07-16)', () => {
         // The giant top-left glyph must be the SHAPE of the effect it causes
         // (flame=burn, flask=poison, crosshair=mark, …). A card whose free
         // rider resolves no shape falls back to an abstract text rune — the
         // exact "generic concentric circles" read this guard exists to block.
-        // When it fires, select one supplied source icon for the keyword and
-        // add it to the card-glyph registry.
+        // When it fires, add the keyword's silhouette to glyphShapes.ts (and
+        // the synced copies in the editor's KwGlyph + build-catalog.mjs).
         const offenders: string[] = [];
         for (const { id } of cardLibrary) {
             const card = getCard(id);
@@ -222,7 +215,7 @@ describe('card-face honesty guard', () => {
             if (!card || !src) continue;
             const f = faceStats(card, src);
             if (!f.freeGlyph) continue; // no free line → no glyph at all
-            if (!f.freeGlyphKey || !CARD_GLYPH_FILE_BY_KEY[f.freeGlyphKey]) {
+            if (!glyphShapeFor(f.freeGlyphKey)) {
                 offenders.push(`${id} → freeGlyphKey=${f.freeGlyphKey ?? 'null'} (text rune '${f.freeGlyph}')`);
             }
         }

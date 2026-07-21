@@ -2,7 +2,7 @@
  {
   "id": "against-my-judgment",
   "name": "Against My Judgment",
-  "image": "./assets/catalog/cards/against-my-judgment.svg",
+  "image": "./assets/catalog/cards/devil-book.webp",
   "pricing": null,
   "face": {
    "freeGlyph": "◉",
@@ -61,7 +61,7 @@
  {
   "id": "anvil-of-form",
   "name": "Anvil of Form",
-  "image": "./assets/catalog/cards/anvil-of-form.svg",
+  "image": "./assets/catalog/cards/guard-1.webp",
   "pricing": "persistent +1 pip on every kindled/floating die ≈ 1.5 × ~6 forges, min-4 ≈ 12 → Axiom",
   "face": {
    "freeGlyph": "❖",
@@ -119,7 +119,7 @@
  {
   "id": "arrow-paradox",
   "name": "Arrow Paradox",
-  "image": "./assets/catalog/cards/arrow-paradox.svg",
+  "image": "./assets/catalog/cards/freeze.webp",
   "pricing": null,
   "face": {
    "freeGlyph": "◉",
@@ -179,7 +179,7 @@
  {
   "id": "bank-the-yield",
   "name": "Bank the Yield",
-  "image": "./assets/catalog/cards/bank-the-yield.svg",
+  "image": "./assets/catalog/cards/meat-pecker.webp",
   "pricing": null,
   "face": {
    "freeGlyph": "✚",
@@ -234,7 +234,7 @@
  {
   "id": "bleed-for-it",
   "name": "Bleed for It",
-  "image": "./assets/catalog/cards/bleed-for-it.svg",
+  "image": "./assets/catalog/cards/dream-flutter.webp",
   "pricing": null,
   "face": {
    "freeGlyph": "◉",
@@ -290,7 +290,7 @@
  {
   "id": "bone-orchard",
   "name": "Bone Orchard",
-  "image": "./assets/catalog/cards/bone-orchard.svg",
+  "image": "./assets/catalog/cards/yggdrasil.webp",
   "pricing": "persistent 1 HP per Soul gained (soul-gated drip) ≈ 1 × ~12 souls, min-4 ≈ 12 → Axiom",
   "face": {
    "freeGlyph": "❖",
@@ -348,7 +348,7 @@
  {
   "id": "bootstrap-loop",
   "name": "Bootstrap Loop",
-  "image": "./assets/catalog/cards/bootstrap-loop.svg",
+  "image": "./assets/catalog/cards/spark.webp",
   "pricing": null,
   "face": {
    "freeGlyph": "⬡",
@@ -407,7 +407,7 @@
  {
   "id": "brace-for-impact",
   "name": "Brace for Impact",
-  "image": "./assets/catalog/cards/brace-for-impact.svg",
+  "image": "./assets/catalog/cards/guard-2.webp",
   "pricing": null,
   "face": {
    "freeGlyph": "❖",
@@ -465,7 +465,7 @@
  {
   "id": "break-the-tempo",
   "name": "Break the Tempo",
-  "image": "./assets/catalog/cards/break-the-tempo.svg",
+  "image": "./assets/catalog/cards/freeze.webp",
   "pricing": null,
   "face": {
    "freeGlyph": "◉",
@@ -520,7 +520,7 @@
  {
   "id": "brief-candle",
   "name": "Brief Candle",
-  "image": "./assets/catalog/cards/brief-candle.svg",
+  "image": "./assets/catalog/cards/burn.webp",
   "pricing": null,
   "face": {
    "freeGlyph": "✦",
@@ -578,7 +578,7 @@
  {
   "id": "cassandras-burden",
   "name": "Cassandra's Burden",
-  "image": "./assets/catalog/cards/cassandras-burden.svg",
+  "image": "./assets/catalog/cards/god-eye-silver.webp",
   "pricing": null,
   "face": {
    "freeGlyph": "⚑",
@@ -638,7 +638,7 @@
  {
   "id": "change-of-heart",
   "name": "Change of Heart",
-  "image": "./assets/catalog/cards/change-of-heart.svg",
+  "image": "./assets/catalog/cards/bright-sphere-yellow.webp",
   "pricing": null,
   "face": {
    "freeGlyph": "∿",
@@ -693,7 +693,7 @@
  {
   "id": "circular-reasoning",
   "name": "Circular Reasoning",
-  "image": "./assets/catalog/cards/circular-reasoning.svg",
+  "image": "./assets/catalog/cards/light-ring.webp",
   "pricing": null,
   "face": {
    "freeGlyph": "⁇",
@@ -751,7 +751,7 @@
  {
   "id": "common-ground",
   "name": "Common Ground",
-  "image": "./assets/catalog/cards/common-ground.svg",
+  "image": "./assets/catalog/cards/bright-sphere-yellow.webp",
   "pricing": null,
   "face": {
    "freeGlyph": "☙",
@@ -811,7 +811,7 @@
  {
   "id": "crown-of-thorns",
   "name": "Crown of Thorns",
-  "image": "./assets/catalog/cards/crown-of-thorns.svg",
+  "image": "./assets/catalog/cards/yggdrasil.webp",
   "pricing": "persistent +1 intensity on applications while FALLEN ≈ 1.5 × ~7 gated ×0.5 ≈ 11 → Axiom",
   "face": {
    "freeGlyph": "❖",
@@ -869,7 +869,7 @@
  {
   "id": "crumbling-resolve",
   "name": "Crumbling Resolve",
-  "image": "./assets/catalog/cards/crumbling-resolve.svg",
+  "image": "./assets/catalog/cards/guard-2.webp",
   "pricing": "engine text (Aporia). RETAINS the old clause (a fully-blocked attack",
   "face": {
    "freeGlyph": "☠",
@@ -927,7 +927,7 @@
  {
   "id": "currys-conversion",
   "name": "Curry's Conversion",
-  "image": "./assets/catalog/cards/currys-conversion.svg",
+  "image": "./assets/catalog/cards/bleed.webp",
   "pricing": null,
   "face": {
    "freeGlyph": "◉",
@@ -985,7 +985,7 @@
  {
   "id": "delphic-ambiguity",
   "name": "Delphic Ambiguity",
-  "image": "./assets/catalog/cards/delphic-ambiguity.svg",
+  "image": "./assets/catalog/cards/confuse.webp",
   "pricing": null,
   "face": {
    "freeGlyph": "◉",
@@ -1044,7 +1044,7 @@
  {
   "id": "disarming-smile",
   "name": "Disarming Smile",
-  "image": "./assets/catalog/cards/disarming-smile.svg",
+  "image": "./assets/catalog/cards/light-ring.webp",
   "pricing": "rapport i2 d2 (3) + heal 2 (0.65) + FREE sway 1 (0.3) ≈ 4.5 → Lemma",
   "face": {
    "freeGlyph": "∿",
@@ -1103,7 +1103,7 @@
  {
   "id": "ex-nihilo",
   "name": "Ex Nihilo",
-  "image": "./assets/catalog/cards/ex-nihilo.svg",
+  "image": "./assets/catalog/cards/bright-sphere-yellow.webp",
   "pricing": null,
   "face": {
    "freeGlyph": "⬡",
@@ -1162,7 +1162,7 @@
  {
   "id": "exordium",
   "name": "Exordium",
-  "image": "./assets/catalog/cards/exordium.svg",
+  "image": "./assets/catalog/cards/light-ring.webp",
   "pricing": null,
   "face": {
    "freeGlyph": "❡",
@@ -1218,7 +1218,7 @@
  {
   "id": "fallen-grace",
   "name": "Fallen Grace",
-  "image": "./assets/catalog/cards/fallen-grace.svg",
+  "image": "./assets/catalog/cards/light-ring.webp",
   "pricing": null,
   "face": {
    "freeGlyph": "◉",
@@ -1277,7 +1277,7 @@
  {
   "id": "festering-argument",
   "name": "Festering Argument",
-  "image": "./assets/catalog/cards/festering-argument.svg",
+  "image": "./assets/catalog/cards/dream-flutter.webp",
   "pricing": null,
   "face": {
    "freeGlyph": "◉",
@@ -1335,7 +1335,7 @@
  {
   "id": "glimpse",
   "name": "Glimpse",
-  "image": "./assets/catalog/cards/glimpse.svg",
+  "image": "./assets/catalog/cards/god-eye-silver.webp",
   "pricing": null,
   "face": {
    "freeGlyph": "◉",
@@ -1395,7 +1395,7 @@
  {
   "id": "grace-under-fire",
   "name": "Grace Under Fire",
-  "image": "./assets/catalog/cards/grace-under-fire.svg",
+  "image": "./assets/catalog/cards/circe-placeholder.jpg",
   "pricing": "GUARD 10 (2.5) + rapport i2 d2 (3.0) = 5.5 + drew-blood rider",
   "face": {
    "freeGlyph": "❖",
@@ -1455,7 +1455,7 @@
  {
   "id": "half-spoken-prophecy",
   "name": "Half-Spoken Prophecy",
-  "image": "./assets/catalog/cards/half-spoken-prophecy.svg",
+  "image": "./assets/catalog/cards/circe-placeholder.jpg",
   "pricing": "RUPTURE 1 affliction / consume_affliction, no Soul (5.5) +",
   "face": {
    "freeGlyph": "◉",
@@ -1514,7 +1514,7 @@
  {
   "id": "half-step",
   "name": "Half-Step",
-  "image": "./assets/catalog/cards/half-step.svg",
+  "image": "./assets/catalog/cards/blue-light.webp",
   "pricing": null,
   "face": {
    "freeGlyph": "⬡",
@@ -1570,7 +1570,7 @@
  {
   "id": "hedgehogs-dilemma",
   "name": "Hedgehog's Dilemma",
-  "image": "./assets/catalog/cards/hedgehogs-dilemma.svg",
+  "image": "./assets/catalog/cards/guard-3.webp",
   "pricing": "persistent — every THORNS trigger also marks the enemy ≈ 1 × ~8 triggers, min-4 ≈ 12 → Axiom",
   "face": {
    "freeGlyph": "❖",
@@ -1628,7 +1628,7 @@
  {
   "id": "hold-the-line",
   "name": "Hold the Line",
-  "image": "./assets/catalog/cards/hold-the-line.svg",
+  "image": "./assets/catalog/cards/guard-1.webp",
   "pricing": null,
   "face": {
    "freeGlyph": "❖",
@@ -1683,7 +1683,7 @@
  {
   "id": "irresistible-grace",
   "name": "Irresistible Grace",
-  "image": "./assets/catalog/cards/irresistible-grace.svg",
+  "image": "./assets/catalog/cards/light-ring.webp",
   "pricing": "persistent — SWAY no longer decays (≈ +1/turn saved) AND stacks",
   "face": {
    "freeGlyph": "❖",
@@ -1741,7 +1741,7 @@
  {
   "id": "forge-masters-stamp",
   "name": "Master's Stamp",
-  "image": "./assets/catalog/cards/forge-masters-stamp.svg",
+  "image": "./assets/catalog/cards/devil-book.webp",
   "pricing": "engine text — amplifies the fired SPECIAL payload (+1◆), min-4 ≈ 4",
   "face": {
    "freeGlyph": "❖",
@@ -1795,7 +1795,7 @@
  {
   "id": "measured-answer",
   "name": "Measured Answer",
-  "image": "./assets/catalog/cards/measured-answer.svg",
+  "image": "./assets/catalog/cards/guard-3.webp",
   "pricing": null,
   "face": {
    "freeGlyph": "❖",
@@ -1850,7 +1850,7 @@
  {
   "id": "mirror-of-guilt",
   "name": "Mirror of Guilt",
-  "image": "./assets/catalog/cards/mirror-of-guilt.svg",
+  "image": "./assets/catalog/cards/god-eye-silver.webp",
   "pricing": "engine text — every self-debuff you gain lands 1 stack on the enemy (Aporia)",
   "face": {
    "freeGlyph": "☠",
@@ -1908,7 +1908,7 @@
  {
   "id": "mirror-of-longing",
   "name": "Mirror of Longing",
-  "image": "./assets/catalog/cards/mirror-of-longing.svg",
+  "image": "./assets/catalog/cards/god-eye-silver.webp",
   "pricing": "engine text — damage your defenses prevent becomes SWAY (Aporia)",
   "face": {
    "freeGlyph": "☠",
@@ -1966,7 +1966,7 @@
  {
   "id": "mounting-case",
   "name": "Mounting Case",
-  "image": "./assets/catalog/cards/mounting-case.svg",
+  "image": "./assets/catalog/cards/bright-sphere-yellow.webp",
   "pricing": null,
   "face": {
    "freeGlyph": "❡",
@@ -2027,7 +2027,7 @@
  {
   "id": "nettle-cloak",
   "name": "Nettle Cloak",
-  "image": "./assets/catalog/cards/nettle-cloak.svg",
+  "image": "./assets/catalog/cards/yggdrasil.webp",
   "pricing": null,
   "face": {
    "freeGlyph": "❖",
@@ -2082,7 +2082,7 @@
  {
   "id": "opening-statement",
   "name": "Opening Statement",
-  "image": "./assets/catalog/cards/opening-statement.svg",
+  "image": "./assets/catalog/cards/light-ring.webp",
   "pricing": null,
   "face": {
    "freeGlyph": "❡",
@@ -2142,7 +2142,7 @@
  {
   "id": "ouroboros",
   "name": "Ouroboros",
-  "image": "./assets/catalog/cards/ouroboros.svg",
+  "image": "./assets/catalog/cards/blue-light.webp",
   "pricing": null,
   "face": {
    "freeGlyph": "⁇",
@@ -2201,7 +2201,7 @@
  {
   "id": "pact-of-akrasia",
   "name": "Pact of Akrasia",
-  "image": "./assets/catalog/cards/pact-of-akrasia.svg",
+  "image": "./assets/catalog/cards/devil-book.webp",
   "pricing": null,
   "face": {
    "freeGlyph": "❖",
@@ -2263,7 +2263,7 @@
  {
   "id": "pebble-in-the-boot",
   "name": "Pebble in the Boot",
-  "image": "./assets/catalog/cards/pebble-in-the-boot.svg",
+  "image": "./assets/catalog/cards/circe-placeholder.jpg",
   "pricing": "nettle sting i1 d3 (printed 6 → tempo-weighted 4.63 ÷ 3 = 1.54) +",
   "face": {
    "freeGlyph": "❖",
@@ -2322,7 +2322,7 @@
  {
   "id": "peroratio-interrupta",
   "name": "Peroratio Interrupta",
-  "image": "./assets/catalog/cards/peroratio-interrupta.svg",
+  "image": "./assets/catalog/cards/light-ring.webp",
   "pricing": null,
   "face": {
    "freeGlyph": "❡",
@@ -2380,7 +2380,7 @@
  {
   "id": "prophecy-fulfilled",
   "name": "Prophecy Fulfilled",
-  "image": "./assets/catalog/cards/prophecy-fulfilled.svg",
+  "image": "./assets/catalog/cards/god-eye-silver.webp",
   "pricing": "RUPTURE (4 + fuel) + 3 fuel per omen hit ≈ 13 with a played oracle engine → Axiom",
   "face": {
    "freeGlyph": "◉",
@@ -2438,7 +2438,7 @@
  {
   "id": "quagmire-of-doubt",
   "name": "Quagmire of Doubt",
-  "image": "./assets/catalog/cards/quagmire-of-doubt.svg",
+  "image": "./assets/catalog/cards/confuse.webp",
   "pricing": "engine text — telegraphs enter play 1 rung lower, rest of combat (Aporia)",
   "face": {
    "freeGlyph": "☠",
@@ -2496,7 +2496,7 @@
  {
   "id": "quod-erat-demonstrandum",
   "name": "Quod Erat Demonstrandum",
-  "image": "./assets/catalog/cards/quod-erat-demonstrandum.svg",
+  "image": "./assets/catalog/cards/circe-placeholder.jpg",
   "pricing": "PAID [PERORATION at 5: rider [ruptureMarks 2 (2 × ⅔ = 1.33) +",
   "face": {
    "freeGlyph": "⚑",
@@ -2556,7 +2556,7 @@
  {
   "id": "recurring-symptom",
   "name": "Recurring Symptom",
-  "image": "./assets/catalog/cards/recurring-symptom.svg",
+  "image": "./assets/catalog/cards/bleed.webp",
   "pricing": null,
   "face": {
    "freeGlyph": "◉",
@@ -2611,7 +2611,7 @@
  {
   "id": "red-herring",
   "name": "Red Herring",
-  "image": "./assets/catalog/cards/red-herring.svg",
+  "image": "./assets/catalog/cards/will-o-wisp.webp",
   "pricing": null,
   "face": {
    "freeGlyph": "◉",
@@ -2669,7 +2669,7 @@
  {
   "id": "refrain",
   "name": "Refrain",
-  "image": "./assets/catalog/cards/refrain.svg",
+  "image": "./assets/catalog/cards/will-o-wisp.webp",
   "pricing": null,
   "face": {
    "freeGlyph": "⁇",
@@ -2729,7 +2729,7 @@
  {
   "id": "resonance-detonation",
   "name": "Resonance Detonation",
-  "image": "./assets/catalog/cards/resonance-detonation.svg",
+  "image": "./assets/catalog/cards/spark.webp",
   "pricing": null,
   "face": {
    "freeGlyph": "◉",
@@ -2789,7 +2789,7 @@
  {
   "id": "resonant-chamber",
   "name": "Resonant Chamber",
-  "image": "./assets/catalog/cards/resonant-chamber.svg",
+  "image": "./assets/catalog/cards/spark.webp",
   "pricing": "persistent — the first spell each turn gains ECHO ≈ ×0.8 spell/turn × rest, min-4 ≈ 12 → Axiom",
   "face": {
    "freeGlyph": "❖",
@@ -2847,7 +2847,7 @@
  {
   "id": "restate-the-point",
   "name": "Restate the Point",
-  "image": "./assets/catalog/cards/restate-the-point.svg",
+  "image": "./assets/catalog/cards/light-ring.webp",
   "pricing": null,
   "face": {
    "freeGlyph": "❖",
@@ -2902,7 +2902,7 @@
  {
   "id": "second-sight",
   "name": "Second Sight",
-  "image": "./assets/catalog/cards/second-sight.svg",
+  "image": "./assets/catalog/cards/god-eye-silver.webp",
   "pricing": null,
   "face": {
    "freeGlyph": "◉",
@@ -2957,7 +2957,7 @@
  {
   "id": "second-take",
   "name": "Second Take",
-  "image": "./assets/catalog/cards/second-take.svg",
+  "image": "./assets/catalog/cards/confuse.webp",
   "pricing": null,
   "face": {
    "freeGlyph": "⁇",
@@ -3012,7 +3012,7 @@
  {
   "id": "second-thoughts",
   "name": "Second Thoughts",
-  "image": "./assets/catalog/cards/second-thoughts.svg",
+  "image": "./assets/catalog/cards/blue-light.webp",
   "pricing": null,
   "face": {
    "freeGlyph": "⁇",
@@ -3071,7 +3071,7 @@
  {
   "id": "self-flagellant",
   "name": "Self-Flagellant",
-  "image": "./assets/catalog/cards/self-flagellant.svg",
+  "image": "./assets/catalog/cards/burn.webp",
   "pricing": "RUPTURE (4 + fuel 8, bonusPct 0.10 ≈ +0.004) − recoil 5 credit",
   "face": {
    "freeGlyph": "◉",
@@ -3126,7 +3126,7 @@
  {
   "id": "signs-and-portents",
   "name": "Signs and Portents",
-  "image": "./assets/catalog/cards/signs-and-portents.svg",
+  "image": "./assets/catalog/cards/will-o-wisp.webp",
   "pricing": null,
   "face": {
    "freeGlyph": "◉",
@@ -3184,7 +3184,7 @@
  {
   "id": "sketch-of-a-thought",
   "name": "Sketch of a Thought",
-  "image": "./assets/catalog/cards/sketch-of-a-thought.svg",
+  "image": "./assets/catalog/cards/blue-light.webp",
   "pricing": null,
   "face": {
    "freeGlyph": "⬡",
@@ -3243,7 +3243,7 @@
  {
   "id": "slippery-slope",
   "name": "Slippery Slope",
-  "image": "./assets/catalog/cards/slippery-slope.svg",
+  "image": "./assets/catalog/cards/dream-flutter.webp",
   "pricing": null,
   "face": {
    "freeGlyph": "◉",
@@ -3297,7 +3297,7 @@
  {
   "id": "soft-word",
   "name": "Soft Word",
-  "image": "./assets/catalog/cards/soft-word.svg",
+  "image": "./assets/catalog/cards/meat-pecker.webp",
   "pricing": null,
   "face": {
    "freeGlyph": "☙",
@@ -3355,7 +3355,7 @@
  {
   "id": "stuck-in-their-head",
   "name": "Stuck in Their Head",
-  "image": "./assets/catalog/cards/stuck-in-their-head.svg",
+  "image": "./assets/catalog/cards/will-o-wisp.webp",
   "pricing": "engine text — every ECHO / REPRISE drips 2 (echo-gated, §1 source 3) (Aporia)",
   "face": {
    "freeGlyph": "☠",
@@ -3413,7 +3413,7 @@
  {
   "id": "suppurating-curse",
   "name": "Suppurating Curse",
-  "image": "./assets/catalog/cards/suppurating-curse.svg",
+  "image": "./assets/catalog/cards/devil-book.webp",
   "pricing": "engine text — DOUBLES the enemy's total DoT damage each round (a",
   "face": {
    "freeGlyph": "☠",
@@ -3471,7 +3471,7 @@
  {
   "id": "sweet-poison",
   "name": "Sweet Poison",
-  "image": "./assets/catalog/cards/sweet-poison.svg",
+  "image": "./assets/catalog/cards/dream-flutter.webp",
   "pricing": null,
   "face": {
    "freeGlyph": "◉",
@@ -3530,7 +3530,7 @@
  {
   "id": "tempered-edge",
   "name": "Tempered Edge",
-  "image": "./assets/catalog/cards/tempered-edge.svg",
+  "image": "./assets/catalog/cards/circe-placeholder.jpg",
   "pricing": "Guard 5 (1.25) + ember i2 d2 (tempo 3.5 ÷ 3 = 1.17) = 2.42 +",
   "face": {
    "freeGlyph": "⬡",
@@ -3590,7 +3590,7 @@
  {
   "id": "the-adamant-wall",
   "name": "The Adamant Wall",
-  "image": "./assets/catalog/cards/the-adamant-wall.svg",
+  "image": "./assets/catalog/cards/guard-1.webp",
   "pricing": null,
   "face": {
    "freeGlyph": "❖",
@@ -3645,7 +3645,7 @@
  {
   "id": "the-anvil-speaks",
   "name": "The Anvil Speaks",
-  "image": "./assets/catalog/cards/the-anvil-speaks.svg",
+  "image": "./assets/catalog/cards/circe-placeholder.jpg",
   "pricing": "nettle sting i3 d4 (printed 24 → tempo-weighted 16.41 ÷ 3 = 5.47)",
   "face": {
    "freeGlyph": "❖",
@@ -3705,7 +3705,7 @@
  {
   "id": "the-burden-of-repetition",
   "name": "The Burden of Repetition",
-  "image": "./assets/catalog/cards/the-burden-of-repetition.svg",
+  "image": "./assets/catalog/cards/circe-placeholder.jpg",
   "pricing": "[poison i1 d1 (tempo-weighted 3.66 ÷ 3 = 1.22) + closer",
   "face": {
    "freeGlyph": "◉",
@@ -3767,7 +3767,7 @@
  {
   "id": "the-closing-word",
   "name": "The Closing Word",
-  "image": "./assets/catalog/cards/the-closing-word.svg",
+  "image": "./assets/catalog/cards/bright-sphere-yellow.webp",
   "pricing": "PERORATION at 6 → consume marks 3/stack + draw 2 + 2 Conviction ≈ 13 (CONCEDE at 8 — alt-win, §9) → Axiom",
   "face": {
    "freeGlyph": "❡",
@@ -3821,7 +3821,7 @@
  {
   "id": "the-gleaners-due",
   "name": "The Gleaner's Due",
-  "image": "./assets/catalog/cards/the-gleaners-due.svg",
+  "image": "./assets/catalog/cards/meat-pecker.webp",
   "pricing": "REAP 2 → KINDLE (2.5) + draw 2 (4) − soul cost 2 + rider soul 1 + FREE",
   "face": {
    "freeGlyph": "⚑",
@@ -3879,7 +3879,7 @@
  {
   "id": "the-olive-branch",
   "name": "The Olive Branch",
-  "image": "./assets/catalog/cards/the-olive-branch.svg",
+  "image": "./assets/catalog/cards/yggdrasil.webp",
   "pricing": null,
   "face": {
    "freeGlyph": "☙",
@@ -3938,7 +3938,7 @@
  {
   "id": "the-oracles-eye",
   "name": "The Oracle's Eye",
-  "image": "./assets/catalog/cards/the-oracles-eye.svg",
+  "image": "./assets/catalog/cards/god-eye-silver.webp",
   "pricing": "persistent always-revealed next stance + omen riders ×1.5 ≈ 12 (min-4 law) → Axiom",
   "face": {
    "freeGlyph": "❖",
@@ -3996,7 +3996,7 @@
  {
   "id": "the-overtake",
   "name": "The Overtake",
-  "image": "./assets/catalog/cards/the-overtake.svg",
+  "image": "./assets/catalog/cards/ice-sword.webp",
   "pricing": "spend ALL pips (+1 Guard per) + RUPTURE (3.5 fuel/pip, +50% burst) —",
   "face": {
    "freeGlyph": "◉",
@@ -4056,7 +4056,7 @@
  {
   "id": "poisoned-well",
   "name": "The Poisoned Well",
-  "image": "./assets/catalog/cards/poisoned-well.svg",
+  "image": "./assets/catalog/cards/circe-placeholder.jpg",
   "pricing": "poison i2 d2 (card-played clock 1.83, tempo-weighted 12.81 ÷ 3 =",
   "face": {
    "freeGlyph": "◉",
@@ -4114,7 +4114,7 @@
  {
   "id": "the-reaping",
   "name": "The Reaping",
-  "image": "./assets/catalog/cards/the-reaping.svg",
+  "image": "./assets/catalog/cards/ice-sword.webp",
   "pricing": null,
   "face": {
    "freeGlyph": "🩸",
@@ -4173,7 +4173,7 @@
  {
   "id": "tu-quoque",
   "name": "Tu Quoque",
-  "image": "./assets/catalog/cards/tu-quoque.svg",
+  "image": "./assets/catalog/cards/yggdrasil.webp",
   "pricing": null,
   "face": {
    "freeGlyph": "❖",
@@ -4231,7 +4231,7 @@
  {
   "id": "turnabout",
   "name": "Turnabout",
-  "image": "./assets/catalog/cards/turnabout.svg",
+  "image": "./assets/catalog/cards/confuse.webp",
   "pricing": null,
   "face": {
    "freeGlyph": "◉",
@@ -4289,7 +4289,7 @@
  {
   "id": "undistributed-middle",
   "name": "Undistributed Middle",
-  "image": "./assets/catalog/cards/undistributed-middle.svg",
+  "image": "./assets/catalog/cards/confuse.webp",
   "pricing": null,
   "face": {
    "freeGlyph": "◉",
@@ -4349,7 +4349,7 @@
  {
   "id": "venom-and-vein",
   "name": "Venom and Vein",
-  "image": "./assets/catalog/cards/venom-and-vein.svg",
+  "image": "./assets/catalog/cards/dream-flutter.webp",
   "pricing": "persistent +1 intensity on every bleed/poison application ≈ 1.5 × ~8 triggers × min-4 law ≈ 12 → Axiom",
   "face": {
    "freeGlyph": "❖",
@@ -4407,7 +4407,7 @@
  {
   "id": "videtur-quod",
   "name": "Videtur Quod",
-  "image": "./assets/catalog/cards/videtur-quod.svg",
+  "image": "./assets/catalog/cards/circe-placeholder.jpg",
   "pricing": "PAID [poison i1 d3 (card-played 1.83 cadence, tempo-weighted",
   "face": {
    "freeGlyph": "❡",
@@ -4466,7 +4466,7 @@
  {
   "id": "winnowing",
   "name": "Winnowing",
-  "image": "./assets/catalog/cards/winnowing.svg",
+  "image": "./assets/catalog/cards/ice-sword.webp",
   "pricing": null,
   "face": {
    "freeGlyph": "🩸",
@@ -4524,7 +4524,7 @@
  {
   "id": "zenos-half-step",
   "name": "Zeno's Half-Step",
-  "image": "./assets/catalog/cards/zenos-half-step.svg",
+  "image": "./assets/catalog/cards/confuse.webp",
   "pricing": null,
   "face": {
    "freeGlyph": "◉",
