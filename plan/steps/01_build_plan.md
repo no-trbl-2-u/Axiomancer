@@ -888,10 +888,16 @@ supersession collisions before any engine work.
 > carries the used-dice grey-out jot, see its brief). Phase 33d (GLYPHS
 > pilot) last of the three.
 
-- [ ] Phase 33d — GLYPHS pilot (Option-B grammar experiment). FREE-charge
+- [x] Phase 33d — GLYPHS pilot (Option-B grammar experiment). FREE-charge
       is compatible with spec 33 §3 rule 5 (FREE lines never touch momentum).
       Author pilot cards against the ratified four-die model. Deps: 33a +
-      D4 + D7.
+      D4 + D7. New `state.glyphs` charge-and-crack zone + dieless
+      `crackGlyph` action + `glyphShatter` enemy counterplay hook + 4
+      sandbox-only pilot cards (erosion/bastion). No library/preset
+      promotion, no mobile UI this phase — both explicit follow-ups. Brief:
+      `plan/phases/phase_33d_glyphs_pilot.md` —
+      `feat(mechanics): GLYPHS pilot — charging seals, player-cracked (phase 33d)`
+      (ac1853b2).
 
 **Legacy-combat cleanup (owner-directed 2026-07-18, chat — ships on its own
 branch, parallel to the D-sequence; does NOT preempt the D-sequence march
