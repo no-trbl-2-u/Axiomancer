@@ -167,6 +167,7 @@ const SIGS = {
   'Kindled Fury': { cost: 4, fx: E => { E.allMissesToMana(); E.kindle(); } },
   Cataract: { cost: 5, fx: E => E.dmg(5) },
   Recant: { cost: 5, fx: E => E.reclaim(99) },
+  'Common Ground': { cost: 5, fx: E => E.progressToken() }, // v3, only with --concede
 };
 const SIG_PICKS = {
   STANDSTILL: ['Cataract', 'The Final Word'], // v1 ran Final Word + Foresight (no damage sig): 20-round stalls. Cataract turns banked ◆ into the kill path.
@@ -232,21 +233,87 @@ function remove(tiers, name, count) {
     while (count > 0 && e[0] === name && e[1] > 0) { e[1]--; count--; }
 }
 
+// ============================================================================
+// v3 EXPERIMENT (bus-ride batch, 2026-07-22): Common Ground / minions / allies
+//   --concede            add the universal sig; smart brain plays to Accord
+//   --minions            shuffle 1 minion into each enemy tier
+//   --allies             test each ally with its built-for preset
+// Rulings encoded: phase = tier of the current telegraph (Last Stand locks FURY);
+// minion reveal IS the enemy's action that turn; max 1 minion (dupe heals 2);
+// minions take direct damage only; forced discards give no ◆; ally absorbs an
+// ENTIRE strike then is exiled; ally refreshes at player turn start.
+// ============================================================================
+let CONCEDE_ON = false;
+let CG_FIXED = false; // --cgfixed: Common Ground ignores ATTUNE/discounts (flat 5◆)
+let MINIONS_ON = false;
+let ALLY_IX = null; // index into ALLY_CARDS, or null
+
+const MINIONS = {
+  SKULK: {
+    A: { nm: 'Skulk Whelp', hp: 2, etb: S => mAtk(S, 1, 1), fx: { A: S => mAtk(S, 1, 1), P: S => mAtk(S, 1, 2), F: S => mAtk(S, 2, 2) } },
+    P: { nm: 'Filch-Shade', hp: 3, etb: S => { S.p.conv = Math.max(0, S.p.conv - 1); }, fx: {
+      A: S => { S.e.guard += 1; },
+      P: S => { const d = S.p.dice.find(usable); if (d) d.face = 'X'; },
+      F: S => mAtk(S, 3, 1) } },
+    F: { nm: 'Night Chorus', hp: 2, etb: S => mAtk(S, 2, 1), fx: {
+      A: S => { S.e.guard += 2; }, P: S => mAtk(S, 2, 1), F: S => { S.e.chorus = true; } } },
+  },
+  SHELLBACK: {
+    A: { nm: 'Barnacle Cluster', hp: 4, etb: S => { S.e.guard += 2; }, fx: {
+      A: S => { S.e.guard += 1; }, P: S => { S.e.guard += 2; }, F: S => { S.e.thorns = Math.min(3, S.e.thorns + 1); } } },
+    P: { nm: 'Molt-Tender', hp: 3, etb: S => { S.e.blight = Math.max(0, S.e.blight - 1); }, fx: {
+      A: S => { S.e.blight = Math.max(0, S.e.blight - 1); },
+      P: S => { S.e.blight = Math.max(0, S.e.blight - 1); S.e.hp = Math.min(ENEMIES[S.enemyName].hp, S.e.hp + 1); },
+      F: S => { S.e.hp = Math.min(ENEMIES[S.enemyName].hp, S.e.hp + 3); } } },
+    F: { nm: 'Shard of Shell', hp: 5, etb: () => {}, retaliateA: true, fx: {
+      A: () => {}, P: S => mAtk(S, 2, 1), F: S => mAtk(S, 4, 1) } },
+  },
+  BRUTE: {
+    A: { nm: 'Scavenger Rat', hp: 2, etb: S => mAtk(S, 1, 1), fx: {
+      A: S => { S.e.hp = Math.min(ENEMIES[S.enemyName].hp, S.e.hp + 1); }, P: S => mAtk(S, 1, 2), F: S => mAtk(S, 2, 2) } },
+    P: { nm: 'Drumbeater', hp: 3, etb: S => { S.e.pbonus += 1; }, fx: {
+      A: S => { S.e.pbonus += 1; }, P: S => { S.e.pbonus += 1; }, F: S => { S.e.pbonus += 2; } } },
+    F: { nm: 'Tremorling', hp: 4, etb: S => forceDiscard(S), fx: {
+      A: S => forceDiscard(S), P: S => mAtk(S, 2, 1), F: S => { mAtk(S, 3, 1); if (!S.over) forceDiscard(S); } } },
+  },
+};
+function mAtk(S, n, hits) { for (let h = 0; h < hits && !S.over; h++) hurtPlayer(S, n, true); }
+function forceDiscard(S) { if (S.p.hand.length) { S.p.discard.push(S.p.hand.shift()); } } // no ◆
+
+// Allies: enter play Paid with ANY die; auto-exhaust each round for the current
+// phase's line ('end' timing = after the player's plays, before the telegraph).
+const ALLY_CARDS = [
+  { nm: 'The Penitent Skulk', built: 'MALISON', fx: { A: (E) => E.scry(2), P: (E, S) => { S.p.hexTop = true; }, F: (E, S) => E.dmg(S.e.fired.length) } },
+  { nm: 'Skulk of the Shallows', built: 'TORRENT', fx: { A: (E) => E.advanceChain(), P: (E) => E.chainShield(), F: (E, S) => { S.p.burstBonus = 3; } } },
+  { nm: 'The Quiet Skulk', built: 'STANDSTILL', timing: 'end', fx: { A: (E) => E.stagger(1), P: (E) => E.stagger(2), F: (E, S) => { if (effPower(S) <= 0 && S.e.telegraph) E.dmg(2); } } },
+  { nm: 'The Doorwright', built: 'BASTION', fx: { A: (E) => E.guard(2), P: (E) => E.guard(2, true), F: (E) => E.thorns(1) } },
+  { nm: 'Blightshell', built: 'CONTAGION', fx: { A: (E) => E.blight(1), P: (E) => E.blight(2), F: (E, S) => { S.e.blightNoDecay = true; } } },
+  { nm: 'The Kiln-Back', built: 'FOUNDRY', fx: { A: (E) => E.temper(1), P: (E) => E.temper(2), F: (E) => E.kindle() } },
+  { nm: 'The Gospel Brute', built: 'INVOCATION', fx: { A: (E) => E.conviction(1), P: (E) => E.attune(2), F: (E) => E.conviction(2) } },
+  { nm: 'The Load-Bearer', built: 'BASTION', fx: { A: (E) => E.guard(3), P: (E) => E.thorns(1), F: (E) => E.guard(4) } },
+  { nm: 'The Sledge', built: 'FOUNDRY', fx: { A: (E) => E.temper(1), P: (E) => E.dmg(2), F: (E) => E.dmg(4) } },
+];
+const ALLY_BASE_IX = 100;
+
 // ------------------------------------------------------------------- engine
 function newGame(presetName, enemyName, recipe, seed) {
   const rnd = mulberry32(seed);
   const preset = PRESETS[presetName];
   const deck = [];
   preset.cards.forEach((c, ix) => { for (let i = 0; i < c.n; i++) deck.push(ix); });
+  if (ALLY_IX !== null) deck.push(ALLY_BASE_IX + ALLY_IX); // 21st card: the befriended ally
 
   const spec = ENEMIES[enemyName];
   const tiers = JSON.parse(JSON.stringify(spec.tiers));
   if (recipe === 'easy') spec.easy(tiers);
   if (recipe === 'hard') spec.hard(tiers);
   const edeck = [];
+  const tierSizes = { A: 0, P: 0, F: 0 };
   for (const key of ['A', 'P', 'F']) {
     const tier = [];
     for (const [nm, n] of tiers[key]) for (let i = 0; i < n; i++) tier.push(nm);
+    if (MINIONS_ON) tier.push({ minion: key }); // 1 minion lives in each tier
+    tierSizes[key] = tier.length;
     edeck.push(...shuffled(tier, rnd));
   }
 
@@ -258,19 +325,27 @@ function newGame(presetName, enemyName, recipe, seed) {
       surge: 0, attune: 0, chainShield: false, echoSig: false,
       ench: [], rite: null, dice: [], persistDie: null, kindled: false,
       pressed: false, sigUsedTurn: false, sigs: SIG_PICKS[presetName].slice(),
+      ally: null, hexTop: false, burstBonus: 0, // v3
     },
     e: {
       hp: spec.hp, deck: edeck, discard: [], fired: [], telegraph: null,
       guard: 0, thorns: 0, blight: 0, enraged: false, skip: false, doubt: 0,
       known: 0, staggers: 0,
+      // v3: phase tracking + minion + Concede
+      tierSizes, drawn: 0, phase: 'A', minion: null, pbonus: 0, progress: 0,
+      chorus: false, blightNoDecay: false,
     },
     stats: { convEarned: 0, convSpent: 0, bursts: 0, sigFires: 0, pressFates: 0, hexFired: 0, freePlays: 0, paidPlays: 0, discardsForConv: 0 },
   };
+  if (CONCEDE_ON) S.p.sigs.push('Common Ground');
   revealTelegraph(S);
   return S;
 }
 
-const cardOf = (S, ix) => PRESETS[S.presetName].cards[ix];
+const cardOf = (S, ix) =>
+  ix >= ALLY_BASE_IX
+    ? { nm: ALLY_CARDS[ix - ALLY_BASE_IX].nm, col: 'A', t: 'ALLY', v: 6, free: () => {}, paid: () => {} }
+    : PRESETS[S.presetName].cards[ix];
 
 function makeVerbs(S) {
   const E = {
@@ -279,7 +354,8 @@ function makeVerbs(S) {
     thorns: n => { S.p.thorns = Math.min(3, S.p.thorns + n); },
     blight: n => { S.e.blight = Math.min(6, S.e.blight + n); },
     heal: n => { S.p.hp = Math.min(30, S.p.hp + n); },
-    dmg: n => dealToEnemy(S, n, true),
+    dmg: n => dealPlayerDamage(S, n),
+    progressToken: () => { S.e.progress++; },
     scry: n => {
       S.e.known = Math.max(S.e.known, Math.min(n, S.e.deck.length));
       const arch = S.p.ench.filter(e => e === 'archive').length; // The Deep File: bottom a card, ping 1 per copy
@@ -309,7 +385,10 @@ function makeVerbs(S) {
     echoNextSig: () => { S.p.echoSig = true; },
     freeSig: ctx => { const s = bestSig(S, ctx.brain); if (s) fireSig(S, s, ctx.brain, true); },
     bothSigsFree: ctx => { for (const s of S.p.sigs) fireSig(S, s, ctx.brain, true); },
-    hex: depth => { const at = Math.min(depth, S.e.deck.length); S.e.deck.splice(at, 0, { curse: S._curseIx }); },
+    hex: depth => {
+      if (S.p.hexTop) { depth = 0; S.p.hexTop = false; } // The Penitent Skulk (PRESS)
+      const at = Math.min(depth, S.e.deck.length); S.e.deck.splice(at, 0, { curse: S._curseIx });
+    },
     doubt: () => { S.e.doubt++; },
     firedCount: () => S.e.fired.length,
     reclaim: n => { while (n-- > 0 && S.e.fired.length) S.p.hand.push(S.e.fired.pop()); },
@@ -367,6 +446,7 @@ function checkBurst(S) {
   S.p.dice.push({ color: 'G', face: rollFace('G', S.rnd), temp: true });
   const waves = S.p.ench.filter(e => e === 'wave').length;
   if (waves) dealToEnemy(S, 3 * waves, true);
+  if (S.p.burstBonus) { dealToEnemy(S, S.p.burstBonus, true); S.p.burstBonus = 0; } // Skulk of the Shallows (FURY)
   if (S.p.rite && S.p.rite.trigger === 'burst') riteCharge(S);
   if (S.p.rite && S.p.rite.trigger === 'burst') {
     // Maelstrom static: bursts deal damage equal to its charges (before this one's sac check ran)
@@ -388,6 +468,21 @@ function riteCharge(S, ctxBrain) {
 function spendDie(S, die) {
   if (die.face === 'S') { S.p.conv += 2; S.stats.convEarned += 2; }
   S.p.dice.splice(S.p.dice.indexOf(die), 1);
+}
+
+// v3: player-sourced damage is assignable — brains focus the minion down when
+// the hit wouldn't be badly wasted (physical rule: you choose the target).
+function dealPlayerDamage(S, n) {
+  const m = S.e.minion;
+  if (m && m.hp > 0 && n <= m.hp + 2) { dealToMinion(S, n); return; }
+  dealToEnemy(S, n, true);
+}
+function dealToMinion(S, n) {
+  const m = S.e.minion;
+  if (!m || n <= 0) return;
+  m.hp -= n;
+  if (m.spec.retaliateA && S.e.phase === 'A') hurtPlayer(S, 1, false); // Shard of Shell
+  if (m.hp <= 0) { S.e.discard.push(m.entry); S.e.minion = null; } // card returns for Last Stand
 }
 
 function dealToEnemy(S, n, direct) {
@@ -413,11 +508,11 @@ function hurtPlayer(S, n, isHit) {
 function effPower(S) {
   const t = S.e.telegraph;
   if (!t) return 0;
-  return Math.max(0, ENEMY_CARDS[t].base - S.e.staggers);
+  return Math.max(0, ENEMY_CARDS[t].base + S.e.pbonus - S.e.staggers); // pbonus: Drumbeater
 }
 
 function revealTelegraph(S) {
-  S.e.telegraph = null; S.e.staggers = 0;
+  S.e.telegraph = null; S.e.staggers = 0; S.e.pbonus = 0;
   while (S.e.deck.length || S.e.discard.length) {
     if (!S.e.deck.length) { // Last Stand
       S.e.deck = S.e.discard.slice(); S.e.discard = []; S.e.enraged = true;
@@ -430,7 +525,18 @@ function revealTelegraph(S) {
       if (S.over) return;
       continue;
     }
-    if (S.e.doubt > 0) { S.e.doubt--; S.e.discard.push(top); continue; } // Whispered Doubt eats it
+    // real deck entry: advance the phase clock (Last Stand locks FURY)
+    S.e.drawn++;
+    if (S.e.enraged) S.e.phase = 'F';
+    else S.e.phase = S.e.drawn <= S.e.tierSizes.A ? 'A' : S.e.drawn <= S.e.tierSizes.A + S.e.tierSizes.P ? 'P' : 'F';
+    if (S.e.doubt > 0) { S.e.doubt--; S.e.discard.push(top); continue; } // Whispered Doubt eats it (minions too)
+    if (typeof top === 'object' && top.minion !== undefined) { // v3 minion reveal
+      if (S.e.minion) { S.e.minion.hp += 2; S.e.discard.push(top); continue; } // dupe heals 2, keep revealing
+      const spec = MINIONS[S.enemyName][top.minion];
+      S.e.minion = { spec, hp: spec.hp, nm: spec.nm, entry: top };
+      spec.etb(S);
+      return; // the reveal IS the enemy's whole action: no telegraph this cycle
+    }
     S.e.telegraph = top;
     return;
   }
@@ -439,6 +545,8 @@ function revealTelegraph(S) {
 function enemyTurn(S) {
   for (let i = S.p.ench.filter(e => e === 'blight1').length; i > 0; i--) S.e.blight = Math.min(6, S.e.blight + 1); // Lingering Cough
   if (S.e.skip) { S.e.skip = false; endEnemyTurn(S); return; }
+  // v3: minion triggers its current-phase line at the start of the enemy turn
+  if (S.e.minion) { S.e.minion.spec.fx[S.e.phase](S); if (S.over) return; }
   const t = S.e.telegraph;
   if (t) {
     const card = ENEMY_CARDS[t];
@@ -446,9 +554,22 @@ function enemyTurn(S) {
     if (power <= 0) {
       S.e.discard.push(t); // fizzle
     } else {
-      const bonus = S.e.enraged && card.kind === 'attack' ? 1 : 0;
-      if (card.kind === 'attack') { for (let h = 0; h < card.hits; h++) { hurtPlayer(S, power + bonus, true); if (S.over) return; } }
-      else if (card.kind === 'guard') S.e.guard += power;
+      const bonus = (S.e.enraged ? 1 : 0) + (S.e.chorus ? 1 : 0);
+      if (card.kind === 'attack') {
+        const incoming = (power + bonus) * (card.hits || 1);
+        if (S.p.ally && (incoming >= 5 || incoming >= S.p.hp)) {
+          S.p.ally = null; // the ally absorbs the ENTIRE strike and is exiled
+          S.e.discard.push(t);
+        } else {
+          for (let h = 0; h < card.hits; h++) { hurtPlayer(S, power + bonus, true); if (S.over) return; }
+          S.e.discard.push(t);
+        }
+        S.e.chorus = false;
+        revealTelegraph(S);
+        endEnemyTurn(S);
+        return;
+      }
+      if (card.kind === 'guard') S.e.guard += power;
       else if (card.kind === 'thorns') S.e.thorns = Math.min(3, S.e.thorns + power);
       else if (card.kind === 'molt') { S.e.blight = Math.max(0, S.e.blight - 2); S.e.hp = Math.min(ENEMIES[S.enemyName].hp, S.e.hp + power); }
       S.e.discard.push(t);
@@ -461,9 +582,12 @@ function enemyTurn(S) {
 function endEnemyTurn(S) {
   if (S.e.blight > 0) {
     dealToEnemy(S, S.e.blight, false);
-    S.e.blight--;
+    if (S.e.blightNoDecay) S.e.blightNoDecay = false; // Blightshell (FURY)
+    else S.e.blight--;
     if (S.p.rite && S.p.rite.trigger === 'blightTick') riteCharge(S);
   }
+  // v3 Concede: an enemy ending its turn with 3+ PROGRESS ties into an Accord
+  if (!S.over && CONCEDE_ON && S.e.progress >= 3) S.over = 'accord';
 }
 
 // ---- playing cards
@@ -503,6 +627,10 @@ function playPaid(S, handIx, die, brain) {
     else S.p.discard.push(ix);
     return;
   }
+  if (c.t === 'ALLY') { // v3: befriended ally enters play (max 1; replacing discards nothing — no dupes exist)
+    S.p.ally = { aix: ix - ALLY_BASE_IX, exhausted: false };
+    return;
+  }
   c.paid(E, ctx);
   if (echoTwice) c.paid(E, ctx);
   if (c.t !== 'CURSE') S.p.discard.push(ix);
@@ -510,7 +638,7 @@ function playPaid(S, handIx, die, brain) {
 
 function fireSig(S, name, brain, free) {
   const sig = SIGS[name];
-  const disc = S.p.attune + S.p.ench.filter(e => e === 'sigDiscount').length;
+  const disc = CG_FIXED && name === 'Common Ground' ? 0 : S.p.attune + S.p.ench.filter(e => e === 'sigDiscount').length;
   const cost = free ? 0 : Math.max(0, sig.cost - disc);
   if (!free) {
     if (S.p.conv < cost) return false;
@@ -549,7 +677,7 @@ function legalActions(S) {
     acts.push({ k: 'free', h });
     for (const d of S.p.dice) {
       if (!usable(d)) continue;
-      const ok = c.col === 'G' ? d.color === 'G' : (d.color === c.col || d.color === 'G');
+      const ok = c.col === 'A' ? true : c.col === 'G' ? d.color === 'G' : (d.color === c.col || d.color === 'G'); // 'A' = ally, any die
       if (ok) { acts.push({ k: 'paid', h, die: d }); break; } // one representative die; refined at exec
     }
     acts.push({ k: 'discard', h });
@@ -567,7 +695,7 @@ function chooseDie(S, c, prefer) {
   // (specials are worth +2conv either way, so spend mana first to keep options? No:
   // spending the SPECIAL yields conv NOW. brains: greedy spends special first, smart
   // spends exact-color mana first and hoards gold unless needed.)
-  const cands = S.p.dice.filter(d => usable(d) && (c.col === 'G' ? d.color === 'G' : (d.color === c.col || d.color === 'G')));
+  const cands = S.p.dice.filter(d => usable(d) && (c.col === 'A' ? true : c.col === 'G' ? d.color === 'G' : (d.color === c.col || d.color === 'G')));
   if (!cands.length) return null;
   if (prefer === 'goldLast') {
     cands.sort((a, b) => (a.color === 'G' ? 1 : 0) - (b.color === 'G' ? 1 : 0) || (a.face === 'S' ? 0 : 1) - (b.face === 'S' ? 0 : 1));
@@ -615,8 +743,14 @@ const BRAINS = {
       return (effPower(S) + (S.e.enraged ? 1 : 0)) * (c.hits || 1);
     })();
 
+    // v3 Concede mode: the goal is the Accord, not the kill — every spare ◆
+    // becomes PROGRESS, and the damage sigs stay holstered.
+    if (CONCEDE_ON) {
+      const disc = CG_FIXED ? 0 : S.p.attune + S.p.ench.filter(e => e === 'sigDiscount').length;
+      if (S.p.conv >= Math.max(0, SIGS['Common Ground'].cost - disc)) return { k: 'sig', s: 'Common Ground' };
+    }
     // 1. lethal check: can a sig finish it?
-    for (const s of S.p.sigs) {
+    if (!CONCEDE_ON) for (const s of S.p.sigs) {
       const disc = S.p.attune + S.p.ench.filter(e => e === 'sigDiscount').length;
       const afford = S.p.conv >= Math.max(0, SIGS[s].cost - disc);
       if (!afford) continue;
@@ -624,7 +758,7 @@ const BRAINS = {
       if (s === 'The Reckoning' && 2 * S.e.blight >= S.e.hp + S.e.guard) return { k: 'sig', s };
     }
     // 1b. surplus ◆: damage sigs are a repeatable kill path — spend, don't hoard
-    for (const s of S.p.sigs) {
+    if (!CONCEDE_ON) for (const s of S.p.sigs) {
       const disc = S.p.attune + S.p.ench.filter(e => e === 'sigDiscount').length;
       const cost = Math.max(0, SIGS[s].cost - disc);
       if (S.p.conv < cost + 2) continue; // keep 2◆ working capital for Press Fate
@@ -648,6 +782,7 @@ const BRAINS = {
     S.p.hand.forEach((ix, h) => {
       const c = cardOf(S, ix);
       if (c.t !== 'ENCH' && c.t !== 'RITE') return;
+      if (CONCEDE_ON && ['The Deep File', 'Standing Wave', 'Lingering Cough', 'The Ledger', 'Terminal Diagnosis', 'Maelstrom', 'Unbroken'].includes(c.nm)) return; // damage engines stay benched
       if (c.t === 'RITE' && S.p.rite) return;
       if (c.t === 'ENCH' && S.p.ench.length >= 3) return;
       const die = chooseDie(S, c, 'goldLast');
@@ -670,6 +805,7 @@ const BRAINS = {
         else if (!S.p.chainShield) score -= (preset === 'TORRENT' ? 4 : 1.5); // breaks it
       }
       // combo sense
+      if (CONCEDE_ON && ['Turnabout', 'Dead Air', 'White Heat', 'Rupture', 'The Long Con', 'The Anvil Speaks', 'Fever Logic', 'Riptide', 'Poisoned Well'].includes(c.nm)) score -= 6; // don't kill the friend
       if (c.nm === 'Fever Logic' && S.e.blight < 2) score -= 3;
       if (c.nm === 'Rupture' && S.e.blight < 4) score -= 3;
       if (c.nm === 'The Long Con' && S.e.fired.length < 2) score -= 3;
@@ -687,11 +823,17 @@ const BRAINS = {
       let score = 1;
       if (c.t === 'ENCH' || c.t === 'RITE') score -= 0.5; // free ench/rite = one-shot glyph, mild waste
       if (c.free.toString().includes('scry') && S.e.known > 1) score -= 1;
+      if (CONCEDE_ON) { // pacifism: a free play that hurts the friend is worse than nothing
+        const fs = c.free.toString();
+        if (/blight|hex|thorns|dmg/.test(fs)) score -= 6;
+        if (/scry/.test(fs) && S.p.ench.includes('archive')) score -= 6;
+      }
       if (bestFree === null || score > bestFree.score) bestFree = { k: 'free', h, score };
     });
     if (bestFree && bestFree.score > 0) return bestFree;
 
     // 7. discard a spare unpayable card for ◆ if a sig is within reach
+    if (CONCEDE_ON && S.p.hand.length) return { k: 'discard', h: 0 }; // pacifism: every spare card is 1◆ of PROGRESS
     const cheapest = Math.min(...S.p.sigs.map(s => Math.max(0, SIGS[s].cost - S.p.attune)));
     if (S.p.hand.length > 2 && S.p.conv < cheapest && cheapest - S.p.conv <= 2) return { k: 'discard', h: 0 };
 
@@ -722,6 +864,13 @@ function playerTurn(S, brainName) {
   }
   if (p.rite && p.rite.trigger === 'turnStart') riteCharge(S);
 
+  // v3: ally refreshes; start-timed allies auto-exhaust for the current phase's line
+  if (p.ally) {
+    p.ally.exhausted = false;
+    const a = ALLY_CARDS[p.ally.aix];
+    if (a.timing !== 'end') { a.fx[S.e.phase](makeVerbs(S), S); p.ally.exhausted = true; }
+  }
+
   const brain = BRAINS[brainName];
   let guardBudget = 200; // hard loop cap
   while (!S.over && guardBudget-- > 0) {
@@ -739,6 +888,13 @@ function playerTurn(S, brainName) {
       S.p.discard.push(S.p.hand[act.h]); S.p.hand.splice(act.h, 1);
       S.p.conv++; S.stats.convEarned++; S.stats.discardsForConv++;
     } else break; // illegal/stale action = brain is done
+  }
+
+  // v3: end-timed allies (The Quiet Skulk) exhaust after your plays, before the telegraph
+  if (!S.over && p.ally && !p.ally.exhausted) {
+    const a = ALLY_CARDS[p.ally.aix];
+    a.fx[S.e.phase](makeVerbs(S), S);
+    p.ally.exhausted = true;
   }
 
   // Forge Eternal: keep one unspent die (best face)
@@ -1529,6 +1685,72 @@ const presets = onlyPreset ? [onlyPreset.toUpperCase()] : Object.keys(PRESETS);
 const enemies = onlyEnemy ? [onlyEnemy.toUpperCase()] : Object.keys(ENEMIES);
 const brains = onlyBrain ? [onlyBrain.toLowerCase()] : ['random', 'greedy', 'smart'];
 const recipes = onlyRecipe ? [onlyRecipe.toLowerCase()] : ['easy', 'std', 'hard'];
+
+// ------------------------------------------------------------- v3 runners
+MINIONS_ON = has('minions'); // composes with the default solo matrix below
+
+if (has('concede')) {
+  CONCEDE_ON = true;
+  CG_FIXED = has('cgfixed');
+  const t0v = Date.now();
+  console.log(`\nCONCEDE EXPERIMENT — Common Ground (5◆ → 1 PROGRESS; 3+ at enemy turn end = Accord)`);
+  console.log(`smart brain plays FOR the Accord (damage sigs holstered, kill cards benched) · std recipe · ${GAMES} games/cell`);
+  console.log(`minions: ${MINIONS_ON ? 'ON' : 'off'}\n`);
+  console.log(['PRESET'.padEnd(11), 'ENEMY'.padEnd(10), 'ACCORD'.padStart(7), 'KILLED*'.padStart(8), 'DIED'.padStart(6), 'STALL'.padStart(6), 'ROUNDS'.padStart(7), '◆EARN'.padStart(7)].join(' '));
+  for (const p of presets) for (const e of enemies) {
+    let accord = 0, win = 0, loss = 0, stall = 0, rounds = 0, conv = 0;
+    for (let g = 0; g < GAMES; g++) {
+      const S = gameLoop(p, e, 'std', 'smart', SEED0 + g * 7919);
+      if (S.over === 'accord') accord++;
+      else if (S.over === 'win') win++;
+      else if (S.over === 'loss') loss++;
+      else stall++;
+      rounds += S.round; conv += S.stats.convEarned;
+    }
+    const pcx = x => (100 * x / GAMES).toFixed(0).padStart(5) + '%';
+    console.log([p.padEnd(11), e.padEnd(10), pcx(accord).padStart(7), pcx(win).padStart(8), pcx(loss).padStart(6), pcx(stall).padStart(6), (rounds / GAMES).toFixed(1).padStart(7), (conv / GAMES).toFixed(1).padStart(7)].join(' '));
+  }
+  console.log('\n* KILLED = the accidental kill: passive damage (Blight ticks, Deep File, Thorns) ended the fight before 3 PROGRESS.');
+  console.log(`${((Date.now() - t0v) / 1000).toFixed(1)}s`);
+  process.exit(0);
+}
+
+if (has('allies')) {
+  const t0v = Date.now();
+  console.log(`\nALLY EXPERIMENT — each ally runs with its built-for preset (21-card deck) vs that preset's baseline`);
+  console.log(`smart brain · std recipe · minions ${MINIONS_ON ? 'ON' : 'off'} · ${GAMES} games/cell · cell = win% · avg rounds\n`);
+  const base = {};
+  for (const a of ALLY_CARDS) {
+    if (base[a.built]) continue;
+    ALLY_IX = null;
+    base[a.built] = {};
+    for (const e of enemies) {
+      let w = 0, r = 0;
+      for (let g = 0; g < GAMES; g++) { const S = gameLoop(a.built, e, 'std', 'smart', SEED0 + g * 7919); if (S.over === 'win') w++; r += S.round; }
+      base[a.built][e] = { w: w / GAMES, r: r / GAMES };
+    }
+  }
+  console.log(['ALLY'.padEnd(23), 'PRESET'.padEnd(11), ...enemies.map(e => e.slice(0, 5).padStart(16))].join(''));
+  for (let i = 0; i < ALLY_CARDS.length; i++) {
+    const a = ALLY_CARDS[i];
+    ALLY_IX = i;
+    const row = [a.nm.padEnd(23), a.built.padEnd(11)];
+    for (const e of enemies) {
+      let w = 0, r = 0;
+      for (let g = 0; g < GAMES; g++) { const S = gameLoop(a.built, e, 'std', 'smart', SEED0 + g * 7919); if (S.over === 'win') w++; r += S.round; }
+      const b = base[a.built][e];
+      row.push(`${(100 * w / GAMES).toFixed(0)}%·${(r / GAMES).toFixed(1)}r(${(r / GAMES - b.r) >= 0 ? '+' : ''}${(r / GAMES - b.r).toFixed(1)})`.padStart(16));
+    }
+    console.log(row.join(''));
+  }
+  ALLY_IX = null;
+  console.log('\nBaselines (no ally):');
+  for (const [p, es] of Object.entries(base))
+    console.log(`  ${p.padEnd(11)} ${enemies.map(e => `${e.slice(0, 5)}: ${(100 * es[e].w).toFixed(0)}%·${es[e].r.toFixed(1)}r`).join('   ')}`);
+  console.log('(rounds delta in parens: negative = the ally speeds the kill. Bodyguard rule: ally eats any 5+ strike, exiled.)');
+  console.log(`${((Date.now() - t0v) / 1000).toFixed(1)}s`);
+  process.exit(0);
+}
 
 // --------------------------------------------------------------- Co-op runner
 if (has('coop')) {

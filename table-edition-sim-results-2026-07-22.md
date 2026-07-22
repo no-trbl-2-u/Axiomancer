@@ -337,3 +337,168 @@ D ally + caps 10/5                       66%·8r         68%·7r         69%·6r
 E ally + caps uncapped                   68%·8r         71%·7r         75%·5r
 F caps 10/5 only (no ally)               63%·8r         64%·7r         62%·6r
 ```
+
+## v3 EXPERIMENT — Common Ground / Minions / Allies (2026-07-22, bus-ride batch)
+
+Rulings encoded: phase = tier printed on the current telegraph (Last Stand locks FURY);
+minion reveal IS the enemy's whole action; max 1 minion (dupe heals 2); minions take
+direct damage only; Whispered Doubt can eat a minion reveal; forced discards give no ◆;
+ally = Paid any die, max 1, auto-exhaust for phase line, absorbs an ENTIRE 5+ strike
+then exiled; Accord checked at end of enemy turn (3+ PROGRESS).
+
+### Concede, pacifist smart brain, ATTUNE allowed to discount Common Ground
+```
+
+CONCEDE EXPERIMENT — Common Ground (5◆ → 1 PROGRESS; 3+ at enemy turn end = Accord)
+smart brain plays FOR the Accord (damage sigs holstered, kill cards benched) · std recipe · 300 games/cell
+minions: off
+
+PRESET      ENEMY       ACCORD  KILLED*   DIED  STALL  ROUNDS   ◆EARN
+STANDSTILL  SKULK         100%       0%     0%     0%     5.2    21.6
+STANDSTILL  SHELLBACK     100%       0%     0%     0%     5.6    21.6
+STANDSTILL  BRUTE         100%       0%     0%     0%     5.0    21.2
+CONTAGION   SKULK          94%       6%     0%     0%     3.9    19.8
+CONTAGION   SHELLBACK     100%       0%     0%     0%     3.9    19.8
+CONTAGION   BRUTE         100%       0%     0%     0%     3.9    19.8
+BASTION     SKULK          99%       1%     0%     0%     6.0    21.6
+BASTION     SHELLBACK     100%       0%     0%     0%     6.0    21.7
+BASTION     BRUTE         100%       0%     0%     0%     6.0    21.7
+FOUNDRY     SKULK         100%       0%     0%     0%     5.7    18.3
+FOUNDRY     SHELLBACK     100%       0%     0%     0%     5.7    18.3
+FOUNDRY     BRUTE         100%       0%     0%     0%     5.7    18.3
+TORRENT     SKULK         100%       0%     0%     0%     7.4    23.1
+TORRENT     SHELLBACK     100%       0%     0%     0%     7.4    23.1
+TORRENT     BRUTE         100%       0%     0%     0%     7.4    23.1
+INVOCATION  SKULK         100%       0%     0%     0%     2.3     8.1
+INVOCATION  SHELLBACK     100%       0%     0%     0%     2.3     8.1
+INVOCATION  BRUTE         100%       0%     0%     0%     2.3     8.1
+MALISON     SKULK          81%      19%     0%     0%     4.1    20.5
+MALISON     SHELLBACK      95%       5%     0%     0%     4.1    20.9
+MALISON     BRUTE          94%       6%     0%     0%     4.2    20.9
+
+* KILLED = the accidental kill: passive damage (Blight ticks, Deep File, Thorns) ended the fight before 3 PROGRESS.
+0.5s
+```
+
+### Concede, pacifist smart brain, --cgfixed (Common Ground immune to ATTUNE/discounts)
+```
+
+CONCEDE EXPERIMENT — Common Ground (5◆ → 1 PROGRESS; 3+ at enemy turn end = Accord)
+smart brain plays FOR the Accord (damage sigs holstered, kill cards benched) · std recipe · 300 games/cell
+minions: off
+
+PRESET      ENEMY       ACCORD  KILLED*   DIED  STALL  ROUNDS   ◆EARN
+STANDSTILL  SKULK         100%       0%     0%     0%     5.2    21.6
+STANDSTILL  SHELLBACK     100%       0%     0%     0%     5.6    21.6
+STANDSTILL  BRUTE         100%       0%     0%     0%     5.0    21.2
+CONTAGION   SKULK          94%       6%     0%     0%     3.9    19.8
+CONTAGION   SHELLBACK     100%       0%     0%     0%     3.9    19.8
+CONTAGION   BRUTE         100%       0%     0%     0%     3.9    19.8
+BASTION     SKULK          99%       1%     0%     0%     6.0    21.6
+BASTION     SHELLBACK     100%       0%     0%     0%     6.0    21.7
+BASTION     BRUTE         100%       0%     0%     0%     6.0    21.7
+FOUNDRY     SKULK         100%       0%     0%     0%     5.7    18.3
+FOUNDRY     SHELLBACK     100%       0%     0%     0%     5.7    18.3
+FOUNDRY     BRUTE         100%       0%     0%     0%     5.7    18.3
+TORRENT     SKULK         100%       0%     0%     0%     7.4    23.1
+TORRENT     SHELLBACK     100%       0%     0%     0%     7.4    23.1
+TORRENT     BRUTE         100%       0%     0%     0%     7.4    23.1
+INVOCATION  SKULK         100%       0%     0%     0%     4.0    15.7
+INVOCATION  SHELLBACK     100%       0%     0%     0%     4.0    15.7
+INVOCATION  BRUTE         100%       0%     0%     0%     4.0    15.7
+MALISON     SKULK          81%      19%     0%     0%     4.1    20.5
+MALISON     SHELLBACK      95%       5%     0%     0%     4.1    20.9
+MALISON     BRUTE          94%       6%     0%     0%     4.2    20.9
+
+* KILLED = the accidental kill: passive damage (Blight ticks, Deep File, Thorns) ended the fight before 3 PROGRESS.
+0.5s
+```
+
+### Minions ON — solo matrix, smart, std (compare v2 baseline above)
+```
+
+AXIOMANCER TABLE EDITION — batch sim · 300 games/cell · seed 20260722 · 0.4s
+presets: STANDSTILL, CONTAGION, BASTION, FOUNDRY, TORRENT, INVOCATION, MALISON · enemies: SKULK, SHELLBACK, BRUTE · brains: smart
+
+==================== BRAIN: SMART ====================
+PRESET      SKULK·S SHELL·S BRUTE·S
+STANDSTILL     100%    100%    100%
+CONTAGION      100%    100%    100%
+BASTION        100%    100%    100%
+FOUNDRY        100%     96%     99%
+TORRENT        100%    100%    100%
+INVOCATION     100%    100%    100%
+MALISON        100%    100%    100%
+
+==================== STANDARD-RECIPE DETAIL (smartest brain available) ====================
+brain: smart
+PRESET      ENEMY        WIN  STALL  ROUNDS  VITAE  BURSTS  SIGS  ◆EARN  PRESS  HEX  FREE  PAID
+STANDSTILL  SKULK       100%     0%     5.1   29.5     1.2   0.5    6.8    2.2  0.0  15.5   8.9
+STANDSTILL  SHELLBACK   100%     0%     6.1   28.8     1.8   0.7    9.0    3.1  0.0  18.7  11.7
+STANDSTILL  BRUTE       100%     0%     6.0   29.2     1.8   0.8    8.9    3.0  0.0  20.4  11.4
+CONTAGION   SKULK       100%     0%     4.1   26.1     1.1   0.5    5.9    1.9  0.0  12.5   7.9
+CONTAGION   SHELLBACK   100%     0%     5.6   25.0     2.0   0.8    9.0    3.1  0.0  17.2  11.9
+CONTAGION   BRUTE       100%     0%     5.3   22.2     1.8   0.7    8.4    2.9  0.0  16.1  11.0
+BASTION     SKULK       100%     0%     5.3   29.8     1.7   0.4    7.0    2.6  0.0  21.6   9.3
+BASTION     SHELLBACK   100%     0%    11.8   29.9     5.8   1.8   19.6    7.7  0.0  47.2  24.7
+BASTION     BRUTE       100%     0%     7.3   29.6     2.7   0.8   10.4    4.1  0.0  29.5  13.8
+FOUNDRY     SKULK       100%     0%     6.8   23.7     4.5   3.9   22.5    1.3  0.0   9.5  22.1
+FOUNDRY     SHELLBACK    96%     0%    10.4   10.3     7.5   7.1   38.8    1.7  0.0  14.6  34.7
+FOUNDRY     BRUTE        99%     0%     8.6   16.2     5.9   5.4   30.4    1.5  0.0  12.0  28.3
+TORRENT     SKULK       100%     0%     3.6   29.4     5.7   0.5    7.5    2.4  0.0  12.3   9.4
+TORRENT     SHELLBACK   100%     0%     4.2   26.8     7.0   0.6    9.0    2.9  0.0  14.4  11.3
+TORRENT     BRUTE       100%     0%     4.2   28.6     6.8   0.7    9.0    2.9  0.0  14.2  11.3
+INVOCATION  SKULK       100%     0%     3.1   27.9     0.9   4.2   10.5    2.2  0.0   7.4   6.2
+INVOCATION  SHELLBACK   100%     0%     3.9   24.9     1.3   6.3   14.1    3.0  0.0   9.7   8.3
+INVOCATION  BRUTE       100%     0%     3.8   25.5     1.3   6.2   13.9    2.9  0.0   9.6   8.1
+MALISON     SKULK       100%     0%     3.6   27.2     5.5   0.3    6.4    1.8 10.4  14.9   7.7
+MALISON     SHELLBACK   100%     0%     4.2   24.8     6.7   0.5    7.8    2.2 11.8  25.0   9.3
+MALISON     BRUTE       100%     0%     4.2   24.8     6.8   0.5    7.8    2.2 11.8  27.8   9.4
+
+Run with --assumptions to see the rules calls the sim had to make (rulebook gaps).
+```
+
+### Allies — each with its built-for preset vs baseline
+```
+
+ALLY                   PRESET                SKULK           SHELL           BRUTE
+The Penitent Skulk     MALISON     100%·3.7r(+0.2) 100%·4.1r(+0.1) 100%·4.1r(+0.1)
+Skulk of the Shallows  TORRENT     100%·3.6r(+0.0) 100%·3.9r(+0.0) 100%·4.0r(-0.0)
+The Quiet Skulk        STANDSTILL  100%·5.1r(+0.0) 100%·5.8r(+0.0) 100%·6.0r(+0.1)
+The Doorwright         BASTION     100%·6.2r(+0.1) 100%·9.7r(+0.3) 100%·6.9r(+0.2)
+Blightshell            CONTAGION   100%·4.1r(+0.1) 100%·5.3r(-0.0) 100%·5.0r(-0.1)
+The Kiln-Back          FOUNDRY     100%·6.3r(-0.3) 100%·7.9r(-1.0) 100%·7.4r(-0.5)
+The Gospel Brute       INVOCATION  100%·3.1r(+0.1) 100%·3.7r(-0.0) 100%·3.7r(+0.0)
+The Load-Bearer        BASTION     100%·6.2r(+0.1) 100%·9.7r(+0.3) 100%·6.9r(+0.2)
+The Sledge             FOUNDRY     100%·6.3r(-0.3) 100%·8.0r(-0.9) 100%·7.4r(-0.5)
+
+Baselines (no ally):
+  MALISON     SKULK: 100%·3.6r   SHELL: 100%·4.0r   BRUTE: 100%·4.0r
+  TORRENT     SKULK: 100%·3.5r   SHELL: 100%·3.9r   BRUTE: 100%·4.0r
+  STANDSTILL  SKULK: 100%·5.1r   SHELL: 100%·5.8r   BRUTE: 100%·5.9r
+  BASTION     SKULK: 100%·6.1r   SHELL: 100%·9.4r   BRUTE: 100%·6.7r
+  CONTAGION   SKULK: 100%·4.1r   SHELL: 100%·5.3r   BRUTE: 100%·5.1r
+  FOUNDRY     SKULK: 100%·6.7r   SHELL: 99%·8.9r   BRUTE: 99%·7.9r
+  INVOCATION  SKULK: 100%·3.1r   SHELL: 100%·3.7r   BRUTE: 100%·3.7r
+(rounds delta in parens: negative = the ally speeds the kill. Bodyguard rule: ally eats any 5+ strike, exiled.)
+0.9s
+```
+
+### Headlines
+1. CONCEDE IS FREE MONEY as drafted: a committed pacifist accords ~100% in 4-7 rounds,
+   0% deaths, every preset, even with minions on. The discard-for-◆ economy (5 cards ≈
+   5◆/round) pays the 15◆ price trivially and 30 Vitae shrugs off a 5-round stall.
+   The Accord needs a real price: discards don't fuel PROGRESS, or cost escalates
+   (5/6/7◆), or PROGRESS decays in FURY, or the enemy enrages while tokens sit.
+2. ATTUNE exploit: Invocation accords in 2.3 rounds (Common Ground discounted to ~0◆).
+   --cgfixed (flat 5◆) drags it back to 4.0r. Recommended ruling: Common Ground cost
+   is fixed - no ATTUNE, no Standing Invocation.
+3. Playing your deck normally KILLS the friend: without deliberate pacifism, 5 of 7
+   presets accidental-kill 97-100% of attempts. Contagion/Malison can never fully
+   disarm (curses already in the deck keep firing: Malison 5-19% accidental kills
+   even as a pacifist - thematically perfect).
+4. Minions are nearly free texture in solo: win rates hold (worst dip Foundry/Shellback
+   100->96%), rounds +0.2 to +2.5. Drumbeater/Molt-Tender create real targeting choices.
+5. Allies barely move the solo kill race (already 100% win): offensive allies shave up
+   to 1.0r (Kiln-Back/Sledge), defensive allies cost their deck slot (+0.1-0.3r).
+   Their real value is survivability/co-op/run-scale - solo speed was never the point.
