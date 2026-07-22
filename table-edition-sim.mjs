@@ -77,8 +77,10 @@ const PRESETS = {
       { nm: 'Cold Reading', n: 4, col: 'P', t: 'SPELL', free: E => E.scry(2), paid: E => { E.scry(3); E.draw(1); }, v: 1 },
       { nm: 'Hold That Thought', n: 4, col: 'R', t: 'SPELL', free: E => E.guard(2), paid: E => { E.guard(2); E.stagger(1); }, v: 2 },
       { nm: 'Motion to Suppress', n: 3, col: 'B', t: 'SPELL', free: E => E.stagger(1), paid: E => { E.stagger(2); if (E.telegraphFizzled()) E.draw(2); }, v: 3 },
-      { nm: 'Circular Argument', n: 3, col: 'P', t: 'ENCH', ench: 'scry1', free: E => E.scry(1), v: 1 },
-      { nm: 'Dead Air', n: 1, col: 'G', t: 'SPELL', free: E => E.stagger(1), paid: E => { const twice = E.telegraphFizzled(); E.stagger(3); if (twice) E.stagger(3); }, v: 4 },
+      // v2 (co-op pass): The Deep File replaces Circular Argument — scry-into-damage engine
+      { nm: 'The Deep File', n: 3, col: 'P', t: 'ENCH', ench: 'archive', free: E => E.scry(1), v: 3 },
+      // v2 (co-op pass): Dead Air cashes a dead telegraph for damage instead of double-stagger
+      { nm: 'Dead Air', n: 1, col: 'G', t: 'SPELL', free: E => E.stagger(1), paid: E => { E.stagger(3); if (E.telegraphFizzled()) E.dmg(3); }, v: 4 },
       { nm: 'Turnabout', n: 1, col: 'G', t: 'SPELL', free: E => E.draw(1), paid: E => E.turnabout(), v: 5 },
     ],
   },
@@ -115,7 +117,8 @@ const PRESETS = {
       { nm: 'Half-Step', n: 3, col: 'P', t: 'SPELL', free: E => E.temper(1), paid: E => { E.temper(2); E.halfStepPush(); }, v: 3 },
       { nm: 'Annealing', n: 3, col: 'R', t: 'ENCH', ench: 'anneal', free: E => E.temper(1), v: 2 },
       { nm: 'The Forge Eternal', n: 1, col: 'G', t: 'ENCH', ench: 'forge', free: E => E.temper(1), v: 3 },
-      { nm: 'White Heat', n: 1, col: 'G', t: 'SPELL', free: E => E.temper(1), paid: (E, ctx) => E.whiteHeat(ctx), v: 5 },
+      // v2 (co-op pass): one-die White Heat — 4 dmg, 6 if the paying die shows SPECIAL
+      { nm: 'White Heat', n: 1, col: 'G', t: 'SPELL', free: E => E.temper(1), paid: (E, ctx) => E.dmg(ctx && ctx.dieFace === 'S' ? 6 : 4), v: 5 },
     ],
   },
   TORRENT: {
@@ -277,7 +280,11 @@ function makeVerbs(S) {
     blight: n => { S.e.blight = Math.min(6, S.e.blight + n); },
     heal: n => { S.p.hp = Math.min(30, S.p.hp + n); },
     dmg: n => dealToEnemy(S, n, true),
-    scry: n => { S.e.known = Math.max(S.e.known, Math.min(n, S.e.deck.length)); },
+    scry: n => {
+      S.e.known = Math.max(S.e.known, Math.min(n, S.e.deck.length));
+      const arch = S.p.ench.filter(e => e === 'archive').length; // The Deep File: bottom a card, ping 1 per copy
+      if (arch) dealToEnemy(S, arch, true);
+    },
     stagger: n => { S.e.staggers += n; },
     telegraphFizzled: () => effPower(S) <= 0,
     fizzleTelegraph: () => { S.e.staggers = 99; },
@@ -480,11 +487,12 @@ function playPaid(S, handIx, die, brain) {
   S.stats.paidPlays++;
   S._curseIx = ix;
   const echoTwice = die.echoed;
+  const dieFace = die.face;
   spendDie(S, die);
   // chain: R/B/P advance-or-break; G/E neutral (ASSUMPTION)
   if (c.col === 'R' || c.col === 'B' || c.col === 'P') advanceChain(S, c.col, false);
   const E = makeVerbs(S);
-  const ctx = { brain };
+  const ctx = { brain, dieFace };
   if (c.t === 'ENCH') {
     if (S.p.ench.length < 3) { S.p.ench.push(c.ench); S._enchIx = S._enchIx || []; S._enchIx.push(ix); }
     else S.p.discard.push(ix);
@@ -667,7 +675,6 @@ const BRAINS = {
       if (c.nm === 'The Long Con' && S.e.fired.length < 2) score -= 3;
       if (c.nm === 'Turnabout' && S.e.staggers < 2) score -= 3;
       if (c.nm === 'The Anvil Speaks' && S.p.thorns < 2) score -= 2;
-      if (c.nm === 'White Heat' && S.p.dice.filter(usable).length < 2) score -= 5;
       if ((c.nm === 'Raised Shield' || c.nm === 'Hold That Thought' || c.nm === 'Breakwater' || c.nm === 'Measured Answer') && incoming === 0) score -= 1.5;
       if (bestPaid === null || score > bestPaid.score) bestPaid = { k: 'paid', h, die, score };
     });
@@ -711,7 +718,7 @@ function playerTurn(S, brainName) {
   }
   // enchant turn-start triggers
   for (const e of p.ench) {
-    if (e === 'scry1') S.e.known = Math.max(S.e.known, 1);
+    if (e === 'archive') makeVerbs(S).scry(1); // The Deep File: turn-start SCRY (which itself pings)
   }
   if (p.rite && p.rite.trigger === 'turnStart') riteCharge(S);
 
@@ -899,7 +906,8 @@ function pvpVerbs(S, meIx) {
     blight: n => { foe.blight = Math.min(6, foe.blight + n); },
     heal: n => { me.hp = Math.min(me.maxhp, me.hp + n); },
     dmg: n => pvpHurt(S, foeIx, n, true, meIx),
-    scry: () => {}, stagger: () => {}, telegraphFizzled: () => false,
+    scry: () => { const arch = me.ench.filter(e => e === 'archive').length; if (arch) pvpHurt(S, foeIx, arch, true, meIx); },
+    stagger: () => {}, telegraphFizzled: () => false,
     fizzleTelegraph: () => {}, turnabout: () => {},
     doubleBlight: () => { foe.blight = Math.min(6, foe.blight * 2); },
     rupture: () => { const b = foe.blight; foe.blight = 0; pvpHurt(S, foeIx, 2 * b, true, meIx); },
@@ -965,13 +973,14 @@ function pvpPlayPaid(S, meIx, h, die) {
   me.hand.splice(h, 1);
   S._curseIx = ix;
   const echoTwice = die.echoed;
+  const dieFace = die.face;
   pvpSpend(S, me, die);
   if (c.col === 'R' || c.col === 'B' || c.col === 'P') pvpChain(S, meIx, c.col, false);
   if (c.t === 'ENCH') { if (me.ench.length < 3) me.ench.push(c.ench); else me.discard.push(ix); return; }
   if (c.t === 'RITE') { if (!me.rite) me.rite = { trigger: c.rite.trigger, threshold: c.rite.threshold, payoff: c.rite.payoff, charges: 0 }; else me.discard.push(ix); return; }
   const E = pvpVerbs(S, meIx);
-  c.paid(E, {});
-  if (echoTwice) c.paid(E, {});
+  c.paid(E, { dieFace });
+  if (echoTwice) c.paid(E, { dieFace });
   if (c.t !== 'CURSE') me.discard.push(ix);
 }
 
@@ -1035,7 +1044,6 @@ const PVP_BRAINS = {
       if (c.nm === 'Rupture' && foe.blight < 4) score -= 3;
       if (c.nm === 'The Long Con' && me.fired.length < 2) score -= 3;
       if (c.nm === 'The Anvil Speaks' && me.thorns < 2) score -= 2;
-      if (c.nm === 'White Heat' && !me.temps.some(usable)) score -= 6;
       if (bestPaid === null || score > bestPaid.score) bestPaid = { k: 'paid', h, die, score };
     });
     if (bestPaid && bestPaid.score > 0.5) return bestPaid;
@@ -1065,6 +1073,7 @@ function pvpTurn(S, meIx, brainName) {
   while (me.hand.length < 5) { const b = me.hand.length; pvpDraw(S, meIx); if (me.hand.length === b) break; }
   if (me.skipNow) { me.skipNow = false; me.skip = false; return; } // Sealed Fate fired into this turn
   for (let i = me.ench.filter(e => e === 'anneal').length; i > 0; i--) { const m = S.dice.find(d => d.face === 'X'); if (m) m.face = 'M'; }
+  for (let i = me.ench.filter(e => e === 'archive').length; i > 0; i--) pvpVerbs(S, meIx).scry(1); // The Deep File
   // Lingering Cough: at the start of the ENEMY turn — my cough blights the foe on THEIR turn start; handled here for foe's coughs targeting me:
   const foe = S.ps[1 - meIx];
   for (const e of foe.ench) if (e === 'blight1') me.blight = Math.min(6, me.blight + 1);
@@ -1264,7 +1273,11 @@ function coopVerbs(S, i) {
     blight: n => { S.e.blight = Math.min(BLIGHT_MAX, S.e.blight + n); },
     heal: n => { const tgt = S.party[allyFor(S, i, 'heal')]; tgt.hp = Math.min(tgt.maxhp, tgt.hp + n); },
     dmg: n => coopHurtEnemy(S, n, true, i),
-    scry: n => { S.e.known = Math.max(S.e.known, Math.min(n, S.e.deck.length)); },
+    scry: n => {
+      S.e.known = Math.max(S.e.known, Math.min(n, S.e.deck.length));
+      const arch = m.ench.filter(e => e === 'archive').length; // The Deep File
+      if (arch) coopHurtEnemy(S, arch, true, i);
+    },
     stagger: n => { const q = biggestAttack(S); if (q) { q.st += n; S.e.lastStag = q; } },
     telegraphFizzled: () => { const q = S.e.lastStag || S.e.queue[0]; return !q || effQ(q) <= 0; },
     fizzleTelegraph: () => { const q = biggestAttack(S); if (q) q.st = 99; },
@@ -1359,7 +1372,6 @@ function coopMemberTurn(S, i, brainName) {
         if (c.nm === 'Turnabout' && Math.max(0, ...S.e.queue.map(q => q.st)) < 2) score -= 3;
         if (c.nm === 'The Long Con' && S.e.fired.length < 2) score -= 3;
         if (c.nm === 'The Anvil Speaks' && m.thorns < 2) score -= 2;
-        if (c.nm === 'White Heat' && !m.temps.some(usable)) score -= 6;
         // stall the pay if others still owe theirs and hand is rich in frees
         if (!m.paidDone && unpaidOthers > 0 && m.hand.length > 3) score -= 0.8;
       }
@@ -1394,6 +1406,7 @@ function coopExec(S, i, a) {
   m.hand.splice(a.h, 1);
   S._curseIx = ix;
   const echoTwice = die.echoed;
+  const dieFace = die.face;
   const personal = m.temps.includes(die);
   if (die.face === 'S') m.conv += 2;
   if (personal) m.temps.splice(m.temps.indexOf(die), 1);
@@ -1402,8 +1415,8 @@ function coopExec(S, i, a) {
   if (c.t === 'ENCH') { if (m.ench.length < 3) m.ench.push(c.ench); else m.discard.push(ix); return !personal; }
   if (c.t === 'RITE') { if (!m.rite) m.rite = { trigger: c.rite.trigger, threshold: c.rite.threshold, payoff: c.rite.payoff, charges: 0 }; else m.discard.push(ix); return !personal; }
   const E = coopVerbs(S, i);
-  c.paid(E, {});
-  if (echoTwice) c.paid(E, {});
+  c.paid(E, { dieFace });
+  if (echoTwice) c.paid(E, { dieFace });
   if (c.t !== 'CURSE') m.discard.push(ix);
   return !personal;
 }
@@ -1469,6 +1482,7 @@ function coopGame(partyPresets, enemyName, recipe, T, hpMult, brainName, seed) {
     }
     S.dice = ['R', 'B', 'P', 'G'].map(c => ({ color: c, face: rollFace(c, rnd) }));
     for (const m of S.party) for (let k = m.ench.filter(e => e === 'anneal').length; k > 0; k--) { const x = S.dice.find(d => d.face === 'X'); if (x) x.face = 'M'; }
+    for (let i = 0; i < S.party.length && !S.over; i++) for (let k = S.party[i].ench.filter(e => e === 'archive').length; k > 0; k--) coopVerbs(S, i).scry(1); // The Deep File
     let turn = 0, guardCap = 80;
     while (!S.over && guardCap-- > 0) {
       const i = turn % S.party.length;

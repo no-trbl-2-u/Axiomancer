@@ -273,3 +273,43 @@ D ally + caps 10/5                       60%·9r         62%·8r         63%·7r
 E ally + caps uncapped                   62%·9r         68%·7r         77%·6r
 F caps 10/5 only (no ally)               58%·9r         61%·8r         59%·7r
 ```
+
+## CO-OP DIAL EXPERIMENT (run 5) — v2 CARD LIBRARY at T=P, HP×P (300 games/cell)
+Library changes: Standstill 'The Deep File' ENCH replaces Circular Argument (turn-start SCRY 1; every SCRY bottoms a card, deal 1/copy);
+Standstill 'Dead Air' paid = STAGGER 3 + deal 3 if telegraph at 0; Foundry 'White Heat' = one-die (4 dmg, 6 on SPECIAL).
+Also fixed: Lingering Cough ench trigger (was dead in solo+coop). Solo Standstill: 20r stall -> ~5.5r.
+```
+=== first-only telegraph ===
+
+CO-OP DIAL EXPERIMENT — pinned at T = P, HP = solo × P · telegraphs: first only · brain: smart · 300 games/cell · unique decks
+Dial 1: cards may target other players (GUARD/THORNS to whoever the telegraph aims at, HEAL to lowest).
+Dial 2: token caps (BLIGHT/THORNS max).
+
+CONFIG                              2P (T=2,×2)    3P (T=3,×3)    4P (T=4,×4)
+A base (no dials, caps 6/3)              55%·9r         58%·8r         50%·7r
+B ally targeting, caps 6/3               59%·9r         57%·8r         54%·7r
+C ally + caps 8/4                        62%·9r         62%·7r         60%·6r
+D ally + caps 10/5                       65%·9r         66%·7r         64%·6r
+E ally + caps uncapped                   68%·8r         71%·7r         79%·6r
+F caps 10/5 only (no ally)               62%·9r         67%·7r         62%·6r
+
+Reading: A is the undialed baseline. B−A = ally-targeting lift. F−A = caps-only lift. C/D/E = combined.
+0.7s
+
+=== full telegraphs ===
+
+CO-OP DIAL EXPERIMENT — pinned at T = P, HP = solo × P · telegraphs: ALL T face-up · brain: smart · 300 games/cell · unique decks
+Dial 1: cards may target other players (GUARD/THORNS to whoever the telegraph aims at, HEAL to lowest).
+Dial 2: token caps (BLIGHT/THORNS max).
+
+CONFIG                              2P (T=2,×2)    3P (T=3,×3)    4P (T=4,×4)
+A base (no dials, caps 6/3)              58%·9r         57%·8r         53%·7r
+B ally targeting, caps 6/3               64%·9r         64%·8r         60%·7r
+C ally + caps 8/4                        67%·9r         69%·8r         68%·7r
+D ally + caps 10/5                       68%·9r         71%·7r         71%·6r
+E ally + caps uncapped                   70%·8r         75%·7r         81%·6r
+F caps 10/5 only (no ally)               66%·9r         66%·7r         65%·6r
+
+Reading: A is the undialed baseline. B−A = ally-targeting lift. F−A = caps-only lift. C/D/E = combined.
+0.8s
+```
