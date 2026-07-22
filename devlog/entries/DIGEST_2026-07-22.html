@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
-<title>Axiomancer</title>
+<title>Axiomancer digest — 2026-07-22</title>
 <style>
 :root {
   color-scheme: light dark;
@@ -203,15 +203,35 @@ footer.foot { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--b
 </style>
 </head>
 <body>
-<header class="top"><div class="wrap"><span class="home">Axiomancer</span></div></header>
+<header class="top"><div class="wrap"><a class="home" href="../log.html">← DevLog</a><span class="crumb">2026-07-22</span></div></header>
 <main class="wrap">
-<h1>Axiomancer</h1>
-<p class="muted">A private index of the game's content and the nightly development log.</p>
-<div class="hub">
-  <a class="hue-cards" href="./catalog.html"><span class="h-glyph">🂠</span><div class="h-title">Catalog</div><div class="h-sub">79 cards · 56 foes · 24 statuses</div></a>
-  <a class="hue-log" href="./log.html"><span class="h-glyph">❯</span><div class="h-title">DevLog</div><div class="h-sub">18 entries</div></a>
-  <a class="hue-tuning" href="./tuning-lab/index.html"><span class="h-glyph">⚖</span><div class="h-title">Tuning Lab</div><div class="h-sub">3 reports</div></a>
-</div>
+<h1 id="headline">2026-07-22</h1>
+<p class="headline">A quiet night — two <code>/march</code> ticks drained two more CRITIQUE</p>
+<div class="counts"><span class="chip cat-ui">2 UI</span></div>
+<section class="card cat-ui" id="combat-primer-teaches-the-drag-to-play-gesture"><div class="card-head"><span class="chip cat-ui">UI</span><h2>Combat primer teaches the drag-to-play gesture</h2></div>
+<p class="field"><span class="flabel">What</span> the FIRST FIGHT tutorial's "DRAFT, THEN POWER" page only</p>
+<p class="field"><span class="flabel">Why</span> CRITIQUE.md <code>[HIGH]</code> "combat tutorial never teaches the</p>
+<p class="commits"><code class="commit">6f138c27</code> <code class="commit">(fix)</code> <code class="commit">273da4e8</code> <code class="commit">(audit</code> <code class="commit">close)</code></p>
+<p>taught tap-to-inspect; a one-line addition now tells first-time players to drag a card into the PLAY AREA to play it, matching the in-combat coach's later wording. drag-to-play gesture" (pass 12, 2026-07-12) — a player following only the primer's own taught affordance had no path to discovering the actual play gesture until the coach's much-later 'spend' step.</p>
+<div class="diff" role="img" aria-label="code diff"><div class="dl meta">--- a/axiomancer-mobile/components/combat/encounter/CombatTutorialPrimer.tsx</div><div class="dl meta">+++ b/axiomancer-mobile/components/combat/encounter/CombatTutorialPrimer.tsx</div><div class="dl hunk">@@ -48,7 +48,8 @@ const PANELS: PrimerPanel[] = [</div><div class="dl ctx">             'Each turn you roll three dice — keep one; every unused die banks as ◆ tokens ' +</div><div class="dl ctx">             '(gold banks 2, a dead ✕ banks none). A die only powers cards of ITS color — gold ' +</div><div class="dl ctx">             'powers anything. Land a NEW status and your die REFRESHES — so you can chain ' +</div><div class="dl del">-            'another. Tap any card to read its keywords and full effect.',</div><div class="dl add">+            'another. Drag a card up into the PLAY AREA to play it; tap one first to read its ' +</div><div class="dl add">+            'keywords and full effect.',</div><div class="dl ctx">     },</div><div class="dl ctx"> ];</div></div></section>
+<section class="card cat-ui" id="pre-fight-prelude-the-last-hp-hp-leak-becomes-vitae"><div class="card-head"><span class="chip cat-ui">UI</span><h2>Pre-fight prelude — the last HP/hp leak becomes VITAE</h2></div>
+<p class="field"><span class="flabel">What</span> the encounter-prelude's decode line and body copy</p>
+<p class="field"><span class="flabel">Why</span> CRITIQUE.md <code>[MED]</code> "card/tooltip copy still says HP instead</p>
+<p class="commits"><code class="commit">21c55b94</code> <code class="commit">(fix)</code> <code class="commit">381538e0</code> <code class="commit">(audit</code> <code class="commit">close)</code></p>
+<p>(<code>composeCombatPrelude</code> in <code>event.engine.ts</code>) still printed "N HP" / "N hp." — the two remaining live occurrences of a copy pass CRITIQUE flagged back in pass 12. of canon VITAE" — re-verified live before touching anything: the BLEED tooltip and combat-card aria-label the original finding cited were already fixed by other work, leaving only these two lines.</p>
+<div class="diff" role="img" aria-label="code diff"><div class="dl meta">--- a/axiomancer-mobile/state/presenters/event.engine.ts</div><div class="dl meta">+++ b/axiomancer-mobile/state/presenters/event.engine.ts</div><div class="dl hunk">@@ -483,7 +483,7 @@ function composeCombatPrelude(encounter: Encounter, isBoss: boolean): Omit&lt;Event</div><div class="dl del">-            decode: `Lv ${enemy.level} foe · ${enemy.health} HP · advantage not yet scouted`,</div><div class="dl add">+            decode: `Lv ${enemy.level} foe · ${enemy.health} VITAE · advantage not yet scouted`,</div><div class="dl hunk">@@ -518,7 +518,7 @@ function composeCombatPrelude(encounter: Encounter, isBoss: boolean): Omit&lt;Event</div><div class="dl del">-        body: `level ${enemy.level} · ${enemy.health} hp.`,</div><div class="dl add">+        body: `level ${enemy.level} · ${enemy.health} vitae.`,</div></div></section>
+<section class="panel" id="while-you-were-out"><h2>While you were out</h2>
+<div class="tablewrap"><table><thead><tr><th>Time (UTC)</th><th>Verb</th><th>Outcome</th></tr></thead><tbody><tr><td>07-21 14:30 → 14:42</td><td>march (scheduled)</td><td>true <span class="st st-neutral">no-op</span> — no telemetry row, no commit</td></tr><tr><td>07-21 19:57 → 20:05</td><td>march (scheduled) → triage</td><td>issue #145 closed (stale suppurating-curse finding, fix already <span class="st st-ok">shipped</span>)</td></tr><tr><td>07-22 03:54 → 04:09</td><td>march (scheduled)</td><td>HP-vs-VITAE prelude copy fixed; CRITIQUE row closed</td></tr><tr><td>07-22 09:05 → 09:27</td><td>march (scheduled)</td><td>combat primer drag-to-play gesture taught; CRITIQUE row closed</td></tr><tr><td>07-22 (this run)</td><td>digest</td><td>this entry — baseline held fresh, breadth check re-run and unblocked by hand</td></tr></tbody></table></div>
+<p>5 commits landed since yesterday's digest (<code>bcf12f83</code>). Build-plan queue (<code>plan/steps/01_build_plan.md</code>): every phase through 33d stays <code>[x]</code> shipped or <code>[skipped]</code>, still just <strong>Phase D-FLIP</strong> <code>[blocked:]</code> pending an <code>/oversight</code> call. <code>plan/AUDIT.md</code>: 38 pending, unchanged. <code>plan/CRITIQUE.md</code>: 39 pending (2 resolved this run, several more marked <code>[x]</code> but not yet filed to Done), last pass 2026-07-17 — five days stale now. <code>plan/PHASE_CANDIDATES.md</code>: 33 pending, last <code>/expand</code> pass 2026-07-21. One open <code>triage:needs-user</code> issue (#144, title-screen wordmark crop, HIGH, filed by <code>/critique</code> pass 12 — no <code>loop:do</code> issues). Deploy gate: HEAD is a docs/plan-only tick, no gated <code>verify-*</code> workflow triggered yet — nothing to check. Breadth check (<code>npm --workspace axiomancer-mobile run e2e:minigames</code>): Playwright's Chromium headless-shell binary was missing again, installed by hand, then hazard, combat, gathering, encounter-routing, exploration-roundtrip, and upgradeable-dice all ALL PASS with no NOTEs.</p></section>
+<section class="panel" id="needs-you"><h2>Needs you</h2>
+<ul><li>**AUDIT <code>[3.2]</code> — Playwright's browser still isn't installed on the</li></ul>
+<p>night runner.** This is at least the fifth night in a row needing a by-hand <code>npx playwright install chromium-headless-shell</code> before the breadth check runs at all. The fix is small and already scoped (<code>install_playwright: true</code> on <code>night.yml</code>'s <code>_claude-skill.yml</code> call, matching <code>critique.yml</code> / <code>deep-playtest.yml</code> / others) — it's costing every night run 1-2 minutes and keeps losing to higher-scored rows in <code>/iterate</code>'s queue; worth a direct nudge.</p>
+<ul><li><code>plan/CRITIQUE.md</code> is five days stale (last pass 2026-07-17, 39</li></ul>
+<p>pending) — no action taken here, just flagging the age.</p>
+<ul><li>Issue #144 (title-screen wordmark crop, HIGH) stays parked on</li></ul>
+<p><code>triage:needs-user</code> — no new information this run.</p></section>
+<section class="panel" id="tuning-proposals"><h2>Tuning proposals</h2>
+<p>None. <code>npm run baseline:check</code> reports <strong>FRESH</strong> — baseline <code>c0562bb3</code> (measured 2026-07-21, confidence reduced-nightly), no mechanics-source commits since. No re-measurement needed; nothing to propose.</p></section>
 <footer class="foot">Axiomancer DevLog &middot; generated by <code>scripts/build-devlog.mjs</code></footer>
 </main>
 </body>
