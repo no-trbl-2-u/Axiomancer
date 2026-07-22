@@ -1,0 +1,23 @@
+# Needs Brainstorming
+
+## New idea: 2 new card types
+
+### 1. "Ally" (player card type)
+A player-controlled card with a choice built in.
+
+- Presents **3 different effects**; the **player chooses 1** on play.
+- Once used, the card is **exhausted until next round**.
+- **Alternative framing:** instead of a free choice of 3, the card carries
+  3 effects mapped **one per phase** — one for **Approach**, one for **Press**,
+  one for **Fury** — and the active effect is determined by the current phase.
+
+(Open question for brainstorming: which of the two framings — "player picks 1 of 3"
+vs. "1 effect per phase" — is the intended design, or are they two variants to
+compare?)
+
+### 2. "Minion" (enemy card type)
+An enemy-side card that behaves like a small persistent creature.
+
+- Has **its own HP** (can be targeted / destroyed independently of the enemy).
+- Carries **3 effects, one per phase** — Approach, Press, Fury.
+- The phase-matched effect **triggers once per round during the enemy turn**.
