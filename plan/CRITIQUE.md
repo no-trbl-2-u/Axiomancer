@@ -420,7 +420,8 @@ one level down, in the routing helper `onApply` calls next).
   morale value/formatter already used in the SELF tab's POOLS panel.
 - source: playtester (critique pass 12)
 
-### [HIGH] title screen — wordmark cropped above the mobile fold
+### [x] [HIGH] title screen — wordmark cropped above the mobile fold (RESOLVED 2026-07-22, commit 0725b9cc)
+- issue: #148
 - pass: 12 (commit 3dc27d24)
 - viewport: mobile
 - category: visual
@@ -433,6 +434,14 @@ one level down, in the routing helper `onApply` calls next).
 - suggested fix: reflow or rescale the title art/wordmark so the full
   name fits inside the mobile viewport without requiring scroll.
 - source: playtester (critique pass 12)
+- resolution: root cause was the 1024x1024 square key art rendered
+  with `contentFit="cover"` on a narrow/tall viewport — covering the
+  full screen height scales the square up and crops ~27% off each
+  side, taking the wordmark's leading "A" and trailing "R" with it.
+  `TitleScreen.tsx`'s art image now uses `contentFit="contain"` pinned
+  to the top edge at full width (`aspectRatio: 1`), so the whole
+  square — wordmark included — is always fully visible; verified at
+  414x896 via the expo-web dev server.
 
 ### [x] [HIGH] combat tutorial never teaches the drag-to-play gesture (RESOLVED 2026-07-22, commit 6f138c27)
 - issue: #147
