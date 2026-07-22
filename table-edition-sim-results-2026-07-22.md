@@ -313,3 +313,27 @@ F caps 10/5 only (no ally)               66%·9r         66%·7r         65%·6r
 Reading: A is the undialed baseline. B−A = ally-targeting lift. F−A = caps-only lift. C/D/E = combined.
 0.8s
 ```
+
+## CO-OP TRIGGER-TIMING CHECK (run 6) — 'start of turn' as per-MINI-TURN vs per-ROUND (v2 library, T=P, HP×P, 300 games/cell)
+Run 5 already used per-ROUND semantics (owner's ruling). This run is the literal per-mini-turn reading for comparison.
+```
+=== per-mini-turn · first-only telegraph ===
+
+CONFIG                              2P (T=2,×2)    3P (T=3,×3)    4P (T=4,×4)
+A base (no dials, caps 6/3)              56%·9r         59%·7r         50%·6r
+B ally targeting, caps 6/3               60%·9r         58%·7r         54%·6r
+C ally + caps 8/4                        63%·9r         60%·7r         59%·6r
+D ally + caps 10/5                       65%·8r         64%·7r         61%·6r
+E ally + caps uncapped                   68%·8r         69%·7r         73%·5r
+F caps 10/5 only (no ally)               62%·9r         64%·7r         58%·6r
+
+=== per-mini-turn · full telegraphs ===
+
+CONFIG                              2P (T=2,×2)    3P (T=3,×3)    4P (T=4,×4)
+A base (no dials, caps 6/3)              58%·9r         57%·7r         54%·6r
+B ally targeting, caps 6/3               63%·9r         63%·7r         61%·6r
+C ally + caps 8/4                        65%·9r         66%·7r         67%·6r
+D ally + caps 10/5                       66%·8r         68%·7r         69%·6r
+E ally + caps uncapped                   68%·8r         71%·7r         75%·5r
+F caps 10/5 only (no ally)               63%·8r         64%·7r         62%·6r
+```

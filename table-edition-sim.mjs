@@ -1144,6 +1144,7 @@ let COOP_ALLY = false;   // beneficial effects (GUARD/THORNS/HEAL) may target ot
 let BLIGHT_MAX = 6;      // co-op only; solo/PvP keep the printed caps
 let THORNS_MAX = 3;
 let COOP_FULLTEL = false; // third experiment: ALL T enemy cards face-up before the player round
+let COOP_TURNSTART = false; // "start of turn" fires on every 1-card mini-turn (default: once per ROUND — owner's ruling)
 
 const effQ = q => Math.max(0, ENEMY_CARDS[q.nm].base - q.st);
 function biggestAttack(S) {
@@ -1323,6 +1324,10 @@ function coopChooseDie(S, m, c) {
 // Returns true if the member made their PAID play this turn.
 function coopMemberTurn(S, i, brainName) {
   const m = S.party[i];
+  if (COOP_TURNSTART) { // literal reading: enchant turn-start triggers fire every mini-turn
+    for (let k = m.ench.filter(e => e === 'anneal').length; k > 0; k--) { const x = S.dice.find(d => d.face === 'X'); if (x) x.face = 'M'; }
+    for (let k = m.ench.filter(e => e === 'archive').length; k > 0; k--) { coopVerbs(S, i).scry(1); if (S.over) return; }
+  }
   const incoming = incomingFor(S, i);
 
   // quick actions (not the card): sigs and press fate
@@ -1481,8 +1486,10 @@ function coopGame(partyPresets, enemyName, recipe, T, hpMult, brainName, seed) {
       while (m.hand.length < 5) { const b = m.hand.length; coopDraw(S, S.party.indexOf(m)); if (m.hand.length === b) break; }
     }
     S.dice = ['R', 'B', 'P', 'G'].map(c => ({ color: c, face: rollFace(c, rnd) }));
-    for (const m of S.party) for (let k = m.ench.filter(e => e === 'anneal').length; k > 0; k--) { const x = S.dice.find(d => d.face === 'X'); if (x) x.face = 'M'; }
-    for (let i = 0; i < S.party.length && !S.over; i++) for (let k = S.party[i].ench.filter(e => e === 'archive').length; k > 0; k--) coopVerbs(S, i).scry(1); // The Deep File
+    if (!COOP_TURNSTART) { // owner's ruling: "start of turn" = once per ROUND
+      for (const m of S.party) for (let k = m.ench.filter(e => e === 'anneal').length; k > 0; k--) { const x = S.dice.find(d => d.face === 'X'); if (x) x.face = 'M'; }
+      for (let i = 0; i < S.party.length && !S.over; i++) for (let k = S.party[i].ench.filter(e => e === 'archive').length; k > 0; k--) coopVerbs(S, i).scry(1); // The Deep File
+    }
     let turn = 0, guardCap = 80;
     while (!S.over && guardCap-- > 0) {
       const i = turn % S.party.length;
@@ -1539,6 +1546,7 @@ if (has('coop')) {
   if (has('dials')) {
     const TOFF = has('tp') ? 0 : 1; // default T = P−1; --tp pins T = P
     COOP_FULLTEL = has('fulltel');  // reveal ALL T enemy cards before the player round
+    COOP_TURNSTART = has('turnstart'); // per-mini-turn enchant triggers (default: per round)
     const CONFIGS = [
       { label: 'A base (no dials, caps 6/3)', ally: false, bl: 6, th: 3 },
       { label: 'B ally targeting, caps 6/3', ally: true, bl: 6, th: 3 },
