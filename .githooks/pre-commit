@@ -1,0 +1,12 @@
+#!/bin/sh
+set -eu
+
+repo_root=$(git rev-parse --show-toplevel)
+cd "$repo_root"
+
+# TELEMETRY.md is generated residue, but it belongs to the code change that
+# produced it. Always stage its current state with any commit.
+if [ -n "$(git status --porcelain -- TELEMETRY.md)" ]; then
+  git add -A -- TELEMETRY.md
+  printf '%s\n' 'pre-commit: staged TELEMETRY.md alongside this commit.' >&2
+fi
