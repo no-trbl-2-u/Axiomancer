@@ -1,11 +1,12 @@
-import { View, Text, Pressable, StyleSheet } from 'react-native';
+import { View, Text, Pressable } from 'react-native';
 import { Image } from 'expo-image';
 import { FONTS } from '@/theme/axm';
 import { makeStyles } from '@/theme/runtime';
 import { useGameActions } from '@/state/GameStoreProvider';
 
-// The throne-room key art doubles as the launcher icon; here it fills
-// the title screen and the painted "AxiomanceR" wordmark carries the brand.
+// The throne-room key art doubles as the launcher icon; here it anchors
+// the top of the title screen and the painted "AxiomanceR" wordmark
+// carries the brand.
 const TITLE_ART = require('@/assets/images/title-embark.jpg');
 
 interface TitleScreenProps {
@@ -26,12 +27,19 @@ export function TitleScreen({ onContinue }: TitleScreenProps) {
 
   return (
     <View style={styles.container}>
-      {/* Full-bleed key art — anchored to the top so the painted
-          wordmark stays in frame on tall portrait screens. */}
+      {/* The source art is a 1024x1024 square with the painted
+          "AxiomanceR" wordmark near its top edge. A full-bleed
+          `cover` fit on a narrow/tall phone viewport scales the
+          square up to match screen height, which crops both sides
+          — cutting the wordmark's leading "A" and trailing "R".
+          `contain` keeps the whole square (wordmark included)
+          intact at full width instead; the container's own dark
+          background fills the space below it, which the scrim
+          bands already darken toward for the CTA panel. */}
       <Image
         source={TITLE_ART}
-        style={StyleSheet.absoluteFill}
-        contentFit="cover"
+        style={styles.artImage}
+        contentFit="contain"
         contentPosition="top center"
         accessibilityLabel="A crowned king enthroned beside a horned axiomancer in a stained-glass hall"
       />
@@ -77,6 +85,16 @@ const useStyles = makeStyles((AXM) => ({
     flex: 1,
     backgroundColor: AXM.bg,
     justifyContent: 'flex-end',
+  },
+  // Square art pinned to the top edge, full width — see the
+  // `contentFit="contain"` comment above for why this replaces
+  // absoluteFill+cover.
+  artImage: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    aspectRatio: 1,
   },
   // Stacked translucent bands fake a bottom-up gradient without an
   // extra gradient dependency, fading the art into the dark CTA panel.
