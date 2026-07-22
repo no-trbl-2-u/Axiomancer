@@ -109,6 +109,10 @@ const EXPECTED_ROUTE_FILES: ReadonlySet<string> = new Set([
     './village/index.tsx',
     './dialogue/index.tsx',
     './cutscene/index.tsx',
+    // Table Edition (VOID / branch-only MVP) — solo board-game mode:
+    // setup + fight screens over lib/table-edition/engine.ts.
+    './table-edition/index.tsx',
+    './table-edition/play.tsx',
     // Dev-only enemy-art gallery (visual-audit 2026-06); gated by
     // isDevToolsEnabled() so production renders an empty view.
     './devart/index.tsx',

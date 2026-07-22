@@ -477,6 +477,27 @@ export default function CharacterScreen() {
           </View>
         </View>
       )}
+      {/* Table Edition (VOID / branch-only MVP): solo board-game mode.
+          Entry lives here so it's reachable with any save state. */}
+      <Pressable
+        onPress={() => router.push('/table-edition')}
+        accessibilityRole="button"
+        accessibilityLabel="Play Table Edition, the solo board game mode, beta"
+        style={{
+          borderWidth: 1,
+          borderColor: AXM.sulfur,
+          backgroundColor: AXM.panelBg,
+          padding: 12,
+          marginTop: 16,
+        }}
+      >
+        <Text style={{ fontFamily: FONTS.sans, fontSize: 14, letterSpacing: 2, color: AXM.sulfur }}>
+          ⚄ TABLE EDITION · BETA
+        </Text>
+        <Text style={{ fontFamily: FONTS.serif, fontSize: 12, color: AXM.bone, marginTop: 2 }}>
+          The board game, played solo: four dice, one deck, a telegraphed enemy.
+        </Text>
+      </Pressable>
       <ThemeSwitcher />
       <DevToolsLink />
     </ScreenBg>

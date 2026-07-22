@@ -1,4 +1,5 @@
 import { View, Text, Pressable, StyleSheet } from 'react-native';
+import { router } from 'expo-router';
 import { Image } from 'expo-image';
 import { FONTS } from '@/theme/axm';
 import { makeStyles } from '@/theme/runtime';
@@ -67,6 +68,16 @@ export function TitleScreen({ onContinue }: TitleScreenProps) {
           Your path begins in the fishing village, where travelers gather
           before venturing into the realms beyond.
         </Text>
+
+        {/* Table Edition (VOID / branch-only MVP) — solo board-game mode. */}
+        <Pressable
+          onPress={() => router.push('/table-edition')}
+          accessibilityRole="button"
+          accessibilityLabel="Play Table Edition, the solo board game mode, beta"
+          style={({ pressed }) => [styles.tableEditionLink, pressed && { opacity: 0.7 }]}
+        >
+          <Text style={styles.tableEditionText}>⚄ TABLE EDITION · BETA</Text>
+        </Pressable>
       </View>
     </View>
   );
@@ -150,6 +161,20 @@ const useStyles = makeStyles((AXM) => ({
     textAlign: 'center',
     opacity: 0.7,
     marginTop: 4,
+  },
+  tableEditionLink: {
+    borderWidth: 1,
+    borderColor: AXM.bone,
+    paddingVertical: 8,
+    paddingHorizontal: 20,
+    backgroundColor: 'rgba(10,10,10,0.6)',
+  },
+  tableEditionText: {
+    fontFamily: FONTS.sans,
+    fontSize: 13,
+    letterSpacing: 2,
+    color: AXM.parchment,
+    textAlign: 'center',
   },
   footerText: {
     fontFamily: FONTS.serifItalic,

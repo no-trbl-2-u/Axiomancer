@@ -43,9 +43,10 @@ describe('TitleScreen', () => {
       </TestWrapper>
     );
 
-    const button = getByRole('button');
+    // Two buttons since the Table Edition (branch-only beta) link joined
+    // the screen — target the embark CTA by its accessible name.
+    const button = getByRole('button', { name: 'Embark on your journey' });
     expect(button).toBeTruthy();
-    expect(button.props.accessibilityLabel).toBe('Embark on your journey');
     expect(getByText('EMBARK…')).toBeTruthy();
   });
 
@@ -57,7 +58,7 @@ describe('TitleScreen', () => {
       </TestWrapper>
     );
 
-    const button = getByRole('button');
+    const button = getByRole('button', { name: 'Embark on your journey' });
     fireEvent.press(button);
 
     expect(mockOnContinue).toHaveBeenCalledTimes(1);
