@@ -48,7 +48,8 @@ const PANELS: PrimerPanel[] = [
             'Each turn you roll three dice — keep one; every unused die banks as ◆ tokens ' +
             '(gold banks 2, a dead ✕ banks none). A die only powers cards of ITS color — gold ' +
             'powers anything. Land a NEW status and your die REFRESHES — so you can chain ' +
-            'another. Tap any card to read its keywords and full effect.',
+            'another. Drag a card up into the PLAY AREA to play it; tap one first to read its ' +
+            'keywords and full effect.',
     },
 ];
 
