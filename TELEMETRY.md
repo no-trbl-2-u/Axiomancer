@@ -97,3 +97,4 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-07-20T14:37:58Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-07-20T20:03:29Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-07-20T20:05:03Z | subagent | Explore | claude-sonnet-5 | main | Survey juice/animation call sites and precedents |
+| 2026-07-22T18:28:44Z | skill | artifact-design | claude-fable-5 | main | - |
