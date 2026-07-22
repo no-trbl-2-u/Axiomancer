@@ -483,7 +483,7 @@ function composeCombatPrelude(encounter: Encounter, isBoss: boolean): Omit<Event
             accentKey: 'blood',
             enabled: true,
             subtitle: fightSubtitle,
-            decode: `Lv ${enemy.level} foe · ${enemy.health} HP · advantage not yet scouted`,
+            decode: `Lv ${enemy.level} foe · ${enemy.health} VITAE · advantage not yet scouted`,
         },
         {
             id: 'flee',
@@ -518,7 +518,7 @@ function composeCombatPrelude(encounter: Encounter, isBoss: boolean): Omit<Event
         badgeAccentKey: 'blood',
         title: enemy.name.toUpperCase(),
         subtitle,
-        body: `level ${enemy.level} · ${enemy.health} hp.`,
+        body: `level ${enemy.level} · ${enemy.health} vitae.`,
         choices,
         lore: null,
         canSkip: false,
