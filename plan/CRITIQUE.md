@@ -483,7 +483,8 @@ one level down, in the routing helper `onApply` calls next).
   VITAE bar from the same computed enemy stat.
 - source: playtester (critique pass 12)
 
-### [MED] card/tooltip copy still says "HP" instead of canon VITAE
+### [x] [MED] card/tooltip copy still says "HP" instead of canon VITAE (RESOLVED 2026-07-22, commit 21c55b94)
+- issue: #146
 - pass: 12 (commit 3dc27d24)
 - viewport: mobile
 - category: voice
@@ -498,6 +499,12 @@ one level down, in the routing helper `onApply` calls next).
 - suggested fix: replace remaining "HP"/"hp" occurrences in encounter
   and card copy with VITAE per bearings' copy canon.
 - source: playtester (critique pass 12)
+- resolution: the two evidence quotes for the combat-card aria-label
+  and BLEED tooltip were already fixed by unrelated prior work
+  (verified live 2026-07-22 — no longer reproducible). The remaining
+  two live occurrences (`event.engine.ts` pre-fight prelude `decode`
+  and `body` strings) were the actual fix — both now read VITAE/vitae,
+  matching the same function's own `fightSubtitle`.
 
 ### [MED] general — rethink early-game as canned preset-deck tutorial, defer deckbuilding to labyrinth choice
 - pass: user-jot (commit 63cfb3ba)
