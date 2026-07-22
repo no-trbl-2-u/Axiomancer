@@ -434,7 +434,8 @@ one level down, in the routing helper `onApply` calls next).
   name fits inside the mobile viewport without requiring scroll.
 - source: playtester (critique pass 12)
 
-### [HIGH] combat tutorial never teaches the drag-to-play gesture
+### [x] [HIGH] combat tutorial never teaches the drag-to-play gesture (RESOLVED 2026-07-22, commit 6f138c27)
+- issue: #147
 - pass: 12 (commit 3dc27d24)
 - viewport: mobile
 - category: comprehension
@@ -452,6 +453,15 @@ one level down, in the routing helper `onApply` calls next).
   drag-to-stage/APPLY gesture, and/or a visible "drag to play"
   affordance on card faces.
 - source: playtester (critique pass 12)
+- resolution: `CombatTutorialPrimer.tsx`'s DICE & CARDS page (page
+  3/3) now says "Drag a card up into the PLAY AREA to play it; tap
+  one first to read its keywords and full effect." — matching the
+  wording already used by the in-combat coach's 'spend' step
+  (`combat-tutorial-steps.ts`), which taught the gesture but only
+  after the primer had already sent the player off with tap-only
+  instructions. The larger suggested "visible drag affordance on
+  card faces" remains open as a follow-up, not required to close
+  this finding.
 
 ### [MED] persistent header VITAE bar doesn't update during combat
 - pass: 12 (commit 3dc27d24)
