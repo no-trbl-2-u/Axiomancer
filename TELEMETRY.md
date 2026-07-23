@@ -115,3 +115,7 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-07-23T09:05:51Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-07-23T10:53:21Z | slash-prompt | /digest | unknown | user/ci | /digest |
 | 2026-07-23T10:53:23Z | skill | digest | unknown | main | - |
+| 2026-07-23T14:39:42Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-07-23T14:39:44Z | skill | march | unknown | main | - |
+| 2026-07-23T14:42:38Z | subagent | Explore | claude-sonnet-5 | main | Locate reward-pool spell definitions |
+| 2026-07-23T14:45:05Z | subagent | Explore | claude-sonnet-5 | main | Investigate blacksmith MapEvent node gating |

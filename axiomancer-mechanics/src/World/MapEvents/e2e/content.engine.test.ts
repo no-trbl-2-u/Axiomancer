@@ -57,10 +57,10 @@ describe('fishing-village content — new-player map', () => {
             state = r.state;
         }
 
-        // 7 encounter-kind nodes (6 regular + the fv-6 boss) — a slight
-        // plurality. Phase D6c converted one plain encounter (fv-16) into the
-        // single authored blacksmith node ("The Anvil").
-        expect(counts.encounter).toBe(7);
+        // 8 encounter-kind nodes (7 regular + the fv-6 boss) — a slight
+        // plurality. fv-16 reverted to a plain encounter when the blacksmith
+        // map node was gated back to dev-only (owner /oversight 2026-07-18).
+        expect(counts.encounter).toBe(8);
         expect(counts.rest).toBe(4);
         expect(counts.gathering).toBe(4);
         expect(counts.hazard).toBe(3);
@@ -68,7 +68,6 @@ describe('fishing-village content — new-player map', () => {
         expect(counts.narration).toBe(1);
         expect(counts.interaction).toBe(1);
         expect(counts.quest).toBe(1);
-        expect(counts.blacksmith).toBe(1);
         // Encounters remain the single largest kind.
         const maxCount = Math.max(...Object.values(counts));
         expect(counts.encounter).toBe(maxCount);

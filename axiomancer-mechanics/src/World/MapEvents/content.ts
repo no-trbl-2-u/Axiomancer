@@ -17,7 +17,6 @@ import {
 } from './resolve-map-event';
 import type { MapEventPool } from './types';
 import type { EnemySlug } from '../../Enemy/enemy.library';
-import { HEART_RICH_PAYLOAD_VARIANT } from '../Blacksmith/blacksmith.content';
 
 // ─── northern-forest pools ────────────────────────────────────────────────────
 
@@ -546,28 +545,6 @@ function fvInteractionPool(nodeId: string, npcName: string, description: string)
     };
 }
 
-// Blacksmith ("The Anvil", Spec 33 §6 / Phase D6c). ONE authored node on the
-// FIRST map (owner /oversight 2026-07-18 — a single fixed placement, NOT a
-// cadence: the WHEN/WHETHER of the blacksmith's identity stays owner-open in
-// plan/AUDIT.md). Hands the host a die-gear upgrade session with the witness
-// swap variant on offer. The visit budget authored here is a PLACEHOLDER hint;
-// the mobile host maps the spendable unit to the player's real currency (D7
-// ratifies the numbers).
-function fvBlacksmithPool(nodeId: string, description: string): MapEventPool {
-    return {
-        id: `${nodeId}.blacksmith`,
-        entries: [{
-            kind: 'blacksmith', weight: 1,
-            payload: {
-                kind: 'blacksmith',
-                budget: 12,
-                variants: [HEART_RICH_PAYLOAD_VARIANT],
-                description,
-            },
-        }],
-    };
-}
-
 // A narration node (the dialogue-backed shell kind). "What Do I Tell Father?"
 // — the boy overhears Father counting coin for the boat, then faces a small
 // but real dilemma at dinner: tell the truth about the cost, spare him the
@@ -670,11 +647,6 @@ const FV_HAZARD_NODES: Record<string, string> = {
     'fv-23': 'A gull-slick ledge crumbles underfoot above the rocks.',
 };
 const FV_LOOT_NODES: Record<string, number> = { 'fv-2': 0, 'fv-11': 1, 'fv-17': 2 };
-// The single authored blacksmith node (owner-decided placement — one node, no
-// cadence). fv-16 was a plain encounter; it now hosts "The Anvil".
-const FV_BLACKSMITH_NODES: Record<string, string> = {
-    'fv-16': 'A lean-to forge, coals still breathing. The smith looks up from the anvil and nods at your dice.',
-};
 // One coastal NPC for texture (the narration node fv-14 is wired separately).
 const fvShoreInteraction = fvInteractionPool(
     'fv-19',
@@ -702,8 +674,6 @@ const FISHING_VILLAGE_NEW_PLAYER_POOLS: ReadonlyArray<{ nodeId: string; pool: Ma
                 out.push({ nodeId, pool: fvGatheringPool(nodeId, FV_GATHER_MATERIALS[FV_GATHER_NODES[nodeId]!]!, 'You crouch to gather what the tide left behind.') });
             } else if (FV_HAZARD_NODES[nodeId]) {
                 out.push({ nodeId, pool: fvHazardPool(nodeId, FV_HAZARD_NODES[nodeId]!) });
-            } else if (FV_BLACKSMITH_NODES[nodeId]) {
-                out.push({ nodeId, pool: fvBlacksmithPool(nodeId, FV_BLACKSMITH_NODES[nodeId]!) });
             } else if (nodeId in FV_LOOT_NODES) {
                 out.push({ nodeId, pool: fvLootCachePool(nodeId, FV_LOOT_CACHES[FV_LOOT_NODES[nodeId]!]!) });
             } else {

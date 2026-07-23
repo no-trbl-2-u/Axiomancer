@@ -1,15 +1,16 @@
 /**
- * Hermetic E2E — Blacksmith encounter ("The Anvil") store flow + map
- * interception (Spec 33 §6 / Phase D6c). Drives the anvil through the
- * store action layer: begin → intro → forging (hone / temper / swap) →
- * card → outcome → claim, and verifies:
- *   - a 'blacksmith' map event launches the session (interception), not a
- *     paced /event card;
+ * Hermetic E2E — Blacksmith encounter ("The Anvil") store flow (Spec 33 §6 /
+ * Phase D6c). Drives the anvil through the store action layer: begin → intro
+ * → forging (hone / temper / swap) → card → outcome → claim, and verifies:
  *   - HONE / TEMPER / SWAP drive the engine;
  *   - a cap OR afford refusal surfaces the reason LOUDLY and no-ops the
  *     rail + budget;
  *   - claim writes `outcome.rail` to `Character.dieGear` and deducts
  *     `outcome.spent` from the wallet.
+ *
+ * The map node that used to launch this via interception was gated back to
+ * dev-only (owner /oversight 2026-07-18); `beginBlacksmith()` here mirrors
+ * the surviving Dev-menu entry point, not a map tap.
  *
  * Seeded; no timers, no network. The upgrade transitions are
  * deterministic, so no roll pinning is needed.
@@ -17,9 +18,6 @@
 
 import { afterEach, describe, expect, it, jest } from '@jest/globals';
 import {
-    createMapState,
-    getMapDefinition,
-    getNodePrimaryEventKind,
     concreteDefaultRail,
     HEART_RICH_PAYLOAD_VARIANT,
     type GameState,
@@ -29,7 +27,6 @@ import {
 import { createAppActions, type AppActions } from '@/state/actions';
 import { createAppStore, type AppStore } from '@/state/store';
 import { selectHasActiveBlacksmith, selectBlacksmithVM } from '@/state/presenters/blacksmith.engine';
-import { selectHasActiveEvent, selectPacedEventRoute } from '@/state/presenters/event.engine';
 import { createMemoryAdapter } from '@/test-utils/memoryAdapter';
 
 afterEach(() => {
@@ -52,47 +49,6 @@ function setCurrency(store: AppStore, currency: number): void {
     const state = store.getState() as unknown as GameState;
     store.setState({ player: { ...state.player, currency } } as never);
 }
-
-/** Seat the player on `nodeId` of fishing-village, mirroring a reachable tap. */
-function seatAt(store: AppStore, nodeId: string): void {
-    const base = store.getState() as unknown as GameState;
-    const map = createMapState(getMapDefinition('coastal-continent', 'fishing-village'));
-    store.setState({
-        world: { ...base.world, currentMap: { ...map, currentNode: nodeId } },
-    } as never);
-}
-
-function firstBlacksmithNode(): string {
-    const def = getMapDefinition('coastal-continent', 'fishing-village');
-    const node = def.nodes.find(
-        (n) => getNodePrimaryEventKind('coastal-continent', 'fishing-village', n.id) === 'blacksmith',
-    );
-    if (!node) throw new Error('no blacksmith node on fishing-village');
-    return node.id;
-}
-
-describe('blacksmith map interception', () => {
-    it('the authored fishing-village node opens "The Anvil", not a paced /event', () => {
-        const { store, actions } = makeStoreAndActions();
-        seatAt(store, firstBlacksmithNode());
-
-        expect(actions.resolveCurrentMapEvent('blacksmith')).toBe(true);
-
-        expect(selectHasActiveBlacksmith(store.getState())).toBe(true);
-        expect(selectHasActiveEvent(store.getState())).toBe(false);
-        expect(selectPacedEventRoute(store.getState())).toBeNull();
-        // The witness swap variant rides the payload through to the session.
-        expect(session(store).variants.map((v) => v.id)).toContain(HEART_RICH_PAYLOAD_VARIANT.id);
-    });
-
-    it('there is exactly ONE blacksmith node on the first map (no invented cadence)', () => {
-        const def = getMapDefinition('coastal-continent', 'fishing-village');
-        const count = def.nodes.filter(
-            (n) => getNodePrimaryEventKind('coastal-continent', 'fishing-village', n.id) === 'blacksmith',
-        ).length;
-        expect(count).toBe(1);
-    });
-});
 
 describe('blacksmith forging drives the engine', () => {
     it('HONE adds a mana face to the target die', () => {
