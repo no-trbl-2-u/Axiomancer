@@ -153,7 +153,7 @@ const PRESETS = [
     { nm: 'Banner of the Host', r: 'U', n: 3, hue: 'mind', t: 'ENCH', art: 'knight-banner', free: ['CONVICTION',1], paid: 'ENCHANT — whenever an ally exhausts, CONVICTION +1.' },
     { nm: 'Muster', r: 'U', n: 3, hue: 'heart', t: 'SPELL', art: 'meeple-group', free: ['ATTUNE',1], paid: 'RALLY all your allies. DRAW 1.' },
     { nm: 'The Open Door', r: 'R', n: 1, gold: 1, t:'SPELL', art: 'door', free: ['DRAW',1], paid: 'Return one exiled ally to play, refreshed.' },
-    { nm: 'The Long Table', r: 'R', n: 1, gold: 1, t:'ENCH', art: 'table', free: ['CONVICTION',1], paid: 'ENCHANT — at the start of the round, RALLY one ally.' },
+    { nm: 'The Long Table', r: 'R', n: 1, gold: 1, t:'ENCH', art: 'table', free: ['CONVICTION',1], paid: 'ENCHANT — each round, one ally may EXHAUST twice.' },
   ]},
 ];
 

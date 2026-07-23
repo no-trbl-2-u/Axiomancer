@@ -937,7 +937,8 @@ function playerTurn(S, brainName) {
     a.exhausted = false;
     if (ALLY_CARDS[a.aix].timing !== 'end') exhaustAlly(S, a);
   }
-  // The Long Table: at the start of the round, RALLY one ally (acts again)
+  // The Long Table: each round one ally may EXHAUST twice (v3.1 wording fix —
+  // "round-start RALLY" was dead text: nothing is exhausted at round start)
   for (let i = p.ench.filter(e => e === 'longTable').length; i > 0; i--) {
     const a = p.allies.find(x => x.exhausted);
     if (a) { a.exhausted = false; exhaustAlly(S, a); }
