@@ -157,6 +157,21 @@ const PRESETS = {
       { nm: 'Sealed Fate', n: 1, col: 'G', t: 'CURSE', curse: E => { E.skipEnemyTurn(); E.dmg(3); }, free: E => E.hex(2), paid: E => E.hex(0), v: 4 },
     ],
   },
+  // v3 (owner request 2026-07-22): the ally deck. Conviction + draw + ally/ench
+  // interaction; rare returns an ally from exile. Starts with 2 befriended allies
+  // in the deck (ASSUMPTION: The Doorwright + The Sledge; a real player picks).
+  COVENANT: {
+    stance: 'P',
+    cards: [
+      { nm: 'Warm Welcome', n: 4, col: 'P', t: 'SPELL', free: E => E.conviction(1), paid: E => { E.conviction(1); E.draw(1); }, v: 2 },
+      { nm: 'Letters of Passage', n: 4, col: 'B', t: 'SPELL', free: E => E.draw(1), paid: E => { E.draw(2); if (E.hasAlly()) E.conviction(1); }, v: 2 },
+      { nm: 'Shield of Guests', n: 4, col: 'R', t: 'SPELL', free: E => E.guard(2), paid: E => { E.guard(3); E.rallyOne(); }, v: 2 },
+      { nm: 'Banner of the Host', n: 3, col: 'B', t: 'ENCH', ench: 'hostBanner', free: E => E.conviction(1), v: 3 },
+      { nm: 'Muster', n: 3, col: 'P', t: 'SPELL', free: E => E.attune(1), paid: E => { E.rallyAll(); E.draw(1); }, v: 3 },
+      { nm: 'The Open Door', n: 1, col: 'G', t: 'SPELL', free: E => E.draw(1), paid: E => E.unexile(), v: 5 },
+      { nm: 'The Long Table', n: 1, col: 'G', t: 'ENCH', ench: 'longTable', free: E => E.conviction(1), v: 4 },
+    ],
+  },
 };
 
 const SIGS = {
@@ -177,6 +192,7 @@ const SIG_PICKS = {
   TORRENT: ['Cataract', 'Kindled Fury'],
   INVOCATION: ['Cataract', 'Foresight'],
   MALISON: ['Recant', 'Cataract'],
+  COVENANT: ['Cataract', 'Ironclad Oath'],
 };
 
 // Enemy cards: kind attack|guard|thorns|molt|rest. base = printed number, hits.
@@ -194,6 +210,11 @@ const ENEMY_CARDS = {
   Sweep: { kind: 'attack', base: 2, hits: 2 },
   Heave: { kind: 'attack', base: 6, hits: 1 },
   Rampage: { kind: 'attack', base: 4, hits: 2 },
+  // v3 — The Broodmother
+  Sting: { kind: 'attack', base: 2, hits: 1 },
+  'Wax Ward': { kind: 'guard', base: 3 },
+  Swarm: { kind: 'swarm', base: 2 }, // one hit per minion in play, each at (2 − Stagger); no minions = fizzle
+  'Brood-Hymn': { kind: 'goad', base: 1 }, // every minion triggers its line again; staggerable to fizzle
 };
 
 const ENEMIES = {
@@ -214,6 +235,18 @@ const ENEMIES = {
     tiers: { A: [['Catch Breath', 4], ['Sweep', 3]], P: [['Heave', 4], ['Sweep', 2], ['Catch Breath', 1]], F: [['Rampage', 3], ['Heave', 3]] },
     easy: t => { swap(t, 'Heave', 'Catch Breath', 2); remove(t, 'Rampage', 1); },
     hard: t => { swap(t, 'Catch Breath', 'Sweep', 2); swap(t, 'Heave', 'Rampage', 1); },
+  },
+  // v3 — the minion enemy. '@X' tier entries are its brood (MINIONS.BROODMOTHER[X]),
+  // core to the deck, not gated by --minions.
+  BROODMOTHER: {
+    hp: 30,
+    tiers: {
+      A: [['Sting', 3], ['Wax Ward', 2], ['@A', 2]],
+      P: [['Swarm', 3], ['Sting', 2], ['@P', 2]],
+      F: [['Brood-Hymn', 3], ['Swarm', 2], ['@F', 2]],
+    },
+    easy: t => { swap(t, 'Brood-Hymn', 'Sting', 1); remove(t, '@F', 1); },
+    hard: t => { swap(t, 'Sting', 'Swarm', 2); add(t, 'A', '@A', 1); },
   },
 };
 function swap(tiers, from, to, count) {
@@ -239,9 +272,12 @@ function remove(tiers, name, count) {
 //   --minions            shuffle 1 minion into each enemy tier
 //   --allies             test each ally with its built-for preset
 // Rulings encoded: phase = tier of the current telegraph (Last Stand locks FURY);
-// minion reveal IS the enemy's action that turn; max 1 minion (dupe heals 2);
-// minions take direct damage only; forced discards give no ◆; ally absorbs an
-// ENTIRE strike then is exiled; ally refreshes at player turn start.
+// minion reveal IS the enemy's action that turn; NO CAP on minions or allies in
+// play [owner-ruled 2026-07-22 — grey interaction cards + ally preset + minion
+// enemy need open boards]; minions take direct damage only; forced discards give
+// no ◆; ally absorbs an ENTIRE strike then is exiled; allies refresh at player
+// turn start; RALLY = an exhausted ally acts again; SILENCE = minion skips its
+// next line.
 // ============================================================================
 let CONCEDE_ON = false;
 let CG_FIXED = false; // --cgfixed: Common Ground ignores ATTUNE/discounts (flat 5◆)
@@ -276,6 +312,17 @@ const MINIONS = {
     F: { nm: 'Tremorling', hp: 4, etb: S => forceDiscard(S), fx: {
       A: S => forceDiscard(S), P: S => mAtk(S, 2, 1), F: S => { mAtk(S, 3, 1); if (!S.over) forceDiscard(S); } } },
   },
+  // The Broodmother's brood is CORE to her deck (not gated by --minions).
+  BROODMOTHER: {
+    A: { nm: 'Broodling', hp: 2, etb: S => mAtk(S, 1, 1), fx: {
+      A: S => mAtk(S, 1, 1), P: S => mAtk(S, 1, 2), F: S => mAtk(S, 2, 2) } },
+    P: { nm: 'Wax-Sister', hp: 3, etb: S => { for (const m of S.e.minions) m.hp += 1; }, fx: {
+      A: S => { S.e.guard += 1; },
+      P: S => { for (const m of S.e.minions) m.hp += 1; },
+      F: S => { for (const m of S.e.minions) m.hp += 1; S.e.hp = Math.min(ENEMIES[S.enemyName].hp, S.e.hp + 2); } } },
+    F: { nm: 'Choir-Larva', hp: 4, etb: S => { S.e.pbonus += 1; }, fx: {
+      A: S => { S.e.guard += 2; }, P: S => mAtk(S, 2, 1), F: S => { S.e.pbonus += 2; } } },
+  },
 };
 function mAtk(S, n, hits) { for (let h = 0; h < hits && !S.over; h++) hurtPlayer(S, n, true); }
 function forceDiscard(S) { if (S.p.hand.length) { S.p.discard.push(S.p.hand.shift()); } } // no ◆
@@ -302,6 +349,7 @@ function newGame(presetName, enemyName, recipe, seed) {
   const deck = [];
   preset.cards.forEach((c, ix) => { for (let i = 0; i < c.n; i++) deck.push(ix); });
   if (ALLY_IX !== null) deck.push(ALLY_BASE_IX + ALLY_IX); // 21st card: the befriended ally
+  if (presetName === 'COVENANT') deck.push(ALLY_BASE_IX + 3, ALLY_BASE_IX + 8); // starting allies: Doorwright + Sledge
 
   const spec = ENEMIES[enemyName];
   const tiers = JSON.parse(JSON.stringify(spec.tiers));
@@ -311,8 +359,9 @@ function newGame(presetName, enemyName, recipe, seed) {
   const tierSizes = { A: 0, P: 0, F: 0 };
   for (const key of ['A', 'P', 'F']) {
     const tier = [];
-    for (const [nm, n] of tiers[key]) for (let i = 0; i < n; i++) tier.push(nm);
-    if (MINIONS_ON) tier.push({ minion: key }); // 1 minion lives in each tier
+    for (const [nm, n] of tiers[key]) for (let i = 0; i < n; i++)
+      tier.push(nm.startsWith('@') ? { minion: nm.slice(1) } : nm); // '@X' = native minion (Broodmother)
+    if (MINIONS_ON && MINIONS[enemyName] && !tier.some(e => typeof e === 'object')) tier.push({ minion: key });
     tierSizes[key] = tier.length;
     edeck.push(...shuffled(tier, rnd));
   }
@@ -325,14 +374,14 @@ function newGame(presetName, enemyName, recipe, seed) {
       surge: 0, attune: 0, chainShield: false, echoSig: false,
       ench: [], rite: null, dice: [], persistDie: null, kindled: false,
       pressed: false, sigUsedTurn: false, sigs: SIG_PICKS[presetName].slice(),
-      ally: null, hexTop: false, burstBonus: 0, // v3
+      allies: [], exiled: [], hexTop: false, burstBonus: 0, // v3 (no cap on allies in play)
     },
     e: {
       hp: spec.hp, deck: edeck, discard: [], fired: [], telegraph: null,
       guard: 0, thorns: 0, blight: 0, enraged: false, skip: false, doubt: 0,
       known: 0, staggers: 0,
       // v3: phase tracking + minion + Concede
-      tierSizes, drawn: 0, phase: 'A', minion: null, pbonus: 0, progress: 0,
+      tierSizes, drawn: 0, phase: 'A', minions: [], pbonus: 0, progress: 0,
       chorus: false, blightNoDecay: false,
     },
     stats: { convEarned: 0, convSpent: 0, bursts: 0, sigFires: 0, pressFates: 0, hexFired: 0, freePlays: 0, paidPlays: 0, discardsForConv: 0 },
@@ -356,6 +405,10 @@ function makeVerbs(S) {
     heal: n => { S.p.hp = Math.min(30, S.p.hp + n); },
     dmg: n => dealPlayerDamage(S, n),
     progressToken: () => { S.e.progress++; },
+    hasAlly: () => S.p.allies.length > 0,
+    rallyOne: () => { const a = S.p.allies.find(x => x.exhausted); if (a) { a.exhausted = false; exhaustAlly(S, a); } },
+    rallyAll: () => { for (const a of S.p.allies.filter(x => x.exhausted)) { a.exhausted = false; exhaustAlly(S, a); } },
+    unexile: () => { if (S.p.exiled.length) S.p.allies.push({ aix: S.p.exiled.pop(), exhausted: false }); },
     scry: n => {
       S.e.known = Math.max(S.e.known, Math.min(n, S.e.deck.length));
       const arch = S.p.ench.filter(e => e === 'archive').length; // The Deep File: bottom a card, ping 1 per copy
@@ -470,19 +523,25 @@ function spendDie(S, die) {
   S.p.dice.splice(S.p.dice.indexOf(die), 1);
 }
 
-// v3: player-sourced damage is assignable — brains focus the minion down when
+// v3: player-sourced damage is assignable — brains focus a minion down when
 // the hit wouldn't be badly wasted (physical rule: you choose the target).
 function dealPlayerDamage(S, n) {
-  const m = S.e.minion;
-  if (m && m.hp > 0 && n <= m.hp + 2) { dealToMinion(S, n); return; }
+  const m = S.e.minions.filter(x => x.hp > 0 && n <= x.hp + 2).sort((a, b) => a.hp - b.hp)[0];
+  if (m) { dealToMinion(S, m, n); return; }
   dealToEnemy(S, n, true);
 }
-function dealToMinion(S, n) {
-  const m = S.e.minion;
+function dealToMinion(S, m, n) {
   if (!m || n <= 0) return;
   m.hp -= n;
   if (m.spec.retaliateA && S.e.phase === 'A') hurtPlayer(S, 1, false); // Shard of Shell
-  if (m.hp <= 0) { S.e.discard.push(m.entry); S.e.minion = null; } // card returns for Last Stand
+  if (m.hp <= 0) { S.e.discard.push(m.entry); S.e.minions.splice(S.e.minions.indexOf(m), 1); } // card returns for Last Stand
+}
+// v3: exhaust helper — Banner of the Host pays ◆ per exhaust
+function exhaustAlly(S, a) {
+  if (a.exhausted) return;
+  a.exhausted = true;
+  ALLY_CARDS[a.aix].fx[S.e.phase](makeVerbs(S), S);
+  for (let i = S.p.ench.filter(e => e === 'hostBanner').length; i > 0; i--) { S.p.conv++; S.stats.convEarned++; }
 }
 
 function dealToEnemy(S, n, direct) {
@@ -530,10 +589,9 @@ function revealTelegraph(S) {
     if (S.e.enraged) S.e.phase = 'F';
     else S.e.phase = S.e.drawn <= S.e.tierSizes.A ? 'A' : S.e.drawn <= S.e.tierSizes.A + S.e.tierSizes.P ? 'P' : 'F';
     if (S.e.doubt > 0) { S.e.doubt--; S.e.discard.push(top); continue; } // Whispered Doubt eats it (minions too)
-    if (typeof top === 'object' && top.minion !== undefined) { // v3 minion reveal
-      if (S.e.minion) { S.e.minion.hp += 2; S.e.discard.push(top); continue; } // dupe heals 2, keep revealing
+    if (typeof top === 'object' && top.minion !== undefined) { // v3 minion reveal (no cap)
       const spec = MINIONS[S.enemyName][top.minion];
-      S.e.minion = { spec, hp: spec.hp, nm: spec.nm, entry: top };
+      S.e.minions.push({ spec, hp: spec.hp, nm: spec.nm, entry: top });
       spec.etb(S);
       return; // the reveal IS the enemy's whole action: no telegraph this cycle
     }
@@ -545,8 +603,12 @@ function revealTelegraph(S) {
 function enemyTurn(S) {
   for (let i = S.p.ench.filter(e => e === 'blight1').length; i > 0; i--) S.e.blight = Math.min(6, S.e.blight + 1); // Lingering Cough
   if (S.e.skip) { S.e.skip = false; endEnemyTurn(S); return; }
-  // v3: minion triggers its current-phase line at the start of the enemy turn
-  if (S.e.minion) { S.e.minion.spec.fx[S.e.phase](S); if (S.over) return; }
+  // v3: every minion triggers its current-phase line at the start of the enemy turn
+  for (const m of S.e.minions.slice()) {
+    if (m.silenced) { m.silenced = false; continue; } // SILENCE: skips its next line
+    m.spec.fx[S.e.phase](S);
+    if (S.over) return;
+  }
   const t = S.e.telegraph;
   if (t) {
     const card = ENEMY_CARDS[t];
@@ -555,13 +617,16 @@ function enemyTurn(S) {
       S.e.discard.push(t); // fizzle
     } else {
       const bonus = (S.e.enraged ? 1 : 0) + (S.e.chorus ? 1 : 0);
-      if (card.kind === 'attack') {
-        const incoming = (power + bonus) * (card.hits || 1);
-        if (S.p.ally && (incoming >= 5 || incoming >= S.p.hp)) {
-          S.p.ally = null; // the ally absorbs the ENTIRE strike and is exiled
+      if (card.kind === 'attack' || card.kind === 'swarm') {
+        const hits = card.kind === 'swarm' ? S.e.minions.length : (card.hits || 1);
+        if (hits <= 0) { S.e.discard.push(t); revealTelegraph(S); endEnemyTurn(S); return; } // Swarm with no brood fizzles
+        const incoming = (power + bonus) * hits;
+        if (S.p.allies.length && (incoming >= 5 || incoming >= S.p.hp)) {
+          const a = S.p.allies.pop(); // one ally absorbs the ENTIRE strike and is exiled
+          S.p.exiled.push(a.aix);
           S.e.discard.push(t);
         } else {
-          for (let h = 0; h < card.hits; h++) { hurtPlayer(S, power + bonus, true); if (S.over) return; }
+          for (let h = 0; h < hits; h++) { hurtPlayer(S, power + bonus, true); if (S.over) return; }
           S.e.discard.push(t);
         }
         S.e.chorus = false;
@@ -569,7 +634,8 @@ function enemyTurn(S) {
         endEnemyTurn(S);
         return;
       }
-      if (card.kind === 'guard') S.e.guard += power;
+      if (card.kind === 'goad') { for (const m of S.e.minions.slice()) { m.spec.fx[S.e.phase](S); if (S.over) return; } }
+      else if (card.kind === 'guard') S.e.guard += power;
       else if (card.kind === 'thorns') S.e.thorns = Math.min(3, S.e.thorns + power);
       else if (card.kind === 'molt') { S.e.blight = Math.max(0, S.e.blight - 2); S.e.hp = Math.min(ENEMIES[S.enemyName].hp, S.e.hp + power); }
       S.e.discard.push(t);
@@ -627,8 +693,8 @@ function playPaid(S, handIx, die, brain) {
     else S.p.discard.push(ix);
     return;
   }
-  if (c.t === 'ALLY') { // v3: befriended ally enters play (max 1; replacing discards nothing — no dupes exist)
-    S.p.ally = { aix: ix - ALLY_BASE_IX, exhausted: false };
+  if (c.t === 'ALLY') { // v3: befriended ally enters play (no cap)
+    S.p.allies.push({ aix: ix - ALLY_BASE_IX, exhausted: false });
     return;
   }
   c.paid(E, ctx);
@@ -739,7 +805,9 @@ const BRAINS = {
     const preset = S.presetName;
     const incoming = (() => {
       const t = S.e.telegraph; if (!t) return 0;
-      const c = ENEMY_CARDS[t]; if (c.kind !== 'attack') return 0;
+      const c = ENEMY_CARDS[t];
+      if (c.kind === 'swarm') return (effPower(S) + (S.e.enraged ? 1 : 0)) * S.e.minions.length;
+      if (c.kind !== 'attack') return 0;
       return (effPower(S) + (S.e.enraged ? 1 : 0)) * (c.hits || 1);
     })();
 
@@ -864,11 +932,15 @@ function playerTurn(S, brainName) {
   }
   if (p.rite && p.rite.trigger === 'turnStart') riteCharge(S);
 
-  // v3: ally refreshes; start-timed allies auto-exhaust for the current phase's line
-  if (p.ally) {
-    p.ally.exhausted = false;
-    const a = ALLY_CARDS[p.ally.aix];
-    if (a.timing !== 'end') { a.fx[S.e.phase](makeVerbs(S), S); p.ally.exhausted = true; }
+  // v3: allies refresh; start-timed allies auto-exhaust for the current phase's line
+  for (const a of p.allies) {
+    a.exhausted = false;
+    if (ALLY_CARDS[a.aix].timing !== 'end') exhaustAlly(S, a);
+  }
+  // The Long Table: at the start of the round, RALLY one ally (acts again)
+  for (let i = p.ench.filter(e => e === 'longTable').length; i > 0; i--) {
+    const a = p.allies.find(x => x.exhausted);
+    if (a) { a.exhausted = false; exhaustAlly(S, a); }
   }
 
   const brain = BRAINS[brainName];
@@ -891,11 +963,7 @@ function playerTurn(S, brainName) {
   }
 
   // v3: end-timed allies (The Quiet Skulk) exhaust after your plays, before the telegraph
-  if (!S.over && p.ally && !p.ally.exhausted) {
-    const a = ALLY_CARDS[p.ally.aix];
-    a.fx[S.e.phase](makeVerbs(S), S);
-    p.ally.exhausted = true;
-  }
+  if (!S.over) for (const a of p.allies) if (!a.exhausted) exhaustAlly(S, a);
 
   // Forge Eternal: keep one unspent die (best face)
   if (p.ench.includes('forge')) {
@@ -952,6 +1020,7 @@ const PVP_NOTES = [
 // telegraph-bound and dead in PvP); Cataract listed first so surplus-◆ logic sees it.
 const PVP_SIG_PICKS = {
   STANDSTILL: ['Cataract', 'Ironclad Oath'],
+  COVENANT: ['Cataract', 'Ironclad Oath'],
   CONTAGION: ['The Reckoning', 'Cataract'],
   BASTION: ['Ironclad Oath', 'Cataract'],
   FOUNDRY: ['Cataract', 'Kindled Fury'],
@@ -1056,6 +1125,8 @@ function pvpSig(S, meIx, name, free) {
 function pvpVerbs(S, meIx) {
   const me = S.ps[meIx], foeIx = 1 - meIx, foe = S.ps[foeIx];
   const E = {
+    // v3 stubs: COVENANT's ally verbs are solo-only for now (no ally board in PvP)
+    hasAlly: () => false, rallyOne: () => {}, rallyAll: () => {}, unexile: () => {}, progressToken: () => {},
     draw: n => { for (let i = 0; i < n; i++) pvpDraw(S, meIx); },
     guard: (n, persist) => { if (persist || me.ench.includes('guardPersists')) me.pguard += n; else me.guard += n; },
     thorns: n => { me.thorns = Math.min(3, me.thorns + n); },
@@ -1424,6 +1495,8 @@ function coopSig(S, i, name, free) {
 function coopVerbs(S, i) {
   const m = S.party[i];
   const E = {
+    // v3 stubs: COVENANT's ally verbs are solo-only for now (no ally board in co-op yet)
+    hasAlly: () => false, rallyOne: () => {}, rallyAll: () => {}, unexile: () => {}, progressToken: () => {},
     draw: n => { for (let k = 0; k < n; k++) coopDraw(S, i); },
     guard: (n, persist) => { const tgt = S.party[allyFor(S, i, 'guard')]; if (persist || tgt.ench.includes('guardPersists')) tgt.pguard += n; else tgt.guard += n; },
     thorns: n => { const tgt = S.party[allyFor(S, i, 'guard')]; tgt.thorns = Math.min(THORNS_MAX, tgt.thorns + n); },

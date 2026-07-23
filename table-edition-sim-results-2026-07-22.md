@@ -502,3 +502,116 @@ Baselines (no ally):
 5. Allies barely move the solo kill race (already 100% win): offensive allies shave up
    to 1.0r (Kiln-Back/Sledge), defensive allies cost their deck slot (+0.1-0.3r).
    Their real value is survivability/co-op/run-scale - solo speed was never the point.
+
+## v3.1 — no-cap ruling, COVENANT (ally deck), THE BROODMOTHER (minion enemy)
+
+Owner rulings 2026-07-22 evening: NO cap on minions or allies in play (grey interaction
+cards Rallying Cry / Gag Order added: RALLY = exhausted ally acts again, SILENCE = minion
+skips its next line); ally faces no longer print a built-for badge (design-doc note only).
+COVENANT starts with 2 befriended allies in the deck (sim assumption: Doorwright+Sledge).
+
+### Solo matrix with COVENANT and THE BROODMOTHER (smart, std, 300 games)
+```
+
+AXIOMANCER TABLE EDITION — batch sim · 300 games/cell · seed 20260722 · 0.6s
+presets: STANDSTILL, CONTAGION, BASTION, FOUNDRY, TORRENT, INVOCATION, MALISON, COVENANT · enemies: SKULK, SHELLBACK, BRUTE, BROODMOTHER · brains: smart
+
+==================== BRAIN: SMART ====================
+PRESET      SKULK·S SHELL·S BRUTE·S BROOD·S
+STANDSTILL     100%    100%    100%    100%
+CONTAGION      100%    100%    100%    100%
+BASTION        100%    100%    100%    100%
+FOUNDRY        100%     99%     99%     96%
+TORRENT        100%    100%    100%    100%
+INVOCATION     100%    100%    100%    100%
+MALISON        100%    100%    100%    100%
+COVENANT       100%    100%    100%    100%
+
+==================== STANDARD-RECIPE DETAIL (smartest brain available) ====================
+brain: smart
+PRESET      ENEMY        WIN  STALL  ROUNDS  VITAE  BURSTS  SIGS  ◆EARN  PRESS  HEX  FREE  PAID
+STANDSTILL  SKULK       100%     0%     5.1   29.9     1.2   0.5    6.9    2.2  0.0  15.4   9.1
+STANDSTILL  SHELLBACK   100%     0%     5.8   28.4     1.6   0.7    8.3    2.7  0.0  17.1  11.0
+STANDSTILL  BRUTE       100%     0%     5.9   29.3     1.8   0.8    8.8    2.8  0.0  19.5  11.3
+STANDSTILL  BROODMOTHER  100%     0%     5.7   28.5     1.5   0.7    8.3    2.7  0.0  17.7  10.6
+CONTAGION   SKULK       100%     0%     4.1   27.4     1.2   0.5    6.0    1.9  0.0  12.5   8.0
+CONTAGION   SHELLBACK   100%     0%     5.3   24.7     1.6   0.7    8.1    2.8  0.0  15.9  10.6
+CONTAGION   BRUTE       100%     0%     5.1   22.1     1.6   0.7    7.9    2.7  0.0  15.6  10.4
+CONTAGION   BROODMOTHER  100%     0%     4.9   21.1     1.5   0.6    7.6    2.6  0.0  15.1  10.0
+BASTION     SKULK       100%     0%     6.1   29.9     2.2   0.6    8.6    3.3  0.0  23.9  11.4
+BASTION     SHELLBACK   100%     0%     9.4   29.8     4.2   1.3   15.1    6.1  0.0  36.5  19.3
+BASTION     BRUTE       100%     0%     6.7   29.6     2.5   0.7    9.8    3.8  0.0  26.8  13.0
+BASTION     BROODMOTHER  100%     0%     5.5   29.5     1.8   0.5    7.8    2.8  0.0  22.3  10.1
+FOUNDRY     SKULK       100%     0%     6.7   25.8     4.5   3.8   21.7    1.3  0.0   8.9  21.8
+FOUNDRY     SHELLBACK    99%     0%     8.9   11.0     6.5   5.8   31.8    1.5  0.0  12.3  29.8
+FOUNDRY     BRUTE        99%     0%     7.9   17.0     5.5   4.9   27.1    1.4  0.0  10.8  26.0
+FOUNDRY     BROODMOTHER   96%     0%     9.1   14.3     6.5   6.0   33.1    1.5  0.0  12.4  30.5
+TORRENT     SKULK       100%     0%     3.5   29.7     5.5   0.6    7.5    2.4  0.0  11.9   9.3
+TORRENT     SHELLBACK   100%     0%     3.9   26.5     6.3   0.6    8.8    2.7  0.0  13.3  10.5
+TORRENT     BRUTE       100%     0%     4.0   28.6     6.5   0.7    9.1    2.9  0.0  13.6  11.0
+TORRENT     BROODMOTHER  100%     0%     3.9   28.7     6.3   0.6    8.6    2.7  0.0  13.3  10.5
+INVOCATION  SKULK       100%     0%     3.1   28.5     0.9   4.4   10.7    2.2  0.0   7.4   6.3
+INVOCATION  SHELLBACK   100%     0%     3.7   24.1     1.2   6.1   13.5    2.8  0.0   9.4   8.0
+INVOCATION  BRUTE       100%     0%     3.7   25.4     1.2   6.0   13.3    2.8  0.0   9.4   7.9
+INVOCATION  BROODMOTHER  100%     0%     3.6   25.2     1.1   5.6   12.7    2.7  0.0   8.9   7.5
+MALISON     SKULK       100%     0%     3.6   27.9     5.7   0.3    6.3    1.9 10.2  18.5   7.8
+MALISON     SHELLBACK   100%     0%     4.0   24.1     6.7   0.4    7.6    2.2 11.4  22.2   9.0
+MALISON     BRUTE       100%     0%     4.0   24.9     6.8   0.5    7.8    2.3 11.5  22.4   9.2
+MALISON     BROODMOTHER  100%     0%     4.0   24.9     7.1   0.4    7.4    2.2 11.9  23.3   9.0
+COVENANT    SKULK       100%     0%     4.2   29.8     1.3   5.2   28.0    2.5  0.0  16.1  10.8
+COVENANT    SHELLBACK   100%     0%     4.9   28.6     1.9   7.5   39.5    2.8  0.0  19.5  13.4
+COVENANT    BRUTE       100%     0%     4.8   29.0     1.7   7.0   37.2    2.7  0.0  19.0  12.8
+COVENANT    BROODMOTHER  100%     0%     4.7   29.2     1.8   7.0   37.1    2.8  0.0  18.7  12.8
+
+Run with --assumptions to see the rules calls the sim had to make (rulebook gaps).
+Numbers are lower bounds on deck strength: the "smart" brain is a heuristic, not an oracle.
+```
+
+### COVENANT full gradient
+```
+
+AXIOMANCER TABLE EDITION — batch sim · 300 games/cell · seed 20260722 · 0.5s
+presets: COVENANT · enemies: SKULK, SHELLBACK, BRUTE, BROODMOTHER · brains: random, greedy, smart
+
+==================== BRAIN: RANDOM ====================
+PRESET      SKULK·E SKULK·S SKULK·H SHELL·E SHELL·S SHELL·H BRUTE·E BRUTE·S BRUTE·H BROOD·E BROOD·S BROOD·H
+COVENANT        85%     79%     63%     28%     25%     10%     12%      3%      3%     34%     32%     13%
+
+==================== BRAIN: GREEDY ====================
+PRESET      SKULK·E SKULK·S SKULK·H SHELL·E SHELL·S SHELL·H BRUTE·E BRUTE·S BRUTE·H BROOD·E BROOD·S BROOD·H
+COVENANT       100%    100%    100%    100%    100%     99%    100%    100%    100%    100%    100%    100%
+
+==================== BRAIN: SMART ====================
+PRESET      SKULK·E SKULK·S SKULK·H SHELL·E SHELL·S SHELL·H BRUTE·E BRUTE·S BRUTE·H BROOD·E BROOD·S BROOD·H
+COVENANT       100%    100%    100%    100%    100%    100%    100%    100%    100%    100%    100%    100%
+
+==================== STANDARD-RECIPE DETAIL (smartest brain available) ====================
+brain: smart
+PRESET      ENEMY        WIN  STALL  ROUNDS  VITAE  BURSTS  SIGS  ◆EARN  PRESS  HEX  FREE  PAID
+COVENANT    SKULK       100%     0%     4.2   29.8     1.3   5.2   28.0    2.5  0.0  16.1  10.8
+COVENANT    SHELLBACK   100%     0%     4.9   28.6     1.9   7.5   39.5    2.8  0.0  19.5  13.4
+COVENANT    BRUTE       100%     0%     4.8   29.0     1.7   7.0   37.2    2.7  0.0  19.0  12.8
+COVENANT    BROODMOTHER  100%     0%     4.7   29.2     1.8   7.0   37.1    2.8  0.0  18.7  12.8
+
+==================== SKILL GRADIENT (win% std recipe: random → smart) ====================
+How much the pilot matters = how intense the rulebook/teach needs to be.
+
+COVENANT    SKULK:  79%→100%   SHELL:  25%→100%   BRUTE:   3%→100%   BROOD:  32%→100%
+
+==================== RECIPE SPREAD (best brain, win% easy/std/hard) — §6's primary hypothesis ====================
+COVENANT    SKULK: 100%/100%/100%   SHELL: 100%/100%/100%   BRUTE: 100%/100%/100%   BROOD: 100%/100%/100%
+
+Run with --assumptions to see the rules calls the sim had to make (rulebook gaps).
+Numbers are lower bounds on deck strength: the "smart" brain is a heuristic, not an oracle.
+```
+
+### Headlines
+1. COVENANT is healthy on arrival: 100% smart wins, 4.2-4.9r (family range), ~29 Vitae
+   kept, 5-7.5 sig fires/game - the Banner/exhaust conviction engine works, Sledge+
+   Doorwright carry damage/defense. Skill gradient intact (Brute 3%->100%).
+2. THE BROODMOTHER slots in as the hardest of the four for dice decks (Foundry 96%,
+   8.9r) and the easiest to out-tempo for guard decks (Bastion 5.4r). Swarm + Wax-Sister
+   makes ignoring the brood a real mistake; Brood-Hymn in FURY is the scare card.
+3. Concede vs Broodmother: the first enemy that punishes the stall at all (1% deaths,
+   Bastion 17% accidental kills from thorns/chip) - directionally what Accord needs.
+4. No-cap boards did not destabilize solo: all prior cells within noise of v3 numbers.

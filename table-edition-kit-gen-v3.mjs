@@ -56,6 +56,7 @@ const GLYPH = {
   STAGGER: 'cancel', RUPTURE: 'burst-blob', THORNS: 'spikes', TEMPER: 'anvil',
   KINDLE: 'fire', SURGE: 'power-lightning', CONVICTION: 'cut-diamond', ATTUNE: 'meditation',
   HEX: 'death-skull', ATTACK: 'crossed-swords', PROGRESS: 'progression', EXHAUST: 'clockwise-rotation',
+  RALLY: 'trumpet-flag', SILENCE: 'mute',
 };
 const GLYPH_GLOSS = {
   DRAW: 'draw N cards', GUARD: 'block next N damage (fades at round end unless "persists")',
@@ -71,6 +72,8 @@ const GLYPH_GLOSS = {
   ATTACK: 'enemy hits for N',
   PROGRESS: 'accord token on the enemy; 3+ at its turn end = the fight ties into an Accord',
   EXHAUST: 'rotate 45° to use; straighten at your turn start',
+  RALLY: 'straighten an exhausted ally — it may act again this turn',
+  SILENCE: 'the minion skips its next phase line',
 };
 const KW_RE = new RegExp(`\\b(${Object.keys(GLYPH).join('|')}|RITE|ENCHANT|SPECIAL|MANA|MISS)\\b`, 'g');
 
@@ -141,6 +144,17 @@ const PRESETS = [
     { nm: 'The Long Con', r: 'R', n: 1, gold: 1, t:'SPELL', art: 'domino-mask', free: ['DRAW',1], paid: 'Deal 3 damage per card in the fired-Curse pile.' },
     { nm: 'Sealed Fate', r: 'R', n: 1, gold: 1, t:'CURSE', art: 'sands-of-time', free: ['HEX'], paid: 'HEX on top of the enemy deck instead.', pay: 'When drawn: the enemy skips this turn entirely and takes 3 damage.' },
   ]},
+  // v3 — the ally deck. Design notes (not printed): Doorwright/Sledge suggested starters;
+  // ally themes per the design doc's "built for" table.
+  { name: 'COVENANT', badge: 'round-table', stance: 'heart', v3: true, glyphs: ['CONVICTION','DRAW','GUARD','RALLY','ATTUNE','EXHAUST'], cards: [
+    { nm: 'Warm Welcome', r: 'C', n: 4, hue: 'heart', t: 'SPELL', art: 'beer-stein', free: ['CONVICTION',1], paid: 'CONVICTION +1, DRAW 1.' },
+    { nm: 'Letters of Passage', r: 'C', n: 4, hue: 'mind', t: 'SPELL', art: 'envelope', free: ['DRAW',1], paid: 'DRAW 2. If you have an ally in play, CONVICTION +1.' },
+    { nm: 'Shield of Guests', r: 'C', n: 4, hue: 'body', t: 'SPELL', art: 'bell-shield', free: ['GUARD',2], paid: 'GUARD 3. RALLY one ally.' },
+    { nm: 'Banner of the Host', r: 'U', n: 3, hue: 'mind', t: 'ENCH', art: 'knight-banner', free: ['CONVICTION',1], paid: 'ENCHANT — whenever an ally exhausts, CONVICTION +1.' },
+    { nm: 'Muster', r: 'U', n: 3, hue: 'heart', t: 'SPELL', art: 'meeple-group', free: ['ATTUNE',1], paid: 'RALLY all your allies. DRAW 1.' },
+    { nm: 'The Open Door', r: 'R', n: 1, gold: 1, t:'SPELL', art: 'door', free: ['DRAW',1], paid: 'Return one exiled ally to play, refreshed.' },
+    { nm: 'The Long Table', r: 'R', n: 1, gold: 1, t:'ENCH', art: 'table', free: ['CONVICTION',1], paid: 'ENCHANT — at the start of the round, RALLY one ally.' },
+  ]},
 ];
 
 const NEUTRAL = { name: 'NEUTRAL', badge: 'plain-circle', stance: 'grey', glyphs: ['DRAW','HEAL','SCRY','CLEANSE','CONVICTION','KINDLE','RECALL','ECHO','SURGE'], cards: [
@@ -183,6 +197,14 @@ const ENEMIES = [
       'Heave': { fx: 'Attack 6.', art: 'fist' }, 'Rampage': { fx: 'Attack 4, twice.', art: 'trample' } },
     tiers: { APPROACH: [['Catch Breath',4],['Sweep',3]], PRESS: [['Heave',4],['Sweep',2],['Catch Breath',1]], FURY: [['Rampage',3],['Heave',3]] },
     easy: 'Easy: swap 2 Heave → Catch Breath; remove 1 Rampage.', hard: 'Hard: swap 2 Catch Breath → Sweep; swap 1 Heave → Rampage.' },
+  // v3 — the minion enemy: her brood ARE deck cards (minion faces below), core to the build.
+  { name: 'THE BROODMOTHER', hp: 30, v3: true, cards: {
+      'Sting': { fx: 'Attack 2.', art: 'wasp-sting' },
+      'Wax Ward': { fx: 'GUARD 3 (persists).', art: 'honeycomb' },
+      'Swarm': { fx: 'Attack 2, once per minion she has in play. No minions: it fizzles.', art: 'bee' },
+      'Brood-Hymn': { fx: 'Every minion triggers its phase line again, right now.', art: 'hive-mind' } },
+    tiers: { APPROACH: [['Sting',3],['Wax Ward',2],['Broodling',2]], PRESS: [['Swarm',3],['Sting',2],['Wax-Sister',2]], FURY: [['Brood-Hymn',3],['Swarm',2],['Choir-Larva',2]] },
+    easy: 'Easy: swap 1 Brood-Hymn → Sting; remove 1 Choir-Larva.', hard: 'Hard: swap 2 Sting → Swarm; add 1 Broodling to APPROACH.' },
 ];
 
 // ---- v3: minions (1 per enemy per tier). Auto-play on reveal (that reveal IS the enemy's
@@ -207,6 +229,13 @@ const MINIONS = [
     etb: 'The telegraph gets +1 power.', A: "The Brute's next attack gets +1.", P: 'The telegraph gets +1 power.', F: 'The telegraph gets +2 power.' },
   { enemy: 'THE BRUTE', tier: 'FURY', nm: 'Tremorling', hp: 4, art: 'quake-stomp',
     etb: 'You discard 1 card (no ◆).', A: 'You discard 1 card (no ◆).', P: 'Attack 2.', F: 'Attack 3; you discard 1 (no ◆).' },
+  // v3 — the Broodmother's brood (×2 copies each, printed below via n)
+  { enemy: 'THE BROODMOTHER', tier: 'APPROACH', nm: 'Broodling', hp: 2, n: 2, art: 'maggot',
+    etb: 'Attack 1.', A: 'Attack 1.', P: 'Attack 1, twice.', F: 'Attack 2, twice.' },
+  { enemy: 'THE BROODMOTHER', tier: 'PRESS', nm: 'Wax-Sister', hp: 3, n: 2, art: 'honey-jar',
+    etb: 'Every minion gains +1 HP.', A: 'She gains GUARD 1.', P: 'Every minion gains +1 HP.', F: 'Every minion +1 HP; she HEALS 2.' },
+  { enemy: 'THE BROODMOTHER', tier: 'FURY', nm: 'Choir-Larva', hp: 4, n: 2, art: 'alien-egg',
+    etb: 'The telegraph gets +1 power.', A: 'She gains GUARD 2.', P: 'Attack 2.', F: 'The telegraph gets +2 power.' },
 ];
 
 // ---- v3: allies (befriended enemies — the reward face of an Accord). Enter play via Paid,
@@ -299,6 +328,7 @@ function refRulesCell(p) {
 }
 
 for (const p of [...PRESETS, NEUTRAL]) {
+  if (p.v3) continue; // COVENANT prints in the trailing v3 section
   for (const c of p.cards)
     for (let i = 1; i <= c.n; i++) cells.push(playerCell(p, c, i));
   cells.push(refGlyphCell(p), refRulesCell(p));
@@ -313,6 +343,7 @@ for (const g of SIGS)
   }));
 
 for (const e of ENEMIES) {
+  if (e.v3) continue; // The Broodmother prints in the trailing v3 section
   for (const [tier, list] of Object.entries(e.tiers))
     for (const [nm, n] of list)
       for (let i = 1; i <= n; i++)
@@ -365,8 +396,8 @@ function minionCell(m) {
         <div class="crule"></div>
         <div class="etb">✧ ENTERS: ${boldKw(m.etb)}</div>
         <div class="phz">${rows}</div>
-        <div class="mininote">Reveal = its whole turn. Enemy turn start: use the current phase's line.
-        Direct damage only — no tokens. Max 1 in play; a duplicate reveal heals it 2.</div>
+        <div class="mininote">Reveal = its whole turn. Enemy turn start: each minion in play uses the
+        current phase's line. Direct damage only — no tokens.</div>
       </div>
       <div class="foot">shuffle into its ${m.tier} tier</div>
     </div>
@@ -381,15 +412,15 @@ function allyCell(a) {
     <div class="bd">
       <div class="top">
         <div class="cfree">${icon(a.art, 'glbig')}</div>
-        <div class="crarity">BUILT FOR ${a.built}</div>
+        <div class="crarity">ALLY</div>
       </div>
       <div class="cbtm" style="margin-top:3px">
         <div class="cname">${esc(a.nm)}</div>
         <div class="crule"></div>
         <div class="phz">${rows}</div>
-        <div class="mininote">Max 1 ally in play; refresh at your turn start. <b>EXHAUST ↷</b>:
-        use the current phase's line. Any time: assign one ENTIRE enemy strike to it — then
-        exile it (it returns after the fight).</div>
+        <div class="mininote">Refreshes at your turn start. <b>EXHAUST ↷</b>: use the current
+        phase's line. Any time: assign one ENTIRE enemy strike to it — then exile it (it
+        returns after the fight).</div>
       </div>
       <div class="foot">BEFRIENDED ${a.of} · ACCORD REWARD</div>
     </div>
@@ -405,8 +436,40 @@ for (let i = 1; i <= 2; i++)
     payload: 'Every player knows this Skill. It kills no one. Kill it first and the tokens are wasted.',
     foot: 'SIGNATURE SKILL · EVERYONE', cls: 'sig',
   }));
-for (const m of MINIONS) v3cells.push(minionCell(m));
+for (const m of MINIONS) for (let i = 0; i < (m.n || 1); i++) v3cells.push(minionCell(m));
 for (const a of ALLIES) v3cells.push(allyCell(a));
+
+// COVENANT — the ally deck (20 cards + its two reference cards)
+const cov = PRESETS.find(p => p.name === 'COVENANT');
+for (const c of cov.cards) for (let i = 1; i <= c.n; i++) v3cells.push(playerCell(cov, c, i));
+v3cells.push(refGlyphCell(cov), refRulesCell(cov));
+
+// v3 grey utilities — ally/minion interaction lives in the Koinē
+const V3_NEUTRAL = [
+  { nm: 'Rallying Cry', r: 'C', n: 1, t: 'SPELL', art: 'trumpet', free: ['RALLY', 1], paid: 'RALLY all your allies.' },
+  { nm: 'Gag Order', r: 'C', n: 1, t: 'SPELL', art: 'mute', free: ['SILENCE', 1], paid: 'SILENCE every minion in play.' },
+];
+for (const c of V3_NEUTRAL) v3cells.push(playerCell(NEUTRAL, c, 1));
+
+// THE BROODMOTHER — action cards + Last Stand (her brood prints above, with the minions)
+const brood = ENEMIES.find(e => e.v3);
+for (const [tier, list] of Object.entries(brood.tiers))
+  for (const [nm, n] of list) {
+    if (!brood.cards[nm]) continue; // brood entries are minion faces, not action cards
+    for (let i = 1; i <= n; i++)
+      v3cells.push(face(S.foe, `${brood.name} · ${tier}`, {
+        rarity: n > 1 ? `${i}/${n}` : '', freeIcon: null, freeVal: '',
+        art: icon(brood.cards[nm].art, 'art-ic'), name: nm,
+        paidHtml: `<div class="cpaid">${boldKw(brood.cards[nm].fx)}</div>`,
+        payload: null, foot: `stack ${tier === 'APPROACH' ? 'TOP' : tier === 'PRESS' ? 'MIDDLE' : 'BOTTOM'}`, cls: 'foe',
+      }));
+  }
+v3cells.push(face(S.foe, `${brood.name} · LAST STAND`, {
+  rarity: 'SET ASIDE', freeIcon: null, freeVal: '',
+  art: icon('enrage', 'art-ic'), name: 'Enrage',
+  paidHtml: `<div class="cpaid">When the deck empties: flip the discard face-down unshuffled (same order = new deck), leave this face-up. All its Attacks are +1 from now on.</div>`,
+  payload: null, foot: brood.name, cls: 'foe',
+}));
 const v3start = pages.length + 1;
 for (let i = 0; i < v3cells.length; i += 9)
   pages.push(`<div class="page"><div class="grid">${v3cells.slice(i, i + 9).join('')}</div></div>`);
@@ -433,11 +496,17 @@ const ref = `
   <p class="small"><b>v3 additions (2026-07-22, UNTESTED — the bus-ride batch):</b>
   <b>Common Ground</b> (universal Signature Skill ×2): 5◆ places a PROGRESS token; an enemy
   ending its turn with 3+ (boss: 5) ties the fight into an <b>Accord</b> — flip its card:
-  it may join you as an ALLY. <b>9 Minions</b> (1 per enemy per tier): shuffle into the
-  matching tier; on reveal it auto-plays (that reveal is the enemy's whole turn) and then
-  triggers a phase-keyed line at the start of every enemy turn; it has its own HP and takes
-  direct damage only. <b>9 Allies</b>: Paid (any die), max 1 in play, EXHAUST for a
-  phase-keyed line, or absorb one entire strike and be exiled for the fight.
+  it may join you as an ALLY. <b>Minions</b>: shuffled into the printed tier; on reveal one
+  auto-plays (that reveal is the enemy's whole turn) and then triggers a phase-keyed line at
+  the start of every enemy turn; it has its own HP and takes direct damage only.
+  <b>Allies</b>: Paid (any die), EXHAUST for a phase-keyed line, or absorb one entire strike
+  and be exiled for the fight. <b>There is no cap</b> on minions or allies in play.
+  <b>RALLY</b> straightens an exhausted ally (it acts again); <b>SILENCE</b> makes a minion
+  skip its next line (Rallying Cry / Gag Order, the new grey pair, carry them).
+  <b>COVENANT</b>, the eighth deck, plays the host: Conviction + draw + ally engines, and
+  The Open Door returns an exiled ally to play (suggested starting allies: The Doorwright +
+  The Sledge). <b>THE BROODMOTHER</b> (30 HP) is the minion enemy — her brood are deck
+  cards, Swarm hits once per minion, Brood-Hymn re-triggers them all.
   <b>Phase</b> = the tier printed on the current telegraph's rail; during Last Stand the
   phase is always FURY. Whispered Doubt may eat a minion reveal. All v3 cards live on the
   final card pages — print those alone to upgrade a sleeved v2 kit.</p>
