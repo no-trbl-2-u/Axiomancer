@@ -780,6 +780,17 @@
   no-ops on a direct push to `main` — compare a known-good case
   like #82/Phase 31 against #83/Phase 32 part 1 commit-by-commit;
   once understood, sweep-close the 9 confirmed-stale issues by hand)
+- update 2026-07-23: another confirmed instance outside the phase-mirror
+  lane — an /iterate finding-mirror issue (#151, blacksmith map-node
+  fix) carried a `Closes #151` trailer on its shipping commit
+  (`09048b8e`, direct push to `main`, verify + deploy both green) and
+  still didn't auto-close; closed by hand. Same symptom as #83/Phase 32
+  Part 1 above — a present, correctly-numbered trailer on a direct-to-
+  main push sometimes just doesn't fire. Narrows the "which commits"
+  question: this isn't phase-mirror-specific, so the root cause is
+  probably in how GitHub processes `Closes #N` on this repo's push
+  pattern generally, not something particular to `ship-a-phase`'s
+  commit shape.
 
 ## Done
 
