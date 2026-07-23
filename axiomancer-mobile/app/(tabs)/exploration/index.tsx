@@ -180,7 +180,18 @@ export default function ExplorationScreen() {
 
     return (
         <ScreenBg scrollable={false}>
-            <StatusCard />
+            {/* CRITIQUE.md [MED] "persistent header VITAE bar doesn't update
+              * during combat" (pass 12): the encounter modal already renders
+              * full-screen over this map (see onEncounterFight above), but
+              * this out-of-combat header stayed mounted underneath it,
+              * showing a stale VITAE reading that visibly contradicted the
+              * live combat HUD's. There is no shared store between this
+              * screen's player snapshot and the combat panel's local state
+              * (CombatEncounterPanel keeps its engine state in local React
+              * state), so the fix is to stop rendering the stale header
+              * while the modal owns the screen, matching the "full-screen"
+              * design intent instead of wiring a new cross-boundary read. */}
+            {!showEncounterModal && <StatusCard />}
 
             {aesthetic === 'codex' && (() => {
                 const { left, right } = selectExplorationCodexHeader(vm);

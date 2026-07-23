@@ -119,3 +119,5 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-07-23T14:39:44Z | skill | march | unknown | main | - |
 | 2026-07-23T14:42:38Z | subagent | Explore | claude-sonnet-5 | main | Locate reward-pool spell definitions |
 | 2026-07-23T14:45:05Z | subagent | Explore | claude-sonnet-5 | main | Investigate blacksmith MapEvent node gating |
+| 2026-07-23T19:54:22Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-07-23T19:56:35Z | subagent | general-purpose | claude-sonnet-5 | main | Score pending audit/critique findings |
