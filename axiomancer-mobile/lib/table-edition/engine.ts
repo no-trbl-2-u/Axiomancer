@@ -1,10 +1,18 @@
 // ============================================================================
 // Axiomancer: TABLE EDITION — solo engine (VOID / branch-only MVP)
 // ----------------------------------------------------------------------------
-// Direct TypeScript port of table-edition-sim.mjs (repo root, v2 library,
+// Direct TypeScript port of table-edition-sim.mjs (repo root, v3.1 library,
 // 2026-07-22) restructured for interactive play. The batch entry points
 // (runGame / BRAINS) keep the sim's exact RNG call order so the parity test
 // can hold this port to the simulator's measured numbers.
+//
+// v3.1 content: COVENANT (the ally deck, starts with 2 befriended allies),
+// THE BROODMOTHER (minion enemy — brood are deck cards), minions for the
+// classic three (optional), allies + RALLY, Common Ground (PROGRESS → Accord).
+// Owner rulings: NO cap on minions or allies; phase = the telegraph's printed
+// tier (Last Stand locks FURY); minion reveal IS the enemy's whole action;
+// minions take direct damage only; forced discards give no ◆; an ally absorbs
+// one ENTIRE strike then is exiled.
 //
 // This is the PHYSICAL game's ruleset — deliberately NOT the @mechanics
 // engine. It lives here, self-contained, so deleting lib/table-edition/ and
@@ -51,7 +59,8 @@ export const dieUsable = (d: Die): boolean => d.face === 'S' || d.face === 'M';
 // --------------------------------------------------------------- card data
 export const CYCLE: Record<string, Color> = { P: 'R', R: 'B', B: 'P' }; // HEART -> BODY -> MIND -> HEART
 
-export type CardType = 'SPELL' | 'ENCH' | 'RITE' | 'CURSE';
+export type CardType = 'SPELL' | 'ENCH' | 'RITE' | 'CURSE' | 'ALLY';
+export type CardColor = Color | 'A'; // 'A' = ally, payable by ANY die
 export type EnchKind =
   | 'archive'
   | 'blight1'
@@ -60,7 +69,9 @@ export type EnchKind =
   | 'forge'
   | 'wave'
   | 'sigDiscount'
-  | 'ledger';
+  | 'ledger'
+  | 'hostBanner'
+  | 'longTable';
 export type RiteTrigger = 'blightTick' | 'fullAbsorb' | 'burst' | 'sigUse' | 'turnStart';
 
 export interface EffectCtx {
@@ -70,7 +81,7 @@ export interface EffectCtx {
 export interface CardDef {
   nm: string;
   n: number;
-  col: Color;
+  col: CardColor;
   t: CardType;
   v: number;
   free: (E: Verbs, ctx?: EffectCtx) => void;
@@ -91,7 +102,8 @@ export type PresetName =
   | 'FOUNDRY'
   | 'TORRENT'
   | 'INVOCATION'
-  | 'MALISON';
+  | 'MALISON'
+  | 'COVENANT';
 
 export const PRESETS: Record<PresetName, { stance: Color; cards: CardDef[] }> = {
   STANDSTILL: {
@@ -178,6 +190,18 @@ export const PRESETS: Record<PresetName, { stance: Color; cards: CardDef[] }> = 
       { nm: 'Sealed Fate', n: 1, col: 'G', t: 'CURSE', v: 4, curse: (E) => { E.skipEnemyTurn(); E.dmg(3); }, free: (E) => E.hex(2), paid: (E) => E.hex(0), freeText: 'HEX 2 deep', paidText: 'HEX on top of the enemy deck instead.', payload: 'When drawn: the enemy skips this turn entirely and takes 3 damage.' },
     ],
   },
+  COVENANT: {
+    stance: 'P',
+    cards: [
+      { nm: 'Warm Welcome', n: 4, col: 'P', t: 'SPELL', v: 2, free: (E) => E.conviction(1), paid: (E) => { E.conviction(1); E.draw(1); }, freeText: '◆ +1', paidText: '◆ +1, DRAW 1.' },
+      { nm: 'Letters of Passage', n: 4, col: 'B', t: 'SPELL', v: 2, free: (E) => E.draw(1), paid: (E) => { E.draw(2); if (E.hasAlly()) E.conviction(1); }, freeText: 'DRAW 1', paidText: 'DRAW 2. If you have an ally in play, ◆ +1.' },
+      { nm: 'Shield of Guests', n: 4, col: 'R', t: 'SPELL', v: 2, free: (E) => E.guard(2), paid: (E) => { E.guard(3); E.rallyOne(); }, freeText: 'GUARD 2', paidText: 'GUARD 3. RALLY one ally.' },
+      { nm: 'Banner of the Host', n: 3, col: 'B', t: 'ENCH', v: 3, ench: 'hostBanner', free: (E) => E.conviction(1), freeText: '◆ +1', paidText: 'ENCHANT — whenever an ally exhausts, ◆ +1.' },
+      { nm: 'Muster', n: 3, col: 'P', t: 'SPELL', v: 3, free: (E) => E.attune(1), paid: (E) => { E.rallyAll(); E.draw(1); }, freeText: 'ATTUNE 1', paidText: 'RALLY all your allies. DRAW 1.' },
+      { nm: 'The Open Door', n: 1, col: 'G', t: 'SPELL', v: 5, free: (E) => E.draw(1), paid: (E) => E.unexile(), freeText: 'DRAW 1', paidText: 'Return one exiled ally to play, refreshed.' },
+      { nm: 'The Long Table', n: 1, col: 'G', t: 'ENCH', v: 4, ench: 'longTable', free: (E) => E.conviction(1), freeText: '◆ +1', paidText: 'ENCHANT — each round, one ally may EXHAUST twice.' },
+    ],
+  },
 };
 
 export interface SigDef {
@@ -193,6 +217,7 @@ export const SIGS: Record<string, SigDef> = {
   'Kindled Fury': { cost: 4, fx: (E) => { E.allMissesToMana(); E.kindle(); }, text: 'Upgrade all your MISSES to MANA, then KINDLE 1.' },
   Cataract: { cost: 5, fx: (E) => E.dmg(5), text: 'Deal 5 damage.' },
   Recant: { cost: 5, fx: (E) => E.reclaim(99), text: 'Return ALL fired Curses to your hand.' },
+  'Common Ground': { cost: 5, fx: (E) => E.progressToken(), text: 'Place 1 PROGRESS. Enemy ends its turn with 3+: Accord — the fight ties; it may join you.' },
 };
 export const SIG_PICKS: Record<PresetName, string[]> = {
   STANDSTILL: ['Cataract', 'The Final Word'],
@@ -202,10 +227,11 @@ export const SIG_PICKS: Record<PresetName, string[]> = {
   TORRENT: ['Cataract', 'Kindled Fury'],
   INVOCATION: ['Cataract', 'Foresight'],
   MALISON: ['Recant', 'Cataract'],
+  COVENANT: ['Cataract', 'Ironclad Oath'],
 };
 
 // -------------------------------------------------------------- enemy data
-export type EnemyCardKind = 'attack' | 'guard' | 'thorns' | 'molt' | 'rest';
+export type EnemyCardKind = 'attack' | 'guard' | 'thorns' | 'molt' | 'rest' | 'swarm' | 'goad';
 export interface EnemyCardDef {
   kind: EnemyCardKind;
   base: number;
@@ -226,9 +252,13 @@ export const ENEMY_CARDS: Record<string, EnemyCardDef> = {
   Sweep: { kind: 'attack', base: 2, hits: 2, text: 'Attack 2, twice.' },
   Heave: { kind: 'attack', base: 6, hits: 1, text: 'Attack 6.' },
   Rampage: { kind: 'attack', base: 4, hits: 2, text: 'Attack 4, twice.' },
+  Sting: { kind: 'attack', base: 2, hits: 1, text: 'Attack 2.' },
+  'Wax Ward': { kind: 'guard', base: 3, text: 'GUARD 3 (persists).' },
+  Swarm: { kind: 'swarm', base: 2, text: 'Attack 2, once per minion she has in play. No minions: it fizzles.' },
+  'Brood-Hymn': { kind: 'goad', base: 1, text: 'Every minion triggers its phase line again, right now.' },
 };
 
-export type EnemyName = 'SKULK' | 'SHELLBACK' | 'BRUTE';
+export type EnemyName = 'SKULK' | 'SHELLBACK' | 'BRUTE' | 'BROODMOTHER';
 export type Recipe = 'easy' | 'std' | 'hard';
 type TierMap = Record<'A' | 'P' | 'F', [string, number][]>;
 interface EnemySpec {
@@ -260,7 +290,125 @@ export const ENEMIES: Record<EnemyName, EnemySpec> = {
     easy: (t) => { swap(t, 'Heave', 'Catch Breath', 2); removeCard(t, 'Rampage', 1); },
     hard: (t) => { swap(t, 'Catch Breath', 'Sweep', 2); swap(t, 'Heave', 'Rampage', 1); },
   },
+  // '@X' tier entries are her brood (MINIONS.BROODMOTHER[X]) — core to the deck.
+  BROODMOTHER: {
+    hp: 30,
+    title: 'THE BROODMOTHER',
+    tiers: {
+      A: [['Sting', 3], ['Wax Ward', 2], ['@A', 2]],
+      P: [['Swarm', 3], ['Sting', 2], ['@P', 2]],
+      F: [['Brood-Hymn', 3], ['Swarm', 2], ['@F', 2]],
+    },
+    easy: (t) => { swap(t, 'Brood-Hymn', 'Sting', 1); removeCard(t, '@F', 1); },
+    hard: (t) => { swap(t, 'Sting', 'Swarm', 2); addCard(t, 'A', '@A', 1); },
+  },
 };
+
+// ------------------------------------------------------------- v3: minions
+export interface MinionSpec {
+  nm: string;
+  hp: number;
+  retaliateA?: boolean; // Shard of Shell: its attackers take 1 in APPROACH
+  etb: (S: GameState) => void;
+  fx: Record<'A' | 'P' | 'F', (S: GameState) => void>;
+  etbText: string;
+  lines: Record<'A' | 'P' | 'F', string>;
+}
+export interface MinionInstance {
+  spec: MinionSpec;
+  nm: string;
+  hp: number;
+  entry: EnemyDeckEntry;
+  silenced?: boolean;
+}
+function mAtk(S: GameState, n: number, hits: number) {
+  for (let h = 0; h < hits && !S.over; h++) hurtPlayer(S, n, true);
+}
+function forceDiscard(S: GameState) {
+  if (S.p.hand.length) S.p.discard.push(S.p.hand.shift() as number); // no ◆
+}
+function healEnemy(S: GameState, n: number) {
+  S.e.hp = Math.min(ENEMIES[S.enemyName].hp, S.e.hp + n);
+}
+export const MINIONS: Record<EnemyName, Record<'A' | 'P' | 'F', MinionSpec>> = {
+  SKULK: {
+    A: { nm: 'Skulk Whelp', hp: 2, etb: (S) => mAtk(S, 1, 1), fx: { A: (S) => mAtk(S, 1, 1), P: (S) => mAtk(S, 1, 2), F: (S) => mAtk(S, 2, 2) },
+      etbText: 'Attack 1.', lines: { A: 'Attack 1.', P: 'Attack 1, twice.', F: 'Attack 2, twice.' } },
+    P: { nm: 'Filch-Shade', hp: 3, etb: (S) => { S.p.conv = Math.max(0, S.p.conv - 1); }, fx: {
+        A: (S) => { S.e.guard += 1; },
+        P: (S) => { const d = S.p.dice.find(dieUsable); if (d) d.face = 'X'; },
+        F: (S) => mAtk(S, 3, 1) },
+      etbText: 'You lose 1◆.', lines: { A: 'The Skulk gains GUARD 1.', P: 'One of your unspent dice becomes a MISS.', F: 'Attack 3.' } },
+    F: { nm: 'Night Chorus', hp: 2, etb: (S) => mAtk(S, 2, 1), fx: {
+        A: (S) => { S.e.guard += 2; }, P: (S) => mAtk(S, 2, 1), F: (S) => { S.e.chorus = true; } },
+      etbText: 'Attack 2.', lines: { A: 'The Skulk gains GUARD 2.', P: 'Attack 2.', F: "The Skulk's attacks get +1." } },
+  },
+  SHELLBACK: {
+    A: { nm: 'Barnacle Cluster', hp: 4, etb: (S) => { S.e.guard += 2; }, fx: {
+        A: (S) => { S.e.guard += 1; }, P: (S) => { S.e.guard += 2; }, F: (S) => { S.e.thorns = Math.min(3, S.e.thorns + 1); } },
+      etbText: 'The Shellback gains GUARD 2.', lines: { A: 'It gains GUARD 1.', P: 'It gains GUARD 2.', F: 'It gains THORNS 1.' } },
+    P: { nm: 'Molt-Tender', hp: 3, etb: (S) => { S.e.blight = Math.max(0, S.e.blight - 1); }, fx: {
+        A: (S) => { S.e.blight = Math.max(0, S.e.blight - 1); },
+        P: (S) => { S.e.blight = Math.max(0, S.e.blight - 1); healEnemy(S, 1); },
+        F: (S) => healEnemy(S, 3) },
+      etbText: 'Remove 1 of its Blight.', lines: { A: 'Remove 1 Blight.', P: 'Remove 1 Blight; it HEALS 1.', F: 'It HEALS 3.' } },
+    F: { nm: 'Shard of Shell', hp: 5, retaliateA: true, etb: () => {}, fx: {
+        A: () => {}, P: (S) => mAtk(S, 2, 1), F: (S) => mAtk(S, 4, 1) },
+      etbText: 'Nothing. It stands.', lines: { A: 'Its attackers take 1.', P: 'Attack 2.', F: 'Attack 4.' } },
+  },
+  BRUTE: {
+    A: { nm: 'Scavenger Rat', hp: 2, etb: (S) => mAtk(S, 1, 1), fx: {
+        A: (S) => healEnemy(S, 1), P: (S) => mAtk(S, 1, 2), F: (S) => mAtk(S, 2, 2) },
+      etbText: 'Attack 1.', lines: { A: 'The Brute HEALS 1.', P: 'Attack 1, twice.', F: 'Attack 2, twice.' } },
+    P: { nm: 'Drumbeater', hp: 3, etb: (S) => { S.e.pbonus += 1; }, fx: {
+        A: (S) => { S.e.pbonus += 1; }, P: (S) => { S.e.pbonus += 1; }, F: (S) => { S.e.pbonus += 2; } },
+      etbText: 'The telegraph gets +1 power.', lines: { A: "The Brute's next attack gets +1.", P: 'The telegraph gets +1 power.', F: 'The telegraph gets +2 power.' } },
+    F: { nm: 'Tremorling', hp: 4, etb: (S) => forceDiscard(S), fx: {
+        A: (S) => forceDiscard(S), P: (S) => mAtk(S, 2, 1), F: (S) => { mAtk(S, 3, 1); if (!S.over) forceDiscard(S); } },
+      etbText: 'You discard 1 card (no ◆).', lines: { A: 'You discard 1 (no ◆).', P: 'Attack 2.', F: 'Attack 3; you discard 1 (no ◆).' } },
+  },
+  BROODMOTHER: {
+    A: { nm: 'Broodling', hp: 2, etb: (S) => mAtk(S, 1, 1), fx: { A: (S) => mAtk(S, 1, 1), P: (S) => mAtk(S, 1, 2), F: (S) => mAtk(S, 2, 2) },
+      etbText: 'Attack 1.', lines: { A: 'Attack 1.', P: 'Attack 1, twice.', F: 'Attack 2, twice.' } },
+    P: { nm: 'Wax-Sister', hp: 3, etb: (S) => { for (const m of S.e.minions) m.hp += 1; }, fx: {
+        A: (S) => { S.e.guard += 1; },
+        P: (S) => { for (const m of S.e.minions) m.hp += 1; },
+        F: (S) => { for (const m of S.e.minions) m.hp += 1; healEnemy(S, 2); } },
+      etbText: 'Every minion gains +1 HP.', lines: { A: 'She gains GUARD 1.', P: 'Every minion gains +1 HP.', F: 'Every minion +1 HP; she HEALS 2.' } },
+    F: { nm: 'Choir-Larva', hp: 4, etb: (S) => { S.e.pbonus += 1; }, fx: {
+        A: (S) => { S.e.guard += 2; }, P: (S) => mAtk(S, 2, 1), F: (S) => { S.e.pbonus += 2; } },
+      etbText: 'The telegraph gets +1 power.', lines: { A: 'She gains GUARD 2.', P: 'Attack 2.', F: 'The telegraph gets +2 power.' } },
+  },
+};
+
+// -------------------------------------------------------------- v3: allies
+export interface AllyDef {
+  nm: string;
+  timing?: 'end'; // The Quiet Skulk exhausts after your plays, before the telegraph
+  fx: Record<'A' | 'P' | 'F', (E: Verbs, S: GameState) => void>;
+  lines: Record<'A' | 'P' | 'F', string>;
+}
+export const ALLY_CARDS: AllyDef[] = [
+  { nm: 'The Penitent Skulk', fx: { A: (E) => E.scry(2), P: (_E, S) => { S.p.hexTop = true; }, F: (E, S) => E.dmg(S.e.fired.length) },
+    lines: { A: 'SCRY 2 the enemy deck.', P: 'Your HEXES go on top this turn.', F: 'Deal 1 damage per fired Curse.' } },
+  { nm: 'Skulk of the Shallows', fx: { A: (E) => E.advanceChain(), P: (E) => E.chainShield(), F: (_E, S) => { S.p.burstBonus = 3; } },
+    lines: { A: 'Advance your chain 1 (any color).', P: 'Your chain cannot break this turn.', F: 'Your next Surge Burst this turn deals 3.' } },
+  { nm: 'The Quiet Skulk', timing: 'end', fx: { A: (E) => E.stagger(1), P: (E) => E.stagger(2), F: (E, S) => { if (effPower(S) <= 0 && S.e.telegraph) E.dmg(2); } },
+    lines: { A: 'STAGGER 1.', P: 'STAGGER 2.', F: 'Deal 2 damage if the telegraph is at 0.' } },
+  { nm: 'The Doorwright', fx: { A: (E) => E.guard(2), P: (E) => E.guard(2, true), F: (E) => E.thorns(1) },
+    lines: { A: 'GUARD 2.', P: 'GUARD 2 (persists).', F: 'THORNS 1.' } },
+  { nm: 'Blightshell', fx: { A: (E) => E.blight(1), P: (E) => E.blight(2), F: (_E, S) => { S.e.blightNoDecay = true; } },
+    lines: { A: 'BLIGHT 1.', P: 'BLIGHT 2.', F: "This round's Blight tick doesn't reduce Blight." } },
+  { nm: 'The Kiln-Back', fx: { A: (E) => E.temper(1), P: (E) => E.temper(2), F: (E) => E.kindle() },
+    lines: { A: 'TEMPER 1.', P: 'TEMPER 2.', F: 'KINDLE 1.' } },
+  { nm: 'The Gospel Brute', fx: { A: (E) => E.conviction(1), P: (E) => E.attune(2), F: (E) => E.conviction(2) },
+    lines: { A: '◆ +1.', P: 'ATTUNE 2.', F: '◆ +2.' } },
+  { nm: 'The Load-Bearer', fx: { A: (E) => E.guard(3), P: (E) => E.thorns(1), F: (E) => E.guard(4) },
+    lines: { A: 'GUARD 3.', P: 'THORNS 1.', F: 'GUARD 4.' } },
+  { nm: 'The Sledge', fx: { A: (E) => E.temper(1), P: (E) => E.dmg(2), F: (E) => E.dmg(4) },
+    lines: { A: 'TEMPER 1.', P: 'Deal 2 damage.', F: 'Deal 4 damage.' } },
+];
+export const ALLY_BASE_IX = 100;
 function swap(tiers: TierMap, from: string, to: string, count: number) {
   for (const tier of Object.values(tiers))
     for (const e of tier) {
@@ -288,7 +436,8 @@ function removeCard(tiers: TierMap, name: string, count: number) {
 
 // ------------------------------------------------------------------- state
 export type CurseRef = { curse: number };
-export type EnemyDeckEntry = string | CurseRef;
+export type MinionRef = { minion: 'A' | 'P' | 'F' };
+export type EnemyDeckEntry = string | CurseRef | MinionRef;
 export interface RiteState {
   trigger: RiteTrigger;
   threshold: number;
@@ -302,7 +451,8 @@ export interface GameState {
   enemyName: EnemyName;
   recipe: Recipe;
   round: number;
-  over: 'win' | 'loss' | 'stall' | null;
+  over: 'win' | 'loss' | 'stall' | 'accord' | null;
+  concede: boolean; // Common Ground available + Accord win condition live
   log: string[];
   p: {
     hp: number;
@@ -327,12 +477,16 @@ export interface GameState {
     pressed: boolean;
     sigUsedTurn: boolean;
     sigs: string[];
+    allies: { aix: number; exhausted: boolean }[];
+    exiled: number[];
+    hexTop: boolean;
+    burstBonus: number;
   };
   e: {
     hp: number;
     maxhp: number;
     deck: EnemyDeckEntry[];
-    discard: string[];
+    discard: EnemyDeckEntry[];
     fired: number[];
     telegraph: string | null;
     guard: number;
@@ -343,6 +497,14 @@ export interface GameState {
     doubt: number;
     known: number;
     staggers: number;
+    tierSizes: { A: number; P: number; F: number };
+    drawn: number;
+    phase: 'A' | 'P' | 'F';
+    minions: MinionInstance[];
+    pbonus: number;
+    progress: number;
+    chorus: boolean;
+    blightNoDecay: boolean;
   };
   stats: {
     convEarned: number;
@@ -360,22 +522,39 @@ export interface GameState {
 
 export const PLAYER_MAX_HP = 30;
 
-export function newGame(presetName: PresetName, enemyName: EnemyName, recipe: Recipe, seed: number): GameState {
+export interface GameOptions {
+  minions?: boolean; // shuffle 1 minion into each tier of the classic three
+  concede?: boolean; // Common Ground + Accord live (the universal sig)
+}
+
+export function newGame(
+  presetName: PresetName,
+  enemyName: EnemyName,
+  recipe: Recipe,
+  seed: number,
+  opts: GameOptions = {},
+): GameState {
   const rnd = mulberry32(seed);
   const preset = PRESETS[presetName];
   const deck: number[] = [];
   preset.cards.forEach((c, ix) => {
     for (let i = 0; i < c.n; i++) deck.push(ix);
   });
+  if (presetName === 'COVENANT') deck.push(ALLY_BASE_IX + 3, ALLY_BASE_IX + 8); // starting allies: Doorwright + Sledge
 
   const spec = ENEMIES[enemyName];
   const tiers: TierMap = JSON.parse(JSON.stringify(spec.tiers));
   if (recipe === 'easy') spec.easy(tiers);
   if (recipe === 'hard') spec.hard(tiers);
   const edeck: EnemyDeckEntry[] = [];
+  const tierSizes = { A: 0, P: 0, F: 0 };
   for (const key of ['A', 'P', 'F'] as const) {
-    const tier: string[] = [];
-    for (const [nm, n] of tiers[key]) for (let i = 0; i < n; i++) tier.push(nm);
+    const tier: EnemyDeckEntry[] = [];
+    for (const [nm, n] of tiers[key])
+      for (let i = 0; i < n; i++)
+        tier.push(nm.startsWith('@') ? { minion: nm.slice(1) as 'A' | 'P' | 'F' } : nm);
+    if (opts.minions && !tier.some((e) => typeof e === 'object')) tier.push({ minion: key });
+    tierSizes[key] = tier.length;
     edeck.push(...shuffled(tier, rnd));
   }
 
@@ -386,6 +565,7 @@ export function newGame(presetName: PresetName, enemyName: EnemyName, recipe: Re
     recipe,
     round: 0,
     over: null,
+    concede: !!opts.concede,
     log: [],
     p: {
       hp: PLAYER_MAX_HP,
@@ -410,6 +590,10 @@ export function newGame(presetName: PresetName, enemyName: EnemyName, recipe: Re
       pressed: false,
       sigUsedTurn: false,
       sigs: SIG_PICKS[presetName].slice(),
+      allies: [],
+      exiled: [],
+      hexTop: false,
+      burstBonus: 0,
     },
     e: {
       hp: spec.hp,
@@ -426,6 +610,14 @@ export function newGame(presetName: PresetName, enemyName: EnemyName, recipe: Re
       doubt: 0,
       known: 0,
       staggers: 0,
+      tierSizes,
+      drawn: 0,
+      phase: 'A',
+      minions: [],
+      pbonus: 0,
+      progress: 0,
+      chorus: false,
+      blightNoDecay: false,
     },
     stats: {
       convEarned: 0,
@@ -440,11 +632,30 @@ export function newGame(presetName: PresetName, enemyName: EnemyName, recipe: Re
     },
     _curseIx: -1,
   };
+  if (S.concede) S.p.sigs.push('Common Ground');
   revealTelegraph(S);
   return S;
 }
 
-export const cardOf = (S: GameState, ix: number): CardDef => PRESETS[S.presetName].cards[ix];
+const ALLY_FACE_CACHE = new Map<number, CardDef>();
+export const cardOf = (S: GameState, ix: number): CardDef => {
+  if (ix >= ALLY_BASE_IX) {
+    let c = ALLY_FACE_CACHE.get(ix);
+    if (!c) {
+      const a = ALLY_CARDS[ix - ALLY_BASE_IX];
+      c = {
+        nm: a.nm, n: 1, col: 'A', t: 'ALLY', v: 6,
+        free: () => {}, paid: () => {},
+        freeText: 'ALLY',
+        paidText: `A · ${a.lines.A}  P · ${a.lines.P}  F · ${a.lines.F}`,
+        payload: 'Pay ANY die to put into play. Exhausts each round for the current phase line; can absorb one entire strike (exiled).',
+      };
+      ALLY_FACE_CACHE.set(ix, c);
+    }
+    return c;
+  }
+  return PRESETS[S.presetName].cards[ix];
+};
 
 function say(S: GameState, msg: string) {
   S.log.push(msg);
@@ -489,6 +700,11 @@ export interface Verbs {
   reclaim: (n: number) => void;
   skipEnemyTurn: () => void;
   allMissesToMana: () => void;
+  progressToken: () => void;
+  hasAlly: () => boolean;
+  rallyOne: () => void;
+  rallyAll: () => void;
+  unexile: () => void;
 }
 
 export function makeVerbs(S: GameState): Verbs {
@@ -501,7 +717,18 @@ export function makeVerbs(S: GameState): Verbs {
     thorns: (n) => { S.p.thorns = Math.min(3, S.p.thorns + n); },
     blight: (n) => { S.e.blight = Math.min(6, S.e.blight + n); },
     heal: (n) => { S.p.hp = Math.min(PLAYER_MAX_HP, S.p.hp + n); },
-    dmg: (n) => dealToEnemy(S, n, true),
+    dmg: (n) => dealPlayerDamage(S, n),
+    progressToken: () => { S.e.progress++; say(S, `PROGRESS ${S.e.progress}/3 — the argument is landing.`); },
+    hasAlly: () => S.p.allies.length > 0,
+    rallyOne: () => { const a = S.p.allies.find((x) => x.exhausted); if (a) { a.exhausted = false; exhaustAlly(S, a); } },
+    rallyAll: () => { for (const a of S.p.allies.filter((x) => x.exhausted)) { a.exhausted = false; exhaustAlly(S, a); } },
+    unexile: () => {
+      if (S.p.exiled.length) {
+        const aix = S.p.exiled.pop() as number;
+        S.p.allies.push({ aix, exhausted: false });
+        say(S, `${ALLY_CARDS[aix].nm} returns through The Open Door.`);
+      }
+    },
     scry: (n) => {
       S.e.known = Math.max(S.e.known, Math.min(n, S.e.deck.length));
       const arch = S.p.ench.filter((e) => e === 'archive').length; // The Deep File: bottom a card, ping 1 per copy
@@ -545,6 +772,7 @@ export function makeVerbs(S: GameState): Verbs {
     freeSig: (ctx) => { const s = bestSig(S, ctx.brain ?? 'greedy'); if (s) fireSig(S, s, ctx.brain ?? 'greedy', true); },
     bothSigsFree: (ctx) => { for (const s of S.p.sigs) fireSig(S, s, ctx.brain ?? 'greedy', true); },
     hex: (depth) => {
+      if (S.p.hexTop) { depth = 0; S.p.hexTop = false; } // The Penitent Skulk (PRESS)
       const at = Math.min(depth, S.e.deck.length);
       S.e.deck.splice(at, 0, { curse: S._curseIx });
     },
@@ -602,6 +830,7 @@ function checkBurst(S: GameState) {
   say(S, 'SURGE BURST — a temporary gold die joins your pool.');
   const waves = S.p.ench.filter((e) => e === 'wave').length;
   if (waves) dealToEnemy(S, 3 * waves, true);
+  if (S.p.burstBonus) { dealToEnemy(S, S.p.burstBonus, true); S.p.burstBonus = 0; } // Skulk of the Shallows (FURY)
   if (S.p.rite && S.p.rite.trigger === 'burst') riteCharge(S);
   if (S.p.rite && S.p.rite.trigger === 'burst') {
     dealToEnemy(S, S.p.rite.charges, true);
@@ -623,6 +852,36 @@ function riteCharge(S: GameState, ctxBrain?: BrainName) {
 function spendDie(S: GameState, die: Die) {
   if (die.face === 'S') { S.p.conv += 2; S.stats.convEarned += 2; }
   S.p.dice.splice(S.p.dice.indexOf(die), 1);
+}
+
+// v3: player-sourced damage is assignable — focus a minion when the hit
+// wouldn't be badly wasted (physical rule: you choose the target).
+function dealPlayerDamage(S: GameState, n: number) {
+  const m = S.e.minions.filter((x) => x.hp > 0 && n <= x.hp + 2).sort((a, b) => a.hp - b.hp)[0];
+  if (m) { dealToMinion(S, m, n); return; }
+  dealToEnemy(S, n, true);
+}
+function dealToMinion(S: GameState, m: MinionInstance, n: number) {
+  if (!m || n <= 0) return;
+  m.hp -= n;
+  if (m.spec.retaliateA && S.e.phase === 'A') hurtPlayer(S, 1, false); // Shard of Shell
+  if (m.hp <= 0) {
+    S.e.discard.push(m.entry); // the card returns for Last Stand
+    S.e.minions.splice(S.e.minions.indexOf(m), 1);
+    say(S, `${m.nm} is destroyed.`);
+  }
+}
+// v3: ally exhaust — Banner of the Host pays ◆ per exhaust
+function exhaustAlly(S: GameState, a: { aix: number; exhausted: boolean }) {
+  if (a.exhausted) return;
+  a.exhausted = true;
+  const def = ALLY_CARDS[a.aix];
+  say(S, `${def.nm} acts — ${def.lines[S.e.phase]}`);
+  def.fx[S.e.phase](makeVerbs(S), S);
+  for (let i = S.p.ench.filter((e) => e === 'hostBanner').length; i > 0; i--) {
+    S.p.conv++;
+    S.stats.convEarned++;
+  }
 }
 
 function dealToEnemy(S: GameState, n: number, direct: boolean) {
@@ -653,7 +912,7 @@ function hurtPlayer(S: GameState, n: number, isHit: boolean) {
 export function effPower(S: GameState): number {
   const t = S.e.telegraph;
   if (!t) return 0;
-  return Math.max(0, ENEMY_CARDS[t].base - S.e.staggers);
+  return Math.max(0, ENEMY_CARDS[t].base + S.e.pbonus - S.e.staggers); // pbonus: Drumbeater / Choir-Larva
 }
 
 function fireCurse(S: GameState, ix: number) {
@@ -670,6 +929,7 @@ function fireCurse(S: GameState, ix: number) {
 function revealTelegraph(S: GameState) {
   S.e.telegraph = null;
   S.e.staggers = 0;
+  S.e.pbonus = 0;
   while (S.e.deck.length || S.e.discard.length) {
     if (!S.e.deck.length) {
       // Last Stand
@@ -680,17 +940,28 @@ function revealTelegraph(S: GameState) {
     }
     const top = S.e.deck.shift() as EnemyDeckEntry;
     if (S.e.known > 0) S.e.known--;
-    if (typeof top !== 'string') {
+    if (typeof top !== 'string' && 'curse' in top) {
       fireCurse(S, top.curse);
       S.stats.hexFired++;
       if (S.over) return;
       continue;
     }
+    // real deck entry: advance the phase clock (Last Stand locks FURY)
+    S.e.drawn++;
+    if (S.e.enraged) S.e.phase = 'F';
+    else S.e.phase = S.e.drawn <= S.e.tierSizes.A ? 'A' : S.e.drawn <= S.e.tierSizes.A + S.e.tierSizes.P ? 'P' : 'F';
     if (S.e.doubt > 0) {
       S.e.doubt--;
       S.e.discard.push(top);
-      say(S, `Whispered Doubt eats the reveal — ${top} is discarded.`);
+      say(S, `Whispered Doubt eats the reveal — ${typeof top === 'string' ? top : 'a minion'} is discarded.`);
       continue;
+    }
+    if (typeof top !== 'string') { // v3 minion reveal (no cap)
+      const spec = MINIONS[S.enemyName][top.minion];
+      S.e.minions.push({ spec, hp: spec.hp, nm: spec.nm, entry: top });
+      say(S, `${spec.nm} enters play — ${spec.etbText}`);
+      spec.etb(S);
+      return; // the reveal IS the enemy's whole action: no telegraph this cycle
     }
     S.e.telegraph = top;
     return;
@@ -706,6 +977,13 @@ export function enemyTurn(S: GameState) {
     endEnemyTurn(S);
     return;
   }
+  // v3: every minion triggers its current-phase line at the start of the enemy turn
+  for (const m of S.e.minions.slice()) {
+    if (m.silenced) { m.silenced = false; say(S, `${m.nm} is SILENCED — it skips its line.`); continue; }
+    say(S, `${m.nm} — ${m.spec.lines[S.e.phase]}`);
+    m.spec.fx[S.e.phase](S);
+    if (S.over) return;
+  }
   const t = S.e.telegraph;
   if (t) {
     const card = ENEMY_CARDS[t];
@@ -714,11 +992,40 @@ export function enemyTurn(S: GameState) {
       S.e.discard.push(t);
       say(S, `${t} FIZZLES.`);
     } else {
-      const bonus = S.e.enraged && card.kind === 'attack' ? 1 : 0;
-      if (card.kind === 'attack') {
-        say(S, `${t} hits for ${power + bonus}${(card.hits || 1) > 1 ? ` × ${card.hits}` : ''}.`);
-        for (let h = 0; h < (card.hits || 1); h++) {
-          hurtPlayer(S, power + bonus, true);
+      const bonus = (S.e.enraged ? 1 : 0) + (S.e.chorus ? 1 : 0);
+      if (card.kind === 'attack' || card.kind === 'swarm') {
+        const hits = card.kind === 'swarm' ? S.e.minions.length : card.hits || 1;
+        if (hits <= 0) {
+          S.e.discard.push(t);
+          say(S, `${t} FIZZLES — no brood to swarm with.`);
+          S.e.chorus = false;
+          revealTelegraph(S);
+          endEnemyTurn(S);
+          return;
+        }
+        const incoming = (power + bonus) * hits;
+        if (S.p.allies.length && (incoming >= 5 || incoming >= S.p.hp)) {
+          const a = S.p.allies.pop() as { aix: number; exhausted: boolean };
+          S.p.exiled.push(a.aix);
+          S.e.discard.push(t);
+          say(S, `${ALLY_CARDS[a.aix].nm} takes the ENTIRE ${t} (${incoming}) and is exiled.`);
+        } else {
+          say(S, `${t} hits for ${power + bonus}${hits > 1 ? ` × ${hits}` : ''}.`);
+          for (let h = 0; h < hits; h++) {
+            hurtPlayer(S, power + bonus, true);
+            if (S.over) return;
+          }
+          S.e.discard.push(t);
+        }
+        S.e.chorus = false;
+        revealTelegraph(S);
+        endEnemyTurn(S);
+        return;
+      }
+      if (card.kind === 'goad') {
+        say(S, `${t} — the brood sings; every minion acts again.`);
+        for (const m of S.e.minions.slice()) {
+          m.spec.fx[S.e.phase](S);
           if (S.over) return;
         }
       } else if (card.kind === 'guard') { S.e.guard += power; say(S, `${t} — the enemy gains GUARD ${power}.`); }
@@ -739,8 +1046,14 @@ function endEnemyTurn(S: GameState) {
   if (S.e.blight > 0) {
     say(S, `Blight ticks for ${S.e.blight}.`);
     dealToEnemy(S, S.e.blight, false);
-    S.e.blight--;
+    if (S.e.blightNoDecay) S.e.blightNoDecay = false; // Blightshell (FURY)
+    else S.e.blight--;
     if (S.p.rite && S.p.rite.trigger === 'blightTick') riteCharge(S);
+  }
+  // Concede: an enemy ending its turn with 3+ PROGRESS ties into an Accord
+  if (!S.over && S.concede && S.e.progress >= 3) {
+    S.over = 'accord';
+    say(S, 'ACCORD — the fight ends in common ground. It may join you.');
   }
 }
 
@@ -781,6 +1094,11 @@ export function playPaid(S: GameState, handIx: number, die: Die, brain?: BrainNa
       S.p.rite = { trigger: c.rite.trigger, threshold: c.rite.threshold, payoff: c.rite.payoff, charges: 0, name: c.nm };
       say(S, `${c.nm} enters play as your Rite.`);
     } else S.p.discard.push(ix);
+    return;
+  }
+  if (c.t === 'ALLY') { // v3: befriended ally enters play (no cap)
+    S.p.allies.push({ aix: ix - ALLY_BASE_IX, exhausted: false });
+    say(S, `${c.nm} joins your side.`);
     return;
   }
   if (c.paid) c.paid(E, ctx);
@@ -833,7 +1151,9 @@ export function sigDiscount(S: GameState): number {
 }
 
 export function payableDice(S: GameState, c: CardDef): Die[] {
-  return S.p.dice.filter((d) => dieUsable(d) && (c.col === 'G' ? d.color === 'G' : d.color === c.col || d.color === 'G'));
+  return S.p.dice.filter(
+    (d) => dieUsable(d) && (c.col === 'A' ? true : c.col === 'G' ? d.color === 'G' : d.color === c.col || d.color === 'G'),
+  );
 }
 
 export function legalActions(S: GameState): Action[] {
@@ -843,7 +1163,7 @@ export function legalActions(S: GameState): Action[] {
     acts.push({ k: 'free', h });
     for (const d of S.p.dice) {
       if (!dieUsable(d)) continue;
-      const ok = c.col === 'G' ? d.color === 'G' : d.color === c.col || d.color === 'G';
+      const ok = c.col === 'A' ? true : c.col === 'G' ? d.color === 'G' : d.color === c.col || d.color === 'G';
       if (ok) { acts.push({ k: 'paid', h, die: d }); break; }
     }
     acts.push({ k: 'discard', h });
@@ -935,6 +1255,7 @@ export const BRAINS: Record<BrainName, (S: GameState) => Action> = {
       const t = S.e.telegraph;
       if (!t) return 0;
       const c = ENEMY_CARDS[t];
+      if (c.kind === 'swarm') return (effPower(S) + (S.e.enraged ? 1 : 0)) * S.e.minions.length;
       if (c.kind !== 'attack') return 0;
       return (effPower(S) + (S.e.enraged ? 1 : 0)) * (c.hits || 1);
     })();
@@ -1042,11 +1363,23 @@ export function startPlayerTurn(S: GameState) {
     if (e === 'archive') makeVerbs(S).scry(1); // The Deep File: round-start SCRY (which itself pings)
   }
   if (p.rite && p.rite.trigger === 'turnStart') riteCharge(S);
+  // v3: allies refresh; start-timed allies auto-exhaust for the current phase's line
+  for (const a of p.allies) {
+    a.exhausted = false;
+    if (ALLY_CARDS[a.aix].timing !== 'end') exhaustAlly(S, a);
+  }
+  // The Long Table: each round, one ally may EXHAUST twice
+  for (let i = p.ench.filter((e) => e === 'longTable').length; i > 0; i--) {
+    const a = p.allies.find((x) => x.exhausted);
+    if (a) { a.exhausted = false; exhaustAlly(S, a); }
+  }
 }
 
 /** End of the player's action phase: Forge Eternal keep, kindled dice expire. */
 export function endPlayerTurn(S: GameState) {
   const p = S.p;
+  // v3: end-timed allies (The Quiet Skulk) exhaust after your plays, before the telegraph
+  if (!S.over) for (const a of p.allies) if (!a.exhausted) exhaustAlly(S, a);
   if (p.ench.includes('forge')) {
     const keep = p.dice
       .filter((d) => !d.temp && !d.kindled)
@@ -1101,8 +1434,9 @@ export function runGame(
   recipe: Recipe,
   brainName: BrainName,
   seed: number,
+  opts: GameOptions = {},
 ): GameState {
-  const S = newGame(presetName, enemyName, recipe, seed);
+  const S = newGame(presetName, enemyName, recipe, seed, opts);
   while (!S.over && S.round < 40) {
     playerTurnBatch(S, brainName);
     if (S.over) break;
@@ -1118,7 +1452,8 @@ export function runGame(
 export const PRESET_NAMES = Object.keys(PRESETS) as PresetName[];
 export const ENEMY_NAMES = Object.keys(ENEMIES) as EnemyName[];
 export const STANCE_LABEL: Record<Color, string> = { R: 'BODY', B: 'MIND', P: 'HEART', G: 'GOLD' };
-export const COLOR_LABEL: Record<Color, string> = { R: 'RED', B: 'BLUE', P: 'PURPLE', G: 'GOLD' };
+export const COLOR_LABEL: Record<CardColor, string> = { R: 'RED', B: 'BLUE', P: 'PURPLE', G: 'GOLD', A: 'ANY' };
+export const PHASE_LABEL: Record<'A' | 'P' | 'F', string> = { A: 'APPROACH', P: 'PRESS', F: 'FURY' };
 export const FACE_LABEL: Record<Face, string> = { S: 'SPECIAL', M: 'MANA', X: 'MISS' };
 
 /** The enemy cards revealed by SCRY (top of deck, `known` deep). */
@@ -1126,8 +1461,9 @@ export function knownEnemyCards(S: GameState): { label: string; isCurse: boolean
   const out: { label: string; isCurse: boolean }[] = [];
   for (let i = 0; i < S.e.known && i < S.e.deck.length; i++) {
     const entry = S.e.deck[i];
-    if (typeof entry === 'object') out.push({ label: cardOf(S, entry.curse).nm, isCurse: true });
-    else out.push({ label: entry, isCurse: false });
+    if (typeof entry === 'string') out.push({ label: entry, isCurse: false });
+    else if ('curse' in entry) out.push({ label: cardOf(S, entry.curse).nm, isCurse: true });
+    else out.push({ label: MINIONS[S.enemyName][entry.minion].nm, isCurse: false });
   }
   return out;
 }
@@ -1140,4 +1476,12 @@ export const PRESET_BLURB: Record<PresetName, string> = {
   TORRENT: 'Momentum. Chain HEART→BODY→MIND for Surge Bursts and gold dice.',
   INVOCATION: 'Ritual. Bank Conviction fast and fire Signature Skills every round.',
   MALISON: 'Curses. Slide traps into the enemy deck and profit when they fire.',
+  COVENANT: 'The host. Conviction, card flow, and befriended enemies who act every round.',
+};
+
+export const ENEMY_BLURB: Record<EnemyName, string> = {
+  SKULK: 'Fast chip damage that snowballs into Frenzy.',
+  SHELLBACK: 'Armor, thorns, and a shell that heals itself.',
+  BRUTE: 'Slow haymakers. Survive the Heave, fear the Rampage.',
+  BROODMOTHER: 'Her brood are cards. Swarm hits once per minion; the Hymn wakes them all.',
 };

@@ -15,6 +15,7 @@ import {
   SIG_PICKS,
   SIGS,
   PRESET_BLURB,
+  ENEMY_BLURB,
   STANCE_LABEL,
   type PresetName,
   type EnemyName,
@@ -33,10 +34,14 @@ export default function TableEditionSetup() {
   const [preset, setPreset] = useState<PresetName>('STANDSTILL');
   const [enemy, setEnemy] = useState<EnemyName>('SKULK');
   const [recipe, setRecipe] = useState<Recipe>('std');
+  const [minions, setMinions] = useState(true);
 
   const start = () => {
     const seed = Math.floor(Math.random() * 0x7fffffff);
-    router.push({ pathname: '/table-edition/play', params: { preset, enemy, recipe, seed: String(seed) } });
+    router.push({
+      pathname: '/table-edition/play',
+      params: { preset, enemy, recipe, seed: String(seed), minions: minions ? '1' : '0' },
+    });
   };
 
   return (
@@ -57,7 +62,8 @@ export default function TableEditionSetup() {
         <Text style={styles.section}>YOUR DECK</Text>
         {PRESET_NAMES.map((p) => {
           const on = p === preset;
-          const sigLine = SIG_PICKS[p].map((s) => `${s} ${SIGS[s].cost}◆`).join(' · ');
+          const sigLine =
+            SIG_PICKS[p].map((s) => `${s} ${SIGS[s].cost}◆`).join(' · ') + ' · Common Ground 5◆ (everyone)';
           return (
             <Pressable
               key={p}
@@ -80,23 +86,38 @@ export default function TableEditionSetup() {
         })}
 
         <Text style={styles.section}>THE ENEMY</Text>
-        <View style={styles.enemyRow}>
+        <View style={styles.enemyGrid}>
           {ENEMY_NAMES.map((e) => {
             const on = e === enemy;
             return (
               <Pressable
                 key={e}
                 onPress={() => setEnemy(e)}
-                style={[styles.enemyCell, on && styles.rowOn]}
+                style={[styles.enemyCell, styles.enemyCellHalf, on && styles.rowOn]}
                 accessibilityRole="button"
                 accessibilityState={{ selected: on }}
               >
                 <Text style={[styles.rowName, on && styles.rowNameOn]}>{ENEMIES[e].title}</Text>
-                <Text style={styles.rowBlurb}>{ENEMIES[e].hp} Vitae</Text>
+                <Text style={styles.rowBlurb}>{ENEMIES[e].hp} Vitae · {ENEMY_BLURB[e]}</Text>
               </Pressable>
             );
           })}
         </View>
+
+        <Pressable
+          onPress={() => setMinions((m) => !m)}
+          style={[styles.enemyCell, minions && styles.rowOn, { marginTop: 8 }]}
+          accessibilityRole="switch"
+          accessibilityState={{ checked: minions }}
+        >
+          <Text style={[styles.rowName, minions && styles.rowNameOn]}>
+            MINIONS {minions ? 'ON' : 'OFF'}
+          </Text>
+          <Text style={styles.rowBlurb}>
+            Shuffle 1 minion into each tier of Skulk / Shellback / Brute. The Broodmother
+            always brings her brood.
+          </Text>
+        </Pressable>
 
         <Text style={styles.section}>RECIPE</Text>
         <View style={styles.enemyRow}>
@@ -159,6 +180,7 @@ const useStyles = makeStyles((AXM) => ({
   rowBlurb: { fontFamily: FONTS.serif, fontSize: 13, lineHeight: 18, color: AXM.bone, marginTop: 2 },
   rowSigs: { fontFamily: FONTS.mono, fontSize: 10, color: AXM.bone, marginTop: 4, opacity: 0.8 },
   enemyRow: { flexDirection: 'row', gap: 8 },
+  enemyGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   enemyCell: {
     flex: 1,
     backgroundColor: AXM.panelBg,
@@ -167,6 +189,7 @@ const useStyles = makeStyles((AXM) => ({
     padding: 10,
     alignItems: 'center',
   },
+  enemyCellHalf: { flexBasis: '47%', flexGrow: 1 },
   cta: {
     marginTop: 28,
     backgroundColor: AXM.sulfur,

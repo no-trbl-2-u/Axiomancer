@@ -1,9 +1,11 @@
 // Table Edition (VOID / branch-only) — parity harness.
 //
 // Holds the mobile engine port to the batch simulator's measured numbers
-// (table-edition-sim.mjs at the repo root, v2 library). Reference cells were
-// regenerated 2026-07-22 with:  node table-edition-sim.mjs --games 200 --brain smart
-// (seed 20260722, seed formula SEED0 + g*7919 — reproduced exactly here).
+// (table-edition-sim.mjs, v3.1 library — now lives in the board-brainstorm
+// repo). Reference cells regenerated 2026-07-22 with:
+//   node table-edition-sim.mjs --games 200 --brain smart
+// (seed 20260722, seed formula SEED0 + g*7919 — reproduced exactly here;
+// no --concede/--minions, matching this test's default GameOptions).
 // The port keeps the sim's RNG call order, so avg rounds should land within
 // a tight band of the reference; drift beyond it means a rules divergence.
 
@@ -23,24 +25,35 @@ const REFERENCE: Record<string, { win: number; rounds: number }> = {
   'STANDSTILL/SKULK': { win: 1.0, rounds: 5.1 },
   'STANDSTILL/SHELLBACK': { win: 1.0, rounds: 5.7 },
   'STANDSTILL/BRUTE': { win: 1.0, rounds: 5.8 },
+  'STANDSTILL/BROODMOTHER': { win: 1.0, rounds: 5.6 },
   'CONTAGION/SKULK': { win: 1.0, rounds: 4.0 },
   'CONTAGION/SHELLBACK': { win: 1.0, rounds: 5.2 },
   'CONTAGION/BRUTE': { win: 1.0, rounds: 5.0 },
+  'CONTAGION/BROODMOTHER': { win: 1.0, rounds: 4.9 },
   'BASTION/SKULK': { win: 1.0, rounds: 6.0 },
   'BASTION/SHELLBACK': { win: 1.0, rounds: 9.3 },
   'BASTION/BRUTE': { win: 1.0, rounds: 6.6 },
+  'BASTION/BROODMOTHER': { win: 1.0, rounds: 5.4 },
   'FOUNDRY/SKULK': { win: 1.0, rounds: 6.6 },
   'FOUNDRY/SHELLBACK': { win: 1.0, rounds: 8.8 },
   'FOUNDRY/BRUTE': { win: 1.0, rounds: 7.9 },
+  'FOUNDRY/BROODMOTHER': { win: 0.96, rounds: 8.9 },
   'TORRENT/SKULK': { win: 1.0, rounds: 3.5 },
   'TORRENT/SHELLBACK': { win: 1.0, rounds: 3.9 },
   'TORRENT/BRUTE': { win: 1.0, rounds: 4.0 },
+  'TORRENT/BROODMOTHER': { win: 1.0, rounds: 3.9 },
   'INVOCATION/SKULK': { win: 1.0, rounds: 3.0 },
   'INVOCATION/SHELLBACK': { win: 1.0, rounds: 3.7 },
   'INVOCATION/BRUTE': { win: 1.0, rounds: 3.7 },
+  'INVOCATION/BROODMOTHER': { win: 1.0, rounds: 3.6 },
   'MALISON/SKULK': { win: 1.0, rounds: 3.5 },
   'MALISON/SHELLBACK': { win: 1.0, rounds: 4.0 },
   'MALISON/BRUTE': { win: 1.0, rounds: 4.0 },
+  'MALISON/BROODMOTHER': { win: 1.0, rounds: 4.0 },
+  'COVENANT/SKULK': { win: 1.0, rounds: 4.2 },
+  'COVENANT/SHELLBACK': { win: 1.0, rounds: 4.9 },
+  'COVENANT/BRUTE': { win: 1.0, rounds: 4.8 },
+  'COVENANT/BROODMOTHER': { win: 1.0, rounds: 4.7 },
 };
 
 function cell(preset: PresetName, enemy: EnemyName, brain: 'random' | 'greedy' | 'smart') {

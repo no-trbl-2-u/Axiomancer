@@ -25,7 +25,9 @@ import {
   CYCLE,
   COLOR_LABEL,
   FACE_LABEL,
+  PHASE_LABEL,
   PLAYER_MAX_HP,
+  ALLY_CARDS,
   type GameState,
   type PresetName,
   type EnemyName,
@@ -38,11 +40,12 @@ const CHAIN_ORDER: Record<string, string> = { P: 'HEART', R: 'BODY', B: 'MIND' }
 
 export default function TableEditionPlay() {
   const styles = useStyles();
-  const params = useLocalSearchParams<{ preset: string; enemy: string; recipe: string; seed: string }>();
+  const params = useLocalSearchParams<{ preset: string; enemy: string; recipe: string; seed: string; minions: string }>();
   const preset = (params.preset ?? 'STANDSTILL') as PresetName;
   const enemy = (params.enemy ?? 'SKULK') as EnemyName;
   const recipe = (params.recipe ?? 'std') as Recipe;
   const seed0 = parseInt(params.seed ?? '1', 10) || 1;
+  const minionsOn = params.minions === '1';
 
   const [seed, setSeed] = useState(seed0);
   const gameRef = useRef<GameState | null>(null);
@@ -52,12 +55,13 @@ export default function TableEditionPlay() {
 
   // Lazy init + reset on "play again"
   const S = useMemo(() => {
-    const g = newGame(preset, enemy, recipe, seed);
+    // Common Ground (Accord) is a universal sig — always live in the app.
+    const g = newGame(preset, enemy, recipe, seed, { concede: true, minions: minionsOn });
     startPlayerTurn(g);
     gameRef.current = g;
     return g;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [preset, enemy, recipe, seed]);
+  }, [preset, enemy, recipe, seed, minionsOn]);
 
   const refresh = useCallback(() => {
     setSelCard(null);
@@ -136,17 +140,33 @@ export default function TableEditionPlay() {
         <View style={styles.mat}>
           <View style={styles.matHeader}>
             <Text style={styles.enemyName}>{ENEMIES[enemy].title}</Text>
-            {S.e.enraged ? <Text style={styles.enrage}>ENRAGED</Text> : null}
+            <Text style={styles.phase}>{PHASE_LABEL[S.e.phase]}</Text>
           </View>
           <Bar styles={styles} value={S.e.hp} max={S.e.maxhp} danger />
           <View style={styles.chipRow}>
             <Chip styles={styles} label={`VITAE ${Math.max(0, S.e.hp)}/${S.e.maxhp}`} />
+            {S.e.enraged ? <Chip styles={styles} label="ENRAGED" warn /> : null}
             {S.e.guard > 0 ? <Chip styles={styles} label={`GUARD ${S.e.guard}`} /> : null}
             {S.e.thorns > 0 ? <Chip styles={styles} label={`THORNS ${S.e.thorns}`} /> : null}
             {S.e.blight > 0 ? <Chip styles={styles} label={`BLIGHT ${S.e.blight}`} warn /> : null}
+            {S.e.progress > 0 ? <Chip styles={styles} label={`PROGRESS ${S.e.progress}/3`} gold /> : null}
             <Chip styles={styles} label={`DECK ${S.e.deck.length}`} dim />
             {S.e.fired.length ? <Chip styles={styles} label={`CURSES FIRED ${S.e.fired.length}`} dim /> : null}
           </View>
+
+          {/* minions in play */}
+          {S.e.minions.length > 0 ? (
+            <View style={styles.chipRow}>
+              {S.e.minions.map((m, i) => (
+                <View key={`${m.nm}-${i}`} style={styles.minion}>
+                  <Text style={styles.minionName}>
+                    {m.nm} · {m.hp} HP{m.silenced ? ' · SILENCED' : ''}
+                  </Text>
+                  <Text style={styles.minionLine}>{PHASE_LABEL[S.e.phase]}: {m.spec.lines[S.e.phase]}</Text>
+                </View>
+              ))}
+            </View>
+          ) : null}
 
           {/* telegraph */}
           <View style={styles.telegraph}>
@@ -226,6 +246,25 @@ export default function TableEditionPlay() {
               {S.p.rite ? (
                 <Chip styles={styles} label={`RITE · ${S.p.rite.name} ${S.p.rite.charges}/${S.p.rite.threshold}`} gold />
               ) : null}
+            </View>
+          )}
+
+          {/* allies in play / exiled */}
+          {(S.p.allies.length > 0 || S.p.exiled.length > 0) && (
+            <View style={styles.chipRow}>
+              {S.p.allies.map((a, i) => (
+                <View key={`${a.aix}-${i}`} style={[styles.minion, styles.allyChip, a.exhausted && styles.allySpent]}>
+                  <Text style={styles.minionName}>
+                    {ALLY_CARDS[a.aix].nm}{a.exhausted ? ' ↷' : ''}
+                  </Text>
+                  <Text style={styles.minionLine}>
+                    {PHASE_LABEL[S.e.phase]}: {ALLY_CARDS[a.aix].lines[S.e.phase]}
+                  </Text>
+                </View>
+              ))}
+              {S.p.exiled.map((aix, i) => (
+                <Chip key={`ex-${aix}-${i}`} styles={styles} label={`EXILED · ${ALLY_CARDS[aix].nm}`} dim />
+              ))}
             </View>
           )}
 
@@ -366,14 +405,16 @@ export default function TableEditionPlay() {
         <View style={styles.overOverlay}>
           <View style={styles.overCard}>
             <Text style={styles.overTitle}>
-              {S.over === 'win' ? 'THE ARGUMENT HOLDS' : S.over === 'loss' ? 'REFUTED' : 'STALEMATE'}
+              {S.over === 'win' ? 'THE ARGUMENT HOLDS' : S.over === 'accord' ? 'ACCORD' : S.over === 'loss' ? 'REFUTED' : 'STALEMATE'}
             </Text>
             <Text style={styles.overStats}>
               {S.over === 'win'
                 ? `${ENEMIES[enemy].title} falls in ${S.round} rounds. Vitae kept: ${S.p.hp}/${PLAYER_MAX_HP}.`
-                : S.over === 'loss'
-                  ? `You fall in round ${S.round}.`
-                  : '40 rounds without a kill.'}
+                : S.over === 'accord'
+                  ? `Common ground in ${S.round} rounds. ${ENEMIES[enemy].title} may join you as an ally.`
+                  : S.over === 'loss'
+                    ? `You fall in round ${S.round}.`
+                    : '40 rounds without a kill.'}
             </Text>
             <Text style={styles.overDetail}>
               {S.stats.freePlays} free · {S.stats.paidPlays} paid · {S.stats.sigFires} sigs · {S.stats.bursts} bursts ·{' '}
@@ -451,6 +492,12 @@ const useStyles = makeStyles((AXM) => ({
   chipText: { fontFamily: FONTS.mono, fontSize: 10, color: AXM.parchment },
   chipTextDim: { color: AXM.bone },
 
+  phase: { fontFamily: FONTS.sans, fontSize: 11, color: AXM.sulfur, letterSpacing: 2 },
+  minion: { borderWidth: 1, borderColor: AXM.rust, backgroundColor: AXM.debuff, padding: 5, maxWidth: 220 },
+  allyChip: { borderColor: AXM.heal, backgroundColor: AXM.buff },
+  allySpent: { opacity: 0.55 },
+  minionName: { fontFamily: FONTS.sans, fontSize: 11, color: AXM.parchment, letterSpacing: 1 },
+  minionLine: { fontFamily: FONTS.serif, fontSize: 10, color: AXM.bone, marginTop: 1 },
   telegraph: { borderWidth: 1, borderColor: AXM.rust, backgroundColor: AXM.dockBg, padding: 8, gap: 3 },
   telegraphKicker: { fontFamily: FONTS.sans, fontSize: 9, letterSpacing: 1.5, color: AXM.bone },
   telegraphTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline' },
