@@ -113,3 +113,5 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-07-22T14:31:59Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-07-23T03:52:53Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-07-23T09:05:51Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-07-23T10:53:21Z | slash-prompt | /digest | unknown | user/ci | /digest |
+| 2026-07-23T10:53:23Z | skill | digest | unknown | main | - |
