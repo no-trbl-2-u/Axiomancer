@@ -663,27 +663,38 @@ one level down, in the routing helper `onApply` calls next).
   Phase 33's SWAY-cleanse enemy work.
 - source: playtester (owner-directed break-test session)
 
-### [HIGH] phase 31-32's effect on the doctrine curve is unmeasured — full confirmation rebaseline needed
+### [x] [HIGH] phase 31-32's effect on the doctrine curve is unmeasured (RESOLVED 2026-07-23 — framing stale, issue #150)
 - pass: session 2026-07-17 (card-text + measurement-freshness work,
   branch claude/card-text-paid-effects-3cd590, PRs #91/#92)
 - viewport: n/a
 - category: measurement
-- observation: the checked-in deck-matrix baseline is stamped
-  2026-07-12 and `npm run baseline:check` reports it stale by 33
-  mechanics-source commits — including keep-hand, REAP-attacks-max-HP,
-  charm resolve milestones, Oratory milestone drip, TURNABOUT, OMEN
-  v2, and OVERHEAT, the changes aimed at the very findings the
-  baseline records (mid badly under ~50%, late 0.00 for all ten
-  presets). The fixes shipped; the validation did not.
+- resolution: RESOLVED-BY-CLARIFICATION, not by code change. The
+  "unmeasured" premise no longer holds: `/digest`'s reduced-nightly
+  baseline regens have re-measured the doctrine curve repeatedly since
+  this row was filed — 2026-07-18 at `31f62c1e` (mid 7.3%, late 0%),
+  2026-07-20 at `345cb0a6` (mid 35.3%, late 0%), 2026-07-21 at
+  `c0562bb3` (mid 22.9% — the 07-18→07-20 climb reversed, late still
+  0%) — all logged in `plan/AUDIT.md` "Doctrine-curve confirmation"
+  rows. The pass-13 annotation above bucketed this as needing an
+  in-combat capture critique's cold `critique:drive` can't reach, but
+  the digest's sim-harness measurement path is independent of that
+  limitation and has been supplying the read all along. The doctrine
+  violation itself STANDS (late-stage flat 0% across four
+  measurements now; mid-stage newly regressing) — its owner is the
+  separate `[HIGH] late-stage global collapse` row below and the
+  standing "Post-D8 flag-on curve repair" candidate in
+  `plan/PHASE_CANDIDATES.md`, not this row. Queue was overstating open
+  HIGH bugs by double-counting the same doctrine failure under two
+  rows; corrected.
+- observation (as filed): the checked-in deck-matrix baseline is
+  stamped 2026-07-12 and `npm run baseline:check` reports it stale by
+  33 mechanics-source commits — including keep-hand,
+  REAP-attacks-max-HP, charm resolve milestones, Oratory milestone
+  drip, TURNABOUT, OMEN v2, and OVERHEAT, the changes aimed at the
+  very findings the baseline records (mid badly under ~50%, late 0.00
+  for all ten presets). The fixes shipped; the validation did not.
 - evidence: `npm run baseline:check` output at a99d0f64;
   `plan/tuning/2026-07-11-honest-rebaseline-and-evidence.md` §1.
-- suggested fix: run the FULL confirmation pass —
-  `npm run baseline:regen` at seeds 1/2/3 (or the manual harness per
-  the rebaseline doc) — and judge the new curve against the locked
-  80/50/25-35/0 doctrine. The nightly digest's reduced pass
-  (`--runs=30 --confidence=reduced-nightly`, live since #92) gives a
-  directional read automatically, but close calls need the full
-  multi-seed measurement before `/deck-tuning` acts.
 
 ### [MED] four reward-pool spells still print generated telegraphese
 - pass: session 2026-07-17 (card-text work, PRs #91/#92)

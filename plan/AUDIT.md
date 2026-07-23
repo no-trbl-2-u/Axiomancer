@@ -264,31 +264,16 @@
   death, the-abortive) is the sharper target than the mid-game cliff now
   that mid is self-correcting.
 
-### Doctrine-curve confirmation (digest 2026-07-18, reduced-nightly): mid/late collapse persists unchanged despite two days of engine work
-- category: content
-- impact: 7
-- ease: 3
-- detail: `/digest`'s reduced-nightly re-measure at `31f62c1e` (blind
-  policy-pick, doctrine early ~80 / mid ~50 / late 25-35 / impossible 0):
-  early 84.4% (in band), **mid 7.3%** (was 8.7% at the last digest's
-  `bf0d3712` measurement — still far under ~50%), **late 0%** (was
-  0.14% — still far under 25-35%), impossible 0% (in band, unchanged).
-  Phase 33b (enemy archetypes + variable-rung telegraphs) and the whole
-  D1-D6e Upgradeable-Dice rework landed on top of the last measurement
-  and moved the curve by noise only — neither targeted the collapse
-  directly. The CRITIQUE.md `[HIGH] phase 31-32's effect on the doctrine
-  curve is unmeasured` row's framing is now stale (it *is* measured,
-  repeatedly, and the answer is "no better"); the finding itself stands.
-  Phase D7 ("Tuning, ratification + honest re-baseline") is the queued
-  phase already scoped to read this curve against the win-curve
-  ratification — this row is the evidence trail for that read, not a
-  new ask.
-- next: /iterate to refresh the CRITIQUE.md HIGH row's wording (measured,
-  still failing — not unmeasured). Owner call (/oversight 2026-07-18): no
-  dedicated collapse phase yet — let the spec-33 finale land first (Phase
-  D-FLIP + D8 put the F3 sink and valves in play), re-measure the curve,
-  and mint a dedicated phase only if the collapse survives a healthy
-  flag-on economy.
+### [x] Doctrine-curve confirmation (digest 2026-07-18, reduced-nightly): mid/late collapse persists unchanged despite two days of engine work
+- drained 2026-07-23 (iterate tick, issue #150): the row's "next" action
+  — reword the CRITIQUE.md `[HIGH] phase 31-32's effect on the doctrine
+  curve is unmeasured` row, since it's actually measured repeatedly —
+  is done; that CRITIQUE row is now `[x]` RESOLVED (framing was stale,
+  underlying doctrine violation redirected to the `[HIGH] late-stage
+  global collapse` row + the standing "Post-D8 flag-on curve repair"
+  candidate). The 2026-07-20 and 2026-07-21 confirmation rows below
+  remain open — they track the still-live mid/late doctrine numbers,
+  not the stale-wording issue this row flagged.
 
 ### [x] Authored per-phase / boss stance-check variety — PROMOTED to Phase D9 via /oversight 2026-07-18
 - category: mechanics
