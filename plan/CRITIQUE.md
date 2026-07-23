@@ -472,7 +472,7 @@ one level down, in the routing helper `onApply` calls next).
   card faces" remains open as a follow-up, not required to close
   this finding.
 
-### [MED] persistent header VITAE bar doesn't update during combat
+### [x] [MED] persistent header VITAE bar doesn't update during combat (RESOLVED 2026-07-23, commit 20af943f, issue #152)
 - pass: 12 (commit 3dc27d24)
 - viewport: mobile
 - category: inconsistency
@@ -485,7 +485,13 @@ one level down, in the routing helper `onApply` calls next).
   in-combat element reading "Player, VITAE 0 of 80."
 - suggested fix: bind the persistent header VITAE bar to the same live
   combat state store the in-combat HUD reads from.
+- resolution: no shared store exists to bind to (`CombatEncounterPanel`
+  keeps engine state in local React state) — instead the exploration
+  screen stops rendering the out-of-combat header while the encounter
+  modal is showing, since that modal already renders full-screen over
+  the map by design. `axiomancer-mobile/app/(tabs)/exploration/index.tsx`.
 - source: playtester (critique pass 12)
+- issue: #152
 
 ### [MED] pre-fight enemy preview disagrees with live combat VITAE
 - pass: 12 (commit 3dc27d24)
