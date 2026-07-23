@@ -42,7 +42,7 @@ const slipperySlope: Card = {
         'inevitable. The ground tilts, and they slide the whole way down.',
     tier: 2, rank: 1, cardType: 'spell',
     targetType: 'enemy',
-    paidSummary: 'Afflict with POISON 1 for 4 turns.',
+    paidSummary: 'Inflict POISON 1 for 4 turns.',
     // pts (phase 36b tempo horizon; WS3.5 clock; phase 30 FREE-currency law):
     // poison i1 d4 is a RAMP — per-round HP 4,4,6,6, the big ticks landing at
     // rounds 3-4, PAST the ~4-round death clock — so the tempo weight discounts
@@ -67,7 +67,7 @@ const festeringArgument: Card = {
         'to answer it. Everything they carry runs a little longer.',
     tier: 2, rank: 3, cardType: 'spell',
     targetType: 'enemy',
-    paidSummary: 'PROLONG every DoT you have on the foe by 1 turn.',
+    paidSummary: 'PROLONG every DoT on the enemy by 1 turn.',
     // pts (phase 30): +1 duration to ALL DoTs ≈ 1/dot × expected 2-3 live dots
     // ≈ 5.5 + FREE MARK seed i1 d1 (0.6) ≈ 6.1 → Thesis
     free: { applyEffect: { effectId: 'debuff_mark', intensity: 1, duration: 1 } },
@@ -87,8 +87,8 @@ const currysConversion: Card = {
     tier: 2, rank: 4, cardType: 'spell',
     targetType: 'enemy',
     paidSummary:
-        'REARGUE — flip the foe\'s BLEED and POISON into each other, each ' +
-        'landing +1 intensity.',
+        'REARGUE — Convert all enemy BLEED to POISON and all POISON to BLEED, ' +
+        'then add 1 intensity to each.',
     // pts (phase 30): convert bleed↔poison +1 int ≈ 1.5/instance × ~2 + tempo
     // value ≈ 6.5 + FREE MARK seed i1 d1 (0.6, weak deposit) + DRAW 1 kicker
     // (2, legal alongside a weak-enough deposit) ≈ 9.1 → Theorem
@@ -111,8 +111,8 @@ const resonanceDetonation: Card = {
     tier: 3, rank: 5, cardType: 'spell',
     targetType: 'enemy',
     paidSummary:
-        'RUPTURE ALL with 50% more force, SIPHON 35%, then RECALL 2 cards — ' +
-        'their FREE lines fire now.',
+        'RUPTURE ALL for 50% more damage. SIPHON 35% of the RUPTURE damage. ' +
+        'RECALL 2 cards; fire their FREE lines now.',
     // pts (DRASTIC late-stage rework, 2026-07-08 — deliberately overrides the
     // normal pricing curve per directive): RUPTURE alone caps at
     // ruptureBurstCap() per cast (WS7.1: a pure fraction of enemy max HP), a
@@ -150,7 +150,9 @@ const resonanceDetonation: Card = {
 const venomAndVein: Card = {
     id: 'venom-and-vein',
     theme: 'affliction',
-    persistentEffect: 'Your BLEED and POISON land +1 intensity and +1 duration.',
+    persistentEffect:
+        'When a PAID line includes a DoT, every enemy status on that line ' +
+        'gains +1 intensity and +1 duration.',
     name: 'Venom and Vein',
     philosophicalAspect: 'body',
     description:
@@ -166,7 +168,9 @@ const venomAndVein: Card = {
 const suppuratingCurse: Card = {
     id: 'suppurating-curse',
     theme: 'affliction',
-    persistentEffect: "At round end, the enemy takes this round's POISON and BLEED damage again.",
+    persistentEffect:
+        'At the end of each round, deal damage equal to the DoT damage the ' +
+        'enemy took that round.',
     name: 'Suppurating Curse',
     philosophicalAspect: 'mind',
     description:
@@ -219,7 +223,7 @@ const openingStatement: Card = {
         'named, start to bleed.',
     tier: 1, rank: 2, cardType: 'spell',
     targetType: 'enemy',
-    paidSummary: 'MARK 1 for 2 turns. POISON 1 for 2 turns. Gain 2 PREMISES.',
+    paidSummary: 'Apply MARK 1. Inflict POISON 1 for 2 turns. Gain 2 PREMISES.',
     // pts (WS10.1 KW-1 fold, 2026-07-11 — argument-wound folded into POISON,
     // duration tuned 3 → 2 for the card-played clock; spec 33 D4: cadence
     // 2 → 1.83): mark d2 (1.5) + poison i1 d2 (lifetime 7.3, tempo ÷3 ≈ 2.1)
@@ -1502,6 +1506,9 @@ const recurringSymptom: Card = {
         + 'the fever was always going to come back around, and it comes back worse.',
     tier: 2, rank: 3, cardType: 'spell',
     targetType: 'enemy',
+    paidSummary:
+        'Inflict POISON 1 for 2 turns. Reroll all spent, exhausted, or X dice ' +
+        'in your tray except floating dice.',
     // pts (spec 33 D4): REROLL this card's miss faces (2.0) + poison i1 d2
     // (card-played clock, 1.83 cadence: tempo-weighted 6.4 ÷3 = 2.14) = 4.14 +
     // FREE mark i1 d2 (0.75×1×2 = 1.5) = 5.64 → uncommon band 4.5-13 (Thesis).
@@ -1755,6 +1762,7 @@ const poisonedWell: Card = {
         'from it comes up tainted, and the first draught is the worst.',
     tier: 1, rank: 1, cardType: 'spell',
     targetType: 'enemy',
+    paidSummary: 'Inflict POISON 2 for 2 turns.',
     // pts: poison i2 d2 (card-played clock 1.83, tempo-weighted 12.81 ÷ 3 =
     // 4.27) + FREE [mark i1 d1 (0.75) + conviction 1 (1.0)] = 1.75 → 6.02 →
     // common band 1.5-7.5 (Doxa). FREE share 1.75/6.02 = 29.1% ✓.

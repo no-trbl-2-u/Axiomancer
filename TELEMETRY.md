@@ -121,3 +121,4 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-07-23T14:45:05Z | subagent | Explore | claude-sonnet-5 | main | Investigate blacksmith MapEvent node gating |
 | 2026-07-23T19:54:22Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-07-23T19:56:35Z | subagent | general-purpose | claude-sonnet-5 | main | Score pending audit/critique findings |
+| 2026-07-23T20:20:29Z | subagent | Explore | claude-opus-4-8 | main | Map Upgradeable Dice flag architecture |
