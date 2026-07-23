@@ -151,8 +151,8 @@ const venomAndVein: Card = {
     id: 'venom-and-vein',
     theme: 'affliction',
     persistentEffect:
-        'When a PAID line includes a DoT, every enemy status on that line ' +
-        'gains +1 intensity and +1 duration.',
+        'When a PAID line includes BLEED or POISON, every enemy status on ' +
+        'that line gains +1 intensity and +1 duration.',
     name: 'Venom and Vein',
     philosophicalAspect: 'body',
     description:
@@ -169,8 +169,8 @@ const suppuratingCurse: Card = {
     id: 'suppurating-curse',
     theme: 'affliction',
     persistentEffect:
-        'At the end of each round, deal damage equal to the DoT damage the ' +
-        'enemy took that round.',
+        'At the end of each round, deal the enemy\'s POISON and BLEED damage ' +
+        'from that round again.',
     name: 'Suppurating Curse',
     philosophicalAspect: 'mind',
     description:

@@ -25,9 +25,9 @@ const EXPECTED_PAID_LINES: Readonly<Record<string, string>> = {
     'resonance-detonation':
         'PAID — RUPTURE ALL for 50% more damage. SIPHON 35% of the RUPTURE damage. RECALL 2 cards; fire their FREE lines now. Costs 1 die.',
     'venom-and-vein':
-        'PAID (rest of combat) — When a PAID line includes a DoT, every enemy status on that line gains +1 intensity and +1 duration. Costs 1 die.',
+        'PAID (rest of combat) — When a PAID line includes BLEED or POISON, every enemy status on that line gains +1 intensity and +1 duration. Costs 1 die.',
     'suppurating-curse':
-        'PAID (rest of combat) — At the end of each round, deal damage equal to the DoT damage the enemy took that round. Costs 1 die. Attaches to the enemy.',
+        "PAID (rest of combat) — At the end of each round, deal the enemy's POISON and BLEED damage from that round again. Costs 1 die. Attaches to the enemy.",
     'recurring-symptom':
         'PAID — Inflict POISON 1 for 2 turns. Reroll all spent, exhausted, or X dice in your tray except floating dice. Costs 1 die.',
 };
