@@ -564,9 +564,11 @@ the default).
 **Evidence CLI:** `npm run combat-playtest` — flags `--stage=<id|all>`,
 `--policy=<id|all>`, `--deck=<grammar above>`, `--enemy=<slug>`, `--runs=N`,
 `--seed=N`, `--sandbox=<setId[,setId...]>` (comma-separated sets apply in
-order), `--upgradeable-dice` (spec-33 flag-on sweep), `--cards` (per-card
-usage table), `--json` (the `PlaytestReport` and nothing else). Full
-cookbook: `docs/playtest.md`.
+order), `--legacy-dice` (opt into the pre-spec-33 comparison model — the
+sweep DEFAULTS to the spec-33 Upgradeable-Dice model the shipped app boots
+ON; `--upgradeable-dice` is the redundant explicit-ON switch), `--cards`
+(per-card usage table), `--json` (the `PlaytestReport` — now carrying a
+`diceModel` field — and nothing else). Full cookbook: `docs/playtest.md`.
 
 **Baselines (ROOT scripts):** `npm run baseline:check` — freshness alarm
 (also printed at session start) · `npm run baseline:regen` — re-measures and

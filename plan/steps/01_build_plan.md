@@ -803,7 +803,7 @@ supersession collisions before any engine work.
       hidden. `fix(mobile): flag-on paid-play UI commit` — D7's flag-flip is no
       longer gated on it.
 
-- [blocked: superseded by unmerged D10-D12 full-flag-teardown decision — needs /oversight 2026-07-19] Phase D-FLIP — Upgradeable-Dice flag ON by default. OWNER-DIRECTED
+- [x] Phase D-FLIP — Upgradeable Dice is the default player and balance-witness model; legacy dice remains an explicit comparison mode. OWNER-DIRECTED
       via /oversight 2026-07-18, explicitly overriding D7's DO-NOT-FLIP
       recommendation: the owner accepts the measured regressions (early
       −15, statusEngagement −9, breaks 2:1 over surges) as transitional
@@ -835,11 +835,16 @@ supersession collisions before any engine work.
       (`isUpgradeableDiceEnabled()`) is still OFF, by deliberate design
       (tests/sims toggle both models per-suite). Only `/oversight` may
       set `[skipped]`; ship-a-phase does not have that authority, so this
-      row is `[blocked]` instead pending a human call: skip D-FLIP and
-      adopt the D10-D12 rows (re-authored fresh against current `main`,
-      not cherry-picked from the stale branch), or affirm D-FLIP's
-      original narrower scope still stands. See `plan/AUDIT.md` "Phase
-      D-FLIP is superseded by the D10-D12 dice-flag teardown".
+      row was `[blocked]` pending a human call. **RESOLVED 2026-07-23 by T:**
+      "Fix main" and "allow for upgradeable dice." Mobile remains default-ON;
+      `combat-playtest` now also defaults ON so scheduled balance evidence
+      measures the player model, declares `diceModel` in JSON/text, and offers
+      `--legacy-dice` only as an explicit comparison. The mechanics module
+      stays default-OFF for hermetic isolation and suites may still toggle both
+      models. The stale D10-D12 teardown direction is rejected; supported
+      comparison is intentional. Request provenance: T's 2026-07-23 reply to
+      the doctrine sweeper, because silent Mobile-ON / witness-OFF evidence
+      produced materially false player-balance claims.
 - [x] Phase D8 — One dice valve in every starter preset. (shipped 10ec4fe8,
       2026-07-18 — all ten themed valves passed the court, no fallback needed;
       curve red at mid/late stays the next bounded tuning phase.) Under the

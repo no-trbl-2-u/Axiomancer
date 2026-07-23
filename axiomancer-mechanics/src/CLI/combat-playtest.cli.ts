@@ -34,8 +34,13 @@
  *   --runs=N                                runs per cell (default 60)
  *   --seed=N                                base seed (default 1)
  *   --sandbox=<setId[,setId...]>            apply sandbox card set(s) before running
- *   --upgradeable-dice                      run the spec-33 Upgradeable-Dice model
- *                                           flag-ON for this sweep (restored after)
+ *   (dice model: DEFAULT is the spec-33 Upgradeable-Dice model — the combat the
+ *    shipped app boots ON, so the witnesses measure what players actually get.)
+ *   --legacy-dice                           run the pre-spec-33 model instead
+ *                                           (explicit comparison mode; restored after)
+ *   --upgradeable-dice                      redundant explicit-ON switch (kept for
+ *                                           existing scripts; mutually exclusive with
+ *                                           --legacy-dice)
  *   --cards                                 append the per-card usage table
  *   --json                                  print the PlaytestReport as JSON — and
  *                                           NOTHING else (agent consumption)
@@ -160,12 +165,23 @@ function main(): void {
         }
     }
 
-    // Spec-33 Upgradeable-Dice flag-on capability (Phase D7 keystone). The flag
-    // is a module global; set it AROUND the sweep and restore it in `finally` so
-    // a flag-on run never leaks into any other suite sharing this process.
-    const upgradeableDice = has('upgradeable-dice');
+    // Spec-33 Upgradeable-Dice model. THE FLIP (owner call 2026-07-18): the
+    // shipped app boots this model ON for every build, so the balance witnesses
+    // run it ON by DEFAULT too — the numbers describe the combat players
+    // actually get. `--legacy-dice` opts into the pre-spec-33 comparison model;
+    // `--upgradeable-dice` is the now-redundant explicit-ON switch (kept for
+    // existing scripts). Passing both is a contradiction and fails loudly. The
+    // flag is a module global: set it AROUND the sweep and restore the prior
+    // state in `finally` so a run never leaks its model into any other suite
+    // sharing this process.
+    const forceLegacy = has('legacy-dice');
+    const forceUpgradeable = has('upgradeable-dice');
+    if (forceLegacy && forceUpgradeable) {
+        fail('--legacy-dice and --upgradeable-dice are mutually exclusive — pick one dice model.');
+    }
+    const upgradeableDice = !forceLegacy;
     const wasUpgradeable = isUpgradeableDiceEnabled();
-    if (upgradeableDice) setUpgradeableDice(true);
+    setUpgradeableDice(upgradeableDice);
     let report;
     try {
         report = runPlaytestMatrix({
@@ -177,7 +193,7 @@ function main(): void {
             enemySlugs: enemySlug !== undefined ? [enemySlug] : undefined,
         });
     } finally {
-        if (upgradeableDice) setUpgradeableDice(wasUpgradeable);
+        setUpgradeableDice(wasUpgradeable);
     }
 
     // Per-cell replay index: enough to re-run any cell (or a single seed via
@@ -192,6 +208,7 @@ function main(): void {
                 deck: cell.spec.deck,
                 runs: cell.spec.runs,
                 seed: cell.spec.seed,
+                diceModel: report.diceModel,
                 winRate: cell.stats.winRate,
                 statusEngagement: cell.stats.statusEngagement,
                 dotHpFraction: cell.stats.dotHpFraction,
@@ -211,7 +228,8 @@ function main(): void {
         + ` deck=${deckArg}${enemySlug !== undefined ? ` enemy=${enemySlug}` : ''} runs=${runs} seed=${seed}\n`,
     );
     if (sandboxNote) process.stdout.write(sandboxNote);
-    if (upgradeableDice) process.stdout.write('Upgradeable-Dice model: FLAG-ON (spec 33)\n');
+    // Dice model is declared in the report header (formatPlaytestReport) for
+    // both models, and in the JSON via report.diceModel above.
     process.stdout.write('\n');
     process.stdout.write(formatPlaytestReport(report, { perCard }));
 }

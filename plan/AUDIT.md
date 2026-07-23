@@ -72,7 +72,7 @@
   project's actual loop-shape/adaptation notes live (`plan/bearings.md`
   § Surface looks like the closest fit).
 
-### Phase D-FLIP is superseded by the D10-D12 dice-flag teardown — `/oversight` skip it
+### [resolved 2026-07-23] Upgradeable Dice activation law
 - category: divergence
 - impact: 5
 - ease: 8
@@ -97,10 +97,12 @@
   2026-07-18) while the mechanics-package default stays OFF by design
   (tests/sims toggle both models per-suite) and D8 already shipped on
   top of that live state without D-FLIP formally preceding it.
-- next: /oversight — confirm skip D-FLIP + re-author D10-D12 fresh
-  against current `main` (do not cherry-pick the stale branch), or
-  affirm D-FLIP's original narrower scope (flip the mechanics-package
-  default only) still stands.
+- resolution: T directed "Fix main" and "allow for upgradeable dice" after the
+  doctrine sweeper exposed materially different Mobile-ON and witness-OFF
+  results. Mobile and normal `combat-playtest` balance witnesses default ON;
+  every report declares its dice model; `--legacy-dice` preserves an explicit
+  comparison lane. The mechanics module remains default-OFF for hermetic test
+  isolation. Do not resurrect the stale D10-D12 teardown branch.
 
 ### [user-issue #129] [HIGH] Log T's provenance for every Hermes-originated queue change
 - category: external-issue

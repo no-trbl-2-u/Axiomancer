@@ -130,8 +130,13 @@ npm run combat -- --enemy audit-sentinel --stage mid --deck draft:dot --seed 11 
 The `combat-playtest` CLI (`src/CLI/combat-playtest.cli.ts`) accepts
 `--stage=early|mid|late|impossible|all`, `--policy=<id|all>`,
 `--deck=<grammar above>`, `--enemy=<slug>`, `--runs=N`, `--seed=N`,
-`--sandbox=<setId>`, `--cards`, `--json`. The interactive `combat` CLI's
-answer protocol (script/stdin JSONL) lives in `src/CLI/io.ts`.
+`--sandbox=<setId>`, `--cards`, `--json`. The sweep DEFAULTS to the spec-33
+Upgradeable-Dice model (the combat the shipped app boots ON); pass
+`--legacy-dice` for the pre-spec-33 comparison model (`--upgradeable-dice` is
+the redundant explicit-ON switch, mutually exclusive with `--legacy-dice`).
+Every run declares its model — the text report prints a `Dice model:` header
+and the `--json` `PlaytestReport` carries a `diceModel` field. The interactive
+`combat` CLI's answer protocol (script/stdin JSONL) lives in `src/CLI/io.ts`.
 
 ## The e2e bands are the balance contract
 

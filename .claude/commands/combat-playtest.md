@@ -144,6 +144,11 @@ legible reasons.
   failure.
 
 ### Step 1 — Run the quantitative matrix
+The CLI defaults to **Upgradeable Dice ON**, matching the shipped Mobile
+experience. Use `--legacy-dice` only for an explicitly labeled comparison;
+never cite that comparison as current player-balance evidence. Every text and
+JSON report declares its dice model.
+
 ```
 npm run combat-playtest -- --stage=all --policy=all --runs=60 --seed=1
 npm run combat-playtest -- --stage=all --policy=all --runs=60 --seed=1 --cards
@@ -258,7 +263,11 @@ determinism `src/Combat/e2e/combat-playtest.matrix.sim.test.ts` · card
 coverage `src/Combat/e2e/combat-playtest.card-coverage.sim.test.ts`.
 
 **One-page reference:** `docs/playtest.md` (stage table, policy roster, deck
-grammar, sandbox workflow, CLI cookbook).
+selection grammar, commands, contract-test map).
+
+**Dice model:** Upgradeable Dice is ON by default. `--legacy-dice` selects the
+pre-spec-33 comparison model. `--upgradeable-dice` remains as a redundant
+explicit-ON compatibility switch; combining both switches is an error.
 
 **Sub-agent:** `.claude/agents/playtester.md`.
 
