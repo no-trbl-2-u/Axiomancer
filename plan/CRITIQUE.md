@@ -696,7 +696,20 @@ one level down, in the routing helper `onApply` calls next).
 - evidence: `npm run baseline:check` output at a99d0f64;
   `plan/tuning/2026-07-11-honest-rebaseline-and-evidence.md` §1.
 
-### [MED] four reward-pool spells still print generated telegraphese
+### [x] [MED] four reward-pool spells still print generated telegraphese (RESOLVED 2026-07-23 — stale, all four ids retired)
+- RESOLVED 2026-07-23 (iterate tick). All four named cards —
+  straw-mans-jab, memento-mori, heart-of-the-matter, ad-nauseam — were
+  retired from the live library in Phase D8 (`plan/tuning/2026-07-18-d8-preset-dice-valves.md`
+  "Out (retired)" ledger), one day after this row was filed. None exist
+  in `axiomancer-mechanics/src/Cards/cards.library.ts` (the current
+  card-definition file) or anywhere else as live card objects — only in
+  comments/tests documenting the retirement. There is nothing left to
+  author `paidSummary` prose for. The underlying pattern this row
+  pointed at (draft/reward cards missing authored paid text) may still
+  be real for other live cards — of the library's 79 current ids, ~33
+  still lack `paidSummary` — but that's a fresh finding against
+  different cards, not this one. Queue was tracking dead card ids;
+  corrected.
 - pass: session 2026-07-17 (card-text work, PRs #91/#92)
 - viewport: n/a
 - category: content/copy

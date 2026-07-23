@@ -180,10 +180,22 @@
   at the push step or improvise.
 - next: /iterate (doc-only edit to skills/oversight.md §6)
 
-### Gate the first-map blacksmith MapEvent node back to dev-only
+### [x] Gate the first-map blacksmith MapEvent node back to dev-only — RESOLVED 2026-07-23 (issue #151)
 - category: content
 - impact: 4
 - ease: 7
+- resolution: removed the `FV_BLACKSMITH_NODES` map-data entry + the
+  `fvBlacksmithPool` helper from `axiomancer-mechanics/src/World/MapEvents/content.ts`
+  (fv-16 falls back to a plain encounter, its pre-D6c state). Updated the
+  three tests that asserted the node's kind: `content.engine.test.ts`
+  (encounter count 7→8), `map-encounter-minigames.engine.test.ts`
+  (dropped the `blacksmith` count assertion), and
+  `blacksmith.flow.engine.test.ts` (removed the map-interception describe
+  block; the forging tests already drove the session via
+  `beginBlacksmith()` directly, unaffected). Dev-menu entry
+  (`DebugBlacksmithButton.tsx`) untouched — it calls `beginBlacksmith()`
+  directly, bypassing map-event resolution. Full three-workspace
+  `npm run verify` green.
 - detail: filed via /oversight 2026-07-18. Owner ruled the blacksmith is
   NOT the confirmed dice-upgrade surface (see the resolved
   `[needs-user-call]` row below): the screen stays dev-menu-only until
