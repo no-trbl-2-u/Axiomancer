@@ -1,13 +1,13 @@
 name: verify-mechanics
 
-# Verify gate for the mechanics engine. Runs the package's own `verify`
-# script (type-check + type-check:tests + lint + vitest + build) on every
-# PR/push to main that touches the mechanics package.
+# Sole owner for mechanics and root dependency changes. Mobile and the card
+# editor consume mechanics as local source, so this job detects the documented
+# cross-package impact paths and runs the affected consumer gates in the same
+# installed environment. Unknown, lockfile, and workflow changes fail closed.
 #
-# No publish / deploy:check step — the monorepo consumes mechanics as local
-# source (mobile + card-editor via the @mechanics alias); it is no longer
-# published to npm, so the old dist/tag/CHANGELOG structural assertions do
-# not apply.
+# Cards-library data-only edits retain their former carve-out: mechanics,
+# mobile unit/type checks, editor contract checks, and the real Expo export all
+# run, while the slow browser journeys are skipped.
 
 on:
   push:
@@ -32,11 +32,14 @@ concurrency:
 
 jobs:
   verify:
+    name: mechanics + affected consumers
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 60
     steps:
-      - name: Checkout
+      - name: Checkout full history for impact detection
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -44,52 +47,36 @@ jobs:
           node-version: '22'
           cache: 'npm'
 
-      - name: Install workspace dependencies
+      - name: Install workspace dependencies once
         run: npm ci
 
-      - name: Skip-comment gate
-        run: node automation/check-skip-comments.mjs
-        working-directory: axiomancer-mechanics
-
-      - name: Verify (type-check + tests + build)
-        run: npm run verify --workspace axiomancer-mechanics
-
-  # The AGENTS.md "cross-package impact checklist", mechanized. Mobile and
-  # the card editor consume mechanics as local source via @mechanics, so a
-  # mechanics-only push can break them without verify-mobile /
-  # verify-card-editor ever triggering (their path filters don't watch
-  # mechanics). Witness: edba726 shipped mechanics+mobile green but broke
-  # the editor's SpecialMechanicKind union, leaving main red for half a
-  # day until 3c9bbaf.
-  cross-package:
-    runs-on: ubuntu-latest
-    timeout-minutes: 25
-    steps:
-      - name: Checkout (full history for diff detection)
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      # Soft measurement-freshness alarm: warns (never fails) when mechanics
-      # source has moved past the stamped deck-matrix baseline, so balance
-      # findings citing it are visibly dated. Zero-dep; needs the full
-      # history this job already fetches.
-      - name: Baseline freshness (soft warning)
-        run: node scripts/check-baseline-freshness.mjs
-
-      - name: Detect impact-path changes
+      - name: Determine cross-package impact
         id: impact
         shell: bash
         run: |
+          set -euo pipefail
+
+          force_full=false
           if [ "${{ github.event_name }}" = "pull_request" ]; then
-            range="origin/${{ github.base_ref }}...HEAD"
+            git fetch --no-tags --depth=200 origin "${{ github.base_ref }}" 2>/dev/null \
+              || git fetch --no-tags origin "${{ github.base_ref }}" 2>/dev/null || true
+            base="$(git merge-base "origin/${{ github.base_ref }}" HEAD 2>/dev/null || true)"
+            if [ -n "$base" ]; then
+              range="$base...HEAD"
+            else
+              range="HEAD~1..HEAD"
+              force_full=true
+            fi
           elif [ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ] \
-            && git cat-file -e "${{ github.event.before }}" 2>/dev/null; then
+            && git cat-file -e "${{ github.event.before }}^{commit}" 2>/dev/null; then
             range="${{ github.event.before }}..${{ github.sha }}"
           else
             range="HEAD~1..HEAD"
+            force_full=true
           fi
-          echo "diff range: $range"
+
+          changed="$(git diff --name-only "$range")"
+          printf 'diff range: %s\nchanged files:\n%s\n' "$range" "$changed"
 
           mobile_paths=(
             'axiomancer-mechanics/src/Combat/'
@@ -109,32 +96,93 @@ jobs:
             'axiomancer-mechanics/src/index.ts'
           )
 
-          mobile=false; editor=false
+          mobile=false
+          editor=false
+          run_heavy=false
+          card_only=false
+
           if git diff --name-only "$range" -- "${mobile_paths[@]}" | grep -q .; then
             mobile=true
           fi
           if git diff --name-only "$range" -- "${editor_paths[@]}" | grep -q .; then
             editor=true
           fi
+
+          trigger_changed="$(printf '%s\n' "$changed" | grep -E '^(axiomancer-mechanics/|package-lock\.json$|\.github/workflows/verify-mechanics\.yml$)' || true)"
+          if [ -n "$trigger_changed" ] \
+            && ! printf '%s\n' "$trigger_changed" | grep -Fvx 'axiomancer-mechanics/src/Cards/cards.library.ts' >/dev/null; then
+            card_only=true
+          fi
+
+          if [ "$force_full" = true ] \
+            || printf '%s\n' "$changed" | grep -Eq '^(package-lock\.json|\.github/workflows/verify-mechanics\.yml)$'; then
+            mobile=true
+            editor=true
+            run_heavy=true
+          elif [ "$mobile" = true ] && [ "$card_only" != true ]; then
+            run_heavy=true
+          fi
+
           echo "mobile=$mobile" >> "$GITHUB_OUTPUT"
           echo "editor=$editor" >> "$GITHUB_OUTPUT"
-          echo "mobile impact: $mobile / editor impact: $editor"
+          echo "run_heavy=$run_heavy" >> "$GITHUB_OUTPUT"
+          echo "card_only=$card_only" >> "$GITHUB_OUTPUT"
+          printf 'mobile=%s editor=%s run_heavy=%s card_only=%s\n' \
+            "$mobile" "$editor" "$run_heavy" "$card_only"
 
-      - name: Setup Node
-        if: ${{ steps.impact.outputs.mobile == 'true' || steps.impact.outputs.editor == 'true' }}
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-          cache: 'npm'
+      - name: Baseline freshness (soft warning)
+        run: node scripts/check-baseline-freshness.mjs
 
-      - name: Install workspace dependencies
-        if: ${{ steps.impact.outputs.mobile == 'true' || steps.impact.outputs.editor == 'true' }}
-        run: npm ci
+      - name: Check retired terminology
+        run: node scripts/check-lexicon.mjs
 
-      - name: Verify mobile against mechanics change
-        if: ${{ steps.impact.outputs.mobile == 'true' }}
+      - name: Skip-comment gate
+        run: node automation/check-skip-comments.mjs
+        working-directory: axiomancer-mechanics
+
+      - name: Verify mechanics (type-check + tests + build)
+        run: npm run verify --workspace axiomancer-mechanics
+
+      - name: Verify mobile against affected mechanics
+        if: steps.impact.outputs.mobile == 'true'
         run: npm run verify --workspace axiomancer-mobile
 
-      - name: Type-check card editor against mechanics change
-        if: ${{ steps.impact.outputs.editor == 'true' }}
+      - name: Type-check card editor against affected mechanics
+        if: steps.impact.outputs.editor == 'true'
         run: npm run type-check --workspace axiomancer-card-editor
+
+      - name: Export and inspect the affected mobile bundle once
+        if: steps.impact.outputs.mobile == 'true'
+        run: npm run smoke:bundler --workspace axiomancer-mobile
+        env:
+          BUILD_PROFILE: preview
+          SMOKE_BUNDLER_TIMEOUT_MS: '480000'
+          SMOKE_BUNDLER_OUTPUT_DIR: '.smoke-dist'
+
+      - name: Install Playwright Chromium
+        if: steps.impact.outputs.run_heavy == 'true'
+        run: npx playwright install --with-deps chromium
+
+      - name: Hazard playthrough (both routes)
+        if: steps.impact.outputs.run_heavy == 'true'
+        run: npm run e2e:hazard --workspace axiomancer-mobile
+        env:
+          HAZARD_E2E_REUSE_EXPORT: '1'
+
+      - name: Gathering playthrough (both stances)
+        if: steps.impact.outputs.run_heavy == 'true'
+        run: npm run e2e:gathering --workspace axiomancer-mobile
+        env:
+          GATHER_E2E_REUSE_EXPORT: '1'
+
+      - name: Encounter routing (every minigame trigger to its screen)
+        if: steps.impact.outputs.run_heavy == 'true'
+        run: npm run e2e:encounters --workspace axiomancer-mobile
+        env:
+          ENCOUNTER_E2E_REUSE_EXPORT: '1'
+
+      - name: Combat playthrough (Hazard-Pattern Combat)
+        if: steps.impact.outputs.run_heavy == 'true'
+        run: npm run e2e:combat --workspace axiomancer-mobile
+        env:
+          COMBAT_E2E_REUSE_EXPORT: '1'

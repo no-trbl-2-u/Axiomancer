@@ -1,33 +1,20 @@
 name: check-lexicon
 
-# Retired-terminology lint (scripts/check-lexicon.mjs — plain node, no AI,
-# no npm ci needed). Enforces axiomancer-mechanics/docs/lexicon.json against
-# every live *.md surface so retired game concepts (src/Skills, basePower,
-# chipHp, Pressure Tracks, ...) cannot quietly re-enter docs that agents
-# read as current law. See docs/LEXICON.md for the triage rules (fix vs
-# HISTORICAL banner vs lexicon-ok pragma).
+# Active package verification runs the lexicon check in its already-billed
+# runner. Documentation-only commits are guarded by the tracked pre-commit hook;
+# this weekly/manual sweep is the remote backstop for commits made without the
+# hook. It no longer launches one extra hosted runner for every code commit.
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - '**/*.md'
-      - 'axiomancer-mechanics/docs/lexicon.json'
-      - 'scripts/check-lexicon.mjs'
-      - '.github/workflows/check-lexicon.yml'
-  pull_request:
-    branches: [main]
-    paths:
-      - '**/*.md'
-      - 'axiomancer-mechanics/docs/lexicon.json'
-      - 'scripts/check-lexicon.mjs'
-      - '.github/workflows/check-lexicon.yml'
+  schedule:
+    - cron: '19 7 * * 0'
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: check-lexicon-${{ github.ref }}
+  group: check-lexicon
   cancel-in-progress: true
 
 jobs:
@@ -36,8 +23,5 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
       - name: Lint retired terminology
         run: node scripts/check-lexicon.mjs

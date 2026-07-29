@@ -10,3 +10,11 @@ if [ -n "$(git status --porcelain -- TELEMETRY.md)" ]; then
   git add -A -- TELEMETRY.md
   printf '%s\n' 'pre-commit: staged TELEMETRY.md alongside this commit.' >&2
 fi
+
+# Retired terminology is cheapest to reject before it reaches a hosted runner.
+# Active package workflows run the same check remotely; this hook protects
+# documentation-only commits between the weekly remote backstops.
+if git diff --cached --name-only --diff-filter=ACMR \
+  | grep -Eq '(\.md$|^axiomancer-mechanics/docs/lexicon\.json$|^scripts/check-lexicon\.mjs$)'; then
+  node scripts/check-lexicon.mjs
+fi

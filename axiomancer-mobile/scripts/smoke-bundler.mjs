@@ -37,7 +37,7 @@ import { spawn } from 'node:child_process'
 import { rm, stat, readFile } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
 import { tmpdir } from 'node:os'
-import { join } from 'node:path'
+import { join, resolve } from 'node:path'
 
 // ---------------------------------------------------------------------------
 // Config
@@ -104,6 +104,19 @@ export function buildExportArgs(outputDir) {
     ]
 }
 
+export function resolveOutputConfig({ configuredOutputDir, tempDir, pid, now }) {
+    if (configuredOutputDir) {
+        return {
+            outputDir: resolve(configuredOutputDir),
+            preserveOutput: true,
+        }
+    }
+    return {
+        outputDir: join(tempDir, `axm-smoke-${pid}-${now}`),
+        preserveOutput: false,
+    }
+}
+
 // ---------------------------------------------------------------------------
 // Side-effecting runners
 // ---------------------------------------------------------------------------
@@ -156,13 +169,22 @@ async function inspectExport(outputDir) {
 // ---------------------------------------------------------------------------
 
 async function main() {
-    const outputDir = join(tmpdir(), `axm-smoke-${process.pid}-${Date.now()}`)
+    const { outputDir, preserveOutput } = resolveOutputConfig({
+        configuredOutputDir: process.env.SMOKE_BUNDLER_OUTPUT_DIR,
+        tempDir: tmpdir(),
+        pid: process.pid,
+        now: Date.now(),
+    })
     const timeoutMs = Number(process.env.SMOKE_BUNDLER_TIMEOUT_MS ?? DEFAULT_TIMEOUT_MS)
 
     console.log(`smoke-bundler: exporting to ${outputDir} (timeout ${timeoutMs}ms)`)
 
     let result
     try {
+        // Never accept a stale export as evidence. A configured output path is
+        // preserved only after this run succeeds so downstream E2E scripts can
+        // reuse the exact bundle that the smoke check inspected.
+        await rm(outputDir, { recursive: true, force: true })
         const { exitCode, timedOut } = await runExport(outputDir, timeoutMs)
         const { missingFiles, indexHtmlBytes } = await inspectExport(outputDir)
         result = classifyExportResult({ exitCode, timedOut, indexHtmlBytes, missingFiles })
@@ -171,10 +193,14 @@ async function main() {
         result = { exit: EXIT.FAILED, reason: 'unexpected error' }
     }
 
-    try {
-        await rm(outputDir, { recursive: true, force: true })
-    } catch {
-        // Cleanup is best-effort.
+    if (!preserveOutput) {
+        try {
+            await rm(outputDir, { recursive: true, force: true })
+        } catch {
+            // Cleanup is best-effort.
+        }
+    } else {
+        console.log(`smoke-bundler: preserving verified export at ${outputDir}`)
     }
 
     console.log(`smoke-bundler: ${result.reason} (exit ${result.exit})`)

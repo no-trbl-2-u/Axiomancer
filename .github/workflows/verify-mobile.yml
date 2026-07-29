@@ -1,42 +1,29 @@
 name: verify-mobile
 
-# Verify gate for the mobile app. Because mobile now consumes mechanics as
-# LOCAL SOURCE (via the @mechanics alias → ../axiomancer-mechanics/src),
-# changes to EITHER package must re-run this gate.
+# Mobile-owned verification. Mechanics and root lockfile changes are owned by
+# verify-mechanics, which runs the affected consumer gates itself; this avoids
+# launching a second full mobile workflow for the same commit.
 #
-# Jobs: the hermetic verify gate (lint + typecheck + jest), the bundler
-# smoke test (expo export web), and the browser-driven minigame playthroughs.
-#
-# Cards-only carve-out: a change confined to
-# axiomancer-mechanics/src/Cards/cards.library.ts (i.e. the card editor
-# added/updated card DATA, touching no mobile or other-mechanics code) is
-# still fully validated by the mechanics gate (its ~10 card e2e suites +
-# type-check) and by this workflow's fast legs — but the slow Playwright
-# `e2e-minigames` job (the wall-clock hotspot) is skipped. The `detect-scope` job below
-# computes this; the gate defaults to running the heavy job whenever the
-# change scope can't be determined (never skip on uncertainty).
+# This job deliberately preserves the existing full mobile evidence on every
+# mobile change. It installs once, verifies once, exports once, then reuses that
+# inspected export for every Playwright journey. Subsystem path-routing is a
+# separate policy decision and is not enabled here.
 
 on:
   push:
     branches: [main]
     paths:
       - 'axiomancer-mobile/**'
-      - 'axiomancer-mechanics/**'
       - '.github/workflows/verify-mobile.yml'
-      - 'package-lock.json'
   pull_request:
     branches: [main]
     paths:
       - 'axiomancer-mobile/**'
-      - 'axiomancer-mechanics/**'
       - '.github/workflows/verify-mobile.yml'
-      - 'package-lock.json'
 
 permissions:
   contents: read
 
-# Opt JS-based actions onto Node 24 ahead of GitHub's default flip; does not
-# affect the Node used by npm ci / verify (pinned per job below).
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
 
@@ -45,137 +32,54 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  detect-scope:
-    name: detect-scope (cards-only carve-out)
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    outputs:
-      run_heavy: ${{ steps.scope.outputs.run_heavy }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - name: Determine change scope
-        id: scope
-        env:
-          EVENT: ${{ github.event_name }}
-          BEFORE: ${{ github.event.before }}
-          BASE_REF: ${{ github.base_ref }}
-        run: |
-          set -euo pipefail
-          CARD_FILE="axiomancer-mechanics/src/Cards/cards.library.ts"
-
-          # Resolve the base commit to diff HEAD against (PR vs push).
-          if [ "$EVENT" = "pull_request" ]; then
-            git fetch --no-tags --depth=200 origin "$BASE_REF" 2>/dev/null \
-              || git fetch --no-tags origin "$BASE_REF" 2>/dev/null || true
-            BASE="$(git merge-base "origin/$BASE_REF" HEAD 2>/dev/null || echo '')"
-          else
-            BASE="${BEFORE:-}"
-          fi
-
-          # Unknown / empty / all-zero / missing base -> run the heavy job
-          # (never skip on uncertainty).
-          if [ -z "$BASE" ] || ! git cat-file -e "${BASE}^{commit}" 2>/dev/null; then
-            echo "base unresolved ('$BASE'); defaulting run_heavy=true"
-            echo "run_heavy=true" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-
-          CHANGED="$(git diff --name-only "$BASE" HEAD)"
-          echo "Changed files:"; echo "$CHANGED"
-
-          # Heavy (run e2e) unless every relevant change is the card file.
-          # The workflow's other trigger paths (the lockfile — a dependency
-          # bump changes the runtime bundle — and this workflow file itself)
-          # are load-bearing and must run heavy. Files outside all trigger
-          # paths (docs/root) are irrelevant here.
-          RUN=false
-          while IFS= read -r f; do
-            [ -z "$f" ] && continue
-            case "$f" in
-              "$CARD_FILE") : ;;                  # card DATA only — light
-              axiomancer-mobile/*) RUN=true ;;    # any mobile change — heavy
-              axiomancer-mechanics/*) RUN=true ;; # other mechanics change — heavy
-              package-lock.json) RUN=true ;;      # dependency change — heavy
-              .github/workflows/*) RUN=true ;;    # gate change — heavy
-              *) : ;;                             # docs/root/other — irrelevant
-            esac
-          done <<< "$CHANGED"
-
-          echo "run_heavy=$RUN"
-          echo "run_heavy=$RUN" >> "$GITHUB_OUTPUT"
-
   verify:
-    name: verify (lint + typecheck + jest)
+    name: verify + bundler + Playwright journeys
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 45
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'npm'
+
       - name: Install workspace dependencies
         run: npm ci
-      - name: Run verify gate
+
+      - name: Check retired terminology
+        run: node scripts/check-lexicon.mjs
+
+      - name: Run mobile verify gate
         run: npm run verify --workspace axiomancer-mobile
 
-  smoke-bundler:
-    name: smoke-bundler (expo export web)
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-      - name: Install workspace dependencies
-        run: npm ci
-      - name: Run bundler smoke
+      - name: Export and inspect the web bundle once
         run: npm run smoke:bundler --workspace axiomancer-mobile
         env:
+          BUILD_PROFILE: preview
           SMOKE_BUNDLER_TIMEOUT_MS: '480000'
+          SMOKE_BUNDLER_OUTPUT_DIR: '.smoke-dist'
 
-  e2e-minigames:
-    name: e2e-minigames (playwright playthroughs)
-    # Cards-only carve-out: skipped when the change is confined to
-    # cards.library.ts (card DATA edits). The mechanics gate still
-    # fully validates the cards; see the header comment + detect-scope.
-    needs: detect-scope
-    # Fail closed: skip ONLY on an explicit 'false'. If detect-scope crashed
-    # (unset/empty output), run the heavy job — never skip on uncertainty.
-    if: needs.detect-scope.outputs.run_heavy != 'false'
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-      - name: Install workspace dependencies
-        run: npm ci
-      - name: Install Playwright chromium
+      - name: Install Playwright Chromium
         run: npx playwright install --with-deps chromium
+
       - name: Hazard playthrough (both routes)
         run: npm run e2e:hazard --workspace axiomancer-mobile
+        env:
+          HAZARD_E2E_REUSE_EXPORT: '1'
+
       - name: Gathering playthrough (both stances)
         run: npm run e2e:gathering --workspace axiomancer-mobile
         env:
           GATHER_E2E_REUSE_EXPORT: '1'
-      - name: Encounter routing (every minigame trigger → its screen)
+
+      - name: Encounter routing (every minigame trigger to its screen)
         run: npm run e2e:encounters --workspace axiomancer-mobile
         env:
           ENCOUNTER_E2E_REUSE_EXPORT: '1'
+
       - name: Combat playthrough (Hazard-Pattern Combat)
         run: npm run e2e:combat --workspace axiomancer-mobile
         env:

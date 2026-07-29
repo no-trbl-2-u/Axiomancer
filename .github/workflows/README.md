@@ -3,8 +3,12 @@
 Two layers live here:
 
 1. **CI and deterministic builds:** `verify-mechanics`, `verify-mobile`,
-   `verify-card-editor`, `preview-build`, `build-devlog`. The verify workflows
-   are path-filtered checks on push/PR; `npm run deploy:check` polls them.
+   `verify-card-editor`, `preview-build`, `build-devlog`. Each package has one
+   owning verify workflow: mechanics owns root dependency changes and runs
+   affected mobile/editor consumer gates; mobile and editor run only for their
+   own paths. Mobile verification installs once, exports once, and reuses that
+   inspected export for every Playwright journey. `npm run deploy:check` polls
+   the verify workflows.
 2. **Claude automation:** every zero-input skill/command in the repo,
    runnable from the Actions tab and (where it makes sense) on a schedule.
    All of them funnel through the reusable runner
@@ -28,6 +32,7 @@ Two layers live here:
 | Workflow | Skill | Trigger | Notes |
 |---|---|---|---|
 | `build-devlog.yml` | deterministic `npm run site:build` | manual | Rebuilds the catalog + DevLog, uploads `devlog/` as an artifact, and commits changed generated files to `main`; no Claude invocation. |
+| `check-lexicon.yml` | deterministic retired-term lint | weekly + manual | Active package verify jobs run this lint in their existing runner; the tracked pre-commit hook protects docs-only commits, and this workflow is the remote backstop. |
 | `march.yml` | `/march` | 6-hour cron + manual | The autonomous-beast tick: triage → critique → ship-a-phase → iterate. Manual runs accept `focus_phase`; when set, the run dispatches `/ship-a-phase phase <focus_phase>` instead of normal `/march`. Pushes to `main`. |
 | `night.yml` | `/digest` | daily 08:47 UTC + manual | Morning briefing to `plan/DIGEST.html` (stylized, self-contained page) + nightly breadth checks. |
 | `consolidate.yml` | `/consolidate` | monthly (2nd, 07:23 UTC) + manual | Memory curator: compacts `plan/` durable memory (bearings, CRITIQUE archive, lessons/reflexes hygiene). Curation only — meaning never changes. Pushes to `main`. |

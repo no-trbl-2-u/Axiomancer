@@ -30,7 +30,10 @@ if (fs.existsSync('.env')) {
 }
 
 const PROVIDER = process.env.DEPLOY_PROVIDER ?? 'github-actions'  // Axiomancer: CI-green gate
-const TIMEOUT_MS = 15 * 60 * 1000   // 15 min (CI incl. mobile e2e can be slow)
+// Verification now consolidates package checks and browser evidence into one
+// sequential runner. Preserve an override for local probes, but give the owned
+// CI job enough time to finish without the deploy gate declaring a false stall.
+const TIMEOUT_MS = Number(process.env.DEPLOY_TIMEOUT_MS ?? 45 * 60 * 1000)
 const POLL_MS = 8 * 1000
 // Grace window: if no gated workflow has appeared for HEAD by now, the
 // commit's paths triggered no verify-* workflow (e.g. a plan/ or docs-only

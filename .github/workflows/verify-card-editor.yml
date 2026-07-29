@@ -1,27 +1,20 @@
 name: verify-card-editor
 
-# Verify gate for the card (Action) editor dev tool: type-check (which
-# exercises src/data/mechanics.contract.ts, the compile-time drift contract
-# with the mechanics unions) + lint + vite build. It reads mechanics source
-# live via the @mechanics alias (→ ../axiomancer-mechanics/src), so a
-# mechanics rename can silently break it — this guards that coupling. Runs
-# on changes to either package.
+# Card-editor-owned verification. Mechanics and root lockfile changes are owned
+# by verify-mechanics, which runs the editor contract check when its coupled
+# mechanics paths change. This workflow therefore starts only for editor work.
 
 on:
   push:
     branches: [main]
     paths:
       - 'axiomancer-card-editor/**'
-      - 'axiomancer-mechanics/**'
       - '.github/workflows/verify-card-editor.yml'
-      - 'package-lock.json'
   pull_request:
     branches: [main]
     paths:
       - 'axiomancer-card-editor/**'
-      - 'axiomancer-mechanics/**'
       - '.github/workflows/verify-card-editor.yml'
-      - 'package-lock.json'
 
 permissions:
   contents: read
@@ -37,12 +30,18 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: '22'
           cache: 'npm'
+
       - name: Install workspace dependencies
         run: npm ci
-      - name: Verify (type-check + lint + build)
+
+      - name: Check retired terminology
+        run: node scripts/check-lexicon.mjs
+
+      - name: Verify editor (type-check + lint + build)
         run: npm run verify --workspace axiomancer-card-editor

@@ -7,6 +7,8 @@
 // .mjs). Same pattern as smoke-screens.test.ts and
 // deploy-check.test.ts. Keep these in sync with the .mjs file.
 
+import { resolve } from 'node:path'
+
 describe('smoke-bundler helpers', () => {
     const EXIT = {
         OK: 0,
@@ -27,6 +29,29 @@ describe('smoke-bundler helpers', () => {
             '--output-dir',
             outputDir,
         ]
+    }
+
+    function resolveOutputConfig({
+        configuredOutputDir,
+        tempDir,
+        pid,
+        now,
+    }: {
+        configuredOutputDir?: string
+        tempDir: string
+        pid: number
+        now: number
+    }): { outputDir: string; preserveOutput: boolean } {
+        if (configuredOutputDir) {
+            return {
+                outputDir: resolve(configuredOutputDir),
+                preserveOutput: true,
+            }
+        }
+        return {
+            outputDir: `${tempDir}/axm-smoke-${pid}-${now}`,
+            preserveOutput: false,
+        }
     }
 
     interface ClassifyInput {
@@ -85,6 +110,31 @@ describe('smoke-bundler helpers', () => {
             const i = args.indexOf('--output-dir')
             expect(i).toBeGreaterThanOrEqual(0)
             expect(args[i + 1]).toBe('/tmp/abc')
+        })
+    })
+
+    describe('resolveOutputConfig', () => {
+        test('preserves an explicitly configured export for downstream E2E reuse', () => {
+            expect(resolveOutputConfig({
+                configuredOutputDir: '/repo/.smoke-dist',
+                tempDir: '/tmp',
+                pid: 7,
+                now: 9,
+            })).toEqual({
+                outputDir: '/repo/.smoke-dist',
+                preserveOutput: true,
+            })
+        })
+
+        test('uses an ephemeral output when reuse is not requested', () => {
+            expect(resolveOutputConfig({
+                tempDir: '/tmp',
+                pid: 7,
+                now: 9,
+            })).toEqual({
+                outputDir: '/tmp/axm-smoke-7-9',
+                preserveOutput: false,
+            })
         })
     })
 

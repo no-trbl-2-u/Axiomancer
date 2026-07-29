@@ -73,11 +73,11 @@ Witness: edba726 shipped mechanics + mobile green but broke the
 editor's `SpecialMechanicKind` union, leaving `verify-card-editor` red
 on `main` for half a day.
 
-This checklist is also mechanized in CI: the `cross-package` job in
+This checklist is also mechanized in CI: the owning job in
 `.github/workflows/verify-mechanics.yml` diffs the pushed range against
 the impact paths above and runs the mobile verify / editor type-check
-automatically. Run them locally anyway — CI catching it means the break
-already reached `main`.
+in the same installed environment. Run them locally anyway — CI
+catching it means the break already reached `main`.
 
 The
 mechanics-only tuning skills (`combat-playtest`, `deck-tuning`,
