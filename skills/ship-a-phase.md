@@ -356,6 +356,24 @@ next in 2–3 lines.
     log the stderr and continue. The mirror is a public timeline,
     not a verification step. Do not block phase delivery on
     GitHub issue API hiccups.
+11. **Never end the turn waiting on a backgrounded research
+    sub-agent.** When a `/ship-a-phase` tick needs a sub-agent's
+    findings (e.g. an `Explore` mapping a save-schema migration
+    pattern) before code can be written, spawn it in the
+    **foreground** (blocking) and synthesize before proceeding —
+    do not spawn in the background and end the turn "waiting."
+    Each loop invocation is a fresh session with no later turn to
+    resume into; a backgrounded call's results are discarded when
+    the runner tears down, and the next tick re-starts the same
+    research from scratch (confirmed 2026-07-16: two consecutive
+    Phase 32 Part 1b ticks each spawned a background `Explore`
+    agent and ended the turn deferring to it — zero commits, zero
+    carried research, ~$4 combined cost). If the research is
+    large enough to want backgrounding anyway, persist its
+    findings to a scratch note under `plan/` before ending the
+    turn, so the next tick can pick up cheaply instead of
+    re-researching. Same rule as `skills/digest.md` §3.6/§4.7,
+    extended to research sub-agents (not just `verify`/`deploy`).
 
 ## 8. Cross-link retrofit policy
 

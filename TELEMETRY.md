@@ -124,3 +124,5 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-07-23T20:20:29Z | subagent | Explore | claude-opus-4-8 | main | Map Upgradeable Dice flag architecture |
 | 2026-07-29T14:38:49Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-07-29T16:41:20Z | slash-prompt | /triage | unknown | user/ci | /triage 153 |
+| 2026-07-29T19:51:31Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-07-29T20:03:03Z | subagent | Explore | claude-sonnet-5 | main | Locate draft-scorer starvation code |

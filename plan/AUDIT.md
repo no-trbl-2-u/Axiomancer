@@ -653,7 +653,15 @@
   nightly breadth signal is dead.
 - next: /iterate
 
-### Phase 32 Part 1b stalls: two consecutive `/march` ticks spawn a background Explore agent, then end the turn "waiting" on it — zero commits, zero carried research
+### [x] Phase 32 Part 1b stalls: two consecutive `/march` ticks spawn a background Explore agent, then end the turn "waiting" on it — zero commits, zero carried research — RESOLVED 2026-07-29 (issue #155)
+- issue: #155
+- resolution: added Hard rule 11 to `skills/ship-a-phase.md` §7 —
+  research sub-agents a tick needs before it can write code must
+  run in the foreground (blocking) and get synthesized before the
+  turn ends; if backgrounding is still wanted, persist findings to
+  a `plan/` scratch note first. Mirrors `skills/digest.md`
+  §3.6/§4.7's existing verify/deploy rule, extended to research
+  sub-agents.
 - category: gap
 - impact: 6
 - ease: 6
