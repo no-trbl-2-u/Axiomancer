@@ -7,8 +7,10 @@ Two layers live here:
    owning verify workflow: mechanics owns root dependency changes and runs
    affected mobile/editor consumer gates; mobile and editor run only for their
    own paths. Mobile verification installs once, exports once, and reuses that
-   inspected export for every Playwright journey. `npm run deploy:check` polls
-   the verify workflows.
+   inspected export for the affected Hazard / Gathering / Encounter / Combat
+   journeys. Shared or unknown runtime changes fail closed to all journeys;
+   Sunday/manual mobile runs are the unconditional full-suite backstop.
+   `npm run deploy:check` polls the verify workflows.
 2. **Claude automation:** every zero-input skill/command in the repo,
    runnable from the Actions tab and (where it makes sense) on a schedule.
    All of them funnel through the reusable runner

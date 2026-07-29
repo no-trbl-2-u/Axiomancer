@@ -1,13 +1,11 @@
 name: verify-mobile
 
 # Mobile-owned verification. Mechanics and root lockfile changes are owned by
-# verify-mechanics, which runs the affected consumer gates itself; this avoids
-# launching a second full mobile workflow for the same commit.
-#
-# This job deliberately preserves the existing full mobile evidence on every
-# mobile change. It installs once, verifies once, exports once, then reuses that
-# inspected export for every Playwright journey. Subsystem path-routing is a
-# separate policy decision and is not enabled here.
+# verify-mechanics, which runs affected consumer gates itself. This job installs
+# once, verifies once, exports once when integration evidence is required, and
+# runs only the browser journeys owned by the changed subsystem. Shared or
+# unknown runtime paths fail closed to all journeys. The weekly/manual lane is
+# the unconditional full-suite backstop.
 
 on:
   push:
@@ -20,6 +18,9 @@ on:
     paths:
       - 'axiomancer-mobile/**'
       - '.github/workflows/verify-mobile.yml'
+  schedule:
+    - cron: '13 7 * * 0'
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -28,17 +29,19 @@ env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
 
 concurrency:
-  group: verify-mobile-${{ github.ref }}
+  group: verify-mobile-${{ github.ref }}-${{ github.event_name }}
   cancel-in-progress: true
 
 jobs:
   verify:
-    name: verify + bundler + Playwright journeys
+    name: verify + affected Playwright journeys
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
-      - name: Checkout
+      - name: Checkout full history for suite routing
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -46,16 +49,57 @@ jobs:
           node-version: '22'
           cache: 'npm'
 
+      - name: Determine affected browser journeys
+        id: scope
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          force_full=false
+          if [ "${{ github.event_name }}" = "schedule" ] \
+            || [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            range="HEAD~1..HEAD"
+            force_full=true
+          elif [ "${{ github.event_name }}" = "pull_request" ]; then
+            git fetch --no-tags --depth=200 origin "${{ github.base_ref }}" 2>/dev/null \
+              || git fetch --no-tags origin "${{ github.base_ref }}" 2>/dev/null || true
+            base="$(git merge-base "origin/${{ github.base_ref }}" HEAD 2>/dev/null || true)"
+            if [ -n "$base" ]; then
+              range="$base...HEAD"
+            else
+              range="HEAD~1..HEAD"
+              force_full=true
+            fi
+          elif [ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ] \
+            && git cat-file -e "${{ github.event.before }}^{commit}" 2>/dev/null; then
+            range="${{ github.event.before }}..${{ github.sha }}"
+          else
+            range="HEAD~1..HEAD"
+            force_full=true
+          fi
+
+          changed="$(git diff --name-only "$range")"
+          printf 'diff range: %s\nchanged files:\n%s\n' "$range" "$changed"
+          if [ "$force_full" = true ]; then
+            printf '%s\n' "$changed" | node scripts/ci-e2e-scope.mjs mobile --full | tee -a "$GITHUB_OUTPUT"
+          else
+            printf '%s\n' "$changed" | node scripts/ci-e2e-scope.mjs mobile | tee -a "$GITHUB_OUTPUT"
+          fi
+
       - name: Install workspace dependencies
         run: npm ci
 
       - name: Check retired terminology
         run: node scripts/check-lexicon.mjs
 
+      - name: Test E2E scope classifier
+        run: node --test scripts/ci-e2e-scope.test.mjs
+
       - name: Run mobile verify gate
         run: npm run verify --workspace axiomancer-mobile
 
       - name: Export and inspect the web bundle once
+        if: steps.scope.outputs.run_integration == 'true'
         run: npm run smoke:bundler --workspace axiomancer-mobile
         env:
           BUILD_PROFILE: preview
@@ -63,24 +107,29 @@ jobs:
           SMOKE_BUNDLER_OUTPUT_DIR: '.smoke-dist'
 
       - name: Install Playwright Chromium
+        if: steps.scope.outputs.run_integration == 'true'
         run: npx playwright install --with-deps chromium
 
       - name: Hazard playthrough (both routes)
+        if: steps.scope.outputs.hazard == 'true'
         run: npm run e2e:hazard --workspace axiomancer-mobile
         env:
           HAZARD_E2E_REUSE_EXPORT: '1'
 
       - name: Gathering playthrough (both stances)
+        if: steps.scope.outputs.gathering == 'true'
         run: npm run e2e:gathering --workspace axiomancer-mobile
         env:
           GATHER_E2E_REUSE_EXPORT: '1'
 
       - name: Encounter routing (every minigame trigger to its screen)
+        if: steps.scope.outputs.encounters == 'true'
         run: npm run e2e:encounters --workspace axiomancer-mobile
         env:
           ENCOUNTER_E2E_REUSE_EXPORT: '1'
 
       - name: Combat playthrough (Hazard-Pattern Combat)
+        if: steps.scope.outputs.combat == 'true'
         run: npm run e2e:combat --workspace axiomancer-mobile
         env:
           COMBAT_E2E_REUSE_EXPORT: '1'

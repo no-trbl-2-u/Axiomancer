@@ -1,0 +1,107 @@
+import assert from 'node:assert/strict'
+import test from 'node:test'
+
+import { classifyE2EScope } from './ci-e2e-scope.mjs'
+
+const classify = (owner, files, forceFull = false) => classifyE2EScope({ owner, files, forceFull })
+
+test('mobile hazard screen selects hazard plus its route-entry evidence', () => {
+    const result = classify('mobile', ['axiomancer-mobile/app/hazard/index.tsx'])
+    assert.equal(result.hazard, true)
+    assert.equal(result.encounters, true)
+    assert.equal(result.gathering, false)
+    assert.equal(result.combat, false)
+    assert.equal(result.full, false)
+})
+
+test('mobile subsystem component selects only its owned journey', () => {
+    const result = classify('mobile', ['axiomancer-mobile/components/gathering/PlotCard.tsx'])
+    assert.equal(result.gathering, true)
+    assert.equal(result.hazard, false)
+    assert.equal(result.encounters, false)
+    assert.equal(result.combat, false)
+})
+
+test('mixed mobile subsystems select the union', () => {
+    const result = classify('mobile', [
+        'axiomancer-mobile/components/hazard/HazardCard.tsx',
+        'axiomancer-mobile/components/combat/encounter/CombatBoard.tsx',
+    ])
+    assert.equal(result.hazard, true)
+    assert.equal(result.combat, true)
+    assert.equal(result.full, false)
+})
+
+test('shared mobile runtime path fails closed to every journey', () => {
+    const result = classify('mobile', ['axiomancer-mobile/store/index.ts'])
+    assert.deepEqual(
+        [result.hazard, result.gathering, result.encounters, result.combat],
+        [true, true, true, true],
+    )
+    assert.equal(result.full, true)
+})
+
+test('mobile runtime asset changes fail closed while screenshots do not', () => {
+    assert.equal(classify('mobile', ['axiomancer-mobile/assets/images/arena.webp']).full, true)
+    assert.equal(classify('mobile', ['axiomancer-mobile/screenshots/arena.webp']).run_integration, false)
+})
+
+test('mobile docs and hermetic tests do not launch browser evidence', () => {
+    const result = classify('mobile', [
+        'axiomancer-mobile/docs/combat.md',
+        'axiomancer-mobile/components/hazard/__tests__/HazardCard.test.tsx',
+    ])
+    assert.equal(result.run_integration, false)
+})
+
+test('mechanics Cards changes select combat and the editor contract', () => {
+    const result = classify('mechanics', ['axiomancer-mechanics/src/Cards/cards.library.ts'])
+    assert.equal(result.mobile, true)
+    assert.equal(result.editor, true)
+    assert.equal(result.combat, true)
+    assert.equal(result.hazard, false)
+    assert.equal(result.full, false)
+})
+
+test('mechanics Hazard and Gathering changes select their own journeys', () => {
+    const result = classify('mechanics', [
+        'axiomancer-mechanics/src/World/Hazard/hazards.ts',
+        'axiomancer-mechanics/src/World/Gathering/gathering.ts',
+    ])
+    assert.equal(result.hazard, true)
+    assert.equal(result.gathering, true)
+    assert.equal(result.encounters, false)
+    assert.equal(result.combat, false)
+})
+
+test('mechanics quest/rest/loot changes select encounter routing', () => {
+    const result = classify('mechanics', ['axiomancer-mechanics/src/World/QuestBoard/quests.ts'])
+    assert.equal(result.encounters, true)
+    assert.equal(result.hazard, false)
+    assert.equal(result.editor, false)
+})
+
+test('uncoupled mechanics source remains mechanics-only', () => {
+    const result = classify('mechanics', ['axiomancer-mechanics/src/Inventory/inventory.ts'])
+    assert.equal(result.mobile, false)
+    assert.equal(result.editor, false)
+    assert.equal(result.run_integration, false)
+})
+
+test('mechanics public index and forced backstop run everything', () => {
+    for (const result of [
+        classify('mechanics', ['axiomancer-mechanics/src/index.ts']),
+        classify('mobile', [], true),
+    ]) {
+        assert.equal(result.full, true)
+        assert.deepEqual(
+            [result.hazard, result.gathering, result.encounters, result.combat],
+            [true, true, true, true],
+        )
+    }
+})
+
+test('classifier changes fail closed in either owner', () => {
+    assert.equal(classify('mobile', ['scripts/ci-e2e-scope.mjs']).full, true)
+    assert.equal(classify('mechanics', ['scripts/ci-e2e-scope.mjs']).full, true)
+})

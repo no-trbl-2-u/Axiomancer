@@ -3,23 +3,25 @@ name: verify-mechanics
 # Sole owner for mechanics and root dependency changes. Mobile and the card
 # editor consume mechanics as local source, so this job detects the documented
 # cross-package impact paths and runs the affected consumer gates in the same
-# installed environment. Unknown, lockfile, and workflow changes fail closed.
-#
-# Cards-library data-only edits retain their former carve-out: mechanics,
-# mobile unit/type checks, editor contract checks, and the real Expo export all
-# run, while the slow browser journeys are skipped.
+# installed environment. Each known subsystem selects its own browser journey;
+# shared, lockfile, workflow, classifier, and unknown-history changes fail
+# closed to the full suite.
 
 on:
   push:
     branches: [main]
     paths:
       - 'axiomancer-mechanics/**'
+      - 'scripts/ci-e2e-scope.mjs'
+      - 'scripts/ci-e2e-scope.test.mjs'
       - '.github/workflows/verify-mechanics.yml'
       - 'package-lock.json'
   pull_request:
     branches: [main]
     paths:
       - 'axiomancer-mechanics/**'
+      - 'scripts/ci-e2e-scope.mjs'
+      - 'scripts/ci-e2e-scope.test.mjs'
       - '.github/workflows/verify-mechanics.yml'
       - 'package-lock.json'
 
@@ -50,7 +52,7 @@ jobs:
       - name: Install workspace dependencies once
         run: npm ci
 
-      - name: Determine cross-package impact
+      - name: Determine affected consumers and browser journeys
         id: impact
         shell: bash
         run: |
@@ -77,64 +79,20 @@ jobs:
 
           changed="$(git diff --name-only "$range")"
           printf 'diff range: %s\nchanged files:\n%s\n' "$range" "$changed"
-
-          mobile_paths=(
-            'axiomancer-mechanics/src/Combat/'
-            'axiomancer-mechanics/src/Cards/'
-            'axiomancer-mechanics/src/Effects/'
-            'axiomancer-mechanics/src/index.ts'
-            'axiomancer-mechanics/src/World/LootCache/'
-            'axiomancer-mechanics/src/World/Gathering/'
-            'axiomancer-mechanics/src/World/Hazard/'
-            'axiomancer-mechanics/src/World/Rest/'
-            'axiomancer-mechanics/src/World/QuestBoard/'
-          )
-          editor_paths=(
-            'axiomancer-mechanics/src/Cards/'
-            'axiomancer-mechanics/src/Effects/'
-            'axiomancer-mechanics/src/Combat/'
-            'axiomancer-mechanics/src/index.ts'
-          )
-
-          mobile=false
-          editor=false
-          run_heavy=false
-          card_only=false
-
-          if git diff --name-only "$range" -- "${mobile_paths[@]}" | grep -q .; then
-            mobile=true
+          if [ "$force_full" = true ]; then
+            printf '%s\n' "$changed" | node scripts/ci-e2e-scope.mjs mechanics --full | tee -a "$GITHUB_OUTPUT"
+          else
+            printf '%s\n' "$changed" | node scripts/ci-e2e-scope.mjs mechanics | tee -a "$GITHUB_OUTPUT"
           fi
-          if git diff --name-only "$range" -- "${editor_paths[@]}" | grep -q .; then
-            editor=true
-          fi
-
-          trigger_changed="$(printf '%s\n' "$changed" | grep -E '^(axiomancer-mechanics/|package-lock\.json$|\.github/workflows/verify-mechanics\.yml$)' || true)"
-          if [ -n "$trigger_changed" ] \
-            && ! printf '%s\n' "$trigger_changed" | grep -Fvx 'axiomancer-mechanics/src/Cards/cards.library.ts' >/dev/null; then
-            card_only=true
-          fi
-
-          if [ "$force_full" = true ] \
-            || printf '%s\n' "$changed" | grep -Eq '^(package-lock\.json|\.github/workflows/verify-mechanics\.yml)$'; then
-            mobile=true
-            editor=true
-            run_heavy=true
-          elif [ "$mobile" = true ] && [ "$card_only" != true ]; then
-            run_heavy=true
-          fi
-
-          echo "mobile=$mobile" >> "$GITHUB_OUTPUT"
-          echo "editor=$editor" >> "$GITHUB_OUTPUT"
-          echo "run_heavy=$run_heavy" >> "$GITHUB_OUTPUT"
-          echo "card_only=$card_only" >> "$GITHUB_OUTPUT"
-          printf 'mobile=%s editor=%s run_heavy=%s card_only=%s\n' \
-            "$mobile" "$editor" "$run_heavy" "$card_only"
 
       - name: Baseline freshness (soft warning)
         run: node scripts/check-baseline-freshness.mjs
 
       - name: Check retired terminology
         run: node scripts/check-lexicon.mjs
+
+      - name: Test E2E scope classifier
+        run: node --test scripts/ci-e2e-scope.test.mjs
 
       - name: Skip-comment gate
         run: node automation/check-skip-comments.mjs
@@ -152,7 +110,7 @@ jobs:
         run: npm run type-check --workspace axiomancer-card-editor
 
       - name: Export and inspect the affected mobile bundle once
-        if: steps.impact.outputs.mobile == 'true'
+        if: steps.impact.outputs.run_integration == 'true'
         run: npm run smoke:bundler --workspace axiomancer-mobile
         env:
           BUILD_PROFILE: preview
@@ -160,29 +118,29 @@ jobs:
           SMOKE_BUNDLER_OUTPUT_DIR: '.smoke-dist'
 
       - name: Install Playwright Chromium
-        if: steps.impact.outputs.run_heavy == 'true'
+        if: steps.impact.outputs.run_integration == 'true'
         run: npx playwright install --with-deps chromium
 
       - name: Hazard playthrough (both routes)
-        if: steps.impact.outputs.run_heavy == 'true'
+        if: steps.impact.outputs.hazard == 'true'
         run: npm run e2e:hazard --workspace axiomancer-mobile
         env:
           HAZARD_E2E_REUSE_EXPORT: '1'
 
       - name: Gathering playthrough (both stances)
-        if: steps.impact.outputs.run_heavy == 'true'
+        if: steps.impact.outputs.gathering == 'true'
         run: npm run e2e:gathering --workspace axiomancer-mobile
         env:
           GATHER_E2E_REUSE_EXPORT: '1'
 
       - name: Encounter routing (every minigame trigger to its screen)
-        if: steps.impact.outputs.run_heavy == 'true'
+        if: steps.impact.outputs.encounters == 'true'
         run: npm run e2e:encounters --workspace axiomancer-mobile
         env:
           ENCOUNTER_E2E_REUSE_EXPORT: '1'
 
       - name: Combat playthrough (Hazard-Pattern Combat)
-        if: steps.impact.outputs.run_heavy == 'true'
+        if: steps.impact.outputs.combat == 'true'
         run: npm run e2e:combat --workspace axiomancer-mobile
         env:
           COMBAT_E2E_REUSE_EXPORT: '1'

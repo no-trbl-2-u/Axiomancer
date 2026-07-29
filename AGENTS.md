@@ -76,8 +76,12 @@ on `main` for half a day.
 This checklist is also mechanized in CI: the owning job in
 `.github/workflows/verify-mechanics.yml` diffs the pushed range against
 the impact paths above and runs the mobile verify / editor type-check
-in the same installed environment. Run them locally anyway — CI
-catching it means the break already reached `main`.
+in the same installed environment. Browser evidence is routed by subsystem:
+Combat/Cards/Effects → Combat; Hazard → Hazard; Gathering → Gathering;
+LootCache/Rest/QuestBoard → Encounter routing. Shared, lockfile, workflow,
+classifier, or unknown-history changes fail closed to every journey. Run the
+consumer gates locally anyway — CI catching a break means it already reached
+`main`.
 
 The
 mechanics-only tuning skills (`combat-playtest`, `deck-tuning`,
