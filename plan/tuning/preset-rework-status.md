@@ -19,7 +19,10 @@ Each preset appears exactly once below.
 
 ## Player audited
 
-- **Erosion** — T considers it in a good place. Hold it out of the rework queue unless new player evidence or a regression reopens it.
+None. T's later authority, recorded in
+[`COMBAT_SYSTEM_FOUNDATIONAL_REDESIGN_PLAN.md`](../ideas/COMBAT_SYSTEM_FOUNDATIONAL_REDESIGN_PLAN.md),
+corrected the earlier Erosion classification: it has not received a qualifying
+player audit.
 
 ## Planned
 
@@ -27,6 +30,8 @@ Each preset appears exactly once below.
 
 ## Untouched
 
+- **Erosion** — later owner authority supersedes the stale player-audited row;
+  cross-preset screens and wording work do not promote it from this category.
 - **Foundry**
 - **Penitent**
 - **Standstill**

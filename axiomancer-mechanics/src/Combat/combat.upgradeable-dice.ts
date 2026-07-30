@@ -5,8 +5,8 @@
  * Heart (purple) at 1 special / 2 mana / 3 miss, and the wild Gold die at
  * 1 special / 1 mana / 4 miss. Face semantics: a MANA die may power one paid
  * line of its color (gold = any color); a MISS is dead; a SPECIAL powers a
- * card AND fires its gear payload (+2◆ by default) when USED (the provisional
- * use-triggered rule, one switchable constant below).
+ * card AND fires its gear payload (+2◆ by default) when USED (the ratified
+ * use-triggered rule, kept as one switchable constant below).
  *
  * The dice are immutable; ALL progression lives on DIE GEAR (D5). D2 ships the
  * gear INTERFACE with the hardcoded default loadout (`DEFAULT_DIE_GEAR`).
@@ -69,9 +69,9 @@ export const PRESS_FATE_COST = 1;
 export const OVERHEAT_CRACK_CHANCE = 0.35;
 
 /**
- * §6 PROVISIONAL (owner, D1 — may flip to fires-on-roll after playthroughs):
- * a SPECIAL face fires its payload only when the die is USED to power a card.
- * Keep this the single switch — nothing else may encode the trigger timing.
+ * §6 owner-ratified fires-on-use rule (D7): a SPECIAL face fires its payload
+ * only when the die is USED to power a card. Keep this the single switch —
+ * nothing else may encode the trigger timing.
  */
 export const SPECIAL_FIRES_ON_USE = true;
 

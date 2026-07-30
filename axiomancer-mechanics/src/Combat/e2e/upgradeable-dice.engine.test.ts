@@ -5,7 +5,7 @@
  *   §1 ROLL LAW — 4 fixed-color dice every round, faces from the gear tables;
  *      the color law gates powering (gold = wild); no draft, no single-die law
  *   §1 SPECIAL — fires its gear payload (+2◆) only when the die is USED
- *      (the provisional use-triggered rule), including from the Reserve
+ *      (the owner-ratified use-triggered rule), including from the Reserve
  *   §1 CEILING — 7 die objects; overflow converts to +1◆, never silently drops
  *   §2 STANCE — stance = last PAID card's stance; FREE lines never shift it;
  *      open stance checks resolve at phase end (punishes x1.5 / yields x0.5+1◆);
@@ -182,7 +182,7 @@ describe('spec 33 §1 — the four-die roll law', () => {
 
 // ── §1 — SPECIAL fires on use ───────────────────────────────────────────────
 
-describe('spec 33 §1/§6 — the SPECIAL payload (provisional use-triggered rule)', () => {
+describe('spec 33 §1/§6 — the SPECIAL payload (ratified use-triggered rule)', () => {
     it('a special die USED to power a card fires +2◆', () => {
         const s = open([SPECIAL, MANA, MANA, MANA]);
         const before = s.conviction;

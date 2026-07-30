@@ -648,7 +648,7 @@ export type CombatEvent =
     // combat) is granted and momentum resets to null.
     | { kind: 'momentum-surged'; dieId: string }
     // A SPECIAL face fired its gear payload because its die was USED to power a
-    // card (the provisional use-triggered rule).
+    // card (the owner-ratified use-triggered rule).
     | { kind: 'special-fired'; dieId: string; conviction: number; total: number }
     // Press Fate (flag-on form): 1 Conviction rerolled ALL miss faces, honestly.
     | { kind: 'press-fate-rerolled'; dieIds: string[]; cost: number }

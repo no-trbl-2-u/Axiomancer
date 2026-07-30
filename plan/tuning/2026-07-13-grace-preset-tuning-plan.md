@@ -17,15 +17,21 @@
 **Primary path:** SWAY, RAPPORT, explicit capitulation choice
 **Excluded:** Every other preset, including Erosion and Oratory
 
-### Shipped deck
+### Shipped deck — current static recipe
 
 - 4 × `soft-word`
 - 4 × `second-thoughts`
 - 2 × `the-olive-branch`
-- 2 × `measured-answer`
+- 2 × `grace-under-fire`
 - 1 × `irresistible-grace`
 - 1 × `ouroboros`
 - 1 × `crumbling-resolve`
+
+Under the normal Upgradeable-Dice model, Grace's valve replaces one
+`soft-word` with one `change-of-heart`. Effective play is therefore
+`3 × soft-word`, `1 × change-of-heart`, and the remaining static recipe above.
+All new marker and decomposition evidence must declare `diceModel: upgradeable`
+and reason about this effective deck rather than the pre-valve list.
 
 ## Historical marker — reproduction required
 
@@ -135,8 +141,8 @@ These experiments were run and reverted. Do not repeat them without new evidence
 
 **Steps:**
 
-1. Inspect FREE/PAID use for all seven unique cards.
-2. Confirm `measured-answer`'s currently starved PAID line is a policy problem or a real card-economy problem before changing it.
+1. Inspect FREE/PAID use for every card in the effective Upgradeable-Dice Grace deck, including the `change-of-heart` valve.
+2. Confirm whether `grace-under-fire` and `change-of-heart` are reached and used under the failing policies before changing card economy.
 3. Measure how often `irresistible-grace`, `ouroboros`, and `crumbling-resolve` enter play before defeat.
 4. Measure whether failures die from inadequate RAPPORT/Guard, SWAY decay, inaccessible paid lines, or an unreachable resolve target.
 5. Select one Grace-owned lever only.

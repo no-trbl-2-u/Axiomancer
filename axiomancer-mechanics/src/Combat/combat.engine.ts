@@ -1059,7 +1059,7 @@ export function playCombatCard(
 
 /**
  * Spec 33 §2/§3 (flag-gated) — post-play bookkeeping for a LANDED PAID play:
- * 1. SPECIAL payload (§1, provisional use-triggered rule): the powering die's
+ * 1. SPECIAL payload (§1, owner-ratified use-triggered rule): the powering die's
  *    special face fires its gear payload (+◆) because it was USED.
  * 2. Stance-from-cards: the player's stance becomes this card's stance.
  * 3. Momentum: start / advance / break-to-NULL (owner-locked D1); a completed
@@ -1080,7 +1080,7 @@ function applyStanceAndMomentumV2(
     if (state.phase === 'complete') return transition;
     const events: CombatEvent[] = [];
 
-    // 1. SPECIAL fires on USE (the single provisional switch).
+    // 1. SPECIAL fires on USE (the single ratified switch).
     if (SPECIAL_FIRES_ON_USE && played.dieId) {
         const preDie = preState.dice.find(d => d.id === played.dieId)
             ?? (preState.reserve ?? []).find(d => d.id === played.dieId);
