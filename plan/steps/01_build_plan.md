@@ -1003,6 +1003,23 @@ See the status rows above; generate briefs on demand.
 (Empty until phases ship. Add `[-]` rows for partial-but-shipped
 phases with linked notes here.)
 
+## Queue change log
+
+> Append-only. Records provenance whenever T, via Hermes,
+> directs a mutation of this file's queue (add / remove /
+> reorder / reprioritize / split / merge / skip / block / unblock
+> / material scope change to a phase row). Filed via `/oversight`
+> 2026-07-30 (issue #129) — forward-looking only; existing queue
+> history above is NOT reconstructed into this log. The entry
+> must land in the SAME commit as the queue mutation it records.
+> Format per row: date, actor, action + affected phase ID(s),
+> confirmation this was T's request, T's stated reason (or
+> "reason not stated" — never invent one), and the resulting
+> commit/issue/phase-brief when available.
+
+(Empty — no Hermes-originated queue mutation has landed since
+this log was created.)
+
 ## Phase log (commit hashes)
 
 - phase 0 — (adoption commit) — nexus methodology adopted

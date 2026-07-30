@@ -245,6 +245,17 @@ For each answer:
   plan edit, apply. If ambiguous, write to `plan/AUDIT.md` as
   `[needs-user-call]` and tell the user.
 
+**Queue-mutation provenance** (adopted via /oversight 2026-07-30,
+issue #129): if any applied answer changes
+`plan/steps/01_build_plan.md`'s queue (abandon/promote a phase,
+reorder, reprioritize, split/merge, block/unblock, or otherwise
+materially change a phase row), add a row to that file's
+`## Queue change log` section in the **same commit** — date,
+actor (`T via Hermes` when the instruction came via Hermes,
+otherwise the actual source), the action + affected phase
+ID(s), confirmation this was T's request, T's stated reason (or
+"reason not stated"), and the resulting commit/issue/brief.
+
 ### Step 6 — Commit + push
 
 ```bash

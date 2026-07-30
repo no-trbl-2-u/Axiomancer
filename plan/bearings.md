@@ -224,6 +224,16 @@ ambiguity.)
   code change, so both brains drain one queue via `/triage`. If the
   loop finds shipped code with no queue trace, treat it as drift and
   surface it rather than double-shipping.
+- **Hermes-originated queue mutations get a provenance log entry**
+  (adopted via /oversight 2026-07-30, issue #129): any time a
+  Hermes-originated instruction changes `plan/steps/01_build_plan.md`'s
+  queue (add/remove/reorder/reprioritize/split/merge/skip/block/
+  unblock/material scope change to a phase row), the same commit adds
+  a row to that file's `## Queue change log` section — date, actor
+  (`T via Hermes`), the action + affected phase IDs, confirmation T
+  requested it, T's stated reason (or "reason not stated"), and the
+  resulting commit/issue/brief. Forward-looking only; do not
+  reconstruct pre-2026-07-30 queue history into the log.
 
 ## AUDIT category taxonomy (this project)
 
