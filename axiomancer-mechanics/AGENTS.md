@@ -92,6 +92,11 @@ Never squash or amend after pushing unless explicitly asked.
   the project root when used. This file is gitignored and ephemeral.
 - **Spec update**: If using a spec file to implement a change, update the
   spec as you walk through the steps.
+- **Wording-pin discipline**: `grace-card-wording` and the paid-summary
+  honesty guard (`paidText` in `src/Combat/combat.cards.ts`) pin AUTHORED
+  card prose to its underlying payload. If you reword a card's authored
+  summary, update its pin in the same commit — never silence or loosen a
+  guard just to make a wording change land.
 
 ### Hermetic E2E testing — REQUIRED
 

@@ -158,6 +158,12 @@ working in a package.
 - `npm run verify --workspace axiomancer-card-editor` — type-check (incl. the
   `mechanics.contract.ts` drift assertions) + lint + build
   (`type-check` alone remains the fast cross-package gate)
+- **Fresh `.claude/worktrees/*` checkouts**: run `npm install` at the
+  worktree root before verifying. A worktree has no per-workspace
+  `node_modules`, so `tsc` resolves the hoisted root TypeScript instead
+  of a package's pinned version (mismatched `module`/`moduleResolution`
+  options between them can fail with e.g. `TS5095`) — installing first
+  avoids the detour.
 
 ## Nexus — the autonomous loop (live)
 
