@@ -127,3 +127,5 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-07-29T19:51:31Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-07-29T20:03:03Z | subagent | Explore | claude-sonnet-5 | main | Locate draft-scorer starvation code |
 | 2026-07-30T09:11:09Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-07-30T10:52:41Z | slash-prompt | /digest | unknown | user/ci | /digest |
+| 2026-07-30T10:52:43Z | skill | digest | unknown | main | - |

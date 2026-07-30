@@ -14,6 +14,42 @@
 
 ## Pending
 
+### Doctrine-curve confirmation (digest 2026-07-30, reduced-nightly): first default-Upgradeable-Dice nightly read — mid near-total collapse, early down sharply, late still dead flat
+- category: content
+- impact: 8
+- ease: 3
+- detail: `/digest`'s reduced-nightly re-measure at `aa21018b` (blind
+  policy-pick, doctrine early ~80 / mid ~50 / late 25-35 / impossible 0):
+  early 59.9% (was 77.4% at the 2026-07-21 digest's `c0562bb3` read —
+  down 17.4pts), **mid 4.7%** (was 22.9% — down 18.2pts, the softest
+  mid read logged in any digest to date), **late 0%** (unchanged —
+  another measurement running at exactly zero), impossible 0% (in
+  band, unchanged). **Not directly comparable to prior digest
+  entries**: `afd26600` (2026-07-23, "fix(playtest): default witnesses
+  to Upgradeable Dice") flipped `combat-playtest`'s default dice model
+  from legacy to spec-33 Upgradeable Dice — same CLI invocation
+  (`--stage=all --policy=all --deck=policy-pick --runs=30 --seed=1
+  --cards --json`), different model measured. This is the first
+  reduced-nightly baseline to carry a `diceModel` field at all
+  (`"upgradeable"`); the `c0562bb3` baseline predates the field and was
+  measured under the old legacy-dice default, so this drop is not
+  evidence of fresh regression — it's the flag-on curve becoming
+  visible by default instead of only under an explicit flag. The
+  direction lines up with the D8 flag-on gate rerun
+  (`plan/tuning/2026-07-18-d8-preset-dice-valves.md`): "mid is a cliff
+  for 8/10" preset decks under flag-on — this is that same cliff. The
+  6-day gap since the last digest (`night` workflow failed
+  2026-07-24 through 2026-07-29 on a GitHub Actions billing hold, now
+  resolved — see this digest's "Needs you" panel) means no digest
+  measured the interim `afd26600`-era commits until now.
+- next: /iterate — re-anchor future digest doctrine-curve comparisons
+  against this reading (stop diffing against pre-`afd26600` legacy-dice
+  numbers). `/deck-tuning` owns the actual repair via the existing
+  "Post-D8 flag-on curve repair" candidate in
+  `plan/PHASE_CANDIDATES.md` — this confirms it's still live and, now
+  that flag-on is the default nightly measurement, more urgent than its
+  filing date suggests.
+
 ### 2026-07-20 missing-layers survey — unpromoted findings (audio, settings, a11y, perf, flags, save export)
 - category: gap
 - impact: 5

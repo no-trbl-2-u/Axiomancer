@@ -917,7 +917,7 @@
    "freeGlyph": "◉",
    "freeKw": "MARK",
    "freeVal": "1",
-   "paid": "REARGUE — flip the foe's BLEED and POISON into each other, each landing +1 intensity."
+   "paid": "REARGUE — Convert all enemy BLEED to POISON and all POISON to BLEED, then add 1 intensity to each."
   },
   "chips": [
    {
@@ -1261,7 +1261,7 @@
    "freeGlyph": "◉",
    "freeKw": "MARK",
    "freeVal": "1",
-   "paid": "PROLONG every DoT you have on the foe by 1 turn."
+   "paid": "PROLONG every DoT on the enemy by 1 turn."
   },
   "chips": [
    {
@@ -2052,7 +2052,7 @@
    "freeGlyph": "❡",
    "freeKw": "PREMISE",
    "freeVal": "1",
-   "paid": "MARK 1 for 2 turns. POISON 1 for 2 turns. Gain 2 PREMISES."
+   "paid": "Apply MARK 1. Inflict POISON 1 for 2 turns. Gain 2 PREMISES."
   },
   "chips": [
    {
@@ -2518,7 +2518,7 @@
    "freeGlyph": "◉",
    "freeKw": "MARK",
    "freeVal": "1",
-   "paid": "poison i1 d2 + re-roll every spent/dead die (2/play)."
+   "paid": "Inflict POISON 1 for 2 turns. Reroll all spent, exhausted, or X dice in your tray except floating dice."
   },
   "chips": [
    {
@@ -2688,7 +2688,7 @@
    "freeGlyph": "◉",
    "freeKw": "MARK",
    "freeVal": "1",
-   "paid": "RUPTURE ALL with 50% more force, SIPHON 35%, then RECALL 2 cards — their FREE lines fire now."
+   "paid": "RUPTURE ALL for 50% more damage. SIPHON 35% of the RUPTURE damage. RECALL 2 cards; fire their FREE lines now."
   },
   "chips": [
    {
@@ -3193,7 +3193,7 @@
    "freeGlyph": "◉",
    "freeKw": "MARK",
    "freeVal": "1",
-   "paid": "Afflict with POISON 1 for 4 turns."
+   "paid": "Inflict POISON 1 for 4 turns."
   },
   "chips": [
    {
@@ -3360,7 +3360,7 @@
    "freeGlyph": "☠",
    "freeKw": "CURSE",
    "freeVal": "3r",
-   "paid": "At round end, the enemy takes this round's POISON and BLEED damage again. Costs 1 die. Attaches to the enemy."
+   "paid": "At the end of each round, deal the enemy's POISON and BLEED damage from that round again. Costs 1 die. Attaches to the enemy."
   },
   "chips": [
    {
@@ -3405,7 +3405,7 @@
   ],
   "lines": [
    "FREE — the printed passive for 3 rounds.",
-   "PAID (rest of combat) — At round end, the enemy takes this round's POISON and BLEED damage again. (attaches to the enemy)"
+   "PAID (rest of combat) — At the end of each round, deal the enemy's POISON and BLEED damage from that round again. (attaches to the enemy)"
   ]
  },
  {
@@ -3992,7 +3992,7 @@
    "freeGlyph": "◉",
    "freeKw": "MARK",
    "freeVal": "1",
-   "paid": "poison i2 d2 (4/play)."
+   "paid": "Inflict POISON 2 for 2 turns."
   },
   "chips": [
    {
@@ -4280,7 +4280,7 @@
    "freeGlyph": "❖",
    "freeKw": "ENCHANT",
    "freeVal": "3r",
-   "paid": "Your BLEED and POISON land +1 intensity and +1 duration."
+   "paid": "When a PAID line includes BLEED or POISON, every enemy status on that line gains +1 intensity and +1 duration."
   },
   "chips": [
    {
@@ -4325,7 +4325,7 @@
   ],
   "lines": [
    "FREE — the printed passive for 3 rounds.",
-   "PAID (rest of combat) — Your BLEED and POISON land +1 intensity and +1 duration."
+   "PAID (rest of combat) — When a PAID line includes BLEED or POISON, every enemy status on that line gains +1 intensity and +1 duration."
   ]
  },
  {
