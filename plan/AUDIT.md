@@ -104,10 +104,17 @@
   comparison lane. The mechanics module remains default-OFF for hermetic test
   isolation. Do not resurrect the stale D10-D12 teardown branch.
 
-### [user-issue #129] [HIGH] Log T's provenance for every Hermes-originated queue change
+### [x] [user-issue #129] [HIGH] Log T's provenance for every Hermes-originated queue change — RESOLVED 2026-07-30 (commit 4284562a)
 - category: external-issue
 - impact: 6
 - ease: 6
+- resolution: added a forward-looking "## Queue change log" section to
+  `plan/steps/01_build_plan.md` (empty, format spec inline). Requirement to
+  land a same-commit entry on every Hermes-originated queue mutation is now
+  recorded in both `plan/bearings.md` (new standing-decision bullet) and
+  `skills/oversight.md` §6 Step 5 (the skill that applies most queue-
+  mutating adjustments). Pre-2026-07-30 queue history was NOT reconstructed
+  per the finding's explicit instruction.
 - detail: filed 2026-07-19 by the owner via Hermes. T asked that any time
   the plan queue changes, a log records that T asked for it and why (when
   given). Requirement: an append-only "Queue change log" section in
@@ -122,7 +129,6 @@
   this entry land in the SAME commit as each Hermes-originated queue
   mutation going forward. Do NOT rewrite existing queue history as
   reconstruction — this is a forward-looking log, starting now.
-- next: /iterate will pick up; reference #129 in commit body.
 
 ### hazard/gathering "paradox-token" reward vocabulary outlives the card category
 - category: divergence
