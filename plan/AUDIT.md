@@ -816,6 +816,12 @@
   "trailer present, didn't fire" (#83, #151, #155) vs. the ~9 "trailer
   missing entirely" cases — two distinct failure populations under one
   row.
+- update 2026-07-30: a fourth instance — #129 (`user-issue`-routed
+  finding, Queue change log fix) carried a `Closes #129` trailer on its
+  shipping commit (`4284562a`, direct push to `main`, verify green,
+  deploy:check reported no gated workflow for the docs-only diff) and
+  still didn't auto-close; closed by hand. Four-for-four now on
+  "trailer present, didn't fire" (#83, #151, #155, #129).
 
 ## Done
 
