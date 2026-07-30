@@ -765,30 +765,6 @@ one level down, in the routing helper `onApply` calls next).
 - suggested fix: owner call — bump small-face lines to 4-5 (layout
   risk: name/glyph crowding) or keep 3 and accept the ellipsis.
 
-### [LOW] [green-lit 2026-07-18] session doc-residue: three AGENTS/CLAUDE additions approved — land via /iterate
-- pass: session 2026-07-17 (measurement-freshness work)
-- viewport: n/a
-- category: docs
-- observation: three small doc additions were proposed to the owner
-  and awaited their call when this was filed: (1) AGENTS.md worktree
-  bootstrap note — fresh worktrees lack per-workspace node_modules,
-  so tsc resolves the hoisted TypeScript (5.9.3 vs the workspace's
-  6.0.3) and fails on tsconfig; "npm install at the worktree root
-  first" saves the detour. (2) Promote the PR auto-merge convention
-  from axiomancer-mobile/CLAUDE.md to root AGENTS.md (it applies
-  repo-wide). (3) Mechanics-side note on wording-pin discipline:
-  grace-card-wording + the paid-summary honesty guard pin AUTHORED
-  prose — reword a card and its pins in the same commit, never
-  silence a guard.
-- suggested fix: on green-light, land all three as one docs commit.
-- RESOLVED (owner call via /oversight 2026-07-18): **green-light all
-  three.** Decision recorded here; the docs edit itself is a shipped-path
-  change, so oversight does not land it — routed to `/iterate` to commit
-  all three as one docs commit (AGENTS.md worktree-bootstrap note; promote
-  the PR auto-merge convention mobile CLAUDE.md → root AGENTS.md; mechanics
-  wording-pin discipline note).
-- next: /iterate (land the three approved doc additions as one docs commit)
-
 ### [MED] general — color-match die riders are a fake condition; remove
 - pass: user-jot (commit 486dbded)
 - viewport: unspecified
@@ -800,6 +776,23 @@ one level down, in the routing helper `onApply` calls next).
 - source: user
 
 ## Done
+
+### [x] [LOW] [green-lit 2026-07-18] session doc-residue: three AGENTS/CLAUDE additions approved — RESOLVED 2026-07-30 (commit 7c20b4fd, issue #156)
+- pass: session 2026-07-17 (measurement-freshness work)
+- category: docs
+- resolution: (2), promoting the PR auto-merge convention to root
+  AGENTS.md, was already done in an earlier tick (root AGENTS.md
+  "Pull requests" section; axiomancer-mobile/CLAUDE.md now points at
+  it). This tick landed the two still-missing pieces as one docs
+  commit: (1) a worktree-bootstrap note in root AGENTS.md's Verify
+  section (fresh `.claude/worktrees/*` checkouts lack per-workspace
+  node_modules, so `tsc` can resolve the hoisted root TypeScript and
+  fail with e.g. TS5095 — `npm install` at the worktree root first
+  avoids the detour) and (3) a wording-pin discipline note in
+  axiomancer-mechanics/AGENTS.md's Caveats section (grace-card-wording
+  + the paid-summary honesty guard pin authored prose; reword a card
+  and its pin in the same commit). Root `npm run verify` green across
+  all three workspaces.
 
 ### [x] [HIGH] suppurating-curse can never fire on poison or bleed (RESOLVED 2026-07-12, commit b097efec — row was stale, closed via issue #145)
 - pass: owner-playtest 2026-07-12
