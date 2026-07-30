@@ -858,6 +858,15 @@
   deploy:check reported no gated workflow for the docs-only diff) and
   still didn't auto-close; closed by hand. Four-for-four now on
   "trailer present, didn't fire" (#83, #151, #155, #129).
+- update 2026-07-30 (second, same day): a fifth instance — #156 (plain
+  `/iterate` finding-mirror, the CRITIQUE.md doc-residue drain) carried
+  a `Closes #156` trailer on its shipping commit (`7c20b4fd`, direct
+  push to `main`, verify green, deploy:check reported no gated workflow
+  for this docs-only diff) and still didn't auto-close; closed by hand.
+  Five-for-five now on "trailer present, didn't fire" (#83, #151, #155,
+  #129, #156) — every observed docs-only-diff close has failed this
+  way; worth checking whether the pattern is specific to commits where
+  deploy:check finds no gated workflow to confirm against.
 
 ## Done
 
