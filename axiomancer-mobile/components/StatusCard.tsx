@@ -58,7 +58,7 @@ export function StatusCard(props: StatusCardProps = {}) {
         <View style={styles.nameCol}>
           <Text style={styles.name} numberOfLines={1}>{name}</Text>
           <SectionLabel size={9} style={styles.levelSubtitle}>
-            LEVEL · LVL {level} PILGRIM
+            LVL {level} · PILGRIM
           </SectionLabel>
         </View>
       </View>

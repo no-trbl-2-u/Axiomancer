@@ -106,11 +106,13 @@ describe('StatusCard: structural landmarks', () => {
         expect(tree.queryByText('MANA')).toBeNull();
     });
 
-    it('renders the LEVEL section label', () => {
+    it('renders the LEVEL section label without doubling the label (#157)', () => {
         const tree = mount(<StatusCard />);
         // Match the SectionLabel's text content; the LEVEL chip
-        // composes the formatted level number into a "LEVEL · LVL N PILGRIM"
-        // string.
-        expect(tree.queryByText(/^LEVEL · LVL/)).not.toBeNull();
+        // composes the formatted level number into a "LVL N · PILGRIM"
+        // string. Regression guard: must not read the level word twice
+        // back-to-back ("LEVEL · LVL N"), the critique pass 14 finding.
+        expect(tree.queryByText(/^LVL \d+ · PILGRIM$/)).not.toBeNull();
+        expect(tree.queryByText(/^LEVEL · LVL/)).toBeNull();
     });
 });
