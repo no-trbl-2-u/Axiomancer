@@ -1,7 +1,7 @@
 # Critique log
 
-> Last pass: 2026-07-17 at commit b4870384
-> Pass count: 13
+> Last pass: 2026-07-31 at commit 9a445281
+> Pass count: 14
 
 > External-observer feedback for Axiomancer. Populated by
 > `/critique` (which drives the local expo-web build with the
@@ -9,7 +9,53 @@
 > `/iterate`. See `skills/critique.md` for the contract and
 > `plan/bearings.md` § Surface for the local-build adaptation.
 
+> **[critique pass 14, 2026-07-31, commit 9a445281] Unattended `/march`
+> tick.** Used the non-MCP `critique:drive` transport (§3.5) at both
+> mobile (375×812) and desktop (1280×800) against the cold-enterable
+> screen set (title, onboarding/deck-picker, combat-encounter preview,
+> exploration hub). Zero console/page errors besides one benign
+> `navigator.vibrate` autoplay-policy warning on the combat preview
+> (an artifact of the headless driver never having received a user
+> gesture — not reproducible by a real player, not filed). Both
+> pass-13-reconfirmed HIGHs still hold fixed: MORALE renders arabic
+> "5 / 10" (not "v of x"), and the mobile title wordmark is fully
+> visible (no crop). One new finding below (exploration-hub level
+> subtitle). Also noticed, but declined to file: at the 1280×800
+> desktop viewport the title screen's art image (`aspectRatio: 1`,
+> full-width) overlays the CTA directly instead of sitting in its own
+> panel above it (as it cleanly does on mobile) — per
+> `plan/bearings.md` § Surface the web build is dev/e2e/playtesting-only
+> with no shipped desktop surface, so this has no real player impact;
+> noting here rather than filing so it isn't silently dropped if that
+> assumption ever changes. Still at the pass-13 plateau otherwise: an
+> **interactive** `/critique` (playtester + Playwright MCP reaching
+> live card-play) remains the next productive step for the unverified
+> in-combat rows (VITAE-vs-HP copy, DoT round-clock math, tuning-harness
+> starvation, doctrine-curve rebaseline) — a cold drive still can't
+> pass "ENTER COMBAT".
+
 ## Pending
+
+### [MED] exploration hub — player subtitle reads "LEVEL · LVL 1 PILGRIM", doubling the level label
+- pass: 14 (commit 9a445281)
+- viewport: mobile + desktop (375×812, 1280×800)
+- auth_state: anonymous
+- category: visual
+- observation: the exploration-hub `StatusCard` (name + level badge,
+  visible any time the player is on the map) renders a subtitle line
+  "LEVEL · LVL 1 PILGRIM" — the static section label "LEVEL" and the
+  value string's own "LVL {n}" both say the same thing back to back,
+  reading as a template/copy-paste leftover rather than intentional
+  flavor. Same shape as the earlier header MORALE "v of x" placeholder
+  bug (RESOLVED 2026-07-18, different component) — a label colliding
+  with its own value.
+- evidence: `StatusCard.tsx:61` — `` LEVEL · LVL {level} PILGRIM ``
+  inside a `SectionLabel`; confirmed live in the exploration-hub
+  cold-drive capture (mobile + desktop): "LEVEL · LVL 1 PILGRIM".
+- suggested fix: drop the redundant leading "LEVEL · " section label
+  (or drop "LVL" from the value string) so the subtitle reads e.g.
+  "LVL 1 · PILGRIM" once, not twice.
+- source: critique:drive (unattended pass, §3.5 non-MCP transport)
 
 ### [LOW] mobile — combat corner medallions occlude the fan-end hand cards' touch centers
 - pass: combat declutter residue (PR #135, 2026-07-19)
