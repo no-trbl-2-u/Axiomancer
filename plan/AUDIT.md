@@ -538,10 +538,21 @@
   simulateHazardPatternCombatDetailed; surface in PlaytestStageSummary +
   the report formatter)
 
-### [3.5] `critique:drive` combat capture stops at the pre-fight preview — in-combat card-face rows can't be re-validated unattended
+### [x] [3.5] `critique:drive` combat capture stops at the pre-fight preview — RESOLVED 2026-07-31 (issue #158)
 - category: gap
 - impact: 5
 - ease: 7
+- issue: #158
+- resolution: added a `combat-board` screen entry to
+  `axiomancer-mobile/scripts/critique-drive.mjs` mirroring
+  `combat-encounter-e2e.mjs`'s pattern (`combat-enter` click → re-kill
+  primer → wait for `combat-board`), captured alongside the existing
+  pre-fight `combat` preview. Verified locally: the new capture's DOM
+  text shows the live hand (Soft Word, Brace for Impact, Festering
+  Argument, Slippery Slope) and VITAE/phase HUD, where the old capture
+  only ever reached the pre-fight threat-sequence reveal. Factored the
+  shared primer-dismiss loop into `dismissCombatPrimer()` since both
+  screens now use it.
 - detail: the Phase 34 transport
   (`axiomancer-mobile/scripts/critique-drive.mjs`) navigates
   `/combat-encounter` and dismisses the tutorial primer, but never
