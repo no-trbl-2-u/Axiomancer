@@ -36,7 +36,7 @@
 
 ## Pending
 
-### [MED] exploration hub — player subtitle reads "LEVEL · LVL 1 PILGRIM", doubling the level label
+### [x] [MED] exploration hub — player subtitle reads "LEVEL · LVL 1 PILGRIM", doubling the level label — RESOLVED 2026-07-31 (commit 16c89f25, issue #157)
 - pass: 14 (commit 9a445281)
 - viewport: mobile + desktop (375×812, 1280×800)
 - auth_state: anonymous
@@ -52,10 +52,9 @@
 - evidence: `StatusCard.tsx:61` — `` LEVEL · LVL {level} PILGRIM ``
   inside a `SectionLabel`; confirmed live in the exploration-hub
   cold-drive capture (mobile + desktop): "LEVEL · LVL 1 PILGRIM".
-- suggested fix: drop the redundant leading "LEVEL · " section label
-  (or drop "LVL" from the value string) so the subtitle reads e.g.
-  "LVL 1 · PILGRIM" once, not twice.
-- source: critique:drive (unattended pass, §3.5 non-MCP transport)
+- resolution: dropped the redundant leading "LEVEL · " section label —
+  subtitle now reads "LVL {n} · PILGRIM" once. Updated the pinned test
+  string in `StatusCard.test.tsx` to match + added a regression guard.
 
 ### [LOW] mobile — combat corner medallions occlude the fan-end hand cards' touch centers
 - pass: combat declutter residue (PR #135, 2026-07-19)
