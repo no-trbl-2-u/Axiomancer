@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
-<title>Axiomancer</title>
+<title>Axiomancer digest — 2026-07-31</title>
 <style>
 :root {
   color-scheme: light dark;
@@ -203,15 +203,44 @@ footer.foot { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--b
 </style>
 </head>
 <body>
-<header class="top"><div class="wrap"><span class="home">Axiomancer</span></div></header>
+<header class="top"><div class="wrap"><a class="home" href="../log.html">← DevLog</a><span class="crumb">2026-07-31</span></div></header>
 <main class="wrap">
-<h1>Axiomancer</h1>
-<p class="muted">A private index of the game's content and the nightly development log.</p>
-<div class="hub">
-  <a class="hue-cards" href="./catalog.html"><span class="h-glyph">🂠</span><div class="h-title">Catalog</div><div class="h-sub">79 cards · 56 foes · 24 statuses</div></a>
-  <a class="hue-log" href="./log.html"><span class="h-glyph">❯</span><div class="h-title">DevLog</div><div class="h-sub">21 entries</div></a>
-  <a class="hue-tuning" href="./tuning-lab/index.html"><span class="h-glyph">⚖</span><div class="h-title">Tuning Lab</div><div class="h-sub">3 reports</div></a>
-</div>
+<h1 id="headline">2026-07-31</h1>
+<p class="headline">A quiet, healthy night: five loop ticks, all green, zero code</p>
+<div class="counts"><span class="chip cat-ui">1 UI</span><span class="chip cat-infra">2 infra</span><span class="chip cat-balance">1 balance</span></div>
+<section class="card cat-balance" id="baseline-re-measured-after-a-comment-only-trip-numbers-confirmed-unchanged"><div class="card-head"><span class="chip cat-balance">balance</span><h2>Baseline re-measured after a comment-only trip — numbers confirmed unchanged</h2></div>
+<p class="field"><span class="flabel">What</span> <code>npm run baseline:check</code> came up stale by one mechanics-source</p>
+<p class="field"><span class="flabel">Why</span> <code>50cda5da</code> ("docs(combat): reconcile ratified dice and preset</p>
+<p class="commits"><code class="commit">50cda5da</code> <code class="commit">(measured</code> <code class="commit">on</code> <code class="commit">`202d721c`</code> <code class="commit">baseline</code> <code class="commit">stamp)</code></p>
+<p>commit (<code>50cda5da</code>). Re-measured with <code>npm run baseline:regen -- --runs=30 --confidence=reduced-nightly</code>; the new baseline is byte-identical to the prior read on every stage cell — early 59.9%, mid 4.7%, late 0%, impossible 0% (doctrine early ~80 / mid ~50 / late 25-35 / impossible 0), only <code>generatedAt</code>/<code>commit</code> metadata changed. truth") turned out to be exactly what its title says — it swaps <code>PROVISIONAL</code> wording for <code>ratified</code> in three comments (<code>combat.upgradeable-dice.ts</code>, <code>combat.engine.ts</code>, <code>combat.encounter.types.ts</code>) and touches no runtime logic, so the seeded sim reproduced last night's numbers exactly. The standing <code>plan/AUDIT.md</code> "doctrine-curve confirmation" row (filed 2026-07-30) still describes the live doctrine gap accurately — no new row needed, this just confirms it wasn't stale data.</p>
+<div class="diff" role="img" aria-label="code diff"><div class="dl meta">--- a/axiomancer-mechanics/src/Combat/combat.upgradeable-dice.ts</div><div class="dl meta">+++ b/axiomancer-mechanics/src/Combat/combat.upgradeable-dice.ts</div><div class="dl hunk">@@ -69,9 +69,9 @@ export const OVERHEAT_CRACK_CHANCE = 0.35;</div><div class="dl ctx">&nbsp;</div><div class="dl ctx"> /**</div><div class="dl del">- * §6 PROVISIONAL (owner, D1 — may flip to fires-on-roll after playthroughs):</div><div class="dl del">- * a SPECIAL face fires its payload only when the die is USED to power a card.</div><div class="dl add">+ * §6 owner-ratified fires-on-use rule (D7): a SPECIAL face fires its payload</div><div class="dl add">+ * only when the die is USED to power a card.</div><div class="dl ctx">  */</div><div class="dl ctx"> export const SPECIAL_FIRES_ON_USE = true;</div></div></section>
+<section class="card cat-infra" id="closes-n-no-op-hits-its-fifth-confirmed-instance-expand-promotes-root-causing-it"><div class="card-head"><span class="chip cat-infra">infra</span><h2><code>Closes #N</code> no-op hits its fifth confirmed instance — <code>/expand</code> promotes root-causing it</h2></div>
+<p class="field"><span class="flabel">What</span> <code>/iterate</code> drained the "session doc-residue" CRITIQUE row (two</p>
+<p class="field"><span class="flabel">Why</span> this is the loop's meta-rail working as designed — a symptom</p>
+<p class="commits"><code class="commit">7c20b4fd</code> <code class="commit">(#156</code> <code class="commit">doc</code> <code class="commit">additions)</code> <code class="commit">44b289fa</code> <code class="commit">9a445281</code></p>
+<p>doc additions to <code>AGENTS.md</code> files), then found its own shipping commit's <code>Closes #156</code> trailer failed to auto-close the issue — identical to four prior cases (#83, #151, #155, #129). This time <code>/expand</code> pass 4 looked at the pattern (5 confirmed instances, 3 of the last 15 commits were re-filings of the same bug) and filed it as a <code>[score 6.0]</code> phase candidate: root-cause why a correctly-numbered <code>Closes #N</code> trailer silently no-ops on a direct-to-main push. that kept recurring as one-line AUDIT notes finally crossed the threshold into "worth a dedicated phase," filed as a proposal (not applied) per the digest/expand contract; <code>/oversight</code> decides whether to promote it. (fifth-instance note), 202d721c (expand pass 4 candidate)</p></section>
+<section class="card cat-ui" id="critique-pass-14-exploration-hub-doubles-its-own-level-label"><div class="card-head"><span class="chip cat-ui">UI</span><h2>Critique pass 14: exploration hub doubles its own level label</h2></div>
+<p class="field"><span class="flabel">What</span> the unattended <code>critique:drive</code> pass reconfirmed the MORALE</p>
+<p class="field"><span class="flabel">Why</span> same shape as the earlier header MORALE "v of x" placeholder</p>
+<p class="commits"><code class="commit">1549af7b</code></p>
+<p>and title-wordmark fixes still hold, then found one new MED: the exploration-hub <code>StatusCard</code> subtitle reads "LEVEL · LVL 1 PILGRIM" — the static "LEVEL" section label and the value string's own "LVL {n}" say the same thing back to back. bug (RESOLVED 2026-07-18) — a label colliding with its own value. Filed to <code>plan/CRITIQUE.md</code> for <code>/iterate</code> to drain; not fixed here.</p></section>
+<section class="card cat-infra" id="breadth-check-needs-playwrights-browser-hand-installed-eighth-night-running"><div class="card-head"><span class="chip cat-infra">infra</span><h2>Breadth check needs Playwright's browser hand-installed — eighth night running</h2></div>
+<p class="field"><span class="flabel">What</span> <code>npm --workspace axiomancer-mobile run e2e:minigames</code> aborted</p>
+<p class="field"><span class="flabel">Why</span> <code>plan/AUDIT.md</code> <code>[3.2]</code> has flagged this since 2026-07-17:</p>
+<p>immediately on <code>hazard-e2e.mjs</code> with "Executable doesn't exist at .../chromium_headless_shell-1228/..."; installed by hand (<code>npx playwright install chromium-headless-shell</code>), then all six e2e legs — hazard, combat, gathering, encounter-routing, exploration-roundtrip, upgradeable-dice — <strong>ALL PASS</strong>. <code>.github/workflows/night.yml</code> still doesn't set <code>install_playwright: true</code> on its <code>_claude-skill.yml</code> call, unlike every other Playwright-driving workflow in this repo. Added an update note to the existing row — this is a one-line fix that keeps not landing.</p></section>
+<section class="panel" id="while-you-were-out"><h2>While you were out</h2>
+<div class="tablewrap"><table><thead><tr><th>Time (UTC)</th><th>Verb</th><th>Outcome</th></tr></thead><tbody><tr><td>07-30 09:27 → 09:30</td><td>march (audit)</td><td>Hermes-provenance queue-change log ships (#129); fourth Closes-trailer note</td></tr><tr><td>07-30 11:17</td><td>digest</td><td>yesterday's entry — baseline re-measured, doctrine-curve confirmation filed</td></tr><tr><td>07-30 16:03</td><td>ops (out-of-band, human)</td><td><code>docs(combat)</code>: PROVISIONAL → ratified comment rename (no behavior change)</td></tr><tr><td>07-30 20:10 → 20:13</td><td>march (iterate)</td><td>doc-residue drained (#156); fifth Closes-trailer instance noted</td></tr><tr><td>07-31 03:58 → 04:14</td><td>march (critique)</td><td><span class="st st-ok">pass</span> 14 — 1 new MED finding (exploration-hub subtitle doubling)</td></tr><tr><td>07-31 09:22 → 09:29</td><td>march (expand)</td><td><span class="st st-ok">pass</span> 4 — Closes-#N bug promoted to a phase candidate</td></tr><tr><td>07-31 (this run)</td><td>digest</td><td>this entry — baseline confirmed unchanged, breadth check re-unblocked by hand, Playwright-gap AUDIT row updated</td></tr></tbody></table></div>
+<p>6 commits landed since the last digest (<code>2646fe1c</code>, 07-30), one of them (<code>50cda5da</code>) out-of-band from a human/non-bot author. Build-plan queue (<code>plan/steps/01_build_plan.md</code>): every phase through 38 is <code>[x]</code> shipped, queue empty, no Hermes-originated mutations logged. <code>plan/AUDIT.md</code>: 43 pending (one row updated this run — the Playwright-install gap). <code>plan/CRITIQUE.md</code>: 39 pending, last pass today (pass 14, 07-31, commit <code>1549af7b</code>). <code>plan/PHASE_CANDIDATES.md</code>: 43 pending, last <code>/expand</code> pass 07-31 (pass 4, 1 candidate filed). One open <code>triage:needs-user</code> issue (#144, still stale — see Needs you). No <code>loop:do</code> issues. Deploy gate: HEAD (<code>202d721c</code>) is a docs/plan-only tick, nothing to check; the one gated commit in this window (<code>50cda5da</code>) triggered <code>verify-mechanics</code>, which passed clean.</p></section>
+<section class="panel" id="needs-you"><h2>Needs you</h2>
+<ul><li><strong>Issue #144 is still open, now across four digest cycles.</strong> Flagged</li></ul>
+<p>in the 07-23 and 07-30 digests as a stale duplicate of #148 (the underlying title-screen wordmark crop shipped and #148 auto-closed); #144 itself never got a <code>Closes</code> trailer and still sits on <code>triage:needs-user</code>. Worth a direct close-as-duplicate.</p>
+<ul><li>**<code>plan/AUDIT.md</code> <code>[3.2]</code> — Playwright's browser still isn't</li></ul>
+<p>installed on the night runner, eighth night in a row.** A one-line <code>install_playwright: true</code> addition to <code>.github/workflows/night.yml</code> would end the recurring by-hand workaround.</p>
+<ul><li><strong><code>Closes #N</code> not auto-closing is now 5-for-5</strong> (#83, #151, #155,</li></ul>
+<p>#129, #156). <code>/expand</code> pass 4 promoted root-causing it to a phase candidate (<code>[score 6.0]</code> in <code>plan/PHASE_CANDIDATES.md</code>) — awaiting <code>/oversight</code> promotion into the build plan.</p></section>
+<section class="panel" id="tuning-proposals"><h2>Tuning proposals</h2>
+<ul><li>None new from this digest. The baseline re-measure confirmed the</li></ul>
+<p>existing 2026-07-30 doctrine-curve reading rather than producing a fresh one (see the <code>[balance]</code> card above) — the standing "Post-D8 flag-on curve repair" candidate in <code>plan/PHASE_CANDIDATES.md</code> still covers the live mid-stage gap; no gate, cadence, or ceiling mistuning observed this pass beyond what's already filed (the <code>Closes #N</code> candidate, filed by <code>/expand</code> this window, not by this digest).</p></section>
 <footer class="foot">Axiomancer DevLog &middot; generated by <code>scripts/build-devlog.mjs</code></footer>
 </main>
 </body>

@@ -694,6 +694,12 @@
   every future night run repeats the same failure and the
   nightly breadth signal is dead.
 - next: /iterate
+- update 2026-07-31: still unfixed — `night.yml` still has no
+  `install_playwright: true` (confirmed by grep this run). At least
+  the eighth night in a row needing the by-hand
+  `npx playwright install chromium-headless-shell` workaround before
+  the breadth check would run at all; the fix is a one-line addition
+  to `.github/workflows/night.yml`.
 
 ### [x] Phase 32 Part 1b stalls: two consecutive `/march` ticks spawn a background Explore agent, then end the turn "waiting" on it — zero commits, zero carried research — RESOLVED 2026-07-29 (issue #155)
 - issue: #155

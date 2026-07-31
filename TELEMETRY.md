@@ -134,3 +134,5 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-07-31T03:59:16Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-07-31T04:03:56Z | skill | critique | claude-sonnet-5 | main | - |
 | 2026-07-31T09:23:13Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-07-31T11:13:32Z | slash-prompt | /digest | unknown | user/ci | /digest |
+| 2026-07-31T11:13:34Z | skill | digest | unknown | main | - |
