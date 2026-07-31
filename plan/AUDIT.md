@@ -873,6 +873,17 @@
   #129, #156) — every observed docs-only-diff close has failed this
   way; worth checking whether the pattern is specific to commits where
   deploy:check finds no gated workflow to confirm against.
+- update 2026-07-31: a sixth instance, this time BREAKING the "docs-only
+  diff" pattern noted above — #157 (`/march` -> `/iterate` tick,
+  exploration-hub StatusCard LEVEL/LVL subtitle fix) carried a
+  `Closes #157` trailer on its shipping commit (`16c89f25`, direct push
+  to `main`, `verify-mobile` GitHub Actions run completed
+  `conclusion: success`) and still didn't auto-close; closed by hand.
+  This one DID have a real gated workflow run green against it, ruling
+  out "no gated workflow to confirm against" as the sole explanation —
+  the failure mode reproduces on both docs-only and code+CI-verified
+  commits. Six-for-six now on "trailer present, didn't fire" (#83,
+  #151, #155, #129, #156, #157).
 
 ## Done
 
