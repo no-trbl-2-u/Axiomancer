@@ -382,10 +382,11 @@ one level down, in the routing helper `onApply` calls next).
   per-card forging; candidates via /expand.
 - source: session closeout (evidence pass, 2026-07-11)
 
-### [MED] control-lock sim policy is threat-blind — WS8 surface variety unexploited
+### [x] [MED] control-lock sim policy is threat-blind — WS8 surface variety unexploited — RESOLVED 2026-08-01 (commit d0d83e06, issue #159)
 - pass: session-closeout 2026-07-12 (commit ffadca96)
 - viewport: n/a
 - category: tuning-harness
+- issue: #159
 - observation: `rankCard` in the sim policies never reads
   `threatPhases`, so no sim policy can exploit WS8's control-surface
   variety (the data exists; no decision layer uses it). Pinned as a
@@ -397,6 +398,13 @@ one level down, in the routing helper `onApply` calls next).
   phase (rungs, intent type) when ranking STAGGER/BACKFIRE plays; flip
   the `it.fails` pin to a passing assertion in the same change.
 - source: session closeout
+- resolution: added `controlSurfaceBonus` to the `control-lock` policy's
+  `rankCard` (`combat.sim-policies.ts`) — a threat carrying a rider ranks
+  BACKFIRE punish highest (no roster candidate erases a rider outright);
+  a clean or compounding threat ranks STAGGER rung-denial highest, with
+  `lock_stance` as a certainty tiebreak. Flipped the WS8.4 `it.fails` pin
+  to a passing `it` per its own documented instructions. Verified: all 4
+  fixture threats now produce >1 distinct preferred control card.
 
 ### [MED] engine hooks missing for two ratified-adjacent bridge shapes
 - pass: session-closeout 2026-07-12 (commit ffadca96)
