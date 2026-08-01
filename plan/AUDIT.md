@@ -14,6 +14,27 @@
 
 ## Pending
 
+### Doctrine-curve confirmation (digest 2026-08-01, reduced-nightly): mid collapses to zero, early ticks up, late still dead flat
+- category: content
+- impact: 8
+- ease: 3
+- detail: `/digest`'s reduced-nightly re-measure at `ef492fff` (blind
+  policy-pick, doctrine early ~80 / mid ~50 / late 25-35 / impossible 0):
+  early 61.1% (was 59.9% at the 2026-07-30 digest's `aa21018b` read —
+  up 1.2pts, still well under band), **mid 0.0%** (was 4.7% — the mid
+  band has now fully collapsed to zero, the softest mid read logged in
+  any digest to date), late 0% (unchanged — still zero), impossible 0%
+  (in band, unchanged). This is the third consecutive digest confirming
+  the flag-on mid/late collapse the 2026-07-30 entry first exposed once
+  Upgradeable Dice became the default nightly measurement; the gap has
+  not closed and mid has gotten measurably worse rather than better.
+- next: /iterate — re-anchor future digest doctrine-curve comparisons
+  against this reading. `/deck-tuning` owns the actual repair via the
+  existing "Post-D8 flag-on curve repair" candidate in
+  `plan/PHASE_CANDIDATES.md` — this confirms it's still live and, given
+  mid's continued deterioration, more urgent than its filing date
+  suggests.
+
 ### Doctrine-curve confirmation (digest 2026-07-30, reduced-nightly): first default-Upgradeable-Dice nightly read — mid near-total collapse, early down sharply, late still dead flat
 - category: content
 - impact: 8
@@ -729,6 +750,13 @@
   `npx playwright install chromium-headless-shell` workaround before
   the breadth check would run at all; the fix is a one-line addition
   to `.github/workflows/night.yml`.
+- update 2026-08-01: still unfixed — `night.yml` still has no
+  `install_playwright: true` (confirmed by grep this run; `critique.yml`
+  has it, `night.yml` doesn't). Ninth night in a row needing the by-hand
+  `npx playwright install chromium` workaround (this run installed the
+  full `chromium` browser, not just `chromium-headless-shell` — the
+  cache was cold for both) before `npm run e2e:minigames` would run at
+  all. Still a one-line fix.
 
 ### [x] Phase 32 Part 1b stalls: two consecutive `/march` ticks spawn a background Explore agent, then end the turn "waiting" on it — zero commits, zero carried research — RESOLVED 2026-07-29 (issue #155)
 - issue: #155
@@ -920,6 +948,26 @@
   and still didn't auto-close; closed by hand. Seven-for-seven now on
   "trailer present, didn't fire" (#83, #151, #155, #129, #156, #157,
   #160).
+- update 2026-08-01 (digest pulse review): two MORE instances surfaced
+  that no `/iterate` tick had caught — #158 (`critique:drive` combat-
+  capture fix, shipping commit `ef19091e`, `Closes #158`, 2026-07-31
+  20:09) and #159 (WS8.4 control-lock threat-surface fix, shipping
+  commit `d0d83e06`, `Closes #159`, 2026-08-01 04:19) both still showed
+  `OPEN` on GitHub when this digest checked, and neither had an AUDIT.md
+  update note — unlike #157 and #160, whose shipping ticks noticed the
+  no-op and closed by hand same-session. Both closed by hand now
+  (verify green on both shipping commits per their own commit messages).
+  Nine-for-nine now on "trailer present, didn't fire" (#83, #151, #155,
+  #129, #156, #157, #158, #159, #160) — chronologically #158 and #159
+  actually preceded #160, so the true running count was already 8-for-8
+  before #160 shipped. Widens the finding: it isn't just that the
+  trailer no-ops: the *catching* of the no-op is itself inconsistent —
+  some `/iterate` ticks check and close by hand same-session, others
+  (this pair) don't check at all and the issue would sit open
+  indefinitely without a `/digest` pulse pass to catch it. Worth adding
+  an explicit "confirm the issue actually closed" step to whichever
+  skill lands the `Closes #N` trailer, not just relying on the digest's
+  periodic sweep.
 
 ## Done
 
