@@ -106,14 +106,15 @@
 - suggested fix: when the swap-pool measurement pass runs, watch these two cards' usage + FALLEN uptime; if the matrix shows confusion (played then immediately un-Fallen with no payoff), redesign toward pay-then-cash ordering.
 - source: /deck-tuning fan-out session
 
-### [LOW] mechanics — THEME_KEYWORDS.harvest still advertises TICK (owner-ratified dead 2026-07-10)
+### [x] [LOW] mechanics — THEME_KEYWORDS.harvest still advertises TICK (owner-ratified dead 2026-07-10) — RESOLVED 2026-08-01 (issue #160)
 - pass: swap-pool fan-out residue (PR #130, 2026-07-18)
 - viewport: n/a
 - auth_state: n/a
 - category: content
+- issue: #160
 - observation: `card-themes.ts` lists TICK in harvest's keyword family, but the atlas records TICK's owner-ratified death and no live card uses it — the catalog's family search advertises an empty set (the exact "family lie" class KW-2/KW-6 fixed in phase 29).
 - evidence: harvest swap-pool designer note; docs/keyword-atlas.md TICK row.
-- suggested fix: drop TICK from `THEME_KEYWORDS.harvest` (and any other family that lists it) in the next keyword hygiene pass.
+- resolution: dropped TICK from `THEME_KEYWORDS.affliction` and `THEME_KEYWORDS.harvest` (both families listed it) in `axiomancer-mechanics/src/Cards/card-themes.ts`. Confirmed no live card uses TICK (`roles-themes.engine.test.ts` "no TICK vocabulary anywhere in the sets" witness) and no test pins family length/contents beyond the KW-6 glossary-resolution check. Mechanics + mobile verify green.
 - source: /deck-tuning fan-out session
 
 ### [LOW] mechanics — fated-course engine hook survives its retired card as a test harness

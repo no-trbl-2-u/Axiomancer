@@ -51,13 +51,13 @@ export const CARD_THEMES: readonly CardTheme[] = Object.freeze([
  * REPRISE renamed to RECALL.
  */
 export const THEME_KEYWORDS: Record<CardTheme, readonly string[]> = Object.freeze({
-    affliction: ['POISON', 'BLEED', 'MARK', 'TICK', 'RUPTURE'],
+    affliction: ['POISON', 'BLEED', 'MARK', 'RUPTURE'],
     peroration: ['PREMISE', 'DRAW', 'GUARD'],
     forge:      ['KINDLE', 'PIP', 'FORGE', 'DRAW'],
     akrasia:    ['RECOIL', 'FALLEN', 'MARK', 'HEAL'],
     control:    ['STAGGER', 'BACKFIRE', 'FORETELL', 'DRAW'],
     oracle:     ['FORETELL', 'OMEN', 'DRAW', 'RUPTURE'],
-    harvest:    ['SOUL', 'REAP', 'MARK', 'TICK'],
+    harvest:    ['SOUL', 'REAP', 'MARK'],
     charm:      ['SWAY', 'RAPPORT', 'CLEANSE', 'HEAL'],
     bulwark:    ['THORNS', 'RIPOSTE', 'GUARD', 'HEAL'],
     echo:       ['ECHO', 'RECALL', 'DRAW'],

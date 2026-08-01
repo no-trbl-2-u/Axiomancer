@@ -574,6 +574,24 @@
   critique unless the card-face gap recurs for those surfaces too.
 - next: /iterate
 
+### [x] [external-critique] `card-themes.ts` THEME_KEYWORDS advertises the dead TICK keyword — RESOLVED 2026-08-01 (issue #160)
+- category: external-critique
+- impact: 3
+- ease: 9
+- issue: #160
+- resolution: dropped TICK from `THEME_KEYWORDS.affliction` and
+  `THEME_KEYWORDS.harvest` (`axiomancer-mechanics/src/Cards/card-themes.ts`)
+  — both families listed a keyword ratified dead 2026-07-10 (phase 30,
+  KW-4) that no live card uses, an empty-set "family lie" of the class
+  KW-2/KW-6 fixed in phase 29. Confirmed dead via
+  `roles-themes.engine.test.ts`'s "no TICK vocabulary anywhere in the
+  sets" witness; no test pins family length/contents beyond the KW-6
+  glossary-resolution check (`keywords.test.ts`). Mechanics + mobile
+  `npm run verify` green.
+- detail: mirrored from `plan/CRITIQUE.md` Pending row (filed via
+  /deck-tuning fan-out session, 2026-07-18, PR #130 residue).
+- next: (drained)
+
 ### Combat deck-matrix baseline stale by 33 mechanics-source commits
 - category: gap
 - impact: 6
