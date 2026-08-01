@@ -547,10 +547,11 @@ one level down, in the routing helper `onApply` calls next).
 - source: playtester (critique pass 12)
 - issue: #152
 
-### [MED] pre-fight enemy preview disagrees with live combat VITAE
+### [x] [MED] pre-fight enemy preview disagrees with live combat VITAE — RESOLVED 2026-08-01 (commit 15d45699, issue #162)
 - pass: 12 (commit 3dc27d24)
 - viewport: mobile
 - category: inconsistency
+- issue: #162
 - observation: the pre-fight encounter card for "Little Belle"
   previews the enemy as "level 2 · 50 hp.", but immediately on
   entering combat the same enemy's VITAE bar reads 100/100 — double
@@ -561,6 +562,17 @@ one level down, in the routing helper `onApply` calls next).
 - suggested fix: source the pre-fight preview and the live combat
   VITAE bar from the same computed enemy stat.
 - source: playtester (critique pass 12)
+- resolution: root cause was systemic, not Little-Belle-specific —
+  `beginHazardEncounter` (`axiomancer-mobile/state/actions.ts`) applies
+  the `ENCOUNTER_ENEMY_HP_MULTIPLIER` (2x) testing knob to every live
+  foe's HP, but `composeCombatPrelude`'s preview text
+  (`axiomancer-mobile/state/presenters/event.engine.ts`) read the
+  enemy's unscaled `health`. Preview now derives its displayed health
+  from the same `withScaledEnemyHp` helper used at the live chokepoint.
+  Also widened `event.engine.test.ts`'s roman-numeral subtitle regex to
+  the full lowercase-roman alphabet — the doubled value exposed a
+  stale test regex that only ever accepted i/v/x. Full three-workspace
+  `npm run verify` green.
 
 ### [x] [MED] card/tooltip copy still says "HP" instead of canon VITAE (RESOLVED 2026-07-22, commit 21c55b94)
 - issue: #146
