@@ -913,6 +913,13 @@
   the failure mode reproduces on both docs-only and code+CI-verified
   commits. Six-for-six now on "trailer present, didn't fire" (#83,
   #151, #155, #129, #156, #157).
+- update 2026-08-01: a seventh instance — #160 (`/march` -> `/iterate`
+  tick, THEME_KEYWORDS dead-TICK-keyword fix) carried a `Closes #160`
+  trailer on its shipping commit (`581b3fe9`, direct push to `main`,
+  `verify-mechanics` GitHub Actions run completed `conclusion: success`)
+  and still didn't auto-close; closed by hand. Seven-for-seven now on
+  "trailer present, didn't fire" (#83, #151, #155, #129, #156, #157,
+  #160).
 
 ## Done
 
