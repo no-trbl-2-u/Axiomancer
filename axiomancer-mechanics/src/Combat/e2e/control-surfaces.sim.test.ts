@@ -267,32 +267,21 @@ describe('WS8.4 — control choice should be a matchup read (falsifiable)', () =
     // control-lock policy's preferred control card should DIFFER between a
     // damage-heavy, a rider-heavy, and an escalation-heavy threat.
     //
-    // KILL SIGNAL — CONFIRMED as of 2026-07-11 and documented via `it.fails`:
-    // `control-lock.rankCard` (combat.sim-policies.ts) scores candidates by
-    // control-class membership + new-status + DoT preview and NEVER reads
-    // `state.threatPhases`, so it prefers the same card against all three
-    // fixtures (the modern analogue of "the biggest Roll penalty is always
-    // picked"). The data now carries surface variety; the decision layer does
-    // not exploit it. When a threat-aware ranking ships, this `it.fails`
-    // will start FAILING (because the body passes) — promote it to a plain
-    // `it` in that change.
-    it.fails('preferred control card differs by threat (damage / rider / escalation)', () => {
+    // FIXED (this change): `control-lock.rankCard` (combat.sim-policies.ts)
+    // now reads `state.threatPhases` via `controlSurfaceBonus` — a threat
+    // carrying a rider ranks BACKFIRE punish highest (no candidate here
+    // erases a rider outright, so cash in on the guaranteed drip instead);
+    // a clean or compounding threat ranks STAGGER rung-denial highest
+    // (stance-lock as a certainty tiebreak). Was pinned `it.fails` /
+    // "documents the kill signal" until `plan/CRITIQUE.md` [MED]
+    // "control-lock sim policy is threat-blind — WS8 surface variety
+    // unexploited" (session-closeout 2026-07-12) was addressed.
+    it('preferred control card differs by threat (damage / rider / escalation)', () => {
         const picks = new Set([
             preferredControlCard(damageHeavy()),
             preferredControlCard(riderHeavy()),
             preferredControlCard(escalationHeavy()),
         ]);
         expect(picks.size).toBeGreaterThan(1);
-    });
-
-    it('documents the kill signal: today the pick is threat-blind (same card, all threats)', () => {
-        const picks = [
-            preferredControlCard(damageHeavy()),
-            preferredControlCard(riderHeavy()),
-            preferredControlCard(escalationHeavy()),
-        ];
-        // Pinned so the moment the policy becomes threat-aware, this fails
-        // loudly alongside the it.fails flip above — both must move together.
-        expect(new Set(picks).size).toBe(1);
     });
 });

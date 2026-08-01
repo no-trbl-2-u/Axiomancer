@@ -133,6 +133,45 @@ function isUtilityClass(card: CombatCard): boolean {
 }
 
 /**
+ * WS8.4 — does the enemy's UPCOMING telegraphed run carry a rider (a status
+ * effect riding the damage, not just the damage itself)? Read from the
+ * omniscient `threatPhases` (control-lock is never blind), from the current
+ * phase onward, so a rider two phases out still counts.
+ */
+function upcomingThreatHasRider(s: CombatEncounterState): boolean {
+    return s.threatPhases
+        .slice(s.currentPhaseIndex)
+        .some(p => p.threatAction.effects.some(e => !!e.effectId));
+}
+
+/**
+ * WS8.4 falsifiable probe (spec 32 §12 #6) — the control-lock policy's pick
+ * should be a matchup read, not a fixed rotation. Two distinct control
+ * surfaces exist among rung-denial candidates: STAGGER (rungsTotal on the
+ * card's `stagger` special mechanic — softens/denies the telegraphed hit
+ * itself) and BACKFIRE (`debuff_backfire`'s intensity × duration — punishes
+ * the enemy for every rung denied, landing regardless of what the rung
+ * carried). Against a threat that carries a RIDER, denying rungs alone
+ * doesn't erase it (only the WS8.2 BLIND surface does, a distinct card
+ * class) — cash in on the guaranteed BACKFIRE punish instead. Against a
+ * clean or compounding threat, the rung denial itself IS the win — rank on
+ * STAGGER rungs first (stance-lock as a certainty tiebreak), BACKFIRE as a
+ * rounding error.
+ */
+function controlSurfaceBonus(s: CombatEncounterState, card: CombatCard): number {
+    const source = getCardById(card.id);
+    if (!source) return 0;
+    const staggerRungs = source.specialMechanics
+        ?.find((m): m is { kind: 'stagger'; rungs: number } => m.kind === 'stagger')?.rungs ?? 0;
+    const locksStance = source.specialMechanics?.some(m => m.kind === 'lock_stance') ?? false;
+    const backfire = source.combatEffects?.find(e => e.effectId === 'debuff_backfire');
+    const backfireValue = backfire ? (backfire.intensity ?? 1) * (backfire.duration ?? 1) : 0;
+
+    if (upcomingThreatHasRider(s)) return backfireValue * 100;
+    return staggerRungs * 1000 + (locksStance ? 10 : 0) + backfireValue;
+}
+
+/**
  * The legacy `bestCard` ordering as a pure per-card score (bit-identical
  * argmax): payoff cash-ins first (never on a low-HP mercy turn), Befriend when
  * the foe is low, then new-status > any-status > damage preview.
@@ -237,7 +276,8 @@ export const COMBAT_SIM_POLICIES: Record<CombatSimPolicyId, CombatSimPolicy> = {
         preferredFocus: 'control',
         rankCard: (s, card) => {
             if (isControlClass(card)) {
-                return (isNewStatus(s, card) ? BAND_PRIMARY : BAND_SECONDARY) + card.bottomDamagePreview;
+                return (isNewStatus(s, card) ? BAND_PRIMARY : BAND_SECONDARY)
+                    + card.bottomDamagePreview + controlSurfaceBonus(s, card);
             }
             if (card.verbClass === 'direct-dot') return BAND_EFFECT * 10 + card.bottomDamagePreview;
             if (card.verbClass === 'defend') return BAND_EFFECT;
