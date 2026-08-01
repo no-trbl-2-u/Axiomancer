@@ -145,3 +145,5 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-08-01T04:00:07Z | skill | iterate | claude-sonnet-5 | main | - |
 | 2026-08-01T08:38:36Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-08-01T10:23:04Z | slash-prompt | /digest | unknown | user/ci | /digest |
+| 2026-08-01T19:41:30Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-08-01T19:43:42Z | subagent | Explore | claude-sonnet-5 | main | Investigate VITAE preview mismatch bug |

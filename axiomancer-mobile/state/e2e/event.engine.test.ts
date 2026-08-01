@@ -335,10 +335,11 @@ describe('selectEventViewModel: combat-prelude composition', () => {
         // Subtitle is non-null on combat-prelude choices.
         expect(fight.subtitle).not.toBeNull();
         expect(flee.subtitle).not.toBeNull();
-        // Lowercase-roman cost + ritual register. Decimal fallback
-        // kicks in for stats >= 11 (Roman map only goes to x), which
-        // the regex accommodates.
-        expect(fight.subtitle).toMatch(/^[ivx0-9]+ · [ivx0-9]+ vitae · adv\. unknown$/);
+        // Lowercase-roman cost + ritual register — `toRomanLower`
+        // (state/presenters/roman.ts) emits the full subtractive
+        // alphabet (i,v,x,l,c,d,m) for any positive n, not just i/v/x,
+        // so the regex must accept the full alphabet.
+        expect(fight.subtitle).toMatch(/^[ivxlcdm0-9]+ · [ivxlcdm0-9]+ vitae · adv\. unknown$/);
         expect(flee.subtitle).toBe('forfeit the path · -ii morale');
     });
 

@@ -33,6 +33,7 @@ import type {
 } from '@mechanics';
 import { getDialogueNode, visibleChoices } from '@mechanics';
 
+import { ENCOUNTER_ENEMY_HP_MULTIPLIER, withScaledEnemyHp } from '../actions';
 import type { AppStoreState } from '../store';
 import {
     defaultBodyForEvent,
@@ -451,6 +452,11 @@ function composeCombatPrelude(encounter: Encounter, isBoss: boolean): Omit<Event
     // row 4) dated back to Phase 60b's migration; engine
     // `Encounter` exposes `.enemies` directly today.
     const enemy = encounter.enemies[0];
+    // The live encounter (`beginHazardEncounter` in actions.ts) scales every
+    // foe's HP by `ENCOUNTER_ENEMY_HP_MULTIPLIER` before combat starts, so the
+    // combat VITAE bar reads double this preview's authored value unless the
+    // preview previews the SAME scaled number.
+    const previewHealth = withScaledEnemyHp(enemy, ENCOUNTER_ENEMY_HP_MULTIPLIER).health;
     const badge = isBoss ? 'OMEN OF DOOM' : ENCOUNTER_LABEL;
     // Phase 43 port: boss encounters swap FIGHT/FLEE labels for
     // STRIKE/KNEEL per the design's chat-1 spec ("KNEEL / STRIKE for
@@ -468,7 +474,7 @@ function composeCombatPrelude(encounter: Encounter, isBoss: boolean): Omit<Event
     // ritual-register kicker. Boss variant tightens the kicker
     // since the engine's boss-blocks-flee rule is part of the
     // design intent (KNEEL is sealed, not a real choice).
-    const fightSubtitle = `${toRomanLower(enemy.level)} · ${toRomanLower(enemy.health)} vitae · adv. unknown`;
+    const fightSubtitle = `${toRomanLower(enemy.level)} · ${toRomanLower(previewHealth)} vitae · adv. unknown`;
     const fleeSubtitle = isBoss
         ? 'sealed · no retreat'
         : 'forfeit the path · -ii morale';
@@ -483,7 +489,7 @@ function composeCombatPrelude(encounter: Encounter, isBoss: boolean): Omit<Event
             accentKey: 'blood',
             enabled: true,
             subtitle: fightSubtitle,
-            decode: `Lv ${enemy.level} foe · ${enemy.health} VITAE · advantage not yet scouted`,
+            decode: `Lv ${enemy.level} foe · ${previewHealth} VITAE · advantage not yet scouted`,
         },
         {
             id: 'flee',
@@ -518,7 +524,7 @@ function composeCombatPrelude(encounter: Encounter, isBoss: boolean): Omit<Event
         badgeAccentKey: 'blood',
         title: enemy.name.toUpperCase(),
         subtitle,
-        body: `level ${enemy.level} · ${enemy.health} vitae.`,
+        body: `level ${enemy.level} · ${previewHealth} vitae.`,
         choices,
         lore: null,
         canSkip: false,
