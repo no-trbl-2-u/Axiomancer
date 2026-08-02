@@ -968,6 +968,18 @@
   an explicit "confirm the issue actually closed" step to whichever
   skill lands the `Closes #N` trailer, not just relying on the digest's
   periodic sweep.
+- update 2026-08-02: a tenth instance — #163 (`/march` -> `/iterate`
+  tick, policy-pick draft-scorer newcomer-visibility fix) carried a
+  `Closes #163` trailer on its shipping commit (`fbace426`, direct push
+  to `main`, `verify-mechanics` GitHub Actions run completed
+  `conclusion: success`) and still didn't auto-close; the shipping tick
+  noticed the no-op same-session and closed by hand (per §Step 7's
+  `close-comment` still showing `OPEN` after posting). Ten-for-ten now
+  on "trailer present, didn't fire" (#83, #151, #155, #129, #156, #157,
+  #158, #159, #160, #163). No new root-cause signal — same symptom on a
+  green, code-changing, direct-to-main commit; the `next` action below
+  (root-cause the `Closes #N` no-op) remains the actionable follow-up,
+  not yet picked up.
 
 ## Done
 
