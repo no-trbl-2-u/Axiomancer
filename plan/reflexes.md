@@ -8,13 +8,10 @@
 > `../../customization/lessons-layer.md` for the two-tier
 > model and the promotion/drain paths.
 
-1. Verify gate is foreground, always. Never
-   `run_in_background` it, never `--no-verify`. A red gate
-   blocks the commit; it does not get worked around.
-2. Commit and push are one atomic act. No unpushed commits
+1. Commit and push are one atomic act. No unpushed commits
    sit at the end of a turn — the next tick assumes
    `origin/main` is the whole truth.
-3. Blocked is loud. Before a skill stops on a failure-mode
+2. Blocked is loud. Before a skill stops on a failure-mode
    condition, it surfaces an issue or a mirror comment first
    — silence is the failure, not the blocker itself.
 
@@ -28,3 +25,10 @@
 - <ISO> — drained into `skills/<NAME>.md` §<N>: "<one-line
   summary>" (the reflex became a procedure step, not a
   reminder).
+- 2026-08-02 — drained "verify gate is foreground, never
+  `--no-verify`" (was reflex #1): now hard-blocked at the
+  harness by `.claude/hooks/guard.mjs`'s `no-verify`,
+  `force-push`, and `backgroundedGate` checks (PreToolUse),
+  not just warned. The rule survives as AGENTS.md standing
+  rule 3 / bearings.md hard rule 3; a guard hook enforcing a
+  hard block fully supersedes the reflex's reminder purpose.

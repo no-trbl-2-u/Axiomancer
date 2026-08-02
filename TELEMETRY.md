@@ -153,3 +153,4 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-08-02T08:42:41Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-08-02T08:42:43Z | skill | march | unknown | main | - |
 | 2026-08-02T08:43:55Z | skill | expand | claude-sonnet-5 | main | - |
+| 2026-08-02T09:26:08Z | slash-prompt | /consolidate | unknown | user/ci | /consolidate |
