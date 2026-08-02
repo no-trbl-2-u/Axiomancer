@@ -1,166 +1,131 @@
 # Combat screen
 
-> Implementation pinned by [Spec 04](../specs/04-combat-screen-wiring.md).
-> The engine — [`axiomancer-mechanics`](https://www.npmjs.com/package/axiomancer-mechanics)
-> — owns combat rules. This doc describes only what the **screen**
-> renders for each phase and how data flows.
+> **Hazard-Pattern Combat (mechanics Spec 25, mobile Spec 26 / 26b) is the
+> ONLY combat engine.** The legacy turn-based resolver this doc used to
+> describe (`resolveCombatRound`, the four-phase `choosing_stance` loop,
+> `app/(tabs)/combat.tsx`) was fully removed from the engine in 2026-06 —
+> see `plan/bearings.md` § "Which combat engine is canonical". **Never**
+> resurrect that shape for a combat gate or playtest. The engine-side rules
+> live in [`axiomancer-mechanics/docs/combat.md`](../../axiomancer-mechanics/docs/combat.md);
+> this doc describes only what the **mobile screen** renders and how it
+> drives that engine. (History: the retired screen was pinned by
+> [Spec 04](../specs/04-combat-screen-wiring.md), kept as a decision
+> record — do not treat it as current.)
 
-The combat screen lives at [`app/(tabs)/combat.tsx`](../app/(tabs)/combat.tsx)
-as a thin UI shell. All math, RNG, and state shaping happens in the
-presenter at [`state/presenters/combat.engine.ts`](../state/presenters/combat.engine.ts).
-The screen reads one frozen view-model and dispatches engine actions
-through [`state/actions.ts`](../state/actions.ts).
+## Entry points
+
+Combat is a card-and-dice-drafting surface hosted by
+[`<CombatEncounterPanel>`](../components/combat/encounter/CombatEncounterPanel.tsx),
+mounted from two places:
+
+- [`app/combat-encounter/index.tsx`](../app/combat-encounter/index.tsx) —
+  dev-only launcher route. Bootstraps a mock foe + demo deck and passes
+  `persistOutcome={false}`, so playing here never mutates the real
+  player's progression (a sandbox).
+- `EncounterModalOverlay` (live map flow) — feeds the panel the real
+  enemy + player and sets `persistOutcome={true}`.
 
 ## Data flow
 
 ```text
-engine GameStore  ──►  selectCombatViewModel(state, localUi)  ──►  CombatViewModel
-                                                                       │
-                                                                       ▼
-                                                                CombatScreen JSX
-                                                                       │
-                                                       TouchableOpacity onPress
-                                                                       │
-                                                                       ▼
-                                                            useGameActions().*
-                                                                       │
-                                                                       ▼
-                                                              engine reducers
+CombatEncounterState (pure, from axiomancer-mechanics)
+        │  held in <CombatEncounterPanel>'s local React state
+        │  advanced by calling engine transition functions directly
+        │  (initializeCombatEncounter, rollEncounterDice, draftStanceDie,
+        │   playCombatCard, endTurn, resolveThreatPhase, playSignatureSkill, …)
+        ▼
+buildCombatViewModel(state)  ──►  CombatViewModel
+  (state/presenters/combat-encounter.engine.ts)
+        ▼
+<CombatBoard>  (components/combat/encounter/CombatBoard.tsx)
 ```
 
-- `useCombatViewModel({ selectedStance })` ([combat.engine.ts](../state/presenters/combat.engine.ts))
-  is a thin React hook around `selectCombatViewModel` that subscribes
-  only to the engine's `combat` + `player` slices and memoises the VM.
-  Subscribing the screen to the full selector return value directly
-  would loop forever — `useSyncExternalStore` needs a stable snapshot
-  per state, but a freshly-frozen VM object is fresh on every call.
-- `localUi` carries the player's *previewed* stance (`selectedStance`)
-  while the player is composing a turn. The engine never sees a stance
-  until the player commits — taps a stance card, which dispatches
-  `setPlayerStance` and advances the phase to `choosing_action`
-  ([Spec 04 Q2](../specs/04-combat-screen-wiring.md): default A).
+Unlike the retired screen, there is no separate "action layer" module —
+the panel calls the `@mechanics` transition functions from `@mechanics`
+directly and re-renders from the returned `CombatEncounterState`. The
+presenter (`buildCombatViewModel`) is the only translation step, and owns
+the engine → view-model mapping; the board owns all UI/interaction.
+
+`persistOutcome` (live play only) hand-rolls the economy write-back the
+engine intentionally omits (it has no economy layer): final HP →
+`player.health`, `enemy.xpReward` → experience (+ level-ups),
+`rollLoot(enemy.loot)` → inventory, plus the deckbuilder reward card.
 
 ## Phases
 
-The engine's `combat.phase` field drives the four-phase loop
-([Spec 04 Q1](../specs/04-combat-screen-wiring.md): A). The screen never
-owns phase — it reads `vm.phase` and dispatches `setCombatPhase` /
-`resolveRound` / `nextRound` to advance.
+The engine's `CombatEncounterState.phase` (`CombatEncounterPhase` in
+`axiomancer-mechanics`) drives the loop:
 
-Per [Q5](../specs/04-combat-screen-wiring.md), the three choosing-phase
-pickers (stance / action / card) sit in a horizontal pager so the
-player can swipe back to reselect a stance or swipe forward to cards.
-The pager's page index stays in sync with `vm.phase`; resolving the
-round swaps the pager out for the resolve panel.
-
-| Phase | What renders | What the user can do | VM slice |
-|---|---|---|---|
-| `choosing_stance` | Three stance cards (Heart / Body / Mind) with derived stats and ADV / DIS badges relative to the enemy's last stance. | Tap a stance to commit. | `vm.stancePicker` |
-| `choosing_action` | Attack / Defend / Card / Item action grid + flee link. | Tap Attack to dispatch a basic attack and resolve. Tap Card to slide forward to the card picker. Item surfaces a `'Hands are empty.'` toast; Flee surfaces `vm.actionPicker.fleeMessage` (currently `'No fleeing yet.'`) — both are no-ops pending follow-up phases ([Q6](../specs/04-combat-screen-wiring.md) = C). | `vm.actionPicker` |
-| `choosing_skill` | Horizontal scroll of card cards filtered by current stance; greys out cards with `wrong-stance` or `insufficient-mana`. Cards come from a fixture ([Q3](../specs/04-combat-screen-wiring.md) = A); the swap site lives in [`state/mocks/combat.cards.fixture.ts`](../state/mocks/combat.cards.fixture.ts). Phase 16 (`[skipped]`) drains this when the engine ships the top-level `skillLibrary` / `getSkillById` re-export — see `plan/AUDIT.md` `[needs-engine-release]`. | Tap a card to open the **confirm overlay** (Phase 127): a detail card of the deterministic result (damage / effects / cost) with explicit COMMIT / CANCEL controls. COMMIT spends mana and resolves; CANCEL returns to the picker with no side effects. | `vm.skillPicker` |
-| `resolving` | VS layout with player + enemy stance glyphs, advantage label, roll totals, and a damage / friendship banner. **Card rounds (Phase 127) suppress the attack-roll tracker** — `vm.resolve.playerActionWasSkill` is `true`, so the panel renders a deterministic doctrine banner (no dice imagery) instead of the contested roll bars. | Tap "Next Round" to clear `playerChoice` and return to `choosing_stance`. When the engine signals `endReason !== 'ongoing'` the button changes to "Depart". | `vm.resolve` |
-
-## Always-visible panels
-
-| Panel | VM source |
+| Phase | Meaning |
 |---|---|
-| Enemy panel — name, tier, HP bar, friendship meter, mind marks, effect chips, "last stance" badge, flavour line. | `vm.enemy`, `vm.friendshipCounter`, `vm.friendshipCounterMax` |
-| Battle log — full scroll with severity-coloured lines ([Q4](../specs/04-combat-screen-wiring.md) = C-with-colour). | `vm.log` |
-| Player HUD — HP bar, MP bar, effect chips. | `vm.player` |
-| Phase header — index pill, header label, pip row. | `vm.phaseHeader`, `vm.phaseIndex`, `vm.phaseOrder` |
+| `reveal` | Enemy + opening hand visible, before dice are rolled. |
+| `dice-roll` | Player rolls stance dice (`rollEncounterDice`). |
+| `phase-play` | Player plays cards (`draftStanceDie`, `playCombatCard`, `endTurn` to re-roll). |
+| `phase-resolve` | Effect kinds compared, enemy threat action fires, phase graded Clear/Overwhelmed (`resolveThreatPhase`). |
+| `between-phases` | DoT ticks, durations tick, hand draws back to 5. |
+| `mercy-choice` | Control Saturation opened the spare/exploit modal (`selectEncounterMercyChoice`). |
+| `complete` | Combat over, `finalOutcome` determined. |
 
-## Severity colours (battle log)
+## Turn flow (Spec 26b)
 
-```text
-info       → AXM.parchment    (cream)
-damage     → AXM.blood        (red)
-crit       → AXM.sulfur       (yellow)
-heal       → #5a8a3a          (moss)
-effect     → AXM.rust         (rust)
-friendship → AXM.rust         (rust)
-system     → AXM.bone         (bone)
-```
+Per turn, inside `phase-play`: **reveal → roll 2 dice → DRAFT one as your
+stance die (the other converts to Conviction) → drag the drafted die onto
+a staged card to POWER it → END TURN to discard + re-roll → END PHASE to
+resolve the threat phase.**
 
-Adding a new severity means: extend `LogSeverity` in
-[`combat.engine.ts`](../state/presenters/combat.engine.ts), map a
-colour token in `LOG_SEVERITY_COLOR` ([combat.tsx](../app/(tabs)/combat.tsx)),
-and emit the severity from the action layer's `summarizeRoundEvents`.
+The drag-to-power interaction model (unchanged since introduction, per
+`CombatBoard.tsx`'s own header comment):
 
-## Action layer hooks
+1. Drag a card UP into the play region to **stage** it (drag to the scrap
+   zone to discard instead).
+2. Drag a **die** onto the staged card to power it — this only *selects*
+   the die; it isn't committed yet, and can be re-dragged to a different
+   card.
+3. Read the card's live keyword line (stance-read + projected hit).
+4. Tap **APPLY** (the ribbon fused to the staged card) to commit.
 
-| Action | What it does |
+A landed status effect refreshes the drafted die (the combo loop): it
+returns to the tray draggable ("↻ AGAIN") for another card via an
+explicit re-drop — it never auto-attaches to the next staged card.
+
+## Board layout
+
+`CombatBoard` is a full-bleed battlefield with floating chrome, not a
+scrolling panel stack:
+
+| Region | Renders |
 |---|---|
-| `startCombat(enemy)` | Engine `startCombat` + stamps a placeholder `mana` / `maxMana` on the combat-player snapshot. |
-| `endCombat()` | Engine `endCombat`. |
-| `setCombatPhase(phase)` | Engine `setPhase` no-op when no combat is active. |
-| `setPlayerStance(stance)` | Engine `setPlayerStance`. |
-| `setPlayerAction(action, skillId?)` | Engine `setPlayerAction`; stashes `skillId` on `playerChoice` when present. |
-| `resolveRound()` | Calls `resolveCombatRound` with `(playerCombatAction, enemyAction)`; walks the resolver's events into severity-tagged log entries; stashes a `lastResolution` summary on the combat slice for the resolve panel; transitions phase to `resolving`. |
-| `nextRound()` | Clears `playerChoice` and sets phase back to `choosing_stance`. |
+| Battlefield + top HUD | `CombatCombatantPane` — enemy pane, player pane, intent telegraph, effect chips. |
+| Play region | Invisible drop target; dashed affordance shows only while a card drag is live. |
+| Signature rune column | Left edge — Conviction chip + circular signature runes. |
+| Dice row | Free-floating gem dice above the hand. |
+| Hand fan | Edge-to-edge arc of playable cards. |
+| Corner medallions | Player portrait (tap → pilgrim modal) and the END PHASE button. |
+| Bottom rail | HP, phase ledger (`ledger`/`phaseBadge`/`roundLabel`/`turnLabel`), deck/discard counts. |
 
-## Placeholder mana
+There is no scrolling battle log in the current UI (the retired screen's
+severity-coloured log is gone); state changes read from the board itself
+plus transient FX (`CombatFx`).
 
-The engine does not yet ship a player mana system. The action layer
-seeds `combat.player.mana = 9` and `maxMana = 14` on `startCombat`
-([state/actions.ts](../state/actions.ts) → `ensureManaOnCombatPlayer`).
-Cards decrement the in-combat snapshot's mana. The whole accounting
-goes away once engine Spec 04 lands.
+## View-model
 
-## What's still placeholder
-
-- **Cards** — see [Spec 04 Q3](../specs/04-combat-screen-wiring.md);
-  fixture at [`state/mocks/combat.cards.fixture.ts`](../state/mocks/combat.cards.fixture.ts).
-- **Mana** — see "Placeholder mana" above.
-- **Flee** — surfaces `vm.actionPicker.fleeMessage` (currently `'No fleeing yet.'`); presenter-sourced post-Phase-29 critique drain ([Q6](../specs/04-combat-screen-wiring.md)).
-- **Item** action — disabled until Spec 06 wires the inventory's
-  consumable picker into combat.
-- **Stance-derived stats** — the numbers shown on each stance card
-  read from `player.derivedStats` via `deriveStancePerformance` in
-  `state/presenters/combat.engine.ts` (Phase 26, commit `d8d2e33`).
-  The presenter maps the engine's three stat dimensions —
-  `emotional*` (Heart), `physical*` (Body), `mental*` (Mind) — onto
-  the `{attack, card, defense}` triple per stance, rounded at the
-  mapper boundary because engine stats are real-valued.
-
-## Phase 127 — deterministic cards & the enemy-answer blocker
-
-Player cards are deterministic doctrine: they always hit and carry
-static, mechanics-owned damage (the engine's `executeSkill` /
-`calculateSkillDamage` path — no contested attack roll). Phase 127
-makes the UI honest about that:
-
-- **Confirm overlay** ([`components/combat/SkillConfirmOverlay.tsx`](../components/combat/SkillConfirmOverlay.tsx))
-  — tapping a card stages it (local `pendingSkill` state in
-  `app/(tabs)/combat.tsx`) and opens a detail card before the round
-  commits. COMMIT routes through the existing
-  `setPlayerAction('card', id)` + `resolveRound()` path; CANCEL clears
-  the staged card with no side effects.
-- **No card dice tracker** — the action layer stamps `wasSkill` onto
-  the round-resolve summary (`state/actions.ts`), the presenter lifts it
-  to `vm.resolve.playerActionWasSkill`, and `ResolvePanel` swaps the
-  contested roll bars for a deterministic banner on card rounds. Roll
-  UI is preserved for genuine attack / defend rounds.
-
-**Blocked — enemy card-answer display.** The brief's stretch goal is to
-show how the enemy *responds* to a player card (Phase 150 of
-`axiomancer-mechanics`). The pinned engine (`axiomancer-mechanics`
-**0.21.0**) does not publish an enemy card-answer event: `SkillPhaseEvent`
-(`dist/Combat/combat.resolver.d.ts`) carries only player-cast outcomes
-(`damage`, `heal`, `effect-applied`, `buff-stripped`, `synergy-fired`,
-…) and `determineEnemyAction` selects a stance/action, never a
-counter-card keyed to the player's technique. Until the engine ships a
-typed enemy-response event (mechanics Phase 150), mobile cannot surface
-it without inventing combat logic — which the thin-client law forbids.
-This is the exact contract gap to drain when the engine bump lands.
+`CombatViewModel` (`state/presenters/combat-encounter.engine.ts`) is the
+single frozen object the board renders — `phase`, `enemy`, `player`,
+`dice`, `hand`, `read`, `conviction`, `signatures`, `resonance`,
+`momentum` (and the flag-gated Spec 33 `momentumV2` / `playerStance` /
+`dieGear` / `pressFate` variants), plus draft-state flags (`drafted`,
+`hasDraft`, `needsDraft`, `diceRolled`). See the file's own interfaces
+(`CombatEnemyPaneVM`, `CombatPlayerPaneVM`, `CombatCardVM`, `CombatDieVM`,
+…) for the full per-region shape — they're the source of truth, not this
+doc.
 
 ## Tests
 
 | What | Where |
 |---|---|
-| Hermetic e2e — presenter + action layer + four-phase loop + every terminal | [`state/e2e/combat.engine.test.ts`](../state/e2e/combat.engine.test.ts) |
-| Hermetic e2e — HUD slice composition | [`state/e2e/combat-hud.engine.test.ts`](../state/e2e/combat-hud.engine.test.ts) |
-| Component render — every phase renders without throwing | [`state/e2e/combat.screen.test.tsx`](../state/e2e/combat.screen.test.tsx) |
+| Component render — the combat-encounter screen mounts and plays through phases | [`state/e2e/combat-encounter.screen.test.tsx`](../state/e2e/combat-encounter.screen.test.tsx) |
+| HUD slice composition | [`state/e2e/combat-hud.engine.test.ts`](../state/e2e/combat-hud.engine.test.ts), [`state/presenters/__tests__/combat-hud.engine.test.ts`](../state/presenters/__tests__/combat-hud.engine.test.ts) |
+| Multi-stage board interaction (drag/END PHASE guards) | [`components/combat/encounter/__tests__/CombatBoard.multistage.test.tsx`](../components/combat/encounter/__tests__/CombatBoard.multistage.test.tsx) |
 
-`npm test` must pass twice in a row and `npx tsc --noEmit` must be
-clean before declaring a combat change done. See
-[`docs/testing.md`](./testing.md).
+`npm test` must pass twice in a row and `npx tsc --noEmit` must be clean
+before declaring a combat change done. See [`docs/testing.md`](./testing.md).

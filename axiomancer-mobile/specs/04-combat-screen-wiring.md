@@ -1,6 +1,13 @@
 # Spec 04 — Combat Screen Wiring
 
 > Status: [DONE on 2026-05-12 — see this branch's PR]
+>
+> **Superseded (2026-06):** the screen this spec wired
+> (`app/(tabs)/combat.tsx`) and the engine reducer it drove
+> (`resolveCombatRound`) were both fully removed in favor of
+> Hazard-Pattern Combat (Spec 26 / 26b, `<CombatEncounterPanel>` at
+> `app/combat-encounter/`). Kept here as a decision record only — see
+> [`docs/combat.md`](../docs/combat.md) for the current screen.
 
 ## Goal
 
