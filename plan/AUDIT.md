@@ -14,6 +14,25 @@
 
 ## Pending
 
+### Doctrine-curve confirmation (digest 2026-08-02, reduced-nightly): unchanged from 08-01's flat-zero mid/late read
+- category: content
+- impact: 8
+- ease: 3
+- detail: `/digest`'s reduced-nightly re-measure at `acc64eca` (blind
+  policy-pick, doctrine early ~80 / mid ~50 / late 25-35 / impossible 0):
+  early 61.1%, mid 0.0%, late 0%, impossible 0% — byte-identical to the
+  2026-08-01 digest's `ef492fff` read (only the JSON's `generatedAt`/
+  `commit` meta fields changed). `baseline:check` had flagged staleness
+  against `fbace426` (draft-scorer newcomer/sandbox-visibility fix), but
+  that fix targets the *draft* scorer's card-offer weighting, not the
+  `policy-pick` deck-construction path this matrix measures, so an
+  unchanged read is the expected outcome, not a fresh data point on the
+  collapse itself — this row exists to keep the freshness stamp honest,
+  not to report new movement.
+- next: /iterate — no new signal; `/deck-tuning` continues to own the
+  actual repair via the existing "Post-D8 flag-on curve repair"
+  candidate in `plan/PHASE_CANDIDATES.md`.
+
 ### Doctrine-curve confirmation (digest 2026-08-01, reduced-nightly): mid collapses to zero, early ticks up, late still dead flat
 - category: content
 - impact: 8
@@ -757,6 +776,13 @@
   full `chromium` browser, not just `chromium-headless-shell` — the
   cache was cold for both) before `npm run e2e:minigames` would run at
   all. Still a one-line fix.
+- update 2026-08-02: still unfixed — `night.yml` still has no
+  `install_playwright: true` (confirmed by grep this run). Tenth night
+  in a row needing the by-hand `npx playwright install
+  chromium-headless-shell` workaround before `npm run e2e:minigames`
+  would run at all; all six legs (hazard, combat, gathering,
+  encounter-routing, exploration-roundtrip, upgradeable-dice) ALL PASS
+  once installed. Still a one-line fix.
 
 ### [x] Phase 32 Part 1b stalls: two consecutive `/march` ticks spawn a background Explore agent, then end the turn "waiting" on it — zero commits, zero carried research — RESOLVED 2026-07-29 (issue #155)
 - issue: #155
@@ -980,6 +1006,18 @@
   green, code-changing, direct-to-main commit; the `next` action below
   (root-cause the `Closes #N` no-op) remains the actionable follow-up,
   not yet picked up.
+- update 2026-08-02 (digest pulse review): an eleventh instance,
+  chronologically the tenth (it shipped before #163 above but the
+  shipping tick's own AUDIT note didn't check GitHub) — #162 (pre-fight
+  enemy preview VITAE fix) carried a `Closes #162` trailer on its
+  shipping commit (`15d45699`, direct push to `main`, `verify-mobile`
+  presumed green per the commit's own "full three-workspace `npm run
+  verify` green" claim) and still showed `OPEN` on GitHub when this
+  digest checked. Same undetected-by-the-shipping-tick pattern as
+  #158/#159 (2026-08-01 digest): the `next` action's "catching is
+  itself unreliable" widening keeps reproducing. Closed by hand now.
+  Eleven confirmed instances total (#83, #151, #155, #129, #156, #157,
+  #158, #159, #160, #162, #163).
 
 ## Done
 
