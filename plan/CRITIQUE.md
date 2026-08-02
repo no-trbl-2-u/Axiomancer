@@ -650,18 +650,34 @@ one level down, in the routing helper `onApply` calls next).
 > only the recurring *patterns* were carried; stale one-off rows
 > were dropped. Each maps to category `external-critique`.
 
-### [MED] Engine doc-drift is chronic
+### [x] [MED] Engine doc-drift is chronic — RESOLVED 2026-08-02 (commit 6690c5d0, issue #164)
 - New engine surfaces (status-depth constants, new spec exports)
   chronically lag `spec.md` / `docs/combat.md`. Keep a doc-sync
   check in the loop rather than trusting the docs. (Build-plan
   Phase 12 addresses the current backlog; this is the recurring
   guard.)
+- resolution: this pass's manifestation — `axiomancer-mobile/docs/
+  combat.md` still described the fully-retired legacy combat screen
+  (deleted `app/(tabs)/combat.tsx`, the removed `resolveCombatRound`
+  four-phase loop, a deleted `SkillConfirmOverlay` component, three
+  dead e2e test paths) — rewritten to describe the current
+  `<CombatEncounterPanel>`/`<CombatBoard>` architecture, every link
+  verified to resolve. **Standing guard, not closed for good:** this
+  is a recurring pattern seeded from archived critique history: a
+  future pass finding NEW doc/engine drift should re-file a fresh row
+  rather than treat this resolution as blanket coverage.
 
-### [MED] Wrong-engine mental model in docs
+### [x] [MED] Wrong-engine mental model in docs — RESOLVED 2026-08-02 (commit 6690c5d0, issue #164)
 - Any surviving copy in `docs/combat.md` that frames
   Hazard-Pattern Combat as "additive/secondary" or teaches
   `resolveCombatRound`-first is the wrong mental model for mobile
   integrators. Hazard-Pattern Combat is primary.
+- resolution: `axiomancer-mobile/docs/combat.md` opens with an
+  explicit "Hazard-Pattern Combat is the ONLY combat engine" doctrine
+  banner and no longer references `resolveCombatRound` as current;
+  `specs/04-combat-screen-wiring.md` (the doc it was pinned to) is now
+  marked superseded. Same standing-guard caveat as the row above —
+  re-file fresh if a new instance surfaces.
 
 ### [LOW] Combat kill-path legibility
 - The status kill-path (DoT / execute) is the intended win path
