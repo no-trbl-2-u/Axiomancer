@@ -12,6 +12,19 @@
  * guarantees at least one defend card and at least one status-applying card
  * (when the pool allows), so no drafted deck is locked out of the status game.
  *
+ * Draft-visibility guarantee (GH #163): a card newly merged into the pool via
+ * `extraCards` (a sandbox card with no matching library id — NOT an override
+ * of an existing library card) is, for most policy foci, off-focus and one
+ * candidate among 70-80+ — its single-draw share of the weighted lottery can
+ * be well under 1%, so a handful of measurement seeds can miss it entirely
+ * even though it is structurally draftable. Every draft therefore also
+ * guarantees at least one such newcomer card (when the pool has one and room
+ * allows), the same way it guarantees defend/status — this does not touch
+ * `FOCUS_WEIGHT`/`OFF_FOCUS_WEIGHT` or the odds for the library's existing
+ * 70 cards, and is a no-op whenever `extraCards` is empty (every real starter
+ * preset — `combat.starter-deck-presets.ts` — uses fixed 'preset' lists, not
+ * 'draft', so this guarantee never touches production decks).
+ *
  * Determinism: all randomness flows through the injected `rng` (defaulting to
  * the seedable global singleton, never `Math.random`) — the same rng state
  * always drafts the same deck.
@@ -85,11 +98,18 @@ interface DraftCandidate {
     verbClass: CombatVerbClass;
     weight: number;
     copiesLeft: number;
+    /** True for an `extraCards` entry whose id has no match in `cardLibrary`
+     *  — a genuinely new pool member (not an override of a library card).
+     *  Drives the newcomer-visibility guarantee (GH #163). */
+    isNewcomer: boolean;
 }
 
 /** Resolves the draft pool (ids + verb classes) for the given options. */
 function buildCandidates(options: DeckDraftOptions): DraftCandidate[] {
     const extra = options.extraCards ?? [];
+    const libraryIds = new Set(cardLibrary.map(card => card.id));
+    const newcomerIds = new Set(extra.filter(card => !libraryIds.has(card.id)).map(card => card.id));
+
     const merged = new Map<string, Card>();
     for (const card of cardLibrary) merged.set(card.id, card);
     for (const card of extra) merged.set(card.id, card);
@@ -109,6 +129,7 @@ function buildCandidates(options: DeckDraftOptions): DraftCandidate[] {
             verbClass: card.verbClass,
             weight: focusWeight(options.focus, card.verbClass),
             copiesLeft: maxCopies,
+            isNewcomer: newcomerIds.has(id),
         });
     }
     return candidates;
@@ -130,8 +151,9 @@ function weightedPick(candidates: DraftCandidate[], rng: () => number): DraftCan
 /**
  * Drafts a focused combat deck: a weighted seeded sample of the eligible pool
  * (focus-fitting verb classes at 4x weight), capped at `maxCopies` per card,
- * guaranteed to contain at least one defend and one status-applying card when
- * the pool allows. No escape card is appended — no in-combat retreat exists.
+ * guaranteed to contain at least one defend card, one status-applying card,
+ * and (GH #163) one newly-merged `extraCards` newcomer, whenever the pool
+ * allows each. No escape card is appended — no in-combat retreat exists.
  * Deterministic for a given rng state. Pass the result straight into
  * `initializeCombatEncounter`.
  */
@@ -148,17 +170,35 @@ export function draftCombatDeck(options: DeckDraftOptions): string[] {
         deck.push(pick);
     }
 
-    // Guarantees, in fixed order: >=1 defend, then >=1 status-applying card.
+    // Guarantees, in fixed order: >=1 defend, >=1 status-applying card, then
+    // (GH #163) >=1 copy of EACH DISTINCT extraCards newcomer id. Per-id (not
+    // per-class) on purpose — a sandbox set commonly merges several newcomer
+    // cards (e.g. roles-forge's slag-runoff + ingot-of-ruin) and one being
+    // drafted must never let the others hide behind a generic "some newcomer
+    // present" check; every one gets its own visibility floor.
+    // `isGuaranteedClass` protects every guaranteed slot from a LATER
+    // guarantee's replacement search, regardless of which guarantee placed it.
     ensureClassPresent(deck, candidates, rng, c => c.verbClass === 'defend');
     ensureClassPresent(deck, candidates, rng, c => STATUS_VERB_CLASSES.includes(c.verbClass));
+    const newcomerIds = new Set(candidates.filter(c => c.isNewcomer).map(c => c.id));
+    for (const id of newcomerIds) {
+        ensureClassPresent(deck, candidates, rng, c => c.id === id);
+    }
 
     return deck.map(c => c.id);
 }
 
+/** A card satisfying any of the draft's guarantees — protected from being
+ *  swapped out by a LATER guarantee's replacement search (order-independent:
+ *  every guarantee call consults the same union). */
+function isGuaranteedClass(c: DraftCandidate): boolean {
+    return c.verbClass === 'defend' || STATUS_VERB_CLASSES.includes(c.verbClass) || c.isNewcomer;
+}
+
 /**
  * If no drafted card matches `matches`, swap one in from the pool (when the
- * pool has one), replacing the last drafted card that is neither a defend nor
- * a status card — so satisfying one guarantee never breaks the other.
+ * pool has one), replacing the last drafted card that satisfies none of the
+ * draft's guarantees — so satisfying one guarantee never breaks another.
  */
 function ensureClassPresent(
     deck: DraftCandidate[],
@@ -172,11 +212,9 @@ function ensureClassPresent(
     const pick = weightedPick(options, rng);
     if (!pick) return;
 
-    const protectedCard = (c: DraftCandidate): boolean =>
-        c.verbClass === 'defend' || STATUS_VERB_CLASSES.includes(c.verbClass);
     let replaceAt = deck.length - 1;
     for (let i = deck.length - 1; i >= 0; i--) {
-        if (!protectedCard(deck[i])) { replaceAt = i; break; }
+        if (!isGuaranteedClass(deck[i])) { replaceAt = i; break; }
     }
     deck[replaceAt].copiesLeft += 1;
     pick.copiesLeft -= 1;

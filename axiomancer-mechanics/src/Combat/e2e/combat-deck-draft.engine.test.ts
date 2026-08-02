@@ -167,6 +167,69 @@ describe('draftCombatDeck stage + extraCards pools', () => {
     });
 });
 
+describe('draftCombatDeck newcomer-visibility guarantee (GH #163)', () => {
+    // A self-buff newcomer (classifyVerbClass falls through to 'buff-self')
+    // — off-focus (OFF_FOCUS_WEIGHT=1, no 4x lean) under 'dot'/'control'/
+    // 'damage'/'balanced', one candidate among 70+, well under 1% single-draw
+    // share — the exact shape the filed finding named: a sandbox card the
+    // weighted lottery structurally starves at small seed counts even though
+    // it is draftable.
+    const offFocusNewcomerA: Card = {
+        id: 'draft-test-newcomer-a', name: 'Newcomer A',
+        philosophicalAspect: 'mind', description: 'test-only off-focus newcomer', tier: 1,
+        targetType: 'self', rank: 1, cardType: 'spell',
+        combatEffects: [{ effectId: 'buff_regeneration', appliedTo: 'self', intensity: 1, duration: 2 }],
+    };
+    const offFocusNewcomerB: Card = { ...offFocusNewcomerA, id: 'draft-test-newcomer-b' };
+
+    it('a lone newcomer is present in EVERY draft across many seeds and foci (was: near-zero)', () => {
+        const focuses = ['dot', 'control', 'damage', 'utility', 'balanced'] as const;
+        for (const focus of focuses) {
+            for (let seed = 1; seed <= 30; seed++) {
+                const deck = draftCombatDeck({
+                    focus, rng: lcg(seed), extraCards: [offFocusNewcomerA],
+                });
+                expect(deck, `${focus}/seed ${seed} missing the newcomer`)
+                    .toContain('draft-test-newcomer-a');
+            }
+        }
+    });
+
+    it('TWO newcomers in the same set each get their own floor — one present never hides the other', () => {
+        // This is the exact regression the naive "any newcomer present" guarantee
+        // missed: roles-forge merges two newcomer ids (slag-runoff + ingot-of-ruin)
+        // and a single "some newcomer" check let the first satisfy the guarantee
+        // while the second stayed invisible.
+        for (let seed = 1; seed <= 30; seed++) {
+            const deck = draftCombatDeck({
+                focus: 'balanced', rng: lcg(seed),
+                extraCards: [offFocusNewcomerA, offFocusNewcomerB],
+            });
+            expect(deck, `seed ${seed} missing newcomer A`).toContain('draft-test-newcomer-a');
+            expect(deck, `seed ${seed} missing newcomer B`).toContain('draft-test-newcomer-b');
+        }
+    });
+
+    it('is a no-op with no extraCards — the defend/status guarantees, deck size, and library-only odds are unchanged', () => {
+        for (const seed of [1, 4, 9, 16, 25]) {
+            const withNoExtras = draftCombatDeck({ focus: 'dot', rng: lcg(seed) });
+            const withEmptyExtras = draftCombatDeck({ focus: 'dot', rng: lcg(seed), extraCards: [] });
+            expect(withEmptyExtras).toEqual(withNoExtras);
+        }
+    });
+
+    it('respects the stage tier gate — a tier-3 newcomer is never forced into an early (tier-1) draft', () => {
+        const tier3Newcomer: Card = { ...offFocusNewcomerA, id: 'draft-test-newcomer-t3', tier: 3 };
+        const early = COMBAT_STAGE_PROFILES.early;
+        for (const seed of [1, 2, 3, 4, 5]) {
+            const deck = draftCombatDeck({
+                focus: 'balanced', stage: early, rng: lcg(seed), extraCards: [tier3Newcomer],
+            });
+            expect(deck).not.toContain('draft-test-newcomer-t3');
+        }
+    });
+});
+
 describe('resolveDeckSelection', () => {
     it("kind 'preset' delegates to buildPresetDeck (unknown preset → empty)", () => {
         const selection: CombatDeckSelection = { kind: 'preset', presetId: 'erosion' };

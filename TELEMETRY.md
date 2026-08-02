@@ -147,3 +147,6 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-08-01T10:23:04Z | slash-prompt | /digest | unknown | user/ci | /digest |
 | 2026-08-01T19:41:30Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-08-01T19:43:42Z | subagent | Explore | claude-sonnet-5 | main | Investigate VITAE preview mismatch bug |
+| 2026-08-02T04:02:50Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-08-02T04:07:51Z | skill | iterate | claude-sonnet-5 | main | - |
+| 2026-08-02T04:11:49Z | subagent | card-expert | claude-sonnet-5 | main | Fix draft scorer starving new/sandbox cards |
