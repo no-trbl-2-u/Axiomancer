@@ -1018,6 +1018,17 @@
   itself unreliable" widening keeps reproducing. Closed by hand now.
   Eleven confirmed instances total (#83, #151, #155, #129, #156, #157,
   #158, #159, #160, #162, #163).
+- update 2026-08-02 (second): a twelfth instance — #164 (`/march` ->
+  `/iterate` tick, mobile `docs/combat.md` rewrite draining the
+  standing "Engine doc-drift" / "Wrong-engine mental model" CRITIQUE.md
+  rows) carried a `Closes #164` trailer on its shipping commit
+  (`6690c5d0`, direct push to `main`, docs-only diff, `npm run verify
+  --workspace axiomancer-mobile` green — 268/268 suites) and still
+  didn't auto-close; the shipping tick noticed the no-op same-session
+  and closed by hand. Twelve confirmed instances total (#83, #151,
+  #155, #129, #156, #157, #158, #159, #160, #162, #163, #164). No new
+  root-cause signal; the `next` action (root-cause the `Closes #N`
+  no-op) remains unpicked-up.
 
 ## Done
 
