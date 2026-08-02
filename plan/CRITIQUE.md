@@ -346,10 +346,11 @@ one level down, in the routing helper `onApply` calls next).
   witnesses; until ratified, the current whole-instance shed stands.
 - source: adversarial code review (2026-07-12)
 
-### [HIGH] tuning harness — policy-pick draft scorer starves new/sandbox cards
+### [x] [HIGH] tuning harness — policy-pick draft scorer starves new/sandbox cards (RESOLVED 2026-08-02, commit fbace426, issue #163)
 - pass: session-closeout 2026-07-12 (commit ffadca96, branch claude/axiomancer-dawncaster-comparison-cz6008)
 - viewport: n/a
 - category: tuning-harness
+- issue: #163
 - observation: the policy-pick draft scorer never surfaces new or
   sandbox cards — five sets (doom-species, chooseX-vein, roles-charm,
   roles-harvest, roles-forge's ingot) had ZERO drafts at one or more
@@ -365,6 +366,21 @@ one level down, in the routing helper `onApply` calls next).
   pool newcomers) unblocks SIX pending gate verdicts; do it before the
   next sandbox A/B cycle so evidence stops being lottery-shaped.
 - source: session closeout (evidence pass, 2026-07-11)
+- resolution: reproduced live on `main` (`694edb59`) before fixing —
+  `ingot-of-ruin` 0/24 draws across the 3 canonical late-stage seeds;
+  `conjure-exercise`/`roles-bulwark` produced byte-identical decks
+  across all 40 mid-stage seed=2 cells. `draftCombatDeck`
+  (`combat.deck-draft.ts`) now extends the existing defend/status
+  floor pattern with a per-id guarantee: every distinct `extraCards`
+  newcomer id is forced into the draft when the stage/tier pool
+  allows it (per-id, not per-class, so a set with multiple newcomers
+  can't have one hide another). `FOCUS_WEIGHT`/`OFF_FOCUS_WEIGHT` and
+  library-card odds untouched; no-ops whenever `extraCards` is empty,
+  so real starter presets are unaffected. Regression coverage in
+  `combat-deck-draft.engine.test.ts`. Post-fix: `ingot-of-ruin` hits
+  48/48 eligible cells; all named sets now surface in 71-100% of
+  stage-eligible cells. Mechanics `npm run verify`: 190 files / 4085
+  tests green.
 
 ### [HIGH] late-stage global collapse — all 10 presets 0.00 late
 - pass: session-closeout 2026-07-12 (commit ffadca96)
