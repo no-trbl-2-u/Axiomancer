@@ -746,7 +746,20 @@ one level down, in the routing helper `onApply` calls next).
   of it.
 - source: playtester (owner-directed break-test session)
 
-### [MED] SWAY has no meter anywhere in the combat UI
+### [x] [MED] SWAY has no meter anywhere in the combat UI (RESOLVED — stale, already fixed by WI-5, issue #167)
+- RESOLVED 2026-08-03 (verified stale; no new code). WI-5 (2026-07-12,
+  commit `88406af8`) already shipped an `AltWinMeter` (SWAY →
+  CAPITULATE, PREMISE → ORATORY) under the VITAE bar in
+  `CombatCombatantPane.tsx` — `testID="combat-sway-meter"`, full
+  `accessibilityRole="progressbar"` semantics, gated on
+  `enemy.swayVisible` (visible once sway accrues or the preset's deck
+  feeds the mechanic). Presenter-level regression coverage already
+  exists: `legibility-sweep.engine.test.ts` "surfaces the SWAY meter
+  with the engine capitulate target when sway accrues" pins
+  `swayVisible`/`sway`/`swayTarget`. The row predates or narrowly
+  missed WI-5's same-day landing; the queue was overstating an open
+  MED. Corrected.
+- issue: #167
 - pass: owner-playtest 2026-07-12
 - viewport: mobile (expo-web via Playwright)
 - category: visual/legibility

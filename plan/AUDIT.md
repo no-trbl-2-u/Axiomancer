@@ -14,6 +14,24 @@
 
 ## Pending
 
+### [x] [external-critique] SWAY has no meter anywhere in the combat UI — RESOLVED 2026-08-03 (issue #167)
+- category: external-critique
+- impact: 6
+- ease: 9
+- issue: #167
+- resolution: verified stale; no new code. WI-5 (2026-07-12, commit
+  `88406af8`) already shipped an `AltWinMeter` (SWAY -> CAPITULATE,
+  PREMISE -> ORATORY) under the VITAE bar in
+  `axiomancer-mobile/components/combat/encounter/CombatCombatantPane.tsx`
+  — `testID="combat-sway-meter"`, full `accessibilityRole="progressbar"`
+  semantics, gated on `enemy.swayVisible`. Presenter-level regression
+  coverage already exists in `legibility-sweep.engine.test.ts` ("surfaces
+  the SWAY meter with the engine capitulate target when sway accrues").
+  The finding predates or narrowly missed WI-5's same-day landing.
+- detail: mirrored from `plan/CRITIQUE.md` Pending row (filed by the
+  playtester during the 2026-07-12 owner-directed break-test session).
+- next: (drained)
+
 ### Doctrine-curve confirmation (digest 2026-08-02, reduced-nightly): unchanged from 08-01's flat-zero mid/late read
 - category: content
 - impact: 8
