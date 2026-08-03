@@ -310,8 +310,10 @@ npm run deploy:check
 ```
 
 **Once deploy:check is green and the row carried an `- issue: #N`,
-post the close-comment** (the `Closes #N` commit trailer already
-auto-closed the issue; the comment confirms the deploy URL):
+post the close-comment** (posts the deploy-URL comment AND actively
+closes the issue via the API — the `Closes #N` commit trailer is a
+belt-and-suspenders backup, not the load-bearing close; see
+`scripts/loop-issue.mjs`'s `close-comment` doc comment):
 
 ```bash
 node scripts/loop-issue.mjs close-comment \
@@ -321,8 +323,8 @@ node scripts/loop-issue.mjs close-comment \
 ```
 
 Failures of `close-comment` are warnings, not blockers — the fix
-shipped, the issue is closed, the comment is just polish. Continue
-to Step 8.
+shipped; the close is best-effort like the rest of the mirror.
+Continue to Step 8.
 
 ### Step 8 — Done
 

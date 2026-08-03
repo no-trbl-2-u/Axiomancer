@@ -5,7 +5,9 @@
 // the autonomous loop's work. Two flavors:
 //
 //   1) /iterate findings (one issue per finding — "open" + "close-comment")
-//      The shipping commit's `Closes #N` trailer auto-closes.
+//      close-comment posts the deploy comment AND actively closes the
+//      issue via the API; the shipping commit's `Closes #N` trailer is a
+//      belt-and-suspenders backup, not the load-bearing close (see below).
 //
 //   2) Phases (one issue per phase, find-or-create-or-reopen — "phase-open"
 //      + "phase-close"). Idempotent across ticks: if an issue with the
@@ -29,11 +31,16 @@
 //                 --commit <sha>
 //                 --deploy-url <url>
 //
-//     Posts a follow-up comment confirming the deploy. The
-//     `Closes #N` trailer in the commit body auto-closes the issue
-//     when pushed to main; no explicit `gh issue close` is required.
-//     Failures are warnings, not blockers — the fix has already
-//     shipped.
+//     Posts a follow-up comment confirming the deploy AND actively
+//     closes the issue via the API (state=closed, state_reason=
+//     completed). The `Closes #N` commit trailer proved unreliable —
+//     13 confirmed instances (2026-07-13 through 2026-08-03, see
+//     plan/AUDIT.md finding "[2.4] Phase-mirror issue close is
+//     unreliable") of a present, correctly-numbered trailer on a
+//     green, direct-to-main commit silently failing to auto-close.
+//     Mirrors the fix already applied to phase mirrors below
+//     (cmdPhaseClose). Idempotent; failures are warnings, not
+//     blockers — the fix has already shipped.
 //
 //   phase-open --phase <id>
 //              --title "<title>"
@@ -237,14 +244,14 @@ function findPhaseIssue(phaseId, repo) {
   return { number: matches[0].number, state: 'CLOSED' }
 }
 
-// Close a phase mirror via the API (state=closed, state_reason=completed).
-// This is the LOAD-BEARING close: the `Closes #N` commit trailer only fires
-// for commits pushed directly to the default branch, so phases that reach
-// `main` via cross-session `claude/*` branch merge reconciliation would leak
-// the mirror open without it. Idempotent — an already-closed issue is treated
-// as success (gh prints "already closed" and exits non-zero on some versions;
-// swallow only that case, mirroring `ensureLabel`).
-function closePhaseIssue(number, repo) {
+// Close an issue via the API (state=closed, state_reason=completed). This is
+// the LOAD-BEARING close for both phase mirrors and /iterate finding mirrors:
+// the `Closes #N` commit trailer is unreliable (see callers for the specific
+// evidence each has accumulated) and cannot be trusted alone. Idempotent — an
+// already-closed issue is treated as success (gh prints "already closed" and
+// exits non-zero on some versions; swallow only that case, mirroring
+// `ensureLabel`).
+function closeIssue(number, repo) {
   const r = ghCall(['issue', 'close', String(number), '--repo', repo, '--reason', 'completed'])
   if (r.status === 0) return { closed: true }
   const out = `${r.stderr ?? ''}${r.stdout ?? ''}`
@@ -348,7 +355,16 @@ function cmdCloseComment(flags) {
   const r = ghCall(['issue', 'comment', String(number), '--repo', repo, '--body', body])
   if (r.status !== 0) {
     process.stderr.write(`loop-issue: comment failed for #${number} (status ${r.status})\n${r.stderr}\n`)
-    return // best-effort: do not exit non-zero
+    // fall through — still attempt the close below; the comment is a
+    // courtesy, the close is the point.
+  }
+
+  // Actively close via the API rather than trusting the `Closes #N` commit
+  // trailer — see the close-comment doc comment above for the evidence.
+  const close = closeIssue(number, repo)
+  if (close.error) {
+    process.stderr.write(`loop-issue: close failed for #${number}: ${close.error}\n`)
+    // best-effort: do not exit non-zero
   }
 }
 
@@ -358,7 +374,7 @@ export function buildCloseCommentBody({ commit, deployUrl }) {
     '',
     `Live at ${deployUrl} after deploy ready (~3–5 min).`,
     '',
-    '_The autonomous loop closes this issue via the commit\'s `Closes #N` trailer; no manual close is required._',
+    '_Closed by the autonomous loop via the GitHub API (reliable regardless of push route); the commit\'s `Closes #N` trailer is a belt-and-suspenders backup._',
   ].join('\n')
 }
 
@@ -520,7 +536,7 @@ function cmdPhaseClose(flags) {
   // the header). Skip the API call when we already know it's closed (idempotent
   // + saves a round-trip); otherwise close with state_reason=completed.
   if (knownState === 'CLOSED') return
-  const close = closePhaseIssue(target, repo)
+  const close = closeIssue(target, repo)
   if (close.error) {
     process.stderr.write(`loop-issue: phase close failed for #${target}: ${close.error}\n`)
   }
@@ -583,7 +599,8 @@ Usage:
 
   node scripts/loop-issue.mjs close-comment --number <N> \\
       --commit <sha> --deploy-url <url>
-      → posts a follow-up comment; the Closes #N commit trailer auto-closes
+      → posts a follow-up comment AND closes the issue via the API
+      (reliable regardless of push route; the Closes #N trailer is a backup)
 
   node scripts/loop-issue.mjs phase-open --phase <id> \\
       --title "Phase <id> — <topic>" --body-file <path>
