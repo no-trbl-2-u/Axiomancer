@@ -897,10 +897,22 @@
   before removal.
 - next: /iterate
 
-### [2.4] Phase-mirror issue close is unreliable — 9 shipped phases still show open, and even a present trailer once failed
+### [x] [2.4] Phase-mirror issue close is unreliable — 9 shipped phases still show open, and even a present trailer once failed — RESOLVED 2026-08-03 (commit 0441c554, issue #166)
+- resolution: `loop-issue.mjs close-comment` (the `/iterate` finding-mirror
+  close path) never got the active-API-close fix that `phase-close` already
+  carried for the same underlying trailer unreliability. Extracted
+  `closePhaseIssue` into a shared `closeIssue()` helper and called it from
+  `cmdCloseComment` too — it now posts the deploy comment AND closes the
+  issue via `gh issue close --reason completed`, idempotent and best-effort,
+  mirroring `phase-close`'s pattern exactly. The `Closes #N` trailer is now
+  a backup for finding mirrors, not the load-bearing close, matching how
+  phase mirrors have worked since Phase 35. Doc comments, help text, and
+  `skills/iterate.md` Step 7 updated to match. Root cause of the trailer
+  itself no-oping remains unknown — this fix stops depending on it working.
 - category: gap
 - impact: 4
 - ease: 5
+- issue: #166
 - detail: `skills/ship-a-phase.md` Step 10 says the shipping commit
   should add a `Closes #<phase-issue-number>` trailer so GitHub
   auto-closes the phase mirror opened in Step 2.5. Checked every
