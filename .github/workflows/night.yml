@@ -32,3 +32,4 @@ jobs:
         --dangerously-skip-permissions
       prompt: '/digest'
       timeout_minutes: 90
+      install_playwright: true

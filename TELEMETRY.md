@@ -158,3 +158,4 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-08-02T10:21:46Z | skill | digest | unknown | main | - |
 | 2026-08-02T14:06:15Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-08-02T14:07:10Z | skill | iterate | claude-sonnet-5 | main | - |
+| 2026-08-03T10:11:56Z | slash-prompt | /march | unknown | user/ci | /march |
