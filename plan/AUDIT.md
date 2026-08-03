@@ -1033,6 +1033,15 @@
   #155, #129, #156, #157, #158, #159, #160, #162, #163, #164). No new
   root-cause signal; the `next` action (root-cause the `Closes #N`
   no-op) remains unpicked-up.
+- update 2026-08-03: a thirteenth instance — #165 (`/march` ->
+  `/iterate` tick, `night.yml` missing `install_playwright: true` fix)
+  carried a `Closes #165` trailer on its shipping commit (`ca5b86f1`,
+  direct push to `main`, workflow-config-only diff, no verify gate
+  applies, `deploy:check` reported no gated workflow to confirm — a
+  docs/config-only tick) and still didn't auto-close; the shipping tick
+  noticed the no-op same-session and closed by hand. Thirteen confirmed
+  instances total (#83, #151, #155, #129, #156, #157, #158, #159, #160,
+  #162, #163, #164, #165). No new root-cause signal.
 
 ## Done
 
