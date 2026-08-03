@@ -744,7 +744,11 @@
   Hermes side — not something the loop can enforce alone.
 - next: /oversight (standing question 0 drains this)
 
-### [3.2] Night workflow never installs Playwright's browser — breadth check silently would fail on every run
+### [x] [3.2] Night workflow never installs Playwright's browser — breadth check silently would fail on every run — RESOLVED 2026-08-03 (commit ca5b86f1, issue #165)
+- resolution: added `install_playwright: true` to the `digest` job's
+  `with:` block in `.github/workflows/night.yml`, mirroring
+  `critique.yml`. One-line fix; no verify gate applies (workflow-config
+  only, no package touched).
 - category: gap
 - impact: 4
 - ease: 8
