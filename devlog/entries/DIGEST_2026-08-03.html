@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
-<title>Axiomancer</title>
+<title>Axiomancer digest — 2026-08-03</title>
 <style>
 :root {
   color-scheme: light dark;
@@ -203,15 +203,46 @@ footer.foot { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--b
 </style>
 </head>
 <body>
-<header class="top"><div class="wrap"><span class="home">Axiomancer</span></div></header>
+<header class="top"><div class="wrap"><a class="home" href="../log.html">← DevLog</a><span class="crumb">2026-08-03</span></div></header>
 <main class="wrap">
-<h1>Axiomancer</h1>
-<p class="muted">A private index of the game's content and the nightly development log.</p>
-<div class="hub">
-  <a class="hue-cards" href="./catalog.html"><span class="h-glyph">🂠</span><div class="h-title">Catalog</div><div class="h-sub">79 cards · 56 foes · 24 statuses</div></a>
-  <a class="hue-log" href="./log.html"><span class="h-glyph">❯</span><div class="h-title">DevLog</div><div class="h-sub">24 entries</div></a>
-  <a class="hue-tuning" href="./tuning-lab/index.html"><span class="h-glyph">⚖</span><div class="h-title">Tuning Lab</div><div class="h-sub">3 reports</div></a>
-</div>
+<h1 id="headline">2026-08-03</h1>
+<p class="headline">A quiet infra night — two long-standing gaps closed at the root: the</p>
+<div class="counts"><span class="chip cat-infra">3 infra</span></div>
+<section class="card cat-infra" id="night-workflow-now-installs-playwright-before-the-breadth-check"><div class="card-head"><span class="chip cat-infra">infra</span><h2>Night workflow now installs Playwright before the breadth check</h2></div>
+<p class="field"><span class="flabel">What</span> <code>.github/workflows/night.yml</code> now passes</p>
+<p class="field"><span class="flabel">Why</span> without it, <code>/digest</code>'s <code>e2e:minigames</code> breadth check aborted</p>
+<p class="commits"><code class="commit">ca5b86f1</code> <code class="commit">(issue</code> <code class="commit">#165</code> <code class="commit">—</code> <code class="commit">see</code> <code class="commit">the</code> <code class="commit">`Closes</code> <code class="commit">#N`</code> <code class="commit">card</code> <code class="commit">below</code> <code class="commit">for</code></p>
+<p><code>install_playwright: true</code> to the shared skill workflow, mirroring <code>critique.yml</code> and its peers. on every cold Actions runner ("Executable doesn't exist at <code>.../chromium_headless_shell-1228/...</code>"), confirmed unfixed for ten consecutive nights — each one needing a by-hand <code>npx playwright install chromium-headless-shell</code> workaround before the check could even run. <code>plan/AUDIT.md</code> finding <code>[3.2]</code>, issue #165.</p>
+<div class="diff" role="img" aria-label="code diff"><div class="dl meta">--- a/.github/workflows/night.yml</div><div class="dl meta">+++ b/.github/workflows/night.yml</div><div class="dl hunk">@@ -32,3 +32,4 @@ jobs:</div><div class="dl ctx">         --dangerously-skip-permissions</div><div class="dl ctx">       prompt: '/digest'</div><div class="dl ctx">       timeout_minutes: 90</div><div class="dl add">+      install_playwright: true</div></div>
+<p>why this needed a hand-close anyway)</p></section>
+<section class="card cat-infra" id="combat-md-rewritten-for-the-current-hazard-pattern-combat-screen"><div class="card-head"><span class="chip cat-infra">infra</span><h2><code>combat.md</code> rewritten for the current Hazard-Pattern Combat screen</h2></div>
+<p class="field"><span class="flabel">What</span> replaced <code>docs/combat.md</code>'s description of the fully-retired</p>
+<p class="field"><span class="flabel">Why</span> <code>plan/CRITIQUE.md</code>'s standing "Engine doc-drift is chronic" /</p>
+<p class="commits"><code class="commit">6690c5d0</code> <code class="commit">(issue</code> <code class="commit">#164;</code> <code class="commit">verify:</code> <code class="commit">`npm</code> <code class="commit">run</code> <code class="commit">verify</code> <code class="commit">--workspace</code></p>
+<p>legacy combat screen (deleted <code>app/(tabs)/combat.tsx</code>, the removed <code>resolveCombatRound</code> four-phase loop, a deleted <code>SkillConfirmOverlay</code>, three e2e paths that no longer exist) with the real <code>&lt;CombatEncounterPanel&gt;</code> / <code>&lt;CombatBoard&gt;</code> architecture — entry points, data flow, the <code>CombatEncounterPhase</code> union, the drag-to-power turn flow, board layout, <code>CombatViewModel</code> shape. Spec 04 marked superseded so it isn't mistaken for current architecture. "Wrong-engine mental model in docs" rows (external-critique, score ~4.9) — a fresh reader following the old doc would have built a mental model of a screen that hasn't existed since 2026-06.</p>
+<div class="diff" role="img" aria-label="code diff"><div class="dl del">-The combat screen lives at [`app/(tabs)/combat.tsx`](../app/(tabs)/combat.tsx)</div><div class="dl del">-as a thin UI shell. All math, RNG, and state shaping happens in the</div><div class="dl del">-presenter at [`state/presenters/combat.engine.ts`](../state/presenters/combat.engine.ts).</div><div class="dl add">+&gt; **Hazard-Pattern Combat (mechanics Spec 25, mobile Spec 26 / 26b) is the</div><div class="dl add">+&gt; ONLY combat engine.** The legacy turn-based resolver this doc used to</div><div class="dl add">+&gt; describe (`resolveCombatRound`, the four-phase `choosing_stance` loop,</div><div class="dl add">+&gt; `app/(tabs)/combat.tsx`) was fully removed from the engine in 2026-06.</div></div>
+<p>axiomancer-mobile`, 268 suites / 2715 tests green)</p></section>
+<section class="card cat-infra" id="thirteenth-closes-n-no-op-still-unpicked-up"><div class="card-head"><span class="chip cat-infra">infra</span><h2>Thirteenth <code>Closes #N</code> no-op — still unpicked-up</h2></div>
+<p class="field"><span class="flabel">What</span> #165's shipping commit (<code>ca5b86f1</code>) carried a correctly</p>
+<p class="field"><span class="flabel">Why</span> the same unexplained symptom tracked since #83 (Phase 32 Part</p>
+<p>numbered <code>Closes #165</code> trailer on a direct push to <code>main</code> — a workflow-config-only diff with no verify gate to apply — and still didn't auto-close the issue; closed by hand same-session. 1, 2026-07-13). Thirteen confirmed instances now (#83, #151, #155, #129, #156, #157, #158, #159, #160, #162, #163, #164, #165), no new root-cause signal this time either. Already escalated to the top of <code>plan/PHASE_CANDIDATES.md</code> (score 8.5, <code>[score 8.5, escalated]</code>) via <code>/expand</code> — this entry is a log update, not a new proposal; the loop doesn't get to fix its own constraint-tracking without <code>/oversight</code>.</p></section>
+<section class="panel" id="while-you-were-out"><h2>While you were out</h2>
+<div class="tablewrap"><table><thead><tr><th>Tick (UTC)</th><th>Verb</th><th>Outcome</th></tr></thead><tbody><tr><td>08-02 14:04 → 14:22</td><td><code>/march</code> → <code>/iterate</code></td><td><span class="st st-ok">shipped</span> — combat.md rewrite (#164)</td></tr><tr><td>08-02 19:40 → 19:45</td><td><code>/march</code></td><td><span class="st st-neutral">no-op</span></td></tr><tr><td>08-03 04:03 → 04:07</td><td><code>/march</code></td><td><span class="st st-neutral">no-op</span></td></tr><tr><td>08-03 10:10 → 10:27</td><td><code>/march</code> → <code>/iterate</code></td><td><span class="st st-ok">shipped</span> — night.yml Playwright fix (#165)</td></tr></tbody></table></div>
+<ul><li>Build plan: 57/57 checked, none blocked.</li><li><code>plan/AUDIT.md</code>: 31 open pending rows (42 total under Pending, 11</li></ul>
+<p>already marked resolved-in-place).</p>
+<ul><li><code>plan/CRITIQUE.md</code>: 21 open pending rows; last full pass 2026-07-31</li></ul>
+<p>at commit <code>9a445281</code> (three days stale — next <code>/critique</code> due).</p>
+<ul><li><code>plan/PHASE_CANDIDATES.md</code>: 34 pending candidates.</li><li><code>triage:needs-user</code> / <code>loop:do</code> issues: 0 open (closed the one</li></ul>
+<p>stale duplicate below).</p>
+<ul><li>Deploy: nothing to check — HEAD is a docs/plan-only tick, no gated</li></ul>
+<p>workflow triggered.</p></section>
+<section class="panel" id="needs-you"><h2>Needs you</h2>
+<ul><li>Nothing blocked this cycle. One piece of hygiene handled directly:</li></ul>
+<p>issue #144 ("title screen wordmark cropped above the mobile fold") was a duplicate of #148 — identical critique-pass-12 finding, already fixed by commit <code>0725b9cc</code> (2026-07-22), whose <code>Closes #148</code> trailer never touched the duplicate. Verified the fix (<code>contentFit="contain"</code>) is still live in <code>TitleScreen.tsx</code>, commented, and closed #144 as not-planned/duplicate.</p></section>
+<section class="panel" id="tuning-proposals"><h2>Tuning proposals</h2>
+<p>None. <code>npm run baseline:check</code> reports <strong>FRESH</strong> — baseline <code>acc64eca</code>, measured 2026-08-02, confidence <code>reduced-nightly</code>, no mechanics-source commits since. No re-measure triggered, so no doctrine-curve bands to report against this cycle.</p></section>
+<section class="panel" id="todays-intent"><h2>Today's intent</h2>
+<p>Breadth check (<code>npm --workspace axiomancer-mobile run e2e:minigames</code>, the project's real substitute for this skill's stale <code>npm run e2e</code> pointer — <code>plan/AUDIT.md</code>'s standing divergence finding) ran full and green: hazard, combat, gathering, encounter-routing, exploration/ combat-prelude round-trip, and upgradeable-dice all <code>ALL PASS</code>. No baseline screenshots changed since the last digest, so no UI shots this cycle.</p></section>
 <footer class="foot">Axiomancer DevLog &middot; generated by <code>scripts/build-devlog.mjs</code></footer>
 </main>
 </body>
