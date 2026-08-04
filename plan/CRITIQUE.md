@@ -708,7 +708,27 @@ one level down, in the routing helper `onApply` calls next).
   projected-lethality readout would close the gap (build-plan
   Phase 2).
 
-### [MED] DoT card faces print round-clock math that contradicts their own keyword glosses
+### [x] [MED] DoT card faces print round-clock math that contradicts their own keyword glosses (RESOLVED — stale, already fixed by WI-2, issue #168)
+- RESOLVED 2026-08-04 (verified stale; no new code). The trigger-clock
+  source of truth this row's suggested fix asked for already exists:
+  `debuffs.library.json`'s `damageOverTime.trigger` field
+  (`debuff_poison` tagged `"card-played"`, `debuff_bleed` tagged
+  `"damage-instance"`). It is read once in `cardCalc()`
+  (`axiomancer-mobile/state/presenters/combat-encounter.engine.ts:1187-1188`,
+  `out.dotTrigger`) and consumed by both the card-face generator
+  (`faceStats`) and the detail-overlay generator (`detailCore`).
+  Event-triggered DoT faces now read e.g. "foe loses VITAE each card
+  you play" (poison) / "foe loses VITAE each time it is struck"
+  (bleed) — round-clock "X over Nt turns" phrasing is emitted ONLY for
+  the `dotTrigger === null` branch (genuinely round-clock/legacy
+  effects), never for poison or bleed. Fix landed in commit
+  `b097efec` ("Fixes from cleanup", WI-2, 2026-07-12 11:45:52) — ten
+  minutes BEFORE this CRITIQUE row was even filed (11:55:20 the same
+  day), so the finding was already stale at filing time. Regression
+  coverage: `axiomancer-mobile/state/presenters/__tests__/card-face-honesty.guard.test.ts`
+  sweeps the entire card library asserting no event-triggered DoT face
+  prints round-clock phrasing; passes clean on current `main`.
+- issue: #168
 - pass: owner-playtest 2026-07-12
 - viewport: mobile (expo-web via Playwright)
 - category: content/copy

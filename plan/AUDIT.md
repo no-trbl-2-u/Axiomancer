@@ -14,6 +14,30 @@
 
 ## Pending
 
+### [x] [external-critique] DoT card faces print round-clock math that contradicts their own keyword glosses — RESOLVED 2026-08-04 (issue #168)
+- category: external-critique
+- impact: 6
+- ease: 9
+- issue: #168
+- resolution: verified stale; no new code. The trigger-clock source of
+  truth the row asked for already exists —
+  `debuffs.library.json`'s `damageOverTime.trigger` field, read once in
+  `cardCalc()` (`axiomancer-mobile/state/presenters/combat-encounter.engine.ts:1187-1188`)
+  and consumed by both the card-face and detail-overlay generators.
+  Event-triggered DoT faces (poison, bleed) already print their real
+  trigger ("each card you play" / "each time it is struck"); round-clock
+  "X over Nt turns" phrasing survives only for genuinely round-clock
+  (`dotTrigger === null`) effects. Fix landed in commit `b097efec` (WI-2,
+  2026-07-12 11:45:52) — ten minutes before this CRITIQUE row was even
+  filed (11:55:20 the same day). Regression guard
+  `card-face-honesty.guard.test.ts` sweeps the full card library and
+  passes clean on current `main` (verified this tick: 9/9 tests green).
+- detail: mirrored from `plan/CRITIQUE.md` Pending row (filed by the
+  playtester during the 2026-07-12 owner-directed break-test session;
+  flagged for re-check by /critique pass 15, 2026-08-04, once Phase 32
+  shipped in full).
+- next: (drained)
+
 ### [x] [external-critique] SWAY has no meter anywhere in the combat UI — RESOLVED 2026-08-03 (issue #167)
 - category: external-critique
 - impact: 6
