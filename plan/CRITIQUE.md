@@ -1,13 +1,36 @@
 # Critique log
 
-> Last pass: 2026-07-31 at commit 9a445281
-> Pass count: 14
+> Last pass: 2026-08-04 at commit db84dfc0
+> Pass count: 15
 
 > External-observer feedback for Axiomancer. Populated by
 > `/critique` (which drives the local expo-web build with the
 > `playtester` agent — there is no hosted URL), drained by
 > `/iterate`. See `skills/critique.md` for the contract and
 > `plan/bearings.md` § Surface for the local-build adaptation.
+
+> **[critique pass 15, 2026-08-04, commit db84dfc0] Unattended `/march`
+> tick.** Used the non-MCP `critique:drive` transport (§3.5) at both
+> mobile (375×812) and desktop (1280×800). **Methodology note:** this
+> run's cold drive reached past "ENTER COMBAT" into the live
+> combat-board (card hand, dice tray, stance state) at both viewports —
+> the pass-13/14 note that "a cold drive still can't pass ENTER COMBAT"
+> no longer holds; a future pass can use this to settle the
+> unverified in-combat rows directly instead of waiting on an
+> interactive pass. Using that new reach this pass: the VITAE-vs-HP
+> row (RESOLVED 2026-07-22) still holds with no regression — the live
+> board's health readouts are icon-only (♥ + number), no "HP" or
+> "VITAE" text rendered anywhere to regress. The open **[MED] DoT card
+> faces print round-clock math** row (2026-07-12) is reconfirmed
+> live: the visible hand showed "Inflict POISON 1 for 4 turns." and
+> "PROLONG every DoT on the enemy by 1 turn." — still duration-phrased
+> card faces, unchanged since filing. Flagging for `/iterate`: that
+> row's suggested fix says "fold into Phase 32's DoT-clock work," and
+> Phase 32 is now `[x]` shipped in the build plan — worth checking
+> whether the row is actually stale-resolved-by-Phase-32 or genuinely
+> still open before it scores again. Zero console/page errors besides
+> the same benign `navigator.vibrate` warning seen every prior pass.
+> No new findings filed — nothing observed outside the existing rows.
 
 > **[critique pass 14, 2026-07-31, commit 9a445281] Unattended `/march`
 > tick.** Used the non-MCP `critique:drive` transport (§3.5) at both
