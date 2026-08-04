@@ -167,3 +167,5 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-08-03T20:10:58Z | skill | iterate | claude-sonnet-5 | main | - |
 | 2026-08-04T09:19:10Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-08-04T09:24:19Z | skill | critique | claude-sonnet-5 | main | - |
+| 2026-08-04T11:11:07Z | slash-prompt | /digest | unknown | user/ci | /digest |
+| 2026-08-04T11:11:09Z | skill | digest | unknown | main | - |

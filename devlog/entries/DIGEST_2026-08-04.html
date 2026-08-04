@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
-<title>Axiomancer</title>
+<title>Axiomancer digest — 2026-08-04</title>
 <style>
 :root {
   color-scheme: light dark;
@@ -203,15 +203,44 @@ footer.foot { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--b
 </style>
 </head>
 <body>
-<header class="top"><div class="wrap"><span class="home">Axiomancer</span></div></header>
+<header class="top"><div class="wrap"><a class="home" href="../log.html">← DevLog</a><span class="crumb">2026-08-04</span></div></header>
 <main class="wrap">
-<h1>Axiomancer</h1>
-<p class="muted">A private index of the game's content and the nightly development log.</p>
-<div class="hub">
-  <a class="hue-cards" href="./catalog.html"><span class="h-glyph">🂠</span><div class="h-title">Catalog</div><div class="h-sub">79 cards · 56 foes · 24 statuses</div></a>
-  <a class="hue-log" href="./log.html"><span class="h-glyph">❯</span><div class="h-title">DevLog</div><div class="h-sub">25 entries</div></a>
-  <a class="hue-tuning" href="./tuning-lab/index.html"><span class="h-glyph">⚖</span><div class="h-title">Tuning Lab</div><div class="h-sub">3 reports</div></a>
-</div>
+<h1 id="headline">2026-08-04</h1>
+<p class="headline">The chronic bug finally got root-caused instead of hand-closed again:</p>
+<div class="counts"><span class="chip cat-infra">3 infra</span></div>
+<section class="card cat-infra" id="close-comment-now-actively-closes-finding-mirror-issues-via-the-api"><div class="card-head"><span class="chip cat-infra">infra</span><h2><code>close-comment</code> now actively closes finding-mirror issues via the API</h2></div>
+<p class="field"><span class="flabel">What</span> <code>scripts/loop-issue.mjs</code>'s <code>close-comment</code> command (the</p>
+<p class="field"><span class="flabel">Why</span> <code>plan/AUDIT.md</code> finding <code>[2.4]</code> — thirteen confirmed instances</p>
+<p class="commits"><code class="commit">0441c554</code> <code class="commit">(issue</code> <code class="commit">#166)</code> <code class="commit">audit</code> <code class="commit">row</code> <code class="commit">closed</code> <code class="commit">at</code> <code class="commit">aa8133c7</code></p>
+<p><code>/iterate</code> finding-mirror close path) now posts its deploy comment AND closes the issue directly via <code>gh issue close --reason completed</code>, instead of relying on the commit's <code>Closes #N</code> trailer to auto-close it. (issues #83, #151, #155, #129, #156, #157, #158, #159, #160, #162, #163, #164, #165) of a present, correctly-numbered <code>Closes #N</code> trailer on a green, direct-to-main commit silently failing to auto-close its mirrored issue, each one requiring a by-hand close. Phase mirrors already carried this fix (<code>cmdPhaseClose</code>'s <code>closePhaseIssue</code> helper); finding mirrors never got it. The helper is now shared as <code>closeIssue()</code> and called from both paths — the trailer is a backup now, not the load-bearing close. Root cause of the trailer itself still no-oping remains unknown; this fix stops depending on it working.</p>
+<div class="diff" role="img" aria-label="code diff"><div class="dl del">-// Close a phase mirror via the API (state=closed, state_reason=completed).</div><div class="dl del">-// This is the LOAD-BEARING close: the `Closes #N` commit trailer only fires</div><div class="dl del">-// for commits pushed directly to the default branch, so phases that reach</div><div class="dl del">-// `main` via cross-session `claude/*` branch merge reconciliation would leak</div><div class="dl del">-// the mirror open without it. Idempotent — ...</div><div class="dl del">-function closePhaseIssue(number, repo) {</div><div class="dl add">+// Close an issue via the API (state=closed, state_reason=completed). This is</div><div class="dl add">+// the LOAD-BEARING close for both phase mirrors and /iterate finding mirrors:</div><div class="dl add">+// the `Closes #N` commit trailer is unreliable (see callers for the specific</div><div class="dl add">+// evidence each has accumulated) and cannot be trusted alone. Idempotent — ...</div><div class="dl add">+function closeIssue(number, repo) {</div><div class="dl ctx">   const r = ghCall(['issue', 'close', String(number), '--repo', repo, '--reason', 'completed'])</div><div class="dl ctx">   if (r.status === 0) return { closed: true }</div><div class="dl hunk">@@ -358,7 +374,7 @@ export function buildCloseCommentBody({ commit, deployUrl }) {</div><div class="dl add">+  const close = closeIssue(number, repo)</div><div class="dl add">+  if (close.error) {</div><div class="dl add">+    process.stderr.write(`loop-issue: close failed for #${number}: ${close.error}\n`)</div><div class="dl add">+  }</div></div></section>
+<section class="card cat-infra" id="sway-meter-audit-finding-verified-stale-already-shipped"><div class="card-head"><span class="chip cat-infra">infra</span><h2>SWAY meter audit finding — verified stale, already shipped</h2></div>
+<p class="field"><span class="flabel">What</span> the mirrored <code>[external-critique]</code> finding "SWAY has no meter</p>
+<p class="field"><span class="flabel">Why</span> WI-5 (2026-07-12, commit <code>88406af8</code>) already shipped an</p>
+<p class="commits"><code class="commit">db84dfc0</code> <code class="commit">(issue</code> <code class="commit">#167)</code></p>
+<p>anywhere in the combat UI" (issue #167) closed as already-resolved, no new code. <code>AltWinMeter</code> (SWAY → CAPITULATE, PREMISE → ORATORY) under the VITAE bar in <code>CombatCombatantPane.tsx</code>, with <code>testID="combat-sway-meter"</code> and full <code>accessibilityRole="progressbar"</code> semantics, plus presenter-level regression coverage in <code>legibility-sweep.engine.test.ts</code>. The finding predated or narrowly missed WI-5's same-day landing.</p></section>
+<section class="card cat-infra" id="critique-pass-15-0-findings-cold-drive-now-reaches-live-combat"><div class="card-head"><span class="chip cat-infra">infra</span><h2>Critique pass 15 — 0 findings, cold drive now reaches live combat</h2></div>
+<p class="field"><span class="flabel">What</span> pass 15's unattended <code>critique:drive</code> run (mobile 375×812,</p>
+<p class="field"><span class="flabel">Why</span> this widens what future unattended passes can verify directly</p>
+<p class="commits"><code class="commit">ebcee7ee</code></p>
+<p>desktop 1280×800) reached past "ENTER COMBAT" into the live combat board (card hand, dice tray, stance state) at both viewports for the first time — prior passes 13/14 noted a cold drive couldn't get that far. instead of leaving to an interactive pass. Used the new reach this pass to reconfirm the VITAE-vs-HP row holds (icon-only health readouts, no regression) and to reconfirm the standing "[MED] DoT card faces print round-clock math" row is still live — flagged for <code>/iterate</code> to check whether that row is actually stale-resolved-by-Phase-32 now that Phase 32 is shipped. Zero console/page errors beyond the standing benign <code>navigator.vibrate</code> warning. No new findings filed.</p></section>
+<section class="panel" id="while-you-were-out"><h2>While you were out</h2>
+<div class="tablewrap"><table><thead><tr><th>Tick (UTC)</th><th>Verb</th><th>Outcome</th></tr></thead><tbody><tr><td>08-03 15:22 → 15:47</td><td><code>/march</code> → <code>/iterate</code></td><td><span class="st st-ok">shipped</span> — close-comment API-close fix (#166) + finding [2.4] resolved</td></tr><tr><td>08-03 20:06 → 20:24</td><td><code>/march</code> → <code>/iterate</code></td><td><span class="st st-ok">shipped</span> — SWAY meter finding verified stale (#167)</td></tr><tr><td>08-04 03:45 → 03:50</td><td><code>/march</code></td><td><span class="st st-neutral">no-op</span></td></tr><tr><td>08-04 09:17 → 09:34</td><td><code>/march</code> → <code>/critique</code></td><td><span class="st st-ok">shipped</span> — <span class="st st-ok">pass</span> 15, 0 findings, methodology advance</td></tr></tbody></table></div>
+<ul><li>Build plan: 57/57 checked, none blocked.</li><li><code>plan/AUDIT.md</code>: 30 open pending rows (43 total under Pending, 13</li></ul>
+<p>already marked resolved-in-place).</p>
+<ul><li><code>plan/CRITIQUE.md</code>: 20 open pending rows; last full pass today</li></ul>
+<p>(2026-08-04, commit <code>db84dfc0</code>, pass 15).</p>
+<ul><li><code>plan/PHASE_CANDIDATES.md</code>: 34 pending candidates, unchanged this</li></ul>
+<p>window.</p>
+<ul><li><code>triage:needs-user</code> / <code>loop:do</code> issues: 0 open.</li><li>Deploy: nothing to check — HEAD is a docs/plan-only tick, no gated</li></ul>
+<p>workflow triggered.</p></section>
+<section class="panel" id="needs-you"><h2>Needs you</h2>
+<ul><li>Nothing blocked this cycle. One piece of hygiene handled directly:</li></ul>
+<p>issue #161 ("night.yml missing install_playwright") was a duplicate of #165 — same finding, filed earlier (2026-07-17) but never closed. The actual fix landed via commit <code>ca5b86f1</code> and #165 was hand-closed same-session when its own <code>Closes #165</code> trailer no-op'd; #161's trailer never had a chance to fire since the shipping commit only referenced #165. Verified <code>install_playwright: true</code> is still live in <code>.github/workflows/night.yml</code> and closed #161 as duplicate/resolved.</p></section>
+<section class="panel" id="tuning-proposals"><h2>Tuning proposals</h2>
+<p>None. <code>npm run baseline:check</code> reports <strong>FRESH</strong> — baseline <code>acc64eca</code>, measured 2026-08-02, confidence <code>reduced-nightly</code>, no mechanics-source commits since. No re-measure triggered, so no doctrine-curve bands to report against this cycle.</p></section>
+<section class="panel" id="todays-intent"><h2>Today's intent</h2>
+<p>Breadth check (<code>npm --workspace axiomancer-mobile run e2e:minigames</code>) ran full and green: hazard, combat, gathering, encounter-routing, exploration/combat-prelude round-trip, and upgradeable-dice all <code>ALL PASS</code>. No baseline screenshots changed since the last digest, so no UI shots this cycle.</p></section>
 <footer class="foot">Axiomancer DevLog &middot; generated by <code>scripts/build-devlog.mjs</code></footer>
 </main>
 </body>
