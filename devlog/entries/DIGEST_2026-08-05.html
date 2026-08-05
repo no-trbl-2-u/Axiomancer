@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
-<title>Axiomancer</title>
+<title>Axiomancer digest — 2026-08-05</title>
 <style>
 :root {
   color-scheme: light dark;
@@ -203,15 +203,46 @@ footer.foot { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--b
 </style>
 </head>
 <body>
-<header class="top"><div class="wrap"><span class="home">Axiomancer</span></div></header>
+<header class="top"><div class="wrap"><a class="home" href="../log.html">← DevLog</a><span class="crumb">2026-08-05</span></div></header>
 <main class="wrap">
-<h1>Axiomancer</h1>
-<p class="muted">A private index of the game's content and the nightly development log.</p>
-<div class="hub">
-  <a class="hue-cards" href="./catalog.html"><span class="h-glyph">🂠</span><div class="h-title">Catalog</div><div class="h-sub">79 cards · 56 foes · 24 statuses</div></a>
-  <a class="hue-log" href="./log.html"><span class="h-glyph">❯</span><div class="h-title">DevLog</div><div class="h-sub">26 entries</div></a>
-  <a class="hue-tuning" href="./tuning-lab/index.html"><span class="h-glyph">⚖</span><div class="h-title">Tuning Lab</div><div class="h-sub">3 reports</div></a>
-</div>
+<h1 id="headline">2026-08-05</h1>
+<p class="headline">A quiet, clean cycle: two audit findings drained (one confirming a</p>
+<div class="counts"><span class="chip cat-mechanics">3 mechanics</span></div>
+<section class="card cat-mechanics" id="dot-card-face-finding-verified-stale-the-fix-already-shipped-but-not-everywhere"><div class="card-head"><span class="chip cat-mechanics">mechanics</span><h2>DoT card-face finding verified stale — the fix already shipped, but not everywhere</h2></div>
+<p class="field"><span class="flabel">What</span> the mirrored <code>[external-critique]</code> finding "DoT card faces</p>
+<p class="field"><span class="flabel">Why</span> WI-2 (2026-07-12, commit <code>b097efec</code>) already made</p>
+<p class="commits"><code class="commit">0e69be8b</code> <code class="commit">(issue</code> <code class="commit">#168)</code></p>
+<p>print round-clock math that contradicts their own keyword glosses" (issue #168) closed as already-resolved for its literal claim, no new code. auto-generated DoT card faces read <code>dotTrigger</code> from <code>debuffs.library.json</code>'s <code>damageOverTime.trigger</code> field, so event-triggered DoTs (poison, bleed) print their real trigger instead of "X over Nt" phrasing — <code>card-face-honesty.guard.test.ts</code> sweeps the whole library and passes 9/9 on current main. The closure was narrow on purpose: it only covers the <code>faceStats</code> auto-generated path. Critique pass 16 (same day) found the gap that closure left open — see below.</p></section>
+<section class="card cat-mechanics" id="combat-deck-matrix-baseline-confirmed-fresh-by-ordinary-cadence-no-re-measure-needed"><div class="card-head"><span class="chip cat-mechanics">mechanics</span><h2>Combat deck-matrix baseline — confirmed fresh by ordinary cadence, no re-measure needed</h2></div>
+<p class="field"><span class="flabel">What</span> the standing "baseline stale by 33 mechanics-source commits"</p>
+<p class="field"><span class="flabel">Why</span> <code>npm run baseline:check</code> now reports <strong>FRESH</strong> — baseline</p>
+<p class="commits"><code class="commit">63574686</code> <code class="commit">(issue</code> <code class="commit">#169)</code></p>
+<p>audit row (issue #169, filed 2026-07-17) closed as resolved by the nightly cadence itself — no new code, no manual regen. <code>acc64eca</code>, measured 2026-08-02, no mechanics-source commits since. The row's own suggested fix (<code>baseline:regen</code>, or a reduced-nightly digest re-measure) has simply run repeatedly since filing — the chain of doctrine-curve confirmation rows spanning 2026-07-20 through 2026-08-02 each re-measured at a fresher commit. The row's warning about "Metric v2" blind spots still applies to those newer rows; it isn't reintroduced by closing this one.</p></section>
+<section class="card cat-mechanics" id="critique-pass-16-one-finding-authored-card-text-bypasses-the-dot-phrasing-fix"><div class="card-head"><span class="chip cat-mechanics">mechanics</span><h2>Critique pass 16 — one finding: authored card text bypasses the DoT-phrasing fix</h2></div>
+<p class="field"><span class="flabel">What</span> pass 16's unattended <code>critique:drive</code> run (mobile 375×812,</p>
+<p class="field"><span class="flabel">Why</span> the pass-15 note asked whether the "Inflict POISON 1 for 4</p>
+<p class="commits"><code class="commit">d6da5b90</code></p>
+<p>desktop 1280×800) reached the live combat board at both viewports again, zero console/page errors beyond the standing benign <code>navigator.vibrate</code> warning. Filed one finding: seven cards with an authored <code>paidSummary</code> (e.g. "Slippery Slope", <code>combat.cards.ts:389</code>) bypass the auto-generated <code>faceStats</code> path entirely and print their raw authored string verbatim — including the round-clock "for N turns" phrasing WI-2 fixed for the <em>generated</em> path. turns" wording on the live hand was genuinely fixed by Phase 32. It was closed 2026-08-04 as "RESOLVED — stale" (issue #168, see above), but pass 16 re-read the fix and its guard test against the actual render path and found the closure's claim was narrower than the symptom: authored overrides were never in scope. Filed as a fresh Pending row (not a re-open) with the 7-card list and code-level citations so <code>/iterate</code> can act without re-deriving this.</p></section>
+<section class="panel" id="while-you-were-out"><h2>While you were out</h2>
+<div class="tablewrap"><table><thead><tr><th>Tick (UTC)</th><th>Verb</th><th>Outcome</th></tr></thead><tbody><tr><td>08-04 14:56 → 15:03</td><td><code>/march</code> → <code>/expand</code></td><td><span class="st st-neutral">no-op</span> — <span class="st st-ok">pass</span> 6, no new candidates, 1 resolved in place</td></tr><tr><td>08-04 20:05 → 20:19</td><td><code>/march</code> → <code>/iterate</code></td><td><span class="st st-ok">shipped</span> — DoT card-face finding verified stale (#168)</td></tr><tr><td>08-05 03:41 → 03:50</td><td><code>/march</code> → <code>/iterate</code></td><td><span class="st st-ok">shipped</span> — baseline-stale finding resolved by nightly cadence (#169)</td></tr><tr><td>08-05 09:15 → 09:32</td><td><code>/march</code> → <code>/critique</code></td><td><span class="st st-ok">shipped</span> — <span class="st st-ok">pass</span> 16, 1 finding filed</td></tr></tbody></table></div>
+<ul><li>Build plan: 58/58 checked (1 skipped), none blocked.</li><li><code>plan/AUDIT.md</code>: 29 open pending rows (44 total under Pending, 15</li></ul>
+<p>already marked resolved-in-place).</p>
+<ul><li><code>plan/CRITIQUE.md</code>: 20 open pending rows; last full pass today</li></ul>
+<p>(2026-08-05, commit <code>63574686</code>, pass 16).</p>
+<ul><li><code>plan/PHASE_CANDIDATES.md</code>: 34 pending candidates, unchanged this</li></ul>
+<p>window.</p>
+<ul><li><code>triage:needs-user</code> / <code>loop:do</code> issues: 0 open. No open PRs.</li><li>Deploy: nothing to check — HEAD is a docs/plan-only tick, no gated</li></ul>
+<p>workflow triggered.</p>
+<ul><li>Breadth check (<code>npm --workspace axiomancer-mobile run e2e:minigames</code>)</li></ul>
+<p>ran full and green: hazard, combat, gathering, encounter-routing, exploration/combat-prelude round-trip, and upgradeable-dice all <code>ALL PASS</code>.</p>
+<ul><li>Deck-matrix baseline fresh at <code>acc64eca</code> (measured 2026-08-02,</li></ul>
+<p>confidence <code>reduced-nightly</code>) — <code>npm run baseline:check</code> confirms no mechanics-source commits since.</p></section>
+<section class="panel" id="needs-you"><h2>Needs you</h2>
+<p>Nothing blocked this cycle. No new <code>[needs-user-call]</code> rows, no open <code>triage:needs-user</code> issues.</p></section>
+<section class="panel" id="tuning-proposals"><h2>Tuning proposals</h2>
+<p>None. <code>npm run baseline:check</code> reports <strong>FRESH</strong> — no re-measure triggered, so no doctrine-curve bands to report against this cycle.</p></section>
+<section class="panel" id="todays-intent"><h2>Today's intent</h2>
+<p>No baseline screenshots changed since the last digest, so no UI shots this cycle. The night's real news is methodological: pass 16 shows the critique loop distinguishing a narrow fix's actual scope from the symptom that prompted it, rather than accepting "the auto-generated path is fixed" as "the bug is fixed." That finding is now queued for <code>/iterate</code> to pick up on the next tick.</p></section>
 <footer class="foot">Axiomancer DevLog &middot; generated by <code>scripts/build-devlog.mjs</code></footer>
 </main>
 </body>
