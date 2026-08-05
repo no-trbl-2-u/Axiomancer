@@ -674,20 +674,26 @@
   /deck-tuning fan-out session, 2026-07-18, PR #130 residue).
 - next: (drained)
 
-### Combat deck-matrix baseline stale by 33 mechanics-source commits
+### [x] Combat deck-matrix baseline stale by 33 mechanics-source commits — RESOLVED 2026-08-05 (issue #169)
 - category: gap
 - impact: 6
 - ease: 6
+- issue: #169
+- resolution: verified resolved by the ordinary nightly cadence, no new
+  code. `npm run baseline:check` now reports "FRESH. Baseline acc64eca
+  measured 2026-08-02; no mechanics-source commits since." The row's own
+  suggested action (`baseline:regen` or a reduced-nightly digest pass)
+  has run repeatedly since filing — see the chain of doctrine-curve
+  confirmation rows below spanning 2026-07-20 through 2026-08-02, each
+  re-measuring at a fresher commit. The row's warning about the "Metric
+  v2" blind spots still applies to *those* newer rows; it is not
+  reintroduced by closing this one.
 - detail: surfaced 2026-07-17 by the new session-start hook — the
   baseline was measured 2026-07-12 (merge f325c423 + 953de92e) and 33
   mechanics-source commits have landed since (incl. the card PAID-prose
   work). Any balance/engagement answer citing it describes a 5-day-old
-  engine. Note the interaction with the parked "Metric v2" row above:
-  regenerating restores freshness but the metric's known blind spots
-  still apply — regen is hygiene, not a green light for new tuning
-  conclusions.
-- next: /iterate (npm run baseline:regen, or the digest's reduced
-  nightly pass)
+  engine.
+- next: (drained)
 
 ### theme-switch-e2e.mjs uses URL.pathname — broken paths on Windows
 - category: debt

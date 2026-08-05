@@ -174,3 +174,5 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-08-04T20:07:16Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-08-04T20:08:12Z | skill | iterate | claude-sonnet-5 | main | - |
 | 2026-08-04T20:09:02Z | subagent | general-purpose | claude-sonnet-5 | main | Check DoT card face text against critique claim |
+| 2026-08-05T03:42:26Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-08-05T03:45:23Z | skill | iterate | claude-sonnet-5 | main | - |
