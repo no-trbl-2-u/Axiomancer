@@ -152,6 +152,41 @@ describe('card-face honesty guard', () => {
         expect(offenders).toEqual([]);
     });
 
+    it('WI-2 extension (2026-08-05) — no authored PAID sentence claims a round-clock lifetime for an event-triggered DoT it carries', () => {
+        // The WI-2 sweep above only reads `faceStats`'s own 'dot' classification,
+        // which reflects a card's single PRIMARY effect (`resolvePrimary`) — a
+        // card whose primary effect is something else (e.g. Opening Statement's
+        // MARK, Exordium's PREMISE) skips that sweep entirely even though its
+        // printed PAID sentence — the authored `paidSummary`, rendered verbatim
+        // as `bottomActionText` via `cleanPaidSentence` on the hand card — still
+        // carries a secondary event-triggered DoT (critique pass 16, 2026-08-05:
+        // "Slippery Slope" printed "Inflict POISON 1 for 4 turns" though POISON
+        // ticks per card played, never per round). This sweep reads every
+        // combatEffect on every card, independent of the primary-effect
+        // classification, and fails any printed PAID sentence still shaped like
+        // the round-clock lie ("KEYWORD n for m turns") for a DoT that actually
+        // ticks per event.
+        const offenders: string[] = [];
+        for (const { id } of cardLibrary) {
+            const card = getCard(id);
+            const src = getCardById(id);
+            if (!card || !src) continue;
+            for (const ce of src.combatEffects ?? []) {
+                const def = lookupEffect(ce.effectId);
+                const trigger = (def?.payload as { damageOverTime?: { trigger?: string } } | undefined)?.damageOverTime?.trigger;
+                const isEvent = trigger === 'card-played' || trigger === 'damage-instance' || trigger === 'payoff';
+                if (!isEvent) continue;
+                const keyword = keywordForEffect(ce.effectId)?.toUpperCase();
+                if (!keyword) continue;
+                const lie = new RegExp(`\\b${keyword}\\s+\\d+\\s+for\\s+\\d+\\s*turns?\\b`, 'i');
+                if (lie.test(card.bottomActionText)) {
+                    offenders.push(`${id} → PAID sentence still says '${keyword} n for m turns' for an event-triggered DoT (trigger=${trigger})`);
+                }
+            }
+        }
+        expect(offenders).toEqual([]);
+    });
+
     it('P2 HP→VITAE sweep — no card face or detail string says "HP" (player-facing term is VITAE)', () => {
         const offenders: string[] = [];
         const hp = /\bHP\b/;

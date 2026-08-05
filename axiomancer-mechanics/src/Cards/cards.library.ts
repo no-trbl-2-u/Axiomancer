@@ -42,7 +42,7 @@ const slipperySlope: Card = {
         'inevitable. The ground tilts, and they slide the whole way down.',
     tier: 2, rank: 1, cardType: 'spell',
     targetType: 'enemy',
-    paidSummary: 'Inflict POISON 1 for 4 turns.',
+    paidSummary: 'Inflict POISON 1 (ticks each card you play; 4 turns).',
     // pts (phase 36b tempo horizon; WS3.5 clock; phase 30 FREE-currency law):
     // poison i1 d4 is a RAMP — per-round HP 4,4,6,6, the big ticks landing at
     // rounds 3-4, PAST the ~4-round death clock — so the tempo weight discounts
@@ -200,7 +200,7 @@ const exordium: Card = {
         'breath, the wound is already open.',
     tier: 1, rank: 1, cardType: 'spell',
     targetType: 'enemy',
-    paidSummary: 'Afflict with POISON 1 for 2 turns. Gain 1 PREMISE and DRAW 1.',
+    paidSummary: 'Afflict with POISON 1 (ticks each card you play; 2 turns). Gain 1 PREMISE and DRAW 1.',
     // pts (WS10.1 KW-1 fold, 2026-07-11 — argument-wound folded into POISON;
     // spec 33 D4 re-derives the card-played cadence 2 → 1.83): poison i1 d2
     // card-played clock (lifetime 1.83×(2+2)=7.3, tempo-weighted ÷3 ≈ 2.1) +
@@ -223,7 +223,7 @@ const openingStatement: Card = {
         'named, start to bleed.',
     tier: 1, rank: 2, cardType: 'spell',
     targetType: 'enemy',
-    paidSummary: 'Apply MARK 1. Inflict POISON 1 for 2 turns. Gain 2 PREMISES.',
+    paidSummary: 'Apply MARK 1. Inflict POISON 1 (ticks each card you play; 2 turns). Gain 2 PREMISES.',
     // pts (WS10.1 KW-1 fold, 2026-07-11 — argument-wound folded into POISON,
     // duration tuned 3 → 2 for the card-played clock; spec 33 D4: cadence
     // 2 → 1.83): mark d2 (1.5) + poison i1 d2 (lifetime 7.3, tempo ÷3 ≈ 2.1)
@@ -249,8 +249,8 @@ const mountingCase: Card = {
     tier: 2, rank: 3, cardType: 'spell',
     targetType: 'enemy',
     paidSummary:
-        'Afflict with MARK 1 for 3 turns and POISON 1 for 4 turns. Gain 2 ' +
-        'PREMISES.',
+        'Afflict with MARK 1 for 3 turns and POISON 1 (ticks each card you ' +
+        'play; 4 turns). Gain 2 PREMISES.',
     // pts (WS10.1 KW-1 fold, 2026-07-11 — argument-wound folded into POISON,
     // intensity tuned 2 → 1 for the card-played clock; spec 33 D4: cadence
     // 2 → 1.83): mark d3 (2.25) + poison i1 d4 (lifetime 1.83×10=18.3,
@@ -516,7 +516,7 @@ const sweetPoison: Card = {
         'but you did drink.',
     tier: 2, rank: 2, cardType: 'spell',
     targetType: 'enemy',
-    paidSummary: 'Afflict with POISON 1 for 4 turns. BLEED 1 for 2 turns on yourself.',
+    paidSummary: 'Afflict with POISON 1 (ticks each card you play; 4 turns). BLEED 1 on yourself (ticks each time you are struck; 2 turns).',
     // pts (WS3.5 clock re-price, 2026-07-11 — intensity tuned 2 → 1; phase 30:
     // FREE self-MARK seed i1 d1 replaces the retired TICK; spec 33 D4 re-derives
     // the card-played cadence 2 → 1.83): poison i1 d4 (lifetime 18.3,
@@ -575,7 +575,7 @@ const fallenGrace: Card = {
         'pays better there.',
     tier: 2, rank: 4, cardType: 'spell',
     targetType: 'enemy',
-    paidSummary: 'Afflict with BLEED 2 for 3 turns.',
+    paidSummary: 'Afflict with BLEED 2 (ticks each time it is struck; 3 turns).',
     // pts (phase 30): bleed i2 d3 (~5) + FREE self-MARK seed i1 d1 (0.6, weak
     // deposit) + DRAW 1 kicker (2, legal alongside the weak deposit) +
     // FALLEN(heal 4 ≈ 1.3 ×0.5 = 0.7) + tempo ≈ 8.9 → Theorem
@@ -597,8 +597,8 @@ const pactOfAkrasia: Card = {
     tier: 3, rank: 5, cardType: 'spell',
     targetType: 'self',
     paidSummary:
-        'BLEED 1 for 2 turns on yourself. FORGE a temporary WILD gold die and ' +
-        'bank the spent die, then RECOIL 6.',
+        'BLEED 1 on yourself (ticks each time you are struck; 2 turns). ' +
+        'FORGE a temporary WILD gold die and bank the spent die, then RECOIL 6.',
     // pts (spec 33 D4 re-author): the FORGE grant is now a temporary gold die
     // (combat-only), so it lost the cross-combat persistence credit (9 → 6) —
     // which alone dropped this floor-Axiom card below band. The lost value is
@@ -827,7 +827,7 @@ const glimpse: Card = {
         'blow that causes it.',
     tier: 1, rank: 1, cardType: 'spell',
     targetType: 'enemy',
-    paidSummary: 'POISON 1 for 1 turn. MARK 1 for 2 turns. FORETELL 2.',
+    paidSummary: 'POISON 1 (ticks each card you play; 1 turn). MARK 1 for 2 turns. FORETELL 2.',
     // pts (WS10.1 KW-1, 2026-07-11 — foretold-wound replaced by its parts:
     // POISON + MARK double-apply; spec 33 D4: cadence 2 → 1.83): poison i1 d1
     // (lifetime 1.83×2=3.66, tempo ÷3 ≈ 1.22) + mark i1 d2 (1.5) + FORETELL 2
@@ -881,8 +881,8 @@ const cassandrasBurden: Card = {
     tier: 2, rank: 3, cardType: 'spell',
     targetType: 'enemy',
     paidSummary:
-        'POISON 1 and MARK 1 for 2 turns. OMEN — stake window 1-2 (ante 2 ' +
-        'Conviction at window 1): on hit, GUARD 4.',
+        'POISON 1 (ticks each card you play; 2 turns) and MARK 1 for 2 turns. ' +
+        'OMEN — stake window 1-2 (ante 2 Conviction at window 1): on hit, GUARD 4.',
     // pts (WS10.1 KW-1, 2026-07-11 — foretold-wound replaced by its parts:
     // POISON + MARK double-apply, intensity tuned 2 → 1 for the card-played
     // clock; phase 30 FREE-currency law; spec 33 D4: cadence 2 → 1.83): poison
@@ -985,7 +985,7 @@ const briefCandle: Card = {
         'behind is yours to gather — some of it before it even finishes burning.',
     tier: 1, rank: 1, cardType: 'spell',
     targetType: 'enemy',
-    paidSummary: 'Afflict with BLEED 2 for 1 turn.',
+    paidSummary: 'Afflict with BLEED 2 (ticks each time it is struck; 1 turn).',
     // pts (WS3.5 clock re-price, 2026-07-11): bleed i2 d1 on the
     // damage-instance clock — 2 expected ticks land BOTH stacks in the round
     // (6+3 = 9 HP → 3) + FREE souls 1 (0.75) = 3.75 → Doxa, in-budget; the
@@ -1363,7 +1363,7 @@ const refrain: Card = {
         'starts to sound like the truth — and the truth leaves a mark.',
     tier: 1, rank: 1, cardType: 'spell',
     targetType: 'enemy',
-    paidSummary: 'MARK 1 for 2 turns. POISON 1 for 1 turn. ECHO.',
+    paidSummary: 'MARK 1 for 2 turns. POISON 1 (ticks each card you play; 1 turn). ECHO.',
     // pts (WS10.1 KW-1 fold, 2026-07-11 — echo_sting folded into POISON,
     // duration tuned 2 → 1: the ECHO already re-applies it; phase 30
     // FREE-currency law; spec 33 D4: card-played cadence 2 → 1.83): [mark d2
@@ -1507,8 +1507,8 @@ const recurringSymptom: Card = {
     tier: 2, rank: 3, cardType: 'spell',
     targetType: 'enemy',
     paidSummary:
-        'Inflict POISON 1 for 2 turns. Reroll all spent, exhausted, or X dice ' +
-        'in your tray except floating dice.',
+        'Inflict POISON 1 (ticks each card you play; 2 turns). Reroll all ' +
+        'spent, exhausted, or X dice in your tray except floating dice.',
     // pts (spec 33 D4): REROLL this card's miss faces (2.0) + poison i1 d2
     // (card-played clock, 1.83 cadence: tempo-weighted 6.4 ÷3 = 2.14) = 4.14 +
     // FREE mark i1 d2 (0.75×1×2 = 1.5) = 5.64 → uncommon band 4.5-13 (Thesis).
@@ -1762,7 +1762,7 @@ const poisonedWell: Card = {
         'from it comes up tainted, and the first draught is the worst.',
     tier: 1, rank: 1, cardType: 'spell',
     targetType: 'enemy',
-    paidSummary: 'Inflict POISON 2 for 2 turns.',
+    paidSummary: 'Inflict POISON 2 (ticks each card you play; 2 turns).',
     // pts: poison i2 d2 (card-played clock 1.83, tempo-weighted 12.81 ÷ 3 =
     // 4.27) + FREE [mark i1 d1 (0.75) + conviction 1 (1.0)] = 1.75 → 6.02 →
     // common band 1.5-7.5 (Doxa). FREE share 1.75/6.02 = 29.1% ✓.

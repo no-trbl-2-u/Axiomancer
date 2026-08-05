@@ -15,9 +15,9 @@ import { getDeckPreset, PRESET_DICE_VALVES } from '../combat.starter-deck-preset
 
 const EXPECTED_PAID_LINES: Readonly<Record<string, string>> = {
     'poisoned-well':
-        'PAID — Inflict POISON 2 for 2 turns. Costs 1 die.',
+        'PAID — Inflict POISON 2 (ticks each card you play; 2 turns). Costs 1 die.',
     'opening-statement':
-        'PAID — Apply MARK 1. Inflict POISON 1 for 2 turns. Gain 2 PREMISES. Costs 1 die.',
+        'PAID — Apply MARK 1. Inflict POISON 1 (ticks each card you play; 2 turns). Gain 2 PREMISES. Costs 1 die.',
     'festering-argument':
         'PAID — PROLONG every DoT on the enemy by 1 turn. Costs 1 die.',
     'currys-conversion':
@@ -29,7 +29,7 @@ const EXPECTED_PAID_LINES: Readonly<Record<string, string>> = {
     'suppurating-curse':
         "PAID (rest of combat) — At the end of each round, deal the enemy's POISON and BLEED damage from that round again. Costs 1 die. Attaches to the enemy.",
     'recurring-symptom':
-        'PAID — Inflict POISON 1 for 2 turns. Reroll all spent, exhausted, or X dice in your tray except floating dice. Costs 1 die.',
+        'PAID — Inflict POISON 1 (ticks each card you play; 2 turns). Reroll all spent, exhausted, or X dice in your tray except floating dice. Costs 1 die.',
 };
 
 describe('Erosion paid-effect wording', () => {
