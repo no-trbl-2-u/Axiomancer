@@ -1,13 +1,35 @@
 # Critique log
 
-> Last pass: 2026-08-04 at commit db84dfc0
-> Pass count: 15
+> Last pass: 2026-08-05 at commit 63574686
+> Pass count: 16
 
 > External-observer feedback for Axiomancer. Populated by
 > `/critique` (which drives the local expo-web build with the
 > `playtester` agent — there is no hosted URL), drained by
 > `/iterate`. See `skills/critique.md` for the contract and
 > `plan/bearings.md` § Surface for the local-build adaptation.
+
+> **[critique pass 16, 2026-08-05, commit 63574686] Unattended `/march`
+> tick.** Used the non-MCP `critique:drive` transport (§3.5) at both
+> mobile (375×812) and desktop (1280×800); the cold drive again
+> reached past "ENTER COMBAT" into the live combat-board at both
+> viewports. Zero console/page errors besides the same benign
+> `navigator.vibrate` warning seen every prior pass. One new finding
+> filed (below): the pass-15 note flagged "Inflict POISON 1 for 4
+> turns." on the live hand and asked `/iterate` to settle whether that
+> row was genuinely fixed by Phase 32 — it was then closed 2026-08-04
+> as "RESOLVED — stale, already fixed by WI-2" (commit 0e69be8b, issue
+> #168). This pass re-read the WI-2 fix and its guard test against the
+> actual render path and found the closure incomplete: WI-2 only
+> covers cards whose face text is auto-generated
+> (`faceStats`'s `dot` case); a card with an authored `paidSummary`
+> (`combat.cards.ts:389`) bypasses that path entirely and prints its
+> raw authored string verbatim — which is exactly what the "Slippery
+> Slope" card visible on this pass's board does. Filed as a fresh
+> Pending row (not a re-open of the closed one, since the closed row's
+> narrow claim — the auto-generated path is fixed — still holds) with
+> the specific 7-card list and code-level citations so `/iterate` can
+> act without re-deriving this.
 
 > **[critique pass 15, 2026-08-04, commit db84dfc0] Unattended `/march`
 > tick.** Used the non-MCP `critique:drive` transport (§3.5) at both
@@ -58,6 +80,49 @@
 > pass "ENTER COMBAT".
 
 ## Pending
+
+### [MED] combat — authored `paidSummary` card text still prints round-clock "for N turns" for event-triggered poison/bleed, reopening the WI-2 "RESOLVED — stale" closure
+- pass: 16 (commit 63574686)
+- viewport: mobile + desktop (375×812, 1280×800)
+- auth_state: anonymous
+- category: comprehension
+- observation: this pass's cold drive reached the live combat-board
+  and captured the "Slippery Slope" hand card printing "Inflict
+  POISON 1 for 4 turns." — round-clock duration language — at both
+  viewports. `debuff_poison`'s trigger is `"card-played"` (an event,
+  not a per-round tick — confirmed in
+  `axiomancer-mechanics/src/Effects/debuffs.library.json`), so this is
+  exactly the lie the WI-2 fix (issue #168) was supposed to have
+  killed. The 2026-08-04 "RESOLVED — stale" closure of the prior DoT
+  round-clock row (below, in Done) only verified the auto-generated
+  path: `faceStats`'s `dot` case
+  (`axiomancer-mobile/state/presenters/combat-encounter.engine.ts:1643-1660`)
+  and its guard test
+  (`card-face-honesty.guard.test.ts:110-153`, "WI-2 — every
+  event-triggered DoT face names its trigger"). Neither touches a card
+  with an authored `paidSummary` override: `combat.cards.ts:389`
+  (`const authored = !persistent ? card.paidSummary : undefined`) and
+  `:415` (`dotSuffix = authored ? '' : ...`) show the authored string
+  fully replaces the auto-generated event-aware text, and the guard
+  test only walks `faceStats`'s classification — never the raw
+  `bottomActionText`/`paidSummary` sentence that
+  `CombatBoard.tsx`'s `cleanPaidSentence()` (line 1518) actually prints
+  on the hand card. The fix landed; it just doesn't cover authored
+  cards, and the regression guard can't catch what it never reads.
+- evidence: `axiomancer-mobile/.critique-artifacts/{mobile,desktop}/04-combat-board.png`
+  + `.txt` (this pass); `axiomancer-mechanics/src/Cards/cards.library.ts`
+  — at least 7 cards share the pattern (lines 45, 203, 226, 519, 578,
+  830, 1765), e.g. `slippery-slope`: `paidSummary: 'Inflict POISON 1
+  for 4 turns.'`.
+- suggested fix: either reword the 7 authored `paidSummary` strings to
+  event-based phrasing (matching the auto-generated `evt.verb` text,
+  e.g. "each card you play" / "each hit taken"), or drop the
+  `paidSummary` override for pure-DoT cards so the already-correct
+  auto-generated `dotFace`/`dotSuffix` renders instead — then extend
+  the WI-2 guard test to sweep `bottomActionText`/`paidSummary`
+  strings too, not just `faceStats`'s `dot` classification, so this
+  can't regress silently again.
+- source: critique (unattended `/march` tick, non-MCP transport)
 
 ### [x] [MED] exploration hub — player subtitle reads "LEVEL · LVL 1 PILGRIM", doubling the level label — RESOLVED 2026-07-31 (commit 16c89f25, issue #157)
 - pass: 14 (commit 9a445281)
