@@ -81,8 +81,16 @@
 
 ## Pending
 
-### [MED] combat — authored `paidSummary` card text still prints round-clock "for N turns" for event-triggered poison/bleed, reopening the WI-2 "RESOLVED — stale" closure
+### [x] [MED] combat — authored `paidSummary` card text still prints round-clock "for N turns" for event-triggered poison/bleed, reopening the WI-2 "RESOLVED — stale" closure — RESOLVED 2026-08-05 (commit d320ee12, issue #170)
 - pass: 16 (commit 63574686)
+- issue: #170
+- resolution: reworded all 12 offending authored `paidSummary` strings (the
+  sweep found 5 more than this row's cited 7) to name the real trigger while
+  keeping the honest duration number; extended the WI-2 guard test to read
+  every card's `combatEffects` directly instead of `faceStats`'s
+  primary-effect classification, which is what let a multi-effect authored
+  card (e.g. this row's own Opening Statement citation) slip through
+  undetected. See `plan/AUDIT.md`'s mirrored row for the full account.
 - viewport: mobile + desktop (375×812, 1280×800)
 - auth_state: anonymous
 - category: comprehension

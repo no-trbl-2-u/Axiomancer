@@ -14,6 +14,33 @@
 
 ## Pending
 
+### [x] [external-critique] authored `paidSummary` card text still prints round-clock DoT duration — RESOLVED 2026-08-05 (commit d320ee12, issue #170)
+- category: external-critique
+- impact: 6
+- ease: 7
+- issue: #170
+- resolution: the WI-2 fix (issue #168) only patched `faceStats`'s
+  auto-generated dot classification; a card's authored `paidSummary` fully
+  replaces that text (`combat.cards.ts:389/415`) and was never covered — nor
+  could the existing guard test catch it, since it gates on `faceStats`'s
+  single PRIMARY-effect classification and skips multi-effect authored cards
+  (e.g. Opening Statement's primary effect is MARK, not its POISON). A full
+  sweep of `cards.library.ts` for POISON/BLEED + "for N turns" found 12
+  offending cards, not just the one the critique row cited: slippery-slope,
+  exordium, opening-statement, mounting-case, sweet-poison, fallen-grace,
+  pact-of-akrasia, glimpse, cassandras-burden, brief-candle, refrain,
+  recurring-symptom. Reworded all 12 to name the real trigger ("ticks each
+  card you play" / "ticks each time it is struck") while keeping the honest
+  duration number; updated the two pinned `bottomActionText` fixtures in
+  `erosion-paid-wording.engine.test.ts`. Extended
+  `card-face-honesty.guard.test.ts` with a new sweep that reads every card's
+  `combatEffects` directly (not gated on the primary-effect classification),
+  closing the exact gap that let this ship. Mechanics 190 files/4085 tests +
+  build green; mobile lint + typecheck + 268 files/2716 tests green.
+- detail: mirrored from `plan/CRITIQUE.md` Pending row (filed by critique
+  pass 16, 2026-08-05, unattended `/march` tick).
+- next: (drained)
+
 ### [x] [external-critique] DoT card faces print round-clock math that contradicts their own keyword glosses — RESOLVED 2026-08-04 (issue #168)
 - category: external-critique
 - impact: 6
