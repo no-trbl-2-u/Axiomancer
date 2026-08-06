@@ -1,10 +1,12 @@
 # Spec 33 — Upgradeable Dice: the four-die combat rework
 
-> **Status:** DESIGN (CDR) — **D1 review LANDED 2026-07-17**
-> (mechanics-expert verdict: PASS-WITH-EDITS; all edits applied in this
-> revision; decision log in
-> `plan/phases/phase_D1_upgradeable_dice_spec_review.md`). Nothing here is
-> implemented yet — D2 (engine core) is next.
+> **Status:** IMPLEMENTED — **D1–D8 shipped and D7 ratified by 2026-07-18**
+> (decision history remains in the D-series phase briefs and
+> `plan/tuning/2026-07-18-d7-ratification.md`). Current player and playtest
+> paths use Upgradeable Dice. The blacksmith implementation remains a dev/test
+> surface only: T rejected it as the player-facing upgrade home, which stays
+> unresolved in `plan/PHASE_CANDIDATES.md` under “Re-home dice upgrades off
+> the blacksmith.”
 >
 > **Provenance:** owner proposal + brainstorm session 2026-07-17
 > (`braindump/2026-07-17-upgradeable-dice-combat.md`), refined through two
@@ -242,22 +244,23 @@ its die:
   does. Default gear payload: *"powers a card of this color AND grants
   2◆"* (§1). Later-game gear changes the payload — **swapping gear IS the
   payload change**, so no forge-service keyword exists for it.
-- **Face upgrades** — gear is upgraded at the **blacksmith encounter**
-  (new content surface, D5): upgrades add hit faces to the die the gear
-  drives. Hard caps unchanged: **≤2 special and ≥1 miss per colored die;
-  Gold ≤1 special** — whiff is never forgeable away.
+- **Face upgrades** — HONE and TEMPER upgrade the face table driven by the
+  equipped gear. The shipped blacksmith route exercises this economy as a
+  dev/test surface, but it is **not** the accepted player-facing home. T
+  rejected that placement after D7; rest sites, relics, or events remain
+  unchosen candidates. Hard caps remain **≤2 special and ≥1 miss per colored
+  die; Gold ≤1 special** — whiff is never forgeable away.
 - **Persistence** — gear items + upgrade state persist via the Game
   module's save/versioning machinery (`GAME_STATE_VERSION` in
   `src/Game/game.migrate.ts`). The pieces themselves are equipment-engine
   items (spec-05) living in a dedicated 4-slot rail — the DICE are not
   items; their GEAR is.
 
-**PROVISIONAL rule (owner, D1 — revisit after playthroughs):** the special
-benefit fires only when the die is **used to power a card** — a rolled
-special that goes unspent grants nothing. The owner may later switch to
-fires-on-roll; D2 must keep this a single switchable rule. Consequence: a
-banked special die spent later from Reserve DOES fire its payload (the
-trigger is use, not roll).
+**RATIFIED rule (D7):** the special benefit fires only when the die is **used
+to power a card** — a rolled special that goes unspent grants nothing.
+`SPECIAL_FIRES_ON_USE = true` is the owner-ratified switch. A banked special
+die spent later from Reserve DOES fire its payload because the trigger is use,
+not roll.
 
 **FORGE preset identity = special-amplifier enchantments** [owner, D1] —
 NOT payload changes: enchantment cards that increase the benefit of fired
@@ -327,12 +330,11 @@ density — those constants must be re-derived in D4.
 
 ## 8. Phasing
 
-Promoted to `plan/steps/01_build_plan.md` as **Phases D1–D7**, each with a
-brief in `plan/phases/` (spec review → flagged engine core → sim harness →
-pricing re-derivation → die-gear layer + blacksmith → mobile UI → tuning +
-honest re-baseline). Public-barrel warning for D2: any `CombatManaDie`
-shape change is public-API-breaking — migrate mobile + card-editor in the
-same phase and re-verify `npm run verify -w axiomancer-mobile`.
+Phases **D1–D8 shipped** through the unified build plan: spec review → engine
+core → sim harness → pricing re-derivation → die-gear layer and dev blacksmith
+surface → Mobile UI → tuning/ratification → preset dice valves. Future
+face-table or public `CombatManaDie` changes remain cross-package changes:
+verify Mobile and Card Editor under the root impact checklist.
 
 ## 9. D1 review — resolved 2026-07-17 + residual opens
 
@@ -352,11 +354,11 @@ Resolved (decision log:
    real kb receipts (Quacks catch-up valve, Oathsworn transparent risk)
    stand and both support the visible-upgradeable-face-table design.
 
-Residual opens (tracked, none blocking D2):
+Residual opens (tracked; they do not make the shipped model provisional):
 
-- **PROVISIONAL special-on-use rule** (§6) — owner may flip to
-  fires-on-roll after playthroughs; D2 keeps it one switchable rule.
-- STAKE retirement gap — D3 measures (§7).
+- STAKE retirement gap — measured during the D-series court; any further
+  response belongs to tuning evidence, not rollout.
 - "SPECIAL" keyword rename opportunity — deferred.
-- Blacksmith encounter design (D5): pricing, map placement, upgrade
-  cadence.
+- Player-facing upgrade home and cadence — unresolved. The blacksmith is
+  rejected as that home; do not promote rest site, relic, or event without
+  the attended owner design call required by the live candidate.

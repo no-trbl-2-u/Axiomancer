@@ -6,8 +6,8 @@
 > HTML preview, or the private hosted DevLog), run the breadth
 > checks too slow for the per-commit path, propose gate tunings
 > as candidates — never apply them. The instrument panel,
-> delivered instead of fetched. See
-> `nexus/concepts/loop-shapes.md` §2.
+> delivered instead of fetched. The live unified-loop bearings are
+> `plan/bearings.md`; the retired pre-monorepo `nexus/` tree is not authority.
 
 ## 1. Purpose
 
@@ -43,11 +43,10 @@ its own cadence.
    pass age, `plan/PHASE_CANDIDATES.md` pending, open
    `triage:needs-user` / `loop:do` issues, deploy state
    (`npm run deploy:check`).
-3. **Breadth checks** (the night-only legs — adapt per
-   project; see `nexus/customization/hermetic-e2e.md`):
+3. **Breadth checks** (the night-only browser legs):
 
    ```bash
-   SMOKE_SAMPLE=full npm run e2e     # every URL, not the sample
+   npm --workspace axiomancer-mobile run e2e:minigames
    ```
 
    Failures become HIGH `plan/AUDIT.md` rows — the digest
@@ -219,7 +218,7 @@ npm run baseline:regen -- --runs=30 --confidence=reduced-nightly  # the reduced 
 plan/AUDIT.md                        # breadth failures land here
 plan/PHASE_CANDIDATES.md             # tuning proposals land here
 gh run list --workflow march -L 20   # the invisible no-ops
-SMOKE_SAMPLE=full npm run e2e           # the nightly breadth leg
+npm --workspace axiomancer-mobile run e2e:minigames  # nightly breadth leg
 npm run verify
 git commit -m "digest: <YYYY-MM-DD>" && git push origin main
 ```
