@@ -83,6 +83,39 @@
   playtester during the 2026-07-12 owner-directed break-test session).
 - next: (drained)
 
+### Doctrine-curve confirmation (digest 2026-08-06, reduced-nightly): unchanged for a fifth straight read — the triggering commit was text-only
+- category: content
+- impact: 8
+- ease: 3
+- detail: `baseline:check` flagged staleness by exactly one mechanics-source
+  commit (`d320ee12` — reworded 12 cards' authored `paidSummary` strings,
+  no numeric/effect change; verified via `git show` diff, string literals
+  only). Re-measured with `/digest`'s reduced-nightly pass at `444886eb`;
+  the regenerated `report` block is **byte-identical** to the prior
+  `acc64eca` (2026-08-02) and `ef492fff` (2026-08-01) reads — confirmed via
+  direct diff of the committed JSON (only `meta.generatedAt`/`meta.commit`/
+  `meta.note` changed). blind policy-pick, doctrine early ~80 / mid ~50 /
+  late 25-35 / impossible 0: early 61.1%, mid 0.0%, late 0%, impossible 0%
+  — identical to 08-01 and 08-02. This is the fifth consecutive digest
+  confirming the flag-on mid/late collapse first exposed 07-30; five days
+  of intervening commits have been copy/content/audit/critique housekeeping,
+  not mechanics rebalancing, so an unchanged read is expected, not a stall
+  in the repair. (Sanity check performed this pass: confirmed no hidden
+  coupling from card-face text into the policy-pick draft path — neither
+  `scoreCard` (`Cards/cards.pricing.ts`) nor `draftCombatDeck`'s
+  `verbClass`-based weighting (`Combat/combat.deck-draft.ts`,
+  `Combat/combat.cards.ts`) reads `paidSummary`; the only consumer of
+  card-face text is `cardComplexity`'s keyword scan
+  (`Combat/combat.card-complexity.ts`), which feeds `preset:`-path
+  complexity reporting only, never the `policy-pick` deck this matrix
+  measures — so the byte-identical result is the mechanically expected
+  one, not a coincidence worth further chasing.)
+- next: /iterate — no new signal; `/deck-tuning` continues to own the
+  actual repair via the existing "Post-D8 flag-on curve repair" candidate
+  in `plan/PHASE_CANDIDATES.md`. The persistent late=0% doctrine violation
+  stays tracked live in `plan/CRITIQUE.md`'s `[HIGH] late-stage global
+  collapse` row.
+
 ### Doctrine-curve confirmation (digest 2026-08-02, reduced-nightly): unchanged from 08-01's flat-zero mid/late read
 - category: content
 - impact: 8

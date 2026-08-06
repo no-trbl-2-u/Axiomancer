@@ -517,7 +517,7 @@
    "freeGlyph": "✦",
    "freeKw": "SOUL",
    "freeVal": "1",
-   "paid": "Afflict with BLEED 2 for 1 turn."
+   "paid": "Afflict with BLEED 2 (ticks each time it is struck; 1 turn)."
   },
   "chips": [
    {
@@ -574,7 +574,7 @@
    "freeGlyph": "⚑",
    "freeKw": "DRAW",
    "freeVal": "1",
-   "paid": "POISON 1 and MARK 1 for 2 turns. OMEN — stake window 1-2 (ante 2 Conviction at window 1): on hit, GUARD 4."
+   "paid": "POISON 1 (ticks each card you play; 2 turns) and MARK 1 for 2 turns. OMEN — stake window 1-2 (ante 2 Conviction at window 1): on hit, GUARD 4."
   },
   "chips": [
    {
@@ -1148,7 +1148,7 @@
    "freeGlyph": "❡",
    "freeKw": "PREMISE",
    "freeVal": "1",
-   "paid": "Afflict with POISON 1 for 2 turns. Gain 1 PREMISE and DRAW 1."
+   "paid": "Afflict with POISON 1 (ticks each card you play; 2 turns). Gain 1 PREMISE and DRAW 1."
   },
   "chips": [
    {
@@ -1203,7 +1203,7 @@
    "freeGlyph": "◉",
    "freeKw": "MARK",
    "freeVal": "1",
-   "paid": "Afflict with BLEED 2 for 3 turns."
+   "paid": "Afflict with BLEED 2 (ticks each time it is struck; 3 turns)."
   },
   "chips": [
    {
@@ -1318,7 +1318,7 @@
    "freeGlyph": "◉",
    "freeKw": "FORETELL",
    "freeVal": "1",
-   "paid": "POISON 1 for 1 turn. MARK 1 for 2 turns. FORETELL 2."
+   "paid": "POISON 1 (ticks each card you play; 1 turn). MARK 1 for 2 turns. FORETELL 2."
   },
   "chips": [
    {
@@ -1938,7 +1938,7 @@
    "freeGlyph": "❡",
    "freeKw": "PREMISE",
    "freeVal": "1",
-   "paid": "Afflict with MARK 1 for 3 turns and POISON 1 for 4 turns. Gain 2 PREMISES."
+   "paid": "Afflict with MARK 1 for 3 turns and POISON 1 (ticks each card you play; 4 turns). Gain 2 PREMISES."
   },
   "chips": [
    {
@@ -2052,7 +2052,7 @@
    "freeGlyph": "❡",
    "freeKw": "PREMISE",
    "freeVal": "1",
-   "paid": "Apply MARK 1. Inflict POISON 1 for 2 turns. Gain 2 PREMISES."
+   "paid": "Apply MARK 1. Inflict POISON 1 (ticks each card you play; 2 turns). Gain 2 PREMISES."
   },
   "chips": [
    {
@@ -2169,7 +2169,7 @@
    "freeGlyph": "❖",
    "freeKw": "GUARD",
    "freeVal": "2",
-   "paid": "BLEED 1 for 2 turns on yourself. FORGE a temporary WILD gold die and bank the spent die, then RECOIL 6."
+   "paid": "BLEED 1 on yourself (ticks each time you are struck; 2 turns). FORGE a temporary WILD gold die and bank the spent die, then RECOIL 6."
   },
   "chips": [
    {
@@ -2518,7 +2518,7 @@
    "freeGlyph": "◉",
    "freeKw": "MARK",
    "freeVal": "1",
-   "paid": "Inflict POISON 1 for 2 turns. Reroll all spent, exhausted, or X dice in your tray except floating dice."
+   "paid": "Inflict POISON 1 (ticks each card you play; 2 turns). Reroll all spent, exhausted, or X dice in your tray except floating dice."
   },
   "chips": [
    {
@@ -2629,7 +2629,7 @@
    "freeGlyph": "⁇",
    "freeKw": "MILL",
    "freeVal": "1",
-   "paid": "MARK 1 for 2 turns. POISON 1 for 1 turn. ECHO."
+   "paid": "MARK 1 for 2 turns. POISON 1 (ticks each card you play; 1 turn). ECHO."
   },
   "chips": [
    {
@@ -3193,7 +3193,7 @@
    "freeGlyph": "◉",
    "freeKw": "MARK",
    "freeVal": "1",
-   "paid": "Inflict POISON 1 for 4 turns."
+   "paid": "Inflict POISON 1 (ticks each card you play; 4 turns)."
   },
   "chips": [
    {
@@ -3417,7 +3417,7 @@
    "freeGlyph": "◉",
    "freeKw": "MARK",
    "freeVal": "1",
-   "paid": "Afflict with POISON 1 for 4 turns. BLEED 1 for 2 turns on yourself."
+   "paid": "Afflict with POISON 1 (ticks each card you play; 4 turns). BLEED 1 on yourself (ticks each time you are struck; 2 turns)."
   },
   "chips": [
    {
@@ -3992,7 +3992,7 @@
    "freeGlyph": "◉",
    "freeKw": "MARK",
    "freeVal": "1",
-   "paid": "Inflict POISON 2 for 2 turns."
+   "paid": "Inflict POISON 2 (ticks each card you play; 2 turns)."
   },
   "chips": [
    {

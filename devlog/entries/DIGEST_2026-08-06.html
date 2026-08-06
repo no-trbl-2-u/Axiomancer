@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
-<title>Axiomancer</title>
+<title>Axiomancer digest — 2026-08-06</title>
 <style>
 :root {
   color-scheme: light dark;
@@ -203,15 +203,45 @@ footer.foot { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--b
 </style>
 </head>
 <body>
-<header class="top"><div class="wrap"><span class="home">Axiomancer</span></div></header>
+<header class="top"><div class="wrap"><a class="home" href="../log.html">← DevLog</a><span class="crumb">2026-08-06</span></div></header>
 <main class="wrap">
-<h1>Axiomancer</h1>
-<p class="muted">A private index of the game's content and the nightly development log.</p>
-<div class="hub">
-  <a class="hue-cards" href="./catalog.html"><span class="h-glyph">🂠</span><div class="h-title">Catalog</div><div class="h-sub">79 cards · 56 foes · 24 statuses</div></a>
-  <a class="hue-log" href="./log.html"><span class="h-glyph">❯</span><div class="h-title">DevLog</div><div class="h-sub">27 entries</div></a>
-  <a class="hue-tuning" href="./tuning-lab/index.html"><span class="h-glyph">⚖</span><div class="h-title">Tuning Lab</div><div class="h-sub">3 reports</div></a>
-</div>
+<h1 id="headline">2026-08-06</h1>
+<p class="headline">Another quiet, clean cycle: two content/copy findings drained (an</p>
+<div class="counts"><span class="chip cat-content">2 content</span></div>
+<section class="card cat-content" id="authored-paidsummary-text-closes-the-wi-2-gap-for-real"><div class="card-head"><span class="chip cat-content">content</span><h2>Authored paidSummary text closes the WI-2 gap for real</h2></div>
+<p class="field"><span class="flabel">What</span> reworded the 12 authored <code>paidSummary</code> strings that still</p>
+<p class="field"><span class="flabel">Why</span> critique pass 16 found that the WI-2 fix (issue #168, landed</p>
+<p class="commits"><code class="commit">`d320ee12`</code> <code class="commit">(fix)</code> <code class="commit">`2458d51e`</code> <code class="commit">(audit</code> <code class="commit">finding</code> <code class="commit">closed</code> <code class="commit">issue</code></p>
+<p>claimed round-clock POISON/BLEED duration ("Inflict POISON 1 for 4 turns.") even though both effects tick per event, not per round; extended the honesty guard to sweep every card's <code>combatEffects</code> directly instead of trusting <code>faceStats</code>'s single-primary-effect classification. 2026-07-12) only patched the <em>auto-generated</em> card-face path — a card's authored <code>paidSummary</code> fully replaces that text and was never in scope. The gap that let this ship: the existing guard test walked <code>faceStats</code>'s classification, which reflects a card's single PRIMARY effect and silently skips multi-effect cards (Opening Statement's primary effect is MARK, not its POISON). #170)</p>
+<div class="diff" role="img" aria-label="code diff"><div class="dl del">- paidSummary: 'Inflict POISON 1 for 4 turns.',</div><div class="dl add">+ paidSummary: 'Inflict POISON 1 (ticks each card you play; 4 turns).',</div></div></section>
+<section class="card cat-content" id="catalog-generator-stops-bolding-retired-keywords"><div class="card-head"><span class="chip cat-content">content</span><h2>Catalog generator stops bolding retired keywords</h2></div>
+<p class="field"><span class="flabel">What</span> pruned 12 dead words — DAMAGE, STUN, SLOW, BURN, CONFUSION,</p>
+<p class="field"><span class="flabel">Why</span> none of the 12 appear in the mechanics guard allowlist</p>
+<p class="commits"><code class="commit">`489819a6`</code> <code class="commit">(fix</code> <code class="commit">issue</code> <code class="commit">#171)</code> <code class="commit">`444886eb`</code> <code class="commit">(audit</code> <code class="commit">finding</code></p>
+<p>SILENCE, REGEN, EXECUTE, COMPOUND, VULNERABLE, BARRIER, REPRISE — from <code>scripts/build-catalog.mjs</code>'s <code>KEYWORD_WORDS</code> bolding list and regenerated <code>devlog/catalog.html</code>. (<code>paid-summary-honesty.engine.test.ts</code>) or the live mobile <code>KEYWORD_GLOSS</code> registry — spec 32 v3 retired them or never had them. Bolding a word implies the glossary overlay can define it; these 12 couldn't be defined, so the catalog was printing fake keywords. "damage" was the only one actually live in card text (18 bolded occurrences pre-fix, 0 after). closed)</p>
+<div class="diff" role="img" aria-label="code diff"><div class="dl ctx"> const KEYWORD_WORDS = [</div><div class="dl del">-  "STRIP BUFF", "HEAL SELF", "DAMAGE", "POISON", "BLEED", "BURN", "MARK", "GUARD",</div><div class="dl del">-  "BARRIER", "RIPOSTE", "STUN", "SLOW", "CONFUSION", "SILENCE", "STAGGER", "BACKFIRE",</div><div class="dl add">+  "STRIP BUFF", "HEAL SELF", "POISON", "BLEED", "MARK", "GUARD",</div><div class="dl add">+  "RIPOSTE", "STAGGER", "BACKFIRE",</div></div></section>
+<section class="panel" id="while-you-were-out"><h2>While you were out</h2>
+<div class="tablewrap"><table><thead><tr><th>Tick (UTC)</th><th>Verb</th><th>Outcome</th></tr></thead><tbody><tr><td>08-05 20:01 → 20:35</td><td><code>/march</code> → <code>/iterate</code></td><td><span class="st st-ok">shipped</span> — authored paidSummary DoT-text fix (#170)</td></tr><tr><td>08-06 03:47 → 03:59</td><td><code>/march</code> → <code>/critique</code></td><td><span class="st st-neutral">no-op</span> — <span class="st st-ok">pass</span> 17, 0 findings</td></tr><tr><td>08-06 09:18 → 09:37</td><td><code>/march</code> → <code>/iterate</code></td><td><span class="st st-ok">shipped</span> — catalog keyword-bolding fix (#171)</td></tr></tbody></table></div>
+<ul><li><code>loop:phase</code> GitHub issues (the phase mirror): 55 total, 50 closed,</li></ul>
+<p>5 still open for in-flight phases (#143 GLYPHS pilot, #140 Phase 38, #139 Phase 37, #98 Phase D1, #83 Phase 32) — expected, not stale.</p>
+<ul><li><code>plan/AUDIT.md</code>: 28 open pending rows (46 total under Pending, 18</li></ul>
+<p>already resolved-in-place; today's new doctrine-curve confirmation row is one of the 28).</p>
+<ul><li><code>plan/CRITIQUE.md</code>: 18 open pending rows; last full pass today</li></ul>
+<p>(2026-08-06, commit <code>c4f67d5c</code>, pass 17, 0 findings).</p>
+<ul><li><code>plan/PHASE_CANDIDATES.md</code>: 34 pending candidates, unchanged this</li></ul>
+<p>window; last <code>/expand</code> pass 2026-08-04.</p>
+<ul><li><code>triage:needs-user</code> / <code>loop:do</code> issues: 0 open. No open PRs.</li><li>Deploy: nothing to check — HEAD is a docs/plan-only tick, no gated</li></ul>
+<p><code>verify-*</code> workflow triggered.</p>
+<ul><li>Breadth check (<code>npm --workspace axiomancer-mobile run e2e:minigames</code></li></ul>
+<p>— the real command; <code>skills/digest.md</code>'s own <code>SMOKE_SAMPLE=full npm run e2e</code> still doesn't exist, per the standing <code>[divergence]</code> row) ran full and green: hazard, combat, gathering, encounter-routing, exploration/combat-prelude round-trip, and upgradeable-dice all <code>ALL PASS</code>.</p>
+<ul><li>Deck-matrix baseline re-measured this cycle — see Tuning proposals.</li></ul></section>
+<section class="panel" id="needs-you"><h2>Needs you</h2>
+<p>Nothing blocked this cycle. No new <code>[needs-user-call]</code> rows, no open <code>triage:needs-user</code> issues. One small housekeeping item for whenever someone's near GitHub issues: #146, #147, and #152 were all resolved in <code>plan/CRITIQUE.md</code>'s Done log back on 2026-07-22/23 (commits <code>21c55b94</code>, <code>6f138c27</code>, <code>20af943f</code>), but those commits predate the <code>Closes #N</code> trailer convention, so the issues never auto-closed and are still sitting open. Not a live bug — just three stale tabs.</p></section>
+<section class="panel" id="tuning-proposals"><h2>Tuning proposals</h2>
+<p><code>baseline:check</code> opened this cycle <strong>stale by exactly one mechanics-source commit</strong> (<code>d320ee12</code>) — re-measured with the reduced nightly pass (<code>npm run baseline:regen -- --runs=30 --confidence=reduced-nightly</code>), now committed at <code>444886eb</code>.</p>
+<p>The regenerated report is <strong>byte-identical</strong> to the last two reads (<code>acc64eca</code> 2026-08-02, <code>ef492fff</code> 2026-08-01) — confirmed by diffing the committed JSON directly; only the <code>meta</code> stamp changed. Read (blind policy-pick, doctrine early ~80 / mid ~50 / late 25-35 / impossible 0): early 61.1%, mid 0.0%, late 0%, impossible 0% — the fifth consecutive digest confirming the flag-on mid/late collapse first exposed 2026-07-30. This is the expected outcome, not a stalled repair: <code>d320ee12</code> only reworded 12 cards' authored display text (verified via diff — string literals only, no numeric/effect change), and a quick trace confirmed neither <code>scoreCard</code> (<code>Cards/cards.pricing.ts</code>) nor <code>draftCombatDeck</code>'s <code>verbClass</code>-based weighting (<code>Combat/combat.deck-draft.ts</code>, <code>Combat/combat.cards.ts</code>) reads <code>paidSummary</code> — the only consumer of card-face text (<code>cardComplexity</code>'s keyword scan) feeds <code>preset:</code>-path complexity reporting, never the <code>policy-pick</code> deck this matrix measures. No new tuning action: <code>/deck-tuning</code> continues to own the actual repair via the existing "Post-D8 flag-on curve repair" candidate; the persistent late=0% doctrine violation stays tracked live in <code>plan/CRITIQUE.md</code>'s <code>[HIGH] late-stage global collapse</code> row.</p></section>
+<section class="panel" id="todays-intent"><h2>Today's intent</h2>
+<p>No baseline screenshots changed since the last digest, so no UI shots this cycle. The two shipped fixes both belong to the same family — authored/generated text drifting out of sync with what the guard tests actually check — and both closed the same day they were found. The baseline re-measure this cycle did more verification than usual (tracing whether a text-only commit could legitimately move a simulation's win rate) precisely because the numbers looked like they might have moved before the byte-diff proved they hadn't; worth noting for the next stale-by-a-suspicious-commit cycle that the fast check is <code>git diff &lt;old&gt;..&lt;new&gt; -- axiomancer-mechanics/docs/reports/baselines/deck-matrix-baseline.json</code> before re-deriving percentages by hand.</p></section>
 <footer class="foot">Axiomancer DevLog &middot; generated by <code>scripts/build-devlog.mjs</code></footer>
 </main>
 </body>
