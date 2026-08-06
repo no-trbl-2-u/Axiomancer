@@ -979,10 +979,18 @@ one level down, in the routing helper `onApply` calls next).
   by `grace-card-wording.engine.test.ts` — update its pins in the
   same commit.
 
-### [LOW] catalog keyword bolder still speaks dead vocabulary
+### [x] [LOW] catalog keyword bolder still speaks dead vocabulary — RESOLVED 2026-08-06 (commit 489819a6, issue #171)
 - pass: session 2026-07-17 (card-text work)
 - viewport: devlog/catalog.html
 - category: content/copy
+- issue: #171
+- resolution: pruned `KEYWORD_WORDS` in `scripts/build-catalog.mjs` to drop
+  the 12 dead words. Confirmed against the mechanics guard allowlist
+  (`paid-summary-honesty.engine.test.ts`) and the live mobile
+  `KEYWORD_GLOSS` registry (`axiomancer-mobile/state/combat/keywords.ts`)
+  that none of the 12 are real keywords. "damage" was the only one
+  actually live in card text (18 bolded occurrences pre-fix, 0 after);
+  regenerated `devlog/catalog.html`. Root verify green.
 - observation: `scripts/build-catalog.mjs` KEYWORD_WORDS bolds words
   the spec 32 v3 registry retired or never had — DAMAGE, STUN, SLOW,
   BURN, CONFUSION, SILENCE, REGEN, EXECUTE, COMPOUND, VULNERABLE,
