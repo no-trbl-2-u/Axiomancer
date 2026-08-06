@@ -133,14 +133,18 @@ const RARITY_META = {
 // them; the face just flags that they ARE keywords). Longest-first so multi-word
 // keywords win the match.
 const KEYWORD_WORDS = [
-  "STRIP BUFF", "HEAL SELF", "DAMAGE", "POISON", "BLEED", "BURN", "MARK", "GUARD",
-  "BARRIER", "RIPOSTE", "STUN", "SLOW", "CONFUSION", "SILENCE", "STAGGER", "BACKFIRE",
+  "STRIP BUFF", "HEAL SELF", "POISON", "BLEED", "MARK", "GUARD",
+  "RIPOSTE", "STAGGER", "BACKFIRE",
   "SWAY", "REAP", "SOUL", "SOULS", "FORETELL", "PREMISE", "ECHO", "FORGE", "DRAW",
-  "REGEN", "SIPHON", "EXECUTE", "RUPTURE", "COMPOUND", "ENCHANT", "DISENCHANT",
-  "PROLONG", "RECALL", "PERORATION", "CONCEDE", "CAPITULATE", "VULNERABLE", "THORNS",
-  "TICK", "DOT", "CLEANSE", "PERORATE", "REPRISE", "PIP", "PIPS",
+  "SIPHON", "RUPTURE", "ENCHANT", "DISENCHANT",
+  "PROLONG", "RECALL", "PERORATION", "CONCEDE", "CAPITULATE", "THORNS",
+  "TICK", "DOT", "CLEANSE", "PERORATE", "PIP", "PIPS",
   // 2026-07-16 (authored paid summaries) — registry words the list was missing.
   "KINDLE", "RECOIL", "FALLEN", "OMEN", "RAPPORT", "MILL", "HEAL", "REARGUE", "PREMISES",
+  // 2026-08-06 (iterate — retired-vocabulary sweep) — DAMAGE, STUN, SLOW, BURN,
+  // CONFUSION, SILENCE, REGEN, EXECUTE, COMPOUND, VULNERABLE, BARRIER, REPRISE
+  // dropped: spec 32 v3 retired or never had these; bolding them implied a
+  // keyword the glossary overlay cannot define (plan/CRITIQUE.md).
 ].sort((a, b) => b.length - a.length);
 
 function boldKeywords(text) {

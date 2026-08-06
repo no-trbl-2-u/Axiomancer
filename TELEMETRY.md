@@ -181,3 +181,6 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-08-05T11:18:10Z | skill | digest | unknown | main | - |
 | 2026-08-05T20:03:16Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-08-06T03:48:22Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-08-06T09:19:49Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-08-06T09:20:58Z | skill | iterate | claude-sonnet-5 | main | - |
+| 2026-08-06T09:23:19Z | subagent | Explore | claude-sonnet-5 | main | Scope combat kill-path legibility fix |
