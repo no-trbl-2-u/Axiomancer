@@ -1,13 +1,31 @@
 # Critique log
 
-> Last pass: 2026-08-05 at commit 63574686
-> Pass count: 16
+> Last pass: 2026-08-05 at commit 2458d51e
+> Pass count: 17
 
 > External-observer feedback for Axiomancer. Populated by
 > `/critique` (which drives the local expo-web build with the
 > `playtester` agent — there is no hosted URL), drained by
 > `/iterate`. See `skills/critique.md` for the contract and
 > `plan/bearings.md` § Surface for the local-build adaptation.
+
+> **[critique pass 17, 2026-08-05, commit 2458d51e] Unattended `/march`
+> tick.** Used the non-MCP `critique:drive` transport (§3.5) at both
+> mobile (375×812) and desktop (1280×800); the cold drive again
+> reached past "ENTER COMBAT" into the live combat-board at both
+> viewports. Zero console/page errors besides the same benign
+> `navigator.vibrate` warning seen every prior pass, zero nav errors.
+> Self-assessed all 10 captures (title, onboarding, combat preview,
+> live combat-board, exploration hub × 2 viewports) against the
+> current Pending/Done log: the fanned mobile hand's obscured card
+> body text is the known tap-to-open-detail-modal design (Phase 22,
+> taught by the combat tutorial), the wide-margin desktop layout is
+> the documented dev/e2e-only surface (not a shipping target per
+> `plan/bearings.md` § Surface), and the "Slippery Slope" PAID line
+> ("Inflict POISON 1 (ticks each card you play; 4 turns).") is the
+> pass-16 finding's own fix (commit d320ee12, now guard-tested by
+> `card-face-honesty.guard.test.ts`'s WI-2 extension), not a
+> regression. Zero fresh findings this pass.
 
 > **[critique pass 16, 2026-08-05, commit 63574686] Unattended `/march`
 > tick.** Used the non-MCP `critique:drive` transport (§3.5) at both
