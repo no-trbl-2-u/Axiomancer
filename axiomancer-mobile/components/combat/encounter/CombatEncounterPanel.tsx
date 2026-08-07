@@ -890,8 +890,8 @@ export function CombatEncounterPanel({
                         <Text style={styles.tipGloss}>
                             Play stances around the wheel — HEART, then BODY, then MIND (starting on any of
                             them). Each right stance lights the next node; a wrong stance resets the wheel.
-                            Light all three and you forge a wild ✦ MOMENTUM die — drag it onto ANY card to
-                            power it, with the wild colour-match bonus.
+                            Light all three and you forge a wild ✦ MOMENTUM die — drag it onto ANY card,
+                            regardless of colour, to power it.
                         </Text>
                         <Text style={styles.tipMeta}>wrong stance resets · the wild die lasts until spent or the turn ends</Text>
                         <View style={styles.tipBadgeWrap} pointerEvents="none">

@@ -1975,11 +1975,17 @@ const theAnvilSpeaks: Card = {
  *  detonator, the strongest result of the run (mid blind 0.420→0.583, sE
  *  +0.068 — win AND engagement up at every measured cell; retires the
  *  refrain deck's akrasia borrow). RECOLORED heart→body for the evicted
- *  self-flagellant seat (aspect field only; note the `match` dieBonus now
- *  keys to a BODY die — in the refrain recipe's body slot the conviction
- *  kicker fires at least as often as the measured heart-colored A/B form).
+ *  self-flagellant seat (aspect field only).
  *  Watch item carried into the promotion report: winnowing's dominant-card
- *  share rose to ~0.90 behind burden in the A/B. */
+ *  share rose to ~0.90 behind burden in the A/B.
+ *  2026-08-07 (issue #173) — dropped the `dieBonus onColor: 'match'`
+ *  wrapper: under the color law (`colorMatch = wild-or-stance`, see
+ *  `combat.engine.ts`) every legal paid play of this card IS a color
+ *  match, so the conviction rider was firing unconditionally while priced
+ *  at the conditional dieBonus ×0.6 discount. Folded straight into
+ *  `specialMechanics` as a plain unconditional `rider` (same carrier as
+ *  this card's other two paid riders) and re-priced at full weight; see
+ *  the recomputed `// pts:` line below. */
 const theBurdenOfRepetition: Card = {
     id: 'the-burden-of-repetition',
     theme: 'echo',
@@ -1992,11 +1998,17 @@ const theBurdenOfRepetition: Card = {
     targetType: 'enemy',
     // pts: [poison i1 d1 (tempo-weighted 3.66 ÷ 3 = 1.22) + closer
     // ruptureMarks 2 (1.33, pre-existing stacks — the plant trails) +
-    // trailing plant mark i1 d2 (1.5)] × ECHO 1.8 = 7.30 (scorer-exact: the
-    // multiplier covers the whole PAID line; the riders fire once at runtime
-    // — priced rich, never cheap) + dieBonus match [conviction 1 (1.0)] ×
-    // 0.6 = 0.6 + FREE [MILL 2 (2.0) + mark i1 d2 (1.5)] = 3.5 → 11.40 →
-    // uncommon band 4.5-13 (Theorem). FREE share 3.5/11.40 = 30.7%.
+    // trailing plant mark i1 d2 (1.5) + conviction 1 (1.0, unconditional —
+    // was a fake `dieBonus onColor: 'match'` condition, issue #173; every
+    // legal die powering this card satisfies the color law's match test,
+    // so this rider always fired and now prices at full weight, not the
+    // 0.6 conditional discount)] × ECHO 1.8 = 9.10 (scorer-exact 9.096; the
+    // multiplier covers the whole PAID line, including this rider — ECHO
+    // literally replays the full paid resolution, so the rider now firing
+    // twice under echo matches its doubled price) + FREE [MILL 2 (2.0) +
+    // mark i1 d2 (1.5)] = 3.5 → 12.60 (scorer-exact 12.596) → uncommon band
+    // 4.5-13 (Theorem) — still fits, no re-band needed. FREE share
+    // 3.5/12.60 = 27.8%.
     free: { millCards: 2, applyEffect: { effectId: 'debuff_mark', intensity: 1, duration: 2 } },
     combatEffects: [
         { effectId: 'debuff_poison', appliedTo: 'opponent', intensity: 1, duration: 1 },
@@ -2005,8 +2017,8 @@ const theBurdenOfRepetition: Card = {
         { kind: 'echo' },
         { kind: 'rider', rider: { ruptureMarks: 2 } },
         { kind: 'rider', rider: { applyEffect: { effectId: 'debuff_mark', intensity: 1, duration: 2 } } },
+        { kind: 'rider', rider: { conviction: 1 } },
     ],
-    dieBonus: { onColor: 'match', rider: { conviction: 1 } },
     addedIn: '2026-07-18',
     tags: ['echo', 'payoff', 'dot'],
 };
