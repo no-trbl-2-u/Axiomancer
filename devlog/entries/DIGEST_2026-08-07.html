@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
-<title>Axiomancer</title>
+<title>Axiomancer digest — 2026-08-07</title>
 <style>
 :root {
   color-scheme: light dark;
@@ -203,15 +203,45 @@ footer.foot { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--b
 </style>
 </head>
 <body>
-<header class="top"><div class="wrap"><span class="home">Axiomancer</span></div></header>
+<header class="top"><div class="wrap"><a class="home" href="../log.html">← DevLog</a><span class="crumb">2026-08-07</span></div></header>
 <main class="wrap">
-<h1>Axiomancer</h1>
-<p class="muted">A private index of the game's content and the nightly development log.</p>
-<div class="hub">
-  <a class="hue-cards" href="./catalog.html"><span class="h-glyph">🂠</span><div class="h-title">Catalog</div><div class="h-sub">79 cards · 56 foes · 24 statuses</div></a>
-  <a class="hue-log" href="./log.html"><span class="h-glyph">❯</span><div class="h-title">DevLog</div><div class="h-sub">28 entries</div></a>
-  <a class="hue-tuning" href="./tuning-lab/index.html"><span class="h-glyph">⚖</span><div class="h-title">Tuning Lab</div><div class="h-sub">3 reports</div></a>
-</div>
+<h1 id="headline">2026-08-07</h1>
+<p class="headline">Quiet cycle: one infra hygiene fix, one real mechanics fix (a fake</p>
+<div class="counts"><span class="chip cat-mechanics">1 mechanics</span><span class="chip cat-infra">1 infra</span></div>
+<section class="card cat-infra" id="deploy-check-stops-red-flagging-superseded-ci-runs"><div class="card-head"><span class="chip cat-infra">infra</span><h2>deploy-check stops red-flagging superseded CI runs</h2></div>
+<p class="field"><span class="flabel">What</span> <code>scripts/deploy-check.mjs</code> now checks whether a <code>cancelled</code></p>
+<p class="field"><span class="flabel">Why</span> a concurrent push's concurrency-group <code>cancel-in-progress</code></p>
+<p class="commits"><code class="commit">`3375fe98`</code> <code class="commit">(fix</code> <code class="commit">issue</code> <code class="commit">#172)</code> <code class="commit">`a0882f60`</code> <code class="commit">(audit</code> <code class="commit">finding</code></p>
+<p>verify-* run's SHA has been superseded by a newer <code>origin/main</code> tip before treating the cancellation as a hard failure; a genuine cancellation on the current tip still fails closed. cancels an older commit's in-flight run even though that commit's own checks never failed — the gate was mapping that cancellation to the same exit code as real CI red, risking a wrongful stop on green code. Filed as an AUDIT.md finding 2026-07-17. closed)</p>
+<div class="diff" role="img" aria-label="code diff"><div class="dl ctx">     const failed = runs.find((r) =&gt; r.status === 'completed' &amp;&amp; r.conclusion !== 'success')</div><div class="dl ctx">     if (failed) {</div><div class="dl add">+      // A `cancelled` run isn't necessarily a real failure: GitHub's</div><div class="dl add">+      // concurrency group (`cancel-in-progress`) cancels an older</div><div class="dl add">+      // commit's in-flight verify-* run when a newer commit lands on</div><div class="dl add">+      // the same ref, even though the older commit's own checks never</div><div class="dl add">+      // actually failed. Only fail-closed on a genuine cancellation —</div><div class="dl add">+      // one where this SHA is still the branch tip, so nothing</div><div class="dl add">+      // superseded it.</div><div class="dl add">+      if (failed.conclusion === 'cancelled') {</div><div class="dl add">+        let remoteTip = null</div><div class="dl add">+        try {</div><div class="dl add">+          remoteTip = execSync('git ls-remote origin refs/heads/main', { encoding: 'utf-8' })</div><div class="dl add">+            .split('\t')[0]</div><div class="dl add">+            .trim()</div><div class="dl add">+        } catch {</div><div class="dl add">+          // No network / no origin remote — fall through to fail-closed below.</div><div class="dl add">+        }</div><div class="dl add">+        if (remoteTip &amp;&amp; remoteTip !== sha) {</div><div class="dl add">+          console.error(`DEPLOY GATE: run cancelled — superseded by a newer commit on origin/main.`)</div><div class="dl add">+          process.exit(2)</div><div class="dl add">+        }</div><div class="dl add">+      }</div><div class="dl ctx">       console.error(`DEPLOY FAILED (CI red).`)</div></div></section>
+<section class="card cat-mechanics" id="color-match-die-riders-fold-into-honest-unconditional-pricing"><div class="card-head"><span class="chip cat-mechanics">mechanics</span><h2>Color-match die riders fold into honest unconditional pricing</h2></div>
+<p class="field"><span class="flabel">What</span> <code>the-burden-of-repetition</code>'s <code>conviction: 1</code> rider dropped</p>
+<p class="field"><span class="flabel">Why</span> owner directive (2026-07-18 jot): under the color law, only</p>
+<p class="commits"><code class="commit">`d793d607`</code> <code class="commit">(fix</code> <code class="commit">issue</code> <code class="commit">#173)</code> <code class="commit">`043e298e`</code> <code class="commit">(audit</code> <code class="commit">finding</code></p>
+<p>its <code>dieBonus: { onColor: 'match' }</code> wrapper and moved into <code>specialMechanics</code> as a plain unconditional rider, re-priced at full weight instead of the conditional discount (11.40 → 12.60, still inside the printed uncommon band 4.5-13); the momentum-wheel tooltip that misattributed the bonus to the wild die specifically was reworded to match. a same-stance or WILD die can legally power a card, so <code>onColor: 'match'</code> fires on <em>every</em> legal paid play — it was never a condition, just a guaranteed bonus wearing a conditional discount. Re-verified the finding's original "7 cards" count was stale (Phase 30's FREE-lines rewrite had already stripped <code>dieBonus</code> from 6 of them); only this one card still carried it. The FATE Engine's X-die exception (<code>colorMatch</code> correctly <code>false</code> for an X-die play) was investigated and deliberately left alone — no live card uses <code>fate</code> today, but baking the bonus into unconditional math would silently grant it to any future fate-flagged card. closed)</p>
+<div class="diff" role="img" aria-label="code diff"><div class="dl ctx">     free: { millCards: 2, applyEffect: { effectId: 'debuff_mark', intensity: 1, duration: 2 } },</div><div class="dl ctx">     combatEffects: [</div><div class="dl ctx">         { effectId: 'debuff_poison', appliedTo: 'opponent', intensity: 1, duration: 1 },</div><div class="dl ctx">         { kind: 'echo' },</div><div class="dl ctx">         { kind: 'rider', rider: { ruptureMarks: 2 } },</div><div class="dl ctx">         { kind: 'rider', rider: { applyEffect: { effectId: 'debuff_mark', intensity: 1, duration: 2 } } },</div><div class="dl add">+        { kind: 'rider', rider: { conviction: 1 } },</div><div class="dl ctx">     ],</div><div class="dl del">-    dieBonus: { onColor: 'match', rider: { conviction: 1 } },</div></div></section>
+<section class="panel" id="while-you-were-out"><h2>While you were out</h2>
+<div class="tablewrap"><table><thead><tr><th>Tick (UTC)</th><th>Verb</th><th>Outcome</th></tr></thead><tbody><tr><td>08-07 00:20 → 00:37</td><td><code>/march</code> → <code>/iterate</code></td><td><span class="st st-ok">shipped</span> — deploy-check cancelled-as-<span class="st st-bad">red</span> fix (#172)</td></tr><tr><td>08-07 03:25 → 03:36</td><td><code>/march</code> → <code>/critique</code></td><td><span class="st st-neutral">no-op</span> — <span class="st st-ok">pass</span> 18, 0 findings</td></tr><tr><td>08-07 07:49 → 08:46</td><td><code>/march</code> → <code>/iterate</code></td><td><span class="st st-ok">shipped</span> — color-match die-bonus fix (#173)</td></tr></tbody></table></div>
+<ul><li><code>loop:phase</code> GitHub issues (the phase mirror): 30 total, 25 closed,</li></ul>
+<p>5 still open for in-flight phases — expected, not stale.</p>
+<ul><li><code>plan/AUDIT.md</code>: 30 open pending rows (48 total under Pending, 18</li></ul>
+<p>already resolved-in-place; today's new doctrine-curve confirmation row is one of the 30).</p>
+<ul><li><code>plan/CRITIQUE.md</code>: 17 open pending rows; last full pass today</li></ul>
+<p>(2026-08-07, commit <code>8ebe3b7f</code>, pass 18, 0 findings).</p>
+<ul><li><code>plan/PHASE_CANDIDATES.md</code>: 34 pending candidates, unchanged this</li></ul>
+<p>window; last <code>/expand</code> pass 2026-08-06 (pass 7, no candidates).</p>
+<ul><li><code>triage:needs-user</code> / <code>loop:do</code> issues: 0 open. No open PRs.</li><li>Deploy: nothing to check — HEAD is a docs/plan-only tick, no gated</li></ul>
+<p><code>verify-*</code> workflow triggered yet (grace window).</p>
+<ul><li>Breadth check (<code>npm --workspace axiomancer-mobile run e2e:minigames</code>)</li></ul>
+<p>ran full and green: hazard, combat, gathering, encounter-routing, exploration/combat-prelude round-trip, and upgradeable-dice all <code>ALL PASS</code>.</p>
+<ul><li>Deck-matrix baseline re-measured this cycle — see Tuning proposals.</li></ul></section>
+<section class="panel" id="needs-you"><h2>Needs you</h2>
+<p>Nothing blocked this cycle. No new <code>[needs-user-call]</code> rows, no open <code>triage:needs-user</code> issues, no open PRs.</p></section>
+<section class="panel" id="tuning-proposals"><h2>Tuning proposals</h2>
+<p><code>baseline:check</code> opened this cycle <strong>stale by exactly one mechanics-source commit</strong> (<code>d793d607</code>) — re-measured with the reduced nightly pass (<code>npm run baseline:regen -- --runs=30 --confidence=reduced-nightly</code>), now committed at <code>043e298e</code>.</p>
+<p>The regenerated report is <strong>byte-identical</strong> to the last three reads (<code>444886eb</code> 2026-08-06, <code>acc64eca</code> 2026-08-02, <code>ef492fff</code> 2026-08-01) — confirmed by diffing the committed JSON directly; only the <code>meta</code> stamp changed. Read (blind policy-pick, doctrine early ~80 / mid ~50 / late 25-35 / impossible 0): early 61.1%, mid 0.0%, late 0%, impossible 0% — the sixth consecutive digest confirming the flag-on mid/late collapse first exposed 2026-07-30. This is the expected outcome, not a stalled repair: <code>d793d607</code> only re-priced one uncommon card's paid rider (still inside its printed band, 11.40 → 12.60) and reworded a tooltip string — neither touches <code>scoreCard</code>'s pricing bands broadly nor <code>draftCombatDeck</code>'s deck-construction weighting in a way that would move a 30-run policy-pick matrix. No new tuning action: <code>/deck-tuning</code> continues to own the actual repair via the existing "Post-D8 flag-on curve repair" candidate; the persistent late=0% doctrine violation stays tracked live in <code>plan/CRITIQUE.md</code>'s <code>[HIGH] late-stage global collapse</code> row. Full detail filed to <code>plan/AUDIT.md</code>.</p></section>
+<section class="panel" id="todays-intent"><h2>Today's intent</h2>
+<p>No baseline screenshots changed since the last digest, so no UI shots this cycle. Both shipped fixes this cycle closed real AUDIT findings same-day-filed-or-earlier: the deploy-check fix closes a 2026-07-17 finding about a gate that could wrongfully stop the loop on green code, and the color-match fix closes a 2026-07-18 owner directive about a fake conditional bonus. Six straight byte-identical doctrine-curve reads is now a strong signal in its own right — the collapse is stable and well-characterized, not still-unfolding; the next thing worth doing with this data is letting <code>/deck-tuning</code> or a dedicated late-stage tuning phase actually spend a cycle on the repair, since more confirmation passes at this point mostly restate what's already known.</p></section>
 <footer class="foot">Axiomancer DevLog &middot; generated by <code>scripts/build-devlog.mjs</code></footer>
 </main>
 </body>

@@ -14,6 +14,36 @@
 
 ## Pending
 
+### Doctrine-curve confirmation (digest 2026-08-07, reduced-nightly): unchanged for a sixth straight read
+- category: content
+- impact: 8
+- ease: 3
+- detail: `baseline:check` flagged staleness by exactly one mechanics-source
+  commit (`d793d607` — folded the fake color-match `dieBonus` condition
+  into an unconditional `specialMechanics` rider on
+  `the-burden-of-repetition`, re-pricing it 11.40 -> 12.60; a single-card
+  paid-line repricing, not a global rebalance). Re-measured with
+  `/digest`'s reduced-nightly pass at `043e298e`; the regenerated
+  `report` block is **byte-identical** to the `444886eb` (2026-08-06),
+  `acc64eca` (2026-08-02), and `ef492fff` (2026-08-01) reads — confirmed
+  via direct diff of the committed JSON (only `meta.generatedAt`/
+  `meta.commit`/`meta.note` changed). blind policy-pick, doctrine early
+  ~80 / mid ~50 / late 25-35 / impossible 0: early 61.1%, mid 0.0%, late
+  0%, impossible 0% — identical to every read since 08-01. This is the
+  sixth consecutive digest confirming the flag-on mid/late collapse
+  first exposed 07-30. The triggering commit only touched one uncommon
+  card's paid-rider pricing (still inside its printed band) and a
+  momentum-wheel tooltip string; neither `scoreCard`
+  (`Cards/cards.pricing.ts`) nor `draftCombatDeck`'s policy-pick
+  construction path reads that card's tooltip text or is sensitive to a
+  single card's price moving within its band, so a byte-identical result
+  is the mechanically expected one.
+- next: /iterate — no new signal; `/deck-tuning` continues to own the
+  actual repair via the existing "Post-D8 flag-on curve repair" candidate
+  in `plan/PHASE_CANDIDATES.md`. The persistent late=0% doctrine violation
+  stays tracked live in `plan/CRITIQUE.md`'s `[HIGH] late-stage global
+  collapse` row.
+
 ### [x] [external-critique] color-match die riders are a fake condition — RESOLVED 2026-08-07 (commit d793d607, issue #173)
 - category: external-critique
 - impact: 6

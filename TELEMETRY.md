@@ -194,3 +194,5 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-08-07T07:50:40Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-08-07T07:51:30Z | skill | iterate | claude-sonnet-5 | main | - |
 | 2026-08-07T07:56:32Z | subagent | card-expert | claude-sonnet-5 | main | Fix fake color-match die-bonus condition |
+| 2026-08-07T09:43:57Z | slash-prompt | /digest | unknown | user/ci | /digest |
+| 2026-08-07T09:44:00Z | skill | digest | unknown | main | - |

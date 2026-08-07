@@ -3647,7 +3647,7 @@
    "freeGlyph": "◉",
    "freeKw": "MARK",
    "freeVal": "1",
-   "paid": "poison i1 d1 + ECHO + consume all marks — 2 damage per stack + mark i1 d2 (2/play)."
+   "paid": "poison i1 d1 + ECHO + consume all marks — 2 damage per stack + mark i1 d2 + +1 Conviction (2/play)."
   },
   "chips": [
    {
@@ -3696,7 +3696,7 @@
    "ECHO",
    "consume all marks — 2 damage per stack",
    "mark i1 d2",
-   "Die bonus: powering die match fires a rider"
+   "+1 Conviction"
   ]
  },
  {
