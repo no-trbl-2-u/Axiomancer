@@ -14,6 +14,31 @@
 
 ## Pending
 
+### [x] [external-critique] color-match die riders are a fake condition — RESOLVED 2026-08-07 (commit d793d607, issue #173)
+- category: external-critique
+- impact: 6
+- ease: 6
+- issue: #173
+- resolution: re-verified the row's "7 cards" count was stale (Phase 30's
+  FREE-lines rewrite had already stripped `dieBonus` from 6 of them); only
+  `the-burden-of-repetition` still carried the fake `onColor: 'match'`
+  condition (always-true under the color law, since only a same-stance or
+  WILD die can legally power a card). Folded its `conviction: 1` rider
+  into `specialMechanics` as a plain unconditional rider and re-priced at
+  full weight (11.40 -> 12.60, still inside the printed uncommon band
+  4.5-13); reworded the momentum-wheel tooltip that misattributed the
+  bonus to the wild die specifically. Investigated but did NOT bake the
+  flat `COLOR_MATCH_DAMAGE_BONUS`/duration bonus into unconditional math:
+  the FATE Engine's X-die mechanism is a genuine, tested exception
+  (`colorMatch` is correctly `false` for an X-die play) — no live card
+  uses `fate` today, but baking it in would silently grant the bonus to
+  any future fate-flagged card. That part of the finding was a false
+  premise; closed as verified-not-a-bug. Mechanics 190 files/4085 tests +
+  mobile 268 files/2716 tests green.
+- detail: mirrored from `plan/CRITIQUE.md` Pending row (filed via `/jot`,
+  2026-07-18, owner directive).
+- next: (drained)
+
 ### [x] [external-critique] authored `paidSummary` card text still prints round-clock DoT duration — RESOLVED 2026-08-05 (commit d320ee12, issue #170)
 - category: external-critique
 - impact: 6

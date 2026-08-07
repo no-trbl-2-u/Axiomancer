@@ -1032,15 +1032,34 @@ one level down, in the routing helper `onApply` calls next).
 - suggested fix: owner call — bump small-face lines to 4-5 (layout
   risk: name/glyph crowding) or keep 3 and accept the ellipsis.
 
-### [MED] general — color-match die riders are a fake condition; remove
+### [x] [MED] general — color-match die riders are a fake condition; remove — RESOLVED 2026-08-07 (commit d793d607, issue #173)
 - pass: user-jot (commit 486dbded)
 - viewport: unspecified
 - auth_state: anonymous
 - category: mechanics
+- issue: #173
 - observation: Owner directive (2026-07-18, combat UI polish session): color-match die riders must go. Under the color law (only same-stance or WILD powers a card), the 7 library cards with an on-color dieBonus (e.g. soft-word "HEART die: SWAY 1") have a fake condition — it fires on every paid play except WILD, and the printed line reads as a replacement not a bonus. Owner: "There should be no color match riders... ignoring gold since that's a big win anyway." Open sub-call: fold the rider into the paid effect (soft-word → SWAY 4; preserves colored-die behavior, tiny WILD buff — recommended) vs drop outright (small nerf). Related residue: the global colorMatch flag (combat.engine.ts:1915) counts WILD as a match so it is ALWAYS true — the +3 Guard/Barrier COLOR_MATCH_DAMAGE_BONUS and the status-duration bonus are flat bonuses wearing conditional copy; bake the constants into base math and delete the misleading "+3 on colour match" wording (zero gameplay change). Affected: 7 cards' dieBonus fields + pricing comments (dieBonus x0.6 weight), combat.engine.ts rider path, mobile presenter colorMatchHint/armedReadValue copy.
 - evidence: user-spotted at 2026-07-18T15:17:02Z
 - suggested fix: [user has not specified — iterate to determine]
 - source: user
+- resolution: re-verified the "7 cards" count was stale — Phase 30's
+  FREE-lines rewrite had already stripped `dieBonus` from 6 of them;
+  only `the-burden-of-repetition` still carried the fake
+  `onColor: 'match'` condition. Folded its `conviction: 1` rider
+  directly into `specialMechanics` as a plain unconditional rider and
+  re-priced it at full weight (was the conditional dieBonus ×0.6
+  discount) — 11.40 → 12.60, still inside the printed uncommon band
+  4.5-13. Reworded the momentum-wheel tooltip that misattributed the
+  color-match bonus to the wild die specifically. Did NOT bake the
+  flat `COLOR_MATCH_DAMAGE_BONUS`/duration bonus into unconditional
+  math: the FATE Engine's X-die mechanism is a genuine, tested
+  exception (`colorMatch` is correctly `false` for an X-die-powered
+  play — no live card uses `fate` today, but baking the bonus in would
+  silently grant it to any future fate-flagged card). That portion of
+  the finding was a false premise, not a bug — closing as
+  verified-not-a-bug rather than shipped. `axiomancer-mechanics` 190
+  files/4085 tests green; `axiomancer-mobile` 268 files/2716 tests
+  green.
 
 ## Done
 
