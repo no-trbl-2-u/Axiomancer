@@ -242,6 +242,29 @@ else if (PROVIDER === 'github-actions') {
 
     const failed = runs.find((r) => r.status === 'completed' && r.conclusion !== 'success')
     if (failed) {
+      // A `cancelled` run isn't necessarily a real failure: GitHub's
+      // concurrency group (`cancel-in-progress`) cancels an older
+      // commit's in-flight verify-* run when a newer commit lands on
+      // the same ref, even though the older commit's own checks never
+      // actually failed. Only fail-closed on a genuine cancellation —
+      // one where this SHA is still the branch tip, so nothing
+      // superseded it.
+      if (failed.conclusion === 'cancelled') {
+        let remoteTip = null
+        try {
+          remoteTip = execSync('git ls-remote origin refs/heads/main', { encoding: 'utf-8' })
+            .split('\t')[0]
+            .trim()
+        } catch {
+          // No network / no origin remote — fall through to fail-closed below.
+        }
+        if (remoteTip && remoteTip !== sha) {
+          console.error(`DEPLOY GATE: run cancelled — superseded by a newer commit on origin/main.`)
+          console.error(`  Checked SHA ${sha.slice(0, 7)}, current tip ${remoteTip.slice(0, 7)}.`)
+          console.error(`  Not a real failure — re-run deploy:check against the newer HEAD.`)
+          process.exit(2)
+        }
+      }
       console.error(`DEPLOY FAILED (CI red).`)
       console.error(`  Workflow: ${failed.name} concluded ${failed.conclusion}`)
       console.error(`  Run: ${failed.html_url}`)
