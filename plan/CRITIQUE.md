@@ -807,11 +807,25 @@ one level down, in the routing helper `onApply` calls next).
   marked superseded. Same standing-guard caveat as the row above —
   re-file fresh if a new instance surfaces.
 
-### [LOW] Combat kill-path legibility
+### [x] [LOW] Combat kill-path legibility — RESOLVED 2026-08-07 (commit 615ff26b, issue #174)
 - The status kill-path (DoT / execute) is the intended win path
   but is not obviously legible on the combat board. A
   projected-lethality readout would close the gap (build-plan
   Phase 2).
+- issue: #174
+- resolution: build-plan Phase 2 had shipped the mechanics selector
+  `projectCombatOutcome` (pending DoT / rounds-to-kill /
+  lethal-in-flight), but nothing in `axiomancer-mobile` ever consumed
+  it — the API existed, the board stayed illegible. Forwarded the
+  projection onto `CombatEnemyPaneVM` in the enemy-pane presenter
+  (`combat-encounter.engine.ts`) and rendered it on the combat board
+  (`CombatCombatantPane.tsx`) as a "DOT PENDING" / "LETHAL IN N"
+  readout, reusing the existing `AltWinMeter` component (same HUD slot
+  as the SWAY/PREMISE alt-win meters). Added presenter coverage
+  (`legibility-sweep.engine.test.ts`) pinning the hidden/pending/lethal
+  states against the same fixture as mechanics' own
+  `projected-lethality.engine.test.ts` e2e. Mobile lint + typecheck +
+  268 files/2719 tests green.
 
 ### [x] [MED] DoT card faces print round-clock math that contradicts their own keyword glosses (RESOLVED — stale, already fixed by WI-2, issue #168)
 - RESOLVED 2026-08-04 (verified stale; no new code). The trigger-clock

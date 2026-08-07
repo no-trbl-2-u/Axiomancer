@@ -44,6 +44,28 @@
   stays tracked live in `plan/CRITIQUE.md`'s `[HIGH] late-stage global
   collapse` row.
 
+### [x] [external-critique] Combat kill-path legibility — RESOLVED 2026-08-07 (commit 615ff26b, issue #174)
+- category: external-critique
+- impact: 4
+- ease: 7
+- issue: #174
+- resolution: build-plan Phase 2 had shipped the mechanics selector
+  `projectCombatOutcome` (pending DoT / rounds-to-kill /
+  lethal-in-flight), but nothing in `axiomancer-mobile` ever consumed
+  it — the API existed, the board stayed illegible. Forwarded the
+  projection onto `CombatEnemyPaneVM` in the enemy-pane presenter
+  (`combat-encounter.engine.ts`) and rendered it on the combat board
+  (`CombatCombatantPane.tsx`) as a "DOT PENDING" / "LETHAL IN N"
+  readout, reusing the existing `AltWinMeter` component (same HUD slot
+  as the SWAY/PREMISE alt-win meters). Added presenter coverage
+  (`legibility-sweep.engine.test.ts`) pinning the hidden/pending/lethal
+  states against the same fixture as mechanics' own
+  `projected-lethality.engine.test.ts` e2e. Mobile lint + typecheck +
+  268 files/2719 tests green.
+- detail: mirrored from `plan/CRITIQUE.md` Pending row (seeded
+  2026-07-03 from the retired `/archive` critique history).
+- next: (drained)
+
 ### [x] [external-critique] color-match die riders are a fake condition — RESOLVED 2026-08-07 (commit d793d607, issue #173)
 - category: external-critique
 - impact: 6
