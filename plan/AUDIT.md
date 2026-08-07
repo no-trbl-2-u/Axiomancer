@@ -14,6 +14,18 @@
 
 ## Pending
 
+### [x] [tests] GateSockets has zero test coverage on real state logic — RESOLVED 2026-08-07 (issue #175)
+- category: tests
+- impact: 5
+- ease: 7
+- issue: #175
+- resolution: added `axiomancer-mobile/components/labyrinth/__tests__/
+  GateSockets.test.tsx` (9 tests) pinning socket rendering (pre-confirmed +
+  open), the `distinctWords` pocket dedupe, lay/take-back/clear behavior,
+  the `openSockets` capacity guard, and submit ordering
+  (`[...preConfirmed, ...laid]`). Mobile verify: 269 files/2728 tests green.
+- next: (drained)
+
 ### Doctrine-curve confirmation (digest 2026-08-07, reduced-nightly): unchanged for a sixth straight read
 - category: content
 - impact: 8
