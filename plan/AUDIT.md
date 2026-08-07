@@ -614,10 +614,24 @@
   moduleResolution `node`), or install per-worktree. A task chip was
   also filed from the session.
 
-### deploy-check reports a `cancelled` CI run as red — false-red during concurrent-push collisions
+### [x] deploy-check reports a `cancelled` CI run as red — false-red during concurrent-push collisions — RESOLVED 2026-08-07 (commit 3375fe98, issue #172)
 - category: debt
 - impact: 5
 - ease: 6
+- issue: #172
+- resolution: `scripts/deploy-check.mjs`'s GitHub Actions poll loop now
+  special-cases a `cancelled` conclusion: before failing closed, it
+  checks `origin/main`'s current tip (`git ls-remote origin
+  refs/heads/main`) against the polled SHA. If the tip has moved on
+  (a newer commit superseded the polled one — the concurrency-group
+  scenario this row described), it exits 2 (retry/stale) with a
+  message pointing at the newer HEAD instead of exit 1 (red). A
+  `cancelled` run whose SHA is still the branch tip (a genuine
+  cancellation, not a supersession) still fails closed, unchanged from
+  before. Root `npm run verify` green (268 suites/2716 tests mobile,
+  mechanics + card-editor green); manual `deploy:check` run against
+  the current green HEAD confirmed the normal success path is
+  unaffected.
 - detail: surfaced 2026-07-17 during the Phase 36a march tick. A
   concurrent "file the residue" session pushed several commits onto
   `main` while 36a's `verify-mobile` was mid-run; GitHub's concurrency
