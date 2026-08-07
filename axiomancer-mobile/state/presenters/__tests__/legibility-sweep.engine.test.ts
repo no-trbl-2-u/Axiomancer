@@ -89,6 +89,53 @@ describe('WI-5 — SWAY / PREMISE alt-win meters', () => {
     });
 });
 
+// Phase 2 (spec 30) — the status kill-path foresight. The engine selector
+// (`projectCombatOutcome`) already had hermetic coverage in mechanics; this
+// pins the mobile presenter actually forwards it onto the enemy pane VM,
+// which it never did before this pass (the API shipped Phase 2 but was
+// never wired to the board — CRITIQUE.md "Combat kill-path legibility").
+describe('Phase 2 — projected-lethality readout (spec 30)', () => {
+    it('reads zero/hidden when the foe carries no DoT', () => {
+        const vm = buildCombatViewModel(openState());
+        expect(vm.enemy.pendingDot).toBe(0);
+        expect(vm.enemy.roundsToKill).toBeNull();
+        expect(vm.enemy.isLethalInFlight).toBe(false);
+    });
+
+    it('surfaces a pending tally for a DoT that will not finish the foe', () => {
+        let s = openState();
+        s = {
+            ...s,
+            enemy: {
+                ...s.enemy, health: 300, maxHealth: 300,
+                effects: [{ effectId: 'debuff_bleed', intensity: 1, remainingDuration: 2, appliedAt: 1, tier: 2 }],
+            },
+        };
+        const vm = buildCombatViewModel(s);
+        expect(vm.enemy.pendingDot).toBe(3);
+        expect(vm.enemy.roundsToKill).toBeNull();
+        expect(vm.enemy.isLethalInFlight).toBe(false);
+    });
+
+    it('flags isLethalInFlight + a rounds-to-kill countdown when stacked DoT alone clears remaining HP', () => {
+        // Same fixture as mechanics' projected-lethality e2e suite (i3 d5
+        // bleed vs 15 HP — decay-aware ticks 9, 6, 3; 2 expected ticks/round
+        // clears 15 HP on round 1).
+        let s = openState();
+        s = {
+            ...s,
+            enemy: {
+                ...s.enemy, health: 15, maxHealth: 15,
+                effects: [{ effectId: 'debuff_bleed', intensity: 3, remainingDuration: 5, appliedAt: 1, tier: 2 }],
+            },
+        };
+        const vm = buildCombatViewModel(s);
+        expect(vm.enemy.pendingDot).toBe(18);
+        expect(vm.enemy.roundsToKill).toBe(1);
+        expect(vm.enemy.isLethalInFlight).toBe(true);
+    });
+});
+
 describe('CombatViewModel.discardCards — the REPRISE picker data source (phase 28)', () => {
     it('resolves discard-pile ids to display names', () => {
         let s = openState();

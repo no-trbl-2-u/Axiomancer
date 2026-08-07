@@ -24,6 +24,9 @@ import {
     projectRuptureBurst, projectIncomingThreat,
     CONCEDE_PREMISES_BASE, CONCEDE_PREMISES_ELITE, CONCEDE_PREMISES_BOSS,
     capitulateThreshold, concedeFloorFor,
+    // phase 2 — projected-lethality readout (spec 30): the status kill-path
+    // foresight, wired into the board's HUD by this pass.
+    projectCombatOutcome,
     // Spec 33 (Phase D6a) — flag-on combat render core: the die-face axis, the
     // OVERHEAT-crack read, and the Press Fate reroll price. Inert flag-off.
     isUpgradeableDiceEnabled, PRESS_FATE_COST,
@@ -316,6 +319,12 @@ export interface CombatEnemyPaneVM {
      *  (so a whole-plan-is-SWAY preset like GRACE sees the track from turn 1). */
     sway: number; swayTarget: number; swayVisible: boolean;
     premises: number; premiseAt: number; premiseVisible: boolean;
+    /** Phase 2 (spec 30) — the status kill-path foresight. `pendingDot` is the
+     *  damage the foe's CURRENT stacks will deal if nothing else happens;
+     *  `roundsToKill` is null unless that alone clears remaining HP, in which
+     *  case `isLethalInFlight` is true. Engine truth (`projectCombatOutcome`),
+     *  this presenter only forwards it. */
+    pendingDot: number; roundsToKill: number | null; isLethalInFlight: boolean;
 }
 export interface CombatPlayerPaneVM {
     name: string; hp: number; maxHp: number; hpPct: number; guard: number; effects: CombatEffectChipVM[];
@@ -837,6 +846,9 @@ function enemyPane(state: CombatEncounterState): CombatEnemyPaneVM {
     // is declared). Each meter shows when it has a value OR the deck feeds it.
     const sway = state.sway ?? 0;
     const premises = state.premises ?? 0;
+    // Phase 2 (spec 30) — pure selector, no state mutation; safe to call once
+    // per render off the same encounter state the rest of the pane reads.
+    const lethality = projectCombatOutcome(state);
     return {
         name: e.name,
         artKey: e.portraitAsset ?? e.id,
@@ -863,6 +875,9 @@ function enemyPane(state: CombatEncounterState): CombatEnemyPaneVM {
         // peroration track (combat-peroration) owns the premises/at readout.
         premiseVisible: !state.peroration
             && (premises > 0 || deckFeedsMechanic(state, ['premise', 'peroration', 'spend_premises'])),
+        pendingDot: lethality.pendingDot,
+        roundsToKill: lethality.roundsToKill,
+        isLethalInFlight: lethality.isLethalInFlight,
     };
 }
 

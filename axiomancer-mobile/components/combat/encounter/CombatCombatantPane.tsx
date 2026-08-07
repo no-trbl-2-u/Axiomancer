@@ -588,6 +588,20 @@ export const CombatCombatantPane = React.memo(function CombatCombatantPane({
                 {enemy.premiseVisible ? (
                     <AltWinMeter glyph="☞" label="PREMISE" value={enemy.premises} target={enemy.premiseAt} color={AXM.sulfur} testID="combat-premise-meter" />
                 ) : null}
+                {/* Phase 2 (spec 30) — the status kill-path foresight. Makes the
+                    DoT win path foreseeable instead of invisible accumulation:
+                    a plain pending tally once stacks land, a "LETHAL IN N" call
+                    once they alone clear remaining HP. */}
+                {enemy.pendingDot > 0 ? (
+                    <AltWinMeter
+                        glyph="☠"
+                        label={enemy.isLethalInFlight ? `LETHAL IN ${enemy.roundsToKill}` : 'DOT PENDING'}
+                        value={Math.min(enemy.pendingDot, enemy.hp)}
+                        target={enemy.hp}
+                        color={AXM.blood}
+                        testID="combat-lethality-meter"
+                    />
+                ) : null}
                 <View style={styles.hudUnderBar} pointerEvents="box-none">
                     {/* hidden-stance read — badge only, no text telegraph */}
                     <Text
