@@ -14,6 +14,15 @@ description of Axiomancer. Read once at session start. The TL;DR:
 > by a deterministic TypeScript rules engine, where your
 > worldview is a mechanical input rather than flavor.
 
+**PIVOTING (T direct, 2026-08-08):** the product is becoming **a Dark
+Fantasy deckbuilding RPG campaign**, whole-product. The TL;DR above and
+`spec.md` itself are rewritten in **Phase 44i** — deliberately last, so
+the spec documents what the retheme actually did rather than what it
+intended. Until then the line above still describes the shipped product,
+and the open question it raises ("your worldview is a mechanical input"
+is what makes this an RPG rather than a deckbuilder) is settled in
+**Phase 42**, not here. See § "THE UNSHACKLING".
+
 Three-package npm-workspaces monorepo: a pure rules **engine**
 (`axiomancer-mechanics`), an Expo/React-Native **app**
 (`axiomancer-mobile`) that consumes the engine as local source,
@@ -57,6 +66,16 @@ with no session handshake.
 Decided across the two source projects and the monorepo merge.
 Revisit only if a phase genuinely cannot ship without changing
 one of these — then stop and surface it as `[needs-user-call]`.
+
+> **Exception (2026-08-08): the Expo rows are now scheduled to change.**
+> T lifted the "not now" on the Expo decouple; **Phase 47** re-platforms
+> the mobile framework and CI/CD rows (`expo-router`, `expo-image`,
+> `expo-font`, `expo-haptics`, `expo-constants`, `expo-linking`,
+> `expo-splash-screen`, `expo-status-bar`, `expo-navigation-bar`, the
+> `jest-expo` preset, `expo lint`, and the EAS deploy path). Reanimated 4
+> / gesture-handler / rn-svg / screens / safe-area-context are bare-RN
+> and carry over unchanged. Do not pre-emptively drift off Expo before
+> that phase — the rows below stay authoritative until it lands.
 
 | Layer | Choice | Notes |
 |---|---|---|
@@ -197,7 +216,9 @@ ambiguity.)
 - **Win condition:** HP is the sole win condition. Never
   reintroduce Pressure Tracks / `CombatPressureTracks`.
   <!-- lexicon-ok: pressure-tracks -->
-- **Copy canon:** VITAE, STANCE. Never HEALTH / GUARD.
+- **Copy canon:** VITAE, STANCE. Never HEALTH / GUARD. *(Theme-bearing —
+  Phase 42's ratified fiction may replace these terms; until it does they
+  remain canon and copy regressions are still rejected.)*
 - **Content location:** engine content in mechanics `src/*`
   libraries; player-facing strings in mobile presenters /
   `*.copy.ts`; no hardcoded copy in components; no hex literals
@@ -208,9 +229,92 @@ ambiguity.)
   faces.
 - **Voice:** terse, archaic-flavored, "cold and old" — but **no
   thee/thou/thy/thine/ye**. Mercy/exploit language reads as
-  morally charged, never neutral.
-- **Balance doctrines (per encounter):** status-effect play is
-  the dominant win path (combat); Gathering greed < restraint <
+  morally charged, never neutral. *(Theme-bearing — a Phase 42 proposal
+  may argue for a different register, and the "morally charged" clause
+  presumes the morality system survives the retheme. Binding until
+  Phase 42 is ratified; re-derive it there, don't drift from it before.)*
+- **THE UNSHACKLING (T direct, /oversight 2026-08-08) — three locked
+  constraints are VOID.** T, verbatim: *"remove constraints across the
+  entire application. Normal damage is allowed, deck tuning is allowed to
+  change anything about a card, no more philosophy based theme. I want to
+  give you full freedom to take this deckbuilder in any direction."*
+  Authorised by the source-of-truth hierarchy below (T's latest explicit
+  decision outranks every ADR/CDR/spec). What falls:
+  1. **The strike is alive.** Cards MAY deal raw enemy-HP damage. Spec 32
+     v3 §1/§12's no-strike law and the status-dominance balance doctrine
+     are retired for combat. The enforcing witness
+     (`Cards/e2e/doctrine-strike-dead.engine.test.ts`) and spec 32's
+     FREE-line "never damage" law come down in **Phase 41**.
+  2. **`/deck-tuning` has full card authority** — no sandbox-first
+     quarantine, no byte-identity law, no recolor-not-repartition rule,
+     no per-change owner ballot, no `[needs-user-call]` on recolors or
+     new cards. Anything about any card is fair game — **bounded only by
+     the LOCKED MECHANICS carve-out below**: cards may do anything to
+     Conviction, the Surge meter and the Dice system except make them
+     irrelevant.
+  3. **Philosophy theming is retired** as the organising fiction.
+     **RATIFIED the same day — the replacement is "a Dark Fantasy
+     deckbuilding RPG campaign", WHOLE PRODUCT.** T's framing:
+     *"It's looser, not that different from what we already have, and
+     should be an easy pivot while opening up A LOT of doors for us."*
+     Read "looser" as the governing constraint: this is a re-skin plus
+     permission, **not** a ground-up redesign — engine mechanics, keyword
+     *behavior*, the dice model and the minigame doctrines all survive.
+     **Phase 42** authors the bible (`specs/34-dark-fantasy-campaign.md`)
+     and **Phases 44a-44i** execute it across cards, keywords, themes,
+     enemies, world, story, morality and the product shell. Until 42 is
+     ratified, do NOT rename anything and do NOT improvise dark-fantasy
+     flavor in passing — the retheme runs off a map and a lint
+     (Phase 44a), not opportunistically. Keywords that already read dark
+     fantasy (POISON, BLEED, MARK, DOOM, THORNS, GUARD, RIPOSTE) are
+     expected to survive unchanged; renaming what already works is churn.
+  What does NOT fall (still binding): every hermeticity and determinism
+  rule (injected RNG, no disk/network/TTY in engine tests), the verify
+  and deploy gates, the nexus hard rules, and `GAME_STATE_VERSION`
+  migration discipline. "Remove constraints" was about DESIGN law, not
+  engineering rigour.
+- **LOCKED MECHANICS — the carve-out from the unshackling (T direct,
+  /oversight 2026-08-08).** T, verbatim: *"the Conviction, Surge meter,
+  and Dice mechanics system, those are LOCKED into place and will need to
+  stay. Cards can effect them, but agents should not remove the
+  mechanics."* The unshackling's "full freedom" **stops here**. Three
+  systems are permanently in the game:
+  1. **Conviction** — the banked combat resource that funds Signature
+     Skills. Anchors: `CombatEncounterState.conviction`
+     (`Combat/combat.encounter.types.ts`), the `conviction-gained` /
+     `special-fired` events, `fate-tapped`'s `'conviction'` choice,
+     `die-forged`'s `'conviction'` destination, `SPECIAL_CONVICTION_DEFAULT`,
+     and every `SIGNATURE_SKILLS` cost. Spec 26 / 26b.
+  2. **The Surge meter** — the global momentum wheel and its surge.
+     Anchors: `MOMENTUM_CHAIN_ORDER`, `MOMENTUM_SURGE_LENGTH`,
+     `SURGE_DIE_PREFIX`, the `momentum-surged` event, and
+     `die-overflowed`'s `'surge'` source. Spec 31.
+  3. **The Dice mechanics system** — `Combat/dice.ts`,
+     `Combat/combat.dice.ts`, `Combat/combat.upgradeable-dice.ts`,
+     `DEFAULT_DIE_GEAR` / `activeDieGear`, the HONE/TEMPER die-gear
+     economy, and the Upgradeable-Dice model that D-FLIP made the default
+     (legacy dice stays as the explicit comparison mode). Spec 33.
+  **What is allowed:** cards, keywords, enemies and content MAY read,
+  feed, spend, block, amplify or otherwise interact with all three — that
+  is explicitly encouraged, and normal damage does not displace them.
+  **What is forbidden without a new T ruling:** removing, replacing,
+  no-op'ing, feature-flagging off, or routing around any of the three;
+  deleting their tests as "dead doctrine" during Phase 41; or letting a
+  balance pass tune them out of relevance. If a phase genuinely cannot
+  ship without touching one of these, **stop and surface it as
+  `[needs-user-call]`** — do not decide it under the standing
+  big-decisions authority, which this carve-out explicitly overrides.
+  **On renaming:** the LOCK is on the mechanics, not the words, but all
+  three names already read dark fantasy, so the default is **keep the
+  names too**. A Phase 42 proposal to rename any of them must say so
+  out loud, route through the Phase 44a map, and check
+  `GAME_STATE_VERSION` — the mechanic survives either way.
+- **Balance doctrines (per encounter):** ~~status-effect play is
+  the dominant win path (combat)~~ — **VOID for combat via the
+  unshackling above; Phase 43 defines the replacement objective
+  function, and until it lands every doctrine-curve reading measures
+  a dead law.** Still live for the minigames:
+  Gathering greed < restraint <
   skill; Loot-cache informed > blind > coward; Quest Board
   naive-finishes / deliberate-finishes-well; Rest
   meagre-but-never-lethal (posture gradient); Hazard -> CDR-0006

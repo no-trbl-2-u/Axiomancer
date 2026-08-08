@@ -549,6 +549,14 @@ one level down, in the routing helper `onApply` calls next).
   tests green.
 
 ### [HIGH] late-stage global collapse — all 10 presets 0.00 late
+- **SUPERSEDED AS A TARGET by the unshackling (/oversight 2026-08-08).**
+  "All 10 presets 0.00 late" was a failure *against the status-dominance
+  doctrine*, which T voided this day. Whether a 0.00 late win rate is
+  still a defect is now an open question that **Phase 43** (objective
+  function v2) answers — and normal damage, newly legal, is the most
+  obvious lever if it is. Keep this row open as evidence; do not treat
+  its 80/50/25-35/0 target band as live. The post-Phase-39 reading below
+  is a faithful record of the measurement, but it measures the old law.
 - **Phase 39 landed 2026-08-08 (commit `8d50591e`) but did NOT drain
   this row — the matrix is the witness, and it still reads a
   violation.** The digest's first post-Phase-39 baseline (reduced

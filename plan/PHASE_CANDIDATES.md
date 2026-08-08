@@ -151,7 +151,10 @@
   naturally with the curve-repair phase above (new cards can be the
   mid-game second-gear payoffs the failing decks need).
 
-### Expo decouple (CI/CD re-platform) — owner-declared, post-D-batch
+### ~~Expo decouple (CI/CD re-platform)~~ PROMOTED to Phase 47 via /oversight 2026-08-08
+> T's "not now" is LIFTED by the unshackling. The banked decision
+> inputs below are the phase's starting material; do NOT self-promote
+> further sub-phases from this row — Phase 47 sequences them.
 - source: owner design session 2026-07-18 (roll-ritual chat). Owner intent,
   verbatim scope: *"start decoupling from expo in a coming set of phases (not
   now) in order to change our CI/CD."* Filed here so the intent survives
@@ -189,7 +192,10 @@
 > next-tier candidates awaiting `/oversight` promotion. Verify
 > "already shipped?" notes before promoting.
 
-### Starter-library trim + duplication pass (owner-led; metrics-slate powered)
+### Starter-library trim + duplication pass — ABSORBED into Phase 39 (partially) via /oversight 2026-08-08
+> **Only the DUPLICATION half is absorbed.** Trims stay PAUSED under
+> ruling R2 (see the status update at the end of this row) — Phase 39
+> must not cut cards. Do not re-promote this row separately.
 - source: owner session 2026-07-18 (metrics-slate chat; PR #119 + report
   `axiomancer-mechanics/docs/reports/preset-sweep-2026-07-18.md`). Owner
   intent, near-verbatim: TRIM cards first, then run DUPLICATES within each
@@ -326,7 +332,8 @@
   doctrine flag (`--doctrine-policy=blind`), and a card-holding policy to
   make opp% discriminating (currently saturated ≥90% everywhere).
 
-### Re-tune the starter library against `scoreCard` v2 (`/deck-tuning`)
+### ~~Re-tune the starter library against `scoreCard` v2~~ ABSORBED into Phase 39 via /oversight 2026-08-08
+> Same cards, pricing axis. Do not re-promote separately.
 - source: Phase 36a + 36b follow-through (2026-07-17). The pricing model is
   now honest about two axes it was blind to when the shipped 70-card library /
   10 presets were authored: **alt-win currencies** (36a — SWAY→CAPITULATE at
@@ -541,7 +548,9 @@
   spec 33 §1; EA-6 (wheel) and EA-7 (STAKE) surfaces are reinterpreted, not
   duplicated.
 
-### Re-home dice upgrades off the blacksmith (design thread)
+### ~~Re-home dice upgrades off the blacksmith~~ PROMOTED to Phase 45 via /oversight 2026-08-08
+> Design session + implementation now carry a phase row. Full context
+> below stays as the brief's source material.
 - source: /oversight 2026-07-18 — owner ruled "wrong surface — rethink"
   on the standing blacksmith cadence/identity `[needs-user-call]`
   (AUDIT, now resolved).
@@ -614,7 +623,11 @@
   sweep; once it is, the next `/oversight` re-asks design-now vs drop.
   Still do not self-promote.
 
-### [score 7.0] GLYPHS pilot (Phase 33d) post-ship follow-ups — mobile UI, sim policy, promotion court
+### ~~[score 7.0] GLYPHS pilot (Phase 33d) post-ship follow-ups~~ PROMOTED to Phases 49-51 via /oversight 2026-08-08
+> Sequenced exactly as this row proposed: 49 completeness-critic touch-UX
+> gate, 50 mobile UI, 51 sim `crackAt` policy + promotion court.
+> SOUL/Harvest parity, the library retrofit and a 3rd theme remain
+> explicit non-goals unless the pilot graduates.
 - proposed: 2026-07-21, expand pass 1
 - source signals:
   - Phase 33d brief (`plan/phases/phase_33d_glyphs_pilot.md`) §
@@ -651,7 +664,9 @@
 - conflicts: none — explicitly anticipated by the shipping phase's own
   brief; no spec.md non-goal touched.
 
-### [score 4.0] Early-game rethink: canned preset-deck tutorials + re-derive the dropped Quest Board tutorial (design session needed)
+### ~~[score 4.0] Early-game rethink~~ PROMOTED to Phase 46 via /oversight 2026-08-08
+> Design session then N content/mobile phases; now depends on Phase 42
+> (tutorial copy is theme-bearing).
 - proposed: 2026-07-21, expand pass 1
 - source signals:
   - `plan/CRITIQUE.md` [MED] "rethink early-game as canned preset-deck

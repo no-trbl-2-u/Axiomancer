@@ -14,6 +14,28 @@
 
 ## Pending
 
+> **BANNER (/oversight 2026-08-08 — the unshackling).** The seven
+> byte-identical "Doctrine-curve confirmation" rows below (07-20 →
+> 08-07) measure adherence to the status-dominance doctrine, which T
+> voided this day. They are **historical readings of a dead law**, not
+> open findings: do not drain them, do not act on their 80/50/25-35/0
+> target band, and do not file another identical nightly. The next
+> `/consolidate` should compact the seven into one historical row, and
+> `/digest` should stop emitting them until **Phase 43** defines the
+> replacement objective function.
+>
+> The **post-Phase-39 row immediately below is different** and stays
+> live: it is a post-phase verification rather than an eighth identical
+> nightly, and its numbers are the honest record of what Phase 39 did.
+> Read it with the caveat that its target band is void — Phase 43
+> decides whether mid 2.0% / late 0.0% is a defect at all. Likewise the
+> two `[needs-user-call]` rows it spawned are genuinely open, and the
+> unshackling **changes one of them**: the foundry row's blocker ("no
+> card in the current 86-card library gives forge a heart-aspect
+> win-path alternative") is no longer a constraint, because a
+> replacement may now be authored freely, including with normal damage.
+> See `plan/bearings.md` § "THE UNSHACKLING".
+
 ### Doctrine-curve confirmation post-Phase-39: violation persists — matrix is the witness
 - category: content
 - impact: 8
@@ -104,7 +126,10 @@
   #174) were closed by hand during /oversight 2026-08-08 with a comment
   citing the shipping commit — so the CURRENT queue is clean and this
   row is about the mechanism, not the backlog.
-- next: /iterate — re-open the root-cause hunt. Compare `615ff26b` vs
+- **PROMOTED to build-plan Phase 48 via /oversight 2026-08-08** (T:
+  "make phases for everything you mentioned") — it is no longer competing
+  with Phase 39 for an `/iterate` slot.
+- next: Phase 48 — re-open the root-cause hunt. Compare `615ff26b` vs
   `1004894` end to end (push event shape, whether `scripts/loop-issue.mjs`
   or GitHub's own trailer parser did the closing, whether one landed
   inside a batched push where only the tip commit's trailers are
@@ -1054,8 +1079,15 @@
   shape, win-path attribution). Loop guidance meanwhile: do not
   build new tuning conclusions on statusEngagement alone; treat its
   numbers as suspect per the known blind spots.
-- next: attended session (T-gated — not loop work; do not auto-ship
-  a metric rewrite)
+- **PROMOTED to build-plan Phase 43 via /oversight 2026-08-08** — and
+  the target moved. `statusEngagement` was the objective function
+  *because* status play was the doctrine; the unshackling voids that
+  doctrine, so the metric now measures adherence to a rule the game no
+  longer has. Phase 43 defines what "good combat" means under the new
+  rules rather than merely fixing the old metric's blind spots. The
+  "treat its numbers as suspect" guidance hardens to: **every existing
+  doctrine-curve reading measures a dead law** until 43 lands.
+- next: Phase 43 (no longer a parked attended session)
 
 ### [x] Hermes-decided work is invisible to the loop — RESOLVED via /oversight 2026-07-18: convention adopted
 - category: divergence
