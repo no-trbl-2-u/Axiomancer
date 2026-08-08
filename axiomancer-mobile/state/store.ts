@@ -177,8 +177,29 @@ export interface MobileLabyrinthSlice {
     } | null;
 }
 
+/**
+ * Mobile-only post-combat CARD REWARD slice (the 1-of-3 theme-aware draft).
+ *
+ * The offer used to live in `CombatEncounterPanel`'s own React state, so any
+ * unmount mid-draft (navigating away, a remount) silently threw the offer
+ * away and the player lost a reward they had already earned. Hoisting it here
+ * makes the draft survive the panel: the offer is rolled once per won
+ * encounter, held until the player picks or skips, and cleared on claim.
+ *
+ * Transient by design — the CLAIM is what persists (`addRewardCard` onto
+ * `Character.combatRewardCards`, followed by an explicit `save()`), not the
+ * pending offer.
+ */
+export interface MobileCombatRewardSlice {
+    /** Card ids offered by the current draft; empty when no draft is open. */
+    offers: readonly string[];
+    /** True once the player picked or skipped — the overlay must not re-open. */
+    claimed: boolean;
+}
+
 export type AppStoreState = GameStore & {
     event: MobileEventSlice;
+    combatReward: MobileCombatRewardSlice;
     hazard: MobileHazardSlice;
     gathering: MobileGatheringSlice;
     quest: MobileQuestSlice;
@@ -210,6 +231,11 @@ export const EMPTY_EVENT_SLICE: MobileEventSlice = Object.freeze({
     dialogueCursor: null,
     history: Object.freeze([]),
     sourceNodeType: null,
+});
+
+export const EMPTY_COMBAT_REWARD_SLICE: MobileCombatRewardSlice = Object.freeze({
+    offers: Object.freeze([]),
+    claimed: false,
 });
 
 export const EMPTY_HAZARD_SLICE: MobileHazardSlice = Object.freeze({ session: null, tutorial: false });
@@ -319,6 +345,7 @@ export function createAppStore(options: CreateAppStoreOptions = {}): AppStore {
     store.setState({
         save: () => withPassthrough(engineSave),
         event: EMPTY_EVENT_SLICE,
+        combatReward: EMPTY_COMBAT_REWARD_SLICE,
         hazard: EMPTY_HAZARD_SLICE,
         gathering: EMPTY_GATHERING_SLICE,
         quest: EMPTY_QUEST_SLICE,

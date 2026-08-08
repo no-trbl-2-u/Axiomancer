@@ -29,7 +29,7 @@ import {
     initializeCombatEncounter, rollEncounterDice, playCombatCard, resolveThreatPhase,
     startTurn, endTurn, draftStanceDie, discardCombatCard, playSignatureSkill,
     tapFateDie, getPendingDotTotal, getFloatingDiceColors,
-    selectEncounterMercyChoice, selectCapitulationChoice, buildCombatSummary, rollCombatCardRewards, addRewardCard,
+    selectEncounterMercyChoice, selectCapitulationChoice, buildCombatSummary,
     rollLoot, addItem, getLogger,
     type CombatEncounterState, type CombatOutcome, type Character, type Enemy, type CombatEvent,
 } from '@mechanics';
@@ -45,14 +45,21 @@ import { CombatTutorialCoach } from '@/components/combat/encounter/CombatTutoria
 import { currentCombatTutorialStep } from '@/components/combat/encounter/combat-tutorial-steps';
 import { Image } from 'expo-image';
 import { getEncounterEnemyArt } from '@/assets/images/enemies';
-import { INTENT_ICONS, buildCombatViewModel, resolveApplyRouting, rewardOfferVMs, STANCE_COLORS, type CombatCardVM, type CombatEffectChipVM, type CombatSignatureVM } from '@/state/presenters/combat-encounter.engine';
+import { INTENT_ICONS, buildCombatViewModel, resolveApplyRouting, rewardCardVMs, STANCE_COLORS, type CombatCardVM, type CombatEffectChipVM, type CombatSignatureVM } from '@/state/presenters/combat-encounter.engine';
 import { PlayerPortraitImage } from '@/components/art/PlayerPortraitImage';
 import { useGameState, useGameStore } from '@/state/GameStoreProvider';
-import { COMBAT_TUTORIAL_FLAG, completeCombatTutorialAction, runArchetype, skewRewardsByArchetype } from '@/state/combat/store-actions';
+import {
+    COMBAT_TUTORIAL_FLAG, completeCombatTutorialAction,
+    claimCombatRewardAction, resetCombatRewardAction, rollCombatRewardAction,
+} from '@/state/combat/store-actions';
 import { FONTS } from '@/theme/axm';
 import { makeStyles, usePalette } from '@/theme/runtime';
 
 type DropResolver = (payload: DragPayload, x: number, y: number) => void | Promise<void>;
+
+/** Stable empty-offers reference — a fresh `[]` in the selector would make the
+ *  store subscription report a change on every render. */
+const EMPTY_OFFERS: readonly string[] = Object.freeze([]);
 
 /** Rendered size of the dragged-die ghost chip — the die ghost anchors on HALF
  *  of its rendered FOOTPRINT (cube + shadow, not the bare size) so it tracks
@@ -113,8 +120,8 @@ function isMercifulWin(outcome: CombatOutcome): boolean {
  * on every outcome — forged dice persist across combats until spent. Phase 32
  * part 1b: unspent Harvest Souls write back the same way — `player.bankedSouls`
  * accumulates `finalState.souls`, "the jar travels" regardless of how the
- * fight ended. The deckbuilder card is handled separately (claimed mid-flow
- * via `addRewardCard`).
+ * fight ended. The deckbuilder card is handled separately (rolled into the
+ * store on victory, claimed via `claimCombatRewardAction`).
  */
 export function applyHazardOutcome(
     store: StoreLike,
@@ -267,6 +274,9 @@ export function CombatEncounterPanel({
     const detailCardW = Math.min(264, screenW - 116);
     const player = useGameState((s) => s.player);
     const store = useGameStore();
+    // The live reward draft (store-owned so it survives a panel remount).
+    const rewardOffers = useGameState((s) => s.combatReward?.offers ?? EMPTY_OFFERS);
+    const rewardsClaimed = useGameState((s) => s.combatReward?.claimed ?? false);
 
     // ── first-fight tutorial (primer panels → turn-one coach) ──
     const seenTutorial = useGameState(
@@ -297,9 +307,9 @@ export function CombatEncounterPanel({
     // The prompt HOLDS the deferred play (including the WS7.2 chosen X) — the
     // board committed nothing yet, so dismissing the prompt is a clean cancel.
     const [reprisalPrompt, setReprisalPrompt] = useState<{ uid: string; dieId: string | null; power: boolean; chosenX?: number } | null>(null);
-    // Deckbuilder reward (Spec 26b §C) — rolled once on victory, claimed before the summary.
-    const [rewardOffers, setRewardOffers] = useState<string[]>([]);
-    const [rewardsClaimed, setRewardsClaimed] = useState(false);
+    // Deckbuilder reward (Spec 26b §C) — rolled once on victory, claimed before
+    // the summary. The offer lives in the STORE, not here: panel-local state
+    // meant navigating away mid-draft silently threw away an earned reward.
     const wroteBackRef = useRef(false);
     const exitedRef = useRef(false);
     // Resolution-feedback bridge: the latest resolved engine events + a rising seq.
@@ -320,6 +330,7 @@ export function CombatEncounterPanel({
         setResolving(false);
     }, []);
     useEffect(() => () => { if (resolveTimer.current) clearTimeout(resolveTimer.current); }, []);
+
 
     // Bootstrap the encounter ONCE — combat must not restart when the store
     // player mutates (e.g. our own write-back) or props re-identify.
@@ -539,13 +550,17 @@ export function CombatEncounterPanel({
     const handleExit = useCallback(() => {
         if (exitedRef.current) return;
         exitedRef.current = true;
+        // Clear the draft slate for the NEXT encounter. Deliberately here and
+        // not on mount: the store slice has to outlive a panel remount, or it
+        // would drop the offer exactly when it is meant to preserve it.
+        resetCombatRewardAction(store);
         try {
             getLogger().info('combat', 'encounter-exited', {
                 outcome: live.finalOutcome ?? null,
             });
         } catch { /* logging never breaks play */ }
         onExit(live.finalOutcome ?? null);
-    }, [onExit, live.finalOutcome]);
+    }, [onExit, live.finalOutcome, store]);
 
     // Economy write-back — fires once, the instant combat reaches a terminal
     // outcome (so spoils land even if the player lingers on the summary).
@@ -555,14 +570,13 @@ export function CombatEncounterPanel({
         if (persistOutcome) applyHazardOutcome(store, live.finalOutcome, live, enemy);
     }, [live.finalOutcome, live, persistOutcome, store, enemy]);
 
-    // Roll the deckbuilder reward once, on victory. Roll a wider pool, then bias
-    // it ~60% toward the run's hidden archetype (a no-op for non-bundle runs).
+    // Roll the deckbuilder reward once, on victory. The roll is engine truth
+    // (theme-aware: weighted toward what the deck already plays, with a real
+    // off-theme pivot); the action is idempotent, so a remount re-reads the
+    // SAME offer rather than rerolling it.
     useEffect(() => {
-        if (live.finalOutcome === 'victory' && rewardOffers.length === 0 && !rewardsClaimed && player) {
-            const pool = rollCombatCardRewards(player, Math.random, 8);
-            setRewardOffers(skewRewardsByArchetype(pool, runArchetype(store), 3));
-        }
-    }, [live.finalOutcome, rewardOffers.length, rewardsClaimed, player, store]);
+        if (live.finalOutcome === 'victory') rollCombatRewardAction(store);
+    }, [live.finalOutcome, store]);
 
     // Tutorial completes itself once the turn-one coach script is exhausted.
     useEffect(() => {
@@ -572,9 +586,10 @@ export function CombatEncounterPanel({
         }
     }, [tutorialActive, primerDone, live, vm, finishTutorial]);
 
+    // Claim (or skip) — the action appends the card AND persists, so the pick
+    // no longer waits on some unrelated save() to happen along.
     const onRewardPick = useCallback((cardId: string | null) => {
-        if (cardId) store.setState((s) => (s.player ? { player: addRewardCard(s.player, cardId) } : {}));
-        setRewardsClaimed(true);
+        claimCombatRewardAction(store, cardId);
     }, [store]);
 
     // Identity-stable board props: inline arrows / fresh objects here defeat
@@ -1036,7 +1051,7 @@ export function CombatEncounterPanel({
 
             {/* deckbuilder reward — claimed before the summary on a win */}
             {live.finalOutcome === 'victory' && !rewardsClaimed && rewardOffers.length > 0 && (
-                <CombatRewardsOverlay offers={rewardOfferVMs(rewardOffers)} onPick={onRewardPick} />
+                <CombatRewardsOverlay offers={rewardCardVMs(rewardOffers)} onPick={onRewardPick} />
             )}
 
             {summary && (rewardsClaimed || live.finalOutcome !== 'victory') && (

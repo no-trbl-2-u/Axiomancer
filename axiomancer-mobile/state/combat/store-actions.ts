@@ -13,13 +13,13 @@
 import {
     COMBAT_REWARD_POOL,
     STARTING_CARD_IDS,
-    getCard,
+    addRewardCard,
     listDeckPresets,
-    type CombatCard,
+    rollCombatCardRewards,
     type GameState,
 } from '@mechanics';
 
-import type { AppStore } from '../store';
+import { EMPTY_COMBAT_REWARD_SLICE, type AppStore } from '../store';
 
 /**
  * Flag set once the guided first hazard-combat tutorial is completed or
@@ -168,10 +168,12 @@ export function randomizeCombatDeckAction(store: AppStore): string[] {
 // Starter bundles (deck identity) — the pre-run "choose your path" decks.
 //
 // A bundle is one of the engine's themed preset decks plus a HIDDEN archetype
-// tag. The tag is never shown to the player; it biases combat-card rewards
-// toward the kind of cards their chosen path wants (see
-// `skewRewardsByArchetype`). Mobile authors only presentation (accent + the
-// theme's two hallmark-keyword pills) — every card id is engine truth.
+// tag. The tag is never shown to the player. It no longer steers card rewards
+// — the reward draft reads the deck's THEMES directly (2026-08-08), which is
+// both finer-grained and works on the neutral Threadbare Office where the
+// archetype read was simply null. The tag survives as a run-identity marker.
+// Mobile authors only presentation (accent + the theme's two hallmark-keyword
+// pills) — every card id is engine truth.
 // ---------------------------------------------------------------------------
 
 export type StarterArchetype = 'bleeder' | 'guardian' | 'controller';
@@ -181,10 +183,10 @@ export interface StarterBundle {
     name: string;
     description: string;
     /**
-     * Hidden archetype tag — never surfaced in the UI. Biases later card
-     * rewards (see `skewRewardsByArchetype`). `null` for themes whose engine
-     * (Forge's dice manufacture) maps onto none of the three reward
-     * archetypes: they seed their deck but apply no reward skew.
+     * Hidden archetype tag — never surfaced in the UI, and no longer a reward
+     * lever (the draft reads deck THEMES now). Kept as the run-identity marker
+     * the bundle flag records. `null` for themes that map onto none of the
+     * three archetypes.
      */
     archetype: StarterArchetype | null;
     /** Tile accent colour. A per-theme hue, decoupled from stance colour so
@@ -240,7 +242,7 @@ export function chosenStarterBundle(store: AppStore): StarterBundle | null {
     return tag ? starterBundleById(tag.slice(BUNDLE_FLAG_PREFIX.length)) : null;
 }
 
-/** The hidden archetype tag for this run, or null. Drives the reward skew. */
+/** The hidden archetype tag for this run, or null. Run identity only. */
 export function runArchetype(store: AppStore): StarterArchetype | null {
     const flags = (store.getState() as unknown as GameState).flags ?? [];
     const tag = flags.find((f) => f.startsWith(ARCHETYPE_FLAG_PREFIX));
@@ -272,28 +274,54 @@ export function seedStarterBundleAction(store: AppStore, bundleId: string): void
     try { store.getState().save(); } catch { /* persistence must not block the run */ }
 }
 
-/** Coarse archetype a reward card belongs to, from its engine metadata. */
-function cardArchetypeOf(card: CombatCard | null | undefined): StarterArchetype | null {
-    if (!card) return null;
-    if (card.effectKind === 'dot') return 'bleeder';
-    if (card.effectKind === 'control') return 'controller';
-    if (card.verbClass === 'defend' || card.verbClass === 'buff-self' || card.verbClass === 'enchant') return 'guardian';
-    return null;
+// ---------------------------------------------------------------------------
+// Post-combat card reward — the theme-aware 1-of-3 draft.
+//
+// The ROLL is engine truth (`rollCombatCardRewards` reads the player's actual
+// deck themes and weights offers toward them, keeping an off-theme pivot open
+// — see `REWARD_OFF_THEME_RATE`). Mobile owns exactly two things: WHEN the
+// draft opens, and persisting the claim. The old mobile-side archetype skew
+// (`skewRewardsByArchetype`) is gone — it re-sorted the engine's weighted roll
+// behind its back and did nothing at all on the neutral Threadbare Office.
+// ---------------------------------------------------------------------------
+
+/** Offers shown per reward screen. */
+export const COMBAT_REWARD_OFFER_COUNT = 3;
+
+/**
+ * Rolls the post-combat draft into the store, once. No-ops when a draft is
+ * already open, when the reward was already claimed this encounter, or when no
+ * player is loaded — so a re-render (or a panel remount mid-draft) re-reads the
+ * SAME offer instead of rerolling it.
+ */
+export function rollCombatRewardAction(store: AppStore): readonly string[] {
+    const state = store.getState();
+    const slice = state.combatReward ?? EMPTY_COMBAT_REWARD_SLICE;
+    if (slice.claimed || slice.offers.length > 0) return slice.offers;
+    const player = (state as unknown as GameState).player;
+    if (!player) return EMPTY_COMBAT_REWARD_SLICE.offers;
+    const offers = rollCombatCardRewards(player, Math.random, COMBAT_REWARD_OFFER_COUNT);
+    store.setState({ combatReward: { offers, claimed: false } } as never);
+    return offers;
 }
 
 /**
- * Bias a pool of reward ids ~60% toward the run's hidden archetype, returning
- * `n` ids. A no-op (first `n`, original order) when there is no archetype tag —
- * so non-bundle runs keep today's behaviour exactly.
+ * Resolves the draft: `cardId` appends that card to the player's persistent
+ * `combatRewardCards`; `null` is the SKIP (a lean deck is a legitimate play —
+ * the draft is claimed, nothing is added). Either way the claim is PERSISTED
+ * immediately, mirroring `seedStarterBundleAction`: before this, a pick lived
+ * only in memory until some unrelated `save()` happened to run, so closing the
+ * app after taking a card silently lost it.
  */
-export function skewRewardsByArchetype(ids: string[], archetype: StarterArchetype | null, n: number): string[] {
-    if (!archetype) return ids.slice(0, n);
-    const match = ids.filter((id) => cardArchetypeOf(getCard(id)) === archetype);
-    const rest = ids.filter((id) => !match.includes(id));
-    const out: string[] = [];
-    const add = (id: string): void => { if (!out.includes(id) && out.length < n) out.push(id); };
-    match.slice(0, Math.min(match.length, Math.round(n * 0.6))).forEach(add);
-    rest.forEach(add);
-    match.forEach(add); // pad from any remaining matches if `rest` was short
-    return out.slice(0, n);
+export function claimCombatRewardAction(store: AppStore, cardId: string | null): void {
+    const player = (store.getState() as unknown as GameState).player;
+    const patch: Record<string, unknown> = { combatReward: { offers: [], claimed: true } };
+    if (cardId && player) patch.player = addRewardCard(player, cardId);
+    store.setState(patch as never);
+    try { store.getState().save(); } catch { /* persistence must not strand the reward screen */ }
+}
+
+/** Clears the draft for the next encounter (called when combat is left). */
+export function resetCombatRewardAction(store: AppStore): void {
+    store.setState({ combatReward: EMPTY_COMBAT_REWARD_SLICE } as never);
 }

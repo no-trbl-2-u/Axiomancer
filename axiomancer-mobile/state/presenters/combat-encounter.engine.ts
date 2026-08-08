@@ -2116,29 +2116,48 @@ function readVM(state: CombatEncounterState): CombatReadVM {
 
 // ── Deckbuilder reward offers (Spec 26b §C) ──────────────────────────────────
 
-export interface CombatRewardOfferVM {
-    cardId: string; name: string; stance: string; stanceColor: string;
-    effectKind: 'dot' | 'control' | 'none';
-    /** Spec 32 v3 — rarity band (rare frame keys off `rarity === 'rare'`). */
-    rarity?: 'common' | 'uncommon' | 'rare';
-    rank?: 1 | 2 | 3 | 4 | 5 | 6;
-    rankName: string | null;
-    cardType?: 'spell' | 'enchantment' | 'disenchant';
-    verbClass: string; tier: number; preview: number; text: string;
-}
-
-/** Maps reward card ids (from rollCombatCardRewards) into display VMs. */
-export function rewardOfferVMs(ids: string[]): CombatRewardOfferVM[] {
-    const out: CombatRewardOfferVM[] = [];
+/**
+ * Maps reward card ids (from `rollCombatCardRewards`) into REAL card VMs — the
+ * exact `CombatCardVM` the hand and the inspect modal render.
+ *
+ * The thin `CombatRewardOfferVM` this replaced (2026-08-08) duplicated a
+ * hand-rolled slice of face logic — a name, a glyph, a tier line — which the
+ * card-face-honesty guard could not see and which was already drifting from
+ * the real face. A player committing a card to their deck for the rest of the
+ * run reads the same face they will read in combat, or the reward screen is
+ * lying to them.
+ *
+ * There is no encounter state here (the reward is post-combat), so the face is
+ * built at the card's authored truth: no drafted-die read, no live enemy
+ * difficulty, no chosen-X clamp. Every number still comes from `faceStats` /
+ * `detailStats` — the same engine selectors the hand uses.
+ */
+export function rewardCardVMs(ids: readonly string[]): CombatCardVM[] {
+    const out: CombatCardVM[] = [];
     for (const id of ids) {
-        const c = getCard(id);
-        if (!c) continue;
+        const card = getCard(id);
+        if (!card) continue;
+        const sourceCard = getCardById(id);
         out.push({
-            cardId: id, name: c.name, stance: c.stance, stanceColor: STANCE_COLORS[c.stance] ?? '#888',
-            effectKind: c.effectKind, rarity: c.rarity, rank: c.rank,
-            rankName: c.rank ? RANK_NAMES[c.rank] : null, cardType: c.cardType,
-            verbClass: c.verbClass, tier: c.tier, preview: c.bottomDamagePreview,
-            text: c.bottomActionText,
+            // The offer is one card per id, so the id IS a stable uid.
+            uid: `reward-${id}`,
+            cardId: id, name: card.name, stance: card.stance,
+            stanceColor: STANCE_COLORS[card.stance] ?? '#888',
+            verbClass: card.verbClass, effectKind: card.effectKind,
+            rarity: card.rarity, rank: card.rank,
+            rankName: card.rank ? RANK_NAMES[card.rank] : null,
+            cardType: card.cardType,
+            tier: card.tier,
+            topActionText: card.topActionText, bottomActionText: card.bottomActionText,
+            bottomDamagePreview: card.bottomDamagePreview,
+            dieLines: card.dieLines,
+            face: faceStats(card, sourceCard),
+            detail: detailStats(card, sourceCard),
+            // No die is drafted at the reward screen — there is no read to show.
+            read: null, colorMatch: false,
+            flavor: sourceCard?.description ?? null,
+            chooseX: null,
+            needsReprisalChoice: false,
         });
     }
     return out;

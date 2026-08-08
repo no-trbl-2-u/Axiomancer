@@ -308,7 +308,11 @@ export { playerArchetype, CONCLUDE_DMG_PER_STACK } from './combat.signature';
 export {
     COMBAT_REWARD_POOL, STARTING_CARD_ID, STARTING_CARD_IDS, rollCombatCardRewards, addRewardCard,
     unlockCardViaDilemma,
+    // Theme-aware reward draft (2026-08-08) — the deck-theme read + its pivot lever.
+    REWARD_RARITY_WEIGHTS, REWARD_THEMES, REWARD_OFF_THEME_RATE,
+    deckThemeCounts, deckThemeShares,
 } from './combat.rewards';
+export type { RewardTheme } from './combat.rewards';
 export type { PlayerArchetype } from './combat.encounter.types';
 export {
     COMBAT_LOADOUT_FLAG_PREFIX, COMBAT_LOADOUT_MAX,

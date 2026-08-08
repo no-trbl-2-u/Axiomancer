@@ -148,6 +148,9 @@ export {
     playerArchetype, CONCLUDE_DMG_PER_STACK,
     COMBAT_REWARD_POOL, STARTING_CARD_ID, STARTING_CARD_IDS, rollCombatCardRewards, addRewardCard,
     unlockCardViaDilemma,
+    // Theme-aware reward draft (2026-08-08) — the deck-theme read + its pivot lever.
+    REWARD_RARITY_WEIGHTS, REWARD_THEMES, REWARD_OFF_THEME_RATE,
+    deckThemeCounts, deckThemeShares,
     // PR #190 Press Fate partial re-roll
     dieIsRerollable, hasRerollableDice, rerollSpentDice,
     // soft-control + stat-debuff threat tunables
@@ -321,6 +324,7 @@ export {
     CARD_THEMES, THEME_KEYWORDS, keywordsForTheme, isCardTheme,
 } from './Cards';
 export type { CardTheme } from './Cards';
+export type { RewardTheme } from './Combat';
 
 // ─── Game (state, store, persistence, constants) ──────────────────────────────
 export {
