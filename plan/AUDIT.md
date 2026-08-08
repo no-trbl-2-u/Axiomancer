@@ -14,6 +14,16 @@
 
 ## Pending
 
+> **BANNER (/oversight 2026-08-08 — the unshackling).** Every
+> "Doctrine-curve confirmation" row below (seven of them, 07-20 → 08-07)
+> measures adherence to the status-dominance doctrine, which T voided
+> this day. They are now **historical readings of a dead law**, not open
+> findings: do not drain them, do not act on their 80/50/25-35/0 target
+> band, and do not file an eighth. `/digest`'s nightly pass should stop
+> emitting them until **Phase 43** defines the replacement objective
+> function; the next `/consolidate` should compact the seven into one
+> historical row. See `plan/bearings.md` § "THE UNSHACKLING".
+
 ### `Closes #N` auto-close is still not firing reliably — the 2026-08-03 fix does not hold
 - category: debt
 - impact: 5
@@ -35,7 +45,10 @@
   #174) were closed by hand during /oversight 2026-08-08 with a comment
   citing the shipping commit — so the CURRENT queue is clean and this
   row is about the mechanism, not the backlog.
-- next: /iterate — re-open the root-cause hunt. Compare `615ff26b` vs
+- **PROMOTED to build-plan Phase 48 via /oversight 2026-08-08** (T:
+  "make phases for everything you mentioned") — it is no longer competing
+  with Phase 39 for an `/iterate` slot.
+- next: Phase 48 — re-open the root-cause hunt. Compare `615ff26b` vs
   `1004894` end to end (push event shape, whether `scripts/loop-issue.mjs`
   or GitHub's own trailer parser did the closing, whether one landed
   inside a batched push where only the tip commit's trailers are
@@ -985,8 +998,15 @@
   shape, win-path attribution). Loop guidance meanwhile: do not
   build new tuning conclusions on statusEngagement alone; treat its
   numbers as suspect per the known blind spots.
-- next: attended session (T-gated — not loop work; do not auto-ship
-  a metric rewrite)
+- **PROMOTED to build-plan Phase 43 via /oversight 2026-08-08** — and
+  the target moved. `statusEngagement` was the objective function
+  *because* status play was the doctrine; the unshackling voids that
+  doctrine, so the metric now measures adherence to a rule the game no
+  longer has. Phase 43 defines what "good combat" means under the new
+  rules rather than merely fixing the old metric's blind spots. The
+  "treat its numbers as suspect" guidance hardens to: **every existing
+  doctrine-curve reading measures a dead law** until 43 lands.
+- next: Phase 43 (no longer a parked attended session)
 
 ### [x] Hermes-decided work is invisible to the loop — RESOLVED via /oversight 2026-07-18: convention adopted
 - category: divergence

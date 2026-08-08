@@ -58,6 +58,16 @@ Decided across the two source projects and the monorepo merge.
 Revisit only if a phase genuinely cannot ship without changing
 one of these — then stop and surface it as `[needs-user-call]`.
 
+> **Exception (2026-08-08): the Expo rows are now scheduled to change.**
+> T lifted the "not now" on the Expo decouple; **Phase 47** re-platforms
+> the mobile framework and CI/CD rows (`expo-router`, `expo-image`,
+> `expo-font`, `expo-haptics`, `expo-constants`, `expo-linking`,
+> `expo-splash-screen`, `expo-status-bar`, `expo-navigation-bar`, the
+> `jest-expo` preset, `expo lint`, and the EAS deploy path). Reanimated 4
+> / gesture-handler / rn-svg / screens / safe-area-context are bare-RN
+> and carry over unchanged. Do not pre-emptively drift off Expo before
+> that phase — the rows below stay authoritative until it lands.
+
 | Layer | Choice | Notes |
 |---|---|---|
 | Repo | npm workspaces monorepo (3 flat packages) | **npm, never pnpm/yarn** |
@@ -197,7 +207,9 @@ ambiguity.)
 - **Win condition:** HP is the sole win condition. Never
   reintroduce Pressure Tracks / `CombatPressureTracks`.
   <!-- lexicon-ok: pressure-tracks -->
-- **Copy canon:** VITAE, STANCE. Never HEALTH / GUARD.
+- **Copy canon:** VITAE, STANCE. Never HEALTH / GUARD. *(Theme-bearing —
+  Phase 42's ratified fiction may replace these terms; until it does they
+  remain canon and copy regressions are still rejected.)*
 - **Content location:** engine content in mechanics `src/*`
   libraries; player-facing strings in mobile presenters /
   `*.copy.ts`; no hardcoded copy in components; no hex literals
@@ -208,9 +220,43 @@ ambiguity.)
   faces.
 - **Voice:** terse, archaic-flavored, "cold and old" — but **no
   thee/thou/thy/thine/ye**. Mercy/exploit language reads as
-  morally charged, never neutral.
-- **Balance doctrines (per encounter):** status-effect play is
-  the dominant win path (combat); Gathering greed < restraint <
+  morally charged, never neutral. *(Theme-bearing — a Phase 42 proposal
+  may argue for a different register, and the "morally charged" clause
+  presumes the morality system survives the retheme. Binding until
+  Phase 42 is ratified; re-derive it there, don't drift from it before.)*
+- **THE UNSHACKLING (T direct, /oversight 2026-08-08) — three locked
+  constraints are VOID.** T, verbatim: *"remove constraints across the
+  entire application. Normal damage is allowed, deck tuning is allowed to
+  change anything about a card, no more philosophy based theme. I want to
+  give you full freedom to take this deckbuilder in any direction."*
+  Authorised by the source-of-truth hierarchy below (T's latest explicit
+  decision outranks every ADR/CDR/spec). What falls:
+  1. **The strike is alive.** Cards MAY deal raw enemy-HP damage. Spec 32
+     v3 §1/§12's no-strike law and the status-dominance balance doctrine
+     are retired for combat. The enforcing witness
+     (`Cards/e2e/doctrine-strike-dead.engine.test.ts`) and spec 32's
+     FREE-line "never damage" law come down in **Phase 41**.
+  2. **`/deck-tuning` has full card authority** — no sandbox-first
+     quarantine, no byte-identity law, no recolor-not-repartition rule,
+     no per-change owner ballot, no `[needs-user-call]` on recolors or
+     new cards. Anything about any card is fair game.
+  3. **Philosophy theming is retired** as the organising fiction. Nothing
+     replaces it yet — **Phase 42** authors three direction proposals and
+     T ratifies one. Until that ratification, do NOT rename cards,
+     themes, keywords, world/story/character specs, or `spec.md`, and do
+     NOT invent a replacement theme in passing: the retheme executes in
+     Phase 44 against a ratified spec, not opportunistically.
+  What does NOT fall (still binding): every hermeticity and determinism
+  rule (injected RNG, no disk/network/TTY in engine tests), the verify
+  and deploy gates, the nexus hard rules, and `GAME_STATE_VERSION`
+  migration discipline. "Remove constraints" was about DESIGN law, not
+  engineering rigour.
+- **Balance doctrines (per encounter):** ~~status-effect play is
+  the dominant win path (combat)~~ — **VOID for combat via the
+  unshackling above; Phase 43 defines the replacement objective
+  function, and until it lands every doctrine-curve reading measures
+  a dead law.** Still live for the minigames:
+  Gathering greed < restraint <
   skill; Loot-cache informed > blind > coward; Quest Board
   naive-finishes / deliberate-finishes-well; Rest
   meagre-but-never-lethal (posture gradient); Hazard -> CDR-0006

@@ -511,6 +511,14 @@ one level down, in the routing helper `onApply` calls next).
   tests green.
 
 ### [HIGH] late-stage global collapse — all 10 presets 0.00 late
+- **SUPERSEDED LATER THE SAME DAY by the unshackling.** "All 10 presets
+  0.00 late" was a failure *against the status-dominance doctrine*, which
+  T voided on 2026-08-08. Whether a 0.00 late win rate is still a defect
+  is now an open question that **Phase 43** (objective function v2)
+  answers — and normal damage, newly legal, is the most obvious lever if
+  it is. Keep this row open as evidence; do not treat its target band as
+  live. The Phase 39 assignment below stands, but 39 is itself rescoped
+  and now sequenced behind 41/43.
 - **ASSIGNED to build-plan Phase 39 via /oversight 2026-08-08.** Do NOT
   let `/iterate` pick this row and attempt a partial fix — it is the same
   signal as `plan/AUDIT.md`'s nightly doctrine-curve confirmations
