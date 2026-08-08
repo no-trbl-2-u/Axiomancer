@@ -33,14 +33,14 @@ describe('CombatViewModel.peroration — the Premise track + CONCEDE beat (phase
     it('surfaces the declared card, tally, and tier-floored CONCEDE threshold', () => {
         let s = openState();
         // createMockEncounterEnemy is difficulty 'elite' -> CONCEDE_PREMISES_ELITE (10)
-        // floors the-closing-word's authored concedeAt (8).
-        s = { ...s, premises: 3, peroration: { cardId: 'the-closing-word', at: 6, concedeAt: 8 } };
+        // floors The Black Cap's authored concedeAt (8).
+        s = { ...s, premises: 3, peroration: { cardId: 'the-black-cap', at: 6, concedeAt: 8 } };
         const vm = buildCombatViewModel(s);
         expect(vm.peroration.active).toBe(true);
         expect(vm.peroration.premises).toBe(3);
         expect(vm.peroration.at).toBe(6);
         expect(vm.peroration.concedeAt).toBe(10); // tier-floored, not the raw 8
-        expect(vm.peroration.cardName).toBe('The Closing Word');
+        expect(vm.peroration.cardName).toBe('The Black Cap');
     });
 });
 
@@ -63,13 +63,13 @@ describe('WI-5 — SWAY / PREMISE alt-win meters', () => {
     });
 
     it('shows the SWAY meter from turn 1 when the deck plan is SWAY, before any is gained (GRACE)', () => {
-        const vm = buildCombatViewModel(deckState(['soft-word', 'soft-word', 'soft-word']));
+        const vm = buildCombatViewModel(deckState(['thin-hymn', 'thin-hymn', 'thin-hymn']));
         expect(vm.enemy.sway).toBe(0);
         expect(vm.enemy.swayVisible).toBe(true);
     });
 
     it('surfaces the undeclared PREMISE tally, then yields to the peroration track once declared', () => {
-        let s = deckState(['exordium', 'exordium', 'exordium']);
+        let s = deckState(['petty-indictment', 'petty-indictment', 'petty-indictment']);
         s = { ...s, premises: 2 };
         let vm = buildCombatViewModel(s);
         expect(vm.enemy.premiseVisible).toBe(true);
@@ -77,7 +77,7 @@ describe('WI-5 — SWAY / PREMISE alt-win meters', () => {
         expect(vm.enemy.premiseAt).toBe(0); // no target bar until a Peroration is declared
 
         // Declaring a PERORATION hands the readout to the existing peroration track.
-        s = { ...s, peroration: { cardId: 'the-closing-word', at: 6, concedeAt: 8 } };
+        s = { ...s, peroration: { cardId: 'the-black-cap', at: 6, concedeAt: 8 } };
         vm = buildCombatViewModel(s);
         expect(vm.enemy.premiseVisible).toBe(false);
     });
@@ -139,11 +139,11 @@ describe('Phase 2 — projected-lethality readout (spec 30)', () => {
 describe('CombatViewModel.discardCards — the REPRISE picker data source (phase 28)', () => {
     it('resolves discard-pile ids to display names', () => {
         let s = openState();
-        s = { ...s, discard: ['festering-argument', 'the-overtake'] };
+        s = { ...s, discard: ['the-long-lent', 'open-every-grave'] };
         const vm = buildCombatViewModel(s);
         expect(vm.discardCards).toEqual([
-            { id: 'festering-argument', name: 'Festering Argument' },
-            { id: 'the-overtake', name: 'The Overtake' },
+            { id: 'the-long-lent', name: 'The Long Lent' },
+            { id: 'open-every-grave', name: 'Open Every Grave' },
         ]);
     });
 });
@@ -154,8 +154,8 @@ describe('CombatCardVM.needsReprisalChoice (phase 28)', () => {
         s = {
             ...s,
             hand: [
-                { uid: 'u-reprise', cardId: 'second-thoughts' },
-                { uid: 'u-plain', cardId: 'slippery-slope' },
+                { uid: 'u-reprise', cardId: 'shallow-grave' },
+                { uid: 'u-plain', cardId: 'spoiled-poultice' },
             ],
         };
         const vm = buildCombatViewModel(s);
@@ -169,7 +169,7 @@ describe('CombatCardVM.needsReprisalChoice (phase 28)', () => {
 describe('CombatCardVM rupture face — live projected burst (phase 28)', () => {
     it('shows a real projected number, not the qualitative "detonate" word', () => {
         let s = openState();
-        s = { ...s, hand: [{ uid: 'u-rupture', cardId: 'resonance-detonation' }] };
+        s = { ...s, hand: [{ uid: 'u-rupture', cardId: 'communion-of-the-worm' }] };
         const vm = buildCombatViewModel(s);
         const card = vm.hand.find(c => c.uid === 'u-rupture')!;
         expect(card.face.kind).toBe('rupture');
@@ -191,29 +191,29 @@ describe('CombatIntentVM.wallMath — the telegraph readout (phase 28)', () => {
 // the board used to show NOTHING while an enchantment/curse was attached.
 describe('standing enchant/curse chips (card-wording audit 2026-07-12)', () => {
     it('a permanent player enchantment renders a ❖ chip with the passive gloss', () => {
-        const s = { ...openState(), persistentZone: ['venom-and-vein'] };
+        const s = { ...openState(), persistentZone: ['the-untended-garden'] };
         const vm = buildCombatViewModel(s);
-        const chip = vm.player.effects.find(e => e.effectId === 'venom-and-vein');
+        const chip = vm.player.effects.find(e => e.effectId === 'the-untended-garden');
         expect(chip).toBeDefined();
         expect(chip!.standing).toBe(true);
         expect(chip!.glyph.glyph).toBe('❖');
-        expect(chip!.glyph.label).toBe('Venom and Vein');
+        expect(chip!.glyph.label).toBe('The Untended Garden');
         expect(chip!.duration).toBe(0);              // permanent → no countdown tag
         expect(chip!.gloss).toBeTruthy();            // Card.persistentEffect
     });
 
     it('a timed FREE instance carries its rounds-left clock', () => {
-        const s = { ...openState(), tempZone: [{ cardId: 'venom-and-vein', roundsLeft: 2 }] };
+        const s = { ...openState(), tempZone: [{ cardId: 'the-untended-garden', roundsLeft: 2 }] };
         const vm = buildCombatViewModel(s);
-        const chip = vm.player.effects.find(e => e.effectId === 'venom-and-vein');
+        const chip = vm.player.effects.find(e => e.effectId === 'the-untended-garden');
         expect(chip?.standing).toBe(true);
         expect(chip?.duration).toBe(2);
     });
 
     it('a curse attached to the enemy renders a ☒ chip on the enemy pane', () => {
-        const s = { ...openState(), enemyAttachments: ['suppurating-curse'] };
+        const s = { ...openState(), enemyAttachments: ['the-congregation-below'] };
         const vm = buildCombatViewModel(s);
-        const chip = vm.enemy.effects.find(e => e.effectId === 'suppurating-curse');
+        const chip = vm.enemy.effects.find(e => e.effectId === 'the-congregation-below');
         expect(chip).toBeDefined();
         expect(chip!.standing).toBe(true);
         expect(chip!.glyph.glyph).toBe('☒');

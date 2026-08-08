@@ -63,7 +63,7 @@ function stateAtPhase(
 describe('Phase 33b — CAUTERIZE archetype (enemyCleanse), directly authored', () => {
     it('Fire Giant carries an explicit enemyCleanse on a plain linear phase (no branch)', () => {
         const seq = getThreatSequence(deepClone(FireGiant));
-        const phase = seq[2];
+        const phase = seq[1]; // 'The Mountain's Spine' — the cauterize card
         expect(phase.branch).toBeUndefined();
         expect(phase.threatAction.effects.some(e => (e.enemyCleanse ?? 0) > 0)).toBe(true);
         expect(phase.threatAction.description).toContain('sheds 1 affliction');
@@ -83,7 +83,7 @@ describe('Phase 33b — CAUTERIZE archetype (enemyCleanse), directly authored', 
             { effectId: 'debuff_poison', intensity: 2, remainingDuration: 3, appliedAt: 1, tier: 2 as const },
             { effectId: 'debuff_bleed', intensity: 2, remainingDuration: 3, appliedAt: 1, tier: 2 as const },
         ];
-        const s = stateAtPhase(FireGiant, 2, { enemy: { ...deepClone(FireGiant), effects: debuffs } });
+        const s = stateAtPhase(FireGiant, 1, { enemy: { ...deepClone(FireGiant), effects: debuffs } });
         const res = resolveThreatPhase(s);
         expect(res.state.enemy.effects.length).toBe(1); // one shed, one survivor — never a full wipe
         const cleansed = res.state.log.find(e => e.kind === 'threat-cleansed');
@@ -138,12 +138,6 @@ describe('Phase 33b — SWAY-cleanse archetype, directly authored', () => {
 // ── Variable-rung telegraphs ─────────────────────────────────────────────────
 
 describe('Phase 33b — variable-rung telegraphs authored in both directions', () => {
-    it('Zoma (elite) softens its opening phase below the flat elite default', () => {
-        const seq = getThreatSequence(deepClone(Zoma));
-        expect(seq[0].rungs).toBe(1);
-        expect(THREAT_RUNGS).toBe(2); // the elite flat default this phase undercuts
-    });
-
     it('The Sophist (boss) also softens its opening phase below the flat boss default', () => {
         const seq = getThreatSequence(deepClone(TheSophist));
         expect(seq[0].rungs).toBe(2);
@@ -161,11 +155,13 @@ describe('Phase 33b — variable-rung telegraphs authored in both directions', (
     });
 
     it('an authored LOW rung count denies with fewer stagger rungs than the flat default would require', () => {
-        // Zoma phase 1: authored rungs:1. One stagger rung is enough to deny —
-        // the flat elite default (2) would leave it merely weakened.
-        const s = stateAtPhase(Zoma, 0, { staggerRungs: 1 });
+        // The Sophist phase 1: authored rungs:2 on a BOSS. Two stagger rungs
+        // deny it — the flat boss default (3) would leave it merely weakened,
+        // and the elite flat default (2) is the floor it descends to.
+        const s = stateAtPhase(TheSophist, 0, { staggerRungs: 2 });
         const projection = projectIncomingThreat(s);
-        expect(projection.rungsTotal).toBe(1);
+        expect(projection.rungsTotal).toBe(2);
+        expect(projection.rungsTotal).toBeLessThan(THREAT_RUNGS_BOSS);
         expect(projection.willDeny).toBe(true);
     });
 

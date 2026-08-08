@@ -38,7 +38,10 @@ export const THEME_KEYWORDS: Record<CardTheme, readonly string[]> = Object.freez
     debt:  ['RECOIL', 'FALLEN', 'DOOM', 'IMMOLATE', 'BLEED', 'DRAW', 'HEAL'],
     grave: ['MILL', 'RECALL', 'REPLAY', 'REQUIEM', 'IMMOLATE', 'ECHO', 'DOOM', 'FORETELL'],
     vigil: ['GUARD', 'THORNS', 'RIPOSTE', 'BLEED', 'DOOM', 'FORETELL'],
-    trial: ['PREMISE', 'CONCEDE', 'STAGGER', 'BACKFIRE', 'MARK', 'DOOM'],
+    // CONCEDE / PERORATION are deliberately ABSENT: both were demoted from the
+    // keyword registry (phase 29) and live in the systems glossary instead, so
+    // a theme family may not claim them (mobile KW-6 parity law).
+    trial: ['PREMISE', 'STAGGER', 'BACKFIRE', 'MARK', 'DOOM'],
     choir: ['SWAY', 'RAPPORT', 'SOUL', 'REAP', 'DOOM', 'HEAL', 'CLEANSE', 'KINDLE'],
     curse: ['PURGE'],
 });

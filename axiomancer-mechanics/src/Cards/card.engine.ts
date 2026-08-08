@@ -182,7 +182,13 @@ export function executeCard(
         // the conjuring play IS its ownership provenance. The tag lives on the
         // registry record (`cards.thoughtforms.ts`), not on player state.
         const thoughtform = (lookupCard(cardId)?.tags ?? []).includes('thoughtform');
-        const owned = thoughtform
+        // PROFANE CANON (2026-08-08): a CURSE is never learned and never a
+        // reward — an enemy hexes it into the combat deck (`curseCardId`), and
+        // the whole point of PURGE is that the player can play it back out.
+        // The hex IS its ownership provenance, exactly as the conjuring play is
+        // a Thoughtform's.
+        const cursed = lookupCard(cardId)?.theme === 'curse';
+        const owned = thoughtform || cursed
             || playerCaster.knownCards.includes(cardId)
             || (playerCaster.combatRewardCards ?? []).includes(cardId);
         if (!owned) {

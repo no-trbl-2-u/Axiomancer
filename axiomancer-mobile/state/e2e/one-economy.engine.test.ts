@@ -97,7 +97,7 @@ describe('starter cards + learn-card flow', () => {
         actions.startCombat(makeEnemy());
         const known = store.getState().player.knownCards ?? [];
         expect(known.length).toBeGreaterThan(0);
-        expect(known).toContain('brace-for-impact');
+        expect(known).toContain('chilblain-watch');
     });
 
     it('getLearnableCardOffers returns ≤3 unknown, requirement-met offers with effect lines', () => {

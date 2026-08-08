@@ -20,6 +20,7 @@
 
 import type { AuthoredThreatStep, AuthoredThreatPhase } from './combat.threat';
 import { ENEMY_CARD_LIBRARY, type EnemyCard, type EnemyCardFace } from './combat.enemy-cards';
+import { ENEMY_REGISTRY } from '../Enemy/enemy.library';
 
 /** enemy id → its ordered deck of enemy-card ids. */
 export const ENEMY_DECKS: Record<string, readonly string[]> = {
@@ -68,7 +69,7 @@ export const ENEMY_DECKS: Record<string, readonly string[]> = {
     'enemy-sugata': ['wept-in-advance', 'the-downbeat', 'the-calamity-spoken'], // 3 phases preserved, heart/body/heart shape kept. Ramp 0.9 → 0.95 → 1.3. The half-erased dancer grieves in advance, defends the beat (its literal old phase 2), and the calamity spoken over it lands as 
     'enemy-frayed-one': ['the-tally-mark', 'the-downbeat', 'the-count-completes'], // 3 phases preserved. Ramp 0.85 → 0.95 → 1.35. The weaver reads as ledger-of-threads: it inventories your loose ends (tally), beats the weft across you (downbeat — a real loom verb), and closes the coun
     'enemy-bone-totem': ['first-knock', 'the-written-line', 'the-calamity-spoken'], // 3 phases preserved. Ramp 0.8 → 1.0 → 1.3. The stacked-curse totem is the second injector user and the most literal one: the sentence under construction gets a clause written into YOUR deck, then the t
-    'enemy-tri-eyes': ['the-tally-mark', 'wept-in-advance', 'the-count-completes'], // 3 phases preserved. Ramp 0.85 → 0.9 → 1.35. Slot 2's grief card carries the old else-fork's pleading ('how badly it wants the tally to balance'). FLAG: the WS9 bearer-afflictions-gte-3 balance-the-boo
+    'enemy-tri-eyes': ['the-tally-mark', 'the-tally-reconciled', 'the-count-completes'], // 3 phases preserved. Ramp 0.85 → 0.9 → 1.35. Slot 2's grief card carries the old else-fork's pleading ('how badly it wants the tally to balance'). FLAG: the WS9 bearer-afflictions-gte-3 balance-the-boo
     'enemy-tri-eyes-hollowed': ['the-tally-mark', 'deemed-redundant', 'the-count-completes'], // 3 phases preserved. Ramp 0.85 → 1.05 → 1.35. Deliberately the tri-eyes deck with one swap: the hollowed traded its pleading heart card for the cold redundancy verdict — the hollowing is visible in the
     'enemy-zoma': ['the-tally-mark', 'deemed-redundant', 'the-calamity-spoken'], // 3 phases preserved, mind/mind/heart shape kept. Ramp 0.85 → 1.05 → 1.3. The premiseShed identity sits exactly where it lives today (slot 2, shed 2), and the final heart turn — both heads in terrible a
     'enemy-zoma-ascendant': ['the-tally-mark', 'the-warm-unison', 'deemed-redundant', 'verdict-without-seam'], // BOSS, 4 phases preserved. Ramp 0.85 → 0.95 → 1.05 → 1.45; stake:true on exactly the SECOND card (the-warm-unison, its existing staked phase). The consensus arc: the premise stated against you, the inv
@@ -90,6 +91,12 @@ function faceToPhase(face: EnemyCardFace): AuthoredThreatPhase {
         damageWeight: face.damageWeight,
         threatEffectId: face.effectId,
         threatIntensity: face.intensity,
+        enemyHeal: face.enemyHeal,
+        enemyCleanse: face.enemyCleanse,
+        swayCleanse: face.swayCleanse,
+        premiseShed: face.premiseShed,
+        glyphShatter: face.glyphShatter,
+        curseCardId: face.curseCardId,
         actionText: face.actionText,
         stanceHint: face.stanceHint,
     };
@@ -97,7 +104,52 @@ function faceToPhase(face: EnemyCardFace): AuthoredThreatPhase {
 
 /** Projects one enemy card onto its authored threat step. The telegraph names
  *  the card being played — the enemy is visibly a deck-player. */
-function cardToStep(cardId: string, card: EnemyCard, isFinal: boolean): AuthoredThreatStep {
+
+/**
+ * AUTHORED STANCE CHECKS (spec 33 §2 / phase D9) — deck-level, like the stake.
+ * A stance check names which stance the fight PUNISHES and which it YIELDS to
+ * on a given phase; it is an enemy's read of YOU, not a property of the card
+ * it happens to be holding, and signature cards are shared across decks — so
+ * the authoring lives here, keyed by deck and phase index. Phases with no
+ * entry fall through to `defaultStanceCheck` (combat.threat.ts), unchanged.
+ *
+ * Ported verbatim from the pre-rework `AUTHORED_THREAT_SEQUENCES` literals
+ * (@ a69eab56) so the D9 content survives the Profane-Canon rework intact.
+ */
+export const DECK_STANCE_CHECKS: Record<string, Record<number, { punishes?: 'heart' | 'body' | 'mind'; yields?: 'heart' | 'body' | 'mind' }>> = {
+    'enemy-grave-larva': { 0: { yields: 'mind' }, 1: { punishes: 'body' } },
+    'enemy-little-belle': { 0: { yields: 'heart' } },
+    'enemy-foot-stealer': { 0: { yields: 'mind' } },
+    'enemy-the-butcher': { 1: { yields: 'mind' } },
+    'enemy-king-of-revenge': { 0: { punishes: 'heart' }, 2: { yields: 'mind' } },
+    'enemy-sugata': { 1: { yields: 'body' } },
+    'enemy-tri-eyes': { 0: { yields: 'heart' }, 2: { punishes: 'mind' } },
+    'enemy-mirac': { 1: { punishes: 'heart' } },
+    'enemy-hasshaku-sama': { 0: { yields: 'heart' } },
+    'enemy-rawhead-rex': { 0: { punishes: 'body' }, 1: { yields: 'heart' } },
+    'enemy-fire-giant': { 0: { punishes: 'body' }, 1: { yields: 'mind' } },
+    'enemy-rangda': { 1: { punishes: 'mind' }, 2: { yields: 'heart' } },
+    'enemy-tezcatlipoca': { 0: { punishes: 'mind' }, 1: { yields: 'heart' } },
+    'enemy-death': { 0: { yields: 'mind' }, 1: { punishes: 'heart' } },
+};
+
+/**
+ * THE COVETED DIE is a DECK property, not a card property: only a boss or a
+ * unique wagers it, and only on its second card. Signature cards are shared
+ * across decks (the same Devoured Lexicon serves an elite and a boss), so the
+ * law is enforced here — at the one place that knows which enemy is playing —
+ * rather than trusted to every card literal.
+ */
+function wagersCovetedDie(enemyId: string): boolean {
+    const registry = ENEMY_REGISTRY as Record<string, { difficulty?: string } | undefined>;
+    const difficulty = registry[enemyId.replace(/^enemy-/, '')]?.difficulty;
+    return difficulty === 'boss' || difficulty === 'unique';
+}
+
+function cardToStep(
+    cardId: string, card: EnemyCard, isFinal: boolean, stake: boolean,
+    stanceCheck: { punishes?: 'heart' | 'body' | 'mind'; yields?: 'heart' | 'body' | 'mind' } | undefined,
+): AuthoredThreatStep {
     if (card.branch) {
         return {
             branch: {
@@ -119,7 +171,8 @@ function cardToStep(cardId: string, card: EnemyCard, isFinal: boolean): Authored
         glyphShatter: card.glyphShatter,
         curseCardId: card.curseCardId,
         rungs: card.rungs,
-        stake: card.stake,
+        stake: stake || undefined,
+        stanceCheck,
         unlockAfterRound: card.unlockAfterRound,
         actionText: `${card.name} — ${card.actionText}`,
         stanceHint: card.stanceHint,
@@ -138,7 +191,8 @@ export function compileEnemyDeck(enemyId: string): AuthoredThreatStep[] {
     return deck.map((cardId, i) => {
         const card = ENEMY_CARD_LIBRARY[cardId];
         if (!card) throw new Error(`Enemy deck '${enemyId}' names unknown card '${cardId}'.`);
-        return cardToStep(cardId, card, i === deck.length - 1);
+        const stake = i === 1 && wagersCovetedDie(enemyId);
+        return cardToStep(cardId, card, i === deck.length - 1, stake, DECK_STANCE_CHECKS[enemyId]?.[i]);
     });
 }
 

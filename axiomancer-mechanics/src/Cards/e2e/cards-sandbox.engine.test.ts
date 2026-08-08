@@ -57,9 +57,9 @@ describe('sandbox registry — register / lookup / clear', () => {
     it('starts empty and stays invisible to getCardById', () => {
         expect(hasSandboxContent()).toBe(false);
         expect(listSandboxCards()).toEqual([]);
-        expect(getSandboxCard('slippery-slope')).toBeUndefined();
+        expect(getSandboxCard('spoiled-poultice')).toBeUndefined();
         // Library lookups are untouched when the sandbox is empty.
-        expect(getCardById('slippery-slope')?.name).toBe('Slippery Slope');
+        expect(getCardById('spoiled-poultice')?.name).toBe('Spoiled Poultice');
         expect(getCardById('no-such-card')).toBeUndefined();
     });
 
@@ -73,14 +73,14 @@ describe('sandbox registry — register / lookup / clear', () => {
 
     it('clearSandboxCards wipes both new cards and overrides', () => {
         registerSandboxCards([testDotCard()]);
-        registerSandboxOverride('slippery-slope', { tier: 3 });
+        registerSandboxOverride('spoiled-poultice', { tier: 3 });
         expect(hasSandboxContent()).toBe(true);
         expect(listSandboxCards()).toHaveLength(2);
 
         clearSandboxCards();
         expect(hasSandboxContent()).toBe(false);
         expect(getCardById('sandbox-test-rot')).toBeUndefined();
-        expect(getCardById('slippery-slope')?.tier).toBe(2); // library literal (spec 32 v3)
+        expect(getCardById('spoiled-poultice')?.tier).toBe(1); // library literal (profane canon)
     });
 });
 
@@ -88,7 +88,7 @@ describe('sandbox registry — register / lookup / clear', () => {
 
 describe('sandbox registry — collisions and validation', () => {
     it('registering an id that exists in the card library throws', () => {
-        expect(() => registerSandboxCards([testDotCard('slippery-slope')]))
+        expect(() => registerSandboxCards([testDotCard('spoiled-poultice')]))
             .toThrow(/collides with the card library/);
     });
 
@@ -99,7 +99,7 @@ describe('sandbox registry — collisions and validation', () => {
     });
 
     it('registration is atomic — a colliding batch registers nothing', () => {
-        expect(() => registerSandboxCards([testDotCard('sandbox-ok'), testDotCard('brace-for-impact')]))
+        expect(() => registerSandboxCards([testDotCard('sandbox-ok'), testDotCard('chilblain-watch')]))
             .toThrow();
         expect(getSandboxCard('sandbox-ok')).toBeUndefined();
         expect(hasSandboxContent()).toBe(false);
@@ -117,16 +117,16 @@ describe('sandbox registry — library-card overrides', () => {
     // (Override target was straw-mans-jab until its D8 retirement — re-targeted
     //  to slippery-slope, a surviving library card with a combatEffects payload.)
     it('a shallow patch is merged over the library card and visible via getCardById', () => {
-        const base = getCardById('slippery-slope');
-        expect(base?.combatEffects?.[0]?.intensity).toBe(1); // library literal (spec 32 v3)
+        const base = getCardById('spoiled-poultice');
+        expect(base?.combatEffects?.[0]?.intensity).toBe(1); // library literal (profane canon)
 
-        registerSandboxOverride('slippery-slope', {
+        registerSandboxOverride('spoiled-poultice', {
             combatEffects: [{ effectId: 'debuff_bleed', appliedTo: 'opponent', intensity: 3, duration: 2 }],
         });
-        const merged = getCardById('slippery-slope');
+        const merged = getCardById('spoiled-poultice');
         expect(merged?.combatEffects?.[0]?.intensity).toBe(3);
         // Untouched fields survive the merge; the id is immutable.
-        expect(merged?.id).toBe('slippery-slope');
+        expect(merged?.id).toBe('spoiled-poultice');
         expect(merged?.name).toBe(base?.name);
         expect(merged?.dieBonus).toEqual(base?.dieBonus);
         expect(merged?.rank).toBe(base?.rank);
@@ -135,62 +135,27 @@ describe('sandbox registry — library-card overrides', () => {
     it('repeated overrides of the same card accumulate (shallow-merge order)', () => {
         // slippery-slope's library literals are rank 1 / tier 2 — both patches
         // must move the merged value away from the base.
-        registerSandboxOverride('slippery-slope', { rank: 3 });
-        registerSandboxOverride('slippery-slope', { tier: 3 });
-        const merged = getCardById('slippery-slope');
+        registerSandboxOverride('spoiled-poultice', { rank: 3 });
+        registerSandboxOverride('spoiled-poultice', { tier: 3 });
+        const merged = getCardById('spoiled-poultice');
         expect(merged?.rank).toBe(3);
         expect(merged?.tier).toBe(3);
-        expect(listSandboxCards().map(c => c.id)).toEqual(['slippery-slope']);
+        expect(listSandboxCards().map(c => c.id)).toEqual(['spoiled-poultice']);
     });
 });
 
 // ── Set registry (post-v3 reset) ─────────────────────────────────────────────
 
 describe('sandbox sets — the registry after the post-v3 reset', () => {
-    it('carries the WS7.2 chooseX + WS3.4 doom + WS2.1 conjure + WS4 theme-role + WS5.2 sequencing + WS6.2 bridge + phase 33d GLYPHS sets (pre-v3 experiment sets stayed retired; WS2.2 free-line-conversions retired 2026-07-12, superseded by the Phase 30 full library pass)', () => {
-        // (The spec 33 `dice-valves-33` set was promoted into the curated
-        //  library in Phase D8, 2026-07-18 — ten-in/ten-out ledger in
-        //  plan/tuning/2026-07-18-d8-preset-dice-valves.md.)
-        const expected = [
-            'chooseX-vein', 'doom-species', 'conjure-exercise',
-            'roles-forge', 'roles-bulwark', 'roles-charm', 'roles-harvest',
-            'sequencing-microset', 'bridge-rewards',
-            // Phase 33d — the GLYPHS pilot (Option-B grammar experiment).
-            'glyphs-33d',
-            // The standing per-theme swap pools (owner-ratified fan-out
-            // 2026-07-18; 30 spells each).
-            'swap-affliction', 'swap-peroration', 'swap-forge', 'swap-akrasia',
-            'swap-control', 'swap-oracle', 'swap-harvest', 'swap-charm',
-            'swap-bulwark', 'swap-echo',
-        ];
-        expect(Object.keys(SANDBOX_CARD_SETS)).toEqual(expected);
-        expect(listSandboxSets().map(s => s.id)).toEqual(expected);
-        expect(SANDBOX_CARD_SETS['chooseX-vein'].cards.map(c => c.id)).toEqual(['the-open-vein']);
-        expect(SANDBOX_CARD_SETS['doom-species'].cards.map(c => c.id)).toEqual(['debt-of-days']);
-        expect(SANDBOX_CARD_SETS['conjure-exercise'].cards.map(c => c.id)).toEqual(['foundry-sprite', 'corollary']);
-        // WS4.1-4.4 — the theme-role passes (deep coverage in
-        // roles-themes.engine.test.ts).
-        expect(SANDBOX_CARD_SETS['roles-forge'].cards.map(c => c.id)).toEqual(['slag-runoff', 'ingot-of-ruin']);
-        expect(SANDBOX_CARD_SETS['roles-bulwark'].cards.map(c => c.id)).toEqual(['grit-between-stones', 'the-unmoved-mover']);
-        expect(SANDBOX_CARD_SETS['roles-charm'].cards.map(c => c.id)).toEqual(['a-sweeter-poison']);
-        expect(SANDBOX_CARD_SETS['roles-harvest'].cards.map(c => c.id)).toEqual(['the-long-ledger', 'seedcorn-sacrifice']);
-        // WS5.2 — the sequencing-grammar microset (deep coverage in
-        // sequencing-grammar.engine.test.ts).
-        expect(SANDBOX_CARD_SETS['sequencing-microset'].cards.map(c => c.id)).toEqual([
-            'captatio-benevolentiae', 'in-medias-res', 'coda',
-            'dying-echo', 'wages-of-weakness', 'answered-in-kind',
-        ]);
-        // WS6.2 — the cross-theme bridge rewards (deep coverage in
-        // bridge-rewards.engine.test.ts).
-        expect(SANDBOX_CARD_SETS['bridge-rewards'].cards.map(c => c.id)).toEqual([
-            'barbed-compliment', 'the-poured-rampart', 'interest-on-the-flesh',
-            'entered-into-evidence', 'stolen-cadence', 'unbroken-countenance',
-        ]);
-        // Phase 33d — the GLYPHS pilot (deep coverage in glyphs.engine.test.ts).
-        expect(SANDBOX_CARD_SETS['glyphs-33d'].cards.map(c => c.id)).toEqual([
-            'glyph-of-suppuration', 'ash-that-remembers',
-            'glyph-of-the-bulwark', 'ward-that-waits',
-        ]);
+    it('is EMPTY at the Profane-Canon reset — the spec-32 sets died with the library they measured', () => {
+        // PROFANE CANON (2026-08-08): the wholesale card rework retired the
+        // 86-card themed library, so every experiment set and swap pool that
+        // referenced it was cleared (same clean-reset rule spec 32 v3 applied
+        // to ITS predecessors; the retired sets live in git history).
+        // `/deck-tuning` authors the next generation of canon-era sets here —
+        // when it does, this pin is the ledger it must update.
+        expect(Object.keys(SANDBOX_CARD_SETS)).toEqual([]);
+        expect(listSandboxSets()).toEqual([]);
     });
 
     it('applySandboxSet returns undefined for an unknown id and registers nothing', () => {

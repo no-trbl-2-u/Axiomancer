@@ -36,6 +36,8 @@ const KNOWN_UPPER = new Set([
     'PREMISES', 'KINDLE', 'PIP', 'PIPS', 'RECOIL', 'FALLEN', 'STAGGER',
     'BACKFIRE', 'FORETELL', 'OMEN', 'SOUL', 'SOULS', 'REAP', 'SWAY',
     'RAPPORT', 'THORNS', 'RIPOSTE', 'ECHO', 'RECALL', 'MILL',
+    // profane canon (2026-08-08) — the rework's new vocabulary
+    'REPLAY', 'REQUIEM', 'FESTER', 'IMMOLATE', 'PURGE',
     // structural / system words the faces already print in caps
     'FREE', 'ALL', 'WILD', 'VITAE', 'CONCEDE', 'PERORATION', 'OPENING',
     'DOT', 'DOTS', 'HP',

@@ -21,8 +21,8 @@
  *   6. A second `turnabout` play after the reset is a legal no-op (banks 0,
  *      does not fizzle) — mirrors `reap_all`'s "always fires" precedent.
  *   7. Per-combat scope: starts at 0 for a fresh combat.
- *   8. A full `COMBAT_SIM_POLICY_ORDER` × seed sweep on the Standstill preset
- *      deck runs without crashing.
+ *   8. A full `COMBAT_SIM_POLICY_ORDER` × seed sweep on the late campaign
+ *      snapshot (plus the TURNABOUT fixture) runs without crashing.
  *
  * Fixture/RNG conventions follow `akrasia-debt-ledger.engine.test.ts` /
  * `reap-max-hp-erosion.engine.test.ts` (shared builder in
@@ -50,8 +50,32 @@ import { COMBAT_SIM_POLICY_ORDER } from '../combat.sim-policies';
 import { buildPresetDeck } from '../combat.starter-deck-presets';
 import { THREAT_RUNGS } from '../effects';
 import type { CombatEncounterState, CombatEvent, CombatThreatPhase } from '../combat.encounter.types';
+import { registerSandboxCards, clearSandboxCards } from '../../Cards/cards.sandbox';
+import type { Card } from '../../Cards/types';
 
-afterEach(() => vi.restoreAllMocks());
+afterEach(() => { vi.restoreAllMocks(); clearSandboxCards(); });
+
+/**
+ * TURNABOUT fixture. The verb survived the Profane-Canon rework as an ENGINE
+ * mechanic but lost its library carrier (`turnabout`, the control capstone)
+ * with the spec-32 library; the ledger and its cash-out are still live and
+ * still under test, so the carrier moved into the fixture.
+ * Provenance: cards.library.ts @ a69eab56.
+ */
+const FIXTURE_TURNABOUT: Card = {
+    id: 'turnabout',
+    theme: 'vigil',
+    name: 'Turnabout (fixture)',
+    philosophicalAspect: 'mind',
+    description: 'Test carrier for TURNABOUT — cash the whole denial ledger.',
+    tier: 3, rank: 6, cardType: 'spell',
+    targetType: 'enemy',
+    paidSummary: 'BACKFIRE ALL — 1.5 damage per rung this fight has denied.',
+    free: { revealStance: true },
+    specialMechanics: [{ kind: 'turnabout', burstPerRung: 1.5 }],
+    addedIn: '2026-08-08',
+    tags: ['vigil', 'payoff'],
+};
 
 function findEvents<K extends CombatEvent['kind']>(events: CombatEvent[], kind: K): Extract<CombatEvent, { kind: K }>[] {
     return events.filter((e): e is Extract<CombatEvent, { kind: K }> => e.kind === kind);
@@ -123,11 +147,14 @@ describe('Phase 32 part 4a — TURNABOUT ledger accrual (resolveThreatPhase)', (
 /** CLEAN fixture (no pre-applied enemy effects) with `rungsDeniedTotal`
  *  pinned and the card under test staged in hand. */
 function stateFor(cardId: string, rungsDeniedTotal: number): CombatEncounterState {
+    registerSandboxCards([FIXTURE_TURNABOUT]);
     const s = buildFixtureState({ clean: true });
     return {
         ...s,
         rungsDeniedTotal,
         hand: [{ uid: 'under-test', cardId }],
+        // The fixture owns the library; the sandbox carrier needs adding.
+        player: { ...s.player, knownCards: [...s.player.knownCards, cardId] },
         enemy: { ...s.enemy, effects: [] },
     };
 }
@@ -179,8 +206,12 @@ describe('rungsDeniedTotal ledger — per-combat scope', () => {
         expect(s.rungsDeniedTotal).toBe(0);
     });
 
-    it('sim policies never crash across every policy and seed with the ledger live (Standstill deck)', () => {
-        const standstillDeck = buildPresetDeck('standstill');
+    it('sim policies never crash across every policy and seed with the ledger live (the vigil wall + TURNABOUT)', () => {
+        registerSandboxCards([FIXTURE_TURNABOUT]);
+        // PROFANE CANON (2026-08-08): no preset seats a TURNABOUT carrier —
+        // the late campaign snapshot (the canon's STAGGER/denial deck) drives
+        // the sweep with the fixture capstone added on top.
+        const standstillDeck = [...buildPresetDeck('apostate'), 'turnabout'];
         expect(standstillDeck.length).toBeGreaterThan(0);
         expect(standstillDeck).toContain('turnabout');
 

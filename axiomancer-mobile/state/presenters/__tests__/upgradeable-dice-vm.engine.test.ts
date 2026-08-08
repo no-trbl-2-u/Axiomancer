@@ -20,7 +20,7 @@ import type { CombatEncounterState, CombatManaDie } from '@mechanics';
 import { buildCombatViewModel } from '../combat-encounter.engine';
 import { createMockEncounterEnemy } from '../../mocks/combat.mock';
 
-const DECK = ['slippery-slope', 'slippery-slope', 'straw-mans-jab', 'straw-mans-jab', 'sketch-of-a-thought', 'sketch-of-a-thought'];
+const DECK = ['spoiled-poultice', 'spoiled-poultice', 'chilblain-watch', 'chilblain-watch', 'first-spadeful', 'first-spadeful'];
 
 function openEncounter(): CombatEncounterState {
     const player = createCharacter({ name: 'Hero', level: 3, baseStats: { heart: 8, body: 8, mind: 8 } });

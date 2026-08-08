@@ -46,6 +46,15 @@ export interface EnemyCardFace {
     damageWeight?: number;
     effectId?: string;
     intensity?: number;
+    /** Escalation / counterplay riders a fork may carry (same semantics as
+     *  the card's own fields — Tri-Eyes' THEN fork sheds one of its own
+     *  afflictions when its ledger is written past legibility). */
+    enemyHeal?: number;
+    enemyCleanse?: number;
+    swayCleanse?: number;
+    premiseShed?: number;
+    glyphShatter?: boolean;
+    curseCardId?: string;
     actionText: string;
     stanceHint: string;
 }
@@ -224,10 +233,12 @@ export const ENEMY_CARD_LIBRARY: Record<string, EnemyCard> = {
         damageWeight: 0.95,
         effectId: 'debuff_poison',
         intensity: 2,
-        stake: true,
         actionText: 'The Black Death lays a hand on you like a census',
         stanceHint: 'A plague with posture; every touch is enrollment.',
-        // Black Death signature 1 — the STAKE card, seated second. Adapts his current opener line; the wager reads as enrollment in the census.
+        // Black Death signature 1, seated second. Adapts his current opener
+        // line; the enrollment IS the threat. NO `stake`: the registry rates
+        // the Black Death ELITE (enemy.library.ts), and the coveted-die
+        // authoring law reserves the wager for boss/unique decks.
     },
     'bc-sig-embrace-of-history': {
         name: 'The Embrace of History',
@@ -250,7 +261,6 @@ export const ENEMY_CARD_LIBRARY: Record<string, EnemyCard> = {
         damageWeight: 0.9,
         effectId: 'debuff_mark',
         intensity: 2,
-        stake: true,
         actionText: 'It eats the word you were about to use for it',
         stanceHint: 'It thinks in shapes language was built to avoid.',
         // The-Unnameable signature 1 — the STAKE card, seated second (its current sequence lacked a stake; boss law now requires one, and wagering the coveted die against a thing that eats names is the correct dread). Keeps its current opener line.
@@ -1122,6 +1132,35 @@ export const ENEMY_CARD_LIBRARY: Record<string, EnemyCard> = {
         actionText: 'It shows you the version of you that already lost, at leisure',
         stanceHint: 'There is grief in the glass — every reflection it keeps was somebody\'s best attempt.',
         // Tezcatlipoca signature 1, its existing phase 2 (which carried the stake) preserved verbatim. Wagering the coveted die against a mirror that already owns your losing self. stake:true, boss\'s SECOND card. Mid band 0.95.
+    },
+    'the-tally-reconciled': {
+        name: 'The Tally, Reconciled',
+        archetype: 'omen-choir',
+        grade: 'signature',
+        stance: 'heart',
+        damageWeight: 1.0,
+        effectId: 'debuff_mark',
+        // Tri-Eyes' preserved bearer-afflictions-gte-3 branch (WS9): written
+        // past legibility, the ledger stops pleading and reconciles itself —
+        // shedding one of its own entries. Forks ported verbatim from the
+        // pre-rework authored sequence (@ a69eab56).
+        branch: {
+            condition: { kind: 'bearer-afflictions-gte', n: 3 },
+            then: {
+                stance: 'mind', damageWeight: 0.7, enemyCleanse: 1,
+                actionText: 'It strikes the deepest entry from the ledger of itself and turns a corrected eye on you',
+                stanceHint: 'Written past legibility, it stops pleading and coldly reconciles the account.',
+            },
+            else: {
+                stance: 'heart', damageWeight: 1.0,
+                effectId: 'debuff_mark',
+                actionText: 'It recounts your every misstep until your hand falters',
+                stanceHint: 'There is something almost pleading in how badly it wants the tally to balance.',
+            },
+        },
+        actionText: 'It recounts your every misstep until your hand falters',
+        stanceHint: 'There is something almost pleading in how badly it wants the tally to balance.',
+        // The archetype's one branching card. Base fields describe the else-fork (the pleading recount, the common case); the then-fork is the cold reconciliation that sheds an affliction when the ledger itself is written past legibility.
     },
     'smoke-through-the-seams': {
         name: 'Smoke Through the Seams',

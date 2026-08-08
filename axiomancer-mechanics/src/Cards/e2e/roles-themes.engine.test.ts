@@ -54,7 +54,10 @@ import { playCombatCard } from '../../Combat/combat.engine';
 import { RESERVE_PIP_CAP } from '../../Combat/combat.dice';
 import type { CombatEncounterState, CombatEvent } from '../../Combat/combat.encounter.types';
 import { getCardById } from '../cards.library';
-import { SANDBOX_CARD_SETS, applySandboxSet } from '../cards.sandbox-sets';
+import {
+    ROLES_FORGE_CARDS, ROLES_BULWARK_CARDS, ROLES_CHARM_CARDS, ROLES_HARVEST_CARDS,
+    applyFixtureCards,
+} from '../../test-utils/retired-verb-cards';
 import { clearSandboxCards } from '../cards.sandbox';
 import { scoreCard } from '../cards.pricing';
 import { rankToRarity } from '../types';
@@ -65,10 +68,13 @@ afterEach(() => {
     clearSandboxCards();
 });
 
-const FORGE_SET = SANDBOX_CARD_SETS['roles-forge']!;
-const BULWARK_SET = SANDBOX_CARD_SETS['roles-bulwark']!;
-const CHARM_SET = SANDBOX_CARD_SETS['roles-charm']!;
-const HARVEST_SET = SANDBOX_CARD_SETS['roles-harvest']!;
+/** PROFANE CANON (2026-08-08): the four `roles-*` sandbox SETS died with the
+ *  spec-32 library; their carriers survive as synthetic fixtures so the WS4
+ *  theme-role verbs stay under test. */
+const FORGE_SET = { cards: ROLES_FORGE_CARDS, overrides: [] as const };
+const BULWARK_SET = { cards: ROLES_BULWARK_CARDS, overrides: [] as const };
+const CHARM_SET = { cards: ROLES_CHARM_CARDS, overrides: [] as const };
+const HARVEST_SET = { cards: ROLES_HARVEST_CARDS, overrides: [] as const };
 const ALL_ROLE_SETS = [FORGE_SET, BULWARK_SET, CHARM_SET, HARVEST_SET] as const;
 const ROLE_CARD_IDS = [
     'slag-runoff', 'ingot-of-ruin', 'grit-between-stones', 'the-unmoved-mover',
@@ -199,7 +205,7 @@ describe('roles-* theme sets — registry shape and rank-band honesty', () => {
     });
 
     it('applying a set makes its cards resolvable through getCardById', () => {
-        for (const set of ALL_ROLE_SETS) applySandboxSet(set.id);
+        for (const set of ALL_ROLE_SETS) applyFixtureCards(set.cards);
         for (const id of ROLE_CARD_IDS) {
             expect(getCardById(id), id).toBeDefined();
         }
@@ -222,7 +228,7 @@ describe('roles-* theme sets — registry shape and rank-band honesty', () => {
 // ─── 2. Slag Runoff — pips land while there is room; overflow becomes Ember ──
 
 describe('slag-runoff (WS4.1) — RIPEN whose overflow converts to Kindling Ember', () => {
-    beforeEach(() => { applySandboxSet('roles-forge'); });
+    beforeEach(() => { applyFixtureCards(ROLES_FORGE_CARDS); });
 
     it('FREE: ripens the Reserve by 1 pip (forge currency deposit)', () => {
         const before = fixtureWith('slag-runoff');
@@ -274,7 +280,7 @@ describe('slag-runoff (WS4.1) — RIPEN whose overflow converts to Kindling Embe
 // ─── 3. Ingot of Ruin — the uncapped ALL-spender + payoff-class closer ───────
 
 describe('ingot-of-ruin (WS4.1) — spend ALL pips → MARK per 2 → mark detonation', () => {
-    beforeEach(() => { applySandboxSet('roles-forge'); });
+    beforeEach(() => { applyFixtureCards(ROLES_FORGE_CARDS); });
 
     it('PAID (rich board): ripens once, spends every pip, lands MARK, closer cashes ALL marks', () => {
         // Fixture: Reserve die at 1 pip → grant_pip 1 → 2 pips banked →
@@ -346,7 +352,7 @@ describe('ingot-of-ruin (WS4.1) — spend ALL pips → MARK per 2 → mark deton
 // ─── 4. Grit Between Stones — non-reactive sting + payoff-class closer ───────
 
 describe('grit-between-stones (WS4.2) — Nettle Sting + Guard + mark detonation', () => {
-    beforeEach(() => { applySandboxSet('roles-bulwark'); });
+    beforeEach(() => { applyFixtureCards(ROLES_BULWARK_CARDS); });
 
     it('PAID: lands the sting (non-reactive DoT), raises Guard, cashes every MARK', () => {
         const before = fixtureWith('grit-between-stones');
@@ -374,7 +380,7 @@ describe('grit-between-stones (WS4.2) — Nettle Sting + Guard + mark detonation
 // ─── 5. The Unmoved Mover — the enemyDamageLastRound ledger condition ────────
 
 describe('the-unmoved-mover (WS4.2) — the combat-ledger state predicate', () => {
-    beforeEach(() => { applySandboxSet('roles-bulwark'); });
+    beforeEach(() => { applyFixtureCards(ROLES_BULWARK_CARDS); });
 
     it('checkStatePredicate reads the ledger exactly (0 = unmoved; absent = vacuous truth)', () => {
         const p = { kind: 'enemy-dealt-no-damage-last-round' } as const;
@@ -426,7 +432,7 @@ describe('the-unmoved-mover (WS4.2) — the combat-ledger state predicate', () =
 // ─── 6. A Sweeter Poison — SWAY + the RUPTURE-class closer + the late plant ──
 
 describe('a-sweeter-poison (WS4.3) — SWAY + mark closer; MARK ×2 planted AFTER it', () => {
-    beforeEach(() => { applySandboxSet('roles-charm'); });
+    beforeEach(() => { applyFixtureCards(ROLES_CHARM_CARDS); });
 
     it('PAID (rich board): SWAY +3; the closer cashes exactly the 3 PRE-EXISTING marks; MARK ×2 lands after', () => {
         const before = fixtureWith('a-sweeter-poison');
@@ -479,7 +485,7 @@ describe('a-sweeter-poison (WS4.3) — SWAY + mark closer; MARK ×2 planted AFTE
 // ─── 7. The Long Ledger — two payoff-class DoT fires + the late-booked Bleed ─
 
 describe('the-long-ledger (WS4.4) — consume_affliction ×2 (the WS3 payoff clock) + a short Bleed after', () => {
-    beforeEach(() => { applySandboxSet('roles-harvest'); });
+    beforeEach(() => { applyFixtureCards(ROLES_HARVEST_CARDS); });
 
     it('PAID (rich board): TWO payoff-class fires — both fixture DoTs consumed at full remaining fuel; the fresh Bleed books after', () => {
         const before = fixtureWith('the-long-ledger');
@@ -536,7 +542,7 @@ describe('the-long-ledger (WS4.4) — consume_affliction ×2 (the WS3 payoff clo
 // ─── 8. Seedcorn Sacrifice — REAP 2 → sow a Bleed + draw (the flywheel) ──────
 
 describe('seedcorn-sacrifice (WS4.4) — the funded REAP sows next season', () => {
-    beforeEach(() => { applySandboxSet('roles-harvest'); });
+    beforeEach(() => { applyFixtureCards(ROLES_HARVEST_CARDS); });
 
     it('PAID (funded): spends exactly 2 Souls, sows Bleed +3 intensity, draws 1', () => {
         const before = fixtureWith('seedcorn-sacrifice');

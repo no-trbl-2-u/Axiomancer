@@ -21,10 +21,10 @@ describe('Phase 99 unlocked card access', () => {
             level: 5,
             baseStats: { heart: 8, body: 6, mind: 7 },
             knownCards: [
-                'slippery-slope',
-                'brace-for-impact',
-                'soft-word',
-                'glimpse',
+                'spoiled-poultice',
+                'chilblain-watch',
+                'thin-hymn',
+                'first-spadeful',
             ],
             effects: [],
         });
@@ -47,7 +47,7 @@ describe('Phase 99 unlocked card access', () => {
         expect(availableCards).toEqual(player.knownCards);
 
         // Test card that player doesn't know
-        const unknownCardId = 'resonance-detonation'; // rank-5 finisher
+        const unknownCardId = 'miserere'; // rank-5 finisher
         expect(player.knownCards).not.toContain(unknownCardId);
     });
 

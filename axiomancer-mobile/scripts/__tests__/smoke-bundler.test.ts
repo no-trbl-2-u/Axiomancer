@@ -115,13 +115,18 @@ describe('smoke-bundler helpers', () => {
 
     describe('resolveOutputConfig', () => {
         test('preserves an explicitly configured export for downstream E2E reuse', () => {
+            // `resolveOutputConfig` runs the configured path through
+            // `path.resolve`, which is platform-shaped (POSIX '/repo/...' vs
+            // Win32 'C:\repo\...'). Compare against the same resolver so the
+            // assertion pins the BEHAVIOUR (configured path preserved verbatim,
+            // preserveOutput on) rather than the host's separator.
             expect(resolveOutputConfig({
                 configuredOutputDir: '/repo/.smoke-dist',
                 tempDir: '/tmp',
                 pid: 7,
                 now: 9,
             })).toEqual({
-                outputDir: '/repo/.smoke-dist',
+                outputDir: resolve('/repo/.smoke-dist'),
                 preserveOutput: true,
             })
         })

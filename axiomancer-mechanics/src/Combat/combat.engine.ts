@@ -3170,6 +3170,16 @@ function playBottomAction(
                 events.push({ kind: 'hand-drawn', cards: draw.drawn });
             }
         }
+        if (r.millCards) {
+            // MILL — the cards go straight to the discard, never to hand (the
+            // grave's own draw). The profane canon prints MILL on PAID riders
+            // (first-spadeful, spadework), so the in-play applier has to
+            // deliver it too — printed == applied.
+            const mill = drawCombatCards(drawPile, discard, state.deck, r.millCards, _rng);
+            drawPile = mill.drawPile;
+            discard = [...mill.discard, ...mill.drawn];
+            events.push({ kind: 'cards-milled', cards: mill.drawn });
+        }
         if (r.premises) premisesGained += r.premises;
         if (r.sway) swayGained += r.sway;
         if (r.souls) gainSoulsLocal(r.souls, 'granted');

@@ -24,7 +24,7 @@ import type { CombatEncounterState, CombatManaDie } from '@mechanics';
 import { resolveApplyRouting, buildCombatViewModel } from '../combat-encounter.engine';
 import { createMockEncounterEnemy } from '../../mocks/combat.mock';
 
-const DECK = ['slippery-slope', 'slippery-slope', 'straw-mans-jab', 'straw-mans-jab', 'sketch-of-a-thought', 'sketch-of-a-thought'];
+const DECK = ['spoiled-poultice', 'spoiled-poultice', 'chilblain-watch', 'chilblain-watch', 'first-spadeful', 'first-spadeful'];
 
 function openEncounter(floating: ('heart' | 'body' | 'mind' | 'wild')[]): CombatEncounterState {
     const player = createCharacter({ name: 'Hero', level: 3, baseStats: { heart: 8, body: 8, mind: 8 } });
@@ -61,7 +61,7 @@ describe('floating-die APPLY routing (the snap-back bug)', () => {
     it('a wild floating die COMMITS a play (no fizzle) and is consumed forever', () => {
         const s = openEncounter(['wild']);
         const float = s.dice.find(d => d.floating)!;
-        const uid = findHand(s, 'slippery-slope');
+        const uid = findHand(s, 'spoiled-poultice');
         const routing = resolveApplyRouting(s, float.id);
         const res = playCombatCard(s, { uid }, true, routing.explicitDieId);
         expect(res.events.some(e => e.kind === 'effect-fizzled')).toBe(false);
@@ -80,7 +80,7 @@ describe('floating-die APPLY routing (the snap-back bug)', () => {
         if (tray) s = draftStanceDie(s, tray.id).state;
         // ...then BOTH floats still power plays in the same turn.
         for (const f of floats) {
-            const uid = s.hand.find(h => h.cardId === 'slippery-slope' || h.cardId === 'straw-mans-jab' || h.cardId === 'sketch-of-a-thought')!.uid;
+            const uid = s.hand.find(h => h.cardId === 'spoiled-poultice' || h.cardId === 'chilblain-watch' || h.cardId === 'first-spadeful')!.uid;
             const routing = resolveApplyRouting(s, f.id);
             expect(routing.explicitDieId).toBe(f.id);
             const res = playCombatCard(s, { uid }, true, routing.explicitDieId);
@@ -93,7 +93,7 @@ describe('floating-die APPLY routing (the snap-back bug)', () => {
     it('a colored floating die obeys the color law (body float cannot power a mind card)', () => {
         const s = openEncounter(['body']);
         const float = s.dice.find(d => d.floating)!;
-        const uid = findHand(s, 'sketch-of-a-thought'); // mind spell
+        const uid = findHand(s, 'first-spadeful'); // mind spell
         const res = playCombatCard(s, { uid }, true, resolveApplyRouting(s, float.id).explicitDieId);
         expect(res.events.some(e => e.kind === 'effect-fizzled')).toBe(true);
         // The mismatch never consumes the float.
@@ -124,7 +124,7 @@ describe('floating-die APPLY routing (the snap-back bug)', () => {
         afterEach(() => setUpgradeableDice(false));
 
         function openHeartEncounter(): CombatEncounterState {
-            const deck = ['soft-word', 'soft-word', 'straw-mans-jab', 'straw-mans-jab', 'sketch-of-a-thought', 'sketch-of-a-thought'];
+            const deck = ['thin-hymn', 'thin-hymn', 'chilblain-watch', 'chilblain-watch', 'first-spadeful', 'first-spadeful'];
             const player = createCharacter({ name: 'Hero', level: 3, baseStats: { heart: 8, body: 8, mind: 8 } });
             player.knownCards = Array.from(new Set([...(player.knownCards ?? []), ...deck]));
             const state = initializeCombatEncounter(player, createMockEncounterEnemy(), deck, 7);
@@ -145,7 +145,7 @@ describe('floating-die APPLY routing (the snap-back bug)', () => {
             setUpgradeableDice(true);
             const s = openHeartEncounter();
             s.dice = [heartMana()];
-            const uid = findHand(s, 'soft-word');
+            const uid = findHand(s, 'thin-hymn');
             const routing = resolveApplyRouting(s, 'u-heart');
             const res = playCombatCard(s, { uid }, true, routing.explicitDieId);
             // card-played:1, fizzled:0 (the hermetic probe's exact signature).

@@ -22,7 +22,7 @@ import { buildCombatViewModel } from '@/state/presenters/combat-encounter.engine
 import { createMockEncounterEnemy } from '@/state/mocks/combat.mock';
 import { withAllProviders } from '@/test-utils/withAllProviders';
 
-const CARDS = ['second-thoughts', 'slippery-slope'];
+const CARDS = ['shallow-grave', 'spoiled-poultice'];
 
 const noopDrag = (): DragController =>
     ({ begin: () => undefined, move: () => undefined, end: () => undefined, active: null } as unknown as DragController);
@@ -58,10 +58,10 @@ describe('CombatBoard — REPRISE songbook interception', () => {
     it('calls onReprisalNeeded (not onApply) for a powered reprise card with a non-empty discard', () => {
         const { store } = withAllProviders(<></>);
         const player = buildPlayer(store);
-        let s = openAndDraft(player, CARDS, 'mind'); // second-thoughts is philosophicalAspect 'mind'
-        s = { ...s, discard: ['recurring-symptom'] };
+        let s = openAndDraft(player, CARDS, 'heart'); // shallow-grave is philosophicalAspect 'heart'
+        s = { ...s, discard: ['unction-of-boils'] };
         const vm = buildCombatViewModel(s);
-        const uid = vm.hand.find(c => c.cardId === 'second-thoughts')!.uid;
+        const uid = vm.hand.find(c => c.cardId === 'shallow-grave')!.uid;
 
         const cbs = boardCallbacks();
         const { tree } = withAllProviders(
@@ -80,10 +80,10 @@ describe('CombatBoard — REPRISE songbook interception', () => {
     it('holds the deferred play (nothing consumed): a second APPLY re-defers with identical args, so a panel cancel restores the pre-play state', () => {
         const { store } = withAllProviders(<></>);
         const player = buildPlayer(store);
-        let s = openAndDraft(player, CARDS, 'mind');
-        s = { ...s, discard: ['recurring-symptom'] };
+        let s = openAndDraft(player, CARDS, 'heart');
+        s = { ...s, discard: ['unction-of-boils'] };
         const vm = buildCombatViewModel(s);
-        const uid = vm.hand.find(c => c.cardId === 'second-thoughts')!.uid;
+        const uid = vm.hand.find(c => c.cardId === 'shallow-grave')!.uid;
 
         const cbs = boardCallbacks();
         const { tree } = withAllProviders(
@@ -128,8 +128,8 @@ describe('CombatBoard — REPRISE songbook interception', () => {
         try {
             const { store } = withAllProviders(<></>);
             const player = { ...buildPlayer(store), knownCards: [...CARDS, xReprise.id] };
-            let s = openAndDraft(player, [xReprise.id, 'slippery-slope'], 'mind');
-            s = { ...s, discard: ['recurring-symptom'] };
+            let s = openAndDraft(player, [xReprise.id, 'spoiled-poultice'], 'mind');
+            s = { ...s, discard: ['unction-of-boils'] };
             const vm = buildCombatViewModel(s);
             const card = vm.hand.find(c => c.cardId === xReprise.id)!;
             expect(card.chooseX).not.toBeNull(); // the stepper is live
@@ -158,9 +158,9 @@ describe('CombatBoard — REPRISE songbook interception', () => {
     it('applies directly when the discard pile is empty (nothing to choose)', () => {
         const { store } = withAllProviders(<></>);
         const player = buildPlayer(store);
-        const s = openAndDraft(player, CARDS, 'mind'); // discard starts empty
+        const s = openAndDraft(player, CARDS, 'heart'); // discard starts empty
         const vm = buildCombatViewModel(s);
-        const uid = vm.hand.find(c => c.cardId === 'second-thoughts')!.uid;
+        const uid = vm.hand.find(c => c.cardId === 'shallow-grave')!.uid;
 
         const cbs = boardCallbacks();
         const { tree } = withAllProviders(
@@ -182,9 +182,9 @@ describe('CombatBoard — REPRISE songbook interception', () => {
         // match it: THE COLOR LAW gate (2026-07-12) demotes an off-color
         // drafted die to the FREE action instead of routing a fizzle.
         let s = openAndDraft(player, CARDS, 'body');
-        s = { ...s, discard: ['recurring-symptom'] };
+        s = { ...s, discard: ['unction-of-boils'] };
         const vm = buildCombatViewModel(s);
-        const uid = vm.hand.find(c => c.cardId === 'slippery-slope')!.uid;
+        const uid = vm.hand.find(c => c.cardId === 'spoiled-poultice')!.uid;
 
         const cbs = boardCallbacks();
         const { tree } = withAllProviders(

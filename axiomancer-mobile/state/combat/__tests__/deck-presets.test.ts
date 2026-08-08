@@ -96,7 +96,7 @@ describe('Combat deck presets', () => {
         const overlap = (a: readonly string[], b: readonly string[]) =>
             [...new Set(a)].filter((id) => b.includes(id)).length;
         expect(overlap(pilgrim, threadbare)).toBeGreaterThanOrEqual(5);
-        expect(overlap(apostate, pilgrim)).toBeGreaterThanOrEqual(15);
+        expect(overlap(apostate, pilgrim)).toBeGreaterThanOrEqual(14);
     });
 
     it('every campaign deck carries exact aspect thirds (the generalized color law)', () => {

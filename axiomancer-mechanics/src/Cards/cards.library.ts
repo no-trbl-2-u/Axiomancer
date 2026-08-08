@@ -553,8 +553,8 @@ const edictOfTheOpenWound: Card = {
     name: 'Edict of the Open Wound',
     philosophicalAspect: 'body',
     persistentEffect:
-        'The enemy\'s wounds refuse to close: its DoTs no longer lose ' +
-        'duration, and its healing fails.',
+        'The enemy\'s wounds refuse to close: its POISON, BLEED and DOOM no ' +
+        'longer lose duration, and its HEAL fails.',
     description:
         'By order of the parish that buried its last surgeon: let nothing ' +
         'close. The scab is annulled, the salve confiscated, the prayer for ' +
@@ -694,8 +694,8 @@ const blankIndenture: Card = {
     tier: 3, rank: 5, cardType: 'spell',
     targetType: 'enemy',
     paidSummary:
-        'RECOIL X of your choosing (at least 3). Afflict with POISON at half ' +
-        'of X, rounded up (ticks each card you play; 4 turns).',
+        'RECOIL X of your choosing (at least 3). Afflict with POISON — 1 ' +
+        'stack per 2 VITAE paid, rounded up (ticks each card you play; 4 turns).',
     // pts: recoil_x min 3, poisonPerX 0.5 — expected X 6 → POISON i3 d4
     // (~12.9 tempo-weighted) − X credit (1.5) = 11.4 + FREE [DOOM i2 (2.9) +
     // DRAW 1 (2)] ≈ 16.3 → Axiom. THE drawback-is-the-whole-story card: no
@@ -731,7 +731,7 @@ const jointAndSeveral: Card = {
     name: 'Joint and Several',
     philosophicalAspect: 'heart',
     persistentEffect:
-        'Whenever you pay RECOIL, the enemy loses the same amount of HP — ' +
+        'Whenever you pay RECOIL, the enemy loses the same amount of VITAE — ' +
         'they are liable for your debts.',
     description:
         'The amendment is read aloud in the smallest of the nine courts: ' +
@@ -904,8 +904,8 @@ const theCongregationBelow: Card = {
     name: 'The Congregation Below',
     philosophicalAspect: 'mind',
     persistentEffect:
-        'At the end of each round, the foe takes 1 damage per 3 cards in ' +
-        'your discard pile.',
+        'At the end of each round, the foe takes 1 damage per 3 cards you ' +
+        'MILL or spend into your discard pile.',
     description:
         'Every burial is a deposition. Below the frost line the parish ' +
         'keeps perfect minutes, and at the close of each round the dead ' +

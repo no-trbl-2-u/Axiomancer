@@ -110,7 +110,7 @@ describe('createAppActions: dispatch', () => {
 
         // Every seeded starter card must actually have been learned (none
         // silently dropped by an unmet learning requirement).
-        expect(player.knownCards).toEqual(['slippery-slope', 'brace-for-impact']);
+        expect(player.knownCards).toEqual(['spoiled-poultice', 'chilblain-watch']);
         for (const id of player.knownCards) {
             expect(getCardById(id)).toBeTruthy();
         }
@@ -127,7 +127,7 @@ describe('createAppActions: dispatch', () => {
         // A 2-card deck draws a padded hand — both starters must be present
         // (duplicates are the reshuffle law at work, not a bug).
         const distinct = new Set(visible.map(({ card }) => card.id));
-        expect(distinct).toEqual(new Set(['slippery-slope', 'brace-for-impact']));
+        expect(distinct).toEqual(new Set(['spoiled-poultice', 'chilblain-watch']));
         // One card erodes (DoT) and one defends — the strike is dead, so the
         // opening hand teaches poison + Guard rather than a raw hit.
         const verbs = visible.map(({ card }) => card.verbClass);

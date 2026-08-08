@@ -6,7 +6,7 @@
  * color-match data fix. Seeded RNG only; no disk / network / TTY.
  */
 
-import { describe, it, expect, afterEach, vi } from 'vitest';
+import { describe, it, expect, afterEach, beforeEach, vi } from 'vitest';
 
 import { Player } from '../../Character/characters.mock';
 import type { Character } from '../../Character/types';
@@ -20,8 +20,52 @@ import {
     projectRupture, projectRuptureBurst, projectIncomingThreat, getDisruptMeter,
 } from '../combat.engine';
 import type { CombatDieColor, CombatEncounterState } from '../combat.encounter.types';
+import { registerSandboxCards, clearSandboxCards } from '../../Cards/cards.sandbox';
+import type { Card } from '../../Cards/types';
 
-afterEach(() => { vi.restoreAllMocks(); });
+afterEach(() => { vi.restoreAllMocks(); clearSandboxCards(); });
+
+/**
+ * RUPTURE variant fixtures. The Profane Canon prints exactly one detonation
+ * (Communion of the Worm — plain RUPTURE, no amplifier), so the `bonusPct`
+ * and `fuelPerPip` branches of `projectRuptureBurst` and the Overtake 2-pip
+ * gate lost their library carriers. The ENGINE branches are still live and
+ * still under test; only the printed card moved into the fixture.
+ * Provenance: resonance-detonation / the-overtake @ a69eab56.
+ */
+const FIXTURE_BONUS_RUPTURE: Card = {
+    id: 'fx-resonance-detonation',
+    theme: 'rot',
+    name: 'Resonance Detonation (fixture)',
+    philosophicalAspect: 'mind',
+    description: 'Test carrier for RUPTURE with a bonusPct amplifier.',
+    tier: 3, rank: 5, cardType: 'spell',
+    targetType: 'enemy',
+    paidSummary: 'RUPTURE for 150% of the pending total.',
+    free: { applyEffect: { effectId: 'debuff_mark', intensity: 1, duration: 1 } },
+    specialMechanics: [{ kind: 'rupture', bonusPct: 0.5 }],
+    addedIn: '2026-08-08',
+    tags: ['rot', 'payoff'],
+};
+
+const FIXTURE_PIP_RUPTURE: Card = {
+    id: 'fx-the-overtake',
+    theme: 'grave',
+    name: 'The Overtake (fixture)',
+    philosophicalAspect: 'body',
+    description: 'Test carrier for the pip-fed RUPTURE and its 2-pip gate.',
+    tier: 2, rank: 5, cardType: 'spell',
+    targetType: 'enemy',
+    paidSummary: 'Spend every banked PIP, then RUPTURE at 3.5 fuel per pip.',
+    free: { applyEffect: { effectId: 'debuff_mark', intensity: 1, duration: 1 } },
+    specialMechanics: [
+        { kind: 'spend_all_pips', guardPerPip: 1 },
+        { kind: 'rupture', fuelPerPip: 3.5, bonusPct: 0.5 },
+        { kind: 'refresh_die' },
+    ],
+    addedIn: '2026-08-08',
+    tags: ['grave', 'payoff'],
+};
 
 const ae = (effectId: string, intensity = 1, remainingDuration = 4): ActiveEffect =>
     ({ effectId, intensity, remainingDuration, appliedAt: 1, tier: 2 });
@@ -62,19 +106,20 @@ function openAndDraft(player: Character, enemy: Enemy, deck: string[], die: Comb
 }
 
 describe('projectRuptureBurst — per-card-accurate rupture preview (phase 28)', () => {
-    const PLAIN = 'peroratio-interrupta'; // no bonusPct/fuelPerPip
-    const BONUS = 'resonance-detonation'; // bonusPct 0.5, no fuelPerPip
-    const PIP_FED = 'the-overtake';       // fuelPerPip 3.5, bonusPct 0.5
+    const PLAIN = 'communion-of-the-worm';   // no bonusPct/fuelPerPip (canon)
+    const BONUS = FIXTURE_BONUS_RUPTURE.id;  // bonusPct 0.5, no fuelPerPip
+    const PIP_FED = FIXTURE_PIP_RUPTURE.id;  // fuelPerPip 3.5, bonusPct 0.5
+    beforeEach(() => { registerSandboxCards([FIXTURE_BONUS_RUPTURE, FIXTURE_PIP_RUPTURE]); });
 
     it('matches projectRupture for a card with no card-specific rupture mechanic', () => {
         mockSequentialRng(0.05);
         const enemyEffects = [ae('debuff_poison', 2, 4)];
-        const state = openAndDraft(makePlayer([PLAIN]), makeEnemy(300, 'mind', enemyEffects), [PLAIN], 'mind');
+        const state = openAndDraft(makePlayer([PLAIN]), makeEnemy(300, 'heart', enemyEffects), [PLAIN], 'heart');
         const card = state.hand.find(h => h.cardId === PLAIN)!;
         expect(projectRuptureBurst(state, { uid: card.uid, id: PLAIN } as never)).toBe(projectRupture(state));
     });
 
-    it('adds bonusPct for resonance-detonation (undershoots without it)', () => {
+    it('adds bonusPct for the amplified detonation (undershoots without it)', () => {
         mockSequentialRng(0.05);
         const enemyEffects = [ae('debuff_poison', 2, 4)];
         const state = openAndDraft(makePlayer([BONUS]), makeEnemy(900, 'mind', enemyEffects), [BONUS], 'mind');
@@ -85,7 +130,7 @@ describe('projectRuptureBurst — per-card-accurate rupture preview (phase 28)',
         expect(perCard).toBe(Math.round(flat * 1.5));
     });
 
-    it('incorporates fuelPerPip × banked reserve/floating pips for the-overtake', () => {
+    it('incorporates fuelPerPip × banked reserve/floating pips for the pip-fed rupture', () => {
         mockSequentialRng(0.05);
         let state = openAndDraft(makePlayer([PIP_FED]), makeEnemy(900, 'mind', []), [PIP_FED], 'mind');
         const card = state.hand.find(h => h.cardId === PIP_FED)!;
@@ -97,8 +142,9 @@ describe('projectRuptureBurst — per-card-accurate rupture preview (phase 28)',
 });
 
 describe('Overtake 2-pip gate (phase 28)', () => {
-    // the-overtake is philosophicalAspect 'body' — powering it requires a body die.
-    const OVERTAKE = 'the-overtake';
+    // the pip-fed fixture is philosophicalAspect 'body' — powering it requires a body die.
+    const OVERTAKE = FIXTURE_PIP_RUPTURE.id;
+    beforeEach(() => { registerSandboxCards([FIXTURE_PIP_RUPTURE]); });
 
     it('fizzles the rupture payoff below 2 spent pips (no HP loss from the mechanic)', () => {
         mockSequentialRng(0.05);
@@ -123,9 +169,9 @@ describe('Overtake 2-pip gate (phase 28)', () => {
 
     it('does not affect a plain rupture card (no fuelPerPip) below 2 pips', () => {
         mockSequentialRng(0.05);
-        const RUP = 'peroratio-interrupta';
+        const RUP = 'communion-of-the-worm';
         const enemyEffects = [ae('debuff_poison', 2, 4)];
-        const state = openAndDraft(makePlayer([RUP]), makeEnemy(300, 'mind', enemyEffects), [RUP], 'mind');
+        const state = openAndDraft(makePlayer([RUP]), makeEnemy(300, 'heart', enemyEffects), [RUP], 'heart');
         const res = playCombatCard(state, { uid: state.hand.find(h => h.cardId === RUP)!.uid }, true);
         expect(res.events.find(e => e.kind === 'rupture-detonated')).toBeDefined();
         expect(res.events.find(e => e.kind === 'effect-fizzled')).toBeUndefined();
@@ -151,39 +197,39 @@ describe('getDisruptMeter.willDeny — STAGGER-rung denial (phase 28 fix)', () =
 });
 
 describe('REPRISE songbook choice (phase 28)', () => {
-    const REPRISE_CARD = 'second-thoughts'; // count: 1, mind aspect
+    const REPRISE_CARD = 'shallow-grave'; // RECALL 1, heart aspect
 
     it('returns the player-chosen discard card, not the argmax pick', () => {
         mockSequentialRng(0.05);
-        let state = openAndDraft(makePlayer([REPRISE_CARD]), makeEnemy(300, 'mind', []), [REPRISE_CARD], 'mind');
+        let state = openAndDraft(makePlayer([REPRISE_CARD]), makeEnemy(300, 'heart', []), [REPRISE_CARD], 'heart');
         // A low-rank and a high-rank card in discard — argmax would pick the high-rank one.
-        state = { ...state, discard: ['festering-argument', 'the-overtake'] };
+        state = { ...state, discard: ['spoiled-poultice', 'open-every-grave'] };
         const uid = state.hand.find(h => h.cardId === REPRISE_CARD)!.uid;
-        const res = playCombatCard(state, { uid }, true, undefined, undefined, { reprisalCardId: 'festering-argument' });
+        const res = playCombatCard(state, { uid }, true, undefined, undefined, { reprisalCardId: 'spoiled-poultice' });
         const reprised = res.events.find(e => e.kind === 'reprised') as { returned: string[] } | undefined;
         expect(reprised).toBeDefined();
-        expect(reprised!.returned).toEqual(['festering-argument']);
+        expect(reprised!.returned).toEqual(['spoiled-poultice']);
     });
 
     it('falls back to the highest-rank auto-pick when no choice is given', () => {
         mockSequentialRng(0.05);
-        let state = openAndDraft(makePlayer([REPRISE_CARD]), makeEnemy(300, 'mind', []), [REPRISE_CARD], 'mind');
-        state = { ...state, discard: ['festering-argument', 'the-overtake'] };
+        let state = openAndDraft(makePlayer([REPRISE_CARD]), makeEnemy(300, 'heart', []), [REPRISE_CARD], 'heart');
+        state = { ...state, discard: ['spoiled-poultice', 'open-every-grave'] };
         const uid = state.hand.find(h => h.cardId === REPRISE_CARD)!.uid;
         const res = playCombatCard(state, { uid }, true);
         const reprised = res.events.find(e => e.kind === 'reprised') as { returned: string[] } | undefined;
         expect(reprised).toBeDefined();
-        expect(reprised!.returned).toEqual(['the-overtake']); // higher rank (5 vs 3)
+        expect(reprised!.returned).toEqual(['open-every-grave']); // higher rank (5 vs 1)
     });
 
     it('falls back to auto-pick when the chosen id is not in the discard pile', () => {
         mockSequentialRng(0.05);
-        let state = openAndDraft(makePlayer([REPRISE_CARD]), makeEnemy(300, 'mind', []), [REPRISE_CARD], 'mind');
-        state = { ...state, discard: ['festering-argument', 'the-overtake'] };
+        let state = openAndDraft(makePlayer([REPRISE_CARD]), makeEnemy(300, 'heart', []), [REPRISE_CARD], 'heart');
+        state = { ...state, discard: ['spoiled-poultice', 'open-every-grave'] };
         const uid = state.hand.find(h => h.cardId === REPRISE_CARD)!.uid;
         const res = playCombatCard(state, { uid }, true, undefined, undefined, { reprisalCardId: 'not-in-discard' });
         const reprised = res.events.find(e => e.kind === 'reprised') as { returned: string[] } | undefined;
-        expect(reprised!.returned).toEqual(['the-overtake']);
+        expect(reprised!.returned).toEqual(['open-every-grave']);
     });
 });
 

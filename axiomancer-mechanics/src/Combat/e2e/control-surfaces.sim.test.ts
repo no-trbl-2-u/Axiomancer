@@ -45,6 +45,8 @@ import { COMBAT_SIM_POLICIES } from '../combat.sim-policies';
 import type {
     CombatEncounterState, CombatThreatPhase, CombatCard,
 } from '../combat.encounter.types';
+import { registerSandboxCards, clearSandboxCards } from '../../Cards/cards.sandbox';
+import type { Card } from '../../Cards/types';
 
 afterEach(() => { vi.restoreAllMocks(); });
 
@@ -213,16 +215,51 @@ describe('WS8.2 — CONFUSION owns the STANCE surface (BLUR: player-borne fog)',
 // STAGGER walls, BACKFIRE punishes, and the lock_stance pin — after WS8.2
 // these genuinely edit different surfaces (rung strength / engine drip /
 // stance certainty).
+// PROFANE CANON (2026-08-08): the canon prints exactly two control cards and
+// BOTH carry STAGGER + BACKFIRE together, so the library alone can no longer
+// present the probe with distinct surfaces. What is under test here is the
+// POLICY's matchup read, not the card list — the pure single-surface carriers
+// are therefore synthetic fixtures, and the canon's own combined card sits
+// beside them as the real-world control.
+const SURFACE_CARDS: readonly Card[] = [
+    {
+        id: 'fx-rung-wall', theme: 'trial', name: 'Rung Wall (fixture)',
+        philosophicalAspect: 'body',
+        description: 'Test carrier: pure STAGGER — rung strength only.',
+        tier: 2, rank: 3, cardType: 'spell', targetType: 'enemy',
+        paidSummary: 'STAGGER 1.',
+        free: { premises: 1 },
+        specialMechanics: [{ kind: 'stagger', rungs: 1 }],
+        addedIn: '2026-08-08', tags: ['trial'],
+    },
+    {
+        id: 'fx-punish-drip', theme: 'trial', name: 'Punish Drip (fixture)',
+        philosophicalAspect: 'mind',
+        description: 'Test carrier: pure BACKFIRE — deny-punish drip only.',
+        tier: 2, rank: 3, cardType: 'spell', targetType: 'enemy',
+        paidSummary: 'Apply BACKFIRE 2 for 3 turns.',
+        free: { premises: 1 },
+        combatEffects: [{ effectId: 'debuff_backfire', appliedTo: 'opponent', intensity: 2, duration: 3 }],
+        addedIn: '2026-08-08', tags: ['trial'],
+    },
+    {
+        id: 'fx-stance-pin', theme: 'trial', name: 'Stance Pin (fixture)',
+        philosophicalAspect: 'body',
+        description: 'Test carrier: lock_stance + STAGGER — stance certainty.',
+        tier: 2, rank: 4, cardType: 'spell', targetType: 'enemy',
+        paidSummary: 'Lock the foe into its telegraphed stance. STAGGER 1.',
+        free: { revealStance: true },
+        combatEffects: [{ effectId: 'debuff_backfire', appliedTo: 'opponent', intensity: 1, duration: 2 }],
+        specialMechanics: [{ kind: 'lock_stance' }, { kind: 'stagger', rungs: 1 }],
+        addedIn: '2026-08-08', tags: ['trial'],
+    },
+];
+
 const CONTROL_CANDIDATES = [
-    'zenos-half-step',          // STAGGER 1 — rung strength
-    'red-herring',              // BACKFIRE — deny-punish drip
-    'undistributed-middle',     // STAGGER + BACKFIRE
-    'arrow-paradox',            // lock_stance + STAGGER — stance certainty
-    // phase 32 part 4a: paralysis-of-analysis (STAGGER 2 + acute BACKFIRE)
-    // was replaced by turnabout (a banked-denial finisher, not a rung/drip
-    // control surface) — no substitute added here; the remaining four
-    // candidates still exercise the falsifiable rung-strength / drip /
-    // stance-certainty surfaces this probe targets.
+    'fx-rung-wall',             // STAGGER 1 — rung strength
+    'fx-punish-drip',           // BACKFIRE — deny-punish drip
+    'scolds-bridle',            // STAGGER + BACKFIRE (the canon's own)
+    'fx-stance-pin',            // lock_stance + STAGGER — stance certainty
 ];
 
 /** Damage-heavy: big clean hits, no riders — deny/soften is worth the most. */
@@ -246,6 +283,8 @@ const escalationHeavy = () => makeEnemy(300, [
 
 /** The control-lock policy's preferred candidate against this threat. */
 function preferredControlCard(enemy: Enemy): string {
+    clearSandboxCards();
+    registerSandboxCards([...SURFACE_CARDS]);
     const state = rollEncounterDice(
         initializeCombatEncounter(makePlayer(CONTROL_CANDIDATES), enemy, CONTROL_CANDIDATES, 7),
     ).state;

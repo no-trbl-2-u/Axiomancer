@@ -31,19 +31,9 @@ describe('DebugCombatDeck: deck controls', () => {
     it('renders a button for every strategy deck preset plus the randomizer', () => {
         const tree = render(withProviders(makeStore(), <DebugCombatDeck />));
 
-        for (const id of [
-            'starter-baseline',
-            'erosion',
-            'oratory',
-            'foundry',
-            'penitent',
-            'standstill',
-            'augury',
-            'tithe',
-            'grace',
-            'bastion',
-            'refrain',
-        ]) {
+        // PROFANE CANON (2026-08-08): the ten theme presets became three
+        // campaign snapshots of one evolving deck.
+        for (const id of ['starter-baseline', 'threadbare', 'pilgrim', 'apostate']) {
             expect(tree.queryByTestId(`debug-combat-deck-preset-${id}`)).not.toBeNull();
         }
         expect(tree.queryByTestId('debug-combat-deck-randomize')).not.toBeNull();
@@ -53,11 +43,11 @@ describe('DebugCombatDeck: deck controls', () => {
         const store = makeStore();
         const tree = render(withProviders(store, <DebugCombatDeck />));
 
-        fireEvent.press(tree.getByTestId('debug-combat-deck-preset-erosion'));
+        fireEvent.press(tree.getByTestId('debug-combat-deck-preset-pilgrim'));
 
         expect(store.getState().player.knownCards.length).toBeGreaterThan(0);
         expect(store.getState().player.combatRewardCards).toEqual([]);
-        expect(tree.getByText(/Erosion: \d+-card deck/i)).toBeTruthy();
+        expect(tree.getByText(/The Pilgrim's Burden: \d+-card deck/i)).toBeTruthy();
     });
 
     it('pressing random deck deals a random hand into knownCards', () => {

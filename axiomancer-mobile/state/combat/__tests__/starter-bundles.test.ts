@@ -17,56 +17,65 @@ function makeStore() {
     return createAppStore({ adapter: createMemoryAdapter() });
 }
 
-describe('Starter bundles — the pre-run deck picker (spec 32 v3 themed decks)', () => {
-    it('exposes one bundle per themed preset deck, in the engine display order', () => {
+/**
+ * PROFANE CANON (2026-08-08): the ten theme bundles became THREE campaign
+ * snapshots of one evolving deck (threadbare 18 → pilgrim 30 → apostate 45).
+ * The picker's contract is unchanged — one tile per seatable deck, every card
+ * a real engine id, seeding tags the run — only its roster moved.
+ */
+describe('Starter bundles — the pre-run deck picker (the campaign snapshots)', () => {
+    const EXPECTED_SIZES: Record<string, number> = {
+        threadbare: 18,
+        pilgrim: 30,
+        apostate: 45,
+    };
+
+    it('exposes one bundle per campaign snapshot, in the engine display order', () => {
         const ids = STARTER_BUNDLES.map((b) => b.id);
-        expect(ids).toEqual([
-            'erosion', 'oratory', 'foundry', 'penitent', 'standstill',
-            'augury', 'tithe', 'grace', 'bastion', 'refrain',
-        ]);
+        expect(ids).toEqual(['threadbare', 'pilgrim', 'apostate']);
         // No duplicate ids.
         expect(new Set(ids).size).toBe(ids.length);
     });
 
     it('every bundle is a non-empty, playable deck drawn only from engine card ids', () => {
         for (const b of STARTER_BUNDLES) {
-            expect(b.cardIds.length).toBe(15); // the 4/4/2/2/1/1/1 recipe
+            expect(b.cardIds.length).toBe(EXPECTED_SIZES[b.id]);
             for (const id of b.cardIds) {
                 expect(FULL_POOL.has(id)).toBe(true);
                 expect(getCard(id)).toBeTruthy();
             }
-            // Presentation: every tile carries its theme's two hallmark keywords.
+            // Presentation: every tile carries its stage's two hallmark keywords.
             expect(b.pills.length).toBe(2);
             expect(b.description.length).toBeGreaterThan(0);
         }
     });
 
-    it('each themed bundle actually plays its theme (a spot check per engine)', () => {
+    it('each snapshot actually plays the canon spine (a spot check per stage)', () => {
         const byId = Object.fromEntries(STARTER_BUNDLES.map((b) => [b.id, b]));
         const has = (id: string, pred: (c: NonNullable<ReturnType<typeof getCard>>) => boolean) =>
             byId[id]!.cardIds.some((c) => { const card = getCard(c); return !!card && pred(card); });
         const effect = (needle: string) =>
             (c: NonNullable<ReturnType<typeof getCard>>) => (c.primaryEffectId ?? '').includes(needle);
-        // Erosion stacks DoTs (poison-led since the 5/5/5 recipe color law
-        // moved its bleed common to Oratory's body slot pool); Tithe plants
-        // the fast bleed; Bastion still fields defense (the-adamant-wall);
-        // every theme ships an enchantment + disenchant rare.
-        expect(has('erosion', effect('poison'))).toBe(true);
-        expect(has('tithe', effect('bleed'))).toBe(true);
-        expect(has('bastion', (c) => c.verbClass === 'defend')).toBe(true);
-        for (const b of STARTER_BUNDLES) {
-            expect(has(b.id, (c) => c.cardType === 'enchantment')).toBe(true);
-            expect(has(b.id, (c) => c.cardType === 'disenchant')).toBe(true);
+
+        // The rot clock runs from the first snapshot to the last; the wall
+        // arrives with the pilgrim trimming; the persistent zones are the
+        // apostate's signature (the canon seats no enchantment before then).
+        for (const id of ['threadbare', 'pilgrim', 'apostate']) {
+            expect(has(id, effect('poison'))).toBe(true);
         }
+        expect(has('threadbare', (c) => c.verbClass === 'defend')).toBe(true);
+        expect(has('pilgrim', (c) => c.verbClass === 'defend')).toBe(true);
+        expect(has('apostate', (c) => c.cardType === 'enchantment')).toBe(true);
+        expect(has('apostate', (c) => c.cardType === 'disenchant')).toBe(true);
     });
 
     it('seeding a reward-archetype bundle tags the run with its hidden archetype', () => {
         const store = makeStore();
         store.setState({ player: { ...store.getState().player, knownCards: [] } } as never);
-        seedStarterBundleAction(store, 'erosion');
+        seedStarterBundleAction(store, 'pilgrim');
         const flags = (store.getState() as unknown as { flags?: string[] }).flags ?? [];
         expect(flags).toContain(BUNDLE_CHOSEN_FLAG);
-        expect(chosenStarterBundle(store)?.id).toBe('erosion');
+        expect(chosenStarterBundle(store)?.id).toBe('pilgrim');
         expect(runArchetype(store)).toBe('bleeder');
         expect(store.getState().player.knownCards.length).toBeGreaterThan(0);
     });
@@ -74,8 +83,8 @@ describe('Starter bundles — the pre-run deck picker (spec 32 v3 themed decks)'
     it('seeding an unmapped-archetype bundle seeds its deck but applies no reward skew', () => {
         const store = makeStore();
         store.setState({ player: { ...store.getState().player, knownCards: [] } } as never);
-        seedStarterBundleAction(store, 'foundry'); // Forge maps to no reward archetype
-        expect(chosenStarterBundle(store)?.id).toBe('foundry');
+        seedStarterBundleAction(store, 'threadbare'); // the Office maps to no reward archetype
+        expect(chosenStarterBundle(store)?.id).toBe('threadbare');
         expect(runArchetype(store)).toBeNull(); // archetype: null → no skew tag
         expect(store.getState().player.knownCards.length).toBeGreaterThan(0);
     });
