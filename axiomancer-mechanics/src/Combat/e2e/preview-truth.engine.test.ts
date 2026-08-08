@@ -80,7 +80,7 @@ function threatState(
     effects: CombatThreatPhase['threatAction']['effects'],
     opts: { playerEffects?: ActiveEffect[]; enemyEffects?: ActiveEffect[] } = {},
 ): CombatEncounterState {
-    let s = initializeCombatEncounter(makePlayer(['slippery-slope']), makeEnemy(500, 'body'), ['slippery-slope'], 7);
+    let s = initializeCombatEncounter(makePlayer(['spoiled-poultice']), makeEnemy(500, 'body'), ['spoiled-poultice'], 7);
     s = rollEncounterDice(s).state;
     s = {
         ...s,
@@ -101,9 +101,9 @@ describe('P0-truth — the card preview is the applied number', () => {
             const card = getCard(c.id);
             return card?.verbClass === 'direct-dot';
         });
-        // Post-D8 library: slippery-slope, sweet-poison, fallen-grace,
-        // brief-candle, recurring-symptom at minimum (straw-mans-jab retired
-        // in D8).
+        // Profane-Canon library (2026-08-08): spoiled-poultice,
+        // unction-of-boils, the-sextons-bell, gangrene-gospel, the-vig at
+        // minimum — the rot/debt cores keep the DoT-seed class populated.
         expect(dotCards.length).toBeGreaterThanOrEqual(5);
         for (const entry of dotCards) {
             const card = getCard(entry.id)!;
@@ -157,14 +157,15 @@ describe('P0-truth — the card preview is the applied number', () => {
     });
 
     it('an OFF-color die cannot power a card — the play fizzles honestly (the color law)', () => {
-        // Dice-law rework (2026-07-09): slippery-slope is a BODY card; a heart
-        // die may not power it at all. The old "off-color lands untouched
-        // numbers" case no longer exists — the fizzle IS the truth now.
-        let s = initializeCombatEncounter(makePlayer(['slippery-slope']), makeEnemy(500, 'heart'), ['slippery-slope'], 7);
+        // Dice-law rework (2026-07-09): spoiled-poultice (the Profane-Canon
+        // poison starter) is a BODY card; a heart die may not power it at
+        // all. The old "off-color lands untouched numbers" case no longer
+        // exists — the fizzle IS the truth now.
+        let s = initializeCombatEncounter(makePlayer(['spoiled-poultice']), makeEnemy(500, 'heart'), ['spoiled-poultice'], 7);
         s = rollEncounterDice(s).state;
         s = setDice(s, ['heart']);
         s = draftStanceDie(s, s.dice[0].id).state;
-        const entry = s.hand.find(h => h.cardId === 'slippery-slope')!;
+        const entry = s.hand.find(h => h.cardId === 'spoiled-poultice')!;
         const res = playCombatCard(s, { uid: entry.uid }, true);
         expect(res.events.some(e => e.kind === 'effect-fizzled')).toBe(true);
         expect(res.state.enemy.effects.length).toBe(0);
@@ -172,13 +173,13 @@ describe('P0-truth — the card preview is the applied number', () => {
 
     it('a color-MATCHED status play lands +1 duration (Fate Engine R7 — printed on the card)', () => {
         // body die vs body-stance enemy: neutral read, color match → +1 turn.
-        let s = initializeCombatEncounter(makePlayer(['slippery-slope']), makeEnemy(500, 'body'), ['slippery-slope'], 7);
+        let s = initializeCombatEncounter(makePlayer(['spoiled-poultice']), makeEnemy(500, 'body'), ['spoiled-poultice'], 7);
         s = rollEncounterDice(s).state;
         s = setDice(s, ['body']);
         s = draftStanceDie(s, s.dice[0].id).state;
-        const entry = s.hand.find(h => h.cardId === 'slippery-slope')!;
+        const entry = s.hand.find(h => h.cardId === 'spoiled-poultice')!;
         const after = playCombatCard(s, { uid: entry.uid }, true).state;
-        const authored = cardLibrary.find(c => c.id === 'slippery-slope')!.combatEffects!
+        const authored = cardLibrary.find(c => c.id === 'spoiled-poultice')!.combatEffects!
             .find(e => e.appliedTo === 'opponent')!;
         const landed = after.enemy.effects.find(e => e.effectId === authored.effectId)!;
         expect(landed.intensity).toBe(authored.intensity ?? 1);
@@ -187,7 +188,7 @@ describe('P0-truth — the card preview is the applied number', () => {
     });
 
     it('projectCardImpact never advertises a strike number — the strike is dead (spec 32 v3 §1)', () => {
-        const s = initializeCombatEncounter(makePlayer(['slippery-slope']), makeEnemy(500, 'body'), ['slippery-slope'], 7);
+        const s = initializeCombatEncounter(makePlayer(['spoiled-poultice']), makeEnemy(500, 'body'), ['spoiled-poultice'], 7);
         for (const entry of cardLibrary) {
             const card = getCard(entry.id)!;
             const impact = projectCardImpact(s, card);
@@ -223,7 +224,7 @@ describe('P0-truth — threat-side payloads bite for real', () => {
     });
 
     it('charm (forcedStance) makes the enemy fight from the forced stance — the read sees it', () => {
-        let s = initializeCombatEncounter(makePlayer(['slippery-slope']), makeEnemy(500, 'body'), ['slippery-slope'], 7);
+        let s = initializeCombatEncounter(makePlayer(['spoiled-poultice']), makeEnemy(500, 'body'), ['spoiled-poultice'], 7);
         s = rollEncounterDice(s).state;
         // Enemy phase stance is body, but charm forces heart → a MIND die now
         // reads ADVANTAGE (mind beats heart), where vs body it would read

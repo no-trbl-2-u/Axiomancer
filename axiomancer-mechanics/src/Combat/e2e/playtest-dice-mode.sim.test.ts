@@ -28,7 +28,7 @@ import { isUpgradeableDiceEnabled, setUpgradeableDice } from '../combat.upgradea
 const TINY = {
     stages: ['early'] as const,
     policies: ['greedy'] as const,
-    decks: [{ kind: 'preset', presetId: 'erosion' } as const],
+    decks: [{ kind: 'preset', presetId: 'threadbare' } as const],
     enemySlugs: ['grave-larva'],
     runsPerCell: 1,
     seed: 1,
@@ -63,7 +63,7 @@ describe('playtest report declares its dice model', () => {
 
 const PKG_ROOT = resolve(__dirname, '..', '..', '..');
 const CLI = resolve(PKG_ROOT, 'src', 'CLI', 'combat-playtest.cli.ts');
-const BASE_ARGS = ['--stage=early', '--policy=greedy', '--enemy=grave-larva', '--deck=preset:erosion', '--runs=1', '--json'];
+const BASE_ARGS = ['--stage=early', '--policy=greedy', '--enemy=grave-larva', '--deck=preset:threadbare', '--runs=1', '--json'];
 
 function runCli(args: readonly string[]): { stdout: string; status: number; stderr: string } {
     try {

@@ -77,7 +77,9 @@ describe('buildCharacterFromPreset', () => {
         expect(player.level).toBe(15);
         expect(player.baseStats).toEqual({ heart: 20, body: 30, mind: 25 });
         expect(player.knownCards).toHaveLength(14); // spec 32 v3 recipe: all tiers + the synergy payoff
-        expect(player.knownCards).toContain('resonance-detonation');
+        // Profane Canon (2026-08-08): the synergy payoff is communion-of-the-worm
+        // (RUPTURE ALL + SIPHON — the resonance-detonation successor).
+        expect(player.knownCards).toContain('communion-of-the-worm');
         // Phase 19 — wears the relic loadout; declared procedural gear benched.
         expect(player.equipment.weapon?.id).toBe('relic-overwhelming');
         expect(player.equipment.armor?.id).toBe('relic-read');

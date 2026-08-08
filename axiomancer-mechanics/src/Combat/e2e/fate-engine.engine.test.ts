@@ -270,10 +270,11 @@ describe('R8 — a bogus dieId is an explicit fizzle', () => {
 });
 
 describe('the projected card prints its die lines (real units)', () => {
-    it('threshold lines appear on v3 library cards', () => {
-        // mounting-case: threshold heart×2 → +1 Premise
-        expect(getCard('mounting-case')!.dieLines?.some(l => l.includes('HEART ×2'))).toBe(true);
-        // bootstrap-loop: threshold mind×2 → +1 pip to every Reserve die
-        expect(getCard('bootstrap-loop')!.dieLines?.some(l => l.includes('Reserve'))).toBe(true);
+    it('threshold lines appear on profane-canon library cards', () => {
+        // the-long-lent: threshold mind×3 → tick every DoT now
+        expect(getCard('the-long-lent')!.dieLines?.some(l => l.includes('MIND ×3'))).toBe(true);
+        // the-offertory-plate: threshold heart×3 → +2 Souls
+        expect(getCard('the-offertory-plate')!.dieLines?.some(l => l.includes('HEART ×3'))).toBe(true);
+        expect(getCard('the-offertory-plate')!.dieLines?.some(l => l.includes('Souls'))).toBe(true);
     });
 });

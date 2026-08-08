@@ -257,6 +257,8 @@ export function statePredicateText(p: SynergyStatePredicate): string {
             return 'blood already paid (you paid RECOIL earlier this turn)';
         case 'enemy-drew-blood':
             return 'the enemy drew blood since your last turn';
+        case 'requiem':
+            return `REQUIEM ${p.n} (${p.n}+ cards in your discard pile)`;
     }
 }
 
@@ -294,7 +296,9 @@ export function mechanicText(m: CardSpecialMechanic): string | null {
         // KW-3 (phase 29): FESTER→PROLONG, TRANSMUTE→REARGUE (renames).
         case 'extend_dots': return `PROLONG +${m.turns} duration to ALL your DoTs`;
         case 'convert_dots': return `REARGUE — convert bleed↔poison, +${m.bonusIntensity} intensity`;
-        case 'boost_all_dots': return `PROLONG +${m.intensity} intensity to ALL enemy DoTs`;
+        // Profane canon (2026-08-08): FESTER earns its own registry row — the
+        // intensity half of the old PROLONG double-duty splits out.
+        case 'boost_all_dots': return `FESTER ${m.intensity} — every DoT on the enemy gains +${m.intensity} intensity`;
         case 'soul_gain': return `+${m.count} Soul${m.count === 1 ? '' : 's'}`;
         // KW-2 (phase 29): re-mapped Soul→Rupture — extends RUPTURE's
         // printed sense ("consume N afflictions") instead of a redundant
@@ -331,6 +335,9 @@ export function mechanicText(m: CardSpecialMechanic): string | null {
         case 'reroll_spent': return 're-roll every spent/dead die';
         case 'befriend_attempt': return 'Befriend attempt';
         case 'strip_random_buff': return 'strip a random buff';
+        // Profane-canon rework — the pyre verbs.
+        case 'immolate': return `IMMOLATE ${m.count} — burn the lowest card${m.count === 1 ? '' : 's'} in hand from the fight: ${riderText(m.rider)}`;
+        case 'purge_self': return 'PURGE — this card leaves the fight entirely';
         default: return null;
     }
 }

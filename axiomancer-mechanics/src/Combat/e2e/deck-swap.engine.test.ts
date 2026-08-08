@@ -38,24 +38,24 @@ const swapCandidate: Card = {
 
 describe('applyDeckSwaps', () => {
     it('replaces EVERY copy of out, preserving copy count and seat order', () => {
-        const deck = ['a-card', 'slippery-slope', 'a-card', 'other'];
+        const deck = ['a-card', 'spoiled-poultice', 'a-card', 'other'];
         // 'out' presence is checked against the list; 'in' must resolve via
         // getCardById — use a real library id.
-        const swapped = applyDeckSwaps(deck, [{ out: 'a-card', in: 'slippery-slope' }]);
-        expect(swapped).toEqual(['slippery-slope', 'slippery-slope', 'slippery-slope', 'other']);
+        const swapped = applyDeckSwaps(deck, [{ out: 'a-card', in: 'spoiled-poultice' }]);
+        expect(swapped).toEqual(['spoiled-poultice', 'spoiled-poultice', 'spoiled-poultice', 'other']);
     });
 
     it('applies swaps in order — a later swap may target a swapped-in id', () => {
         const deck = ['x', 'y'];
         const swapped = applyDeckSwaps(deck, [
-            { out: 'x', in: 'slippery-slope' },
-            { out: 'slippery-slope', in: 'opening-statement' },
+            { out: 'x', in: 'spoiled-poultice' },
+            { out: 'spoiled-poultice', in: 'petty-indictment' },
         ]);
-        expect(swapped).toEqual(['opening-statement', 'y']);
+        expect(swapped).toEqual(['petty-indictment', 'y']);
     });
 
     it('throws when out is not in the deck (no silent no-op)', () => {
-        expect(() => applyDeckSwaps(['a'], [{ out: 'missing', in: 'slippery-slope' }]))
+        expect(() => applyDeckSwaps(['a'], [{ out: 'missing', in: 'spoiled-poultice' }]))
             .toThrow(/'missing' is not in the resolved deck/);
     });
 
@@ -73,15 +73,15 @@ describe('applyDeckSwaps', () => {
 
 describe('parseDeckSelectionArg — the +swap: suffix', () => {
     it('parses a plain preset unchanged', () => {
-        expect(parseDeckSelectionArg('preset:erosion')).toEqual({ kind: 'preset', presetId: 'erosion' });
+        expect(parseDeckSelectionArg('preset:threadbare')).toEqual({ kind: 'preset', presetId: 'threadbare' });
     });
 
     it('parses one and many swap pairs', () => {
-        expect(parseDeckSelectionArg('preset:erosion+swap:a/b')).toEqual({
-            kind: 'preset', presetId: 'erosion', swaps: [{ out: 'a', in: 'b' }],
+        expect(parseDeckSelectionArg('preset:threadbare+swap:a/b')).toEqual({
+            kind: 'preset', presetId: 'threadbare', swaps: [{ out: 'a', in: 'b' }],
         });
-        expect(parseDeckSelectionArg('preset:erosion+swap:a/b, c/d')).toEqual({
-            kind: 'preset', presetId: 'erosion',
+        expect(parseDeckSelectionArg('preset:threadbare+swap:a/b, c/d')).toEqual({
+            kind: 'preset', presetId: 'threadbare',
             swaps: [{ out: 'a', in: 'b' }, { out: 'c', in: 'd' }],
         });
     });
@@ -91,22 +91,22 @@ describe('parseDeckSelectionArg — the +swap: suffix', () => {
     });
 
     it('rejects malformed pairs and an empty suffix loudly', () => {
-        expect(() => parseDeckSelectionArg('preset:erosion+swap:a')).toThrow(/Bad swap pair 'a'/);
-        expect(() => parseDeckSelectionArg('preset:erosion+swap:a/b/c')).toThrow(/Bad swap pair 'a\/b\/c'/);
-        expect(() => parseDeckSelectionArg('preset:erosion+swap:')).toThrow(/needs at least one/);
+        expect(() => parseDeckSelectionArg('preset:threadbare+swap:a')).toThrow(/Bad swap pair 'a'/);
+        expect(() => parseDeckSelectionArg('preset:threadbare+swap:a/b/c')).toThrow(/Bad swap pair 'a\/b\/c'/);
+        expect(() => parseDeckSelectionArg('preset:threadbare+swap:')).toThrow(/needs at least one/);
     });
 });
 
 describe('resolveDeckSelection — preset + swaps', () => {
     it('resolves to the preset deck with the seat substituted (flag-agnostic)', () => {
         registerSandboxCards([swapCandidate]);
-        const base = buildPresetDeck('erosion');
+        const base = buildPresetDeck('threadbare');
         expect(base.length).toBeGreaterThan(0);
         const out = base[0];
         const copies = base.filter(id => id === out).length;
 
         const resolved = resolveDeckSelection(
-            { kind: 'preset', presetId: 'erosion', swaps: [{ out, in: swapCandidate.id }] },
+            { kind: 'preset', presetId: 'threadbare', swaps: [{ out, in: swapCandidate.id }] },
             undefined,
         );
 
@@ -117,7 +117,7 @@ describe('resolveDeckSelection — preset + swaps', () => {
     });
 
     it('swap-less preset selections stay byte-identical to buildPresetDeck', () => {
-        expect(resolveDeckSelection({ kind: 'preset', presetId: 'erosion' }, undefined))
-            .toEqual(buildPresetDeck('erosion'));
+        expect(resolveDeckSelection({ kind: 'preset', presetId: 'threadbare' }, undefined))
+            .toEqual(buildPresetDeck('threadbare'));
     });
 });

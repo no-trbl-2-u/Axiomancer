@@ -63,8 +63,8 @@ registerSandboxCards([{
     specialMechanics: [{ kind: 'rupture' }],
 }]);
 
-const DOT_BODY = 'slippery-slope';       // body starter, DoT (v3 poison)
-const CONTROL_HEART = 'red-herring';     // mind, control (BACKFIRE)
+const DOT_BODY = 'spoiled-poultice';     // body starter, DoT (poison, card-played clock)
+const CONTROL_HEART = 'scolds-bridle';   // body, control (STAGGER + BACKFIRE)
 const DAMAGE_BODY = 'qa-payoff-burst';   // body, payoff burst (sandbox fixture)
 
 const SEED = 12345;

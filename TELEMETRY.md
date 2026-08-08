@@ -211,3 +211,5 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-08-08T11:37:10Z | subagent | Explore | claude-fable-5 | main | Inventory inline SVG usage |
 | 2026-08-08T11:37:15Z | subagent | Explore | claude-fable-5 | main | Distill design handoff intent |
 | 2026-08-08T13:25:19Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-08-08T14:43:46Z | subagent | scout | claude-opus-5 | main | Scout MTG/PvE card research |
+| 2026-08-08T14:49:24Z | subagent | Explore | claude-fable-5 | main | Map mobile/editor card coupling |

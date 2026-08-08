@@ -24,8 +24,12 @@ import { lookupEffect } from '../../Effects';
 import { createCharacter } from '../../Character';
 import type { ActiveEffect } from '../../Effects/types';
 
-const CARD_A = 'slippery-slope';
-const CARD_B = 'brace-for-impact';
+// Profane Canon (2026-08-08): fixture seats moved to the new library —
+// spoiled-poultice (poison starter), chilblain-watch (guard starter),
+// the-long-lent (PROLONG glue) hold the roles slippery-slope /
+// brace-for-impact / festering-argument used to.
+const CARD_A = 'spoiled-poultice';
+const CARD_B = 'chilblain-watch';
 
 describe('combat loadout codec', () => {
     it('addToLoadout encodes a card as a flag', () => {
@@ -84,7 +88,7 @@ describe('buildCombatDeck with curated loadout', () => {
         level: 1,
         baseStats: { heart: 5, body: 5, mind: 5 },
     });
-    const EXTRA = 'festering-argument'; // a third real card only knownCards carries
+    const EXTRA = 'the-long-lent'; // a third real card only knownCards carries
     const playerWithCards = { ...player, knownCards: [CARD_A, CARD_B, EXTRA] };
 
     it('uses the curated loadout when loadout flags are present', () => {

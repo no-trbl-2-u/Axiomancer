@@ -71,18 +71,12 @@ const COMBAT_CARD_POOL: readonly string[] = Object.freeze(
  */
 const STARTER_DECK_IDS: readonly string[] = STARTING_CARD_IDS;
 
-/** The ten themed preset ids (spec 32 v3 §8), in the engine's display order. */
+/** The three campaign preset ids (the Profane Canon rework, 2026-08-08) —
+ *  snapshots of ONE deck evolving early → mid → late, in campaign order. */
 export type ThemedDeckId =
-    | 'erosion'
-    | 'oratory'
-    | 'foundry'
-    | 'penitent'
-    | 'standstill'
-    | 'augury'
-    | 'tithe'
-    | 'grace'
-    | 'bastion'
-    | 'refrain';
+    | 'threadbare'
+    | 'pilgrim'
+    | 'apostate';
 
 export type CombatDeckPresetId = 'starter-baseline' | ThemedDeckId;
 
@@ -207,19 +201,14 @@ export const BUNDLE_CHOSEN_FLAG = 'starter-bundle-chosen';
 const BUNDLE_FLAG_PREFIX = 'bundle:';
 const ARCHETYPE_FLAG_PREFIX = 'archetype:';
 
-/** Mobile presentation + reward-skew tag per themed preset (spec 32 v3 §6):
- *  the theme's two hallmark keywords and the archetype family they feed. */
+/** Mobile presentation + reward-skew tag per campaign preset (the Profane
+ *  Canon): a stage accent and the snapshot's leading keywords. The early
+ *  Office skews nowhere (it is deliberately neutral chaff); the mid Burden
+ *  leans rot/debt (bleeder); the late Canon adds the wall (guardian). */
 const BUNDLE_CHROME: Record<ThemedDeckId, { accent: string; pills: readonly string[]; archetype: StarterArchetype | null }> = {
-    erosion: { accent: '#5aa02c', pills: ['POISON', 'BLEED'], archetype: 'bleeder' },
-    oratory: { accent: '#c98a2b', pills: ['PREMISE', 'PERORATION'], archetype: 'controller' },
-    foundry: { accent: '#b0653a', pills: ['KINDLE', 'PIP'], archetype: null },
-    penitent: { accent: '#a63a3a', pills: ['RECOIL', 'FALLEN'], archetype: 'bleeder' },
-    standstill: { accent: '#4f7fd6', pills: ['STAGGER', 'BACKFIRE'], archetype: 'controller' },
-    augury: { accent: '#6c5ce7', pills: ['FORETELL', 'OMEN'], archetype: 'controller' },
-    tithe: { accent: '#7a8450', pills: ['SOUL', 'REAP'], archetype: 'bleeder' },
-    grace: { accent: '#9a5fd0', pills: ['SWAY', 'RAPPORT'], archetype: 'guardian' },
-    bastion: { accent: '#7f8c9b', pills: ['THORNS', 'RIPOSTE'], archetype: 'guardian' },
-    refrain: { accent: '#4aa6a0', pills: ['ECHO', 'REPRISE'], archetype: 'controller' },
+    threadbare: { accent: '#8a8273', pills: ['GUARD', 'POISON'], archetype: null },
+    pilgrim: { accent: '#5aa02c', pills: ['POISON', 'RECOIL'], archetype: 'bleeder' },
+    apostate: { accent: '#a63a3a', pills: ['DOOM', 'THORNS'], archetype: 'guardian' },
 };
 
 // One bundle per themed preset deck, in the engine's display order. Each

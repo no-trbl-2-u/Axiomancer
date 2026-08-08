@@ -17,13 +17,17 @@
  *      a low roll and pushes past the cap on a high roll; a die at
  *      `OVERHEAT_PIP_CEILING` takes no further pushes (no risk, no
  *      change); multiple dice resolve independently in one call.
- *   2. The `half-step` card (forge common, `{ kind: 'overheat', pips: 1 }`
- *      riding alongside its existing `guard`/`grant_pip`): an empty
- *      Reserve is a legal no-op (no fizzle); a Reserve die already at the
- *      cap pushes past it on a neutral roll; the same die busts (halves)
- *      on a low roll and fires `overheat-bust`.
- *   3. A full `COMBAT_SIM_POLICY_ORDER` × seed sweep on the `foundry`
- *      preset deck (half-step ×4) runs without crashing.
+ *   2. The OVERHEAT card leg (`{ kind: 'overheat', pips: 1 }` riding
+ *      alongside `guard`/`grant_pip`): an empty Reserve is a legal no-op
+ *      (no fizzle); a Reserve die already at the cap pushes past it on a
+ *      neutral roll; the same die busts (halves) on a low roll and fires
+ *      `overheat-bust`. PROFANE CANON (2026-08-08): the library carrier
+ *      (`half-step`, retired with the forge theme) moved out of the
+ *      57-card canon — the verb stays engine-live, so a SYNTHETIC sandbox
+ *      fixture mirroring half-step's exact shape carries the leg now.
+ *   3. A full `COMBAT_SIM_POLICY_ORDER` × seed sweep on a canon preset
+ *      deck (`pilgrim`) with the OVERHEAT fixture seated ×4 runs without
+ *      crashing.
  *
  * Fixture/RNG conventions follow `turnabout-ledger.engine.test.ts` /
  * `akrasia-debt-ledger.engine.test.ts` (shared builder in
@@ -40,6 +44,7 @@ import { Player } from '../../Character/characters.mock';
 import type { Character } from '../../Character/types';
 import { GraveLarva } from '../../Enemy/enemy.library';
 import { deepClone } from '../../Utils';
+import { registerSandboxCards } from '../../Cards/cards.sandbox';
 import { mockSequentialRng } from '../../test-utils/rng';
 import { buildFixtureState } from '../../test-utils/card-fixture';
 import { playCombatCard } from '../combat.engine';
@@ -52,6 +57,25 @@ import {
 import type { CombatEncounterState, CombatEvent, CombatManaDie } from '../combat.encounter.types';
 
 afterEach(() => vi.restoreAllMocks());
+
+// PROFANE CANON (2026-08-08): `overheat` lost its library carrier (half-step,
+// retired with the forge theme). The verb is still engine-live — this
+// synthetic fixture mirrors the retired card's exact mechanic shape
+// (guard 5 + grant_pip 2 + overheat 1, FREE pips 1) so the leg under test is
+// the RULE, not any one card's tuning.
+const OVERHEAT_CARD = 'qa-overheat-half-step';
+registerSandboxCards([
+    {
+        id: OVERHEAT_CARD, name: 'QA Overheat (ex-Half-Step)',
+        philosophicalAspect: 'body', description: 'overheat fixture', tier: 1,
+        targetType: 'self', rank: 2, cardType: 'spell',
+        free: { pips: 1 },
+        specialMechanics: [
+            { kind: 'guard', amount: 5 }, { kind: 'grant_pip', count: 2 },
+            { kind: 'overheat', pips: 1 },
+        ],
+    },
+]);
 
 function findEvents<K extends CombatEvent['kind']>(events: CombatEvent[], kind: K): Extract<CombatEvent, { kind: K }>[] {
     return events.filter((e): e is Extract<CombatEvent, { kind: K }> => e.kind === kind);
@@ -116,14 +140,16 @@ describe('overheatReserve (pure)', () => {
     });
 });
 
-// ── Card: half-step ───────────────────────────────────────────────────────────
+// ── Card: the OVERHEAT fixture (ex-half-step) ────────────────────────────────
 
 function stateFor(reserve: CombatManaDie[]): CombatEncounterState {
     const s = buildFixtureState({ clean: true });
     return {
         ...s,
+        // The fixture's ownership gate lists only library ids — own the QA card too.
+        player: { ...s.player, knownCards: [...s.player.knownCards, OVERHEAT_CARD] },
         reserve,
-        hand: [{ uid: 'under-test', cardId: 'half-step' }],
+        hand: [{ uid: 'under-test', cardId: OVERHEAT_CARD }],
     };
 }
 
@@ -133,7 +159,7 @@ function playPaid(state: CombatEncounterState, value: number): { events: CombatE
     return { events, after };
 }
 
-describe("half-step's OVERHEAT leg", () => {
+describe("the OVERHEAT card leg (ex-half-step fixture)", () => {
     it('an empty Reserve is a legal no-op — no fizzle, no reserve dice created', () => {
         const before = stateFor([]);
         const { events, after } = playPaid(before, 0.5);
@@ -157,7 +183,7 @@ describe("half-step's OVERHEAT leg", () => {
         const [busted] = findEvents(events, 'overheat-bust');
         expect(busted).toBeDefined();
         expect(busted!.dieId).toBe('r0');
-        expect(busted!.cardId).toBe('half-step');
+        expect(busted!.cardId).toBe(OVERHEAT_CARD);
         const finalDie = after.reserve?.find(d => d.id === 'r0');
         expect(finalDie?.pips).toBe(busted!.pips);
         expect(finalDie?.pips).toBeLessThan(RESERVE_PIP_CAP);
@@ -165,19 +191,19 @@ describe("half-step's OVERHEAT leg", () => {
 });
 
 describe('OVERHEAT — per-combat / sim sweep', () => {
-    it('sim policies never crash across every policy and seed (Foundry deck, half-step live)', () => {
-        // 2026-07-19: half-step (the OVERHEAT carrier) was unseated from the
-        // foundry preset by tempered-edge; the sweep's whole point is
-        // OVERHEAT-live sims, so seat half-step back into its old x4 seat
-        // explicitly (it remains a library/reward card).
-        const foundryDeck = buildPresetDeck('foundry')
-            .map(id => (id === 'tempered-edge' ? 'half-step' : id));
-        expect(foundryDeck.length).toBeGreaterThan(0);
-        expect(foundryDeck).toContain('half-step');
+    it('sim policies never crash across every policy and seed (pilgrim deck, OVERHEAT live)', () => {
+        // PROFANE CANON (2026-08-08): the foundry preset retired with the ten
+        // theme presets; the sweep's whole point is OVERHEAT-live sims, so
+        // seat the synthetic OVERHEAT fixture ×4 into a canon preset deck
+        // (pilgrim, the 30-card mid snapshot) explicitly.
+        const overheatDeck = buildPresetDeck('pilgrim')
+            .map((id, i) => (i < 4 ? OVERHEAT_CARD : id));
+        expect(overheatDeck.length).toBeGreaterThan(0);
+        expect(overheatDeck).toContain(OVERHEAT_CARD);
 
         function makeSimPlayer(): Character {
             const p = deepClone(Player);
-            p.knownCards = foundryDeck.slice();
+            p.knownCards = overheatDeck.slice();
             return p;
         }
 
@@ -185,7 +211,7 @@ describe('OVERHEAT — per-combat / sim sweep', () => {
             for (const seed of [1, 2, 3, 11]) {
                 const p = makeSimPlayer();
                 const e = deepClone(GraveLarva);
-                const run = runOneEncounter(p, e, seed, policy, { deck: foundryDeck });
+                const run = runOneEncounter(p, e, seed, policy, { deck: overheatDeck });
                 expect(run.outcome).toBeDefined();
             }
         }

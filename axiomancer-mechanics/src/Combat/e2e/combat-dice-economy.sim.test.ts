@@ -71,7 +71,7 @@ describe('spec 33 D3 — dice-math gates (authoritative face-table witness)', ()
 describe('spec 33 D3 — realized-play invariants (flag-on matrix)', () => {
     // A small, fast slice — invariants hold for any config.
     const result = simulateUpgradeableEconomy({
-        presets: ['oratory', 'standstill', 'erosion'],
+        presets: ['threadbare', 'pilgrim', 'apostate'],
         stages: ['early', 'mid'],
         seeds: [1, 2, 3, 4, 5],
     });

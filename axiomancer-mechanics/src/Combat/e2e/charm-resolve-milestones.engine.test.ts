@@ -23,8 +23,14 @@
  *      re-fire it or claw back the RAPPORT stack already landed.
  *   5. Per-combat, per-enemy reset (`initializeCombatEncounter` starts both
  *      flags false).
- *   6. A full `COMBAT_SIM_POLICY_ORDER` × seed sweep on the `grace` (Charm)
- *      preset deck runs without crashing.
+ *   6. A full `COMBAT_SIM_POLICY_ORDER` × seed sweep on the `threadbare`
+ *      preset deck (its `thin-hymn` copies are the SWAY carriers) runs
+ *      without crashing.
+ *
+ * Profane Canon re-pin (2026-08-08): the sway carrier under test is
+ * `thin-hymn` (flat SWAY 3, `{ kind: 'sway', amount: 3 }`, no self-echo) —
+ * the old `change-of-heart` / `soft-word` charm cards retired with the
+ * library rework; the `grace` preset gave way to the campaign presets.
  *
  * Fixture/RNG conventions follow `akrasia-debt-ledger.engine.test.ts`
  * (shared builder in `src/test-utils/card-fixture.ts`,
@@ -97,12 +103,12 @@ describe('Phase 32 part 4e — pure resolve-milestone threshold arithmetic', () 
 
 describe('Crossing Wavering only', () => {
     it('a gain that clears Wavering but not Faltering lands one RAPPORT stack and fires exactly one milestone event', () => {
-        // change-of-heart (the surviving charm SWAY carrier after heart-of-
-        // the-matter's D8 retirement) pays a flat SWAY 3 ({ kind: 'sway',
-        // amount: 3 }, no self-echo). resolve = 35 (maxHealth 100) ->
-        // wavering 16 / faltering 28. Pre-seeded sway 14 + the 3-point gain
-        // = 17: clears wavering (16), stays under faltering (28).
-        const before = stateFor('change-of-heart', 14, {
+        // thin-hymn (the Profane Canon's choir SWAY starter) pays a flat
+        // SWAY 3 ({ kind: 'sway', amount: 3 }, no self-echo). resolve = 35
+        // (maxHealth 100) -> wavering 16 / faltering 28. Pre-seeded sway 14
+        // + the 3-point gain = 17: clears wavering (16), stays under
+        // faltering (28).
+        const before = stateFor('thin-hymn', 14, {
             enemy: { ...buildFixtureState({ clean: true }).enemy, maxHealth: 100, health: 100, effects: [] },
         });
         const resolve = capitulateThreshold(before.enemy);
@@ -131,11 +137,11 @@ describe('Crossing Wavering only', () => {
 describe('Crossing BOTH Wavering and Faltering in one gain', () => {
     it('a single played card that jumps the running total past both waypoints fires both milestone events in one gainSway call', () => {
         // resolve = 14 (the fixture's default maxHealth 40) -> wavering 6 /
-        // faltering 11. change-of-heart's flat SWAY 3 is echoed to 6 by a
+        // faltering 11. thin-hymn's flat SWAY 3 is echoed to 6 by a
         // PENDING ECHO CHARGE (state.echoNextSpell, consumed by this play):
         // pre-seeded sway 5 (below wavering) + the 6-point gain = 11: clears
         // BOTH waypoints in this one gainSway call.
-        const before = stateFor('change-of-heart', 5, { echoNextSpell: true });
+        const before = stateFor('thin-hymn', 5, { echoNextSpell: true });
         const resolve = capitulateThreshold(before.enemy);
         expect(resolve).toBe(14);
         const { wavering, faltering } = swayResolveMilestoneThresholds(resolve);
@@ -173,9 +179,9 @@ describe('A shrinking live resolve never re-fires or claws back an already-cross
     it('Wavering stays fired (and its RAPPORT stack stays landed) even after the enemy\'s resolve later shrinks below the crossed threshold', () => {
         // First play crosses Wavering only (mirrors the "Wavering only" case
         // above): resolve 35 (maxHealth 100), wavering 16, faltering 28.
-        // change-of-heart's SWAY 3 on pre-seed 14 -> 17: past 16, under 28.
+        // thin-hymn's SWAY 3 on pre-seed 14 -> 17: past 16, under 28.
         const bigEnemy = { ...buildFixtureState({ clean: true }).enemy, maxHealth: 100, health: 100, effects: [] };
-        const first = stateFor('change-of-heart', 14, { enemy: bigEnemy });
+        const first = stateFor('thin-hymn', 14, { enemy: bigEnemy });
         const firstResult = playPaid(first);
         expect(firstResult.after.swayMilestoneWaveringFired).toBe(true);
         expect(firstResult.after.swayMilestoneFalteringFired).toBeFalsy();
@@ -194,7 +200,7 @@ describe('A shrinking live resolve never re-fires or claws back an already-cross
         const second: CombatEncounterState = {
             ...firstResult.after,
             enemy: shrunkEnemy,
-            hand: [{ uid: 'under-test-2', cardId: 'soft-word' }],
+            hand: [{ uid: 'under-test-2', cardId: 'thin-hymn' }],
         };
         mockSequentialRng(0.5);
         const { events, state: after } = playCombatCard(second, { uid: 'under-test-2' }, true);
@@ -215,14 +221,14 @@ describe('Per-combat, per-enemy reset', () => {
         expect(s.swayMilestoneFalteringFired).toBe(false);
     });
 
-    it('sim policies never crash across every policy and seed while resolve milestones fire (grace preset deck)', () => {
-        const graceDeck = buildPresetDeck('grace');
-        expect(graceDeck.length).toBeGreaterThan(0);
-        expect(graceDeck).toContain('soft-word'); // the theme's own sway carrier
+    it('sim policies never crash across every policy and seed while resolve milestones fire (threadbare preset deck)', () => {
+        const swayDeck = buildPresetDeck('threadbare');
+        expect(swayDeck.length).toBeGreaterThan(0);
+        expect(swayDeck).toContain('thin-hymn'); // the choir's own sway carrier
 
         function makePlayer(): Character {
             const p = deepClone(Player);
-            p.knownCards = graceDeck.slice();
+            p.knownCards = swayDeck.slice();
             return p;
         }
 
@@ -230,7 +236,7 @@ describe('Per-combat, per-enemy reset', () => {
             for (const seed of [1, 2, 3, 11]) {
                 const p = makePlayer();
                 const e = deepClone(GraveLarva);
-                const run = runOneEncounter(p, e, seed, policy, { deck: graceDeck });
+                const run = runOneEncounter(p, e, seed, policy, { deck: swayDeck });
                 expect(run.outcome).toBeDefined();
             }
         }

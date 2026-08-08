@@ -64,15 +64,21 @@ describe('Phase 14 — route survivorship vs coverage-audit classification', () 
         // card balance. A normal fv-6 boss becomes winnable once the preset decks
         // are tuned, which repeatedly broke a seed-pinned fixture (seed 7, then
         // seed 32); the impossible enemy decouples this classifier test from
-        // balance for good. fv-4 (an ordinary encounter) is still won normally;
-        // fv-7 is a route target but must never be reached once fv-6 ends in
-        // defeat.
+        // balance for good.
+        //
+        // PROFANE CANON (2026-08-08): the intermediate fv-4 encounter is also
+        // decoupled from balance now. `--combat-max-turns 4` is chosen so the
+        // fv-4 fodder fight (Float-Eye) hits the turn cap UNRESOLVED (outcome
+        // null — not a defeat, so the route continues), while the L110 ceiling
+        // at fv-6 still kills within the cap. Only a real `defeat` blocks the
+        // route; a capped, undecided combat must not. fv-7 is a route target
+        // but must never be reached once fv-6 ends in defeat.
         await runGameCli([
             '--route', 'fv-2,fv-3,fv-4,fv-5,fv-6,fv-7',
             '--auto-combat',
             '--combat-policy', 'naive',
             '--combat-seed', '32',
-            '--combat-max-turns', '30',
+            '--combat-max-turns', '4',
             '--combat-enemy', 'the-incompleteness',
             '--combat-enemy-node', 'fv-6',
             '--state-log', logPath,
@@ -84,6 +90,9 @@ describe('Phase 14 — route survivorship vs coverage-audit classification', () 
         expect(summary.blockedAtNodeId).toBe('fv-6');
         expect(summary.blockerReason).toBe('combat defeat');
         expect((summary.combatOutcomes as Record<string, string>)['fv-6']).toBe('defeat');
+        // The capped fv-4 combat resolved to no outcome — it must be recorded
+        // as neither a defeat nor a phantom victory.
+        expect(summary.combatOutcomes as Record<string, string>).not.toHaveProperty('fv-4');
         expect(summary.visitedNodeIds).not.toContain('fv-7');
         expect(summary.unvisitedNodeIds).toContain('fv-7');
     });
@@ -128,12 +137,17 @@ describe('Phase 14 — route survivorship vs coverage-audit classification', () 
     it('reports the exact unvisited nodes for a partial legal route', async () => {
         const logPath = tmpPath('partial');
 
+        // PROFANE CANON (2026-08-08): `--combat-max-turns 4` keeps the fv-12
+        // fodder encounter balance-independent — the fight hits the turn cap
+        // unresolved (not a defeat), so the walk stays survivorship no matter
+        // how the untuned decks trade. This test proves the visited/unvisited
+        // ACCOUNTING, not combat strength.
         await runGameCli([
             '--route', 'fv-2,fv-12',
             '--auto-combat',
             '--combat-policy', 'status',
             '--combat-seed', '42',
-            '--combat-max-turns', '12',
+            '--combat-max-turns', '4',
             '--state-log', logPath,
         ]);
 

@@ -1,8 +1,12 @@
 /**
- * Wording guard — the complete live Erosion paid-line surface.
+ * Wording guard — the complete live starter paid-line surface.
  *
- * The normal preset contributes seven unique cards. Upgradeable Dice swaps in
- * Recurring Symptom, so its paid line belongs to the same player-facing audit.
+ * Profane Canon re-pin (2026-08-08): the ten theme presets (erosion et al.)
+ * are retired; the campaign now opens on the THREADBARE preset (the
+ * Threadbare Office, 18 cards / 8 uniques). Its paid lines are the first
+ * player-facing wording surface of every run, so they carry the audit the
+ * Erosion preset used to. Upgradeable Dice swaps in the threadbare valve
+ * (Knucklebone Recant), so its paid line belongs to the same audit.
  * This test pins the production projection, not merely the authored fragments.
  */
 
@@ -14,31 +18,33 @@ import { toCombatCard } from '../combat.cards';
 import { getDeckPreset, PRESET_DICE_VALVES } from '../combat.starter-deck-presets';
 
 const EXPECTED_PAID_LINES: Readonly<Record<string, string>> = {
-    'poisoned-well':
-        'PAID — Inflict POISON 2 (ticks each card you play; 2 turns). Costs 1 die.',
-    'opening-statement':
-        'PAID — Apply MARK 1. Inflict POISON 1 (ticks each card you play; 2 turns). Gain 2 PREMISES. Costs 1 die.',
-    'festering-argument':
-        'PAID — PROLONG every DoT on the enemy by 1 turn. Costs 1 die.',
-    'currys-conversion':
-        'PAID — REARGUE — Convert all enemy BLEED to POISON and all POISON to BLEED, then add 1 intensity to each. Costs 1 die.',
-    'resonance-detonation':
-        'PAID — RUPTURE ALL for 50% more damage. SIPHON 35% of the RUPTURE damage. RECALL 2 cards; fire their FREE lines now. Costs 1 die.',
-    'venom-and-vein':
-        'PAID (rest of combat) — When a PAID line includes BLEED or POISON, every enemy status on that line gains +1 intensity and +1 duration. Costs 1 die.',
-    'suppurating-curse':
-        "PAID (rest of combat) — At the end of each round, deal the enemy's POISON and BLEED damage from that round again. Costs 1 die. Attaches to the enemy.",
-    'recurring-symptom':
-        'PAID — Inflict POISON 1 (ticks each card you play; 2 turns). Reroll all spent, exhausted, or X dice in your tray except floating dice. Costs 1 die.',
+    'spoiled-poultice':
+        'PAID — Inflict POISON 1 (ticks each card you play; 2 turns). Costs 1 die.',
+    'chilblain-watch':
+        'PAID — GUARD 6. Gain THORNS 1 for 2 turns. Costs 1 die.',
+    'petty-indictment':
+        'PAID — Apply MARK 1 for 2 turns. Gain 1 PREMISE. Costs 1 die.',
+    'first-spadeful':
+        'PAID — MILL 2. FORETELL 1. Costs 1 die.',
+    'grandmothers-psalter':
+        'PAID — DRAW 2. CLEANSE 1. Costs 1 die.',
+    'thumbprick-oath':
+        'PAID — RECOIL 1. DRAW 1 and gain 1 Conviction. Costs 1 die.',
+    'thin-hymn':
+        'PAID — SWAY 3. Costs 1 die.',
+    'threadbare-cope':
+        'PAID — GUARD 4. DRAW 1. Costs 1 die.',
+    'knucklebone-recant':
+        'PAID — Reroll every spent die in your tray. Gain 1 Conviction. Costs 1 die.',
 };
 
-describe('Erosion paid-effect wording', () => {
-    it('covers every unique preset card plus the live Erosion dice valve', () => {
-        const preset = getDeckPreset('erosion');
+describe('Threadbare paid-effect wording', () => {
+    it('covers every unique preset card plus the live threadbare dice valve', () => {
+        const preset = getDeckPreset('threadbare');
         expect(preset).toBeDefined();
 
         const scope = new Set(preset?.cardIds ?? []);
-        scope.add(PRESET_DICE_VALVES.erosion.valveId);
+        scope.add(PRESET_DICE_VALVES.threadbare.valveId);
 
         expect([...scope].sort()).toEqual(Object.keys(EXPECTED_PAID_LINES).sort());
     });

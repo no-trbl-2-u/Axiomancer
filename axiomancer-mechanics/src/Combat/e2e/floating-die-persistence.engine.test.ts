@@ -4,7 +4,8 @@
  * The handoff's open checklist item (2026-07-09): the save-back seam was only
  * unit-covered — this pins the WHOLE loop through real encounters:
  *
- *   fight 1: forge a float (ex-nihilo) → combat ends →
+ *   fight 1: forge a float (a sandbox fixture mirroring the retired
+ *   ex-nihilo — see the FORGE registration below) → combat ends →
  *   getFloatingDiceColors → Character.floatingDice (the save-back) →
  *   fight 2: the float materializes in the opening tray → spend it (bypassing
  *   the draft) → gone forever → fight 3 opens with an empty pool.
@@ -23,6 +24,7 @@ import type { Character } from '../../Character/types';
 import type { Enemy } from '../../Enemy/types';
 import { GraveLarva } from '../../Enemy/enemy.library';
 import { deepClone } from '../../Utils';
+import { registerSandboxCards } from '../../Cards/cards.sandbox';
 import {
     initializeCombatEncounter, rollEncounterDice, playCombatCard, draftStanceDie,
     getFloatingDiceColors,
@@ -31,8 +33,25 @@ import { FLOATING_DICE_CAP } from '../combat.dice';
 import { runHazardCombatAutoEncounter } from '../combat.autoplay';
 import type { CombatDieColor, CombatEncounterState } from '../combat.encounter.types';
 
-const FORGE = 'ex-nihilo';       // mind spell: FORGE a WILD floating die
-const DOT = 'slippery-slope';    // body spell: Poison — a wild float powers it
+// PROFANE CANON (2026-08-08): `forge_floating_die` lost its library carrier
+// (ex-nihilo, retired with the forge theme). The verb — and the cross-combat
+// persistence seam this file pins — is still engine-live, so a SYNTHETIC
+// sandbox fixture mirroring the retired card's exact shape forges the float.
+const FORGE = 'qa-ex-nihilo';    // mind spell fixture: FORGE a WILD floating die
+const DOT = 'spoiled-poultice';  // body spell (canon starter): Poison — a wild float powers it
+
+registerSandboxCards([
+    {
+        id: FORGE, name: 'QA Ex Nihilo (forge fixture)',
+        philosophicalAspect: 'mind', description: 'forge_floating_die fixture', tier: 2,
+        targetType: 'self', rank: 4, cardType: 'spell',
+        free: { pips: 1 },
+        specialMechanics: [
+            { kind: 'forge_floating_die', color: 'wild' },
+            { kind: 'bank_spent_die' },
+        ],
+    },
+]);
 
 function makePlayer(cards: string[], floatingDice: ('heart' | 'body' | 'mind' | 'wild')[] = []): Character {
     const p = deepClone(Player);

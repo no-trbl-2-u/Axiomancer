@@ -48,10 +48,10 @@ const EFFECT_KEYWORD: Record<string, string> = {
     // still-live species keep the cloud mapping. ──
     debuff_kindling_ember: 'Bleed',
     debuff_nettle_sting: 'Bleed',
-    // ── Card-local species (2026-07-10 card-keyword doctrine — a face
-    // keyword + gloss, NOT a registry row until it reaches ~3 cards) ──
-    // WS3.4 Doom species (spec 32 §12 #3 — ratified card-local, not
-    // keyword #31); applied by the 'doom-species' sandbox set.
+    // ── DOOM — promoted to a full registry keyword by the Profane Canon
+    // rework (2026-08-08): the inevitability DoT now has a dozen carriers
+    // across rot/debt/grave/trial/choir (was the card-local 'doom-species'
+    // sandbox row). ──
     debuff_creeping_doom: 'Doom',
 };
 
@@ -141,7 +141,12 @@ const MECHANIC_KEYWORD: Record<string, string> = {
     // ── Affliction glue ──
     extend_dots: 'Prolong',
     convert_dots: 'Reargue',
-    boost_all_dots: 'Prolong',
+    boost_all_dots: 'Fester',
+    // ── The pyre verbs (Profane Canon rework, 2026-08-08) ──
+    immolate: 'Immolate',
+    purge_self: 'Purge',
+    // REPLAY earns its row with the rework (open-every-grave headlines it).
+    replay_last: 'Replay',
 };
 
 /**
@@ -176,6 +181,7 @@ const KEYWORD_GLOSS: Record<string, string> = {
     Siphon: 'Heals you for the printed percentage of the damage this play deals.',
     // ── Affliction (T1) ──
     Prolong: 'Adds that many turns to every damage-over-time effect you have on the enemy.',
+    Fester: 'Every damage-over-time effect on the enemy gains that much intensity.',
     Reargue: "Flips the enemy's Bleed into Poison and its Poison into Bleed, each landing that much harder.",
     Poison:
         'Each time a card is played, the enemy loses 2 VITAE per Poison stack — and the longer it holds, the harder it bites.',
@@ -224,9 +230,14 @@ const KEYWORD_GLOSS: Record<string, string> = {
     Riposte:
         'Armed for one threat phase: reduces the first attack by its parry (CUT) value. '
         + 'If Guard fully blocks it, the enemy takes CTR damage — or more if the blow was bigger.',
-    // ── Echo (T10) ──
+    // ── Echo / Grave ──
     Echo: "The card's PAID line fires twice. FREE lines never echo.",
     Recall: 'Returns that many cards from your discard pile to your hand — highest rank first.',
+    Replay: 'Says your last spell again: its PAID payload fires that many more times.',
+    Requiem: "A card's REQUIEM line fires free while your discard pile holds that many cards.",
+    // ── The pyre verbs (Profane Canon rework, 2026-08-08) ──
+    Immolate: 'Burns the lowest-rank cards in your hand as a cost — they leave the fight entirely. A curse burns as well as anything.',
+    Purge: 'Playing this curse removes it from the fight entirely — a die and a beat buy the deck clean.',
     // 2026-07-12 (card-wording audit) — MILL was printed on three echo cards
     // ('mill 1 to discard') with no gloss, no glyph, and no registry row: the
     // only fully unglossed mechanic word in the sweep. Three carriers clears

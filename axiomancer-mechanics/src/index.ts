@@ -111,7 +111,7 @@ export {
     COMBAT_DICE_COUNT, COMBAT_HAND_SIZE, COMBAT_DIE_FACES,
     rollCombatDice, combatDieCanPower, refreshOneDie,
     toCombatCard, projectDeck, classifyVerbClass, buildCombatDeck,
-    COMBAT_DECK_PRESETS, COMBAT_DECK_PRESET_ORDER, PRESET_COLOR_BORROWS,
+    COMBAT_DECK_PRESETS, COMBAT_DECK_PRESET_ORDER, PRESET_LINEAGE,
     listDeckPresets, getDeckPreset, buildPresetDeck,
     getThreatSequence, generateDefaultThreatSequence,
     AUTHORED_THREAT_ENEMY_IDS,

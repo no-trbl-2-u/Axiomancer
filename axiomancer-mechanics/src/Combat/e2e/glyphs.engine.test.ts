@@ -16,10 +16,14 @@
  * the pure engine cases (tick / crack / shatter); the PAID-inscribe and
  * FREE-charge cases need an actual playable card, so — like
  * `momentum-wheel.engine.test.ts` — a handful of QA fixture cards are
- * registered into the sandbox at module scope. The real 4 pilot cards
- * (`glyphs-33d` sandbox set) get one direct registration/resolution smoke
- * test; their pricing/wording is otherwise exercised by the sweep in
- * `cards-sandbox.engine.test.ts`.
+ * registered into the sandbox at module scope.
+ *
+ * PROFANE CANON (2026-08-08): the `glyphs-33d` sandbox SET (the 4 pilot
+ * cards) was cleared with the library rework's sandbox reset — glyphs stay a
+ * sandbox-only mechanic with no curated carrier. The old pilot-card smoke
+ * block is replaced by a registry-resolution smoke over the QA fixtures
+ * (same seam: sandbox-registered glyph cards resolve via `getCardById` and
+ * project via `getCard`/`toCombatCard`).
  */
 
 import { describe, it, expect, afterEach, vi } from 'vitest';
@@ -30,7 +34,6 @@ import { GraveLarva } from '../../Enemy/enemy.library';
 import type { Enemy } from '../../Enemy/types';
 import { deepClone } from '../../Utils';
 import { registerSandboxCards } from '../../Cards/cards.sandbox';
-import { applySandboxSet } from '../../Cards/cards.sandbox-sets';
 import { getCardById } from '../../Cards/cards.library';
 import * as EffectsLib from '../../Effects/effects.library';
 import {
@@ -85,7 +88,6 @@ registerSandboxCards([
         combatEffects: [{ effectId: 'debuff_mark', appliedTo: 'opponent', intensity: 1, duration: 1 }],
     },
 ]);
-applySandboxSet('glyphs-33d');
 
 const rng = (): number => 0.5;
 
@@ -387,21 +389,23 @@ describe('Phase 33d — glyphShatter (enemy counterplay)', () => {
     });
 });
 
-// ── Sandbox registration smoke (the 4 pilot cards) ─────────────────────────
+// ── Sandbox registration smoke ─────────────────────────────────────────────
+// PROFANE CANON (2026-08-08): the glyphs-33d pilot SET was cleared with the
+// sandbox reset (glyphs remain a sandbox-only mechanic, no curated carrier).
+// The registry-resolution seam the old pilot smoke pinned survives on the QA
+// fixtures registered above.
 
-describe('Phase 33d — the 4 pilot cards resolve through the sandbox registry', () => {
+describe('Phase 33d — sandbox glyph cards resolve through the registry', () => {
     it.each([
-        'glyph-of-suppuration', 'ash-that-remembers',
-        'glyph-of-the-bulwark', 'ward-that-waits',
+        'qa-glyph-inscriber-poison', 'qa-glyph-inscriber-barrier', 'qa-glyph-pump',
     ])('%s resolves via getCardById and toCombatCard (getCard) with no collisions', (cardId) => {
         expect(getCardById(cardId)).toBeDefined();
         expect(getCard(cardId)).not.toBeNull();
     });
 
-    it('the two inscriber cards carry a glyph field; the two pump cards do not', () => {
-        expect(getCardById('glyph-of-suppuration')?.glyph).toBeDefined();
-        expect(getCardById('glyph-of-the-bulwark')?.glyph).toBeDefined();
-        expect(getCardById('ash-that-remembers')?.glyph).toBeUndefined();
-        expect(getCardById('ward-that-waits')?.glyph).toBeUndefined();
+    it('the two inscriber fixtures carry a glyph field; the pump does not', () => {
+        expect(getCardById('qa-glyph-inscriber-poison')?.glyph).toBeDefined();
+        expect(getCardById('qa-glyph-inscriber-barrier')?.glyph).toBeDefined();
+        expect(getCardById('qa-glyph-pump')?.glyph).toBeUndefined();
     });
 });

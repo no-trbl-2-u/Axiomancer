@@ -1,11 +1,14 @@
 /**
- * Per-card art registry — spec 32 v3 themed-deck pass (2026-07-08).
+ * Per-card art registry — the Profane Canon pass (2026-08-08).
  *
- * The same 18 paintings back the 70-card themed library, reassigned by THEME
- * so each deck reads as a visual family (Affliction → the toxic moth,
- * Bulwark → the armor set, Oracle → the divine stag, …) with the rare cards
- * taking the strongest painting in the family. Unmapped ids (sandbox /
- * conjured Thoughtforms) fall back to the circe placeholder.
+ * The same 18 paintings back the 57-card canon, reassigned by THEME so each
+ * archetype reads as a visual family (rot → the toxic moth, vigil → the
+ * armor set, grave → the misleading light, debt → the sinister tome, trial →
+ * the radiant rings, choir → the hummingbird + light) with the rare cards
+ * taking the strongest painting in the family. Curses take the devil book —
+ * they should look like something you were handed against your will.
+ * Unmapped ids (sandbox / conjured Thoughtforms) fall back to the circe
+ * placeholder.
  *
  * Metro needs static require literals, so this map is the one place a card id
  * meets a file path; the mechanics package stays art-free.
@@ -33,93 +36,72 @@ const guardShield = require('./guard-3.webp');
 export const FALLBACK_CARD_ART = require('./circe-placeholder.jpg');
 
 const CARD_ART_BY_ID: Record<string, number> = {
-    // ── T1 Affliction — the toxic moth + the dark blade ──
-    'slippery-slope': dreamFlutter,
-    'recurring-symptom': bleedBlade, // D8 valve (affliction)
-    'festering-argument': dreamFlutter,
-    'currys-conversion': bleedBlade,
-    'resonance-detonation': spark,
-    'venom-and-vein': dreamFlutter,
-    'suppurating-curse': devilBook,
-    // ── T2 Peroration — the radiant ring (the case, built in circles) ──
-    'exordium': lightRing,
-    'opening-statement': lightRing,
-    'mounting-case': brightSphere,
-    'peroratio-interrupta': lightRing,
-    'the-closing-word': brightSphere,
-    'practiced-cadence': lightRing, // phase 39 restoration (peroration)
-    'captive-audience': brightSphere, // phase 39 restoration (peroration)
-    'restate-the-point': lightRing, // D8 valve (peroration)
-    'second-take': confuseRings, // D8 valve (echo)
-    // ── T3 Forge — sparks and shifting orbs (dice from nothing) ──
-    'sketch-of-a-thought': blueLight,
-    'half-step': blueLight,
-    'bootstrap-loop': spark,
-    'ex-nihilo': brightSphere,
-    'the-overtake': iceSword,
-    'anvil-of-form': guardTorso,
-    'entropy-tax': devilBook, // phase 39 restoration (forge)
-    'forge-masters-stamp': devilBook, // D8 valve (forge)
-    // ── T4 Akrasia — the sinister tome + the burning blade (the debt) ──
-    'against-my-judgment': devilBook,
-    'sweet-poison': dreamFlutter,
-    'self-flagellant': burnBlade,
-    'fallen-grace': lightRing,
-    'pact-of-akrasia': devilBook,
-    'crown-of-thorns': yggdrasil,
-    'mirror-of-guilt': godEye,
-    // ── T5 Control — the twin rings (the fettered mind) ──
-    'zenos-half-step': confuseRings,
-    'red-herring': willOWisp,
-    'undistributed-middle': confuseRings,
-    'arrow-paradox': freezeCrystal,
-    'turnabout': confuseRings, // phase 32 part 4a: replaces paralysis-of-analysis in this slot
-    'achilles-and-the-tortoise': willOWisp, // phase 39 restoration (control)
-    'break-the-tempo': freezeCrystal, // D8 valve (control)
-    'quagmire-of-doubt': confuseRings,
-    // ── T6 Oracle — the divine stag (seeing truly) ──
-    'glimpse': godEye,
-    'signs-and-portents': willOWisp,
-    'cassandras-burden': godEye,
-    'delphic-ambiguity': confuseRings,
-    'prophecy-fulfilled': godEye,
-    'the-oracles-eye': godEye,
-    'fated-course': godEye, // phase 39 restoration (oracle)
-    'second-sight': godEye, // D8 valve (oracle)
-    // ── T7 Harvest — the hummingbird + blades (the gleaning) ──
-    'brief-candle': burnBlade,
-    'bank-the-yield': meatPecker, // D8 valve (harvest)
-    'winnowing': iceSword,
-    'the-gleaners-due': meatPecker,
-    'the-reaping': iceSword,
-    'bone-orchard': yggdrasil,
-    'the-tithe': meatPecker, // phase 39 restoration (harvest)
-    'bleed-for-it': dreamFlutter, // D8 valve (akrasia)
-    // ── T8 Charm — the radiant ring + the hummingbird (mercy) ──
-    'soft-word': meatPecker,
-    'disarming-smile': lightRing,
-    'common-ground': brightSphere,
-    'the-olive-branch': yggdrasil,
-    'heart-of-the-matter': brightSphere, // phase 39 restoration (charm)
-    'change-of-heart': brightSphere, // D8 valve (charm)
-    'irresistible-grace': lightRing,
-    'mirror-of-longing': godEye,
-    // ── T9 Bulwark — the armor set (the wall) ──
-    'brace-for-impact': guardArmor,
-    'nettle-cloak': yggdrasil,
-    'tu-quoque': yggdrasil,
-    'measured-answer': guardShield,
-    'the-adamant-wall': guardTorso,
-    'hedgehogs-dilemma': guardShield,
-    'crumbling-resolve': guardArmor,
-    // ── T10 Echo — the misleading light + shifting orbs (the refrain) ──
-    'refrain': willOWisp,
-    'second-thoughts': blueLight,
-    'hold-the-line': guardTorso, // D8 valve (bulwark)
-    'circular-reasoning': lightRing,
-    'ouroboros': blueLight,
-    'resonant-chamber': spark,
-    'stuck-in-their-head': willOWisp,
+    // ── The Threadbare Office (starters — worn, plain things) ──
+    'spoiled-poultice': dreamFlutter,
+    'thumbprick-oath': devilBook,
+    'first-spadeful': willOWisp,
+    'chilblain-watch': guardTorso,
+    'petty-indictment': lightRing,
+    'thin-hymn': meatPecker,
+    'grandmothers-psalter': brightSphere,
+    'threadbare-cope': guardArmor,
+    // ── The reliquary dice (valve relics) ──
+    'knucklebone-recant': confuseRings,
+    'ossuary-drawer': blueLight,
+    'saints-finger-bone': godEye,
+    // ── The curses (enemy-injected — they look like a bad bargain) ──
+    'mouthful-of-brine': devilBook,
+    'gnaw-marks': devilBook,
+    'arrears': devilBook,
+    'overheard-name': devilBook,
+    // ── rot — the toxic moth + the dark blade ──
+    'unction-of-boils': dreamFlutter,
+    'the-sextons-bell': bleedBlade,
+    'the-long-lent': dreamFlutter,
+    'gangrene-gospel': bleedBlade,
+    'communion-of-the-worm': spark,
+    'the-untended-garden': yggdrasil,
+    'edict-of-the-open-wound': devilBook,
+    // ── debt — the sinister tome + the burning blade ──
+    'promissory-cut': burnBlade,
+    'the-vig': devilBook,
+    'dead-pledge': devilBook,
+    'distraint': burnBlade,
+    'blank-indenture': devilBook,
+    'the-red-ledger': devilBook,
+    'joint-and-several': devilBook,
+    // ── grave — the misleading light + the pale glow ──
+    'spadework': willOWisp,
+    'shallow-grave': willOWisp,
+    'paupers-pyre': burnBlade,
+    'dirge-for-the-disinterred': blueLight,
+    'open-every-grave': willOWisp,
+    'the-sextons-count': blueLight,
+    'the-congregation-below': yggdrasil,
+    // ── vigil — the armor set (the wall) ──
+    'frostbitten-palisade': guardTorso,
+    'hoarfrost-teeth': yggdrasil,
+    'nothing-crossed-the-ice': freezeCrystal,
+    'the-reprisal-bell': guardShield,
+    'the-besiegers-winter': iceSword,
+    'every-stone-an-oath': guardArmor,
+    'caltrops-under-the-snow': guardShield,
+    // ── trial — the radiant rings (the case, built in circles) ──
+    'reading-of-the-charges': lightRing,
+    'scolds-bridle': confuseRings,
+    'the-pricking-needle': iceSword,
+    'contempt-of-court': confuseRings,
+    'the-black-cap': brightSphere,
+    'the-assize-bell': lightRing,
+    'writ-of-attainder': devilBook,
+    // ── choir — the hummingbird + the divine eye (sung mercy) ──
+    'alms-of-breath': meatPecker,
+    'passing-bell': lightRing,
+    'last-rites-sung-early': iceSword,
+    'the-offertory-plate': brightSphere,
+    'miserere': godEye,
+    'choirbone-reliquary': meatPecker,
+    'the-long-amen': godEye,
 };
 
 export function getCardArt(cardId: string): number {

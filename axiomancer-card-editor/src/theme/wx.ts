@@ -120,6 +120,17 @@ export const KEYWORDS = {
     draw: { label: 'DRAW', family: 'special', unit: '', blurb: 'Draw cards from your deck.' },
     enchant: { label: 'ENCHANT', family: 'special', unit: '', blurb: 'A persistent player-side passive, rest of combat. Paid only.' },
     disenchant: { label: 'DISENCHANT', family: 'special', unit: '', blurb: 'A standing curse attached to the enemy, rest of combat. Paid only.' },
+    // ── Profane Canon (2026-08-08) — the rework vocabulary ──
+    doom: { label: 'DOOM', family: 'dot', unit: '×', blurb: 'A DoT that grows +1 intensity each time the foe acts. No calendar — ends only by consumption.' },
+    immolate: { label: 'IMMOLATE', family: 'special', unit: '', blurb: 'Burn the lowest-rank cards in hand as a cost — they leave the fight entirely.' },
+    purge: { label: 'PURGE', family: 'special', unit: '', blurb: 'This curse card exiles itself from the fight when played.' },
+    requiem: { label: 'REQUIEM', family: 'special', unit: '', blurb: 'Condition line: fires free while your discard pile holds N+ cards.' },
+    fester: { label: 'FESTER', family: 'dot', unit: '×', blurb: 'Every DoT on the enemy gains that much intensity.' },
+    prolong: { label: 'PROLONG', family: 'dot', unit: 't', blurb: 'Every DoT you have on the enemy runs that many turns longer.' },
+    recall: { label: 'RECALL', family: 'special', unit: '', blurb: 'Return cards from your discard pile to hand — highest rank first.' },
+    replay: { label: 'REPLAY', family: 'special', unit: '', blurb: "Your last spell's PAID payload fires again, that many times." },
+    mill: { label: 'MILL', family: 'special', unit: '', blurb: 'Send cards from your deck top to the discard pile.' },
+    recoil: { label: 'RECOIL', family: 'special', unit: '', blurb: 'Pay the printed VITAE as a cost — unpreventable.' },
 } satisfies Record<string, KeywordMeta>;
 
 export type KeywordId = keyof typeof KEYWORDS;

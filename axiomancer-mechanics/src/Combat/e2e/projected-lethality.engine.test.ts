@@ -38,8 +38,11 @@ function makeEnemy(hp: number, effects: ActiveEffect[] = []): Enemy {
     return e;
 }
 
-const RUPTURE_CARD = 'resonance-detonation';
-const REAP_CARD = 'the-reaping'; // REAP all — 2 per Soul
+// Profane Canon (2026-08-08): the finisher carriers are now
+// communion-of-the-worm (RUPTURE ALL + SIPHON 50%) and miserere
+// (REAP ALL — 3 per Soul + SIPHON 50%).
+const RUPTURE_CARD = 'communion-of-the-worm';
+const REAP_CARD = 'miserere';
 
 describe('projectCombatOutcome — the consolidated status kill-path readout', () => {
     it('no DoT on the foe — nothing pending, no foreseeable kill, no finishers', () => {
@@ -121,7 +124,7 @@ describe('projectCombatOutcome — the consolidated status kill-path readout', (
         expect(reap.ready).toBe(true);
         expect(reap.ready).toBe(expectedReap.ready);
         expect(reap.amount).toBe(expectedReap.amount);
-        expect(reap.amount).toBe(12); // 4 per Soul × 3 Souls, neutral read (v3 rework)
+        expect(reap.amount).toBe(9); // 3 per Soul × 3 Souls, neutral read (Profane Canon)
     });
 
     it('an empty Soul bank leaves the reap finisher present but NOT ready', () => {
@@ -135,8 +138,8 @@ describe('projectCombatOutcome — the consolidated status kill-path readout', (
 
     it('a hand with no finisher-mechanic cards reports no finishers', () => {
         const enemy = makeEnemy(300, [ae('debuff_bleed', 1, 2)]);
-        const deck = ['brace-for-impact']; // a real, playable, non-finisher card
-        const state = initializeCombatEncounter(makePlayer(['brace-for-impact']), enemy, deck, 7);
+        const deck = ['chilblain-watch']; // a real, playable, non-finisher card
+        const state = initializeCombatEncounter(makePlayer(['chilblain-watch']), enemy, deck, 7);
         const projection = projectCombatOutcome(state);
         expect(projection.finishers).toEqual([]);
     });

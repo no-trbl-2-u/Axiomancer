@@ -73,21 +73,21 @@ export function DebugPlaythroughPresets() {
                 availableStatPoints: 0, // All points spent
                 baseStats: { heart: 15, body: 15, mind: 15 }, // High balanced stats
                 knownCards: [
-                    // Spec 32 v3 — a cross-theme endgame spread: commons,
-                    // uncommons, and the rare finishers/persistents.
-                    'slippery-slope',
-                    'festering-argument',
-                    'festering-argument',
-                    'currys-conversion',
-                    'resonance-detonation',
-                    'venom-and-vein',
-                    'suppurating-curse',
-                    'brace-for-impact',
-                    'nettle-cloak',
-                    'measured-answer',
-                    'the-adamant-wall',
-                    'zenos-half-step',
-                    'undistributed-middle',
+                    // Profane Canon — a cross-archetype endgame spread:
+                    // commons, uncommons, and the rare finishers/persistents.
+                    'unction-of-boils',
+                    'the-sextons-bell',
+                    'the-long-lent',
+                    'gangrene-gospel',
+                    'communion-of-the-worm',
+                    'the-untended-garden',
+                    'edict-of-the-open-wound',
+                    'chilblain-watch',
+                    'hoarfrost-teeth',
+                    'the-reprisal-bell',
+                    'nothing-crossed-the-ice',
+                    'scolds-bridle',
+                    'the-vig',
                 ],
                 inventory: endgameInventory,
                 currency: 500,

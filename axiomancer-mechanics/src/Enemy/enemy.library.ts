@@ -192,7 +192,7 @@ export const LittleBelle = createEnemy({
     tier1Overrides: T1_DEFAULT,
     loot: [none(60), drop('heart-draught', 30), drop('minor-healing-potion', 10)],
     philosophicalAlignment: { epistemology: -67, outlook: -67, scope: -67 },
-    cards: [card('soft-word')],
+    cards: [card('thin-hymn')],
     friendshipReward: {
         items: [{ ...getConsumableById('heart-draught')! }],
         xpBonus: 10,
@@ -268,7 +268,7 @@ export const WaterHolger = createEnemy({
     tier1Overrides: T1_DEFAULT,
     loot: [none(50), drop('heart-draught', 30), drop('healing-potion', 15), drop('antidote', 5)],
     philosophicalAlignment: { epistemology: -67, outlook: -67, scope: 0 },
-    cards: [card('soft-word')],
+    cards: [card('thin-hymn')],
     friendshipReward: {
         items: [
             { ...getConsumableById('healing-potion')! },
@@ -342,7 +342,7 @@ export const Ghast = createEnemy({
     tier1Overrides: T1_DEFAULT,
     loot: [none(55), drop('clarity-serum', 25), drop('focus-vial', 20)],
     philosophicalAlignment: { epistemology: 67, outlook: -67, scope: -67 },
-    cards: [card('red-herring')],
+    cards: [card('scolds-bridle')],
     addedIn: ADDED,
     tags: ['early-game', 'enemy'],
 });
@@ -382,7 +382,7 @@ export const TheButcher = createEnemy({
     },
     loot: [none(35), drop('body-elixir', 35), drop('healing-potion', 20), drop('berserker-brew', 10)],
     philosophicalAlignment: { epistemology: 0, outlook: -67, scope: -67 },
-    cards: [card('sweet-poison')],
+    cards: [card('unction-of-boils')],
     addedIn: ADDED,
     tags: ['early-game', 'elite', 'enemy'],
 });
@@ -404,7 +404,7 @@ export const BrineHag = createEnemy({
     },
     loot: [none(35), drop('heart-draught', 30), drop('healing-potion', 20), drop('resonance-crystal', 15)],
     philosophicalAlignment: { epistemology: -67, outlook: -67, scope: 0 },
-    cards: [card('soft-word')],
+    cards: [card('thin-hymn')],
     befriendabilityConfig: {
         hpGate: { belowPct: 0.3 },
         roundsThreshold: 4,
@@ -466,7 +466,7 @@ export const TheFerryman = createEnemy({
     },
     loot: [none(35), drop('clarity-serum', 25), drop('focus-vial', 25), drop('philosopher-tea', 15)],
     philosophicalAlignment: { epistemology: 0, outlook: -67, scope: 67 },
-    cards: [card('festering-argument')],
+    cards: [card('the-long-lent')],
     befriendabilityConfig: {
         hpGate: { belowPct: 0.25 },
         roundsThreshold: 6,
@@ -542,7 +542,7 @@ export const KingOfRevenge = createEnemy({
         drop('heart-draught', 20),
     ],
     philosophicalAlignment: { epistemology: -67, outlook: -67, scope: -67 },
-    cards: [card('half-step'), card('brief-candle'), card('red-herring')],
+    cards: [card('knucklebone-recant'), card('passing-bell'), card('scolds-bridle')],
     befriendabilityConfig: {
         hpGate: { belowPct: 0.7 },
         roundsThreshold: 1,
@@ -619,7 +619,7 @@ export const Wichtlein = createEnemy({
     tier1Overrides: T1_DEFAULT,
     loot: [none(55), drop('focus-vial', 25), drop('clarity-serum', 20)],
     philosophicalAlignment: { epistemology: 67, outlook: -67, scope: 0 },
-    cards: [card('red-herring')],
+    cards: [card('scolds-bridle')],
     addedIn: ADDED,
     tags: ['mid-game', 'enemy'],
 });
@@ -654,7 +654,7 @@ export const Kudan = createEnemy({
         drop('revive-crystal', 10),
     ],
     philosophicalAlignment: { epistemology: -67, outlook: -67, scope: 67 },
-    cards: [card('slippery-slope')],
+    cards: [card('spoiled-poultice')],
     finalBlowLines: {
         brutal: 'The prophecy dies unspoken. Whatever it knew becomes, mercifully, unknowable.',
         quiet:  'It lies down like cattle before weather. The calamity will have to introduce itself.',
@@ -710,7 +710,7 @@ export const WeepingHead = createEnemy({
     tier1Overrides: T1_DEFAULT,
     loot: [none(55), drop('heart-draught', 30), drop('healing-potion', 15)],
     philosophicalAlignment: { epistemology: -67, outlook: -67, scope: -67 },
-    cards: [card('soft-word')],
+    cards: [card('thin-hymn')],
     addedIn: ADDED,
     tags: ['mid-game', 'enemy'],
 });
@@ -729,7 +729,7 @@ export const GoblinShaman = createEnemy({
     tier1Overrides: T1_DEFAULT,
     loot: [none(50), drop('clarity-serum', 25), drop('focus-vial', 15), drop('philosopher-tea', 10)],
     philosophicalAlignment: { epistemology: -67, outlook: 0, scope: 0 },
-    cards: [card('glimpse')],
+    cards: [card('shallow-grave')],
     addedIn: ADDED,
     tags: ['mid-game', 'enemy'],
 });
@@ -789,7 +789,7 @@ export const TriEyes = createEnemy({
     tier1Overrides: T1_DEFAULT,
     loot: [none(50), drop('clarity-serum', 30), drop('healing-potion', 20)],
     philosophicalAlignment: { epistemology: 67, outlook: 0, scope: 0 },
-    cards: [card('red-herring'), card('brief-candle')],
+    cards: [card('scolds-bridle'), card('passing-bell')],
     befriendabilityConfig: {
         hpGate: { belowPct: 0.7 },
         roundsThreshold: 1,
@@ -838,7 +838,7 @@ export const Mabadi = createEnemy({
     },
     loot: [none(40), drop('body-elixir', 30), drop('whetstone-oil', 20), drop('healing-potion', 10)],
     philosophicalAlignment: { epistemology: 67, outlook: 0, scope: -67 },
-    cards: [card('half-step')],
+    cards: [card('knucklebone-recant')],
     addedIn: ADDED,
     tags: ['mid-game', 'elite', 'enemy'],
 });
@@ -860,7 +860,7 @@ export const FrayedOne = createEnemy({
     },
     loot: [none(40), drop('clarity-serum', 25), drop('void-essence', 20), drop('philosopher-tea', 15)],
     philosophicalAlignment: { epistemology: 0, outlook: -67, scope: 67 },
-    cards: [card('festering-argument')],
+    cards: [card('the-long-lent')],
     addedIn: ADDED,
     tags: ['mid-game', 'elite', 'enemy'],
 });
@@ -882,7 +882,7 @@ export const BoneTotem = createEnemy({
     },
     loot: [none(40), drop('iron-skin-draught', 25), drop('clarity-serum', 20), drop('void-essence', 15)],
     philosophicalAlignment: { epistemology: -67, outlook: -67, scope: 67 },
-    cards: [card('sweet-poison')],
+    cards: [card('unction-of-boils')],
     addedIn: ADDED,
     tags: ['mid-game', 'elite', 'enemy'],
 });
@@ -904,7 +904,7 @@ export const BoneWizard = createEnemy({
     },
     loot: [none(35), drop('philosopher-tea', 25), drop('clarity-serum', 25), drop('void-essence', 15)],
     philosophicalAlignment: { epistemology: 67, outlook: 0, scope: 67 },
-    cards: [card('slippery-slope')],
+    cards: [card('spoiled-poultice')],
     addedIn: ADDED,
     tags: ['mid-game', 'elite', 'enemy'],
 });
@@ -938,7 +938,7 @@ export const Mirac = createEnemy({
         drop('resonance-crystal', 10),
     ],
     philosophicalAlignment: { epistemology: 0, outlook: -67, scope: 67 },
-    cards: [card('festering-argument'), card('sweet-poison'), card('bootstrap-loop')],
+    cards: [card('the-long-lent'), card('unction-of-boils'), card('ossuary-drawer')],
     finalBlowLines: {
         brutal: 'The court adjourns violently. The verdict, unread, unhappens.',
         quiet:  'The hood bows. The red orb dims to a case dismissed.',
@@ -974,7 +974,7 @@ export const CursedPaladin = createEnemy({
     },
     loot: [none(35), drop('iron-skin-draught', 25), drop('body-elixir', 25), drop('healing-potion', 15)],
     philosophicalAlignment: { epistemology: -67, outlook: -67, scope: 0 },
-    cards: [card('half-step'), card('soft-word')],
+    cards: [card('knucklebone-recant'), card('thin-hymn')],
     addedIn: ADDED,
     tags: ['mid-game', 'elite', 'enemy'],
 });
@@ -993,7 +993,7 @@ export const VampireThrall = createEnemy({
     tier1Overrides: T1_DEFAULT,
     loot: [none(55), drop('body-elixir', 25), drop('healing-potion', 20)],
     philosophicalAlignment: { epistemology: -67, outlook: -67, scope: 0 },
-    cards: [card('sweet-poison')],
+    cards: [card('unction-of-boils')],
     addedIn: ADDED,
     tags: ['mid-game', 'enemy'],
 });
@@ -1015,7 +1015,7 @@ export const HasshakuSama = createEnemy({
     },
     loot: [none(30), drop('heart-draught', 30), drop('healing-potion', 25), drop('resonance-crystal', 15)],
     philosophicalAlignment: { epistemology: -67, outlook: 0, scope: -67 },
-    cards: [card('soft-word'), card('soft-word')],
+    cards: [card('thin-hymn'), card('thin-hymn')],
     befriendabilityConfig: {
         hpGate: { belowPct: 0.4 },
         roundsThreshold: 3,
@@ -1079,7 +1079,7 @@ export const JeweledTree = createEnemy({
     },
     loot: [none(25), drop('resonance-crystal', 30), drop('heart-draught', 25), drop('greater-healing-potion', 20)],
     philosophicalAlignment: { epistemology: -67, outlook: 67, scope: 67 },
-    cards: [card('soft-word')],
+    cards: [card('thin-hymn')],
     addedIn: ADDED,
     tags: ['mid-game', 'elite', 'enemy'],
 });
@@ -1101,7 +1101,7 @@ export const OgreNaga = createEnemy({
     },
     loot: [none(35), drop('body-elixir', 30), drop('hunters-elixir', 20), drop('greater-healing-potion', 15)],
     philosophicalAlignment: { epistemology: 0, outlook: -67, scope: -67 },
-    cards: [card('sweet-poison')],
+    cards: [card('unction-of-boils')],
     addedIn: ADDED,
     tags: ['mid-game', 'elite', 'enemy'],
 });
@@ -1123,7 +1123,7 @@ export const Sidelle = createEnemy({
     },
     loot: [none(35), drop('whetstone-oil', 25), drop('body-elixir', 25), drop('greater-healing-potion', 15)],
     philosophicalAlignment: { epistemology: 0, outlook: -67, scope: -67 },
-    cards: [card('half-step')],
+    cards: [card('knucklebone-recant')],
     addedIn: ADDED,
     tags: ['mid-game', 'elite', 'enemy'],
 });
@@ -1151,7 +1151,7 @@ export const RawheadRex = createEnemy({
         drop('revive-crystal', 15),
     ],
     philosophicalAlignment: { epistemology: 0, outlook: -67, scope: -67 },
-    cards: [card('sweet-poison'), card('half-step'), card('brief-candle')],
+    cards: [card('unction-of-boils'), card('knucklebone-recant'), card('passing-bell')],
     finalBlowLines: {
         brutal: 'The bloody bones come apart into their two advertised components.',
         quiet:  'It backs down the cellar stairs one last time, and the dark closes politely behind it.',
@@ -1189,7 +1189,7 @@ export const FateSpinner = createEnemy({
         drop('revive-crystal', 10),
     ],
     philosophicalAlignment: { epistemology: 67, outlook: 0, scope: 67 },
-    cards: [card('glimpse'), card('red-herring'), card('slippery-slope')],
+    cards: [card('shallow-grave'), card('scolds-bridle'), card('spoiled-poultice')],
     befriendabilityConfig: {
         hpGate: { belowPct: 0.2 },
         roundsThreshold: 8,
@@ -1260,7 +1260,7 @@ export const AshenBoneDrake = createEnemy({
     },
     loot: [none(30), drop('iron-skin-draught', 25), drop('greater-healing-potion', 25), drop('war-horn-draught', 20)],
     philosophicalAlignment: { epistemology: 0, outlook: -67, scope: 0 },
-    cards: [card('half-step'), card('glimpse')],
+    cards: [card('knucklebone-recant'), card('shallow-grave')],
     addedIn: ADDED,
     tags: ['mid-game', 'elite', 'enemy'],
 });
@@ -1288,7 +1288,7 @@ export const RaAminKa = createEnemy({
         drop('revive-crystal', 15),
     ],
     philosophicalAlignment: { epistemology: -67, outlook: 0, scope: 67 },
-    cards: [card('bootstrap-loop'), card('slippery-slope'), card('undistributed-middle')],
+    cards: [card('ossuary-drawer'), card('spoiled-poultice'), card('petty-indictment')],
     finalBlowLines: {
         brutal: 'The wrappings unwind all at once. The decree inside was four thousand years of dust.',
         quiet:  'The king lies back down. The administration, at very long last, adjourns.',
@@ -1320,7 +1320,7 @@ export const LadyGabriella = createEnemy({
     },
     loot: [none(30), drop('heart-draught', 30), drop('regeneration-tonic', 20), drop('greater-healing-potion', 20)],
     philosophicalAlignment: { epistemology: 0, outlook: -67, scope: -67 },
-    cards: [card('soft-word'), card('soft-word')],
+    cards: [card('thin-hymn'), card('thin-hymn')],
     befriendabilityConfig: {
         hpGate: { belowPct: 0.35 },
         roundsThreshold: 5,
@@ -1384,7 +1384,7 @@ export const Zoma = createEnemy({
     },
     loot: [none(30), drop('philosopher-tea', 30), drop('clarity-serum', 25), drop('greater-resonance-crystal', 15)],
     philosophicalAlignment: { epistemology: 67, outlook: 0, scope: 0 },
-    cards: [card('red-herring'), card('glimpse')],
+    cards: [card('scolds-bridle'), card('shallow-grave')],
     addedIn: ADDED,
     tags: ['mid-game', 'elite', 'enemy'],
 });
@@ -1407,7 +1407,7 @@ export const MabadiUndrowned = createEnemy({
     },
     loot: [none(30), drop('body-elixir', 25), drop('whetstone-oil', 25), drop('supreme-healing-potion', 20)],
     philosophicalAlignment: { epistemology: 67, outlook: -67, scope: -67 },
-    cards: [card('half-step'), card('slippery-slope')],
+    cards: [card('knucklebone-recant'), card('spoiled-poultice')],
     addedIn: ADDED,
     tags: ['mid-game', 'elite', 'enemy'],
 });
@@ -1433,7 +1433,7 @@ export const TriEyesHollowed = createEnemy({
     },
     loot: [none(30), drop('clarity-serum', 25), drop('philosopher-tea', 25), drop('void-essence', 20)],
     philosophicalAlignment: { epistemology: 67, outlook: -67, scope: 67 },
-    cards: [card('brief-candle'), card('festering-argument')],
+    cards: [card('passing-bell'), card('the-long-lent')],
     addedIn: ADDED,
     tags: ['late-game', 'elite', 'enemy'],
 });
@@ -1455,7 +1455,7 @@ export const BlackDeath = createEnemy({
     },
     loot: [none(25), drop('antidote', 30), drop('supreme-healing-potion', 25), drop('phoenix-tear', 20)],
     philosophicalAlignment: { epistemology: 0, outlook: -67, scope: 67 },
-    cards: [card('sweet-poison'), card('half-step')],
+    cards: [card('unction-of-boils'), card('knucklebone-recant')],
     addedIn: ADDED,
     tags: ['late-game', 'elite', 'enemy'],
 });
@@ -1477,7 +1477,7 @@ export const TheUnnameable = createEnemy({
     },
     loot: [none(25), drop('void-essence', 35), drop('philosopher-tea', 20), drop('supreme-healing-potion', 20)],
     philosophicalAlignment: { epistemology: 0, outlook: -67, scope: 67 },
-    cards: [card('slippery-slope'), card('glimpse')],
+    cards: [card('spoiled-poultice'), card('shallow-grave')],
     addedIn: ADDED,
     tags: ['late-game', 'elite', 'enemy'],
 });
@@ -1499,7 +1499,7 @@ export const FireGiant = createEnemy({
     },
     loot: [none(25), drop('war-horn-draught', 30), drop('supreme-healing-potion', 25), drop('iron-skin-draught', 20)],
     philosophicalAlignment: { epistemology: 0, outlook: 0, scope: -67 },
-    cards: [card('sweet-poison'), card('half-step')],
+    cards: [card('unction-of-boils'), card('knucklebone-recant')],
     addedIn: ADDED,
     tags: ['late-game', 'elite', 'enemy'],
 });
@@ -1522,7 +1522,7 @@ export const GreaterDevil = createEnemy({
     },
     loot: [none(25), drop('void-essence', 30), drop('supreme-healing-potion', 25), drop('greater-resonance-crystal', 20)],
     philosophicalAlignment: { epistemology: 67, outlook: -67, scope: 0 },
-    cards: [card('red-herring'), card('bootstrap-loop')],
+    cards: [card('scolds-bridle'), card('ossuary-drawer')],
     addedIn: ADDED,
     tags: ['late-game', 'elite', 'enemy'],
 });
@@ -1550,7 +1550,7 @@ export const Rangda = createEnemy({
         drop('revive-crystal', 15),
     ],
     philosophicalAlignment: { epistemology: -67, outlook: -67, scope: 0 },
-    cards: [card('soft-word'), card('festering-argument'), card('glimpse')],
+    cards: [card('thin-hymn'), card('the-long-lent'), card('shallow-grave')],
     befriendabilityConfig: {
         hpGate: { belowPct: 0.2 },
         roundsThreshold: 8,
@@ -1628,7 +1628,7 @@ export const ZomaAscendant = createEnemy({
         drop('revive-crystal', 15),
     ],
     philosophicalAlignment: { epistemology: 67, outlook: -67, scope: 67 },
-    cards: [card('glimpse'), card('bootstrap-loop'), card('red-herring')],
+    cards: [card('shallow-grave'), card('ossuary-drawer'), card('scolds-bridle')],
     finalBlowLines: {
         brutal: 'The two heads disagree one final, fatal time — about which of them was struck.',
         quiet:  'Both voices finish the same sentence and, having nothing left to settle, stop.',
@@ -1666,7 +1666,7 @@ export const ElderFireGiant = createEnemy({
         drop('revive-crystal', 15),
     ],
     philosophicalAlignment: { epistemology: 0, outlook: -67, scope: 67 },
-    cards: [card('sweet-poison'), card('half-step'), card('brief-candle')],
+    cards: [card('unction-of-boils'), card('knucklebone-recant'), card('passing-bell')],
     finalBlowLines: {
         brutal: 'The white fire goes out all at once, and the cold that follows has a genealogy too.',
         quiet:  'The elder banks his own coals, unhurried to the end.',
@@ -1704,7 +1704,7 @@ export const Tezcatlipoca = createEnemy({
         drop('revive-crystal', 20),
     ],
     philosophicalAlignment: { epistemology: 67, outlook: -67, scope: 67 },
-    cards: [card('glimpse'), card('bootstrap-loop'), card('festering-argument')],
+    cards: [card('shallow-grave'), card('ossuary-drawer'), card('the-long-lent')],
     finalBlowLines: {
         brutal: 'The mirror takes one last look at itself. The smoke declines to survive the review.',
         quiet:  'The reflection bows first. The god, being thorough, follows it down.',
@@ -1742,7 +1742,7 @@ export const ArchDemon = createEnemy({
         drop('revive-crystal', 20),
     ],
     philosophicalAlignment: { epistemology: 0, outlook: -67, scope: -67 },
-    cards: [card('sweet-poison'), card('half-step'), card('bootstrap-loop')],
+    cards: [card('unction-of-boils'), card('knucklebone-recant'), card('ossuary-drawer')],
     finalBlowLines: {
         brutal: 'The promotion is rescinded from above, violently, with prejudice.',
         quiet:  'The appetite completes. There was, in the end, exactly one thing it had not eaten.',
@@ -1781,7 +1781,7 @@ export const Beelzebub = createEnemy({
         drop('greater-resonance-crystal', 15),
     ],
     philosophicalAlignment: { epistemology: -67, outlook: -67, scope: 67 },
-    cards: [card('sweet-poison'), card('glimpse'), card('bootstrap-loop')],
+    cards: [card('unction-of-boils'), card('shallow-grave'), card('ossuary-drawer')],
     finalBlowLines: {
         brutal: 'The swarm loses quorum. Policy, lacking a body, disbands.',
         quiet:  'One fly leaves, then the rest. Lordship over what swarms was always a tenancy.',
@@ -1820,7 +1820,7 @@ export const Death = createEnemy({
         drop('philosopher-tea', 10),
     ],
     philosophicalAlignment: { epistemology: 0, outlook: 0, scope: 67 },
-    cards: [card('slippery-slope'), card('festering-argument'), card('bootstrap-loop')],
+    cards: [card('spoiled-poultice'), card('the-long-lent'), card('ossuary-drawer')],
     finalBlowLines: {
         brutal: 'The appointment is cancelled with force. The calendar bleeds a little.',
         quiet:  'It checks the ledger, finds an error in your favor, and withdraws without apology.',
@@ -1870,7 +1870,7 @@ export const TheAbortive = createEnemy({
         drop('greater-resonance-crystal', 10),
     ],
     philosophicalAlignment: { epistemology: -67, outlook: -67, scope: 67 },
-    cards: [card('bootstrap-loop'), card('slippery-slope'), card('glimpse')],
+    cards: [card('ossuary-drawer'), card('spoiled-poultice'), card('shallow-grave')],
     finalBlowLines: {
         brutal: 'The unbegun ends. The two states were closer than theology admits.',
         quiet:  'It curls back into the shape of a thing about to start, and rests there.',
@@ -1931,7 +1931,7 @@ export const TheDoorwarden = createEnemy({
         drop('resonance-crystal', 15),
     ],
     philosophicalAlignment: { epistemology: 67, outlook: 0, scope: -67 },
-    cards: [card('red-herring'), card('undistributed-middle'), card('half-step')],
+    cards: [card('scolds-bridle'), card('petty-indictment'), card('knucklebone-recant')],
     finalBlowLines: {
         brutal: 'The hinge-priest comes apart at every joint at once. Ten thousand doors, unheld, swing open somewhere.',
         quiet:  'He folds shut along his own seams, the way a door closes on an empty room, and stays closed.',
@@ -1985,7 +1985,7 @@ export const TheIndex = createEnemy({
         drop('revive-crystal', 15),
     ],
     philosophicalAlignment: { epistemology: 67, outlook: -67, scope: 67 },
-    cards: [card('festering-argument'), card('glimpse'), card('red-herring')],
+    cards: [card('the-long-lent'), card('shallow-grave'), card('scolds-bridle')],
     finalBlowLines: {
         brutal: 'The drawers burst in order, A through the end of knowing. The misfiled truths get one moment of daylight each.',
         quiet:  'It shelves itself, finally, in the one place it never checked: under its own name.',
@@ -2042,7 +2042,7 @@ export const TheSophist = createEnemy({
         drop('revive-crystal', 20),
     ],
     philosophicalAlignment: { epistemology: 67, outlook: -67, scope: 67 },
-    cards: [card('bootstrap-loop'), card('glimpse'), card('red-herring')],
+    cards: [card('ossuary-drawer'), card('shallow-grave'), card('scolds-bridle')],
     befriendabilityConfig: {
         hpGate: { belowPct: 0.25 },
         roundsThreshold: 6,
@@ -2148,7 +2148,7 @@ export const TheIncompleteness = createEnemy({
     // It drops nothing; the fight is the lesson.
     loot: [none(100)],
     philosophicalAlignment: { epistemology: 67, outlook: 0, scope: 67 },
-    cards: [card('bootstrap-loop'), card('slippery-slope'), card('glimpse')],
+    cards: [card('ossuary-drawer'), card('spoiled-poultice'), card('shallow-grave')],
     finalBlowLines: {
         brutal: 'You do not finish the proof. You break the page it was written on, and the page stops holding sentences.',
         quiet: 'It remains true. It simply stops insisting, and the wood is quiet where the argument stood.',

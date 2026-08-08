@@ -1,8 +1,10 @@
 /**
  * Hermetic E2E — RECOIL X, the first chosen X-cost (WS7.2, spec 32 §12
- * item 5), LIVE through the HP-model combat engine via the `chooseX-vein`
- * sandbox set (The Open Vein: RECOIL X of your choosing, min 3 → POISON at
- * ceil(X/3) intensity).
+ * item 5), LIVE through the HP-model combat engine via `blank-indenture`
+ * (Blank Indenture: RECOIL X of your choosing, min 3 → POISON at half of X,
+ * rounded up). Profane-canon rework (2026-08-08): the mechanic's carrier
+ * moved from the `chooseX-vein` sandbox set (the-open-vein) into the LIBRARY
+ * itself — same engine clamp, poisonPerX now 0.5.
  *
  * Pins the engine clamp (X ∈ [min, affordable], affordable = live HP − 1,
  * floored at min), the POISON payoff scaling with the paid X, and the WS7.2
@@ -19,7 +21,6 @@ import type { Enemy } from '../../Enemy/types';
 import { GraveLarva } from '../../Enemy/enemy.library';
 import { deepClone } from '../../Utils';
 import { mockSequentialRng } from '../../test-utils/rng';
-import { applySandboxSet } from '../../Cards/cards.sandbox-sets';
 import type { ActiveEffect } from '../../Effects/types';
 import {
     initializeCombatEncounter, rollEncounterDice, draftStanceDie, playCombatCard,
@@ -30,12 +31,9 @@ import type { CombatDieColor, CombatEncounterState, CombatTransition } from '../
 
 afterEach(() => { vi.restoreAllMocks(); });
 
-// The sandbox set is live for this whole process (registering twice throws,
-// so it happens once at module scope — the same pattern as the QA fixtures).
-applySandboxSet('chooseX-vein');
-
-const VEIN = 'the-open-vein';
-const MIN_X = 3; // the card's printed minimum
+const VEIN = 'blank-indenture';
+const MIN_X = 3;          // the card's printed minimum
+const POISON_PER_X = 0.5; // the card's printed payoff rate (half of X, rounded up)
 
 function makePlayer(cards: string[], effects: ActiveEffect[] = []): Character {
     const p = deepClone(Player);
@@ -45,7 +43,7 @@ function makePlayer(cards: string[], effects: ActiveEffect[] = []): Character {
     return p;
 }
 
-function makeEnemy(hp: number, stance: 'heart' | 'body' | 'mind' = 'body', effects: ActiveEffect[] = []): Enemy {
+function makeEnemy(hp: number, stance: 'heart' | 'body' | 'mind' = 'heart', effects: ActiveEffect[] = []): Enemy {
     const e = deepClone(GraveLarva);
     e.id = 'enemy-test-dummy';
     e.health = hp; e.maxHealth = hp; e.effects = effects;
@@ -63,13 +61,13 @@ function setDice(state: CombatEncounterState, colors: CombatDieColor[]): CombatE
     return { ...state, dice, draftedDieId: null, turn };
 }
 
-/** Opens phase-play, forces the pool, and drafts a BODY die (The Open Vein is
- *  a body card vs a body foe → neutral read, no intensity skew). */
+/** Opens phase-play, forces the pool, and drafts a HEART die (Blank Indenture
+ *  is a heart card vs a heart foe → neutral read, no intensity skew). */
 function openAndDraft(player: Character, enemy: Enemy, seed = 7): CombatEncounterState {
     const deck = [VEIN, VEIN, VEIN, VEIN, VEIN];
     let state = initializeCombatEncounter(player, enemy, deck, seed);
     state = rollEncounterDice(state).state;
-    state = setDice(state, ['body', 'x']);
+    state = setDice(state, ['heart', 'x']);
     state = draftStanceDie(state, state.dice[0].id).state;
     return state;
 }
@@ -100,14 +98,14 @@ function lcg(seed: number): () => number {
 // ── Engine clamp + payoff scaling ────────────────────────────────────────────
 
 describe('RECOIL X — the engine clamps X and scales the POISON payoff', () => {
-    it('absent chosenX plays the printed minimum (RECOIL 3 → POISON i1)', () => {
+    it('absent chosenX plays the printed minimum (RECOIL 3 → POISON i2)', () => {
         mockSequentialRng(0.05);
         const state = openAndDraft(makePlayer([VEIN]), makeEnemy(400));
         const hpBefore = state.player.health;
         const res = playVein(state);
         expect(recoilPaid(res)).toBe(MIN_X);
         expect(hpBefore - res.state.player.health).toBe(MIN_X);
-        expect(poisonIntensity(res)).toBe(Math.ceil(MIN_X / 3)); // 1
+        expect(poisonIntensity(res)).toBe(Math.ceil(MIN_X * POISON_PER_X)); // 2
     });
 
     it('clamps a chosenX below the printed minimum up to it', () => {
@@ -115,7 +113,7 @@ describe('RECOIL X — the engine clamps X and scales the POISON payoff', () => 
         const state = openAndDraft(makePlayer([VEIN]), makeEnemy(400));
         const res = playVein(state, 1);
         expect(recoilPaid(res)).toBe(MIN_X);
-        expect(poisonIntensity(res)).toBe(1);
+        expect(poisonIntensity(res)).toBe(Math.ceil(MIN_X * POISON_PER_X)); // 2
     });
 
     it('clamps a greedy chosenX to affordability (live HP − 1) — the play never self-kills', () => {
@@ -126,17 +124,17 @@ describe('RECOIL X — the engine clamps X and scales the POISON payoff', () => 
         const res = playVein(state, 50);
         expect(recoilPaid(res)).toBe(9);
         expect(res.state.player.health).toBe(1);
-        expect(poisonIntensity(res)).toBe(Math.ceil(9 / 3)); // 3
+        expect(poisonIntensity(res)).toBe(Math.ceil(9 * POISON_PER_X)); // 5
     });
 
-    it('POISON scales with the paid X: ceil(X × 1/3) intensity', () => {
+    it('POISON scales with the paid X: ceil(X × 0.5) intensity', () => {
         mockSequentialRng(0.05);
         const state = openAndDraft(makePlayer([VEIN]), makeEnemy(400));
         const hpBefore = state.player.health;
         const res = playVein(state, 12);
         expect(recoilPaid(res)).toBe(12);
         expect(hpBefore - res.state.player.health).toBe(12);
-        expect(poisonIntensity(res)).toBe(4);
+        expect(poisonIntensity(res)).toBe(6);
         // The blood price feeds the spec 32 §12 #4 RECOIL ledger too.
         expect(res.state.recoilPaidThisTurn).toBe(12);
     });

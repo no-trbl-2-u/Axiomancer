@@ -27,7 +27,7 @@ import {
 } from '../combat.engine';
 import type { CombatDieColor, CombatEncounterState } from '../combat.encounter.types';
 
-const DOT_BODY = 'slippery-slope'; // body stance, applies a bleed DoT
+const DOT_BODY = 'spoiled-poultice'; // body stance, applies a poison DoT
 
 function makePlayer(cards: string[]): Character {
     const p = deepClone(Player);

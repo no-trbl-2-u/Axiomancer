@@ -109,7 +109,7 @@ describe('CombatBoard — REPRISE songbook interception', () => {
         // a sandbox one so the combination stays covered as sets grow.
         const xReprise: Card = {
             id: 'test-x-reprise',
-            theme: 'echo',
+            theme: 'grave',
             name: 'Test X Reprise',
             philosophicalAspect: 'mind',
             description: 'Board-test fixture: REPRISE + chosen-X on one card.',

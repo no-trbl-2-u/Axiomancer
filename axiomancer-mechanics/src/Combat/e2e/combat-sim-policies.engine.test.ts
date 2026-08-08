@@ -75,12 +75,13 @@ function loadout(cards: string[]): Character {
 }
 
 // A cross-theme starter mix: ramping poison, second poison DoT, control, guard.
-// (straw-mans-jab held the second seat until its D8 retirement. Its default
-//  replacement festering-argument — and half-step — turned the pinned
-//  KingOfRevenge fight below into a defeat, so the seat went to
-//  recurring-symptom: the same theme (affliction), same aspect (body), and a
-//  real DoT, under which BOTH pinned fights stay status victories.)
-const MIX = ['slippery-slope', 'recurring-symptom', 'red-herring', 'brace-for-impact'];
+// (Profane Canon 2026-08-08: the old library is gone wholesale. The seats
+//  refill by mechanical role — spoiled-poultice (weak poison starter, was
+//  slippery-slope), unction-of-boils (tier-2 poison DoT, was
+//  recurring-symptom — same theme, same body aspect), scolds-bridle
+//  (STAGGER + BACKFIRE control, was red-herring), chilblain-watch (guard
+//  starter, was brace-for-impact).)
+const MIX = ['spoiled-poultice', 'unction-of-boils', 'scolds-bridle', 'chilblain-watch'];
 
 function card(id: string): CombatCard {
     const projected = toCombatCard(id, getCardById, lookupEffect);
@@ -131,7 +132,7 @@ describe('policy roster — every id resolves', () => {
     it('aggro-brute is the doctrinal weak baseline: pure damage preview, no status awareness', () => {
         const s = freshState();
         const brute = COMBAT_SIM_POLICIES['aggro-brute'];
-        const dot = card('slippery-slope');
+        const dot = card('spoiled-poultice');
         const plain = card(QA_STATUSLESS);
         // The brute ranks strictly by preview — it does NOT put status first.
         expect(brute.rankCard(s, dot, forbiddenRng)).toBe(dot.bottomDamagePreview);
@@ -142,13 +143,13 @@ describe('policy roster — every id resolves', () => {
 describe('greedy rankCard — the legacy ordering as scores (doctrine: status > everything)', () => {
     it('ranks a status card above a statusless card', () => {
         const s = freshState();
-        expect(COMBAT_SIM_POLICIES.greedy.rankCard(s, card('slippery-slope'), forbiddenRng))
+        expect(COMBAT_SIM_POLICIES.greedy.rankCard(s, card('spoiled-poultice'), forbiddenRng))
             .toBeGreaterThan(COMBAT_SIM_POLICIES.greedy.rankCard(s, card(QA_STATUSLESS), forbiddenRng));
     });
 
     it('ranks a status NEW to the board above the same status already applied', () => {
         const s = freshState();
-        const dot = card('slippery-slope');
+        const dot = card('spoiled-poultice');
         const freshScore = COMBAT_SIM_POLICIES.greedy.rankCard(s, dot, forbiddenRng);
         const applied = deepClone(s);
         applied.enemy.effects = [
@@ -164,10 +165,10 @@ describe('greedy rankCard — the legacy ordering as scores (doctrine: status > 
         low.enemy.health = 1;
         const greedy = COMBAT_SIM_POLICIES.greedy;
         expect(greedy.rankCard(low, card(QA_BEFRIEND), forbiddenRng))
-            .toBeGreaterThan(greedy.rankCard(low, card('slippery-slope'), forbiddenRng));
+            .toBeGreaterThan(greedy.rankCard(low, card('spoiled-poultice'), forbiddenRng));
         // ...but NOT before that (status play stays the default game).
         expect(greedy.rankCard(s, card(QA_BEFRIEND), forbiddenRng))
-            .toBeLessThan(greedy.rankCard(s, card('slippery-slope'), forbiddenRng));
+            .toBeLessThan(greedy.rankCard(s, card('spoiled-poultice'), forbiddenRng));
     });
 });
 
@@ -215,15 +216,20 @@ describe('greedy object reproduces the pinned decision sequences', () => {
     // comment above) — every seed-derived draw and greedy decision shifted;
     // both pins re-measured against the current engine. Both fights remain
     // status victories at the same round counts as before the swap.
-    it('seed 11 vs LittleBelle: a two-round status victory', () => {
+    //
+    // Re-pinned 2026-08-08 (Profane Canon): the card library was replaced
+    // wholesale and every MIX seat refilled by role (see the MIX comment
+    // above) — every seed-derived draw and greedy decision shifted; both
+    // pins re-measured against the new library + engine.
+    it('seed 11 vs LittleBelle: a status victory', () => {
         const r = runOneEncounter(loadout(MIX), LittleBelle, 11, 'greedy');
         expect({ outcome: r.outcome, rounds: r.rounds, plays: r.plays, statusPlays: r.statusPlays })
-            .toEqual({ outcome: 'victory', rounds: 2, plays: 9, statusPlays: 6 });
-        expect(r.cardUsage['slippery-slope']).toEqual({
-            cardId: 'slippery-slope', plays: 2, bottomPlays: 2, topPlays: 0, statusLands: 2, discards: 0,
+            .toEqual({ outcome: 'victory', rounds: 3, plays: 10, statusPlays: 6 });
+        expect(r.cardUsage['spoiled-poultice']).toEqual({
+            cardId: 'spoiled-poultice', plays: 3, bottomPlays: 3, topPlays: 0, statusLands: 3, discards: 0,
         });
-        expect(r.cardUsage['recurring-symptom']).toEqual({
-            cardId: 'recurring-symptom', plays: 2, bottomPlays: 2, topPlays: 0, statusLands: 2, discards: 0,
+        expect(r.cardUsage['unction-of-boils']).toEqual({
+            cardId: 'unction-of-boils', plays: 2, bottomPlays: 2, topPlays: 0, statusLands: 2, discards: 0,
         });
     });
 
@@ -246,12 +252,13 @@ describe('greedy object reproduces the pinned decision sequences', () => {
     // Re-pinned 2026-07-18 (Phase D8, see the LittleBelle pin above):
     // recurring-symptom now holds the second MIX seat — still a four-round
     // status victory (plays 17→18, statusPlays 12→11).
-    it('seed 11 vs KingOfRevenge: a four-round status victory (Gate 0 law: one tray per phase)', () => {
+    // Re-pinned 2026-08-08 (Profane Canon, see the LittleBelle pin above).
+    it('seed 11 vs KingOfRevenge: a status victory (Gate 0 law: one tray per phase)', () => {
         const r = runOneEncounter(loadout(MIX), KingOfRevenge, 11, 'greedy');
         expect({ outcome: r.outcome, rounds: r.rounds, plays: r.plays, statusPlays: r.statusPlays })
-            .toEqual({ outcome: 'victory', rounds: 4, plays: 18, statusPlays: 11 });
-        expect(r.cardUsage['recurring-symptom']).toEqual({
-            cardId: 'recurring-symptom', plays: 4, bottomPlays: 3, topPlays: 1, statusLands: 3, discards: 0,
+            .toEqual({ outcome: 'victory', rounds: 4, plays: 17, statusPlays: 10 });
+        expect(r.cardUsage['unction-of-boils']).toEqual({
+            cardId: 'unction-of-boils', plays: 4, bottomPlays: 4, topPlays: 0, statusLands: 4, discards: 0,
         });
         // card-retreat no longer exists — it can never appear in cardUsage.
     }, 30_000);
@@ -262,7 +269,7 @@ describe('chaos — randomness flows only through the injected seeded rng', () =
         const s = freshState();
         let calls = 0;
         const rng = (): number => { calls++; return 0.42; };
-        const score = COMBAT_SIM_POLICIES.chaos.rankCard(s, card('slippery-slope'), rng);
+        const score = COMBAT_SIM_POLICIES.chaos.rankCard(s, card('spoiled-poultice'), rng);
         expect(calls).toBe(1);
         expect(score).toBe(0.42);
         expect(COMBAT_SIM_POLICIES.chaos.rankSignature).toBeDefined();
@@ -297,7 +304,7 @@ describe('per-card telemetry — cardUsage is consistent with the aggregate coun
     });
 
     it('respects an explicit deck: only its ids appear in usage', () => {
-        const deck = ['slippery-slope', 'slippery-slope', 'brace-for-impact'];
+        const deck = ['spoiled-poultice', 'spoiled-poultice', 'chilblain-watch'];
         const allowed = new Set(deck);
         const r = runOneEncounter(loadout(MIX), LittleBelle, 4, 'greedy', { deck });
         expect(Object.keys(r.cardUsage).length).toBeGreaterThan(0);
@@ -309,12 +316,12 @@ describe('per-card telemetry — cardUsage is consistent with the aggregate coun
     it('focusCardIds boosts a card to the front of ranking so it gets exercised', () => {
         // Greedy would normally power the DoT before the guard; the focus
         // boost must force the guard into play (the card-coverage lever).
-        const deck = ['slippery-slope', 'brace-for-impact', 'brace-for-impact', 'nettle-cloak'];
+        const deck = ['spoiled-poultice', 'chilblain-watch', 'chilblain-watch', 'hoarfrost-teeth'];
         const r = runOneEncounter(loadout(deck), LittleBelle, 6, 'greedy', {
-            deck, focusCardIds: ['brace-for-impact'],
+            deck, focusCardIds: ['chilblain-watch'],
         });
-        expect(r.cardUsage['brace-for-impact']?.plays ?? 0).toBeGreaterThanOrEqual(1);
-        expect(r.cardUsage['brace-for-impact']?.bottomPlays ?? 0).toBeGreaterThanOrEqual(1);
+        expect(r.cardUsage['chilblain-watch']?.plays ?? 0).toBeGreaterThanOrEqual(1);
+        expect(r.cardUsage['chilblain-watch']?.bottomPlays ?? 0).toBeGreaterThanOrEqual(1);
     });
 
     it('throws on an unknown policy id (honest failure, no silent fallback)', () => {

@@ -232,8 +232,9 @@ describe('draftCombatDeck newcomer-visibility guarantee (GH #163)', () => {
 
 describe('resolveDeckSelection', () => {
     it("kind 'preset' delegates to buildPresetDeck (unknown preset → empty)", () => {
-        const selection: CombatDeckSelection = { kind: 'preset', presetId: 'erosion' };
-        expect(resolveDeckSelection(selection, undefined)).toEqual(buildPresetDeck('erosion'));
+        const selection: CombatDeckSelection = { kind: 'preset', presetId: 'threadbare' };
+        expect(resolveDeckSelection(selection, undefined)).toEqual(buildPresetDeck('threadbare'));
+        expect(resolveDeckSelection(selection, undefined).length).toBeGreaterThan(0);
         expect(resolveDeckSelection({ kind: 'preset', presetId: 'nope' }, undefined)).toEqual([]);
     });
 
@@ -249,14 +250,14 @@ describe('resolveDeckSelection', () => {
 
     it("kind 'cards' drops invalid ids, with no escape card appended", () => {
         const deck = resolveDeckSelection(
-            { kind: 'cards', cardIds: ['slippery-slope', 'not-a-card', 'brace-for-impact'] },
+            { kind: 'cards', cardIds: ['spoiled-poultice', 'not-a-card', 'chilblain-watch'] },
             undefined);
-        expect(deck).toEqual(['slippery-slope', 'brace-for-impact']);
+        expect(deck).toEqual(['spoiled-poultice', 'chilblain-watch']);
 
         // The removed Retreat id is now just another invalid id — dropped like any other.
         const trusted = resolveDeckSelection(
-            { kind: 'cards', cardIds: ['card-retreat', 'red-herring'] }, undefined);
-        expect(trusted).toEqual(['red-herring']);
+            { kind: 'cards', cardIds: ['card-retreat', 'scolds-bridle'] }, undefined);
+        expect(trusted).toEqual(['scolds-bridle']);
     });
 
     it("kind 'policy-pick' throws at this layer (the harness resolves it)", () => {

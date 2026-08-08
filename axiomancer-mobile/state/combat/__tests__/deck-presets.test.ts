@@ -1,5 +1,5 @@
 import { describe, expect, it } from '@jest/globals';
-import { COMBAT_REWARD_POOL, PRESET_COLOR_BORROWS, STARTING_CARD_IDS, getCard, listDeckPresets } from '@mechanics';
+import { COMBAT_REWARD_POOL, STARTING_CARD_IDS, getCard, listDeckPresets } from '@mechanics';
 
 import {
     applyCombatDeckPresetAction,
@@ -9,20 +9,16 @@ import {
 import { createAppStore } from '@/state/store';
 import { createMemoryAdapter } from '@/test-utils/memoryAdapter';
 
-// Spec 32 v3 §8 — the starter baseline plus the ten themed preset decks.
+// Profane Canon (2026-08-08) — the starter baseline plus the three campaign
+// presets (snapshots of one deck evolving early → mid → late).
 const expectedPresetIds = [
     'starter-baseline',
-    'erosion',
-    'oratory',
-    'foundry',
-    'penitent',
-    'standstill',
-    'augury',
-    'tithe',
-    'grace',
-    'bastion',
-    'refrain',
+    'threadbare',
+    'pilgrim',
+    'apostate',
 ];
+
+const EXPECTED_SIZES: Record<string, number> = { threadbare: 18, pilgrim: 30, apostate: 45 };
 
 const FULL_POOL = new Set([...STARTING_CARD_IDS, ...COMBAT_REWARD_POOL]);
 
@@ -31,7 +27,7 @@ function makeStore() {
 }
 
 describe('Combat deck presets', () => {
-    it('exposes the starter baseline + the ten themed presets in stable order', () => {
+    it('exposes the starter baseline + the three campaign presets in campaign order', () => {
         expect(COMBAT_DECK_PRESETS.map((preset) => preset.id)).toEqual(expectedPresetIds);
     });
 
@@ -44,17 +40,17 @@ describe('Combat deck presets', () => {
         }
     });
 
-    it('themed presets mirror the engine recipe verbatim (4/4/2/2/1/1/1 — 15 cards)', () => {
+    it('campaign presets mirror the engine recipes verbatim (18 / 30 / 45, cap 50)', () => {
         const engine = Object.fromEntries(listDeckPresets().map((p) => [p.id, p]));
         for (const preset of COMBAT_DECK_PRESETS) {
             if (preset.id === 'starter-baseline') continue;
             expect(preset.cardIds).toEqual([...engine[preset.id]!.cardIds]);
-            expect(preset.cardIds.length).toBe(15);
-            // 7 uniques per theme: 2 commons ×4, 2 uncommons ×2, 3 rares ×1.
+            expect(preset.cardIds.length).toBe(EXPECTED_SIZES[preset.id]);
+            expect(preset.cardIds.length).toBeLessThanOrEqual(50);
+            // The MTG copy law: never more than 4 of a card.
             const counts = new Map<string, number>();
             for (const id of preset.cardIds) counts.set(id, (counts.get(id) ?? 0) + 1);
-            expect(counts.size).toBe(7);
-            expect([...counts.values()].sort((a, b) => b - a)).toEqual([4, 4, 2, 2, 1, 1, 1]);
+            for (const n of counts.values()) expect(n).toBeLessThanOrEqual(4);
         }
     });
 
@@ -68,49 +64,44 @@ describe('Combat deck presets', () => {
             },
         } as never);
 
-        const result = applyCombatDeckPresetAction(store, 'erosion');
+        const result = applyCombatDeckPresetAction(store, 'pilgrim');
 
-        expect(result.presetId).toBe('erosion');
+        expect(result.presetId).toBe('pilgrim');
         expect(result.cardIds.length).toBeGreaterThan(0);
         expect(store.getState().player.knownCards).toEqual(result.cardIds);
         expect(store.getState().player.combatRewardCards).toEqual([]);
     });
 
     it('is deterministic — the same preset yields the same deck every time', () => {
-        const first = applyCombatDeckPresetAction(makeStore(), 'grace');
-        const second = applyCombatDeckPresetAction(makeStore(), 'grace');
+        const first = applyCombatDeckPresetAction(makeStore(), 'apostate');
+        const second = applyCombatDeckPresetAction(makeStore(), 'apostate');
         expect(first.cardIds).toEqual(second.cardIds);
     });
 
-    it('starter-baseline restores the engine starting deck (spec 32 v3 §7)', () => {
+    it('starter-baseline restores the engine starting deck', () => {
         const result = applyCombatDeckPresetAction(makeStore(), 'starter-baseline');
         expect(result.cardIds).toEqual([...STARTING_CARD_IDS]);
-        expect(result.cardIds).toContain('slippery-slope');
-        expect(result.cardIds).toContain('brace-for-impact');
+        expect(result.cardIds).toContain('spoiled-poultice');
+        expect(result.cardIds).toContain('chilblain-watch');
     });
 
-    it('cross-deck overlap exists only through the documented 5/5/5 color-law borrows', () => {
-        // Spec 32 §12 item 9 (ratified 2026-07-12): every recipe is exactly
-        // 5 body / 5 mind / 5 heart, so presets borrow cross-theme cards of a
-        // missing color. The engine pins the borrow map (PRESET_COLOR_BORROWS);
-        // any other overlap is still a bug.
-        const borrowable = new Set(Object.values(PRESET_COLOR_BORROWS).flat());
-        const seen = new Map<string, string>();
-        for (const preset of COMBAT_DECK_PRESETS) {
-            if (preset.id === 'starter-baseline') continue;
-            for (const id of new Set(preset.cardIds)) {
-                const owner = seen.get(id);
-                expect(owner === undefined || owner === preset.id || borrowable.has(id)).toBe(true);
-                seen.set(id, preset.id);
-            }
-        }
+    it('THE LINEAGE LAW: each later preset contains its predecessor minus removals (never a fresh deck)', () => {
+        // The three presets are snapshots of ONE evolving deck: everything in
+        // an earlier snapshot either survives into the next or was removed at
+        // a removal encounter — the engine pins the exact multiset math; here
+        // we pin the campaign-facing consequence: pilgrim and apostate share
+        // most of their bulk with their predecessor.
+        const [threadbare, pilgrim, apostate] = ['threadbare', 'pilgrim', 'apostate']
+            .map((id) => COMBAT_DECK_PRESETS.find((p) => p.id === id)!.cardIds);
+        const overlap = (a: readonly string[], b: readonly string[]) =>
+            [...new Set(a)].filter((id) => b.includes(id)).length;
+        expect(overlap(pilgrim, threadbare)).toBeGreaterThanOrEqual(5);
+        expect(overlap(apostate, pilgrim)).toBeGreaterThanOrEqual(15);
     });
 
-    it('every themed deck carries exactly 5 body / 5 mind / 5 heart cards (the recipe color law)', () => {
-        const engine = Object.fromEntries(listDeckPresets().map((p) => [p.id, p]));
+    it('every campaign deck carries exact aspect thirds (the generalized color law)', () => {
         for (const preset of COMBAT_DECK_PRESETS) {
             if (preset.id === 'starter-baseline') continue;
-            expect(engine[preset.id]).toBeDefined();
             const counts = { body: 0, mind: 0, heart: 0 };
             for (const id of preset.cardIds) {
                 const card = getCard(id);
@@ -118,7 +109,8 @@ describe('Combat deck presets', () => {
                 // `stance` is the projected cardStanceColor = philosophicalAspect.
                 counts[card!.stance as 'body' | 'mind' | 'heart'] += 1;
             }
-            expect(counts).toEqual({ body: 5, mind: 5, heart: 5 });
+            const third = preset.cardIds.length / 3;
+            expect(counts).toEqual({ body: third, mind: third, heart: third });
         }
     });
 
