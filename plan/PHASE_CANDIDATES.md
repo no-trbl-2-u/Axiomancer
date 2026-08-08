@@ -9,6 +9,35 @@
 
 ## Pending
 
+### Inter-map travel — the first map has no exit
+- source: first-map audit 2026-08-08 (`axiomancer-mechanics/docs/reports/FIRST-MAP-AUDIT.md`,
+  finding F4). Filed as a candidate rather than shipped in that pass: it is a
+  missing FEATURE, not a broken one, and building it under an audit banner
+  would have been scope the audit was not asked for.
+- evidence: there is no in-game path from `fishing-village` to
+  `northern-forest`. `changeMap` exists as a store action but its only caller
+  is `DebugMapResetButton`; `northern-forest` sits in `lockedMaps` and nothing
+  anywhere calls `unlockMap`. The `get-to-forest` quest's objective is
+  `reach / nf-1` — a node on a map the player cannot travel to — so the quest
+  is uncompletable even now that its grant path works again (F3).
+  Consequence: with the audit's fixes in, a run walks the village's ten beats,
+  kills the King of Revenge, completes `starting-quest`, takes Old Marrow's
+  reward, is granted `get-to-forest` — and then stands at the terminal column
+  with nowhere to go and no way to satisfy it.
+- shape: a `travel` (or `wayfare`) MapEventKind is the smallest coherent
+  version — payload names the destination continent+map, the handler unlocks
+  and switches, mobile routes it like any other paced event. Touches
+  `MapEvents/types.ts` + `handlers.ts`, the mobile event presenter and a new
+  or reused screen, `unlockMap` wiring, and the save shape (`currentMap` is
+  already persisted; confirm a mid-map switch round-trips). Cross-package, so
+  it carries the AGENTS.md impact checklist.
+- open question the phase must settle: whether arriving on a new map resets
+  or preserves the old map's `MapState`, i.e. whether the coastal continent is
+  a sequence of one-way acts or a place you can move around in. The gauntlet
+  traversal law implies the former; the `completedMaps` field implies someone
+  once meant the latter.
+
+
 ### AXM Log follow-ups — minigame engine taps, Sentry slot, native clipboard
 - source: repo-wide structured logging shipped 2026-07-20 (owner-directed,
   direct-to-main; contract in `docs/logging.md`). V1 taps combat
