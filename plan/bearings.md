@@ -273,6 +273,20 @@ ambiguity.)
   and deploy gates, the nexus hard rules, and `GAME_STATE_VERSION`
   migration discipline. "Remove constraints" was about DESIGN law, not
   engineering rigour.
+- **Direct pushes to `main` are sanctioned from ANY session, including
+  remote/web ones** (T direct, 2026-08-08: *"Direct pushes to main are
+  fine, keep going."*). Settles a standing ambiguity: remote Claude Code
+  sessions are told by their harness to develop on a `claude/*` branch
+  and open a PR, which conflicted with `skills/oversight.md` §6 and with
+  "Loop pushes to trunk (`main`) directly" below. T's ruling is the
+  explicit permission that resolves it — **no branch or PR is required**,
+  and the AUDIT row that asked for a "remote-session delivery" note in
+  the skill is drained as no-change-needed. Branch + PR remains available
+  and is still the better choice when a change genuinely wants review
+  before landing (large or risky diffs, anything a human should read
+  first); it is simply no longer mandatory. Everything else is unchanged:
+  the verify gate still runs pre-commit, the deploy gate still runs
+  post-push, and no force-push or destructive git op is permitted.
 - **THE CURRENT CARD LIBRARY IS TRANSITIONAL — do not spend tuning
   effort on it** (T direct, /oversight 2026-08-08). Asked to rule on
   Phase 39's two open findings, T answered: *"This is fine. We're
