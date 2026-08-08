@@ -987,7 +987,7 @@ product-level pivot that VOIDS several previously "locked" doctrines).**
 > unshackling phases below — scope preserved, order changed. See the
 > Queue change log.
 
-- [ ] Phase 41 — Constraint demolition (do this FIRST; everything below
+- [x] Phase 41 — Constraint demolition (do this FIRST; everything below
       depends on it). Remove the machinery that enforces the three
       retired constraints, so later phases are not fighting their own
       test suite: (a) `src/Cards/e2e/doctrine-strike-dead.engine.test.ts`
@@ -1014,7 +1014,8 @@ product-level pivot that VOIDS several previously "locked" doctrines).**
       re-home any assertion that happens to pin one of the locked systems
       into a suite that survives, rather than dropping it with the file.
       See `plan/bearings.md` § "LOCKED MECHANICS". (mechanics)
-      Deps: none. Brief: to generate.
+      Deps: none. Brief: `plan/phases/phase_41_constraint_demolition.md`.
+      — `feat(mechanics): constraint demolition — phase 41` (08745441, 1bd9bd2b)
 - [ ] Phase 42 — The Dark Fantasy campaign bible (design phase; output is
       a spec, not code). **T ratified the direction 2026-08-08: "Dark
       Fantasy deckbuilding RPG campaign", WHOLE PRODUCT** — so this is no
@@ -1216,6 +1217,18 @@ the replacement must be reachable before the Night Watch comes out, or
 > Every phase below uses NEUTRAL working names (`RestChoice`, `rest` /
 > `anvil` / `cut`) and keeps player copy in the mobile copy layer so
 > Phase 44f can rename it properly. Do not name this node poetically.
+>
+> **Interaction with the V-sequence (noted 2026-08-08 at merge).** The
+> Woodcut Codex landed while this epic was being planned; the two queues
+> touch in two places. (a) **V5** wires backgrounds into "encounter
+> screens" — `/rest` is one, and **52e deletes the Night Watch screen**.
+> Whichever runs second wins; running V5 first means styling a screen
+> about to be replaced. Prefer 52d/52e first, or have V5 skip `/rest`
+> and pick it up after. V6's glyph unification names hazard / gathering
+> / cache / combat and NOT rest, so it is unaffected. (b) **V1 already
+> restyled `axiomancer-mobile/app/blacksmith/index.tsx`** — 52d's
+> "reuse the blacksmith screen, do not rebuild it" still holds and is
+> now cheaper, but read the current file, not the pre-Woodcut one.
 
 - [ ] Phase 52a — Deck-removal engine primitive + the escalating price.
       The engine has no card removal at all today (`removeCardFromDeck`
@@ -1465,6 +1478,44 @@ RESEQUENCED the same day behind the unshackling — see above):**
 > to `main`. Matches the issue's acceptance criteria structurally; no
 > queued phase needed. Not yet confirmed via a live manual run.
 
+**The Woodcut Codex — full visual redesign (T-directed 2026-08-08, web
+session: "keys to the kingdom … full wipe on all the constraints I had
+before regarding the direction of the game's design"; master plan:
+`plan/phases/phase_V_visual_redesign_masterplan.md` — sub-briefs generate
+on pickup):**
+
+- [ ] Phase V1 — Iconography canon: one data-driven icon registry
+      (`components/icons/` — `<AxmIcon>` + curated game-icons.net
+      silhouettes extracted from the owner-provided `Potential Assets/`
+      library via `scripts/extract-game-icons.mjs`); `ActionIcon` /
+      `EffectGlyph` become thin adapters; kill the verbatim path
+      duplicates (tab bar, CombatVictoryPanel, pixel-heart pair); orphan
+      components resolved (mobile)
+- [ ] Phase V2 — The map as an artifact: WILDS map scene redesign —
+      parchment-void backdrop (hatch + vignette + torn frame,
+      procedural), registry node/kind icons (treasure→chest), compass
+      rose, region-accent theming (mobile; after V1)
+- [ ] Phase V3 — Menus & chrome: tab bar on the registry with the
+      handoff active treatment, ✠-eyebrow header convention audited into
+      one shared component, panel-furniture consistency pass across
+      SELF/SATCHEL/MEMOIR + modals (mobile; after V1)
+- [ ] Phase V4 — Background acquisition pipeline: scout public-domain
+      woodcut/engraving + CC0 texture sources; provenance.json + webp
+      budget per the labyrinth/cards convention; deliver per-region map
+      backdrops, encounter-screen backgrounds, title candidates (assets)
+- [ ] Phase V5 — Backgrounds wired: `ScreenBg` keyed art slot with
+      dim/vignette; encounter screens + map regions consume V4 art;
+      combat arena variety; procedural fallback stays (mobile; after V2+V4)
+- [ ] Phase V6 — Combat & minigame glyph unification: shared subset of
+      hazard/gathering/cache/combat glyph kits folds into the registry;
+      keyword-mark canon audit (mobile; after V1)
+- [ ] Phase V7 — Illustration upgrades: replace remaining procedural
+      illustration SVGs with acquired art per `SVG_ASSET_SPEC.md` §5–8;
+      PixelEmblem carve-out preserved (assets + mobile; after V4)
+- [ ] Phase V8 — Closure: `/critic-loop` screenshot pass, contrast/a11y
+      audit, placeholder teardown, `SVG_ASSET_SPEC.md` reconciled,
+      `docs/VISUAL_LANGUAGE.md` (mobile; after V1–V7)
+
 > **After the queue drains:** `/march` transitions to `/iterate`
 > — draining `plan/AUDIT.md` + `plan/CRITIQUE.md`, doc-drift,
 > `as any` clusters, hex-literal -> AXM migration, a11y, and
@@ -1573,6 +1624,20 @@ phases with linked notes here.)
   the standing big-decisions authority and must surface as
   `[needs-user-call]`. See `plan/bearings.md` § "LOCKED MECHANICS".
   Resulting commit: this one.
+- **2026-08-08** — actor: **T via attended web session** (Claude Code on
+  the web, branch `claude/game-visual-redesign-5v21po`). Action: **added
+  the V-sequence** (Phases V1–V8, the Woodcut Codex full visual
+  redesign). Confirmed T's request: yes — verbatim: *"I am giving you
+  complete freedom to take the game in any visual theme. I am currently
+  trying to do a full wipe on all the constraints I had before regarding
+  the direction of the game's design"*, with explicit instructions to
+  plan the phases into the loop, replace the app's scattered SVGs with
+  the provided icon/glyph directory, and add acquired background
+  imagery; map first, then menus. T's stated reason: full game visual
+  redesign toward a "finished" visual design. Resulting artifacts:
+  master plan `plan/phases/phase_V_visual_redesign_masterplan.md`; V1
+  (map + menus slice) implemented in the same session/PR that lands this
+  row.
 - **2026-08-08** — actor: **T direct** (attended chat session, this
   worktree — not `/oversight`, not Hermes). Action: **added Phases
   52a-52f** (the rest-choice epic: deck-removal primitive, first-class

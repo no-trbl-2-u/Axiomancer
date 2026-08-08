@@ -25,7 +25,9 @@ export type NodeType =
     | 'treasure'
     | 'boss'
     | 'quest'
-    | 'hazard';
+    | 'hazard'
+    | 'blacksmith'
+    | 'village';
 
 export interface ExplorationNode {
     /** Stable engine node ID. */
@@ -127,14 +129,21 @@ export interface ExplorationViewModel {
 // giving adjacent nodes an at-a-glance "what is this" glyph. Boss uses a
 // distinct `crown` (not the encounter `sword`) so the climax is signposted.
 export const ACTION_ICON_BY_TYPE: Record<NodeType, string> = {
-    rest: 'flame',
-    gather: 'bag',
+    // Phase V — every node kind wears its own woodcut: campfire for
+    // rest, herb bundle for gathering, falling rocks for hazard.
+    rest: 'rest',
+    gather: 'herbs',
     current: 'eye',
     encounter: 'sword',
-    treasure: 'scroll',
-    boss: 'crown',
+    // Phase V1 — treasure reads as a chest, not a scroll (the scroll
+    // stays the quest/document mark), and a boss node wears the crowned
+    // skull rather than the plain crown (the crown stays the SELF mark).
+    treasure: 'chest',
+    boss: 'boss',
     quest: 'scroll',
-    hazard: 'arcane',
+    hazard: 'hazard',
+    blacksmith: 'anvil',
+    village: 'village',
 };
 
 const ACTION_TAG_BY_TYPE: Record<NodeType, string> = {
@@ -146,6 +155,8 @@ const ACTION_TAG_BY_TYPE: Record<NodeType, string> = {
     boss: 'TRAVEL · BOSS',
     quest: 'LORE',
     hazard: 'PERIL · BRAVE IT',
+    blacksmith: 'FORGE · DIE GEAR',
+    village: 'HAVEN · TRADE',
 };
 
 const ENCOUNTER_NODE_TYPES = new Set<NodeType>(['encounter', 'boss']);
@@ -163,13 +174,12 @@ const KIND_TO_NODE_TYPE: Record<MapEventKind, NodeType> = {
     quest: 'quest',
     hazard: 'hazard',
     interaction: 'quest',
-    village: 'treasure',
+    // Phase V — village and blacksmith wear their own woodcuts now
+    // (huts and anvil); no more borrowed glyphs.
+    village: 'village',
     cutscene: 'quest',
     narration: 'quest',
-    // Spec 33 §6 / Phase D5 — the blacksmith ("The Anvil") die-gear upgrade
-    // node. No bespoke glyph yet (D6 owns the blacksmith UI); borrows the
-    // nearest utility/reward icon for now.
-    blacksmith: 'treasure',
+    blacksmith: 'blacksmith',
 };
 
 /** Node display type, sourced from the engine's authored event pools. */

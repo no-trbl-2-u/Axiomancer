@@ -36,6 +36,24 @@
 > replacement may now be authored freely, including with normal damage.
 > See `plan/bearings.md` § "THE UNSHACKLING".
 
+### axio-query overview still publishes the retired "THE STRIKE IS DEAD" doctrine after Phase 41
+- category: divergence
+- impact: 8
+- ease: 9
+- detail: filed 2026-08-08 by the scheduled SomberSoft roundtable against
+  clean current `main` at `e24f9723`. The live `axio_overview` response still
+  says `THE STRIKE IS DEAD — no card touches HP...` because
+  `scripts/axio-mcp-server.mjs::extractDoctrine()` selects that phrase from the
+  stale header of `axiomancer-mechanics/src/Cards/cards.library.ts`. T voided
+  that doctrine in the 2026-08-08 unshackling, and Phase 41 removed its hard
+  test, but the engine-truth MCP now presents the dead law as current doctrine.
+  Historical plan/devlog mentions are not the defect; the live overview is.
+- next: update the card-library header to state that direct damage is legal
+  while Conviction, Surge and Dice remain locked, update the MCP doctrine
+  selector if necessary, and add a server smoke assertion that the overview
+  cannot publish the retired phrase. Verify `axio_overview` against the live
+  server plus the nearest MCP smoke test.
+
 ### [x] Doctrine-curve confirmation post-Phase-39: violation persists — RESOLVED via /oversight 2026-08-08: accepted, library is transitional
 - category: content
 - impact: 8
@@ -610,10 +628,19 @@
   know the sanctioned path.
 - next: /iterate (deploy-check.mjs env fallback + a bearings note)
 
-### `skills/oversight.md` assumes direct push to `main` — web sessions must ship via branch + PR
+### [x] `skills/oversight.md` assumes direct push to `main` — RESOLVED via /oversight 2026-08-08: no change needed, direct push is sanctioned
 - category: docs
 - impact: 2
 - ease: 8
+- **resolution (T direct, 2026-08-08): "Direct pushes to main are fine,
+  keep going."** The row's premise — that a remote web session *cannot*
+  push `main` and must ship via branch + PR — is falsified: this session
+  pushed `main` directly (`3cb3c3d`, `463a3bc`) after two branch+PR
+  rounds, and T ratified the direct path. So §6 of the skill is already
+  correct as written and needs **no** "remote-session delivery" note.
+  The branch+PR path stays available and is still the right call for
+  anything a reviewer should see before it lands; it is simply not
+  mandatory. Filed as a standing decision in `plan/bearings.md`.
 - detail: filed 2026-07-18 (oversight session residue). §6 of the skill
   commits and pushes `origin main`, but attended oversight from a
   Claude Code web session runs under a mandated `claude/*` branch and
@@ -624,7 +651,7 @@
   + ready-for-review PR + owner merge; rebase-merge preferred so the
   audit-trail commit lands intact) so future web oversights don't stall
   at the push step or improvise.
-- next: /iterate (doc-only edit to skills/oversight.md §6)
+- next: (drained — no doc edit required)
 
 ### [x] Gate the first-map blacksmith MapEvent node back to dev-only — RESOLVED 2026-07-23 (issue #151)
 - category: content

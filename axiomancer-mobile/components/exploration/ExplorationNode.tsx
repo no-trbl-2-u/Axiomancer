@@ -47,6 +47,8 @@ export function ExplorationNode({ node: n, onNodePress, isSelected }: Exploratio
         gather: AXM.bone,
         current: AXM.sulfur,
         hazard: AXM.rust,
+        blacksmith: AXM.rust,
+        village: AXM.sulfur,
     };
     const tooltip = useTooltip();
     const ref = useRef<View | null>(null);

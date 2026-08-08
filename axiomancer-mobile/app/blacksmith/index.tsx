@@ -18,6 +18,7 @@ import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import * as Haptics from 'expo-haptics';
 
 import { ScreenBg } from '@/components/ScreenBg';
+import { AxmIcon } from '@/components/icons';
 import { useGameActions, useGameState } from '@/state/GameStoreProvider';
 import {
     selectBlacksmithVM,
@@ -132,7 +133,10 @@ export default function BlacksmithScreen() {
     return (
         <ScreenBg scrollable={false}>
             <ScrollView style={styles.scrollOuter} contentContainerStyle={styles.scroll}>
-                <Text style={styles.eyebrow}>THE ANVIL</Text>
+                <View style={styles.eyebrowRow}>
+                    <AxmIcon name="action-anvil" size={18} />
+                    <Text style={styles.eyebrow}>THE ANVIL</Text>
+                </View>
                 <Text style={styles.title}>A SMITH FOR YOUR DICE</Text>
 
                 {vm.phase === 'intro' && (
@@ -268,6 +272,11 @@ export default function BlacksmithScreen() {
 const useStyles = makeStyles((AXM) => ({
     scrollOuter: { flex: 1 },
     scroll: { padding: 14, paddingBottom: 24, flexGrow: 1, justifyContent: 'center' },
+    eyebrowRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+    },
     eyebrow: {
         fontFamily: FONTS.sans,
         fontSize: 12,

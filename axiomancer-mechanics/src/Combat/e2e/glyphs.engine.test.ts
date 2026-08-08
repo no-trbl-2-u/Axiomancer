@@ -18,8 +18,8 @@
  * `momentum-wheel.engine.test.ts` — a handful of QA fixture cards are
  * registered into the sandbox at module scope. The real 4 pilot cards
  * (`glyphs-33d` sandbox set) get one direct registration/resolution smoke
- * test; their pricing/wording is otherwise exercised by the doctrine sweeps
- * in `cards-sandbox.engine.test.ts` / `doctrine-strike-dead.engine.test.ts`.
+ * test; their pricing/wording is otherwise exercised by the sweep in
+ * `cards-sandbox.engine.test.ts`.
  */
 
 import { describe, it, expect, afterEach, vi } from 'vitest';

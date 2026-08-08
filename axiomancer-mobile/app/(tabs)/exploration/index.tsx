@@ -7,6 +7,7 @@ import { StatusCard } from '@/components/StatusCard';
 import { SectionLabel } from '@/components/SectionLabel';
 import { ExplorationCodexHeader } from '@/components/ExplorationCodexHeader';
 import { MapCanvas } from '@/components/exploration/MapCanvas';
+import { mapBackdropFor } from '@/assets/images/maps';
 import { NodeGrid } from '@/components/exploration/NodeGrid';
 import { NodeConfirmPanel } from '@/components/exploration/NodeConfirmPanel';
 import { EventBadge } from '@/components/exploration/EventBadge';
@@ -208,7 +209,7 @@ export default function ExplorationScreen() {
             </View>
 
             {/* Node Graph */}
-            <MapCanvas nodes={vm.nodes} edges={vm.edges}>
+            <MapCanvas nodes={vm.nodes} edges={vm.edges} backdrop={mapBackdropFor(vm.region)}>
                 <MapOverlays legend={vm.legend} />
                 <NodeGrid
                     nodes={vm.nodes}

@@ -126,9 +126,8 @@ function findEvent<K extends CombatEvent['kind']>(
 }
 
 // ── The shared rich precondition fixture ──────────────────────────────────────
-// Extracted to `src/test-utils/card-fixture.ts` (WS0.4) so the doctrine
-// witness (`doctrine-strike-dead.engine.test.ts`) can build the same player /
-// die tray with a CLEAN enemy. This suite always uses the RICH default.
+// Lives in `src/test-utils/card-fixture.ts` (WS0.4) so other suites can build
+// the same player / die tray. This suite always uses the RICH default.
 
 interface PlayResult {
     events: CombatEvent[];

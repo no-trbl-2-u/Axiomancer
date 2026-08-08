@@ -27,6 +27,7 @@ import { Image } from 'expo-image';
 import Svg, { Circle, Path as SvgPath } from 'react-native-svg';
 
 import { TREASURE_FALLING_COINS } from '@/assets/images/treasure';
+import { AxmIcon } from '@/components/icons';
 import { Splatter } from '@/components/Splatter';
 import { VictoryWreath } from '@/components/art/VictoryWreath';
 import { FONTS } from '@/theme/axm';
@@ -231,18 +232,9 @@ function ItemGlyph({ slot, size = 18 }: { slot: string; size?: number }) {
     const AXM = usePalette();
     const c = AXM.parchment;
     if (slot === 'weapon') {
-        return (
-            <Svg width={size} height={size} viewBox="0 0 32 32">
-                <SvgPath
-                    d="M22 4 L28 4 L28 10 L13 25 L10 28 L4 28 L4 22 L7 19 Z"
-                    fill="none"
-                    stroke={c}
-                    strokeWidth="2"
-                    strokeLinejoin="round"
-                />
-                <SvgPath d="M11 21 L15 25" fill="none" stroke={c} strokeWidth="2" />
-            </Svg>
-        );
+        // Canonical sword mark from the icon registry (Phase V1) — this
+        // slot used to re-inline the path verbatim.
+        return <AxmIcon name="action-sword" size={size} color={c} />;
     }
     if (slot === 'accessory' || slot === 'trinket') {
         return (
