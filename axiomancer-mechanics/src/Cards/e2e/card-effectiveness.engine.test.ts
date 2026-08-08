@@ -544,8 +544,8 @@ function assertCardEffective(cardId: string): void {
 // ── Suite ──────────────────────────────────────────────────────────────────────
 
 describe('card effectiveness lint — every PAID face produces its promised observable delta', () => {
-    it('the coverage universe is the 79-card themed library (spec 32 v3 §7 + the 2026-07-19 promotions)', () => {
-        expect(cardLibrary.length).toBe(79);
+    it('the coverage universe is the 86-card themed library (spec 32 v3 §7 + the 2026-07-19 promotions + the phase-39 restorations)', () => {
+        expect(cardLibrary.length).toBe(86);
     });
 
     it('GENERICALLY_ASSERTED kinds in the library are exactly the D8 valve die-verbs '
@@ -573,7 +573,7 @@ describe('card effectiveness lint — every PAID face produces its promised obse
         (cardId) => { assertCardEffective(cardId); },
     );
 
-    it('every card is accounted for exactly once (strict + known-ineffective == 79, no silent drops)', () => {
+    it('every card is accounted for exactly once (strict + known-ineffective == 86, no silent drops)', () => {
         expect(strictCases.length + Object.keys(KNOWN_INEFFECTIVE).length).toBe(cardLibrary.length);
     });
 });

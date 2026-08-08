@@ -47,6 +47,8 @@ const CARD_ART_BY_ID: Record<string, number> = {
     'mounting-case': brightSphere,
     'peroratio-interrupta': lightRing,
     'the-closing-word': brightSphere,
+    'practiced-cadence': lightRing, // phase 39 restoration (peroration)
+    'captive-audience': brightSphere, // phase 39 restoration (peroration)
     'restate-the-point': lightRing, // D8 valve (peroration)
     'second-take': confuseRings, // D8 valve (echo)
     // ── T3 Forge — sparks and shifting orbs (dice from nothing) ──
@@ -56,6 +58,7 @@ const CARD_ART_BY_ID: Record<string, number> = {
     'ex-nihilo': brightSphere,
     'the-overtake': iceSword,
     'anvil-of-form': guardTorso,
+    'entropy-tax': devilBook, // phase 39 restoration (forge)
     'forge-masters-stamp': devilBook, // D8 valve (forge)
     // ── T4 Akrasia — the sinister tome + the burning blade (the debt) ──
     'against-my-judgment': devilBook,
@@ -71,6 +74,7 @@ const CARD_ART_BY_ID: Record<string, number> = {
     'undistributed-middle': confuseRings,
     'arrow-paradox': freezeCrystal,
     'turnabout': confuseRings, // phase 32 part 4a: replaces paralysis-of-analysis in this slot
+    'achilles-and-the-tortoise': willOWisp, // phase 39 restoration (control)
     'break-the-tempo': freezeCrystal, // D8 valve (control)
     'quagmire-of-doubt': confuseRings,
     // ── T6 Oracle — the divine stag (seeing truly) ──
@@ -80,6 +84,7 @@ const CARD_ART_BY_ID: Record<string, number> = {
     'delphic-ambiguity': confuseRings,
     'prophecy-fulfilled': godEye,
     'the-oracles-eye': godEye,
+    'fated-course': godEye, // phase 39 restoration (oracle)
     'second-sight': godEye, // D8 valve (oracle)
     // ── T7 Harvest — the hummingbird + blades (the gleaning) ──
     'brief-candle': burnBlade,
@@ -88,12 +93,14 @@ const CARD_ART_BY_ID: Record<string, number> = {
     'the-gleaners-due': meatPecker,
     'the-reaping': iceSword,
     'bone-orchard': yggdrasil,
+    'the-tithe': meatPecker, // phase 39 restoration (harvest)
     'bleed-for-it': dreamFlutter, // D8 valve (akrasia)
     // ── T8 Charm — the radiant ring + the hummingbird (mercy) ──
     'soft-word': meatPecker,
     'disarming-smile': lightRing,
     'common-ground': brightSphere,
     'the-olive-branch': yggdrasil,
+    'heart-of-the-matter': brightSphere, // phase 39 restoration (charm)
     'change-of-heart': brightSphere, // D8 valve (charm)
     'irresistible-grace': lightRing,
     'mirror-of-longing': godEye,

@@ -910,6 +910,12 @@ export interface CombatEncounterState {
      *  overwrite this — it stays pinned to the most recent status-landing
      *  spell so an intervening no-status play can never "steal" the echo. */
     lastSpellCardId?: string | null;
+    /** Phase 39 (2026-08-08) — the `state.round` `lastSpellCardId` was last set
+     *  on. Ouroboros's precondition-width retune (target ~25% fizz, was 3-10%
+     *  — `lastSpellCardId` never reset across turns, so it almost never
+     *  fizzled after the first status-landing spell of the whole combat)
+     *  narrows REPLAY_LAST to "landed THIS turn", not "ever this combat". */
+    lastSpellRound?: number;
     /** Spec 32 §12 #4 (combat ledgers) — RECOIL HP paid this turn (`recoil`
      *  mechanic + fate recoil). Reset with `spellsPlayedThisTurn` at turn start. */
     recoilPaidThisTurn?: number;

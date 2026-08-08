@@ -113,6 +113,10 @@ export function buildFixtureState(options: { clean?: boolean } = {}): CombatEnco
         echoNextSpell: false,
         spellsPlayedThisTurn: 0,
         lastSpellCardId: 'slippery-slope', // a real, different, replayable spell (ouroboros fodder)
+        // Phase 39 (2026-08-08): ouroboros's REPLAY_LAST precondition-width
+        // retune requires `lastSpellRound === round` ("landed THIS turn") —
+        // the fixture's `round` is 1 (initializeCombatEncounter's default).
+        lastSpellRound: 1,
         persistentZone: [],
         enemyAttachments: [],
         discard: ['slippery-slope', 'currys-conversion', 'festering-argument'], // reprise fodder (straw-mans-jab retired in D8)

@@ -161,13 +161,25 @@ describe('preset combat decks (spec 32 v3 §8)', () => {
             'slippery-slope',      // affliction b-common — evicted by poisoned-well (stays the starting-pair card)
             'the-adamant-wall',    // bulwark b-rare — evicted by the-anvil-speaks
             'the-closing-word',    // peroration h-rare — evicted by quod-erat-demonstrandum
+            // ── phase 39 (2026-08-08) — restored §A, but not seated by §B's
+            // seat swap or §C's curve repair; reward/draft-only ──
+            'achilles-and-the-tortoise', // control m-ench — measured DEAD in grace (no STAGGER engine there); no other seat
+            'captive-audience',    // peroration h-rare dis — fills the ench/dis pin, no seat
+            'fated-course',        // oracle m-rare dis — fills the ench/dis pin, no seat
+            'the-tithe',           // harvest m-rare dis — fills the ench/dis pin, no seat
+            // ── phase 39 (2026-08-08) — evicted by the foundry/grace
+            // color-law compensating shuffle (§B): each theme's own
+            // enchantment, swapped out for a restored §A enchantment (foundry)
+            // or a re-borrowed echo enchantment (grace, re-picked after A/B) ──
+            'anvil-of-form',       // forge m-ench — evicted by practiced-cadence (foundry)
+            'irresistible-grace',  // charm h-ench — evicted by resonant-chamber (grace)
         ];
         const seated = new Set<string>();
         for (const preset of listDeckPresets()) for (const id of preset.cardIds) seated.add(id);
         const actual = cardLibrary.map(c => c.id).filter(id => !seated.has(id)).sort();
         expect(actual).toEqual([...REWARD_ONLY].sort());
         // And the seated set + reward-only set is the whole library.
-        expect(seated.size + actual.length).toBe(79);
+        expect(seated.size + actual.length).toBe(86);
     });
 
     it('a focused preset carries at least a full common playset on the lever it advertises', () => {
@@ -205,7 +217,10 @@ describe('preset combat decks (spec 32 v3 §8)', () => {
 
     /** The flag-off recipes, pinned byte-for-byte (pre-D8 baseline, seven
      * seats re-pinned by the owner-ratified 2026-07-19 swap-pool promotions:
-     * erosion/oratory/foundry/augury/grace/bastion/refrain). */
+     * erosion/oratory/foundry/augury/grace/bastion/refrain; foundry and grace
+     * re-pinned AGAIN by phase 39's (2026-08-08) owner-ruled identity seat
+     * swaps + color-law compensating shuffle — see combat.starter-deck-
+     * presets.ts's foundry/grace preset comments for the full arithmetic). */
     const FLAG_OFF_SNAPSHOT: Record<string, string[]> = {
         erosion: [
             'poisoned-well', 'poisoned-well', 'poisoned-well', 'poisoned-well',
@@ -223,7 +238,7 @@ describe('preset combat decks (spec 32 v3 §8)', () => {
             'signs-and-portents', 'signs-and-portents', 'signs-and-portents', 'signs-and-portents',
             'tempered-edge', 'tempered-edge', 'tempered-edge', 'tempered-edge',
             'bootstrap-loop', 'bootstrap-loop', 'ex-nihilo', 'ex-nihilo',
-            'the-overtake', 'anvil-of-form', 'mirror-of-longing',
+            'the-overtake', 'practiced-cadence', 'entropy-tax',
         ],
         penitent: [
             'against-my-judgment', 'against-my-judgment', 'against-my-judgment', 'against-my-judgment',
@@ -253,7 +268,7 @@ describe('preset combat decks (spec 32 v3 §8)', () => {
             'soft-word', 'soft-word', 'soft-word', 'soft-word',
             'second-thoughts', 'second-thoughts', 'second-thoughts', 'second-thoughts',
             'the-olive-branch', 'the-olive-branch', 'grace-under-fire', 'grace-under-fire',
-            'ouroboros', 'irresistible-grace', 'crumbling-resolve',
+            'heart-of-the-matter', 'resonant-chamber', 'crumbling-resolve',
         ],
         bastion: [
             'pebble-in-the-boot', 'pebble-in-the-boot', 'pebble-in-the-boot', 'pebble-in-the-boot',
@@ -344,8 +359,8 @@ describe('preset combat decks (spec 32 v3 §8)', () => {
             expect(() => buildUpgradeableDicePresetDeck('erosion', {})).toThrow(); // seat missing
         });
 
-        it('the curated library is exactly 79 (70 post-D8 + the 9 promoted 2026-07-19)', () => {
-            expect(cardLibrary.length).toBe(79);
+        it('the curated library is exactly 86 (70 post-D8 + the 9 promoted 2026-07-19 + the 7 phase-39 restorations)', () => {
+            expect(cardLibrary.length).toBe(86);
             // All ten promoted valves are library cards…
             for (const id of COMBAT_DECK_PRESET_ORDER) {
                 expect(getCardById(PRESET_DICE_VALVES[id].valveId)).toBeDefined();
