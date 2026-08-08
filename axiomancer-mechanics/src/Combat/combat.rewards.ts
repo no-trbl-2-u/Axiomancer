@@ -17,8 +17,7 @@
 import type { Character } from '../Character/types';
 import { cardLibrary, getCardById } from '../Cards/cards.library';
 import { rankToRarity } from '../Cards/types';
-import { playerArchetype } from './combat.signature';
-import type { PlayerArchetype } from './combat.encounter.types';
+import { CARD_THEMES, type CardTheme } from '../Cards/card-themes';
 
 /**
  * The card-reward pool — the Profane Canon: the whole library EXCEPT the
@@ -62,23 +61,114 @@ function validPool(extraPool: readonly string[] = []): string[] {
     for (const id of extraPool) {
         if (!merged.includes(id)) merged.push(id);
     }
-    return merged.filter(id => !!getCardById(id));
+    // The curse filter is a POOL law, not a library law: an `extraPool`
+    // injection must not smuggle deck contamination onto the reward screen.
+    return merged.filter(id => {
+        const card = getCardById(id);
+        return !!card && card.theme !== 'curse';
+    });
 }
 
-const ASPECT_OF = (id: string): PlayerArchetype | null => {
-    const s = getCardById(id);
-    return s ? (s.philosophicalAspect as PlayerArchetype) : null;
-};
+// ---------------------------------------------------------------------------
+// THEME-AWARE DRAFT (2026-08-08) — replaces the archetype skew.
+//
+// The old lever read the player's dominant `philosophicalAspect` and doubled
+// the weight of matching cards. It was blunt (three coarse aspects over a
+// six-theme canon) and, on the neutral Threadbare Office, it did nothing at
+// all. The new lever reads the deck the player is ACTUALLY PLAYING — the
+// union of `knownCards` + `combatRewardCards`, tallied by `Card.theme` — and
+// pulls offers toward the themes that deck already leans on.
+//
+// The pull is deliberately incomplete. Every offer slot first rolls its
+// ALLEGIANCE: `REWARD_OFF_THEME_RATE` of slots are OFF-THEME, and an off-theme
+// slot weights themes by the COMPLEMENT of their deck share, so the themes the
+// deck plays LEAST are the likeliest off-theme draw. That is the pivot path:
+// trial and choir are the thinnest seats in every campaign preset (the
+// Apostate deck holds zero trial and one choir card), so the off-theme slot is
+// how a player ever gets shown that door. Deepen a build, never lock it.
+// ---------------------------------------------------------------------------
+
+/** Every theme a reward may belong to — the canon minus the curse class. */
+export type RewardTheme = Exclude<CardTheme, 'curse'>;
+
+/** The offerable themes, in canon order. */
+export const REWARD_THEMES: readonly RewardTheme[] = Object.freeze(
+    CARD_THEMES.filter((t): t is RewardTheme => t !== 'curse'),
+);
 
 /**
- * Rolls `count` distinct card-reward offers after a won combat. Biased toward the
- * player's archetype (≈2× weight) so rewards tend to reinforce a build, while
- * still offering cross-aspect variety. Pure (seeded by `rng`).
+ * The share of offer slots rolled OFF-THEME — the run's pivot rate, and a
+ * DESIGN lever, not a mechanical one.
+ *
+ * At 0.35, a standard 3-offer screen expects ~1.05 off-theme offers and shows
+ * at least one 72.5% of the time (1 − 0.65³), while ~2 of every 3 offers still
+ * deepen what the deck already plays. Raising it makes runs pivot constantly;
+ * dropping it below ~0.2 closes the trial/choir door on a committed deck.
+ */
+export const REWARD_OFF_THEME_RATE = 0.35;
+
+/** A reward candidate's theme, or `null` for a themeless (e.g. sandbox) card. */
+function themeOf(id: string): RewardTheme | null {
+    const theme = getCardById(id)?.theme;
+    return theme && theme !== 'curse' ? theme : null;
+}
+
+/**
+ * How many cards of each theme the player's ACTUAL DECK plays — the union of
+ * learned cards and earned reward cards (duplicates count: four copies of a
+ * rot common IS a rot deck). Curse contamination is excluded; it is never
+ * offerable, so letting it hold share would only waste weight mass.
+ */
+export function deckThemeCounts(player: Character): Record<RewardTheme, number> {
+    const counts = Object.fromEntries(REWARD_THEMES.map(t => [t, 0])) as Record<RewardTheme, number>;
+    for (const id of [...(player.knownCards ?? []), ...(player.combatRewardCards ?? [])]) {
+        const theme = themeOf(id);
+        if (theme) counts[theme] += 1;
+    }
+    return counts;
+}
+
+/**
+ * The deck's theme SHARES (each theme's fraction of the themed deck; they sum
+ * to 1). An all-themeless or empty deck reads as all-zero — the roll then
+ * treats every theme as equally on-theme, which is the honest answer for a
+ * player who has not committed to anything yet.
+ */
+export function deckThemeShares(player: Character): Record<RewardTheme, number> {
+    const counts = deckThemeCounts(player);
+    const total = REWARD_THEMES.reduce((sum, t) => sum + counts[t], 0);
+    const shares = Object.fromEntries(REWARD_THEMES.map(t => [t, 0])) as Record<RewardTheme, number>;
+    if (total === 0) return shares;
+    for (const t of REWARD_THEMES) shares[t] = counts[t] / total;
+    return shares;
+}
+
+/** Picks an index from `weights` with probability proportional to weight. */
+function weightedIndex(weights: number[], roll: number): number {
+    const total = weights.reduce((a, b) => a + b, 0);
+    if (total <= 0) return -1;
+    let r = roll * total;
+    for (let i = 0; i < weights.length; i++) {
+        r -= weights[i];
+        if (r <= 0) return i;
+    }
+    return weights.length - 1;
+}
+
+/**
+ * Rolls `count` distinct card-reward offers after a won combat, drafted toward
+ * the themes the player's deck already plays while keeping a real off-theme
+ * pivot open (see `REWARD_OFF_THEME_RATE`). Pure — every decision is seeded by
+ * `rng`, so the same (player, seed, count) always yields the same offers.
+ *
+ * Each slot spends exactly three `rng` draws: allegiance, theme, card. Rarity
+ * (`REWARD_RARITY_WEIGHTS`) is applied WITHIN the chosen theme, so the theme
+ * lever and the rarity lever stay independent and separately tunable.
  *
  * `extraPool` (WS6.2) injects extra candidate ids — the sandbox measurement
  * hook: registered sandbox cards can compete at the reward screen without
- * touching the pinned 70-card `COMBAT_REWARD_POOL`. Unregistered ids are
- * dropped by the resolve filter, never offered.
+ * touching the pinned `COMBAT_REWARD_POOL`. Unregistered ids are dropped by
+ * the resolve filter, never offered.
  */
 export function rollCombatCardRewards(
     player: Character,
@@ -86,26 +176,27 @@ export function rollCombatCardRewards(
     count = 3,
     extraPool: readonly string[] = [],
 ): string[] {
-    const archetype = playerArchetype(player);
-    const pool = validPool(extraPool);
+    const shares = deckThemeShares(player);
+    const remaining = validPool(extraPool);
     const offers: string[] = [];
-    const remaining = pool.slice();
     while (offers.length < count && remaining.length > 0) {
-        // Weighted pick: archetype-aligned entries get double weight; rarity
-        // weights (spec 32 v3 §4) make rares an occasional prize.
-        const weights = remaining.map(id => {
-            const arch = ASPECT_OF(id) === archetype ? 2 : 1;
-            const rank = getCardById(id)?.rank ?? 1;
-            return arch * REWARD_RARITY_WEIGHTS[rankToRarity(rank)];
-        });
-        const total = weights.reduce((a, b) => a + b, 0);
-        let roll = rng() * total;
-        let idx = 0;
-        for (; idx < remaining.length; idx++) {
-            roll -= weights[idx];
-            if (roll <= 0) break;
-        }
-        const pick = remaining[Math.min(idx, remaining.length - 1)];
+        const offTheme = rng() < REWARD_OFF_THEME_RATE;
+        // Only themes that still have a candidate left may be drawn — an
+        // exhausted theme must not silently eat a slot.
+        const live = REWARD_THEMES.filter(t => remaining.some(id => themeOf(id) === t));
+        // On-theme weight IS the deck share; off-theme weight is its
+        // complement, so the least-played themes lead the pivot draw. An
+        // uncommitted deck (all shares 0) reads as uniform either way.
+        const themeWeights = live.map(t => (offTheme ? 1 - shares[t] : shares[t]));
+        const themeIdx = weightedIndex(themeWeights, rng());
+        // Fallbacks: no live theme (only themeless candidates left), or an
+        // on-theme draw whose whole weight mass is zero. Both resolve against
+        // the full remaining pool rather than dropping the offer.
+        const theme = themeIdx >= 0 ? live[themeIdx] : null;
+        const candidates = theme === null ? remaining : remaining.filter(id => themeOf(id) === theme);
+        const cardWeights = candidates.map(id => REWARD_RARITY_WEIGHTS[rankToRarity(getCardById(id)?.rank ?? 1)]);
+        const cardIdx = weightedIndex(cardWeights, rng());
+        const pick = candidates[cardIdx >= 0 ? cardIdx : 0];
         offers.push(pick);
         remaining.splice(remaining.indexOf(pick), 1);
     }
